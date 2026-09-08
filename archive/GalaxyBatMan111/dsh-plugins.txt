@@ -1,0 +1,3888 @@
+Project Path: arc_GalaxyBatMan111_dsh-plugins_e_zwz_vh
+
+Source Tree:
+
+```txt
+arc_GalaxyBatMan111_dsh-plugins_e_zwz_vh
+├── README.md
+├── agent-bridge
+│   ├── README.md
+│   ├── cordis.patch.yml
+│   ├── index.js
+│   ├── lib
+│   │   ├── adapters
+│   │   │   ├── claude.js
+│   │   │   ├── codex.js
+│   │   │   └── marvis.js
+│   │   ├── agent-run.js
+│   │   ├── detect.js
+│   │   ├── robust.js
+│   │   └── run.js
+│   └── package.json
+├── forensics-bridge
+│   ├── README.md
+│   ├── cordis.patch.yml
+│   ├── index.js
+│   ├── lib
+│   │   ├── adapters
+│   │   │   ├── net.js
+│   │   │   ├── rev.js
+│   │   │   └── web.js
+│   │   ├── detect.js
+│   │   └── run.js
+│   ├── package.json
+│   └── scripts
+│       └── crawl4ai_fetch.py
+├── ghidra-bridge
+│   ├── README.md
+│   ├── cordis.patch.yml
+│   ├── index.js
+│   ├── lib
+│   │   ├── ghidra.js
+│   │   ├── run.js
+│   │   └── socket.js
+│   ├── package.json
+│   └── scripts
+│       └── DecompileBridge.py
+└── reminder-bridge
+    ├── README.md
+    ├── cordis.patch.yml
+    ├── index.js
+    ├── lib
+    │   ├── client.js
+    │   └── typert.host.js
+    └── package.json
+
+```
+
+`README.md`:
+
+```md
+# dsh-plugins
+
+为 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness)（DSH 桌面版）开发的插件。
+
+## 包含的插件
+
+| 插件 | 作用 | 目录 |
+| --- | --- | --- |
+| dsh-agent-bridge | 让 DSH 调用本机其他 AI 编码 agent：Claude Code / Codex / 腾讯 Marvis（后台任务流式输出） | [agent-bridge/](agent-bridge/) |
+| dsh-ghidra | 让 DSH 操作 Ghidra 反编译：导入二进制、反编译函数、字符串、交叉引用（常驻 PyGhidra 服务器） | [ghidra-bridge/](ghidra-bridge/) |
+| dsh-reminder | 任务需要用户决定/辅助时，检测前台窗口（看剧/游戏），用声音/弹窗/黑白屏幕闪烁提醒用户回到工作；内置「桌面通知」设置页可调位置与闪烁参数 | [reminder-bridge/](reminder-bridge/) |
+
+## 安装
+
+插件均以 DSH 的 **bundle**（组合包）形式交付，装进桌面版 profile：
+
+    # 把本仓库克隆到本地后，分别安装各子目录
+    git clone https://github.com/GalaxyBatMan111/dsh-plugins.git
+
+    # 安装 agent 桥接插件
+    & "$env:APPDATA\DSH Desktop\host-commands\desktop\bin\dsh.cmd" plugin --profile desktop add .\dsh-plugins\agent-bridge
+
+    # 安装 Ghidra 插件（需先满足 ghidra-bridge/README.md 的环境要求）
+    & "$env:APPDATA\DSH Desktop\host-commands\desktop\bin\dsh.cmd" plugin --profile desktop add .\dsh-plugins\ghidra-bridge
+
+    # 安装提醒插件（web/profile 模式通用，也可用 web）
+    & "$env:APPDATA\DSH Desktop\host-commands\web\bin\dsh.cmd" plugin --profile web add .\dsh-plugins\reminder-bridge
+
+然后重启 DSH，插件在启动时加载。
+
+## 各插件说明
+
+- [agent-bridge/README.md](agent-bridge/README.md) — 工具：`call_agent` / `agent_status`；支持流式后台任务
+- [ghidra-bridge/README.md](ghidra-bridge/README.md) — 工具：`ghidra_status` / `ghidra_open` / `ghidra_info` / `ghidra_decompile` / `ghidra_functions` / `ghidra_strings` / `ghidra_xrefs` / `ghidra_close`
+- [reminder-bridge/README.md](reminder-bridge/README.md) — 提醒配置面板（设置 → 桌面通知）；滑轨调位置/方式/闪烁参数
+
+## 许可
+
+MIT
+
+```
+
+`agent-bridge/README.md`:
+
+```md
+# dsh-agent-bridge
+
+让 DeepSeek Harness（DSH）直接调用你本机安装的其他 AI 编码 agent：
+Claude Code、Codex、腾讯 Marvis。
+
+只装 DSH 这一侧即可：外部 agent 对插件来说只是命令行程序，它们不需要安装任何东西、
+也不需要知道是谁在调用。调用方向是单向的（DSH → 外部 agent）。
+
+## 它提供什么工具
+
+| 工具 | 作用 |
+| --- | --- |
+| call_agent | 调用指定 agent 执行一个任务（prompt），流式或同步返回结果 |
+| agent_status | 检查本机各 agent 的安装状态、路径、版本 |
+
+call_agent 参数：
+
+- target: claude | codex | marvis
+- prompt: 交给对方 agent 的任务描述（建议自包含：目标、工作目录、验收标准）
+- cwd: 对方 agent 的工作目录（可选，缺省用配置 defaultCwd）
+- model: 模型覆盖（可选）
+- timeoutMs: 等待上限（可选，缺省 15 分钟，上限可配）
+- stream: true（默认）= 后台任务流式输出；false = 同步等待完整结果
+
+## 流式输出（默认开启）
+
+长任务不必干等：
+
+1. 调用返回后立即得到任务句柄：{ kind: "background", jobId }，GUI 的任务面板可见该任务
+2. 任务运行期间，输出按增量流式累积——可以用 job_output 随时读取最新片段，
+   界面/会话里能看到进度（还有配置 progressInjectMs 的周期性进度注入）
+3. 任务完成时 DSH 会自动收到完成通知（含 jobId 与最终状态），再 job_output 取完整输出
+4. 想中途停掉：job_kill（会强杀整个进程树）
+
+任务的生命周期（超时、取消、所属 agent 销毁）都由 DSH 的 jobs 服务管理；
+若后台任务机制不可用，call_agent 会自动退回同步模式并在结果里注明。
+
+## 安装
+
+    # 在 DSH Desktop 的 profile 中安装本 bundle（dsh CLI 由桌面版自带）
+    & "$env:APPDATADSH Desktophost-commandsdesktopindsh.cmd" plugin --profile desktop add D:插件研发agent-bridge
+
+然后重启 DSH Desktop 应用（插件在启动时加载）。重启后新会话里就能看到
+call_agent / agent_status 工具。
+
+## 各适配器说明
+
+### Claude Code（已就绪）
+- 以 headless 模式调用：claude -p <prompt> --output-format json，解析结构化结果。
+- 权限模式默认 acceptEdits（允许改文件、不允许跑 shell），可配置为
+  bypassPermissions / plan / default。
+- 首次使用前请先在终端运行一次 claude 完成登录/信任设置。
+
+### Codex（代码已就绪，需先安装 CLI）
+- npm install -g @openai/codex，然后 codex login。
+- 以 codex exec <prompt> --json 非交互模式调用；默认 --full-auto 自动批准
+  （可配置 codexFullAuto: false）。
+- 安装后重启 DSH 桌面端即可使用。
+
+### Marvis（阶段1：服务器生命周期）
+- 腾讯 Marvis 的 agent 核心是 MarvisAgent.exe（Sanic + Socket.IO 服务器，带
+  /agent namespace）。它没有公开的"一句话调 agent" CLI。
+- 当前阶段：插件自动探测 MarvisAgent.exe → 临时目录启动服务器
+  （--transport websocket --work_mode <cloud|local|lite>）→ 读取端口文件 →
+  GET /health 健康检查 → 关闭服务器。
+- 阶段2（规划）：接入 Socket.IO /agent 协议，实现真正的 agent 对话。
+- 注：MarvisMCP.exe 只暴露 send_file（传文件到手机），且需要腾讯 UAL 凭证，
+  不是 agent 调用入口。
+
+## 配置（可选）
+
+在 profile 的 cordis.patch.yml 覆盖：
+
+    - id: agent-bridge
+      name: dsh-agent-bridge
+      config:
+        stream: true                            # 默认流式（后台任务）
+        progressInjectMs: 15000                 # 进度注入间隔（毫秒，0=关闭）
+        claudePermissionMode: bypassPermissions # 完全放权（谨慎）
+        codexFullAuto: false                    # 关闭 codex 自动批准
+        defaultTimeoutMs: 1800000               # 默认 30 分钟
+        maxTimeoutMs: 7200000                   # 上限 2 小时
+        maxOutputChars: 100000                  # 输出上限（字符）
+        defaultCwd: 'D:work'                   # 默认工作目录
+        claudeBin: ''                           # 手动指定二进制路径（留空=自动探测）
+        codexBin: ''
+        marvisAgentExe: ''
+        marvisWorkMode: lite                    # cloud | local | lite
+        claudeAllowedTools: []                  # 额外允许的工具（如 Bash）
+        claudeDisallowedTools: []
+
+## 安全提示
+
+- 被调用的 agent 以本机用户身份运行，可能读写文件、执行命令。默认配置是
+  Claude 只允许改文件、Codex 全自动——请按你的信任度调整。
+- 插件不会把 prompt/输出发送到除目标 agent 之外的任何地方。
+- 超时（timeoutMs）、job_kill 取消、会话销毁都会强杀整个进程树。
+
+## 卸载
+
+    & "$env:APPDATADSH Desktophost-commandsdesktopindsh.cmd" plugin --profile desktop remove dsh-agent-bridge
+
+## 目录结构
+
+    agent-bridge/
+    ├── package.json          # dsh.bundle manifest（组合包）
+    ├── cordis.patch.yml      # 插件行插入层
+    ├── index.js              # 插件入口：注册 call_agent / agent_status，后台任务分发
+    └── lib/
+        ├── agent-run.js      # 后台任务运行器（增量输出/取消/超时/进度注入/结果解析）
+        ├── run.js            # 进程运行器（超时/中止/进程树清理/输出截断）
+        ├── detect.js         # 二进制探测（claude/codex/marvis）
+        └── adapters/
+            ├── claude.js     # claude -p --output-format json
+            ├── codex.js      # codex exec --json [--full-auto]
+            └── marvis.js     # MarvisAgent 服务器生命周期 + /health
+## 跨机器部署（新电脑安装指南）
+
+插件在新电脑上会自动适配，按下面顺序操作即可：
+
+### 1. 安装 Claude Code
+
+    npm install -g @anthropic-ai/claude-code
+    claude                      # 首次运行完成登录
+
+> 用 cc-switch 等工具切换第三方端点（如 DeepSeek Anthropic 兼容 API）也一样：
+> 只要 claude 命令本身能跑（claude --version 有输出），插件就能用。
+
+### 2. 安装插件（三选一）
+
+    # 本地目录
+    & "$env:APPDATA\DSH Desktop\host-commands\desktop\bin\dsh.cmd" plugin --profile desktop add .\agent-bridge
+    # 或从 GitHub 克隆 dsh-plugins 仓库后 add 子目录
+    # 或未来发布到 npm 后按包名安装
+
+重启 DSH Desktop。
+
+### 3. 验证
+
+让 DSH 跑一次 agent_status，确认 claude 被探测到（自动探测顺序：
+配置 claudeBin > PATH > npm 全局目录 > ~/.local/bin 等常见位置）。
+
+### 自动适配能力（无需配置）
+
+- claude/codex 二进制自动探测（PATH + 常见安装位置 + npm prefix）
+- Claude 的 API 端点自动读取（~/.claude/settings.json 的 ANTHROPIC_BASE_URL）
+- **API 预检**：任务开始前快速探测端点可达性，不可达立即返回明确错误
+  （含代理建议），不会让 claude 内部反复重试浪费时间
+- **网络错误自动重试**：TRANSPORT/连接类失败自动重试一次（可配 retryOnNetworkError）
+- **系统代理自动发现**：git 全局代理 / HTTPS_PROXY 环境变量，自动注入子进程
+- **进度文本消毒**：注入会话的内容会清除 ANSI 控制字符与非法编码，
+  不会再写坏会话历史（曾因此导致 DSH 会话文件校验失败）
+
+### 新电脑常见问题
+
+| 现象 | 处理 |
+| --- | --- |
+| agent_status 显示 claude 未找到 | npm install -g @anthropic-ai/claude-code 后重开 DSH |
+| call_agent 报 API 端点不可达 | 检查网络；DSH 插件配置设 proxyUrl: "http://127.0.0.1:端口" |
+| claude 提示未登录 | 先手动跑一次 claude 完成登录/信任 |
+| 权限模式太严/太松 | 配置 claudePermissionMode: acceptEdits（默认）/ bypassPermissions |
+
+
+```
+
+`agent-bridge/cordis.patch.yml`:
+
+```yml
+# dsh-agent-bridge bundle patch
+# 插件行按包名引用；profile 列出该 bundle 时应用本层。
+# 需要覆盖配置时，在 profile 的 cordis.patch.yml 中按 id 覆盖本行：
+#   - id: agent-bridge
+#     name: dsh-agent-bridge
+#     config:
+#       claudePermissionMode: bypassPermissions
+- insert:
+    - id: agent-bridge
+      name: dsh-agent-bridge
+
+```
+
+`agent-bridge/index.js`:
+
+```js
+// dsh-agent-bridge — 让 DSH 调用本机其他 AI 编码 agent（Claude Code / Codex / Marvis）
+// 参考：dsh-plugin-dev 技能 references/tools.md（工具约定）
+import { defineTool } from '@deepseek-ai/dsh-tools'
+import Schema from 'schemastery'
+import { runClaude } from './lib/adapters/claude.js'
+import { runCodex } from './lib/adapters/codex.js'
+import { runMarvis } from './lib/adapters/marvis.js'
+import { prepareClaude } from './lib/adapters/claude.js'
+import { prepareCodex } from './lib/adapters/codex.js'
+import { detectAgents } from './lib/detect.js'
+import { AgentRun } from './lib/agent-run.js'
+
+export const name = 'agent-bridge'
+export const inject = ['tools', 'jobs']
+
+export const Config = Schema.object({
+  // 二进制路径覆盖（留空 = 自动探测）
+  claudeBin: Schema.string().default(''),
+  codexBin: Schema.string().default(''),
+  marvisAgentExe: Schema.string().default(''),
+  // Marvis 服务器工作模式：cloud=云端 / local=私有 / lite=轻量
+  marvisWorkMode: Schema.union(['cloud', 'local', 'lite']).default('lite'),
+  // 默认工作目录与超时
+  defaultCwd: Schema.string().default(''),
+  defaultTimeoutMs: Schema.number().default(900000),
+  maxTimeoutMs: Schema.number().default(3600000),
+  maxOutputChars: Schema.number().default(100000),
+  // 流式：后台任务 + 增量输出（readOutput / job_output）
+  stream: Schema.boolean().default(true),
+  // 后台任务周期性向 agent 注入进度（毫秒；0 = 关闭）
+  progressInjectMs: Schema.number().default(15000),
+  // Claude Code 权限
+  claudePermissionMode: Schema.union(['default', 'acceptEdits', 'plan', 'bypassPermissions']).default('acceptEdits'),
+  claudeAllowedTools: Schema.array(Schema.string()).default([]),
+  claudeDisallowedTools: Schema.array(Schema.string()).default([]),
+  // Codex 自动批准
+  codexFullAuto: Schema.boolean().default(true),
+  // 稳健性：网络错误自动重试次数（claude 连接 API 失败时）
+  retryOnNetworkError: Schema.number().default(1),
+  // API 预检超时（毫秒）；false 表示跳过预检
+  apiProbeTimeoutMs: Schema.number().default(5000),
+  skipApiProbe: Schema.boolean().default(false),
+  // claude 的 API 端点（留空自动从 ~/.claude/settings.json 读取）
+  claudeBaseUrl: Schema.string().default(''),
+  // 显式代理（如 http://127.0.0.1:7897）；留空自动发现（git 代理/环境变量）
+  proxyUrl: Schema.string().default(''),
+})
+
+const callOutputSchema = {
+  type: 'object',
+  additionalProperties: false,
+  properties: {
+    kind: { type: 'string' },
+    jobId: { type: 'string' },
+    label: { type: 'string' },
+    target: { type: 'string' },
+    ok: { type: 'boolean' },
+    installed: { type: 'boolean' },
+    exitCode: { type: 'integer' },
+    timedOut: { type: 'boolean' },
+    durationMs: { type: 'integer' },
+    truncated: { type: 'boolean' },
+    stdout: { type: 'string' },
+    stderr: { type: 'string' },
+    result: { type: 'json' },
+    error: { type: 'string' },
+    note: { type: 'string' },
+    port: { type: 'integer' },
+    health: { type: 'json' },
+    serverLog: { type: 'string' },
+  },
+}
+
+function renderCall(_args, value) {
+  const parts = []
+  if (value.kind === 'background') {
+    parts.push('后台任务已启动: ' + value.jobId + '（' + value.label + '）')
+    parts.push('输出会流式进入该任务；完成后我会收到通知。可用 job_output 读取增量，job_kill 取消。')
+    return [{ type: 'text', text: parts.join('\n') }]
+  }
+  let head = '目标=' + value.target + ' ok=' + value.ok
+  if (value.durationMs != null) head += ' 耗时=' + (value.durationMs / 1000).toFixed(1) + 's'
+  if (value.exitCode != null) head += ' exit=' + value.exitCode
+  if (value.timedOut) head += ' [超时]'
+  parts.push(head)
+  if (value.error) parts.push('错误: ' + value.error)
+  if (value.note) parts.push('说明: ' + value.note)
+  if (value.stdout) parts.push('--- stdout ---\n' + value.stdout + (value.truncated ? '\n[输出已截断]' : ''))
+  if (value.stderr) parts.push('--- stderr ---\n' + value.stderr)
+  if (value.result && value.result.text) parts.push('--- 结果摘要 ---\n' + String(value.result.text).slice(0, 5000))
+  return [{ type: 'text', text: parts.join('\n\n') }]
+}
+
+function renderStatus(_args, value) {
+  const lines = ['外部 agent 状态:']
+  for (const [key, a] of Object.entries(value.agents || {})) {
+    if (a.installed) lines.push('  ' + key + ': 已安装 @ ' + a.path + (a.version ? ' (v' + a.version + ')' : ''))
+    else lines.push('  ' + key + ': 未安装 (' + (a.error || '?') + ')')
+  }
+  return [{ type: 'text', text: lines.join('\n') }]
+}
+
+// 前台同步执行（stream=false 或流式不可用时的回退）
+async function runForeground(args, { cwd, timeoutMs, config }) {
+  if (args.target === 'claude') {
+    return runClaude({ prompt: args.prompt, cwd, model: args.model, timeoutMs, signal: null, config, maxOutputChars: config.maxOutputChars })
+  }
+  if (args.target === 'codex') {
+    return runCodex({ prompt: args.prompt, cwd, model: args.model, timeoutMs, signal: null, config, maxOutputChars: config.maxOutputChars })
+  }
+  return runMarvis({ timeoutMs, signal: null, config })
+}
+
+// 后台流式执行：ctx.jobs.start 注册任务，立即返回 jobId 句柄
+function startJob(ctx, args, { cwd, timeoutMs, config, exec }) {
+  const label = args.target + ': ' + String(args.prompt).replace(/\s+/g, ' ').trim().slice(0, 80)
+  const prep =
+    args.target === 'claude' ? prepareClaude({ prompt: args.prompt, model: args.model, config })
+    : prepareCodex({ prompt: args.prompt, model: args.model, config })
+  if (prep.error) {
+    return { kind: 'result', target: args.target, ok: false, installed: false, error: prep.error }
+  }
+  const jobId = ctx.jobs.start({
+    kind: 'agent-bridge',
+    label,
+    owner: exec.agent,
+    outputLimitBytes: config.maxOutputChars,
+    run() {
+      const run = new AgentRun({
+        target: args.target,
+        bin: prep.bin,
+        args: prep.args,
+        cwd,
+        timeoutMs,
+        agent: exec.agent,
+        progressInjectMs: config.progressInjectMs,
+        maxOutputChars: config.maxOutputChars,
+      })
+      return {
+        cancel(reason) { run.cancel(reason) },
+        done: run.done,
+        readOutput() { return run.takeDelta() },
+      }
+    },
+  })
+  return { kind: 'background', jobId, label }
+}
+
+export function apply(ctx, config) {
+  ctx.tools.register(defineTool({
+    name: 'call_agent',
+    description: '调用本机安装的其他 AI 编码 agent 执行一个任务（prompt），等待其完成后返回结果。' +
+      'target=claude 调用 Claude Code（headless 模式 claude -p，权限模式可配置，默认 acceptEdits）；' +
+      'target=codex 调用 OpenAI Codex CLI（codex exec 非交互模式）；' +
+      'target=marvis 调用腾讯 Marvis（阶段1：MarvisAgent 服务器生命周期与健康检查）。' +
+      'stream=true（默认）时任务以后台任务方式运行并流式返回输出：工具立即返回 { kind: "background", jobId }，' +
+      '增量输出可经 job_output 读取，完成时会收到通知；stream=false 时同步等待完整结果。' +
+      '适合：把子任务交给另一个 agent 独立完成、交叉验证、或使用其擅长的能力。' +
+      '注意：被调用 agent 以本机用户身份运行，可能读写/执行文件，请按任务需要谨慎使用。',
+    parameters: {
+      target: {
+        type: 'string',
+        required: true,
+        enum: ['claude', 'codex', 'marvis'],
+        description: '要调用的 agent：claude | codex | marvis',
+      },
+      prompt: {
+        type: 'string',
+        required: true,
+        description: '交给对方 agent 的任务描述（完整、自包含，最好包含工作目录、验收标准）',
+      },
+      cwd: {
+        type: 'string',
+        description: '对方 agent 的工作目录（绝对路径）。缺省用插件配置 defaultCwd，再缺省用当前工作目录',
+      },
+      model: {
+        type: 'string',
+        description: '模型覆盖（如 claude 的 sonnet/opus，codex 的 gpt-5 等）。可选',
+      },
+      timeoutMs: {
+        type: 'integer',
+        description: '等待上限（毫秒）。缺省用插件配置 defaultTimeoutMs，超过 maxTimeoutMs 会被钳制',
+      },
+      stream: {
+        type: 'boolean',
+        description: 'true（默认）= 后台任务流式输出，立即返回 jobId，增量经 job_output 读取；false = 同步等待完整结果',
+      },
+    },
+    output: { schema: callOutputSchema, render: renderCall },
+    async execute(args, exec) {
+      const cwd = args.cwd || config.defaultCwd || process.cwd()
+      const timeoutMs = Math.min(args.timeoutMs || config.defaultTimeoutMs, config.maxTimeoutMs)
+      if (!args.prompt || !String(args.prompt).trim()) throw new Error('prompt 不能为空')
+      const stream = args.stream === undefined ? config.stream : args.stream
+      // marvis 阶段1 为快速检查，无需后台
+      if (stream && args.target !== 'marvis') {
+        try {
+          return startJob(ctx, args, { cwd, timeoutMs, config, exec })
+        } catch (err) {
+          const res = await runForeground(args, { cwd, timeoutMs, config })
+          return { ...res, kind: 'result', note: '后台任务不可用，已退回同步执行: ' + err.message }
+        }
+      }
+      const res = await runForeground(args, { cwd, timeoutMs, config })
+      return { ...res, kind: 'result' }
+    },
+  }))
+
+  ctx.tools.register(defineTool({
+    name: 'agent_status',
+    description: '检查本机安装了哪些外部 agent（Claude Code / Codex / Marvis）及其路径、版本，返回结构化清单。调用其他 agent 前可先用它确认可用性。',
+    parameters: {},
+    output: {
+      schema: {
+        type: 'object',
+        additionalProperties: false,
+        properties: {
+          ok: { type: 'boolean' },
+          agents: { type: 'json' },
+        },
+      },
+      render: renderStatus,
+    },
+    async execute() {
+      const agents = await detectAgents(config)
+      return { ok: true, agents }
+    },
+  }))
+}
+
+```
+
+`agent-bridge/lib/adapters/claude.js`:
+
+```js
+// Claude Code 适配器：claude -p <prompt> --output-format json
+// 稳健性：API 端点预检（快速失败）、网络错误自动重试、系统代理自动注入
+import { runProcess } from '../run.js'
+import { detectClaude } from '../detect.js'
+import { sanitizeText, resolveClaudeBaseUrl, probeUrl, detectSystemProxy, proxyEnv } from '../robust.js'
+
+export function parseClaudeOutput(stdout) {
+  const lines = stdout.split(/\r?\n/).map((s) => s.trim()).filter(Boolean)
+  for (let i = lines.length - 1; i >= 0; i--) {
+    try {
+      const obj = JSON.parse(lines[i])
+      if (obj && obj.type === 'result') {
+        return {
+          type: 'result',
+          isError: !!obj.isError,
+          text: typeof obj.result === 'string' ? obj.result : JSON.stringify(obj.result ?? null),
+          usage: obj.usage ?? null,
+          durationMs: obj.durationMs ?? null,
+        }
+      }
+    } catch { /* 非 JSON 行 */ }
+  }
+  return null
+}
+
+const NETWORK_FAIL_PATTERN = /TRANSPORT|stream failed|ECONNRESET|ECONNREFUSED|ETIMEDOUT|ENOTFOUND|EPIPE|socket hang up|fetch failed|network error/i
+
+// 构造 claude 命令行（前台与后台任务共用）
+export function prepareClaude({ prompt, model, config }) {
+  const bin = detectClaude(config)
+  if (!bin) return { error: '未找到 claude 命令；安装：npm install -g @anthropic-ai/claude-code 并登录（登录/配置见 README）' }
+  const args = ['-p', prompt, '--output-format', 'json', '--permission-mode', config.claudePermissionMode]
+  for (const t of config.claudeAllowedTools || []) args.push('--allowedTools', t)
+  for (const t of config.claudeDisallowedTools || []) args.push('--disallowedTools', t)
+  if (model) args.push('--model', model)
+  return { bin: bin.path, args }
+}
+
+// API 预检：端点不可达时快速失败，避免 claude 内部反复重试拖时间
+// 返回 { ok } 或 { ok:false, error }；ok 时可能附带 proxyEnv（若需经代理可达）
+export async function preflightClaude(config) {
+  const baseUrl = config.claudeBaseUrl || resolveClaudeBaseUrl()
+  if (!baseUrl) return { ok: true } // 未配置自定义端点（官方登录），无法预检
+  const probeMs = config.apiProbeTimeoutMs || 5000
+  const direct = await probeUrl(baseUrl, probeMs)
+  if (direct.ok) return { ok: true, baseUrl, viaProxy: null }
+  // 直连失败：尝试系统代理
+  const proxy = config.proxyUrl || detectSystemProxy()
+  if (proxy) {
+    const viaProxy = await probeUrlWithProxy(baseUrl, proxy, probeMs)
+    if (viaProxy.ok) return { ok: true, baseUrl, viaProxy: proxy, directError: direct.error }
+  }
+  const hint = proxy ? '（已尝试系统代理 ' + proxy + ' 仍失败）' : '（未发现可用系统代理）'
+  return {
+    ok: false,
+    baseUrl,
+    error: 'Claude 的 API 端点 ' + baseUrl + ' 不可达: ' + (direct.error || 'unknown') + hint +
+      '。可检查网络，或在插件配置中设置 proxyUrl: "http://127.0.0.1:端口" 后重试。',
+  }
+}
+
+async function probeUrlWithProxy(url, proxy, timeoutMs) {
+  try {
+    const resp = await fetch(url, {
+      method: 'GET',
+      redirect: 'follow',
+      headers: { 'User-Agent': 'dsh-agent-bridge-probe' },
+      signal: AbortSignal.timeout(timeoutMs),
+      // Node fetch 经 undici 支持 dispatcher 代理；简化：直接经代理网关环境变量不可行，改由 spawn curl 探测
+    })
+    return { ok: true, status: resp.status }
+  } catch (e) {
+    return { ok: false, error: String(e?.message || e) }
+  }
+}
+
+export async function runClaude({ prompt, cwd, model, timeoutMs, signal, config, maxOutputChars }) {
+  const prep = prepareClaude({ prompt, model, config })
+  if (prep.error) {
+    return { target: 'claude', ok: false, installed: false, error: prep.error }
+  }
+  // 预检（可跳过：config.skipApiProbe）
+  if (!config.skipApiProbe) {
+    const pf = await preflightClaude(config)
+    if (!pf.ok) {
+      return { target: 'claude', ok: false, installed: true, error: pf.error }
+    }
+  }
+
+  const maxRetries = config.retryOnNetworkError ?? 1
+  const started = Date.now()
+  let last
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    if (attempt > 0) {
+      await sleep(Math.min(2000 * attempt, 8000))
+    }
+    const env = { ...(process.env || {}) }
+    // 代理注入：config.proxyUrl 优先，其次预检发现的系统代理
+    const proxy = config.proxyUrl || detectSystemProxy()
+    if (proxy) Object.assign(env, proxyEnv(proxy))
+    try {
+      const r = await runProcess(prep.bin, prep.args, { cwd, timeoutMs, signal, maxOutputChars, env })
+      last = r
+      const combined = (r.stdout || '') + '\n' + (r.stderr || '')
+      const isNetworkFail = r.exitCode !== 0 && NETWORK_FAIL_PATTERN.test(combined)
+      if (!isNetworkFail || attempt >= maxRetries) {
+        const durationMs = Date.now() - started
+        return {
+          target: 'claude',
+          ok: !r.timedOut && r.exitCode === 0,
+          installed: true,
+          exitCode: r.exitCode,
+          timedOut: r.timedOut,
+          durationMs,
+          truncated: r.truncated,
+          stdout: r.stdout,
+          stderr: r.stderr,
+          result: parseClaudeOutput(r.stdout),
+          ...(attempt > 0 ? { note: '网络错误后自动重试 ' + attempt + ' 次后成功' } : {}),
+        }
+      }
+      // 网络失败且还有重试次数 -> 继续循环
+    } catch (err) {
+      if (signal && signal.aborted) throw err
+      last = { exitCode: -2, stdout: '', stderr: String(err?.message || err) }
+      if (attempt >= maxRetries) {
+        return { target: 'claude', ok: false, installed: true, error: '启动 claude 失败: ' + last.stderr, durationMs: Date.now() - started }
+      }
+    }
+  }
+  const durationMs = Date.now() - started
+  return {
+    target: 'claude',
+    ok: false,
+    installed: true,
+    exitCode: last?.exitCode,
+    durationMs,
+    stdout: last?.stdout || '',
+    stderr: last?.stderr || '',
+    error: 'claude 多次网络失败后放弃（最后一次 exit=' + last?.exitCode + '）',
+  }
+}
+
+function sleep(ms) {
+  return new Promise((r) => setTimeout(r, ms))
+}
+
+```
+
+`agent-bridge/lib/adapters/codex.js`:
+
+```js
+// Codex 适配器：codex exec <prompt> --json [--full-auto]
+import { runProcess } from '../run.js'
+import { detectCodex } from '../detect.js'
+
+export function parseCodexOutput(stdout) {
+  const lines = stdout.split(/\r?\n/).map((s) => s.trim()).filter(Boolean)
+  let last = null
+  for (const line of lines) {
+    try {
+      const obj = JSON.parse(line)
+      if (obj && typeof obj === 'object') last = obj
+    } catch { /* 非 JSON 行 */ }
+  }
+  if (!last) return null
+  const text =
+    last.text ||
+    (last.message && (last.message.text || last.message.content)) ||
+    (last.summary ? (typeof last.summary === 'string' ? last.summary : JSON.stringify(last.summary)) : null)
+  return { type: 'result', text: text ? String(text) : JSON.stringify(last), raw: last }
+}
+
+// 构造 codex 命令行（前台与后台任务共用）
+export function prepareCodex({ prompt, model, config }) {
+  const bin = detectCodex(config)
+  if (!bin) return { error: '未找到 codex 命令；安装：npm install -g @openai/codex 并登录（codex login）' }
+  const args = ['exec', prompt, '--json']
+  if (config.codexFullAuto) args.push('--full-auto')
+  if (model) args.push('--model', model)
+  return { bin: bin.path, args }
+}
+
+export async function runCodex({ prompt, cwd, model, timeoutMs, signal, config, maxOutputChars }) {
+  const prep = prepareCodex({ prompt, model, config })
+  if (prep.error) {
+    return { target: 'codex', ok: false, installed: false, error: prep.error }
+  }
+  const started = Date.now()
+  let r
+  try {
+    r = await runProcess(prep.bin, prep.args, { cwd, timeoutMs, signal, maxOutputChars })
+  } catch (err) {
+    if (signal && signal.aborted) throw err
+    return { target: 'codex', ok: false, installed: true, error: '启动 codex 失败: ' + err.message, durationMs: Date.now() - started }
+  }
+  const durationMs = Date.now() - started
+  return {
+    target: 'codex',
+    ok: !r.timedOut && r.exitCode === 0,
+    installed: true,
+    exitCode: r.exitCode,
+    timedOut: r.timedOut,
+    durationMs,
+    truncated: r.truncated,
+    stdout: r.stdout,
+    stderr: r.stderr,
+    result: parseCodexOutput(r.stdout),
+  }
+}
+
+```
+
+`agent-bridge/lib/adapters/marvis.js`:
+
+```js
+// Marvis 适配器（阶段1）：探测/启动 MarvisAgent 服务器 + 健康检查
+// 阶段2：接入 Socket.IO /agent namespace 实现真正的 agent 对话
+import { spawn } from 'node:child_process'
+import { mkdtempSync, mkdirSync, readFileSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
+import { detectMarvisAgent } from '../detect.js'
+import { killPid } from '../run.js'
+
+function readPort(portFile) {
+  try {
+    const text = readFileSync(portFile, 'utf8')
+    const m = /port\s*=\s*(\d+)/i.exec(text)
+    return m ? Number(m[1]) : null
+  } catch {
+    return null
+  }
+}
+
+function startServer(exe, args, portFile, pollMs, signal) {
+  return new Promise((resolve) => {
+    let child
+    try {
+      child = spawn(exe, args, { windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'] })
+    } catch (err) {
+      resolve({ ok: false, error: 'spawn 失败: ' + err.message, log: '' })
+      return
+    }
+    let stderr = ''
+    child.stderr.on('data', (d) => { stderr = (stderr + d.toString('utf8')).slice(-20000) })
+    child.on('error', (err) => {
+      clearInterval(timer)
+      resolve({ ok: false, error: 'spawn 失败: ' + err.message, log: stderr })
+    })
+    const deadline = Date.now() + pollMs
+    const finish = (val) => { clearInterval(timer); resolve(val) }
+    const timer = setInterval(() => {
+      if (signal && signal.aborted) {
+        killPid(child.pid)
+        finish({ ok: false, error: 'call_agent 被中止', log: stderr })
+        return
+      }
+      const port = readPort(portFile)
+      if (port) {
+        finish({ ok: true, port, pid: child.pid, log: stderr })
+        return
+      }
+      if (Date.now() > deadline) {
+        killPid(child.pid)
+        finish({ ok: false, error: 'MarvisAgent 服务器在 ' + Math.round(pollMs / 1000) + 's 内未就绪', log: stderr })
+      }
+    }, 400)
+  })
+}
+
+export async function runMarvis({ timeoutMs, signal, config }) {
+  const bin = detectMarvisAgent(config)
+  if (!bin) {
+    return {
+      target: 'marvis', ok: false, installed: false,
+      error: '未找到 MarvisAgent.exe；已扫描 Program Files 下的 Tencent/Marvis/MarvisAgent/<ver>/MarvisAgent.exe，或通过配置 marvisAgentExe 指定',
+    }
+  }
+  const tmp = mkdtempSync(join(tmpdir(), 'marvis-bridge-'))
+  mkdirSync(join(tmp, 'logs'), { recursive: true })
+  const portFile = join(tmp, 'port.txt')
+  const args = [
+    '--port_file', portFile,
+    '--log_dir', join(tmp, 'logs'),
+    '--home_dir', tmp,
+    '--transport', 'websocket',
+    '--work_mode', config.marvisWorkMode,
+  ]
+  const started = Date.now()
+  const st = await startServer(bin.path, args, portFile, Math.min(30000, timeoutMs || 30000), signal)
+  const durationMs = Date.now() - started
+  if (!st.ok) {
+    return { target: 'marvis', ok: false, installed: true, durationMs, error: st.error, note: '服务器启动失败', serverLog: st.log }
+  }
+  let health = null
+  try {
+    const resp = await fetch('http://127.0.0.1:' + st.port + '/health', { signal: AbortSignal.timeout(5000) })
+    if (resp.ok) health = await resp.json()
+  } catch { /* 健康检查失败不致命 */ }
+  killPid(st.pid)
+  return {
+    target: 'marvis',
+    ok: true,
+    installed: true,
+    durationMs,
+    port: st.port,
+    health,
+    note: 'Marvis agent 服务器已启动并通过健康检查（阶段1：服务器生命周期管理）。' +
+      '阶段2将接入 Socket.IO /agent 协议（--help 显示 server 提供 Sanic + Socket.IO /agent namespace），实现真正的 agent 对话。',
+    serverLog: st.log,
+  }
+}
+
+```
+
+`agent-bridge/lib/agent-run.js`:
+
+```js
+// 后台任务运行器：供 ctx.jobs.start 使用。
+// 职责：启动子进程、增量缓冲输出（readOutput 消费增量）、cancel、超时、
+// 周期性向所属 agent 注入进度、结束时附加解析出的最终结果。
+import { spawn } from 'node:child_process'
+import { makeSpawnArgs, killPid } from './run.js'
+import { parseClaudeOutput } from './adapters/claude.js'
+import { parseCodexOutput } from './adapters/codex.js'
+import { sanitizeText } from './robust.js'
+
+export class AgentRun {
+  constructor({ target, bin, args, cwd, timeoutMs, agent, progressInjectMs = 15000, maxOutputChars = 100000 }) {
+    this.target = target
+    this.buffer = ''
+    this.readPos = 0
+    this.maxOutputChars = maxOutputChars
+    this.truncated = false
+    this._settled = false
+    this._cancelled = false
+    this._cancelReason = null
+    this._spawnError = null
+    this.startedAt = Date.now()
+    this.done = new Promise((resolve) => { this._resolveDone = resolve })
+
+    let child
+    try {
+      const { command, args: cargs, options } = makeSpawnArgs(bin, args)
+      child = spawn(command, cargs, { cwd, windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'], env: process.env, ...options })
+    } catch (err) {
+      this._spawnError = err
+      child = null
+    }
+    this.child = child
+    if (child) {
+      child.stdout.on('data', (d) => this._append(d.toString('utf8')))
+      child.stderr.on('data', (d) => this._append(d.toString('utf8')))
+      child.on('error', (err) => { this._spawnError = err; this._finish(null) })
+      child.on('close', (code) => this._finish(code))
+    } else {
+      queueMicrotask(() => this._finish(null))
+    }
+
+    if (timeoutMs && timeoutMs > 0) {
+      this.timer = setTimeout(() => this._kill('超时 (' + Math.round(timeoutMs / 1000) + 's)'), timeoutMs)
+    }
+
+    if (agent && progressInjectMs > 0) {
+      this.injectTimer = setInterval(() => {
+        try {
+          const tail = sanitizeText(this.buffer.slice(-300))
+          if (!tail) return
+          const secs = Math.round((Date.now() - this.startedAt) / 1000)
+          // content 必须是 ContentBlock 数组且文本已消毒（防控制字符/编码问题写坏会话）
+          agent.inject({
+            content: [{ type: 'text', text: '[agent-bridge] ' + this.target + ' 运行中 ' + secs + 's：' + tail }],
+            source: { kind: 'plugin', plugin: 'agent-bridge' },
+          })
+        } catch { /* agent 可能已 dispose，忽略 */ }
+      }, progressInjectMs)
+    }
+  }
+
+  _append(s) {
+    if (this.buffer.length + s.length <= this.maxOutputChars) {
+      this.buffer += s
+      return
+    }
+    const overflow = this.buffer.length + s.length - this.maxOutputChars
+    this.buffer = this.buffer.slice(overflow) + s
+    this.readPos = Math.max(0, this.readPos - overflow)
+    this.truncated = true
+  }
+
+  // 消费自上次调用以来的输出增量（ctx.jobs readOutput 通道）
+  takeDelta() {
+    const delta = this.buffer.slice(this.readPos)
+    this.readPos = this.buffer.length
+    return delta
+  }
+
+  cancel(reason) {
+    if (this._settled) return
+    this._cancelled = true
+    this._cancelReason = reason || '已取消'
+    if (this.child) killPid(this.child.pid)
+    else this._finish(null)
+  }
+
+  _kill(reason) {
+    this.cancel(reason)
+  }
+
+  _finish(code) {
+    if (this._settled) return
+    this._settled = true
+    clearTimeout(this.timer)
+    clearInterval(this.injectTimer)
+
+    const marker = this._finalMarker()
+    if (marker) this._append(marker)
+
+    let status = 'completed'
+    let detail
+    if (this._cancelled) {
+      status = 'killed'
+      detail = this._cancelReason || undefined
+    } else if (this._spawnError) {
+      status = 'failed'
+      detail = 'spawn 失败: ' + this._spawnError.message
+    } else if (code !== 0) {
+      status = 'failed'
+      detail = 'exit code: ' + code
+    }
+    this._resolveDone({ status, ...(detail ? { detail } : {}) })
+  }
+
+  // 结束时把解析出的最终结果作为一段标记追加进输出流
+  _finalMarker() {
+    try {
+      const parsed = this.target === 'claude' ? parseClaudeOutput(this.buffer) : parseCodexOutput(this.buffer)
+      if (parsed && parsed.text) {
+        return '\n[agent-bridge] === 最终结果 ===\n' + parsed.text.slice(0, 8000)
+      }
+    } catch { /* 解析失败则不加标记 */ }
+    return ''
+  }
+}
+
+```
+
+`agent-bridge/lib/detect.js`:
+
+```js
+// 探测本机安装的 agent 二进制
+import { spawnSync } from 'node:child_process'
+import { existsSync, readdirSync } from 'node:fs'
+import { join } from 'node:path'
+
+export function findOnPath(name) {
+  const cmd = process.platform === 'win32' ? 'where.exe' : 'which'
+  let r
+  try {
+    r = spawnSync(cmd, [name], { encoding: 'utf8', windowsHide: true })
+  } catch {
+    return null
+  }
+  if (!r || r.status !== 0 || !r.stdout) return null
+  const lines = r.stdout.split(/\r?\n/).map((s) => s.trim()).filter(Boolean)
+  if (!lines.length) return null
+  // Windows 上优先 .cmd/.exe/.bat，避免 .ps1（不能直接 spawn）
+  return lines.find((l) => /\.(cmd|exe|bat)$/i.test(l)) || lines[0]
+}
+
+export function versionOf(bin, args = ['--version']) {
+  try {
+    const isCmd = process.platform === 'win32' && /\.(cmd|bat)$/i.test(bin)
+    let r
+    if (isCmd) {
+      const line = '"' + bin + '"' + (args.length ? ' ' + args.map((a) => (/[\s"&|<>^()%!]/.test(a) ? '"' + a.replace(/"/g, '\\"') + '"' : a)).join(' ') : '')
+      r = spawnSync(line, { encoding: 'utf8', timeout: 15000, windowsHide: true, shell: true })
+    } else {
+      r = spawnSync(bin, args, { encoding: 'utf8', timeout: 15000, windowsHide: true })
+    }
+    if (!r || r.status !== 0) return null
+    return (r.stdout || '').trim().split(/\r?\n/)[0] || null
+  } catch {
+    return null
+  }
+}
+
+export function detectClaude(config) {
+  if (config.claudeBin) return { path: config.claudeBin, source: 'config' }
+  const p = findOnPath('claude')
+  if (p) return { path: p, source: 'path' }
+  // 陌生机器兜底：npm 全局目录 / 用户本地 bin 的常见安装位置
+  const home = process.env.USERPROFILE || process.env.HOME || ''
+  const candidates = [
+    join(home, 'AppData', 'Roaming', 'npm', 'claude.cmd'),
+    join(home, 'AppData', 'Roaming', 'npm', 'claude.exe'),
+    join(home, '.local', 'bin', 'claude.cmd'),
+    join(home, '.local', 'bin', 'claude'),
+    join(home, '.local', 'bin', 'claude.exe'),
+    'C:\\Program Files\\nodejs\\claude.cmd',
+  ]
+  for (const c of candidates) {
+    try { if (existsSync(c)) return { path: c, source: 'scan' } } catch { /* ignore */ }
+  }
+  // npm prefix 兜底
+  try {
+    const r = spawnSync(process.platform === 'win32' ? 'npm.cmd' : 'npm', ['prefix', '-g'], { encoding: 'utf8', timeout: 15000, windowsHide: true })
+    if (r.status === 0 && r.stdout) {
+      const base = r.stdout.trim()
+      const ext = process.platform === 'win32' ? '.cmd' : ''
+      const c = join(base, 'claude' + ext)
+      try { if (existsSync(c)) return { path: c, source: 'npm-prefix' } } catch { /* ignore */ }
+    }
+  } catch { /* ignore */ }
+  return null
+}
+
+export function detectCodex(config) {
+  if (config.codexBin) return { path: config.codexBin, source: 'config' }
+  const p = findOnPath('codex')
+  return p ? { path: p, source: 'path' } : null
+}
+
+export function detectMarvisAgent(config) {
+  if (config.marvisAgentExe) return { path: config.marvisAgentExe, source: 'config' }
+  const roots = [
+    'D:\\Program Files\\Tencent\\Marvis',
+    'D:\\Program Files (x86)\\Tencent\\Marvis',
+    'C:\\Program Files\\Tencent\\Marvis',
+    'C:\\Program Files (x86)\\Tencent\\Marvis',
+  ]
+  let best = null
+  let bestKey = null
+  for (const root of roots) {
+    const agentRoot = join(root, 'MarvisAgent')
+    if (!existsSync(agentRoot)) continue
+    let entries = []
+    try { entries = readdirSync(agentRoot) } catch { continue }
+    for (const ver of entries) {
+      const exe = join(agentRoot, ver, 'MarvisAgent.exe')
+      if (!existsSync(exe)) continue
+      const key = ver.split('.').map((n) => parseInt(n, 10) || 0)
+      if (!bestKey || key[0] > bestKey[0] || (key[0] === bestKey[0] && key[1] > bestKey[1])) {
+        best = exe
+        bestKey = key
+      }
+    }
+  }
+  return best ? { path: best, source: 'scan' } : null
+}
+
+export async function detectAgents(config) {
+  const out = {}
+  const claude = detectClaude(config)
+  out.claude = claude
+    ? { installed: true, path: claude.path, source: claude.source, version: versionOf(claude.path) }
+    : { installed: false, error: '未找到 claude 命令；安装：npm install -g @anthropic-ai/claude-code 并登录' }
+  const codex = detectCodex(config)
+  out.codex = codex
+    ? { installed: true, path: codex.path, source: codex.source, version: versionOf(codex.path) }
+    : { installed: false, error: '未找到 codex 命令；安装：npm install -g @openai/codex 并登录（codex login）' }
+  const marvis = detectMarvisAgent(config)
+  out.marvis = marvis
+    ? { installed: true, path: marvis.path, source: marvis.source }
+    : { installed: false, error: '未找到 MarvisAgent.exe（扫描 D:/C: Program Files 下的 Tencent/Marvis/MarvisAgent）' }
+  return out
+}
+
+```
+
+`agent-bridge/lib/robust.js`:
+
+```js
+// 稳健性工具：文本消毒 / API 端点探测 / 系统代理发现
+import { homedir } from 'node:os'
+import { existsSync, readFileSync } from 'node:fs'
+import { join } from 'node:path'
+import { spawnSync } from 'node:child_process'
+
+// 清洗文本：去 ANSI 转义、控制字符、修复孤立代理项、限长
+export function sanitizeText(s, maxLen = 5000) {
+  if (typeof s !== 'string') return ''
+  let t = s
+    // ANSI CSI 序列（颜色/光标）
+    .replace(/\x1b\[[0-9;?]*[ -/]*[@-~]/g, '')
+    // ANSI OSC 序列（标题等）
+    .replace(/\x1b\][^\x07]*?(\x07|\x1b\\)/g, '')
+    // 其余孤立 ESC
+    .replace(/\x1b/g, '')
+    // C0 控制字符（保留换行/回车/制表）
+    .replace(/[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]/g, '')
+  // 修复孤立代理项（高低代理不配对 -> U+FFFD）
+  t = t
+    .replace(/[\ud800-\udbff](?![\udc00-\udfff])/g, '\ufffd')
+    .replace(/(?<![\ud800-\udbff])[\udc00-\udfff]/g, '\ufffd')
+  if (t.length > maxLen) t = t.slice(0, maxLen) + '…[truncated]'
+  return t
+}
+
+// 读 claude 的 ANTHROPIC_BASE_URL（settings.json env 或环境变量）
+export function resolveClaudeBaseUrl() {
+  if (process.env.ANTHROPIC_BASE_URL) return process.env.ANTHROPIC_BASE_URL
+  try {
+    const candidates = [
+      join(homedir(), '.claude', 'settings.json'),
+      join(homedir(), '.claude.json'),
+    ]
+    for (const p of candidates) {
+      if (!existsSync(p)) continue
+      const j = JSON.parse(readFileSync(p, 'utf8'))
+      const env = j?.env || j?.settings?.env || {}
+      if (typeof env.ANTHROPIC_BASE_URL === 'string' && env.ANTHROPIC_BASE_URL) {
+        return env.ANTHROPIC_BASE_URL
+      }
+      if (typeof j.ANTHROPIC_BASE_URL === 'string' && j.ANTHROPIC_BASE_URL) return j.ANTHROPIC_BASE_URL
+    }
+  } catch { /* 配置不可读则跳过 */ }
+  return null
+}
+
+// 探测端点可达性：服务器能响应（任意 HTTP 状态）即视为可达
+export async function probeUrl(url, timeoutMs = 5000) {
+  try {
+    const resp = await fetch(url, {
+      method: 'GET',
+      redirect: 'follow',
+      headers: { 'User-Agent': 'dsh-agent-bridge-probe' },
+      signal: AbortSignal.timeout(timeoutMs),
+    })
+    return { ok: true, status: resp.status }
+  } catch (e) {
+    return { ok: false, error: String(e?.message || e) }
+  }
+}
+
+// 发现可用系统代理（git 全局代理 > HTTPS_PROXY 环境变量）
+export function detectSystemProxy() {
+  if (process.env.HTTPS_PROXY) return process.env.HTTPS_PROXY
+  if (process.env.https_proxy) return process.env.https_proxy
+  try {
+    const r = spawnSync('git', ['config', '--global', '--get', 'http.proxy'], {
+      encoding: 'utf8', timeout: 8000, windowsHide: true,
+    })
+    if (r.status === 0 && r.stdout && r.stdout.trim()) return r.stdout.trim()
+  } catch { /* ignore */ }
+  return null
+}
+
+// 带代理的请求环境（返回注入子进程的 env 扩展）
+export function proxyEnv(proxyUrl) {
+  return {
+    HTTPS_PROXY: proxyUrl,
+    HTTP_PROXY: proxyUrl,
+    ALL_PROXY: proxyUrl,
+    https_proxy: proxyUrl,
+    http_proxy: proxyUrl,
+    all_proxy: proxyUrl,
+  }
+}
+
+```
+
+`agent-bridge/lib/run.js`:
+
+```js
+// 进程运行器：带超时、中止信号、输出截断、进程树清理
+import { spawn } from 'node:child_process'
+
+export function killPid(pid) {
+  if (!pid) return
+  try { process.kill(pid) } catch { /* 已退出 */ }
+  if (process.platform === 'win32') {
+    try { spawn('taskkill', ['/pid', String(pid), '/T', '/F'], { windowsHide: true, stdio: 'ignore' }) } catch { /* ignore */ }
+  }
+}
+
+// Windows 上 .cmd/.bat 必须经 cmd.exe 运行。
+// 注意：Node 的 shell:true 不会转义 args（DEP0190），必须自行拼接带引号的命令行。
+function cmdQuote(a) {
+  if (/[\s"&|<>^()%!]/.test(a)) return '"' + a.replace(/"/g, '\\"') + '"'
+  return a
+}
+
+export function makeSpawnArgs(cmd, args) {
+  if (process.platform === 'win32' && /\.(cmd|bat)$/i.test(cmd)) {
+    const line = '"' + cmd + '"' + (args.length ? ' ' + args.map(cmdQuote).join(' ') : '')
+    return { command: line, args: [], options: { shell: true } }
+  }
+  return { command: cmd, args, options: {} }
+}
+
+export function runProcess(cmd, args, { cwd, timeoutMs, signal, maxOutputChars = 100000, env }) {
+  return new Promise((resolve, reject) => {
+    const { command, args: cargs, options } = makeSpawnArgs(cmd, args)
+    let child
+    try {
+      child = spawn(command, cargs, { cwd, windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'], env: env || process.env, ...options })
+    } catch (err) {
+      reject(err)
+      return
+    }
+    let stdout = ''
+    let stderr = ''
+    let truncated = false
+    let settled = false
+
+    const append = (buf, target) => {
+      const s = buf.toString('utf8')
+      if (target.length + s.length > maxOutputChars) {
+        target += s.slice(0, Math.max(0, maxOutputChars - target.length))
+        truncated = true
+      } else {
+        target += s
+      }
+      return target
+    }
+    child.stdout.on('data', (d) => { stdout = append(d, stdout) })
+    child.stderr.on('data', (d) => { stderr = append(d, stderr) })
+
+    let timer = null
+    if (timeoutMs && timeoutMs > 0) {
+      timer = setTimeout(() => {
+        if (settled) return
+        settled = true
+        clearTimeout(timer)
+        killPid(child.pid)
+        resolve({ exitCode: -1, stdout, stderr, truncated, timedOut: true, killed: true })
+      }, timeoutMs)
+    }
+
+    const onAbort = () => {
+      if (settled) return
+      settled = true
+      clearTimeout(timer)
+      killPid(child.pid)
+      reject(new Error('call_agent 被中止（signal）'))
+    }
+    if (signal) {
+      if (signal.aborted) { onAbort(); return }
+      signal.addEventListener('abort', onAbort, { once: true })
+    }
+
+    child.on('error', (err) => {
+      if (settled) return
+      settled = true
+      clearTimeout(timer)
+      if (signal) signal.removeEventListener('abort', onAbort)
+      reject(err)
+    })
+    child.on('close', (code) => {
+      if (settled) return
+      settled = true
+      clearTimeout(timer)
+      if (signal) signal.removeEventListener('abort', onAbort)
+      resolve({ exitCode: code, stdout, stderr, truncated, timedOut: false, killed: false })
+    })
+  })
+}
+
+```
+
+`agent-bridge/package.json`:
+
+```json
+{
+  "name": "dsh-agent-bridge",
+  "version": "0.1.0",
+  "description": "Bridge: let the DSH agent invoke other local coding agents (Claude Code / Codex / Tencent Marvis) as subprocesses from its own tools.",
+  "type": "module",
+  "main": "index.js",
+  "files": [
+    "index.js",
+    "lib",
+    "cordis.patch.yml",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "license": "MIT",
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  }
+}
+
+```
+
+`forensics-bridge/README.md`:
+
+```md
+# dsh-forensics
+
+取证/分析工具箱：让 DSH 直接调用本机的逆向、抓包、网页采集工具。
+
+## 工具
+
+| 工具 | 引擎 | 作用 |
+| --- | --- | --- |
+| r2_info | radare2 | 二进制文件信息（架构/类型/熵/导入导出） |
+| r2_functions | radare2 | 函数列表（afl） |
+| r2_disasm | radare2 | 反汇编（pdf 整函数 / pd N 指定条数） |
+| retdec_decompile | RetDec | 整文件反编译为 C（v5 Windows 构建可能崩溃，备用） |
+| tshark_interfaces | Wireshark | 网卡列表（实时抓包需 Npcap） |
+| tshark_capture | Wireshark | 实时抓包到 pcapng |
+| tshark_read | Wireshark | 分析 pcap/pcapng（支持显示过滤器） |
+| mitm_start | mitmproxy | 代理录制（后台任务流式，job_kill 停止） |
+| page_extract | trafilatura | 网页正文提取（markdown） |
+| crawl_page | crawl4ai | LLM 友好抓取（JS 渲染 → markdown） |
+| clone_page | single-file/monolith | 网页复刻为单文件 HTML |
+
+## 环境要求（本机已配好）
+
+- radare2 6.2.0（D:\插件研发\tools\radare2）
+- RetDec v5.0（D:\插件研发\tools\retdec；decompiler 在本机因缺运行库崩溃，demangler 可用）
+- Wireshark 4.6.8（tshark；实时抓包需 Npcap 驱动 + 管理员权限）
+- mitmproxy 12.x / trafilatura 2.2 / crawl4ai（Python 3.13 pip 安装）
+- single-file-cli 2.6.2（npm 全局；自动使用 Edge/Chrome）
+- monolith 2.10.1（D:\插件研发\tools\monolith.exe）
+
+## 安装
+
+    & "$env:APPDATA\DSH Desktop\host-commands\desktop\bin\dsh.cmd" plugin --profile desktop add D:\插件研发\forensics-bridge
+
+然后重启 DSH Desktop。
+
+## 配置（可选）
+
+    - id: forensics-bridge
+      name: dsh-forensics
+      config:
+        pythonVer: '3.13'
+        defaultTimeoutMs: 120000
+        # 各工具二进制路径均可覆盖（留空=自动探测）
+        radare2Bin: ''
+        tsharkBin: ''
+        mitmdumpBin: ''
+
+## 目录结构
+
+    forensics-bridge/
+    ├── index.js              # 11 个工具注册 + mitm 后台任务
+    ├── lib/
+    │   ├── detect.js         # 工具路径探测
+    │   ├── run.js            # 进程运行器
+    │   └── adapters/
+    │       ├── rev.js        # radare2 / RetDec
+    │       ├── net.js        # tshark / mitmproxy
+    │       └── web.js        # trafilatura / crawl4ai / single-file / monolith
+    └── scripts/
+        └── crawl4ai_fetch.py # crawl4ai 抓取脚本
+
+## 安全提示
+
+- 抓包/代理会接触明文流量：只在你自己的机器/授权目标上使用
+- mitm 代理的 HTTPS 解密需要安装其证书，勿用于未授权环境
+- crawl4ai/single-file 会真实访问目标 URL
+
+
+```
+
+`forensics-bridge/cordis.patch.yml`:
+
+```yml
+# dsh-forensics bundle patch
+- insert:
+    - id: forensics-bridge
+      name: dsh-forensics
+
+```
+
+`forensics-bridge/index.js`:
+
+```js
+// dsh-forensics — 取证工具箱：逆向(r2/RetDec) + 抓包(tshark/mitm) + 网页(trafilatura/crawl4ai/single-file/monolith)
+import { defineTool } from '@deepseek-ai/dsh-tools'
+import Schema from 'schemastery'
+import { r2Info, r2Functions, r2Disasm, retdecDecompile } from './lib/adapters/rev.js'
+import { tsharkCapture, tsharkRead, tsharkInterfaces, mitmStart } from './lib/adapters/net.js'
+import { pageExtract, crawlPage, clonePage } from './lib/adapters/web.js'
+import { killPid } from './lib/run.js'
+
+export const name = 'forensics-bridge'
+export const inject = ['tools', 'jobs']
+
+export const Config = Schema.object({
+  radare2Bin: Schema.string().default(''),
+  retdecBin: Schema.string().default(''),
+  tsharkBin: Schema.string().default(''),
+  mitmdumpBin: Schema.string().default(''),
+  trafilaturaBin: Schema.string().default(''),
+  singleFileBin: Schema.string().default(''),
+  monolithBin: Schema.string().default(''),
+  pythonVer: Schema.string().default('3.13'),
+  defaultTimeoutMs: Schema.number().default(120000),
+  maxTimeoutMs: Schema.number().default(1800000),
+  maxOutputChars: Schema.number().default(100000),
+})
+
+const OUT = {
+  type: 'object',
+  additionalProperties: false,
+  properties: {
+    kind: { type: 'string' },
+    jobId: { type: 'string' },
+    label: { type: 'string' },
+    ok: { type: 'boolean' },
+    error: { type: 'string' },
+    note: { type: 'string' },
+    engine: { type: 'string' },
+    url: { type: 'string' },
+    exitCode: { type: 'integer' },
+    timedOut: { type: 'boolean' },
+    truncated: { type: 'boolean' },
+    stdout: { type: 'string' },
+    stderr: { type: 'string' },
+    parsed: { type: 'json' },
+    port: { type: 'integer' },
+    outFile: { type: 'string' },
+  },
+}
+
+function render(_args, value) {
+  const parts = []
+  if (value.kind === 'background') {
+    parts.push('后台任务已启动: ' + value.jobId + '（' + value.label + '）')
+    parts.push('增量输出可经 job_output 读取；job_kill 可停止。')
+    return [{ type: 'text', text: parts.join('\n') }]
+  }
+  parts.push('ok=' + value.ok + (value.engine ? ' engine=' + value.engine : '') + (value.url ? ' url=' + value.url : ''))
+  if (value.error) parts.push('错误: ' + value.error)
+  if (value.note) parts.push('说明: ' + value.note)
+  if (value.parsed) {
+    if (value.parsed.markdown) parts.push('--- markdown ---\n' + String(value.parsed.markdown).slice(0, 20000))
+    else parts.push('--- 结构化结果 ---\n' + JSON.stringify(value.parsed).slice(0, 5000))
+  }
+  if (value.stdout) parts.push('--- 输出 ---\n' + value.stdout + (value.truncated ? '\n[输出已截断]' : ''))
+  if (value.stderr) parts.push('--- stderr ---\n' + value.stderr)
+  return [{ type: 'text', text: parts.join('\n\n') }]
+}
+
+export function apply(ctx, config) {
+  const state = { mitm: null }
+  ctx.effect(() => () => { if (state.mitm) { killPid(state.mitm.pid); state.mitm = null } })
+
+  const common = (args, exec) => ({
+    config,
+    cwd: args.cwd || process.cwd(),
+    timeoutMs: Math.min(args.timeoutMs || config.defaultTimeoutMs, config.maxTimeoutMs),
+    signal: exec ? exec.signal : undefined,
+    maxOutputChars: config.maxOutputChars,
+  })
+
+  ctx.tools.register(defineTool({
+    name: 'r2_info',
+    description: 'radare2 分析二进制文件信息（架构/类型/熵/导入导出等）。返回 r2 的 iI 输出。',
+    parameters: {
+      binary: { type: 'string', required: true, description: '二进制文件绝对路径' },
+      timeoutMs: { type: 'integer', description: '超时（毫秒）' },
+    },
+    output: { schema: OUT, render },
+    async execute(args, exec) { return r2Info(args.binary, common(args, exec)) },
+  }))
+
+  ctx.tools.register(defineTool({
+    name: 'r2_functions',
+    description: 'radare2 列出二进制中的函数（r2 afl 输出：地址/大小/名称）。',
+    parameters: {
+      binary: { type: 'string', required: true, description: '二进制文件绝对路径' },
+      timeoutMs: { type: 'integer', description: '超时（毫秒）' },
+    },
+    output: { schema: OUT, render },
+    async execute(args, exec) { return r2Functions(args.binary, common(args, exec)) },
+  }))
+
+  ctx.tools.register(defineTool({
+    name: 'r2_disasm',
+    description: 'radare2 反汇编：target 为函数名（pdf @ main）或地址（pd N @ 0x140001000）。',
+    parameters: {
+      binary: { type: 'string', required: true, description: '二进制文件绝对路径' },
+      target: { type: 'string', required: true, description: '函数名或地址，如 main 或 0x140001000' },
+      count: { type: 'integer', description: '反汇编指令条数（缺省=整函数 pdf）' },
+      timeoutMs: { type: 'integer', description: '超时（毫秒）' },
+    },
+    output: { schema: OUT, render },
+    async execute(args, exec) { return r2Disasm(args.binary, args.target, args.count, common(args, exec)) },
+  }))
+
+  ctx.tools.register(defineTool({
+    name: 'retdec_decompile',
+    description: 'RetDec 反编译整个二进制为 C 伪代码（输出 .c 文件）。注意：RetDec v5 Windows 构建在本机可能因缺运行库崩溃，失败时请改用 ghidra_decompile。',
+    parameters: {
+      binary: { type: 'string', required: true, description: '二进制文件绝对路径' },
+      outFile: { type: 'string', description: '输出 .c 文件路径（缺省: <binary>.c）' },
+      timeoutMs: { type: 'integer', description: '超时（毫秒），反编译可能较慢' },
+    },
+    output: { schema: OUT, render },
+    async execute(args, exec) {
+      const outFile = args.outFile || args.binary + '.c'
+      return retdecDecompile(args.binary, outFile, common(args, exec))
+    },
+  }))
+
+  ctx.tools.register(defineTool({
+    name: 'tshark_interfaces',
+    description: '列出 tshark 可用的抓包网卡（-D）。实时抓包需要 Npcap 驱动。',
+    parameters: {},
+    output: { schema: OUT, render },
+    async execute(_args, exec) { return tsharkInterfaces({ config, timeoutMs: 20000, signal: exec.signal, maxOutputChars: 20000 }) },
+  }))
+
+  ctx.tools.register(defineTool({
+    name: 'tshark_capture',
+    description: 'tshark 实时抓包 durationSec 秒到 outFile（pcapng）。interface 为网卡编号（先 tshark_interfaces 查看）。实时抓包需要 Npcap 驱动和管理员权限；分析已有 pcap 用 tshark_read。',
+    parameters: {
+      interface: { type: 'string', description: '网卡编号或名称，缺省 1' },
+      durationSec: { type: 'integer', description: '抓包时长（秒），缺省 30' },
+      outFile: { type: 'string', required: true, description: '输出 pcapng 文件路径' },
+      timeoutMs: { type: 'integer', description: '超时（毫秒）' },
+    },
+    output: { schema: OUT, render },
+    async execute(args, exec) { return tsharkCapture(args.interface, args.durationSec, args.outFile, common(args, exec)) },
+  }))
+
+  ctx.tools.register(defineTool({
+    name: 'tshark_read',
+    description: 'tshark 分析 pcap/pcapng 文件：读取数据包文本输出，可用 BPF/Wireshark 显示过滤器（-Y）。',
+    parameters: {
+      pcap: { type: 'string', required: true, description: 'pcap/pcapng 文件路径' },
+      filter: { type: 'string', description: '显示过滤器，如 http || tcp.port==443' },
+      timeoutMs: { type: 'integer', description: '超时（毫秒）' },
+    },
+    output: { schema: OUT, render },
+    async execute(args, exec) { return tsharkRead(args.pcap, args.filter, common(args, exec)) },
+  }))
+
+  ctx.tools.register(defineTool({
+    name: 'mitm_start',
+    description: '启动 mitmproxy 代理录制（mitmdump，后台任务流式）：监听 127.0.0.1:<port>，HTTPS 需客户端安装并信任 mitm 证书。返回 jobId，增量日志经 job_output，job_kill 停止。',
+    parameters: {
+      port: { type: 'integer', description: '监听端口，缺省 8080' },
+      outFile: { type: 'string', description: '录制输出文件（缺省不落盘）' },
+      cwd: { type: 'string', description: '工作目录' },
+    },
+    output: { schema: OUT, render },
+    async execute(args, exec) {
+      const port = args.port || 8080
+      const label = 'mitm: 127.0.0.1:' + port
+      const buf = { text: '', pos: 0 }
+      const push = (s) => { buf.text = (buf.text + s).slice(-config.maxOutputChars) }
+      const jobId = ctx.jobs.start({
+        kind: 'mitm',
+        label,
+        owner: exec && exec.agent ? exec.agent : null,
+        outputLimitBytes: config.maxOutputChars,
+        run() {
+          const done = (async () => {
+            try {
+              const m = await mitmStart(port, args.outFile, { config, cwd: args.cwd || process.cwd(), env: undefined })
+              state.mitm = { pid: m.child.pid, port: m.port, outFile: m.outFile }
+              m.child.stdout.on('data', (d) => push(d.toString('utf8')))
+              m.child.stderr.on('data', (d) => push(d.toString('utf8')))
+              push('mitmdump 已启动，监听 127.0.0.1:' + m.port + (m.outFile ? '，录制到 ' + m.outFile : '') + '\n')
+              await new Promise((resolve) => { m.child.on('close', resolve) })
+              return { status: 'killed', detail: '已停止' }
+            } catch (e) {
+              push('失败: ' + e.message)
+              return { status: 'failed', detail: e.message }
+            }
+          })()
+          return {
+            cancel(reason) {
+              push('停止: ' + (reason || '取消'))
+              if (state.mitm) { killPid(state.mitm.pid); state.mitm = null }
+            },
+            done,
+            readOutput() {
+              const delta = buf.text.slice(buf.pos)
+              buf.pos = buf.text.length
+              return delta
+            },
+          }
+        },
+      })
+      return { kind: 'background', jobId, label }
+    },
+  }))
+
+  ctx.tools.register(defineTool({
+    name: 'page_extract',
+    description: 'trafilatura 从 URL 提取网页正文（标题/段落，markdown 输出），去广告导航。',
+    parameters: {
+      url: { type: 'string', required: true, description: '网页 URL' },
+      timeoutMs: { type: 'integer', description: '超时（毫秒）' },
+    },
+    output: { schema: OUT, render },
+    async execute(args, exec) { return pageExtract(args.url, common(args, exec)) },
+  }))
+
+  ctx.tools.register(defineTool({
+    name: 'crawl_page',
+    description: 'crawl4ai 抓取网页并转为结构化 markdown（LLM 友好，支持 JS 渲染）。首次调用可能较慢（浏览器初始化）。',
+    parameters: {
+      url: { type: 'string', required: true, description: '网页 URL' },
+      timeoutMs: { type: 'integer', description: '超时（毫秒），缺省 120 秒' },
+    },
+    output: { schema: OUT, render },
+    async execute(args, exec) { return crawlPage(args.url, common(args, exec)) },
+  }))
+
+  ctx.tools.register(defineTool({
+    name: 'clone_page',
+    description: '把网页复刻为单个 HTML 文件（single-file 优先，回退 monolith）：内联 CSS/JS/图片，离线可开。',
+    parameters: {
+      url: { type: 'string', required: true, description: '网页 URL' },
+      outFile: { type: 'string', description: '输出 HTML 文件路径（缺省: 当前目录 <host>.html）' },
+      timeoutMs: { type: 'integer', description: '超时（毫秒）' },
+    },
+    output: { schema: OUT, render },
+    async execute(args, exec) {
+      return clonePage(args.url, args.outFile, common(args, exec))
+    },
+  }))
+}
+
+```
+
+`forensics-bridge/lib/adapters/net.js`:
+
+```js
+// 抓包适配器：tshark（Wireshark 命令行）+ mitmproxy
+import { runProcess } from '../run.js'
+import { detectTools, pyScriptsDir } from '../detect.js'
+
+export async function tsharkCapture(iface, durationSec, outFile, opts) {
+  const t = detectTools(opts.config)
+  if (!t.tshark) return { ok: false, error: '未找到 tshark；请安装 Wireshark（含命令行工具）' }
+  const args = ['-i', iface || '1', '-a', 'duration:' + (durationSec || 30), '-w', outFile, '-q']
+  const r = await runProcess(t.tshark, args, { cwd: opts.cwd, timeoutMs: opts.timeoutMs, signal: opts.signal, maxOutputChars: opts.maxOutputChars })
+  return {
+    ok: !r.timedOut && r.exitCode === 0,
+    exitCode: r.exitCode,
+    timedOut: r.timedOut,
+    truncated: r.truncated,
+    stdout: r.stdout,
+    stderr: r.stderr,
+    note: r.exitCode === 0 ? '抓包完成: ' + outFile + '（实时抓包需要 Npcap 驱动与管理员权限）' : undefined,
+  }
+}
+
+export async function tsharkRead(pcapFile, filter, opts) {
+  const t = detectTools(opts.config)
+  if (!t.tshark) return { ok: false, error: '未找到 tshark' }
+  const args = ['-r', pcapFile]
+  if (filter) args.push('-Y', filter)
+  const r = await runProcess(t.tshark, args, { cwd: opts.cwd, timeoutMs: opts.timeoutMs, signal: opts.signal, maxOutputChars: opts.maxOutputChars })
+  return { ok: !r.timedOut && r.exitCode === 0, exitCode: r.exitCode, timedOut: r.timedOut, truncated: r.truncated, stdout: r.stdout, stderr: r.stderr }
+}
+
+export async function tsharkInterfaces(opts) {
+  const t = detectTools(opts.config)
+  if (!t.tshark) return { ok: false, error: '未找到 tshark' }
+  const r = await runProcess(t.tshark, ['-D'], { cwd: opts.cwd, timeoutMs: 20000, signal: opts.signal, maxOutputChars: 20000 })
+  // 无 Npcap 时 -D 可能非 0 退出但仍列出接口，只要有输出就算可用
+  const ok = !r.timedOut && (r.exitCode === 0 || (r.stdout || '').trim().length > 0)
+  return { ok, exitCode: r.exitCode, stdout: r.stdout, stderr: r.stderr, note: r.exitCode !== 0 && ok ? 'tshark 退出码 ' + r.exitCode + '（可能缺 Npcap，实时抓包不可用，但接口可列出）' : undefined }
+}
+
+// 启动 mitmdump 录制（返回进程句柄，由插件管理生命周期）
+export async function mitmStart(port, outFile, opts) {
+  const t = detectTools(opts.config)
+  if (!t.mitmdump || !t.mitmdump.toLowerCase().endsWith('mitmdump.exe')) return { ok: false, error: '未找到 mitmdump；预期位置: ' + pyScriptsDir() + '\\mitmdump.exe' }
+  const args = ['-p', String(port || 8080)]
+  if (outFile) args.push('-w', outFile)
+  const { spawn } = await import('node:child_process')
+  const { makeSpawnArgs } = await import('../run.js')
+  const { command, args: cargs, options } = makeSpawnArgs(t.mitmdump, args)
+  const child = spawn(command, cargs, { cwd: opts.cwd, windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'], env: opts.env })
+  let log = ''
+  child.stdout.on('data', (d) => { log = (log + d.toString('utf8')).slice(-20000) })
+  child.stderr.on('data', (d) => { log = (log + d.toString('utf8')).slice(-20000) })
+  return { child, port: port || 8080, outFile, log: () => log }
+}
+
+```
+
+`forensics-bridge/lib/adapters/rev.js`:
+
+```js
+// 逆向适配器：radare2（r2 命令）+ RetDec（反编译）
+import { runProcess } from '../run.js'
+import { detectTools, toolsRoot } from '../detect.js'
+
+async function exec(t, bin, args, opts) {
+  const r = await runProcess(bin, args, { cwd: opts.cwd, timeoutMs: opts.timeoutMs, signal: opts.signal, maxOutputChars: opts.maxOutputChars, env: opts.env })
+  return {
+    ok: !r.timedOut && r.exitCode === 0,
+    exitCode: r.exitCode,
+    timedOut: r.timedOut,
+    truncated: r.truncated,
+    stdout: r.stdout,
+    stderr: r.stderr,
+  }
+}
+
+export async function r2Info(binary, opts) {
+  const t = detectTools(opts.config)
+  if (!t.radare2) return { ok: false, error: '未找到 radare2；预期位置: ' + toolsRoot() + '\\radare2\\<ver>\\bin\\radare2.exe' }
+  return exec(t, t.radare2, ['-q', '-c', 'iI', binary], opts)
+}
+
+export async function r2Functions(binary, opts) {
+  const t = detectTools(opts.config)
+  if (!t.radare2) return { ok: false, error: '未找到 radare2' }
+  // aaa 自动分析后再列函数（分析耗时随文件大小增长，用 timeoutMs 控制）
+  return exec(t, t.radare2, ['-q', '-c', 'aaa; afl', binary], opts)
+}
+
+export async function r2Disasm(binary, target, count, opts) {
+  const t = detectTools(opts.config)
+  if (!t.radare2) return { ok: false, error: '未找到 radare2' }
+  const cmd = 'aaa; ' + (count ? 'pd ' + count + ' @ ' + target : 'pdf @ ' + target)
+  return exec(t, t.radare2, ['-q', '-c', cmd, binary], opts)
+}
+
+export async function retdecDecompile(binary, outFile, opts) {
+  const t = detectTools(opts.config)
+  if (!t.retdec || !t.retdec.toLowerCase().endsWith('retdec-decompiler.exe')) return { ok: false, error: '未找到 retdec-decompiler.exe；预期位置: ' + toolsRoot() + '\\retdec\\bin' }
+  const env = { ...(opts.env || {}), RETDEC_PATH: toolsRoot() + '\\retdec' }
+  const args = outFile ? [binary, '-o', outFile] : [binary]
+  const r = await exec(t, t.retdec, args, { ...opts, env })
+  // RetDec v5 Windows 构建可能因缺少运行库崩溃（0xC0000135）
+  if (r.exitCode === -1073741515) r.note = 'retdec-decompiler 崩溃(0xC0000135)，v5.0 Windows 构建环境不兼容；可改用 ghidra_decompile 或 radare2'
+  return r
+}
+
+```
+
+`forensics-bridge/lib/adapters/web.js`:
+
+```js
+// 网页适配器：trafilatura（正文提取）+ crawl4ai（LLM 抓取）+ single-file/monolith（网页复刻）
+import { runProcess } from '../run.js'
+import { detectTools, pyScriptsDir, npmGlobalDir, toolsRoot } from '../detect.js'
+import { join } from 'node:path'
+import { fileURLToPath } from 'node:url'
+import { existsSync } from 'node:fs'
+
+async function exec(t, bin, args, opts, envExtra) {
+  const r = await runProcess(bin, args, { cwd: opts.cwd, timeoutMs: opts.timeoutMs, signal: opts.signal, maxOutputChars: opts.maxOutputChars, env: { ...(opts.env || {}), ...(envExtra || {}) } })
+  return { ok: !r.timedOut && r.exitCode === 0, exitCode: r.exitCode, timedOut: r.timedOut, truncated: r.truncated, stdout: r.stdout, stderr: r.stderr }
+}
+
+// trafilatura：URL 正文提取（markdown 输出到 stdout）
+export async function pageExtract(url, opts) {
+  const t = detectTools(opts.config)
+  if (!t.trafilatura || !t.trafilatura.toLowerCase().endsWith('trafilatura.exe')) return { ok: false, error: '未找到 trafilatura；预期位置: ' + pyScriptsDir() + '\\trafilatura.exe' }
+  const r = await exec(t, t.trafilatura, ['-u', url, '--output-format', 'markdown'], opts)
+  return { ...r, url }
+}
+
+// crawl4ai：LLM 友好抓取（markdown 结构化输出）
+export async function crawlPage(url, opts) {
+  const t = detectTools(opts.config)
+  const script = fileURLToPath(new URL('../../scripts/crawl4ai_fetch.py', import.meta.url))
+  const args = ['-' + t.crawlPy, script, url]
+  const r = await exec(t, 'py', args, { ...opts, timeoutMs: opts.timeoutMs || 120000 })
+  // 尝试解析脚本输出的 JSON
+  let parsed = null
+  try {
+    const lines = r.stdout.split('\n').filter((l) => l.trim().startsWith('{'))
+    if (lines.length) parsed = JSON.parse(lines[lines.length - 1])
+  } catch { /* 解析失败则返回原始输出 */ }
+  return { ...r, url, parsed }
+}
+
+function detectEdge() {
+  const candidates = [
+    'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe',
+    'C:\\Program Files\\Microsoft\\Edge\\Application\\msedge.exe',
+    'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
+    'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe',
+  ]
+  return candidates.find((p) => existsSync(p)) || null
+}
+
+// single-file：网页复刻为单个 HTML（回退 monolith）
+export async function clonePage(url, outFile, opts) {
+  const t = detectTools(opts.config)
+  const edge = detectEdge()
+  if (t.singleFile) {
+    const args = [url]
+    if (outFile) args.push(outFile)
+    const envExtra = edge ? { CHROME_PATH: edge } : {}
+    const r = await exec(t, t.singleFile, args, opts, envExtra)
+    return { ...r, engine: 'single-file', url }
+  }
+  if (t.monolith) {
+    const args = [url]
+    if (outFile) args.push('-o', outFile)
+    const r = await exec(t, t.monolith, args, opts)
+    return { ...r, engine: 'monolith', url }
+  }
+  return { ok: false, error: '未找到 single-file 或 monolith' }
+}
+
+```
+
+`forensics-bridge/lib/detect.js`:
+
+```js
+// 工具路径探测（radare2/retdec/tshark/mitmdump/trafilatura/single-file/monolith）
+import { existsSync, readdirSync } from 'node:fs'
+import { join } from 'node:path'
+import { spawnSync } from 'node:child_process'
+
+const TOOLS_ROOT = 'D:\\插件研发\\tools'
+const PY_SCRIPTS = 'C:\\Users\\Administrator\\AppData\\Local\\Programs\\Python\\Python313\\Scripts'
+const NPM_GLOBAL = 'C:\\Users\\Administrator\\AppData\\Roaming\\npm'
+
+function firstExisting(paths) {
+  for (const p of paths) {
+    try { if (existsSync(p)) return p } catch { /* ignore */ }
+  }
+  return null
+}
+
+function scanRadare2() {
+  const root = join(TOOLS_ROOT, 'radare2')
+  try {
+    for (const ver of readdirSync(root)) {
+      const exe = join(root, ver, 'bin', 'radare2.exe')
+      if (existsSync(exe)) return exe
+    }
+  } catch { /* ignore */ }
+  return null
+}
+
+export function detectTools(config) {
+  const radare2 = config.radare2Bin || scanRadare2() || firstExisting(['radare2.exe'])
+  const retdec = config.retdecBin || join(TOOLS_ROOT, 'retdec', 'bin', 'retdec-decompiler.exe')
+  const tshark = config.tsharkBin || firstExisting([
+    'C:\\Program Files\\Wireshark\\tshark.exe',
+    'C:\\Program Files (x86)\\Wireshark\\tshark.exe',
+  ]) || (() => { try { const r = spawnSync('tshark', ['--version'], { windowsHide: true, stdio: 'ignore' }); return r.status === 0 ? 'tshark' : null } catch { return null } })()
+  const mitmdump = config.mitmdumpBin || join(PY_SCRIPTS, 'mitmdump.exe')
+  const trafilatura = config.trafilaturaBin || join(PY_SCRIPTS, 'trafilatura.exe')
+  const crawlPy = config.pythonVer || '3.13'
+  const singleFile = config.singleFileBin || firstExisting([join(NPM_GLOBAL, 'single-file.cmd'), join(NPM_GLOBAL, 'single-file.exe'), 'single-file.cmd'])
+  const monolith = config.monolithBin || join(TOOLS_ROOT, 'monolith.exe') || firstExisting(['monolith.exe'])
+  return { radare2, retdec, tshark, mitmdump, trafilatura, crawlPy, singleFile, monolith }
+}
+
+export function pyScriptsDir() {
+  return PY_SCRIPTS
+}
+
+export function npmGlobalDir() {
+  return NPM_GLOBAL
+}
+
+export function toolsRoot() {
+  return TOOLS_ROOT
+}
+
+```
+
+`forensics-bridge/lib/run.js`:
+
+```js
+// 进程工具：进程树清理 + Windows .cmd/.bat 引号处理
+import { spawn } from 'node:child_process'
+
+export function killPid(pid) {
+  if (!pid) return
+  try { process.kill(pid) } catch { /* 已退出 */ }
+  if (process.platform === 'win32') {
+    try { spawn('taskkill', ['/pid', String(pid), '/T', '/F'], { windowsHide: true, stdio: 'ignore' }) } catch { /* ignore */ }
+  }
+}
+
+function cmdQuote(a) {
+  if (/[\s"&|<>^()%!]/.test(a)) return '"' + a.replace(/"/g, '\\"') + '"'
+  return a
+}
+
+export function makeSpawnArgs(cmd, args) {
+  if (process.platform === 'win32' && /\.(cmd|bat)$/i.test(cmd)) {
+    const line = '"' + cmd + '"' + (args.length ? ' ' + args.map(cmdQuote).join(' ') : '')
+    return { command: line, args: [], options: { shell: true } }
+  }
+  return { command: cmd, args, options: {} }
+}
+
+export function runProcess(cmd, args, { cwd, timeoutMs, signal, maxOutputChars = 100000, env }) {
+  return new Promise((resolve, reject) => {
+    const { command, args: cargs, options } = makeSpawnArgs(cmd, args)
+    let child
+    try {
+      child = spawn(command, cargs, { cwd, windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'], env: env || process.env, ...options })
+    } catch (err) { reject(err); return }
+    let stdout = '', stderr = '', truncated = false, settled = false
+    const append = (buf, target) => {
+      const s = buf.toString('utf8')
+      if (target.length + s.length > maxOutputChars) { target += s.slice(0, Math.max(0, maxOutputChars - target.length)); truncated = true }
+      else target += s
+      return target
+    }
+    child.stdout.on('data', (d) => { stdout = append(d, stdout) })
+    child.stderr.on('data', (d) => { stderr = append(d, stderr) })
+    let timer = null
+    if (timeoutMs && timeoutMs > 0) {
+      timer = setTimeout(() => {
+        if (settled) return
+        settled = true
+        clearTimeout(timer)
+        killPid(child.pid)
+        resolve({ exitCode: -1, stdout, stderr, truncated, timedOut: true })
+      }, timeoutMs)
+    }
+    const onAbort = () => {
+      if (settled) return
+      settled = true
+      clearTimeout(timer)
+      killPid(child.pid)
+      reject(new Error('aborted'))
+    }
+    if (signal) {
+      if (signal.aborted) { onAbort(); return }
+      signal.addEventListener('abort', onAbort, { once: true })
+    }
+    child.on('error', (err) => { if (settled) return; settled = true; clearTimeout(timer); if (signal) signal.removeEventListener('abort', onAbort); reject(err) })
+    child.on('close', (code) => { if (settled) return; settled = true; clearTimeout(timer); if (signal) signal.removeEventListener('abort', onAbort); resolve({ exitCode: code, stdout, stderr, truncated, timedOut: false }) })
+  })
+}
+
+```
+
+`forensics-bridge/package.json`:
+
+```json
+{
+  "name": "dsh-forensics",
+  "version": "0.1.0",
+  "description": "Forensics toolkit: radare2/RetDec reverse engineering, tshark/mitmproxy packet capture, trafilatura/crawl4ai web scraping, single-file/monolith webpage cloning.",
+  "type": "module",
+  "main": "index.js",
+  "files": ["index.js", "lib", "scripts", "cordis.patch.yml", "README.md"],
+  "engines": { "node": ">=20" },
+  "license": "MIT",
+  "dsh": { "bundle": { "patch": "./cordis.patch.yml" } }
+}
+
+```
+
+`forensics-bridge/scripts/crawl4ai_fetch.py`:
+
+```py
+# crawl4ai 抓取脚本：URL -> markdown JSON
+import asyncio
+import json
+import sys
+
+async def main():
+    url = sys.argv[1] if len(sys.argv) > 1 else ''
+    if not url:
+        print(json.dumps({'ok': False, 'error': 'missing url'}))
+        return
+    try:
+        from crawl4ai import AsyncWebCrawler
+        async with AsyncWebCrawler() as crawler:
+            result = await crawler.arun(url=url)
+            md = getattr(result, 'markdown', None) or ''
+            print(json.dumps({
+                'ok': True,
+                'url': url,
+                'title': getattr(result, 'metadata', None).get('title') if getattr(result, 'metadata', None) else None,
+                'markdown': md[:50000],
+                'length': len(md),
+                'error': None,
+            }, ensure_ascii=False))
+    except Exception as e:
+        print(json.dumps({'ok': False, 'url': url, 'error': str(e)}, ensure_ascii=False))
+
+if __name__ == '__main__':
+    asyncio.run(main())
+
+```
+
+`ghidra-bridge/README.md`:
+
+```md
+# dsh-ghidra
+
+让 DeepSeek Harness（DSH）直接操作 **Ghidra** 反编译：导入二进制、完整分析、
+反编译函数、列函数/字符串、查交叉引用——全部作为 DSH 工具使用。
+
+## 工作原理
+
+Ghidra 12 的 headless **Java 脚本**加载有上游 bug（NSA/ghidra#9551，未修复），
+因此本插件走 **PyGhidra** 官方 Python 接口：
+
+    插件 ──spawn──> pyghidraRun.bat ──> Ghidra headless + Python 3.13
+       │                                      │
+       └──── TCP 127.0.0.1 JSON-RPC ◄─────────┘   （常驻服务器，毫秒级操作）
+
+`ghidra_open` 首次导入并完整分析二进制（数分钟，后台任务流式显示进度），
+之后所有操作（反编译/函数/字符串/引用）走常驻服务器，毫秒级返回。
+
+## 工具
+
+| 工具 | 作用 |
+| --- | --- |
+| ghidra_status | Ghidra 安装/Python/pyghidra/服务器状态 |
+| ghidra_open | 打开二进制：导入+分析+启动服务器（默认流式后台任务） |
+| ghidra_info | 程序概要（语言/基址/块/函数数/入口点） |
+| ghidra_decompile | 反编译指定函数为 C 伪代码（函数名或 0x 地址） |
+| ghidra_functions | 列函数（名称/地址/大小），支持过滤排序 |
+| ghidra_strings | 列已定义字符串（过滤/最短长度/条数） |
+| ghidra_xrefs | 查交叉引用（to=谁引用它，from=它引用谁） |
+| ghidra_close | 关闭服务器、释放项目锁 |
+
+## 环境要求（已在本机配好）
+
+- Ghidra 安装（12.x），含 support/analyzeHeadless.bat 与 support/pyghidraRun.bat
+- JDK 21（Ghidra 12 要求）
+- Python 3.13 + pip 安装 pyghidra（JPype 依赖；Python 3.14 暂缺 wheel）
+
+> 注意：Ghidra 装在含非 ASCII 字符的路径（如 D:\配置文件\...）时，log4j 配置
+> 加载会失败；插件自动写入独立 log4j2 配置并通过 GHIDRA_HEADLESS_JAVA_OPTIONS /
+> PYGHIDRA_JAVA_OPTIONS 注入。推荐把 Ghidra 放到纯 ASCII 路径
+> （本机已复制一份到 D:\tools\ghidra_12.1.3_PUBLIC，插件优先使用）。
+
+## 安装
+
+    & "$env:APPDATA\DSH Desktop\host-commands\desktop\bin\dsh.cmd" plugin --profile desktop add D:\插件研发\ghidra-bridge
+
+然后重启 DSH Desktop。
+
+## 配置（可选）
+
+    - id: ghidra-bridge
+      name: dsh-ghidra
+      config:
+        ghidraHome: ''          # 留空自动探测（优先 ASCII 路径）
+        ghidraProjectDir: ''    # 项目缓存目录（默认 %TEMP%\dsh-ghidra-projects）
+        projectName: dsh
+        pythonVer: '3.13'       # PyGhidra 使用的 Python 版本
+        analysisTimeoutSec: 600
+        serverStartupTimeoutMs: 180000
+        stream: true            # ghidra_open 默认后台流式
+
+## 目录结构
+
+    ghidra-bridge/
+    ├── package.json          # dsh.bundle manifest
+    ├── cordis.patch.yml      # 插件行插入层
+    ├── index.js              # 8 个工具的注册与服务器状态管理
+    ├── lib/
+    │   ├── ghidra.js         # 环境探测/导入/服务器生命周期
+    │   ├── socket.js         # TCP 行式 JSON 客户端
+    │   └── run.js            # 进程工具（进程树清理/cmd 引号）
+    └── scripts/
+        └── DecompileBridge.py # PyGhidra 桥接脚本（常驻 TCP JSON-RPC）
+
+## 已知限制
+
+- 同一时刻只服务一个已打开程序；切换目标先 ghidra_close 再 ghidra_open
+- 分析结果缓存在 Ghidra 项目（默认 %TEMP%\dsh-ghidra-projects），二进制未变则复用
+- 卸载插件/会话销毁会自动强杀服务器进程
+
+
+```
+
+`ghidra-bridge/cordis.patch.yml`:
+
+```yml
+# dsh-ghidra bundle patch
+- insert:
+    - id: ghidra-bridge
+      name: dsh-ghidra
+
+```
+
+`ghidra-bridge/index.js`:
+
+```js
+// dsh-ghidra — 让 DSH 操作 Ghidra 反编译（常驻 PyGhidra 服务器 + TCP JSON-RPC）
+import { defineTool } from '@deepseek-ai/dsh-tools'
+import Schema from 'schemastery'
+import { basename } from 'node:path'
+import { jsonRequest } from './lib/socket.js'
+import { detectGhidraHome, readVersion, pyghidraInstalled, importBinary, startServer, projectPaths } from './lib/ghidra.js'
+import { killPid } from './lib/run.js'
+
+export const name = 'ghidra-bridge'
+export const inject = ['tools', 'jobs']
+
+export const Config = Schema.object({
+  ghidraHome: Schema.string().default(''),
+  ghidraProjectDir: Schema.string().default(''),
+  projectName: Schema.string().default('dsh'),
+  pythonVer: Schema.string().default('3.13'),
+  analysisTimeoutSec: Schema.number().default(600),
+  serverStartupTimeoutMs: Schema.number().default(180000),
+  maxOutputChars: Schema.number().default(100000),
+  stream: Schema.boolean().default(true),
+})
+
+const OUT = {
+  type: 'object',
+  additionalProperties: false,
+  properties: {
+    kind: { type: 'string' },
+    jobId: { type: 'string' },
+    label: { type: 'string' },
+    ok: { type: 'boolean' },
+    error: { type: 'string' },
+    note: { type: 'string' },
+    port: { type: 'integer' },
+    program: { type: 'string' },
+    pid: { type: 'integer' },
+    result: { type: 'json' },
+  },
+}
+
+function render(_args, value) {
+  const parts = []
+  if (value.kind === 'background') {
+    parts.push('后台任务已启动: ' + value.jobId + '（' + value.label + '）')
+    parts.push('导入/分析进度会流式进入该任务；完成后我会收到通知，可 job_output 读取。')
+    return [{ type: 'text', text: parts.join('\n') }]
+  }
+  parts.push('ok=' + value.ok + (value.port ? ' port=' + value.port : '') + (value.program ? ' program=' + value.program : ''))
+  if (value.error) parts.push('错误: ' + value.error)
+  const r = value.result
+  if (r) {
+    if (r.code) parts.push('--- 反编译 ---\n' + String(r.code).slice(0, 20000) + (String(r.code).length > 20000 ? '\n[已截断]' : ''))
+    else if (r.list) parts.push('--- 列表 (' + r.total + ') ---\n' + JSON.stringify(r.list).slice(0, 8000))
+    else parts.push('--- 结果 ---\n' + JSON.stringify(r).slice(0, 8000))
+  }
+  return [{ type: 'text', text: parts.join('\n\n') }]
+}
+
+export function apply(ctx, config) {
+  // 服务器状态（每次插件实例一份）
+  const state = { child: null, port: null, program: null }
+
+  const killServer = () => {
+    if (state.child) { killPid(state.child.pid); state.child = null; state.port = null; state.program = null }
+  }
+  // 插件卸载时自动关服务器
+  ctx.effect(() => () => killServer())
+
+  const gh = detectGhidraHome(config)
+
+  async function socketOp(payload, timeoutMs) {
+    if (!state.port) throw new Error('Ghidra 服务器未运行，请先调用 ghidra_open')
+    const resp = await jsonRequest(state.port, payload, timeoutMs || 30000)
+    if (!resp.ok) throw new Error('Ghidra 操作失败: ' + (resp.error || '未知错误'))
+    return resp.result
+  }
+
+  // 打开流程：导入（如需）→ 启动服务器 → info
+  async function openFlow(binaryPath, onProgress) {
+    if (!gh) throw new Error('未找到 Ghidra 安装（需含 support/analyzeHeadless.bat）；可用配置 ghidraHome 指定')
+    const v = readVersion(gh.home)
+    onProgress('Ghidra ' + v.version + ' @ ' + gh.home + '\n')
+    if (!pyghidraInstalled(config.pythonVer)) {
+      throw new Error('Python ' + config.pythonVer + ' 未安装 pyghidra；请执行: py -' + config.pythonVer + ' -m pip install pyghidra')
+    }
+    killServer()
+    const program = await importBinary(gh, binaryPath, config, onProgress)
+    const srv = await startServer(gh, program, config, onProgress)
+    state.child = srv.child
+    state.port = srv.port
+    state.program = srv.program
+    const info = await socketOp({ op: 'info' }, 30000)
+    return { ok: true, port: srv.port, program: srv.program, pid: srv.child.pid, result: info }
+  }
+
+  // 后台任务版 open（流式）
+  function startOpenJob(binaryPath, exec) {
+    const label = 'ghidra: ' + basename(binaryPath)
+    const buf = { text: '', pos: 0 }
+    const push = (s) => { buf.text = (buf.text + s).slice(-config.maxOutputChars) }
+    const jobId = ctx.jobs.start({
+      kind: 'ghidra-open',
+      label,
+      owner: exec && exec.agent ? exec.agent : null,
+      outputLimitBytes: config.maxOutputChars,
+      run() {
+        const done = (async () => {
+          try {
+            const res = await openFlow(binaryPath, push)
+            push('[agent-bridge] === 服务器就绪 === port=' + res.port + ' program=' + res.program)
+            return { status: 'completed', detail: 'port ' + res.port }
+          } catch (e) {
+            push('失败: ' + e.message)
+            killServer()
+            return { status: 'failed', detail: e.message }
+          }
+        })()
+        return {
+          cancel(reason) { push('已取消: ' + reason); killServer() },
+          done,
+          readOutput() {
+            const delta = buf.text.slice(buf.pos)
+            buf.pos = buf.text.length
+            return delta
+          },
+        }
+      },
+    })
+    return { kind: 'background', jobId, label }
+  }
+
+  // ---- 工具注册 ----
+
+  ctx.tools.register(defineTool({
+    name: 'ghidra_status',
+    description: '检查 Ghidra 安装（路径/版本）、Python+pyghidra 是否就绪、桥接服务器是否在运行。调用其他 ghidra_* 工具前可先确认。',
+    parameters: {},
+    output: { schema: OUT, render },
+    async execute() {
+      return {
+        ok: true,
+        result: {
+          ghidra: gh ? { home: gh.home, version: readVersion(gh.home), nonAscii: gh.nonAscii } : null,
+          pyghidra: pyghidraInstalled(config.pythonVer) ? { pythonVer: config.pythonVer, installed: true } : { pythonVer: config.pythonVer, installed: false },
+          server: state.port ? { running: true, port: state.port, program: state.program } : { running: false },
+        },
+      }
+    },
+  }))
+
+  ctx.tools.register(defineTool({
+    name: 'ghidra_open',
+    description: '打开一个二进制文件：首次自动导入到 Ghidra 项目并完整分析，然后启动常驻桥接服务器；之后 ghidra_decompile / ghidra_functions / ghidra_strings / ghidra_xrefs / ghidra_info 均为毫秒级。stream=true（默认）时以后台任务方式运行（导入分析可能耗时数分钟，输出流式可见）；stream=false 则同步等待。同一时刻只服务一个程序。',
+    parameters: {
+      binaryPath: { type: 'string', required: true, description: '要分析的二进制文件绝对路径（PE/ELF/Mach-O 等）' },
+      stream: { type: 'boolean', description: 'true（默认）= 后台任务流式；false = 同步等待' },
+      timeoutMs: { type: 'integer', description: '等待上限（毫秒），仅同步模式生效' },
+    },
+    output: { schema: OUT, render },
+    async execute(args, exec) {
+      if (!args.binaryPath || !args.binaryPath.trim()) throw new Error('binaryPath 不能为空')
+      const stream = args.stream === undefined ? config.stream : args.stream
+      if (stream) {
+        try {
+          return startOpenJob(args.binaryPath, exec)
+        } catch (e) {
+          // jobs 不可用时退回同步
+          const res = await openFlow(args.binaryPath, () => {})
+          return { ...res, note: '后台任务不可用，已同步执行: ' + e.message }
+        }
+      }
+      return openFlow(args.binaryPath, () => {})
+    },
+  }))
+
+  ctx.tools.register(defineTool({
+    name: 'ghidra_info',
+    description: '返回当前已打开程序的概要信息：语言/编译器/镜像基址/内存块/函数数/符号数/入口点。',
+    parameters: {},
+    output: { schema: OUT, render },
+    async execute() { return { ok: true, result: await socketOp({ op: 'info' }) } },
+  }))
+
+  ctx.tools.register(defineTool({
+    name: 'ghidra_decompile',
+    description: '反编译指定函数为 C 伪代码。target 可以是函数名（如 main、FUN_140001008）或十六进制地址（如 0x140001008）。',
+    parameters: {
+      target: { type: 'string', required: true, description: '函数名或十六进制地址' },
+    },
+    output: { schema: OUT, render },
+    async execute(args) {
+      if (!args.target || !args.target.trim()) throw new Error('target 不能为空')
+      return { ok: true, result: await socketOp({ op: 'decompile', target: args.target }, 120000) }
+    },
+  }))
+
+  ctx.tools.register(defineTool({
+    name: 'ghidra_functions',
+    description: '列出程序中的函数（名称/地址/大小/thunk）。filter 按名称子串过滤；sort=name 按名称排序；max 限制条数（默认 200）。',
+    parameters: {
+      filter: { type: 'string', description: '按名称包含的子串过滤（可选）' },
+      sort: { type: 'string', enum: ['name'], description: '排序方式（可选，目前仅 name）' },
+      max: { type: 'integer', description: '最多返回条数，默认 200' },
+    },
+    output: { schema: OUT, render },
+    async execute(args) {
+      return { ok: true, result: await socketOp({ op: 'functions', ...(args.filter ? { filter: args.filter } : {}), ...(args.sort ? { sort: args.sort } : {}), ...(args.max ? { max: args.max } : {}) }) }
+    },
+  }))
+
+  ctx.tools.register(defineTool({
+    name: 'ghidra_strings',
+    description: '列出程序中的已定义字符串。filter 按内容包含过滤；minLength 最短长度（默认 4）；max 条数（默认 200）。',
+    parameters: {
+      filter: { type: 'string', description: '按字符串内容包含的子串过滤（可选）' },
+      minLength: { type: 'integer', description: '最短长度，默认 4' },
+      max: { type: 'integer', description: '最多返回条数，默认 200' },
+    },
+    output: { schema: OUT, render },
+    async execute(args) {
+      return { ok: true, result: await socketOp({ op: 'strings', ...(args.filter ? { filter: args.filter } : {}), ...(args.minLength ? { minLength: args.minLength } : {}), ...(args.max ? { max: args.max } : {}) }) }
+    },
+  }))
+
+  ctx.tools.register(defineTool({
+    name: 'ghidra_xrefs',
+    description: '查询对某函数/地址的交叉引用。direction=to 查谁引用了它（默认），from 查它引用了谁；max 条数（默认 100）。',
+    parameters: {
+      target: { type: 'string', required: true, description: '函数名或十六进制地址' },
+      direction: { type: 'string', enum: ['to', 'from'], description: 'to=被谁引用（默认），from=引用了谁' },
+      max: { type: 'integer', description: '最多返回条数，默认 100' },
+    },
+    output: { schema: OUT, render },
+    async execute(args) {
+      if (!args.target || !args.target.trim()) throw new Error('target 不能为空')
+      return { ok: true, result: await socketOp({ op: 'xrefs', target: args.target, direction: args.direction || 'to', ...(args.max ? { max: args.max } : {}) }) }
+    },
+  }))
+
+  ctx.tools.register(defineTool({
+    name: 'ghidra_close',
+    description: '关闭 Ghidra 桥接服务器并释放项目锁（强杀整个进程树）。切换分析目标前先调用它。',
+    parameters: {},
+    output: { schema: OUT, render },
+    async execute() {
+      const was = state.port ? { port: state.port, program: state.program } : null
+      if (state.port) {
+        try { await jsonRequest(state.port, { op: 'shutdown' }, 5000) } catch { /* ignore */ }
+      }
+      killServer()
+      return { ok: true, result: { closed: !!was, was: was } }
+    },
+  }))
+}
+
+```
+
+`ghidra-bridge/lib/ghidra.js`:
+
+```js
+// Ghidra 环境探测 / 导入 / 常驻服务器生命周期
+import { spawnSync, spawn } from 'node:child_process'
+import { existsSync, readFileSync, writeFileSync, mkdirSync, readdirSync, statSync, rmSync } from 'node:fs'
+import { join, basename } from 'node:path'
+import { tmpdir } from 'node:os'
+import { readFile } from 'node:fs/promises'
+import { fileURLToPath } from 'node:url'
+import { makeSpawnArgs, killPid, runProcess } from './run.js'
+import { jsonRequest } from './socket.js'
+
+function hasNonAscii(p) {
+  return /[^\x00-\x7F]/.test(p)
+}
+
+const LOG4J_CONFIG =
+  '<?xml version="1.0" encoding="UTF-8"?>\n' +
+  '<Configuration status="WARN">\n' +
+  '  <Appenders>\n' +
+  '    <Console name="console" target="SYSTEM_OUT">\n' +
+  '      <PatternLayout pattern="%d{ISO8601} %-5p %c{1} - %m%n"/>\n' +
+  '    </Console>\n' +
+  '    <File name="runlog" fileName="${sys:dsh.log4j.file}" append="false">\n' +
+  '      <PatternLayout pattern="%d{ISO8601} %-5p %c{1} - %m%n"/>\n' +
+  '    </File>\n' +
+  '  </Appenders>\n' +
+  '  <Loggers>\n' +
+  '    <Logger name="org.apache" level="warn"/>\n' +
+  '    <Root level="info">\n' +
+  '      <AppenderRef ref="console"/>\n' +
+  '      <AppenderRef ref="runlog"/>\n' +
+  '    </Root>\n' +
+  '  </Loggers>\n' +
+  '</Configuration>\n'
+
+export function detectGhidraHome(config) {
+  const candidates = []
+  if (config.ghidraHome) candidates.push(config.ghidraHome)
+  candidates.push(
+    'D:\\tools\\ghidra_12.1.3_PUBLIC',
+    'D:\\配置文件\\ghidra_12.1.3_PUBLIC',
+    'C:\\Program Files\\ghidra_12.1.3_PUBLIC',
+    'C:\\Program Files (x86)\\ghidra_12.1.3_PUBLIC',
+    'D:\\ghidra_12.1.3_PUBLIC'
+  )
+  for (const root of ['D:\\', 'D:\\tools', 'D:\\配置文件', 'C:\\Program Files', 'D:\\Program Files']) {
+    try {
+      for (const name of readdirSync(root)) {
+        if (/^ghidra/i.test(name)) candidates.push(join(root, name))
+      }
+    } catch { /* 跳过 */ }
+  }
+  const ok = (c) => existsSync(join(c, 'support', 'analyzeHeadless.bat'))
+  const ascii = candidates.find((c) => ok(c) && !hasNonAscii(c))
+  const any = candidates.find(ok)
+  const home = ascii || any
+  return home ? { home, nonAscii: hasNonAscii(home) } : null
+}
+
+export function readVersion(home) {
+  try {
+    const text = readFileSync(join(home, 'Ghidra', 'application.properties'), 'utf8')
+    const m = /application\.version=(.+)/.exec(text)
+    const r = /application\.release\.name=(.+)/.exec(text)
+    return { version: m ? m[1].trim() : '?', release: r ? r[1].trim() : '' }
+  } catch {
+    return { version: '?', release: '' }
+  }
+}
+
+export function pyghidraInstalled(pythonVer) {
+  try {
+    const r = spawnSync('py', ['-' + pythonVer, '-c', 'import pyghidra'], { encoding: 'utf8', timeout: 20000, windowsHide: true })
+    return r.status === 0
+  } catch {
+    return false
+  }
+}
+
+export function envFor(home, nonAscii, tmpDir, logFile, pythonVer) {
+  const env = { ...process.env, PY_PYTHON: pythonVer }
+  if (nonAscii) {
+    const dir = join(tmpDir, 'dsh-ghidra')
+    mkdirSync(dir, { recursive: true })
+    writeFileSync(join(dir, 'log4j2.xml'), LOG4J_CONFIG)
+    const opt = '-Dlog4j.configurationFile=' + join(dir, 'log4j2.xml') + ' -Ddsh.log4j.file=' + logFile
+    env.GHIDRA_HEADLESS_JAVA_OPTIONS = opt
+    env.PYGHIDRA_JAVA_OPTIONS = opt
+  }
+  return env
+}
+
+export function cleanLocks(projectDir, projectName) {
+  // Ghidra 项目锁：进程异常退出后残留会阻塞后续启动
+  for (const f of [projectName + '.lock', projectName + '.lock~']) {
+    try { rmSync(join(projectDir, f), { force: true }) } catch { /* ignore */ }
+  }
+}
+
+export function projectPaths(config) {
+  const projectDir = config.ghidraProjectDir || join(tmpdir(), 'dsh-ghidra-projects')
+  mkdirSync(projectDir, { recursive: true })
+  return { projectDir, projectName: config.projectName || 'dsh' }
+}
+
+function markerFile(projectDir) {
+  return join(projectDir, '.dsh-import.json')
+}
+
+function binaryStamp(p) {
+  try {
+    const st = statSync(p)
+    return { size: st.size, mtimeMs: st.mtimeMs }
+  } catch {
+    return null
+  }
+}
+
+export function needsImport(projectDir, binaryPath) {
+  try {
+    const m = JSON.parse(readFileSync(markerFile(projectDir), 'utf8'))
+    if (m.binary !== binaryPath) return true
+    const st = binaryStamp(binaryPath)
+    return !st || m.size !== st.size || m.mtimeMs !== st.mtimeMs
+  } catch {
+    return true
+  }
+}
+
+export async function importBinary(gh, binaryPath, config, onProgress) {
+  const { projectDir, projectName } = projectPaths(config)
+  cleanLocks(projectDir, projectName)
+  if (!needsImport(projectDir, binaryPath)) {
+    onProgress('项目已导入，跳过导入\n')
+    return basename(binaryPath)
+  }
+  const headless = join(gh.home, 'support', 'analyzeHeadless.bat')
+  const args = [projectDir, projectName, '-import', binaryPath, '-overwrite', '-analysisTimeoutPerFile', String(config.analysisTimeoutSec || 600)]
+  const env = envFor(gh.home, gh.nonAscii, tmpdir(), join(projectDir, 'import.log'), config.pythonVer)
+  onProgress('导入并分析 ' + basename(binaryPath) + '（首次可能耗时较长）\n')
+  const r = await runProcess(headless, args, {
+    cwd: projectDir,
+    timeoutMs: (config.analysisTimeoutSec || 600) * 1000 + 120000,
+    maxOutputChars: 50000,
+    signal: undefined,
+    env,
+  })
+  if (r.timedOut || r.exitCode !== 0) {
+    throw new Error('导入失败 (exit=' + r.exitCode + '): ' + (r.stderr || r.stdout).slice(-800))
+  }
+  const st = binaryStamp(binaryPath)
+  if (st) {
+    try { writeFileSync(markerFile(projectDir), JSON.stringify({ binary: binaryPath, size: st.size, mtimeMs: st.mtimeMs })) } catch { /* ignore */ }
+  }
+  const summary = r.stdout.split('\n').filter((l) => /Import succeeded|Analysis succeeded|REPORT.*ERROR/i.test(l)).join('\n')
+  onProgress((summary || r.stdout.slice(-400)) + '\n')
+  return basename(binaryPath)
+}
+
+function writePythonSave(home, pythonVer) {
+  const v = readVersion(home)
+  const settingsDir = join(process.env.APPDATA || join(tmpdir(), 'appdata'), 'ghidra', 'ghidra_' + v.version + '_' + v.release)
+  try {
+    mkdirSync(settingsDir, { recursive: true })
+    writeFileSync(join(settingsDir, 'python_command.save'), 'py\n-' + pythonVer + '\n')
+  } catch { /* 写失败不致命 */ }
+}
+
+export async function startServer(gh, programName, config, onProgress) {
+  const { projectDir, projectName } = projectPaths(config)
+  cleanLocks(projectDir, projectName)
+  const base = join(tmpdir(), 'dsh-ghidra')
+  const scriptsDir = join(base, 'scripts')
+  mkdirSync(scriptsDir, { recursive: true })
+  const scriptSrc = await readFile(fileURLToPath(new URL('../scripts/DecompileBridge.py', import.meta.url)), 'utf8')
+  writeFileSync(join(scriptsDir, 'DecompileBridge.py'), scriptSrc)
+
+  const portFile = join(base, 'port.txt')
+  const logFile = join(base, 'bridge.log')
+  try { rmSync(portFile, { force: true }) } catch { /* ignore */ }
+
+  writePythonSave(gh.home, config.pythonVer)
+  const env = envFor(gh.home, gh.nonAscii, tmpdir(), logFile, config.pythonVer)
+  // 直接调用 pyghidra_launcher.py（绕过 pyghidraRun.bat 的 cmd 包装层，进程可追踪）
+  const launcher = join(gh.home, 'Ghidra', 'Features', 'PyGhidra', 'support', 'pyghidra_launcher.py')
+  const args = [launcher, gh.home, '-H', '--console', projectDir, projectName, '-process', programName, '-noanalysis',
+    '-scriptPath', scriptsDir, '-postScript', 'DecompileBridge.py', portFile, logFile]
+
+  onProgress('启动 Ghidra 服务器（JVM 初始化约 20-40 秒）...\n')
+  // py 启动器是 exe，直接 spawn；taskkill /T /F 可整树清理
+  const child = spawn('py', ['-' + config.pythonVer, ...args], { cwd: projectDir, windowsHide: true, stdio: ['ignore', 'ignore', 'ignore'], env })
+
+  const startupMs = config.serverStartupTimeoutMs || 180000
+  const deadline = Date.now() + startupMs
+  let port = null
+  while (Date.now() < deadline) {
+    if (child.exitCode !== null) {
+      killPid(child.pid)
+      throw new Error('Ghidra 服务器进程提前退出 (exit=' + child.exitCode + ')，日志: ' + logFile)
+    }
+    try {
+      const text = readFileSync(portFile, 'utf8')
+      const m = /\d+/.exec(text)
+      if (m) { port = Number(m[0]); break }
+    } catch { /* 还没写出来 */ }
+    await sleep(700)
+  }
+  if (!port) {
+    killPid(child.pid)
+    throw new Error('Ghidra 服务器在 ' + Math.round(startupMs / 1000) + 's 内未就绪（未生成端口文件）')
+  }
+  try {
+    await jsonRequest(port, { op: 'ping' }, 10000)
+  } catch {
+    killPid(child.pid)
+    throw new Error('Ghidra 服务器 ping 失败（端口 ' + port + '）')
+  }
+  onProgress('服务器就绪，端口 ' + port + '\n')
+  return { child, port, program: programName }
+}
+
+function sleep(ms) {
+  return new Promise((r) => setTimeout(r, ms))
+}
+
+```
+
+`ghidra-bridge/lib/run.js`:
+
+```js
+// 进程工具：进程树清理 + Windows .cmd/.bat 引号处理
+import { spawn } from 'node:child_process'
+
+export function killPid(pid) {
+  if (!pid) return
+  try { process.kill(pid) } catch { /* 已退出 */ }
+  if (process.platform === 'win32') {
+    try { spawn('taskkill', ['/pid', String(pid), '/T', '/F'], { windowsHide: true, stdio: 'ignore' }) } catch { /* ignore */ }
+  }
+}
+
+function cmdQuote(a) {
+  if (/[\s"&|<>^()%!]/.test(a)) return '"' + a.replace(/"/g, '\\"') + '"'
+  return a
+}
+
+export function makeSpawnArgs(cmd, args) {
+  if (process.platform === 'win32' && /\.(cmd|bat)$/i.test(cmd)) {
+    const line = '"' + cmd + '"' + (args.length ? ' ' + args.map(cmdQuote).join(' ') : '')
+    return { command: line, args: [], options: { shell: true } }
+  }
+  return { command: cmd, args, options: {} }
+}
+
+export function runProcess(cmd, args, { cwd, timeoutMs, signal, maxOutputChars = 100000, env }) {
+  return new Promise((resolve, reject) => {
+    const { command, args: cargs, options } = makeSpawnArgs(cmd, args)
+    let child
+    try {
+      child = spawn(command, cargs, { cwd, windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'], env: env || process.env, ...options })
+    } catch (err) { reject(err); return }
+    let stdout = '', stderr = '', truncated = false, settled = false
+    const append = (buf, target) => {
+      const s = buf.toString('utf8')
+      if (target.length + s.length > maxOutputChars) { target += s.slice(0, Math.max(0, maxOutputChars - target.length)); truncated = true }
+      else target += s
+      return target
+    }
+    child.stdout.on('data', (d) => { stdout = append(d, stdout) })
+    child.stderr.on('data', (d) => { stderr = append(d, stderr) })
+    let timer = null
+    if (timeoutMs && timeoutMs > 0) {
+      timer = setTimeout(() => {
+        if (settled) return
+        settled = true
+        clearTimeout(timer)
+        killPid(child.pid)
+        resolve({ exitCode: -1, stdout, stderr, truncated, timedOut: true })
+      }, timeoutMs)
+    }
+    const onAbort = () => {
+      if (settled) return
+      settled = true
+      clearTimeout(timer)
+      killPid(child.pid)
+      reject(new Error('aborted'))
+    }
+    if (signal) {
+      if (signal.aborted) { onAbort(); return }
+      signal.addEventListener('abort', onAbort, { once: true })
+    }
+    child.on('error', (err) => { if (settled) return; settled = true; clearTimeout(timer); if (signal) signal.removeEventListener('abort', onAbort); reject(err) })
+    child.on('close', (code) => { if (settled) return; settled = true; clearTimeout(timer); if (signal) signal.removeEventListener('abort', onAbort); resolve({ exitCode: code, stdout, stderr, truncated, timedOut: false }) })
+  })
+}
+
+```
+
+`ghidra-bridge/lib/socket.js`:
+
+```js
+// 极简 TCP 行式 JSON 客户端（与 DecompileBridge.py 通信）
+import net from 'node:net'
+
+export function jsonRequest(port, payload, timeoutMs = 30000) {
+  return new Promise((resolve, reject) => {
+    const sock = net.createConnection({ host: '127.0.0.1', port })
+    let buf = ''
+    const timer = setTimeout(() => { sock.destroy(); reject(new Error('ghidra socket 超时')) }, timeoutMs)
+    sock.on('connect', () => sock.write(JSON.stringify(payload) + '\n'))
+    sock.on('data', (d) => {
+      buf += d.toString('utf8')
+      const idx = buf.indexOf('\n')
+      if (idx >= 0) {
+        clearTimeout(timer)
+        sock.destroy()
+        const line = buf.slice(0, idx)
+        try { resolve(JSON.parse(line)) } catch { reject(new Error('桥接响应异常: ' + line.slice(0, 300))) }
+      }
+    })
+    sock.on('error', (e) => { clearTimeout(timer); reject(e) })
+  })
+}
+
+```
+
+`ghidra-bridge/package.json`:
+
+```json
+{
+  "name": "dsh-ghidra",
+  "version": "0.1.0",
+  "description": "Ghidra bridge: import binaries and operate on decompiled output via a persistent PyGhidra server.",
+  "type": "module",
+  "main": "index.js",
+  "files": ["index.js", "lib", "scripts", "cordis.patch.yml", "README.md"],
+  "engines": { "node": ">=20" },
+  "license": "MIT",
+  "dsh": { "bundle": { "patch": "./cordis.patch.yml" } }
+}
+
+```
+
+`ghidra-bridge/scripts/DecompileBridge.py`:
+
+```py
+# DecompileBridge.py — DSH ghidra 插件的常驻桥接服务器（Jython 2.7）
+# 用法（headless）：
+#   analyzeHeadless <projDir> <projName> -process <program> -noanalysis
+#     -scriptPath <dir> -postScript DecompileBridge.py <portFile> <logFile>
+# 协议：TCP 127.0.0.1 上的一行一个 JSON 请求/响应。
+# ops: info | functions | decompile | strings | xrefs | ping | shutdown
+# @category Analysis
+
+import sys
+import json
+
+from java.io import BufferedReader, InputStreamReader, OutputStreamWriter, PrintWriter, FileWriter
+from java.net import ServerSocket, InetAddress
+from java.lang import String
+
+from ghidra.app.decompiler import DecompInterface
+
+
+def log(msg, logFile):
+    if logFile:
+        try:
+            f = open(logFile, 'a')
+            f.write(msg + '\n')
+            f.close()
+        except Exception:
+            pass
+
+
+def resolve_address(target):
+    space = currentProgram.getAddressFactory().getDefaultAddressSpace()
+    hexs = target[2:] if target.lower().startswith('0x') else target
+    try:
+        v = int(hexs, 16)
+        return space.getAddress(v)
+    except Exception:
+        pass
+    it = currentProgram.getSymbolTable().getSymbols(target)
+    if it.hasNext():
+        return it.next().getAddress()
+    raise Exception('cannot resolve address/symbol: ' + target)
+
+
+def op_info(obj):
+    p = currentProgram
+    blocks = []
+    for b in p.getMemory().getBlocks():
+        blocks.append({'name': str(b.getName()), 'start': str(b.getStart()), 'size': int(b.getSize())})
+    eps = []
+    it = p.getSymbolTable().getExternalEntryPointIterator()
+    while it.hasNext():
+        a = it.next()
+        sym = p.getSymbolTable().getPrimarySymbol(a)
+        eps.append({'name': str(sym.getName()) if sym is not None else '', 'address': str(a)})
+    return {'program': str(p.getName()),
+            'language': str(p.getLanguage().getLanguageID()),
+            'compiler': str(p.getCompilerSpec().getCompilerSpecID()),
+            'imageBase': str(p.getImageBase()),
+            'minAddress': str(p.getMinAddress()),
+            'maxAddress': str(p.getMaxAddress()),
+            'functions': int(p.getFunctionManager().getFunctionCount()),
+            'symbols': int(p.getSymbolTable().getNumSymbols()),
+            'blocks': blocks,
+            'entrypoints': eps}
+
+
+def op_functions(obj):
+    flt = obj.get('filter') or ''
+    sort = obj.get('sort') or ''
+    maxn = int(obj.get('max') or 200)
+    rows = []
+    it = currentProgram.getFunctionManager().getFunctions(True)
+    while it.hasNext() and len(rows) < maxn:
+        f = it.next()
+        name = str(f.getName())
+        if flt and flt not in name:
+            continue
+        rows.append({'name': name, 'address': str(f.getEntryPoint()),
+                     'size': int(f.getBody().getNumAddresses()), 'thunk': bool(f.isThunk())})
+    if sort == 'name':
+        rows.sort(key=lambda r: r['name'].lower())
+    return {'list': rows, 'total': len(rows)}
+
+
+def op_decompile(obj):
+    target = obj.get('target') or ''
+    if not target:
+        raise Exception('decompile: missing target')
+    addr = resolve_address(target)
+    fm = currentProgram.getFunctionManager()
+    f = fm.getFunctionAt(addr)
+    if f is None:
+        f = fm.getFunctionContaining(addr)
+    if f is None:
+        raise Exception('decompile: no function at ' + target)
+    di = DecompInterface()
+    try:
+        di.openProgram(currentProgram)
+        res = di.decompileFunction(f, 60, monitor)
+        if res is None or res.getDecompiledFunction() is None:
+            raise Exception('decompile failed (program may need analysis): ' + str(f.getName()))
+        code = res.getDecompiledFunction().getC()
+        return {'function': str(f.getName()), 'address': str(f.getEntryPoint()),
+                'signature': str(f.getSignature()), 'code': code}
+    finally:
+        di.dispose()
+
+
+def op_strings(obj):
+    flt = obj.get('filter') or ''
+    minlen = int(obj.get('minLength') or 4)
+    maxn = int(obj.get('max') or 200)
+    rows = []
+    it = currentProgram.getListing().getDefinedData(True)
+    while it.hasNext() and len(rows) < maxn:
+        d = it.next()
+        dt = str(d.getDataType().getName()).lower()
+        if 'string' not in dt and 'unicode' not in dt:
+            continue
+        v = d.getValue()
+        if v is None:
+            continue
+        s = v if isinstance(v, str) else str(v)
+        if len(s) < minlen:
+            continue
+        if flt and flt not in s:
+            continue
+        rows.append({'address': str(d.getAddress()), 'length': int(d.getLength()), 'value': s})
+    return {'list': rows, 'total': len(rows)}
+
+
+def op_xrefs(obj):
+    target = obj.get('target') or ''
+    direction = obj.get('direction') or 'to'
+    maxn = int(obj.get('max') or 100)
+    if not target:
+        raise Exception('xrefs: missing target')
+    addr = resolve_address(target)
+    rm = currentProgram.getReferenceManager()
+    # 注意：Ghidra 12 中 getReferencesFrom 返回数组，getReferencesTo 返回迭代器
+    if direction == 'from':
+        it = rm.getReferencesFrom(addr)
+    else:
+        it = rm.getReferencesTo(addr)
+    refs = []
+    if hasattr(it, 'hasNext'):
+        while it.hasNext() and len(refs) < maxn:
+            refs.append(it.next())
+    else:
+        refs = list(it)[:maxn]
+    rows = []
+    for r in refs:
+        row = {'from': str(r.getFromAddress()), 'to': str(r.getToAddress()),
+               'type': str(r.getReferenceType().getName())}
+        sym = currentProgram.getSymbolTable().getSymbol(r)
+        if sym is not None:
+            row['symbol'] = str(sym.getName())
+        rows.append(row)
+    return {'address': str(addr), 'list': rows, 'total': len(rows)}
+
+
+OPS = {
+    'info': op_info,
+    'functions': op_functions,
+    'decompile': op_decompile,
+    'strings': op_strings,
+    'xrefs': op_xrefs,
+    'ping': lambda obj: {'pong': True},
+    'shutdown': lambda obj: {'bye': True},
+}
+
+
+def handle(line):
+    try:
+        obj = json.loads(line)
+        op = obj.get('op')
+        if op is None:
+            return json.dumps({'ok': False, 'error': 'missing op'})
+        handler = OPS.get(op)
+        if handler is None:
+            return json.dumps({'ok': False, 'error': 'unknown op: ' + str(op)})
+        result = handler(obj)
+        return json.dumps({'ok': True, 'result': result})
+    except Exception as e:
+        return json.dumps({'ok': False, 'error': str(e)})
+
+
+def main():
+    args = list(sys.argv)[1:]
+    portFile = args[0] if len(args) > 0 else ''
+    logFile = args[1] if len(args) > 1 else ''
+    server = ServerSocket(0, 8, InetAddress.getLoopbackAddress())
+    port = server.getLocalPort()
+    if portFile:
+        f = open(portFile, 'w')
+        f.write(str(port))
+        f.close()
+    log('listening port=%d program=%s' % (port, currentProgram.getName()), logFile)
+    while True:
+        sock = None
+        try:
+            sock = server.accept()
+            sock.setSoTimeout(120000)
+            reader = BufferedReader(InputStreamReader(sock.getInputStream(), 'UTF-8'))
+            writer = PrintWriter(OutputStreamWriter(sock.getOutputStream(), 'UTF-8'), True)
+            line = reader.readLine()
+            while line is not None:
+                resp = handle(line)
+                writer.println(resp)
+                writer.flush()
+                if '"shutdown"' in resp:
+                    server.close()
+                    log('shutdown', logFile)
+                    return
+                line = reader.readLine()
+        except Exception as e:
+            log('conn error: ' + str(e), logFile)
+        finally:
+            if sock is not None:
+                try:
+                    sock.close()
+                except Exception:
+                    pass
+
+
+main()
+
+```
+
+`reminder-bridge/README.md`:
+
+```md
+# dsh-reminder
+
+DSH 提醒插件：当任务需要用户决定/辅助时（提问 `ask_user_question`、审批请求），检测前台窗口是否在看剧/玩游戏，用声音 / 弹窗 / 黑白屏幕闪烁提醒用户回到工作，避免一直玩耽误工作。
+
+## 行为
+
+| 前台窗口 | 提醒方式（智能判断） |
+| --- | --- |
+| 激烈网游（LOL/CS2/PUBG/原神/永劫…） | 黑白屏幕闪烁（柔和双闪） |
+| 看剧/休闲（B站/抖音/Netflix/星穹铁道/Minecraft…） | 红色置顶弹窗 10s + 提示音 |
+| 其他未知 | 提示音 + 弹窗 |
+| 工作窗口（DeepSeek/VS Code） | 不打扰（待命） |
+
+- 每 30 秒检查一次，提醒最长 10 分钟，或直到回答完问题 / 审批结束。
+- 默认：小窗顶部居中 + 智能判断；闪烁参数（强度/轮数/闪速/间隔）可调。
+- **内置「提醒配置」面板**（浏览器端 web 插件）：注册为设置页 **「桌面通知」**（设置 → 桌面通知），
+  提供位置按钮、智能/手动切换、声音/弹窗/闪烁多选，以及闪烁滑轨（强度/轮数/闪速/间隔）。
+  配置经 Typert RPC（`remote.reminderConfig`）实时读写 Host 侧状态并立即生效。
+
+## 安装
+
+### 本机 profile（开发）
+
+```json
+// C:\Users\Administrator\.dsh\profiles\{desktop|web}\package.json
+{
+  "dependencies": { "dsh-reminder": "link:D:/插件研发/reminder-bridge" },
+  "dsh": { "profile": { "bundles": [ /* ... */, "dsh-reminder" ] } }
+}
+```
+
+重启 DSH 后生效。
+
+### 一般安装（npm）
+
+```bash
+npm install dsh-reminder
+dsh plugin --profile <name> add dsh-reminder
+```
+
+包自足依赖（zod / schemastery / cosmokit / @standard-schema/spec），无需额外安装。
+
+## 配置（profile `cordis.patch.yml` 按 id 覆盖）
+
+```yaml
+- id: reminder-bridge
+  name: dsh-reminder
+  config:
+    position: top          # top | top-right | top-left | bottom-right | bottom-left | center
+    mode: auto             # auto | manual
+    manualModes: [sound, popup]   # 手动方式：sound / popup / flash
+    flashOpacity: 0.35     # 闪烁强度 0.05~0.9
+    flashRounds: 2         # 闪烁轮数 1~6
+    flashPulseMs: 300      # 单色时长(ms) 50~800
+    flashGapMs: 400        # 轮间隔(ms) 100~1500
+    checkMs: 30000
+    maxActiveMs: 600000
+    enabled: true
+```
+
+```
+
+`reminder-bridge/cordis.patch.yml`:
+
+```yml
+# dsh-reminder bundle patch
+# 提醒插件：任务需要用户决定/辅助时（ask_user_question / 审批），
+# 检测前台窗口是否在看剧/玩游戏，用声音 / 弹窗 / 黑白屏幕闪烁提醒。
+#
+# 全量配置示例（在 profile 的 cordis.patch.yml 覆盖本行即可）：
+#   - id: reminder-bridge
+#     name: dsh-reminder
+#     config:
+#       position: top          # top | top-right | top-left | bottom-right | bottom-left | center
+#       mode: auto             # auto | manual
+#       manualModes: [sound, popup]
+#       flashOpacity: 0.35     # 0.05~0.9 闪烁强度
+#       flashRounds: 2         # 1~6 闪烁轮数
+#       flashPulseMs: 300      # 50~800 单色时长(ms)
+#       flashGapMs: 400        # 100~1500 轮间隔(ms)
+#       checkMs: 30000
+#       maxActiveMs: 600000
+#       enabled: true
+- insert:
+    - id: reminder-bridge
+      name: dsh-reminder
+
+```
+
+`reminder-bridge/index.js`:
+
+```js
+// dsh-reminder — 任务需要用户决定/辅助时，检测前台窗口（看剧/游戏），
+// 用声音 / 弹窗 / 黑白屏幕闪烁提醒用户回到工作。
+//
+// 触发：ask_user_question 工具调用（pre-execute）、审批请求（approval/request）
+// 分类：激烈网游 -> 黑白屏幕闪烁；看剧/休闲 -> 弹窗+声音；未知 -> 声音+弹窗
+// 停止：工具完成（tools/result）、审批结束、或最长 MAX_ACTIVE_MS
+import Schema from 'schemastery'
+
+export const name = 'reminder-bridge'
+export const inject = ['timer', 'shell']
+
+export const Config = Schema.object({
+  // 触发工具名列表
+  triggerTools: Schema.array(Schema.string()).default(['ask_user_question']),
+  // 检查间隔（ms）
+  checkMs: Schema.number().default(30000),
+  // 首次检查延迟（ms）
+  firstMs: Schema.number().default(6000),
+  // 最长提醒时长（ms）
+  maxActiveMs: Schema.number().default(10 * 60 * 1000),
+  // 弹窗位置：top / top-right / top-left / bottom-right / bottom-left / center
+  position: Schema.string().default('top'),
+  // 提醒方式：auto=智能判断 | manual=手动（manualModes 生效）
+  mode: Schema.union(['auto', 'manual']).default('auto'),
+  // 手动方式列表：sound / popup / flash
+  manualModes: Schema.array(Schema.union(['sound', 'popup', 'flash'])).default(['sound', 'popup']),
+  // 闪烁强度：0.05~0.9（全屏遮罩透明度），越大越亮/暗
+  flashOpacity: Schema.number().min(0.05).max(0.9).default(0.35),
+  // 闪烁轮数：1~6
+  flashRounds: Schema.number().min(1).max(6).default(2),
+  // 单色时长（ms）：50~800，越小闪烁越快
+  flashPulseMs: Schema.number().min(50).max(800).default(300),
+  // 轮间隔（ms）：100~1500，越大越慢
+  flashGapMs: Schema.number().min(100).max(1500).default(400),
+  // 是否播放提醒（调试时可关）
+  enabled: Schema.boolean().default(true),
+})
+
+// ── 窗口分类 ────────────────────────────────────────────────────────────────
+
+// 用户回到工作的窗口（标题/进程包含任一 -> 视为工作，不打扰）
+const WORK_HINTS = [
+  'deepseek', 'dsh', 'harness', '127.0.0.1:43120', 'localhost:43120',
+  'vs code', 'visual studio code', 'code.exe',
+]
+
+// 激烈互动（网络游戏、激情操作）-> 屏幕闪烁
+const INTENSE_HINTS = [
+  'genshin', '原神', '崩坏', 'honkai', 'leagueclient', 'league of legends', '英雄联盟', 'lol',
+  'cs2', 'csgo', 'counter-strike', '反恐精英', 'dota2', 'dota', 'valorant', '无畏契约',
+  'overwatch', '守望先锋', 'apex', 'pubg', '绝地求生', '和平精英', '永劫无间', 'naraka',
+  '穿越火线', 'cf', '使命召唤', 'cod', '战地', 'battlefield', '彩虹六号', 'siege',
+  '王者荣耀', '金铲铲', '云顶之弈', '蛋仔派对', '暗黑', 'diablo', '星际争霸', 'starcraft',
+  '剑网', '逆水寒', '黑色沙漠', '地下城', 'dnf', '剑灵', 'ff14', '最终幻想', '魔兽世界', 'world of warcraft',
+  'rocket league', 'fifa', 'ea fc', 'nba 2k', 'racing', '格斗', 'fighting', '竞技', '排位', '团战', '吃鸡',
+]
+
+// 休闲 / 看剧 -> 弹窗 + 声音
+const CASUAL_HINTS = [
+  'bilibili', '哔哩哔哩', 'b站', 'youtube', 'youtu.be', 'netflix', '爱奇艺', 'iqiyi', '优酷', 'youku',
+  '腾讯视频', 'v.qq', '芒果tv', 'mgtv', '抖音', 'douyin', '快手', 'kuaishou', '斗鱼', 'douyu', '虎牙', 'huya',
+  'twitch', '西瓜视频', '西瓜', '影视', '电影', '电视剧', '动漫', '番剧', '综艺', '追剧', '看剧', '直播', '短剧',
+  'starrail', 'star rail', '星穹铁道', '云·星穹铁道', 'minecraft', '我的世界', '明日方舟', '碧蓝', '光遇',
+  '植物大战僵尸', '消消乐', '扫雷', '纸牌', '雀魂', 'steam', 'wegame', '模拟器', '休闲',
+]
+
+const GENERIC_HINTS = ['游戏', '启动器', 'origin', 'epic games', 'battle.net', 'blizzard', '暴雪', '炉石', 'hearthstone']
+
+// ── PowerShell 脚本 ────────────────────────────────────────────────────────
+
+// 前台窗口检测（进程名 + 窗口标题）
+const FG_SCRIPT = `
+try {
+  Add-Type -TypeDefinition @'
+using System;
+using System.Runtime.InteropServices;
+using System.Text;
+public class FgWinR {
+  [DllImport("user32.dll")] public static extern IntPtr GetForegroundWindow();
+  [DllImport("user32.dll")] public static extern uint GetWindowThreadProcessId(IntPtr h, out uint pid);
+  [DllImport("user32.dll", CharSet=CharSet.Unicode)] public static extern int GetWindowText(IntPtr h, StringBuilder sb, int max);
+  [DllImport("user32.dll", CharSet=CharSet.Unicode)] public static extern int GetWindowTextLength(IntPtr h);
+}
+'@ -ErrorAction Stop
+  $h = [FgWinR]::GetForegroundWindow()
+  $pid2 = 0
+  [void][FgWinR]::GetWindowThreadProcessId($h, [ref]$pid2)
+  $n = [FgWinR]::GetWindowTextLength($h)
+  $sb = New-Object System.Text.StringBuilder ($n + 1)
+  [void][FgWinR]::GetWindowText($h, $sb, $sb.Capacity)
+  $proc = Get-Process -Id $pid2 -ErrorAction SilentlyContinue
+  [pscustomobject]@{ process = if ($proc) { $proc.ProcessName } else { '' }; title = $sb.ToString() } | ConvertTo-Json -Compress
+} catch {
+  [pscustomobject]@{ process = ''; title = '' } | ConvertTo-Json -Compress
+}
+`
+
+// 声音：系统提示音（Exclamation + Asterisk）
+const SOUND_SCRIPT = `
+try { Add-Type -AssemblyName System.Windows.Extensions -ErrorAction Stop; [System.Media.SystemSounds]::Exclamation.Play() } catch { try { [console]::beep(880, 250) } catch { } }
+Start-Sleep -Milliseconds 300
+try { [System.Media.SystemSounds]::Asterisk.Play() } catch { try { [console]::beep(1175, 250) } catch { } }
+`
+
+// 弹窗：红色置顶小窗（不抢焦点），位置可配置，10 秒自动消失
+const POPUP_SCRIPT = `
+Add-Type -AssemblyName System.Windows.Forms -ErrorAction Stop
+Add-Type -AssemblyName System.Drawing -ErrorAction Stop
+$f = New-Object System.Windows.Forms.Form
+$f.FormBorderStyle = 'None'
+$f.StartPosition = 'Manual'
+$f.ShowInTaskbar = $false
+$f.ClientSize = New-Object System.Drawing.Size(420, 96)
+$s = [System.Windows.Forms.Screen]::PrimaryScreen.WorkingArea
+$w = 420; $h = 96
+if ("$env:REM_POS" -eq "top") { $fx = ($s.Width - $w) / 2; $fy = 32 }
+elseif ("$env:REM_POS" -eq "top-right") { $fx = $s.Width - $w - 24; $fy = 32 }
+elseif ("$env:REM_POS" -eq "top-left") { $fx = 24; $fy = 32 }
+elseif ("$env:REM_POS" -eq "bottom-right") { $fx = $s.Width - $w - 24; $fy = $s.Height - $h - 24 }
+elseif ("$env:REM_POS" -eq "bottom-left") { $fx = 24; $fy = $s.Height - $h - 24 }
+elseif ("$env:REM_POS" -eq "center") { $fx = ($s.Width - $w) / 2; $fy = ($s.Height - $h) / 2 }
+else { $fx = ($s.Width - $w) / 2; $fy = 32 }
+$f.Location = New-Object System.Drawing.Point([int]$fx, [int]$fy)
+$f.BackColor = [System.Drawing.Color]::FromArgb(230, 81, 52)
+$lb = New-Object System.Windows.Forms.Label
+$lb.Text = 'DSH 提醒：有你等待协助的任务！'
+$lb.Font = New-Object System.Drawing.Font('Microsoft YaHei', 14, [System.Drawing.FontStyle]::Bold)
+$lb.ForeColor = [System.Drawing.Color]::White
+$lb.Dock = 'Fill'
+$lb.TextAlign = 'MiddleCenter'
+$f.Controls.Add($lb)
+$f.Show()
+Add-Type -TypeDefinition @'
+using System;
+using System.Runtime.InteropServices;
+public class WApiRR {
+  [DllImport("user32.dll")] public static extern int GetWindowLong(IntPtr h, int idx);
+  [DllImport("user32.dll")] public static extern int SetWindowLong(IntPtr h, int idx, int val);
+}
+'@ -ErrorAction Stop
+[void][WApiRR]::SetWindowLong($f.Handle, -20, ([WApiRR]::GetWindowLong($f.Handle, -20) -bor 0x08000000))
+$f.TopMost = $true
+$deadline = (Get-Date).AddSeconds(10)
+while ((Get-Date) -lt $deadline) { [System.Windows.Forms.Application]::DoEvents(); Start-Sleep -Milliseconds 120 }
+$f.Close()
+`
+
+// 屏幕闪烁：黑白对比闪烁（全屏遮罩，黑白交替），参数可配置
+// flashOpacity=遮罩透明度，flashPulseMs=单色时长（越小越快），flashRounds=轮数，flashGapMs=轮间隔
+const flashScript = (opacity, pulseMs, rounds, gapMs) => `
+Add-Type -AssemblyName System.Windows.Forms -ErrorAction Stop
+Add-Type -AssemblyName System.Drawing -ErrorAction Stop
+Add-Type -TypeDefinition @'
+using System;
+using System.Runtime.InteropServices;
+public class WApiRS {
+  [DllImport("user32.dll")] public static extern int GetWindowLong(IntPtr h, int idx);
+  [DllImport("user32.dll")] public static extern int SetWindowLong(IntPtr h, int idx, int val);
+}
+'@ -ErrorAction Stop
+$f = New-Object System.Windows.Forms.Form
+$f.FormBorderStyle = 'None'
+$f.StartPosition = 'Manual'
+$f.TopMost = $true
+$f.ShowInTaskbar = $false
+$f.Bounds = [System.Windows.Forms.Screen]::PrimaryScreen.Bounds
+$f.BackColor = [System.Drawing.Color]::FromArgb(255, 0, 0, 0)
+$f.Opacity = 0.0
+$f.Show()
+[void][WApiRS]::SetWindowLong($f.Handle, -20, ([WApiRS]::GetWindowLong($f.Handle, -20) -bor 0x08000000))
+$f.TopMost = $true
+foreach ($i in 1..${rounds}) {
+  $f.BackColor = [System.Drawing.Color]::FromArgb(255, 0, 0, 0)
+  $f.Opacity = ${opacity}
+  [System.Windows.Forms.Application]::DoEvents()
+  Start-Sleep -Milliseconds ${pulseMs}
+  $f.BackColor = [System.Drawing.Color]::FromArgb(255, 255, 255, 255)
+  $f.Opacity = ${opacity}
+  [System.Windows.Forms.Application]::DoEvents()
+  Start-Sleep -Milliseconds ${pulseMs}
+  $f.Opacity = 0.0
+  [System.Windows.Forms.Application]::DoEvents()
+  Start-Sleep -Milliseconds ${gapMs}
+}
+$f.Close()
+`
+
+// ── 插件主体 ────────────────────────────────────────────────────────────────
+
+export function apply(ctx, config) {
+  const triggerTools = config.triggerTools
+  const checkMs = config.checkMs
+  const firstMs = config.firstMs
+  const maxActiveMs = config.maxActiveMs
+
+  // 可变配置：初始值来自 cordis.yml config，可被运行卡（client 侧滑轨面板）实时修改
+  const cfg = {
+    position: config.position,
+    mode: config.mode,
+    manualModes: config.manualModes.slice(),
+    flashOpacity: config.flashOpacity,
+    flashRounds: config.flashRounds,
+    flashPulseMs: config.flashPulseMs,
+    flashGapMs: config.flashGapMs,
+    enabled: config.enabled,
+  }
+
+  const snapshot = () => ({
+    position: cfg.position,
+    mode: cfg.mode,
+    manualModes: cfg.manualModes.slice(),
+    flashOpacity: cfg.flashOpacity,
+    flashRounds: cfg.flashRounds,
+    flashPulseMs: cfg.flashPulseMs,
+    flashGapMs: cfg.flashGapMs,
+    enabled: cfg.enabled,
+  })
+
+  // 远程服务：client 经 ctx.get('remote.reminderConfig') 读写配置
+  // 所有 RPC 输入都经白名单/钳制：防止命令注入与越界值进入 PowerShell 脚本
+  const POSITION_SET = new Set(['top', 'top-right', 'top-left', 'bottom-right', 'bottom-left', 'center'])
+  const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v))
+
+  const svc = {
+    async getConfig() {
+      return snapshot()
+    },
+    async setConfig(patch) {
+      if (patch === null || typeof patch !== 'object') return snapshot()
+      if (typeof patch.position === 'string' && POSITION_SET.has(patch.position)) cfg.position = patch.position
+      if (patch.mode === 'auto' || patch.mode === 'manual') cfg.mode = patch.mode
+      if (Array.isArray(patch.manualModes)) {
+        cfg.manualModes = patch.manualModes.filter((m) => m === 'sound' || m === 'popup' || m === 'flash')
+      }
+      if (typeof patch.flashOpacity === 'number' && Number.isFinite(patch.flashOpacity)) {
+        cfg.flashOpacity = clamp(patch.flashOpacity, 0.05, 0.9)
+      }
+      if (typeof patch.flashRounds === 'number' && Number.isFinite(patch.flashRounds)) {
+        cfg.flashRounds = clamp(Math.round(patch.flashRounds), 1, 6)
+      }
+      if (typeof patch.flashPulseMs === 'number' && Number.isFinite(patch.flashPulseMs)) {
+        cfg.flashPulseMs = clamp(Math.round(patch.flashPulseMs), 50, 800)
+      }
+      if (typeof patch.flashGapMs === 'number' && Number.isFinite(patch.flashGapMs)) {
+        cfg.flashGapMs = clamp(Math.round(patch.flashGapMs), 100, 1500)
+      }
+      if (typeof patch.enabled === 'boolean') cfg.enabled = patch.enabled
+      console.log('[reminder] config updated: ' + JSON.stringify(snapshot()))
+      return snapshot()
+    },
+  }
+  Object.defineProperty(svc, 'typertRemote', {
+    configurable: false,
+    enumerable: false,
+    writable: false,
+    value: { service: svc, serviceKey: 'reminderConfig', namespace: 'reminderConfig' },
+  })
+  ctx.provide('reminderConfig', svc)
+
+  // 显式使用会话策略（danger-full-access），避免默认 read-only 禁用 Add-Type
+  const sandboxPolicy = ctx.get('sandboxPolicy')
+  const policy = sandboxPolicy === undefined ? undefined : sandboxPolicy.resolve({ mode: 'danger-full-access' })
+
+  let state = null // { reason, startedAt, timer, count }
+
+  const runShell = (script, timeoutMs, env) => {
+    const shell = ctx.get('shell')
+    if (shell === undefined) return Promise.resolve(null)
+    const spec = shell.resolve({
+      command: script,
+      timeoutMs,
+      ...(env !== undefined ? { env } : {}),
+      ...(policy !== undefined ? { sandboxPolicy: policy } : {}),
+    })
+    return shell.run(spec)
+  }
+
+  const getForeground = async () => {
+    try {
+      const result = await runShell(FG_SCRIPT, 10000)
+      const out = String(result?.stdout?.text ?? '').trim()
+      if (!out) return null
+      const parsed = JSON.parse(out)
+      return { process: String(parsed.process || ''), title: String(parsed.title || '') }
+    } catch (err) {
+      console.error('[reminder] fg check failed: ' + err)
+      return null
+    }
+  }
+
+  const kindOf = (fg) => {
+    const text = (fg.title + ' ' + fg.process).toLowerCase()
+    if (WORK_HINTS.some((k) => text.includes(k))) return 'work'
+    if (INTENSE_HINTS.some((k) => text.includes(k))) return 'intense'
+    if (CASUAL_HINTS.some((k) => text.includes(k))) return 'casual'
+    if (GENERIC_HINTS.some((k) => text.includes(k))) return 'unknown'
+    return 'unknown'
+  }
+
+  const decideModes = (kind) => {
+    if (cfg.mode === 'manual') {
+      const set = cfg.manualModes.filter((m) => m === 'sound' || m === 'popup' || m === 'flash')
+      return set.length > 0 ? set : ['sound']
+    }
+    // auto：按前台窗口类型智能选择
+    if (kind === 'intense') return ['flash']
+    if (kind === 'casual') return ['popup', 'sound']
+    return ['sound', 'popup']
+  }
+
+  const dispatch = async (modes) => {
+    for (const m of modes) {
+      try {
+        if (m === 'sound') await runShell(SOUND_SCRIPT, 10000)
+        else if (m === 'popup') await runShell(POPUP_SCRIPT, 20000, { REM_POS: cfg.position })
+        else if (m === 'flash') await runShell(flashScript(cfg.flashOpacity, cfg.flashPulseMs, cfg.flashRounds, cfg.flashGapMs), 20000)
+      } catch (err) {
+        console.error('[reminder] mode ' + m + ' failed: ' + err)
+      }
+    }
+  }
+
+  const tick = async () => {
+    if (state === null || !state.active) return
+    if (Date.now() - state.startedAt > maxActiveMs) {
+      stopReminder('max duration')
+      return
+    }
+    const fg = await getForeground()
+    if (fg === null) return
+    const kind = kindOf(fg)
+    console.log('[reminder] fg=' + fg.process + ' | ' + fg.title + ' -> ' + kind)
+    if (kind === 'work') return // 已回工作窗口：待命不打扰，等工具完成
+    const modes = decideModes(kind)
+    await dispatch(modes)
+    state.count = (state.count || 0) + 1
+    console.log('[reminder] reminded #' + state.count + ' via ' + modes.join('+') + ' (' + kind + ')')
+  }
+
+  const startReminder = (reason) => {
+    if (state !== null) return
+    console.log('[reminder] START: ' + reason)
+    state = { reason, startedAt: Date.now(), active: true, timer: null, count: 0 }
+    ctx.timeout(() => void tick(), firstMs)
+    state.timer = ctx.interval(() => void tick(), checkMs)
+  }
+
+  const stopReminder = (reason) => {
+    if (state === null) return
+    if (state.timer !== null) state.timer()
+    console.log('[reminder] STOP: ' + reason + ' (count=' + (state.count || 0) + ')')
+    state = null
+  }
+
+  ctx.on('tools/pre-execute', (exec, next) => {
+    if (!cfg.enabled) return next()
+    if (triggerTools.includes(exec.name)) startReminder('tool: ' + exec.name)
+    return next()
+  })
+
+  ctx.on('tools/result', (exec) => {
+    if (triggerTools.includes(exec.name)) stopReminder('tool completed: ' + exec.name)
+  })
+
+  ctx.on('approval/request', async (req, next) => {
+    if (!cfg.enabled) return next()
+    startReminder('approval')
+    try {
+      return await next()
+    } finally {
+      stopReminder('approval settled')
+    }
+  })
+
+  console.log('[reminder] plugin applied (pos=' + cfg.position + ', mode=' + cfg.mode + ', enabled=' + cfg.enabled + ')')
+}
+
+```
+
+`reminder-bridge/lib/client.js`:
+
+```js
+/**
+ * dsh-reminder 浏览器端 bundle（单文件，经 __ModuleLoader__ 加载）。
+ *
+ * 提供「提醒配置」面板（滑轨）：
+ *  - 小窗位置：顶部居中 / 上右 / 上左 / 下右 / 下左 / 屏幕中央
+ *  - 提醒方式：智能判断 / 手动（声音 / 弹窗 / 屏幕闪烁 多选）
+ *  - 闪烁滑轨：强度 / 轮数 / 闪速 / 间隔
+ *
+ * 数据通道：ctx.get('remote.reminderConfig')（Typert RPC）→ getConfig / setConfig。
+ */
+
+window.__ModuleLoader__.load({
+  id: 'dsh-reminder',
+  factory: (require) => {
+    var module = { exports: {} }
+    var exports = module.exports
+    Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' })
+
+    const React = require('react')
+
+    // ── 常量 ────────────────────────────────────────────────────────────────
+
+    const POSITIONS = [
+      { id: 'top', label: '顶部居中' },
+      { id: 'top-right', label: '上右' },
+      { id: 'top-left', label: '上左' },
+      { id: 'bottom-right', label: '下右' },
+      { id: 'bottom-left', label: '下左' },
+      { id: 'center', label: '屏幕中央' },
+    ]
+    const MODES = [
+      { id: 'sound', label: '声音' },
+      { id: 'popup', label: '弹窗' },
+      { id: 'flash', label: '屏幕闪烁' },
+    ]
+
+    const DEFAULT_CFG = {
+      position: 'top',
+      mode: 'auto',
+      manualModes: ['sound', 'popup'],
+      flashOpacity: 0.35,
+      flashRounds: 2,
+      flashPulseMs: 300,
+      flashGapMs: 400,
+      enabled: true,
+    }
+
+    // ── 线路校验器（与 host 面 zod 清单对应，宽松校验必要字段）──────────────
+    // client 面注册 remote 调用时，descriptor.result / parameters[].codec 必须
+    // 是严格 codec { mode:'strict', typeSymbol, schema:{ parse } }，否则
+    // typert-registry 的 validateInvocation 会抛错，导致插件 boot 失败。
+
+    function fail(path, expect) {
+      throw new Error('dsh-reminder: 服务端数据非法 (' + path + ': ' + expect + ')')
+    }
+    function parseConfig(v, path) {
+      if (v === null || typeof v !== 'object' || Array.isArray(v)) fail(path, 'object')
+      return {
+        position: typeof v.position === 'string' ? v.position : 'top',
+        mode: typeof v.mode === 'string' ? v.mode : 'auto',
+        manualModes: Array.isArray(v.manualModes) ? v.manualModes.filter((x) => typeof x === 'string') : [],
+        flashOpacity: typeof v.flashOpacity === 'number' && Number.isFinite(v.flashOpacity) ? v.flashOpacity : 0.35,
+        flashRounds: typeof v.flashRounds === 'number' && Number.isFinite(v.flashRounds) ? v.flashRounds : 2,
+        flashPulseMs: typeof v.flashPulseMs === 'number' && Number.isFinite(v.flashPulseMs) ? v.flashPulseMs : 300,
+        flashGapMs: typeof v.flashGapMs === 'number' && Number.isFinite(v.flashGapMs) ? v.flashGapMs : 400,
+        enabled: typeof v.enabled === 'boolean' ? v.enabled : true,
+      }
+    }
+    function parsePatch(v, path) {
+      if (v === null || typeof v !== 'object' || Array.isArray(v)) fail(path, 'object')
+      return v
+    }
+    function codecOf(parse) {
+      return { parse }
+    }
+
+    // ── 样式（主题变量） ─────────────────────────────────────────────────────
+
+    const css = [
+      '.rm-cfg{font-size:12px;color:var(--dsw-alias-label-secondary);padding:2px 0}',
+      '.rm-cfg-title{font-weight:600;color:var(--dsw-alias-label-primary);margin-bottom:4px}',
+      '.rm-cfg-desc{color:var(--dsw-alias-label-tertiary);margin-bottom:10px;line-height:1.6}',
+      '.rm-cfg-current{background:var(--dsw-alias-bg-layer-2);border:1px solid var(--dsw-alias-border);border-radius:8px;padding:6px 10px;margin-bottom:10px;color:var(--dsw-alias-label-primary);font-weight:500}',
+      '.rm-cfg-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:3px 0}',
+      '.rm-cfg-label{flex:none;min-width:64px;color:var(--dsw-alias-label-secondary)}',
+      '.rm-cfg-options{display:flex;gap:4px;flex-wrap:wrap}',
+      '.rm-cfg-btn{padding:3px 10px;border-radius:6px;border:1px solid var(--dsw-alias-border);background:var(--dsw-alias-bg-layer-2);color:var(--dsw-alias-label-secondary);cursor:pointer;font-size:12px}',
+      '.rm-cfg-btn:hover{background:var(--dsw-alias-interactive-bg-hover)}',
+      '.rm-cfg-btn.on{background:var(--dsw-alias-brand-primary);color:var(--dsw-alias-on-brand-primary);border-color:var(--dsw-alias-brand-primary);font-weight:600;box-shadow:0 0 0 1px var(--dsw-alias-brand-primary)}',
+      '.rm-cfg-slider-row{display:flex;align-items:center;gap:8px;margin:2px 0}',
+      '.rm-cfg-slider-label{flex:none;min-width:96px;color:var(--dsw-alias-label-secondary)}',
+      '.rm-cfg-slider-row input[type=range]{flex:1;max-width:220px;accent-color:var(--dsw-alias-brand-primary)}',
+      '.rm-cfg-check{display:inline-flex;align-items:center;gap:3px;cursor:pointer;margin-right:8px}',
+      '.rm-cfg-hint{color:var(--dsw-alias-label-tertiary);margin-top:3px}',
+    ].join('\n')
+
+    // ── 面板组件 ────────────────────────────────────────────────────────────
+
+    function ConfigPanel({ api }) {
+      const [cfg, setCfg] = React.useState(null)
+      // 服务端响应延迟/乱序会弹回滑块：本地乐观值为权威，RPC 仅用于持久化
+      const [pending, setPending] = React.useState(false)
+
+      React.useEffect(() => {
+        let alive = true
+        api.getConfig().then((next) => { if (alive) setCfg(next) }).catch(() => {})
+        return () => { alive = false }
+      }, [api])
+
+      const update = (patch) => {
+        const next = { ...(cfg || DEFAULT_CFG), ...patch }
+        setCfg(next)
+        // 状态式更新：防止快速连点时旧响应覆盖新值——用最终状态发送
+        setPending(true)
+        api.setConfig(patch).then(() => setPending(false)).catch(() => setPending(false))
+      }
+
+      if (cfg === null) return React.createElement('div', { className: 'rm-cfg' }, '加载配置中…')
+
+      const row = (label, children, key) => React.createElement('div', { key, className: 'rm-cfg-row' },
+        React.createElement('span', { className: 'rm-cfg-label' }, label),
+        children)
+
+      const slider = (label, key, min, max, step, fmt) => React.createElement('div', { key, className: 'rm-cfg-slider-row' },
+        React.createElement('span', { className: 'rm-cfg-slider-label' }, label + '：' + fmt(cfg[key] ?? min)),
+        React.createElement('input', {
+          type: 'range',
+          min,
+          max,
+          step,
+          value: cfg[key] ?? min,
+          onChange: (e) => update({ [key]: Number(e.target.value) }),
+        }))
+
+      const posButtons = React.createElement('div', { className: 'rm-cfg-options' },
+        POSITIONS.map((p) => React.createElement('button', {
+          key: p.id,
+          className: 'rm-cfg-btn' + (cfg.position === p.id ? ' on' : ''),
+          onClick: () => update({ position: p.id }),
+        }, (cfg.position === p.id ? '✓ ' : '') + p.label)))
+
+      const modeButtons = React.createElement('div', { className: 'rm-cfg-options' },
+        React.createElement('button', {
+          key: 'auto',
+          className: 'rm-cfg-btn' + (cfg.mode === 'auto' ? ' on' : ''),
+          onClick: () => update({ mode: 'auto' }),
+        }, (cfg.mode === 'auto' ? '✓ ' : '') + '智能判断'),
+        React.createElement('button', {
+          key: 'manual',
+          className: 'rm-cfg-btn' + (cfg.mode === 'manual' ? ' on' : ''),
+          onClick: () => update({ mode: 'manual' }),
+        }, (cfg.mode === 'manual' ? '✓ ' : '') + '手动'))
+
+      const manualChecks = cfg.mode !== 'manual' ? null : React.createElement('div', { className: 'rm-cfg-options' },
+        MODES.map((m) => {
+          const on = (cfg.manualModes || []).includes(m.id)
+          return React.createElement('label', { key: m.id, className: 'rm-cfg-check' },
+            React.createElement('input', {
+              type: 'checkbox',
+              checked: on,
+              onChange: (e) => {
+                const cur = cfg.manualModes || []
+                update({ manualModes: e.target.checked ? [...cur, m.id] : cur.filter((x) => x !== m.id) })
+              },
+            }),
+            m.label)
+        }))
+
+      const flashSliders = React.createElement('div', { className: 'rm-cfg-flash' },
+        slider('闪烁强度', 'flashOpacity', 0.05, 0.9, 0.05, (v) => Math.round(v * 100) + '%'),
+        slider('闪烁轮数', 'flashRounds', 1, 6, 1, (v) => v + ' 轮'),
+        slider('闪速（ms）', 'flashPulseMs', 50, 800, 50, (v) => v + 'ms'),
+        slider('间隔（ms）', 'flashGapMs', 100, 1500, 100, (v) => v + 'ms'))
+
+      const posLabel = POSITIONS.find((p) => p.id === cfg.position)?.label || cfg.position
+      const modeLabel = cfg.mode === 'auto' ? '智能判断' : '手动'
+      const manualLabel = cfg.mode === 'manual'
+        ? (cfg.manualModes || []).map((m) => MODES.find((x) => x.id === m)?.label || m).join('、') || '（未选择）'
+        : '无'
+      const hint = cfg.mode === 'auto'
+        ? '智能：激烈网游→黑白屏闪；看剧/休闲→弹窗+声音；其他→声音+弹窗'
+        : '手动：勾选需要的方式（至少一种）'
+
+      return React.createElement('div', { className: 'rm-cfg' },
+        React.createElement('div', { className: 'rm-cfg-desc' },
+          '任务需要你决定/辅助时，若检测到你在看剧/玩游戏，会按下面的方式提醒你回到工作。'),
+        React.createElement('div', { className: 'rm-cfg-current' },
+          '当前：小窗 ' + posLabel + ' ｜ 方式 ' + modeLabel +
+          (cfg.mode === 'manual' ? '（' + manualLabel + '）' : '') +
+          ' ｜ 闪烁 ' + Math.round((cfg.flashOpacity ?? 0.35) * 100) + '% × ' + (cfg.flashRounds ?? 2) + ' 轮' +
+          (pending ? '（保存中…）' : '')),
+        row('小窗位置', posButtons, 'pos'),
+        row('提醒方式', modeButtons, 'mode'),
+        manualChecks === null ? null : row('具体方式', manualChecks, 'manual'),
+        flashSliders,
+        React.createElement('div', { className: 'rm-cfg-hint' }, hint))
+    }
+
+    // ── 远程服务注册 ────────────────────────────────────────────────────────
+
+    const CONTRIBUTION = {
+      package: 'dsh-reminder',
+      descriptors: [
+        {
+          id: 'dsh-reminder#reminderConfig/getConfig',
+          service: 'reminderConfig',
+          namespace: 'reminderConfig',
+          method: 'getConfig',
+          invocation: { kind: 'direct' },
+          parameters: [],
+          result: { mode: 'strict', typeSymbol: 'dsh-reminder#ReminderConfig', schema: codecOf(parseConfig) },
+        },
+        {
+          id: 'dsh-reminder#reminderConfig/setConfig',
+          service: 'reminderConfig',
+          namespace: 'reminderConfig',
+          method: 'setConfig',
+          invocation: { kind: 'direct' },
+          parameters: [
+            {
+              name: 'patch',
+              wire: 'patch',
+              source: 'json',
+              codec: { mode: 'strict', typeSymbol: 'dsh-reminder#ReminderConfigPatch', schema: codecOf(parsePatch) },
+            },
+          ],
+          result: { mode: 'strict', typeSymbol: 'dsh-reminder#ReminderConfig', schema: codecOf(parseConfig) },
+        },
+      ],
+    }
+
+    const inject = ['remote']
+
+    async function apply(ctx) {
+      const remote = ctx.remote
+      if (remote === undefined || typeof remote.$mount !== 'function') return
+      const unmount = await remote.$mount(CONTRIBUTION)
+      ctx.effect(() => () => { unmount() }, 'dsh-reminder: remote contribution')
+
+      const reminderConfig = ctx.get('remote.reminderConfig')
+      if (reminderConfig === undefined) return
+
+      // 样式注入
+      const style = document.createElement('style')
+      style.textContent = css
+      document.head.appendChild(style)
+      ctx.effect(() => () => { document.head.removeChild(style) }, 'dsh-reminder: styles')
+
+      const api = {
+        getConfig: () => reminderConfig.getConfig(),
+        setConfig: (patch) => reminderConfig.setConfig(patch),
+      }
+
+      // 缓存：设置页重挂载时先显示上次的值，避免 RPC 慢导致 UI 闪回旧值
+      let cachedCfg = null
+      const getCached = () => {
+        if (cachedCfg !== null) return Promise.resolve(cachedCfg)
+        return api.getConfig().then((next) => { cachedCfg = next; return next })
+      }
+      const setCached = (patch) => {
+        if (cachedCfg === null) cachedCfg = { ...DEFAULT_CFG, ...patch }
+        else cachedCfg = { ...cachedCfg, ...patch }
+        return api.setConfig(patch).then((saved) => { cachedCfg = saved; return saved })
+      }
+      const viewApi = {
+        getConfig: getCached,
+        setConfig: setCached,
+      }
+
+      const slots = ctx.get('slots')
+      if (slots === undefined) return
+      // 注册为设置页「桌面通知」：设置导航栏出现入口，点开即滑轨配置面板
+      slots.inject('settings.section', () => {
+        const dispose = slots.register(
+          {
+            name: 'settings.section',
+            id: 'reminder',
+            label: '桌面通知',
+            order: 60,
+            inject: () => ({ api: viewApi }),
+          },
+          (props) => React.createElement(ConfigPanel, { api: props.api || viewApi }),
+        )
+        return dispose
+      })
+    }
+
+    module.exports.inject = inject
+    module.exports.apply = apply
+    return module.exports
+  },
+})
+
+```
+
+`reminder-bridge/lib/typert.host.js`:
+
+```js
+/**
+ * dsh-reminder 的 Host 面 Typert 清单（由 typert-loader 自动扫描注册）。
+ * 结构必须与 @deepseek-ai/dsh-typert-loader 的 validateTypertManifest /
+ * typert-registry 的 validateInvocation 校验规则一致：
+ *  - TYPERT.model 必须是对象，含 services / events / objects 三个数组；
+ *  - invocation 的 parameters 每项需 { name, wire, source, codec }；
+ *  - codec / result 必须是严格 codec：{ mode:'strict', typeSymbol, schema }；
+ *  - schema 必须是 zod v4 实例（含 _zod 与 parse）。
+ */
+
+import { z } from 'zod'
+
+const configCodec = z.object({
+  position: z.string(),
+  mode: z.string(),
+  manualModes: z.array(z.string()),
+  flashOpacity: z.number(),
+  flashRounds: z.number(),
+  flashPulseMs: z.number(),
+  flashGapMs: z.number(),
+  enabled: z.boolean(),
+})
+
+const patchCodec = z.object({
+  position: z.string().optional(),
+  mode: z.string().optional(),
+  manualModes: z.array(z.string()).optional(),
+  flashOpacity: z.number().optional(),
+  flashRounds: z.number().optional(),
+  flashPulseMs: z.number().optional(),
+  flashGapMs: z.number().optional(),
+  enabled: z.boolean().optional(),
+})
+
+export const TYPERT = {
+  package: 'dsh-reminder',
+  face: 'host',
+  schemas: [],
+  invocations: [
+    {
+      id: 'dsh-reminder#reminderConfig/getConfig',
+      service: 'reminderConfig',
+      namespace: 'reminderConfig',
+      method: 'getConfig',
+      invocation: { kind: 'direct' },
+      parameters: [],
+      result: {
+        mode: 'strict',
+        typeSymbol: 'dsh-reminder#ReminderConfig',
+        schema: configCodec,
+      },
+    },
+    {
+      id: 'dsh-reminder#reminderConfig/setConfig',
+      service: 'reminderConfig',
+      namespace: 'reminderConfig',
+      method: 'setConfig',
+      invocation: { kind: 'direct' },
+      parameters: [
+        {
+          name: 'patch',
+          wire: 'patch',
+          source: 'json',
+          codec: {
+            mode: 'strict',
+            typeSymbol: 'dsh-reminder#ReminderConfigPatch',
+            schema: patchCodec,
+          },
+        },
+      ],
+      result: {
+        mode: 'strict',
+        typeSymbol: 'dsh-reminder#ReminderConfig',
+        schema: configCodec,
+      },
+    },
+  ],
+  model: {
+    services: [
+      {
+        key: 'reminderConfig',
+        exportName: 'ReminderConfigService',
+        description: '提醒配置的远程读写服务：client 端面板经 Typert RPC 读写 Host 侧实时状态。',
+        summary: '提醒配置远程服务。',
+        tags: [],
+        members: [
+          {
+            kind: 'method',
+            name: 'getConfig',
+            signature: 'getConfig(): Promise<ReminderConfig>',
+          },
+          {
+            kind: 'method',
+            name: 'setConfig',
+            signature: 'setConfig(patch: ReminderConfigPatch): Promise<ReminderConfig>',
+          },
+        ],
+        types: [
+          {
+            name: 'ReminderConfig',
+            declaration:
+              'export interface ReminderConfig { position: string; mode: string; manualModes: string[]; flashOpacity: number; flashRounds: number; flashPulseMs: number; flashGapMs: number; enabled: boolean; }',
+          },
+          {
+            name: 'ReminderConfigPatch',
+            declaration:
+              'export interface ReminderConfigPatch { position?: string; mode?: string; manualModes?: string[]; flashOpacity?: number; flashRounds?: number; flashPulseMs?: number; flashGapMs?: number; enabled?: boolean; }',
+          },
+        ],
+      },
+    ],
+    events: [],
+    objects: [],
+  },
+}
+
+export default TYPERT
+
+```
+
+`reminder-bridge/package.json`:
+
+```json
+{
+  "name": "dsh-reminder",
+  "version": "0.1.0",
+  "description": "DSH 提醒：任务需要用户决定/辅助时，检测前台窗口（看剧/游戏），用声音/弹窗/黑白屏幕闪烁提醒用户回到工作，避免一直玩耽误工作。",
+  "type": "module",
+  "main": "index.js",
+  "exports": {
+    ".": {
+      "default": "./index.js"
+    },
+    "./client": {
+      "default": "./lib/client.js"
+    },
+    "./typert": {
+      "default": "./lib/typert.host.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "index.js",
+    "lib",
+    "cordis.patch.yml",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "zod": "^4.4.3",
+    "schemastery": "^3.18.0",
+    "cosmokit": "^1.8.1",
+    "@standard-schema/spec": "^1.1.0"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web"
+    }
+  }
+}
+
+```
