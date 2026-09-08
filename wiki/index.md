@@ -37,7 +37,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Kernel Callbacks](concepts/kernel-callbacks.md)
 - [Kernel Pool Scanning](concepts/kernel-pool-scanning.md) — Segment Heap–era hidden driver/shellcode pool walks; PiDDBCache/MmUnloadedDrivers forensics; KDP rule tables
 - [Mixed Boolean-Arithmetic](concepts/mixed-boolean-arithmetic.md) — linear/polynomial MBA obfuscation; CoBRA/mbased/MBA (CUDA)/goomba (Hex-Rays + Z3)/chernobog (Hikari LLVM Hex-Rays)/GAMBA (Python simplifier + benchmark datasets)/mba-wasm (Rust/WASM web UI)/gnn-deobfuscation (GNN ML)/ProMBA/Kong/QSynthesis/DrillAndJoin/msynth/SMT simplification; mixed-boolean-transform / limba compile-time source obfuscation; VMProtect/Themida/LLVM passes
-- [Mobile Anti-Cheat](concepts/mobile-anti-cheat.md) — mobile root/Frida/emulator/integrity detection; ACE/RASP SDKs; G-Presto native AC RE; post-clear identity rotation via [[device-reset-spoofer]]; bypass research framing
+- [Mobile Anti-Cheat](concepts/mobile-anti-cheat.md) — mobile root/Frida/emulator/integrity/USB-ADB detection; ACE/RASP SDKs; G-Presto native AC RE; post-clear identity rotation via [[device-reset-spoofer]]; in-app USB/ADB masking via [[usb-detection-bypass]]; bypass research framing
 - [OBS Game Capture](concepts/obs-game-capture.md) — OBS Game/Window/Display/Virtual Camera modes; AI visual pipeline + detection signals
 - [PatchGuard](concepts/patchguard.md)
 - [Present Hook](concepts/present-hook.md) — IDXGISwapChain::Present / wglSwapBuffers / vkQueuePresentKHR overlay path; platform constraints ([[swapchain-bottleneck]]); links [[obs-game-capture]], [[draw-call-hook]], [[present-injector]]
