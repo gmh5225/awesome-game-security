@@ -10,11 +10,23 @@ confidence: medium
 
 # Hawkeye
 
-**Hawkeye** (hawkeye-Leo) — Windows **kernel security research console** for anti-cheat analysis and live forensics, backed by a host-native kernel driver on Windows 10/11 x64. Interactive command bench with `!probe` (live symbol/module inspection), `!etw` (ETW execution sampling and call-stack tracing), `!kernel_region` (virtual address classification), and memory read/disassembly utilities. GPL-3.0-or-later **Community** edition; **Hawkeye Lab** adds automated high-risk detection simulations and `!analyze` scored reports across memory mapping, active pages, and kernel injection patterns. (source: wiki/sources/descriptions/hawkeye-Leo__hawkeye.md)
+**Hawkeye** (hawkeye-Leo) — Windows **kernel security research console** for anti-cheat analysis and live forensics, backed by a host-native kernel driver on Windows 10/11 x64. (source: wiki/sources/descriptions/hawkeye-Leo__hawkeye.md)
 
-## Use cases
+Interactive command bench for authorized kernel and anti-cheat researchers investigating driver behavior, memory access, anti-capture mechanisms, and related cheat techniques on systems they administer.
 
-Authorized kernel and anti-cheat researchers investigating driver behavior, memory access, anti-capture mechanisms, and related cheat techniques on systems they administer.
+## Commands
+
+| Command | Purpose |
+|---------|---------|
+| `!probe` | Live symbol and module inspection |
+| `!etw` | ETW-based execution sampling and call-stack tracing |
+| `!kernel_region` | Virtual address classification |
+| (built-ins) | Memory read and disassembly utilities |
+
+## Editions
+
+- **Community** (GPL-3.0-or-later; source in hawkeye-community) — interactive command bench and core probing utilities.
+- **Hawkeye Lab** — automated high-risk detection simulations plus `!analyze` workflow producing scored analysis reports across memory mapping, active pages, and kernel injection patterns.
 
 ## Links
 

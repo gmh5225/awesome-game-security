@@ -1638,7 +1638,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [gvmp-anticheat](entities/gvmp-anticheat.md) — GVMP.de alt:V GTA V client AC (C++; ENet, DirectX hooks, MinHook, pattern scan, process integrity; Anti Cheat; divodeuxsevres)
 - [HelloIommuPkg](entities/helloiommupkg.md) — sample DXE DMA-remapping (IOMMU) driver (tandasat; Detection:DMA)
 - [H5GG](entities/h5gg.md) — iOS modding engine (JavaScript + HTML5 UI; memory edit, scripts/plugins, pointer chains, h5frida hook/patch; jailbroken and non-jailbroken modes; cheat / IOS cheat engine)
-- [Hawkeye](entities/hawkeye.md) — Windows kernel security research console for anti-cheat analysis (hawkeye-Leo; `!probe`/`!etw`/`!kernel_region`; Hawkeye Lab `!analyze` scored reports; GPL Community + paid Lab; Anti Cheat)
+- [Hawkeye](entities/hawkeye.md) — Windows kernel security research console for anti-cheat analysis and live forensics (hawkeye-Leo; host-native driver Win10/11 x64; `!probe`/`!etw`/`!kernel_region`; Hawkeye Lab `!analyze` scored reports; GPL Community + paid Lab; Anti Cheat)
 - [hdd_serial_spoofer](entities/hdd-serial-spoofer.md) — HDD serial spoof (C/C++; cheat / HWID; namazso)
 - [hacking-online-games](entities/hacking-online-games.md) — curated online/multiplayer game hacking resources (network protocol RE, server-side emulation, packet encryption, AC bypass; GameGuard/MMORPG papers; dsasmblr; cheat / guide)
 - [hacksysextremevulnerabledriver](entities/hacksysextremevulnerabledriver.md) — HackSys Team vulnerable-driver exploitation guide (Cheat / Guide)
