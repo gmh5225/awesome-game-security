@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-08** — ingest `readme:categories`: Cheat ~2793 (+1; GalaxyBatMan111/[[dsh-plugins]] DSH PyGhidra Ghidra bridge in RE Tools) / Anti Cheat ~713 / IOS Emulator ~5 / other major section counts stable; 41 sections; entity [[dsh-plugins]]; refreshed README-map counts and scope on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/reverse-engineering]], and [[overviews/dma-attack]]; fixed IOS Emulator ~5 scope drift on [[overviews/game-hacking]]; light `index.md` section notes (no per-category pages).
+
 - **2026-09-08** — ingest `description:RytterMohn/UsbDetectionBypass`: entity [[usb-detection-bypass]] (RytterMohn; LSPosed/Xposed; Kotlin + native C++; masks in-app USB connection/USB debugging via SystemProperties, UsbManager, broadcasts, getprop/dumpsys, sysfs; scoped per-app; diagnostic logging; authorized RE and anti-cheat testing on rooted devices; Cheat / Xposed); cited on [[overviews/mobile-security]] and [[concepts/mobile-anti-cheat]]; cross-linked [[device-reset-spoofer]], [[hidemyandroid]], [[root-detection-low-level]], and [[xposed-module-kit]].
 
 - **2026-09-08** — ingest `description:zqxwce/vphone-ws`: entity [[vphone-ws]] (zqxwce; native macOS SwiftUI GUI for [[vphone-cli]]; browse/create/boot/clone/export/delete iOS and cloudOS Virtualization.framework PCC research VMs; creation wizard with security variants from minimal hardening to jailbreak/experimental profiles; live CLI task progress; host readiness checks for vphone-cli, research guest permissions, and AMFI bypass; IOS Emulator); cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]]; cross-linked [[vphone-cli]], [[vphone-aio]], [[darwin-vm]], and [[research-rigor]].
