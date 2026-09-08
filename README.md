@@ -1336,6 +1336,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/0xCD4/SSL-bypass [Root Detection & SSL Bypass Script]
 - https://github.com/Ishanoshada/Ultimate-Frida-Bypass [Frida script bypassing Talsec/freeRASP, SSL pinning, root/emulator/Frida detection on Android]
 - https://github.com/infosecrajesh/Auto-generate-Frida-bypass-scripts-for-SSL-pinning-root-detection-on-Android-iOS [Static-analysis Frida script generator for Android/iOS SSL pinning and root/jailbreak bypass]
+- https://github.com/3v1lC0d3/Root_Detection_Low_level [Frida script that hooks java.io.File and Runtime.exec to log suspicious paths/commands and Java stack traces for Android root-detection behavior analysis]
 - https://github.com/moaaz01/nightowl [Unified Android APK analysis CLI with framework detection (Unity/Flutter/RN), RASP defense profiling, and auto-generated Frida bypass scripts]
 - https://github.com/VarshaWanjari0/Auto-Android-App-Modding-Tool [Termux-based Android APK modding toolkit for Frida Gadget and native .so injection, patching, rebuild, align, and sign workflows]
 - https://github.com/aimardcr/FridaDetectionBypass [Debugger Detection Bypass]
@@ -3915,6 +3916,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 > Game:L4D2
 - https://github.com/gmh5225/L4D2-Cheat [Linux]
 - https://github.com/gmh5225/L4D2Basic
+- https://github.com/krakensuit/ZenWare.cc [Open-source L4D2 internal + external training framework (x86, C++17, MinHook) with loader, DLL, and documented architecture for educational/local-server use]
 
 > Game:mhxy
 - https://github.com/gmh5225/mhxy_kernel
@@ -4701,6 +4703,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/PickAngE/AntiCheat-Scanner [Windows forensic scanner for ACE, EAC, BattlEye, EA AC, and HoYoProtect via drivers, services, BAM, Prefetch, and PE metadata]
 - https://github.com/poli0981/wardsweep [Windows Rust/WPF tool to audit installed kernel anti-cheats (EAC, BE, Vanguard, ACE), export reports, uninstall orphaned drivers/services, and sweep leftover registry and filesystem residue]
 - https://github.com/codedevdev/irontrace [Windows hardware and forensic integrity scanner for game-server anti-cheat with DMA/PCIe/USB watchlists and explainable integrity reports]
+- https://github.com/hawkeye-Leo/hawkeye [Official GitHub Pages site for Hawkeye — Windows kernel security and anti-cheat research console with live probing, ETW, and automated detection reports (GPL source in hawkeye-community)]
 - https://github.com/winzysss/JarAnalyzer [Windows Minecraft screenshare cheat forensics scanner — MFT-walks disks, scans JAR constant pools against blacklists, flags obfuscated archives, exports evidence reports]
 
 > Dynamic Script
