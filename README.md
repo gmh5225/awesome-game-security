@@ -1268,6 +1268,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/longpoxin/hideroot
 - https://github.com/canyie/Riru-MomoHider
 - https://github.com/newbit1/rootAVD [root AVD]
+- https://github.com/CHERWING/xiaomi_usb_security_bypass [Magisk module bypassing MIUI USB debugging (Security settings), USB install, and fastboot account/SIM gates for scrcpy input injection on rooted Xiaomi]
 - https://github.com/Fox2Code/FoxMagiskModuleManager [A module manager for Magisk]
 - https://github.com/MMRLApp/WebUI-X-Portable [Portable Android app providing the MMRL WebUI X interface for browsing, installing, and managing Magisk/APatch/KernelSU modules]
 - https://github.com/zelect0r/zamr [Curated MMRL module repository for Magisk/KernelSU/APatch (Play Integrity Fix, Zygisk, root-hide, TEESimulator)]
