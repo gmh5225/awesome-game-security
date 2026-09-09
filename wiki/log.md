@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-09** — ingest `skill:graphics-api`: rendering/capture threat model + capture-layer contracts + observation-tool routing on [[overviews/graphics-api]]; capture contracts and WDA/mode-matching exclusion limits on [[anti-screenshot-capture]]; output-merger shader/depth evidence on [[draw-call-hook]]; Present anti-detection/evasion surface on [[present-hook]]; `index.md` updated.
+
 - **2026-09-09** — ingest `skill:game-hacking`: attacker-capability/defensive-coverage framing + EFI/UEFI trust boundaries + HWID spoofing synthesis on [[overviews/game-hacking]]; new concepts [[hwid-spoofing]] and [[driver-communication]]; YOLO training→TensorRT pipeline on [[obs-game-capture]]; `index.md` updated.
 
 - **2026-09-09** — ingest `skill:game-engine`: [[engine-trust-boundaries]] concept (baseline dimensions, boundary map, evidence report fields); trust-boundary synthesis on [[overviews/game-engine]]; reflection vs native layout on [[unreal-object-model]], IL2CPP metadata limits on [[il2cpp]], SDK license ground truth on [[source-netvars]]; `index.md` updated.

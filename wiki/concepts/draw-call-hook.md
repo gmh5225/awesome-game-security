@@ -7,7 +7,7 @@ sources:
   - wiki/sources/descriptions/frostbone25__ShaderInjector.md
   - wiki/sources/descriptions/baobao1044__GameLagReducer.md
   - wiki/sources/descriptions/DrNseven__D3D11-Wallhack.md
-updated: 2026-08-26
+updated: 2026-09-09
 confidence: medium
 ---
 
@@ -35,6 +35,12 @@ Present-only overlays ([[present-hook]]) draw on top of the finished frame; draw
 - **DX11 draw-call wallhack** — Educational DX11 hook samples such as [[d3d11-wallhack]] (DrNseven; C++; Detours + ImGui; DLL inject + render-path hooks; menu-driven stride/index-count logging to identify target models; 32/64-bit Windows; cheat prototyping / graphics pipeline analysis) illustrate DX11 draw-interception wallhack beside OpenGL `glDrawElements` samples. (source: wiki/sources/descriptions/DrNseven__D3D11-Wallhack.md)
 
 Engine-specific samples often combine draw hooks with SDK offsets ([[battlefield-1-internal]], [[csgo-bot]] OpenGL/shader lane).
+
+## Shader and depth-state evidence
+
+Unauthorized shader or pipeline-state changes can alter visibility and appearance, but the affected stage must be identified. A pixel shader returning a particular color or alpha does not by itself force depth testing to pass—Direct3D's output-merger combines shader output with render-target blending and depth/stencil processing; bound resources and state matter. (source: wiki/sources/skills/graphics-api.md)
+
+For an owned sample or supplied frame capture, preserve shader identity, pipeline/depth-stencil state, bound targets, draw order, and event context. Compare with the expected material/render pass, including legitimate debug visualization and accessibility modes. A colored object or unexpected pixel is evidence to investigate, not proof of a particular state change or malicious intent.
 
 ## Detection surface
 

@@ -366,7 +366,7 @@ sources:
   - wiki/sources/descriptions/SeanPesce__Direct3D9-Overlay.md
   - wiki/sources/descriptions/Suprcode__mir3-zircon.md
   - wiki/sources/descriptions/0mdi__edgegdi_hook.md
-updated: 2026-09-07
+updated: 2026-09-09
 confidence: high
 ---
 
@@ -375,6 +375,12 @@ confidence: high
 # Graphics API
 
 Interception and overlay rendering across DirectX, OpenGL, and Vulkan—Present/SwapBuffers hooks, DXGI swap chains, shader/draw interception, screenshot surfaces, and capture pipelines used by both overlays and AI visual cheats. Capture path, hook point, compositor behavior, and observable artifacts vary by API, driver, game, and tool version—verify the active path with [[research-rigor]] before attributing a capture or overlay signal. (source: wiki/sources/skills/graphics-api.md)
+
+## Rendering and capture threat model
+
+Separate **application render targets**, **presentation queues**, **compositor output**, **physical display output**, and **captured images**. A capture observes one layer—it is not an interchangeable copy of every other layer. Classify unauthorized in-process graphics changes, separate-process overlay abuse, and inappropriate frame access by the required capability; correlate module provenance, graphics configuration, resource ownership, capture-process identity, and timing. Legitimate recording, debugging, accessibility, and vendor tools are mandatory counterexamples. (source: wiki/sources/skills/graphics-api.md)
+
+For owned sample apps, record a coverage matrix: API, OS/driver, windowed/fullscreen state, presentation model (DXGI flip model, DirectFlip, Independent Flip), HDR/SDR, monitors, capture backend, cursor handling, and timestamps. Black, missing, or stale frames have multiple benign explanations—they do not alone prove concealment. Flip-model and compositor involvement depend on measured configuration, not fixed assumptions.
 
 ## Hook points by API
 
@@ -400,7 +406,34 @@ Vtable trampolines on swap chains remain the dominant internal-overlay pattern; 
 
 - **OBS and frame export** — Game Capture (injected graphics hook + shared GPU resources), Window/Display Capture (compositor backends), Virtual Camera (downstream AI or streaming). Modes differ in inject footprint, latency, and what compositors include—see [[obs-game-capture]]. Multi-mode capture tools such as [[capture-engine]] (aufkrawall; WGC/DDA or injected D3D9–D3D12/Vulkan/OpenGL/DXVK hooks; Matroska recording, HDR overlays, DLSS/FSR frame gen; explicit AC safety boundaries between non-injected and hook modes) complement OBS-style capture for graphics API RE and controlled capture workflows. (source: wiki/sources/descriptions/aufkrawall__capture-engine.md) Engine-native UE C++ capture tutorials such as [[unreal-image-capture]] (TimmHess; in-engine high-FPS RGB, segmentation masks, and depth export without blocking render/game threads; synthetic dataset generation for ML/CV—not external D3D12 hook segmentation on shipping builds) extend that lane for controlled annotated render-output workflows from source scenes. (source: wiki/sources/descriptions/TimmHess__UnrealImageCapture.md) External D3D12 hook segmentation tools such as [[segcap]] (Qervas; MinHook command submission intercept + UE4/5 CustomDepth runtime introspection; per-pixel object-ID masks on retail titles without engine source; automated virtual-gamepad capture sessions exporting masks/RGB/JSON for RE and game-security research) complement that lane for ground-truth segmentation on closed-source UE clients. (source: wiki/sources/descriptions/Qervas__segcap.md)
 - **AI visual pipeline** — Present/backbuffer copy → staging readback → ROI crop → inference → HID via [[hardware-input-injection]]; dual-PC NDI/capture-card paths add transport latency. Measure each stage on deployed hardware; correlate graphics signals with behavior ([[ai-aimbot-detection]]).
-- **Anti-screenshot** — AC may BitBlt, Desktop Duplication, hook Present, or read back render targets; cheats evade via overlay suppression, `WDA_EXCLUDEFROMCAPTURE`, DWM tricks, or hardware overlay planes—see [[anti-screenshot-capture]].
+- **Anti-screenshot** — AC may BitBlt, Desktop Duplication, hook Present, or read back render targets; cheats evade via overlay suppression, `WDA_EXCLUDEFROMCAPTURE`, DWM tricks, or hardware overlay planes—see [[anti-screenshot-capture]]. Window display affinity and display-mode matching APIs do not guarantee unobservable content through every route; verify the active OS/composition path and collector result before attributing missing regions to concealment.
+
+### Capture layer contracts
+
+Each observation path has a different contract—do not treat outputs as interchangeable proof:
+
+| Path | Evidence limit |
+|------|----------------|
+| Window/DC capture | Records the actual API and window; `PrintWindow` asks the app to render into a supplied DC—not an independent guarantee of physical display contents |
+| Desktop Duplication | Composited desktop along output boundaries; protected-content and metadata restrictions apply |
+| Swap-chain `Present` observation | Identifies a presentation operation; DXGI may discard frames under documented conditions—a `Present` call does not prove every submitted frame reached the monitor |
+| Render-target readback | Retained resource at a defined sync point; relationship to later composition and display must be demonstrated |
+
+Choose the layer before interpreting screenshot or AI-capture evidence. Scheduled snapshots cover their acquisition intervals; intermittent absence does not establish session-wide absence.
+
+## Observation and validation tools
+
+Select repository tools by the evidence required—report API/backend, driver, compositor, tool version, measurement coverage, and benign alternatives. (source: wiki/sources/skills/graphics-api.md)
+
+| Need | Tool class |
+|------|------------|
+| Frame timing / present metrics | [[presentmon]] (ETW-based DXGI/D3D present events) |
+| Instrumented CPU/GPU profiling | [[tracy]], [[optick]], [[remotery]] |
+| Frame capture / shader debug | RenderDoc (multi-API frame debugger), PIX, NVIDIA Nsight |
+| API misuse diagnostics | Vulkan validation layers (preserve VUIDs, SDK/layer versions—a validation finding is not an anti-abuse verdict) |
+| Compatibility / translation | dxwrapper, Wine/DXVK layers—verify active backend before hook attribution |
+
+Windows documents `SwapBuffers` through GDI; do not assume a similarly named wrapper or hook-library symbol is the platform contract.
 
 ## Key sub-areas
 
