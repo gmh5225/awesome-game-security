@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-09** — ingest `description:sosso33/omikron-tns-omk-engine`: entity [[omikron-tns-omk-engine]] (sosso33; C++20 from-scratch Omikron: The Nomad Soul 1999 engine replica; Runtime.exe + proprietary format RE; 153-opcode script VM, 8192-byte game state, cutscene/UI/audio/3D containers; Python readers/web viewers + announcement-trace validation suite; optional SDL/Vulkan; user-supplied retail data; preservation/RE research; Cheat / RE Tools); cited on [[overviews/reverse-engineering]] and [[overviews/game-engine]]; cross-linked [[pc-wackywheels-doc]], [[awesome-game-file-format-reversing]], and [[research-rigor]]; `index.md` updated.
+
 - **2026-09-09** — ingest `description:Timehue/ShinobiX`: entity [[shinobix]] (Timehue; React/Vite SPA + TypeScript API + Supabase; server-authoritative combat/PvE/economy/saves; settlement receipts, currency ledgers, save locks, auth policies; HTTP hardening + reward-integrity audit docs + parity/settlement tests; Open Source Anti Cheat System reference); cited on [[overviews/game-engine]] and [[concepts/engine-trust-boundaries]]; cross-linked [[gatewarden-public]], [[adaptive-boss-arena]], and [[certael]]; `index.md` updated.
 
 - **2026-09-09** — ingest `skill:windows-kernel`: new concept [[driver-trust-boundaries]] (IOCTL authorization, driver provenance, signed-driver threat classes, VBS/blocklist scope); driver-trust + hypervisor/pool evidence-limit synthesis on [[overviews/windows-kernel]]; Pool2/3 contracts and tag/table attribution limits on [[kernel-pool-scanning]]; VBS state distinction + hypervisor enforcement-boundary review table + WHP limits on [[hvci]]; kernel build-specific evidence row on [[research-rigor]]; `index.md` updated.

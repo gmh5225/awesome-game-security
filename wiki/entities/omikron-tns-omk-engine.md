@@ -13,6 +13,8 @@ confidence: medium
 
 Open-source, from-scratch **C++20** reimplementation of the engine behind Quantic Dream and Eidos's 1999 title **Omikron: The Nomad Soul**, built from reverse-engineered documentation of the original `Runtime.exe` and shipped data formats. Python supports readers, web viewers, and a large automated verification suite; optional SDL and Vulkan backends enable interactive play. Documents and parses proprietary containers and subsystems—the 153-opcode script VM, 8192-byte game state, cutscenes, UI, audio, and 3D assets—and validates behavior by comparing announcement traces against captures from the original binary. Requires the user to supply their own legally owned game data. (source: wiki/sources/descriptions/sosso33__omikron-tns-omk-engine.md)
 
+Aimed at game preservationists, reverse engineers, and researchers who want a reproducible, evidence-backed study of a late-1990s commercial game engine—not a cheat or modding drop-in.
+
 Sits in the Cheat **RE Tools** lane beside title-specific format studies such as [[pc-wackywheels-doc]] and curated indexes like [[awesome-game-file-format-reversing]]—evidence-backed late-1990s commercial engine preservation rather than a general tool.
 
 ## Scope
@@ -21,8 +23,9 @@ Sits in the Cheat **RE Tools** lane beside title-specific format studies such as
 |------|-------|
 | **Engine core** | C++20 portable replica of original Runtime.exe behavior |
 | **Formats** | Script VM (153 opcodes), game state, cutscenes, UI, audio, 3D assets |
-| **Validation** | Automated trace comparison against original binary captures |
-| **Tooling** | Python readers/viewers; optional SDL/Vulkan interactive backends |
+| **Validation** | Announcement-trace comparison against original-binary captures (Python test suite) |
+| **Tooling** | Python readers/viewers/web UI; optional SDL/Vulkan interactive backends |
+| **Audience** | Preservation, RE methodology, late-1990s engine research |
 
 ## Links
 
