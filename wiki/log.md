@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-09** — ingest `skill:windows-kernel`: new concept [[driver-trust-boundaries]] (IOCTL authorization, driver provenance, signed-driver threat classes, VBS/blocklist scope); driver-trust + hypervisor/pool evidence-limit synthesis on [[overviews/windows-kernel]]; Pool2/3 contracts and tag/table attribution limits on [[kernel-pool-scanning]]; VBS state distinction + hypervisor enforcement-boundary review table + WHP limits on [[hvci]]; kernel build-specific evidence row on [[research-rigor]]; `index.md` updated.
+
 - **2026-09-09** — ingest `skill:reverse-engineering`: [[binary-evidence]] concept (question classification, address provenance, imported/reachable/observed finding granularity, decompiler limits); [[binary-diffing]] concept (patch-analysis tools, similarity-as-candidate-evidence, Diaphora validation limits); exception-driven and WHP evidence-review dimensions on [[dynamic-binary-instrumentation]]; binary-evidence synthesis + diffing evidence limits on [[overviews/reverse-engineering]]; `index.md` updated.
 
 - **2026-09-09** — ingest `skill:mobile-security`: [[mobile-trust-boundaries]] concept (package/runtime/platform/server map, SELinux/Play Integrity/App Attest/network-trust evidence, privilege limits); trust-boundary synthesis on [[overviews/mobile-security]]; detection-finding review on [[concepts/mobile-anti-cheat]]; Frida observation-limit table on [[concepts/frida]]; `index.md` updated.

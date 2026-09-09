@@ -8,6 +8,7 @@ sources:
   - wiki/sources/skills/game-engine.md
   - wiki/sources/skills/mobile-security.md
   - wiki/sources/skills/reverse-engineering.md
+  - wiki/sources/skills/windows-kernel.md
   - wiki/sources/descriptions/xihedun-2026__Ponytail-Risk-.md
   - wiki/sources/descriptions/thatskriptkid__re-harness.md
   - wiki/sources/descriptions/P4nda0s__IDA-NO-MCP.md
@@ -40,6 +41,7 @@ Cross-cutting evidence discipline for factual synthesis, detector assessment, an
 | Engine globals, offsets, SDK dumps | [[overviews/game-engine]] + [[unreal-object-model]] / [[il2cpp]] / [[source-netvars]] |
 | Mobile root/hook/emulator/integrity claims | [[overviews/mobile-security]] + [[mobile-anti-cheat]] |
 | RE tool stealth/coverage, deobfuscation claims | [[overviews/reverse-engineering]] + [[dynamic-binary-instrumentation]] / [[mixed-boolean-arithmetic]] |
+| Kernel offsets, pool layouts, callback/ETW bypass claims | [[overviews/windows-kernel]] + [[driver-trust-boundaries]] / [[kernel-pool-scanning]] |
 | Evidence conflicts across sources | domain skill + this page |
 
 Engine globals, object layouts, metadata formats, and helper APIs vary by engine branch, build configuration, platform, and game modifications—verify the exact version and binary artifacts before generalizing signatures or offsets. (source: wiki/sources/skills/game-engine.md)
@@ -48,8 +50,10 @@ Mobile root visibility, hook detection, emulator heuristics, and attestation out
 
 DBI coverage, trap-and-emulate latency, deobfuscation completeness, and anti-debug bypass effectiveness vary by binary build, Windows version, integrity checks, and timing defenses—record hash, tool version, and measured evidence before generalizing stealth or recovery claims. (source: wiki/sources/skills/reverse-engineering.md)
 
+Undocumented kernel structures, offsets, globals, and allocator internals vary by Windows build, architecture, and configuration — verify against symbols and runtime observations for the exact target before generalizing PoCs, pool parsers, or forensic heuristics; distinguish documented contracts, observed host state, and inferred internals. (source: wiki/sources/skills/windows-kernel.md)
+
 LLM-assisted static RE should ground conclusions in disassembler/decompiler evidence (pseudocode, xrefs, FLIRT IDs) from tool APIs rather than model speculation—read-only agent harnesses such as [[re-harness]] enforce IDA/IDASQL-backed workflows for auditable outputs (source: wiki/sources/descriptions/thatskriptkid__re-harness.md); file-export bridges such as [[ida-no-mcp]] materialize decompilation, xref metadata, and call graphs as plain files for AI IDEs without live MCP, keeping analysis anchored to IDA output rather than model invention (source: wiki/sources/descriptions/P4nda0s__IDA-NO-MCP.md); byte-level claim checkers such as [[reverify]] run deterministic VERIFIED/REFUTED/INCONCLUSIVE gates against PE/ELF/Mach-O bytes in a reconstruction-agent loop with an established-facts ledger, refuting model hallucinations before they propagate. (source: wiki/sources/descriptions/2akouwu__reverify.md)
 
 ## Related
 
-[[compiled-wiki]] · [[resource-selection]] · [[input-provenance]] · [[detector-operations]] · [[mobile-anti-cheat]] · [[overviews/overview]] · [[overviews/anti-cheat]] · [[overviews/mobile-security]] · [[AGENTS]]
+[[compiled-wiki]] · [[resource-selection]] · [[driver-trust-boundaries]] · [[input-provenance]] · [[detector-operations]] · [[mobile-anti-cheat]] · [[overviews/overview]] · [[overviews/anti-cheat]] · [[overviews/mobile-security]] · [[AGENTS]]

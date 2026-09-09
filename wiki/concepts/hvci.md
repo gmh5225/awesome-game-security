@@ -23,13 +23,13 @@ sources:
   - wiki/sources/descriptions/Harvester57__CodeIntegrity-DriverBlocklist.md
   - wiki/sources/descriptions/Cr4sh__KernelForge.md
   - wiki/sources/descriptions/CodeMaxx__windows-runtime-attestation-report.md
-updated: 2026-09-01
+updated: 2026-09-09
 confidence: high
 ---
 
 # HVCI
 
-Hypervisor-Enforced Code Integrity (Memory Integrity): a **Virtualization-Based Security (VBS)** feature where the Secure Kernel (VTL1) and hypervisor EPT/SLAT enforce that kernel pages are not simultaneously writable and executable without re-validation. VBS splits the machine into VTL0 (normal Windows kernel + user mode) and VTL1 (Secure Kernel + policy enforcement) via the Windows hypervisor; HVCI is the memory-protection bucket within that stack. (source: wiki/sources/skills/windows-kernel.md)
+Hypervisor-Enforced Code Integrity (Memory Integrity): a **Virtualization-Based Security (VBS)** feature where the Secure Kernel (VTL1) and hypervisor EPT/SLAT enforce that kernel pages are not simultaneously writable and executable without re-validation. VBS splits the machine into VTL0 (normal Windows kernel + user mode) and VTL1 (Secure Kernel + policy enforcement) via the Windows hypervisor; HVCI is the memory-protection bucket within that stack. **Distinguish VBS/HVCI capability, configuration, and running state** — compatibility evidence does not prove every driver interface or data operation is safe. (source: wiki/sources/skills/windows-kernel.md)
 
 ## Enforcement model
 
@@ -55,9 +55,23 @@ VBS enclave abuse PoCs such as [[fake-enclave]] (gmh5225; proof-of-concept misus
 
 Lab teardown guides such as [[disabling-hyper-v]] (gmh5225; Win10; Microsoft's Device Guard and Credential Guard hardware readiness tool → disable HVCI, Device Guard, Credential Guard, and related VBS so Hyper-V can be fully removed—not an in-place bypass) document the configuration side of turning Memory Integrity off for research hosts. (source: wiki/sources/descriptions/gmh5225__Disabling-Hyper-V.md)
 
+## Hypervisor enforcement boundary
+
+A trusted hypervisor can enforce a separate guest-memory protection boundary; Windows VBS/KDP is one concrete architecture. Protecting selected data differs from validating kernel code, authenticating an administrative request, or preserving a detector's end-to-end coverage. For a vulnerable-driver threat, first establish driver presence, reachable interface, and required privilege; a claim that attempted kernel tampering was blocked additionally requires the evidence below. Guest-kernel compromise does not automatically defeat an independently enforced boundary — but that assumes the hypervisor, hardware, and configuration path remain trustworthy.
+
+| Review question | Evidence required |
+|---|---|
+| What is covered? | Exact protected memory, active mappings, access class and lifecycle |
+| Who owns the policy? | Hypervisor/security-component provenance and authority to change mappings |
+| Was an access observed? | Fault/exit context, collection coverage, mapping and execution correlation |
+| Was the operation prevented? | Enforced decision and resulting state — an exit alone does not establish denial |
+| What remains outside scope? | Unprotected aliases, permitted update paths, device DMA, firmware gaps |
+
+**WHP** user-mode APIs manage guest partitions without granting arbitrary host-kernel control — capabilities, exit contexts, and architecture support are build- and configuration-dependent; correlate the actual exit reason with the analysis question. (source: wiki/sources/skills/windows-kernel.md)
+
 HVCI/kCET-aware kernel exception research such as [[bugcheck-suppressor]] (XaFF-XaFF; data-only HAL dispatch hook + bugcheck-callback interception + SEH `RtlUnwindEx` recovery; CET-compatible assembly stubs; BSOD suppression PoC) probes how Memory Integrity and shadow-stack enforcement interact with bugcheck handling—not a bypass of W→X policy itself. (source: wiki/sources/descriptions/XaFF-XaFF__BugcheckSuppressor.md)
 
 ## Related
 
-[[patchguard]] · [[byovd]] · [[iommu]] · [[bustercall]] · [[bootbypass]] · [[zero-hvci]] · [[kernel-forge]] · [[fake-enclave]] · [[secure-game]] · [[disabling-hyper-v]] · [[solemn]] · [[wdactools]] · [[code-integrity-driverblocklist]] · [[msft-driverblocklist]] · [[hvci-loldrivers-check]] · [[byovdfinder]] · [[loldrivers-client]] · [[goodmans-kernel]] · [[bugcheck-suppressor]] · [[ci-dll-demo]] · [[windows-runtime-attestation-report]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]]
+[[driver-trust-boundaries]] · [[patchguard]] · [[byovd]] · [[iommu]] · [[bustercall]] · [[bootbypass]] · [[zero-hvci]] · [[kernel-forge]] · [[fake-enclave]] · [[secure-game]] · [[disabling-hyper-v]] · [[solemn]] · [[wdactools]] · [[code-integrity-driverblocklist]] · [[msft-driverblocklist]] · [[hvci-loldrivers-check]] · [[byovdfinder]] · [[loldrivers-client]] · [[goodmans-kernel]] · [[bugcheck-suppressor]] · [[ci-dll-demo]] · [[windows-runtime-attestation-report]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]]
 

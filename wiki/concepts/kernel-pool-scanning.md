@@ -10,13 +10,21 @@ sources:
   - wiki/sources/descriptions/hLunaaa__hLunaaa.github.io.md
   - wiki/sources/descriptions/Sentient111__ClearDriverTraces.md
   - wiki/sources/descriptions/gmh5225__Allocating-individual-pages.md
-updated: 2026-08-15
+updated: 2026-09-09
 confidence: high
 ---
 
 # Kernel Pool Scanning
 
-Anti-cheat and EDR techniques that walk kernel pool allocators to find hidden drivers, shellcode, and executable memory without a matching loaded module. Windows 10 19H1+ **Segment Heap** pool internals materially changed scanner design. (source: wiki/sources/skills/anti-cheat.md)
+Anti-cheat and EDR techniques that walk kernel pool allocators to find hidden drivers, shellcode, and executable memory without a matching loaded module. Windows 10 19H1+ **Segment Heap** pool internals materially changed scanner design. Treat allocator internals as hypotheses tied to an exact kernel binary, architecture, configuration, and matching symbols — internal offsets and routing diagrams are not a stable Windows driver interface. (source: wiki/sources/skills/anti-cheat.md) (source: wiki/sources/skills/windows-kernel.md)
+
+## Pool allocation contracts
+
+- **`ExAllocatePool2` / `ExAllocatePool3`:** minimum Windows 10 version 2004; Pool2 zero-initializes by default unless `POOL_FLAG_UNINITIALIZED`; at `DISPATCH_LEVEL`, Pool2 requires nonpaged allocation — do not assume Pool2 automatically falls back on older kernels.
+- **Attribution:** pool tags are caller-supplied labels for debugging — leads for attribution, not cryptographic driver identities. A rare tag, shared tag, or `pooltag.txt` lookup cannot alone establish which signed binary allocated a buffer or that a hidden driver is present.
+- **Forensic tables:** `PiDDBCacheTable`, `MmUnloadedDrivers`, `PoolBigPageTable` require exact-build definitions, collection method, retention/coverage limits, and supporting artifacts — missing or malformed data can reflect incompleteness, stale symbols, reuse, or corruption.
+- **KDP / Secure Pool:** historical KDP architecture describes static data protection and dynamic secure-pool allocations using VBS/SLAT — not evidence that every Pool3 allocation on a present machine is protected; establish applicable API, protection state, region lifecycle, and trustworthy hypervisor/policy path.
+- **Review evidence:** for an authorized image, record provenance/hash, acquisition time, OS/architecture, symbol identity, parser version, and unavailable regions; keep allocation facts, ownership hypotheses, and security conclusions separate. A negative scan describes parser coverage for the retained snapshot — not proof that all prior driver activity was observed. (source: wiki/sources/skills/windows-kernel.md)
 
 ## Why Segment Heap matters
 
@@ -74,4 +82,4 @@ Offensive research such as [[allocating-individual-pages]] allocates isolated ke
 
 ## Related
 
-[[kernel-callbacks]] · [[byovd]] · [[hvci]] · [[etw-threat-intelligence]] · [[kernel-codecave-poc]] · [[revert-mapper]] · [[allocating-individual-pages]] · [[kn-diff-pool]] · [[pooldump]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]]
+[[driver-trust-boundaries]] · [[kernel-callbacks]] · [[byovd]] · [[hvci]] · [[etw-threat-intelligence]] · [[kernel-codecave-poc]] · [[revert-mapper]] · [[allocating-individual-pages]] · [[kn-diff-pool]] · [[pooldump]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]]
