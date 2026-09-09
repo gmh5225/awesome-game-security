@@ -36,13 +36,17 @@ sources:
   - wiki/sources/descriptions/W1lliam1337__digital-sdk.md
   - wiki/sources/descriptions/ProjectBorealis__PBCharacterMovement.md
   - wiki/sources/descriptions/CallumCVM__ValveGen.md
-updated: 2026-09-03
+updated: 2026-09-09
 confidence: high
 ---
 
 # Source NetVars
 
 Valve **Source 1** and **Source 2** games expose replicated entity state through **ClientClass → RecvTable → RecvProp** chains and **CreateInterface**-exported engine interfaces. Cheat SDK and offset tooling walks these structures to map class names to network property offsets. (source: wiki/sources/skills/game-engine.md)
+
+## Source availability vs license
+
+Distinguish **open-source engines**, **licensed engine source**, **SDK game code**, and **reference-source subsets** when choosing ground truth. Official [[source-sdk-2013]] (ValveSoftware) and community SDK trees carry non-commercial or mod-specific license terms—repository visibility in the collection does not imply unrestricted reuse or parity with shipped game binaries. NetVar offsets derived from a leaked or SDK tree still require verification against the target game build on the [[engine-trust-boundaries]] artifact axis. (source: wiki/sources/skills/game-engine.md)
 
 ## NetVar parsing workflow (Source 1)
 
@@ -71,4 +75,4 @@ UE4 movement plugins such as [[pbcharactermovement]] (ProjectBorealis; recreates
 
 ## Related
 
-[[unreal-object-model]] · [[il2cpp]] · [[valvegen]] · [[sdk]] · [[csgo-sdk]] · [[csgo-sdk-improved]] · [[csgo-offsets]] · [[hazedumper]] · [[blazedumper]] · [[offsets]] · [[offset-streaming]] · [[dvrt]] · [[gh-offset-dumper]] · [[apex-legends-offset-dumper]] · [[gh-entity-list-finder]] · [[source2gen]] · [[source2sdk]] · [[source2dumps]] · [[dezlock-dump]] · [[cs2-dumper]] · [[dota2dumped]] · [[cs2-offsets]] · [[cs2-sdk]] · [[cs2-internal-sdk]] · [[cs2-things]] · [[cs2-webradar]] · [[cs2-fov-changer]] · [[source-engine]] · [[hl2sdk]] · [[source-sdk-2013]] · [[pbcharactermovement]] · [[source-sdk-orangebox]] · [[cstrike15-src]] · [[csso-src]] · [[csgo-cheat-base]] · [[deadcell-csgo]] · [[csgo-internal-base]] · [[research-rigor]] · [[overviews/game-engine]] · [[overviews/game-hacking]]
+[[engine-trust-boundaries]] · [[unreal-object-model]] · [[il2cpp]] · [[valvegen]] · [[sdk]] · [[csgo-sdk]] · [[csgo-sdk-improved]] · [[csgo-offsets]] · [[hazedumper]] · [[blazedumper]] · [[offsets]] · [[offset-streaming]] · [[dvrt]] · [[gh-offset-dumper]] · [[apex-legends-offset-dumper]] · [[gh-entity-list-finder]] · [[source2gen]] · [[source2sdk]] · [[source2dumps]] · [[dezlock-dump]] · [[cs2-dumper]] · [[dota2dumped]] · [[cs2-offsets]] · [[cs2-sdk]] · [[cs2-internal-sdk]] · [[cs2-things]] · [[cs2-webradar]] · [[cs2-fov-changer]] · [[source-engine]] · [[hl2sdk]] · [[source-sdk-2013]] · [[pbcharactermovement]] · [[source-sdk-orangebox]] · [[cstrike15-src]] · [[csso-src]] · [[csgo-cheat-base]] · [[deadcell-csgo]] · [[csgo-internal-base]] · [[research-rigor]] · [[overviews/game-engine]] · [[overviews/game-hacking]]

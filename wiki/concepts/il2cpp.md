@@ -64,13 +64,17 @@ sources:
   - wiki/sources/descriptions/ByNameModding__BNM-Android.md
   - wiki/sources/descriptions/Darlenepurpleblack444__Zygisk-Il2CppFucker.md
   - wiki/sources/descriptions/4ch12dy__il2cpp.md
-updated: 2026-09-04
+updated: 2026-09-09
 confidence: high
 ---
 
 # IL2CPP
 
 Unity’s ahead-of-time C++ compilation backend. Managed assemblies become native code (`GameAssembly.dll` / `libil2cpp.so`) plus `global-metadata.dat` describing types, methods, and strings. (source: wiki/sources/skills/game-engine.md)
+
+## Trust boundary (metadata vs native)
+
+IL2CPP chains managed assemblies, linker stripping, C++ code generation, and native compilation. Reconstructed class/method names from `global-metadata.dat` or dumpers do **not** guarantee complete type coverage, accurate field order, or recoverable original C# source—stripping removes unused types; generated C++ may inline or reorder storage. Treat dump output as a **metadata surface** on [[engine-trust-boundaries]]; validate hot paths against disassembly and the title’s Unity IL2CPP generation. Encrypted or relocated metadata adds another boundary before any static dump succeeds. (source: wiki/sources/skills/game-engine.md)
 
 ## Object model
 
@@ -100,4 +104,4 @@ Mono builds instead use `Assembly-CSharp.dll` + dnSpy/ILSpy on the embedded [[mo
 
 ## Related
 
-[[unreal-object-model]] · [[source-netvars]] · [[android-modding]] · [[hybridclr]] · [[fakerandroid]] · [[pyasm-patch]] · [[frida]] · [[frida-il2cpp-bridge]] · [[frida-il2cpp-datacollector]] · [[il2cpp-hook-scripts]] · [[il2cpp-hookscripts]] · [[il2cpp-versions]] · [[entities/il2cpp]] · [[il22cpp]] · [[il2cpp-resolver]] · [[il2cpp-resolver-external]] · [[external-il2cpp]] · [[il2cpp-runtime-dumper]] · [[qiling-il2cpp-dump]] · [[il2cpp-finder]] · [[il2cpp-assembly-unhollower]] · [[il2cpp-inspector]] · [[il2cpp-sdk-generator]] · [[bnm-android]] · [[il2cpp-pdb]] · [[il2cpp-encrtypt]] · [[ether-uprotector]] · [[il2cppdumper]] · [[il2cppdumper-kp7742]] · [[il2cppdumpdroidgui]] · [[zygisk-il2cppdumper]] · [[zygisk-il2cppfucker]] · [[codm-dumper]] · [[il2cppdumper-yuanshen]] · [[il2cpp-spy]] · [[unityexplorer]] · [[unityspeedtools]] · [[android-il2cpp-modspeed]] · [[unity-vulnerable-entrypoint]] · [[monohook]] · [[mono]] · [[mono-external-lib]] · [[unity202x-externalresolve]] · [[escapefromtarkov-trainer]] · [[taskbarhero-bot]] · [[rust-rustinternal]] · [[kors-lol]] · [[crc32]] · [[goose-goose-duck-hack]] · [[bepinex-il2cppbase]] · [[autogunfire-reborn]] · [[blockpost-cheat]] · [[devour-menu]] · [[devour-client]] · [[fall-guys-sharp]] · [[fallguys-frida-modmenu]] · [[matscan]] · [[pokemongo-dumper]] · [[dummy-dlls-naraka-1-9-21]] · [[honor-of-kings-re-research]] · [[research-rigor]] · [[overviews/game-engine]] · [[overviews/mobile-security]] · [[overviews/reverse-engineering]]
+[[engine-trust-boundaries]] · [[unreal-object-model]] · [[source-netvars]] · [[android-modding]] · [[hybridclr]] · [[fakerandroid]] · [[pyasm-patch]] · [[frida]] · [[frida-il2cpp-bridge]] · [[frida-il2cpp-datacollector]] · [[il2cpp-hook-scripts]] · [[il2cpp-hookscripts]] · [[il2cpp-versions]] · [[entities/il2cpp]] · [[il22cpp]] · [[il2cpp-resolver]] · [[il2cpp-resolver-external]] · [[external-il2cpp]] · [[il2cpp-runtime-dumper]] · [[qiling-il2cpp-dump]] · [[il2cpp-finder]] · [[il2cpp-assembly-unhollower]] · [[il2cpp-inspector]] · [[il2cpp-sdk-generator]] · [[bnm-android]] · [[il2cpp-pdb]] · [[il2cpp-encrtypt]] · [[ether-uprotector]] · [[il2cppdumper]] · [[il2cppdumper-kp7742]] · [[il2cppdumpdroidgui]] · [[zygisk-il2cppdumper]] · [[zygisk-il2cppfucker]] · [[codm-dumper]] · [[il2cppdumper-yuanshen]] · [[il2cpp-spy]] · [[unityexplorer]] · [[unityspeedtools]] · [[android-il2cpp-modspeed]] · [[unity-vulnerable-entrypoint]] · [[monohook]] · [[mono]] · [[mono-external-lib]] · [[unity202x-externalresolve]] · [[escapefromtarkov-trainer]] · [[taskbarhero-bot]] · [[rust-rustinternal]] · [[kors-lol]] · [[crc32]] · [[goose-goose-duck-hack]] · [[bepinex-il2cppbase]] · [[autogunfire-reborn]] · [[blockpost-cheat]] · [[devour-menu]] · [[devour-client]] · [[fall-guys-sharp]] · [[fallguys-frida-modmenu]] · [[matscan]] · [[pokemongo-dumper]] · [[dummy-dlls-naraka-1-9-21]] · [[honor-of-kings-re-research]] · [[research-rigor]] · [[overviews/game-engine]] · [[overviews/mobile-security]] · [[overviews/reverse-engineering]]

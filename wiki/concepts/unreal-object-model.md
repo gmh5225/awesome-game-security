@@ -37,7 +37,7 @@ sources:
   - wiki/sources/descriptions/Glmour__ue-live-bridge.md
   - wiki/sources/descriptions/BobHUnrealTech__UnrealSDKDumper-4.25.md
   - wiki/sources/descriptions/BadBrojo__UEDumper-MemProcFS.md
-updated: 2026-09-01
+updated: 2026-09-09
 confidence: high
 ---
 
@@ -53,6 +53,10 @@ UObject → AActor → APawn → ACharacter → APlayerCharacter
 ```
 
 Reflected property offsets come from version-specific class metadata, not fixed constants.
+
+## Reflection vs native layout
+
+Unreal reflection exposes **annotated** members through `UProperty` / `FProperty` metadata; native-only members, padding, and object lifetime rules may sit outside the reflected schema. A dumper-generated SDK or Blueprint-visible layout is therefore not a complete C++ memory map—pair SDK output with disassembly, vtable analysis, or owned-build symbols before treating offsets as exhaustive. This is one lane on the broader [[engine-trust-boundaries]] map (metadata surface vs native execution). (source: wiki/sources/skills/game-engine.md)
 
 ## Key globals
 
@@ -84,4 +88,4 @@ Curated UE tooling indexes such as [[unreal-engine-guide]] complement these SDK 
 
 ## Related
 
-[[unreal-engine]] · [[dumper-7]] · [[source-netvars]] · [[il2cpp]] · [[patternsleuth]] · [[source2gen]] · [[valorant-dumper]] · [[uedumper]] · [[uedumper-memprocfs]] · [[ezfndev-uedumper]] · [[shh0yauedumper]] · [[unrealdumper-4-25]] · [[unrealsdkdumper-4-25]] · [[qemu-unrealdumper-4-25]] · [[unreal-engine-tools]] · [[ue-unreal-engine-sdk]] · [[ue4-cheat-engine]] · [[ue4-injector]] · [[ue4-processevent-intercept]] · [[ue-live-bridge]] · [[unreal-engine-guide]] · [[unrealcpp]] · [[asset-tutorial-plugin]] · [[fortnite-virtual-offsets]] · [[fortnite-sigs]] · [[f0ndo-fortnite-sigs]] · [[fortnite-sigs-updated-every-update]] · [[fortnite-offsets]] · [[trydos-fortnite-offsets]] · [[android1337-fortnite-offsets]] · [[fortnite-offsets-and-sigs]] · [[fortnite-offsets-sigs-and-more]] · [[fortnite-offset-dumper]] · [[fortnite-voyagertf]] · [[fortnite-masterpasta-ihack-source-leak]] · [[fortnite-leak5]] · [[smite-esp-aimbot]] · [[research-rigor]] · [[overviews/game-engine]] · [[overviews/game-hacking]]
+[[engine-trust-boundaries]] · [[unreal-engine]] · [[dumper-7]] · [[source-netvars]] · [[il2cpp]] · [[patternsleuth]] · [[source2gen]] · [[valorant-dumper]] · [[uedumper]] · [[uedumper-memprocfs]] · [[ezfndev-uedumper]] · [[shh0yauedumper]] · [[unrealdumper-4-25]] · [[unrealsdkdumper-4-25]] · [[qemu-unrealdumper-4-25]] · [[unreal-engine-tools]] · [[ue-unreal-engine-sdk]] · [[ue4-cheat-engine]] · [[ue4-injector]] · [[ue4-processevent-intercept]] · [[ue-live-bridge]] · [[unreal-engine-guide]] · [[unrealcpp]] · [[asset-tutorial-plugin]] · [[fortnite-virtual-offsets]] · [[fortnite-sigs]] · [[f0ndo-fortnite-sigs]] · [[fortnite-sigs-updated-every-update]] · [[fortnite-offsets]] · [[trydos-fortnite-offsets]] · [[android1337-fortnite-offsets]] · [[fortnite-offsets-and-sigs]] · [[fortnite-offsets-sigs-and-more]] · [[fortnite-offset-dumper]] · [[fortnite-voyagertf]] · [[fortnite-masterpasta-ihack-source-leak]] · [[fortnite-leak5]] · [[smite-esp-aimbot]] · [[research-rigor]] · [[overviews/game-engine]] · [[overviews/game-hacking]]
