@@ -35,7 +35,7 @@ sources:
   - wiki/sources/descriptions/LaihoE__DLAC.md
   - wiki/sources/descriptions/Driw0x__CS2Guard.md
   - wiki/sources/descriptions/87andrewh__DeepAimDetector.md
-updated: 2026-09-04
+updated: 2026-09-09
 confidence: medium
 ---
 
@@ -56,7 +56,7 @@ Some pipelines capture frames → run object detection → emit mouse/HID moveme
 
 ## Server-side replay analysis
 
-When telemetry provenance is trusted, servers can reconstruct aim without local process scans:
+When telemetry provenance is trusted ([[input-provenance]]), servers can reconstruct aim without local process scans:
 
 - Record per-tick mouse deltas, view angles, fire/damage events at server tick rate.
 - Reconstruct crosshair trajectories; define **engagement windows** (time-to-target, overshoot, correction count, hold time before fire).
@@ -107,4 +107,4 @@ Tabular engagement features (reaction time, curvature stats, dx/dy correlation, 
 
 ## Related
 
-[[hardware-input-injection]] · [[usb-monitor-bof]] · [[research-rigor]] · [[present-hook]] · [[kernel-mouse]] · [[overviews/anti-cheat]] · [[overviews/game-hacking]]
+[[hardware-input-injection]] · [[input-provenance]] · [[detector-operations]] · [[usb-monitor-bof]] · [[research-rigor]] · [[present-hook]] · [[kernel-mouse]] · [[overviews/anti-cheat]] · [[overviews/game-hacking]]

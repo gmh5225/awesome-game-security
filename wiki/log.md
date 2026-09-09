@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-09** — ingest `skill:anti-cheat`: seven-step detection methodology, evidence-package requirements, and threat-framing guidance on [[overviews/anti-cheat]]; new concepts [[input-provenance]], [[detector-operations]], and [[network-environment-evidence]]; refreshed [[hardware-input-injection]] (USB HID report analysis, KMBox Net network context, limitations) and [[research-rigor]] (evidence-package retention); `index.md` updated.
+
 - **2026-09-09** — ingest `skill:overview`: expanded 12-skill routing table (linux-platform-security, game-server-security, game-supply-chain-security); README cross-category map; repository root layers; resource selection format and evidence-reconciliation guidance; concept [[resource-selection]]; refreshed [[overviews/overview]], [[concepts/compiled-wiki]], and [[concepts/research-rigor]]; `index.md` updated.
 
 - **2026-09-09** — ingest `readme:categories`: Anti Cheat ~714 (+1; Timehue/[[shinobix]] browser MMORPG server-authoritative auth/reward-integrity AC patterns in Open Source Anti Cheat System) / Cheat ~2794 / other major section counts stable; 41 sections; entity [[shinobix]]; refreshed README-map counts and scope on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], and [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).

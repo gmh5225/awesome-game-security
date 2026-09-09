@@ -3,6 +3,7 @@ title: Research Rigor
 kind: concept
 topics: [overview]
 sources:
+  - wiki/sources/skills/anti-cheat.md
   - wiki/sources/skills/overview.md
   - wiki/sources/skills/game-engine.md
   - wiki/sources/skills/mobile-security.md
@@ -28,6 +29,7 @@ Cross-cutting evidence discipline for factual synthesis, detector assessment, an
 - Separate **automated scoring** from **enforcement action** when evaluating operator AC stacks—platforms such as [[ponytail-risk]] default to shadow mode so rule/AI signals feed human review rather than immediate bans. (source: wiki/sources/descriptions/xihedun-2026__Ponytail-Risk-.md)
 - Do not import fixed detection thresholds or confidence values without representative calibration and validation for the target environment.
 - Narrow the conclusion or report it as inconclusive when evidence is missing or contradictory.
+- Retain complete **evidence packages** for detector findings: raw artifact or immutable reference, timestamps/ordering, schema/game/detector versions, feature transforms, threshold/model version, sample counts, provenance, contradictory evidence, limitations, and the exact rule that fired. (source: wiki/sources/skills/anti-cheat.md)
 
 ## When to apply
 
@@ -50,4 +52,4 @@ LLM-assisted static RE should ground conclusions in disassembler/decompiler evid
 
 ## Related
 
-[[compiled-wiki]] · [[resource-selection]] · [[mobile-anti-cheat]] · [[overviews/overview]] · [[overviews/mobile-security]] · [[AGENTS]]
+[[compiled-wiki]] · [[resource-selection]] · [[input-provenance]] · [[detector-operations]] · [[mobile-anti-cheat]] · [[overviews/overview]] · [[overviews/anti-cheat]] · [[overviews/mobile-security]] · [[AGENTS]]
