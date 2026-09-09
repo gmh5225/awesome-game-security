@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-09** — ingest `description:Fare9/Dragons-vs-VMs`: entity [[dragons-vs-vms]] (Fare9; VMProtect x64 devirtualization lab; Binary Ninja VM trace; dragon-tales lift to IGNIL/LLVM IR; Z3 symbolic handler recovery; all 256 handler slots classified; serial-check sample + BN databases; Cheat / Fix VMP); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[vmplift]], [[novmp]], [[titan]], and [[vmprotect-devirtualization]]; `index.md` updated.
+
 - **2026-09-09** — ingest `readme:categories`: Cheat ~2797 (+1; fare9/[[dragons-vs-vms]] VMProtect x64 devirtualization lab in Fix VMP) / Anti Cheat ~716 / other major section counts stable; 41 sections; entity [[dragons-vs-vms]]; refreshed README-map counts and Fix VMP scope on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/reverse-engineering]], and [[overviews/dma-attack]]; light `index.md` section notes (no per-category pages).
 
 - **2026-09-09** — lint: index vs disk scan — 9 overviews, 42 concepts, 3867 entities (3918 index entries); index.md fully synced (0 missing, 0 dead, 0 duplicate entries); overview wikilink spot-check (9 pages) — fixed 2 dead [[index]] wikilinks on [[overviews/overview]] (`wiki/index.md` catalog reference); concept spot-check (42 pages) — fixed 1 dead [[index]] on [[resource-selection]]; 6 cross-kind slug collisions ([[game-hacking]], [[anti-cheat]], [[reverse-engineering]], [[il2cpp]], [[byovd]], [[dma]]) — expected, no repair needed.
