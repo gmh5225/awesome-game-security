@@ -4,6 +4,7 @@ kind: concept
 topics: [game-engine, anti-cheat, reverse-engineering]
 sources:
   - wiki/sources/skills/game-engine.md
+  - wiki/sources/descriptions/Timehue__ShinobiX.md
 updated: 2026-09-09
 confidence: high
 ---
@@ -33,7 +34,7 @@ Apply [[research-rigor]] when porting artifacts across builds. Separate **reflec
 | Reflected metadata | Schema accepted as full memory layout | [[unreal-object-model]], [[il2cpp]] |
 | Serialized assets | Untrusted content accepted by importer | asset-format RE; supply-chain review |
 | In-process plugins | Third-party code with engine privileges | mod/plugin inventory |
-| Client replication | Client assertions treated as authoritative state | game-server-security (authority, sessions) |
+| Client replication | Client assertions treated as authoritative state | game-server-security (authority, sessions); browser SPA clients such as [[shinobix]] require server-side settlement receipts and ledgered economy mutations (source: wiki/sources/descriptions/Timehue__ShinobiX.md) |
 | Build / update / mod distribution | Tampered binaries or mod channels | game-supply-chain-security |
 | Tick / prediction / replay | Ordering or replay limits misunderstood | game-server-security (time-ordering evidence) |
 | Graphics measurements | Present timing or draw counts misread | [[overviews/graphics-api]] |
@@ -62,4 +63,4 @@ Owned-build diagnostic workflows belong with [[research-rigor]] robustness/triag
 
 ## Related
 
-[[unreal-object-model]] · [[il2cpp]] · [[source-netvars]] · [[resource-selection]] · [[research-rigor]] · [[overviews/game-engine]] · [[overviews/anti-cheat]]
+[[unreal-object-model]] · [[il2cpp]] · [[source-netvars]] · [[resource-selection]] · [[research-rigor]] · [[shinobix]] · [[overviews/game-engine]] · [[overviews/anti-cheat]]

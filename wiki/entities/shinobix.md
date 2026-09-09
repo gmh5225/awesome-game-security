@@ -11,9 +11,19 @@ confidence: medium
 
 # ShinobiX
 
-**ShinobiX** (Timehue) — live-service browser ninja MMORPG with a React/Vite single-page client, TypeScript API server, and Supabase-backed persistence. Server-authoritative combat, PvE, economy, and player-save flows use settlement receipts, currency ledgers, save locks, and authentication policies to resist client-side tampering and duplication. Ships extensive security-oriented documentation and audit material covering HTTP hardening, auth and anti-cheat patterns, reward-integrity contracts, and combat authority boundaries, backed by broad automated test coverage across parity and settlement paths. Reference for practical online-RPG backend integrity—not a commercial AC product. (source: wiki/sources/descriptions/Timehue__ShinobiX.md)
+Live-service **browser ninja MMORPG** (Timehue) with a React/Vite single-page client, TypeScript API server, and Supabase-backed persistence. Combat, PvE, economy, and player-save flows are **server-authoritative**, defended with settlement receipts, currency ledgers, save locks, and authentication policies against client-side tampering and duplication. Ships extensive security-oriented documentation and audit material (HTTP hardening, auth/anti-cheat patterns, reward-integrity contracts, combat authority boundaries) plus broad automated tests across parity and settlement paths. Reference for practical online-RPG backend integrity—not a commercial AC product. (source: wiki/sources/descriptions/Timehue__ShinobiX.md)
 
-Useful beside other published validation references such as [[gatewarden-public]] and [[adaptive-boss-arena]] when studying server-authoritative game design and documented anti-abuse contracts.
+## Architecture
+
+React/Vite SPA client; TypeScript API layer; Supabase persistence; live-service MMORPG deployment.
+
+## Integrity mechanisms
+
+Server-authoritative combat, PvE, economy, and player-save flows; settlement receipts; currency ledgers; save locks; authentication policies resisting duplication and stat/reward spoofing.
+
+## Documentation & testing
+
+Published security audit material covering HTTP hardening, auth and anti-cheat patterns, reward-integrity contracts, and combat authority boundaries; automated parity and settlement-path test coverage.
 
 ## Links
 
@@ -21,4 +31,4 @@ Useful beside other published validation references such as [[gatewarden-public]
 
 ## Related
 
-[[overviews/anti-cheat]] · [[gatewarden-public]] · [[adaptive-boss-arena]] · [[void-engine]] · [[research-rigor]]
+[[overviews/anti-cheat]] · [[overviews/game-engine]] · [[engine-trust-boundaries]] · [[gatewarden-public]] · [[adaptive-boss-arena]] · [[certael]] · [[research-rigor]]

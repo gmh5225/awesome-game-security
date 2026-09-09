@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-09** — ingest `description:Timehue/ShinobiX`: entity [[shinobix]] (Timehue; React/Vite SPA + TypeScript API + Supabase; server-authoritative combat/PvE/economy/saves; settlement receipts, currency ledgers, save locks, auth policies; HTTP hardening + reward-integrity audit docs + parity/settlement tests; Open Source Anti Cheat System reference); cited on [[overviews/game-engine]] and [[concepts/engine-trust-boundaries]]; cross-linked [[gatewarden-public]], [[adaptive-boss-arena]], and [[certael]]; `index.md` updated.
+
 - **2026-09-09** — ingest `skill:windows-kernel`: new concept [[driver-trust-boundaries]] (IOCTL authorization, driver provenance, signed-driver threat classes, VBS/blocklist scope); driver-trust + hypervisor/pool evidence-limit synthesis on [[overviews/windows-kernel]]; Pool2/3 contracts and tag/table attribution limits on [[kernel-pool-scanning]]; VBS state distinction + hypervisor enforcement-boundary review table + WHP limits on [[hvci]]; kernel build-specific evidence row on [[research-rigor]]; `index.md` updated.
 
 - **2026-09-09** — ingest `skill:reverse-engineering`: [[binary-evidence]] concept (question classification, address provenance, imported/reachable/observed finding granularity, decompiler limits); [[binary-diffing]] concept (patch-analysis tools, similarity-as-candidate-evidence, Diaphora validation limits); exception-driven and WHP evidence-review dimensions on [[dynamic-binary-instrumentation]]; binary-evidence synthesis + diffing evidence limits on [[overviews/reverse-engineering]]; `index.md` updated.
