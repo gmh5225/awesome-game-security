@@ -1,6 +1,6 @@
 ---
 name: awesome-game-security-overview
-description: Guide for understanding and contributing to the awesome-game-security curated resource list. Use this skill when adding new resources, organizing categories, mapping topics across anti-cheat, Windows kernel, DMA, reverse engineering, and game-engine research, or maintaining README.md format consistency.
+description: Navigate and maintain the awesome-game-security resource collection and its skill, wiki, description, and archive layers. Use for topic routing, resource discovery, link validation, category placement, duplicate review, or README conventions across game engines, graphics, reverse engineering, platform security, DMA, and network evidence. Prefer original sources, record versions and provenance, and treat generated summaries as discovery aids requiring claim verification.
 ---
 
 # Awesome Game Security - Project Overview
@@ -71,8 +71,11 @@ When an AI agent receives a query, use this table to select the best skill:
 
 | Query topic | Primary skill | Related skills |
 |---|---|---|
-| EAC, BattlEye, Vanguard, detection, heartbeat, screenshot | anti-cheat | windows-kernel |
-| pcileech, FPGA, DMA, IOMMU, Thunderbolt | dma-attack | anti-cheat |
+| Layered detection, integrity, heartbeat, screenshot evidence | anti-cheat | windows-kernel, research-rigor |
+| pcileech, FPGA, DMA, IOMMU, Thunderbolt/USB4 | dma-attack | anti-cheat |
+| USB bridge/data-transfer cables, LeechCore, WinPmem, remote memory sources | dma-attack | windows-kernel, research-rigor |
+| Account/device restrictions, network association, NAT/CGNAT, claimed ban duration | anti-cheat | research-rigor |
+| Attack prerequisites, trust boundaries, benign counterexamples, defense coverage | game-hacking | the matching domain skill, research-rigor |
 | Unreal SDK, Unity IL2CPP, engine structs, Godot, Lumix | game-engine | game-hacking |
 | Memory hacking, injection, overlays, driver comm, HWID spoof | game-hacking | graphics-api |
 | D3D/Vulkan/OpenGL hooks, Present hook, shader interception | graphics-api | game-hacking |
@@ -125,6 +128,30 @@ All 27 top-level `##` sections in README.md:
 - Should provide unique value not covered by existing entries
 - Prefer original repos over forks unless fork adds significant value
 - Include language/platform tags when helpful (e.g., `[Rust]`, `[Unity]`)
+
+## Source Selection and Description Quality
+
+Choose resources for authority, direct support, version fit, methodology, and
+unique contribution to the question. Popularity, search rank, and source count
+do not establish that a resource is the best evidence. A historical reference
+can explain a technique without proving it still works on current platforms.
+
+Write resource descriptions as purpose + platform/scope + distinctive value +
+material limitation. For offensive research, identify the attack class and
+prerequisite boundary; for defense, distinguish prevention, observation, and
+attribution. Treat unsupported performance, invisibility, compatibility, and
+fixed-duration enforcement claims as claims to verify, not descriptive facts.
+
+For exact implementation claims, cite a file at a specific commit or a verified
+release artifact. Preserve canonical repository links for discovery and use
+maintainer-provided citation metadata when available.
+[GitHub permanent links](https://docs.github.com/en/repositories/working-with-files/using-files/getting-permanent-links-to-files),
+[GitHub citation files](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-citation-files)
+
+Use existing wiki/description/archive layers to find original material; verify
+that material before promoting a claim. Record the review date, applicable
+version, and unresolved gaps. The sources above were reviewed on 2026-09-09;
+this date does not imply that every pre-existing skill example was revalidated.
 
 ## Research Rigor
 

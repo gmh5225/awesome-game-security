@@ -1,18 +1,51 @@
 ---
 name: mobile-security
-description: Guide for Android and iOS game security, reversing, and anti-cheat-adjacent platform research. Use this skill when working with APK or IPA analysis, IL2CPP mobile titles, Frida, Zygisk or Magisk, jailbreak or root detection bypass, Android kernel modules, emulator detection, or mobile anti-cheat systems.
+description: Assess Android and iOS game security through package/signing analysis, platform attack surfaces, controlled instrumentation, network configuration, and server-verified integrity signals. Use for APK/AAB/IPA triage, native or IL2CPP builds, Frida observations, root/jailbreak and emulator evidence, SELinux, Play Integrity, App Attest, and false-positive analysis. Record device, OS, OEM, ABI, signing, entitlement, and build provenance before drawing conclusions.
 ---
 
 # Mobile Game Security
 
 ## Overview
 
-This skill covers mobile security resources from the awesome-game-security collection, focusing on Android and iOS game security research, reverse engineering, and protection bypass techniques.
+This skill covers Android and iOS game-security analysis across package provenance, runtime integrity, local data, platform policy, attestation, and backend trust. Describe attacker capabilities and defense limits separately at each boundary.
 
 Mobile behavior is strongly version-, OEM-, entitlement-, signing-, kernel-,
 and policy-dependent. Verify the exact device/build and use
 [`research-rigor`](../research-rigor/SKILL.md) before treating a root, hook,
 emulator, or integrity signal as attribution.
+
+## Mobile Trust Boundaries and Integrity Evidence
+
+Separate app package/signing, process isolation, platform/device integrity,
+and server authorization/game rules. Repackaging, privileged instrumentation,
+local-data exposure, request replay, and reliance on client assertions affect
+different boundaries. State whether the scenario requires ordinary app access,
+a developer build, privileged runtime access, kernel control, or server access.
+
+Keep local indicators, verified attestation, backend decisions, and sanctions
+separate. A root indicator is not proof of cheating; a valid integrity response
+does not validate arbitrary game logic. Record the exact build and signing
+identity with the observation source and available counterevidence.
+
+- Android SELinux mandatory access control also applies to root processes.
+  Record enforcement state, domain, build, and relevant policy denials instead
+  of assigning universal trust or stealth ratings to framework names.
+  [AOSP SELinux](https://source.android.com/docs/security/features/selinux)
+- Validate Play Integrity request details, identity, binding, and freshness
+  before interpreting app/device/account verdicts on the backend.
+  [Android integrity verdicts](https://developer.android.com/google/play/integrity/verdicts)
+- App Attest requires server verification of attestations/assertions, including
+  challenge and counter handling. Keep development and production context
+  separate. [Apple server validation](https://developer.apple.com/documentation/devicecheck/validating-apps-that-connect-to-your-server)
+- For owned-app transport tests, distinguish debug-only trust anchors from
+  release configuration and verify the packaged result.
+  [Android network security configuration](https://developer.android.com/privacy-and-security/security-config)
+
+Include supported emulators, stock devices, developer builds, OS updates, and
+service/attestation errors as controls. Record unavailable evidence separately
+from a verified negative result. Report the boundary, prerequisite, artifact,
+backend interpretation, false-positive alternatives, and unresolved limits.
+Sources above were reviewed on 2026-09-09.
 
 ## README Coverage
 
@@ -133,7 +166,8 @@ Interceptor.attach(Module.findExportByName("libgame.so", "function_name"), {
 ```
 - Kernel-based root solution, works at kernel level (no /system modification)
 - Module system compatible with Magisk modules via KSU module API
-- Stealth advantage: no su binary on filesystem, harder to detect
+- Filesystem artifacts and observability depend on the exact version and
+  configuration; do not infer artifact absence or detectability from its name
 - Requires custom kernel or GKI (Generic Kernel Image) patching
 - APatch: newer alternative, patches boot.img with KernelPatch
 ```
@@ -147,13 +181,11 @@ Interceptor.attach(Module.findExportByName("libgame.so", "function_name"), {
 ```
 
 #### Root Solution Comparison
-```
-| Solution  | Level       | Stealth | GKI Support | Module System |
-|-----------|-------------|---------|-------------|---------------|
-| Magisk    | User/Init   | Medium  | Yes         | Mature        |
-| KernelSU  | Kernel      | High    | Yes         | Growing       |
-| APatch    | Kernel      | High    | Yes         | Growing       |
-```
+
+Compare the exact release, supported kernel/device, privilege boundary,
+module configuration, and observed artifacts. Framework names do not establish
+a fixed stealth ranking, compatibility guarantee, or detector outcome. Preserve
+the baseline and collection limits when comparing evidence across systems.
 
 ### Managed Dynamic Instrumentation on Rooted Android
 ```

@@ -1,6 +1,6 @@
 ---
 name: windows-kernel-security
-description: Guide for Windows kernel internals and security mechanisms used in game protection and low-level research. Use this skill when working with drivers, IRQL-sensitive callbacks, EPROCESS, ETHREAD, MMVAD internals, IOCTL paths, DSE, PatchGuard, HVCI, PiDDBCache, MmUnloadedDrivers, or kernel memory inspection.
+description: Analyze Windows kernel security and driver attack surfaces for game-security research. Use for IOCTL access control, callbacks and IRQL, kernel memory acquisition, build-specific EPROCESS/ETHREAD/MMVAD analysis, driver provenance, DSE/PatchGuard, VBS/HVCI, vulnerable-driver exposure, and crash or memory forensics. Distinguish documented contracts from inferred internals and evaluate attack prerequisites, observable artifacts, mitigation scope, and false positives.
 ---
 
 # Windows Kernel Security
@@ -13,6 +13,41 @@ Treat undocumented structures, offsets, globals, and allocator internals as
 build-specific. Verify them against symbols and runtime observations for the
 exact Windows build; use [`research-rigor`](../research-rigor/SKILL.md) before
 generalizing a PoC or forensic heuristic.
+
+## Driver Attack Surface and Evidence
+
+| Threat class | Necessary capability or boundary | Evidence and defensive focus |
+|---|---|---|
+| Dangerous privileged interface | A caller can reach sensitive driver operations | Device ACLs, per-operation authorization, constrained functionality |
+| Vulnerable signed-driver abuse | An affected driver is loaded or loadable and its interface reachable | Exact hash/version, provenance, loaded inventory, applicable policy |
+| Driver-mediated acquisition | A host kernel acquisition component and usable interface | Driver/service identity, acquisition process, interface access, timeline |
+| Kernel code/data tampering | Ability to modify the affected protected state | Trusted comparison evidence, ownership, protection and integrity events |
+
+Review buffer lengths, output initialization, object lifetime, cancellation,
+and IRQL alongside caller authorization. Signed code can still expose unsafe
+operations. The table is a threat-model synthesis; actual reachability requires
+evidence for the specific build and configuration.
+[Microsoft driver security checklist](https://learn.microsoft.com/en-us/windows-hardware/drivers/driversecurity/driver-security-checklist)
+
+Distinguish VBS/HVCI capability, configuration, and running state. Memory
+integrity imposes executable-memory constraints; compatibility does not prove
+every driver interface or data operation safe.
+[Memory integrity compatibility](https://learn.microsoft.com/en-us/windows-hardware/drivers/driversecurity/implement-hvci-compatible-code)
+
+Driver blocklists have incomplete coverage. Distinguish controls that prevent
+writing a vulnerable driver to disk from policies that block loading it, and
+record the active policy/version rather than assuming protection from the OS name.
+[Microsoft driver block rules](https://learn.microsoft.com/en-us/windows/security/application-security/application-control/app-control-for-business/design/microsoft-recommended-driver-block-rules)
+
+Use Driver Verifier on a recovery-capable test system when evaluating owned
+drivers; preserve tested configuration and crash artifacts. It can deliberately
+bugcheck a system and does not establish a low false-positive anti-abuse detector.
+[Driver Verifier](https://learn.microsoft.com/en-us/windows-hardware/drivers/devtest/driver-verifier)
+
+For acquisition relayed over USB or a network, use the
+[source/transport distinction](../dma-attack/references/acquisition-and-transport.md).
+Legitimate incident response can produce the same acquisition artifacts.
+Sources in this section were reviewed on 2026-09-09.
 
 ## README Coverage
 
@@ -307,7 +342,7 @@ Windows 10 19H1     : Kernel Segment Heap introduced (March 2019, build 1903)
 Windows 10 2004     : ExAllocatePool2 / ExAllocatePool3 added
                       └─ ExAllocatePoolWithTag officially deprecated
 Windows 10 20H2~    : Dynamic KDP (Kernel Data Protection) stabilized
-Windows 11          : VBS/HVCI enabled by default; Secure Pool usage expanded
+Windows 11          : HVCI default on most new devices; verify runtime state
 
 Common misconception: Many sources claim "the Segment Heap was introduced
 in Windows 10 2004," but the kernel segment heap was actually introduced

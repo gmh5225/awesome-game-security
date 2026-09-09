@@ -1,6 +1,6 @@
 ---
 name: anti-cheat-systems
-description: Guide for modern game anti-cheat architecture, Windows kernel monitoring, and detection tradeoffs. Use this skill when analyzing EAC, BattlEye, Vanguard, FACEIT AC, kernel callbacks, handle protection, manual-map detection, boot-start drivers, BYOVD, DMA threats, or behavioral telemetry in game security research.
+description: Analyze layered game integrity defenses across clients, Windows kernel components, hardware trust, server authority, and behavioral telemetry. Use for driver and memory evidence, DMA versus host-mediated acquisition, input-device signals, account/device restrictions, network association, or false-positive review. Map attack prerequisites and observation points, distinguish detection from enforcement, and produce versioned findings with corroboration, limitations, and primary sources.
 ---
 
 # Anti-Cheat Systems & Analysis
@@ -8,6 +8,32 @@ description: Guide for modern game anti-cheat architecture, Windows kernel monit
 ## Overview
 
 This skill covers layered anti-cheat design across kernel drivers, privileged services, in-game components, and backend telemetry. It is most useful for mapping how modern anti-cheats monitor process handles, image loads, memory integrity, driver trust, virtualization abuse, DMA threats, and suspicious input behavior on Windows.
+
+## Threat Coverage and Enforcement Evidence
+
+Describe each threat by the capability needed, resource exposed, trust boundary
+crossed, and observation point available to the defender. Compare host, device,
+graphics, input, and server observations without assuming one collector sees all
+layers. Use the [attacker capability map](../game-hacking/references/attack-surface-map.md)
+for cross-layer classification, including attacks that do not modify game memory.
+
+For shared networks, account/device association, reported network restrictions,
+or claimed sanction duration, read
+[Network environment evidence](references/network-environment-evidence.md).
+Keep connection failure, rate limiting, detection, and enforcement as separate
+events. A common address, acquisition driver, or unusual input device needs
+context and corroboration before attribution.
+
+For a two-computer memory setup, first use
+[acquisition and transport classification](../dma-attack/references/acquisition-and-transport.md).
+PCIe inspection addresses a different surface from host-driver acquisition;
+neither observation alone establishes the entire system's integrity.
+
+Produce an evidence record containing the affected build, claimed attacker
+capability, collector and visibility limits, observation timeline, benign
+controls, supported finding, and remaining uncertainty. Consult
+[research-rigor](../research-rigor/SKILL.md) when evaluating a detector or
+turning a finding into an enforcement recommendation.
 
 ## README Coverage
 
@@ -452,8 +478,9 @@ Network Traffic Indicators (KMBox Net):
 - KMBox Net uses UDP communication on the local network
 - Packet pattern: consistent-size UDP packets at high frequency
   from a secondary device to the KMBox's IP
-- If cheat PC is on the same network: detectable via
-  network monitoring (firewall/router logs)
+- Network evidence requires a collector that receives the relevant traffic.
+  A shared LAN or public address alone provides neither visibility into every
+  inter-device exchange nor evidence of prohibited use.
 
 Driver-Level Detection:
 - interception.sys: known driver signature, detectable via

@@ -1,18 +1,50 @@
 ---
 name: reverse-engineering-tools
-description: Guide for reverse engineering protected games and anti-cheat components across user mode, kernel mode, and hypervisor-aware environments. Use this skill when analyzing drivers, IOCTL protocols, callback registration, injected-code artifacts, integrity checks, protected binaries, or debugging security-sensitive game components.
+description: Investigate game clients, protection components, drivers, and memory artifacts through reproducible binary analysis with IDA, Ghidra, debuggers, and instrumentation. Use for PE and symbol inspection, disassembly and decompilation, control/data-flow reconstruction, binary diffing, obfuscation classification, and interface analysis. Produce versioned findings with traceable evidence, explicit uncertainty, attack-surface context, and defensive implications.
 ---
 
 # Reverse Engineering Tools & Techniques
 
 ## Overview
 
-This skill covers reverse engineering workflows for game security research, including protected game clients, anti-cheat user-mode modules, kernel drivers, memory artifacts, and debugging environments that must survive anti-analysis checks.
+This skill covers evidence-driven analysis of game clients, protection modules, drivers, and memory artifacts. Use static and observed behavior to reconstruct interfaces and trust boundaries, while documenting how protection, obfuscation, or instrumentation limits the conclusions.
 
 Treat performance, stealth, coverage, and compatibility claims as
 target/version-specific. Record the binary hash, tool version, configuration,
 environment, and observed evidence; use
 [`research-rigor`](../research-rigor/SKILL.md) for consequential conclusions.
+
+## Binary Evidence and Attack-Surface Findings
+
+Preserve the sample hash, provenance, architecture, image layout, tool version,
+analysis configuration, and symbol identity. Keep file offsets, RVAs, and
+runtime addresses distinct, including relocation assumptions in disk/memory
+comparisons. Match symbols to the actual binary; public and private symbol
+sets offer different information.
+[PE format](https://learn.microsoft.com/en-us/windows/win32/debug/pe-format),
+[Symbols and symbol files](https://learn.microsoft.com/en-us/windows-hardware/drivers/debugger/symbols-and-symbol-files)
+
+Decompiler output is a reconstruction. Validate inferred types, names,
+prototypes, and function boundaries against instructions, ABI constraints,
+and available observations. Ghidra's instruction semantics and p-code model
+are useful for understanding why displayed C is not recovered source.
+[Ghidra language documentation](https://ghidra.re/ghidra_docs/languages/index.html),
+[Ghidra analysis guide](https://ghidra.re/ghidra_docs/GhidraClass/Beginner/Introduction_to_Ghidra_Student_Guide.html)
+
+Classify the question before selecting an analysis mode:
+
+| Question | Evidence to develop | Limit to state |
+|---|---|---|
+| Interface abuse | Input origin, callers, required privilege, validation and protected resource | Reachable code is not proof of invocation or abuse |
+| Integrity tampering | Independently acquired comparison data and collector trust | A compromised or incomplete collector can distort results |
+| Packing/obfuscation | Representation changes and uncertainty in recovered structure | Obfuscation alone does not establish maliciousness |
+| Anti-analysis behavior | Conditions associated with differing execution | Observation coverage may be limited by the environment |
+| Security-relevant binary change | Semantic differences and affected trust boundary | Compiler, library, and layout changes can dominate a diff |
+
+Report supporting addresses/artifacts and explain each inference. An imported
+API, reachable path, and observed call are distinct findings. Preserve missing
+symbols, incomplete dumps, generated code, and unexecuted paths as limitations.
+Sources in this section were reviewed on 2026-09-09.
 
 ## README Coverage
 

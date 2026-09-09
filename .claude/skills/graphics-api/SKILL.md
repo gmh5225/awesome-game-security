@@ -1,6 +1,6 @@
 ---
 name: graphics-api-hooking
-description: Guide for graphics API interception, overlay rendering, and render-pipeline analysis across DirectX, OpenGL, and Vulkan. Use this skill when working with Present or SwapBuffers hooks, DXGI swap chains, shader or draw-call interception, screenshot-sensitive overlays, or graphics debugging in game security research.
+description: Analyze Direct3D/DXGI, OpenGL, and Vulkan rendering, presentation, composition, and capture behavior for graphics debugging and game-security research. Use for swap chains, overlays, frame capture, resource lifetime and synchronization, shader inspection, and capture-coverage experiments. Distinguish API instrumentation from compromise and validate findings against the actual driver, compositor, display mode, and capture backend.
 ---
 
 # Graphics API Hooking & Rendering
@@ -13,6 +13,40 @@ Capture paths, hook points, synchronization, latency, and observable artifacts
 vary by API, driver, compositor, application, and tool version. Verify the
 active path and use [`research-rigor`](../research-rigor/SKILL.md) before
 attributing a capture or overlay signal.
+
+## Rendering and Capture Threat Model
+
+Distinguish application render targets, presentation queues, compositor
+output, physical display output, and captured images. A capture is an observation
+at one layer, not an interchangeable copy of every other layer.
+
+Classify unauthorized in-process graphics changes, separate-process overlay
+abuse, and inappropriate frame access by the required capability. Correlate
+module provenance, graphics-layer configuration, resource ownership, capture
+process identity, and timing where available. Include legitimate recording,
+debugging, accessibility, and vendor tools as counterexamples.
+
+For owned sample applications, record a coverage matrix: API, OS/driver,
+windowed/fullscreen state, presentation model, HDR/SDR, monitors, capture
+backend, cursor handling, and timestamps. Black, missing, or stale frames need
+candidate explanations; they are not sufficient evidence of concealment.
+
+- DXGI composition, DirectFlip, and Independent Flip depend on configuration;
+  a fixed assumption about compositor involvement is unreliable.
+  [Microsoft flip-model guidance](https://learn.microsoft.com/en-us/windows/win32/direct3ddxgi/for-best-performance--use-dxgi-flip-model)
+- Desktop Duplication is a particular acquisition path with its own behavior
+  and protected-content restrictions.
+  [Desktop Duplication API](https://learn.microsoft.com/en-us/windows-hardware/drivers/display/desktop-duplication-api)
+- Vulkan validation and synchronization validation diagnose API/resource misuse.
+  Preserve VUIDs, SDK/layer versions, and diagnostics; a validation finding is
+  not an anti-abuse verdict.
+  [Khronos development tools](https://docs.vulkan.org/guide/latest/development_tools.html)
+- Windows documents `SwapBuffers` through GDI. Do not assume a similarly named
+  wrapper or hook-library symbol is the platform contract.
+  [Microsoft SwapBuffers](https://learn.microsoft.com/en-us/windows/win32/api/wingdi/nf-wingdi-swapbuffers)
+
+Sources above were reviewed on 2026-09-09. Use the active path and measured
+controls when interpreting older API examples in this skill.
 
 ## README Coverage
 
@@ -171,7 +205,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 - Hook Desktop Window Manager
 - Render in DWM composition
 - Higher privilege requirements
-- Better anti-detection
+- Observability depends on the actual composition and collection environment
 ```
 
 ### Steam Overlay Hijack
@@ -264,7 +298,8 @@ D3DXVECTOR3 WorldToScreen(D3DXVECTOR3 pos, D3DXMATRIX viewProjection) {
 
 ### How Anti-Cheat Captures Screenshots
 ```
-- BitBlt from game window DC: captures visible content including overlays
+- BitBlt from a window DC: coverage depends on the window, composition, and
+  capture path; validate against known displayed content and benign overlays
 - DXGI Desktop Duplication API: captures composited desktop output
 - IDXGISwapChain::Present interception: grab backbuffer before present
 - PrintWindow: capture specific window contents
@@ -292,7 +327,7 @@ D3DXVECTOR3 WorldToScreen(D3DXVECTOR3 pos, D3DXMATRIX viewProjection) {
 ```
 - Projects that detect and evade AC screenshot capture
 - Techniques: hook Present to suppress overlay on screenshot frames
-- DWM-based overlays that survive PrintWindow but not BitBlt
+- Claims comparing DWM overlay capture across APIs require measured coverage
 - Kernel-level: suppress screenshot by blocking DC access
 ```
 

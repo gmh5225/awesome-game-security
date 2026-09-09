@@ -1,13 +1,33 @@
 ---
 name: dma-attack-techniques
-description: Guide for PCIe DMA threat modeling, FPGA-based memory access, and defensive implications in game security. Use this skill when researching pcileech, BAR and TLP behavior, page-table walking, IOMMU or VT-d, device impersonation, firmware mimicry, or DMA detection and mitigation in game security research.
+description: Analyze hardware DMA threats and distinguish them from host-driver memory acquisition and network or USB transport. Use for PCIe/FPGA, BAR/TLP behavior, IOMMU/VT-d isolation, Thunderbolt/USB4, LeechCore, WinPmem, USB bridge cables, device identity evidence, and acquisition forensics. Map the actual memory initiator, required access, trust boundaries, observable artifacts, and mitigation limits before classifying a system as DMA.
 ---
 
 # DMA Attack Techniques
 
 ## Overview
 
-This skill covers Direct Memory Access research from the awesome-game-security collection, focusing on FPGA-based PCIe attacks, pcileech usage, physical-memory access workflows, and the defensive limits of software anti-cheat once a hostile device can read memory below the OS.
+This skill covers DMA threat models, device isolation, and physical-memory acquisition evidence. It separates the component that accesses memory from the transport, analysis software, and optional input path. Classify capabilities and protection boundaries before reasoning about a particular device or product.
+
+## Classify the Acquisition Path First
+
+For USB transfer cables, two-computer setups, LeechCore, or WinPmem, read
+[Memory acquisition and transport](references/acquisition-and-transport.md).
+Use it to distinguish hardware bus access from host-mediated software capture
+and to evaluate US516/90212 implementation claims against primary sources.
+
+- Identify the memory source: PCIe requester, host kernel component, hypervisor
+  interface, or offline image. A library name or second computer does not settle it.
+- Record source access requirements, transport endpoints, analysis location,
+  write capability, and input functionality separately; leave unknowns explicit.
+- Map controls to the actual boundary: device DMA remapping, driver/interface
+  security, authenticated transport, or server-side information exposure.
+- Report available artifacts, benign uses, missing visibility, and confidence.
+  A clean process module list or absent FPGA is not a clean-host finding.
+
+Use [research-rigor](../research-rigor/SKILL.md) for disputed implementation,
+performance, compatibility, or detectability claims. This classification does
+not establish that a particular commercial setup uses the components it advertises.
 
 ## README Coverage
 
@@ -36,13 +56,12 @@ A modern external DMA cheat consists of three components:
    injects keyboard/mouse input on the gaming PC according to commands
    from the cheat PC, closing the loop.
 
-The structural property that makes this threat distinctive:
-no attacker code executes on the gaming PC. The DMA card performs
-hardware-level transactions between the FPGA and the gaming PC's
-memory controller, mediated by the chipset and (when configured) the IOMMU.
-The gaming PC's OS, drivers, and anti-cheat see only a PCIe device
-announcing itself through Configuration Space and performing what looks
-like ordinary DMA.
+This hardware-only model need not use a host memory-acquisition process.
+The device initiates memory transactions subject to platform routing and
+IOMMU mappings. Host agents and mixed hardware/software designs are separate
+cases. Visibility depends on the observer and platform; device presence,
+configuration, policy state, and available fault telemetry are different
+observations, none of which alone establishes malicious intent.
 ```
 
 ### Three Defense Layers

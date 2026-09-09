@@ -1,6 +1,6 @@
 ---
 name: game-security-research-rigor
-description: Guide for evidence-grounded game-security research, citation verification, uncertainty, reproducible analysis, and detector evaluation. Use when validating technical claims, synthesizing README or wiki resources, comparing security techniques, assessing telemetry or models, or deciding whether evidence supports an anti-cheat conclusion.
+description: Verify game-security claims through primary-source checks, explicit trust boundaries, claim ledgers, reproducible evidence, and calibrated uncertainty. Use for attack/defense comparisons, community reports, enforcement-scope claims, telemetry quality, detector evaluation, or conflicting citations. Separate observation, finding, attribution, and action; assess confounders, base rates, false positives, temporal validity, and source limitations before drawing consequential conclusions.
 ---
 
 # Game Security Research Rigor
@@ -57,6 +57,40 @@ malicious intent, or the responsible actor.
    - Use one of: supported, suspicious, no signal observed within scope, or
      inconclusive.
    - Never turn missing data into a clean result.
+
+## Claim Records for Architecture and Enforcement Reports
+
+Use a compact record when a material claim is disputed:
+
+| Field | Record |
+|---|---|
+| Claim and scope | Exact proposition, system/version, time window, affected unit |
+| Evidence class | Observed, reproduced, source-documented, inferred, or unknown |
+| Source identity | Primary URL/artifact, author or owner, version/hash, review date |
+| Direct support | Relevant passage, behavior, or measurement; what it does not establish |
+| Alternatives | Confounders, legitimate uses, counterevidence, missing observations |
+| Conclusion | Narrow finding, confidence basis, and unresolved verification |
+
+Separate publication, revision, retrieval, and event dates. A review date does
+not make a historical example current. Multiple reposts of one claim are not
+independent corroboration; an unavailable video or snippet is a lead, not
+verified evidence. Leave inaccessible or unsupported claims unresolved.
+
+For implementation behavior, use immutable references where available instead
+of assuming a branch URL preserves the inspected code.
+[GitHub permanent links](https://docs.github.com/en/repositories/working-with-files/using-files/getting-permanent-links-to-files)
+
+For architecture, identify the memory initiator, transport, processing, and
+input roles before assigning labels such as DMA. See
+[acquisition and transport](../dma-attack/references/acquisition-and-transport.md).
+Interface compatibility is not proof of identical backend mechanisms.
+
+For enforcement, distinguish account/device/network scope from observed access
+failure. Do not infer a private backend key, an exact timer, a staged rollout,
+or future permanent policy from repeated symptoms. Bound timing by actual
+observations and keep provider policy separate from analyst inference. See
+[network environment evidence](../anti-cheat/references/network-environment-evidence.md)
+for the relevant RFCs and a worked claim breakdown.
 
 ## Detector and telemetry evaluation
 

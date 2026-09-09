@@ -1,13 +1,32 @@
 ---
 name: game-hacking-techniques
-description: Guide for game-hacking technique taxonomy and threat modeling relevant to game security. Use this skill when researching memory access, code injection, overlays, input simulation, engine-specific attack surfaces, or how modern anti-cheat systems constrain user-mode, kernel-mode, hypervisor, and DMA-based cheat implementations.
+description: Classify game-cheating threats and evaluate defensive coverage across client memory, code injection, rendering, input, game engines, kernel components, DMA, and remote acquisition transports. Use to map attacker goals, required privileges, trust boundaries, information exposure, observable artifacts, server authority, and benign counterexamples. Keep conceptual attack analysis separate from claims about a specific product, device, or enforcement policy.
 ---
 
 # Game Hacking Techniques
 
 ## Overview
 
-This skill covers game-hacking techniques documented in the awesome-game-security collection, with emphasis on how cheats move from user mode to kernel mode, hypervisors, and DMA when defenders raise the bar. It is best used to understand the offensive side of the threat model that anti-cheat systems are designed to detect.
+This skill maps the offensive side of game-security threat models: what an attacker seeks to observe or control, which capability is required, and where defenses have visibility or authority. User-mode, kernel, hypervisor, device, visual, and network threats are alternative or combined paths, not a universal escalation sequence.
+
+## Attacker Capability and Defensive Coverage
+
+Read the [attack surface map](references/attack-surface-map.md) when comparing
+attack families or building a defense coverage matrix. It includes client-state
+exposure, manipulation, injection, privileged acquisition, visual/input
+automation, and abuse of server trust, with prerequisites and counterexamples.
+
+For each relevant family, explain the attack objective and boundary before
+naming tools. Identify what the defender can actually observe, what control
+prevents or limits the behavior, and what remains uncertain. Distinguish
+read-only information abuse from state modification, and synthetic input from
+evidence of human intent. Avoid presenting a missing artifact as proof that an
+attack is undetectable.
+
+Cross-reference [DMA acquisition](../dma-attack/references/acquisition-and-transport.md)
+for host-driver versus device access, and
+[network evidence](../anti-cheat/references/network-environment-evidence.md)
+for account/device association and reported restrictions.
 
 Treat implementations, performance numbers, stealth rankings, and detection
 claims as versioned threat-model examples rather than guarantees. Use

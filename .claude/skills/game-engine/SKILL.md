@@ -1,6 +1,6 @@
 ---
 name: game-engine-resources
-description: Guide for game-engine internals, source trees, plugins, and engine-specific security research. Use this skill when researching Unreal, Unity, Source, Godot, custom engines, engine detectors, engine explorers, or engine protection patterns relevant to modding, reverse engineering, and anti-cheat.
+description: Research Unreal, Unity, Source, Godot, and custom engine architecture for security analysis and development. Use for engine/version identification, reflection and object lifecycles, Mono versus IL2CPP builds, assets and native plugins, replication boundaries, source provenance, and attack-surface modeling. Match conclusions to the exact engine branch, platform, build configuration, and artifact set.
 ---
 
 # Game Engine Development Resources
@@ -14,6 +14,39 @@ branch, build configuration, platform, and game modifications. Verify the exact
 version and binary artifacts; use
 [`research-rigor`](../research-rigor/SKILL.md) before generalizing signatures or
 offsets.
+
+## Engine Trust Boundaries and Evidence
+
+Baseline the engine branch, game build/hash, platform/ABI, scripting backend,
+stripping configuration, symbol availability, and plugin versions. Separate
+reflected metadata, native/managed execution, serialized assets, plugins, and
+client/server replication; each exposes a different research surface.
+
+Describe attack scenarios by the boundary that must fail: untrusted content
+accepted by an importer, a plugin granted in-process execution, or client
+assertions accepted as authoritative game state. Correlate asset provenance,
+plugin inventory, owned-build diagnostics, serialization checks, and server
+validation evidence. Engine identification or object discovery alone does not
+establish compromise.
+
+- Unreal reflection covers annotated members; native-only members and object
+  lifetime require separate evidence. A reflected schema is not a complete C++
+  layout. [Epic Objects](https://dev.epicgames.com/documentation/en-us/unreal-engine/objects-in-unreal-engine)
+- Unity IL2CPP involves managed assemblies, stripping, C++ generation, and native
+  compilation. Reconstructed names or metadata do not guarantee complete type
+  coverage or original-source recovery.
+  [Unity IL2CPP](https://docs.unity3d.com/Manual/il2cpp-introduction.html)
+- Extension compatibility is versioned: the Godot 4.4 manifest documents engine
+  compatibility and platform/build/architecture selection. Verify the target
+  release rather than projecting this example onto all versions.
+  [Godot 4.4 GDExtension manifest](https://docs.godotengine.org/en/4.4/tutorials/scripting/gdextension/gdextension_file.html)
+- Distinguish open-source engines, licensed engine source, SDK game code, and
+  reference-source subsets. Source SDK 2013 has its own non-commercial license;
+  repository visibility does not imply unrestricted reuse.
+  [Valve Source SDK 2013](https://github.com/ValveSoftware/source-sdk-2013)
+
+Report the affected boundary, prerequisite, artifact, observed result, benign
+controls, and version-dependent limits. Sources above were reviewed on 2026-09-09.
 
 ## README Coverage
 
@@ -47,11 +80,11 @@ offsets.
 - Unity-specific design patterns
 - VR/AR development guides
 
-### Open Source Engines
+### Open Engines and Source-Available SDKs
 - **Godot**: Free and open-source, supports GDScript and C#
 - **Cocos2d-x**: Cross-platform 2D game framework
 - **CRYENGINE**: High-fidelity graphics engine
-- **Source Engine**: Valve's game engine (various versions)
+- **Source SDK**: Valve game-code SDKs with version-specific license terms
 
 ### Custom/Educational Engines
 - Hazel Engine (TheCherno's educational series)
