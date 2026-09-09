@@ -44,7 +44,8 @@ sources:
   - wiki/sources/descriptions/JonathanEke__DayZ-Server-Battleye-Remover.md
   - wiki/sources/descriptions/AkitaYui__AkHeartbeat-BE.md
   - wiki/sources/descriptions/Aki2k__BEDaisy.md
-updated: 2026-09-03
+  - wiki/sources/descriptions/brandenbailey23__r6-siege-battleye-launch-bug.md
+updated: 2026-09-09
 confidence: medium
 ---
 
@@ -86,6 +87,8 @@ Title-specific R6 external samples such as [[r6-external]] (C/C++; driver develo
 
 Service/install/launch emulation is studied via [[fakeeye]] (Hypercall): lightweight C++ BattlEye-style launcher emulator that reproduces launcher-side behavior for isolated lab anti-cheat research and compatibility testing; earlier mexploitui fork documents SCM-managed `BEService`, external config, and BE-style game process creation without the real AC stack. (source: wiki/sources/descriptions/Hypercall__FakeEye.md; wiki/sources/descriptions/mexploitui__FakeEye.md)
 
+Launch-path regression evidence such as [[r6-siege-battleye-launch-bug]] (brandenbailey23; Markdown issue report) documents a Rainbow Six Siege Y11S3 client exit during the BattlEye + Ubisoft Sentinel handshake on standard Ubisoft Connect/Steam paths while `RainbowSixHelper.exe` succeeds—Windows System events, launcher logs, BEService/BEDaisy telemetry, and byte-identical checksums rule out corrupt binaries; hypothesis centers on launch-path bootstrapping or server-side version negotiation rather than driver blocklists. (source: wiki/sources/descriptions/brandenbailey23__r6-siege-battleye-launch-bug.md)
+
 Historical service-layer bypass tradecraft is preserved in [[noeye]] (Schnocker): C++ runtime modules plus a dedicated Windows service and C# setup app for service installation, process interaction, and runtime control against older BE protection behavior. (source: wiki/sources/descriptions/Schnocker__NoEye.md)
 
 Client-side protocol emulation is studied via [[be-emulator]] (gmh5225): simulates BE communication protocol, heartbeat responses, and module-loading interface so games run without active BE protection—useful for analyzing game↔BE integration and protocol RE. (source: wiki/sources/descriptions/gmh5225__BE-Emulator.md)
@@ -126,4 +129,4 @@ GTA V Enhanced BattlEye integration research such as [[akheartbeat-be]] (AkitaYu
 
 ## Related
 
-[[easy-anti-cheat]] · [[vanguard]] · [[pubg-p2c-re]] · [[dayz-server-battleye-remover]] · [[akheartbeat-be]] · [[battleye-re]] · [[bedaisy-reversal]] · [[battleye-decryption]] · [[battleye-shellcode]] · [[blindeye]] · [[be-shellcode]] · [[be-battleye-shellcode]] · [[be-shellcode-dump]] · [[be-shellcode-tester]] · [[battleye-shellcode-dumper]] · [[battleye-region-walking]] · [[battleye-rust]] · [[battleye-handler-bypass]] · [[badeye]] · [[bedaisy]] · [[bedaisy-bypass]] · [[be-forcer-fortnite]] · [[be-emulator]] · [[beclient]] · [[beservice-intcallbacks]] · [[arma3beclient]] · [[r6-external]] · [[r6s-external-v2]] · [[external-r6s-cheat]] · [[r6-cheat-dumper]] · [[rainbow-6-siege-cheat]] · [[rainbow-six-siege-rs6-external-esp-aimbot-hack-cheat]] · [[r6s-internal-cheat]] · [[r6-internal-v3]] · [[fakeeye]] · [[noeye]] · [[goodeye]] · [[splendid-implanter]] · [[battleye-user-mode-bypass]] · [[system-thread-finder]] · [[stealth-sytem-thread-finder-be]] · [[skiphook]] · [[present-hook-detection]] · [[present-hook]] · [[libelevate]] · [[overviews/anti-cheat]] · [[kernel-callbacks]]
+[[easy-anti-cheat]] · [[vanguard]] · [[pubg-p2c-re]] · [[dayz-server-battleye-remover]] · [[akheartbeat-be]] · [[battleye-re]] · [[bedaisy-reversal]] · [[battleye-decryption]] · [[battleye-shellcode]] · [[blindeye]] · [[be-shellcode]] · [[be-battleye-shellcode]] · [[be-shellcode-dump]] · [[be-shellcode-tester]] · [[battleye-shellcode-dumper]] · [[battleye-region-walking]] · [[battleye-rust]] · [[battleye-handler-bypass]] · [[badeye]] · [[bedaisy]] · [[bedaisy-bypass]] · [[be-forcer-fortnite]] · [[be-emulator]] · [[beclient]] · [[beservice-intcallbacks]] · [[arma3beclient]] · [[r6-external]] · [[r6s-external-v2]] · [[external-r6s-cheat]] · [[r6-cheat-dumper]] · [[rainbow-6-siege-cheat]] · [[rainbow-six-siege-rs6-external-esp-aimbot-hack-cheat]] · [[r6s-internal-cheat]] · [[r6-internal-v3]] · [[r6-siege-battleye-launch-bug]] · [[fakeeye]] · [[noeye]] · [[goodeye]] · [[splendid-implanter]] · [[battleye-user-mode-bypass]] · [[system-thread-finder]] · [[stealth-sytem-thread-finder-be]] · [[skiphook]] · [[present-hook-detection]] · [[present-hook]] · [[libelevate]] · [[overviews/anti-cheat]] · [[kernel-callbacks]]

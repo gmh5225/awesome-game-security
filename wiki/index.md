@@ -2990,7 +2990,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [razer-rzctl](entities/razer-rzctl.md) — BYOVD via Razer `rzctl.sys` (kernel mouse/keyboard simulation or IOCTL kernel access; gmh5225)
 - [R3nzSkin](entities/r3nzskin.md) — LoL skin changer (C++; client-side skin rendering; DLL injector; pattern scan + Python auto-updaters; KsDumper integration; Skin; Kurok00; cheat / game:lol)
 - [R3nzSkinTFT](entities/r3nzskin-tft.md) — LoL/TFT skin changer (C++; champion skin ID memory patch; client-only cosmetic swap; Skin; gmh5225; cheat / game:lol)
-- [R6 Siege BattlEye Launch Bug](entities/r6-siege-battleye-launch-bug.md) — R6 Siege Y11S3 BattlEye/Sentinel handshake failure on standard launch paths; BEDaisy telemetry, checksum evidence, RainbowSixHelper.exe bypass (brandenbailey23; Cheat / Explore AntiCheat System:BE)
+- [R6 Siege BattlEye Launch Bug](entities/r6-siege-battleye-launch-bug.md) — Markdown issue report: R6 Siege Y11S3 BattlEye/Sentinel dual-AC handshake failure on standard launch paths; Windows/Ubisoft/BEDaisy evidence, checksum parity, troubleshooting timeline; RainbowSixHelper.exe working path (brandenbailey23; Cheat / Explore AntiCheat System:BE)
 - [R6-Internal-V3](entities/r6-internal-v3.md) — R6 internal: modding / SDK generation / memory analysis (C/C++)
 - [r6-internal](entities/r6-internal.md) — R6 internal cheat base: C++ SDK, hooking utils, ImGui + D3D11 overlay; snapline ESP, targeting, entity access (JGonz1337; educational internal architecture; cheat / game:r6 [Internal])
 - [r6-chams-public](entities/r6-chams-public.md) — R6 chams: Chameleon Models + visual check (educational; cheat / game:r6 [Chams])
