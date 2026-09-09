@@ -1,6 +1,6 @@
 ---
 name: game-security-research-rigor
-description: Verify game-security claims through primary-source checks, explicit trust boundaries, claim ledgers, reproducible evidence, and calibrated uncertainty. Use for attack/defense comparisons, community reports, enforcement-scope claims, telemetry quality, detector evaluation, or conflicting citations. Separate observation, finding, attribution, and action; assess confounders, base rates, false positives, temporal validity, and source limitations before drawing consequential conclusions.
+description: Verify game-security claims through primary-source checks, explicit trust boundaries, claim ledgers, reproducible evidence, and calibrated uncertainty. Use for attack/defense comparisons, community reports, enforcement-scope claims, telemetry quality, detector evaluation, conflicting citations, or disagreement across README/wiki/description/archive layers. Separate observation, finding, attribution, and action; assess confounders, base rates, false positives, temporal validity, and source limitations before drawing consequential conclusions.
 ---
 
 # Game Security Research Rigor
@@ -15,6 +15,10 @@ Use [skill evaluation](references/skill-evaluation.md) for catalog routing,
 coexistence, and answer-quality assessment. Use
 [robustness and triage](references/robustness-and-triage.md) for owned-build
 diagnostics and regression evidence.
+
+For collection-specific source lineage, archive completeness and conflicting
+project descriptions, use [repository evidence reconciliation](references/repository-evidence.md).
+For exact local locations, use [repository navigation](../overview/references/repository-navigation.md).
 
 ## Separate the reasoning layers
 

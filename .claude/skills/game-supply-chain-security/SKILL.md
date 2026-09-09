@@ -1,6 +1,6 @@
 ---
 name: game-supply-chain-security
-description: Assess game build, launcher, update, distribution, and mod/plugin supply chains. Use for release credentials, CI isolation, dependency provenance and SBOMs, signed update metadata, rollback/freeze resistance, Workshop content trust, archive extraction boundaries, and incident recovery. Distinguish artifact authenticity, authorized release, freshness, compatibility, and safe execution; tie findings to the exact build, channel, platform, publisher, and verification policy.
+description: Assess game build, launcher, update, distribution, and mod/plugin trust. Use to connect repository CI resources, editor acquisition, hot-patch runtimes, asset specifications, and parsers to release credentials, isolation, provenance, SBOMs, update freshness, ingestion boundaries, and recovery. Distinguish a build tool or script bridge from release authorization, and format acceptance from safe loading; report exact artifact, dependency version, channel, publisher, and verification policy.
 ---
 
 # Game Build, Update, and Mod Supply Chains
@@ -9,6 +9,10 @@ Use this skill to review release and content trust boundaries. Route runtime
 object models to [game-engine](../game-engine/SKILL.md), platform package signing
 to [mobile-security](../mobile-security/SKILL.md), and privileged driver behavior
 to [windows-kernel](../windows-kernel/SKILL.md).
+
+For repository-backed choices, read the
+[supply-chain resource guide](references/repository-resources.md) for CI entry
+points, editor acquisition, hot-patch runtimes, and asset-parser dependencies.
 
 ## Map Release Authority
 

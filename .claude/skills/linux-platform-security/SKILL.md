@@ -1,6 +1,6 @@
 ---
 name: linux-platform-security
-description: Analyze native Linux, SteamOS, Steam Deck, and Proton game-security boundaries. Use for ELF and process evidence, credentials and capabilities, namespaces, seccomp, LSM policy, native-versus-translated execution, compatibility triage, and defensive observability. Record kernel, distribution, runtime, game build, and active policy; distinguish legitimate compatibility components from suspicious behavior and report privilege prerequisites, evidence gaps, and benign counterexamples.
+description: Analyze native Linux, SteamOS, Steam Deck and Proton game-security boundaries. Use for compatibility-versus-policy triage, ELF/process evidence, credentials and capabilities, namespaces, seccomp, LSMs and Linux memory forensics; select repository resources across Wine, kernel, WSL and forensic categories. Record the actual kernel, distribution, runtime and active policy; distinguish platform mismatch, observation gaps and suspicious behavior with explicit privilege prerequisites and benign comparisons.
 ---
 
 # Linux, SteamOS, and Proton Security
@@ -72,3 +72,7 @@ consequential claims.
 
 Primary sources reviewed: 2026-09-09. Distribution defaults and supported
 runtime/protection combinations must be checked for the actual target build.
+
+## Repository Navigation
+
+For project selection, load [repository resource selection](references/repository-resources.md) on demand. Use the shared [repository navigation](../overview/references/repository-navigation.md) for local discovery layers, filename case, missing snapshots and currentness. Generated descriptions and wiki pages are discovery aids, not independent evidence.

@@ -1,287 +1,100 @@
 ---
 name: awesome-game-security-overview
-description: Navigate and maintain the awesome-game-security resource collection and its skill, wiki, description, and archive layers. Use for topic routing, resource discovery, link validation, category placement, duplicate review, or README conventions across game engines, graphics, reverse engineering, platform security, DMA, and network evidence. Prefer original sources, record versions and provenance, and treat generated summaries as discovery aids requiring claim verification.
+description: Find, select and maintain resources in awesome-game-security using its actual README taxonomy, skill catalog, compiled wiki, generated descriptions and source archives. Use for repository-specific discovery, category placement, duplicate or identity review, missing/case-mismatched local paths, and choosing the right domain skill. Return a focused selection with provenance and limitations; route technical conclusions to the matching domain rather than treating collection membership as proof.
 ---
 
-# Awesome Game Security - Project Overview
+# Awesome Game Security: Resource Selection
 
-## Purpose
+Use this skill to connect a concrete question to the collection. Start with the
+question's object and desired output, then select the relevant domain and only
+the resource layers needed to answer it. Repository membership is a discovery
+signal, not a capability, endorsement or compatibility guarantee.
 
-This is a curated collection of resources related to game security, covering both offensive (game hacking, cheating) and defensive (anti-cheat) aspects. The project serves as a comprehensive reference for security researchers, game developers, and enthusiasts, especially where Windows internals, driver trust, reverse engineering, DMA, and modern anti-cheat defenses intersect.
+## Select a Domain
 
-## README Coverage
+Folder IDs below locate skills; installed invocation names come from each
+SKILL.md frontmatter. Existing names and folders are not all identical.
 
-- Top-level engines and rendering: `Game Engine`, `Renderer`, `DirectX`, `OpenGL`, `Vulkan`
-- Offensive research: `Cheat`
-- Defensive research: `Anti Cheat`
-- Platform hardening: `Windows Security Features`
-- Platform-specific ecosystems: `Android Emulator`, `IOS Emulator`, `Windows Emulator`, `Linux Emulator`
-- Supporting infrastructure: `Mathematics`, `3D Graphics`, `AI`, `Image Codec`, `Wavefront Obj`, `Task Scheduler`, `Game Network`, `PhysX SDK`, `Game Develop`, `Game Assets`, `Game Hot Patch`, `Game Testing`, `Game Tools`, `Game Manager`, `Game CI`
-- Platform subsystems: `WSL`, `WSA`
-- Console emulation: `Game Boy`, `Nintendo Switch`, `Xbox`, `PlayStation`
-- Tips and tricks: `Some Tricks`
-
-## Project Structure
-
-```
-awesome-game-security/
-├── README.md           # Main resource list
-├── LICENSE             # MIT License
-├── awesome-image.webp  # Project banner
-└── scripts/
-    ├── generate-toc.py  # Generate table of contents
-    └── remove-forks.py  # Clean up forked repos
-```
-
-## README.md Format Convention
-
-### Category Structure
-
-Each category follows this format:
-
-```markdown
-## Category Name
-> Subcategory (optional)
-- https://github.com/user/repo [Brief description]
-- https://github.com/user/repo [Another description]
-```
-
-### Link Format
-
-- Always use full GitHub URLs for repositories
-- Non-GitHub links are also supported (blog posts, articles, documentation sites)
-- Add brief descriptions in square brackets `[description]`
-- Use consistent spacing and formatting
-- Group related resources under subcategories with `>`
-
-### Example Entry
-
-```markdown
-## Game Engine
-> Guide
-- https://github.com/example/guide [Comprehensive game dev guide]
-
-> Source
-- https://github.com/example/engine [Open source game engine]
-```
-
-## Skill Routing Guide
-
-When an AI agent receives a query, use this table to select the best skill:
-
-| Query topic | Primary skill | Related skills |
+| Question or artifact | Primary skill | Boundary / related work |
 |---|---|---|
-| Layered detection, integrity, heartbeat, screenshot evidence | anti-cheat | windows-kernel, research-rigor |
-| pcileech, FPGA, DMA, IOMMU, Thunderbolt/USB4 | dma-attack | anti-cheat |
-| USB bridge/data-transfer cables, LeechCore, WinPmem, remote memory sources | dma-attack | windows-kernel, research-rigor |
-| Account/device restrictions, network association, NAT/CGNAT, claimed ban duration | anti-cheat | research-rigor |
-| Attack prerequisites, trust boundaries, benign counterexamples, defense coverage | game-hacking | the matching domain skill, research-rigor |
-| Gameplay RPCs, session verification, object authorization, inventory, purchases, retry semantics | game-server-security | game-engine, research-rigor |
-| Clock domains, tick/frame time, replication ordering, prediction/correction, replay fidelity | game-server-security | game-engine, anti-cheat |
-| Input units/provenance, telemetry health, detector rollout, decision recovery | anti-cheat | windows-kernel, research-rigor |
-| CI/release credentials, launchers, signed updates, SBOM/provenance, mod distribution | game-supply-chain-security | game-engine, mobile-security |
-| Native Linux, SteamOS/Steam Deck, Proton, capabilities, namespaces, seccomp, LSMs | linux-platform-security | reverse-engineering, graphics-api |
-| Unreal SDK, Unity IL2CPP, engine structs, Godot, Lumix | game-engine | game-hacking |
-| Memory hacking, injection, overlays, driver comm, HWID spoof | game-hacking | graphics-api |
-| D3D/Vulkan/OpenGL hooks, Present hook, shader interception | graphics-api | game-hacking |
-| Android root, Frida, iOS jailbreak, KernelSU, APatch | mobile-security | game-hacking |
-| IDA, Ghidra, DBI, deobfuscation, binary diffing, MCP RE tools, trap-and-emulate CFT, WHP tracing | reverse-engineering | anti-cheat, windows-kernel |
-| Drivers, callbacks, PatchGuard, HVCI, ETW, pool forensics, WHP API | windows-kernel | anti-cheat, reverse-engineering |
-| Claim validation, citation checks, detector evaluation, evidence conflicts | research-rigor | the matching domain skill |
-| Adding resources, README format, link validation | overview | (any) |
+| Detector architecture, input evidence, telemetry faults or decisions | [anti-cheat](../anti-cheat/SKILL.md) | Platform signals need the relevant platform contract; conclusions need research-rigor |
+| Physical-memory source, PCIe/USB bridge, FPGA, IOMMU or host acquisition | [dma-attack](../dma-attack/SKILL.md) | Separate memory initiator, transport and analysis backend |
+| Engine source, runtime metadata, plugins or asset boundaries | [game-engine](../game-engine/SKILL.md) | Editor tools are distinct from shipped runtime; persistent state goes to server security |
+| Attack classes, prerequisite access and defensive coverage | [game-hacking](../game-hacking/SKILL.md) | Identify the boundary before choosing a specialized domain |
+| Rendering API, capture, translation or frame/performance artifacts | [graphics-api](../graphics-api/SKILL.md) | Timing output, captured pixels and game-state evidence differ |
+| Binary identity, static analysis, symbols, dumps or code comparison | [reverse-engineering](../reverse-engineering/SKILL.md) | Recovered structure does not by itself prove runtime behavior |
+| Windows drivers, callbacks, telemetry and platform policy | [windows-kernel](../windows-kernel/SKILL.md) | Runtime privileges, observation scope and preventive policy are separate |
+| Android/iOS package, device-integrity or mobile runtime evidence | [mobile-security](../mobile-security/SKILL.md) | Local root observations, remote attestations and enforcement differ |
+| Linux, SteamOS, Proton, credentials or namespaces | [linux-platform-security](../linux-platform-security/SKILL.md) | Compatibility layers and isolation mechanisms have different roles |
+| RPC authorization, sessions, economy, timing and replay consistency | [game-server-security](../game-server-security/SKILL.md) | Transport reliability does not authorize a gameplay effect |
+| CI, dependencies, launchers, update trust, mods or content distribution | [game-supply-chain-security](../game-supply-chain-security/SKILL.md) | Build provenance, artifact signing and runtime safety are distinct |
+| Conflicting claims, source lineage, evaluation or uncertain attribution | [research-rigor](../research-rigor/SKILL.md) | Pair with the domain that supplies the actual technical contract |
 
-Also check `wiki/overviews/<topic>.md` for the matching primary skill topic before deep README/archive dives.
+Resource discovery can finish here when the user only needs locations or a
+shortlist. Do not force a security review onto ordinary graphics, game-development
+or library-usage questions merely because their resources occur in this collection.
 
-The server, supply-chain, and Linux skills may not yet have corresponding wiki
-overviews. Use their local entrypoints and cited primary sources when a wiki
-page is absent; do not invent an overview path or treat its absence as no coverage.
+## Use the Actual Repository
 
-For skill-library improvement, use the
-[coverage and quality roadmap](references/coverage-roadmap.md). For routing and
-answer-quality regression review, use the
-[evaluation guide](../research-rigor/references/skill-evaluation.md).
+Read [repository navigation](references/repository-navigation.md) for current
+layer roles, exact-path lookup, archive limitations and the read-only indexer.
+Each domain entrypoint links a focused repository resource guide; load only the
+one relevant to the question.
 
-## Main Categories
+The top-level README uses H2 categories, blockquote subcategories and resource
+bullets. Category names are current data, not a fixed count to memorize. Important
+cross-category relationships include:
 
-All 27 top-level `##` sections in README.md:
+| README area | Typical routing |
+|---|---|
+| Game Engine; Game Develop; Game Assets; Game Hot Patch | Engine/runtime, package and release boundaries |
+| Renderer; DirectX; OpenGL; Vulkan; Game Testing | Rendering, capture, compatibility and performance evidence |
+| Game Network; Game CI | Transport/session contracts and release authority |
+| Cheat; Anti Cheat; Some Tricks; Windows Security Features | Threat classes, observation mechanisms and platform controls |
+| Platform/console emulator categories; WSL; WSA | Match the actual host, guest, compatibility layer and target format |
+| Mathematics; AI; Image Codec; Wavefront Obj; PhysX SDK | Supporting algorithms, measurement and parser/asset context |
 
-1. **Game Engine**: Engines, source code, plugins (Unreal/Unity/Godot/Lumix), detectors
-2. **Mathematics**: Linear algebra, physics libraries
-3. **Renderer**: Software renderers, ray tracing
-4. **3D Graphics**: 3D modeling and graphics resources
-5. **AI**: Machine learning for games
-6. **Image Codec**: Image processing libraries
-7. **Wavefront Obj**: OBJ file parsers
-8. **Task Scheduler**: Job/task scheduling systems
-9. **Game Network**: Networking, KCP, JWT, geolocation
-10. **PhysX SDK**: NVIDIA PhysX resources
-11. **Game Develop**: Development guides, source code, MCP servers, AI agents
-12. **Game Assets / Hot Patch / Testing / Tools / Manager / CI**: Supporting infrastructure
-13. **DirectX**: Guides, hooks, tools, emulation, overlays
-14. **OpenGL**: Guides, source, hooks
-15. **Vulkan**: API, guides, hooks
-16. **Cheat**: Offensive research (debugging, injection, hooking, DMA, overlays, driver comm, EFI, anti-forensics, game-specific)
-17. **Anti Cheat**: Defensive research (protection, detection, callbacks, forensics, signature scanning)
-18. **Some Tricks**: Ring0/Ring3/Linux/Android tricks and techniques
-19. **Windows Security Features**: DSE, PatchGuard, VBS, HVCI, Secure Boot
-20. **WSL / WSA**: Windows Subsystem for Linux/Android
-21. **Windows / Linux / Android / IOS Emulator**: Platform emulators
-22. **Game Boy / Nintendo Switch / Xbox / PlayStation**: Console emulators and research
+Do not flatten a resource's category into a capability claim. Some Linux kernel
+references are listed in Android-related subcategories; organizations and sample
+projects can appear alongside libraries. Read the actual entry and its scope.
 
-## Contributing Guidelines
+Current root layers are README.md, .claude/skills/, wiki/, description/, archive/,
+scripts/ and .github/workflows/. Individual skill installation may omit the rest.
+Check available files and use verified upstream sources when a local layer is absent.
+A corresponding wiki page is not guaranteed for every skill. Check
+[the catalog](../../../wiki/index.md) or the directory before constructing a path.
 
-1. **Check for duplicates** before adding new resources
-2. **Verify links** are working and point to original repos
-3. **Add descriptions** that clearly explain the resource's purpose
-4. **Place in correct category** based on primary functionality
-5. **Follow existing format** for consistency
+## Produce a Useful Selection
 
-## Quality Criteria
+For each chosen resource, provide the original identity/URL, README location,
+reason it fits this task, expected artifact, version/platform scope, and a material
+limitation. Use a small comparative table when alternatives serve different roles.
+Distinguish resources already listed from supplemental sources discovered upstream.
 
-- Resource should be actively maintained or historically significant
-- Should provide unique value not covered by existing entries
-- Prefer original repos over forks unless fork adds significant value
-- Include language/platform tags when helpful (e.g., `[Rust]`, `[Unity]`)
+For exact capability claims, inspect primary documentation or a source file at a
+known revision. Follow [repository evidence reconciliation](../research-rigor/references/repository-evidence.md)
+when generated layers or historical snapshots disagree. A popular project, working
+link or large archive does not settle technical quality.
 
-## Source Selection and Description Quality
+## Maintain the Collection When Requested
 
-Choose resources for authority, direct support, version fit, methodology, and
-unique contribution to the question. Popularity, search rank, and source count
-do not establish that a resource is the best evidence. A historical reference
-can explain a technique without proving it still works on current platforms.
+Check existing occurrences, original/fork relationships and the chosen category
+before adding an entry. Preserve deep links and document meaningful redirects;
+changing the owner is not enough to establish equivalent source identity.
 
-Write resource descriptions as purpose + platform/scope + distinctive value +
-material limitation. For offensive research, identify the attack class and
-prerequisite boundary; for defense, distinguish prevention, observation, and
-attribution. Treat unsupported performance, invisibility, compatibility, and
-fixed-duration enforcement claims as claims to verify, not descriptive facts.
+Use the existing bullet convention:
 
-For exact implementation claims, cite a file at a specific commit or a verified
-release artifact. Preserve canonical repository links for discovery and use
-maintainer-provided citation metadata when available.
-[GitHub permanent links](https://docs.github.com/en/repositories/working-with-files/using-files/getting-permanent-links-to-files),
-[GitHub citation files](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-citation-files)
-
-Use existing wiki/description/archive layers to find original material; verify
-that material before promoting a claim. Record the review date, applicable
-version, and unresolved gaps. The sources above were reviewed on 2026-09-09;
-this date does not imply that every pre-existing skill example was revalidated.
-
-## Research Rigor
-
-For factual synthesis, detector assessment, or consequential security claims,
-use [`research-rigor`](../research-rigor/SKILL.md) with the matching domain
-skill.
-
-- Treat README entries, generated descriptions, wiki pages, and archives as
-  discovery/provenance layers, not automatic proof of their embedded claims.
-- Verify citation identity and confirm the source text supports the exact claim.
-- Separate observation, finding, attribution, and action.
-- Do not import fixed thresholds or confidence values without representative
-  calibration and validation for the target environment.
-- Narrow the conclusion or report it as inconclusive when evidence is missing
-  or contradictory.
-
-## Scripts Usage
-
-### Generate Table of Contents
-```bash
-python scripts/generate-toc.py
+```markdown
+## Category
+> Subcategory
+- https://github.com/owner/project [Purpose; platform/scope; distinctive value or limitation]
 ```
 
-### Remove Fork References
-```bash
-python scripts/remove-forks.py
-```
+Keep the public skills table aligned with actual frontmatter names. Check links,
+category placement and the exact diff. Repository maintenance scripts can call
+services and write or publish data; inspect the chosen script instead of running
+bulk automation as a retrieval shortcut.
 
----
-
-## Data Source
-
-**Important**: This skill provides conceptual guidance and overview information. For detailed information use the following sources **in priority order**:
-
-### 0. Compiled LLM Wiki (preferred for synthesis)
-
-The repo maintains a Karpathy-style compiled wiki under `wiki/`, updated by Cursor CLI (`scripts/update-wiki-cli.py`). Prefer this layer for cross-cutting concepts, domain overviews, and citation-aware synthesis before diving into raw lists or archives.
-
-| Need | Path |
-|------|------|
-| Catalog | `wiki/index.md` |
-| Schema / conventions | `wiki/AGENTS.md` |
-| Domain overviews | `wiki/overviews/<topic>.md` (aligned with skill topics) |
-| Concepts | `wiki/concepts/<slug>.md` |
-| Entities (tools/projects) | `wiki/entities/<slug>.md` |
-| Activity log | `wiki/log.md` |
-
-Raw GitHub URLs (same paths on `main`):
-
-```
-https://raw.githubusercontent.com/gmh5225/awesome-game-security/refs/heads/main/wiki/index.md
-https://raw.githubusercontent.com/gmh5225/awesome-game-security/refs/heads/main/wiki/overviews/anti-cheat.md
-```
-
-**When answering topical questions** (DMA, EAC, Present hooks, HVCI, …): read `wiki/index.md`, then the matching overview/concept pages. Fall back to skills and descriptions if wiki pages are missing.
-
-### 1. Project Overview & Resource Index
-
-Fetch the main README for the full curated list of repositories, tools, and descriptions:
-
-```
-https://raw.githubusercontent.com/gmh5225/awesome-game-security/refs/heads/main/README.md
-```
-
-The main README contains thousands of curated links organized by category. When users ask for specific tools, projects, or implementations, retrieve and reference the appropriate sections from this source.
-
-### 2. Repository Descriptions
-
-For a concise English summary of what a repository does, the project maintains auto-generated description files.
-
-**Description URL format:**
-```
-https://raw.githubusercontent.com/gmh5225/awesome-game-security/refs/heads/main/description/{owner}/{repo}/description_en.txt
-```
-
-**Examples:**
-```
-https://raw.githubusercontent.com/gmh5225/awesome-game-security/refs/heads/main/description/00christian00/UnityDecompiled/description_en.txt
-https://raw.githubusercontent.com/gmh5225/awesome-game-security/refs/heads/main/description/ufrisk/pcileech/description_en.txt
-```
-
-**How to use:**
-1. Identify the GitHub repository the user is asking about (owner and repo name from the URL).
-2. Construct the description URL: replace `{owner}` with the GitHub username/org and `{repo}` with the repository name.
-3. Fetch the description file — it contains a short, human-readable summary of the repository's purpose and contents.
-4. If the fetch returns a 404, the description has not been generated yet; fall back to the README entry or the archive.
-
-### 3. Repository Code Details (Archive)
-
-For detailed repository information (file structure, source code, implementation details), the project maintains a local archive. If a repository has been archived, **prefer fetching from the archive** over cloning or browsing GitHub directly — but prefer description + wiki first for high-level answers.
-
-**Archive URL format:**
-```
-https://raw.githubusercontent.com/gmh5225/awesome-game-security/refs/heads/main/archive/{owner}/{repo}.txt
-```
-
-**Examples:**
-```
-https://raw.githubusercontent.com/gmh5225/awesome-game-security/refs/heads/main/archive/ufrisk/pcileech.txt
-https://raw.githubusercontent.com/gmh5225/awesome-game-security/refs/heads/main/archive/000-aki-000/GameDebugMenu.txt
-```
-
-**How to use:**
-1. Identify the GitHub repository the user is asking about (owner and repo name from the URL).
-2. Construct the archive URL: replace `{owner}` with the GitHub username/org and `{repo}` with the repository name (no `.git` suffix).
-3. Fetch the archive file — it contains a full code snapshot with file trees and source code generated by `code2prompt`.
-4. If the fetch returns a 404, the repository has not been archived yet; fall back to the README or direct GitHub browsing.
-
-**Priority order when answering questions about a specific repository:**
-1. Wiki entity/concept (if present) — compiled context
-2. Description (quick summary) — `description/{owner}/{repo}/description_en.txt`
-3. Archive (full code snapshot) — when deeper implementation details are needed
-4. README entry — fallback when neither wiki, description, nor archive is available
-
----
-
-## Compiled wiki
-
-Start with `wiki/index.md` and `wiki/overviews/overview.md`. Schema: `wiki/AGENTS.md`. Maintained by `scripts/update-wiki-cli.py`.
+For skill-library changes, use the [coverage roadmap](references/coverage-roadmap.md)
+and [evaluation guide](../research-rigor/references/skill-evaluation.md). Structural
+validation and a successful lookup are not evidence of superior model performance.

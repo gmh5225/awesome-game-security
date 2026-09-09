@@ -34,15 +34,19 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill <skill-n
 **Available Skills:**
 | Skill | Description |
 |-------|-------------|
-| `anti-cheat-systems` | Modern anti-cheat architecture, detection tradeoffs, and system-specific research across EAC, BE, Vanguard, FACEIT, and related telemetry or driver defenses |
-| `dma-attack-techniques` | PCIe DMA threat modeling, FPGA memory access, IOMMU constraints, device impersonation, and DMA detection or mitigation |
-| `game-engine-resources` | Engine internals, source trees, plugins, explorers, and protection patterns for Unreal, Unity, Source, Godot, and custom engines |
-| `game-hacking-techniques` | Threat-model view of cheat implementation across user mode, kernel mode, hypervisors, DMA, overlays, memory access, and engine-specific attack surfaces |
-| `graphics-api-hooking` | DirectX, OpenGL, and Vulkan interception, overlay rendering, draw-call hooks, swap-chain analysis, and screenshot-sensitive graphics workflows |
-| `mobile-security` | Android and iOS reversing, Frida, Zygisk or Magisk, jailbreak or root bypass, mobile kernel modules, emulator detection, and mobile anti-cheat research |
-| `awesome-game-security-overview` | Repository taxonomy, category mapping, contribution guidance, and navigation across offensive and defensive game-security topics |
-| `reverse-engineering-tools` | Reverse engineering protected games and anti-cheat components across user mode, kernel mode, debuggers, dump analysis, and anti-analysis workflows |
-| `windows-kernel-security` | Windows kernel internals for game security including callbacks, MMVAD, IOCTL paths, DSE, PatchGuard, PiDDBCache, and hostile-driver detection |
+| `anti-cheat-systems` | Layered integrity, telemetry provenance, detector operation, enforcement evidence and false-positive review |
+| `dma-attack-techniques` | DMA versus host-mediated acquisition, transport roles, IOMMU scope and memory-forensics evidence |
+| `game-engine-resources` | Engine source, runtime metadata, editor/runtime plugins, assets and authoritative-state boundaries |
+| `game-hacking-techniques` | Attack classes, prerequisite access, trust boundaries, defensive observations and benign counterexamples |
+| `graphics-api-hooking` | Graphics API and translation layers, frame capture, performance traces and observation limits |
+| `mobile-security` | Android/iOS runtime, package provenance, device-integrity evidence and mobile platform boundaries |
+| `awesome-game-security-overview` | Exact repository categories, resource selection, local-layer lookup and source provenance |
+| `reverse-engineering-tools` | Binary identity, static analysis, symbols, versioned code comparison and offline artifacts |
+| `windows-kernel-security` | Driver interfaces, callbacks, platform policy, kernel telemetry and forensic coverage |
+| `game-server-security` | Server authority, sessions, RPC authorization, economy consistency, clocks and replay evidence |
+| `game-supply-chain-security` | Build/release authority, signed updates, dependency provenance, mods and content distribution |
+| `linux-platform-security` | Native Linux, SteamOS, Proton, credentials, isolation and platform-policy evidence |
+| `game-security-research-rigor` | Source reconciliation, claim provenance, detector evaluation, uncertainty and skill regression review |
 
 **Compiled wiki:** agents can also browse [`wiki/`](wiki/) (see [`wiki/AGENTS.md`](wiki/AGENTS.md)) — a maintained knowledge layer over skills, README categories, and descriptions.
 

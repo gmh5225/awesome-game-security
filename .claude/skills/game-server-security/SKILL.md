@@ -1,6 +1,6 @@
 ---
 name: game-server-security
-description: Review multiplayer authority and game backend trust across gameplay RPCs, authentication, object authorization, inventory, virtual economy, purchases, and asynchronous events. Use for session/entitlement verification, transaction consistency, clock domains, replication ordering, prediction, replay fidelity, and network failure handling. Produce operation maps, supported invariants and evidence-based findings; distinguish client intent, verified identity, permission, simulation and committed state.
+description: Review multiplayer authority and backend trust across RPCs, sessions, object authorization, inventory, economy, and purchases. Use when choosing or assessing KCP, GameNetworkingSockets, Steam networking interfaces, server frameworks, or token-validation resources; distinguish delivery reliability, transport identity, game permission, and durable state. Cover retries, provider contracts, clock domains, replication order, prediction, and replay, producing operation maps and evidence-based invariants.
 ---
 
 # Game Server and Backend Security
@@ -9,6 +9,11 @@ Use this skill for architecture and owned-source review of consequential game
 operations. Treat client, listen server, dedicated server, backend, store, and
 administrative tools as separate authorities. For connection restrictions and
 ban-duration reports, use [network evidence](../anti-cheat/references/network-environment-evidence.md).
+
+When matching repository resources to a network or backend layer, read the
+[server resource guide](references/repository-resources.md). It locates the
+actual README categories and separates protocol, platform service, framework,
+and token-validation responsibilities.
 
 ## Map One Consequential Operation
 

@@ -1,6 +1,6 @@
 ---
 name: anti-cheat-systems
-description: Analyze layered game integrity defenses across clients, kernels, hardware trust, server authority, and behavioral telemetry. Use for driver/memory evidence, DMA versus host-mediated acquisition, input provenance, replay fidelity, collector health, detector rollout/recovery, account/device restrictions, network association, and false-positive review. Map prerequisites and observation points, distinguish detection from enforcement, and produce versioned findings with corroboration, limitations, and primary sources.
+description: Analyze layered game integrity defenses and select repository resources for process-memory reports, acquired-memory forensics, callback scope, behavioral measurement and driver-policy evidence. Use for DMA versus host-mediated acquisition, input provenance, replay fidelity, collector health, detector rollout/recovery, device/account restrictions, network association and false-positive review. Map prerequisites and observation points, distinguish detection from enforcement, and produce versioned findings with corroboration and limits.
 ---
 
 # Anti-Cheat Systems & Analysis
@@ -46,42 +46,12 @@ controls, supported finding, and remaining uncertainty. Consult
 [research-rigor](../research-rigor/SKILL.md) when evaluating a detector or
 turning a finding into an enforcement recommendation.
 
-## README Coverage
+## Repository Resource Selection
 
-- `Anti Cheat > Guide`
-- `Anti Cheat > Stress Testing`
-- `Anti Cheat > Driver Unit Test Framework`
-- `Anti Cheat > Anti Debugging`
-- `Anti Cheat > Page Protection`
-- `Anti Cheat > Binary Packer`
-- `Anti Cheat > CLR Protection`
-- `Anti Cheat > Anti Disassembly`
-- `Anti Cheat > Sample Unpacker`
-- `Anti Cheat > Dump Fix`
-- `Anti Cheat > Encrypt Variable`
-- `Anti Cheat > Lazy Importer`
-- `Anti Cheat > Anti-Cheat Programming`
-- `Anti Cheat > Compile Time`
-- `Anti Cheat > Shellcode Engine & Tricks`
-- `Anti Cheat > Obfuscation Engine`
-- `Anti Cheat > Screenshot`
-- `Anti Cheat > Game Engine Protection:*`
-- `Anti Cheat > Open Source Anti Cheat System`
-- `Anti Cheat > Analysis Framework`
-- `Anti Cheat > Detection:*`
-- `Anti Cheat > Signature Scanning`
-- `Anti Cheat > Information System & Forensics`
-- `Anti Cheat > Dynamic Script`
-- `Anti Cheat > Kernel Mode Winsock`
-- `Anti Cheat > Fuzzer`
-- `Anti Cheat > Windows Ring3 Callback`
-- `Anti Cheat > Windows Ring0 Callback`
-- `Anti Cheat > Winows User Dump Analysis`
-- `Anti Cheat > Winows Kernel Dump Analysis`
-- `Anti Cheat > Sign Tools`
-- `Anti Cheat > Backup File / Backup Drivers`
-- `Anti Cheat > Black Signature`
-- `Windows Security Features`
+Choose inspection, forensics, callback, behavioral or policy resources by the
+observation they can support. Read
+[repository resources](references/repository-resources.md) for exact README
+families and the evidence required before drawing a detector conclusion.
 
 ## Major Anti-Cheat Systems
 
@@ -967,69 +937,15 @@ Limitations:
 
 ---
 
-## Data Source
+## Repository Navigation
 
-**Important**: This skill provides conceptual guidance and overview information. For detailed information use the following sources:
+Load [repository resources](references/repository-resources.md) for this
+domain's resource choices and evidence outputs. Use
+[shared repository navigation](../overview/references/repository-navigation.md)
+for local discovery layers, case-sensitive paths, missing snapshots and current
+upstream verification. Generated summaries are discovery aids, not independent
+evidence.
 
-### 1. Project Overview & Resource Index
-
-Fetch the main README for the full curated list of repositories, tools, and descriptions:
-
-```
-https://raw.githubusercontent.com/gmh5225/awesome-game-security/refs/heads/main/README.md
-```
-
-The main README contains thousands of curated links organized by category. When users ask for specific tools, projects, or implementations, retrieve and reference the appropriate sections from this source.
-
-### 2. Repository Code Details (Archive)
-
-For detailed repository information (file structure, source code, implementation details), the project maintains a local archive. If a repository has been archived, **always prefer fetching from the archive** over cloning or browsing GitHub directly.
-
-**Archive URL format:**
-```
-https://raw.githubusercontent.com/gmh5225/awesome-game-security/refs/heads/main/archive/{owner}/{repo}.txt
-```
-
-**Examples:**
-```
-https://raw.githubusercontent.com/gmh5225/awesome-game-security/refs/heads/main/archive/ufrisk/pcileech.txt
-https://raw.githubusercontent.com/gmh5225/awesome-game-security/refs/heads/main/archive/000-aki-000/GameDebugMenu.txt
-```
-
-**How to use:**
-1. Identify the GitHub repository the user is asking about (owner and repo name from the URL).
-2. Construct the archive URL: replace `{owner}` with the GitHub username/org and `{repo}` with the repository name (no `.git` suffix).
-3. Fetch the archive file — it contains a full code snapshot with file trees and source code generated by `code2prompt`.
-4. If the fetch returns a 404, the repository has not been archived yet; fall back to the README or direct GitHub browsing.
-
-### 3. Repository Descriptions
-
-For a concise English summary of what a repository does, the project maintains auto-generated description files.
-
-**Description URL format:**
-```
-https://raw.githubusercontent.com/gmh5225/awesome-game-security/refs/heads/main/description/{owner}/{repo}/description_en.txt
-```
-
-**Examples:**
-```
-https://raw.githubusercontent.com/gmh5225/awesome-game-security/refs/heads/main/description/00christian00/UnityDecompiled/description_en.txt
-https://raw.githubusercontent.com/gmh5225/awesome-game-security/refs/heads/main/description/ufrisk/pcileech/description_en.txt
-```
-
-**How to use:**
-1. Identify the GitHub repository the user is asking about (owner and repo name from the URL).
-2. Construct the description URL: replace `{owner}` with the GitHub username/org and `{repo}` with the repository name.
-3. Fetch the description file — it contains a short, human-readable summary of the repository's purpose and contents.
-4. If the fetch returns a 404, the description has not been generated yet; fall back to the README entry or the archive.
-
-**Priority order when answering questions about a specific repository:**
-1. Description (quick summary) — fetch first for concise context
-2. Archive (full code snapshot) — fetch when deeper implementation details are needed
-3. README entry — fallback when neither description nor archive is available
-
----
-
-## Compiled wiki
-
-Prefer the compiled domain overview at `wiki/overviews/anti-cheat.md` (see `wiki/index.md` and `wiki/AGENTS.md`) before re-deriving synthesis from raw README/archive material.
+The compiled [anti-cheat overview](../../../wiki/overviews/anti-cheat.md)
+can help locate related material; trace consequential claims to their underlying
+source.
