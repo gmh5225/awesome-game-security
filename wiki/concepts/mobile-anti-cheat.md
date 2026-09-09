@@ -58,7 +58,7 @@ sources:
   - wiki/sources/descriptions/ARandomPerson7__G-Presto-Anti-Cheat-Reverse-Engineered.md
   - wiki/sources/descriptions/ARandomPerson7__Appsealing-Reversal.md
   - wiki/sources/descriptions/savagedamage__android-security-wizard.md
-updated: 2026-09-08
+updated: 2026-09-09
 confidence: medium
 ---
 
@@ -102,6 +102,12 @@ Multi-check collections: [[detection]], [[android-native-root-detector]], [[meow
 
 Apply [[research-rigor]]—detectors and bypasses vary by build, OEM, and server policy; README samples are not universal recipes.
 
+## Detection finding review
+
+For a claimed integrity failure, identify the **signal**, **observer**, **required attacker capability**, and **boundary affected** (package, runtime, platform, or server—see [[mobile-trust-boundaries]]). Correlate available package, process, platform, and server evidence with legitimate debug/development use. Missing instrumentation telemetry or one passed local check does not establish an unmodified device or a successful concealment technique. Retain collection limits and uncertain attribution in the final finding. (source: wiki/sources/skills/mobile-security.md)
+
+Filesystem/package indicators, build properties, and runtime observations may support a device-state hypothesis—record how each was obtained, the observer's privilege, and whether the observation source is trustworthy. A developer build, custom ROM, stale artifact, or unavailable visibility can explain an indicator or its absence. Keep root-state assessment separate from verified attestation, server authorization, and evidence of cheating.
+
 ## Related
 
-[[research-rigor]] · [[frida]] · [[memdetection]] · [[lazenca-s]] · [[pairipcore]] · [[appsealing-reversal]] · [[apppealing-new]] · [[freedom]] · [[vpnhide]] · [[android-overlay-protection]] · [[android-overlay-malware-example]] · [[android-native-surface]] · [[zygisk]] · [[magisk]] · [[kernelsu]] · [[apex-su]] · [[knoxpatch]] · [[riru-momo-hider]] · [[magisk-killer]] · [[magisk-eop]] · [[keyattestation]] · [[android-hardware-attestation-demo]] · [[droidshield]] · [[react-native-shieldscan]] · [[react-native-device-risk-signals]] · [[free-rasp-reactnative]] · [[detection]] · [[antifrida]] · [[android-virtualcam-manager]] · [[locusmimic]] · [[anywhere]] · [[hidemyandroid]] · [[android-faker]] · [[device-reset-spoofer]] · [[usb-detection-bypass]] · [[xiaomi-usb-security-bypass]] · [[copg]] · [[nexus]] · [[zamr]] · [[pif-config-generator]] · [[spoofing-collection]] · [[honor-of-kings-re-research]] · [[ff-ace-anticheat-analysis]] · [[g-presto-anti-cheat-reverse-engineered]] · [[android-security-wizard]] · [[dfm-android-unicorn]] · [[kpm-memreader]] · [[pubgm1.6-deadgame]] · [[overviews/mobile-security]] · [[overviews/anti-cheat]]
+[[research-rigor]] · [[mobile-trust-boundaries]] · [[frida]] · [[memdetection]] · [[lazenca-s]] · [[pairipcore]] · [[appsealing-reversal]] · [[apppealing-new]] · [[freedom]] · [[vpnhide]] · [[android-overlay-protection]] · [[android-overlay-malware-example]] · [[android-native-surface]] · [[zygisk]] · [[magisk]] · [[kernelsu]] · [[apex-su]] · [[knoxpatch]] · [[riru-momo-hider]] · [[magisk-killer]] · [[magisk-eop]] · [[keyattestation]] · [[android-hardware-attestation-demo]] · [[droidshield]] · [[react-native-shieldscan]] · [[react-native-device-risk-signals]] · [[free-rasp-reactnative]] · [[detection]] · [[antifrida]] · [[android-virtualcam-manager]] · [[locusmimic]] · [[anywhere]] · [[hidemyandroid]] · [[android-faker]] · [[device-reset-spoofer]] · [[usb-detection-bypass]] · [[xiaomi-usb-security-bypass]] · [[copg]] · [[nexus]] · [[zamr]] · [[pif-config-generator]] · [[spoofing-collection]] · [[honor-of-kings-re-research]] · [[ff-ace-anticheat-analysis]] · [[g-presto-anti-cheat-reverse-engineered]] · [[android-security-wizard]] · [[dfm-android-unicorn]] · [[kpm-memreader]] · [[pubgm1.6-deadgame]] · [[overviews/mobile-security]] · [[overviews/anti-cheat]]

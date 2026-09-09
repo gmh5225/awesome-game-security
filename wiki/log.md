@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-09** — ingest `skill:mobile-security`: [[mobile-trust-boundaries]] concept (package/runtime/platform/server map, SELinux/Play Integrity/App Attest/network-trust evidence, privilege limits); trust-boundary synthesis on [[overviews/mobile-security]]; detection-finding review on [[concepts/mobile-anti-cheat]]; Frida observation-limit table on [[concepts/frida]]; `index.md` updated.
+
 - **2026-09-09** — ingest `skill:graphics-api`: rendering/capture threat model + capture-layer contracts + observation-tool routing on [[overviews/graphics-api]]; capture contracts and WDA/mode-matching exclusion limits on [[anti-screenshot-capture]]; output-merger shader/depth evidence on [[draw-call-hook]]; Present anti-detection/evasion surface on [[present-hook]]; `index.md` updated.
 
 - **2026-09-09** — ingest `skill:game-hacking`: attacker-capability/defensive-coverage framing + EFI/UEFI trust boundaries + HWID spoofing synthesis on [[overviews/game-hacking]]; new concepts [[hwid-spoofing]] and [[driver-communication]]; YOLO training→TensorRT pipeline on [[obs-game-capture]]; `index.md` updated.
