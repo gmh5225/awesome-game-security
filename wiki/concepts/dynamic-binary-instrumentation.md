@@ -13,7 +13,7 @@ sources:
   - wiki/sources/descriptions/GJDuck__e9patch.md
   - wiki/sources/descriptions/GlacierW__MBA.md
   - wiki/sources/descriptions/DynamoRIO__drmemory.md
-updated: 2026-08-25
+updated: 2026-09-09
 confidence: high
 ---
 
@@ -52,10 +52,29 @@ Replace branch instructions with fault-generating sentinels; on exception, emula
 
 Illustrative: [[cpp-veh-dbi]]. Exception-per-branch designs can be orders of magnitude slower — benchmark on target and account for timing checks.
 
+### Evidence limits (exception-driven)
+
+Exception-driven instrumentation observes selected execution points while changing some combination of code, memory permissions, exception handling, state, or timing. Treat the resulting trace as an **observation under those conditions**—a static control-flow graph or smaller modification footprint does not establish a universally safer or more complete strategy. (source: wiki/sources/skills/reverse-engineering.md)
+
+For owned test programs, assess before generalizing:
+
+| Dimension | What to record |
+|-----------|----------------|
+| **Semantic fidelity** | Registers, memory effects, error handling, synchronization, and program results vs an uninstrumented baseline under supported conditions |
+| **Coverage** | Measured unit (instruction/block/edge/function), denominator, input set, thread scope, missing intervals; an observed edge ≠ every feasible path; a page event ≠ an instruction trace |
+| **Observation cost** | Runtime overhead, exception volume, termination, instability, scheduling changes; distinguish application defects from collection artifacts |
+| **Scope** | Unsupported instructions, generated code, external calls, collector limitations before transferring results across versions |
+
+DynamoRIO transparency documentation covers state, resource, synchronization, and timing concerns for its clients—it supports these review dimensions but does not validate ad hoc exception instrumentation designs.
+
 ## User-mode hypervisor-assisted tracing
 
-WHP API runs guest code snippets with EPT-equivalent page traps (R/W/X), CPUID interception, and syscall emulation — pure user mode, no driver signing. Composable with disassemblers; limited to snippet/function scope unless full OS modeling is added. WHP trap libraries such as [[vmtrace]] (host-backed guest memory, page traps, VM-exit single-step tracing; asmjit codegen) complement full PE emulators like [[winvisor]]. (source: wiki/sources/descriptions/momo5502__vmtrace.md)
+WHP API runs guest code snippets with EPT-equivalent page traps (R/W/X), CPUID interception, and syscall emulation — pure user mode, no driver signing. A user-mode application manages guest partitions through Windows Hypervisor Platform; this is **not** the same as running the hypervisor inside that process, forcing all guest code to user mode, or gaining arbitrary host-kernel control. (source: wiki/sources/skills/reverse-engineering.md)
+
+For an analysis trace, record host/guest boundaries, guest execution state, modeled memory/devices, enabled capabilities, and the actual exit reason. A page-access exit supports a finding about that access under the configured policy—it does not provide complete instruction or edge coverage. The documented exit enumeration has no generic syscall exit: do not assume every guest system call automatically transfers control to the analysis application. Match OS/SDK/architecture and nested-environment support; preserve unmodeled scheduler, device, timing, and concurrency effects plus unsupported instructions and missing trace intervals. Review semantic fidelity against an owned baseline before drawing conclusions from modeled execution.
+
+WHP trap libraries such as [[vmtrace]] (host-backed guest memory, page traps, VM-exit single-step tracing; asmjit codegen) complement full PE emulators like [[winvisor]]. (source: wiki/sources/descriptions/momo5502__vmtrace.md)
 
 ## Related
 
-[[e9patch]] · [[frida]] · [[adbi]] · [[tinyinst]] · [[drmemory]] · [[river]] · [[mambo]] · [[covcane]] · [[cpp-veh-dbi]] · [[w1tn3ss]] · [[pyda]] · [[panda]] · [[glacierw-mba]] · [[vmtrace]] · [[winvisor]] · [[hyper-rev]] · [[ripr]] · [[overviews/reverse-engineering]] · [[overviews/game-hacking]]
+[[binary-evidence]] · [[e9patch]] · [[frida]] · [[adbi]] · [[tinyinst]] · [[drmemory]] · [[river]] · [[mambo]] · [[covcane]] · [[cpp-veh-dbi]] · [[w1tn3ss]] · [[pyda]] · [[panda]] · [[glacierw-mba]] · [[vmtrace]] · [[winvisor]] · [[hyper-rev]] · [[ripr]] · [[overviews/reverse-engineering]] · [[overviews/game-hacking]]
