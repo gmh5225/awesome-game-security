@@ -181,6 +181,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [AMD IBS Toolkit](entities/amd-ibs-toolkit.md) — AMD Instruction-Based Sampling toolkit (hardware instruction subset sampling; cheat / Windows kernel explorer / AMD Sampling)
 - [AMD-SP-Loader](entities/amd-sp-loader.md) — Binary Ninja loader for AMD SP/PSP firmware (ABL + PSP bootloader load addresses; PSP syscall annotation; PSPTool workflow; dayzerosec; AMD-SP or PSP firmware)
 - [amd-ryzen-master-driver-v17-exploit](entities/amd-ryzen-master-driver-v17-exploit.md) — AMD Ryzen Master v17 driver BYOVD (IOCTL → physmem R/W; kernel exploitation / driver map / AC bypass; gmh5225)
+- [amice](entities/amice.md) — Rust LLVM pass plugin for compile-time native obfuscation (fuqiuluo; clang -fpass-plugin; string encrypt, CFF, bogus CFG, MBA, indirect calls/branches, BB split/shuffle, instruction-level VMP; llvm-plugin-rs + inkwell; LLVM 11–22; Android NDK; C/C++/Rust IR; Obfuscation Engine)
 - [ANGRYORCHARD](entities/angryorchard.md) — win32k NtUserHardErrorControl kernel exploit (thread→KernelMode elevation; arbitrary kernel R/W; Some Tricks; gmh5225)
 - [Advanced Root Checker](entities/advanced-root-checker.md) — offline Android root/hook detector (Java; su/Magisk/KernelSU/APatch/Zygisk/Xposed/LSPosed, Frida anti-tamper, risk score; Laert-Android; cheat / Android root)
 - [Advanced-Anticheat](entities/advanced-anticheat.md) — open-source Roblox Luau client-server AC (movement/executor/GUI/ESP; ProfileStore flags/bans; honeypots)
