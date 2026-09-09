@@ -1,0 +1,156 @@
+Project Path: arc_brandenbailey23_r6-siege-battleye-launch-bug_zgebfhaa
+
+Source Tree:
+
+```txt
+arc_brandenbailey23_r6-siege-battleye-launch-bug_zgebfhaa
+└── ISSUE_REPORT.md
+
+```
+
+`ISSUE_REPORT.md`:
+
+```md
+# Rainbow Six Siege (Steam) — Game terminated during anti-cheat handshake after Y11S3 update; works only when launched via `RainbowSixHelper.exe`
+
+**Status:** Open · **Platform:** PC (Steam, app 359550) · **Report date:** 2026-09-08 (local, UTC-07:00)
+
+## Environment
+
+| Component | Detail |
+|---|---|
+| OS | Windows 11 Pro 25H2, build 26200.9445 |
+| Hardware | HP Z4 G4 (Xeon W-2155), NVIDIA RTX 3060, 64 GB RAM |
+| Game version | `Y11S3.0.0.1_C9879602_D2383527_S125572_116592546` (per `%LOCALAPPDATA%\Ubisoft\r6s\R6Status.ini`) |
+| Distribution | Steam (files verified via "Verify integrity of game files" — **clean**, no modifications reported) |
+| Anti-cheats | BattlEye (via `RainbowSix_BE.exe` / `BEService`) **and** Ubisoft Sentinel (`sen_service` / `sen_driver.sys`) |
+| Other security | Windows Defender (real-time), HP Wolf Security (Sure Click endpoint active; Sure Sense disabled) |
+
+**No cheats, hacks, or modified game files are in use.** Steam integrity verification completes with no errors. Both `RainbowSix.exe` and `RainbowSixHelper.exe` are byte-identical (same SHA-256) and are both tracked as legitimate executables by Ubisoft Connect's launcher state (`R6Status.ini`).
+
+---
+
+## Summary
+
+After a game update/reinstall on **2026-09-08**, launching Siege through the **standard paths** (Steam Play button, Ubisoft Connect, or `RainbowSix.exe` via a launcher) results in the anti-cheat **terminating the game client ~1 minute into startup** — *after* BattlEye's service and kernel driver load successfully, and *after* the game connects to Ubisoft's backend. There is **no crash dialog and no error event logged locally**; the process exits cleanly/deliberately.
+
+Launching the **same game binary** directly via `RainbowSixHelper.exe` (identical file, located in the same install folder) **works reliably** and allows normal play.
+
+An earlier symptom — BattlEye service installation failure `(4, 30000020)` — was resolved on our side (see "What was tried"), but the client termination described above persists for the standard launch paths.
+
+---
+
+## Timeline (2026-09-08, local time UTC-07:00)
+
+| Time | Event |
+|---|---|
+| 14:26–14:29 | Game launched and ran normally (BEDaisy kernel driver loaded OK per FilterManager) |
+| 17:15–17:24 | Game launched and ran normally (BEDaisy loaded OK) |
+| ~17:43 | `RainbowSix.exe` access-violation crash (WER APPCRASH `0xc0000005`) occurred while Steam was writing update files |
+| 17:50–17:59 | Steam update/reinstall of the game completed |
+| 18:04 | First failed launch — BattlEye console: `Failed to start BattlEye Service (0)` → `Failed to install BattlEye Service (4, 30000020)`; repeated on every subsequent launch through standard paths |
+| 18:16 | Manual clean re-registration of the BattlEye service (delete stale service + shared folder → run `RainbowSix_BE.exe 1 0`) → **service install fixed** |
+| 18:41–18:47 | Launches now get further: `BEService` starts and `BEDaisy` kernel driver **loads successfully** (SCM 7045 + FilterManager Id 6). The game still exits ~1 min later with no logged error. One attempt via Ubisoft Connect (≈18:44) reached the in-game menu and displayed *"an update was installed and needs to restart"*; after clicking restart, launches failed again |
+| 18:57 | After a full Steam "Verify integrity" (clean), launch again threw the BattlEye install error `(4, 30000020)` once more |
+| 19:04–19:14 | Multiple retries (Steam and Ubisoft Connect): BattlEye service + `BEDaisy` load OK each time; Ubisoft Connect launcher log shows the game process **connecting to the Ubi backend then ending after 1–50 s**, no error |
+| 19:20 | Ubisoft Connect "quickboot" staging cleared (`%LOCALAPPDATA%\Ubisoft\r6s` removed/backed up) → client still terminated on standard-path launch |
+| ~19:30 | **Launching `RainbowSixHelper.exe` directly works and the game runs normally** (with all background apps running) |
+
+---
+
+## Symptoms (exact)
+
+1. **Standard-path launches (Steam Play / Ubisoft Connect / `RainbowSix.exe`):**
+   - BattlEye console may appear briefly; BattlEye service and `BEDaisy.sys` register and load (verified in event log).
+   - The game shows its startup/"Updating security measures" phase, then the client **closes** without an error dialog.
+   - Ubisoft Connect returns to its home screen.
+2. **Direct launch (`RainbowSixHelper.exe`):** game boots normally to the menu and is playable.
+
+---
+
+## Key technical evidence
+
+### BattlEye service is healthy; driver loads
+System log (Service Control Manager / FilterManager) during failed standard-path launches:
+```
+7045  A service was installed... Service Name: BEDaisy
+      File: C:\Program Files (x86)\Common Files\BattlEye\BEDaisy.sys
+6     File System Filter 'BEDaisy' (10.0, 2026-08-04) loaded and registered successfully
+1     ...unloaded successfully.   (on client exit)
+```
+`BEService` (DisplayName "BattlEye Service", path `C:\Program Files (x86)\Common Files\BattlEye\BEService.exe`) registers and starts. All BattlEye binaries are digitally signed by *BattlEye Innovations e.K.* (verified). No Code Integrity / AppLocker blocks. Windows Memory Integrity (HVCI) is enabled and does **not** block the driver.
+
+### The client exits deliberately — no crash
+- No `Application Error` (1000) / WER events for the post-update terminations → not an access violation.
+- Ubisoft Connect launcher log (`C:\Program Files (x86)\Ubisoft\Ubisoft Game Launcher\logs\launcher_log.txt`) shows the game connecting to the backend then ending:
+  ```
+  19:12:50  Game with process id 34464 connected (API version: 2.9.0)
+  19:12:50  Game with process id 34464 disconnected.
+  19:14:22  Game process ended.
+  ```
+  No anti-cheat/version error is recorded by the launcher.
+
+### Repeated "Steam info is not available" in the game-starter log
+`game_starter_log.txt` logs the following on **every** launch (including earlier launches on days the game worked, so it may be non-fatal — flagging for completeness):
+```
+UplayConnection.cpp   ERROR  Failed to initialize Steam API
+UplayConnection.cpp   ERROR  Steam info is not available.
+```
+
+### Executable identity
+- `RainbowSix.exe` and `RainbowSixHelper.exe` are **byte-identical** (same SHA-256, same size 117,263,432 B, same timestamp) in the install dir `E:\SteamLibrary\steamapps\common\Tom Clancy's Rainbow Six Siege\`.
+- `%LOCALAPPDATA%\Ubisoft\r6s\R6Status.ini` tracks **both** executables with the same version and checksum (`Y11S3.0.0.1_...`, `Checksum=602500107`) and manages a staged copy of the executable ("quickboot"):
+  ```
+  [RainbowSix.exe]        Version=Y11S3.0.0.1_C9879602_D2383527_S125572_116592546  Checksum=602500107  BootAttempts=2
+  [RainbowSixHelper.exe]  Version=Y11S3.0.0.1_C9879602_D2383527_S125572_116592546  Checksum=602500107  BootAttempts=0
+  [quickboot] active=1
+  ```
+
+---
+
+## What was tried (and result)
+
+| # | Action | Result |
+|---|---|---|
+| 1 | Steam → Verify integrity of game files | Clean (no repairs needed) — **did not fix** |
+| 2 | Full clean reinstall of the game before this session | Did not prevent the issue |
+| 3 | Re-register BattlEye service from scratch (delete `BattlEye Service`/`BEService`/`BEDaisy`, delete `C:\Program Files (x86)\Common Files\BattlEye`, run game installer `RainbowSix_BE.exe 1 0`) | Fixed the `(4, 30000020)` service-install error; service + driver now load every launch |
+| 4 | Windows Defender exclusions added for: game install dir, `Common Files\BattlEye`, Ubisoft Sentinel folder, and `BEService.exe` / `RainbowSix_BE.exe` / `RainbowSix.exe` / `RainbowSixHelper.exe` | No change to the termination |
+| 5 | Ran everything elevated (all launchers set to "Run as administrator"; no UAC inconsistencies) | No change |
+| 6 | Closed background tools (Process Lasso, MSI Afterburner/RTSS, NVIDIA Profile Inspector, DSX) — these had been used without issue for years | No change |
+| 7 | Cleared Ubisoft Connect "quickboot" staging folder `%LOCALAPPDATA%\Ubisoft\r6s` (backed up) | Standard-path launch still terminated |
+| 8 | Firewall audit (rules for all game/anti-cheat executables are `Allow`, inbound, no blocks; outbound default-allow) | No blocks found |
+| 9 | System time checked (plausible; Windows Time service stopped but clock sane) | Not a factor |
+| 10 | **Launch game directly via `RainbowSixHelper.exe`** | ✅ **WORKS — game runs normally** |
+
+---
+
+## Root-cause hypothesis
+
+The failure is isolated to the **standard launch path's bootstrapping role of `RainbowSix.exe`** (Steam Play / Ubisoft Connect), not to the game binary, BattlEye, the kernel driver, or game files:
+
+- The same bytes launched as `RainbowSixHelper.exe` run perfectly.
+- The client is terminated only after BattlEye init **and** after connecting to Ubisoft's backend — consistent with a **server-side or client-side security/version negotiation failure** during the "security measures"/session handshake that the standard path performs and the direct path does not.
+- Possibly related to the dual anti-cheat (BattlEye + Sentinel) sequencing introduced/updated in Y11S3, or to the backend expecting a build component that the update on 2026-09-08 did not deliver.
+
+Suggested areas for Ubisoft/BattlEye to check: session rejection reasons for this account/game version on 2026-09-08 (backend logs), why `RainbowSix.exe` (launcher role) terminates the client while the identical `RainbowSixHelper.exe` (game role) succeeds, and the "Steam info is not available" errors in the game-starter log.
+
+---
+
+## Reproduction steps
+
+1. Launch Rainbow Six Siege via **Steam Play** (or Ubisoft Connect / run `RainbowSix.exe`).
+2. BattlEye initializes (console may appear), game reaches the startup/security phase.
+3. Within ~1 minute the game client closes with no error; launcher returns to its library screen.
+4. Workaround: launch `RainbowSixHelper.exe` from the install folder → game runs normally.
+
+## Requested outcome
+
+- Please determine whether the client termination is a server-side rejection for this build/account, and
+- Restore normal behavior for the standard `RainbowSix.exe` launch path (or document `RainbowSixHelper.exe` as the supported launcher for this build).
+
+---
+
+*Additional logs available on request: Windows System/Application event-log excerpts, Ubisoft Connect `game_starter_log.txt` / `launcher_log.txt` / `service_log.txt`, `R6Status.ini`, Sentinel service logs, and full BattlEye file hashes/signature details.*
+
+```
