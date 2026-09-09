@@ -1,0 +1,2930 @@
+Project Path: arc_pavelinbs-afk_anticheatsystem_ney6o9i9
+
+Source Tree:
+
+```txt
+arc_pavelinbs-afk_anticheatsystem_ney6o9i9
+├── CMakeLists.txt
+├── Dockerfile.cmake
+├── README.md
+├── anticheat.vdf
+├── build_cmake.sh
+└── src
+    ├── anticheat_core.cpp
+    ├── anticheat_core.h
+    ├── config.cpp
+    ├── config.h
+    ├── events.cpp
+    ├── events.h
+    ├── integration
+    │   ├── admin_bridge.cpp
+    │   └── admin_bridge.h
+    ├── logging
+    │   ├── ac_logger.cpp
+    │   └── ac_logger.h
+    ├── modules
+    │   ├── aim_analyzer.cpp
+    │   ├── aim_analyzer.h
+    │   ├── integrity_checker.cpp
+    │   ├── integrity_checker.h
+    │   ├── math_utils.h
+    │   ├── movement_analyzer.cpp
+    │   ├── movement_analyzer.h
+    │   ├── statistics_tracker.cpp
+    │   ├── statistics_tracker.h
+    │   ├── suspicion_scorer.cpp
+    │   ├── suspicion_scorer.h
+    │   ├── wallhack_detector.cpp
+    │   └── wallhack_detector.h
+    ├── player_profile.h
+    ├── players.cpp
+    ├── players.h
+    ├── plugin.cpp
+    ├── plugin.h
+    ├── schema.cpp
+    ├── schema.h
+    ├── vtable_finder.cpp
+    └── vtable_finder.h
+
+```
+
+`CMakeLists.txt`:
+
+```txt
+cmake_minimum_required(VERSION 3.16)
+
+# anticheat — MetaMod:Source 2 plugin (CS2)
+# Output: build/addons/anticheat/bin/linuxsteamrt64/anticheat.so
+
+project(anticheat LANGUAGES CXX)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+option(AC_OPTIMIZE "Enable -O3 in Release" ON)
+
+function(ac_try_path OUT_VAR)
+  set(${OUT_VAR} "" PARENT_SCOPE)
+  foreach(candidate IN LISTS ARGN)
+    if(candidate AND EXISTS "${candidate}")
+      set(${OUT_VAR} "${candidate}" PARENT_SCOPE)
+      return()
+    endif()
+  endforeach()
+endfunction()
+
+if(NOT HL2SDK_PATH AND DEFINED ENV{HL2SDKCS2})
+  set(HL2SDK_PATH "$ENV{HL2SDKCS2}")
+endif()
+if(NOT MMS_PATH AND DEFINED ENV{MMSOURCE112})
+  set(MMS_PATH "$ENV{MMSOURCE112}")
+elseif(NOT MMS_PATH AND DEFINED ENV{MMSOURCE_DEV})
+  set(MMS_PATH "$ENV{MMSOURCE_DEV}")
+endif()
+
+set(_ac_roots
+  "${CMAKE_SOURCE_DIR}"
+  "${CMAKE_SOURCE_DIR}/.."
+  "${CMAKE_SOURCE_DIR}/../.."
+)
+foreach(_root IN LISTS _ac_roots)
+  list(APPEND _ac_hl2sdk_candidates "${_root}/deps/hl2sdk-cs2")
+  list(APPEND _ac_mms_candidates "${_root}/deps/metamod-source")
+endforeach()
+
+if(NOT HL2SDK_PATH OR NOT EXISTS "${HL2SDK_PATH}/public/tier0/dbg.h")
+  ac_try_path(_found_hl2sdk ${_ac_hl2sdk_candidates})
+  if(_found_hl2sdk)
+    set(HL2SDK_PATH "${_found_hl2sdk}")
+  endif()
+endif()
+if(NOT MMS_PATH OR NOT EXISTS "${MMS_PATH}/core/ISmmPlugin.h")
+  ac_try_path(_found_mms ${_ac_mms_candidates})
+  if(_found_mms)
+    set(MMS_PATH "${_found_mms}")
+  endif()
+endif()
+
+set(HL2SDK_PATH "${HL2SDK_PATH}" CACHE PATH "Path to hl2sdk-cs2")
+set(MMS_PATH "${MMS_PATH}" CACHE PATH "Path to metamod-source")
+
+if(NOT HL2SDK_PATH OR NOT EXISTS "${HL2SDK_PATH}/public/tier0/dbg.h")
+  message(FATAL_ERROR "HL2SDK not found. Run: bash build_cmake.sh")
+endif()
+if(NOT MMS_PATH OR NOT EXISTS "${MMS_PATH}/core/ISmmPlugin.h")
+  message(FATAL_ERROR "Metamod:Source not found. Run: bash build_cmake.sh")
+endif()
+
+if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+  set(CMAKE_BUILD_TYPE Release CACHE STRING "Build type" FORCE)
+endif()
+
+set(MMS_CORE "${MMS_PATH}/core")
+
+add_library(anticheat_flags INTERFACE)
+
+target_compile_definitions(anticheat_flags INTERFACE
+  META_IS_SOURCE2
+  SOURCE_ENGINE=25
+  SE_CS2=25
+  GAME_DLL
+  RAD_TELEMETRY_DISABLED
+  stricmp=strcasecmp
+  _stricmp=strcasecmp
+  _snprintf=snprintf
+  _vsnprintf=vsnprintf
+  HAVE_STDINT_H
+  GNUC
+)
+
+if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+  target_compile_options(anticheat_flags INTERFACE
+    -pipe
+    -fno-strict-aliasing
+    -Wall
+    -Wno-uninitialized
+    -Wno-parentheses
+    -Wno-unused
+    -Wno-switch
+    -Wno-sign-compare
+    -Wno-attributes
+    -Wno-invalid-offsetof
+    -Wno-non-virtual-dtor
+    -Wno-overloaded-virtual
+    -fno-threadsafe-statics
+    -fvisibility=hidden
+    -fvisibility-inlines-hidden
+    -fno-omit-frame-pointer
+    $<$<COMPILE_LANGUAGE:CXX>:-std=c++17>
+  )
+endif()
+
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+  target_compile_definitions(anticheat_flags INTERFACE
+    LINUX
+    _LINUX
+    POSIX
+    _FILE_OFFSET_BITS=64
+    X64BITS
+    PLATFORM_64BITS
+    COMPILER_GCC
+    _GLIBCXX_USE_CXX11_ABI=0
+  )
+  target_compile_options(anticheat_flags INTERFACE -fPIC -msse)
+  if(CMAKE_BUILD_TYPE STREQUAL "Release" AND AC_OPTIMIZE)
+    target_compile_options(anticheat_flags INTERFACE -O3)
+    target_compile_definitions(anticheat_flags INTERFACE NDEBUG)
+  endif()
+endif()
+
+target_include_directories(anticheat_flags INTERFACE
+  "${CMAKE_CURRENT_SOURCE_DIR}/src"
+  "${MMS_CORE}"
+  "${MMS_CORE}/sourcehook"
+  "${HL2SDK_PATH}/thirdparty/protobuf-3.21.8/src"
+  "${HL2SDK_PATH}/public"
+  "${HL2SDK_PATH}/public/engine"
+  "${HL2SDK_PATH}/public/mathlib"
+  "${HL2SDK_PATH}/public/tier0"
+  "${HL2SDK_PATH}/public/tier1"
+  "${HL2SDK_PATH}/public/entity2"
+  "${HL2SDK_PATH}/public/game/server"
+  "${HL2SDK_PATH}/public/schemasystem"
+  "${HL2SDK_PATH}/game/shared"
+  "${HL2SDK_PATH}/game/server"
+  "${HL2SDK_PATH}/common"
+)
+
+set(AC_PROTO_FILES
+  "${HL2SDK_PATH}/common/valveextensions.proto"
+  "${HL2SDK_PATH}/common/network_connection.proto"
+  "${HL2SDK_PATH}/common/networkbasetypes.proto"
+)
+
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+  set(AC_PROTOC "${HL2SDK_PATH}/devtools/bin/linux/protoc")
+else()
+  set(AC_PROTOC "${HL2SDK_PATH}/devtools/bin/protoc.exe")
+endif()
+
+if(NOT EXISTS "${AC_PROTOC}")
+  message(FATAL_ERROR "protoc not found: ${AC_PROTOC}")
+endif()
+
+set(AC_PROTO_GEN_DIR "${CMAKE_CURRENT_BINARY_DIR}/generated")
+file(MAKE_DIRECTORY "${AC_PROTO_GEN_DIR}")
+
+set(AC_PROTO_SRCS "")
+set(AC_PROTO_HDRS "")
+
+foreach(proto ${AC_PROTO_FILES})
+  get_filename_component(proto_name "${proto}" NAME_WE)
+  set(out_cc "${AC_PROTO_GEN_DIR}/${proto_name}.pb.cc")
+  set(out_h "${AC_PROTO_GEN_DIR}/${proto_name}.pb.h")
+  list(APPEND AC_PROTO_SRCS "${out_cc}")
+  list(APPEND AC_PROTO_HDRS "${out_h}")
+
+  add_custom_command(
+    OUTPUT "${out_cc}" "${out_h}"
+    COMMAND "${AC_PROTOC}"
+      --cpp_out=${AC_PROTO_GEN_DIR}
+      "-I${HL2SDK_PATH}/common"
+      "-I${HL2SDK_PATH}/thirdparty/protobuf-3.21.8/src"
+      "${proto}"
+    DEPENDS "${proto}"
+    COMMENT "Generating ${proto_name}.pb.cc"
+    VERBATIM
+  )
+endforeach()
+
+add_custom_target(anticheat_protoc DEPENDS ${AC_PROTO_SRCS} ${AC_PROTO_HDRS})
+
+set(AC_PLUGIN_SRCS
+  src/plugin.cpp
+  src/schema.cpp
+  src/vtable_finder.cpp
+  src/players.cpp
+  src/events.cpp
+  src/config.cpp
+  src/anticheat_core.cpp
+  src/integration/admin_bridge.cpp
+  src/modules/aim_analyzer.cpp
+  src/modules/wallhack_detector.cpp
+  src/modules/movement_analyzer.cpp
+  src/modules/statistics_tracker.cpp
+  src/modules/integrity_checker.cpp
+  src/modules/suspicion_scorer.cpp
+)
+
+set(AC_SDK_SRCS
+  "${HL2SDK_PATH}/public/tier0/memoverride.cpp"
+  "${HL2SDK_PATH}/entity2/entitysystem.cpp"
+  "${HL2SDK_PATH}/entity2/entityidentity.cpp"
+  "${HL2SDK_PATH}/entity2/entitykeyvalues.cpp"
+  "${HL2SDK_PATH}/tier1/convar.cpp"
+  "${HL2SDK_PATH}/tier1/keyvalues3.cpp"
+)
+
+add_library(anticheat SHARED
+  ${AC_PLUGIN_SRCS}
+  ${AC_SDK_SRCS}
+  ${AC_PROTO_SRCS}
+)
+
+add_dependencies(anticheat anticheat_protoc)
+
+target_link_libraries(anticheat PRIVATE anticheat_flags)
+target_include_directories(anticheat PRIVATE "${AC_PROTO_GEN_DIR}")
+
+set_target_properties(anticheat PROPERTIES
+  PREFIX ""
+  OUTPUT_NAME "anticheat"
+)
+
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+  set(HL2SDK_LIB "${HL2SDK_PATH}/lib/linux64")
+  set(AC_SDK_LIBS
+    "${HL2SDK_LIB}/mathlib.a"
+    "${HL2SDK_LIB}/interfaces.a"
+    "${HL2SDK_LIB}/release/libprotobuf.a"
+  )
+  foreach(lib ${AC_SDK_LIBS})
+    if(NOT EXISTS "${lib}")
+      message(FATAL_ERROR "Missing HL2SDK library: ${lib}")
+    endif()
+  endforeach()
+
+  target_link_libraries(anticheat PRIVATE
+    ${AC_SDK_LIBS}
+    dl
+    pthread
+    m
+  )
+
+  target_link_options(anticheat PRIVATE
+    -static-libgcc
+    -static-libstdc++
+  )
+
+  set(AC_OUT_DIR "${CMAKE_BINARY_DIR}/addons/anticheat/bin/linuxsteamrt64")
+  set_target_properties(anticheat PROPERTIES
+    LIBRARY_OUTPUT_DIRECTORY "${AC_OUT_DIR}"
+  )
+
+  set(AC_PKG_METAMOD "${CMAKE_BINARY_DIR}/addons/metamod")
+  set(AC_PKG_CFG "${CMAKE_BINARY_DIR}/addons/anticheat/configs")
+  add_custom_target(anticheat_package ALL
+    DEPENDS anticheat
+    COMMAND ${CMAKE_COMMAND} -E make_directory "${AC_PKG_METAMOD}"
+    COMMAND ${CMAKE_COMMAND} -E make_directory "${AC_PKG_CFG}"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+      "${CMAKE_SOURCE_DIR}/anticheat.vdf" "${AC_PKG_METAMOD}/"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+      "${CMAKE_SOURCE_DIR}/config/anticheat_config.json" "${AC_PKG_CFG}/"
+    COMMENT "Packaging addons/anticheat layout"
+  )
+else()
+  message(FATAL_ERROR "Unsupported platform: ${CMAKE_SYSTEM_NAME} (use WSL/Linux build_cmake.sh)")
+endif()
+
+message(STATUS "anticheat: HL2SDK=${HL2SDK_PATH}")
+message(STATUS "anticheat: MMS=${MMS_PATH}")
+
+```
+
+`Dockerfile.cmake`:
+
+```cmake
+FROM ubuntu:22.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends \
+      build-essential \
+      cmake \
+      git \
+ && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /work/cs2-anticheat
+
+```
+
+`README.md`:
+
+```md
+# anticheat (CS2 MetaMod)
+
+Серверный античит для CS2. Детекция в C++ (MetaMod), баны и репорты — через те же каналы, что AdminPlugin / PlaytimeReporter.
+
+## Сборка (WSL / Linux)
+
+```bash
+cd cs2-anticheat
+bash build_cmake.sh
+```
+
+Артефакты: `build/addons/anticheat/` + `build/addons/metamod/anticheat.vdf`.
+
+Нужны Docker (для совместимого GLIBC) или Ubuntu 20.04/22.04. Зависимости `deps/hl2sdk-cs2` и `deps/metamod-source` клонируются рядом в `pluginscpp/deps` (общие с CustomRounds/lr_core).
+
+## Установка
+
+1. Скопируйте `addons/anticheat` и `addons/metamod/anticheat.vdf` на сервер.
+2. Убедитесь, что загружены **AdminPlugin** и **PlaytimeReporter** (CounterStrikeSharp).
+3. Настройте `admin_freeze_sync.json` и `playtime_reporter.json` как обычно — баны/репорты уйдут туда же.
+
+## Пороги
+
+| Очки | Действие |
+|------|----------|
+| 15+ | мониторинг (только серверный лог) |
+| 25+ | warn в лог |
+| **35+** | **репорт** в модерацию (`css_anticheat_auto_report`) — **без кика** |
+| **50+** | **бан 45 дней** через AdminPlugin (`css_anticheat_apply_ban`) → HTML по центру 10 сек → кик |
+
+Очки подозрительности **никогда не показываются** игроку.
+
+## Интеграция
+
+- Бан → тот же `banned_steamids.json` + POST `/api/cs2/sanctions`, что и админка.
+- Репорт → тот же ticket ingest, что `!report` (source `cs2_anticheat`).
+
+## Конфиг
+
+Файл на сервере: `addons/anticheat/configs/anticheat_config.json` (пример из `config/anticheat_config.json`):
+
+```json
+{
+  "plugin_name": "anticheat",
+  "version": "1.0.0",
+  "modules": {
+    "aim_analyzer": { "enabled": true, "snap_angle_threshold": 55.0, "snap_time_ms": 50 },
+    "wallhack_detector": { "enabled": false },
+    "movement_analyzer": { "enabled": true, "bhop_detection": false, "speed_threshold": 380.0 },
+    "statistics_tracker": { "enabled": true, "kd_threshold": 7.0, "headshot_pct_threshold": 85.0, "min_kills": 12 },
+    "integrity_checker": { "enabled": false }
+  },
+  "scoring": {
+    "monitor_threshold": 15,
+    "warn_threshold": 25,
+    "report_threshold": 35,
+    "ban_threshold": 50,
+    "score_decay_per_minute": 1.2
+  },
+  "ban": {
+    "duration_days": 45,
+    "reason": "Использование читов",
+    "countdown_seconds": 10
+  },
+  "notes": {
+    "reports": "35+ -> css_anticheat_auto_report (PlaytimeReporter ticket API)",
+    "bans": "50+ -> css_anticheat_apply_ban (AdminPlugin banned_steamids + /api/cs2/sanctions + 10s HTML)"
+  }
+}
+```
+
+```
+
+`anticheat.vdf`:
+
+```vdf
+"Metamod Plugin"
+{
+	"alias"	"anticheat"
+	"file"	"addons/anticheat/bin/linuxsteamrt64/anticheat"
+}
+
+```
+
+`build_cmake.sh`:
+
+```sh
+#!/bin/bash
+# Build anticheat with CMake for CS2 linuxsteamrt64.
+#
+# Usage:
+#   cd cs2-anticheat && bash build_cmake.sh
+#   AC_NATIVE=1 bash build_cmake.sh   # local build (Ubuntu 20.04/22.04 only)
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+WORK_ROOT="$(cd "$ROOT/.." && pwd)"
+DEPS="${DEPS_ROOT:-$WORK_ROOT/deps}"
+
+if [ "${AC_IN_DOCKER:-0}" = "1" ]; then
+  BUILD="$ROOT/build"
+else
+  if [[ "$ROOT" == /mnt/* ]]; then
+    BUILD="${AC_BUILD_DIR:-$HOME/.cache/anticheat/build}"
+  else
+    BUILD="$ROOT/build"
+  fi
+fi
+
+DOCKER_IMAGE="${AC_DOCKER_IMAGE:-anticheat-cmake-builder}"
+
+ac_host_glibc_ok() {
+  if [ -f /etc/os-release ]; then
+    # shellcheck disable=SC1091
+    . /etc/os-release
+    case "${VERSION_ID:-}" in
+      20.04|22.04) return 0 ;;
+    esac
+  fi
+  if command -v ldd >/dev/null 2>&1; then
+    local ver
+    ver="$(ldd --version 2>/dev/null | head -1 | grep -oE '[0-9]+\.[0-9]+' | head -1 || true)"
+    case "$ver" in
+      2.3[0-5]|2.2[0-9]|2.1[0-9]|2.[0-9]) return 0 ;;
+    esac
+  fi
+  return 1
+}
+
+if [ "${AC_NATIVE:-0}" != "1" ] && [ "${AC_IN_DOCKER:-0}" != "1" ]; then
+  if ac_host_glibc_ok; then
+    echo "==> Ubuntu 20.04/22.04 (or GLIBC <= 2.35) detected — native build"
+    AC_NATIVE=1
+  elif ! command -v docker >/dev/null 2>&1; then
+    cat >&2 <<'EOF'
+ERROR: Docker is required for a CS2-compatible build on this host.
+
+Options:
+  1) Install Docker, then re-run: bash build_cmake.sh
+  2) Build inside Ubuntu 20.04/22.04 (WSL distro), then re-run
+EOF
+    exit 1
+  fi
+fi
+
+if [ "${AC_NATIVE:-0}" != "1" ] && [ "${AC_IN_DOCKER:-0}" != "1" ]; then
+  if ! docker image inspect "$DOCKER_IMAGE" >/dev/null 2>&1; then
+    echo "==> Building Docker image $DOCKER_IMAGE (one-time)"
+    docker build -f "$ROOT/Dockerfile.cmake" -t "$DOCKER_IMAGE" "$ROOT"
+  fi
+
+  echo "==> Building anticheat inside Docker ($DOCKER_IMAGE)"
+  docker run --rm \
+    -v "$WORK_ROOT:/work" \
+    -e AC_IN_DOCKER=1 \
+    -e AC_NATIVE=1 \
+    "$DOCKER_IMAGE" \
+    bash -lc "sed -i 's/\r$//' /work/cs2-anticheat/build_cmake.sh && bash /work/cs2-anticheat/build_cmake.sh"
+  exit $?
+fi
+
+mkdir -p "$DEPS"
+
+if command -v apt-get >/dev/null 2>&1; then
+  missing=()
+  command -v cmake >/dev/null 2>&1 || missing+=(cmake)
+  command -v git >/dev/null 2>&1 || missing+=(git)
+  command -v g++ >/dev/null 2>&1 || missing+=(build-essential)
+  if [ ${#missing[@]} -gt 0 ]; then
+    cat >&2 <<EOF
+Missing packages: ${missing[*]}
+
+Install once:
+  sudo apt-get update
+  sudo apt-get install -y build-essential cmake git
+EOF
+    exit 1
+  fi
+fi
+
+if [ "$BUILD" != "$ROOT/build" ]; then
+  echo "==> Build dir (Linux fs): $BUILD"
+fi
+
+if [ ! -f "$DEPS/hl2sdk-cs2/public/tier0/dbg.h" ]; then
+  echo "==> Cloning hl2sdk-cs2"
+  rm -rf "$DEPS/hl2sdk-cs2"
+  git clone --branch cs2 --depth 1 https://github.com/alliedmodders/hl2sdk.git "$DEPS/hl2sdk-cs2"
+fi
+
+if [ ! -f "$DEPS/metamod-source/core/ISmmPlugin.h" ]; then
+  echo "==> Cloning metamod-source"
+  git clone --recursive --depth 1 https://github.com/alliedmodders/metamod-source.git "$DEPS/metamod-source"
+fi
+
+chmod +x "$DEPS/hl2sdk-cs2/devtools/bin/linux/protoc" 2>/dev/null || true
+
+cmake -S "$ROOT" -B "$BUILD" \
+  -DCMAKE_BUILD_TYPE=Release \
+  -DHL2SDK_PATH="$DEPS/hl2sdk-cs2" \
+  -DMMS_PATH="$DEPS/metamod-source"
+
+cmake --build "$BUILD" -j"$(nproc)"
+
+SO="$BUILD/addons/anticheat/bin/linuxsteamrt64/anticheat.so"
+if [ -f "$SO" ] && command -v objdump >/dev/null 2>&1; then
+  MAX_GLIBC="$(objdump -T "$SO" 2>/dev/null | grep -oE 'GLIBC_[0-9.]+' | sort -u -V | tail -1 || true)"
+  if [ -n "$MAX_GLIBC" ]; then
+    echo "==> Max GLIBC symbol required: $MAX_GLIBC"
+  fi
+fi
+
+echo "=== BUILD OK ==="
+find "$BUILD/addons" -type f
+if [ "$BUILD" != "$ROOT/build" ] && [ -d "$BUILD/addons" ]; then
+  rm -rf "$ROOT/build"
+  mkdir -p "$ROOT/build"
+  cp -a "$BUILD/addons" "$ROOT/build/"
+  echo "==> Copied addons -> $ROOT/build/addons"
+fi
+
+```
+
+`src/anticheat_core.cpp`:
+
+```cpp
+#include "anticheat_core.h"
+#include "modules/aim_analyzer.h"
+#include "modules/wallhack_detector.h"
+#include "modules/movement_analyzer.h"
+#include "modules/statistics_tracker.h"
+#include "modules/integrity_checker.h"
+#include "modules/suspicion_scorer.h"
+#include "integration/admin_bridge.h"
+#include "players.h"
+#include "plugin.h"
+
+#include <chrono>
+#include <vector>
+#include <cstring>
+
+AntiCheatCore* AntiCheatCore::s_Instance = nullptr;
+
+AntiCheatCore* AntiCheatCore::GetInstance()
+{
+	if (!s_Instance)
+		s_Instance = new AntiCheatCore();
+	return s_Instance;
+}
+
+bool AntiCheatCore::Initialize()
+{
+	m_Config = AntiCheatConfig::LoadFromFile("addons/anticheat/configs/anticheat_config.json");
+
+	m_AimAnalyzer = std::make_unique<AimAnalyzer>();
+	m_WallhackDetector = std::make_unique<WallhackDetector>();
+	m_MovementAnalyzer = std::make_unique<MovementAnalyzer>();
+	m_StatisticsTracker = std::make_unique<StatisticsTracker>();
+	m_IntegrityChecker = std::make_unique<IntegrityChecker>();
+	m_SuspicionScorer = std::make_unique<SuspicionScorer>();
+
+	m_AimAnalyzer->SetConfig(m_Config.snap_angle_threshold, (float)m_Config.snap_time_threshold_ms, 2.0f, 0.5f);
+	m_WallhackDetector->SetConfig(100.0f, 15.0f);
+	m_MovementAnalyzer->SetConfig(m_Config.speed_threshold, 250.0f);
+	m_SuspicionScorer->SetThresholds(m_Config.monitor_threshold, m_Config.warn_threshold,
+		m_Config.report_threshold, m_Config.ban_threshold, m_Config.score_decay_per_second);
+
+	std::memset(m_SlotToSteam, 0, sizeof(m_SlotToSteam));
+	AC_Log("core initialized");
+	return true;
+}
+
+void AntiCheatCore::Shutdown()
+{
+	m_PlayerProfiles.clear();
+	AC_Log("core shutdown");
+}
+
+void AntiCheatCore::OnPlayerConnect(int slot, uint64_t steamID, const char* name)
+{
+	if (slot < 0 || slot >= AC_MAXPLAYERS || steamID == 0)
+		return;
+
+	auto profile = std::make_shared<PlayerProfile>();
+	profile->steamId = steamID;
+	profile->slot = slot;
+	profile->name = name ? name : "";
+	profile->connectionTime = std::chrono::steady_clock::now();
+	profile->lastActivityTime = profile->connectionTime;
+
+	CGlobalVars* gv = GetGlobals();
+	profile->lastMoveTime = gv ? gv->curtime : 0.0f;
+
+	m_PlayerProfiles[steamID] = profile;
+	m_SlotToSteam[slot] = steamID;
+}
+
+void AntiCheatCore::OnPlayerDisconnect(int slot, uint64_t steamID)
+{
+	uint64_t sid = steamID ? steamID : (slot >= 0 && slot < AC_MAXPLAYERS ? m_SlotToSteam[slot] : 0);
+	if (slot >= 0 && slot < AC_MAXPLAYERS)
+		m_SlotToSteam[slot] = 0;
+	if (sid)
+		m_PlayerProfiles.erase(sid);
+}
+
+PlayerProfile* AntiCheatCore::GetPlayerBySlot(int slot)
+{
+	if (slot < 0 || slot >= AC_MAXPLAYERS)
+		return nullptr;
+	uint64_t sid = m_SlotToSteam[slot];
+	return sid ? GetPlayerProfile(sid) : nullptr;
+}
+
+PlayerProfile* AntiCheatCore::GetPlayerProfile(uint64_t steamID)
+{
+	auto it = m_PlayerProfiles.find(steamID);
+	return it != m_PlayerProfiles.end() ? it->second.get() : nullptr;
+}
+
+void AntiCheatCore::OnPlayerDeath(int attackerSlot, int victimSlot, bool headshot)
+{
+	PlayerProfile* attacker = GetPlayerBySlot(attackerSlot);
+	PlayerProfile* victim = GetPlayerBySlot(victimSlot);
+	if (attacker && victim && attacker->steamId != victim->steamId)
+	{
+		attacker->kills++;
+		if (headshot)
+			attacker->headshots++;
+		float aimScore = m_AimAnalyzer->OnPlayerShoot(*attacker, *victim, headshot, 0.0f);
+		if (aimScore > 0.0f)
+			m_SuspicionScorer->AddScore(attacker->steamId, "AimAnalyzer", aimScore, "Combat aim anomaly");
+	}
+	if (victim)
+		victim->deaths++;
+}
+
+void AntiCheatCore::OnPlayerHurt(int attackerSlot, int victimSlot, float damage)
+{
+	PlayerProfile* attacker = GetPlayerBySlot(attackerSlot);
+	PlayerProfile* victim = GetPlayerBySlot(victimSlot);
+	if (attacker && victim && attacker->steamId != victim->steamId)
+	{
+		attacker->totalDamage += damage;
+		attacker->shotsHit++;
+	}
+}
+
+void AntiCheatCore::OnWeaponFire(int shooterSlot)
+{
+	if (auto* p = GetPlayerBySlot(shooterSlot))
+		p->shotsFired++;
+}
+
+void AntiCheatCore::SampleAllPlayers()
+{
+	for (auto& [steamID, profile] : m_PlayerProfiles)
+	{
+		(void)steamID;
+		float pos[3]{}, ang[3]{}, vel[3]{};
+		if (!SamplePlayerState(profile->slot, pos, ang, vel))
+			continue;
+
+		profile->lastPosition = profile->position;
+		profile->position = AcVec3(pos[0], pos[1], pos[2]);
+		profile->lastViewAngles = profile->viewAngles;
+		profile->viewAngles = AcAngle(ang[0], ang[1], ang[2]);
+		profile->velocity = AcVec3(vel[0], vel[1], vel[2]);
+		profile->inAir = false;
+	}
+}
+
+void AntiCheatCore::OnGameFrame()
+{
+	static auto lastTick = std::chrono::steady_clock::now();
+	auto now = std::chrono::steady_clock::now();
+	float deltaTime = std::chrono::duration<float>(now - lastTick).count();
+	lastTick = now;
+	if (deltaTime <= 0.0f || deltaTime > 1.0f)
+		deltaTime = 0.015f;
+
+	SampleAllPlayers();
+	m_SuspicionScorer->DecayScores(deltaTime);
+
+	for (auto& [steamID, profile] : m_PlayerProfiles)
+	{
+		(void)steamID;
+		ProcessPlayer(profile.get());
+	}
+}
+
+void AntiCheatCore::OnRoundStart()
+{
+	for (auto& [steamID, profile] : m_PlayerProfiles)
+	{
+		(void)steamID;
+		profile->roundsPlayed++;
+	}
+}
+
+void AntiCheatCore::OnRoundEnd()
+{
+	if (!m_Config.enable_skill_spike_detection)
+		return;
+	for (auto& [steamID, profile] : m_PlayerProfiles)
+	{
+		(void)steamID;
+		float spike = m_StatisticsTracker->CompareWithHistory(*profile);
+		if (spike > 0.0f)
+			m_SuspicionScorer->AddScore(profile->steamId, "StatisticsTracker", spike, "Skill spike");
+	}
+}
+
+void AntiCheatCore::ProcessPlayer(PlayerProfile* profile)
+{
+	if (!profile || profile->isBanned || profile->actionTakenBan)
+		return;
+
+	float scoreDelta = 0.0f;
+
+	if (m_Config.enable_aim_detection)
+	{
+		scoreDelta = m_AimAnalyzer->Analyze(*profile, 0.015f);
+		if (scoreDelta > 0.0f)
+			m_SuspicionScorer->AddScore(profile->steamId, "AimAnalyzer", scoreDelta, "Aim anomaly");
+	}
+
+	if (m_Config.enable_wallhack_detection)
+	{
+		std::vector<PlayerProfile*> enemies;
+		for (auto& [sid, other] : m_PlayerProfiles)
+		{
+			(void)sid;
+			if (other.get() == profile)
+				continue;
+			int t1 = GetPlayerTeamNum(profile->slot);
+			int t2 = GetPlayerTeamNum(other->slot);
+			if (t1 >= 2 && t2 >= 2 && t1 != t2)
+				enemies.push_back(other.get());
+		}
+		scoreDelta = m_WallhackDetector->Analyze(*profile, enemies);
+		if (scoreDelta > 0.0f)
+			m_SuspicionScorer->AddScore(profile->steamId, "WallhackDetector", scoreDelta, "Visibility anomaly");
+	}
+
+	if (m_Config.enable_movement_detection)
+	{
+		scoreDelta = m_MovementAnalyzer->Analyze(*profile, 0.015f);
+		if (scoreDelta > 0.0f)
+			m_SuspicionScorer->AddScore(profile->steamId, "MovementAnalyzer", scoreDelta, "Movement anomaly");
+	}
+
+	if (m_Config.enable_stats_tracking)
+	{
+		scoreDelta = m_StatisticsTracker->AnalyzeSession(*profile);
+		if (scoreDelta > 0.0f)
+			m_SuspicionScorer->AddScore(profile->steamId, "StatisticsTracker", scoreDelta, "High statistics");
+	}
+
+	scoreDelta = m_IntegrityChecker->CheckIntegrity(*profile);
+	if (scoreDelta > 0.0f)
+		m_SuspicionScorer->AddScore(profile->steamId, "IntegrityChecker", scoreDelta, "Integrity");
+
+	CheckAndApplyActions(profile);
+}
+
+void AntiCheatCore::CheckAndApplyActions(PlayerProfile* profile)
+{
+	ScorerAction action = m_SuspicionScorer->EvaluatePlayer(*profile);
+	// Scores never printed to the player — only server log via SuspicionScorer.
+
+	if (action == ScorerAction::REPORT && !profile->actionTakenReport)
+	{
+		profile->actionTakenReport = true;
+		AdminBridge_SendReport(profile->steamId, profile->name.c_str());
+		AC_Log("auto-report steam=%llu name=%s score=%.1f",
+			(unsigned long long)profile->steamId, profile->name.c_str(),
+			m_SuspicionScorer->GetScore(profile->steamId));
+	}
+
+	if (action == ScorerAction::DEFERRED_BAN && !profile->actionTakenBan)
+	{
+		profile->actionTakenBan = true;
+		profile->isBanned = true;
+		AdminBridge_ApplyBan(profile->steamId, profile->name.c_str());
+		AC_Log("auto-ban steam=%llu name=%s score=%.1f (AdminPlugin 10s HTML)",
+			(unsigned long long)profile->steamId, profile->name.c_str(),
+			m_SuspicionScorer->GetScore(profile->steamId));
+	}
+}
+
+```
+
+`src/anticheat_core.h`:
+
+```h
+#pragma once
+
+#include <unordered_map>
+#include <memory>
+#include <cstdint>
+#include "player_profile.h"
+#include "config.h"
+
+#ifndef AC_MAXPLAYERS
+#define AC_MAXPLAYERS 64
+#endif
+
+class AimAnalyzer;
+class WallhackDetector;
+class MovementAnalyzer;
+class StatisticsTracker;
+class IntegrityChecker;
+class SuspicionScorer;
+
+class AntiCheatCore {
+public:
+	static AntiCheatCore* GetInstance();
+
+	bool Initialize();
+	void Shutdown();
+
+	void OnPlayerConnect(int slot, uint64_t steamID, const char* name);
+	void OnPlayerDisconnect(int slot, uint64_t steamID);
+	void OnPlayerDeath(int attackerSlot, int victimSlot, bool headshot);
+	void OnPlayerHurt(int attackerSlot, int victimSlot, float damage);
+	void OnWeaponFire(int shooterSlot);
+	void OnGameFrame();
+	void OnRoundStart();
+	void OnRoundEnd();
+
+	PlayerProfile* GetPlayerBySlot(int slot);
+	PlayerProfile* GetPlayerProfile(uint64_t steamID);
+	const AntiCheatConfig& GetConfig() const { return m_Config; }
+
+private:
+	AntiCheatCore() = default;
+
+	static AntiCheatCore* s_Instance;
+
+	AntiCheatConfig m_Config;
+	std::unordered_map<uint64_t, std::shared_ptr<PlayerProfile>> m_PlayerProfiles;
+	uint64_t m_SlotToSteam[AC_MAXPLAYERS]{};
+
+	std::unique_ptr<AimAnalyzer> m_AimAnalyzer;
+	std::unique_ptr<WallhackDetector> m_WallhackDetector;
+	std::unique_ptr<MovementAnalyzer> m_MovementAnalyzer;
+	std::unique_ptr<StatisticsTracker> m_StatisticsTracker;
+	std::unique_ptr<IntegrityChecker> m_IntegrityChecker;
+	std::unique_ptr<SuspicionScorer> m_SuspicionScorer;
+
+	void SampleAllPlayers();
+	void ProcessPlayer(PlayerProfile* profile);
+	void CheckAndApplyActions(PlayerProfile* profile);
+};
+
+```
+
+`src/config.cpp`:
+
+```cpp
+#include "config.h"
+
+#include <fstream>
+#include <sstream>
+#include <cstdlib>
+#include <cstring>
+
+#include "plugin.h"
+
+static bool ReadFileText(const std::string& path, std::string& out)
+{
+	std::ifstream f(path);
+	if (!f)
+		return false;
+	std::ostringstream ss;
+	ss << f.rdbuf();
+	out = ss.str();
+	return true;
+}
+
+static bool JsonFindNumber(const std::string& json, const char* key, double& out)
+{
+	std::string needle = std::string("\"") + key + "\"";
+	size_t p = json.find(needle);
+	if (p == std::string::npos)
+		return false;
+	p = json.find(':', p);
+	if (p == std::string::npos)
+		return false;
+	++p;
+	while (p < json.size() && (json[p] == ' ' || json[p] == '\t'))
+		++p;
+	char* end = nullptr;
+	double v = std::strtod(json.c_str() + p, &end);
+	if (end == json.c_str() + p)
+		return false;
+	out = v;
+	return true;
+}
+
+static bool JsonFindBool(const std::string& json, const char* key, bool& out)
+{
+	std::string needle = std::string("\"") + key + "\"";
+	size_t p = json.find(needle);
+	if (p == std::string::npos)
+		return false;
+	p = json.find(':', p);
+	if (p == std::string::npos)
+		return false;
+	++p;
+	while (p < json.size() && (json[p] == ' ' || json[p] == '\t'))
+		++p;
+	if (json.compare(p, 4, "true") == 0)
+	{
+		out = true;
+		return true;
+	}
+	if (json.compare(p, 5, "false") == 0)
+	{
+		out = false;
+		return true;
+	}
+	return false;
+}
+
+AntiCheatConfig AntiCheatConfig::LoadFromFile(const std::string& filepath)
+{
+	AntiCheatConfig cfg;
+	std::string json;
+	if (!ReadFileText(filepath, json))
+	{
+		AC_Log("config not found (%s), using defaults", filepath.c_str());
+		return cfg;
+	}
+
+	double d = 0;
+	bool b = false;
+	if (JsonFindNumber(json, "snap_angle_threshold", d)) cfg.snap_angle_threshold = (float)d;
+	if (JsonFindNumber(json, "snap_time_ms", d)) cfg.snap_time_threshold_ms = (int)d;
+	if (JsonFindNumber(json, "kd_threshold", d)) { /* informational */ }
+	if (JsonFindNumber(json, "headshot_pct_threshold", d)) cfg.headshot_ratio_threshold = (float)(d / 100.0);
+	if (JsonFindNumber(json, "min_kills", d)) cfg.min_kills_for_stats = (int)d;
+	if (JsonFindNumber(json, "speed_threshold", d)) cfg.speed_threshold = (float)d;
+	if (JsonFindNumber(json, "monitor_threshold", d)) cfg.monitor_threshold = (float)d;
+	if (JsonFindNumber(json, "warn_threshold", d)) cfg.warn_threshold = (float)d;
+	if (JsonFindNumber(json, "report_threshold", d)) cfg.report_threshold = (float)d;
+	if (JsonFindNumber(json, "kick_threshold", d)) cfg.report_threshold = (float)d; // legacy name
+	if (JsonFindNumber(json, "ban_threshold", d)) cfg.ban_threshold = (float)d;
+	if (JsonFindNumber(json, "duration_days", d)) cfg.ban_duration_days = (int)d;
+	if (JsonFindNumber(json, "score_decay_per_minute", d)) cfg.score_decay_per_second = (float)(d / 60.0);
+	if (JsonFindBool(json, "bhop_detection", b)) cfg.enable_bhop_detection = b;
+	if (JsonFindBool(json, "enable_wallhack_detection", b)) cfg.enable_wallhack_detection = b;
+	if (JsonFindBool(json, "enable_aim_detection", b)) cfg.enable_aim_detection = b;
+
+	AC_Log("config loaded from %s (ban>=%.0f report>=%.0f)", filepath.c_str(), cfg.ban_threshold, cfg.report_threshold);
+	return cfg;
+}
+
+```
+
+`src/config.h`:
+
+```h
+#pragma once
+
+#include <string>
+#include <cstdint>
+
+struct AntiCheatConfig {
+	float snap_angle_threshold = 55.0f;
+	int snap_time_threshold_ms = 50;
+	float headshot_ratio_threshold = 0.85f;
+	int min_kills_for_stats = 12;
+
+	float speed_threshold = 380.0f;
+	bool enable_bhop_detection = false;
+
+	float monitor_threshold = 15.0f;
+	float warn_threshold = 25.0f;
+	float report_threshold = 35.0f;
+	float ban_threshold = 50.0f;
+
+	int ban_duration_days = 45;
+	std::string ban_reason = "Использование читов (Античит система)";
+	int ban_countdown_seconds = 10;
+
+	bool enable_aim_detection = true;
+	bool enable_wallhack_detection = false; // needs reliable visibility traces
+	bool enable_skill_spike_detection = true;
+	bool enable_stats_tracking = true;
+	bool enable_movement_detection = true;
+
+	float score_decay_per_second = 0.02f;
+
+	static AntiCheatConfig LoadFromFile(const std::string& filepath);
+};
+
+```
+
+`src/events.cpp`:
+
+```cpp
+#include "events.h"
+
+#include <igameevents.h>
+#include <cstring>
+
+#include "plugin.h"
+#include "anticheat_core.h"
+
+static bool s_bRegistered = false;
+static int s_iRetryThrottle = 0;
+
+static const char* s_EventNames[] = {
+	"player_death",
+	"player_hurt",
+	"weapon_fire",
+	"round_start",
+	"round_end",
+};
+
+static int EventSlot(IGameEvent* event, const char* key)
+{
+	CPlayerSlot slot = event->GetPlayerSlot(key);
+	int i = slot.Get();
+	return (i >= 0 && i < AC_MAXPLAYERS) ? i : -1;
+}
+
+class ACEventListener final : public IGameEventListener2
+{
+public:
+	void FireGameEvent(IGameEvent* event) override
+	{
+		if (!event)
+			return;
+
+		const char* name = event->GetName();
+		if (!name)
+			return;
+
+		AntiCheatCore* core = AntiCheatCore::GetInstance();
+
+		if (!strcmp(name, "player_death"))
+		{
+			int attacker = EventSlot(event, "attacker");
+			int victim = EventSlot(event, "userid");
+			bool hs = event->GetBool("headshot");
+			core->OnPlayerDeath(attacker, victim, hs);
+			return;
+		}
+
+		if (!strcmp(name, "player_hurt"))
+		{
+			int attacker = EventSlot(event, "attacker");
+			int victim = EventSlot(event, "userid");
+			float dmg = event->GetFloat("dmg_health");
+			core->OnPlayerHurt(attacker, victim, dmg);
+			return;
+		}
+
+		if (!strcmp(name, "weapon_fire"))
+		{
+			int shooter = EventSlot(event, "userid");
+			core->OnWeaponFire(shooter);
+			return;
+		}
+
+		if (!strcmp(name, "round_start"))
+		{
+			core->OnRoundStart();
+			return;
+		}
+
+		if (!strcmp(name, "round_end"))
+		{
+			core->OnRoundEnd();
+			return;
+		}
+	}
+};
+
+static ACEventListener s_Listener;
+
+void Events_TryRegister()
+{
+	if (s_bRegistered || !g_pGameEventManager)
+		return;
+	if (s_iRetryThrottle++ % 64 != 0)
+		return;
+
+	bool allOk = true;
+	for (const char* name : s_EventNames)
+	{
+		if (g_pGameEventManager->FindListener(&s_Listener, name))
+			continue;
+		if (!g_pGameEventManager->AddListener(&s_Listener, name, true))
+			allOk = false;
+	}
+
+	if (allOk)
+	{
+		s_bRegistered = true;
+		AC_Log("game events hooked");
+	}
+}
+
+void Events_Unregister()
+{
+	if (g_pGameEventManager)
+		g_pGameEventManager->RemoveListener(&s_Listener);
+	s_bRegistered = false;
+}
+
+void Events_OnStartupServer()
+{
+	s_bRegistered = false;
+	s_iRetryThrottle = 0;
+}
+
+```
+
+`src/events.h`:
+
+```h
+#pragma once
+
+void Events_TryRegister();
+void Events_Unregister();
+void Events_OnStartupServer();
+
+```
+
+`src/integration/admin_bridge.cpp`:
+
+```cpp
+#include "admin_bridge.h"
+
+#include "../plugin.h"
+
+#include <cstdio>
+
+static void EscapeForCommand(const char* in, char* out, size_t outSize)
+{
+	if (!out || outSize == 0)
+		return;
+	size_t j = 0;
+	if (!in)
+	{
+		out[0] = '\0';
+		return;
+	}
+	for (size_t i = 0; in[i] && j + 2 < outSize; ++i)
+	{
+		char c = in[i];
+		if (c == '"' || c == '\\' || c == ';' || c == '\n' || c == '\r')
+			continue;
+		out[j++] = c;
+	}
+	out[j] = '\0';
+}
+
+void AdminBridge_ApplyBan(uint64_t steamId, const char* playerName)
+{
+	if (!g_pEngine || steamId == 0)
+		return;
+
+	char safeName[96];
+	EscapeForCommand(playerName, safeName, sizeof(safeName));
+	char cmd[256];
+	if (safeName[0])
+		std::snprintf(cmd, sizeof(cmd), "css_anticheat_apply_ban %llu \"%s\"\n",
+			(unsigned long long)steamId, safeName);
+	else
+		std::snprintf(cmd, sizeof(cmd), "css_anticheat_apply_ban %llu\n",
+			(unsigned long long)steamId);
+
+	AC_Log("bridge ban -> %s", cmd);
+	g_pEngine->ServerCommand(cmd);
+}
+
+void AdminBridge_SendReport(uint64_t steamId, const char* playerName)
+{
+	if (!g_pEngine || steamId == 0)
+		return;
+
+	char safeName[96];
+	EscapeForCommand(playerName, safeName, sizeof(safeName));
+	char cmd[256];
+	if (safeName[0])
+		std::snprintf(cmd, sizeof(cmd), "css_anticheat_auto_report %llu \"%s\"\n",
+			(unsigned long long)steamId, safeName);
+	else
+		std::snprintf(cmd, sizeof(cmd), "css_anticheat_auto_report %llu\n",
+			(unsigned long long)steamId);
+
+	AC_Log("bridge report -> %s", cmd);
+	g_pEngine->ServerCommand(cmd);
+}
+
+```
+
+`src/integration/admin_bridge.h`:
+
+```h
+#pragma once
+
+#include <cstdint>
+
+void AdminBridge_ApplyBan(uint64_t steamId, const char* playerName);
+void AdminBridge_SendReport(uint64_t steamId, const char* playerName);
+
+```
+
+`src/logging/ac_logger.cpp`:
+
+```cpp
+#include "ac_logger.h"
+#include <iostream>
+#include <vector>
+#include <chrono>
+#include <iomanip>
+#include <sstream>
+
+void ACLogger::Init(const std::string& log_directory) {
+    m_LogDir = log_directory;
+    std::string filepath = m_LogDir + "/anticheat_" + GetCurrentDate() + ".log";
+    m_LogFile.open(filepath, std::ios::app);
+}
+
+ACLogger::~ACLogger() {
+    if (m_LogFile.is_open()) {
+        m_LogFile.close();
+    }
+}
+
+std::string ACLogger::GetCurrentDate() {
+    auto now = std::chrono::system_clock::now();
+    auto t_c = std::chrono::system_clock::to_time_t(now);
+    std::stringstream ss;
+    ss << std::put_time(std::localtime(&t_c), "%Y-%m-%d");
+    return ss.str();
+}
+
+std::string ACLogger::GetCurrentTime() {
+    auto now = std::chrono::system_clock::now();
+    auto t_c = std::chrono::system_clock::to_time_t(now);
+    std::stringstream ss;
+    ss << std::put_time(std::localtime(&t_c), "%H:%M:%S");
+    return ss.str();
+}
+
+void ACLogger::Log(LogLevel level, const char* format, va_list args) {
+    std::lock_guard<std::mutex> lock(m_Mutex);
+
+    std::string prefix;
+    std::string color;
+    std::string reset_color = "\033[0m";
+
+    switch (level) {
+        case LogLevel::DEBUG:    prefix = "[DEBUG]";    color = "\033[36m"; break; // Cyan
+        case LogLevel::INFO:     prefix = "[INFO]";     color = "\033[32m"; break; // Green
+        case LogLevel::WARNING:  prefix = "[WARN]";     color = "\033[33m"; break; // Yellow
+        case LogLevel::ALERT:    prefix = "[ALERT]";    color = "\033[35m"; break; // Magenta
+        case LogLevel::CRITICAL: prefix = "[CRITICAL]"; color = "\033[31m"; break; // Red
+    }
+
+    std::vector<char> buffer(2048);
+    vsnprintf(buffer.data(), buffer.size(), format, args);
+    std::string message(buffer.data());
+
+    std::string console_msg = color + "[anticheat] " + prefix + " " + message + reset_color;
+    std::string file_msg = "[" + GetCurrentTime() + "] [anticheat] " + prefix + " " + message;
+
+    // Output to console
+    std::cout << console_msg << std::endl;
+
+    // Output to file
+    if (m_LogFile.is_open()) {
+        m_LogFile << file_msg << std::endl;
+    }
+}
+
+void ACLogger::Debug(const char* format, ...) {
+    va_list args; va_start(args, format); Log(LogLevel::DEBUG, format, args); va_end(args);
+}
+void ACLogger::Info(const char* format, ...) {
+    va_list args; va_start(args, format); Log(LogLevel::INFO, format, args); va_end(args);
+}
+void ACLogger::Warning(const char* format, ...) {
+    va_list args; va_start(args, format); Log(LogLevel::WARNING, format, args); va_end(args);
+}
+void ACLogger::Alert(const char* format, ...) {
+    va_list args; va_start(args, format); Log(LogLevel::ALERT, format, args); va_end(args);
+}
+void ACLogger::Critical(const char* format, ...) {
+    va_list args; va_start(args, format); Log(LogLevel::CRITICAL, format, args); va_end(args);
+}
+
+```
+
+`src/logging/ac_logger.h`:
+
+```h
+#pragma once
+#include <string>
+#include <mutex>
+#include <fstream>
+#include <cstdarg>
+
+enum class LogLevel {
+    DEBUG,
+    INFO,
+    WARNING,
+    ALERT,
+    CRITICAL
+};
+
+class ACLogger {
+public:
+    static ACLogger& GetInstance() {
+        static ACLogger instance;
+        return instance;
+    }
+
+    void Init(const std::string& log_directory);
+    
+    void Debug(const char* format, ...);
+    void Info(const char* format, ...);
+    void Warning(const char* format, ...);
+    void Alert(const char* format, ...);
+    void Critical(const char* format, ...);
+
+private:
+    ACLogger() = default;
+    ~ACLogger();
+
+    void Log(LogLevel level, const char* format, va_list args);
+    std::string GetCurrentDate();
+    std::string GetCurrentTime();
+
+    std::mutex m_Mutex;
+    std::ofstream m_LogFile;
+    std::string m_LogDir;
+};
+
+```
+
+`src/modules/aim_analyzer.cpp`:
+
+```cpp
+#include "aim_analyzer.h"
+#include "../plugin.h"
+
+AimAnalyzer::AimAnalyzer()
+	: m_snapThreshold(55.0f), m_minReactionTimeMs(50.0f), m_maxFov(2.0f), m_minSmoothness(0.5f)
+{
+}
+
+void AimAnalyzer::SetConfig(float snapThreshold, float minReactionTimeMs, float maxFov, float minSmoothness)
+{
+	m_snapThreshold = snapThreshold;
+	m_minReactionTimeMs = minReactionTimeMs;
+	m_maxFov = maxFov;
+	m_minSmoothness = minSmoothness;
+}
+
+float AimAnalyzer::Analyze(PlayerProfile& player, float deltaTime)
+{
+	(void)deltaTime;
+	float suspicionDelta = 0.0f;
+
+	float dPitch = AngleDifference(player.viewAngles.pitch, player.lastViewAngles.pitch);
+	float dYaw = AngleDifference(player.viewAngles.yaw, player.lastViewAngles.yaw);
+	float snapAngle = std::sqrt(dPitch * dPitch + dYaw * dYaw);
+
+	// Only flag extreme snaps; normal flicks in CS2 can be 30-50° in a tick.
+	if (snapAngle > m_snapThreshold)
+	{
+		suspicionDelta += 2.0f;
+		AC_Log("aim snap %.1f° steam=%llu", snapAngle, (unsigned long long)player.steamId);
+	}
+
+	return suspicionDelta;
+}
+
+float AimAnalyzer::OnPlayerShoot(PlayerProfile& shooter, PlayerProfile& victim, bool headshot, float distance)
+{
+	(void)distance;
+	float suspicionDelta = 0.0f;
+
+	float fov = CalculateFOV(shooter.viewAngles, shooter.position, victim.position);
+
+	// Perfect headshot with near-zero FOV after a large recent snap is more suspicious than FOV alone.
+	if (headshot && fov < m_maxFov && shooter.kills >= 5)
+		suspicionDelta += 3.0f;
+
+	if (shooter.timeCrosshairOnEnemy > 0.0f &&
+		shooter.timeCrosshairOnEnemy < (m_minReactionTimeMs / 1000.0f) &&
+		shooter.kills >= 3)
+	{
+		suspicionDelta += 8.0f;
+		AC_Log("trigger-like reaction %.0fms steam=%llu",
+			shooter.timeCrosshairOnEnemy * 1000.0f, (unsigned long long)shooter.steamId);
+	}
+
+	return suspicionDelta;
+}
+
+```
+
+`src/modules/aim_analyzer.h`:
+
+```h
+#pragma once
+#include "math_utils.h"
+
+class AimAnalyzer {
+public:
+    AimAnalyzer();
+    
+    void SetConfig(float snapThreshold, float minReactionTimeMs, float maxFov, float minSmoothness);
+    
+    float Analyze(PlayerProfile& player, float deltaTime);
+    float OnPlayerShoot(PlayerProfile& shooter, PlayerProfile& victim, bool headshot, float distance);
+
+private:
+    float m_snapThreshold;     // degrees per tick
+    float m_minReactionTimeMs; // inhuman reaction < 50ms
+    float m_maxFov;            // fov threshold for aimbot
+    float m_minSmoothness;     // for jitter/curve detection
+};
+
+```
+
+`src/modules/integrity_checker.cpp`:
+
+```cpp
+#include "integrity_checker.h"
+
+IntegrityChecker::IntegrityChecker() = default;
+IntegrityChecker::~IntegrityChecker() = default;
+
+bool IntegrityChecker::CheckConVars(PlayerProfile&) { return false; }
+bool IntegrityChecker::DetectImpossibleState(PlayerProfile&) { return false; }
+bool IntegrityChecker::VerifyTickConsistency(PlayerProfile&) { return false; }
+bool IntegrityChecker::CheckNetworkAnomalies(PlayerProfile&) { return false; }
+
+float IntegrityChecker::CheckIntegrity(PlayerProfile& player)
+{
+	(void)player;
+	// Placeholders disabled — returning positive scores without real checks would false-ban.
+	return 0.0f;
+}
+
+```
+
+`src/modules/integrity_checker.h`:
+
+```h
+#pragma once
+
+#include "../player_profile.h"
+#include <string>
+
+class IntegrityChecker {
+public:
+    IntegrityChecker();
+    ~IntegrityChecker();
+
+    // Returns suspicion score delta
+    float CheckIntegrity(PlayerProfile& player);
+
+private:
+    bool CheckConVars(PlayerProfile& player);
+    bool DetectImpossibleState(PlayerProfile& player);
+    bool VerifyTickConsistency(PlayerProfile& player);
+    bool CheckNetworkAnomalies(PlayerProfile& player);
+};
+
+```
+
+`src/modules/math_utils.h`:
+
+```h
+#pragma once
+
+#include <cmath>
+#include <algorithm>
+#include "../player_profile.h"
+
+inline float NormalizeAngle(float angle) {
+    while (angle > 180.0f) angle -= 360.0f;
+    while (angle < -180.0f) angle += 360.0f;
+    return angle;
+}
+
+inline float AngleDifference(float a, float b) {
+    return std::abs(NormalizeAngle(a - b));
+}
+
+inline float VectorDistance(const AcVec3& a, const AcVec3& b) {
+    return (a - b).Length();
+}
+
+inline float DotProduct(const AcVec3& a, const AcVec3& b) {
+    return a.x * b.x + a.y * b.y + a.z * b.z;
+}
+
+inline float AngleBetweenVectors(AcVec3 a, AcVec3 b) {
+    a.Normalize();
+    b.Normalize();
+    float dot = DotProduct(a, b);
+    dot = std::clamp(dot, -1.0f, 1.0f);
+    return std::acos(dot);
+}
+
+inline float DegreesToRadians(float degrees) {
+    return degrees * (3.14159265358979323846f / 180.0f);
+}
+
+inline float RadiansToDegrees(float radians) {
+    return radians * (180.0f / 3.14159265358979323846f);
+}
+
+inline float CalculateFOV(const AcAngle& viewAngle, const AcVec3& eyePos, const AcVec3& targetPos) {
+    AcVec3 dir = targetPos - eyePos;
+    dir.Normalize();
+
+    float pitch = RadiansToDegrees(std::asin(-dir.z));
+    float yaw = RadiansToDegrees(std::atan2(dir.y, dir.x));
+
+    float dPitch = AngleDifference(viewAngle.pitch, pitch);
+    float dYaw = AngleDifference(viewAngle.yaw, yaw);
+
+    return std::sqrt(dPitch * dPitch + dYaw * dYaw);
+}
+
+```
+
+`src/modules/movement_analyzer.cpp`:
+
+```cpp
+#include "movement_analyzer.h"
+#include "../plugin.h"
+
+MovementAnalyzer::MovementAnalyzer()
+	: m_maxVelocity(380.0f), m_maxTeleportDistance(250.0f)
+{
+}
+
+void MovementAnalyzer::SetConfig(float maxVelocity, float maxTeleportDistance)
+{
+	m_maxVelocity = maxVelocity;
+	m_maxTeleportDistance = maxTeleportDistance;
+}
+
+float MovementAnalyzer::Analyze(PlayerProfile& player, float deltaTime)
+{
+	float suspicionDelta = 0.0f;
+
+	float speed = player.velocity.Length();
+	float horiz = std::sqrt(player.velocity.x * player.velocity.x + player.velocity.y * player.velocity.y);
+
+	if (!player.inAir && horiz > m_maxVelocity)
+	{
+		suspicionDelta += 3.0f;
+		AC_Log("speedhack? horiz=%.0f steam=%llu", horiz, (unsigned long long)player.steamId);
+	}
+
+	float distanceMoved = VectorDistance(player.position, player.lastPosition);
+	if (deltaTime > 0.0f && distanceMoved > m_maxTeleportDistance && (distanceMoved / deltaTime) > 2500.0f)
+	{
+		suspicionDelta += 6.0f;
+		AC_Log("teleport? dist=%.0f steam=%llu", distanceMoved, (unsigned long long)player.steamId);
+	}
+
+	(void)speed;
+	return suspicionDelta;
+}
+
+```
+
+`src/modules/movement_analyzer.h`:
+
+```h
+#pragma once
+#include "math_utils.h"
+
+class MovementAnalyzer {
+public:
+    MovementAnalyzer();
+
+    void SetConfig(float maxVelocity, float maxTeleportDistance);
+
+    float Analyze(PlayerProfile& player, float deltaTime);
+
+private:
+    float m_maxVelocity;
+    float m_maxTeleportDistance;
+};
+
+```
+
+`src/modules/statistics_tracker.cpp`:
+
+```cpp
+#include "statistics_tracker.h"
+#include "../plugin.h"
+#include <cmath>
+
+StatisticsTracker::StatisticsTracker() = default;
+StatisticsTracker::~StatisticsTracker() = default;
+
+void StatisticsTracker::ComputeMetrics(PlayerProfile& player)
+{
+	player.kdRatio = player.GetKD();
+	player.headshotPercentage = player.GetHSPercent();
+	player.accuracy = player.GetAccuracy();
+	player.adr = player.GetADR();
+}
+
+void StatisticsTracker::UpdateStats(PlayerProfile& player, const GameEvent& event)
+{
+	(void)event;
+	ComputeMetrics(player);
+}
+
+float StatisticsTracker::AnalyzeSession(PlayerProfile& player)
+{
+	ComputeMetrics(player);
+	float suspicionDelta = 0.0f;
+
+	// Require enough sample size; both KD and HS absurdly high.
+	const int minKills = 12;
+	if (player.kills >= minKills &&
+		player.kdRatio >= 7.0f &&
+		player.headshotPercentage > 85.0f)
+	{
+		suspicionDelta += 12.0f;
+		AC_Log("high stats KD=%.1f HS=%.0f%% kills=%d steam=%llu",
+			player.kdRatio, player.headshotPercentage, player.kills,
+			(unsigned long long)player.steamId);
+	}
+
+	return suspicionDelta;
+}
+
+HistoricalStats StatisticsTracker::GetHistoricalStats(uint64_t steamId)
+{
+	auto it = historical_stats_cache_.find(steamId);
+	if (it != historical_stats_cache_.end())
+		return it->second;
+	return HistoricalStats();
+}
+
+float StatisticsTracker::CompareWithHistory(PlayerProfile& player)
+{
+	ComputeMetrics(player);
+	if (player.kills < 10 || player.roundsPlayed < 5)
+		return 0.0f;
+
+	HistoricalStats history = GetHistoricalStats(player.steamId);
+	float spikeSuspicion = 0.0f;
+
+	// Only when we have real history (std_dev set from DB). Defaults are weak.
+	if (history.std_dev_kd > 0.1f &&
+		player.kdRatio > history.mean_kd + 3.5f * history.std_dev_kd)
+	{
+		spikeSuspicion += 8.0f;
+	}
+
+	if (history.std_dev_hs > 1.0f &&
+		player.headshotPercentage > history.mean_hs + 3.5f * history.std_dev_hs)
+	{
+		spikeSuspicion += 5.0f;
+	}
+
+	return spikeSuspicion;
+}
+
+```
+
+`src/modules/statistics_tracker.h`:
+
+```h
+#pragma once
+
+#include "../player_profile.h"
+#include <unordered_map>
+#include <cstdint>
+
+class StatisticsTracker {
+public:
+    StatisticsTracker();
+    ~StatisticsTracker();
+
+    void UpdateStats(PlayerProfile& player, const GameEvent& event);
+    float AnalyzeSession(PlayerProfile& player);
+    float CompareWithHistory(PlayerProfile& player);
+
+private:
+    void ComputeMetrics(PlayerProfile& player);
+    HistoricalStats GetHistoricalStats(uint64_t steamId);
+    
+    std::unordered_map<uint64_t, HistoricalStats> historical_stats_cache_;
+};
+
+```
+
+`src/modules/suspicion_scorer.cpp`:
+
+```cpp
+#include "suspicion_scorer.h"
+#include "../plugin.h"
+
+void SuspicionScorer::SetThresholds(float monitor, float warn, float report, float ban, float decayPerSec)
+{
+	monitor_threshold_ = monitor;
+	warn_threshold_ = warn;
+	report_threshold_ = report;
+	ban_threshold_ = ban;
+	decay_rate_per_second_ = decayPerSec;
+}
+
+void SuspicionScorer::AddScore(uint64_t steamId, const std::string& module, float score, const std::string& reason)
+{
+	if (score <= 0.0f || banned_.count(steamId))
+		return;
+
+	auto now = std::chrono::steady_clock::now();
+	player_scores_[steamId].score += score;
+	player_scores_[steamId].last_update = now;
+
+	// Server-only log — never shown to the suspicious player.
+	AC_Log("score +%.1f [%s] steam=%llu reason=%s total=%.1f",
+		score, module.c_str(), (unsigned long long)steamId, reason.c_str(),
+		player_scores_[steamId].score);
+}
+
+float SuspicionScorer::GetScore(uint64_t steamId)
+{
+	auto it = player_scores_.find(steamId);
+	return it != player_scores_.end() ? it->second.score : 0.0f;
+}
+
+ScorerAction SuspicionScorer::EvaluatePlayer(PlayerProfile& player)
+{
+	float score = GetScore(player.steamId);
+
+	if (score >= ban_threshold_)
+	{
+		if (!banned_.count(player.steamId))
+		{
+			banned_.insert(player.steamId);
+			AC_Log("[BAN] steam=%llu name=%s score=%.1f",
+				(unsigned long long)player.steamId, player.name.c_str(), score);
+		}
+		return ScorerAction::DEFERRED_BAN;
+	}
+
+	if (score >= report_threshold_)
+	{
+		if (!reported_.count(player.steamId))
+		{
+			reported_.insert(player.steamId);
+			AC_Log("[REPORT] steam=%llu name=%s score=%.1f",
+				(unsigned long long)player.steamId, player.name.c_str(), score);
+		}
+		return ScorerAction::REPORT;
+	}
+
+	if (score >= warn_threshold_)
+		return ScorerAction::WARN;
+	if (score >= monitor_threshold_)
+		return ScorerAction::MONITOR;
+	return ScorerAction::NONE;
+}
+
+void SuspicionScorer::DecayScores(float deltaTime)
+{
+	for (auto& pair : player_scores_)
+	{
+		if (banned_.count(pair.first))
+			continue;
+		if (pair.second.score > 0.0f)
+		{
+			pair.second.score -= deltaTime * decay_rate_per_second_;
+			if (pair.second.score < 0.0f)
+				pair.second.score = 0.0f;
+		}
+	}
+}
+
+```
+
+`src/modules/suspicion_scorer.h`:
+
+```h
+#pragma once
+
+#include "../player_profile.h"
+#include <unordered_map>
+#include <string>
+#include <chrono>
+#include <unordered_set>
+
+enum class ScorerAction {
+	NONE,
+	MONITOR,
+	WARN,
+	REPORT,       // was KICK — send moderation report
+	DEFERRED_BAN  // ban via AdminPlugin (10s HTML countdown)
+};
+
+struct PlayerSuspicion {
+	float score = 0.0f;
+	std::chrono::steady_clock::time_point last_update;
+};
+
+class SuspicionScorer {
+public:
+	SuspicionScorer() = default;
+	~SuspicionScorer() = default;
+
+	void SetThresholds(float monitor, float warn, float report, float ban, float decayPerSec);
+
+	void AddScore(uint64_t steamId, const std::string& module, float score, const std::string& reason);
+	float GetScore(uint64_t steamId);
+	ScorerAction EvaluatePlayer(PlayerProfile& player);
+	void DecayScores(float deltaTime);
+
+private:
+	std::unordered_map<uint64_t, PlayerSuspicion> player_scores_;
+	std::unordered_set<uint64_t> reported_;
+	std::unordered_set<uint64_t> banned_;
+
+	float monitor_threshold_ = 15.0f;
+	float warn_threshold_ = 25.0f;
+	float report_threshold_ = 35.0f;
+	float ban_threshold_ = 50.0f;
+	float decay_rate_per_second_ = 0.02f;
+};
+
+```
+
+`src/modules/wallhack_detector.cpp`:
+
+```cpp
+#include "wallhack_detector.h"
+#include "../plugin.h"
+
+WallhackDetector::WallhackDetector()
+	: m_maxPreAimMs(50.0f), m_wallBangSuspicionThreshold(15.0f)
+{
+}
+
+void WallhackDetector::SetConfig(float maxPreAimMs, float wallBangSuspicionThreshold)
+{
+	m_maxPreAimMs = maxPreAimMs;
+	m_wallBangSuspicionThreshold = wallBangSuspicionThreshold;
+}
+
+float WallhackDetector::Analyze(PlayerProfile& player, const std::vector<PlayerProfile*>& enemies)
+{
+	// Without engine visibility traces this detector is too noisy — return 0.
+	// Kept for future EngineTrace integration.
+	(void)player;
+	(void)enemies;
+	(void)m_maxPreAimMs;
+	(void)m_wallBangSuspicionThreshold;
+	return 0.0f;
+}
+
+```
+
+`src/modules/wallhack_detector.h`:
+
+```h
+#pragma once
+#include "math_utils.h"
+#include <vector>
+
+class WallhackDetector {
+public:
+    WallhackDetector();
+    
+    void SetConfig(float maxPreAimMs, float wallBangSuspicionThreshold);
+    
+    float Analyze(PlayerProfile& player, const std::vector<PlayerProfile*>& enemies);
+
+private:
+    float m_maxPreAimMs;
+    float m_wallBangSuspicionThreshold;
+};
+
+```
+
+`src/player_profile.h`:
+
+```h
+#pragma once
+
+#include <string>
+#include <cstdint>
+#include <chrono>
+#include <deque>
+#include <map>
+#include <vector>
+#include <cmath>
+
+// ============================================================
+// Math types used throughout the anti-cheat system
+// ============================================================
+struct AcVec3 {
+    float x, y, z;
+
+    AcVec3() : x(0), y(0), z(0) {}
+    AcVec3(float x, float y, float z) : x(x), y(y), z(z) {}
+
+    AcVec3 operator+(const AcVec3& other) const { return {x + other.x, y + other.y, z + other.z}; }
+    AcVec3 operator-(const AcVec3& other) const { return {x - other.x, y - other.y, z - other.z}; }
+    AcVec3 operator*(float scalar) const { return {x * scalar, y * scalar, z * scalar}; }
+
+    float Length() const { return std::sqrt(x * x + y * y + z * z); }
+    float LengthSqr() const { return x * x + y * y + z * z; }
+
+    void Normalize() {
+        float len = Length();
+        if (len > 0) { x /= len; y /= len; z /= len; }
+    }
+};
+
+struct AcAngle {
+    float pitch, yaw, roll;
+
+    AcAngle() : pitch(0), yaw(0), roll(0) {}
+    AcAngle(float p, float y, float r) : pitch(p), yaw(y), roll(r) {}
+};
+
+// ============================================================
+// Player Profile — unified data structure for all modules
+// ============================================================
+struct PlayerProfile {
+    // === Identification ===
+    uint64_t steamId = 0;
+    std::string name;
+    std::string ipAddress;
+
+    // === Time Tracking ===
+    std::chrono::steady_clock::time_point connectionTime;
+    std::chrono::steady_clock::time_point lastActivityTime;
+    float lastMoveTime = 0.0f;
+
+    // === Position & Movement ===
+    AcVec3 position;
+    AcVec3 lastPosition;
+    AcVec3 velocity;
+    std::deque<AcVec3> positionHistory;
+
+    // === View Angles (last 128 ticks) ===
+    AcAngle viewAngles;
+    AcAngle lastViewAngles;
+    std::deque<AcAngle> angleHistory;
+    std::deque<float> angleDeltaHistory;
+
+    // === Movement State ===
+    bool isCrouching = false;
+    bool inAir = false;
+
+    // === Pre-Aim Tracking ===
+    float timeCrosshairOnEnemy = 0.0f;
+    bool isLookingAtEnemy = false;
+    struct PreAimData {
+        std::chrono::steady_clock::time_point lastTargetAcquiredTime;
+        int preAimSuspicionCount = 0;
+    } preAimData;
+
+    // === Combat Statistics (current session) ===
+    int kills = 0;
+    int deaths = 0;
+    int assists = 0;
+    int headshots = 0;
+    float totalDamage = 0.0f;
+    int shotsFired = 0;
+    int shotsHit = 0;
+    int roundsPlayed = 0;
+
+    // === Computed Metrics (cached) ===
+    float kdRatio = 0.0f;
+    float headshotPercentage = 0.0f;
+    float accuracy = 0.0f;
+    float adr = 0.0f;
+
+    // === Per-Round Stats ===
+    std::map<int, int> killsPerRound;
+
+    // === Historical Data (from MySQL) ===
+    float previousSessionKD = 0.0f;
+    float previousSessionHSRatio = 0.0f;
+
+    // === Suspicion / Flagging ===
+    float suspicionScore = 0.0f;
+    std::map<std::string, float> suspicionBreakdown;
+    bool isFlagged = false;
+    bool isBanned = false;
+    bool actionTakenReport = false;
+    bool actionTakenBan = false;
+    int slot = -1;
+
+    // === Timestamps ===
+    std::chrono::system_clock::time_point lastViolationTime;
+
+    // === Helpers ===
+    float GetKD() const {
+        return deaths > 0 ? static_cast<float>(kills) / deaths : static_cast<float>(kills);
+    }
+    float GetHSPercent() const {
+        return kills > 0 ? (static_cast<float>(headshots) / kills) * 100.0f : 0.0f;
+    }
+    float GetAccuracy() const {
+        return shotsFired > 0 ? (static_cast<float>(shotsHit) / shotsFired) * 100.0f : 0.0f;
+    }
+    float GetADR() const {
+        return roundsPlayed > 0 ? totalDamage / roundsPlayed : 0.0f;
+    }
+};
+
+// === Shared structs ===
+struct HistoricalStats {
+    float mean_kd = 1.0f;
+    float std_dev_kd = 0.5f;
+    float mean_hs = 40.0f;
+    float std_dev_hs = 15.0f;
+    float mean_acc = 30.0f;
+    float std_dev_acc = 10.0f;
+};
+
+struct BanInfo {
+    int id = 0;
+    uint64_t steamId = 0;
+    std::string reason;
+    std::string bannedAt;
+    std::string expiresAt;
+    bool isActive = false;
+    bool isDeferred = false;
+    std::string deferredUntil;
+};
+
+struct SessionData {
+    std::string sessionStart;
+    std::string sessionEnd;
+    int kills = 0;
+    int deaths = 0;
+    int headshots = 0;
+    int damage = 0;
+    int rounds = 0;
+    float finalScore = 0.0f;
+};
+
+struct GameEvent {
+    std::string eventName;
+    uint64_t attackerSteamId = 0;
+    uint64_t victimSteamId = 0;
+    bool headshot = false;
+    float damage = 0.0f;
+};
+
+```
+
+`src/players.cpp`:
+
+```cpp
+#include "players.h"
+
+#include "plugin.h"
+#include "schema.h"
+
+CEntityInstance* GetControllerBySlot(int iSlot)
+{
+	if (!g_pGameEntitySystem || iSlot < 0 || iSlot >= AC_MAXPLAYERS)
+		return nullptr;
+	return g_pGameEntitySystem->GetEntityInstance(CEntityIndex(iSlot + 1));
+}
+
+CEntityInstance* GetPawnBySlot(int iSlot)
+{
+	CEntityInstance* pController = GetControllerBySlot(iSlot);
+	if (!pController || !g_pGameEntitySystem)
+		return nullptr;
+
+	CEntityHandle hPawn = Schema_Get<CEntityHandle>(pController, "CBasePlayerController", "m_hPawn");
+	return g_pGameEntitySystem->GetEntityInstance(hPawn);
+}
+
+int GetPlayerTeamNum(int iSlot)
+{
+	CEntityInstance* pController = GetControllerBySlot(iSlot);
+	if (!pController)
+		return 0;
+	return Schema_Get<uint8_t>(pController, "CBaseEntity", "m_iTeamNum");
+}
+
+bool IsPlayerAlive(int iSlot)
+{
+	CEntityInstance* pPawn = GetPawnBySlot(iSlot);
+	if (!pPawn)
+		return false;
+	return Schema_Get<int32_t>(pPawn, "CBaseEntity", "m_iHealth") > 0;
+}
+
+const char* GetPlayerNameSafe(int iSlot)
+{
+	(void)iSlot;
+	return "";
+}
+
+bool SamplePlayerState(int iSlot, float* outPos, float* outAngles, float* outVel)
+{
+	CEntityInstance* pPawn = GetPawnBySlot(iSlot);
+	CEntityInstance* pController = GetControllerBySlot(iSlot);
+	if (!pPawn || !pController)
+		return false;
+
+	if (outPos)
+	{
+		void* pNode = Schema_Get<void*>(pPawn, "CBaseEntity", "m_pGameSceneNode");
+		if (pNode)
+		{
+			struct Vec3 { float x, y, z; };
+			Vec3 abs = Schema_Get<Vec3>(pNode, "CGameSceneNode", "m_vecAbsOrigin");
+			outPos[0] = abs.x;
+			outPos[1] = abs.y;
+			outPos[2] = abs.z;
+		}
+	}
+
+	if (outAngles)
+	{
+		struct Ang { float pitch, yaw, roll; };
+		Ang eye = Schema_Get<Ang>(pController, "CCSPlayerController", "m_angEyeAngles");
+		outAngles[0] = eye.pitch;
+		outAngles[1] = eye.yaw;
+		outAngles[2] = eye.roll;
+	}
+
+	if (outVel)
+	{
+		struct Vec3 { float x, y, z; };
+		Vec3 vel = Schema_Get<Vec3>(pPawn, "CBaseEntity", "m_vecAbsVelocity");
+		outVel[0] = vel.x;
+		outVel[1] = vel.y;
+		outVel[2] = vel.z;
+	}
+
+	return true;
+}
+
+```
+
+`src/players.h`:
+
+```h
+#pragma once
+
+#include <cstdint>
+
+class CEntityInstance;
+
+CEntityInstance* GetControllerBySlot(int iSlot);
+CEntityInstance* GetPawnBySlot(int iSlot);
+int GetPlayerTeamNum(int iSlot);
+bool IsPlayerAlive(int iSlot);
+bool SamplePlayerState(int iSlot, float* outPos, float* outAngles, float* outVel);
+const char* GetPlayerNameSafe(int iSlot);
+
+```
+
+`src/plugin.cpp`:
+
+```cpp
+#include "plugin.h"
+
+#include <schemasystem/schemasystem.h>
+#include <interfaces/interfaces.h>
+#include <cstdarg>
+
+#include "events.h"
+#include "anticheat_core.h"
+#include "vtable_finder.h"
+#include "players.h"
+
+AntiCheatPlugin g_AntiCheatPlugin;
+PLUGIN_EXPOSE(AntiCheatPlugin, g_AntiCheatPlugin);
+
+IVEngineServer2* g_pEngine = nullptr;
+ISource2Server* g_pServer = nullptr;
+IGameEventManager2* g_pGameEventManager = nullptr;
+INetworkServerService* g_pNetServerService = nullptr;
+CGameEntitySystem* g_pGameEntitySystem = nullptr;
+
+CGameEntitySystem* GameEntitySystem()
+{
+	return g_pGameEntitySystem;
+}
+
+static int g_iEventMgrHookId = 0;
+static int g_iEntSysHookId = 0;
+
+#ifdef _WIN32
+#define SERVER_LIB "server.dll"
+#else
+#define SERVER_LIB "/libserver.so"
+#endif
+
+class GameSessionConfiguration_t
+{
+};
+
+SH_DECL_HOOK3_void(IServerGameDLL, GameFrame, SH_NOATTRIB, 0, bool, bool, bool);
+SH_DECL_HOOK3_void(INetworkServerService, StartupServer, SH_NOATTRIB, 0, const GameSessionConfiguration_t&, ISource2WorldSession*, const char*);
+SH_DECL_HOOK2(IGameEventManager2, LoadEventsFromFile, SH_NOATTRIB, 0, int, const char*, bool);
+SH_DECL_HOOK2_void(CEntitySystem, Spawn, SH_NOATTRIB, 0, int, const EntitySpawnInfo_t*);
+SH_DECL_HOOK4_void(IServerGameClients, ClientPutInServer, SH_NOATTRIB, 0, CPlayerSlot, char const*, int, uint64);
+SH_DECL_HOOK5_void(IServerGameClients, ClientDisconnect, SH_NOATTRIB, 0, CPlayerSlot, ENetworkDisconnectionReason, const char*, uint64, const char*);
+
+static IServerGameClients* g_pGameClients = nullptr;
+
+void AC_Log(const char* fmt, ...)
+{
+	char buf[512];
+	va_list va;
+	va_start(va, fmt);
+	V_vsnprintf(buf, sizeof(buf), fmt, va);
+	va_end(va);
+	ConColorMsg(Color(120, 200, 120, 255), "[anticheat] %s\n", buf);
+}
+
+void AC_LogCritical(const char* fmt, ...)
+{
+	char buf[512];
+	va_list va;
+	va_start(va, fmt);
+	V_vsnprintf(buf, sizeof(buf), fmt, va);
+	va_end(va);
+	ConColorMsg(Color(255, 80, 80, 255), "[anticheat][CRITICAL] %s\n", buf);
+}
+
+bool AntiCheatPlugin::Load(PluginId id, ISmmAPI* ismm, char* error, size_t maxlen, bool late)
+{
+	PLUGIN_SAVEVARS();
+
+	GET_V_IFACE_CURRENT(GetEngineFactory, g_pCVar, ICvar, CVAR_INTERFACE_VERSION);
+	GET_V_IFACE_ANY(GetEngineFactory, g_pSchemaSystem, ISchemaSystem, SCHEMASYSTEM_INTERFACE_VERSION);
+	GET_V_IFACE_CURRENT(GetEngineFactory, g_pEngine, IVEngineServer2, SOURCE2ENGINETOSERVER_INTERFACE_VERSION);
+	GET_V_IFACE_CURRENT(GetServerFactory, g_pServer, ISource2Server, SOURCE2SERVER_INTERFACE_VERSION);
+	GET_V_IFACE_CURRENT(GetEngineFactory, g_pNetServerService, INetworkServerService, NETWORKSERVERSERVICE_INTERFACE_VERSION);
+	GET_V_IFACE_ANY(GetServerFactory, g_pGameClients, IServerGameClients, SOURCE2GAMECLIENTS_INTERFACE_VERSION);
+
+	g_SMAPI->AddListener(this, this);
+
+	SH_ADD_HOOK(IServerGameDLL, GameFrame, g_pServer, SH_MEMBER(this, &AntiCheatPlugin::Hook_GameFrame), true);
+	SH_ADD_HOOK(INetworkServerService, StartupServer, g_pNetServerService, SH_MEMBER(this, &AntiCheatPlugin::Hook_StartupServer), true);
+	SH_ADD_HOOK(IServerGameClients, ClientPutInServer, g_pGameClients, SH_MEMBER(this, &AntiCheatPlugin::Hook_ClientPutInServer), true);
+	SH_ADD_HOOK(IServerGameClients, ClientDisconnect, g_pGameClients, SH_MEMBER(this, &AntiCheatPlugin::Hook_ClientDisconnect), true);
+
+	if (void* pEventMgrVtbl = FindVirtualTable(SERVER_LIB, "CGameEventManager"))
+	{
+		g_iEventMgrHookId = SH_ADD_DVPHOOK(IGameEventManager2, LoadEventsFromFile,
+			reinterpret_cast<IGameEventManager2*>(pEventMgrVtbl),
+			SH_MEMBER(this, &AntiCheatPlugin::Hook_LoadEventsFromFile), false);
+	}
+	else
+	{
+		V_strncpy(error, "Failed to locate CGameEventManager vtable", maxlen);
+		return false;
+	}
+
+	if (void* pEntSysVtbl = FindVirtualTable(SERVER_LIB, "CGameEntitySystem"))
+	{
+		g_iEntSysHookId = SH_ADD_DVPHOOK(CEntitySystem, Spawn,
+			reinterpret_cast<CEntitySystem*>(pEntSysVtbl),
+			SH_MEMBER(this, &AntiCheatPlugin::Hook_EntitySystemSpawn), true);
+	}
+	else
+	{
+		V_strncpy(error, "Failed to locate CGameEntitySystem vtable", maxlen);
+		return false;
+	}
+
+	if (!AntiCheatCore::GetInstance()->Initialize())
+	{
+		V_strncpy(error, "AntiCheatCore init failed", maxlen);
+		return false;
+	}
+
+	AC_Log("loaded %s v%s (%s)", GetName(), GetVersion(), GetDate());
+	META_CONPRINTF("[%s] Loaded %s v%s\n", GetLogTag(), GetName(), GetVersion());
+	return true;
+}
+
+bool AntiCheatPlugin::Unload(char* error, size_t maxlen)
+{
+	Events_Unregister();
+	AntiCheatCore::GetInstance()->Shutdown();
+
+	SH_REMOVE_HOOK(IServerGameDLL, GameFrame, g_pServer, SH_MEMBER(this, &AntiCheatPlugin::Hook_GameFrame), true);
+	SH_REMOVE_HOOK(INetworkServerService, StartupServer, g_pNetServerService, SH_MEMBER(this, &AntiCheatPlugin::Hook_StartupServer), true);
+	SH_REMOVE_HOOK(IServerGameClients, ClientPutInServer, g_pGameClients, SH_MEMBER(this, &AntiCheatPlugin::Hook_ClientPutInServer), true);
+	SH_REMOVE_HOOK(IServerGameClients, ClientDisconnect, g_pGameClients, SH_MEMBER(this, &AntiCheatPlugin::Hook_ClientDisconnect), true);
+	if (g_iEventMgrHookId)
+		SH_REMOVE_HOOK_ID(g_iEventMgrHookId);
+	if (g_iEntSysHookId)
+		SH_REMOVE_HOOK_ID(g_iEntSysHookId);
+
+	AC_Log("unloaded");
+	return true;
+}
+
+void AntiCheatPlugin::Hook_GameFrame(bool simulating, bool bFirstTick, bool bLastTick)
+{
+	Events_TryRegister();
+	if (simulating)
+		AntiCheatCore::GetInstance()->OnGameFrame();
+}
+
+void AntiCheatPlugin::Hook_StartupServer(const GameSessionConfiguration_t&, ISource2WorldSession*, const char*)
+{
+	Events_OnStartupServer();
+}
+
+int AntiCheatPlugin::Hook_LoadEventsFromFile(const char* filename, bool bSearchAll)
+{
+	if (!g_pGameEventManager)
+		g_pGameEventManager = META_IFACEPTR(IGameEventManager2);
+	RETURN_META_VALUE(MRES_IGNORED, 0);
+}
+
+void AntiCheatPlugin::Hook_EntitySystemSpawn(int nCount, const EntitySpawnInfo_t* pInfo)
+{
+	if (!g_pGameEntitySystem)
+		g_pGameEntitySystem = reinterpret_cast<CGameEntitySystem*>(META_IFACEPTR(CEntitySystem));
+}
+
+void AntiCheatPlugin::Hook_ClientPutInServer(CPlayerSlot slot, char const* pszName, int type, uint64 xuid)
+{
+	int iSlot = slot.Get();
+	if (iSlot < 0 || iSlot >= AC_MAXPLAYERS)
+		return;
+	if (!xuid)
+		return;
+	AntiCheatCore::GetInstance()->OnPlayerConnect(iSlot, xuid, pszName ? pszName : "");
+}
+
+void AntiCheatPlugin::Hook_ClientDisconnect(CPlayerSlot slot, ENetworkDisconnectionReason, const char*, uint64 xuid, const char*)
+{
+	int iSlot = slot.Get();
+	if (iSlot < 0 || iSlot >= AC_MAXPLAYERS)
+		return;
+	AntiCheatCore::GetInstance()->OnPlayerDisconnect(iSlot, xuid);
+}
+
+```
+
+`src/plugin.h`:
+
+```h
+#pragma once
+
+#include <ISmmPlugin.h>
+#include <tier0/dbg.h>
+#include <tier1/strtools.h>
+#include <eiface.h>
+#include <iserver.h>
+#include <igameevents.h>
+#include <icvar.h>
+#include <entity2/entitysystem.h>
+
+#define AC_MAXPLAYERS 64
+
+class AntiCheatPlugin final : public ISmmPlugin, public IMetamodListener
+{
+public:
+	bool Load(PluginId id, ISmmAPI* ismm, char* error, size_t maxlen, bool late) override;
+	bool Unload(char* error, size_t maxlen) override;
+
+	const char* GetAuthor() override		{ return "g3raakl3 & pRfect"; }
+	const char* GetName() override			{ return "AntiCheat"; }
+	const char* GetDescription() override	{ return "CS2 server-side anticheat (MetaMod)"; }
+	const char* GetURL() override			{ return ""; }
+	const char* GetLicense() override		{ return "Proprietary"; }
+	const char* GetVersion() override		{ return "1.0.1"; }
+	const char* GetDate() override			{ return __DATE__; }
+	const char* GetLogTag() override		{ return "ANTICHEAT"; }
+
+public:
+	void Hook_GameFrame(bool simulating, bool bFirstTick, bool bLastTick);
+	void Hook_StartupServer(const GameSessionConfiguration_t& config, ISource2WorldSession*, const char*);
+	int  Hook_LoadEventsFromFile(const char* filename, bool bSearchAll);
+	void Hook_EntitySystemSpawn(int nCount, const EntitySpawnInfo_t* pInfo);
+	void Hook_ClientPutInServer(CPlayerSlot slot, char const* pszName, int type, uint64 xuid);
+	void Hook_ClientDisconnect(CPlayerSlot slot, ENetworkDisconnectionReason reason, const char* pszName, uint64 xuid, const char* pszNetworkID);
+};
+
+extern AntiCheatPlugin g_AntiCheatPlugin;
+
+extern IVEngineServer2* g_pEngine;
+extern ISource2Server* g_pServer;
+extern IGameEventManager2* g_pGameEventManager;
+extern INetworkServerService* g_pNetServerService;
+extern CGameEntitySystem* g_pGameEntitySystem;
+
+inline CGlobalVars* GetGlobals()
+{
+	return g_pEngine ? g_pEngine->GetServerGlobals() : nullptr;
+}
+
+void AC_Log(const char* fmt, ...);
+void AC_LogCritical(const char* fmt, ...);
+
+```
+
+`src/schema.cpp`:
+
+```cpp
+#include "schema.h"
+
+#include <map>
+#include <string>
+
+#include <tier0/dbg.h>
+#include <schemasystem/schemasystem.h>
+#include <entity2/entityinstance.h>
+
+#ifdef _WIN32
+#define SERVER_MODULE "server.dll"
+#else
+#define SERVER_MODULE "libserver.so"
+#endif
+
+static int32_t ResolveOffset(const char* className, const char* fieldName)
+{
+	CSchemaSystemTypeScope* pScope = g_pSchemaSystem->FindTypeScopeForModule(SERVER_MODULE);
+	if (!pScope)
+	{
+		Warning("[CR] schema: no type scope for %s\n", SERVER_MODULE);
+		return -1;
+	}
+
+	SchemaClassInfoData_t* pClass = pScope->FindDeclaredClass(className).Get();
+	if (!pClass)
+	{
+		Warning("[CR] schema: class %s not found\n", className);
+		return -1;
+	}
+
+	for (SchemaClassInfoData_t* p = pClass; p; )
+	{
+		for (int i = 0; i < p->m_nFieldCount; i++)
+		{
+			SchemaClassFieldData_t& field = p->m_pFields[i];
+			if (!strcmp(field.m_pszName, fieldName))
+				return field.m_nSingleInheritanceOffset;
+		}
+		p = p->m_nBaseClassCount ? p->m_pBaseClasses[0].m_pClass : nullptr;
+	}
+
+	Warning("[CR] schema: field %s::%s not found\n", className, fieldName);
+	return -1;
+}
+
+int32_t Schema_GetOffset(const char* className, const char* fieldName)
+{
+	static std::map<std::string, int32_t> s_cache;
+
+	std::string key = std::string(className) + "::" + fieldName;
+	auto it = s_cache.find(key);
+	if (it != s_cache.end())
+		return it->second;
+
+	int32_t off = ResolveOffset(className, fieldName);
+	s_cache[key] = off;
+	return off;
+}
+
+void Schema_NetworkStateChanged(CEntityInstance* pEntity, int32_t offset)
+{
+	pEntity->NetworkStateChanged(NetworkStateChangedData((uint32)offset));
+}
+
+```
+
+`src/schema.h`:
+
+```h
+#pragma once
+
+#include <cstdint>
+
+class CEntityInstance;
+
+int32_t Schema_GetOffset(const char* className, const char* fieldName);
+
+template <typename T>
+T Schema_Get(void* pInstance, const char* className, const char* fieldName, T defaultValue = T())
+{
+	int32_t off = Schema_GetOffset(className, fieldName);
+	if (off < 0 || !pInstance)
+		return defaultValue;
+	return *reinterpret_cast<T*>(reinterpret_cast<uintptr_t>(pInstance) + off);
+}
+
+template <typename T>
+bool Schema_SetNetworked(CEntityInstance* pEntity, const char* className, const char* fieldName, const T& value);
+
+template <typename T>
+bool Schema_Set(void* pInstance, const char* className, const char* fieldName, const T& value)
+{
+	int32_t off = Schema_GetOffset(className, fieldName);
+	if (off < 0 || !pInstance)
+		return false;
+	*reinterpret_cast<T*>(reinterpret_cast<uintptr_t>(pInstance) + off) = value;
+	return true;
+}
+
+void Schema_NetworkStateChanged(CEntityInstance* pEntity, int32_t offset);
+
+template <typename T>
+bool Schema_SetNetworked(CEntityInstance* pEntity, const char* className, const char* fieldName, const T& value)
+{
+	int32_t off = Schema_GetOffset(className, fieldName);
+	if (off < 0 || !pEntity)
+		return false;
+	T* pField = reinterpret_cast<T*>(reinterpret_cast<uintptr_t>(pEntity) + off);
+	if (*pField == value)
+		return true;
+	*pField = value;
+	Schema_NetworkStateChanged(pEntity, off);
+	return true;
+}
+
+struct SchemaField
+{
+	const char* cls;
+	const char* field;
+	int32_t off = -2;
+
+	int32_t Offset()
+	{
+		if (off == -2)
+			off = Schema_GetOffset(cls, field);
+		return off;
+	}
+
+	template <typename T>
+	T Get(void* pInstance, T defaultValue = T())
+	{
+		int32_t o = Offset();
+		if (o < 0 || !pInstance)
+			return defaultValue;
+		return *reinterpret_cast<T*>(reinterpret_cast<uintptr_t>(pInstance) + o);
+	}
+
+	template <typename T>
+	bool SetNetworked(CEntityInstance* pEntity, const T& value)
+	{
+		int32_t o = Offset();
+		if (o < 0 || !pEntity)
+			return false;
+		T* pField = reinterpret_cast<T*>(reinterpret_cast<uintptr_t>(pEntity) + o);
+		if (*pField == value)
+			return true;
+		*pField = value;
+		Schema_NetworkStateChanged(pEntity, o);
+		return true;
+	}
+};
+
+```
+
+`src/vtable_finder.cpp`:
+
+```cpp
+#include "vtable_finder.h"
+
+#include <cstring>
+#include <cstdio>
+#include <string>
+
+#include <tier0/dbg.h>
+
+#ifdef __linux__
+
+#include <dlfcn.h>
+#include <elf.h>
+#include <fcntl.h>
+#include <link.h>
+#include <sys/mman.h>
+#include <sys/stat.h>
+#include <unistd.h>
+
+#include <vector>
+
+struct SectionRange
+{
+	std::string name;
+	uint8_t* base = nullptr;
+	size_t size = 0;
+};
+
+struct ModuleSections
+{
+	uintptr_t loadBase = 0;
+	std::vector<SectionRange> sections;
+	const SectionRange* Get(const char* name) const
+	{
+		for (auto& s : sections)
+			if (s.name == name)
+				return &s;
+		return nullptr;
+	}
+};
+
+static bool ReadSections(const char* moduleSuffix, ModuleSections& out)
+{
+	struct CbData { const char* suffix; std::string path; uintptr_t base = 0; bool found = false; };
+	CbData cb{moduleSuffix};
+
+	dl_iterate_phdr([](struct dl_phdr_info* info, size_t, void* dataPtr) -> int {
+		CbData* d = reinterpret_cast<CbData*>(dataPtr);
+		size_t nameLen = strlen(info->dlpi_name);
+		size_t sufLen = strlen(d->suffix);
+		if (nameLen >= sufLen && !strcmp(info->dlpi_name + nameLen - sufLen, d->suffix))
+		{
+			// Metamod's loader shim is also called libserver.so and lives
+			// under addons/ — we want the real game binary.
+			if (strstr(info->dlpi_name, "/addons/"))
+				return 0;
+			d->path = info->dlpi_name;
+			d->base = info->dlpi_addr;
+			d->found = true;
+			return 1;
+		}
+		return 0;
+	}, &cb);
+
+	if (!cb.found)
+	{
+		Warning("[CR] vtable: module %s is not loaded\n", moduleSuffix);
+		return false;
+	}
+
+	int fd = open(cb.path.c_str(), O_RDONLY);
+	if (fd == -1)
+		return false;
+
+	struct stat st;
+	if (fstat(fd, &st) != 0)
+	{
+		close(fd);
+		return false;
+	}
+
+	void* map = mmap(nullptr, st.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
+	close(fd);
+	if (map == MAP_FAILED)
+		return false;
+
+	auto* ehdr = static_cast<ElfW(Ehdr)*>(map);
+	auto* shdrs = reinterpret_cast<ElfW(Shdr)*>(reinterpret_cast<uintptr_t>(ehdr) + ehdr->e_shoff);
+	const char* strTab = reinterpret_cast<const char*>(reinterpret_cast<uintptr_t>(ehdr) + shdrs[ehdr->e_shstrndx].sh_offset);
+
+	out.loadBase = cb.base;
+	for (int i = 0; i < ehdr->e_shnum; i++)
+	{
+		ElfW(Shdr)* shdr = &shdrs[i];
+		const char* name = strTab + shdr->sh_name;
+		if (!*name || !(shdr->sh_flags & SHF_ALLOC))
+			continue;
+		SectionRange s;
+		s.name = name;
+		s.base = reinterpret_cast<uint8_t*>(cb.base + shdr->sh_addr);
+		s.size = shdr->sh_size;
+		out.sections.push_back(std::move(s));
+	}
+
+	munmap(map, st.st_size);
+	return true;
+}
+
+static void* SearchBytes(const uint8_t* haystack, size_t haySize, const void* needle, size_t needleSize)
+{
+	if (!haystack || haySize < needleSize || !needleSize)
+		return nullptr;
+	const uint8_t* n = static_cast<const uint8_t*>(needle);
+	for (size_t i = 0; i + needleSize <= haySize; i++)
+	{
+		if (haystack[i] == n[0] && !memcmp(haystack + i, n, needleSize))
+			return const_cast<uint8_t*>(haystack + i);
+	}
+	return nullptr;
+}
+
+static void* FindBytes(const SectionRange* sec, const void* pattern, size_t len)
+{
+	if (!sec)
+		return nullptr;
+	return SearchBytes(sec->base, sec->size, pattern, len);
+}
+
+// Finds occurrences of an 8-byte pointer value in a section.
+static void* FindPointer(const SectionRange* sec, void* value, void* startAfter = nullptr)
+{
+	if (!sec)
+		return nullptr;
+	uint8_t* from = sec->base;
+	size_t size = sec->size;
+	if (startAfter)
+	{
+		uint8_t* s = static_cast<uint8_t*>(startAfter) + sizeof(void*);
+		if (s < sec->base || s >= sec->base + sec->size)
+			return nullptr;
+		size -= (s - sec->base);
+		from = s;
+	}
+	return SearchBytes(from, size, &value, sizeof(void*));
+}
+
+void* FindVirtualTable(const char* moduleSuffix, const char* className)
+{
+	ModuleSections mod;
+	if (!ReadSections(moduleSuffix, mod))
+		return nullptr;
+
+	// 1. Mangled type name string in .rodata: "<len><name>\0"
+	char mangled[256];
+	snprintf(mangled, sizeof(mangled), "%zu%s", strlen(className), className);
+
+	void* typeNameStr = FindBytes(mod.Get(".rodata"), mangled, strlen(mangled) + 1);
+	if (!typeNameStr)
+	{
+		Warning("[CR] vtable: type descriptor for %s not found\n", className);
+		return nullptr;
+	}
+
+	// 2. type_info object references the name string (second field of typeinfo)
+	void* typeNameSlot = FindPointer(mod.Get(".data.rel.ro"), typeNameStr);
+	if (!typeNameSlot)
+	{
+		Warning("[CR] vtable: type_info for %s not found\n", className);
+		return nullptr;
+	}
+	void* typeInfo = static_cast<uint8_t*>(typeNameSlot) - sizeof(void*);
+
+	// 3. vtable layout: [offset-to-top][typeinfo*][vfunc0]...
+	//    take the match whose offset-to-top is 0 (the primary vtable)
+	for (const char* secName : {".data.rel.ro", ".data.rel.ro.local"})
+	{
+		const SectionRange* sec = mod.Get(secName);
+		void* hit = nullptr;
+		while ((hit = FindPointer(sec, typeInfo, hit)) != nullptr)
+		{
+			int64_t offsetToTop = *reinterpret_cast<int64_t*>(static_cast<uint8_t*>(hit) - sizeof(void*));
+			if (offsetToTop == 0)
+				return static_cast<uint8_t*>(hit) + sizeof(void*);
+		}
+	}
+
+	Warning("[CR] vtable: vtable for %s not found\n", className);
+	return nullptr;
+}
+
+static bool ParseHexNibble(char c, uint8_t& out)
+{
+	if (c >= '0' && c <= '9') { out = (uint8_t)(c - '0'); return true; }
+	if (c >= 'A' && c <= 'F') { out = (uint8_t)(c - 'A' + 10); return true; }
+	if (c >= 'a' && c <= 'f') { out = (uint8_t)(c - 'a' + 10); return true; }
+	return false;
+}
+
+void* FindFunctionSignature(const char* moduleSuffix, const char* sectionName, const char* idaSig)
+{
+	if (!moduleSuffix || !sectionName || !idaSig || !*idaSig)
+		return nullptr;
+
+	std::vector<uint8_t> pattern;
+	std::vector<uint8_t> mask; // 1 = must match, 0 = wildcard
+
+	const char* p = idaSig;
+	while (*p)
+	{
+		while (*p == ' ')
+			p++;
+		if (!*p)
+			break;
+
+		if (*p == '?')
+		{
+			pattern.push_back(0);
+			mask.push_back(0);
+			while (*p == '?')
+				p++;
+			continue;
+		}
+
+		if (!p[1])
+			break;
+
+		uint8_t hi = 0, lo = 0;
+		if (!ParseHexNibble(p[0], hi) || !ParseHexNibble(p[1], lo))
+			return nullptr;
+
+		pattern.push_back((uint8_t)((hi << 4) | lo));
+		mask.push_back(1);
+		p += 2;
+	}
+
+	if (pattern.empty())
+		return nullptr;
+
+	ModuleSections mod;
+	if (!ReadSections(moduleSuffix, mod))
+		return nullptr;
+
+	const SectionRange* sec = mod.Get(sectionName);
+	if (!sec)
+		return nullptr;
+
+	for (size_t i = 0; i + pattern.size() <= sec->size; i++)
+	{
+		bool ok = true;
+		for (size_t j = 0; j < pattern.size(); j++)
+		{
+			if (mask[j] && sec->base[i + j] != pattern[j])
+			{
+				ok = false;
+				break;
+			}
+		}
+		if (ok)
+			return sec->base + i;
+	}
+
+	return nullptr;
+}
+
+#else // !__linux__
+
+void* FindVirtualTable(const char*, const char* className)
+{
+	Warning("[CR] vtable lookup is only implemented for Linux (%s)\n", className);
+	return nullptr;
+}
+
+void* FindFunctionSignature(const char*, const char*, const char*)
+{
+	return nullptr;
+}
+
+#endif
+
+```
+
+`src/vtable_finder.h`:
+
+```h
+#pragma once
+
+#include <cstddef>
+
+void* FindVirtualTable(const char* moduleSuffix, const char* className);
+void* FindFunctionSignature(const char* moduleSuffix, const char* sectionName, const char* idaSig);
+
+```
