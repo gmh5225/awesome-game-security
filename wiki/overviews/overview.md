@@ -119,31 +119,61 @@ The README organizes ~41 top-level sections (incl. empty `NeverC & NeverD — Yo
 
 ## Skill routing (primary topics)
 
-| Topic | Overview | Typical queries |
-|-------|----------|-----------------|
-| Anti-cheat | [[overviews/anti-cheat]] | EAC, BattlEye, Vanguard, detection |
-| DMA | [[overviews/dma-attack]] | pcileech, FPGA, IOMMU |
-| Game engine | [[overviews/game-engine]] | Unreal, Unity IL2CPP, Godot |
-| Game hacking | [[overviews/game-hacking]] | memory, injection, overlays |
-| Graphics API | [[overviews/graphics-api]] | Present hooks, DXGI, Vulkan |
-| Mobile | [[overviews/mobile-security]] | Frida, Magisk, jailbreak |
-| Reverse engineering | [[overviews/reverse-engineering]] | IDA, DBI, deobfuscation, MCP RE tools |
-| Windows kernel | [[overviews/windows-kernel]] | callbacks, HVCI, PatchGuard |
-| Research rigor | [[research-rigor]] | claim validation, citation checks, detector evaluation |
-| Project maintenance | (this page) | adding resources, README format, link validation |
+Start from the question's object and desired output; pick the domain skill, then only the resource layers needed. Repository membership is a discovery signal—not capability, endorsement, or compatibility proof. Folder IDs locate skills; installed invocation names come from each `SKILL.md` frontmatter. (source: wiki/sources/skills/overview.md)
 
-Also check `wiki/overviews/<topic>.md` for the matching primary skill topic before deep README or archive dives. (source: wiki/sources/skills/overview.md)
+| Question or artifact | Primary skill | Boundary / related work |
+|---|---|---|
+| Detector architecture, input evidence, telemetry faults or decisions | [[overviews/anti-cheat]] | Platform signals need the relevant platform contract; conclusions need [[research-rigor]] |
+| Physical-memory source, PCIe/USB bridge, FPGA, IOMMU or host acquisition | [[overviews/dma-attack]] | Separate memory initiator, transport and analysis backend |
+| Engine source, runtime metadata, plugins or asset boundaries | [[overviews/game-engine]] | Editor tools ≠ shipped runtime; persistent state → server security |
+| Attack classes, prerequisite access and defensive coverage | [[overviews/game-hacking]] | Identify the boundary before choosing a specialized domain |
+| Rendering API, capture, translation or frame/performance artifacts | [[overviews/graphics-api]] | Timing output, captured pixels and game-state evidence differ |
+| Binary identity, static analysis, symbols, dumps or code comparison | [[overviews/reverse-engineering]] | Recovered structure does not by itself prove runtime behavior |
+| Windows drivers, callbacks, telemetry and platform policy | [[overviews/windows-kernel]] | Runtime privileges, observation scope and preventive policy are separate |
+| Android/iOS package, device-integrity or mobile runtime evidence | [[overviews/mobile-security]] | Local root observations, remote attestations and enforcement differ |
+| Linux, SteamOS, Proton, credentials or namespaces | `linux-platform-security` skill | Compatibility layers and isolation mechanisms have different roles |
+| RPC authorization, sessions, economy, timing and replay consistency | `game-server-security` skill | Transport reliability does not authorize a gameplay effect |
+| CI, dependencies, launchers, update trust, mods or content distribution | `game-supply-chain-security` skill | Build provenance, artifact signing and runtime safety are distinct |
+| Conflicting claims, source lineage, evaluation or uncertain attribution | [[research-rigor]] | Pair with the domain that supplies the actual technical contract |
+| Project maintenance, README format, link validation | (this page) | Adding resources, category placement, duplicate review |
+
+Resource discovery can finish at this page when the user only needs locations or a shortlist. Do not force a security review onto ordinary graphics, game-development, or library-usage questions merely because their resources appear in this collection. A corresponding wiki overview is not guaranteed for every skill—check [[index]] or the skill directory before constructing a path.
+
+## README cross-category routing
+
+Category names are current data, not a fixed count. Do not flatten a resource's category into a capability claim. (source: wiki/sources/skills/overview.md)
+
+| README area | Typical routing |
+|---|---|
+| Game Engine; Game Develop; Game Assets; Game Hot Patch | Engine/runtime, package and release boundaries |
+| Renderer; DirectX; OpenGL; Vulkan; Game Testing | Rendering, capture, compatibility and performance evidence |
+| Game Network; Game CI | Transport/session contracts and release authority |
+| Cheat; Anti Cheat; Some Tricks; Windows Security Features | Threat classes, observation mechanisms and platform controls |
+| Platform/console emulator categories; WSL; WSA | Match the actual host, guest, compatibility layer and target format |
+| Mathematics; AI; Image Codec; Wavefront Obj; PhysX SDK | Supporting algorithms, measurement and parser/asset context |
+
+Some Linux kernel references appear in Android-related subcategories; organizations and sample projects can sit alongside libraries. Read the actual entry and its scope.
+
+## Repository root layers
+
+Current root layers: `README.md`, `.claude/skills/`, `wiki/`, `description/`, `archive/`, `scripts/`, `.github/workflows/`. Individual skill installations may omit the rest—check available files and use verified upstream sources when a local layer is absent. (source: wiki/sources/skills/overview.md)
 
 ## Answer priority (data layers)
 
-Prefer the [[compiled-wiki]] layer for cross-cutting synthesis; fall back in order when a repo-specific answer is needed: (source: wiki/sources/skills/overview.md)
+Prefer the [[compiled-wiki]] layer for cross-cutting synthesis; fall back in order when a repo-specific answer is needed. See [[resource-selection]] for selection format and provenance fields. (source: wiki/sources/skills/overview.md)
 
-1. Wiki entity/concept/overview (if present)
-2. `description/{owner}/{repo}/description_en.txt` (concise English summary)
-3. `archive/{owner}/{repo}.txt` (full code snapshot; avoid for high-level questions)
-4. README category entry
+1. Wiki entity/concept/overview (if present)—start at [[index]]
+2. `description/{owner}/{repo}/description_en.txt` (concise English summary; generated, not independent verification)
+3. `archive/{owner}/{repo}.txt` (captured source snapshot; may be truncated or incomplete—prefer relevant portions over re-cloning)
+4. README category entry (original URL with any file/revision suffix)
+
+For exact capability claims, inspect primary documentation or a source file at a known revision. When generated layers or historical snapshots disagree, follow [[research-rigor]] evidence-reconciliation guidance. Keep collection revision and capture/generation dates separate from upstream version. Multiple generated layers from one source are not independent corroboration; missing archive content does not establish upstream absence.
 
 Treat README entries, generated descriptions, wiki pages, and archives as **discovery/provenance** layers—not automatic proof of embedded claims. Pair domain skills with [[research-rigor]] for consequential security conclusions.
+
+## Resource selection format
+
+For each chosen resource, provide: original identity/URL, README location, reason it fits the task, expected artifact, version/platform scope, and a material limitation. Use a small comparative table when alternatives serve different roles. Distinguish resources already listed from supplemental sources discovered upstream. (source: wiki/sources/skills/overview.md)
 
 ## Contributing & README format
 
@@ -153,7 +183,7 @@ Maintenance scripts under `scripts/`: `generate-toc.py` (TOC generation), `remov
 
 ## Core concepts
 
-- [[compiled-wiki]], [[research-rigor]] — synthesis layer and evidence discipline
+- [[compiled-wiki]], [[resource-selection]], [[research-rigor]] — synthesis layer, provenance workflow, and evidence discipline
 - [[easy-anti-cheat]], [[battleye]], [[vanguard]] — major AC products
 - [[dma]], [[iommu]] — external memory access threat/defense
 - [[hvci]], [[patchguard]], [[kernel-callbacks]], [[byovd]] — Windows trust stack
