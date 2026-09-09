@@ -16,6 +16,11 @@ emulator, or integrity signal as attribution.
 
 ## Mobile Trust Boundaries and Integrity Evidence
 
+Use [game-server-security](../game-server-security/SKILL.md) for verified
+purchases, entitlement transitions, account authorization and retries. Use
+[game-supply-chain-security](../game-supply-chain-security/SKILL.md) when the
+question concerns build provenance, updates or third-party content.
+
 Separate app package/signing, process isolation, platform/device integrity,
 and server authorization/game rules. Repackaging, privileged instrumentation,
 local-data exposure, request replay, and reliance on client assertions affect

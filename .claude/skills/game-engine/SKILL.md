@@ -17,6 +17,12 @@ offsets.
 
 ## Engine Trust Boundaries and Evidence
 
+Use [game-server-security](../game-server-security/SKILL.md) for authority,
+sessions, inventory and purchases, and
+[game-supply-chain-security](../game-supply-chain-security/SKILL.md) for build,
+update and mod-distribution trust. For owned-build diagnostic reports, use
+[robustness and triage](../research-rigor/references/robustness-and-triage.md).
+
 Baseline the engine branch, game build/hash, platform/ABI, scripting backend,
 stripping configuration, symbol availability, and plugin versions. Separate
 reflected metadata, native/managed execution, serialized assets, plugins, and

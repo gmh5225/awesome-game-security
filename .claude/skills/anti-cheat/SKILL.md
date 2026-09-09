@@ -11,6 +11,12 @@ This skill covers layered anti-cheat design across kernel drivers, privileged se
 
 ## Threat Coverage and Enforcement Evidence
 
+Separate detector design from
+[server/backend correctness](../game-server-security/SKILL.md). For native Linux,
+SteamOS and Proton observations, use
+[linux-platform-security](../linux-platform-security/SKILL.md) before applying
+Windows-specific assumptions.
+
 Describe each threat by the capability needed, resource exposed, trust boundary
 crossed, and observation point available to the defender. Compare host, device,
 graphics, input, and server observations without assuming one collector sees all

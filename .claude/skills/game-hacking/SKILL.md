@@ -11,6 +11,12 @@ This skill maps the offensive side of game-security threat models: what an attac
 
 ## Attacker Capability and Defensive Coverage
 
+For threats beyond local runtime access, use
+[game-server-security](../game-server-security/SKILL.md) for backend authority
+and transactional correctness, and
+[game-supply-chain-security](../game-supply-chain-security/SKILL.md) for build,
+release and mod trust. Each extends the attack taxonomy with its own prerequisites.
+
 Read the [attack surface map](references/attack-surface-map.md) when comparing
 attack families or building a defense coverage matrix. It includes client-state
 exposure, manipulation, injection, privileged acquisition, visual/input

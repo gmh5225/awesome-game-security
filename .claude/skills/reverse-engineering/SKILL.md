@@ -16,6 +16,11 @@ environment, and observed evidence; use
 
 ## Binary Evidence and Attack-Surface Findings
 
+For native Linux or Proton context, first use
+[linux-platform-security](../linux-platform-security/SKILL.md). For diagnostic
+reports from owned test builds, use
+[robustness and triage](../research-rigor/references/robustness-and-triage.md).
+
 Preserve the sample hash, provenance, architecture, image layout, tool version,
 analysis configuration, and symbol identity. Keep file offsets, RVAs, and
 runtime addresses distinct, including relocation assumptions in disk/memory

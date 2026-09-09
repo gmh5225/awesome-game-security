@@ -76,6 +76,9 @@ When an AI agent receives a query, use this table to select the best skill:
 | USB bridge/data-transfer cables, LeechCore, WinPmem, remote memory sources | dma-attack | windows-kernel, research-rigor |
 | Account/device restrictions, network association, NAT/CGNAT, claimed ban duration | anti-cheat | research-rigor |
 | Attack prerequisites, trust boundaries, benign counterexamples, defense coverage | game-hacking | the matching domain skill, research-rigor |
+| Gameplay RPCs, session verification, object authorization, inventory, purchases, retry semantics | game-server-security | game-engine, research-rigor |
+| CI/release credentials, launchers, signed updates, SBOM/provenance, mod distribution | game-supply-chain-security | game-engine, mobile-security |
+| Native Linux, SteamOS/Steam Deck, Proton, capabilities, namespaces, seccomp, LSMs | linux-platform-security | reverse-engineering, graphics-api |
 | Unreal SDK, Unity IL2CPP, engine structs, Godot, Lumix | game-engine | game-hacking |
 | Memory hacking, injection, overlays, driver comm, HWID spoof | game-hacking | graphics-api |
 | D3D/Vulkan/OpenGL hooks, Present hook, shader interception | graphics-api | game-hacking |
@@ -86,6 +89,15 @@ When an AI agent receives a query, use this table to select the best skill:
 | Adding resources, README format, link validation | overview | (any) |
 
 Also check `wiki/overviews/<topic>.md` for the matching primary skill topic before deep README/archive dives.
+
+The server, supply-chain, and Linux skills may not yet have corresponding wiki
+overviews. Use their local entrypoints and cited primary sources when a wiki
+page is absent; do not invent an overview path or treat its absence as no coverage.
+
+For skill-library improvement, use the
+[coverage and quality roadmap](references/coverage-roadmap.md). For routing and
+answer-quality regression review, use the
+[evaluation guide](../research-rigor/references/skill-evaluation.md).
 
 ## Main Categories
 
