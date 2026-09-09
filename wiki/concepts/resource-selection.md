@@ -36,7 +36,7 @@ Use a small comparative table when alternatives serve different roles (e.g. DMA 
 
 ## Data layer order
 
-1. Wiki entity/concept/overview ([[index]])
+1. Wiki entity/concept/overview (`wiki/index.md`)
 2. `description/{owner}/{repo}/description_en.txt`
 3. `archive/{owner}/{repo}.txt` (scoped inspection; not a guaranteed complete checkout)
 4. README category bullet

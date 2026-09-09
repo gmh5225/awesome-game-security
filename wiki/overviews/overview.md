@@ -137,7 +137,7 @@ Start from the question's object and desired output; pick the domain skill, then
 | Conflicting claims, source lineage, evaluation or uncertain attribution | [[research-rigor]] | Pair with the domain that supplies the actual technical contract |
 | Project maintenance, README format, link validation | (this page) | Adding resources, category placement, duplicate review |
 
-Resource discovery can finish at this page when the user only needs locations or a shortlist. Do not force a security review onto ordinary graphics, game-development, or library-usage questions merely because their resources appear in this collection. A corresponding wiki overview is not guaranteed for every skill—check [[index]] or the skill directory before constructing a path.
+Resource discovery can finish at this page when the user only needs locations or a shortlist. Do not force a security review onto ordinary graphics, game-development, or library-usage questions merely because their resources appear in this collection. A corresponding wiki overview is not guaranteed for every skill—check `wiki/index.md` or the skill directory before constructing a path.
 
 ## README cross-category routing
 
@@ -162,7 +162,7 @@ Current root layers: `README.md`, `.claude/skills/`, `wiki/`, `description/`, `a
 
 Prefer the [[compiled-wiki]] layer for cross-cutting synthesis; fall back in order when a repo-specific answer is needed. See [[resource-selection]] for selection format and provenance fields. (source: wiki/sources/skills/overview.md)
 
-1. Wiki entity/concept/overview (if present)—start at [[index]]
+1. Wiki entity/concept/overview (if present)—start at `wiki/index.md`
 2. `description/{owner}/{repo}/description_en.txt` (concise English summary; generated, not independent verification)
 3. `archive/{owner}/{repo}.txt` (captured source snapshot; may be truncated or incomplete—prefer relevant portions over re-cloning)
 4. README category entry (original URL with any file/revision suffix)
