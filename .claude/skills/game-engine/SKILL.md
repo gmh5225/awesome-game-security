@@ -17,6 +17,9 @@ offsets.
 
 ## Engine Trust Boundaries and Evidence
 
+For tick/frame distinctions, prediction, replication ordering and replay
+limitations, use [time and replay evidence](../game-server-security/references/time-ordering-and-replay.md).
+
 Use [game-server-security](../game-server-security/SKILL.md) for authority,
 sessions, inventory and purchases, and
 [game-supply-chain-security](../game-supply-chain-security/SKILL.md) for build,

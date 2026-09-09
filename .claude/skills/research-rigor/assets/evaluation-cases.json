@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "suite_id": "game-security-core-v1",
+  "suite_id": "game-security-core-v2",
   "purpose": "Public routing and reasoning regression scenarios. Not an automatic detector benchmark, hidden evaluation, or evidence of world-leading performance.",
   "cases": [
     {
@@ -383,6 +383,142 @@
       ],
       "critical_errors": [
         "Load security workflows because the sentence contains game."
+      ]
+    },
+    {
+      "id": "input-units-and-trajectory",
+      "kind": "boundary",
+      "prompt": "服务器按tick保存了客户端上报的鼠标dx/dy。能直接把它们当像素并完整还原玩家准星轨迹吗？",
+      "primary_skills": [
+        "anti-cheat",
+        "game-server-security"
+      ],
+      "checks": [
+        "Separate client-uploaded values from independent server observations.",
+        "Declare coordinate space, transformations, aggregation and sampling coverage.",
+        "Reconstruct only supported samples; preserve gaps and view/visibility limitations."
+      ],
+      "critical_errors": [
+        "Treat raw deltas as pixels or infer a complete sub-tick trajectory."
+      ]
+    },
+    {
+      "id": "cross-machine-time",
+      "kind": "boundary",
+      "prompt": "Client and server timestamps both have microsecond precision. Can their difference establish a precise player reaction time?",
+      "primary_skills": [
+        "game-server-security",
+        "research-rigor"
+      ],
+      "checks": [
+        "Identify source clocks and justify synchronization/mapping.",
+        "Distinguish timestamp resolution from timing accuracy.",
+        "Define actual visibility/input observation points and uncertainty."
+      ],
+      "critical_errors": [
+        "Infer precise cross-machine duration from timestamp resolution alone."
+      ]
+    },
+    {
+      "id": "replication-order",
+      "kind": "boundary",
+      "prompt": "Two Unreal actors send reliable RPCs, and a replicated property has a notification callback. Does reliable mean every receiver sees one global order?",
+      "primary_skills": [
+        "game-server-security",
+        "game-engine"
+      ],
+      "checks": [
+        "Identify the actor/channel scope of the documented ordering guarantee.",
+        "Do not assume cross-actor, mixed-message or RepNotify global ordering.",
+        "Review authoritative dependencies separately from callback order."
+      ],
+      "critical_errors": [
+        "Promise universal global ordering because messages are reliable."
+      ]
+    },
+    {
+      "id": "resimulation-effects",
+      "kind": "boundary",
+      "prompt": "同一simulation tick在客户端回滚重算时出现多次，是否说明玩家发了多次奖励请求，应该按次数发奖励或处罚？",
+      "primary_skills": [
+        "game-server-security",
+        "game-engine"
+      ],
+      "checks": [
+        "Separate repeated simulation from new input and committed operations.",
+        "Preserve prediction-pass and authoritative effect context.",
+        "Review persistent side-effect ownership and avoid attribution from repeated ticks."
+      ],
+      "critical_errors": [
+        "Count each resimulation as a fresh user action or entitlement grant."
+      ]
+    },
+    {
+      "id": "collector-send-failure",
+      "kind": "boundary",
+      "prompt": "A collector reports exporter failures and the detector shows fewer alerts. Does that prove permanent data loss, cleaner players, or grounds to sanction clients?",
+      "primary_skills": [
+        "anti-cheat",
+        "research-rigor"
+      ],
+      "checks": [
+        "Distinguish retryable send failures from confirmed lost or delayed evidence.",
+        "Compare pipeline health, coverage and evaluated counts.",
+        "Separate continuity policy and player attribution without a universal fail-open/closed rule."
+      ],
+      "critical_errors": [
+        "Equate fewer alerts with cleaner players or collector faults with misconduct."
+      ]
+    },
+    {
+      "id": "detector-decision-recovery",
+      "kind": "boundary",
+      "prompt": "We rolled back a faulty detector release. Have all sanctions and derived records produced by that release automatically been corrected?",
+      "primary_skills": [
+        "anti-cheat",
+        "research-rigor"
+      ],
+      "checks": [
+        "Separate code rollback from decision and data correction.",
+        "Identify affected windows, versions and original evidence.",
+        "Preserve review/correction history under the applicable policy."
+      ],
+      "critical_errors": [
+        "Claim model rollback automatically undoes consequential decisions."
+      ]
+    },
+    {
+      "id": "debugger-etw-scope",
+      "kind": "boundary",
+      "prompt": "A debugger-related thread setting changed debugger visibility. Can a report say that the thread is invisible to all ETW providers?",
+      "primary_skills": [
+        "windows-kernel",
+        "anti-cheat"
+      ],
+      "checks": [
+        "Distinguish debugger and ETW mechanisms.",
+        "Require exact provider/build/configuration evidence for an undocumented effect.",
+        "Treat absent events as a coverage question before claiming invisibility."
+      ],
+      "critical_errors": [
+        "Assert universal ETW invisibility from the debugger setting."
+      ]
+    },
+    {
+      "id": "callback-coverage",
+      "kind": "boundary",
+      "prompt": "One object-callback channel stopped producing events. Does that prove the entire security product is blind and all activity undetected?",
+      "primary_skills": [
+        "windows-kernel",
+        "anti-cheat"
+      ],
+      "checks": [
+        "Limit findings to the specific callback operation and interval.",
+        "Inspect available collector continuity, provider configuration and loss evidence.",
+        "Evaluate independent observations separately."
+      ],
+      "critical_errors": [
+        "Equate one missing channel with complete undetectability."
       ]
     }
   ]

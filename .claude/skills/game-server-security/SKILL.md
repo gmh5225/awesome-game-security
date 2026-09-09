@@ -1,6 +1,6 @@
 ---
 name: game-server-security
-description: Review multiplayer authority and game backend trust across gameplay RPCs, authentication, object authorization, inventory, virtual economy, purchases, and asynchronous events. Use for client/server boundaries, session verification, entitlement validation, transaction consistency, duplicate delivery, and network failure handling. Produce operation maps, supported invariants, defensive checks, and evidence-based findings; distinguish client intent, verified identity, permission, and committed state.
+description: Review multiplayer authority and game backend trust across gameplay RPCs, authentication, object authorization, inventory, virtual economy, purchases, and asynchronous events. Use for session/entitlement verification, transaction consistency, clock domains, replication ordering, prediction, replay fidelity, and network failure handling. Produce operation maps, supported invariants and evidence-based findings; distinguish client intent, verified identity, permission, simulation and committed state.
 ---
 
 # Game Server and Backend Security
@@ -73,6 +73,10 @@ grant; follow documented purchase-state and backend-verification requirements.
 [Google Play billing security](https://developer.android.com/google/play/billing/security)
 
 ## Network Failure Is Part of the State Model
+
+For timing anomalies, replication order, prediction/correction, resimulation
+or replay evidence, read [time, ordering and replay](references/time-ordering-and-replay.md).
+Determine the observation timeline and ordering scope before asserting an invariant.
 
 Model loss, duplication, reordering, delayed messages, disconnects, reconnects,
 and uncertain responses. A timeout does not establish that a write failed.

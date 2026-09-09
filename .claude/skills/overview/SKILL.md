@@ -77,6 +77,8 @@ When an AI agent receives a query, use this table to select the best skill:
 | Account/device restrictions, network association, NAT/CGNAT, claimed ban duration | anti-cheat | research-rigor |
 | Attack prerequisites, trust boundaries, benign counterexamples, defense coverage | game-hacking | the matching domain skill, research-rigor |
 | Gameplay RPCs, session verification, object authorization, inventory, purchases, retry semantics | game-server-security | game-engine, research-rigor |
+| Clock domains, tick/frame time, replication ordering, prediction/correction, replay fidelity | game-server-security | game-engine, anti-cheat |
+| Input units/provenance, telemetry health, detector rollout, decision recovery | anti-cheat | windows-kernel, research-rigor |
 | CI/release credentials, launchers, signed updates, SBOM/provenance, mod distribution | game-supply-chain-security | game-engine, mobile-security |
 | Native Linux, SteamOS/Steam Deck, Proton, capabilities, namespaces, seccomp, LSMs | linux-platform-security | reverse-engineering, graphics-api |
 | Unreal SDK, Unity IL2CPP, engine structs, Godot, Lumix | game-engine | game-hacking |

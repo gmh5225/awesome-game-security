@@ -16,6 +16,9 @@ generalizing a PoC or forensic heuristic.
 
 ## Driver Attack Surface and Evidence
 
+For event provenance, provider/callback scope and absent telemetry, use
+[observation coverage](../anti-cheat/references/input-provenance-and-measurement.md).
+
 | Threat class | Necessary capability or boundary | Evidence and defensive focus |
 |---|---|---|
 | Dangerous privileged interface | A caller can reach sensitive driver operations | Device ACLs, per-operation authorization, constrained functionality |
@@ -327,7 +330,8 @@ Key kernel providers:
 ```
 - Patch EtwEventWrite in ntdll.dll (user-mode ETW silencing)
 - Patch nt!EtwpEventWriteFull in kernel (kernel-mode ETW silencing)
-- NtSetInformationThread(ThreadHideFromDebugger) — hides thread from ETW
+- A debugger-related thread setting does not establish ETW invisibility;
+  undocumented cross-subsystem effects need build/provider-specific evidence
 - Remove provider registration by walking EtwRegistration list
 - EPT-based protection can defend ETW structures from tampering
 ```
@@ -1087,7 +1091,8 @@ Without hypervisor defense:
 1. Attacker loads vulnerable signed driver
 2. Gains kernel R/W primitives
 3. Patches callback list to remove EPP callbacks
-4. EPP is blinded — attacker operates undetected
+4. The affected callback channel may lose coverage; evaluate independent
+   evidence separately rather than assuming the whole product is blinded
 
 With EPT-based defense:
 1. Attacker loads vulnerable signed driver

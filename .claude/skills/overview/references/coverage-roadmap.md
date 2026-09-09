@@ -9,11 +9,13 @@ all other skill libraries. Source quantity and document length are not quality s
 | Area | Gap found in the baseline | This iteration | Further evidence needed |
 |---|---|---|---|
 | Server authority and backend economy | Mostly topic names and general server-authority advice | Dedicated operation, authorization, purchase and transaction review skill | Owned-service fixtures and provider/version-specific case studies |
+| Time, ordering and replay | General retry advice without clock or recording-fidelity analysis | Versioned engine references for timelines, ordering, resimulation and replay effects | Game-specific capture fidelity and authoritative-state fixtures |
+| Detector operational reliability | Statistical rules without a separate collector-health and decision-recovery workflow | Coverage/health states, rollout controls and correction evidence | Incident exercises and production cohort evaluation |
 | Build/update/mod supply chain | Plugin provenance and package signing without an end-to-end release model | Dedicated release-authority, update, provenance and content-boundary skill | Implementation-specific update/recovery and release-pipeline evidence |
 | Desktop Linux and Proton | Scattered tool/platform mentions without a coherent trust model | Dedicated runtime, credential, namespace and policy skill | Representative distro/runtime/game compatibility matrix |
 | Robustness and remediation | Tool names without a shared diagnostic-evidence workflow | Owned-build contracts, sanitizer limits and artifact-triage reference | Project-specific regression artifacts and reviewed fixes |
 | Skill behavior | No checked-in routing and answer-quality case suite | Public scenario suite, local validator and evaluation rubric | Repeated model runs, comparison baselines and separately held-out cases |
-| Legacy technical claims | New evidence rules coexist with older detailed catalogs | Existing catalogs retained; new material cites primary sources | Claim-by-claim review of historical thresholds, layouts, compatibility and detectability claims |
+| Legacy technical claims | New evidence rules coexist with older detailed catalogs | Focused corrections to input/trajectory provenance, units, behavioral generalizations and ETW/callback coverage; remainder retained | Further claim-by-claim review of historical thresholds, layouts, compatibility and detectability claims |
 
 ## Priorities Beyond This Iteration
 

@@ -136,6 +136,11 @@ for the relevant RFCs and a worked claim breakdown.
 
 ## Invariant checks
 
+For timing, rollback or recording-dependent invariants, use
+[time and replay evidence](../game-server-security/references/time-ordering-and-replay.md).
+For absent or delayed telemetry and decision recovery, use
+[detector operations](../anti-cheat/references/detector-operations.md).
+
 Before treating an invariant violation as strong evidence:
 
 1. Confirm the invariant is actually guaranteed for that state and build.

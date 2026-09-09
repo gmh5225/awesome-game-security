@@ -6,8 +6,8 @@ skill behavior; it is not an anti-cheat classifier benchmark.
 
 ## Public Regression Suite
 
-[evaluation-cases.json](../assets/evaluation-cases.json) contains 24 scenarios:
-13 positive, 8 boundary, and 3 unrelated requests. `primary_skills` lists
+[evaluation-cases.json](../assets/evaluation-cases.json) contains 32 scenarios:
+13 positive, 16 boundary, and 3 unrelated requests. `primary_skills` lists
 acceptable primary **folder IDs**, not a requirement to load every listed skill.
 An empty list means the request should not invoke a game-security workflow.
 
@@ -60,7 +60,7 @@ Record each dimension as **met**, **partial**, **failed**, or **not observable**
 with supporting output. A critical error fails the case's reasoning assessment;
 do not hide it in an average score. "Not observable" is not a pass.
 
-Report counts and raw outcomes before aggregate rates. These 24 authored cases
+Report counts and raw outcomes before aggregate rates. These 32 authored cases
 are a small public regression set. They are not independent, representative of
 all user tasks, or sufficient to estimate production error rates. Additional
 held-out requests and repeated runs are necessary for generalization claims.

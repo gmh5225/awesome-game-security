@@ -1,6 +1,6 @@
 ---
 name: anti-cheat-systems
-description: Analyze layered game integrity defenses across clients, Windows kernel components, hardware trust, server authority, and behavioral telemetry. Use for driver and memory evidence, DMA versus host-mediated acquisition, input-device signals, account/device restrictions, network association, or false-positive review. Map attack prerequisites and observation points, distinguish detection from enforcement, and produce versioned findings with corroboration, limitations, and primary sources.
+description: Analyze layered game integrity defenses across clients, kernels, hardware trust, server authority, and behavioral telemetry. Use for driver/memory evidence, DMA versus host-mediated acquisition, input provenance, replay fidelity, collector health, detector rollout/recovery, account/device restrictions, network association, and false-positive review. Map prerequisites and observation points, distinguish detection from enforcement, and produce versioned findings with corroboration, limitations, and primary sources.
 ---
 
 # Anti-Cheat Systems & Analysis
@@ -10,6 +10,11 @@ description: Analyze layered game integrity defenses across clients, Windows ker
 This skill covers layered anti-cheat design across kernel drivers, privileged services, in-game components, and backend telemetry. It is most useful for mapping how modern anti-cheats monitor process handles, image loads, memory integrity, driver trust, virtualization abuse, DMA threats, and suspicious input behavior on Windows.
 
 ## Threat Coverage and Enforcement Evidence
+
+For input units, uploaded fields or missing events, use
+[input provenance and measurement](references/input-provenance-and-measurement.md).
+For service faults, shadow/canary evaluation, rollout and affected decisions, use
+[detector operations](references/detector-operations.md).
 
 Separate detector design from
 [server/backend correctness](../game-server-security/SKILL.md). For native Linux,
@@ -319,6 +324,11 @@ Anti-AI Countermeasures (Game Design):
 ```
 
 ### Server-Side Replay Analysis for AI Aimbot Detection
+
+Before interpreting trajectories or reaction time, use
+[input measurement](references/input-provenance-and-measurement.md) and
+[time, ordering and replay](../game-server-security/references/time-ordering-and-replay.md).
+
 ```
 Server-side detection can analyze gameplay and input telemetry without relying
 on local process-scanning hits. It is a strong complementary layer against
@@ -326,7 +336,9 @@ zero-memory AI cheats when telemetry provenance and integrity are trustworthy;
 client-uploaded fields remain untrusted until validated.
 
 Input Telemetry Collection:
-- Record raw mouse delta (dx, dy) per tick at server tick rate
+- Separate server-observed view/action state from uploaded client input
+- For each field record origin, units, sample rate, aggregation and validation;
+  server tick records alone do not establish raw-device or sub-tick coverage
 - Record timestamps at the highest reliable precision supported by the input,
   engine, transport, and clock-synchronization pipeline
 - Record crosshair angle / view angle per tick
@@ -336,7 +348,8 @@ Input Telemetry Collection:
   headshot count, K/D, average engagement distance
 
 Replay-Based Trajectory Reconstruction:
-- Reconstruct full crosshair trajectory from recorded input deltas
+- Reconstruct only the sampled trajectory supported by recorded data;
+  preserve missing intervals, transformations and interpolation uncertainty
 - Overlay trajectory onto 3D game state (player positions, obstacles)
 - Identify "engagement windows": trajectory segments where crosshair
   moves toward and locks onto a target
@@ -349,13 +362,15 @@ Statistical Features for AI Detection:
 Temporal features:
 - Reaction time distribution: time from target visibility to
   first crosshair movement toward target
+  → Distinguish world, replicated, replay and displayed visibility;
+    define the available observation point before measuring the interval
   → Compare automation and human distributions only within a matched,
     versioned setup; target-visibility definition, tick rate, latency, skill,
     and input method materially change the result
 - Time-to-lock distribution: time from engagement start to
   crosshair on target
-  → AI: consistent, speed-limited by smoothing algorithm
-  → Human: highly variable, depends on initial angular distance
+  → Compare matched distributions; consistency is a hypothesis to evaluate,
+    not a universal distinction between automation and human behavior
 
 Spatial features:
 - Trajectory curvature: some smoothing algorithms produce repeated parametric
@@ -372,13 +387,12 @@ Engagement pattern features:
 - Target selection consistency: automation configured with an explicit scoring
   objective may select targets more consistently than a matched human baseline;
   implementations need not use closest-to-crosshair or confidence ordering
-- FOV boundary effect: AI shows sharp engagement cutoff at
-  configured pixel radius; humans have gradual falloff
-- Engagement rate: percentage of visible targets engaged;
-  AI engages more consistently than humans who miss, ignore,
-  or react slowly to peripheral targets
-- Multi-target switch pattern: AI switches with machine-like
-  regularity; humans show grouping and hesitation
+- FOV boundary effect: measure boundary behavior in a declared coordinate
+  space and context; there is no universal automated/human cutoff shape
+- Engagement rate: measure against a defined visible-target denominator
+  and matched task/skill/input context; consistency alone is not attribution
+- Multi-target switching: compare timing and grouping against matched
+  baselines; regularity is a candidate feature, not proof of automation
 ```
 
 ### ML Classifier for AI Aimbot Detection
@@ -386,18 +400,23 @@ Engagement pattern features:
 Feature engineering and model architecture for detecting
 AI-generated mouse input at scale.
 
+Declare observed coordinate spaces, transformations and sampling/time bases.
+Device-relative units, normalized absolute coordinates, viewport pixels and
+view-angle degrees are distinct; pixel metrics require supported pixel data
+or a documented conversion. See the input measurement reference above.
+
 Feature Vector (per engagement window):
   f1:  reaction_time_ms
   f2:  time_to_lock_ms
   f3:  initial_angular_distance_deg
   f4:  trajectory_curvature_mean
   f5:  trajectory_curvature_std
-  f6:  overshoot_magnitude_px
+  f6:  overshoot_magnitude (declared coordinate space and units)
   f7:  correction_count
   f8:  final_hold_time_ms
   f9:  angular_velocity_max_deg_per_sec
   f10: angular_velocity_std
-  f11: micro_correction_frequency (small deltas < 2px per tick)
+  f11: micro_correction_rate (calibrated threshold, declared units/time base)
   f12: trajectory_straightness_ratio (distance / path_length)
   f13: dx_dy_correlation (Pearson correlation of delta components)
   f14: delta_magnitude_entropy (Shannon entropy of |delta| sequence)
@@ -876,8 +895,10 @@ Limitations:
 ```
 - Periodic client-to-server health check packets
 - Encrypted challenge-response with server nonce
-- Timing-based integrity: detect suspended or debugged processes
-- Failure modes: silent disconnect, delayed ban, immediate kick
+- Timing anomalies can reflect scheduling, transport, collector or backend
+  faults as well as other causes; diagnose the observation path first
+- Apply documented access-continuity policy separately from misconduct
+  attribution; heartbeat failure alone does not establish grounds for a sanction
 ```
 
 ### Screenshot Capture
