@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-09** — ingest `skill:game-hacking`: attacker-capability/defensive-coverage framing + EFI/UEFI trust boundaries + HWID spoofing synthesis on [[overviews/game-hacking]]; new concepts [[hwid-spoofing]] and [[driver-communication]]; YOLO training→TensorRT pipeline on [[obs-game-capture]]; `index.md` updated.
+
 - **2026-09-09** — ingest `skill:game-engine`: [[engine-trust-boundaries]] concept (baseline dimensions, boundary map, evidence report fields); trust-boundary synthesis on [[overviews/game-engine]]; reflection vs native layout on [[unreal-object-model]], IL2CPP metadata limits on [[il2cpp]], SDK license ground truth on [[source-netvars]]; `index.md` updated.
 
 - **2026-09-09** — ingest `skill:dma-attack`: [[memory-acquisition-path]] classification (initiator vs transport vs analysis site); assurance boundaries and device evidence dimensions on [[overviews/dma-attack]]; full 16-entry IOMMU bypass catalog + ATS-untrusted/RMRR on [[concepts/iommu]]; [[entities/pcileech]] initiator/transport split and FPGA shadow-config architecture; `index.md` updated.

@@ -4,11 +4,14 @@ kind: concept
 topics: [graphics-api, game-hacking, anti-cheat]
 sources:
   - wiki/sources/skills/graphics-api.md
+  - wiki/sources/skills/game-hacking.md
   - wiki/sources/descriptions/gmh5225__OBS-graphics-hook32-Hook.md
   - wiki/sources/descriptions/gmh5225__OBS-Hook.md
   - wiki/sources/descriptions/ekknod__G37OBS.md
   - wiki/sources/descriptions/aufkrawall__capture-engine.md
-updated: 2026-08-18
+  - wiki/sources/descriptions/Passer1072__RookieAI_yolov8.md
+  - wiki/sources/descriptions/Leksa667__YOLOv8-Overlay-CS2.md
+updated: 2026-09-09
 confidence: medium
 ---
 
@@ -41,6 +44,19 @@ Game render → Present/backbuffer copy → shared GPU texture
 **OBS plugin form factor** — AI as an OBS video filter (`obs_source_frame` callback) runs inference in-process and may emit HID via hardware devices; appears as “OBS running a filter.” Title-specific Lua OBS plugins such as [[g37obs]] (ekknod; CS:GO; plugin development; cheat / game:csgo) illustrate game-facing OBS plugin research beside generic AI-filter pipelines. (source: wiki/sources/descriptions/ekknod__G37OBS.md)
 
 **Dual-machine** — Game PC OBS → NDI or capture card → cheat PC inference → network to KMBox on game PC; end-to-end latency depends on encode, buffer, and sync—measure percentiles on the deployed setup, not fixed budgets.
+
+## YOLO training pipeline (game-specific models)
+
+End-to-end workflow from gameplay frames to deployed inference—measure on the exact capture path, model, precision, and hardware. (source: wiki/sources/skills/game-hacking.md)
+
+1. **Data collection** — diverse maps, lighting, skins, distances, occlusion; include negative samples (friendlies, empty scenes)
+2. **Annotation** — YOLO txt format (`class cx cy w h`, normalized 0–1); typical classes: enemy body, enemy head, friendly
+3. **Augmentation** — Ultralytics mosaic/mixup; game-specific brightness/contrast, crosshair crop, motion blur; avoid aspect-ratio distortion
+4. **Training** — Ultralytics YOLOv8/v10/v11; tune input size, confidence/NMS thresholds, batch; validate mAP and held-out maps/skins/patches
+5. **Export** — ONNX simplify → TensorRT engine (FP16/INT8 with calibration); benchmark latency vs accuracy on target GPU
+6. **Runtime** — preprocess ROI (e.g. 320×640), decode version-specific output tensors, NMS, target selection (crosshair distance + confidence), pixel→mouse delta
+
+Alternative backends: DirectML, OpenVINO, ONNX Runtime CUDA EP. Corpus: [[rookieai-yolov8]], [[yolov8-overlay-cs2]], [[ai-aimbot-detection]].
 
 Corpus adjacency: [[input-overlay]] (OBS Keyboard Mapper plugin), [[present-hook]] (backbuffer copy alternative to OBS hook). OBS graphics-hook hijack samples such as [[obs-graphics-hook32-hook]] (gmh5225; 32-bit OBS hook inject; pointer-replacement technique) and [[obs-hook]] (gmh5225; hijack OBS Game Capture hook DLL to inject custom draw calls through OBS's trusted pipeline—no separate overlay HWND; AC whitelist research) illustrate offensive reuse of the same Game Capture hook surface researchers already monitor for `obs-graphics-hook64.dll`. (source: wiki/sources/descriptions/gmh5225__OBS-graphics-hook32-Hook.md) (source: wiki/sources/descriptions/gmh5225__OBS-Hook.md)
 
