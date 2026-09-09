@@ -4,6 +4,7 @@ kind: concept
 topics: [anti-cheat]
 sources:
   - wiki/sources/skills/anti-cheat.md
+  - wiki/sources/descriptions/pavelinbs-afk__anticheatsystem.md
 updated: 2026-09-09
 confidence: high
 ---
@@ -31,6 +32,8 @@ Diagnose the observation path first:
 - Combine **causally distinct** signals; correlated detectors can fail together.
 - Maximum-score aggregation or a fixed signal count does not guarantee a lower false-positive rate—measure joint error on held-out populations.
 - Retrain periodically when adversaries adapt; validate session-level aggregation for cross-session dependence and drift.
+
+Production server plugins such as [[anticheatsystem]] aggregate modular analyzer hits into JSON-configured suspicion scores before log/report/ban escalation via shared admin APIs—tune thresholds and module weights with shadow/canary runs before enabling automatic sanctions. (source: wiki/sources/descriptions/pavelinbs-afk__anticheatsystem.md)
 
 ## Related
 
