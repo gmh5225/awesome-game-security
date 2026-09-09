@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-09** — ingest `readme:categories`: Cheat ~2797 (+1; fare9/[[dragons-vs-vms]] VMProtect x64 devirtualization lab in Fix VMP) / Anti Cheat ~716 / other major section counts stable; 41 sections; entity [[dragons-vs-vms]]; refreshed README-map counts and Fix VMP scope on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/reverse-engineering]], and [[overviews/dma-attack]]; light `index.md` section notes (no per-category pages).
+
 - **2026-09-09** — lint: index vs disk scan — 9 overviews, 42 concepts, 3867 entities (3918 index entries); index.md fully synced (0 missing, 0 dead, 0 duplicate entries); overview wikilink spot-check (9 pages) — fixed 2 dead [[index]] wikilinks on [[overviews/overview]] (`wiki/index.md` catalog reference); concept spot-check (42 pages) — fixed 1 dead [[index]] on [[resource-selection]]; 6 cross-kind slug collisions ([[game-hacking]], [[anti-cheat]], [[reverse-engineering]], [[il2cpp]], [[byovd]], [[dma]]) — expected, no repair needed.
 
 - **2026-09-09** — ingest `description:fuqiuluo/amice`: entity [[amice]] (fuqiuluo; Rust LLVM pass plugin; clang -fpass-plugin compile-time IR obfuscation; string encrypt, CFF, bogus CFG, MBA, indirect calls/branches, BB split/shuffle, instruction-level VMP; llvm-plugin-rs + inkwell; LLVM 11–22; Android NDK; C/C++/Rust; Obfuscation Engine); cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]]; cross-linked [[control-flow-flattening]], [[mixed-boolean-arithmetic]], [[dll-ollvm]], [[the-poor-mans-obfuscator]], [[kagura]], and [[dprotect]]; `index.md` updated.
