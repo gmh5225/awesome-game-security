@@ -4261,6 +4261,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/gmh5225/Alcatraz
 - https://github.com/es3n1n/obfuscator
 - https://github.com/ykus4/kagura [LLVM pass plugin for CFG/string obfuscation, anti-tamper, and anti-debug across mobile/desktop/Wasm]
+- https://github.com/fuqiuluo/amice [Rust LLVM pass plugin for compile-time obfuscation and instruction-level VM virtualization on C/C++/Rust (LLVM 11–22; Android NDK supported)]
 - https://github.com/nkhmelni/Obscura [Hassle-free LLVM pass-plugin obfuscator for C/C++/ObjC/Swift]
 - https://github.com/jnastarot/furikuri
 - https://github.com/nickcano/RelocBonus [Attack Reloc]
@@ -4436,6 +4437,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - [Proof of concept Anti-Cheat plugin for CS:GO](https://github.com/ekknod/CSGO-AC)
 - https://github.com/Pintuzoft/OSAntiCheat [Server-side CS2 CounterStrikeSharp heuristic anti-cheat (spinbot/aimbot/triggerbot/wallhack detectors, log-only)]
 - https://github.com/karola3vax/CS2AC [Open-source server-side CS2 anti-cheat Metamod:Source plugin with aimbot/aimlock/silentaim and related detections]
+- https://github.com/pavelinbs-afk/anticheatsystem [CS2 MetaMod server-side anti-cheat with C++ aim/movement/statistics analyzers, suspicion scoring, and AdminPlugin ban integration]
 - https://github.com/cs2-server-plugins/cs2-calladmin [ModSharp CS2 server plugin for in-game cheater reports with admin claim/resolve workflow and optional Discord notifications]
 - https://github.com/speedskater1610/CS2KAC [Open-source CS2 kernel-mode anti-cheat companion (KMDF driver + usermode service) for client-side integrity signals alongside CS2AC/CS2FOW]
 - https://github.com/Driw0x/CS2Guard [ML behavioral cheat detection for CS2 from demo parsing and feature engineering toward real-time server-side anti-cheat]
