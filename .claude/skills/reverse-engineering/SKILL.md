@@ -125,48 +125,33 @@ project or locating the matching README family.
 4. Behavioral analysis
 5. Driver IOCTL and callback tracing
 
-### Exception-Driven Lightweight DBI (Trap-and-Emulate)
-```
-Concept:
-- Replace branch instructions with fault-generating sentinel opcodes
-- Catch the resulting exception → emulate the original branch → log → resume
-- Full cycle: patch → fault → capture → emulate → record → restore → continue
+### Exception-Driven Instrumentation: Evidence Limits
 
-Sentinel Selection:
-- HLT (0xF4) for ret → triggers STATUS_PRIVILEGED_INSTRUCTION
-- SALC (0xD6) for jmp/jcc/call → triggers STATUS_ILLEGAL_INSTRUCTION
-- Avoids INT3 (0xCC) which anti-debug/integrity checks commonly scan for
-- Different sentinels can multiplex branch types
+Exception-driven instrumentation observes selected execution points while changing
+some combination of code, memory permissions, exception handling, state or timing.
+Treat the resulting trace as an observation under those conditions. A static
+control-flow graph or a smaller modification footprint does not establish a
+universally safer or more complete strategy.
 
-Exception Capture:
-- Hooking KiUserExceptionDispatcher can avoid some higher-level VEH/SEH
-  dispatch overhead, but latency, stability, and detectability must be measured
-  on the target Windows build
-- Assembly stub tail-calls into RtlDispatchException
-- Handler dispatches by exception code to custom emulation logic
+For owned test programs, assess:
 
-Branch Emulation Engine:
-- Disassemble original (pre-patch) instruction at fault RIP
-- jcc: 16-condition lookup table (ZF, SF, CF, OF, PF combinations)
-- Direct call: push return address, update RIP
-- Indirect branch: resolve effective address (register, memory, SIB, RIP-relative)
-- ret: pop return address from stack, handle ret imm16 (extra pop)
-- loop/jrcxz: decrement RCX, conditional branch
+- **Semantic fidelity:** expected registers, memory effects, error handling,
+  synchronization and program results remain consistent with an uninstrumented
+  baseline under the supported conditions.
+- **Coverage:** define the measured unit (instruction, block, edge or function),
+  denominator, input set, thread scope and missing intervals. An observed edge
+  does not establish every feasible path, and a page event is not an instruction
+  trace.
+- **Observation cost:** report runtime overhead, exception volume, termination,
+  instability and changes in scheduling; distinguish application defects from
+  collection artifacts.
+- **Scope:** identify unsupported instructions, generated code, external calls
+  and collector limitations before transferring results across versions.
 
-Instrumentation Strategies:
-- Bounded Bulk Patching: scan a window from seed address, patch all branches
-  → Simple but detectable by integrity checks
-- Branch Chasing: patch only current branch, re-instrument at target on fault
-  → Smaller patch footprint, with coverage, race, and detectability tradeoffs
-- CFG-Guided Patching: recursive-descent static CFG + chasing for unreached edges
-  → Best coverage/safety balance
-
-Integrity Check Evasion:
-- PAGE_GUARD + Trap Flag (single-step) instead of direct code patching
-- Trigger guard page exception → set TF → single-step through original instruction
-- Avoids directly modifying `.text`, but guard state, exception rate, debug
-  state, and timing can still be detected
-```
+[DynamoRIO's transparency documentation](https://dynamorio.org/transparency.html)
+explains state, resource, synchronization and timing concerns for its own clients.
+It supports these review dimensions; it does not validate the ad hoc exception
+instrumentation previously described here. Sources reviewed: 2026-09-09.
 
 ### Control Flow Tracing (CFT) Applications
 ```
@@ -176,51 +161,33 @@ Integrity Check Evasion:
 - Deobfuscation: resolve indirect branches observed under covered executions;
   completeness requires additional path exploration or proof
 - Hot path analysis, branch coverage measurement
-- Exception-per-branch designs can be orders of magnitude slower; benchmark the
-  exact target and account for timing checks and session timeouts
+- Report measured tracing overhead for the exact workload, collector and
+  environment; preserve timeouts and observation-induced failures
 - Portable to other architectures: ARM (UDF), RISC-V (illegal instruction)
 ```
 
-### User-Mode Hypervisor-Assisted Tracing
-```
-Concept:
-- Use Windows Hypervisor Platform (WHP) API to run guest code in user mode
-- No kernel driver required — standard user-mode process hosts the hypervisor
-- Map host memory pages into guest address space
-- Configure page-level traps (read/write/execute permissions per page)
-- Guest execution triggers VM exits on configured events
+### User-Mode Hypervisor-Assisted Analysis
 
-Trap-Driven Execution:
-- Page fault traps: set per-page R/W/X permissions via EPT-equivalent API
-  → Execute fault = code coverage, Write fault = memory write monitoring
-  → Read fault = data access tracking
-- CPUID interception: guest executes CPUID → VM exit → host decides response
-  → Useful for fingerprinting guest environment queries
-- Syscall interception: guest executes syscall → VM exit → host emulates
-  → Controlled experiments without real kernel interaction
+A user-mode application can manage guest partitions and virtual processors through
+Windows Hypervisor Platform, backed by the Windows hypervisor. This is not the
+same as running the hypervisor inside that process, forcing all guest code to
+execute in user mode, or gaining arbitrary control of the running host kernel.
+[Microsoft WHP API](https://learn.microsoft.com/en-us/virtualization/api/hypervisor-platform/hypervisor-platform)
 
-Workflow:
-1. Prepare initial CPU state (registers, segments, control registers)
-2. Map target code + data pages with desired permissions
-3. Enter guest execution loop
-4. On VM exit: inspect reason, handle trap, optionally modify state
-5. Resume or terminate guest
+For an existing analysis trace, record host/guest boundaries, guest execution
+state, modeled memory/devices, enabled capabilities and the actual exit reason.
+A page-access exit can support a finding about that access under the configured
+policy; it does not provide complete instruction or edge coverage. The documented
+exit enumeration has no generic syscall exit: do not assume every guest system
+call automatically transfers control to the analysis application.
+[Microsoft exit contexts](https://learn.microsoft.com/en-us/virtualization/api/hypervisor-platform/funcs/whvexitcontextdatatypes)
 
-Advantages:
-- Pure user-mode: no driver signing, no PatchGuard concerns
-- Controlled: host controls modeled guest memory and CPU state; external timing,
-  concurrency, devices, and unmodeled OS behavior can introduce nondeterminism
-- Composable: combine with disassemblers/emulators for hybrid analysis
-- Debuggable: host process can be debugged normally
-
-Limitations:
-- Requires hardware virtualization support (VT-x/AMD-V)
-- Windows-specific (WHP API is Windows 10+)
-- The lightweight workflow described here is suited to snippets/functions;
-  booting a full OS is possible only with substantially more platform and device
-  modeling
-- Nested virtualization considerations when host is already a VM
-```
+Match OS/SDK/architecture and nested-environment support to the particular API
+and tool. Use the [Windows WHP contract](../windows-kernel/SKILL.md#windows-hypervisor-platform-whp-api)
+for version and capability details. Preserve unmodeled scheduler, device, timing
+and concurrency effects, along with unsupported instructions and missing trace
+intervals. Review semantic fidelity against an owned baseline before drawing
+conclusions from a modeled execution. Sources reviewed: 2026-09-09.
 
 ## Anti-Analysis Bypass
 
@@ -401,16 +368,24 @@ queries like "find all functions calling CreateRemoteThread" or
 ```
 Tools for comparing binary versions (patch analysis, vulnerability research):
 - BinDiff (Google): graph-based structural comparison
-- Diaphora: IDA plugin, best open-source binary diff
+- Diaphora: IDA-based program comparison; matching quality requires validation
 - ghidriff: Ghidra-based diffing, command-line and scriptable
 - DarunGrim: patch analysis focused differ
 - turbodiff: lightweight IDA diffing plugin
 
 Use cases in game security:
 - Tracking anti-cheat driver updates between versions
-- Identifying patched vulnerabilities in game clients
+- Reviewing changed behavior and trust-boundary assumptions in supplied builds
 - Comparing obfuscated builds to isolate logic changes
 ```
+
+[Diaphora's maintainer documentation](https://github.com/joxeankoret/diaphora)
+describes an IDA-based diffing tool; a comparative quality ranking requires a
+specified benchmark and independently checked matches. Preserve tool/IDA versions,
+both input hashes, architecture, compiler/optimization changes and unmatched
+functions. Similarity scores and decompiled differences are candidate evidence;
+corroborate a claimed semantic change before assigning security impact.
+Source reviewed: 2026-09-09.
 
 ## Anti-Debug Techniques Catalog
 

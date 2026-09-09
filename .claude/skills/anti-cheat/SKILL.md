@@ -35,6 +35,9 @@ Keep connection failure, rate limiting, detection, and enforcement as separate
 events. A common address, acquisition driver, or unusual input device needs
 context and corroboration before attribution.
 
+For firmware-tier, EPT/DMA, HVCI, containment, or TPM certainty claims, use
+[assurance boundaries](../dma-attack/references/assurance-boundaries.md).
+
 For a two-computer memory setup, first use
 [acquisition and transport classification](../dma-attack/references/acquisition-and-transport.md).
 PCIe inspection addresses a different surface from host-driver acquisition;
@@ -511,14 +514,13 @@ Limitations:
 - VAD and executable memory inspection
 
 ### Hypervisor-Level Components
-```
-- EPT-based memory access monitoring
-- Callback list write protection via EPT hooks
-- ETW structure integrity enforcement
-- AC driver code page protection (prevent patching)
-- VMCALL interface for policy configuration from kernel driver
-- VM exit handlers for EPT violations on protected regions
-```
+
+Potential roles include CPU memory-permission enforcement and integrity evidence
+for specifically protected regions. Identify the actual hypervisor integration,
+policy owner, protected object/page lifetimes, and configuration interface.
+Hypervisor presence does not establish that callback lists, telemetry structures,
+or arbitrary third-party code are protected. DMA remapping is a separate path.
+[Assurance boundaries](../dma-attack/references/assurance-boundaries.md)
 
 ### Server-Side Components
 - Statistical analysis
@@ -551,45 +553,24 @@ Limitations:
 ## DMA Cheat Detection Methodology
 
 ### PCIe-Layer Detection Pipeline
-```
-Detection targets inconsistencies between what a device claims to be
-and how it actually behaves. Each technique targets a specific
-firmware emulation tier or class of gap.
 
-Configuration Integrity:
-- VID/DID/SVID/SDID against known-real-silicon allowlist
-- Capability-chain walk: DWord-aligned Next pointers, no overlaps, no cycles
-- Signature-residue scanning: Xilinx 7-series default byte patterns,
-  Device Capabilities field bits, reserved-field defaults
-- Capability presence consistency: donor model must expose expected caps
-- BAR mask verification: write 0xFFFFFFFF, compare size mask vs donor
+Compare supported inventory and device observations with a matched, documented
+baseline. Record exact SKU/function, firmware, driver, platform topology, power
+state, and workload before interpreting an identity or behavior discrepancy.
 
-BAR Memory Probing:
-- Send Memory Read TLPs to BAR ranges, validate responses by donor class
-- NIC BAR0: register layout (ring descriptors, interrupt mask, link status)
-- NVMe BAR0: controller registers (CAP, VS, CC, CSTS, AQA, ASQ/ACQ)
-- XHCI BAR0: capability registers (CAPLENGTH, HCSPARAMS, HCCPARAMS)
-- stock pcileech zerowrite4k returns all-zeros; loopaddr echoes address
+- Configuration: identifiers, capability structure, OS-assigned resources, and
+  collector coverage; an unknown identifier is not an automatic verdict.
+- Function: applicable device contract and existing register/driver evidence;
+  a zero value or idle device has legitimate explanations.
+- Link and errors: negotiated state, platform policy, power/workload context,
+  available logs, and missing-data limits.
+- Decision: specific discrepancy, plausible benign causes, corroboration, and
+  evaluation error rates for the population where the rule will operate.
 
-R/W Consistency:
-- Toggle writable bits (Command BME, Device Control MPS/MRRS, MSI Enable)
-- Walk W1C bits (Status, AER Status): write 1s, confirm clear semantics
-- Walk reserved bits: write 1s, confirm read-back as 0
-- Per-register writable masks must match donor model exactly
-
-Link-State Validation:
-- Compare negotiated Width/Speed with slot topology, platform policy, signal
-  integrity, and the claimed device; capable devices can legitimately train down
-- DLL Active, Slot Clock Config consistency
-- ASPM behavioral validation only when ASPM is enabled and the workload,
-  observation window, firmware, and platform policy should exercise it
-
-AER Baselining:
-- Compare correctable-error rates against per-silicon baseline
-- Implausibly clean logs (zero correctables when donor normally
-  produces Bad TLP / Replay Timer Timeout) = anomalous
-- UR/CA response distribution to probes of unimplemented offsets
-```
+Windows owns PCI headers and capability registers. A generic collector should
+not modify another driver's bus-master, interrupt, BAR, or remapping state as a
+live classification probe. Use documented, permitted interfaces and read the
+[platform ownership limits](../dma-attack/references/assurance-boundaries.md).
 
 ### Completion Latency Fingerprinting
 ```
@@ -633,8 +614,9 @@ Execution phase statistical signature:
 - Distinguishing features: Fano factor, autocorrelation at frame intervals,
   address-space coverage entropy
 
-Honeypot regions effective when combined with IOMMU denial/fault logging,
-hypervisor EPT traps, decoy IOVA mappings, or server-side behavioral traps.
+Decoy evidence must identify the requester and collector. An EPT trap concerns
+CPU access; device DMA needs its own remapping/fault or platform evidence.
+An application event has different semantics. None alone establishes cheating.
 ```
 
 ### IOMMU-Layer Detection
@@ -659,57 +641,43 @@ ACS Topology Verification:
   possible; confirm the full topology, root-complex behavior, and IOMMU grouping
 ```
 
-### IOMMU Containment Primitives
-```
-Before ban verdict, containment protects the live match:
+### IOMMU Containment Boundaries
 
-1. IOMMU domain sandbox: reprogram device domain to sandbox memory;
-   cheat reads garbage data
+Identify the OS/platform authority for device isolation, the affected hierarchy,
+current mappings, in-flight work, recovery owner, and evidence of completed
+isolation. Remapping, bus-master state, and downstream-port containment have
+separate prerequisites; their effectiveness is not determined by a firmware tier.
 
-2. Bus Master Enable clearance: toggle Command[2] to 0;
-   effective for tier-0 through tier-3
-
-3. Downstream Port Containment (DPC): if upstream port supports
-   DPC Extended Capability (0x001D), trigger Contained state —
-   contain downstream traffic according to the port/platform implementation;
-   verify the resulting link and device state
-
-4. Anti-cheat-owned device domain: map only sandbox IOVAs
-```
+A generic game-security driver must not take ownership of another driver's PCI
+configuration or remapping state. Use documented platform lifecycle/policy
+controls, evaluate availability effects, and separate authorized access restriction
+from a sanction decision.
+[Containment contract](../dma-attack/references/assurance-boundaries.md)
 
 ### External Trust Anchors
-```
-When local kernel/hypervisor trust fails, external anchors close the gap:
 
-TPM Remote Attestation:
-- Server sends nonce → client requests TPM2_Quote(AIK, PCR_selection, nonce)
-- Verifier checks: AIK signature, certificate chain, EK binding,
-  nonce freshness, PCR composite matches known-good policy
-- A compromised kernel cannot normally set extend-only PCRs back to an
-  arbitrary prior value, but a valid quote still covers only selected
-  measurements and not all runtime state
+Attestation can support confidence in selected measurements when key enrollment,
+verifier trust, freshness, measurement-log consistency, and appraisal policy are
+validated. It does not automatically reveal a present DMA device or every live
+IOMMU mapping, and a manufacturer certificate is not a universal attestation-key
+trust chain.
 
-Measured Boot PCR Relevance:
-- PCR[0]: UEFI firmware code
-- PCR[7]: Secure Boot policy + DMA Protection Disabled event
-- PCR[17]: DRTM/Secure Launch measurement
-
-UEFI Pre-Boot DMA Integrity:
-- Verify DMAR/IVRS protection indicators
-- Cross-check BIOS version against known vulnerable CVE lists
-- Verify PCR[7] DMA Protection Disabled event state
-```
+PCR meanings and reset/extend rules depend on the platform profile. The Windows
+OEM DMA-protection event has a specified scope; interpret absence only with an
+applicable and trustworthy measurement path. Keep measured boot, runtime evidence,
+and protection-policy compliance as separate findings.
+[TPM and platform evidence](../dma-attack/references/assurance-boundaries.md)
 
 ### Layered Detection Synthesis
 ```
 No single signature is durable. Production pipeline layers:
 
-1. Pre-game: IOMMU active, IR enabled, Secure Boot, VBS/HVCI,
-   TPM provisioned, attestation validates, BIOS not vulnerable,
-   ACS topology verified
+1. Pre-game: record platform support, effective remapping and security policy,
+   observed-running services, applicable firmware fixes, topology, attestation
+   coverage, and explicit unknowns; apply a documented deployment baseline
 
-2. Inventory: full 4 KB config dump per device, problem codes,
-   SMBIOS slot cross-reference
+2. Inventory: supported device/configuration snapshot with readable span,
+   missing fields, problem codes, and SMBIOS slot cross-reference
 
 3. Config integrity: per-donor reference database comparison
 
@@ -727,28 +695,31 @@ correlated detectors can fail together, and no fixed signal count guarantees a
 practical false-positive rate.
 ```
 
-### Firmware Sophistication Tiers (Detection Mapping)
-```
-Tier 0 (Stock):        VID/DID blacklist catches immediately
-Tier 1 (Bridge):       Signature residue, driverless device detection
-Tier 2 (Shadow):       R/W consistency probing catches write drops
-Tier 3 (Overlay RAM):  BAR probing + class-functional A/B testing
-Tier 4 (BAR+MSI):      Interrupt distribution + BAR content baselining
-Tier 5 (Behavioral):   Multi-session latency/ASPM/AER statistical analysis
-Tier 6 (Private):      Requires external trust anchors (TPM + attestation)
-```
+### Device Evidence Instead of Firmware Tiers
+
+Public/private labels and informal tier numbers are not validated assurance
+levels. Evaluate identity/provenance, configuration/function, runtime behavior,
+remapping policy, and platform trust separately. An identifier match can support
+a classification rule only within its evaluated scope; it does not imply
+immediate detection or malicious intent. No device label establishes that TPM
+attestation is necessary or sufficient for its detection.
+
+Report observed dimensions, untested properties, collector requirements, matched
+benign baselines, and measured decision error rates.
+[Device evidence dimensions](../dma-attack/references/assurance-boundaries.md)
 
 ### Forensic Evidence for DMA Cases
 ```
 Capture on detection:
-- Full 4 KB config dump + capability chain walk
+- Supported configuration snapshot and capability structure, with missing fields
 - PCIe link state history (LTSSM, ASPM transitions)
 - MSI/MSI-X arrival timeline
 - AER correctable counts
 - IOMMU fault log entries + domain assignments
 - ACS bridge state
-- Honeypot access records (EPT trap log)
-- TPM PCR snapshot
+- Protected-page CPU events (EPT evidence, with policy context)
+- Device DMA events from the relevant platform/IOMMU collector
+- TPM quote, selected measurement profile, and consistent event log
 - MCFG / DMAR / IVRS ACPI tables
 - SMBIOS slot inventory + BIOS version
 - Completion latency distribution histograms
@@ -786,52 +757,29 @@ causes are tested, and the joint false-positive behavior is validated.
 - Timing-based detection
 
 ### Hypervisor-Based Defense for Anti-Cheat
-```
-Concept:
-- Use hypervisor (EPT/SLAT) to enforce anti-cheat protections
-  from a privilege level above the kernel
-- Even if attacker achieves kernel R/W (BYOVD, exploit),
-  hypervisor-level enforcement remains intact
-- EPT hooks replace traditional kernel hooks:
-  operate outside the guest OS, invisible to kernel-level rootkits
 
-EPT Hook Protection Targets:
-- Anti-cheat driver executable pages
-  → Prevents attackers from patching AC driver code in memory
-- Kernel callback lists (PsSetCreateProcessNotifyRoutine, ObRegisterCallbacks)
-  → Write authorization moved to hypervisor; kernel-level callback removal denied
-- ETW-related structures
-  → Unauthorized writes trigger EPT violations, caught by hypervisor
-- EPP/AC process memory
-  → Protects security software from silent tampering
+A trusted hypervisor can enforce processor memory permissions outside the guest
+kernel's direct control. This is conditional isolation, not a guarantee that
+all kernel-level tampering is prevented. Verify the actual integration, protected
+regions and lifetimes, policy/configuration authority, backing-memory isolation,
+and coverage of other privileged access paths.
 
-Hypervisor vs Kernel-Level Threats:
-- Common kernel-level attack chain:
-  1. Attacker uses BYOVD or kernel exploit for R/W primitives
-  2. Patches callbacks to remove AC notifications
-  3. Tampers with ETW to disable telemetry
-  4. Modifies AC driver code to blind detection
-- With hypervisor defense:
-  1. Same kernel R/W primitives obtained
-  2. Write to protected callback list → EPT violation → VM exit
-  3. Hypervisor evaluates context and denies unauthorized modification
-  4. AC callbacks and telemetry remain intact
+EPT violations concern CPU access under an active policy. Device DMA uses the
+separate IOMMU path; a hypervisor may manage both, but EPT alone is neither DMA
+protection nor DMA telemetry. Conversely, device DMA does not universally defeat
+a hypervisor deployment that also enforces appropriate IOMMU policy.
 
-Advantages:
-- Higher privilege than the guest kernel under the stated hypervisor threat
-  model; ordinary VTL0 writes cannot directly change protected EPT policy
-- No guest-kernel patch is required, although hypervisor presence and effects
-  may still be observable
-- Can remain effective after guest-kernel compromise if the hypervisor,
-  configuration path, hardware, and protected policy remain trustworthy
-- Complements existing kernel-mode detection (callbacks, signatures, scans)
+Operating outside the guest kernel does not imply invisibility. Hyper-V provides
+guest-visible discovery interfaces, and performance or compatibility effects may
+also be observable. Presence alone identifies neither misuse nor specific
+protection coverage.
 
-Limitations:
-- Requires hardware virtualization support (VT-x/AMD-V)
-- Performance overhead from VM exits on protected region access
-- Complexity: must handle nested virtualization (VMware, Hyper-V)
-- DMA attacks bypass hypervisor memory protections (separate threat)
-```
+Treat VBS/memory integrity, driver-blocking policy, and DMA remapping as separate
+controls with deployment and compatibility requirements. Memory integrity does
+not make every signed driver safe. Report supported, configured, and running
+state; a missing feature is not by itself misconduct. Use existing trusted
+platform evidence and owned-build review to verify these assumptions.
+[Hypervisor and DMA assurance](../dma-attack/references/assurance-boundaries.md)
 
 ## Code Protection Techniques
 

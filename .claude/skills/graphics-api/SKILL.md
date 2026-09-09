@@ -226,30 +226,21 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 - May require specific drivers
 ```
 
-## Shader Manipulation
+## Shader and Depth-State Evidence
 
-### Wallhack Implementation
-```hlsl
-// Disable depth testing
-OMSetDepthStencilState(depthDisabledState, 0);
+Unauthorized shader or pipeline-state changes can alter visibility and
+appearance, but the affected stage must be identified. A pixel shader returning
+a particular color or alpha does not by itself force depth testing to pass.
+Direct3D's output-merger combines shader output with render-target blending and
+depth/stencil processing; the bound resources and state matter.
+[Microsoft output-merger stage](https://learn.microsoft.com/en-us/windows/win32/direct3d11/d3d10-graphics-programming-guide-output-merger-stage)
 
-// Or in pixel shader
-float4 PSMain(VS_OUTPUT input) : SV_Target {
-    // Always pass depth test
-    return float4(1, 0, 0, 0.5);  // Red transparent
-}
-```
-
-### Chams (Character Highlighting)
-```hlsl
-// Replace model shader
-float4 PSChams(VS_OUTPUT input) : SV_Target {
-    if (isEnemy) {
-        return float4(1, 0, 0, 1);  // Red
-    }
-    return float4(0, 1, 0, 1);      // Green
-}
-```
+For an owned sample or supplied frame capture, preserve the shader identity,
+pipeline/depth-stencil state, bound targets, draw order and event context. Compare
+with the expected material/render pass, including legitimate debug visualization
+and accessibility modes. A colored object or unexpected pixel is evidence to
+investigate, not proof of a particular state change or malicious intent.
+Source reviewed: 2026-09-09.
 
 ## Rendering Concepts
 
@@ -298,42 +289,41 @@ D3DXVECTOR3 WorldToScreen(D3DXVECTOR3 pos, D3DXMATRIX viewProjection) {
 - Shader debugging
 - Frame profiling
 
-## Anti-Screenshot Techniques
+## Screenshot Evidence and Capture Boundaries
 
-### How Anti-Cheat Captures Screenshots
-```
-- BitBlt from a window DC: coverage depends on the window, composition, and
-  capture path; validate against known displayed content and benign overlays
-- DXGI Desktop Duplication API: captures composited desktop output
-- IDXGISwapChain::Present interception: grab backbuffer before present
-- PrintWindow: capture specific window contents
-- DirectX/Vulkan frame readback: copy render target to CPU-readable buffer
-- Scheduled captures: random intervals to catch intermittent overlays
-```
+Choose the observation layer before interpreting a screenshot. These mechanisms
+have different contracts and do not establish interchangeable coverage:
 
-### Overlay Evasion Against Screenshot
-```
-- Disable overlay rendering during screenshot frame:
-  - Detect screenshot by hooking BitBlt/PrintWindow in AC module
-  - Suppress ImGui rendering for captured frame
-- DWM composition tricks:
-  - Render to a separate window that DWM excludes from capture
-  - Use WDA_EXCLUDEFROMCAPTURE (SetWindowDisplayAffinity) on overlay window
-- Hardware overlay planes:
-  - Use IDXGIOutput::FindClosestMatchingMode + hardware overlay
-  - Content on hardware overlay plane may not appear in software capture
-- External rendering:
-  - Render on secondary display or capture card output
-  - OBS virtual camera trick: render to virtual camera feed
-```
+| Path | Documented scope and evidence limit |
+|---|---|
+| Window/DC capture | Record the actual API and window. `PrintWindow` asks the owning application to render into the supplied DC; the call is not an independent guarantee of the physical display contents. |
+| Desktop Duplication | Acquires desktop data along output boundaries with associated metadata and protected-content restrictions. Record output selection and processing of frame/cursor metadata. |
+| Swap-chain presentation observation | Identifies an application presentation operation. DXGI presentation queues can discard frames under documented conditions; a `Present` call does not establish that every submitted frame appeared on the monitor. |
+| Render-target readback | Establishes the retained resource at a defined synchronization point, whose relationship to later composition and display must be demonstrated. |
 
-### Cheat-Side Anti-Screenshot (README > Anti Screenshot)
-```
-- Projects that detect and evade AC screenshot capture
-- Techniques: hook Present to suppress overlay on screenshot frames
-- Claims comparing DWM overlay capture across APIs require measured coverage
-- Kernel-level: suppress screenshot by blocking DC access
-```
+Primary contracts: [PrintWindow](https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-printwindow),
+[Desktop Duplication](https://learn.microsoft.com/en-us/windows-hardware/drivers/display/desktop-duplication-api),
+[DXGI Present](https://learn.microsoft.com/en-us/windows/win32/api/dxgi/nf-dxgi-idxgiswapchain-present).
+
+### Exclusion Claims and Benign Counterexamples
+
+Window display affinity is a platform capture-control mechanism, not a guarantee
+that content is unobservable through every route. Microsoft explicitly disclaims
+strict content protection. Verify the active OS/composition path and the collector's
+result before attributing a missing region to concealment.
+[Window display affinity contract](https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-setwindowdisplayaffinity)
+
+`IDXGIOutput::FindClosestMatchingMode` selects a matching display mode; it does not
+establish allocation of a hardware overlay plane or screenshot exclusion. Claims
+about plane composition need evidence from the actual presentation path.
+[Display-mode matching](https://learn.microsoft.com/en-us/windows/win32/api/dxgi/nf-dxgi-idxgioutput-findclosestmatchingmode)
+
+Use owned known-content controls to distinguish capture failure, application
+rendering behavior, protected content, output selection, stale frames and actual
+content differences. Scheduled snapshots cover their acquisition intervals;
+intermittent absence does not establish absence throughout the session. Preserve
+capture settings, API return/error information, timestamps and missing frames.
+Sources reviewed: 2026-09-09.
 
 ## OBS Capture Pipeline and AI Visual Cheat Surface
 
@@ -366,7 +356,8 @@ Display Capture:
   Duplication or Windows Graphics Capture
 - Composition coverage and latency vary; protected content and hardware overlays
   can create exceptions
-- No per-process interaction
+- A display-source label alone does not establish which processes or modules
+  the complete recording configuration interacts with; inspect the active setup
 
 OBS Virtual Camera:
 - Outputs captured frames as a virtual camera device
@@ -374,6 +365,15 @@ OBS Virtual Camera:
 - May be discoverable through virtual-camera device registration and media
   pipeline activity, depending on platform and OBS version
 ```
+
+OBS Window Capture exposes backend selection, including BitBlt and Windows
+Graphics Capture in its Windows implementation. Do not equate every Window
+Capture configuration with Desktop Duplication or transfer its coverage claims
+to another source type. Compare the selected backend and observed frames against
+legitimate recording controls.
+[OBS Window Capture documentation](https://obsproject.com/kb/window-capture-sources),
+[OBS Windows capture implementation](https://github.com/obsproject/obs-studio/blob/master/plugins/win-capture/window-capture.c).
+Sources reviewed: 2026-09-09.
 
 ### Frame Pipeline for AI Aimbot
 ```

@@ -99,6 +99,12 @@ For skill-library changes, use the [coverage roadmap](references/coverage-roadma
 and [evaluation guide](../research-rigor/references/skill-evaluation.md). Structural
 validation and a successful lookup are not evidence of superior model performance.
 
+## Recorded Quality Review
+
+Read the [2026-09-09 quality review](references/quality-review-2026-09-09.md) for
+corrected legacy claims, actual evaluation outputs, preserved Data Source
+requirements and unresolved portability/coverage limits.
+
 ## Data Source
 
 Use the following repository sources directly when applying this skill. Prefer

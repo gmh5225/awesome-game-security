@@ -336,451 +336,94 @@ Key kernel providers:
 - EPT-based protection can defend ETW structures from tampering
 ```
 
-## Kernel Segment Heap Architecture
+## Kernel Pool Architecture and Allocation Contracts
 
-### Timeline
-```
-Windows NT ~ 1809   : Legacy NT Pool Manager (ExAllocatePoolWithTag)
-Windows 10 19H1     : Kernel Segment Heap introduced (March 2019, build 1903)
-                      └─ User-mode Segment Heap ported to the kernel
-Windows 10 2004     : ExAllocatePool2 / ExAllocatePool3 added
-                      └─ ExAllocatePoolWithTag officially deprecated
-Windows 10 20H2~    : Dynamic KDP (Kernel Data Protection) stabilized
-Windows 11          : HVCI default on most new devices; verify runtime state
+Treat allocator internals as hypotheses tied to an exact kernel binary,
+architecture, configuration and matching symbols. Internal structure offsets,
+size thresholds, encoded headers, cache depths and allocation-routing diagrams
+are not a stable Windows driver interface. A symbol name without sufficient type
+information does not establish a layout; public and private symbol content differ.
+[Microsoft symbol scope](https://learn.microsoft.com/en-us/windows-hardware/drivers/debugger/public-and-private-symbols)
 
-Common misconception: Many sources claim "the Segment Heap was introduced
-in Windows 10 2004," but the kernel segment heap was actually introduced
-in 19H1 (1903). Windows 10 2004 added the new Pool APIs built on top of it.
-```
+### Architecture Questions for a Review
 
-### Legacy NT Pool Structure (_POOL_HEADER, pre-19H1)
-```
-_POOL_HEADER (16 bytes, x64):
-Offset  Field           Size   Description
-0x00    PoolIndex        1 B    Pool descriptor index
-0x01    PreviousSize     1 B    Previous chunk size
-0x02    PoolType         1 B    Pool type (Paged, NonPaged, etc.)
-0x03    BlockSize        1 B    Current chunk size (>> 4)
-0x04    PoolTag          4 B    4-byte ASCII tag
-0x08    ProcessBilled    8 B    KPROCESS pointer (valid only with PoolQuota)
+Separate the public allocation request from its observed allocator path. Record
+pool flags, requested size, lifetime, calling/access IRQL and any special-pool or
+verifier configuration. If a dump or source study identifies size-class,
+variable-size, segment-backed or large-allocation paths, report only the path
+supported for that artifact. Do not infer the introduction date or every later
+layout from the availability of a public API.
 
-Memory layout:
-[POOL_HEADER 16B][user data ...][POOL_HEADER 16B][user data ...]
-      ↑ plaintext, predictable        ↑ adjacent → overwritable
+For corruption analysis, preserve the useful threat classes: out-of-bounds
+access, use after free, double free, uninitialized disclosure and metadata damage.
+Each requires evidence of the faulty access or lifetime boundary. A crash, unusual
+allocation pattern or integrity-check failure alone does not establish deliberate
+exploitation, a specific corruption mechanism or successful privilege escalation.
+Do not turn historical metadata-decoding formulas into a current parser contract.
 
-Security weaknesses:
-- Pool Walking: traverse chunks linearly via BlockSize
-- Pool Overflow: corrupt adjacent header for arbitrary write on free
-- PoolIndex Overwrite: OOB dereference into pool descriptor array
-- ProcessBilled Overwrite: arbitrary address dereference on free path
+### Public Pool API Boundaries
 
-Windows 8 partial mitigation:
-  ProcessBilled = KPROCESS_PTR ^ ExpPoolQuotaCookie ^ CHUNK_ADDR
-  But plaintext _POOL_HEADER remained until 19H1.
-```
+- `ExAllocatePool2` and `ExAllocatePool3` document Windows 10 version 2004 as
+  their minimum supported client. The latter adds extended parameters; match the
+  particular parameter contract to the target WDK and OS.
+- Pool2 zero-initializes by default unless `POOL_FLAG_UNINITIALIZED` is used.
+  Allocation initialization does not cover later buffer reuse or incomplete
+  construction of a larger object. Review information disclosure and output
+  initialization before removing explicit clearing.
+- Review failure handling, quota semantics and pool/access IRQL together.
+  At `DISPATCH_LEVEL`, Pool2 requires nonpaged allocation; memory accessed there
+  must remain nonpaged even if it was allocated at a lower IRQL.
+- Earlier Windows targets require the documented down-level allocation APIs and
+  their initialization requirements. Do not assume Pool2 automatically falls
+  back to allocation plus clearing on an older kernel.
 
-### _SEGMENT_HEAP Core Structure
-```
-Each pool type is managed by its own independent _SEGMENT_HEAP instance.
+[ExAllocatePool2](https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/wdm/nf-wdm-exallocatepool2),
+[ExAllocatePool3](https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/wdm/nf-wdm-exallocatepool3).
 
-_SEGMENT_HEAP (illustrative kernel offsets observed for 20H2; verify symbols):
-0x000   EnvHandle (10 B)     — heap environment handle
-0x010   Signature (4 B)      — commonly 0xDDEEDDEE on this layout
-0x028   UserContext (8 B)
-0x048   AllocatedBase (8 B)  — LFH structure allocation base
-0x058   SegContexts[2] (0x180 B) — segment context array
-0x100   VsContext (0xC0 B)   — VS allocator context
-0x280   LfhContext (0x4C0 B) — LFH allocator context
-higher  LargeAllocMetadata   — large allocation metadata
-higher  LargeReservedPages / LargeCommittedPages
+### KDP and Protected Data
 
-Per pool type instances (nt!PoolVector / HEAP_POOL_NODES):
-├── NonPagedPool (NP)       → _SEGMENT_HEAP instance #1
-├── NonPagedPoolNx (NPNx)   → _SEGMENT_HEAP instance #2  ← primary target
-├── PagedPool (PP)          → _SEGMENT_HEAP instance #3
-├── PagedPoolSession        → _SEGMENT_HEAP stored in current thread
-└── (other special pools)
-```
-
-### Allocation Routing Flow
-```
-ExAllocatePoolWithTag / ExAllocatePool2 / ExAllocatePool3
-        │
-        ▼
-  ExAllocateHeapPool (internal)
-        │
-        ├─ size ≤ 0x200 AND LFH activated  ──▶  kLFH
-        │   └─ RtlpHpLfhContextAllocate
-        │
-        ├─ 0x1e1 ≤ size ≤ 0xfe0            ──▶  VS Allocator
-        │   └─ RtlpHpVsContextAllocateInternal
-        │
-        ├─ page-aligned (0x20000~0x7f0000)  ──▶  Segment Allocator
-        │   └─ RtlpHpSegAlloc
-        │
-        └─ large (> 0x7f0000)              ──▶  Large Allocator
-            └─ RtlpHpLargeAlloc
-```
-
-### kLFH (Low Fragmentation Heap)
-```
-Size range:       ≤ 0x200 bytes (512 B), when LFH activated for that size class
-Activation:       After 18 consecutive allocations of the same size
-Key function:     RtlpHpLfhContextAllocate
-Chunk header:     _POOL_HEADER (16 B, still present)
-Metadata:         _HEAP_LFH_SUBSEGMENT (isolated, not inline)
-Bucket count:     129 (Buckets[129])
-
-Bucket structure:
-_HEAP_LFH_CONTEXT
-└── Buckets[129]
-     ├── Bucket #0:   size 1~8 B
-     ├── Bucket #1:   size 9~16 B
-     ├── ...
-     └── Bucket #128: size ~0x1FF B
-         (each bucket has AffinitySlots → _HEAP_LFH_SUBSEGMENT)
-
-Security properties:
-- Block placement within subsegment is randomized
-- Next allocation position managed through FreeHint, encoded with LfhKey
-- Adjacent chunk overflow cannot directly corrupt management structure
-```
-
-### VS Allocator (Variable Size)
-```
-Size range:       (a) ≤ 0x1e0 && LFH inactive; (b) 0x1e1~0xfe0;
-                  (c) 0x1001~0xffff && non-page-aligned
-Key function:     RtlpHpVsContextAllocateInternal
-Chunk header:     _HEAP_VS_CHUNK_HEADER (16 B, HeapKey XOR encoded)
-Free management:  Red-Black Tree (FreeChunkTree)
-Algorithm:        Best-fit
-
-_HEAP_VS_CHUNK_HEADER (allocated state):
-┌──────────────────────────────────────────────────────────┐
-│  Sizes (8 B) — XOR encoded: HeaderBits ^ self_addr ^ HeapKey
-│    ├─ UnsafeSize      : chunk size / 16
-│    ├─ UnsafePrevSize  : previous chunk size / 16
-│    ├─ MemoryCost      : pages occupied
-│    └─ UnusedBytes     : whether unused bytes exist
-│  EncodedSegmentPageOffset (1 B)
-│    — (self_addr ^ self ^ HeapKey) & 0xFF
-│    — page distance to VS subsegment start
-└──────────────────────────────────────────────────────────┘
-
-Memory layout:
-[_HEAP_VS_CHUNK_HEADER 16B][_POOL_HEADER 16B][user data ...]
-       ↑ HeapKey XOR             ↑ PoolTag etc. still present
-
-VS subsegment structure (_HEAP_VS_SUBSEGMENT):
-├── ListEntry      — subsegment linked list
-├── CommitBitmap   — page commit state bitmap
-├── CommitLock     — lock used during commit
-├── Size (2 B)     — subsegment size (>> 4)
-└── Signature (15 bit) + FullCommit (1 bit) — integrity check
-```
-
-### Segment Allocator (Backend)
-```
-Size range #1:    0x20000 < size ≤ 0x7f000 (128 KB ~ 508 KB)
-Size range #2:    0x7f000 < size ≤ 0x7f0000 (508 KB ~ ~7 MB)
-Core structure:   _HEAP_PAGE_SEGMENT + 256 page descriptors
-Segment mask:     0xFFFFFFFFFFF00000
-
-The kernel uses two independent SegContexts (unlike user-mode's single context).
-
-Page segment signature encoding:
-check = page_segment ^ page_segment->Signature
-      ^ 0xA2E64EADA2E64EAD ^ RtlpHpHeapGlobals.HeapKey
-```
-
-### Large Allocator
-```
-Size range:       > 0x7f0000 (typically page-aligned)
-Key function:     RtlpHpLargeAlloc
-Metadata:         _SEGMENT_HEAP.LargeAllocMetadata
-Tracking:         BigPagePoolTable (PoolTrackTable)
-No inline header; metadata recorded externally.
-```
-
-### Header Layout Per Allocation Path
-```
-Path          Memory layout (chunk start → user data)
-────────────────────────────────────────────────────────────────
-kLFH          [_POOL_HEADER 16B] [data]
-VS            [_HEAP_VS_CHUNK_HEADER 16B] [_POOL_HEADER 16B] [data]
-Segment       [_HEAP_PAGE_SEGMENT header] ... [page descriptors]
-Large         Metadata in BigPagePoolTable; no inline header
-CacheAligned  [_POOL_HEADER #1] ... [_POOL_HEADER #2 (CacheAligned)] [data]
-```
-
-### Residual _POOL_HEADER Under Segment Heap
-```
-_POOL_HEADER was not fully removed. Remaining usage:
-
-Field           Status under Segment Heap
-PoolTag         Still recorded (for debugging/tracing)
-PoolType        Recorded, not used for allocator selection on free
-BlockSize       Unused in VS path; still present in kLFH
-PreviousSize    Unused, set to 0
-PoolIndex       Unused, set to 0
-ProcessBilled   Valid only with PoolQuota flag (encoded with ExpPoolQuotaCookie)
-```
-
-### Pointer Encoding Mechanisms
-```
-Global key structure: _RTLP_HP_HEAP_GLOBALS (nt!RtlpHpHeapGlobals)
-Generated randomly at boot time; global in ntoskrnl.
-
-{
-    UINT64 HeapKey;   // VS Allocator + Segment Allocator header encoding
-    UINT64 LfhKey;    // LFH callback pointer encoding
-}
-
-Encoding formulas:
-
-VS chunk header — Sizes field:
-  encoded = (real Sizes) ^ (address of vs_chunk_header) ^ HeapKey
-
-VS chunk — EncodedSegmentPageOffset:
-  encoded = ((real page distance) ^ vs_chunk_header ^ HeapKey) & 0xFF
-
-Segment context signature:
-  check = page_segment ^ page_segment->Signature
-        ^ 0xA2E64EADA2E64EAD ^ HeapKey
-
-LFH callback function pointer:
-  encoded = real function address ^ HeapKey ^ address of LfhContext
-
-ProcessBilled (POOL_HEADER, Windows 8+):
-  encoded = KPROCESS_PTR ^ ExpPoolQuotaCookie ^ CHUNK_ADDR
-
-Implications for attackers:
-- Must leak HeapKey and LfhKey from RtlpHpHeapGlobals
-- Must know chunk's own virtual address (self-referential XOR)
-- Failing encoding validation triggers:
-  BugCheck 0x139 (KERNEL_SECURITY_CHECK_FAILURE) or
-  BugCheck 0x13A (KERNEL_MODE_HEAP_CORRUPTION)
-```
-
-### Dynamic Lookaside and Delay Free
-```
-Dynamic Lookaside:
-_HEAP_VS_CONTEXT
-└── Lookaside buckets (_RTL_DYNAMIC_LOOKASIDE)
-     ├── Per-size singly-linked lists
-     ├── Depth (2 B)     — current list depth
-     └── NextEntry (8 B) — pointer to next cached chunk
-
-Rebalancing (every 3 Balance Set Manager scans):
-- alloc count < 25 → Depth decreases by 10
-- miss ratio ≥ 0.5% → Depth increases
-- miss ratio < 0.5% → Depth decreases by 1
-- Range: minimum 4 ~ MaximumDepth
-
-Delay Free (VS Allocator):
-- size < 1 KB AND Config.Flags bit 4 == 1:
-  → stored in DelayFreeContext list
-  → batch freed after 32 entries accumulate
-- Otherwise: inserted immediately into FreeChunkTree
-- Security: disrupts UAF timing (cannot immediately reuse freed chunk)
-```
-
-### New Pool APIs: ExAllocatePool2 / ExAllocatePool3
-```
-Evolution:
-ExAllocatePool                 (legacy, no tag)
-ExAllocatePoolWithTag          (pre-19H1 standard, deprecated in 2004)
-ExAllocatePoolWithTagPriority  (priority support)
-ExAllocatePoolWithQuotaTag     (quota tracking)
-        ↓
-ExAllocatePool2                (general case, zero-initialized by default)
-ExAllocatePool3                (extended parameters, priority + Secure Pool)
-
-ExAllocatePool2:
-  PVOID ExAllocatePool2(POOL_FLAGS Flags, SIZE_T NumberOfBytes, ULONG Tag);
-  - Zero-initialized by default (no RtlZeroMemory needed)
-  - Returns NULL on failure by default
-  - POOL_FLAG_RAISE_ON_FAILURE converts to exception
-  - POOL_FLAG_USE_QUOTA integrates legacy PoolQuota
-
-ExAllocatePool3:
-  PVOID ExAllocatePool3(POOL_FLAGS Flags, SIZE_T NumberOfBytes, ULONG Tag,
-                        PCPOOL_EXTENDED_PARAMETER ExtendedParameters, ULONG Count);
-  Extended parameter types:
-  - PoolExtendedParameterPriority: allocation priority (e.g., HighPoolPriority)
-  - PoolExtendedParameterSecurePool: KDP Secure Pool (VTL0 write-protected)
-
-Down-level compatibility:
-  #define POOL_ZERO_DOWN_LEVEL_SUPPORT
-  ExInitializeDriverRuntime(DriversRuntimeInitSupportFlags);
-  → ExAllocatePool2 internally falls back to alloc + memset on older OS
-```
-
-### Kernel Data Protection (KDP) and Secure Pool
-```
-KDP leverages Segment Heap's Secure Pool feature to allocate
-kernel memory whose ordinary VTL0 writes are blocked while the VTL1 policy,
-hypervisor, and configuration path remain trustworthy.
-
-Illustrative implementation layout (verify on the target build):
-  Dedicated Secure Pool region (reported as one PML4 entry on relevant builds)
-  Base address: randomized at boot
-  Managed by: Secure Kernel (VTL1)
-  VTL0 writes: blocked via NAR (Node Address Range)
-
-Initialization flow:
-1. NT Memory Manager boot Phase 1
-2. Randomly calculate 512 GB Secure Pool virtual address
-3. INITIALIZE_SECURE_POOL Secure Call → Secure Kernel
-4. Secure Kernel creates NAR + initializes NTE (Node Table Entry)
-
-Anti-cheat usage:
-  // Create Secure Pool context
-  ExCreatePool(POOL_FLAG_NON_PAGED, tag, &securePoolHandle);
-
-  // Allocate detection rule table (immutable after init)
-  POOL_EXTENDED_PARAMS_SECURE_POOL sp = {
-      .Cookie           = MY_COOKIE,
-      .SecurePoolHandle = securePoolHandle,
-      .Buffer           = &detectionRuleTable,
-      .SecurePoolFlags  = SECURE_POOL_FLAGS_FREEABLE
-      // MODIFIABLE flag omitted → write-protected after init
-  };
-  g_DetectionRules = ExAllocatePool3(POOL_FLAG_NON_PAGED,
-      sizeof(detectionRuleTable), 'DRul', &extParams, 1);
-  // Protected from ordinary VTL0 writes while KDP policy remains intact
-```
-
-### Attack Technique Evolution (Segment Heap Era)
-```
-Technique comparison:
-Technique                    NT Pool (pre-19H1)    Segment Heap (19H1+)
-─────────────────────────────────────────────────────────────────────────
-Adjacent header overwrite    Direct metadata       Encoding/cookies complicate use
-Pool Walking                 Legacy linear walk    Path-specific metadata/symbols needed
-ProcessBilled overwrite      Requires Win8+ cookie Requires cookie + HeapKey
-kLFH pool spray              Predictable           Possible but needs precise control
-VS FreeChunkTree corruption  N/A                   Requires HeapKey bypass
-Large chunk BigPool tracking PoC exists             PoC exists (PoolTrackTable)
-
-Modern kLFH exploit requirements:
-1. Find target object of same size (same kLFH bucket)
-2. Target must contain exploitable members (pointer, function table)
-3. Target allocation must be triggerable from user mode
-4. Vulnerable and target objects must be in same pool type
-   (NonPagedPoolNx and PagedPool use separate _SEGMENT_HEAP instances)
-
-VS chunk overflow recovery (must restore to avoid BugCheck):
-  ghost_chunk->Sizes.HeaderBits =
-      (real_sizes) ^ (ULONG_PTR)ghost_chunk ^ HeapKey;
-  ghost_chunk->EncodedSegmentPageOffset =
-      ((real_page_offset) ^ (ULONG_PTR)ghost_chunk ^ HeapKey) & 0xFF;
-  // Failure → BugCheck 0x13A
-
-Required pre-exploit leak values:
-Symbol                          Purpose               Source
-nt!RtlpHpHeapGlobals           HeapKey, LfhKey        Pattern scan ExFreePoolWithTag
-nt!ExpPoolQuotaCookie           Decode ProcessBilled   Pattern scan ExAllocatePoolWithQuotaTag
-nt!PsInitialSystemProcess      EPROCESS chain         ntoskrnl import analysis
-Chunk's own virtual address    Self-referential XOR   Requires info-leak primitive
-```
-
-### BugCheck Codes (Segment Heap Related)
-```
-Code    Name                               Trigger
-0x139   KERNEL_SECURITY_CHECK_FAILURE      VS/LFH header integrity check failure
-0x13A   KERNEL_MODE_HEAP_CORRUPTION        Heap metadata corruption detected
-0xC5    DRIVER_CORRUPTED_EXPOOL            Pool accessed at incorrect IRQL
-0x19    BAD_POOL_HEADER                    _POOL_HEADER validation failure (LFH path)
-```
+Microsoft's 2020 KDP architecture article describes static data protection and
+dynamic secure-pool allocations using VBS/SLAT. It is historical implementation
+context, not evidence that a present machine protects every pool allocation or
+that an arbitrary Pool3 allocation is secure. Establish the applicable API,
+successful protection state, exact region and lifecycle, and the trustworthiness
+of the hypervisor and policy path. Content protection does not by itself prove
+that every reference to that content, caller or update operation is authorized.
+[Microsoft KDP architecture](https://www.microsoft.com/en-us/security/blog/2020/07/08/introducing-kernel-data-protection-a-new-platform-security-technology-for-preventing-data-corruption/)
 
 ## Pool Allocation & Forensics
 
-### Pool Forensics Artifacts
-```
-PiDDBCacheTable:
-- Tracks historically loaded drivers by hash + timestamp
-- Anti-cheat inspects this to detect BYOVD or test-signed driver loads
-- Attackers attempt to remove entries post-load
+### Attribution and Coverage
 
-MmUnloadedDrivers:
-- Circular buffer of recently unloaded drivers (name + address range)
-- Cannot be cleared from user mode
-- Anti-cheat uses to detect load-unload-reload patterns
+Pool tags are caller-supplied labels used by debugging and tracking tools;
+PoolMon groups memory use by tag. They are leads for attribution, not
+cryptographic driver identities. A rare tag, a shared tag or a lookup in
+`pooltag.txt` cannot by itself establish which signed binary allocated a buffer,
+that a hidden driver is present, or that the allocation is malicious.
+[PoolMon scope](https://learn.microsoft.com/en-us/windows-hardware/drivers/debugger/using-poolmon-to-find-a-kernel-mode-memory-leak)
 
-PoolBigPageTable:
-- Maps large pool allocations (>= PAGE_SIZE) to owning driver tag
-- Used for: identifying hidden drivers, finding leaked pool allocations
-- Anti-cheat walks this to detect manually mapped driver memory
-```
+If a report invokes `PiDDBCacheTable`, `MmUnloadedDrivers`, `PoolBigPageTable` or
+similar internal names, require an exact-build definition, collection method,
+retention/coverage limits and supporting artifacts. Do not assume a universal
+field layout, complete driver history or a one-to-one relationship between a
+pool allocation and a driver object. Missing or malformed data can reflect
+image incompleteness, stale symbols, reuse, collection effects or corruption.
 
-### Pool Tag Forensics
-```
-- ExAllocatePoolWithTag / ExAllocatePool2: every allocation carries a 4-byte tag
-- Pool tag scanning: identify driver presence by known tags
-- Tool: pooltag.txt (Microsoft), PoolMon, WinDbg !poolfind
-- Anti-cheat technique: scan pool tags for known cheat driver signatures
-```
+### Review Evidence
 
-### Modern Pool Scanning (Segment Heap Era)
-```
-Legacy method (pre-19H1) — NO LONGER WORKS:
-  Follow BlockSize in inline header to traverse linearly.
-  PPOOL_HEADER h = startAddr;
-  while (h->BlockSize != 0) {
-      if (h->PoolTag == TARGET_TAG) { /* ... */ }
-      h += h->BlockSize;  // Invalid under segment heap
-  }
+For an existing authorized image, record its provenance/hash, acquisition time,
+OS/architecture, symbol identity, parser version and unavailable regions. Keep
+allocation facts, ownership hypotheses and security conclusions separate.
+Correlate available allocation stacks, loaded-module provenance, driver/service
+records and independent telemetry. Explain benign alternatives before assigning
+intent to executable memory, unrecognized tags or unusual allocation counts.
 
-Modern alternatives:
+A negative scan describes the selected parser, metadata path and retained
+snapshot; it is not proof that all allocations or prior driver activity were
+observed. A bugcheck code is a starting point for its parameters, stack and
+surrounding state, not a unique allocator-path or attack signature.
 
-BigPool detection (Large Alloc path):
-  Reference nt!PoolBigPageTable (or nt!PoolTrackTable)
-  └─ Traverse BigPagePoolTable entries
-  └─ Find allocations without corresponding driver objects
-
-Small allocation detection:
-  _SEGMENT_HEAP → VsContext → SubsegmentList traversal
-  _SEGMENT_HEAP → LfhContext → Buckets[] → AffinitySlots → Subsegments
-
-VS Chunk Header decoding (requires HeapKey):
-  real_sizes = encoded_header ^ chunk_address ^ HeapKey
-  → Decode to determine chunk size, PoolTag, allocation legitimacy
-
-Anti-cheat scanning targets:
-- Suspicious PoolTags: cheat drivers use custom/rare tags; maintain blacklist
-- Executable permission pages: NonPagedPool chunks with X permission
-  from suspicious sources (no corresponding loaded module)
-- Shellcode patterns: scan decoded chunk contents for known cheat signatures,
-  ROP gadgets, specific syscall sequences
-- kLFH allocation pattern anomalies: unusual allocation patterns in
-  specific size buckets can indicate pool grooming
-
-WinDbg commands:
-  dt nt!_RTLP_HP_HEAP_GLOBALS nt!RtlpHpHeapGlobals  // HeapKey, LfhKey
-  dt nt!_SEGMENT_HEAP <address>
-  dt nt!_HEAP_VS_CHUNK_HEADER <address>
-  dt nt!_HEAP_LFH_CONTEXT <address>
-  !pool <address>
-  !poolfind <Tag> [pool_type]
-  !poolused [flags]                    // stats by PoolTag
-  dt nt!_POOL_TRACKER_BIG_PAGES nt!PoolBigPageTable
-
-VS chunk header decode (manual):
-  HeaderBits_raw = poi(<chunk_addr>)
-  real Sizes = HeaderBits_raw ^ <chunk_addr> ^ HeapKey
-```
-
-### Driver Development Migration Checklist
-```
-□ ExAllocatePoolWithTag          → ExAllocatePool2
-□ ExAllocatePool (without tag)   → Remove or ExAllocatePool2
-□ ExAllocatePoolWithTagPriority  → ExAllocatePool3 + Priority param
-□ ExAllocatePoolWithQuotaTag     → ExAllocatePool2 + POOL_FLAG_USE_QUOTA
-□ RtlZeroMemory after alloc     → Remove (ExAllocatePool2 zero-initializes)
-□ Review POOL_FLAG_RAISE_ON_FAILURE (NULL check vs exception)
-□ Critical read-only data       → ExAllocatePool3 + Secure Pool
-```
+Sources for these pool-contract and evidence corrections reviewed: 2026-09-09.
 
 ### SSDT Hooking (Legacy)
 ```
@@ -932,29 +575,20 @@ Control Fields:
 ```
 
 #### EPT (Extended Page Tables)
-```
-Intel's implementation of SLAT (Second-Level Address Translation):
-- Gives the hypervisor independent control over guest memory
-- Two-stage address translation pipeline:
-  1. GVA → GPA: Guest Virtual → Guest Physical (via guest page tables, rooted at CR3)
-  2. GPA → HPA: Guest Physical → Host Physical (via EPT, rooted at EPTP in VMCS)
-- Guest believes it owns its own memory mappings
-- Hypervisor has a second, independent layer controlling:
-  - What physical memory is reachable
-  - What permissions apply (read/write/execute)
 
-EPT Hierarchy:
-- PML4 → PDPT → PD → PT (4-level page table)
-- Each entry carries read/write/execute permissions
-- EPT violations trigger VM exits when access permissions are violated
+EPT is Intel's second-stage translation for guest-physical to host-physical
+addresses; guest page tables separately translate guest virtual addresses.
+Review the processor capabilities and active virtualization controls before
+assuming a paging depth, page size or particular handling of a denied access.
+A four-level diagram describes one configuration, not every implementation.
+[Intel system-programming manuals](https://www.intel.com/content/www/us/en/developer/articles/technical/intel-sdm.html)
 
-Page Table Entries (PTE):
-- Maps GVA to GPA
-- Carries: read/write, supervisor-only, caching, software-defined bits
-- Guest PTEs and EPT serve different roles:
-  - Guest PTE: controls guest's view of memory
-  - EPT: controls hypervisor's view of the guest
-```
+Second-stage permissions constrain CPU access to the configured guest mappings.
+They do not themselves identify the responsible module or decide whether an
+operation is legitimate. Device-originated access needs its own IOMMU and device
+policy analysis; use [DMA analysis](../dma-attack/SKILL.md). A guest virtual
+address or module name must be correlated with the observed mapping and execution
+context before making an attribution claim.
 
 #### VM Exits & VMCALL
 ```
@@ -983,125 +617,73 @@ VMCALL:
 - NPT (Nested Page Tables) — AMD's SLAT equivalent
 - SVM operations (VMRUN, VMSAVE, VMLOAD)
 
-### Use Cases
-- Memory hiding
-- Syscall interception
-- Security monitoring
-- Anti-cheat evasion
-- EPT-based memory protection and introspection
+### Review Use Cases
+
+Use virtualization evidence to examine guest isolation, authorized introspection
+and integrity policy. Treat unauthorized concealment or tampering as threat
+categories with explicit access prerequisites and observation limits; the
+presence of virtualization is also normal for development and platform security.
 
 ### Windows Hypervisor Platform (WHP) API
-```
-User-mode hypervisor interface (Windows 10+):
-- WHvCreatePartition / WHvSetupPartition: create VM partition
-- WHvCreateVirtualProcessor: add vCPU
-- WHvMapGpaRange: map host memory into guest physical address space
-- WHvRunVirtualProcessor: enter guest execution, blocks until VM exit
-- WHvGetVirtualProcessorRegisters / Set: read/write guest CPU state
 
-Key capability:
-- Enables hypervisor-assisted analysis from user mode (no kernel driver)
-- Page-level trap handling: set R/W/X permissions per guest page
-- VM exit reasons: memory access violation, CPUID, MSR access, I/O port, syscall
-- Controlled execution: the host controls modeled guest CPU state and mapped
-  memory; external timing, devices, concurrency, and unmodeled dependencies
-  still need explicit handling
+WHP exposes user-mode APIs to manage guest partitions, virtual processors and
+guest-physical mappings using the Windows hypervisor. It does not grant a tool
+arbitrary control over the running host kernel. Record the host/guest boundary,
+Windows build, architecture, SDK, feature state and actual capabilities.
+[WHP API contract](https://learn.microsoft.com/en-us/virtualization/api/hypervisor-platform/hypervisor-platform)
 
-Prerequisites:
-- Enable Windows features: Microsoft-Hyper-V-Hypervisor + HypervisorPlatform
-- Hardware: VT-x or AMD-V support
-- Note: WHP coexists with Hyper-V but conflicts with some third-party hypervisors
+The current `WHvRunVirtualProcessor` contract lists Windows 10 version 1803 for
+x64 and Windows 11 version 24H2 build 26100.3915 for Arm64. Its successful return
+and exit context describe a stop in guest execution, not complete tracing of
+every instruction or a deterministic replay. Capabilities and available exit
+contexts are architecture- and configuration-dependent; there is no generic
+`syscall` exit reason in the documented enumeration. Correlate the actual reason
+and context with the analysis question.
+[Run contract](https://learn.microsoft.com/en-us/virtualization/api/hypervisor-platform/funcs/whvrunvirtualprocessor),
+[exit contexts](https://learn.microsoft.com/en-us/virtualization/api/hypervisor-platform/funcs/whvexitcontextdatatypes),
+[capabilities](https://learn.microsoft.com/en-us/virtualization/api/hypervisor-platform/funcs/whvgetcapability).
 
-See also: reverse-engineering skill → User-Mode Hypervisor-Assisted Tracing
-for analysis workflows built on WHP
-```
+Preserve unmodeled device, scheduler, timing and concurrency effects in a result.
+A CPU feature name or enabled optional feature alone does not prove that a given
+analysis tool, nested environment or third-party hypervisor combination is
+supported. Use product/build-specific evidence for compatibility; do not impose
+a universal coexistence or conflict rule.
 
 ## Hypervisor-Based Defense
 
-### Concept
-```
-- Security approach using virtualization primitives to enforce protections
-  from a higher privilege level than the guest kernel
-- Moves security decisions into an isolated execution environment
-  that a compromised kernel cannot easily tamper with
-- Present across major OS platforms:
-  - Windows: Virtualization-Based Security (VBS)
-  - Android: Android Virtualization Framework (AVF)
-  - Apple: Secure execution environments, hardware-backed isolation
-```
+### Enforcement Boundary
 
-### EPT Hooks as Defensive Primitives
-```
-Mechanism:
-- Instead of patching the guest kernel, modify EPT permissions
-- Specific memory accesses trigger EPT violations → VM exit
-- Hypervisor inspects the access and decides: allow, deny, or log
+A trusted hypervisor can enforce a separate guest-memory protection boundary.
+Windows VBS/KDP is one concrete architecture; other platforms' isolated execution
+environments require their own contracts and must not be equated with EPT hooks.
+Protecting selected data also differs from validating kernel code, authenticating
+an administrative request or preserving a detector's end-to-end coverage.
+[Microsoft KDP architecture](https://www.microsoft.com/en-us/security/blog/2020/07/08/introducing-kernel-data-protection-a-new-platform-security-technology-for-preventing-data-corruption/)
 
-Example: Watching writes to a sensitive region
-1. Remove write permission from the EPT entry for target region
-2. Guest runs normally until it attempts a write to that region
-3. EPT violation → VM exit → hypervisor receives control
-4. Hypervisor evaluates context:
-   - Which module performed the access
-   - What memory was touched
-   - Whether the access is authorized
-5. Decision: allow write, deny and return, or log and continue
+### Conditions for a Supported Protection Claim
 
-Advantages over traditional kernel hooks:
-- Operate outside the guest OS
-- Can remain effective after guest-kernel compromise if the hypervisor and
-  policy/configuration channel remain trustworthy
-- Avoid guest-kernel patching, although hypervisor presence and effects may be
-  observable
-- Ordinary guest-kernel writes cannot directly remove correctly enforced
-  second-stage permissions
-```
+| Review question | Evidence required |
+|---|---|
+| What is covered? | Exact protected memory, active mappings, access class and lifecycle; names such as callback list or ETW structure are not enough |
+| Who owns the policy? | Hypervisor/security-component provenance and the authority allowed to change mappings or configuration |
+| Was an access observed? | Available fault/exit context, collection coverage and correlation with the relevant mapping and execution context |
+| Was the operation prevented? | Enforced decision and resulting state; a reported exit alone does not establish denial or continuing integrity |
+| What remains outside scope? | Unprotected aliases or state, permitted update paths, device DMA, firmware and independent event or service failures |
 
-### Protectable Assets via EPT
-```
-- Executable pages of EPP (Endpoint Protection Platform) drivers
-  → Prevents silent patching of security software
-- ETW-related structures
-  → Unauthorized writes fault into hypervisor
-- Callback/callout/routine lists (PsSetCreateProcessNotifyRoutine, etc.)
-  → Write authorization moved outside the guest kernel
-- Critical kernel data structures
-  → PatchGuard-protected regions, SSDT, IDT
-```
+For a vulnerable-driver threat, first establish the affected driver's presence,
+reachable interface and required privilege. A claim that attempted kernel data
+tampering was blocked additionally requires the protection evidence above.
+Do not infer that every driver-mediated write would fault or that every callback
+remains intact merely because a hypervisor is installed.
 
-### Threat Model for Hypervisor Defense
-```
-Assumes kernel compromise has already happened:
-- Attacker has kernel code execution
-- Attacker can load vulnerable drivers (BYOVD)
-- Attacker can modify kernel memory
-- Traditional kernel-resident protections are untrustworthy
+A CPU fault gives machine context; identifying a trustworthy principal and
+handling an allowed update are separate policy problems. Report detection,
+prevention, post-event integrity and recovery as different outcomes. Guest-kernel
+compromise does not automatically defeat an independently enforced boundary,
+but that claim assumes the hypervisor, hardware and configuration path remain
+trustworthy. Preserve those assumptions and any missing coverage explicitly.
 
-Hypervisor advantage:
-- Sits above the guest kernel in privilege hierarchy
-- Enforces policies from a higher privilege layer
-- Guest-kernel rootkits cannot directly rewrite hypervisor policy under the
-  stated threat model; hypervisor vulnerabilities, DMA/SMM, configuration
-  weaknesses, and hardware compromise remain separate attack paths
-```
-
-### Attack Scenario: BYOVD vs EPT Protection
-```
-Without hypervisor defense:
-1. Attacker loads vulnerable signed driver
-2. Gains kernel R/W primitives
-3. Patches callback list to remove EPP callbacks
-4. The affected callback channel may lose coverage; evaluate independent
-   evidence separately rather than assuming the whole product is blinded
-
-With EPT-based defense:
-1. Attacker loads vulnerable signed driver
-2. Gains kernel R/W primitives
-3. Attempts to patch callback list
-4. EPT violation triggers VM exit
-5. Hypervisor catches the write, evaluates context
-6. Write is denied — callback list remains intact
-```
+Sources for these virtualization-boundary corrections reviewed: 2026-09-09.
 
 ## Resource Organization
 

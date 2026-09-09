@@ -123,7 +123,7 @@ Typical setup:
                         (KMBox / Logitech)   │  TensorRT/CUDA   │
                                              └──────────────────┘
 
-Dual-machine variant (maximum isolation):
+Dual-machine variant (separate processing location):
 - Machine A (game): only runs game + OBS, sends frames via NDI/capture card
 - Machine B (cheat): runs AI model, sends mouse commands via USB/network
   to hardware input device on Machine A
@@ -137,12 +137,13 @@ Single-machine variant:
 
 Pipeline stages:
 
-1. Frame Capture:
-   - OBS Game Capture (injects graphics hook DLL into game process)
-   - OBS Window Capture (no injection, uses DXGI Desktop Duplication)
-   - OBS plugin filter form (AI as OBS filter, minimal footprint)
-   - Direct framebuffer copy from GPU output layer (60+ FPS)
-   - Capture card (for dual-machine: HDMI/DP input on cheat PC)
+1. Frame Source Evidence:
+   - Identify the actual source/backend and retained frame stage; a source label
+     does not establish hook use, display coverage or a fixed frame rate
+   - Treat capture plugins and external capture devices as separate provenance
+     questions, and compare against legitimate recording configurations
+   - Evaluate capture semantics using the graphics-api skill before interpreting
+     a missing image or a process/module observation
 
 2. AI Object Detection:
    - Model: YOLOv5 / YOLOv8 / YOLOv10 / YOLO11 (lightweight variants)
@@ -339,33 +340,33 @@ Alternative acceleration backends:
 - Hardware-based (FPGA)
 ```
 
-## EFI/UEFI Cheats
+## EFI/UEFI Threat Boundaries
 
-### Boot-Time Loading
-```
-- EFI manual map: load unsigned driver payload during UEFI boot phase
-- ExitBootServices hook: intercept Windows boot to inject kernel code
-- Runtime DXE drivers: persist across OS boot via EFI runtime services
-- GetVariable/SetVariable: communicate between EFI and OS runtime
-```
+Classify boot-component tampering, runtime firmware behavior and device-originated
+memory access as separate capabilities. Record the boot stage, affected component,
+necessary privilege or trust failure, persistence evidence and observation point.
+Runtime residency does not by itself demonstrate persistence across a reboot.
 
-### EFI-Based Memory Access
-```
-- Map physical memory via EFI runtime services
-- Bypass DSE entirely (code runs before Windows kernel loads)
-- Survive Secure Boot if firmware is compromised or test-signed
-- Combine with DMA for maximum stealth
-```
+Secure Boot, Windows startup integrity and measured-boot assessment address
+different parts of the trust chain. An assertion that code runs before the OS,
+is test-signed, or uses a firmware interface does not demonstrate acceptance by
+the actual configured policy. Preserve firmware/build identity, active trust and
+revocation policy, and available measurement evidence.
+[Microsoft boot security](https://learn.microsoft.com/en-us/windows/security/operating-system-security/system-security/secure-the-windows-10-boot-process)
 
-### Detection Challenges
-```
-- Pre-OS or manually mapped payloads may avoid the normal Windows image-load
-  path, so a corresponding driver image callback need not occur
-- Artifacts depend on later payload stages; absence from MmUnloadedDrivers or
-  PiDDBCacheTable is not guaranteed
-- Secure Boot + TPM attestation is primary defense
-- Firmware integrity measurement (UEFI capsule verification)
-```
+Combining firmware and DMA claims establishes no general stealth advantage.
+Identify the memory accessor and its trust boundary independently. Microsoft
+separates post-OS Kernel DMA Protection from firmware responsibility during boot;
+evaluate both stages rather than extending a runtime policy conclusion backwards
+through the boot process.
+[Kernel DMA Protection](https://learn.microsoft.com/en-us/windows/security/hardware-security/kernel-dma-protection-for-thunderbolt)
+
+Missing OS image-load or driver-bookkeeping evidence must be scoped to the
+collector and lifecycle it covers. Corroborate with available boot, firmware,
+device and runtime evidence; a quiet channel is not proof that execution was
+invisible. Use [windows-kernel](../windows-kernel/SKILL.md) for callback contracts
+and [dma-attack](../dma-attack/SKILL.md) for acquisition boundaries.
+Sources reviewed: 2026-09-09.
 
 ## HWID Spoofing
 
@@ -519,58 +520,31 @@ Vector2 WorldToScreen(Vector3 worldPos, Matrix viewMatrix) {
 - Keyboard filter drivers
 - HID manipulation
 
-### Hardware Input Devices (for AI Visual Cheats)
-```
-Hardware input devices produce genuine HID reports indistinguishable
-from ordinary input in the fields of an individual protocol-conformant report.
-Descriptors, timing, topology, firmware, and gameplay behavior can still
-provide imperfect signals.
+### Input Sources and Observation Scope
 
-KMBox series (KMBox Net, KMBox B Pro, KMBox B+):
-- Standalone hardware device connected via USB or network
-- Receives mouse/keyboard commands over TCP/UDP or serial
-- Generates real USB HID reports to the gaming PC
-- Gaming PC sees a standard USB mouse, not API-injected input
-- Network variant enables dual-machine setups
-- Supports relative movement, absolute positioning, button events
-- API: simple serial/network protocol for move(dx, dy), click, etc.
+Protocol-conformant input does not authenticate human intent. Raw Input can
+identify different source devices, while API-generated input has its own
+platform contract; neither observation alone establishes a cheating decision.
+[Microsoft Raw Input](https://learn.microsoft.com/en-us/windows/win32/inputdev/about-raw-input),
+[Microsoft SendInput](https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-sendinput)
 
-Arduino / Teensy / STM32 microcontroller:
-- Custom firmware emulating USB HID device
-- Receives commands from cheat PC via serial/USB CDC
-- Generates USB HID mouse reports
-- Cheapest hardware option, fully customizable
-- Leonardo / Pro Micro (ATmega32U4) most common for native USB HID
+Use this comparison as a collection plan, with no concealment ordering:
 
-Logitech driver exploitation:
-- Older versions of G HUB / LGS (Logitech Gaming Software) expose
-  internal APIs for mouse movement
-- ghub_mouse_move() or lgs_mouse_move() via DLL injection into GHUB
-- Logitech devices have driver-level whitelist advantage
-- Specific driver versions required (newer versions patched)
-- No external hardware needed, but driver-version-dependent
+| Source class | Evidence potentially available | Benign controls and limits |
+|---|---|---|
+| External HID or input bridge | Device identity/topology, reported input and relevant host associations | Ordinary peripherals, KVMs, remappers and accessibility devices; device names alone do not establish behavior |
+| Vendor or other input driver | Exact image/version, service/device ownership and observed operations | Legitimate vendor software; a familiar publisher does not demonstrate a game-specific exemption |
+| Input filter component | Driver provenance, configured role and available input-path observations | Authorized filters and accessibility software; presence alone is not a verdict |
+| User-mode input API | Caller/path evidence where available, integrity-level context and observed events | UI testing and accessibility; API visibility and collection coverage vary |
 
-Interception driver (interception.sys):
-- Open-source keyboard/mouse filter driver
-- Intercepts and injects input at driver level
-- Commonly used with AI aimbots for zero-hardware-cost injection
-- Detectable by anti-cheat (driver signature known)
+Record actual observer access, provider health, sampling, input transformation
+and gameplay context. A remote decision process or additional device changes
+which components need examination; it does not make the entire pipeline less
+observable in every deployment. The table's review criteria are a synthesis,
+not a documented guarantee that any one detector collects these fields.
 
-HDMI/DP KVM-style middleman:
-- Hardware device sitting between mouse and PC
-- Intercepts real mouse data, injects AI-calculated deltas
-- Can preserve much of the expected interface behavior, depending on its USB
-  descriptors, timing, topology, and electrical implementation
-- Potentially low software footprint but complex hardware setup
-
-Illustrative detection-surface ordering, not a universal ranking:
-1. Dedicated hardware — fewer software artifacts, but device and behavior
-   signals remain
-2. KVM middleman — limited host software footprint if protocol behavior matches
-3. Vendor-driver abuse — version and process/module artifacts may be available
-4. Known filter driver — driver identity and behavior may be available
-5. User-mode injection API — API/call-path telemetry may be available
-```
+Use [input provenance](../anti-cheat/references/input-provenance-and-measurement.md)
+for units, client uploads and missing samples. Sources reviewed: 2026-09-09.
 
 ### KMBox Protocol Details
 ```

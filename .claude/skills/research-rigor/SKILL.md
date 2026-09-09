@@ -1,6 +1,6 @@
 ---
 name: game-security-research-rigor
-description: Verify game-security claims through primary-source checks, explicit trust boundaries, claim ledgers, reproducible evidence, and calibrated uncertainty. Use for attack/defense comparisons, community reports, enforcement-scope claims, telemetry quality, detector evaluation, conflicting citations, or disagreement across README/wiki/description/archive layers. Separate observation, finding, attribution, and action; assess confounders, base rates, false positives, temporal validity, and source limitations before drawing consequential conclusions.
+description: Verify game-security claims through primary-source checks, explicit trust boundaries, claim ledgers, reproducible evidence, and calibrated uncertainty. Use for attack/defense comparisons, community reports, enforcement-scope claims, telemetry quality, detector evaluation, owned-game-build diagnostics and sanitizer limits, untrusted instructions in retrieved sources, conflicting citations, or disagreement across README/wiki/description/archive layers. Separate observation, finding, attribution, and action; assess confounders, base rates, false positives, temporal validity, and source limitations before drawing consequential conclusions.
 ---
 
 # Game Security Research Rigor

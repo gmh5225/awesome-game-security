@@ -16,7 +16,7 @@ all other skill libraries. Source quantity and document length are not quality s
 | Robustness and remediation | Tool names without a shared diagnostic-evidence workflow | Owned-build contracts, sanitizer limits and artifact-triage reference | Project-specific regression artifacts and reviewed fixes |
 | Skill behavior | No checked-in routing and answer-quality case suite | Public scenario suite, local validator and evaluation rubric | Repeated model runs, comparison baselines and separately held-out cases |
 | Repository-grounded selection | Repeated source templates, stale category counts and weak tool-role distinctions | Per-domain resource guides, shared provenance rules and an offline section/layer index | Ongoing upstream/version checks and held-out retrieval tasks |
-| Legacy technical claims | New evidence rules coexist with older detailed catalogs | Focused corrections to input/trajectory provenance, units, behavioral generalizations and ETW/callback coverage; remainder retained | Further claim-by-claim review of historical thresholds, layouts, compatibility and detectability claims |
+| Legacy technical claims | New evidence rules coexist with older detailed catalogs | Corrections to input/trajectory and callback evidence plus targeted firmware, attestation, virtualization, kernel/mobile and graphics claims; see the recorded quality review | Further claim-by-claim review of historical thresholds, layouts, compatibility and detectability claims |
 
 ## Priorities Beyond This Iteration
 
@@ -26,8 +26,9 @@ all other skill libraries. Source quantity and document length are not quality s
 2. **Entry-point size:** seven baseline entrypoints exceed 500 lines; DMA is
    1,800 lines and Windows kernel 1,178. Refactor by actual task only after
    identifying necessary references and verifying routing/answer regressions.
-   Shared data-source templates have now been consolidated and overview routing
-   shortened; the remaining domain catalogs still need task-based refactoring.
+   Direct Data Source sections are retained in every entrypoint by project
+   requirement; shared navigation supplements them. The remaining domain
+   catalogs still need task-based refactoring without removing those sections.
    Preserve source provenance and working links during any extraction.
 3. **Portable naming:** nine baseline `name` values differ from their containing
    folder names. Existing names are preserved in this iteration. Agent Skills
@@ -58,3 +59,6 @@ selection, appropriate non-selection, overlap, and ambiguous questions.
 Use the [evaluation guide](../../research-rigor/references/skill-evaluation.md)
 for this repository's local case format. Do not turn a validator pass, one
 reviewer's score, or a small smoke sample into a world-leading quality claim.
+
+See the [recorded 2026-09-09 review](quality-review-2026-09-09.md) for concrete
+corrections and actual limited evaluation results.

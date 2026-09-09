@@ -29,6 +29,10 @@ Use [research-rigor](../research-rigor/SKILL.md) for disputed implementation,
 performance, compatibility, or detectability claims. This classification does
 not establish that a particular commercial setup uses the components it advertises.
 
+For certainty claims about firmware classes, EPT, HVCI, containment, or TPM
+proof, read [assurance boundaries](references/assurance-boundaries.md). It
+separates mechanism, deployed policy, evidence coverage, and attribution.
+
 ## README Coverage
 
 - `Cheat > DMA`
@@ -65,20 +69,15 @@ observations, none of which alone establishes malicious intent.
 ```
 
 ### Three Defense Layers
-```
-Layer              Mechanism                    What It Catches
-─────────────────────────────────────────────────────────────────────────────
-PCIe-layer         Inspect Config Space &        Identity mismatch — spoofed
-fingerprinting     behavior at the bus level     device that doesn't match
-                                                 real silicon's full signature
 
-IOMMU              Use the IOMMU to bound        Out-of-domain DMA — device
-enforcement        what physical memory the       trying to read game memory
-                   device can touch               it wasn't allocated
+| Layer | Property evaluated | Limits |
+|---|---|---|
+| PCIe identity and behavior | Consistency with an identified device and matched baseline | A mismatch needs version, topology, driver, workload, and benign-device context; an identifier is not proof of intent |
+| IOMMU enforcement | Device requests permitted by the active remapping policy | Verify actual path, mappings, lifecycle, and available fault evidence; enforcement and observation are separate |
+| External attestation | Authenticity and policy appraisal of selected measurements | Boot evidence does not automatically cover current device behavior or runtime mapping state |
 
-External           TPM-anchored measured boot,   Boot-chain compromise — IOMMU
-attestation        cloud-verified                or kernel itself subverted
-```
+Use the [assurance reference](references/assurance-boundaries.md) for the
+underlying platform contracts and the evidence required at each layer.
 
 ## PCIe Protocol Stack
 
@@ -226,7 +225,8 @@ beyond negotiated limit) is observably distinct from real silicon.
 
 ### MPS and MRRS as Fingerprints
 ```
-Both are negotiated once at link bring-up and fixed for the session.
+Record current MPS/MRRS configuration and the responsible platform software;
+do not infer the active values solely from advertised link capability.
 - Device Capabilities[2:0]: Max_Payload_Size_Supported
   (0=128, 1=256, 2=512, 3=1024, 4=2048, 5=4096 bytes)
 - Device Control[7:5]: current MPS (must be <= Supported,
@@ -308,8 +308,9 @@ ECAM (Enhanced, MMIO path):
 On Windows, supported paths are:
 - IRP_MN_READ_CONFIG / IRP_MN_WRITE_CONFIG
 - BUS_INTERFACE_STANDARD.GetBusData / SetBusData
-Production anti-cheat should use documented bus interfaces;
-direct MCFG mapping is a lab-only technique.
+Use documented bus interfaces within the caller's permitted ownership scope.
+Direct MCFG mapping is not a supported substitute for the Windows PCI stack;
+OS ownership of headers and capabilities still applies.
 ```
 
 ## PCIe Configuration Space
@@ -336,10 +337,10 @@ bit 0:    0 = Memory BAR, 1 = I/O BAR
 bits 2:1: 00 = 32-bit, 10 = 64-bit (BAR pair)
 bit 3:    Prefetchable
 
-BAR size discovery: write 0xFFFFFFFF to BAR, read back.
-Lower bits (except type bits) come back as 0; rest form a size mask.
-Real silicon's size masks are device-specific; a spoofed BAR with
-64 KB mask when the donor uses 4 KB is detectable in one operation.
+BAR sizing belongs to platform enumeration and resource management.
+For a collector, compare OS-reported resources with the exact device contract;
+do not rewrite a live device's BARs. A size discrepancy requires context about
+the device revision, active function, firmware, and collection method.
 ```
 
 ### Capabilities Chain
@@ -770,7 +771,7 @@ Approaches 1–3 are the foundation of most current DMA cheats.
 8   FLR race                    FLR/Hot Reset race window           Synchronized FLR handling
 9   SMM bypass                  SMM code exempt from IOMMU          Boot Guard / Platform Secure Boot
 10  DMA-remapping driver bugs   Bugs in OS IOMMU manager            OS patching
-11  Hypervisor escape           Compromised hypervisor              VBS / measured boot; TPM attestation
+11  Hypervisor trust failure    Compromised hypervisor              Platform remediation; boot evidence is not runtime proof
 12  Interrupt injection (no IR) Write arbitrary interrupts           Mandatory IR enforcement
 13  RMRR/IVMD scope abuse       Fake ACPI tables cover attacker     Measured boot; runtime RMRR audit
                                 physical ranges
@@ -857,7 +858,7 @@ performance counters independent of firmware spoofing.
 Form Factor           Description                 Detection
 ────────────────────────────────────────────────────────────────────
 M.2 NGFF Key M        Internal NVMe slot           Dominant modern form;
-                                                    physically invisible
+                                                    physical inspection needed
 M.2 + USB3 bridge     M.2 board with FT601         Gaming PC sees only M.2
 PCIe x1/x4 add-in     Traditional add-in card      More physically visible
 External USB3          USB3-to-PCIe (legacy)        Mostly obsolete
@@ -1015,129 +1016,62 @@ W1C cases: write 0x00000000 to Correctable Error Status,
 then write known-1 patterns, verify read-back semantics.
 ```
 
-### Donor Card Extraction
-```
-A common emulation strategy starts with a donor device and clones more than
-VID/DID: configuration-space layout, capabilities, BAR masks, interrupt-table
-layout, and device serial behavior where present. Completeness varies by design.
+### Claimed Device Identity and Baselines
 
-Extraction tools:
-- lspci -d [VID:DID] -vvv -xxxx (full ECAM dump)
-- setpci -s <BDF> ECAP_AER+0x4.L
-- Direct ECAM mapping in kernel-mode tools
-- VFIO passthrough + programmatic dump
+Compare the claimed device with provenance-backed inventory and a matched
+reference: exact SKU, function, firmware, driver, topology, and power/workload
+state. Multiple legitimate devices can share product identifiers. A lower link
+speed, inactive function, or unusual device class needs context; none is an
+automatic finding of device impersonation.
 
-Donor selection pitfalls:
-- Duplicating hardware already in gaming PC → caught instantly
-- Must match FPGA's actual PCIe capability (x16 Gen4 on Gen2 x1 fails)
-- Silicon generation must align with claimed link speed
-- Class-functional A/B testing detects non-functional donors
-```
+### Device Evidence Dimensions
 
-### Firmware Sophistication Tiers
-```
-Tier  Description              Detection Difficulty
-──────────────────────────────────────────────────────────────────
-0     Stock                    Trivial — VID/DID blacklist
-      Unmodified upstream;
-      10EE:0666 IDs
+Replace informal firmware tiers with a record of properties actually observed:
 
-1     Bridge                   Easy — signature residue,
-      .coe replaced with       driverless device, BME clearance
-      donor VID/DID only
+| Dimension | Evidence needed | Permitted conclusion |
+|---|---|---|
+| Identity and provenance | Device inventory, exact identifiers, trusted source and version | Consistent, inconsistent, or unverified identity |
+| Configuration and function | Applicable device contract and matched observations | A specific conformance discrepancy with known alternatives |
+| Runtime behavior | Collector coverage, workload and power-state baseline | A calibrated anomaly within the measured conditions |
+| Memory-access policy | Active platform/driver remapping and available fault evidence | Permitted or denied access on the established path |
+| Platform trust | Attestation policy and supported runtime observations | Trust in the measured properties, with unmeasured state explicit |
 
-2     Shadow config            Medium — R/W consistency probe
-      Full 4 KB shadow;        catches silent write drops
-      no overlay RAM
+No public/private label establishes detector difficulty, guaranteed detection,
+or a requirement for one particular trust anchor. A device can satisfy observed
+behavioral checks while other properties remain unknown. See
+[assurance boundaries](references/assurance-boundaries.md).
 
-3     Overlay RAM              Medium-hard — BAR probe still fails;
-      Shadow + writable layer  class-functional A/B fails
-      with per-register masks
+### Reference-Set Limits
 
-4     BAR MMIO + MSI           Hard — interrupt distribution analysis;
-      Donor-class BAR memory   BAR-region content baselining
-      responder + MSI generator
-
-5     Behavioral emulation     Very hard — multi-session statistical
-      Latency jitter, ASPM,    analysis required
-      AER counters, donor-
-      class-specific behavior
-
-6     Private + randomized     Currently undefeated by hardware-layer
-      Per-customer layout,     signatures alone
-      capability shuffling,
-      custom hard-IP integration
-
-Each tier transition corresponds to a defender technique
-that closed the prior tier's escape hatch.
-Cost-to-implement is nonlinear: 0–2 are public/trivial,
-3 needs moderate Verilog, 4–5 need deep PCIe knowledge,
-6 is sustained engineering.
-```
-
-### Donor Exhaustion
-```
-Each detected donor class becomes nonviable. Remaining viable donors
-trend toward obscure industrial cards — which themselves become
-a behavioral signal on consumer gaming PCs.
-
-Donor Class            Detection Status
-─────────────────────────────────────────────────────────
-Wi-Fi adapters         Heavily detected; class-spoof checks ubiquitous
-Wired NICs             "NIC with loaded driver but zero packets" test
-NVMe SSDs              Harder; detected via missing namespace activity
-Audio codecs           Lower bandwidth fits FPGA; class checks present
-USB host controllers   Child-device enumeration check breaks naive
-Capture cards          Harder (genuinely idle when no source)
-Industrial / OEM SKUs  Increasingly only viable; demographic signal
-Server-class accel.    Physically implausible on consumer boards
-```
+Describe which legitimate device populations a baseline covers. A reference-set
+absence is an unknown identity, not proof that a device class is malicious or
+technically implausible. Do not claim that a whole class is defeated, undetected,
+or exhausted without a versioned evaluation and measured error rates.
 
 ## Detection at the PCIe Layer
 
 ### Configuration Integrity
-```
-- VID/DID/SVID/SDID against known-real-silicon list
-- Capability-chain walk: DWord-aligned Next pointers, no overlaps, no cycles
-- Signature-residue scanning: Xilinx 7-series default byte patterns at
-  known relative offsets (Device Capabilities field bits, reserved bits,
-  VSEC vendor IDs)
-- Capability presence consistency: expected capabilities must match the donor's
-  exact SKU, firmware, function, and configuration
-- BAR mask verification: write 0xFFFFFFFF, compare size mask against donor
-```
 
-### BAR Memory Read Probing
-```
-Send Memory Read TLPs to BAR ranges, validate responses by donor class:
+Use supported, permitted observations of device identity, capability structure,
+OS-assigned resources, and advertised functions. Compare with the exact device
+contract and a matched baseline; document unavailable or inaccessible fields.
+Collection should not modify another driver's configuration registers.
 
-NIC donor BAR0: register layout with receive/transmit ring descriptors,
-  interrupt mask, link status. Offset 0x00 returns specific bit pattern.
+### BAR and Register Evidence
 
-NVMe donor BAR0: NVMe controller registers — CAP (MQES, DSTRD,
-  MPSMIN/MPSMAX), VS, CC, CSTS, AQA, ASQ/ACQ, doorbells at 0x1000.
+Distinguish OS-reported BAR resources from device-specific register contents.
+A zero or unexpected value may reflect reset, power state, a missing driver,
+unsupported functionality, or collector scope. Establish register semantics and
+which actor owns access before interpreting it as a conformance failure.
 
-USB XHCI donor BAR0: Capability Registers (CAPLENGTH, HCSPARAMS, HCCPARAMS).
+### Configuration Ownership and Consistency
 
-zerowrite4k returns all-zeros; loopaddr echoes address. These patterns are
-conspicuous under donor-specific functional probes, although individual real
-register ranges can legitimately contain zeros.
-Tier-4 firmwares implement donor-class responders but usually only
-cover registers checked at probe time, leaving others divergent.
-```
-
-### R/W Consistency Probing
-```
-- Command Register: toggle Memory Space, I/O Space, Bus Master Enable
-- Device Control: change MPS, MRRS, Error Enables
-- MSI Control: toggle Enable, change Multiple Message Enable
-- Walk every W1C bit (Status, AER Status): write 1s, confirm clear
-- Walk reserved bits: write 1s, confirm read-back as 0
-- Per-register writable masks must match donor
-
-Tier-2 (no overlay) fails immediately.
-Tier-3 (single global mask) fails on W1C and reserved-bit cases.
-```
+Assess consistency from existing traces, device documentation, owned-source
+review, and documented platform interfaces. Windows retains control of PCI
+headers and capabilities. A generic collector is not entitled to toggle bus
+mastering, payload size, MSI state, or reserved bits to classify live devices.
+Any separately designed device validation must respect the owning driver and
+platform lifecycle. See [configuration and containment boundaries](references/assurance-boundaries.md).
 
 ### LTSSM and Link-State Validation
 ```
@@ -1225,10 +1159,10 @@ Distinguishing features:
 - Autocorrelation at frame intervals
 - Address-space coverage entropy
 
-Honeypot regions complement this when combined with:
-  IOMMU denial/fault logging, hypervisor-managed protected pages,
-  device-domain sandboxing, decoy IOVA mappings, or server-side
-  behavioral traps tied to fake game objects.
+Decoy observations require a defined collector and access path. An EPT event
+records processor access under the active EPT policy; device DMA requires
+separate remapping/fault or platform evidence. Server events have their own
+application semantics. Do not attribute one collector's event to another layer.
 ```
 
 ### Hot-Plug and Link Disruption Events
@@ -1288,64 +1222,48 @@ IOMMU grouping before calling it an exploitable isolation hole.
 ```
 
 ### IOMMU as Containment Primitive
-```
-Active containment when suspect device is identified:
 
-1. IOMMU domain re-remapping:
-   Reprogram device's domain to sandbox memory instead of revoking access.
-   Requests may receive sandbox data or fault depending on mappings and device
-   behavior; validate OS/driver stability before using this response.
+Containment is a platform/driver responsibility. Record the authorized policy
+owner, affected device hierarchy, existing mappings, in-flight work, recovery
+path, and evidence that the requested isolation completed. Remapping, bus-master
+state, and downstream-port containment have different prerequisites and scope;
+none has an effectiveness guarantee derived from a firmware tier.
 
-2. Bus Master Enable clearance:
-   Toggle Command[2] to 0. Effectiveness depends on platform enforcement,
-   device behavior, and alternate paths; monitor for restoration or races.
-
-3. Downstream Port Containment (DPC):
-   When DPC is enabled on root port (Extended Cap ID 0x001D),
-   supported trigger conditions can place the downstream hierarchy into
-   containment. Verify the port status, traffic blocking, link recovery, and
-   platform-specific behavior; support is not universal.
-
-4. Anti-cheat-owned device domain:
-   For device owned by AC driver, allocate and map only sandbox IOVAs,
-   never expose game memory.
-
-5. Hypervisor-integrated enforcement:
-   Enforce policy above guest kernel by trapping IOMMU MMIO programming.
-   Requires privileged platform integration.
-```
+Use supported OS-managed device lifecycle and isolation controls. Do not instruct
+a generic game-security driver to rewrite another device's PCI configuration or
+IOMMU ownership. Preserve evidence and evaluate availability impact before an
+authorized response; restriction is separate from misconduct attribution.
+[Platform ownership and containment](references/assurance-boundaries.md)
 
 ## Hypervisor-Level Defense
 
 ### EPT-Based Memory Protection
-```
-EPT translates Guest Physical Address (GPA) to Host Physical Address (HPA).
-A hypervisor owning the EPT can:
 
-- Mark game memory as read-execute-only in EPT, even if guest OS marks
-  read-write. Writes cause EPT violations the hypervisor traps.
-- Hide pages by clearing EPT mappings.
-- Implement watchpoints on specific GPA ranges.
+EPT supplies a processor-side guest-physical to host-physical translation and
+permission boundary. A violation concerns an access governed by the active EPT
+policy. IOMMU remapping supplies the separate device-to-memory boundary; an EPT
+trap is not direct evidence of a PCIe DMA request.
 
-IOMMU blocks DMA at device-to-memory boundary;
-EPT blocks CPU access at guest-to-host boundary.
-A cheat combining DMA card with kernel-mode payload faces both.
-```
+A trusted hypervisor can own both policies, but verify each path independently.
+Protection depends on correct region coverage, page lifetime, backing-memory
+isolation, and trusted policy/configuration interfaces. A guest CPU permission
+change alone establishes no device-DMA coverage. Hypervisor presence and effects
+may be observable; operating outside the guest kernel does not imply invisibility.
+[CPU, DMA, and hypervisor assurance](references/assurance-boundaries.md)
 
 ### VBS, HVCI, and VTL Split
-```
-VBS creates Secure Kernel (VTL 1) alongside regular kernel (VTL 0)
-in a Hyper-V partition. HVCI uses VTL 1 to enforce no executable page
-in VTL 0 is simultaneously writable.
 
-Anti-cheat interaction:
-- Register VTL 1 callouts to validate guest state
-- Attest against System Guard Secure Launch (DRTM) measurements
-- Rely on HVCI to block BYOVD patterns
+VBS and memory integrity strengthen isolation of kernel code-integrity decisions.
+They do not grant arbitrary third-party drivers a VTL 1 extension interface or
+make every signed driver safe. Review documented integration and the effective
+vulnerable-driver policy separately; blocklist coverage has limits.
 
-Combined VBS+HVCI+TPM+SecureBoot is assumed baseline for
-serious anti-cheat threat models.
-```
+Record platform support, configured policy, services actually running, and
+compatibility evidence. Kernel DMA Protection does not require VBS, and per-device
+DMA remapping can be enabled independently of the overall feature. Select an
+explicit deployment baseline for the product instead of treating every security
+feature as a universal requirement or its absence as misconduct.
+[Feature and deployment boundaries](references/assurance-boundaries.md)
 
 ### SMM Considerations
 ```
@@ -1381,111 +1299,59 @@ IOMMU policy, ACS topology, ATS policy, and attestation remain required.
 
 ## External Trust Anchors
 
-### TPM 2.0
-```
-Hardware (or firmware-isolated) cryptoprocessor with:
-- PCRs: extend-only registers, PCR[n] = SHA256(PCR[n] || new_value)
-- Persistent keys: EK (manufacturer), SRK (provisioned), user-defined
-- Hierarchy: Endorsement, Storage, Platform, Null
-```
+### TPM Measurements and PCR Profiles
 
-### PCR Allocation (Measured Boot)
-```
-PCR   Measured Content
-0     SRTM / Core Root of Trust — UEFI firmware code
-1     Platform configuration data — firmware variables
-2     Option ROM code — third-party UEFI drivers
-3     Option ROM configuration and data
-4     IPL / boot manager binary (e.g., bootmgfw.efi)
-5     IPL configuration — GPT/partition table, boot config
-6     Manufacturer-specific / state-transition events
-7     Secure Boot policy (PK, KEK, db, dbx)
-8–15  OS-defined (BitLocker binds to PCR[11])
-16    Debug
-17–22 DRTM measurements (Secure Launch)
-23    Application-defined
-```
+A TPM supports protected keys and measurement reporting. Record the actual TPM
+implementation, PCR bank, platform profile, and selected measurements. PCR reset
+and extend rules are profile-dependent; a universal extend-only table is
+inaccurate. Resolve measurement meaning from the applicable profile and event
+log, rather than assigning one fixed PCR layout to every system.
 
-### Remote Attestation Cryptography
-```
-Trust property: without the attestation key or a break in the TPM/verification
-chain, local software cannot forge a quote over arbitrary PCR values.
+### Remote Attestation Evidence
 
-Flow:
-1. Server sends nonce
-2. Client calls TPM2_Quote(AIK, PCR_selection, nonce)
-   TPM computes PCR composite, builds TPMS_ATTEST, signs with AIK
-3. Client sends Quote + AIK certificate chain
-4. Verifier checks:
-   - AIK signature valid
-   - AIK certificate chains to trusted TPM manufacturer root
-   - EK on known-EK list (binds AIK to real TPM)
-   - Nonce matches (freshness, replay protection)
-   - PCR composite matches known-good value
+Review key enrollment, verifier trust anchors, signature validity, expected
+qualifying data, PCR selection/digest consistency, event-log consistency, and
+the appraisal policy. An attestation key's trust chain depends on the enrollment
+scheme; it does not automatically terminate at a TPM manufacturer certificate.
 
-A rootkit loading after measured boot cannot normally reset extend-only PCRs to
-an arbitrary prior value through the standard TPM interface. A software
-simulator cannot produce a quote verifiable under a trusted hardware-backed
-attestation key, but a valid quote still covers only the selected measurements.
-```
+A valid quote supports the selected measurements under that trust model. It does
+not establish the absence of a DMA-capable device or authenticate every current
+IOMMU mapping. Separate accepted boot evidence, unsupported measurement coverage,
+and verified runtime state in the report.
 
 ### DRTM and Secure Launch
-```
-Dynamic Root of Trust for Measurement allows "late launch" —
-trusted execution environment established after OS boot,
-measurement captured into PCR[17].
 
-Intel: GETSEC[SENTER] (TXT)
-AMD: SKINIT (SVM extension)
+Secure Launch uses DRTM during startup to establish a measured execution path.
+Do not describe this as an arbitrary post-boot application launch or assume that
+one PCR comparison verifies every security component. Record platform support,
+launch state, applicable measurement profile, and appraisal policy.
 
-CPU enters measured execution state, Secure Loader Block (SLB)
-loaded and hashed into PCR[17], control transfers to
-Measured Launch Environment (MLE).
+### Pre-Boot DMA Evidence
 
-Microsoft System Guard Secure Launch uses this to load HVCI's
-hypervisor into measured state independent of SRTM chain.
-Defender requests Quote including PCR[17] and matches against
-known-good MLE measurement.
-```
+Firmware's pre-boot isolation responsibilities and Windows runtime DMA policy
+are distinct. Microsoft's OEM contract specifies a PCR 7 event when relevant
+DMA protections are disabled or reduced. Interpret its presence or absence only
+against the applicable contract and a trustworthy measurement/event-log path.
+ACPI indicators describe platform capabilities and policy inputs, not a complete
+snapshot of live IOMMU mappings.
 
-### UEFI Pre-Boot DMA Integrity
-```
-Pre-Boot DMA Protection: firmware must isolate DMA-capable devices'
-I/O buffers before ExitBootServices().
-
-ACPI indicators:
-- Intel: DMA_CTRL_PLATFORM_OPT_IN_FLAG in DMAR table flags
-- AMD: DMA remap support bit in IVRS IVinfo field
-
-Windows PCR[7] event: firmware extends EV_EFI_ACTION with
-"DMA Protection Disabled" when IOMMU/Kernel DMA Protection
-is disabled, providing attestation hook.
-
-Combined picture:
-PCR[0]/PCR[7] anchor firmware and DMA-protection policy,
-ACPI tables describe runtime IOMMU config,
-documented DMA interfaces show what OS actually remaps,
-attestation ties local claims to remote-verified known-good policy.
-```
+Sources and verification limits: [attestation and platform contracts](references/assurance-boundaries.md).
 
 ## Layered Detection Pipeline
 
 ### Pre-Game Environmental Verification
-```
-- IOMMU active and applied to DMA-capable PCIe paths
-- Interrupt Remapping enabled
-- Secure Boot enabled
-- VBS/HVCI active
-- TPM 2.0 present and provisioned
-- Attestation Quote validates against expected policy
-- BIOS/UEFI version not in known vulnerable pre-boot DMA list
-- ACS topology walk: all relevant bridges enforce SV, TB, RR, CR
-```
+
+Record supported, configured, and observed-running state separately for device
+remapping, interrupt remapping, Secure Boot, VBS/memory integrity, and attestation.
+Bind requirements to a documented product/platform policy. Assess firmware update
+applicability and relevant topology; absence from a known-issue list is not proof
+that firmware has no vulnerabilities. Unsupported or unavailable evidence should
+remain explicit, with compatibility and recovery paths defined.
 
 ### PCIe Inventory Pass
 ```
 - Enumerate all PCIe devices via PnP tree
-- Full 4 KB config-space dump for each
+- Supported configuration snapshot, recording readable span and missing fields
 - Check device problem codes (DEVPKEY_Device_ProblemCode)
 - Cross-reference SMBIOS slot inventory with populated devices
 ```
@@ -1495,8 +1361,8 @@ attestation ties local claims to remote-verified known-good policy.
 - VID/DID/SVID/SDID against known-good list
 - Capability-chain walk and validation
 - Signature-residue scan
-- BAR mask verification
-- R/W consistency probing
+- OS-reported BAR/resource consistency
+- Configuration consistency from permitted observations
 - Compare against per-donor reference database
 ```
 
@@ -1531,9 +1397,9 @@ Verdict informed by:
 - Server-side aggregation across sessions
 - Behavioral verification (input timing, gameplay statistics)
 
-While verdict accumulates, containment protects the live match:
-IOMMU re-remapping to sandbox, BME clearance, or EPT-level
-game-process protection degrades cheat effectiveness in real time.
+Any authorized containment must use the established OS/platform owner and
+verify its actual scope and completion. EPT CPU permissions and device DMA
+isolation are different controls; neither implies a guaranteed real-time outcome.
 ```
 
 Apply [`research-rigor`](../research-rigor/SKILL.md) when converting these
@@ -1542,35 +1408,21 @@ platform, topology, driver, and power state; preserve raw captures and test
 benign alternatives before attribution.
 
 ### Realistic Limits
-```
-A firmware that:
-- Clones donor byte-for-byte (full 4 KB config + all capabilities)
-- Implements donor-class BAR MMIO, MSI generation, overlay RAM
-- Adds completion-latency jitter matching donor distribution
-- Generates plausible AER correctable-error rates
-- Transitions through ASPM states like the donor
-- Uses donor not present in gaming PC and not on blacklists
-- Operates only within driver-mapped IOMMU domains (legitimate-path exfil)
-- Avoids honeypot regions through gameplay-aware address whitelisting
 
-...can evade the listed PCIe-layer and IOMMU-layer signatures when each is used
-in isolation and the emulation matches the defender's tested dimensions.
+A passing identity or behavioral check establishes consistency only in the
+observed dimensions. A denied DMA request establishes the enforced boundary
+for that request; it does not classify every device or actor. A valid attestation
+result covers its selected measurements and appraisal policy, not all current
+memory access.
 
-This is why external trust anchors are required:
-TPM attestation, measured boot, and server-side correlation operate
-outside the "spoof a PCIe endpoint" problem.
+Choose complementary controls for independently identified trust gaps. External
+attestation can support boot-state confidence but is not a universal solution to
+unobserved runtime activity. Report coverage, missing evidence, shared failure
+modes, and measured error rates instead of an evasion checklist or a claim that
+one device class requires a particular detector.
 
-A device cannot forge a TPM Quote signature without the attestation key, but a
-valid Quote attests only the selected PCR values and nonce. It does not by
-itself prove the absence of a runtime DMA device or the current IOMMU mapping.
-The verifier must validate the event log and a policy covering measured
-firmware, DMA-protection events, Secure Boot, VBS/HVCI, and IOMMU configuration,
-then obtain separate evidence for unmeasured runtime state.
-
-Layering PCIe, IOMMU, hypervisor, and attestation controls raises attacker cost;
-whether it exceeds attacker value is an environment-specific economic claim,
-not a technical guarantee.
-```
+Layered protection may increase attack cost; the magnitude and economic effect
+remain deployment-specific claims requiring evidence.
 
 ## Forensic Evidence Capture
 
@@ -1578,7 +1430,7 @@ not a technical guarantee.
 ```
 Artifact                     Source                          Purpose
 ──────────────────────────────────────────────────────────────────────────────
-Full 4 KB config dump        Bus interface / ECAM            Donor ID post-hoc
+Supported config snapshot    OS PCI interface                Device identity and collection scope
 Capability chain walk        Parsed from config              Capability presence
 PCIe link state history      Link Status over session        LTSSM anomaly evidence
 MSI/MSI-X arrival timeline   OS interrupt telemetry          Rate claim refutation
@@ -1586,8 +1438,9 @@ AER correctable counts       AER capability registers        Baseline outlier ev
 IOMMU fault log entries      WHEA/ETW, Driver Verifier       Invalid-DMA evidence
 IOMMU domain assignments     IOMMU manager state walk        Passthrough anomaly
 ACS bridge state             Bridge enumeration              Isolation assessment
-Honeypot access record       Hypervisor EPT trap log         Unauthorized read evidence
-TPM PCR snapshot             TPM Quote API                   Boot-chain attestation
+Protected-page CPU event    Hypervisor EPT event evidence   CPU access-policy observation
+Device DMA fault evidence    Platform/IOMMU collector        Device request-policy observation
+TPM quote and measurement log Attestation provider           Selected-measurement appraisal
 MCFG / DMAR / IVRS tables   ACPI subsystem                  Platform config baseline
 SMBIOS slot inventory        DMI subsystem                   Slot-population audit
 BIOS version + patch level   SMBIOS                          Pre-Boot DMA fix verify

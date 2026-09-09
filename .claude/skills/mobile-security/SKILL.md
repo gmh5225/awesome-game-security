@@ -165,82 +165,58 @@ Interceptor.attach(Module.findExportByName("libgame.so", "function_name"), {
 - **xHook**: PLT hook library
 - **Dobby**: Multi-platform hook framework
 
-### Modern Root Solutions
+### Root Mechanisms and Privilege Boundaries
 
-#### KernelSU
-```
-- Kernel-based root solution, works at kernel level (no /system modification)
-- Module system compatible with Magisk modules via KSU module API
-- Filesystem artifacts and observability depend on the exact version and
-  configuration; do not infer artifact absence or detectability from its name
-- Requires custom kernel or GKI (Generic Kernel Image) patching
-- APatch: newer alternative, patches boot.img with KernelPatch
-```
+KernelSU implements a kernel component that grants root privileges to user-space
+applications. APatch describes kernel patching through KernelPatch and separately
+identifies kernel-space modules. A root-enabled application does not thereby
+execute all its code in kernel mode: distinguish user-space credentials,
+privileged services, kernel components and their interfaces.
+[KernelSU architecture](https://kernelsu.org/guide/what-is-kernelsu.html),
+[APatch architecture FAQ](https://apatch.dev/faq.html).
 
-#### APatch
-```
-- Patches Android kernel at boot via KernelPatch
-- No need for custom kernel source (works on stock GKI kernels)
-- Module support similar to Magisk/KernelSU
-- Root process runs within kernel context
-```
+Compare an exact release, kernel/device, boot-image provenance and module
+configuration. Do not infer universal stock-kernel compatibility, interchangeable
+module APIs, filesystem cleanliness or detectability from a framework name.
+Android SELinux normally constrains even root processes; for a modified kernel,
+record the observed enforcement and collection trust assumptions rather than
+assuming either normal policy behavior or its total absence.
+[AOSP SELinux](https://source.android.com/docs/security/features/selinux)
 
-#### Root Solution Comparison
+### Dynamic Instrumentation and Observation Limits
 
-Compare the exact release, supported kernel/device, privilege boundary,
-module configuration, and observed artifacts. Framework names do not establish
-a fixed stealth ranking, compatibility guarantee, or detector outcome. Preserve
-the baseline and collection limits when comparing evidence across systems.
+Frida distinguishes injected, embedded and preloaded operation. These are
+integration modes, not universal stealth levels or guarantees of early-execution
+coverage. Bind a report to the exact tool revision, target build, entry point,
+required privilege and actual evidence source.
+[Frida modes](https://frida.re/docs/modes/)
 
-### Managed Dynamic Instrumentation on Rooted Android
-```
-Methodology (KSU/Magisk module + single binary engine):
-- Package injector + loader + agent into one ARM64 binary
-  to reduce footprint and version mismatch risk
-- Expose a local HTTP RPC control plane (127.0.0.1:<port>) for
-  low-latency script management, session listing, and function calls
-- Keep boot path safe: do NOT start instrumentation engine in
-  post-fs-data/service early stage; use delayed manual start after
-  boot_completed to avoid zygote/module startup contention
+| Question | Evidence to preserve |
+|---|---|
+| What boundary was crossed? | Owned debug integration, user-space process access or a privileged/kernel component; avoid treating them as equivalent |
+| What changed in the observation? | Available module/memory provenance, process lifecycle, control-channel exposure and instrumentation logs |
+| What could be missed? | Uncovered startup periods, native versus managed execution, unloaded components, unavailable logs and effects of the observer itself |
+| Is a detector conclusion justified? | Defined observable signal, exact tested configuration, benign/debug-build comparison and false-positive/false-negative limits |
 
-Injection modes:
-- Attach: ptrace into running process, inject bootstrap shellcode,
-  resolve libc symbols, dlopen agent, then run JS
-- Spawn: zygote-hijack path to pause child at fork and inject before
-  app initialization (covers Application.onCreate / class init)
-- Watch-SO: eBPF-based dlopen monitor that triggers injection when
-  target native library is loaded
+Packing components into one binary, moving work to a different layer or changing
+an instrumentation mode does not establish fewer observable artifacts, universal
+compatibility or guaranteed nondetection. Evaluate the complete privileged path
+and its management interface; do not infer a clean device from one absent signal.
 
-Stealth tiers:
-- NORMAL: direct RWX patching (fastest, easiest to detect)
-- WXSHADOW: shadow-page patching to reduce /proc memory visibility
-- RECOMP: function recompile/relocation with minimal inline patch
+### Local Root Indicators and Attribution
 
-Operational pattern:
-- Lifecycle commands: start/stop/restart/status
-- Analysis mode: temporarily disable conflicting zygisk modules,
-  reboot, instrument, then restore and reboot back to normal mode
-- Troubleshooting-first logging: keep manager and engine logs separate
-```
+Filesystem/package indicators, build properties and runtime observations may
+support a device-state hypothesis. Record how each was obtained, the observer's
+privilege and whether the observation source is trustworthy. A developer build,
+custom ROM, stale artifact or unavailable visibility can explain an indicator or
+its absence. Keep root-state assessment separate from verified attestation,
+server authorization and evidence of cheating.
 
-### Root Detection Bypass
-
-#### Common Checks
-```
-- /system/bin/su existence
-- /system/xbin/su existence  
-- Build.TAGS contains "test-keys"
-- ro.build.selinux property
-- Magisk files/folders
-- Package manager checks
-```
-
-#### Bypass Methods
-- **Magisk DenyList / Shamiko**: Modern root hiding (replaces MagiskHide)
-- **LSPosed/EdXposed**: Xposed framework hooks
-- **Frida scripts**: Hook detection functions
-- **APK patching**: Remove detection code
-- **KernelSU SU isolation**: Process-level root visibility control
+Review how a privileged component could affect the trustworthiness of local
+observations at the mechanism level. Do not treat a list of framework names or
+local checks as proof of a specific hiding method, or rank systems by a fixed
+stealth tier. Sources for these privilege/instrumentation corrections reviewed:
+2026-09-09.
 
 ### Zygisk Modules
 
@@ -356,26 +332,31 @@ ANativeWindow* window = ANativeWindow_fromSurface(env, surface);
 
 ## Network Analysis
 
-### Tools
-- **mitmproxy**: MITM proxy
-- **Charles Proxy**: Traffic analysis
-- **Frida SSL bypass**: Certificate pinning bypass
+### Authorized Transport Observation
 
-### Certificate Pinning Bypass
-```javascript
-// Frida universal SSL bypass
-Java.perform(function() {
-    var TrustManager = Java.registerClass({
-        implements: [X509TrustManager],
-        methods: {
-            checkClientTrusted: function() {},
-            checkServerTrusted: function() {},
-            getAcceptedIssuers: function() { return []; }
-        }
-    });
-    // Install custom TrustManager
-});
-```
+Use existing captures or an owned test build to distinguish connection metadata,
+TLS validation and decrypted application content. A proxy or packet record only
+covers traffic visible at that observation point; it does not establish that
+all networking libraries or the release build use the same trust configuration.
+
+### Trust Configuration and Pinning Evidence
+
+For Android, inspect the actual networking stack, target SDK, manifest-linked
+Network Security Configuration, domain policy and build variant. Android's
+documented default CA trust changes with the target SDK; debug-only trust anchors
+apply when the application is debuggable. A successful debug capture cannot
+establish release-build trust or pinning behavior.
+
+A replacement Java trust manager is not a universal TLS or certificate-pinning
+analysis method: custom/native stacks and independently configured checks require
+their own contracts and evidence. Preserve the test configuration, relevant
+validation result and unobserved paths. Review authorized debug configuration
+and release checks without weakening production trust or publishing a bypass
+recipe. Consult iOS-specific trust contracts separately.
+[Android Network Security Configuration](https://developer.android.com/privacy-and-security/security-config),
+[unsafe trust-manager guidance](https://developer.android.com/privacy-and-security/risks/unsafe-trustmanager).
+
+Source reviewed: 2026-09-09.
 
 ## Anti-Cheat on Mobile
 
@@ -394,14 +375,14 @@ Java.perform(function() {
 - Hook detection
 ```
 
-### Bypass Strategies
-```
-1. Static analysis of detection code
-2. Hook detection functions
-3. Hide injection footprint
-4. Timing attack consideration
-5. Clean environment emulation
-```
+### Detection Finding Review
+
+For a claimed integrity failure, identify the signal, observer, required attacker
+capability and the boundary affected. Correlate available package, process,
+platform and server evidence with legitimate debug/development use. Missing
+instrumentation telemetry or one passed local check does not establish an
+unmodified device or a successful concealment technique. Retain collection
+limits and uncertain attribution in the final finding.
 
 ## eBPF-Based Tools
 

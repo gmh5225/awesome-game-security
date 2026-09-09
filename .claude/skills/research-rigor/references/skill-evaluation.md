@@ -6,8 +6,8 @@ skill behavior; it is not an anti-cheat classifier benchmark.
 
 ## Public Regression Suite
 
-[evaluation-cases.json](../assets/evaluation-cases.json) contains 40 scenarios:
-13 positive, 24 boundary, and 3 unrelated requests. `primary_skills` lists
+[evaluation-cases.json](../assets/evaluation-cases.json) contains 48 scenarios:
+13 positive, 32 boundary, and 3 unrelated requests. `primary_skills` lists
 acceptable primary **folder IDs**, not a requirement to load every listed skill.
 An empty list means the request should not invoke a game-security workflow.
 
@@ -25,6 +25,11 @@ The validator requires a positive case for every local skill folder and the
 presence of all three case categories. It uses Python's standard library, reads
 local metadata, and neither executes case prompts nor calls services. A pass
 does not validate skill frontmatter, external citations, or model answers.
+
+A recorded review is available in [review-2026-09-09.json](../assets/review-2026-09-09.json)
+with inputs, raw outputs, predefined-route comparisons and limitations. Read the
+[quality review](../../overview/references/quality-review-2026-09-09.md) before
+interpreting its initial 40-case run and five-case follow-up as effectiveness claims.
 
 ## Evaluate Actual Behavior Separately
 
@@ -60,7 +65,7 @@ Record each dimension as **met**, **partial**, **failed**, or **not observable**
 with supporting output. A critical error fails the case's reasoning assessment;
 do not hide it in an average score. "Not observable" is not a pass.
 
-Report counts and raw outcomes before aggregate rates. These 40 authored cases
+Report counts and raw outcomes before aggregate rates. These 48 authored cases
 are a small public regression set. They are not independent, representative of
 all user tasks, or sufficient to estimate production error rates. Additional
 held-out requests and repeated runs are necessary for generalization claims.
