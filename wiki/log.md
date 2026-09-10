@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-10** — lint: index vs disk scan — 9 overviews, 42 concepts, 3870 entities (3921 index entries); index.md fully synced (0 missing, 0 dead, 0 duplicate entries); overview wikilink spot-check (9 pages) — 0 broken links; concept spot-check (42 pages) — 0 broken links; index.md wikilink scan — 0 broken links; 6 cross-kind slug collisions ([[game-hacking]], [[anti-cheat]], [[reverse-engineering]], [[il2cpp]], [[byovd]], [[dma]]) — expected, no repair needed; no structural edits required.
+
 - **2026-09-10** — ingest `description:1-3-7/disrobe`: entity [[disrobe]] (1-3-7; Rust modular static recovery platform; unpack/deobfuscate/decompile native PE packers, Python protections, APKs, WASM, JVM/.NET/Go/JS bytecode, and nested archives; Ghidra integration; Python/TypeScript bindings; benchmark harnesses; Cheat / RE Tools); cited on [[overviews/reverse-engineering]] and [[concepts/control-flow-flattening]]; cross-linked [[ghidra]], [[de4py]], [[decbench]], [[awesome-executable-packing]], [[pe-protector]], and [[pyarmor]]; `index.md` updated.
 
 - **2026-09-10** — ingest `description:LordeTyrael/PokeAllianceAntiCheatAnalysis`: entity [[pokealliance-anti-cheat-analysis]] (LordeTyrael; static/dynamic audit of PokeAlliance OTCv8 Pokémon MMO client; `PokeAlliance_dx.exe` PE RE; server-triggered process/module/window enumeration, login hardware fingerprinting, Lua startup blacklists, server-driven bot checks; Frida JS hooks + Python live tracer; Anti Cheat / game:pokealliance); cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]]; cross-linked [[frida]], [[hwid-spoofing]], and [[ff-ace-anticheat-analysis]]; `index.md` updated.
