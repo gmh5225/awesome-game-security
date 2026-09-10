@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-10** — ingest `description:1-3-7/disrobe`: entity [[disrobe]] (1-3-7; Rust modular static recovery platform; unpack/deobfuscate/decompile native PE packers, Python protections, APKs, WASM, JVM/.NET/Go/JS bytecode, and nested archives; Ghidra integration; Python/TypeScript bindings; benchmark harnesses; Cheat / RE Tools); cited on [[overviews/reverse-engineering]] and [[concepts/control-flow-flattening]]; cross-linked [[ghidra]], [[de4py]], [[decbench]], [[awesome-executable-packing]], [[pe-protector]], and [[pyarmor]]; `index.md` updated.
+
 - **2026-09-10** — ingest `description:LordeTyrael/PokeAllianceAntiCheatAnalysis`: entity [[pokealliance-anti-cheat-analysis]] (LordeTyrael; static/dynamic audit of PokeAlliance OTCv8 Pokémon MMO client; `PokeAlliance_dx.exe` PE RE; server-triggered process/module/window enumeration, login hardware fingerprinting, Lua startup blacklists, server-driven bot checks; Frida JS hooks + Python live tracer; Anti Cheat / game:pokealliance); cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]]; cross-linked [[frida]], [[hwid-spoofing]], and [[ff-ace-anticheat-analysis]]; `index.md` updated.
 
 - **2026-09-10** — ingest `readme:categories`: Cheat ~2799 (+2; jbro129/[[android-modding]] Android game modding repo catalog promoted to Guide samples) / Anti Cheat ~716 / other major section counts stable; 41 sections; refreshed README-map counts and Guide scope on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/reverse-engineering]], and [[overviews/dma-attack]]; light `index.md` section notes (no per-category pages).

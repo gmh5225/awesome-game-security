@@ -21,7 +21,8 @@ sources:
   - wiki/sources/descriptions/CKCat__d810.md
   - wiki/sources/descriptions/zhurong2020__pyobfus.md
   - wiki/sources/descriptions/19h__chernobog.md
-updated: 2026-09-05
+  - wiki/sources/descriptions/1-3-7__disrobe.md
+updated: 2026-09-10
 confidence: high
 ---
 
@@ -39,9 +40,10 @@ confidence: high
 6. **Trace-based recovery** — runtime traces from [[dynamic-binary-instrumentation]] resolve indirect branches under covered executions; completeness needs additional path exploration.
 7. **Live debugger JCC patching** — when jump-conditional and indirect-branch obfuscation wraps Unity/miHoYo decryption stubs, [[anti-mihoyo-jcc-obfuscate]] (DNLINYJ; x64dbg plugin; monitors decryption ranges, tracks dynamic jumps, patches instructions in-session; build-offset-specific; unmaintained; source: wiki/sources/descriptions/DNLINYJ__Anti_miHoYo_Jcc_Obfuscate.md) complements static Genshin CFG tools such as [[genshinjumpfixer2]] for readable stepping through protected game paths.
 8. **Boundary-hook monitoring** — when stacked VMP+OLLVM on Android resists static deflattening, [[frida-vmp-bypass]] hooks libc/JNI/Java API exits and logs caller addresses inside the protected library to reconstruct security-sensitive call chains without lifting flattened bytecode. (source: wiki/sources/descriptions/tomhamidi97-arch__frida-vmp-bypass.md)
+9. **Automated multi-format recovery pipelines** — when protections span packers, bytecode obfuscators, or nested containers, platforms such as [[disrobe]] run format-specific unpack/deobfuscate passes and Ghidra-oriented decompile workflows before manual CFF recovery. (source: wiki/sources/descriptions/1-3-7__disrobe.md)
 
 CFF often co-occurs with [[mixed-boolean-arithmetic]] and opaque predicates — simplify MBA blocks after CFG recovery for readable pseudocode.
 
 ## Related
 
-[[anti-ollvm]] · [[anti-mihoyo-jcc-obfuscate]] · [[frida-vmp-bypass]] · [[idadeflat]] · [[ollvm-unflattener]] · [[pagalaxylab-ghidra-scripts]] · [[d810]] · [[d810-ng]] · [[hex-rays-deob]] · [[chernobog]] · [[emotet-deobfuscator]] · [[obpo-plugin]] · [[unflat]] · [[obfuscator]] · [[rust-obfuscator]] · [[pyobfus]] · [[alcatraz]] · [[obfuscation-detection]] · [[ghidra-obfuscation-detection]] · [[xrefgen]] · [[obfuscation-analysis]] · [[genshinjumpfixer2]] · [[mixed-boolean-arithmetic]] · [[dynamic-binary-instrumentation]] · [[overviews/reverse-engineering]]
+[[disrobe]] · [[anti-ollvm]] · [[anti-mihoyo-jcc-obfuscate]] · [[frida-vmp-bypass]] · [[idadeflat]] · [[ollvm-unflattener]] · [[pagalaxylab-ghidra-scripts]] · [[d810]] · [[d810-ng]] · [[hex-rays-deob]] · [[chernobog]] · [[emotet-deobfuscator]] · [[obpo-plugin]] · [[unflat]] · [[obfuscator]] · [[rust-obfuscator]] · [[pyobfus]] · [[alcatraz]] · [[obfuscation-detection]] · [[ghidra-obfuscation-detection]] · [[xrefgen]] · [[obfuscation-analysis]] · [[genshinjumpfixer2]] · [[mixed-boolean-arithmetic]] · [[dynamic-binary-instrumentation]] · [[overviews/reverse-engineering]]
