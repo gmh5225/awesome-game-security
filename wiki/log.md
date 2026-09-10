@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-10** — ingest `description:vmguard/dwm-window-capture`: entity [[dwm-window-capture]] (vmguard; C++17 Windows utility; D3D11 + DWM redirection surfaces via undocumented DWM exports; GPU-backed focused-window texture → staging readback + WIC PNG; Alt+Insert hotkey; Windows graphics / screen-capture / game-security research; README `[DWM Redirect]`; Anti Cheat → Screenshot); cited on [[overviews/graphics-api]] and [[concepts/anti-screenshot-capture]]; cross-linked [[screenshot]], [[dwm-screen-shot]], and [[disablenvidiascreenshot]]; `index.md` updated.
+
 - **2026-09-10** — ingest `readme:categories`: Cheat ~2800 / Anti Cheat ~719 (+2; TheCruZ/nvidiaCapture NVIDIA scanout + vmguard/dwm-window-capture DWM redirect in Screenshot) / other major section counts stable; 41 sections; refreshed README-map counts and Screenshot scope on [[overviews/anti-cheat]], [[overviews/graphics-api]], [[concepts/anti-screenshot-capture]], [[overviews/overview]], [[overviews/dma-attack]], and [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
 
 - **2026-09-10** — ingest `description:AshrafMorningstar/hayday-bot`: entity [[hayday-bot]] (AshrafMorningstar; Python + Frida JS + TypeScript anti-telemetry + native C++; in-memory Hay Day crop automation via guest ARM64 libg.so hooks on LDPlayer 9; Promon SHIELD gadget bypass, Quago telemetry block, emulator/root fingerprint spoof; libg.so/JNI RE utilities; cheat / Frida); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[frida]], [[mobile-anti-cheat]], and [[frida-find-jni-native-methods]]; `index.md` updated.

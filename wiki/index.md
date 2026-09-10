@@ -1121,6 +1121,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [dwm-overlay](entities/dwm-overlay.md) — DWM/DirectX ImGui overlay (Yukin02; dispatch/present-path assembly stubs; external overlay without `.text` patches; README `[DWM Overlay without modify .text]`) + LoxTus PoC (MinHook + D3D11 + ImGui; dwmcore present pattern scan; swap-chain UI; README `[DWM]`)
 - [dwmhook](entities/dwmhook.md) — DWM composition overlay (gmh5225 PoC; inject draw calls without overlay HWND; README `[DWM]`) + mfxiaosheng DX11 vtable ImGui framework (MinHook/PolyHook2; PDB/DIA; `[DWM VFTable]`)
 - [dwm-screen-shot](entities/dwm-screen-shot.md) — DWM screenshot / AC research (C++; anti-cheat engineers; README `[DWM]`)
+- [dwm-window-capture](entities/dwm-window-capture.md) — DWM redirect focused-window capture (vmguard; C++17; D3D11 + undocumented DWM exports; staging readback + WIC PNG; Alt+Insert; README `[DWM Redirect]`; Anti Cheat → Screenshot)
 - [DroidShield](entities/droidshield.md) — Android RASP SDK (root/debugger/Frida-Xposed/emulator/tamper; polymorphic checks)
 - [Disable NMI callbacks](entities/disable-nmi-callbacks.md) — kernel driver; KiNmiInterruptStart pattern scan + affinity/NMI-state patch vs NMI stack-walk AC (gmh5225)
 - [Disable Windows Defender](entities/disable-windows-defender-.md) — UAC bypass + SYSTEM token escalation → real-time / Tamper Protection disable (gmh5225)
