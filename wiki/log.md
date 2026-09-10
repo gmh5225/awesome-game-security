@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-10** — lint: index vs disk scan — 9 overviews, 42 concepts, 3874 entities (3925 index entries); index.md fully synced (0 missing, 0 dead, 0 duplicate entries); overview wikilink spot-check (9 pages) — 0 broken links; concept spot-check (42 pages) — 0 broken links; index.md wikilink scan — 0 broken links; 6 cross-kind slug collisions ([[game-hacking]], [[anti-cheat]], [[reverse-engineering]], [[il2cpp]], [[byovd]], [[dma]]) — expected, no repair needed; no structural edits required.
+
 - **2026-09-10** — ingest `description:TheCruZ/nvidiaCapture`: entity [[nvidia-capture]] (TheCruZ; Windows PoC; D3D11 + DXGI + NVAPI; reads GPU scanout via undocumented `NvAPI_D3D11_WksReadScanout` below usermode Present/BitBlt hook evasion; PNG export; NVAPI error reporting; screenshot-evasion research; README `[NVIDIA Scanout]`; Anti Cheat → Screenshot); cited on [[overviews/graphics-api]] and [[concepts/anti-screenshot-capture]]; cross-linked [[disablenvidiascreenshot]], [[dwm-window-capture]], and [[screenshot]]; `index.md` updated.
 
 - **2026-09-10** — ingest `description:vmguard/dwm-window-capture`: entity [[dwm-window-capture]] (vmguard; C++17 Windows utility; D3D11 + DWM redirection surfaces via undocumented DWM exports; GPU-backed focused-window texture → staging readback + WIC PNG; Alt+Insert hotkey; Windows graphics / screen-capture / game-security research; README `[DWM Redirect]`; Anti Cheat → Screenshot); cited on [[overviews/graphics-api]] and [[concepts/anti-screenshot-capture]]; cross-linked [[screenshot]], [[dwm-screen-shot]], and [[disablenvidiascreenshot]]; `index.md` updated.
