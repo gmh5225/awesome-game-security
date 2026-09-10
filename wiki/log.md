@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-10** — ingest `readme:categories`: Cheat ~2800 / Anti Cheat ~719 (+2; TheCruZ/nvidiaCapture NVIDIA scanout + vmguard/dwm-window-capture DWM redirect in Screenshot) / other major section counts stable; 41 sections; refreshed README-map counts and Screenshot scope on [[overviews/anti-cheat]], [[overviews/graphics-api]], [[concepts/anti-screenshot-capture]], [[overviews/overview]], [[overviews/dma-attack]], and [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
+
 - **2026-09-10** — ingest `description:AshrafMorningstar/hayday-bot`: entity [[hayday-bot]] (AshrafMorningstar; Python + Frida JS + TypeScript anti-telemetry + native C++; in-memory Hay Day crop automation via guest ARM64 libg.so hooks on LDPlayer 9; Promon SHIELD gadget bypass, Quago telemetry block, emulator/root fingerprint spoof; libg.so/JNI RE utilities; cheat / Frida); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[frida]], [[mobile-anti-cheat]], and [[frida-find-jni-native-methods]]; `index.md` updated.
 
 - **2026-09-10** — ingest `description:LucasAlgera/Kernel-AC`: entity [[kernel-ac]] (LucasAlgera; educational Windows kernel anti-cheat graduation project; KMDF driver + C++ SCM launcher; ObRegisterCallbacks on process/thread handle create/duplicate; strips dangerous access rights; trusted-process whitelist e.g. explorer.exe/discord.exe; IOCTL game-PID registration; Anti Cheat); cited on [[overviews/anti-cheat]] and [[concepts/kernel-callbacks]]; cross-linked [[mini-anti-cheat-v2]], [[bloom-anticheat]], [[peregrine-anticheat]], [[sentinelac]], and [[oac]]; `index.md` updated.
