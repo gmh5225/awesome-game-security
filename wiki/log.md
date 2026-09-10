@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-10** — ingest `readme:categories`: Cheat ~2800 (+1; 1-3-7/[[disrobe]] modular static recovery pipeline in RE Tools) / Anti Cheat ~717 (+1; LordeTyrael/[[pokealliance-anti-cheat-analysis]] PokeAlliance OTCv8 client audit) / other major section counts stable; 41 sections; refreshed README-map counts and scope on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/game-hacking]], [[overviews/reverse-engineering]], and [[overviews/dma-attack]]; light `index.md` section notes (no per-category pages).
+
 - **2026-09-10** — lint: index vs disk scan — 9 overviews, 42 concepts, 3870 entities (3921 index entries); index.md fully synced (0 missing, 0 dead, 0 duplicate entries); overview wikilink spot-check (9 pages) — 0 broken links; concept spot-check (42 pages) — 0 broken links; index.md wikilink scan — 0 broken links; 6 cross-kind slug collisions ([[game-hacking]], [[anti-cheat]], [[reverse-engineering]], [[il2cpp]], [[byovd]], [[dma]]) — expected, no repair needed; no structural edits required.
 
 - **2026-09-10** — ingest `description:1-3-7/disrobe`: entity [[disrobe]] (1-3-7; Rust modular static recovery platform; unpack/deobfuscate/decompile native PE packers, Python protections, APKs, WASM, JVM/.NET/Go/JS bytecode, and nested archives; Ghidra integration; Python/TypeScript bindings; benchmark harnesses; Cheat / RE Tools); cited on [[overviews/reverse-engineering]] and [[concepts/control-flow-flattening]]; cross-linked [[ghidra]], [[de4py]], [[decbench]], [[awesome-executable-packing]], [[pe-protector]], and [[pyarmor]]; `index.md` updated.
