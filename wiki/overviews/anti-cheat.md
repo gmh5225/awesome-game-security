@@ -8,6 +8,7 @@ sources:
   - wiki/sources/descriptions/Driw0x__CS2Guard.md
   - wiki/sources/descriptions/zelect0r__zamr.md
   - wiki/sources/descriptions/Lixense__ff-ace-anticheat-analysis.md
+  - wiki/sources/descriptions/LordeTyrael__PokeAllianceAntiCheatAnalysis.md
   - wiki/sources/descriptions/0dayatday0__BattleFN-cheat-analysis.md
   - wiki/sources/descriptions/zyhp__vac3_inhibitor.md
   - wiki/sources/descriptions/x1tan__vac3-dumper.md
@@ -1089,6 +1090,7 @@ Structured research indexes such as [[anti-cheat-research-index]] catalog public
 - [[tf2bd-database]] — community-maintained TF2 cheater/suspicious-player/scammer JSON lists and chat word-filter rules for TF2 Bot Detector (TF2BD v3 playerlist/rules schemas; last-seen metadata + proof; client-side alerts via surepy/tf2_bot_detector; Garou3299) (source: wiki/sources/descriptions/Garou3299__tf2bd-database.md)
 - [[gatewarden-public]] — Godot 4.7 tower defense prototype with published PathValidator placement-abuse rejection codes (flow-field softlock/maze checks; 30 Hz deterministic sim; 59 GUT tests + headless bot; test-driven validation reference; euuuuuuan) (source: wiki/sources/descriptions/euuuuuuan__gatewarden-public.md)
 - [[shinobix]] — live browser MMORPG with server-authoritative combat and documented auth/reward-integrity anti-cheat patterns (settlement receipts, currency ledgers, save locks; HTTP hardening + parity/settlement test coverage; Timehue; Open Source Anti Cheat System) (source: wiki/sources/descriptions/Timehue__ShinobiX.md)
+- [[pokealliance-anti-cheat-analysis]] — PokeAlliance OTCv8 Pokémon MMO client static/dynamic audit (LordeTyrael; server-triggered process/module/window enumeration, login hardware fingerprinting, Lua startup blacklists, server-driven bot checks over traditional anti-debug; Frida JS hooks + Python live tracer; Anti Cheat defensive research) (source: wiki/sources/descriptions/LordeTyrael__PokeAllianceAntiCheatAnalysis.md)
 - [[r6-siege-battleye-launch-bug]] — R6 Siege Y11S3 BattlEye/Sentinel handshake failure on standard launch paths with BEDaisy telemetry, checksum evidence, and working bypass via RainbowSixHelper.exe (brandenbailey23; Explore AntiCheat System:BE launch regression report) (source: wiki/sources/descriptions/brandenbailey23__r6-siege-battleye-launch-bug.md)
 - [[void-engine]] — Godot 4.x editor plugin with WhiteVoid AntiCheat autoload (debugger/process/window detection, honeypot integrity checks, HWID ban enforcement); GDScript; VoidNet ENet/Firebase WebRTC multiplayer stack; lannden1245; Open Source Anti Cheat System) (source: wiki/sources/descriptions/lannden1245__Void-Engine.md)
 - [[ricochet-deobfuscator]] — C/C++ Ricochet deobfuscator (driver / memory analysis; explore anticheat:ricochet) (source: wiki/sources/descriptions/weak1337__ricochet_deobfuscator.md)
