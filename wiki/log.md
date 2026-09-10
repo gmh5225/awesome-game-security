@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-10** — ingest `description:AshrafMorningstar/hayday-bot`: entity [[hayday-bot]] (AshrafMorningstar; Python + Frida JS + TypeScript anti-telemetry + native C++; in-memory Hay Day crop automation via guest ARM64 libg.so hooks on LDPlayer 9; Promon SHIELD gadget bypass, Quago telemetry block, emulator/root fingerprint spoof; libg.so/JNI RE utilities; cheat / Frida); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[frida]], [[mobile-anti-cheat]], and [[frida-find-jni-native-methods]]; `index.md` updated.
+
 - **2026-09-10** — ingest `description:LucasAlgera/Kernel-AC`: entity [[kernel-ac]] (LucasAlgera; educational Windows kernel anti-cheat graduation project; KMDF driver + C++ SCM launcher; ObRegisterCallbacks on process/thread handle create/duplicate; strips dangerous access rights; trusted-process whitelist e.g. explorer.exe/discord.exe; IOCTL game-PID registration; Anti Cheat); cited on [[overviews/anti-cheat]] and [[concepts/kernel-callbacks]]; cross-linked [[mini-anti-cheat-v2]], [[bloom-anticheat]], [[peregrine-anticheat]], [[sentinelac]], and [[oac]]; `index.md` updated.
 
 - **2026-09-10** — ingest `readme:categories`: Cheat ~2800 (+1; 1-3-7/[[disrobe]] modular static recovery pipeline in RE Tools) / Anti Cheat ~717 (+1; LordeTyrael/[[pokealliance-anti-cheat-analysis]] PokeAlliance OTCv8 client audit) / other major section counts stable; 41 sections; refreshed README-map counts and scope on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/game-hacking]], [[overviews/reverse-engineering]], and [[overviews/dma-attack]]; light `index.md` section notes (no per-category pages).
