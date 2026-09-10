@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-10** — ingest `description:TheCruZ/nvidiaCapture`: entity [[nvidia-capture]] (TheCruZ; Windows PoC; D3D11 + DXGI + NVAPI; reads GPU scanout via undocumented `NvAPI_D3D11_WksReadScanout` below usermode Present/BitBlt hook evasion; PNG export; NVAPI error reporting; screenshot-evasion research; README `[NVIDIA Scanout]`; Anti Cheat → Screenshot); cited on [[overviews/graphics-api]] and [[concepts/anti-screenshot-capture]]; cross-linked [[disablenvidiascreenshot]], [[dwm-window-capture]], and [[screenshot]]; `index.md` updated.
+
 - **2026-09-10** — ingest `description:vmguard/dwm-window-capture`: entity [[dwm-window-capture]] (vmguard; C++17 Windows utility; D3D11 + DWM redirection surfaces via undocumented DWM exports; GPU-backed focused-window texture → staging readback + WIC PNG; Alt+Insert hotkey; Windows graphics / screen-capture / game-security research; README `[DWM Redirect]`; Anti Cheat → Screenshot); cited on [[overviews/graphics-api]] and [[concepts/anti-screenshot-capture]]; cross-linked [[screenshot]], [[dwm-screen-shot]], and [[disablenvidiascreenshot]]; `index.md` updated.
 
 - **2026-09-10** — ingest `readme:categories`: Cheat ~2800 / Anti Cheat ~719 (+2; TheCruZ/nvidiaCapture NVIDIA scanout + vmguard/dwm-window-capture DWM redirect in Screenshot) / other major section counts stable; 41 sections; refreshed README-map counts and Screenshot scope on [[overviews/anti-cheat]], [[overviews/graphics-api]], [[concepts/anti-screenshot-capture]], [[overviews/overview]], [[overviews/dma-attack]], and [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).

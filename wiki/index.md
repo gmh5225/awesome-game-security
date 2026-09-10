@@ -2545,6 +2545,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [NotAnOverlay](entities/not-an-overlay.md) — Windows GDI PoC: regular-window screen clone vs transparent always-on-top overlay; BitBlt/StretchBlt; external ESP rendering / AC overlay-visibility tradeoffs (PierreCiholas; [Duplicating with GDI])
 - [Npcap](entities/npcap.md) — Windows packet capture/inject (Nmap; WinPcap successor; Packet Capture&Parse)
 - [NvidiaApi](entities/nvidiaapi.md) — undocumented NvAPI GPU serial / board fingerprint (HWID research)
+- [nvidia-capture](entities/nvidia-capture.md) — NVIDIA GPU scanout capture PoC (TheCruZ; C++; D3D11 + DXGI + NVAPI; `NvAPI_D3D11_WksReadScanout`; below usermode hook evasion; PNG export; README `[NVIDIA Scanout]`; Anti Cheat → Screenshot)
 - [Nvidia-GPU-Spoof](entities/nvidia-gpu-spoof.md) — NVIDIA GPU UUID spoof via `nvlddmkm.sys` (Cheat HWID)
 - [NVIDIA Overlay](entities/nvidia-overlay.md) — GeForce Experience overlay DirectX hijack (trusted-process rendering; anti-cheat overlay evasion; gmh5225)
 - [nvidia-overlay-hijack](entities/nvidia-overlay-hijack.md) — GeForce Experience overlay render-context hijack (DirectX 11 + ImGui menu; helper draw/animation/input; x86/x64; practical integration—not stealth; AC detection risk; Calvin-LLC; README [Hijack Nvidia])
