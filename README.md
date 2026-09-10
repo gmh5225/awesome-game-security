@@ -1359,6 +1359,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/TheQmaks/phantom-frida [Build anti-detection Frida server from source]
 - https://github.com/1013503897/Morphida [Polymorphic anti-detection Android arm64 frida-server builds that morph static fingerprints per release]
 - https://github.com/astra1dev/MalumMenu-Android [Among Us Android cheat menu using Frida and frida-il2cpp-bridge]
+- https://github.com/AshrafMorningstar/hayday-bot [Frida-based Hay Day automation with guest ARM64 libg.so hooking on LDPlayer/Houdini and Promon SHIELD/Quago anti-cheat bypass]
 - https://github.com/quarkslab/android-hardware-attestation-demo [End-to-end PoC bypassing backend hardware Key Attestation by Frida-hooking KeystoreAttestation.generateAttestedKey and relaying the backend nonce to a clean, bootloader-locked device that returns a genuine TEE/StrongBox chain — no TEE tampering or forged certs]
 
 > Hook ART(android)
@@ -4355,6 +4356,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/ConWan30/QorTroller [Cryptographic console anti-cheat proving human controller presence via attested inputs and verifiable match receipts]
 - https://github.com/wflores9/Ironwall [Open-source anti-cheat protocol stack with thin client, TEE attestation, ZK-SNARK human-input proofs, and Hedera HCS + XRPL dual-anchored match receipts]
 - https://github.com/Abdelnour2/MiniAntiCheatV2 [Educational Windows kernel anti-cheat PoC: process blacklist plus ObCallbacks handle shield]
+- https://github.com/LucasAlgera/Kernel-AC [Educational Windows kernel anti-cheat graduation project with WDM driver (ObCallbacks, IOCTL) and usermode client]
 - https://github.com/HEEAAP/Sentinel-Anti-Cheat [Educational usermode anti-cheat daemon with remote debugger checks, hardware-breakpoint scanning, PEB-based memory reads, and configurable threat response policies]
 - https://github.com/vovasicidk/sentinelac [Open-source anti-cheat skeleton with usermode SDK, ObRegisterCallbacks kernel stub, overlay isolation, and stack-walk injection detection]
 - https://github.com/nulli83/Mj-lnir [Windows client-server anti-cheat with C++ core scanner, Rust agent, and self-hosted studio control plane for injection detection and enforcement]
