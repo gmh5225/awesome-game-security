@@ -1,0 +1,768 @@
+Project Path: arc_TheCruZ_nvidiaCapture_s_ju92t2
+
+Source Tree:
+
+```txt
+arc_TheCruZ_nvidiaCapture_s_ju92t2
+├── README.md
+├── nvidiaCapture
+│   ├── nvidiaCapture.cpp
+│   ├── nvidiaCapture.vcxproj
+│   └── nvidiaCapture.vcxproj.filters
+└── nvidiaCapture.sln
+
+```
+
+`README.md`:
+
+```md
+# NVIDIA Scanout Capture for Anti-Cheat
+
+> **Proof of concept** showing how anti-cheat systems can use an undocumented NVIDIA driver function to capture the real screen content, bypassing screenshot-blocking techniques used by cheat software.
+
+---
+
+## The Problem
+
+Cheat software (wallhacks, aimbots, ESP overlays, etc.) commonly hooks into the graphics pipeline to **block or fake screenshots** taken by anti-cheat systems. When an anti-cheat tries to capture the screen to look for visual evidence of cheating, the cheat intercepts the call and returns a clean frame — hiding its overlays, modified textures, and visual modifications.
+
+Conventional capture methods (`BitBlt`, `DXGI OutputDuplication`, `PrintWindow`) all operate at the application or compositor level, where cheat hooks can easily intercept and sanitize the output.
+
+## The Solution
+
+The NVIDIA driver exposes an undocumented workstation function — `NvAPI_D3D11_WksReadScanout` (interface `0xBCB1C536`) — that reads directly from the **GPU scanout buffer**: the final composited image that the display controller sends to the monitor.
+
+This happens at the hardware level, **below** any user-mode hooks that cheat software installs:
+
+```
+Application framebuffer
+        |
+        v
++-----------------------+
+|   DWM / Compositor    |<-- Most block/flags/hooks happens at this point or before
++-----------------------+
+        |
+        v
++-----------------------+
+|  GPU Scanout Buffer   |<-- This tool reads HERE (hardware level)
++-----------------------+
+        |
+        v
+      Monitor
+```
+
+Since cheats hook the rendering pipeline or capture APIs, they **cannot intercept** a kernel-mode scanout read issued through the NVIDIA driver. The captured image shows exactly what the monitor displays — including any cheat overlays the software is trying to hide.
+
+> **Note on DKOM:** In theory, a cheat running at kernel level could use Direct Kernel Object Manipulation (DKOM) to intercept or tamper with the driver's scanout read path — for example, by patching the NVIDIA kernel-mode dispatch table or manipulating the returned buffer. However, DKOM-based bypass of scanout captures is still uncommon in the wild due to the complexity involved, the risk of triggering PatchGuard / KPP, and the additional anti-cheat kernel drivers (e.g. EAC, BattlEye, Vanguard) that actively monitor for such modifications.
+
+## Requirements
+
+| Requirement | Details |
+|---|---|
+| **GPU** | NVIDIA GPU (detected via DXGI vendor ID `0x10DE`) |
+| **Driver** | NVIDIA driver with workstation feature support |
+| **OS** | Windows 10 or later (x64) |
+| **Privileges** | Administrator |
+| **Build tools** | Visual Studio 2022 (v143 toolset) or compatible MSVC compiler |
+
+## Building
+
+### Visual Studio (recommended)
+
+1. Open `nvidiaCapture.sln` in Visual Studio 2022
+2. Select **Release | x64** configuration
+3. Build -> Build Solution (`Ctrl+Shift+B`)
+4. Output: `x64/Release/nvidiaCapture.exe`
+
+## Usage
+
+```bat
+:: Run as Administrator
+nvidiaCapture.exe
+```
+
+On success, `capture.png` is saved in the working directory containing the real scanout buffer contents — including any cheat overlays that would be hidden from normal screenshots.
+
+### Blocked capture (cheat interference detected)
+
+When cheat software intercepts the capture:
+
+```
+  ##############################################################
+  ##                                                          ##
+  ##   !!  CAPTURE FAILED - POSSIBLE CHEAT INTERFERENCE  !!   ##
+  ##                                                          ##
+  ##############################################################
+
+  Reason : NvAPI_D3D11_WksReadScanout failed: NVAPI_NO_IMPLEMENTATION ...
+  NVAPI  : 0xfffffffd
+
+  The scanout capture failed. This may indicate that cheat
+  software is intercepting GPU-level framebuffer reads to
+  hide its visual modifications from anti-cheat screenshots.
+```
+
+## NVAPI Error Reference
+
+| Code | Value | Meaning |
+|---|---|---|
+| `0xfffffffd` | `-3` | `NVAPI_NO_IMPLEMENTATION` — driver lacks workstation capture support (common on GeForce consumer drivers) |
+| `0xfffffffc` | `-4` | `NVAPI_API_NOT_INITIALIZED` — `NvAPI_Initialize` was not called |
+| `0xfffffffb` | `-5` | `NVAPI_INVALID_ARGUMENT` — struct layout or version mismatch |
+| `0xfffffffa` | `-6` | `NVAPI_INVALID_USER_PRIVILEGE` — not running as admin |
+| `0xfffffff7` | `-9` | `NVAPI_INCOMPATIBLE_STRUCT_VERSION` — wrong version field in params |
+| `0xffffff9b` | `-101` | `NVAPI_EXPECTED_PHYSICAL_GPU_HANDLE` — invalid GPU handle in params |
+| `0xffffff9a` | `-102` | `NVAPI_EXPECTED_DISPLAY_HANDLE` — `targetId` is zero or invalid |
+| `0xffffff77` | `-137` | `NVAPI_INVALID_USER_PRIVILEDGE` — not running as admin |
+
+## Queue Index Options
+
+The `flags.queueIndex` field selects which stage of the scanout composition pipeline to capture:
+
+Based on Nvidia leaks:
+0: os render portion, 1 scanout portion, 2..15 : invisible intermediate portions.
+
+## Technical Details
+
+### Struct: `NV_WKS_READ_SCANOUT_PARAMS` (56 bytes)
+
+```
+Offset  Size  Field            Description
+--------------------------------------------------------------
+0x00    4     version          sizeof(struct) | (1 << 16) = 0x00010038
+0x04    4     targetId         OS display target (QueryDisplayConfig)
+0x08    8     hPhysicalGpu     NvPhysicalGpuHandle
+0x10    16    rect             NV_RECT {left, top, right, bottom} (IN/OUT)
+0x20    8     flags            Bitfield: queueIndex(4), mpoIndex(3), ...
+0x28    4     format           OUT: NV_FORMAT / D3DDDIFORMAT
+0x2C    4     _pad             Alignment padding
+0x30    8     ppData           OUT: Pointer to VirtualAlloc'd pixel data
+```
+
+### Function signature
+
+```cpp
+// Interface ID: 0xBCB1C536
+// Resolved via: nvapi_QueryInterface(0xBCB1C536)
+NvAPI_Status NvAPI_D3D11_WksReadScanout(
+    ID3D11Device*                pDev,
+    NV_WKS_READ_SCANOUT_PARAMS*  pParams
+);
+```
+
+### Output data
+
+- `ppData` points to raw pixel data allocated by the driver via `VirtualAlloc()`
+- Format is reported in `params.format` (typically `21` = `D3DFMT_A8R8G8B8` / BGRA8)
+- The caller **must** free the buffer with `VirtualFree(data, 0, MEM_RELEASE)`
+
+## Disclaimer
+
+This tool is published for **educational and security research purposes**. It demonstrates a technique for anti-cheat systems to capture tamper-proof screenshots on NVIDIA hardware. Use responsibly and only on systems you own or have explicit authorization to test.
+
+## Author
+
+Manuel Herrera (TheCruZ)
+
+```
+
+`nvidiaCapture.sln`:
+
+```sln
+
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36930.0 d17.14
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "nvidiaCapture", "nvidiaCapture\nvidiaCapture.vcxproj", "{BF9335AD-7A30-41D8-A294-5E949AAAD675}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{BF9335AD-7A30-41D8-A294-5E949AAAD675}.Debug|x64.ActiveCfg = Debug|x64
+		{BF9335AD-7A30-41D8-A294-5E949AAAD675}.Debug|x64.Build.0 = Debug|x64
+		{BF9335AD-7A30-41D8-A294-5E949AAAD675}.Debug|x86.ActiveCfg = Debug|Win32
+		{BF9335AD-7A30-41D8-A294-5E949AAAD675}.Debug|x86.Build.0 = Debug|Win32
+		{BF9335AD-7A30-41D8-A294-5E949AAAD675}.Release|x64.ActiveCfg = Release|x64
+		{BF9335AD-7A30-41D8-A294-5E949AAAD675}.Release|x64.Build.0 = Release|x64
+		{BF9335AD-7A30-41D8-A294-5E949AAAD675}.Release|x86.ActiveCfg = Release|Win32
+		{BF9335AD-7A30-41D8-A294-5E949AAAD675}.Release|x86.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {1CD8F957-1C31-4F21-8DAE-746BB1F27836}
+	EndGlobalSection
+EndGlobal
+
+```
+
+`nvidiaCapture/nvidiaCapture.cpp`:
+
+```cpp
+// =============================================================================
+//  NVIDIA Scanout Capture for Anti-Cheat - Proof of Concept
+// =============================================================================
+//
+//  Demonstrates that NvAPI_D3D11_WksReadScanout (undocumented, interface
+//  0xBCB1C536) can read the GPU scanout buffer directly, bypassing any
+//  screenshot-blocking techniques used by cheat software to hide overlays,
+//  wallhacks, aimbots, or other visual modifications from anti-cheat systems.
+//
+//  Cheats commonly hook the graphics pipeline to block or return blank
+//  screenshots so that anti-cheat screen capture sees a clean frame.
+//  This tool reads the scanout buffer at the hardware level, capturing
+//  exactly what the display controller sends to the monitor - including
+//  any cheat overlays the software is trying to hide.
+//
+//  Requirements:
+//    - NVIDIA GPU with compatible driver
+//    - Workstation feature support in the driver
+//    - Administrator privileges (or queueIndex 14 / Shadowplay path)
+//
+// Author: Manuel Herrera (TheCruZ)
+// =============================================================================
+
+#include <iostream>
+#include <cstdint>
+#include <vector>
+#include <string>
+#include <d3d11.h>
+#include <dxgi.h>
+#include <wincodec.h>
+
+#pragma comment(lib, "d3d11.lib")
+#pragma comment(lib, "dxgi.lib")
+#pragma comment(lib, "ole32.lib")
+#pragma comment(lib, "windowscodecs.lib")
+#pragma comment(lib, "user32.lib")
+
+// ---- NVAPI types -----------------------------------------------------------
+
+struct NV_RECT
+{
+    uint32_t left;
+    uint32_t top;
+    uint32_t right;
+    uint32_t bottom;
+};
+
+struct NV_WKS_READ_SCANOUT_PARAMS
+{
+    uint32_t version;        // offset 0:  MAKE_NVAPI_VERSION(this, 1) = sizeof | (1<<16)
+    uint32_t targetId;       // offset 4:  OS display target ID from QueryDisplayConfig()
+    void* hPhysicalGpu;      // offset 8:  Physical GPU handle (for SLI GPU selection)
+    NV_RECT rect;            // offset 16: IN: desired rect (0,0,0,0 = whole). OUT: actual captured rect
+    struct {                  // offset 32: flags bitfield (8 bytes)
+        uint64_t queueIndex            : 4;  // 0=OS render, 1=scanout, 14=Shadowplay (no admin)
+        uint64_t mpoIndex              : 3;
+        uint64_t rightStereoEye        : 1;
+        uint64_t leftAndRightStereoEye : 1;
+        uint64_t osRenderBuffer        : 1;  // OUT
+        uint64_t scanoutBuffer         : 1;  // OUT
+        uint64_t warping               : 1;  // OUT
+        uint64_t perPixelIntensity     : 1;  // OUT
+        uint64_t intensityRGTexture    : 1;  // OUT
+        uint64_t intensityBATexture    : 1;  // OUT
+        uint64_t grayscaleDome         : 1;  // OUT
+        uint64_t grayscaleEizo         : 1;  // OUT
+        uint64_t yuv420                : 1;  // OUT
+        uint64_t yuv422                : 1;  // OUT
+        uint64_t yuv444                : 1;  // OUT
+        uint64_t hdr                   : 1;  // OUT
+        uint64_t smoothScaling         : 1;  // OUT
+        uint64_t eshift                : 1;  // OUT
+        uint64_t virtualSplit          : 1;  // OUT
+        uint64_t streamSource          : 1;  // OUT
+        uint64_t reserved              : 39;
+    } flags;
+    uint32_t format;         // offset 40: OUT: NV_FORMAT (D3DDDIFORMAT)
+    uint32_t _pad;           // offset 44: alignment padding
+    void** ppData;           // offset 48: OUT: pixel data (VirtualAlloc'd, caller frees with VirtualFree)
+};
+// sizeof = 56 = 0x38
+
+typedef void*    (*nvapi_QueryInterface_t)(uint32_t id);
+typedef uint32_t (*nvapi_Initialize_t)();
+typedef uint32_t (*nvapi_EnumPhysicalGPUs_t)(void* handles[64], uint32_t* count);
+typedef uint32_t (*nvapi_WksReadScanout_t)(ID3D11Device* pDev, NV_WKS_READ_SCANOUT_PARAMS* params);
+
+// ---- Warning banner --------------------------------------------------------
+
+static void PrintCheatWarning(const std::string& reason, uint32_t nvapiStatus = 0)
+{
+    std::cerr << "\n";
+    std::cerr << "  ##############################################################\n";
+    std::cerr << "  ##                                                          ##\n";
+    std::cerr << "  ##   !!  CAPTURE FAILED - POSSIBLE CHEAT INTERFERENCE  !!   ##\n";
+    std::cerr << "  ##                                                          ##\n";
+    std::cerr << "  ##############################################################\n";
+    std::cerr << "\n";
+    std::cerr << "  Reason : " << reason << "\n";
+    if (nvapiStatus != 0)
+        std::cerr << "  NVAPI  : 0x" << std::hex << nvapiStatus << std::dec << "\n";
+    std::cerr << "\n";
+    std::cerr << "  The scanout capture failed. This may indicate that cheat\n";
+    std::cerr << "  software is intercepting GPU-level framebuffer reads to\n";
+    std::cerr << "  hide its visual modifications from anti-cheat screenshots.\n";
+    std::cerr << "\n";
+}
+
+// ---- GPU detection ---------------------------------------------------------
+
+static bool HasNvidiaGpu()
+{
+    IDXGIFactory* factory = nullptr;
+    if (FAILED(CreateDXGIFactory(__uuidof(IDXGIFactory), reinterpret_cast<void**>(&factory))))
+        return false;
+
+    bool found = false;
+    IDXGIAdapter* adapter = nullptr;
+    for (UINT i = 0; factory->EnumAdapters(i, &adapter) != DXGI_ERROR_NOT_FOUND; i++)
+    {
+        DXGI_ADAPTER_DESC desc{};
+        adapter->GetDesc(&desc);
+        adapter->Release();
+
+        // NVIDIA vendor ID = 0x10DE
+        if (desc.VendorId == 0x10DE)
+        {
+            std::wcout << L"[+] NVIDIA GPU found: " << desc.Description << std::endl;
+            found = true;
+            break;
+        }
+    }
+
+    factory->Release();
+    return found;
+}
+
+// ---- Display target --------------------------------------------------------
+
+static uint32_t GetPrimaryDisplayTargetId()
+{
+    UINT32 pathCount = 0, modeCount = 0;
+    if (GetDisplayConfigBufferSizes(QDC_ONLY_ACTIVE_PATHS, &pathCount, &modeCount) != ERROR_SUCCESS)
+        return 0;
+
+    std::vector<DISPLAYCONFIG_PATH_INFO> paths(pathCount);
+    std::vector<DISPLAYCONFIG_MODE_INFO> modes(modeCount);
+
+    if (QueryDisplayConfig(QDC_ONLY_ACTIVE_PATHS, &pathCount, paths.data(), &modeCount, modes.data(), nullptr) != ERROR_SUCCESS)
+        return 0;
+
+    if (pathCount > 0)
+        return paths[0].targetInfo.id;
+
+    return 0;
+}
+
+// ---- PNG save --------------------------------------------------------------
+
+static HRESULT SaveBufferToPng(const void* data, uint32_t width, uint32_t height, uint32_t stride, const wchar_t* filename)
+{
+    HRESULT hr = CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED);
+    if (FAILED(hr) && hr != S_FALSE && hr != RPC_E_CHANGED_MODE)
+        return hr;
+
+    IWICImagingFactory* factory = nullptr;
+    hr = CoCreateInstance(CLSID_WICImagingFactory, nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&factory));
+    if (FAILED(hr))
+        return hr;
+
+    IWICStream* stream = nullptr;
+    factory->CreateStream(&stream);
+    hr = stream->InitializeFromFilename(filename, GENERIC_WRITE);
+    if (FAILED(hr))
+    {
+        stream->Release();
+        factory->Release();
+        return hr;
+    }
+
+    IWICBitmapEncoder* encoder = nullptr;
+    factory->CreateEncoder(GUID_ContainerFormatPng, nullptr, &encoder);
+    encoder->Initialize(stream, WICBitmapEncoderNoCache);
+
+    IWICBitmapFrameEncode* frame = nullptr;
+    encoder->CreateNewFrame(&frame, nullptr);
+    frame->Initialize(nullptr);
+    frame->SetSize(width, height);
+
+    WICPixelFormatGUID pixelFormat = GUID_WICPixelFormat32bppBGRA;
+    frame->SetPixelFormat(&pixelFormat);
+
+    for (uint32_t y = 0; y < height; y++)
+    {
+        const BYTE* row = static_cast<const BYTE*>(data) + y * stride;
+        hr = frame->WritePixels(1, width * 4, width * 4, const_cast<BYTE*>(row));
+        if (FAILED(hr))
+            break;
+    }
+
+    frame->Commit();
+    encoder->Commit();
+
+    frame->Release();
+    encoder->Release();
+    stream->Release();
+    factory->Release();
+    CoUninitialize();
+
+    return hr;
+}
+
+// ---- Main ------------------------------------------------------------------
+
+int main()
+{
+    std::cout << "=============================================================\n";
+    std::cout << "  NVIDIA Scanout Capture for Anti-Cheat - Proof of Concept\n";
+    std::cout << "=============================================================\n\n";
+
+    // Step 1: Check for NVIDIA GPU via DXGI
+    std::cout << "[*] Checking for NVIDIA GPU...\n";
+    if (!HasNvidiaGpu())
+    {
+        std::cout << "No NVIDIA GPU detected via DXGI (vendor 0x10DE)";
+        return 1;
+    }
+
+    // Step 2: Create D3D11 device
+    std::cout << "[*] Creating D3D11 device...\n";
+    ID3D11Device* device = nullptr;
+    ID3D11DeviceContext* ctx = nullptr;
+    D3D_FEATURE_LEVEL level = D3D_FEATURE_LEVEL_11_0;
+
+    HRESULT hr = D3D11CreateDevice(
+        nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr,
+        D3D11_CREATE_DEVICE_BGRA_SUPPORT,
+        &level, 1, D3D11_SDK_VERSION,
+        &device, nullptr, &ctx);
+
+    if (FAILED(hr))
+    {
+        PrintCheatWarning("D3D11 device creation failed (hr=0x" +
+            ([&]{ char b[16]; snprintf(b,sizeof(b),"%08X",hr); return std::string(b); })() + ")");
+        return 1;
+    }
+    std::cout << "[+] D3D11 device created\n";
+
+    // Step 3: Load NVAPI
+    std::cout << "[*] Loading nvapi64.dll...\n";
+    HMODULE nvapiModule = LoadLibraryA("nvapi64.dll");
+    if (!nvapiModule)
+    {
+        PrintCheatWarning("Cannot load nvapi64.dll - NVIDIA driver missing or blocked");
+        ctx->Release(); device->Release();
+        return 1;
+    }
+
+    auto QueryInterface = reinterpret_cast<nvapi_QueryInterface_t>(
+        GetProcAddress(nvapiModule, "nvapi_QueryInterface"));
+    if (!QueryInterface)
+    {
+        PrintCheatWarning("nvapi_QueryInterface export not found - driver tampered?");
+        FreeLibrary(nvapiModule); ctx->Release(); device->Release();
+        return 1;
+    }
+    std::cout << "[+] nvapi64.dll loaded\n";
+
+    // Step 4: Initialize NVAPI
+    std::cout << "[*] Initializing NVAPI...\n";
+    auto nvInit = reinterpret_cast<nvapi_Initialize_t>(QueryInterface(0x0150E828));
+    if (!nvInit)
+    {
+        PrintCheatWarning("NvAPI_Initialize (0x0150E828) not found in driver");
+        FreeLibrary(nvapiModule); ctx->Release(); device->Release();
+        return 1;
+    }
+    uint32_t status = nvInit();
+    if (status != 0)
+    {
+        PrintCheatWarning("NvAPI_Initialize failed", status);
+        FreeLibrary(nvapiModule); ctx->Release(); device->Release();
+        return 1;
+    }
+    std::cout << "[+] NVAPI initialized\n";
+
+    // Step 5: Enumerate physical GPUs
+    std::cout << "[*] Enumerating physical GPUs...\n";
+    auto nvEnumGPUs = reinterpret_cast<nvapi_EnumPhysicalGPUs_t>(QueryInterface(0xE5AC921F));
+    void* gpuHandles[64] = {};
+    uint32_t gpuCount = 0;
+    if (!nvEnumGPUs || (status = nvEnumGPUs(gpuHandles, &gpuCount)) != 0 || gpuCount == 0)
+    {
+        PrintCheatWarning("NvAPI_EnumPhysicalGPUs failed or returned 0 GPUs", status);
+        FreeLibrary(nvapiModule); ctx->Release(); device->Release();
+        return 1;
+    }
+    std::cout << "[+] Found " << gpuCount << " physical GPU(s)\n";
+
+    // Step 6: Get display target ID
+    std::cout << "[*] Querying display target ID...\n";
+    uint32_t targetId = GetPrimaryDisplayTargetId();
+    if (targetId == 0)
+    {
+        PrintCheatWarning("QueryDisplayConfig returned no active display target");
+        FreeLibrary(nvapiModule); ctx->Release(); device->Release();
+        return 1;
+    }
+    std::cout << "[+] Primary display target ID: " << targetId << "\n";
+
+    // Step 7: Resolve the undocumented scanout read function
+    std::cout << "[*] Resolving NvAPI_D3D11_WksReadScanout (0xBCB1C536)...\n";
+    auto nvReadScanout = reinterpret_cast<nvapi_WksReadScanout_t>(QueryInterface(0xBCB1C536));
+    if (!nvReadScanout)
+    {
+        PrintCheatWarning("NvAPI_D3D11_WksReadScanout (0xBCB1C536) not found - "
+                          "driver may lack workstation capture support");
+        FreeLibrary(nvapiModule); ctx->Release(); device->Release();
+        return 1;
+    }
+    std::cout << "[+] Function resolved\n";
+
+    // Step 8: Perform scanout capture
+    std::cout << "[*] Performing scanout capture...\n";
+
+    void* capturedData = nullptr;
+    NV_WKS_READ_SCANOUT_PARAMS params{};
+    params.version      = sizeof(NV_WKS_READ_SCANOUT_PARAMS) | (1 << 16);
+    params.targetId     = targetId;
+    params.hPhysicalGpu = gpuHandles[0];
+    params.ppData       = reinterpret_cast<void**>(&capturedData);
+    // rect {0,0,0,0} = capture the entire scanout surface
+    // flags.queueIndex = 0 = OS render buffer (requires admin)
+
+    status = nvReadScanout(device, &params);
+    if (status != 0)
+    {
+        std::string detail;
+        switch (static_cast<int32_t>(status))
+        {
+        case -3:   detail = "NVAPI_NO_IMPLEMENTATION - driver does not support this function"; break;
+        case -4:   detail = "NVAPI_API_NOT_INITIALIZED"; break;
+        case -5:   detail = "NVAPI_INVALID_ARGUMENT - struct layout or version mismatch"; break;
+        case -6:   detail = "NVAPI_INVALID_USER_PRIVILEGE - run as Administrator or use queueIndex=14"; break;
+        case -9:   detail = "NVAPI_INCOMPATIBLE_STRUCT_VERSION"; break;
+        case -101: detail = "NVAPI_EXPECTED_PHYSICAL_GPU_HANDLE"; break;
+        case -102: detail = "NVAPI_EXPECTED_DISPLAY_HANDLE - targetId invalid"; break;
+        case -137: detail = "NVAPI_INVALID_USER_PRIVILEDGE - run as Administrator or use queueIndex=14"; break;
+        default:   detail = "Unknown NVAPI error"; break;
+        }
+        PrintCheatWarning("NvAPI_D3D11_WksReadScanout failed: " + detail, status);
+        FreeLibrary(nvapiModule); ctx->Release(); device->Release();
+        return 1;
+    }
+
+    uint32_t width  = params.rect.right - params.rect.left;
+    uint32_t height = params.rect.bottom - params.rect.top;
+
+    std::cout << "[+] Capture succeeded!\n";
+    std::cout << "    Region : " << params.rect.left << "," << params.rect.top
+              << " -> " << params.rect.right << "," << params.rect.bottom
+              << " (" << width << "x" << height << ")\n";
+    std::cout << "    Format : " << params.format << "\n";
+    std::cout << "    Data   : " << capturedData << "\n";
+
+    // Step 9: Save to PNG
+    if (width > 0 && height > 0 && capturedData)
+    {
+        std::cout << "[*] Saving capture.png...\n";
+        hr = SaveBufferToPng(capturedData, width, height, width * 4, L"capture.png");
+        if (FAILED(hr))
+        {
+            PrintCheatWarning("Failed to encode PNG (hr=0x" +
+                ([&]{ char b[16]; snprintf(b,sizeof(b),"%08X",hr); return std::string(b); })() + ")");
+        }
+        else
+        {
+            std::cout << "[+] Saved capture.png (" << width << "x" << height << ")\n";
+        }
+        VirtualFree(capturedData, 0, MEM_RELEASE);
+    }
+    else
+    {
+        PrintCheatWarning("Capture returned empty data (width=" + std::to_string(width) +
+                          " height=" + std::to_string(height) + ")");
+    }
+
+    // Cleanup
+    ctx->Release();
+    device->Release();
+    FreeLibrary(nvapiModule);
+
+    std::cout << "\n[*] Done.\n";
+    return 0;
+}
+
+```
+
+`nvidiaCapture/nvidiaCapture.vcxproj`:
+
+```vcxproj
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>17.0</VCProjectVersion>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectGuid>{bf9335ad-7a30-41d8-a294-5e949aaad675}</ProjectGuid>
+    <RootNamespace>nvidiaCapture</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="nvidiaCapture.cpp" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
+```
+
+`nvidiaCapture/nvidiaCapture.vcxproj.filters`:
+
+```filters
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Archivos de origen">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Archivos de encabezado">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Archivos de recursos">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="nvidiaCapture.cpp">
+      <Filter>Archivos de origen</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
+```

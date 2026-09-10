@@ -1,0 +1,355 @@
+Project Path: arc_vmguard_dwm-window-capture_sovt1xzq
+
+Source Tree:
+
+```txt
+arc_vmguard_dwm-window-capture_sovt1xzq
+├── LICENSE
+├── README.md
+└── src
+    ├── capture.cpp
+    ├── capture.h
+    └── main.cpp
+
+```
+
+`LICENSE`:
+
+```
+MIT License
+
+Copyright (c) 2026 vmguard
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
+`README.md`:
+
+```md
+# dwm-window-capture
+A small window utility that captures the currently focused window using 
+Direct3D 11 and DWM redirection surfaces, then save it as a png.
+
+### What it does
+ - Captures gpu accelerated windows without BitBlt
+ - Uses DWM redirection surfaces
+ - Copies shared surface to a staging texture
+ - Reads back pixels to CPU
+ - Encodes to PNG with WIC
+
+### Requirements
+ - Windows
+ - Visual studio + windows SDK
+ - Direct3D 11
+ - C++17 or later
+ - Only tested on windows 10 22h2
+
+### Usage
+Run the exe, press Alt + Insert to capture
+The image will be stored in the working directory in png format
+
+### Notes/warnings
+ - Uses undocument DWM exports
+ - May break on newer windows versions
+ - May capture some protected windows
+
+### Why?
+Just wanted to learn more about Clean D3D11 usage and 
+windows internals. Also have been putting off finishing
+this project for a while, wanted to get it done.
+
+```
+
+`src/capture.cpp`:
+
+```cpp
+#include "capture.h"
+#include <iostream>
+
+#pragma comment(lib, "d3d11.lib")
+#pragma comment(lib, "windowscodecs.lib")
+
+#define HR_CHECK(hr, msg) if (FAILED(hr)) { throw std::runtime_error(msg); }
+
+
+struct ScopedMap {
+    ID3D11DeviceContext* ctx;
+    ID3D11Resource* res;
+    ScopedMap(ID3D11DeviceContext* c, ID3D11Resource* r) : ctx(c), res(r) {}
+    ~ScopedMap() { if (ctx && res) ctx->Unmap(res, 0); }
+};
+
+ComInitializer::ComInitializer() {
+    // RPC_E_CHANGED_MODE is a nonfatal success. it just means COM was already initialized with a different threading model
+    auto hr = CoInitializeEx(nullptr, COINIT_MULTITHREADED);
+    if (FAILED(hr) && hr != RPC_E_CHANGED_MODE)
+        throw std::runtime_error("COM init failed");
+}
+
+ComInitializer::~ComInitializer() { CoUninitialize(); }
+
+D3DContext::D3DContext() {
+    D3D_FEATURE_LEVEL levels[] = { D3D_FEATURE_LEVEL_11_0 };
+    HR_CHECK(D3D11CreateDevice(nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr,
+        D3D11_CREATE_DEVICE_BGRA_SUPPORT, levels, 1,
+        D3D11_SDK_VERSION, &device_, nullptr, &context_), "Device creation failed");
+
+    ComPtr<IDXGIDevice> dxgi;
+    device_.As(&dxgi);
+    ComPtr<IDXGIAdapter> adapter;
+    dxgi->GetParent(__uuidof(IDXGIAdapter), reinterpret_cast<void**>(adapter.GetAddressOf()));
+
+    DXGI_ADAPTER_DESC desc;
+    adapter->GetDesc(&desc);
+    luid_ = desc.AdapterLuid;
+}
+
+PngEncoder::PngEncoder() {
+    HR_CHECK(CoCreateInstance(CLSID_WICImagingFactory, nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&factory_)), "WIC Factory failed");
+}
+
+void PngEncoder::Save(const std::wstring& path, const CaptureResult& res) {
+    ComPtr<IWICStream> stream;
+    HR_CHECK(factory_->CreateStream(&stream), "Stream creation failed");
+    HR_CHECK(stream->InitializeFromFilename(path.c_str(), GENERIC_WRITE), "File init failed");
+
+    ComPtr<IWICBitmapEncoder> encoder;
+    HR_CHECK(factory_->CreateEncoder(GUID_ContainerFormatPng, nullptr, &encoder), "Encoder init failed");
+    encoder->Initialize(stream.Get(), WICBitmapEncoderNoCache);
+
+    ComPtr<IWICBitmapFrameEncode> frame;
+    encoder->CreateNewFrame(&frame, nullptr);
+    frame->Initialize(nullptr);
+    frame->SetSize(res.width, res.height);
+
+    WICPixelFormatGUID format = GUID_WICPixelFormat32bppBGRA;
+    frame->SetPixelFormat(&format);
+    frame->WritePixels(res.height, res.pitch, res.pitch * res.height, const_cast<BYTE*>(res.pixels.data()));
+
+    frame->Commit();
+    encoder->Commit();
+}
+
+WindowCapturer::WindowCapturer(D3DContext& d3d) : d3d_(d3d) {
+    LoadDwmFunctions();
+}
+
+void WindowCapturer::LoadDwmFunctions() {
+    HMODULE hDwm = GetModuleHandleA("dwmapi.dll");
+    if (!hDwm) hDwm = LoadLibraryA("dwmapi.dll");
+    if (!hDwm) throw std::runtime_error("dwmapi.dll missing");
+
+    getSurface_ = (pfnGetSurf)GetProcAddress(hDwm, MAKEINTRESOURCEA(100));
+    updateSurface_ = (pfnUpdSurf)GetProcAddress(hDwm, MAKEINTRESOURCEA(101));
+
+    if (!getSurface_ || !updateSurface_) throw std::runtime_error("DWM exports not found");
+}
+
+CaptureResult WindowCapturer::Capture(HWND hwnd) {
+    DWORD fmt{}; HANDLE hSurface{}; UINT64 updateId{};
+    HRESULT hr = getSurface_(hwnd, d3d_.AdapterLuid(), nullptr, DWM_REDIRECTION_GDI, &fmt, &hSurface, &updateId);
+
+    if (hr != S_DWM_SURFACE_AVAILABLE) throw std::runtime_error("Window surface unavailable");
+
+    updateSurface_(hwnd, updateId, 0, nullptr, nullptr);
+
+    ComPtr<ID3D11Resource> res;
+    d3d_.Device()->OpenSharedResource(hSurface, IID_PPV_ARGS(&res));
+
+    ComPtr<ID3D11Texture2D> srcTex;
+    res.As(&srcTex);
+
+    D3D11_TEXTURE2D_DESC desc;
+    srcTex->GetDesc(&desc);
+    // We must copy the shared surface to a staging texture with CPU_ACCESS_READ
+    // Direct3D 11 does not allow the cpu to map() a default usage shared resource 
+    // directly so this copy acts as our bridge from GPU to System memory.
+    auto staging = CreateStagingTexture(desc);
+    d3d_.Context()->CopyResource(staging.Get(), srcTex.Get());
+
+    D3D11_MAPPED_SUBRESOURCE mapped;
+    HR_CHECK(d3d_.Context()->Map(staging.Get(), 0, D3D11_MAP_READ, 0, &mapped), "Texture map failed");
+
+    ScopedMap unmap(d3d_.Context(), staging.Get()); 
+
+    CaptureResult result;
+    result.width = desc.Width;
+    result.height = desc.Height;
+    result.pitch = mapped.RowPitch;
+    result.pixels.assign((BYTE*)mapped.pData, (BYTE*)mapped.pData + (result.pitch * result.height));
+
+    return result;
+}
+
+ComPtr<ID3D11Texture2D> WindowCapturer::CreateStagingTexture(const D3D11_TEXTURE2D_DESC& srcDesc) {
+    D3D11_TEXTURE2D_DESC stagingDesc = srcDesc;
+    stagingDesc.Usage = D3D11_USAGE_STAGING;
+    stagingDesc.BindFlags = 0;
+    stagingDesc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
+    stagingDesc.MiscFlags = 0;
+
+    ComPtr<ID3D11Texture2D> tex;
+    d3d_.Device()->CreateTexture2D(&stagingDesc, nullptr, &tex);
+    return tex;
+}
+
+```
+
+`src/capture.h`:
+
+```h
+#pragma once
+
+#define WIN32_LEAN_AND_MEAN
+#define NOMINMAX
+#include <windows.h>
+#include <d3d11.h>
+#include <wincodec.h>
+#include <wrl/client.h>
+#include <vector>
+#include <string>
+#include <stdexcept>
+
+using Microsoft::WRL::ComPtr;
+
+static constexpr DWORD DWM_REDIRECTION_GDI = 0x10;
+static constexpr HRESULT S_DWM_SURFACE_AVAILABLE = (HRESULT)0x00263005;
+
+struct CaptureResult {
+    std::vector<BYTE> pixels;
+    UINT width = 0;
+    UINT height = 0;
+    UINT pitch = 0;
+};
+
+class ComInitializer {
+public:
+    ComInitializer();
+    ~ComInitializer();
+    ComInitializer(const ComInitializer&) = delete;
+    ComInitializer& operator=(const ComInitializer&) = delete;
+};
+
+class D3DContext {
+public:
+    D3DContext();
+    ID3D11Device* Device() const { return device_.Get(); }
+    ID3D11DeviceContext* Context() const { return context_.Get(); }
+    LUID AdapterLuid() const { return luid_; }
+    // D3DContext manages the singleton like lifecycle of the GPU device.
+    // We delete copy/assignment to prevent accidental reference count spikes or resource leaks across threads.
+    D3DContext(const D3DContext&) = delete;
+    D3DContext& operator=(const D3DContext&) = delete;
+
+private:
+    ComPtr<ID3D11Device> device_;
+    ComPtr<ID3D11DeviceContext> context_;
+    LUID luid_{};
+};
+
+class PngEncoder {
+public:
+    PngEncoder();
+    void Save(const std::wstring& path, const CaptureResult& res);
+
+private:
+    ComPtr<IWICImagingFactory> factory_;
+};
+
+class WindowCapturer {
+public:
+    WindowCapturer(D3DContext& d3d);
+    CaptureResult Capture(HWND hwnd);
+
+private:
+    D3DContext& d3d_;
+
+    typedef HRESULT(WINAPI* pfnGetSurf)(HWND, LUID, HANDLE, DWORD, DWORD*, HANDLE*, UINT64*);
+    typedef HRESULT(WINAPI* pfnUpdSurf)(HWND, UINT64, DWORD, HANDLE, RECT*);
+
+    pfnGetSurf getSurface_ = nullptr;
+    pfnUpdSurf updateSurface_ = nullptr;
+
+    void LoadDwmFunctions();
+    ComPtr<ID3D11Texture2D> CreateStagingTexture(const D3D11_TEXTURE2D_DESC& srcDesc);
+};
+
+```
+
+`src/main.cpp`:
+
+```cpp
+#include "capture.h"
+#include <iostream>
+#include <ctime>
+
+std::wstring GetTimestampPath() {
+    std::time_t t = std::time(nullptr);
+    std::tm tm{};
+    localtime_s(&tm, &t);
+    wchar_t buf[64];
+    wcsftime(buf, 64, L"cap_%Y%m%d_%H%M%S.png", &tm);
+    return buf;
+}
+
+int main() {
+    try {
+        ComInitializer com;
+        D3DContext d3d;
+        PngEncoder encoder;
+        WindowCapturer capturer(d3d);
+
+        const int HOTKEY_ID = 1;
+        if (!RegisterHotKey(nullptr, HOTKEY_ID, MOD_ALT, VK_INSERT)) {
+            std::cerr << "Hotkey registration failed: " << GetLastError() << std::endl;
+            return 1;
+        }
+
+        std::cout << "Press Alt + insert to capture." << std::endl;
+
+        MSG msg{};
+        while (GetMessage(&msg, nullptr, 0, 0)) {
+            if (msg.message == WM_HOTKEY && msg.wParam == HOTKEY_ID) {
+                HWND target = GetForegroundWindow();
+                if (!target) continue;
+
+                try {
+                    auto result = capturer.Capture(target);
+                    auto path = GetTimestampPath();
+                    encoder.Save(path, result);
+                    std::wcout << L"[+] Saved to: " << path << std::endl;
+                }
+                catch (const std::exception& e) {
+                    std::cerr << "Capture failed: " << e.what() << std::endl;
+                }
+            }
+            DispatchMessage(&msg);
+        }
+
+        UnregisterHotKey(nullptr, HOTKEY_ID);
+    }
+    catch (const std::exception& e) {
+        std::cerr << "FATAL ERROR: " << e.what() << std::endl;
+        return 1;
+    }
+    return 0;
+}
+
+```
