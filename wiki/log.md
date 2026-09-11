@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-11** — ingest `description:hfiref0x/NtCall64`: entity [[ntcall64]] (hfiref0x; Windows NT x64 syscall fuzzer; ntoskrnl + optional win32k Shadow SSDT; randomized parameters, INI blacklists, per-ID targeting, pass counts, file/serial logging; LocalSystem elevation; kernel stability/vulnerability research; Anti Cheat / Driver Unit Test Framework); cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[syscall-tables]], [[ntsleuth]], [[vfdynf]], and [[kernforge]]; `index.md` updated.
+
 - **2026-09-11** — ingest `description:irembo337/Fusion-AntiCheat`: entity [[fusion-anti-cheat]] (irembo337; FusionGuard; C# MelonLoader .NET 6 server-side LabFusion/BONELAB anti-cheat + anti-crash; Harmony patches on network spawns/teleports/avatar changes/message floods; crash-barcode blocklist, rate limits, movement/score heuristics, SteamID allow/deny lists, Discord webhooks, in-game admin panel; Anti Cheat / game:bonelab); cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[7dtd-anticheatmod]], [[tshock]], and [[unityexplorer]]; `index.md` updated.
 
 - **2026-09-11** — ingest `description:mrphrazer/msynth`: entity [[msynth]] (mrphrazer; Python MBA deobfuscation framework; AST walks with pre-computed oracle tables, algebraic/semantic rewrites, and Smir stochastic synthesis; Miasm + optional SMT verification; SiMBA/GAMBA lineage; parallel processing; Cheat Mixed boolean-arithmetic); cited on [[overviews/reverse-engineering]] and [[concepts/mixed-boolean-arithmetic]]; cross-linked [[gamba]], [[goomba]], [[obfuscation-analysis]], and [[qsynthesis]]; `index.md` updated.
