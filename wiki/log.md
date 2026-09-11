@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-11** — lint (agent pass): index vs disk scan — 9 overviews, 42 concepts, 3880 entities (3931 index entries); index.md fully synced (0 missing, 0 dead, 0 duplicate entries); overview wikilink spot-check (9 pages) — 0 broken links; concept spot-check (42 pages) — 0 broken links; index.md wikilink scan — 0 broken links; 6 cross-kind slug collisions ([[game-hacking]], [[anti-cheat]], [[reverse-engineering]], [[il2cpp]], [[byovd]], [[dma]]) — expected, no repair needed; no structural edits required.
+
 - **2026-09-11** — lint: index vs disk scan — 9 overviews, 42 concepts, 3880 entities (3931 index entries); index.md fully synced (0 missing, 0 dead, 0 duplicate entries); overview wikilink spot-check (9 pages) — 0 broken links; concept spot-check (42 pages) — 0 broken links; index.md wikilink scan — 0 broken links; 6 cross-kind slug collisions ([[game-hacking]], [[anti-cheat]], [[reverse-engineering]], [[il2cpp]], [[byovd]], [[dma]]) — expected, no repair needed; no structural edits required.
 
 - **2026-09-11** — ingest `description:hfiref0x/NtCall64`: entity [[ntcall64]] (hfiref0x; Windows NT x64 syscall fuzzer; ntoskrnl + optional win32k Shadow SSDT; randomized parameters, INI blacklists, per-ID targeting, pass counts, file/serial logging; LocalSystem elevation; kernel stability/vulnerability research; Anti Cheat / Driver Unit Test Framework); cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[syscall-tables]], [[ntsleuth]], [[vfdynf]], and [[kernforge]]; `index.md` updated.
