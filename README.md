@@ -4413,6 +4413,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/StarBloomMinecraft/BlarionAntiCheat [Minecraft Bedrock behavior-pack anti-cheat on ScriptAPI with 40+ combat/movement/inventory detection modules]
 - https://github.com/Eangly99/AstroX-AntiCheat [GeyserMC extension anti-cheat for Minecraft Bedrock intercepting raw RakNet packets before Java translation]
 - https://github.com/majimaakane/7dtd-AntiCheatMod [Server-side 7 Days to Die mod blocking cheat commands and detecting fly, teleport, speedhack, and godmode]
+- https://github.com/irembo337/Fusion-AntiCheat [Server-side LabFusion/BONELAB anti-cheat with avatar allowlist enforcement and in-game settings panel]
 - https://github.com/Pryaxis/TShock [Mature open-source Terraria server framework with built-in server-side anti-cheat, permissions, and community moderation tools]
 - https://github.com/Garou3299/tf2bd-database [Community-maintained TF2 cheater and suspicious-player JSON lists for surepy/tf2_bot_detector]
 - https://github.com/somewhatpublicacc/wellsanticheat [Among Us host-side BepInEx anti-cheat for RPC abuse, crashers, spam, and lobby cheats]
