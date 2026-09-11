@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-11** — ingest `description:aeterna/aeterna-rongroi`: entity [[aeterna-rongroi]] (aeterna; offline read-only FiveM PC-check tool; Rust/Tauri 2 + React UI + CLI; YAML rules engine + read-only collectors; Found/NotFound/Unmeasured evidence without clean/guilty verdicts; self-check/screenshare modes with path redaction and consent; Secure Boot posture inspection; no host writes or networking); cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[dead-anticheat]], [[atomicshieldclient]], and [[irontrace]]; `index.md` updated.
+
 - **2026-09-11** — ingest `readme:categories`: Anti Cheat ~720 (+1; aeterna/aeterna-rongroi offline FiveM PC-check evidence tool) / DirectX ~41 (+1; BUNNY-19C/DLSSG-30s-manager RTX 30 DLSS-G deploy manager with kernel AC fingerprinting) / Cheat ~2801 / other major section counts stable; 41 sections; refreshed README-map counts and FiveM PC-check + DLSS-G/AC-interaction scope on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/graphics-api]], [[overviews/reverse-engineering]], and [[overviews/dma-attack]]; light `index.md` section notes (no per-category pages).
 
 - **2026-09-11** — ingest `description:lsxll666/AntiCheatToggle`: entity [[anticheattoggle]] (lsxll666; C# WinForms; stop/disable Tencent ACE / Perfect World / Reason CyberSecurity kernel drivers blocking VirtualBox spawn VERR_INVALID_NAME (-104); service start-type backup + `--off`/`--on`/`--status`; Cheat / QEMU/KVM/PVE/VBOX); cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[virtualbox]] and [[ff-ace-anticheat-analysis]]; `index.md` updated.
