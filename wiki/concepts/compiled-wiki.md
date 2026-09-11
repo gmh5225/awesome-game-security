@@ -46,4 +46,4 @@ For topical questions (DMA, EAC, Present hooks, HVCI, …): start at [[overviews
 
 ## Related
 
-[[overviews/overview]] · [[resource-selection]] · [[research-rigor]] · [[AGENTS]]
+[[overviews/overview]] · [[resource-selection]] · [[research-rigor]] · [AGENTS](AGENTS.md)

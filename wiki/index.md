@@ -2,7 +2,7 @@
 
 Compiled knowledge catalog for awesome-game-security.
 
-> Maintained via `scripts/update-wiki-cli.py`. See [[AGENTS]] for schema.
+> Maintained via `scripts/update-wiki-cli.py`. See [AGENTS](AGENTS.md) for schema.
 
 ## Overviews
 

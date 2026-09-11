@@ -55,4 +55,4 @@ Before adding entries: check duplicates, fork relationships, and category placem
 
 ## Related
 
-[[compiled-wiki]] · [[research-rigor]] · [[overviews/overview]] · [[AGENTS]]
+[[compiled-wiki]] · [[research-rigor]] · [[overviews/overview]] · [AGENTS](AGENTS.md)
