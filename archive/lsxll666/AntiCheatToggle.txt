@@ -1,0 +1,884 @@
+Project Path: arc_lsxll666_AntiCheatToggle_d4cd2tj_
+
+Source Tree:
+
+```txt
+arc_lsxll666_AntiCheatToggle_d4cd2tj_
+├── AntiCheatToggle.cs
+├── README.md
+├── app.manifest
+├── build.ps1
+└── 使用说明.txt
+
+```
+
+`AntiCheatToggle.cs`:
+
+```cs
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Drawing;
+using System.IO;
+using System.ServiceProcess;
+using System.Text;
+using System.Windows.Forms;
+using Microsoft.Win32;
+
+namespace AntiCheatToggle
+{
+    public class Target
+    {
+        public string Name;
+        public string Desc;
+        public int DefaultStart;
+        public Target(string name, string desc, int defStart)
+        {
+            Name = name;
+            Desc = desc;
+            DefaultStart = defStart;
+        }
+    }
+
+    // ---------------- 全部核心逻辑（GUI 与命令行共用） ----------------
+    public static class Core
+    {
+        public static readonly Target[] Targets = new Target[]
+        {
+            new Target("MessageTransfer", "完美世界竞技平台(CS)反作弊过滤驱动", 2),
+            new Target("ACE-BOOT", "腾讯 ACE 反作弊引导驱动", 1),
+            new Target("ACE-BASE", "腾讯 ACE 反作弊核心驱动", 3),
+            new Target("ACE-GAME", "腾讯 ACE 反作弊游戏驱动", 3),
+            new Target("rsKernelEngine", "Reason CyberSecurity 驱动", 1),
+            new Target("AntiCheatExpert Service", "腾讯 ACE 用户态服务(SGuardSvc64)", 3)
+        };
+
+        public static readonly string[] ProcPatterns = new string[]
+        {
+            "SGuard", "ACE-Service", "ACE-Tray", "AntiCheat", "perfectworld", "pwautil", "WmgpOptimizer"
+        };
+
+        public static bool IsAdmin()
+        {
+            try
+            {
+                System.Security.Principal.WindowsPrincipal p =
+                    new System.Security.Principal.WindowsPrincipal(System.Security.Principal.WindowsIdentity.GetCurrent());
+                return p.IsInRole(System.Security.Principal.WindowsBuiltInRole.Administrator);
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
+        public static int GetStartType(string name)
+        {
+            try
+            {
+                using (RegistryKey k = Registry.LocalMachine.OpenSubKey(@"SYSTEM\CurrentControlSet\Services\" + name))
+                {
+                    if (k == null) return -1;
+                    object v = k.GetValue("Start");
+                    if (v == null) return -1;
+                    return Convert.ToInt32(v);
+                }
+            }
+            catch (Exception)
+            {
+                return -1;
+            }
+        }
+
+        public static string StartTypeText(int st)
+        {
+            switch (st)
+            {
+                case 0: return "0 引导启动";
+                case 1: return "1 系统启动";
+                case 2: return "2 自动";
+                case 3: return "3 手动";
+                case 4: return "4 已禁用";
+                default: return "未安装";
+            }
+        }
+
+        public static bool SetStartType(string name, int value, Action<string> log)
+        {
+            try
+            {
+                using (RegistryKey k = Registry.LocalMachine.OpenSubKey(@"SYSTEM\CurrentControlSet\Services\" + name, true))
+                {
+                    if (k == null) return false;
+                    k.SetValue("Start", value, RegistryValueKind.DWord);
+                    return true;
+                }
+            }
+            catch (Exception e)
+            {
+                log("  设置启动类型失败 " + name + " : " + e.Message);
+                return false;
+            }
+        }
+
+        public static string GetStatusText(string name)
+        {
+            try
+            {
+                using (ServiceController sc = new ServiceController(name))
+                {
+                    return sc.Status.ToString();
+                }
+            }
+            catch (Exception)
+            {
+                return "未安装";
+            }
+        }
+
+        public static void StopTarget(string name, Action<string> log)
+        {
+            try
+            {
+                using (ServiceController sc = new ServiceController(name))
+                {
+                    if (sc.Status == ServiceControllerStatus.Running || sc.Status == ServiceControllerStatus.StartPending ||
+                        sc.Status == ServiceControllerStatus.Paused || sc.Status == ServiceControllerStatus.ContinuePending)
+                    {
+                        sc.Stop();
+                        try { sc.WaitForStatus(ServiceControllerStatus.Stopped, TimeSpan.FromSeconds(25)); }
+                        catch (Exception) { }
+                    }
+                    sc.Refresh();
+                    log("  停止 " + name + " -> " + sc.Status.ToString());
+                }
+            }
+            catch (Exception e)
+            {
+                log("  停止失败 " + name + " : " + e.Message);
+            }
+        }
+
+        public static void StartTarget(string name, Action<string> log)
+        {
+            try
+            {
+                using (ServiceController sc = new ServiceController(name))
+                {
+                    if (sc.Status == ServiceControllerStatus.Stopped)
+                    {
+                        sc.Start();
+                        try { sc.WaitForStatus(ServiceControllerStatus.Running, TimeSpan.FromSeconds(20)); }
+                        catch (Exception) { }
+                    }
+                    sc.Refresh();
+                    log("  启动 " + name + " -> " + sc.Status.ToString());
+                }
+            }
+            catch (Exception e)
+            {
+                log("  启动失败 " + name + "（重启后会自动加载）: " + e.Message);
+            }
+        }
+
+        public static void KillProcesses(Action<string> log)
+        {
+            int me = Process.GetCurrentProcess().Id;
+            Process[] all = Process.GetProcesses();
+            int killed = 0;
+            foreach (Process p in all)
+            {
+                try
+                {
+                    if (p.Id == me) continue;
+                    string n = p.ProcessName;
+                    bool hit = false;
+                    foreach (string pat in ProcPatterns)
+                    {
+                        if (n.IndexOf(pat, StringComparison.OrdinalIgnoreCase) >= 0) { hit = true; break; }
+                    }
+                    if (!hit) continue;
+                    log("  结束进程 " + n + " (PID " + p.Id + ")");
+                    p.Kill();
+                    killed++;
+                }
+                catch (Exception e)
+                {
+                    log("  结束进程失败: " + e.Message);
+                }
+                finally
+                {
+                    p.Dispose();
+                }
+            }
+            if (killed == 0) log("  没有发现正在运行的反作弊进程。");
+        }
+
+        public static string BackupFile()
+        {
+            string dir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "AntiCheatToggle");
+            if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
+            return Path.Combine(dir, "starttypes.txt");
+        }
+
+        public static void SaveBackup(Action<string> log)
+        {
+            try
+            {
+                string f = BackupFile();
+                if (File.Exists(f))
+                {
+                    log("  已有原始值备份: " + f);
+                    return;
+                }
+                StringBuilder sb = new StringBuilder();
+                sb.AppendLine("# AntiCheatToggle 原始启动类型备份 " + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+                foreach (Target t in Targets)
+                {
+                    int st = GetStartType(t.Name);
+                    if (st < 0) continue;
+                    sb.AppendLine(t.Name + "=" + st);
+                }
+                File.WriteAllText(f, sb.ToString(), Encoding.UTF8);
+                log("  已备份原始启动类型 -> " + f);
+            }
+            catch (Exception e)
+            {
+                log("  备份失败（恢复时将使用内置默认值）: " + e.Message);
+            }
+        }
+
+        public static Dictionary<string, int> LoadBackup(Action<string> log)
+        {
+            Dictionary<string, int> map = new Dictionary<string, int>();
+            try
+            {
+                string f = BackupFile();
+                if (!File.Exists(f)) return map;
+                foreach (string line in File.ReadAllLines(f))
+                {
+                    if (line.StartsWith("#")) continue;
+                    int i = line.IndexOf('=');
+                    if (i <= 0) continue;
+                    string key = line.Substring(0, i).Trim();
+                    string val = line.Substring(i + 1).Trim();
+                    int n;
+                    if (int.TryParse(val, out n)) map[key] = n;
+                }
+            }
+            catch (Exception e)
+            {
+                log("  读取备份失败: " + e.Message);
+            }
+            return map;
+        }
+
+        public static void TurnOff(bool persist, bool kill, Action<string> log)
+        {
+            log("=== 关闭反作弊驱动 ===");
+            SaveBackup(log);
+            if (kill)
+            {
+                log("结束反作弊进程...");
+                KillProcesses(log);
+            }
+            foreach (Target t in Targets)
+            {
+                if (GetStartType(t.Name) < 0)
+                {
+                    log("跳过 " + t.Name + "（未安装）");
+                    continue;
+                }
+                log("处理 " + t.Name + " ...");
+                StopTarget(t.Name, log);
+                if (persist)
+                {
+                    if (SetStartType(t.Name, 4, log)) log("  已设为禁止开机自启动 (Start=4)");
+                }
+            }
+            log("=== 关闭完成 ===");
+        }
+
+        public static void TurnOn(Action<string> log)
+        {
+            log("=== 恢复反作弊驱动 ===");
+            Dictionary<string, int> map = LoadBackup(log);
+            foreach (Target t in Targets)
+            {
+                if (GetStartType(t.Name) < 0)
+                {
+                    log("跳过 " + t.Name + "（未安装）");
+                    continue;
+                }
+                int st = t.DefaultStart;
+                if (map.ContainsKey(t.Name)) st = map[t.Name];
+                log("处理 " + t.Name + " -> " + StartTypeText(st));
+                SetStartType(t.Name, st, log);
+                if (st != 4) StartTarget(t.Name, log);
+            }
+            log("=== 恢复完成（个别驱动需重启后才重新加载）===");
+        }
+
+        public static string StatusReport()
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine("elevated = " + IsAdmin() + "   user = " + Environment.UserName);
+            sb.AppendLine();
+            foreach (Target t in Targets)
+            {
+                sb.AppendLine(string.Format("{0,-24} start={1,-14} status={2}   ({3})",
+                    t.Name, StartTypeText(GetStartType(t.Name)), GetStatusText(t.Name), t.Desc));
+            }
+            return sb.ToString();
+        }
+    }
+
+    // ---------------- 图形界面 ----------------
+    public class MainForm : Form
+    {
+        private ListView lv;
+        private TextBox txtLog;
+        private CheckBox chkPersist;
+        private CheckBox chkKill;
+        private Button btnOff;
+        private Button btnRestore;
+        private Button btnRefresh;
+
+        public MainForm()
+        {
+            Text = "反作弊驱动一键开关  (解决 VirtualBox VERR_INVALID_NAME -104)";
+            ClientSize = new Size(810, 590);
+            MinimumSize = new Size(700, 500);
+            StartPosition = FormStartPosition.CenterScreen;
+            Font = new Font("Microsoft YaHei UI", 9F);
+            Icon = SystemIcons.Shield;
+
+            Label lblTop = new Label();
+            lblTop.SetBounds(12, 8, 786, 46);
+            lblTop.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            lblTop.Text = "游戏反作弊 / 安全类内核驱动会拦截 VirtualBox 创建虚拟机进程，导致 “Error in supR3HardenedWinReSpawn” 与 VERR_INVALID_NAME (-104)。\r\n点【一键关闭】停掉这些驱动，虚拟机即可正常启动；不需要时点【一键恢复】还原。";
+            Controls.Add(lblTop);
+
+            lv = new ListView();
+            lv.View = View.Details;
+            lv.FullRowSelect = true;
+            lv.GridLines = true;
+            lv.HeaderStyle = ColumnHeaderStyle.Nonclickable;
+            lv.SetBounds(12, 58, 786, 186);
+            lv.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            lv.Columns.Add("服务 / 驱动名", 200);
+            lv.Columns.Add("说明", 300);
+            lv.Columns.Add("启动类型", 130);
+            lv.Columns.Add("当前状态", 130);
+            Controls.Add(lv);
+
+            chkPersist = new CheckBox();
+            chkPersist.SetBounds(12, 252, 470, 24);
+            chkPersist.Text = "同时禁止开机自启动（重启后依旧保持关闭，推荐）";
+            chkPersist.Checked = true;
+            Controls.Add(chkPersist);
+
+            chkKill = new CheckBox();
+            chkKill.SetBounds(12, 278, 470, 24);
+            chkKill.Text = "同时结束相关反作弊进程（SGuard / ACE / 完美平台等）";
+            chkKill.Checked = true;
+            Controls.Add(chkKill);
+
+            btnOff = new Button();
+            btnOff.Text = "一键关闭";
+            btnOff.SetBounds(12, 310, 132, 36);
+            btnOff.Click += new EventHandler(btnOff_Click);
+            Controls.Add(btnOff);
+
+            btnRestore = new Button();
+            btnRestore.Text = "一键恢复";
+            btnRestore.SetBounds(154, 310, 132, 36);
+            btnRestore.Click += new EventHandler(btnRestore_Click);
+            Controls.Add(btnRestore);
+
+            btnRefresh = new Button();
+            btnRefresh.Text = "刷新状态";
+            btnRefresh.SetBounds(296, 310, 132, 36);
+            btnRefresh.Click += new EventHandler(btnRefresh_Click);
+            Controls.Add(btnRefresh);
+
+            Label lblNote = new Label();
+            lblNote.SetBounds(440, 306, 358, 44);
+            lblNote.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            lblNote.ForeColor = Color.Firebrick;
+            lblNote.Text = "注意：关闭期间完美世界竞技平台、腾讯系游戏可能无法启动；\r\n平台下次运行时也可能自行把驱动装回来。";
+            Controls.Add(lblNote);
+
+            txtLog = new TextBox();
+            txtLog.Multiline = true;
+            txtLog.ReadOnly = true;
+            txtLog.ScrollBars = ScrollBars.Vertical;
+            txtLog.BackColor = Color.White;
+            txtLog.SetBounds(12, 356, 786, 222);
+            txtLog.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            Controls.Add(txtLog);
+
+            Log("程序已启动。管理员=" + Core.IsAdmin());
+            RefreshList();
+        }
+
+        private void Log(string s)
+        {
+            txtLog.AppendText("[" + DateTime.Now.ToString("HH:mm:ss") + "] " + s + Environment.NewLine);
+        }
+
+        private void RefreshList()
+        {
+            lv.BeginUpdate();
+            lv.Items.Clear();
+            foreach (Target t in Core.Targets)
+            {
+                int st = Core.GetStartType(t.Name);
+                string status = Core.GetStatusText(t.Name);
+                ListViewItem it = new ListViewItem(new string[] { t.Name, t.Desc, Core.StartTypeText(st), status });
+                if (st < 0) it.ForeColor = Color.Gray;
+                else if (status == "Running") it.ForeColor = Color.Firebrick;
+                else it.ForeColor = Color.ForestGreen;
+                lv.Items.Add(it);
+            }
+            lv.EndUpdate();
+        }
+
+        private void btnRefresh_Click(object sender, EventArgs e)
+        {
+            RefreshList();
+            Log("状态已刷新。");
+        }
+
+        private void btnOff_Click(object sender, EventArgs e)
+        {
+            if (!Core.IsAdmin())
+            {
+                MessageBox.Show("需要管理员权限，请右键“以管理员身份运行”。", "权限不足", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+            btnOff.Enabled = false;
+            btnRestore.Enabled = false;
+            try
+            {
+                Core.TurnOff(chkPersist.Checked, chkKill.Checked, Log);
+                RefreshList();
+                MessageBox.Show(this,
+                    "处理完成，现在可以启动 VirtualBox 了。" + Environment.NewLine + Environment.NewLine +
+                    (chkPersist.Checked ? "已同时禁止开机自启动，重启后依然保持关闭。" : "未禁止开机自启动，重启后驱动会恢复。"),
+                    "完成", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                Log("出错: " + ex.Message);
+                MessageBox.Show(this, "出错：" + ex.Message, "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                btnOff.Enabled = true;
+                btnRestore.Enabled = true;
+            }
+        }
+
+        private void btnRestore_Click(object sender, EventArgs e)
+        {
+            if (!Core.IsAdmin())
+            {
+                MessageBox.Show("需要管理员权限，请右键“以管理员身份运行”。", "权限不足", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+            btnOff.Enabled = false;
+            btnRestore.Enabled = false;
+            try
+            {
+                Core.TurnOn(Log);
+                RefreshList();
+                MessageBox.Show(this, "已恢复原始启动类型并尝试重新启动驱动。\r\n个别驱动需要重启电脑后才会重新加载。", "完成",
+                    MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                Log("出错: " + ex.Message);
+                MessageBox.Show(this, "出错：" + ex.Message, "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                btnOff.Enabled = true;
+                btnRestore.Enabled = true;
+            }
+        }
+
+        [STAThread]
+        public static void Main(string[] args)
+        {
+            string mode = args.Length > 0 ? args[0].ToLowerInvariant() : "";
+            if (mode == "--off" || mode == "--on" || mode == "--status" || mode == "--selftest")
+            {
+                StringBuilder sb = new StringBuilder();
+                Action<string> log = delegate(string s) { sb.AppendLine("[" + DateTime.Now.ToString("HH:mm:ss") + "] " + s); };
+                log("mode=" + mode + "  elevated=" + Core.IsAdmin() + "  user=" + Environment.UserName);
+                if (mode == "--off") Core.TurnOff(true, true, log);
+                else if (mode == "--on") Core.TurnOn(log);
+                log("");
+                log("--- 当前状态 ---");
+                log(Core.StatusReport());
+                string text = sb.ToString();
+                string[] outs = new string[]
+                {
+                    Path.Combine(Path.GetTempPath(), "anticheat-toggle-result.txt"),
+                    @"C:\ProgramData\anticheat-toggle-result.txt"
+                };
+                foreach (string p in outs)
+                {
+                    try { File.WriteAllText(p, text, Encoding.UTF8); }
+                    catch (Exception) { }
+                }
+                return;
+            }
+            Application.EnableVisualStyles();
+            Application.SetCompatibleTextRenderingDefault(false);
+            Application.Run(new MainForm());
+        }
+    }
+}
+
+```
+
+`README.md`:
+
+```md
+# AntiCheatToggle · 一键关闭游戏反作弊驱动
+
+> 解决 VirtualBox 启动虚拟机时报 `Error in supR3HardenedWinReSpawn` / `VERR_INVALID_NAME (-104)` 的问题。
+
+游戏反作弊 / 安全类**内核驱动**（完美世界竞技平台、腾讯 ACE 等）会拦截 VirtualBox 创建虚拟机进程，
+导致虚拟机完全无法启动。这个工具用一次点击，把这些驱动停掉并禁止开机自启，虚拟机立刻就能用；
+想玩游戏时再点一次「一键恢复」即可还原。
+
+---
+
+## 问题现象
+
+启动任意虚拟机时弹出：
+
+```
+VirtualBox - Error in supR3HardenedWinReSpawn
+
+Error relaunching VirtualBox VM process: 5
+Command line: 'C:\Program Files\Oracle\VirtualBox\VirtualBoxVM.exe
+60eaff78-4bdd-042d-2e72-669728efd737-suplib-3rdchild --comment <VM名>
+--startvm <UUID> --no-startvm-errormsgbox "--sup-hardening-log=...\VBoxHardening.log"'
+(rc=-104)
+
+Please try reinstalling VirtualBox.
+
+where: supR3HardenedWinReSpawn what: 5 VERR_INVALID_NAME (-104) -
+Invalid (malformed) file/path name.
+```
+
+对应的 `VBoxHardening.log` 里可以看到失败点：
+
+```
+... supR3HardenedWinFindAdversaries: 0x0        ← 没有任何 DLL 注入/文件被篡改
+904.1124: SUPR3HardenedMain: Respawn #2
+904.1124: Error -104 in supR3HardenedWinReSpawn! (enmWhat=5)
+```
+
+**关键判断：**`FindAdversaries: 0x0` 说明 VirtualBox 自检是通过的，文件没坏、路径也没问题；
+失败发生在「创建 VM 子进程」这一步被外部驱动挡掉。所以：
+
+* ❌ 重装 VirtualBox 没用
+* ❌ 改虚拟机路径 / 改用户名没用
+* ❌ 关 Hyper-V 没用（除非你确实是 Hyper-V 冲突，那是另一种报错）
+
+---
+
+## 支持的关闭对象
+
+| 服务 / 驱动 | 说明 | 默认启动类型 |
+| --- | --- | --- |
+| `MessageTransfer` | 完美世界竞技平台（CS）反作弊文件过滤驱动 | 自动 |
+| `ACE-BOOT` | 腾讯 ACE 反作弊引导驱动 | 系统启动 |
+| `ACE-BASE` | 腾讯 ACE 反作弊核心驱动 | 手动 |
+| `ACE-GAME` | 腾讯 ACE 反作弊游戏驱动 | 手动 |
+| `rsKernelEngine` | Reason CyberSecurity 驱动 | 系统启动 |
+| `AntiCheatExpert Service` | 腾讯 ACE 用户态服务（SGuardSvc64） | 手动 |
+
+未安装的项目会自动跳过，不会报错。
+
+---
+
+## 使用方法
+
+### 方式一：直接用编译好的程序（推荐）
+
+1. 下载 [`AntiCheatToggle.exe`](./AntiCheatToggle.exe)
+2. 双击运行 → UAC 弹窗点「是」（停内核驱动必须管理员权限）
+3. 点 **【一键关闭】** → 现在可以正常启动 VirtualBox 了
+4. 想玩游戏时点 **【一键恢复】** → 驱动还原，重启后游戏平台正常使用
+
+界面上的两个勾选项：
+
+* ☑ **同时禁止开机自启动**（默认勾选）：把驱动设为「已禁用」，重启后依旧保持关闭，不用每次再点
+* ☑ **同时结束相关反作弊进程**（默认勾选）：顺手结束 `SGuard64` / `SGuardSvc64` / 完美平台等进程
+
+### 方式二：从源码编译
+
+只需要 Windows 自带的 .NET Framework 编译器，无需安装任何 SDK：
+
+```powershell
+# 在仓库目录下执行
+powershell -ExecutionPolicy Bypass -File .\build.ps1
+```
+
+编译产物：`AntiCheatToggle.exe`（约 16 KB，单文件绿色版）。
+源码就一个文件 `AntiCheatToggle.cs` + 提权清单 `app.manifest`。
+
+### 命令行模式
+
+```bat
+AntiCheatToggle.exe --off       :: 等于点「一键关闭」
+AntiCheatToggle.exe --on        :: 等于点「一键恢复」
+AntiCheatToggle.exe --status    :: 只查看状态，不做任何修改
+```
+
+执行结果会写入 `C:\ProgramData\anticheat-toggle-result.txt`，方便脚本/计划任务调用。
+
+---
+
+## 备份与恢复
+
+第一次执行「关闭」时，原始启动类型会备份到：
+
+```
+%LOCALAPPDATA%\AntiCheatToggle\starttypes.txt
+```
+
+内容示例：
+
+```
+# AntiCheatToggle 原始启动类型备份 2026-09-11 08:55:03
+MessageTransfer=2
+ACE-BOOT=1
+ACE-BASE=3
+ACE-GAME=3
+rsKernelEngine=1
+AntiCheatExpert Service=3
+```
+
+「一键恢复」就是照这份文件还原的。即使备份文件被删掉，程序内置的默认值也能恢复。
+如果想手动还原：
+
+```bat
+sc.exe config MessageTransfer start= auto
+sc.exe config ACE-BOOT        start= system
+sc.exe config ACE-BASE        start= demand
+sc.exe config rsKernelEngine  start= system
+```
+
+启动类型的含义：`0 引导启动` / `1 系统启动` / `2 自动` / `3 手动` / `4 已禁用`。
+
+---
+
+## 自己排查同类问题的思路
+
+遇到 `supR3HardenedWinReSpawn` 系列报错，按这个顺序看就能定位：
+
+1. **看 `VBoxHardening.log`**（在虚拟机目录的 `Logs\` 下），从下往上找 `Error`、`VERR_`。
+   * 出现 `supR3HardenedWinFindAdversaries: 0x…` 非 0 → 有 DLL 注入（杀软、加速器、广告过滤软件）。
+   * 出现 `Error -104 in supR3HardenedWinReSpawn` → 进程创建被拦截（本文这种情况，多为内核驱动）。
+2. **列出第三方内核驱动**：
+
+   ```powershell
+   Get-CimInstance Win32_SystemDriver |
+     Where-Object { $_.State -eq 'Running' -and $_.PathName -notmatch 'System32\\(drivers|DriverStore)' } |
+     Select-Object Name, DisplayName, PathName
+   ```
+
+   名字里带反作弊、游戏平台、加速器、安全软件的，基本都是嫌疑对象。
+3. **停掉嫌疑对象再试**（管理员）：
+
+   ```bat
+   sc.exe stop <驱动名>
+   sc.exe config <驱动名> start= disabled
+   ```
+
+   能起来就是它；再 `start= auto` 还原即可。
+
+---
+
+## 已验证环境
+
+| 项目 | 版本 |
+| --- | --- |
+| 宿主系统 | Windows 11（build 26200，25H2） |
+| VirtualBox | 7.2.16 r174877 |
+| 触发驱动 | 完美世界竞技平台 `MessageTransfer.sys`、腾讯 ACE `ACE-BOOT.sys` |
+| 结果 | 停止前 100% 报 -104；停止后虚拟机正常启动 |
+
+---
+
+## 常见问题
+
+**Q：能只关掉其中一个吗？**
+A：可以。最省事的做法是用管理员 PowerShell 单独处理，例如只处理完美平台：
+
+```bat
+sc.exe stop MessageTransfer
+sc.exe config MessageTransfer start= disabled
+```
+
+**Q：关闭后游戏/平台打不开了？**
+A：这是预期行为——反作弊驱动没加载，游戏会拒绝启动。点「一键恢复」还原即可。
+
+**Q：过几天虚拟机又打不开了？**
+A：游戏平台启动时可能把驱动重新装回来。再点一次「一键关闭」就行。
+
+**Q：这工具会改 VirtualBox 吗？**
+A：不会。它只操作这 6 个反作弊相关服务/驱动的「启动类型」和「运行状态」，
+不碰 VirtualBox 的任何文件与设置，也不联网。
+
+---
+
+## 免责声明
+
+* 本工具会停止并禁用游戏反作弊驱动。**这可能导致相应游戏/平台无法启动，也可能违反某些平台的使用条款**，请自行评估风险后使用。
+* 请只在自己的电脑上使用；使用前建议先备份重要数据。
+* 作者不对因使用本工具造成的任何后果负责。
+
+---
+
+## English (short)
+
+**AntiCheatToggle** — a tiny GUI utility that stops and disables anti-cheat kernel drivers
+(Perfect World Arena `MessageTransfer`, Tencent ACE `ACE-BOOT`/`ACE-BASE`/`ACE-GAME`, etc.)
+which block VirtualBox from spawning its VM process, causing:
+
+```
+Error in supR3HardenedWinReSpawn ... VERR_INVALID_NAME (-104)
+```
+
+One click to fix, one click to restore. No installer, no network access, no changes to VirtualBox itself.
+Build with the bundled `build.ps1` (uses the .NET Framework `csc.exe` already present on Windows).
+
+---
+
+## 许可
+
+本仓库暂未指定开源协议；欢迎自由使用与修改，转载请注明出处。
+
+```
+
+`app.manifest`:
+
+```manifest
+<?xml version="1.0" encoding="utf-8"?>
+<assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">
+  <assemblyIdentity version="1.0.0.0" name="AntiCheatToggle.app" />
+  <trustInfo xmlns="urn:schemas-microsoft-com:asm.v2">
+    <security>
+      <requestedPrivileges xmlns="urn:schemas-microsoft-com:asm.v3">
+        <requestedExecutionLevel level="requireAdministrator" uiAccess="false" />
+      </requestedPrivileges>
+    </security>
+  </trustInfo>
+  <compatibility xmlns="urn:schemas-microsoft-com:compatibility.v1">
+    <application>
+      <!-- Windows 10 / 11 -->
+      <supportedOS Id="{8e0f7a12-bfb3-4fe8-b9a5-48fd50a15a9a}" />
+      <supportedOS Id="{1f676c76-80e1-4239-95bb-83d0f6d0da78}" />
+      <supportedOS Id="{4a2f28e3-53b9-4441-ba9c-d69d4a4a6e38}" />
+    </application>
+  </compatibility>
+  <application xmlns="urn:schemas-microsoft-com:asm.v3">
+    <windowsSettings>
+      <dpiAware xmlns="http://schemas.microsoft.com/SMI/2005/WindowsSettings">true</dpiAware>
+      <longPathAware xmlns="http://schemas.microsoft.com/SMI/2016/WindowsSettings">true</longPathAware>
+    </windowsSettings>
+  </application>
+</assembly>
+
+```
+
+`build.ps1`:
+
+```ps1
+$ErrorActionPreference = 'Stop'
+$src  = Split-Path -Parent $MyInvocation.MyCommand.Path
+$csc  = 'C:\Windows\Microsoft.NET\Framework64\v4.0.30319\csc.exe'
+$fw   = 'C:\Windows\Microsoft.NET\Framework64\v4.0.30319'
+$out  = Join-Path $src 'AntiCheatToggle.exe'
+
+& $csc /nologo /target:winexe /platform:x64 /optimize+ /codepage:65001 `
+    "/win32manifest:$src\app.manifest" `
+    "/out:$out" `
+    "/reference:$fw\System.dll" `
+    "/reference:$fw\System.Drawing.dll" `
+    "/reference:$fw\System.Windows.Forms.dll" `
+    "/reference:$fw\System.ServiceProcess.dll" `
+    "$src\AntiCheatToggle.cs"
+
+if (Test-Path $out) {
+    $fi = Get-Item $out
+    Write-Host ("编译成功: {0}  ({1:N0} 字节)" -f $fi.FullName, $fi.Length)
+    # 复制一份到桌面，方便双击
+    $desk = 'C:\Users\16240\Desktop\反作弊一键开关.exe'
+    Copy-Item $out $desk -Force
+    Write-Host ("已复制到桌面: {0}" -f $desk)
+} else {
+    Write-Host '编译失败'
+}
+
+```
+
+`使用说明.txt`:
+
+```txt
+反作弊驱动一键开关  —— 使用说明
+=====================================
+
+【它解决什么问题】
+  游戏反作弊 / 安全类内核驱动（完美世界竞技平台、腾讯 ACE 等）会拦截 VirtualBox
+  创建虚拟机进程，导致启动虚拟机时报：
+      Error in supR3HardenedWinReSpawn
+      Error relaunching VirtualBox VM process: 5 ... VERR_INVALID_NAME (-104)
+  这是“被外部驱动拦截”，不是 VirtualBox 装坏了，重装没用。
+  本工具一键停掉这些驱动，虚拟机即可正常启动。
+
+【怎么用】
+  1. 双击  exe（会在 UAC 弹窗，点“是”，因为停驱动必须管理员权限）
+  2. 点【一键关闭】——停掉列表里的驱动和服务，虚拟机就能开了
+  3. 以后想玩游戏了，点【一键恢复】——驱动恢复原样，重启后游戏平台也能正常用
+
+  两个勾选项：
+    □ 同时禁止开机自启动（默认勾选）
+        勾上 = 设为“已禁用”，重启后依旧保持关闭，不用每次再点
+        不勾 = 只停本次，重启后驱动自动回来
+    □ 同时结束相关反作弊进程（默认勾选）
+        顺手结束 SGuard64 / SGuardSvc64 / 完美平台等进程
+
+  命令行用法（可选，方便做快捷方式/计划任务）：
+    反作弊一键开关.exe --off     等于点“一键关闭”
+    反作弊一键开关.exe --on      等于点“一键恢复”
+    反作弊一键开关.exe --status  只查看状态，不做任何修改
+      结果会写到 C:\ProgramData\anticheat-toggle-result.txt
+
+【处理的 6 个对象】
+  MessageTransfer          完美世界竞技平台(CS)反作弊过滤驱动
+  ACE-BOOT                 腾讯 ACE 反作弊引导驱动
+  ACE-BASE                 腾讯 ACE 反作弊核心驱动
+  ACE-GAME                 腾讯 ACE 反作弊游戏驱动
+  rsKernelEngine           Reason CyberSecurity 驱动
+  AntiCheatExpert Service  腾讯 ACE 用户态服务(SGuardSvc64)
+
+【原始启动类型备份在哪里】
+  C:\Users\<你的用户名>\AppData\Local\AntiCheatToggle\starttypes.txt
+  【一键恢复】就是照这个文件还原的，删了它也能用内置默认值恢复。
+
+【注意事项】
+  * 关闭期间：完美世界竞技平台、腾讯系游戏可能无法启动（反作弊起不来）
+  * 平台下次运行时可能会自己把驱动装回来，装回来后虚拟机又会打不开，
+    到时候再点一次【一键关闭】即可
+  * 本程序不含任何联网、不改 VirtualBox 的任何设置，只做“停/恢复驱动”这一件事
+
+```
