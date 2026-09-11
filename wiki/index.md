@@ -1424,6 +1424,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [function-collections](entities/function-collections.md) — C PoCs for uncommon Ring3 paths (memory analysis; AC callback lane)
 - [FunctionInliner](entities/function-inliner.md) — IDA Pro plugin: reverse clang function outlining (`--moutline`); inline outlined helpers per caller; restore Hex-Rays on ARM size-optimized binaries (Cellebrite Labs; cheat / IDA Plugins)
 - [fumo-loader](entities/fumo-loader.md) — PTE.User page-table injection loader (C/C++; kernel driver; anti-cheat research; cheat / injection:windows; dumbasPL)
+- [Fusion AntiCheat](entities/fusion-anti-cheat.md) — FusionGuard server-side LabFusion/BONELAB MelonLoader AC (Harmony network policy; crash-barcode blocklist; avatar allowlist; SteamID lists; Discord webhooks; irembo337)
 - [furikuri](entities/furikuri.md) — C/C++ obfuscation engine (jnastarot; AC Obfuscation Engine)
 - [Flax Engine](entities/flax-engine.md) — full-source C++/C# 3D game engine and editor (FlaxEngine; mixed native rendering/platform + .NET managed scripting; Vulkan; Windows/Linux/macOS; engine runtime, editor, build scripts; Game Engine / source [C++/C# 3D])
 - [Fyrox](entities/fyrox.md) — production-ready Rust 2D/3D game engine (FyroxEngine; modular crates + integrated scene editor; editor-driven iteration; examples and learning resources; Game Engine / source [Rust])
