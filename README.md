@@ -1047,6 +1047,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/bliutech/mbased [Practical Simplifications of Mixed Boolean-Arithmetic Obfuscation]
 - https://github.com/SynthesisLab/MBA [High-performance Mixed Boolean-Arithmetic (MBA) expression synthesis tool]
 - https://github.com/astean1001/ProMBA [MBA deobfuscator via Program Synthesis and Term Rewriting]
+- https://github.com/mrphrazer/msynth [MBA deobfuscation framework using pre-computed oracles, algebraic simplification, and stochastic program synthesis; integrates with Miasm symbolic execution]
 - https://github.com/fvrmatteo/DrillAndJoin [C++17 Drill & Join exact Boolean synthesis; SMT-guided 64-bit opaque-predicate and MBA-style simplification via Bitwuzla]
 - https://github.com/DenuvoSoftwareSolutions/GAMBA [Simplification of General Mixed Boolean-Arithmetic Expressions: GAMBA]
 - https://github.com/mizt0/mixed-boolean-transform [Mixed boolean arithmetic x+y transform]
@@ -4743,6 +4744,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/0vercl0k/snapshot [Rust WinDbg extension that dumps CPU register state and VM physical memory for snapshot-based kernel fuzzing (companion to wtf)]
 - https://github.com/kernullist/kernforge [Go workbench for Windows/anti-cheat project analysis, fuzzing, and evidence-backed verification]
 - https://github.com/jxy-s/vfdynf [Application Verifier DynFault provider for stack-aware Windows fault injection and targeted API fuzzing]
+- https://github.com/hfiref0x/ntcall64 [Windows NT x64 syscall fuzzer for ntoskrnl and win32k service tables on Windows 7+; configurable passes, blacklists, and logging for kernel stability/vulnerability research]
 
 > OpenCV
 - https://github.com/YouNeverKnow00/Rust-Auto-Weapon-Detection-OpenCV-Example
