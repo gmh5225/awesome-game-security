@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-11** — ingest `description:lsxll666/AntiCheatToggle`: entity [[anticheattoggle]] (lsxll666; C# WinForms; stop/disable Tencent ACE / Perfect World / Reason CyberSecurity kernel drivers blocking VirtualBox spawn VERR_INVALID_NAME (-104); service start-type backup + `--off`/`--on`/`--status`; Cheat / QEMU/KVM/PVE/VBOX); cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[virtualbox]] and [[ff-ace-anticheat-analysis]]; `index.md` updated.
+
 - **2026-09-11** — ingest `readme:categories`: Cheat ~2801 (+1; lsxll666/AntiCheatToggle WinForms ACE/Perfect World/Reason CyberSecurity kernel-driver toggle for VirtualBox VERR_INVALID_NAME (-104) in QEMU/KVM/PVE/VBOX) / Anti Cheat ~719 / other major section counts stable; 41 sections; refreshed README-map counts and virtualization-lab scope on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/anti-cheat]], [[overviews/reverse-engineering]], and [[overviews/dma-attack]]; light `index.md` section notes (no per-category pages).
 
 - **2026-09-11** — lint: index vs disk scan — 9 overviews, 42 concepts, 3874 entities (3925 index entries); index.md fully synced (0 missing, 0 dead, 0 duplicate entries); overview wikilink spot-check (9 pages) — 0 broken links; concept spot-check (42 pages) — replaced 3 dead [[AGENTS]] wikilinks with `[AGENTS](AGENTS.md)` on [[compiled-wiki]], [[research-rigor]], and [[resource-selection]] (schema doc, not a page kind); index.md header — same [[AGENTS]]→markdown fix; index.md wikilink scan — 0 broken links after repair; 6 cross-kind slug collisions ([[game-hacking]], [[anti-cheat]], [[reverse-engineering]], [[il2cpp]], [[byovd]], [[dma]]) — expected, no repair needed.

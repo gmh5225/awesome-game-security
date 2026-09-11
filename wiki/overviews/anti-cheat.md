@@ -909,6 +909,7 @@ sources:
   - wiki/sources/descriptions/AdvDebug__AntiCrack-DotNet.md
   - wiki/sources/descriptions/Ahora57__MAJESTY-technologies.md
   - wiki/sources/descriptions/ApexLegendsUC__anti-cheat-emulator.md
+  - wiki/sources/descriptions/lsxll666__AntiCheatToggle.md
 updated: 2026-09-11
 confidence: high
 ---
@@ -1029,6 +1030,7 @@ Structured research indexes such as [[anti-cheat-research-index]] catalog public
 - [[anti-cheat-amateur]] — MemRE injectable memory editor + GothGirlFeet kdmapper-compatible KMDF driver (NUL-device IOCTL cross-process R/W; DBVM hypercall shims bypass RPM blocks); CE-style scan/pointer workflows, UE GWorld/GNames, Tencent ACE evasion research (source: wiki/sources/descriptions/not1cyyy__Anti-Cheat-Amateur.md)
 - [[sguard-limit]] — Windows ACE-Guard client restriction/patch toolkit (H3d9; user-mode C++ controller + kernel C/asm module; virtual memory ops, VAD traversal, suspend/resume, detour hooks; Visual Studio solution; anti-cheat RE / bypass experimentation) (source: wiki/sources/descriptions/H3d9__sguard_limit.md)
 - [[ff-ace-anticheat-analysis]] — Tencent ACE (libanogs/libanort) Free Fire byte-level RE post-mortem (Lixense; Python/JS IDA automation + SQLite detection index; APK hash, cert parsing, inline-hook scans, self-integrity checksum catalog; Explore AntiCheat System:ACE defensive research) (source: wiki/sources/descriptions/Lixense__ff-ace-anticheat-analysis.md)
+- [[anticheattoggle]] — WinForms utility to temporarily stop/disable Tencent ACE, Perfect World Arena, and Reason CyberSecurity kernel drivers that block VirtualBox VM spawn (`supR3HardenedWinReSpawn` VERR_INVALID_NAME -104); backs up service start types; CLI `--off`/`--on`/`--status`; research-host virtualization troubleshooting (lsxll666; Cheat / QEMU/KVM/PVE/VBOX) (source: wiki/sources/descriptions/lsxll666__AntiCheatToggle.md)
 - [[battlefn-cheat-analysis]] — detected Fortnite cheat post-mortem (0dayatday0; written analysis + sample modules + manual-map / privileged-memory PoCs; batch + C++ usermode→kernel paths; real-world tradecraft and mistake catalog for defensive researchers) (source: wiki/sources/descriptions/0dayatday0__BattleFN-cheat-analysis.md)
 - [[meme-rw]] — C++/CMake protected-process memory access PoC; vulnerable-driver mapping framework with driver-load helpers, process/module utilities, and memory R/W control; end-to-end target-process open + memory ops for anti-cheat bypass experimentation and defensive protected-memory research (SamuelTulach; cheat / kdmapper) (source: wiki/sources/descriptions/SamuelTulach__meme-rw.md)
 - [[remap]] — Windows kernel page-remapping PoC; copies protected-process pages into another process VA space for memory R/W and dump workflows after setup; documents Windows 10 range limits, operational caveats, and cleanup crash risks; anti-cheat bypass and low-level process-memory research (EBalloon; cheat / Clone process) (source: wiki/sources/descriptions/EBalloon__Remap.md)

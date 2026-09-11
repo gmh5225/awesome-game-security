@@ -1830,6 +1830,7 @@ sources:
   - wiki/sources/descriptions/Maxamedxasa__SakoREStudio.md
   - wiki/sources/descriptions/danigargu__deREferencing.md
   - wiki/sources/descriptions/AshrafMorningstar__hayday-bot.md
+  - wiki/sources/descriptions/lsxll666__AntiCheatToggle.md
 updated: 2026-09-11
 confidence: high
 ---
@@ -2773,7 +2774,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - KVM RDTSC timing-handler patches such as [[rdtsc-kvm-handler]] (WCharacter; Linux kernel C; intercept/alter guest RDTSC on Intel VMX and AMD SVM; fake timestamp deltas + QEMU CPU flags such as disabling RDTSCP; timing-based anti-cheat / VM-evasion research; cheat / Bypass RDTSC) sit in that same below-OS hypervisor-timing lane beside [[checkhv-um]] and [[ophion]]. (source: wiki/sources/descriptions/WCharacter__RDTSC-KVM-Handler.md)
 - Linux KVM VM-exit timing compensation patches such as [[better-timing]] (SamuelTulach; kernel patch + docs/demos; records VM-exit timing characteristics and offsets guest TSC for bare-metal-like execution timing; reduced detection by common VM-check tools; virtualization security / anti-cheat timing-heuristic testing; cheat / Bypass CPU Timing) sit beside [[rdtsc-kvm-handler]] in that below-OS hypervisor-timing lane. (source: wiki/sources/descriptions/SamuelTulach__BetterTiming.md)
 - VirtualBox on a KVM backend via [[virtualbox-kvm]] (cyberus-technology; hardware graphics acceleration not in GUI yet—manual setup; cheat / QEMU/KVM/PVE/VBOX research-host lane) also sits in that lane beside QEMU/PVE tooling. (source: wiki/sources/descriptions/cyberus-technology__virtualbox-kvm.md)
-- WinForms ACE/Perfect World driver toggle lsxll666/AntiCheatToggle (stop/disable Tencent ACE, Perfect World Arena, and Reason CyberSecurity kernel drivers blocking VirtualBox VM spawn with `supR3HardenedWinReSpawn` VERR_INVALID_NAME (-104); CLI `--off`/`--on`/`--status` + one-click restore of backed-up service start types; cheat / QEMU/KVM/PVE/VBOX research-host lane) (source: wiki/sources/README-categories.md) (source: wiki/sources/descriptions/lsxll666__AntiCheatToggle.md)
+- [[anticheattoggle]] (lsxll666; WinForms ACE/Perfect World/Reason CyberSecurity kernel-driver toggle for VirtualBox VERR_INVALID_NAME (-104); CLI `--off`/`--on`/`--status` + one-click restore; cheat / QEMU/KVM/PVE/VBOX research-host lane) (source: wiki/sources/descriptions/lsxll666__AntiCheatToggle.md)
 - Title-specific CS:GO cheats hosted inside KVM/QEMU guests such as [[kvm-csgo-cheat]] (Rust; gmh5225) also sit in that QEMU/KVM/PVE/VBOX research lane for below-OS isolation study. (source: wiki/sources/descriptions/gmh5225__kvm-csgo-cheat.md)
 - Host-side KVM/QEMU CS1.6 triggerbots such as [[cs16-trigger-kvm]] (gmh5225; guest memory APIs + input injection from the hypervisor host) also sit in that below-OS isolation lane. (source: wiki/sources/descriptions/gmh5225__cs16-trigger-kvm.md)
 - QEMU-based Escape from Tarkov cheat frameworks such as [[escape-from-tuxkov]] (Qemu-Gang; C++; gameplay modules + memory/data pipelines for Linux/QEMU external or hybrid setups; cheat / game:eft [QEMU]) extend that below-OS isolation lane to Unity/BattlEye titles beside CS:GO/KVM samples. (source: wiki/sources/descriptions/Qemu-Gang__Escape-from-TuxKov.md)
