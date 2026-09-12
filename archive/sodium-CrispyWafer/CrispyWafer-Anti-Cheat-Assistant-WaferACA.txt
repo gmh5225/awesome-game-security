@@ -1,0 +1,3105 @@
+Project Path: arc_sodium-CrispyWafer_CrispyWafer-Anti-Cheat-Assistant-WaferACA_rtulcdho
+
+Source Tree:
+
+```txt
+arc_sodium-CrispyWafer_CrispyWafer-Anti-Cheat-Assistant-WaferACA_rtulcdho
+├── LICENSE
+├── README.md
+├── build.gradle
+├── gradle
+│   └── wrapper
+│       └── gradle-wrapper.properties
+├── gradle.properties
+├── settings.gradle
+└── src
+    └── main
+        ├── java
+        │   └── com
+        │       └── wafer
+        │           └── aca
+        │               ├── WaferACA.java
+        │               ├── client
+        │               │   ├── ClientKeyBindings.java
+        │               │   └── MatchTerminatedScreen.java
+        │               ├── command
+        │               │   └── WaferACACommands.java
+        │               ├── detection
+        │               │   ├── AimBotDetector.java
+        │               │   └── ModDetectionManager.java
+        │               ├── event
+        │               │   ├── ClientForgeEvents.java
+        │               │   └── ServerForgeEvents.java
+        │               ├── network
+        │               │   ├── ClientboundCheatDetected.java
+        │               │   ├── ClientboundMatchTerminated.java
+        │               │   ├── ClientboundPlayerModList.java
+        │               │   ├── NetworkHandler.java
+        │               │   ├── ServerboundClientModList.java
+        │               │   └── ServerboundRequestModList.java
+        │               └── util
+        │                   └── MessageUtil.java
+        └── resources
+            ├── META-INF
+            │   └── mods.toml
+            ├── assets
+            │   └── waferaca
+            │       └── lang
+            │           ├── en_us.json
+            │           └── zh_cn.json
+            └── pack.mcmeta
+
+```
+
+`LICENSE`:
+
+```
+MIT License
+
+Copyright (c) 2026 Sodium_CrispyWafer
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
+`README.md`:
+
+```md
+# WaferACA - Minecraft Forge 1.20.1 客户端反作弊模组
+
+## 简介
+
+WaferACA 是一个面向 Minecraft 1.20.1 (Forge 47.2-47.4) 的反作弊模组，能够检测服务器上其他玩家使用的客户端模组，并针对特定作弊模组（CrispyWafer Gun Tracker Mod）进行告警。
+
+## 功能特性
+
+### 1. 进入服务器自动播报
+进入服务器的瞬间，自动在公共聊天发送：
+> **WaferACA**（红色）反作弊初始化完成，正在开始检测！（绿色）
+
+### 2. 玩家客户端模组检测
+检测服务器上所有在线玩家安装的客户端模组列表。
+
+### 3. 作弊模组告警
+一旦检测到玩家使用 [CrispyWafer Gun Tracker Mod](https://github.com/sodium-CrispyWafer/Gun-Tracker-Mod)（modid: `crispywaferguntrackermod`），自动在公共聊天发送：
+> **xxx玩家**使用了作弊！（红色）
+
+### 4. 显示所有玩家的模组列表
+在服务端配合模式下，可以查看服务器上每个玩家安装的完整模组列表：
+- **按键 O**：打开/显示所有玩家的模组列表（可在控制设置中修改）
+- **聊天命令 `.waca`**：在聊天框输入 `.waca` 显示所有玩家模组列表
+- **聊天命令 `.waca <玩家名>`**：查看指定玩家的模组列表
+- **聊天命令 `.mods`**：同 `.waca`
+
+显示示例：
+```
+===== WaferACA 玩家模组列表 (3人) =====
+[正常] Player1 (5个模组): forge, minecraft, jei, sodium, optifine
+[作弊] Player2 (4个模组): forge, minecraft, crispywaferguntrackermod, jei
+[正常] Player3 (原版): vanilla
+========================================
+```
+
+## 双模式检测架构
+
+由于 Minecraft 协议限制，**纯客户端无法直接获取其他玩家的客户端模组列表**。因此本模组采用双模式设计：
+
+### 模式一：服务端配合模式（推荐，精确检测）
+
+- **前提**：服务器也安装了本模组（WaferACA）
+- **原理**：服务端通过 Forge FML 握手协议获取每个玩家的完整模组列表，经自定义网络包分发给客户端
+- **特点**：100% 精确检测，无漏报无误报
+- **自动切换**：客户端进入服务器后自动尝试请求，5秒内收到响应即启用此模式
+
+### 模式二：纯客户端行为检测模式（备用，启发式）
+
+- **前提**：服务器未安装本模组
+- **原理**：通过分析其他玩家的视角移动特征，启发式判断是否使用自瞄类作弊
+- **检测维度**：
+  - **旋转平滑度**：人类操作有自然抖动，自瞄过于平滑
+  - **速度一致性**：自瞄旋转速度恒定，人类变化大
+  - **Flick 检测**：瞬间大角度旋转后立即稳定（flick aim 特征）
+  - **追踪精度**：持续微小修正锁定目标（自瞄追踪特征）
+- **特点**：存在误报可能，可疑度 ≥75% 时触发告警
+- **自动切换**：请求超时 5 秒后自动启用此模式
+
+## 安装方法
+
+### 客户端安装
+1. 安装 Minecraft Forge 1.20.1（版本 47.2.0 ~ 47.4.x）
+2. 将 `waferaca-1.0.0.jar` 放入 `.minecraft/mods/` 文件夹
+3. 启动游戏
+
+### 服务端安装（推荐，启用精确检测）
+1. 在 Forge 服务端的 `mods/` 文件夹中放入同一个 `waferaca-1.0.0.jar`
+2. 重启服务器
+3. 客户端进入服务器后自动启用服务端配合模式
+
+> **注意**：同一个 jar 文件同时包含客户端和服务端逻辑，无需分别下载。
+
+## 构建方法
+
+### 环境要求
+- **JDK 17**（必须，Forge 1.20.1 不支持 Java 11 及以下）
+- **Gradle 8.1.1**（项目已包含 `gradle-wrapper.properties`，IDE 会自动下载）
+- 网络连接（首次构建需要下载 Forge 和依赖）
+
+### 构建步骤
+
+#### 方式一：使用 Gradle Wrapper（推荐）
+```bash
+cd WaferACA
+
+# 如果缺少 gradlew 脚本，先用系统 Gradle 生成 wrapper：
+gradle wrapper --gradle-version 8.1.1
+
+# Windows
+gradlew.bat build
+
+# Linux / macOS
+chmod +x gradlew
+./gradlew build
+```
+
+#### 方式二：使用系统 Gradle
+```bash
+cd WaferACA
+gradle build
+```
+
+构建产物位于：`build/libs/waferaca-1.0.0.jar`
+
+### IDE 导入注意事项
+
+**IntelliJ IDEA**：
+1. `File → Open` 选择项目根目录（含 `build.gradle` 的文件夹）
+2. 等待 Gradle 同步完成（首次需要下载 Forge，可能需要 5-10 分钟）
+3. 同步完成后，右侧 Gradle 面板会出现 `genIntellijRuns` 任务，双击生成运行配置
+4. 运行 `runClient` 启动客户端测试
+
+**Eclipse**：
+1. `File → Import → Gradle → Existing Gradle Project`
+2. 选择项目根目录
+3. 等待同步完成
+4. 运行 `genEclipseRuns` 任务生成运行配置
+
+> **常见问题**：如果 IDE 同步时报 `genEclipseRuns` 或依赖图错误，请确认：
+> 1. JDK 版本是 17（`File → Project Structure → SDK`）
+> 2. Gradle 使用项目的 wrapper 版本（8.1.1）
+> 3. 网络能访问 `maven.minecraftforge.net` 和 `services.gradle.org`
+
+### 开发环境运行
+```bash
+# 运行客户端
+./gradlew runClient
+
+# 运行服务端
+./gradlew runServer
+```
+
+## 项目结构
+
+```
+WaferACA/
+├── build.gradle                    # Gradle 构建配置
+├── gradle.properties               # 版本和依赖配置
+├── settings.gradle                 # 项目设置
+├── gradlew / gradlew.bat          # Gradle Wrapper
+└── src/main/
+    ├── java/com/wafer/aca/
+    │   ├── WaferACA.java           # 模组主类
+    │   ├── network/
+    │   │   ├── NetworkHandler.java           # 网络通道注册
+    │   │   ├── ServerboundRequestModList.java # 客户端→服务端：请求模组列表
+    │   │   └── ClientboundPlayerModList.java  # 服务端→客户端：返回模组列表
+    │   ├── detection/
+    │   │   ├── ModDetectionManager.java  # 模组检测管理器（核心）
+    │   │   └── AimBotDetector.java       # 自瞄行为检测器
+    │   ├── event/
+    │   │   ├── ClientForgeEvents.java   # 客户端事件处理器
+    │   │   └── ServerForgeEvents.java   # 服务端事件处理器
+    │   └── util/
+    │       └── MessageUtil.java          # 聊天消息工具类
+    └── resources/
+        ├── META-INF/mods.toml   # 模组描述文件
+        └── pack.mcmeta           # 资源包描述
+```
+
+## 技术说明
+
+### 服务端模组列表提取原理
+
+Forge 在客户端连接服务器时会进行 FML 握手，客户端会将自己的模组列表发送给服务器。服务器将这些信息存储在 Netty Channel 的 `HandshakeHandler` 属性中。
+
+本模组通过以下步骤提取：
+1. 从 `ServerPlayer.connection.connection` 获取 `Connection`
+2. 通过反射查找 `HandshakeHandler` 的 `AttributeKey`
+3. 从 Channel 属性中获取 `HandshakeHandler` 实例
+4. 遍历其字段，识别 `List<String>` 或 `Map<String,String>` 形式的模组列表
+5. 通过包含 `forge`/`minecraft` 且格式为小写字母数字的特征验证
+
+### 颜色消息实现
+
+Minecraft 公共聊天不支持客户端自定义 `Component` 颜色（服务器会过滤），因此使用 `§` 颜色代码嵌入文本：
+- `§c` = 红色（RED）
+- `§a` = 绿色（GREEN）
+- `§r` = 重置格式
+
+大部分服务器会保留这些颜色代码。同时在本地显示标准 `Component` 组件消息，确保自己能看到正确颜色。
+
+## 兼容性
+
+| 项目 | 版本 |
+|------|------|
+| Minecraft | 1.20.1 |
+| Forge | 47.2.0 ~ 47.4.x |
+| Java | 17 |
+| 目标作弊模组 | CrispyWafer Gun Tracker Mod 1.0.0 |
+
+## 常见问题
+
+**Q: 为什么纯客户端不能直接检测其他玩家的模组？**
+A: Minecraft 协议中，客户端只与服务器通信，客户端之间不直接交换模组信息。Forge 握手也只在客户端-服务器之间进行，服务器不会把其他客户端的模组列表发给当前客户端。
+
+**Q: 行为检测会误报吗？**
+A: 会。技术高超的玩家可能被误判，建议将行为检测结果作为参考，结合服务端配合模式使用。
+
+**Q: 服务器需要安装吗？**
+A: 不安装也能用（纯客户端行为检测模式），但安装后可以获得精确的模组列表检测。推荐服务端也安装。
+
+**Q: 能检测其他作弊模组吗？**
+A: 目前专门针对 `crispywaferguntrackermod` 进行告警。服务端配合模式下可以获取所有玩家的完整模组列表，你可以在 `ModDetectionManager.java` 中添加更多目标模组的检测。
+
+## 许可证
+
+MIT License
+
+```
+
+`build.gradle`:
+
+```gradle
+plugins {
+    id 'eclipse'
+    id 'idea'
+    id 'maven-publish'
+    id 'net.minecraftforge.gradle' version '6.0.24'
+}
+
+version = mod_version
+group = mod_group_id
+
+base {
+    archivesName = mod_id
+}
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(17)
+
+minecraft {
+    mappings channel: mapping_channel, version: mapping_version
+
+    runs {
+        configureEach {
+            workingDirectory project.file('run')
+            property 'forge.logging.markers', 'REGISTRIES'
+            property 'forge.logging.console.level', 'debug'
+            mods {
+                "${mod_id}" {
+                    source sourceSets.main
+                }
+            }
+        }
+
+        client {
+            property 'forge.enabledGameTestNamespaces', mod_id
+        }
+
+        server {
+            property 'forge.enabledGameTestNamespaces', mod_id
+            args '--nogui'
+        }
+    }
+}
+
+sourceSets.main.resources { srcDir 'src/generated/resources' }
+
+repositories {
+}
+
+dependencies {
+    minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
+}
+
+tasks.named('processResources', ProcessResources).configure {
+    var replaceProperties = [
+            minecraft_version: minecraft_version, minecraft_version_range: minecraft_version_range,
+            forge_version: forge_version, forge_version_range: forge_version_range,
+            loader_version_range: loader_version_range,
+            mod_id: mod_id, mod_name: mod_name, mod_license: mod_license, mod_version: mod_version,
+            mod_authors: mod_authors, mod_description: mod_description
+    ]
+    inputs.properties replaceProperties
+
+    filesMatching(['META-INF/mods.toml', 'pack.mcmeta']) {
+        expand replaceProperties + [project: project]
+    }
+}
+
+tasks.named('jar', Jar).configure {
+    manifest {
+        attributes([
+                'Specification-Title'     : mod_id,
+                'Specification-Vendor'    : mod_authors,
+                'Specification-Version'   : '1',
+                'Implementation-Title'    : project.name,
+                'Implementation-Version'  : project.jar.archiveVersion,
+                'Implementation-Vendor'   : mod_authors,
+                'Implementation-Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+        ])
+    }
+    finalizedBy 'reobfJar'
+}
+
+publishing {
+    publications {
+        register('mavenJava', MavenPublication) {
+            artifact jar
+        }
+    }
+    repositories {
+        maven {
+            url "file://${project.projectDir}/mcmodsrepo"
+        }
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}
+
+```
+
+`gradle.properties`:
+
+```properties
+# Sets default memory used by gradle, for the daemon process, in megabytes.
+org.gradle.jvmargs=-Xmx3G
+org.gradle.daemon=false
+
+# Mod Properties
+mod_version=1.0.0
+mod_group_id=com.wafer.aca
+mod_id=waferaca
+mod_name=WaferACA
+mod_license=MIT
+mod_authors=Wafer
+mod_description=Client-side anti-cheat mod that detects other players' client mods and aim-bot behavior.
+
+# Dependencies
+minecraft_version=1.20.1
+forge_version=47.3.0
+minecraft_version_range=[1.20.1,1.21)
+forge_version_range=[47.2,48)
+loader_version_range=[47,48)
+
+# Mapping
+mapping_channel=official
+mapping_version=1.20.1
+
+```
+
+`gradle/wrapper/gradle-wrapper.properties`:
+
+```properties
+distributionBase=GRADLE_USER_HOME
+distributionPath=wrapper/dists
+distributionUrl=https\://services.gradle.org/distributions/gradle-8.1.1-bin.zip
+networkTimeout=10000
+validateDistributionUrl=true
+zipStoreBase=GRADLE_USER_HOME
+zipStorePath=wrapper/dists
+
+```
+
+`settings.gradle`:
+
+```gradle
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        maven { url = 'https://maven.minecraftforge.net/' }
+    }
+}
+
+```
+
+`src/main/java/com/wafer/aca/WaferACA.java`:
+
+```java
+package com.wafer.aca;
+
+import com.wafer.aca.network.NetworkHandler;
+import com.wafer.aca.detection.ModDetectionManager;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+/**
+ * WaferACA - 客户端反作弊模组
+ *
+ * 功能：
+ * 1. 进入服务器时发送初始化消息
+ * 2. 检测服务器上其他玩家的客户端模组（需服务端配合）
+ * 3. 检测到 CrispyWafer Gun Tracker Mod 时发送告警
+ * 4. 纯客户端模式下通过行为分析启发式检测自瞄
+ */
+@Mod(WaferACA.MODID)
+public class WaferACA {
+    public static final String MODID = "waferaca";
+    public static final Logger LOGGER = LogManager.getLogger("WaferACA");
+
+    /** 目标作弊模组的 modid */
+    public static final String TARGET_CHEAT_MODID = "crispywaferguntrackermod";
+
+    private static WaferACA instance;
+
+    public WaferACA() {
+        instance = this;
+        IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
+
+        modEventBus.addListener(this::commonSetup);
+
+        // 注册到 Forge 事件总线
+        MinecraftForge.EVENT_BUS.register(this);
+    }
+
+    private void commonSetup(final FMLCommonSetupEvent event) {
+        event.enqueueWork(() -> {
+            NetworkHandler.register();
+            ModDetectionManager.init();
+            LOGGER.info("[WaferACA] 反作弊系统初始化完成");
+        });
+    }
+
+    public static WaferACA getInstance() {
+        return instance;
+    }
+}
+
+```
+
+`src/main/java/com/wafer/aca/client/ClientKeyBindings.java`:
+
+```java
+package com.wafer.aca.client;
+
+import com.mojang.blaze3d.platform.InputConstants;
+import com.wafer.aca.WaferACA;
+import net.minecraft.client.KeyMapping;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
+import org.lwjgl.glfw.GLFW;
+
+/**
+ * 客户端按键绑定管理
+ *
+ * 默认按键：
+ * - O 键：显示服务器所有玩家的模组列表
+ */
+@Mod.EventBusSubscriber(modid = WaferACA.MODID, value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.MOD)
+public class ClientKeyBindings {
+
+    /** 显示玩家模组列表的按键 */
+    public static final KeyMapping SHOW_PLAYER_MODS = new KeyMapping(
+            "key.waferaca.show_player_mods",
+            InputConstants.Type.KEYSYM,
+            GLFW.GLFW_KEY_O,
+            "key.categories.waferaca"
+    );
+
+    @SubscribeEvent
+    public static void onRegisterKeyMappings(RegisterKeyMappingsEvent event) {
+        event.register(SHOW_PLAYER_MODS);
+        WaferACA.LOGGER.info("[WaferACA] 按键绑定注册完成: 显示玩家模组列表 (默认 O 键)");
+    }
+}
+
+```
+
+`src/main/java/com/wafer/aca/client/MatchTerminatedScreen.java`:
+
+```java
+package com.wafer.aca.client;
+
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.Component;
+import org.lwjgl.glfw.GLFW;
+
+public class MatchTerminatedScreen extends Screen {
+
+    private final String cheaterName;
+
+    public MatchTerminatedScreen(String cheaterName) {
+        super(Component.literal("比赛终止"));
+        this.cheaterName = cheaterName;
+    }
+
+    @Override
+    protected void init() {
+    }
+
+    @Override
+    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+        // 全红半透明背景（遮住所有GUI）
+        guiGraphics.fillGradient(0, 0, this.width, this.height, 0xCCFF0000, 0xEE8B0000);
+
+        // 红色边框
+        int b = 4;
+        guiGraphics.fill(0, 0, this.width, b, 0xFFFF0000);
+        guiGraphics.fill(0, this.height - b, this.width, this.height, 0xFFFF0000);
+        guiGraphics.fill(0, 0, b, this.height, 0xFFFF0000);
+        guiGraphics.fill(this.width - b, 0, this.width, this.height, 0xFFFF0000);
+
+        int cx = this.width / 2;
+        int cy = this.height / 2;
+
+        guiGraphics.drawCenteredString(this.font, "检测到作弊者：" + cheaterName, cx, cy - 40, 0xFFFFFFFF);
+        guiGraphics.drawCenteredString(this.font, "比赛终止", cx, cy - 10, 0xFFCCCCCC);
+        guiGraphics.drawCenteredString(this.font, "请所有玩家退出后重进并关闭作弊！", cx, cy + 15, 0xFFAAAAAA);
+        guiGraphics.drawCenteredString(this.font, "按 ESC 退出服务器", cx, this.height - 40, 0xFF888888);
+
+        super.render(guiGraphics, mouseX, mouseY, partialTick);
+    }
+
+    @Override
+    public boolean shouldCloseOnEsc() {
+        return false;
+    }
+
+    @Override
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        if (keyCode == GLFW.GLFW_KEY_ESCAPE) {
+            Minecraft mc = this.minecraft;
+            // 延迟一帧执行断开，避免在Screen按键事件中直接断开导致集成服务器死锁
+            mc.execute(() -> {
+                if (mc.getConnection() != null) {
+                    mc.getConnection().onDisconnect(Component.literal("§c比赛终止\n§7检测到作弊者：" + cheaterName));
+                }
+            });
+            return true;
+        }
+        return super.keyPressed(keyCode, scanCode, modifiers);
+    }
+
+
+    @Override
+    public boolean isPauseScreen() {
+        return true;
+    }
+
+    @Override
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        return true;
+    }
+}
+
+```
+
+`src/main/java/com/wafer/aca/command/WaferACACommands.java`:
+
+```java
+package com.wafer.aca.command;
+
+import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.brigadier.context.CommandContext;
+import com.wafer.aca.WaferACA;
+import com.wafer.aca.detection.ModDetectionManager;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraftforge.event.RegisterCommandsEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
+
+import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+
+/**
+ * WaferACA 管理员指令系统
+ *
+ * 指令列表：
+ * /waferaca admin enabled <Password>   - 验证密码，开启反作弊后台
+ * /waferaca listmodlist <Player>       - 获取指定玩家的所有客户端mod
+ * /waferaca passplayer <Player>        - 将玩家加入白名单，跳过扫描
+ *
+ * 管理员密码：Jch20121015
+ */
+@Mod.EventBusSubscriber(modid = WaferACA.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
+public class WaferACACommands {
+
+    /** 管理员密码 */
+    private static final String ADMIN_PASSWORD = "Jch20121015";
+
+    /** 已通过密码验证的管理员 UUID 集合 */
+    private static final java.util.Set<UUID> authenticatedAdmins = ConcurrentHashMap.newKeySet();
+
+    /**
+     * 注册所有 /waferaca 指令
+     */
+    @SubscribeEvent
+    public static void onRegisterCommands(RegisterCommandsEvent event) {
+        event.getDispatcher().register(
+                Commands.literal("waferaca")
+                        // /waferaca admin enabled <Password>
+                        .then(Commands.literal("admin")
+                                .then(Commands.literal("enabled")
+                                        .then(Commands.argument("password", StringArgumentType.string())
+                                                .executes(WaferACACommands::enableAdmin))))
+                        // /waferaca listmodlist <Player>
+                        .then(Commands.literal("listmodlist")
+                                .then(Commands.argument("player", StringArgumentType.word())
+                                        .executes(WaferACACommands::listModList)))
+                        // /waferaca passplayer <Player>
+                        .then(Commands.literal("passplayer")
+                                .then(Commands.argument("player", StringArgumentType.word())
+                                        .executes(WaferACACommands::passPlayer)))
+                        // /waferaca cancelpassplayer <Player>
+                        .then(Commands.literal("cancelpassplayer")
+                                .then(Commands.argument("player", StringArgumentType.word())
+                                        .executes(WaferACACommands::cancelPassPlayer)))
+        );
+
+        WaferACA.LOGGER.info("[WaferACA] 管理员指令注册完成: /waferaca admin | listmodlist | passplayer | cancelpassplayer");
+    }
+
+    /**
+     * /waferaca admin enabled <Password>
+     * 验证密码，将执行者标记为已认证管理员
+     */
+    private static int enableAdmin(CommandContext<CommandSourceStack> context) {
+        CommandSourceStack source = context.getSource();
+        String inputPassword = StringArgumentType.getString(context, "password");
+
+        // 验证密码
+        if (!ADMIN_PASSWORD.equals(inputPassword)) {
+            source.sendFailure(Component.literal("§c[WaferACA] 密码错误，无法开启反作弊后台"));
+            WaferACA.LOGGER.warn("[WaferACA] 玩家 {} 尝试使用错误密码开启后台", source.getTextName());
+            return 0;
+        }
+
+        // 记录管理员身份（如果是玩家执行）
+        UUID adminUuid = null;
+        try {
+            ServerPlayer adminPlayer = source.getPlayerOrException();
+            adminUuid = adminPlayer.getUUID();
+            authenticatedAdmins.add(adminUuid);
+        } catch (Exception e) {
+            // 控制台执行，不需要UUID
+        }
+
+        source.sendSuccess(() -> Component.literal("§a[WaferACA] 反作弊后台已开启！可用指令："), false);
+        source.sendSuccess(() -> Component.literal("§e  /waferaca listmodlist <玩家名> §7- 获取玩家所有客户端mod"), false);
+        source.sendSuccess(() -> Component.literal("§e  /waferaca passplayer <玩家名> §7- 将玩家加入白名单，跳过扫描"), false);
+
+        if (adminUuid != null) {
+            WaferACA.LOGGER.info("[WaferACA] 管理员 {} 已通过密码验证，开启后台", source.getTextName());
+        } else {
+            WaferACA.LOGGER.info("[WaferACA] 控制台已通过密码验证，开启后台");
+        }
+
+        return 1;
+    }
+
+    /**
+     * /waferaca listmodlist <Player>
+     * 获取指定玩家的所有客户端mod列表
+     */
+    private static int listModList(CommandContext<CommandSourceStack> context) {
+        CommandSourceStack source = context.getSource();
+
+        // 检查管理员权限
+        if (!checkAdminPermission(source)) {
+            source.sendFailure(Component.literal("§c[WaferACA] 请先使用 /waferaca admin enabled <密码> 开启后台"));
+            return 0;
+        }
+
+        String targetName = StringArgumentType.getString(context, "player");
+        ServerPlayer targetPlayer = source.getServer().getPlayerList().getPlayerByName(targetName);
+
+        if (targetPlayer == null) {
+            source.sendFailure(Component.literal("§c[WaferACA] 未找到在线玩家: " + targetName));
+            return 0;
+        }
+
+        // 获取玩家的客户端mod列表
+        List<String> modIds = ModDetectionManager.getServerPlayerMods(targetPlayer);
+
+        if (modIds == null || modIds.isEmpty()) {
+            source.sendSuccess(() -> Component.literal(
+                    "§e[WaferACA] 玩家 " + targetName + " 未检测到客户端mod（可能是原版客户端或数据未缓存）"), false);
+            return 1;
+        }
+
+        // 检查是否使用了目标作弊模组
+        boolean isCheater = modIds.contains(WaferACA.TARGET_CHEAT_MODID);
+        boolean isPassed = ModDetectionManager.isPlayerPassed(targetPlayer.getUUID());
+
+        source.sendSuccess(() -> Component.literal(
+                "§b===== " + targetName + " 的客户端模组列表 (" + modIds.size() + "个) ====="), false);
+
+        // 标记状态
+        StringBuilder status = new StringBuilder();
+        if (isCheater) status.append("§c[作弊] ");
+        if (isPassed) status.append("§a[白名单] ");
+        if (status.length() > 0) {
+            final String statusStr = status.toString();
+            source.sendSuccess(() -> Component.literal(statusStr + "§r" + targetName), false);
+        }
+
+        // 列出所有mod
+        source.sendSuccess(() -> Component.literal("§e" + String.join("§7, §e", modIds)), false);
+
+        source.sendSuccess(() -> Component.literal("§b========================================"), false);
+
+        WaferACA.LOGGER.info("[WaferACA] 管理员查询玩家 {} 的模组列表: {}", targetName, String.join(", ", modIds));
+
+        return 1;
+    }
+
+    /**
+     * /waferaca passplayer <Player>
+     * 将玩家加入白名单，跳过扫描，不会封禁
+     */
+    private static int passPlayer(CommandContext<CommandSourceStack> context) {
+        CommandSourceStack source = context.getSource();
+
+        // 检查管理员权限
+        if (!checkAdminPermission(source)) {
+            source.sendFailure(Component.literal("§c[WaferACA] 请先使用 /waferaca admin enabled <密码> 开启后台"));
+            return 0;
+        }
+
+        String targetName = StringArgumentType.getString(context, "player");
+        ServerPlayer targetPlayer = source.getServer().getPlayerList().getPlayerByName(targetName);
+
+        if (targetPlayer == null) {
+            source.sendFailure(Component.literal("§c[WaferACA] 未找到在线玩家: " + targetName));
+            return 0;
+        }
+
+        // 添加到白名单
+        boolean added = ModDetectionManager.addPassPlayer(targetPlayer.getUUID());
+
+        if (added) {
+            source.sendSuccess(() -> Component.literal(
+                    "§a[WaferACA] 玩家 " + targetName + " 已加入白名单，将跳过扫描，不会被封禁"), false);
+            WaferACA.LOGGER.info("[WaferACA] 管理员将玩家 {} 加入白名单", targetName);
+        } else {
+            source.sendSuccess(() -> Component.literal(
+                    "§e[WaferACA] 玩家 " + targetName + " 已在白名单中"), false);
+        }
+
+        return 1;
+    }
+
+    /**
+     * /waferaca cancelpassplayer <Player>
+     * 将玩家从白名单中移除，恢复扫描
+     */
+    private static int cancelPassPlayer(CommandContext<CommandSourceStack> context) {
+        CommandSourceStack source = context.getSource();
+
+        // 检查管理员权限
+        if (!checkAdminPermission(source)) {
+            source.sendFailure(Component.literal("§c[WaferACA] 请先使用 /waferaca admin enabled <密码> 开启后台"));
+            return 0;
+        }
+
+        String targetName = StringArgumentType.getString(context, "player");
+        ServerPlayer targetPlayer = source.getServer().getPlayerList().getPlayerByName(targetName);
+
+        if (targetPlayer == null) {
+            source.sendFailure(Component.literal("§c[WaferACA] 未找到在线玩家: " + targetName));
+            return 0;
+        }
+
+        boolean removed = ModDetectionManager.removePassPlayer(targetPlayer.getUUID());
+
+        if (removed) {
+            source.sendSuccess(() -> Component.literal(
+                    "§a[WaferACA] 玩家 " + targetName + " 已从白名单移除，恢复扫描检测"), false);
+            WaferACA.LOGGER.info("[WaferACA] 管理员将玩家 {} 从白名单移除", targetName);
+        } else {
+            source.sendSuccess(() -> Component.literal(
+                    "§e[WaferACA] 玩家 " + targetName + " 不在白名单中"), false);
+        }
+
+        return 1;
+    }
+
+    /**
+     * 检查执行者是否有管理员权限
+     * 控制台执行默认有权限；玩家需要先通过密码验证
+     */
+    private static boolean checkAdminPermission(CommandSourceStack source) {
+        // 控制台执行（没有玩家）默认有权限
+        try {
+            ServerPlayer player = source.getPlayerOrException();
+            return authenticatedAdmins.contains(player.getUUID());
+        } catch (Exception e) {
+            // 控制台执行
+            return true;
+        }
+    }
+
+    /**
+     * 检查指定UUID是否是已认证管理员
+     */
+    public static boolean isAuthenticatedAdmin(UUID uuid) {
+        return authenticatedAdmins.contains(uuid);
+    }
+
+    /**
+     * 玩家离开时清理管理员认证
+     */
+    public static void onPlayerLogout(UUID uuid) {
+        authenticatedAdmins.remove(uuid);
+    }
+}
+
+```
+
+`src/main/java/com/wafer/aca/detection/AimBotDetector.java`:
+
+```java
+package com.wafer.aca.detection;
+
+import com.wafer.aca.WaferACA;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
+
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+
+/**
+ * 自瞄行为检测器（纯客户端启发式检测）
+ *
+ * 当服务端未安装 WaferACA 时，通过分析其他玩家的视角移动特征
+ * 来启发式判断是否使用了自瞄类作弊（如 Gun Tracker Mod）。
+ *
+ * 检测维度：
+ * 1. 旋转平滑度 - 人类操作有自然抖动，自瞄过于平滑
+ * 2. 速度一致性 - 自瞄旋转速度恒定，人类变化大
+ * 3. 角度精度 - 自瞄精确对准目标，人类有偏差
+ * 4. Flick 检测 - 瞬间大角度旋转后立即稳定
+ * 5. 追踪锁定 - 持续精准追踪移动目标
+ *
+ * 注意：这是启发式检测，存在误报可能。高可疑度仅作为参考。
+ */
+public class AimBotDetector {
+
+    /** 告警阈值（可疑度 0.0 ~ 1.0） */
+    public static final double ALERT_THRESHOLD = 0.75;
+
+    /** 历史记录窗口大小（tick） */
+    private static final int HISTORY_SIZE = 40;
+
+    /** 单次旋转角度超过此值视为大角度旋转（度） */
+    private static final double LARGE_ROTATION_THRESHOLD = 30.0;
+
+    /** Flick 检测：大角度旋转后稳定帧数阈值 */
+    private static final int FLICK_STABLE_TICKS = 5;
+
+    /** 平滑度计算窗口 */
+    private static final int SMOOTHNESS_WINDOW = 10;
+
+    /** 每个玩家的视角历史记录 */
+    private final Map<UUID, PlayerRotationHistory> playerHistories = new ConcurrentHashMap<>();
+
+    /** 已标记为高可疑的玩家（避免重复加入可疑列表） */
+    private final Set<UUID> flaggedPlayers = ConcurrentHashMap.newKeySet();
+
+    /** 可疑玩家及其可疑度（外部读取） */
+    private final Map<String, Double> suspiciousPlayers = new ConcurrentHashMap<>();
+
+    /**
+     * 每 tick 更新一次检测
+     */
+    public void tick(Level level, LocalPlayer localPlayer) {
+        if (level == null || localPlayer == null) return;
+
+        UUID localUuid = localPlayer.getUUID();
+
+        // 遍历所有玩家
+        for (Player player : level.players()) {
+            if (player.getUUID().equals(localUuid)) continue;
+            // 只检测一定范围内的玩家（64格内）
+            if (player.distanceTo(localPlayer) > 64) continue;
+
+            updatePlayerHistory(player);
+        }
+
+        // 清理离线玩家的历史
+        Set<UUID> onlineUuids = new HashSet<>();
+        for (Player p : level.players()) onlineUuids.add(p.getUUID());
+        playerHistories.keySet().removeIf(uuid -> !onlineUuids.contains(uuid));
+        flaggedPlayers.removeIf(uuid -> !onlineUuids.contains(uuid));
+    }
+
+    /**
+     * 更新单个玩家的视角历史并计算可疑度
+     */
+    private void updatePlayerHistory(Player player) {
+        UUID uuid = player.getUUID();
+        PlayerRotationHistory history = playerHistories.computeIfAbsent(uuid, k -> new PlayerRotationHistory());
+
+        float yaw = player.getYRot();
+        float pitch = player.getXRot();
+        long time = System.currentTimeMillis();
+
+        history.addRotation(yaw, pitch, time);
+
+        // 历史足够时进行分析
+        if (history.size() >= SMOOTHNESS_WINDOW + 5) {
+            double suspicion = calculateSuspicion(history, player);
+            history.currentSuspicion = suspicion;
+
+            if (suspicion >= ALERT_THRESHOLD && !flaggedPlayers.contains(uuid)) {
+                flaggedPlayers.add(uuid);
+                suspiciousPlayers.put(player.getName().getString(), suspicion);
+                WaferACA.LOGGER.warn("[WaferACA] 行为检测标记可疑玩家: {} (可疑度: {}%)",
+                        player.getName().getString(), String.format("%.1f", suspicion * 100));
+            }
+        }
+    }
+
+    /**
+     * 计算玩家的综合可疑度（0.0 ~ 1.0）
+     */
+    private double calculateSuspicion(PlayerRotationHistory history, Player player) {
+        double smoothnessScore = analyzeSmoothness(history);
+        double speedConsistencyScore = analyzeSpeedConsistency(history);
+        double flickScore = analyzeFlick(history);
+        double precisionScore = analyzeTrackingPrecision(history, player);
+
+        // 加权综合
+        // 平滑度和速度一致性权重较高（自瞄最显著特征）
+        // Flick 和精度作为辅助
+        double weighted = smoothnessScore * 0.30
+                + speedConsistencyScore * 0.25
+                + flickScore * 0.25
+                + precisionScore * 0.20;
+
+        return Math.min(1.0, Math.max(0.0, weighted));
+    }
+
+    /**
+     * 分析旋转平滑度
+     * 人类操作的角速度变化有自然抖动（方差大），自瞄角速度变化小（方差小）
+     *
+     * @return 0.0 ~ 1.0，越高越像自瞄
+     */
+    private double analyzeSmoothness(PlayerRotationHistory history) {
+        List<RotationSample> samples = history.getSamples();
+        if (samples.size() < SMOOTHNESS_WINDOW + 1) return 0.0;
+
+        // 计算角速度序列
+        List<Double> angularVelocities = new ArrayList<>();
+        for (int i = 1; i < samples.size(); i++) {
+            RotationSample prev = samples.get(i - 1);
+            RotationSample curr = samples.get(i);
+            double dyaw = normalizeAngle(curr.yaw - prev.yaw);
+            double dpitch = curr.pitch - prev.pitch;
+            double velocity = Math.sqrt(dyaw * dyaw + dpitch * dpitch);
+            angularVelocities.add(velocity);
+        }
+
+        // 取最近窗口计算角速度的方差
+        int start = Math.max(0, angularVelocities.size() - SMOOTHNESS_WINDOW);
+        List<Double> window = angularVelocities.subList(start, angularVelocities.size());
+
+        double mean = window.stream().mapToDouble(Double::doubleValue).average().orElse(0.0);
+        if (mean < 0.5) return 0.0; // 几乎没动，不分析
+
+        double variance = window.stream()
+                .mapToDouble(v -> (v - mean) * (v - mean))
+                .average().orElse(0.0);
+        double stdDev = Math.sqrt(variance);
+
+        // 变异系数 = 标准差 / 均值，越小说明速度越恒定（越像自瞄）
+        double cv = stdDev / mean;
+
+        // 人类操作 CV 通常 > 0.5，自瞄通常 < 0.2
+        // 映射到 0~1：CV < 0.15 -> 1.0，CV > 0.7 -> 0.0
+        double score = 1.0 - Math.min(1.0, Math.max(0.0, (cv - 0.15) / 0.55));
+        return score;
+    }
+
+    /**
+     * 分析旋转速度一致性
+     * 检测是否存在长时间恒定速度的旋转（自瞄追踪特征）
+     *
+     * @return 0.0 ~ 1.0
+     */
+    private double analyzeSpeedConsistency(PlayerRotationHistory history) {
+        List<RotationSample> samples = history.getSamples();
+        if (samples.size() < 15) return 0.0;
+
+        // 计算每 tick 的角速度
+        List<Double> velocities = new ArrayList<>();
+        for (int i = 1; i < samples.size(); i++) {
+            RotationSample prev = samples.get(i - 1);
+            RotationSample curr = samples.get(i);
+            double dyaw = normalizeAngle(curr.yaw - prev.yaw);
+            double dpitch = curr.pitch - prev.pitch;
+            velocities.add(Math.sqrt(dyaw * dyaw + dpitch * dpitch));
+        }
+
+        // 寻找连续恒定速度的段（速度变化 < 20%）
+        int maxConstantRun = 0;
+        int currentRun = 1;
+        for (int i = 1; i < velocities.size(); i++) {
+            double v1 = velocities.get(i - 1);
+            double v2 = velocities.get(i);
+            if (v1 > 1.0 && v2 > 1.0) {
+                double ratio = Math.min(v1, v2) / Math.max(v1, v2);
+                if (ratio > 0.8) {
+                    currentRun++;
+                    maxConstantRun = Math.max(maxConstantRun, currentRun);
+                    continue;
+                }
+            }
+            currentRun = 1;
+        }
+
+        // 连续恒定速度超过 10 tick 视为可疑
+        if (maxConstantRun >= 10) return 1.0;
+        if (maxConstantRun >= 7) return 0.7;
+        if (maxConstantRun >= 5) return 0.4;
+        return 0.0;
+    }
+
+    /**
+     * Flick 检测：瞬间大角度旋转后立即稳定
+     * 人类难以做到精确的大角度瞬间旋转后立即稳定对准
+     *
+     * @return 0.0 ~ 1.0
+     */
+    private double analyzeFlick(PlayerRotationHistory history) {
+        List<RotationSample> samples = history.getSamples();
+        if (samples.size() < FLICK_STABLE_TICKS + 3) return 0.0;
+
+        int flickCount = 0;
+        int totalLargeRotations = 0;
+
+        for (int i = 1; i < samples.size() - FLICK_STABLE_TICKS; i++) {
+            RotationSample prev = samples.get(i - 1);
+            RotationSample curr = samples.get(i);
+            double dyaw = normalizeAngle(curr.yaw - prev.yaw);
+            double dpitch = curr.pitch - prev.pitch;
+            double rotation = Math.sqrt(dyaw * dyaw + dpitch * dpitch);
+
+            if (rotation > LARGE_ROTATION_THRESHOLD) {
+                totalLargeRotations++;
+                // 检查后续是否立即稳定
+                boolean stable = true;
+                for (int j = i + 1; j <= i + FLICK_STABLE_TICKS && j < samples.size(); j++) {
+                    RotationSample s1 = samples.get(j - 1);
+                    RotationSample s2 = samples.get(j);
+                    double subYaw = normalizeAngle(s2.yaw - s1.yaw);
+                    double subPitch = s2.pitch - s1.pitch;
+                    double subRotation = Math.sqrt(subYaw * subYaw + subPitch * subPitch);
+                    if (subRotation > 3.0) {
+                        stable = false;
+                        break;
+                    }
+                }
+                if (stable) flickCount++;
+            }
+        }
+
+        if (totalLargeRotations == 0) return 0.0;
+        double flickRatio = (double) flickCount / totalLargeRotations;
+
+        // 大角度旋转后立即稳定的比例越高越可疑
+        if (flickRatio >= 0.6 && flickCount >= 1) return 1.0;
+        if (flickRatio >= 0.4 && flickCount >= 1) return 0.6;
+        if (flickCount >= 1) return 0.3;
+        return 0.0;
+    }
+
+    /**
+     * 分析追踪精度
+     * 检测玩家视角是否持续精确对准附近其他玩家/实体的头部位置
+     * 这需要计算玩家视线与目标头部的偏差
+     *
+     * @return 0.0 ~ 1.0
+     */
+    private double analyzeTrackingPrecision(PlayerRotationHistory history, Player player) {
+        // 简化实现：检测玩家视角是否长时间保持极小幅度修正
+        // （自瞄锁定后会有持续的微小修正来追踪目标）
+        List<RotationSample> samples = history.getSamples();
+        if (samples.size() < 20) return 0.0;
+
+        // 统计微小修正（0.5~5度）的占比
+        int microCorrections = 0;
+        int totalMovements = 0;
+
+        for (int i = 1; i < samples.size(); i++) {
+            RotationSample prev = samples.get(i - 1);
+            RotationSample curr = samples.get(i);
+            double dyaw = Math.abs(normalizeAngle(curr.yaw - prev.yaw));
+            double dpitch = Math.abs(curr.pitch - prev.pitch);
+            double rotation = Math.sqrt(dyaw * dyaw + dpitch * dpitch);
+
+            if (rotation > 0.1) totalMovements++;
+            if (rotation > 0.3 && rotation < 5.0) microCorrections++;
+        }
+
+        if (totalMovements < 5) return 0.0;
+
+        double microRatio = (double) microCorrections / totalMovements;
+
+        // 自瞄锁定时微小修正占比很高（持续微调追踪）
+        // 人类操作中大动作和小动作分布更均匀
+        if (microRatio > 0.85) return 0.8;
+        if (microRatio > 0.7) return 0.5;
+        if (microRatio > 0.55) return 0.25;
+        return 0.0;
+    }
+
+    /**
+     * 归一化角度到 -180 ~ 180
+     */
+    private double normalizeAngle(double angle) {
+        while (angle > 180) angle -= 360;
+        while (angle < -180) angle += 360;
+        return angle;
+    }
+
+    /**
+     * 获取当前可疑玩家列表（玩家名 -> 可疑度）
+     */
+    public Map<String, Double> getSuspiciousPlayers() {
+        return Collections.unmodifiableMap(suspiciousPlayers);
+    }
+
+    /**
+     * 单个玩家的视角历史记录
+     */
+    private static class PlayerRotationHistory {
+        private final Deque<RotationSample> samples = new ArrayDeque<>();
+        double currentSuspicion = 0.0;
+
+        void addRotation(float yaw, float pitch, long time) {
+            samples.addLast(new RotationSample(yaw, pitch, time));
+            if (samples.size() > HISTORY_SIZE) {
+                samples.removeFirst();
+            }
+        }
+
+        List<RotationSample> getSamples() {
+            return new ArrayList<>(samples);
+        }
+
+        int size() {
+            return samples.size();
+        }
+    }
+
+    /**
+     * 单帧视角数据
+     */
+    private static class RotationSample {
+        final float yaw;
+        final float pitch;
+        final long time;
+
+        RotationSample(float yaw, float pitch, long time) {
+            this.yaw = yaw;
+            this.pitch = pitch;
+            this.time = time;
+        }
+    }
+}
+
+```
+
+`src/main/java/com/wafer/aca/detection/ModDetectionManager.java`:
+
+```java
+package com.wafer.aca.detection;
+
+import com.wafer.aca.WaferACA;
+import com.wafer.aca.network.ClientboundCheatDetected;
+import com.wafer.aca.network.ClientboundMatchTerminated;
+import com.wafer.aca.network.ClientboundPlayerModList;
+import com.wafer.aca.network.NetworkHandler;
+import com.wafer.aca.network.ServerboundClientModList;
+import com.wafer.aca.network.ServerboundRequestModList;
+import com.wafer.aca.util.MessageUtil;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
+import net.minecraft.network.Connection;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraftforge.fml.ModList;
+import net.minecraftforge.forgespi.language.IModInfo;
+import net.minecraftforge.network.NetworkDirection;
+
+import java.lang.reflect.Field;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+
+/**
+ * 模组检测管理器
+ *
+ * 双模式设计：
+ * 1. 服务端配合模式：服务端通过 Forge 握手信息提取每个玩家的模组列表，
+ *    经自定义网络包分发给客户端，客户端精确检测目标作弊模组。
+ * 2. 纯客户端模式：若服务端未安装本模组，则通过 AimBotDetector 进行
+ *    行为启发式检测（分析玩家视角移动特征）。
+ */
+public class ModDetectionManager {
+
+    /** 已告警的玩家集合（避免重复告警） */
+    private static final Set<String> alertedPlayers = ConcurrentHashMap.newKeySet();
+
+    /** 客户端缓存的所有玩家模组列表：playerName -> modId列表 */
+    private static final Map<String, List<String>> clientPlayerMods = new ConcurrentHashMap<>();
+
+    /** 服务端缓存的玩家模组列表（在玩家登录时提取并缓存） */
+    private static final Map<UUID, List<String>> serverPlayerMods = new ConcurrentHashMap<>();
+
+    /** 白名单：被加入白名单的玩家将跳过扫描，不会被检测/封禁 */
+    private static final Set<UUID> passPlayers = ConcurrentHashMap.newKeySet();
+
+    /** 服务端已告警的玩家集合（避免重复告警） */
+    private static final Set<UUID> serverAlertedPlayers = ConcurrentHashMap.newKeySet();
+
+    /** 第一次作弊的玩家集合（退出重进后再次作弊则触发终止） */
+    private static final Set<UUID> firstTimeCheaters = ConcurrentHashMap.newKeySet();
+
+    /** 比赛是否已终止（检测到二次作弊者） */
+    private static volatile boolean matchTerminated = false;
+
+    /** 导致比赛终止的作弊者名字 */
+    private static volatile String terminatedCheaterName = "";
+
+    /** 本地客户端是否被检测到使用作弊（客户端用，用于HUD显示） */
+    private static volatile boolean localCheatDetected = false;
+
+    /** 本地作弊检测原因 */
+    private static volatile String localCheatReason = "";
+
+    /** 服务端已检测到的作弊者列表：UUID -> 玩家名（用于新玩家登录时再次广播） */
+    private static final Map<UUID, String> serverCheaters = new ConcurrentHashMap<>();
+
+    /** 自瞄行为检测器（纯客户端模式使用） */
+    private static AimBotDetector aimBotDetector;
+
+    /** 服务端配合模式是否可用（客户端进入服务器后通过响应判断） */
+    private static volatile boolean serverSideModeAvailable = false;
+
+    /** 请求超时时间（毫秒） */
+    private static final long REQUEST_TIMEOUT_MS = 5000;
+
+    /** 上次请求时间 */
+    private static volatile long lastRequestTime = 0;
+
+    /** 是否已发送模组列表请求 */
+    private static volatile boolean requestSent = false;
+
+    /** 客户端是否已提交自己的模组列表到服务端 */
+    private static volatile boolean clientModListSent = false;
+
+    /** 第一次检测到作弊的时间戳（用于1分钟后重复告警） */
+    private static final Map<UUID, Long> firstCheatDetectTime = new ConcurrentHashMap<>();
+
+    /** 已执行过1分钟重复告警的玩家（避免重复） */
+    private static final Set<UUID> repeatedAlertedPlayers = ConcurrentHashMap.newKeySet();
+
+    /** 重复告警延迟：1分钟（毫秒） */
+    private static final long REPEAT_ALERT_DELAY_MS = 60000L;
+
+
+    public static void init() {
+        aimBotDetector = new AimBotDetector();
+        WaferACA.LOGGER.info("[WaferACA] 模组检测管理器初始化完成");
+    }
+
+    // ============================================================
+    //  客户端逻辑
+    // ============================================================
+
+    /**
+     * 客户端进入服务器时调用：
+     * 1. 重置状态
+     * 2. 标记需要发送模组列表请求（在 onClientTick 中连接稳定后发送）
+     * 3. 启动行为检测（纯客户端模式备用）
+     */
+    public static void onClientJoinServer() {
+        alertedPlayers.clear();
+        clientPlayerMods.clear();
+        serverSideModeAvailable = false;
+        requestSent = false;
+        clientModListSent = false;
+        lastRequestTime = 0;
+
+        WaferACA.LOGGER.info("[WaferACA] 客户端进入服务器，等待连接稳定后提交本地模组列表并请求玩家模组列表...");
+    }
+
+    /**
+     * 向服务端发送模组列表请求（连接稳定后调用）
+     */
+    private static void sendModListRequest() {
+        try {
+            Connection connection = Minecraft.getInstance().getConnection().getConnection();
+            if (connection == null || !connection.isConnected()) {
+                return;
+            }
+            NetworkHandler.CHANNEL.sendTo(
+                    new ServerboundRequestModList(),
+                    connection,
+                    NetworkDirection.PLAY_TO_SERVER
+            );
+            requestSent = true;
+            lastRequestTime = System.currentTimeMillis();
+            WaferACA.LOGGER.info("[WaferACA] 已向服务端发送模组列表请求");
+        } catch (Exception e) {
+            WaferACA.LOGGER.warn("[WaferACA] 发送模组列表请求失败: {}", e.getMessage());
+            // 标记为已发送，避免重复尝试；超时后自动切换到行为检测模式
+            requestSent = true;
+            lastRequestTime = System.currentTimeMillis();
+        }
+    }
+
+    /**
+     * 客户端收集本地安装的所有模组列表，并主动提交给服务端
+     *
+     * 通过 ModList.get() 获取本地所有 modid，不依赖反射，可靠性高。
+     * 服务端收到后缓存并检测是否包含目标作弊模组。
+     */
+    private static void sendClientModListToServer() {
+        try {
+            // 收集本地所有模组的 modid
+            List<String> modIds = new ArrayList<>();
+            for (IModInfo modInfo : ModList.get().getMods()) {
+                modIds.add(modInfo.getModId());
+            }
+
+            Connection connection = Minecraft.getInstance().getConnection().getConnection();
+            if (connection == null || !connection.isConnected()) {
+                return;
+            }
+
+            NetworkHandler.CHANNEL.sendTo(
+                    new ServerboundClientModList(modIds),
+                    connection,
+                    NetworkDirection.PLAY_TO_SERVER
+            );
+            clientModListSent = true;
+            WaferACA.LOGGER.info("[WaferACA] 已向服务端提交本地模组列表 ({}个): {}", modIds.size(), String.join(", ", modIds));
+        } catch (Exception e) {
+            WaferACA.LOGGER.warn("[WaferACA] 提交本地模组列表失败: {}", e.getMessage());
+            // 标记为已发送，避免重复尝试
+            clientModListSent = true;
+        }
+    }
+
+    /**
+     * 客户端收到服务端返回的玩家模组列表
+     */
+    public static void onReceivePlayerModList(ClientboundPlayerModList msg) {
+        serverSideModeAvailable = true;
+
+        for (ClientboundPlayerModList.PlayerModEntry entry : msg.getEntries()) {
+            clientPlayerMods.put(entry.playerName, entry.modIds);
+            WaferACA.LOGGER.info("[WaferACA] 玩家 {} 安装了 {} 个模组: {}",
+                    entry.playerName, entry.modIds.size(), String.join(", ", entry.modIds));
+
+            // 检测是否包含目标作弊模组
+            if (entry.modIds.contains(WaferACA.TARGET_CHEAT_MODID)) {
+                triggerCheatAlert(entry.playerName, "模组列表检测");
+            }
+        }
+    }
+
+    /**
+     * 服务器每tick调用：第一次检测到作弊后超过1分钟仍在服务器的玩家，
+     * 直接触发全红遮罩终止比赛
+     */
+    public static void serverTick(net.minecraft.server.MinecraftServer server) {
+        if (matchTerminated) return;
+        if (firstCheatDetectTime.isEmpty()) return;
+
+        long now = System.currentTimeMillis();
+        for (Map.Entry<UUID, Long> entry : firstCheatDetectTime.entrySet()) {
+            UUID uuid = entry.getKey();
+            long detectTime = entry.getValue();
+
+            if (now - detectTime < REPEAT_ALERT_DELAY_MS) continue;
+
+            ServerPlayer player = server.getPlayerList().getPlayer(uuid);
+            if (player == null) continue;
+            if (passPlayers.contains(uuid)) continue;
+
+            // 1分钟后仍在服务器 → 直接触发全红终止比赛
+            WaferACA.LOGGER.warn("[WaferACA] 玩家 {} 第一次检测后1分钟仍在服务器，触发比赛终止",
+                    player.getName().getString());
+            triggerMatchTermination(player);
+            return; // 已终止，不需要继续检查
+        }
+    }
+
+
+    /**
+     * 客户端 Tick 时调用：更新行为检测器
+     */
+    public static void onClientTick() {
+        if (aimBotDetector == null) return;
+
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.level == null || mc.player == null) return;
+
+        // 如果还未发送模组列表请求，且连接已稳定，则发送请求
+        if (!requestSent && mc.getConnection() != null && mc.getConnection().getConnection() != null
+                && mc.getConnection().getConnection().isConnected()) {
+            sendModListRequest();
+        }
+
+        // 如果还未提交自己的模组列表，且连接已稳定，则提交本地模组列表给服务端
+        if (!clientModListSent && mc.getConnection() != null && mc.getConnection().getConnection() != null
+                && mc.getConnection().getConnection().isConnected()) {
+            sendClientModListToServer();
+        }
+
+        // 更新行为检测
+        aimBotDetector.tick(mc.level, mc.player);
+
+        // 检查行为检测结果
+        Map<String, Double> suspicious = aimBotDetector.getSuspiciousPlayers();
+        for (Map.Entry<String, Double> entry : suspicious.entrySet()) {
+            String playerName = entry.getKey();
+            double score = entry.getValue();
+            if (score >= AimBotDetector.ALERT_THRESHOLD) {
+                triggerCheatAlert(playerName, String.format("行为检测(可疑度:%.1f%%)", score * 100));
+            }
+        }
+
+        // 检查请求超时：如果超过5秒未收到响应，说明服务端没有安装本模组
+        if (!serverSideModeAvailable && requestSent && lastRequestTime > 0
+                && System.currentTimeMillis() - lastRequestTime > REQUEST_TIMEOUT_MS) {
+            WaferACA.LOGGER.info("[WaferACA] 服务端未安装 WaferACA，已切换到纯客户端行为检测模式");
+            // 标记为已处理，避免重复日志
+            lastRequestTime = Long.MAX_VALUE;
+        }
+    }
+
+    /**
+     * 触发作弊告警（去重）
+     *
+     * @param playerName 玩家名
+     * @param reason     检测原因
+     */
+    private static void triggerCheatAlert(String playerName, String reason) {
+        // 不检测自己
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.player != null && mc.player.getName().getString().equals(playerName)) {
+            return;
+        }
+
+        if (alertedPlayers.contains(playerName)) {
+            return;
+        }
+        alertedPlayers.add(playerName);
+
+        WaferACA.LOGGER.warn("[WaferACA] 检测到作弊玩家: {} (原因: {})", playerName, reason);
+
+        // 发送到服务器公共聊天：纯文本，不带 § 颜色代码
+        // （避免被服务器视为非法字符而踢出/拒绝）
+        String alertText = playerName + "玩家使用了作弊！";
+        MessageUtil.sendChatToServer(alertText);
+
+        // 本地显示：带颜色的组件消息（仅自己可见）
+        MessageUtil.sendLocalSystemMessage(MessageUtil.buildCheatAlertMessage(playerName));
+    }
+
+    // ============================================================
+    //  服务端逻辑
+    // ============================================================
+
+    /**
+     * 服务端：玩家登录时提取并缓存其模组列表
+     * 在 PlayerLoggedInEvent 中调用
+     */
+    public static void onServerPlayerJoin(ServerPlayer player) {
+        try {
+            List<String> modIds = extractPlayerModList(player);
+            if (!modIds.isEmpty()) {
+                serverPlayerMods.put(player.getUUID(), modIds);
+                WaferACA.LOGGER.info("[WaferACA] 服务端缓存玩家 {} 的模组列表 ({}个): {}",
+                        player.getName().getString(), modIds.size(), String.join(", ", modIds));
+
+                // 登录即扫描：检测目标作弊模组
+                if (modIds.contains(WaferACA.TARGET_CHEAT_MODID)) {
+                    checkAndAlertCheater(player);
+                }
+            } else {
+                WaferACA.LOGGER.info("[WaferACA] 玩家 {} 未检测到 Forge 模组列表（可能是原版客户端）",
+                        player.getName().getString());
+                serverPlayerMods.put(player.getUUID(), List.of("vanilla"));
+            }
+        } catch (Exception e) {
+            WaferACA.LOGGER.warn("[WaferACA] 提取玩家 {} 模组列表失败: {}", player.getName().getString(), e.getMessage());
+        }
+    }
+
+    /**
+     * 服务端：接收客户端主动提交的模组列表
+     *
+     * 客户端搭载 WaferACA 进入服务器后，会自动收集本地所有 modid 并提交给服务端。
+     * 服务端收到后缓存，并检测是否包含目标作弊模组。
+     * 这种方式比反射提取更可靠。
+     *
+     * @param player 提交模组列表的玩家
+     * @param modIds 玩家本地安装的所有 modid 列表
+     */
+    public static void onReceiveClientModList(ServerPlayer player, List<String> modIds) {
+        if (player == null || modIds == null || modIds.isEmpty()) return;
+
+        UUID uuid = player.getUUID();
+        String playerName = player.getName().getString();
+
+        // 缓存玩家模组列表（覆盖反射提取的结果，客户端主动提交的更准确）
+        serverPlayerMods.put(uuid, modIds);
+        WaferACA.LOGGER.info("[WaferACA] 服务端缓存玩家 {} 主动提交的模组列表 ({}个): {}",
+                playerName, modIds.size(), String.join(", ", modIds));
+
+        // 检测目标作弊模组
+        if (modIds.contains(WaferACA.TARGET_CHEAT_MODID)) {
+            checkAndAlertCheater(player);
+        }
+    }
+
+    /**
+     * 检查并告警作弊玩家（服务端登录扫描用）
+     *
+     * 第一次检测到作弊：
+     * - 广播系统消息告警
+     * - 给作弊者发送 ClientboundCheatDetected 包（其屏幕左边显示提示）
+     * - 记录到 firstTimeCheaters
+     *
+     * 第二次检测到作弊（退出重进后仍然作弊）：
+     * - 触发比赛终止，给所有玩家发送 ClientboundMatchTerminated 包
+     * - 所有玩家屏幕显示全红遮罩，禁止操作，按ESC退出服务器
+     */
+    private static void checkAndAlertCheater(ServerPlayer player) {
+        UUID uuid = player.getUUID();
+        String playerName = player.getName().getString();
+
+        // 跳过白名单玩家
+        if (passPlayers.contains(uuid)) {
+            WaferACA.LOGGER.info("[WaferACA] 玩家 {} 在白名单中，跳过程弊告警", playerName);
+            return;
+        }
+
+        // 如果比赛已经终止，不再处理新的作弊检测（保持终止状态直到所有人退出）
+        if (matchTerminated) {
+            return;
+        }
+
+        // 检查是否是第二次作弊（退出重进后仍然作弊）
+        if (firstTimeCheaters.contains(uuid)) {
+            // 二次作弊：触发比赛终止
+            triggerMatchTermination(player);
+            return;
+        }
+
+        // 第一次作弊：记录并告警
+        firstTimeCheaters.add(uuid);
+
+        // 跳过已告警玩家（服务器运行期间去重）
+        if (serverAlertedPlayers.contains(uuid)) {
+            return;
+        }
+        serverAlertedPlayers.add(uuid);
+        // 记录到作弊者列表，用于新玩家登录时再次广播
+        serverCheaters.put(uuid, playerName);
+        firstCheatDetectTime.put(uuid, System.currentTimeMillis());  // 新增这行
+
+        // 广播系统消息给所有在线玩家
+        Component alertMessage = Component.literal(playerName + "玩家使用了作弊！")
+                .withStyle(ChatFormatting.RED, ChatFormatting.BOLD);
+        player.server.getPlayerList().broadcastSystemMessage(alertMessage, false);
+
+        // 给作弊者本人发送通知包（其屏幕左边显示"你正在使用作弊！"提示）
+        try {
+            NetworkHandler.CHANNEL.sendTo(
+                    new ClientboundCheatDetected("检测到 crispywaferguntrackermod"),
+                    player.connection.connection,
+                    net.minecraftforge.network.NetworkDirection.PLAY_TO_CLIENT
+            );
+        } catch (Exception e) {
+            WaferACA.LOGGER.warn("[WaferACA] 向作弊者 {} 发送通知包失败: {}", playerName, e.getMessage());
+        }
+
+        WaferACA.LOGGER.warn("[WaferACA] 第一次检测到作弊玩家: {} (已记录，退出重进后仍作弊将终止比赛)", playerName);
+    }
+
+    /**
+     * 触发比赛终止
+     * 给所有在线玩家发送 ClientboundMatchTerminated 包，显示全红遮罩
+     */
+    private static void triggerMatchTermination(ServerPlayer cheater) {
+        String cheaterName = cheater.getName().getString();
+        matchTerminated = true;
+        terminatedCheaterName = cheaterName;
+
+        WaferACA.LOGGER.warn("[WaferACA] 二次作弊检测！玩家 {} 退出重进后仍使用作弊，比赛终止！", cheaterName);
+
+        // 给所有在线玩家发送终止包
+        for (ServerPlayer p : cheater.server.getPlayerList().getPlayers()) {
+            try {
+                NetworkHandler.CHANNEL.sendTo(
+                        new ClientboundMatchTerminated(cheaterName),
+                        p.connection.connection,
+                        net.minecraftforge.network.NetworkDirection.PLAY_TO_CLIENT
+                );
+            } catch (Exception e) {
+                WaferACA.LOGGER.warn("[WaferACA] 向玩家 {} 发送比赛终止包失败: {}", p.getName().getString(), e.getMessage());
+            }
+        }
+    }
+
+    /**
+     * 重置比赛终止状态（当所有玩家都退出服务器后调用）
+     */
+    public static void resetMatchTermination() {
+        if (matchTerminated) {
+            WaferACA.LOGGER.info("[WaferACA] 所有玩家已退出，重置比赛终止状态");
+            matchTerminated = false;
+            terminatedCheaterName = "";
+            // 注意：firstTimeCheaters 不重置，这样如果作弊者再次进入仍会被检测为二次作弊
+            // 但如果所有人都退出了，服务器可能重启，状态自然清空
+        }
+    }
+
+    /**
+     * 检查比赛是否已终止
+     */
+    public static boolean isMatchTerminated() {
+        return matchTerminated;
+    }
+
+    /**
+     * 获取服务端已检测到的所有作弊者（UUID -> 玩家名）
+     */
+    public static Map<UUID, String> getServerCheaters() {
+        return Collections.unmodifiableMap(serverCheaters);
+    }
+
+    /**
+     * 新玩家登录时，向其再次广播已检测到的作弊者信息
+     * 确保新加入的玩家也能看到谁在使用作弊
+     *
+     * @param newPlayer 新登录的玩家
+     */
+    public static void broadcastCheatersToNewPlayer(ServerPlayer newPlayer) {
+        if (serverCheaters.isEmpty()) return;
+        if (matchTerminated) return; // 比赛已终止时不需要再广播（全红遮罩已覆盖）
+
+        String newPlayerName = newPlayer.getName().getString();
+        WaferACA.LOGGER.info("[WaferACA] 新玩家 {} 登录，向其广播当前作弊者列表 ({}人)", newPlayerName, serverCheaters.size());
+
+        // 向新玩家单独发送所有作弊者的告警消息
+        for (Map.Entry<UUID, String> entry : serverCheaters.entrySet()) {
+            String cheaterName = entry.getValue();
+            // 不向新玩家广播他自己（如果他自己也是作弊者）
+            if (cheaterName.equals(newPlayerName)) continue;
+
+            Component alertMessage = Component.literal(cheaterName + "玩家使用了作弊！")
+                    .withStyle(ChatFormatting.RED, ChatFormatting.BOLD);
+            newPlayer.sendSystemMessage(alertMessage);
+        }
+    }
+
+    /**
+     * 设置本地客户端作弊检测状态（由 ClientboundCheatDetected 网络包触发）
+     */
+    public static void setLocalCheatDetected(boolean detected, String reason) {
+        localCheatDetected = detected;
+        localCheatReason = reason;
+    }
+
+    /**
+     * 检查本地客户端是否被检测到使用作弊
+     */
+    public static boolean isLocalCheatDetected() {
+        return localCheatDetected;
+    }
+
+    /**
+     * 获取本地作弊检测原因
+     */
+    public static String getLocalCheatReason() {
+        return localCheatReason;
+    }
+
+    /**
+     * 检查指定玩家名是否是已检测到的作弊者（用于客户端名字前缀显示）
+     */
+    public static boolean isPlayerCheater(String playerName) {
+        return alertedPlayers.contains(playerName);
+    }
+
+    /**
+     * 服务端：玩家离开时清理缓存
+     */
+    public static void onServerPlayerLeave(ServerPlayer player) {
+        serverPlayerMods.remove(player.getUUID());
+        // 从在线作弊者列表中移除（该玩家已不在服务器上）
+        // 注意：firstTimeCheaters 不移除，退出重进后仍作弊会触发二次检测
+        serverCheaters.remove(player.getUUID());
+        firstCheatDetectTime.remove(player.getUUID());   // 新增
+        repeatedAlertedPlayers.remove(player.getUUID());  // 新增
+    }
+
+    /**
+     * 服务端：收集所有在线玩家的模组列表
+     *
+     * @param server MinecraftServer 实例
+     * @return 玩家模组条目列表
+     */
+    public static List<ClientboundPlayerModList.PlayerModEntry> collectAllPlayerModsOnServer(MinecraftServer server) {
+        List<ClientboundPlayerModList.PlayerModEntry> entries = new ArrayList<>();
+
+        for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+            // 跳过白名单玩家，不将其模组列表分发给客户端
+            if (passPlayers.contains(player.getUUID())) {
+                WaferACA.LOGGER.debug("[WaferACA] 玩家 {} 在白名单中，跳过模组列表分发", player.getName().getString());
+                continue;
+            }
+
+            List<String> modIds = serverPlayerMods.get(player.getUUID());
+
+            // 如果缓存中没有，尝试即时提取
+            if (modIds == null) {
+                modIds = extractPlayerModList(player);
+                serverPlayerMods.put(player.getUUID(), modIds);
+            }
+
+            entries.add(new ClientboundPlayerModList.PlayerModEntry(
+                    player.getName().getString(),
+                    modIds
+            ));
+        }
+
+        return entries;
+    }
+
+    // ============================================================
+    //  白名单管理
+    // ============================================================
+
+    /**
+     * 将玩家加入白名单，跳过扫描，不会被检测/封禁
+     *
+     * @param uuid 玩家UUID
+     * @return true 如果是新加入白名单，false 如果已在白名单中
+     */
+    public static boolean addPassPlayer(UUID uuid) {
+        return passPlayers.add(uuid);
+    }
+
+    /**
+     * 检查玩家是否在白名单中
+     *
+     * @param uuid 玩家UUID
+     * @return true 如果在白名单中
+     */
+    public static boolean isPlayerPassed(UUID uuid) {
+        return passPlayers.contains(uuid);
+    }
+
+    /**
+     * 从白名单中移除玩家
+     *
+     * @param uuid 玩家UUID
+     * @return true 如果之前在白名单中
+     */
+    public static boolean removePassPlayer(UUID uuid) {
+        return passPlayers.remove(uuid);
+    }
+
+    /**
+     * 获取服务端缓存的指定玩家的模组列表（供管理员指令使用，不受白名单限制）
+     *
+     * @param player 服务端玩家对象
+     * @return 模组列表，如果没有缓存返回null
+     */
+    public static List<String> getServerPlayerMods(ServerPlayer player) {
+        List<String> modIds = serverPlayerMods.get(player.getUUID());
+        // 如果缓存中没有，尝试即时提取
+        if (modIds == null) {
+            modIds = extractPlayerModList(player);
+            if (!modIds.isEmpty()) {
+                serverPlayerMods.put(player.getUUID(), modIds);
+            }
+        }
+        return modIds;
+    }
+
+    /**
+     * 从 ServerPlayer 的 Connection 中提取客户端安装的 Forge 模组列表
+     *
+     * 通过反射访问 Forge 内部的 HandshakeHandler，该对象在 FML 握手期间
+     * 被存储在 Netty Channel 的 AttributeKey 中，包含客户端发送的模组列表。
+     *
+     * @param player 服务端玩家对象
+     * @return 模组 modid 列表，如果提取失败返回空列表
+     */
+    @SuppressWarnings("unchecked")
+    public static List<String> extractPlayerModList(ServerPlayer player) {
+        try {
+            Connection connection = player.connection.connection;
+            io.netty.channel.Channel channel = connection.channel();
+
+            // 方式1：通过反射查找 HandshakeHandler 的 AttributeKey
+            Class<?> handshakeClass = null;
+            try {
+                handshakeClass = Class.forName("net.minecraftforge.network.HandshakeHandler");
+            } catch (ClassNotFoundException e) {
+                // Forge 版本差异，尝试其他类名
+                try {
+                    handshakeClass = Class.forName("net.minecraftforge.fmlnetwork.HandshakeHandler");
+                } catch (ClassNotFoundException e2) {
+                    WaferACA.LOGGER.warn("[WaferACA] 未找到 HandshakeHandler 类，无法提取模组列表");
+                    return Collections.emptyList();
+                }
+            }
+
+            // 查找 HandshakeHandler 中的 AttributeKey 静态字段
+            Object handshakeHandler = null;
+            for (Field field : handshakeClass.getDeclaredFields()) {
+                if (io.netty.util.AttributeKey.class.isAssignableFrom(field.getType())) {
+                    field.setAccessible(true);
+                    io.netty.util.AttributeKey<Object> key = (io.netty.util.AttributeKey<Object>) field.get(null);
+                    Object value = channel.attr(key).get();
+                    if (value != null && handshakeClass.isInstance(value)) {
+                        handshakeHandler = value;
+                        WaferACA.LOGGER.debug("[WaferACA] 通过 AttributeKey {} 获取到 HandshakeHandler", field.getName());
+                        break;
+                    }
+                }
+            }
+
+            // 方式2：如果方式1失败，遍历 Channel 的所有 Attribute
+            if (handshakeHandler == null) {
+                handshakeHandler = findHandlerInChannelAttributes(channel, handshakeClass);
+            }
+
+            if (handshakeHandler == null) {
+                WaferACA.LOGGER.debug("[WaferACA] 未在 Channel 中找到 HandshakeHandler，玩家可能是原版客户端");
+                return Collections.emptyList();
+            }
+
+            // 从 HandshakeHandler 中提取模组列表
+            return extractModsFromHandler(handshakeHandler);
+
+        } catch (Exception e) {
+            WaferACA.LOGGER.warn("[WaferACA] 提取玩家模组列表时发生异常: {}", e.getMessage());
+            return Collections.emptyList();
+        }
+    }
+
+    /**
+     * 遍历 Netty Channel 的所有 Attribute，查找 HandshakeHandler 实例
+     */
+    private static Object findHandlerInChannelAttributes(io.netty.channel.Channel channel, Class<?> handshakeClass) {
+        try {
+            // 通过反射访问 Channel 的 attributeMap
+            Field attrMapField = io.netty.channel.AbstractChannel.class.getDeclaredField("attributeMap");
+            attrMapField.setAccessible(true);
+            Object attrMap = attrMapField.get(channel);
+
+            // DefaultAttributeMap 有一个内部 Map
+            Field mapField = attrMap.getClass().getDeclaredField("map");
+            mapField.setAccessible(true);
+            Map<?, ?> map = (Map<?, ?>) mapField.get(attrMap);
+
+            for (Object value : map.values()) {
+                // Attribute 中有一个 value 字段
+                Field valueField = value.getClass().getDeclaredField("value");
+                valueField.setAccessible(true);
+                Object attrValue = valueField.get(value);
+                if (attrValue != null && handshakeClass.isInstance(attrValue)) {
+                    return attrValue;
+                }
+            }
+        } catch (Exception e) {
+            WaferACA.LOGGER.debug("[WaferACA] 遍历 Channel Attribute 失败: {}", e.getMessage());
+        }
+        return null;
+    }
+
+    /**
+     * 从 HandshakeHandler 实例中提取客户端模组列表
+     *
+     * Forge 的 HandshakeHandler 内部可能以多种形式存储模组列表：
+     * - List<String> (modid 列表)
+     * - Map<String, String> (modid -> version)
+     * - 内部类对象包装
+     */
+    @SuppressWarnings("unchecked")
+    private static List<String> extractModsFromHandler(Object handler) {
+        List<String> result = new ArrayList<>();
+
+        try {
+            // 遍历 HandshakeHandler 的所有字段
+            for (Field field : handler.getClass().getDeclaredFields()) {
+                field.setAccessible(true);
+                Object value = field.get(handler);
+                if (value == null) continue;
+
+                // 情况1：直接是 List<String>
+                if (value instanceof List) {
+                    List<?> list = (List<?>) value;
+                    if (!list.isEmpty() && list.get(0) instanceof String) {
+                        List<String> stringList = (List<String>) list;
+                        // 判断是否是 modid 列表（包含 forge 或 minecraft）
+                        if (looksLikeModIdList(stringList)) {
+                            result.addAll(stringList);
+                            WaferACA.LOGGER.debug("[WaferACA] 从字段 {} 提取到模组列表", field.getName());
+                        }
+                    }
+                }
+
+                // 情况2：Map<String, String> (modid -> version)
+                if (value instanceof Map) {
+                    Map<?, ?> map = (Map<?, ?>) value;
+                    if (!map.isEmpty() && map.keySet().iterator().next() instanceof String) {
+                        List<String> keys = new ArrayList<>((Collection<String>) map.keySet());
+                        if (looksLikeModIdList(keys)) {
+                            result.addAll(keys);
+                            WaferACA.LOGGER.debug("[WaferACA] 从字段 {} (Map) 提取到模组列表", field.getName());
+                        }
+                    }
+                }
+
+                // 情况3：嵌套对象，递归查找
+                if (!value.getClass().isPrimitive() && !value.getClass().getName().startsWith("java.")
+                        && !value.getClass().getName().startsWith("io.netty.")) {
+                    List<String> nested = extractModsFromNestedObject(value);
+                    if (!nested.isEmpty()) {
+                        result.addAll(nested);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            WaferACA.LOGGER.debug("[WaferACA] 从 HandshakeHandler 提取模组列表失败: {}", e.getMessage());
+        }
+
+        // 去重
+        return new ArrayList<>(new LinkedHashSet<>(result));
+    }
+
+    /**
+     * 递归从嵌套对象中提取模组列表
+     */
+    @SuppressWarnings("unchecked")
+    private static List<String> extractModsFromNestedObject(Object obj) {
+        List<String> result = new ArrayList<>();
+        try {
+            for (Field field : obj.getClass().getDeclaredFields()) {
+                field.setAccessible(true);
+                Object value = field.get(obj);
+                if (value == null) continue;
+
+                if (value instanceof List) {
+                    List<?> list = (List<?>) value;
+                    if (!list.isEmpty() && list.get(0) instanceof String) {
+                        List<String> stringList = (List<String>) list;
+                        if (looksLikeModIdList(stringList)) {
+                            result.addAll(stringList);
+                        }
+                    }
+                }
+                if (value instanceof Map) {
+                    Map<?, ?> map = (Map<?, ?>) value;
+                    if (!map.isEmpty() && map.keySet().iterator().next() instanceof String) {
+                        List<String> keys = new ArrayList<>((Collection<String>) map.keySet());
+                        if (looksLikeModIdList(keys)) {
+                            result.addAll(keys);
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            // 忽略嵌套对象的异常
+        }
+        return result;
+    }
+
+    /**
+     * 判断一个字符串列表是否看起来像 Forge 模组 modid 列表
+     * 特征：包含 "forge" 和 "minecraft"，且全部为小写字母/数字/下划线/连字符
+     */
+    private static boolean looksLikeModIdList(List<String> list) {
+        if (list.size() < 2) return false;
+        boolean hasForge = list.contains("forge");
+        boolean hasMinecraft = list.contains("minecraft");
+        if (!hasForge && !hasMinecraft) return false;
+
+        // 检查格式
+        for (String s : list) {
+            if (!s.matches("^[a-z0-9_-]+$")) return false;
+        }
+        return true;
+    }
+
+    /**
+     * 获取客户端缓存的玩家模组列表（调试用）
+     */
+    public static Map<String, List<String>> getClientPlayerMods() {
+        return Collections.unmodifiableMap(clientPlayerMods);
+    }
+
+    /**
+     * 检查服务端配合模式是否可用
+     */
+    public static boolean isServerSideModeAvailable() {
+        return serverSideModeAvailable;
+    }
+
+    // ============================================================
+    //  显示功能
+    // ============================================================
+
+    /**
+     * 获取格式化的玩家模组列表，用于聊天框显示
+     *
+     * @return 格式化后的字符串列表（每行一条），如果服务端配合模式不可用返回提示
+     */
+    public static List<String> getFormattedPlayerModList() {
+        List<String> lines = new ArrayList<>();
+
+        if (!serverSideModeAvailable) {
+            lines.add("§c[WaferACA] 服务端未安装 WaferACA，无法获取其他玩家模组列表");
+            lines.add("§7提示：请让服务器管理员安装 waferaca.jar 以启用精确检测");
+            lines.add("§7当前使用纯客户端行为检测模式（仅能检测可疑自瞄行为）");
+            return lines;
+        }
+
+        if (clientPlayerMods.isEmpty()) {
+            lines.add("§e[WaferACA] 暂无玩家模组数据（可能正在请求中，请稍候再试）");
+            return lines;
+        }
+
+        lines.add("§b===== WaferACA 玩家模组列表 (" + clientPlayerMods.size() + "人) =====");
+
+        for (Map.Entry<String, List<String>> entry : clientPlayerMods.entrySet()) {
+            String playerName = entry.getKey();
+            List<String> modIds = entry.getValue();
+            boolean isCheater = modIds.contains(WaferACA.TARGET_CHEAT_MODID);
+
+            StringBuilder sb = new StringBuilder();
+            if (isCheater) {
+                sb.append("§c[作弊] ");
+            } else {
+                sb.append("§a[正常] ");
+            }
+            sb.append("§f").append(playerName);
+            sb.append(" §7(").append(modIds.size()).append("个模组): ");
+            sb.append("§e").append(String.join("§7, §e", modIds));
+
+            lines.add(sb.toString());
+        }
+
+        lines.add("§b========================================");
+        lines.add("§7按键 O 可重新打开此列表 | 输入 .waca 也可显示");
+        return lines;
+    }
+
+    /**
+     * 获取指定玩家的模组列表
+     *
+     * @param playerName 玩家名
+     * @return 模组列表，如果不存在返回 null
+     */
+    public static List<String> getPlayerMods(String playerName) {
+        return clientPlayerMods.get(playerName);
+    }
+
+    /**
+     * 检查指定玩家是否使用了目标作弊模组
+     *
+     * @param playerName 玩家名
+     * @return true 如果使用了目标作弊模组
+     */
+    public static boolean isPlayerUsingCheat(String playerName) {
+        List<String> mods = clientPlayerMods.get(playerName);
+        return mods != null && mods.contains(WaferACA.TARGET_CHEAT_MODID);
+    }
+}
+
+```
+
+`src/main/java/com/wafer/aca/event/ClientForgeEvents.java`:
+
+```java
+package com.wafer.aca.event;
+
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.wafer.aca.WaferACA;
+import com.wafer.aca.client.ClientKeyBindings;
+import com.wafer.aca.detection.ModDetectionManager;
+import com.wafer.aca.util.MessageUtil;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
+import net.minecraft.network.chat.Component;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.client.event.ClientChatEvent;
+import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
+import net.minecraftforge.client.event.RenderGuiOverlayEvent;
+import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraft.client.gui.GuiGraphics;
+
+
+import java.util.List;
+
+/**
+ * 客户端事件处理器
+ *
+ * 负责：
+ * 1. 玩家进入服务器时发送初始化聊天消息
+ * 2. 每 tick 更新模组检测和行为检测
+ * 3. 按键 O 显示所有玩家的模组列表
+ * 4. 聊天命令 .waca 显示玩家模组列表
+ */
+@Mod.EventBusSubscriber(modid = WaferACA.MODID, value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.FORGE)
+public class ClientForgeEvents {
+
+    /** 进入服务器后是否已发送初始化消息 */
+    private static boolean initMessageSent = false;
+
+    /** 进入服务器后的 tick 计数器，用于延迟发送消息（避免登录过程中发送被服务器拒绝） */
+    private static int joinTickCounter = 0;
+
+    /** 延迟发送的 tick 数（60 tick = 3秒），确保玩家完全进入服务器后再发送聊天消息 */
+    private static final int INIT_MESSAGE_DELAY_TICKS = 60;
+
+    /**
+     * 客户端玩家加入服务器时触发
+     * 发送初始化消息并启动模组检测
+     */
+    @SubscribeEvent
+    public static void onPlayerJoinServer(ClientPlayerNetworkEvent.LoggingIn event) {
+        WaferACA.LOGGER.info("[WaferACA] 客户端玩家进入服务器，触发初始化流程");
+
+        // 重置状态，延迟发送确保完全进入服务器
+        initMessageSent = false;
+        joinTickCounter = 0;
+
+        // 重置本地作弊检测状态
+        ModDetectionManager.setLocalCheatDetected(false, "");
+
+        // 通知检测管理器
+        ModDetectionManager.onClientJoinServer();
+    }
+
+    /**
+     * 客户端玩家离开服务器时触发
+     * 重置状态
+     */
+    @SubscribeEvent
+    public static void onPlayerLeaveServer(ClientPlayerNetworkEvent.LoggingOut event) {
+        WaferACA.LOGGER.info("[WaferACA] 客户端玩家离开服务器，重置检测状态");
+        initMessageSent = false;
+    }
+
+    /**
+     * 客户端每 tick 触发
+     * 用于：
+     * 1. 延迟发送初始化消息（确保连接完全建立）
+     * 2. 更新行为检测
+     * 3. 检测按键 O 显示玩家模组列表
+     */
+    @SubscribeEvent
+    public static void onClientTick(TickEvent.ClientTickEvent event) {
+        if (event.phase != TickEvent.Phase.END) return;
+
+        Minecraft mc = Minecraft.getInstance();
+
+        // 发送初始化消息（延迟到完全进入服务器后，避免登录过程中发送被服务器拒绝）
+        if (!initMessageSent) {
+            joinTickCounter++;
+            if (joinTickCounter >= INIT_MESSAGE_DELAY_TICKS
+                    && mc.player != null && mc.getConnection() != null
+                    && mc.getConnection().getConnection() != null
+                    && mc.getConnection().getConnection().isConnected()) {
+                sendInitMessage();
+                initMessageSent = true;
+            }
+        }
+
+        // 更新检测
+        ModDetectionManager.onClientTick();
+
+        // 检测按键 O：显示玩家模组列表
+        while (ClientKeyBindings.SHOW_PLAYER_MODS.consumeClick()) {
+            if (mc.player != null && mc.level != null) {
+                displayPlayerModList();
+            }
+        }
+    }
+
+    /**
+     * 监听客户端聊天输入，处理 .waca 命令
+     * 以 . 开头的消息不会发送到服务器，作为客户端命令处理
+     */
+    @SubscribeEvent
+    public static void onClientChat(ClientChatEvent event) {
+        String message = event.getMessage();
+        if (message == null) return;
+
+        String trimmed = message.trim().toLowerCase();
+
+        // 处理 .waca 命令（显示所有玩家模组列表）
+        if (trimmed.equals(".waca") || trimmed.equals(".waferaca") || trimmed.equals(".mods")) {
+            event.setCanceled(true); // 取消发送到服务器
+            displayPlayerModList();
+            return;
+        }
+
+        // 处理 .waca <玩家名> 命令（显示指定玩家的模组）
+        if (trimmed.startsWith(".waca ") || trimmed.startsWith(".mods ")) {
+            event.setCanceled(true);
+            String playerName = message.trim().substring(message.trim().indexOf(' ') + 1);
+            displaySinglePlayerMods(playerName);
+        }
+    }
+
+    /**
+     * 显示所有玩家的模组列表到本地聊天框
+     */
+    private static void displayPlayerModList() {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.player == null) return;
+
+        List<String> lines = ModDetectionManager.getFormattedPlayerModList();
+        for (String line : lines) {
+            mc.player.sendSystemMessage(Component.literal(line));
+        }
+
+        WaferACA.LOGGER.info("[WaferACA] 已显示玩家模组列表 ({}行)", lines.size());
+    }
+
+    /**
+     * 显示单个玩家的模组列表
+     *
+     * @param playerName 玩家名
+     */
+    private static void displaySinglePlayerMods(String playerName) {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.player == null) return;
+
+        if (!ModDetectionManager.isServerSideModeAvailable()) {
+            mc.player.sendSystemMessage(Component.literal(
+                    "§c[WaferACA] 服务端未安装 WaferACA，无法查询玩家模组"));
+            return;
+        }
+
+        List<String> mods = ModDetectionManager.getPlayerMods(playerName);
+        if (mods == null) {
+            mc.player.sendSystemMessage(Component.literal(
+                    "§e[WaferACA] 未找到玩家 " + playerName + " 的模组数据"));
+            return;
+        }
+
+        boolean isCheater = ModDetectionManager.isPlayerUsingCheat(playerName);
+        String status = isCheater ? "§c[作弊]" : "§a[正常]";
+
+        mc.player.sendSystemMessage(Component.literal(
+                status + " §f" + playerName + " §7(" + mods.size() + "个模组):"));
+        mc.player.sendSystemMessage(Component.literal(
+                "§e" + String.join("§7, §e", mods)));
+    }
+
+    /**
+     * 发送初始化消息：
+     * - 公共聊天发送纯文本（不带 § 颜色代码，避免被服务器视为非法字符而踢出）
+     * - 本地客户端显示带颜色的组件消息
+     *
+     * 注意：许多服务器（尤其是带反作弊/聊天过滤的）会拒绝包含 § 的聊天消息，
+     * 甚至在登录过程中直接踢出玩家。因此公共聊天只发纯文本。
+     */
+    private static void sendInitMessage() {
+        // 公共聊天：纯文本，不带 § 颜色代码
+        String chatMessage = "WaferACA反作弊初始化完成，正在开始检测！";
+        MessageUtil.sendChatToServer(chatMessage);
+
+        // 本地显示：带颜色的组件消息（仅自己可见）
+        MessageUtil.sendLocalSystemMessage(MessageUtil.buildInitMessage());
+
+        WaferACA.LOGGER.info("[WaferACA] 已发送反作弊初始化消息（公共聊天纯文本，本地带颜色）");
+    }
+
+    // ============================================================
+    //  作弊者名字前缀 + HUD提示
+    // ============================================================
+
+    /**
+     * 玩家名字格式化事件：给检测到的作弊者名字加上红色 [作弊者] 前缀
+     */
+    @SubscribeEvent
+    public static void onNameFormat(PlayerEvent.NameFormat event) {
+        String playerName = String.valueOf(event.getUsername());
+        if (ModDetectionManager.isPlayerCheater(playerName)) {
+            event.setDisplayname(Component.literal("§c[作弊者]§r " + playerName));
+        }
+    }
+
+
+
+    /**
+     * HUD渲染事件：如果本地客户端被检测到使用作弊，在屏幕左边显示提示图标
+     */
+    @SubscribeEvent
+    public static void onRenderGui(RenderGuiOverlayEvent.Post event) {
+        if (!ModDetectionManager.isLocalCheatDetected()) return;
+
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.screen != null) return;
+
+        GuiGraphics guiGraphics = event.getGuiGraphics();
+        int scaledHeight = mc.getWindow().getGuiScaledHeight();
+
+        int x = 8;
+        int y = scaledHeight / 2 - 25;
+        int boxWidth = 130;
+        int boxHeight = 50;
+
+        // 红色半透明背景框
+        guiGraphics.fill(x, y, x + boxWidth, y + boxHeight, 0xCC8B0000);
+        // 红色边框
+        guiGraphics.fill(x, y, x + boxWidth, y + 1, 0xFFFF0000);
+        guiGraphics.fill(x, y + boxHeight - 1, x + boxWidth, y + boxHeight, 0xFFFF0000);
+        guiGraphics.fill(x, y, x + 1, y + boxHeight, 0xFFFF0000);
+        guiGraphics.fill(x + boxWidth - 1, y, x + boxWidth, y + boxHeight, 0xFFFF0000);
+
+        // 文字
+        guiGraphics.drawString(mc.font, "⚠ 警告", x + 8, y + 6, 0xFFFF5555);
+        guiGraphics.drawString(mc.font, "你正在使用作弊！", x + 8, y + 20, 0xFFFFFFFF);
+        guiGraphics.drawString(mc.font, "请立即关闭", x + 8, y + 34, 0xFFFFAA00);
+    }
+
+}
+
+```
+
+`src/main/java/com/wafer/aca/event/ServerForgeEvents.java`:
+
+```java
+package com.wafer.aca.event;
+
+import com.wafer.aca.WaferACA;
+import com.wafer.aca.command.WaferACACommands;
+import com.wafer.aca.detection.ModDetectionManager;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
+
+/**
+ * 服务端事件处理器
+ *
+ * 负责：
+ * 1. 玩家登录时提取并缓存其客户端模组列表
+ * 2. 玩家离开时清理缓存
+ *
+ * 只有服务端安装了本模组时，这些事件才会生效，
+ * 从而支持"服务端配合模式"的精确模组检测。
+ */
+@Mod.EventBusSubscriber(modid = WaferACA.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
+public class ServerForgeEvents {
+
+    /**
+     * 玩家登录服务器时触发
+     * 提取该玩家的客户端模组列表并缓存
+     */
+    @SubscribeEvent
+    public static void onPlayerLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
+        if (event.getEntity() instanceof ServerPlayer serverPlayer) {
+            WaferACA.LOGGER.info("[WaferACA] 服务端检测到玩家登录: {}", serverPlayer.getName().getString());
+            // PlayerLoggedInEvent 在 FML 握手完成后触发，可直接提取模组列表
+            // 使用服务器线程执行，确保线程安全
+            serverPlayer.server.execute(() -> {
+                // 先提取并检测该玩家自己的模组列表
+                ModDetectionManager.onServerPlayerJoin(serverPlayer);
+                // 再向新玩家广播当前已检测到的其他作弊者
+                ModDetectionManager.broadcastCheatersToNewPlayer(serverPlayer);
+            });
+        }
+    }
+
+    /**
+     * 玩家离开服务器时触发
+     * 清理该玩家的模组列表缓存
+     */
+    @SubscribeEvent
+    public static void onPlayerLoggedOut(PlayerEvent.PlayerLoggedOutEvent event) {
+        if (event.getEntity() instanceof ServerPlayer serverPlayer) {
+            WaferACA.LOGGER.info("[WaferACA] 服务端检测到玩家离开: {}", serverPlayer.getName().getString());
+            ModDetectionManager.onServerPlayerLeave(serverPlayer);
+            // 清理该玩家的管理员认证（白名单保留）
+            WaferACACommands.onPlayerLogout(serverPlayer.getUUID());
+
+            // 延迟一tick检查：如果所有玩家都退出了，重置比赛终止状态
+            serverPlayer.server.execute(() -> {
+                if (serverPlayer.server.getPlayerCount() <= 0) {
+                    ModDetectionManager.resetMatchTermination();
+                }
+            });
+        }
+    }
+}
+
+```
+
+`src/main/java/com/wafer/aca/network/ClientboundCheatDetected.java`:
+
+```java
+package com.wafer.aca.network;
+
+import com.wafer.aca.WaferACA;
+import com.wafer.aca.detection.ModDetectionManager;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraftforge.network.NetworkEvent;
+
+import java.util.function.Supplier;
+
+/**
+ * 服务端 -> 客户端：通知该客户端"你被检测到使用作弊"
+ *
+ * 服务端检测到玩家使用 crispywaferguntrackermod 时，
+ * 向该玩家的客户端发送此包。客户端收到后在屏幕左边显示
+ * "你正在使用作弊！"的提示图标。
+ */
+public class ClientboundCheatDetected {
+
+    private final String reason;
+
+    public ClientboundCheatDetected(String reason) {
+        this.reason = reason;
+    }
+
+    public String getReason() {
+        return reason;
+    }
+
+    public static void encode(ClientboundCheatDetected msg, FriendlyByteBuf buf) {
+        buf.writeUtf(msg.reason);
+    }
+
+    public static ClientboundCheatDetected decode(FriendlyByteBuf buf) {
+        return new ClientboundCheatDetected(buf.readUtf());
+    }
+
+    public static void handle(ClientboundCheatDetected msg, Supplier<NetworkEvent.Context> ctx) {
+        ctx.get().enqueueWork(() -> {
+            WaferACA.LOGGER.warn("[WaferACA] 收到服务端通知：本地客户端被检测到使用作弊 ({})", msg.reason);
+            ModDetectionManager.setLocalCheatDetected(true, msg.reason);
+        });
+        ctx.get().setPacketHandled(true);
+    }
+}
+
+```
+
+`src/main/java/com/wafer/aca/network/ClientboundMatchTerminated.java`:
+
+```java
+package com.wafer.aca.network;
+
+import com.wafer.aca.WaferACA;
+import com.wafer.aca.client.MatchTerminatedScreen;
+import net.minecraft.client.Minecraft;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraftforge.network.NetworkEvent;
+
+import java.util.function.Supplier;
+
+/**
+ * 服务端 -> 所有客户端：通知比赛终止（检测到二次作弊者）
+ *
+ * 当作弊者退出重进后仍然使用作弊时，服务端向所有在线玩家
+ * 发送此包。客户端收到后打开全红遮罩界面，禁止所有操作，
+ * 按ESC可退出服务器。所有玩家退出重进后解除，但如果仍有
+ * 人作弊则再次触发。
+ */
+public class ClientboundMatchTerminated {
+
+    private final String cheaterName;
+
+    public ClientboundMatchTerminated(String cheaterName) {
+        this.cheaterName = cheaterName;
+    }
+
+    public String getCheaterName() {
+        return cheaterName;
+    }
+
+    public static void encode(ClientboundMatchTerminated msg, FriendlyByteBuf buf) {
+        buf.writeUtf(msg.cheaterName);
+    }
+
+    public static ClientboundMatchTerminated decode(FriendlyByteBuf buf) {
+        return new ClientboundMatchTerminated(buf.readUtf());
+    }
+
+    public static void handle(ClientboundMatchTerminated msg, Supplier<NetworkEvent.Context> ctx) {
+        ctx.get().enqueueWork(() -> {
+            WaferACA.LOGGER.warn("[WaferACA] 收到服务端通知：比赛终止！作弊者: {}", msg.cheaterName);
+            Minecraft mc = Minecraft.getInstance();
+            // 打开全红遮罩界面
+            mc.execute(() -> {
+                mc.setScreen(new MatchTerminatedScreen(msg.cheaterName));
+            });
+        });
+        ctx.get().setPacketHandled(true);
+    }
+}
+
+```
+
+`src/main/java/com/wafer/aca/network/ClientboundPlayerModList.java`:
+
+```java
+package com.wafer.aca.network;
+
+import com.wafer.aca.WaferACA;
+import com.wafer.aca.detection.ModDetectionManager;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraftforge.network.NetworkEvent;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Supplier;
+
+/**
+ * 服务端 -> 客户端：返回一批玩家的模组列表
+ *
+ * 包含玩家名和该玩家安装的所有客户端模组 modid 列表
+ * 客户端收到后进行作弊模组检测
+ */
+public class ClientboundPlayerModList {
+
+    private final List<PlayerModEntry> entries;
+    private final boolean isLastBatch;
+
+    public ClientboundPlayerModList(List<PlayerModEntry> entries, boolean isLastBatch) {
+        this.entries = entries;
+        this.isLastBatch = isLastBatch;
+    }
+
+    public List<PlayerModEntry> getEntries() {
+        return entries;
+    }
+
+    public boolean isLastBatch() {
+        return isLastBatch;
+    }
+
+    public static void encode(ClientboundPlayerModList msg, FriendlyByteBuf buf) {
+        buf.writeInt(msg.entries.size());
+        for (PlayerModEntry entry : msg.entries) {
+            buf.writeUtf(entry.playerName);
+            buf.writeInt(entry.modIds.size());
+            for (String modId : entry.modIds) {
+                buf.writeUtf(modId);
+            }
+        }
+        buf.writeBoolean(msg.isLastBatch);
+    }
+
+    public static ClientboundPlayerModList decode(FriendlyByteBuf buf) {
+        int count = buf.readInt();
+        List<PlayerModEntry> entries = new ArrayList<>(count);
+        for (int i = 0; i < count; i++) {
+            String playerName = buf.readUtf();
+            int modCount = buf.readInt();
+            List<String> modIds = new ArrayList<>(modCount);
+            for (int j = 0; j < modCount; j++) {
+                modIds.add(buf.readUtf());
+            }
+            entries.add(new PlayerModEntry(playerName, modIds));
+        }
+        boolean isLast = buf.readBoolean();
+        return new ClientboundPlayerModList(entries, isLast);
+    }
+
+    public static void handle(ClientboundPlayerModList msg, Supplier<NetworkEvent.Context> ctx) {
+        ctx.get().enqueueWork(() -> {
+            WaferACA.LOGGER.info("[WaferACA] 收到服务端模组列表数据，玩家数: {}, 是否最后一批: {}",
+                    msg.entries.size(), msg.isLastBatch);
+
+            // 交给检测管理器处理
+            ModDetectionManager.onReceivePlayerModList(msg);
+        });
+        ctx.get().setPacketHandled(true);
+    }
+
+    /**
+     * 单个玩家的模组数据
+     */
+    public static class PlayerModEntry {
+        public final String playerName;
+        public final List<String> modIds;
+
+        public PlayerModEntry(String playerName, List<String> modIds) {
+            this.playerName = playerName;
+            this.modIds = modIds;
+        }
+    }
+}
+
+```
+
+`src/main/java/com/wafer/aca/network/NetworkHandler.java`:
+
+```java
+package com.wafer.aca.network;
+
+import com.wafer.aca.WaferACA;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraftforge.network.NetworkDirection;
+import net.minecraftforge.network.NetworkRegistry;
+import net.minecraftforge.network.simple.SimpleChannel;
+
+import java.util.Optional;
+
+/**
+ * 网络通道处理器
+ * 负责注册自定义网络包，用于客户端与服务端之间交换玩家模组列表
+ */
+public class NetworkHandler {
+
+    private static final String PROTOCOL_VERSION = "1";
+
+    public static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
+            new ResourceLocation(WaferACA.MODID, "main"),
+            () -> PROTOCOL_VERSION,
+            PROTOCOL_VERSION::equals,
+            PROTOCOL_VERSION::equals
+    );
+
+    private static int packetId = 0;
+
+    private static int nextId() {
+        return packetId++;
+    }
+
+    /**
+     * 注册所有网络包
+     * 必须在 FMLCommonSetupEvent 中调用
+     */
+    public static void register() {
+        // 客户端 -> 服务端：请求所有在线玩家的模组列表
+        CHANNEL.messageBuilder(ServerboundRequestModList.class, nextId(), NetworkDirection.PLAY_TO_SERVER)
+                .encoder(ServerboundRequestModList::encode)
+                .decoder(ServerboundRequestModList::decode)
+                .consumerMainThread(ServerboundRequestModList::handle)
+                .add();
+
+        // 客户端 -> 服务端：客户端主动提交自己本地安装的模组列表
+        CHANNEL.messageBuilder(ServerboundClientModList.class, nextId(), NetworkDirection.PLAY_TO_SERVER)
+                .encoder(ServerboundClientModList::encode)
+                .decoder(ServerboundClientModList::decode)
+                .consumerMainThread(ServerboundClientModList::handle)
+                .add();
+
+        // 服务端 -> 客户端：返回玩家模组列表数据
+        CHANNEL.messageBuilder(ClientboundPlayerModList.class, nextId(), NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(ClientboundPlayerModList::encode)
+                .decoder(ClientboundPlayerModList::decode)
+                .consumerMainThread(ClientboundPlayerModList::handle)
+                .add();
+
+        // 服务端 -> 客户端：通知该客户端"你被检测到使用作弊"
+        CHANNEL.messageBuilder(ClientboundCheatDetected.class, nextId(), NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(ClientboundCheatDetected::encode)
+                .decoder(ClientboundCheatDetected::decode)
+                .consumerMainThread(ClientboundCheatDetected::handle)
+                .add();
+
+        // 服务端 -> 所有客户端：通知比赛终止（二次作弊者）
+        CHANNEL.messageBuilder(ClientboundMatchTerminated.class, nextId(), NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(ClientboundMatchTerminated::encode)
+                .decoder(ClientboundMatchTerminated::decode)
+                .consumerMainThread(ClientboundMatchTerminated::handle)
+                .add();
+
+        WaferACA.LOGGER.info("[WaferACA] 网络通道注册完成，协议版本: {}", PROTOCOL_VERSION);
+    }
+
+    /**
+     * 检查服务端是否安装了 WaferACA（通过通道是否存在判断）
+     * 客户端在进入服务器后可调用此方法判断是否启用服务端配合模式
+     */
+    public static boolean isServerSidePresent() {
+        // 客户端可以通过 NetworkRegistry 检查远端是否有此通道
+        // 但在实际连接中，更可靠的方式是发送请求后看是否有响应
+        // 这里返回 true 作为乐观判断，实际由响应超时机制控制
+        return true;
+    }
+}
+
+```
+
+`src/main/java/com/wafer/aca/network/ServerboundClientModList.java`:
+
+```java
+package com.wafer.aca.network;
+
+import com.wafer.aca.WaferACA;
+import com.wafer.aca.detection.ModDetectionManager;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraftforge.network.NetworkEvent;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Supplier;
+
+/**
+ * 客户端 -> 服务端：客户端主动提交自己本地安装的所有模组列表
+ *
+ * 客户端搭载 WaferACA 进入服务器后，自动收集本地所有 modid 并发送给服务端。
+ * 服务端收到后缓存并检测是否包含目标作弊模组（crispywaferguntrackermod）。
+ *
+ * 这种方式比服务端反射提取更可靠，因为：
+ * - 客户端直接通过 ModList.get() 获取，不依赖 Forge 内部 API
+ * - 不依赖反射，跨 Forge 版本兼容性更好
+ * - 只要客户端安装了 WaferACA 就能正常提交
+ */
+public class ServerboundClientModList {
+
+    private final List<String> modIds;
+
+    public ServerboundClientModList(List<String> modIds) {
+        this.modIds = modIds;
+    }
+
+    public List<String> getModIds() {
+        return modIds;
+    }
+
+    public static void encode(ServerboundClientModList msg, FriendlyByteBuf buf) {
+        buf.writeInt(msg.modIds.size());
+        for (String modId : msg.modIds) {
+            buf.writeUtf(modId);
+        }
+    }
+
+    public static ServerboundClientModList decode(FriendlyByteBuf buf) {
+        int count = buf.readInt();
+        List<String> modIds = new ArrayList<>(count);
+        for (int i = 0; i < count; i++) {
+            modIds.add(buf.readUtf());
+        }
+        return new ServerboundClientModList(modIds);
+    }
+
+    public static void handle(ServerboundClientModList msg, Supplier<NetworkEvent.Context> ctx) {
+        ctx.get().enqueueWork(() -> {
+            ServerPlayer sender = ctx.get().getSender();
+            if (sender == null) return;
+
+            WaferACA.LOGGER.info("[WaferACA] 收到玩家 {} 主动提交的模组列表 ({}个)",
+                    sender.getName().getString(), msg.modIds.size());
+
+            // 交给检测管理器缓存并检测
+            ModDetectionManager.onReceiveClientModList(sender, msg.modIds);
+        });
+        ctx.get().setPacketHandled(true);
+    }
+}
+
+```
+
+`src/main/java/com/wafer/aca/network/ServerboundRequestModList.java`:
+
+```java
+package com.wafer.aca.network;
+
+import com.wafer.aca.WaferACA;
+import com.wafer.aca.detection.ModDetectionManager;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraftforge.network.NetworkEvent;
+
+import java.util.List;
+import java.util.function.Supplier;
+
+/**
+ * 客户端 -> 服务端：请求所有在线玩家的客户端模组列表
+ *
+ * 客户端在进入服务器后发送此包，服务端收到后：
+ * 1. 遍历所有在线玩家
+ * 2. 通过 Forge 握手信息提取每个玩家的模组列表
+ * 3. 通过 ClientboundPlayerModList 分批返回
+ */
+public class ServerboundRequestModList {
+
+    public ServerboundRequestModList() {
+    }
+
+    public static void encode(ServerboundRequestModList msg, FriendlyByteBuf buf) {
+        // 无额外数据，仅作为请求信号
+    }
+
+    public static ServerboundRequestModList decode(FriendlyByteBuf buf) {
+        return new ServerboundRequestModList();
+    }
+
+    public static void handle(ServerboundRequestModList msg, Supplier<NetworkEvent.Context> ctx) {
+        ctx.get().enqueueWork(() -> {
+            ServerPlayer sender = ctx.get().getSender();
+            if (sender == null) return;
+
+            WaferACA.LOGGER.info("[WaferACA] 玩家 {} 请求获取服务器玩家模组列表", sender.getName().getString());
+
+            // 获取所有在线玩家的模组列表并发送给请求者
+            List<ClientboundPlayerModList.PlayerModEntry> entries =
+                    ModDetectionManager.collectAllPlayerModsOnServer(sender.server);
+
+            // 分批发送（避免单个包过大）
+            int batchSize = 10;
+            for (int i = 0; i < entries.size(); i += batchSize) {
+                int end = Math.min(i + batchSize, entries.size());
+                List<ClientboundPlayerModList.PlayerModEntry> batch = entries.subList(i, end);
+                boolean isLast = (end >= entries.size());
+                NetworkHandler.CHANNEL.sendTo(
+                        new ClientboundPlayerModList(batch, isLast),
+                        sender.connection.connection,
+                        net.minecraftforge.network.NetworkDirection.PLAY_TO_CLIENT
+                );
+            }
+
+            // 如果没有玩家，发送一个空的结束包
+            if (entries.isEmpty()) {
+                NetworkHandler.CHANNEL.sendTo(
+                        new ClientboundPlayerModList(List.of(), true),
+                        sender.connection.connection,
+                        net.minecraftforge.network.NetworkDirection.PLAY_TO_CLIENT
+                );
+            }
+        });
+        ctx.get().setPacketHandled(true);
+    }
+}
+
+```
+
+`src/main/java/com/wafer/aca/util/MessageUtil.java`:
+
+```java
+package com.wafer.aca.util;
+
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+
+/**
+ * 聊天消息工具类
+ * 负责构建带颜色的组件消息并发送到服务器公共聊天
+ */
+public class MessageUtil {
+
+    /**
+     * 构建初始化消息：WaferACA（红色）反作弊初始化完成，正在开始检测！（绿色）
+     */
+    public static Component buildInitMessage() {
+        MutableComponent prefix = Component.literal("WaferACA")
+                .withStyle(ChatFormatting.RED, ChatFormatting.BOLD);
+        MutableComponent suffix = Component.literal("反作弊初始化完成，正在开始检测！")
+                .withStyle(ChatFormatting.GREEN);
+        return prefix.append(suffix);
+    }
+
+    /**
+     * 构建作弊告警消息：xxx玩家使用了作弊！（红色）
+     *
+     * @param playerName 玩家名
+     */
+    public static Component buildCheatAlertMessage(String playerName) {
+        MutableComponent name = Component.literal(playerName)
+                .withStyle(ChatFormatting.YELLOW, ChatFormatting.BOLD);
+        MutableComponent suffix = Component.literal("玩家使用了作弊！")
+                .withStyle(ChatFormatting.RED, ChatFormatting.BOLD);
+        return name.append(suffix);
+    }
+
+    /**
+     * 构建模组列表消息（调试用，本地显示）
+     */
+    public static Component buildModListMessage(String playerName, java.util.List<String> modIds) {
+        MutableComponent header = Component.literal("[WaferACA] " + playerName + " 的模组列表: ")
+                .withStyle(ChatFormatting.AQUA);
+        MutableComponent list = Component.literal(String.join(", ", modIds))
+                .withStyle(ChatFormatting.GRAY);
+        return header.append(list);
+    }
+
+    /**
+     * 发送消息到服务器公共聊天（所有玩家可见）
+     *
+     * @param message 消息内容（纯文本）
+     */
+    public static void sendChatToServer(String message) {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.player != null && mc.player.connection != null) {
+            mc.player.connection.sendChat(message);
+        }
+    }
+
+    /**
+     * 发送组件消息到服务器公共聊天
+     * 注意：sendChat 只接受纯文本，颜色组件会被转为纯文本发送
+     * 如果需要保留颜色，应使用 sendSystemMessage（仅本地可见）
+     *
+     * @param component 组件消息
+     */
+    public static void sendComponentChatToServer(Component component) {
+        // 服务器公共聊天不支持客户端自定义颜色（会被服务器过滤）
+        // 因此转为纯文本发送，颜色格式通过特殊字符保留的方式不可靠
+        // 这里直接发送纯文本内容
+        String plainText = component.getString();
+        sendChatToServer(plainText);
+    }
+
+    /**
+     * 发送本地系统消息（仅自己可见，保留颜色）
+     *
+     * @param component 组件消息
+     */
+    public static void sendLocalSystemMessage(Component component) {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.player != null) {
+            mc.player.sendSystemMessage(component);
+        }
+    }
+
+    /**
+     * 发送带颜色前缀的聊天消息到服务器
+     * 使用 Minecraft 颜色代码（§）嵌入文本，部分服务器支持
+     *
+     * @param text  消息文本
+     * @param color 颜色
+     */
+    public static void sendColoredChat(String text, ChatFormatting color) {
+        String colored = "§" + color.getChar() + text + "§r";
+        sendChatToServer(colored);
+    }
+}
+
+```
+
+`src/main/resources/META-INF/mods.toml`:
+
+```toml
+modLoader="javafml"
+loaderVersion="${loader_version_range}"
+license="${mod_license}"
+
+[[mods]]
+modId="${mod_id}"
+version="${mod_version}"
+displayName="${mod_name}"
+authors="${mod_authors}"
+description='''
+${mod_description}
+'''
+
+[[dependencies.${mod_id}]]
+    modId="forge"
+    mandatory=true
+    versionRange="${forge_version_range}"
+    ordering="NONE"
+    side="BOTH"
+
+[[dependencies.${mod_id}]]
+    modId="minecraft"
+    mandatory=true
+    versionRange="${minecraft_version_range}"
+    ordering="NONE"
+    side="BOTH"
+
+```
+
+`src/main/resources/assets/waferaca/lang/en_us.json`:
+
+```json
+{
+  "key.categories.waferaca": "WaferACA Anti-Cheat",
+  "key.waferaca.show_player_mods": "Show Player Mod List"
+}
+
+```
+
+`src/main/resources/assets/waferaca/lang/zh_cn.json`:
+
+```json
+{
+  "key.categories.waferaca": "WaferACA 反作弊",
+  "key.waferaca.show_player_mods": "显示玩家模组列表"
+}
+
+```
+
+`src/main/resources/pack.mcmeta`:
+
+```mcmeta
+{
+    "pack": {
+        "description": "${mod_name} resources",
+        "pack_format": 15,
+        "forge:resource_pack_format": 15,
+        "forge:data_pack_format": 15
+    }
+}
+
+```
