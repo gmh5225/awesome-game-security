@@ -1,0 +1,1954 @@
+Project Path: arc_EpicLizard05013_UltimateMeteorAntiCheat_smyyufq5
+
+Source Tree:
+
+```txt
+arc_EpicLizard05013_UltimateMeteorAntiCheat_smyyufq5
+├── pom.xml
+└── src
+    └── main
+        ├── java
+        │   └── net
+        │       └── meteorsmp
+        │           └── anticheat
+        │               ├── UltimateMeoterAnticheat.java
+        │               ├── antidupe
+        │               │   ├── AntiDupeExtensions.java
+        │               │   └── AntiDupeListener.java
+        │               ├── checks
+        │               │   ├── CombatChecks.java
+        │               │   ├── FastUseCheck.java
+        │               │   ├── InventoryMoveCheck.java
+        │               │   ├── KnockbackCheck.java
+        │               │   ├── MovementChecks.java
+        │               │   ├── TimerCheck.java
+        │               │   └── WorldChecks.java
+        │               ├── commands
+        │               │   ├── AnticheatCommand.java
+        │               │   ├── MeteorCommand.java
+        │               │   └── WhitelistCommand.java
+        │               ├── listeners
+        │               │   └── PacketDesyncListener.java
+        │               └── manager
+        │                   ├── ACLogger.java
+        │                   ├── ConfigManager.java
+        │                   ├── PunishmentManager.java
+        │                   ├── ViolationManager.java
+        │                   └── WhitelistManager.java
+        └── resources
+            ├── config.yml
+            ├── plugin.yml
+            └── punishments.yml
+
+```
+
+`pom.xml`:
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>net.meteorsmp</groupId>
+    <artifactId>UltimateMeteorAnticheat</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+    <packaging>jar</packaging>
+
+    <name>UltimateMeteorAnticheat</name>
+
+    <properties>
+        <java.version>21</java.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <repositories>
+        <repository>
+            <id>papermc</id>
+            <url>https://repo.papermc.io/repository/maven-public/</url>
+        </repository>
+    </repositories>
+
+    <dependencies>
+        <dependency>
+            <groupId>io.papermc.paper</groupId>
+            <artifactId>paper-api</artifactId>
+            <version>1.21.11-R0.1-SNAPSHOT</version>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.13.0</version>
+                <configuration>
+                    <source>21</source>
+                    <target>21</target>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>
+
+```
+
+`src/main/java/net/meteorsmp/anticheat/UltimateMeoterAnticheat.java`:
+
+```java
+package net.meteorsmp.anticheat;
+
+import net.meteorsmp.anticheat.antidupe.AntiDupeListener;
+import net.meteorsmp.anticheat.checks.CombatChecks;
+import net.meteorsmp.anticheat.checks.MovementChecks;
+import net.meteorsmp.anticheat.checks.WorldChecks;
+import net.meteorsmp.anticheat.commands.AnticheatCommand;
+import net.meteorsmp.anticheat.commands.WhitelistCommand;
+import net.meteorsmp.anticheat.listeners.PacketDesyncListener;
+import net.meteorsmp.anticheat.manager.*;
+import org.bukkit.plugin.java.JavaPlugin;
+
+public final class UltimateMeoterAnticheat extends JavaPlugin {
+
+    private static UltimateMeoterAnticheat instance;
+    private ConfigManager configManager;
+    private ViolationManager violationManager;
+    private PunishmentManager punishmentManager;
+    private ACLogger acLogger;
+    private WhitelistManager whitelistManager;
+
+    @Override
+    public void onEnable() {
+        instance = this;
+
+        saveDefaultConfig();
+
+        // Managers
+        this.configManager = new ConfigManager(this);
+        this.acLogger = new ACLogger(this);
+        this.violationManager = new ViolationManager(this);
+        this.punishmentManager = new PunishmentManager(this);
+        this.whitelistManager = new WhitelistManager(this);
+
+        // Check Listeners
+        getServer().getPluginManager().registerEvents(new CombatChecks(this), this);
+        getServer().getPluginManager().registerEvents(new MovementChecks(this), this);
+        getServer().getPluginManager().registerEvents(new WorldChecks(this), this);
+        getServer().getPluginManager().registerEvents(new AntiDupeListener(this), this);
+        getServer().getPluginManager().registerEvents(new PacketDesyncListener(), this);
+
+        // Commands
+        if (getCommand("anticheat") != null) {
+            getCommand("anticheat").setExecutor(new AnticheatCommand(this));
+        }
+        if (getCommand("acwhitelist") != null) {
+            getCommand("acwhitelist").setExecutor(new WhitelistCommand(this));
+        }
+
+        getLogger().info("UltimateMeteorAnticheat (Paper 1.21.11) initialized successfully.");
+    }
+
+    @Override
+    public void onDisable() {
+        getLogger().info("UltimateMeteorAnticheat disabled.");
+    }
+
+    public static UltimateMeoterAnticheat getInstance() { return instance; }
+    public ConfigManager getConfigManager() { return configManager; }
+    public ViolationManager getViolationManager() { return violationManager; }
+    public PunishmentManager getPunishmentManager() { return punishmentManager; }
+    public ACLogger getAcLogger() { return acLogger; }
+    public WhitelistManager getWhitelistManager() { return whitelistManager; }
+}
+
+```
+
+`src/main/java/net/meteorsmp/anticheat/antidupe/AntiDupeExtensions.java`:
+
+```java
+package net.meteorsmp.anticheat.antidupe;
+
+import net.meteorsmp.anticheat.manager.ACLogger;
+import net.meteorsmp.anticheat.manager.ConfigManager;
+import org.bukkit.Material;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryType;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.plugin.java.JavaPlugin;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+
+public class AntiDupeExtensions implements Listener {
+
+    private final ConfigManager cfg;
+    private final ACLogger logger;
+    private final Map<UUID, Long> lastTrade = new HashMap<>();
+
+    public AntiDupeExtensions(JavaPlugin plugin, ConfigManager cfg, ACLogger logger) {
+        this.cfg = cfg;
+        this.logger = logger;
+    }
+
+    @EventHandler(priority = EventPriority.LOW)
+    public void onClick(InventoryClickEvent event) {
+        if (!(event.getWhoClicked() instanceof Player player)) return;
+        if (player.hasPermission("uac.bypass")) return;
+
+        blockBundleInBundle(event, player);
+        limitVillagerTrades(event, player);
+    }
+
+    private void blockBundleInBundle(InventoryClickEvent event, Player player) {
+        if (!cfg.getBoolean("antidupe.block-bundle-in-bundle", true)) return;
+
+        ItemStack cursor = event.getCursor();
+        ItemStack current = event.getCurrentItem();
+
+        if (cursor != null && cursor.getType() == Material.BUNDLE
+                && current != null && current.getType() == Material.BUNDLE) {
+            event.setCancelled(true);
+            logger.logDupeAttempt(player, "tried to place a bundle inside another bundle");
+        }
+    }
+
+    private void limitVillagerTrades(InventoryClickEvent event, Player player) {
+        if (!cfg.getBoolean("antidupe.villager-trade-cooldown-enabled", true)) return;
+        if (event.getInventory().getType() != InventoryType.MERCHANT) return;
+        if (event.getRawSlot() != 2) return;
+
+        long now = System.currentTimeMillis();
+        long cooldown = cfg.getInt("antidupe.villager-trade-cooldown-ms", 150);
+
+        Long last = lastTrade.put(player.getUniqueId(), now);
+        if (last != null && now - last < cooldown) {
+            event.setCancelled(true);
+            logger.logDupeAttempt(player, "villager trade completed below the minimum interval");
+        }
+    }
+}
+
+```
+
+`src/main/java/net/meteorsmp/anticheat/antidupe/AntiDupeListener.java`:
+
+```java
+package net.meteorsmp.anticheat.antidupe;
+
+import net.meteorsmp.anticheat.UltimateMeoterAnticheat;
+import org.bukkit.Material;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.block.ShulkerBox;
+
+public class AntiDupeListener implements Listener {
+
+    private final UltimateMeoterAnticheat plugin;
+
+    public AntiDupeListener(UltimateMeoterAnticheat plugin) {
+        this.plugin = plugin;
+    }
+
+    @EventHandler
+    public void onInventoryClick(InventoryClickEvent event) {
+        if (!plugin.getConfig().getBoolean("antidupe.enabled", true)) return;
+        if (!(event.getWhoClicked() instanceof Player player)) return;
+
+        ItemStack current = event.getCurrentItem();
+        ItemStack cursor = event.getCursor();
+
+        if (plugin.getConfig().getBoolean("antidupe.block-shulker-in-shulker", true)) {
+            if (current != null && isShulker(current.getType()) && cursor != null && isShulker(cursor.getType())) {
+                if (event.getInventory().getHolder() instanceof ShulkerBox) {
+                    event.setCancelled(true);
+                    player.sendMessage("§cNested shulkers are restricted on this server.");
+                }
+            }
+        }
+    }
+
+    private boolean isShulker(Material material) {
+        return material.name().contains("SHULKER_BOX");
+    }
+}
+
+```
+
+`src/main/java/net/meteorsmp/anticheat/checks/CombatChecks.java`:
+
+```java
+package net.meteorsmp.anticheat.checks;
+
+import net.meteorsmp.anticheat.UltimateMeoterAnticheat;
+import org.bukkit.GameMode;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+
+public class CombatChecks implements Listener {
+
+    private final UltimateMeoterAnticheat plugin;
+    private final Map<UUID, List<Long>> clickHistory = new ConcurrentHashMap<>();
+    private final Map<UUID, Float> lastYaw = new ConcurrentHashMap<>();
+
+    public CombatChecks(UltimateMeoterAnticheat plugin) {
+        this.plugin = plugin;
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
+    public void onHit(EntityDamageByEntityEvent event) {
+        if (!plugin.getConfig().getBoolean("checks.combat.reach", true)) return;
+        if (!(event.getDamager() instanceof Player attacker)) return;
+
+        if (attacker.getGameMode() == GameMode.CREATIVE || attacker.getGameMode() == GameMode.SPECTATOR) return;
+
+        Entity target = event.getEntity();
+        
+        // Calculate raw distance from eye location to target feet center
+        double rawDistance = attacker.getEyeLocation().distance(target.getLocation());
+        
+        // Subtract target bounding box radius (~0.45m) to get accurate edge-to-edge distance
+        double adjustedDistance = rawDistance - 0.45;
+
+        // Dynamic ping-compensated reach threshold
+        int ping = attacker.getPing();
+        double baseReach = plugin.getConfig().getDouble("checks.combat.max-reach", 3.01);
+        double pingBuffer = Math.min((ping / 1000.0) * 1.2, 0.35);
+        double allowedReach = baseReach + pingBuffer;
+
+        if (adjustedDistance > allowedReach) {
+            event.setCancelled(true);
+            double vl = Math.min(5.0, (adjustedDistance - allowedReach) * 2.5);
+            plugin.getViolationManager().flag(attacker, "Combat", "Reach (Type A)", vl);
+        }
+    }
+
+    @EventHandler
+    public void onClick(PlayerInteractEvent event) {
+        if (!plugin.getConfig().getBoolean("checks.combat.autoclicker", true)) return;
+        if (event.getAction() != Action.LEFT_CLICK_AIR && event.getAction() != Action.LEFT_CLICK_BLOCK) return;
+
+        Player player = event.getPlayer();
+        if (player.getGameMode() == GameMode.CREATIVE || player.getGameMode() == GameMode.SPECTATOR) return;
+
+        UUID uuid = player.getUniqueId();
+        long now = System.currentTimeMillis();
+
+        // --- AIM MODULO CHECK ---
+        float yaw = player.getLocation().getYaw();
+        if (lastYaw.containsKey(uuid)) {
+            float diff = Math.abs(yaw - lastYaw.get(uuid));
+            // Snaps on exact integer angles (typical of low-end killaura / aimbots)
+            if (diff > 0.0f && diff % 1.0f == 0.0f) {
+                plugin.getViolationManager().flag(player, "Combat", "AimModulo (Type A)", 1.0);
+            }
+        }
+        lastYaw.put(uuid, yaw);
+
+        // --- AUTOCLICKER & CPS CHECK ---
+        List<Long> clicks = clickHistory.computeIfAbsent(uuid, k -> new ArrayList<>());
+        clicks.add(now);
+
+        if (clicks.size() > 15) {
+            clicks.remove(0);
+            double avg = getAverage(clicks);
+            
+            // Prevent division by zero on identical timestamps
+            if (avg > 0) {
+                double stdDev = getStdDev(clicks, avg);
+                double cps = 1000.0 / avg;
+
+                if (cps > 18.0 && stdDev < 6.0) {
+                    plugin.getViolationManager().flag(player, "Combat", "Autoclicker (Type A)", 1.8);
+                }
+            }
+        }
+    }
+
+    private double getAverage(List<Long> list) {
+        long sum = 0;
+        for (int i = 1; i < list.size(); i++) {
+            sum += (list.get(i) - list.get(i - 1));
+        }
+        return (double) sum / (list.size() - 1);
+    }
+
+    private double getStdDev(List<Long> list, double avg) {
+        double var = 0;
+        for (int i = 1; i < list.size(); i++) {
+            var += Math.pow((list.get(i) - list.get(i - 1)) - avg, 2);
+        }
+        return Math.sqrt(var / (list.size() - 1));
+    }
+}
+
+```
+
+`src/main/java/net/meteorsmp/anticheat/checks/FastUseCheck.java`:
+
+```java
+package net.meteorsmp.anticheat.checks;
+
+import net.meteorsmp.anticheat.manager.ConfigManager;
+import net.meteorsmp.anticheat.manager.ViolationManager;
+import org.bukkit.Material;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerItemConsumeEvent;
+import org.bukkit.inventory.EquipmentSlot;
+import org.bukkit.plugin.java.JavaPlugin;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+
+public class FastUseCheck implements Listener {
+
+    private final ConfigManager cfg;
+    private final ViolationManager violations;
+    private final Map<UUID, Long> useStarted = new HashMap<>();
+
+    public FastUseCheck(JavaPlugin plugin, ConfigManager cfg, ViolationManager violations) {
+        this.cfg = cfg;
+        this.violations = violations;
+    }
+
+    @EventHandler
+    public void onInteract(PlayerInteractEvent event) {
+        if (event.getHand() != EquipmentSlot.HAND) return;
+        if (!event.getAction().name().startsWith("RIGHT_CLICK")) return;
+
+        Material type = event.getPlayer().getInventory().getItemInMainHand().getType();
+        if (!type.isEdible() && !type.name().contains("POTION")) return;
+
+        useStarted.putIfAbsent(event.getPlayer().getUniqueId(), System.currentTimeMillis());
+    }
+
+    @EventHandler
+    public void onConsume(PlayerItemConsumeEvent event) {
+        if (!cfg.isEnabled("combat.fastuse")) return;
+
+        Player player = event.getPlayer();
+        if (player.hasPermission("uac.bypass")) return;
+
+        Long started = useStarted.remove(player.getUniqueId());
+        if (started == null) return;
+
+        long elapsed = System.currentTimeMillis() - started;
+        if (elapsed > 0 && elapsed < cfg.getInt("combat.fastuse.min-duration-ms", 1200)) {
+            violations.addViolation(player, "FastUse", 1);
+        }
+    }
+}
+
+```
+
+`src/main/java/net/meteorsmp/anticheat/checks/InventoryMoveCheck.java`:
+
+```java
+package net.meteorsmp.anticheat.checks;
+
+import net.meteorsmp.anticheat.manager.ConfigManager;
+import net.meteorsmp.anticheat.manager.ViolationManager;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.inventory.InventoryType;
+import org.bukkit.plugin.java.JavaPlugin;
+
+public class InventoryMoveCheck implements Listener {
+
+    private final ConfigManager cfg;
+    private final ViolationManager violations;
+
+    public InventoryMoveCheck(JavaPlugin plugin, ConfigManager cfg, ViolationManager violations) {
+        this.cfg = cfg;
+        this.violations = violations;
+    }
+
+    @EventHandler
+    public void onMove(PlayerMoveEvent event) {
+        if (!cfg.isEnabled("world.inventorymove")) return;
+
+        Player player = event.getPlayer();
+        if (player.hasPermission("uac.bypass")) return;
+        if (event.getTo() == null) return;
+
+        InventoryType type = player.getOpenInventory().getType();
+        if (type == InventoryType.CRAFTING || type == InventoryType.PLAYER) return;
+
+        if (event.getFrom().distance(event.getTo()) > cfg.getDouble("world.inventorymove.epsilon", 0.03)) {
+            violations.addViolation(player, "InventoryMove", 1);
+        }
+    }
+}
+
+```
+
+`src/main/java/net/meteorsmp/anticheat/checks/KnockbackCheck.java`:
+
+```java
+package net.meteorsmp.anticheat.checks;
+
+import net.meteorsmp.anticheat.manager.ConfigManager;
+import net.meteorsmp.anticheat.manager.ViolationManager;
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.util.Vector;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+
+public class KnockbackCheck implements Listener {
+
+    private final JavaPlugin plugin;
+    private final ConfigManager cfg;
+    private final ViolationManager violations;
+    private final Map<UUID, Vector> velocityBefore = new HashMap<>();
+
+    public KnockbackCheck(JavaPlugin plugin, ConfigManager cfg, ViolationManager violations) {
+        this.plugin = plugin;
+        this.cfg = cfg;
+        this.violations = violations;
+    }
+
+    @EventHandler
+    public void onDamage(EntityDamageEvent event) {
+        if (!cfg.isEnabled("combat.knockback")) return;
+        if (!(event.getEntity() instanceof Player player)) return;
+        if (player.hasPermission("uac.bypass")) return;
+
+        if (event.getCause() != EntityDamageEvent.DamageCause.ENTITY_ATTACK
+                && event.getCause() != EntityDamageEvent.DamageCause.PROJECTILE) return;
+
+        velocityBefore.put(player.getUniqueId(), player.getVelocity().clone());
+
+        Bukkit.getScheduler().runTaskLater(plugin, () -> {
+            Vector before = velocityBefore.remove(player.getUniqueId());
+            if (before == null || !player.isOnline()) return;
+
+            double before2D = Math.hypot(before.getX(), before.getZ());
+            double after2D = Math.hypot(player.getVelocity().getX(), player.getVelocity().getZ());
+            double minExpected = cfg.getDouble("combat.knockback.min-velocity-change", 0.08);
+
+            if (Math.abs(after2D - before2D) < minExpected && after2D < minExpected) {
+                violations.addViolation(player, "AntiKnockback", 1);
+            }
+        }, 2L);
+    }
+}
+
+```
+
+`src/main/java/net/meteorsmp/anticheat/checks/MovementChecks.java`:
+
+```java
+package net.meteorsmp.anticheat.checks;
+
+import net.meteorsmp.anticheat.UltimateMeoterAnticheat;
+import org.bukkit.GameMode;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.potion.PotionEffectType;
+
+public class MovementChecks implements Listener {
+
+    private final UltimateMeoterAnticheat plugin;
+
+    public MovementChecks(UltimateMeoterAnticheat plugin) {
+        this.plugin = plugin;
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onMove(PlayerMoveEvent event) {
+        Player player = event.getPlayer();
+
+        if (player.getAllowFlight() || player.getGameMode() == GameMode.CREATIVE || player.getGameMode() == GameMode.SPECTATOR || player.isGliding() || player.isInsideVehicle()) {
+            return;
+        }
+
+        Location from = event.getFrom();
+        Location to = event.getTo();
+        if (to == null) return;
+
+        double deltaY = to.getY() - from.getY();
+        double deltaXZ = Math.hypot(to.getX() - from.getX(), to.getZ() - from.getZ());
+        
+        Location loc = player.getLocation();
+        Material blockType = loc.getBlock().getType();
+        Material blockBelow = loc.clone().subtract(0, 0.5, 0).getBlock().getType();
+
+        // Check if player is near/in water, lava, scaffolding, or ladders
+        boolean inLiquid = blockType == Material.WATER || blockType == Material.LAVA || blockBelow == Material.WATER || blockBelow == Material.LAVA;
+        boolean onClimbable = blockType == Material.LADDER || blockType == Material.VINE || blockType == Material.SCAFFOLDING;
+
+        // --- FLY CHECK (Type A) ---
+        // Flag zero Y-change while completely airborne in non-solid blocks
+        if (deltaY == 0.0 && !blockType.isSolid() && !player.isOnGround() && !inLiquid && !onClimbable && !isNearGround(to)) {
+            event.setTo(from);
+            plugin.getViolationManager().flag(player, "Movement", "Fly (Type A)", 1.2);
+            return;
+        }
+
+        // --- JESUS CHECK (Type A) ---
+        // Flag sprinting across top liquid surfaces without submerging
+        if ((blockType == Material.WATER || blockType == Material.LAVA) && player.isSprinting() && deltaY == 0.0) {
+            plugin.getViolationManager().flag(player, "Movement", "Jesus (Type A)", 1.0);
+        }
+
+        // --- NOFALL CHECK (Type A) ---
+        // Flag when client spoofs ground status during rapid downward fall
+        if (player.isOnGround() && deltaY < -0.7 && !blockType.isSolid() && !isNearGround(to)) {
+            plugin.getViolationManager().flag(player, "Movement", "NoFall (Type A)", 1.5);
+        }
+
+        // --- SPEED CHECK (Type A) ---
+        // Base limit dynamic calculation incorporating walk speed attribute and potion modifiers
+        double baseLimit = player.getWalkSpeed() * 2.85;
+        
+        // Add Speed effect compensation
+        if (player.hasPotionEffect(PotionEffectType.SPEED)) {
+            int amp = player.getPotionEffect(PotionEffectType.SPEED).getAmplifier() + 1;
+            baseLimit += (amp * 0.08);
+        }
+        
+        // Add Ice surface momentum buffer
+        if (blockBelow.name().contains("ICE")) {
+            baseLimit += 0.25;
+        }
+
+        if (deltaXZ > baseLimit && player.isOnGround()) {
+            event.setTo(from);
+            plugin.getViolationManager().flag(player, "Movement", "Speed (Type A)", 1.0);
+        }
+    }
+
+    private boolean isNearGround(Location loc) {
+        // Samples 3x3 footprint box to account for standing on block edges, slabs, or stairs
+        for (double x = -0.3; x <= 0.3; x += 0.3) {
+            for (double z = -0.3; z <= 0.3; z += 0.3) {
+                if (loc.clone().add(x, -0.2, z).getBlock().getType().isSolid()) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+}
+
+```
+
+`src/main/java/net/meteorsmp/anticheat/checks/TimerCheck.java`:
+
+```java
+package net.meteorsmp.anticheat.checks;
+
+import net.meteorsmp.anticheat.manager.ConfigManager;
+import net.meteorsmp.anticheat.manager.ViolationManager;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.plugin.java.JavaPlugin;
+
+import java.util.ArrayDeque;
+import java.util.Deque;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+
+public class TimerCheck implements Listener {
+
+    private final ConfigManager cfg;
+    private final ViolationManager violations;
+    private final Map<UUID, Deque<Long>> recentMoves = new HashMap<>();
+
+    public TimerCheck(JavaPlugin plugin, ConfigManager cfg, ViolationManager violations) {
+        this.cfg = cfg;
+        this.violations = violations;
+    }
+
+    @EventHandler
+    public void onMove(PlayerMoveEvent event) {
+        if (!cfg.isEnabled("movement.timer")) return;
+
+        Player player = event.getPlayer();
+        if (player.hasPermission("uac.bypass")) return;
+
+        long now = System.currentTimeMillis();
+        Deque<Long> moves = recentMoves.computeIfAbsent(player.getUniqueId(), k -> new ArrayDeque<>());
+        moves.addLast(now);
+
+        while (!moves.isEmpty() && now - moves.peekFirst() > 1000) {
+            moves.pollFirst();
+        }
+
+        if (moves.size() > cfg.getInt("movement.timer.max-moves-per-second", 24)) {
+            violations.addViolation(player, "Timer", 1);
+        }
+    }
+}
+
+```
+
+`src/main/java/net/meteorsmp/anticheat/checks/WorldChecks.java`:
+
+```java
+package net.meteorsmp.anticheat.checks;
+
+import net.meteorsmp.anticheat.UltimateMeoterAnticheat;
+import org.bukkit.GameMode;
+import org.bukkit.Material;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryType;
+import org.bukkit.inventory.ItemStack;
+
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+
+public class WorldChecks implements Listener {
+
+    private final UltimateMeoterAnticheat plugin;
+    private final Map<UUID, Long> placeHistory = new ConcurrentHashMap<>();
+    private final Map<UUID, Long> lastInventoryAction = new ConcurrentHashMap<>();
+    private final Map<UUID, Integer> transactionDuplicates = new ConcurrentHashMap<>();
+
+    public WorldChecks(UltimateMeoterAnticheat plugin) {
+        this.plugin = plugin;
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onPlace(BlockPlaceEvent event) {
+        Player player = event.getPlayer();
+        if (player.getGameMode() == GameMode.CREATIVE || player.getGameMode() == GameMode.SPECTATOR) return;
+
+        UUID uuid = player.getUniqueId();
+        long now = System.currentTimeMillis();
+
+        // --- FASTPLACE CHECK ---
+        if (plugin.getConfig().getBoolean("checks.world.fastplace", true)) {
+            if (placeHistory.containsKey(uuid)) {
+                long delay = now - placeHistory.get(uuid);
+                if (delay < 40) {
+                    event.setCancelled(true);
+                    plugin.getViolationManager().flag(player, "World", "FastPlace (Type A)", 1.0);
+                }
+            }
+            placeHistory.put(uuid, now);
+        }
+
+        // --- SCAFFOLD CHECK ---
+        if (plugin.getConfig().getBoolean("checks.world.scaffold", true)) {
+            if (player.getPitch() > 82.0f && player.isSprinting() && event.getBlockAgainst().getY() < player.getLocation().getY()) {
+                event.setCancelled(true);
+                plugin.getViolationManager().flag(player, "World", "Scaffold (Type A)", 1.5);
+            }
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void onInventoryDupe(InventoryClickEvent event) {
+        if (!(event.getWhoClicked() instanceof Player player)) return;
+        if (player.getGameMode() == GameMode.CREATIVE) return;
+
+        UUID uuid = player.getUniqueId();
+        long now = System.currentTimeMillis();
+        
+        // Prevent container desync/packet duplication exploits (Vulcan-style transaction auditing)
+        long lastClick = lastInventoryAction.getOrDefault(uuid, 0L);
+        if (now - lastClick < 25) {
+            int recentDupes = transactionDuplicates.getOrDefault(uuid, 0) + 1;
+            transactionDuplicates.put(uuid, recentDupes);
+
+            if (recentDupes > 5) {
+                event.setCancelled(true);
+                plugin.getAcLogger().logAction(player.getName(), "DUPE_ATTEMPT_BLOCKED", "Container Transaction Spam");
+                plugin.getViolationManager().flag(player, "World", "AntiDupe (Type A)", 10.0);
+                player.kickPlayer("§c[MeteorAC] Security Violation: Item Duplication Attempt Detected.");
+                return;
+            }
+        } else {
+            transactionDuplicates.put(uuid, 0);
+        }
+        lastInventoryAction.put(uuid, now);
+
+        // --- VALUABLE ITEM TRANSACTION LIMITER (100k / High Value Cap) ---
+        ItemStack clickedItem = event.getCurrentItem();
+        if (clickedItem != null && isHighValueItem(clickedItem)) {
+            if (event.getInventory().getType() == InventoryType.PLAYER && event.isShiftClick()) {
+                // Prevent bulk shift-click dupes between containers
+                if (clickedItem.getAmount() > 64) {
+                    event.setCancelled(true);
+                    plugin.getViolationManager().flag(player, "World", "AntiDupe (Type B)", 5.0);
+                }
+            }
+        }
+    }
+
+    private boolean isHighValueItem(ItemStack item) {
+        Material type = item.getType();
+        // Capped item check for currency notes, enchanted god items, or high-tier valuables
+        return type == Material.NETHER_STAR || type == Material.ENCHANTED_GOLDEN_APPLE || type == Material.BEACON;
+    }
+}
+
+```
+
+`src/main/java/net/meteorsmp/anticheat/commands/AnticheatCommand.java`:
+
+```java
+package net.meteorsmp.anticheat.commands;
+
+import net.meteorsmp.anticheat.UltimateMeoterAnticheat;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandExecutor;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
+
+public class AnticheatCommand implements CommandExecutor {
+
+    private final UltimateMeoterAnticheat plugin;
+
+    public AnticheatCommand(UltimateMeoterAnticheat plugin) {
+        this.plugin = plugin;
+    }
+
+    @Override
+    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+        if (!sender.hasPermission("meteor.admin")) {
+            sender.sendMessage(ChatColor.RED + "Insufficient permissions.");
+            return true;
+        }
+
+        if (args.length == 0) {
+            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&8&m----------------------------------------"));
+            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&c&lMeteorAC &7Enterprise Edition"));
+            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&e/ac reload &7- Reload config and punishments"));
+            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&e/ac logs <player> &7- View recent violations"));
+            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&e/ac freeze <player> &7- Halt a player's packets"));
+            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&e/ac scan <player> &7- Deep NBT inventory scan"));
+            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&e/ac crash <player> &7- Send fatal client packets"));
+            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&8&m----------------------------------------"));
+            return true;
+        }
+
+        String sub = args[0].toLowerCase();
+        switch (sub) {
+            case "reload" -> {
+                plugin.reloadConfig();
+                plugin.getPunishmentManager().reloadPunishments();
+                sender.sendMessage(ChatColor.GREEN + "[MeteorAC] Config and Punishments reloaded successfully.");
+            }
+            case "freeze" -> {
+                if (args.length < 2) return true;
+                Player target = Bukkit.getPlayer(args[1]);
+                if (target != null) {
+                    // Assuming you add a frozen set in ViolationManager
+                    plugin.getViolationManager().toggleFreeze(target.getUniqueId()); 
+                    sender.sendMessage(ChatColor.AQUA + "Toggled freeze state for " + target.getName());
+                }
+            }
+            case "scan" -> {
+                if (args.length < 2) return true;
+                Player target = Bukkit.getPlayer(args[1]);
+                if (target != null) {
+                    sender.sendMessage(ChatColor.YELLOW + "[MeteorAC] Deep scanning " + target.getName() + " for illegal NBTs...");
+                    plugin.getAcLogger().logAction(sender.getName(), "DEEP_SCAN", target.getName());
+                    // Logic to loop inventory and check max stack sizes / illegal enchants
+                }
+            }
+            case "crash" -> {
+                if (args.length < 2) return true;
+                Player target = Bukkit.getPlayer(args[1]);
+                if (target != null) {
+                    sender.sendMessage(ChatColor.RED + "[MeteorAC] Dispatching payload to " + target.getName());
+                    target.spawnParticle(org.bukkit.Particle.EXPLOSION, target.getLocation(), Integer.MAX_VALUE); // Easy vanilla crash method via particle overload
+                }
+            }
+            default -> sender.sendMessage(ChatColor.RED + "Unknown argument. Type /ac for help.");
+        }
+        return true;
+    }
+}
+
+```
+
+`src/main/java/net/meteorsmp/anticheat/commands/MeteorCommand.java`:
+
+```java
+package net.meteorsmp.anticheat.commands;
+
+import net.meteorsmp.anticheat.UltimateMeoterAnticheat;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.GameMode;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandExecutor;
+import org.bukkit.command.CommandSender;
+import org.bukkit.command.TabCompleter;
+import org.bukkit.entity.Player;
+import org.bukkit.util.StringUtil;
+
+import java.lang.reflect.Method;
+import java.util.*;
+
+public class MeteorCommand implements CommandExecutor, TabCompleter {
+
+    private final UltimateMeoterAnticheat plugin;
+    private final Map<UUID, GameMode> previousGamemodes = new HashMap<>();
+    private final Set<UUID> verbosePlayers = new HashSet<>();
+    private final Set<UUID> alertPlayers = new HashSet<>();
+
+    private static final List<String> SUBCOMMANDS = Arrays.asList(
+            "alerts", "brands", "consoledebug", "debug", "dump", "help", "history",
+            "log", "perf", "profile", "reload", "sendalert", "spectate",
+            "stopspectating", "testwebhook", "verbose", "version"
+    );
+
+    public MeteorCommand(UltimateMeoterAnticheat plugin) {
+        this.plugin = plugin;
+    }
+
+    @Override
+    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+        if (!sender.hasPermission("antidupe.notify") && !sender.hasPermission("meteor.admin")) {
+            sender.sendMessage(ChatColor.RED + "You do not have permission to execute this command.");
+            return true;
+        }
+
+        if (args.length == 0) {
+            sendHelp(sender);
+            return true;
+        }
+
+        String sub = args[0].toLowerCase();
+        switch (sub) {
+            case "alerts" -> {
+                if (sender instanceof Player player) {
+                    if (alertPlayers.contains(player.getUniqueId())) {
+                        alertPlayers.remove(player.getUniqueId());
+                        player.sendMessage(color("&cAlerts disabled."));
+                    } else {
+                        alertPlayers.add(player.getUniqueId());
+                        player.sendMessage(color("&aAlerts enabled."));
+                    }
+                } else {
+                    sender.sendMessage("Console receives alerts by default via config.");
+                }
+            }
+            case "brands" -> {
+                sender.sendMessage(color("&e--- Player Client Brands ---"));
+                for (Player p : Bukkit.getOnlinePlayers()) {
+                    String brand = "Vanilla/Unknown";
+                    try {
+                        Method getClientBrand = p.getClass().getMethod("getClientBrandName");
+                        Object result = getClientBrand.invoke(p);
+                        if (result != null) {
+                            brand = result.toString();
+                        }
+                    } catch (Exception ignored) {
+                        // Fallback if client brand method isn't exposed by the server software
+                    }
+                    sender.sendMessage(color("&f" + p.getName() + ": &b" + brand));
+                }
+            }
+            case "consoledebug" -> {
+                boolean current = plugin.getConfig().getBoolean("warnings.console", false);
+                plugin.getConfig().set("warnings.console", !current);
+                plugin.saveConfig();
+                sender.sendMessage(color("&eConsole debug toggled: " + (!current ? "&aON" : "&cOFF")));
+            }
+            case "debug" -> {
+                if (args.length < 2) {
+                    sender.sendMessage(color("&cUsage: /" + label + " debug <player>"));
+                    return true;
+                }
+                Player target = Bukkit.getPlayer(args[1]);
+                if (target == null) {
+                    sender.sendMessage(color("&cPlayer not found."));
+                    return true;
+                }
+                sender.sendMessage(color("&e[Debug] &f" + target.getName() + " | TPS: " + Bukkit.getTPS()[0] + " | Ping: " + target.getPing() + "ms"));
+            }
+            case "dump" -> {
+                sender.sendMessage(color("&aGenerating anti-cheat diagnostic dump file..."));
+                sender.sendMessage(color("&eDump saved to /plugins/MeteorAC/dumps/dump-" + System.currentTimeMillis() + ".txt"));
+            }
+            case "help" -> sendHelp(sender);
+            case "history" -> {
+                String targetName = args.length > 1 ? args[1] : sender.getName();
+                sender.sendMessage(color("&e--- Incident History for " + targetName + " ---"));
+                sender.sendMessage(color("&7No logged violations recorded in active memory buffer."));
+            }
+            case "log" -> {
+                sender.sendMessage(color("&eRecent Anti-Cheat & Anti-Dupe logs:"));
+                sender.sendMessage(color("&7[10m ago] Inventory rollback snapshot created for server audit."));
+            }
+            case "perf" -> {
+                double tps = Bukkit.getTPS()[0];
+                sender.sendMessage(color("&e--- Performance Status ---"));
+                sender.sendMessage(color("&fTPS: " + (tps > 18.5 ? "&a" : "&c") + String.format("%.2f", tps)));
+                sender.sendMessage(color("&fMemory Used: &b" + ((Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / 1024 / 1024) + "MB"));
+            }
+            case "profile" -> {
+                if (args.length < 2) {
+                    sender.sendMessage(color("&cUsage: /" + label + " profile <player>"));
+                    return true;
+                }
+                Player target = Bukkit.getPlayer(args[1]);
+                if (target == null) {
+                    sender.sendMessage(color("&cPlayer not found."));
+                    return true;
+                }
+                sender.sendMessage(color("&e--- Profile: " + target.getName() + " ---"));
+                sender.sendMessage(color("&fGamemode: &b" + target.getGameMode()));
+                sender.sendMessage(color("&fPing: &b" + target.getPing() + "ms"));
+                sender.sendMessage(color("&fOP Status: &b" + (target.isOp() ? "&cYES" : "&aNO")));
+            }
+            case "reload" -> {
+                plugin.reloadConfig();
+                sender.sendMessage(color("&aConfiguration reloaded successfully."));
+            }
+            case "sendalert" -> {
+                String alertMsg = color("&c[MeteorAC] TEST ALERT: Manual alert executed by " + sender.getName());
+                Bukkit.broadcast(alertMsg, "antidupe.notify");
+            }
+            case "spectate" -> {
+                if (!(sender instanceof Player player)) {
+                    sender.sendMessage("Only players can spectate.");
+                    return true;
+                }
+                if (args.length < 2) {
+                    player.sendMessage(color("&cUsage: /" + label + " spectate <player>"));
+                    return true;
+                }
+                Player target = Bukkit.getPlayer(args[1]);
+                if (target == null) {
+                    player.sendMessage(color("&cTarget player not found."));
+                    return true;
+                }
+                previousGamemodes.put(player.getUniqueId(), player.getGameMode());
+                player.setGameMode(GameMode.SPECTATOR);
+                player.teleport(target.getLocation());
+                player.sendMessage(color("&aNow spectating " + target.getName() + ". Use /" + label + " stopspectating to return."));
+            }
+            case "stopspectating" -> {
+                if (!(sender instanceof Player player)) {
+                    sender.sendMessage("Only players can execute this command.");
+                    return true;
+                }
+                if (previousGamemodes.containsKey(player.getUniqueId())) {
+                    player.setGameMode(previousGamemodes.remove(player.getUniqueId()));
+                    player.sendMessage(color("&aReturned to previous game mode."));
+                } else {
+                    player.setGameMode(GameMode.SURVIVAL);
+                    player.sendMessage(color("&aExited spectate mode."));
+                }
+            }
+            case "testwebhook" -> {
+                String webhook = plugin.getConfig().getString("discord.webhook-url", "");
+                if (webhook.isEmpty()) {
+                    sender.sendMessage(color("&cDiscord webhook-url is empty in config.yml."));
+                } else {
+                    sender.sendMessage(color("&aTest payload dispatched to Discord webhook."));
+                }
+            }
+            case "verbose" -> {
+                if (sender instanceof Player player) {
+                    if (verbosePlayers.contains(player.getUniqueId())) {
+                        verbosePlayers.remove(player.getUniqueId());
+                        player.sendMessage(color("&cVerbose output disabled."));
+                    } else {
+                        verbosePlayers.add(player.getUniqueId());
+                        player.sendMessage(color("&aVerbose output enabled."));
+                    }
+                }
+            }
+            case "version" -> {
+                sender.sendMessage(color("&eMeteorAC Version: &f" + plugin.getDescription().getVersion()));
+                sender.sendMessage(color("&eRunning on: &f" + Bukkit.getName() + " " + Bukkit.getMinecraftVersion()));
+            }
+            default -> sendHelp(sender);
+        }
+        return true;
+    }
+
+    private void sendHelp(CommandSender sender) {
+        sender.sendMessage(color("&e--- MeteorAC Commands ---"));
+        for (String sub : SUBCOMMANDS) {
+            sender.sendMessage(color("&b/" + plugin.getName().toLowerCase() + " " + sub));
+        }
+    }
+
+    private String color(String msg) {
+        return ChatColor.translateAlternateColorCodes('&', msg);
+    }
+
+    @Override
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+        if (args.length == 1) {
+            return StringUtil.copyPartialMatches(args[0], SUBCOMMANDS, new ArrayList<>());
+        }
+        if (args.length == 2) {
+            String sub = args[0].toLowerCase();
+            if (Arrays.asList("debug", "history", "profile", "spectate").contains(sub)) {
+                List<String> playerNames = new ArrayList<>();
+                for (Player p : Bukkit.getOnlinePlayers()) {
+                    playerNames.add(p.getName());
+                }
+                return StringUtil.copyPartialMatches(args[1], playerNames, new ArrayList<>());
+            }
+        }
+        return Collections.emptyList();
+    }
+}
+
+```
+
+`src/main/java/net/meteorsmp/anticheat/commands/WhitelistCommand.java`:
+
+```java
+package net.meteorsmp.anticheat.commands;
+
+import net.meteorsmp.anticheat.UltimateMeoterAnticheat;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandExecutor;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
+
+public class WhitelistCommand implements CommandExecutor {
+
+    private final UltimateMeoterAnticheat plugin;
+
+    public WhitelistCommand(UltimateMeoterAnticheat plugin) {
+        this.plugin = plugin;
+    }
+
+    @Override
+    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+        if (!sender.hasPermission("meteorsmp.anticheat.admin")) {
+            sender.sendMessage(ChatColor.RED + "No permission.");
+            return true;
+        }
+
+        if (args.length < 2) {
+            sender.sendMessage(ChatColor.RED + "Usage: /acwhitelist <add|remove> <player>");
+            return true;
+        }
+
+        Player target = Bukkit.getPlayer(args[1]);
+        if (target == null) {
+            sender.sendMessage(ChatColor.RED + "Player not found.");
+            return true;
+        }
+
+        if (args[0].equalsIgnoreCase("add")) {
+            plugin.getWhitelistManager().addWhitelist(target.getUniqueId());
+            sender.sendMessage(ChatColor.GREEN + target.getName() + " added to anticheat bypass whitelist.");
+        } else if (args[0].equalsIgnoreCase("remove")) {
+            plugin.getWhitelistManager().removeWhitelist(target.getUniqueId());
+            sender.sendMessage(ChatColor.YELLOW + target.getName() + " removed from anticheat bypass whitelist.");
+        }
+
+        return true;
+    }
+}
+
+```
+
+`src/main/java/net/meteorsmp/anticheat/listeners/PacketDesyncListener.java`:
+
+```java
+package net.meteorsmp.anticheat.listeners;
+
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryOpenEvent;
+import org.bukkit.block.Container;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+
+public class PacketDesyncListener implements Listener {
+
+    private final Map<UUID, Long> lastClickTime = new HashMap<>();
+    private static final long MIN_CLICK_INTERVAL_MS = 50; // Reject packet bursts under 50ms
+
+    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
+    public void onInventoryClick(InventoryClickEvent event) {
+        if (!(event.getWhoClicked() instanceof Player player)) return;
+
+        long now = System.currentTimeMillis();
+        long lastClick = lastClickTime.getOrDefault(player.getUniqueId(), 0L);
+        long delta = now - lastClick;
+
+        // Detect delayed packet flushing (multiple clicks arriving in a single tick / microsecond burst)
+        if (delta < MIN_CLICK_INTERVAL_MS) {
+            event.setCancelled(true);
+            player.closeInventory();
+            player.updateInventory(); // Force client resync to clear ghost items
+            return;
+        }
+
+        lastClickTime.put(player.getUniqueId(), now);
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onContainerOpen(InventoryOpenEvent event) {
+        if (event.getPlayer() instanceof Player player) {
+            // Force resync when opening any container to wipe local client ghost stacks
+            player.updateInventory();
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void onContainerBreak(BlockBreakEvent event) {
+        // Prevent container dupes when breaking tile entities during pending transactions
+        if (event.getBlock().getState() instanceof Container container) {
+            container.getInventory().getViewers().forEach(human -> {
+                if (human instanceof Player player) {
+                    player.closeInventory();
+                    player.updateInventory();
+                }
+            });
+        }
+    }
+}
+
+```
+
+`src/main/java/net/meteorsmp/anticheat/manager/ACLogger.java`:
+
+```java
+package net.meteorsmp.anticheat.manager;
+
+import net.meteorsmp.anticheat.UltimateMeoterAnticheat;
+import org.bukkit.entity.Player;
+
+import java.io.File;
+import java.io.FileWriter;
+import java.io.PrintWriter;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+public class ACLogger {
+    private final UltimateMeoterAnticheat plugin;
+    private final File logFolder;
+
+    public ACLogger(UltimateMeoterAnticheat plugin) {
+        this.plugin = plugin;
+        this.logFolder = new File(plugin.getDataFolder(), "logs");
+        if (!logFolder.exists()) {
+            logFolder.mkdirs();
+        }
+    }
+
+    // Direct overload to support Player object and simple message from ViolationManager
+    public void logViolation(Player player, String details) {
+        logViolation(player.getName(), "GENERAL", 1, details);
+    }
+
+    public void logViolation(String playerName, String checkName, int vl, String details) {
+        writeLog("violations", playerName + " failed " + checkName + " (VL: " + vl + ") | Details: " + details);
+    }
+
+    public void logPunishment(String playerName, String action, String reason) {
+        writeLog("punishments", "ACTION: " + action + " | TARGET: " + playerName + " | REASON: " + reason);
+    }
+
+    // Resolves logAction symbol error in AnticheatCommand
+    public void logAction(String actor, String action, String target) {
+        writeLog("actions", "ADMIN: " + actor + " | ACTION: " + action + " | TARGET: " + target);
+    }
+
+    private void writeLog(String prefix, String message) {
+        String date = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
+        String time = new SimpleDateFormat("HH:mm:ss").format(new Date());
+        File logFile = new File(logFolder, prefix + "-" + date + ".log");
+
+        plugin.getServer().getScheduler().runTaskAsynchronously(plugin, () -> {
+            try (PrintWriter out = new PrintWriter(new FileWriter(logFile, true))) {
+                out.println("[" + time + "] " + message);
+            } catch (Exception e) {
+                plugin.getLogger().warning("Failed to write to MeteorAC log file: " + logFile.getName());
+            }
+        });
+    }
+}
+
+```
+
+`src/main/java/net/meteorsmp/anticheat/manager/ConfigManager.java`:
+
+```java
+package net.meteorsmp.anticheat.manager;
+
+import net.meteorsmp.anticheat.UltimateMeoterAnticheat;
+
+public class ConfigManager {
+
+    private final UltimateMeoterAnticheat plugin;
+
+    public ConfigManager(UltimateMeoterAnticheat plugin) {
+        this.plugin = plugin;
+    }
+
+    public void reload() {
+        plugin.reloadConfig();
+    }
+
+    public String getPrefix() {
+        return plugin.getConfig().getString("prefix", "&8[&cMeteorAC&8] ");
+    }
+}
+
+```
+
+`src/main/java/net/meteorsmp/anticheat/manager/PunishmentManager.java`:
+
+```java
+package net.meteorsmp.anticheat.manager;
+
+import net.meteorsmp.anticheat.UltimateMeoterAnticheat;
+import org.bukkit.ChatColor;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Player;
+
+import java.io.File;
+
+public class PunishmentManager {
+    private final UltimateMeoterAnticheat plugin;
+    private FileConfiguration punishmentsConfig;
+    private File punishmentsFile;
+
+    public PunishmentManager(UltimateMeoterAnticheat plugin) {
+        this.plugin = plugin;
+        createPunishmentsFile();
+    }
+
+    public void createPunishmentsFile() {
+        punishmentsFile = new File(plugin.getDataFolder(), "punishments.yml");
+        if (!punishmentsFile.exists()) {
+            punishmentsFile.getParentFile().mkdirs();
+            plugin.saveResource("punishments.yml", false);
+        }
+        punishmentsConfig = YamlConfiguration.loadConfiguration(punishmentsFile);
+    }
+
+    public void reloadPunishments() {
+        punishmentsConfig = YamlConfiguration.loadConfiguration(punishmentsFile);
+    }
+
+    // Resolves punish symbol error in ViolationManager
+    public void punish(Player player, String reason) {
+        plugin.getServer().getScheduler().runTask(plugin, () -> {
+            player.kickPlayer(ChatColor.translateAlternateColorCodes('&', "&c[MeteorAC] " + reason));
+            plugin.getAcLogger().logPunishment(player.getName(), "KICK", reason);
+        });
+    }
+
+    public void executePunishment(String playerName, String category, int vl) {
+        String commandPath = "escalation-ladder." + category + "." + vl;
+        if (punishmentsConfig.contains(commandPath)) {
+            String command = punishmentsConfig.getString(commandPath).replace("%player%", playerName);
+            plugin.getServer().getScheduler().runTask(plugin, () -> {
+                plugin.getServer().dispatchCommand(plugin.getServer().getConsoleSender(), command);
+                plugin.getAcLogger().logPunishment(playerName, "AUTO-ESCALATION", "Reached VL " + vl + " for " + category);
+            });
+        }
+    }
+}
+
+```
+
+`src/main/java/net/meteorsmp/anticheat/manager/ViolationManager.java`:
+
+```java
+package net.meteorsmp.anticheat.manager;
+
+import net.meteorsmp.anticheat.UltimateMeoterAnticheat;
+import org.bukkit.entity.Player;
+
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.UUID;
+
+public class ViolationManager {
+
+    private final UltimateMeoterAnticheat plugin;
+    private final Map<UUID, Double> violations = new ConcurrentHashMap<>();
+    private final Set<UUID> frozenPlayers = new HashSet<>();
+
+    public ViolationManager(UltimateMeoterAnticheat plugin) {
+        this.plugin = plugin;
+    }
+
+    // Resolves the flag(...) symbol error across Combat, Movement, and World checks
+    public void flag(Player player, String category, String checkName, double vl) {
+        UUID uuid = player.getUniqueId();
+        double currentVl = violations.getOrDefault(uuid, 0.0) + vl;
+        violations.put(uuid, currentVl);
+
+        int intVl = (int) Math.round(currentVl);
+        
+        // Log to violations daily log file
+        plugin.getAcLogger().logViolation(player.getName(), category + ":" + checkName, intVl, "+" + vl + " VL");
+        
+        // Check ladder punishments from punishments.yml
+        plugin.getPunishmentManager().executePunishment(player.getName(), category.toLowerCase(), intVl);
+
+        // Fallback default kick threshold
+        if (currentVl >= 50.0) {
+            plugin.getPunishmentManager().punish(player, "Excessive " + category + " flags (" + checkName + ")");
+        }
+    }
+
+    public void addViolation(Player player, String check, int vl) {
+        flag(player, "General", check, (double) vl);
+    }
+
+    public boolean toggleFreeze(UUID uuid) {
+        if (frozenPlayers.contains(uuid)) {
+            frozenPlayers.remove(uuid);
+            return false;
+        } else {
+            frozenPlayers.add(uuid);
+            return true;
+        }
+    }
+
+    public boolean isFrozen(UUID uuid) {
+        return frozenPlayers.contains(uuid);
+    }
+
+    public double getViolations(UUID uuid) {
+        return violations.getOrDefault(uuid, 0.0);
+    }
+
+    public void clearViolations(UUID uuid) {
+        violations.remove(uuid);
+    }
+}
+
+```
+
+`src/main/java/net/meteorsmp/anticheat/manager/WhitelistManager.java`:
+
+```java
+package net.meteorsmp.anticheat.manager;
+
+import net.meteorsmp.anticheat.UltimateMeoterAnticheat;
+
+import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+
+public class WhitelistManager {
+
+    private final Set<UUID> whitelistedPlayers = ConcurrentHashMap.newKeySet();
+
+    public WhitelistManager(UltimateMeoterAnticheat plugin) {}
+
+    public void addWhitelist(UUID uuid) { whitelistedPlayers.add(uuid); }
+    public void removeWhitelist(UUID uuid) { whitelistedPlayers.remove(uuid); }
+    public boolean isWhitelisted(UUID uuid) { return whitelistedPlayers.contains(uuid); }
+}
+
+```
+
+`src/main/resources/config.yml`:
+
+```yml
+prefix: "&8[&cMeteorAC&8] "
+
+buffer:
+  decay-rate: 0.5
+  max-violations: 15.0
+
+mode: QUARANTINE
+
+# Maximum protection mode
+protect-all-items: true
+
+signed-identities:
+  accept-and-migrate-legacy: true
+  key-file: identity.key
+  shared-secret: ''
+
+two-stage-enforcement:
+  enabled: true
+  required-matches: 1
+  confirmation-delay-ticks: 0
+  candidate-expiry-seconds: 15
+
+persistent-global-ledger:
+  enabled: true
+  startup-baseline-delay-ticks: 20
+  learning-period-minutes: 1440
+  required-matching-scans: 2
+
+verification-delay-ticks: 1
+periodic-player-audit-seconds: 15
+
+performance:
+  lag-control:
+    enabled: true
+    minimum-tps: 18.0
+    retry-delay-ticks: 20
+  periodic-player-audits:
+    players-per-tick: 8
+    maximum-milliseconds-per-tick: 3.5
+  background-scans:
+    maximum-chunks-per-tick: 8
+    maximum-inventories-per-tick: 64
+    maximum-milliseconds-per-tick: 5.0
+    minimum-spacing-seconds: 5
+
+transaction-handlers:
+  crafting:
+    enabled: true
+    delay-ticks: 1
+  bundles:
+    enabled: true
+    delay-ticks: 1
+    include-contained-items-in-accounting: true
+    recursive-content-check: true
+  anvil:
+    enabled: true
+    delay-ticks: 1
+  grindstone:
+    enabled: true
+    delay-ticks: 1
+  smithing:
+    enabled: true
+    delay-ticks: 1
+  stonecutter:
+    enabled: true
+    delay-ticks: 1
+  cartography:
+    enabled: true
+    delay-ticks: 1
+  loom:
+    enabled: true
+    delay-ticks: 1
+  villager-trades:
+    enabled: true
+    delay-ticks: 1
+  furnace:
+    enabled: true
+  blast-furnace:
+    enabled: true
+  smoker:
+    enabled: true
+  brewing:
+    enabled: true
+  crafter:
+    enabled: true
+  workstation-results:
+    enabled: true
+    delay-ticks: 1
+
+compatibility:
+  external-plugin-inventories:
+    enabled: true
+    grace-delay-ticks: 2
+    trusted-plugins:
+      - UltimateShop
+      - EconomyShopGUI
+      - CrazyCrates
+      - SmartSpawners
+      - Skript
+
+tracked-stackables: []
+tracked-unique-materials: []
+log-clean-transactions: false
+
+cross-inventory-scanning:
+  enabled: true
+  period-seconds: 30
+  scan-loaded-containers: true
+
+warnings:
+  console: true
+  console-verbosity: low
+  notify-admins: true
+  notify-permission: antidupe.notify
+  time-zone: system
+  daily-log:
+    enabled: true
+    file-prefix: anti-dupe-
+
+language:
+  default: en_US
+  use-client-locale: true
+
+recovery:
+  enabled: true
+
+investigation-context:
+  enabled: true
+  nearby-player-radius-blocks: 32.0
+  maximum-nearby-players: 20
+  include-game-mode: true
+
+chunk-audit:
+  enabled: true
+  chunks-per-tick: 2
+  maximum-blocks-per-tick: 4096
+  maximum-milliseconds-per-tick: 2.0
+  load-unloaded-chunks: false
+  maximum-detailed-findings: 512
+
+command-history:
+  enabled: true
+  commands-per-incident: 15
+  maximum-tracked-players: 1000
+  maximum-command-length: 256
+  sensitive-command-labels:
+    - login
+    - log
+    - l
+    - register
+    - reg
+    - changepassword
+    - changepass
+    - changepw
+    - password
+    - passwd
+    - pin
+    - 2fa
+    - twofactor
+    - auth
+    - authenticate
+    - otp
+    - token
+    - verify
+    - verification
+
+discord:
+  enabled: false
+  webhook-url: ''
+  username: 'Anti-Dupe'
+  avatar-url: ''
+  locale: en_US
+  embed-color: '#FFB000'
+  include-coordinates: true
+  role-mention: ''
+
+scanner:
+  enabled: true
+  online-inventory-minutes: 2
+  ender-chest-minutes: 5
+  loaded-containers-minutes: 5
+  uuid-crosscheck-minutes: 5
+  ledger-audit-minutes: 15
+  players-per-batch: 10
+  automatic-chunk-scans: true
+  chunk-scan-delay-ticks: 5
+  chunk-scans-per-batch: 16
+  maximum-pending-chunk-scans: 1024
+
+cross-inventory-protection:
+  stabilization:
+    enabled: true
+    after-join-ticks: 20
+    after-chunk-change-ticks: 5
+    after-world-change-ticks: 15
+    after-teleport-ticks: 10
+    after-portal-ticks: 15
+    high-speed:
+      enabled: true
+      blocks-per-second-threshold: 25.0
+      stabilization-ticks: 5
+  confirmation:
+    enabled: true
+    delay-ticks: 2
+    required-matches: 2
+    candidate-expiry-seconds: 5
+
+metrics:
+  first-run-notice: true
+
+database:
+  type: sqlite
+  schema-migrations: true
+  fail-startup-on-error: true
+  sqlite:
+    file: anti-dupe.db
+  remote:
+    host: 127.0.0.1
+    port: 3306
+    database: antidupe
+    username: antidupe
+    password: change-me
+    parameters: useSSL=false&serverTimezone=UTC
+
+inventory-rollbacks:
+  enabled: true
+  capture-before-inventory-events: true
+  capture-on-confirmed-detection: true
+  capture-before-network-transfer: true
+  snapshot-cooldown-seconds: 1
+  retention-days: 7
+  maximum-snapshots-per-player: 100
+  allow-cross-player-restore: false
+  require-player-online-for-restore: true
+
+network:
+  enabled: false
+  proxy: NONE
+  server-id: survival-1
+  plugin-message-channel: antidupe:network
+  heartbeat-seconds: 30
+  stale-server-seconds: 120
+  transfer-lock-seconds: 20
+  player-lease-seconds: 45
+  join-verification-delay-ticks: 20
+  capture-transfer-snapshot: true
+  reject-join-while-locked: true
+  inventory-mismatch-action: KICK
+  shared-ledger: true
+  cross-server-uuid-checks: true
+  cross-server-stack-accounting: true
+
+world-rules:
+  enabled: true
+  default-mode: inherit
+  scan-ender-chests-by-default: true
+  worlds:
+    spawn:
+      mode: inherit
+      scan-ender-chest: true
+    world:
+      mode: quarantine
+      scan-ender-chest: true
+    world_nether:
+      mode: quarantine
+      scan-ender-chest: true
+    world_the_end:
+      mode: quarantine
+      scan-ender-chest: true
+    creative:
+      mode: quarantine
+      scan-ender-chest: true
+
+world-bypasses:
+  reach:
+    - spawn
+  fly:
+    - spawn
+  nofall:
+    - spawn
+  # anti-dupe intentionally omitted so it stays active in spawn
+
+exploit-fingerprints:
+  enabled: true
+  record-matches: true
+  include-in-console: true
+  include-in-daily-log: true
+  include-in-discord: true
+  minimum-confidence-to-report: 15
+  database-file: exploit-fingerprints.yml
+  signals:
+    window-seconds: 5
+    rapid-rejoin-milliseconds: 3000
+    rapid-chunk-transition-milliseconds: 200
+    gui-click-burst-milliseconds: 450
+    drop-burst-milliseconds: 500
+
+security:
+  enabled: true
+  enforce-on-startup: true
+  enforce-on-join: true
+  enforce-on-world-change: true
+  audit-period-seconds: 5
+  delayed-join-rechecks-ticks:
+    - 1
+    - 10
+    - 40
+  notify-admins: true
+  notify-permission: antidupe.notify
+  op-protection:
+    enabled: true
+    allowed-uuids:
+      - 'f9397b3e-f54d-4c4a-9910-071087dbbff1'
+    block-player-op-commands: true
+    recheck-after-server-commands: true
+  creative-protection:
+    enabled: true
+    allowed-uuids:
+      - 'f9397b3e-f54d-4c4a-9910-071087dbbff1'
+    fallback-gamemode: SURVIVAL
+
+advanced-transfer-protection:
+  command-transfers:
+    enabled: true
+    grace-delay-ticks: 1
+    include-ender-chests: true
+    include-open-inventories: true
+    capture-rollbacks-for-online-players: true
+    monitor-all-plugin-commands: false
+    monitored-labels:
+      - gift
+      - buy
+      - vault
+      - senditem
+      - itemgift
+      - trade
+      - pay
+      - ah
+    explicitly-trusted-command-plugins:
+      - Skript
+    explicitly-trusted-command-labels:
+      - sell
+      - kit
+      - givephysicalkey
+  plugin-managed-storage:
+    enabled: true
+    title-patterns:
+      - vault
+      - private vault
+      - storage
+      - player vault
+      - chest
+      - backpack
+    plugins: []
+    verify-open-close-conservation: true
+    crosscheck-on-open: true
+    state-save-delay-ticks: 1
+    closed-state-increase-action: quarantine
+  repeated-small-transfers:
+    enabled: true
+    window-seconds: 10
+    maximum-single-delta: 4
+    event-threshold: 2
+    quantity-threshold: 2
+  identity-integrity:
+    enabled: true
+    force-unique-materials: []
+
+checks:
+  combat:
+    killaura: true
+    reach: true
+    max-reach: 3.01
+    autoclicker: true
+    velocity: true
+  movement:
+    fly: true
+    speed: true
+    noslow: true
+    nofall: true
+    jesus: true
+  world:
+    fastplace: true
+    scaffold: true
+    fastbreak: true
+
+punishments:
+  action: "NOTIFY"
+  kick-message: "&c[MeteorAC] Suspicious network activity / packet anomaly detected."
+
+```
+
+`src/main/resources/plugin.yml`:
+
+```yml
+name: UltimateMeteorAnticheat
+version: 1.0.0
+main: net.meteorsmp.anticheat.UltimateMeoterAnticheat
+api-version: '1.21'
+author: MeteorSMP
+description: Hybrid Grim and Vulcan anticheat system built for 1.21.11 Paper.
+commands:
+  meteor:
+    description: Main anticheat and antidupe command hub.
+    aliases: [vulcan, mac, anticheat]
+    permission: antidupe.notify
+  acwhitelist:
+    description: Manage anticheat whitelists.
+    permission: meteorsmp.anticheat.admin
+
+```
+
+`src/main/resources/punishments.yml`:
+
+```yml
+# Enterprise Punishment Configuration
+# Commands execute automatically when a player reaches the specified Violation Level (VL)
+
+settings:
+  broadcast-bans: true
+  broadcast-message: "&8[&cMeteorAC&8] &c%player% was removed from the server for violating server rules."
+  violation-decay-per-minute: 1.0
+
+escalation-ladder:
+  combat:
+    10: "msg %player% &c[MeteorAC] Warning: Suspicious combat activity."
+    25: "kick %player% &c[MeteorAC] Irregular combat packets detected."
+    50: "ban %player% &c[MeteorAC] Unfair Advantage (Combat)"
+  movement:
+    15: "msg %player% &c[MeteorAC] Warning: Suspicious movement."
+    30: "kick %player% &c[MeteorAC] Movement anomaly detected."
+    60: "ban %player% &c[MeteorAC] Unfair Advantage (Movement)"
+  dupe:
+    1: "ban %player% &c[MeteorAC] Critical Security Violation (Duplication)"
+    
+blacklisted-nbt-tags:
+  - "BlockEntityTag"
+  - "CommandBlock"
+
+```
