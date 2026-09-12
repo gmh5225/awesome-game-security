@@ -2515,7 +2515,6 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/gmh5225/PdFwKrnlMapper [PdFwKrnl.sys]
 - https://github.com/gmh5225/pdfwkrnl-exploit [PdFwKrnl.sys]
 - https://github.com/Bad-Jubies/Exploits [AmdPowerProfiler.sys]
-- https://github.com/mein-0/forti-research [fortimon3_74.sys]
 
 > Driver Communication
 - https://github.com/gmh5225/Driver-Communication-List
@@ -4355,6 +4354,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/lauralex/OAC [Open Anti-Cheat: x64 Windows kernel driver plus user-mode scanner reference implementation with ObCallbacks handle filtering and cross-view integrity checks]
 - https://github.com/violetweather/Certael [Server-authoritative open-source anti-cheat framework with Godot/Unity/Unreal adapters]
 - https://github.com/lannden1245/Void-Engine [Godot 4.x plugin with WhiteVoid AntiCheat: debugger/process/window detection, honeypot integrity checks, and HWID ban enforcement]
+- https://github.com/modcommunity/dot-server-security [Godot 4 dedicated-server security addon with movement/shot validation, configurable rule-engine escalation, ban feeds, and dry-run auditing]
 - https://github.com/vul-os/magnetite [Rust self-hostable game platform with magnetite-anticheat: server-authoritative deterministic replay verification and composable cheat validators]
 - https://github.com/web-coder-lab/chessking [Rust server-side anti-cheat for multiplayer chess: risk scoring, device fingerprinting, match integrity, captcha, and ban escalation]
 - https://github.com/XX-Batsu/bevy-personal-test [Rust Bevy multiplayer framework with sandboxed Rhai script VM, rollback netcode, and shadow-VM anti-cheat verification]
