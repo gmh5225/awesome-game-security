@@ -366,6 +366,7 @@ sources:
   - wiki/sources/descriptions/H3d9__sguard_limit.md
   - wiki/sources/descriptions/gmh5225__avhook.md
   - wiki/sources/descriptions/martinjanas__Sensum.md
+  - wiki/sources/descriptions/sodium-CrispyWafer__CrispyWafer-Anti-Cheat-Assistant-WaferACA.md
   - wiki/sources/descriptions/soyware__heck_csgo_external.md
   - wiki/sources/descriptions/si1kyyy__csgo_cheat_external.md
   - wiki/sources/descriptions/rrpvm__csgo-external-cheat.md
@@ -1200,7 +1201,7 @@ Structured research indexes such as [[anti-cheat-research-index]] catalog public
 
 **Paper freecam mitigation:** [[petal-anti-freecam]] (boggymc; Java Paper/CanvasMC **1.21** plugin; PacketEvents outgoing chunk masking; ChunkMasker replaces underground sections with air below configurable hide-Y for players above cutoff; tile-entity filtering; per-tick refresh budget; runtime reload; optional CanvasMC async teleport visibility listeners; server-side anti-freecam/wallhack without client mods; Anti Cheat / game:minecraft) for operators needing packet-layer terrain stripping beside investigation plugins such as [[antixrayviewer]] and QA clients such as [[anticheat-qa]]. (source: wiki/sources/descriptions/boggymc__PetalAntiFreecam.md)
 
-**Forge peer-mod detection:** sodium-CrispyWafer/WaferACA (Minecraft Forge **1.20.1** client mod; server-cooperative FML mod-list extraction + custom network packets, or client-only aimbot heuristics from rotation smoothness/flick/tracking; public cheat alerts and per-player mod commands; Open Source Anti Cheat System / game:minecraft) for Forge multiplayer operators needing lightweight peer cheat-mod visibility beside integrity mods such as [[katapult-anticheat]]. (source: wiki/sources/README-categories.md) (source: wiki/sources/descriptions/sodium-CrispyWafer__CrispyWafer-Anti-Cheat-Assistant-WaferACA.md)
+**Forge peer-mod detection:** [[crispy-wafer-anti-cheat-assistant-waferaca]] (sodium-CrispyWafer; Java Forge **1.20.1** client mod; server-cooperative FML mod-list extraction + custom network packets, or client-only aimbot heuristics from rotation smoothness/flick/tracking; public cheat alerts and per-player mod commands/key bindings; Open Source Anti Cheat System / game:minecraft) for Forge multiplayer operators needing lightweight peer cheat-mod visibility beside integrity mods such as [[katapult-anticheat]]. (source: wiki/sources/descriptions/sodium-CrispyWafer__CrispyWafer-Anti-Cheat-Assistant-WaferACA.md)
 
 **Cross-platform MC client AC:** EPOTATOTV/PACC4_0 (PACC; Bedrock/Java client-side anti-cheat; local memory/process/HID detection, AI behavior scoring, encrypted persistence, separate PTV admin backend; Open Source Anti Cheat System / game:minecraft) for operators studying client-resident MC cheat detection beside server-side plugins such as [[grim]] and QA clients such as [[anticheat-qa]]. (source: wiki/sources/README-categories.md) (source: wiki/sources/descriptions/EPOTATOTV__PACC4_0.md)
 
