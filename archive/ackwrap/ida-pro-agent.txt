@@ -1,0 +1,110 @@
+Project Path: arc_ackwrap_ida-pro-agent_opb9nd60
+
+Source Tree:
+
+```txt
+arc_ackwrap_ida-pro-agent_opb9nd60
+└── README.md
+
+```
+
+`README.md`:
+
+```md
+# ida-agent
+
+[English](#english) | [中文](#中文)
+
+> **Windows x64 only / 仅支持 Windows x64**
+>
+> Requires **IDA Professional 9.4 for Windows**, with its bundled **Qt 6.8.2**. Linux, macOS, and other IDA/Qt versions are not supported.
+>
+> 需要 **Windows 版 IDA Professional 9.4** 及其自带的 **Qt 6.8.2**。不支持 Linux、macOS 和其他 IDA/Qt 版本。
+
+[Download releases / 下载发布版本](https://github.com/ackwrap/ida-pro-agent/releases)
+
+## English
+
+ida-agent combines an IDA plugin, an MCP Gateway for external AI clients, and a built-in AI Console. It supports function and cross-reference inspection, pseudocode, bounded argument tracing across direct callers, guard evidence extraction, and supported IDB edits through ChangeSets.
+
+This repository hosts public usage documentation and binary releases. Source code and CI builds are maintained separately. GitHub's automatic **Source code** downloads contain this public repository's documents; use the named release assets to install ida-agent.
+
+### Install
+
+1. Download `ida-agent-<version>-windows-x64-setup.exe` from Releases and close IDA before installing or upgrading. The installer installs for the current Windows user and deploys the IDA plugin.
+2. Alternatively, extract `ida-agent-<version>-windows-x64.zip`, then copy `plugins/ida-agent-plugin.dll` into your IDA user plugin directory. Keep the Gateway and skills together in the extracted directory.
+3. Start IDA and load a database. Open **Edit → Plugins → IDA Agent**.
+4. When upgrading from ida-mcp, retire the old `ida_mcp_plugin.dll` before loading the new plugin, and use `ida-agent` for your MCP client entry.
+
+The installer has a separate `.sha256` file; the portable ZIP includes per-file `SHA256SUMS.txt`. IDA itself and Qt runtime DLLs are not bundled.
+
+### Configure a provider
+
+Open **Provider Settings...**, select the OpenAI or Claude preset, or add a custom provider. Set the API mode, Base URL, and API key. Use **Refresh Models** or **Add Model...**, choose a default model/provider, save, then open **Open AI Chat**.
+
+| API mode | Base URL example | Endpoint appended by the plugin |
+| --- | --- | --- |
+| OpenAI Responses | `https://api.openai.com/v1` | `/responses` |
+| OpenAI-compatible Chat Completions | Your provider's API prefix, such as `https://api.example.com/v1` | `/chat/completions` |
+| Anthropic Messages | `https://api.anthropic.com/v1` | `/messages` |
+
+Enter the API prefix, not a complete operation URL. **Test Connection** checks model discovery, not chat, streaming, or tool-calling compatibility. Providers without model discovery may work with a manually added model.
+
+API keys and saved proxy passwords are stored as plaintext with current-user file permissions, normally in `%LOCALAPPDATA%\ida-agent\ai\providers.json`. The built-in AI sends conversation content and relevant analysis results to the selected provider. External MCP clients use their own provider settings.
+
+### MCP clients
+
+Run `ida-agent-gateway.exe -web` for the local client configuration manager, or configure your MCP client to start `ida-agent-gateway.exe` with no arguments for stdio. Keep IDA open with the database loaded. Optional HTTP transport binds only to loopback; authenticated remote hosting is not implemented.
+
+Version 0.3.1 adds ZCode alongside Codex, OpenCode, Claude Code, Antigravity CLI, and Grok Build. ZCode uses the user-level `~/.zcode/cli/config.json` (`mcp.servers`), with optional skills under `~/.zcode/skills/`.
+
+On Windows, the manager also discovers Codex in common npm/Scoop installations and the desktop app's bundled CLI when PATH is outdated. It runs the native executable without requiring Node.js in PATH. For custom installations, set `IDA_AGENT_CODEX_PATH` to the absolute path of `codex.exe` and restart the manager.
+
+### Limits and build environment
+
+- Pseudocode and semantic analysis require a compatible Hex-Rays decompiler and license. Caller tracing expands known direct callers, defaults to two levels, and permits at most five. Unknown indirect calls, native tail calls, callee-return summaries, and heap aliases are not recovered.
+- Guard evidence is function-local and does not prove safety, exploitability, or complete input validation. General cross-reference tracing is not semantic taint analysis. Results may be partial or truncated.
+- Only supported ChangeSet edits offer preview/apply/rollback. Arbitrary scripts are not sandboxed or automatically reversible.
+- The Windows build configuration uses MSVC 2022 x64, Windows SDK, CMake 3.25+, Ninja, Go 1.25.0+, Python 3.11, and Inno Setup 6. It links public IDA SDK import libraries against Qt 6.8.2 headers; runtime Qt comes from IDA.
+- CI checks compilation and unit tests. Those checks do not replace live IDA UI or licensed integration testing.
+
+## 中文
+
+ida-agent 包含 IDA 插件、供外部 AI 客户端使用的 MCP Gateway，以及内置 AI Console。支持函数与交叉引用检查、伪代码、沿直接调用者进行有限层级的参数回溯、校验证据提取，以及通过 ChangeSet 执行支持的 IDB 修改。
+
+本仓库用于发布使用说明和二进制版本，源码与 CI 构建单独维护。GitHub 自动提供的 **Source code** 下载只包含本公开仓库中的文档，安装请使用带有 `ida-agent` 名称的发布附件。
+
+### 安装
+
+1. 从 Releases 下载 `ida-agent-<版本>-windows-x64-setup.exe`，安装或升级前关闭 IDA。安装器按当前 Windows 用户安装，并部署 IDA 插件。
+2. 也可以解压 `ida-agent-<版本>-windows-x64.zip`，将 `plugins/ida-agent-plugin.dll` 复制到 IDA 用户插件目录。Gateway 与技能目录保留在便携目录中。
+3. 启动 IDA 并加载数据库，在 **Edit → Plugins → IDA Agent** 中使用插件。
+4. 从 ida-mcp 升级时，先停用旧的 `ida_mcp_plugin.dll`，避免重复加载；MCP 客户端条目统一使用 `ida-agent`。
+
+安装器附带独立 `.sha256` 校验文件，便携 ZIP 内含逐文件 `SHA256SUMS.txt`。发布包不包含 IDA 或 Qt 运行时 DLL。
+
+### 配置供应商
+
+打开 **Provider Settings...**，选择 OpenAI、Claude 预设或添加自定义供应商，填写 API 模式、Base URL 和 API Key。通过 **Refresh Models** 获取模型，或用 **Add Model...** 手动添加模型 ID，设置默认模型和供应商，保存后打开 **Open AI Chat**。
+
+支持 OpenAI 风格的 **Responses / Chat Completions** 和 Anthropic 风格的 **Messages**。Base URL 填 API 前缀，例如 `https://api.openai.com/v1`，不要附加 `/responses`、`/chat/completions` 或 `/messages`，插件会自动追加。**Test Connection** 只检查模型列表接口，不能证明聊天、流式输出和工具调用均兼容；不支持模型列表的服务可尝试手动添加模型。
+
+API Key 和已保存的代理密码使用当前用户文件权限保护，但以明文保存，通常位于 `%LOCALAPPDATA%\ida-agent\ai\providers.json`。内置 AI 会向选定供应商发送会话内容与相关分析结果。外部 MCP 客户端使用其自己的模型供应商配置。
+
+### MCP 客户端
+
+运行 `ida-agent-gateway.exe -web` 打开本地配置管理页，或让 MCP 客户端以无参数方式启动 `ida-agent-gateway.exe` 使用 stdio。使用时保持 IDA 与数据库打开。可选 HTTP 模式仅监听本机回环地址，尚未实现带认证的远程服务。
+
+0.3.1 在 Codex、OpenCode、Claude Code、Antigravity CLI、Grok Build 之外新增 ZCode 支持。ZCode 使用用户级 `~/.zcode/cli/config.json` 中的 `mcp.servers`，可选技能位于 `~/.zcode/skills/`。
+
+Windows 下，管理页也会检查常见 npm/Scoop 安装位置及 Codex 桌面应用自带的 CLI，避免旧 PATH 导致检测失败；优先运行原生程序，不依赖 PATH 中的 Node.js。自定义安装位置可通过 `IDA_AGENT_CODEX_PATH` 指定 `codex.exe` 的绝对路径，设置后重启管理页。
+
+### 当前限制与编译环境
+
+- 伪代码和语义分析需要对应的 Hex-Rays 反编译器与许可。跨函数追踪只展开已知直接调用者，默认两层、最多五层；不恢复未知间接调用、原生尾调用、被调函数返回值摘要或堆别名。
+- 校验证据仅覆盖函数内部，不能证明安全、可利用性或输入校验完备。普通交叉引用追踪不是语义污点分析，结果可能不完整或被预算截断。
+- 只有支持的 ChangeSet 修改提供预览、应用和回滚；任意脚本没有沙箱，也不会自动回滚。
+- Windows 构建配置使用 MSVC 2022 x64、Windows SDK、CMake 3.25+、Ninja、Go 1.25.0+、Python 3.11 和 Inno Setup 6。编译使用 Qt 6.8.2 头文件与公开 IDA SDK 导入库，运行时使用 IDA 自带 Qt。
+- CI 编译与单元测试通过，不能替代真实 IDA 的 UI 或需要许可的集成测试。
+
+```
