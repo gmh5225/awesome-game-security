@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-12** — ingest `description:EpicLizard05013/UltimateMeteorAntiCheat`: entity [[ultimate-meteor-anticheat]] (EpicLizard05013; Java Paper **1.21.11** survival plugin; combat reach/autoclicker/aim-modulo + movement fly/speed/nofall/jesus + world fastplace/scaffold; inventory transaction auditing, nested-container restrictions, packet desync anti-dupe; violation escalation, whitelisting, admin commands, optional Discord webhooks; Anti Cheat / game:minecraft); cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[bs-anticheat]], [[larping-anti-cheat]], [[uagc]], [[icuac]], [[grim]], and [[minecraft-anticheat-list]]; `index.md` updated.
+
 - **2026-09-12** — ingest `readme:categories`: Anti Cheat ~727 (+1; EpicLizard05013/UltimateMeteorAntiCheat Paper 1.21.11 survival AC/anti-dupe in Open Source Anti Cheat System) / Cheat ~2806 / other major section counts stable; 41 sections; refreshed README-map counts and Paper MC server-AC scope on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/reverse-engineering]], and [[overviews/dma-attack]]; light `index.md` section notes (no per-category pages).
 
 - **2026-09-12** — ingest `description:Coldzer0/RE4F`: entity [[re4f]] (Coldzer0; Obsidian-friendly Windows RE curriculum; x86/x64, NASM/MASM, Windows memory/PE, static/dynamic analysis with IDA/Ghidra/x64dbg/WinDbg/BN/DnSpy, anti-analysis packing/anti-debug; Cheat / Guide); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[ida-for-delphi]], [[luadecompiler]], [[intro-to-gamehacking]], and [[mytechnotalent-reverse-engineering]]; `index.md` updated.
