@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-12** — ingest `description:wumingzhinu/VirtualMachine`: entity [[virtualmachine]] (VM Studio; full guest Android VM on ARM64; native C isolation + Kotlin UI; chrooted rootfs, syscall translation, Vulkan/OpenGL ES; Magisk root toggle, Xposed, Google Play, camera/sensor/VPN passthrough); cited on [[overviews/mobile-security]] and [[mobile-anti-cheat]]; `index.md` updated.
+
 - **2026-09-12** — ingest `readme:categories`: Cheat ~2803 (+1; wumingzhinu/VirtualMachine VM Studio full guest Android VM with Vulkan/Magisk/Xposed) / Anti Cheat ~725 (+3; sodium-CrispyWafer/WaferACA Forge peer-mod detection + EPOTATOTV/PACC4_0 cross-platform MC client AC + beto2-dev/Hyapk Android HyVm/dex2c packer) / other major section counts stable; 41 sections; refreshed README-map counts and scope on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/game-hacking]], [[overviews/mobile-security]], [[overviews/reverse-engineering]], and [[overviews/dma-attack]]; light `index.md` section notes (no per-category pages).
 
 - **2026-09-12** — lint: index vs disk scan — 9 overviews, 42 concepts, 3880 entities (3931 index entries); index.md fully synced (0 missing, 0 dead, 0 duplicate entries); overview wikilink spot-check (9 pages) — 0 broken links; concept spot-check (42 pages) — 0 broken links; index.md wikilink scan — 0 broken links; 6 cross-kind slug collisions ([[game-hacking]], [[anti-cheat]], [[reverse-engineering]], [[il2cpp]], [[byovd]], [[dma]]) — expected, no repair needed; no structural edits required.
