@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-12** — ingest `description:Coldzer0/RE4F`: entity [[re4f]] (Coldzer0; Obsidian-friendly Windows RE curriculum; x86/x64, NASM/MASM, Windows memory/PE, static/dynamic analysis with IDA/Ghidra/x64dbg/WinDbg/BN/DnSpy, anti-analysis packing/anti-debug; Cheat / Guide); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[ida-for-delphi]], [[luadecompiler]], [[intro-to-gamehacking]], and [[mytechnotalent-reverse-engineering]]; `index.md` updated.
+
 - **2026-09-12** — ingest `description:unrandoms/frida-mobile-kit`: entity [[frida-mobile-kit]] (unrandoms; categorized Frida JS for SSL pinning bypass OkHttp/TrustManager/Conscrypt/Flutter/React Native, HTTP/WebSocket traffic logging, crypto key extraction, root/SafetyNet bypass, method tracing/string dumps; Python CLI list/spawn/attach/combine hooks; Cheat / Frida); cited on [[concepts/frida]] and [[overviews/mobile-security]]; cross-linked [[ssl-bypass]], [[root-detection-low-level]], [[moabille]], and [[frida-ide]]; `index.md` updated.
 
 - **2026-09-12** — ingest `readme:categories`: Cheat ~2806 (+2; Coldzer0/RE4F Obsidian RE curriculum in Guide + unrandoms/frida-mobile-kit Android Frida script toolkit in Frida) / Anti Cheat ~726 / other major section counts stable; 41 sections; refreshed README-map counts and guide/Frida scope on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/reverse-engineering]], [[overviews/mobile-security]], and [[overviews/dma-attack]]; light `index.md` section notes (no per-category pages).
