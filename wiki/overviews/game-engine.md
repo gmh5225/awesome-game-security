@@ -750,7 +750,7 @@ Also: [[everything-game-dev-code]] (MRCalderon3D; multi-engine AI agent scaffold
 
 ## Security-relevant surfaces
 
-Object models and property offsets, rendering hooks ([[present-hook]]), network replication, and README **Game Engine Protection:*** subtrees (Unreal/Unity/Source). Engine selection for analysis weighs target platform, source access, language, graphics API, and documentation quality. (source: wiki/sources/skills/game-engine.md)
+Object models and property offsets, rendering hooks ([[present-hook]]), network replication, and README **Game Engine Protection:*** subtrees (Unreal/Unity/Source). Godot 4 dedicated-server addons such as [[dot-server-security]] harden multiplayer hosts with a configuration-driven rule engine—sliding-window rate limits and warn/gag/mute/kick/ban ladders across chat, connections, auth, remote console, and server-side movement/shot validation—complementing client-side Godot AC plugins like [[void-engine]]. (source: wiki/sources/descriptions/modcommunity__dot-server-security.md) Engine selection for analysis weighs target platform, source access, language, graphics API, and documentation quality. (source: wiki/sources/skills/game-engine.md)
 
 ## Key sub-areas
 

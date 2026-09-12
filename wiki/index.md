@@ -1112,7 +1112,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Doriax](entities/doriax.md) — cross-platform C++ ECS game engine with ImGui editor (Lua/C++ scripting; Sokol OpenGL; DirectX/OpenGL/Metal/Vulkan; desktop/mobile/web)
 - [dotNIET](entities/dotniet.md) — IDA plugin: .NET NativeAOT type/method symbol recovery (Import .NET Symbol)
 - [dotrix](entities/dotrix.md) — open-source Rust 3D engine (dot + matrix; Game Engine / source)
-- [dot-server-security](entities/dot-server-security.md) — Godot 4 dedicated-server security addon (GDScript rule engine; movement/shot validation; sliding-window rate limits; warn/gag/mute/kick/ban escalation; external ban feeds; dry-run default; modcommunity; Anti Cheat / Open Source Anti Cheat System)
+- [dot-server-security](entities/dot-server-security.md) — Godot 4 dedicated-server security addon (GDScript configuration-driven rule engine; chat/connection/auth/console/AC surfaces; movement re-sim + shot validation; impossible vs suspicious tiers; sliding-window rate limits; warn/gag/mute/kick/ban escalation; external ban feeds; dry-run auditing default; modcommunity; Anti Cheat / Open Source Anti Cheat System)
 - [DotX64Dbg](entities/dotx64dbg.md) — .NET 6 / C# x64dbg plugin framework (live edit; custom commands)
 - [DoubleCallBack](entities/double-callback.md) — DWM in kernel (C/C++; cheat render/draw)
 - [dp701](entities/dp701.md) — IDA Pro dark color theme (syntax/UI palette; cheat / IDA themes; gmh5225)
