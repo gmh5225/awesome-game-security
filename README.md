@@ -4408,6 +4408,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/clementine44613/seiun-ac [Fabric server/client mod that hashes and whitelists client mods and resource packs, with gray-list warnings, Discord alerts, and mid-session pack-change detection for Minecraft 1.21.11]
 - https://github.com/no1qq/UAGC [Context-aware PaperMC 1.21 anti-cheat plugin with check framework, confidence/evidence model, exemptions, and staff bypass visibility]
 - https://github.com/realkyx29-design/LarpingAntiCheat [Paper 1.21+ Minecraft anti-cheat plugin (Hyphon) with combat/movement/world checks, honeypot ESP decoys, and custom-enchant/modifier capability analysis]
+- https://github.com/EpicLizard05013/UltimateMeteorAntiCheat [Paper 1.21.11 Minecraft server plugin with combat, movement, world, anti-dupe, and packet-desync checks plus violation logging and punishment management]
 - https://github.com/Lazyzouo/ICUAC [Open-source bilingual Paper/Folia server-side rule enforcement for commands, items/NBT, effects, and end-crystal combat]
 - https://github.com/StelGR/ArrowAntiCheat [Open-source Minecraft Java/Bedrock packet-based anti-cheat with combat and movement checks]
 - https://github.com/EPOTATOTV/PACC4_0 [Cross-platform Minecraft Bedrock/Java client-side anti-cheat (PACC) with local memory/process/HID detection, AI behavior scoring, encrypted persistence, and separate PTV admin backend]
