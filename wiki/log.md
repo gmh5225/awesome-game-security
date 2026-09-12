@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-12** — lint: index vs disk scan — 9 overviews, 42 concepts, 3887 entities (3938 index entries); index.md fully synced (0 missing, 0 dead, 0 duplicate entries); overview wikilink spot-check (9 pages) — 0 broken links; concept spot-check (42 pages) — 0 broken links; index.md wikilink scan — 0 broken links; 6 cross-kind slug collisions ([[game-hacking]], [[anti-cheat]], [[reverse-engineering]], [[il2cpp]], [[byovd]], [[dma]]) — expected, no repair needed; no structural edits required.
+
 - **2026-09-12** — ingest `description:ackwrap/ida-pro-agent`: entity [[ida-pro-agent]] (ackwrap; IDA Pro 9.4 Windows plugin; built-in AI Console + MCP Gateway; Hex-Rays pseudocode, bounded caller tracing, guard-evidence extraction, preview/apply/rollback IDB ChangeSets; C++/Go/Python; Qt 6.8.2; OpenAI/Anthropic/custom MCP providers; malware/anti-cheat/deep binary RE; cheat / IDA Plugins); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[ida-pro-mcp]], [[ida-codex-mcp]], [[binarylens]], [[aether]], [[idassist]], [[reverify]], and [[ida-no-mcp]]; `index.md` updated.
 
 - **2026-09-12** — ingest `readme:categories`: Cheat ~2804 (+1; ackwrap/ida-pro-agent IDA Pro 9.4 Windows AI console + MCP gateway in IDA Plugins) / Anti Cheat ~726 / other major section counts stable; 41 sections; refreshed README-map counts and IDA LLM/MCP scope on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/reverse-engineering]], [[overviews/dma-attack]], and [[overviews/anti-cheat]]; light `index.md` section notes (no per-category pages).
