@@ -1729,6 +1729,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [HP Hardware Diagnostics PoC](entities/hp-hardware-diagnostics-poc.md) — HP `etdsupp.sys` diagnostics driver IOCTL LPE (OEM BYOVD / privilege escalation; gmh5225)
 - [hpp-hack](entities/hpp-hack.md) — CS1.6 HPP hack (C/C++; OpenGL + modding + SDK generation; cheat / game:cs1.6; gmh5225)
 - [HPCS2](entities/hpcs2.md) — external CS2 cheat test project (Half-People; C++ Visual Studio; process memory utilities + handle hijacking + CS2 offset headers; INI-configured aim/RCS/ESP; educational cheat and anti-cheat behavior study; cheat / game:cs2 [External])
+- [Hyapk](entities/hyapk.md) — Android APK/game protection packer (beto2-dev; Kotlin CLI + C runtime; per-method HyVm VMP or Dex2C, ChaCha20-Poly1305 opcode encryption, smali renaming, resource encryption, signature/DEX integrity, anti-tamper/anti-debug, anti-Frida/root/emulator heuristics; Anti Cheat Binary Packer)
 - [hygieia](entities/hygieia.md) — Deputation WDK kernel driver; paging-structure scan for vulnerable-driver traces; 1 GB/2 MB/4 KB page mappings; low-level memory forensics for prior unsigned-driver activity; anti-cheat / kernel security research
 - [hyper-reV](entities/hyper-rev.md) — Hyper-V memory introspection / RE (structures / hypercalls / partitions)
 - [HyperDbg](entities/hyperdbg.md) — open-source VT-x/EPT hypervisor-assisted Windows debugger (C/C++; user/kernel; stealth breakpoints, hidden hooks, memory-access monitoring; RE / fuzzing / malware / anti-cheat research; README [VT debuger])

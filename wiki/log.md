@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-12** — ingest `description:beto2-dev/Hyapk`: entity [[hyapk]] (beto2-dev; Kotlin CLI + C native runtime; per-method HyVm VMP or Dex2C, ChaCha20-Poly1305 opcode encryption, smali renaming, resource encryption, signature/DEX integrity, anti-tamper/anti-debug, anti-Frida/root/emulator heuristics; Anti Cheat Binary Packer); cited on [[overviews/anti-cheat]] and [[mobile-anti-cheat]]; cross-linked [[obfuscapk]], [[appsealing-reversal]], [[pairipcore]], and [[android-unpacker]]; `index.md` updated.
+
 - **2026-09-12** — ingest `description:sodium-CrispyWafer/CrispyWafer-Anti-Cheat-Assistant-WaferACA`: entity [[crispy-wafer-anti-cheat-assistant-waferaca]] (WaferACA; Java Forge **1.20.1** client AC; server-cooperative FML peer mod-list extraction + custom network packets, or client-only rotation/flick/tracking aimbot heuristics; public cheat alerts + per-player mod commands/key bindings; Anti Cheat / game:minecraft); cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[katapult-anticheat]], [[local-anticheat-1-8-9]], and [[seiun-ac]]; `index.md` updated.
 
 - **2026-09-12** — ingest `description:wumingzhinu/VirtualMachine`: entity [[virtualmachine]] (VM Studio; full guest Android VM on ARM64; native C isolation + Kotlin UI; chrooted rootfs, syscall translation, Vulkan/OpenGL ES; Magisk root toggle, Xposed, Google Play, camera/sensor/VPN passthrough); cited on [[overviews/mobile-security]] and [[mobile-anti-cheat]]; `index.md` updated.
