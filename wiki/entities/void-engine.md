@@ -27,4 +27,4 @@ Also includes **VoidNet** networking (ENet and Firebase-backed WebRTC with optio
 
 ## Related
 
-[[overviews/anti-cheat]] · [[overviews/game-engine]] · [[godot]] · [[godot-sandbox]] · [[better-godot-mcp]] · [[certael]] · [[gatewarden-public]] · [[research-rigor]]
+[[overviews/anti-cheat]] · [[overviews/game-engine]] · [[godot]] · [[godot-sandbox]] · [[better-godot-mcp]] · [[certael]] · [[gatewarden-public]] · [[dot-server-security]] · [[research-rigor]]
