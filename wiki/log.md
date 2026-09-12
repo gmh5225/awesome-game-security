@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-12** — ingest `description:ackwrap/ida-pro-agent`: entity [[ida-pro-agent]] (ackwrap; IDA Pro 9.4 Windows plugin; built-in AI Console + MCP Gateway; Hex-Rays pseudocode, bounded caller tracing, guard-evidence extraction, preview/apply/rollback IDB ChangeSets; C++/Go/Python; Qt 6.8.2; OpenAI/Anthropic/custom MCP providers; malware/anti-cheat/deep binary RE; cheat / IDA Plugins); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[ida-pro-mcp]], [[ida-codex-mcp]], [[binarylens]], [[aether]], [[idassist]], [[reverify]], and [[ida-no-mcp]]; `index.md` updated.
+
 - **2026-09-12** — ingest `readme:categories`: Cheat ~2804 (+1; ackwrap/ida-pro-agent IDA Pro 9.4 Windows AI console + MCP gateway in IDA Plugins) / Anti Cheat ~726 / other major section counts stable; 41 sections; refreshed README-map counts and IDA LLM/MCP scope on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/reverse-engineering]], [[overviews/dma-attack]], and [[overviews/anti-cheat]]; light `index.md` section notes (no per-category pages).
 
 - **2026-09-12** — ingest `description:mein-0/forti-research`: entity [[forti-research]] (mein-0; C PoC; FortiClient **`fortimon3_74.sys`** anti-exploit minifilter; Filter Manager port → unauthenticated 8-byte kill message; kernel terminate incl. PPL Defender/lsass; missing caller auth + handle-table misuse; Fortinet-signed BYOVD; cheat); cited on [[overviews/windows-kernel]] and [[byovd]]; cross-linked [[pplkiller]], [[phantomkiller]], [[process-killer-byovd]], and [[driver-communication]]; `index.md` updated.
