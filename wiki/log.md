@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-12** — ingest `readme:categories`: Cheat ~2804 (+1; ackwrap/ida-pro-agent IDA Pro 9.4 Windows AI console + MCP gateway in IDA Plugins) / Anti Cheat ~726 / other major section counts stable; 41 sections; refreshed README-map counts and IDA LLM/MCP scope on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/reverse-engineering]], [[overviews/dma-attack]], and [[overviews/anti-cheat]]; light `index.md` section notes (no per-category pages).
+
 - **2026-09-12** — ingest `description:mein-0/forti-research`: entity [[forti-research]] (mein-0; C PoC; FortiClient **`fortimon3_74.sys`** anti-exploit minifilter; Filter Manager port → unauthenticated 8-byte kill message; kernel terminate incl. PPL Defender/lsass; missing caller auth + handle-table misuse; Fortinet-signed BYOVD; cheat); cited on [[overviews/windows-kernel]] and [[byovd]]; cross-linked [[pplkiller]], [[phantomkiller]], [[process-killer-byovd]], and [[driver-communication]]; `index.md` updated.
 
 - **2026-09-12** — ingest `description:modcommunity/dot-server-security`: entity [[dot-server-security]] (modcommunity; Godot 4 GDScript dedicated-server security addon; configuration-driven rule engine with sliding-window rate limits and warn/gag/mute/kick/ban escalation across chat, connections, auth, remote console, and server-side AC; movement re-simulation + shot validation; impossible vs suspicious claim tiers; external ban feeds; dry-run auditing default; optional dot-* moderation/chat addons; Anti Cheat / Open Source Anti Cheat System); cited on [[overviews/game-engine]] and [[concepts/detector-operations]]; cross-linked [[void-engine]], [[godot]], and [[detector-operations]]; `index.md` updated.
