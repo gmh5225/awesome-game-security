@@ -1872,6 +1872,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/kweatherman/yara4ida [Unofficial YARA IDA Pro plugin]
 - https://github.com/Berk000x/BinaryLens [An IDA plugin that uses LLM to speed up binary analysis]
 - https://github.com/jtang613/IDAssist [AI-powered RE plugin for IDA Pro: LLM function explanation, semantic knowledge graph, RAG, MCP integration]
+- https://github.com/ackwrap/ida-pro-agent [IDA Pro 9.4 Windows plugin with built-in AI console and MCP gateway for pseudocode analysis, bounded caller tracing, guard-evidence extraction, and preview/apply/rollback IDB ChangeSets]
 - https://github.com/pgarba/ida-llm-explainer [Local llama.cpp IDA plugin for function explain/rename/struct inference with human-in-the-loop accept]
 - https://github.com/CyberSecurityUP/DriverVuln-Analyzer-IDA-Plugin [Driver Vuln Analyzer]
 - https://github.com/ssmugabi/IDAPlugins [Integrate essential IDA Pro plugins for enhanced functionality, including deobfuscation, binary diffing, and custom cryptography support]
