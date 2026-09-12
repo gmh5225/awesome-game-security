@@ -1639,6 +1639,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/FBlackBox/BlackBox [Android]
 - https://github.com/ServenScorpion/VirtualApp [Android]
 - https://github.com/chinaapps/zn-toolbox [Host-no-root Android container VM (Twoyi fork) with built-in root and LSPosed for isolated mobile modding]
+- https://github.com/wumingzhinu/VirtualMachine [Android VM app (VM Studio) with Vulkan rendering, Magisk root toggle, Xposed module support, and Google Play services for isolated mobile environments]
 - https://github.com/mandiant/flare-vm
 - https://github.com/hzqst/VmwareHardenedLoader
 - https://github.com/d4rksystem/VMwareCloak
@@ -4111,6 +4112,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/frkngksl/Huan
 - https://github.com/frkngksl/HintInject [Hint/Name Table]
 - https://github.com/ClaudiuGeorgiu/Obfuscapk [Android]
+- https://github.com/beto2-dev/Hyapk [Android APK/game protection packer with per-method VMP (HyVm), dex2c, smali renaming, resource encryption, and anti-tamper/anti-debug/anti-Frida/anti-root checks]
 - https://github.com/magnussen7/Embuche [ELF]
 - https://github.com/EgeBalci/amber
 - https://github.com/SamLarenN/PePacker
@@ -4397,12 +4399,14 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/EliGamer154/CheatCheck [Fabric server-side Minecraft mod with player reporting, /cheatcheck spectate moderation, safemode, and tempban toolkit for vanilla clients]
 - https://github.com/enis1enis2/Windfall-AntiCheat [Open-source Minecraft Spigot/Paper/Folia packet-based anti-cheat with combat/movement/inventory checks]
 - https://github.com/Gitex68/Katapult-AntiCheat [NeoForge 1.21.1 client/server Minecraft mod enforcing SHA-256 checksums on client mods and resource packs with live whitelist management]
+- https://github.com/sodium-CrispyWafer/CrispyWafer-Anti-Cheat-Assistant-WaferACA [Minecraft Forge 1.20.1 client anti-cheat mod that detects other players' installed client mods and alerts when known cheat mods (e.g., Gun Tracker) are present]
 - https://github.com/Charlie328402/Sentinel-Anti-Cheat [NeoForge server-side Minecraft anti-cheat mod with movement, combat, and x-ray checks plus a Discord violation bot]
 - https://github.com/clementine44613/seiun-ac [Fabric server/client mod that hashes and whitelists client mods and resource packs, with gray-list warnings, Discord alerts, and mid-session pack-change detection for Minecraft 1.21.11]
 - https://github.com/no1qq/UAGC [Context-aware PaperMC 1.21 anti-cheat plugin with check framework, confidence/evidence model, exemptions, and staff bypass visibility]
 - https://github.com/realkyx29-design/LarpingAntiCheat [Paper 1.21+ Minecraft anti-cheat plugin (Hyphon) with combat/movement/world checks, honeypot ESP decoys, and custom-enchant/modifier capability analysis]
 - https://github.com/Lazyzouo/ICUAC [Open-source bilingual Paper/Folia server-side rule enforcement for commands, items/NBT, effects, and end-crystal combat]
 - https://github.com/StelGR/ArrowAntiCheat [Open-source Minecraft Java/Bedrock packet-based anti-cheat with combat and movement checks]
+- https://github.com/EPOTATOTV/PACC4_0 [Cross-platform Minecraft Bedrock/Java client-side anti-cheat (PACC) with local memory/process/HID detection, AI behavior scoring, encrypted persistence, and separate PTV admin backend]
 - https://github.com/XuanXuan-ZhengGui/Minecraft-Anti-Cheat [Open-source Minecraft Spigot/Paper anti-cheat with combat/movement detections and confidence scoring]
 - https://github.com/cklsit/AdvancedAntiCheat [Minecraft Spigot/Paper anti-cheat plugin with flight/speed checks, client inspection, and ban sync]
 - https://github.com/nsharp-collab/AvAAntiCheat [Minecraft Bukkit/Spigot anti-cheat plugin with movement, combat, autoclick, and packet checks]
