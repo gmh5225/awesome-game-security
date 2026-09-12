@@ -1,0 +1,2698 @@
+Project Path: arc_unrandoms_frida-mobile-kit_42pzw_y4
+
+Source Tree:
+
+```txt
+arc_unrandoms_frida-mobile-kit_42pzw_y4
+├── README.md
+├── USAGE.md
+├── cli
+│   ├── frida_kit.py
+│   └── manifest.json
+├── requirements.txt
+└── scripts
+    ├── cert-pinning
+    │   ├── bypass-conscrypt.js
+    │   ├── bypass-flutter.js
+    │   ├── bypass-okhttp.js
+    │   ├── bypass-react-native.js
+    │   └── bypass-trustmanager.js
+    ├── crypto
+    │   ├── extract-aes-keys.js
+    │   ├── log-cipher-ops.js
+    │   └── log-messagedigest.js
+    ├── memory
+    │   ├── dump-strings.js
+    │   ├── find-class-methods.js
+    │   └── trace-method-calls.js
+    ├── root-detection
+    │   ├── bypass-generic.js
+    │   ├── bypass-rootbeer.js
+    │   └── bypass-safetynet.js
+    └── traffic
+        ├── extract-json-bodies.js
+        ├── log-http-requests.js
+        └── log-websocket.js
+
+```
+
+`README.md`:
+
+```md
+# frida-mobile-kit
+
+A practical Frida script toolkit for Android application dynamic analysis. Covers certificate pinning bypass, HTTP/WebSocket traffic logging, cryptographic key extraction, root detection bypass, and runtime memory inspection.
+
+## Scripts at a glance
+
+```
+scripts/
+  cert-pinning/
+    bypass-okhttp.js          # OkHttp 3.x + 4.x CertificatePinner
+    bypass-trustmanager.js    # X509TrustManager, WebView SSL, HttpsURLConnection
+    bypass-conscrypt.js       # Conscrypt TrustManagerImpl, NetworkSecurityTrustManager
+    bypass-flutter.js         # Flutter BoringSSL ssl_verify_peer_cert (native)
+    bypass-react-native.js    # React Native / Hermes OkHttp + OkHttpClientProvider
+  traffic/
+    log-http-requests.js      # Log all OkHttp + HttpURLConnection requests/responses
+    log-websocket.js          # Log WebSocket send/receive frames
+    extract-json-bodies.js    # Pretty-print JSON request/response bodies
+  crypto/
+    log-cipher-ops.js         # Log Cipher algorithm, key, IV, plaintext/ciphertext
+    extract-aes-keys.js       # Dump SecretKeySpec + PBKDF2 key bytes at creation
+    log-messagedigest.js      # Log all MessageDigest inputs and digests
+  root-detection/
+    bypass-rootbeer.js        # RootBeer library bypass
+    bypass-generic.js         # File.exists, Runtime.exec, Build.TAGS, PackageManager
+    bypass-safetynet.js       # SafetyNet Attestation + Play Integrity API
+  memory/
+    dump-strings.js           # Heap dump of live Java String objects
+    find-class-methods.js     # List methods/fields of any class at runtime
+    trace-method-calls.js     # Trace method calls with args and return values
+```
+
+## Setup
+
+```bash
+pip install -r requirements.txt
+```
+
+Push `frida-server` to your device:
+
+```bash
+adb push frida-server /data/local/tmp/
+adb shell chmod 755 /data/local/tmp/frida-server
+adb shell /data/local/tmp/frida-server &
+```
+
+Download `frida-server` matching your `frida` version from the [Frida releases page](https://github.com/frida/frida/releases).
+
+## Quick start
+
+### Bypass certificate pinning
+
+```bash
+# Single OkHttp bypass
+frida -U -l scripts/cert-pinning/bypass-okhttp.js -f com.example.app --no-pause
+
+# All pinning bypass scripts at once (via CLI)
+python cli/frida_kit.py run --all-pinning --target com.example.app
+
+# OkHttp + TrustManager + Conscrypt combined (most comprehensive)
+frida -U \
+  -l scripts/cert-pinning/bypass-okhttp.js \
+  -l scripts/cert-pinning/bypass-trustmanager.js \
+  -l scripts/cert-pinning/bypass-conscrypt.js \
+  -f com.example.app --no-pause
+```
+
+### Log HTTP traffic
+
+```bash
+frida -U -l scripts/traffic/log-http-requests.js -n com.example.app
+
+# Save output to file
+python cli/frida_kit.py run traffic/log-http-requests \
+  --target com.example.app --output http_traffic.log
+```
+
+### Extract crypto keys
+
+```bash
+frida -U \
+  -l scripts/crypto/extract-aes-keys.js \
+  -l scripts/crypto/log-cipher-ops.js \
+  -f com.example.app --no-pause
+```
+
+### Bypass root detection
+
+```bash
+python cli/frida_kit.py run --all-root-bypass --target com.example.app
+```
+
+### Trace a specific method
+
+Edit `scripts/memory/trace-method-calls.js`:
+```javascript
+const TARGET_CLASS = 'com.example.app.AuthManager';
+const TARGET_METHOD = 'verifyToken';
+const TARGET_PARAMS = ['java.lang.String'];
+```
+Then:
+```bash
+frida -U -l scripts/memory/trace-method-calls.js -f com.example.app --no-pause
+```
+
+## CLI wrapper
+
+```bash
+python cli/frida_kit.py list
+python cli/frida_kit.py run cert-pinning/bypass-okhttp --target com.example.app
+python cli/frida_kit.py run cert-pinning/bypass-okhttp --target com.example.app --device USB --spawn
+python cli/frida_kit.py run --all-pinning --target com.example.app
+python cli/frida_kit.py run traffic/log-http-requests --target com.example.app --output reqs.log
+```
+
+## Combining scripts
+
+Scripts are independent and can be combined freely with multiple `-l` flags:
+
+```bash
+frida -U \
+  -l scripts/cert-pinning/bypass-okhttp.js \
+  -l scripts/cert-pinning/bypass-trustmanager.js \
+  -l scripts/root-detection/bypass-generic.js \
+  -l scripts/traffic/log-http-requests.js \
+  -f com.example.app --no-pause
+```
+
+Each script logs with a unique prefix (`[frida-kit][script-name]`) for easy grepping:
+
+```bash
+frida ... 2>&1 | grep '\[frida-kit\]\[bypass-okhttp\]'
+```
+
+## Script notes
+
+### OkHttp versions
+
+`bypass-okhttp.js` hooks both the 3.x (`com.squareup.okhttp`) and 4.x (`okhttp3`) namespaces and their internal method variants (`check` vs `check$okhttp`). The script prints which hooks succeeded at startup.
+
+### Flutter apps
+
+Flutter bundles BoringSSL inside `libflutter.so`; Java-level TrustManager hooks have no effect. Use `bypass-flutter.js` which hooks at the native level via `ssl_verify_peer_cert` or `SSL_CTX_set_verify`. On fully stripped release builds the export symbol may be absent — the script logs a warning with guidance.
+
+### SafetyNet / Play Integrity
+
+`bypass-safetynet.js` intercepts the response callback before the app parses it. Apps that verify the JWS signature server-side will still fail; this script is effective for apps that only check `ctsProfileMatch` or `basicIntegrity` on the client.
+
+## Tested environments
+
+| Android version | API level | Architecture |
+|---|---|---|
+| Android 14 | 34 | ARM64 |
+| Android 13 | 33 | ARM64 |
+| Android 12 | 32 | ARM64 |
+| Android 11 | 30 | ARM64 |
+| Android 10 | 29 | ARM64 + x86_64 |
+
+frida-tools: 12.3+, frida: 16.2+
+
+## See also
+
+Full usage examples, device setup, and configuration options: [USAGE.md](USAGE.md)
+
+```
+
+`USAGE.md`:
+
+```md
+# Usage Guide — frida-mobile-kit
+
+## Prerequisites
+
+```bash
+pip install frida-tools frida
+# or install from requirements.txt:
+pip install -r requirements.txt
+```
+
+Your device must have a running `frida-server` matching your installed frida version.
+Download from: https://github.com/frida/frida/releases
+
+```bash
+adb push frida-server /data/local/tmp/
+adb shell chmod 755 /data/local/tmp/frida-server
+adb shell /data/local/tmp/frida-server &
+```
+
+---
+
+## CLI Usage
+
+```bash
+python cli/frida_kit.py list
+python cli/frida_kit.py run cert-pinning/bypass-okhttp --target com.example.app
+python cli/frida_kit.py run cert-pinning/bypass-okhttp --target com.example.app --device USB
+python cli/frida_kit.py run --all-pinning --target com.example.app
+python cli/frida_kit.py run traffic/log-http-requests --target com.example.app --output requests.log
+python cli/frida_kit.py run memory/dump-strings --target com.example.app --spawn
+```
+
+---
+
+## Direct frida usage
+
+### Single script
+```bash
+frida -U -l scripts/cert-pinning/bypass-okhttp.js -f com.example.app --no-pause
+```
+
+### Multiple scripts (combine with multiple -l flags)
+```bash
+frida -U \
+  -l scripts/cert-pinning/bypass-okhttp.js \
+  -l scripts/cert-pinning/bypass-trustmanager.js \
+  -l scripts/root-detection/bypass-generic.js \
+  -f com.example.app --no-pause
+```
+
+### Attach to running process
+```bash
+frida -U -l scripts/traffic/log-http-requests.js -n com.example.app
+```
+
+---
+
+## Script Categories
+
+### cert-pinning/
+
+| Script | What it hooks |
+|---|---|
+| `bypass-okhttp.js` | OkHttp 3.x and 4.x `CertificatePinner.check()` |
+| `bypass-trustmanager.js` | `X509TrustManager.checkServerTrusted()`, WebViewClient SSL errors, `HttpsURLConnection` |
+| `bypass-conscrypt.js` | Conscrypt `TrustManagerImpl`, `NetworkSecurityTrustManager` (API 24+) |
+| `bypass-flutter.js` | Flutter BoringSSL `ssl_verify_peer_cert` via native hook |
+| `bypass-react-native.js` | React Native / Hermes OkHttp + `OkHttpClientProvider` |
+
+**Recommended combination for most apps:**
+```bash
+frida -U \
+  -l scripts/cert-pinning/bypass-okhttp.js \
+  -l scripts/cert-pinning/bypass-trustmanager.js \
+  -l scripts/cert-pinning/bypass-conscrypt.js \
+  -f com.example.app --no-pause
+```
+
+---
+
+### traffic/
+
+| Script | What it hooks |
+|---|---|
+| `log-http-requests.js` | OkHttp `RealCall.execute`, `HttpURLConnection.getInputStream` |
+| `log-websocket.js` | `RealWebSocket.send/onMessage` text and binary frames |
+| `extract-json-bodies.js` | JSON request/response body pretty-printing via OkHttp |
+
+---
+
+### crypto/
+
+| Script | What it hooks |
+|---|---|
+| `log-cipher-ops.js` | `javax.crypto.Cipher.init()` and `doFinal()` — logs key, IV, data |
+| `extract-aes-keys.js` | `SecretKeySpec`, `KeyGenerator.generateKey`, `PBEKeySpec` (PBKDF2) |
+| `log-messagedigest.js` | All `MessageDigest` operations — SHA-1, SHA-256, MD5, etc. |
+
+---
+
+### root-detection/
+
+| Script | What it hooks |
+|---|---|
+| `bypass-rootbeer.js` | `com.scottyab.rootbeer.RootBeer` all boolean check methods |
+| `bypass-generic.js` | `File.exists()`, `Runtime.exec()`, `Build.TAGS`, `PackageManager.getPackageInfo()` |
+| `bypass-safetynet.js` | SafetyNet `AttestationResponse.getJwsResult()`, Play Integrity `IntegrityTokenResponse.token()` |
+
+**Full root bypass:**
+```bash
+python cli/frida_kit.py run --all-root-bypass --target com.example.app
+```
+
+---
+
+### memory/
+
+| Script | Configuration |
+|---|---|
+| `dump-strings.js` | Set `FILTER_PATTERN` regex to narrow results |
+| `find-class-methods.js` | Set `TARGET_CLASS` to the class to inspect |
+| `trace-method-calls.js` | Set `TARGET_CLASS`, `TARGET_METHOD`, optionally `TARGET_PARAMS` |
+
+Example — trace a specific method:
+```javascript
+// In trace-method-calls.js:
+const TARGET_CLASS = 'com.example.app.AuthManager';
+const TARGET_METHOD = 'login';
+const TARGET_PARAMS = ['java.lang.String', 'java.lang.String'];
+```
+
+```bash
+frida -U -l scripts/memory/trace-method-calls.js -f com.example.app --no-pause
+```
+
+---
+
+## Tested Devices & Android Versions
+
+| Device | Android | Status |
+|---|---|---|
+| Google Pixel 7 | Android 14 (API 34) | Verified |
+| Google Pixel 6a | Android 13 (API 33) | Verified |
+| Samsung Galaxy S22 | Android 13 (API 33) | Verified |
+| Android Emulator x86_64 | Android 12 (API 31) | Verified |
+| OnePlus 9 | Android 12 (API 32) | Verified |
+
+frida-server version tested: 16.2.x, 16.3.x
+
+---
+
+## Tips
+
+- Use `--spawn` / `-f` to inject scripts before the app starts (avoids missing early initialization).
+- Combine cert pinning bypass + root bypass scripts for hardened apps.
+- Add `--runtime=v8` to `frida` if scripts fail on older devices (forces V8 instead of QuickJS).
+- If OkHttp hooks don't fire, the app may use a different HTTP client — try `log-http-requests.js` alongside to confirm which stack is in use.
+
+```
+
+`cli/frida_kit.py`:
+
+```py
+#!/usr/bin/env python3
+"""
+frida_kit.py — CLI wrapper for frida-mobile-kit scripts.
+
+Commands:
+  frida-kit list
+  frida-kit run <script-path> --target <package>
+  frida-kit run <script-path> --target <package> --device USB
+  frida-kit run --all-pinning --target <package>
+  frida-kit run <script-path> --target <package> --output <file>
+
+Examples:
+  python frida_kit.py list
+  python frida_kit.py run cert-pinning/bypass-okhttp --target com.example.app
+  python frida_kit.py run --all-pinning --target com.example.app --device USB
+  python frida_kit.py run traffic/log-http-requests --target com.example.app --output reqs.log
+"""
+
+import argparse
+import json
+import os
+import subprocess
+import sys
+import tempfile
+from pathlib import Path
+from typing import List, Optional
+
+SCRIPTS_DIR = Path(__file__).parent.parent / "scripts"
+MANIFEST_PATH = Path(__file__).parent / "manifest.json"
+
+
+def load_manifest() -> dict:
+    """Load the script manifest from manifest.json."""
+    if not MANIFEST_PATH.exists():
+        print(f"[frida-kit] ERROR: manifest.json not found at {MANIFEST_PATH}", file=sys.stderr)
+        sys.exit(1)
+    with MANIFEST_PATH.open() as f:
+        return json.load(f)
+
+
+def resolve_script_path(script_key: str) -> Path:
+    """Resolve a manifest key to an absolute .js file path."""
+    # script_key examples: "cert-pinning/bypass-okhttp"
+    path = SCRIPTS_DIR / (script_key + ".js")
+    if not path.exists():
+        print(f"[frida-kit] ERROR: Script not found: {path}", file=sys.stderr)
+        sys.exit(1)
+    return path
+
+
+def cmd_list(manifest: dict) -> None:
+    """Print all available scripts with descriptions."""
+    scripts = manifest.get("scripts", {})
+    groups = manifest.get("groups", {})
+
+    categories: dict = {}
+    for key, info in scripts.items():
+        cat = info.get("category", "misc")
+        categories.setdefault(cat, []).append((key, info))
+
+    print("\nfrida-mobile-kit — available scripts\n")
+    print(f"{'Script':<42}  {'Description'}")
+    print("-" * 90)
+
+    for cat in sorted(categories):
+        print(f"\n  [{cat}]")
+        for key, info in sorted(categories[cat]):
+            desc = info.get("description", "")
+            tags = ", ".join(info.get("tags", []))
+            print(f"    {key:<40}  {desc}")
+            if tags:
+                print(f"    {'':<40}  tags: {tags}")
+
+    print("\n  [groups]")
+    for gname, gscripts in groups.items():
+        print(f"    --{gname:<38}  runs: {', '.join(gscripts)}")
+
+    print()
+
+
+def build_frida_command(
+    scripts: List[Path],
+    target: str,
+    device: Optional[str],
+    spawn: bool,
+    extra_args: List[str],
+) -> List[str]:
+    """Build the frida CLI command from script paths and options."""
+    cmd = ["frida"]
+
+    if device == "USB" or device == "usb":
+        cmd += ["-U"]
+    elif device and device.startswith("emulator"):
+        cmd += ["-D", device]
+    else:
+        cmd += ["-U"]  # default to USB
+
+    if spawn:
+        cmd += ["-f", target, "--no-pause"]
+    else:
+        cmd += ["-n", target]
+
+    for script in scripts:
+        cmd += ["-l", str(script)]
+
+    cmd += extra_args
+    return cmd
+
+
+def cmd_run(
+    manifest: dict,
+    script_key: Optional[str],
+    group: Optional[str],
+    target: str,
+    device: str,
+    output: Optional[str],
+    spawn: bool,
+    extra_args: List[str],
+) -> None:
+    """Resolve scripts and invoke frida."""
+    scripts: List[Path] = []
+
+    if group:
+        groups = manifest.get("groups", {})
+        if group not in groups:
+            print(f"[frida-kit] ERROR: Unknown group '--{group}'. Available: {list(groups)}", file=sys.stderr)
+            sys.exit(1)
+        for key in groups[group]:
+            scripts.append(resolve_script_path(key))
+        print(f"[frida-kit] Running group '{group}': {[str(s.name) for s in scripts]}")
+    elif script_key:
+        # Support bare category/name or full path
+        if script_key.endswith(".js"):
+            p = Path(script_key)
+            if not p.exists():
+                print(f"[frida-kit] ERROR: File not found: {script_key}", file=sys.stderr)
+                sys.exit(1)
+            scripts.append(p)
+        else:
+            # Strip leading scripts/ if user typed it
+            key = script_key.removeprefix("scripts/")
+            scripts.append(resolve_script_path(key))
+    else:
+        print("[frida-kit] ERROR: Specify a script path or a group (--all-pinning, etc.)", file=sys.stderr)
+        sys.exit(1)
+
+    cmd = build_frida_command(scripts, target, device, spawn, extra_args)
+    print(f"[frida-kit] Executing: {' '.join(cmd)}\n")
+
+    if output:
+        out_path = Path(output)
+        print(f"[frida-kit] Output will be written to: {out_path}")
+        with out_path.open("w") as out_file:
+            result = subprocess.run(cmd, stdout=out_file, stderr=subprocess.STDOUT)
+    else:
+        result = subprocess.run(cmd)
+
+    if result.returncode != 0:
+        print(f"\n[frida-kit] frida exited with code {result.returncode}", file=sys.stderr)
+        sys.exit(result.returncode)
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(
+        prog="frida-kit",
+        description="frida-mobile-kit CLI — attach Frida scripts to Android apps",
+    )
+    subparsers = parser.add_subparsers(dest="command", required=True)
+
+    # list
+    subparsers.add_parser("list", help="List available scripts and groups")
+
+    # run
+    run_parser = subparsers.add_parser("run", help="Run one or more scripts against an app")
+    run_parser.add_argument(
+        "script",
+        nargs="?",
+        help="Script path (e.g. cert-pinning/bypass-okhttp) or .js file",
+    )
+    run_parser.add_argument("--target", required=True, metavar="PACKAGE",
+                            help="Target app package name (e.g. com.example.app)")
+    run_parser.add_argument("--device", default="USB", metavar="DEVICE",
+                            help="Device type: USB (default), emulator-XXXX, or device ID")
+    run_parser.add_argument("--output", metavar="FILE",
+                            help="Write frida output to this file instead of stdout")
+    run_parser.add_argument("--spawn", action="store_true",
+                            help="Spawn the app instead of attaching to a running process")
+
+    # Group flags (--all-pinning, --all-root-bypass)
+    run_parser.add_argument("--all-pinning", dest="group", action="store_const",
+                            const="all-pinning",
+                            help="Run all cert-pinning bypass scripts")
+    run_parser.add_argument("--all-root-bypass", dest="group", action="store_const",
+                            const="all-root-bypass",
+                            help="Run all root detection bypass scripts")
+
+    args, extra = parser.parse_known_args()
+    manifest = load_manifest()
+
+    if args.command == "list":
+        cmd_list(manifest)
+    elif args.command == "run":
+        group = getattr(args, "group", None)
+        cmd_run(
+            manifest=manifest,
+            script_key=args.script,
+            group=group,
+            target=args.target,
+            device=args.device,
+            output=getattr(args, "output", None),
+            spawn=getattr(args, "spawn", False),
+            extra_args=extra,
+        )
+
+
+if __name__ == "__main__":
+    main()
+
+```
+
+`cli/manifest.json`:
+
+```json
+{
+  "scripts": {
+    "cert-pinning/bypass-okhttp": {
+      "description": "Bypass OkHttp3/4 CertificatePinner SSL pinning",
+      "category": "cert-pinning",
+      "tags": ["okhttp", "ssl", "pinning"]
+    },
+    "cert-pinning/bypass-trustmanager": {
+      "description": "Hook X509TrustManager and install permissive TrustManager; covers NetworkSecurityConfig",
+      "category": "cert-pinning",
+      "tags": ["trustmanager", "ssl", "pinning", "webview"]
+    },
+    "cert-pinning/bypass-conscrypt": {
+      "description": "Hook Conscrypt TrustManagerImpl and NetworkSecurityTrustManager (API 24+)",
+      "category": "cert-pinning",
+      "tags": ["conscrypt", "ssl", "pinning"]
+    },
+    "cert-pinning/bypass-flutter": {
+      "description": "Patch Flutter BoringSSL ssl_verify_peer_cert via native hook",
+      "category": "cert-pinning",
+      "tags": ["flutter", "boringssl", "ssl", "native"]
+    },
+    "cert-pinning/bypass-react-native": {
+      "description": "Bypass SSL pinning in React Native / Hermes apps (OkHttp + OkHttpClientProvider)",
+      "category": "cert-pinning",
+      "tags": ["react-native", "hermes", "ssl", "okhttp"]
+    },
+    "traffic/log-http-requests": {
+      "description": "Log all HTTP requests and responses via OkHttp and HttpURLConnection",
+      "category": "traffic",
+      "tags": ["http", "logging", "okhttp", "traffic"]
+    },
+    "traffic/log-websocket": {
+      "description": "Log WebSocket send/receive frames (text and binary)",
+      "category": "traffic",
+      "tags": ["websocket", "logging", "okhttp"]
+    },
+    "traffic/extract-json-bodies": {
+      "description": "Extract and pretty-print JSON request and response bodies",
+      "category": "traffic",
+      "tags": ["json", "http", "logging", "okhttp"]
+    },
+    "crypto/log-cipher-ops": {
+      "description": "Log javax.crypto.Cipher operations: algorithm, key, IV, plaintext/ciphertext",
+      "category": "crypto",
+      "tags": ["aes", "cipher", "crypto", "logging"]
+    },
+    "crypto/extract-aes-keys": {
+      "description": "Dump key bytes from SecretKeySpec, KeyGenerator.generateKey, and PBEKeySpec (PBKDF2)",
+      "category": "crypto",
+      "tags": ["aes", "keys", "secretkey", "pbkdf2", "crypto"]
+    },
+    "crypto/log-messagedigest": {
+      "description": "Log all MessageDigest hash operations (SHA-1, SHA-256, MD5, etc.) with inputs",
+      "category": "crypto",
+      "tags": ["sha256", "md5", "hash", "crypto", "logging"]
+    },
+    "root-detection/bypass-rootbeer": {
+      "description": "Bypass RootBeer library (com.scottyab.rootbeer) root detection",
+      "category": "root-detection",
+      "tags": ["rootbeer", "root", "bypass"]
+    },
+    "root-detection/bypass-generic": {
+      "description": "Bypass generic root detection: File.exists, Runtime.exec, Build.TAGS, PackageManager",
+      "category": "root-detection",
+      "tags": ["root", "bypass", "file", "generic"]
+    },
+    "root-detection/bypass-safetynet": {
+      "description": "Bypass SafetyNet Attestation and Play Integrity API attestation callbacks",
+      "category": "root-detection",
+      "tags": ["safetynet", "play-integrity", "gms", "attestation"]
+    },
+    "memory/dump-strings": {
+      "description": "Scan Java heap for live String objects and dump values (credentials, tokens, etc.)",
+      "category": "memory",
+      "tags": ["heap", "strings", "memory", "credentials"]
+    },
+    "memory/find-class-methods": {
+      "description": "List all methods, constructors, and fields of a class at runtime",
+      "category": "memory",
+      "tags": ["reflection", "methods", "introspection"]
+    },
+    "memory/trace-method-calls": {
+      "description": "Trace all calls to a specified method with arguments and return values",
+      "category": "memory",
+      "tags": ["trace", "methods", "args", "return"]
+    }
+  },
+  "groups": {
+    "all-pinning": [
+      "cert-pinning/bypass-okhttp",
+      "cert-pinning/bypass-trustmanager",
+      "cert-pinning/bypass-conscrypt"
+    ],
+    "all-root-bypass": [
+      "root-detection/bypass-rootbeer",
+      "root-detection/bypass-generic",
+      "root-detection/bypass-safetynet"
+    ]
+  }
+}
+
+```
+
+`requirements.txt`:
+
+```txt
+frida-tools>=12.3.0
+frida>=16.2.0
+
+```
+
+`scripts/cert-pinning/bypass-conscrypt.js`:
+
+```js
+/**
+ * bypass-conscrypt.js
+ *
+ * Hooks Conscrypt's SSL pin enforcement via
+ * com.android.org.conscrypt.TrustManagerImpl and the internal
+ * Platform.checkServerTrusted() used by Conscrypt on AOSP >= API 24.
+ *
+ * Tested Android API levels: 24–34 (Conscrypt is the default SSL provider from API 24)
+ * Known limitations:
+ *   - Class names may differ across custom ROMs; logs a warning when not found.
+ *   - Does not bypass pinning in apps that bundle their own Conscrypt AAR.
+ */
+
+'use strict';
+
+const TAG = '[frida-kit][bypass-conscrypt]';
+
+Java.perform(function () {
+
+    // ---- com.android.org.conscrypt.TrustManagerImpl ----
+    // This is the AOSP Conscrypt TrustManager; it enforces both CA chain and pin validation.
+    try {
+        const TrustManagerImpl = Java.use('com.android.org.conscrypt.TrustManagerImpl');
+
+        // checkServerTrusted(X509Certificate[] chain, String authType, String host)
+        try {
+            TrustManagerImpl.checkServerTrusted.overload(
+                '[Ljava.security.cert.X509Certificate;',
+                'java.lang.String',
+                'java.lang.String'
+            ).implementation = function (chain, authType, host) {
+                console.log(TAG + ' TrustManagerImpl.checkServerTrusted(chain, authType, host) bypassed for: ' + host);
+                return Java.use('java.util.ArrayList').$new();
+            };
+            console.log(TAG + ' Hooked checkServerTrusted(chain, authType, host)');
+        } catch (e) {
+            console.log(TAG + ' checkServerTrusted(3 args) not found: ' + e.message);
+        }
+
+        // checkServerTrusted(X509Certificate[] chain, String authType)
+        try {
+            TrustManagerImpl.checkServerTrusted.overload(
+                '[Ljava.security.cert.X509Certificate;',
+                'java.lang.String'
+            ).implementation = function (chain, authType) {
+                console.log(TAG + ' TrustManagerImpl.checkServerTrusted(chain, authType) bypassed');
+                return;
+            };
+            console.log(TAG + ' Hooked checkServerTrusted(chain, authType)');
+        } catch (e) {
+            console.log(TAG + ' checkServerTrusted(2 args) not found: ' + e.message);
+        }
+
+        // verifyChain — internal method used in newer Conscrypt versions
+        try {
+            TrustManagerImpl.verifyChain.implementation = function (untrustedChain, trustAnchorChain, host, clientAuth, ocspData, tlsSctData) {
+                console.log(TAG + ' TrustManagerImpl.verifyChain() bypassed for: ' + host);
+                return untrustedChain;
+            };
+            console.log(TAG + ' Hooked TrustManagerImpl.verifyChain');
+        } catch (e) {
+            console.log(TAG + ' verifyChain not found: ' + e.message);
+        }
+
+    } catch (e) {
+        console.log(TAG + ' com.android.org.conscrypt.TrustManagerImpl not found: ' + e.message);
+    }
+
+    // ---- Conscrypt bundled in app (org.conscrypt package) ----
+    try {
+        const OrgTrustManagerImpl = Java.use('org.conscrypt.TrustManagerImpl');
+        OrgTrustManagerImpl.checkServerTrusted.overload(
+            '[Ljava.security.cert.X509Certificate;',
+            'java.lang.String',
+            'java.lang.String'
+        ).implementation = function (chain, authType, host) {
+            console.log(TAG + ' org.conscrypt TrustManagerImpl.checkServerTrusted bypassed for: ' + host);
+            return Java.use('java.util.ArrayList').$new();
+        };
+        console.log(TAG + ' Hooked org.conscrypt.TrustManagerImpl');
+    } catch (e) {
+        console.log(TAG + ' org.conscrypt.TrustManagerImpl not found (expected if not bundled)');
+    }
+
+    // ---- NetworkSecurityConfig pin enforcement via NetworkSecurityTrustManager ----
+    try {
+        const NetworkSecurityTrustManager = Java.use('android.security.net.config.NetworkSecurityTrustManager');
+        NetworkSecurityTrustManager.checkServerTrusted.overload(
+            '[Ljava.security.cert.X509Certificate;',
+            'java.lang.String',
+            'java.lang.String'
+        ).implementation = function (chain, authType, host) {
+            console.log(TAG + ' NetworkSecurityTrustManager.checkServerTrusted bypassed for: ' + host);
+            return;
+        };
+        console.log(TAG + ' Hooked android.security.net.config.NetworkSecurityTrustManager');
+    } catch (e) {
+        console.log(TAG + ' NetworkSecurityTrustManager not found: ' + e.message);
+    }
+
+    console.log(TAG + ' Conscrypt SSL pin bypass loaded.');
+});
+
+```
+
+`scripts/cert-pinning/bypass-flutter.js`:
+
+```js
+/**
+ * bypass-flutter.js
+ *
+ * Patches Flutter's SSL certificate verification by hooking the native
+ * ssl_verify_peer_cert function in the bundled BoringSSL (libflutter.so).
+ * Flutter apps do not use the Android TrustManager; they bundle BoringSSL
+ * and call ssl_verify_peer_cert which returns SSL_VERIFY_OK (0) on success.
+ *
+ * Tested Android API levels: 21–34, Flutter 2.x and 3.x (ARM64 and ARM32)
+ * Known limitations:
+ *   - Requires the app to use the default Flutter networking (dart:io HttpClient).
+ *   - Apps using custom native TLS (e.g. via dart:ffi + OpenSSL) need a different hook.
+ *   - Offset-based patching is NOT used; relies on export symbol lookup.
+ */
+
+'use strict';
+
+const TAG = '[frida-kit][bypass-flutter]';
+
+// ssl_verify_peer_cert is an internal BoringSSL function.
+// It is not exported by name in release builds, so we scan for a known byte pattern
+// on ARM64. On debug/profile builds the export exists by name.
+
+function hookByExport(lib) {
+    const exportAddr = Module.findExportByName(lib, 'ssl_verify_peer_cert');
+    if (exportAddr) {
+        console.log(TAG + ' Found ssl_verify_peer_cert export at: ' + exportAddr);
+        Interceptor.attach(exportAddr, {
+            onLeave: function (retval) {
+                retval.replace(ptr(0)); // SSL_VERIFY_OK = 0
+                console.log(TAG + ' ssl_verify_peer_cert return value set to SSL_VERIFY_OK');
+            }
+        });
+        return true;
+    }
+    return false;
+}
+
+function hookByHandshake(lib) {
+    // Fallback: hook SSL_CTX_set_verify via BoringSSL exports to disable verification
+    const setVerify = Module.findExportByName(lib, 'SSL_CTX_set_verify');
+    if (!setVerify) return false;
+    console.log(TAG + ' SSL_CTX_set_verify found at: ' + setVerify);
+    // Intercept calls and force mode = SSL_VERIFY_NONE (0)
+    Interceptor.attach(setVerify, {
+        onEnter: function (args) {
+            args[1] = ptr(0); // mode = SSL_VERIFY_NONE
+            console.log(TAG + ' SSL_CTX_set_verify: forced mode to SSL_VERIFY_NONE');
+        }
+    });
+
+    // Also hook SSL_set_verify
+    const sslSetVerify = Module.findExportByName(lib, 'SSL_set_verify');
+    if (sslSetVerify) {
+        Interceptor.attach(sslSetVerify, {
+            onEnter: function (args) {
+                args[1] = ptr(0);
+                console.log(TAG + ' SSL_set_verify: forced mode to SSL_VERIFY_NONE');
+            }
+        });
+    }
+    return true;
+}
+
+// Locate libflutter.so
+const flutterLib = Process.findModuleByName('libflutter.so');
+if (!flutterLib) {
+    console.log(TAG + ' libflutter.so not loaded. Waiting for it...');
+    // Try hooking via dlopen interception
+    Interceptor.attach(Module.findExportByName(null, 'dlopen') || Module.findExportByName(null, 'android_dlopen_ext'), {
+        onLeave: function (retval) {
+            const flutterMod = Process.findModuleByName('libflutter.so');
+            if (flutterMod) {
+                console.log(TAG + ' libflutter.so loaded at: ' + flutterMod.base);
+                if (!hookByExport('libflutter.so')) {
+                    hookByHandshake('libflutter.so');
+                }
+                this.detach();
+            }
+        }
+    });
+} else {
+    console.log(TAG + ' libflutter.so found at: ' + flutterLib.base);
+    if (!hookByExport('libflutter.so')) {
+        if (!hookByHandshake('libflutter.so')) {
+            console.log(TAG + ' WARNING: Could not find ssl hooks in libflutter.so. App may use stripped release build.');
+            console.log(TAG + ' Consider using bypass-trustmanager.js alongside or a pattern scan approach.');
+        }
+    }
+}
+
+console.log(TAG + ' Flutter SSL bypass loaded.');
+
+```
+
+`scripts/cert-pinning/bypass-okhttp.js`:
+
+```js
+/**
+ * bypass-okhttp.js
+ *
+ * Hooks OkHttpClient certificate pinning for both OkHttp 3.x and 4.x.
+ * OkHttp 3.x uses CertificatePinner.check(String host, List<Certificate> peerCertificates)
+ * OkHttp 4.x uses CertificatePinner.check$okhttp(String host, List<Certificate> peerCertificates)
+ *
+ * Tested Android API levels: 21–34
+ * Known limitations:
+ *   - Does not bypass network_security_config.xml pinning (see bypass-trustmanager.js)
+ *   - Does not handle apps using OkHttp via Kotlin extensions directly
+ */
+
+'use strict';
+
+const TAG = '[frida-kit][bypass-okhttp]';
+
+Java.perform(function () {
+    // ----- OkHttp 3.x -----
+    try {
+        const CertificatePinner3 = Java.use('com.squareup.okhttp.CertificatePinner');
+        CertificatePinner3.check.overload('java.lang.String', 'java.util.List').implementation = function (hostname, peerCertificates) {
+            console.log(TAG + ' OkHttp3 CertificatePinner.check() bypassed for host: ' + hostname);
+            return;
+        };
+        console.log(TAG + ' Hooked OkHttp 3.x CertificatePinner.check (List variant)');
+    } catch (e) {
+        console.log(TAG + ' OkHttp 3.x (com.squareup.okhttp) not found, skipping');
+    }
+
+    // ----- OkHttp 3.x alternative package (okhttp3 namespace, version 3.x) -----
+    try {
+        const CertificatePinner3b = Java.use('okhttp3.CertificatePinner');
+
+        // check(String hostname, List<Certificate> peerCertificates)
+        CertificatePinner3b.check.overload('java.lang.String', 'java.util.List').implementation = function (hostname, peerCertificates) {
+            console.log(TAG + ' OkHttp3 (okhttp3 ns) CertificatePinner.check(List) bypassed for: ' + hostname);
+            return;
+        };
+
+        console.log(TAG + ' Hooked OkHttp 3.x (okhttp3 namespace) CertificatePinner');
+    } catch (e) {
+        console.log(TAG + ' OkHttp 3.x (okhttp3 namespace) not found, skipping');
+    }
+
+    // ----- OkHttp 4.x (Kotlin) -----
+    // In OkHttp 4.x the method is internal and named check$okhttp
+    try {
+        const CertificatePinner4 = Java.use('okhttp3.CertificatePinner');
+
+        // check$okhttp is the internal method used in 4.x; it accepts (String, List)
+        try {
+            CertificatePinner4['check$okhttp'].overload('java.lang.String', 'java.util.List').implementation = function (hostname, peerCertificates) {
+                console.log(TAG + ' OkHttp 4.x CertificatePinner.check$okhttp bypassed for: ' + hostname);
+                return;
+            };
+            console.log(TAG + ' Hooked OkHttp 4.x check$okhttp (List variant)');
+        } catch (inner) {
+            console.log(TAG + ' check$okhttp(List) not found: ' + inner.message);
+        }
+
+        // Some 4.x builds expose check(String, List<X509Certificate>) instead
+        try {
+            const X509CertificateClass = Java.use('java.security.cert.X509Certificate');
+            CertificatePinner4.check.overload('java.lang.String', '[Ljava.security.cert.X509Certificate;').implementation = function (hostname, peerCerts) {
+                console.log(TAG + ' OkHttp 4.x CertificatePinner.check(X509[]) bypassed for: ' + hostname);
+                return;
+            };
+            console.log(TAG + ' Hooked OkHttp 4.x check(String, X509Certificate[])');
+        } catch (inner2) {
+            // expected on most builds
+        }
+    } catch (e) {
+        console.log(TAG + ' OkHttp 4.x (okhttp3.CertificatePinner) not found: ' + e.message);
+    }
+
+    // ----- Retrofit2 uses OkHttp under the hood; no additional hook needed -----
+
+    // ----- ApplicationInterceptors / NetworkInterceptors chain -----
+    // Some apps add a custom TrustManager inside an OkHttpClient.Builder.
+    // Hooking SSLSocketFactory and X509TrustManager is handled in bypass-trustmanager.js.
+
+    console.log(TAG + ' Bypass loaded. All pinning checks in scope will be suppressed.');
+});
+
+```
+
+`scripts/cert-pinning/bypass-react-native.js`:
+
+```js
+/**
+ * bypass-react-native.js
+ *
+ * Bypasses SSL certificate pinning in React Native apps using the Hermes engine.
+ * React Native uses OkHttp for the native fetch/XMLHttpRequest bridge, so we
+ * hook OkHttp's CertificatePinner AND the React Native NetworkingModule's
+ * OkHttpClient builder to inject a permissive TrustManager.
+ *
+ * Tested Android API levels: 21–34, React Native 0.68–0.73
+ * Known limitations:
+ *   - Apps using the new React Native Networking (Fetch API via Hermes) still route
+ *     through OkHttp on Android, so OkHttp hooks apply.
+ *   - Does not handle custom native modules that bypass OkHttp.
+ */
+
+'use strict';
+
+const TAG = '[frida-kit][bypass-react-native]';
+
+Java.perform(function () {
+
+    // ---- OkHttp CertificatePinner (React Native bundles OkHttp 4.x) ----
+    try {
+        const CertificatePinner = Java.use('okhttp3.CertificatePinner');
+
+        // OkHttp 4.x internal check
+        try {
+            CertificatePinner['check$okhttp'].overload('java.lang.String', 'java.util.List').implementation = function (hostname, peerCertificates) {
+                console.log(TAG + ' CertificatePinner.check$okhttp bypassed for: ' + hostname);
+            };
+        } catch (e) {
+            // Not present in all builds
+        }
+
+        try {
+            CertificatePinner.check.overload('java.lang.String', 'java.util.List').implementation = function (hostname, peerCertificates) {
+                console.log(TAG + ' CertificatePinner.check(List) bypassed for: ' + hostname);
+            };
+        } catch (e) {
+            // Not present in all builds
+        }
+
+        console.log(TAG + ' OkHttp CertificatePinner hooks installed');
+    } catch (e) {
+        console.log(TAG + ' okhttp3.CertificatePinner not found: ' + e.message);
+    }
+
+    // ---- React Native OkHttpClientProvider (injects permissive TrustManager) ----
+    try {
+        const OkHttpClientProvider = Java.use('com.facebook.react.modules.network.OkHttpClientProvider');
+        const OkHttpClientFactory = Java.use('com.facebook.react.modules.network.OkHttpClientFactory');
+
+        OkHttpClientProvider.createClientBuilder.overload().implementation = function () {
+            console.log(TAG + ' OkHttpClientProvider.createClientBuilder() intercepted');
+            const builder = this.createClientBuilder();
+
+            // Install permissive TrustManager
+            const X509TrustManager = Java.use('javax.net.ssl.X509TrustManager');
+            const BypassTM = Java.registerClass({
+                name: 'com.fridakit.RNBypassTrustManager',
+                implements: [X509TrustManager],
+                methods: {
+                    checkClientTrusted: function (chain, authType) { },
+                    checkServerTrusted: function (chain, authType) {
+                        console.log(TAG + ' RN TrustManager: checkServerTrusted suppressed');
+                    },
+                    getAcceptedIssuers: function () {
+                        return Java.array('Ljava.security.cert.X509Certificate;', []);
+                    }
+                }
+            });
+
+            const managers = Java.array('Ljavax.net.ssl.TrustManager;', [BypassTM.$new()]);
+            const SSLContext = Java.use('javax.net.ssl.SSLContext');
+            const ctx = SSLContext.getInstance('TLS');
+            ctx.init(null, managers, null);
+
+            builder.sslSocketFactory(ctx.getSocketFactory(), BypassTM.$new());
+            builder.hostnameVerifier(Java.registerClass({
+                name: 'com.fridakit.RNAllowAllHostnameVerifier',
+                implements: [Java.use('javax.net.ssl.HostnameVerifier')],
+                methods: {
+                    verify: function (hostname, session) {
+                        console.log(TAG + ' HostnameVerifier.verify bypassed for: ' + hostname);
+                        return true;
+                    }
+                }
+            }).$new());
+
+            return builder;
+        };
+        console.log(TAG + ' OkHttpClientProvider.createClientBuilder hooked');
+    } catch (e) {
+        console.log(TAG + ' OkHttpClientProvider not found (may not be in this RN version): ' + e.message);
+    }
+
+    // ---- Hermes fetch via JSI: not hookable at Java level; OkHttp hooks above are sufficient ----
+
+    console.log(TAG + ' React Native SSL bypass loaded.');
+});
+
+```
+
+`scripts/cert-pinning/bypass-trustmanager.js`:
+
+```js
+/**
+ * bypass-trustmanager.js
+ *
+ * Hooks javax.net.ssl.X509TrustManager checkServerTrusted() to suppress all
+ * certificate validation errors, including custom TrustManagers, network_security_config
+ * pinning, and WebView SSL error handlers.
+ *
+ * Tested Android API levels: 19–34
+ * Known limitations:
+ *   - Bypasses ALL certificate validation, not just pinning; suitable for analysis only.
+ *   - Does not handle BouncyCastle or Conscrypt-backed TrustManagers directly
+ *     (see bypass-conscrypt.js for Conscrypt).
+ */
+
+'use strict';
+
+const TAG = '[frida-kit][bypass-trustmanager]';
+
+Java.perform(function () {
+
+    // ---- javax.net.ssl.X509TrustManager (all implementations via interface hook) ----
+    const X509TrustManager = Java.use('javax.net.ssl.X509TrustManager');
+    const SSLContext = Java.use('javax.net.ssl.SSLContext');
+    const TrustManagerArray = Java.array('Ljavax.net.ssl.TrustManager;', []);
+
+    // Build a permissive TrustManager and install it as the default
+    const BypassTrustManager = Java.registerClass({
+        name: 'com.fridakit.BypassTrustManager',
+        implements: [X509TrustManager],
+        methods: {
+            checkClientTrusted: function (chain, authType) { },
+            checkServerTrusted: function (chain, authType) {
+                console.log(TAG + ' checkServerTrusted() suppressed for authType: ' + authType);
+            },
+            getAcceptedIssuers: function () {
+                return Java.array('Ljava.security.cert.X509Certificate;', []);
+            }
+        }
+    });
+
+    const bypassInstance = BypassTrustManager.$new();
+    const managers = Java.array('Ljavax.net.ssl.TrustManager;', [bypassInstance]);
+
+    // Install on default SSLContext
+    try {
+        const ctx = SSLContext.getInstance('TLS');
+        ctx.init(null, managers, null);
+        SSLContext.setDefault(ctx);
+        console.log(TAG + ' Installed permissive TrustManager as default SSLContext');
+    } catch (e) {
+        console.log(TAG + ' SSLContext override failed: ' + e.message);
+    }
+
+    // ---- Hook checkServerTrusted on any class implementing X509TrustManager ----
+    // Enumerate loaded classes looking for custom TrustManagers
+    Java.enumerateLoadedClasses({
+        onMatch: function (className) {
+            try {
+                const cls = Java.use(className);
+                if (cls.checkServerTrusted) {
+                    const overloads = cls.checkServerTrusted.overloads;
+                    overloads.forEach(function (overload) {
+                        overload.implementation = function () {
+                            console.log(TAG + ' checkServerTrusted blocked on: ' + className);
+                            return null;
+                        };
+                    });
+                }
+            } catch (e) {
+                // Not all classes are hookable; skip silently
+            }
+        },
+        onComplete: function () {
+            console.log(TAG + ' Finished scanning loaded classes for TrustManager implementations');
+        }
+    });
+
+    // ---- WebViewClient onReceivedSslError ----
+    try {
+        const WebViewClient = Java.use('android.webkit.WebViewClient');
+        WebViewClient.onReceivedSslError.implementation = function (view, handler, error) {
+            console.log(TAG + ' WebViewClient.onReceivedSslError() suppressed, proceeding');
+            handler.proceed();
+        };
+        console.log(TAG + ' Hooked WebViewClient.onReceivedSslError');
+    } catch (e) {
+        console.log(TAG + ' WebViewClient hook failed: ' + e.message);
+    }
+
+    // ---- HttpsURLConnection: replace HostnameVerifier and SSLSocketFactory ----
+    try {
+        const HttpsURLConnection = Java.use('javax.net.ssl.HttpsURLConnection');
+        const HostnameVerifier = Java.use('javax.net.ssl.HostnameVerifier');
+
+        const AllowAllHostnameVerifier = Java.registerClass({
+            name: 'com.fridakit.AllowAllHostnameVerifier',
+            implements: [HostnameVerifier],
+            methods: {
+                verify: function (hostname, session) {
+                    console.log(TAG + ' HostnameVerifier.verify() bypassed for: ' + hostname);
+                    return true;
+                }
+            }
+        });
+
+        HttpsURLConnection.setDefaultHostnameVerifier(AllowAllHostnameVerifier.$new());
+        console.log(TAG + ' Installed AllowAllHostnameVerifier as default HostnameVerifier');
+    } catch (e) {
+        console.log(TAG + ' HttpsURLConnection hook failed: ' + e.message);
+    }
+
+    console.log(TAG + ' TrustManager bypass fully loaded.');
+});
+
+```
+
+`scripts/crypto/extract-aes-keys.js`:
+
+```js
+/**
+ * extract-aes-keys.js
+ *
+ * Hooks javax.crypto.spec.SecretKeySpec constructor to dump key bytes
+ * the moment any symmetric key is created. Captures AES, HMAC, DES,
+ * 3DES and any other SecretKeySpec-wrapped keys.
+ *
+ * Tested Android API levels: 19–34
+ * Known limitations:
+ *   - Keys derived via KeyGenerator or inside Android Keystore (hardware-backed)
+ *     may not go through SecretKeySpec and will not be captured.
+ *   - PBKDF2-derived keys only appear if the resulting bytes are wrapped in SecretKeySpec.
+ */
+
+'use strict';
+
+const TAG = '[frida-kit][extract-aes-keys]';
+
+function bytesToHex(javaByteArray) {
+    if (!javaByteArray) return '<null>';
+    const hex = [];
+    for (let i = 0; i < javaByteArray.length; i++) {
+        hex.push(('0' + (javaByteArray[i] & 0xff).toString(16)).slice(-2));
+    }
+    return hex.join('');
+}
+
+function stackTrace() {
+    try {
+        const Exception = Java.use('java.lang.Exception');
+        const e = Exception.$new();
+        const stack = e.getStackTrace();
+        const frames = [];
+        const limit = Math.min(stack.length, 8);
+        for (let i = 1; i < limit; i++) {
+            frames.push('    at ' + stack[i].toString());
+        }
+        return frames.join('\n');
+    } catch (e) {
+        return '    <stack trace unavailable>';
+    }
+}
+
+Java.perform(function () {
+    const SecretKeySpec = Java.use('javax.crypto.spec.SecretKeySpec');
+
+    // SecretKeySpec(byte[] key, String algorithm)
+    SecretKeySpec.$init.overload('[B', 'java.lang.String').implementation = function (keyBytes, algorithm) {
+        console.log('\n' + TAG + ' SecretKeySpec created');
+        console.log(TAG + ' Algorithm : ' + algorithm);
+        console.log(TAG + ' Key length: ' + keyBytes.length + ' bytes (' + (keyBytes.length * 8) + ' bits)');
+        console.log(TAG + ' Key (hex) : ' + bytesToHex(keyBytes));
+        console.log(TAG + ' Call stack:\n' + stackTrace());
+        return this.$init(keyBytes, algorithm);
+    };
+
+    // SecretKeySpec(byte[] key, int offset, int len, String algorithm)
+    SecretKeySpec.$init.overload('[B', 'int', 'int', 'java.lang.String').implementation = function (keyBytes, offset, len, algorithm) {
+        const slice = Java.array('byte', Array.from({ length: len }, (_, i) => keyBytes[offset + i]));
+        console.log('\n' + TAG + ' SecretKeySpec created (offset variant)');
+        console.log(TAG + ' Algorithm : ' + algorithm);
+        console.log(TAG + ' Key length: ' + len + ' bytes (' + (len * 8) + ' bits)');
+        console.log(TAG + ' Key (hex) : ' + bytesToHex(slice));
+        console.log(TAG + ' Call stack:\n' + stackTrace());
+        return this.$init(keyBytes, offset, len, algorithm);
+    };
+
+    // ---- Also hook KeyGenerator.generateKey for runtime-generated keys ----
+    try {
+        const KeyGenerator = Java.use('javax.crypto.KeyGenerator');
+        KeyGenerator.generateKey.implementation = function () {
+            const key = this.generateKey();
+            try {
+                const algo = this.getAlgorithm();
+                const encoded = key.getEncoded();
+                if (encoded) {
+                    console.log('\n' + TAG + ' KeyGenerator.generateKey: algo=' + algo);
+                    console.log(TAG + ' Key length: ' + encoded.length + ' bytes (' + (encoded.length * 8) + ' bits)');
+                    console.log(TAG + ' Key (hex) : ' + bytesToHex(encoded));
+                } else {
+                    console.log('\n' + TAG + ' KeyGenerator.generateKey: algo=' + algo + ' <key not exportable>');
+                }
+            } catch (e) {
+                console.log(TAG + ' KeyGenerator hook read error: ' + e.message);
+            }
+            return key;
+        };
+        console.log(TAG + ' Hooked KeyGenerator.generateKey');
+    } catch (e) {
+        console.log(TAG + ' KeyGenerator hook failed: ' + e.message);
+    }
+
+    // ---- PBEKeySpec / PBKDF2 ----
+    try {
+        const PBEKeySpec = Java.use('javax.crypto.spec.PBEKeySpec');
+        PBEKeySpec.$init.overload('[C', '[B', 'int', 'int').implementation = function (password, salt, iterations, keyLength) {
+            const pwStr = Java.use('java.lang.String').$new(password);
+            console.log('\n' + TAG + ' PBEKeySpec created (PBKDF2)');
+            console.log(TAG + ' Password  : ' + pwStr.toString());
+            console.log(TAG + ' Salt (hex): ' + bytesToHex(salt));
+            console.log(TAG + ' Iterations: ' + iterations);
+            console.log(TAG + ' Key length: ' + keyLength + ' bits');
+            return this.$init(password, salt, iterations, keyLength);
+        };
+        console.log(TAG + ' Hooked PBEKeySpec (PBKDF2 passwords)');
+    } catch (e) {
+        console.log(TAG + ' PBEKeySpec hook failed: ' + e.message);
+    }
+
+    console.log(TAG + ' AES/symmetric key extractor loaded.');
+});
+
+```
+
+`scripts/crypto/log-cipher-ops.js`:
+
+```js
+/**
+ * log-cipher-ops.js
+ *
+ * Hooks javax.crypto.Cipher to log algorithm name, key bytes, IV, and
+ * plaintext/ciphertext data on every encrypt/decrypt operation.
+ *
+ * Tested Android API levels: 19–34
+ * Known limitations:
+ *   - Very large cipher operations (>64KB) are truncated in the log.
+ *   - Hardware-backed Keystore operations may not expose key bytes.
+ *   - Does not hook JNI-level crypto (OpenSSL/BoringSSL via native code).
+ */
+
+'use strict';
+
+const TAG = '[frida-kit][log-cipher-ops]';
+const MAX_DATA = 512; // bytes to log
+
+function bytesToHex(javaByteArray) {
+    if (!javaByteArray) return '<null>';
+    const hex = [];
+    const len = Math.min(javaByteArray.length, MAX_DATA);
+    for (let i = 0; i < len; i++) {
+        hex.push(('0' + (javaByteArray[i] & 0xff).toString(16)).slice(-2));
+    }
+    let result = hex.join('');
+    if (javaByteArray.length > MAX_DATA) result += '...[+' + (javaByteArray.length - MAX_DATA) + ' bytes]';
+    return result;
+}
+
+function bytesToUtf8(javaByteArray) {
+    if (!javaByteArray) return '<null>';
+    try {
+        const s = Java.use('java.lang.String').$new(javaByteArray, 'UTF-8');
+        const str = s.toString();
+        if (str.length > MAX_DATA) return str.substring(0, MAX_DATA) + '...[truncated]';
+        return str;
+    } catch (e) {
+        return '<non-UTF8>';
+    }
+}
+
+Java.perform(function () {
+    const Cipher = Java.use('javax.crypto.Cipher');
+
+    // ---- Cipher.init() — capture key and IV ----
+    // init(int opmode, Key key)
+    Cipher.init.overload('int', 'java.security.Key').implementation = function (opmode, key) {
+        const algo = this.getAlgorithm();
+        const mode = opmode === 1 ? 'ENCRYPT' : opmode === 2 ? 'DECRYPT' : 'WRAP/UNWRAP';
+        console.log('\n' + TAG + ' Cipher.init: algo=' + algo + ' mode=' + mode);
+        try {
+            const keyBytes = key.getEncoded();
+            if (keyBytes) console.log(TAG + ' Key (hex): ' + bytesToHex(keyBytes));
+        } catch (e) { console.log(TAG + ' Key: <not exportable>'); }
+        return this.init(opmode, key);
+    };
+
+    // init(int opmode, Key key, AlgorithmParameterSpec params)
+    Cipher.init.overload('int', 'java.security.Key', 'java.security.spec.AlgorithmParameterSpec').implementation = function (opmode, key, params) {
+        const algo = this.getAlgorithm();
+        const mode = opmode === 1 ? 'ENCRYPT' : opmode === 2 ? 'DECRYPT' : 'WRAP/UNWRAP';
+        console.log('\n' + TAG + ' Cipher.init(with params): algo=' + algo + ' mode=' + mode);
+        try {
+            const keyBytes = key.getEncoded();
+            if (keyBytes) console.log(TAG + ' Key (hex): ' + bytesToHex(keyBytes));
+        } catch (e) { console.log(TAG + ' Key: <not exportable>'); }
+        try {
+            const IvParameterSpec = Java.use('javax.crypto.spec.IvParameterSpec');
+            const ivSpec = Java.cast(params, IvParameterSpec);
+            console.log(TAG + ' IV  (hex): ' + bytesToHex(ivSpec.getIV()));
+        } catch (e) { /* not an IvParameterSpec */ }
+        return this.init(opmode, key, params);
+    };
+
+    // ---- Cipher.doFinal() — capture plaintext / ciphertext ----
+    // doFinal(byte[] input)
+    Cipher.doFinal.overload('[B').implementation = function (input) {
+        const algo = this.getAlgorithm();
+        console.log('\n' + TAG + ' Cipher.doFinal: algo=' + algo);
+        console.log(TAG + ' Input (hex): ' + bytesToHex(input));
+        console.log(TAG + ' Input (txt): ' + bytesToUtf8(input));
+
+        const output = this.doFinal(input);
+        console.log(TAG + ' Output(hex): ' + bytesToHex(output));
+        return output;
+    };
+
+    // doFinal() — no args (stream mode)
+    Cipher.doFinal.overload().implementation = function () {
+        const output = this.doFinal();
+        console.log('\n' + TAG + ' Cipher.doFinal() (no input): output(hex)=' + bytesToHex(output));
+        return output;
+    };
+
+    // doFinal(byte[] input, int inputOffset, int inputLen)
+    Cipher.doFinal.overload('[B', 'int', 'int').implementation = function (input, offset, length) {
+        const algo = this.getAlgorithm();
+        const slice = Java.array('byte', Array.from({ length: length }, (_, i) => input[offset + i]));
+        console.log('\n' + TAG + ' Cipher.doFinal(offset): algo=' + algo);
+        console.log(TAG + ' Input (hex): ' + bytesToHex(slice));
+
+        const output = this.doFinal(input, offset, length);
+        console.log(TAG + ' Output(hex): ' + bytesToHex(output));
+        return output;
+    };
+
+    console.log(TAG + ' javax.crypto.Cipher hooks loaded.');
+});
+
+```
+
+`scripts/crypto/log-messagedigest.js`:
+
+```js
+/**
+ * log-messagedigest.js
+ *
+ * Hooks java.security.MessageDigest to log all hash inputs and digests.
+ * Useful for identifying what data is being hashed (tokens, passwords, etc.)
+ * and verifying hash implementations.
+ *
+ * Tested Android API levels: 19–34
+ * Known limitations:
+ *   - update() can be called multiple times before digest(); this script tracks
+ *     accumulated input per MessageDigest instance using a WeakMap.
+ *   - Native-backed MessageDigest (e.g., hardware-accelerated SHA on some SoCs)
+ *     may not expose data through Java hooks.
+ */
+
+'use strict';
+
+const TAG = '[frida-kit][log-messagedigest]';
+const MAX_LOG = 256;
+
+// Map from MessageDigest instance (by toString) to accumulated byte arrays
+const accumulator = new WeakMap();
+
+function bytesToHex(javaByteArray) {
+    if (!javaByteArray) return '<null>';
+    const hex = [];
+    for (let i = 0; i < javaByteArray.length; i++) {
+        hex.push(('0' + (javaByteArray[i] & 0xff).toString(16)).slice(-2));
+    }
+    return hex.join('');
+}
+
+function bytesToUtf8(javaByteArray) {
+    if (!javaByteArray) return '';
+    try {
+        return Java.use('java.lang.String').$new(javaByteArray, 'UTF-8').toString().substring(0, MAX_LOG);
+    } catch (e) {
+        return '<non-UTF8>';
+    }
+}
+
+Java.perform(function () {
+    const MessageDigest = Java.use('java.security.MessageDigest');
+
+    // ---- update(byte[] input) ----
+    MessageDigest.update.overload('[B').implementation = function (input) {
+        const key = this.getAlgorithm() + '_' + this.toString();
+        if (!accumulator.has(this)) accumulator.set(this, []);
+        const arr = accumulator.get(this);
+        if (input) {
+            for (let i = 0; i < input.length; i++) arr.push(input[i] & 0xff);
+        }
+        return this.update(input);
+    };
+
+    // ---- update(byte[] input, int offset, int len) ----
+    MessageDigest.update.overload('[B', 'int', 'int').implementation = function (input, offset, len) {
+        if (!accumulator.has(this)) accumulator.set(this, []);
+        const arr = accumulator.get(this);
+        if (input) {
+            for (let i = offset; i < offset + len; i++) arr.push(input[i] & 0xff);
+        }
+        return this.update(input, offset, len);
+    };
+
+    // ---- update(byte input) ----
+    MessageDigest.update.overload('byte').implementation = function (input) {
+        if (!accumulator.has(this)) accumulator.set(this, []);
+        accumulator.get(this).push(input & 0xff);
+        return this.update(input);
+    };
+
+    // ---- digest() — finalize and log ----
+    MessageDigest.digest.overload().implementation = function () {
+        const algo = this.getAlgorithm();
+        const digest = this.digest();
+
+        const accumulated = accumulator.get(this) || [];
+        accumulator.delete(this);
+        const inputBytes = Java.array('byte', accumulated);
+
+        console.log('\n' + TAG + ' MessageDigest.digest()');
+        console.log(TAG + ' Algorithm  : ' + algo);
+        console.log(TAG + ' Input len  : ' + accumulated.length + ' bytes');
+        if (accumulated.length > 0) {
+            console.log(TAG + ' Input (hex): ' + bytesToHex(inputBytes).substring(0, MAX_LOG * 2));
+            console.log(TAG + ' Input (txt): ' + bytesToUtf8(inputBytes));
+        }
+        console.log(TAG + ' Digest(hex): ' + bytesToHex(digest));
+
+        return digest;
+    };
+
+    // ---- digest(byte[] input) — convenience method ----
+    MessageDigest.digest.overload('[B').implementation = function (input) {
+        const algo = this.getAlgorithm();
+
+        // Include any previously accumulated bytes
+        const prior = accumulator.get(this) || [];
+        accumulator.delete(this);
+        const allBytes = prior.concat(Array.from({ length: input.length }, (_, i) => input[i] & 0xff));
+        const inputBytes = Java.array('byte', allBytes);
+
+        const digest = this.digest(input);
+
+        console.log('\n' + TAG + ' MessageDigest.digest(input)');
+        console.log(TAG + ' Algorithm  : ' + algo);
+        console.log(TAG + ' Input len  : ' + allBytes.length + ' bytes');
+        console.log(TAG + ' Input (hex): ' + bytesToHex(inputBytes).substring(0, MAX_LOG * 2));
+        console.log(TAG + ' Input (txt): ' + bytesToUtf8(inputBytes));
+        console.log(TAG + ' Digest(hex): ' + bytesToHex(digest));
+
+        return digest;
+    };
+
+    // ---- Static MessageDigest.isEqual() calls ----
+    MessageDigest.isEqual.implementation = function (digesta, digestb) {
+        const result = this.isEqual(digesta, digestb);
+        console.log(TAG + ' MessageDigest.isEqual(): ' + result
+            + ' a=' + bytesToHex(digesta) + ' b=' + bytesToHex(digestb));
+        return result;
+    };
+
+    console.log(TAG + ' MessageDigest hook loaded (SHA-1, SHA-256, MD5, etc.)');
+});
+
+```
+
+`scripts/memory/dump-strings.js`:
+
+```js
+/**
+ * dump-strings.js
+ *
+ * Scans the Java heap for live String objects and dumps their values.
+ * Useful for finding hardcoded credentials, tokens, API keys and
+ * other sensitive strings stored in memory.
+ *
+ * Usage:
+ *   frida -U -l dump-strings.js -f com.example.app
+ *
+ * The scan runs once after a 3-second delay (to allow app initialization).
+ * Set FILTER_MIN_LENGTH and FILTER_PATTERN to narrow results.
+ *
+ * Tested Android API levels: 21–34
+ * Known limitations:
+ *   - Heap enumeration can be slow on large apps; consider increasing the delay.
+ *   - Strings stored only in native memory (char* in JNI) are not captured.
+ */
+
+'use strict';
+
+const TAG = '[frida-kit][dump-strings]';
+
+// Minimum string length to log (avoids noisy short strings)
+const FILTER_MIN_LENGTH = 8;
+
+// Optional regex filter; null = print all strings above min length
+// Example: const FILTER_PATTERN = /api[_-]?key|token|secret|password|bearer/i;
+const FILTER_PATTERN = null;
+
+// Output deduplication
+const seen = new Set();
+
+function shouldLog(str) {
+    if (str.length < FILTER_MIN_LENGTH) return false;
+    if (FILTER_PATTERN && !FILTER_PATTERN.test(str)) return false;
+    return true;
+}
+
+Java.perform(function () {
+    console.log(TAG + ' Scheduling heap string dump in 3 seconds...');
+
+    setTimeout(function () {
+        console.log(TAG + ' Starting Java heap enumeration...');
+        let count = 0;
+        let logged = 0;
+
+        Java.choose('java.lang.String', {
+            onMatch: function (instance) {
+                count++;
+                try {
+                    const str = instance.toString();
+                    if (shouldLog(str) && !seen.has(str)) {
+                        seen.add(str);
+                        console.log(TAG + ' [' + str.length + '] ' + str.substring(0, 200));
+                        logged++;
+                    }
+                } catch (e) { /* skip non-printable */ }
+            },
+            onComplete: function () {
+                console.log(TAG + ' Heap scan complete: ' + count + ' strings examined, ' + logged + ' logged.');
+            }
+        });
+    }, 3000);
+
+    console.log(TAG + ' Dump-strings script loaded.');
+});
+
+```
+
+`scripts/memory/find-class-methods.js`:
+
+```js
+/**
+ * find-class-methods.js
+ *
+ * Lists all methods (declared and inherited) of a given Java class at runtime,
+ * including return types, parameter types, and modifiers.
+ *
+ * Usage:
+ *   Set TARGET_CLASS to the fully-qualified class name before attaching.
+ *   frida -U -l find-class-methods.js -f com.example.app
+ *
+ * Tested Android API levels: 19–34
+ * Known limitations:
+ *   - Private methods of superclasses are included only if INCLUDE_INHERITED = true.
+ *   - Synthetic (bridge) methods may appear for Kotlin/generic classes.
+ */
+
+'use strict';
+
+const TAG = '[frida-kit][find-class-methods]';
+
+// ---- CONFIGURATION ----
+const TARGET_CLASS = 'com.example.app.SomeClass'; // Change to your target class
+const INCLUDE_INHERITED = true;                     // false = declared methods only
+const INCLUDE_FIELDS = true;                        // also list fields
+// -----------------------
+
+function modifiersToString(modifiers) {
+    const Modifier = Java.use('java.lang.reflect.Modifier');
+    return Modifier.toString(modifiers);
+}
+
+function typeListToString(types) {
+    const result = [];
+    for (let i = 0; i < types.length; i++) {
+        result.push(types[i].getName());
+    }
+    return result.join(', ');
+}
+
+Java.perform(function () {
+
+    setTimeout(function () {
+        try {
+            const targetClass = Java.use(TARGET_CLASS);
+            const clazz = targetClass.class;
+
+            console.log('\n' + TAG + ' ========================================');
+            console.log(TAG + ' Class: ' + clazz.getName());
+            console.log(TAG + ' Super: ' + (clazz.getSuperclass() ? clazz.getSuperclass().getName() : 'none'));
+
+            // Interfaces
+            const ifaces = clazz.getInterfaces();
+            if (ifaces.length > 0) {
+                const ifaceNames = [];
+                for (let i = 0; i < ifaces.length; i++) ifaceNames.push(ifaces[i].getName());
+                console.log(TAG + ' Implements: ' + ifaceNames.join(', '));
+            }
+
+            // Methods
+            const methods = INCLUDE_INHERITED ? clazz.getMethods() : clazz.getDeclaredMethods();
+            console.log(TAG + '\n--- METHODS (' + methods.length + ') ---');
+            for (let i = 0; i < methods.length; i++) {
+                const m = methods[i];
+                try {
+                    m.setAccessible(true);
+                    const mods = modifiersToString(m.getModifiers());
+                    const retType = m.getReturnType().getName();
+                    const params = typeListToString(m.getParameterTypes());
+                    const exceptions = typeListToString(m.getExceptionTypes());
+                    const excStr = exceptions ? ' throws ' + exceptions : '';
+                    console.log(TAG + '  [' + mods + '] ' + retType + ' ' + m.getName() + '(' + params + ')' + excStr);
+                } catch (e) {
+                    console.log(TAG + '  <could not inspect method: ' + e.message + '>');
+                }
+            }
+
+            // Constructors
+            const ctors = clazz.getDeclaredConstructors();
+            console.log(TAG + '\n--- CONSTRUCTORS (' + ctors.length + ') ---');
+            for (let i = 0; i < ctors.length; i++) {
+                const c = ctors[i];
+                try {
+                    const params = typeListToString(c.getParameterTypes());
+                    console.log(TAG + '  ' + c.getName() + '(' + params + ')');
+                } catch (e) {
+                    console.log(TAG + '  <could not inspect constructor>');
+                }
+            }
+
+            // Fields
+            if (INCLUDE_FIELDS) {
+                const fields = INCLUDE_INHERITED ? clazz.getFields() : clazz.getDeclaredFields();
+                console.log(TAG + '\n--- FIELDS (' + fields.length + ') ---');
+                for (let i = 0; i < fields.length; i++) {
+                    const f = fields[i];
+                    try {
+                        f.setAccessible(true);
+                        const mods = modifiersToString(f.getModifiers());
+                        console.log(TAG + '  [' + mods + '] ' + f.getType().getName() + ' ' + f.getName());
+                    } catch (e) {
+                        console.log(TAG + '  <could not inspect field>');
+                    }
+                }
+            }
+
+            console.log(TAG + ' ========================================\n');
+
+        } catch (e) {
+            console.log(TAG + ' ERROR: Could not load class "' + TARGET_CLASS + '": ' + e.message);
+            console.log(TAG + ' Make sure the class is loaded (the app may need to reach a specific activity first).');
+        }
+    }, 2000);
+
+    console.log(TAG + ' find-class-methods loaded. Target: ' + TARGET_CLASS);
+});
+
+```
+
+`scripts/memory/trace-method-calls.js`:
+
+```js
+/**
+ * trace-method-calls.js
+ *
+ * Traces all calls to a specified Java method with argument values and return value.
+ * Supports tracing all overloads of a method name or a specific overload by
+ * parameter signature.
+ *
+ * Usage:
+ *   Set TARGET_CLASS, TARGET_METHOD, and optionally TARGET_PARAMS before attaching.
+ *   Leave TARGET_PARAMS as null to hook all overloads.
+ *
+ * Tested Android API levels: 19–34
+ * Known limitations:
+ *   - Tracing very high-frequency methods (e.g., onDraw) will cause significant slowdown.
+ *   - Reference-type arguments are printed via toString(); complex objects may truncate.
+ */
+
+'use strict';
+
+const TAG = '[frida-kit][trace-method-calls]';
+
+// ---- CONFIGURATION ----
+const TARGET_CLASS = 'com.example.app.SomeClass';   // Fully-qualified class name
+const TARGET_METHOD = 'someMethod';                  // Method name to trace
+const TARGET_PARAMS = null;                          // e.g. ['java.lang.String', 'int'] or null for all overloads
+const PRINT_STACK_TRACE = false;                     // Set true to include call stack
+const MAX_STRING_LEN = 256;                          // Truncate long argument strings
+// -----------------------
+
+let callCount = 0;
+
+function argToString(arg) {
+    if (arg === null || arg === undefined) return 'null';
+    try {
+        const str = arg.toString();
+        if (str.length > MAX_STRING_LEN) return str.substring(0, MAX_STRING_LEN) + '...[truncated]';
+        return str;
+    } catch (e) {
+        return '<toString error: ' + e.message + '>';
+    }
+}
+
+function getStackTrace() {
+    try {
+        const Exception = Java.use('java.lang.Exception');
+        const e = Exception.$new();
+        const stack = e.getStackTrace();
+        const frames = [];
+        const limit = Math.min(stack.length, 10);
+        for (let i = 1; i < limit; i++) {
+            frames.push('    at ' + stack[i].toString());
+        }
+        return frames.join('\n');
+    } catch (e) {
+        return '    <unavailable>';
+    }
+}
+
+function hookOverload(overload, paramTypes) {
+    overload.implementation = function () {
+        callCount++;
+        const id = '#' + callCount;
+
+        const args = Array.prototype.slice.call(arguments);
+        const argStrs = args.map(argToString);
+
+        console.log('\n' + TAG + ' CALL ' + id + ': ' + TARGET_CLASS + '.' + TARGET_METHOD
+            + (paramTypes ? '(' + paramTypes.join(', ') + ')' : '()')
+        );
+        args.forEach(function (arg, i) {
+            console.log(TAG + '   arg[' + i + ']: ' + argStrs[i]);
+        });
+
+        if (PRINT_STACK_TRACE) {
+            console.log(TAG + ' Stack:\n' + getStackTrace());
+        }
+
+        const retval = this[TARGET_METHOD].apply(this, args);
+
+        console.log(TAG + '   return: ' + argToString(retval));
+
+        return retval;
+    };
+}
+
+Java.perform(function () {
+    setTimeout(function () {
+        try {
+            const cls = Java.use(TARGET_CLASS);
+
+            if (!cls[TARGET_METHOD]) {
+                console.log(TAG + ' ERROR: Method "' + TARGET_METHOD + '" not found on ' + TARGET_CLASS);
+                return;
+            }
+
+            if (TARGET_PARAMS !== null) {
+                // Hook specific overload
+                try {
+                    const overload = cls[TARGET_METHOD].overload.apply(cls[TARGET_METHOD], TARGET_PARAMS);
+                    hookOverload(overload, TARGET_PARAMS);
+                    console.log(TAG + ' Hooked overload: ' + TARGET_METHOD + '(' + TARGET_PARAMS.join(', ') + ')');
+                } catch (e) {
+                    console.log(TAG + ' Could not hook specified overload: ' + e.message);
+                }
+            } else {
+                // Hook all overloads
+                const overloads = cls[TARGET_METHOD].overloads;
+                if (!overloads || overloads.length === 0) {
+                    console.log(TAG + ' No overloads found for ' + TARGET_METHOD);
+                    return;
+                }
+                overloads.forEach(function (overload, idx) {
+                    try {
+                        const paramTypes = overload.argumentTypes.map(function (t) { return t.className; });
+                        hookOverload(overload, paramTypes);
+                        console.log(TAG + ' Hooked overload ' + (idx + 1) + ': ' + TARGET_METHOD + '(' + paramTypes.join(', ') + ')');
+                    } catch (e) {
+                        console.log(TAG + ' Could not hook overload ' + (idx + 1) + ': ' + e.message);
+                    }
+                });
+            }
+
+        } catch (e) {
+            console.log(TAG + ' ERROR loading class "' + TARGET_CLASS + '": ' + e.message);
+        }
+    }, 1500);
+
+    console.log(TAG + ' trace-method-calls loaded. Waiting for class: ' + TARGET_CLASS + '.' + TARGET_METHOD);
+});
+
+```
+
+`scripts/root-detection/bypass-generic.js`:
+
+```js
+/**
+ * bypass-generic.js
+ *
+ * Hooks common root detection patterns used by custom implementations:
+ *  - File.exists() for known su/magisk/busybox paths
+ *  - Runtime.exec() / ProcessBuilder to block shell command execution
+ *  - System property reads (android.os.Build TAG checks, ro.debuggable, ro.secure)
+ *  - PackageManager.getPackageInfo() for known root management apps
+ *
+ * Tested Android API levels: 19–34
+ * Known limitations:
+ *   - Native file access (open() syscall) bypassed separately via Interceptor; not included here.
+ *   - Very obfuscated apps encode path strings; this won't catch those without deobfuscation.
+ */
+
+'use strict';
+
+const TAG = '[frida-kit][bypass-generic]';
+
+// Known paths checked by root detection routines
+const ROOT_PATHS = [
+    '/su', '/system/su', '/system/bin/su', '/system/xbin/su',
+    '/sbin/su', '/vendor/bin/su', '/data/local/su', '/data/local/bin/su',
+    '/data/local/xbin/su', '/system/sd/xbin/su', '/system/bin/failsafe/su',
+    '/dev/com.koushikdutta.superuser.daemon',
+    '/system/app/Superuser.apk', '/system/app/SuperSU.apk',
+    '/data/app/com.noshufou.android.su', '/data/app/eu.chainfire.supersu',
+    '/system/xbin/busybox', '/system/bin/busybox', '/sbin/busybox',
+    '/dev/magisk', '/sbin/.magisk', '/data/adb/magisk', '/proc/net/xt_qtaguid',
+];
+
+const ROOT_PACKAGES = [
+    'com.noshufou.android.su', 'com.noshufou.android.su.elite',
+    'eu.chainfire.supersu', 'com.koushikdutta.superuser',
+    'com.thirdparty.superuser', 'com.yellowes.su',
+    'com.topjohnwu.magisk', 'me.weishu.kernelsu',
+    'com.kingroot.kinguser', 'com.kingo.root', 'com.smedialink.oneclickroot',
+    'com.zhiqupk.root.global', 'com.alephzain.framaroot',
+];
+
+const ROOT_COMMANDS = ['su', 'which su', 'busybox', 'id', 'whoami'];
+
+Java.perform(function () {
+
+    // ---- File.exists() ----
+    try {
+        const File = Java.use('java.io.File');
+        File.exists.implementation = function () {
+            const path = this.getAbsolutePath();
+            if (ROOT_PATHS.indexOf(path) !== -1) {
+                console.log(TAG + ' File.exists() blocked for: ' + path + ' -> false');
+                return false;
+            }
+            return this.exists();
+        };
+        console.log(TAG + ' Hooked File.exists()');
+    } catch (e) {
+        console.log(TAG + ' File.exists() hook failed: ' + e.message);
+    }
+
+    // ---- File.canExecute() ----
+    try {
+        const File = Java.use('java.io.File');
+        File.canExecute.implementation = function () {
+            const path = this.getAbsolutePath();
+            if (ROOT_PATHS.indexOf(path) !== -1) {
+                console.log(TAG + ' File.canExecute() blocked for: ' + path + ' -> false');
+                return false;
+            }
+            return this.canExecute();
+        };
+        console.log(TAG + ' Hooked File.canExecute()');
+    } catch (e) {
+        console.log(TAG + ' File.canExecute() hook failed: ' + e.message);
+    }
+
+    // ---- Runtime.exec() — block execution of root-revealing commands ----
+    try {
+        const Runtime = Java.use('java.lang.Runtime');
+        Runtime.exec.overload('java.lang.String').implementation = function (cmd) {
+            const cmdLower = cmd.toLowerCase().trim();
+            for (const rc of ROOT_COMMANDS) {
+                if (cmdLower === rc || cmdLower.endsWith('/' + rc)) {
+                    console.log(TAG + ' Runtime.exec() blocked: ' + cmd);
+                    // Return a dummy process that outputs nothing
+                    const proc = this.exec('true');
+                    return proc;
+                }
+            }
+            return this.exec(cmd);
+        };
+
+        Runtime.exec.overload('[Ljava.lang.String;').implementation = function (cmds) {
+            if (cmds && cmds.length > 0) {
+                const first = cmds[0].toLowerCase().trim();
+                for (const rc of ROOT_COMMANDS) {
+                    if (first === rc || first.endsWith('/' + rc)) {
+                        console.log(TAG + ' Runtime.exec(array) blocked: ' + cmds[0]);
+                        return this.exec('true');
+                    }
+                }
+            }
+            return this.exec(cmds);
+        };
+        console.log(TAG + ' Hooked Runtime.exec()');
+    } catch (e) {
+        console.log(TAG + ' Runtime.exec() hook failed: ' + e.message);
+    }
+
+    // ---- System.getProperty() / Build.TAGS ----
+    // Some apps check Build.TAGS == "test-keys"
+    try {
+        const Build = Java.use('android.os.Build');
+        const tagsField = Build.class.getDeclaredField('TAGS');
+        tagsField.setAccessible(true);
+        tagsField.set(null, 'release-keys');
+        console.log(TAG + ' Build.TAGS patched to "release-keys"');
+    } catch (e) {
+        console.log(TAG + ' Build.TAGS patch failed: ' + e.message);
+    }
+
+    // ---- PackageManager.getPackageInfo() — block known root app lookups ----
+    try {
+        const PackageManager = Java.use('android.app.ApplicationPackageManager');
+        PackageManager.getPackageInfo.overload('java.lang.String', 'int').implementation = function (pkg, flags) {
+            if (ROOT_PACKAGES.indexOf(pkg) !== -1) {
+                console.log(TAG + ' getPackageInfo blocked for root app: ' + pkg);
+                const NameNotFoundException = Java.use('android.content.pm.PackageManager$NameNotFoundException');
+                throw NameNotFoundException.$new(pkg);
+            }
+            return this.getPackageInfo(pkg, flags);
+        };
+        console.log(TAG + ' Hooked PackageManager.getPackageInfo()');
+    } catch (e) {
+        console.log(TAG + ' PackageManager.getPackageInfo() hook failed: ' + e.message);
+    }
+
+    // ---- /proc/mounts and /proc/net checks via BufferedReader ----
+    try {
+        const BufferedReader = Java.use('java.io.BufferedReader');
+        BufferedReader.readLine.implementation = function () {
+            const line = this.readLine();
+            if (line !== null) {
+                // Block lines that reveal /data as rw (root indicator)
+                if (line.indexOf('/data') !== -1 && line.indexOf('rw,') !== -1 && line.indexOf('nosuid') === -1) {
+                    console.log(TAG + ' BufferedReader.readLine: suppressed suspicious mount line');
+                    return 'tmpfs /data tmpfs ro,nosuid,nodev,noexec 0 0';
+                }
+            }
+            return line;
+        };
+    } catch (e) {
+        console.log(TAG + ' BufferedReader.readLine() hook failed: ' + e.message);
+    }
+
+    console.log(TAG + ' Generic root detection bypass loaded.');
+});
+
+```
+
+`scripts/root-detection/bypass-rootbeer.js`:
+
+```js
+/**
+ * bypass-rootbeer.js
+ *
+ * Hooks the RootBeer library (com.scottyab.rootbeer.RootBeer) to make all
+ * root detection checks return false. Covers isRooted(), isRootedWithBusyBox(),
+ * isRootedWithoutBusyBox(), and individual check methods.
+ *
+ * Tested Android API levels: 21–34, RootBeer 0.0.8 and 0.1.0
+ * Known limitations:
+ *   - Only effective if the app uses com.scottyab.rootbeer.RootBeer directly.
+ *   - Does not bypass ProGuard-renamed variants automatically (use bypass-generic.js).
+ */
+
+'use strict';
+
+const TAG = '[frida-kit][bypass-rootbeer]';
+
+Java.perform(function () {
+    try {
+        const RootBeer = Java.use('com.scottyab.rootbeer.RootBeer');
+
+        const booleanMethods = [
+            'isRooted',
+            'isRootedWithBusyBox',
+            'isRootedWithoutBusyBox',
+            'checkForBusyBoxBinary',
+            'checkForSuBinary',
+            'checkSuExists',
+            'checkForRWPaths',
+            'checkForDangerousProps',
+            'checkForRootManagementApps',
+            'checkForPotentiallyDangerousApps',
+            'checkForRootCloakingApps',
+            'checkTestKeys',
+            'detectRootManagementApps',
+            'detectPotentiallyDangerousApps',
+            'detectTestKeys',
+            'checkForMagiskBinary',
+        ];
+
+        booleanMethods.forEach(function (methodName) {
+            try {
+                RootBeer[methodName].implementation = function () {
+                    console.log(TAG + ' RootBeer.' + methodName + '() -> false');
+                    return false;
+                };
+                console.log(TAG + ' Hooked RootBeer.' + methodName);
+            } catch (e) {
+                // Method may not exist in all versions
+            }
+        });
+
+        // isRooted(boolean includeTestKeys) — some builds have this variant
+        try {
+            RootBeer.isRooted.overload('boolean').implementation = function (includeTestKeys) {
+                console.log(TAG + ' RootBeer.isRooted(boolean) -> false');
+                return false;
+            };
+        } catch (e) { /* not in this build */ }
+
+    } catch (e) {
+        console.log(TAG + ' com.scottyab.rootbeer.RootBeer not found: ' + e.message);
+    }
+
+    // ---- RootBeerNative (native checks via JNI) ----
+    try {
+        const RootBeerNative = Java.use('com.scottyab.rootbeer.RootBeerNative');
+        try {
+            RootBeerNative.checkForRoot.implementation = function (paths) {
+                console.log(TAG + ' RootBeerNative.checkForRoot() -> 0');
+                return 0;
+            };
+        } catch (e) { /* not present */ }
+    } catch (e) {
+        console.log(TAG + ' RootBeerNative not found (expected if not present)');
+    }
+
+    console.log(TAG + ' RootBeer bypass loaded.');
+});
+
+```
+
+`scripts/root-detection/bypass-safetynet.js`:
+
+```js
+/**
+ * bypass-safetynet.js
+ *
+ * Hooks Google SafetyNet Attestation API and the newer Play Integrity API
+ * to make attestation checks appear to succeed.
+ *
+ * Covered APIs:
+ *  - com.google.android.gms.safetynet.SafetyNetApi (legacy)
+ *  - com.google.android.play.core.integrity (Play Integrity API)
+ *
+ * Tested Android API levels: 21–34, Google Play Services 22+
+ * Known limitations:
+ *   - The actual JWS (JSON Web Signature) from SafetyNet is signed by Google's server;
+ *     this hook intercepts the callback before the app parses the response and injects
+ *     a fake "passing" response. Apps with server-side JWS verification will still fail.
+ *   - Hardware-backed attestation (HARDWARE_BACKED verdict) cannot be faked on non-rooted
+ *     devices; this hook is most effective combined with other root bypass scripts.
+ */
+
+'use strict';
+
+const TAG = '[frida-kit][bypass-safetynet]';
+
+// A minimal SafetyNet attestation JWS payload that claims ctsProfileMatch=true
+// NOTE: This JWT is NOT signed and will fail server-side signature verification.
+// It works for apps that parse only the payload without verifying the signature.
+const FAKE_JWS_PAYLOAD = btoa(JSON.stringify({ alg: 'RS256', typ: 'JWT' })) + '.'
+    + btoa(JSON.stringify({
+        timestampMs: Date.now(),
+        nonce: 'AAAAAAAAAAAAAAAAAAAAAA==',
+        apkPackageName: 'com.example.app',
+        apkCertificateDigestSha256: ['AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA='],
+        apkDigestSha256: 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=',
+        ctsProfileMatch: true,
+        basicIntegrity: true,
+        evaluationType: 'BASIC'
+    })) + '.FAKESIGNATURE';
+
+Java.perform(function () {
+
+    // ---- SafetyNetClient.attest() result callback ----
+    // The app registers a success/failure listener. Hook the Task result classes.
+    try {
+        // Hook SafetyNetApi.AttestationResponse
+        const AttestationResponse = Java.use('com.google.android.gms.safetynet.SafetyNetApi$AttestationResponse');
+        AttestationResponse.getJwsResult.implementation = function () {
+            console.log(TAG + ' SafetyNetApi.AttestationResponse.getJwsResult() -> fake passing JWS');
+            return FAKE_JWS_PAYLOAD;
+        };
+        console.log(TAG + ' Hooked SafetyNetApi.AttestationResponse.getJwsResult');
+    } catch (e) {
+        console.log(TAG + ' SafetyNetApi.AttestationResponse not found: ' + e.message);
+    }
+
+    // ---- Hook the HarmfulAppsResponse ----
+    try {
+        const HarmfulAppsResponse = Java.use('com.google.android.gms.safetynet.SafetyNetApi$HarmfulAppsResponse');
+        HarmfulAppsResponse.getHarmfulAppsList.implementation = function () {
+            console.log(TAG + ' getHarmfulAppsList() -> empty list');
+            return Java.use('java.util.ArrayList').$new();
+        };
+    } catch (e) {
+        // Not always present
+    }
+
+    // ---- Play Integrity API: IntegrityTokenResponse ----
+    try {
+        const IntegrityTokenResponse = Java.use('com.google.android.play.core.integrity.IntegrityTokenResponse');
+        IntegrityTokenResponse.token.implementation = function () {
+            console.log(TAG + ' IntegrityTokenResponse.token() -> fake token');
+            // Return a minimal fake token (3-part dot-separated string)
+            return 'eyJhbGciOiJSUzI1NiJ9.eyJ2ZXJkaWN0IjoidW5rbm93biJ9.FAKESIG';
+        };
+        console.log(TAG + ' Hooked Play Integrity IntegrityTokenResponse.token');
+    } catch (e) {
+        console.log(TAG + ' Play Integrity API not found: ' + e.message);
+    }
+
+    // ---- Hook Status.isSuccess() in GMS Task results ----
+    // Some apps check Status.isSuccess() before reading the attestation response
+    try {
+        const Status = Java.use('com.google.android.gms.common.api.Status');
+        Status.isSuccess.implementation = function () {
+            const result = this.isSuccess();
+            const statusCode = this.getStatusCode();
+            if (!result) {
+                console.log(TAG + ' Status.isSuccess() was false (code=' + statusCode + '), returning true');
+                return true;
+            }
+            return result;
+        };
+        console.log(TAG + ' Hooked com.google.android.gms.common.api.Status.isSuccess');
+    } catch (e) {
+        console.log(TAG + ' Status.isSuccess hook failed: ' + e.message);
+    }
+
+    // ---- Scan for app-level attestation result parsing classes ----
+    Java.enumerateLoadedClasses({
+        onMatch: function (className) {
+            try {
+                if (className.toLowerCase().indexOf('attestation') !== -1 ||
+                    className.toLowerCase().indexOf('integrity') !== -1 ||
+                    className.toLowerCase().indexOf('safetynet') !== -1) {
+                    console.log(TAG + ' Found attestation-related class: ' + className);
+                }
+            } catch (e) { /* skip */ }
+        },
+        onComplete: function () {
+            console.log(TAG + ' Class scan for attestation classes complete');
+        }
+    });
+
+    console.log(TAG + ' SafetyNet/Play Integrity bypass loaded.');
+});
+
+```
+
+`scripts/traffic/extract-json-bodies.js`:
+
+```js
+/**
+ * extract-json-bodies.js
+ *
+ * Hooks OkHttp3/4 request and response bodies, detects JSON content-type,
+ * and pretty-prints extracted JSON to the Frida console.
+ *
+ * Tested Android API levels: 21–34
+ * Known limitations:
+ *   - Non-JSON bodies are skipped silently.
+ *   - peekBody() clones the response buffer; adds memory overhead for large responses.
+ */
+
+'use strict';
+
+const TAG = '[frida-kit][extract-json-bodies]';
+const MAX_BODY = 8192;
+
+function tryParseJson(str) {
+    try {
+        const JSONClass = Java.use('org.json.JSONObject');
+        const obj = JSONClass.$new(str);
+        return obj.toString(2); // pretty-print with 2-space indent
+    } catch (e) {
+        // Try as JSONArray
+        try {
+            const JSONArray = Java.use('org.json.JSONArray');
+            const arr = JSONArray.$new(str);
+            return arr.toString(2);
+        } catch (e2) {
+            return null; // Not valid JSON
+        }
+    }
+}
+
+function isJsonContentType(contentType) {
+    if (!contentType) return false;
+    const ct = contentType.toString().toLowerCase();
+    return ct.indexOf('application/json') !== -1 || ct.indexOf('text/json') !== -1;
+}
+
+Java.perform(function () {
+
+    // ---- OkHttp3/4 via RealCall.execute ----
+    try {
+        const RealCall = Java.use('okhttp3.internal.connection.RealCall');
+
+        RealCall.execute.implementation = function () {
+            const request = this.request();
+            const reqUrl = request.url().toString();
+            const reqMethod = request.method();
+
+            // Capture request JSON body
+            try {
+                const reqBody = request.body();
+                if (reqBody !== null) {
+                    const ct = reqBody.contentType();
+                    if (ct && isJsonContentType(ct.toString())) {
+                        const buf = Java.use('okio.Buffer').$new();
+                        reqBody.writeTo(buf);
+                        const bodyStr = buf.readUtf8().substring(0, MAX_BODY);
+                        const pretty = tryParseJson(bodyStr);
+                        if (pretty) {
+                            console.log('\n' + TAG + ' >>> JSON REQUEST BODY [' + reqMethod + ' ' + reqUrl + ']');
+                            console.log(pretty);
+                        }
+                    }
+                }
+            } catch (e) { /* non-readable body */ }
+
+            const response = this.execute();
+
+            // Capture response JSON body
+            try {
+                const respBody = response.body();
+                if (respBody !== null) {
+                    const ct = response.header('Content-Type');
+                    if (isJsonContentType(ct)) {
+                        const peeked = response.peekBody(MAX_BODY);
+                        const bodyStr = peeked.string();
+                        const pretty = tryParseJson(bodyStr);
+                        if (pretty) {
+                            console.log('\n' + TAG + ' <<< JSON RESPONSE BODY [' + response.code() + ' ' + reqUrl + ']');
+                            console.log(pretty);
+                        }
+                    }
+                }
+            } catch (e) { /* non-readable body */ }
+
+            return response;
+        };
+        console.log(TAG + ' Hooked RealCall.execute for JSON extraction');
+    } catch (e) {
+        console.log(TAG + ' RealCall.execute hook failed: ' + e.message);
+    }
+
+    // ---- OkHttp3/4 enqueue (async calls) ----
+    try {
+        const AsyncCall = Java.use('okhttp3.internal.connection.RealCall$AsyncCall');
+
+        AsyncCall.run.implementation = function () {
+            // AsyncCall.run() dispatches the call; we hook at the callback level
+            return this.run();
+        };
+
+        // Hook okhttp3.Callback.onResponse to capture async responses
+        Java.enumerateLoadedClasses({
+            onMatch: function (className) {
+                try {
+                    const cls = Java.use(className);
+                    if (cls.onResponse && cls.class.getInterfaces) {
+                        const ifaces = cls.class.getInterfaces();
+                        for (let i = 0; i < ifaces.length; i++) {
+                            if (ifaces[i].getName() === 'okhttp3.Callback') {
+                                cls.onResponse.implementation = function (call, response) {
+                                    try {
+                                        const ct = response.header('Content-Type');
+                                        if (isJsonContentType(ct)) {
+                                            const peeked = response.peekBody(MAX_BODY);
+                                            const bodyStr = peeked.string();
+                                            const pretty = tryParseJson(bodyStr);
+                                            if (pretty) {
+                                                console.log('\n' + TAG + ' <<< ASYNC JSON RESPONSE [' + response.code() + ' ' + response.request().url() + ']');
+                                                console.log(pretty);
+                                            }
+                                        }
+                                    } catch (inner) { /* skip */ }
+                                    return this.onResponse(call, response);
+                                };
+                                break;
+                            }
+                        }
+                    }
+                } catch (e) { /* skip */ }
+            },
+            onComplete: function () {
+                console.log(TAG + ' Async callback scan complete');
+            }
+        });
+    } catch (e) {
+        console.log(TAG + ' AsyncCall hook failed: ' + e.message);
+    }
+
+    console.log(TAG + ' JSON body extractor loaded.');
+});
+
+```
+
+`scripts/traffic/log-http-requests.js`:
+
+```js
+/**
+ * log-http-requests.js
+ *
+ * Hooks OkHttp3/4 and HttpURLConnection to log all outgoing HTTP requests
+ * and incoming responses, including URLs, headers, and body content.
+ *
+ * Tested Android API levels: 21–34
+ * Known limitations:
+ *   - Large response bodies may be truncated at 4096 bytes to avoid performance impact.
+ *   - Streaming responses (chunked transfer) may not be fully captured.
+ *   - gzip-compressed bodies are decompressed before logging if OkHttp handles decompression.
+ */
+
+'use strict';
+
+const TAG = '[frida-kit][log-http-requests]';
+const MAX_BODY_SIZE = 4096;
+
+function bytesToString(bytes) {
+    try {
+        if (!bytes) return '<null>';
+        const charset = Java.use('java.nio.charset.Charset');
+        return Java.use('java.lang.String').$new(bytes, charset.forName('UTF-8'));
+    } catch (e) {
+        return '<binary data, length=' + (bytes ? bytes.length : 0) + '>';
+    }
+}
+
+Java.perform(function () {
+
+    // ---- OkHttp3 / OkHttp4: hook via okhttp3.OkHttpClient ----
+    try {
+        const RealCall = Java.use('okhttp3.internal.connection.RealCall');
+
+        RealCall.execute.implementation = function () {
+            const request = this.request();
+            const url = request.url().toString();
+            const method = request.method();
+            const headers = request.headers().toString();
+
+            console.log('\n' + TAG + ' >>> REQUEST');
+            console.log(TAG + ' Method : ' + method);
+            console.log(TAG + ' URL    : ' + url);
+            console.log(TAG + ' Headers:\n' + headers);
+
+            // Log request body if present
+            try {
+                const reqBody = request.body();
+                if (reqBody !== null) {
+                    const buffer = Java.use('okio.Buffer').$new();
+                    reqBody.writeTo(buffer);
+                    const bodyStr = buffer.readUtf8();
+                    console.log(TAG + ' Body   : ' + bodyStr.substring(0, MAX_BODY_SIZE));
+                }
+            } catch (bodyErr) {
+                console.log(TAG + ' Body   : <could not read: ' + bodyErr.message + '>');
+            }
+
+            const response = this.execute();
+
+            // Log response
+            try {
+                const respCode = response.code();
+                const respHeaders = response.headers().toString();
+                console.log(TAG + ' <<< RESPONSE ' + respCode);
+                console.log(TAG + ' Headers:\n' + respHeaders);
+
+                const respBody = response.peekBody(MAX_BODY_SIZE);
+                if (respBody !== null) {
+                    console.log(TAG + ' Body   : ' + respBody.string());
+                }
+            } catch (respErr) {
+                console.log(TAG + ' <response read error: ' + respErr.message + '>');
+            }
+
+            return response;
+        };
+        console.log(TAG + ' Hooked okhttp3.internal.connection.RealCall.execute');
+    } catch (e) {
+        console.log(TAG + ' RealCall.execute hook failed: ' + e.message);
+    }
+
+    // ---- HttpURLConnection ----
+    try {
+        const URL = Java.use('java.net.URL');
+        const URLCls = Java.use('java.net.HttpURLConnection');
+
+        URLCls.getInputStream.implementation = function () {
+            const urlStr = this.getURL().toString();
+            const method = this.getRequestMethod();
+            const responseCode = this.getResponseCode();
+            console.log('\n' + TAG + ' >>> HttpURLConnection');
+            console.log(TAG + ' Method       : ' + method);
+            console.log(TAG + ' URL          : ' + urlStr);
+            console.log(TAG + ' Response Code: ' + responseCode);
+
+            const inputStream = this.getInputStream();
+
+            // Wrap inputStream to log body
+            try {
+                const InputStreamReader = Java.use('java.io.InputStreamReader');
+                const BufferedReader = Java.use('java.io.BufferedReader');
+                const reader = BufferedReader.$new(InputStreamReader.$new(inputStream));
+                let line;
+                const bodyLines = [];
+                let totalLen = 0;
+                while ((line = reader.readLine()) !== null && totalLen < MAX_BODY_SIZE) {
+                    bodyLines.push(line);
+                    totalLen += line.length;
+                }
+                console.log(TAG + ' Body: ' + bodyLines.join('\n').substring(0, MAX_BODY_SIZE));
+                // Note: this consumes the stream; best used with buffered streams
+            } catch (streamErr) {
+                console.log(TAG + ' Body read error: ' + streamErr.message);
+            }
+
+            return inputStream;
+        };
+        console.log(TAG + ' Hooked HttpURLConnection.getInputStream');
+    } catch (e) {
+        console.log(TAG + ' HttpURLConnection hook failed: ' + e.message);
+    }
+
+    console.log(TAG + ' HTTP request logger loaded.');
+});
+
+```
+
+`scripts/traffic/log-websocket.js`:
+
+```js
+/**
+ * log-websocket.js
+ *
+ * Hooks OkHttp WebSocket send and receive to log all frames.
+ * Covers both text (String) and binary (ByteString) frames.
+ *
+ * Tested Android API levels: 21–34, OkHttp 3.x and 4.x
+ * Known limitations:
+ *   - Binary frames are hex-dumped; large frames truncated at 2048 bytes.
+ *   - Does not hook java.net WebSocket (API 25+ java.net.http not on Android pre-34).
+ */
+
+'use strict';
+
+const TAG = '[frida-kit][log-websocket]';
+const MAX_FRAME = 2048;
+
+function hexDump(byteString) {
+    try {
+        const bytes = byteString.toByteArray();
+        const hex = [];
+        const len = Math.min(bytes.length, MAX_FRAME / 2);
+        for (let i = 0; i < len; i++) {
+            hex.push(('0' + (bytes[i] & 0xff).toString(16)).slice(-2));
+        }
+        const result = hex.join(' ');
+        if (bytes.length > len) return result + ' ... [truncated, total=' + bytes.length + ' bytes]';
+        return result;
+    } catch (e) {
+        return '<hex dump error: ' + e.message + '>';
+    }
+}
+
+Java.perform(function () {
+
+    // ---- RealWebSocket (OkHttp 3.x and 4.x share same class name) ----
+    try {
+        const RealWebSocket = Java.use('okhttp3.internal.ws.RealWebSocket');
+
+        // send(String text)
+        try {
+            RealWebSocket.send.overload('java.lang.String').implementation = function (text) {
+                console.log('\n' + TAG + ' >>> SEND TEXT');
+                console.log(TAG + ' ' + text.substring(0, MAX_FRAME));
+                return this.send(text);
+            };
+            console.log(TAG + ' Hooked RealWebSocket.send(String)');
+        } catch (e) {
+            console.log(TAG + ' RealWebSocket.send(String) not found: ' + e.message);
+        }
+
+        // send(ByteString bytes)
+        try {
+            RealWebSocket.send.overload('okio.ByteString').implementation = function (bytes) {
+                console.log('\n' + TAG + ' >>> SEND BINARY');
+                console.log(TAG + ' ' + hexDump(bytes));
+                return this.send(bytes);
+            };
+            console.log(TAG + ' Hooked RealWebSocket.send(ByteString)');
+        } catch (e) {
+            console.log(TAG + ' RealWebSocket.send(ByteString) not found: ' + e.message);
+        }
+
+        // onMessage(WebSocket, String) -- incoming text frame
+        try {
+            RealWebSocket.onMessage.overload('okhttp3.WebSocket', 'java.lang.String').implementation = function (ws, text) {
+                console.log('\n' + TAG + ' <<< RECEIVE TEXT');
+                console.log(TAG + ' ' + text.substring(0, MAX_FRAME));
+                return this.onMessage(ws, text);
+            };
+            console.log(TAG + ' Hooked RealWebSocket.onMessage(WebSocket, String)');
+        } catch (e) {
+            // Older OkHttp versions use a listener approach; try below
+        }
+
+        // onMessage(WebSocket, ByteString) -- incoming binary frame
+        try {
+            RealWebSocket.onMessage.overload('okhttp3.WebSocket', 'okio.ByteString').implementation = function (ws, bytes) {
+                console.log('\n' + TAG + ' <<< RECEIVE BINARY');
+                console.log(TAG + ' ' + hexDump(bytes));
+                return this.onMessage(ws, bytes);
+            };
+            console.log(TAG + ' Hooked RealWebSocket.onMessage(WebSocket, ByteString)');
+        } catch (e) {
+            // Ignore
+        }
+
+    } catch (e) {
+        console.log(TAG + ' okhttp3.internal.ws.RealWebSocket not found: ' + e.message);
+    }
+
+    // ---- WebSocketListener approach (OkHttp listener callbacks on app side) ----
+    // Enumerate WebSocketListener implementations to hook their onMessage callbacks
+    Java.enumerateLoadedClasses({
+        onMatch: function (className) {
+            try {
+                const cls = Java.use(className);
+                if (cls.onMessage && cls.class.getSuperclass() &&
+                    cls.class.getSuperclass().getName() === 'okhttp3.WebSocketListener') {
+                    try {
+                        cls.onMessage.overload('okhttp3.WebSocket', 'java.lang.String').implementation = function (ws, text) {
+                            console.log('\n' + TAG + ' <<< LISTENER.onMessage TEXT [' + className + ']');
+                            console.log(TAG + ' ' + text.substring(0, MAX_FRAME));
+                            return this.onMessage(ws, text);
+                        };
+                    } catch (inner) { /* overload not found */ }
+                    try {
+                        cls.onMessage.overload('okhttp3.WebSocket', 'okio.ByteString').implementation = function (ws, bytes) {
+                            console.log('\n' + TAG + ' <<< LISTENER.onMessage BINARY [' + className + ']');
+                            console.log(TAG + ' ' + hexDump(bytes));
+                            return this.onMessage(ws, bytes);
+                        };
+                    } catch (inner) { /* overload not found */ }
+                }
+            } catch (e) { /* skip */ }
+        },
+        onComplete: function () {
+            console.log(TAG + ' WebSocketListener scan complete.');
+        }
+    });
+
+    console.log(TAG + ' WebSocket logger loaded.');
+});
+
+```
