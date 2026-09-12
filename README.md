@@ -1338,6 +1338,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/SeeFlowerX/frida-smali-trace [Smali trace]
 - https://github.com/Ylarod/Florida [anti-detection version of frida-server]
 - https://github.com/noobpk/frida-android-hook [Trace classes/functions/and modify the return values]
+- https://github.com/unrandoms/frida-mobile-kit [Organized Frida script toolkit for Android dynamic analysis: cert pinning bypass (OkHttp, Flutter, React Native), traffic/crypto logging, root-detection bypass, and runtime memory inspection with a small CLI]
 - https://github.com/apkunpacker/AntiFrida_Bypass [Bypass Some AntiFrida Checks]
 - https://github.com/Abbbbbi/Frida-Seccomp [Frida-Seccomp]
 - https://github.com/rednaga/frida-stack [Getting better stacks and backtraces in Frida]
