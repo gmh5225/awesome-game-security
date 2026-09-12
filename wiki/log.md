@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-12** — lint (agent pass): index vs disk scan — 9 overviews, 42 concepts, 3884 entities (3935 index entries); index.md fully synced (0 missing, 0 dead, 0 duplicate entries); overview wikilink spot-check (9 pages) — 0 broken links; concept spot-check (42 pages) — 0 broken links; index.md wikilink scan — 0 broken links; 6 cross-kind slug collisions ([[game-hacking]], [[anti-cheat]], [[reverse-engineering]], [[il2cpp]], [[byovd]], [[dma]]) — expected, no repair needed; no structural edits required.
+
 - **2026-09-12** — ingest `description:EPOTATOTV/PACC4_0`: entity [[pacc4-0]] (EPOTATOTV; PACC; cross-platform Minecraft Bedrock/Java player-side anti-cheat; on-device memory/process/HID inspection, Python AI behavior scoring, Rust signed encrypted event pipeline, red-screen warnings, separate PTV admin backend without server ban integration; Windows/Linux/Android/iOS/HarmonyOS native probes; Anti Cheat / game:minecraft); cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[crispy-wafer-anti-cheat-assistant-waferaca]], [[katapult-anticheat]], [[anticheat-qa]], [[grim]], and [[minecraft-anticheat-list]]; `index.md` updated.
 
 - **2026-09-12** — ingest `description:beto2-dev/Hyapk`: entity [[hyapk]] (beto2-dev; Kotlin CLI + C native runtime; per-method HyVm VMP or Dex2C, ChaCha20-Poly1305 opcode encryption, smali renaming, resource encryption, signature/DEX integrity, anti-tamper/anti-debug, anti-Frida/root/emulator heuristics; Anti Cheat Binary Packer); cited on [[overviews/anti-cheat]] and [[mobile-anti-cheat]]; cross-linked [[obfuscapk]], [[appsealing-reversal]], [[pairipcore]], and [[android-unpacker]]; `index.md` updated.
