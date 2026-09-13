@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-13** — lint (agent pass): index vs disk scan — 9 overviews, 50 concepts, 3894 entities (3953 index entries); index.md fully synced (0 missing, 0 dead, 0 duplicate entries); overview wikilink spot-check (9 pages) — 0 broken links; concept spot-check (50 pages) — 0 broken links; index.md wikilink scan — 0 broken links; 6 cross-kind slug collisions ([[game-hacking]], [[anti-cheat]], [[reverse-engineering]], [[il2cpp]], [[byovd]], [[dma]]) — expected, no repair needed; no structural edits required.
+
 - **2026-09-13** — ingest `description:SloMR/Rootect`: entity [[rootect]] (SloMR; zero-dep Kotlin+native C++ RASP; raw syscall probes for Magisk/KernelSU/Frida/Xposed/repack/emulator/debugger; scored risk reports + optional Key Attestation; sample app + reference attestation server; mobile games/security-sensitive apps); cited on [[concepts/mobile-anti-cheat]]; cross-linked [[device-trust]], [[rootsentry]]; `index.md` updated.
 
 - **2026-09-13** — ingest `description:aryribeiro/cobra`: entity [[cobra-snake]] (aryribeiro; TypeScript/Next.js/React web Snake; HTML5 Canvas 60 FPS; 40+ emoji power-ups; LibSQL Top 10 leaderboard + localStorage fallback; HMAC-signed game sessions, score plausibility validation, rate-limited submissions, silent forged-score rejection; Anti-Cheat Programming browser score-integrity reference); cited on [[overviews/anti-cheat]] and [[concepts/network-environment-evidence]]; cross-linked [[pew-game]]; `index.md` updated.
