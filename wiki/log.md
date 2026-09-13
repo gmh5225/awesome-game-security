@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-13** — ingest `readme:categories`: Anti Cheat ~728 (+1; XuJun05/[[faircount]] Fabric mod/resource-pack whitelist AC in Open Source Anti Cheat System) / Cheat ~2807 / other major section counts stable; 41 sections; entity [[faircount]]; refreshed README-map counts and Fabric client-integrity scope on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/game-hacking]], [[overviews/reverse-engineering]], and [[overviews/dma-attack]]; light `index.md` section notes (no per-category pages).
+
 - **2026-09-13** — ingest `description:KSwordDEV/KSword`: entity [[ksword]] (Qt ARK + custom kernel driver; modular process/kernel/memory/driver/callback/SSDT panels; Win32 API monitor; CE plugin; DWM; VirusTotal/ThreatBook); cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]] (fixed source cite); `index.md` updated.
 
 - **2026-09-13** — ingest `readme:categories`: Cheat ~2807 (+1; KSwordDEV/[[ksword]] Qt ARK in Windows Kernel Explorer) / Anti Cheat ~727 / other major section counts stable; 41 sections; entity [[ksword]]; refreshed README-map counts and kernel-explorer scope on [[overviews/overview]], [[overviews/windows-kernel]], [[overviews/game-hacking]], [[overviews/reverse-engineering]], and [[overviews/dma-attack]]; light `index.md` section notes (no per-category pages).
