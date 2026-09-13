@@ -147,6 +147,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/adriengivry/Overload
 - https://github.com/gmh5225/GameEngine-MapleEngine
 - https://github.com/inanevin/LinaEngine
+- https://github.com/apistol78/traktor [Open-source C++ Vulkan game engine with editor tooling and shipped commercial titles on Steam, PSN, iOS, and macOS]
 - https://github.com/storm-devs/storm-engine
 - https://github.com/minetest/minetest
 - https://github.com/godotengine/godot
