@@ -8,13 +8,13 @@ sources:
   - wiki/sources/descriptions/iqrw0__DieDMAProtection.md
   - wiki/sources/descriptions/cutecatsandvirtualmachines__DmaProtect.md
   - wiki/sources/descriptions/BigAnteater__KVM-GPU-Passthrough.md
-updated: 2026-09-09
+updated: 2026-09-13
 confidence: high
 ---
 
 # IOMMU
 
-I/O Memory Management Unit (Intel VT-d / AMD-Vi) translates device IOVAs using the Requester ID (BDF) and enforces per-device read/write permissions—the primary software-controlled barrier against out-of-domain [[dma]] when remapping is active on the device path. Classify the initiator first with [[memory-acquisition-path]]; host-mediated capture and hypervisor EPT events are separate boundaries. (source: wiki/sources/skills/dma-attack.md)
+I/O Memory Management Unit (Intel VT-d / AMD-Vi) translates device IOVAs using the Requester ID (BDF) and enforces per-device read/write permissions—the primary software-controlled barrier against out-of-domain [[dma]] when remapping is active on the device path. Classify the initiator first with [[memory-acquisition-path]]; host-mediated capture and hypervisor EPT events are separate boundaries. A denied IOMMU fault bounds that request on the established path—it does not prove absence of every device or runtime mapping; see [[assurance-boundaries]] for enforcement vs observation limits. (source: wiki/sources/skills/dma-attack.md)
 
 ## Translation flow
 
@@ -88,4 +88,4 @@ Misconfigured BIOS, pre-boot DMA, ACS holes, ATS abuse, over-mapped pages, legit
 
 ## Related
 
-[[dma]] · [[memory-acquisition-path]] · [[helloiommupkg]] · [[dmaprotect]] · [[diedmaprotection]] · [[kvm-gpu-passthrough]] · [[byovd]] · [[hvci]] · [[overviews/dma-attack]] · [[overviews/anti-cheat]]
+[[dma]] · [[memory-acquisition-path]] · [[assurance-boundaries]] · [[helloiommupkg]] · [[dmaprotect]] · [[diedmaprotection]] · [[kvm-gpu-passthrough]] · [[byovd]] · [[hvci]] · [[overviews/dma-attack]] · [[overviews/anti-cheat]]

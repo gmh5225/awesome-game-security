@@ -96,7 +96,21 @@ confidence: high
 
 # DMA Attack
 
-PCIe Direct Memory Access threat modeling for game security: classify the **memory initiator** and transport before reasoning about a device or product; then map FPGA endpoints (often M.2), host tools like [[pcileech]]/MemProcFS, and defenses software anti-cheat alone cannot fully cover once a hostile bus-master can read RAM. (source: wiki/sources/skills/dma-attack.md)
+PCIe Direct Memory Access threat modeling for game security: identify the **memory initiator**, **transport**, **required privilege**, **isolation boundary**, and **observable artifacts** before classifying a technique as DMA or attributing a product. Then map FPGA endpoints (often M.2), host tools like [[pcileech]]/MemProcFS, and defenses software anti-cheat alone cannot fully cover once a hostile bus-master can read RAM. (source: wiki/sources/skills/dma-attack.md)
+
+## Topic routing
+
+| Question lane | Route |
+|---------------|-------|
+| Initiator vs transport vs analysis site | [[memory-acquisition-path]] |
+| Certainty about firmware tiers, EPT, HVCI, containment, TPM proof | [[assurance-boundaries]] |
+| TLPs, config space, FPGA constraints, [[pcileech]], device emulation | PCIe stack below; [[pcileech-fpga]], [[pcileechgen]] |
+| VT-d/AMD-Vi, ACS, ATS/PASID, domains, hypervisors, trust anchors | [[iommu]], [[hvci]] |
+| Fingerprinting, forensics, Thunderbolt/USB4, memory-access evidence | Layered detection pipeline below; [[irontrace]], [[drvscan]], [[aetheris]] |
+| Host driver or kernel-only mechanisms | [[overviews/windows-kernel]] |
+| Disputed implementation, performance, or detectability claims | [[research-rigor]] |
+
+Use sibling skill topics when one boundary dominates the question; apply [[research-rigor]] before turning architecture claims into findings. (source: wiki/sources/skills/dma-attack.md)
 
 ## Classify the acquisition path first
 
@@ -118,7 +132,7 @@ Host stack in the curated list: [[pcileech]] → LeechCore → [[pcileech-fpga]]
 | [[iommu]] enforcement | Device requests permitted by active remapping policy | Verify actual path, mappings, lifecycle, and fault evidence; enforcement and observation are separate |
 | External attestation | Authenticity and policy appraisal of selected measurements | Boot evidence does not automatically cover current device behavior or runtime mapping state |
 
-Hypervisor containment ([[hvci]], EPT traps, honeypot pages) and firmware policy (pre-boot DMA protection, BIOS DXE hardening in [[x670e-tomahawk-anticheat-update]]) stack on top. **Assurance boundaries:** separate mechanism, deployed policy, evidence coverage, and attribution—do not treat Kernel DMA Protection “On,” HVCI, or a valid TPM quote as proof of every endpoint’s runtime ATS state or absence of DMA-capable hardware. (source: wiki/sources/skills/dma-attack.md)
+Hypervisor containment ([[hvci]], EPT traps, honeypot pages) and firmware policy (pre-boot DMA protection, BIOS DXE hardening in [[x670e-tomahawk-anticheat-update]]) stack on top. **Assurance boundaries:** see [[assurance-boundaries]]—separate mechanism, deployed policy, evidence coverage, and attribution; do not treat Kernel DMA Protection “On,” HVCI, or a valid TPM quote as proof of every endpoint’s runtime ATS state or absence of DMA-capable hardware. (source: wiki/sources/skills/dma-attack.md)
 
 ## PCIe stack (detection-relevant)
 
@@ -164,7 +178,7 @@ Firmware matching donor behavior on tested dimensions can evade isolated PCIe/IO
 
 ## Related concepts
 
-[[dma]] · [[memory-acquisition-path]] · [[iommu]] · [[helloiommupkg]] · [[dmaprotect]] · [[diedmaprotection]] · [[hvci]] · [[byovd]] · [[research-rigor]] · [[pcileech]] · [[pcie-detector]] · [[drvscan]] · [[dma-pe-dumper]] · [[volk-dma]] · [[dmalib]] · [[dmalibrary]] · [[vm]] · [[pcileech-fpga]] · [[pcileechgen]] · [[pcileech-dma-fullstealth]] · [[pcileech-quantumstealth-max]] · [[pcileech-fpga-dma-vmd]] · [[pcileech-dma-nvme-vmd]] · [[pcileech-wifi]] · [[pcileech-wifi-v2]] · [[dma-attack-firmware-customization]] · [[dma-cfw-guide]] · [[dma-fw-guide-2.0]] · [[pcileech-dma-firmware-guide]] · [[entities/dma]] · [[vgk-dma-bypass]] · [[ddma]] · [[ddma-1]] · [[diskjacker]] · [[fpga-dma-multi-tool]] · [[dma-tools-rs]] · [[memtools]] · [[aetheris]] · [[dma-pcie-board-75t]] · [[litepcie]] · [[s6-pcie-microblaze]] · [[pico-dma]] · [[xilinx-fpga-pcie-xdma-tutorial]] · [[learn-fpga-programming]] · [[pciem]] · [[physpatch]] · [[x670e-tomahawk-anticheat-update]] · [[dma-invoker]] · [[dma-speedtest-memflow-rs]] · [[pcileech-memprocfs-mcp]] · [[dma-cheat-engine-loader]] · [[cheat-engine-dma-plugin]] · [[cheatengine-dma]] · [[cheat-engine-ceserver-pcileech]] · [[ceserver-rawmem]] · [[csgo-dma-overlay]] · [[fn-dma-cheat]] · [[meatyeftrelease]] · [[eftleecher]] · [[eft-dma-radar-1]] · [[nathans-tarkov-radar-public]] · [[cs2-dma-radar]] · [[cs2-dma-cheat]] · [[cs2-dma-extrnal]] · [[cs2-dma]] · [[cs2-kvm-dma]] · [[gta5-dma-cheat]] · [[apex-dma-cheat-updated]] · [[apex-dma-kvm-pub]] · [[ape-ex-abominations]] · [[arc-raiders-radar-dma-radar]] · [[luminary-dma]] · [[rust-dma-cheat]] · [[dma-cheat-base]] · [[unispect-dma-plugin]] · [[reclass-dma]] · [[overviews/anti-cheat]]
+[[dma]] · [[memory-acquisition-path]] · [[assurance-boundaries]] · [[iommu]] · [[helloiommupkg]] · [[dmaprotect]] · [[diedmaprotection]] · [[hvci]] · [[byovd]] · [[research-rigor]] · [[pcileech]] · [[pcie-detector]] · [[drvscan]] · [[dma-pe-dumper]] · [[volk-dma]] · [[dmalib]] · [[dmalibrary]] · [[vm]] · [[pcileech-fpga]] · [[pcileechgen]] · [[pcileech-dma-fullstealth]] · [[pcileech-quantumstealth-max]] · [[pcileech-fpga-dma-vmd]] · [[pcileech-dma-nvme-vmd]] · [[pcileech-wifi]] · [[pcileech-wifi-v2]] · [[dma-attack-firmware-customization]] · [[dma-cfw-guide]] · [[dma-fw-guide-2.0]] · [[pcileech-dma-firmware-guide]] · [[entities/dma]] · [[vgk-dma-bypass]] · [[ddma]] · [[ddma-1]] · [[diskjacker]] · [[fpga-dma-multi-tool]] · [[dma-tools-rs]] · [[memtools]] · [[aetheris]] · [[dma-pcie-board-75t]] · [[litepcie]] · [[s6-pcie-microblaze]] · [[pico-dma]] · [[xilinx-fpga-pcie-xdma-tutorial]] · [[learn-fpga-programming]] · [[pciem]] · [[physpatch]] · [[x670e-tomahawk-anticheat-update]] · [[dma-invoker]] · [[dma-speedtest-memflow-rs]] · [[pcileech-memprocfs-mcp]] · [[dma-cheat-engine-loader]] · [[cheat-engine-dma-plugin]] · [[cheatengine-dma]] · [[cheat-engine-ceserver-pcileech]] · [[ceserver-rawmem]] · [[csgo-dma-overlay]] · [[fn-dma-cheat]] · [[meatyeftrelease]] · [[eftleecher]] · [[eft-dma-radar-1]] · [[nathans-tarkov-radar-public]] · [[cs2-dma-radar]] · [[cs2-dma-cheat]] · [[cs2-dma-extrnal]] · [[cs2-dma]] · [[cs2-kvm-dma]] · [[gta5-dma-cheat]] · [[apex-dma-cheat-updated]] · [[apex-dma-kvm-pub]] · [[ape-ex-abominations]] · [[arc-raiders-radar-dma-radar]] · [[luminary-dma]] · [[rust-dma-cheat]] · [[dma-cheat-base]] · [[unispect-dma-plugin]] · [[reclass-dma]] · [[overviews/anti-cheat]]
 
 ## README map
 
