@@ -931,6 +931,27 @@ confidence: high
 
 Layered game protection across kernel drivers, privileged services, in-game modules, and backend telemetry. Modern systems monitor handles, image loads, memory integrity, driver trust, virtualization abuse, DMA, and suspicious input. (source: wiki/sources/skills/anti-cheat.md)
 
+## System map
+
+Map five roles before product-specific analysis: **protected asset** (fairness goal or integrity target), **attacker capability** (memory R/W, injection, DMA, synthesized input, etc.), **observation point** (client module, kernel driver, server replay, backend), **detector** (rule, model, heuristic), and **enforcement authority** (kick, ban, shadow flag, appeal workflow). Separate confirmed vendor or product behavior from general defensive patterns—README listings and bypass PoCs illustrate threat models and lab artifacts, not guaranteed live enforcement. (source: wiki/sources/skills/anti-cheat.md)
+
+## Topic routing
+
+| Question lane | Route |
+|---------------|-------|
+| Product layers, client/kernel/memory/process/behavior signals | Detection methodology below; [[easy-anti-cheat]], [[battleye]], major-system entries |
+| Analysis methods, bypass categories, telemetry ethics | [[research-rigor]]; README `Detection:*` tree |
+| Collection source selection | [[resource-selection]], [[repository-navigation]] |
+| Input trust, units, missing-event coverage | [[input-provenance]] |
+| Shadow/canary rollout, collector faults vs misconduct | [[detector-operations]] |
+| Shared network, association, rate-limit vs sanction | [[network-environment-evidence]] |
+| DMA/PCIe boundary dominates | [[overviews/dma-attack]], [[dma]] |
+| Kernel driver trust dominates | [[overviews/windows-kernel]] |
+| Graphics/present path dominates | [[overviews/graphics-api]] |
+| Mobile integrity dominates | [[overviews/mobile-security]], [[mobile-anti-cheat]] |
+
+Use sibling skill topics when one boundary dominates the question; apply [[research-rigor]] to consequential or disputed claims. (source: wiki/sources/skills/anti-cheat.md)
+
 ## Detection methodology
 
 Use [[research-rigor]] when turning detector hits into enforcement. The anti-cheat skill frames seven decision steps: (1) define the decision unit (player/engagement/session/account/device/build) with game mode, patch, platform, input method, and timeframe; (2) establish telemetry trust via [[input-provenance]] labels; (3) keep **observation → finding → attribution → action** separate—a detector hit is not proof of cheating or intent; (4) calibrate features, sample floors, and thresholds on representative held-out data; (5) measure deployment risk (prevalence, FPR/FNR, precision, recall, calibration, review volume); (6) corroborate with causally distinct signals and measured joint error—correlated detectors can fail together; (7) preserve counterevidence and appeal paths before high-impact punitive action. Invariant findings need rollback/reconnect/replication-delay/game-bug exclusions before calling exploitation; describe as state-integrity violations until exploitation and attribution are separately supported. (source: wiki/sources/skills/anti-cheat.md)

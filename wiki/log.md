@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-13** — ingest `skill:anti-cheat`: refreshed [[overviews/anti-cheat]] with five-role system map + topic-routing table; updated [[input-provenance]] (observation coverage, missing-event discipline), [[detector-operations]] (state separation, time domains), and [[network-environment-evidence]] (outcome vs decision key, identity boundaries); `index.md` updated.
+
 - **2026-09-13** — ingest `skill:overview`: refreshed [[overviews/overview]] with [[repository-navigation]] indexer guidance, catalog-maintenance refs (coverage roadmap, 2026-09-09 quality review), and corrected stale `generate-toc.py`/`remove-forks.py` script claims; new concept [[repository-navigation]]; updated [[resource-selection]], [[compiled-wiki]], and [[research-rigor]]; `index.md` updated.
 
 - **2026-09-13** — ingest `readme:categories`: Anti Cheat ~728 (+1; XuJun05/[[faircount]] Fabric mod/resource-pack whitelist AC in Open Source Anti Cheat System) / Cheat ~2807 / other major section counts stable; 41 sections; entity [[faircount]]; refreshed README-map counts and Fabric client-integrity scope on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/game-hacking]], [[overviews/reverse-engineering]], and [[overviews/dma-attack]]; light `index.md` section notes (no per-category pages).
