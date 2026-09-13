@@ -8,13 +8,13 @@ sources:
   - wiki/sources/descriptions/gmh5225__Driver-read_write.md
   - wiki/sources/descriptions/gmh5225__DataPtrSwap-driver.md
   - wiki/sources/descriptions/Sinclairq__data-communication.md
-updated: 2026-09-09
-confidence: medium
+updated: 2026-09-13
+confidence: high
 ---
 
 # Driver Communication
 
-Kernel–user **data channels** used by cheat drivers, research tools, and some anti-cheat components. The README catalog lists 40+ methods; classify by transport mechanism and observation surface rather than treating all as equivalent stealth. (source: wiki/sources/skills/game-hacking.md)
+Kernel–user **data channels** used by cheat drivers, research tools, and some anti-cheat components. In [[cheat-attack-surface]] terms this is **privileged driver/interface abuse**: record which interface is reachable, what operations it exposes, and whether authorization—not signature alone—constrains abuse. The README catalog lists 40+ methods; classify by transport mechanism and observation surface rather than treating all as equivalent stealth. (source: wiki/sources/skills/game-hacking.md)
 
 ## Taxonomy
 
@@ -48,4 +48,4 @@ Missing one collector's artifact does not prove a channel is invisible—scope c
 
 ## Related
 
-[[kernel-callbacks]] · [[byovd]] · [[stack-spoofing]] · [[km-um-communication]] · [[overviews/game-hacking]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]]
+[[cheat-attack-surface]] · [[kernel-callbacks]] · [[byovd]] · [[stack-spoofing]] · [[km-um-communication]] · [[driver-trust-boundaries]] · [[overviews/game-hacking]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]]

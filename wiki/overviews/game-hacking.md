@@ -1848,7 +1848,26 @@ confidence: high
 
 # Game Hacking
 
-Offensive technique taxonomy and threat model: how cheats escalate from user-mode memory/injection to kernel drivers, hypervisors, EFI, and [[dma]] as defenders raise the bar. User-mode, kernel, hypervisor, device, visual, and network threats are **alternative or combined paths**, not a mandatory escalation ladder. Treat stealth rankings, latency figures, and detection claims as versioned examples—apply [[research-rigor]] before converting README samples into enforcement or factual claims. (source: wiki/sources/skills/game-hacking.md)
+Map what an attacker observes or controls, the required capability, the trust boundary crossed, and where defenders have evidence or authority. User-mode, kernel, hypervisor, device, visual, and network threats are **alternative or combined paths**, not a mandatory escalation ladder. Treat stealth rankings, latency figures, and detection claims as versioned examples—apply [[research-rigor]] before converting README samples into enforcement or factual claims. (source: wiki/sources/skills/game-hacking.md)
+
+## Topic routing
+
+| Question lane | Route |
+|---------------|-------|
+| Threat-family taxonomy, objective/boundary before tools | [[cheat-attack-surface]] |
+| Privilege levels, injection, cheat categories | Escalation model below; [[byovd]], [[present-hook]] |
+| Overlays, memory paths, driver comm, W2S, input | [[world-to-screen]], [[driver-communication]], [[hardware-input-injection]]; [[overviews/graphics-api]] |
+| EFI, HWID, stack spoofing, anti-detection | [[hwid-spoofing]], [[stack-spoofing]]; [[overviews/windows-kernel]] |
+| Engine-specific surfaces, RE workflows | [[overviews/game-engine]], [[overviews/reverse-engineering]] |
+| PCIe/DMA memory access | [[overviews/dma-attack]], [[memory-acquisition-path]] |
+| Backend authority, transactional correctness | game-server-security skill topic |
+| Build, update, mod-distribution trust | game-supply-chain-security skill topic |
+| Input telemetry trust, visual aim pipelines | [[input-provenance]], [[ai-aimbot-detection]] |
+| Network association, rate limits vs sanctions | [[network-environment-evidence]] |
+| Evidence and source selection | [[resource-selection]], [[repository-navigation]] |
+| Disputed implementation or detectability claims | [[research-rigor]] |
+
+Use sibling skill topics when one boundary dominates the question; keep recommendations defensive and within authorized scope. (source: wiki/sources/skills/game-hacking.md)
 
 ## Attacker capability and defensive coverage
 

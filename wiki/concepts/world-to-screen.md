@@ -14,13 +14,13 @@ sources:
   - wiki/sources/descriptions/Zetolac__FortniteExternalW2S.md
   - wiki/sources/descriptions/NullTerminatorr__NullBase.md
   - wiki/sources/descriptions/DrNseven__D3D11-Worldtoscreen-Finder.md
-updated: 2026-08-26
+updated: 2026-09-13
 confidence: high
 ---
 
 # World-to-Screen
 
-Project a **3D world-space point** (entity bone, item, waypoint) onto **2D screen pixels** using the active view/projection matrix—core math for ESP boxes, aim FOV checks, and radar overlays. Invalid when the point is behind the camera (`w < threshold`). (source: wiki/sources/skills/game-hacking.md)
+Project a **3D world-space point** (entity bone, item, waypoint) onto **2D screen pixels** using the active view/projection matrix—core math for visual (ESP) cheats, aim FOV checks, and radar overlays. In [[cheat-attack-surface]] terms this is **client-state observation** plus a **graphics/composition** path: defenders may see overlay draw evidence, capture-layer artifacts, or gameplay behavior without a memory-write primitive. Invalid when the point is behind the camera (`w < threshold`). (source: wiki/sources/skills/game-hacking.md)
 
 ## Pipeline
 
@@ -37,4 +37,4 @@ Cross-engine constexpr libraries such as [[omath]] ship W2S, projectile predicti
 
 ## Related
 
-[[present-hook]] · [[unreal-object-model]] · [[source-netvars]] · [[omath]] · [[directxmath]] · [[fortnite-w2s-offset-fortnite]] · [[fortnite-external-w2s]] · [[ow-fov]] · [[hl2esp]] · [[call-of-duty-vanguard-hack-esp-aimbot-unlock-all]] · [[call-of-duty-warzone-hack-esp-slient-aimbot-internal-unlock-all]] · [[lab-esp-and-aimbot]] · [[nullbase]] · [[d3d11-worldtoscreen-finder]] · [[overviews/game-hacking]] · [[overviews/graphics-api]]
+[[cheat-attack-surface]] · [[present-hook]] · [[unreal-object-model]] · [[source-netvars]] · [[omath]] · [[directxmath]] · [[fortnite-w2s-offset-fortnite]] · [[fortnite-external-w2s]] · [[ow-fov]] · [[hl2esp]] · [[call-of-duty-vanguard-hack-esp-aimbot-unlock-all]] · [[call-of-duty-warzone-hack-esp-slient-aimbot-internal-unlock-all]] · [[lab-esp-and-aimbot]] · [[nullbase]] · [[d3d11-worldtoscreen-finder]] · [[overviews/game-hacking]] · [[overviews/graphics-api]]
