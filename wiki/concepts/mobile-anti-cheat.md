@@ -60,13 +60,13 @@ sources:
   - wiki/sources/descriptions/savagedamage__android-security-wizard.md
   - wiki/sources/descriptions/wumingzhinu__VirtualMachine.md
   - wiki/sources/descriptions/beto2-dev__Hyapk.md
-updated: 2026-09-12
+updated: 2026-09-13
 confidence: medium
 ---
 
 # Mobile Anti-Cheat
 
-Client-side integrity and environment checks on Android/iOS game clients, often combined with server-side validation, attestation, and regional commercial protectors. Overlaps README `Anti Cheat > Detection:*` mobile lanes (Android root, Magisk, Frida) and title-specific native SDKs. (source: wiki/sources/skills/mobile-security.md)
+Client-side integrity and environment checks on Android/iOS game clients, often combined with server-side validation, attestation, and regional commercial protectors. Overlaps README `Anti Cheat > Detection:*` mobile lanes (Android root, Magisk, Frida) and title-specific native SDKs. Route IL2CPP/Mono engine internals to [[il2cpp]] and [[overviews/game-engine]]; route TLS/pinning capture claims to [[mobile-network-trust-evidence]]; apply [[research-rigor]] for version-sensitive attestation or bypass claims. (source: wiki/sources/skills/mobile-security.md)
 
 ## Common systems
 
@@ -112,4 +112,4 @@ Filesystem/package indicators, build properties, and runtime observations may su
 
 ## Related
 
-[[research-rigor]] · [[mobile-trust-boundaries]] · [[frida]] · [[memdetection]] · [[lazenca-s]] · [[pairipcore]] · [[hyapk]] · [[appsealing-reversal]] · [[apppealing-new]] · [[freedom]] · [[vpnhide]] · [[android-overlay-protection]] · [[android-overlay-malware-example]] · [[android-native-surface]] · [[zygisk]] · [[magisk]] · [[kernelsu]] · [[apex-su]] · [[knoxpatch]] · [[riru-momo-hider]] · [[magisk-killer]] · [[magisk-eop]] · [[keyattestation]] · [[android-hardware-attestation-demo]] · [[droidshield]] · [[react-native-shieldscan]] · [[react-native-device-risk-signals]] · [[free-rasp-reactnative]] · [[detection]] · [[antifrida]] · [[android-virtualcam-manager]] · [[locusmimic]] · [[anywhere]] · [[hidemyandroid]] · [[android-faker]] · [[device-reset-spoofer]] · [[usb-detection-bypass]] · [[xiaomi-usb-security-bypass]] · [[copg]] · [[nexus]] · [[zamr]] · [[pif-config-generator]] · [[spoofing-collection]] · [[honor-of-kings-re-research]] · [[ff-ace-anticheat-analysis]] · [[g-presto-anti-cheat-reverse-engineered]] · [[android-security-wizard]] · [[dfm-android-unicorn]] · [[kpm-memreader]] · [[pubgm1.6-deadgame]] · [[overviews/mobile-security]] · [[overviews/anti-cheat]]
+[[research-rigor]] · [[mobile-trust-boundaries]] · [[mobile-network-trust-evidence]] · [[frida]] · [[memdetection]] · [[lazenca-s]] · [[pairipcore]] · [[hyapk]] · [[appsealing-reversal]] · [[apppealing-new]] · [[freedom]] · [[vpnhide]] · [[android-overlay-protection]] · [[android-overlay-malware-example]] · [[android-native-surface]] · [[zygisk]] · [[magisk]] · [[kernelsu]] · [[apex-su]] · [[knoxpatch]] · [[riru-momo-hider]] · [[magisk-killer]] · [[magisk-eop]] · [[keyattestation]] · [[android-hardware-attestation-demo]] · [[droidshield]] · [[react-native-shieldscan]] · [[react-native-device-risk-signals]] · [[free-rasp-reactnative]] · [[detection]] · [[antifrida]] · [[android-virtualcam-manager]] · [[locusmimic]] · [[anywhere]] · [[hidemyandroid]] · [[android-faker]] · [[device-reset-spoofer]] · [[usb-detection-bypass]] · [[xiaomi-usb-security-bypass]] · [[copg]] · [[nexus]] · [[zamr]] · [[pif-config-generator]] · [[spoofing-collection]] · [[honor-of-kings-re-research]] · [[ff-ace-anticheat-analysis]] · [[g-presto-anti-cheat-reverse-engineered]] · [[android-security-wizard]] · [[dfm-android-unicorn]] · [[kpm-memreader]] · [[pubgm1.6-deadgame]] · [[overviews/mobile-security]] · [[overviews/anti-cheat]]

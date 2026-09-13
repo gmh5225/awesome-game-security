@@ -59,13 +59,13 @@ sources:
   - wiki/sources/descriptions/0xCD4__SSL-bypass.md
   - wiki/sources/descriptions/3v1lC0d3__Root_Detection_Low_level.md
   - wiki/sources/descriptions/unrandoms__frida-mobile-kit.md
-updated: 2026-09-12
+updated: 2026-09-13
 confidence: high
 ---
 
 # Frida
 
-Cross-platform dynamic instrumentation toolkit widely used on Android/iOS (and desktop) to attach/spawn processes, intercept native/Java/ObjC APIs, and script runtime behavior without static patching. (source: wiki/sources/skills/mobile-security.md)
+Cross-platform dynamic instrumentation toolkit widely used on Android/iOS (and desktop) to attach/spawn processes, intercept native/Java/ObjC APIs, and script runtime behavior without static patching. For mobile game-security routing (package/platform vs engine vs kernel lanes), see [[overviews/mobile-security]] topic-routing table. (source: wiki/sources/skills/mobile-security.md)
 
 ## Observation limits
 

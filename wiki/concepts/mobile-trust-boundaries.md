@@ -4,7 +4,7 @@ kind: concept
 topics: [mobile-security, anti-cheat]
 sources:
   - wiki/sources/skills/mobile-security.md
-updated: 2026-09-09
+updated: 2026-09-13
 confidence: high
 ---
 
@@ -14,13 +14,14 @@ Android and iOS game security spans **independent trust surfaces** that fail sep
 
 ## Baseline before analysis
 
-Record before generalizing root, hook, emulator, or integrity signals:
+Record **device, OS build, ABI, package signer, entitlements, privilege state, and collection method** before generalizing root, hook, emulator, or integrity signals:
 
 | Dimension | Why it matters |
 |-----------|----------------|
 | Device / build / ABI | OEM, GKI kernel, signing, and policy vary by release |
-| Package signer & entitlements | Debug vs release, sideload, enterprise profiles |
-| Required privilege | App sandbox vs root/jailbreak vs kernel module vs server |
+| Package signer & entitlements | Debug vs release, sideload, enterprise profiles, iOS entitlements/capabilities |
+| Privilege state | App sandbox vs root/jailbreak vs kernel module vs server-side operator |
+| Collection method | Static APK, runtime hook, `/proc`, attestation relay, or backend log—each has blind spots |
 | Observation source & limits | Who collected the signal and what they could not see |
 
 Apply [[research-rigor]]—mobile behavior is strongly version-, OEM-, entitlement-, signing-, kernel-, and policy-dependent. A root indicator is not proof of cheating; a valid integrity response does not validate arbitrary game logic.
@@ -42,7 +43,7 @@ Keep **local indicators**, **verified attestation**, **backend decisions**, and 
 - **SELinux** — mandatory access control applies to root processes too. Record enforcement state, domain, build, and relevant policy denials instead of assigning universal trust or stealth ratings to framework names. (source: wiki/sources/skills/mobile-security.md)
 - **Play Integrity** — validate request details, identity, binding, and freshness on the backend before interpreting app/device/account verdicts. Research modules such as [[pif-config-generator]] and [[zamr]] catalog attestation-spoof configs for controlled testing—not proof that production backends accept them.
 - **App Attest (iOS)** — requires server verification of attestations/assertions, including challenge and counter handling; keep development and production context separate.
-- **Network trust configuration** — for owned-app transport tests, distinguish debug-only trust anchors from release configuration. Android Network Security Configuration defaults change with target SDK; a successful debug capture does not establish release-build trust or pinning behavior. Custom/native TLS stacks need their own contracts and evidence.
+- **Network trust configuration** — for owned-app transport tests, distinguish debug-only trust anchors from release configuration. Android Network Security Configuration defaults change with target SDK; a successful debug capture does not establish release-build trust or pinning behavior. Custom/native TLS stacks need their own contracts and evidence. See [[mobile-network-trust-evidence]].
 
 Include supported emulators, stock devices, developer builds, OS updates, and service/attestation errors as **controls**. Record unavailable evidence separately from a verified negative result.
 
@@ -65,4 +66,4 @@ When documenting mobile security findings, include:
 
 ## Related
 
-[[research-rigor]] · [[mobile-anti-cheat]] · [[frida]] · [[keyattestation]] · [[android-hardware-attestation-demo]] · [[detector-operations]] · [[overviews/mobile-security]] · [[overviews/anti-cheat]]
+[[research-rigor]] · [[mobile-anti-cheat]] · [[mobile-network-trust-evidence]] · [[frida]] · [[keyattestation]] · [[android-hardware-attestation-demo]] · [[detector-operations]] · [[overviews/mobile-security]] · [[overviews/anti-cheat]]

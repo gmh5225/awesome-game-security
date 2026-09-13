@@ -513,7 +513,7 @@ sources:
   - wiki/sources/descriptions/Maxamedxasa__SakoREStudio.md
   - wiki/sources/descriptions/AshrafMorningstar__hayday-bot.md
   - wiki/sources/descriptions/wumingzhinu__VirtualMachine.md
-updated: 2026-09-12
+updated: 2026-09-13
 confidence: high
 ---
 
@@ -525,6 +525,22 @@ confidence: high
 # Mobile Security
 
 Android and iOS game security: APK/IPA analysis, native/IL2CPP reversing, root/jailbreak ecosystems, dynamic instrumentation ([[frida]]), and mobile anti-cheat (root/Frida/emulator detection). Apply [[research-rigor]] before treating root, hook, emulator, or integrity signals as attribution—behavior is strongly version-, OEM-, entitlement-, signing-, kernel-, and policy-dependent. (source: wiki/sources/skills/mobile-security.md)
+
+Record the **device, OS build, ABI, package signer, entitlements, privilege state, and collection method** before drawing conclusions about root, hook, emulator, integrity, or attestation signals. Apply [[research-rigor]] for version-sensitive attestation or bypass claims; route general engine, network-authority, or desktop-kernel questions to their narrower skill topics. (source: wiki/sources/skills/mobile-security.md)
+
+## Topic routing
+
+| Question lane | Route |
+|---------------|-------|
+| Package/signing, platform policy, root/jailbreak, attestation | [[mobile-trust-boundaries]]; Android/iOS lanes below |
+| IL2CPP/Mono, Unreal, overlays, traffic, mobile AC | [[il2cpp]], [[unreal-object-model]], [[mobile-anti-cheat]], [[mobile-network-trust-evidence]]; [[overviews/game-engine]] |
+| eBPF, Android kernels, HarmonyOS, CVEs, emulators | eBPF / kernel / HarmonyOS sections below; [[overviews/reverse-engineering]] |
+| Backend purchases, entitlements, replay | game-server-security skill topic |
+| Build/update provenance, sideload supply chain | game-supply-chain-security skill topic |
+| Repository resource selection | [[resource-selection]], [[repository-navigation]] |
+| Disputed implementation or detectability claims | [[research-rigor]] |
+
+Use sibling skill topics when one boundary dominates the question. (source: wiki/sources/skills/mobile-security.md)
 
 ## Trust boundaries
 
