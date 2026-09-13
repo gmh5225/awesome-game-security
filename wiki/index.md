@@ -652,7 +652,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [clipboard-tools-ue4](entities/clipboard-tools-ue4.md) — UE4 plugin: copy string args to system clipboard (C++ module; UE4.27; in-engine debug/scripting text transfer; Plugins:Unreal; aoharudesu)
 - [ClrGuard](entities/clrguard.md) — Windows defensive CLR assembly-load monitor/blocker (ClrHook DLL hooks; PE metadata/hash logging; optional Windows service; endgameinc; Anti Cheat → CLR Protection)
 - [CoBRA](entities/cobra.md) — Trail of Bits MBA expression simplifier (C++; Cheat Mixed boolean-arithmetic)
-- [Cobra (web Snake)](entities/cobra-snake.md) — Next.js web Snake with HMAC game sessions, score plausibility, rate-limited leaderboard AC (aryribeiro; Anti Cheat / Anti-Cheat Programming)
+- [Cobra (web Snake)](entities/cobra-snake.md) — Next.js/React HTML5 Canvas Snake; LibSQL Top 10 leaderboard; HMAC game sessions, score plausibility, rate-limited silent forged-score rejection (aryribeiro; Anti Cheat / Anti-Cheat Programming)
 - [Cognitor](entities/cognitor.md) — Go Windows kernel driver static analysis (IDA/Ghidra exports; IOCTL/access-check/ALPC/COM rules; Patch Tuesday diff)
 - [COD-boiii](entities/cod-boiii.md) — BOIII client modification/research: patches, SDK structures, runtime engine tooling (gmh5225; Reverse engineering and analysis)
 - [CoD_Hacks](entities/cod-hacks.md) — Call of Duty v1.5 educational hack collection: Desk.dll multi-hack, internal W2S ESP, OpenGL `glDrawElements` wallhack, syscall wallhack, pattern-scan trainer (attilathedud; cheat / game:cod)

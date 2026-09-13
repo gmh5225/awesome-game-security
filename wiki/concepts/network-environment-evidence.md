@@ -4,6 +4,7 @@ kind: concept
 topics: [anti-cheat]
 sources:
   - wiki/sources/skills/anti-cheat.md
+  - wiki/sources/descriptions/aryribeiro__cobra.md
 updated: 2026-09-13
 confidence: medium
 ---
@@ -23,6 +24,8 @@ Evidence about **shared networks**, account/device association, reported connect
 | Several devices lose access | Shared dependency or correlated condition | Common person, trigger, or enforcement mechanism |
 
 Neither retry delay nor error code alone establishes a game sanction. (source: wiki/sources/skills/anti-cheat.md)
+
+Browser leaderboard backends such as [[cobra-snake]] apply **submission rate limits** on score POST endpoints separately from plausibility checks and HMAC session binding—throttled requests are a service-level control, not proof of account sanction. (source: wiki/sources/descriptions/aryribeiro__cobra.md)
 
 ## Event separation
 
