@@ -4205,6 +4205,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/euuuuuuan/gatewarden-public [Godot 4 tower defense prototype with published in-game placement-abuse rejection codes and deterministic 30 Hz sim]
 - https://github.com/Shadow-46/adaptive-boss-arena [Unity 6 boss-arena demo with assembly-enforced anti-cheat firewall that blocks AI from reading player input, plus edit-mode tests]
 - https://github.com/Timehue/ShinobiX [Live browser MMORPG with server-authoritative combat and documented auth/reward-integrity anti-cheat patterns]
+- https://github.com/aryribeiro/cobra [Production web snake game with server-side HMAC game sessions, score plausibility checks, and rate-limited leaderboard submission anti-cheat]
 
 > Compile Time
 - https://github.com/ManulMap/malstring [Using c++23 compile-time magic to produce obfuscated PIC strings and arrays]
@@ -4657,6 +4658,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/Laert-Android/Advanced-Root-Checker [Offline Android root/hook detector (Magisk/KernelSU/APatch, Frida, Xposed) with anti-tamper checks]
 - https://github.com/Xheghun/DeviceTrust [Kotlin + NDK Android library for root, emulator, hooking, custom ROM, and bootloader integrity checks with configurable risk scoring]
 - https://github.com/cognis-digital/rootsentry [Zero-dependency mobile RASP CLI that scores root/jailbreak, emulator, hook, and tamper evidence into TRUSTED→CRITICAL posture verdicts]
+- https://github.com/SloMR/Rootect [Zero-dependency Android RASP library that reports root, Frida, Xposed, repackaging, and emulator evidence with native syscall checks and hardware attestation]
 - https://github.com/Mrack/MemDetection [Calculate the CRC of libc.so and libart.so in memory and compare it with the file]
 - https://github.com/apkunpacker/RootAppDetector [Small POC code that detects known root-related apps by attempting to launch their activities and monitoring security exception]
 - https://github.com/Rem01Gaming/meowna_detector [Prove of concept of detecting meowna module]
