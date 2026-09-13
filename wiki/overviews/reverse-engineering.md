@@ -1328,11 +1328,27 @@ confidence: high
 
 # Reverse Engineering
 
-Workflows for protected game clients and anti-cheat components across user mode, kernel, and hypervisor-aware environments: debug/disassemble, DBI, deobfuscation, dump analysis, and IOCTL/callback mapping. Pair [[research-rigor]] when converting tool claims or detector observations into consequential conclusions—record binary hash, tool version, configuration, environment, and observed evidence. (source: wiki/sources/skills/reverse-engineering.md)
+Workflows for protected game clients and anti-cheat components across user mode, kernel, and hypervisor-aware environments: debug/disassemble, DBI, deobfuscation, dump analysis, and IOCTL/callback mapping. Pair [[research-rigor]] when converting tool claims or detector observations into consequential conclusions. (source: wiki/sources/skills/reverse-engineering.md)
+
+Record the **artifact hash, format, architecture, tool version, environment, and observed addresses** before drawing conclusions. Separate static inference from runtime evidence and label protection-induced uncertainty. See [[static-runtime-evidence]] for the baseline table and static/runtime finding limits. (source: wiki/sources/skills/reverse-engineering.md)
+
+## Topic routing
+
+| Question lane | Route |
+|---------------|-------|
+| Binary findings, debuggers, disassemblers, memory tools, DBI | [[binary-evidence]], [[static-runtime-evidence]]; Binary evidence + DBI sections below; [[dynamic-binary-instrumentation]] |
+| Anti-analysis, game targets, workflow, obfuscation | Workflow + Obfuscation recovery sections; [[mixed-boolean-arithmetic]], [[control-flow-flattening]]; [[overviews/game-engine]] |
+| Plugins, MCP tools, diffing, anti-debug, virtualization, exploit analysis | MCP-assisted RE + Anti-analysis sections; [[binary-diffing]] |
+| Repository resource selection | [[resource-selection]], [[repository-navigation]] |
+| Kernel contracts dominate | [[overviews/windows-kernel]], [[driver-trust-boundaries]] |
+| Engine models dominate | [[overviews/game-engine]], [[il2cpp]], [[unreal-object-model]], [[source-netvars]] |
+| Disputed implementation or detectability claims | [[research-rigor]] |
+
+Use sibling skill topics when one boundary dominates the question. (source: wiki/sources/skills/reverse-engineering.md)
 
 ## Binary evidence
 
-Classify the investigative question and preserve address provenance before selecting tools or stating defensive implications. See [[binary-evidence]] for the full question/evidence table, decompiler-reconstruction limits, and finding granularity (imported API vs reachable path vs observed call).
+Classify the investigative question and preserve address provenance before selecting tools or stating defensive implications. See [[binary-evidence]] for the full question/evidence table, decompiler-reconstruction limits, and finding granularity (imported API vs reachable path vs observed call); [[static-runtime-evidence]] for artifact baseline and static/runtime separation.
 
 | Question | Preserve in the report |
 |----------|------------------------|

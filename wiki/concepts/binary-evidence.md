@@ -4,13 +4,13 @@ kind: concept
 topics: [reverse-engineering, anti-cheat]
 sources:
   - wiki/sources/skills/reverse-engineering.md
-updated: 2026-09-09
+updated: 2026-09-13
 confidence: high
 ---
 
 # Binary Evidence
 
-Discipline for framing **what a binary artifact can prove** before converting static views, debugger observations, or diff output into security conclusions. Pair with [[research-rigor]] and [[overviews/reverse-engineering]] when reporting interface abuse, integrity findings, obfuscation, anti-analysis behavior, or build-to-build changes. (source: wiki/sources/skills/reverse-engineering.md)
+Discipline for framing **what a binary artifact can prove** before converting static views, debugger observations, or diff output into security conclusions. Pair with [[static-runtime-evidence]] for artifact baseline and static/runtime separation, [[research-rigor]], and [[overviews/reverse-engineering]] when reporting interface abuse, integrity findings, obfuscation, anti-analysis behavior, or build-to-build changes. (source: wiki/sources/skills/reverse-engineering.md)
 
 ## Provenance to preserve
 
@@ -42,4 +42,4 @@ Preserve missing symbols, incomplete dumps, generated code, and unexecuted paths
 
 ## Related
 
-[[research-rigor]] · [[binary-diffing]] · [[dynamic-binary-instrumentation]] · [[mixed-boolean-arithmetic]] · [[control-flow-flattening]] · [[overviews/reverse-engineering]] · [[overviews/anti-cheat]]
+[[static-runtime-evidence]] · [[research-rigor]] · [[binary-diffing]] · [[dynamic-binary-instrumentation]] · [[mixed-boolean-arithmetic]] · [[control-flow-flattening]] · [[overviews/reverse-engineering]] · [[overviews/anti-cheat]]

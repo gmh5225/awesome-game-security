@@ -5,13 +5,13 @@ topics: [reverse-engineering, anti-cheat]
 sources:
   - wiki/sources/skills/reverse-engineering.md
   - wiki/sources/descriptions/joxeankoret__diaphora.md
-updated: 2026-09-09
+updated: 2026-09-13
 confidence: high
 ---
 
 # Binary Diffing
 
-Structural and semantic comparison of binary builds for patch analysis, anti-cheat driver update tracking, obfuscated-client logic isolation, and vulnerability research. Diff output is **candidate evidence**—corroborate claimed semantic changes before assigning security impact. (source: wiki/sources/skills/reverse-engineering.md)
+Structural and semantic comparison of binary builds for patch analysis, anti-cheat driver update tracking, obfuscated-client logic isolation, and vulnerability research. Diff output is **candidate evidence**—corroborate claimed semantic changes before assigning security impact. Preserve matched input hashes and tool versions per [[static-runtime-evidence]]; route ecosystem/diffing lanes via [[overviews/reverse-engineering]] topic-routing table. (source: wiki/sources/skills/reverse-engineering.md)
 
 ## Corpus tools
 
@@ -40,4 +40,4 @@ Similarity scores and decompiled differences suggest where to look—they do not
 
 ## Related
 
-[[binary-evidence]] · [[research-rigor]] · [[diaphora]] · [[ghidriff]] · [[turbodiff]] · [[mixed-boolean-arithmetic]] · [[control-flow-flattening]] · [[overviews/reverse-engineering]]
+[[static-runtime-evidence]] · [[binary-evidence]] · [[research-rigor]] · [[diaphora]] · [[ghidriff]] · [[turbodiff]] · [[mixed-boolean-arithmetic]] · [[control-flow-flattening]] · [[overviews/reverse-engineering]]

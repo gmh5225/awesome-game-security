@@ -13,13 +13,13 @@ sources:
   - wiki/sources/descriptions/GJDuck__e9patch.md
   - wiki/sources/descriptions/GlacierW__MBA.md
   - wiki/sources/descriptions/DynamoRIO__drmemory.md
-updated: 2026-09-09
+updated: 2026-09-13
 confidence: high
 ---
 
 # Dynamic Binary Instrumentation
 
-**DBI** modifies or observes program behavior at runtime without recompiling the target. In game-security RE, DBI supports API hooking, coverage measurement, fuzz harness creation, behavioral analysis, and tracing of driver IOCTLs and kernel callbacks. (source: wiki/sources/skills/reverse-engineering.md)
+**DBI** modifies or observes program behavior at runtime without recompiling the target. In game-security RE, DBI supports API hooking, coverage measurement, fuzz harness creation, behavioral analysis, and tracing of driver IOCTLs and kernel callbacks. Record artifact baseline and separate static reachability from observed traces via [[static-runtime-evidence]]; route tool selection through [[overviews/reverse-engineering]] topic-routing table. (source: wiki/sources/skills/reverse-engineering.md)
 
 Offline **static binary rewriting** on Linux ELF via [[e9patch]] can insert jumps, trampolines, and probes at arbitrary instructions without reassembly—useful when runtime DBI is blocked or when preparing instrumented binaries ahead of execution. (source: wiki/sources/descriptions/GJDuck__e9patch.md)
 
@@ -77,4 +77,4 @@ WHP trap libraries such as [[vmtrace]] (host-backed guest memory, page traps, VM
 
 ## Related
 
-[[binary-evidence]] · [[e9patch]] · [[frida]] · [[adbi]] · [[tinyinst]] · [[drmemory]] · [[river]] · [[mambo]] · [[covcane]] · [[cpp-veh-dbi]] · [[w1tn3ss]] · [[pyda]] · [[panda]] · [[glacierw-mba]] · [[vmtrace]] · [[winvisor]] · [[hyper-rev]] · [[ripr]] · [[overviews/reverse-engineering]] · [[overviews/game-hacking]]
+[[static-runtime-evidence]] · [[binary-evidence]] · [[e9patch]] · [[frida]] · [[adbi]] · [[tinyinst]] · [[drmemory]] · [[river]] · [[mambo]] · [[covcane]] · [[cpp-veh-dbi]] · [[w1tn3ss]] · [[pyda]] · [[panda]] · [[glacierw-mba]] · [[vmtrace]] · [[winvisor]] · [[hyper-rev]] · [[ripr]] · [[overviews/reverse-engineering]] · [[overviews/game-hacking]]
