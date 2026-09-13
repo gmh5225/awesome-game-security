@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-13** — ingest `description:SloMR/Rootect`: entity [[rootect]] (SloMR; zero-dep Kotlin+native C++ RASP; raw syscall probes for Magisk/KernelSU/Frida/Xposed/repack/emulator/debugger; scored risk reports + optional Key Attestation; sample app + reference attestation server; mobile games/security-sensitive apps); cited on [[concepts/mobile-anti-cheat]]; cross-linked [[device-trust]], [[rootsentry]]; `index.md` updated.
+
 - **2026-09-13** — ingest `description:aryribeiro/cobra`: entity [[cobra-snake]] (aryribeiro; TypeScript/Next.js/React web Snake; HTML5 Canvas 60 FPS; 40+ emoji power-ups; LibSQL Top 10 leaderboard + localStorage fallback; HMAC-signed game sessions, score plausibility validation, rate-limited submissions, silent forged-score rejection; Anti-Cheat Programming browser score-integrity reference); cited on [[overviews/anti-cheat]] and [[concepts/network-environment-evidence]]; cross-linked [[pew-game]]; `index.md` updated.
 
 - **2026-09-13** — ingest `readme:categories`: Anti Cheat ~730 (+2; aryribeiro/[[cobra-snake]] web Snake HMAC/score-plausibility leaderboard AC in Anti-Cheat Programming + SloMR/[[rootect]] zero-dep Android RASP in Detection:Android root) / Cheat ~2807 / other major section counts stable; 41 sections; entities [[cobra-snake]] and [[rootect]]; refreshed README-map counts and browser/server + mobile RASP scope on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/mobile-security]], [[overviews/reverse-engineering]], and [[overviews/dma-attack]]; light `index.md` section notes (no per-category pages).
