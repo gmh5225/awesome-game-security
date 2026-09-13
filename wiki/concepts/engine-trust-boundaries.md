@@ -5,13 +5,13 @@ topics: [game-engine, anti-cheat, reverse-engineering]
 sources:
   - wiki/sources/skills/game-engine.md
   - wiki/sources/descriptions/Timehue__ShinobiX.md
-updated: 2026-09-09
+updated: 2026-09-13
 confidence: high
 ---
 
 # Engine Trust Boundaries
 
-Game engines expose multiple **research surfaces** that fail independently. Security conclusions must name which boundary broke—not merely that an engine was identified or an object offset was found. (source: wiki/sources/skills/game-engine.md)
+Game engines expose multiple **research surfaces** that fail independently. Security conclusions must name which boundary broke—not merely that an engine was identified or an object offset was found. Pair boundary mapping with [[engine-artifact-selection]] when choosing version-matched collection resources for a concrete artifact. (source: wiki/sources/skills/game-engine.md)
 
 ## Baseline before analysis
 
@@ -61,6 +61,20 @@ When documenting engine-related findings, include:
 
 Owned-build diagnostic workflows belong with [[research-rigor]] robustness/triage guidance when triaging regressions on builds you control.
 
+## README coverage (skill map)
+
+Primary collection lanes for engine work—route to [[engine-artifact-selection]] for version-matched picks within each lane:
+
+| Lane | Examples |
+|------|----------|
+| `Game Engine > Guide` / `Source` | Learning resources, engine implementations, subsystem references |
+| `Game Engine Plugins:Unreal` / `:Unity` / `:Godot` / `:Lumix` | Editor and runtime plugin inventories |
+| `Game Engine Detector` | Mobile APK/IPA engine identification |
+| `Cheat > SDK CodeGen` | Automated SDK/header generators |
+| `Cheat > Game Engine Explorer:*` | Per-engine runtime dump and exploration tooling |
+| `Anti Cheat > Game Engine Protection:*` | Engine-integrated protection research |
+| `Game Develop > MCP server` | AI-assisted editor/runtime MCP bridges |
+
 ## Related
 
-[[unreal-object-model]] · [[il2cpp]] · [[source-netvars]] · [[resource-selection]] · [[research-rigor]] · [[shinobix]] · [[overviews/game-engine]] · [[overviews/anti-cheat]]
+[[engine-artifact-selection]] · [[unreal-object-model]] · [[il2cpp]] · [[source-netvars]] · [[resource-selection]] · [[repository-navigation]] · [[research-rigor]] · [[shinobix]] · [[overviews/game-engine]] · [[overviews/anti-cheat]]

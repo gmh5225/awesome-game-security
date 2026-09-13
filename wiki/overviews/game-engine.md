@@ -678,7 +678,7 @@ sources:
   - wiki/sources/descriptions/BepInEx__BepInEx.md
   - wiki/sources/descriptions/BepInEx__BepInEx.Utility.IL2CPP.md
   - wiki/sources/descriptions/4ch12dy__il2cpp.md
-updated: 2026-09-12
+updated: 2026-09-13
 confidence: high
 ---
 
@@ -687,7 +687,23 @@ confidence: high
 
 # Game Engine
 
-Engine internals, plugins, detectors, and SDK workflows that underpin modding, reverse engineering, and anti-cheat integration points—especially Unreal, Unity ([[il2cpp]] / Mono), Source, Godot, and custom engines. Engine globals, object layouts, metadata formats, and helper APIs vary by branch, build configuration, platform, and game modifications—apply [[research-rigor]] before generalizing signatures or offsets across titles. (source: wiki/sources/skills/game-engine.md)
+Identify the exact **engine, version, build type, runtime, and artifact** before generalizing an object layout or tooling workflow. Engine internals, plugins, detectors, and SDK paths underpin modding, reverse engineering, and anti-cheat integration—especially Unreal, Unity ([[il2cpp]] / Mono), Source, Godot, and custom engines. Globals, object layouts, metadata formats, and helper APIs vary by branch, build configuration, platform, and game modifications—apply [[research-rigor]] before generalizing signatures or offsets across titles. (source: wiki/sources/skills/game-engine.md)
+
+## Topic routing
+
+| Question lane | Route |
+|---------------|-------|
+| Boundary map, baseline dimensions, evidence report fields | [[engine-trust-boundaries]] |
+| Version-matched resource choice by artifact type | [[engine-artifact-selection]], [[resource-selection]], [[repository-navigation]] |
+| UE SDK / UObject layout extraction | [[unreal-object-model]]; SDK generation below |
+| Unity IL2CPP / Mono metadata and dumpers | [[il2cpp]] |
+| Source NetVars / CreateInterface layouts | [[source-netvars]] |
+| Attacker capabilities and cheat techniques | [[overviews/game-hacking]] |
+| Rendering / present / draw-call evidence | [[overviews/graphics-api]] |
+| Replication authority, sessions, inventory | game-server-security skill topic |
+| Build, update, mod-distribution trust | game-supply-chain-security skill topic |
+
+Use sibling skill topics when one boundary dominates the question; apply [[research-rigor]] to consequential or disputed claims. (source: wiki/sources/skills/game-engine.md)
 
 ## Engine trust boundaries
 

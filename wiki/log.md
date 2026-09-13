@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-13** — ingest `skill:game-engine`: refreshed [[overviews/game-engine]] with topic-routing table and identify-engine/version/build/artifact preamble; new concept [[engine-artifact-selection]] (artifact-type boundary check, README-backed selection table, untrusted-asset/plugin scenarios); updated [[engine-trust-boundaries]] (README skill-map lanes, [[engine-artifact-selection]] cross-link) and [[unreal-object-model]] (SDK baseline prerequisites); `index.md` updated.
+
 - **2026-09-13** — ingest `skill:dma-attack`: refreshed [[overviews/dma-attack]] with five-dimension classification + topic-routing table; new concept [[assurance-boundaries]] (mechanism/policy/coverage/attribution, EPT vs IOMMU, attestation scope); updated [[memory-acquisition-path]] (privilege, boundary, artifacts) and [[iommu]] (enforcement vs observation); `index.md` updated.
 
 - **2026-09-13** — ingest `skill:anti-cheat`: refreshed [[overviews/anti-cheat]] with five-role system map + topic-routing table; updated [[input-provenance]] (observation coverage, missing-event discipline), [[detector-operations]] (state separation, time domains), and [[network-environment-evidence]] (outcome vs decision key, identity boundaries); `index.md` updated.

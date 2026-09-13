@@ -37,7 +37,7 @@ sources:
   - wiki/sources/descriptions/Glmour__ue-live-bridge.md
   - wiki/sources/descriptions/BobHUnrealTech__UnrealSDKDumper-4.25.md
   - wiki/sources/descriptions/BadBrojo__UEDumper-MemProcFS.md
-updated: 2026-09-09
+updated: 2026-09-13
 confidence: high
 ---
 
@@ -76,6 +76,8 @@ Common fields include vtable, flags, internal index, class pointer, name, and ou
 `UObject::ProcessEvent` is the reflection dispatch path for Blueprint/native `UFunction` calls on live instances. Internal instrumentation often targets it after SDK generation—compact hook libraries such as [[ue4-processevent-intercept]] (Skengdo; VMT shadowing instead of direct vtable patches; hook lifecycle designed to reapply as objects are recreated; example captures/modifies gameplay-related calls; UE4 RE and game security research) sit beside vtable offset dumps when studying Unreal call flow. (source: wiki/sources/descriptions/Skengdo__ue4-processevent-intercept.md)
 
 ## SDK generation workflow
+
+Before injecting dumpers or publishing offsets, baseline engine branch, game build/hash, platform/ABI, and stripping/symbol availability on the [[engine-trust-boundaries]] metadata surface. (source: wiki/sources/skills/game-engine.md)
 
 1. Identify UE version from binary signatures or strings
 2. Inject [[dumper-7]] (Encryqed; C++ UE4/UE5 SDK generator; in-process DLL; locates engine structures/offsets; emits C++ headers for RE/modding; configurable offset overrides; [SDK Dump for all of UE4 and UE5]) (source: wiki/sources/descriptions/Encryqed__Dumper-7.md) or live-script via UE4SS into the running process — external live-control bridges such as [[ue-live-bridge]] (Glmour; UE4SS Lua mod + Python driver; append-only JSONL IPC; property read/write and UFunction calls with verified CONFIRMED/FALSE_SUCCESS write verdicts; MCP for agent automation) drive the same [[unreal-object-model]] surface from outside the process without engine source changes. (source: wiki/sources/descriptions/Glmour__ue-live-bridge.md) UE4-specific injection PoCs such as [[ue4-injector]] (Zebratic; C++; legacy UE4 vulnerability for shellcode/DLL load into target game processes; security research into UE4 process-injection vectors and AC implications) document engine-specific inject paths beside generic dumper workflows. (source: wiki/sources/descriptions/Zebratic__UE4Injector.md)
