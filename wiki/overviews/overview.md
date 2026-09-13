@@ -158,6 +158,15 @@ Some Linux kernel references appear in Android-related subcategories; organizati
 
 Current root layers: `README.md`, `.claude/skills/`, `wiki/`, `description/`, `archive/`, `scripts/`, `.github/workflows/`. Individual skill installations may omit the rest—check available files and use verified upstream sources when a local layer is absent. (source: wiki/sources/skills/overview.md)
 
+For layer selection, path lookup, case-ambiguity handling, and archive limitations, see [[repository-navigation]]. Prefer the bundled read-only indexer (`.claude/skills/overview/scripts/repository_index.py`) for deterministic section/repo queries instead of loading the full README or archive tree. (source: wiki/sources/skills/overview.md)
+
+```bash
+python3 .claude/skills/overview/scripts/repository_index.py --section "Game Network" --subsection "Source" --limit 5
+python3 .claude/skills/overview/scripts/repository_index.py --repo owner/repo
+```
+
+The helper reads README metadata and directory entries only—it does not fetch upstream, execute projects, or modify files. Counts describe discovery entries, not unique tools or quality scores.
+
 ## Answer priority (data layers)
 
 Prefer the [[compiled-wiki]] layer for cross-cutting synthesis; fall back in order when a repo-specific answer is needed. See [[resource-selection]] for selection format and provenance fields. (source: wiki/sources/skills/overview.md)
@@ -179,11 +188,15 @@ For each chosen resource, provide: original identity/URL, README location, reaso
 
 Each README category uses `## Category Name`, optional `> Subcategory`, and bullet links with full URLs plus `[brief description]`. Before adding entries: check duplicates, verify links, place by primary function, and tag language/platform when helpful (e.g. `[Rust]`, `[Unity]`). Quality bar: actively maintained or historically significant, unique value, prefer original repos over forks unless the fork adds substantial work. (source: wiki/sources/skills/overview.md)
 
-Maintenance scripts under `scripts/`: `generate-toc.py` (TOC generation), `remove-forks.py` (fork cleanup).
+Keep maintenance separate from retrieval: archiving, link repair, description generation, and wiki updates live under `scripts/` (including `update-wiki-cli.py` for this wiki). Some paths invoke external services or commit changes—read the selected script before a maintenance task; do not run bulk automation merely to answer a resource question. There is no current `scripts/generate-toc.py` or `scripts/remove-forks.py`; older references to them do not establish availability. (source: wiki/sources/skills/overview.md)
+
+## Catalog maintenance and skill coverage
+
+Skill-library maintenance references (in `.claude/skills/overview/references/`): **catalog workflow** (domain routing, selection format, README conventions), **repository navigation** (layer roles, indexer, identity preservation), **coverage roadmap** (prioritized skill gaps—server authority, replay fidelity, supply chain, Linux/Proton, evaluation suite), and the **2026-09-09 quality review** (corrected legacy firmware/attestation/graphics claims; limited routing evaluation—38/40 primary matches on 40 public cases, not task-answer accuracy). Pair domain skills with [[research-rigor]] when elevating catalog text into technical conclusions. (source: wiki/sources/skills/overview.md)
 
 ## Core concepts
 
-- [[compiled-wiki]], [[resource-selection]], [[research-rigor]] — synthesis layer, provenance workflow, and evidence discipline
+- [[compiled-wiki]], [[resource-selection]], [[repository-navigation]], [[research-rigor]] — synthesis layer, provenance workflow, path lookup, and evidence discipline
 - [[easy-anti-cheat]], [[battleye]], [[vanguard]] — major AC products
 - [[dma]], [[iommu]] — external memory access threat/defense
 - [[hvci]], [[patchguard]], [[kernel-callbacks]], [[byovd]] — Windows trust stack

@@ -5,13 +5,15 @@ topics: [overview]
 sources:
   - wiki/sources/skills/overview.md
   - wiki/AGENTS.md
-updated: 2026-09-09
+updated: 2026-09-13
 confidence: high
 ---
 
 # Compiled Wiki
 
 Karpathy-style **compiled knowledge wiki** under `wiki/`, maintained by `scripts/update-wiki-cli.py` (Cursor CLI in CI). It sits between immutable upstream sources (README, `.claude/skills/`, `description/**`) and raw archives, offering citation-aware synthesis for agents and humans. Generated wiki pages are discovery aids—follow their original citations before adopting technical claims. (source: wiki/sources/skills/overview.md) (source: wiki/AGENTS.md)
+
+For deterministic section/repo lookup without loading the full README, use `.claude/skills/overview/scripts/repository_index.py`—see [[repository-navigation]]. (source: wiki/sources/skills/overview.md)
 
 ## Layout
 
@@ -46,4 +48,4 @@ For topical questions (DMA, EAC, Present hooks, HVCI, …): start at [[overviews
 
 ## Related
 
-[[overviews/overview]] · [[resource-selection]] · [[research-rigor]] · [AGENTS](AGENTS.md)
+[[overviews/overview]] · [[resource-selection]] · [[repository-navigation]] · [[research-rigor]] · [AGENTS](AGENTS.md)

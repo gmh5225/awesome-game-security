@@ -13,13 +13,13 @@ sources:
   - wiki/sources/descriptions/thatskriptkid__re-harness.md
   - wiki/sources/descriptions/P4nda0s__IDA-NO-MCP.md
   - wiki/sources/descriptions/2akouwu__reverify.md
-updated: 2026-09-09
+updated: 2026-09-13
 confidence: high
 ---
 
 # Research Rigor
 
-Cross-cutting evidence discipline for factual synthesis, detector assessment, and consequential security claims in the awesome-game-security corpus. Pair the matching domain skill (e.g. [[overviews/anti-cheat]], [[overviews/dma-attack]]) with research-rigor when converting README listings, wiki prose, or archive snippets into actionable conclusions. (source: wiki/sources/skills/overview.md)
+Cross-cutting evidence discipline for factual synthesis, detector assessment, and consequential security claims in the awesome-game-security corpus. Pair the matching domain skill (e.g. [[overviews/anti-cheat]], [[overviews/dma-attack]]) with research-rigor when converting README listings, wiki prose, or archive snippets into actionable conclusions. Use with the selected domain skill when the task asks for technical conclusions—not merely resource discovery. (source: wiki/sources/skills/overview.md)
 
 ## Principles
 
@@ -54,6 +54,10 @@ Undocumented kernel structures, offsets, globals, and allocator internals vary b
 
 LLM-assisted static RE should ground conclusions in disassembler/decompiler evidence (pseudocode, xrefs, FLIRT IDs) from tool APIs rather than model speculation—read-only agent harnesses such as [[re-harness]] enforce IDA/IDASQL-backed workflows for auditable outputs (source: wiki/sources/descriptions/thatskriptkid__re-harness.md); file-export bridges such as [[ida-no-mcp]] materialize decompilation, xref metadata, and call graphs as plain files for AI IDEs without live MCP, keeping analysis anchored to IDA output rather than model invention (source: wiki/sources/descriptions/P4nda0s__IDA-NO-MCP.md); byte-level claim checkers such as [[reverify]] run deterministic VERIFIED/REFUTED/INCONCLUSIVE gates against PE/ELF/Mach-O bytes in a reconstruction-agent loop with an established-facts ledger, refuting model hallucinations before they propagate. (source: wiki/sources/descriptions/2akouwu__reverify.md)
 
+## Skill quality baseline
+
+The 2026-09-09 skill quality review corrected legacy firmware-tier, EPT/DMA, attestation, kernel layout, WHP, graphics capture, and input-concealment overgeneralizations across domain skills. Limited routing evaluation (38/40 primary matches on 40 public cases) measures agreement with predefined acceptable routes—not task-answer accuracy or production error rates. See [[overviews/overview]] catalog-maintenance section for coverage-roadmap gaps. (source: wiki/sources/skills/overview.md)
+
 ## Related
 
-[[compiled-wiki]] · [[resource-selection]] · [[driver-trust-boundaries]] · [[input-provenance]] · [[detector-operations]] · [[mobile-anti-cheat]] · [[overviews/overview]] · [[overviews/anti-cheat]] · [[overviews/mobile-security]] · [AGENTS](AGENTS.md)
+[[compiled-wiki]] · [[resource-selection]] · [[repository-navigation]] · [[driver-trust-boundaries]] · [[input-provenance]] · [[detector-operations]] · [[mobile-anti-cheat]] · [[overviews/overview]] · [[overviews/anti-cheat]] · [[overviews/mobile-security]] · [AGENTS](AGENTS.md)

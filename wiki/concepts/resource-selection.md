@@ -4,13 +4,13 @@ kind: concept
 topics: [overview]
 sources:
   - wiki/sources/skills/overview.md
-updated: 2026-09-09
+updated: 2026-09-13
 confidence: high
 ---
 
 # Resource Selection
 
-Workflow for connecting a concrete question to the awesome-game-security collection: start from the question's object and desired output, select the relevant domain skill, then only the resource layers needed to answer it. (source: wiki/sources/skills/overview.md)
+Workflow for connecting a concrete question to the awesome-game-security collection: start from the user's object and desired output, select the relevant domain skill, then only the resource layers needed to answer it. (source: wiki/sources/skills/overview.md)
 
 ## Principles
 
@@ -41,7 +41,7 @@ Use a small comparative table when alternatives serve different roles (e.g. DMA 
 3. `archive/{owner}/{repo}.txt` (scoped inspection; not a guaranteed complete checkout)
 4. README category bullet
 
-Resolve path casing before constructing local or raw URLs. Extract owner/repo from the GitHub URL, omitting a `.git` suffix.
+Resolve path casing before constructing local or raw URLs. Extract owner/repo from the GitHub URL, omitting a `.git` suffix. For deterministic section/repo lookup, prefer `.claude/skills/overview/scripts/repository_index.py` over loading the full README or archive tree—see [[repository-navigation]]. (source: wiki/sources/skills/overview.md)
 
 ## Maintenance (when requested)
 
@@ -55,4 +55,4 @@ Before adding entries: check duplicates, fork relationships, and category placem
 
 ## Related
 
-[[compiled-wiki]] · [[research-rigor]] · [[overviews/overview]] · [AGENTS](AGENTS.md)
+[[compiled-wiki]] · [[repository-navigation]] · [[research-rigor]] · [[overviews/overview]] · [AGENTS](AGENTS.md)
