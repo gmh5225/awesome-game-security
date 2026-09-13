@@ -1,0 +1,1101 @@
+Project Path: arc_trevorftp_ServerGuard_92ygpsac
+
+Source Tree:
+
+```txt
+arc_trevorftp_ServerGuard_92ygpsac
+├── BlockPalette.cs
+├── BlockVisibility.cs
+├── EntityDecoys.cs
+├── EntityVisibility.cs
+├── README.md
+├── ServerGuardConfig.cs
+└── ServerGuardModSystem.cs
+
+```
+
+`BlockPalette.cs`:
+
+```cs
+using System;
+using System.Collections.Generic;
+using Vintagestory.API.Client;
+using Vintagestory.API.Common;
+using Vintagestory.API.Util;
+
+namespace ServerGuard;
+
+public class BlockPalette
+{
+    public class Settings
+    {
+        public string HostPattern = null!;
+        public string OrePattern = null!;
+        public string HostCode = null!;
+    }
+
+    public readonly bool[] Opaque;
+    public readonly int[] Host;
+    public readonly int[][] Decoys;
+    public readonly int OreCount;
+
+    public BlockPalette(IWorldAccessor world, Settings settings)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(settings.HostPattern);
+        ArgumentException.ThrowIfNullOrWhiteSpace(settings.OrePattern);
+        ArgumentException.ThrowIfNullOrWhiteSpace(settings.HostCode);
+        Opaque = new bool[world.Blocks.Count];
+        Host = new int[world.Blocks.Count];
+        Decoys = new int[world.Blocks.Count][];
+        Array.Fill(Decoys, Array.Empty<int>());
+        Dictionary<int, List<int>> ores = [];
+
+        foreach (Block block in world.Blocks)
+        {
+            if (block.Code == null) continue;
+            bool opaque = block.SideOpaque.All && block.SideSolid.All && block.DrawType == EnumDrawType.Cube;
+            Opaque[block.Id] = opaque;
+            if (!opaque || block.EntityClass != null || block.LightHsv[2] != 0) continue;
+            bool ore = WildcardUtil.Match(settings.OrePattern, block.Code.ToString());
+            if (!ore && !WildcardUtil.Match(settings.HostPattern, block.Code.ToString())) continue;
+            string? rock = block.Variant["rock"];
+            if (rock == null) continue;
+            Block? host = world.GetBlock(AssetLocation.Create(settings.HostCode.Replace("{rock}", rock), block.Code.Domain));
+            if (host == null || host.Id == 0) throw new InvalidOperationException($"Missing host rock for {block.Code}.");
+            Host[block.Id] = host.Id;
+            if (!ore) continue;
+            if (!ores.TryGetValue(host.Id, out var variants)) ores[host.Id] = variants = [];
+            variants.Add(block.Id);
+            OreCount++;
+        }
+
+        foreach (var entry in ores) Decoys[entry.Key] = entry.Value.ToArray();
+        if (OreCount == 0) throw new InvalidOperationException("ServerGuard did not resolve any supported ore blocks.");
+    }
+
+    public bool IsOpaque(int id) => id < 0 || Opaque[id];
+}
+
+```
+
+`BlockVisibility.cs`:
+
+```cs
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Security.Cryptography;
+using HarmonyLib;
+using Vintagestory.API.Common;
+using Vintagestory.API.Config;
+using Vintagestory.API.MathTools;
+using Vintagestory.API.Server;
+using Vintagestory.Common;
+using Vintagestory.Server;
+
+namespace ServerGuard;
+
+public class BlockVisibility
+{
+    private const int chunkSize = GlobalConstants.ChunkSize;
+    private const int chunkMask = chunkSize - 1;
+    private const int chunkBits = 5;
+    private const int chunkVolume = chunkSize * chunkSize * chunkSize;
+    private const int maxCachedChunks = 4096;
+    private const int updateBatchSize = 512;
+    private readonly ServerMain server;
+    private readonly ServerGuardConfig config;
+    private readonly BlockPalette palette;
+    private readonly int salt = RandomNumberGenerator.GetInt32(int.MaxValue);
+    private readonly object sync = new();
+    private readonly int[] source = new int[chunkVolume];
+    private readonly int[] compressionBuffer = new int[ChunkDataLayer.DATASLICES * ChunkDataLayer.SLICESIZE];
+    private readonly ChunkDataPool pool;
+    private readonly ChunkDataLayer output;
+    private readonly IWorldChunk?[] neighbors = new IWorldChunk?[BlockFacing.NumberOfFaces];
+    private readonly BlockPos pos = new(Dimensions.NormalWorld);
+    private readonly BlockPos neighborPos = new(Dimensions.NormalWorld);
+    private readonly Dictionary<(int X, int Y, int Z), LinkedListNode<CacheEntry>> cache = [];
+    private readonly LinkedList<CacheEntry> cacheOrder = [];
+    private readonly Action<int[], byte[], byte[], int> unpack;
+    private long cacheBytes;
+
+    public long CacheHits { get; private set; }
+    public long ChunksMasked { get; private set; }
+    public long BlocksMasked { get; private set; }
+    public long CacheBytes => cacheBytes;
+
+    private sealed class CacheEntry((int X, int Y, int Z) key, byte[] original, byte[] masked)
+    {
+        public readonly (int X, int Y, int Z) Key = key;
+        public readonly byte[] Original = original;
+        public readonly byte[] Masked = masked;
+        public long Bytes => Original.LongLength + Masked.LongLength;
+    }
+
+    public BlockVisibility(ServerMain server, ServerGuardConfig config, BlockPalette palette)
+    {
+        this.server = server;
+        this.config = config;
+        this.palette = palette;
+        pool = new ChunkDataPool(chunkSize, server);
+        output = new ChunkDataLayer(pool);
+        unpack = AccessTools.Method(typeof(ChunkData), "UnpackBlocksTo", [typeof(int[]), typeof(byte[]), typeof(byte[]), typeof(int)])
+            .CreateDelegate<Action<int[], byte[], byte[], int>>();
+    }
+
+    public void MaskChunk(Packet_ServerChunk packet)
+    {
+        if (!config.ConcealOre || packet.Empty != 0) return;
+        if (packet.Compver != 2) throw new InvalidOperationException($"Unsupported chunk compression version {packet.Compver}.");
+
+        lock (sync)
+        {
+            var key = (packet.X, packet.Y, packet.Z);
+            if (cache.TryGetValue(key, out var cached))
+            {
+                if (ReferenceEquals(cached.Value.Original, packet.Blocks))
+                {
+                    cacheOrder.Remove(cached);
+                    cacheOrder.AddLast(cached);
+                    packet.SetBlocks(cached.Value.Masked);
+                    CacheHits++;
+                    return;
+                }
+                remove(cached);
+            }
+
+            unpack(source, packet.Blocks, packet.LightSat, packet.Compver);
+            bool hasHost = false;
+            foreach (int id in source)
+            {
+                if (palette.Host[id] == 0) continue;
+                hasHost = true;
+                break;
+            }
+            if (!hasHost) return;
+
+            pos.SetAndCorrectDimension(packet.X, packet.Y, packet.Z);
+            neighborPos.Set(pos);
+            foreach (BlockFacing face in BlockFacing.ALLFACES)
+            {
+                face.IterateThruFacingOffsets(neighborPos);
+                neighbors[face.Index] = server.BlockAccessor.GetChunk(neighborPos.X, neighborPos.InternalY, neighborPos.Z);
+            }
+
+            output.PopulateWithAir();
+            int changed = 0;
+            try
+            {
+                for (int y = 0; y < chunkSize; y++)
+                {
+                    for (int z = 0; z < chunkSize; z++)
+                    {
+                        for (int x = 0; x < chunkSize; x++)
+                        {
+                            int index = (y * chunkSize + z) * chunkSize + x;
+                            int id = source[index];
+                            int host = palette.Host[id];
+                            if (host != 0 && enclosed(x, y, z))
+                            {
+                                id = replacement(host, packet.X * chunkSize + x, packet.Y * chunkSize + y, packet.Z * chunkSize + z);
+                                changed++;
+                            }
+                            output.SetUnsafe(index, id);
+                        }
+                    }
+                }
+
+                byte[] masked = ChunkDataLayer.Compress(output, compressionBuffer);
+                CacheEntry entry = new(key, packet.Blocks, masked);
+                cache[key] = cacheOrder.AddLast(entry);
+                cacheBytes += entry.Bytes;
+                while (cacheBytes > config.ChunkCacheMiB * 1024L * 1024 || cache.Count > maxCachedChunks) remove(cacheOrder.First!);
+                packet.SetBlocks(masked);
+                ChunksMasked++;
+                BlocksMasked += changed;
+            }
+            finally
+            {
+                pool.FreeArrays(output);
+                Array.Clear(neighbors);
+            }
+        }
+        ServerMain.FrameProfiler.Mark("serverguard-chunks");
+    }
+
+    private bool enclosed(int x, int y, int z)
+    {
+        return palette.IsOpaque(read(x - 1, y, z, BlockFacing.WEST))
+            && palette.IsOpaque(read(x + 1, y, z, BlockFacing.EAST))
+            && palette.IsOpaque(read(x, y - 1, z, BlockFacing.DOWN))
+            && palette.IsOpaque(read(x, y + 1, z, BlockFacing.UP))
+            && palette.IsOpaque(read(x, y, z - 1, BlockFacing.NORTH))
+            && palette.IsOpaque(read(x, y, z + 1, BlockFacing.SOUTH));
+    }
+
+    private int read(int x, int y, int z, BlockFacing face)
+    {
+        if ((uint)x < chunkSize && (uint)y < chunkSize && (uint)z < chunkSize) return source[(y * chunkSize + z) * chunkSize + x];
+        IWorldChunk? chunk = neighbors[face.Index];
+        if (chunk == null || chunk.Disposed) return -1;
+        return chunk.UnpackAndReadBlock(((y & chunkMask) * chunkSize + (z & chunkMask)) * chunkSize + (x & chunkMask), BlockLayersAccess.Solid);
+    }
+
+    private int replacement(int host, int x, int y, int z)
+    {
+        int[] variants = palette.Decoys[host];
+        if (config.DecoyPercent == 0 || variants.Length == 0) return host;
+        // Small clusters retain compression and use the same rule for stone and real ore.
+        uint noise = (uint)GameMath.MurmurHash3((x >> 1) ^ salt, y >> 1, z >> 1);
+        return noise % 100 < config.DecoyPercent ? variants[noise / 100 % (uint)variants.Length] : host;
+    }
+
+    private int getView(int id, BlockPos position)
+    {
+        int host = palette.Host[id];
+        if (host == 0) return id;
+        neighborPos.Set(position);
+        foreach (BlockFacing face in BlockFacing.ALLFACES)
+        {
+            face.IterateThruFacingOffsets(neighborPos);
+            if (!palette.IsOpaque(getBlock(neighborPos))) return id;
+        }
+        return replacement(host, position.X, position.InternalY, position.Z);
+    }
+
+    private int getBlock(BlockPos position)
+    {
+        IWorldChunk? chunk = server.BlockAccessor.GetChunk(position.X >> chunkBits, position.InternalY >> chunkBits, position.Z >> chunkBits);
+        if (chunk == null || chunk.Disposed) return -1;
+        return chunk.UnpackAndReadBlock(((position.Y & chunkMask) * chunkSize + (position.Z & chunkMask)) * chunkSize + (position.X & chunkMask), BlockLayersAccess.Solid);
+    }
+
+    public int MaskSingle(IServerPlayer player, int id, int x, int y, int z)
+    {
+        // Negative packet IDs encode the fluid layer as -blockId - 1, including fluid removal.
+        if (id < 0 || !config.ConcealOre) return id;
+        lock (sync)
+        {
+            ConnectedClient client = server.Clients[player.ClientId];
+            BlockPos changed = new BlockPos(Dimensions.NormalWorld).SetAndCorrectDimension(x, y, z);
+            invalidateAround(changed);
+            BlockPos adjacent = changed.Copy();
+            foreach (BlockFacing face in BlockFacing.ALLFACES)
+            {
+                face.IterateThruFacingOffsets(adjacent);
+                int actual = getBlock(adjacent);
+                if (actual < 0 || palette.Host[actual] == 0 || !didSend(client, adjacent)) continue;
+                server.SendPacket(player.ClientId, new Packet_Server {
+                    Id = Packet_ServerIdEnum.ExchangeBlock,
+                    ExchangeBlock = new Packet_ServerExchangeBlock {
+                        X = adjacent.X,
+                        Y = adjacent.InternalY,
+                        Z = adjacent.Z,
+                        BlockType = getView(actual, adjacent)
+                    }
+                });
+            }
+            return getView(id, changed);
+        }
+    }
+
+    public void SendUpdates(List<BlockPos> positions, int packetId)
+    {
+        lock (sync)
+        {
+            for (int start = 0; start < positions.Count; start += updateBatchSize)
+            {
+                Dictionary<(int X, int Y, int Z), HashSet<BlockPos>> groups = [];
+                int end = Math.Min(start + updateBatchSize, positions.Count);
+                for (int i = start; i < end; i++)
+                {
+                    BlockPos changed = positions[i];
+                    invalidateAround(changed);
+                    addUpdate(groups, changed);
+                    BlockPos adjacent = changed.Copy();
+                    foreach (BlockFacing face in BlockFacing.ALLFACES)
+                    {
+                        face.IterateThruFacingOffsets(adjacent);
+                        int id = getBlock(adjacent);
+                        if (id >= 0 && palette.Host[id] != 0) addUpdate(groups, adjacent.Copy());
+                    }
+                }
+
+                foreach (var group in groups)
+                {
+                    BlockPos[] updates = [.. group.Value];
+                    Packet_ServerSetBlocks blocks = new();
+                    blocks.SetSetBlocks(packUpdates(updates));
+                    Packet_Server packet = new() { Id = packetId, SetBlocks = blocks };
+                    foreach (ConnectedClient client in server.Clients.Values)
+                    {
+                        if (client.Player == null || !client.State.ConnectedOrPlaying() || !didSend(client, updates[0])) continue;
+                        server.SendPacket(client.Id, packet);
+                    }
+                }
+            }
+        }
+        ServerMain.FrameProfiler.Mark("serverguard-blockupdates");
+    }
+
+    private static void addUpdate(Dictionary<(int X, int Y, int Z), HashSet<BlockPos>> groups, BlockPos position)
+    {
+        var key = (position.X >> chunkBits, position.InternalY >> chunkBits, position.Z >> chunkBits);
+        if (!groups.TryGetValue(key, out var group)) groups[key] = group = [];
+        group.Add(position);
+    }
+
+    private byte[] packUpdates(BlockPos[] updates)
+    {
+        using MemoryStream stream = new(4 + updates.Length * 5 * sizeof(int));
+        using BinaryWriter writer = new(stream);
+        writer.Write(updates.Length);
+        foreach (BlockPos position in updates) writer.Write(position.X);
+        foreach (BlockPos position in updates) writer.Write(position.InternalY);
+        foreach (BlockPos position in updates) writer.Write(position.Z);
+        foreach (BlockPos position in updates)
+        {
+            int id = server.BlockAccessor.GetBlock(position, BlockLayersAccess.Solid).Id;
+            writer.Write(getView(id, position));
+        }
+        foreach (BlockPos position in updates) writer.Write(server.BlockAccessor.GetBlock(position, BlockLayersAccess.Fluid).Id);
+        return Compression.Compress(stream.ToArray());
+    }
+
+    private bool didSend(ConnectedClient client, BlockPos position)
+    {
+        return client.Entityplayer?.Pos.Dimension == position.dimension
+            && client.DidSendChunk(server.WorldMap.ChunkIndex3D(position.X >> chunkBits, position.InternalY >> chunkBits, position.Z >> chunkBits));
+    }
+
+    private void invalidateAround(BlockPos position)
+    {
+        invalidate(position.X >> chunkBits, position.InternalY >> chunkBits, position.Z >> chunkBits);
+        pos.Set(position);
+        foreach (BlockFacing face in BlockFacing.ALLFACES)
+        {
+            face.IterateThruFacingOffsets(pos);
+            invalidate(pos.X >> chunkBits, pos.InternalY >> chunkBits, pos.Z >> chunkBits);
+        }
+    }
+
+    private void invalidate(int x, int y, int z)
+    {
+        if (cache.TryGetValue((x, y, z), out var entry)) remove(entry);
+    }
+
+    private void remove(LinkedListNode<CacheEntry> entry)
+    {
+        cache.Remove(entry.Value.Key);
+        cacheOrder.Remove(entry);
+        cacheBytes -= entry.Value.Bytes;
+    }
+
+    public void OnColumnLoaded(IChunkColumnGenerateRequest request, int dimension)
+    {
+        if (!config.ConcealOre || server.ShuttingDown) return;
+        lock (sync)
+        {
+            for (int y = 0; y < request.Chunks.Length; y++)
+            {
+                int chunkY = y + dimension * GlobalConstants.DimensionSizeInChunks;
+                invalidate(request.ChunkX, chunkY, request.ChunkZ);
+                foreach (BlockFacing face in BlockFacing.HORIZONTALS)
+                {
+                    pos.SetAndCorrectDimension(request.ChunkX, chunkY, request.ChunkZ).Add(face);
+                    invalidate(pos.X, pos.InternalY, pos.Z);
+                    long index = server.WorldMap.ChunkIndex3D(pos.X, pos.InternalY, pos.Z);
+                    foreach (ConnectedClient client in server.Clients.Values)
+                    {
+                        if (client.DidSendChunk(index)) client.forceSendChunks.Add(index);
+                    }
+                }
+            }
+        }
+    }
+}
+
+```
+
+`EntityDecoys.cs`:
+
+```cs
+using System;
+using System.Collections.Generic;
+using Vintagestory.API.Common;
+using Vintagestory.API.Common.Entities;
+using Vintagestory.API.Config;
+using Vintagestory.API.Datastructures;
+using Vintagestory.API.MathTools;
+using Vintagestory.API.Server;
+using Vintagestory.API.Util;
+using Vintagestory.Server;
+
+namespace ServerGuard;
+
+public class EntityDecoys : IDisposable
+{
+    private const int intervalMs = 250;
+    private const int maxTotal = 64;
+    private const int searchColumns = 4;
+    private const int searchDepth = 32;
+    private const int maxRange = 80;
+    private const int chunkSize = GlobalConstants.ChunkSize;
+    private const int chunkMask = chunkSize - 1;
+    private const int chunkBits = 5;
+    private readonly ICoreServerAPI api;
+    private readonly ServerMain server;
+    private readonly ServerGuardConfig config;
+    private readonly BlockPalette palette;
+    private readonly EntityVisibility visibility;
+    private readonly List<Template> templates = [];
+    private readonly Dictionary<ConnectedClient, List<Decoy>> clients = [];
+    private readonly List<ConnectedClient> connected = [];
+    private readonly List<ConnectedClient> disconnected = [];
+    private readonly List<EntityDespawn> despawns = [];
+    private readonly BlockPos scratch = new(Dimensions.NormalWorld);
+    private readonly BlockPos spacePos = new(Dimensions.NormalWorld);
+    private readonly long listenerId;
+    private readonly int minRange;
+    private int cursor;
+
+    public int ActiveCount { get; private set; }
+    public long Spawned { get; private set; }
+
+    public class Settings
+    {
+        public string[] Types = null!;
+    }
+
+    private sealed class Template(EntityProperties properties, TreeAttribute health, float width, float height)
+    {
+        public readonly EntityProperties Properties = properties;
+        public readonly TreeAttribute Health = health;
+        public readonly Cuboidf Bounds = new(-width / 2, 0, -width / 2, width / 2, height, width / 2);
+        public readonly int MinCell = (int)Math.Floor(0.5 - width / 2);
+        public readonly int MaxCell = (int)Math.Ceiling(0.5 + width / 2) - 1;
+        public readonly int Height = (int)Math.Ceiling(height);
+    }
+
+    private sealed class Decoy(EntityAgent entity, Template template, long expires)
+    {
+        public readonly EntityAgent Entity = entity;
+        public readonly Template Template = template;
+        public readonly long Expires = expires;
+        public long NextPosition;
+        public int Tick;
+    }
+
+    public EntityDecoys(ICoreServerAPI api, ServerMain server, ServerGuardConfig config, BlockPalette palette, EntityVisibility visibility)
+    {
+        this.api = api;
+        this.server = server;
+        this.config = config;
+        this.palette = palette;
+        this.visibility = visibility;
+        minRange = Math.Max(32, config.AlwaysVisibleRange + 8);
+        Settings settings = api.Assets.Get("serverguard:config/entities.json").ToObject<Settings>();
+        if (settings.Types?.Length is not > 0) throw new ArgumentException("ServerGuard requires decoy entity patterns.");
+        foreach (EntityProperties properties in api.World.EntityTypes)
+        {
+            if (properties.Class is not ("EntityAgent" or "EntityDrifter")) continue;
+            bool matches = false;
+            string code = properties.Code.ToString();
+            foreach (string pattern in settings.Types)
+            {
+                if (WildcardUtil.Match(pattern, code)) matches = true;
+            }
+            if (!matches) continue;
+            var size = properties.SelectionBoxSize ?? properties.CollisionBoxSize;
+            float width = Math.Max(size.X, properties.CollisionBoxSize.X);
+            float height = Math.Max(size.Y, properties.CollisionBoxSize.Y);
+            if (properties.Class == "EntityDrifter")
+            {
+                float[]? alternate = properties.Attributes["alternativeCollisionBox"].AsArray<float>();
+                if (alternate?.Length != 2) throw new ArgumentException($"Missing alternate drifter bounds for {code}.");
+                width = Math.Max(width, alternate[0]);
+                height = Math.Max(height, alternate[1]);
+            }
+            if (width is <= 0 or > 3 || height is <= 0 or > 3) throw new ArgumentException($"Unsupported decoy bounds for {code}.");
+            foreach (JsonObject behavior in properties.Server.BehaviorsAsJsonObj)
+            {
+                if (behavior["code"].AsString() != "health") continue;
+                float max = behavior["maxhealth"].AsFloat();
+                if (max <= 0) throw new ArgumentException($"Missing decoy health for {properties.Code}.");
+                float current = behavior["currenthealth"].AsFloat(max);
+                TreeAttribute health = new();
+                health.SetFloat("basemaxhealth", max);
+                health.SetFloat("maxhealth", max);
+                health.SetFloat("currenthealth", current);
+                health.SetFloat("previousHealthValue", current);
+                templates.Add(new Template(properties, health, width, height));
+                break;
+            }
+        }
+        if (templates.Count == 0) throw new ArgumentException("No supported ServerGuard decoy entity types were registered.");
+        listenerId = api.Event.RegisterGameTickListener(onTick, intervalMs);
+        api.Logger.Notification("ServerGuard decoys: {0} creatures per player, {1} creature variants, {2} total cap.", config.EntityDecoysPerPlayer, templates.Count, maxTotal);
+    }
+
+    private void onTick(float dt)
+    {
+        if (server.ShuttingDown) return;
+        long now = Environment.TickCount64;
+        connected.Clear();
+        foreach (ConnectedClient client in server.Clients.Values)
+        {
+            if (client.Entityplayer == null || !client.State.ConnectedOrPlaying()) continue;
+            connected.Add(client);
+            if (!clients.ContainsKey(client)) clients.Add(client, []);
+        }
+        disconnected.Clear();
+        foreach (var entry in clients)
+        {
+            if (!server.Clients.TryGetValue(entry.Key.Id, out ConnectedClient? current) || !ReferenceEquals(current, entry.Key) || current.Entityplayer == null || !current.State.ConnectedOrPlaying())
+            {
+                despawnAll(entry.Key, entry.Value);
+                disconnected.Add(entry.Key);
+                continue;
+            }
+            refresh(entry.Key, entry.Value, now);
+        }
+        foreach (ConnectedClient client in disconnected) clients.Remove(client);
+        if (connected.Count > 0 && ActiveCount < maxTotal)
+        {
+            if (cursor >= connected.Count) cursor = 0;
+            ConnectedClient client = connected[cursor++];
+            List<Decoy> decoys = clients[client];
+            if (decoys.Count < config.EntityDecoysPerPlayer) trySpawn(client, decoys, now);
+        }
+        ServerMain.FrameProfiler.Mark("serverguard-decoys");
+    }
+
+    private void refresh(ConnectedClient client, List<Decoy> decoys, long now)
+    {
+        despawns.Clear();
+        for (int i = decoys.Count - 1; i >= 0; i--)
+        {
+            Decoy decoy = decoys[i];
+            EntityAgent entity = decoy.Entity;
+            scratch.SetAndCorrectDimension((int)Math.Floor(entity.Pos.X), (int)Math.Floor(entity.Pos.InternalY), (int)Math.Floor(entity.Pos.Z));
+            if (now >= decoy.Expires || !inRange(client, entity.Pos) || !hasSpace(client, scratch, decoy.Template) || visibility.CanSee(client, entity, false))
+            {
+                despawns.Add(new EntityDespawn { EntityId = entity.EntityId, DespawnData = new EntityDespawnData { Reason = EnumDespawnReason.OutOfRange } });
+                decoys.RemoveAt(i);
+                ActiveCount--;
+                continue;
+            }
+            if (now < decoy.NextPosition) continue;
+            decoy.NextPosition = now + 1000;
+            decoy.Tick += 30;
+            entity.Pos.HeadYaw = entity.Pos.Yaw + (float)(api.World.Rand.NextDouble() - 0.5);
+            server.SendPacket(client.Id, new Packet_Server {
+                Id = Packet_ServerIdEnum.EntitySpawnPosition,
+                EntityPosition = ServerPackets.getEntityPositionPacket(entity.Pos, entity, decoy.Tick)
+            });
+        }
+        sendDespawns(client);
+    }
+
+    private bool inRange(ConnectedClient client, EntityPos position)
+    {
+        var viewer = client.Entityplayer.Pos;
+        if (viewer.Dimension != position.Dimension) return false;
+        double distance = viewer.SquareDistanceTo(position);
+        return distance > minRange * minRange && distance < maxRange * maxRange;
+    }
+
+    private bool hasSpace(ConnectedClient client, BlockPos position, Template template)
+    {
+        if (position.Y < 1) return false;
+        for (int dy = -1; dy < template.Height; dy++)
+        {
+            for (int dz = template.MinCell; dz <= template.MaxCell; dz++)
+            {
+                for (int dx = template.MinCell; dx <= template.MaxCell; dx++)
+                {
+                    spacePos.Set(position).Add(dx, dy, dz);
+                    int x = spacePos.X >> chunkBits;
+                    int y = spacePos.InternalY >> chunkBits;
+                    int z = spacePos.Z >> chunkBits;
+                    if (!client.DidSendChunk(server.WorldMap.ChunkIndex3D(x, y, z))) return false;
+                    IWorldChunk? chunk = server.BlockAccessor.GetChunk(x, y, z);
+                    if (chunk == null || chunk.Disposed) return false;
+                    int index = ((spacePos.Y & chunkMask) * chunkSize + (spacePos.Z & chunkMask)) * chunkSize + (spacePos.X & chunkMask);
+                    int solid = chunk.UnpackAndReadBlock(index, BlockLayersAccess.Solid);
+                    if (dy < 0)
+                    {
+                        if (!palette.Opaque[solid]) return false;
+                    }
+                    else if (solid != 0 || chunk.UnpackAndReadBlock(index, BlockLayersAccess.Fluid) != 0) return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    private void trySpawn(ConnectedClient client, List<Decoy> decoys, long now)
+    {
+        Random random = api.World.Rand;
+        Template template = templates[random.Next(templates.Count)];
+        var properties = template.Properties;
+        // A serialization-only instance avoids registering server AI, physics, or behavior callbacks.
+        if (api.ClassRegistry.CreateEntity(properties) is not EntityAgent entity || entity is EntityPlayer) throw new InvalidOperationException($"Unsupported decoy class for {properties.Code}.");
+        entity.Api = api;
+        entity.World = server;
+        entity.Code = properties.Code;
+        entity.Tags = properties.Tags;
+        entity.SelectionBox = template.Bounds;
+        var viewer = client.Entityplayer.Pos;
+        entity.Pos.Dimension = viewer.Dimension;
+        for (int column = 0; column < searchColumns; column++)
+        {
+            double angle = random.NextDouble() * Math.PI * 2;
+            double radius = minRange + 4 + random.NextDouble() * (maxRange - minRange - 4);
+            int x = (int)Math.Floor(viewer.X + Math.Cos(angle) * radius);
+            int z = (int)Math.Floor(viewer.Z + Math.Sin(angle) * radius);
+            for (int depth = 0; depth < searchDepth; depth++)
+            {
+                scratch.Set(x, (int)Math.Floor(viewer.Y) + 8 - depth, z);
+                scratch.dimension = viewer.Dimension;
+                entity.Pos.SetPos(x + 0.5, scratch.Y, z + 0.5);
+                if (!inRange(client, entity.Pos) || !hasSpace(client, scratch, template) || visibility.CanSee(client, entity, false)) continue;
+                bool occupied = false;
+                foreach (Decoy existing in decoys)
+                {
+                    if (existing.Entity.Pos.SquareDistanceTo(entity.Pos) < 9) occupied = true;
+                }
+                if (occupied) break;
+                // Reserve IDs from the native main-thread allocator without spawning into the world.
+                entity.EntityId = ++((SaveGame)api.WorldManager.SaveGame).LastEntityId;
+                entity.Pos.Yaw = (float)(random.NextDouble() * Math.PI * 2);
+                entity.PositionBeforeFalling.Set(entity.Pos.X, entity.Pos.Y, entity.Pos.Z);
+                entity.WatchedAttributes.SetAttribute("health", template.Health.Clone());
+                entity.WatchedAttributes.SetInt("textureIndex", random.Next(properties.Client.TexturesAlternatesCount + 1));
+                Packet_Entity packet = ServerPackets.GetEntityPacket(entity);
+                decoys.Add(new Decoy(entity, template, now + random.Next(30000, 60001)));
+                ActiveCount++;
+                Spawned++;
+                server.SendPacket(client.Id, new Packet_Server {
+                    Id = Packet_ServerIdEnum.EntitySpawn,
+                    EntitySpawn = new Packet_EntitySpawn { Entity = [packet], EntityCount = 1, EntityLength = 1 }
+                });
+                return;
+            }
+        }
+    }
+
+    private void despawnAll(ConnectedClient client, List<Decoy> decoys)
+    {
+        despawns.Clear();
+        foreach (Decoy decoy in decoys)
+        {
+            despawns.Add(new EntityDespawn { EntityId = decoy.Entity.EntityId, DespawnData = new EntityDespawnData { Reason = EnumDespawnReason.OutOfRange } });
+        }
+        if (client.State.ConnectedOrPlaying()) sendDespawns(client);
+        ActiveCount -= decoys.Count;
+        decoys.Clear();
+    }
+
+    private void sendDespawns(ConnectedClient client)
+    {
+        if (despawns.Count == 0) return;
+        server.SendPacket(client.Id, ServerPackets.GetEntityDespawnPacket(despawns));
+    }
+
+    public void Dispose()
+    {
+        api.Event.UnregisterGameTickListener(listenerId);
+        foreach (var entry in clients) despawnAll(entry.Key, entry.Value);
+        clients.Clear();
+    }
+}
+
+```
+
+`EntityVisibility.cs`:
+
+```cs
+using System;
+using System.Collections.Generic;
+using System.Threading;
+using Vintagestory.API.Common;
+using Vintagestory.API.Common.Entities;
+using Vintagestory.API.Config;
+using Vintagestory.API.MathTools;
+using Vintagestory.Server;
+
+namespace ServerGuard;
+
+public class EntityVisibility : IDisposable
+{
+    private const int visibilityIntervalMs = 200;
+    private const int boundsCorners = 1 << 3;
+    private const int samplesPerEntity = 1 + boundsCorners;
+    private const double boundsMargin = 0.25;
+    private readonly ServerGuardConfig config;
+    private readonly ThreadLocal<VisibilityWorker> workers;
+    private readonly double maxRayRangeSq;
+    private long rays;
+    private long concealed;
+    private long budgetExhaustions;
+
+    public long Rays => Interlocked.Read(ref rays);
+    public long Concealed => Interlocked.Read(ref concealed);
+    public long BudgetExhaustions => Interlocked.Read(ref budgetExhaustions);
+
+    private sealed class VisibilityWorker(ServerMain server, BlockPalette palette)
+    {
+        public readonly AABBIntersectionTest Raycaster = new(new OcclusionSupplier(server));
+        public readonly Ray Ray = new();
+        public readonly BlockFilter Filter = (pos, block) => palette.Opaque[block.Id];
+        public readonly Dictionary<(int ClientId, long EntityId), bool> Visible = [];
+        public long Epoch = -1;
+        public int Remaining;
+    }
+
+    private sealed class OcclusionSupplier(IWorldIntersectionSupplier world) : IWorldIntersectionSupplier
+    {
+        public IBlockAccessor blockAccessor => world.blockAccessor;
+        public Vec3i MapSize => world.MapSize;
+
+        public Block GetBlock(BlockPos pos) => world.GetBlock(pos);
+
+        // Full-cube bounds avoid decor queries for solid-block occlusion on physics threads.
+        public Cuboidf[] GetBlockIntersectionBoxes(BlockPos pos) => Block.DefaultCollisionSelectionBoxes;
+
+        public Entity[] GetEntitiesAround(Vec3d position, float horRange, float vertRange, ActionConsumable<Entity>? matches = null) => world.GetEntitiesAround(position, horRange, vertRange, matches);
+
+        public bool IsValidPos(BlockPos pos) => world.IsValidPos(pos);
+    }
+
+    public EntityVisibility(ServerMain server, ServerGuardConfig config, BlockPalette palette)
+    {
+        this.config = config;
+        double range = server.DefaultEntityTrackingRange * GlobalConstants.ChunkSize;
+        maxRayRangeSq = range * range;
+        workers = new ThreadLocal<VisibilityWorker>(() => new VisibilityWorker(server, palette));
+    }
+
+    public bool CanSee(ConnectedClient client, Entity entity, bool useCache = true)
+    {
+        if (!config.ConcealEntities || (!config.ConcealPlayers && entity is EntityPlayer)) return true;
+        EntityPlayer? viewer = client.Entityplayer;
+        if (viewer == null || ReferenceEquals(viewer, entity)) return true;
+        if (viewer.Pos.Dimension != entity.Pos.Dimension) return false;
+        if (entity.AllowOutsideLoadedRange || ReferenceEquals(viewer.MountedOn?.MountSupplier.OnEntity, entity)) return true;
+
+        double distanceSq = viewer.Pos.SquareDistanceTo(entity.Pos);
+        if (distanceSq <= config.AlwaysVisibleRange * config.AlwaysVisibleRange || distanceSq > maxRayRangeSq) return true;
+        Cuboidf? box = entity.SelectionBox;
+        if (box == null) return true;
+
+        VisibilityWorker worker = workers.Value!;
+        long epoch = Environment.TickCount64 / visibilityIntervalMs;
+        if (epoch != worker.Epoch)
+        {
+            worker.Epoch = epoch;
+            worker.Remaining = config.EntityRayBudgetPerThread;
+            worker.Visible.Clear();
+        }
+        var key = (client.Id, entity.EntityId);
+        bool visible;
+        if (useCache && worker.Visible.TryGetValue(key, out visible)) return visible;
+        if (worker.Remaining < samplesPerEntity)
+        {
+            // Keep ordinary visibility when the ray budget cannot establish occlusion.
+            Interlocked.Increment(ref budgetExhaustions);
+            return true;
+        }
+
+        var origin = worker.Ray.origin;
+        origin.Set(viewer.Pos.X + viewer.LocalEyePos.X, viewer.Pos.InternalY + viewer.LocalEyePos.Y, viewer.Pos.Z + viewer.LocalEyePos.Z);
+        visible = clearRay(worker, entity.Pos.X + box.MidX, entity.Pos.InternalY + box.MidY, entity.Pos.Z + box.MidZ);
+        for (int corner = 0; corner < boundsCorners && !visible; corner++)
+        {
+            double x = (corner & 1) == 0 ? box.X1 - boundsMargin : box.X2 + boundsMargin;
+            double y = (corner & 2) == 0 ? box.Y1 - boundsMargin : box.Y2 + boundsMargin;
+            double z = (corner & 4) == 0 ? box.Z1 - boundsMargin : box.Z2 + boundsMargin;
+            visible = clearRay(worker, entity.Pos.X + x, entity.Pos.InternalY + y, entity.Pos.Z + z);
+        }
+        if (useCache) worker.Visible[key] = visible;
+        if (!visible) Interlocked.Increment(ref concealed);
+        return visible;
+    }
+
+    private bool clearRay(VisibilityWorker worker, double x, double y, double z)
+    {
+        var ray = worker.Ray;
+        ray.dir.Set(x - ray.origin.X, y - ray.origin.Y, z - ray.origin.Z);
+        float distance = (float)ray.dir.Length();
+        worker.Raycaster.LoadRayAndPos(ray);
+        worker.Remaining--;
+        Interlocked.Increment(ref rays);
+        return worker.Raycaster.GetSelectedBlock(distance, worker.Filter) == null;
+    }
+
+    public void FilterTracking(Entity entity, List<ConnectedClient> clients, int threadIndex)
+    {
+        foreach (ConnectedClient client in clients)
+        {
+            List<Entity> tracked = client.threadedTrackedEntities[threadIndex];
+            int last = tracked.Count - 1;
+            if (last >= 0 && ReferenceEquals(tracked[last], entity) && !CanSee(client, entity)) tracked.RemoveAt(last);
+        }
+    }
+
+    public void FilterSpawns(List<ConnectedClient> clients)
+    {
+        foreach (ConnectedClient client in clients)
+        {
+            List<Entity> spawns = client.EntitySpawnsToSend;
+            for (int i = spawns.Count - 1; i >= 0; i--)
+            {
+                Entity entity = spawns[i];
+                if (CanSee(client, entity)) continue;
+                client.TrackedEntities.Remove(entity.EntityId);
+                spawns.RemoveAt(i);
+            }
+        }
+    }
+
+    public void Dispose() => workers.Dispose();
+}
+
+```
+
+`README.md`:
+
+```md
+# ServerGuard
+
+ServerGuard conceals fully enclosed ore before chunk data reaches clients and mixes ore decoys into the surrounding host rocks. It also filters occluded non-player entities through native tracking and can send optional creature decoys.
+
+## Configuration
+
+Edit `ModConfig/serverguard.json`, then restart the server.
+
+Optional [Integrated Mod Manager (IMM)](https://mods.vintagestory.at/imm) support lets you edit these settings in-game. Changes still require a server restart. IMM is not required.
+
+### Default settings
+
+- **ConcealOre: true**  
+  Enables ore protection.
+
+- **DecoyPercent: 12**  
+  Ore decoy density. Accepts 0 to 50%. Set to 0 for concealment only.
+
+- **ChunkCacheMiB: 64**  
+  Compressed chunk cache limit. Accepts 1 to 1024 MiB.
+
+- **ConcealEntities: true**  
+  Enables entity protection and creature decoys.
+
+- **ConcealPlayers: false**  
+  Includes real players in entity concealment. Requires `ConcealEntities`.
+
+- **AlwaysVisibleRange: 16**  
+  Entities within this distance remain visible. Accepts 8 to 64 blocks.
+
+- **EntityRayBudgetPerThread: 512**  
+  Visibility raycasts allowed per thread every 200 ms. Accepts 16 to 16384.
+
+- **EntityDecoysPerPlayer: 8**  
+  Target creature decoys per player. Accepts 0 to 16. Set to 0 to disable.
+
+## Server command
+
+Use `/serverguard` to check protection settings and counters. Requires the `controlserver` permission.
+
+```
+
+`ServerGuardConfig.cs`:
+
+```cs
+using System;
+
+namespace ServerGuard;
+
+public class ServerGuardConfig
+{
+    public bool ConcealOre = true;
+    public int DecoyPercent = 12;
+    public int ChunkCacheMiB = 64;
+    public bool ConcealEntities = true;
+    public bool ConcealPlayers = false;
+    public int AlwaysVisibleRange = 16;
+    public int EntityRayBudgetPerThread = 512;
+    public int EntityDecoysPerPlayer = 8;
+
+    public void Validate()
+    {
+        if (DecoyPercent is < 0 or > 50) throw new ArgumentOutOfRangeException(nameof(DecoyPercent), DecoyPercent, "Expected 0 to 50 in ModConfig/serverguard.json.");
+        if (ChunkCacheMiB is < 1 or > 1024) throw new ArgumentOutOfRangeException(nameof(ChunkCacheMiB), ChunkCacheMiB, "Expected 1 to 1024 in ModConfig/serverguard.json.");
+        if (AlwaysVisibleRange is < 8 or > 64) throw new ArgumentOutOfRangeException(nameof(AlwaysVisibleRange), AlwaysVisibleRange, "Expected 8 to 64 blocks in ModConfig/serverguard.json.");
+        if (EntityRayBudgetPerThread is < 16 or > 16384) throw new ArgumentOutOfRangeException(nameof(EntityRayBudgetPerThread), EntityRayBudgetPerThread, "Expected 16 to 16384 in ModConfig/serverguard.json.");
+        if (EntityDecoysPerPlayer is < 0 or > 16) throw new ArgumentOutOfRangeException(nameof(EntityDecoysPerPlayer), EntityDecoysPerPlayer, "Expected 0 to 16 in ModConfig/serverguard.json.");
+    }
+}
+
+```
+
+`ServerGuardModSystem.cs`:
+
+```cs
+using System;
+using System.Collections.Generic;
+using System.Reflection;
+using HarmonyLib;
+using Vintagestory.API.Common;
+using Vintagestory.API.Common.Entities;
+using Vintagestory.API.Config;
+using Vintagestory.API.MathTools;
+using Vintagestory.API.Server;
+using Vintagestory.Server;
+
+namespace ServerGuard;
+
+public class ServerGuardModSystem : ModSystem
+{
+    private const string harmonyId = "serverguard.network";
+    private ServerGuardConfig config = null!;
+    private BlockVisibility blocks = null!;
+    private EntityVisibility entities = null!;
+    private EntityDecoys? decoys;
+    private AccessTools.FieldRef<ChunkColumnLoadRequest, int> getDimension = null!;
+    private Harmony harmony = null!;
+    private static ServerGuardModSystem? active;
+
+    public override bool ShouldLoad(EnumAppSide forSide) => forSide == EnumAppSide.Server;
+
+    public override void StartServerSide(ICoreServerAPI api)
+    {
+        string? version = typeof(GameVersion).GetField(nameof(GameVersion.ShortGameVersion))?.GetRawConstantValue() as string;
+        if (version != "1.22.7") throw new NotSupportedException($"ServerGuard requires Vintage Story 1.22.7. Found {version}.");
+        if (api.World is not ServerMain server) throw new NotSupportedException("ServerGuard requires the standard Vintage Story server.");
+        if (active != null) throw new InvalidOperationException("ServerGuard is already running in this process.");
+
+        config = api.LoadModConfig<ServerGuardConfig>("serverguard.json") ?? new ServerGuardConfig();
+        config.Validate();
+        api.StoreModConfig(config, "serverguard.json");
+        BlockPalette palette = new(api.World, api.Assets.Get("serverguard:config/blocks.json").ToObject<BlockPalette.Settings>());
+        blocks = new BlockVisibility(server, config, palette);
+        getDimension = AccessTools.FieldRefAccess<ChunkColumnLoadRequest, int>("dimension");
+        entities = new EntityVisibility(server, config, palette);
+        harmony = new Harmony(harmonyId);
+        try
+        {
+            patch(typeof(ServerChunk), "ToPacket", [typeof(int), typeof(int), typeof(int), typeof(bool)], nameof(afterChunk), false);
+            patch(typeof(ServerMain), "SendSetBlocksPacket", [typeof(List<BlockPos>), typeof(int)], nameof(beforeBlocks), true);
+            patch(typeof(ServerMain), "SendSetBlock", [typeof(IServerPlayer), typeof(int), typeof(int), typeof(int), typeof(int), typeof(bool)], nameof(beforeBlock), true);
+            patch(typeof(PhysicsManager), "UpdateTrackedEntityState", [typeof(Entity), typeof(List<ConnectedClient>), typeof(int)], nameof(afterTracking), false);
+            patch(typeof(PhysicsManager), "PrepareEntitySpawns", [typeof(Entity[]), typeof(List<ConnectedClient>)], nameof(afterSpawns), false);
+            patch(typeof(PhysicsManager), "SendPrioritySpawn", [typeof(Entity), typeof(ICollection<ConnectedClient>)], nameof(beforePrioritySpawn), true);
+            patch(typeof(ServerMain).Assembly.GetType("Vintagestory.Server.ServerSystemSupplyChunks", true)!, "mainThreadLoadChunkColumn", [typeof(ChunkColumnLoadRequest)], nameof(afterColumnLoaded), false);
+            api.ChatCommands.Create("serverguard")
+                .WithDescription(Lang.Get("serverguard:command-description"))
+                .RequiresPrivilege(Privilege.controlserver)
+                .HandleWith(onStatus);
+            active = this;
+            if (config.ConcealEntities && config.EntityDecoysPerPlayer > 0) decoys = new EntityDecoys(api, server, config, palette, entities);
+        }
+        catch
+        {
+            active = null;
+            disposeProtection();
+            throw;
+        }
+
+        api.Logger.Notification("ServerGuard loaded with {0} ore variants. Ore concealment: {1}, entity concealment: {2}, player concealment: {3}.", palette.OreCount, config.ConcealOre, config.ConcealEntities, config.ConcealEntities && config.ConcealPlayers);
+    }
+
+    private void patch(Type owner, string name, Type[] parameters, string handler, bool prefix)
+    {
+        MethodInfo method = AccessTools.DeclaredMethod(owner, name, parameters)
+            ?? throw new MissingMethodException(owner.FullName, name);
+        HarmonyMethod hook = new(typeof(ServerGuardModSystem), handler);
+        harmony.Patch(method, prefix: prefix ? hook : null, postfix: prefix ? null : hook);
+    }
+
+    private TextCommandResult onStatus(TextCommandCallingArgs args)
+    {
+        if (!ReferenceEquals(active, this)) return TextCommandResult.Error(Lang.Get("serverguard:inactive"));
+        return TextCommandResult.Success(Lang.Get("serverguard:status",
+            config.ConcealOre, config.ConcealEntities, blocks.ChunksMasked, blocks.CacheHits, blocks.CacheBytes, blocks.BlocksMasked, entities.Rays, entities.Concealed, entities.BudgetExhaustions, decoys?.ActiveCount ?? 0, decoys?.Spawned ?? 0, config.ConcealEntities && config.ConcealPlayers));
+    }
+
+    private static void afterChunk(Packet_ServerChunk __result) => active?.blocks.MaskChunk(__result);
+
+    private static void afterColumnLoaded(ChunkColumnLoadRequest chunkRequest)
+    {
+        ServerGuardModSystem? guard = active;
+        if (guard != null) guard.blocks.OnColumnLoaded(chunkRequest, guard.getDimension(chunkRequest));
+    }
+
+    private static bool beforeBlocks(List<BlockPos> positions, int packetId)
+    {
+        ServerGuardModSystem? guard = active;
+        if (guard?.config.ConcealOre != true) return true;
+        guard.blocks.SendUpdates(positions, packetId);
+        return false;
+    }
+
+    private static void beforeBlock(IServerPlayer player, ref int blockId, int posX, int posY, int posZ)
+    {
+        ServerGuardModSystem? guard = active;
+        if (guard != null) blockId = guard.blocks.MaskSingle(player, blockId, posX, posY, posZ);
+    }
+
+    private static void afterTracking(Entity entity, List<ConnectedClient> clients, int zeroBasedThreadNum)
+    {
+        ServerGuardModSystem? guard = active;
+        if (guard?.config.ConcealEntities == true) guard.entities.FilterTracking(entity, clients, zeroBasedThreadNum);
+    }
+
+    private static void afterSpawns(List<ConnectedClient> clientList)
+    {
+        ServerGuardModSystem? guard = active;
+        if (guard?.config.ConcealEntities == true) guard.entities.FilterSpawns(clientList);
+    }
+
+    private static void beforePrioritySpawn(Entity entity, ref ICollection<ConnectedClient> clientList)
+    {
+        ServerGuardModSystem? guard = active;
+        if (guard?.config.ConcealEntities != true) return;
+        List<ConnectedClient> visible = [];
+        foreach (ConnectedClient client in clientList)
+        {
+            if (guard.entities.CanSee(client, entity)) visible.Add(client);
+        }
+        clientList = visible;
+    }
+
+    public override void Dispose()
+    {
+        if (!ReferenceEquals(active, this)) return;
+        active = null;
+        disposeProtection();
+    }
+
+    private void disposeProtection()
+    {
+        try
+        {
+            decoys?.Dispose();
+        }
+        finally
+        {
+            try
+            {
+                harmony.UnpatchAll(harmonyId);
+            }
+            finally
+            {
+                entities.Dispose();
+            }
+        }
+    }
+}
+
+```
