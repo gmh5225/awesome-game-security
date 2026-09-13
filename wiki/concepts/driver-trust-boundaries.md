@@ -5,13 +5,13 @@ topics: [windows-kernel, anti-cheat, game-hacking]
 sources:
   - wiki/sources/skills/windows-kernel.md
   - wiki/sources/skills/anti-cheat.md
-updated: 2026-09-09
+updated: 2026-09-13
 confidence: high
 ---
 
 # Driver Trust Boundaries
 
-Windows kernel driver interfaces, authorization, and provenance framing for game-security research. Signed code can still expose unsafe IOCTL paths; reachability and defensive value require evidence for the specific build and configuration — not the driver name alone. (source: wiki/sources/skills/windows-kernel.md)
+Windows kernel driver interfaces, authorization, and provenance framing for game-security research. Signed code can still expose unsafe IOCTL paths; reachability and defensive value require evidence for the specific build and configuration — not the driver name alone. Establish the [[kernel-evidence-baseline]] (build, symbols, documented vs observed vs inferred) before IOCTL or policy conclusions; route domain questions via [[overviews/windows-kernel]] topic-routing table. (source: wiki/sources/skills/windows-kernel.md)
 
 ## Threat-model synthesis
 
@@ -39,4 +39,4 @@ The table is a synthesis lane; actual reachability requires build/configuration 
 
 ## Related
 
-[[byovd]] · [[hvci]] · [[patchguard]] · [[kernel-callbacks]] · [[kernel-pool-scanning]] · [[etw-threat-intelligence]] · [[driver-communication]] · [[research-rigor]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]]
+[[kernel-evidence-baseline]] · [[byovd]] · [[hvci]] · [[patchguard]] · [[kernel-callbacks]] · [[kernel-pool-scanning]] · [[etw-threat-intelligence]] · [[driver-communication]] · [[research-rigor]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]]

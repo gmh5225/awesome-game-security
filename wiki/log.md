@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-13** — ingest `skill:windows-kernel`: refreshed [[overviews/windows-kernel]] with topic-routing table and skill preamble (build/symbol match; documented/observed/inferred separation); new concept [[kernel-evidence-baseline]] (baseline dimensions, three evidence layers, query pairing table); updated [[driver-trust-boundaries]], [[kernel-pool-scanning]], and [[kernel-callbacks]] with baseline + overview routing cross-links; `index.md` updated.
+
 - **2026-09-13** — ingest `skill:reverse-engineering`: refreshed [[overviews/reverse-engineering]] with topic-routing table and skill preamble (artifact hash/format/architecture/tool version/environment/addresses; static vs runtime separation; protection-induced uncertainty); new concept [[static-runtime-evidence]] (baseline dimensions, static/runtime finding limits, protection uncertainty); updated [[binary-evidence]] (baseline cross-link), [[dynamic-binary-instrumentation]] (overview routing cross-link), and [[binary-diffing]] (baseline + routing cross-links); `index.md` updated.
 
 - **2026-09-13** — ingest `skill:mobile-security`: refreshed [[overviews/mobile-security]] with topic-routing table and skill preamble (device/build/ABI/signer/entitlements/privilege/collection method); new concept [[mobile-network-trust-evidence]] (networking stack/build variant/observation point, debug vs release trust, capture vs backend); updated [[mobile-trust-boundaries]] (full baseline fields, network-trust cross-link), [[mobile-anti-cheat]] (engine/network routing), and [[frida]] (overview routing cross-link); `index.md` updated.

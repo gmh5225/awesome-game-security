@@ -10,13 +10,13 @@ sources:
   - wiki/sources/descriptions/hLunaaa__hLunaaa.github.io.md
   - wiki/sources/descriptions/Sentient111__ClearDriverTraces.md
   - wiki/sources/descriptions/gmh5225__Allocating-individual-pages.md
-updated: 2026-09-09
+updated: 2026-09-13
 confidence: high
 ---
 
 # Kernel Pool Scanning
 
-Anti-cheat and EDR techniques that walk kernel pool allocators to find hidden drivers, shellcode, and executable memory without a matching loaded module. Windows 10 19H1+ **Segment Heap** pool internals materially changed scanner design. Treat allocator internals as hypotheses tied to an exact kernel binary, architecture, configuration, and matching symbols — internal offsets and routing diagrams are not a stable Windows driver interface. (source: wiki/sources/skills/anti-cheat.md) (source: wiki/sources/skills/windows-kernel.md)
+Anti-cheat and EDR techniques that walk kernel pool allocators to find hidden drivers, shellcode, and executable memory without a matching loaded module. Windows 10 19H1+ **Segment Heap** pool internals materially changed scanner design. Treat allocator internals as hypotheses tied to an exact kernel binary, architecture, configuration, and matching symbols — internal offsets and routing diagrams are not a stable Windows driver interface. Apply [[kernel-evidence-baseline]] before attributing pool tags or table walks to specific drivers; route memory/forensics questions via [[overviews/windows-kernel]]. (source: wiki/sources/skills/anti-cheat.md) (source: wiki/sources/skills/windows-kernel.md)
 
 ## Pool allocation contracts
 
@@ -82,4 +82,4 @@ Offensive research such as [[allocating-individual-pages]] allocates isolated ke
 
 ## Related
 
-[[driver-trust-boundaries]] · [[kernel-callbacks]] · [[byovd]] · [[hvci]] · [[etw-threat-intelligence]] · [[kernel-codecave-poc]] · [[revert-mapper]] · [[allocating-individual-pages]] · [[kn-diff-pool]] · [[pooldump]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]]
+[[kernel-evidence-baseline]] · [[driver-trust-boundaries]] · [[kernel-callbacks]] · [[byovd]] · [[hvci]] · [[etw-threat-intelligence]] · [[kernel-codecave-poc]] · [[revert-mapper]] · [[allocating-individual-pages]] · [[kn-diff-pool]] · [[pooldump]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]]

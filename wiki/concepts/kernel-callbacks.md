@@ -33,13 +33,13 @@ sources:
   - wiki/sources/descriptions/AlSch092__EasyHandles.md
   - wiki/sources/descriptions/Abdelnour2__MiniAntiCheatV2.md
   - wiki/sources/descriptions/LucasAlgera__Kernel-AC.md
-updated: 2026-09-10
+updated: 2026-09-13
 confidence: high
 ---
 
 # Kernel Callbacks
 
-Windows notify/object registration APIs used by anti-cheat and EDR to observe process/thread creation, image loads, handle operations, registry, and file I/O. (source: wiki/sources/skills/windows-kernel.md)
+Windows notify/object registration APIs used by anti-cheat and EDR to observe process/thread creation, image loads, handle operations, registry, and file I/O. Review **IRQL**, APC/attach context, buffer lifetimes, and cancellation alongside callback registration scope — authorization at one API does not prove safe behavior at every dispatch path. Route driver-observation questions via [[overviews/windows-kernel]]; pair build-sensitive callback-list claims with [[kernel-evidence-baseline]]. (source: wiki/sources/skills/windows-kernel.md)
 
 ## Common APIs
 
@@ -59,4 +59,4 @@ Attackers with kernel R/W ([[byovd]]) may try to unlink or patch callback lists;
 
 ## Related
 
-[[byovd]] · [[hvci]] · [[bustercall]] · [[cheeky-blinder]] · [[boundcallback]] · [[mapped-callback]] · [[pink-eye]] · [[edrsandblast]] · [[kernel-callback-removal]] · [[dcmb]] · [[kpdb]] · [[openark]] · [[winobjex64]] · [[windbg-extensions]] · [[rtoolz]] · [[ps-notif-routine-unloader]] · [[ps-image-notify-routine-spam-filter]] · [[notify-routine-hijack-thread]] · [[bam-extension-table-hook]] · [[kernel-callback-functions-list]] · [[kernel-snippets]] · [[function-collections]] · [[symlink-callback]] · [[vaultguard]] · [[sentinelac]] · [[bloom-anticheat]] · [[kernel-ac]] · [[mini-anti-cheat-v2]] · [[libelevate]] · [[easy-handles]] · [[van1338]] · [[wnf-driver-meme]] · [[vanguard]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]]
+[[kernel-evidence-baseline]] · [[byovd]] · [[hvci]] · [[bustercall]] · [[cheeky-blinder]] · [[boundcallback]] · [[mapped-callback]] · [[pink-eye]] · [[edrsandblast]] · [[kernel-callback-removal]] · [[dcmb]] · [[kpdb]] · [[openark]] · [[winobjex64]] · [[windbg-extensions]] · [[rtoolz]] · [[ps-notif-routine-unloader]] · [[ps-image-notify-routine-spam-filter]] · [[notify-routine-hijack-thread]] · [[bam-extension-table-hook]] · [[kernel-callback-functions-list]] · [[kernel-snippets]] · [[function-collections]] · [[symlink-callback]] · [[vaultguard]] · [[sentinelac]] · [[bloom-anticheat]] · [[kernel-ac]] · [[mini-anti-cheat-v2]] · [[libelevate]] · [[easy-handles]] · [[van1338]] · [[wnf-driver-meme]] · [[vanguard]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]]
