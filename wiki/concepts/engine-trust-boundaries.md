@@ -5,6 +5,7 @@ topics: [game-engine, anti-cheat, reverse-engineering]
 sources:
   - wiki/sources/skills/game-engine.md
   - wiki/sources/descriptions/Timehue__ShinobiX.md
+  - wiki/sources/descriptions/apistol78__traktor.md
 updated: 2026-09-13
 confidence: high
 ---
@@ -47,6 +48,7 @@ Engine identification or object discovery **alone does not establish compromise*
 - **Unity IL2CPP** — managed assemblies, stripping, C++ generation, and native compilation interact; reconstructed names or metadata do not guarantee complete type coverage or original-source recovery. See [[il2cpp]].
 - **Godot** — GDExtension compatibility is versioned (manifest documents engine release, platform, build, architecture); verify the target release rather than projecting one example onto all versions.
 - **Source / SDK trees** — distinguish open-source engines, licensed engine source, SDK game code, and reference-source subsets. Source SDK 2013 carries its own non-commercial license; repository visibility does not imply unrestricted reuse. See [[source-netvars]].
+- **Traktor (modular OSS engine)** — runtime, integrated editor, build toolchain, Avalanche asset server, Lua scripting, and P2P state replication are independent surfaces; editor MCP tooling adds an agent-driven workflow boundary separate from shipped player builds. See [[traktor]]. (source: wiki/sources/descriptions/apistol78__traktor.md)
 
 ## Evidence report fields
 

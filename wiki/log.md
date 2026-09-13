@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-13** — ingest `description:apistol78/traktor`: entity [[traktor]] (apistol78; modular C++ engine + editor + build toolchain; DX11/Vulkan/Metal + node-based HLSL/GLSL shader graph; Lua scripting; Bullet/Jolt physics; P2P replication; Avalanche asset server; editor MCP; Linux/Windows/macOS/Raspberry Pi/Android/iOS; shipped commercial titles; Game Engine / source); added security-research angles section; cited on [[concepts/engine-artifact-selection]] and [[concepts/engine-trust-boundaries]]; `index.md` updated.
+
 - **2026-09-13** — ingest `readme:categories`: Game Engine ~158 (+1; apistol78/[[traktor]] C++ Vulkan/DX11/Metal engine + editor with shipped commercial titles in Game Engine / source) / Cheat ~2807 / Anti Cheat ~730 / other major section counts stable; 41 sections; entity [[traktor]]; refreshed README-map counts and OSS shipped-title engine scope on [[overviews/overview]] and [[overviews/game-engine]]; light `index.md` section notes (no per-category pages).
 
 - **2026-09-13** — lint (agent pass): index vs disk scan — 9 overviews, 50 concepts, 3894 entities (3953 index entries); index.md fully synced (0 missing, 0 dead, 0 duplicate entries); overview wikilink spot-check (9 pages) — 0 broken links; concept spot-check (50 pages) — 0 broken links; index.md wikilink scan — 0 broken links; 6 cross-kind slug collisions ([[game-hacking]], [[anti-cheat]], [[reverse-engineering]], [[il2cpp]], [[byovd]], [[dma]]) — expected, no repair needed; no structural edits required.

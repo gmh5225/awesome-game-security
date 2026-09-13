@@ -3465,7 +3465,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [tpm-mmio](entities/tpm-mmio.md) — MMIO TPM 2.0 public EK read (bypass OS hooks; Detection:HWID)
 - [tpm-spoofer](entities/tpm-spoofer.md) — KM TPM request-path hook + UM EK/serial checker (C/C++ WDK; TPM HWID spoof PoC; SamuelTulach + s0ngidong3; Cheat [TPM])
 - [traccar-geocoder](entities/traccar-geocoder.md) — self-hosted OSM reverse geocoder (Rust + C++ PBF; Game Network / Location)
-- [Traktor](entities/traktor.md) — modular C++ Vulkan/DX11/Metal engine + editor; Lua/Bullet/Jolt; P2P replication; Avalanche asset server; editor MCP; shipped commercial titles (apistol78; Game Engine / source)
+- [Traktor](entities/traktor.md) — modular C++ Vulkan/DX11/Metal engine + editor; Lua/Bullet/Jolt; P2P replication; Avalanche asset server; editor MCP; full-source engine internals for security researchers; shipped commercial titles (apistol78; Game Engine / source)
 - [tracee](entities/tracee.md) — Linux/Android runtime security + forensics via eBPF (Go; kernel telemetry + behavioral detections; K8s/container paths; Aqua Security)
 - [TrickyStore](entities/trickystore.md) — Android key-attestation cert-chain module (per-app config, SPL spoof; 5ec1cff + beakthoven rewrite; cheat / HWID research)
 - [Triton](entities/triton.md) — dynamic binary analysis library (symbolic exec, taint analysis, SMT simplification; x86/x64/ARM/AArch64/RISC-V; LLVM/Z3 lift; Z3/Bitwuzla; C++/Python; JonathanSalwan; DBA RE automation)
