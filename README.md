@@ -2301,6 +2301,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/gmh5225/Pcileech-DMA-NVMe-VMD [Firmware real camouflage through motherboard VMD function.（Pcileech-DMA）]
 - https://github.com/a0yark/ArcRaidersRadar-dma-Radar [DMA radar/ESP, MemProcFS + Unicorn Engine for pointer decryption emulation]
 - https://github.com/TheAustinUS/LuminaryDMA [Call of Duty read-only DMA cheat framework with PCILeech/MockDMA backends, BO6 offsets, and client-info decryption]
+- https://github.com/orphannn/hoozi-cs2-dma [CS2 external DMA assistant with configurable player ESP, map collision visibility checks, and LeechCore/VMM integration]
 - https://github.com/MGreif/PCILeech_DMA_Proxy [A DLL with Loader that hooks common windows memory API functions and proxies them to the remote device via DMA]
 
 > W2S
@@ -4401,6 +4402,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/g4vrk/React [Paper/Folia Minecraft aim-assist anti-cheat using rotation heuristics and optional AI verdict server]
 - https://github.com/RiseShieldDev/AntiXrayViewer [Paper Minecraft plugin that detects X-Ray ore mining, records player sessions, and lets admins replay suspicious activity]
 - https://github.com/boggymc/PetalAntiFreecam [Paper plugin that masks underground blocks in outgoing chunk packets to mitigate Minecraft freecam/wallhack cheats]
+- https://github.com/trevorftp/ServerGuard [Vintage Story server mod that conceals enclosed ore, filters occluded entities, and injects ore/creature decoys before chunk data reaches clients]
 - https://github.com/enis1enis2/WindfallAntiCheatF [Minecraft Fabric packet-based anti-cheat with combat/movement checks and Geyser/Bedrock compatibility]
 - https://github.com/IamFriendly0242u/The-Dreamers-Guards [Fabric server/client anti-cheat suite with mod blacklist scanning, encrypted auth, progressive punishments, and Discord alerts]
 - https://github.com/EliGamer154/CheatCheck [Fabric server-side Minecraft mod with player reporting, /cheatcheck spectate moderation, safemode, and tempban toolkit for vanilla clients]
