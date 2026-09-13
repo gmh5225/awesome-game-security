@@ -7,13 +7,13 @@ sources:
   - wiki/sources/descriptions/frostbone25__ShaderInjector.md
   - wiki/sources/descriptions/baobao1044__GameLagReducer.md
   - wiki/sources/descriptions/DrNseven__D3D11-Wallhack.md
-updated: 2026-09-09
+updated: 2026-09-13
 confidence: medium
 ---
 
 # Draw Call Hook
 
-Intercepting **draw submission** or **shader/pipeline state** instead of (or in addition to) the Present path—used for wallhack, chams, and render-debug research. Hook targets vary by API and engine render graph. (source: wiki/sources/skills/graphics-api.md)
+Draw-call evidence modifies **what the game renders**, not merely what a post-compositing capture shows—apply [[frame-observation-boundary]] and identify the affected pipeline stage before attributing wallhack or chams. Intercepting **draw submission** or **shader/pipeline state** instead of (or in addition to) the Present path—used for wallhack, chams, and render-debug research. Hook targets vary by API and engine render graph. (source: wiki/sources/skills/graphics-api.md)
 
 ## Hook targets
 
@@ -48,4 +48,4 @@ Modified pipeline state, unexpected shader bytecode, draw-count anomalies, and i
 
 ## Related
 
-[[present-hook]] · [[shader-injector]] · [[game-lag-reducer]] · [[d3d11-wallhack]] · [[world-to-screen]] · [[overviews/graphics-api]] · [[overviews/game-hacking]]
+[[frame-observation-boundary]] · [[present-hook]] · [[shader-injector]] · [[game-lag-reducer]] · [[d3d11-wallhack]] · [[world-to-screen]] · [[overviews/graphics-api]] · [[overviews/game-hacking]]

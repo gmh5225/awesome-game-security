@@ -11,13 +11,13 @@ sources:
   - wiki/sources/descriptions/aufkrawall__capture-engine.md
   - wiki/sources/descriptions/Passer1072__RookieAI_yolov8.md
   - wiki/sources/descriptions/Leksa667__YOLOv8-Overlay-CS2.md
-updated: 2026-09-09
+updated: 2026-09-13
 confidence: medium
 ---
 
 # OBS Game Capture
 
-OBS Studio frame-acquisition modes and their **security-research relevance**: legitimate streaming, accessibility overlays, and **AI visual cheat pipelines** that reuse capture instead of game-memory reads. Implementation varies by OBS version, Windows build, graphics API, and source settings—identify the active backend before inferring artifacts. (source: wiki/sources/skills/graphics-api.md)
+OBS Studio frame-acquisition modes and their **security-research relevance**: legitimate streaming, accessibility overlays, and **AI visual cheat pipelines** that reuse capture instead of game-memory reads. Use [[frame-observation-boundary]] to record OBS version, Windows build, graphics API, source mode, and synchronization before inferring inject footprint or AI latency. Implementation varies by setting—identify the active backend before treating artifacts as proof. (source: wiki/sources/skills/graphics-api.md)
 
 ## Capture modes
 
@@ -72,4 +72,4 @@ Treat as **collection signals** requiring behavioral and contextual corroboratio
 
 ## Related
 
-[[anti-screenshot-capture]] · [[present-hook]] · [[capture-engine]] · [[obs-graphics-hook32-hook]] · [[obs-hook]] · [[g37obs]] · [[ai-aimbot-detection]] · [[hardware-input-injection]] · [[overviews/graphics-api]] · [[overviews/game-hacking]] · [[overviews/anti-cheat]]
+[[frame-observation-boundary]] · [[anti-screenshot-capture]] · [[present-hook]] · [[capture-engine]] · [[obs-graphics-hook32-hook]] · [[obs-hook]] · [[g37obs]] · [[ai-aimbot-detection]] · [[hardware-input-injection]] · [[overviews/graphics-api]] · [[overviews/game-hacking]] · [[overviews/anti-cheat]]

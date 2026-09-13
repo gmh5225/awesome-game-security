@@ -44,15 +44,13 @@ sources:
   - wiki/sources/descriptions/Nou4r__PresentInjector.md
   - wiki/sources/descriptions/Ckateowm__ModernWarfare2-Cpp-External.md
   - wiki/sources/descriptions/0mdi__edgegdi_hook.md
-updated: 2026-09-09
+updated: 2026-09-13
 confidence: high
 ---
 
-
-
 # Present Hook
 
-Intercepting the graphics present/swap path (e.g. `IDXGISwapChain::Present`, DX9 `Present`/`EndScene`, `wglSwapBuffers`, `vkQueuePresentKHR`) to draw overlays or copy frames each frame. (source: wiki/sources/skills/graphics-api.md)
+Apply [[frame-observation-boundary]] before attributing overlay artifacts to a specific Present hook or anti-cheat module—record API, compositor, and capture path first. Intercepting the graphics present/swap path (e.g. `IDXGISwapChain::Present`, DX9 `Present`/`EndScene`, `wglSwapBuffers`, `vkQueuePresentKHR`) to draw overlays or copy frames each frame. (source: wiki/sources/skills/graphics-api.md)
 
 ## Uses
 
@@ -87,5 +85,5 @@ Windows provides no first-class API for third-party overlays to compose beside a
 
 ## Related
 
-[[overviews/graphics-api]] · [[present-injector]] · [[reshade]] · [[swapchain-bottleneck]] · [[obs-game-capture]] · [[obs-graphics-hook32-hook]] · [[obs-hook]] · [[draw-call-hook]] · [[anti-screenshot-capture]] · [[kiero]] · [[kiero2]] · [[directxhook]] · [[dx11-basehook]] · [[directx11hook]] · [[gh-d3d11-hook]] · [[hydrahook]] · [[d3dhook-imgui]] · [[d3d12-hook-imgui]] · [[universalhookx]] · [[universal-dear-imgui-hook]] · [[direct3d9-overlay]] · [[vulkan-hook]] · [[pubg-dx]] · [[lazysight]] · [[modernwarfare2-cpp-external]] · [[present-hook-detection]] · [[winbo]] · [[wda-monitor-trick]] · [[eac-overlay]] · [[dwm-hook]] · [[dwm-overlay]] · [[dwmhook]] · [[dwm-screen-shot]] · [[disablenvidiascreenshot]] · [[dxgkrnl-hook]] · [[krnl-gdi-render]] · [[edgegdi-hook]] · [[3d9]] · [[direct3d-hook]] · [[goverlay]] · [[battleye]] · [[overviews/game-hacking]] · [[overviews/anti-cheat]]
+[[frame-observation-boundary]] · [[overviews/graphics-api]] · [[present-injector]] · [[reshade]] · [[swapchain-bottleneck]] · [[obs-game-capture]] · [[obs-graphics-hook32-hook]] · [[obs-hook]] · [[draw-call-hook]] · [[anti-screenshot-capture]] · [[kiero]] · [[kiero2]] · [[directxhook]] · [[dx11-basehook]] · [[directx11hook]] · [[gh-d3d11-hook]] · [[hydrahook]] · [[d3dhook-imgui]] · [[d3d12-hook-imgui]] · [[universalhookx]] · [[universal-dear-imgui-hook]] · [[direct3d9-overlay]] · [[vulkan-hook]] · [[pubg-dx]] · [[lazysight]] · [[modernwarfare2-cpp-external]] · [[present-hook-detection]] · [[winbo]] · [[wda-monitor-trick]] · [[eac-overlay]] · [[dwm-hook]] · [[dwm-overlay]] · [[dwmhook]] · [[dwm-screen-shot]] · [[disablenvidiascreenshot]] · [[dxgkrnl-hook]] · [[krnl-gdi-render]] · [[edgegdi-hook]] · [[3d9]] · [[direct3d-hook]] · [[goverlay]] · [[battleye]] · [[overviews/game-hacking]] · [[overviews/anti-cheat]]
 

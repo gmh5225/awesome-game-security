@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-13** — ingest `skill:graphics-api`: refreshed [[overviews/graphics-api]] with topic-routing table and skill preamble (API/backend/driver/compositor/capture path/sync/tool version; separate observed capture from assumed enforcement); new concept [[frame-observation-boundary]] (layer separation, capability classification, coverage matrix); updated [[present-hook]], [[draw-call-hook]], and [[obs-game-capture]] with frame-observation baseline cross-links; `index.md` updated.
+
 - **2026-09-13** — ingest `skill:game-hacking`: refreshed [[overviews/game-hacking]] with topic-routing table aligned to skill reference lanes; new concept [[cheat-attack-surface]] (threat-family taxonomy, objective/boundary/evidence framing, counterexamples); updated [[world-to-screen]] (visual-cheat defensive context) and [[driver-communication]] (interface authorization vs signature scope); `index.md` updated.
 
 - **2026-09-13** — ingest `skill:game-engine`: refreshed [[overviews/game-engine]] with topic-routing table and identify-engine/version/build/artifact preamble; new concept [[engine-artifact-selection]] (artifact-type boundary check, README-backed selection table, untrusted-asset/plugin scenarios); updated [[engine-trust-boundaries]] (README skill-map lanes, [[engine-artifact-selection]] cross-link) and [[unreal-object-model]] (SDK baseline prerequisites); `index.md` updated.
