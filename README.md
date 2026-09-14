@@ -3005,6 +3005,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://www.unknowncheats.me/forum/anti-cheat-bypass/458928-eacs-maskable-interrupt-callback.html [NMI]
 - https://www.unknowncheats.me/forum/anti-cheat-bypass/464943-eac-nmi-bypass-callbacks.html [NMI Bypass]
 - https://github.com/gmh5225/EasyAntiCheat-Reversing
+- https://github.com/BishopTopG/all-about-eac [Memflow-based external VM reverse-engineering dossier on a captured EasyAntiCheat_EOS.sys build, documenting kernel callbacks, minifilter policy, and device IPC with reproducible evidence]
 - https://github.com/19h/eac-analysis [eac.elf VM reconstruction: dlopen/trace harness, dispatch & VMTAIL probes, bytecode recover/IR/CFG, handler ISA, static path replay, MBA reducers; Linux ELF]
 - https://github.com/Sinclairq/hiearchy-eac [Integrity Checks]
 - https://github.com/Rat431/EAC_Emu [Simple EasyAntiCheat x64 emulator]
@@ -4746,6 +4747,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/codedevdev/irontrace [Windows hardware and forensic integrity scanner for game-server anti-cheat with DMA/PCIe/USB watchlists and explainable integrity reports]
 - https://github.com/hawkeye-Leo/hawkeye [Official GitHub Pages site for Hawkeye — Windows kernel security and anti-cheat research console with live probing, ETW, and automated detection reports (GPL source in hawkeye-community)]
 - https://github.com/winzysss/JarAnalyzer [Windows Minecraft screenshare cheat forensics scanner — MFT-walks disks, scans JAR constant pools against blacklists, flags obfuscated archives, exports evidence reports]
+- https://github.com/NotSkrib/error-pc-check [Open-source consensual Minecraft Java screenshare workflow: signed C# client agent, staff web panel, and Supabase backend for live forensic scans and severity-ranked cheat evidence reports]
 
 > Dynamic Script
 - https://github.com/can1357/NtLua
