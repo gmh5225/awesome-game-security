@@ -859,6 +859,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__EAC.md
   - wiki/sources/descriptions/chaeyk__eac-leak.md
   - wiki/sources/descriptions/ch4ncellor__EAC-Reversal.md
+  - wiki/sources/descriptions/BishopTopG__all-about-eac.md
   - wiki/sources/descriptions/gmh5225__EAC-Driver-UD-for-now.md
   - wiki/sources/descriptions/gmh5225__EAC-EasyAntiCheatMemorySig.md
   - wiki/sources/descriptions/gmh5225__EAC-shellcode-1.md
@@ -979,6 +980,7 @@ Structured research indexes such as [[anti-cheat-research-index]] catalog public
 - [[easyanticheat-src]] — Hex-Rays decompiled source-style snapshot of EAC kernel driver; large C output + headers with function prototypes and data structures; process memory ops, validation, and anti-cheat control paths (Decompile dump lane; EBalloon) (source: wiki/sources/descriptions/EBalloon__EasyAntiCheat-SRC.md)
 - [[eac]] — mixed EAC study pack: reversed `easyanticheat.sys` kernel callback/heuristic logic + EAC/EOS SDK drop with headers and `EOS_FileDecryptionTool` (Study pack lane; gmh5225) (source: wiki/sources/descriptions/gmh5225__EAC.md)
 - [[eac-reversal]] — updated devirtualized EAC driver internals: callback checks, dispatch verification, callback enumeration, certificate validation, and code integrity as C++ pseudocode (Reversed driver lane; ch4ncellor) (source: wiki/sources/descriptions/ch4ncellor__EAC-Reversal.md)
+- [[all-about-eac]] — Memflow-only external-VM RE dossier on one captured Fortnite `EasyAntiCheat_EOS.sys` build; passive physical-memory acquisition + matched kernel PDB layouts; maps process/thread/image callbacks, Ob handle policy, registry callbacks, minifilter, device IPC, and per-thread callback contexts; evidence-labeled claims + Python validation; studies lifecycle/persistence/executable-mapping/platform-state monitoring; no bypass material (External VM memory-forensics lane; BishopTopG) (source: wiki/sources/descriptions/BishopTopG__all-about-eac.md)
 - [[eac-emu]] — simple x64 EAC DLL emulator stub; exports expected anti-cheat API functions with placeholder implementations; C++ plus assembly patch helpers; PoC for RE and compatibility testing of EAC-linked client code (Client stub lane; Rat431) (source: wiki/sources/descriptions/Rat431__EAC_Emu.md)
 - [[easyanticheat-emulator]] — lightweight EAC client-interface DLL stub; fake client-side exports so game binaries proceed as if anti-cheat is present; debugging-oriented; no server-side protocol spoofing (Client stub lane; CamxxCore [EAC Emulator]) (source: wiki/sources/descriptions/CamxxCore__EasyAntiCheat-Emulator.md)
 - [[eac-leak]] — leaked EAC server implementation with EOS SDK anti-cheat session handling; game-server ↔ EAC cloud validation protocol RE (Server-side lane; chaeyk) (source: wiki/sources/descriptions/chaeyk__eac-leak.md)

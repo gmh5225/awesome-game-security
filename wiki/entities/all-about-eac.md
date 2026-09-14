@@ -13,7 +13,9 @@ confidence: medium
 
 Memflow-only reverse-engineering **dossier** documenting one captured **EasyAntiCheat_EOS.sys** build (Fortnite) from **outside a Windows VM** via passive physical-memory acquisitions matched to Windows kernel PDB layouts. Maps EAC's registered kernel surfaces: process/thread/image callbacks, Object Manager handle policy, registry callbacks, Filter Manager minifilter, device IPC, and private per-thread callback contexts. Packages narrative deep dives, technical appendices, evidence-labeled claims, Python validation tooling, and reproducible derivation rules—explicitly excluding bypass or exploit material. (source: wiki/sources/descriptions/BishopTopG__all-about-eac.md)
 
-Complements disk-based driver dumps ([[easyanticheat-reversing]], [[eac-extractor-utility]]) and Linux userland VM reconstruction ([[eac-analysis]]) with an **external VM memory-forensics** lane for studying live EAC kernel registration and minifilter policy.
+Aimed at game security researchers, anti-cheat engineers, and Windows kernel reverse engineers studying how EAC monitors **process lifecycle**, **persistence**, **executable mapping**, and **platform state**.
+
+Complements disk-based driver dumps ([[easyanticheat-reversing]], [[eac-extractor-utility]]) and Linux userland VM reconstruction ([[eac-analysis]]) with an **external VM memory-forensics** lane for studying live EAC kernel registration and minifilter policy without in-guest agents.
 
 ## Links
 
@@ -21,4 +23,4 @@ Complements disk-based driver dumps ([[easyanticheat-reversing]], [[eac-extracto
 
 ## Related
 
-[[easy-anti-cheat]] · [[eac-reversal]] · [[eac-analysis]] · [[easyanticheat-reversing]] · [[kernel-callbacks]] · [[overviews/anti-cheat]] · [[overviews/reverse-engineering]] · [[overviews/game-hacking]]
+[[easy-anti-cheat]] · [[eac-reversal]] · [[eac-analysis]] · [[easyanticheat-reversing]] · [[kernel-callbacks]] · [[memflow-kvm]] · [[overviews/anti-cheat]] · [[overviews/reverse-engineering]] · [[overviews/windows-kernel]] · [[overviews/game-hacking]]
