@@ -455,6 +455,7 @@ sources:
   - wiki/sources/descriptions/Nou4r__PresentInjector.md
   - wiki/sources/descriptions/NepMods__InjectARM64.md
   - wiki/sources/descriptions/NotOfficer__cs2-sdk.md
+  - wiki/sources/descriptions/orphannn__hoozi-cs2-dma.md
   - wiki/sources/descriptions/cheat-engine__UnrealEngineTools.md
   - wiki/sources/descriptions/cheat-engine__ControllerMode.md
   - wiki/sources/descriptions/gmh5225__cheat-engine-ceserver-pcileech.md
