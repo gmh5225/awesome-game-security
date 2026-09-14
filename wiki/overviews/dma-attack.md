@@ -90,7 +90,7 @@ sources:
   - wiki/sources/descriptions/TheAustinUS__LuminaryDMA.md
   - wiki/sources/descriptions/16SalomonArs__Pcileech-DMA-Firmware-Guide.md
   - wiki/sources/descriptions/12i192i1043__pcileech-cmedia-cmi8738.md
-updated: 2026-09-13
+updated: 2026-09-14
 confidence: high
 ---
 
@@ -182,4 +182,4 @@ Firmware matching donor behavior on tested dimensions can evade isolated PCIe/IO
 
 ## README map
 
-No top-level DMA section — maps via `Cheat` (~2807) DMA lanes (incl. [[aetheris]] PyQt6 MemProcFS/PCILeech-FPGA forensics dashboard with audited reversible actions + [[luminary-dma]] Call of Duty read-only PCILeech/MockDMA framework) and `Anti Cheat > Detection:DMA` (~730), plus hypervisor/virtualization/HWID detection and `Windows Security Features` (~10; CET/shadow stack + TPM PCR attestation of virt/IOMMU/Secure Boot/VBS/HVCI/DSE/blocklist — e.g. [[sewindows]] local replay and remote attestation + [[windows-runtime-attestation-report]] GetRuntimeAttestationReport driver/hotpatch dump). (source: wiki/sources/README-categories.md) (source: wiki/sources/descriptions/Dray973__Aetheris.md) (source: wiki/sources/descriptions/fsquirt__SEWindows.md) (source: wiki/sources/descriptions/CodeMaxx__windows-runtime-attestation-report.md)
+No top-level DMA section — maps via `Cheat` (~2808) DMA lanes (incl. [[aetheris]] PyQt6 MemProcFS/PCILeech-FPGA forensics dashboard with audited reversible actions + [[luminary-dma]] Call of Duty read-only PCILeech/MockDMA framework + [[hoozi-cs2-dma]] CS2 external read-only ESP with map-collision visibility checks and LeechCore/VMM integration) and `Anti Cheat > Detection:DMA` (~731), plus hypervisor/virtualization/HWID detection and `Windows Security Features` (~10; CET/shadow stack + TPM PCR attestation of virt/IOMMU/Secure Boot/VBS/HVCI/DSE/blocklist — e.g. [[sewindows]] local replay and remote attestation + [[windows-runtime-attestation-report]] GetRuntimeAttestationReport driver/hotpatch dump). (source: wiki/sources/README-categories.md) (source: wiki/sources/descriptions/Dray973__Aetheris.md) (source: wiki/sources/descriptions/fsquirt__SEWindows.md) (source: wiki/sources/descriptions/CodeMaxx__windows-runtime-attestation-report.md)

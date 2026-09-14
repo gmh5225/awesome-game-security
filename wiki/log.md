@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-14** — ingest `readme:categories`: Cheat ~2808 (+1; orphannn/[[hoozi-cs2-dma]] CS2 read-only DMA ESP with map-collision visibility in Cheat DMA lane) / Anti Cheat ~731 (+1; trevorftp/[[serverguard]] Vintage Story ore/entity decoy server mod in Open Source Anti Cheat System) / other major section counts stable; 41 sections; entities [[hoozi-cs2-dma]] and [[serverguard]]; refreshed README-map counts and CS2 DMA + Vintage Story server-AC scope on [[overviews/overview]], [[overviews/dma-attack]], [[overviews/game-hacking]], [[overviews/anti-cheat]], and [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
+
 - **2026-09-13** — ingest `description:apistol78/traktor`: entity [[traktor]] (apistol78; modular C++ engine + editor + build toolchain; DX11/Vulkan/Metal + node-based HLSL/GLSL shader graph; Lua scripting; Bullet/Jolt physics; P2P replication; Avalanche asset server; editor MCP; Linux/Windows/macOS/Raspberry Pi/Android/iOS; shipped commercial titles; Game Engine / source); added security-research angles section; cited on [[concepts/engine-artifact-selection]] and [[concepts/engine-trust-boundaries]]; `index.md` updated.
 
 - **2026-09-13** — ingest `readme:categories`: Game Engine ~158 (+1; apistol78/[[traktor]] C++ Vulkan/DX11/Metal engine + editor with shipped commercial titles in Game Engine / source) / Cheat ~2807 / Anti Cheat ~730 / other major section counts stable; 41 sections; entity [[traktor]]; refreshed README-map counts and OSS shipped-title engine scope on [[overviews/overview]] and [[overviews/game-engine]]; light `index.md` section notes (no per-category pages).
