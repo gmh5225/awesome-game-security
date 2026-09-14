@@ -17,7 +17,7 @@ Targets Vintage Story server operators needing practical server-side anti-cheat 
 
 ## Mitigation stack
 
-Harmony server-networking patches; enclosed-ore concealment + ore decoys in host rock; server-side entity raycast filtering (creatures/optional players); configurable creature decoys; ModConfig tuning; `/serverguard` admin command.
+Harmony server-networking patches on outgoing chunk/world data; enclosed-ore concealment + ore decoys in host rock; server-side entity raycast filtering (creatures/optional players); configurable creature decoys; ModConfig tuning (ore concealment, decoy density, chunk caching, entity ray budgets); `/serverguard` admin command.
 
 ## Links
 

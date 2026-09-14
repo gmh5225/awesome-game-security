@@ -3241,7 +3241,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [SentinelAC](entities/sentinelac.md) — OSS Windows AC skeleton (SDK + UM service + ObRegisterCallbacks; overlay / stack-walk)
 - [Sensum](entities/sensum.md) — internal CS:GO cheat (actively developed; cheat / game:csgo)
 - [Serenity.gg-FN-and-Loader](entities/serenity-gg-fn-and-loader.md) — Fortnite: kernel driver + shader work + module loader (C/C++; cheat / game:fortnite; gmh5225)
-- [ServerGuard](entities/serverguard.md) — Vintage Story server mod (trevorftp; C# Harmony; enclosed-ore concealment + ore/creature decoys; server-side entity raycast filtering; ModConfig; `/serverguard` admin; Open Source Anti Cheat System / game:vintage story)
+- [ServerGuard](entities/serverguard.md) — Vintage Story server mod (trevorftp; C# Harmony; intercepts chunk/world data; enclosed-ore concealment + ore/creature decoys; server-side entity raycast filtering; ModConfig chunk-cache/ray-budget tuning; `/serverguard` admin; Open Source Anti Cheat System / game:vintage story)
 - [Serious Engine Base](entities/serious-engine-base.md) — open-source Croteam Serious Engine core (Serious Sam; C/C++; render/world/entities/network/audio/scripting; VS + Ogg/Vorbis; Game Engine / source)
 - [SF_TRT_61](entities/sf-trt-61.md) — AMXZzzz Windows C++ computer-vision aiming framework (DXGI capture; OpenCV; ImGui; TensorRT + DirectML/ONNX; YOLO-style models; PID/FOV movement + trigger logic; multiple input injection; AI game automation + AC evasion research; cheat / Machine Learning YOLO)
 - [shibari](entities/shibari.md) — C++/C PE/PE+ multi-file linker (merge into one; modding; Anti Cheat → Binary Packer)

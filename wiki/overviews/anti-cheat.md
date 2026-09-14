@@ -896,6 +896,7 @@ sources:
   - wiki/sources/descriptions/Remus3__Lanternlight.md
   - wiki/sources/descriptions/RiseShieldDev__AntiXrayViewer.md
   - wiki/sources/descriptions/boggymc__PetalAntiFreecam.md
+  - wiki/sources/descriptions/trevorftp__ServerGuard.md
   - wiki/sources/descriptions/Pryaxis__TShock.md
   - wiki/sources/descriptions/Rwkeith__Diglett.md
   - wiki/sources/descriptions/Rwkeith__Nomad.md
