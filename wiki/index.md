@@ -1027,7 +1027,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [DumpVAC](entities/dumpvac.md) — PoC to disable VAC module execution and dump received modules with automatic decryption (RenardDev; Steam/module-loading hooks; C/C++; explore anticheat:vac)
 - [DumpPE](entities/dumpepe.md) — lightweight CLI PE dumper (OpenProcess/RPM; SizeOfImage mapped-image dump; x86/x64; packed/protected EXE post-unpack RE; d35ha)
 - [Dumper-7](entities/dumper-7.md) — C++ UE4/UE5 SDK generator (Encryqed; in-process DLL inject; engine structure/offset discovery; generated C++ headers; configurable overrides; cheat / SDK Dump for all of UE4 and UE5)
-- [Zircon UE Dumper](entities/zircon-ue-dumper.md) — C++20 UE 4.22–5.7 runtime reflection toolkit (TheHolyOneZ; live/minidump/disk; C++ SDK, USMAP, IDA/Ghidra/BN types, Frida bindings, Python stubs; GUI object browser + Blueprint decompile; cheat / SDK Dump)
+- [Zircon UE Dumper](entities/zircon-ue-dumper.md) — C++20 UE 4.22–5.7 runtime reflection toolkit (TheHolyOneZ; live/minidump/disk/static PE; dynamic offset derivation; cross-build diffing; C++ SDK, USMAP, IDA/Ghidra/BN types, Frida bindings, Python stubs, ReClass; GUI object browser + Blueprint decompile; cheat / SDK Dump)
 - [dumpwow](entities/dumpwow.md) — WoW client module unpacker (gmh5225 fork; C++/Python; namreeb lineage; cheat / game:wow)
 - [dumpy](entities/dumpy.md) — Rust LSASS dump via duplicated existing handles (native object/system APIs; XOR output + optional HTTP upload; detection-evasion research; Kudaes; Elevating Handle By LSASS)
 - [dynre-x86](entities/dynre-x86.md) — early x86 dynamic-recompilation learning codebase (C++; Zydis decode/operand inspect; Makefile + Docker; instruction-decoding / binary-translation pipeline study)

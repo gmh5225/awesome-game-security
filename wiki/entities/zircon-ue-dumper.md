@@ -15,6 +15,10 @@ confidence: medium
 
 Sits in the multi-format Unreal SDK-generation lane beside in-process inject dumpers such as [[dumper-7]], all-in-one editors such as [[uedumper]], MemProcFS-backed external dumpers such as [[uedumper-memprocfs]], and live-script generators such as [[re-ue4ss]]—all feeding the same [[unreal-object-model]] research surface.
 
+## Audience
+
+Reverse engineers, mod developers, and game security researchers use Zircon when they need accurate reflection data, **cross-build diffing** between UE patches, and **multi-tool export pipelines** from one shared intermediate representation. (source: wiki/sources/descriptions/TheHolyOneZ__Zircon-UE-Dumper.md)
+
 ## Links
 
 - Repo: https://github.com/TheHolyOneZ/Zircon-UE-Dumper

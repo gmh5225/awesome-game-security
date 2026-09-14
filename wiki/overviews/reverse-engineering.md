@@ -1264,6 +1264,7 @@ sources:
   - wiki/sources/descriptions/ATsahikian__pe-protector.md
   - wiki/sources/descriptions/89luca89__pakkero.md
   - wiki/sources/descriptions/TheCruZ__FindXrefs.md
+  - wiki/sources/descriptions/TheHolyOneZ__Zircon-UE-Dumper.md
   - wiki/sources/descriptions/SwagSoftware__Kisak-Strike.md
   - wiki/sources/descriptions/SinaKarvandi__Hypervisor-From-Scratch.md
   - wiki/sources/descriptions/Snoopy-Sec__Localroot-ALL-CVE.md
