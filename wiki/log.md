@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-14** — lint (agent pass): index vs disk scan — 9 overviews, 50 concepts, 3898 entities (3957 index entries); index.md fully synced (0 missing, 0 dead, 0 duplicate entries); overview wikilink spot-check (9 pages) — 0 broken links; concept spot-check (50 pages) — 0 broken links; index.md wikilink scan — 0 broken links; 6 cross-kind slug collisions ([[game-hacking]], [[anti-cheat]], [[reverse-engineering]], [[il2cpp]], [[byovd]], [[dma]]) — expected, no repair needed; no structural edits required.
+
 - **2026-09-14** — ingest `description:TheHolyOneZ/Zircon-UE-Dumper`: entity [[zircon-ue-dumper]] (TheHolyOneZ; C++20 UE 4.22–5.7 reflection toolkit; live/minidump/disk/static PE; dynamic offset derivation; cross-build diffing; shared IR → C++ SDK/USMAP/IDA/Ghidra/BN/Frida/Python/ReClass; GUI object browser + Blueprint decompile; cheat / SDK Dump); cited on [[concepts/unreal-object-model]] and [[overviews/reverse-engineering]]; `index.md` updated.
 
 - **2026-09-14** — ingest `readme:categories`: Cheat ~2809 (+1; TheHolyOneZ/[[zircon-ue-dumper]] UE 4.22–5.7 multi-format reflection dumper in Cheat SDK Dump lane) / Anti Cheat ~731 / other major section counts stable; 41 sections; entity [[zircon-ue-dumper]]; refreshed README-map counts and UE reflection-dumper scope on [[overviews/overview]], [[overviews/game-engine]], [[overviews/game-hacking]], [[overviews/reverse-engineering]], [[overviews/dma-attack]], and [[concepts/unreal-object-model]]; light `index.md` section notes (no per-category pages).
