@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-14** — lint (agent pass): index vs disk scan — 9 overviews, 50 concepts, 3897 entities (3956 index entries); index.md fully synced (0 missing, 0 dead, 0 duplicate entries); overview wikilink spot-check (9 pages) — 0 broken links; concept spot-check (50 pages) — 0 broken links; index.md wikilink scan — 0 broken links; 6 cross-kind slug collisions ([[game-hacking]], [[anti-cheat]], [[reverse-engineering]], [[il2cpp]], [[byovd]], [[dma]]) — expected, no repair needed; no structural edits required.
+
 - **2026-09-14** — lint: index vs disk scan — 9 overviews, 50 concepts, 3897 entities (3956 index entries); index.md fully synced (0 missing, 0 dead, 0 duplicate entries); overview wikilink spot-check (9 pages) — 0 broken links; concept spot-check (50 pages) — 0 broken links; index.md wikilink scan — 0 broken links; 6 cross-kind slug collisions ([[game-hacking]], [[anti-cheat]], [[reverse-engineering]], [[il2cpp]], [[byovd]], [[dma]]) — expected, no repair needed; no structural edits required.
 
 - **2026-09-14** — ingest `description:orphannn/hoozi-cs2-dma`: entity [[hoozi-cs2-dma]] (orphannn; CS2 external read-only FPGA DMA from second PC; player ESP with map-collision visibility for 21 maps; pattern scan + Source 2 schema offset sync with hourly/per-build cache; configurable menu + localization; planned aim/radar/item ESP/Lua; LeechCore/VMM; cheat / game:cs2 [DMA]); cited on [[overviews/dma-attack]], [[overviews/game-hacking]], and [[concepts/source-netvars]]; cross-linked [[source-netvars]], [[cs2-dumper]], [[cs2-dma]], and [[luminary-dma]]; `index.md` updated.
