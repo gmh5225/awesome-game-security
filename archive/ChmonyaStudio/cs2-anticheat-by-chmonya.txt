@@ -1,0 +1,2806 @@
+Project Path: arc_ChmonyaStudio_cs2-anticheat-by-chmonya_5hvqpk9b
+
+Source Tree:
+
+```txt
+arc_ChmonyaStudio_cs2-anticheat-by-chmonya_5hvqpk9b
+├── AntiCheatConfig.cs
+├── AntiCheatPlugin.cs
+├── CHANGELOG.md
+├── CSAntiCheat.csproj
+├── Database.cs
+├── LICENSE
+├── MenuHandler.cs
+├── PlayerStats.cs
+├── README.md
+├── WebhookLogger.cs
+└── anticheat_config.example.json
+
+```
+
+`AntiCheatConfig.cs`:
+
+```cs
+namespace CSAntiCheat;
+
+public class AntiCheatConfig
+{
+    // ============================================================
+    // GENERAL
+    // ============================================================
+    public string WebhookUrl { get; set; } = "https://discord.com/api/webhooks/YOUR_WEBHOOK_HERE";
+    public string WebhookUsername { get; set; } = "Server | AntiCheat";
+    public string ServerName { get; set; } = "My CS2 Server";
+    public bool WebhookEnabled { get; set; } = true;
+
+    // ============================================================
+    // WHITELIST / ADMINS
+    // ============================================================
+    public List<string> Whitelist { get; set; } = new() { "76561198737716015" };
+    public List<string> SuperAdmins { get; set; } = new() { "76561198737716015" };
+
+    // ============================================================
+    // MODULE TOGGLES
+    // ============================================================
+    public bool SpeedCheckEnabled { get; set; } = true;
+    public bool AimCheckEnabled { get; set; } = true;
+    public bool BhopCheckEnabled { get; set; } = false;
+    public bool PacketCheckEnabled { get; set; } = true;
+    public bool GridSnapEnabled { get; set; } = true;
+    public bool JerkAnalysisEnabled { get; set; } = true;
+    public bool StrafeSyncCheckEnabled { get; set; } = true;
+    public bool PrefireCheckEnabled { get; set; } = true;
+    public bool WallbangProxyCheckEnabled { get; set; } = true;
+    public bool PitchAntiAimCheckEnabled { get; set; } = true;
+    public bool SpinbotCheckEnabled { get; set; } = true;
+
+    // ============================================================
+    // SPEED
+    // ============================================================
+    public float MaxSpeed { get; set; } = 6.0f;
+    public int SpeedConsecutiveTicks { get; set; } = 8;
+    public float HugeSpeedThreshold { get; set; } = 14.0f;
+    public int HugeSpeedConsecutiveTicks { get; set; } = 3;
+
+    // ============================================================
+    // AIM
+    // ============================================================
+    public float MaxAngleDeltaPerTick { get; set; } = 55f;
+    public int SnapConsecutiveTicks { get; set; } = 2;
+    public float AimWindowMaxAvg { get; set; } = 20f;
+    public int AimWindowSize { get; set; } = 8;
+
+    // ============================================================
+    // JERK / AI AIMBOT
+    // ============================================================
+    public int JerkConsecutiveTicks { get; set; } = 4;
+    public float JerkMinMagnitude { get; set; } = 0.3f;
+    public float JerkSmallTolerance { get; set; } = 0.4f;
+    public int SmoothJerkConsecutiveTicks { get; set; } = 6;
+
+    // ============================================================
+    // SUBPIXEL / DMA
+    // ============================================================
+    public int SubpixelConsecutiveTicks { get; set; } = 15;
+    public float SubpixelMinDelta { get; set; } = 1.5f;
+
+    // ============================================================
+    // GRID SNAP / TRIGGERBOT
+    // ============================================================
+    public float GridSnapTolerance { get; set; } = 0.5f;
+    public int GridSnapMinShots { get; set; } = 4;
+    public double StdDevTrigger { get; set; } = 15.0;
+
+    // ============================================================
+    // PREFIRE
+    // ============================================================
+    public int PrefireWindowMs { get; set; } = 150;
+    public float PrefireConeDegrees { get; set; } = 20f;
+    public float PrefireMaxDistance { get; set; } = 3000f;
+    public float PrefireShotDirTolerance { get; set; } = 30f;
+    public int PrefireMinEvents { get; set; } = 2;
+    public int PrefireThrottleSeconds { get; set; } = 15;
+    public int PrefireSingleTapWindowMs { get; set; } = 500;
+
+    // ============================================================
+    // WALLBANG PROXY
+    // ============================================================
+    public int WallbangProxyMinHits { get; set; } = 30;
+    public float WallbangProxyRatioTrigger { get; set; } = 0.30f;
+    public float WallbangProxyConeDegrees { get; set; } = 25f;
+
+    // ============================================================
+    // AUTO-STRAFE SYNC
+    // ============================================================
+    public int StrafeSyncConsecutiveTicks { get; set; } = 12;
+    public float StrafeSyncMinYawDelta { get; set; } = 1.0f;
+    public float StrafeSyncMinSpeed { get; set; } = 3.0f;
+
+    // ============================================================
+    // HvH — PITCH ANTI-AIM
+    // ============================================================
+    public float PitchMinLimit { get; set; } = -89f;
+    public float PitchMaxLimit { get; set; } = 89f;
+    public int PitchBanConsecutiveTicks { get; set; } = 2;
+
+    // ============================================================
+    // HvH — SPINBOT / JITTER
+    // ============================================================
+    public float SpinbotMinYawDelta { get; set; } = 140f;
+    public int SpinbotConsecutiveTicks { get; set; } = 3;
+
+    // ============================================================
+    // BHOP
+    // ============================================================
+    public float BhopMinSpeed { get; set; } = 8.0f;
+    public int BhopConsecutiveTicks { get; set; } = 6;
+
+    // ============================================================
+    // PACKET / TICKBASE
+    // ============================================================
+    public int PacketMaxCmdsPerSecond { get; set; } = 140;
+    public int PacketMaxJumpPerSecond { get; set; } = 6;
+
+    // ============================================================
+    // AI SCORING
+    // ============================================================
+    public bool AiScoringEnabled { get; set; } = true;
+    public float AiDiversityBonus { get; set; } = 1.6f;
+
+    // ============================================================
+    // GENERAL BAN LOGIC
+    // ============================================================
+    public int SuspicionToBan { get; set; } = 25;
+    public int SuspicionDecaySeconds { get; set; } = 90;
+    public bool AutoBanEnabled { get; set; } = true;
+    public int BanDurationMinutes { get; set; } = 0;
+    public int MinPlayersForChecks { get; set; } = 1;
+    public float HeadshotRatioToFlag { get; set; } = 0.90f;
+    public int MinKillsToCheckHS { get; set; } = 12;
+
+    // ============================================================
+    // DEBUG
+    // ============================================================
+    public bool DebugLog { get; set; } = true;
+    public int DebugIntervalSeconds { get; set; } = 2;
+
+    // ============================================================
+    // VERIFICATION RULES (shown to admins)
+    // ============================================================
+    public VerificationRules VerificationRules { get; set; } = new();
+}
+
+public class VerificationRules
+{
+    public string Title { get; set; } = "🔍 Verification rules";
+    public List<RuleItem> Rules { get; set; } = new()
+    {
+        new() { Num = "1",  Text = "Reports are submitted via !report." },
+        new() { Num = "2",  Text = "Admin collects match logs and Prefetch logs." },
+        new() { Num = "3",  Text = "Checklist: match duration >5 min, at least one lost round." },
+        new() { Num = "4",  Text = "Anomalies: speed >7.2 m/s, rotation >360° per frame." },
+        new() { Num = "5",  Text = "Allowed software: Steam Input, NVIDIA/AMD drivers, MSI Afterburner." },
+        new() { Num = "6",  Text = "Forbidden: Aim, Wallhack, ESP, Bhop, Recoil Control, Anti-Aim." },
+        new() { Num = "7",  Text = "Deleting Prefetch logs — ban up to 72 hours." },
+        new() { Num = "8",  Text = "Punishments: tier 1 — 2-12 h; tier 2 — 24-72 h; tier 3 — permanent." },
+        new() { Num = "9",  Text = "Appeal within 1 hour after verdict with evidence." },
+        new() { Num = "10", Text = "Final decision made by anti-cheat committee." }
+    };
+}
+
+public class RuleItem
+{
+    public string Num { get; set; } = "";
+    public string Text { get; set; } = "";
+}
+
+```
+
+`AntiCheatPlugin.cs`:
+
+```cs
+using CounterStrikeSharp.API;
+using CounterStrikeSharp.API.Core;
+using CounterStrikeSharp.API.Modules.Admin;
+using CounterStrikeSharp.API.Modules.Commands;
+using CounterStrikeSharp.API.Modules.Utils;
+using System.Reflection;
+using System.Text.Json;
+
+namespace CSAntiCheat;
+
+public class AntiCheatPlugin : BasePlugin
+{
+    public override string ModuleName => "CS2 AntiCheat";
+    public override string ModuleVersion => "2.4.2";
+    public override string ModuleAuthor => "Chmonya";
+    public override string ModuleDescription => "Anti-cheat: webhook, DB, whitelist, DMA/AI/HvH/GridSnap/Prefire detection";
+
+    public static AntiCheatPlugin Instance { get; private set; } = null!;
+    public AntiCheatConfig Config { get; private set; } = new();
+    public Database Db { get; private set; } = null!;
+    public WebhookLogger Webhook { get; private set; } = null!;
+
+    private string _configPath = "";
+    private readonly Dictionary<ulong, PlayerStats> _stats = new();
+    private readonly Dictionary<ulong, (string reason, DateTime until, int attempts)> _pendingKicks = new();
+
+    // Atomic reference swap — thread-safe without lock
+    private volatile HashSet<ulong> _whitelistCache = new();
+
+    private DateTime _lastDebug = DateTime.MinValue;
+
+    // Reflection cache for EyeAngles
+    private static PropertyInfo? _eyeAnglesProp;
+    private static bool _eyeAnglesSearched;
+    private static bool _eyeAnglesWarned;
+
+    // Reflection cache for MovementServices / Buttons
+    private static bool _buttonsResolveTried;
+    private static PropertyInfo? _msProp;
+    private static PropertyInfo? _lastUsercmdProp;
+    private static FieldInfo? _buttonsField;
+
+    // Usercmd bit masks (CS2)
+    private const ulong IN_LEFT      = 1UL << 7;
+    private const ulong IN_RIGHT     = 1UL << 8;
+    private const ulong IN_MOVELEFT  = 1UL << 9;
+    private const ulong IN_MOVERIGHT = 1UL << 10;
+
+    // ============================================================
+    // LOAD / UNLOAD
+    // ============================================================
+    public override void Load(bool hotReload)
+    {
+        try { Console.OutputEncoding = System.Text.Encoding.UTF8; } catch { }
+
+        Instance = this;
+        _configPath = Path.Combine(ModuleDirectory, "anticheat_config.json");
+        LoadConfig();
+        RebuildWhitelistCache();
+
+        Db = new Database(ModuleDirectory);
+        Db.Initialize();
+        Webhook = new WebhookLogger(Config.WebhookUrl, Config.WebhookUsername);
+
+        // Event handlers
+        RegisterEventHandler<EventPlayerConnectFull>(OnPlayerConnect);
+        RegisterEventHandler<EventPlayerDisconnect>(OnPlayerDisconnect);
+        RegisterEventHandler<EventPlayerDeath>(OnPlayerDeath, HookMode.Post);
+        RegisterEventHandler<EventPlayerHurt>(OnPlayerHurt, HookMode.Post);
+        RegisterEventHandler<EventPlayerJump>(OnPlayerJump, HookMode.Post);
+        RegisterEventHandler<EventWeaponFire>(OnWeaponFire, HookMode.Post);
+
+        // Commands
+        AddCommand("css_ac", "Anti-cheat menu", OnAcCommand);
+        AddCommand("css_anticheat", "Anti-cheat menu", OnAcCommand);
+        AddCommand("css_rules", "Verification rules", OnRulesCommand);
+
+        // Main loop
+        RegisterListener<Listeners.OnTick>(OnTick);
+
+        Console.WriteLine($"[AntiCheat v{ModuleVersion}] Loaded. Server={Config.ServerName}, Webhook={Config.WebhookEnabled}, AutoBan={Config.AutoBanEnabled}");
+    }
+
+    public override void Unload(bool hotReload)
+    {
+        Instance = null!;
+        Console.WriteLine("[AntiCheat] Unloaded.");
+    }
+
+    public void SaveConfigPublic()
+    {
+        try
+        {
+            File.WriteAllText(_configPath, JsonSerializer.Serialize(Config, new JsonSerializerOptions { WriteIndented = true }));
+            RebuildWhitelistCache();
+        }
+        catch (Exception ex) { Console.WriteLine($"[AntiCheat] SaveConfig error: {ex.Message}"); }
+    }
+
+    private void LoadConfig()
+    {
+        if (File.Exists(_configPath))
+        {
+            try { Config = JsonSerializer.Deserialize<AntiCheatConfig>(File.ReadAllText(_configPath)) ?? new(); }
+            catch (Exception ex) { Console.WriteLine($"[AntiCheat] LoadConfig error: {ex.Message}"); Config = new(); }
+        }
+        else Config = new();
+        SaveConfigPublic();
+    }
+
+    public void RebuildWhitelistCache()
+    {
+        var newCache = new HashSet<ulong>();
+        foreach (var s in Config.Whitelist)
+            if (ulong.TryParse(s, out var v) && v != 0UL) newCache.Add(v);
+        _whitelistCache = newCache;
+        Console.WriteLine($"[AntiCheat] Whitelist cache rebuilt: {newCache.Count} entries");
+    }
+
+    // ============================================================
+    // CONNECT / DISCONNECT
+    // ============================================================
+    private HookResult OnPlayerConnect(EventPlayerConnectFull @event, GameEventInfo info)
+    {
+        var player = @event.Userid;
+        if (player == null || !player.IsValid || player.IsBot) return HookResult.Continue;
+
+        try
+        {
+            if (!IsWhitelisted(player.SteamID))
+            {
+                var bans = Db.GetRecentBans(500);
+                var hit = bans.FirstOrDefault(b => b.SteamId == player.SteamID);
+                if (hit != null)
+                {
+                    bool stillBanned = hit.DurationMinutes == 0
+                        || (DateTime.UtcNow - hit.CreatedAt.ToUniversalTime()).TotalMinutes < hit.DurationMinutes;
+                    if (stillBanned)
+                    {
+                        Console.WriteLine($"[AntiCheat] {player.PlayerName} is banned. Kicking.");
+                        _pendingKicks[player.SteamID] = ("Banned", DateTime.UtcNow.AddSeconds(5), 0);
+                        return HookResult.Continue;
+                    }
+                }
+            }
+        }
+        catch (Exception ex) { Console.WriteLine($"[AntiCheat] connect error: {ex.Message}"); }
+
+        _stats[player.SteamID] = new PlayerStats
+        {
+            SteamId = player.SteamID,
+            Name = player.PlayerName,
+            LastDecay = DateTime.UtcNow
+        };
+        return HookResult.Continue;
+    }
+
+    private HookResult OnPlayerDisconnect(EventPlayerDisconnect @event, GameEventInfo info)
+    {
+        var player = @event.Userid;
+        if (player != null)
+        {
+            _stats.Remove(player.SteamID);
+            _pendingKicks.Remove(player.SteamID);
+        }
+        return HookResult.Continue;
+    }
+
+    // ============================================================
+    // WEAPON FIRE — timing + prefire snapshot
+    // ============================================================
+    private HookResult OnWeaponFire(EventWeaponFire @event, GameEventInfo info)
+    {
+        try
+        {
+            var player = @event.Userid;
+            if (player == null || !player.IsValid || player.IsBot) return HookResult.Continue;
+            if (IsWhitelisted(player.SteamID)) return HookResult.Continue;
+
+            if (!_stats.TryGetValue(player.SteamID, out var st)) return HookResult.Continue;
+
+            var now = DateTime.UtcNow;
+            var pawn = player.PlayerPawn.Value;
+
+            // === Shot intervals ===
+            if (st.LastShotTime != DateTime.MinValue)
+            {
+                double interval = (now - st.LastShotTime).TotalMilliseconds;
+                st.ShotIntervals.Add(interval);
+                if (st.ShotIntervals.Count > 6) st.ShotIntervals.RemoveAt(0);
+
+                if (st.ShotIntervals.Count >= 5)
+                {
+                    int n = st.ShotIntervals.Count;
+                    double sum = 0;
+                    for (int i = 0; i < n; i++) sum += st.ShotIntervals[i];
+                    double mean = sum / n;
+
+                    double varSum = 0;
+                    for (int i = 0; i < n; i++) { double d = st.ShotIntervals[i] - mean; varSum += d * d; }
+                    double stdDev = Math.Sqrt(varSum / n);
+
+                    if (stdDev < Config.StdDevTrigger && mean > 10.0)
+                    {
+                        AddSuspicion(player, "Robotic Click Timing", $"StdDev: {stdDev:F2}ms, Mean: {mean:F2}ms", 4);
+                        st.ShotIntervals.Clear();
+                    }
+                    else if (Config.GridSnapEnabled)
+                    {
+                        double tickMs = (double)Server.TickInterval * 1000.0;
+                        if (tickMs > 0.5)
+                        {
+                            int snapped = 0;
+                            for (int i = 0; i < n; i++)
+                            {
+                                double ticks = st.ShotIntervals[i] / tickMs;
+                                double remMs = Math.Abs(ticks - Math.Round(ticks)) * tickMs;
+                                if (remMs < Config.GridSnapTolerance) snapped++;
+                            }
+                            if (snapped >= Config.GridSnapMinShots)
+                            {
+                                AddSuspicion(player, "Grid Snapped Timing",
+                                    $"{snapped}/{n} shots in tick grid ({tickMs:F2}ms)", 5);
+                                st.ShotIntervals.Clear();
+                            }
+                        }
+                    }
+                }
+            }
+
+            // === PREFIRE: cone snapshot (zero-alloc via Clear) ===
+            if (Config.PrefireCheckEnabled && pawn != null && pawn.IsValid)
+            {
+                var angles = GetEyeAnglesSafe(pawn) ?? GetEyeAnglesFromController(player);
+                if (angles != null)
+                {
+                    st.LastShotAngles = angles;
+                    st.EnemiesInConeAtShot.Clear();
+
+                    var origin = pawn.AbsOrigin;
+                    if (origin != null)
+                    {
+                        foreach (var other in Utilities.GetPlayers())
+                        {
+                            if (other == null || !other.IsValid || other.IsBot || !other.PawnIsAlive) continue;
+                            if (other.SteamID == player.SteamID) continue;
+                            if (other.Team == player.Team) continue;
+                            var op = other.PlayerPawn.Value;
+                            if (op == null || !op.IsValid || op.AbsOrigin == null) continue;
+
+                            float dist = Distance(origin, op.AbsOrigin);
+                            if (dist > Config.PrefireMaxDistance) continue;
+                            if (AngleToTarget(angles, origin, op.AbsOrigin) <= Config.PrefireConeDegrees)
+                                st.EnemiesInConeAtShot.Add(other.SteamID);
+                        }
+                    }
+                }
+            }
+
+            st.LastShotTime = now;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[AntiCheat] OnWeaponFire error: {ex.Message}");
+        }
+        return HookResult.Continue;
+    }
+
+    // ============================================================
+    // HURT — wallbang proxy
+    // ============================================================
+    private HookResult OnPlayerHurt(EventPlayerHurt @event, GameEventInfo info)
+    {
+        try
+        {
+            var attacker = @event.Attacker;
+            var victim = @event.Userid;
+            if (attacker == null || !attacker.IsValid || attacker.IsBot) return HookResult.Continue;
+            if (victim == null || !victim.IsValid || victim.IsBot) return HookResult.Continue;
+            if (attacker.SteamID == victim.SteamID) return HookResult.Continue;
+            if (IsWhitelisted(attacker.SteamID)) return HookResult.Continue;
+
+            if (!_stats.TryGetValue(attacker.SteamID, out var stats)) return HookResult.Continue;
+
+            if (Config.WallbangProxyCheckEnabled)
+            {
+                stats.HitsTotal++;
+
+                var pawn = attacker.PlayerPawn.Value;
+                var angles = pawn != null && pawn.IsValid
+                    ? (GetEyeAnglesSafe(pawn) ?? GetEyeAnglesFromController(attacker))
+                    : null;
+                var origin = pawn?.AbsOrigin;
+
+                if (angles == null || origin == null)
+                {
+                    stats.HitsBlind++;
+                }
+                else
+                {
+                    bool anyVisible = false;
+                    foreach (var other in Utilities.GetPlayers())
+                    {
+                        if (other == null || !other.IsValid || other.IsBot || !other.PawnIsAlive) continue;
+                        if (other.SteamID == attacker.SteamID) continue;
+                        if (other.Team == attacker.Team) continue;
+                        var op = other.PlayerPawn.Value;
+                        if (op == null || !op.IsValid || op.AbsOrigin == null) continue;
+
+                        if (AngleToTarget(angles, origin, op.AbsOrigin) <= Config.WallbangProxyConeDegrees)
+                        {
+                            anyVisible = true;
+                            break;
+                        }
+                    }
+                    if (!anyVisible) stats.HitsBlind++;
+                }
+
+                if (stats.HitsTotal >= Config.WallbangProxyMinHits)
+                {
+                    float ratio = (float)stats.HitsBlind / stats.HitsTotal;
+                    if (ratio >= Config.WallbangProxyRatioTrigger)
+                    {
+                        AddSuspicion(attacker, "Wallbang Proxy",
+                            $"{stats.HitsBlind}/{stats.HitsTotal} ({ratio:P0}) blind hits", 2);
+                        stats.HitsBlind = 0;
+                        stats.HitsTotal = 0;
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[AntiCheat] OnPlayerHurt error: {ex.Message}");
+        }
+        return HookResult.Continue;
+    }
+
+    // ============================================================
+    // TICK — heart of the anti-cheat
+    // ============================================================
+    private void OnTick()
+    {
+        try
+        {
+            // Process pending kicks first (retries)
+            ProcessPendingKicks();
+
+            var players = Utilities.GetPlayers();
+            if (players.Count < Config.MinPlayersForChecks) return;
+
+            // Skip warmup and freeze-time
+            var gameRules = Utilities.FindAllEntitiesByDesignerName<CCSGameRulesProxy>("cs_gamerules").FirstOrDefault()?.GameRules;
+            if (gameRules != null)
+            {
+                if (gameRules.WarmupPeriod) return;
+                if (gameRules.FreezePeriod) return;
+            }
+
+            // ===== DEBUG (sqrt only inside throttle) =====
+            if (Config.DebugLog && (DateTime.UtcNow - _lastDebug).TotalSeconds >= Config.DebugIntervalSeconds)
+            {
+                _lastDebug = DateTime.UtcNow;
+                foreach (var dbg in players)
+                {
+                    if (dbg == null || !dbg.IsValid || dbg.IsBot || dbg.IsHLTV || !dbg.PawnIsAlive) continue;
+                    var p = dbg.PlayerPawn.Value;
+                    if (p == null || !p.IsValid) continue;
+
+                    var v = p.AbsVelocity;
+                    float spd = v == null ? -1f : (float)Math.Sqrt(v.X * v.X + v.Y * v.Y + v.Z * v.Z) / 52.49f;
+                    var ang = GetEyeAnglesSafe(p) ?? GetEyeAnglesFromController(dbg);
+                    string angStr = ang == null ? "NULL" : $"X={ang.X:F1} Y={ang.Y:F1}";
+                    if (_stats.TryGetValue(dbg.SteamID, out var st))
+                        Console.WriteLine($"[AC DBG] {dbg.PlayerName} | spd={spd:F2} | score={st.SuspicionScore} | ang={angStr}");
+                }
+            }
+
+            float maxSpeedSq = (Config.MaxSpeed * 52.49f) * (Config.MaxSpeed * 52.49f);
+            float hugeSpeedSq = (Config.HugeSpeedThreshold * 52.49f) * (Config.HugeSpeedThreshold * 52.49f);
+
+            // ===== MAIN LOOP =====
+            foreach (var player in players)
+            {
+                if (player == null || !player.IsValid || player.IsBot || player.IsHLTV || !player.PawnIsAlive) continue;
+                if (!_stats.TryGetValue(player.SteamID, out var stats)) continue;
+                if (IsWhitelisted(player.SteamID)) continue;
+
+                var pawn = player.PlayerPawn.Value;
+                if (pawn == null || !pawn.IsValid) continue;
+
+                // ============ HvH: PITCH ANTI-AIM ============
+                if (Config.PitchAntiAimCheckEnabled)
+                {
+                    var ang = GetEyeAnglesSafe(pawn) ?? GetEyeAnglesFromController(player);
+                    if (ang != null)
+                    {
+                        float pitch = ang.X;
+                        if (pitch < Config.PitchMinLimit || pitch > Config.PitchMaxLimit)
+                            stats.ConsecutiveInvalidPitchTicks++;
+                        else
+                            stats.ConsecutiveInvalidPitchTicks = 0;
+
+                        if (stats.ConsecutiveInvalidPitchTicks >= Config.PitchBanConsecutiveTicks)
+                        {
+                            Console.WriteLine($"[AntiCheat] HvH Pitch AA: {player.PlayerName} pitch={pitch:F1}");
+                            BanPlayer(player,
+                                $"[HvH] Invalid Pitch angle {pitch:F1}° (limit [{Config.PitchMinLimit};{Config.PitchMaxLimit}])",
+                                null, 0);
+                            stats.ConsecutiveInvalidPitchTicks = 0;
+                            continue;
+                        }
+                    }
+                }
+
+                // ============ HvH: SPINBOT / JITTER ============
+                if (Config.SpinbotCheckEnabled)
+                {
+                    var ang = GetEyeAnglesSafe(pawn) ?? GetEyeAnglesFromController(player);
+                    if (ang != null && stats.LastAngles != null)
+                    {
+                        float dyaw = Math.Abs(NormalizeAngle(ang.Y - stats.LastAngles.Y));
+
+                        if (dyaw > Config.SpinbotMinYawDelta)
+                            stats.ConsecutiveSpinbotTicks++;
+                        else
+                            stats.ConsecutiveSpinbotTicks = 0;
+
+                        if (stats.ConsecutiveSpinbotTicks >= Config.SpinbotConsecutiveTicks)
+                        {
+                            Console.WriteLine($"[AntiCheat] HvH Spinbot: {player.PlayerName} dyaw={dyaw:F1}");
+                            BanPlayer(player,
+                                $"[HvH] Spinbot/Jitter AA: Δyaw={dyaw:F1}°/tick × {Config.SpinbotConsecutiveTicks}+",
+                                null, 0);
+                            stats.ConsecutiveSpinbotTicks = 0;
+                            continue;
+                        }
+                    }
+                }
+
+                // ============ PREFIRE ============
+                if (Config.PrefireCheckEnabled && stats.LastShotTime != DateTime.MinValue)
+                {
+                    double msSinceShot = (DateTime.UtcNow - stats.LastShotTime).TotalMilliseconds;
+                    if (msSinceShot >= 0 && msSinceShot <= Config.PrefireWindowMs)
+                    {
+                        var angles = GetEyeAnglesSafe(pawn) ?? GetEyeAnglesFromController(player);
+                        var origin = pawn.AbsOrigin;
+                        if (angles != null && origin != null)
+                        {
+                            foreach (var other in players)
+                            {
+                                if (other == null || !other.IsValid || other.IsBot || !other.PawnIsAlive) continue;
+                                if (other.SteamID == player.SteamID) continue;
+                                if (other.Team == player.Team) continue;
+                                if (stats.EnemiesInConeAtShot.Contains(other.SteamID)) continue;
+
+                                var op = other.PlayerPawn.Value;
+                                if (op == null || !op.IsValid || op.AbsOrigin == null) continue;
+
+                                float dist = Distance(origin, op.AbsOrigin);
+                                if (dist > Config.PrefireMaxDistance) continue;
+
+                                float angToTarget = AngleToTarget(angles, origin, op.AbsOrigin);
+                                if (angToTarget > Config.PrefireConeDegrees) continue;
+
+                                if (stats.LastShotAngles != null)
+                                {
+                                    float shotAng = AngleToTarget(stats.LastShotAngles, origin, op.AbsOrigin);
+                                    if (shotAng > Config.PrefireShotDirTolerance) continue;
+                                }
+
+                                if ((DateTime.UtcNow - stats.LastPrefireFlagTime).TotalSeconds < Config.PrefireThrottleSeconds) continue;
+
+                                stats.PrefireEvents++;
+                                if (stats.PrefireEvents >= Config.PrefireMinEvents)
+                                {
+                                    AddSuspicion(player, "Prefire",
+                                        $"Shot {msSinceShot:F0}ms before target enters cone (dist={dist:F0})", 2);
+                                    stats.PrefireEvents = 0;
+                                    stats.LastPrefireFlagTime = DateTime.UtcNow;
+                                }
+                                break;
+                            }
+                        }
+                    }
+                    else if (msSinceShot > Config.PrefireWindowMs + 1000)
+                    {
+                        if (stats.PrefireEvents > 0) stats.PrefireEvents--;
+                        if (msSinceShot > 10000) stats.LastShotTime = DateTime.MinValue;
+                    }
+                }
+
+                // ============ SPEED ============
+                if (Config.SpeedCheckEnabled)
+                {
+                    var vel = pawn.AbsVelocity;
+                    bool onGround = (pawn.Flags & 1) != 0;
+                    if (vel != null)
+                    {
+                        float hSpeedSq = vel.X * vel.X + vel.Y * vel.Y;
+                        float totalSpeedSq = hSpeedSq + vel.Z * vel.Z;
+
+                        if (totalSpeedSq > hugeSpeedSq) stats.ConsecutiveHugeSpeed++;
+                        else stats.ConsecutiveHugeSpeed = 0;
+
+                        if (stats.ConsecutiveHugeSpeed >= Config.HugeSpeedConsecutiveTicks)
+                        {
+                            float totalSpeed = (float)Math.Sqrt(totalSpeedSq) / 52.49f;
+                            stats.SpeedViolations++;
+                            stats.SuspicionScore += 5;
+                            stats.ConsecutiveHugeSpeed = 0;
+                            AddSuspicion(player, "Speed/NoClip", $"{totalSpeed:F1} m/s × {Config.HugeSpeedConsecutiveTicks}+", 5);
+                        }
+
+                        if (onGround && hSpeedSq > maxSpeedSq) stats.ConsecutiveSpeedTicks++;
+                        else stats.ConsecutiveSpeedTicks = 0;
+
+                        if (stats.ConsecutiveSpeedTicks >= Config.SpeedConsecutiveTicks)
+                        {
+                            float hSpeed = (float)Math.Sqrt(hSpeedSq) / 52.49f;
+                            stats.SpeedViolations++;
+                            stats.SuspicionScore += 3;
+                            stats.ConsecutiveSpeedTicks = 0;
+                            if (stats.SpeedViolations % 2 == 0)
+                                AddSuspicion(player, "Speed (ground)", $"{hSpeed:F1} m/s × {Config.SpeedConsecutiveTicks}+", 3);
+                        }
+                    }
+                }
+
+                // ============ AIM + JERK ============
+                if (Config.AimCheckEnabled)
+                {
+                    var angles = GetEyeAnglesSafe(pawn) ?? GetEyeAnglesFromController(player);
+                    if (angles != null && stats.LastAngles != null)
+                    {
+                        float signedDy = NormalizeAngle(angles.Y - stats.LastAngles.Y);
+                        float dx = Math.Abs(NormalizeAngle(angles.X - stats.LastAngles.X));
+                        float dy = Math.Abs(signedDy);
+                        float delta = (float)Math.Sqrt(dx * dx + dy * dy);
+                        stats.LastYawDelta = signedDy;
+
+                        // AIM snap
+                        if (delta > Config.MaxAngleDeltaPerTick) stats.ConsecutiveSnapTicks++;
+                        else stats.ConsecutiveSnapTicks = 0;
+
+                        if (stats.ConsecutiveSnapTicks >= Config.SnapConsecutiveTicks)
+                        {
+                            stats.SnapViolations++;
+                            stats.SuspicionScore += 4;
+                            stats.ConsecutiveSnapTicks = 0;
+                            AddSuspicion(player, "Aim snap (instant)", $"Δ={delta:F0}°/tick × {Config.SnapConsecutiveTicks}+", 4);
+                        }
+
+                        // AIM window
+                        stats.AimWindowDelta += delta;
+                        stats.AimWindowTicks++;
+                        if (stats.AimWindowTicks >= Config.AimWindowSize)
+                        {
+                            float avg = stats.AimWindowDelta / stats.AimWindowTicks;
+                            if (avg > Config.AimWindowMaxAvg)
+                            {
+                                stats.SnapViolations++;
+                                stats.SuspicionScore += 3;
+                                AddSuspicion(player, "Aim spin", $"Avg {avg:F1}°/tick × {Config.AimWindowSize}", 3);
+                            }
+                            stats.AimWindowDelta = 0;
+                            stats.AimWindowTicks = 0;
+                        }
+                        else if (delta < 1.0f)
+                        {
+                            stats.AimWindowDelta *= 0.8f;
+                            stats.AimWindowTicks = Math.Max(0, stats.AimWindowTicks - 1);
+                        }
+
+                        // JERK (2 signals)
+                        if (Config.JerkAnalysisEnabled)
+                        {
+                            float acc = delta - stats.LastAimDelta;
+                            float jerk = acc - stats.LastAcceleration;
+
+                            bool accSignificant = Math.Abs(acc) > Config.JerkMinMagnitude;
+                            bool lastAccSignificant = Math.Abs(stats.LastAcceleration) > 0.001f;
+                            bool sameSign = accSignificant && lastAccSignificant
+                                            && ((acc > 0f) == (stats.LastAcceleration > 0f));
+
+                            if (sameSign) stats.ConsecutiveSameAccelerationTicks++;
+                            else stats.ConsecutiveSameAccelerationTicks = 0;
+
+                            if (stats.ConsecutiveSameAccelerationTicks >= Config.JerkConsecutiveTicks)
+                            {
+                                stats.SnapViolations++;
+                                stats.SuspicionScore += 4;
+                                AddSuspicion(player, "Algorithmic Smoothing (Acc)",
+                                    $"Stable acceleration {acc:F2} × {Config.JerkConsecutiveTicks}+", 4);
+                                stats.ConsecutiveSameAccelerationTicks = 0;
+                            }
+
+                            bool smallJerk = Math.Abs(jerk) < Config.JerkSmallTolerance && Math.Abs(acc) > 0.5f;
+                            if (smallJerk) stats.ConsecutiveSmoothJerkTicks++;
+                            else stats.ConsecutiveSmoothJerkTicks = 0;
+
+                            if (stats.ConsecutiveSmoothJerkTicks >= Config.SmoothJerkConsecutiveTicks)
+                            {
+                                stats.SnapViolations++;
+                                stats.SuspicionScore += 5;
+                                AddSuspicion(player, "Bezier Smoothing (Jerk≈0)",
+                                    $"|jerk|<{Config.JerkSmallTolerance} × {Config.SmoothJerkConsecutiveTicks}+", 5);
+                                stats.ConsecutiveSmoothJerkTicks = 0;
+                            }
+
+                            stats.LastAcceleration = acc;
+                            stats.LastJerk = jerk;
+                        }
+
+                        // Subpixel / DMA
+                        bool isIntX = Math.Abs(dx - Math.Round(dx)) < 0.001f;
+                        bool isIntY = Math.Abs(dy - Math.Round(dy)) < 0.001f;
+                        if (isIntX && isIntY && delta > Config.SubpixelMinDelta) stats.ConsecutiveIntegerAimTicks++;
+                        else stats.ConsecutiveIntegerAimTicks = 0;
+
+                        if (stats.ConsecutiveIntegerAimTicks >= Config.SubpixelConsecutiveTicks)
+                        {
+                            stats.SnapViolations++;
+                            stats.SuspicionScore += 5;
+                            AddSuspicion(player, "DMA Subpixel Pattern",
+                                $"Integer steps × {Config.SubpixelConsecutiveTicks}+", 5);
+                            stats.ConsecutiveIntegerAimTicks = 0;
+                        }
+
+                        stats.LastAimDelta = delta;
+                    }
+                    if (angles != null) stats.LastAngles = angles;
+                }
+
+                // ============ AUTO-BHOP STRAFE SYNC ============
+                if (Config.StrafeSyncCheckEnabled)
+                {
+                    var vel = pawn.AbsVelocity;
+                    if (vel != null)
+                    {
+                        float speedMs = (float)Math.Sqrt(vel.X * vel.X + vel.Y * vel.Y) / 52.49f;
+                        ulong btns = GetButtonsSafe(pawn);
+
+                        bool moveLeft  = (btns & IN_MOVELEFT)  != 0 || (btns & IN_LEFT)  != 0;
+                        bool moveRight = (btns & IN_MOVERIGHT) != 0 || (btns & IN_RIGHT) != 0;
+
+                        float yawDelta = stats.LastYawDelta;
+                        bool mouseRight = yawDelta > Config.StrafeSyncMinYawDelta;
+                        bool mouseLeft  = yawDelta < -Config.StrafeSyncMinYawDelta;
+
+                        bool sync = speedMs > Config.StrafeSyncMinSpeed &&
+                                    ((moveLeft && mouseLeft) || (moveRight && mouseRight));
+
+                        if (sync) stats.ConsecutiveStrafeSyncTicks++;
+                        else stats.ConsecutiveStrafeSyncTicks = 0;
+
+                        if (stats.ConsecutiveStrafeSyncTicks >= Config.StrafeSyncConsecutiveTicks)
+                        {
+                            stats.BhopViolations++;
+                            stats.SuspicionScore += 4;
+                            AddSuspicion(player, "Auto-Strafe Sync",
+                                $"A/D + mouse synced × {Config.StrafeSyncConsecutiveTicks}+", 4);
+                            stats.ConsecutiveStrafeSyncTicks = 0;
+                        }
+
+                        stats.LastButtons = btns;
+                    }
+                }
+
+                // ============ BHOP ============
+                if (Config.BhopCheckEnabled)
+                {
+                    var vel = pawn.AbsVelocity;
+                    bool onGround = (pawn.Flags & 1) != 0;
+                    if (vel != null)
+                    {
+                        float speedMs = (float)Math.Sqrt(vel.X * vel.X + vel.Y * vel.Y) / 52.49f;
+                        if (onGround && speedMs > Config.BhopMinSpeed) stats.ConsecutiveBhopTicks++;
+                        else stats.ConsecutiveBhopTicks = 0;
+
+                        if (stats.ConsecutiveBhopTicks >= Config.BhopConsecutiveTicks)
+                        {
+                            stats.BhopViolations++;
+                            stats.SuspicionScore += 2;
+                            stats.ConsecutiveBhopTicks = 0;
+                            if (stats.BhopViolations % 3 == 0)
+                                AddSuspicion(player, "Bhop abuse",
+                                    $"{speedMs:F1} m/s on ground × {Config.BhopConsecutiveTicks}+", 2);
+                        }
+                    }
+                }
+
+                // ============ PACKET ============
+                if (Config.PacketCheckEnabled)
+                {
+                    stats.CmdCountInWindow++;
+                    var elapsed = (DateTime.UtcNow - stats.LastPacketWindow).TotalSeconds;
+                    if (elapsed >= 1.0)
+                    {
+                        if (stats.CmdCountInWindow > Config.PacketMaxCmdsPerSecond)
+                        {
+                            stats.PacketViolations++;
+                            stats.SuspicionScore += 5;
+                            AddSuspicion(player, "Tickbase / DoubleTap",
+                                $"USCMD/sec: {stats.CmdCountInWindow} (limit {Config.PacketMaxCmdsPerSecond})", 5);
+                        }
+                        if (stats.JumpCountInWindow > Config.PacketMaxJumpPerSecond)
+                        {
+                            stats.PacketViolations++;
+                            stats.SuspicionScore += 2;
+                            AddSuspicion(player, "Jump rate abuse", $"{stats.JumpCountInWindow} jumps/sec", 2);
+                        }
+                        stats.CmdCountInWindow = 0;
+                        stats.JumpCountInWindow = 0;
+                        stats.LastPacketWindow = DateTime.UtcNow;
+                    }
+                }
+
+                // ============ DECAY ============
+                if ((DateTime.UtcNow - stats.LastDecay).TotalSeconds >= Config.SuspicionDecaySeconds)
+                {
+                    if (stats.SuspicionScore > 0) stats.SuspicionScore--;
+                    stats.LastDecay = DateTime.UtcNow;
+                }
+
+                // ============ AUTO-BAN ============
+                if (Config.AutoBanEnabled && stats.SuspicionScore >= Config.SuspicionToBan)
+                {
+                    if (!IsWhitelisted(player.SteamID) && !_pendingKicks.ContainsKey(player.SteamID))
+                    {
+                        BanPlayer(player,
+                            $"[AC] score={stats.SuspicionScore} (spd:{stats.SpeedViolations} snap:{stats.SnapViolations} bhop:{stats.BhopViolations} pkt:{stats.PacketViolations})",
+                            null, Config.BanDurationMinutes);
+                    }
+                    stats.SuspicionScore = 0;
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            if (!_eyeAnglesWarned)
+            {
+                Console.WriteLine($"[AntiCheat] OnTick error: {ex.Message}");
+                _eyeAnglesWarned = true;
+            }
+        }
+    }
+
+    // ============================================================
+    // EYE ANGLES — SAFE (reflection, cross-version)
+    // ============================================================
+    private static QAngle? GetEyeAnglesSafe(CCSPlayerPawn pawn)
+    {
+        if (!_eyeAnglesSearched)
+        {
+            _eyeAnglesSearched = true;
+
+            string[] names = { "EyeAngles", "V_angle", "ViewAngle", "AimAngles", "Angles" };
+
+            Type[] types =
+            {
+                pawn.GetType(),
+                typeof(CCSPlayerPawnBase),
+                typeof(CBasePlayerPawn),
+                typeof(CBaseEntity),
+            };
+
+            foreach (var name in names)
+            {
+                foreach (var t in types)
+                {
+                    try
+                    {
+                        var p = t.GetProperty(name,
+                            BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy);
+                        if (p == null) continue;
+
+                        var pt = Nullable.GetUnderlyingType(p.PropertyType) ?? p.PropertyType;
+                        if (pt != typeof(QAngle)) continue;
+
+                        _eyeAnglesProp = p;
+                        Console.WriteLine($"[AntiCheat] EyeAngles resolved: {t.Name}.{p.Name} ({p.PropertyType.Name})");
+                        break;
+                    }
+                    catch { }
+                }
+                if (_eyeAnglesProp != null) break;
+            }
+
+            if (_eyeAnglesProp == null)
+                Console.WriteLine("[AntiCheat] WARNING: EyeAngles/V_angle not found. Aim detection disabled.");
+        }
+
+        if (_eyeAnglesProp == null) return null;
+
+        try
+        {
+            var value = _eyeAnglesProp.GetValue(pawn);
+            if (value is QAngle q) return q;
+        }
+        catch { }
+        return null;
+    }
+    private static QAngle? GetEyeAnglesFromController(CCSPlayerController player)
+    {
+        try
+        {
+            var t = player.GetType();
+            foreach (var name in new[] { "EyeAngles", "V_angle", "ViewAngle" })
+            {
+                var p = t.GetProperty(name,
+                    BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy);
+                if (p == null) continue;
+
+                var pt = Nullable.GetUnderlyingType(p.PropertyType) ?? p.PropertyType;
+                if (pt != typeof(QAngle)) continue;
+
+                var v = p.GetValue(player);
+                if (v is QAngle q) return q;
+            }
+        }
+        catch { }
+        return null;
+    }
+
+    // ============================================================
+    // HELPERS
+    // ============================================================
+    private static float Distance(Vector a, Vector b)
+    {
+        float dx = a.X - b.X, dy = a.Y - b.Y, dz = a.Z - b.Z;
+        return (float)Math.Sqrt(dx * dx + dy * dy + dz * dz);
+    }
+
+    private static float AngleToTarget(QAngle angles, Vector fromOrigin, Vector toOrigin)
+    {
+        float dx = toOrigin.X - fromOrigin.X;
+        float dy = toOrigin.Y - fromOrigin.Y;
+        float dz = toOrigin.Z - fromOrigin.Z;
+
+        float horizDist = (float)Math.Sqrt(dx * dx + dy * dy);
+        if (horizDist < 1f) return 0f;
+
+        float targetYaw = (float)(Math.Atan2(dy, dx) * 180.0 / Math.PI);
+        float targetPitch = (float)(-Math.Atan2(dz, horizDist) * 180.0 / Math.PI);
+
+        float dyaw = Math.Abs(NormalizeAngle(angles.Y - targetYaw));
+        float dpitch = Math.Abs(NormalizeAngle(angles.X - targetPitch));
+
+        return (float)Math.Sqrt(dyaw * dyaw + dpitch * dpitch);
+    }
+
+    private static ulong GetButtonsSafe(CCSPlayerPawn pawn)
+    {
+        try
+        {
+            if (!_buttonsResolveTried)
+            {
+                _buttonsResolveTried = true;
+                var pawnType = pawn.GetType();
+                _msProp = pawnType.GetProperty("MovementServices");
+                if (_msProp != null)
+                {
+                    var msType = _msProp.PropertyType;
+                    _lastUsercmdProp = msType.GetProperty("LastUsercmd");
+                }
+                Console.WriteLine($"[AntiCheat] Buttons resolver: ms={_msProp != null}, cmd={_lastUsercmdProp != null}");
+            }
+
+            if (_msProp == null || _lastUsercmdProp == null) return 0;
+            var ms = _msProp.GetValue(pawn);
+            if (ms == null) return 0;
+            var cmd = _lastUsercmdProp.GetValue(ms);
+            if (cmd == null) return 0;
+
+            var cmdType = cmd.GetType();
+            _buttonsField ??= cmdType.GetField("Buttons");
+            if (_buttonsField != null)
+            {
+                var v = _buttonsField.GetValue(cmd);
+                if (v is ulong u) return u;
+                if (v is int i) return (ulong)i;
+                if (v is uint ui) return ui;
+            }
+            return 0;
+        }
+        catch { return 0; }
+    }
+
+    // ============================================================
+    // SUSPICION
+    // ============================================================
+    private void AddSuspicion(CCSPlayerController player, string reason, string details, int weight)
+    {
+        if (!_stats.TryGetValue(player.SteamID, out var stats)) return;
+
+        stats.SuspicionScore += weight;
+        stats.ReasonCounts[reason] = stats.ReasonCounts.GetValueOrDefault(reason) + 1;
+        stats.LastFlag = DateTime.UtcNow;
+
+        Db.AddSuspicion(player.SteamID, player.PlayerName, reason, details, Config.ServerName);
+
+        if (Config.AiScoringEnabled && stats.ReasonCounts.Count >= 3)
+        {
+            int extra = (int)(stats.SuspicionScore * (Config.AiDiversityBonus - 1f));
+            if (extra > 0) { stats.SuspicionScore += extra; details += $" [AI Boost: +{extra}]"; }
+        }
+
+        Webhook.Send(
+            "⚠️ Suspicion detected",
+            $"**Player:** {player.PlayerName}\n" +
+            $"**SteamID:** `{player.SteamID}`\n" +
+            $"**Reason:** {reason}\n" +
+            $"**Details:** {details}\n" +
+            $"**Server:** {Config.ServerName}",
+            0xFFAA00,
+            new List<(string, string)>
+            {
+                ("Suspicion score", stats.SuspicionScore.ToString()),
+                ("Violations", string.Join(", ", stats.ReasonCounts.Select(kv => $"{kv.Key}:{kv.Value}")))
+            });
+    }
+
+    // ============================================================
+    // PENDING KICKS / JUMP / DEATH
+    // ============================================================
+    private void ProcessPendingKicks()
+    {
+        if (_pendingKicks.Count == 0) return;
+        var now = DateTime.UtcNow;
+        foreach (var kv in _pendingKicks.ToList())
+        {
+            if (now > kv.Value.until) { _pendingKicks.Remove(kv.Key); continue; }
+
+            var target = Utilities.GetPlayers().FirstOrDefault(p => p != null && p.IsValid && p.SteamID == kv.Key);
+            if (target == null) { _pendingKicks.Remove(kv.Key); continue; }
+
+            int uid = target.UserId ?? -1;
+            if (uid > 0)
+            {
+                try { Server.ExecuteCommand($"kickid {uid}"); } catch { }
+            }
+        }
+    }
+
+    private HookResult OnPlayerJump(EventPlayerJump @event, GameEventInfo info)
+    {
+        try
+        {
+            var player = @event.Userid;
+            if (player == null || !player.IsValid || player.IsBot) return HookResult.Continue;
+            if (_stats.TryGetValue(player.SteamID, out var st)) st.JumpCountInWindow++;
+        }
+        catch { }
+        return HookResult.Continue;
+    }
+
+    private HookResult OnPlayerDeath(EventPlayerDeath @event, GameEventInfo info)
+    {
+        try
+        {
+            var attacker = @event.Attacker;
+            var victim = @event.Userid;
+            if (attacker == null || !attacker.IsValid || attacker.IsBot) return HookResult.Continue;
+            if (victim == null || !victim.IsValid) return HookResult.Continue;
+            if (attacker.SteamID == victim.SteamID) return HookResult.Continue;
+            if (IsWhitelisted(attacker.SteamID)) return HookResult.Continue;
+
+            if (!_stats.TryGetValue(attacker.SteamID, out var stats)) return HookResult.Continue;
+
+            stats.TotalKills++;
+            if (@event.Headshot) stats.Headshots++;
+
+            if (stats.TotalKills >= Config.MinKillsToCheckHS)
+            {
+                var ratio = (float)stats.Headshots / stats.TotalKills;
+                if (ratio >= Config.HeadshotRatioToFlag)
+                {
+                    AddSuspicion(attacker, "High HS-ratio",
+                        $"HS: {stats.Headshots}/{stats.TotalKills} ({ratio:P0})", 2);
+                    stats.Headshots = 0;
+                    stats.TotalKills = 0;
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[AntiCheat] OnPlayerDeath error: {ex.Message}");
+        }
+        return HookResult.Continue;
+    }
+
+    // ============================================================
+    // BAN / KICK
+    // ============================================================
+    public void BanPlayer(CCSPlayerController target, string reason, CCSPlayerController? admin, int durationMinutes)
+    {
+        if (target == null || !target.IsValid) return;
+        if (IsWhitelisted(target.SteamID)) return;
+        if (_pendingKicks.ContainsKey(target.SteamID)) return;
+
+        string adminName = admin?.PlayerName ?? "AntiCheat (auto)";
+        var durationStr = durationMinutes == 0 ? "permanent" : $"{durationMinutes} min";
+
+        Db.AddBan(target.SteamID, target.PlayerName, reason, adminName, durationMinutes, Config.ServerName);
+
+        Webhook.Send(
+            "🔨 Player banned",
+            $"**Player:** {target.PlayerName}\n" +
+            $"**SteamID:** `{target.SteamID}`\n" +
+            $"**Reason:** {reason}\n" +
+            $"**Admin:** {adminName}\n" +
+            $"**Duration:** {durationStr}\n" +
+            $"**Server:** {Config.ServerName}",
+            0xFF0000);
+
+        Server.PrintToChatAll($" {ChatColors.Red}[AntiCheat]{ChatColors.Default} " +
+                              $"Player {ChatColors.Red}{target.PlayerName}{ChatColors.Default} " +
+                              $"was banned. Reason: {reason}");
+
+        Console.WriteLine($"[AntiCheat] BAN: {target.PlayerName} | sid={target.SteamID} | reason={reason}");
+
+        _pendingKicks[target.SteamID] = (reason, DateTime.UtcNow.AddSeconds(5), 0);
+
+        int uid = target.UserId ?? -1;
+        if (uid > 0)
+        {
+            try { Server.ExecuteCommand($"banid {durationMinutes} {uid}"); } catch { }
+            try { Server.ExecuteCommand($"kickid {uid}"); } catch { }
+        }
+    }
+
+    public void KickPlayer(CCSPlayerController target, string reason, CCSPlayerController? admin)
+    {
+        if (target == null || !target.IsValid) return;
+        var adminName = admin?.PlayerName ?? "AntiCheat";
+
+        Webhook.Send("👢 Player kicked",
+            $"**Player:** {target.PlayerName}\n**SteamID:** `{target.SteamID}`\n**Reason:** {reason}\n**Admin:** {adminName}\n**Server:** {Config.ServerName}",
+            0xFF6600);
+        Server.PrintToChatAll($" {ChatColors.Red}[AntiCheat]{ChatColors.Default} Player {target.PlayerName} kicked. Reason: {reason}");
+
+        int uid = target.UserId ?? -1;
+        if (uid > 0)
+        {
+            _pendingKicks[target.SteamID] = (reason, DateTime.UtcNow.AddSeconds(3), 0);
+            try { Server.ExecuteCommand($"kickid {uid}"); } catch { }
+        }
+    }
+
+    // ============================================================
+    // PUBLIC HELPERS (used by MenuHandler)
+    // ============================================================
+    public bool IsWhitelisted(ulong steamId) => _whitelistCache.Contains(steamId);
+    public bool IsSuperAdmin(ulong steamId) => Config.SuperAdmins.Contains(steamId.ToString());
+
+    public int GetSuspicionScore(ulong steamId)
+    {
+        if (_stats.TryGetValue(steamId, out var stats))
+            return stats.SuspicionScore;
+        return 0;
+    }
+
+    public bool IsAcAdmin(CCSPlayerController player)
+    {
+        if (IsSuperAdmin(player.SteamID)) return true;
+        try { return AdminManager.PlayerHasPermissions(player, "@css/generic"); }
+        catch { return false; }
+    }
+
+    // ============================================================
+    // COMMANDS
+    // ============================================================
+    private void OnRulesCommand(CCSPlayerController? player, CommandInfo cmd)
+    {
+        if (player == null) return;
+        var rules = Config.VerificationRules;
+        player.PrintToChat($" {ChatColors.Gold}=== {rules.Title} ===");
+        foreach (var r in rules.Rules)
+            player.PrintToChat($" {ChatColors.Yellow}{r.Num}.{ChatColors.Default} {r.Text}");
+    }
+
+    private void OnAcCommand(CCSPlayerController? player, CommandInfo cmd)
+    {
+        if (player == null || !player.IsValid) return;
+        if (!IsAcAdmin(player))
+        {
+            player.PrintToChat($" {ChatColors.Red}[AntiCheat]{ChatColors.Default} Access denied.");
+            return;
+        }
+        MenuHandler.OpenMainMenu(player);
+    }
+
+    private static float NormalizeAngle(float a)
+    {
+        while (a > 180) a -= 360;
+        while (a < -180) a += 360;
+        return a;
+    }
+}
+
+```
+
+`CHANGELOG.md`:
+
+```md
+# Changelog
+
+All notable changes to this project are documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+---
+
+## [Unreleased]
+
+### Planned
+- Voice / sound cheat detection
+- Improved wallbang raycast detection (performance permitting)
+- Cross-server ban synchronization
+- Web panel for ban management
+
+---
+## [2.4.2] — 2026-09-15
+
+### Added
+- `GetSuspicionScore()` public helper for MenuHandler
+- Skip checks during warmup AND freeze period
+- Retry counter for pending kicks
+
+### Fixed
+- File integrity issue (missing helper methods after truncation)
+- Removed unused `_buttonsWarned` field (clean build, 0 warnings)
+
+### Changed
+- Version bumped to 2.5.0
+## [2.4.1] — 2026-09-15
+
+### Added
+- **HvH Pitch Anti-Aim** — instant ban when pitch is outside `[-89°; 89°]`
+- **Spinbot / Jitter detection** — instant ban when Δyaw > 140°/tick for 3+ ticks
+- **Tickbase / DoubleTap** — uscmd rate abuse detection (>140 uscmd/sec)
+- Reflection-based EyeAngles resolver — works across all CounterStrikeSharp versions
+- Buttons resolver fallback chain (`MovementServices` → `LastUsercmd` → `Buttons`)
+
+### Changed
+- Reduced `PacketMaxCmdsPerSecond` from 200 → 140 (better HvH detection on 64-tick)
+- Fully wrapped `OnTick` in try/catch — no listener removal on error
+- `AddSuspicion` moved AI-diversity boost out of `OnTick` to avoid double counting
+
+### Fixed
+- HANDLE leak in `ScanModulesInProcess` (RAII wrapper)
+- `npos` crash in SteamID parser on malformed input (`STEAM_0:1` without second colon)
+- Binary-safe Aho-Corasick for null bytes in process memory scans
+- Whitelist cache race condition (atomic reference swap instead of mutation)
+- `IN_LEFT` / `IN_RIGHT` bit masks in strafe-sync detection
+
+---
+
+## [2.3.1] — 2026-09-14
+
+### Added
+- **Prefire detection** — 150 ms window, direction match, 15 sec throttle
+- **Wallbang proxy** — >30% blind hits after 30+ hits trigger
+- **Jerk analysis** (3rd derivative) — catches AI aimbot with Bezier smoothing
+- **DMA subpixel pattern** — detects hardware mouse emulators (Arduino, KMBox)
+
+### Changed
+- `AddSuspicion` now takes `CCSPlayerController` directly (no separate `_stats` lookup)
+
+### Fixed
+- Zero-alloc `ShotIntervals` — no more `new HashSet` on every shot
+- `Math.Sign(acc)` zero-edge case in Jerk analysis
+- `ContainsRaw` for binary data (memory, file content)
+
+---
+
+## [2.3.0] — 2026-09-14
+
+### Added
+- **Prefire detection** module
+- **Wallbang proxy** module
+- **Jerk / Bezier smoothing** detector
+- **DMA subpixel pattern** detector
+- `PitchAntiAimCheckEnabled` and `SpinbotCheckEnabled` config toggles
+- `JerkSmallTolerance` and `SmoothJerkConsecutiveTicks` config
+
+### Removed
+- DWM topmost toggle from AntiOBS Lua (caused CS2 freezes)
+
+---
+
+## [2.2.0] — 2026-09-14
+
+### Added
+- **Auto-Strafe Sync** detection (A/D + mouse in same tick)
+- **Grid Snap timing** detection (triggerbot firing in server tick grid)
+- **AI Diversity Boost** (×1.6 for 3+ different violation types)
+
+### Changed
+- `SuspicionToBan` raised from 12 → 25 (fewer false positives)
+- `SuspicionDecaySeconds` raised from 60 → 90
+
+---
+
+## [2.1.0] — 2026-09-14
+
+### Added
+- **Robotic Click Timing** detection (σ < 15 ms across 5+ shots)
+- Reflection-based EyeAngles (fallback for CSS versions without direct access)
+- `_pendingKicks` queue with retry every tick (5 sec window)
+- Ban message de-duplication via `_pendingKicks.ContainsKey`
+
+### Fixed
+- `banid` malformed command — switched from `steamid64` to `userid`
+- Double ban message (removed duplicate call from `OnTick`)
+
+---
+
+## [2.0.0] — 2026-09-14
+
+### Added
+- **JSON ban-list** — survives server restart (unlike native `banid`)
+- **Discord webhook** integration — every detection logged
+- **In-game admin menu** (`!ac`) — thresholds, whitelist, kick/ban
+- **Whitelist** + **SuperAdmins** from config
+- **Speed / NoClip** detection (ground-only, squared sums, no sqrt in hot path)
+- **Aim Snap** detection (>55°/tick × 2+)
+- **Aim Spin** detection (avg >20°/tick over 8 tick window)
+- **HS-Ratio** detection (>90% HS after 12+ kills)
+- Config file with all thresholds
+- `Database.cs` — JSON persistence for suspicions and bans
+- `WebhookLogger.cs` — Discord webhook with embeds
+- `MenuHandler.cs` — ChatMenu UI for admins
+
+### Removed
+- SQLite dependency (caused load errors on CSS — switched to JSON)
+
+---
+
+## [1.0.0] — 2026-09-14
+
+### Added
+- Initial release
+- Basic Speed / Aim detection
+- Simple ban system (in-memory only, resets on restart)
+- Basic admin command `!ac`
+
+---
+
+## Version format
+
+- **MAJOR** — breaking changes (config format, API changes)
+- **MINOR** — new detection modules, new features
+- **PATCH** — bug fixes, threshold tweaks, refactoring
+
+---
+
+## Links
+
+- **Releases:** https://github.com/ChmonyaStudio/cs2-anticheat/releases
+- **Issues:** https://github.com/ChmonyaStudio/cs2-anticheat/issues
+- **Repository:** https://github.com/ChmonyaStudio/cs2-anticheat
+
+```
+
+`CSAntiCheat.csproj`:
+
+```csproj
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+    <AssemblyName>CSAntiCheat</AssemblyName>
+    <RootNamespace>CSAntiCheat</RootNamespace>
+    <ImplicitUsings>enable</ImplicitUsings>
+
+    <!-- Metadata -->
+    <Product>AntiCheat</Product>
+    <Version>2.4.2</Version>
+    <Authors>Chmonya</Authors>
+    <Description>Anti-cheat plugin for CS2 CounterStrikeSharp servers</Description>
+    <Copyright>Copyright (c) 2026 Chmonya</Copyright>
+
+    <!-- Build settings -->
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <DebugType>embedded</DebugType>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CounterStrikeSharp.API" Version="1.0.302" />
+  </ItemGroup>
+
+</Project>
+
+```
+
+`Database.cs`:
+
+```cs
+using System.Text.Json;
+
+namespace CSAntiCheat;
+
+// ============================================================
+// RECORDS
+// ============================================================
+public class SuspicionRecord
+{
+    public ulong SteamId { get; set; }
+    public string PlayerName { get; set; } = "";
+    public string Reason { get; set; } = "";
+    public string Details { get; set; } = "";
+    public string ServerName { get; set; } = "";
+    public DateTime CreatedAt { get; set; }
+}
+
+public class BanRecord
+{
+    public ulong SteamId { get; set; }
+    public string PlayerName { get; set; } = "";
+    public string Reason { get; set; } = "";
+    public string AdminName { get; set; } = "";
+    public int DurationMinutes { get; set; }
+    public string ServerName { get; set; } = "";
+    public DateTime CreatedAt { get; set; }
+}
+
+// ============================================================
+// DATABASE
+// ============================================================
+/// <summary>
+/// Simple JSON storage. Thread-safe, with auto-save.
+/// Files: anticheat_suspicions.json and anticheat_bans.json in plugin folder.
+/// </summary>
+public class Database
+{
+    private readonly string _suspPath;
+    private readonly string _bansPath;
+    private readonly object _lock = new();
+
+    private List<SuspicionRecord> _suspicions = new();
+    private List<BanRecord> _bans = new();
+
+    private const int MAX_RECORDS = 50_000;
+
+    private static readonly JsonSerializerOptions JsonOpts = new()
+    {
+        WriteIndented = true,
+        Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+    };
+
+    public Database(string pluginFolder)
+    {
+        _suspPath = Path.Combine(pluginFolder, "anticheat_suspicions.json");
+        _bansPath = Path.Combine(pluginFolder, "anticheat_bans.json");
+    }
+
+    public void Initialize()
+    {
+        lock (_lock)
+        {
+            _suspicions = LoadList<SuspicionRecord>(_suspPath);
+            _bans = LoadList<BanRecord>(_bansPath);
+            Save();
+        }
+    }
+
+    // ============================================================
+    // SUSPICIONS
+    // ============================================================
+    public void AddSuspicion(ulong steamId, string name, string reason, string details, string server)
+    {
+        lock (_lock)
+        {
+            _suspicions.Add(new SuspicionRecord
+            {
+                SteamId = steamId,
+                PlayerName = name,
+                Reason = reason,
+                Details = details,
+                ServerName = server,
+                CreatedAt = DateTime.UtcNow
+            });
+
+            // Keep only latest MAX_RECORDS entries
+            if (_suspicions.Count > MAX_RECORDS)
+                _suspicions.RemoveRange(0, _suspicions.Count - MAX_RECORDS);
+
+            Save();
+        }
+    }
+
+    public List<SuspicionRecord> GetRecentSuspicions(int limit)
+    {
+        lock (_lock)
+        {
+            return _suspicions
+                .OrderByDescending(s => s.CreatedAt)
+                .Take(limit)
+                .Select(s => new SuspicionRecord
+                {
+                    SteamId = s.SteamId,
+                    PlayerName = s.PlayerName,
+                    Reason = s.Reason,
+                    Details = s.Details,
+                    ServerName = s.ServerName,
+                    CreatedAt = s.CreatedAt.ToLocalTime()
+                })
+                .ToList();
+        }
+    }
+
+    // ============================================================
+    // BANS
+    // ============================================================
+    public void AddBan(ulong steamId, string name, string reason, string admin, int duration, string server)
+    {
+        lock (_lock)
+        {
+            _bans.Add(new BanRecord
+            {
+                SteamId = steamId,
+                PlayerName = name,
+                Reason = reason,
+                AdminName = admin,
+                DurationMinutes = duration,
+                ServerName = server,
+                CreatedAt = DateTime.UtcNow
+            });
+
+            if (_bans.Count > MAX_RECORDS)
+                _bans.RemoveRange(0, _bans.Count - MAX_RECORDS);
+
+            Save();
+        }
+    }
+
+    public List<BanRecord> GetRecentBans(int limit)
+    {
+        lock (_lock)
+        {
+            return _bans
+                .OrderByDescending(b => b.CreatedAt)
+                .Take(limit)
+                .Select(b => new BanRecord
+                {
+                    SteamId = b.SteamId,
+                    PlayerName = b.PlayerName,
+                    Reason = b.Reason,
+                    AdminName = b.AdminName,
+                    DurationMinutes = b.DurationMinutes,
+                    ServerName = b.ServerName,
+                    CreatedAt = b.CreatedAt.ToLocalTime()
+                })
+                .ToList();
+        }
+    }
+
+    // ============================================================
+    // INTERNALS
+    // ============================================================
+    private void Save()
+    {
+        try
+        {
+            File.WriteAllText(_suspPath, JsonSerializer.Serialize(_suspicions, JsonOpts));
+            File.WriteAllText(_bansPath, JsonSerializer.Serialize(_bans, JsonOpts));
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[AntiCheat DB] Save error: {ex.Message}");
+        }
+    }
+
+    private static List<T> LoadList<T>(string path)
+    {
+        if (!File.Exists(path)) return new List<T>();
+        try
+        {
+            var txt = File.ReadAllText(path);
+            return JsonSerializer.Deserialize<List<T>>(txt) ?? new List<T>();
+        }
+        catch
+        {
+            return new List<T>();
+        }
+    }
+}
+
+```
+
+`LICENSE`:
+
+```
+CS2 AntiCheat — Source-Available License
+Version 1.0, 2026
+
+Copyright (c) 2026 Chmonya
+All rights reserved.
+
+================================================================
+ПРЕАМБУЛА / PREAMBLE
+================================================================
+
+Это исходный код, доступный для публичного просмотра, использования
+и модификации под личные нужды. Продажа, публикация форков и
+присвоение авторства — запрещены.
+
+This is source-available code, provided for public viewing, personal
+use, and modification for personal needs. Selling, publishing forks,
+and claiming authorship are prohibited.
+
+================================================================
+ENGLISH
+================================================================
+
+1. GRANT OF RIGHTS
+
+You are granted a non-exclusive, non-transferable, royalty-free
+right to:
+
+   a) Use this software on your own Counter-Strike 2 server(s).
+   b) View, study, and analyze the source code.
+   c) Modify the source code for your own private use.
+   d) Distribute this software unmodified and free of charge,
+      provided this license is included in full and unmodified.
+
+2. RESTRICTIONS
+
+You MAY NOT:
+
+   a) Sell, license, rent, lease, or otherwise commercially exploit
+      this software or any derivative of it.
+   b) Publish, upload, or distribute modified versions of this
+      software (forks) on any platform, including but not limited
+      to GitHub, GitLab, Bitbucket, private servers, forums, or
+      any file-sharing service.
+   c) Claim authorship of this software or any part of it.
+   d) Remove, alter, or obscure any copyright notices, author
+      credits, or license text.
+   e) Use this software as part of a paid product, paid service,
+      or any offering that generates revenue.
+   f) Bundle this software with other paid products or services.
+   g) Rebrand this software and distribute it under a different
+      name.
+   h) Use the author's name, nickname, or logo for promotional
+      purposes without prior written permission.
+
+3. CONTRIBUTIONS
+
+By submitting a pull request, patch, or any other contribution,
+you grant the author a perpetual, irrevocable, royalty-free
+license to use, modify, and distribute your contribution as part
+of this software under the terms of this license. You retain
+copyright over your own contribution.
+
+4. NO WARRANTY
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+OTHER DEALINGS IN THE SOFTWARE.
+
+5. TERMINATION
+
+Any violation of the restrictions in Section 2 automatically
+terminates your rights under this license. Upon termination,
+you must cease all use and destroy all copies of the software.
+
+6. GOVERNING LAW
+
+This license is governed by the laws of the author's country of
+residence, without regard to conflict of law principles.
+
+================================================================
+РУССКИЙ
+================================================================
+
+1. ПРЕДОСТАВЛЯЕМЫЕ ПРАВА
+
+Вам предоставляется неисключительное, непередаваемое,
+безвозмездное право:
+
+   а) Использовать данное ПО на своём сервере Counter-Strike 2.
+   б) Просматривать, изучать и анализировать исходный код.
+   в) Изменять исходный код для личного использования.
+   г) Распространять данное ПО в неизменённом виде и
+      бесплатно, при условии сохранения данной лицензии
+      в полном и неизменённом виде.
+
+2. ЗАПРЕТЫ
+
+ЗАПРЕЩАЕТСЯ:
+
+   а) Продавать, лицензировать, сдавать в аренду или иным
+      образом извлекать коммерческую выгоду из данного ПО
+      или его производных.
+   б) Публиковать, загружать или распространять изменённые
+      версии данного ПО (форки) на любой платформе, включая,
+      но не ограничиваясь: GitHub, GitLab, Bitbucket, приватные
+      серверы, форумы, файлообменники.
+   в) Присваивать авторство данного ПО или любой его части.
+   г) Удалять, изменять или скрывать уведомления об авторских
+      правах, упоминания автора или текст лицензии.
+   д) Использовать данное ПО как часть платного продукта,
+      платной услуги или любого предложения, приносящего
+      доход.
+   е) Включать данное ПО в состав других платных продуктов
+      или услуг.
+   ж) Переименовывать данное ПО и распространять его под
+      другим названием.
+   з) Использовать имя, ник или логотип автора в
+      рекламных целях без предварительного письменного
+      разрешения.
+
+3. ВКЛАДЫ
+
+Отправляя pull request, патч или любой другой вклад, вы
+предоставляете автору бессрочную, безотзывную, безвозмездную
+лицензию на использование, изменение и распространение вашего
+вклада в составе данного ПО на условиях настоящей лицензии.
+Авторские права на ваш собственный вклад остаются за вами.
+
+4. ОТСУТСТВИЕ ГАРАНТИЙ
+
+ПО ПРЕДОСТАВЛЯЕТСЯ "КАК ЕСТЬ", БЕЗ КАКИХ-ЛИБО ГАРАНТИЙ, ЯВНЫХ
+ИЛИ ПОДРАЗУМЕВАЕМЫХ, ВКЛЮЧАЯ, НО НЕ ОГРАНИЧИВАЯСЬ, ГАРАНТИИ
+ТОВАРНОЙ ПРИГОДНОСТИ, ПРИГОДНОСТИ ДЛЯ КОНКРЕТНОЙ ЦЕЛИ И
+ОТСУТСТВИЯ НАРУШЕНИЙ ПРАВ. НИ В КАКОМ СЛУЧАЕ АВТОРЫ ИЛИ
+ПРАВООБЛАДАТЕЛИ НЕ НЕСУТ ОТВЕТСТВЕННОСТИ ЗА ЛЮБЫЕ ИСКИ, УЩЕРБ
+ИЛИ ИНУЮ ОТВЕТСТВЕННОСТЬ, БУДЬ ТО ПО ДОГОВОРУ, ДЕЛИКТУ ИЛИ
+ИНЫМ ОБРАЗОМ, ВОЗНИКАЮЩУЮ ИЗ ИЛИ В СВЯЗИ С ПО ИЛИ
+ИСПОЛЬЗОВАНИЕМ ИЛИ ИНЫМИ ДЕЙСТВИЯМИ С ПО.
+
+5. ПРЕКРАЩЕНИЕ
+
+Любое нарушение запретов из Раздела 2 автоматически прекращает
+ваши права по настоящей лицензии. При прекращении вы обязаны
+прекратить любое использование и уничтожить все копии ПО.
+
+6. ПРИМЕНИМОЕ ПРАВО
+
+Настоящая лицензия регулируется законодательством страны
+проживания автора, без учёта коллизионных норм.
+
+================================================================
+
+```
+
+`MenuHandler.cs`:
+
+```cs
+using CounterStrikeSharp.API;
+using CounterStrikeSharp.API.Core;
+using CounterStrikeSharp.API.Modules.Menu;
+using CounterStrikeSharp.API.Modules.Utils;
+
+namespace CSAntiCheat;
+
+public static class MenuHandler
+{
+    // ============================================================
+    // MAIN MENU
+    // ============================================================
+    public static void OpenMainMenu(CCSPlayerController player)
+    {
+        var cfg = AntiCheatPlugin.Instance.Config;
+        var menu = new ChatMenu("🛡️ AntiCheat");
+
+        menu.AddMenuOption(
+            $"Autoban: {(cfg.AutoBanEnabled ? "ON" : "OFF")}",
+            (p, o) =>
+            {
+                cfg.AutoBanEnabled = !cfg.AutoBanEnabled;
+                AntiCheatPlugin.Instance.SaveConfigPublic();
+                p.PrintToChat($" {ChatColors.Red}[AntiCheat]{ChatColors.Default} Autoban: {(cfg.AutoBanEnabled ? "ON" : "OFF")}");
+                OpenMainMenu(p);
+            });
+
+        menu.AddMenuOption(
+            $"Webhook: {(cfg.WebhookEnabled ? "ON" : "OFF")}",
+            (p, o) =>
+            {
+                cfg.WebhookEnabled = !cfg.WebhookEnabled;
+                AntiCheatPlugin.Instance.SaveConfigPublic();
+                p.PrintToChat($" {ChatColors.Red}[AntiCheat]{ChatColors.Default} Webhook: {(cfg.WebhookEnabled ? "ON" : "OFF")}");
+                OpenMainMenu(p);
+            });
+
+        menu.AddMenuOption(
+            $"Debug: {(cfg.DebugLog ? "ON" : "OFF")}",
+            (p, o) =>
+            {
+                cfg.DebugLog = !cfg.DebugLog;
+                AntiCheatPlugin.Instance.SaveConfigPublic();
+                p.PrintToChat($" {ChatColors.Red}[AntiCheat]{ChatColors.Default} Debug: {(cfg.DebugLog ? "ON" : "OFF")}");
+                OpenMainMenu(p);
+            });
+
+        menu.AddMenuOption("⚙️ Adjust thresholds", (p, o) => OpenThresholds(p));
+        menu.AddMenuOption("✅ Manage whitelist", (p, o) => OpenWhitelist(p));
+        menu.AddMenuOption("👥 Players (check/actions)", (p, o) => OpenPlayers(p));
+        menu.AddMenuOption("📋 Recent suspicions", (p, o) => ShowRecentSuspicions(p));
+        menu.AddMenuOption("🔨 Recent bans", (p, o) => ShowRecentBans(p));
+        menu.AddMenuOption("📜 Verification rules", (p, o) =>
+        {
+            MenuManager.CloseActiveMenu(p);
+            var rules = cfg.VerificationRules;
+            p.PrintToChat($" {ChatColors.Gold}=== {rules.Title} ===");
+            foreach (var r in rules.Rules)
+                p.PrintToChat($" {ChatColors.Yellow}{r.Num}.{ChatColors.Default} {r.Text}");
+        });
+
+        menu.AddMenuOption("❌ Close", (p, o) => MenuManager.CloseActiveMenu(p));
+
+        MenuManager.OpenChatMenu(player, menu);
+    }
+
+    // ============================================================
+    // THRESHOLDS
+    // ============================================================
+    private static void OpenThresholds(CCSPlayerController player)
+    {
+        var cfg = AntiCheatPlugin.Instance.Config;
+        var menu = new ChatMenu("⚙️ Thresholds");
+
+        menu.AddMenuOption($"Max speed: {cfg.MaxSpeed:F1} m/s", (p, o) =>
+        {
+            cfg.MaxSpeed += 0.5f;
+            if (cfg.MaxSpeed > 15f) cfg.MaxSpeed = 5f;
+            AntiCheatPlugin.Instance.SaveConfigPublic();
+            OpenThresholds(p);
+        });
+
+        menu.AddMenuOption($"Ban threshold: {cfg.SuspicionToBan}", (p, o) =>
+        {
+            cfg.SuspicionToBan += 5;
+            if (cfg.SuspicionToBan > 100) cfg.SuspicionToBan = 5;
+            AntiCheatPlugin.Instance.SaveConfigPublic();
+            OpenThresholds(p);
+        });
+
+        menu.AddMenuOption($"Aim snap: {cfg.MaxAngleDeltaPerTick:F0}°/tick", (p, o) =>
+        {
+            cfg.MaxAngleDeltaPerTick += 5;
+            if (cfg.MaxAngleDeltaPerTick > 180) cfg.MaxAngleDeltaPerTick = 30;
+            AntiCheatPlugin.Instance.SaveConfigPublic();
+            OpenThresholds(p);
+        });
+
+        menu.AddMenuOption($"Prefire window: {cfg.PrefireWindowMs} ms", (p, o) =>
+        {
+            cfg.PrefireWindowMs += 50;
+            if (cfg.PrefireWindowMs > 500) cfg.PrefireWindowMs = 100;
+            AntiCheatPlugin.Instance.SaveConfigPublic();
+            OpenThresholds(p);
+        });
+
+        menu.AddMenuOption($"Ban duration: {(cfg.BanDurationMinutes == 0 ? "perm" : cfg.BanDurationMinutes + " min")}", (p, o) =>
+        {
+            cfg.BanDurationMinutes = cfg.BanDurationMinutes switch
+            {
+                0 => 60,
+                60 => 360,
+                360 => 1440,
+                1440 => 10080,
+                10080 => 0,
+                _ => 0
+            };
+            AntiCheatPlugin.Instance.SaveConfigPublic();
+            OpenThresholds(p);
+        });
+
+        menu.AddMenuOption($"Decay: {cfg.SuspicionDecaySeconds} sec", (p, o) =>
+        {
+            cfg.SuspicionDecaySeconds += 30;
+            if (cfg.SuspicionDecaySeconds > 300) cfg.SuspicionDecaySeconds = 30;
+            AntiCheatPlugin.Instance.SaveConfigPublic();
+            OpenThresholds(p);
+        });
+
+        menu.AddMenuOption("⬅ Back", (p, o) => OpenMainMenu(p));
+        MenuManager.OpenChatMenu(player, menu);
+    }
+
+    // ============================================================
+    // WHITELIST
+    // ============================================================
+    private static void OpenWhitelist(CCSPlayerController player)
+    {
+        var cfg = AntiCheatPlugin.Instance.Config;
+        var menu = new ChatMenu("✅ Whitelist");
+
+        foreach (var sid in cfg.Whitelist.ToList())
+        {
+            var captured = sid;
+            menu.AddMenuOption($"❌ Remove {captured}", (p, o) =>
+            {
+                cfg.Whitelist.Remove(captured);
+                AntiCheatPlugin.Instance.SaveConfigPublic();
+                p.PrintToChat($" {ChatColors.Red}[AntiCheat]{ChatColors.Default} {captured} removed from whitelist.");
+                OpenWhitelist(p);
+            });
+        }
+
+        menu.AddMenuOption("➕ Add myself", (p, o) =>
+        {
+            var sid = p.SteamID.ToString();
+            if (!cfg.Whitelist.Contains(sid))
+            {
+                cfg.Whitelist.Add(sid);
+                AntiCheatPlugin.Instance.SaveConfigPublic();
+                p.PrintToChat($" {ChatColors.Red}[AntiCheat]{ChatColors.Default} You've been added to whitelist.");
+            }
+            OpenWhitelist(p);
+        });
+
+        menu.AddMenuOption("⬅ Back", (p, o) => OpenMainMenu(p));
+        MenuManager.OpenChatMenu(player, menu);
+    }
+
+    // ============================================================
+    // PLAYERS
+    // ============================================================
+    private static void OpenPlayers(CCSPlayerController player)
+    {
+        var menu = new ChatMenu("👥 Players");
+
+        foreach (var target in Utilities.GetPlayers())
+        {
+            if (target == null || !target.IsValid || target.IsBot) continue;
+            var t = target;
+            menu.AddMenuOption($"{t.PlayerName} | {t.SteamID}", (p, o) => OpenPlayerActions(p, t));
+        }
+
+        menu.AddMenuOption("⬅ Back", (p, o) => OpenMainMenu(p));
+        MenuManager.OpenChatMenu(player, menu);
+    }
+
+    private static void OpenPlayerActions(CCSPlayerController admin, CCSPlayerController target)
+    {
+        var cfg = AntiCheatPlugin.Instance.Config;
+        var plugin = AntiCheatPlugin.Instance;
+        var menu = new ChatMenu($"Player: {target.PlayerName}");
+
+        menu.AddMenuOption("🔍 Info", (p, o) =>
+        {
+            MenuManager.CloseActiveMenu(p);
+            p.PrintToChat($" {ChatColors.Gold}=== {target.PlayerName} ===");
+            p.PrintToChat($" SteamID: {target.SteamID}");
+            p.PrintToChat($" Whitelisted: {(plugin.IsWhitelisted(target.SteamID) ? "yes" : "no")}");
+            p.PrintToChat($" SuperAdmin: {(plugin.IsSuperAdmin(target.SteamID) ? "yes" : "no")}");
+            p.PrintToChat($" Suspicion score: {(plugin.GetSuspicionScore(target.SteamID))}");
+        });
+
+        menu.AddMenuOption("➕ Add to whitelist", (p, o) =>
+        {
+            var sid = target.SteamID.ToString();
+            if (!cfg.Whitelist.Contains(sid))
+            {
+                cfg.Whitelist.Add(sid);
+                plugin.SaveConfigPublic();
+                p.PrintToChat($" {ChatColors.Red}[AntiCheat]{ChatColors.Default} {target.PlayerName} added to whitelist.");
+            }
+        });
+
+        menu.AddMenuOption("➖ Remove from whitelist", (p, o) =>
+        {
+            var sid = target.SteamID.ToString();
+            cfg.Whitelist.Remove(sid);
+            plugin.SaveConfigPublic();
+            p.PrintToChat($" {ChatColors.Red}[AntiCheat]{ChatColors.Default} {target.PlayerName} removed from whitelist.");
+        });
+
+        menu.AddMenuOption("👢 Kick", (p, o) => plugin.KickPlayer(target, "Admin decision", p));
+        menu.AddMenuOption("🔨 Ban (PERM)", (p, o) => plugin.BanPlayer(target, "Admin decision", p, 0));
+        menu.AddMenuOption("🔨 Ban (60 min)", (p, o) => plugin.BanPlayer(target, "Admin decision", p, 60));
+        menu.AddMenuOption("🔨 Ban (1440 min)", (p, o) => plugin.BanPlayer(target, "Admin decision", p, 1440));
+
+        menu.AddMenuOption("⬅ Back", (p, o) => OpenPlayers(p));
+        MenuManager.OpenChatMenu(admin, menu);
+    }
+
+    // ============================================================
+    // RECENT LISTS
+    // ============================================================
+    private static void ShowRecentSuspicions(CCSPlayerController player)
+    {
+        MenuManager.CloseActiveMenu(player);
+        var recent = AntiCheatPlugin.Instance.Db.GetRecentSuspicions(10);
+        player.PrintToChat($" {ChatColors.Gold}=== Recent suspicions ===");
+        if (recent.Count == 0) { player.PrintToChat(" Empty."); return; }
+        foreach (var s in recent)
+            player.PrintToChat($" {ChatColors.Yellow}[{s.CreatedAt:HH:mm}] {s.PlayerName} ({s.SteamId}): {s.Reason}");
+    }
+
+    private static void ShowRecentBans(CCSPlayerController player)
+    {
+        MenuManager.CloseActiveMenu(player);
+        var recent = AntiCheatPlugin.Instance.Db.GetRecentBans(10);
+        player.PrintToChat($" {ChatColors.Gold}=== Recent bans ===");
+        if (recent.Count == 0) { player.PrintToChat(" Empty."); return; }
+        foreach (var b in recent)
+            player.PrintToChat($" {ChatColors.Red}[{b.CreatedAt:HH:mm}] {b.PlayerName} ({b.SteamId}): {b.Reason}");
+    }
+}
+
+```
+
+`PlayerStats.cs`:
+
+```cs
+using CounterStrikeSharp.API.Modules.Utils;
+
+namespace CSAntiCheat;
+
+public class PlayerStats
+{
+    // ============================================================
+    // IDENTITY
+    // ============================================================
+    public ulong SteamId { get; set; }
+    public string Name { get; set; } = "";
+
+    // ============================================================
+    // SUSPICION / DECAY
+    // ============================================================
+    public int SuspicionScore { get; set; }
+    public DateTime LastDecay { get; set; } = DateTime.UtcNow;
+    public DateTime LastFlag { get; set; } = DateTime.MinValue;
+
+    // ============================================================
+    // ANGLE TRACKING
+    // ============================================================
+    public QAngle? LastAngles { get; set; }
+
+    // ============================================================
+    // VIOLATION COUNTERS
+    // ============================================================
+    public int SpeedViolations { get; set; }
+    public int SnapViolations { get; set; }
+    public int BhopViolations { get; set; }
+    public int PacketViolations { get; set; }
+
+    // ============================================================
+    // KILL TRACKING (HS-ratio)
+    // ============================================================
+    public int TotalKills { get; set; }
+    public int Headshots { get; set; }
+
+    // ============================================================
+    // CONSECUTIVE TICK FILTERS
+    // ============================================================
+    public int ConsecutiveSpeedTicks { get; set; }
+    public int ConsecutiveSnapTicks { get; set; }
+    public int ConsecutiveBhopTicks { get; set; }
+    public int ConsecutiveHugeSpeed { get; set; }
+
+    // ============================================================
+    // DMA / SUBPIXEL
+    // ============================================================
+    public int ConsecutiveIntegerAimTicks { get; set; }
+    public float LastAimDelta { get; set; }
+
+    // ============================================================
+    // JERK / BEZIER SMOOTHING
+    // ============================================================
+    public float LastAcceleration { get; set; }
+    public int ConsecutiveSameAccelerationTicks { get; set; }
+    public float LastJerk { get; set; }
+    public int ConsecutiveSmoothJerkTicks { get; set; }
+
+    // ============================================================
+    // AIM WINDOW
+    // ============================================================
+    public float AimWindowDelta { get; set; }
+    public int AimWindowTicks { get; set; }
+
+    // ============================================================
+    // SHOT TIMING
+    // ============================================================
+    public DateTime LastShotTime { get; set; } = DateTime.MinValue;
+    public List<double> ShotIntervals { get; set; } = new();
+
+    // ============================================================
+    // AUTO-STRAFE SYNC
+    // ============================================================
+    public float LastYawDelta { get; set; }
+    public ulong LastButtons { get; set; }
+    public int ConsecutiveStrafeSyncTicks { get; set; }
+
+    // ============================================================
+    // PREFIRE
+    // ============================================================
+    public QAngle? LastShotAngles { get; set; }
+    public HashSet<ulong> EnemiesInConeAtShot { get; set; } = new();
+    public int PrefireEvents { get; set; }
+    public DateTime LastPrefireFlagTime { get; set; } = DateTime.MinValue;
+
+    // ============================================================
+    // WALLBANG PROXY
+    // ============================================================
+    public int HitsTotal { get; set; }
+    public int HitsBlind { get; set; }
+
+    // ============================================================
+    // HvH
+    // ============================================================
+    public int ConsecutiveInvalidPitchTicks { get; set; }
+    public int ConsecutiveSpinbotTicks { get; set; }
+
+    // ============================================================
+    // PACKET / TICKBASE
+    // ============================================================
+    public DateTime LastPacketWindow { get; set; } = DateTime.UtcNow;
+    public int CmdCountInWindow { get; set; }
+    public int JumpCountInWindow { get; set; }
+
+    // ============================================================
+    // AI SCORING (diversity bonus)
+    // ============================================================
+    public Dictionary<string, int> ReasonCounts { get; set; } = new();
+}
+
+```
+
+`README.md`:
+
+```md
+# CS2 AntiCheat for CounterStrikeSharp
+
+**🌍 Language / Язык:** **[🇬🇧 English](#-english)** · **[🇷🇺 Русский](#-русский)**
+
+![CS2](https://img.shields.io/badge/CS2-CounterStrikeSharp-blue)
+![.NET](https://img.shields.io/badge/.NET-8.0-purple)
+![Release](https://img.shields.io/github/v/release/ChmonyaStudio/cs2-anticheat)
+![License](https://img.shields.io/badge/license-MIT-green)
+
+---
+
+## 🇬🇧 English
+
+A modern, feature-rich anti-cheat plugin for CS2 servers running CounterStrikeSharp. Catches aimbot, wallhack, HvH, DMA, triggerbot, bhop scripts, and more — with zero performance impact.
+
+### 📦 Download
+
+**[⬇️ Download the latest release](https://github.com/ChmonyaStudio/cs2-anticheat/releases/latest)**
+
+No compilation required — the release contains the compiled `.dll`, ready to drop into your plugins folder.
+
+### ✨ Features
+
+#### 🎯 Detection Modules
+
+| Module | What it catches |
+|---|---|
+| **Speed / NoClip** | Speedhack, noclip, ground-speed abuse |
+| **Aim Snap** | Instant flick > 55°/tick |
+| **Aim Spin** | Sustained > 20°/tick avg |
+| **Jerk Analysis** | AI aimbot (Bezier smoothing, stable acceleration) |
+| **DMA Subpixel** | Hardware mouse emulators (Arduino, KMBox) |
+| **Grid Snap Timing** | Triggerbot firing in server tick grid |
+| **Robotic Click Timing** | Perfect shot rhythm (σ < 15 ms) |
+| **Prefire** | Shooting before enemy enters FOV cone |
+| **Wallbang Proxy** | >30% hits with no visible target |
+| **Auto-Strafe Sync** | A/D synced to mouse with 0ms reaction |
+| **HS-Ratio** | >90% headshots after 12+ kills |
+
+#### 🧨 HvH Modules (instant ban)
+
+| Module | Detects |
+|---|---|
+| **Pitch Anti-Aim** | Pitch outside `[-89°; 89°]` — impossible without cheat |
+| **Spinbot / Jitter** | Δyaw > 140°/tick × 3+ ticks |
+| **Tickbase / DoubleTap** | >140 uscmd/sec |
+
+#### ⚙️ Infrastructure
+
+- ✅ **JSON ban-list** — survives server restart (unlike native `banid`)
+- ✅ **Discord webhook** — every detection logged with SteamID, details, timestamp
+- ✅ **In-game admin menu** (`!ac`) — thresholds, whitelist, kick/ban players
+- ✅ **Whitelist + SuperAdmins** — from config, no recompile
+- ✅ **Zero-alloc tick loop** — no GC pressure even with 64 players
+- ✅ **Auto-ban with suspicion score** — decay over time, no false positives
+
+### 🚀 Quick Start
+
+#### 1. Install CounterStrikeSharp
+Follow the official guide: https://docs.cssharp.dev/
+
+#### 2. Download the plugin
+
+Go to the [**Releases**](https://github.com/ChmonyaStudio/cs2-anticheat/releases/latest) page and download:
+
+- `CSAntiCheat-vX.Y.Z.zip` — compiled plugin, ready to install
+- `anticheat_config.example.json` — config template
+
+#### 3. Install
+
+Extract the `.zip` into:
+```
+game/csgo/addons/counterstrikesharp/plugins/CSAntiCheat/
+```
+
+Expected structure:
+```
+plugins/
+└── CSAntiCheat/
+    ├── CSAntiCheat.dll
+    └── (dependencies, if any)
+```
+
+Restart the server.
+
+#### 4. Configure
+
+On first launch, `anticheat_config.json` and `anticheat_bans.json` are created automatically. Edit:
+
+```json
+{
+  "WebhookUrl": "https://discord.com/api/webhooks/YOUR_WEBHOOK",
+  "ServerName": "My CS2 Server",
+  "Whitelist": ["76561198737716015"],
+  "SuperAdmins": ["76561198737716015"]
+}
+```
+
+#### 5. Test
+
+Join the server and type `!ac` in chat. The admin menu should appear.
+
+### 🎮 Admin Commands
+
+| Command | What it does |
+|---|---|
+| `!ac` / `!anticheat` | Open anti-cheat menu |
+| `!rules` | Show verification checklist |
+
+### 🔧 Configuration Reference
+
+Key thresholds (full list in the config file):
+
+| Parameter | Default | Description |
+|---|---|---|
+| `MaxSpeed` | 6.0 | Ground-speed threshold (m/s) |
+| `SuspicionToBan` | 25 | Points needed for auto-ban |
+| `SuspicionDecaySeconds` | 60 | Points decay interval |
+| `MaxAngleDeltaPerTick` | 55 | Aim-snap threshold (°/tick) |
+| `JerkConsecutiveTicks` | 4 | AI aimbot detection threshold |
+| `PrefireWindowMs` | 150 | Prefire detection window |
+| `PitchBanConsecutiveTicks` | 2 | HvH pitch ban threshold |
+| `SpinbotMinYawDelta` | 140 | Spinbot threshold (°/tick) |
+
+### 🧠 How it works
+
+The plugin runs on every server tick (~64 Hz) and analyzes:
+
+1. **Player velocity** — squared sums (no sqrt in hot path)
+2. **Eye angles** — via reflection, works across CSS versions
+3. **Usercmd buttons** — for strafe-sync detection
+4. **Shot intervals** — for triggerbot detection
+5. **Memory fingerprint** — for DMA subpixel patterns
+
+Each violation adds **suspicion points**. At threshold → auto-ban + webhook + JSON log.
+
+To avoid false positives:
+- **Consecutive-tick filters** — ignore single-frame spikes
+- **Warmup / freeze skip** — no detection during warmup
+- **Whitelist** — admins, VIPs, developers never banned
+- **Decay** — honest players don't accumulate points
+
+### 🛠️ Requirements
+
+- **CounterStrikeSharp** 1.0.300+
+- **.NET 8.0** runtime
+- Windows or Linux server
+
+### 📋 Changelog
+
+See [CHANGELOG.md](CHANGELOG.md) for the full version history.
+
+### 🐛 Known Limitations
+
+- Pattern scan for stream-proof may differ between CS2 builds
+- Wallbang proxy uses **angle-based heuristic**, not raycast (for performance)
+- Voice / sound cheats are not covered
+
+### 🤝 Contributing
+
+PRs are welcome. For new detection modules — please open an issue first.
+
+### 📜 License
+
+MIT — see [LICENSE](LICENSE).
+
+### 💬 Contact
+
+- **GitHub Issues:** [report a bug](https://github.com/ChmonyaStudio/cs2-anticheat/issues)
+- **Telegram:** [@p1zdabol4ik](https://t.me/p1zdabol4ik)
+
+---
+
+## 🇷🇺 Русский
+
+Современный античит-плагин для CS2 серверов на CounterStrikeSharp. Ловит aimbot, wallhack, HvH, DMA, triggerbot, bhop-скрипты и другое — без влияния на производительность.
+
+### 📦 Скачать
+
+**[⬇️ Скачать последний релиз](https://github.com/ChmonyaStudio/cs2-anticheat/releases/latest)**
+
+Сборка не нужна — в релизе готовый `.dll`, который просто кладётся в папку плагинов.
+
+### ✨ Возможности
+
+#### 🎯 Модули детекта
+
+| Модуль | Что ловит |
+|---|---|
+| **Speed / NoClip** | Speedhack, noclip, ускорение на земле |
+| **Aim Snap** | Мгновенный рывок > 55°/тик |
+| **Aim Spin** | Плавное вращение > 20°/тик (среднее) |
+| **Jerk Analysis** | AI-aimbot (сглаживание по Безье, стабильное ускорение) |
+| **DMA Subpixel** | Аппаратные эмуляторы мыши (Arduino, KMBox) |
+| **Grid Snap Timing** | Triggerbot, стреляющий в сетку тика сервера |
+| **Robotic Click Timing** | Идеальный ритм стрельбы (σ < 15 мс) |
+| **Prefire** | Выстрел до входа врага в конус обзора |
+| **Wallbang Proxy** | >30% попаданий без видимой цели |
+| **Auto-Strafe Sync** | A/D синхронизированы с мышью с 0 мс реакции |
+| **HS-Ratio** | >90% хедшотов после 12+ киллов |
+
+#### 🧨 HvH модули (мгновенный бан)
+
+| Модуль | Что детектит |
+|---|---|
+| **Pitch Anti-Aim** | Pitch вне `[-89°; 89°]` — невозможно без чита |
+| **Spinbot / Jitter** | Δyaw > 140°/тик × 3+ тика |
+| **Tickbase / DoubleTap** | >140 uscmd/сек |
+
+#### ⚙️ Инфраструктура
+
+- ✅ **JSON бан-лист** — переживает рестарт сервера (в отличие от нативного `banid`)
+- ✅ **Discord-вебхук** — каждый детект логируется с SteamID, деталями, временем
+- ✅ **Внутриигровое меню админа** (`!ac`) — пороги, вайтлист, кик/бан игроков
+- ✅ **Вайтлист + SuperAdmins** — из конфига, без перекомпиляции
+- ✅ **Zero-alloc в тике** — никакого давления на GC даже при 64 игроках
+- ✅ **Автобан с очками подозрения** — спад со временем, без ложных срабатываний
+
+### 🚀 Быстрый старт
+
+#### 1. Установи CounterStrikeSharp
+Официальный гайд: https://docs.cssharp.dev/
+
+#### 2. Скачай плагин
+
+Открой страницу [**Releases**](https://github.com/ChmonyaStudio/cs2-anticheat/releases/latest) и скачай:
+
+- `CSAntiCheat-vX.Y.Z.zip` — скомпилированный плагин, готов к установке
+- `anticheat_config.example.json` — шаблон конфига
+
+#### 3. Установи
+
+Распакуй `.zip` в:
+```
+game/csgo/addons/counterstrikesharp/plugins/CSAntiCheat/
+```
+
+Должна получиться структура:
+```
+plugins/
+└── CSAntiCheat/
+    ├── CSAntiCheat.dll
+    └── (зависимости, если есть)
+```
+
+Перезапусти сервер.
+
+#### 4. Настрой
+
+При первом запуске автоматически создаются `anticheat_config.json` и `anticheat_bans.json`. Открой конфиг:
+
+```json
+{
+  "WebhookUrl": "https://discord.com/api/webhooks/ТВОЙ_ВЕБХУК",
+  "ServerName": "Мой CS2 сервер",
+  "Whitelist": ["76561198737716015"],
+  "SuperAdmins": ["76561198737716015"]
+}
+```
+
+#### 5. Проверь
+
+Зайди на сервер и напиши `!ac` в чат. Должно открыться меню.
+
+### 🎮 Команды админа
+
+| Команда | Что делает |
+|---|---|
+| `!ac` / `!anticheat` | Открыть меню античита |
+| `!rules` | Показать чек-лист проверки |
+
+### 🔧 Справочник настроек
+
+Ключевые пороги (полный список — в конфиге):
+
+| Параметр | Дефолт | Описание |
+|---|---|---|
+| `MaxSpeed` | 6.0 | Порог скорости на земле (м/с) |
+| `SuspicionToBan` | 25 | Очков для автобана |
+| `SuspicionDecaySeconds` | 60 | Интервал спада очков |
+| `MaxAngleDeltaPerTick` | 55 | Порог aim-snap (°/тик) |
+| `JerkConsecutiveTicks` | 4 | Порог детекта AI-aimbot |
+| `PrefireWindowMs` | 150 | Окно детекта prefire |
+| `PitchBanConsecutiveTicks` | 2 | Порог бана по HvH Pitch |
+| `SpinbotMinYawDelta` | 140 | Порог spinbot (°/тик) |
+
+### 🧠 Как это работает
+
+Плагин работает **каждый тик сервера** (~64 раза/сек) и анализирует:
+
+1. **Скорость игрока** — суммы квадратов (без sqrt в горячем пути)
+2. **Углы обзора** — через рефлексию, работает на всех версиях CSS
+3. **Кнопки usercmd** — для детекта синхронизации стрейфов
+4. **Интервалы выстрелов** — для детекта triggerbot
+5. **Отпечаток памяти** — для DMA-субпиксельных паттернов
+
+Каждое нарушение даёт **очки подозрения**. При достижении порога → автобан + вебхук + запись в JSON.
+
+Чтобы избежать ложных срабатываний:
+- **Фильтр "N тиков подряд"** — игнорирует одиночные всплески
+- **Пропуск разминки / фриза** — нет детекта в warmup
+- **Вайтлист** — админы, VIP, разработчики не банятся
+- **Спад** — честные игроки не накапливают очки
+
+### 🛠️ Требования
+
+- **CounterStrikeSharp** 1.0.300+
+- **.NET 8.0** runtime
+- Windows или Linux сервер
+
+### 📋 Changelog
+
+Полная история версий: [CHANGELOG.md](CHANGELOG.md)
+
+### 🐛 Известные ограничения
+
+- Паттерн-скан для stream-proof может отличаться между билдами CS2
+- Wallbang proxy использует **эвристику по углам**, а не raycast (для производительности)
+- Voice / sound читы не покрываются
+
+### 🤝 Вклад
+
+PR приветствуются. Для новых модулей детекта — сначала открывай issue.
+
+### 📜 Лицензия
+
+MIT — см. [LICENSE](LICENSE).
+
+### 💬 Контакты
+
+- **GitHub Issues:** [сообщить о баге](https://github.com/ChmonyaStudio/cs2-anticheat/issues)
+- **Telegram:** [@p1zdabol4ik](https://t.me/p1zdabol4ik)
+
+---
+
+**Made with ❤️ for the CS2 community. / Сделано с ❤️ для CS2-сообщества.**
+
+```
+
+`WebhookLogger.cs`:
+
+```cs
+using System.Net.Http;
+using System.Text;
+using System.Text.Json;
+
+namespace CSAntiCheat;
+
+public class WebhookLogger
+{
+    private static readonly HttpClient _http = new()
+    {
+        Timeout = TimeSpan.FromSeconds(10)
+    };
+
+    private readonly string _url;
+    private readonly string _username;
+
+    public WebhookLogger(string url, string username)
+    {
+        _url = url?.Trim() ?? "";
+        _username = string.IsNullOrWhiteSpace(username) ? "AntiCheat" : username;
+    }
+
+    /// <summary>
+    /// Sends an embed to the configured Discord webhook.
+    /// Silently returns if URL is empty or placeholder.
+    /// </summary>
+    public void Send(string title, string description, int color = 0xFFAA00, List<(string, string)>? fields = null)
+    {
+        // Guard: config toggle
+        var cfg = AntiCheatPlugin.Instance?.Config;
+        if (cfg == null || !cfg.WebhookEnabled) return;
+
+        // Guard: URL not set or still placeholder
+        if (string.IsNullOrWhiteSpace(_url)) return;
+        if (_url.Contains("YOUR_WEBHOOK_HERE")) return;
+        if (!_url.StartsWith("https://discord.com/api/webhooks/") &&
+            !_url.StartsWith("https://discordapp.com/api/webhooks/"))
+            return;
+
+        // Build embed
+        var embed = new Dictionary<string, object>
+        {
+            ["title"] = title,
+            ["description"] = description,
+            ["color"] = color,
+            ["timestamp"] = DateTime.UtcNow.ToString("o"),
+            ["footer"] = new { text = "AntiCheat" }
+        };
+
+        if (fields != null && fields.Count > 0)
+        {
+            embed["fields"] = fields
+                .Select(f => new
+                {
+                    name = Truncate(f.Item1, 256),
+                    value = Truncate(f.Item2, 1024),
+                    inline = true
+                })
+                .ToArray();
+        }
+
+        var payload = new
+        {
+            username = _username,
+            embeds = new[] { embed }
+        };
+
+        string json;
+        try
+        {
+            json = JsonSerializer.Serialize(payload);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[AntiCheat Webhook] Serialize error: {ex.Message}");
+            return;
+        }
+
+        // Fire and forget
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                using var content = new StringContent(json, Encoding.UTF8, "application/json");
+                using var resp = await _http.PostAsync(_url, content);
+
+                if (!resp.IsSuccessStatusCode)
+                {
+                    Console.WriteLine($"[AntiCheat Webhook] HTTP {(int)resp.StatusCode}: {resp.ReasonPhrase}");
+                }
+            }
+            catch (TaskCanceledException)
+            {
+                Console.WriteLine("[AntiCheat Webhook] Timeout");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[AntiCheat Webhook] {ex.Message}");
+            }
+        });
+    }
+
+    // ============================================================
+    // HELPERS
+    // ============================================================
+    private static string Truncate(string s, int max)
+    {
+        if (string.IsNullOrEmpty(s)) return "";
+        return s.Length <= max ? s : s.Substring(0, max - 3) + "...";
+    }
+}
+
+```
+
+`anticheat_config.example.json`:
+
+```json
+{
+  "WebhookUrl": "https://discord.com/api/webhooks/YOUR_WEBHOOK_HERE",
+  "WebhookUsername": "Server | AntiCheat",
+  "ServerName": "My CS2 Server",
+  "WebhookEnabled": true,
+
+  "Whitelist": [
+    "76561198737716015"
+  ],
+  "SuperAdmins": [
+    "76561198737716015"
+  ],
+
+  "SpeedCheckEnabled": true,
+  "MaxSpeed": 6.0,
+  "SpeedConsecutiveTicks": 8,
+  "HugeSpeedThreshold": 14.0,
+  "HugeSpeedConsecutiveTicks": 3,
+
+  "AimCheckEnabled": true,
+  "MaxAngleDeltaPerTick": 55.0,
+  "SnapConsecutiveTicks": 2,
+  "AimWindowMaxAvg": 20.0,
+  "AimWindowSize": 8,
+
+  "JerkAnalysisEnabled": true,
+  "JerkConsecutiveTicks": 4,
+  "JerkMinMagnitude": 0.3,
+  "JerkSmallTolerance": 0.4,
+  "SmoothJerkConsecutiveTicks": 6,
+
+  "SubpixelConsecutiveTicks": 15,
+  "SubpixelMinDelta": 1.5,
+
+  "GridSnapEnabled": true,
+  "GridSnapTolerance": 0.5,
+  "GridSnapMinShots": 4,
+  "StdDevTrigger": 15.0,
+
+  "PrefireCheckEnabled": true,
+  "PrefireWindowMs": 150,
+  "PrefireConeDegrees": 20.0,
+  "PrefireMaxDistance": 3000.0,
+  "PrefireShotDirTolerance": 30.0,
+  "PrefireMinEvents": 2,
+  "PrefireThrottleSeconds": 15,
+  "PrefireSingleTapWindowMs": 500,
+
+  "WallbangProxyCheckEnabled": true,
+  "WallbangProxyMinHits": 30,
+  "WallbangProxyRatioTrigger": 0.30,
+  "WallbangProxyConeDegrees": 25.0,
+
+  "StrafeSyncCheckEnabled": true,
+  "StrafeSyncConsecutiveTicks": 12,
+  "StrafeSyncMinYawDelta": 1.0,
+  "StrafeSyncMinSpeed": 3.0,
+
+  "PitchAntiAimCheckEnabled": true,
+  "PitchMinLimit": -89.0,
+  "PitchMaxLimit": 89.0,
+  "PitchBanConsecutiveTicks": 2,
+
+  "SpinbotCheckEnabled": true,
+  "SpinbotMinYawDelta": 140.0,
+  "SpinbotConsecutiveTicks": 3,
+
+  "PacketCheckEnabled": true,
+  "PacketMaxCmdsPerSecond": 140,
+  "PacketMaxJumpPerSecond": 6,
+
+  "BhopCheckEnabled": false,
+  "BhopMinSpeed": 8.0,
+  "BhopConsecutiveTicks": 6,
+
+  "AiScoringEnabled": true,
+  "AiDiversityBonus": 1.6,
+
+  "SuspicionToBan": 25,
+  "SuspicionDecaySeconds": 90,
+  "AutoBanEnabled": true,
+  "BanDurationMinutes": 0,
+  "MinPlayersForChecks": 1,
+  "HeadshotRatioToFlag": 0.90,
+  "MinKillsToCheckHS": 12,
+
+  "DebugLog": true,
+  "DebugIntervalSeconds": 2,
+
+  "VerificationRules": {
+    "Title": "🔍 Правила проверки игроков на читы",
+    "Rules": [
+      { "Num": "1", "Text": "Жалоба подаётся через команду !report." },
+      { "Num": "2", "Text": "Администратор собирает логи матча и Prefetch-логи." },
+      { "Num": "3", "Text": "Чек-лист: длительность матча >5 мин, наличие проигранного раунда." },
+      { "Num": "4", "Text": "Аномалии: скорость >7.2 м/с, поворот >360° за кадр." },
+      { "Num": "5", "Text": "Разрешённый софт: Steam Input, драйверы NVIDIA/AMD, MSI Afterburner." },
+      { "Num": "6", "Text": "Запрещённый софт: Aim, Wallhack, ESP, Bhop, Recoil Control, Anti-Aim." },
+      { "Num": "7", "Text": "За удаление/модификацию Prefetch-логов — бан до 72 часов." },
+      { "Num": "8", "Text": "Наказания: ур.1 — 2-12 ч; ур.2 — 24-72 ч; ур.3 — перманент." },
+      { "Num": "9", "Text": "Апелляция подаётся в течение 1 часа после вердикта." },
+      { "Num": "10", "Text": "Итоговое решение выносит античит-комиссия." }
+    ]
+  }
+}
+
+```
