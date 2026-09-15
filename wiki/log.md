@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-15** — ingest `readme:categories`: Cheat ~2812 (+1; DimaReverse/[[nuitka-themida-unpacker]] Themida+Nuitka two-stage unpack in Fix Themida) / Anti Cheat ~734 (+1; IDELd/[[sac-the-server-anticheat]] CS2 Metamod/CSS server-side AC in Open Source Anti Cheat System) / other major section counts stable; 41 sections; entities [[nuitka-themida-unpacker]] and [[sac-the-server-anticheat]]; refreshed README-map counts and Themida+Nuitka unpack + CS2 server-side AC scope on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/game-hacking]], [[overviews/reverse-engineering]], and [[overviews/dma-attack]]; light `index.md` section notes (no per-category pages).
+
 - **2026-09-15** — ingest `description:IZxMD/ac-compat-research`: entity [[ac-compat-research]] (IZxMD; vendor-agnostic Linux kernel AC hosting feasibility study; LSM/signing/isolation/ABI; non-virtualized compatibility-layer dossier + knowledge graph; no bypass material; Anti Cheat / Guide); cited on [[concepts/research-rigor]] and [[overviews/game-hacking]]; cross-linked [[linux-anticheat]] and [[are-we-anti-cheat-yet]]; `index.md` updated.
 
 - **2026-09-15** — ingest `readme:categories`: Anti Cheat ~733 (+1; IZxMD/[[ac-compat-research]] vendor-agnostic Linux kernel AC hosting feasibility study in Guide) / Cheat ~2811 / other major section counts stable; 41 sections; entity [[ac-compat-research]]; refreshed README-map counts and Linux kernel AC architecture scope on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], and [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
