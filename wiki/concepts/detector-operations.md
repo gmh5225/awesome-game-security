@@ -7,6 +7,7 @@ sources:
   - wiki/sources/descriptions/pavelinbs-afk__anticheatsystem.md
   - wiki/sources/descriptions/modcommunity__dot-server-security.md
   - wiki/sources/descriptions/IDELd__SAC-The-server-AntiCheat.md
+  - wiki/sources/descriptions/ChmonyaStudio__cs2-anticheat-by-chmonya.md
 updated: 2026-09-15
 confidence: high
 ---
@@ -50,7 +51,7 @@ Distinguish source-event time, collector observation, server receipt, and decisi
 - Maximum-score aggregation or a fixed signal count does not guarantee a lower false-positive rate—measure joint error on held-out populations.
 - Retrain periodically when adversaries adapt; validate session-level aggregation for cross-session dependence and drift.
 
-Production server plugins such as [[anticheatsystem]] aggregate modular analyzer hits into JSON-configured suspicion scores before log/report/ban escalation via shared admin APIs—tune thresholds and module weights with shadow/canary runs before enabling automatic sanctions. (source: wiki/sources/descriptions/pavelinbs-afk__anticheatsystem.md) CS2 server plugins such as [[sac-the-server-anticheat]] implement four-stage progressive warning/ban ladders and elevate mass-check sensitivity after multiple in-game player reports—audit escalation thresholds before enabling automatic sanctions. (source: wiki/sources/descriptions/IDELd__SAC-The-server-AntiCheat.md) Godot dedicated-server addons such as [[dot-server-security]] ship **dry-run by default**, logging rule hits and escalation ladders (warn/gag/mute/kick/ban) without punitive action until operators finish auditing configuration. (source: wiki/sources/descriptions/modcommunity__dot-server-security.md)
+Production server plugins such as [[anticheatsystem]] aggregate modular analyzer hits into JSON-configured suspicion scores before log/report/ban escalation via shared admin APIs—tune thresholds and module weights with shadow/canary runs before enabling automatic sanctions. (source: wiki/sources/descriptions/pavelinbs-afk__anticheatsystem.md) CS2 server plugins such as [[sac-the-server-anticheat]] implement four-stage progressive warning/ban ladders and elevate mass-check sensitivity after multiple in-game player reports—audit escalation thresholds before enabling automatic sanctions. (source: wiki/sources/descriptions/IDELd__SAC-The-server-AntiCheat.md) CounterStrikeSharp CS2 plugins such as [[cs2-anticheat-by-chmonya]] run per-tick modular heuristics (aim snap/jerk, DMA subpixel mouse emulation, triggerbot/prefire/wallbang, HvH anti-aim/spinbot) into a decaying suspicion score with JSON ban persistence, Discord webhook alerts, and in-game admin threshold/whitelist controls—calibrate module weights before enabling auto-ban. (source: wiki/sources/descriptions/ChmonyaStudio__cs2-anticheat-by-chmonya.md) Godot dedicated-server addons such as [[dot-server-security]] ship **dry-run by default**, logging rule hits and escalation ladders (warn/gag/mute/kick/ban) without punitive action until operators finish auditing configuration. (source: wiki/sources/descriptions/modcommunity__dot-server-security.md)
 
 ## Related
 

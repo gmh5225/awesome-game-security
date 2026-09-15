@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-15** — ingest `description:ChmonyaStudio/cs2-anticheat-by-chmonya`: entity [[cs2-anticheat-by-chmonya]] (ChmonyaStudio; C#/.NET 8 CounterStrikeSharp; per-tick heuristics for aim snap/jerk, DMA subpixel mouse emulation, HvH anti-aim/spinbot/tickbase, triggerbot/prefire/wallbang/bhop; decaying suspicion auto-ban; JSON ban list + Discord webhooks + in-game admin menu; Open Source Anti Cheat System); cited on [[concepts/detector-operations]] and [[overviews/dma-attack]]; cross-linked [[sac-the-server-anticheat]], [[cs2ac]], and [[cs2guard]]; `index.md` updated.
+
 - **2026-09-15** — ingest `readme:categories`: Anti Cheat ~735 (+1; ChmonyaStudio/[[cs2-anticheat-by-chmonya]] CS2 CounterStrikeSharp server-side heuristic AC with DMA subpixel detection in Open Source Anti Cheat System) / Cheat ~2812 / other major section counts stable; 41 sections; entity [[cs2-anticheat-by-chmonya]]; refreshed README-map counts and CS2 server-side CSS AC scope on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/game-hacking]], [[overviews/dma-attack]], and [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
 
 - **2026-09-15** — lint (agent pass): index vs disk scan — 9 overviews, 50 concepts, 3904 entities (3963 index entries); index.md fully synced (0 missing, 0 dead, 0 duplicate entries); overview wikilink spot-check (9 pages) — 0 broken links; concept spot-check (50 pages) — 0 broken links; index.md wikilink scan — 0 broken links; 6 cross-kind slug collisions ([[game-hacking]], [[anti-cheat]], [[reverse-engineering]], [[il2cpp]], [[byovd]], [[dma]]) — expected, no repair needed; no structural edits required.
