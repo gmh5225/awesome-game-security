@@ -502,6 +502,7 @@ sources:
   - wiki/sources/descriptions/savagedamage__android-security-wizard.md
   - wiki/sources/descriptions/NetKingJ__awesome-android-security.md
   - wiki/sources/descriptions/NPC2000__AppPealing-new.md
+  - wiki/sources/descriptions/Xposed-Modules-Repo__com.fuck.iab.md
   - wiki/sources/descriptions/NepMods__InjectARM64.md
   - wiki/sources/descriptions/Nirad-Maharaj__Disable-Call-Recording-BookRestore-.md
   - wiki/sources/descriptions/IAIK__armageddon.md
@@ -513,7 +514,7 @@ sources:
   - wiki/sources/descriptions/Maxamedxasa__SakoREStudio.md
   - wiki/sources/descriptions/AshrafMorningstar__hayday-bot.md
   - wiki/sources/descriptions/wumingzhinu__VirtualMachine.md
-updated: 2026-09-13
+updated: 2026-09-15
 confidence: high
 ---
 
@@ -594,7 +595,7 @@ Root paths: `/proc/<pid>/mem` pread/pwrite, GameGuardian-style editors, ceserver
 
 ## In-app purchase (IAP) & billing
 
-Client-side Play Billing hooks such as [[freedom]] intercept the billing service interface and return fake purchase confirmations—useful for studying IAP verification weaknesses on Android games that trust local billing callbacks without robust server-side receipt checks. (source: wiki/sources/descriptions/gmh5225__freedom.md)
+Client-side Play Billing hooks such as [[freedom]] intercept the billing service interface and return fake purchase confirmations—useful for studying IAP verification weaknesses on Android games that trust local billing callbacks without robust server-side receipt checks. (source: wiki/sources/descriptions/gmh5225__freedom.md) Multi-store billing hook module [[com-fuck-iab]] (FKIAB; LSPosed/Xposed; intercepts Google Play, Bazaar, and Myket billing service binders; embeds Frida Gum for compiled TypeScript per-package scripts; restore purchases / bypass local checks; Cheat / Xposed) extends that lane for regional storefronts and scriptable per-title IAP analysis. (source: wiki/sources/descriptions/Xposed-Modules-Repo__com.fuck.iab.md)
 
 ## Mobile anti-cheat
 
