@@ -4470,6 +4470,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/karola3vax/CS2AC [Open-source server-side CS2 anti-cheat Metamod:Source plugin with aimbot/aimlock/silentaim and related detections]
 - https://github.com/pavelinbs-afk/anticheatsystem [CS2 MetaMod server-side anti-cheat with C++ aim/movement/statistics analyzers, suspicion scoring, and AdminPlugin ban integration]
 - https://github.com/IDELd/SAC-The-server-AntiCheat [Server-side CS2 anti-cheat plugin for Metamod:Source and CounterStrikeSharp with 17 algorithmic detection modules, in-game reporting, and progressive enforcement]
+- https://github.com/ChmonyaStudio/cs2-anticheat-by-chmonya [Server-side CS2 CounterStrikeSharp anti-cheat with heuristic detectors for aim snap/jerk, DMA subpixel, HvH anti-aim/spinbot, grid-snap triggerbot, and prefire; JSON ban-list and Discord webhooks]
 - https://github.com/cs2-server-plugins/cs2-calladmin [ModSharp CS2 server plugin for in-game cheater reports with admin claim/resolve workflow and optional Discord notifications]
 - https://github.com/speedskater1610/CS2KAC [Open-source CS2 kernel-mode anti-cheat companion (KMDF driver + usermode service) for client-side integrity signals alongside CS2AC/CS2FOW]
 - https://github.com/Driw0x/CS2Guard [ML behavioral cheat detection for CS2 from demo parsing and feature engineering toward real-time server-side anti-cheat]
