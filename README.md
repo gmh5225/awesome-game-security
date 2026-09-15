@@ -1095,6 +1095,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/sodareverse/TDE
 - https://github.com/ergrelet/themida-unmutate
 - https://github.com/ergrelet/unlicense [Dynamic unpacker and import fixer for Themida/WinLicense 2.x and 3.x]
+- https://github.com/DimaReverse/nuitka-themida-unpacker [Two-stage unpacking pipeline that chains Themida/WinLicense dynamic unpacking (unlicense) with Nuitka onefile KAX/KAY static extraction]
 - https://github.com/Hendi48/Magicmida [Themida auto-unpacker for 32/64-bit apps with dump and section restore helpers]
 - https://github.com/guoxing2024/magicmida-rs [Rust reimplementation of Magicmida Themida unpacker with IAT rebuild and OEP discovery]
 - https://github.com/bobalkkagi/bobalkkagi [Themida 3.x unpacking/unwrapping via API-hook emulation (Tiger red64)]
@@ -4468,6 +4469,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/Pintuzoft/OSAntiCheat [Server-side CS2 CounterStrikeSharp heuristic anti-cheat (spinbot/aimbot/triggerbot/wallhack detectors, log-only)]
 - https://github.com/karola3vax/CS2AC [Open-source server-side CS2 anti-cheat Metamod:Source plugin with aimbot/aimlock/silentaim and related detections]
 - https://github.com/pavelinbs-afk/anticheatsystem [CS2 MetaMod server-side anti-cheat with C++ aim/movement/statistics analyzers, suspicion scoring, and AdminPlugin ban integration]
+- https://github.com/IDELd/SAC-The-server-AntiCheat [Server-side CS2 anti-cheat plugin for Metamod:Source and CounterStrikeSharp with 17 algorithmic detection modules, in-game reporting, and progressive enforcement]
 - https://github.com/cs2-server-plugins/cs2-calladmin [ModSharp CS2 server plugin for in-game cheater reports with admin claim/resolve workflow and optional Discord notifications]
 - https://github.com/speedskater1610/CS2KAC [Open-source CS2 kernel-mode anti-cheat companion (KMDF driver + usermode service) for client-side integrity signals alongside CS2AC/CS2FOW]
 - https://github.com/Driw0x/CS2Guard [ML behavioral cheat detection for CS2 from demo parsing and feature engineering toward real-time server-side anti-cheat]
