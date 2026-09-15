@@ -28,4 +28,4 @@ Peers with [[themida-unmutate]], [[magicmida]], [[magicmida-rs]], and [[bobalkka
 
 ## Related
 
-[[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[unlicense]] · [[themida-unmutate]] · [[magicmida]] · [[control-flow-flattening]]
+[[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[unlicense]] · [[unpacker]] · [[disrobe]] · [[themida-unmutate]] · [[magicmida]] · [[control-flow-flattening]]
