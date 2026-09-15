@@ -1312,6 +1312,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 
 > Xposed
 - https://github.com/NPC2000/AppPealing-new [An Xposed module that disables Inka AppSealing, a popular anti-cheat and anti-root solution]
+- https://github.com/xposed-modules-repo/com.fuck.iab [LSPosed/Xposed module that hooks Google Play, Bazaar, and Myket in-app billing to bypass purchases, with per-package Frida script support]
 - https://github.com/mabbcoll13/xposed-module-kit [Xposed/LSPosed module scaffold with hook templates and root-detection bypass example]
 - https://github.com/Jordan231111/lsposed-universal-template [LSPosed/LSPatch module template with Unity/Unreal/Godot engine detection, native pattern scan and memory helpers, and runtime overlay toggles]
 - https://github.com/wchunlin1006/LocusMimic [LSPosed/Xposed Android GPS spoof module with map picker, saved locations, and app/system/mock-provider modes]
