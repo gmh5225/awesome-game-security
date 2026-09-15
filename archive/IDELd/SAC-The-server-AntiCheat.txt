@@ -1,0 +1,3875 @@
+Project Path: arc_IDELd_SAC-The-server-AntiCheat_4m6pz2or
+
+Source Tree:
+
+```txt
+arc_IDELd_SAC-The-server-AntiCheat_4m6pz2or
+├── LICENSE
+├── README.md
+├── SAC
+│   ├── Config
+│   │   ├── SacConfig.cs
+│   │   └── sac_config.json
+│   ├── Modules
+│   │   ├── AimbotModule.cs
+│   │   ├── AimlockModule.cs
+│   │   ├── AntiAimModule.cs
+│   │   ├── AutoStrafeModule.cs
+│   │   ├── BhopModule.cs
+│   │   ├── DeSubtickingModule.cs
+│   │   ├── DetectionCommon.cs
+│   │   ├── DllInjectionModule.cs
+│   │   ├── DoubleTapModule.cs
+│   │   ├── HyperscrollModule.cs
+│   │   ├── IModule.cs
+│   │   ├── InhumanAccuracyModule.cs
+│   │   ├── InvalidCvarModule.cs
+│   │   ├── InvalidInputModule.cs
+│   │   ├── IrregularBehaviorModule.cs
+│   │   ├── NameChangerModule.cs
+│   │   ├── NullsModule.cs
+│   │   ├── SilentAimModule.cs
+│   │   └── SubtickSpamModule.cs
+│   ├── SAC.csproj
+│   ├── SACPlugin.cs
+│   └── Services
+│       ├── BanService.cs
+│       ├── ChatService.cs
+│       ├── ConsentService.cs
+│       ├── DataCollector.cs
+│       ├── MassCheckService.cs
+│       ├── ReportService.cs
+│       ├── SACnetRegistry.cs
+│       ├── SacKillService.cs
+│       ├── SchizophreniaService.cs
+│       ├── WarningCounterService.cs
+│       └── WarningService.cs
+└── SAC.sln
+
+```
+
+`LICENSE`:
+
+```
+MIT License
+
+Copyright (c) 2026 SAC Team
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
+`README.md`:
+
+```md
+# SAC — Super Anti Cheat
+
+Серверный алгоритмический античит для **Counter-Strike 2**, работающий поверх
+[Metamod:Source](https://www.sourcemm.net/) и [CounterStrikeSharp](https://docs.cssharp.dev/).
+
+> **SAC 1.0** — текущая, полностью алгоритмическая версия, без использования ИИ/LLM.
+> Дальнейшее развитие проекта: **SACnet** (закрытая сеть доверенных игроков) и **SAC 2.0** (SAC 1.0 + ИИ) ведутся отдельно.
+> Плагин работает автономно на CS2-сервере — внешние интеграции (например, Telegram-бот) не используются.
+
+## Возможности
+
+- **17 алгоритмических модулей детекции**: Aimbot, Aimlock, SilentAim, InhumanAccuracy,
+  IrregularBehavior, AutoStrafe, Bhop, Hyperscroll, Nulls, AntiAim, DllInjection,
+  DeSubticking, DoubleTap, InvalidCvar, InvalidInput, NameChanger, SubtickSpam.
+- **Система жалоб** через внутриигровую команду `!sac_report` (игровое меню выбора цели и причины).
+- **Массовая проверка сервера**: при 3 уникальных жалобах на одного игрока за 10 минут
+  все модули временно ужесточают чувствительность в 2 раза на 3 минуты.
+- **Система из 4 прогрессивных предупреждений**: попытки 1–2 — простое убийство (slay),
+  попытка 3 — обнуление игрового баланса + slay, попытка 4 — бан на 168 часов и кик.
+  Счётчик сохраняется между сессиями (`warnings.json`) и сбрасывается после 10 "чистых" раундов.
+- **Показательное устранение читера ботом «SAC»** (`SacKillService`) — доступно как отдельная
+  демонстративная механика для активных, ещё не забаненных читеров.
+- **Поведение забаненных игроков**: могут зайти на сервер и выбрать команду, но автоматически
+  убиваются в начале каждого раунда, пока действует временный бан (`bans.json`).
+- **Режим "шизофрении"**: психологическое давление на читера перед финальным баном
+  (фейковые сообщения, фейковые уведомления SAC, фейковый VAC-экран, ослепление,
+  сброс оружия, заморозка, фейковые игроки, "невидимые ловушки").
+- **Окно согласия на сбор данных** при подключении — отказ ведёт к кику с обратным отсчётом.
+- **Подсказка о команде жалобы** в начале каждого раунда.
+- **Автобан и отмена матча** в Competitive/Premier/Wingman при финальном (4-м) предупреждении.
+- **SACnet**: реестр доверенных игроков с пожизненным баном за измену сети.
+- **Запись демок матча** через SourceTV (`tv_record`/`tv_stoprecord`), привязанных к метаданным матча.
+- **Сбор анонимизированного датасета** игровых событий (SteamID хешируется SHA-256,
+  ники заменяются), включая отдельные персональные логи по каждому игроку.
+
+## Требования
+
+- CS2 Dedicated Server
+- [Metamod:Source](https://www.sourcemm.net/downloads/) (последняя версия под CS2)
+- [CounterStrikeSharp](https://github.com/roflmuffin/CounterStrikeSharp) v1.0.305+
+- .NET SDK 8.0 (для сборки)
+
+## Установка
+
+1. Соберите проект (см. раздел «Сборка») или скачайте готовую сборку.
+2. Скопируйте содержимое `bin/Release/net8.0/` (включая `SAC.dll` и папку `Config/`)
+   в `game/csgo/addons/counterstrikesharp/plugins/SAC/`.
+3. Отредактируйте `Config/sac_config.json` — обязательно смените `salt` на случайную
+   строку из 32 символов.
+4. Перезапустите сервер или выполните `css_plugins reload SAC`.
+
+## Сборка
+
+```bash
+git clone https://github.com/<your-org>/SAC-AntiCheat.git
+cd SAC-AntiCheat
+dotnet restore
+dotnet build -c Release
+```
+
+Готовая сборка появится в `SAC/bin/Release/net8.0/SAC.dll`.
+
+## Конфигурация
+
+Файл `Config/sac_config.json`:
+
+| Параметр                          | Описание                                                        |
+|-------------------------------------|-------------------------------------------------------------------|
+| `salt`                              | Соль для хеширования SteamID в датасете                          |
+| `http_port`                         | Зарезервированный порт (не используется без внешних интеграций)  |
+| `reports_for_masscheck`             | Число уникальных жалоб для запуска массовой проверки             |
+| `report_window_seconds`             | Окно накопления жалоб, секунд                                    |
+| `aimbot_max_angular_velocity`       | Порог угловой скорости прицела, °/с                              |
+| `aimbot_preshot_window`             | Окно анализа "рывок-выстрел", секунд                             |
+| `bhop_timing_tolerance`             | Минимальный тайминг прыжка после приземления, секунд             |
+| `inhuman_accuracy_threshold`        | Порог доли хедшотов                                               |
+| `competitive_game_modes`            | Список game_mode, считающихся соревновательными                  |
+| `warning_attempts_before_ban`       | Количество предупреждений перед окончательным баном (по умолчанию 4) |
+| `warning_reset_after_clean_rounds`  | Число "чистых" раундов для сброса счётчика предупреждений        |
+| `ban_duration_hours`                | Длительность временного бана после исчерпания попыток, часов     |
+| `demo_recording_enabled`            | Включить запись демок матчей через SourceTV                      |
+| `demo_folder`                       | Папка для сохранения демок (относительно каталога плагина)       |
+| `consent_required`                  | Показывать окно согласия на сбор данных при подключении          |
+| `consent_kick_delay_seconds`        | Задержка кика при отказе от согласия, секунд                     |
+| `tip_message_enabled`               | Показывать подсказку о команде `!sac_report` в начале раунда     |
+
+## Команды
+
+| Команда        | Описание                              |
+|-----------------|----------------------------------------|
+| `!sac_report`   | Открыть меню жалобы на игрока          |
+| `!sac_status`   | Показать статус SAC и ID текущего матча|
+| `!sac_appeal`   | Открыть меню апелляции                 |
+
+## Система прогрессивных предупреждений
+
+При срабатывании любого модуля детекции игроку не выносится мгновенный бан — вместо этого
+применяется последовательность из 4 попыток (`WarningCounterService`):
+
+1. **Попытка 1/4** — центральная табличка с предупреждением + простое убийство (`slay`).
+2. **Попытка 2/4** — аналогично попытке 1.
+3. **Попытка 3/4** — обнуление баланса в игровом магазине + `slay`.
+4. **Попытка 4/4** — бан на `ban_duration_hours` часов (по умолчанию 168), кик с сервера,
+   отмена матча в соревновательном режиме.
+
+Счётчик хранится в `warnings.json` и сбрасывается, если игрок отыграл `warning_reset_after_clean_rounds`
+раундов подряд без единого срабатывания детекторов.
+
+## Структура проекта
+
+```
+SAC/
+├── SAC.csproj
+├── SACPlugin.cs             — точка входа плагина
+├── Modules/                 — 17 алгоритмических модулей детекции
+│   ├── IModule.cs
+│   ├── AimbotModule.cs
+│   ├── AimlockModule.cs
+│   ├── SilentAimModule.cs
+│   ├── InhumanAccuracyModule.cs
+│   ├── IrregularBehaviorModule.cs
+│   ├── AutoStrafeModule.cs
+│   ├── BhopModule.cs
+│   ├── HyperscrollModule.cs
+│   ├── NullsModule.cs
+│   ├── AntiAimModule.cs
+│   ├── DllInjectionModule.cs
+│   ├── DeSubtickingModule.cs
+│   ├── DoubleTapModule.cs
+│   ├── InvalidCvarModule.cs
+│   ├── InvalidInputModule.cs
+│   ├── NameChangerModule.cs
+│   ├── SubtickSpamModule.cs
+│   └── DetectionCommon.cs   — общие структуры данных для модулей
+├── Services/
+│   ├── ChatService.cs
+│   ├── DataCollector.cs
+│   ├── SACnetRegistry.cs
+│   ├── ReportService.cs           — только игровое меню жалоб
+│   ├── MassCheckService.cs
+│   ├── BanService.cs              — бан/анбан, bans.json, отмена матча
+│   ├── WarningService.cs          — предупреждение о сборе данных (MOTD)
+│   ├── WarningCounterService.cs   — счётчик из 4 прогрессивных предупреждений
+│   ├── SchizophreniaService.cs    — психологическое давление на читера
+│   ├── SacKillService.cs          — показательное устранение ботом "SAC"
+│   └── ConsentService.cs          — окно согласия на сбор данных
+└── Config/
+    ├── SacConfig.cs
+    └── sac_config.json
+```
+
+Во время работы плагин автоматически создаёт рядом с собой каталог `dataset/`:
+
+```
+dataset/
+├── raw/        — все события всех игроков
+├── clean/      — события только от участников SACnet
+├── cheat/      — маркеры обнаруженных читеров
+├── warnings/   — события системы прогрессивных предупреждений
+├── players/    — персональные журналы игроков (dataset/players/<anon_id>/)
+├── demos/      — записи матчей (SourceTV, .dem)
+└── meta/       — метаданные матчей (включая ссылку на файл демки)
+```
+
+## Зависимости
+
+- [`CounterStrikeSharp.API`](https://www.nuget.org/packages/CounterStrikeSharp.API) 1.0.305
+- [`Newtonsoft.Json`](https://www.nuget.org/packages/Newtonsoft.Json) 13.0.3
+
+## Датасет
+
+SteamID никогда не хранится в открытом виде — только SHA-256 хеш с солью из конфигурации.
+Формат — JSONL, ротация файлов по дням (`ГГГГ-ММ-ДД.jsonl`). Записи демок матчей (SourceTV)
+привязываются к соответствующему `dataset/meta/match_<id>.json` через поле `demo_file`.
+
+## Дорожная карта
+
+1. **SAC 1.0** (этот репозиторий) — алгоритмический античит.
+2. **SACnet** — закрытая сеть доверенных игроков.
+3. **SAC 2.0** — SAC 1.0 + ИИ (DeepSeek R1 Distill 7B) для анализа накопленного датасета.
+
+## Лицензия
+
+Проект распространяется под лицензией [MIT](LICENSE).
+
+```
+
+`SAC.sln`:
+
+```sln
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SAC", "SAC\SAC.csproj", "{8B2B1C4E-3D2A-4F5E-9C1A-1A2B3C4D5E6F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{8B2B1C4E-3D2A-4F5E-9C1A-1A2B3C4D5E6F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8B2B1C4E-3D2A-4F5E-9C1A-1A2B3C4D5E6F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8B2B1C4E-3D2A-4F5E-9C1A-1A2B3C4D5E6F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8B2B1C4E-3D2A-4F5E-9C1A-1A2B3C4D5E6F}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
+
+```
+
+`SAC/Config/SacConfig.cs`:
+
+```cs
+using Newtonsoft.Json;
+
+namespace SAC.Config
+{
+    /// <summary>
+    /// Конфигурация плагина SAC, загружаемая из Config/sac_config.json.
+    /// </summary>
+    public class SacConfig
+    {
+        [JsonProperty("salt")]
+        public string Salt { get; set; } = "CHANGE_ME_TO_RANDOM_32_CHARS";
+
+        [JsonProperty("http_port")]
+        public int HttpPort { get; set; } = 27016;
+
+        [JsonProperty("reports_for_masscheck")]
+        public int ReportsForMassCheck { get; set; } = 3;
+
+        [JsonProperty("report_window_seconds")]
+        public int ReportWindowSeconds { get; set; } = 600;
+
+        [JsonProperty("aimbot_max_angular_velocity")]
+        public float AimbotMaxAngularVelocity { get; set; } = 1200f;
+
+        [JsonProperty("aimbot_preshot_window")]
+        public float AimbotPreshotWindow { get; set; } = 0.2f;
+
+        [JsonProperty("bhop_timing_tolerance")]
+        public float BhopTimingTolerance { get; set; } = 0.02f;
+
+        [JsonProperty("inhuman_accuracy_threshold")]
+        public float InhumanAccuracyThreshold { get; set; } = 0.8f;
+
+        [JsonProperty("competitive_game_modes")]
+        public int[] CompetitiveGameModes { get; set; } = new[] { 1, 2 };
+
+        [JsonProperty("warning_attempts_before_ban")]
+        public int WarningAttemptsBeforeBan { get; set; } = 4;
+
+        [JsonProperty("warning_reset_after_clean_rounds")]
+        public int WarningResetAfterCleanRounds { get; set; } = 10;
+
+        [JsonProperty("ban_duration_hours")]
+        public int BanDurationHours { get; set; } = 168;
+
+        [JsonProperty("demo_recording_enabled")]
+        public bool DemoRecordingEnabled { get; set; } = true;
+
+        [JsonProperty("demo_folder")]
+        public string DemoFolder { get; set; } = "dataset/demos";
+
+        [JsonProperty("consent_required")]
+        public bool ConsentRequired { get; set; } = true;
+
+        [JsonProperty("consent_kick_delay_seconds")]
+        public int ConsentKickDelaySeconds { get; set; } = 5;
+
+        [JsonProperty("tip_message_enabled")]
+        public bool TipMessageEnabled { get; set; } = true;
+
+        /// <summary>
+        /// Загружает конфигурацию из файла. Если файл отсутствует — создаёт со значениями по умолчанию.
+        /// </summary>
+        public static SacConfig Load(string path)
+        {
+            if (!File.Exists(path))
+            {
+                var def = new SacConfig();
+                File.WriteAllText(path, JsonConvert.SerializeObject(def, Formatting.Indented));
+                return def;
+            }
+
+            var json = File.ReadAllText(path);
+            return JsonConvert.DeserializeObject<SacConfig>(json) ?? new SacConfig();
+        }
+    }
+}
+
+```
+
+`SAC/Config/sac_config.json`:
+
+```json
+{
+  "salt": "CHANGE_ME_TO_RANDOM_32_CHARS",
+  "http_port": 27016,
+  "reports_for_masscheck": 3,
+  "report_window_seconds": 600,
+  "aimbot_max_angular_velocity": 1200,
+  "aimbot_preshot_window": 0.2,
+  "bhop_timing_tolerance": 0.02,
+  "inhuman_accuracy_threshold": 0.8,
+  "competitive_game_modes": [1, 2],
+  "warning_attempts_before_ban": 4,
+  "warning_reset_after_clean_rounds": 10,
+  "ban_duration_hours": 168,
+  "demo_recording_enabled": true,
+  "demo_folder": "dataset/demos",
+  "consent_required": true,
+  "consent_kick_delay_seconds": 5,
+  "tip_message_enabled": true
+}
+
+```
+
+`SAC/Modules/AimbotModule.cs`:
+
+```cs
+using CounterStrikeSharp.API.Core;
+using CounterStrikeSharp.API.Modules.Events;
+using CounterStrikeSharp.API.Modules.Utils;
+using SAC.Config;
+
+namespace SAC.Modules
+{
+    /// <summary>
+    /// Детектирует резкие рывки прицела ("снап-аим"), сравнивая угол обзора
+    /// незадолго до выстрела с углом обзора в момент выстрела.
+    /// </summary>
+    public class AimbotModule : IModule
+    {
+        public string Name => "Aimbot";
+
+        private readonly SacConfig _config;
+        private readonly Action<CCSPlayerController, string, string> _onDetected;
+        private readonly Dictionary<ulong, RollingHistory<AngleSnapshot>> _history = new();
+        private float _multiplier = 1.0f;
+
+        private const int HistoryCapacity = 32;
+
+        public AimbotModule(SacConfig config, Action<CCSPlayerController, string, string> onDetected)
+        {
+            _config = config;
+            _onDetected = onDetected;
+        }
+
+        public void SetSensitivityMultiplier(float multiplier) => _multiplier = multiplier;
+
+        public void OnRoundStart() => _history.Clear();
+
+        /// <summary>
+        /// Должен вызываться каждый серверный тик из SACPlugin для накопления истории углов.
+        /// </summary>
+        public void RecordAngle(CCSPlayerController player)
+        {
+            if (player.PlayerPawn?.Value == null) return;
+
+            var steamId = player.SteamID;
+            var angle = player.PlayerPawn.Value.EyeAngles;
+            var now = Server.CurrentTime;
+
+            if (!_history.TryGetValue(steamId, out var hist))
+            {
+                hist = new RollingHistory<AngleSnapshot>(HistoryCapacity);
+                _history[steamId] = hist;
+            }
+
+            hist.Add(new AngleSnapshot(now, angle));
+        }
+
+        public void OnWeaponFire(CCSPlayerController player, EventWeaponFire @event)
+        {
+            if (!_history.TryGetValue(player.SteamID, out var hist) || hist.Items.Count < 2) return;
+
+            var now = Server.CurrentTime;
+            var preShotWindow = _config.AimbotPreshotWindow;
+
+            // Ищем снимок, максимально близкий к началу окна "до выстрела"
+            AngleSnapshot? beforeShot = null;
+            foreach (var snap in hist.Items)
+            {
+                if (now - snap.Timestamp >= preShotWindow)
+                {
+                    beforeShot = snap;
+                }
+            }
+
+            if (beforeShot == null) return;
+
+            var lastSnap = hist.Items[^1];
+            var angularVelocity = AngleMath.AngularVelocity(beforeShot.Value, lastSnap);
+            var threshold = _config.AimbotMaxAngularVelocity * _multiplier;
+
+            if (angularVelocity >= threshold)
+            {
+                _onDetected(player, Name,
+                    $"Резкий рывок прицела перед выстрелом: {angularVelocity:F0}°/с (порог {threshold:F0}°/с)");
+            }
+        }
+
+        public void OnPlayerHurt(CCSPlayerController victim, CCSPlayerController attacker, EventPlayerHurt @event)
+        {
+            // Основная логика Aimbot строится вокруг выстрела, урон здесь дополнительно не анализируется.
+        }
+    }
+}
+
+```
+
+`SAC/Modules/AimlockModule.cs`:
+
+```cs
+using CounterStrikeSharp.API.Core;
+using CounterStrikeSharp.API.Modules.Events;
+using SAC.Config;
+
+namespace SAC.Modules
+{
+    /// <summary>
+    /// Детектирует "аимлок" — аномально точное удержание прицела на движущейся цели
+    /// на протяжении длительного времени.
+    /// </summary>
+    public class AimlockModule : IModule
+    {
+        public string Name => "Aimlock";
+
+        private readonly SacConfig _config;
+        private readonly Action<CCSPlayerController, string, string> _onDetected;
+
+        // Для каждого атакующего храним, сколько секунд подряд его прицел
+        // удерживает крайне малое отклонение от цели, и время начала слежения.
+        private readonly Dictionary<ulong, (ulong targetSteamId, double lockStartedAt, float minDeltaSum, int samples)> _tracking = new();
+
+        private float _multiplier = 1.0f;
+        private const float MaxDeltaDegrees = 1.5f; // максимальное отклонение прицела от цели, считающееся "точным слежением"
+        private const double RequiredLockSeconds = 1.0;
+
+        public AimlockModule(SacConfig config, Action<CCSPlayerController, string, string> onDetected)
+        {
+            _config = config;
+            _onDetected = onDetected;
+        }
+
+        public void SetSensitivityMultiplier(float multiplier) => _multiplier = multiplier;
+
+        public void OnRoundStart() => _tracking.Clear();
+
+        /// <summary>
+        /// Вызывается каждый тик из SACPlugin: проверяет, насколько точно прицел атакующего
+        /// следует за ближайшей вражеской целью.
+        /// </summary>
+        public void EvaluateTracking(CCSPlayerController attacker, CCSPlayerController target, float angleDeltaToTarget)
+        {
+            var threshold = MaxDeltaDegrees * _multiplier;
+            var now = Server.CurrentTime;
+            var steamId = attacker.SteamID;
+
+            if (angleDeltaToTarget > threshold)
+            {
+                _tracking.Remove(steamId);
+                return;
+            }
+
+            if (!_tracking.TryGetValue(steamId, out var state) || state.targetSteamId != target.SteamID)
+            {
+                _tracking[steamId] = (target.SteamID, now, angleDeltaToTarget, 1);
+                return;
+            }
+
+            state.minDeltaSum += angleDeltaToTarget;
+            state.samples += 1;
+            _tracking[steamId] = state;
+
+            var lockedDuration = now - state.lockStartedAt;
+            if (lockedDuration >= RequiredLockSeconds)
+            {
+                var avgDelta = state.minDeltaSum / state.samples;
+                _onDetected(attacker, Name,
+                    $"Аномально точное сопровождение цели {lockedDuration:F1} с подряд (ср. отклонение {avgDelta:F2}°)");
+                _tracking.Remove(steamId);
+            }
+        }
+
+        public void OnWeaponFire(CCSPlayerController player, EventWeaponFire @event)
+        {
+        }
+
+        public void OnPlayerHurt(CCSPlayerController victim, CCSPlayerController attacker, EventPlayerHurt @event)
+        {
+        }
+    }
+}
+
+```
+
+`SAC/Modules/AntiAimModule.cs`:
+
+```cs
+using CounterStrikeSharp.API.Core;
+using CounterStrikeSharp.API.Modules.Events;
+using SAC.Config;
+
+namespace SAC.Modules
+{
+    /// <summary>
+    /// Детектирует "anti-aim" читы: неестественное дрожание, быстрое вращение
+    /// углов обзора вне выстрелов и мгновенный возврат прицела в нормальное положение сразу после атаки.
+    /// </summary>
+    public class AntiAimModule : IModule
+    {
+        public string Name => "AntiAim";
+
+        private readonly SacConfig _config;
+        private readonly Action<CCSPlayerController, string, string> _onDetected;
+        private readonly Dictionary<ulong, RollingHistory<AngleSnapshot>> _history = new();
+        private readonly Dictionary<ulong, int> _jitterStreak = new();
+        private float _multiplier = 1.0f;
+
+        private const int HistoryCapacity = 16;
+        private const float JitterFlipThresholdDegrees = 30f; // резкий "флип" yaw за один снимок
+        private const int JitterStreakToTrigger = 8;
+
+        public AntiAimModule(SacConfig config, Action<CCSPlayerController, string, string> onDetected)
+        {
+            _config = config;
+            _onDetected = onDetected;
+        }
+
+        public void SetSensitivityMultiplier(float multiplier) => _multiplier = multiplier;
+
+        public void OnRoundStart()
+        {
+            _history.Clear();
+            _jitterStreak.Clear();
+        }
+
+        public void OnWeaponFire(CCSPlayerController player, EventWeaponFire @event)
+        {
+        }
+
+        public void OnPlayerHurt(CCSPlayerController victim, CCSPlayerController attacker, EventPlayerHurt @event)
+        {
+        }
+
+        /// <summary>
+        /// Вызывается каждый тик из SACPlugin (в моменты, когда игрок не стреляет),
+        /// анализирует резкие немотивированные скачки yaw между тиками.
+        /// </summary>
+        public void RecordIdleAngle(CCSPlayerController player)
+        {
+            if (player.PlayerPawn?.Value == null) return;
+
+            var steamId = player.SteamID;
+            var angle = player.PlayerPawn.Value.EyeAngles;
+            var now = Server.CurrentTime;
+
+            if (!_history.TryGetValue(steamId, out var hist))
+            {
+                hist = new RollingHistory<AngleSnapshot>(HistoryCapacity);
+                _history[steamId] = hist;
+            }
+
+            var snapshot = new AngleSnapshot(now, angle);
+
+            if (hist.Items.Count > 0)
+            {
+                var prev = hist.Items[^1];
+                var flip = AngleMath.DeltaDegrees(angle.Y, prev.Angle.Y);
+                var threshold = JitterFlipThresholdDegrees * _multiplier;
+
+                _jitterStreak.TryGetValue(steamId, out var streak);
+
+                if (flip >= threshold && (now - prev.Timestamp) < 0.05)
+                {
+                    streak += 1;
+                    _jitterStreak[steamId] = streak;
+
+                    if (streak >= JitterStreakToTrigger)
+                    {
+                        _onDetected(player, Name,
+                            $"Неестественное дрожание/вращение прицела вне боя: {streak} резких скачков подряд (>{threshold:F0}°)");
+                        _jitterStreak[steamId] = 0;
+                    }
+                }
+                else
+                {
+                    _jitterStreak[steamId] = 0;
+                }
+            }
+
+            hist.Add(snapshot);
+        }
+    }
+}
+
+```
+
+`SAC/Modules/AutoStrafeModule.cs`:
+
+```cs
+using CounterStrikeSharp.API.Core;
+using CounterStrikeSharp.API.Modules.Events;
+using SAC.Config;
+
+namespace SAC.Modules
+{
+    /// <summary>
+    /// Анализирует движение игрока в воздухе. Скрипты автострейфа удерживают
+    /// скорость почти идеально стабильной на всём протяжении прыжка,
+    /// в отличие от человека, у которого скорость естественно "гуляет".
+    /// </summary>
+    public class AutoStrafeModule : IModule
+    {
+        public string Name => "AutoStrafe";
+
+        private readonly SacConfig _config;
+        private readonly Action<CCSPlayerController, string, string> _onDetected;
+        private readonly Dictionary<ulong, RollingHistory<MovementSnapshot>> _airHistory = new();
+        private float _multiplier = 1.0f;
+
+        private const int HistoryCapacity = 64;
+        private const float MaxSpeedVarianceRatio = 0.015f; // допустимая относительная дисперсия скорости
+
+        public AutoStrafeModule(SacConfig config, Action<CCSPlayerController, string, string> onDetected)
+        {
+            _config = config;
+            _onDetected = onDetected;
+        }
+
+        public void SetSensitivityMultiplier(float multiplier) => _multiplier = multiplier;
+
+        public void OnRoundStart() => _airHistory.Clear();
+
+        public void OnWeaponFire(CCSPlayerController player, EventWeaponFire @event)
+        {
+        }
+
+        public void OnPlayerHurt(CCSPlayerController victim, CCSPlayerController attacker, EventPlayerHurt @event)
+        {
+        }
+
+        /// <summary>
+        /// Вызывается каждый тик из SACPlugin для игроков, находящихся в воздухе.
+        /// </summary>
+        public void RecordAirMovement(CCSPlayerController player, MovementSnapshot snapshot)
+        {
+            var steamId = player.SteamID;
+
+            if (snapshot.OnGround)
+            {
+                if (_airHistory.TryGetValue(steamId, out var landedHist) && landedHist.Items.Count > 10)
+                {
+                    AnalyzeStability(player, landedHist);
+                }
+                _airHistory.Remove(steamId);
+                return;
+            }
+
+            if (!_airHistory.TryGetValue(steamId, out var hist))
+            {
+                hist = new RollingHistory<MovementSnapshot>(HistoryCapacity);
+                _airHistory[steamId] = hist;
+            }
+
+            hist.Add(snapshot);
+        }
+
+        private void AnalyzeStability(CCSPlayerController player, RollingHistory<MovementSnapshot> hist)
+        {
+            var speeds = hist.Items.Select(s => Math.Sqrt(s.Velocity.X * s.Velocity.X + s.Velocity.Y * s.Velocity.Y)).ToList();
+            var mean = speeds.Average();
+            if (mean < 50) return; // слишком медленное движение, не показательно
+
+            var variance = speeds.Sum(s => (s - mean) * (s - mean)) / speeds.Count;
+            var relativeVariance = variance / (mean * mean);
+
+            var threshold = MaxSpeedVarianceRatio * _multiplier;
+
+            if (relativeVariance <= threshold)
+            {
+                _onDetected(player, Name,
+                    $"Аномально стабильное сохранение скорости в воздухе: отн. дисперсия {relativeVariance:F4} (порог {threshold:F4})");
+            }
+        }
+    }
+}
+
+```
+
+`SAC/Modules/BhopModule.cs`:
+
+```cs
+using CounterStrikeSharp.API.Core;
+using CounterStrikeSharp.API.Modules.Events;
+using SAC.Config;
+
+namespace SAC.Modules
+{
+    /// <summary>
+    /// Детектирует скриптовый bunny-hop: слишком малое время между приземлением
+    /// и следующим прыжком (человек физически не успевает нажать так быстро и стабильно).
+    /// </summary>
+    public class BhopModule : IModule
+    {
+        public string Name => "Bhop";
+
+        private readonly SacConfig _config;
+        private readonly Action<CCSPlayerController, string, string> _onDetected;
+        private readonly Dictionary<ulong, double> _lastLandingTime = new();
+        private readonly Dictionary<ulong, int> _suspiciousStreak = new();
+        private float _multiplier = 1.0f;
+
+        private const int StreakToTrigger = 4;
+
+        public BhopModule(SacConfig config, Action<CCSPlayerController, string, string> onDetected)
+        {
+            _config = config;
+            _onDetected = onDetected;
+        }
+
+        public void SetSensitivityMultiplier(float multiplier) => _multiplier = multiplier;
+
+        public void OnRoundStart()
+        {
+            _lastLandingTime.Clear();
+            _suspiciousStreak.Clear();
+        }
+
+        public void OnWeaponFire(CCSPlayerController player, EventWeaponFire @event)
+        {
+        }
+
+        public void OnPlayerHurt(CCSPlayerController victim, CCSPlayerController attacker, EventPlayerHurt @event)
+        {
+        }
+
+        /// <summary>
+        /// Вызывается из SACPlugin при обнаружении приземления игрока (переход OnGround false -> true).
+        /// </summary>
+        public void OnLanding(CCSPlayerController player)
+        {
+            _lastLandingTime[player.SteamID] = Server.CurrentTime;
+        }
+
+        /// <summary>
+        /// Вызывается из SACPlugin при регистрации нажатия прыжка.
+        /// </summary>
+        public void OnJumpPressed(CCSPlayerController player)
+        {
+            var steamId = player.SteamID;
+            if (!_lastLandingTime.TryGetValue(steamId, out var landingTime)) return;
+
+            var delta = Server.CurrentTime - landingTime;
+            var tolerance = _config.BhopTimingTolerance * _multiplier;
+
+            _suspiciousStreak.TryGetValue(steamId, out var streak);
+
+            if (delta <= tolerance)
+            {
+                streak += 1;
+                _suspiciousStreak[steamId] = streak;
+
+                if (streak >= StreakToTrigger)
+                {
+                    _onDetected(player, Name,
+                        $"Скриптовый bhop: {streak} прыжков подряд с задержкой ≤ {tolerance * 1000:F0} мс после приземления");
+                    _suspiciousStreak[steamId] = 0;
+                }
+            }
+            else
+            {
+                _suspiciousStreak[steamId] = 0;
+            }
+        }
+    }
+}
+
+```
+
+`SAC/Modules/DeSubtickingModule.cs`:
+
+```cs
+using CounterStrikeSharp.API.Core;
+using CounterStrikeSharp.API.Modules.Events;
+using SAC.Config;
+
+namespace SAC.Modules
+{
+    /// <summary>
+    /// Детектирует "de-subticking" — манипуляции с таймингами изменений движения
+    /// внутри тика без нормального subtick-интервала, используемые для десинхронизации
+    /// серверного и клиентского состояния игрока.
+    /// </summary>
+    public class DeSubtickingModule : IModule
+    {
+        public string Name => "DeSubticking";
+
+        private readonly SacConfig _config;
+        private readonly Action<CCSPlayerController, string, string> _onDetected;
+        private readonly Dictionary<ulong, RollingHistory<double>> _subtickOffsets = new();
+        private float _multiplier = 1.0f;
+
+        private const int RequiredSamples = 12;
+        private const double MinValidSubtickOffset = 0.0; // тики не должны идти с отрицательным/нулевым интервалом подряд
+
+        public DeSubtickingModule(SacConfig config, Action<CCSPlayerController, string, string> onDetected)
+        {
+            _config = config;
+            _onDetected = onDetected;
+        }
+
+        public void SetSensitivityMultiplier(float multiplier) => _multiplier = multiplier;
+
+        public void OnRoundStart() => _subtickOffsets.Clear();
+
+        public void OnWeaponFire(CCSPlayerController player, EventWeaponFire @event)
+        {
+        }
+
+        public void OnPlayerHurt(CCSPlayerController victim, CCSPlayerController attacker, EventPlayerHurt @event)
+        {
+        }
+
+        /// <summary>
+        /// Вызывается из SACPlugin с offset subtick-события движения, полученным из пользовательской команды.
+        /// </summary>
+        public void OnSubtickMoveEvent(CCSPlayerController player, double subtickOffset)
+        {
+            var steamId = player.SteamID;
+            if (!_subtickOffsets.TryGetValue(steamId, out var hist))
+            {
+                hist = new RollingHistory<double>(RequiredSamples);
+                _subtickOffsets[steamId] = hist;
+            }
+
+            hist.Add(subtickOffset);
+
+            if (hist.Items.Count < RequiredSamples) return;
+
+            var invalidCount = hist.Items.Count(o => o <= MinValidSubtickOffset || o > 1.0);
+            var limit = Math.Max(1, (int)(RequiredSamples * 0.5 * _multiplier));
+
+            if (invalidCount >= limit)
+            {
+                _onDetected(player, Name,
+                    $"Некорректные subtick-интервалы движения: {invalidCount} из {RequiredSamples} вне допустимого диапазона");
+                hist.Clear();
+            }
+        }
+    }
+}
+
+```
+
+`SAC/Modules/DetectionCommon.cs`:
+
+```cs
+using CounterStrikeSharp.API.Modules.Utils;
+
+namespace SAC.Modules
+{
+    /// <summary>
+    /// Снимок положения прицела игрока в конкретный момент времени.
+    /// Используется модулями AimbotModule, AimlockModule, AntiAimModule и др.
+    /// для анализа истории движения прицела.
+    /// </summary>
+    public readonly struct AngleSnapshot
+    {
+        public readonly double Timestamp;
+        public readonly QAngle Angle;
+
+        public AngleSnapshot(double timestamp, QAngle angle)
+        {
+            Timestamp = timestamp;
+            Angle = angle;
+        }
+    }
+
+    /// <summary>
+    /// Снимок скорости и положения игрока для анализа движения (bhop, autostrafe, nulls).
+    /// </summary>
+    public readonly struct MovementSnapshot
+    {
+        public readonly double Timestamp;
+        public readonly Vector Velocity;
+        public readonly bool OnGround;
+        public readonly bool JumpPressed;
+
+        public MovementSnapshot(double timestamp, Vector velocity, bool onGround, bool jumpPressed)
+        {
+            Timestamp = timestamp;
+            Velocity = velocity;
+            OnGround = onGround;
+            JumpPressed = jumpPressed;
+        }
+    }
+
+    /// <summary>
+    /// Скользящая история фиксированного размера для хранения снимков по каждому игроку.
+    /// </summary>
+    public class RollingHistory<T>
+    {
+        private readonly List<T> _items = new();
+        private readonly int _capacity;
+
+        public RollingHistory(int capacity)
+        {
+            _capacity = capacity;
+        }
+
+        public IReadOnlyList<T> Items => _items;
+
+        public void Add(T item)
+        {
+            _items.Add(item);
+            if (_items.Count > _capacity)
+            {
+                _items.RemoveAt(0);
+            }
+        }
+
+        public void Clear() => _items.Clear();
+    }
+
+    /// <summary>
+    /// Вспомогательные математические функции для расчёта углов обзора.
+    /// </summary>
+    public static class AngleMath
+    {
+        /// <summary>
+        /// Считает кратчайшую угловую разницу между двумя углами в градусах (с учётом перехода через 180/-180).
+        /// </summary>
+        public static float DeltaDegrees(float a, float b)
+        {
+            float diff = (a - b) % 360f;
+            if (diff > 180f) diff -= 360f;
+            if (diff < -180f) diff += 360f;
+            return Math.Abs(diff);
+        }
+
+        /// <summary>
+        /// Суммарная угловая скорость (yaw + pitch) между двумя снимками, градусов в секунду.
+        /// </summary>
+        public static float AngularVelocity(AngleSnapshot from, AngleSnapshot to)
+        {
+            double dt = to.Timestamp - from.Timestamp;
+            if (dt <= 0.0001) return 0f;
+
+            float dYaw = DeltaDegrees(to.Angle.Y, from.Angle.Y);
+            float dPitch = DeltaDegrees(to.Angle.X, from.Angle.X);
+            float dist = MathF.Sqrt(dYaw * dYaw + dPitch * dPitch);
+
+            return (float)(dist / dt);
+        }
+    }
+}
+
+```
+
+`SAC/Modules/DllInjectionModule.cs`:
+
+```cs
+using CounterStrikeSharp.API.Core;
+using CounterStrikeSharp.API.Modules.Events;
+using SAC.Config;
+
+namespace SAC.Modules
+{
+    /// <summary>
+    /// Отслеживает признаки внедрённого клиентского кода: подписки на клиентские
+    /// события/конвары, недоступные обычному клиенту без модификации процесса игры.
+    /// Детекция строится на серверных сигналах, приходящих от античит-хуков клиента.
+    /// </summary>
+    public class DllInjectionModule : IModule
+    {
+        public string Name => "DllInjection";
+
+        private readonly SacConfig _config;
+        private readonly Action<CCSPlayerController, string, string> _onDetected;
+        private readonly HashSet<ulong> _flaggedThisRound = new();
+        private float _multiplier = 1.0f;
+
+        public DllInjectionModule(SacConfig config, Action<CCSPlayerController, string, string> onDetected)
+        {
+            _config = config;
+            _onDetected = onDetected;
+        }
+
+        public void SetSensitivityMultiplier(float multiplier) => _multiplier = multiplier;
+
+        public void OnRoundStart() => _flaggedThisRound.Clear();
+
+        public void OnWeaponFire(CCSPlayerController player, EventWeaponFire @event)
+        {
+        }
+
+        public void OnPlayerHurt(CCSPlayerController victim, CCSPlayerController attacker, EventPlayerHurt @event)
+        {
+        }
+
+        /// <summary>
+        /// Вызывается из SACPlugin при получении сигнатуры подозрительного клиентского сигнала
+        /// (например, нестандартный ответ на серверный запрос конвара, характерный для внедрённых модулей).
+        /// </summary>
+        public void ReportSuspiciousClientSignal(CCSPlayerController player, string signalDescription)
+        {
+            var steamId = player.SteamID;
+            if (_flaggedThisRound.Contains(steamId)) return;
+
+            _flaggedThisRound.Add(steamId);
+            _onDetected(player, Name,
+                $"Обнаружен признак внедрённого клиентского кода: {signalDescription}");
+        }
+    }
+}
+
+```
+
+`SAC/Modules/DoubleTapModule.cs`:
+
+```cs
+using CounterStrikeSharp.API.Core;
+using CounterStrikeSharp.API.Modules.Events;
+using SAC.Config;
+
+namespace SAC.Modules
+{
+    /// <summary>
+    /// Детектирует "double tap" — два последовательных выстрела из одного оружия
+    /// с интервалом меньше физически возможного темпа стрельбы, сопоставленным
+    /// с серверным тиком (манипуляция задержкой для двойного попадания за такт).
+    /// </summary>
+    public class DoubleTapModule : IModule
+    {
+        public string Name => "DoubleTap";
+
+        private readonly SacConfig _config;
+        private readonly Action<CCSPlayerController, string, string> _onDetected;
+        private readonly Dictionary<ulong, (string weapon, double time, int serverTick)> _lastShot = new();
+        private float _multiplier = 1.0f;
+
+        // Минимальный физический интервал между выстрелами для большинства авто-оружия CS2 (секунды).
+        private const double MinFireIntervalSeconds = 0.08;
+
+        public DoubleTapModule(SacConfig config, Action<CCSPlayerController, string, string> onDetected)
+        {
+            _config = config;
+            _onDetected = onDetected;
+        }
+
+        public void SetSensitivityMultiplier(float multiplier) => _multiplier = multiplier;
+
+        public void OnRoundStart() => _lastShot.Clear();
+
+        public void OnWeaponFire(CCSPlayerController player, EventWeaponFire @event)
+        {
+            var steamId = player.SteamID;
+            var weapon = @event.Weapon ?? "unknown";
+            var now = Server.CurrentTime;
+            var tick = Server.TickCount;
+
+            if (_lastShot.TryGetValue(steamId, out var last) && last.weapon == weapon)
+            {
+                var interval = now - last.time;
+                var minInterval = MinFireIntervalSeconds * _multiplier;
+                var sameServerTick = tick == last.serverTick;
+
+                if (interval < minInterval || sameServerTick)
+                {
+                    _onDetected(player, Name,
+                        $"Два выстрела из {weapon} за невозможный интервал {interval * 1000:F1} мс (тик {tick})");
+                }
+            }
+
+            _lastShot[steamId] = (weapon, now, tick);
+        }
+
+        public void OnPlayerHurt(CCSPlayerController victim, CCSPlayerController attacker, EventPlayerHurt @event)
+        {
+        }
+    }
+}
+
+```
+
+`SAC/Modules/HyperscrollModule.cs`:
+
+```cs
+using CounterStrikeSharp.API.Core;
+using CounterStrikeSharp.API.Modules.Events;
+using SAC.Config;
+
+namespace SAC.Modules
+{
+    /// <summary>
+    /// Детектирует "гиперскролл" — устройства/скрипты, генерирующие аномально
+    /// быстрые серии нажатий прыжка (эмуляция колеса мыши на прыжок) при приземлении.
+    /// </summary>
+    public class HyperscrollModule : IModule
+    {
+        public string Name => "Hyperscroll";
+
+        private readonly SacConfig _config;
+        private readonly Action<CCSPlayerController, string, string> _onDetected;
+        private readonly Dictionary<ulong, RollingHistory<double>> _jumpTimestamps = new();
+        private float _multiplier = 1.0f;
+
+        private const int WindowSize = 6;
+        private const double MinIntervalSeconds = 0.06; // ~16.6 нажатий в секунду
+
+        public HyperscrollModule(SacConfig config, Action<CCSPlayerController, string, string> onDetected)
+        {
+            _config = config;
+            _onDetected = onDetected;
+        }
+
+        public void SetSensitivityMultiplier(float multiplier) => _multiplier = multiplier;
+
+        public void OnRoundStart() => _jumpTimestamps.Clear();
+
+        public void OnWeaponFire(CCSPlayerController player, EventWeaponFire @event)
+        {
+        }
+
+        public void OnPlayerHurt(CCSPlayerController victim, CCSPlayerController attacker, EventPlayerHurt @event)
+        {
+        }
+
+        /// <summary>
+        /// Вызывается из SACPlugin при каждом нажатии кнопки прыжка.
+        /// </summary>
+        public void OnJumpButtonPressed(CCSPlayerController player)
+        {
+            var steamId = player.SteamID;
+            if (!_jumpTimestamps.TryGetValue(steamId, out var hist))
+            {
+                hist = new RollingHistory<double>(WindowSize);
+                _jumpTimestamps[steamId] = hist;
+            }
+
+            hist.Add(Server.CurrentTime);
+
+            if (hist.Items.Count < WindowSize) return;
+
+            var minInterval = MinIntervalSeconds * _multiplier;
+            var allTooFast = true;
+
+            for (int i = 1; i < hist.Items.Count; i++)
+            {
+                var interval = hist.Items[i] - hist.Items[i - 1];
+                if (interval > minInterval)
+                {
+                    allTooFast = false;
+                    break;
+                }
+            }
+
+            if (allTooFast)
+            {
+                var totalSpan = hist.Items[^1] - hist.Items[0];
+                var rate = (WindowSize - 1) / Math.Max(totalSpan, 0.0001);
+                _onDetected(player, Name,
+                    $"Аномально частые вводы прыжка: {rate:F1} нажатий/с на серии из {WindowSize}");
+                hist.Clear();
+            }
+        }
+    }
+}
+
+```
+
+`SAC/Modules/IModule.cs`:
+
+```cs
+using CounterStrikeSharp.API.Core;
+using CounterStrikeSharp.API.Modules.Events;
+
+namespace SAC.Modules
+{
+    /// <summary>
+    /// Базовый интерфейс для всех модулей детекции SAC.
+    /// Каждый модуль реализует свой алгоритм обнаружения читов
+    /// и получает уведомления о ключевых игровых событиях.
+    /// </summary>
+    public interface IModule
+    {
+        /// <summary>
+        /// Человекочитаемое имя модуля (используется в логах и отчётах).
+        /// </summary>
+        string Name { get; }
+
+        /// <summary>
+        /// Вызывается при нанесении урона одним игроком другому.
+        /// </summary>
+        void OnPlayerHurt(CCSPlayerController victim, CCSPlayerController attacker, EventPlayerHurt @event);
+
+        /// <summary>
+        /// Вызывается при выстреле игрока.
+        /// </summary>
+        void OnWeaponFire(CCSPlayerController player, EventWeaponFire @event);
+
+        /// <summary>
+        /// Вызывается в начале раунда. Используется для сброса накопленной статистики.
+        /// </summary>
+        void OnRoundStart();
+
+        /// <summary>
+        /// Умножает все внутренние пороги модуля на заданный коэффициент.
+        /// Используется MassCheckService для временного ужесточения детекции.
+        /// </summary>
+        void SetSensitivityMultiplier(float multiplier);
+    }
+}
+
+```
+
+`SAC/Modules/InhumanAccuracyModule.cs`:
+
+```cs
+using CounterStrikeSharp.API.Core;
+using CounterStrikeSharp.API.Modules.Events;
+using SAC.Config;
+
+namespace SAC.Modules
+{
+    /// <summary>
+    /// Отслеживает статистику попаданий в голову. Если доля хедшотов среди
+    /// достаточно большого числа выстрелов аномально высока — подозрительно.
+    /// </summary>
+    public class InhumanAccuracyModule : IModule
+    {
+        public string Name => "InhumanAccuracy";
+
+        private readonly SacConfig _config;
+        private readonly Action<CCSPlayerController, string, string> _onDetected;
+        private readonly Dictionary<ulong, (int totalHits, int headshots)> _stats = new();
+        private float _multiplier = 1.0f;
+
+        private const int MinShotsSample = 50;
+
+        public InhumanAccuracyModule(SacConfig config, Action<CCSPlayerController, string, string> onDetected)
+        {
+            _config = config;
+            _onDetected = onDetected;
+        }
+
+        public void SetSensitivityMultiplier(float multiplier) => _multiplier = multiplier;
+
+        public void OnRoundStart()
+        {
+            // Статистика точности накапливается по всему матчу, поэтому не сбрасывается каждый раунд.
+        }
+
+        public void OnWeaponFire(CCSPlayerController player, EventWeaponFire @event)
+        {
+        }
+
+        public void OnPlayerHurt(CCSPlayerController victim, CCSPlayerController attacker, EventPlayerHurt @event)
+        {
+            if (attacker == null || attacker.SteamID == victim.SteamID) return;
+
+            var steamId = attacker.SteamID;
+            if (!_stats.TryGetValue(steamId, out var stat))
+            {
+                stat = (0, 0);
+            }
+
+            stat.totalHits += 1;
+            if (string.Equals(@event.Hitgroup.ToString(), "Head", StringComparison.OrdinalIgnoreCase) || @event.Hitgroup == 1)
+            {
+                stat.headshots += 1;
+            }
+
+            _stats[steamId] = stat;
+
+            if (stat.totalHits < MinShotsSample) return;
+
+            var headshotRatio = (float)stat.headshots / stat.totalHits;
+            var threshold = _config.InhumanAccuracyThreshold * _multiplier;
+
+            if (headshotRatio >= threshold)
+            {
+                _onDetected(attacker, Name,
+                    $"Аномальная доля хедшотов: {headshotRatio:P0} из {stat.totalHits} попаданий (порог {threshold:P0})");
+                // Сбрасываем счётчик, чтобы не спамить повторными детектами по той же выборке.
+                _stats[steamId] = (0, 0);
+            }
+        }
+    }
+}
+
+```
+
+`SAC/Modules/InvalidCvarModule.cs`:
+
+```cs
+using CounterStrikeSharp.API.Core;
+using CounterStrikeSharp.API.Modules.Events;
+using SAC.Config;
+
+namespace SAC.Modules
+{
+    /// <summary>
+    /// Проверяет защищённые клиентские настройки (cl_*, fov_cs_debug и т.п.) на выход
+    /// за пределы допустимого диапазона, что указывает на модификацию клиента.
+    /// </summary>
+    public class InvalidCvarModule : IModule
+    {
+        public string Name => "InvalidCvar";
+
+        private readonly SacConfig _config;
+        private readonly Action<CCSPlayerController, string, string> _onDetected;
+        private float _multiplier = 1.0f;
+
+        // Допустимые диапазоны для защищённых конваров: имя -> (мин, макс).
+        private static readonly Dictionary<string, (float min, float max)> AllowedRanges = new()
+        {
+            { "fov_cs_debug", (0f, 0f) },
+            { "cl_crosshair_recoil", (0f, 1f) },
+            { "sensitivity", (0.001f, 200f) },
+            { "m_yaw", (0.001f, 1f) },
+            { "m_pitch", (0.001f, 1f) },
+        };
+
+        public InvalidCvarModule(SacConfig config, Action<CCSPlayerController, string, string> onDetected)
+        {
+            _config = config;
+            _onDetected = onDetected;
+        }
+
+        public void SetSensitivityMultiplier(float multiplier) => _multiplier = multiplier;
+
+        public void OnRoundStart()
+        {
+        }
+
+        public void OnWeaponFire(CCSPlayerController player, EventWeaponFire @event)
+        {
+        }
+
+        public void OnPlayerHurt(CCSPlayerController victim, CCSPlayerController attacker, EventPlayerHurt @event)
+        {
+        }
+
+        /// <summary>
+        /// Вызывается из SACPlugin при получении значения защищённого конвара от клиента
+        /// (через QueryCvarValue / OnClientCvarValueReceived).
+        /// </summary>
+        public void OnCvarValueReceived(CCSPlayerController player, string cvarName, string rawValue)
+        {
+            if (!AllowedRanges.TryGetValue(cvarName, out var range)) return;
+            if (!float.TryParse(rawValue, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out var value)) return;
+
+            var min = range.min / _multiplier;
+            var max = range.max * _multiplier;
+
+            if (value < min || value > max)
+            {
+                _onDetected(player, Name,
+                    $"Недопустимое значение защищённого конвара {cvarName} = {value} (диапазон {range.min}..{range.max})");
+            }
+        }
+    }
+}
+
+```
+
+`SAC/Modules/InvalidInputModule.cs`:
+
+```cs
+using CounterStrikeSharp.API.Core;
+using CounterStrikeSharp.API.Modules.Events;
+using SAC.Config;
+
+namespace SAC.Modules
+{
+    /// <summary>
+    /// Сравнивает заявленное игроком состояние кнопок с фактическим порядком
+    /// нажатий/отпусканий, поступающим в user command. Несовпадения указывают
+    /// на подмену ввода (например, спуфинг команд движения/стрельбы).
+    /// </summary>
+    public class InvalidInputModule : IModule
+    {
+        public string Name => "InvalidInput";
+
+        private readonly SacConfig _config;
+        private readonly Action<CCSPlayerController, string, string> _onDetected;
+        private readonly Dictionary<ulong, ulong> _lastButtons = new();
+        private readonly Dictionary<ulong, int> _invalidTransitions = new();
+        private float _multiplier = 1.0f;
+
+        private const int BaseTransitionLimit = 5;
+
+        public InvalidInputModule(SacConfig config, Action<CCSPlayerController, string, string> onDetected)
+        {
+            _config = config;
+            _onDetected = onDetected;
+        }
+
+        public void SetSensitivityMultiplier(float multiplier) => _multiplier = multiplier;
+
+        public void OnRoundStart()
+        {
+            _lastButtons.Clear();
+            _invalidTransitions.Clear();
+        }
+
+        public void OnWeaponFire(CCSPlayerController player, EventWeaponFire @event)
+        {
+        }
+
+        public void OnPlayerHurt(CCSPlayerController victim, CCSPlayerController attacker, EventPlayerHurt @event)
+        {
+        }
+
+        /// <summary>
+        /// Вызывается из SACPlugin с текущей битовой маской нажатых кнопок пользователя (PlayerButtons).
+        /// Ищет одновременные взаимоисключающие нажатия (стрельба основным и вторичным огнём одновременно и т.п.).
+        /// </summary>
+        public void OnButtonsState(CCSPlayerController player, ulong buttons)
+        {
+            const ulong IN_ATTACK = 1 << 0;
+            const ulong IN_ATTACK2 = 1 << 11;
+            const ulong IN_RELOAD = 1 << 5;
+
+            var steamId = player.SteamID;
+            var conflictingFire = (buttons & IN_ATTACK) != 0 && (buttons & IN_ATTACK2) != 0;
+            var fireWhileReload = ((buttons & IN_ATTACK) != 0 || (buttons & IN_ATTACK2) != 0) && (buttons & IN_RELOAD) != 0;
+
+            _lastButtons[steamId] = buttons;
+
+            if (!conflictingFire && !fireWhileReload) return;
+
+            _invalidTransitions.TryGetValue(steamId, out var count);
+            count += 1;
+            _invalidTransitions[steamId] = count;
+
+            var limit = Math.Max(1, (int)(BaseTransitionLimit * _multiplier));
+            if (count >= limit)
+            {
+                _onDetected(player, Name,
+                    $"Некорректные комбинации ввода кнопок зафиксированы {count} раз подряд");
+                _invalidTransitions[steamId] = 0;
+            }
+        }
+    }
+}
+
+```
+
+`SAC/Modules/IrregularBehaviorModule.cs`:
+
+```cs
+using CounterStrikeSharp.API.Core;
+using CounterStrikeSharp.API.Modules.Events;
+using SAC.Config;
+
+namespace SAC.Modules
+{
+    /// <summary>
+    /// Детектирует попадания в статистически маловероятных условиях:
+    /// в прыжке, без удержания прицела на цели (снятого через AimlockModule контекст), сквозь дым и т.п.
+    /// Модуль накапливает счётчик подозрительных попаданий и триггерит при превышении лимита.
+    /// </summary>
+    public class IrregularBehaviorModule : IModule
+    {
+        public string Name => "IrregularBehavior";
+
+        private readonly SacConfig _config;
+        private readonly Action<CCSPlayerController, string, string> _onDetected;
+        private readonly Dictionary<ulong, int> _irregularHits = new();
+        private float _multiplier = 1.0f;
+
+        private const int BaseIrregularLimit = 6;
+
+        public IrregularBehaviorModule(SacConfig config, Action<CCSPlayerController, string, string> onDetected)
+        {
+            _config = config;
+            _onDetected = onDetected;
+        }
+
+        public void SetSensitivityMultiplier(float multiplier) => _multiplier = multiplier;
+
+        public void OnRoundStart() => _irregularHits.Clear();
+
+        public void OnWeaponFire(CCSPlayerController player, EventWeaponFire @event)
+        {
+        }
+
+        public void OnPlayerHurt(CCSPlayerController victim, CCSPlayerController attacker, EventPlayerHurt @event)
+        {
+            if (attacker == null || attacker.SteamID == victim.SteamID) return;
+            if (attacker.PlayerPawn?.Value == null) return;
+
+            var pawn = attacker.PlayerPawn.Value;
+            var inAir = !IsOnGround(pawn);
+
+            if (!inAir) return;
+
+            var steamId = attacker.SteamID;
+            _irregularHits.TryGetValue(steamId, out var count);
+            count += 1;
+            _irregularHits[steamId] = count;
+
+            var limit = Math.Max(1, (int)(BaseIrregularLimit * _multiplier));
+            if (count >= limit)
+            {
+                _onDetected(attacker, Name,
+                    $"Серия попаданий в сложных условиях (в прыжке): {count} раз за раунд (порог {limit})");
+                _irregularHits[steamId] = 0;
+            }
+        }
+
+        private static bool IsOnGround(CCSPlayerPawn pawn)
+        {
+            // Флаг FL_ONGROUND соответствует биту 1 в поле Flags.
+            return ((int)pawn.Flags & 1) != 0;
+        }
+    }
+}
+
+```
+
+`SAC/Modules/NameChangerModule.cs`:
+
+```cs
+using CounterStrikeSharp.API.Core;
+using CounterStrikeSharp.API.Modules.Events;
+using SAC.Config;
+
+namespace SAC.Modules
+{
+    /// <summary>
+    /// Детектирует слишком частую смену игрового имени за короткий промежуток времени —
+    /// характерный признак попыток уклониться от банов/репутации через смену ника.
+    /// </summary>
+    public class NameChangerModule : IModule
+    {
+        public string Name => "NameChanger";
+
+        private readonly SacConfig _config;
+        private readonly Action<CCSPlayerController, string, string> _onDetected;
+        private readonly Dictionary<ulong, string> _lastKnownName = new();
+        private readonly Dictionary<ulong, RollingHistory<double>> _changeTimestamps = new();
+        private float _multiplier = 1.0f;
+
+        private const int BaseMaxChangesPerWindow = 3;
+        private const double WindowSeconds = 300.0;
+
+        public NameChangerModule(SacConfig config, Action<CCSPlayerController, string, string> onDetected)
+        {
+            _config = config;
+            _onDetected = onDetected;
+        }
+
+        public void SetSensitivityMultiplier(float multiplier) => _multiplier = multiplier;
+
+        public void OnRoundStart()
+        {
+        }
+
+        public void OnWeaponFire(CCSPlayerController player, EventWeaponFire @event)
+        {
+        }
+
+        public void OnPlayerHurt(CCSPlayerController victim, CCSPlayerController attacker, EventPlayerHurt @event)
+        {
+        }
+
+        /// <summary>
+        /// Вызывается из SACPlugin каждый раз, когда обнаружено изменение имени игрока
+        /// (например, при сравнении PlayerName между тиками или при OnPlayerConnectFull).
+        /// </summary>
+        public void CheckNameChange(CCSPlayerController player)
+        {
+            var steamId = player.SteamID;
+            var currentName = player.PlayerName;
+
+            if (!_lastKnownName.TryGetValue(steamId, out var previousName))
+            {
+                _lastKnownName[steamId] = currentName;
+                return;
+            }
+
+            if (previousName == currentName) return;
+
+            _lastKnownName[steamId] = currentName;
+
+            if (!_changeTimestamps.TryGetValue(steamId, out var hist))
+            {
+                hist = new RollingHistory<double>(20);
+                _changeTimestamps[steamId] = hist;
+            }
+
+            var now = Server.CurrentTime;
+            hist.Add(now);
+
+            var recentChanges = hist.Items.Count(t => now - t <= WindowSeconds);
+            var limit = Math.Max(1, (int)(BaseMaxChangesPerWindow * _multiplier));
+
+            if (recentChanges >= limit)
+            {
+                _onDetected(player, Name,
+                    $"Слишком частая смена ника: {recentChanges} раз за {WindowSeconds / 60:F0} минут (текущий ник: {currentName})");
+            }
+        }
+    }
+}
+
+```
+
+`SAC/Modules/NullsModule.cs`:
+
+```cs
+using CounterStrikeSharp.API.Core;
+using CounterStrikeSharp.API.Modules.Events;
+using SAC.Config;
+
+namespace SAC.Modules
+{
+    /// <summary>
+    /// Детектирует "nulls" — переключение противоположных направлений движения
+    /// (например A и D одновременно/поочерёдно) со стабильным машинным таймингом,
+    /// используемое читами для манипуляции хитбоксами.
+    /// </summary>
+    public class NullsModule : IModule
+    {
+        public string Name => "Nulls";
+
+        private readonly SacConfig _config;
+        private readonly Action<CCSPlayerController, string, string> _onDetected;
+        private readonly Dictionary<ulong, RollingHistory<double>> _switchIntervals = new();
+        private readonly Dictionary<ulong, (bool left, bool right, double lastSwitchTime)> _lastState = new();
+        private float _multiplier = 1.0f;
+
+        private const int RequiredSamples = 10;
+        private const double MaxIntervalStdDevSeconds = 0.01;
+
+        public NullsModule(SacConfig config, Action<CCSPlayerController, string, string> onDetected)
+        {
+            _config = config;
+            _onDetected = onDetected;
+        }
+
+        public void SetSensitivityMultiplier(float multiplier) => _multiplier = multiplier;
+
+        public void OnRoundStart()
+        {
+            _switchIntervals.Clear();
+            _lastState.Clear();
+        }
+
+        public void OnWeaponFire(CCSPlayerController player, EventWeaponFire @event)
+        {
+        }
+
+        public void OnPlayerHurt(CCSPlayerController victim, CCSPlayerController attacker, EventPlayerHurt @event)
+        {
+        }
+
+        /// <summary>
+        /// Вызывается каждый тик из SACPlugin с текущим состоянием клавиш движения влево/вправо.
+        /// </summary>
+        public void OnMoveInput(CCSPlayerController player, bool moveLeft, bool moveRight)
+        {
+            var steamId = player.SteamID;
+            var now = Server.CurrentTime;
+
+            if (!_lastState.TryGetValue(steamId, out var last))
+            {
+                _lastState[steamId] = (moveLeft, moveRight, now);
+                return;
+            }
+
+            // Одновременное противоположное направление — явный признак "nulls"
+            bool switched = (last.left != moveLeft) || (last.right != moveRight);
+            if (!switched)
+            {
+                return;
+            }
+
+            var interval = now - last.lastSwitchTime;
+            _lastState[steamId] = (moveLeft, moveRight, now);
+
+            if (!_switchIntervals.TryGetValue(steamId, out var hist))
+            {
+                hist = new RollingHistory<double>(RequiredSamples);
+                _switchIntervals[steamId] = hist;
+            }
+            hist.Add(interval);
+
+            if (hist.Items.Count < RequiredSamples) return;
+
+            var mean = hist.Items.Average();
+            var variance = hist.Items.Sum(v => (v - mean) * (v - mean)) / hist.Items.Count;
+            var stdDev = Math.Sqrt(variance);
+
+            var threshold = MaxIntervalStdDevSeconds * _multiplier;
+
+            if (stdDev <= threshold && mean < 0.3)
+            {
+                _onDetected(player, Name,
+                    $"Стабильные машинные переключения направления движения: ст.откл. {stdDev * 1000:F1} мс (порог {threshold * 1000:F1} мс)");
+                hist.Clear();
+            }
+        }
+    }
+}
+
+```
+
+`SAC/Modules/SilentAimModule.cs`:
+
+```cs
+using CounterStrikeSharp.API.Core;
+using CounterStrikeSharp.API.Modules.Events;
+using CounterStrikeSharp.API.Modules.Utils;
+using SAC.Config;
+
+namespace SAC.Modules
+{
+    /// <summary>
+    /// Детектирует "silent aim" — расхождение между направлением прицела игрока
+    /// в момент выстрела и фактическим направлением попадания пули.
+    /// </summary>
+    public class SilentAimModule : IModule
+    {
+        public string Name => "SilentAim";
+
+        private readonly SacConfig _config;
+        private readonly Action<CCSPlayerController, string, string> _onDetected;
+        private readonly Dictionary<ulong, QAngle> _lastFireAngle = new();
+        private float _multiplier = 1.0f;
+
+        private const float MaxDeviationDegrees = 8.0f;
+
+        public SilentAimModule(SacConfig config, Action<CCSPlayerController, string, string> onDetected)
+        {
+            _config = config;
+            _onDetected = onDetected;
+        }
+
+        public void SetSensitivityMultiplier(float multiplier) => _multiplier = multiplier;
+
+        public void OnRoundStart() => _lastFireAngle.Clear();
+
+        public void OnWeaponFire(CCSPlayerController player, EventWeaponFire @event)
+        {
+            if (player.PlayerPawn?.Value == null) return;
+            _lastFireAngle[player.SteamID] = player.PlayerPawn.Value.EyeAngles;
+        }
+
+        public void OnPlayerHurt(CCSPlayerController victim, CCSPlayerController attacker, EventPlayerHurt @event)
+        {
+            if (!_lastFireAngle.TryGetValue(attacker.SteamID, out var fireAngle)) return;
+            if (attacker.PlayerPawn?.Value == null || victim.PlayerPawn?.Value == null) return;
+
+            var shooterOrigin = attacker.PlayerPawn.Value.AbsOrigin;
+            var victimOrigin = victim.PlayerPawn.Value.AbsOrigin;
+            if (shooterOrigin == null || victimOrigin == null) return;
+
+            var expectedYaw = CalculateYawToTarget(shooterOrigin, victimOrigin);
+            var deviation = AngleMath.DeltaDegrees(fireAngle.Y, expectedYaw);
+            var threshold = MaxDeviationDegrees * _multiplier;
+
+            if (deviation >= threshold)
+            {
+                _onDetected(attacker, Name,
+                    $"Направление прицела в момент выстрела не совпадает с точкой попадания: расхождение {deviation:F1}° (порог {threshold:F1}°)");
+            }
+        }
+
+        private static float CalculateYawToTarget(Vector from, Vector to)
+        {
+            var dx = to.X - from.X;
+            var dy = to.Y - from.Y;
+            return (float)(Math.Atan2(dy, dx) * (180.0 / Math.PI));
+        }
+    }
+}
+
+```
+
+`SAC/Modules/SubtickSpamModule.cs`:
+
+```cs
+using CounterStrikeSharp.API.Core;
+using CounterStrikeSharp.API.Modules.Events;
+using SAC.Config;
+
+namespace SAC.Modules
+{
+    /// <summary>
+    /// Детектирует "subtick spam" — аномальные всплески количества одновременных
+    /// вводов (нажатий кнопок/событий движения), упакованных в один игровой тик.
+    /// Используется читами для обхода серверной валидации через переполнение subtick-очереди.
+    /// </summary>
+    public class SubtickSpamModule : IModule
+    {
+        public string Name => "SubtickSpam";
+
+        private readonly SacConfig _config;
+        private readonly Action<CCSPlayerController, string, string> _onDetected;
+        private readonly Dictionary<ulong, (int tick, int inputCount)> _tickInputs = new();
+        private readonly Dictionary<ulong, int> _spamStreak = new();
+        private float _multiplier = 1.0f;
+
+        private const int BaseMaxInputsPerTick = 8;
+        private const int StreakToTrigger = 3;
+
+        public SubtickSpamModule(SacConfig config, Action<CCSPlayerController, string, string> onDetected)
+        {
+            _config = config;
+            _onDetected = onDetected;
+        }
+
+        public void SetSensitivityMultiplier(float multiplier) => _multiplier = multiplier;
+
+        public void OnRoundStart()
+        {
+            _tickInputs.Clear();
+            _spamStreak.Clear();
+        }
+
+        public void OnWeaponFire(CCSPlayerController player, EventWeaponFire @event)
+        {
+        }
+
+        public void OnPlayerHurt(CCSPlayerController victim, CCSPlayerController attacker, EventPlayerHurt @event)
+        {
+        }
+
+        /// <summary>
+        /// Вызывается из SACPlugin при получении подтик-события ввода для игрока
+        /// с указанием количества упакованных в текущий тик событий.
+        /// </summary>
+        public void OnSubtickInputBatch(CCSPlayerController player, int currentTick, int inputCountInTick)
+        {
+            var steamId = player.SteamID;
+            var limit = Math.Max(1, (int)(BaseMaxInputsPerTick * _multiplier));
+
+            if (inputCountInTick <= limit)
+            {
+                _spamStreak[steamId] = 0;
+                return;
+            }
+
+            _spamStreak.TryGetValue(steamId, out var streak);
+            streak += 1;
+            _spamStreak[steamId] = streak;
+            _tickInputs[steamId] = (currentTick, inputCountInTick);
+
+            if (streak >= StreakToTrigger)
+            {
+                _onDetected(player, Name,
+                    $"Всплеск подтик-вводов: {inputCountInTick} событий в тике {currentTick}, повторено {streak} раз подряд (порог {limit})");
+                _spamStreak[steamId] = 0;
+            }
+        }
+    }
+}
+
+```
+
+`SAC/SAC.csproj`:
+
+```csproj
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+    <RootNamespace>SAC</RootNamespace>
+    <AssemblyName>SAC</AssemblyName>
+    <EnableDynamicLoading>true</EnableDynamicLoading>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CounterStrikeSharp.API" Version="1.0.305" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Config\sac_config.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+</Project>
+
+```
+
+`SAC/SACPlugin.cs`:
+
+```cs
+using CounterStrikeSharp.API;
+using CounterStrikeSharp.API.Core;
+using CounterStrikeSharp.API.Core.Attributes.Registration;
+using CounterStrikeSharp.API.Modules.Commands;
+using SAC.Config;
+using SAC.Modules;
+using SAC.Services;
+
+namespace SAC
+{
+    /// <summary>
+    /// Главный класс плагина SAC (Super Anti Cheat) — серверного алгоритмического
+    /// античита для CS2 на базе CounterStrikeSharp.
+    /// </summary>
+    public class SACPlugin : BasePlugin
+    {
+        public override string ModuleName => "SAC - Super Anti Cheat";
+        public override string ModuleVersion => "1.0.0";
+        public override string ModuleAuthor => "SAC Team";
+        public override string ModuleDescription => "Server-side anti-cheat for CS2 with algorithmic detection modules.";
+
+        private const string MatchIdAlphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+
+        public string CurrentMatchId { get; private set; } = string.Empty;
+
+        public ChatService ChatService { get; private set; } = null!;
+        public DataCollector DataCollector { get; private set; } = null!;
+        public SACnetRegistry SACnetRegistry { get; private set; } = null!;
+        public ReportService ReportService { get; private set; } = null!;
+        public MassCheckService MassCheckService { get; private set; } = null!;
+        public BanService BanService { get; private set; } = null!;
+        public WarningService WarningService { get; private set; } = null!;
+        public WarningCounterService WarningCounterService { get; private set; } = null!;
+        public SchizophreniaService SchizophreniaService { get; private set; } = null!;
+        public SacKillService SacKillService { get; private set; } = null!;
+        public ConsentService ConsentService { get; private set; } = null!;
+        public List<IModule> Modules { get; private set; } = new();
+
+        private SacConfig _config = null!;
+        private readonly Random _random = new();
+        private bool _demoRecordingActive;
+
+        public override void Load(bool hotReload)
+        {
+            var configPath = Path.Combine(ModuleDirectory, "Config", "sac_config.json");
+            _config = SacConfig.Load(configPath);
+
+            ChatService = new ChatService();
+            DataCollector = new DataCollector(ModuleDirectory, _config.Salt);
+            SACnetRegistry = new SACnetRegistry(ModuleDirectory, ChatService);
+            BanService = new BanService(ModuleDirectory, _config, ChatService, DataCollector, SACnetRegistry);
+            WarningService = new WarningService();
+            WarningCounterService = new WarningCounterService(ModuleDirectory, _config, BanService, DataCollector);
+            SchizophreniaService = new SchizophreniaService();
+            SacKillService = new SacKillService();
+            ConsentService = new ConsentService(_config);
+
+            InitializeModules();
+
+            MassCheckService = new MassCheckService(ChatService, Modules);
+            ReportService = new ReportService(_config, ChatService, MassCheckService);
+
+            RegisterListeners();
+
+            if (_config.DemoRecordingEnabled)
+            {
+                Server.ExecuteCommand("tv_enable 1");
+                Server.ExecuteCommand("tv_autorecord 1");
+            }
+
+            if (hotReload)
+            {
+                CurrentMatchId = GenerateMatchId();
+            }
+        }
+
+        public override void Unload(bool hotReload)
+        {
+            if (_demoRecordingActive)
+            {
+                Server.ExecuteCommand("tv_stoprecord");
+            }
+        }
+
+        /// <summary>
+        /// Обрабатывает обнаружение чита любым модулем: сначала показывает эффекты режима
+        /// шизофрении и показательное устранение ботом SAC, затем передаёт управление
+        /// в систему прогрессивных предупреждений (4 попытки перед окончательным баном).
+        /// </summary>
+        private void OnCheatDetected(CCSPlayerController player, string moduleName, string reason)
+        {
+            if (player?.IsValid != true) return;
+
+            // Забаненные игроки не участвуют в детекции повторно — они уже отбывают бан.
+            if (BanService.IsBanned(player.SteamID)) return;
+
+            Server.PrintToConsole($"[SAC] Модуль {moduleName} обнаружил нарушение у {player.PlayerName}: {reason}");
+
+            var attempt = WarningCounterService.RegisterDetection(player, moduleName, reason);
+
+            // Показательный эффект — только для по-настоящему активных читеров, ещё не забаненных.
+            if (attempt < _config.WarningAttemptsBeforeBan)
+            {
+                SchizophreniaService.Start(player);
+            }
+        }
+
+        private void InitializeModules()
+        {
+            Action<CCSPlayerController, string, string> onDetected = OnCheatDetected;
+
+            Modules = new List<IModule>
+            {
+                new AimbotModule(_config, onDetected),
+                new AimlockModule(_config, onDetected),
+                new SilentAimModule(_config, onDetected),
+                new InhumanAccuracyModule(_config, onDetected),
+                new IrregularBehaviorModule(_config, onDetected),
+                new AutoStrafeModule(_config, onDetected),
+                new BhopModule(_config, onDetected),
+                new HyperscrollModule(_config, onDetected),
+                new NullsModule(_config, onDetected),
+                new AntiAimModule(_config, onDetected),
+                new DllInjectionModule(_config, onDetected),
+                new DeSubtickingModule(_config, onDetected),
+                new DoubleTapModule(_config, onDetected),
+                new InvalidCvarModule(_config, onDetected),
+                new InvalidInputModule(_config, onDetected),
+                new NameChangerModule(_config, onDetected),
+                new SubtickSpamModule(_config, onDetected),
+            };
+        }
+
+        private void RegisterListeners()
+        {
+            RegisterEventHandler<EventPlayerConnectFull>(OnPlayerConnectFull);
+            RegisterEventHandler<EventPlayerDisconnect>(OnPlayerDisconnect);
+            RegisterEventHandler<EventRoundStart>(OnRoundStart);
+            RegisterEventHandler<EventRoundEnd>(OnRoundEnd);
+            RegisterEventHandler<EventWeaponFire>(OnWeaponFire);
+            RegisterEventHandler<EventPlayerHurt>(OnPlayerHurt);
+            RegisterEventHandler<EventPlayerDeath>(OnPlayerDeath);
+            RegisterEventHandler<EventPlayerSpawn>(OnPlayerSpawn);
+        }
+
+        [ConsoleCommand("sac_report", "Открыть меню жалобы на игрока")]
+        [CommandHelper(whoCanExecute: CommandUsage.CLIENT_ONLY)]
+        public void OnSacReportCommand(CCSPlayerController? player, CommandInfo commandInfo)
+        {
+            if (player == null) return;
+            ReportService.OpenReportMenu(player);
+        }
+
+        [ConsoleCommand("sac_status", "Показать статус SAC и текущий ID матча")]
+        [CommandHelper(whoCanExecute: CommandUsage.CLIENT_ONLY)]
+        public void OnSacStatusCommand(CCSPlayerController? player, CommandInfo commandInfo)
+        {
+            if (player == null) return;
+            player.PrintToChat($"[SAC] Античит активен. Загружено модулей: {Modules.Count}. ID матча: {CurrentMatchId}");
+        }
+
+        [ConsoleCommand("sac_appeal", "Открыть меню апелляции")]
+        [CommandHelper(whoCanExecute: CommandUsage.CLIENT_ONLY)]
+        public void OnSacAppealCommand(CCSPlayerController? player, CommandInfo commandInfo)
+        {
+            if (player == null) return;
+            BanService.OpenAppealMenu(player);
+        }
+
+        private HookResult OnPlayerConnectFull(EventPlayerConnectFull @event, GameEventInfo info)
+        {
+            var player = @event.Userid;
+            if (player?.IsValid != true || player.IsBot) return HookResult.Continue;
+
+            WarningService.ShowWarningIfNeeded(player);
+
+            if (BanService.IsBanned(player.SteamID))
+            {
+                player.PrintToCenterHtml(
+                    "<font color='red' size='22'>Ваш аккаунт находится в SAC блокировке на этом сервере!</font><br/>" +
+                    "<font color='white' size='16'>В начале раунда, вы будете автоматически убиты!</font>");
+            }
+            else
+            {
+                ConsentService.RequestConsent(player);
+            }
+
+            return HookResult.Continue;
+        }
+
+        private HookResult OnPlayerDisconnect(EventPlayerDisconnect @event, GameEventInfo info)
+        {
+            var player = @event.Userid;
+            if (player?.IsValid == true)
+            {
+                ConsentService.ClearOnDisconnect(player.SteamID);
+            }
+
+            var connectedCount = Utilities.GetPlayers().Count(p => p is { IsValid: true, IsBot: false });
+            WarningService.ResetIfServerEmpty(connectedCount - 1);
+            return HookResult.Continue;
+        }
+
+        private HookResult OnRoundStart(EventRoundStart @event, GameEventInfo info)
+        {
+            if (string.IsNullOrEmpty(CurrentMatchId))
+            {
+                CurrentMatchId = GenerateMatchId();
+
+                var players = Utilities.GetPlayers().Where(p => p is { IsValid: true, IsBot: false }).ToList();
+
+                string? demoFile = null;
+                if (_config.DemoRecordingEnabled)
+                {
+                    var demoName = $"{CurrentMatchId}_{DateTime.UtcNow:yyyy-MM-dd_HHmmss}";
+                    demoFile = $"{_config.DemoFolder}/{demoName}.dem";
+                    Server.ExecuteCommand($"tv_record {_config.DemoFolder}/{demoName}");
+                    _demoRecordingActive = true;
+                }
+
+                DataCollector.SaveMatchMeta(CurrentMatchId, Server.MapName, players, demoFile);
+            }
+
+            foreach (var module in Modules)
+            {
+                module.OnRoundStart();
+            }
+
+            WarningCounterService.OnRoundStart();
+
+            ChatService.PrintCheckStart();
+            ChatService.PrintMatchId(CurrentMatchId);
+
+            if (_config.TipMessageEnabled)
+            {
+                ChatService.PrintTip();
+            }
+
+            return HookResult.Continue;
+        }
+
+        private HookResult OnRoundEnd(EventRoundEnd @event, GameEventInfo info)
+        {
+            return HookResult.Continue;
+        }
+
+        private HookResult OnWeaponFire(EventWeaponFire @event, GameEventInfo info)
+        {
+            var player = @event.Userid;
+            if (player?.IsValid != true) return HookResult.Continue;
+
+            foreach (var module in Modules)
+            {
+                module.OnWeaponFire(player, @event);
+            }
+
+            return HookResult.Continue;
+        }
+
+        private HookResult OnPlayerHurt(EventPlayerHurt @event, GameEventInfo info)
+        {
+            var victim = @event.Userid;
+            var attacker = @event.Attacker;
+
+            if (victim?.IsValid != true || attacker?.IsValid != true) return HookResult.Continue;
+
+            foreach (var module in Modules)
+            {
+                module.OnPlayerHurt(victim, attacker, @event);
+            }
+
+            return HookResult.Continue;
+        }
+
+        private HookResult OnPlayerDeath(EventPlayerDeath @event, GameEventInfo info)
+        {
+            return HookResult.Continue;
+        }
+
+        private HookResult OnPlayerSpawn(EventPlayerSpawn @event, GameEventInfo info)
+        {
+            var player = @event.Userid;
+            if (player?.IsValid != true || player.IsBot) return HookResult.Continue;
+
+            // Забаненный игрок может выбрать команду, но в начале каждого раунда его убивают.
+            if (BanService.IsBanned(player.SteamID))
+            {
+                var pawn = player.PlayerPawn?.Value;
+                if (pawn != null && pawn.IsValid)
+                {
+                    pawn.CommitSuicide(false, true);
+                }
+                else
+                {
+                    Server.ExecuteCommand($"slay {player.UserId}");
+                }
+                return HookResult.Continue;
+            }
+
+            var nameChangerModule = Modules.OfType<NameChangerModule>().FirstOrDefault();
+            nameChangerModule?.CheckNameChange(player);
+
+            return HookResult.Continue;
+        }
+
+        /// <summary>
+        /// Генерирует случайный 8-символьный ID матча из безопасного алфавита
+        /// (без визуально похожих символов вроде 0/O, 1/I).
+        /// </summary>
+        private string GenerateMatchId()
+        {
+            var chars = new char[8];
+            for (int i = 0; i < 8; i++)
+            {
+                chars[i] = MatchIdAlphabet[_random.Next(MatchIdAlphabet.Length)];
+            }
+            return new string(chars);
+        }
+    }
+}
+
+```
+
+`SAC/Services/BanService.cs`:
+
+```cs
+using CounterStrikeSharp.API;
+using CounterStrikeSharp.API.Core;
+using CounterStrikeSharp.API.Modules.Cvars;
+using CounterStrikeSharp.API.Modules.Menu;
+using Newtonsoft.Json;
+using SAC.Config;
+
+namespace SAC.Services
+{
+    /// <summary>
+    /// Запись о бане игрока, хранится в bans.json.
+    /// </summary>
+    public class BanRecord
+    {
+        [JsonProperty("steamid")]
+        public string SteamId { get; set; } = string.Empty;
+
+        [JsonProperty("banned_at")]
+        public DateTime BannedAt { get; set; }
+
+        [JsonProperty("expires_at")]
+        public DateTime? ExpiresAt { get; set; }
+
+        [JsonProperty("reason")]
+        public string Reason { get; set; } = string.Empty;
+
+        [JsonProperty("permanent")]
+        public bool Permanent { get; set; }
+    }
+
+    /// <summary>
+    /// Отвечает за бан обнаруженного читера, отмену соревновательного матча
+    /// и предоставление доступа к апелляции.
+    /// </summary>
+    public class BanService
+    {
+        private readonly SacConfig _config;
+        private readonly ChatService _chatService;
+        private readonly DataCollector _dataCollector;
+        private readonly SACnetRegistry _sacnetRegistry;
+        private readonly string _bansFilePath;
+        private readonly object _bansLock = new();
+        private Dictionary<ulong, BanRecord> _bans = new();
+
+        private const string EvidenceBaseUrl = "https://your-sac-server.com/evidence";
+
+        public BanService(string pluginBaseDirectory, SacConfig config, ChatService chatService, DataCollector dataCollector, SACnetRegistry sacnetRegistry)
+        {
+            _config = config;
+            _chatService = chatService;
+            _dataCollector = dataCollector;
+            _sacnetRegistry = sacnetRegistry;
+            _bansFilePath = Path.Combine(pluginBaseDirectory, "bans.json");
+            LoadBans();
+        }
+
+        private void LoadBans()
+        {
+            lock (_bansLock)
+            {
+                if (!File.Exists(_bansFilePath))
+                {
+                    _bans = new Dictionary<ulong, BanRecord>();
+                    SaveBans();
+                    return;
+                }
+
+                var json = File.ReadAllText(_bansFilePath);
+                var list = JsonConvert.DeserializeObject<List<BanRecord>>(json) ?? new List<BanRecord>();
+                _bans = list
+                    .Where(b => ulong.TryParse(b.SteamId, out _))
+                    .ToDictionary(b => ulong.Parse(b.SteamId), b => b);
+            }
+        }
+
+        private void SaveBans()
+        {
+            lock (_bansLock)
+            {
+                var json = JsonConvert.SerializeObject(_bans.Values.ToList(), Formatting.Indented);
+                File.WriteAllText(_bansFilePath, json);
+            }
+        }
+
+        /// <summary>
+        /// Проверяет, забанен ли игрок в данный момент. Автоматически снимает истёкшие временные баны.
+        /// </summary>
+        public bool IsBanned(ulong steamId)
+        {
+            lock (_bansLock)
+            {
+                if (!_bans.TryGetValue(steamId, out var ban)) return false;
+
+                if (!ban.Permanent && ban.ExpiresAt.HasValue && ban.ExpiresAt.Value <= DateTime.UtcNow)
+                {
+                    _bans.Remove(steamId);
+                    SaveBans();
+                    return false;
+                }
+
+                return true;
+            }
+        }
+
+        /// <summary>
+        /// Возвращает запись о бане игрока, если он забанен, иначе null.
+        /// </summary>
+        public BanRecord? GetBan(ulong steamId)
+        {
+            lock (_bansLock)
+            {
+                return _bans.TryGetValue(steamId, out var ban) ? ban : null;
+            }
+        }
+
+        /// <summary>
+        /// Банит игрока на указанное количество часов (используется системой прогрессивных предупреждений).
+        /// Дополнительно логирует в датасет и отменяет соревновательный матч при необходимости.
+        /// </summary>
+        public void BanTemporary(ulong steamId, int hours, string reason)
+        {
+            lock (_bansLock)
+            {
+                var record = new BanRecord
+                {
+                    SteamId = steamId.ToString(),
+                    BannedAt = DateTime.UtcNow,
+                    ExpiresAt = DateTime.UtcNow.AddHours(hours),
+                    Reason = reason,
+                    Permanent = false
+                };
+
+                _bans[steamId] = record;
+                SaveBans();
+            }
+
+            var player = Utilities.GetPlayers().FirstOrDefault(p => p.IsValid && p.SteamID == steamId);
+            var wasSacnetMember = _sacnetRegistry.IsMember(steamId);
+
+            if (wasSacnetMember)
+            {
+                _sacnetRegistry.PermanentlyBan(steamId, reason);
+            }
+
+            if (player != null)
+            {
+                _dataCollector.MarkAsCheater(player, reason, wasSacnetMember);
+                _chatService.PrintDetection(player.PlayerName, reason);
+            }
+
+            if (IsCompetitiveMode())
+            {
+                _chatService.PrintMatchCancelled();
+                _chatService.PrintMatchCancelledHud();
+                CancelMatch();
+            }
+        }
+
+        /// <summary>
+        /// Основная точка входа при обнаружении чита: банит игрока, логирует в датасет,
+        /// исключает из SACnet при необходимости и отменяет соревновательный матч.
+        /// </summary>
+        public void BanAndCancelMatch(CCSPlayerController cheater, string reason)
+        {
+            var wasSacnetMember = _sacnetRegistry.IsMember(cheater.SteamID);
+
+            if (wasSacnetMember)
+            {
+                _sacnetRegistry.PermanentlyBan(cheater.SteamID, reason);
+            }
+
+            _dataCollector.MarkAsCheater(cheater, reason, wasSacnetMember);
+
+            _chatService.PrintDetection(cheater.PlayerName, reason);
+            Server.PrintToChatAll($"[SAC] Данные игрока {cheater.PlayerName} добавлены в датасет для обучения SAC 2.0.");
+
+            Server.ExecuteCommand($"kickid {cheater.UserId} \"[SAC] Обнаружен чит: {reason}\"");
+
+            if (IsCompetitiveMode())
+            {
+                _chatService.PrintMatchCancelled();
+                _chatService.PrintMatchCancelledHud();
+                CancelMatch();
+            }
+        }
+
+        /// <summary>
+        /// Проверяет, является ли текущий режим соревновательным (game_type 0, game_mode 1 или 2).
+        /// </summary>
+        public bool IsCompetitiveMode()
+        {
+            var gameTypeCvar = ConVar.Find("game_type");
+            var gameModeCvar = ConVar.Find("game_mode");
+
+            if (gameTypeCvar == null || gameModeCvar == null) return false;
+
+            var gameType = gameTypeCvar.GetPrimitiveValue<int>();
+            var gameMode = gameModeCvar.GetPrimitiveValue<int>();
+
+            return gameType == 0 && _config.CompetitiveGameModes.Contains(gameMode);
+        }
+
+        /// <summary>
+        /// Отменяет текущий матч: перезапускает варм-ап и рестартует игру.
+        /// </summary>
+        public void CancelMatch()
+        {
+            Server.ExecuteCommand("mp_warmup_start");
+            Server.ExecuteCommand("mp_warmup_pausetimer 1");
+            Server.ExecuteCommand("mp_restartgame 1");
+        }
+
+        /// <summary>
+        /// Открывает меню апелляции для забаненного игрока (доступно, например, через отдельный веб-интерфейс).
+        /// </summary>
+        public void OpenAppealMenu(CCSPlayerController player)
+        {
+            var menu = new CenterHtmlMenu("Апелляция SAC");
+
+            menu.AddMenuOption("📥 Скачать доказательства", (p, option) =>
+            {
+                var url = $"{EvidenceBaseUrl}/{p.SteamID}.zip";
+                p.PrintToChat($"[SAC] Ссылка на доказательства: {url}");
+            });
+
+            menu.AddMenuOption("📝 Подать апелляцию", (p, option) =>
+            {
+                p.PrintToChat("[SAC] Для подачи апелляции обратитесь в Telegram-бот SAC командой /appeal.");
+            });
+
+            MenuManager.OpenCenterHtmlMenu(null, player, menu);
+        }
+    }
+}
+
+```
+
+`SAC/Services/ChatService.cs`:
+
+```cs
+using CounterStrikeSharp.API;
+using CounterStrikeSharp.API.Core;
+
+namespace SAC.Services
+{
+    /// <summary>
+    /// Централизованный сервис для вывода всех текстовых сообщений SAC в чат и HUD.
+    /// Тексты сообщений зафиксированы и не должны изменяться без обновления документации.
+    /// </summary>
+    public class ChatService
+    {
+        public void PrintCheckStart()
+        {
+            Server.PrintToChatAll("[СИСТЕМА] [SAC] Проверка на наличие софтеров..!");
+        }
+
+        public void PrintDetection(string username, string action)
+        {
+            Server.PrintToChatAll($"[SAC] Система SAC кикнула игрока под ником {username}. SAC сочла его поведение подозрительным.");
+        }
+
+        public void PrintMatchCancelled()
+        {
+            Server.PrintToChatAll("[SAC] СИСТЕМА SAC ОТМЕНИЛА МАТЧ! Пользователи с читами были заблокированы, а матч отменён!");
+        }
+
+        public void PrintMatchCancelledHud()
+        {
+            var html = "<font color='red' class='fontSize-l'>СИСТЕМА SAC ОТМЕНИЛА МАТЧ!</font><br>" +
+                        "<font color='#CCCCCC' class='fontSize-s'>Пользователи с читами были обнаружены и заблокированы.<br>Матч будет перезапущен.</font>";
+
+            foreach (var player in Utilities.GetPlayers())
+            {
+                if (player is { IsValid: true, IsBot: false })
+                {
+                    player.PrintToCenterHtml(html);
+                }
+            }
+        }
+
+        public void PrintReportReceived(string targetName)
+        {
+            Server.PrintToChatAll($"[REPORT] Жалоба на игрока {targetName} была отправлена!");
+        }
+
+        public void PrintMatchId(string matchId)
+        {
+            Server.PrintToChatAll($"[SAC] ID матча: {matchId} | Жалоба: !sac_report или TG-бот: /report {matchId}");
+        }
+
+        public void PrintMassCheckStart(string suspectName)
+        {
+            Server.PrintToChatAll($"[СИСТЕМА] [SAC] Поступило несколько жалоб на {suspectName}. Начинаю тотальную проверку сервера..!");
+        }
+
+        public void PrintSacnetBetrayal(string name)
+        {
+            Server.PrintToChatAll($"[SAC] Игрок {name} исключён из SACnet за использование читов. Пожизненный бан.");
+        }
+
+        /// <summary>
+        /// Подсказка о том, как подать жалобу. Выводится в начале каждого раунда и матча.
+        /// </summary>
+        public void PrintTip()
+        {
+            Server.PrintToChatAll("[SAC] [TIP] Для подачи жалобы на игрока, откройте консоль и введите команду: !sac_report");
+        }
+    }
+}
+
+```
+
+`SAC/Services/ConsentService.cs`:
+
+```cs
+using CounterStrikeSharp.API;
+using CounterStrikeSharp.API.Core;
+using CounterStrikeSharp.API.Modules.Menu;
+using CounterStrikeSharp.API.Modules.Timers;
+using SAC.Config;
+
+namespace SAC.Services
+{
+    /// <summary>
+    /// Показывает игроку окно согласия на сбор логов/видео для обучения SAC/SACnet
+    /// сразу после подключения, до выбора команды. При отказе — кикает с обратным отсчётом.
+    /// </summary>
+    public class ConsentService
+    {
+        private readonly SacConfig _config;
+        private readonly HashSet<ulong> _declinedThisSession = new();
+        private readonly HashSet<ulong> _consentedThisSession = new();
+
+        private const string ConsentText =
+            "Продолжая играть на этом сервере, вы принимаете то,<br/>" +
+            "что логи/видео вашей игры будут собираться для обучения<br/>" +
+            "наших дальнейших античитов семейства SAC и SACnet!";
+
+        public ConsentService(SacConfig config)
+        {
+            _config = config;
+        }
+
+        /// <summary>
+        /// Показывает окно согласия игроку, если он ещё не согласился/не отказался в этой сессии подключения.
+        /// </summary>
+        public void RequestConsent(CCSPlayerController player)
+        {
+            if (!_config.ConsentRequired)
+            {
+                _consentedThisSession.Add(player.SteamID);
+                return;
+            }
+
+            var menu = new CenterHtmlMenu("Соглашение SAC");
+            menu.AddMenuOption("Согласиться", (p, option) => OnConsentAccepted(p));
+            menu.AddMenuOption("Отказать", (p, option) => OnConsentDeclined(p));
+
+            player.PrintToCenterHtml(ConsentText);
+            MenuManager.OpenCenterHtmlMenu(null, player, menu);
+        }
+
+        /// <summary>
+        /// Проверяет, отказался ли игрок от согласия (используется, чтобы не пускать его дальше).
+        /// </summary>
+        public bool HasDeclined(ulong steamId) => _declinedThisSession.Contains(steamId);
+
+        public bool HasConsented(ulong steamId) => _consentedThisSession.Contains(steamId);
+
+        /// <summary>
+        /// Сбрасывает состояние согласия при отключении игрока — при переподключении окно покажется снова.
+        /// </summary>
+        public void ClearOnDisconnect(ulong steamId)
+        {
+            _declinedThisSession.Remove(steamId);
+            _consentedThisSession.Remove(steamId);
+        }
+
+        private void OnConsentAccepted(CCSPlayerController player)
+        {
+            _consentedThisSession.Add(player.SteamID);
+        }
+
+        private void OnConsentDeclined(CCSPlayerController player)
+        {
+            _declinedThisSession.Add(player.SteamID);
+
+            var secondsLeft = _config.ConsentKickDelaySeconds;
+            ShowCountdown(player, secondsLeft);
+
+            var ticksLeft = secondsLeft;
+            var steamId = player.SteamID;
+            Timer? countdownTimer = null;
+
+            countdownTimer = Server.AddTimer(1.0f, () =>
+            {
+                ticksLeft -= 1;
+
+                var current = Utilities.GetPlayers().FirstOrDefault(p => p.IsValid && p.SteamID == steamId);
+                if (current == null)
+                {
+                    countdownTimer?.Kill();
+                    return;
+                }
+
+                if (ticksLeft <= 0)
+                {
+                    Server.ExecuteCommand($"kickid {current.UserId} \"[SAC] Вы отказались от сбора данных\"");
+                    countdownTimer?.Kill();
+                }
+                else
+                {
+                    ShowCountdown(current, ticksLeft);
+                }
+            }, TimerFlags.REPEAT);
+        }
+
+        private void ShowCountdown(CCSPlayerController player, int secondsLeft)
+        {
+            player.PrintToCenterHtml($"Вы будете кикнуты с сервере через: {secondsLeft} секунд!");
+        }
+    }
+}
+
+```
+
+`SAC/Services/DataCollector.cs`:
+
+```cs
+using System.Security.Cryptography;
+using System.Text;
+using CounterStrikeSharp.API.Core;
+using Newtonsoft.Json;
+
+namespace SAC.Services
+{
+    /// <summary>
+    /// Собирает анонимизированный датасет игровых событий для будущего обучения SAC 2.0.
+    /// Все идентификаторы игроков хешируются, ники заменяются на обезличенные.
+    /// </summary>
+    public class DataCollector
+    {
+        private readonly string _baseDir;
+        private readonly string _salt;
+
+        private const string RawDir = "raw";
+        private const string CleanDir = "clean";
+        private const string CheatDir = "cheat";
+        private const string MetaDir = "meta";
+        private const string WarningsDir = "warnings";
+        private const string PlayersDir = "players";
+        private const string DemosDir = "demos";
+
+        private readonly Dictionary<ulong, string> _anonNameCache = new();
+        private readonly object _writeLock = new();
+
+        public DataCollector(string pluginBaseDirectory, string salt)
+        {
+            _baseDir = Path.Combine(pluginBaseDirectory, "dataset");
+            _salt = salt;
+
+            Directory.CreateDirectory(Path.Combine(_baseDir, RawDir));
+            Directory.CreateDirectory(Path.Combine(_baseDir, CleanDir));
+            Directory.CreateDirectory(Path.Combine(_baseDir, CheatDir));
+            Directory.CreateDirectory(Path.Combine(_baseDir, MetaDir));
+            Directory.CreateDirectory(Path.Combine(_baseDir, WarningsDir));
+            Directory.CreateDirectory(Path.Combine(_baseDir, PlayersDir));
+            Directory.CreateDirectory(Path.Combine(_baseDir, DemosDir));
+        }
+
+        /// <summary>
+        /// Возвращает абсолютный путь к папке для демок (используется SACPlugin для tv_record).
+        /// </summary>
+        public string GetDemosDirectory() => Path.Combine(_baseDir, DemosDir);
+
+        /// <summary>
+        /// Хеширует SteamID игрока солью SHA-256, возвращает первые 12 hex-символов.
+        /// </summary>
+        public string HashSteamId(ulong steamId)
+        {
+            using var sha256 = SHA256.Create();
+            var bytes = Encoding.UTF8.GetBytes($"{steamId}:{_salt}");
+            var hash = sha256.ComputeHash(bytes);
+            var hex = Convert.ToHexString(hash).ToLowerInvariant();
+            return hex[..12];
+        }
+
+        /// <summary>
+        /// Возвращает обезличенный ник вида player_XXXX, стабильный для одного SteamID в рамках сессии сервера.
+        /// </summary>
+        public string AnonymizeName(ulong steamId)
+        {
+            if (_anonNameCache.TryGetValue(steamId, out var cached)) return cached;
+
+            var hash = HashSteamId(steamId);
+            var shortId = hash[..4];
+            var anon = $"player_{shortId}";
+            _anonNameCache[steamId] = anon;
+            return anon;
+        }
+
+        /// <summary>
+        /// Записывает событие в raw/, а также в clean/, если игрок состоит в SACnet.
+        /// </summary>
+        public void LogEvent(CCSPlayerController player, string type, object data, bool isSacnetMember)
+        {
+            var record = new
+            {
+                timestamp = DateTime.UtcNow.ToString("O"),
+                steamid_hash = HashSteamId(player.SteamID),
+                anon_name = AnonymizeName(player.SteamID),
+                type,
+                data
+            };
+
+            var line = JsonConvert.SerializeObject(record);
+
+            AppendLine(RawDir, line);
+            if (isSacnetMember)
+            {
+                AppendLine(CleanDir, line);
+            }
+
+            AppendPlayerLine(player, line);
+        }
+
+        /// <summary>
+        /// Записывает событие срабатывания системы прогрессивных предупреждений в dataset/warnings/.
+        /// </summary>
+        public void LogWarning(CCSPlayerController player, object data)
+        {
+            var record = new
+            {
+                timestamp = DateTime.UtcNow.ToString("O"),
+                steamid_hash = HashSteamId(player.SteamID),
+                anon_name = AnonymizeName(player.SteamID),
+                type = "warning",
+                data
+            };
+
+            var line = JsonConvert.SerializeObject(record);
+            AppendLine(WarningsDir, line);
+            AppendPlayerLine(player, line);
+        }
+
+        /// <summary>
+        /// Дописывает событие в персональный журнал игрока: dataset/players/<anon_id>/<дата>_session.jsonl,
+        /// а также обновляет meta.json с его текущим статусом.
+        /// </summary>
+        private void AppendPlayerLine(CCSPlayerController player, string line)
+        {
+            var anonId = HashSteamId(player.SteamID);
+            var playerDir = Path.Combine(_baseDir, PlayersDir, anonId);
+
+            lock (_writeLock)
+            {
+                Directory.CreateDirectory(playerDir);
+
+                var sessionFile = Path.Combine(playerDir, $"{DateTime.UtcNow:yyyy-MM-dd}_session.jsonl");
+                File.AppendAllText(sessionFile, line + Environment.NewLine);
+
+                var metaFile = Path.Combine(playerDir, "meta.json");
+                var meta = new
+                {
+                    steamid_hash = anonId,
+                    anon_name = AnonymizeName(player.SteamID),
+                    last_seen = DateTime.UtcNow.ToString("O")
+                };
+                File.WriteAllText(metaFile, JsonConvert.SerializeObject(meta, Formatting.Indented));
+            }
+        }
+
+        /// <summary>
+        /// Помечает игрока как читера в датасете (отдельный набор для обучения детектора).
+        /// </summary>
+        public void MarkAsCheater(CCSPlayerController player, string reason, bool wasSacnetMember)
+        {
+            var record = new
+            {
+                timestamp = DateTime.UtcNow.ToString("O"),
+                steamid_hash = HashSteamId(player.SteamID),
+                anon_name = AnonymizeName(player.SteamID),
+                type = "cheater_marker",
+                reason,
+                betrayal = wasSacnetMember
+            };
+
+            var line = JsonConvert.SerializeObject(record);
+            AppendLine(CheatDir, line);
+        }
+
+        /// <summary>
+        /// Сохраняет метаданные матча (карта, участники, файл демки) в meta/match_<id>.json.
+        /// </summary>
+        public void SaveMatchMeta(string matchId, string mapName, IEnumerable<CCSPlayerController> players, string? demoFile = null)
+        {
+            var meta = new
+            {
+                match_id = matchId,
+                map = mapName,
+                started_at = DateTime.UtcNow.ToString("O"),
+                demo_file = demoFile,
+                players = players.Select(p => new
+                {
+                    steamid_hash = HashSteamId(p.SteamID),
+                    anon_name = AnonymizeName(p.SteamID)
+                })
+            };
+
+            var path = Path.Combine(_baseDir, MetaDir, $"match_{matchId}.json");
+            var json = JsonConvert.SerializeObject(meta, Formatting.Indented);
+
+            lock (_writeLock)
+            {
+                File.WriteAllText(path, json);
+            }
+        }
+
+        /// <summary>
+        /// Дописывает путь к файлу демки в уже сохранённые метаданные матча (вызывается при tv_record).
+        /// </summary>
+        public void AttachDemoFile(string matchId, string demoFile)
+        {
+            var path = Path.Combine(_baseDir, MetaDir, $"match_{matchId}.json");
+
+            lock (_writeLock)
+            {
+                if (!File.Exists(path)) return;
+
+                var json = File.ReadAllText(path);
+                var meta = JsonConvert.DeserializeObject<Dictionary<string, object>>(json) ?? new Dictionary<string, object>();
+                meta["demo_file"] = demoFile;
+                File.WriteAllText(path, JsonConvert.SerializeObject(meta, Formatting.Indented));
+            }
+        }
+
+        private void AppendLine(string subDir, string line)
+        {
+            var fileName = $"{DateTime.UtcNow:yyyy-MM-dd}.jsonl";
+            var path = Path.Combine(_baseDir, subDir, fileName);
+
+            lock (_writeLock)
+            {
+                File.AppendAllText(path, line + Environment.NewLine);
+            }
+        }
+    }
+}
+
+```
+
+`SAC/Services/MassCheckService.cs`:
+
+```cs
+using CounterStrikeSharp.API;
+using SAC.Modules;
+
+namespace SAC.Services
+{
+    /// <summary>
+    /// Запускает режим массовой проверки сервера: временно ужесточает чувствительность
+    /// всех модулей детекции при накоплении достаточного числа жалоб на одного игрока.
+    /// </summary>
+    public class MassCheckService
+    {
+        private readonly ChatService _chatService;
+        private readonly List<IModule> _modules;
+
+        private const float HeightenedSensitivity = 0.5f;
+        private const float NormalSensitivity = 1.0f;
+        private const float MassCheckDurationSeconds = 180f; // 3 минуты
+
+        public MassCheckService(ChatService chatService, List<IModule> modules)
+        {
+            _chatService = chatService;
+            _modules = modules;
+        }
+
+        /// <summary>
+        /// Запускает тотальную проверку сервера: усиливает детекцию, объявляет об этом в чате
+        /// и планирует автоматический откат чувствительности через 3 минуты.
+        /// </summary>
+        public void Trigger(ulong suspectSteamId, string suspectName)
+        {
+            _chatService.PrintMassCheckStart(suspectName);
+
+            foreach (var module in _modules)
+            {
+                module.SetSensitivityMultiplier(HeightenedSensitivity);
+            }
+
+            Server.NextWorldUpdate(() =>
+            {
+                Server.AddTimer(MassCheckDurationSeconds, () =>
+                {
+                    foreach (var module in _modules)
+                    {
+                        module.SetSensitivityMultiplier(NormalSensitivity);
+                    }
+                });
+            });
+        }
+    }
+}
+
+```
+
+`SAC/Services/ReportService.cs`:
+
+```cs
+using CounterStrikeSharp.API;
+using CounterStrikeSharp.API.Core;
+using CounterStrikeSharp.API.Modules.Menu;
+using SAC.Config;
+
+namespace SAC.Services
+{
+    /// <summary>
+    /// Обрабатывает жалобы на игроков из двух источников: игровой чат (!sac_report)
+    /// и Telegram-бот (через HTTP). При накоплении достаточного числа уникальных
+    /// источников жалоб на одного игрока запускает массовую проверку.
+    /// </summary>
+    public class ReportService
+    {
+        private readonly SacConfig _config;
+        private readonly ChatService _chatService;
+        private readonly MassCheckService _massCheckService;
+
+        // targetSteamId -> (набор уникальных источников, время последней жалобы)
+        private readonly Dictionary<ulong, (HashSet<string> sources, DateTime windowStart, string targetName)> _reports = new();
+        private readonly object _lock = new();
+
+        public ReportService(SacConfig config, ChatService chatService, MassCheckService massCheckService)
+        {
+            _config = config;
+            _chatService = chatService;
+            _massCheckService = massCheckService;
+        }
+
+        /// <summary>
+        /// Регистрирует жалобу от указанного источника. Источник задаётся строкой вида
+        /// "ingame:<steamid>" для внутриигровых жалоб или "tg:<tg_user_id>" для Telegram.
+        /// </summary>
+        public void RegisterReport(ulong targetSteamId, string targetName, string sourceId, string reason)
+        {
+            lock (_lock)
+            {
+                var now = DateTime.UtcNow;
+
+                if (!_reports.TryGetValue(targetSteamId, out var entry) ||
+                    (now - entry.windowStart).TotalSeconds > _config.ReportWindowSeconds)
+                {
+                    entry = (new HashSet<string>(), now, targetName);
+                }
+
+                entry.sources.Add(sourceId);
+                entry.targetName = targetName;
+                _reports[targetSteamId] = entry;
+
+                _chatService.PrintReportReceived(targetName);
+
+                if (entry.sources.Count >= _config.ReportsForMassCheck)
+                {
+                    _massCheckService.Trigger(targetSteamId, targetName);
+                    _reports.Remove(targetSteamId);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Открывает игровое меню жалобы: сначала список противников, затем причина жалобы.
+        /// </summary>
+        public void OpenReportMenu(CCSPlayerController reporter)
+        {
+            var opponents = Utilities.GetPlayers()
+                .Where(p => p is { IsValid: true, IsBot: false } &&
+                            p.SteamID != reporter.SteamID &&
+                            p.TeamNum != reporter.TeamNum &&
+                            p.TeamNum > 1)
+                .ToList();
+
+            var targetMenu = new CenterHtmlMenu("Кого вы хотите пожаловать?");
+
+            foreach (var opponent in opponents)
+            {
+                targetMenu.AddMenuOption(opponent.PlayerName, (player, option) =>
+                {
+                    OpenReasonMenu(player, opponent);
+                });
+            }
+
+            MenuManager.OpenCenterHtmlMenu(null, reporter, targetMenu);
+        }
+
+        private void OpenReasonMenu(CCSPlayerController reporter, CCSPlayerController target)
+        {
+            var reasonMenu = new CenterHtmlMenu($"Причина жалобы на {target.PlayerName}");
+
+            string[] reasons = { "Aimbot", "Wallhack", "Triggerbot", "Other" };
+            foreach (var reason in reasons)
+            {
+                reasonMenu.AddMenuOption(reason, (player, option) =>
+                {
+                    RegisterReport(target.SteamID, target.PlayerName, $"ingame:{player.SteamID}", reason);
+                });
+            }
+
+            MenuManager.OpenCenterHtmlMenu(null, reporter, reasonMenu);
+        }
+    }
+}
+
+```
+
+`SAC/Services/SACnetRegistry.cs`:
+
+```cs
+using CounterStrikeSharp.API;
+using Newtonsoft.Json;
+
+namespace SAC.Services
+{
+    /// <summary>
+    /// Участник закрытой сети доверенных игроков SACnet.
+    /// </summary>
+    public class SACnetMember
+    {
+        [JsonProperty("steam_id")]
+        public ulong SteamId { get; set; }
+
+        [JsonProperty("username")]
+        public string Username { get; set; } = string.Empty;
+
+        [JsonProperty("joined_at")]
+        public DateTime JoinedAt { get; set; }
+
+        [JsonProperty("is_banned")]
+        public bool IsBanned { get; set; }
+
+        [JsonProperty("banned_at")]
+        public DateTime? BannedAt { get; set; }
+
+        [JsonProperty("ban_reason")]
+        public string? BanReason { get; set; }
+
+        [JsonProperty("hours_played")]
+        public double HoursPlayed { get; set; }
+
+        [JsonProperty("region")]
+        public string Region { get; set; } = "unknown";
+    }
+
+    /// <summary>
+    /// Реестр участников SACnet — закрытой сети доверенных игроков.
+    /// Хранится в файле sacnet_members.json.
+    /// </summary>
+    public class SACnetRegistry
+    {
+        private readonly string _filePath;
+        private readonly ChatService _chatService;
+        private Dictionary<ulong, SACnetMember> _members = new();
+        private readonly object _lock = new();
+
+        public SACnetRegistry(string pluginBaseDirectory, ChatService chatService)
+        {
+            _filePath = Path.Combine(pluginBaseDirectory, "sacnet_members.json");
+            _chatService = chatService;
+            Load();
+        }
+
+        public void Load()
+        {
+            lock (_lock)
+            {
+                if (!File.Exists(_filePath))
+                {
+                    _members = new Dictionary<ulong, SACnetMember>();
+                    Save();
+                    return;
+                }
+
+                var json = File.ReadAllText(_filePath);
+                var list = JsonConvert.DeserializeObject<List<SACnetMember>>(json) ?? new List<SACnetMember>();
+                _members = list.ToDictionary(m => m.SteamId, m => m);
+            }
+        }
+
+        public void Save()
+        {
+            lock (_lock)
+            {
+                var list = _members.Values.ToList();
+                var json = JsonConvert.SerializeObject(list, Formatting.Indented);
+                File.WriteAllText(_filePath, json);
+            }
+        }
+
+        public bool IsMember(ulong steamId)
+        {
+            lock (_lock)
+            {
+                return _members.ContainsKey(steamId) && !_members[steamId].IsBanned;
+            }
+        }
+
+        public SACnetMember? GetMember(ulong steamId)
+        {
+            lock (_lock)
+            {
+                return _members.TryGetValue(steamId, out var member) ? member : null;
+            }
+        }
+
+        /// <summary>
+        /// Пожизненно исключает и банит участника SACnet за использование читов.
+        /// </summary>
+        public void PermanentlyBan(ulong steamId, string reason)
+        {
+            lock (_lock)
+            {
+                if (!_members.TryGetValue(steamId, out var member))
+                {
+                    return;
+                }
+
+                member.IsBanned = true;
+                member.BannedAt = DateTime.UtcNow;
+                member.BanReason = reason;
+
+                _chatService.PrintSacnetBetrayal(member.Username);
+                Save();
+            }
+        }
+    }
+}
+
+```
+
+`SAC/Services/SacKillService.cs`:
+
+```cs
+using CounterStrikeSharp.API;
+using CounterStrikeSharp.API.Core;
+using CounterStrikeSharp.API.Modules.Utils;
+
+namespace SAC.Services
+{
+    /// <summary>
+    /// Реализует показательную механику устранения активного читера: позади него спавнится
+    /// неуязвимый бот с ником "SAC", принадлежащий враждебной команде, который мгновенно
+    /// убивает читера выстрелом в голову и через 0.5 секунды исчезает.
+    /// Используется только для ещё не забаненных, активных читеров.
+    /// </summary>
+    public class SacKillService
+    {
+        private const string BotName = "SAC";
+        private const float SpawnOffsetUnits = 50f;
+        private const float BotLifetimeSeconds = 0.5f;
+
+        /// <summary>
+        /// Выполняет показательное убийство читера ботом "SAC".
+        /// </summary>
+        public void ExecuteSacKill(CCSPlayerController cheater)
+        {
+            var pawn = cheater.PlayerPawn?.Value;
+            if (pawn == null || !pawn.IsValid || pawn.AbsOrigin == null) return;
+
+            var origin = pawn.AbsOrigin;
+            var angle = pawn.EyeAngles;
+
+            // Смещение позиции спавна бота назад от направления взгляда читера.
+            var yawRadians = angle.Y * MathF.PI / 180f;
+            var back = new Vector(
+                origin.X - MathF.Cos(yawRadians) * SpawnOffsetUnits,
+                origin.Y - MathF.Sin(yawRadians) * SpawnOffsetUnits,
+                origin.Z
+            );
+
+            var hostileTeam = cheater.TeamNum == (byte)CsTeam.Terrorist
+                ? CsTeam.CounterTerrorist
+                : CsTeam.Terrorist;
+
+            var bot = SpawnSacBot(back, angle, hostileTeam);
+            if (bot == null) return;
+
+            // Мгновенное убийство читера выстрелом в голову от лица бота.
+            KillCheaterAsHeadshot(cheater, bot);
+
+            // Бот исчезает через 0.5 секунды после устранения читера.
+            Server.AddTimer(BotLifetimeSeconds, () =>
+            {
+                RemoveSacBot(bot);
+            });
+        }
+
+        /// <summary>
+        /// Создаёт неуязвимого бота-исполнителя с именем "SAC" на указанной позиции.
+        /// Фактическое создание управляемого ботом CCSPlayerController выполняется через
+        /// консольные команды сервера (bot_add) с последующей телепортацией и переименованием,
+        /// так как прямое создание валидного player-агента через CreateEntityByName не поддерживается
+        /// публичным API CounterStrikeSharp.
+        /// </summary>
+        private CCSPlayerController? SpawnSacBot(Vector position, QAngle angle, CsTeam team)
+        {
+            var teamCommand = team == CsTeam.Terrorist ? "bot_add_t" : "bot_add_ct";
+            Server.ExecuteCommand(teamCommand);
+
+            // Бот появляется в конце списка игроков — берём последнего подключённого бота.
+            var bot = Utilities.GetPlayers()
+                .Where(p => p is { IsValid: true, IsBot: true })
+                .OrderByDescending(p => p.UserId)
+                .FirstOrDefault();
+
+            if (bot?.PlayerPawn?.Value == null) return null;
+
+            bot.PlayerName = BotName;
+            Utilities.SetStateChanged(bot, "CCSPlayerController", "m_iszPlayerName");
+
+            var botPawn = bot.PlayerPawn.Value;
+            botPawn.Teleport(position, angle, new Vector(0, 0, 0));
+
+            // Неуязвимость бота на время демонстрации.
+            botPawn.TakesDamage = false;
+
+            return bot;
+        }
+
+        /// <summary>
+        /// Мгновенно "убивает" читера от лица бота, эмулируя точный выстрел в голову.
+        /// </summary>
+        private void KillCheaterAsHeadshot(CCSPlayerController cheater, CCSPlayerController bot)
+        {
+            var pawn = cheater.PlayerPawn?.Value;
+            if (pawn == null || !pawn.IsValid) return;
+
+            pawn.CommitSuicide(false, true);
+            Server.PrintToChatAll($"SAC убил {cheater.PlayerName} (headshot)");
+        }
+
+        private void RemoveSacBot(CCSPlayerController bot)
+        {
+            if (bot?.IsValid != true) return;
+            Server.ExecuteCommand($"kickid {bot.UserId} \"SAC bot despawn\"");
+        }
+    }
+}
+
+```
+
+`SAC/Services/SchizophreniaService.cs`:
+
+```cs
+using CounterStrikeSharp.API;
+using CounterStrikeSharp.API.Core;
+using CounterStrikeSharp.API.Modules.Utils;
+
+namespace SAC.Services
+{
+    /// <summary>
+    /// Режим "шизофрении" — психологическое давление на читера перед баном:
+    /// фейковые сообщения от "других игроков", фейковые уведомления SAC,
+    /// фейковый VAC-бан-экран, кратковременное ослепление, сброс оружия и заморозка.
+    /// Эффекты видны и применяются только к целевому игроку.
+    /// </summary>
+    public class SchizophreniaService
+    {
+        private static readonly string[] FakeChatPhrases =
+        {
+            "ты читер, я вижу",
+            "sac, посмотри на него",
+            "он вх, 100%",
+            "у него аим",
+            "кикните его",
+            "я записал демо, тебе конец",
+            "не отвертишься"
+        };
+
+        private static readonly string[] FakeSacNotifications =
+        {
+            "[SAC] Обнаружен чит на вашем аккаунте. Идёт анализ...",
+            "[SAC] Ваш SteamID передан в Valve.",
+            "[SAC] Пожалуйста, не выключайте компьютер.",
+            "[SAC] Ожидается ручная проверка администратором.",
+            "[SAC] Мы всё видим."
+        };
+
+        private const string FakeVacBanHtml =
+            "<font class='fontSize-l' color='red'>VAC Banned</font><br>" +
+            "<font class='fontSize-sm' color='#CCCCCC'>Ваш аккаунт был заблокирован системой VAC.</font>";
+
+        private const float FakeChatChance = 0.20f;
+        private const float FakeNotificationChance = 0.10f;
+        private const float FakeVacScreenChance = 0.03f;
+        private const float FakePlayerChance = 0.08f;
+        private const float InvisibleTrapChance = 0.05f;
+        private const int DefaultDurationSeconds = 60;
+        private const int FreezeDurationSeconds = 10;
+
+        private readonly Random _random = new();
+        private readonly List<CCSPlayerController> _spawnedFakePlayers = new();
+
+        /// <summary>
+        /// Запускает режим шизофрении для указанного игрока на заданную длительность (по умолчанию 60 секунд).
+        /// Эффекты применяются раз в секунду с указанными вероятностями.
+        /// </summary>
+        public void Start(CCSPlayerController target, int durationSeconds = DefaultDurationSeconds)
+        {
+            DropAllWeapons(target);
+            Freeze(target, FreezeDurationSeconds);
+
+            var ticksElapsed = 0;
+            Server.AddTimer(1.0f, () =>
+            {
+                ticksElapsed++;
+                if (ticksElapsed > durationSeconds || target?.IsValid != true)
+                {
+                    CleanupFakePlayers();
+                    return;
+                }
+
+                RunOneSecondOfEffects(target);
+            }, CounterStrikeSharp.API.Modules.Timers.TimerFlags.REPEAT);
+        }
+
+        private void RunOneSecondOfEffects(CCSPlayerController target)
+        {
+            var roll = _random.NextDouble();
+
+            if (roll < FakeVacScreenChance)
+            {
+                ShowFakeVacScreen(target);
+            }
+            else if (roll < FakeVacScreenChance + FakeNotificationChance)
+            {
+                ShowFakeNotification(target);
+            }
+            else if (roll < FakeVacScreenChance + FakeNotificationChance + FakeChatChance)
+            {
+                ShowFakeChatMessage(target);
+            }
+            else if (roll < FakeVacScreenChance + FakeNotificationChance + FakeChatChance + FakePlayerChance)
+            {
+                SpawnFakePlayer(target);
+            }
+            else if (roll < FakeVacScreenChance + FakeNotificationChance + FakeChatChance + FakePlayerChance + InvisibleTrapChance)
+            {
+                TriggerInvisibleTrap(target);
+            }
+        }
+
+        /// <summary>
+        /// Создаёт иллюзию присутствия постороннего игрока в поле зрения читера — бота с моделью
+        /// игрока, который на секунду появляется неподалёку и тут же исчезает.
+        /// ВНИМАНИЕ: публичный API CounterStrikeSharp не предоставляет штатного способа скрыть
+        /// сущность от всех клиентов, кроме одного (это требует хука CheckTransmit на уровне
+        /// движка/Metamod). Реализация ниже создаёт бота-статиста через bot_add и максимально
+        /// быстро его удаляет, минимизируя, но не гарантированно исключая, видимость другими игроками.
+        /// Для полноценной эксклюзивной видимости используйте нативный transmit-хук отдельно.
+        /// </summary>
+        private void SpawnFakePlayer(CCSPlayerController target)
+        {
+            var pawn = target.PlayerPawn?.Value;
+            if (pawn?.AbsOrigin == null) return;
+
+            var angle = pawn.EyeAngles;
+            var yawRadians = (angle.Y + 90f) * MathF.PI / 180f;
+            var spawnPos = new Vector(
+                pawn.AbsOrigin.X + MathF.Cos(yawRadians) * 150f,
+                pawn.AbsOrigin.Y + MathF.Sin(yawRadians) * 150f,
+                pawn.AbsOrigin.Z
+            );
+
+            Server.ExecuteCommand(target.TeamNum == (byte)CsTeam.Terrorist ? "bot_add_ct" : "bot_add_t");
+
+            var fakePlayer = Utilities.GetPlayers()
+                .Where(p => p is { IsValid: true, IsBot: true })
+                .OrderByDescending(p => p.UserId)
+                .FirstOrDefault();
+
+            if (fakePlayer?.PlayerPawn?.Value == null) return;
+
+            fakePlayer.PlayerPawn.Value.Teleport(spawnPos, angle, new Vector(0, 0, 0));
+            _spawnedFakePlayers.Add(fakePlayer);
+
+            Server.AddTimer(1.5f, () =>
+            {
+                if (fakePlayer.IsValid)
+                {
+                    Server.ExecuteCommand($"kickid {fakePlayer.UserId} \"SAC schizo fake player despawn\"");
+                }
+                _spawnedFakePlayers.Remove(fakePlayer);
+            });
+        }
+
+        /// <summary>
+        /// Имитирует срабатывание "невидимой ловушки" — эффект, замечаемый только читером
+        /// (звук/тряска экрана рядом), намекающий, что за ним постоянно наблюдают.
+        /// Полноценные trigger_multiple с эксклюзивной видимостью требуют серверной карты
+        /// с заранее размещёнными точками — здесь эффект эмулируется через уведомление и лёгкую тряску камеры.
+        /// </summary>
+        private void TriggerInvisibleTrap(CCSPlayerController target)
+        {
+            target.PrintToChat("[SAC] *щелчок* ...");
+            target.ExecuteClientCommand("play sounds/ui/counter_beep.vsnd");
+        }
+
+        private void CleanupFakePlayers()
+        {
+            foreach (var fake in _spawnedFakePlayers.ToList())
+            {
+                if (fake.IsValid)
+                {
+                    Server.ExecuteCommand($"kickid {fake.UserId} \"SAC schizo fake player despawn\"");
+                }
+            }
+            _spawnedFakePlayers.Clear();
+        }
+
+        private void ShowFakeChatMessage(CCSPlayerController target)
+        {
+            var phrase = FakeChatPhrases[_random.Next(FakeChatPhrases.Length)];
+            var fakeAuthors = Utilities.GetPlayers()
+                .Where(p => p is { IsValid: true, IsBot: false } && p.SteamID != target.SteamID)
+                .ToList();
+
+            var authorName = fakeAuthors.Count > 0
+                ? fakeAuthors[_random.Next(fakeAuthors.Count)].PlayerName
+                : "Игрок";
+
+            target.PrintToChat($"{authorName}: {phrase}");
+        }
+
+        private void ShowFakeNotification(CCSPlayerController target)
+        {
+            var message = FakeSacNotifications[_random.Next(FakeSacNotifications.Length)];
+            target.PrintToChat(message);
+        }
+
+        private void ShowFakeVacScreen(CCSPlayerController target)
+        {
+            target.PrintToCenterHtml(FakeVacBanHtml);
+            Blind(target, 3.0f);
+        }
+
+        /// <summary>
+        /// Кратковременно ослепляет игрока белой вспышкой экрана (только для него самого).
+        /// </summary>
+        private void Blind(CCSPlayerController target, float durationSeconds)
+        {
+            if (target.Connected != PlayerConnectedState.PlayerConnected) return;
+
+            var fade = new CUserMessageFade();
+            fade.SetDuration((ushort)(durationSeconds * 1000));
+            fade.SetHoldTime((ushort)(durationSeconds * 1000));
+            fade.SetFlags(0x0001 | 0x0002); // FFADE_IN | FFADE_OUT
+            fade.SetColor(0xFFFFFFFF);
+
+            fade.Send(new[] { target });
+        }
+
+        private void DropAllWeapons(CCSPlayerController target)
+        {
+            var pawn = target.PlayerPawn?.Value;
+            if (pawn?.WeaponServices?.MyWeapons == null) return;
+
+            // Перебираем все виды оружия игрока и выбрасываем (роняем) каждое из них на землю.
+            var weapons = pawn.WeaponServices.MyWeapons
+                .Select(handle => handle.Value)
+                .Where(weapon => weapon != null)
+                .ToList();
+
+            foreach (var weapon in weapons)
+            {
+                pawn.Weapon_Drop(weapon!);
+            }
+        }
+
+        private void Freeze(CCSPlayerController target, int seconds)
+        {
+            var pawn = target.PlayerPawn?.Value;
+            if (pawn == null) return;
+
+            const uint FL_FROZEN = 1 << 5;
+            pawn.Flags = (uint)pawn.Flags | FL_FROZEN;
+
+            Server.AddTimer(seconds, () =>
+            {
+                var currentPawn = target?.PlayerPawn?.Value;
+                if (currentPawn != null)
+                {
+                    currentPawn.Flags = (uint)currentPawn.Flags & ~FL_FROZEN;
+                }
+            });
+        }
+    }
+}
+
+```
+
+`SAC/Services/WarningCounterService.cs`:
+
+```cs
+using CounterStrikeSharp.API;
+using CounterStrikeSharp.API.Core;
+using Newtonsoft.Json;
+using SAC.Config;
+
+namespace SAC.Services
+{
+    /// <summary>
+    /// Запись счётчика предупреждений одного игрока, хранится в warnings.json.
+    /// </summary>
+    public class WarningRecord
+    {
+        [JsonProperty("steamid")]
+        public ulong SteamId { get; set; }
+
+        [JsonProperty("attempts")]
+        public int Attempts { get; set; }
+
+        [JsonProperty("rounds_since_last_detection")]
+        public int RoundsSinceLastDetection { get; set; }
+    }
+
+    /// <summary>
+    /// Реализует систему из 4 прогрессивных предупреждений читеру перед окончательным баном:
+    /// попытки 1-2 — простое убийство (slay), попытка 3 — обнуление баланса + slay,
+    /// попытка 4 — бан на 168 часов и кик. Счётчик сохраняется между сессиями в warnings.json
+    /// и сбрасывается после N "чистых" раундов без единого срабатывания детекторов.
+    /// </summary>
+    public class WarningCounterService
+    {
+        private readonly SacConfig _config;
+        private readonly BanService _banService;
+        private readonly DataCollector _dataCollector;
+        private readonly string _filePath;
+        private readonly object _lock = new();
+
+        private Dictionary<ulong, WarningRecord> _records = new();
+
+        public WarningCounterService(string pluginBaseDirectory, SacConfig config, BanService banService, DataCollector dataCollector)
+        {
+            _config = config;
+            _banService = banService;
+            _dataCollector = dataCollector;
+            _filePath = Path.Combine(pluginBaseDirectory, "warnings.json");
+            Load();
+        }
+
+        public void Load()
+        {
+            lock (_lock)
+            {
+                if (!File.Exists(_filePath))
+                {
+                    _records = new Dictionary<ulong, WarningRecord>();
+                    Save();
+                    return;
+                }
+
+                var json = File.ReadAllText(_filePath);
+                var list = JsonConvert.DeserializeObject<List<WarningRecord>>(json) ?? new List<WarningRecord>();
+                _records = list.ToDictionary(r => r.SteamId, r => r);
+            }
+        }
+
+        public void Save()
+        {
+            lock (_lock)
+            {
+                var json = JsonConvert.SerializeObject(_records.Values.ToList(), Formatting.Indented);
+                File.WriteAllText(_filePath, json);
+            }
+        }
+
+        /// <summary>
+        /// Регистрирует срабатывание детектора у игрока и применяет соответствующую попытке реакцию.
+        /// Возвращает номер применённой попытки (1-4).
+        /// </summary>
+        public int RegisterDetection(CCSPlayerController player, string moduleName, string reason)
+        {
+            lock (_lock)
+            {
+                var steamId = player.SteamID;
+                if (!_records.TryGetValue(steamId, out var record))
+                {
+                    record = new WarningRecord { SteamId = steamId, Attempts = 0, RoundsSinceLastDetection = 0 };
+                    _records[steamId] = record;
+                }
+
+                record.Attempts = Math.Min(record.Attempts + 1, _config.WarningAttemptsBeforeBan);
+                record.RoundsSinceLastDetection = 0;
+
+                ApplyAttempt(player, record.Attempts, moduleName, reason);
+                LogAttempt(player, record.Attempts, moduleName, reason);
+
+                Save();
+                return record.Attempts;
+            }
+        }
+
+        private void ApplyAttempt(CCSPlayerController player, int attempt, string moduleName, string reason)
+        {
+            var max = _config.WarningAttemptsBeforeBan;
+
+            switch (attempt)
+            {
+                case 1:
+                    ShowWarningHtml(player, 1, max);
+                    SlayPlayer(player);
+                    break;
+
+                case 2:
+                    ShowWarningHtml(player, 2, max);
+                    SlayPlayer(player);
+                    break;
+
+                case 3:
+                    ShowWarningHtml(player, 3, max);
+                    ZeroOutBalance(player);
+                    SlayPlayer(player);
+                    break;
+
+                default: // 4-я и последующие попытки — окончательный бан
+                    ShowFinalWarningHtml(player, max);
+                    SlayPlayer(player);
+                    _banService.BanTemporary(player.SteamID, _config.BanDurationHours,
+                        $"Cheat detected after {max} warnings ({moduleName}: {reason})");
+                    Server.ExecuteCommand($"kickid {player.UserId} \"[SAC] Вы забанены на {_config.BanDurationHours} часов\"");
+                    break;
+            }
+        }
+
+        private void ShowWarningHtml(CCSPlayerController player, int attempt, int max)
+        {
+            var html = "<font color='red' size='24'>У вас обнаружен чит!</font><br/>" +
+                        "<font color='white' size='18'>Пожалуйста выключите его!</font><br/>" +
+                        $"<font color='yellow' size='16'>Попытка {attempt}/{max}</font>";
+            player.PrintToCenterHtml(html);
+        }
+
+        private void ShowFinalWarningHtml(CCSPlayerController player, int max)
+        {
+            var html = "<font color='red' size='24'>У вас обнаружен чит!</font><br/>" +
+                        $"<font color='white' size='18'>Вы будете забанены на {_config.BanDurationHours} часов!</font><br/>" +
+                        $"<font color='yellow' size='16'>Попытка {max}/{max}</font>";
+            player.PrintToCenterHtml(html);
+        }
+
+        private void SlayPlayer(CCSPlayerController player)
+        {
+            var pawn = player.PlayerPawn?.Value;
+            if (pawn != null && pawn.IsValid)
+            {
+                pawn.CommitSuicide(false, true);
+            }
+            else
+            {
+                Server.ExecuteCommand($"slay {player.UserId}");
+            }
+        }
+
+        private void ZeroOutBalance(CCSPlayerController player)
+        {
+            var moneyServices = player.InGameMoneyServices;
+            if (moneyServices == null) return;
+
+            moneyServices.Account = 0;
+            moneyServices.TotalMoneyEarned = 0;
+            Utilities.SetStateChanged(player, "CCSPlayerController", "m_pInGameMoneyServices");
+        }
+
+        private void LogAttempt(CCSPlayerController player, int attempt, string moduleName, string reason)
+        {
+            var record = new
+            {
+                attempt,
+                module = moduleName,
+                reason
+            };
+
+            _dataCollector.LogWarning(player, record);
+        }
+
+        /// <summary>
+        /// Вызывается в начале каждого раунда: увеличивает счётчик "чистых" раундов у всех
+        /// игроков с накопленными попытками и сбрасывает их при достижении порога.
+        /// </summary>
+        public void OnRoundStart()
+        {
+            lock (_lock)
+            {
+                var changed = false;
+
+                foreach (var record in _records.Values.Where(r => r.Attempts > 0))
+                {
+                    record.RoundsSinceLastDetection += 1;
+                    if (record.RoundsSinceLastDetection >= _config.WarningResetAfterCleanRounds)
+                    {
+                        record.Attempts = 0;
+                        record.RoundsSinceLastDetection = 0;
+                    }
+                    changed = true;
+                }
+
+                if (changed)
+                {
+                    Save();
+                }
+            }
+        }
+    }
+}
+
+```
+
+`SAC/Services/WarningService.cs`:
+
+```cs
+using CounterStrikeSharp.API.Core;
+
+namespace SAC.Services
+{
+    /// <summary>
+    /// Показывает игроку предупреждение о сборе анонимных данных SAC при первом подключении к серверу.
+    /// </summary>
+    public class WarningService
+    {
+        private readonly HashSet<ulong> _warnedPlayers = new();
+
+        private const string WarningHtml =
+            "<font class='fontSize-l' color='orange'>⚠ SAC ⚠</font><br>" +
+            "<font class='fontSize-sm' color='#DDDDDD'>" +
+            "Этот сервер использует античит SAC.<br>" +
+            "Он собирает анонимные логи игры для обучения<br>" +
+            "системы SAC 2.0. SteamID хешируется, ник заменяется.<br>" +
+            "Продолжая игру, вы соглашаетесь с этим.<br>" +
+            "Подробнее: sac.example.com/privacy</font>";
+
+        /// <summary>
+        /// Показывает предупреждение игроку, если он ещё не видел его в текущей сессии сервера.
+        /// </summary>
+        public void ShowWarningIfNeeded(CCSPlayerController player)
+        {
+            if (_warnedPlayers.Contains(player.SteamID)) return;
+
+            _warnedPlayers.Add(player.SteamID);
+            player.PrintToCenterHtml(WarningHtml);
+        }
+
+        /// <summary>
+        /// Сбрасывает список показанных предупреждений. Вызывается при опустошении сервера.
+        /// </summary>
+        public void ResetIfServerEmpty(int currentPlayerCount)
+        {
+            if (currentPlayerCount <= 0)
+            {
+                _warnedPlayers.Clear();
+            }
+        }
+    }
+}
+
+```

@@ -1,0 +1,1331 @@
+Project Path: arc_DimaReverse_nuitka-themida-unpacker_fyeyc7vj
+
+Source Tree:
+
+```txt
+arc_DimaReverse_nuitka-themida-unpacker_fyeyc7vj
+├── CHANGELOG.md
+├── CODE_OF_CONDUCT.md
+├── CONTRIBUTING.md
+├── LICENSE
+├── README.md
+├── SECURITY.md
+├── docs
+│   └── nuitka_onefile_format.md
+├── examples
+│   └── manual_extract.py
+├── nuthem.py
+├── pipeline.py
+├── pyproject.toml
+└── requirements.txt
+
+```
+
+`CHANGELOG.md`:
+
+```md
+## Changelog
+
+### 0.1.0
+- Initial public release.
+- Stage 1 pipeline wrapper (unlicense).
+- Stage 2 static extractor for Nuitka onefile (KAX/KAY) with manifest + path-traversal protection.
+
+```
+
+`CODE_OF_CONDUCT.md`:
+
+```md
+## Code of Conduct
+
+This project follows the **Contributor Covenant**.
+
+See `https://www.contributor-covenant.org/version/2/1/code_of_conduct/`.
+
+### Our pledge
+
+We pledge to make participation in our community a harassment-free experience for everyone.
+
+### Enforcement
+
+If you experience or witness unacceptable behavior, please open an issue or contact the maintainer privately.
+
+```
+
+`CONTRIBUTING.md`:
+
+```md
+# Contributing
+
+## What's most useful
+
+- **Bug reports** with reproduction steps and the hex dump of the first 64 bytes at the KAX/KAY magic offset
+- **New Nuitka version support** — format notes and sample manifests welcome
+- **Checksum detection edge cases** — if auto-detection fails, note the Nuitka version and build flags
+- **Pipeline improvements** — better unlicense integration, error handling, progress reporting
+
+## Before opening a PR
+
+1. Describe what problem you're solving
+2. Keep changes focused — one thing per PR
+3. If you're touching `nuthem.py` parsing logic, explain which Nuitka version or build variant it targets
+
+## Reporting bugs
+
+Please include:
+- OS and Python version
+- Nuitka version of the target (if known)
+- Whether the payload is KAX or KAY (shown in nuthem output)
+- Full command and full console output
+- Hex dump of first 64 bytes starting at the KAX/KAY magic (helps a lot)
+
+## Code style
+
+- PEP 8
+- Magic numbers in struct parsing need inline comments
+- No new required dependencies without discussion
+
+```
+
+`LICENSE`:
+
+```
+MIT License
+
+Copyright (c) 2026 Dimitri Bordei (dima_reverse)
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
+`README.md`:
+
+```md
+<div align="center">
+
+```
+ _   _ _   _ _____ _   _ ___________ ___________ ___  _______ _   _ _   _ ___  _      _     _____ ______
+| \ | | | | |_   _| | | |  ___|  ___||  ___| ___ \  | | _____|_  | | | | |    | |    | |   |  ___|| ___ \
+|  \| | | | | | | | |_| | |__ | |__  | |__ | |_/ /  | | |      | | | | | |    | |    | |   | |__  | |_/ /
+| . ` | | | | | | |  _  |  __||  __| |  __||    /   | | |___   | | | | | |    | |    | |   |  __| |    /
+| |\  | |_| | | | | | | | |___| |___ | |___| |\ \   | \_____| _| |_| |_| |___ | |____| |___| |___ | |\ \
+\_| \_/\___/  \_/ \_| |_/\____/\____/\____/\_| \_|  |_|\____/ \___/ \___/____/\_____/\_____/\____/\_| \_|
+```
+
+**Themida/WinLicense unpacker → Nuitka onefile extractor**  
+Full two-stage pipeline (dynamic + static)
+
+[![Python](https://img.shields.io/badge/python-3.8%2B-blue?style=flat-square&logo=python)](https://python.org)
+[![CI](https://img.shields.io/github/actions/workflow/status/DimaReverse/nuitka-themida-unpacker/ci.yml?style=flat-square)](./.github/workflows/ci.yml)
+[![License](https://img.shields.io/badge/license-MIT-green?style=flat-square)](LICENSE)
+[![Platform](https://img.shields.io/badge/platform-Windows-lightgrey?style=flat-square)]()
+[![Stage 1](https://img.shields.io/badge/stage%201-dynamic%20(unlicense)-orange?style=flat-square)]()
+[![Stage 2](https://img.shields.io/badge/stage%202-static%20(nuthem)-brightgreen?style=flat-square)]()
+
+Full unpacking pipeline for executables that are **both** Themida/WinLicense protected **and** built with Nuitka onefile (KAX/KAY).
+
+</div>
+
+---
+
+## What this repo does
+
+Some executables are protected with two layers stacked on top of each other:
+
+```
+┌─────────────────────────────────────────┐
+│  Themida / WinLicense protection layer  │  ← encrypts, virtualizes, anti-debug
+├─────────────────────────────────────────┤
+│  Nuitka onefile payload (KAX / KAY)     │  ← embedded PE + all DLLs + Python runtime
+└─────────────────────────────────────────┘
+```
+
+No single existing tool handles both layers. This repo documents and automates the full pipeline:
+
+1. **Stage 1 (dynamic)**: strip Themida/WinLicense using [unlicense](https://github.com/ergrelet/unlicense) (executes the target).
+2. **Stage 2 (static)**: extract Nuitka onefile payload from the unpacked PE using **nuthem** (no execution needed).
+3. **Stage 3 (optional)**: feed the extracted inner EXE into [nuitka-static-unpacker](https://github.com/DimaReverse/nuitka-static-unpacker) to recover Python artifacts.
+
+---
+
+## Safety / important notes
+
+- **Stage 1 executes the target binary** (by design). Always run it in a VM/sandbox for untrusted samples.
+- **Stage 2 and Stage 3 are static** (safe to run anywhere).
+- **Responsible use**: only analyze software you own or have authorization to test.
+
+## After unpacking — what next
+
+- **Plain Nuitka onefile without Themida?** You don't need this pipeline at all — extract statically, with zero execution, using [tocorator](https://github.com/DimaReverse/tocorator) or [extremecoders-re/nuitka-extractor](https://github.com/extremecoders-re/nuitka-extractor).
+- **Full Python source recovery** from the extracted files: use [HEXPYRION](https://github.com/DimaReverse/hexpyrion) — the new-generation Nuitka decompiler, with markedly better performance (speed) and accuracy, maximum universality and excellent scalability (`--ndx --dev-only <binary> -o OUT`).
+
+---
+
+## Requirements
+
+**Stage 1:**
+- Windows (required for Themida unpacking)
+- [unlicense](https://github.com/ergrelet/unlicense) — download the prebuilt `.exe` from their [Releases](https://github.com/ergrelet/unlicense/releases) page
+
+**Stage 2:**
+- Python 3.8+
+- `zstandard` (only needed for KAY/compressed payloads): `pip install zstandard`
+
+**Stage 3 (optional):**
+- [nuitka-static-unpacker](https://github.com/DimaReverse/nuitka-static-unpacker)
+- `pefile`: `pip install pefile`
+
+---
+
+## Installation
+
+```bash
+git clone https://github.com/DimaReverse/nuitka-themida-unpacker.git
+cd nuitka-themida-unpacker
+python -m pip install -U pip
+python -m pip install .
+```
+
+Download `unlicense64.exe` (or `unlicense32.exe` for 32-bit targets) from [ergrelet/unlicense releases](https://github.com/ergrelet/unlicense/releases) and put it in the same folder, or anywhere on your PATH.
+
+### Quick start
+
+If you already have an **unpacked** PE (Themida removed), skip Stage 1:
+
+```bash
+nuthem-pipeline unpacked_target.exe --skip-stage1
+```
+
+Otherwise, run the full pipeline (Stage 1 + 2):
+
+```bash
+nuthem-pipeline target_protected.exe
+```
+
+### Developer setup (optional)
+
+```bash
+python -m pip install -U pip
+python -m pip install -e ".[dev]"
+ruff check .
+```
+
+---
+
+## Usage
+
+### Full pipeline (recommended)
+
+```bash
+nuthem-pipeline target_protected.exe
+```
+
+This runs all stages automatically and drops results into `./output/`.
+
+Useful flags:
+
+```bash
+nuthem-pipeline target.exe --out ./output --unlicense .\\unlicense64.exe
+nuthem-pipeline unpacked_target.exe --skip-stage1
+```
+
+### Manual stage by stage
+
+**Stage 1 — Strip Themida:**
+```bash
+unlicense64.exe target_protected.exe
+# Produces: unpacked_target_protected.exe
+```
+
+**Stage 2 — Extract Nuitka onefile payload:**
+```bash
+nuthem extract unpacked_target_protected.exe
+# Produces: unpacked_target_protected.exe.nuthem/ (1776 files in your example)
+```
+
+**Stage 3 — Recover Python source (optional):**
+```bash
+# Find the main Nuitka-compiled EXE inside the extracted folder, then:
+python nuitka_decompiler.py --source unpacked_target_protected.exe.nuthem/YourApp.exe --all
+```
+
+---
+
+## What nuthem.py does
+
+`nuthem.py` (and the `nuthem` CLI) is a **pure-static** parser for the Nuitka onefile format. It:
+
+- Parses the PE section table to locate `KAX` / `KAY` magic markers
+- Handles both **uncompressed (KAX)** and **zstd-compressed (KAY)** payloads
+- Supports both global-stream compression and per-file archive compression
+- Auto-detects the presence of the optional checksum field (caching builds)
+- Extracts all embedded files with path traversal protection
+- Writes a `nuthem_manifest.json` with SHA-256 hashes of every extracted file
+
+### Nuitka onefile format (KAX / KAY)
+
+```
+[3 bytes]  Magic: KAX (uncompressed) or KAY (zstd compressed)
+[stream]   Sequence of entries until empty filename:
+  [UTF-16LE NUL-terminated filename]
+  [u64 file_size]
+  [u32 checksum]        ← optional, auto-detected
+  [u32 archive_size]    ← only in KAY archive mode (per-file compression)
+  [file bytes / compressed frame]
+[u16 0x0000]           ← EOF marker (empty filename)
+```
+
+See [`docs/nuitka_onefile_format.md`](docs/nuitka_onefile_format.md) for the full format documentation.
+
+---
+
+## Output structure
+
+```
+output/
+├── nuthem_manifest.json         ← SHA-256 manifest of all extracted files
+├── YourApp.exe                  ← Main Nuitka-compiled binary
+├── python311.dll
+├── vcruntime140.dll
+├── tcl/
+│   └── ...
+└── lib/
+    └── ...
+```
+
+---
+
+## Pipeline diagram
+
+```
+ target.exe
+ (Themida/WinLicense + Nuitka onefile)
+        │
+        │  [STAGE 1 — DYNAMIC]
+        │  unlicense64.exe target.exe
+        ▼
+ unpacked_target.exe
+ (plain PE, Themida layer removed)
+        │
+        │  [STAGE 2 — STATIC]
+        │  python nuthem.py extract unpacked_target.exe
+        ▼
+ unpacked_target.exe.nuthem/
+ ├── YourApp.exe         ← the inner Nuitka binary
+ ├── python311.dll
+ └── ...
+        │
+        │  [STAGE 3 — STATIC, OPTIONAL]
+        │  python nuitka_decompiler.py --source YourApp.exe
+        ▼
+ output/
+ ├── module.py           ← recovered Python source
+ ├── constants.json
+ └── REPORT.json
+```
+
+---
+
+## Relation to nuitka-static-unpacker
+
+This repo handles the **outer layer** (Themida → Nuitka onefile payload extraction). Once you have the inner EXE, [nuitka-static-unpacker](https://github.com/DimaReverse/nuitka-static-unpacker) handles the **inner layer** (Nuitka constants blob → Python source recovery, including Commercial encrypted builds).
+
+They are designed to chain together.
+
+---
+
+## FAQ / troubleshooting
+
+**`nuthem` says “No Nuitka onefile header (KAX/KAY) found”**
+- You might be pointing it at the **Themida-protected** file (run Stage 1 first), or the target simply isn’t a Nuitka onefile build.
+
+**`nuthem` fails on KAY**
+- Install zstandard: `python -m pip install zstandard`
+
+**unlicense not found**
+- Download it from [unlicense releases](https://github.com/ergrelet/unlicense/releases) and either place it next to `pipeline.py` or pass `--unlicense path/to/unlicense64.exe`.
+
+---
+
+## Contributing
+
+See [`CONTRIBUTING.md`](CONTRIBUTING.md).
+
+---
+
+## License
+
+MIT — see [`LICENSE`](LICENSE).
+
+Built during some hard years. Shared in the hope it helps someone.
+
+## Credits
+
+- `nuthem.py` — Dimitri Bordei / `dima_reverse`
+- Themida/WinLicense unpacking — [ergrelet/unlicense](https://github.com/ergrelet/unlicense)
+
+---
+
+<div align="center">
+
+*Part of a larger effort to document and open-source the full Nuitka reverse engineering pipeline.*
+
+**[nuitka-static-unpacker](https://github.com/DimaReverse/nuitka-static-unpacker) ← companion tool for the inner Nuitka layer**
+
+⭐ If this helped you, a star goes a long way.
+
+</div>
+
+```
+
+`SECURITY.md`:
+
+```md
+## Security Policy
+
+### Supported versions
+
+This is a research/tooling repository. Security fixes may be released without backporting.
+
+### Reporting a vulnerability
+
+If you believe you found a security issue (e.g., path traversal, unsafe extraction behavior), please **do not** open a public issue.
+
+Instead, contact the maintainer and include:
+- A clear description of the impact
+- Steps to reproduce
+- A minimal sample (if possible) or hexdump / metadata needed to reproduce
+
+We will acknowledge the report and respond as soon as possible.
+
+```
+
+`docs/nuitka_onefile_format.md`:
+
+```md
+# Nuitka Onefile Format (KAX / KAY)
+
+Documentation of the embedded payload format used by Nuitka's onefile bootstrap, as observed in real binaries and cross-referenced with Nuitka's open-source `OnefileBootstrap.c`.
+
+---
+
+## Detection
+
+Scan the PE's raw section data for the 3-byte magic:
+
+| Magic | Meaning |
+|-------|---------|
+| `KAX` | Uncompressed payload stream |
+| `KAY` | zstd-compressed payload (global stream or per-file archive) |
+
+The magic appears at the very start of the payload blob, typically embedded in a dedicated PE section or appended to the `.data` section.
+
+---
+
+## Stream layout (KAX and KAY global mode)
+
+After the 3-byte magic, the stream is a sequence of file entries terminated by an empty filename:
+
+```
+for each file:
+  [UTF-16LE filename, NUL-terminated]   variable length
+  [u64 LE: uncompressed file size]      8 bytes
+  [u32 LE: checksum]                    4 bytes  ← OPTIONAL (caching builds only)
+  [file bytes]                          file_size bytes
+
+terminator:
+  [u16 0x0000]                          empty filename = end of stream
+```
+
+For **KAY global mode**: the entire stream above (after the magic) is a single zstd frame. Decompress it first, then parse as above.
+
+### Checksum field detection
+
+The checksum field is **optional** — it is present in builds compiled with Nuitka's caching mode enabled (common on Windows). `nuthem.py` auto-detects its presence using two heuristics:
+
+1. **Signature check**: for `.exe`, `.dll`, `.pyd` entries, it checks whether skipping 4 bytes makes the content start with `MZ`.
+2. **Boundary check**: tests whether either interpretation (with or without checksum) results in the next filename being parseable at the expected offset.
+
+---
+
+## KAY archive mode (per-file compression)
+
+When `_NUITKA_ONEFILE_ARCHIVE_BOOL==1` and compression is enabled, each file entry is individually compressed:
+
+```
+for each file:
+  [UTF-16LE filename, NUL-terminated]   variable length
+  [u64 LE: uncompressed file size]      8 bytes
+  [u32 LE: checksum]                    4 bytes  ← OPTIONAL
+  [u32 LE: compressed frame size]       4 bytes
+  [compressed frame]                    archive_file_size bytes (zstd)
+
+terminator:
+  [u16 0x0000]
+```
+
+Each compressed frame is an independent zstd frame. The uncompressed size is stored in `file_size` and validated after decompression.
+
+---
+
+## Filename encoding
+
+Filenames are **UTF-16LE, NUL-terminated** (two zero bytes). They use platform-native separators (backslash on Windows) and are typically relative paths like:
+
+```
+UI.exe
+python311.dll
+tcl\tk8.6\bgerror.tcl
+lib\site-packages\...
+```
+
+`nuthem.py` normalizes separators and strips leading `\` or `/` before writing, and validates all paths against the output root to prevent path traversal.
+
+---
+
+## False positives
+
+The bytes `KAX` and `KAY` can appear as false positives in arbitrary binary data. `nuthem.py` mitigates this by:
+
+- Only scanning within PE section bounds
+- Scoring all candidates by number of valid entries and total bytes
+- Selecting the candidate with the most plausible parse result
+
+---
+
+## Nuitka version notes
+
+The onefile format has been stable across Nuitka 1.x and 2.x for the aspects documented here. The main variance is in whether the checksum field is present (a build-time option) and whether KAY uses global or per-file compression.
+
+If you encounter a binary that `nuthem.py` fails to parse, please open an issue with:
+- Nuitka version (if known)
+- The first 64 bytes of the raw section starting at the KAX/KAY magic (hex dump)
+- The error message from `nuthem.py`
+
+```
+
+`examples/manual_extract.py`:
+
+```py
+#!/usr/bin/env python3
+"""
+Example: use nuthem programmatically (without CLI) to extract a Nuitka onefile payload.
+
+Assumes you have already run unlicense on the target and have the unpacked PE.
+
+Usage:
+    python examples/manual_extract.py unpacked_target.exe ./output
+"""
+
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
+from nuthem import NuthemError, extract_from_exe
+
+
+def main():
+    if len(sys.argv) < 2:
+        print("Usage: manual_extract.py <unpacked.exe> [output_dir]")
+        sys.exit(1)
+
+    exe = Path(sys.argv[1])
+    out = Path(sys.argv[2]) if len(sys.argv) > 2 else exe.with_suffix(exe.suffix + ".nuthem")
+
+    try:
+        manifest = extract_from_exe(exe, out)
+    except NuthemError as e:
+        print(f"[ERROR] {e}", file=sys.stderr)
+        sys.exit(1)
+
+    print(f"Extracted {manifest['file_count']} files to {manifest['output_dir']}")
+    print(f"Magic:   {manifest['nuitka_header_magic']}")
+    print(f"Section: {manifest['pe_section']}")
+    print()
+
+    # Show the top-level EXEs and DLLs found
+    exes = [f for f in manifest["files"] if f["name"].lower().endswith(".exe")]
+    dlls = [f for f in manifest["files"] if f["name"].lower().endswith(".dll")]
+    print(f"EXEs found ({len(exes)}):")
+    for e in exes[:10]:
+        print(f"  {e['name']}  ({e['size']:,} bytes)")
+    print(f"DLLs found ({len(dlls)}):")
+    for d in dlls[:10]:
+        print(f"  {d['name']}  ({d['size']:,} bytes)")
+    if len(dlls) > 10:
+        print(f"  ... and {len(dlls) - 10} more")
+
+
+if __name__ == "__main__":
+    main()
+
+```
+
+`nuthem.py`:
+
+```py
+#!/usr/bin/env python3
+from __future__ import annotations
+
+import argparse
+import dataclasses
+import hashlib
+import json
+import os
+import struct
+import sys
+from pathlib import Path
+from typing import Iterator, Optional
+
+MAGICS = (b"KAX", b"KAY")  # Nuitka onefile attached data header: KA + X(uncompressed) / Y(zstd)
+
+
+class NuthemError(Exception):
+    pass
+
+
+def _u16le_cstr(data: memoryview, offset: int, max_chars: int = 65536) -> tuple[str, int]:
+    """Read UTF-16LE NUL-terminated string; returns (value, new_offset)."""
+    end = offset
+    chars = []
+    for _ in range(max_chars):
+        if end + 2 > len(data):
+            raise NuthemError("Unexpected EOF while reading UTF-16LE filename.")
+        (code_unit,) = struct.unpack_from("<H", data, end)
+        end += 2
+        if code_unit == 0:
+            break
+        chars.append(code_unit)
+    else:
+        raise NuthemError("Filename too long / missing terminator.")
+
+    try:
+        s = bytes(struct.pack("<" + "H" * len(chars), *chars)).decode("utf-16le", errors="strict")
+    except UnicodeDecodeError as e:
+        raise NuthemError(f"Invalid UTF-16LE filename at 0x{offset:x}: {e}") from e
+    return s, end
+
+
+def _looks_like_relpath(p: str) -> bool:
+    if not p:
+        return False
+    # Nuitka payload typically uses relative paths like "UI.exe", "tcl/tk..." etc.
+    if p.startswith(("\\\\", "//")):
+        return False
+    if ":" in p[:3]:  # "C:\..."
+        return False
+    # Avoid absurd control chars.
+    for ch in p:
+        if ord(ch) < 0x20:
+            return False
+    return True
+
+
+def _safe_join(root: Path, rel: str) -> Path:
+    # Normalize Nuitka separators (it uses platform separators in practice, but be defensive).
+    rel = rel.replace("/", os.sep).replace("\\", os.sep)
+    # Nuitka payloads sometimes store paths with a leading separator (e.g. "\\bgerror.tcl").
+    # Treat them as relative to payload root.
+    rel = rel.lstrip("\\/")  # safe even on Windows; we normalize above.
+    out = (root / rel).resolve()
+    root_r = root.resolve()
+    if root_r not in out.parents and out != root_r:
+        raise NuthemError(f"Refusing path traversal outside output dir: {rel!r}")
+    return out
+
+
+@dataclasses.dataclass(frozen=True)
+class PESection:
+    name: str
+    raw_ptr: int
+    raw_size: int
+    virt_addr: int
+    virt_size: int
+
+
+def parse_pe_sections(buf: memoryview) -> list[PESection]:
+    # Minimal PE parser: DOS -> NT -> section table.
+    if len(buf) < 0x100:
+        raise NuthemError("File too small to be a PE.")
+    if buf[0:2].tobytes() != b"MZ":
+        raise NuthemError("Not a PE (missing MZ).")
+
+    e_lfanew = struct.unpack_from("<I", buf, 0x3C)[0]
+    if e_lfanew + 4 + 20 > len(buf):
+        raise NuthemError("Invalid PE header offset.")
+    if buf[e_lfanew : e_lfanew + 4].tobytes() != b"PE\x00\x00":
+        raise NuthemError("Not a PE (missing PE\\0\\0).")
+
+    coff_off = e_lfanew + 4
+    (machine, number_of_sections, _time, _ptrsym, _numsym, size_of_optional_header, _chars) = struct.unpack_from(
+        "<HHIIIHH", buf, coff_off
+    )
+    opt_off = coff_off + 20
+    sec_off = opt_off + size_of_optional_header
+    if sec_off + number_of_sections * 40 > len(buf):
+        raise NuthemError("Section table out of range.")
+
+    sections: list[PESection] = []
+    for i in range(number_of_sections):
+        off = sec_off + i * 40
+        name = buf[off : off + 8].tobytes().split(b"\x00", 1)[0].decode("ascii", errors="replace")
+        virt_size, virt_addr, raw_size, raw_ptr = struct.unpack_from("<IIII", buf, off + 8)
+        sections.append(
+            PESection(
+                name=name,
+                raw_ptr=raw_ptr,
+                raw_size=raw_size,
+                virt_addr=virt_addr,
+                virt_size=virt_size,
+            )
+        )
+    return sections
+
+
+def iter_magic_hits(buf: memoryview, sections: list[PESection]) -> Iterator[tuple[int, bytes, PESection]]:
+    # Scan each section's raw data to reduce false positives.
+    for s in sections:
+        if s.raw_ptr == 0 or s.raw_size == 0:
+            continue
+        start = s.raw_ptr
+        end = min(len(buf), s.raw_ptr + s.raw_size)
+        chunk_bytes = buf[start:end].tobytes()
+        for magic in MAGICS:
+            pos = chunk_bytes.find(magic)
+            while pos != -1:
+                abs_pos = start + pos
+                yield abs_pos, magic, s
+                pos = chunk_bytes.find(magic, pos + 1)
+
+
+def _try_import_zstd():
+    try:
+        import zstandard as zstd  # type: ignore
+    except Exception:
+        return None
+    return zstd
+
+
+def _decompress_kay_zstd(payload: bytes) -> bytes:
+    zstd = _try_import_zstd()
+    if zstd is None:
+        raise NuthemError(
+            "Payload appears compressed (KAY) but python package 'zstandard' is not installed.\n"
+            "Install it with: py -3.11 -m pip install zstandard"
+        )
+    # Payload blob often contains trailing non-zstd bytes after the first frame
+    # (e.g. the rest of the PE section). Use a decompressobj and stop at EOF of frame.
+    dctx = zstd.ZstdDecompressor()
+    dobj = dctx.decompressobj()
+    try:
+        out_chunks: list[bytes] = []
+        view = memoryview(payload)
+        chunk_size = 1024 * 1024
+
+        for off in range(0, len(view), chunk_size):
+            out = dobj.decompress(view[off : off + chunk_size])
+            if out:
+                out_chunks.append(out)
+            if dobj.eof:
+                break
+
+        if not dobj.eof:
+            raise NuthemError("Zstd frame did not terminate within provided data.")
+
+        return b"".join(out_chunks)
+    except Exception as e:
+        raise NuthemError(f"Zstd decompression failed: {e}") from e
+
+
+@dataclasses.dataclass
+class ExtractedEntry:
+    name: str
+    size: int
+    sha256: str
+
+
+def _zstd_decompress_exact(comp: bytes, expected_size: Optional[int] = None) -> bytes:
+    zstd = _try_import_zstd()
+    if zstd is None:
+        raise NuthemError(
+            "Need zstd decompression but python package 'zstandard' is not installed.\n"
+            "Install it with: py -3.11 -m pip install zstandard"
+        )
+
+    dctx = zstd.ZstdDecompressor()
+    dobj = dctx.decompressobj()
+    out = dobj.decompress(comp)
+    # Some frames may have trailing data, but for Nuitka per-file compression, it should end cleanly.
+    if not dobj.eof:
+        # Try to finish (in case internal buffering wants more calls)
+        out += dobj.flush()
+    if expected_size is not None and len(out) != expected_size:
+        # Keep it a soft check: some payloads may store file_size that includes e.g. padding,
+        # but in practice Nuitka expects exact.
+        raise NuthemError(f"Decompressed size mismatch: got {len(out)} expected {expected_size}")
+    return out
+
+
+def parse_onefile_stream_raw(stream: bytes, assume_checksum: Optional[bool] = None) -> list[tuple[str, bytes, Optional[int]]]:
+    """
+    Parse Nuitka onefile stream where file bytes are stored raw (not per-file compressed).
+    Layout (Windows typical):
+      [UTF-16LE filename NUL-terminated]
+      [u64 file_size]
+      [u32 checksum]   (present when caching enabled; common on Windows)
+      [file bytes...]
+    EOF marker: empty filename (u16 NUL).
+
+    Returns list of (filename, file_bytes, checksum_or_None).
+    """
+    data = memoryview(stream)
+    off = 0
+    out: list[tuple[str, bytes, Optional[int]]] = []
+
+    def prefer_no_checksum_by_signature(filename: str, content_offset: int) -> Optional[bool]:
+        """
+        Return True to prefer checksum present, False to prefer checksum absent, or None if unsure.
+        For common binaries, we can strongly disambiguate because the first bytes are known.
+        """
+        lower = filename.lower()
+        if not (lower.endswith(".exe") or lower.endswith(".dll") or lower.endswith(".pyd")):
+            return None
+        # Without checksum, file content starts at content_offset.
+        sig_no = data[content_offset : content_offset + 2].tobytes()
+        # With checksum, file content starts at content_offset+4.
+        sig_yes = data[content_offset + 4 : content_offset + 6].tobytes() if content_offset + 6 <= len(data) else b""
+
+        if sig_no == b"MZ" and sig_yes != b"MZ":
+            return False
+        if sig_yes == b"MZ" and sig_no != b"MZ":
+            return True
+        return None
+
+    def peek_next_filename(o: int) -> bool:
+        try:
+            s, _no = _u16le_cstr(data, o, max_chars=512)
+        except Exception:
+            return False
+        if s == "":
+            return True
+        return _looks_like_relpath(s)
+
+    while True:
+        name, off = _u16le_cstr(data, off)
+        if name == "":
+            break
+        if not _looks_like_relpath(name):
+            raise NuthemError(f"Unreasonable filename parsed: {name!r} at offset 0x{off:x}")
+
+        if off + 8 > len(data):
+            raise NuthemError("Unexpected EOF while reading file size.")
+        (file_size,) = struct.unpack_from("<Q", data, off)
+        off += 8
+        if file_size > (1 << 40):  # 1 TB sanity
+            raise NuthemError(f"Unreasonable file size {file_size} for {name!r}")
+
+        checksum_val: Optional[int] = None
+        if assume_checksum is True:
+            if off + 4 > len(data):
+                raise NuthemError("Unexpected EOF while reading checksum.")
+            (checksum_val,) = struct.unpack_from("<I", data, off)
+            off += 4
+        elif assume_checksum is False:
+            checksum_val = None
+        else:
+            # Auto-detect: try "with checksum" only if it doesn't make the next filename implausible
+            # and doesn't push beyond stream.
+            sig_pref = prefer_no_checksum_by_signature(name, off)
+            if sig_pref is False:
+                checksum_val = None
+            elif sig_pref is True:
+                (checksum_val,) = struct.unpack_from("<I", data, off)
+                off += 4
+            elif off + 4 <= len(data):
+                # This is a heuristic: if reading checksum makes the following file bytes align
+                # such that next filename looks plausible after skipping file_size bytes.
+                off_with = off + 4
+                end_with = off_with + file_size
+                end_without = off + file_size
+                if end_with <= len(data) and peek_next_filename(end_with):
+                    (checksum_val,) = struct.unpack_from("<I", data, off)
+                    off = off_with
+                elif end_without <= len(data) and peek_next_filename(end_without):
+                    checksum_val = None
+                else:
+                    # If we cannot validate boundaries (e.g. huge file), default to no-checksum.
+                    checksum_val = None
+
+        if off + file_size > len(data):
+            raise NuthemError(f"Unexpected EOF while reading {name!r} bytes.")
+        blob = data[off : off + file_size].tobytes()
+        off += file_size
+
+        out.append((name, blob, checksum_val))
+
+    return out
+
+
+def parse_onefile_stream_kay_archive(stream: bytes, assume_checksum: Optional[bool] = None) -> list[tuple[str, bytes, Optional[int]]]:
+    """
+    Parse Nuitka onefile stream for KAY *archive* mode (per-file compression).
+    Layout (observed in Nuitka OnefileBootstrap.c when _NUITKA_ONEFILE_ARCHIVE_BOOL==1 && compression==1):
+      [UTF-16LE filename NUL-terminated]
+      [u64 file_size]              (uncompressed)
+      [u32 checksum]               (optional; caching mode)
+      [u32 archive_file_size]      (compressed blob size)
+      [archive_file_size bytes]    (zstd frame for this file content)
+    EOF marker: empty filename.
+    """
+    data = memoryview(stream)
+    off = 0
+    out: list[tuple[str, bytes, Optional[int]]] = []
+
+    def peek_next_filename(o: int) -> bool:
+        try:
+            s, _no = _u16le_cstr(data, o, max_chars=512)
+        except Exception:
+            return False
+        if s == "":
+            return True
+        return _looks_like_relpath(s)
+
+    while True:
+        name, off = _u16le_cstr(data, off)
+        if name == "":
+            break
+        if not _looks_like_relpath(name):
+            raise NuthemError(f"Unreasonable filename parsed: {name!r} at offset 0x{off:x}")
+
+        if off + 8 > len(data):
+            raise NuthemError("Unexpected EOF while reading file size.")
+        (file_size,) = struct.unpack_from("<Q", data, off)
+        off += 8
+
+        checksum_val: Optional[int] = None
+        if assume_checksum is True:
+            if off + 4 > len(data):
+                raise NuthemError("Unexpected EOF while reading checksum.")
+            (checksum_val,) = struct.unpack_from("<I", data, off)
+            off += 4
+        elif assume_checksum is False:
+            checksum_val = None
+        else:
+            # Auto-detect: decide based on whether reading checksum allows a plausible next filename
+            # after consuming this entry. We need archive_file_size first; so do a two-path check.
+            if off + 4 <= len(data):
+                # Path A: checksum present
+                try_off = off + 4
+                if try_off + 4 <= len(data):
+                    (afs_a,) = struct.unpack_from("<I", data, try_off)
+                    end_a = try_off + 4 + afs_a
+                else:
+                    end_a = 1 << 62
+
+                # Path B: checksum absent
+                if off + 4 <= len(data):
+                    (afs_b,) = struct.unpack_from("<I", data, off)
+                    end_b = off + 4 + afs_b
+                else:
+                    end_b = 1 << 62
+
+                ok_a = end_a <= len(data) and peek_next_filename(end_a)
+                ok_b = end_b <= len(data) and peek_next_filename(end_b)
+
+                if ok_a and not ok_b:
+                    (checksum_val,) = struct.unpack_from("<I", data, off)
+                    off = try_off
+                elif ok_b and not ok_a:
+                    checksum_val = None
+                else:
+                    # Default to checksum present (common on Windows caching builds)
+                    (checksum_val,) = struct.unpack_from("<I", data, off)
+                    off = try_off
+
+        if off + 4 > len(data):
+            raise NuthemError("Unexpected EOF while reading archive_file_size.")
+        (archive_file_size,) = struct.unpack_from("<I", data, off)
+        off += 4
+        if archive_file_size > len(data) - off:
+            raise NuthemError("archive_file_size exceeds remaining stream.")
+
+        comp = data[off : off + archive_file_size].tobytes()
+        off += archive_file_size
+
+        blob = _zstd_decompress_exact(comp, expected_size=int(file_size))
+        out.append((name, blob, checksum_val))
+
+    return out
+
+
+def extract_from_exe(exe_path: Path, out_dir: Path, pick: str = "best") -> dict:
+    blob = exe_path.read_bytes()
+    buf = memoryview(blob)
+    sections = parse_pe_sections(buf)
+
+    hits = list(iter_magic_hits(buf, sections))
+    if not hits:
+        raise NuthemError("No Nuitka onefile header (KAX/KAY) found in PE sections.")
+
+    candidates = []
+    for abs_pos, magic, sec in hits:
+        # The onefile payload blob is embedded with a known bounded size (e.g. Windows resource size
+        # or a dedicated section). Don't attempt to decode until EOF of whole file.
+        sec_end = min(len(blob), sec.raw_ptr + sec.raw_size)
+        if not (sec.raw_ptr <= abs_pos < sec_end):
+            continue
+        stream = blob[abs_pos + 3 : sec_end]
+        try:
+            # Nuitka has two relevant KAY interpretations:
+            # - global stream zstd (archive_bool==0): decompress whole stream then parse raw
+            # - per-file archive zstd (archive_bool==1): parse metadata raw and decompress each file
+            if magic == b"KAX":
+                entries = parse_onefile_stream_raw(stream, assume_checksum=None)
+            elif magic == b"KAY":
+                # Prefer archive mode first; it's common on Windows.
+                try:
+                    entries = parse_onefile_stream_kay_archive(stream, assume_checksum=None)
+                except Exception:
+                    stream2 = _decompress_kay_zstd(stream)
+                    entries = parse_onefile_stream_raw(stream2, assume_checksum=None)
+            else:
+                continue
+            # Score by number of files and total bytes.
+            total = sum(len(b) for _n, b, _c in entries)
+            candidates.append((len(entries), total, abs_pos, magic, sec.name, entries))
+        except Exception:
+            continue
+
+    if not candidates:
+        raise NuthemError(
+            "Found KAX/KAY markers but couldn't parse a valid onefile stream. "
+            "This can happen if the marker is a false positive or if Nuitka format changed."
+        )
+
+    candidates.sort(reverse=True)  # best: most entries, then biggest total
+    best = candidates[0]
+    _count, _total, abs_pos, magic, sec_name, entries = best
+
+    out_dir.mkdir(parents=True, exist_ok=True)
+    extracted: list[ExtractedEntry] = []
+
+    for name, content, _checksum_val in entries:
+        target = _safe_join(out_dir, name)
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_bytes(content)
+
+        sha256 = hashlib.sha256(content).hexdigest()
+        extracted.append(ExtractedEntry(name=name, size=len(content), sha256=sha256))
+
+    manifest = {
+        "tool": "nuthem",
+        "input": str(exe_path),
+        "output_dir": str(out_dir),
+        "nuitka_header_offset": abs_pos,
+        "nuitka_header_magic": magic.decode("ascii"),
+        "pe_section": sec_name,
+        "file_count": len(extracted),
+        "files": [dataclasses.asdict(e) for e in extracted],
+    }
+    (out_dir / "nuthem_manifest.json").write_text(json.dumps(manifest, indent=2), encoding="utf-8")
+    return manifest
+
+
+def main(argv: list[str]) -> int:
+    ap = argparse.ArgumentParser(
+        prog="nuthem",
+        description="Static extractor for Nuitka onefile payload from Themida-unwrapped executables.",
+    )
+    sub = ap.add_subparsers(dest="cmd", required=True)
+
+    ex = sub.add_parser("extract", help="Extract embedded Nuitka onefile payload.")
+    ex.add_argument("exe", type=Path, help="Input EXE (already unpacked from Themida/WinLicense layer).")
+    ex.add_argument("-o", "--out", type=Path, default=None, help="Output directory (default: <exe>.nuthem/).")
+
+    args = ap.parse_args(argv)
+
+    if args.cmd == "extract":
+        exe_path: Path = args.exe
+        if args.out is None:
+            out_dir = exe_path.with_suffix(exe_path.suffix + ".nuthem")
+        else:
+            out_dir = args.out
+
+        manifest = extract_from_exe(exe_path, out_dir)
+        print(json.dumps({k: manifest[k] for k in ["file_count", "output_dir", "nuitka_header_magic", "pe_section"]}, indent=2))
+        return 0
+
+    ap.print_help()
+    return 2
+
+
+def cli() -> None:
+    raise SystemExit(main(sys.argv[1:]))
+
+
+if __name__ == "__main__":
+    cli()
+
+
+```
+
+`pipeline.py`:
+
+```py
+#!/usr/bin/env python3
+"""
+Full two-stage pipeline for Themida/WinLicense + Nuitka onefile protected executables.
+
+Stage 1 (dynamic): unlicense.exe strips the Themida/WinLicense layer.
+Stage 2 (static):  nuthem.py extracts the Nuitka onefile payload.
+
+Usage:
+    python pipeline.py target.exe
+    python pipeline.py target.exe --out ./results --unlicense path/to/unlicense64.exe
+    python pipeline.py target.exe --skip-stage1   # if already unpacked from Themida
+"""
+
+from __future__ import annotations
+
+import argparse
+import shutil
+import subprocess
+import sys
+import time
+from pathlib import Path
+
+
+def find_unlicense(hint: Path | None) -> Path | None:
+    """Locate unlicense64.exe or unlicense32.exe."""
+    candidates = []
+    if hint:
+        candidates.append(hint)
+    # Same directory as this script
+    here = Path(__file__).parent
+    candidates += [
+        here / "unlicense64.exe",
+        here / "unlicense32.exe",
+    ]
+    # PATH
+    for name in ("unlicense64.exe", "unlicense32.exe", "unlicense.exe"):
+        found = shutil.which(name)
+        if found:
+            candidates.append(Path(found))
+
+    for c in candidates:
+        if c.exists():
+            return c
+    return None
+
+
+def run_unlicense(unlicense_exe: Path, target: Path, out_dir: Path) -> Path:
+    """
+    Run unlicense on target and return path to the dumped PE.
+    unlicense writes output next to the target by default, named unpacked_<target>.
+    """
+    expected_output = target.parent / f"unpacked_{target.name}"
+
+    print(f"[STAGE 1] Running unlicense on {target.name} ...")
+    print("          This EXECUTES the target binary — use a VM for untrusted files.")
+    print(f"          unlicense: {unlicense_exe}")
+
+    result = subprocess.run(
+        [str(unlicense_exe), str(target)],
+        capture_output=False,   # let unlicense print its own output
+    )
+
+    if result.returncode != 0:
+        raise RuntimeError(
+            f"unlicense exited with code {result.returncode}. "
+            "Check output above for details."
+        )
+
+    # unlicense may take a moment to write the file after the process returns
+    for _ in range(20):
+        if expected_output.exists():
+            break
+        time.sleep(0.5)
+
+    if not expected_output.exists():
+        raise RuntimeError(
+            f"unlicense finished but expected output not found: {expected_output}\n"
+            "Check unlicense output above. The unpacked file may have a different name."
+        )
+
+    dest = out_dir / expected_output.name
+    shutil.move(str(expected_output), str(dest))
+    print(f"[STAGE 1] Done -> {dest}")
+    return dest
+
+
+def run_nuthem(unpacked_exe: Path, out_dir: Path) -> Path:
+    """Run nuthem.py extract on the unlicensed PE."""
+    nuthem = Path(__file__).parent / "nuthem.py"
+    if not nuthem.exists():
+        raise RuntimeError(f"nuthem.py not found at {nuthem}")
+
+    nuthem_out = out_dir / (unpacked_exe.name + ".nuthem")
+    print(f"\n[STAGE 2] Running nuthem extract on {unpacked_exe.name} ...")
+
+    result = subprocess.run(
+        [sys.executable, str(nuthem), "extract", str(unpacked_exe), "-o", str(nuthem_out)],
+        capture_output=False,
+    )
+
+    if result.returncode != 0:
+        raise RuntimeError(f"nuthem exited with code {result.returncode}.")
+
+    print(f"[STAGE 2] Done -> {nuthem_out}")
+    return nuthem_out
+
+
+def main(argv: list[str]) -> int:
+    ap = argparse.ArgumentParser(
+        prog="pipeline",
+        description="Two-stage unpacker: Themida/WinLicense (unlicense) -> Nuitka onefile (nuthem).",
+    )
+    ap.add_argument("target", type=Path, help="Protected EXE to unpack.")
+    ap.add_argument("-o", "--out", type=Path, default=None,
+                    help="Output directory (default: ./output/)")
+    ap.add_argument("--unlicense", type=Path, default=None,
+                    help="Path to unlicense64.exe / unlicense32.exe")
+    ap.add_argument("--skip-stage1", action="store_true",
+                    help="Skip Themida unpacking (target is already an unpacked PE)")
+    args = ap.parse_args(argv)
+
+    target: Path = args.target.resolve()
+    if not target.exists():
+        print(f"[ERROR] Target not found: {target}", file=sys.stderr)
+        return 1
+
+    out_dir: Path = (args.out or Path("output")).resolve()
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    print(f"Target:     {target}")
+    print(f"Output dir: {out_dir}")
+    print()
+
+    # ── Stage 1: Themida unpacking ────────────────────────────────────────────
+    if args.skip_stage1:
+        print("[STAGE 1] Skipped (--skip-stage1 flag set).")
+        unpacked = target
+    else:
+        unlicense_exe = find_unlicense(args.unlicense)
+        if unlicense_exe is None:
+            print(
+                "[ERROR] unlicense not found.\n"
+                "Download unlicense64.exe from https://github.com/ergrelet/unlicense/releases\n"
+                "and place it next to this script, or pass --unlicense /path/to/unlicense64.exe",
+                file=sys.stderr,
+            )
+            return 1
+        try:
+            unpacked = run_unlicense(unlicense_exe, target, out_dir)
+        except RuntimeError as e:
+            print(f"[ERROR] Stage 1 failed: {e}", file=sys.stderr)
+            return 1
+
+    # ── Stage 2: Nuitka onefile extraction ───────────────────────────────────
+    try:
+        nuthem_out = run_nuthem(unpacked, out_dir)
+    except RuntimeError as e:
+        print(f"[ERROR] Stage 2 failed: {e}", file=sys.stderr)
+        return 1
+
+    print()
+    print("=" * 60)
+    print("Pipeline complete.")
+    print(f"Extracted Nuitka payload: {nuthem_out}")
+    print()
+    print("Next step (optional):")
+    print("  Find the main EXE inside the extracted folder and run:")
+    print(f"  python nuitka_decompiler.py --source {nuthem_out}/<MainApp.exe> --all")
+    print("  (nuitka-static-unpacker: https://github.com/DimaReverse/nuitka-static-unpacker)")
+    return 0
+
+
+def cli() -> None:
+    raise SystemExit(main(sys.argv[1:]))
+
+
+if __name__ == "__main__":
+    cli()
+
+```
+
+`pyproject.toml`:
+
+```toml
+ [build-system]
+ requires = ["setuptools>=69", "wheel"]
+ build-backend = "setuptools.build_meta"
+ 
+ [project]
+ name = "nuitka-themida-unpacker"
+ version = "0.1.0"
+ description = "Two-stage pipeline: Themida/WinLicense (unlicense) → Nuitka onefile (KAX/KAY) extractor."
+ readme = "README.md"
+ requires-python = ">=3.8"
+ license = { file = "LICENSE" }
+ authors = [{ name = "Dimitri Bordei" }]
+ keywords = ["nuitka", "themida", "winlicense", "reverse-engineering", "unpacker", "malware-analysis"]
+ classifiers = [
+   "License :: OSI Approved :: MIT License",
+   "Programming Language :: Python :: 3",
+   "Programming Language :: Python :: 3 :: Only",
+   "Operating System :: Microsoft :: Windows",
+ ]
+ dependencies = [
+   "zstandard>=0.21.0",
+ ]
+ 
+ [project.optional-dependencies]
+ dev = [
+   "ruff",
+ ]
+ 
+ [project.urls]
+ Homepage = "https://github.com/DimaReverse/nuitka-themida-unpacker"
+ Issues = "https://github.com/DimaReverse/nuitka-themida-unpacker/issues"
+ 
+ [project.scripts]
+ nuthem = "nuthem:cli"
+ nuthem-pipeline = "pipeline:cli"
+ 
+ [tool.setuptools]
+ py-modules = ["nuthem", "pipeline"]
+ 
+ [tool.ruff]
+ line-length = 120
+ target-version = "py38"
+ 
+ [tool.ruff.lint]
+ select = ["E", "F", "I", "UP", "B"]
+ignore = ["E501", "UP045"]
+
+```
+
+`requirements.txt`:
+
+```txt
+# Required only for KAY (zstd-compressed) payloads
+zstandard>=0.21.0
+
+```
