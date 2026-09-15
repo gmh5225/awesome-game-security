@@ -23,7 +23,7 @@ Ships about seventeen detection modules covering cheats such as aimbot, aimlock,
 - Player whitelists
 - Optional Discord webhook evidence reporting
 
-Targets community and dedicated CS2 server operators who want behavioral anti-cheat on servers they control—the same server-authoritative lane as [[open.mp-anticheat]] and [[gamesoftacs]], rather than kernel products such as [[easy-anti-cheat]] or [[vanguard]].
+Targets community and dedicated CS2 server operators who want behavioral anti-cheat on servers they control—the same server-authoritative lane as [[sac-the-server-anticheat]], [[anticheatsystem]], [[open.mp-anticheat]], and [[gamesoftacs]], rather than kernel products such as [[easy-anti-cheat]] or [[vanguard]].
 
 ## Links
 
@@ -31,4 +31,4 @@ Targets community and dedicated CS2 server operators who want behavioral anti-ch
 
 ## Related
 
-[[overviews/anti-cheat]] · [[ai-aimbot-detection]] · [[cs2-calladmin]] · [[cs2kac]] · [[cs2-hybrid-anticheat-proposal]] · [[gamesoftacs]] · [[open.mp-anticheat]]
+[[overviews/anti-cheat]] · [[ai-aimbot-detection]] · [[cs2-calladmin]] · [[cs2kac]] · [[cs2-hybrid-anticheat-proposal]] · [[sac-the-server-anticheat]] · [[anticheatsystem]] · [[gamesoftacs]] · [[open.mp-anticheat]]
