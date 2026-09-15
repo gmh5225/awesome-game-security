@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-15** — ingest `description:IZxMD/ac-compat-research`: entity [[ac-compat-research]] (IZxMD; vendor-agnostic Linux kernel AC hosting feasibility study; LSM/signing/isolation/ABI; non-virtualized compatibility-layer dossier + knowledge graph; no bypass material; Anti Cheat / Guide); cited on [[concepts/research-rigor]] and [[overviews/game-hacking]]; cross-linked [[linux-anticheat]] and [[are-we-anti-cheat-yet]]; `index.md` updated.
+
 - **2026-09-15** — ingest `readme:categories`: Anti Cheat ~733 (+1; IZxMD/[[ac-compat-research]] vendor-agnostic Linux kernel AC hosting feasibility study in Guide) / Cheat ~2811 / other major section counts stable; 41 sections; entity [[ac-compat-research]]; refreshed README-map counts and Linux kernel AC architecture scope on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], and [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
 
 - **2026-09-15** — lint (agent pass): index vs disk scan — 9 overviews, 50 concepts, 3901 entities (3960 index entries); index.md fully synced (0 missing, 0 dead, 0 duplicate entries); overview wikilink spot-check (9 pages) — 0 broken links; concept spot-check (50 pages) — 0 broken links; index.md wikilink scan — 0 broken links; 6 cross-kind slug collisions ([[game-hacking]], [[anti-cheat]], [[reverse-engineering]], [[il2cpp]], [[byovd]], [[dma]]) — expected, no repair needed; no structural edits required.

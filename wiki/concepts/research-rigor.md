@@ -13,7 +13,8 @@ sources:
   - wiki/sources/descriptions/thatskriptkid__re-harness.md
   - wiki/sources/descriptions/P4nda0s__IDA-NO-MCP.md
   - wiki/sources/descriptions/2akouwu__reverify.md
-updated: 2026-09-13
+  - wiki/sources/descriptions/IZxMD__ac-compat-research.md
+updated: 2026-09-15
 confidence: high
 ---
 
@@ -43,6 +44,9 @@ Cross-cutting evidence discipline for factual synthesis, detector assessment, an
 | RE tool stealth/coverage, deobfuscation claims | [[overviews/reverse-engineering]] + [[dynamic-binary-instrumentation]] / [[mixed-boolean-arithmetic]] |
 | Kernel offsets, pool layouts, callback/ETW bypass claims | [[overviews/windows-kernel]] + [[driver-trust-boundaries]] / [[kernel-pool-scanning]] |
 | Evidence conflicts across sources | domain skill + this page |
+| Linux kernel AC architecture feasibility | [[overviews/anti-cheat]] + [[ac-compat-research]] |
+
+Architecture feasibility studies such as [[ac-compat-research]] (IZxMD; vendor-agnostic Linux kernel AC hosting without virtualization as the primary approach) subject non-virtualized design options to **rigorous falsification** and document LSM/signing/isolation/ABI constraints from public sources—pair with [[research-rigor]] when elevating such dossiers into platform conclusions. (source: wiki/sources/descriptions/IZxMD__ac-compat-research.md)
 
 Engine globals, object layouts, metadata formats, and helper APIs vary by engine branch, build configuration, platform, and game modifications—verify the exact version and binary artifacts before generalizing signatures or offsets. (source: wiki/sources/skills/game-engine.md)
 

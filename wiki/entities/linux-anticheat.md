@@ -4,7 +4,7 @@ kind: entity
 topics: [anti-cheat, game-hacking]
 sources:
   - wiki/sources/descriptions/mikio815__linux-anticheat.md
-updated: 2026-09-07
+updated: 2026-09-15
 confidence: medium
 ---
 
@@ -12,7 +12,7 @@ confidence: medium
 
 **linux-anticheat** (mikio815) — **work-in-progress kernel-level anti-cheat** designed for **Linux gaming consoles** such as the **Steam Deck**. A four-layer architecture combines a Rust userspace daemon (game launch + security events), **LSM eBPF** programs for core detection, a thin C kernel module that guards eBPF program integrity outside the sandbox, and a planned **BitVisor** hypervisor layer for Intel VMX/EPT write-protection of static kernel regions. Targets locked-down console environments where Secure Boot, kernel lockdown, and TPM attestation make deep kernel protection practical for game-security research. (source: wiki/sources/descriptions/mikio815__linux-anticheat.md)
 
-Sits in the native Linux open-source AC lane beside [[vigil]], [[tlac-modern-local-anti-cheat-reunioned]], and GNU/Linux compatibility references such as [[are-we-anti-cheat-yet]] and [[aclist-github-io]].
+Sits in the native Linux open-source AC lane beside [[vigil]], [[tlac-modern-local-anti-cheat-reunioned]], and GNU/Linux compatibility references such as [[are-we-anti-cheat-yet]] and [[aclist-github-io]]. Architecture feasibility research such as [[ac-compat-research]] (vendor-agnostic Linux kernel AC hosting without virtualization as the primary approach) addresses upstream platform constraints this implementation navigates. (source: wiki/sources/descriptions/IZxMD__ac-compat-research.md)
 
 ## Architecture
 
@@ -35,4 +35,4 @@ Early WIP — research and development reference for Linux-native AC architectur
 
 ## Related
 
-[[vigil]] · [[tlac-modern-local-anti-cheat-reunioned]] · [[are-we-anti-cheat-yet]] · [[aclist-github-io]] · [[tracee]] · [[hvci]] · [[overviews/anti-cheat]] · [[overviews/game-hacking]]
+[[vigil]] · [[tlac-modern-local-anti-cheat-reunioned]] · [[ac-compat-research]] · [[are-we-anti-cheat-yet]] · [[aclist-github-io]] · [[tracee]] · [[hvci]] · [[overviews/anti-cheat]] · [[overviews/game-hacking]]
