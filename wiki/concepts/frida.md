@@ -59,7 +59,8 @@ sources:
   - wiki/sources/descriptions/0xCD4__SSL-bypass.md
   - wiki/sources/descriptions/3v1lC0d3__Root_Detection_Low_level.md
   - wiki/sources/descriptions/unrandoms__frida-mobile-kit.md
-updated: 2026-09-13
+  - wiki/sources/descriptions/Xposed-Modules-Repo__com.fuck.iab.md
+updated: 2026-09-15
 confidence: high
 ---
 
@@ -69,7 +70,7 @@ Cross-platform dynamic instrumentation toolkit widely used on Android/iOS (and d
 
 ## Observation limits
 
-Frida distinguishes **injected**, **embedded**, and **preloaded** operation—these are integration modes, not universal stealth levels or guarantees of early-execution coverage. Bind a report to the exact tool revision, target build, entry point, required privilege, and actual evidence source. (source: wiki/sources/skills/mobile-security.md)
+Frida distinguishes **injected**, **embedded**, and **preloaded** operation—these are integration modes, not universal stealth levels or guarantees of early-execution coverage. Bind a report to the exact tool revision, target build, entry point, required privilege, and actual evidence source. (source: wiki/sources/skills/mobile-security.md) **Embedded Frida Gum** inside LSPosed modules such as [[com-fuck-iab]] (FKIAB; native C++ layer runs compiled TypeScript scripts per target package for multi-store IAP billing hooks) illustrates in-process embedded instrumentation without external `frida-server` attach. (source: wiki/sources/descriptions/Xposed-Modules-Repo__com.fuck.iab.md)
 
 | Question | Evidence to preserve |
 |----------|---------------------|
@@ -86,4 +87,4 @@ Hook game/[[il2cpp]] natives, bypass SSL pinning, probe root/jailbreak checks, t
 
 ## Related
 
-[[mobile-trust-boundaries]] · [[rootraven]] · [[frida-ide]] · [[vscode-frida]] · [[grapefruit]] · [[bagbak]] · [[mast-orchestrator]] · [[moabille]] · [[frida-vmp-bypass]] · [[il2cpp]] · [[nightowl]] · [[auto-generate-frida-bypass-scripts-for-ssl-pinning-root-detection-on-android-ios]] · [[anti-frida]] · [[anti-frida-bypass]] · [[frida-detection-bypass]] · [[ultimate-frida-bypass]] · [[frida-il2cpp-bridge]] · [[frida-android-hook]] · [[frida-find-jni-native-methods]] · [[frida-seccomp]] · [[frida-scripts]] · [[0xdea-frida-scripts]] · [[ssl-bypass]] · [[frida-mobile-kit]] · [[root-detection-low-level]] · [[fridascript]] · [[frida-watchpoint-tutorial]] · [[hook-updater]] · [[frida-stack]] · [[frida-usb-dump]] · [[xpc-tracer]] · [[florida]] · [[phantom-frida]] · [[strongr-frida-android]] · [[frida-stealth]] · [[morphida]] · [[fridare]] · [[florida-zygisk]] · [[magisk-hluda]] · [[frida-rs]] · [[zygisk-frida]] · [[ksurusda]] · [[rust-frida]] · [[mkpms]] · [[antifrida]] · [[frida-detection]] · [[detect-frida]] · [[ts-ue4dumper]] · [[frida-ue4dump]] · [[thats-no-pipe]] · [[frinet]] · [[frinja]] · [[dragonhook]] · [[ghidra-frida-hook-gen]] · [[frida-ceserver]] · [[frida-boot]] · [[overviews/mobile-security]] · [[overviews/reverse-engineering]] · [[overviews/game-engine]]
+[[mobile-trust-boundaries]] · [[com-fuck-iab]] · [[rootraven]] · [[frida-ide]] · [[vscode-frida]] · [[grapefruit]] · [[bagbak]] · [[mast-orchestrator]] · [[moabille]] · [[frida-vmp-bypass]] · [[il2cpp]] · [[nightowl]] · [[auto-generate-frida-bypass-scripts-for-ssl-pinning-root-detection-on-android-ios]] · [[anti-frida]] · [[anti-frida-bypass]] · [[frida-detection-bypass]] · [[ultimate-frida-bypass]] · [[frida-il2cpp-bridge]] · [[frida-android-hook]] · [[frida-find-jni-native-methods]] · [[frida-seccomp]] · [[frida-scripts]] · [[0xdea-frida-scripts]] · [[ssl-bypass]] · [[frida-mobile-kit]] · [[root-detection-low-level]] · [[fridascript]] · [[frida-watchpoint-tutorial]] · [[hook-updater]] · [[frida-stack]] · [[frida-usb-dump]] · [[xpc-tracer]] · [[florida]] · [[phantom-frida]] · [[strongr-frida-android]] · [[frida-stealth]] · [[morphida]] · [[fridare]] · [[florida-zygisk]] · [[magisk-hluda]] · [[frida-rs]] · [[zygisk-frida]] · [[ksurusda]] · [[rust-frida]] · [[mkpms]] · [[antifrida]] · [[frida-detection]] · [[detect-frida]] · [[ts-ue4dumper]] · [[frida-ue4dump]] · [[thats-no-pipe]] · [[frinet]] · [[frinja]] · [[dragonhook]] · [[ghidra-frida-hook-gen]] · [[frida-ceserver]] · [[frida-boot]] · [[overviews/mobile-security]] · [[overviews/reverse-engineering]] · [[overviews/game-engine]]

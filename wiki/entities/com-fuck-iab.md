@@ -12,7 +12,17 @@ confidence: medium
 
 **Android LSPosed/Xposed module** that hooks **in-app billing** across **Google Play**, **Bazaar**, and **Myket** storefronts. Built in **Kotlin** with Java helpers and a **C++ native layer** embedding **Frida Gum** to run compiled **TypeScript scripts** per target package. Core capabilities include intercepting billing service binders, restoring previously purchased items, and loading global or app-specific scripts to bypass purchase checks or unlock premium content. Targets mobile reverse engineers and game security researchers analyzing IAP verification on rooted Android devices. (source: wiki/sources/descriptions/Xposed-Modules-Repo__com.fuck.iab.md)
 
-Complements legacy Play Billing hooks such as [[freedom]] and sits beside packer-bypass modules like [[apppealing-new]] in the Cheat / Xposed lane. Server-side receipt validation remains the defensive countermeasure — local billing callbacks alone should not authorize premium entitlements.
+Complements legacy Play-only billing hooks such as [[freedom]] and sits beside packer-bypass modules like [[apppealing-new]] in the Cheat / Xposed lane. Server-side receipt validation remains the defensive countermeasure — local billing callbacks alone should not authorize premium entitlements.
+
+## Architecture
+
+| Layer | Role |
+|-------|------|
+| Kotlin + Java | Xposed/LSPosed module shell; billing service binder interception |
+| C++ native | Embeds **Frida Gum** runtime inside the module process |
+| TypeScript (compiled) | Global or per-package scripts loaded into target app processes |
+
+Script scope can be **global** (all hooked apps) or **app-specific** (one package), supporting per-title IAP flow analysis without rebuilding the module. (source: wiki/sources/descriptions/Xposed-Modules-Repo__com.fuck.iab.md)
 
 ## Links
 

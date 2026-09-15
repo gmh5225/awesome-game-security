@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-15** — ingest `description:Xposed-Modules-Repo/com.fuck.iab`: entity [[com-fuck-iab]] (FKIAB; LSPosed/Xposed; Kotlin/Java + C++ Frida Gum; Google Play/Bazaar/Myket billing binder hooks; global or per-package compiled TypeScript scripts; restore purchases / bypass local IAP checks; Cheat / Xposed; mobile IAP RE); cited on [[concepts/mobile-anti-cheat]] and [[concepts/frida]]; `index.md` updated.
+
 - **2026-09-15** — ingest `readme:categories`: Cheat ~2811 (+1; xposed-modules-repo/[[com-fuck-iab]] LSPosed/Xposed Google Play/Bazaar/Myket IAP bypass with Frida Gum per-package scripts in Cheat / Xposed) / Anti Cheat ~732 / other major section counts stable; 41 sections; entity [[com-fuck-iab]]; refreshed README-map counts and multi-store IAP bypass scope on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/mobile-security]], [[overviews/dma-attack]], and [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
 
 - **2026-09-14** — ingest `description:BishopTopG/all-about-eac`: entity [[all-about-eac]] (BishopTopG; Memflow-only external-VM RE dossier on one captured Fortnite `EasyAntiCheat_EOS.sys` build; passive physical-memory acquisition + matched kernel PDB layouts; maps process/thread/image callbacks, Ob handle policy, registry callbacks, minifilter, device IPC, per-thread callback contexts; evidence-labeled claims + Python validation; lifecycle/persistence/executable-mapping/platform-state monitoring; no bypass material); cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]]; cross-linked [[memflow-kvm]]; `index.md` updated.
