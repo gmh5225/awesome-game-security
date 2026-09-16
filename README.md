@@ -1286,6 +1286,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/MMRLApp/WebUI-X-Portable [Portable Android app providing the MMRL WebUI X interface for browsing, installing, and managing Magisk/APatch/KernelSU modules]
 - https://github.com/zelect0r/zamr [Curated MMRL module repository for Magisk/KernelSU/APatch (Play Integrity Fix, Zygisk, root-hide, TEESimulator)]
 - https://github.com/Elcapitanoe/pif-config-generator [Automated pipeline to track upstream Android build.prop tags and publish validated Play Integrity Fix (PIF) JSON profiles]
+- https://github.com/wajahatnaeem056/jerrymanager [KernelSU/APatch/Magisk module with Web UI for Play Integrity attestation, keybox injection, root hiding, and banking-app detection cleanup]
 - https://github.com/Dr-TSNG/ZygiskOnKernelSU [Run Zygisk on KernelSU]
 - https://github.com/svoboda18/magiskboot [Boot Image Modification Tool]
 - https://github.com/xiaoxindada/magiskboot_ndk_on_linux [Boot Image Modification Tool]
@@ -1334,6 +1335,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/ChiChou/vscode-frida [Unofficial Frida extension for VSCode]
 - https://github.com/MrOplus/frida-ide [Web-based Frida IDE with integrated JADX decompilation, device/process management, and Claude AI assistant for mobile reverse engineering]
 - https://github.com/ChiChou/bagbak [iOS Frida app decrypt / dump to IPA; extensions; jailbreak; bagbak@5 needs frida@17; deprecated]
+- https://github.com/ndhn27/il2cpp-re [Frida-based iOS tool to dump deobfuscated IL2CPP global-metadata headers from running Unity apps for Il2CppDumper analysis]
 - https://github.com/CrackerCat/strongR-frida-android
 - https://github.com/gmh5225/frida-ue4dump [UE4]
 - https://github.com/jcalabres/hook-updater [Update Frida hooks automatically]
