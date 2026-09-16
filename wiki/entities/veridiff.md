@@ -6,12 +6,12 @@ sources:
   - wiki/sources/descriptions/Veridiff__Veridiff.md
   - wiki/sources/README-categories.md
 updated: 2026-09-16
-confidence: medium
+confidence: high
 ---
 
 # Veridiff
 
-Frida **Stalker dual-trace** engine that finds the exact conditional branch where two executions of the same native code first diverge. Traces basic-block sequences from two runs, applies longest-common-prefix diff, and uses in-agent Capstone disassembly to pinpoint the deciding cmp/jump/branch. Ships as matching Python and Rust APIs with OLLVM-style CFF resync heuristics, optional warm-up to skip dynamic-linker false positives, and x86/ARM64 branch classification. Targets license checks, anti-cheat heuristics, and other obfuscated control flow where manual trace comparison does not scale. (source: wiki/sources/descriptions/Veridiff__Veridiff.md)
+**Dynamic branch divergence engine:** Frida **Stalker dual-trace** that finds the exact conditional branch instruction where two executions of the same native code first take different paths. Traces basic-block sequences from two runs, applies longest-common-prefix diff, and uses in-agent Capstone disassembly to pinpoint the deciding cmp/jump/branch. Ships as matching Python and Rust APIs with OLLVM-style CFF resync heuristics, optional warm-up to skip dynamic-linker false positives, and x86/ARM64 branch classification. Targets license checks, anti-cheat heuristics, and other obfuscated control flow where manual trace comparison does not scale. (source: wiki/sources/descriptions/Veridiff__Veridiff.md)
 
 ## How it works
 

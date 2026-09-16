@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-16** — ingest `description:Veridiff/Veridiff`: entity [[veridiff]] (Veridiff; dynamic branch-divergence engine; Frida Stalker dual-trace; Python + Rust identical APIs; LCP basic-block diff + Capstone disassembly; OLLVM CFF resync + warm-up; x86/ARM64 branch classification; license/anti-cheat branch pinpointing; Cheat / Frida); cited on [[concepts/control-flow-flattening]] and [[concepts/frida]]; `index.md` updated.
+
 - **2026-09-16** — ingest `readme:categories`: Cheat ~2816 (+1; Veridiff/[[veridiff]] Frida Stalker dual-trace branch-divergence engine for OLLVM/anti-cheat checks in Cheat / Frida) / Anti Cheat ~736 / other major section counts stable; 41 sections; entity [[veridiff]]; refreshed README-map counts and Frida Stalker dual-trace scope on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/reverse-engineering]], and [[overviews/dma-attack]]; light `index.md` section notes (no per-category pages).
 
 - **2026-09-16** — ingest `description:WajahatNaeem056/JerryManager`: entity [[jerrymanager]] (WajahatNaeem056; Magisk/KernelSU/APatch shell-script module + browser Web UI; Play Integrity Fix, OhMyKeymint, Tricky Store, TEESimulator, Zygisk Next; keybox injection, per-app targeting, banking-mode Frida/hook cleanup, early-boot locked-device property spoofing; Cheat / Magisk); cited on [[concepts/mobile-anti-cheat]] and [[overviews/mobile-security]]; cross-linked [[zamr]], [[pif-config-generator]], [[magisk]], [[kernelsu]], [[zygisk]], [[trickystore]], and [[frida]]; `index.md` updated.
