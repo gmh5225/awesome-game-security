@@ -554,6 +554,7 @@ sources:
   - wiki/sources/descriptions/mylove90__pc_ginkgo.md
   - wiki/sources/descriptions/mrphrazer__obfuscation_detection.md
   - wiki/sources/descriptions/mrphrazer__obfuscation_analysis.md
+  - wiki/sources/descriptions/mrphrazer__binary-ninja-headless-mcp.md
   - wiki/sources/descriptions/mrphrazer__ghidra-headless-mcp.md
   - wiki/sources/descriptions/bethington__ghidra-mcp.md
   - wiki/sources/descriptions/LaurieWired__GhidraMCP.md
@@ -2180,6 +2181,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Ghidra Sleigh/p-code bridging into Binary Ninja via [[binaryninja-pcode]] (C++; experimental LLIL from p-code) sits in the Cheat Binary Ninja Plugins lane. (source: wiki/sources/descriptions/pd0wm__binaryninja-pcode.md)
 - Custom Binary Ninja architecture plugins via [[binaryninjaplugins]] (Pusty; Python; Java class files, Renesas H8/300, Xtensa ELF; disassembly, decode, partial lifting; Java NOP/branch patch workflows; Cheat Binary Ninja Plugins / firmware+bytecode RE) sits beside [[binaryninja-pcode]]. (source: wiki/sources/descriptions/Pusty__BinaryNinjaPlugins.md)
 - Binary Ninja MCP server via [[binary-ninja-mcp]] (Python; disasm/decompile/xrefs/functions/types for LLM clients; MCP for Binary_Ninja) sits in the Cheat Binary Ninja Plugins / agent-RE lane. (source: wiki/sources/descriptions/fosdickio__binary_ninja_mcp.md)
+- Headless Binary Ninja MCP via [[binary-ninja-headless-mcp]] (mrphrazer; Python 3.11+; 181 RE tools; disasm/IL/patch/types/xrefs/scripting/undo; stdio/TCP; read-only default; fake CI backend; sandboxed container/VM agent RE for game-security/AC/malware binaries; Game Develop / MCP server) sits beside [[binary-ninja-mcp]]. (source: wiki/sources/descriptions/mrphrazer__binary-ninja-headless-mcp.md)
 - BinjaLattice authenticated HTTP MCP bridge via [[binja-lattice-mcp]] (Invoke-RE; Python BN plugin; token auth + optional TLS; export disasm/pseudocode + controlled rename/comment edits; live BN database agent-RE; MCP for Binary_Ninja) sits beside [[binary-ninja-mcp]]. (source: wiki/sources/descriptions/Invoke-RE__binja-lattice-mcp.md)
 - Binary Ninja CLI for agents via [[bn]] (banteg; Python; headless/agent-facing CLI over BN APIs; plugin development; Cheat Binary Ninja Plugins / agent-RE lane) sits beside [[binary-ninja-mcp]]. (source: wiki/sources/descriptions/banteg__bn.md)
 - Vector35 curated official Binary Ninja plugin index via [[official-plugins]] (structured plugin metadata catalog; Python indexing; trusted first-party/endorsed integrations; Cheat Binary Ninja Plugins lane) complements community plugin discovery. (source: wiki/sources/descriptions/Vector35__official-plugins.md)

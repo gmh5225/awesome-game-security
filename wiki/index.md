@@ -513,7 +513,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [blah](entities/blah.md) — lightweight portable C++ 2D game framework (CMake C++17; OpenGL or D3D11; lifecycle/render/input/audio/math; few deps; hackable prototype base; Game Engine / [C++ 2D]; NoelFB)
 - [binary-analysis-mcps](entities/binary-analysis-mcps.md) — Binary analysis MCP collection (Python; IDA Pro function/xref/variable tools for LLM agents; Binary analysis MCPs collections)
 - [binaryaudit](entities/binaryaudit.md) — Harbor benchmark for AI agents finding injected backdoors in stripped C/Go/Rust binaries (Docker; Ghidra/Radare2; lighttpd/dnsmasq/Dropbear/Sozu/Caddy; QuesmaOrg)
-- [binary-ninja-headless-mcp](entities/binary-ninja-headless-mcp.md) — Headless Binary Ninja MCP server (Python 3.11+; 181 RE tools; disasm/IL/patch/types/xrefs/scripting; stdio/TCP; read-only default; fake CI backend; Game Develop / MCP server)
+- [binary-ninja-headless-mcp](entities/binary-ninja-headless-mcp.md) — Headless Binary Ninja MCP server (Python 3.11+; 181 RE tools; disasm/IL/patch/types/xrefs/scripting/undo; stdio/TCP; read-only default; fake CI backend; sandboxed agent RE for game-security/AC/malware; Game Develop / MCP server)
 - [binary-ninja-mcp](entities/binary-ninja-mcp.md) — Binary Ninja MCP server (Python; disasm/decompile/xrefs/functions/types for LLM agents; MCP for Binary_Ninja)
 - [binaryninja-ollama](entities/binaryninja-ollama.md) — Binary Ninja plugin: local Ollama LLM-assisted HLIL function/variable rename (ahaggard2013; offline models)
 - [binaryninja-openai](entities/binaryninja-openai.md) — Binary Ninja plugin: OpenAI-assisted HLIL/pseudo-C function summarize + variable rename (WhatTheFuzz; Integrates OpenAI)
