@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-16** — ingest `readme:categories`: Cheat ~2813 (+1; erensariisik03-sudo/[[farming-simulator-12-mp-build]] native Android FS12 runtime `.so` injection with Substrate hooks in Injection:Android) / Anti Cheat ~736 / other major section counts stable; 41 sections; entity [[farming-simulator-12-mp-build]]; refreshed README-map counts and Android native injection scope on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/anti-cheat]], [[overviews/dma-attack]], and [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
+
 - **2026-09-16** — lint (agent pass): index vs disk scan — 9 overviews, 50 concepts, 3906 entities (3965 index entries); index.md fully synced (0 missing, 0 dead, 0 duplicate entries); overview wikilink spot-check (9 pages) — 0 broken links; concept spot-check (50 pages) — 0 broken links; index.md wikilink scan — 0 broken links; 6 cross-kind slug collisions ([[game-hacking]], [[anti-cheat]], [[reverse-engineering]], [[il2cpp]], [[byovd]], [[dma]]) — expected, no repair needed; no structural edits required.
 
 - **2026-09-16** — ingest `description:ThoriumAC/Thorium-Minecraft-Plugin`: entity [[thorium-minecraft-plugin]] (ThoriumAC; Java Bukkit/Spigot/Paper/Folia; PacketEvents server-packet telemetry—movement/combat/block interaction/transactions/world geometry; WebSocket + protobuf remote Thorium engine; optional alerts/warnings/kicks/bans; auditable open transport vs closed-source inference; MC 1.8–current; Anti Cheat / game:minecraft); cited on [[concepts/detector-operations]] and [[overviews/game-hacking]]; cross-linked [[guardac]] and [[shard]]; `index.md` updated.
