@@ -1841,6 +1841,7 @@ sources:
   - wiki/sources/descriptions/AshrafMorningstar__hayday-bot.md
   - wiki/sources/descriptions/lsxll666__AntiCheatToggle.md
   - wiki/sources/descriptions/IZxMD__ac-compat-research.md
+  - wiki/sources/descriptions/erensariisik03-sudo__Farming-Simulator-12-Mp-Build.md
 updated: 2026-09-16
 confidence: high
 ---

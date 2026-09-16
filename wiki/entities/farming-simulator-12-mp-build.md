@@ -15,7 +15,11 @@ Native Android mod that adds multiplayer to Farming Simulator 12 by injecting `l
 
 ## Technique stack
 
-Runtime `.so` injection; Substrate native hooks; UDP/TCP multiplayer sync; OpenGL ES 2 + ImGui overlay; NDK armeabi build pipeline.
+Runtime `.so` injection; Substrate native hooks on menu/GUI/update via hardcoded offsets; UDP LAN discovery + TCP player sync; OpenGL ES 2 + Dear ImGui overlay; NDK armeabi build; GitHub Actions CI for `libmultiplayermod.so`.
+
+## Audience
+
+Reverse engineers and modders studying native mobile game hooking, legacy Android ABI targets, and runtime modification of closed-source mobile game engines.
 
 ## Links
 
