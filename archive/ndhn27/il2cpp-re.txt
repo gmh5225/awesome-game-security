@@ -1,0 +1,759 @@
+Project Path: arc_ndhn27_il2cpp-re_mlnk4vdw
+
+Source Tree:
+
+```txt
+arc_ndhn27_il2cpp-re_mlnk4vdw
+├── README.md
+├── agents
+│   ├── dump_clean_header_v2.js
+│   ├── dump_clean_header_v3.js
+│   └── dump_clean_header_v4.js
+└── dump_clean_header.py
+
+```
+
+`README.md`:
+
+```md
+# il2cpp-re
+
+A Frida-based tool that dumps a clean (deobfuscated) **global-metadata
+header** from a running Unity/IL2CPP app on iOS, for analysis with
+[Il2CppDumper](https://github.com/Perfare/Il2CppDumper) or similar tools.
+The target app is **never hardcoded** — pass it via `--target` or an
+environment variable at run time.
+
+> **Purpose:** a personal research/reverse-engineering tool (understanding
+> IL2CPP internals, metadata layout, etc). This is not a cheat/hack tool and
+> ships with no feature that modifies app state. Only use it on apps you
+> have the legal right to analyze (your own builds, or apps you've been
+> explicitly authorized to test) — running it against a third-party app may
+> violate that app's Terms of Service; that's on you.
+
+## What's new in this version
+
+The original tool had two separate agents with opposite trade-offs: a
+hardcoded-offset hook (fast, but breaks on every app update until the offset
+is re-derived) and a dynamic Stalker scan (update-proof, but slower). This
+version adds a third agent, **v4**, that merges the two:
+
+- If you give it an offset (`--offset`), it tries the fast hook first.
+- If that offset fires but the captured pointer's magic doesn't match, or it
+  never fires within a few seconds, it **automatically falls back** to the
+  dynamic scan — no manual intervention, no re-running with a different
+  agent.
+- If you don't give it an offset at all, it skips straight to the dynamic
+  scan.
+
+`v4` is now the default agent. The offset is a nice-to-have speed
+optimization, not a requirement.
+
+Also new: the offset is passed in at run time via `--offset` / an RPC call
+into the agent, instead of requiring you to hand-edit the `HOOK_OFFSET`
+constant in the script; the controller verifies the dumped header's magic
+(and prints the raw version field) before writing the output file; the
+default dump size was bumped from 512 to 1024 bytes for headroom on newer
+IL2CPP metadata layouts; and Ctrl+C now detaches cleanly instead of dumping
+a Python traceback.
+
+## Layout
+
+```
+il2cpp-re/
+├── dump_clean_header.py          # controller: spawn app, load agent, wait for the RPC to return the header
+└── agents/
+    ├── dump_clean_header_v4.js   # RECOMMENDED. Adaptive: fast offset hook with automatic
+    │                               fallback to the dynamic scan. Takes its offset at
+    │                               runtime via `configure()`.
+    ├── dump_clean_header_v2.js   # Legacy/manual. Dynamic-scan only (Stalker over il2cpp_init,
+    │                               checks every register against the magic at every
+    │                               instruction) — never goes stale, just slower.
+    └── dump_clean_header_v3.js   # Legacy/manual. Hardcoded-offset only, no fallback — hooks
+    │                               straight into the point where the header has just been
+    │                               deobfuscated (x21 holds the clean pointer). Fastest option
+    │                               when you already trust the offset, but the offset needs to
+    │                               be re-derived every time the module changes.
+```
+
+## Requirements
+
+- A jailbroken iOS device
+- `frida-server` running on the device
+- [pymobiledevice3](https://github.com/doronz88/pymobiledevice3) to forward
+  the USB port, e.g.:
+  ```
+  pymobiledevice3 usbmux forward 45861 45861
+  ```
+- Python 3 + `pip install frida frida-tools`
+
+## Usage
+
+```bash
+# Recommended: adaptive agent, no offset needed (goes straight to the dynamic scan)
+python dump_clean_header.py --target com.example.unityapp
+# or
+TARGET_BUNDLE_ID=com.example.unityapp python dump_clean_header.py
+
+# With a known offset for the fast path (falls back automatically if it's stale)
+python dump_clean_header.py --target com.example.unityapp --offset 0xab6ad08
+
+# Force the legacy scan-only or offset-only agents
+python dump_clean_header.py --target com.example.unityapp --agent agents/dump_clean_header_v2.js
+python dump_clean_header.py --target com.example.unityapp --agent agents/dump_clean_header_v3.js
+```
+
+The script spawns the target app, injects the agent, resumes the process,
+and waits up to 45s (adjustable with `--timeout`) for `il2cpp_init` to reach
+the point where the header has been fully deobfuscated. The result is
+written to `clean_header.bin` (adjustable with `--out`) and its magic is
+verified before writing.
+
+## Technical notes
+
+- Standard post-deobfuscation magic: `0xFAB11BAF` (per the standard
+  `Il2CppGlobalMetadataHeader` layout used by Il2CppDumper).
+- `v4`'s offset (whether from `--offset` or, in `v3`, the hardcoded
+  `HOOK_OFFSET`) is a fixed location inside the current build's IL2CPP
+  module — it needs to be re-derived (e.g. via ADRP cross-reference tracing
+  in a disassembler) after an app update shifts it. With `v4` this is now
+  optional: without it, or when it's stale, the tool just falls back to the
+  slower dynamic scan instead of failing outright.
+
+```
+
+`agents/dump_clean_header_v2.js`:
+
+```js
+// dump_clean_header_v2.js
+// No hardcoded offset. Instead: hook il2cpp_init, use Stalker to single-step
+// through every instruction in the function, and at each instruction check
+// whether any register currently points to memory whose first 4 bytes match
+// the standard post-deobfuscation Il2CppGlobalMetadataHeader magic
+// (0xFAB11BAF). On a match -> that's the clean header, regardless of what
+// offset it happens to live at in the current build.
+//
+// Trade-off vs. the hardcoded-offset version: this never goes stale when the
+// game updates (as long as the deobfuscation algorithm itself doesn't
+// change, only where the code for it lives), but it's slower because it has
+// to "call out" to JS on every instruction inside il2cpp_init. That only
+// happens once at app startup, so the cost is acceptable.
+//
+// NOTE: dump_clean_header_v4.js merges this scan with the offset-hook
+// approach (falling back to this automatically when the offset is stale or
+// missing) and is the recommended default agent. This file is kept for
+// scan-only / manual use.
+
+const REAL_MAGIC = 0xFAB11BAF; // standard post-deobfuscation magic (per Il2CppDumper)
+const HEADER_SIZE = 512;       // kept from the original version, wide enough for the header
+const SCAN_TIMEOUT_MS = 15000; // avoid hanging forever if nothing is found
+
+let resolveHeader = null;
+const headerPromise = new Promise((resolve) => {
+    resolveHeader = resolve;
+});
+
+function looksLikeHeader(ptr) {
+    try {
+        return ptr.readU32() === REAL_MAGIC;
+    } catch (e) {
+        return false; // unreadable -> definitely not a valid pointer here
+    }
+}
+
+function main() {
+    let mod;
+    try {
+        mod = Process.getModuleByName("UnityFramework");
+        installStalkerScan(mod);
+    } catch (e) {
+        console.log("[i] UnityFramework not loaded yet - waiting on the module observer...");
+        const observer = Process.attachModuleObserver({
+            onAdded(m) {
+                if (m.name === "UnityFramework") {
+                    observer.detach();
+                    installStalkerScan(m);
+                }
+            },
+        });
+    }
+}
+
+function installStalkerScan(mod) {
+    let initAddr;
+    try {
+        initAddr = mod.getExportByName("il2cpp_init");
+    } catch (e) {
+        console.log("[!] Could not find the il2cpp_init export - report this, a different hook point is needed for this build.");
+        resolveHeader(null);
+        return;
+    }
+    console.log("[+] il2cpp_init @", initAddr);
+
+    let found = false;
+    const timer = setTimeout(() => {
+        if (!found) {
+            console.log("[!] Timed out (" + SCAN_TIMEOUT_MS + "ms) without finding the header.");
+            resolveHeader(null);
+        }
+    }, SCAN_TIMEOUT_MS);
+
+    Interceptor.attach(initAddr, {
+        onEnter() {
+            const tid = Process.getCurrentThreadId();
+            console.log("[+] Entered il2cpp_init, starting Stalker scan on thread", tid);
+
+            Stalker.follow(tid, {
+                transform(iterator) {
+                    let instr;
+                    while ((instr = iterator.next()) !== null) {
+                        iterator.keep();
+                        if (found) continue;
+
+                        iterator.putCallout((context) => {
+                            if (found) return;
+                            const regs = [
+                                "x0", "x1", "x2", "x3",
+                                "x19", "x20", "x21", "x22", "x23", "x24",
+                            ];
+                            for (const r of regs) {
+                                const v = context[r];
+                                if (v && !v.isNull() && looksLikeHeader(v)) {
+                                    found = true;
+                                    clearTimeout(timer);
+                                    console.log(`[+] Clean header found in ${r} =`, v);
+                                    const bytes = v.readByteArray(HEADER_SIZE);
+                                    resolveHeader(bytes);
+                                    Stalker.unfollow(tid);
+                                    return;
+                                }
+                            }
+                        });
+                    }
+                },
+            });
+        },
+    });
+
+    console.log("[+] Hook + Stalker installed. Waiting for il2cpp_init to reach the deobfuscated header...");
+}
+
+rpc.exports = {
+    waitForHeader: function (timeoutMs) {
+        timeoutMs = timeoutMs || 30000;
+        return new Promise((resolve) => {
+            const timer = setTimeout(() => {
+                console.log("[!] Timed out waiting for header");
+                resolve(null);
+            }, timeoutMs);
+            headerPromise.then((bytes) => {
+                clearTimeout(timer);
+                resolve(bytes);
+            });
+        });
+    },
+};
+
+main();
+
+```
+
+`agents/dump_clean_header_v3.js`:
+
+```js
+// dump_clean_header_v3.js
+// Same idea as the original version, just with HOOK_OFFSET pointed at the
+// location re-derived with relocate_offset.py for the current
+// UnityFramework build.
+//
+// NOTE: dump_clean_header_v4.js does everything this file does, but adds an
+// automatic fallback to the dynamic Stalker scan (from v2) when the offset
+// is stale or wrong, and takes the offset at runtime via the `configure` RPC
+// call instead of requiring a source edit. It's the recommended default
+// agent. This file is kept for offset-only / manual use, or when you want
+// the absolute fastest single-shot hook with no fallback logic at all.
+
+const HOOK_OFFSET = 0xab6ad08;  // right after "mov x21, x0" - x21 holds the clean header pointer
+const HEADER_SIZE = 512;
+
+let resolveHeader = null;
+const headerPromise = new Promise((resolve) => {
+    resolveHeader = resolve;
+});
+
+function main() {
+    let mod;
+    try {
+        mod = Process.getModuleByName("UnityFramework");
+        installHook(mod);
+    } catch (e) {
+        console.log("[i] UnityFramework not loaded yet - waiting on the module observer...");
+        const observer = Process.attachModuleObserver({
+            onAdded(m) {
+                if (m.name === "UnityFramework") {
+                    observer.detach();
+                    installHook(m);
+                }
+            },
+        });
+    }
+}
+
+function installHook(mod) {
+    const hookAddr = mod.base.add(HOOK_OFFSET);
+    console.log("[+] Hooking deobfuscation completion point at", hookAddr);
+
+    const listener = Interceptor.attach(hookAddr, {
+        onEnter(args) {
+            try {
+                const cleanPtr = this.context.x21;
+                console.log("[+] Clean deobfuscated header buffer captured at", cleanPtr);
+                const bytes = cleanPtr.readByteArray(HEADER_SIZE);
+                resolveHeader(bytes);
+            } catch (e) {
+                console.log("[!] Error capturing header:", e.message);
+                resolveHeader(null);
+            }
+            listener.detach();
+        },
+    });
+
+    console.log("[+] Hook installed. Waiting for il2cpp_init to reach the deobfuscation point...");
+}
+
+rpc.exports = {
+    waitForHeader: function (timeoutMs) {
+        timeoutMs = timeoutMs || 30000;
+        return new Promise((resolve) => {
+            const timer = setTimeout(() => {
+                console.log("[!] Timed out waiting for header");
+                resolve(null);
+            }, timeoutMs);
+            headerPromise.then((bytes) => {
+                clearTimeout(timer);
+                resolve(bytes);
+            });
+        });
+    },
+};
+
+main();
+
+```
+
+`agents/dump_clean_header_v4.js`:
+
+```js
+// dump_clean_header_v4.js
+// Adaptive agent that merges v2 (dynamic Stalker scan) and v3 (hardcoded
+// offset hook) into a single strategy:
+//
+//   1. If a hook offset was supplied via configure(), attach directly to it
+//      (fast path, same technique as v3). The moment it fires, the captured
+//      pointer's first 4 bytes are checked against the real
+//      Il2CppGlobalMetadataHeader magic (0xFAB11BAF). If it matches, we're
+//      done - this is the cheapest and quickest route.
+//   2. If the offset hook fires but the magic DOESN'T match (stale offset
+//      after a game update), or if it simply never fires within
+//      OFFSET_FALLBACK_MS, the agent automatically falls back to the
+//      Stalker-based dynamic scan from v2: it single-steps through
+//      il2cpp_init and callouts at every instruction, checking every
+//      general-purpose register for a pointer whose first 4 bytes match the
+//      magic. This never goes stale, it just costs more time.
+//   3. If no offset is supplied at all, the agent skips straight to the
+//      dynamic scan.
+//
+// This means the offset in agents/dump_clean_header_v3.js (or --offset on
+// the CLI) is now an optional speed optimization, not a hard requirement -
+// the tool keeps working across app updates without needing the offset
+// re-derived every time, it just gets slower until someone re-derives it.
+//
+// Configuration is pushed in at runtime via the `configure` RPC export
+// (called by dump_clean_header.py right after the script loads and before
+// the target process is resumed), so nothing here is hardcoded to a
+// specific app, offset, or build.
+
+const REAL_MAGIC = 0xFAB11BAF;      // standard post-deobfuscation magic (Il2CppDumper layout)
+const DEFAULT_HEADER_SIZE = 1024;   // generous upper bound; trimmed by whoever parses the dump
+const OFFSET_FALLBACK_MS = 6000;    // grace period for the fast path before we also start scanning
+const SCAN_TIMEOUT_MS = 20000;      // hard timeout for the dynamic scan itself
+
+const CONFIG = {
+    offset: null,             // NativePointer offset into the module, or null
+    headerSize: DEFAULT_HEADER_SIZE,
+};
+
+let started = false;
+let resolved = false;
+let scanInstalled = false;
+let resolveHeader = null;
+const headerPromise = new Promise((resolve) => {
+    resolveHeader = resolve;
+});
+
+function finish(bytes, method) {
+    if (resolved) return;
+    resolved = true;
+    if (bytes) {
+        console.log(`[+] Clean header captured via the ${method} path (${bytes.byteLength} bytes).`);
+    } else {
+        console.log(`[!] ${method} path ended without a header.`);
+    }
+    resolveHeader(bytes);
+}
+
+function looksLikeHeader(ptr) {
+    try {
+        return ptr.readU32() === REAL_MAGIC;
+    } catch (e) {
+        return false; // unreadable -> definitely not a valid pointer here
+    }
+}
+
+function main() {
+    let mod;
+    try {
+        mod = Process.getModuleByName("UnityFramework");
+        installHooks(mod);
+    } catch (e) {
+        console.log("[i] UnityFramework not loaded yet - waiting on the module observer...");
+        const observer = Process.attachModuleObserver({
+            onAdded(m) {
+                if (m.name === "UnityFramework") {
+                    observer.detach();
+                    installHooks(m);
+                }
+            },
+        });
+    }
+}
+
+function installHooks(mod) {
+    if (CONFIG.offset) {
+        installOffsetHook(mod);
+    } else {
+        console.log("[i] No offset configured - going straight to the dynamic Stalker scan.");
+        installScanHook(mod);
+    }
+}
+
+function installOffsetHook(mod) {
+    const hookAddr = mod.base.add(CONFIG.offset);
+    console.log("[+] Fast path: hooking hardcoded offset at", hookAddr);
+
+    const listener = Interceptor.attach(hookAddr, {
+        onEnter() {
+            try {
+                const cleanPtr = this.context.x21; // holds the clean header pointer right after deobfuscation
+                if (looksLikeHeader(cleanPtr)) {
+                    const bytes = cleanPtr.readByteArray(CONFIG.headerSize);
+                    listener.detach();
+                    finish(bytes, "fast-offset");
+                } else {
+                    console.log("[!] Offset fired but the magic didn't match (stale offset after an app update?) - falling back to the dynamic scan.");
+                    listener.detach();
+                    installScanHook(mod);
+                }
+            } catch (e) {
+                console.log("[!] Offset hook threw:", e.message, "- falling back to the dynamic scan.");
+                listener.detach();
+                installScanHook(mod);
+            }
+        },
+    });
+
+    // Safety net: the offset hook might simply never fire (wrong address,
+    // code path not taken on this run, etc). If nothing has resolved after
+    // OFFSET_FALLBACK_MS, start the dynamic scan alongside it.
+    setTimeout(() => {
+        if (!resolved) {
+            console.log(`[!] No hit on the hardcoded offset after ${OFFSET_FALLBACK_MS}ms - starting the dynamic scan as a fallback (offset hook stays active too).`);
+            installScanHook(mod);
+        }
+    }, OFFSET_FALLBACK_MS);
+}
+
+function installScanHook(mod) {
+    if (scanInstalled) return;
+    scanInstalled = true;
+
+    let initAddr;
+    try {
+        initAddr = mod.getExportByName("il2cpp_init");
+    } catch (e) {
+        console.log("[!] Could not find the il2cpp_init export - need a different hook point for this build.");
+        finish(null, "dynamic-scan");
+        return;
+    }
+    console.log("[+] il2cpp_init @", initAddr);
+
+    const timer = setTimeout(() => {
+        if (!resolved) {
+            console.log(`[!] Dynamic scan timed out after ${SCAN_TIMEOUT_MS}ms without finding a header.`);
+            finish(null, "dynamic-scan");
+        }
+    }, SCAN_TIMEOUT_MS);
+
+    Interceptor.attach(initAddr, {
+        onEnter() {
+            const tid = Process.getCurrentThreadId();
+            console.log("[+] Entered il2cpp_init, starting Stalker scan on thread", tid);
+
+            Stalker.follow(tid, {
+                transform(iterator) {
+                    let instr;
+                    while ((instr = iterator.next()) !== null) {
+                        iterator.keep();
+                        if (resolved) continue;
+
+                        iterator.putCallout((context) => {
+                            if (resolved) return;
+                            const regs = [
+                                "x0", "x1", "x2", "x3",
+                                "x19", "x20", "x21", "x22", "x23", "x24",
+                            ];
+                            for (const r of regs) {
+                                const v = context[r];
+                                if (v && !v.isNull() && looksLikeHeader(v)) {
+                                    clearTimeout(timer);
+                                    console.log(`[+] Clean header found in ${r} =`, v);
+                                    const bytes = v.readByteArray(CONFIG.headerSize);
+                                    finish(bytes, "dynamic-scan");
+                                    Stalker.unfollow(tid);
+                                    return;
+                                }
+                            }
+                        });
+                    }
+                },
+            });
+        },
+    });
+
+    console.log("[+] Hook + Stalker installed. Waiting for il2cpp_init to reach the deobfuscated header...");
+}
+
+rpc.exports = {
+    // Called by the controller right after script.load() and before the
+    // target process is resumed, so this always runs before il2cpp_init
+    // executes.
+    configure: function (cfg) {
+        if (cfg) {
+            if (cfg.offset !== undefined && cfg.offset !== null && cfg.offset !== "") {
+                CONFIG.offset = ptr(cfg.offset);
+            }
+            if (cfg.headerSize) {
+                CONFIG.headerSize = cfg.headerSize;
+            }
+        }
+        console.log(
+            "[i] Config received: offset=" + (CONFIG.offset ? CONFIG.offset : "none (dynamic scan only)") +
+            ", headerSize=" + CONFIG.headerSize
+        );
+        if (!started) {
+            started = true;
+            main();
+        }
+    },
+
+    waitForHeader: function (timeoutMs) {
+        timeoutMs = timeoutMs || 30000;
+        // If the controller never calls configure() (e.g. an older
+        // controller script), start with the dynamic-scan-only path so the
+        // agent still works standalone.
+        if (!started) {
+            started = true;
+            main();
+        }
+        return new Promise((resolve) => {
+            const timer = setTimeout(() => {
+                console.log("[!] Timed out waiting for header");
+                resolve(null);
+            }, timeoutMs);
+            headerPromise.then((bytes) => {
+                clearTimeout(timer);
+                resolve(bytes);
+            });
+        });
+    },
+};
+
+```
+
+`dump_clean_header.py`:
+
+```py
+"""
+dump_clean_header.py
+Spawns a target iOS app, loads a Frida agent, and makes a single blocking RPC
+call that resolves the moment il2cpp_init finishes deobfuscating the shuffled
+global-metadata header (or times out). Writes the clean, standard-layout
+header bytes to a local file.
+
+The app to target is NOT hardcoded - pass it via --target or the
+TARGET_BUNDLE_ID env var. Nothing in this repo names or is specific to any
+particular app/game; it works against any IL2CPP-based iOS app whose
+metadata header you have the legal right to inspect (e.g. your own builds,
+or apps you have explicit permission to analyze).
+
+By default this uses agents/dump_clean_header_v4.js, which tries a fast
+hardcoded-offset hook (if you pass --offset) and automatically falls back to
+a slower but update-proof dynamic Stalker scan if the offset is missing,
+stale, or never fires. You don't need a correct offset for this to work -
+it's purely a speed optimization now.
+
+Usage:
+    python dump_clean_header.py --target com.example.unityapp
+    # or
+    TARGET_BUNDLE_ID=com.example.unityapp python dump_clean_header.py
+
+    # with a known offset for the fast path (falls back automatically if stale)
+    python dump_clean_header.py --target com.example.unityapp --offset 0xab6ad08
+"""
+import argparse
+import os
+import struct
+import sys
+
+import frida
+
+REAL_MAGIC = 0xFAB11BAF  # standard post-deobfuscation magic (Il2CppDumper layout)
+
+
+def parse_args():
+    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument(
+        "--target", "-t",
+        default=os.environ.get("TARGET_BUNDLE_ID"),
+        help="Bundle ID of the app to spawn (or set TARGET_BUNDLE_ID). Required.",
+    )
+    parser.add_argument(
+        "--agent", "-a",
+        default="agents/dump_clean_header_v4.js",
+        help="Path to the Frida agent script to inject "
+             "(default: agents/dump_clean_header_v4.js, the adaptive agent). "
+             "Use agents/dump_clean_header_v2.js for scan-only, or "
+             "agents/dump_clean_header_v3.js for offset-only with no fallback.",
+    )
+    parser.add_argument(
+        "--offset",
+        default=os.environ.get("HOOK_OFFSET"),
+        help="Optional hex offset (e.g. 0xab6ad08) into UnityFramework for the fast-path hook. "
+             "Only used by dump_clean_header_v4.js; ignored by v2/v3, which don't accept runtime "
+             "config. If omitted, v4 goes straight to the dynamic scan.",
+    )
+    parser.add_argument(
+        "--header-size", type=int, default=1024,
+        help="Number of bytes to dump starting at the clean header pointer (default: 1024, "
+             "generous headroom over the actual struct size - trim it however you parse the dump).",
+    )
+    parser.add_argument(
+        "--out", "-o",
+        default="clean_header.bin",
+        help="Where to write the dumped header bytes (default: clean_header.bin)",
+    )
+    parser.add_argument(
+        "--remote",
+        default=os.environ.get("FRIDA_REMOTE", "127.0.0.1:45861"),
+        help="Remote frida-server address, e.g. after "
+             "`pymobiledevice3 usbmux forward 45861 45861` (default: 127.0.0.1:45861)",
+    )
+    parser.add_argument(
+        "--timeout", type=int, default=45000,
+        help="Milliseconds to wait for the header before giving up (default: 45000)",
+    )
+    args = parser.parse_args()
+    if not args.target:
+        parser.error("no target specified - pass --target <bundle-id> or set TARGET_BUNDLE_ID")
+    return args
+
+
+def on_message(message, data):
+    if message.get("type") == "error":
+        print("[agent error]", message.get("stack") or message.get("description"))
+    elif message.get("type") == "send":
+        print("[agent]", message.get("payload"))
+
+
+def verify_magic(header_bytes):
+    """Sanity-check the dump: the first 4 bytes should be the standard
+    post-deobfuscation magic. Also prints the raw version field (next 4
+    bytes) for cross-referencing against Il2CppDumper's known version list -
+    no version is inferred here to avoid guessing wrong."""
+    if len(header_bytes) < 8:
+        print("[!] Dump is too short to verify (<8 bytes) - can't check the magic.")
+        return False
+    magic, version = struct.unpack_from("<II", header_bytes, 0)
+    if magic == REAL_MAGIC:
+        print(f"[+] Magic OK (0x{magic:08X}). Raw version field: {version} (0x{version:08X}).")
+        return True
+    print(f"[!] Magic mismatch: got 0x{magic:08X}, expected 0x{REAL_MAGIC:08X}. "
+          "The dump may be garbage - double check the offset/agent used.")
+    return False
+
+
+def main():
+    args = parse_args()
+
+    with open(args.agent, "r", encoding="utf-8") as f:
+        source = f.read()
+
+    device = frida.get_device_manager().add_remote_device(args.remote)
+
+    def on_detached(reason):
+        print(f"[!] Session detached, reason: {reason}")
+        if reason != "application-requested":
+            print("    (target process crashed, was killed, or the connection was lost)")
+
+    print(f"[*] Spawning {args.target}...")
+    pid = device.spawn([args.target])
+    session = device.attach(pid)
+    session.on("detached", on_detached)
+
+    script = session.create_script(source)
+    script.on("message", on_message)
+    script.load()
+
+    # Push runtime config into the agent, if it supports it (v4 does; v2/v3
+    # self-start at load time and don't export `configure`, so this is a
+    # no-op for them).
+    try:
+        script.exports_sync.configure({
+            "offset": args.offset,
+            "headerSize": args.header_size,
+        })
+    except Exception:
+        pass
+
+    device.resume(pid)
+    print(f"[*] Spawned and resumed, pid={pid}")
+    print(f"[*] Waiting for il2cpp_init to reach the header-deobfuscation point (up to {args.timeout}ms)...")
+
+    try:
+        header_bytes = script.exports_sync.wait_for_header(args.timeout)
+    except KeyboardInterrupt:
+        print("\n[!] Interrupted - detaching...")
+        session.detach()
+        sys.exit(130)
+
+    if not header_bytes:
+        print("[!] Did not capture the header - see agent log above for details.")
+        session.detach()
+        sys.exit(1)
+
+    verify_magic(header_bytes)
+
+    with open(args.out, "wb") as out:
+        out.write(header_bytes)
+    print(f"[+] Wrote {len(header_bytes)} bytes to {args.out}")
+    session.detach()
+
+
+if __name__ == "__main__":
+    try:
+        main()
+    except KeyboardInterrupt:
+        print("\n[!] Interrupted.")
+        sys.exit(130)
+
+```
