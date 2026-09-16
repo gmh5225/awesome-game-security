@@ -10,9 +10,17 @@ confidence: medium
 
 # il2cpp-re
 
-Frida-based **iOS** tool that extracts a **deobfuscated IL2CPP global-metadata header** from a running Unity app on jailbroken devices, producing output suitable for [[il2cppdumper]] and similar reverse-engineering workflows. A Python controller spawns the target by bundle ID and injects JavaScript agents that hook `il2cpp_init` inside UnityFramework to capture the clean header after runtime deobfuscation (verified by `0xFAB11BAF` magic). The default v4 agent tries offset-based hooks when provided and falls back to Stalker-driven register scanning when offsets are stale. (source: wiki/sources/descriptions/ndhn27__il2cpp-re.md)
+Frida-based **iOS** tool that extracts a **deobfuscated IL2CPP global-metadata header** from a running Unity app on jailbroken devices, producing output suitable for [[il2cppdumper]] and similar reverse-engineering workflows. A Python controller spawns the target by bundle ID and injects JavaScript Frida agents that hook `il2cpp_init` inside UnityFramework to capture the clean header after runtime deobfuscation, verified by the standard `0xFAB11BAF` magic. (source: wiki/sources/descriptions/ndhn27__il2cpp-re.md)
 
-Listed in the README under **Cheat → Frida** / Unity IL2CPP metadata lanes beside static dumpers and mobile Frida bridges.
+## How it works
+
+- **Controller:** Python spawns the app by bundle ID and loads Frida JavaScript agents.
+- **Hook point:** `il2cpp_init` in UnityFramework — metadata is captured after runtime deobfuscation, not from obfuscated on-disk blobs.
+- **v4 (default):** Adaptive offset-based hook when an offset is provided; automatic fallback to Stalker-driven dynamic register scan when the offset is missing or stale.
+- **Legacy agents:** v2 (scan-only) and v3 (offset-only) for older or specialized workflows.
+- **Scope:** Read-only header extraction — does not modify application state. Aimed at researchers analyzing IL2CPP internals and metadata layout on iOS games and apps they are authorized to test.
+
+Listed in the README under **Cheat → Frida** / Unity IL2CPP metadata lanes beside static dumpers and mobile Frida bridges such as [[frida-il2cpp-bridge]].
 
 ## Links
 

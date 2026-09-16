@@ -1953,7 +1953,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Il2cppEncrtypt](entities/il2cpp-encrtypt.md) — Unity IL2CPP encryption (C++; asset pipelines + plugin dev; Game Engine Protection:Unity; badApple001)
 - [il2cpp-finder](entities/il2cpp-finder.md) — Unity IL2CPP metadata locator (global-metadata.dat / CodeRegistration / MetadataRegistration scan; obfuscated binaries; cheat / game engine explorer:Unity)
 - [il2cpp-pdb](entities/il2cpp-pdb.md) — Il2CppDumper fork with Rust PDB generator for x64 PE GameAssembly.dll (function names, struct types, typed prototypes; IDA auto-load; [Il2Cpp Dump])
-- [il2cpp-re](entities/il2cpp-re.md) — Frida-based iOS IL2CPP global-metadata header dump from running Unity apps (deobfuscated header for Il2CppDumper; Cheat / Frida)
+- [il2cpp-re](entities/il2cpp-re.md) — Frida iOS IL2CPP deobfuscated global-metadata header dump (UnityFramework il2cpp_init hook; v4 offset/Stalker agents; Il2CppDumper output; read-only; Cheat / Frida)
 - [Il2Cpp-HookScripts](entities/il2cpp-hook-scripts.md) — Android Unity IL2CPP/Mono hook script templates (Frida + native; method intercept / logic patch / runtime data)
 - [Il2CppHookScripts](entities/il2cpp-hookscripts.md) — Frida IL2CPP runtime parse/hook framework (TypeScript il2cpp-hooker npm; batch hooks, QBDI emulation, MCP; axhlzy)
 - [Il2CppInspector](entities/il2cpp-inspector.md) — C# IL2CPP RE tool/library (`global-metadata.dat` + IL2CPP binaries → IDA/Ghidra/BN scripts, C++ headers, DLL injection scaffolds; all versions/platforms; [Il2Cpp Dump])

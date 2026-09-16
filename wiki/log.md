@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-16** — ingest `description:ndhn27/il2cpp-re`: entity [[il2cpp-re]] (ndhn27; Frida iOS IL2CPP deobfuscated global-metadata header dump; Python controller + UnityFramework `il2cpp_init` hook; v4 offset/Stalker fallback + legacy v2/v3 agents; Il2CppDumper-compatible read-only output; Cheat / Frida); cited on [[concepts/il2cpp]], [[overviews/mobile-security]], [[overviews/game-engine]], and [[overviews/reverse-engineering]]; deduped duplicate cite on [[overviews/game-engine]]; `index.md` updated.
+
 - **2026-09-16** — ingest `readme:categories`: Cheat ~2815 (+2; WajahatNaeem056/[[jerrymanager]] Play Integrity Web UI Magisk module + ndhn27/[[il2cpp-re]] iOS Frida deobfuscated IL2CPP metadata dump) / Game Develop ~189 (+1; mrphrazer/[[binary-ninja-headless-mcp]] headless BN MCP in MCP server) / Anti Cheat ~736 / other major section counts stable; 41 sections; entities [[jerrymanager]], [[il2cpp-re]], and [[binary-ninja-headless-mcp]]; refreshed README-map counts and Magisk/IL2CPP/BN-MCP scope on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/mobile-security]], [[overviews/game-engine]], and [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
 
 - **2026-09-16** — ingest `description:erensariisik03-sudo/Farming-Simulator-12-Mp-Build`: entity [[farming-simulator-12-mp-build]] (native Android FS12 multiplayer mod; runtime `libmultiplayermod.so` injection; Substrate hooks on menu/GUI/update; UDP LAN + TCP sync; Dear ImGui OpenGL ES 2 overlay; NDK armeabi; GitHub Actions CI; Cheat / Injection:Android); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; `index.md` updated.
