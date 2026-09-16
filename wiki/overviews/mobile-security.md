@@ -516,6 +516,7 @@ sources:
   - wiki/sources/descriptions/AshrafMorningstar__hayday-bot.md
   - wiki/sources/descriptions/wumingzhinu__VirtualMachine.md
   - wiki/sources/descriptions/erensariisik03-sudo__Farming-Simulator-12-Mp-Build.md
+  - wiki/sources/descriptions/WajahatNaeem056__JerryManager.md
 updated: 2026-09-16
 confidence: high
 ---
@@ -556,7 +557,7 @@ Separate **package/signing**, **runtime/process isolation**, **platform/device i
 | What could be missed? | Uncovered startup, native vs managed execution, observer effects |
 | Is a detector conclusion justified? | Defined signal, exact tested configuration, benign/debug comparison, FPR/FNR limits |
 
-Platform integrity: record **SELinux** enforcement/domain/denials for root and modified-kernel hosts; validate **Play Integrity** request identity, binding, and freshness on the backend ([[pif-config-generator]], [[zamr]], [[jerrymanager]] Web UI module for research configs); verify **App Attest** attestations/assertions server-side with challenge/counter handling; inspect actual **Network Security Configuration** and build variant before inferring release TLS/pinning from debug captures. Route verified purchases, entitlement transitions, and account authorization to game-server-security; build provenance and update channels to game-supply-chain-security. (source: wiki/sources/skills/mobile-security.md)
+Platform integrity: record **SELinux** enforcement/domain/denials for root and modified-kernel hosts; validate **Play Integrity** request identity, binding, and freshness on the backend ([[pif-config-generator]], [[zamr]], [[jerrymanager]] browser Web UI orchestrates Play Integrity Fix, keybox injection, per-app root/banking-mode cleanup for research configs — source: wiki/sources/descriptions/WajahatNaeem056__JerryManager.md); verify **App Attest** attestations/assertions server-side with challenge/counter handling; inspect actual **Network Security Configuration** and build variant before inferring release TLS/pinning from debug captures. Route verified purchases, entitlement transitions, and account authorization to game-server-security; build provenance and update channels to game-supply-chain-security. (source: wiki/sources/skills/mobile-security.md)
 
 KernelSU/APatch architecture: root-enabled apps still split user-space credentials, privileged services, and kernel components—compare exact release, boot-image provenance, and module configuration rather than ranking frameworks by name. Privileged instrumentation ([[frida]] modes, [[zygisk]] inject paths, eBPF loaders) creates an observable surface along the full privileged path; one absent local signal does not establish a clean device.
 

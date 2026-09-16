@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-16** — ingest `description:WajahatNaeem056/JerryManager`: entity [[jerrymanager]] (WajahatNaeem056; Magisk/KernelSU/APatch shell-script module + browser Web UI; Play Integrity Fix, OhMyKeymint, Tricky Store, TEESimulator, Zygisk Next; keybox injection, per-app targeting, banking-mode Frida/hook cleanup, early-boot locked-device property spoofing; Cheat / Magisk); cited on [[concepts/mobile-anti-cheat]] and [[overviews/mobile-security]]; cross-linked [[zamr]], [[pif-config-generator]], [[magisk]], [[kernelsu]], [[zygisk]], [[trickystore]], and [[frida]]; `index.md` updated.
+
 - **2026-09-16** — ingest `description:mrphrazer/binary-ninja-headless-mcp`: entity [[binary-ninja-headless-mcp]] (mrphrazer; Python 3.11+ headless BN MCP; 181 tools across 36 groups; disasm/IL/patch/types/xrefs/scripting/undo; stdio/TCP; read-only default + safe mutation paths + fake CI backend; agent-driven RE in sandboxed containers/VMs; game-security/AC/malware workflows; Game Develop / MCP server); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[ghidra-headless-mcp]], [[binary-ninja-mcp]], and [[binja-lattice-mcp]]; `index.md` updated.
 
 - **2026-09-16** — ingest `description:ndhn27/il2cpp-re`: entity [[il2cpp-re]] (ndhn27; Frida iOS IL2CPP deobfuscated global-metadata header dump; Python controller + UnityFramework `il2cpp_init` hook; v4 offset/Stalker fallback + legacy v2/v3 agents; Il2CppDumper-compatible read-only output; Cheat / Frida); cited on [[concepts/il2cpp]], [[overviews/mobile-security]], [[overviews/game-engine]], and [[overviews/reverse-engineering]]; deduped duplicate cite on [[overviews/game-engine]]; `index.md` updated.
