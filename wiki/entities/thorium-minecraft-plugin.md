@@ -23,4 +23,4 @@ Server-side packet telemetry (movement, combat, block interaction, transactions,
 
 ## Related
 
-[[overviews/anti-cheat]] · [[overviews/game-hacking]] · [[bs-anticheat]] · [[shard]] · [[grim]] · [[sentinel-anticheat-neoforge]] · [[minecraft-anticheat-list]] · [[detector-operations]]
+[[overviews/anti-cheat]] · [[overviews/game-hacking]] · [[bs-anticheat]] · [[guardac]] · [[shard]] · [[grim]] · [[sentinel-anticheat-neoforge]] · [[minecraft-anticheat-list]] · [[detector-operations]]
