@@ -2147,6 +2147,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 
 > Injection:Android
 - https://github.com/gmh5225/Android-ModGamesByInjectZygote
+- https://github.com/erensariisik03-sudo/Farming-Simulator-12-Mp-Build [Native Android mod injecting libmultiplayermod.so into FS12 via runtime hooking for multiplayer]
 - https://github.com/gmh5225/Android-DLL-Injector
 - https://github.com/reveny/Android-Ptrace-Injector
 - https://github.com/reveny/Android-LD-Preload-Injector
