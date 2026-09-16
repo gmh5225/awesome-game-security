@@ -1368,6 +1368,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/kkkbbb/rustFrida [Frida-like Android ARM64 hook — QuickJS, Java/native/stealth hook, QBDI; pairs with wxshadow (mkpms)]
 - https://github.com/dreamland-blog/KSU-Rust-Frida [Android ARM64 dynamic instrumentation module workflow for KernelSU/Magisk: single-binary engine, attach/spawn/watch-so, HTTP RPC control plane, and multi-mode stealth (normal/wxshadow/recomp)]
 - https://github.com/TheQmaks/phantom-frida [Build anti-detection Frida server from source]
+- https://github.com/Veridiff/Veridiff [Frida Stalker dual-trace engine that pinpoints the branch where two native runs diverge, for anti-cheat checks and OLLVM analysis]
 - https://github.com/1013503897/Morphida [Polymorphic anti-detection Android arm64 frida-server builds that morph static fingerprints per release]
 - https://github.com/astra1dev/MalumMenu-Android [Among Us Android cheat menu using Frida and frida-il2cpp-bridge]
 - https://github.com/AshrafMorningstar/hayday-bot [Frida-based Hay Day automation with guest ARM64 libg.so hooking on LDPlayer/Houdini and Promon SHIELD/Quago anti-cheat bypass]
