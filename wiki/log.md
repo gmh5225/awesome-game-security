@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-16** — ingest `readme:categories`: Cheat ~2816 (+1; Veridiff/[[veridiff]] Frida Stalker dual-trace branch-divergence engine for OLLVM/anti-cheat checks in Cheat / Frida) / Anti Cheat ~736 / other major section counts stable; 41 sections; entity [[veridiff]]; refreshed README-map counts and Frida Stalker dual-trace scope on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/reverse-engineering]], and [[overviews/dma-attack]]; light `index.md` section notes (no per-category pages).
+
 - **2026-09-16** — ingest `description:WajahatNaeem056/JerryManager`: entity [[jerrymanager]] (WajahatNaeem056; Magisk/KernelSU/APatch shell-script module + browser Web UI; Play Integrity Fix, OhMyKeymint, Tricky Store, TEESimulator, Zygisk Next; keybox injection, per-app targeting, banking-mode Frida/hook cleanup, early-boot locked-device property spoofing; Cheat / Magisk); cited on [[concepts/mobile-anti-cheat]] and [[overviews/mobile-security]]; cross-linked [[zamr]], [[pif-config-generator]], [[magisk]], [[kernelsu]], [[zygisk]], [[trickystore]], and [[frida]]; `index.md` updated.
 
 - **2026-09-16** — ingest `description:mrphrazer/binary-ninja-headless-mcp`: entity [[binary-ninja-headless-mcp]] (mrphrazer; Python 3.11+ headless BN MCP; 181 tools across 36 groups; disasm/IL/patch/types/xrefs/scripting/undo; stdio/TCP; read-only default + safe mutation paths + fake CI backend; agent-driven RE in sandboxed containers/VMs; game-security/AC/malware workflows; Game Develop / MCP server); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[ghidra-headless-mcp]], [[binary-ninja-mcp]], and [[binja-lattice-mcp]]; `index.md` updated.
