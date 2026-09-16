@@ -555,6 +555,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/blacktop/ida-mcp-rs [Headless IDA Pro MCP server]
 - https://github.com/fosdickio/binary_ninja_mcp [MCP for Binary_Ninja]
 - https://github.com/Invoke-RE/binja-lattice-mcp [MCP for Binary_Ninja]
+- https://github.com/mrphrazer/binary-ninja-headless-mcp [Headless Binary Ninja MCP server with 181 RE tools for AI agents — disassembly, IL, patching, types, xrefs, undo/redo, and scripting without a GUI]
 - https://github.com/dnakov/radare2-mcp [Radare2 MCP Server]
 - https://github.com/GLips/Figma-Context-MCP [Cursor Talk To Figma MCP server]
 - https://github.com/gmh5225/hex2dec-mcp [MCP server that provides conversion between hexadecimal and decimal numbers]
