@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-17** — ingest `readme:categories`: Anti Cheat ~738 (+1; AtakanKeser/[[blastscale]] server-authoritative mobile puzzle move-replay backend with exactly-once rewards in Open Source Anti Cheat System) / Cheat ~2816 / other major section counts stable; 41 sections; entity [[blastscale]]; refreshed README-map counts and mobile server-authoritative replay AC scope on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], and [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
+
 - **2026-09-17** — lint (agent pass): index vs disk scan — 9 overviews, 50 concepts, 3912 entities (3971 index entries); index.md fully synced (0 missing, 0 dead, 0 duplicate entries); overview wikilink spot-check (9 pages) — 0 broken links; concept spot-check (50 pages) — 0 broken links; index.md wikilink scan — 0 broken links; 6 cross-kind slug collisions ([[game-hacking]], [[anti-cheat]], [[reverse-engineering]], [[il2cpp]], [[byovd]], [[dma]]) — expected, no repair needed; no structural edits required.
 
 - **2026-09-17** — ingest `description:theo926/VolcanoAC`: entity [[volcano-ac]] (theo926; open-source Roblox Luau server-side movement AC; per-frame raycast/physics validation for speed, fly, noclip, and fake seated states; walk-speed/air-time/collision limits; lag-back snap to last valid position before kick; configurable thresholds; loadstring remote-update loader; Anti Cheat / game:roblox); cited on [[overviews/game-engine]] (Roblox server-authoritative Luau AC cluster beside [[encryptic-roblox-anti-cheat]]); `index.md` updated; [[overviews/anti-cheat]] and entity page already carried description projection from prior readme pass.
