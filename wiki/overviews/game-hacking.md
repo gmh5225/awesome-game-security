@@ -1406,6 +1406,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__Interep-Driver-Leak.md
   - wiki/sources/descriptions/gmh5225__IOS-jailbreak--Fugu15.md
   - wiki/sources/descriptions/Kc57__iHide.md
+  - wiki/sources/descriptions/regulad__aaoracled.md
   - wiki/sources/descriptions/KpwnZ__Def1nit3lyN0tAJa1lbr3akTool.md
   - wiki/sources/descriptions/gmh5225__Internal-Valorant-Cheat.md
   - wiki/sources/descriptions/gmh5225__Valorant-cheat-internal.md

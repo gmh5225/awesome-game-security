@@ -144,6 +144,7 @@ sources:
   - wiki/sources/descriptions/GliTcHZzZ67__mast-orchestrator.md
   - wiki/sources/descriptions/jafarm189__MOABile.md
   - wiki/sources/descriptions/Kc57__iHide.md
+  - wiki/sources/descriptions/regulad__aaoracled.md
   - wiki/sources/descriptions/KpwnZ__Def1nit3lyN0tAJa1lbr3akTool.md
   - wiki/sources/descriptions/vvb2060__MagiskDetector.md
   - wiki/sources/descriptions/rushiranpise__detection.md

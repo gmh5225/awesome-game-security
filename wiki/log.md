@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-17** — ingest `description:regulad/aaoracled`: entity [[aaoracled]] (regulad; jailbroken iOS/iPadOS App Attest oracle; OracledDCPatch `devicecheckd` bundle-ID forge + REST `DCAppAttestService` keygen/attestation/assertion; Ghidra/Frida offset discovery; userspace App-ID binding on compromised hardware; anti-fraud SDK evaluation with server-side mitigation guidance; Cheat / IOS jailbreak); cited on [[concepts/mobile-trust-boundaries]]; `index.md` updated; [[overviews/mobile-security]], [[overviews/game-hacking]], and entity page already carried description projection from prior readme pass.
+
 - **2026-09-17** — ingest `readme:categories`: Cheat ~2820 (+1; regulad/[[aaoracled]] jailbroken iOS App Attest oracle daemon in Cheat / IOS jailbreak) / Anti Cheat ~738 / other major section counts stable; 41 sections; entity [[aaoracled]]; refreshed README-map counts and iOS App Attest oracle scope on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/mobile-security]], [[concepts/mobile-trust-boundaries]], [[overviews/reverse-engineering]], and [[overviews/dma-attack]]; light `index.md` section notes (no per-category pages).
 
 - **2026-09-17** — ingest `description:HexRaysSA/plugin-repository`: entity [[ida-plugin-repository]] (HexRaysSA; official curated IDA plugin index; JSON manifests + GitHub Actions sync; plugins.hex-rays.com + built-in Plugin Manager; Python merge/mirror/docs pipeline; known/ignored source tracking + Hex-Rays CLI packaging lint; RE/malware/game-security workflows); cited on [[overviews/reverse-engineering]]; `index.md` updated; [[overviews/game-hacking]] and entity page already carried description projection from prior readme pass.

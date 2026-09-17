@@ -1972,7 +1972,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ImGuiRDR2Hook](entities/imgui-rdr2-hook.md) — RDR2 Vulkan + DirectX 12 ImGui hook framework (Halen84; MinHook + Kiero + Dear ImGui; render-path intercept; hook entry points, config handling, stable menu/input notes; overlay development / graphics API hooking practice; cheat / render-draw)
 - [imgui_club](entities/imgui-club.md) — official Dear ImGui extensions (hex mem editor / multi-context / threaded draw)
 - [imgui-ios-mod-menu](entities/imgui-ios-mod-menu.md) — iOS ImGui mod menu (cheat / render-draw)
-- [aaoracled](entities/aaoracled.md) — jailbroken iOS App Attest oracle daemon (OracledDCPatch + REST `DCAppAttestService` API; forged bundle IDs; userspace App-ID binding research; regulad; Cheat / IOS jailbreak)
+- [aaoracled](entities/aaoracled.md) — jailbroken iOS App Attest oracle daemon (OracledDCPatch + REST `DCAppAttestService` API; forged bundle IDs; userspace App-ID binding; anti-fraud SDK evaluation + server-side mitigation guidance; regulad; Cheat / IOS jailbreak)
 - [iHide](entities/ihide.md) — iOS per-app jailbreak-hiding tweak (MobileSubstrate/ObjC hooks; Settings-panel toggle; common jailbreak-detection bypass; Kc57)
 - [ImGui-Spoofer-Leaked](entities/imgui-spoofer-leaked.md) — leaked Windows HWID spoofer with ImGui GUI; C++ loader/mapper kernel components + WinAPI routines; debugger/process anti-analysis (Veuqx0; cheat / HWID)
 - [iOS Jailbreak — Fugu15](entities/ios-jailbreak-fugu15.md) — iOS 15 untethered jailbreak (Fugu15 kernel exploit chain; root, codesign bypass, full-privilege code execution; gmh5225)
