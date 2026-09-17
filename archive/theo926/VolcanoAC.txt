@@ -1,0 +1,219 @@
+Project Path: arc_theo926_VolcanoAC_wt7_kold
+
+Source Tree:
+
+```txt
+arc_theo926_VolcanoAC_wt7_kold
+├── Loadstring
+│   └── Loadstring.luau
+└── SourceCode
+    └── MovementChecks
+        └── MovementChecks.luau
+
+```
+
+`Loadstring/Loadstring.luau`:
+
+```luau
+--Loadstring is recommended for automatic updates. 
+-- ServerScriptService
+
+
+local Htpps = game:GetService("HttpService")
+local Players = game:GetService("Players")
+
+
+
+local inited, result = pcall(function()
+    return loadstring(Htpps:GetAsync("https://raw.githubusercontent.com/theo926/VolcanoAC/refs/heads/main/SourceCode/MovementChecks/MovementChecks.luau"))()
+end)
+
+
+
+local function shutdownServer()
+    for _, player in ipairs(Players:GetPlayers()) do
+        player:Kick("[VolcanoAC] Anti-Cheat failed to initialize.")
+    end
+
+end
+
+if inited then
+    print("VolcanoAC loaded successfully.")
+else
+    shutdownServer()
+
+    warn("Failed to load VolcanoAC: " .. tostring(result))
+    warn("Shutting down server")
+    
+
+end
+
+
+
+```
+
+`SourceCode/MovementChecks/MovementChecks.luau`:
+
+```luau
+--[[
+On Ai detectors remove Volcano AC in ACCII Text cus it messes ups its detection.
+____   ____    .__                                                      
+\   \ /   /___ |  |   ____ _____    ____   ____                         
+ \   Y   /  _ \|  | _/ ___\\__  \  /    \ /  _ \                        
+  \     (  <_> )  |_\  \___ / __ \|   |  (  <_> )                       
+   \___/ \____/|____/\___  >____  /___|  /\____/                        
+                         \/     \/     \/                               
+   _____          __  .__          _________ .__                   __   
+  /  _  \   _____/  |_|__|         \_   ___ \|  |__   ____ _____ _/  |_ 
+ /  /_\  \ /    \   __\  |  ______ /    \  \/|  |  \_/ __ \\__  \\   __\
+/    |    \   |  \  | |  | /_____/ \     \___|   Y  \  ___/ / __ \|  |  
+\____|__  /___|  /__| |__|          \______  /___|  /\___  >____  /__|  
+        \/     \/                          \/     \/     \/     \/      
+                                                                        
+                                                                        
+                                                                        
+                                                                        
+                                                                        
+  
+--[[
+VolcanoAC
+
+
+
+
+
+]]
+
+
+-- CONFIGURATION SETTINGS
+local MAX_WALK_SPEED = 32       -- Max allowed horizontal speed
+local MAX_AIR_TIME = 1.25       -- Seconds allowed in air before flagging fly
+local RAY_CAST_DISTANCE = 6     -- Downward distance to check for ground
+local MAX_LAG_BACKS = 5         -- Number of lag backs allowed before triggering punishment
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+
+-- CODE THAT RUNS WHEN A PLAYER EXCEEDS THE MAXIMUM NUMBER OF LAG BACKS
+
+local function LagBacksExceeded(player, violationCount, reason)
+	warn(string.format("[ANTI-CHEAT] Player %s (%d) Has %d lag backs! Reason: %s", player.Name, player.UserId, violationCount, reason))
+	player:Kick("\n[Anti-Cheat] You were kicked for impossible movement (" .. reason .. "). \n Powered by VolcanoAC")
+	ReplicatedStorage:WaitForChild("AntiCheatViolation"):FireClient()
+end
+
+
+-- ANTI-CHEAT MAIN LOGIC
+
+Players.PlayerAdded:Connect(function(plr)
+	plr.CharacterAdded:Connect(function(char)
+		local hrp = char:WaitForChild("HumanoidRootPart")
+		local humanoid = char:WaitForChild("Humanoid")
+		
+		local raycastParams = RaycastParams.new()
+		raycastParams.FilterType = Enum.RaycastFilterType.Exclude
+		raycastParams.FilterDescendantsInstances = {char}
+		
+		local lastCF = hrp.CFrame
+		local lastGroundedCF = hrp.CFrame
+		local lastGroundedTime = os.clock()
+		local lagBackCount = 0
+		
+		local function LagBack(targetCF, reason)
+			lagBackCount += 1
+			
+			-- Force character out of fake seated states if exploiting
+			if humanoid.Sit and not humanoid.SeatPart then
+				humanoid.Sit = false
+			end
+			
+			hrp.AssemblyLinearVelocity = Vector3.zero
+			hrp.AssemblyAngularVelocity = Vector3.zero
+			hrp:PivotTo(targetCF)
+			
+			if lagBackCount >= MAX_LAG_BACKS then
+				LagBacksExceeded(plr, lagBackCount, reason)
+			end
+		end
+		
+		local connection
+		connection = RunService.Heartbeat:Connect(function(step)
+			if not char:IsDescendantOf(workspace) or humanoid.Health <= 0 then
+				connection:Disconnect()
+				return
+			end
+			
+			local currentCF = hrp.CFrame
+			local state = humanoid:GetState()
+			
+			
+			-- SEAT VALIDATION 
+			
+			-- Check if the player is legitimately attached to a real server seat
+			local realSeat = humanoid.SeatPart
+			local isLegitimatelySeated = (realSeat ~= nil and realSeat:IsA("BasePart") and realSeat:IsDescendantOf(workspace))
+			
+			-- If client claims to be seated/swimming/climbing without a real server seat object, flag or force checks
+			if isLegitimatelySeated then
+				lastCF = currentCF
+				lastGroundedCF = currentCF
+				lastGroundedTime = os.clock()
+				return
+			end
+			
+			-- Skip checks for valid swimming or climbing states(Basicly allows climbing and swimming or sitting without flying stuff typa shi)
+			if state == Enum.HumanoidStateType.Swimming or state == Enum.HumanoidStateType.Climbing then
+				lastCF = currentCF
+				lastGroundedCF = currentCF
+				lastGroundedTime = os.clock()
+				return
+			end
+			
+			
+			-- 1. SPEED CHECK
+			
+			local horizontalDistance = (Vector3.new(currentCF.Position.X, 0, currentCF.Position.Z) - Vector3.new(lastCF.Position.X, 0, lastCF.Position.Z)).Magnitude
+			local calculatedSpeed = horizontalDistance / math.max(step, 0.001)
+			
+			if calculatedSpeed > MAX_WALK_SPEED then
+				LagBack(lastCF, "Speed / Seated Speed Hack")
+				return
+			end
+			
+			
+			-- 2. Fly Check
+			
+			local groundRay = workspace:Raycast(currentCF.Position, Vector3.new(0, -RAY_CAST_DISTANCE, 0), raycastParams)
+			
+			if groundRay and groundRay.Instance.CanCollide then
+				lastGroundedCF = currentCF
+				lastGroundedTime = os.clock()
+			else
+				local airTime = os.clock() - lastGroundedTime
+				local verticalVelocity = hrp.AssemblyLinearVelocity.Y
+				
+				if airTime > MAX_AIR_TIME and verticalVelocity > -10 then
+					LagBack(lastGroundedCF, "Fly / Seated Fly Hack")
+					return
+				end
+			end
+			
+			
+			-- 3. NOCLIP CHECK
+			
+			local moveVector = (currentCF.Position - lastCF.Position)
+			if moveVector.Magnitude > 0.2 then
+				local wallRay = workspace:Raycast(lastCF.Position, moveVector, raycastParams)
+				if wallRay and wallRay.Instance.CanCollide then
+					LagBack(lastCF, "Noclip")
+					return
+				end
+			end
+			
+			lastCF = hrp.CFrame
+		end)
+	end)
+end)
+```
