@@ -4,7 +4,7 @@ kind: concept
 topics: [mobile-security, anti-cheat]
 sources:
   - wiki/sources/skills/mobile-security.md
-updated: 2026-09-13
+updated: 2026-09-17
 confidence: high
 ---
 
@@ -42,7 +42,7 @@ Keep **local indicators**, **verified attestation**, **backend decisions**, and 
 
 - **SELinux** — mandatory access control applies to root processes too. Record enforcement state, domain, build, and relevant policy denials instead of assigning universal trust or stealth ratings to framework names. (source: wiki/sources/skills/mobile-security.md)
 - **Play Integrity** — validate request details, identity, binding, and freshness on the backend before interpreting app/device/account verdicts. Research modules such as [[pif-config-generator]] and [[zamr]] catalog attestation-spoof configs for controlled testing—not proof that production backends accept them.
-- **App Attest (iOS)** — requires server verification of attestations/assertions, including challenge and counter handling; keep development and production context separate.
+- **App Attest (iOS)** — requires server verification of attestations/assertions, including challenge and counter handling; keep development and production context separate. Jailbroken-device oracle tooling such as [[aaoracled]] demonstrates userspace App-ID binding on compromised hardware—not Secure Enclave proof.
 - **Network trust configuration** — for owned-app transport tests, distinguish debug-only trust anchors from release configuration. Android Network Security Configuration defaults change with target SDK; a successful debug capture does not establish release-build trust or pinning behavior. Custom/native TLS stacks need their own contracts and evidence. See [[mobile-network-trust-evidence]].
 
 Include supported emulators, stock devices, developer builds, OS updates, and service/attestation errors as **controls**. Record unavailable evidence separately from a verified negative result.
