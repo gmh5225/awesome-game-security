@@ -10,7 +10,7 @@ confidence: medium
 
 # IDA Plugin Repository
 
-Official Hex-Rays **curated index** for discovering, installing, and sharing IDA Pro plugins—powers plugins.hex-rays.com and the built-in IDA Plugin Manager. Maintains machine-readable JSON manifests with versions, categories, licenses, and release metadata, updated by a periodic GitHub Actions sync job; Python tooling merges plugin data, mirrors archives, generates documentation sites, and produces indexer logs for maintainers. Supports author packaging standards and linting via the Hex-Rays CLI. Aimed at reverse engineers, malware analysts, and security researchers extending IDA for disassembly, decompilation, automation, and game-security workflows. (source: wiki/sources/descriptions/HexRaysSA__plugin-repository.md)
+Official Hex-Rays **curated index** for discovering, installing, and sharing IDA Pro plugins—powers [plugins.hex-rays.com](https://plugins.hex-rays.com) and the built-in IDA Plugin Manager. Maintains machine-readable JSON manifests with versions, categories, licenses, and release metadata, updated by a periodic GitHub Actions sync job; Python tooling merges plugin data, mirrors archives, generates documentation sites, and produces indexer logs and change summaries for maintainers. Tracks explicitly known and ignored plugin sources; supports author packaging standards and linting via the Hex-Rays CLI. Aimed at reverse engineers, malware analysts, and security researchers extending IDA for disassembly, decompilation, automation, and game-security workflows. (source: wiki/sources/descriptions/HexRaysSA__plugin-repository.md)
 
 Canonical upstream discovery lane beside community catalogs such as [[list-of-ida-plugins]] and [[awesome-ida-x64-olly-plugin]].
 

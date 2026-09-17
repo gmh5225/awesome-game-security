@@ -1820,6 +1820,7 @@ sources:
   - wiki/sources/descriptions/HexRaysSA__rax.md
   - wiki/sources/descriptions/HexRaysSA__ida-cyberchef.md
   - wiki/sources/descriptions/HexRaysSA__ida-claude-code-plugins.md
+  - wiki/sources/descriptions/HexRaysSA__plugin-repository.md
   - wiki/sources/descriptions/Gezine__BD-UN-JB.md
   - wiki/sources/descriptions/GLX-ILLUSION__valorant-offsets-autoupdater.md
   - wiki/sources/descriptions/DeNA__mempatch.md

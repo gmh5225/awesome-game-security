@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-17** — ingest `description:HexRaysSA/plugin-repository`: entity [[ida-plugin-repository]] (HexRaysSA; official curated IDA plugin index; JSON manifests + GitHub Actions sync; plugins.hex-rays.com + built-in Plugin Manager; Python merge/mirror/docs pipeline; known/ignored source tracking + Hex-Rays CLI packaging lint; RE/malware/game-security workflows); cited on [[overviews/reverse-engineering]]; `index.md` updated; [[overviews/game-hacking]] and entity page already carried description projection from prior readme pass.
+
 - **2026-09-17** — ingest `description:rom-weaver/rom-weaver`: entity [[rom-weaver]] (local-first Rust CLI + offline WASM PWA; ROM/disc inspect; 21 patch formats; cheat-code baking + save edit; CHD/RVZ containers; checksum verify, multi-patch chains, trim/restore; retro modding/preservation); cited on [[concepts/binary-diffing]] and [[overviews/reverse-engineering]]; `index.md` updated; [[overviews/game-hacking]] and entity page already carried description projection from prior readme pass.
 
 - **2026-09-17** — ingest `description:zodiacon/DbgPrint`: entity [[dbgprint]] (zodiacon; C++ WTL ETW GUI; OutputDebugString + kernel DbgPrint/DbgPrintEx; filter/highlight/persist; on-demand kernel debug components; Session 0; x86/x64/ARM64; Windows Kernel Explorer); cited on [[concepts/etw-threat-intelligence]] and [[overviews/reverse-engineering]]; cross-linked [[dbgviewex]]; `index.md` updated; [[overviews/windows-kernel]] and entity page already carried description projection from prior readme pass.
