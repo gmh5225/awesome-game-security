@@ -1607,6 +1607,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/jjolano/shadow
 - https://github.com/gmh5225/IOS-jailbreak--Fugu15
 - https://github.com/Kc57/iHide
+- https://github.com/regulad/aaoracled [Jailbroken iOS App Attest oracle daemon: headless DCAppAttestService attestation/assertion API for mobile integrity-bypass research]
 - https://github.com/palera1n/palera1n
 - https://github.com/checkra1n
 - https://github.com/opa334/TrollStore [jailed app]
