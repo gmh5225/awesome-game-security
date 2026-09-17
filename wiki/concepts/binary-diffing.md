@@ -5,7 +5,8 @@ topics: [reverse-engineering, anti-cheat]
 sources:
   - wiki/sources/skills/reverse-engineering.md
   - wiki/sources/descriptions/joxeankoret__diaphora.md
-updated: 2026-09-13
+  - wiki/sources/descriptions/rom-weaver__rom-weaver.md
+updated: 2026-09-17
 confidence: high
 ---
 
@@ -22,6 +23,9 @@ Structural and semantic comparison of binary builds for patch analysis, anti-che
 | [[ghidriff]] | Ghidra-based diffing; command-line and scriptable |
 | DarunGrim | Patch-analysis-focused differ |
 | [[turbodiff]] | Lightweight IDA diffing plugin |
+| [[rom-weaver]] | Retro ROM/disc patch apply/create (IPS, BPS, UPS, xdelta/VCDIFF, PPF, DCP); checksum verify and ordered multi-patch chains |
+
+Retro modding and preservation workflows also use delta patch formats (IPS/BPS/xdelta) rather than function-level diffs; [[rom-weaver]] applies and creates those patches locally across disc containers (CHD, RVZ) with checksum verification — complementary to disassembler-based differs for cartridge/disc image pipelines. (source: wiki/sources/descriptions/rom-weaver__rom-weaver.md)
 
 Game-security uses include tracking anti-cheat driver updates between versions, reviewing changed behavior and trust-boundary assumptions in supplied builds, and comparing obfuscated builds to isolate logic changes.
 
@@ -40,4 +44,4 @@ Similarity scores and decompiled differences suggest where to look—they do not
 
 ## Related
 
-[[static-runtime-evidence]] · [[binary-evidence]] · [[research-rigor]] · [[diaphora]] · [[ghidriff]] · [[turbodiff]] · [[mixed-boolean-arithmetic]] · [[control-flow-flattening]] · [[overviews/reverse-engineering]]
+[[static-runtime-evidence]] · [[binary-evidence]] · [[research-rigor]] · [[diaphora]] · [[ghidriff]] · [[turbodiff]] · [[rom-weaver]] · [[mixed-boolean-arithmetic]] · [[control-flow-flattening]] · [[overviews/reverse-engineering]]
