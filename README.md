@@ -942,6 +942,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/Col-E/Recaf [Java]
 - https://github.com/tomvita/SE-tools [Nintendo Switch]
 - https://github.com/StudentBlake/XCI-Explorer [XCI Explorer]
+- https://github.com/rom-weaver/rom-weaver [Local-first browser PWA and Rust CLI to inspect ROMs/disc images, apply and create patches, bake cheat codes, and edit saves offline]
 - https://github.com/0x5abe/vifterpreter [Rust library for parsing PlayStation 2 VIF1 DMA packets and VIF commands]
 - https://github.com/piffd0s/defcon-dreamcast-planetweb-research [DEF CON Dreamcast PlanetWeb exploit chain — Eden loading, memory-write flaw, and MIME stack overflow to run native SH-4 DOOM without a debugger]
 - https://github.com/Anonym0ose/JitDumper [A CIL method body dumper]
@@ -1692,6 +1693,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 > IDA Plugins
 - https://github.com/gmh5225/ida-plugins [List of IDA Plugins]
 - https://github.com/gmh5225/idaplugins-list [List of IDA Plugins]
+- https://github.com/HexRaysSA/plugin-repository [Official Hex-Rays JSON manifest and sync pipeline for plugins.hex-rays.com and the IDA Plugin Manager]
 - https://github.com/fr0gger/awesome-ida-x64-olly-plugin [Curated list of IDA, x64dbg, Ghidra, GDB, and OllyDbg plugins]
 - https://github.com/gmh5225/idawilli [IDA Pro resources, scripts, and configurations]
 - https://github.com/gmh5225/idasdk-collection/tree/master [IDA SDK]
