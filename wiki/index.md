@@ -507,7 +507,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [blazedumper](entities/blazedumper.md) — maintained CS:GO offset database (Akandesh; JSON + C++/C# defs; signature patterns + updater pipeline; cheat / game:csgo [Offset])
 - [BlackSignatureDriver](entities/black-signature-driver.md) — black-signature kernel driver dev + networking (gmh5225; Anti Cheat → Black Signature)
 - [Blarion AntiCheat](entities/blarion-anticheat.md) — Bedrock ScriptAPI behavior-pack AC (StarBloomMinecraft; JavaScript; 40+ combat/movement/inventory/packet modules; configurable thresholds; admin scan + `/flag` API; vanilla/BDS/LiteLoader; Anti Cheat / game:minecraft)
-- [BlastScale](entities/blastscale.md) — server-authoritative mobile puzzle backend (Java Spring Boot + Unity; deterministic move replay; chain-of-responsibility AC pipeline; exactly-once rewards; LiveOps; AtakanKeser; Anti Cheat / Open Source Anti Cheat System)
+- [BlastScale](entities/blastscale.md) — server-authoritative mobile puzzle backend (Java Spring Boot + Unity; deterministic move replay; chain-of-responsibility AC pipeline; exactly-once rewards; LiveOps/Prometheus; AtakanKeser; Anti Cheat / Open Source Anti Cheat System)
 - [BlindEye](entities/blindeye.md) — BattlEye report-path pool-alloc drop (“Packet Fucker”)
 - [Blanket](entities/blanket.md) — process hide via ActiveProcessLinks unlink + PspCidTable + NtQuerySystemInformation hook (cheat / hide)
 - [Blackout](entities/blackout.md) — BYOVD EDR/AV killer via GMER **`gmer64.sys`** (IOCTL PID terminate; Defender continuous suppression; gmh5225)

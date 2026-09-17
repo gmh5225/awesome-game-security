@@ -11,7 +11,7 @@ confidence: medium
 
 # BlastScale
 
-Production-oriented **server-authoritative mobile puzzle** backend built around a casual Unity client, used to study game security, anti-cheat design, and server-side validation at scale. (source: wiki/sources/descriptions/AtakanKeser__BlastScale.md)
+Production-oriented **server-authoritative mobile puzzle** backend built around a casual Unity client. Aimed at engineers studying game security, anti-cheat design, and server-side validation patterns for mobile games. (source: wiki/sources/descriptions/AtakanKeser__BlastScale.md)
 
 ## Stack
 

@@ -4,7 +4,8 @@ kind: concept
 topics: [anti-cheat, game-hacking]
 sources:
   - wiki/sources/skills/anti-cheat.md
-updated: 2026-09-13
+  - wiki/sources/descriptions/AtakanKeser__BlastScale.md
+updated: 2026-09-17
 confidence: high
 ---
 
@@ -54,6 +55,8 @@ Server-side replay reconstruction must:
 - Reconstruct only the sampled trajectory supported by recorded data.
 - Pair with [[research-rigor]] time/ordering checks before interpreting trajectories or latency distributions.
 
+Mobile puzzle backends such as [[blastscale]] issue level seeds and replay submitted moves through a deterministic board engine before a chain-of-responsibility pipeline validates timing, score bounds, and move sequences—treat replayed server state as **server-derived**, not client-reported scoring. (source: wiki/sources/descriptions/AtakanKeser__BlastScale.md)
+
 ## Missing-event discipline
 
 Before interpreting absent callbacks, ETW events, or input samples as evasion:
@@ -66,4 +69,4 @@ Behavioral features remain hypotheses until provenance, units, and collector cov
 
 ## Related
 
-[[ai-aimbot-detection]] · [[hardware-input-injection]] · [[research-rigor]] · [[overviews/anti-cheat]] · [[overviews/game-hacking]]
+[[ai-aimbot-detection]] · [[blastscale]] · [[hardware-input-injection]] · [[research-rigor]] · [[overviews/anti-cheat]] · [[overviews/game-hacking]]
