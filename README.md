@@ -1187,6 +1187,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/BeneficialCode/WinArk [Tool]
 - https://github.com/KSwordDEV/KSword [ARK]
 - https://github.com/zodiacon/ObjectExplorer [GUI explorer for Windows kernel objects, handles, object types, and Object Manager namespace]
+- https://github.com/zodiacon/DbgPrint [GUI viewer for user-mode OutputDebugString and kernel DbgPrint/Ex output via ETW, without registry changes or a custom driver]
 - https://github.com/kernullist/kn-diff-pool [Windows kernel Big Pool snapshot/diff tool with kernel driver and Go TUI]
 - https://github.com/kernullist/kn-live-dbg [Windows kernel live debugging — driver exposes memory primitives, user-mode TUI handles symbols, types, and UX (LiveKD-style)]
 - https://github.com/orinimron123/CVE-2026-40369-EXPLOIT [CVE-2026-40369 — arbitrary kernel increment via NtQuerySystemInformation class 253; browser sandbox escape PoC, Win11 24H2–25H2]
