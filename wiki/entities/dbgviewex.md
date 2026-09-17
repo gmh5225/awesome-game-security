@@ -20,4 +20,4 @@ Complements schema-oriented ETW browsers such as [[etw-explorer]] and cross-buil
 
 ## Related
 
-[[etw-explorer]] · [[etw-watcher]] · [[fibratus]] · [[openprocmon]] · [[blitz]] · [[tableflipper]] · [[xv]] · [[overviews/windows-kernel]] · [[overviews/reverse-engineering]] · [[etw-threat-intelligence]]
+[[dbgprint]] · [[etw-explorer]] · [[etw-watcher]] · [[fibratus]] · [[openprocmon]] · [[blitz]] · [[tableflipper]] · [[xv]] · [[overviews/windows-kernel]] · [[overviews/reverse-engineering]] · [[etw-threat-intelligence]]

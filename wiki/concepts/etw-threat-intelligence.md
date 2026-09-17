@@ -9,6 +9,7 @@ sources:
   - wiki/sources/descriptions/paranoidninja__EtwTi-Syscall-Hook.md
   - wiki/sources/descriptions/muturikaranja__disable-threat-tracing.md
   - wiki/sources/descriptions/zodiacon__EtwExplorer.md
+  - wiki/sources/descriptions/zodiacon__DbgPrint.md
   - wiki/sources/descriptions/jdu2600__EtwTi-FluctuationMonitor.md
   - wiki/sources/descriptions/jdu2600__Etw-SyscallMonitor.md
   - wiki/sources/descriptions/gmh5225__ETWHOOK-InfinityHookClass.md
@@ -22,7 +23,7 @@ sources:
   - wiki/sources/descriptions/Idov31__EtwLeakKernel.md
   - wiki/sources/descriptions/2x7EQ13__CreateProcessAsPPL.md
   - wiki/sources/descriptions/0xjbb__EyYoEtwWhereYouAt.md
-updated: 2026-09-05
+updated: 2026-09-17
 confidence: high
 ---
 
@@ -36,7 +37,7 @@ Event Tracing for Windows (ETW) provider/consumer architecture used by EDR and a
 - **Consumers** subscribe in real time (ETW sessions) or from `.etl` log files.
 - **Controllers** manage sessions (`xperf`, `tracelog`, `logman`).
 
-Key kernel providers include process/thread lifecycle, file I/O, and audit-API call streams. Schema exploration tools such as [[etw-explorer]] help map manifest fields before writing detectors. (source: wiki/sources/descriptions/zodiacon__EtwExplorer.md)
+Key kernel providers include process/thread lifecycle, file I/O, and audit-API call streams. Schema exploration tools such as [[etw-explorer]] help map manifest fields before writing detectors. (source: wiki/sources/descriptions/zodiacon__EtwExplorer.md) Live debug-string capture tools such as [[dbgprint]] subscribe via ETW to `OutputDebugString` and kernel `DbgPrint`/`DbgPrintEx` without custom drivers — useful when correlating driver IOCTL traces or AC telemetry with application debug output during kernel RE. (source: wiki/sources/descriptions/zodiacon__DbgPrint.md)
 
 Consumer-side **stack trace** fields can expose **kernel pointers** when providers emit call stacks — PoCs such as [[etwleakkernel]] start an ETW session, request provider stack data, and parse events to recover addresses for KASLR-bypass and exploit-development research. (source: wiki/sources/descriptions/Idov31__EtwLeakKernel.md)
 
@@ -75,4 +76,4 @@ Stress-testing samples such as [[disable-threat-tracing]] sit on the disable/bli
 
 ## Related
 
-[[kernel-callbacks]] · [[hvci]] · [[etw-explorer]] · [[etw-watcher]] · [[etwleakkernel]] · [[etwti-fluctuation-monitor]] · [[eyyoetwwhereyouat]] · [[etw-syscall-monitor]] · [[etw-syscall]] · [[infinityhook]] · [[etwhook-infinityhookclass]] · [[infinityhook-promax]] · [[infinityhook-latest]] · [[infinityhook-pro]] · [[infinityhookpro-main]] · [[tietwagent]] · [[threat-intelligence-consumer]] · [[etwti-syscall-hook]] · [[disable-threat-tracing]] · [[amsi-etw-patch]] · [[kernel-callback-removal]] · [[createprocessasppl]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]]
+[[kernel-callbacks]] · [[hvci]] · [[dbgprint]] · [[etw-explorer]] · [[etw-watcher]] · [[etwleakkernel]] · [[etwti-fluctuation-monitor]] · [[eyyoetwwhereyouat]] · [[etw-syscall-monitor]] · [[etw-syscall]] · [[infinityhook]] · [[etwhook-infinityhookclass]] · [[infinityhook-promax]] · [[infinityhook-latest]] · [[infinityhook-pro]] · [[infinityhookpro-main]] · [[tietwagent]] · [[threat-intelligence-consumer]] · [[etwti-syscall-hook]] · [[disable-threat-tracing]] · [[amsi-etw-patch]] · [[kernel-callback-removal]] · [[createprocessasppl]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]]
