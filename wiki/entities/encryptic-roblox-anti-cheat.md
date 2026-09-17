@@ -34,4 +34,4 @@ Targets Roblox developers who need practical **server-side cheat mitigation** wh
 
 ## Related
 
-[[overviews/anti-cheat]] · [[overviews/game-engine]] · [[shprotect-ac]] · [[advanced-anticheat]] · [[wontree-rblx-dumper]] · [[roblox-cheats]] · [[lua-obfuscator-clyde-protection]] · [[byfron-bypass]]
+[[overviews/anti-cheat]] · [[overviews/game-engine]] · [[shprotect-ac]] · [[advanced-anticheat]] · [[volcano-ac]] · [[wontree-rblx-dumper]] · [[roblox-cheats]] · [[lua-obfuscator-clyde-protection]] · [[byfron-bypass]]

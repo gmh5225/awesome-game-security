@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-17** — ingest `readme:categories`: Anti Cheat ~737 (+1; theo926/[[volcano-ac]] Roblox Luau server-side movement AC with lag-back enforcement in Open Source Anti Cheat System) / Cheat ~2816 / other major section counts stable; 41 sections; entity [[volcano-ac]]; refreshed README-map counts and Roblox server-side Luau AC scope on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], and [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
+
 - **2026-09-17** — lint (agent pass): index vs disk scan — 9 overviews, 50 concepts, 3911 entities (3970 index entries); index.md fully synced (0 missing, 0 dead, 0 duplicate entries); overview wikilink spot-check (9 pages) — 0 broken links; concept spot-check (50 pages) — 0 broken links; index.md wikilink scan — 0 broken links; 6 cross-kind slug collisions ([[game-hacking]], [[anti-cheat]], [[reverse-engineering]], [[il2cpp]], [[byovd]], [[dma]]) — expected, no repair needed; no structural edits required.
 
 - **2026-09-16** — ingest `description:Veridiff/Veridiff`: entity [[veridiff]] (Veridiff; dynamic branch-divergence engine; Frida Stalker dual-trace; Python + Rust identical APIs; LCP basic-block diff + Capstone disassembly; OLLVM CFF resync + warm-up; x86/ARM64 branch classification; license/anti-cheat branch pinpointing; Cheat / Frida); cited on [[concepts/control-flow-flattening]] and [[concepts/frida]]; `index.md` updated.
