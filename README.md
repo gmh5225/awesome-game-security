@@ -4218,6 +4218,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/Shadow-46/adaptive-boss-arena [Unity 6 boss-arena demo with assembly-enforced anti-cheat firewall that blocks AI from reading player input, plus edit-mode tests]
 - https://github.com/Timehue/ShinobiX [Live browser MMORPG with server-authoritative combat and documented auth/reward-integrity anti-cheat patterns]
 - https://github.com/aryribeiro/cobra [Production web snake game with server-side HMAC game sessions, score plausibility checks, and rate-limited leaderboard submission anti-cheat]
+- https://github.com/AtakanKeser/BlastScale [Server-authoritative mobile puzzle backend with move-replay anti-cheat, exactly-once rewards, and LiveOps tooling]
 
 > Compile Time
 - https://github.com/ManulMap/malstring [Using c++23 compile-time magic to produce obfuscated PIC strings and arrays]
