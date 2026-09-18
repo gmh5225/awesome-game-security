@@ -1387,6 +1387,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 > Android Terminal Emulator
 - https://github.com/termux/termux-app
 - https://github.com/DP-Hridayan/aShellYou [Material You Android ADB/root/shell utility (Shizuku, OTG, wireless debugging)]
+- https://github.com/iflyabd/nowifi-adb [LSPosed module enabling Android wireless debugging over mobile data or Tailscale without WiFi or hotspot]
 - https://github.com/gmh5225/neotty
 - https://github.com/jackpal/Android-Terminal-Emulator
 - https://github.com/NeoTerrm/NeoTerm
