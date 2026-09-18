@@ -58,7 +58,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Network Environment Evidence](concepts/network-environment-evidence.md) — outcome vs decision-key table, NAT/IPv6 identity boundaries, shared-network/account association, connection failure vs detection vs enforcement; KMBox Net UDP context; corroboration before attribution
 - [OBS Game Capture](concepts/obs-game-capture.md) — OBS Game/Window/Display/Virtual Camera modes; [[frame-observation-boundary]] active-path identification; YOLO training→TensorRT pipeline + AI visual capture + detection signals
 - [PatchGuard](concepts/patchguard.md)
-- [Present Hook](concepts/present-hook.md) — IDXGISwapChain::Present / wglSwapBuffers / vkQueuePresentKHR overlay path; [[frame-observation-boundary]] baseline before hook attribution; anti-detection/evasion surface; platform constraints ([[swapchain-bottleneck]]); links [[obs-game-capture]], [[draw-call-hook]], [[present-injector]]
+- [Present Hook](concepts/present-hook.md) — IDXGISwapChain::Present / wglSwapBuffers / vkQueuePresentKHR overlay path; [[frame-observation-boundary]] baseline before hook attribution; proxy-DLL post-processors such as [[opengl32-enhancer]]; anti-detection/evasion surface; platform constraints ([[swapchain-bottleneck]]); links [[obs-game-capture]], [[draw-call-hook]], [[present-injector]]
 - [Research Rigor](concepts/research-rigor.md) — evidence discipline; evidence reconciliation across generated layers; pair with domain overviews; [[ac-compat-research]] Linux kernel AC architecture feasibility / falsification framing
 - [Resource Selection](concepts/resource-selection.md) — domain routing, provenance fields, data-layer order, `repository_index.py` lookup, README maintenance convention
 - [Source NetVars](concepts/source-netvars.md) — ClientClass/RecvTable offset maps; CreateInterface exports (Source 1/2); SDK license vs shipped-binary ground truth
@@ -2703,7 +2703,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [openbarnyard](entities/openbarnyard.md) — WIP Barnyard + TOSHI 2.0 C++ reimplementation (DirectX 8/OpenGL; Premake; RE progress vs binary addresses; Detours SDK hooks, mod loading, ImGui debug; Ghidra RE workflow; Game Engine / source)
 - [openrct2](entities/openrct2.md) — open-source RollerCoaster Tycoon 2 reimplementation (cooperative multiplayer, expanded editing, scripting/plugins; CMake C++; broad platform support; Game Engine / source)
 - [opengl-3d-game-tutorial-series](entities/opengl-3d-game-tutorial-series.md) — cross-platform C++ OpenGL 3D game tutorial (Win32/Cocoa/X11; VAO/shaders/UBO; entity management + input; step-by-step engine build; README [OpenGL]; PardCode)
-- [OpenGL32 Enhancer](entities/opengl32-enhancer.md) — 32-bit opengl32.dll proxy; forwards system OpenGL + hooks wglSwapBuffers for ReShade-style compute-shader post-processing without injector (ASDAlexander77; OpenGL / Hook)
+- [OpenGL32 Enhancer](entities/opengl32-enhancer.md) — 32-bit opengl32.dll proxy; forwards system OpenGL + hooks wglSwapBuffers; OpenGL 4.3 compute-shader ReShade-style chain (FSR, SMAA/TAA, bloom, ACES, SSAO); no injector (ASDAlexander77; OpenGL / Hook)
 - [Object Explorer](entities/object-explorer.md) — GUI Object Manager namespace/handles/types browser (driver + PDB/DIA decode)
 - [OpenArk](entities/openark.md) — Qt anti-rootkit / kernel analysis (callbacks, SSDT, drivers)
 - [OpenClaw](entities/openclaw.md) — C++ Captain Claw reimplementation (Box2D; CMake/Android; Game Develop / source)
