@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-18** — ingest `description:moeskia/fuckAce`: entity [[fuck-ace]] (moeskia; Windows C/MinGW-w64 console; idle priority + last-CPU affinity + EcoQoS ProcessPowerThrottling on SGuard64/SGuardSvc64; admin + SeDebugPrivilege; auto-retry on ACE self-protection; no network/disk I/O; researchers studying ACE resource consumption; Cheat / Explore AntiCheat System:ACE); cited on [[overviews/windows-kernel]] beside [[sguard-limit]]; `index.md` updated; [[overviews/anti-cheat]], [[overviews/game-hacking]], and entity page already carried description projection from prior readme pass.
+
 - **2026-09-18** — ingest `readme:categories`: Cheat ~2822 (+1; moeskia/[[fuck-ace]] Windows ACE SGuard CPU throttling utility in Cheat / Explore AntiCheat System:ACE) / Anti Cheat ~738 / other major section counts stable; 41 sections; entity [[fuck-ace]]; refreshed README-map counts and Tencent ACE resource-mitigation scope on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/anti-cheat]], [[overviews/reverse-engineering]], and [[overviews/dma-attack]]; light `index.md` section notes (no per-category pages).
 
 - **2026-09-18** — lint (agent pass): index vs disk scan — 9 overviews, 50 concepts, 3918 entities (3977 index entries); index.md fully synced (0 missing, 0 dead, 0 duplicate entries); overview wikilink spot-check (9 pages) — 0 broken links; concept spot-check (50 pages) — 0 broken links; index.md wikilink scan — 0 broken links; 6 cross-kind slug collisions ([[game-hacking]], [[anti-cheat]], [[reverse-engineering]], [[il2cpp]], [[byovd]], [[dma]]) — expected, no repair needed; no structural edits required.
