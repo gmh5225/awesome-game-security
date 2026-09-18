@@ -11,16 +11,16 @@ confidence: medium
 
 # skid_factory
 
-**skid_factory** (wrong-commit/skid_factory) is a **Node.js orchestration framework** that connects large language models to low-level game-debugging tools through the Model Context Protocol. Written primarily in TypeScript with Lua and Python bridge scripts, it integrates **Cheat Engine**, **x64dbg**, and **Ghidra** for memory scanning, hardware write-breakpoint monitoring, pointer-chain tracing to static bases, and in-game value patching. (source: wiki/sources/descriptions/wrong-commit__skid_factory.md)
+**skid_factory** (wrong-commit/skid_factory) is a **Node.js orchestration framework** that automates video game reverse engineering and cheat client development by connecting large language models to low-level debugging tools through the Model Context Protocol. Written primarily in TypeScript with Lua and Python bridge scripts, it integrates **Cheat Engine**, **x64dbg**, and **Ghidra** to scan memory, monitor hardware write breakpoints, trace pointer chains to static base addresses, and patch in-game values. (source: wiki/sources/descriptions/wrong-commit__skid_factory.md)
 
 ## Capabilities
 
-- **Interactive REPL:** value scanning and base-address resolution workflows
-- **Advise command:** Cursor CLI–driven iterative memory discovery and patching guidance
+- **Interactive REPL:** proof-of-concept value scanning and base-address resolution workflows
+- **Advise command:** Cursor CLI–driven iterative autonomous memory discovery and patching guidance
 - **MCP bridges:** orchestrates CE/x64dbg/Ghidra instead of manual one-off scripts
 - **Target use:** offline game memory analysis, pointer-chain reconstruction, and cheat prototyping for authorized RE
 
-Sits beside agent-native labs such as [[open-reverselab]], verification-gated MCP hosts such as [[reverify]], and cross-platform pipelines such as [[n0xis]]—emphasizing **tool orchestration** across CE/x64dbg/Ghidra rather than a single static analyzer.
+Targets researchers and reverse engineers who want **LLM-assisted automation** for memory workflows rather than manual scripting. Sits beside per-tool MCP bridges such as [[cheatengine-mcp-bridge]], [[ghidra-mcp]], and [[x64dbg-mcp]], plus agent-native labs such as [[open-reverselab]], verification-gated MCP hosts such as [[reverify]], and cross-platform pipelines such as [[n0xis]]—emphasizing **multi-tool orchestration** across CE/x64dbg/Ghidra rather than a single static analyzer.
 
 ## Role in the README map
 

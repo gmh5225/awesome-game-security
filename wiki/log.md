@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-18** — ingest `description:wrong-commit/skid_factory`: entity [[skid-factory]] (Node.js MCP orchestrator; TypeScript + Lua/Python bridges; Cheat Engine/x64dbg/Ghidra memory scan, hardware write breakpoints, pointer-chain trace, patch workflows; REPL + Cursor CLI advise loop; offline game memory analysis / cheat prototyping); cited on [[overviews/reverse-engineering]]; `index.md` updated; [[overviews/game-hacking]] and entity page already carried description projection from prior readme pass.
+
 - **2026-09-18** — ingest `readme:categories`: Cheat ~2821 (+1; wrong-commit/[[skid-factory]] Node.js MCP orchestrator bridging Cheat Engine, x64dbg, and Ghidra in Cheat / RE Tools) / Anti Cheat ~738 / other major section counts stable; 41 sections; entity [[skid-factory]]; refreshed README-map counts and MCP RE-orchestration scope on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/reverse-engineering]], and [[overviews/dma-attack]]; light `index.md` section notes (no per-category pages).
 
 - **2026-09-18** — lint (agent pass): index vs disk scan — 9 overviews, 50 concepts, 3917 entities (3976 index entries); index.md fully synced (0 missing, 0 dead, 0 duplicate entries); overview wikilink spot-check (9 pages) — 0 broken links; concept spot-check (50 pages) — 0 broken links; index.md wikilink scan — 0 broken links; 6 cross-kind slug collisions ([[game-hacking]], [[anti-cheat]], [[reverse-engineering]], [[il2cpp]], [[byovd]], [[dma]]) — expected, no repair needed; no structural edits required.
