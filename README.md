@@ -921,6 +921,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/ling71671/open-reverselab [Agent-native RE lab with knowledge base, 100+ MCP tools, and APK/PE/game-cheating analysis workflows]
 - https://github.com/2akouwu/reverify [AI-assisted reverse engineering with deterministic byte-level verification via MCP server and CLI]
 - https://github.com/LargoScript/n0xis [Cross-platform Rust RE pipeline with static PE/ELF analysis, SSA decompilation, live memory scanning, hardware watchpoints, and MCP/JSON automation for game reversing]
+- https://github.com/wrong-commit/skid_factory [Node.js orchestrator that automates game reverse engineering and cheat development via MCP bridges to Cheat Engine, x64dbg, and Ghidra, with pointer-trace and memory-patch workflows]
 - https://github.com/mrexodia/ida-nexus-docker [Disposable Docker harness for IDA Pro 9.4+ with Pi and IDA Nexus — runs ordered analysis prompts in isolation and exports audit trails]
 - https://github.com/mrexodia/ida-nexus-events [Live Textual viewer for IDA Nexus /idb_events streams with database discovery, execution provenance, and colored event families for functions, types, patches, and comments]
 - https://github.com/mrexodia/retoolsync [WebSocket server and plugins (IDA, x64dbg, WinDbg, Binary Ninja, VS Code) to sync cursor navigation and goto requests across reverse-engineering sessions]
