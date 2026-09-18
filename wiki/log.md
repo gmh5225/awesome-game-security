@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-18** — ingest `description:iflyabd/nowifi-adb`: entity [[nowifi-adb]] (LSPosed module; Kotlin; wireless ADB over mobile data or Tailscale without WiFi/hotspot; framework/Settings network-check bypass; optional TCP proxy; Magisk+Zygisk; Android 15–16; mobile game analysis, anti-cheat testing, Android security research); cited on [[overviews/reverse-engineering]]; `index.md` updated; [[overviews/mobile-security]], [[overviews/game-hacking]], and entity page already carried description projection from prior readme pass.
+
 - **2026-09-18** — ingest `readme:categories`: Cheat ~2823 (+1; iflyabd/[[nowifi-adb]] LSPosed wireless ADB over mobile data/Tailscale in Cheat / Android Terminal Emulator) / Anti Cheat ~738 / other major section counts stable; 41 sections; entity [[nowifi-adb]]; refreshed README-map counts and off-network wireless-ADB scope on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/mobile-security]], [[overviews/reverse-engineering]], and [[overviews/dma-attack]]; light `index.md` section notes (no per-category pages).
 
 - **2026-09-18** — ingest `description:moeskia/fuckAce`: entity [[fuck-ace]] (moeskia; Windows C/MinGW-w64 console; idle priority + last-CPU affinity + EcoQoS ProcessPowerThrottling on SGuard64/SGuardSvc64; admin + SeDebugPrivilege; auto-retry on ACE self-protection; no network/disk I/O; researchers studying ACE resource consumption; Cheat / Explore AntiCheat System:ACE); cited on [[overviews/windows-kernel]] beside [[sguard-limit]]; `index.md` updated; [[overviews/anti-cheat]], [[overviews/game-hacking]], and entity page already carried description projection from prior readme pass.
