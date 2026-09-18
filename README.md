@@ -726,6 +726,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 
 > Hook
 - https://github.com/bruhmoment21/UniversalHookX
+- https://github.com/ASDAlexander77/opengl32_enhancer [32-bit opengl32.dll proxy that forwards OpenGL calls and hooks wglSwapBuffers for ReShade-style GPU post-processing without binary patching]
 
 ## Vulkan
 > Guide
