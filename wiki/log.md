@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-18** — lint (agent pass): index vs disk scan — 9 overviews, 50 concepts, 3917 entities (3976 index entries); index.md fully synced (0 missing, 0 dead, 0 duplicate entries); overview wikilink spot-check (9 pages) — 0 broken links; concept spot-check (50 pages) — 0 broken links; index.md wikilink scan — 0 broken links; 6 cross-kind slug collisions ([[game-hacking]], [[anti-cheat]], [[reverse-engineering]], [[il2cpp]], [[byovd]], [[dma]]) — expected, no repair needed; no structural edits required.
+
 - **2026-09-17** — ingest `description:regulad/aaoracled`: entity [[aaoracled]] (regulad; jailbroken iOS/iPadOS App Attest oracle; OracledDCPatch `devicecheckd` bundle-ID forge + REST `DCAppAttestService` keygen/attestation/assertion; Ghidra/Frida offset discovery; userspace App-ID binding on compromised hardware; anti-fraud SDK evaluation with server-side mitigation guidance; Cheat / IOS jailbreak); cited on [[concepts/mobile-trust-boundaries]]; `index.md` updated; [[overviews/mobile-security]], [[overviews/game-hacking]], and entity page already carried description projection from prior readme pass.
 
 - **2026-09-17** — ingest `readme:categories`: Cheat ~2820 (+1; regulad/[[aaoracled]] jailbroken iOS App Attest oracle daemon in Cheat / IOS jailbreak) / Anti Cheat ~738 / other major section counts stable; 41 sections; entity [[aaoracled]]; refreshed README-map counts and iOS App Attest oracle scope on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/mobile-security]], [[concepts/mobile-trust-boundaries]], [[overviews/reverse-engineering]], and [[overviews/dma-attack]]; light `index.md` section notes (no per-category pages).
