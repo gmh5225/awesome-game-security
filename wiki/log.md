@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-18** — ingest `readme:categories`: Cheat ~2823 (+1; iflyabd/[[nowifi-adb]] LSPosed wireless ADB over mobile data/Tailscale in Cheat / Android Terminal Emulator) / Anti Cheat ~738 / other major section counts stable; 41 sections; entity [[nowifi-adb]]; refreshed README-map counts and off-network wireless-ADB scope on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/mobile-security]], [[overviews/reverse-engineering]], and [[overviews/dma-attack]]; light `index.md` section notes (no per-category pages).
+
 - **2026-09-18** — ingest `description:moeskia/fuckAce`: entity [[fuck-ace]] (moeskia; Windows C/MinGW-w64 console; idle priority + last-CPU affinity + EcoQoS ProcessPowerThrottling on SGuard64/SGuardSvc64; admin + SeDebugPrivilege; auto-retry on ACE self-protection; no network/disk I/O; researchers studying ACE resource consumption; Cheat / Explore AntiCheat System:ACE); cited on [[overviews/windows-kernel]] beside [[sguard-limit]]; `index.md` updated; [[overviews/anti-cheat]], [[overviews/game-hacking]], and entity page already carried description projection from prior readme pass.
 
 - **2026-09-18** — ingest `readme:categories`: Cheat ~2822 (+1; moeskia/[[fuck-ace]] Windows ACE SGuard CPU throttling utility in Cheat / Explore AntiCheat System:ACE) / Anti Cheat ~738 / other major section counts stable; 41 sections; entity [[fuck-ace]]; refreshed README-map counts and Tencent ACE resource-mitigation scope on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/anti-cheat]], [[overviews/reverse-engineering]], and [[overviews/dma-attack]]; light `index.md` section notes (no per-category pages).
