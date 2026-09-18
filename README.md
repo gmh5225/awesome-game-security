@@ -3104,6 +3104,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 
 > Explore AntiCheat System:ACE
 - https://github.com/H3d9/sguard_limit
+- https://github.com/moeskia/fuckAce [Windows utility that throttles Tencent ACE (SGuard) processes via IDLE priority, last-CPU affinity, and EcoQoS to reduce anti-cheat overhead]
 - https://github.com/rogxo/ReadPhys
 - https://github.com/libtersafe/dfm_android_unicorn [Coordinate Decryption (Android ARM64)]
 - https://github.com/wwweeeqqu/honor-of-kings-RE-research [Honor of Kings mobile RE: KernelPatch KPM reads, Tencent ACE analysis, IL2CPP/native notes]
