@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-19** — lint (agent pass): index vs disk scan — 9 overviews, 50 concepts, 3923 entities (3982 index entries); index.md fully synced (0 missing, 0 dead, 0 duplicate entries); overview wikilink spot-check (9 pages) — 0 broken links; index.md wikilink scan — 0 broken links; no structural edits required.
+
 - **2026-09-19** — ingest `description:danielreytalan635-tech/silent-anticheat`: entity [[silent-anticheat]] (Fabric **26.2** server-side-only alert-only AC; flight/speed/reach heuristics; console + op alerts without kicks/bans/rubberbanding); cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; `index.md` updated.
 
 - **2026-09-19** — ingest `readme:categories`: Anti Cheat ~739 (+1; JoshKappler/[[laneguard]] behavioral mobile skill-game AC test bench in Stress Testing) / Cheat ~2823 / other major section counts stable; 41 sections; refreshed README-map counts and Stress Testing behavioral-bench scope on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], and [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
