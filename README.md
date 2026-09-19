@@ -5088,6 +5088,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/xenia-project/xenia [Xbox 360 Emulator Research Project]
 - https://github.com/wmarti/xenia-mac [MacOS Port of the Xbox 360 Emulator]
 - https://github.com/rexdex/recompiler [Porting Xbox360 executables to Windows]
+- https://github.com/andeecollard/jsrf-recomp [WIP static recompilation of Jet Set Radio Future (Xbox XBE) to native macOS, built on sp00nznet/xboxrecomp]
 - https://github.com/IcyModz420/X360GameHack2025 [Xbox 360/OG Xbox all-in-one XEX/XBE/XISO/PKG/GOD patching tool for RGH/JTAG and Bad Update]
 - https://github.com/exploits-forsale/collateral-damage [Kernel exploit for Xbox SystemOS using CVE-2024-30088]
 - https://github.com/Byrom90/XenonDumper [Dumps files & data required to use the Xenon Xbox 360 Low Level Emulator]
