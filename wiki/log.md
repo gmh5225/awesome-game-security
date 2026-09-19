@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-19** — ingest `description:brendan-duncan/gpu_inspector`: entity [[gpu-inspector]] (cross-platform Electron/C++ GPU frame debugger; Vulkan/D3D12/Metal/Android; shader edit, pixel history, render graphs, WebGPU, MCP plugin; game-dev/graphics/RE audience); cited on [[overviews/graphics-api]] and [[overviews/reverse-engineering]]; [[overviews/game-hacking]] and entity page already carried description projection from prior readme pass; `index.md` updated.
+
 - **2026-09-19** — ingest `readme:categories`: Cheat ~2825 (+1; brendan-duncan/[[gpu-inspector]] native Vulkan/D3D12/Metal/Android GPU frame capture and graphics debugger in Cheat / Debugging) / Anti Cheat ~739 / other major section counts stable; 41 sections; entity [[gpu-inspector]]; refreshed README-map counts and GPU frame-debug scope on [[overviews/overview]], [[overviews/graphics-api]], [[overviews/game-hacking]], [[overviews/reverse-engineering]], and [[overviews/dma-attack]]; light `index.md` section notes (no per-category pages).
 
 - **2026-09-19** — ingest `description:PoP-Lin/IDAPro-MuiLs`: entity [[idapro-muils]] (PoP-Lin; IDAPython + PySide6 scoped Qt dark theme for IDA Pro 9.3; live preview; persistent fonts/accent/density; Windows 11; Cheat / IDA themes); cited on [[overviews/game-hacking]]; `index.md` updated; [[overviews/reverse-engineering]] and entity page already carried description projection from prior readme pass.

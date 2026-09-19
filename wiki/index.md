@@ -1664,7 +1664,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [gltut](entities/gltut.md) — OpenGL tutorial (C++ / XML docs; Renderer / OpenGL Render)
 - [gnn-deobfuscation](entities/gnn-deobfuscation.md) — GNN-based MBA deobfuscation (LostOxygen; Python; training/testing pipelines; Loki/MBABlast/MBAObfuscator datasets by variable count and operation depth; ML simplification research; Cheat Mixed boolean-arithmetic)
 - [gpt-wpre](entities/gpt-wpre.md) — Ghidra+GPT whole-program RE (ghidra_bridge decomp/call graph → bottom-up function summaries; ChatGPT)
-- [GPU Inspector](entities/gpu-inspector.md) — cross-platform GPU frame capture and graphics debugger (Vulkan/D3D12/Metal/Android; shader edit, pixel history, validation, render graphs; WebGPU + MCP plugin; brendan-duncan; Cheat / Debugging)
+- [GPU Inspector](entities/gpu-inspector.md) — cross-platform GPU frame capture and graphics debugger (Vulkan/D3D12/Metal/Android; TypeScript/Electron + C++ layers; shader edit, pixel history, validation, render graphs; WebGPU + MCP plugin; game-dev/graphics/RE audience; brendan-duncan; Cheat / Debugging)
 - [GPU_ShellCode](entities/gpu-shellcode.md) — NVIDIA GPU-resident shellcode staging PoC (CUDA + MinHook; payload in VRAM during idle; VEH restore to RX pages; memory hiding / AC evasion research; H1d3r)
 - [grafana-final-scanner](entities/grafana-final-scanner.md) — Grafana CVE scanner (path traversal/SSRF/auth bypass/info disclosure; version fingerprinting + config analysis; HTML/CSV/JSON reports; Cheat / RE Tools)
 - [GRR Rapid Response](entities/grr.md) — Google remote live forensics (Python server + HTTP agents; fleet artifact/memory/registry collection; IS forensics)

@@ -370,6 +370,7 @@ sources:
   - wiki/sources/descriptions/vmguard__dwm-window-capture.md
   - wiki/sources/descriptions/TheCruZ__nvidiaCapture.md
   - wiki/sources/descriptions/BUNNY-19C__DLSSG-30s-manager.md
+  - wiki/sources/descriptions/brendan-duncan__gpu_inspector.md
 updated: 2026-09-19
 confidence: high
 ---
@@ -450,6 +451,8 @@ Select repository tools by the evidence required—report API/backend, driver, c
 | Frame capture / shader debug | [[gpu-inspector]] (Vulkan/D3D12/Metal/Android; shader edit, pixel history, validation, MCP analysis), RenderDoc (multi-API frame debugger), PIX, NVIDIA Nsight |
 | API misuse diagnostics | Vulkan validation layers (preserve VUIDs, SDK/layer versions—a validation finding is not an anti-abuse verdict) |
 | Compatibility / translation | dxwrapper, Wine/DXVK layers—verify active backend before hook attribution |
+
+Cross-platform frame capture via [[gpu-inspector]] (brendan-duncan; TypeScript/Electron + C++ capture layers; shader debug/edit, pixel history, validation, render graphs, WebGPU browser capture, MCP Claude Code analysis) supports rendering-pipeline and GPU command-flow study for game developers and reverse engineers. (source: wiki/sources/descriptions/brendan-duncan__gpu_inspector.md)
 
 Windows documents `SwapBuffers` through GDI; do not assume a similarly named wrapper or hook-library symbol is the platform contract.
 
