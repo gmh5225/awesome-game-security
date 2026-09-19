@@ -1,0 +1,494 @@
+Project Path: arc_danielreytalan635-tech_silent-anticheat_8qpv124s
+
+Source Tree:
+
+```txt
+arc_danielreytalan635-tech_silent-anticheat_8qpv124s
+├── README.md
+├── build.gradle
+├── gradle.properties
+├── settings.gradle
+└── src
+    └── main
+        ├── java
+        │   └── com
+        │       └── example
+        │           └── silentanticheat
+        │               ├── AlertUtil.java
+        │               ├── PlayerCheckData.java
+        │               ├── SilentAntiCheat.java
+        │               └── checks
+        │                   ├── MovementCheckListener.java
+        │                   └── ReachCheckListener.java
+        └── resources
+            └── fabric.mod.json
+
+```
+
+`README.md`:
+
+```md
+# Silent AntiCheat
+
+Server-side-only, alert-only anti-cheat for Minecraft 26.2 (Fabric).
+
+- Never kicks, bans, or rubberbands anyone.
+- Only sends alerts to the server console and to online ops (dark red, bold chat messages).
+- Checks: Flight/Hover, Speed/Teleport, Reach (>5 blocks).
+- Runs entirely server-side via the `server` entrypoint — regular players connecting
+  to your server do not need to install anything.
+
+## Before you build
+
+Versions move fast on 26.x — double check these against
+https://fabricmc.net/develop/ and bump `gradle.properties` if newer ones exist:
+
+- `loader_version` (currently pinned to 0.19.3 — the latest verified release at time of writing)
+- `fabric_version`
+- `loom_version`
+
+Requires **JDK 25** (Minecraft 26.x raised the minimum from 21).
+
+## Building
+
+```
+./gradlew build
+```
+
+or just push to `main` / open a PR — the included GitHub Actions workflow
+(`.github/workflows/build.yml`) builds the jar automatically and uploads it
+as a workflow artifact.
+
+The finished jar lands in `build/libs/`.
+
+## Tuning
+
+`MovementCheckListener` and `ReachCheckListener` have their thresholds as
+constants at the top of each file (`MAX_AIRBORNE_TICKS`, `MAX_DISTANCE_PER_TICK`,
+`MAX_REACH_DISTANCE`). Adjust them to fit your server's allowed potion effects,
+plugins, and TPS stability.
+
+```
+
+`build.gradle`:
+
+```gradle
+plugins {
+    id 'net.fabricmc.fabric-loom' version '1.17.21'
+    id 'maven-publish'
+}
+
+version = '1.0.0'
+group = 'com.example'
+
+base {
+    archivesName = 'silent-anticheat'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    minecraft 'com.mojang:minecraft:26.2'
+    implementation 'net.fabricmc:fabric-loader:0.19.5'
+    implementation 'net.fabricmc.fabric-api:fabric-api:0.157.0+26.2'
+}
+
+processResources {
+    inputs.property 'version', project.version
+
+    filesMatching('fabric.mod.json') {
+        expand 'version': project.version
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.release = 25
+}
+
+java {
+    withSourcesJar()
+    sourceCompatibility = JavaVersion.VERSION_25
+    targetCompatibility = JavaVersion.VERSION_25
+}
+
+jar {
+    from('LICENSE') {
+        rename { name -> "${name}_silent-anticheat" }
+    }
+}
+
+```
+
+`gradle.properties`:
+
+```properties
+plugins {
+    id 'net.fabricmc.fabric-loom' version '1.7-SNAPSHOT'
+    id 'maven-publish'
+}
+
+version = '1.0.0'
+group = 'com.example'
+
+base {
+    archivesName = 'silent-anticheat'
+}
+
+repositories {
+    maven { url = "https://fabricmc.net" }
+    mavenCentral()
+}
+
+dependencies {
+    minecraft "com.mojang:minecraft:1.21.1"
+    mappings "net.fabricmc:yarn:1.21.1+build.2:v2"
+    modImplementation "net.fabricmc:fabric-loader:0.19.5"
+    modImplementation "net.fabricmc.fabric-api:fabric-api:0.102.0+1.21.1"
+}
+
+processResources {
+    inputs.property "version", project.version
+
+    filesMatching("fabric.mod.json") {
+        expand "version": project.version
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    it.options.release = 21
+}
+
+java {
+    withSourcesJar()
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
+}
+
+```
+
+`settings.gradle`:
+
+```gradle
+pluginManagement {
+    repositories {
+        maven {
+            name = 'Fabric'
+            url = 'https://maven.fabricmc.net/'
+        }
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+
+rootProject.name = 'silent-anticheat'
+
+```
+
+`src/main/java/com/example/silentanticheat/AlertUtil.java`:
+
+```java
+package com.example.silentanticheat;
+
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerPlayer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+/**
+ * Central place for sending anti-cheat alerts.
+ * Alerts NEVER take punitive action -- console log + op-only chat message, nothing else.
+ */
+public final class AlertUtil {
+
+    public static final Logger LOGGER = LoggerFactory.getLogger("SilentAntiCheat");
+
+    private static final Style ALERT_STYLE = Style.EMPTY
+            .withColor(ChatFormatting.DARK_RED)
+            .withBold(true);
+
+    private AlertUtil() {
+    }
+
+    /**
+     * Logs to console and pings every online op with a styled chat message.
+     */
+    public static void alert(MinecraftServer server, ServerPlayer suspect, String checkName, String detail) {
+        String suspectName = suspect.getName().getString();
+
+        String consoleMessage = "[SilentAntiCheat] " + suspectName
+                + " flagged " + checkName + " - " + detail;
+
+        LOGGER.warn(consoleMessage);
+
+        Component opMessage = Component.literal("[AntiCheat] " + suspectName
+                        + " failed " + checkName + " check: " + detail)
+                .setStyle(ALERT_STYLE);
+
+        for (ServerPlayer online : server.getPlayerList().getPlayers()) {
+            // Permission level 2 == /op default. Use the server's operator list directly.
+            if (server.getPlayerList().isOp(online.nameAndId())) {
+                online.sendSystemMessage(opMessage);
+            }
+        }
+    }
+}
+
+```
+
+`src/main/java/com/example/silentanticheat/PlayerCheckData.java`:
+
+```java
+package com.example.silentanticheat;
+
+import net.minecraft.world.phys.Vec3;
+
+/**
+ * Per-player rolling state used by the checks between ticks.
+ */
+public class PlayerCheckData {
+
+    public Vec3 lastPosition;
+    public int airborneTicks = 0;
+    public boolean flightAlertSent = false;
+
+    public PlayerCheckData(Vec3 initialPosition) {
+        this.lastPosition = initialPosition;
+    }
+}
+
+```
+
+`src/main/java/com/example/silentanticheat/SilentAntiCheat.java`:
+
+```java
+package com.example.silentanticheat;
+
+import com.example.silentanticheat.checks.MovementCheckListener;
+import com.example.silentanticheat.checks.ReachCheckListener;
+import net.fabricmc.api.DedicatedServerModInitializer;
+
+public class SilentAntiCheat implements DedicatedServerModInitializer {
+
+    @Override
+    public void onInitializeServer() {
+        AlertUtil.LOGGER.info("[SilentAntiCheat] Initializing -- silent, alert-only detection active.");
+
+        MovementCheckListener.register();
+        ReachCheckListener.register();
+
+        AlertUtil.LOGGER.info("[SilentAntiCheat] Flight, speed/teleport, and reach checks registered.");
+    }
+}
+
+```
+
+`src/main/java/com/example/silentanticheat/checks/MovementCheckListener.java`:
+
+```java
+package com.example.silentanticheat.checks;
+
+import com.example.silentanticheat.AlertUtil;
+import com.example.silentanticheat.PlayerCheckData;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.Vec3;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+
+/**
+ * Tracks per-tick player movement for two checks:
+ *  - Flight/Hover: too many consecutive airborne ticks with no legitimate reason.
+ *  - Speed/Teleport: moved further in one tick than should be legally possible.
+ *
+ * These thresholds are deliberately conservative to avoid false positives; tune
+ * them to your server's allowed potion effects / mods before relying on them.
+ */
+public final class MovementCheckListener {
+
+    private static final Map<UUID, PlayerCheckData> DATA = new HashMap<>();
+
+    // Consecutive ticks of unexplained airtime before we alert (100 ticks = 5s).
+    private static final int MAX_AIRBORNE_TICKS = 100;
+
+    // Blatant single-tick displacement that is never legitimate (teleport hacks,
+    // extreme speed hacks). Real vanilla movement, even sprint-jumping with a
+    // Speed II potion, stays well under this.
+    private static final double MAX_DISTANCE_PER_TICK = 10.0;
+
+    private MovementCheckListener() {
+    }
+
+    public static void register() {
+        ServerTickEvents.END_SERVER_TICK.register(MovementCheckListener::onServerTick);
+    }
+
+    private static void onServerTick(MinecraftServer server) {
+        for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+            PlayerCheckData data = DATA.computeIfAbsent(player.getUUID(), id -> new PlayerCheckData(player.position()));
+
+            Vec3 currentPos = player.position();
+            double distanceMoved = currentPos.distanceTo(data.lastPosition);
+
+            checkSpeedAndTeleport(server, player, distanceMoved);
+            checkFlight(server, player, data);
+
+            data.lastPosition = currentPos;
+        }
+
+        // Clean up disconnected players so the map doesn't grow forever.
+        DATA.keySet().removeIf(uuid -> server.getPlayerList().getPlayer(uuid) == null);
+    }
+
+    private static void checkSpeedAndTeleport(MinecraftServer server, ServerPlayer player, double distanceMoved) {
+        if (player.isFallFlying() || player.getVehicle() != null || player.isSpectator()) {
+            return; // Elytra, minecarts/boats, and spectators legitimately cover huge distances.
+        }
+
+        if (distanceMoved > MAX_DISTANCE_PER_TICK) {
+            AlertUtil.alert(server, player, "Speed/Teleport",
+                    String.format("moved %.2f blocks in a single tick", distanceMoved));
+        }
+    }
+
+    private static void checkFlight(MinecraftServer server, ServerPlayer player, PlayerCheckData data) {
+        if (isExemptFromFlightCheck(player)) {
+            data.airborneTicks = 0;
+            data.flightAlertSent = false;
+            return;
+        }
+
+        if (player.onGround()) {
+            data.airborneTicks = 0;
+            data.flightAlertSent = false;
+            return;
+        }
+
+        data.airborneTicks++;
+
+        if (data.airborneTicks >= MAX_AIRBORNE_TICKS && !data.flightAlertSent) {
+            AlertUtil.alert(server, player, "Flight/Hover",
+                    "airborne for " + data.airborneTicks + " consecutive ticks with no legitimate cause");
+            data.flightAlertSent = true; // avoid re-alerting every tick while still airborne
+        }
+    }
+
+    private static boolean isExemptFromFlightCheck(ServerPlayer player) {
+        if (player.getAbilities().flying) return true;          // Creative/Spectator fly
+        if (player.isFallFlying()) return true;                  // Elytra
+        if (player.onClimbable()) return true;                   // Ladders, vines
+        if (player.isInWater() || player.isInLava()) return true;
+        if (player.isSleeping()) return true;
+        if (player.getVehicle() != null) return true;
+        if (player.isSpectator()) return true;
+
+        BlockPos feetPos = player.blockPosition();
+        BlockState feetState = player.level().getBlockState(feetPos);
+        BlockState belowState = player.level().getBlockState(feetPos.below());
+
+        if (feetState.is(Blocks.COBWEB) || belowState.is(Blocks.COBWEB)) return true;
+        if (feetState.is(Blocks.SCAFFOLDING) || belowState.is(Blocks.SCAFFOLDING)) return true;
+
+        return false;
+    }
+}
+
+```
+
+`src/main/java/com/example/silentanticheat/checks/ReachCheckListener.java`:
+
+```java
+package com.example.silentanticheat.checks;
+
+import com.example.silentanticheat.AlertUtil;
+import net.fabricmc.fabric.api.event.player.AttackEntityCallback;
+import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.phys.Vec3;
+
+/**
+ * Flags attacks or block breaks performed from further than 5 blocks away.
+ * This is a detection-only listener -- it never cancels the event.
+ */
+public final class ReachCheckListener {
+
+    private static final double MAX_REACH_DISTANCE = 5.0;
+
+    private ReachCheckListener() {
+    }
+
+    public static void register() {
+        AttackEntityCallback.EVENT.register((player, level, hand, entity, hitResult) -> {
+            if (player instanceof ServerPlayer serverPlayer) {
+                Vec3 eyePos = serverPlayer.getEyePosition();
+                double distance = eyePos.distanceTo(entity.position());
+
+                if (distance > MAX_REACH_DISTANCE) {
+                    AlertUtil.alert(level.getServer(), serverPlayer, "Reach (Attack)",
+                            String.format("attacked an entity from %.2f blocks away", distance));
+                }
+            }
+            return InteractionResult.PASS;
+        });
+
+        PlayerBlockBreakEvents.BEFORE.register((level, player, pos, state, blockEntity) -> {
+            if (player instanceof ServerPlayer serverPlayer) {
+                Vec3 eyePos = serverPlayer.getEyePosition();
+                Vec3 blockCenter = new Vec3(
+                        pos.getX() + 0.5,
+                        pos.getY() + 0.5,
+                        pos.getZ() + 0.5
+                );
+                double distance = eyePos.distanceTo(blockCenter);
+
+                if (distance > MAX_REACH_DISTANCE) {
+                    AlertUtil.alert(level.getServer(), serverPlayer, "Reach (Block Break)",
+                            String.format("broke a block from %.2f blocks away", distance));
+                }
+            }
+            return true; // Never cancel -- detection only.
+        });
+    }
+}
+
+```
+
+`src/main/resources/fabric.mod.json`:
+
+```json
+{
+  "schemaVersion": 1,
+  "id": "silent-anticheat",
+  "version": "${version}",
+  "name": "Silent AntiCheat",
+  "description": "Server-side-only, alert-only anti-cheat. Never kicks, bans, or rubberbands -- flags suspicious flight, speed, and reach to console and ops.",
+  "authors": ["YourName"],
+  "contact": {
+    "homepage": "https://github.com/yourname/silent-anticheat"
+  },
+  "license": "MIT",
+  "environment": "*",
+  "entrypoints": {
+    "server": [
+      "com.example.silentanticheat.SilentAntiCheat"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=0.19.3",
+    "minecraft": "~26.2",
+    "fabric-api": "*"
+  }
+}
+
+```
