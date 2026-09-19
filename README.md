@@ -1694,6 +1694,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/gmh5225/ida-dark-plus [Dark+ Theme]
 - https://github.com/gmh5225/long_night
 - https://github.com/gmh5225/IdaThemer
+- https://github.com/PoP-Lin/IDAPro-MuiLs [Modern Windows UI theme plugin for IDA Pro 9.3 with scoped Qt styling, live preview, and persistent appearance settings]
 
 > IDA Plugins
 - https://github.com/gmh5225/ida-plugins [List of IDA Plugins]
