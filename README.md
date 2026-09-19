@@ -4426,6 +4426,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/enis1enis2/WindfallAntiCheatF [Minecraft Fabric packet-based anti-cheat with combat/movement checks and Geyser/Bedrock compatibility]
 - https://github.com/IamFriendly0242u/The-Dreamers-Guards [Fabric server/client anti-cheat suite with mod blacklist scanning, encrypted auth, progressive punishments, and Discord alerts]
 - https://github.com/EliGamer154/CheatCheck [Fabric server-side Minecraft mod with player reporting, /cheatcheck spectate moderation, safemode, and tempban toolkit for vanilla clients]
+- https://github.com/danielreytalan635-tech/silent-anticheat [Fabric server-side-only Minecraft anti-cheat that logs flight, speed, and reach violations to console and ops without kicks or rubber-banding]
 - https://github.com/enis1enis2/Windfall-AntiCheat [Open-source Minecraft Spigot/Paper/Folia packet-based anti-cheat with combat/movement/inventory checks]
 - https://github.com/Gitex68/Katapult-AntiCheat [NeoForge 1.21.1 client/server Minecraft mod enforcing SHA-256 checksums on client mods and resource packs with live whitelist management]
 - https://github.com/sodium-CrispyWafer/CrispyWafer-Anti-Cheat-Assistant-WaferACA [Minecraft Forge 1.20.1 client anti-cheat mod that detects other players' installed client mods and alerts when known cheat mods (e.g., Gun Tracker) are present]
