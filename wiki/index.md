@@ -3294,6 +3294,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [spf-ghidra-pattern-helper](entities/spf-ghidra-pattern-helper.md) — Ghidra script: SPF-style byte signature generate/search (Pattern Generator/Finder; wildcards/ranges/alternation; SPF-Framework PatternFinder compat; ATS/ETS2 plugin RE; TrackAndTruckDevs)
 - [SignToolEx](entities/signtoolex.md) — Sign Leaked Cert; expired/leaked Authenticode signing; no timestamp spoofing (Anti Cheat → Sign Tools)
 - [SignToolGUI](entities/signtoolgui.md) — Windows Forms signtool.exe GUI (cert store / PFX / Azure Trusted Signing; batch sign; Anti Cheat → Sign Tools)
+- [Silent AntiCheat](entities/silent-anticheat.md) — Fabric server-side-only Minecraft **26.2** alert-only AC mod (Java; per-tick movement + reach checks for flight/speed/teleport; console + operator alerts; no kicks/bans/rubberband; tunable thresholds; no client mod; danielreytalan635-tech; Anti Cheat / game:minecraft)
 - [SilentMoonwalk](entities/silent-moonwalk.md) — TRUE call-stack spoofer PoC from joint stack-spoofing research (klezVirus; Cheat Spoof Stack)
 - [Silent Packer](entities/silent-packer.md) — pure C ELF/PE packer (section insert, code caves, text infection; XOR/AES; loader/asm unpack stub; RE/obfuscation/defensive packed-binary study; Anti Cheat → Binary Packer)
 - [SJCAM](entities/sjcam.md) — SJ4000 Air (Allwinner V3) firmware RE; AVIOCTRL TCP client; Lelouch Android ARM CFW; EGON/BCL1 parsers; CVE-2026-52656 PoC
