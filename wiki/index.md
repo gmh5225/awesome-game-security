@@ -63,7 +63,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Resource Selection](concepts/resource-selection.md) — domain routing, provenance fields, data-layer order, `repository_index.py` lookup, README maintenance convention
 - [Source NetVars](concepts/source-netvars.md) — ClientClass/RecvTable offset maps; CreateInterface exports (Source 1/2); SDK license vs shipped-binary ground truth
 - [Stack Spoofing](concepts/stack-spoofing.md) — synthetic return stacks vs RtlWalkFrameChain / unwind validation
-- [Static–Runtime Evidence](concepts/static-runtime-evidence.md) — artifact baseline (hash/format/arch/tool/environment/addresses); static inference vs runtime observation; protection-induced uncertainty labeling; pairs [[binary-evidence]] question tables
+- [Static–Runtime Evidence](concepts/static-runtime-evidence.md) — artifact baseline (hash/format/arch/tool/environment/addresses); static inference vs runtime observation; protection-induced uncertainty labeling; reference-trace validation ([[jsrf-recomp]] diagnostics vs emulator traces); pairs [[binary-evidence]] question tables
 - [Unreal Object Model](concepts/unreal-object-model.md) — UObject hierarchy; reflection vs native layout; GObjects/GNames/GWorld; baseline prerequisites + [[dumper-7]] SDK workflow
 - [Vanguard](concepts/vanguard.md)
 - [World-to-Screen](concepts/world-to-screen.md) — 3D view-matrix projection for ESP/aim FOV; client-state observation + graphics/composition defensive context
@@ -2050,7 +2050,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [jmap](entities/jmap.md) — UE4/UE5 .uasset/.umap dependency graphs (reflection data / asset structure)
 - [joshoengine-native](entities/joshoengine-native.md) — C++ native 2D OpenGL engine (vectors/rectangles/circles; cross-platform API; VS build artifacts; roadmap shaders/physics/mobile; Game Engine / source; Sirkles)
 - [job_communication](entities/job-communication.md) — job-object / silo `NtQueryInformationJobObject` Ring0↔Ring3 PoC (gmh5225; cheat / driver communication)
-- [jsrf-recomp](entities/jsrf-recomp.md) — OG Xbox XBE static recompilation to native macOS ARM64 (Jet Set Radio Future; xboxrecomp fork; NV2A/MCPX from xemu; D3D8/DirectSound/controller layers; Xbox)
+- [jsrf-recomp](entities/jsrf-recomp.md) — OG Xbox XBE static recompilation to native macOS ARM64 (Jet Set Radio Future; xboxrecomp fork; NV2A/MCPX from xemu; D3D8/DirectSound/controller layers; diagnostics harness vs emulator traces; preservation/RE)
 - [JinYongLegend](entities/jynew.md) — Unity wuxia RPG framework with modding (Game Develop / Unity source)
 - [jumpy](entities/jumpy.md) — Rust tactical 2D multiplayer shooter (asset-driven maps/characters/items; cross-platform; Pixels style; Game Engine / source)
 - [jupyter-mcp-server](entities/jupyter-mcp-server.md) — MCP server for Jupyter notebooks (create/read/edit/execute; stdio/streamable HTTP; local Jupyter/JupyterHub/Colab; Game Develop / MCP for Jupyter)
