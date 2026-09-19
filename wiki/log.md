@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-19** — ingest `readme:categories`: Anti Cheat ~739 (+1; JoshKappler/[[laneguard]] behavioral mobile skill-game AC test bench in Stress Testing) / Cheat ~2823 / other major section counts stable; 41 sections; refreshed README-map counts and Stress Testing behavioral-bench scope on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], and [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
+
 - **2026-09-19** — ingest `description:andeecollard/jsrf-recomp`: entity [[jsrf-recomp]] (specialized xboxrecomp fork; OG Xbox XBE→native macOS ARM64; replacement kernel + NV2A/MCPX from xemu; D3D8/DirectSound/controller layers; extensive diagnostics harness vs reference emulator traces; Xbox preservation/static recomp/RE); cited on [[concepts/static-runtime-evidence]] and [[overviews/reverse-engineering]]; `index.md` updated; [[overviews/game-hacking]] and entity page already carried description projection from prior readme pass.
 
 - **2026-09-19** — ingest `readme:categories`: Xbox ~9 (+1; andeecollard/[[jsrf-recomp]] OG Xbox XBE static recompilation of Jet Set Radio Future to native macOS ARM64 in Xbox) / Cheat ~2823 / Anti Cheat ~738 / OpenGL ~4 / other major section counts stable; 41 sections; entity [[jsrf-recomp]]; refreshed README-map counts and OG Xbox static-recomp scope on [[overviews/overview]], [[overviews/game-hacking]], and [[overviews/reverse-engineering]]; corrected OpenGL ~4 drift on [[overviews/overview]]; light `index.md` section notes (no per-category pages).
