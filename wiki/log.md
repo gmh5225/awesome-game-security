@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-19** — ingest `description:PoP-Lin/IDAPro-MuiLs`: entity [[idapro-muils]] (PoP-Lin; IDAPython + PySide6 scoped Qt dark theme for IDA Pro 9.3; live preview; persistent fonts/accent/density; Windows 11; Cheat / IDA themes); cited on [[overviews/game-hacking]]; `index.md` updated; [[overviews/reverse-engineering]] and entity page already carried description projection from prior readme pass.
+
 - **2026-09-19** — ingest `readme:categories`: Cheat ~2824 (+1; PoP-Lin/[[idapro-muils]] IDA Pro 9.3 scoped Qt UI theme in Cheat / IDA themes) / Anti Cheat ~739 / other major section counts stable; 41 sections; entity [[idapro-muils]]; refreshed README-map counts and IDA theme scope on [[overviews/overview]], [[overviews/reverse-engineering]], [[overviews/game-hacking]], and [[overviews/dma-attack]]; light `index.md` section notes (no per-category pages).
 
 - **2026-09-19** — lint (agent pass): index vs disk scan — 9 overviews, 50 concepts, 3923 entities (3982 index entries); index.md fully synced (0 missing, 0 dead, 0 duplicate entries); overview wikilink spot-check (9 pages, 11841 links) — 0 broken links; concept spot-check (50 pages, 2283 links) — 0 broken links; index.md wikilink scan — 0 broken links; 6 cross-kind slug collisions ([[game-hacking]], [[anti-cheat]], [[reverse-engineering]], [[il2cpp]], [[byovd]], [[dma]]) — expected, no repair needed; no structural edits required.
