@@ -1376,6 +1376,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/Veridiff/Veridiff [Frida Stalker dual-trace engine that pinpoints the branch where two native runs diverge, for anti-cheat checks and OLLVM analysis]
 - https://github.com/1013503897/Morphida [Polymorphic anti-detection Android arm64 frida-server builds that morph static fingerprints per release]
 - https://github.com/astra1dev/MalumMenu-Android [Among Us Android cheat menu using Frida and frida-il2cpp-bridge]
+- https://github.com/abcd123rft/terraria-android-modding [Documented Android Terraria IL2CPP modding skill plus Frida/JsHook injectable mod menu: il2cpp-by-name hooks, system-UI overlay menus, and offline icon extraction tooling]
 - https://github.com/AshrafMorningstar/hayday-bot [Frida-based Hay Day automation with guest ARM64 libg.so hooking on LDPlayer/Houdini and Promon SHIELD/Quago anti-cheat bypass]
 - https://github.com/quarkslab/android-hardware-attestation-demo [End-to-end PoC bypassing backend hardware Key Attestation by Frida-hooking KeystoreAttestation.generateAttestedKey and relaying the backend nonce to a clean, bootloader-locked device that returns a genuine TEE/StrongBox chain — no TEE tampering or forged certs]
 
