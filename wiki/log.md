@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-20** — lint (agent pass): index vs disk scan — 9 overviews, 50 concepts, 3925 entities (3984 index entries); index.md fully synced (0 missing, 0 dead, 0 duplicate entries); overview wikilink spot-check (9 pages, 11852 links) — 0 broken links; concept spot-check (50 pages, 2283 links) — 0 broken links; index.md wikilink scan — 0 broken links; 6 cross-kind slug collisions ([[game-hacking]], [[anti-cheat]], [[reverse-engineering]], [[il2cpp]], [[byovd]], [[dma]]) — expected, no repair needed; no structural edits required.
+
 - **2026-09-19** — ingest `description:brendan-duncan/gpu_inspector`: entity [[gpu-inspector]] (cross-platform Electron/C++ GPU frame debugger; Vulkan/D3D12/Metal/Android; shader edit, pixel history, render graphs, WebGPU, MCP plugin; game-dev/graphics/RE audience); cited on [[overviews/graphics-api]] and [[overviews/reverse-engineering]]; [[overviews/game-hacking]] and entity page already carried description projection from prior readme pass; `index.md` updated.
 
 - **2026-09-19** — ingest `readme:categories`: Cheat ~2825 (+1; brendan-duncan/[[gpu-inspector]] native Vulkan/D3D12/Metal/Android GPU frame capture and graphics debugger in Cheat / Debugging) / Anti Cheat ~739 / other major section counts stable; 41 sections; entity [[gpu-inspector]]; refreshed README-map counts and GPU frame-debug scope on [[overviews/overview]], [[overviews/graphics-api]], [[overviews/game-hacking]], [[overviews/reverse-engineering]], and [[overviews/dma-attack]]; light `index.md` section notes (no per-category pages).
