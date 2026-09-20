@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-20** — ingest `description:noahware/kernemul`: entity [[kernemul]] (cross-platform C++ x64/ARM64 kernel+usermode emulator; ~380 kernel APIs; WHP/Unicorn; PDB ntoskrnl 26100; premade guest FS; RE / kernel-driver / anti-cheat sandbox); cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]]; [[overviews/anti-cheat]], [[overviews/game-hacking]], and entity page already carried description projection from prior readme pass; `index.md` updated.
+
 - **2026-09-20** — ingest `readme:categories`: Windows Emulator ~8 (+1; noahware/[[kernemul]] x64/ARM64 kernel+usermode driver emulator with WHP/Unicorn backends) / Cheat ~2827 / Anti Cheat ~739 / other major section counts stable; 41 sections; entity [[kernemul]]; corrected Windows Emulator count drift (~7→~8) and refreshed README-map scope on [[overviews/overview]], [[overviews/windows-kernel]], [[overviews/reverse-engineering]], [[overviews/game-hacking]], and [[overviews/anti-cheat]]; light `index.md` section notes (no per-category pages).
 
 - **2026-09-20** — lint (agent pass): index vs disk scan — 9 overviews, 50 concepts, 3927 entities (3986 index entries); index.md fully synced (0 missing, 0 dead, 0 duplicate entries); overview wikilink spot-check (9 pages, 11863 links) — 0 broken links; concept spot-check (50 pages, 2290 links) — 0 broken links; index.md wikilink scan — 0 broken links; 6 cross-kind slug collisions ([[game-hacking]], [[anti-cheat]], [[reverse-engineering]], [[il2cpp]], [[byovd]], [[dma]]) — expected, no repair needed; no structural edits required.
