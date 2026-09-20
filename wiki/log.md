@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-20** — lint (agent pass): index vs disk scan — 9 overviews, 50 concepts, 3927 entities (3986 index entries); index.md fully synced (0 missing, 0 dead, 0 duplicate entries); overview wikilink spot-check (9 pages, 11863 links) — 0 broken links; concept spot-check (50 pages, 2290 links) — 0 broken links; index.md wikilink scan — 0 broken links; 6 cross-kind slug collisions ([[game-hacking]], [[anti-cheat]], [[reverse-engineering]], [[il2cpp]], [[byovd]], [[dma]]) — expected, no repair needed; no structural edits required.
+
 - **2026-09-20** — ingest `description:Iviesever/rooted-android-game-vm`: entity [[rooted-android-game-vm]] (Windows 11 C#/.NET WPF + JSON CLI rooted Android emulator workbench; SDK/emulator/Magisk automation; APK install/update, private app-data export, root diagnostics, checkpoints; Iviesever; Cheat / Android Emulator); cited on [[concepts/mobile-anti-cheat]] and [[overviews/game-hacking]]; [[overviews/mobile-security]], [[overviews/reverse-engineering]], and entity page already carried description projection from prior readme pass; `index.md` updated.
 
 - **2026-09-20** — ingest `readme:categories`: Cheat ~2827 (+1; Iviesever/[[rooted-android-game-vm]] Windows desktop rooted Android game VM workbench with WPF/JSON CLI in Cheat / Android Emulator) / Anti Cheat ~739 / other major section counts stable; 41 sections; entity [[rooted-android-game-vm]]; refreshed README-map counts and desktop Android VM workbench scope on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/mobile-security]], [[overviews/reverse-engineering]], and [[overviews/dma-attack]]; light `index.md` section notes (no per-category pages).
