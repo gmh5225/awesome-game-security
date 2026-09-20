@@ -3159,7 +3159,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ROM Shifter](entities/rom-shifter.md) — Android app for custom-ROM flash, backup, restore, and migration (ShivamXD6; Kotlin/Compose + shell backend; Magisk/KernelSU/APatch; cheat / Android)
 - [RobloxCheats](entities/roblox-cheats.md) — macOS Roblox dylib injector (Mach VM / shared-memory IPC; internal+external ESP; offset finder)
 - [RookieAI_yolov8](entities/rookieai-yolov8.md) — Passer1072 YOLOv8 Ultralytics FPS aim-assist (Python; multi-process capture/inference; PyTorch/TensorRT/ONNX; Win32/Logitech/kmNet input; configurable aim/trigger; cheat / Machine Learning YOLOv8)
-- [Rooted Android Game VM](entities/rooted-android-game-vm.md) — Windows 11 desktop rooted Android emulator workbench (C#/.NET WPF + JSON CLI; SDK/emulator/Magisk automation; APK install, private app-data export, root diagnostics; Iviesever; Cheat Android Emulator)
+- [Rooted Android Game VM](entities/rooted-android-game-vm.md) — Windows 11 desktop rooted Android emulator workbench (C#/.NET WPF + JSON CLI; SDK/emulator/Magisk automation; APK install/update, private app-data export, root diagnostics, checkpoints; Iviesever; Cheat / Android Emulator)
 - [rootAVD](entities/rootavd.md) — root Android Virtual Devices (Magisk/AVD; Cheat Magisk / Android Emulator)
 - [RootAppDetector](entities/root-app-detector.md) — Java Android POC: detect installed root-manager apps via package/activity launch + SecurityException (Detection:Android root; apkunpacker)
 - [Root Detection Low level](entities/root-detection-low-level.md) — Frida JS dynamic analysis: `java.io.File`/`Runtime.exec` hooks, keyword path filters (`su`/`bin`/`apk`), shell-command logging, Java stack traces for root-detection/malware RE (3v1lC0d3; cheat / Frida)

@@ -25,4 +25,4 @@ Sits in the desktop-hosted Android emulator lane beside on-device guest VMs such
 
 ## Related
 
-[[overviews/mobile-security]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]] · [[virtualmachine]] · [[zn-toolbox]] · [[scrcpy]] · [[mobile-anti-cheat]] · [[android-emulator-detection]]
+[[overviews/mobile-security]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]] · [[virtualmachine]] · [[zn-toolbox]] · [[rootavd]] · [[scrcpy]] · [[mobile-anti-cheat]] · [[android-emulator-detection]]
