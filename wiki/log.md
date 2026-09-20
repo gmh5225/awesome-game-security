@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-20** — ingest `description:abcd123rft/terraria-android-modding`: entity [[terraria-android-modding]] (reusable skill package + Frida/JsHook Android Terraria IL2CPP mod menu; il2cpp-by-name hooks, native system-UI overlay, offline icon/name-table tooling; abcd123rft; Cheat / Frida); cited on [[concepts/il2cpp]] and [[concepts/frida]]; overviews and entity page already carried description projection from prior readme pass; `index.md` updated.
+
 - **2026-09-20** — ingest `readme:categories`: Cheat ~2826 (+1; abcd123rft/[[terraria-android-modding]] Android Terraria IL2CPP Frida/JsHook mod-menu skill in Cheat / Frida) / Anti Cheat ~739 / other major section counts stable; 41 sections; entity [[terraria-android-modding]]; refreshed README-map counts and Android Terraria IL2CPP mod-menu scope on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/mobile-security]], [[overviews/reverse-engineering]], and [[overviews/dma-attack]]; light `index.md` section notes (no per-category pages).
 
 - **2026-09-20** — lint (agent pass): index vs disk scan — 9 overviews, 50 concepts, 3925 entities (3984 index entries); index.md fully synced (0 missing, 0 dead, 0 duplicate entries); overview wikilink spot-check (9 pages, 11852 links) — 0 broken links; concept spot-check (50 pages, 2283 links) — 0 broken links; index.md wikilink scan — 0 broken links; 6 cross-kind slug collisions ([[game-hacking]], [[anti-cheat]], [[reverse-engineering]], [[il2cpp]], [[byovd]], [[dma]]) — expected, no repair needed; no structural edits required.
