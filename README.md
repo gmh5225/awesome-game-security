@@ -1658,6 +1658,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/ServenScorpion/VirtualApp [Android]
 - https://github.com/chinaapps/zn-toolbox [Host-no-root Android container VM (Twoyi fork) with built-in root and LSPosed for isolated mobile modding]
 - https://github.com/wumingzhinu/VirtualMachine [Android VM app (VM Studio) with Vulkan rendering, Magisk root toggle, Xposed module support, and Google Play services for isolated mobile environments]
+- https://github.com/Iviesever/rooted-android-game-vm [Windows desktop rooted Android game VM workbench with GUI/CLI management, APK install/update, root diagnostics, and private app-data export for isolated mobile testing]
 - https://github.com/mandiant/flare-vm
 - https://github.com/hzqst/VmwareHardenedLoader
 - https://github.com/d4rksystem/VMwareCloak
