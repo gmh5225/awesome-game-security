@@ -15,6 +15,10 @@ confidence: medium
 
 Physics-based rules target speed hacks, impossible jumps, teleports, flight/hover exploits, packet flooding, timestamp/sequence spoofing, and action abuse (item duplication, quest farming). Strike-based warnings, automatic bans, admin HTTP API/console, optional **HMAC frame signing**, and Docker deployment. Listed under README **Anti Cheat > Open Source Anti Cheat System**.
 
+## Positioning
+
+Lightweight, **zero runtime dependency** Node.js service for indie and custom multiplayer titles that need an external server-side AC layer without embedding engine-specific plugins. Clients report movement and actions; the server applies **world-profile** physics limits rather than trusting client state. (source: wiki/sources/descriptions/Parko-Developer__guard-game.md)
+
 ## Validation surfaces
 
 | Surface | Role |
