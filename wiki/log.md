@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-21** — ingest `readme:categories`: Anti Cheat ~740 (+1; Parko-Developer/[[guard-game]] Node.js engine-agnostic server-side movement/action validation with Unity/Godot/Roblox/JS SDKs in Open Source Anti Cheat System) / Cheat ~2828 / other major section counts stable; 41 sections; entity [[guard-game]]; refreshed README-map counts and engine-agnostic server-side AC scope on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/game-engine]], [[overviews/dma-attack]], and [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
+
 - **2026-09-21** — lint (agent pass): index vs disk scan — 9 overviews, 50 concepts, 3929 entities (3988 index entries); index.md fully synced (0 missing, 0 dead, 0 duplicate entries); overview wikilink spot-check (9 pages, 11879 links) — 0 broken links; concept spot-check (50 pages, 2290 links) — 0 broken links; index.md wikilink scan (579 links) — 0 broken links; 6 cross-kind slug collisions ([[game-hacking]], [[anti-cheat]], [[reverse-engineering]], [[il2cpp]], [[byovd]], [[dma]]) — expected, no repair needed; no structural edits required.
 
 - **2026-09-21** — ingest `description:partoftheworlD/GHIDRApy_FunctionStringAssociate`: entity [[ghidrapy-functionstringassociate]] (Python GhidraScript; node-based string-ref walk → repeatable function comments; mirrors IDA FunctionStringAssociate); cross-linked [[ida-function-string-associate]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]] function–string triage lanes; `index.md` updated.
