@@ -2008,6 +2008,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/Marisa-Chan/GhidrOrean [Ghidra Python scripts: Oreans VM (Themida/Code Virtualizer) DeVirt — Deathway Unvirtualizer reimplementation; CISC/TIGER]
 - https://github.com/advanced-threat-research/GhidraScripts [Some scripts]
 - https://github.com/fuzzypickles14/BetterStringAnalyzer [A better string analyzer for Ghidra]
+- https://github.com/partoftheworld/ghidrapy_functionstringassociate [Ghidra script that associates string literals with functions as comments, mirroring IDA FunctionStringAssociate]
 - https://github.com/clearbluejar/ghidriff [Python Command-Line Ghidra Binary Diffing Engine]
 - https://github.com/MISP/bsimvis [Ghidra BSim-based binary similarity, function diffing, and family clustering with API and web UI]
 - https://github.com/Katharsas/ghidra-struct-importer [Struct Importer]
