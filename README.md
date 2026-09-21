@@ -4386,6 +4386,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/violetweather/Certael [Server-authoritative open-source anti-cheat framework with Godot/Unity/Unreal adapters]
 - https://github.com/lannden1245/Void-Engine [Godot 4.x plugin with WhiteVoid AntiCheat: debugger/process/window detection, honeypot integrity checks, and HWID ban enforcement]
 - https://github.com/modcommunity/dot-server-security [Godot 4 dedicated-server security addon with movement/shot validation, configurable rule-engine escalation, ban feeds, and dry-run auditing]
+- https://github.com/Parko-Developer/guard-game [Node.js server-side cheat detection: clients report movement/actions, server validates against world limits; TCP/HTTP protocol, admin API, and engine SDKs (C#, GDScript, JS, Luau)]
 - https://github.com/vul-os/magnetite [Rust self-hostable game platform with magnetite-anticheat: server-authoritative deterministic replay verification and composable cheat validators]
 - https://github.com/web-coder-lab/chessking [Rust server-side anti-cheat for multiplayer chess: risk scoring, device fingerprinting, match integrity, captcha, and ban escalation]
 - https://github.com/XX-Batsu/bevy-personal-test [Rust Bevy multiplayer framework with sandboxed Rhai script VM, rollback netcode, and shadow-VM anti-cheat verification]
