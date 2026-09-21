@@ -10,9 +10,11 @@ confidence: medium
 
 # GHIDRApy FunctionStringAssociate
 
-Ghidra Python script that walks every function, collects instruction operands that reference string literals, and attaches aggregated strings as repeatable function comments — mirroring IDA's FunctionStringAssociate workflow for faster unknown-binary triage. (source: wiki/sources/descriptions/partoftheworlD__GHIDRApy_FunctionStringAssociate.md)
+Python GhidraScript using the Ghidra scripting API: walks every function in a loaded binary, inspects instruction operands for data references to string literals, and attaches aggregated strings as **repeatable function comments** — mirroring IDA's FunctionStringAssociate workflow for faster unknown-binary triage. (source: wiki/sources/descriptions/partoftheworlD__GHIDRApy_FunctionStringAssociate.md)
 
-Cheat → Ghidra Scripts lane. Complements Java string plugins such as [[better-string-analyzer]], GhidraScript collections such as [[ghidra-scripts]] and [[ghidrascripts]], and the IDA-side [[ida-function-string-associate]] plugin when analysts need function-scoped literal surfacing without manual Defined Strings xref chasing.
+Uses a **node-based reference model** to traverse each function body and resolve string data at referenced addresses, surfacing embedded literals directly on the functions that consume them. Intended for reverse engineers and game security analysts who need function-scoped string orientation without manual Defined Strings xref chasing. (source: wiki/sources/descriptions/partoftheworlD__GHIDRApy_FunctionStringAssociate.md)
+
+Cheat → Ghidra Scripts lane. Complements Java string plugins such as [[better-string-analyzer]], GhidraScript collections such as [[ghidra-scripts]] and [[ghidrascripts]], and the IDA-side [[ida-function-string-associate]] plugin in the same function–string association lane.
 
 ## Links
 

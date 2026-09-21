@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-21** — ingest `description:partoftheworlD/GHIDRApy_FunctionStringAssociate`: entity [[ghidrapy-functionstringassociate]] (Python GhidraScript; node-based string-ref walk → repeatable function comments; mirrors IDA FunctionStringAssociate); cross-linked [[ida-function-string-associate]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]] function–string triage lanes; `index.md` updated.
+
 - **2026-09-21** — ingest `readme:categories`: Cheat ~2828 (+1; partoftheworld/[[ghidrapy-functionstringassociate]] Ghidra FunctionStringAssociate script in Cheat / Ghidra Scripts) / Anti Cheat ~739 / other major section counts stable; 41 sections; entity [[ghidrapy-functionstringassociate]]; refreshed README-map counts and Ghidra string→function annotation scope on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/reverse-engineering]], and [[overviews/dma-attack]]; light `index.md` section notes (no per-category pages).
 
 - **2026-09-21** — lint (agent pass): index vs disk scan — 9 overviews, 50 concepts, 3928 entities (3987 index entries); index.md fully synced (0 missing, 0 dead, 0 duplicate entries); overview wikilink spot-check (9 pages, 11872 links) — 0 broken links; concept spot-check (50 pages, 2290 links) — 0 broken links; index.md wikilink scan (576 links) — 0 broken links; 6 cross-kind slug collisions ([[game-hacking]], [[anti-cheat]], [[reverse-engineering]], [[il2cpp]], [[byovd]], [[dma]]) — expected, no repair needed; no structural edits required.
