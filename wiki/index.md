@@ -4000,6 +4000,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [yarascan-ida](entities/yarascan-ida.md) — IDA Yara file scan plugin (Python; cheat / IDA Plugins)
 - [yaui](entities/yaui.md) — Rust Android inject / emulation research (cheat / injection:android)
 - [YAHFA](entities/yahfa.md) — Android ART method hooking framework (Java + native backup-and-hook APIs; static/virtual/JNI/framework hooks; library + demo/plugin modules; runtime instrumentation / security research; PAGalaxyLab)
+- [YAACS AntiCheat](entities/yaacs-anticheat.md) — oykuoner CS2 server-side aimbot research pipeline (Python; demoparser2 HLTV demo parsing; pitch/yaw spatiotemporal features from Fitts' Law + Minimum Jerk Model; heuristic vs Random Forest classifiers; synthetic + real datasets; privacy-preserving replay-only detection; Anti Cheat / Machine Learning)
 - [YCBR AntiCheat](entities/ycbr-anticheat.md) — Paper 1.8.9 Minecraft AC plugin (Java 8 Maven; ProtocolLib; 19 combat/movement/protocol checks; Grim-style prediction; auth, DDoS guard, admin GUI; YcbrYL1; Anti Cheat / game:minecraft)
 - [YimMenu](entities/yimmenu.md) — GTA menu-ecosystem Lua API/command docs (documentation-only after source removal; LibreTranslate chat-translation setup; script developers; YimMenu)
 - [Yumekage](entities/yumekage.md) — hidden/shadowed memory region PoC (C++; guarded-region + context-switch semantics; PTE Hook; anti-cheat bypass RE; Xyrem)

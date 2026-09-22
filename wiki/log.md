@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-22** — ingest `description:oykuoner/YAACS-AntiCheat`: entity [[yaacs-anticheat]] (Python CS2 demo pitch/yaw aim-telemetry research; demoparser2; Fitts' Law + Minimum Jerk 100-tick features; heuristic vs Random Forest; synthetic + real datasets; privacy-preserving server-side aimbot detection); cited on [[concepts/ai-aimbot-detection]] and [[overviews/anti-cheat]]; `index.md` updated.
+
 - **2026-09-22** — ingest `readme:categories`: Anti Cheat ~742 (+1; nft-syou/[[jevcraft-bench]] Minecraft Paper mining-telemetry behavioral AC research bench with typed LLM evaluation and offline X-Ray heuristic shadow-mode benchmarking in Stress Testing) / Cheat ~2829 (+1 recount) / other major section counts stable; 41 sections; entity [[jevcraft-bench]]; synced projected README-map counts (~742/~2829) on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], [[overviews/game-hacking]], and [[overviews/reverse-engineering]]; added entity index entry; light `index.md` section notes (no per-category pages).
 
 - **2026-09-22** — lint (agent pass): index vs disk scan — 9 overviews, 50 concepts, 3930 entities (3989 index entries); index.md fully synced (0 missing, 0 dead, 0 duplicate entries); overview wikilink spot-check (9 pages, 11889 links) — 0 broken links; concept spot-check (50 pages, 2290 links) — 0 broken links; index.md wikilink scan (582 links) — 0 broken links; 6 cross-kind slug collisions ([[game-hacking]], [[anti-cheat]], [[reverse-engineering]], [[il2cpp]], [[byovd]], [[dma]]) — expected, no repair needed; no structural edits required.
