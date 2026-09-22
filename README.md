@@ -4460,6 +4460,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/majimaakane/7dtd-AntiCheatMod [Server-side 7 Days to Die mod blocking cheat commands and detecting fly, teleport, speedhack, and godmode]
 - https://github.com/irembo337/Fusion-AntiCheat [Server-side LabFusion/BONELAB anti-cheat with avatar allowlist enforcement and in-game settings panel]
 - https://github.com/Pryaxis/TShock [Mature open-source Terraria server framework with built-in server-side anti-cheat, permissions, and community moderation tools]
+- https://github.com/Ghou133/TShock-AntiCheat [Terraria 1.4.5.8 TShock server anti-cheat plugin source with observe-only detections for butcher damage, map brushes, item abuse, and health locks]
 - https://github.com/Garou3299/tf2bd-database [Community-maintained TF2 cheater and suspicious-player JSON lists for surepy/tf2_bot_detector]
 - https://github.com/somewhatpublicacc/wellsanticheat [Among Us host-side BepInEx anti-cheat for RPC abuse, crashers, spam, and lobby cheats]
 - https://github.com/GiannBart/BanMod [Among Us BepInEx mod with host-side AntiCheat module for RPC/task abuse, crashers, and lobby integrity]
