@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-22** — ingest `description:Ghou133/TShock-AntiCheat`: entity [[tshock-anticheat]] (Ghou133; C# .NET 9 TShock plugin; modular core/rule/persistence/TShock-adapter layers; packet readers + safety guards for map brushes, butcher damage, item duplication, health locks, and protocol abuse; ObserveOnly dev source; optional banning/journaling; Terraria 1.4.5.8; Anti Cheat / game:terraria); cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[tshock]]; `index.md` updated.
+
 - **2026-09-22** — ingest `readme:categories`: Anti Cheat ~743 (+1; oykuoner/[[yaacs-anticheat]] CS2 demo pitch/yaw aim-telemetry research with heuristic vs Random Forest classifiers in Machine Learning) / Cheat ~2830 / other major section counts stable; 41 sections; synced projected README-map counts (~743/~2830) on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], and [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
 
 - **2026-09-22** — ingest `description:HullaBrian/ttd-capa-cpp`: entity [[ttd-capa-cpp]] (HullaBrian; C++/Python; capa-compatible TTD trace capability extractor—TTD SDK replay, Win32/native API argument decode, capa rule matching, code-region scan, capability timelines, embeddable DLL; game security / malware RE); cited on [[overviews/reverse-engineering]] and [[concepts/static-runtime-evidence]]; cross-linked [[ttddbg]], [[windbg-tool]], and [[mcp-windbg]]; `index.md` updated.

@@ -26,4 +26,4 @@ Server-side characters; permission groups; item bans; regions; warps; large comm
 
 ## Related
 
-[[overviews/anti-cheat]] · [[overviews/game-hacking]] · [[7dtd-anticheatmod]] · [[dead-anticheat]] · [[petal-anti-freecam]]
+[[tshock-anticheat]] · [[overviews/anti-cheat]] · [[overviews/game-hacking]] · [[7dtd-anticheatmod]] · [[dead-anticheat]] · [[petal-anti-freecam]]
