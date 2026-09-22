@@ -1048,6 +1048,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/LaurieWired/Malimite [iOS and macOS Decompiler]
 - https://github.com/azw413/Glass [Rust mobile-first disassembler for APK/DEX/smali and AArch64 .so/.dylib; CFG, xref, CLI/MCP automation]
 - https://github.com/0xbigshaq/apatchy [Fuzzing Framework for Apache HTTPD Server]
+- https://github.com/HullaBrian/ttd-capa-cpp [TTD capa]
 
 
 > Mixed boolean-arithmetic
