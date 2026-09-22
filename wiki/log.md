@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-22** — ingest `description:HullaBrian/ttd-capa-cpp`: entity [[ttd-capa-cpp]] (HullaBrian; C++/Python; capa-compatible TTD trace capability extractor—TTD SDK replay, Win32/native API argument decode, capa rule matching, code-region scan, capability timelines, embeddable DLL; game security / malware RE); cited on [[overviews/reverse-engineering]] and [[concepts/static-runtime-evidence]]; cross-linked [[ttddbg]], [[windbg-tool]], and [[mcp-windbg]]; `index.md` updated.
+
 - **2026-09-22** — ingest `readme:categories`: Cheat ~2830 (+1; HullaBrian/[[ttd-capa-cpp]] TTD trace capa-compatible capability extractor in RE Tools) / Anti Cheat ~742 / other major section counts stable; 41 sections; entity [[ttd-capa-cpp]]; synced projected README-map counts (~2830/~742) on [[overviews/overview]], [[overviews/reverse-engineering]], [[overviews/dma-attack]], and [[overviews/game-hacking]]; added entity index entry; light `index.md` section notes (no per-category pages).
 
 - **2026-09-22** — lint (agent pass): index vs disk scan — 9 overviews, 50 concepts, 3933 entities (3992 index entries); index.md fully synced (0 missing, 0 dead, 0 duplicate entries); overview wikilink spot-check (9 pages, 11902 links) — 0 broken links; concept spot-check (50 pages, 2291 links) — 0 broken links; index.md wikilink scan (583 links) — 0 broken links; 6 cross-kind slug collisions ([[game-hacking]], [[anti-cheat]], [[reverse-engineering]], [[il2cpp]], [[byovd]], [[dma]]) — expected, no repair needed; no structural edits required.

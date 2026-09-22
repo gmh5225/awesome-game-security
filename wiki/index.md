@@ -63,7 +63,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Resource Selection](concepts/resource-selection.md) — domain routing, provenance fields, data-layer order, `repository_index.py` lookup, README maintenance convention
 - [Source NetVars](concepts/source-netvars.md) — ClientClass/RecvTable offset maps; CreateInterface exports (Source 1/2); SDK license vs shipped-binary ground truth
 - [Stack Spoofing](concepts/stack-spoofing.md) — synthetic return stacks vs RtlWalkFrameChain / unwind validation
-- [Static–Runtime Evidence](concepts/static-runtime-evidence.md) — artifact baseline (hash/format/arch/tool/environment/addresses); static inference vs runtime observation; protection-induced uncertainty labeling; reference-trace validation ([[jsrf-recomp]] diagnostics vs emulator traces); pairs [[binary-evidence]] question tables
+- [Static–Runtime Evidence](concepts/static-runtime-evidence.md) — artifact baseline (hash/format/arch/tool/environment/addresses); static inference vs runtime observation; protection-induced uncertainty labeling; reference-trace validation ([[jsrf-recomp]] diagnostics vs emulator traces); TTD trace behavioral capability via [[ttd-capa-cpp]]; pairs [[binary-evidence]] question tables
 - [Unreal Object Model](concepts/unreal-object-model.md) — UObject hierarchy; reflection vs native layout; GObjects/GNames/GWorld; baseline prerequisites + [[dumper-7]] SDK workflow
 - [Vanguard](concepts/vanguard.md)
 - [World-to-Screen](concepts/world-to-screen.md) — 3D view-matrix projection for ESP/aim FOV; client-state observation + graphics/composition defensive context
@@ -3517,7 +3517,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [TrustMeBro](entities/trustmebro.md) — Authenticode signature manipulation toolkit (Python/C++; signature steal/clone, PKCS#7 SigStash, SIP hijack 19 types, WinVerifyTrust FinalPolicy bypass, Smart App Control evasion, SIPExec/FormatGhost; YARA/Sigma; KriyosArcane)
 - [TWMS Hacking Data](entities/twms-hacking-data.md) — Taiwan MapleStory live-client hacking corpus (offsets, packets, encryption keys, GameGuard bypass; cheat / game:maplestory [TMS CT]; gmh5225)
 - [TtdAntiDebugging](entities/ttd-anti-debugging.md) — C/C++ TTD debug-testing / hooking anti-debug stress sample (Debug Testing)
-- [ttd-capa-cpp](entities/ttd-capa-cpp.md) — HullaBrian capa-compatible TTD trace capability extractor (dynamic API-call extraction, timeline reporting, embeddable DLL; Cheat / RE Tools)
+- [ttd-capa-cpp](entities/ttd-capa-cpp.md) — HullaBrian capa-compatible TTD trace capability extractor (TTD SDK replay, Win32/native API decode, capa rule matching, code-region scan, capability timelines, embeddable DLL; game security / malware RE; Cheat / RE Tools)
 - [ttddbg](entities/ttddbg.md) — IDA Pro plugin: replay WinDbg TTD `.run` traces (forward/backward stepping; Time Travel Debugging)
 - [TWindbg](entities/twindbg.md) — pykd PEDA-like WinDbg UI; registers, disasm, stack smart-deref, memory/symbol commands (WinDbg Plugins)
 - [titancf](entities/titancf.md) — CrossFire (CF) cheat: driver development / rendering / graphics (cheat / game:crossfire; gmh5225)

@@ -12,7 +12,7 @@ confidence: medium
 
 IDA Pro plugin that replays **Time Travel Debugging (TTD)** traces recorded by WinDbg inside IDA. Loads Microsoft TTD `.run` trace files and supports forward and backward stepping through recorded execution without a live debugging session, replaying syscalls, memory operations, and register state from the capture. Aimed at reverse engineers and malware analysts who want IDA Pro's static analysis and decompilation alongside TTD's time-travel debugging workflow. (source: wiki/sources/descriptions/gmh5225__ttddbg.md)
 
-Complements WinDbg-centric TTD capture and triage tooling such as [[mcp-windbg]] and [[windbg-decompile-ext]], and TTD-oriented anti-debug stress samples such as [[ttd-anti-debugging]].
+Complements WinDbg-centric TTD capture and triage tooling such as [[mcp-windbg]], [[windbg-tool]], and [[windbg-decompile-ext]]; capa-compatible behavioral extraction from `.run` traces via [[ttd-capa-cpp]]; and TTD-oriented anti-debug stress samples such as [[ttd-anti-debugging]].
 
 ## Links
 
@@ -20,4 +20,4 @@ Complements WinDbg-centric TTD capture and triage tooling such as [[mcp-windbg]]
 
 ## Related
 
-[[overviews/reverse-engineering]] · [[tenet]] · [[mcp-windbg]] · [[windbg-decompile-ext]] · [[windbg-scripts]] · [[ttd-anti-debugging]] · [[x64dbg-trace-reader]] · [[execution-trace-viewer]]
+[[overviews/reverse-engineering]] · [[tenet]] · [[mcp-windbg]] · [[windbg-tool]] · [[ttd-capa-cpp]] · [[windbg-decompile-ext]] · [[windbg-scripts]] · [[ttd-anti-debugging]] · [[x64dbg-trace-reader]] · [[execution-trace-viewer]]

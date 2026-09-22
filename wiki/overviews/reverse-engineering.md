@@ -1347,6 +1347,8 @@ Workflows for protected game clients and anti-cheat components across user mode,
 
 Record the **artifact hash, format, architecture, tool version, environment, and observed addresses** before drawing conclusions. Separate static inference from runtime evidence and label protection-induced uncertainty. See [[static-runtime-evidence]] for the baseline table and static/runtime finding limits. (source: wiki/sources/skills/reverse-engineering.md)
 
+For full-process **TTD** recordings, [[ttd-capa-cpp]] extracts executed API calls and matches capa rules over replayed traces—including unpacked/runtime-generated code—so behavioral capability findings stay trace-backed rather than static-only. (source: wiki/sources/descriptions/HullaBrian__ttd-capa-cpp.md)
+
 ## Topic routing
 
 | Question lane | Route |
