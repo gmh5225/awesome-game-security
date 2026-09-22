@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-22** — lint (agent pass): index vs disk scan — 9 overviews, 50 concepts, 3933 entities (3992 index entries); index.md fully synced (0 missing, 0 dead, 0 duplicate entries); overview wikilink spot-check (9 pages, 11902 links) — 0 broken links; concept spot-check (50 pages, 2291 links) — 0 broken links; index.md wikilink scan (583 links) — 0 broken links; 6 cross-kind slug collisions ([[game-hacking]], [[anti-cheat]], [[reverse-engineering]], [[il2cpp]], [[byovd]], [[dma]]) — expected, no repair needed; no structural edits required.
+
 - **2026-09-22** — ingest `description:Kryx7z/Conglomerate-Cs2`: entity [[conglomerate-cs2]] (Kryx7z; C++; TempleWare-based internal CS2 DLL; Kiero + MinHook DX11 Present + ImGui menu; pattern scan / vfunc / Source 2 schema for entity interfaces; aim / chams / movement / spectator / anti-flash / FOV / world mods; JSON config + keybinds; cheat / game:cs2 [Internal]); cited on [[overviews/game-hacking]] and [[overviews/graphics-api]]; `index.md` updated.
 
 - **2026-09-22** — ingest `description:oykuoner/YAACS-AntiCheat`: entity [[yaacs-anticheat]] (Python CS2 demo pitch/yaw aim-telemetry research; demoparser2; Fitts' Law + Minimum Jerk 100-tick features; heuristic vs Random Forest; synthetic + real datasets; privacy-preserving server-side aimbot detection); cited on [[concepts/ai-aimbot-detection]] and [[overviews/anti-cheat]]; `index.md` updated.
