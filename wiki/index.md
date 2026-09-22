@@ -672,6 +672,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ConBeerLib](entities/conbeerlib.md) — Linux/Android container·VM detect (cgroup/fs/env; Docker/LXC/K8s/WSL)
 - [ConfuserEx](entities/confuserex.md) — open-source .NET application protector (Confuser successor; AC Binary Packer / CLR protection)
 - [ConfuserEx IDAPython](entities/confuserex-idapython.md) — Python IDAPython deobfuscation script for ConfuserEx (cheat / IDA Plugins)
+- [Conglomerate CS2](entities/conglomerate-cs2.md) — open-source internal CS2 cheat framework (Kryx7z; C++; TempleWare-based; Kiero + MinHook DX11 + ImGui; Source 2 schema/pattern scan; aim/chams/movement/visual mods; JSON config; cheat / game:cs2 [Internal])
 - [Corange](entities/corange.md) — pure C game engine (Game Engine / source)
 - [Corner Culling](entities/corner-culling.md) — 87andrewh server-side occlusion-culling (C++ + Unreal Engine; analytical ray casts, BVH + recent-occluder caching, latency-aware lookahead; reduces wallhack visibility in multiplayer shooters; scalable line-of-sight enforcement research)
 - [Corner Culling Source Engine](entities/corner-culling-source-engine.md) — 87andrewh Source engine anti-wallhack extension (C++ extension + SourceMod + map occluders; strict server-side visibility culling; ray-cast correctness, low overhead, latency-safe; competitive Source servers; For Source Games)

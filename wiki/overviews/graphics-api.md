@@ -115,6 +115,7 @@ sources:
   - wiki/sources/descriptions/KANKOSHEV__NoScreen.md
   - wiki/sources/descriptions/KhronosGroup__glTF.md
   - wiki/sources/descriptions/KisSsArt__CS2-Cheat-Base.md
+  - wiki/sources/descriptions/Kryx7z__Conglomerate-Cs2.md
   - wiki/sources/descriptions/W1lliam1337__cstrike2-hack.md
   - wiki/sources/descriptions/gmh5225__EFT-Veil-EFT.md
   - wiki/sources/descriptions/gmh5225__Astra.md
@@ -371,7 +372,7 @@ sources:
   - wiki/sources/descriptions/TheCruZ__nvidiaCapture.md
   - wiki/sources/descriptions/BUNNY-19C__DLSSG-30s-manager.md
   - wiki/sources/descriptions/brendan-duncan__gpu_inspector.md
-updated: 2026-09-19
+updated: 2026-09-22
 confidence: high
 ---
 
@@ -411,7 +412,7 @@ For owned sample apps, record a coverage matrix: API, OS/driver, windowed/fullsc
 | OpenGL | `wglSwapBuffers` | `glDrawElements`, `glDrawArrays` |
 | Vulkan | `vkQueuePresentKHR`, `vkCreateSwapchainKHR` | `vkCmdDraw`, `vkCmdDrawIndexed`; instance/device layers |
 
-Vtable trampolines on swap chains remain the dominant internal-overlay pattern; the original Windows-only [[kiero]] (Rebzzel/kiero; universal D3D9–12 + OpenGL + Vulkan hooking; MinHook method-table detours; sample ImGui overlays; x86/x64) and cross-API runtime locators such as [[kiero2]] (kiero v2; method addresses only; BYO hooking; CMake FetchContent; Win/Linux/macOS for GL/VK) auto-detect the active graphics API at runtime. (source: wiki/sources/descriptions/Rebzzel__kiero.md) (source: wiki/sources/descriptions/kirchesz__kiero2.md) Portable hook foundations such as [[dobby]] (lightweight multi-platform C/C++ framework; DirectX / hook tooling for graphics programmers and Windows game tooling) underpin BYO Present/vtable interception beside MinHook/PolyHook2 in overlay samples. (source: wiki/sources/descriptions/jmpews__Dobby.md) Multi-engine internal cheat scaffolds such as [[omegaware-framework]] (Omega172; auto D3D11/D3D12 detection; graphics pipeline + WndProc hooks; ImGui overlay/dev console; plugin features; cheat framework) extend universal hook libs with engine-aware scaffolding. (source: wiki/sources/descriptions/Omega172__OmegaWare-Framework.md) Dear ImGui backends wire through the Present hook with a `WndProc` forward for input.
+Vtable trampolines on swap chains remain the dominant internal-overlay pattern; the original Windows-only [[kiero]] (Rebzzel/kiero; universal D3D9–12 + OpenGL + Vulkan hooking; MinHook method-table detours; sample ImGui overlays; x86/x64) and cross-API runtime locators such as [[kiero2]] (kiero v2; method addresses only; BYO hooking; CMake FetchContent; Win/Linux/macOS for GL/VK) auto-detect the active graphics API at runtime. (source: wiki/sources/descriptions/Rebzzel__kiero.md) (source: wiki/sources/descriptions/kirchesz__kiero2.md) Portable hook foundations such as [[dobby]] (lightweight multi-platform C/C++ framework; DirectX / hook tooling for graphics programmers and Windows game tooling) underpin BYO Present/vtable interception beside MinHook/PolyHook2 in overlay samples. (source: wiki/sources/descriptions/jmpews__Dobby.md) Multi-engine internal cheat scaffolds such as [[omegaware-framework]] (Omega172; auto D3D11/D3D12 detection; graphics pipeline + WndProc hooks; ImGui overlay/dev console; plugin features; cheat framework) extend universal hook libs with engine-aware scaffolding. (source: wiki/sources/descriptions/Omega172__OmegaWare-Framework.md) CS2 internal samples such as [[conglomerate-cs2]] (Kryx7z; Kiero + MinHook DX11 Present interception + ImGui in-game menu; chams and visual overlay modules beside aim/movement features; cheat / game:cs2 [Internal]) illustrate title-specific adoption of the kiero/MinHook internal-overlay stack. (source: wiki/sources/descriptions/Kryx7z__Conglomerate-Cs2.md) Dear ImGui backends wire through the Present hook with a `WndProc` forward for input.
 
 ## Overlay taxonomy
 

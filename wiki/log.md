@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-22** — ingest `description:Kryx7z/Conglomerate-Cs2`: entity [[conglomerate-cs2]] (Kryx7z; C++; TempleWare-based internal CS2 DLL; Kiero + MinHook DX11 Present + ImGui menu; pattern scan / vfunc / Source 2 schema for entity interfaces; aim / chams / movement / spectator / anti-flash / FOV / world mods; JSON config + keybinds; cheat / game:cs2 [Internal]); cited on [[overviews/game-hacking]] and [[overviews/graphics-api]]; `index.md` updated.
+
 - **2026-09-22** — ingest `description:oykuoner/YAACS-AntiCheat`: entity [[yaacs-anticheat]] (Python CS2 demo pitch/yaw aim-telemetry research; demoparser2; Fitts' Law + Minimum Jerk 100-tick features; heuristic vs Random Forest; synthetic + real datasets; privacy-preserving server-side aimbot detection); cited on [[concepts/ai-aimbot-detection]] and [[overviews/anti-cheat]]; `index.md` updated.
 
 - **2026-09-22** — ingest `readme:categories`: Anti Cheat ~742 (+1; nft-syou/[[jevcraft-bench]] Minecraft Paper mining-telemetry behavioral AC research bench with typed LLM evaluation and offline X-Ray heuristic shadow-mode benchmarking in Stress Testing) / Cheat ~2829 (+1 recount) / other major section counts stable; 41 sections; entity [[jevcraft-bench]]; synced projected README-map counts (~742/~2829) on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], [[overviews/game-hacking]], and [[overviews/reverse-engineering]]; added entity index entry; light `index.md` section notes (no per-category pages).
