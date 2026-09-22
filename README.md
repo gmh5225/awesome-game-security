@@ -4007,6 +4007,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/mishka-sit2002/CS2-Hybrid-AntiCheat-Proposal [CS2 hybrid anti-cheat proposal: Glicko-2 judge ratings, honeypot entities, and shadow monitoring with Python PoC]
 - https://github.com/Solaree/pairipcore [Public researchings of the Google's Android apps protection]
 - https://github.com/bad-antics/rce-shield [RCE Shield - Remote Code Execution hardening toolkit for PC gamers. Scans game launchers, anti-cheat, mods, overlays, peripherals & network for vulnerabilities]
+- https://github.com/ablanchard-dev/dexcheck [Read-only PC forensics check for Call of Duty / Warzone screen-share vetting. Reads execution and existence traces that survive deletion of the binary and reboots (Prefetch, BAM/DAM, UserAssist, Shimcache, PCA, raw USN journal), plus DMA/PCIe hardware, HWID spoof indicators, kernel driver signatures and Code Integrity refusals. Never writes to the machine. PowerShell 5.1, 40 probes, double-click launcher.]
 
 > Stress Testing
 - https://github.com/niemand-sec/AntiCheat-Testing-Framework [Testing Framework]
