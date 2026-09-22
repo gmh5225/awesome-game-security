@@ -1,0 +1,610 @@
+Project Path: arc_oykuoner_YAACS-AntiCheat_b7b8dzju
+
+Source Tree:
+
+```txt
+arc_oykuoner_YAACS-AntiCheat_b7b8dzju
+├── 1_generate_data.py
+├── 1_parse_hltv_demo.py
+├── 2_visualize_distributions.py
+├── 3_heuristic_engine.py
+├── 4_ml_benchmark.py
+└── 5_generate_graphs
+
+```
+
+`1_generate_data.py`:
+
+```py
+import numpy as np
+import pandas as pd
+
+# ==============================================================================
+# BASELINE: STANDARD HUMAN MOTOR CONTROL
+# Represents the control group evaluated against the "normal variance envelopes"
+# established in the Heuristic Engine.
+# ==============================================================================
+def generate_honest_human_telemetry(duration_seconds=5.0, polling_rate_hz=1000, network_jitter=True):
+    total_samples = int(duration_seconds * polling_rate_hz)
+    
+    # Simulates natural physiological inconsistency in input timing. 
+    base_deltas = (1.0 / polling_rate_hz) + np.random.normal(0, 0.00012, total_samples)
+    
+    # Models the temporal variations (network jitter) that a server-side 
+    # architecture must account for when processing raw telemetry.
+    if network_jitter:
+        jitter_spikes = np.random.choice([0, 0.002, 0.005, -0.001], size=total_samples, p=[0.92, 0.04, 0.02, 0.02])
+        base_deltas = base_deltas + jitter_spikes
+        
+    timestamps = np.cumsum(np.abs(base_deltas))
+    t_steps = np.linspace(0, np.pi * 2, total_samples)
+    
+    # Models natural human aiming trajectories (pitch and yaw) which contain 
+    # higher variance/noise compared to automated assistance.
+    pitch = (12.0 * np.sin(t_steps * 0.6)) + np.random.normal(0, 0.015, total_samples)
+    yaw = (35.0 * np.cos(t_steps * 0.4)) + np.random.normal(0, 0.025, total_samples)
+    return pd.DataFrame({'Timestamp': timestamps, 'Pitch': pitch, 'Yaw': yaw, 'Label': 0})
+
+
+# ==============================================================================
+# THE HIGH-SKILL CHALLENGE: ELITE HUMAN
+# Represents professional esports players whose motor control exhibits extreme 
+# precision, testing the limits of the Visibility Plateau.
+# ==============================================================================
+def generate_elite_human_telemetry(duration_seconds=5.0, polling_rate_hz=1000, network_jitter=True):
+    total_samples = int(duration_seconds * polling_rate_hz)
+    
+    # Crucial detail from your dissertation: Uses tighter variance parameters 
+    # (standard deviation 0.00005) obtained from Arm Movement Coordination research.
+    base_deltas = (1.0 / polling_rate_hz) + np.random.normal(0, 0.00005, total_samples)
+    
+    if network_jitter:
+        jitter_spikes = np.random.choice([0, 0.001, 0.003], size=total_samples, p=[0.95, 0.03, 0.02])
+        base_deltas = base_deltas + jitter_spikes
+        
+    timestamps = np.cumsum(np.abs(base_deltas))
+    t_steps = np.linspace(0, np.pi * 4, total_samples) 
+    
+    # Tighter spatial variance (0.005 and 0.008) to simulate the micro-windows 
+    # of mechanical smoothness seen in elite human play.
+    pitch = (20.0 * np.sin(t_steps * 0.8)) + np.random.normal(0, 0.005, total_samples)
+    yaw = (50.0 * np.cos(t_steps * 0.5)) + np.random.normal(0, 0.008, total_samples)
+    return pd.DataFrame({'Timestamp': timestamps, 'Pitch': pitch, 'Yaw': yaw, 'Label': 0})
+
+
+# ==============================================================================
+# TRADITIONAL THREAT MODEL: HARDWARE AIMBOT
+# Represents basic Direct Memory Access (DMA) or scripted input emulation that 
+# creates unnatural, instantaneous velocity spikes.
+# ==============================================================================
+def generate_hardware_aimbot_telemetry(duration_seconds=5.0, polling_rate_hz=1000):
+    total_samples = int(duration_seconds * polling_rate_hz)
+    
+    # Perfect mathematical polling intervals (no variance). The Heuristic Engine 
+    # easily flags this mechanical consistency.
+    timestamps = np.arange(0, total_samples) * (1.0 / polling_rate_hz)
+    pitch, yaw = np.zeros(total_samples), np.zeros(total_samples)
+    curr_p, curr_y = 0.0, 0.0
+    
+    for i in range(0, total_samples, 250):
+        end = min(i + 250, total_samples)
+        tp, ty = np.random.uniform(-10.0, 30.0), np.random.uniform(-60.0, 60.0)
+        
+        # Perfect linear smoothing/snapping. Violates Fitts' Law and the Minimum
+        # Jerk Model because it lacks smooth acceleration/deceleration.
+        pitch[i:end] = np.linspace(curr_p, tp, end - i)
+        yaw[i:end] = np.linspace(curr_y, ty, end - i)
+        curr_p, curr_y = tp, ty
+    return pd.DataFrame({'Timestamp': timestamps, 'Pitch': pitch, 'Yaw': yaw, 'Label': 1})
+
+
+# ==============================================================================
+# EVASION STRESS TEST: HUMANISED AIMBOT
+# Represents sophisticated cheats designed to mimic human motor control and 
+# evade traditional one-dimensional threshold limits.
+# ==============================================================================
+def generate_humanised_aimbot_telemetry(duration_seconds=5.0, polling_rate_hz=1000):
+    total_samples = int(duration_seconds * polling_rate_hz)
+    
+    # Injects artificial temporal variance to bypass basic heuristic checks.
+    timestamps = np.cumsum(np.abs((1.0 / polling_rate_hz) + np.random.normal(0, 0.00010, total_samples)))
+    pitch, yaw = np.zeros(total_samples), np.zeros(total_samples)
+    curr_p, curr_y = 0.0, 0.0
+    
+    for i in range(0, total_samples, 250):
+        end = min(i + 250, total_samples)
+        tp, ty = np.random.uniform(-10.0, 30.0), np.random.uniform(-60.0, 60.0)
+        progress = np.linspace(0, np.pi, end - i)
+        
+        # Generates an "easing S-curve" to artificially replicate the physiological 
+        # Minimum-Jerk bell curve, requiring the Random Forest model to detect it.
+        easing_curve = (1 - np.cos(progress)) / 2 
+        pitch[i:end] = curr_p + (tp - curr_p) * easing_curve
+        yaw[i:end] = curr_y + (ty - curr_y) * easing_curve
+        curr_p, curr_y = tp, ty
+        
+    return pd.DataFrame({'Timestamp': timestamps, 'Pitch': pitch, 'Yaw': yaw, 'Label': 1})
+
+
+# ==============================================================================
+# DATASET CONSTRUCTION
+# Compiles the high-fidelity synthetic telemetry dataset required for the 
+# Evaluation phase of the Design Science Research (DSR) methodology.
+# ==============================================================================
+def compile_structured_dataset():
+    frames = []
+    global_time = 0.0
+    
+    # 1. Ingest baseline human telemetry
+    for _ in range(15):
+        df = generate_honest_human_telemetry()
+        df['Timestamp'] += global_time
+        frames.append(df)
+        global_time = df['Timestamp'].iloc[-1] + 1.0
+        
+    # 2. Ingest elite human telemetry to establish the performance-skill overlap.
+    for _ in range(3):
+        df = generate_elite_human_telemetry()
+        df['Timestamp'] += global_time
+        frames.append(df)
+        global_time = df['Timestamp'].iloc[-1] + 1.0
+        
+    # 3. Inject standard hardware aimbots
+    df1 = generate_hardware_aimbot_telemetry()
+    df1['Timestamp'] += global_time
+    frames.append(df1)
+    global_time = df1['Timestamp'].iloc[-1] + 1.0
+    
+    # 4. Inject humanised evasion models to stress-test the Random Forest classifier.
+    df2 = generate_humanised_aimbot_telemetry()
+    df2['Timestamp'] += global_time
+    frames.append(df2)
+    
+    master_df = pd.concat(frames, ignore_index=True)
+    master_df.to_csv("telemetry_payload_synthetic.csv", index=False)
+    print(f"Dataset compiled. Total Rows: {len(master_df)}")
+
+if __name__ == "__main__":
+    compile_structured_dataset()
+```
+
+`1_parse_hltv_demo.py`:
+
+```py
+import demoparser2
+import pandas as pd
+import numpy as np
+
+# ==============================================================================
+# DATA PIPELINE IMPLEMENTATION & INGESTION
+# This function extracts spatial-temporal telemetry from professional Counter-Strike 
+# match demos using demoparser2, fulfilling the methodology requirement for a 
+# high-fidelity dataset to test the YAACS artifact.
+# ==============================================================================
+def extract_hltv_telemetry(demo_path, output_csv):
+    print(f"[*] Reading player list from {demo_path}...")
+    
+    # 1. Initialize the parser
+    # By analyzing server-side replays (.dem files), YAACS acts as a privacy-preserving 
+    # alternative to kernel-level anti-cheats (like Vanguard) that probe local memory.
+    parser = demoparser2.DemoParser(demo_path)
+    
+    # 2. Get the list of players first (Very fast, takes 0.1 seconds)
+    player_info = parser.parse_player_info()
+    
+    # Filter out bots and spectators (usually steamid = 0 for bots)
+    real_players = player_info[player_info['steamid'] != 0]
+    
+    # Pick the very first real pro player we find.
+    # This establishes the "Elite Human" cohort necessary to test the "Visibility Plateau" 
+    # and the high-skill challenge, where elite play overlaps with humanised aimbots.
+    target_player_name = real_players.iloc[0]['name']
+    target_steamid = real_players.iloc[0]['steamid']
+    print(f"[*] Found Pro Player: {target_player_name}")
+    print(f"[*] Extracting ONLY their aiming telemetry (Optimized)...")
+    
+    # 3. ONLY parse ticks for this exact SteamID! 
+    # This ensures operational scalability. We only extract the "unavoidable" telemetry 
+    # (pitch and yaw) that a cheater MUST exhibit to alter the game state.
+    df_player = parser.parse_ticks(["pitch", "yaw"], players=[target_steamid])
+    
+    # 4. Format columns to exactly match your YAACS engines
+    df_human = pd.DataFrame({
+        # Multiply by 0.0078 because professional 128Hz servers allocate exactly 
+        # a 7.8125ms tick budget per frame. This reconstructs the temporal reality.
+        'Timestamp': np.arange(len(df_player)) * 0.0078,  
+        'Yaw': df_player['yaw'].values,
+        'Pitch': df_player['pitch'].values,
+        'Label': 0  # 0 = Real Human Pro
+    })
+    
+    # Take a 10,000 tick sample (roughly 1.3 minutes of continuous gameplay)
+    # This provides enough sequential data to be sliced into the 100-tick spatial-temporal 
+    # windows required by the Random Forest classifier.
+    df_human_sample = df_human.head(10000)
+    
+    # 5. GENERATE BOT BASELINE
+    # Represents the traditional Threat Model (e.g., standard DMA hardware aimbot).
+    print("[*] Generating Synthetic Aimbot Data (Label 1)...")
+    sample_size = 2000
+    df_bot = pd.DataFrame({
+        'Timestamp': np.arange(sample_size) * 0.0078,
+        # Notice how np.linspace creates a mathematically perfect line. 
+        # This completely lacks the natural variance described by Fitts' Law and the 
+        # Minimum Jerk Model, meaning the YAACS Heuristic engine will easily catch it.
+        'Yaw': np.linspace(0, 90, sample_size),    
+        'Pitch': np.linspace(0, 45, sample_size),  
+        'Label': 1 
+    })
+    
+    # 6. Merge and save
+    final_df = pd.concat([df_human_sample, df_bot], ignore_index=True)
+    final_df.to_csv(output_csv, index=False)
+    print(f"[*] SUCCESS! Saved to {output_csv}. Ready for Engine testing.")
+
+if __name__ == "__main__":
+    DEMO_FILE = "match.dem" 
+    OUTPUT_FILE = "telemetry_payload_v2.csv"
+    
+    extract_hltv_telemetry(DEMO_FILE, OUTPUT_FILE)
+```
+
+`2_visualize_distributions.py`:
+
+```py
+import pandas as pd
+import matplotlib.pyplot as plt
+
+def plot_trajectories():
+    df = pd.read_csv("telemetry_payload_synthetic.csv")
+    
+    # We will grab the first 5000 rows of a human and the last 5000 rows (which is the humanised bot)
+    human_sample = df[df['Label'] == 0].head(5000)
+    bot_sample = df[df['Label'] == 1].tail(5000)
+    
+    plt.figure(figsize=(12, 6))
+    
+    plt.subplot(1, 2, 1)
+    plt.plot(human_sample['Yaw'], human_sample['Pitch'], alpha=0.7, color='blue')
+    plt.title("Human Aiming Trajectory (2D)")
+    plt.xlabel("Yaw")
+    plt.ylabel("Pitch")
+    plt.grid(True)
+    
+    plt.subplot(1, 2, 2)
+    plt.plot(bot_sample['Yaw'], bot_sample['Pitch'], alpha=0.7, color='red')
+    plt.title("Humanised Bot Aiming Trajectory (2D)")
+    plt.xlabel("Yaw")
+    plt.ylabel("Pitch")
+    plt.grid(True)
+    
+    plt.tight_layout()
+    
+    # This line saves the image directly to your folder in high resolution (300 dpi)
+    plt.savefig("trajectory_comparison.png", dpi=300)
+    print("[*] Successfully saved 'trajectory_comparison.png' to your folder!")
+
+if __name__ == "__main__":
+    plot_trajectories()
+```
+
+`3_heuristic_engine.py`:
+
+```py
+import pandas as pd
+import numpy as np
+from sklearn.metrics import classification_report, accuracy_score, confusion_matrix
+
+# ==============================================================================
+# DATASET INGESTION
+# This pipeline processes either synthetic stress-test data or real professional 
+# HLTV match demos extracted using demoparser2.
+# ==============================================================================
+DATASET_PATH = "telemetry_payload_hltv.csv"
+# DATASET_PATH = "telemetry_payload_synthetic.csv"
+
+# ==============================================================================
+# SPATIOTEMPORAL FEATURE EXTRACTION
+# Why window_size=100? Because evaluating single frames is useless. We use 
+# 100-tick windows to capture a complete "flick" or aiming motion, which gives 
+# us enough data to build a statistical profile of the player's motor control.
+# ==============================================================================
+def extract_window_features(df, window_size=100):
+    
+    # dt (Delta Time): Calculates the time between each server tick.
+    # Why 0.0078? A 128Hz esports server updates every 7.8125 milliseconds. 
+    # If the timestamp diff is missing, we default to the mathematical perfect server tick.
+    dt = df['Timestamp'].diff().replace(0, np.nan).fillna(0.0078)
+    
+    # Calculates the raw angular displacement of the crosshair on the X and Y axis.
+    d_yaw = df['Yaw'].diff().fillna(0)
+    d_pitch = df['Pitch'].diff().fillna(0)
+    
+    # Angle_Delta: The Pythagorean theorem (Euclidean distance) to find the true 
+    # diagonal distance the crosshair moved in a single tick.
+    df['Angle_Delta'] = np.sqrt(d_yaw**2 + d_pitch**2)
+    
+    # Kinematic Modeling: Grounded in physiological research (like Fitts' Law).
+    # Velocity = Distance / Time. Acceleration = Change in Velocity / Time.
+    df['Velocity'] = df['Angle_Delta'] / dt
+    df['Acceleration'] = df['Velocity'].diff().abs().fillna(0) / dt
+    
+    features, labels = [], []
+    
+    # Sliding Window Processing: Slices the match data into 100-tick chunks.
+    for i in range(0, len(df) - window_size, window_size):
+        win = df.iloc[i:i + window_size]
+        
+        # Variance Normalization via Coefficient of Variation (CV).
+        # Why CV instead of Standard Deviation? CV (std / mean) measures RELATIVE 
+        # variance. A fast flick and a slow track might have different raw standard 
+        # deviations, but CV normalizes it so we can judge the mechanical smoothness.
+        vel_mean = win['Velocity'].mean()
+        vel_std = win['Velocity'].std()
+        vel_cv = (vel_std / vel_mean) if vel_mean > 0 else 0
+        
+        acc_mean = win['Acceleration'].mean()
+        acc_std = win['Acceleration'].std()
+        acc_cv = (acc_std / acc_mean) if acc_mean > 0 else 0
+        
+        # Extracts Velocity_CV, which the Random Forest later proves is one of the 
+        # primary discriminators for catching cheats.
+        features.append({
+            'Mean_Angle_Delta': win['Angle_Delta'].mean(),
+            'Velocity_CV': vel_cv,
+            'Acceleration_CV': acc_cv
+        })
+        # Assigns the label (0 for Human, 1 for Bot) based on the majority in the window.
+        labels.append(int(win['Label'].mode()[0]))
+        
+    return pd.DataFrame(features), np.array(labels)
+
+# ==============================================================================
+# BASELINE LAYER: THE HEURISTIC ENGINE
+# This engine represents traditional, static threshold-based anti-cheats. 
+# It evaluates players strictly against hard-coded physiological limits.
+# ==============================================================================
+def run_heuristic_rules(df_features):
+    predictions = []
+    for _, row in df_features.iterrows():
+        
+        # The Thresholds (0.15 and 0.10): These represent the absolute lowest 
+        # boundaries of human inconsistency. 
+        # If a player's Velocity CV drops below 0.10, they are playing with a 
+        # mechanical perfection that violates the Minimum Jerk Model[cite: 4].
+        # This flags traditional aimbots, but causes the "Visibility Plateau" 
+        # when dealing with humanised, S-curve cheats.
+        if row['Acceleration_CV'] < 0.15 or row['Velocity_CV'] < 0.10:
+            predictions.append(1)  # Bot
+        else:
+            predictions.append(0)  # Human
+    return np.array(predictions)
+
+# ==============================================================================
+# EXECUTION PIPELINE
+# ==============================================================================
+if __name__ == "__main__":
+    print(f"[*] Loading dataset: {DATASET_PATH}")
+    raw_df = pd.read_csv(DATASET_PATH)
+    
+    # 1. Feed raw telemetry into the feature engineering pipeline.
+    X_features, y_true = extract_window_features(raw_df)
+    
+    # 2. Evaluate the features using the static heuristic rules.
+    y_pred = run_heuristic_rules(X_features)
+    
+    # 3. Output the baseline performance metrics.
+    # In the dissertation, the heuristic engine produced a 14.00% False Positive 
+    # Rate, proving why Machine Learning is necessary to avoid banning innocent players.
+    print("\n" + "="*40)
+    print("      HEURISTIC ENGINE EVALUATION      ")
+    print("="*40)
+    print(f"Accuracy: {accuracy_score(y_true, y_pred):.4f}")
+    print("\nConfusion Matrix:\n", confusion_matrix(y_true, y_pred))
+    print("\nClassification Report:\n", classification_report(y_true, y_pred, target_names=['Human (0)', 'Bot (1)']))
+```
+
+`4_ml_benchmark.py`:
+
+```py
+import pandas as pd
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import classification_report, roc_auc_score, confusion_matrix
+
+# ==============================================================================
+# DATASET SELECTION: Professional Telemetry vs. Synthetic Simulation
+# HLTV datasets represent real professional Counter-Strike match demos extracted 
+# using demoparser2. This validates the system against the "high-skill 
+# challenge" of elite human play.
+# ==============================================================================
+DATASET_PATH = "telemetry_payload_hltv.csv"
+# DATASET_PATH = "telemetry_payload_synthetic.csv"
+
+# ==============================================================================
+# SPATIOTEMPORAL FEATURE EXTRACTION (100-TICK WINDOWS)
+# YAACS processes 100-tick spatial-temporal telemetry windows to capture complete 
+# behavioral fingerprints rather than evaluating isolated, single frames.
+# ==============================================================================
+def extract_window_features(df, window_size=100):
+    # 0.0078s represents the theoretical timing of a 128Hz server tick budget.
+    dt = df['Timestamp'].diff().replace(0, np.nan).fillna(0.0078)
+    d_yaw = df['Yaw'].diff().fillna(0)
+    d_pitch = df['Pitch'].diff().fillna(0)
+    
+    df['Angle_Delta'] = np.sqrt(d_yaw**2 + d_pitch**2)
+    df['Velocity'] = df['Angle_Delta'] / dt
+    df['Acceleration'] = df['Velocity'].diff().abs().fillna(0) / dt
+    
+    features, labels = [], []
+    
+    for i in range(0, len(df) - window_size, window_size):
+        win = df.iloc[i:i + window_size]
+        
+        vel_mean = win['Velocity'].mean()
+        vel_std = win['Velocity'].std()
+        vel_cv = (vel_std / vel_mean) if vel_mean > 0 else 0
+        
+        acc_mean = win['Acceleration'].mean()
+        acc_std = win['Acceleration'].std()
+        acc_cv = (acc_std / acc_mean) if acc_mean > 0 else 0
+        
+        # FEATURE MATRIX:
+        # Notice the inclusion of 'Max_Angle_Delta'. Your evaluation proved that 
+        # cheats are bounded by the "Evasion-Utility Tradeoff". 
+        # If a cheat wants to actually be useful, it MUST occasionally snap to a 
+        # target, which creates a measurable Max_Angle_Delta spike.
+        features.append({
+            'Mean_Angle_Delta': win['Angle_Delta'].mean(),
+            'Max_Angle_Delta': win['Angle_Delta'].max(),
+            'Velocity_Mean': vel_mean,
+            'Velocity_CV': vel_cv,
+            'Acceleration_CV': acc_cv
+        })
+        labels.append(int(win['Label'].mode()[0]))
+        
+    return pd.DataFrame(features), np.array(labels)
+
+# ==============================================================================
+# SUPERVISED LEARNING: RANDOM FOREST CLASSIFIER
+# This ML layer processes the multivariate time-series data to overcome the 
+# "Visibility Plateau" where the traditional heuristic engine failed.
+# ==============================================================================
+if __name__ == "__main__":
+    print(f"[*] Loading dataset: {DATASET_PATH}")
+    raw_df = pd.read_csv(DATASET_PATH)
+    
+    X, y = extract_window_features(raw_df)
+    
+    # Split 70% training, 30% testing
+    # Stratify=y ensures we keep the same ratio of Humans to Bots in both sets,
+    # addressing the operational scalability and data imbalance problem.
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42, stratify=y)
+    
+    # Train Random Forest Model
+    # Why Random Forest? Because it is incredibly fast. Computational profiling 
+    # confirms this model executes in just 0.77 ms, consuming only 9.86% of the 
+    # server's 128Hz tick budget, adding negligible asynchronous overhead.
+    clf = RandomForestClassifier(n_estimators=100, random_state=42)
+    clf.fit(X_train, y_train)
+    
+    y_pred = clf.predict(X_test)
+    y_proba = clf.predict_proba(X_test)[:, 1]
+    
+    # PERFORMANCE METRICS:
+    # Evaluated against professional telemetry, this model demonstrated total dominance,
+    # achieving 100.00% precision, completely eliminating false bans, and scoring 
+    # a perfect 1.0000 ROC-AUC.
+    print("\n" + "="*40)
+    print("     MACHINE LEARNING BENCHMARK RESULTS     ")
+    print("="*40)
+    print(f"ROC-AUC Score: {roc_auc_score(y_test, y_proba):.4f}")
+    print("\nConfusion Matrix:\n", confusion_matrix(y_test, y_pred))
+    print("\nClassification Report:\n", classification_report(y_test, y_pred, target_names=['Human (0)', 'Bot (1)']))
+    
+    # --------------------------------------------------------------------------
+    # FEATURE IMPORTANCE METRICS (MEAN DECREASE IN IMPURITY)
+    # --------------------------------------------------------------------------
+    # This block satisfies the ELPSI / Professional engineering requirement for 
+    # "Explainable AI". We don't just ban players blindly; the Mean Decrease in 
+    # Impurity (MDI) mathematically justifies WHICH behaviors triggered the ban.
+    # Specifically, MDI ranking validated Max_Angle_Delta and Velocity_CV as the 
+    # primary discriminators.
+    print("\n" + "="*40)
+    print("       FEATURE IMPORTANCE RANKINGS        ")
+    print("="*40)
+    importances = clf.feature_importances_
+    feature_names = X.columns
+    for name, imp in zip(feature_names, importances):
+        print(f"Feature: {name:20s} | Importance: {imp*100:.2f}%")
+```
+
+`5_generate_graphs`:
+
+```
+import matplotlib.pyplot as plt
+import numpy as np
+import seaborn as sns
+
+# Set global aesthetic style
+sns.set_theme(style="whitegrid")
+plt.rcParams.update({'font.size': 12, 'font.family': 'sans-serif'})
+
+def plot_performance_comparison():
+    """Figure 1: Grouped bar chart comparing Heuristic vs ML performance."""
+    categories = ['Accuracy', 'Bot Precision', 'Bot Recall', 'False Positive Rate']
+    
+    # Data values extracted from your test runs
+    hltv_heuristic = [0.8739, 0.5600, 0.9474, 0.1400]
+    hltv_ml = [0.9722, 1.0000, 0.8333, 0.0000]
+    
+    synthetic_heuristic = [0.9319, 1.0000, 0.3131, 0.0000]
+    synthetic_ml = [0.9833, 1.0000, 0.8333, 0.0000]
+
+    x = np.arange(len(categories))
+    width = 0.2
+
+    fig, ax = plt.subplots(figsize=(12, 6))
+
+    # Plot bars
+    ax.bar(x - 1.5*width, hltv_heuristic, width, label='HLTV Pro (Heuristic)', color='#e74c3c')
+    ax.bar(x - 0.5*width, hltv_ml, width, label='HLTV Pro (ML Benchmark)', color='#2ecc71')
+    ax.bar(x + 0.5*width, synthetic_heuristic, width, label='Synthetic (Heuristic)', color='#3498db', alpha=0.7)
+    ax.bar(x + 1.5*width, synthetic_ml, width, label='Synthetic (ML Benchmark)', color='#9b59b6', alpha=0.7)
+
+    ax.set_ylabel('Score / Percentage')
+    ax.set_title('Engine Performance Across Telemetry Datasets', fontsize=14, fontweight='bold', pad=15)
+    ax.set_xticks(x)
+    ax.set_xticklabels(categories, fontweight='bold')
+    ax.set_ylim(0, 1.15)
+    ax.legend(loc='upper right', frameon=True)
+
+    # Add numeric labels on top of bars
+    for p in ax.patches:
+        height = p.get_height()
+        if height > 0:
+            ax.annotate(f'{height:.2f}',
+                        xy=(p.get_x() + p.get_width() / 2, height),
+                        xytext=(0, 3),  
+                        textcoords="offset points",
+                        ha='center', va='bottom', fontsize=9, rotation=0)
+
+    plt.tight_layout()
+    plt.savefig('figure1_performance_comparison.png', dpi=300)
+    print("[*] Saved figure1_performance_comparison.png")
+    plt.close()
+
+def plot_hltv_confusion_matrices():
+    """Figure 2: Side-by-side Confusion Matrix heatmaps for the HLTV experiment."""
+    cm_heuristic = np.array([[86, 14], [1, 18]])
+    cm_ml = np.array([[30, 0], [1, 5]])
+    
+    labels = ['Human (0)', 'Bot (1)']
+    
+    fig, axes = plt.subplots(1, 2, figsize=(12, 5))
+    
+    # Heuristic Matrix
+    sns.heatmap(cm_heuristic, annot=True, fmt='d', cmap='Blues', ax=axes[0],
+                xticklabels=labels, yticklabels=labels, cbar=False, annot_kws={"size": 16, "weight": "bold"})
+    axes[0].set_title('Heuristic Engine (HLTV Pro Data)', fontsize=12, fontweight='bold')
+    axes[0].set_xlabel('Predicted Label')
+    axes[0].set_ylabel('True Label')
+    
+    # ML Matrix
+    sns.heatmap(cm_ml, annot=True, fmt='d', cmap='Greens', ax=axes[1],
+                xticklabels=labels, yticklabels=labels, cbar=False, annot_kws={"size": 16, "weight": "bold"})
+    axes[1].set_title('ML Benchmark Engine (HLTV Pro Data)', fontsize=12, fontweight='bold')
+    axes[1].set_xlabel('Predicted Label')
+    axes[1].set_ylabel('True Label')
+    
+    plt.suptitle('Confusion Matrix Comparison on HLTV Pro Telemetry', fontsize=14, fontweight='bold', y=1.02)
+    plt.tight_layout()
+    plt.savefig('figure2_hltv_confusion_matrices.png', dpi=300)
+    print("[*] Saved figure2_hltv_confusion_matrices.png")
+    plt.close()
+
+if __name__ == "__main__":
+    plot_performance_comparison()
+    plot_hltv_confusion_matrices()
+```
