@@ -13,13 +13,21 @@ confidence: medium
 
 **DexCheck** (ablanchard-dev) is a live, read-only forensic PC check for **Call of Duty** and **Warzone**, built to vet players during supervised screen-shares while a moderator watches the output. (source: wiki/sources/descriptions/ablanchard-dev__dexcheck.md)
 
+## Detection targets
+
+Probes aim to surface cheat software, **DMA cards**, **capture hardware**, **Cronus/XIM-style input devices**, anti-forensic wipe traces, and persistence across **every signed-in user account**—without modifying the host or using the network. (source: wiki/sources/descriptions/ablanchard-dev__dexcheck.md)
+
 ## Probes and artifacts
 
-Runs ~40 read-only probes on Windows via **PowerShell 5.1** (double-click launcher) plus a native **macOS** Bash companion. Scans cover USN journal and Prefetch artifacts, BAM/DAM, UserAssist, Shimcache, PCA, registry and startup persistence, live processes and outbound connections, kernel drivers, **PCIe device identity**, HWID spoof indicators, Code Integrity refusals, and anti-forensic wipe traces across signed-in user accounts.
+Runs ~40 read-only probes on Windows via **PowerShell 5.1** (double-click launcher) plus a native **macOS** Bash companion. Scans cover USN journal and Prefetch artifacts, BAM/DAM, UserAssist, Shimcache, PCA, registry and startup persistence, live processes and outbound connections, kernel drivers, **PCIe device identity**, HWID spoof indicators, Code Integrity refusals, **system security posture**, and anti-forensic wipe traces.
 
 ## Verdict model
 
-Rolls findings into **CLEAN**, **SUSPECT**, or critical verdicts without modifying the host or using the network. Ships a visual setup checklist for cases software cannot see (second-machine radar rigs, spoofed DMA hardware) plus a large PowerShell test suite exercised in CI.
+Rolls findings into **CLEAN**, **SUSPECT**, or **critical** verdict tiers. Ships a visual setup checklist for cases software cannot see (second-machine radar rigs, spoofed DMA hardware). A large PowerShell test suite is exercised in CI.
+
+## Design constraints
+
+Read-only collectors only—no host writes, no outbound network use. Intended for consent-based, moderator-supervised workflows rather than silent background enforcement.
 
 ## Audience
 
@@ -31,4 +39,4 @@ Tournament organizers, community anti-cheat moderators, and game-security resear
 
 ## Related
 
-[[error-pc-check]] · [[aeterna-rongroi]] · [[aetheris]] · [[luminary-dma]] · [[hoozi-cs2-dma]] · [[overviews/anti-cheat]] · [[overviews/dma-attack]] · [[overviews/reverse-engineering]]
+[[error-pc-check]] · [[aeterna-rongroi]] · [[alibi]] · [[aetheris]] · [[luminary-dma]] · [[hoozi-cs2-dma]] · [[hardware-input-injection]] · [[overviews/anti-cheat]] · [[overviews/dma-attack]] · [[overviews/reverse-engineering]]
