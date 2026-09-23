@@ -20,4 +20,4 @@ The same author's Binary Ninja plugin [[obfuscation-analysis]] uses backward sli
 
 ## Related
 
-[[mixed-boolean-arithmetic]] · [[gamba]] · [[goomba]] · [[obfuscation-analysis]] · [[qsynthesis]] · [[promba]] · [[overviews/reverse-engineering]]
+[[mixed-boolean-arithmetic]] · [[binary-cartography]] · [[gamba]] · [[goomba]] · [[obfuscation-analysis]] · [[qsynthesis]] · [[promba]] · [[ghidra-headless-mcp]] · [[overviews/reverse-engineering]]

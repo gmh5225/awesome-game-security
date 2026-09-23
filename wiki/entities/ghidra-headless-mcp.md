@@ -20,4 +20,4 @@ Ghidra-side peer to IDA MCP bridges such as [[ida-mcp-server-plugin]] and [[iida
 
 ## Related
 
-[[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[ida-mcp-server-plugin]] · [[iida-mcp]] · [[ghidrametrics]] · [[binaryninja-pcode]] · [[obfuscation-detection]] · [[obfuscation-analysis]] · [[pocsmith]]
+[[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[binary-cartography]] · [[ida-mcp-server-plugin]] · [[iida-mcp]] · [[ghidrametrics]] · [[binaryninja-headless-mcp]] · [[binaryninja-pcode]] · [[obfuscation-detection]] · [[obfuscation-analysis]] · [[pocsmith]]

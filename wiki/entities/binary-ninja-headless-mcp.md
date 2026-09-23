@@ -22,4 +22,4 @@ Listed in the README under **Game Develop → MCP server** beside GUI-coupled BN
 
 ## Related
 
-[[binary-ninja-mcp]] · [[binja-lattice-mcp]] · [[ghidra-headless-mcp]] · [[overviews/reverse-engineering]] · [[overviews/game-engine]] · [[overviews/game-hacking]] · [[research-rigor]]
+[[binary-ninja-mcp]] · [[binja-lattice-mcp]] · [[ghidra-headless-mcp]] · [[binary-cartography]] · [[overviews/reverse-engineering]] · [[overviews/game-engine]] · [[overviews/game-hacking]] · [[research-rigor]]

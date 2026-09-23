@@ -13,7 +13,11 @@ confidence: medium
 
 **Binary Cartography** (mrphrazer/binary-cartography) is a curated **webinar series repository** for practical reverse engineering, malware analysis, and software protection on real binaries. (source: wiki/sources/descriptions/mrphrazer__binary-cartography.md)
 
-Each session folder includes slides, sample binaries, references, and self-contained **Kali-based Docker** environments preconfigured with Ghidra or Binary Ninja, MCP-connected AI coding agents, and common analysis tooling. README category: Cheat / Guide (adjacent RE Tools workflows).
+Each session folder ships slides, sample binaries, references, and a self-contained **Kali-based Docker** lab preconfigured with Ghidra or Binary Ninja, MCP-connected AI coding agents, and common analysis tooling. Sessions progress through increasingly complex **software protection** and obfuscation schemes on real binaries. README category: Cheat / Guide (adjacent RE Tools workflows).
+
+## Session layout
+
+Per-session folders bundle reproducible artifacts: presentation slides, target binaries, bibliography/references, and a Docker compose environment so analysts can replay the full workflow without local toolchain drift.
 
 ## Workflow themes
 
@@ -21,7 +25,7 @@ Each session folder includes slides, sample binaries, references, and self-conta
 - Malware triage and heuristic code identification
 - Deobfuscation across increasingly complex protection schemes
 
-Primary technologies include Python, Docker, Ghidra headless MCP, Binary Ninja headless MCP, and symbolic analysis frameworks such as Miasm and [[msynth]].
+Primary technologies include Python, Docker, [[ghidra-headless-mcp]], [[binary-ninja-headless-mcp]], and symbolic analysis with **Miasm** plus [[msynth]] for MBA-style simplification during deobfuscation labs.
 
 ## Audience
 
