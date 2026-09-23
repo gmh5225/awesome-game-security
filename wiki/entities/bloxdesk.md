@@ -11,7 +11,11 @@ confidence: medium
 
 # BloxDesk
 
-**BloxDesk** (Buck3ttcode/bloxdesk) is an enterprise-oriented **Roblox anti-cheat platform** that links in-game telemetry, Discord moderation workflows, and cross-server ban enforcement. (source: wiki/sources/descriptions/Buck3ttcode__bloxdesk.md)
+**BloxDesk** (Buck3ttcode/bloxdesk) is an enterprise-oriented **Roblox anti-cheat platform** that links in-game telemetry, Discord moderation workflows, and cross-server ban enforcement. Listed under README **Anti Cheat > Open Source Anti Cheat System** / **game:roblox**. (source: wiki/sources/descriptions/Buck3ttcode__bloxdesk.md)
+
+## Positioning
+
+**Telemetry-first, staff-driven moderation** — unlike auto-enforcement Luau AC such as [[volcano-ac]] or [[shprotect-ac]], the SDK reports incidents via webhooks and leaves kicks/bans to human moderators. Cross-server restrictions use **Roblox Open Cloud**; appeal triage pairs recorded telemetry with **Google Gemini** statement comparison. (source: wiki/sources/descriptions/Buck3ttcode__bloxdesk.md)
 
 ## Detection surface
 
