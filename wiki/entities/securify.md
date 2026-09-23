@@ -3,7 +3,7 @@ title: Securify
 kind: entity
 topics: [anti-cheat, mobile-security]
 sources:
-  - description/RabehX/Securify/description_en.txt
+  - wiki/sources/descriptions/RabehX__Securify.md
   - wiki/sources/README-categories.md
 updated: 2026-09-23
 confidence: medium
@@ -11,7 +11,7 @@ confidence: medium
 
 # Securify
 
-**Securify** (RabehX/Securify) is an open-source Android security verification and hardware attestation utility that audits whether a device is rooted, tampered with, or running in an emulator. Listed under README **Anti Cheat > Detection:Android root**. (source: description/RabehX/Securify/description_en.txt)
+**Securify** (RabehX/Securify) is an open-source Android security verification and hardware attestation utility that audits whether a device is rooted, tampered with, or running in an emulator. Listed under README **Anti Cheat > Detection:Android root**. (source: wiki/sources/descriptions/RabehX__Securify.md)
 
 ## Detection engine
 

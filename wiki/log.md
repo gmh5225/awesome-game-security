@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-23** — ingest `description:RabehX/Securify`: entity [[securify]] (RabehX; Kotlin Compose; Rei 2.0 multi-threaded root/injection/framework/emulator/system-integrity audits; Magisk/KernelSU/Frida/Xposed detection; Play Integrity backend verification; build fingerprint + security-patch reporting + SAF log export; Anti Cheat / Detection:Android root); aligned entity + overview citations to `wiki/sources/descriptions/RabehX__Securify.md` on [[overviews/mobile-security]] and [[overviews/anti-cheat]].
+
 - **2026-09-23** — ingest `readme:categories`: Anti Cheat ~746 (+1; RabehX/[[securify]] Magisk/KernelSU/Play Integrity attestation auditor in Detection:Android root) / Xbox ~10 (+1; 3bdull4h2008/[[mcla-pc]] X360 PPC static recomp to native Windows D3D12) / Cheat ~2831 / other major section counts stable; 41 sections; entities [[securify]] + [[mcla-pc]]; synced projected README-map counts (~746/~2831) on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], [[overviews/reverse-engineering]], [[overviews/game-hacking]], and [[overviews/mobile-security]]; light `index.md` section notes (no per-category pages).
 
 - **2026-09-23** — lint (agent pass): index vs disk scan — 9 overviews, 50 concepts, 3938 entities (3997 index entries); index.md fully synced (0 missing, 0 dead, 0 duplicate entries); overview wikilink spot-check (9 pages, 11928 links) — 0 broken links; concept spot-check (50 pages, 2298 links) — 0 broken links; index.md wikilink scan (602 links) — 0 broken links; 6 cross-kind slug collisions ([[game-hacking]], [[anti-cheat]], [[reverse-engineering]], [[il2cpp]], [[byovd]], [[dma]]) — expected, no repair needed; no structural edits required.
