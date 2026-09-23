@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-23** — ingest `description:3bdull4h2008/mcla-pc`: entity [[mcla-pc]] (3bdull4h2008; Midnight Club: LA X360→native Windows D3D12 port; XenonRecomp PPC static recomp + Xenos microcode→DXIL shader replay + PSO cache; Xbox kernel host, RPF3 VFS, VMX128 hooks, Python soak/RPF3 forensics; CMake/SDL3/DXSC; Xbox / static recompilation); aligned entity + overview citations to `wiki/sources/descriptions/3bdull4h2008__mcla-pc.md` on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; `index.md` entity blurb updated.
+
 - **2026-09-23** — ingest `description:RabehX/Securify`: entity [[securify]] (RabehX; Kotlin Compose; Rei 2.0 multi-threaded root/injection/framework/emulator/system-integrity audits; Magisk/KernelSU/Frida/Xposed detection; Play Integrity backend verification; build fingerprint + security-patch reporting + SAF log export; Anti Cheat / Detection:Android root); aligned entity + overview citations to `wiki/sources/descriptions/RabehX__Securify.md` on [[overviews/mobile-security]] and [[overviews/anti-cheat]].
 
 - **2026-09-23** — ingest `readme:categories`: Anti Cheat ~746 (+1; RabehX/[[securify]] Magisk/KernelSU/Play Integrity attestation auditor in Detection:Android root) / Xbox ~10 (+1; 3bdull4h2008/[[mcla-pc]] X360 PPC static recomp to native Windows D3D12) / Cheat ~2831 / other major section counts stable; 41 sections; entities [[securify]] + [[mcla-pc]]; synced projected README-map counts (~746/~2831) on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], [[overviews/reverse-engineering]], [[overviews/game-hacking]], and [[overviews/mobile-security]]; light `index.md` section notes (no per-category pages).

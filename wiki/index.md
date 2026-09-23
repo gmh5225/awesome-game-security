@@ -2395,7 +2395,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [mba-wasm](entities/mba-wasm.md) — Rust WebAssembly MBA expression toolkit (browser UI; obfuscation, linear congruence solving, permutation polynomial generation, expression simplification; MathJax; MBA-research; Cheat Mixed boolean-arithmetic)
 - [MBA-Obfuscator](entities/mba-obfuscator.md) — non-linear MBA expressions (mba_obfuscator/ + samples/; Cheat Mixed boolean-arithmetic)
 - [mbased](entities/mbased.md) — practical MBA simplification (bliutech; Cheat Mixed boolean-arithmetic)
-- [mcla-pc](entities/mcla-pc.md) — Xbox 360 PPC static recompilation of Midnight Club: LA to native Windows D3D12 (XenonRecomp + Xenos→DXIL; RPF3 VFS; CMake/SDL3; Xbox)
+- [mcla-pc](entities/mcla-pc.md) — Xbox 360 PPC static recompilation of Midnight Club: LA to native Windows D3D12 (XenonRecomp + Xenos→DXIL + PSO cache; RPF3 VFS + VMX128 hooks; CMake/SDL3/DXSC; Xbox)
 - [mast-orchestrator](entities/mast-orchestrator.md) — Flask web dashboard for rooted Android Frida testing; ADB device/root checks, one-click frida-server deploy, SSL pinning/root/crypto hooks, remote script fetch, live output stream, token-auth API (GliTcHZzZ67; cheat / Frida)
 - [moabille](entities/moabille.md) — All-in-one Python TUI mobile security toolkit; multi-device Android/iOS; dual-pane file transfer, scrcpy mirror, automated Frida + Objection setup; ADB/iproxy/ioscpy (jafarm189; cheat / Frida)
 - [mcdota](entities/mcdota.md) — Linux Dota 2 cheat/tinkering framework (LWSS; C++; runtime injection; Panorama UI, ESP, protobuf packet intercept/edit; standard/stealth/integrated load modes; cheat / game:dota2 [linux])
