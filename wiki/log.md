@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-23** — lint (agent pass): index vs disk scan — 9 overviews, 50 concepts, 3935 entities (3994 index entries); index.md fully synced (0 missing, 0 dead, 0 duplicate entries); overview wikilink spot-check (9 pages, 11913 links) — 0 broken links; concept spot-check (50 pages, 2293 links) — 0 broken links; index.md wikilink scan (590 links) — 0 broken links; 6 cross-kind slug collisions ([[game-hacking]], [[anti-cheat]], [[reverse-engineering]], [[il2cpp]], [[byovd]], [[dma]]) — expected, no repair needed; no structural edits required.
+
 - **2026-09-22** — ingest `description:Ghou133/TShock-AntiCheat`: entity [[tshock-anticheat]] (Ghou133; C# .NET 9 TShock plugin; modular core/rule/persistence/TShock-adapter layers; packet readers + safety guards for map brushes, butcher damage, item duplication, health locks, and protocol abuse; ObserveOnly dev source; optional banning/journaling; Terraria 1.4.5.8; Anti Cheat / game:terraria); cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[tshock]]; `index.md` updated.
 
 - **2026-09-22** — ingest `readme:categories`: Anti Cheat ~743 (+1; oykuoner/[[yaacs-anticheat]] CS2 demo pitch/yaw aim-telemetry research with heuristic vs Random Forest classifiers in Machine Learning) / Cheat ~2830 / other major section counts stable; 41 sections; synced projected README-map counts (~743/~2830) on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], and [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
