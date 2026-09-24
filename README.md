@@ -4701,6 +4701,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/Xheghun/DeviceTrust [Kotlin + NDK Android library for root, emulator, hooking, custom ROM, and bootloader integrity checks with configurable risk scoring]
 - https://github.com/cognis-digital/rootsentry [Zero-dependency mobile RASP CLI that scores root/jailbreak, emulator, hook, and tamper evidence into TRUSTED→CRITICAL posture verdicts]
 - https://github.com/SloMR/Rootect [Zero-dependency Android RASP library that reports root, Frida, Xposed, repackaging, and emulator evidence with native syscall checks and hardware attestation]
+- https://github.com/radito/SecurityRiskAndroid [Android JNI sample app with layered runtime-risk detection for root, Frida, hooks, debugger attachment, suspicious memory mappings, ART/Zygote side effects, and isolated-process comparison]
 - https://github.com/Mrack/MemDetection [Calculate the CRC of libc.so and libart.so in memory and compare it with the file]
 - https://github.com/apkunpacker/RootAppDetector [Small POC code that detects known root-related apps by attempting to launch their activities and monitoring security exception]
 - https://github.com/Rem01Gaming/meowna_detector [Prove of concept of detecting meowna module]
