@@ -3268,7 +3268,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [sdk](entities/sdk.md) — Source-engine RE SDK headers (netvars / interfaces; likely CS:GO; C++)
 - [sdkgenny](entities/sdkgenny.md) — general C++ SDK generation library (cursey; PEGTL optional parser; cheat / sdk codegen)
 - [SE-tools](entities/se-tools.md) — Switch homebrew memory/cheat toolkit (Atmosphere dmnt:cht; scanner / pointer / viewer)
-- [SecurityRiskAndroid](entities/security-risk-android.md) — Android JNI layered runtime-risk sample (radito; Frida/Xposed/debugger/memory-mapping/ART-Zygote/isolated-process/GOT-PLT-PHDR integrity checks; sync+async scans; scored verdicts; Anti Cheat / Detection:Android root)
+- [SecurityRiskAndroid](entities/security-risk-android.md) — Android JNI layered runtime-risk sample (radito; Java UI + C native library; sync/async scans + Messenger isolated-process comparison; Frida/Xposed/debugger/memory-mapping/ART-Zygote/KernelSU/mock-location/GOT-PLT-PHDR disk-vs-memory hash checks; scored verdicts; Anti Cheat / Detection:Android root)
 - [Securify](entities/securify.md) — open-source Android Magisk/KernelSU/Play Integrity attestation auditor (Rei 2.0 root/hook/emulator probes; Kotlin Compose; Anti Cheat / Detection:Android root; RabehX)
 - [SEWindows](entities/sewindows.md) — Windows TPM measured-boot verifier (TCG event log, PCR replay, WBCL policy, EK/AK remote attestation; CPU virt/IOMMU/Secure Boot/VBS/HVCI/DSE/blocklist; fsquirt)
 - [Sentinel Anti-Cheat](entities/sentinel-anti-cheat.md) — educational usermode AC daemon (HEEAAP; suspended launch + pre-resume attach; remote-debugger/HWBP/INT3 polling; log/suspend/terminate policies; TaskDialog splash; Open Source Anti Cheat System)

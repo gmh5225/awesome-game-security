@@ -11,11 +11,11 @@ confidence: medium
 
 # SecurityRiskAndroid
 
-**SecurityRiskAndroid** (radito/SecurityRiskAndroid) is an Android sample application with a JNI native library that implements layered **runtime-risk detection** for tampering, hooking, and root-related threats. Listed under README **Anti Cheat > Detection:Android root**. (source: wiki/sources/descriptions/radito__SecurityRiskAndroid.md)
+**SecurityRiskAndroid** (radito/SecurityRiskAndroid) is an Android sample application with a JNI native library that implements layered **runtime-risk detection** for tampering, hooking, and root-related threats on games and other security-sensitive Android apps. Listed under README **Anti Cheat > Detection:Android root**. (source: wiki/sources/descriptions/radito__SecurityRiskAndroid.md)
 
 ## Detection signals
 
-Fast synchronous checks and asynchronous deep scans cover Frida and Xposed artifacts, debugger attachment, suspicious memory mappings, ART and package visibility inconsistencies, KernelSU probes, mock-location indicators, and native code integrity via GOT/PLT, PHDR, and disk-versus-memory hash verification.
+Fast synchronous checks and asynchronous deep scans cover Frida and Xposed artifacts, debugger attachment, suspicious memory mappings, ART/Zygote side effects and package visibility inconsistencies, KernelSU probes, mock-location indicators, and native code integrity via GOT/PLT, PHDR, and disk-versus-memory hash verification.
 
 ## Architecture
 
