@@ -2874,6 +2874,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/cursey/sdkgenny
 - https://github.com/praydog/luagenny
 - https://github.com/ssyuqixe/obfCoder
+- https://github.com/Jadis0x/URKit [Native C++ mod SDK generator for Windows x64 Unity games (Mono/IL2CPP) with CMake project scaffolding, loaders, hooks, ImGui overlay, and optional MCP dev bridge]
 
 > Game Engine Explorer:Unreal
 - https://github.com/UE4SS-RE [UE RE]
