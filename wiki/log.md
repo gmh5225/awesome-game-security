@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-24** — ingest `readme:categories`: Cheat ~2832 (+1; Jadis0x/[[urkit]] Unity/UE CMake mod SDK generator with proxy/inject loaders, SafetyHook hooks, ImGui overlay, and optional MCP DevBridge in RE Tools) / Anti Cheat ~747 / other major section counts stable; 41 sections; entity [[urkit]]; synced projected README-map counts (~2832/~747) on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/reverse-engineering]], [[overviews/game-engine]], and [[overviews/dma-attack]]; light `index.md` section notes (no per-category pages).
+
 - **2026-09-24** — lint (scheduled pass): index vs disk — 9 overviews, 50 concepts, 3941 entities (4000 index entries); 0 missing, 0 dead, 0 duplicate; overview wikilink spot-check 11936 links (0 broken); index wikilink scan 612 links (0 broken); 6 expected cross-kind slug collisions; no structural edits.
 
 - **2026-09-24** — lint (agent pass): index vs disk scan — 9 overviews, 50 concepts, 3941 entities (4000 index entries); index.md fully synced (0 missing, 0 dead, 0 duplicate entries); overview wikilink spot-check (9 pages, 11936 links) — 0 broken links; index.md wikilink scan (612 links) — 0 broken links; 6 cross-kind slug collisions ([[game-hacking]], [[anti-cheat]], [[reverse-engineering]], [[il2cpp]], [[byovd]], [[dma]]) — expected, no repair needed; no structural edits required.
