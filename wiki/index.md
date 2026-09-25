@@ -499,7 +499,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [awesome-unity](entities/awesome-unity.md) — curated Unity assets, libraries, tutorials, and dev resources (AI, networking, UI, tweening, editor tooling, project examples; Game Engine / Unity)
 - [awesome-windbg-extensions](entities/awesome-windbg-extensions.md) — curated WinDbg extension index (kernel analysis, IR, rootkit hunting, memory inspection, debugger automation; WinDbg)
 - [awesome-wow-rust](entities/awesome-wow-rust.md) — curated Rust WoW private-server resources (server implementations / protocol + file-format libs / renderers; cheat / game:wow)
-- [AxManagerD](entities/axmanagerd.md) — root-free Magisk-style Android module framework (property injection, runtime daemons, LSPatch Xposed hooking; Dhizuku/Shizuku Device Owner; Cheat / Magisk)
+- [AxManagerD](entities/axmanagerd.md) — root-free Magisk-style Android module framework (property injection, runtime daemons, LSPatch Xposed hooking; Dhizuku/Shizuku Device Owner; script tracing + AI assistant; Cheat / Magisk)
 - [axhunter](entities/axhunter.md) — Rust XIGNCODE3 xhunter1/xhunter2 driver PoCs (CVE-2026-15430; WriteFile frames; PPL-bypass handles, process R/W, LSA credential extraction; BlackSnufkin)
 - [blackhat2012](entities/blackhat2012.md) — BH2012 anti-debug / anti-disasm / obfuscation / Anti-VM PoCs (C/C++ + FASM)
 - [BlackObfuscator](entities/black-obfuscator.md) — DEX control-flow obfuscator (CodingGay; Java; modified dex2jar pipeline; configurable depth, package targeting, rule-based processing; GUI + Android Studio plugin; mobile app protection / anti-RE; `[Dex]`)
