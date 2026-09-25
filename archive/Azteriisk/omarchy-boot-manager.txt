@@ -1,0 +1,3274 @@
+Project Path: arc_Azteriisk_omarchy-boot-manager_n4ztvvwq
+
+Source Tree:
+
+```txt
+arc_Azteriisk_omarchy-boot-manager_n4ztvvwq
+├── LICENSE
+├── PKGBUILD
+├── README.md
+├── Service.qml
+├── docs
+│   └── screenshots
+├── install.sh
+├── manifest.json
+├── omarchy-boot.desktop
+├── scripts
+│   ├── core
+│   │   ├── __init__.py
+│   │   ├── boot_detector.py
+│   │   ├── limine_manager.py
+│   │   └── secureboot_manager.py
+│   ├── omarchy-boot
+│   ├── omarchy-boot-gui
+│   └── org.omarchy.bootmanager.policy
+├── tests
+│   ├── test_reboot_cli.py
+│   └── test_security_limine.py
+├── uninstall.sh
+└── windows
+    ├── README.md
+    ├── install.bat
+    ├── omarchy-boot.cmd
+    ├── omarchy-boot.ps1
+    ├── reboot-bios.cmd
+    ├── reboot-omarchy.cmd
+    ├── reboot-to-bios.cmd
+    └── reboot-to-omarchy.cmd
+
+```
+
+`LICENSE`:
+
+```
+MIT License
+
+Copyright (c) 2026 Azteriisk
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
+`PKGBUILD`:
+
+```
+# Maintainer: Azteriisk
+pkgname=omarchy-boot-manager-git
+pkgver=1.0.0
+pkgrel=1
+pkgdesc="Windows dual-boot chainloader, sbctl Secure Boot enrollment for anti-cheat games, and reboot controls for Omarchy"
+arch=('any')
+url="https://github.com/Azteriisk/omarchy-boot-manager"
+license=('MIT')
+depends=('python' 'python-gobject' 'gtk4' 'libadwaita' 'efibootmgr' 'sbctl')
+makedepends=('git')
+provides=('omarchy-boot-manager')
+conflicts=('omarchy-boot-manager')
+_commit="76f1b3bcea4fd0a9026e08622bb77eed06c7cc78"
+source=("${pkgname}::git+https://github.com/Azteriisk/omarchy-boot-manager.git#commit=${_commit}")
+sha256sums=('SKIP')
+
+pkgver() {
+  cd "$srcdir/${pkgname}"
+  if tag=$(git describe --long --tags --abbrev=7 2>/dev/null); then
+    echo "$tag" | sed 's/^v//;s/\([^-]*-g\)/r\1/;s/-/./g'
+  else
+    printf "1.0.0.r%s.%s\n" "$(git rev-list --count HEAD)" "$(git rev-parse --short=7 HEAD)"
+  fi
+}
+
+package() {
+  cd "$srcdir/${pkgname}"
+  install -dm755 "$pkgdir/usr/share/omarchy/plugins/azterisk.boot"
+  cp -a manifest.json Service.qml scripts omarchy-boot.desktop README.md "$pkgdir/usr/share/omarchy/plugins/azterisk.boot/"
+  if [ -d windows ]; then
+    cp -a windows "$pkgdir/usr/share/omarchy/plugins/azterisk.boot/"
+  fi
+
+  install -dm755 "$pkgdir/usr/bin"
+  ln -sf "/usr/share/omarchy/plugins/azterisk.boot/scripts/omarchy-boot" "$pkgdir/usr/bin/omarchy-boot"
+  ln -sf "/usr/share/omarchy/plugins/azterisk.boot/scripts/omarchy-boot-gui" "$pkgdir/usr/bin/omarchy-boot-gui"
+
+  install -Dm644 omarchy-boot.desktop "$pkgdir/usr/share/applications/omarchy-boot.desktop"
+  install -Dm644 scripts/org.omarchy.bootmanager.policy "$pkgdir/usr/share/polkit-1/actions/org.omarchy.bootmanager.policy"
+  install -Dm644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+}
+
+```
+
+`README.md`:
+
+```md
+# Omarchy Boot and Secure Boot Manager
+
+An Omarchy plugin that bridges the gap between Windows and Omarchy Linux for users who dual-boot or plan to transition from Windows.
+
+It solves the two biggest pain points in Linux gaming and dual-booting:
+
+1. **Anti-Cheat Compatibility via Permanent Secure Boot**: Enrolls custom Secure Boot keys alongside Microsoft OEM keys so games that require Secure Boot (Valorant/Vanguard, EasyAntiCheat titles, FACEIT) work in Windows while Omarchy boots cleanly with Secure Boot enabled permanently.
+2. **Limine Dual-Boot Integration**: Automatically detects Windows EFI System Partitions and injects a chainload entry into Limine with one click.
+3. **Quick Reboot Controls**: Reboot directly into Windows (one-shot via `efibootmgr -n`) or into UEFI/BIOS setup (`systemctl reboot --firmware-setup`) without holding keyboard hotkeys during POST.
+4. **Bidirectional Fast Swapping (Windows Companion)**: Includes a zero-UAC Windows companion utility (`windows/`) to jump back to Omarchy from Windows with a single desktop click or terminal command (`reboot-omarchy`), setting the one-shot UEFI target via `bcdedit /set {fwbootmgr} bootsequence`.
+
+---
+
+## Screenshots
+
+### Overview Dashboard
+
+![Overview tab showing Secure Boot status, motherboard info, and Windows detection](docs/screenshots/overview.png)
+
+### Secure Boot Setup Wizard
+
+![Three-step wizard for sbctl key enrollment and EFI signing](docs/screenshots/wizard.png)
+
+### Limine Dual-Boot Configuration
+
+![Limine chainload entry preview and one-click Windows configuration](docs/screenshots/limine.png)
+
+### Omarchy Menu Integration
+
+The plugin adds three entries to the Omarchy menu. Search "boot", "bios", or "windows" in the launcher.
+
+![Boot and Secure Boot entry in the Omarchy Setup menu](docs/screenshots/menu.png)
+
+---
+
+## Installation
+
+```bash
+git clone https://github.com/Azteriisk/omarchy-boot-manager.git
+cd omarchy-boot-manager
+chmod +x install.sh
+./install.sh
+```
+
+The installer:
+
+1. Copies the plugin to `~/.config/omarchy/plugins/azterisk.boot/`.
+2. Symlinks `omarchy-boot` and `omarchy-boot-gui` into `~/.local/bin/`.
+3. Installs the `.desktop` launcher.
+4. Merges three entries into `~/.config/omarchy/extensions/omarchy-menu.jsonc`:
+   - **Setup > Boot and Secure Boot** — opens the GUI
+   - **System > Reboot into Windows** — one-shot boot to Windows
+   - **System > Reboot into BIOS Setup** — direct firmware entry
+
+---
+
+## Secure Boot Setup Runbook
+
+### Why this exists
+
+The UEFI specification makes `SecureBoot` a read-only runtime variable. No software can toggle BIOS Secure Boot on or off from within a running OS. The standard workaround of disabling Secure Boot to run Linux breaks anti-cheat systems that verify `SecureBoot == 1` when Windows boots.
+
+The correct solution is to enroll your own Platform Key (PK) alongside Microsoft's certificates. Your bootloader and kernels are signed with your key. Windows still sees legitimate Microsoft CA certs. Secure Boot stays enabled for both operating systems permanently.
+
+### Step 1: Put BIOS into Setup Mode
+
+Setup Mode clears the existing Platform Key, which allows new keys to be enrolled. The GUI detects your motherboard vendor and shows exact BIOS navigation steps.
+
+General procedure:
+
+1. Reboot into BIOS (F2 or DEL on most boards, or use "Reboot into BIOS Setup" from the Omarchy menu).
+2. Navigate to the Secure Boot section (usually under Boot or Security).
+3. Find "Key Management" or "Secure Boot Keys" and choose "Clear" or "Delete All Keys".
+4. Save and boot back into Omarchy.
+
+### Step 2: Run the Wizard
+
+In the GUI, go to the **Secure Boot Wizard** tab and click **Run Wizard**. This opens a terminal running `omarchy-boot setup`, which:
+
+1. Installs `sbctl` if not present.
+2. Generates your custom PK, KEK, and db keys.
+3. Enrolls them alongside Microsoft OEM certificates (`sbctl enroll-keys -m`).
+4. Discovers and signs all EFI binaries with `sbctl sign -s`:
+   - `BOOTX64.EFI` and `LIMINE_X64.EFI` (bootloader)
+   - All kernel UKIs in `/boot/EFI/Linux/` (e.g. `omarchy_linux-omarchy.efi`, `omarchy_linux.efi`)
+   - `fwupdx64.efi` (firmware updater)
+   - All snapshot kernel history EFIs in `limine_history/` directories
+5. Runs `sbctl verify` to confirm all registered files are signed.
+
+The `-s` flag on live kernel files registers them with sbctl's pacman hook so they are automatically re-signed on every kernel update.
+
+### Step 3: Enable Secure Boot in BIOS
+
+After the wizard completes, the GUI shows a green "Ready to Activate" badge and a "Reboot to BIOS Now" button. Click it, then:
+
+1. Navigate to Secure Boot settings.
+2. Set OS Type to "Windows UEFI Mode" (ASUS) or enable Secure Boot directly.
+3. Save and exit.
+
+Omarchy and Windows will both boot with Secure Boot permanently active.
+
+---
+
+## Command Line Interface
+
+```bash
+# Full status report
+omarchy-boot status
+
+# Status as JSON (for scripts or shell widgets)
+omarchy-boot json
+
+# Reboot into Windows on next boot only (returns to Omarchy after)
+omarchy-boot reboot windows
+
+# Reboot directly into UEFI/BIOS firmware setup
+omarchy-boot reboot bios
+
+# Add detected Windows partition chainload entry to /boot/limine.conf
+omarchy-boot add-windows
+
+# Interactive terminal setup wizard
+omarchy-boot setup
+
+# Launch the graphical interface
+omarchy-boot gui
+```
+
+---
+
+## Windows Companion: Swap Back to Omarchy
+
+Dual-booting is only convenient if switching back from Windows is just as effortless. The repository includes a Windows companion utility in [`windows/`](windows/) that allows you to reboot straight into Omarchy without pressing BIOS hotkeys (F11/F12) or making manual bootloader selections.
+
+### How It Works on Windows
+
+Windows manages the one-shot EFI boot target through the BCD store:
+```cmd
+bcdedit /set {fwbootmgr} bootsequence <OMARCHY_ENTRY_GUID>
+shutdown /r /t 0
+```
+This sets the UEFI NVRAM `BootNext` variable directly, mirroring `efibootmgr -n`. On the next reboot only, the motherboard firmware loads Omarchy / Limine directly. Subsequent boots automatically revert to your standard boot order.
+
+### Zero-UAC Execution
+
+Modifying BCD normally requires Administrator privileges and pops a Windows UAC confirmation dialog every time. The companion avoids this by registering a high-integrity Windows Scheduled Task (`RebootToOmarchy`):
+- Desktop shortcuts and terminal commands trigger the task (`schtasks /run /tn "RebootToOmarchy"`).
+- Your PC reboots into Omarchy with **zero UAC prompts**.
+
+### Windows Setup
+
+1. Boot into Windows.
+2. Open the [`windows/`](windows/) folder in this repository (or copy it to your Windows drive).
+3. Right-click **`install.bat`** and select **"Run as administrator"** (or run `.\omarchy-boot.ps1 setup` in an elevated PowerShell terminal).
+4. The wizard scans your UEFI firmware entries, auto-detects your Omarchy / Limine entry, and configures:
+   - **`Reboot into Omarchy`** shortcut on your Desktop
+   - **`Reboot into BIOS`** shortcut on your Desktop
+   - Adds `reboot-omarchy` and `reboot-bios` command aliases to your PowerShell `$PROFILE`
+
+### Windows Commands
+
+```powershell
+# Instant swap to Omarchy Linux
+reboot-omarchy
+
+# Instant reboot to BIOS Setup
+reboot-bios
+
+# View Secure Boot status & EFI partitions
+.\omarchy-boot.ps1 status
+```
+
+---
+
+## Technical Notes
+
+**ESP mount permissions**: Omarchy mounts the EFI System Partition with `fmask=0077`, making `/boot` unreadable by non-root users. The plugin accounts for this by using `sudo find` for EFI discovery at signing time rather than Python `glob()`, which silently returns empty results for unreadable directories.
+
+**Snapshot kernels**: Limine with `limine-snapper-sync` stores immutable kernel copies for each Btrfs snapshot in a `limine_history/` directory on the ESP. These are not tracked by sbctl's signing database since they never change, but must be individually signed for Secure Boot to permit booting into snapshots. The wizard handles this automatically.
+
+**Microsoft OEM key preservation**: The `-m` flag in `sbctl enroll-keys -m` includes Microsoft's CA and KEK certificates alongside your custom keys. This is required for Windows Boot Manager and Windows anti-cheat systems to continue working. Omitting it results in Windows refusing to boot under Secure Boot.
+
+**Bidirectional one-shot swapping**: Linux `efibootmgr -n <id>` and Windows `bcdedit /set {fwbootmgr} bootsequence <guid>` manipulate the exact same underlying UEFI specification runtime variable (`BootNext`, GUID `{8BE4DF61-93CA-11D2-AA0D-00E098032B8C}`). Both directions preserve the primary UEFI boot order, ensuring neither operating system permanently overwrites the user's default boot priority.
+
+**Key re-enrollment**: If you reinstall Omarchy or reset your BIOS to factory defaults, you will need to re-run the wizard. Your previous keys are stored in `/var/lib/sbctl/` and can be re-enrolled without regenerating them.
+
+---
+
+## Uninstallation
+
+```bash
+cd omarchy-boot-manager
+./uninstall.sh
+```
+
+This removes the plugin directory, symlinks, desktop launcher, and menu entries.
+
+---
+
+## License
+
+MIT - [Azteriisk](https://github.com/Azteriisk)
+
+```
+
+`Service.qml`:
+
+```qml
+import QtQuick
+import Quickshell
+import Quickshell.Io
+
+Item {
+  id: root
+
+  property var shell: null
+  property bool secureBootEnabled: false
+  property bool windowsDetected: false
+  property string windowsGuid: ""
+  property string boardModel: ""
+
+  readonly property string bootCli: Quickshell.env("HOME") + "/.config/omarchy/plugins/azterisk.boot/scripts/omarchy-boot"
+
+  function refresh() {
+    if (!statusProc.running) {
+      statusProc.running = true;
+    }
+  }
+
+  function rebootWindows() {
+    rebootWinProc.running = true;
+  }
+
+  function rebootBios() {
+    rebootBiosProc.running = true;
+  }
+
+  function openGui() {
+    guiProc.running = true;
+  }
+
+  Component.onCompleted: {
+    refresh();
+  }
+
+  Process {
+    id: statusProc
+    command: [root.bootCli, "json"]
+    stdout: StdioCollector {
+      waitForEnd: true
+      onStreamFinished: {
+        try {
+          var data = JSON.parse(text.trim());
+          if (data.secure_boot) {
+            root.secureBootEnabled = data.secure_boot.enabled || false;
+          }
+          if (data.windows_partitions && data.windows_partitions.length > 0) {
+            root.windowsDetected = true;
+            root.windowsGuid = data.windows_partitions[0].partuuid || "";
+          } else {
+            root.windowsDetected = false;
+            root.windowsGuid = "";
+          }
+          if (data.hardware) {
+            root.boardModel = (data.hardware.vendor || "") + " " + (data.hardware.model || "");
+          }
+        } catch (e) {
+          // JSON parse fallback
+        }
+      }
+    }
+  }
+
+  Process {
+    id: rebootWinProc
+    command: [root.bootCli, "reboot", "windows"]
+  }
+
+  Process {
+    id: rebootBiosProc
+    command: [root.bootCli, "reboot", "bios"]
+  }
+
+  Process {
+    id: guiProc
+    command: [root.bootCli, "gui"]
+  }
+}
+
+```
+
+`install.sh`:
+
+```sh
+#!/usr/bin/env bash
+# Complete All-In-One Installer for Omarchy Boot & Secure Boot Manager (azterisk.boot)
+# Author: Azteriisk
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PLUGIN_ID="azterisk.boot"
+PLUGINS_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/omarchy/plugins"
+TARGET_DIR="$PLUGINS_DIR/$PLUGIN_ID"
+BIN_DIR="$HOME/.local/bin"
+APPS_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/applications"
+MENU_CONFIG="${XDG_CONFIG_HOME:-$HOME/.config}/omarchy/extensions/omarchy-menu.jsonc"
+
+echo "⚡ Installing Omarchy Boot & Secure Boot Manager..."
+
+# 1. Ensure target directories exist
+mkdir -p "$PLUGINS_DIR"
+mkdir -p "$BIN_DIR"
+mkdir -p "$APPS_DIR"
+mkdir -p "$(dirname "$MENU_CONFIG")"
+
+# 2. Copy files to plugins directory if running outside
+if [ "$SCRIPT_DIR" != "$TARGET_DIR" ]; then
+  mkdir -p "$TARGET_DIR"
+  cp -a "$SCRIPT_DIR/manifest.json" \
+        "$SCRIPT_DIR/Service.qml" \
+        "$SCRIPT_DIR/omarchy-boot.desktop" \
+        "$SCRIPT_DIR/scripts" \
+        "$SCRIPT_DIR/install.sh" \
+        "$SCRIPT_DIR/uninstall.sh" \
+        "$SCRIPT_DIR/README.md" "$TARGET_DIR/"
+  if [ -d "$SCRIPT_DIR/windows" ]; then
+    cp -a "$SCRIPT_DIR/windows" "$TARGET_DIR/"
+  fi
+fi
+
+# 3. Ensure scripts are executable & symlink CLI binaries
+chmod +x "$TARGET_DIR/scripts/omarchy-boot"
+chmod +x "$TARGET_DIR/scripts/omarchy-boot-gui"
+ln -sf "$TARGET_DIR/scripts/omarchy-boot" "$BIN_DIR/omarchy-boot"
+ln -sf "$TARGET_DIR/scripts/omarchy-boot-gui" "$BIN_DIR/omarchy-boot-gui"
+echo "  ✓ Symlinked omarchy-boot to $BIN_DIR/omarchy-boot"
+echo "  ✓ Symlinked omarchy-boot-gui to $BIN_DIR/omarchy-boot-gui"
+
+# 4. Install desktop application entry
+cp "$TARGET_DIR/omarchy-boot.desktop" "$APPS_DIR/omarchy-boot.desktop"
+update-desktop-database "$APPS_DIR" 2>/dev/null || true
+echo "  ✓ Installed application entry in $APPS_DIR/omarchy-boot.desktop"
+
+# 5. Install polkit policy if root/writable
+if [ -w /usr/share/polkit-1/actions ]; then
+  cp "$TARGET_DIR/scripts/org.omarchy.bootmanager.policy" /usr/share/polkit-1/actions/ 2>/dev/null || true
+  echo "  ✓ Installed polkit policy in /usr/share/polkit-1/actions/"
+fi
+
+# 6. Integrate into Omarchy Menu (omarchy-menu.jsonc)
+echo "  ⚙ Configuring Omarchy Menu extensions for Boot Manager..."
+python3 - << 'PYEOF'
+import re
+from pathlib import Path
+
+menu_file = Path.home() / ".config" / "omarchy" / "extensions" / "omarchy-menu.jsonc"
+
+entries_to_add = {
+    "setup.boot": {
+        "icon": "󰌿",
+        "label": "Boot & Secure Boot",
+        "description": "Windows dual-boot & Secure Boot configuration",
+        "aliases": ["boot", "secure-boot", "windows-boot", "bios-setup"],
+        "action": "omarchy-boot gui"
+    },
+    "system.reboot-windows": {
+        "icon": "",
+        "label": "Reboot into Windows",
+        "description": "One-shot boot directly into Windows for next boot",
+        "aliases": ["reboot-windows", "windows"],
+        "action": "omarchy-boot reboot windows"
+    },
+    "system.reboot-bios": {
+        "icon": "󰒔",
+        "label": "Reboot into BIOS Setup",
+        "description": "Reboot straight to motherboard UEFI firmware",
+        "aliases": ["reboot-bios", "bios", "uefi"],
+        "action": "omarchy-boot reboot bios"
+    }
+}
+
+if menu_file.exists():
+    content = menu_file.read_text(encoding="utf-8")
+else:
+    content = "{\n}\n"
+
+# Remove existing boot manager block if already present to avoid duplicates
+block_marker_start = "// --- BEGIN OMARCHY BOOT MANAGER ---"
+block_marker_end = "// --- END OMARCHY BOOT MANAGER ---"
+
+if block_marker_start in content and block_marker_end in content:
+    pattern = re.compile(rf"{re.escape(block_marker_start)}.*?{re.escape(block_marker_end)}\n?", re.DOTALL)
+    content = pattern.sub("", content)
+
+# Format the JSONC entries block
+lines = [
+    f"  {block_marker_start}",
+    '  "setup.boot": {"icon": "󰌿", "label": "Boot & Secure Boot", "description": "Windows dual-boot & Secure Boot configuration", "aliases": ["boot", "secure-boot", "windows-boot", "bios-setup"], "action": "omarchy-boot gui"},',
+    '  "system.reboot-windows": {"icon": "", "label": "Reboot into Windows", "description": "One-shot boot directly into Windows for next boot", "aliases": ["reboot-windows", "windows"], "action": "omarchy-boot reboot windows"},',
+    '  "system.reboot-bios": {"icon": "󰒔", "label": "Reboot into BIOS Setup", "description": "Reboot straight to motherboard UEFI firmware", "aliases": ["reboot-bios", "bios", "uefi"], "action": "omarchy-boot reboot bios"}',
+    f"  {block_marker_end}"
+]
+insertion = "\n".join(lines) + "\n"
+
+# Insert before the last closing bracket
+r_bracket = content.rfind("}")
+if r_bracket != -1:
+    before = content[:r_bracket].rstrip()
+    after = content[r_bracket:]
+    if before and not before.endswith("{") and not before.endswith(","):
+        before += "\n,\n"
+    else:
+        before += "\n"
+    new_content = before + insertion + after
+else:
+    new_content = "{\n" + insertion + "}\n"
+
+menu_file.write_text(new_content, encoding="utf-8")
+print("     [OK] Injected Boot & Secure Boot entries into omarchy-menu.jsonc")
+PYEOF
+
+# 6. Reload Omarchy shell / menu if running
+if command -v omarchy >/dev/null 2>&1; then
+  omarchy restart shell 2>/dev/null || true
+fi
+
+echo ""
+echo "======================================================================"
+echo "  ⚡ Omarchy Boot & Secure Boot Manager installed successfully!"
+echo "======================================================================"
+echo "  How to access:"
+echo "    • Omarchy Menu -> Setup -> 'Boot & Secure Boot'"
+echo "    • Omarchy Menu -> System -> 'Reboot into Windows' & 'Reboot into BIOS'"
+echo "    • App Launcher: search 'boot', 'windows', 'secure boot', 'anticheat'"
+echo "    • Terminal CLI: run 'omarchy-boot status' or 'omarchy-boot setup'"
+echo "    • Graphical App: run 'omarchy-boot gui'"
+echo "======================================================================"
+
+```
+
+`manifest.json`:
+
+```json
+{
+  "schemaVersion": 1,
+  "id": "azterisk.boot",
+  "name": "Boot & Secure Boot Manager",
+  "version": "1.0.0",
+  "author": "Azteriisk",
+  "license": "MIT",
+  "description": "Windows dual-boot chainloading, sbctl Secure Boot enrollment for anti-cheat games, and quick reboot controls.",
+  "kinds": [
+    "service"
+  ],
+  "keepLoaded": false,
+  "entryPoints": {
+    "service": "Service.qml"
+  }
+}
+
+```
+
+`omarchy-boot.desktop`:
+
+```desktop
+[Desktop Entry]
+Name=Omarchy Boot & Secure Boot Manager
+GenericName=Boot & Secure Boot Manager
+Comment=Windows dual-boot chainloading, sbctl Secure Boot enrollment for anti-cheat games, and quick reboot controls
+Exec=omarchy-boot gui
+Icon=security-high
+Terminal=false
+Type=Application
+Categories=Settings;System;HardwareSettings;
+Keywords=boot;windows;secure boot;bios;anticheat;limine;uefi;vanguard;eac;faceit;
+
+```
+
+`scripts/core/__init__.py`:
+
+```py
+"""
+Omarchy Boot & Secure Boot Manager core module.
+"""
+
+from .boot_detector import (
+    get_firmware_info,
+    get_secure_boot_status,
+    get_windows_partitions,
+    get_efi_boot_entries,
+    get_hardware_info
+)
+from .limine_manager import (
+    read_limine_config,
+    has_windows_chainload,
+    generate_windows_entry,
+    add_windows_to_limine
+)
+from .secureboot_manager import (
+    check_sbctl_installed,
+    get_sbctl_status,
+    get_signable_files,
+    generate_setup_commands
+)
+
+__all__ = [
+    "get_firmware_info",
+    "get_secure_boot_status",
+    "get_windows_partitions",
+    "get_efi_boot_entries",
+    "get_hardware_info",
+    "read_limine_config",
+    "has_windows_chainload",
+    "generate_windows_entry",
+    "add_windows_to_limine",
+    "check_sbctl_installed",
+    "get_sbctl_status",
+    "get_signable_files",
+    "generate_setup_commands",
+]
+
+```
+
+`scripts/core/boot_detector.py`:
+
+```py
+#!/usr/bin/env python3
+"""
+Hardware, EFI variables, partition, and bootloader detection engine.
+"""
+
+import os
+import re
+import json
+import subprocess
+from pathlib import Path
+from typing import Dict, Any, List, Optional
+
+EFIVARS_DIR = Path("/sys/firmware/efi/efivars")
+DMI_DIR = Path("/sys/class/dmi/id")
+
+MOTHERBOARD_GUIDES = {
+    "asus": {
+        "vendor": "ASUS",
+        "key": "F2 or DEL",
+        "menu_path": "Advanced Mode (F7) -> Boot tab -> Secure Boot",
+        "setup_mode_steps": [
+            "Press F7 to enter Advanced Mode.",
+            "Navigate to the 'Boot' tab and select 'Secure Boot'.",
+            "Set 'OS Type' to 'Other OS' (or 'Custom').",
+            "Select 'Key Management' -> 'Clear Secure Boot Keys' (enters Setup Mode).",
+            "Save changes (F10) and reboot into Omarchy."
+        ],
+        "enable_steps": [
+            "Press F7 to enter Advanced Mode.",
+            "Navigate to 'Boot' -> 'Secure Boot'.",
+            "Set 'OS Type' back to 'Windows UEFI mode' (or 'Enabled').",
+            "Save changes (F10) and reboot."
+        ]
+    },
+    "msi": {
+        "vendor": "MSI",
+        "key": "DEL",
+        "menu_path": "Advanced (F7) -> Settings -> Security -> Secure Boot",
+        "setup_mode_steps": [
+            "Press F7 for Advanced Mode.",
+            "Go to 'Settings' -> 'Security' -> 'Secure Boot'.",
+            "Change 'Secure Boot Mode' from 'Standard' to 'Custom'.",
+            "Select 'Delete PK' or 'Enroll all Factory Default Keys' -> 'Delete'.",
+            "Save and reboot into Omarchy."
+        ],
+        "enable_steps": [
+            "Return to 'Settings' -> 'Security' -> 'Secure Boot'.",
+            "Set 'Secure Boot' to 'Enabled'.",
+            "Save and reboot."
+        ]
+    },
+    "gigabyte": {
+        "vendor": "Gigabyte / AORUS",
+        "key": "DEL",
+        "menu_path": "Settings / BIOS -> Secure Boot",
+        "setup_mode_steps": [
+            "Enter BIOS (DEL key).",
+            "Navigate to 'Settings' (or 'BIOS') -> 'Secure Boot'.",
+            "Set 'Secure Boot Mode' to 'Custom'.",
+            "Select 'Delete PK' or 'Restore Factory Keys' to enter Setup Mode.",
+            "Save and reboot into Omarchy."
+        ],
+        "enable_steps": [
+            "Navigate to 'Settings' -> 'Secure Boot'.",
+            "Set 'Secure Boot' to 'Enabled'.",
+            "Save and reboot."
+        ]
+    },
+    "asrock": {
+        "vendor": "ASRock",
+        "key": "F2 or DEL",
+        "menu_path": "Security tab -> Secure Boot",
+        "setup_mode_steps": [
+            "Navigate to the 'Security' tab.",
+            "Select 'Secure Boot'.",
+            "Change mode to 'Custom' and select 'Clear Keys'.",
+            "Save and reboot into Omarchy."
+        ],
+        "enable_steps": [
+            "Navigate to 'Security' -> 'Secure Boot'.",
+            "Set 'Secure Boot' to 'Enabled'.",
+            "Save and reboot."
+        ]
+    },
+    "generic": {
+        "vendor": "Generic UEFI Firmware",
+        "key": "DEL, F2, F10, or F12",
+        "menu_path": "Security / Boot -> Secure Boot",
+        "setup_mode_steps": [
+            "Enter BIOS Setup.",
+            "Find 'Secure Boot' under Security or Boot settings.",
+            "Switch to 'Custom Mode' and clear existing Platform Keys (PK).",
+            "Save and reboot into Omarchy."
+        ],
+        "enable_steps": [
+            "Enter BIOS Setup.",
+            "Enable 'Secure Boot'.",
+            "Save and reboot."
+        ]
+    }
+}
+
+
+def read_sys_file(path: Path) -> str:
+    """Reads a sysfs file safely and returns stripped text."""
+    try:
+        if path.exists():
+            return path.read_text(encoding="utf-8", errors="replace").strip()
+    except Exception:
+        pass
+    return ""
+
+
+def get_hardware_info() -> Dict[str, Any]:
+    """Queries DMI information for motherboard and vendor matching."""
+    sys_vendor = read_sys_file(DMI_DIR / "sys_vendor")
+    board_vendor = read_sys_file(DMI_DIR / "board_vendor")
+    product_name = read_sys_file(DMI_DIR / "product_name")
+    board_name = read_sys_file(DMI_DIR / "board_name")
+    bios_version = read_sys_file(DMI_DIR / "bios_version")
+
+    effective_vendor = board_vendor or sys_vendor or "Unknown"
+    effective_model = board_name or product_name or "System"
+
+    vendor_lower = effective_vendor.lower()
+    matched_key = "generic"
+    if "asus" in vendor_lower:
+        matched_key = "asus"
+    elif "msi" in vendor_lower or "micro-star" in vendor_lower:
+        matched_key = "msi"
+    elif "gigabyte" in vendor_lower or "aorus" in vendor_lower:
+        matched_key = "gigabyte"
+    elif "asrock" in vendor_lower:
+        matched_key = "asrock"
+
+    guide = MOTHERBOARD_GUIDES.get(matched_key, MOTHERBOARD_GUIDES["generic"])
+
+    return {
+        "vendor": effective_vendor,
+        "model": effective_model,
+        "bios_version": bios_version,
+        "guide": guide,
+        "matched_key": matched_key
+    }
+
+
+def read_efivar_byte(prefix: str) -> Optional[int]:
+    """Reads the data byte (5th byte) of a boolean EFI variable."""
+    try:
+        matches = list(EFIVARS_DIR.glob(f"{prefix}-*"))
+        if matches and matches[0].exists():
+            data = matches[0].read_bytes()
+            if len(data) >= 5:
+                return int(data[4])
+    except Exception:
+        pass
+    return None
+
+
+def check_keys_enrolled() -> bool:
+    """Checks whether custom keys have been enrolled into NVRAM and sbctl database."""
+    sbctl_dir = Path("/var/lib/sbctl")
+    keys_created = (sbctl_dir / "keys" / "PK").exists()
+    pk_efivars = list(EFIVARS_DIR.glob("PK-*"))
+    pk_enrolled = len(pk_efivars) > 0 and pk_efivars[0].stat().st_size > 4
+    return keys_created and pk_enrolled
+
+
+def get_signed_file_count() -> int:
+    """Returns the count of signed files registered in sbctl database."""
+    files_json = Path("/var/lib/sbctl/files.json")
+    if files_json.exists():
+        try:
+            data = json.loads(files_json.read_text(encoding="utf-8"))
+            if isinstance(data, dict):
+                return len(data)
+        except Exception:
+            pass
+    return 0
+
+
+def get_secure_boot_status() -> Dict[str, Any]:
+    """Checks the live state of UEFI Secure Boot."""
+    sb_byte = read_efivar_byte("SecureBoot")
+    sm_byte = read_efivar_byte("SetupMode")
+    vk_byte = read_efivar_byte("VendorKeys")
+
+    enabled = (sb_byte == 1)
+    setup_mode = (sm_byte == 1)
+    custom_keys = (vk_byte == 1)
+    keys_enrolled = check_keys_enrolled()
+    signed_count = get_signed_file_count()
+
+    if enabled:
+        status_code = "enabled"
+        label = "Enabled and Active"
+    elif keys_enrolled and signed_count > 0:
+        status_code = "enrolled_pending_reboot"
+        label = "Keys Enrolled and Signed (Reboot to BIOS to Activate)"
+    elif setup_mode:
+        status_code = "setup_mode"
+        label = "Setup Mode (Ready to Enroll)"
+    else:
+        status_code = "disabled"
+        label = "Disabled (User Mode)"
+
+    return {
+        "enabled": enabled,
+        "setup_mode": setup_mode,
+        "custom_keys": custom_keys,
+        "keys_enrolled": keys_enrolled,
+        "signed_count": signed_count,
+        "raw_secure_boot": sb_byte,
+        "raw_setup_mode": sm_byte,
+        "status_code": status_code,
+        "label": label
+    }
+
+
+def get_efi_boot_entries() -> Dict[str, Any]:
+    """Parses efibootmgr entries to locate Windows and Omarchy/Limine loaders."""
+    entries = []
+    boot_current = ""
+    boot_order = []
+    windows_boot_id = None
+    limine_boot_id = None
+
+    try:
+        res = subprocess.run(
+            ["efibootmgr"],
+            capture_output=True,
+            text=True,
+            check=False
+        )
+        for line in res.stdout.splitlines():
+            line = line.strip()
+            if line.startswith("BootCurrent:"):
+                boot_current = line.split(":", 1)[1].strip()
+            elif line.startswith("BootOrder:"):
+                raw_order = line.split(":", 1)[1].strip()
+                boot_order = [x.strip() for x in raw_order.split(",") if x.strip()]
+            elif line.startswith("Boot"):
+                m = re.match(r"^Boot([0-9A-Fa-f]{4})\*?\s+(.*?)(?:\t(.*))?$", line)
+                if m:
+                    b_id = m.group(1)
+                    title = m.group(2).strip()
+                    path = (m.group(3) or "").strip()
+                    is_windows = "windows" in title.lower() or "bootmgfw.efi" in path.lower()
+                    is_limine = "limine" in title.lower() or "limine" in path.lower()
+
+                    entry_info = {
+                        "id": b_id,
+                        "title": title,
+                        "path": path,
+                        "is_windows": is_windows,
+                        "is_limine": is_limine
+                    }
+                    entries.append(entry_info)
+
+                    if is_windows and not windows_boot_id:
+                        windows_boot_id = b_id
+                    if is_limine and not limine_boot_id:
+                        limine_boot_id = b_id
+    except Exception:
+        pass
+
+    return {
+        "current": boot_current,
+        "order": boot_order,
+        "entries": entries,
+        "windows_id": windows_boot_id,
+        "limine_id": limine_boot_id
+    }
+
+
+def get_windows_partitions() -> List[Dict[str, Any]]:
+    """
+    Finds Windows installations and EFI partitions by scanning
+    efibootmgr and disk partuuids.
+    """
+    found = []
+
+    # 1. First extract partition GUID directly from efibootmgr Windows Boot Manager line
+    efi_data = get_efi_boot_entries()
+    for entry in efi_data.get("entries", []):
+        if entry["is_windows"]:
+            path = entry["path"]
+            # Look for HD(...,GPT,<guid>,...)
+            m = re.search(r"GPT,([0-9a-fA-F\-]{36})", path)
+            if m:
+                guid = m.group(1).lower()
+                found.append({
+                    "partuuid": guid,
+                    "boot_id": entry["id"],
+                    "title": entry["title"],
+                    "source": "efibootmgr",
+                    "efi_path": "/EFI/Microsoft/Boot/bootmgfw.efi"
+                })
+
+    # 2. Also check lsblk partition tables for vfat/efi partitions
+    try:
+        res = subprocess.run(
+            ["lsblk", "-r", "-n", "-o", "NAME,PARTUUID,FSTYPE,LABEL,MOUNTPOINTS"],
+            capture_output=True,
+            text=True,
+            check=False
+        )
+        for line in res.stdout.splitlines():
+            parts = line.split()
+            if len(parts) >= 2:
+                name = parts[0]
+                partuuid = parts[1].lower()
+                if len(partuuid) == 36 and not any(f["partuuid"] == partuuid for f in found):
+                    # Check if mounted or mountable, or if by-partuuid exists
+                    pu_path = Path(f"/dev/disk/by-partuuid/{partuuid}")
+                    if pu_path.exists():
+                        # We don't necessarily have root to mount and inspect raw fat,
+                        # but efibootmgr already gave us the exact Windows ESP partition.
+                        pass
+    except Exception:
+        pass
+
+    return found
+
+
+def get_firmware_info() -> Dict[str, Any]:
+    """Returns general UEFI system capabilities."""
+    is_uefi = EFIVARS_DIR.exists()
+    has_fw_setup = False
+
+    try:
+        res = subprocess.run(
+            ["bootctl", "status"],
+            capture_output=True,
+            text=True,
+            check=False
+        )
+        for line in res.stdout.splitlines():
+            if "Boot into FW:" in line and "supported" in line.lower():
+                has_fw_setup = True
+                break
+    except Exception:
+        has_fw_setup = is_uefi
+
+    return {
+        "is_uefi": is_uefi,
+        "supports_firmware_setup": has_fw_setup,
+        "hardware": get_hardware_info(),
+        "secure_boot": get_secure_boot_status(),
+        "boot_entries": get_efi_boot_entries(),
+        "windows_partitions": get_windows_partitions()
+    }
+
+
+if __name__ == "__main__":
+    import json
+    print(json.dumps(get_firmware_info(), indent=2))
+
+```
+
+`scripts/core/limine_manager.py`:
+
+```py
+#!/usr/bin/env python3
+"""
+Limine bootloader configuration manager.
+Handles parsing, Windows chainload injection, and default OS selection.
+"""
+
+import os
+import re
+import shutil
+import subprocess
+from pathlib import Path
+from typing import Dict, Any, Optional, Tuple
+
+LIMINE_PATHS = [
+    Path("/boot/limine.conf"),
+    Path("/boot/limine/limine.conf"),
+    Path("/boot/EFI/LIMINE/limine.conf")
+]
+
+
+def find_limine_config() -> Optional[Path]:
+    """Finds the active limine.conf on the system."""
+    for p in LIMINE_PATHS:
+        if p.exists():
+            return p
+    return Path("/boot/limine.conf")
+
+
+def read_limine_config(path: Optional[Path] = None) -> Optional[str]:
+    """Reads limine.conf safely."""
+    cfg_path = path or find_limine_config()
+    if not cfg_path:
+        return None
+
+    try:
+        if cfg_path.exists() and os.access(cfg_path, os.R_OK):
+            return cfg_path.read_text(encoding="utf-8")
+    except Exception:
+        pass
+
+    # Attempt via cat (works if user has read access)
+    try:
+        res = subprocess.run(["cat", str(cfg_path)], capture_output=True, text=True, check=False)
+        if res.returncode == 0 and res.stdout.strip():
+            return res.stdout
+    except Exception:
+        pass
+
+    # Attempt via sudo -n cat (handles fmask=0077 ESP mounts where /boot is root-only)
+    try:
+        res = subprocess.run(["sudo", "-n", "cat", str(cfg_path)], capture_output=True, text=True, check=False)
+        if res.returncode == 0 and res.stdout.strip():
+            return res.stdout
+    except Exception:
+        pass
+
+    return None
+
+
+def has_windows_chainload(content: str) -> bool:
+    """Checks if limine.conf already has a Windows efi_chainload entry."""
+    if not content:
+        return False
+    lower = content.lower()
+    return "efi_chainload" in lower and "bootmgfw.efi" in lower
+
+
+GUID_PATTERN = re.compile(r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$")
+LABEL_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9 _.-]{0,63}$")
+
+
+def validate_guid(guid: str) -> str:
+    """Validates and returns a canonical lowercase GUID."""
+    guid_clean = str(guid).strip().lower()
+    if not GUID_PATTERN.match(guid_clean):
+        raise ValueError(f"Invalid canonical partition GUID: '{guid}'. Expected standard 8-4-4-4-12 hex format.")
+    return guid_clean
+
+
+def validate_label(label: str) -> str:
+    """Validates that a label is single-line, within 64 chars, and contains only safe characters."""
+    label_clean = str(label).strip()
+    if not LABEL_PATTERN.match(label_clean):
+        raise ValueError(
+            f"Invalid label: '{label}'. Must be 1-64 characters starting with alphanumeric and containing only letters, numbers, spaces, hyphens, underscores, or dots."
+        )
+    return label_clean
+
+
+def generate_windows_entry(partuuid: str, label: str = "Windows 11") -> str:
+    """Formats the standardized Limine efi_chainload block."""
+    guid_clean = validate_guid(partuuid)
+    label_clean = validate_label(label)
+    return f"\n/{label_clean}\n    comment: Boot Windows Boot Manager\n    protocol: efi_chainload\n    image_path: guid({guid_clean}):/EFI/Microsoft/Boot/bootmgfw.efi\n"
+
+
+def inject_windows_entry(content: str, partuuid: str, label: str = "Windows 11") -> str:
+    """Appends or updates the Windows chainload entry in limine.conf content."""
+    guid_clean = validate_guid(partuuid)
+    label_clean = validate_label(label)
+    if has_windows_chainload(content):
+        pattern = r"(image_path:\s*guid\()[0-9a-fA-F\-]{36}(\):/EFI/Microsoft/Boot/bootmgfw\.efi)"
+        if re.search(pattern, content, re.IGNORECASE):
+            return re.sub(pattern, rf"\g<1>{guid_clean}\g<2>", content, flags=re.IGNORECASE)
+        return content
+
+    entry = generate_windows_entry(guid_clean, label_clean)
+    stripped = content.rstrip()
+    return f"{stripped}\n{entry}\n"
+
+
+LIMINE_APPEND_HELPER = """
+import sys, re, shutil, time
+from pathlib import Path
+
+GUID_PATTERN = re.compile(r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$")
+LABEL_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9 _.-]{0,63}$")
+
+if len(sys.argv) < 4:
+    sys.exit("Usage: helper <cfg_path> <guid> <label>")
+
+cfg = Path(sys.argv[1]).resolve()
+guid = sys.argv[2].strip().lower()
+label = sys.argv[3].strip()
+
+# Reject unexpected file targets (must be named limine.conf in /boot or /efi)
+is_test_mode = Path(cfg).name == "limine.conf" and bool(importlib := __import__("os").environ.get("_OMARCHY_BOOT_TEST_PATH"))
+if cfg.name != "limine.conf" or (not is_test_mode and not any(str(cfg).startswith(prefix) for prefix in ("/boot", "/efi"))):
+    sys.exit(f"Target is not a valid limine.conf: {cfg}")
+
+if not GUID_PATTERN.match(guid):
+    sys.exit(f"Invalid canonical GUID: {guid}")
+if not LABEL_PATTERN.match(label):
+    sys.exit(f"Invalid label: {label}")
+if not cfg.is_file():
+    sys.exit(f"Config file does not exist: {cfg}")
+
+content = cfg.read_text(encoding="utf-8")
+lower = content.lower()
+if "efi_chainload" in lower and "bootmgfw.efi" in lower:
+    print("Windows entry already exists in config")
+    sys.exit(0)
+
+# Create timestamped backup
+shutil.copy2(cfg, f"{cfg}.bak-{int(time.time())}")
+
+entry = f"\\n/{label}\\n    comment: Boot Windows Boot Manager\\n    protocol: efi_chainload\\n    image_path: guid({guid}):/EFI/Microsoft/Boot/bootmgfw.efi\\n"
+with open(cfg, "a", encoding="utf-8") as f:
+    f.write(entry)
+
+print(f"Windows entry added successfully to {cfg}")
+"""
+
+
+def add_windows_to_limine(partuuid: str, label: str = "Windows 11") -> Tuple[bool, str]:
+    """Safely adds Windows chainload entry to /boot/limine.conf."""
+    try:
+        guid_clean = validate_guid(partuuid)
+        label_clean = validate_label(label)
+    except ValueError as e:
+        return False, str(e)
+
+    cfg_path = find_limine_config() or Path("/boot/limine.conf")
+    if not cfg_path.exists():
+        return False, f"limine.conf not found at {cfg_path}"
+
+    import sys
+    if os.geteuid() == 0:
+        runner = [sys.executable, "-c", LIMINE_APPEND_HELPER, str(cfg_path), guid_clean, label_clean]
+    elif subprocess.run(["sudo", "-n", "true"], capture_output=True).returncode == 0:
+        runner = ["sudo", sys.executable, "-c", LIMINE_APPEND_HELPER, str(cfg_path), guid_clean, label_clean]
+    else:
+        runner = ["pkexec", sys.executable, "-c", LIMINE_APPEND_HELPER, str(cfg_path), guid_clean, label_clean]
+
+    try:
+        res = subprocess.run(runner, capture_output=True, text=True, check=True)
+        return True, res.stdout.strip()
+    except subprocess.CalledProcessError as e:
+        return False, f"Elevation error: {e.stderr.strip() or str(e)}"
+    except FileNotFoundError:
+        return False, "pkexec is not installed on this system"
+
+
+SET_ONESHOT_HELPER = """
+import sys, re, subprocess
+from pathlib import Path
+
+LABEL_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9 _.-]{0,63}$")
+
+if len(sys.argv) < 2:
+    sys.exit("Usage: helper <label>")
+
+label = sys.argv[1].strip()
+if not LABEL_PATTERN.match(label):
+    sys.exit(f"Invalid label: {label}")
+
+guid = "4a67b082-0a4c-41cf-b6c7-440b29bb8c4f"
+attrs = b"\\x07\\x00\\x00\\x00"
+
+def write_var(name, val_str):
+    p = Path(f"/sys/firmware/efi/efivars/{name}-{guid}")
+    if p.exists():
+        subprocess.run(["chattr", "-i", str(p)], check=False)
+        try:
+            p.unlink()
+        except Exception:
+            pass
+    payload = attrs + val_str.encode("utf-16le") + b"\\x00\\x00"
+    with open(p, "wb") as f:
+        f.write(payload)
+
+write_var("LoaderEntryOneShot", label)
+write_var("LoaderConfigTimeoutOneShot", "0")
+print("One-shot boot set for Limine")
+"""
+
+
+def set_limine_oneshot(entry_label: str = "Windows 11") -> Tuple[bool, str]:
+    """Sets the UEFI Boot Loader Interface variable LoaderEntryOneShot so Limine boots Windows on the next reboot."""
+    try:
+        label_clean = validate_label(entry_label)
+    except ValueError as e:
+        return False, str(e)
+
+    import sys
+    if os.geteuid() == 0:
+        runner = [sys.executable, "-c", SET_ONESHOT_HELPER, label_clean]
+    elif subprocess.run(["sudo", "-n", "true"], capture_output=True).returncode == 0:
+        runner = ["sudo", sys.executable, "-c", SET_ONESHOT_HELPER, label_clean]
+    else:
+        runner = ["pkexec", sys.executable, "-c", SET_ONESHOT_HELPER, label_clean]
+
+    try:
+        res = subprocess.run(runner, capture_output=True, text=True, check=True)
+        return True, res.stdout.strip()
+    except subprocess.CalledProcessError as e:
+        return False, f"Elevation error: {e.stderr.strip() or str(e)}"
+    except FileNotFoundError:
+        return False, "pkexec is not installed on this system"
+
+
+if __name__ == "__main__":
+    guid = "8a80c1ba-ee7f-4114-929e-cef5b92cf75e"
+    print("Sample Windows Limine Entry:")
+    print(generate_windows_entry(guid))
+
+```
+
+`scripts/core/secureboot_manager.py`:
+
+```py
+#!/usr/bin/env python3
+"""
+Secure Boot & sbctl management engine.
+Handles checking sbctl status, generating enrollment commands, and verifying EFI signatures.
+"""
+
+import json
+import os
+import shutil
+import subprocess
+from pathlib import Path
+from typing import Dict, Any, List, Tuple, Optional
+
+BOOT_DIR = Path("/boot")
+EFI_DIR = Path("/boot/EFI")
+
+
+def check_sbctl_installed() -> bool:
+    """Checks whether sbctl binary is installed on system."""
+    return shutil.which("sbctl") is not None
+
+
+def get_sbctl_status() -> Dict[str, Any]:
+    """
+    Runs sbctl status to get cryptographic status.
+    Returns parsed dictionary or fallback based on /sys/firmware/efi.
+    """
+    if not check_sbctl_installed():
+        return {
+            "installed": False,
+            "setup_mode": False,
+            "secure_boot": False,
+            "enrolled": False,
+            "keys_created": False,
+            "raw": "sbctl is not installed."
+        }
+
+    try:
+        res = subprocess.run(["sbctl", "status", "--json"], capture_output=True, text=True, check=False)
+        if res.returncode == 0:
+            data = json.loads(res.stdout)
+            data["installed"] = True
+            return data
+    except Exception:
+        pass
+
+    # Fallback to plain sbctl status text parsing
+    try:
+        res = subprocess.run(["sbctl", "status"], capture_output=True, text=True, check=False)
+        stdout = res.stdout.lower()
+        return {
+            "installed": True,
+            "setup_mode": "setup mode: enabled" in stdout,
+            "secure_boot": "secure boot: enabled" in stdout,
+            "enrolled": "vendor keys: custom" in stdout or "keys enrolled: yes" in stdout,
+            "raw": res.stdout.strip()
+        }
+    except Exception as e:
+        return {
+            "installed": True,
+            "error": str(e)
+        }
+
+
+def get_signable_files() -> List[str]:
+    """
+    Scans /boot for EFI binaries that require signing for Omarchy + Limine
+    to boot under Secure Boot. Uses sudo find so it works even when /boot
+    is mounted with fmask=0077 (unreadable by non-root users).
+    Falls back to a hardcoded baseline if sudo find is unavailable.
+    """
+    baseline = [
+        "/boot/EFI/BOOT/BOOTX64.EFI",
+        "/boot/EFI/LIMINE/LIMINE_X64.EFI",
+    ]
+
+    try:
+        res = subprocess.run(
+            ["sudo", "-n", "find", "/boot", "-name", "*.efi", "-type", "f"],
+            capture_output=True, text=True, check=False, timeout=5
+        )
+        if res.returncode == 0 and res.stdout.strip():
+            found = [l.strip() for l in res.stdout.strip().splitlines() if l.strip()]
+            # Exclude snapshot history files — handled separately
+            live = [f for f in found if "limine_history" not in f]
+            return sorted(set(baseline + live))
+    except Exception:
+        pass
+
+    # Non-root fallback: only return what we know for certain
+    return sorted(baseline)
+
+
+def get_signable_snapshot_files() -> List[str]:
+    """
+    Returns snapshot kernel history EFIs from limine_history directories.
+    These are immutable copies that must be signed individually (no -s flag).
+    """
+    try:
+        res = subprocess.run(
+            ["sudo", "-n", "find", "/boot", "-path", "*/limine_history/*", "-type", "f"],
+            capture_output=True, text=True, check=False, timeout=5
+        )
+        if res.returncode == 0 and res.stdout.strip():
+            return sorted(l.strip() for l in res.stdout.strip().splitlines() if l.strip())
+    except Exception:
+        pass
+    return []
+
+
+def generate_setup_commands() -> List[str]:
+    """
+    Returns the exact sequence of shell commands to set up sbctl,
+    enroll keys with Microsoft CA support (-m), and sign all boot files.
+
+    Kernel EFI paths are enumerated at call-time via sudo find so that
+    the glob never silently skips files on fmask=0077-mounted /boot partitions.
+    Snapshot history files are signed individually without -s (they are
+    immutable copies that will never be regenerated by a pacman hook).
+
+    After signing, blake2b hash suffixes are stripped from limine.conf path
+    entries (the '#<hash>' portion). Signing modifies EFI binaries, invalidating
+    stored hashes and causing Limine to prompt 'Press Y to continue' on every
+    boot. Secure Boot now provides the integrity guarantee instead.
+    """
+    cmds = [
+        "sudo pacman -S --needed --noconfirm sbctl",
+        "sudo sbctl create-keys",
+        "sudo sbctl enroll-keys -m",
+    ]
+
+    # Sign live EFI files and register with sbctl (-s) for auto-resign on updates
+    for path in get_signable_files():
+        cmds.append(f"sudo sbctl sign -s {path}")
+
+    # Sign immutable snapshot history kernels (no -s — they won't be regenerated)
+    snapshots = get_signable_snapshot_files()
+    if snapshots:
+        for path in snapshots:
+            cmds.append(f"sudo sbctl sign {path}")
+
+    cmds.append("sudo sbctl verify")
+
+    # Strip blake2b hash suffixes from limine.conf path entries.
+    # sbctl modifies EFI binaries when signing, invalidating Limine's stored
+    # hashes and causing a 'Press Y to continue' prompt on every boot.
+    # Secure Boot provides integrity verification instead.
+    limine_conf_candidates = [
+        "/boot/limine.conf",
+        "/boot/limine/limine.conf",
+        "/boot/EFI/LIMINE/limine.conf",
+    ]
+    strip_cmd = " || ".join(
+        f"sudo sed -i 's|\\.efi#[0-9a-f]*|.efi|g' {p}" for p in limine_conf_candidates
+    )
+    cmds.append(f"( {strip_cmd} ) 2>/dev/null || true")
+
+    return cmds
+
+
+def verify_signatures() -> Tuple[bool, str]:
+    """Runs sbctl verify to confirm that all required EFI binaries are signed."""
+    if not check_sbctl_installed():
+        return False, "sbctl is not installed"
+
+    try:
+        res = subprocess.run(["sbctl", "verify"], capture_output=True, text=True, check=False)
+        is_ok = (res.returncode == 0)
+        return is_ok, res.stdout.strip() or res.stderr.strip()
+    except Exception as e:
+        return False, str(e)
+
+
+if __name__ == "__main__":
+    print(f"sbctl installed: {check_sbctl_installed()}")
+    print(f"Status: {json.dumps(get_sbctl_status(), indent=2)}")
+    print("Signable live files:")
+    for f in get_signable_files():
+        print(f"  - {f}")
+    print("Signable snapshot files:")
+    for f in get_signable_snapshot_files():
+        print(f"  - {f}")
+    print("Generated setup commands:")
+    for c in generate_setup_commands():
+        print(f"  {c}")
+
+```
+
+`scripts/omarchy-boot`:
+
+```
+#!/usr/bin/env python3
+"""
+Omarchy Boot & Secure Boot Manager CLI.
+Command-line interface for status checks, dual-boot configuration,
+and quick reboot controls.
+"""
+
+import sys
+import os
+import re
+import json
+import shutil
+import shlex
+import argparse
+import subprocess
+from pathlib import Path
+
+# Add core to sys.path
+SCRIPT_DIR = Path(__file__).resolve().parent
+sys.path.insert(0, str(SCRIPT_DIR))
+
+from core.boot_detector import (
+    get_firmware_info,
+    get_secure_boot_status,
+    get_hardware_info,
+    get_windows_partitions,
+    get_efi_boot_entries
+)
+from core.limine_manager import (
+    read_limine_config,
+    has_windows_chainload,
+    generate_windows_entry,
+    add_windows_to_limine
+)
+from core.secureboot_manager import (
+    check_sbctl_installed,
+    get_sbctl_status,
+    generate_setup_commands,
+    verify_signatures
+)
+
+# Terminal ANSI colors
+BOLD = "\033[1m"
+GREEN = "\033[32m"
+YELLOW = "\033[33m"
+CYAN = "\033[36m"
+RED = "\033[31m"
+MAGENTA = "\033[35m"
+RESET = "\033[0m"
+
+
+def cmd_status(args):
+    """Prints colorized status report."""
+    fw = get_firmware_info()
+    hw = fw["hardware"]
+    sb = fw["secure_boot"]
+    win = fw["windows_partitions"]
+    boot = fw["boot_entries"]
+
+    limine_cfg = read_limine_config()
+    win_chainloaded = has_windows_chainload(limine_cfg) if limine_cfg else None
+
+    print(f"\n{BOLD}{CYAN}══════════════════════════════════════════════════════════════{RESET}")
+    print(f"{BOLD}{CYAN}      Omarchy Boot & Secure Boot Manager Status               {RESET}")
+    print(f"{BOLD}{CYAN}══════════════════════════════════════════════════════════════{RESET}\n")
+
+    # Hardware & Motherboard
+    print(f"{BOLD}🖥 Hardware Platform:{RESET}")
+    print(f"  • Motherboard: {BOLD}{hw['vendor']}{RESET} {hw['model']}")
+    print(f"  • BIOS Version: {hw['bios_version'] or 'Unknown'}")
+    print(f"  • BIOS Hotkey:  {BOLD}{hw['guide']['key']}{RESET}")
+
+    # Secure Boot
+    print(f"\n{BOLD}🔒 Secure Boot:{RESET}")
+    if sb["enabled"]:
+        print(f"  • State: {GREEN}{BOLD}ENABLED & ACTIVE{RESET} (Anti-Cheat Ready)")
+    elif sb.get("status_code") == "enrolled_pending_reboot":
+        print(f"  • State: {CYAN}{BOLD}KEYS ENROLLED & SIGNED{RESET} (Reboot to BIOS to activate)")
+        print(f"  • Next:  {YELLOW}{BOLD}Reboot into BIOS -> set Secure Boot to Enabled{RESET}")
+    elif sb["setup_mode"]:
+        print(f"  • State: {YELLOW}{BOLD}SETUP MODE (Ready to enroll keys){RESET}")
+    else:
+        print(f"  • State: {RED}{BOLD}DISABLED (User Mode){RESET} (Needs Setup Mode first)")
+
+    sbctl_ok = check_sbctl_installed()
+    print(f"  • sbctl Tool: {'Installed' if sbctl_ok else 'Not installed (available via pacman)'}")
+
+    # Windows Dual-Boot
+    print(f"\n{BOLD}🪟 Windows Dual-Boot:{RESET}")
+    if win:
+        w = win[0]
+        print(f"  • Detected:    {GREEN}{BOLD}Yes{RESET} ({w['title']})")
+        print(f"  • ESP GUID:    {CYAN}{w['partuuid']}{RESET}")
+        print(f"  • Boot ID:     {w['boot_id']}")
+        if win_chainloaded is True:
+            print(f"  • Limine Menu: {GREEN}{BOLD}Configured{RESET} (Chainload present in limine.conf)")
+        elif win_chainloaded is False:
+            print(f"  • Limine Menu: {YELLOW}Not configured yet{RESET} (Run 'omarchy-boot add-windows')")
+        else:
+            print(f"  • Limine Menu: Needs root to inspect /boot/limine.conf")
+    else:
+        print(f"  • Detected:    {YELLOW}No Windows EFI partition found{RESET}")
+
+    # Boot Management
+    print(f"\n{BOLD}⚡ Quick Actions:{RESET}")
+    print(f"  • Reboot into Windows: {BOLD}omarchy-boot reboot windows{RESET}")
+    print(f"  • Reboot into BIOS:    {BOLD}omarchy-boot reboot bios{RESET}")
+    print(f"  • Interactive Setup:   {BOLD}omarchy-boot setup{RESET}")
+    print(f"  • Launch GUI Wizard:   {BOLD}omarchy-boot gui{RESET}")
+    print(f"\n{CYAN}══════════════════════════════════════════════════════════════{RESET}\n")
+
+
+def cmd_json(args):
+    """Outputs all state as JSON."""
+    fw = get_firmware_info()
+    limine_cfg = read_limine_config()
+    fw["limine_windows_configured"] = has_windows_chainload(limine_cfg) if limine_cfg else None
+    fw["sbctl"] = get_sbctl_status()
+    print(json.dumps(fw, indent=2))
+
+
+def cmd_reboot(args):
+    """Handles quick reboot targets."""
+    target = args.target.lower()
+    if target in ("bios", "uefi", "firmware"):
+        print(f"{CYAN}🔄 Rebooting system into UEFI / BIOS Setup...{RESET}")
+        subprocess.run(["systemctl", "reboot", "--firmware-setup"], check=False)
+    elif target in ("windows", "win"):
+        entries = get_efi_boot_entries()
+        win_id = entries.get("windows_id")
+        win_parts = get_windows_partitions()
+
+        if not win_id and not win_parts:
+            print(f"{RED}Error: Windows could not be located in efibootmgr or partitions.{RESET}")
+            sys.exit(1)
+
+        print(f"{CYAN}🔄 Configuring one-shot reboot into Windows...{RESET}")
+
+        # 1. Ensure Windows is in limine.conf if partition is detected
+        if win_parts:
+            partuuid = win_parts[0]["partuuid"]
+            limine_cfg = read_limine_config()
+            if limine_cfg is not None and not has_windows_chainload(limine_cfg):
+                print(f"  • Injecting Windows entry into limine.conf...")
+                add_windows_to_limine(partuuid, label="Windows 11")
+
+        # 2. Trigger OSD if running inside a desktop session
+        if shutil.which("omarchy-osd"):
+            subprocess.run(["omarchy-osd", "-i", "reboot", "-m", "Rebooting to Windows", "-d", "5000"], capture_output=True, check=False)
+
+        # 3. Elevated unified execution: sets BootNext, sets Limine LoaderEntryOneShot, and reboots
+        clean_win_id = str(win_id).strip() if win_id and re.match(r"^[0-9A-Fa-f]{4}$", str(win_id).strip()) else ""
+
+        REBOOT_UNIFIED_HELPER = """
+import sys, re, subprocess
+from pathlib import Path
+
+win_id = sys.argv[1].strip() if len(sys.argv) > 1 else ""
+
+# 1. Set UEFI BootNext if valid ID provided
+if win_id and re.match(r"^[0-9A-Fa-f]{4}$", win_id):
+    subprocess.run(["efibootmgr", "-n", win_id], capture_output=True, check=False)
+
+# 2. Set Limine LoaderEntryOneShot
+guid = "4a67b082-0a4c-41cf-b6c7-440b29bb8c4f"
+attrs = b"\\x07\\x00\\x00\\x00"
+
+def write_var(name, val_str):
+    p = Path(f"/sys/firmware/efi/efivars/{name}-{guid}")
+    if p.exists():
+        subprocess.run(["chattr", "-i", str(p)], check=False)
+        try:
+            p.unlink()
+        except Exception:
+            pass
+    payload = attrs + val_str.encode("utf-16le") + b"\\x00\\x00"
+    with open(p, "wb") as f:
+        f.write(payload)
+
+try:
+    write_var("LoaderEntryOneShot", "Windows 11")
+    write_var("LoaderConfigTimeoutOneShot", "0")
+except Exception:
+    pass
+
+# 3. Trigger reboot
+subprocess.run(["systemctl", "reboot"], check=False)
+"""
+        if os.geteuid() == 0:
+            runner = [sys.executable, "-c", REBOOT_UNIFIED_HELPER, clean_win_id]
+        elif subprocess.run(["sudo", "-n", "true"], capture_output=True).returncode == 0:
+            runner = ["sudo", sys.executable, "-c", REBOOT_UNIFIED_HELPER, clean_win_id]
+        else:
+            runner = ["pkexec", sys.executable, "-c", REBOOT_UNIFIED_HELPER, clean_win_id]
+
+        subprocess.run(runner, check=False)
+    else:
+        print(f"{RED}Unknown reboot target: {target}. Use 'windows' or 'bios'.{RESET}")
+        sys.exit(1)
+
+
+def cmd_add_windows(args):
+    """Adds Windows chainload entry to /boot/limine.conf."""
+    win = get_windows_partitions()
+    if not win:
+        print(f"{RED}Error: No Windows EFI partition detected.{RESET}")
+        sys.exit(1)
+
+    partuuid = win[0]["partuuid"]
+    label = args.label or "Windows 11"
+    print(f"{CYAN}Adding Windows chainload entry (GUID: {partuuid}) to /boot/limine.conf...{RESET}")
+    ok, msg = add_windows_to_limine(partuuid, label)
+    if ok:
+        print(f"{GREEN}✓ Success:{RESET} {msg}")
+    else:
+        print(f"{RED}✗ Failed:{RESET} {msg}")
+        sys.exit(1)
+
+
+def cmd_setup(args):
+    """Interactive CLI setup wizard."""
+    print(f"\n{BOLD}{CYAN}══════════════════════════════════════════════════════════════{RESET}")
+    print(f"{BOLD}{CYAN}      Omarchy Boot & Secure Boot Setup Wizard                 {RESET}")
+    print(f"{BOLD}{CYAN}══════════════════════════════════════════════════════════════{RESET}\n")
+
+    hw = get_hardware_info()
+    sb = get_secure_boot_status()
+    guide = hw["guide"]
+
+    print(f"Detected Motherboard: {BOLD}{hw['vendor']} {hw['model']}{RESET}")
+    print(f"Current Secure Boot State: {BOLD}{sb['label']}{RESET}\n")
+
+    if not sb["setup_mode"] and not sb["enabled"]:
+        print(f"{YELLOW}{BOLD}Step 1: Put your BIOS into Setup Mode{RESET}")
+        print("To allow sbctl to enroll custom keys, your BIOS needs to be in 'Setup Mode'.")
+        print(f"For your {hw['vendor']} motherboard:\n")
+        for i, step in enumerate(guide["setup_mode_steps"], 1):
+            print(f"  {i}. {step}")
+
+        print(f"\nWould you like to reboot into BIOS Setup right now to do this?")
+        choice = input("Reboot into BIOS now? [y/N]: ").strip().lower()
+        if choice == "y":
+            subprocess.run(["systemctl", "reboot", "--firmware-setup"], check=False)
+            return
+
+    print(f"\n{CYAN}{BOLD}Step 2: sbctl Key Creation, Enrollment & Signing{RESET}")
+    cmds = generate_setup_commands()
+    print("The following operations will be performed:")
+    for c in cmds:
+        print(f"  • {c}")
+
+    choice = input("\nExecute Secure Boot signing commands now? [Y/n]: ").strip().lower()
+    if choice != "n":
+        for c in cmds:
+            subprocess.run(shlex.split(c), check=False)
+
+    # Windows dual boot
+    win = get_windows_partitions()
+    if win:
+        partuuid = win[0]["partuuid"]
+        print(f"\n{CYAN}{BOLD}Step 3: Add Windows to Limine Bootloader{RESET}")
+        print(f"Detected Windows Partition GUID: {partuuid}")
+        choice = input("Add Windows chainload entry to /boot/limine.conf? [Y/n]: ").strip().lower()
+        if choice != "n":
+            ok, msg = add_windows_to_limine(partuuid)
+            print(f"Result: {msg}")
+
+    print(f"\n{GREEN}{BOLD}══════════════════════════════════════════════════════════════{RESET}")
+    print(f"{GREEN}{BOLD}  Setup sequence complete!                                    {RESET}")
+    print(f"{GREEN}{BOLD}  You can now reboot into BIOS and turn Secure Boot ON.        {RESET}")
+    print(f"{GREEN}{BOLD}══════════════════════════════════════════════════════════════{RESET}\n")
+
+
+def cmd_gui(args):
+    """Launches the GTK4 / Libadwaita GUI application."""
+    gui_script = SCRIPT_DIR / "omarchy-boot-gui"
+    if gui_script.exists():
+        os.execv(sys.executable, [sys.executable, str(gui_script)])
+    else:
+        print(f"{RED}Error: omarchy-boot-gui not found at {gui_script}{RESET}")
+        sys.exit(1)
+
+
+def main():
+    parser = argparse.ArgumentParser(
+        description="Omarchy Boot & Secure Boot Manager",
+        formatter_class=argparse.RawDescriptionHelpFormatter
+    )
+    subparsers = parser.add_subparsers(dest="command")
+
+    # status
+    p_status = subparsers.add_parser("status", help="Show system Secure Boot and Windows dual-boot status")
+    p_status.set_defaults(func=cmd_status)
+
+    # json
+    p_json = subparsers.add_parser("json", help="Output system status as JSON")
+    p_json.set_defaults(func=cmd_json)
+
+    # reboot
+    p_reboot = subparsers.add_parser("reboot", help="Reboot into specific environment")
+    p_reboot.add_argument("target", choices=["windows", "win", "bios", "uefi", "firmware"], help="Reboot target")
+    p_reboot.set_defaults(func=cmd_reboot)
+
+    # add-windows
+    p_add_win = subparsers.add_parser("add-windows", help="Add Windows chainload entry to /boot/limine.conf")
+    p_add_win.add_argument("--label", default="Windows 11", help="Menu label for Windows entry")
+    p_add_win.set_defaults(func=cmd_add_windows)
+
+    # setup
+    p_setup = subparsers.add_parser("setup", help="Interactive terminal wizard for Secure Boot and Limine")
+    p_setup.set_defaults(func=cmd_setup)
+
+    # gui
+    p_gui = subparsers.add_parser("gui", help="Launch graphical wizard application")
+    p_gui.set_defaults(func=cmd_gui)
+
+    args = parser.parse_args()
+    if not args.command:
+        cmd_status(args)
+    else:
+        args.func(args)
+
+
+if __name__ == "__main__":
+    main()
+
+```
+
+`scripts/omarchy-boot-gui`:
+
+```
+#!/usr/bin/env python3
+"""
+omarchy-boot-gui — Libadwaita / GTK4 GUI for Omarchy Boot & Secure Boot Manager.
+Provides an intuitive, friendly wizard for Windows dual-booters,
+setting up sbctl with Microsoft anti-cheat preservation, and quick reboot controls.
+"""
+
+import sys
+import os
+import shutil
+import subprocess
+from pathlib import Path
+
+# Add core to sys.path
+SCRIPT_DIR = Path(__file__).resolve().parent
+sys.path.insert(0, str(SCRIPT_DIR))
+
+import gi
+gi.require_version("Gtk", "4.0")
+gi.require_version("Adw", "1")
+from gi.repository import Gtk, Adw, Gio, GLib, GObject, Pango
+
+from core.boot_detector import (
+    get_firmware_info,
+    get_secure_boot_status,
+    get_hardware_info,
+    get_windows_partitions,
+    get_efi_boot_entries
+)
+from core.limine_manager import (
+    read_limine_config,
+    has_windows_chainload,
+    add_windows_to_limine
+)
+from core.secureboot_manager import (
+    check_sbctl_installed,
+    get_sbctl_status,
+    generate_setup_commands
+)
+
+
+class BootApp(Adw.Application):
+    __gtype_name__ = "OmarchyBootApp"
+
+    def __init__(self):
+        super().__init__(
+            application_id="org.omarchy.bootmanager",
+            flags=Gio.ApplicationFlags.FLAGS_NONE
+        )
+
+    def do_activate(self):
+        win = self.props.active_window
+        if not win:
+            win = BootWindow(application=self)
+        win.present()
+
+
+class BootWindow(Adw.ApplicationWindow):
+    __gtype_name__ = "OmarchyBootWindow"
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.set_title("Omarchy Boot and Secure Boot Manager")
+        self.set_default_size(860, 720)
+
+        self.setup_ui()
+        self.refresh_state()
+
+    def setup_ui(self):
+        toolbar_view = Adw.ToolbarView()
+        self.set_content(toolbar_view)
+
+        # Header Bar
+        header = Adw.HeaderBar()
+        toolbar_view.add_top_bar(header)
+
+        # Quick Reboot Buttons in Header
+        reboot_win_btn = Gtk.Button(label="Reboot to Windows")
+        reboot_win_btn.set_tooltip_text("Sets next one-shot boot to Windows and restarts")
+        reboot_win_btn.add_css_class("suggested-action")
+        reboot_win_btn.connect("clicked", self.on_reboot_windows)
+        header.pack_end(reboot_win_btn)
+
+        reboot_bios_btn = Gtk.Button(label="Reboot to BIOS")
+        reboot_bios_btn.set_tooltip_text("Restarts directly into UEFI / BIOS Setup")
+        reboot_bios_btn.connect("clicked", self.on_reboot_bios)
+        header.pack_end(reboot_bios_btn)
+
+        # View Switcher Bar & Stack
+        self.view_stack = Adw.ViewStack()
+        self.view_stack.set_vexpand(True)
+        self.view_stack.set_hexpand(True)
+
+        view_switcher_title = Adw.ViewSwitcherTitle(
+            title="Boot and Secure Boot",
+            subtitle="Windows Dual-Boot and Anti-Cheat Setup",
+            stack=self.view_stack
+        )
+        header.set_title_widget(view_switcher_title)
+
+        view_switcher_bar = Adw.ViewSwitcherBar(stack=self.view_stack)
+        view_switcher_title.bind_property(
+            "title-visible",
+            view_switcher_bar,
+            "reveal",
+            GObject.BindingFlags.SYNC_CREATE
+        )
+        toolbar_view.add_bottom_bar(view_switcher_bar)
+        toolbar_view.set_content(self.view_stack)
+
+        # Page 1: Dashboard
+        self.dashboard_page = self.build_dashboard_page()
+        self.view_stack.add_titled_with_icon(
+            self.dashboard_page,
+            "dashboard",
+            "Overview",
+            "computer-symbolic"
+        )
+
+        # Page 2: Secure Boot Wizard
+        self.wizard_page = self.build_wizard_page()
+        self.view_stack.add_titled_with_icon(
+            self.wizard_page,
+            "wizard",
+            "Secure Boot Wizard",
+            "security-high-symbolic"
+        )
+
+        # Page 3: Limine & Dual-Boot
+        self.limine_page = self.build_limine_page()
+        self.view_stack.add_titled_with_icon(
+            self.limine_page,
+            "limine",
+            "Limine Dual-Boot",
+            "drive-multidisk-symbolic"
+        )
+
+    def build_dashboard_page(self) -> Gtk.Widget:
+        page = Adw.PreferencesPage()
+
+        # System Status Group
+        self.status_group = Adw.PreferencesGroup(
+            title="System Security and Boot Status",
+            description="Hardware state and active anti-cheat readiness"
+        )
+        page.add(self.status_group)
+
+        self.row_sb = Adw.ActionRow(title="Secure Boot Status")
+        self.sb_badge = Gtk.Label()
+        self.sb_badge.add_css_class("pill")
+        self.row_sb.add_suffix(self.sb_badge)
+        self.status_group.add(self.row_sb)
+
+        self.row_board = Adw.ActionRow(title="Motherboard and Firmware")
+        self.board_label = Gtk.Label()
+        self.row_board.add_suffix(self.board_label)
+        self.status_group.add(self.row_board)
+
+        self.row_sbctl = Adw.ActionRow(title="sbctl Key Manager")
+        self.sbctl_label = Gtk.Label()
+        self.row_sbctl.add_suffix(self.sbctl_label)
+        self.status_group.add(self.row_sbctl)
+
+        # Windows Dual-Boot Group
+        self.win_group = Adw.PreferencesGroup(
+            title="Windows 11 Dual-Boot Integration",
+            description="Status of Windows partition detection and Limine chainload"
+        )
+        page.add(self.win_group)
+
+        self.row_win_detected = Adw.ActionRow(title="Windows Installation")
+        self.win_detected_label = Gtk.Label()
+        self.row_win_detected.add_suffix(self.win_detected_label)
+        self.win_group.add(self.row_win_detected)
+
+        self.row_win_guid = Adw.ActionRow(title="EFI Partition GUID")
+        self.win_guid_label = Gtk.Label()
+        self.win_guid_label.set_selectable(True)
+        self.row_win_guid.add_suffix(self.win_guid_label)
+        self.win_group.add(self.row_win_guid)
+
+        self.row_limine_status = Adw.ActionRow(title="Limine Windows Entry")
+        self.limine_status_label = Gtk.Label()
+        self.limine_status_label.add_css_class("pill")
+        self.row_limine_status.add_suffix(self.limine_status_label)
+        self.win_group.add(self.row_limine_status)
+
+        # Quick Actions Group on Dashboard
+        actions_group = Adw.PreferencesGroup(
+            title="Quick Boot and Setup Actions",
+            description="Fast shortcuts for restarting or configuring your system"
+        )
+        page.add(actions_group)
+
+        row_act_win = Adw.ActionRow(
+            title="Reboot into Windows",
+            subtitle="Restarts once into Windows Boot Manager (next boot returns to Omarchy)"
+        )
+        btn_act_win = Gtk.Button(label="Reboot to Windows")
+        btn_act_win.add_css_class("suggested-action")
+        btn_act_win.connect("clicked", self.on_reboot_windows)
+        row_act_win.add_suffix(btn_act_win)
+        actions_group.add(row_act_win)
+
+        row_act_bios = Adw.ActionRow(
+            title="Reboot into UEFI / BIOS Setup",
+            subtitle="Restarts directly into motherboard firmware settings"
+        )
+        btn_act_bios = Gtk.Button(label="Reboot to BIOS")
+        btn_act_bios.connect("clicked", self.on_reboot_bios)
+        row_act_bios.add_suffix(btn_act_bios)
+        actions_group.add(row_act_bios)
+
+        row_act_wiz = Adw.ActionRow(
+            title="Secure Boot Signing Wizard",
+            subtitle="Walks through enrolling custom keys with Microsoft anti-cheat support"
+        )
+        btn_act_wiz = Gtk.Button(label="Open Wizard")
+        btn_act_wiz.connect("clicked", lambda b: self.view_stack.set_visible_child_name("wizard"))
+        row_act_wiz.add_suffix(btn_act_wiz)
+        actions_group.add(row_act_wiz)
+
+        return page
+
+    def build_wizard_page(self) -> Gtk.Widget:
+        page = Adw.PreferencesPage()
+
+        intro_group = Adw.PreferencesGroup(
+            title="How It Works: Zero-BIOS Secure Boot",
+            description="Anti-cheat games (Valorant, EAC, FACEIT) require Secure Boot in Windows. "
+                        "By enrolling your own keys while preserving Microsoft OEM keys (-m), "
+                        "both Windows and Omarchy boot with Secure Boot permanently enabled 24/7."
+        )
+        page.add(intro_group)
+
+        # Step 1
+        step1_group = Adw.PreferencesGroup(
+            title="Step 1: Put Motherboard into Setup Mode",
+            description="Your motherboard must be placed into Setup Mode (clearing existing PK keys) once to allow enrolling custom keys."
+        )
+        page.add(step1_group)
+
+        self.step1_guide_row = Adw.ExpanderRow(
+            title="View Motherboard Guide",
+            subtitle="Vendor-specific BIOS instructions"
+        )
+        step1_group.add(self.step1_guide_row)
+
+        guide_row = Adw.PreferencesRow()
+        guide_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+        guide_box.set_margin_top(12)
+        guide_box.set_margin_bottom(12)
+        guide_box.set_margin_start(16)
+        guide_box.set_margin_end(16)
+
+        self.step1_instructions = Gtk.Label(xalign=0)
+        self.step1_instructions.set_wrap(True)
+        self.step1_instructions.set_selectable(True)
+        guide_box.append(self.step1_instructions)
+        guide_row.set_child(guide_box)
+        self.step1_guide_row.add_row(guide_row)
+
+        bios_btn_row = Adw.ActionRow(
+            title="Enter UEFI / BIOS Setup",
+            subtitle="Reboot directly into firmware settings without pressing hotkeys"
+        )
+        btn_fw = Gtk.Button(label="Reboot to BIOS")
+        btn_fw.connect("clicked", self.on_reboot_bios)
+        bios_btn_row.add_suffix(btn_fw)
+        step1_group.add(bios_btn_row)
+
+        # Step 2
+        step2_group = Adw.PreferencesGroup(
+            title="Step 2: Enroll Custom Keys and Sign Bootloaders",
+            description="Generates your master keys, enrolls them with Microsoft OEM keys, and signs Limine and kernel UKIs."
+        )
+        page.add(step2_group)
+
+        run_wizard_row = Adw.ActionRow(
+            title="Launch Automated Signing Wizard",
+            subtitle="Runs 'sbctl create-keys', 'enroll-keys -m', and signs /boot/EFI/"
+        )
+        btn_run_wizard = Gtk.Button(label="Run Wizard")
+        btn_run_wizard.add_css_class("suggested-action")
+        btn_run_wizard.connect("clicked", self.on_run_cli_wizard)
+        run_wizard_row.add_suffix(btn_run_wizard)
+        step2_group.add(run_wizard_row)
+
+        # Step 3
+        step3_group = Adw.PreferencesGroup(
+            title="Step 3: Turn Secure Boot ON in BIOS",
+            description="Once files are signed, return to your BIOS and turn Secure Boot to Enabled. Windows and Omarchy will boot without toggling settings ever again."
+        )
+        page.add(step3_group)
+
+        # Status row shown after wizard completes
+        self.step3_status_row = Adw.ActionRow(
+            title="✅ Keys Enrolled — Bootloaders Signed",
+            subtitle="Your system is ready. Go to BIOS and enable Secure Boot to finish.",
+        )
+        self.step3_status_row.add_css_class("success")
+        btn_reboot_bios2 = Gtk.Button(label="Reboot to BIOS Now")
+        btn_reboot_bios2.add_css_class("suggested-action")
+        btn_reboot_bios2.connect("clicked", self.on_reboot_bios)
+        self.step3_status_row.add_suffix(btn_reboot_bios2)
+        self.step3_status_row.set_visible(False)
+        step3_group.add(self.step3_status_row)
+
+        return page
+
+    def build_limine_page(self) -> Gtk.Widget:
+        page = Adw.PreferencesPage()
+
+        cfg_group = Adw.PreferencesGroup(
+            title="Limine Windows Chainloading",
+            description="Enables launching Windows directly from the Limine boot menu on startup."
+        )
+        page.add(cfg_group)
+
+        self.btn_add_win = Gtk.Button(label="Add Windows to Limine")
+        self.btn_add_win.add_css_class("suggested-action")
+        self.btn_add_win.connect("clicked", self.on_add_windows_to_limine)
+
+        self.limine_action_row = Adw.ActionRow(
+            title="Configure Windows in /boot/limine.conf",
+            subtitle="Automatically injects chainload entry using the detected ESP partition GUID"
+        )
+        self.limine_action_row.add_suffix(self.btn_add_win)
+        cfg_group.add(self.limine_action_row)
+
+        # Code preview
+        preview_group = Adw.PreferencesGroup(
+            title="Generated Entry Preview",
+            description="The exact configuration syntax written to /boot/limine.conf"
+        )
+        page.add(preview_group)
+
+        preview_row = Adw.PreferencesRow()
+        preview_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+        preview_box.set_margin_top(12)
+        preview_box.set_margin_bottom(12)
+        preview_box.set_margin_start(16)
+        preview_box.set_margin_end(16)
+
+        self.limine_preview = Gtk.Label(xalign=0)
+        self.limine_preview.set_wrap(True)
+        self.limine_preview.set_selectable(True)
+        self.limine_preview.add_css_class("monospace")
+        preview_box.append(self.limine_preview)
+        preview_row.set_child(preview_box)
+        preview_group.add(preview_row)
+
+        return page
+
+    def refresh_state(self):
+        """Refreshes hardware and boot status."""
+        fw = get_firmware_info()
+        hw = fw["hardware"]
+        sb = fw["secure_boot"]
+        win = fw["windows_partitions"]
+        guide = hw["guide"]
+
+        # Motherboard label
+        self.board_label.set_text(f"{hw['vendor']} ({hw['model']})")
+
+        # Secure boot badge
+        status_code = sb.get("status_code", "")
+        signed_count = sb.get("signed_count", 0)
+
+        if sb["enabled"]:
+            self.sb_badge.set_text("Enabled and Active")
+            self.sb_badge.remove_css_class("warning")
+            self.sb_badge.remove_css_class("error")
+            self.sb_badge.add_css_class("success")
+            self.row_sb.set_subtitle("Anti-cheat games and Windows run smoothly")
+            self.step3_status_row.set_visible(False)
+        elif status_code == "enrolled_pending_reboot":
+            self.sb_badge.set_text("Ready to Activate")
+            self.sb_badge.remove_css_class("warning")
+            self.sb_badge.remove_css_class("error")
+            self.sb_badge.add_css_class("success")
+            self.row_sb.set_subtitle(
+                f"Keys enrolled, {signed_count} file(s) signed — Reboot to BIOS and enable Secure Boot"
+            )
+            self.step3_status_row.set_visible(True)
+        elif sb["setup_mode"]:
+            self.sb_badge.set_text("Setup Mode")
+            self.sb_badge.remove_css_class("success")
+            self.sb_badge.remove_css_class("error")
+            self.sb_badge.add_css_class("warning")
+            self.row_sb.set_subtitle("Motherboard is ready to enroll custom keys via Step 2")
+            self.step3_status_row.set_visible(False)
+        else:
+            self.sb_badge.set_text("Disabled")
+            self.sb_badge.remove_css_class("success")
+            self.sb_badge.remove_css_class("warning")
+            self.sb_badge.add_css_class("error")
+            self.row_sb.set_subtitle("Put BIOS into Setup Mode (Step 1) before signing")
+            self.step3_status_row.set_visible(False)
+
+        # sbctl status
+        sbctl_ok = check_sbctl_installed()
+        self.sbctl_label.set_text("Installed" if sbctl_ok else "Not installed (will auto-install)")
+
+        # Windows detection
+        if win:
+            w = win[0]
+            self.win_detected_label.set_text("Detected")
+            self.row_win_detected.set_subtitle(w["title"])
+            self.win_guid_label.set_text(w["partuuid"])
+
+            # Preview in Limine tab
+            preview_text = (
+                f"/Windows 11\n"
+                f"    comment: Boot Windows Boot Manager\n"
+                f"    protocol: efi_chainload\n"
+                f"    image_path: guid({w['partuuid']}):/EFI/Microsoft/Boot/bootmgfw.efi"
+            )
+            self.limine_preview.set_text(preview_text)
+        else:
+            self.win_detected_label.set_text("Not Found")
+            self.win_guid_label.set_text("N/A")
+            self.limine_preview.set_text("No Windows EFI partition detected.")
+
+        # Limine check
+        limine_cfg = read_limine_config()
+        if limine_cfg is not None:
+            has_chain = has_windows_chainload(limine_cfg)
+            if has_chain:
+                self.limine_status_label.set_text("Configured")
+                self.limine_status_label.remove_css_class("warning")
+                self.limine_status_label.add_css_class("success")
+                self.row_limine_status.set_subtitle("Windows chainload entry is in /boot/limine.conf")
+                self.btn_add_win.set_label("Already Configured")
+                self.btn_add_win.set_sensitive(False)
+            else:
+                self.limine_status_label.set_text("Not Configured")
+                self.limine_status_label.remove_css_class("success")
+                self.limine_status_label.add_css_class("warning")
+                self.row_limine_status.set_subtitle("Go to the Limine Dual-Boot tab to add the Windows entry")
+        else:
+            self.limine_status_label.set_text("Not Configured")
+            self.limine_status_label.remove_css_class("success")
+            self.limine_status_label.add_css_class("warning")
+            self.row_limine_status.set_subtitle("Go to the Limine Dual-Boot tab to add the Windows entry")
+
+        # Motherboard guide text
+        guide_lines = [
+            f"Motherboard Brand: {guide['vendor']}",
+            f"BIOS Hotkey: {guide['key']}",
+            f"Settings Menu: {guide['menu_path']}\n",
+            "Steps to Enter Setup Mode:"
+        ]
+        for i, step in enumerate(guide["setup_mode_steps"], 1):
+            guide_lines.append(f"  {i}. {step}")
+
+        guide_lines.append("\nSteps to Re-enable Secure Boot Afterwards:")
+        for i, step in enumerate(guide["enable_steps"], 1):
+            guide_lines.append(f"  {i}. {step}")
+
+        self.step1_instructions.set_text("\n".join(guide_lines))
+        self.step1_guide_row.set_subtitle(f"Configured for {hw['vendor']}")
+
+    def on_reboot_windows(self, button):
+        entries = get_efi_boot_entries()
+        win_id = entries.get("windows_id")
+        if not win_id:
+            dialog = Adw.MessageDialog(
+                transient_for=self,
+                heading="Windows Not Found",
+                body="Windows Boot Manager could not be located in efibootmgr."
+            )
+            dialog.add_response("ok", "OK")
+            dialog.present()
+            return
+
+        dialog = Adw.MessageDialog(
+            transient_for=self,
+            heading="Reboot into Windows?",
+            body=f"Your PC will restart directly into Windows Boot Manager (Boot{win_id}) for the next boot only."
+        )
+        dialog.add_response("cancel", "Cancel")
+        dialog.add_response("reboot", "Reboot Now")
+        dialog.set_response_appearance("reboot", Adw.ResponseAppearance.SUGGESTED)
+
+        def on_response(d, response):
+            if response == "reboot":
+                subprocess.Popen(["omarchy-boot", "reboot", "windows"])
+
+        dialog.connect("response", on_response)
+        dialog.present()
+
+    def on_reboot_bios(self, button):
+        dialog = Adw.MessageDialog(
+            transient_for=self,
+            heading="Reboot into UEFI / BIOS Setup?",
+            body="Your system will restart directly into the motherboard firmware setup screen."
+        )
+        dialog.add_response("cancel", "Cancel")
+        dialog.add_response("reboot", "Reboot to BIOS")
+        dialog.set_response_appearance("reboot", Adw.ResponseAppearance.DESTRUCTIVE)
+
+        def on_response(d, response):
+            if response == "reboot":
+                subprocess.Popen(["omarchy-boot", "reboot", "bios"])
+
+        dialog.connect("response", on_response)
+        dialog.present()
+
+    def on_add_windows_to_limine(self, button):
+        win = get_windows_partitions()
+        if not win:
+            return
+
+        ok, msg = add_windows_to_limine(win[0]["partuuid"])
+        dialog = Adw.MessageDialog(
+            transient_for=self,
+            heading="Limine Configuration",
+            body=msg
+        )
+        dialog.add_response("ok", "OK")
+        dialog.present()
+        self.refresh_state()
+
+    def on_run_cli_wizard(self, button):
+        # Open in terminal emulator
+        term_cmd = None
+        for term in ["ghostty", "foot", "kitty", "alacritty", "konsole", "gnome-terminal", "xterm"]:
+            if shutil.which(term):
+                term_cmd = term
+                break
+
+        if term_cmd in ("ghostty", "foot", "kitty", "alacritty"):
+            subprocess.Popen([term_cmd, "-e", "omarchy-boot", "setup"])
+        elif term_cmd:
+            subprocess.Popen([term_cmd, "-e", "omarchy-boot setup"])
+        elif shutil.which("xdg-terminal-exec"):
+            subprocess.Popen(["xdg-terminal-exec", "omarchy-boot", "setup"])
+        else:
+            subprocess.Popen(["omarchy-boot", "setup"])
+
+
+def main():
+    app = BootApp()
+    app.run(sys.argv)
+
+
+if __name__ == "__main__":
+    main()
+
+```
+
+`scripts/org.omarchy.bootmanager.policy`:
+
+```policy
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE policyconfig PUBLIC
+ "-//freedesktop//DTD PolicyKit Policy Configuration 1.0//EN"
+ "http://www.freedesktop.org/standards/PolicyKit/1.0/policyconfig.dtd">
+<policyconfig>
+  <vendor>Omarchy</vendor>
+  <vendor_url>https://github.com/Azteriisk/omarchy-boot-manager</vendor_url>
+
+  <action id="org.omarchy.bootmanager.configure">
+    <description>Configure Limine bootloader and Secure Boot keys</description>
+    <message>Authentication is required to configure boot settings and sign UEFI binaries</message>
+    <defaults>
+      <allow_any>auth_admin</allow_any>
+      <allow_inactive>auth_admin</allow_inactive>
+      <allow_active>auth_admin_keep</allow_active>
+    </defaults>
+    <annotate key="org.freedesktop.policykit.exec.path">/usr/local/bin/omarchy-boot</annotate>
+    <annotate key="org.freedesktop.policykit.exec.allow_gui">true</annotate>
+  </action>
+</policyconfig>
+
+```
+
+`tests/test_reboot_cli.py`:
+
+```py
+import unittest
+import sys
+import argparse
+from pathlib import Path
+from unittest.mock import patch, MagicMock
+
+# Add scripts directory to path
+repo_root = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(repo_root / "scripts"))
+
+import importlib.machinery
+import importlib.util
+
+loader = importlib.machinery.SourceFileLoader("omarchy_boot", str(repo_root / "scripts" / "omarchy-boot"))
+spec = importlib.util.spec_from_loader("omarchy_boot", loader)
+omarchy_boot = importlib.util.module_from_spec(spec)
+loader.exec_module(omarchy_boot)
+
+
+class TestRebootCli(unittest.TestCase):
+    def test_imports_and_globals(self):
+        """Ensure all required standard library modules including 're' are available."""
+        self.assertTrue(hasattr(omarchy_boot, "re"), "Module 're' must be imported in omarchy-boot")
+        self.assertTrue(hasattr(omarchy_boot, "subprocess"))
+        self.assertTrue(hasattr(omarchy_boot, "argparse"))
+
+    def test_cmd_reboot_windows_dryrun(self):
+        """Test cmd_reboot targets windows and invokes the runner with sanitized win_id."""
+        fake_entries = {
+            "current": "0003",
+            "order": ["0003", "0000"],
+            "entries": [{"id": "0000", "title": "Windows Boot Manager", "is_windows": True}],
+            "windows_id": "0000",
+        }
+        fake_parts = [{"partuuid": "8a80c1ba-ee7f-4114-929e-cef5b92cf75e", "title": "Windows"}]
+
+        captured_runner = []
+
+        def fake_run(cmd, *args, **kwargs):
+            if isinstance(cmd, list) and (cmd[0] in ("sudo", "pkexec") or (len(cmd) > 1 and cmd[1] == "-c")):
+                captured_runner.append(cmd)
+                m = MagicMock()
+                m.returncode = 0
+                return m
+            m = MagicMock()
+            m.returncode = 0
+            m.stdout = ""
+            return m
+
+        with patch.object(omarchy_boot, "get_efi_boot_entries", return_value=fake_entries), \
+             patch.object(omarchy_boot, "get_windows_partitions", return_value=fake_parts), \
+             patch.object(omarchy_boot, "read_limine_config", return_value="efi_chainload bootmgfw.efi"), \
+             patch.object(omarchy_boot.subprocess, "run", side_effect=fake_run):
+            omarchy_boot.cmd_reboot(argparse.Namespace(target="windows"))
+
+        self.assertTrue(len(captured_runner) > 0, "Elevated reboot runner must be called")
+        last_call = captured_runner[-1]
+        self.assertEqual(last_call[-1], "0000", "Sanitized Windows ID '0000' should be passed as argument")
+
+
+if __name__ == "__main__":
+    unittest.main()
+
+```
+
+`tests/test_security_limine.py`:
+
+```py
+import unittest
+import sys
+from pathlib import Path
+
+# Add scripts directory to path
+repo_root = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(repo_root / "scripts"))
+
+from core.limine_manager import (
+    validate_guid,
+    validate_label,
+    generate_windows_entry,
+    inject_windows_entry,
+    add_windows_to_limine,
+    set_limine_oneshot,
+)
+
+
+class TestLimineSecurityValidation(unittest.TestCase):
+    def test_valid_guid(self):
+        self.assertEqual(
+            validate_guid("8A80C1BA-EE7F-4114-929E-CEF5B92CF75E"),
+            "8a80c1ba-ee7f-4114-929e-cef5b92cf75e"
+        )
+        self.assertEqual(
+            validate_guid("  8a80c1ba-ee7f-4114-929e-cef5b92cf75e  "),
+            "8a80c1ba-ee7f-4114-929e-cef5b92cf75e"
+        )
+
+    def test_invalid_guid_injection_rejected(self):
+        bad_guids = [
+            "8a80c1ba-ee7f-4114-929e-cef5b92cf75e; id",
+            "8a80c1ba-ee7f-4114-929e-cef5b92cf75e\nLIMEOF",
+            "8a80c1ba-ee7f-4114-929e",
+            "{8a80c1ba-ee7f-4114-929e-cef5b92cf75e}",
+            "not-a-guid",
+            "",
+            "../etc/passwd",
+        ]
+        for bad in bad_guids:
+            with self.subTest(guid=bad):
+                with self.assertRaises(ValueError):
+                    validate_guid(bad)
+
+    def test_valid_label(self):
+        valid_labels = [
+            "Windows 11",
+            "Windows 10 Pro",
+            "Windows-11_Custom.Entry",
+            "Win11",
+            "W",
+        ]
+        for lbl in valid_labels:
+            with self.subTest(label=lbl):
+                self.assertEqual(validate_label(lbl), lbl.strip())
+
+    def test_invalid_label_breakout_rejected(self):
+        bad_labels = [
+            "Windows 11\nLIMEOF\nrm -rf /",
+            "Windows 11\r\nLIMEOF",
+            "Windows; reboot",
+            "Windows `id`",
+            "Windows $(id)",
+            "Windows | sh",
+            "Windows & whoami",
+            "Windows < /etc/shadow",
+            "Windows \" && echo pwned",
+            "",
+            "   ",
+            "-Windows",  # must start with alphanumeric
+            "_Windows",
+            "A" * 65,    # exceeds 64 chars
+        ]
+        for bad in bad_labels:
+            with self.subTest(label=bad):
+                with self.assertRaises(ValueError):
+                    validate_label(bad)
+
+    def test_generate_windows_entry_safe(self):
+        entry = generate_windows_entry("8a80c1ba-ee7f-4114-929e-cef5b92cf75e", "Windows 11")
+        self.assertIn("/Windows 11", entry)
+        self.assertIn("guid(8a80c1ba-ee7f-4114-929e-cef5b92cf75e)", entry)
+
+        # Attempt breakout in generate_windows_entry
+        with self.assertRaises(ValueError):
+            generate_windows_entry("8a80c1ba-ee7f-4114-929e-cef5b92cf75e", "Windows\nLIMEOF")
+
+    def test_add_windows_to_limine_rejects_before_elevation(self):
+        ok, msg = add_windows_to_limine("invalid-guid", "Windows 11")
+        self.assertFalse(ok)
+        self.assertIn("Invalid canonical partition GUID", msg)
+
+        ok, msg = add_windows_to_limine("8a80c1ba-ee7f-4114-929e-cef5b92cf75e", "Bad\nLabel")
+        self.assertFalse(ok)
+        self.assertIn("Invalid label", msg)
+
+    def test_set_limine_oneshot_rejects_before_elevation(self):
+        ok, msg = set_limine_oneshot("Bad\nLabel")
+        self.assertFalse(ok)
+        self.assertIn("Invalid label", msg)
+
+
+    def test_helper_execution_safe(self):
+        import subprocess, tempfile, os
+        from core.limine_manager import LIMINE_APPEND_HELPER
+
+        with tempfile.TemporaryDirectory() as td:
+            cfg = Path(td) / "limine.conf"
+            cfg.write_text("timeout: 5\n", encoding="utf-8")
+
+            # Run helper
+            env = os.environ.copy()
+            env["_OMARCHY_BOOT_TEST_PATH"] = "1"
+
+            res = subprocess.run(
+                [sys.executable, "-c", LIMINE_APPEND_HELPER, str(cfg), "8a80c1ba-ee7f-4114-929e-cef5b92cf75e", "Windows 11"],
+                capture_output=True, text=True, env=env
+            )
+            self.assertEqual(res.returncode, 0, f"Helper failed: {res.stderr}")
+            self.assertIn("Windows entry added successfully", res.stdout)
+
+            # Check config content
+            content = cfg.read_text(encoding="utf-8")
+            self.assertIn("/Windows 11", content)
+            self.assertIn("guid(8a80c1ba-ee7f-4114-929e-cef5b92cf75e)", content)
+
+            # Second run should detect duplicate
+            res2 = subprocess.run(
+                [sys.executable, "-c", LIMINE_APPEND_HELPER, str(cfg), "8a80c1ba-ee7f-4114-929e-cef5b92cf75e", "Windows 11"],
+                capture_output=True, text=True, env=env
+            )
+            self.assertEqual(res2.returncode, 0)
+            self.assertIn("Windows entry already exists", res2.stdout)
+
+            # Test breakout rejection in helper
+            res3 = subprocess.run(
+                [sys.executable, "-c", LIMINE_APPEND_HELPER, str(cfg), "8a80c1ba-ee7f-4114-929e-cef5b92cf75e", "Windows 11\nLIMEOF"],
+                capture_output=True, text=True, env=env
+            )
+            self.assertNotEqual(res3.returncode, 0)
+            self.assertIn("Invalid label", res3.stderr)
+
+
+if __name__ == "__main__":
+    unittest.main()
+
+```
+
+`uninstall.sh`:
+
+```sh
+#!/usr/bin/env bash
+# Uninstaller for Omarchy Boot & Secure Boot Manager (azterisk.boot)
+# Author: Azteriisk
+
+set -euo pipefail
+
+PLUGIN_ID="azterisk.boot"
+TARGET_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/omarchy/plugins/$PLUGIN_ID"
+BIN_DIR="$HOME/.local/bin"
+APPS_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/applications"
+MENU_CONFIG="${XDG_CONFIG_HOME:-$HOME/.config}/omarchy/extensions/omarchy-menu.jsonc"
+
+echo "Removing $PLUGIN_ID..."
+
+# 1. Remove symlinks and desktop entry
+rm -f "$BIN_DIR/omarchy-boot"
+rm -f "$BIN_DIR/omarchy-boot-gui"
+rm -f "$APPS_DIR/omarchy-boot.desktop"
+update-desktop-database "$APPS_DIR" 2>/dev/null || true
+
+# 2. Clean menu entries from omarchy-menu.jsonc
+if [[ -f "$MENU_CONFIG" ]]; then
+  echo "  ⚙ Reverting entries in omarchy-menu.jsonc..."
+  python3 - << 'PYEOF'
+import re
+from pathlib import Path
+
+menu_file = Path.home() / ".config" / "omarchy" / "extensions" / "omarchy-menu.jsonc"
+if menu_file.exists():
+    content = menu_file.read_text(encoding="utf-8")
+    block_marker_start = "// --- BEGIN OMARCHY BOOT MANAGER ---"
+    block_marker_end = "// --- END OMARCHY BOOT MANAGER ---"
+
+    if block_marker_start in content and block_marker_end in content:
+        pattern = re.compile(rf"{re.escape(block_marker_start)}.*?{re.escape(block_marker_end)}\n?", re.DOTALL)
+        content = pattern.sub("", content)
+        menu_file.write_text(content, encoding="utf-8")
+        print("     [OK] Removed Boot Manager entries from omarchy-menu.jsonc")
+PYEOF
+fi
+
+# 3. Remove plugin directory
+if [[ -d "$TARGET_DIR" ]]; then
+  rm -rf "$TARGET_DIR"
+fi
+
+if command -v omarchy >/dev/null 2>&1; then
+  omarchy restart shell 2>/dev/null || true
+fi
+
+echo "Omarchy Boot & Secure Boot Manager uninstalled successfully."
+
+```
+
+`windows/README.md`:
+
+```md
+# Omarchy Boot Manager — Windows Companion
+
+A Windows companion script and zero-UAC shortcut system for [omarchy-boot-manager](https://github.com/Azteriisk/omarchy-boot-manager).
+
+It mirrors Omarchy's `omarchy-boot reboot windows` command, giving you a seamless, one-click way to jump back to Omarchy Linux from Windows without pressing BIOS hotkeys (F11/F12) or making manual bootloader selections.
+
+---
+
+## How It Works
+
+Under UEFI, Windows manages the one-shot boot target via the BCD store:
+```cmd
+bcdedit /set {fwbootmgr} bootsequence <OMARCHY_ENTRY_GUID>
+shutdown /r /t 0
+```
+This sets the UEFI NVRAM `BootNext` variable directly, telling your motherboard firmware to jump straight into Limine / Omarchy on the very next boot. On subsequent boots, the standard boot order is preserved.
+
+### Zero-UAC Execution
+
+Modifying BCD requires Administrator privileges. To avoid an annoying Windows UAC prompt every time you want to switch operating systems:
+- The installer registers a Windows Scheduled Task (`RebootToOmarchy`) with highest privileges.
+- Desktop shortcuts and terminal commands simply trigger the task (`schtasks /run /tn "RebootToOmarchy"`).
+- **Result:** Instant reboot into Omarchy with zero prompt.
+
+---
+
+## Setup
+
+1. Right-click **`install.bat`** and choose **"Run as administrator"** (or run `.\omarchy-boot.ps1 setup` from an elevated PowerShell window).
+2. The wizard automatically parses your UEFI firmware entries, identifies your Limine / Omarchy entry, and prompts you to confirm.
+3. The installer creates:
+   - **`Reboot into Omarchy`** shortcut on your Desktop.
+   - **`Reboot into BIOS`** shortcut on your Desktop.
+   - Adds `reboot-omarchy` and `reboot-bios` command aliases to your PowerShell `$PROFILE`.
+
+---
+
+## Usage
+
+### Option 1: Desktop Shortcut
+Double-click the **`Reboot into Omarchy`** icon on your desktop.
+
+### Option 2: Windows Terminal / PowerShell
+```powershell
+# Instant reboot into Omarchy
+reboot-omarchy
+
+# Instant reboot into BIOS / UEFI setup
+reboot-bios
+
+# View system Secure Boot state & EFI partitions
+.\omarchy-boot.ps1 status
+```
+
+```
+
+`windows/install.bat`:
+
+```bat
+@echo off
+:: Self-elevate to Administrator
+net session >nul 2>&1
+if %errorLevel% neq 0 (
+    echo Elevating to Administrator...
+    powershell -NoProfile -ExecutionPolicy Bypass -Command "Start-Process cmd -ArgumentList '/c \"\"%~f0\"\"' -Verb RunAs"
+    exit /b
+)
+
+cd /d "%~dp0"
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0omarchy-boot.ps1" setup
+pause
+
+```
+
+`windows/omarchy-boot.cmd`:
+
+```cmd
+@echo off
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0omarchy-boot.ps1" %*
+
+```
+
+`windows/omarchy-boot.ps1`:
+
+```ps1
+<#
+.SYNOPSIS
+    Omarchy Boot & Reboot Manager for Windows
+    Windows companion to omarchy-boot-manager.
+.DESCRIPTION
+    Provides zero-friction swapping between Windows and Omarchy Linux.
+    Sets the UEFI one-shot boot sequence to Omarchy / Limine and reboots immediately.
+#>
+
+param(
+    [Parameter(Position = 0)]
+    [string]$Command = "status",
+
+    [Parameter(Position = 1)]
+    [string]$Target = "",
+
+    [Parameter()]
+    [string]$Guid = ""
+)
+
+$ErrorActionPreference = "Continue"
+if (Get-Variable -Name "PSNativeCommandUseErrorActionPreference" -ErrorAction SilentlyContinue) {
+    $PSNativeCommandUseErrorActionPreference = $false
+}
+$ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
+$ConfigFile = Join-Path $ScriptDir "config.json"
+$TaskName = "RebootToOmarchy"
+
+function Test-ScheduledTaskExists {
+    cmd.exe /c "schtasks /query /tn `"$TaskName`" >nul 2>&1"
+    return ($LASTEXITCODE -eq 0)
+}
+
+function Remove-ScheduledTaskIfExists {
+    cmd.exe /c "schtasks /query /tn `"$TaskName`" >nul 2>&1 && schtasks /delete /tn `"$TaskName`" /f >nul 2>&1"
+}
+
+function Test-IsAdmin {
+    $identity = [Security.Principal.WindowsIdentity]::GetCurrent()
+    $principal = New-Object Security.Principal.WindowsPrincipal($identity)
+    return $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+}
+
+function Assert-Admin {
+    param([string[]]$Arguments)
+    if (-not (Test-IsAdmin)) {
+        Write-Host "Elevating privileges for this operation..." -ForegroundColor Yellow
+        $argList = @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "`"$PSCommandPath`"") + $Arguments
+        Start-Process powershell.exe -Verb RunAs -ArgumentList $argList -Wait
+        exit $LASTEXITCODE
+    }
+}
+
+function Get-SecureBootStatus {
+    try {
+        $sb = Get-ItemPropertyValue -Path "HKLM:\System\CurrentControlSet\Control\SecureBoot\State" -Name "UEFISecureBootEnabled" -ErrorAction SilentlyContinue
+        return ($sb -eq 1)
+    } catch {
+        return $false
+    }
+}
+
+function Get-EfiPartitions {
+    try {
+        $parts = Get-Partition | Where-Object { $_.GptType -eq "{c12a7328-f81f-11d2-ba4b-00a0c93ec93b}" }
+        return $parts
+    } catch {
+        return @()
+    }
+}
+
+function Parse-BcdFirmwareEntries {
+    if (-not (Test-IsAdmin)) {
+        return @()
+    }
+
+    $raw = bcdedit /enum firmware 2>&1
+    $entries = @()
+    $current = $null
+
+    foreach ($line in ($raw -split "`r?`n")) {
+        $trimmed = $line.Trim()
+        if ($trimmed -match '^(?:Firmware Application|Windows Boot Manager|Firmware Boot Manager)\s*(\(.*\))?') {
+            if ($current -and $current.Identifier) {
+                $entries += [PSCustomObject]$current
+            }
+            $current = [ordered]@{
+                Type        = $matches[0]
+                Identifier  = ""
+                Description = ""
+                Path        = ""
+                Device      = ""
+            }
+        } elseif ($line -match '^identifier\s+(.+)$') {
+            if (-not $current) {
+                $current = [ordered]@{ Type = "Unknown"; Identifier = ""; Description = ""; Path = ""; Device = "" }
+            }
+            $current.Identifier = $matches[1].Trim()
+        } elseif ($line -match '^description\s+(.+)$') {
+            if ($current) { $current.Description = $matches[1].Trim() }
+        } elseif ($line -match '^path\s+(.+)$') {
+            if ($current) { $current.Path = $matches[1].Trim() }
+        } elseif ($line -match '^device\s+(.+)$') {
+            if ($current) { $current.Device = $matches[1].Trim() }
+        }
+    }
+    if ($current -and $current.Identifier) {
+        $entries += [PSCustomObject]$current
+    }
+    return $entries
+}
+
+function Get-SavedConfig {
+    if (Test-Path $ConfigFile) {
+        try {
+            return Get-Content $ConfigFile -Raw | ConvertFrom-Json
+        } catch {}
+    }
+    return $null
+}
+
+function Save-Config ($cfg) {
+    $json = $cfg | ConvertTo-Json -Depth 4
+    Set-Content -Path $ConfigFile -Value $json -Encoding utf8
+}
+
+function Find-OmarchyEntry {
+    $config = Get-SavedConfig
+    if ($config -and $config.omarchy_guid) {
+        return @{
+            Identifier  = $config.omarchy_guid
+            Description = $config.omarchy_description
+            Source      = "config.json"
+        }
+    }
+
+    if (-not (Test-IsAdmin)) {
+        return $null
+    }
+
+    $entries = Parse-BcdFirmwareEntries
+    # Exclude Windows Boot Manager and Firmware Boot Manager
+    $candidates = $entries | Where-Object {
+        $_.Identifier -ne "{fwbootmgr}" -and
+        $_.Identifier -ne "{bootmgr}" -and
+        $_.Description -notlike "*Windows Boot Manager*"
+    }
+
+    # 1. Search by keyword
+    $match = $candidates | Where-Object {
+        $_.Description -match "(?i)(omarchy|limine|linux|arch)" -or
+        $_.Path -match "(?i)(limine|omarchy|linux)"
+    } | Select-Object -First 1
+
+    if ($match) {
+        return @{
+            Identifier  = $match.Identifier
+            Description = $match.Description
+            Source      = "bcdedit-detected"
+        }
+    }
+
+    # 2. If single non-Windows candidate
+    if ($candidates.Count -eq 1) {
+        return @{
+            Identifier  = $candidates[0].Identifier
+            Description = $candidates[0].Description
+            Source      = "bcdedit-candidate"
+        }
+    }
+
+    return $null
+}
+
+function Show-Status {
+    $sb = Get-SecureBootStatus
+    $sbColor = if ($sb) { "Green" } else { "Red" }
+    $sbText = if ($sb) { "Active (Enrolled & Validated)" } else { "Disabled" }
+
+    Write-Host ""
+    Write-Host "============================================================" -ForegroundColor Cyan
+    Write-Host "     Omarchy Boot & Secure Boot Manager (Windows)" -ForegroundColor Cyan
+    Write-Host "============================================================" -ForegroundColor Cyan
+    Write-Host ""
+    Write-Host "  UEFI Secure Boot:  " -NoNewline
+    Write-Host $sbText -ForegroundColor $sbColor
+
+    # Partitions
+    $efiParts = Get-EfiPartitions
+    Write-Host "`n  EFI System Partitions:" -ForegroundColor White
+    foreach ($p in $efiParts) {
+        $disk = $p.DiskNumber
+        $sizeGb = [math]::Round($p.Size / 1GB, 2)
+        $guid = $p.Guid
+        $label = if ($p.Size -gt 500MB) { "Omarchy / Linux ESP" } else { "Windows ESP" }
+        Write-Host "   - Disk $disk, Partition $($p.PartitionNumber) ($sizeGb GB) - $label" -ForegroundColor Gray
+        Write-Host "     GUID: $guid" -ForegroundColor DarkGray
+    }
+
+    # Omarchy firmware target
+    $omarchy = Find-OmarchyEntry
+    Write-Host "`n  Omarchy Boot Target:" -ForegroundColor White
+    if ($omarchy) {
+        Write-Host "   - Title: " -NoNewline
+        Write-Host "$($omarchy.Description)" -ForegroundColor Green
+        Write-Host "   - GUID:  " -NoNewline
+        Write-Host "$($omarchy.Identifier)" -ForegroundColor Cyan
+        Write-Host "   - Origin: $($omarchy.Source)" -ForegroundColor DarkGray
+    } else {
+        if (-not (Test-IsAdmin)) {
+            Write-Host "   - (Run with Administrator or run 'omarchy-boot setup' to detect)" -ForegroundColor Yellow
+        } else {
+            Write-Host "   - Not detected automatically. Run 'omarchy-boot setup' to configure." -ForegroundColor Yellow
+        }
+    }
+
+    # Scheduled Task Status
+    Write-Host "`n  One-Click Fast Switch Task:" -ForegroundColor White
+    if (Test-ScheduledTaskExists) {
+        Write-Host "   - Status: Installed ($TaskName)" -ForegroundColor Green
+        Write-Host "   - Perms:  Elevated (zero UAC prompts on swap)" -ForegroundColor DarkGreen
+    } else {
+        Write-Host "   - Status: Not installed (Run 'omarchy-boot setup' to install)" -ForegroundColor Yellow
+    }
+
+    Write-Host ""
+    Write-Host "  Quick Actions:" -ForegroundColor White
+    Write-Host "   - Swap to Omarchy:   omarchy-boot reboot omarchy" -ForegroundColor Cyan
+    Write-Host "   - Reboot into BIOS:  omarchy-boot reboot bios" -ForegroundColor Cyan
+    Write-Host "   - Full Setup Wizard: omarchy-boot setup" -ForegroundColor Cyan
+    Write-Host "============================================================`n" -ForegroundColor Cyan
+}
+
+function Invoke-DirectRebootOmarchy {
+    # This function is designed to be executed directly by the elevated scheduled task
+    $entry = Find-OmarchyEntry
+    if (-not $entry -or -not $entry.Identifier) {
+        # Fallback: check config file directly
+        $cfg = Get-SavedConfig
+        if ($cfg -and $cfg.omarchy_guid) {
+            $guid = $cfg.omarchy_guid
+        } else {
+            Write-Host "Error: Omarchy boot GUID not configured." -ForegroundColor Red
+            exit 1
+        }
+    } else {
+        $guid = $entry.Identifier
+    }
+
+    Write-Host "Setting one-shot boot sequence to Omarchy ($guid)..." -ForegroundColor Cyan
+    $res = bcdedit /set "{fwbootmgr}" bootsequence $guid 2>&1
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "Failed to set bootsequence: $res" -ForegroundColor Red
+        exit 1
+    }
+
+    Write-Host "Restarting system into Omarchy Linux..." -ForegroundColor Green
+    Start-Sleep -Milliseconds 500
+    shutdown /r /t 0
+}
+
+function Invoke-Reboot {
+    param([string]$TargetName)
+    $TargetName = $TargetName.ToLower()
+
+    if ($TargetName -in @("bios", "uefi", "firmware")) {
+        Write-Host "Rebooting into UEFI / BIOS Setup..." -ForegroundColor Cyan
+        shutdown /r /fw /t 0
+        return
+    }
+
+    if ($TargetName -in @("omarchy", "linux", "limine", "")) {
+        # Check if scheduled task exists
+        if (Test-ScheduledTaskExists) {
+            Write-Host "Triggering fast swap to Omarchy via elevated task..." -ForegroundColor Cyan
+            cmd.exe /c "schtasks /run /tn `"$TaskName`" >nul 2>&1"
+            Write-Host "Reboot initiated." -ForegroundColor Green
+            return
+        }
+
+        # Otherwise elevate
+        Assert-Admin @("reboot-direct")
+        Invoke-DirectRebootOmarchy
+        return
+    }
+
+    Write-Host "Unknown target: $TargetName. Use 'omarchy' or 'bios'." -ForegroundColor Red
+}
+
+function Run-Setup {
+    Assert-Admin @("setup")
+
+    Write-Host ""
+    Write-Host "============================================================" -ForegroundColor Cyan
+    Write-Host "      Omarchy Boot Manager Windows Setup Wizard" -ForegroundColor Cyan
+    Write-Host "============================================================" -ForegroundColor Cyan
+    Write-Host ""
+
+    # Check existing config
+    $existingCfg = Get-SavedConfig
+    $selected = $null
+
+    if ($Guid) {
+        $cleanGuid = if ($Guid.StartsWith("{")) { $Guid } else { "{$Guid}" }
+        $selected = [PSCustomObject]@{
+            Identifier  = $cleanGuid
+            Description = "Specified Omarchy Target"
+        }
+    } elseif ($existingCfg -and $existingCfg.omarchy_guid) {
+        Write-Host "Found previously configured Omarchy entry: $($existingCfg.omarchy_description) ($($existingCfg.omarchy_guid))`n" -ForegroundColor Green
+        $keep = Read-Host "Keep this entry? [Y/n]"
+        if ($keep.Trim().ToLower() -ne "n") {
+            $selected = [PSCustomObject]@{
+                Identifier  = $existingCfg.omarchy_guid
+                Description = $existingCfg.omarchy_description
+            }
+        }
+    }
+
+    if (-not $selected) {
+        Write-Host "Scanning UEFI firmware entries..." -ForegroundColor Cyan
+        $entries = Parse-BcdFirmwareEntries
+
+        $candidates = $entries | Where-Object {
+            $_.Identifier -ne "{fwbootmgr}" -and
+            $_.Identifier -ne "{bootmgr}" -and
+            $_.Description -notlike "*Windows Boot Manager*"
+        }
+
+        if (-not $candidates -or $candidates.Count -eq 0) {
+            $candidates = $entries | Where-Object { $_.Identifier -ne "{fwbootmgr}" }
+        }
+
+        Write-Host "`nDiscovered UEFI Boot Entries:" -ForegroundColor White
+        $index = 1
+        foreach ($c in $candidates) {
+            Write-Host "  [$index] $($c.Description) ($($c.Identifier))" -ForegroundColor Gray
+            if ($c.Path) { Write-Host "      Path: $($c.Path)" -ForegroundColor DarkGray }
+            $index++
+        }
+
+        # Auto detect
+        $selected = $candidates | Where-Object {
+            $_.Description -match "(?i)(omarchy|limine|linux|arch)" -or
+            $_.Path -match "(?i)(limine|omarchy|linux)"
+        } | Select-Object -First 1
+
+        if (-not $selected -and $candidates.Count -eq 1) {
+            $selected = $candidates[0]
+        }
+
+        if ($selected) {
+            Write-Host "`nAuto-detected Omarchy/Limine entry:" -ForegroundColor Green
+            Write-Host "  $($selected.Description) ($($selected.Identifier))" -ForegroundColor Cyan
+            $confirm = Read-Host "`nUse this entry for swapping to Omarchy? [Y/n]"
+            if ($confirm.Trim().ToLower() -eq "n") {
+                $selected = $null
+            }
+        }
+
+        if (-not $selected) {
+            $pick = Read-Host "`nEnter the number of the Omarchy / Limine entry [1-$($candidates.Count)] or paste the GUID"
+            if ($pick -match '^\d+$' -and [int]$pick -ge 1 -and [int]$pick -le $candidates.Count) {
+                $selected = $candidates[[int]$pick - 1]
+            } elseif ($pick -match '^\{?[0-9a-fA-F\-]{36}\}?$') {
+                $cleanGuid = if ($pick.StartsWith("{")) { $pick } else { "{$pick}" }
+                $selected = [PSCustomObject]@{
+                    Identifier  = $cleanGuid
+                    Description = "Custom Omarchy Entry"
+                }
+            } else {
+                Write-Host "Invalid selection. Setup cancelled." -ForegroundColor Red
+                return
+            }
+        }
+    }
+
+    # Save to config.json
+    $cfg = @{
+        omarchy_guid        = $selected.Identifier
+        omarchy_description = $selected.Description
+        installed_at        = (Get-Date -Format "o")
+    }
+    Save-Config $cfg
+    Write-Host "`nSaved Omarchy target to config.json." -ForegroundColor Green
+
+    # Create runner script for Scheduled Task
+    $runnerPath = Join-Path $ScriptDir "reboot-runner.cmd"
+    $runnerContent = "@echo off`r`npowershell.exe -NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File `"$PSCommandPath`" reboot-direct`r`n"
+    Set-Content -Path $runnerPath -Value $runnerContent -Encoding ascii
+
+    # Remove existing task if present
+    Remove-ScheduledTaskIfExists
+
+    # Create Scheduled Task for zero-UAC execution
+    Write-Host "`nRegistering elevated scheduled task '$TaskName' (allows 1-click reboot with no UAC)..." -ForegroundColor Cyan
+    $createOutput = cmd.exe /c "schtasks /create /tn `"$TaskName`" /tr `"\`"$runnerPath\`"`" /sc ONCE /st 00:00 /ru `"SYSTEM`" /rl HIGHEST /f 2>&1"
+
+    if ($LASTEXITCODE -ne 0) {
+        $user = "$env:USERDOMAIN\$env:USERNAME"
+        $createOutput = cmd.exe /c "schtasks /create /tn `"$TaskName`" /tr `"\`"$runnerPath\`"`" /sc ONCE /st 00:00 /ru `"$user`" /rl HIGHEST /f 2>&1"
+    }
+
+    if ($LASTEXITCODE -eq 0) {
+        Write-Host "Scheduled task created successfully." -ForegroundColor Green
+    } else {
+        Write-Host "Warning: Could not create scheduled task: $createOutput" -ForegroundColor Yellow
+    }
+
+    # Create Desktop Shortcut
+    $desktopPath = [Environment]::GetFolderPath("Desktop")
+    $shortcutPath = Join-Path $desktopPath "Reboot into Omarchy.lnk"
+    $cmdLauncherPath = Join-Path $ScriptDir "reboot-to-omarchy.cmd"
+
+    # Create cmd launcher
+    $cmdLauncherContent = "@echo off`r`nschtasks /run /tn $TaskName >nul 2>&1`r`nif %errorlevel% neq 0 (`r`n    powershell.exe -NoProfile -ExecutionPolicy Bypass -File `"%~dp0omarchy-boot.ps1`" reboot omarchy`r`n)`r`n"
+    Set-Content -Path $cmdLauncherPath -Value $cmdLauncherContent -Encoding ascii
+
+    $wshShell = New-Object -ComObject WScript.Shell
+    $shortcut = $wshShell.CreateShortcut($shortcutPath)
+    $shortcut.TargetPath = $cmdLauncherPath
+    $shortcut.WorkingDirectory = $ScriptDir
+    $shortcut.IconLocation = "$env:SystemRoot\System32\shell32.dll, 220" # Restart icon
+    $shortcut.Description = "Instantly swap into Omarchy Linux"
+    $shortcut.Save()
+
+    Write-Host "Created Desktop Shortcut: 'Reboot into Omarchy'" -ForegroundColor Green
+
+    # Create BIOS Shortcut
+    $biosShortcutPath = Join-Path $desktopPath "Reboot into BIOS.lnk"
+    $biosCmdPath = Join-Path $ScriptDir "reboot-to-bios.cmd"
+    Set-Content -Path $biosCmdPath -Value "@echo off`r`nshutdown /r /fw /t 0`r`n" -Encoding ascii
+
+    $biosShortcut = $wshShell.CreateShortcut($biosShortcutPath)
+    $biosShortcut.TargetPath = $biosCmdPath
+    $biosShortcut.WorkingDirectory = $ScriptDir
+    $biosShortcut.IconLocation = "$env:SystemRoot\System32\shell32.dll, 44" # Hardware / BIOS icon
+    $biosShortcut.Description = "Reboot directly into UEFI / BIOS Setup"
+    $biosShortcut.Save()
+    Write-Host "Created Desktop Shortcut: 'Reboot into BIOS'" -ForegroundColor Green
+
+    # 1. Add windows directory to persistent User PATH
+    $userPath = [Environment]::GetEnvironmentVariable("PATH", "User")
+    if ($userPath -notmatch [regex]::Escape($ScriptDir)) {
+        [Environment]::SetEnvironmentVariable("PATH", "$userPath;$ScriptDir", "User")
+        $env:PATH = "$env:PATH;$ScriptDir"
+        Write-Host "Added '$ScriptDir' to persistent User PATH." -ForegroundColor Green
+    }
+
+    # 2. If ~/.local/bin exists in User profile, install CLI wrappers
+    $localBin = Join-Path $env:USERPROFILE ".local\bin"
+    if (Test-Path $localBin) {
+        Copy-Item (Join-Path $ScriptDir "reboot-omarchy.cmd") (Join-Path $localBin "reboot-omarchy.cmd") -Force
+        Copy-Item (Join-Path $ScriptDir "reboot-bios.cmd") (Join-Path $localBin "reboot-bios.cmd") -Force
+        Copy-Item (Join-Path $ScriptDir "omarchy-boot.cmd") (Join-Path $localBin "omarchy-boot.cmd") -Force
+        Write-Host "Installed CLI binaries into $localBin" -ForegroundColor Green
+    }
+
+    # 3. Configure both Windows PowerShell 5.1 and PowerShell 7 profiles
+    $helperFunc = @"
+
+# Omarchy Boot Manager Helper
+function reboot-omarchy { & '$PSCommandPath' reboot omarchy }
+function reboot-bios { & '$PSCommandPath' reboot bios }
+"@
+    $profilePaths = @(
+        (Join-Path $env:USERPROFILE "Documents\WindowsPowerShell\Microsoft.PowerShell_profile.ps1"),
+        (Join-Path $env:USERPROFILE "Documents\PowerShell\Microsoft.PowerShell_profile.ps1")
+    )
+    foreach ($p in $profilePaths) {
+        $pDir = Split-Path -Parent $p
+        if (-not (Test-Path $pDir)) {
+            New-Item -ItemType Directory -Path $pDir -Force | Out-Null
+        }
+        if (-not (Test-Path $p) -or (Get-Content $p -Raw) -notmatch "reboot-omarchy") {
+            Add-Content -Path $p -Value $helperFunc
+        }
+    }
+    Write-Host "Configured PowerShell profiles (PowerShell 5.1 & PowerShell 7)." -ForegroundColor Green
+
+    Write-Host ""
+    Write-Host "============================================================" -ForegroundColor Green
+    Write-Host "  Setup complete! You can now swap to Omarchy anytime by:" -ForegroundColor Green
+    Write-Host "  1. Double-clicking 'Reboot into Omarchy' on your Desktop" -ForegroundColor White
+    Write-Host "  2. Typing 'reboot-omarchy' in PowerShell or Windows Terminal" -ForegroundColor White
+    Write-Host "============================================================`n" -ForegroundColor Green
+}
+
+# Command Router
+switch ($Command.ToLower()) {
+    "status" {
+        Show-Status
+    }
+    "reboot" {
+        Invoke-Reboot $Target
+    }
+    "reboot-direct" {
+        Invoke-DirectRebootOmarchy
+    }
+    "setup" {
+        Run-Setup
+    }
+    "install" {
+        Run-Setup
+    }
+    default {
+        Write-Host "Unknown command: $Command" -ForegroundColor Red
+        Write-Host "Usage: omarchy-boot [status|reboot|setup]" -ForegroundColor Yellow
+    }
+}
+
+```
+
+`windows/reboot-bios.cmd`:
+
+```cmd
+@echo off
+shutdown /r /fw /t 0
+
+```
+
+`windows/reboot-omarchy.cmd`:
+
+```cmd
+@echo off
+schtasks /run /tn RebootToOmarchy >nul 2>&1
+if %errorlevel% neq 0 (
+    powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0omarchy-boot.ps1" reboot omarchy
+)
+
+```
+
+`windows/reboot-to-bios.cmd`:
+
+```cmd
+@echo off
+shutdown /r /fw /t 0
+
+
+```
+
+`windows/reboot-to-omarchy.cmd`:
+
+```cmd
+@echo off
+schtasks /run /tn RebootToOmarchy >nul 2>&1
+if %errorlevel% neq 0 (
+    powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0omarchy-boot.ps1" reboot omarchy
+)
+
+
+```
