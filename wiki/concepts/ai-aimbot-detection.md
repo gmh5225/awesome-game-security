@@ -37,6 +37,7 @@ sources:
   - wiki/sources/descriptions/87andrewh__DeepAimDetector.md
   - wiki/sources/descriptions/oykuoner__YAACS-AntiCheat.md
   - wiki/sources/descriptions/magicnothief__cs2-overwatch.md
+  - wiki/sources/descriptions/AbdulAmi09__SentinelAntiCheat.md
 updated: 2026-09-25
 confidence: medium
 ---
@@ -97,6 +98,7 @@ Tabular engagement features (reaction time, curvature stats, dx/dy correlation, 
 - [[deepaimdetector]] — 87andrewh SourceTV demo LSTM prototype (Go demo parser → view-angle delta + crosshair-to-target angular features around attack events; Python notebooks; classifies legit-aimbot-assisted gunfights; research experiment; Anti Cheat / Deep Learning) (source: wiki/sources/descriptions/87andrewh__DeepAimDetector.md)
 - [[yaacs-anticheat]] — oykuoner CS2 demo pitch/yaw telemetry research pipeline (Python; demoparser2 HLTV parsing; 100-tick spatiotemporal features from Fitts' Law + Minimum Jerk Model; heuristic rule engine vs Random Forest; synthetic + real datasets for honest/pro/aimbot/humanised-evasion profiles; privacy-preserving server-side aimbot detection without client memory probes; Anti Cheat / Machine Learning) (source: wiki/sources/descriptions/oykuoner__YAACS-AntiCheat.md)
 - [[cs2-overwatch]] — magicnothief CPU-friendly offline CS2 demo review pipeline (Python; hard rules + ray-cast visibility + CS2CD-trained ML behavior scoring + calibrated suspicion tiers; optional local LLM evidence summaries via llama.cpp; browser UI + CLI; ONNX inference; optional YOLO vision cross-checks; privacy-preserving local review; Anti Cheat / Analysis Framework) (source: wiki/sources/descriptions/magicnothief__cs2-overwatch.md)
+- [[sentinel-anticheat-chess]] — AbdulAmi09 chess integrity platform (Python FastAPI + Next.js; Regan-style move-quality baseline + seven statistical signal layers—complexity, timing, historical play, behavioral/online/environmental cues—fused to explainable risk tiers; Stockfish PGN + Maia human-likeness; optional XGBoost/Isolation Forest; hash-chained audit logging, case management, live monitoring, partner API; human-review-first engine-assistance detection; Anti Cheat / Open Source Anti Cheat System) (source: wiki/sources/descriptions/AbdulAmi09__SentinelAntiCheat.md)
 - [[nuremx]] — Apex Legends Python YOLOv5 screen-capture cheat (enemy detection, overlay, aiming; trained weights; no memory hooking; Windows/Linux; Zurek0x; cheat / [AI])
 - [[clickpic]] — screen pixel color detection + auto-click (OpenCV + triggerbot; monitors regions for target colors; gmh5225)
 - [[rust-auto-weapon-detection-opencv-example]] — Facepunch Rust OpenCV weapon detection sample (C++; color filtering + weapon index mapping; screen-based state recognition; no memory reads; YouNeverKnow00)
