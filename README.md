@@ -4533,6 +4533,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/LooperSalty/cs2-tracker [CS2 stats tracker with local FastAPI, Game State Integration live match feed, and explainable heuristic anti-cheat suspicion scoring]
 - https://github.com/oykuoner/YAACS-AntiCheat [CS2 anti-cheat research pipeline that parses HLTV demos with demoparser2, extracts spatiotemporal aim telemetry, and benchmarks heuristic plus ML aimbot classifiers]
 - https://github.com/magicnothief/cs2-overwatch [Offline CS2 demo review pipeline with aim/behavior models, ray-cast visibility checks, calibrated suspicion scoring, and optional local LLM evidence summaries]
+- https://github.com/NetVar1337/apex-anticheat-lab [FPS anti-cheat research lab with cheat taxonomy docs, Python aim-kinematics detectors, match-integrity SQL, YARA loader rules, and PowerShell host driver/PCIe surveys]
 - https://github.com/nft-syou/jevcraft-bench [Behavioral anti-cheat research bench for Minecraft Paper: mining telemetry, typed LLM evaluation, and offline X-Ray heuristic benchmarking in shadow mode]
 - https://github.com/baldspots440/R6Intel [Rainbow Six Siege player stat analyzer with explainable heuristic suspicion scoring via R6Data API]
 - https://github.com/Remus3/Lanternlight [Anti-cheat-safe Mistfall Hunter companion that derives game state only from logs, saves, and passive screen capture—no process memory, injection, or hooks]
