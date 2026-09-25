@@ -617,7 +617,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [CE MCP Plugin](entities/ce-mcp-plugin.md) — Eruditi CE plugin: C + Lua; async TCP AI command channel; memory R/W, freeze, disasm/asm, process control, DLL injection (cheat / MCP for Cheat Engine)
 - [CE Tracer-IDA](entities/ce-tracer-ida.md) — Python IDA plugin: CheatEngine value tracer (memory analysis; cheat / IDA Plugins)
 - [ce-easyanticheat-bypass](entities/ce-easyanticheat-bypass.md) — Cheat Engine bypass for EAC (CE process/window class/driver/memory-access evasion; UD CE; gmh5225)
-- [Ceasta](entities/ceasta.md) — integrated disassembler/decompiler/debugger for Windows/Linux PE/ELF (ngwg; C++17; IDA-style listing + x64dbg-style debugger; Lua plugins; built-in MCP server; Cheat / RE Tools)
+- [Ceasta](entities/ceasta.md) — all-in-one disassembler/decompiler/debugger for Windows/Linux PE/ELF (ngwg; C++17; IDA-style listing + CFG + x64dbg-style debugger; Lua plugins; binary diffing + library signature matching; CLI + built-in MCP; self-contained vendored workbench; Cheat / RE Tools)
 - [ce-tutorial](entities/ce-tutorial.md) — Cheat Engine register tutorial (register roles vs common illustrations; cheat / guide)
 - [ce_speed_hack](entities/ce-speed-hack.md) — compact C++ CE-style speed hack (Detours timing hooks; core hooking logic for learners; user-mode time manipulation; IamSanjid)
 - [ceserver-ios](entities/ceserver-ios.md) — Cheat Engine ceserver for iOS (jailed/jailbroken; desktop CE remote scan/edit, breakpoints, pointer scan; 0xiuks)
