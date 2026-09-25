@@ -36,7 +36,8 @@ sources:
   - wiki/sources/descriptions/Driw0x__CS2Guard.md
   - wiki/sources/descriptions/87andrewh__DeepAimDetector.md
   - wiki/sources/descriptions/oykuoner__YAACS-AntiCheat.md
-updated: 2026-09-22
+  - wiki/sources/descriptions/magicnothief__cs2-overwatch.md
+updated: 2026-09-25
 confidence: medium
 ---
 
@@ -95,6 +96,7 @@ Tabular engagement features (reaction time, curvature stats, dx/dy correlation, 
 - [[cs2guard]] — Driw0x CS2 ML behavioral cheat detection from demo parsing (Python; tick-level aim/tracking/reaction-time features; CS2CD dataset adapters; anomaly + supervised models; visualization/tests; goal of real-time server-side AC without client scans; Anti Cheat / Machine Learning) (source: wiki/sources/descriptions/Driw0x__CS2Guard.md)
 - [[deepaimdetector]] — 87andrewh SourceTV demo LSTM prototype (Go demo parser → view-angle delta + crosshair-to-target angular features around attack events; Python notebooks; classifies legit-aimbot-assisted gunfights; research experiment; Anti Cheat / Deep Learning) (source: wiki/sources/descriptions/87andrewh__DeepAimDetector.md)
 - [[yaacs-anticheat]] — oykuoner CS2 demo pitch/yaw telemetry research pipeline (Python; demoparser2 HLTV parsing; 100-tick spatiotemporal features from Fitts' Law + Minimum Jerk Model; heuristic rule engine vs Random Forest; synthetic + real datasets for honest/pro/aimbot/humanised-evasion profiles; privacy-preserving server-side aimbot detection without client memory probes; Anti Cheat / Machine Learning) (source: wiki/sources/descriptions/oykuoner__YAACS-AntiCheat.md)
+- [[cs2-overwatch]] — magicnothief CPU-friendly offline CS2 demo review pipeline (Python; hard rules + ray-cast visibility + CS2CD-trained ML behavior scoring + calibrated suspicion tiers; optional local LLM evidence summaries via llama.cpp; browser UI + CLI; ONNX inference; optional YOLO vision cross-checks; privacy-preserving local review; Anti Cheat / Analysis Framework) (source: wiki/sources/descriptions/magicnothief__cs2-overwatch.md)
 - [[nuremx]] — Apex Legends Python YOLOv5 screen-capture cheat (enemy detection, overlay, aiming; trained weights; no memory hooking; Windows/Linux; Zurek0x; cheat / [AI])
 - [[clickpic]] — screen pixel color detection + auto-click (OpenCV + triggerbot; monitors regions for target colors; gmh5225)
 - [[rust-auto-weapon-detection-opencv-example]] — Facepunch Rust OpenCV weapon detection sample (C++; color filtering + weapon index mapping; screen-based state recognition; no memory reads; YouNeverKnow00)
