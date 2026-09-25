@@ -1,0 +1,2226 @@
+Project Path: arc_NetVar1337_apex-anticheat-lab_7o5xg2ys
+
+Source Tree:
+
+```txt
+arc_NetVar1337_apex-anticheat-lab_7o5xg2ys
+├── README.md
+├── detections
+│   ├── README.md
+│   ├── aim_metrics.py
+│   ├── baseline.py
+│   └── detectors.py
+├── docs
+│   ├── cheat-taxonomy.md
+│   └── methodology.md
+├── host
+│   ├── README.md
+│   └── driver_survey.ps1
+├── sql
+│   ├── kpi_queries.sql
+│   └── schema.sql
+└── yara
+    ├── README.md
+    ├── hwid_spoofer_traits.yar
+    ├── input_emulator_traits.yar
+    └── loader_traits.yar
+
+```
+
+`README.md`:
+
+```md
+<div align="center">
+
+# apex-anticheat-lab
+
+**FPS anti-cheat research lab — cheat taxonomy, behavioral detections, match-integrity SQL, and host-level signals.**
+
+`game security` · `anti-cheat` · `detection engineering` · `telemetry` · `Apex Legends`
+
+</div>
+
+---
+
+## Why this exists
+
+Anti-cheat work is not "find the file and delete it." Modern FPS cheats ship as subscriptions,
+live in hardware (DMA cards, controller emulators), or never touch the target process at all
+(computer-vision aim, external input injection). The durable counter is a **defense-in-depth
+stack**:
+
+1. **Host signals** — what is loaded, what is plugged in, what is signed, what is a known-vulnerable driver.
+2. **Static signals** — YARA / packing / import traits on loaders and user-mode components.
+3. **Behavioral signals** — server-side telemetry: aim kinematics, recoil regularity, reaction times.
+4. **Economic / account signals** — boosting, deranking, smurfing, HWID ban evasion, account sharing.
+5. **Intelligence** — what the cheat market is shipping this week ([cheat-intel](https://github.com/NetVar1337/cheat-intel)).
+
+This repo is the *detection* half of that stack. It is written from the defender's side:
+everything here is a way to **observe, score, and explain** anomalous behavior.
+
+## Contents
+
+| Path | What it is |
+|:---|:---|
+| [`docs/cheat-taxonomy.md`](docs/cheat-taxonomy.md) | FPS cheat taxonomy — how each class works and how each is detected |
+| [`docs/methodology.md`](docs/methodology.md) | How to build a labelled dataset, pick thresholds, measure detector quality |
+| [`detections/`](detections/) | Python: aim kinematics metrics, anomaly scoring, baseline fitting |
+| [`sql/`](sql/) | Telemetry schema + analyst KPI / match-integrity queries |
+| [`yara/`](yara/) | Heuristic YARA for cheat loaders and HWID spoofers |
+| [`host/`](host/) | PowerShell host survey: driver inventory, vulnerable-driver blocklist, PCIe devices |
+
+## Quick start
+
+```bash
+cd detections
+python -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt
+
+# 1. fit a clean baseline
+python baseline.py --samples ../data/clean_samples.csv --out ../data/baseline.json
+
+# 2. score a population
+python detectors.py --samples ../data/match_samples.csv \
+                    --baseline ../data/baseline.json \
+                    --out ../data/scores.csv
+```
+
+Input format is a flat CSV of **per-input-event samples** (see
+[`detections/README.md`](detections/README.md)). Any replay/telemetry pipeline that can emit
+`player_id, t_ms, yaw, pitch, ...` can feed it — the code does not depend on any particular game.
+
+## Design notes
+
+- **Every detector is a named, single-purpose feature.** Scores are explainable: an analyst
+  should be able to tell a player *why* they were flagged, and a reviewer should be able to
+  argue with a specific number.
+- **Baselines are per-cohort.** Mouse and controller players do not produce the same
+  kinematics; neither do Bronze and Predator. Scoring against a pooled baseline produces
+  mostly false positives.
+- **Nothing here auto-bans.** Output is a prioritised review queue with per-feature evidence.
+
+## Related work
+
+- [`Kevlar-Ultimate`](https://github.com/NetVar1337/Kevlar-Ultimate) — kernel-driver emulation for behavioral analysis of anti-cheat and driver-class threats.
+- [`cheat-intel`](https://github.com/NetVar1337/cheat-intel) — cheat-community monitoring and trend reports.
+- [`account-security`](https://github.com/NetVar1337/account-security) — account takeover and session abuse detection.
+
+## Scope
+
+Defensive research. All analysis is against data the operator owns or synthetic fixtures shipped
+in this repo. No game files, no bypasses, no operational cheat code.
+
+```
+
+`detections/README.md`:
+
+```md
+# Behavioral detections
+
+Python, numpy + scipy + pandas. No game-specific dependencies.
+
+## Input format
+
+One CSV row per **input event** (a mouse sample, a shot, or a frame tick), sorted by
+`player_id, t_ms`:
+
+```csv
+player_id,t_ms,match_id,yaw,pitch,mouse_dx,mouse_dy,event,weapon_id,cohort
+p_001,0,m_8801,101.231,4.913,0.000,0.000,move,weapon_r301,mouse_gold
+p_001,8,m_8801,101.402,4.913,0.171,0.000,move,weapon_r301,mouse_gold
+p_001,412,m_8801,102.900,4.700,-0.210,0.101,fire,weapon_r301,mouse_gold
+```
+
+| Column | Meaning |
+|:---|:---|
+| `player_id` | stable player identifier |
+| `t_ms` | monotonic timestamp within the match, milliseconds |
+| `match_id` | match identifier — used for cross-match consistency |
+| `yaw`, `pitch` | view angles in degrees |
+| `mouse_dx`, `mouse_dy` | raw input delta for this event (0 for non-input events) |
+| `event` | `move`, `fire`, `hit`, `target_enter`, `target_exit` |
+| `weapon_id` | weapon class (recoil metrics are per-weapon) |
+| `cohort` | input-device + skill-tier label, used for baseline lookup |
+| `hit_bone` | *(optional)* `head` / `neck` / `body` on `hit` events |
+
+`event=target_enter` / `target_exit` mark the frames where an opponent becomes / stops being
+under the crosshair. They make reaction-time and triggerbot metrics possible. If your pipeline
+cannot emit them, those metrics return NaN — the code never invents a substitute.
+
+## Files
+
+| File | Purpose |
+|:---|:---|
+| `aim_metrics.py` | pure metric extraction from a player's sample stream |
+| `baseline.py` | fit per-cohort metric distributions from a clean population |
+| `detectors.py` | score a population against a baseline, emit ranked review queue |
+| `requirements.txt` | `numpy`, `scipy`, `pandas` |
+
+## Metrics extracted
+
+| Metric | Question it answers | Cheat class | Suspicious tail |
+|:---|:---|:---|:---|
+| `acq_per_min` | how often does this player acquire a new target? | context | — |
+| `ttt_med_ms` | time-to-target vs. angular distance travelled | aimbot | low |
+| `fitts_slope` | is acquisition speed consistent with human motor control? | aimbot | low |
+| `snap_ratio` | fraction of acquisitions at superhuman *effective* velocity (distance/duration) | aimbot | high |
+| `reaction_med_ms` | target-visible → first-aim latency | aimbot | low |
+| `fire_latency_med_ms` | crosshair-on-target → fire latency | triggerbot | low |
+| `recoil_regularity` | clustering of per-shot compensation vectors (direction *and* magnitude) | no-recoil script | high |
+| `recoil_residual` | variance left after removing the learned pattern | no-recoil script | low |
+| `jerk_p95` | Flash & Hogan dimensionless normalised jerk (Savitzky-Golay smoothed) | aimbot smoothing | two-sided |
+| `track_smoothness` | lag-1 autocorrelation of angular velocity | CV / external aim | high |
+| `accuracy` | hits / fires | aimbot | high |
+| `hs_rate` | headshot share of hits | aimbot | high |
+
+See `aim_metrics.py` for the exact definitions — every one is documented at the function.
+
+## Why cross-match consistency is enforced
+
+A single match can legitimately produce extreme values: a lucky flick, a lobby of new players,
+a 200 ms reaction to a predictable peek. `detectors.py` therefore marks players with fewer
+than `--min-matches` distinct matches as **ineligible** for review. Repeated outliers across
+independent matches are the evidence; a single outlier is noise.
+
+## Known limits
+
+- `fitts_slope` and `snap_ratio` need at least ~5 acquisitions per player to be meaningful;
+  below that they return NaN and are excluded from the score.
+- `jerk_p95` needs acquisitions of at least 7 samples (the Savitzky-Golay window); very short
+  snap acquisitions return NaN. That is acceptable — `snap_ratio` already covers them.
+- `recoil_*` deliberately **skips shots taken mid-flick**: in that window the input is aiming,
+  not recoil compensation, and the two cannot be separated from this signal alone. It is also
+  computed per player, not per weapon; split the stream by `weapon_id` first for precision.
+- `track_smoothness` is sample-rate dependent. Do not compare cohorts with different input
+  poll rates.
+- Metrics assume `t_ms` is monotonic per player. Non-monotonic telemetry is silently
+  re-sorted, which can hide pipeline bugs — validate your exporter before trusting results.
+- **Every threshold here is a starting point.** `SNAP_EFFECTIVE_DEG_S`, `STOP_EPS_DEG_S` and
+  the feature weights in `detectors.py` must be calibrated against your own labelled
+  population. Do not deploy these numbers.
+
+## Sanity check
+
+The metric primitives were verified against four synthetic archetypes (10 acquisitions each,
+same acquisition distances, same cohort):
+
+| archetype | `snap_ratio` | `fitts_slope` | `jerk_p95` | `track_smoothness` | `recoil_regularity` | `recoil_residual` |
+|:---|:---:|:---:|:---:|:---:|:---:|:---:|
+| human (noisy flick + noisy compensation) | 0.00 | 6.38 | 12975 | 0.855 | 0.814 | 0.255 |
+| smooth aimbot (interpolated, low-jitter) | 0.00 | 8.01 | 880 | 0.959 | 0.961 | 0.054 |
+| **snap aimbot** (30° in ~32 ms) | **1.00** | **0.94** | n/a | 0.768 | 0.729 | 0.474 |
+| **recoil script** (identical per-shot vector) | 0.00 | -1.32 | 756 | 0.961 | **1.000** | **0.000** |
+
+Each planted cheat is isolated by the feature it is theoretically predicted to trip:
+`snap_ratio` + flat `fitts_slope` for the snap aimbot, `recoil_regularity` → 1.0 with
+`recoil_residual` → 0.0 for the recoil script, and abnormally low `jerk_p95` /
+abnormally high `track_smoothness` for interpolated smoothing.
+
+Three metrics were rewritten after this test exposed bugs: acquisition segmentation was
+inflating durations ~10x, `recoil_regularity` used scale-invariant cosine similarity (a human
+compensating straight down scored as perfectly regular), and `jerk_p95` differentiated raw
+sampled telemetry (dominated by sampling noise, ~10^6 units) instead of the dimensionless
+normalised jerk.
+
+
+```
+
+`detections/aim_metrics.py`:
+
+```py
+"""Aim kinematics and behavioral metrics for FPS anti-cheat telemetry.
+
+Pure functions over a per-input-event sample stream. No game-specific dependencies.
+
+Schema (one CSV row per input event, sorted by player_id, t_ms):
+
+    player_id,t_ms,match_id,yaw,pitch,mouse_dx,mouse_dy,event,weapon_id,cohort
+    p_001,0,m_8801,101.231,4.913,0.000,0.000,move,weapon_r301,mouse_gold
+
+Optional columns: ``hit_bone`` (``head``/``neck``/``body``) on ``hit`` events.
+
+Every metric answers one question and returns a scalar (or NaN when the stream is too
+sparse to answer it). Sparse-in -> NaN-out is intentional: callers must not silently
+substitute a default.
+"""
+
+from __future__ import annotations
+
+import math
+from dataclasses import dataclass
+from typing import Iterable
+
+import numpy as np
+import pandas as pd
+from scipy.signal import savgol_filter
+
+# --- tuning constants -------------------------------------------------------
+MIN_ACQUIRE_DEG = 15.0     # an "acquisition" must move at least this far
+ACQUIRE_WINDOW_MS = 900.0  # ... within this window
+STOP_EPS_DEG_S = 25.0      # angular velocity below this counts as "stopped"
+STOP_HOLD_MS = 120.0       # ... for at least this long
+SNAP_EFFECTIVE_DEG_S = 500.0  # sustained distance/duration that a human does not hold
+SNAP_MAX_MS = 220.0           # ... or a large acquisition completed implausibly fast
+HUMAN_REACTION_FLOOR_MS = 90.0   # below this, a human did not do it
+HUMAN_FIRE_FLOOR_MS = 110.0
+RECOIL_WIN_MS = 80.0       # per-shot compensation window
+RECOIL_SETTLE_DEG_S = 60.0 # ignore shots taken mid-flick: aim and recoil cannot be separated
+
+METRIC_NAMES = (
+    "acq_per_min",
+    "ttt_med_ms",
+    "fitts_slope",
+    "snap_ratio",
+    "reaction_med_ms",
+    "fire_latency_med_ms",
+    "recoil_regularity",
+    "recoil_residual",
+    "jerk_p95",
+    "track_smoothness",
+    "accuracy",
+    "hs_rate",
+)
+
+
+# --- loading ---------------------------------------------------------------
+
+def load_samples(path: str) -> pd.DataFrame:
+    """Load a sample CSV and normalise dtypes. Raises on an unusable file."""
+    df = pd.read_csv(path)
+    required = {"player_id", "t_ms", "yaw", "pitch", "event"}
+    missing = required - set(df.columns)
+    if missing:
+        raise ValueError(f"sample file missing columns: {sorted(missing)}")
+    df["t_ms"] = pd.to_numeric(df["t_ms"])
+    for col in ("yaw", "pitch", "mouse_dx", "mouse_dy"):
+        if col in df.columns:
+            df[col] = pd.to_numeric(df[col])
+        else:
+            df[col] = 0.0
+    df["cohort"] = df["cohort"].astype(str) if "cohort" in df.columns else "default"
+    df["weapon_id"] = df["weapon_id"].astype(str) if "weapon_id" in df.columns else "default"
+    df = df.sort_values(["player_id", "t_ms"], kind="mergesort").reset_index(drop=True)
+    return df
+
+
+def _player_streams(df: pd.DataFrame) -> Iterable[tuple[str, pd.DataFrame]]:
+    for pid, sub in df.groupby("player_id", sort=False):
+        yield str(pid), sub
+
+
+def _safe(x: float) -> float:
+    return float(x) if x is not None and math.isfinite(float(x)) else float("nan")
+
+
+# --- core kinematics -------------------------------------------------------
+
+def angular_velocity(sub: pd.DataFrame) -> pd.Series:
+    """Instantaneous angular speed in deg/s, aligned to ``sub``'s index."""
+    t = sub["t_ms"].to_numpy(dtype=float) / 1000.0
+    dyaw = np.abs(np.diff(sub["yaw"].to_numpy(dtype=float), prepend=sub["yaw"].iloc[0]))
+    dpitch = np.abs(np.diff(sub["pitch"].to_numpy(dtype=float), prepend=sub["pitch"].iloc[0]))
+    dt = np.diff(t, prepend=t[0])
+    dt = np.where(dt <= 0, np.nan, dt)
+    speed = np.sqrt(dyaw**2 + dpitch**2) / dt
+    return pd.Series(speed, index=sub.index, dtype=float)
+
+
+@dataclass
+class Acquisition:
+    distance_deg: float
+    duration_ms: float
+    peak_vel_deg_s: float
+    median_vel_deg_s: float
+    effective_vel_deg_s: float
+    end_ms: float
+
+
+def find_acquisitions(sub: pd.DataFrame) -> list[Acquisition]:
+    """Segment the stream into aim acquisitions.
+
+    Algorithm: find runs where angular speed exceeds STOP_EPS_DEG_S, merge runs separated by
+    less than STOP_HOLD_MS (a pause that short is one continuous move), then keep merges whose
+    angular distance is >= MIN_ACQUIRE_DEG and whose duration fits ACQUIRE_WINDOW_MS.
+
+    An earlier revision extended segments by sample-gap rather than by motion, which inflated
+    durations by ~10x and made every metric downstream unreliable. Durations here are
+    measured start-of-motion to end-of-motion.
+    """
+    speed = angular_velocity(sub).to_numpy()
+    t = sub["t_ms"].to_numpy(dtype=float)
+    yaw = sub["yaw"].to_numpy(dtype=float)
+    pitch = sub["pitch"].to_numpy(dtype=float)
+
+    moving = np.nan_to_num(speed, nan=0.0) > STOP_EPS_DEG_S
+    n = len(sub)
+
+    # runs of consecutive moving samples
+    runs: list[list[int]] = []
+    i = 0
+    while i < n:
+        if not moving[i]:
+            i += 1
+            continue
+        j = i
+        while j + 1 < n and moving[j + 1]:
+            j += 1
+        runs.append([i, j])
+        i = j + 1
+
+    # merge runs separated by a pause shorter than STOP_HOLD_MS
+    merged: list[list[int]] = []
+    for r in runs:
+        if merged and (t[r[0]] - t[merged[-1][1]]) < STOP_HOLD_MS:
+            merged[-1][1] = r[1]
+        else:
+            merged.append(list(r))
+
+    acqs: list[Acquisition] = []
+    for start, end in merged:
+        dur = float(t[end] - t[start])
+        if dur <= 0 or dur > ACQUIRE_WINDOW_MS:
+            continue
+        dist = float(math.hypot(yaw[end] - yaw[start], pitch[end] - pitch[start]))
+        if dist < MIN_ACQUIRE_DEG:
+            continue
+        seg = speed[start : end + 1]
+        seg = seg[np.isfinite(seg)]
+        if seg.size == 0:
+            continue
+        acqs.append(
+            Acquisition(
+                distance_deg=dist,
+                duration_ms=dur,
+                peak_vel_deg_s=float(seg.max()),
+                median_vel_deg_s=float(np.median(seg)),
+                effective_vel_deg_s=dist / (dur / 1000.0),
+                end_ms=float(t[end]),
+            )
+        )
+    return acqs
+
+
+def fitts_fit(acqs: list[Acquisition], width_deg: float = 1.0) -> tuple[float, float]:
+    """Fit movement time (ms) = a + b * log2(1 + distance/width).
+
+    Returns (slope_b, r_squared). A human slope is clearly positive; a snap-based aimbot
+    shows a near-flat slope because acquisition time barely depends on distance.
+    """
+    if len(acqs) < 5:
+        return float("nan"), float("nan")
+    x = np.log2(1.0 + np.array([a.distance_deg for a in acqs]) / width_deg)
+    y = np.array([a.duration_ms for a in acqs], dtype=float)
+    if np.allclose(x, x[0]):
+        return float("nan"), float("nan")
+    slope, intercept = np.polyfit(x, y, 1)
+    pred = slope * x + intercept
+    ss_res = float(np.sum((y - pred) ** 2))
+    ss_tot = float(np.sum((y - y.mean()) ** 2))
+    r2 = 1.0 - ss_res / ss_tot if ss_tot > 0 else float("nan")
+    return _safe(slope), _safe(r2)
+
+
+def snap_ratio(acqs: list[Acquisition]) -> float:
+    """Fraction of acquisitions that are snaps rather than guided moves.
+
+    A snap is judged on **effective velocity** — distance covered divided by time taken,
+    including the deceleration phase — not on peak instantaneous velocity. A human flick
+    peaks fast but averages far lower because it overshoots and corrects; an aimbot moves at
+    a single high rate and stops dead.
+
+    The threshold is cohort-dependent: calibrate against a labelled clean population rather
+    than treating 500 deg/s as a constant of nature. ``fitts_slope`` is the principled,
+    threshold-free version of the same question, and separates better.
+    """
+    if not acqs:
+        return float("nan")
+    hits = sum(1 for a in acqs if a.effective_vel_deg_s >= SNAP_EFFECTIVE_DEG_S)
+    return _safe(hits / len(acqs))
+
+
+def reaction_times(sub: pd.DataFrame) -> np.ndarray:
+    """target_enter -> first aim movement (ms). Empty when no target_enter events.
+
+    Movement is measured as displacement from the pose at the moment of target entry,
+    not as frame-to-frame delta: the first sample after entry has no predecessor to diff
+    against, and a frame-to-frame diff would miss a slow creep entirely.
+    """
+    enters = sub.index[sub["event"] == "target_enter"].tolist()
+    out = []
+    for idx in enters:
+        t0 = float(sub.at[idx, "t_ms"])
+        y0 = float(sub.at[idx, "yaw"])
+        p0 = float(sub.at[idx, "pitch"])
+        after = sub.loc[idx + 1 :]
+        if after.empty:
+            continue
+        disp = (after["yaw"] - y0).abs() + (after["pitch"] - p0).abs()
+        moved = after[disp > 0.5]
+        if moved.empty:
+            continue
+        out.append(float(moved["t_ms"].iloc[0]) - t0)
+    return np.asarray(out, dtype=float)
+
+
+def fire_latencies(sub: pd.DataFrame) -> np.ndarray:
+    """target_enter -> fire (ms)."""
+    enters = sub.index[sub["event"] == "target_enter"].tolist()
+    out = []
+    for idx in enters:
+        t0 = float(sub.at[idx, "t_ms"])
+        after = sub.loc[idx + 1 :]
+        fires = after[after["event"] == "fire"]
+        if fires.empty:
+            continue
+        out.append(float(fires["t_ms"].iloc[0]) - t0)
+    return np.asarray(out, dtype=float)
+
+
+def recoil_profile(sub: pd.DataFrame) -> tuple[float, float]:
+    """(regularity, residual) of the per-shot input compensation.
+
+    ``regularity`` measures how tightly the per-shot compensation vectors cluster in both
+    direction and magnitude:
+
+        regularity = 1 - mean_pairwise_L2_distance / (2 * mean_norm)
+
+    A scripted anti-recoil sends the same vector every shot (distance 0, regularity 1.0).
+    Human compensation varies in magnitude *and* direction, so it sits well below 1.0.
+
+    An earlier revision used mean pairwise **cosine** similarity, which is scale-invariant and
+    therefore scored a human compensating straight down every shot as perfectly regular. The
+    magnitude term is what makes the metric able to tell a script from a consistent human.
+
+    ``residual`` is the mean L2 norm left after subtracting the learned (mean) pattern,
+    normalised by the pattern magnitude. Low residual + high regularity = scripted.
+    """
+    fires = sub[sub["event"] == "fire"]
+    if len(fires) < 6:
+        return float("nan"), float("nan")
+    t = sub["t_ms"].to_numpy(dtype=float)
+    dx = sub["mouse_dx"].to_numpy(dtype=float)
+    dy = sub["mouse_dy"].to_numpy(dtype=float)
+    speed = angular_velocity(sub).to_numpy()
+
+    vecs = []
+    for t_fire in fires["t_ms"].to_numpy(dtype=float):
+        m = (t >= t_fire) & (t <= t_fire + RECOIL_WIN_MS)
+        if not m.any():
+            continue
+        pre = (t >= t_fire - RECOIL_WIN_MS) & (t < t_fire)
+        # Skip shots taken mid-flick: in that window the input is aiming, not recoil
+        # compensation, and the two cannot be separated from this signal alone.
+        if pre.any():
+            pre_speed = speed[pre]
+            pre_speed = pre_speed[np.isfinite(pre_speed)]
+            if pre_speed.size and float(np.median(pre_speed)) > RECOIL_SETTLE_DEG_S:
+                continue
+        bx = float(np.mean(dx[pre])) if pre.any() else 0.0
+        by = float(np.mean(dy[pre])) if pre.any() else 0.0
+        vecs.append([float(np.sum(dx[m]) - bx), float(np.sum(dy[m]) - by)])
+    V = np.asarray(vecs, dtype=float)
+    if V.shape[0] < 6:
+        return float("nan"), float("nan")
+
+    norms = np.linalg.norm(V, axis=1)
+    valid = norms > 1e-6
+    if int(valid.sum()) < 6:
+        return float("nan"), float("nan")
+    V = V[valid]
+    norms = norms[valid]
+
+    mean_norm = float(norms.mean())
+    # mean pairwise L2 distance (upper triangle, without diagonal)
+    diff = V[:, None, :] - V[None, :, :]
+    dist = np.linalg.norm(diff, axis=2)
+    n = dist.shape[0]
+    iu = np.triu_indices(n, k=1)
+    mean_dist = float(dist[iu].mean())
+    regularity = 1.0 - mean_dist / (2.0 * mean_norm)
+    regularity = float(np.clip(regularity, 0.0, 1.0))
+
+    mean_vec = V.mean(axis=0)
+    residual = float(np.linalg.norm(V - mean_vec, axis=1).mean())
+    scale = float(np.linalg.norm(mean_vec))
+    residual_norm = residual / scale if scale > 1e-6 else float("nan")
+    return _safe(regularity), _safe(residual_norm)
+
+
+def jerk_p95(sub: pd.DataFrame) -> float:
+    """95th percentile of *dimensionless normalised jerk* over acquisitions.
+
+    Raw jerk (deg/s^3) is not usable as a detector: it scales with the third power of the
+    sampling rate and is dominated by telemetry noise, so it mostly measures your exporter
+    rather than the player. The motor-control literature uses the **Flash & Hogan normalised
+    jerk**, which is invariant to movement duration and amplitude:
+
+        J = (T^5 / L^2) * integral of |d^3x/dt^3|^2 dt
+
+    where T is movement duration and L is path length. Low J = smooth, speed-independent of
+    how big or fast the move was.
+
+    Both tails are interesting: a bot's interpolated aim is far smoother than a human
+    (very low J) and mechanical high-frequency correction is far rougher (very high J).
+    """
+    acqs = find_acquisitions(sub)
+    if not acqs:
+        return float("nan")
+
+    t = sub["t_ms"].to_numpy(dtype=float) / 1000.0
+    yaw = np.radians(sub["yaw"].to_numpy(dtype=float))
+    pitch = np.radians(sub["pitch"].to_numpy(dtype=float))
+    tt = sub["t_ms"].to_numpy(dtype=float)
+
+    vals = []
+    for a in acqs:
+        # restrict to the sample span that produced this acquisition
+        idx = np.flatnonzero(tt <= a.end_ms)
+        if idx.size < 6:
+            continue
+        start = int(np.searchsorted(tt, a.end_ms - a.duration_ms, side="left"))
+        seg = slice(max(start, 0), int(idx[-1]) + 1)
+        ts = t[seg]
+        if ts.size < 6:
+            continue
+        T = float(ts[-1] - ts[0])
+        if T <= 0:
+            continue
+
+        # Smooth before differentiating. Sampled telemetry is piecewise-constant and the
+        # third derivative of a staircase is a train of impulses, not a signal. Savitzky-Golay
+        # (polyorder 3) is the standard treatment for sampled kinematic data.
+        wy = yaw[seg]
+        wp = pitch[seg]
+        n = wy.size
+        if n < 7:
+            continue
+        win = 7 if n >= 7 else n
+        if win % 2 == 0:
+            win -= 1
+        wy = savgol_filter(wy, win, 3)
+        wp = savgol_filter(wp, win, 3)
+
+        dt = np.diff(ts)
+        v_ok = dt > 1e-4
+        if int(v_ok.sum()) < 3:
+            continue
+        t_v = (ts[:-1] + dt / 2.0)[v_ok]
+        vy = np.diff(wy)[v_ok] / dt[v_ok]
+        vp = np.diff(wp)[v_ok] / dt[v_ok]
+
+        dt2 = np.diff(t_v)
+        a_ok = dt2 > 1e-4
+        if int(a_ok.sum()) < 2:
+            continue
+        t_a = (t_v[:-1] + dt2 / 2.0)[a_ok]
+        ay = np.diff(vy)[a_ok] / dt2[a_ok]
+        ap = np.diff(vp)[a_ok] / dt2[a_ok]
+
+        dt3 = np.diff(t_a)
+        j_ok = dt3 > 1e-4
+        if int(j_ok.sum()) < 1:
+            continue
+        jy = np.diff(ay)[j_ok] / dt3[j_ok]
+        jp = np.diff(ap)[j_ok] / dt3[j_ok]
+        jerk2 = jy**2 + jp**2
+
+        # path length in radians
+        L = float(np.sum(np.hypot(np.diff(yaw[seg]), np.diff(pitch[seg]))))
+        if L <= 1e-9:
+            continue
+        integral = float(np.sum(jerk2 * dt3[j_ok]))
+        vals.append((T**5 / L**2) * integral)
+
+    return _safe(np.percentile(vals, 95)) if vals else float("nan")
+
+
+def track_smoothness(sub: pd.DataFrame) -> float:
+    """Lag-1 autocorrelation of angular velocity. High = unnaturally smooth tracking."""
+    speed = angular_velocity(sub).to_numpy()
+    speed = speed[np.isfinite(speed)]
+    if speed.size < 20 or np.std(speed) < 1e-9:
+        return float("nan")
+    return _safe(np.corrcoef(speed[:-1], speed[1:])[0, 1])
+
+
+def accuracy(sub: pd.DataFrame) -> float:
+    fires = int((sub["event"] == "fire").sum())
+    hits = int((sub["event"] == "hit").sum())
+    return _safe(hits / fires) if fires else float("nan")
+
+
+def hs_rate(sub: pd.DataFrame) -> float:
+    hits = sub[sub["event"] == "hit"]
+    if hits.empty or "hit_bone" not in hits.columns:
+        return float("nan")
+    head = hits["hit_bone"].astype(str).str.lower().isin(["head", "neck"]).sum()
+    return _safe(head / len(hits))
+
+
+# --- aggregation -----------------------------------------------------------
+
+def player_metrics(sub: pd.DataFrame) -> dict[str, float]:
+    """Compute every metric for one player's sample stream."""
+    acqs = find_acquisitions(sub)
+    slope, _r2 = fitts_fit(acqs)
+    react = reaction_times(sub)
+    lat = fire_latencies(sub)
+    reg, resid = recoil_profile(sub)
+
+    span_min = max((float(sub["t_ms"].max()) - float(sub["t_ms"].min())) / 60000.0, 1e-6)
+
+    out = {
+        "acq_per_min": _safe(len(acqs) / span_min),
+        "ttt_med_ms": _safe(np.median([a.duration_ms for a in acqs])) if acqs else float("nan"),
+        "fitts_slope": slope,
+        "snap_ratio": snap_ratio(acqs),
+        "reaction_med_ms": _safe(np.median(react)) if react.size else float("nan"),
+        "fire_latency_med_ms": _safe(np.median(lat)) if lat.size else float("nan"),
+        "recoil_regularity": reg,
+        "recoil_residual": resid,
+        "jerk_p95": jerk_p95(sub),
+        "track_smoothness": track_smoothness(sub),
+        "accuracy": accuracy(sub),
+        "hs_rate": hs_rate(sub),
+        "n_samples": float(len(sub)),
+        "n_matches": float(sub["match_id"].nunique()) if "match_id" in sub.columns else 1.0,
+    }
+    return out
+
+
+def population_metrics(df: pd.DataFrame) -> pd.DataFrame:
+    """Compute metrics for every player. Returns a DataFrame indexed by player_id."""
+    rows = {}
+    for pid, sub in _player_streams(df):
+        m = player_metrics(sub)
+        m["cohort"] = str(sub["cohort"].iloc[0]) if "cohort" in sub.columns else "default"
+        rows[pid] = m
+    return pd.DataFrame.from_dict(rows, orient="index")
+
+```
+
+`detections/baseline.py`:
+
+```py
+"""Fit per-cohort metric baselines from a clean population.
+
+Usage:
+    python baseline.py --samples ../data/clean_samples.csv --out ../data/baseline.json
+
+The baseline stores robust statistics (median, MAD, and percentiles) per (cohort, metric).
+Robust statistics are deliberate: skill distributions have heavy tails and a single genuine
+outlier player must not move the baseline.
+
+A metric is only recorded when at least --min-players players in the cohort produced a
+finite value. Otherwise it is marked unusable and downstream scoring will report NaN
+rather than silently defaulting.
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+from pathlib import Path
+
+import numpy as np
+
+from aim_metrics import METRIC_NAMES, load_samples, population_metrics
+
+MIN_MAD = 1e-9
+
+
+def robust_stats(values: np.ndarray) -> dict:
+    med = float(np.median(values))
+    mad = float(np.median(np.abs(values - med)))
+    return {
+        "n": int(values.size),
+        "median": med,
+        "mad": mad,
+        # 1.4826 scales MAD to be comparable to a standard deviation for normal data
+        "sigma": float(1.4826 * mad) if mad > MIN_MAD else float("nan"),
+        "p01": float(np.percentile(values, 1)),
+        "p05": float(np.percentile(values, 5)),
+        "p50": float(np.percentile(values, 50)),
+        "p95": float(np.percentile(values, 95)),
+        "p99": float(np.percentile(values, 99)),
+        "mean": float(values.mean()),
+        "std": float(values.std(ddof=1)) if values.size > 1 else float("nan"),
+    }
+
+
+def fit(metrics, min_players: int) -> dict:
+    baselines: dict[str, dict] = {}
+    for cohort, sub in metrics.groupby("cohort"):
+        entry: dict[str, dict] = {"players": int(len(sub))}
+        for name in METRIC_NAMES:
+            if name not in sub.columns:
+                continue
+            vals = sub[name].to_numpy(dtype=float)
+            vals = vals[np.isfinite(vals)]
+            if vals.size < min_players:
+                entry[name] = {"usable": False, "n": int(vals.size)}
+                continue
+            entry[name] = {"usable": True, **robust_stats(vals)}
+        baselines[str(cohort)] = entry
+    return baselines
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser(description=__doc__)
+    ap.add_argument("--samples", required=True, help="clean-population samples CSV")
+    ap.add_argument("--out", required=True, help="output baseline JSON")
+    ap.add_argument("--min-players", type=int, default=10,
+                    help="minimum finite values per (cohort, metric) to record a baseline")
+    args = ap.parse_args()
+
+    df = load_samples(args.samples)
+    metrics = population_metrics(df)
+    baselines = fit(metrics, min_players=args.min_players)
+
+    payload = {
+        "source": str(Path(args.samples)),
+        "players": int(len(metrics)),
+        "cohorts": sorted(baselines.keys()),
+        "min_players": args.min_players,
+        "baselines": baselines,
+    }
+    Path(args.out).parent.mkdir(parents=True, exist_ok=True)
+    Path(args.out).write_text(json.dumps(payload, indent=2, allow_nan=True), encoding="utf-8")
+
+    for cohort, entry in baselines.items():
+        usable = [k for k, v in entry.items() if isinstance(v, dict) and v.get("usable")]
+        print(f"{cohort:<24} players={entry['players']:<5} usable_metrics={len(usable)}/{len(METRIC_NAMES)}")
+    print(f"wrote {args.out}")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
+
+```
+
+`detections/detectors.py`:
+
+```py
+"""Score a player population against a fitted baseline and emit a review queue.
+
+Usage:
+    python detectors.py --samples ../data/match_samples.csv \
+                        --baseline ../data/baseline.json \
+                        --out ../data/scores.csv
+
+Output is a **review queue**, not a verdict. Every row carries the per-feature z-scores
+that produced it so an analyst can see exactly which behaviour drove the score and argue
+with a specific number.
+
+Directionality matters: for some metrics (fire latency, recoil residual, jerk) *low* is
+suspicious; for others (snap ratio, recoil regularity, headshot rate) *high* is suspicious.
+Each metric therefore carries a ``tail`` in FEATURE_WEIGHTS.
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+from pathlib import Path
+
+import numpy as np
+import pandas as pd
+
+from aim_metrics import load_samples, population_metrics
+
+# (weight, tail) — tail=+1 means high values are suspicious, -1 means low, 0 = two-sided
+FEATURE_WEIGHTS: dict[str, tuple[float, int]] = {
+    "fitts_slope":        (1.0, -1),   # flat acquisition-vs-distance = snap aiming
+    "snap_ratio":         (1.2, +1),   # spike-then-stop acquisitions
+    "reaction_med_ms":    (1.1, -1),   # faster than human floor
+    "fire_latency_med_ms":(1.3, -1),   # triggerbot signature
+    "recoil_regularity":  (1.3, +1),   # deterministic compensation
+    "recoil_residual":    (1.1, -1),   # nothing left after subtracting the pattern
+    "hs_rate":            (0.8, +1),
+    "accuracy":           (0.6, +1),
+    "track_smoothness":   (0.7, +1),   # unnaturally smooth tracking
+    "jerk_p95":           (0.5, 0),    # both hyper-jitter and hyper-smooth are odd
+}
+
+
+def z_scores(metrics: pd.DataFrame, baselines: dict) -> pd.DataFrame:
+    out = pd.DataFrame(index=metrics.index)
+    for feature, (weight, tail) in FEATURE_WEIGHTS.items():
+        col = np.full(len(metrics), np.nan)
+        for i, (cohort, val) in enumerate(zip(metrics["cohort"], metrics[feature])):
+            b = baselines.get(str(cohort), {}).get(feature)
+            if not b or not b.get("usable"):
+                continue
+            x = float(val)
+            if not np.isfinite(x):
+                continue
+            sigma = b.get("sigma")
+            if sigma is not None and np.isfinite(sigma) and sigma > 0:
+                z = (x - b["median"]) / sigma
+            else:
+                # fall back to percentile rank mapped to a z-like scale
+                lo, hi = b["p01"], b["p99"]
+                if not (np.isfinite(lo) and np.isfinite(hi) and hi > lo):
+                    continue
+                z = 4.0 * ((x - lo) / (hi - lo) - 0.5)
+            col[i] = z * tail if tail else abs(z)
+        out[f"z_{feature}"] = col
+        out[f"w_{feature}"] = weight
+    return out
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser(description=__doc__)
+    ap.add_argument("--samples", required=True)
+    ap.add_argument("--baseline", required=True)
+    ap.add_argument("--out", required=True)
+    ap.add_argument("--min-matches", type=int, default=2,
+                    help="require this many distinct matches before scoring (cross-match consistency)")
+    args = ap.parse_args()
+
+    df = load_samples(args.samples)
+    metrics = population_metrics(df)
+    baselines = json.loads(Path(args.baseline).read_text(encoding="utf-8"))["baselines"]
+
+    z = z_scores(metrics, baselines)
+    feats = [f for f in FEATURE_WEIGHTS if f"z_{f}" in z.columns]
+
+    # weighted mean over available features; require at least 3 to score at all
+    num = pd.DataFrame({f: z[f"z_{f}"] * z[f"w_{f}"] for f in feats})
+    den = pd.DataFrame({f: z[f"w_{f}"] * z[f"z_{f}"].notna() for f in feats})
+    n_avail = den.sum(axis=1)
+    score = num.sum(axis=1) / den.sum(axis=1).replace(0, np.nan)
+    score[n_avail < 3] = np.nan
+
+    result = metrics.copy()
+    result["score"] = score
+    result["features_used"] = n_avail
+    result["n_matches"] = metrics.get("n_matches", 1.0)
+
+    def top_features(row) -> str:
+        pairs = []
+        for f in feats:
+            v = row.get(f"z_{f}")
+            if pd.notna(v):
+                pairs.append((f, float(v)))
+        pairs.sort(key=lambda kv: abs(kv[1]), reverse=True)
+        return "; ".join(f"{k}={v:+.2f}" for k, v in pairs[:5])
+
+    result["top_features"] = [top_features(r) for _, r in z.iterrows()]
+    result = result.sort_values("score", ascending=False)
+
+    # cross-match consistency: an outlier in one match is weak evidence
+    result["eligible"] = result["n_matches"] >= args.min_matches
+
+    Path(args.out).parent.mkdir(parents=True, exist_ok=True)
+    result.to_csv(args.out, index_label="player_id")
+
+    flagged = result[result["eligible"] & result["score"].notna()]
+    print(f"scored {len(result)} players -> {args.out}")
+    print(f"eligible for review (>= {args.min_matches} matches): {len(flagged)}")
+    if not flagged.empty:
+        print("\ntop of review queue:")
+        cols = [c for c in ("score", "n_matches", "top_features") if c in flagged.columns]
+        print(flagged[cols].head(15).to_string())
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
+
+```
+
+`docs/cheat-taxonomy.md`:
+
+```md
+# FPS cheat taxonomy
+
+A working taxonomy for FPS titles (Apex-shaped: hero shooter, high TTK, movement-heavy,
+server-authoritative with client prediction). Each class lists **how it works** and **how a
+defender detects it** — the detection is the part that matters.
+
+---
+
+## 1. Aim automation
+
+### 1.1 Aimbot (memory-assisted)
+
+Reads entity state (position, bone/head index, visibility) from game or driver memory, computes
+the angle delta to the target, and writes view angles or synthesises mouse input.
+
+- **Sub-variants:** on-key (human-triggered) vs. always-on; smoothing (interpolated angles to
+  look human); FOV-limited (only aims inside a cone); bone-priority (head > neck > chest);
+  target-switching policy; prediction for moving targets.
+- **Detection:** aim kinematics — angular velocity spikes that terminate exactly on target,
+  time-to-target inconsistent with Fitts' law for the distance travelled, reaction times below
+  the human floor (~100-120 ms visual), repeated identical acquisition trajectories, and a
+  headshot-rate tail far outside the cohort distribution.
+
+### 1.2 Triggerbot
+
+Does not move the crosshair; fires the instant a target is under it. Sometimes with a randomised
+delay and an "only when visible" check.
+
+- **Detection:** time-from-crosshair-entry-to-fire distribution; a mass at 0-40 ms with a
+  suspiciously narrow spread; fire events on frames where the target is occluded for a human
+  but visible to the client.
+
+### 1.3 Silent aim / server-side angle manipulation
+
+Sends legitimate-looking mouse input for the visible aim but a different angle to the server
+(hit registration).
+
+- **Detection:** divergence between client-reported view angles and server-observed hit vectors;
+  hits whose implied shot direction is not reproducible from the recorded input stream.
+
+### 1.4 No-recoil / no-spread / recoil scripts
+
+Replaces or cancels the weapon's recoil pattern. Two forms:
+
+- *Memory:* zeroes the recoil accumulator or patches the spread function.
+- *Input:* sends a pre-computed compensating mouse delta per shot (works on console too).
+
+- **Detection:** the compensating deltas are **deterministic**. Autocorrelation of the per-shot
+  mouse-dy sequence shows near-identical periodicity; residual variance after subtracting the
+  learned pattern collapses to ~0 for scripts and stays high for humans. Also: accuracy at range
+  with high-recoil weapons far outside cohort norms.
+
+### 1.5 Computer-vision / external aim
+
+A second machine or capture card reads frames, runs detection (classical CV or a small model),
+and drives a mouse/keyboard emulator (USB HID) or a controller emulator. **Never touches game
+memory.**
+
+- **Detection:** why behavioral analysis is not optional. Look for input-device-level anomalies
+  (HID report timing jitter characteristic of emulators, constant inter-event intervals),
+  perfect tracking smoothness, and hardware descriptors of known emulator devices.
+
+## 2. Information cheats (ESP / wallhack)
+
+Reveals opponents through geometry: boxes, skeletons, health bars, distance, loot, or a radar.
+
+- **How:** reads entity list + transforms from memory; or hooks the render path (D3D11/12
+  present/resize hooks); or — external case — a second screen showing an extracted game-state feed.
+- **Sub-variants:** glow/outline injection (modifies material/shader state), chams, skeleton ESP,
+  radar via map overlay, loot ESP.
+- **Detection:** pure ESP does not change aim, so aim metrics alone miss it. Signals instead:
+  pre-aim/pre-fire through walls (crosshair tracks an occluded player), pathing that consistently
+  avoids hidden opponents, movement decisions carrying too much information, and server-side
+  "knowledge" tests (place a decoy entity visible only server-side and see who reacts).
+
+## 3. Movement & physics manipulation
+
+- **Speed hack / teleport:** alters client time-step or position before replication.
+- **Bunny-hop / auto-strafe scripts, wall-climb, no-clip, fly.**
+- **Packet manipulation:** replayed or dropped position packets to desync hit registration.
+- **Detection:** server-side movement validation — displacement-vs-time sanity envelopes,
+  acceleration limits, impossible ground-trace results, reconciliation-error telemetry.
+
+## 4. Hardware-assisted cheats
+
+### 4.1 DMA (Direct Memory Access)
+
+A second machine reads physical memory over PCIe from an FPGA/PCIe card, computes ESP/aim on the
+second machine, and returns input over USB/serial. The game host is untouched.
+
+- **Detection:** PCIe device enumeration and vendor/device-ID allowlisting; configuration-space
+  and link characteristics that do not match a genuine device class; unexpected DMA-remapping
+  (IOMMU / Vt-d) state; timing fingerprints of the FPGA firmware; driver presence of known DMA
+  toolkit drivers; behavioral detection at the game layer as a backstop.
+
+### 4.2 Controller emulation / macro devices
+
+Cronus-class and Titan-class devices that plug in as a controller and run scripted recoil,
+rapid-fire, or auto-aim macros; also input-bridging to use mouse aim on console.
+
+- **Detection:** device descriptor and firmware revision fingerprinting, HID report timing,
+  report-rate characteristics, anti-recoil signature at the input layer.
+
+### 4.3 Firmware / hypervisor level
+
+Hypervisor-based memory virtualisation to hide state from a kernel anti-cheat; firmware-level
+HWID masking; bootkit-class persistence.
+
+- **Detection:** hypervisor presence indicators, timing side channels (CPUID/RDTSC
+  irregularities), unexpected EPT/SLAT state, secure-boot and measured-boot attestation gaps,
+  TPM quote mismatches.
+
+## 5. Integrity & identity abuse
+
+- **HWID spoofing:** fakes motherboard/BIOS/disk/MAC/TPM identifiers to evade hardware bans.
+  *Detection:* cross-field consistency (a "new" machine whose SMBIOS, disk serials, registry
+  GUIDs and MAC vendor disagree), reuse of known-banned components, fingerprint churn rate.
+- **Account sharing / piloting:** a high-skill player plays on someone else's account.
+  *Detection:* impossible travel, input-behaviour drift (a fundamentally different aim signature
+  on the same account), hardware/locale mismatch, session overlap.
+- **Boosting / deranking:** deliberate losing to drop rank, then queueing with a paying customer.
+  *Detection:* asymmetric duo performance, serial throw patterns, rank-trajectory anomalies.
+- **Smurfing / bot accounts:** fresh accounts played at high skill, or accounts levelled by bots.
+  *Detection:* skill-vs-account-age curves, bot-lobby clustering, input entropy of levelling matches.
+- **Matchmaking manipulation:** stack manipulation, region abuse, queue dodging.
+
+## 6. Cheat delivery / economics
+
+- **Cheat-as-a-Service:** subscription distribution, private loaders, per-build encryption,
+  automated update pipelines, Discord-based support. Signature work expires in days.
+- **Private vs. public:** private cheats trade margin for undetectability. Behavioral signals
+  close the gap because they do not depend on knowing the binary.
+- **Resellers and account markets:** banning the account is not enough when replacement accounts
+  cost cents — which is why identity/economic signals belong in the same loop
+  ([`account-security`](https://github.com/NetVar1337/account-security)).
+
+---
+
+## Mapping: class → detection layer
+
+| Cheat class | Host | Static | Behavioral | Account/Economic |
+|:---|:---:|:---:|:---:|:---:|
+| Aimbot (memory) | ◐ | ● | **●** | ○ |
+| Triggerbot | ○ | ○ | **●** | ○ |
+| Silent aim | ○ | ○ | **●** | ○ |
+| No-recoil script | ○ | ○ | **●** | ○ |
+| CV / external aim | ○ | ○ | **●** | ○ |
+| ESP / wallhack | ◐ | ● | ◐ | ○ |
+| Movement hacks | ○ | ◐ | **●** | ○ |
+| DMA hardware | **●** | ◐ | ◐ | ○ |
+| Controller emulator | **●** | ○ | ● | ○ |
+| Hypervisor / firmware | ● | ◐ | ○ | ○ |
+| HWID spoofing | ● | ○ | ○ | **●** |
+| Account sharing | ○ | ○ | ● | **●** |
+| Boosting / deranking | ○ | ○ | ◐ | **●** |
+
+**●** primary layer · ◐ useful · ○ weak
+
+Takeaway: **behavioral + economic layers carry most of the load**, because they survive cheat
+rewrites, hardware changes and account churn. Host/static layers are high-precision but narrow.
+
+```
+
+`docs/methodology.md`:
+
+```md
+# Detection methodology
+
+How this repo's detectors are built, calibrated and evaluated.
+
+## 1. Start from a question, not a feature
+
+"Is this player cheating" is not a question a detector can answer. Good questions are
+measurable:
+
+- Does this player's time-to-target distribution differ from their input cohort?
+- Is the per-shot recoil compensation more regular than a human can produce?
+- Are fires occurring faster than human reaction time allows?
+
+Each detector in [`detections/`](../detections/) answers exactly one such question and emits one
+number plus the evidence behind it.
+
+## 2. Build a labelled set
+
+Labels come from enforcement outcomes, not from gut feel:
+
+| Label source | Bias to watch for |
+|:---|:---|
+| Confirmed bans (appeal-upheld) | Only catches what is already caught — circular |
+| Manual analyst review | Inter-rater disagreement; measure it |
+| Admitted / known-cheat accounts | Good positive anchor |
+| Verified-clean cohort (pro players, staff, trusted) | Small and unrepresentative |
+| Synthetic injection (scripted inputs, replayed patterns) | Fast but unrealistically clean |
+
+Use several sources and report which you used. A detector validated only on synthetic cheats
+over-fits to synthetic cheats.
+
+## 3. Cohort before score
+
+Pooling populations destroys signal. Fit baselines **per cohort**:
+
+- input device (mouse vs. controller vs. emulator)
+- skill / rank tier
+- weapon class (recoil patterns differ)
+- input sample rate (poll-rate dependent metrics)
+
+`baseline.py` fits one distribution per (cohort, metric) pair and stores mean, std and robust
+percentiles. Robust statistics (median/MAD, percentiles) matter: skill distributions have heavy
+tails and a single genuine outlier should not move the baseline.
+
+## 4. Score, don't decide
+
+`detectors.py` emits a **review score**, not a verdict:
+
+- each metric produces a z-score against the cohort baseline (or a percentile rank)
+- metrics are combined with a configurable weighted sum
+- the top contributing features are written alongside the score
+
+Never auto-ban on a single feature. The output is a queue ordered by suspicion, with the
+evidence a human needs to decide.
+
+## 5. Measure before deploying
+
+For any threshold you intend to act on, report:
+
+- **TPR at a fixed FPR** — recall at, say, 0.1% false-positive rate. In a game with millions of
+  players, 0.1% FPR is still thousands of false accusations, so pick the FPR target from the
+  player population, not from convention.
+- **Precision in the actioned band** — of the accounts you would ban, how many are right?
+- **Population lift** — how much does the flagged band enrich for true positives over random?
+- **Stability over time** — metrics drift (new weapons, patches, input devices). Re-fit on a
+  schedule and track baseline drift.
+
+Report confidence intervals. With a small labelled set, a detector that looks 95% accurate is
+usually a coin flip with error bars.
+
+## 6. Explainability is a requirement
+
+For every flag an analyst should be able to answer:
+
+1. What behaviour was measured?
+2. What is the normal range for this player's cohort?
+3. How far outside it is this player, and in how many independent matches?
+4. Is there a benign explanation (smurf, pro, unusual hardware, accessibility input)?
+
+Benign explanations are common. A genuinely excellent mouse player is a legitimate outlier —
+which is why **cross-match consistency** (repeated outliers across independent matches) is a far
+stronger signal than any single-match score.
+
+## 7. Keep the loop closed
+
+Intel → detector → enforcement → measurement → intel. Every enforcement wave is an experiment:
+measure infection rate before and after, watch for evasion adaptation, and feed the adaptation
+back into the taxonomy ([cheat-intel](https://github.com/NetVar1337/cheat-intel)).
+
+```
+
+`host/README.md`:
+
+```md
+# Host survey
+
+PowerShell 5.1+ / 7+. **Read-only**: enumerates and reports, never modifies system state.
+
+## What it collects
+
+| Section | Why it matters for anti-cheat |
+|:---|:---|
+| Loaded drivers + signer | Unsigned or unexpected-signer drivers are the classic BYOVD / DMA toolkit surface |
+| Vulnerable-driver blocklist match | Known-abusable signed drivers that legitimate software should not be loading |
+| PCIe device inventory | DMA cards present as PCI devices; vendor/device IDs and class are the primary tell |
+| DMA-remapping (IOMMU/Vt-d) state | A disabled or unexpected remapping state removes the main hardware defence |
+| Secure Boot / HVCI / TPM | The trust root the rest of the stack depends on; gaps here invalidate other signals |
+| Device descriptors | Controller emulator and HID bridge fingerprints |
+
+## Usage
+
+```powershell
+# full survey to the console
+.\driver_survey.ps1
+
+# write a JSON artifact for the detection pipeline
+.\driver_survey.ps1 -OutFile .\host-survey.json
+
+# cross-reference a vulnerable-driver blocklist CSV (columns: sha256, name, vendor)
+.\driver_survey.ps1 -BlocklistCsv .\vulnerable-drivers.csv -OutFile .\host-survey.json
+```
+
+## The blocklist input
+
+Microsoft publishes the **vulnerable and dangerous driver blocklist** as part of its
+configuration CI / HVCI policy. Export the hashes you want to match against to a CSV and pass
+it in. It is deliberately not vendored here: it changes, and a stale copy in a public repo is
+worse than none.
+
+Community mirrors exist and are regularly refreshed; validate any mirror against the official
+Microsoft documentation before trusting it in a detection pipeline.
+
+## Interpreting results
+
+- **An unrecognised PCIe device is not proof of a DMA card.** Capture cards, NVMe add-in
+  cards, network adapters and sound cards all appear here. The signal is a device whose
+  vendor/device ID is not in your known-good inventory, or whose class and link characteristics
+  disagree (e.g. a device claiming a simple storage class but presenting an FPGA-like
+  configuration space).
+- **Driver signer mismatches are common in the wild.** Some legitimate vendor software ships
+  expired or cross-signed drivers. Baseline your fleet before alerting.
+- **HVCI off is not a cheat signal.** Plenty of legitimate machines run without it. It changes
+  the *threat model*, and belongs in the risk assessment, not in the alert.
+
+```
+
+`host/driver_survey.ps1`:
+
+```ps1
+<#
+.SYNOPSIS
+    Read-only host survey for anti-cheat / game-security telemetry.
+
+.DESCRIPTION
+    Enumerates loaded drivers and their signers, matches driver hashes against a
+    vulnerable-driver blocklist, inventories PCIe devices (DMA detection surface),
+    and reports the Secure Boot / HVCI / TPM posture.
+
+    This script is strictly read-only. It does not install, unload, patch or modify
+    anything.
+
+.PARAMETER BlocklistCsv
+    Optional CSV with columns: sha256, name, vendor. Driver images are hashed and
+    compared against this list. See host/README.md for how to source it.
+
+.PARAMETER OutFile
+    Optional path to write the survey as JSON.
+
+.PARAMETER HashDrivers
+    Switch. Hash each driver image on disk (slower, but required for blocklist matching).
+
+.EXAMPLE
+    .\driver_survey.ps1 -OutFile .\host-survey.json
+
+.EXAMPLE
+    .\driver_survey.ps1 -BlocklistCsv .\vulnerable-drivers.csv -HashDrivers -OutFile .\host-survey.json
+#>
+[CmdletBinding()]
+param(
+    [string]$BlocklistCsv,
+    [string]$OutFile,
+    [switch]$HashDrivers
+)
+
+$ErrorActionPreference = 'Stop'
+$survey = [ordered]@{
+    generated_utc = (Get-Date).ToUniversalTime().ToString('o')
+    computer      = $env:COMPUTERNAME
+}
+
+# --- 1. loaded drivers + signer -------------------------------------------
+Write-Host '[1/5] enumerating loaded drivers...' -ForegroundColor Cyan
+$drivers = Get-CimInstance -ClassName Win32_SystemDriver | ForEach-Object {
+    $path = $_.PathName
+    $full = if ($path) { $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath(($path -replace '^\\\?\?', '') -replace '^\\SystemRoot', "$env:SystemRoot") } else { $null }
+    $sig  = $null
+    if ($full -and (Test-Path -LiteralPath $full)) {
+        try { $sig = (Get-AuthenticodeSignature -LiteralPath $full).SignerCertificate.Subject } catch { }
+    }
+    [pscustomobject]@{
+        name      = $_.Name
+        state     = $_.State
+        status    = $_.Status
+        startMode = $_.StartMode
+        path      = $full
+        signer    = $sig
+    }
+}
+$survey.drivers = @($drivers)
+Write-Host ("      {0} drivers, {1} without a verified signer" -f @($drivers).Count, @($drivers | Where-Object { -not $_.signer }).Count)
+
+# --- 2. optional blocklist match ------------------------------------------
+if ($BlocklistCsv -and $HashDrivers) {
+    Write-Host '[2/5] matching driver images against blocklist...' -ForegroundColor Cyan
+    $block = @{}
+    Import-Csv -LiteralPath $BlocklistCsv | ForEach-Object {
+        $block[$_.sha256.ToLowerInvariant()] = $_
+    }
+    $hits = foreach ($d in $drivers) {
+        if ($d.path -and (Test-Path -LiteralPath $d.path)) {
+            try {
+                $h = (Get-FileHash -LiteralPath $d.path -Algorithm SHA256).Hash.ToLowerInvariant()
+                if ($block.ContainsKey($h)) {
+                    [pscustomobject]@{
+                        driver = $d.name
+                        path   = $d.path
+                        sha256 = $h
+                        entry  = $block[$h].name
+                        vendor = $block[$h].vendor
+                    }
+                }
+            } catch { }
+        }
+    }
+    $survey.blocklist_matches = @($hits)
+    Write-Host ("      {0} blocklist matches" -f @($hits).Count)
+} else {
+    $survey.blocklist_matches = @()
+    Write-Host '[2/5] skipping blocklist match (needs -BlocklistCsv and -HashDrivers)' -ForegroundColor DarkGray
+}
+
+# --- 3. PCIe device inventory (DMA surface) -------------------------------
+Write-Host '[3/5] enumerating PCI devices...' -ForegroundColor Cyan
+$pci = Get-CimInstance -ClassName Win32_PnPEntity |
+    Where-Object { $_.DeviceID -like 'PCI\*' } |
+    ForEach-Object {
+        $ven = $null; $dev = $null; $sub = $null
+        if ($_.DeviceID -match 'PCI\\VEN_([0-9A-F]{4})&DEV_([0-9A-F]{4})&SUBSYS_([0-9A-F]{8})') {
+            $ven = $Matches[1]; $dev = $Matches[2]; $sub = $Matches[3]
+        }
+        [pscustomobject]@{
+            name        = $_.Name
+            device_id   = $_.DeviceID
+            vendor_id   = $ven
+            device_num  = $dev
+            subsystem   = $sub
+            class       = $_.PNPClass
+            service     = $_.Service
+            status      = $_.Status
+            present     = $_.Present
+        }
+    }
+$survey.pci_devices = @($pci)
+Write-Host ("      {0} PCI devices" -f @($pci).Count)
+
+# --- 4. DMA-remapping / Device Guard posture ------------------------------
+Write-Host '[4/5] reading device-guard / HVCI posture...' -ForegroundColor Cyan
+$posture = [ordered]@{}
+try {
+    $dg = Get-CimInstance -Namespace 'root\Microsoft\Windows\DeviceGuard' -ClassName Win32_DeviceGuard
+    $posture.vbs_status                 = @($dg.VirtualizationBasedSecurityStatus)
+    $posture.available_security_props   = @($dg.AvailableSecurityProperties)
+    $posture.required_security_props    = @($dg.RequiredSecurityProperties)
+    $posture.security_services_configured = @($dg.SecurityServicesConfigured)
+    $posture.security_services_running  = @($dg.SecurityServicesRunning)
+} catch {
+    $posture.device_guard_error = $_.Exception.Message
+}
+try {
+    $hvci = Get-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\HypervisorEnforcedCodeIntegrity' -ErrorAction Stop
+    $posture.hvci_enabled = [bool]$hvci.Enabled
+    $posture.hvci_was_enabled_by = $hvci.WasEnabledBy
+} catch {
+    $posture.hvci_enabled = $null   # key absent = not configured; NOT the same as disabled
+}
+$survey.device_guard = $posture
+
+# --- 5. Secure Boot + TPM -------------------------------------------------
+Write-Host '[5/5] reading Secure Boot / TPM...' -ForegroundColor Cyan
+$trust = [ordered]@{}
+try { $trust.secure_boot = [bool](Confirm-SecureBootUEFI) }
+catch { $trust.secure_boot = $null; $trust.secure_boot_error = $_.Exception.Message }
+try {
+    $tpm = Get-Tpm
+    $trust.tpm_present        = [bool]$tpm.TpmPresent
+    $trust.tpm_ready          = [bool]$tpm.TpmReady
+    $trust.tpm_owned          = [bool]$tpm.TpmOwned
+    $trust.tpm_activated      = [bool]$tpm.TpmActivated
+    $trust.tpm_enabled        = [bool]$tpm.TpmEnabled
+    $trust.tpm_manufacturer   = $tpm.ManufacturerIdTxt
+} catch {
+    $trust.tpm_error = $_.Exception.Message
+}
+$survey.trust = $trust
+
+# --- output ---------------------------------------------------------------
+$json = $survey | ConvertTo-Json -Depth 6
+if ($OutFile) {
+    $json | Set-Content -LiteralPath $OutFile -Encoding UTF8
+    Write-Host "wrote $OutFile" -ForegroundColor Green
+} else {
+    Write-Host ''
+    $json
+}
+
+```
+
+`sql/kpi_queries.sql`:
+
+```sql
+-- Match-integrity KPI and triage queries.
+-- Engine-neutral SQL (window functions, CTEs). Assumes the schema in schema.sql.
+--
+-- These are the queries an analyst runs daily: they answer "is the game healthy?",
+-- "where should review effort go?", and "did the last enforcement wave work?".
+
+-- ---------------------------------------------------------------------------
+-- 1. Headline KPI: match infection rate
+--    Definition: share of matches containing at least one player later confirmed
+--    cheating (appeal-upheld). This is the number that tells you whether the
+--    ecosystem is improving, not the raw ban count.
+-- ---------------------------------------------------------------------------
+WITH confirmed AS (
+    SELECT DISTINCT player_id
+    FROM enforcement
+    WHERE action IN ('ban', 'hwid_ban')
+      AND (appeal_outcome IS NULL OR appeal_outcome = 'upheld')
+),
+match_flags AS (
+    SELECT m.match_id,
+           m.started_at::date AS day,
+           MAX(CASE WHEN c.player_id IS NOT NULL THEN 1 ELSE 0 END) AS infected
+    FROM matches m
+    JOIN match_players mp ON mp.match_id = m.match_id
+    LEFT JOIN confirmed c ON c.player_id = mp.player_id
+    GROUP BY m.match_id, m.started_at::date
+)
+SELECT day,
+       COUNT(*)                                        AS matches_played,
+       SUM(infected)                                   AS infected_matches,
+       ROUND(100.0 * SUM(infected) / COUNT(*), 3)      AS infection_rate_pct
+FROM match_flags
+GROUP BY day
+ORDER BY day;
+
+-- ---------------------------------------------------------------------------
+-- 2. Kill-rate outliers within a rank tier
+--    Cohorting by tier is what makes this usable: a Predator's kill rate is not
+--    comparable to a Bronze's. z-score against the tier mean/std.
+-- ---------------------------------------------------------------------------
+WITH per_match AS (
+    SELECT mp.player_id,
+           p.rank_tier,
+           mp.match_id,
+           mp.kills * 60000.0 / NULLIF(mp.survival_ms, 0) AS kills_per_min
+    FROM match_players mp
+    JOIN players p ON p.player_id = mp.player_id
+    WHERE mp.survival_ms > 60000        -- ignore hot-drops
+),
+tier_stats AS (
+    SELECT rank_tier,
+           AVG(kills_per_min) AS mu,
+           STDDEV_SAMP(kills_per_min) AS sigma,
+           COUNT(*) AS n
+    FROM per_match
+    GROUP BY rank_tier
+    HAVING COUNT(*) >= 100
+)
+SELECT pm.player_id,
+       pm.rank_tier,
+       COUNT(*) AS matches,
+       ROUND(AVG(pm.kills_per_min), 3) AS avg_kpm,
+       ROUND(MAX((pm.kills_per_min - ts.mu) / NULLIF(ts.sigma, 0)), 2) AS max_z
+FROM per_match pm
+JOIN tier_stats ts ON ts.rank_tier = pm.rank_tier
+GROUP BY pm.player_id, pm.rank_tier, ts.mu, ts.sigma
+HAVING COUNT(*) >= 5
+   AND MAX((pm.kills_per_min - ts.mu) / NULLIF(ts.sigma, 0)) > 4
+ORDER BY max_z DESC
+LIMIT 200;
+
+-- ---------------------------------------------------------------------------
+-- 3. Headshot-rate outliers (long-range accuracy)
+--    Aimbots and recoil scripts show up as an impossible tail here, especially
+--    on high-recoil weapons at range.
+-- ---------------------------------------------------------------------------
+SELECT mp.player_id,
+       SUM(mp.shots_hit)  AS hits,
+       SUM(mp.headshots)  AS headshots,
+       ROUND(1.0 * SUM(mp.headshots) / NULLIF(SUM(mp.shots_hit), 0), 4) AS hs_rate,
+       ROUND(AVG(mp.damage), 1) AS avg_damage
+FROM match_players mp
+WHERE mp.shots_hit >= 50
+GROUP BY mp.player_id
+HAVING SUM(mp.shots_hit) >= 200
+   AND 1.0 * SUM(mp.headshots) / NULLIF(SUM(mp.shots_hit), 0) > 0.65
+ORDER BY hs_rate DESC
+LIMIT 200;
+
+-- ---------------------------------------------------------------------------
+-- 4. Triggerbot signature: fire latency mass at the bottom of the distribution
+--    Needs input_events with target_enter / fire markers.
+-- ---------------------------------------------------------------------------
+WITH latencies AS (
+    SELECT e.player_id,
+           f.t_ms - e.t_ms AS fire_latency_ms
+    FROM input_events e
+    JOIN input_events f
+      ON f.player_id = e.player_id
+     AND f.match_id  = e.match_id
+     AND f.event     = 'fire'
+     AND f.t_ms >= e.t_ms
+     AND f.t_ms <  e.t_ms + 1000
+    WHERE e.event = 'target_enter'
+),
+player_stats AS (
+    SELECT player_id,
+           COUNT(*) AS n_engagements,
+           AVG(CASE WHEN fire_latency_ms < 80 THEN 1.0 ELSE 0 END) AS frac_sub80ms,
+           PERCENTILE_CONT(0.1) WITHIN GROUP (ORDER BY fire_latency_ms) AS p10_latency
+    FROM latencies
+    GROUP BY player_id
+    HAVING COUNT(*) >= 30
+)
+SELECT * FROM player_stats
+WHERE frac_sub80ms > 0.35
+ORDER BY frac_sub80ms DESC
+LIMIT 200;
+
+-- ---------------------------------------------------------------------------
+-- 5. Recoil-script regularity
+--    Scripted compensation is deterministic; human compensation is not. Compare
+--    per-player per-shot mouse-dy variance against the weapon cohort.
+-- ---------------------------------------------------------------------------
+WITH shot_vectors AS (
+    SELECT e.player_id,
+           e.match_id,
+           e.t_ms,
+           e.weapon_id,
+           SUM(CASE WHEN s.event = 'move' THEN s.mouse_dy ELSE 0 END) AS comp_dy
+    FROM input_events e
+    LEFT JOIN input_events s
+      ON s.player_id = e.player_id
+     AND s.match_id  = e.match_id
+     AND s.t_ms BETWEEN e.t_ms AND e.t_ms + 80
+    WHERE e.event = 'fire'
+    GROUP BY e.player_id, e.match_id, e.t_ms, e.weapon_id
+),
+per_player AS (
+    SELECT player_id,
+           weapon_id,
+           COUNT(*) AS shots,
+           AVG(comp_dy) AS mean_dy,
+           STDDEV_SAMP(comp_dy) AS sd_dy
+    FROM shot_vectors
+    GROUP BY player_id, weapon_id
+    HAVING COUNT(*) >= 200
+)
+SELECT player_id,
+       weapon_id,
+       shots,
+       ROUND(mean_dy, 4) AS mean_comp_dy,
+       ROUND(sd_dy, 4)   AS sd_comp_dy,
+       ROUND(1.0 * sd_dy / NULLIF(ABS(mean_dy), 0), 4) AS coeff_var
+FROM per_player
+WHERE ABS(mean_dy) > 0.05
+  AND 1.0 * sd_dy / NULLIF(ABS(mean_dy), 0) < 0.12      -- suspiciously consistent
+ORDER BY coeff_var ASC
+LIMIT 200;
+
+-- ---------------------------------------------------------------------------
+-- 6. Boosting / deranking: asymmetric duo performance
+--    One account performs far above its tier while its frequent partner performs
+--    far below, and the pair queues together constantly.
+-- ---------------------------------------------------------------------------
+WITH duos AS (
+    SELECT a.player_id AS booster,
+           b.player_id AS customer
+    FROM match_players a
+    JOIN match_players b
+      ON b.match_id = a.match_id
+     AND b.squad_id = a.squad_id
+     AND b.player_id <> a.player_id
+    GROUP BY a.player_id, b.player_id
+    HAVING COUNT(*) >= 20            -- persistent duo
+),
+perf AS (
+    SELECT mp.player_id,
+           AVG(mp.kills + mp.assists) AS avg_ka,
+           AVG(mp.damage) AS avg_damage,
+           AVG(mp.rp_delta) AS avg_rp
+    FROM match_players mp
+    GROUP BY mp.player_id
+)
+SELECT d.booster, d.customer,
+       ROUND(p1.avg_ka, 2)     AS booster_ka,
+       ROUND(p2.avg_ka, 2)     AS customer_ka,
+       ROUND(p1.avg_rp, 1)     AS booster_rp,
+       ROUND(p2.avg_rp, 1)     AS customer_rp
+FROM duos d
+JOIN perf p1 ON p1.player_id = d.booster
+JOIN perf p2 ON p2.player_id = d.customer
+WHERE p1.avg_ka > 2.5 * NULLIF(p2.avg_ka, 0)
+  AND p2.avg_rp > 0
+ORDER BY booster_ka DESC
+LIMIT 200;
+
+-- ---------------------------------------------------------------------------
+-- 7. Smurfing: skill far above account age / level
+-- ---------------------------------------------------------------------------
+SELECT p.player_id,
+       p.account_level,
+       DATE_PART('day', NOW() - p.account_created) AS account_age_days,
+       ROUND(AVG(mp.kills), 2) AS avg_kills,
+       ROUND(AVG(mp.damage), 1) AS avg_damage,
+       MAX(p.rank_tier) AS tier
+FROM players p
+JOIN match_players mp ON mp.player_id = p.player_id
+WHERE DATE_PART('day', NOW() - p.account_created) < 30
+GROUP BY p.player_id, p.account_level, p.account_created
+HAVING COUNT(mp.match_id) >= 20
+   AND AVG(mp.kills) > 6
+ORDER BY avg_kills DESC
+LIMIT 200;
+
+-- ---------------------------------------------------------------------------
+-- 8. Account sharing / piloting: impossible travel + input signature drift
+-- ---------------------------------------------------------------------------
+WITH travel AS (
+    SELECT s1.player_id,
+           s1.ip_country AS from_country,
+           s2.ip_country AS to_country,
+           s1.ended_at   AS left_at,
+           s2.started_at AS arrived_at,
+           EXTRACT(EPOCH FROM (s2.started_at - s1.ended_at)) / 60.0 AS gap_minutes
+    FROM sessions s1
+    JOIN sessions s2
+      ON s2.player_id = s1.player_id
+     AND s2.started_at > s1.ended_at
+     AND s2.started_at = (
+           SELECT MIN(s3.started_at) FROM sessions s3
+           WHERE s3.player_id = s1.player_id AND s3.started_at > s1.ended_at)
+)
+SELECT player_id, from_country, to_country,
+       ROUND(gap_minutes, 1) AS gap_minutes
+FROM travel
+WHERE from_country IS DISTINCT FROM to_country
+  AND gap_minutes < 240
+ORDER BY gap_minutes ASC
+LIMIT 200;
+
+-- ---------------------------------------------------------------------------
+-- 9. HWID ban evasion: a "new" player on previously banned hardware
+-- ---------------------------------------------------------------------------
+SELECT p.player_id,
+       p.account_created,
+       h.fingerprint,
+       h.first_seen AS hw_first_seen,
+       b.player_id  AS prior_banned_player,
+       b.banned_at
+FROM players p
+JOIN player_hw ph ON ph.player_id = p.player_id
+JOIN hardware  h  ON h.hw_id = ph.hw_id
+JOIN player_hw ph2 ON ph2.hw_id = h.hw_id
+JOIN players   b   ON b.player_id = ph2.player_id AND b.is_banned
+WHERE p.player_id <> b.player_id
+  AND p.account_created > b.banned_at
+  AND NOT p.is_banned
+ORDER BY p.account_created DESC
+LIMIT 200;
+
+-- ---------------------------------------------------------------------------
+-- 10. Hardware fingerprint inconsistency (spoofing indicator)
+--     A genuine machine has consistent components across sessions. A spoofer
+--     churns identifiers independently, so the fingerprint's component set
+--     disagrees with its own history and with its MAC/SMBIOS vendors.
+-- ---------------------------------------------------------------------------
+SELECT h.hw_id,
+       h.fingerprint,
+       COUNT(DISTINCT h.mb_uuid)     AS distinct_mb_uuid,
+       COUNT(DISTINCT h.disk_serial) AS distinct_disk_serial,
+       COUNT(DISTINCT h.mac_vendor)  AS distinct_mac_vendors,
+       MIN(h.first_seen)             AS first_seen,
+       MAX(h.last_seen)              AS last_seen
+FROM hardware h
+GROUP BY h.hw_id, h.fingerprint
+HAVING COUNT(DISTINCT h.mb_uuid) > 1
+    OR COUNT(DISTINCT h.disk_serial) > 2
+    OR COUNT(DISTINCT h.mac_vendor) > 2
+ORDER BY distinct_disk_serial DESC
+LIMIT 200;
+
+-- ---------------------------------------------------------------------------
+-- 11. Enforcement wave efficacy
+--     Infection rate and report volume in the 14 days before vs. after a wave.
+-- ---------------------------------------------------------------------------
+WITH wave AS (
+    SELECT wave_id, MIN(ts) AS wave_start, MAX(ts) AS wave_end
+    FROM enforcement
+    WHERE wave_id IS NOT NULL
+    GROUP BY wave_id
+),
+confirmed AS (
+    SELECT DISTINCT player_id FROM enforcement
+    WHERE action IN ('ban','hwid_ban') AND appeal_outcome IS DISTINCT FROM 'overturned'
+),
+infected AS (
+    SELECT m.started_at::date AS day,
+           MAX(CASE WHEN c.player_id IS NOT NULL THEN 1 ELSE 0 END) AS infected
+    FROM matches m
+    JOIN match_players mp ON mp.match_id = m.match_id
+    LEFT JOIN confirmed c ON c.player_id = mp.player_id
+    GROUP BY m.match_id, m.started_at::date
+)
+SELECT w.wave_id,
+       'before' AS period,
+       ROUND(100.0 * SUM(i.infected) / COUNT(*), 3) AS infection_rate_pct
+FROM wave w JOIN infected i ON i.day BETWEEN w.wave_start::date - 14 AND w.wave_start::date - 1
+GROUP BY w.wave_id
+UNION ALL
+SELECT w.wave_id,
+       'after' AS period,
+       ROUND(100.0 * SUM(i.infected) / COUNT(*), 3) AS infection_rate_pct
+FROM wave w JOIN infected i ON i.day BETWEEN w.wave_end::date AND w.wave_end::date + 14
+GROUP BY w.wave_id
+ORDER BY wave_id, period;
+
+-- ---------------------------------------------------------------------------
+-- 12. Review queue triage: rank players by independent evidence sources
+--     The point is breadth of evidence, not a single extreme number.
+-- ---------------------------------------------------------------------------
+WITH evidence AS (
+    SELECT player_id, 'kill_rate'   AS signal FROM match_players GROUP BY player_id
+    HAVING AVG(kills) > 8
+    UNION ALL
+    SELECT player_id, 'hs_rate' FROM match_players
+    GROUP BY player_id HAVING 1.0 * SUM(headshots) / NULLIF(SUM(shots_hit),0) > 0.6
+    UNION ALL
+    SELECT player_id, 'new_account_high_skill' FROM players p
+    JOIN match_players mp ON mp.player_id = p.player_id
+    WHERE DATE_PART('day', NOW() - p.account_created) < 14
+    GROUP BY p.player_id, p.account_created
+    HAVING COUNT(*) >= 15 AND AVG(mp.kills) > 6
+)
+SELECT e.player_id,
+       COUNT(DISTINCT e.signal) AS independent_signals,
+       STRING_AGG(DISTINCT e.signal, ', ') AS signals
+FROM evidence e
+GROUP BY e.player_id
+HAVING COUNT(DISTINCT e.signal) >= 2
+ORDER BY independent_signals DESC
+LIMIT 500;
+
+```
+
+`sql/schema.sql`:
+
+```sql
+-- Match-integrity / anti-cheat telemetry schema.
+-- Target: any SQL engine with window functions (PostgreSQL, BigQuery, Snowflake, DuckDB).
+-- Deliberately engine-neutral: no game-specific types.
+
+CREATE TABLE players (
+    player_id        BIGINT PRIMARY KEY,
+    account_created  TIMESTAMP NOT NULL,
+    account_level    INT,
+    region           TEXT,
+    platform         TEXT,          -- pc / playstation / xbox / switch
+    input_device     TEXT,          -- mouse / controller / emulator
+    rank_tier        TEXT,          -- bronze .. predator
+    rank_rp          INT,
+    is_banned        BOOLEAN DEFAULT FALSE,
+    banned_at        TIMESTAMP,
+    ban_reason       TEXT           -- aimbot / wallhack / boosting / account_sharing / ...
+);
+
+CREATE TABLE hardware (
+    hw_id            BIGINT PRIMARY KEY,
+    fingerprint      TEXT NOT NULL,      -- canonical hashed machine fingerprint
+    first_seen       TIMESTAMP NOT NULL,
+    last_seen        TIMESTAMP NOT NULL,
+    mb_uuid          TEXT,
+    disk_serial      TEXT,
+    mac_vendor       TEXT,
+    tpm_present      BOOLEAN,
+    tpm_quote_ok     BOOLEAN,
+    is_spoofed_suspect BOOLEAN DEFAULT FALSE
+);
+
+CREATE TABLE player_hw (
+    player_id        BIGINT REFERENCES players(player_id),
+    hw_id            BIGINT REFERENCES hardware(hw_id),
+    first_seen       TIMESTAMP,
+    last_seen        TIMESTAMP,
+    PRIMARY KEY (player_id, hw_id)
+);
+
+CREATE TABLE matches (
+    match_id         BIGINT PRIMARY KEY,
+    started_at       TIMESTAMP NOT NULL,
+    map              TEXT,
+    queue            TEXT,          -- ranked / pubs / mixtape
+    region           TEXT,
+    server_build     TEXT
+);
+
+CREATE TABLE match_players (
+    match_id         BIGINT REFERENCES matches(match_id),
+    player_id        BIGINT REFERENCES players(player_id),
+    squad_id         INT,
+    placement        INT,
+    damage           INT,
+    kills            INT,
+    assists          INT,
+    knocks           INT,
+    headshots        INT,
+    shots_fired      INT,
+    shots_hit        INT,
+    survival_ms      INT,
+    rp_delta         INT,
+    PRIMARY KEY (match_id, player_id)
+);
+
+-- Per-input-event stream, partitioned by day in production.
+CREATE TABLE input_events (
+    match_id         BIGINT,
+    player_id        BIGINT,
+    t_ms             INT,
+    event            TEXT,          -- move / fire / hit / target_enter / target_exit
+    yaw              DOUBLE PRECISION,
+    pitch            DOUBLE PRECISION,
+    mouse_dx         DOUBLE PRECISION,
+    mouse_dy         DOUBLE PRECISION,
+    weapon_id        TEXT,
+    hit_bone         TEXT,
+    distance_m       DOUBLE PRECISION
+);
+
+CREATE TABLE sessions (
+    session_id       BIGINT PRIMARY KEY,
+    player_id        BIGINT REFERENCES players(player_id),
+    hw_id            BIGINT,
+    started_at       TIMESTAMP NOT NULL,
+    ended_at         TIMESTAMP,
+    ip_asn           TEXT,
+    ip_country       TEXT,
+    ip_city          TEXT,
+    client_build     TEXT
+);
+
+CREATE TABLE auth_events (
+    event_id         BIGINT PRIMARY KEY,
+    player_id        BIGINT,
+    ts               TIMESTAMP NOT NULL,
+    kind             TEXT,          -- login / logout / token_refresh / password_reset / mfa
+    success          BOOLEAN,
+    ip_asn           TEXT,
+    ip_country       TEXT,
+    device_id        TEXT,
+    user_agent       TEXT
+);
+
+CREATE TABLE enforcement (
+    action_id        BIGINT PRIMARY KEY,
+    player_id        BIGINT,
+    ts               TIMESTAMP NOT NULL,
+    action           TEXT,          -- ban / suspend / rp_scrub / warning / hwid_ban
+    reason           TEXT,
+    wave_id          TEXT,
+    appeal_outcome   TEXT           -- upheld / overturned / pending
+);
+
+```
+
+`yara/README.md`:
+
+```md
+# YARA rules — cheat loaders & HWID spoofers
+
+Heuristic indicators only. These are **triage aids**, not verdicts: every rule here will
+eventually produce false positives, so they are written to be narrow and to name the trait
+they key on.
+
+## What these rules are for
+
+Cheat loaders are a poor signature target long-term — they are per-build encrypted and
+re-rolled weekly. What *does* persist is the loader's functional shape: it has to decrypt a
+payload, drop or map a driver, resolve a hardware fingerprint to evade a hardware ban, and
+talk to a licensing backend. Those functional traits leave stable strings, imports and
+resource shapes.
+
+## Tuning before use
+
+1. **Run against a clean corpus first.** Measure the false-positive rate on legitimate
+   software you actually deploy (overlay tools, RGB software, benchmarking tools, capture
+   software — all of which legitimately use the same APIs).
+2. **Split rules by trait, not by product.** One rule per functional capability keeps a
+   single rule's FP blast radius small.
+3. **Never act on a single YARA hit.** Feed it into the same review queue as the behavioral
+   signals. A hit is one more piece of evidence, not a ban.
+4. **Expect 30-90 day lifespans.** Track which rules have gone quiet and retire them.
+
+## Rules in this directory
+
+| File | Trait family |
+|:---|:---|
+| `loader_traits.yar` | decrypt-and-execute, driver-drop, licensing/heartbeat strings |
+| `hwid_spoofer_traits.yar` | SMBIOS/disk-serial/MAC spoofing, fingerprint patching |
+| `input_emulator_traits.yar` | HID/controller emulation, macro/recoil scripting |
+
+## Deliberate omissions
+
+No per-product signatures, no hashes of specific cheat builds, and no strings harvested from
+paywalled cheat binaries. Hashes go stale in days and belong in a private IOC feed, not a
+public repo; publishing product-specific strings mostly helps cheat authors know what to
+strip.
+
+```
+
+`yara/hwid_spoofer_traits.yar`:
+
+```yar
+/*
+    HWID spoofer functional traits — heuristic.
+
+    A spoofer has to fake identifiers consistently enough to pass a fingerprint check. That
+    means it must reach the same APIs the fingerprint uses: SMBIOS enumeration, disk serial
+    queries, MAC/adapter enumeration, registry GUIDs, and TPM state.
+
+    See README.md for tuning guidance. Do not action on a single hit.
+*/
+
+rule HwidSpoofer_SmbiosAndDiskSerial
+{
+    meta:
+        description = "Fakes SMBIOS / disk serial identity fields"
+        rationale   = "Legitimate inventory tools read these; they do not patch them"
+        confidence  = "medium"
+        false_positive_rate = "medium — inventory/asset-management agents, benchmark tools"
+
+    strings:
+        $a_getsystemfirmware = "GetSystemFirmwareTable" ascii wide nocase
+        $a_smbios            = "RSMB" ascii wide
+        $a_smart             = "SMART_SEND_DRIVE_COMMAND" ascii wide nocase
+        $a_storageprop       = "StorageDeviceProperty" ascii wide nocase
+        $a_ioctl_storage     = "IOCTL_STORAGE_QUERY_PROPERTY" ascii wide nocase
+        $a_ioctl_disk        = "IOCTL_DISK_GET_DRIVE_LAYOUT_EX" ascii wide nocase
+
+        // fake-value constants commonly substituted
+        $f_to_be_filled      = "To Be Filled By O.E.M." ascii wide nocase
+        $f_defaultstring     = "Default string" ascii wide nocase
+        $f_systemserial      = "System Serial Number" ascii wide nocase
+
+    condition:
+        uint16(0) == 0x5A4D and
+        2 of ($a_*) and
+        1 of ($f_*)
+}
+
+rule HwidSpoofer_RegistryGuidChurn
+{
+    meta:
+        description = "Patches machine identity registry GUIDs"
+        rationale   = "MachineGuid / HwProfileGuid churn is the cheapest evasion and the easiest to see"
+        confidence  = "medium-high"
+        false_positive_rate = "low"
+
+    strings:
+        $r_machineguid = "MachineGuid" ascii wide
+        $r_hwprofile   = "HwProfileGuid" ascii wide
+        $r_productid   = "ProductId" ascii wide
+        $r_editionid   = "EditionID" ascii wide
+        $r_installid   = "InstallationID" ascii wide
+        $api_regset    = "RegSetValueEx" ascii wide
+        $api_regsetnt  = "NtSetValueKey" ascii wide
+
+    condition:
+        uint16(0) == 0x5A4D and
+        2 of ($r_*) and
+        1 of ($api_*)
+}
+
+rule HwidSpoofer_TpmFingerprint
+{
+    meta:
+        description = "Reads or fakes TPM-backed machine identity"
+        rationale   = "TPM attestation is the strongest fingerprint; tools that touch it are rare"
+        confidence  = "high"
+        false_positive_rate = "low"
+
+    strings:
+        $t_tbs        = "tbs.dll" ascii wide nocase
+        $t_getcap     = "Tbsi_Get_TCG_Log" ascii wide nocase
+        $t_pcrcap     = "Tbsi_Physical_Presence_Command" ascii wide nocase
+        $t_nvread     = "TPM2_NV_Read" ascii wide nocase
+        $t_ekcert     = "EK certificate" ascii wide nocase
+        $t_quote      = "TPM Quote" ascii wide nocase
+
+    condition:
+        uint16(0) == 0x5A4D and
+        2 of ($t_*)
+}
+
+rule HwidSpoofer_NicMacSpoof
+{
+    meta:
+        description = "Rewrites network adapter MAC / configuration"
+        rationale   = "MAC is part of most HWID bundles"
+        confidence  = "low-medium"
+        false_positive_rate = "high — VPN/proxy/NIC management tools"
+
+    strings:
+        $n_macreg    = "NetworkAddress" ascii wide
+        $n_adaptset  = "SetIfEntry" ascii wide nocase
+        $n_adaptcfg  = "SNMP_oid" ascii wide nocase
+        $n_registry  = "\\SYSTEM\\CurrentControlSet\\Control\\Class\\{4D36E972" ascii wide nocase
+
+    condition:
+        uint16(0) == 0x5A4D and
+        2 of ($n_*)
+}
+
+```
+
+`yara/input_emulator_traits.yar`:
+
+```yar
+/*
+    Input emulation / macro traits — heuristic.
+
+    Covers the two shapes that matter for FPS: devices that present as a HID controller but
+    are scripted, and user-mode software that synthesises input to control recoil or fire
+    timing.
+
+    See README.md for tuning guidance. Do not action on a single hit.
+*/
+
+rule InputEmulator_HidBridge
+{
+    meta:
+        description = "Bridges one input class into a HID controller report stream"
+        rationale   = "Cross-device input bridging is the core of console aim/recoil devices"
+        confidence  = "medium"
+        false_positive_rate = "high — accessibility tools, legitimate adapters"
+
+    strings:
+        $h_sendinput     = "SendInput" ascii wide
+        $h_mouse_event   = "mouse_event" ascii wide
+        $h_writefile_hid = { 48 8B ?? 48 8D ?? ?? ?? ?? ?? 48 8B ?? FF 15 ?? ?? ?? ?? 85 C0 }
+        $h_vjoy          = "vJoy" ascii wide nocase
+        $h_vigem         = "ViGEm" ascii wide nocase
+        $h_x360          = "Xbox 360 Controller" ascii wide nocase
+        $h_ds4           = "DualShock" ascii wide nocase
+        $h_reportdesc    = { 05 01 09 04 A1 01 15 00 26 FF 00 }
+
+    condition:
+        uint16(0) == 0x5A4D and
+        (1 of ($h_vjoy, $h_vigem, $h_x360, $h_ds4, $h_reportdesc)) and
+        (1 of ($h_sendinput, $h_mouse_event, $h_writefile_hid))
+}
+
+rule Macro_RecoilScriptEngine
+{
+    meta:
+        description = "Deterministic per-shot input scripting engine"
+        rationale   = "Table-driven compensation with timing is the anti-recoil script shape"
+        confidence  = "medium"
+        false_positive_rate = "medium — macro peripherals' own software"
+
+    strings:
+        $m_profile    = "recoil_profile" ascii wide nocase
+        $m_pattern    = "recoil_pattern" ascii wide nocase
+        $m_compensate = "compensate" ascii wide nocase
+        $m_per_shot   = "per_shot" ascii wide nocase
+        $m_smoothing  = "smoothing" ascii wide nocase
+        $m_randdelay  = "random_delay" ascii wide nocase
+        $m_triggerbot = "triggerbot" ascii wide nocase
+        $m_fov        = "aim_fov" ascii wide nocase
+
+    condition:
+        uint16(0) == 0x5A4D and
+        3 of ($m_*)
+}
+
+rule TimingFixedInputLoop
+{
+    meta:
+        description = "Input loop with a fixed inter-event interval"
+        rationale   = "Human input timing is log-normal; a constant interval is mechanical"
+        confidence  = "low"
+        false_positive_rate = "high — any polling loop; use only with corroborating evidence"
+
+    strings:
+        $t_qpc       = "QueryPerformanceCounter" ascii wide
+        $t_sleep     = "Sleep" ascii wide
+        $t_ntdelay   = "NtDelayExecution" ascii wide
+        $t_sendinput = "SendInput" ascii wide
+
+    condition:
+        uint16(0) == 0x5A4D and
+        2 of ($t_qpc, $t_sleep, $t_ntdelay) and
+        $t_sendinput
+}
+
+```
+
+`yara/loader_traits.yar`:
+
+```yar
+/*
+    Cheat loader functional traits — heuristic.
+
+    One rule per capability, not per product. See README.md for tuning guidance and the
+    false-positive warning. Do not action on a single hit.
+
+    Tested against: YARA 4.x
+*/
+
+import "pe"
+
+rule CheatLoader_CryptorShell
+{
+    meta:
+        description = "Decrypt-and-execute shell: standard crypter/loader capability shape"
+        rationale   = "Legitimate installers unpack; they rarely loop-decrypt into RWX and jump"
+        confidence  = "medium"
+        false_positive_rate = "medium — commercial protectors, some DRM"
+
+    strings:
+        $api_virtalloc = "VirtualAlloc" ascii wide nocase
+        $api_vprotect  = "VirtualProtect" ascii wide nocase
+        $api_thread    = "CreateThread" ascii wide nocase
+        $api_section   = "NtCreateSection" ascii wide nocase
+        $api_mapview   = "NtMapViewOfSection" ascii wide nocase
+
+        // classic XOR/RC4 loop-decrypt stub constants
+        $c_xor_key     = { 81 F1 ?? ?? ?? ?? 88 ?? ?? 40 3D ?? ?? ?? ?? 72 F1 }
+        $c_rc4_ksa     = { 30 04 0F 41 81 F9 00 01 00 00 75 F2 }
+
+    condition:
+        uint16(0) == 0x5A4D and
+        filesize < 8MB and
+        (2 of ($api_*)) and
+        (1 of ($c_*))
+}
+
+rule CheatLoader_DriverDrop
+{
+    meta:
+        description = "User-mode component that writes and loads a kernel driver"
+        rationale   = "Normal apps rarely drop a .sys and call the SCM to load it"
+        confidence  = "high"
+        false_positive_rate = "low — some legitimate vendor updaters"
+
+    strings:
+        $sys_ext      = ".sys" ascii wide nocase
+        $svc_create   = "CreateService" ascii wide nocase
+        $svc_start    = "StartService" ascii wide nocase
+        $scm_open     = "OpenSCManager" ascii wide nocase
+        $nt_load_drv  = "NtLoadDriver" ascii wide
+        $reg_drvpath  = "\\Registry\\Machine\\System\\CurrentControlSet\\Services" ascii wide nocase
+        $dev_ioctl    = "DeviceIoControl" ascii wide nocase
+
+    condition:
+        uint16(0) == 0x5A4D and
+        $sys_ext and
+        (2 of ($svc_create, $svc_start, $scm_open, $nt_load_drv)) and
+        (1 of ($reg_drvpath, $dev_ioctl))
+}
+
+rule CheatLoader_LicensingHeartbeat
+{
+    meta:
+        description = "Subscription licensing + heartbeat: cheat-as-a-service delivery shape"
+        rationale   = "Per-user tokens, HWID binding and expiry strings are stable across builds"
+        confidence  = "medium"
+        false_positive_rate = "medium — SaaS applications generally"
+
+    strings:
+        $l_hwid      = "hwid" ascii wide nocase
+        $l_sub       = "subscription" ascii wide nocase
+        $l_expires   = "expires_at" ascii wide nocase
+        $l_license   = "license_key" ascii wide nocase
+        $l_token     = "Bearer " ascii wide
+        $l_discord   = "discord.com/api" ascii wide nocase
+        $l_webhook   = "discord.com/api/webhooks" ascii wide nocase
+        $l_gate      = "gate" ascii wide nocase
+
+    condition:
+        uint16(0) == 0x5A4D and
+        3 of ($l_*)
+}
+
+rule CheatLoader_ManualMap
+{
+    meta:
+        description = "Manual mapping: reflective load without a standard loader"
+        rationale   = "Legitimate plugins use LoadLibrary; manual mapping is deliberate stealth"
+        confidence  = "medium-high"
+        false_positive_rate = "medium — game mod loaders, some overlays"
+
+    strings:
+        $m_exportdir = { 48 63 ?? ?? 48 03 ?? 48 8B ?? ?? 48 85 C0 74 ?? }
+        $m_reloc     = "IMAGE_DIRECTORY_ENTRY_BASERELOC" ascii
+        $m_import    = "IMAGE_DIRECTORY_ENTRY_IMPORT" ascii
+        $m_ntunmap   = "NtUnmapViewOfSection" ascii wide
+        $m_ldrload   = "LdrLoadDll" ascii wide
+
+    condition:
+        uint16(0) == 0x5A4D and
+        (2 of ($m_*))
+}
+
+```
