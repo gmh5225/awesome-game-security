@@ -9,6 +9,7 @@ sources:
   - wiki/sources/descriptions/Parko-Developer__guard-game.md
   - wiki/sources/descriptions/Driw0x__CS2Guard.md
   - wiki/sources/descriptions/oykuoner__YAACS-AntiCheat.md
+  - wiki/sources/descriptions/NetVar1337__apex-anticheat-lab.md
   - wiki/sources/descriptions/zelect0r__zamr.md
   - wiki/sources/descriptions/Lixense__ff-ace-anticheat-analysis.md
   - wiki/sources/descriptions/LordeTyrael__PokeAllianceAntiCheatAnalysis.md
@@ -1255,6 +1256,8 @@ Structured research indexes such as [[anti-cheat-research-index]] catalog public
 **Paper modular MC AC:** [[h-ac]] (Benardelys; Java Paper **1.21** plugin; modular combat/movement/world checks with latency-compensated reach raytracing, violation decay, asynchronous logging, Discord alerts, client brand fingerprinting, and injector detection; Anti Cheat / game:minecraft) for Paper operators beside heuristic plugins such as [[bs-anticheat]] and [[larping-anti-cheat]]. (source: wiki/sources/descriptions/Benardelys__H-AC.md)
 
 **Offline CS2 demo review:** [[cs2-overwatch]] (magicnothief; Python offline demo pipeline; hard rules, ray-cast visibility, ML behavior scoring on CS2CD, calibrated suspicion tiers, optional local LLM summaries; browser UI + CLI; privacy-preserving local review; Anti Cheat / Analysis Framework) beside demo-telemetry research such as [[yaacs-anticheat]] and explainable scoring tools such as [[cs2-tracker]]. (source: wiki/sources/descriptions/magicnothief__cs2-overwatch.md)
+
+**FPS behavioral research lab:** [[apex-anticheat-lab]] (NetVar1337; Python server-side input telemetry; aim kinematics, reaction times, recoil regularity, triggerbot signatures; per-cohort baselines; analyst-review ranking; YARA loader/HWID-spoofer rules; read-only PowerShell host driver/PCIe/vulnerable-driver-blocklist survey; match-integrity SQL; FPS cheat taxonomy + threshold calibration docs; Anti Cheat / Open Source Anti Cheat System) beside demo-telemetry ML stacks such as [[yaacs-anticheat]] and [[cs2guard]]. (source: wiki/sources/descriptions/NetVar1337__apex-anticheat-lab.md)
 
 **Paper custom-SMP AC (Hyphon):** [[larping-anti-cheat]] (realkyx29-design; Java 21 Paper **1.21+** plugin; modular movement/combat/world checks—fly, speed, reach, kill aura, scaffold, fast break; server-authoritative physics snapshots; per-player violation tracking with decay; honeypot/ESP decoy entities + optional packet-layer fake bases; capability analyzer for custom modifiers/enchantments on modded SMP; low false-positive focus; server-side only; Anti Cheat / game:minecraft) for custom SMP operators beside heuristic Paper plugins such as [[bs-anticheat]] and physics-prediction AC such as [[grim]]. (source: wiki/sources/descriptions/realkyx29-design__LarpingAntiCheat.md)
 
