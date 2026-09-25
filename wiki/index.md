@@ -1697,7 +1697,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [rehlds](entities/rehlds.md) — reverse-engineered HLDS dedicated server (builds 6152/6153; DWARF-guided Linux RE; GoldSource protocol / HLTV / mod compatibility; Game Engine / RE)
 - [gunyah-hypervisor](entities/gunyah-hypervisor.md) — Qualcomm Type-1 ARM64 HV (trusted/dependent VMs; Cheat QEMU/KVM + Android Emulator)
 - [gvmp-anticheat](entities/gvmp-anticheat.md) — GVMP.de alt:V GTA V client AC (C++; ENet, DirectX hooks, MinHook, pattern scan, process integrity; Anti Cheat; divodeuxsevres)
-- [H-AC](entities/h-ac.md) — Paper 1.21 server-side Minecraft anti-cheat plugin (Benardelys; modular combat/movement checks; latency-compensated reach raytracing; async violation logging; Anti Cheat / game:minecraft)
+- [H-AC](entities/h-ac.md) — Paper 1.21 HukumAC plugin (Benardelys; modular combat/movement/world checks with violation decay; latency-aware reach raytracing; TPS safeguards; async logging; client brand/injector probes; Anti Cheat / game:minecraft)
 - [HelloIommuPkg](entities/helloiommupkg.md) — sample DXE DMA-remapping (IOMMU) driver (tandasat; Detection:DMA)
 - [H5GG](entities/h5gg.md) — iOS modding engine (JavaScript + HTML5 UI; memory edit, scripts/plugins, pointer chains, h5frida hook/patch; jailbroken and non-jailbroken modes; cheat / IOS cheat engine)
 - [Hawkeye](entities/hawkeye.md) — Windows kernel security research console for anti-cheat analysis and live forensics (hawkeye-Leo; host-native driver Win10/11 x64; `!probe`/`!etw`/`!kernel_region`; Hawkeye Lab `!analyze` scored reports; GPL Community + paid Lab; Anti Cheat)
