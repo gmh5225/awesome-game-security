@@ -1295,6 +1295,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/zelect0r/zamr [Curated MMRL module repository for Magisk/KernelSU/APatch (Play Integrity Fix, Zygisk, root-hide, TEESimulator)]
 - https://github.com/Elcapitanoe/pif-config-generator [Automated pipeline to track upstream Android build.prop tags and publish validated Play Integrity Fix (PIF) JSON profiles]
 - https://github.com/wajahatnaeem056/jerrymanager [KernelSU/APatch/Magisk module with Web UI for Play Integrity attestation, keybox injection, root hiding, and banking-app detection cleanup]
+- https://github.com/bufanchen121101/AxManagerD [Root-free Magisk-style Android module framework with property injection, runtime modules, and built-in LSPatch Xposed hooking]
 - https://github.com/Dr-TSNG/ZygiskOnKernelSU [Run Zygisk on KernelSU]
 - https://github.com/svoboda18/magiskboot [Boot Image Modification Tool]
 - https://github.com/xiaoxindada/magiskboot_ndk_on_linux [Boot Image Modification Tool]
