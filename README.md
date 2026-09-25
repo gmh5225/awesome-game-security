@@ -955,6 +955,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/zodiacon/TotalPE2 [PE Viewer]
 - https://github.com/APKLab/APKLab [Android Reverse-Engineering Workbench for VS Code]
 - https://github.com/zboralski/unflutter [Static analyzer for Flutter/Dart AOT snapshots]
+- https://github.com/ejfkdev/dae [Rust CLI that extracts Dart AOT snapshot debug symbols and structs from Mach-O, ELF, and PE binaries for IDA, radare2, and Frida workflows without a Dart SDK]
 - https://github.com/Guardsquare/flutter-re-demo [Flutter app RE experiments — IDA scripts for Dart function renaming from reFlutter/DWARF, VM memory mapping, object/xref recovery, and decompilation aids]
 - https://github.com/evild3ad/MemProcFS-Analyzer [Windows Forensic Analysis]
 - https://github.com/eybisi/kavanoz [Statically unpacking common android banker malware]
@@ -5006,6 +5007,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/MatheuZSecurity/RingReaper [Linux post-exploitation agent that uses io_uring to stealthily bypass EDR detection by avoiding traditional syscalls]
 - https://github.com/boratanrikulu/gecit [DPI bypass research tool: fake TLS ClientHello desync + built-in DoH; eBPF sock_ops on Linux, TUN proxy on macOS/Windows]
 - https://github.com/gigbh/d-process [Lightweight Linux tool to spawn decoy processes with arbitrary names to evade process-based anti-cheat and tracker checks]
+- https://github.com/Azteriisk/omarchy-boot-manager [Omarchy plugin for sbctl Secure Boot enrollment, Limine Windows chainloading, and reboot controls so Vanguard/EAC/FACEIT titles work on Windows+Linux dual-boot]
 
 > Android
 - https://github.com/quarkslab/android-hardware-attestation-demo [Relay hardware Key Attestation from a clean device to defeat backend integrity checks on a rooted analysis phone — Frida hook + attestation oracle, no TEE tampering]
