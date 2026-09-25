@@ -8,7 +8,8 @@ sources:
   - wiki/sources/descriptions/iqrw0__DieDMAProtection.md
   - wiki/sources/descriptions/cutecatsandvirtualmachines__DmaProtect.md
   - wiki/sources/descriptions/BigAnteater__KVM-GPU-Passthrough.md
-updated: 2026-09-13
+  - wiki/sources/descriptions/kEv1nZ0__VTD-Bypass.md
+updated: 2026-09-25
 confidence: high
 ---
 
@@ -70,7 +71,7 @@ Paths 1–3 underpin most commercial DMA cheats today. (source: wiki/sources/ski
 | 15 | PASID confusion | PASID-aware IOMMU programming |
 | 16 | DMAR/IVRS spoofing | Measured boot covering firmware |
 
-Techniques 1–6 are the active surface for most commercial DMA cheats; 7–13 appear in academic, APT, or firmware contexts; 14–16 are largely theoretical. (source: wiki/sources/skills/dma-attack.md)
+Techniques 1–6 are the active surface for most commercial DMA cheats; 7–13 appear in academic, APT, or firmware contexts; 14–16 are largely theoretical. (source: wiki/sources/skills/dma-attack.md) Concrete **runtime DMAR spoofing via DMA** appears in [[vtd-bypass]] (LeechCore/FPGA physical writes; XSDT/DMAR fabrication and boot-window timed patches so firmware-disabled VT-d reads as enabled). (source: wiki/sources/descriptions/kEv1nZ0__VTD-Bypass.md)
 
 ## Defense uses
 

@@ -11,11 +11,27 @@ confidence: medium
 
 # VTD-Bypass
 
-Python tool (kEv1nZ0/VTD-Bypass) that automates bypassing VT-d and IOMMU-related detection by reading and modifying ACPI tables in host physical memory via LeechCore over FPGA DMA hardware. It dumps memory, locates the XSDT table, builds a checksum-valid DMAR table, and patches XSDT so the system reports VT-d as enabled when firmware has it disabled. Techniques include signature-based ACPI table search, 4KB-aligned hole selection, DRHD base placement in high MMIO space, encrypted configuration files, and repeated timed writes during boot. Targets hardware security research, ACPI/IOMMU analysis, and anti-cheat testing where VT-d enforcement is checked. (source: wiki/sources/descriptions/kEv1nZ0__VTD-Bypass.md)
+Python tool (kEv1nZ0/VTD-Bypass) that automates bypassing VT-d and IOMMU-related detection by reading and modifying ACPI tables in host physical memory via LeechCore over FPGA DMA hardware. Listed in README **Cheat → VT-d/IOMMU**. (source: wiki/sources/descriptions/kEv1nZ0__VTD-Bypass.md)
 
-## Role in the DMA stack
+## Workflow
 
-Offensive **IOMMU/ACPI spoofing** lane beside kernel remapping PoCs such as [[diedmaprotection]] and defensive samples such as [[dmaprotect]]—uses physical DMA writes to fabricate firmware-visible VT-d state rather than driver-mediated table edits. (source: wiki/sources/README-categories.md)
+1. Dump host physical memory over **LeechCore** on FPGA DMA hardware
+2. Locate the **XSDT** ACPI table via signature search
+3. Fabricate a checksum-valid **DMAR** table (DRHD base in high MMIO; 4KB-aligned hole selection)
+4. Patch XSDT so the OS reports **VT-d enabled** when firmware has it disabled
+5. Apply **repeated timed writes during boot** so patches persist through early firmware/OS table reads
+
+## Techniques
+
+- Signature-based ACPI table discovery in physical memory
+- 4KB-aligned hole selection for injected table placement
+- DRHD base address placement in high MMIO space
+- Encrypted configuration files for operator-controlled parameters
+- Boot-window timed physical-memory writes (physical DMA, not driver-mediated IOMMU edits)
+
+## Positioning
+
+Offensive **IOMMU/ACPI spoofing** lane beside kernel remapping PoCs such as [[diedmaprotection]] and defensive samples such as [[dmaprotect]]—fabricates firmware-visible VT-d state rather than reprogramming remapping tables from ring 0. Targets hardware security research, ACPI/IOMMU analysis, and anti-cheat testing where VT-d enforcement is checked. (source: wiki/sources/descriptions/kEv1nZ0__VTD-Bypass.md)
 
 ## Requirements
 

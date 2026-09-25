@@ -3759,7 +3759,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [veh_hide_memory](entities/veh-hide-memory.md) — VEH + PAGE_NOACCESS memory-analysis sample (AC page protection)
 - [vfdynf](entities/vfdynf.md) — Application Verifier DynFault provider (stack-hash low-resource fault injection; OS API hooks + optional buffer fuzzing; PCRE2 exclusions; `vfdynf.dll`; jxy-s)
 - [Vk-Engine](entities/vk-engine.md) — WIP Jai Vulkan engine (clustered forward / PBR / ImGui + Jolt; Game Engine)
-- [VTD-Bypass](entities/vtd-bypass.md) — kEv1nZ0 Python VT-d/IOMMU ACPI table spoofing via LeechCore/FPGA physical-memory writes (XSDT/DMAR fabrication; boot-window timed patches; Cheat / VT-d/IOMMU)
+- [VTD-Bypass](entities/vtd-bypass.md) — kEv1nZ0 Python VT-d/IOMMU ACPI spoofing via LeechCore/FPGA physical writes (XSDT signature search; checksum-valid DMAR fabrication; 4KB hole + high-MMIO DRHD; encrypted config; boot-window timed patches; Cheat / VT-d/IOMMU)
 - [Volatility](entities/volatility.md) — original Python 2 memory forensics (profiles; pslist/modules/rootkit)
 - [Volatility 3](entities/volatility3.md) — Python 3 memory forensics (RAM images; Win/Linux/macOS plugins)
 - [VolcanoAC](entities/volcano-ac.md) — open-source Roblox Luau server-side movement AC (speed/fly/noclip/seated-state validation; lag-back enforcement; loadstring remote-update loader; theo926; Anti Cheat / game:roblox)
