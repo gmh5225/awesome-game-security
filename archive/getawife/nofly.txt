@@ -1,0 +1,1227 @@
+Project Path: arc_getawife_nofly_l3gt8dy2
+
+Source Tree:
+
+```txt
+arc_getawife_nofly_l3gt8dy2
+├── LICENSE
+├── build.gradle.kts
+├── gradle.properties
+├── readme.md
+├── settings.gradle.kts
+└── src
+    └── main
+        ├── java
+        │   └── dev
+        │       └── nofly
+        │           ├── Admin.java
+        │           ├── Buffer.java
+        │           ├── Clock.java
+        │           ├── Exempt.java
+        │           ├── Log.java
+        │           ├── Move.java
+        │           ├── Packets.java
+        │           ├── Simulate.java
+        │           ├── State.java
+        │           ├── Track.java
+        │           ├── config.Java
+        │           ├── effects.java
+        │           └── no_fly.java
+        └── resources
+            ├── config.yml
+            └── plugin.yml
+
+```
+
+`LICENSE`:
+
+```
+MIT License
+
+Copyright (c) 2026 Getawife
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
+`build.gradle.kts`:
+
+```kts
+plugins {
+    java
+}
+
+group = "dev.nofly"
+version = "1.0.0"
+
+repositories {
+    mavenCentral()
+    maven("https://repo.papermc.io/repository/maven-public/")
+    maven("https://repo.codemc.io/repository/maven-releases/")
+}
+
+dependencies {
+    compileOnly("io.papermc.paper:paper-api:1.21.1-R0.1-SNAPSHOT")
+    compileOnly("com.github.retrooper:packetevents-spigot:2.7.0")
+}
+
+java {
+    toolchain.languageVersion.set(JavaLanguageVersion.of(21))
+}
+
+tasks {
+    compileJava {
+        options.encoding = "UTF-8"
+        options.release.set(21)
+    }
+    processResources {
+        filesMatching("plugin.yml") {
+            expand("version" to project.version)
+        }
+    }
+    jar {
+        archiveBaseName.set("NoFly")
+    }
+}
+
+```
+
+`gradle.properties`:
+
+```properties
+org.gradle.jvmargs=-Xmx2g
+org.gradle.parallel=true
+org.gradle.caching=true
+```
+
+`readme.md`:
+
+```md
+# NoFly
+
+A fly detection plugin for Paper 1.21.x. It combines synchronous movement analysis with PacketEvents packet sanity checks.
+
+## Install
+
+1. Install [PacketEvents](https://github.com/retrooper/packetevents) on your server.
+2. Drop `NoFly-1.0.0.jar` into `plugins/`.
+3. Start the server once to generate `config.yml`.
+4. Tune `leniency` upward for unusually noisy movement environments.
+
+## Commands
+
+| command         | permission    | description              |
+| --------------- | ------------- | ------------------------ |
+| `/nofly reload` | `nofly.admin` | reload the configuration |
+
+## Permissions
+
+| permission     | default | description          |
+| -------------- | ------- | -------------------- |
+| `nofly.bypass` | op      | skip movement checks |
+| `nofly.admin`  | op      | use `/nofly`         |
+| `nofly.alerts` | op      | receive flag alerts  |
+
+## Build
+
+```text
+gradle build
+```
+
+The GitHub Actions workflow installs Gradle 8.10.2 automatically.
+
+## License
+
+MIT
+
+```
+
+`settings.gradle.kts`:
+
+```kts
+rootProject.name = "nofly"
+```
+
+`src/main/java/dev/nofly/Admin.java`:
+
+```java
+package dev.nofly;
+
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandExecutor;
+import org.bukkit.command.CommandSender;
+import org.bukkit.command.TabCompleter;
+
+import java.util.List;
+
+public final class admin implements CommandExecutor, TabCompleter {
+
+    private final no_fly plugin;
+
+    public admin(no_fly plugin) {
+        this.plugin = plugin;
+    }
+
+    @Override
+    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+        if (!sender.hasPermission("nofly.admin")) {
+            return true;
+        }
+
+        if (args.length == 0) {
+            sender.sendMessage("/nofly reload");
+            return true;
+        }
+
+        if (args[0].equalsIgnoreCase("reload")) {
+            plugin.config().load();
+            plugin.log().reload();
+            sender.sendMessage("nofly reloaded");
+        }
+
+        return true;
+    }
+
+    @Override
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+        if (args.length != 1) {
+            return List.of();
+        }
+        return List.of("reload");
+    }
+}
+
+```
+
+`src/main/java/dev/nofly/Buffer.java`:
+
+```java
+package dev.nofly;
+
+public final class buffer {
+
+    private double value;
+
+    public boolean add(double amount, double threshold) {
+        if (!Double.isFinite(amount) || !Double.isFinite(threshold)) {
+            return false;
+        }
+        value += Math.max(0.0, amount);
+        return value >= threshold;
+    }
+
+    public void decay(double amount) {
+        if (!Double.isFinite(amount)) {
+            return;
+        }
+        value = Math.max(0.0, value - Math.max(0.0, amount));
+    }
+
+    public void reset() {
+        value = 0.0;
+    }
+
+    public double value() {
+        return value;
+    }
+}
+
+```
+
+`src/main/java/dev/nofly/Clock.java`:
+
+```java
+package dev.nofly;
+
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
+import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitTask;
+
+public final class clock {
+
+    private final JavaPlugin plugin;
+    private final move move;
+    private BukkitTask task;
+
+    public clock(JavaPlugin plugin, move move) {
+        this.plugin = plugin;
+        this.move = move;
+    }
+
+    public void start() {
+        task = Bukkit.getScheduler().runTaskTimer(plugin, this::tick, 1L, 1L);
+    }
+
+    public void stop() {
+        if (task != null) {
+            task.cancel();
+            task = null;
+        }
+    }
+
+    private void tick() {
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            move.tick(player);
+        }
+    }
+}
+
+```
+
+`src/main/java/dev/nofly/Exempt.java`:
+
+```java
+package dev.nofly;
+
+import org.bukkit.GameMode;
+import org.bukkit.entity.Player;
+import org.bukkit.potion.PotionEffectType;
+
+public final class exempt {
+
+    private exempt() {
+    }
+
+    public static boolean check(Player player, track track, long now, config config) {
+        if (player.hasPermission("nofly.bypass")) {
+            return true;
+        }
+        if (player.getGameMode() == GameMode.CREATIVE || player.getGameMode() == GameMode.SPECTATOR) {
+            return true;
+        }
+        if (player.isFlying() || player.isGliding() || player.isRiptiding()) {
+            return true;
+        }
+        if (player.isInsideVehicle() || player.isInWaterOrBubbleColumn() || player.isInLava() || player.isClimbing()) {
+            return true;
+        }
+        if (!player.hasGravity()) {
+            return true;
+        }
+        if (player.hasPotionEffect(PotionEffectType.LEVITATION)
+                || player.hasPotionEffect(PotionEffectType.SLOW_FALLING)) {
+            return true;
+        }
+        if (player.isInPowderedSnow()) {
+            return true;
+        }
+        if (now - track.last_teleport < config.teleport_grace_ms) {
+            return true;
+        }
+        if (now - track.last_damage < config.damage_grace_ms) {
+            return true;
+        }
+        if (now - track.last_velocity < config.velocity_grace_ms) {
+            return true;
+        }
+        if (now - track.last_effect_apply < config.effects_grace_ms) {
+            return true;
+        }
+        return now < track.setback_until;
+    }
+}
+
+```
+
+`src/main/java/dev/nofly/Log.java`:
+
+```java
+package dev.nofly;
+
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.event.HoverEvent;
+import net.kyori.adventure.text.format.NamedTextColor;
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
+import org.bukkit.scheduler.BukkitTask;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.InvalidPathException;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
+import java.time.Instant;
+import java.util.Map;
+import java.util.Queue;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
+
+public final class log {
+
+    private final no_fly plugin;
+    private final Path data_folder;
+    private final Queue<String> queue = new ConcurrentLinkedQueue<>();
+    private final Map<UUID, Long> last_alert = new ConcurrentHashMap<>();
+    private volatile Path file;
+    private final BukkitTask flusher;
+
+    public log(no_fly plugin, Path data_folder) {
+        this.plugin = plugin;
+        this.data_folder = data_folder;
+        reload();
+        flusher = Bukkit.getScheduler().runTaskTimerAsynchronously(plugin, this::flush, 100L, 100L);
+    }
+
+    public void write(Player player, String kind, int total) {
+        UUID id = player.getUniqueId();
+        long now = System.currentTimeMillis();
+        queue.add(Instant.now() + " " + id + " " + player.getName() + " " + kind + " " + total);
+
+        Long previous = last_alert.get(id);
+        if (previous != null && now - previous < 3000L) {
+            return;
+        }
+        last_alert.put(id, now);
+
+        if (!plugin.config().punish_alert) {
+            return;
+        }
+
+        plugin.getLogger().info(player.getName() + " flagged " + kind + " (" + total + ")");
+        Component message = build(player, kind, total);
+        for (Player online : Bukkit.getOnlinePlayers()) {
+            if (online.hasPermission("nofly.alerts")) {
+                online.sendMessage(message);
+            }
+        }
+    }
+
+    public void reload() {
+        flush();
+        Path next;
+        try {
+            Path configured = Path.of(plugin.config().punish_log_file).getFileName();
+            next = configured == null || configured.toString().isBlank() || configured.toString().equals(".")
+                    || configured.toString().equals("..")
+                    ? data_folder.resolve("flags.log")
+                    : data_folder.resolve(configured).normalize();
+        } catch (InvalidPathException error) {
+            next = data_folder.resolve("flags.log");
+        }
+        file = next;
+        ensure_file(next);
+    }
+
+    public void shutdown() {
+        flusher.cancel();
+        flush();
+    }
+
+    public void forget(UUID id) {
+        last_alert.remove(id);
+    }
+
+    private Component build(Player player, String kind, int total) {
+        Component name = Component.text(player.getName(), NamedTextColor.RED)
+                .clickEvent(ClickEvent.runCommand("/tp " + player.getName()))
+                .hoverEvent(HoverEvent.showText(Component.text("teleport to " + player.getName())));
+        return Component.text("[nofly] ", NamedTextColor.DARK_GRAY)
+                .append(name)
+                .append(Component.text(" flagged ", NamedTextColor.GRAY))
+                .append(Component.text(kind, NamedTextColor.YELLOW))
+                .append(Component.text(" (" + total + ")", NamedTextColor.DARK_GRAY));
+    }
+
+    private void ensure_file(Path target) {
+        try {
+            Files.createDirectories(data_folder);
+            Path parent = target.getParent();
+            if (parent != null) {
+                Files.createDirectories(parent);
+            }
+            if (!Files.exists(target)) {
+                Files.createFile(target);
+            }
+        } catch (IOException error) {
+            throw new IllegalStateException("unable to create log file", error);
+        }
+    }
+
+    private void flush() {
+        if (queue.isEmpty()) {
+            return;
+        }
+        Path target = file;
+        if (target == null) {
+            return;
+        }
+        StringBuilder batch = new StringBuilder();
+        String line;
+        while ((line = queue.poll()) != null) {
+            batch.append(line).append(System.lineSeparator());
+        }
+        if (batch.isEmpty()) {
+            return;
+        }
+        try {
+            Files.writeString(target, batch.toString(), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+        } catch (IOException error) {
+            plugin.getLogger().warning("log flush failed: " + error.getMessage());
+        }
+    }
+}
+
+```
+
+`src/main/java/dev/nofly/Move.java`:
+
+```java
+package dev.nofly;
+
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityToggleGlideEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.PlayerRespawnEvent;
+import org.bukkit.event.player.PlayerTeleportEvent;
+
+import java.util.UUID;
+
+public final class move implements Listener {
+
+    private static final double finite_limit = 3.0e7;
+
+    private final no_fly plugin;
+
+    public move(no_fly plugin) {
+        this.plugin = plugin;
+    }
+
+    public void tick(Player player) {
+        if (!player.isOnline()) {
+            return;
+        }
+
+        track track = plugin.state().get(player.getUniqueId());
+        Location current = player.getLocation();
+        long now = System.currentTimeMillis();
+        long sample_nanos = System.nanoTime();
+
+        if (!is_valid(current)) {
+            return;
+        }
+
+        if (!track.initialized || track.last == null || !same_world(track.last, current)) {
+            initialize(track, current, now);
+            track.last_sample_nanos = sample_nanos;
+            return;
+        }
+
+        if (sample_nanos - track.last_sample_nanos > 150_000_000L) {
+            reset_motion(track, current);
+            track.last_sample_nanos = sample_nanos;
+            return;
+        }
+        track.last_sample_nanos = sample_nanos;
+
+        if (exempt.check(player, track, now, plugin.config())) {
+            reset_motion(track, current);
+            return;
+        }
+
+        if (player.isOnGround()) {
+            settle(track, current);
+            return;
+        }
+
+        double dx = current.getX() - track.last.getX();
+        double dy = current.getY() - track.last.getY();
+        double dz = current.getZ() - track.last.getZ();
+        double horizontal = Math.hypot(dx, dz);
+
+        if (track.air_ticks == 0 && dy > 0.65) {
+            track.launch_grace_until = now + 800L;
+        }
+
+        track.air_ticks++;
+        if (Math.abs(dy) <= plugin.config().horizontal_max_vertical) {
+            track.still_ticks++;
+        } else {
+            track.still_ticks = 0;
+        }
+
+        if (Math.abs(dy) >= plugin.config().vertical_stalled_min
+                && Math.abs(dy) <= plugin.config().vertical_stalled_max
+                && Math.abs(dy - track.last_vertical) <= plugin.config().vertical_stalled_delta) {
+            track.stalled_ticks++;
+        } else {
+            track.stalled_ticks = 0;
+        }
+
+        if (dy >= plugin.config().vertical_ascent_min) {
+            track.ascent_ticks++;
+        } else {
+            track.ascent_ticks = 0;
+        }
+
+        boolean launch_grace = now < track.launch_grace_until;
+        boolean vertical_bad = !launch_grace && vertical_bad(track, dy);
+        boolean horizontal_bad = !launch_grace && horizontal_bad(track, horizontal, dy);
+
+        if (vertical_bad) {
+            double severity = violation_amount(track, dy);
+            if (track.vertical_buffer.add(severity, plugin.config().vertical_buffer)) {
+                flag(player, track, "vertical", now);
+                return;
+            }
+        } else {
+            track.vertical_buffer.decay(plugin.config().vertical_decay);
+        }
+
+        if (horizontal_bad) {
+            if (track.horizontal_buffer.add(0.5, plugin.config().horizontal_buffer)) {
+                flag(player, track, "horizontal", now);
+                return;
+            }
+        } else {
+            track.horizontal_buffer.decay(plugin.config().horizontal_decay);
+        }
+
+        track.last_vertical = dy;
+        track.last = current.clone();
+    }
+
+    @EventHandler
+    public void join(PlayerJoinEvent event) {
+        Player player = event.getPlayer();
+        track track = plugin.state().get(player.getUniqueId());
+        initialize(track, player.getLocation(), System.currentTimeMillis());
+    }
+
+    @EventHandler
+    public void respawn(PlayerRespawnEvent event) {
+        Player player = event.getPlayer();
+        Location location = event.getRespawnLocation();
+        long now = System.currentTimeMillis();
+        track track = plugin.state().get(player.getUniqueId());
+        track.last_teleport = now;
+        track.setback_until = now + plugin.config().teleport_grace_ms;
+        initialize(track, location, now);
+    }
+
+    @EventHandler
+    public void world_change(org.bukkit.event.player.PlayerChangedWorldEvent event) {
+        Player player = event.getPlayer();
+        Location location = player.getLocation();
+        long now = System.currentTimeMillis();
+        track track = plugin.state().get(player.getUniqueId());
+        track.last_teleport = now;
+        track.setback_until = now + plugin.config().teleport_grace_ms;
+        initialize(track, location, now);
+    }
+
+    @EventHandler
+    public void teleport(PlayerTeleportEvent event) {
+        Location to = event.getTo();
+        if (to == null) {
+            return;
+        }
+        track track = plugin.state().get(event.getPlayer().getUniqueId());
+        long now = System.currentTimeMillis();
+        track.last_teleport = now;
+        track.setback_until = now + plugin.config().teleport_grace_ms;
+        initialize(track, to, now);
+    }
+
+    @EventHandler
+    public void velocity(org.bukkit.event.player.PlayerVelocityEvent event) {
+        track track = plugin.state().get(event.getPlayer().getUniqueId());
+        track.last_velocity = System.currentTimeMillis();
+        track.vertical_buffer.reset();
+        track.horizontal_buffer.reset();
+    }
+
+    @EventHandler
+    public void glide(EntityToggleGlideEvent event) {
+        if (!plugin.config().glide_on || !event.isGliding()) {
+            return;
+        }
+        if (!(event.getEntity() instanceof Player player)) {
+            return;
+        }
+        boolean no_elytra = player.getInventory().getChestplate() == null
+                || player.getInventory().getChestplate().getType() != Material.ELYTRA;
+        if (no_elytra || player.isOnGround() || player.isFlying()) {
+            event.setCancelled(true);
+        }
+    }
+
+    @EventHandler
+    public void damage(EntityDamageEvent event) {
+        if (!(event.getEntity() instanceof Player player)) {
+            return;
+        }
+        track track = plugin.state().get(player.getUniqueId());
+        track.last_damage = System.currentTimeMillis();
+        track.vertical_buffer.reset();
+        track.horizontal_buffer.reset();
+        track.still_ticks = 0;
+        track.ascent_ticks = 0;
+        track.stalled_ticks = 0;
+    }
+
+    @EventHandler
+    public void quit(PlayerQuitEvent event) {
+        UUID id = event.getPlayer().getUniqueId();
+        plugin.state().drop(id);
+        plugin.log().forget(id);
+    }
+
+    private boolean vertical_bad(track track, double dy) {
+        if (!plugin.config().vertical_on || track.air_ticks <= plugin.config().vertical_startup_ticks) {
+            return false;
+        }
+
+        double expected = simulate.next_vertical(track.last_vertical);
+        double tolerance = plugin.config().vertical_tolerance * plugin.config().leniency;
+        double error = Math.abs(dy - expected);
+
+        if (track.still_ticks >= plugin.config().vertical_hover_ticks) {
+            return true;
+        }
+
+        if (track.ascent_ticks >= plugin.config().vertical_ascent_ticks) {
+            return true;
+        }
+
+        if (track.stalled_ticks >= plugin.config().vertical_stalled_ticks) {
+            return true;
+        }
+
+        return error > tolerance;
+    }
+
+    private boolean horizontal_bad(track track, double horizontal, double dy) {
+        if (!plugin.config().horizontal_on) {
+            return false;
+        }
+        return track.still_ticks >= plugin.config().horizontal_min_ticks
+                && Math.abs(dy) <= plugin.config().horizontal_max_vertical
+                && horizontal >= plugin.config().horizontal_min_horizontal;
+    }
+
+    private double violation_amount(track track, double dy) {
+        double expected = simulate.next_vertical(track.last_vertical);
+        double tolerance = plugin.config().vertical_tolerance * plugin.config().leniency;
+        double excess = Math.abs(dy - expected) - tolerance;
+        return Math.max(0.5, Math.min(2.0, excess * 5.0));
+    }
+
+    private void flag(Player player, track track, String kind, long now) {
+        track.total_flags++;
+        plugin.log().write(player, kind, track.total_flags);
+        track.vertical_buffer.reset();
+        track.horizontal_buffer.reset();
+        track.still_ticks = 0;
+        track.ascent_ticks = 0;
+
+        if (!plugin.config().setback_on || track.setback == null) {
+            return;
+        }
+
+        track.setback_until = now + plugin.config().setback_grace_ms;
+        Location setback = track.setback.clone();
+        player.teleport(setback, PlayerTeleportEvent.TeleportCause.PLUGIN);
+        track.last = setback.clone();
+        track.air_ticks = 0;
+        track.last_vertical = 0.0;
+        track.launch_grace_until = 0L;
+    }
+
+    private void initialize(track track, Location location, long now) {
+        Location copy = location.clone();
+        track.last = copy;
+        track.setback = copy.clone();
+        track.initialized = true;
+        track.air_ticks = 0;
+        track.still_ticks = 0;
+        track.ascent_ticks = 0;
+        track.stalled_ticks = 0;
+        track.last_vertical = 0.0;
+        track.vertical_buffer.reset();
+        track.horizontal_buffer.reset();
+        track.last_teleport = now;
+        track.last_sample_nanos = System.nanoTime();
+        track.launch_grace_until = 0L;
+    }
+
+    private void reset_motion(track track, Location current) {
+        track.last = current.clone();
+        if (current.getWorld() != null && track.setback == null) {
+            track.setback = current.clone();
+        }
+        track.air_ticks = 0;
+        track.still_ticks = 0;
+        track.ascent_ticks = 0;
+        track.stalled_ticks = 0;
+        track.last_vertical = 0.0;
+        track.launch_grace_until = 0L;
+        track.vertical_buffer.decay(plugin.config().vertical_decay);
+        track.horizontal_buffer.decay(plugin.config().horizontal_decay);
+    }
+
+    private void settle(track track, Location current) {
+        track.setback = current.clone();
+        track.last = current.clone();
+        track.air_ticks = 0;
+        track.still_ticks = 0;
+        track.ascent_ticks = 0;
+        track.stalled_ticks = 0;
+        track.last_vertical = 0.0;
+        track.vertical_buffer.reset();
+        track.horizontal_buffer.reset();
+    }
+
+    private boolean same_world(Location first, Location second) {
+        return first.getWorld() != null && first.getWorld().equals(second.getWorld());
+    }
+
+    private boolean is_valid(Location location) {
+        return location.getWorld() != null
+                && Double.isFinite(location.getX())
+                && Double.isFinite(location.getY())
+                && Double.isFinite(location.getZ())
+                && Math.abs(location.getX()) <= finite_limit
+                && Math.abs(location.getZ()) <= finite_limit;
+    }
+}
+
+```
+
+`src/main/java/dev/nofly/Packets.java`:
+
+```java
+package dev.nofly;
+
+import com.github.retrooper.packetevents.event.PacketListener;
+import com.github.retrooper.packetevents.event.PacketReceiveEvent;
+import com.github.retrooper.packetevents.util.Vector3d;
+import com.github.retrooper.packetevents.wrapper.play.client.WrapperPlayClientPlayerFlying;
+
+public final class packets implements PacketListener {
+
+    @Override
+    public void onPacketReceive(PacketReceiveEvent event) {
+        if (!WrapperPlayClientPlayerFlying.isFlying(event.getPacketType())) {
+            return;
+        }
+
+        WrapperPlayClientPlayerFlying packet = new WrapperPlayClientPlayerFlying(event);
+        if (!packet.hasPositionChanged()) {
+            return;
+        }
+
+        Vector3d position = packet.getLocation().getPosition();
+        if (position == null || !finite(position.getX()) || !finite(position.getY()) || !finite(position.getZ())) {
+            event.setCancelled(true);
+            return;
+        }
+
+        if (Math.abs(position.getX()) > 3.0e7
+                || Math.abs(position.getZ()) > 3.0e7
+                || Math.abs(position.getY()) > 2.0e7) {
+            event.setCancelled(true);
+        }
+    }
+
+    private boolean finite(double value) {
+        return Double.isFinite(value);
+    }
+}
+
+```
+
+`src/main/java/dev/nofly/Simulate.java`:
+
+```java
+package dev.nofly;
+
+public final class simulate {
+
+    private simulate() {
+    }
+
+    public static double next_vertical(double previous_vertical) {
+        return previous_vertical * 0.98 - 0.08;
+    }
+}
+
+```
+
+`src/main/java/dev/nofly/State.java`:
+
+```java
+package dev.nofly;
+
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+
+public final class state {
+
+    private final Map<UUID, track> tracks = new ConcurrentHashMap<>();
+
+    public track get(UUID id) {
+        return tracks.computeIfAbsent(id, key -> new track());
+    }
+
+    public void drop(UUID id) {
+        tracks.remove(id);
+    }
+}
+
+```
+
+`src/main/java/dev/nofly/Track.java`:
+
+```java
+package dev.nofly;
+
+import org.bukkit.Location;
+
+public final class track {
+
+    public Location last;
+    public Location setback;
+    public final buffer vertical_buffer = new buffer();
+    public final buffer horizontal_buffer = new buffer();
+    public int air_ticks;
+    public int still_ticks;
+    public int ascent_ticks;
+    public int stalled_ticks;
+    public double last_vertical;
+    public int total_flags;
+    public long last_teleport;
+    public long last_damage;
+    public long last_velocity;
+    public long last_effect_apply;
+    public long setback_until;
+    public long last_sample_nanos;
+    public long launch_grace_until;
+    public boolean initialized;
+}
+
+```
+
+`src/main/java/dev/nofly/config.Java`:
+
+```Java
+package dev.nofly;
+
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.plugin.java.JavaPlugin;
+
+public final class config {
+
+    private final JavaPlugin plugin;
+
+    public double leniency;
+
+    public boolean vertical_on;
+    public double vertical_tolerance;
+    public int vertical_startup_ticks;
+    public int vertical_hover_ticks;
+    public int vertical_ascent_ticks;
+    public int vertical_stalled_ticks;
+    public double vertical_stalled_min;
+    public double vertical_stalled_max;
+    public double vertical_stalled_delta;
+    public double vertical_ascent_min;
+    public double vertical_buffer;
+    public double vertical_decay;
+
+    public boolean horizontal_on;
+    public int horizontal_min_ticks;
+    public double horizontal_max_vertical;
+    public double horizontal_min_horizontal;
+    public double horizontal_buffer;
+    public double horizontal_decay;
+
+    public boolean glide_on;
+
+    public long effects_grace_ms;
+    public long damage_grace_ms;
+    public long velocity_grace_ms;
+    public long teleport_grace_ms;
+    public long setback_grace_ms;
+    public boolean setback_on;
+
+    public boolean punish_alert;
+    public String punish_log_file;
+
+    public config(JavaPlugin plugin) {
+        this.plugin = plugin;
+        plugin.saveDefaultConfig();
+        load();
+    }
+
+    public void load() {
+        plugin.reloadConfig();
+        FileConfiguration file = plugin.getConfig();
+
+        leniency = clamp(file.getDouble("leniency", 1.15), 0.75, 3.0);
+
+        vertical_on = file.getBoolean("vertical.enabled", true);
+        vertical_tolerance = clamp(file.getDouble("vertical.tolerance", 0.09), 0.03, 0.25);
+        vertical_startup_ticks = clamp(file.getInt("vertical.startup_ticks", 2), 1, 6);
+        vertical_hover_ticks = clamp(file.getInt("vertical.hover_ticks", 5), 3, 20);
+        vertical_ascent_ticks = clamp(file.getInt("vertical.ascent_ticks", 10), 5, 20);
+        vertical_stalled_ticks = clamp(file.getInt("vertical.stalled_ticks", 8), 5, 20);
+        vertical_stalled_min = clamp(file.getDouble("vertical.stalled_min", 0.08), 0.04, 0.5);
+        vertical_stalled_max = clamp(file.getDouble("vertical.stalled_max", 0.5), 0.2, 1.0);
+        vertical_stalled_delta = clamp(file.getDouble("vertical.stalled_delta", 0.015), 0.005, 0.05);
+        vertical_ascent_min = clamp(file.getDouble("vertical.ascent_min", 0.08), 0.02, 0.3);
+        vertical_buffer = clamp(file.getDouble("vertical.buffer", 2.5), 1.0, 10.0);
+        vertical_decay = clamp(file.getDouble("vertical.decay", 0.35), 0.05, 2.0);
+
+        horizontal_on = file.getBoolean("horizontal.enabled", true);
+        horizontal_min_ticks = clamp(file.getInt("horizontal.min_ticks", 8), 4, 40);
+        horizontal_max_vertical = clamp(file.getDouble("horizontal.max_vertical", 0.035), 0.01, 0.15);
+        horizontal_min_horizontal = clamp(file.getDouble("horizontal.min_horizontal", 0.10), 0.03, 0.5);
+        horizontal_buffer = clamp(file.getDouble("horizontal.buffer", 2.5), 1.0, 10.0);
+        horizontal_decay = clamp(file.getDouble("horizontal.decay", 0.25), 0.05, 2.0);
+
+        glide_on = file.getBoolean("glide.enabled", true);
+
+        effects_grace_ms = clamp(file.getLong("effects.grace_ms", 1200L), 200L, 10000L);
+        damage_grace_ms = clamp(file.getLong("damage_grace_ms", 2000L), 250L, 10000L);
+        velocity_grace_ms = clamp(file.getLong("velocity_grace_ms", 500L), 100L, 5000L);
+        teleport_grace_ms = clamp(file.getLong("teleport_grace_ms", 1000L), 250L, 10000L);
+        setback_grace_ms = clamp(file.getLong("setback_grace_ms", 750L), 250L, 5000L);
+        setback_on = file.getBoolean("setback.enabled", true);
+
+        punish_alert = file.getBoolean("punish.alert", true);
+        punish_log_file = file.getString("punish.log_file", "flags.log");
+        if (punish_log_file == null || punish_log_file.isBlank()) {
+            punish_log_file = "flags.log";
+        }
+    }
+
+    private double clamp(double value, double min, double max) {
+        if (!Double.isFinite(value)) {
+            return min;
+        }
+        return Math.max(min, Math.min(max, value));
+    }
+
+    private int clamp(int value, int min, int max) {
+        return Math.max(min, Math.min(max, value));
+    }
+
+    private long clamp(long value, long min, long max) {
+        return Math.max(min, Math.min(max, value));
+    }
+}
+
+```
+
+`src/main/java/dev/nofly/effects.java`:
+
+```java
+package dev.nofly;
+
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityPotionEffectEvent;
+
+public final class effects implements Listener {
+
+    private final no_fly plugin;
+
+    public effects(no_fly plugin) {
+        this.plugin = plugin;
+    }
+
+    @EventHandler
+    public void potion(EntityPotionEffectEvent event) {
+        if (!(event.getEntity() instanceof Player player)) {
+            return;
+        }
+        if (event.getAction() != EntityPotionEffectEvent.Action.ADDED
+                && event.getAction() != EntityPotionEffectEvent.Action.CHANGED) {
+            return;
+        }
+        track track = plugin.state().get(player.getUniqueId());
+        track.last_effect_apply = System.currentTimeMillis();
+        track.vertical_buffer.reset();
+        track.horizontal_buffer.reset();
+    }
+}
+
+```
+
+`src/main/java/dev/nofly/no_fly.java`:
+
+```java
+package dev.nofly;
+
+import com.github.retrooper.packetevents.PacketEvents;
+import io.github.retrooper.packetevents.factory.spigot.SpigotPacketEventsBuilder;
+import org.bukkit.plugin.java.JavaPlugin;
+
+public final class no_fly extends JavaPlugin {
+
+    private config config;
+    private state state;
+    private clock clock;
+    private log log;
+    private move move;
+
+    @Override
+    public void onLoad() {
+        PacketEvents.setAPI(SpigotPacketEventsBuilder.build(this));
+        PacketEvents.getAPI().load();
+    }
+
+    @Override
+    public void onEnable() {
+        config = new config(this);
+        state = new state();
+        move = new move(this);
+        clock = new clock(this, move);
+        log = new log(this, getDataFolder().toPath());
+
+        PacketEvents.getAPI().init();
+        PacketEvents.getAPI().getEventManager().registerListener(new packets());
+
+        getServer().getPluginManager().registerEvents(new effects(this), this);
+        getServer().getPluginManager().registerEvents(move, this);
+
+        admin admin = new admin(this);
+        var command = getCommand("nofly");
+        if (command != null) {
+            command.setExecutor(admin);
+            command.setTabCompleter(admin);
+        }
+
+        clock.start();
+    }
+
+    @Override
+    public void onDisable() {
+        if (clock != null) {
+            clock.stop();
+        }
+        if (log != null) {
+            log.shutdown();
+        }
+        PacketEvents.getAPI().terminate();
+    }
+
+    public config config() {
+        return config;
+    }
+
+    public state state() {
+        return state;
+    }
+
+    public clock clock() {
+        return clock;
+    }
+
+    public log log() {
+        return log;
+    }
+}
+
+```
+
+`src/main/resources/config.yml`:
+
+```yml
+leniency: 1.15
+
+vertical:
+  enabled: true
+  tolerance: 0.09
+  startup_ticks: 2
+  hover_ticks: 5
+  ascent_ticks: 10
+  ascent_min: 0.08
+  stalled_ticks: 8
+  stalled_min: 0.08
+  stalled_max: 0.5
+  stalled_delta: 0.015
+  buffer: 2.5
+  decay: 0.35
+
+horizontal:
+  enabled: true
+  min_ticks: 8
+  max_vertical: 0.035
+  min_horizontal: 0.10
+  buffer: 2.5
+  decay: 0.25
+
+glide:
+  enabled: true
+
+effects:
+  grace_ms: 1200
+
+damage_grace_ms: 2000
+velocity_grace_ms: 500
+teleport_grace_ms: 1000
+setback_grace_ms: 750
+
+setback:
+  enabled: true
+
+punish:
+  alert: true
+  log_file: flags.log
+
+```
+
+`src/main/resources/plugin.yml`:
+
+```yml
+name: NoFly
+version: "${version}"
+main: dev.nofly.no_fly
+api-version: "1.21"
+depend: [packetevents]
+author: nofly
+description: A fly detection plugin for Paper 1.21.x.
+commands:
+  nofly:
+    description: Manage the fly check
+    permission: nofly.admin
+permissions:
+  nofly.bypass:
+    description: Skip all fly checks
+    default: op
+  nofly.admin:
+    description: Use /nofly
+    default: op
+  nofly.alerts:
+    description: Receive fly flag alerts in chat
+    default: op
+
+```
