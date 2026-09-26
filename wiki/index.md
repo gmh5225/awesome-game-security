@@ -2701,7 +2701,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [OMath](entities/omath.md) — C++23 constexpr math/physics (W2S / projectile / GJK; Mathematics)
 - [omega-sast](entities/omega-sast.md) — Zero-dependency JavaScript SAST engine (Node.js OMEGA-5.0; obfuscator fingerprinting, string deobfuscation, inter-procedural taint; minified bundle + game/AC web-asset RE; HTML/JSON/Markdown/SARIF)
 - [OmegaWare Framework](entities/omegaware-framework.md) — multi-engine internal cheat framework (Unity/Unreal/generic DirectX; D3D11/D3D12 hooking; ImGui UI; feature plugins; JSON config; Omega172)
-- [Omarchy Boot Manager](entities/omarchy-boot-manager.md) — Omarchy sbctl Secure Boot enrollment + Limine Windows chainload + reboot controls for Vanguard/EAC/FACEIT-friendly Windows+Linux dual-boot (Azteriisk; Some Tricks / Linux)
+- [Omarchy Boot Manager](entities/omarchy-boot-manager.md) — Omarchy sbctl Secure Boot enrollment + Limine Windows chainload + GTK4/CLI reboot controls + Windows bcdedit companion for Vanguard/EAC/FACEIT-friendly Windows+Linux dual-boot (Azteriisk; Some Tricks / Linux)
 - [Omikron TNS OMK Engine](entities/omikron-tns-omk-engine.md) — from-scratch C++20 Omikron: The Nomad Soul (1999) engine reimplementation; 153-opcode script VM + 8192-byte game state + asset format docs; Python announcement-trace verification; optional SDL/Vulkan; user-supplied retail data (sosso33; Cheat / RE Tools)
 - [OmniClutch](entities/omniclutch.md) — Fabric Minecraft 1.21+ automated fall/elytra clutch mod (raycast impact detection; hotbar item selection; Gaussian delays + camera interpolation; WeiNaYongQ; cheat / game:minecraft)
 - [oob_entry](entities/oob-entry.md) — iOS 3.0–10.3.4 tfp0 kernel exploit (C/C++; cheat / iOS jailbreak)
