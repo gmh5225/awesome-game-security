@@ -1545,6 +1545,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/rathorekrishna401-NeuroVoid/ApexSU [Hardened KernelSU fork with Rust userspace, stealth hardening, and reduced attack surface for Android 12+]
 - https://github.com/gmh5225/KernelSU-4.4 [Adapted for Linux Kernel 4.4 + Google GCC 4.9]
 - https://github.com/BuSung-dev/Root-My-Galaxy [One-click KernelSU installer for supported Samsung Galaxy firmware via CVE-2026-43499]
+- https://github.com/tbc0309/KPA-Root [Bootloader unlock, Magisk root, and restore toolkit for the KONKR Pocket Advance gaming handheld with integrity-module support]
 - https://github.com/bmax121/APatch
 - https://github.com/lzghzr/APatch_kpm [APatch modules]
 - https://github.com/abcz316/SKRoot-linuxKernelRoot
@@ -1999,6 +2000,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/Nalen98/AngryGhidra [Use angr in Ghidra]
 - https://github.com/justfoxing/ghidra_bridge [Python 3 bridge to Ghidra's Python scripting]
 - https://github.com/GalaxyBatMan111/dsh-plugins [DSH plugin bundle with PyGhidra Ghidra bridge for binary import, decompilation, strings, and xrefs]
+- https://github.com/Cristallin2006/ghidra-skill-for-dsh [dsh agent skill family: Ghidra headless RPC daemon plus seven RE scenarios (triage, unpack, static, vuln audit, dynamic, traffic, Android APK)]
 - https://github.com/atlas0fd00m/viv-ghidra-decompiler [Vivisect extension bridging symbolik analysis to a headless Ghidra backend for decompiled C pseudocode]
 - https://github.com/0xeb/libghidra [Typed API for Ghidra program databases from C++/Python/Rust; functions, types, memory, decompiler; LibGhidraHost HTTP extension or offline Sleigh backend]
 - https://github.com/astrelsky/GhidraOrbis [Orbis OS specific software and file formats]
@@ -4479,6 +4481,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/theo926/VolcanoAC [Open-source Roblox Luau server anti-cheat with speed, fly, noclip, and seated-state movement validation plus lag-back enforcement]
 - https://github.com/Buck3ttcode/bloxdesk [Roblox Luau telemetry SDK for passive speed, noclip, and remote-spam detection with webhook incident reporting]
 - https://github.com/no1qq/RustBlox [Rust Roblox desktop launcher with TheWatcher client-side watchdog that scans cheat processes, suspicious memory, and injection while Roblox runs]
+- https://github.com/severrir/AntiCheat-Dashboard [Roblox server-side anti-cheat with trust scoring, honeypots, Supabase ingest, Discord alerts, and React staff dashboard]
 - https://github.com/SLAUC91/AntiCheat [Windows rootkit and cheat scanner (hooks, handles, drivers, modules)]
 - https://github.com/gmh5225/AntiCheat
 - https://github.com/ComodoSecurity/openedr [EDR]
