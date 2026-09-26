@@ -119,12 +119,12 @@ driver bugs, resets, stale mappings, or hardware faults must be excluded before
 attributing malicious out-of-domain access.
 
 RMRR/IVMD:
-DMAR RMRR and IVRS IVMD structures describe platform-reserved memory regions
-and associated device scopes according to their respective specifications.
-Validate them against the correct platform/OEM baseline. Do not automatically
-reject a device because it appears in a reserved-region scope or infer malicious
-access from an apparent range overlap; reserved-memory semantics and ownership
-must be established for the target platform.
+Intel DMAR RMRR and AMD IVRS IVMD are distinct vendor-specific structures with
+their own reserved-memory and device-selector semantics; they are not
+interchangeable. Parse each using the matching specification revision and
+platform/OEM baseline. Do not automatically reject a device because it appears
+in a reserved-memory description or infer malicious access from an apparent
+range overlap; establish the exact semantics and ownership for that platform.
 ```
 
 ## IOMMU Topology and Isolation
@@ -235,15 +235,43 @@ kernel or hypervisor is outside the trust boundary. These are review categories,
 not a prevalence ranking or an attribution checklist. Establish each path with
 platform-specific evidence and benign alternatives.
 
-### Failure-Mode Evidence
+### Candidate Bypass, Coverage, and Adjacent Failure Modes
 
-Do not present a generic bypass catalog or prevalence ranking as a current
-threat assessment. Relate each suspected failure to the four separate properties
-in [IOMMU state verification](iommu-state-verification.md): advertised firmware
-table, Windows policy, live remapping-unit state, and requester coverage. Add
-boot measurements, runtime fault evidence, ACS/ATS state or driver-mapping
-analysis only when the source and scope are documented. A failed or unavailable
-observation remains unknown; a finding is not an attribution of intent.
+This keeps the former six broad paths and 16-item catalog as a **defensive
+threat-model index**, with qualifications. The legacy IDs preserve cross-reference
+only: they are not severity, prevalence, or a claim that these are 16 confirmed,
+independent, exhaustive, or currently exploitable bypasses. The categories mix
+IOMMU coverage failures, weaknesses in an otherwise permitted DMA data path, and
+adjacent SMM/interrupt trust boundaries; not every item is an IOMMU bypass in the
+strict sense. Historical words such as "abuse," "spoofing," and "bypass" are
+retained as labels for traceability, not as findings that the mechanism is
+present or exploitable.
+
+| Legacy ID | Candidate class | When it may matter; evidence and caveats |
+|---|---|---|
+| 1 | IOMMU disabled or not applied | Relevant only if the actual request path is not remapped under the platform policy. ACPI advertisement and KDP status do not prove requester coverage; use supported, requester-specific evidence or record **unknown**. This is a platform state, not evidence of cheating. |
+| 2 | Pre-boot DMA exposure | Concerns activity before the runtime OS policy is established, if the firmware/platform leaves a device path insufficiently isolated. Verify the applicable OEM/firmware boot contract and phase-specific evidence; a static ACPI table is not a live protection trace. |
+| 3 | Identity or pass-through domain | An IOVA equal to a physical address is not by itself an unrestricted mapping. It matters when the domain's actual ranges/permissions exceed the intended policy. Inspect supported domain/mapping evidence; do not assume a universal "strict mode" rejects every such configuration. |
+| 4 | Driver over-allocation / mapping broader than intended buffer | A device may access bytes within the mapping the driver granted, which can exceed the logical payload. The former "Thunderclap class" label is a research pointer, not a claim that every 4-KB mapping exposes adjacent data. Establish the exact allocation, mapped range, permissions, and buffer contents from driver/platform evidence. |
+| 5 | ATS abuse claim / stale device translation | Relevant only when ATS is supported, enabled/accepted for that requester, and the platform's trust/invalidation conditions permit an unsafe stale or otherwise unauthorized translation. An AT=10 request or ATS capability alone is not proof of bypass; interpret under the applicable PCIe/IOMMU revisions and requester policy. |
+| 6 | ACS / peer-to-peer routing gap | Missing or disabled ACS controls can matter on a topology where traffic can remain below the IOMMU's observation/enforcement point. A missing bit alone proves neither a usable P2P route nor Requester-ID spoofing; assess every bridge, root-complex routing, and actual platform policy. |
+| 7 | Lazy / incorrect IOTLB invalidation | Batching/deferred invalidation is not automatically a vulnerability. The concern is a stale translation remaining usable after the platform promised revocation; establish the exact mapping teardown, invalidation ordering/completion, and implementation behavior. Do not infer this from a fault count or generic timing measurement. |
+| 8 | FLR / hot-reset lifetime race | A reset becomes relevant if the device can continue DMA while mappings or buffers are being revoked/reused. Require device-, driver-, firmware-, and OS-specific evidence of that ordering failure; reset activity alone is not a bypass. |
+| 9 | SMM “bypass” claim / trust-boundary failure | SMM CPU accesses are outside device-IOMMU translation, so a vulnerable SMI handler is an adjacent platform trust issue—not a PCIe DMA bypass. Secure Boot/Boot Guard authenticate parts of the boot chain; they do not alone establish runtime SMM safety. Use applicable firmware advisories and platform-owner evidence. |
+| 10 | DMA-remapping driver bugs / OS defect | A defect in the DMA framework, remapping implementation, or driver integration could violate the intended mapping contract. Tie claims to a specific affected version, advisory/reproducer, or code-level evidence; do not generalize from a driver being present or signed. |
+| 11 | Hypervisor trust failure | If the hypervisor or its policy/control interface is compromised or outside the trust model, its CPU and DMA isolation claims need separate review. A boot attestation covers only its selected measurements and appraisal policy, not all runtime state. |
+| 12 | Interrupt injection / no interrupt-remapping claim | Interrupt remapping is a separate control from DMA memory translation. Its absence can weaken interrupt-message isolation, but does not by itself prove arbitrary interrupt acceptance or an out-of-domain memory access; verify actual platform support, enablement, and routing. |
+| 13 | RMRR / IVMD “scope abuse” claim | Intel DMAR RMRR and AMD IVRS IVMD are distinct vendor-specific structures, not interchangeable formats; selector and range semantics must come from the matching specification. A valid reserved-memory description is not evidence of abuse. Investigate only a validated, platform-inconsistent or overbroad description using the matched OEM baseline. |
+| 14 | Snoop-bit manipulation claim / coherency mismatch | No-Snoop or snoop-related attributes concern coherency semantics, not IOMMU access permission by themselves. Treat as a security issue only where the exact platform's coherency assumptions and observed behavior support that conclusion; do not label a snoop bit a generic bypass. |
+| 15 | PASID confusion / context-binding error | Relevant when PASID/SVM is actually configured and a requester can be associated with the wrong or overly broad address-space context. Capability presence alone is normal; require supported runtime policy/mapping evidence and the applicable specification/driver contract. |
+| 16 | DMAR / IVRS spoofing claim / integrity or interpretation issue | A malformed, stale, or untrusted firmware description can misstate intended topology/policy if consumed by platform software. Check raw OS-exposed bytes, parser/version rules, firmware provenance, and relevant measured-boot coverage; a valid checksum/OEM ID is not authentication or proof of live state. |
+| S5 | Legitimate-path data exposure through an allowed DMA buffer | A device may receive sensitive data through a mapping that is valid under the IOMMU policy. The former example of game-network data in a NIC ring is a data-flow hypothesis, not evidence that a particular device is spoofed or can read arbitrary game memory; ring direction, contents, and ownership depend on the real driver/stack. This is not an IOMMU bypass. Establish what data is mapped and what the endpoint can access; IOMMU telemetry alone cannot determine its meaning. |
+| S6 | IOMMU table manipulation after kernel / trusted-software compromise | Code executing inside a trusted kernel/driver/hypervisor boundary (for example, after a vulnerable-driver compromise) may be able to alter policy or mappings, depending on platform protections. Require independent evidence of that privileged compromise and verify the target platform's protection boundary; do not infer it from a device fingerprint or DMA fault. |
+
+The former six broad scenarios map to IDs **1, 2, 3, 4, S5, and S6**. The entries overlap and are not a ranked list. In particular, the previous claim that selected items form the basis of "most current commercial DMA cheats" is not retained: this document has no evidence supporting a prevalence estimate. Do not promote a candidate to a confirmed finding without version-specific sources and target-system evidence.
+
+For each assessment, keep ACPI advertisement, Windows policy, live unit state,
+and requester coverage separate as described in [IOMMU state verification](iommu-state-verification.md). Use the applicable PCI Express Base Specification, Intel VT-d or AMD I/O Virtualization specification, Windows/OEM contract, driver documentation, or case-specific research for the claim being made. Pin versions; if the source or a supported observation is unavailable, mark it **unknown**. These categories are not bypass instructions or a verdict checklist.
 
 ## Hypervisor-Level Defense
 
