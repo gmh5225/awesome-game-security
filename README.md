@@ -4690,6 +4690,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 
 > Detection:ESP
 - https://github.com/weak1337/PresentHookDetection
+- https://github.com/kroshtan/esp-killer [Server-side ESP/wallhack detection for The Isle: Evrima via read-only RCON position polling, movement heuristics, and admin alerting]
 
 > Detection:DMA
 - https://github.com/zer0condition/x670e-tomahawk-anticheat-update [Reverse of MSI MAG X670E TOMAHAWK BIOS v1KB anti-cheat update — Bds strips EFI_PCI_IO_ATTRIBUTE_EMBEDDED_ROM pre-boot, DxeCore NX policy retune]
