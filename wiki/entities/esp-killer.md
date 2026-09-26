@@ -11,9 +11,33 @@ confidence: medium
 
 # esp-killer
 
-Server-side **ESP / wallhack detection** for **The Isle: Evrima** multiplayer servers. Python read-only agent polls player positions through the Evrima **RCON** protocol and uploads snapshots to a **FastAPI** backend with SQLite storage and API key management. Flags movement that only makes sense with wallhack vision—heading directly toward distant hidden players or arriving implausibly fast—and alerts admins for human review rather than automatic bans. Because Evrima ships with Easy Anti-Cheat and offers no modding API, the tool never touches the game client. Includes a clean-room RCON client, on-disk upload queue with retry logic, and dev tools (fake RCON server + movement simulator) for pipeline testing. (source: wiki/sources/descriptions/kroshtan__esp-killer.md)
+**esp-killer** (kroshtan/esp-killer) is a **server-side ESP / wallhack detection system** for **The Isle: Evrima** multiplayer servers. Written in Python, it analyzes player movement patterns alone—never touching the game client—because Evrima ships with Easy Anti-Cheat and offers no modding API. (source: wiki/sources/descriptions/kroshtan__esp-killer.md)
 
-Sits in the **Detection:ESP** lane beside server-side terrain/occlusion mitigations such as [[petal-anti-freecam]] and [[serverguard]], and movement-replay backends such as [[blastscale]].
+README category: Anti Cheat / Detection:ESP.
+
+## Detection surface
+
+Movement heuristics flag behavior that only makes sense if a player can see through walls:
+
+- Heading directly toward distant hidden players.
+- Arriving at locations implausibly fast relative to server-visible position snapshots.
+
+Alerts route to server admins for **human review** rather than automatic bans.
+
+## Architecture
+
+- **Read-only agent** — deploys beside the game server; polls player positions through the Evrima **RCON** protocol.
+- **FastAPI backend** — receives position snapshots; **SQLite** storage with API key management.
+- **Clean-room RCON client** — on-disk upload queue with retry logic for resilient telemetry ingest.
+- **Dev tooling** — fake RCON server and movement simulator for pipeline testing without a live game host. (source: wiki/sources/descriptions/kroshtan__esp-killer.md)
+
+## Positioning
+
+Sits in the **Detection:ESP** lane beside server-side terrain/occlusion mitigations such as [[petal-anti-freecam]] and [[serverguard]], and movement-replay backends such as [[blastscale]]. Complements EAC-protected titles where client instrumentation is unavailable by inferring wallhack use from **RCON position telemetry** alone—closer to heuristic server-side review stacks such as [[osanticheat]] than packet-layer visibility masking.
+
+## Peers
+
+[[petal-anti-freecam]] · [[serverguard]] · [[osanticheat]] · [[corner-culling]] · [[blastscale]]
 
 ## Links
 
@@ -21,4 +45,4 @@ Sits in the **Detection:ESP** lane beside server-side terrain/occlusion mitigati
 
 ## Related
 
-[[petal-anti-freecam]] · [[serverguard]] · [[blastscale]] · [[easy-anti-cheat]] · [[overviews/anti-cheat]] · [[concepts/detector-operations]]
+[[easy-anti-cheat]] · [[overviews/anti-cheat]] · [[concepts/detector-operations]]
