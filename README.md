@@ -1009,6 +1009,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/uuksu/RPGMakerDecrypter [Tool for extracting RPG Maker XP, VX and VX Ace encrypted archives]
 - https://github.com/VelocityRa/awesome-game-file-format-reversing [Curated docs/tools for reverse engineering video game file formats and assets]
 - https://github.com/vs-sr-dev/pc-wackywheels-doc [RE documentation for Wacky Wheels (1994): WACKY.DAT archive, track/sprite formats, and fixed-point LUTs behind its pseudo-3D renderer]
+- https://github.com/vs-sr-dev/saturnkit [Game-agnostic Sega Saturn RE toolkit: disc/IP.BIN parsing, SH-2 decode, static recompilation to C++, and a hardware runtime (VDP1/2, SCU, SMPC, CD block, SCSP) for native PC ports]
 - https://github.com/sosso33/omikron-tns-omk-engine [From-scratch C++20 reimplementation of Omikron: The Nomad Soul (1999) with documented format reverse engineering and evidence-backed asset readers]
 - https://github.com/LyeDevGit/WonTree-RBLX-Dumper [Universal Roblox game analysis dumper: Luau decompile stack, remote call graph, live remote logger, framework and anti-cheat pattern detection, markdown/CSV reports]
 - https://github.com/jlucaso1/unturned-godot [Godot 4 port that reverse-engineers Unturned Unity serialized formats from a Steam install and renders maps with terrain, objects, lighting, and multiplayer]
