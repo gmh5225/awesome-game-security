@@ -67,14 +67,17 @@ TC[2:0] — Traffic Class. Default traffic commonly uses TC0, but non-zero TC is
 valid when platform and device policy configure it. Compare usage with the
 claimed device, driver, and workload rather than flagging it in isolation.
 
-Attr[2:0] — RO/NS/IDO. A device emulating a NIC must follow that NIC's
-typical NS/RO usage pattern; mismatches are visible.
+Attr[2:0] — Relaxed Ordering, No Snoop and ID-Based Ordering policy bits.
+Interpret them against the PCIe version, device/driver contract and workload;
+one traffic pattern is not a universal device-identity test.
 
 AT[1:0] — Address Type:
-  00 = Untranslated (IOMMU will translate)
+  00 = Untranslated (translation depends on the applicable IOMMU path/policy)
   01 = Translation Request (ATS only)
-  10 = Translated (device claims it has already translated via ATS)
-This field is the basis of ATS bypass attacks.
+  10 = Translated (used under applicable ATS/platform policy)
+AT state must be interpreted with the requester context and IOMMU policy; it is
+not by itself evidence of a bypass. See the ATS trust/policy discussion in
+`iommu-and-defense.md`.
 
 TD — TLP Digest. If set, an ECRC trailer is present.
 EP — Poisoned. Indicates data is known-bad.
@@ -106,58 +109,51 @@ Completion Status codes:
 010 = Configuration Request Retry Status (CRS)
 100 = Completer Abort (CA)
 
-UR vs CA distinction matters for spoofing detection — real silicon
-responds differently to malformed config accesses vs accesses to
-unimplemented offsets. Many spoofed firmwares hard-code one or the other.
+UR and CA are distinct completion statuses, but observed behavior depends on
+request type, topology and device contract. Do not issue malformed requests or
+probe unimplemented offsets as a generic anti-cheat test; compare only supported,
+passively observed responses with a matched, versioned reference.
 ```
 
 ### Memory Read Completion Splitting
 ```
-A single Memory Read TLP returns up to Max_Read_Request_Size (MRRS) bytes.
-The completer splits the payload at any boundary >= RCB
-(Read Completion Boundary, 64 or 128 bytes).
-Each fragment cannot exceed Max_Payload_Size (MPS).
+A Memory Read request is bounded by its requested size; the completer returns
+one or more Completion-with-Data packets subject to the PCIe rules, Read
+Completion Boundary (RCB) and payload limits. Completion headers carry Lower
+Address[6:0], Byte Count[11:0] and Tag fields used to associate responses with
+the request. Exact behavior depends on the applicable PCIe revision and link
+configuration.
 
-Each Completion carries:
-- Lower Address[6:0] — lowest 7 bits of first byte address
-- Byte Count[11:0] — bytes remaining (last fragment's Byte Count
-  equals its own payload length)
-- BCM — PCI-X compatibility (typically 0)
-- Tag — matches originating MRd's Tag
-
-The split pattern (fragment count, boundary positions) is a
-strong fingerprint: real memory controllers produce characteristic
-distributions of fragment sizes and inter-fragment gaps.
-BRAM-backed emulators producing perfectly uniform 64-byte fragments
-at constant cadence are anomalous.
+A captured split/latency pattern reflects the completer, root complex, memory,
+link, power state and capture point as well as workload. It is not by itself a
+fingerprint of the requesting endpoint or its FPGA implementation. Use it only
+in a controlled, matched protocol-analysis study with the observation path
+explicitly identified.
 ```
 
-### Tag Space and Fingerprinting
+### Tags and Outstanding Requests
 ```
-- 5-bit Tag (original): 32 outstanding non-posted requests per Requester ID
-- Extended Tag (PCIe 1.1+, Device Control[8]): 8-bit / 256 outstanding
-- 10-Bit Tag (PCIe 4.0+, Device Control 2[12]): 1024 outstanding
-
-Tag turnover discipline — which tags get reissued and how quickly —
-reflects the device's internal request tracking pipeline.
-Firmware that issues reads with no tag turnover (same tag, or monotonic
-beyond negotiated limit) is observably distinct from real silicon.
+PCIe uses requester tags to match non-posted requests with completions. The
+original 5-bit tag space supports up to 32 outstanding requests; Extended Tag
+and 10-Bit Tag capabilities can increase that limit when supported and enabled.
+Exact limits depend on specification revision, endpoint capability and active
+controls. A tag sequence describes one implementation under one workload; it
+is not a portable fingerprint. Do not infer identity or misuse from tag order
+alone; preserve the capture point and matched baseline.
 ```
 
-### MPS and MRRS as Fingerprints
+### MPS and MRRS Evidence
 ```
-Record current MPS/MRRS configuration and the responsible platform software;
-do not infer the active values solely from advertised link capability.
-- Device Capabilities[2:0]: Max_Payload_Size_Supported
-  (0=128, 1=256, 2=512, 3=1024, 4=2048, 5=4096 bytes)
-- Device Control[7:5]: current MPS (must be <= Supported,
-  set to minimum of all devices in hierarchy)
-- Device Control[14:12]: Max_Read_Request_Size (same encoding)
-
-The discriminator is donor consistency: a device claiming a donor
-that is known to support larger payloads, different tag behavior,
-or a different negotiated profile should match that donor under
-the same root-port constraints.
+Record advertised and configured values separately, with the platform software
+and topology. In the PCIe Express capability, Max_Payload_Size_Supported is in
+Device Capabilities[2:0], configured MPS is in Device Control[7:5], and MRRS is
+in Device Control[14:12]. The common size encodings are 0=128, 1=256, 2=512,
+3=1024, 4=2048 and 5=4096 bytes; reserved values and supported maxima are
+revision-dependent. MPS must not exceed the function's supported maximum, and
+the chosen value is subject to platform policy and path constraints. MRRS is a
+separate request-size setting. Do not infer a spoof from one value or infer
+active behavior solely from capability bits; compare the exact device revision
+with a matched root-port/workload baseline.
 ```
 
 ### Data Link Layer
@@ -210,6 +206,14 @@ ASPM (Active State Power Management):
 ```
 
 ### Configuration Access Mechanisms
+
+Host-issued PCI configuration transactions are distinct from endpoint-issued
+Memory TLPs and are not evidence that device DMA is enabled or covered by an
+IOMMU. The host can enumerate and inspect a function even when DMA remapping is
+disabled; a configuration snapshot also does not show whether the endpoint
+actually issued memory requests. Windows retains ownership of configuration
+state; use supported observations only.
+
 ```
 Two mechanisms on x86:
 
@@ -230,9 +234,13 @@ On Windows, supported paths are:
 - IRP_MN_READ_CONFIG / IRP_MN_WRITE_CONFIG
 - BUS_INTERFACE_STANDARD.GetBusData / SetBusData
 Use documented bus interfaces within the caller's permitted ownership scope.
-Direct MCFG mapping is not a supported substitute for the Windows PCI stack;
-OS ownership of headers and capabilities still applies.
+CAM/ECAM describes hardware access mechanisms, not permission for a generic
+Windows collector to use raw I/O ports or map configuration apertures. Direct
+MCFG mapping is not a supported substitute for the Windows PCI stack; OS
+ownership of headers and capabilities still applies.
 ```
+
+For Windows access rules, see [Microsoft's PCI configuration-space guidance](https://learn.microsoft.com/en-us/windows-hardware/drivers/pci/accessing-pci-device-configuration-space).
 
 ## PCIe Configuration Space
 
@@ -280,14 +288,17 @@ ID    Capability
 0x13  PCI Advanced Features
 0x14  Enhanced Allocation
 
-Detection: walk the chain, validate each capability's declared size
-doesn't overlap the next, Next is DWord-aligned and within bounds,
-no cycle exists. A malformed chain is itself a signal.
+For a read-only parser, check that each next pointer is aligned, in bounds and
+not cyclic, and validate the minimum layout for known capability IDs against the
+applicable specification. Standard capability headers do not contain a generic
+"declared size" field; do not guess unknown capability lengths. A malformed or
+truncated read is a signal to review the collector and device, not proof of
+spoofing by itself.
 ```
 
 ### PCIe Express Capability (ID 0x10)
 ```
-The single most important capability for spoofing detection.
+A useful source of read-only capability and negotiated-link observations.
 
 Offset  Field                    Notes
 +0x02   PCIe Capabilities        Cap Version, Device/Port Type, Slot Impl
@@ -304,20 +315,18 @@ Offset  Field                    Notes
 +0x30   Link Control 2           Target Link Speed, Compliance
 +0x32   Link Status 2            De-emphasis, EQ Phase status
 
-Detection leverage per field:
-- Device Type (+0x02[7:4]): must match donor's role
-- MPS Supported (+0x04[2:0]): hard-IP ceiling contradicts donor
-- FLR support (+0x04[28]): verify FLR changes same sticky/non-sticky
-  state as claimed donor; naive firmware acknowledges FLR but continues
-  unchanged, producing state inconsistent with donor-defined reset semantics
-- Link Status (+0x12): Width/Speed are negotiated, observable, hard to
-  lie about — hard IP reports what LTSSM actually achieved
-- Slot Clock Config (+0x12[12]): must match real platform behavior
-- Completion Timeout ranges (+0x24): selecting outside claimed ranges
-  is a discriminator
-- AtomicOp (+0x24[6-9]): server-class GPUs/NICs may support; FPGA
-  support depends on IP generation and configuration; compare advertised and
-  exercised behavior with the claimed donor
+Read-only comparison points:
+- Device/port type and class should fit the claimed function and topology.
+- Advertised capability ceilings and OS-configured values should be interpreted
+  against the exact device revision and root-port constraints.
+- Link Status reflects negotiated state; compare with slot wiring, platform
+  policy, power state and a matched device baseline.
+- Slot-clock, completion-timeout and AtomicOp fields are version- and
+  platform-dependent; treat discrepancies as leads, not standalone proof.
+
+Do not trigger FLR, alter completion controls or issue unsupported operations as
+a generic anti-cheat probe. Device-specific conformance tests belong in an
+authorized lab under the owning driver's lifecycle.
 ```
 
 ### MSI and MSI-X Capabilities
@@ -340,15 +349,11 @@ MSI-X (ID 0x11):
 - Each entry: 16 bytes (Addr Low, Addr High, Data, Vector Control)
 - PBA (Pending Bit Array): bit-per-vector pending state
 
-Naive MSI-X emulation failures:
-- Ignores Vector Control Mask writes
-- Sets PBA bits but never clears on unmask
-- Returns hardcoded PBA values
-- Doesn't retire pending interrupts when masks clear
-Detection probe: mask vector → induce interrupt condition →
-observe PBA bit → unmask → observe interrupt firing.
-A conforming implementation should satisfy the relevant MSI-X semantics;
-incomplete emulations may fail, while sophisticated emulations can pass.
+MSI-X masking, pending state and interrupt delivery are stateful and owned by
+the device/driver lifecycle. Do not mask a live vector or induce an interrupt as
+a generic anti-cheat probe. Prefer OS/driver interrupt telemetry and read-only
+state available through an authorized owner. Any behavior test should be limited
+to an isolated lab with the device owner's participation and a recovery path.
 ```
 
 ### AER Extended Capability (ID 0x0001)
@@ -361,11 +366,11 @@ Three error classes:
 Each has Status (sticky, W1C), Mask, and Severity registers.
 Header Log (16B) captures full TLP header of first logged uncorrectable error.
 
-Detection:
-- Absence of AER when donor model is known to expose it = mismatch
-- Zero correctable-error count over long window when donor's silicon
-  normally produces a baseline rate = anomalous
-- Anomalous UR response patterns to probes of unimplemented offsets
+Interpret capability availability and counters against the exact device,
+firmware, link and collection source. A zero error count means only that no error
+was observed by that source during the interval; it is not identity evidence.
+Status registers may be write-one-to-clear and belong to the device/platform
+owner—do not write them or probe malformed offsets as a generic collector.
 ```
 
 ### Extended Capabilities
@@ -391,246 +396,91 @@ Key Extended Capability IDs:
 0x001E  L1 PM Substates
 0x001F  Precision Time Measurement (PTM)
 
-Detection-relevant:
-- DSN: 8-byte unique serial; donor-cloned firmware can collide
-  with another player's identical card
-- VSEC: Xilinx PCIe IP optionally emits VSEC blocks with
-  characteristic Vendor ID + VSEC ID combinations
-- ATS/PASID/SR-IOV presence on consumer-class donor is
-  demographically suspicious — rare outside server-class hardware
+Treat DSN, VSEC, ATS, PASID and SR-IOV fields as device claims to compare with
+an exact specification and matched baseline. A DSN is not an authentication
+credential; capability presence or absence alone does not establish spoofing,
+malice, or DMA coverage. Consumer/server-class expectations need a current,
+versioned device reference rather than a demographic assumption.
 ```
 
-## FPGA Hardware
+## FPGA and Device-Emulation Considerations
 
-### Xilinx PCIe Integrated Block
-```
-Hardened IP block handling:
-- Physical Layer (PHY, 8b/10b or 128b/130b, LTSSM, equalization)
-- Data Link Layer (sequence numbers, replay buffer, flow control)
-- Transaction Layer framing and parsing
-- Subset of Configuration Space
+An FPGA endpoint can implement configurable PCIe functions, but its observed
+behavior depends on the board, PCIe hard IP, firmware, platform and driver. A
+field that differs from a claimed device's matched baseline can justify review;
+it does not identify an FPGA or prove malicious use. Conversely, a self-consistent
+configuration snapshot does not authenticate silicon or prove IOMMU coverage.
 
-IP core documentation:
-- PG054 for 7-series
-- PG156 for UltraScale Gen3
-- PG213 for UltraScale+ Gen4
+Treat the claimed identity, capability list, OS-assigned resources, link state,
+interrupt telemetry and driver behavior as separate evidence. Compare only with
+versioned, device-specific references under matched topology and workload. A
+vendor ID, BAR pattern, FPGA model, timing statistic or absence of a PCIe child
+in a software slot inventory is not a universal detector. Physical-slot and
+SMBIOS inventories can be incomplete; retain collector scope and alternatives.
 
-User logic interfaces over AXI-Stream (TX/RX) and separate
-config management: cfg_mgmt_* (7-series), cfg_ext_* (UltraScale).
+This reference intentionally omits FPGA build, resource-sizing, firmware
+synthesis and register-emulation instructions. For source classification, see
+[acquisition and transport](acquisition-and-transport.md); for read-only
+observations and ownership boundaries, see [detection and forensics](detection-and-forensics.md).
 
-Detection consequences:
-- Default fingerprints leak through: hard block populates Config Space
-  with Xilinx-characteristic byte patterns
-- 7-series firmware authors who don't understand cfg_mgmt_* leave
-  subtle behavioral differences (some CfgTLPs return hard-block defaults)
-```
+## Acquisition and Analysis Tools
 
-### FPGA Family Hierarchy
-```
-Artix-7 (consumer/mid-range, GTP transceivers, PCIe Gen2):
-Chip       LUTs      BRAM(Kbit)  PCIe Hard Block
-XC7A35T    20,800    1,800       Gen2 x4
-XC7A50T    32,600    2,700       Gen2 x4
-XC7A75T    46,200    3,780       Gen2 x4
-XC7A100T   63,400    4,860       Gen2 x4
-XC7A200T   134,600   13,140      Gen2 x4
-(Smaller than T35 have no hard PCIe block)
+### Component Roles
 
-Kintex-7 (high-end, GTX transceivers):
-XC7K70T    41,000    4,860       Gen2 x8
-XC7K160T   101,400   11,700      Gen2 x8
-XC7K325T   203,800   16,020      Gen2 x8 / Gen3 x4
-XC7K410T   254,200   28,620      Gen3 x8
+PCILeech, LeechCore, MemProcFS and related projects occupy different roles in
+hardware acquisition, host-mediated acquisition, transport and analysis. A
+project name, loaded module, library filename or mounted analysis view does not
+prove which memory source is active. Establish component provenance and the
+active backend separately; see [acquisition and transport](acquisition-and-transport.md).
 
-Zynq UltraScale+ (ARM Cortex-A53 cores, GTH/GTY):
-ZU2EG/CG   ~47,000   ~5.3M      Gen3 x4
-ZU3EG/CG   ~70,000   ~7.6M      Gen3 x4
-ZU4EG/EV   ~88,000   ~11.0M     Gen3 x8
-ZU5EG/EV   ~117,000  ~18.0M     Gen3 x8
-ZU6EG/CG   ~230,000  ~32.1M     Gen3 x16
-(EV-suffixed: hardened H.265 codec for DMA + video-capture boards)
-```
+### Device-Side Observation Limits
 
-### Resource Constraints and Capability
-```
-BRAM size caps:
-  shadow config + writable overlay + BAR emulation + state machines.
-  T35 (1.8 Mbit) struggles with full 4 KB shadow + 64 KB BAR + jitter buffers.
-  T100 (4.86 Mbit) fits comfortably.
-  Zynq ZU3 (7+ Mbit) has effectively unlimited room.
+An FPGA design may use a PCIe hard IP block and custom endpoint logic. Public
+reference configurations can have version-specific identity, capability,
+resource or behavior differences, but those are leads—not portable signatures.
+Do not infer the active bitstream from a filename or assume a generic BAR probe
+is safe. Compare read-only, OS-reported configuration/resources and documented
+link/driver behavior with a versioned baseline; never modify another device to
+classify it.
 
-LUT count caps behavioral complexity:
-  Each subsystem (MSI generator, ASPM FSM, AER counter, BAR responder)
-  costs thousands of LUTs. T35 holds 1–2; T100 the full set;
-  Kintex/Zynq adds runtime-reconfigurable parameter tables.
+### Host-Side Analysis Layer
 
-PHY transceiver family (GTP/GTX/GTH/GTY) has measurably different
-signal characteristics; can sometimes be inferred from root-port
-performance counters independent of firmware spoofing.
-```
+Memory-analysis interfaces are downstream of acquisition. A filesystem view,
+process listing or analysis API does not identify whether its input came from a
+PCIe endpoint, host driver, hypervisor, transport peer or offline image. Record
+source provenance, privileges, transfer path, missing data and analysis version;
+do not infer DMA from the tool name or its output format.
 
-### Form Factors
-```
-Form Factor           Description                 Detection
-────────────────────────────────────────────────────────────────────
-M.2 NGFF Key M        Internal NVMe slot           Dominant modern form;
-                                                    physical inspection needed
-M.2 + USB3 bridge     M.2 board with FT601         Gaming PC sees only M.2
-PCIe x1/x4 add-in     Traditional add-in card      More physically visible
-External USB3          USB3-to-PCIe (legacy)        Mostly obsolete
-Combo boards           DMA + HDMI capture +         Complex device tree;
-                       input injection              HDMI activity is fingerprint
+### Reference-Firmware Evidence
 
-M.2 slot populations are partially auditable from software through
-PCI topology, ACPI, SMBIOS, storage inventory, and vendor board databases.
-SMBIOS slot records are often incomplete for M.2, so detection should
-be probabilistic and board-model-aware.
-```
+A public reference bitstream may leave implementation-specific identity or
+behavior that is useful for a version-pinned lab comparison. Such observations
+must be tied to an exact source/build and matched platform. Do not turn one
+reference's identifiers, capability omissions, timing or BAR behavior into a
+universal blacklist, and do not use active BAR/register probes on a live device.
 
-## pcileech Framework
+## Emulated Configuration: Defensive Interpretation
 
-### Project Lineage
-```
-Five upstream repositories:
-- pcileech:       Host-side C application with attack modules
-- pcileech-fpga:  FPGA firmware in Verilog/SystemVerilog, per-board variants
-- MemProcFS:      Virtual filesystem mounting target memory as /proc-like tree
-- LeechCore:      Low-level device abstraction library
-- vmm:            Memory analysis engine (vmm.dll API)
+A programmable endpoint may expose configuration values through its PCIe hard
+IP or an emulated configuration view. Both paths can present self-consistent
+identifiers and capabilities; configuration reads alone cannot authenticate the
+physical device or prove that its DMA is remapped. Compare identity, class,
+capability chain, OS-assigned resources, driver binding and observed behavior
+against a versioned, matched device baseline. Keep any inconsistency as a
+triage signal with benign explanations, not a proof of spoofing.
 
-Pipeline: FPGA → LeechCore → PCILeech attack modules / MemProcFS analysis
-```
+Do not use undocumented offsets, raw ECAM/MMIO access or private bus-driver
+structures as an assumed independent source. Use documented, ownership-appropriate
+configuration observations; compare a second source only when its provenance is
+actually independent. See [defensive inventory boundaries](detection-and-forensics.md#defensive-anti-cheat-inventory-and-correlation).
 
-### FPGA Firmware Architecture
-```
-Key modules:
-- pcileech_pcie_a7.v / _us.v:        Top-level Artix-7 / UltraScale integration
-- pcileech_pcie_tlps128_bram_rdwr.v:  128-bit TLP source/sink (AXI-Stream)
-- pcileech_pcie_cfgspace_shadow.v:    Shadow config space in BRAM
-- pcileech_cfgspace.coe:              Init data (stock: Xilinx 10EE:0666)
-- pcileech_bar_impl_zerowrite4k.v:    Default BAR — absorbs writes, returns zero
-- pcileech_bar_impl_loopaddr.v:       Alternative BAR — echoes address
-- pcileech_bar_impl_none.v:           Disables BAR (returns UR)
-- pcileech_pcie_cfg_a7.v:             Config management via cfg_mgmt_*
-- pcileech_mux.v:                     TLP multiplexer
-- pcileech_fifo.v:                    Internal staging FIFO
-
-Two key architectural choices:
-1. Shadow config is spoofable but not spoofed by default.
-   .coe ships with placeholder Xilinx IDs. User must overwrite
-   with real donor's dump and resynthesize.
-2. BAR controller is functionally inert.
-   zerowrite4k doesn't emulate device behavior.
-   Active BAR probing catches stock builds in one operation.
-```
-
-### Host-Side MemProcFS
-```
-Mounts target memory as filesystem:
-M:\
-├── pid\1234\
-│   ├── name.txt
-│   ├── modules\       ← loaded module list
-│   ├── handles\
-│   ├── vad\           ← virtual address descriptors
-│   ├── memmap.txt
-│   └── minidump\
-├── sys\
-├── name\game.exe\     ← lookup by process name
-└── forensic\
-    ├── yara\
-    ├── timeline\
-    └── registry\
-
-One possible development/use pattern:
-1. Development phase: MemProcFS, signature search, cross-references
-   → slow, broad scanning to find entity manager / player array / view matrix
-2. Execution phase: custom app via vmm.dll/LeechCore,
-   narrower periodic or batched reads of known offsets
-Behavioral analysis can test for this pattern, but implementations may cache,
-randomize, or use different access strategies.
-```
-
-### Stock Firmware Fingerprints
-```
-Common or older vanilla pcileech-fpga configurations may exhibit the following;
-verify the exact commit, FPGA IP configuration, and synthesized design:
-- VID/DID 10EE:0666 (Xilinx placeholder)
-- Xilinx 7-series PCIe IP signature bytes at characteristic offsets
-- DSN Extended Capability absent or default
-- No AER, LTR, ARI, ATS, or SR-IOV capabilities
-- BAR0 mapped (DMA window); BAR1–5 disabled or all-ones
-- BAR reads return zero (zerowrite4k) or echo address (loopaddr)
-- MSI capability present but expected interrupts are not generated
-- Config reads complete in deterministically uniform time
-  (BRAM lookup with fixed pipeline depth, near-zero variance)
-- no observed ASPM transitions under a workload and policy that should enter
-  lower-power states
-- AER correctable-error count stays at zero
-- power state remains D0 under tested conditions
-- Class Code matches donor placeholder but no class-specific behavior
-```
-
-## Configuration Space Spoofing
-
-### Bridge vs Emulated Firmware
-```
-Bridge firmware:
-  Patches identity fields via Vivado's PCIe IP Core GUI
-  (VID, DID, Subsystem IDs, Class Code, sometimes DSN).
-  Fast to produce, but 7-series hard IP generates internal capability
-  blocks at characteristic offsets that retain FPGA-specific fingerprints.
-
-Emulated (1:1) firmware:
-  Implements complete shadow Configuration Space in BRAM.
-  Entire 4 KB extended config space initialized from real donor device hex dump.
-  When OS issues CfgRd TLP, firmware responds from BRAM.
-  The design attempts to prevent IP-core defaults from appearing on the bus.
-
-  Common bugs in emulated firmware:
-  - First 16 bytes still come from IP block (mux priority)
-  - Type 1 config reads not intercepted
-  - Capability blocks bypassed in GUI still leak defaults
-```
-
-### Shadow Configuration Space Implementation
-```
-Requirements:
-1. Intercept incoming CfgRd0/CfgWr0 TLPs
-2. Decode target offset
-3. Look up value in BRAM
-4. Build Completion TLP with correct Completer ID, status, payload
-5. Send Completion through hard IP block
-
-4 KB coverage at 4-byte granularity = 1,024 entries × 4 bytes = 4 KB BRAM.
-Well within even T35's resources.
-```
-
-### Overlay RAM and Writable Register Emulation
-```
-Real devices have writable registers. Firmware that returns correct
-values on reads but drops writes creates detectable inconsistency.
-
-Detection probe:
-  write Command[BME] = 1 → read Command[BME]
-  write Command[BME] = 0 → read Command[BME]
-  Real silicon: bit toggles. Naive shadow: bit stays at BRAM init value.
-
-Overlay RAM merges at read time:
-  response = (base_value & ~writable_mask) | (overlay_value & writable_mask)
-
-The catch: writable mask is register-specific:
-- Command Register: different reserved bits than Device Control
-- MSI Address Low: bits [1:0] reserved-zero
-- BAR: type bits in [3:0] depend on I/O/memory, prefetchable
-- Status Register: W1C bits — writing 1 clears, writing 0 no change
-- AER Status: W1C across the board
-
-Naive implementations with single global mask fail because
-reserved-bit and W1C behavior diverges. Detection probes
-W1C cases: write 0x00000000 to Correctable Error Status,
-then write known-1 patterns, verify read-back semantics.
-```
+PCI configuration and capability registers have different ownership and
+side-effect semantics. Writes to Command/BME, BAR, MSI/MSI-X, reset, status or
+write-one-to-clear fields can disrupt devices, lose evidence or conflict with
+Windows. A generic anti-cheat must not toggle these fields to test whether an
+endpoint is emulated. Use passive, OS-mediated observations; any active
+conformance test must be an explicitly authorized device-owner lab test with
+isolation and recovery. See [configuration and containment boundaries](assurance-boundaries.md).
 
 ### Claimed Device Identity and Baselines
 

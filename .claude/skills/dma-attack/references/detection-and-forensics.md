@@ -1,5 +1,65 @@
 # Detection And Forensics
 
+## Defensive Anti-Cheat Inventory and Correlation
+
+Treat this as a read-only evidence pipeline, not a single-device verdict. The
+four layers describe different questions; a signal at one layer does not fill
+gaps at another.
+
+| Layer | Defensive question | Useful observations | Key limit |
+|---|---|---|---|
+| **L1 — identity/topology** | Which PCIe functions does the OS enumerate, and where are they in the PnP tree? | Device/compatible IDs, class, parent/child path, status, OS-assigned resources | IDs are device claims; OS enumeration may not expose every physical path |
+| **L2 — capability** | Could the function initiate transactions, and what resources/capabilities does it advertise? | Read-only Command/BME snapshot, BAR resource description, validated capability chain | Bus Master Enable is permission, not proof of DMA capability in use or a crime |
+| **L3 — consistency** | Do identity, function, driver binding, status, resources, and behavior fit a matched device baseline? | Correlated PnP/configuration observations, driver/service metadata, documented device behavior | A mismatch needs platform and driver context; heuristics can share false-positive causes |
+| **L4 — IOMMU assurance** | Is protection advertised, enabled by policy, active, and applicable to this requester? | Separate ACPI, Windows policy, live-unit, requester-scope and runtime evidence | One layer does not prove the next; see [IOMMU state verification](iommu-state-verification.md) |
+
+### Collection boundaries
+
+- Use SetupAPI/Configuration Manager device properties for user-mode PnP inventory
+  and supported, ownership-appropriate PCI/bus interfaces for kernel observation.
+  Windows documents `BUS_INTERFACE_STANDARD` and `IRP_MN_READ_CONFIG` for
+  configuration access ([Microsoft guidance](https://learn.microsoft.com/en-us/windows-hardware/drivers/pci/accessing-pci-device-configuration-space));
+  this does not grant generic write authority. Configuration
+  snapshots may be partial; record readable spans and errors, not zero-filled data.
+- Treat an OS-enumerated PnP tree as the scope of that collector, not proof that
+  no other physical endpoint exists. For VMD, follow the Windows-exposed parent/
+  child topology and its owner driver. Do not assume fixed offsets in a VMD BAR,
+  walk undocumented `pci.sys` structures, or map a BAR as a generic way to probe
+  downstream configuration windows.
+- Read OS-reported BAR/resource assignments; do not rewrite BARs or use the
+  sizing-probe write of all ones against a live device. Device-specific BAR
+  contents require documented ownership and register semantics; they are not a
+  default anti-cheat collection method.
+- BME set means the function is permitted to initiate bus-master transactions
+  under the current configuration. NICs, NVMe, GPUs and other legitimate devices
+  commonly need it. Interpret it with class, driver, topology, policy and other
+  evidence—not as an accusation or proof of active memory reads.
+- A missing service, unexpected service name, non-running service, or PnP problem
+  code is context, not a universal `nosrv`/`wrongsrv` rule. Function/class,
+  driver model, device start state, shared services and Windows build all matter.
+  Do not reuse sample-specific magic status values or label a device `fakesrv`
+  from one ID/name pair alone.
+- Vendor/device/subsystem IDs, class and capability lists can be emulated or
+  legitimately vary by revision, firmware, topology and driver. Maintain any
+  risk/allowlist with exact device/driver/firmware baselines, provenance and
+  review date; use it for triage until false-positive behavior is measured.
+- Compare sources only when they are genuinely independent. Two APIs may both
+  report the same bus-driver cache; a raw ECAM/MMIO read is not automatically an
+  independent or supported observation. Do not infer hiding from a blank read,
+  alternating DWORD pattern, one-device count, or mismatch without excluding
+  power state, access limits, topology, virtualization and collector failure.
+
+### Decision and telemetry
+
+Store each observation with its API/collector, timestamp, OS build, device path,
+readable span, error status and baseline version. Keep `present`, `absent`,
+`conflicting` and `unknown` distinct. Unknown is not a pass, but neither is it
+proof of tampering. Correlate layers, validate joint false-positive rates on
+representative benign systems, start with telemetry, and enforce only a
+published platform baseline with compatibility handling, recovery and appeal.
+A finding can justify investigation; it does not by itself establish malicious
+intent or identify the memory requester.
+
 ## Detection at the PCIe Layer
 
 ### Configuration Integrity
@@ -25,153 +85,103 @@ mastering, payload size, MSI state, or reserved bits to classify live devices.
 Any separately designed device validation must respect the owning driver and
 platform lifecycle. See [configuration and containment boundaries](assurance-boundaries.md).
 
-### LTSSM and Link-State Validation
-```
-Sample PCIe Express Capability Link Status over time:
-- Negotiated Width (Link Status[9:4]): consistent with donor deployment
-  and FPGA hard block capability
-- Current Link Speed (Link Status[3:0]): track slot's actual speed
-- A device can legitimately train below its maximum capability; compare the
-  result with slot topology, platform policy, signal quality, and matched donor
-  deployments
-- DLL Active (Link Status[13]): should be 1 during operation
-- Slot Clock Config (Link Status[12]): match real common-clock state
-```
+### Link and ASPM Evidence
 
-### ASPM Behavioral Validation
-```
-Real devices claiming ASPM exhibit characteristic L0 ↔ L1 transitions.
+Use only owner-appropriate, read-only link observations. Negotiated width/speed
+and DLL-active state are snapshots; they do not provide a complete LTSSM trace.
+Compare negotiated values with slot wiring, root-port limits, signal quality,
+power state and matched device baselines. A device may legitimately train below
+its advertised maximum.
 
-Spoofed device anomalies:
-- Claims and enables ASPM but shows no expected transition under a workload,
-  policy, and observation window known to exercise it
-- Transitions with exit latency inconsistent with claimed value
-- Does not reach L1.1/L1.2 when donor, platform, firmware policy, and workload
-  are verified to enable those substates
-
-Sample Link Status "DLL Active" bit over time + PMC counters.
-```
+ASPM capability does not mean the platform enabled ASPM. Evaluate L0/L1 or
+L1-substate behavior only when firmware/OS policy, the link partner and workload
+are known to exercise it, and the collector can actually observe transitions.
+A missing transition or unexpected latency is a contextual anomaly, not proof of
+emulation; Link Status polling alone can miss transitions.
 
 ### AER Baselining
-```
-- Departure from donor baseline: per-silicon correctable-error footprint
-  should be stable. Implausibly clean (zero correctables when donor
-  normally produces Bad TLP / Replay Timer Timeout) is anomalous.
-- Implausible Header Log content (default/zeroed values)
-- Inconsistent UR/CA responses to probes of unimplemented offsets
-```
 
-### Completion Latency Fingerprinting
-```
-Completion latency can reflect memory, arbitration, buffering, power state,
-link, driver, and workload behavior. A simplistic BRAM-backed emulator may show
-lower variance, but real and emulated distributions can overlap.
+Treat Advanced Error Reporting as component-local telemetry. A zero counter may
+mean no error was logged, the capability/counter is unavailable, or the observer
+cannot read it; do not flag a "too clean" device without a controlled, matched
+baseline. Correlate error status, valid-header indicators, logging component,
+link/topology and workload. Do not generate malformed configuration or TLP
+probes as a generic anti-cheat fingerprinting method.
 
-Detection signal is distribution shape, not absolute mean.
+### Completion Latency (Lab Instrumentation Only)
 
-Statistical methods:
-- Kolmogorov–Smirnov test: compare empirical CDFs
-- Tail estimators where sample size and distributional assumptions support them
-- Anderson-Darling test: sensitive to tail differences
+Windows does not provide a generic per-device API for measuring PCIe DMA TLP
+completion timing. A protocol trace or owner-supported counter measures only its
+specific path; observed latency also includes memory, arbitration, buffering,
+power state, link, driver and workload effects. It is not a portable endpoint
+fingerprint.
 
-Choose the sample size from power/variance analysis, collect under controlled
-conditions, compare with a matched donor reference, and validate any decision
-threshold on held-out devices.
-
-Random jitter alone need not reproduce donor behavior. Compare mean, variance,
-tails, modes, autocorrelation, and responses to condition changes.
-```
+For a controlled lab comparison, select distribution tests only after defining
+the capture point, sample size and matched device/workload population. Validate
+thresholds on held-out systems and report uncertainty; mean, tails, modes and
+autocorrelation can all vary legitimately. Do not infer emulation from low
+variance or use software-request latency as a proxy for an unseen DMA TLP.
 
 ### MSI/MSI-X Behavioral Validation
-```
-A device with MSI enabled, programmed Address/Data, an attached driver, and a
-verified interrupt-producing condition should produce interrupts:
 
-- Zero interrupts when driver should exercise device = anomalous
-- Uniform arrival times may indicate a timer-driven generator, but legitimate
-  periodic workloads must be excluded
-- Implausibly bursty patterns not matching donor class
+Use OS interrupt accounting, ETW/performance telemetry or owner-driver counters
+within their documented scope. Interpret a low or zero count only after confirming
+the device is started, the relevant vector is enabled/unmasked, the workload
+should interrupt, and the collector observes that vector. Polling, power state,
+shared-vector behavior and telemetry loss are benign alternatives. Arrival-time
+patterns require a matched workload baseline and are not standalone device
+identity evidence.
 
-Monitor via OS interrupt accounting, ETW/performance telemetry,
-driver counters, kernel instrumentation.
-```
+### Device-Access Pattern Evidence
 
-### Cheat-Phase Access Pattern Recognition
-```
-One possible workflow has a broad discovery phase followed by narrower,
-periodic reads during use. Implementations can cache, randomize, batch, or avoid
-these phases, and legitimate devices can also show periodic access.
-
-Candidate execution features:
-  Temporal periodicity, address-space breadth, and alignment to game-frame
-  intervals, calibrated against matched benign device/workload behavior.
-
-Distinguishing features:
-- Fano factor
-- Autocorrelation at frame intervals
-- Address-space coverage entropy
-
-Decoy observations require a defined collector and access path. An EPT event
-records processor access under the active EPT policy; device DMA requires
-separate remapping/fault or platform evidence. Server events have their own
-application semantics. Do not attribute one collector's event to another layer.
-```
+Access periodicity or address-range breadth is usable only when the collector
+actually observes device requests through a validated platform or protocol
+instrumentation path. Such patterns also arise from legitimate workload and
+buffering behavior; validate metrics against matched benign systems before use.
+An EPT event records processor access under the active EPT policy, not device
+DMA. Device DMA needs separate remapping/fault or protocol evidence, and server
+events have their own application semantics. Do not attribute one collector's
+event to another layer.
 
 ### Hot-Plug and Link Disruption Events
-```
-Firmware swaps and donor reconfigurations require link renegotiation.
-Three observable signals:
 
-1. AER Surprise Down — uncorrectable fatal error logged when link
-   drops unexpectedly mid-session.
-
-2. Slot Status hot-plug events — Presence Detect Changed,
-   Data Link Layer State Changed, MRL Sensor Changed.
-   Register via IoRegisterPlugPlayNotification with
-   EventCategoryTargetDeviceChange or EventCategoryDeviceInterfaceChange.
-
-3. LTSSM re-training cycles — Link Training bit toggling,
-   transient Recovery state.
-
-A device that surprise-downs then reappears with subtly different
-Config Space (adjusted MSI layout, different latency profile,
-different VID/DID) = fingerprint of mid-session firmware reload.
-```
+Device resets and link interruptions can produce telemetry, but also have benign
+causes. Use supported PnP notifications and owner-appropriate link/error sources.
+A Surprise Down, hot-plug status change, retraining cycle, or re-enumeration with
+changed configuration is an anomaly to correlate, not a unique fingerprint of
+firmware reload or cheating. Preserve event order, device path, error source and
+plausible alternatives; do not write slot-status or link-control registers as a
+generic collector.
 
 ## Detection at the IOMMU Layer
 
 ### Fault-Rate Monitoring
-```
-Sample per-device fault counters from IOMMU fault-recording structure
-(VT-d Fault Recording Registers, AMD-Vi Event Log) or from WHEA.
 
-Pipeline:
-1. Snapshot baseline at session start
-2. Sample at intervals; compute per-device fault rate
-3. Threshold-trigger additional PCIe probing on devices exceeding baseline
-4. Aggregate evidence across signals before action
-```
+Use OS/platform-supported fault events where available; there is no generic
+anti-cheat interface that exposes every VT-d or AMD-Vi hardware log. Record the
+source, requester-identity mapping, interval, dropped-event semantics and
+collection errors. A fault is evidence of a denied/failed request within that
+logging path, not proof of malicious intent. A zero count is not proof that no
+request occurred. Do not directly map, clear or reprogram IOMMU registers as a
+monitoring method. See [IOMMU state verification](iommu-state-verification.md).
 
 ### Domain Assignment Audit
-```
-Walk IOMMU domain assignments for anomalies:
-- Devices on passthrough/identity domains when strict mode is active
-- Devices in unexpectedly large IOMMU groups (poor ACS topology)
-- Multiple devices sharing Domain ID when they shouldn't
-```
+
+Audit assignments only through a trusted platform/OS interface that documents
+what it exposes. Preserve requester, domain/mode, policy, timestamp and coverage
+limits; unavailable state is **unknown**, not an empty or safe assignment.
+Passthrough/identity domains, shared domain IDs or large isolation groups are
+not universal misconduct signals. Compare them with the documented platform and
+deployment policy, and assess ACS/topology separately.
 
 ### ACS Topology Verification
-```
-Walk PCIe bridge topology between every endpoint and root complex.
-For each bridge with ACS Capability:
-- Verify Source Validation (SV) enabled
-- Verify Translation Blocking (TB) enabled
-- Verify P2P Request Redirect (RR) and Completion Redirect (CR) enabled
 
-Missing or disabled ACS can limit isolation where peer routing is possible.
-Assess the complete topology, root-complex behavior, firmware policy, and actual
-IOMMU grouping before calling it an exploitable isolation hole.
-```
+Where an owner-appropriate source exposes ACS capability/control state, record
+it along the complete endpoint-to-root path. Missing or disabled ACS can limit
+isolation where peer routing is possible, but a capability bit alone does not
+establish actual routing or an exploitable path. Assess topology, root-complex
+behavior, firmware policy and the effective IOMMU path before drawing a finding;
+do not assume one universal ACS bitset is required on every platform.
 
 ### IOMMU as Containment Primitive
 
@@ -197,16 +207,16 @@ Supported config snapshot    OS PCI interface                Device identity and
 Capability chain walk        Parsed from config              Capability presence
 PCIe link state history      Link Status over session        LTSSM anomaly evidence
 MSI/MSI-X arrival timeline   OS interrupt telemetry          Rate claim refutation
-AER correctable counts       AER capability registers        Baseline outlier evidence
-IOMMU fault log entries      WHEA/ETW, Driver Verifier       Invalid-DMA evidence
-IOMMU domain assignments     IOMMU manager state walk        Passthrough anomaly
+AER error events             Owner-approved AER telemetry   Matched baseline and source context
+IOMMU fault events           OS/platform source, if exposed Denied/failed-request evidence within source scope
+IOMMU assignment status     Platform/OS API, if available   Coverage within documented scope; else unknown
 ACS bridge state             Bridge enumeration              Isolation assessment
 Protected-page CPU event    Hypervisor EPT event evidence   CPU access-policy observation
 Device DMA fault evidence    Platform/IOMMU collector        Device request-policy observation
 TPM quote and measurement log Attestation provider           Selected-measurement appraisal
 MCFG / DMAR / IVRS tables   ACPI subsystem                  Platform config baseline
-SMBIOS slot inventory        DMI subsystem                   Slot-population audit
-BIOS version + patch level   SMBIOS                          Pre-Boot DMA fix verify
+Slot/topology context       PnP + firmware data, if exposed Topology context, not completeness proof
+Firmware identity/version   OS/vendor inventory             Compare with applicable advisory; not proof of fix
 Latency-distribution hists   Per-session sampling            Statistical fingerprint
 ```
 
@@ -224,11 +234,11 @@ systems, and report confidence bounds plus expected appeal volume.
 
 ### PCIe Protocol Captures
 ```
-A PCIe protocol analyzer (interposer) can provide high-fidelity evidence at its
-observation point: TLP-level captures with analyzer-specific timestamp accuracy.
-
-Commercial analyzers capture every TLP, DLLP, and physical-layer ordered set.
-Traces can be replayed to confirm fingerprinting findings.
+A PCIe protocol analyzer can provide detailed evidence at its observation
+point, subject to its configuration, capture filters, buffers, and timestamp
+accuracy. Do not assume a given analyzer captures every TLP, DLLP, or ordered set.
+A trace can support reproduction only for the captured path and conditions;
+record analyzer model, configuration, topology and dropped-capture indicators.
 
 Cost and deployment complexity limit routine use. For high-impact cases,
 protocol-level captures from an independent lab can materially strengthen the
@@ -236,102 +246,56 @@ record, but capture coverage, analyzer configuration, and interpretation still
 need validation.
 ```
 
-## Thunderbolt / USB4 DMA
+## External PCIe DMA: Thunderbolt and USB4
 
-### Attack Surface
-```
-- Thunderbolt 1-4 / USB4 provide direct PCIe tunneling
-- Hot-plug capable: device can be attached at runtime
-- Pre-boot DMA: device has memory access before OS loads
-- Thunderbolt Security Levels:
-  - SL0 (None): no security, legacy mode
-  - SL1 (User Auth): user must approve new devices
-  - SL2 (Secure Connect): device must match previously approved UUID
-  - SL3 (No PCIe tunneling): completely disables DMA
-```
+A connector or protocol label does not by itself prove that a port supports
+PCIe tunneling; capability and authorization depend on the platform, port,
+firmware and attached device. Runtime hot-plug policy and pre-boot DMA protection
+are separate responsibilities. Assess the target's documented platform policy
+and actual PnP/remapping evidence rather than assuming a universal security-level
+mapping or that a device could DMA before Windows starts.
 
-### Thunderbolt-Specific Attacks
-```
-- Thunderclap: malicious Thunderbolt peripherals bypass IOMMU
-- Device re-identification: change UUID to bypass SL2
-- OS-level Thunderbolt driver vulnerabilities
-- PCIe tunneling through USB4 hubs
-```
+Thunderclap-class research demonstrated specific weaknesses in device/driver
+DMA isolation and buffer handling; it should not be summarized as a universal
+IOMMU bypass. Windows Kernel DMA Protection provides policy-controlled
+protection on supported systems, but its status does not establish coverage of
+every internal endpoint. Check the exact Windows, firmware, port and device/driver
+conditions in [Microsoft's KDP documentation](https://learn.microsoft.com/en-us/windows/security/hardware-security/kernel-dma-protection-for-thunderbolt)
+and [IOMMU state verification](iommu-state-verification.md).
 
-### Defensive Measures
-```
-- Kernel DMA Protection (Windows 10 1803+): automatic IOMMU for hot-plug
-- Thunderbolt firmware verification
-- Platform-level: BIOS setting to disable Thunderbolt PCIe tunneling
-- macOS: T2 chip enforces DMA restrictions on Thunderbolt ports
-```
+## CPU Page-Table and Hypervisor Boundary
 
-## Shadow CR3 / Split TLB
+CR3, CPU page-table and EPT/TLB observations concern processor address
+translation; they are not evidence that a PCIe endpoint initiated DMA. A CPU
+translation event must not be attributed to a device without separate requester
+and IOMMU/protocol evidence. Generic TLB flushing or re-walking is not a proof of
+page-table integrity and does not establish device-DMA coverage. Route host
+kernel/hypervisor manipulation to [windows-kernel-security](../../windows-kernel/SKILL.md)
+and assess CPU and device isolation as separate controls.
 
-### Page Table Manipulation
-```
-- Maintain two sets of page tables (two CR3 values):
-  - "Clean" CR3: legitimate page tables visible to anti-cheat
-  - "Shadow" CR3: modified page tables with cheat-accessible mappings
-- Swap CR3 before/after anti-cheat inspection windows
-- Combine with EPT manipulation for hypervisor-level split
-```
+## External Memory-Acquisition Boundary
 
-### Split TLB Techniques
-```
-- Desync instruction TLB (iTLB) and data TLB (dTLB):
-  - Execute code from one physical page
-  - Read data from another physical page at same virtual address
-- Requires precise TLB invalidation control
-- Hypervisor can create EPT-based split: execute on page A,
-  read on page B, at same GPA
-- Anti-cheat mitigation: TLB flush + re-walk, serializing instructions
-```
+A PCIe endpoint can initiate memory transactions without a host process issuing
+an ordinary CPU read on its behalf. Whether those transactions reach system
+memory depends on topology, platform routing and the active IOMMU policy for the
+requester. A host process/module scan therefore cannot establish that no device
+initiated DMA; a PCIe inventory or IOMMU status flag likewise does not prove
+that game memory was read.
 
-## Memory Access Techniques
+For defensive analysis, establish the claimed source, transport, analysis host,
+requester identity and applicable remapping evidence separately. Prefer
+OS/platform fault telemetry, authorized protocol captures, measured machine
+state and matched device baselines. Preserve the collector's coverage and
+limitations. Do not turn this section into a physical-memory acquisition,
+page-table-walking or device-control recipe; use [acquisition and transport](acquisition-and-transport.md)
+for architecture classification and [IOMMU state verification](iommu-state-verification.md)
+for the boundary evidence.
 
-### Physical Memory Reading
-```c
-// Typical pcileech API usage
-HANDLE hDevice;
-BYTE buffer[0x1000];
-pcileech_read_phys(hDevice, physAddr, buffer, sizeof(buffer));
-```
+## Defensive Test Safety
 
-### Virtual Address Translation
-```c
-// Walk page tables: PML4 → PDPT → PD → PT → Physical
-PHYSICAL_ADDRESS TranslateVA(UINT64 cr3, UINT64 virtualAddr) {
-    UINT64 pml4e = ReadPhys(cr3 + PML4_INDEX(virtualAddr) * 8);
-    UINT64 pdpte = ReadPhys(PFN(pml4e) + PDPT_INDEX(virtualAddr) * 8);
-    UINT64 pde = ReadPhys(PFN(pdpte) + PD_INDEX(virtualAddr) * 8);
-    UINT64 pte = ReadPhys(PFN(pde) + PT_INDEX(virtualAddr) * 8);
-    return PFN(pte) + PAGE_OFFSET(virtualAddr);
-}
-```
-
-### DTB (Directory Table Base) Finding
-```
-- Scan physical memory for valid CR3 values
-- Look for kernel structures
-- Use signature scanning
-- Validate page table entries
-```
-
-## Security Considerations
-
-### Ethical Use
-```
-- Security research only
-- Authorized testing environments
-- Responsible disclosure
-- Legal compliance
-```
-
-### Risk Awareness
-```
-- Physical hardware access required
-- Potential system instability
-- Detection by advanced anti-cheat
-- Legal implications
-```
+Run hardware-facing validation only on authorized, isolated test systems with a
+recovery path. Prefer passive/read-only collection and preserve raw observations.
+Do not alter another driver's PCI configuration, BARs, IOMMU state or page
+tables as part of generic anti-cheat detection. Separate a protection-policy
+failure from misconduct attribution, and document the system state that could
+not be observed.

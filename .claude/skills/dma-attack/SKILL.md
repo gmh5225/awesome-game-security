@@ -10,9 +10,10 @@ Identify the memory initiator, transport, required privilege, isolation boundary
 ## Topic routing
 
 - [Classification and threat model](references/classification-and-threat-model.md) for acquisition-path distinctions and attacker prerequisites.
-- [PCIe devices](references/pcie-devices.md) for TLPs, configuration space, FPGA constraints, pcileech, and device emulation.
+- [PCIe devices](references/pcie-devices.md) for TLPs, configuration space, programmable endpoints, and emulation limits.
 - [IOMMU and defense](references/iommu-and-defense.md) for VT-d/AMD-Vi, ACS, ATS/PASID, domain assignment, hypervisors, and trust anchors.
-- [Detection and forensics](references/detection-and-forensics.md) for fingerprinting, evidence capture, Thunderbolt/USB4, and memory access.
+- [IOMMU state verification](references/iommu-state-verification.md) for separating ACPI advertisement, Windows policy, live unit state, and per-requester coverage.
+- [Detection and forensics](references/detection-and-forensics.md) for defensive PCIe inventory, signal correlation, evidence capture, Thunderbolt/USB4, and memory access.
 - [Acquisition and transport](references/acquisition-and-transport.md), [assurance boundaries](references/assurance-boundaries.md), and [repository resources](references/repository-resources.md) for focused evidence and source selection.
 - [Repository map](references/repository-map.md) when maintaining the collection.
 

@@ -4,14 +4,22 @@
 
 ### Translation Flow
 ```
-1. Device issues Memory TLP with target IOVA.
-   TLP header carries 16-bit Requester ID (BDF).
-2. TLP travels upstream through switches/bridges to root complex.
-3. IOMMU intercepts, uses Requester ID to look up translation context.
-4. IOMMU walks device's I/O page tables: IOVA → physical address.
-5. Permission bits (Read, Write) checked against access type.
-6. Success: TLP forwarded with translated physical address.
-7. Failure: fault logged, device receives UR or CA completion.
+1. Device issues a Memory TLP carrying an address; the transaction carries a
+   16-bit Requester ID (Bus:Device:Function).
+2. TLP travels upstream through switches/bridges toward the root complex.
+3. When the applicable IOMMU path and translation mode require remapping, the
+   unit uses requester/topology context to select a translation context.
+4. In a translated context, the supplied address is interpreted as an IOVA and
+   the unit walks the device's I/O page tables: IOVA → physical address.
+5. Permissions are checked against the access type.
+6. A permitted request is forwarded according to the platform's translation
+   and routing mode; a denied request may produce a fault/event.
+
+Do not assume every device Memory TLP is always translated, that an IOMMU
+intercepts every path, or that an untranslated address is literally an IOVA
+whose value happens to equal a physical address. Pass-through, untranslated,
+identity-mapped, and remapped paths have different semantics; establish which
+path applies to the device and platform under review.
 ```
 
 ### Intel VT-d Internals
@@ -111,12 +119,12 @@ driver bugs, resets, stale mappings, or hardware faults must be excluded before
 attributing malicious out-of-domain access.
 
 RMRR/IVMD:
-ACPI DMAR table contains RMRR (Reserved Memory Region Reporting)
-sub-tables declaring physical ranges devices need identity-mapped.
-AMD-Vi has analogous IVMD (I/O Virtualization Memory Definition)
-in the IVRS table. A defender should enumerate these and reject
-configurations where suspect BDFs appear in RMRR scope or
-RMRR ranges overlap game memory regions.
+DMAR RMRR and IVRS IVMD structures describe platform-reserved memory regions
+and associated device scopes according to their respective specifications.
+Validate them against the correct platform/OEM baseline. Do not automatically
+reject a device because it appears in a reserved-region scope or infer malicious
+access from an apparent range overlap; reserved-memory semantics and ownership
+must be established for the target platform.
 ```
 
 ## IOMMU Topology and Isolation
@@ -149,161 +157,93 @@ Bit  Feature                      Effect
 5    P2P Egress Control (EC)      Allow/deny P2P routing per-port
 6    Direct Translated P2P (DT)   Allow P2P with translated addresses
 
-Critical for untrusted endpoints: SV, TB, RR, and CR.
-A switch missing Source Validation lets a malicious device spoof
-its Requester ID, defeating per-BDF IOMMU translation.
-A switch missing P2P Request Redirect allows devices on the same
-switch to DMA directly to each other without IOMMU involvement.
+ACS capability and enabled-control state describe specific peer-routing and
+requester-validation behaviors. Their security relevance depends on the complete
+PCIe hierarchy, root-complex routing, platform policy and active IOMMU path; a
+missing bit alone does not prove an exploitable bypass. Establish which controls
+are required by the target deployment rather than applying a universal bitset.
 ```
 
 ### Peer-to-Peer DMA
-```
-Devices on the same PCIe tree can send Memory TLPs directly to
-each other's BAR ranges without involving system memory.
-Without ACS redirection, peer traffic may remain below the root complex and
-bypass the host IOMMU translation path. Routing behavior is topology- and
-platform-specific, so confirm it with the actual root complex and switches.
 
-Plausible P2P DMA targets for cheat:
-- GPU framebuffer — rendered game state
-- Network adapter ring buffers — game traffic
-- USB controller queues — input device data
-
-Mitigation: ACS Translation Blocking + P2P Request Redirect
-on every intermediate bridge. Defender must walk topology and
-confirm both bits are active.
-```
+PCIe peer-to-peer routing can keep some transactions below the root complex,
+where the host IOMMU may not observe or translate them. Whether that path exists
+and is isolated depends on the endpoint, every bridge, root-complex routing and
+platform policy. Assess actual topology and owner-provided state; do not infer a
+bypass from a card class or an ACS bit in isolation. Any containment policy must
+be designed for the platform owner, not applied by a generic anti-cheat driver.
 
 ### Interrupt Remapping
-```
-MSI/MSI-X interrupts are Memory Writes to 0xFEE00000–0xFEEFFFFF.
-Without Interrupt Remapping (IR), any device with Bus Master enabled
-can write to this range and trigger arbitrary interrupts — NMIs, SMIs,
-or vectors targeting wrong CPU.
 
-With IR enabled, IOMMU validates MSI/MSI-X writes and uses
-remapping-table state to determine permitted destination.
-IR is part of VT-d's broader DMA Remapping architecture.
-Both VT-d and AMD-Vi have integrated equivalents.
-Both should be mandatory in any anti-cheat threat model.
-```
+Interrupt-remapping controls validate device interrupt messages under
+platform-defined policy. Its absence can weaken interrupt isolation, but do not
+infer that any bus-master device can cause an arbitrary interrupt: address
+routing, platform support and message validation also matter. Record advertised,
+configured and observed state separately; make requirements deployment-specific
+and verify through the platform owner.
 
 ## ATS, PASID, and Address Translation Trust
 
 ### ATS (Address Translation Services, Extended Cap ID 0x000F)
-```
-ATS lets a device cache IOMMU translations locally:
-1. Device issues Translation Request TLP (AT=01) with IOVA
-2. IOMMU translates and responds with Translation Completion
-   carrying physical address
-3. Device caches translation in Device-side TLB (DevTLB)
-4. Subsequent accesses issued with AT=10 (Translated) —
-   IOMMU bypasses page-walk, trusting device's cached translation
-5. On mapping changes, IOMMU sends Invalidation Request
 
-Attack surface: malicious device claiming ATS can present
-arbitrary AT=10 TLPs whose addresses were never approved
-by the IOMMU. The IOMMU forwards them trusting the device's claim.
-```
+ATS allows a capable endpoint to cache translations granted through the
+platform's translation-request/invalidation protocol. Translated requests can
+use a device-side translation cache, so mapping lifetime, invalidation and the
+platform's ATS trust policy matter. Do not claim that the ATS capability or an
+AT=10 request alone proves a bypass; establish whether ATS is enabled and
+accepted for this requester, how invalidations are handled, and what the
+applicable IOMMU/platform specification guarantees.
 
 ### PASID (Extended Cap ID 0x001B)
-```
-Extends ATS to per-process address spaces. 20-bit PASID carried
-in a TLP Prefix. IOMMU uses (Requester ID, PASID) jointly
-to select translation context.
 
-PASID enables Shared Virtual Memory (SVM) — primarily found in
-datacenter NICs, AI accelerators. Presence on a consumer card
-is anomalous.
-```
+PASID can select process/address-space context when the device, OS, and IOMMU
+are configured for the relevant shared-virtual-memory features. Presence alone
+is not anomalous; assess the exact function, driver, platform support, and
+runtime policy.
 
-### ATS Trust Model and "ATS Untrusted" Mode
-```
-The fundamental trust assumption: device honestly reports
-translations it has been granted. Unreasonable for external
-Thunderbolt enclosures, FPGAs in M.2 slots, or untrusted
-accelerator cards.
+### ATS Trust and Policy
 
-Modern OS/IOMMU stacks can treat endpoints as ATS-untrusted:
-ATS is disabled, blocked by policy, or stripped.
-Linux: pci=noats plus per-device quirks.
-Windows: Kernel DMA Protection / DMAGuard matters, but don't
-treat "Kernel DMA Protection: On" as proof every internal
-endpoint is ATS-untrusted. Verify ATS state per endpoint.
-```
+ATS security depends on platform policy, requester context, permitted
+translation requests and correct invalidation behavior. Do not assume every
+platform enables ATS, nor that KDP status establishes ATS policy for every
+internal endpoint. Collect per-device ATS policy only through a supported
+owner-provided interface; otherwise mark it unknown. See [IOMMU state
+verification](iommu-state-verification.md) for the distinction between a
+capability advertisement and live requester coverage.
 
-## Driver–IOMMU Contract and Bypass Catalog
+## Driver–IOMMU Contract and Coverage Assessment
 
-### Legitimate DMA Path (Windows)
-```
-1. Acquire DMA adapter: IoGetDmaAdapter / WDF wrapper
-2. Allocate buffer: MmAllocateContiguousMemorySpecifyCacheNode
-   or WdfCommonBufferCreate
-3. Map for DMA: AllocateCommonBuffer / MapTransferEx
-   - OS allocates IOVA from device's domain
-   - Creates IOMMU page-table entries: [IOVA, IOVA+size) → physical pages
-   - Returns IOVA to driver
-4. Program device: driver writes IOVA into device's BAR registers
-5. Device DMAs: TLPs arrive at IOMMU with BDF + IOVA
-6. IOMMU translates: page-walk produces physical address
-7. Completion and unmap: teardown IOMMU entries + IOTLB invalidation
+### OS-Managed DMA Contract (Conceptual)
 
-In this model, device can DMA only to addresses the driver
-explicitly mapped. Game memory is not in that range.
-```
+In an intended OS-managed path, a device driver requests DMA mappings through
+the platform's DMA subsystem; the OS/IOMMU establishes and tears down mappings
+according to the device and platform policy. Isolation depends on remapping
+being active for that requester, correct buffer bounds and lifetime, appropriate
+invalidation, and trusted driver/OS behavior. Do not infer from this intended
+contract that game memory can never be mapped, copied into an allowed buffer, or
+exposed through a faulty driver. Use the target Windows/driver documentation and
+runtime evidence for exact guarantees.
 
-### Six Paths to Out-of-Domain Access
-```
-1. IOMMU not active or not applied to this path
-   VT-d/AMD-Vi disabled, OS not enforcing, device outside protected ports
+### Coverage Failure Classes
 
-2. Pre-boot DMA injection
-   Inject before IOMMU initialized; requires firmware-level exploit
+For a defensive threat model, consider whether remapping is absent or not
+applied to a requester; whether pre-boot and runtime protections differ;
+whether a domain or mapping is broader than the product policy permits; whether
+buffer sizing, mapping lifetime or invalidation is faulty; whether sensitive
+data is intentionally present in an allowed buffer; and whether firmware, the
+kernel or hypervisor is outside the trust boundary. These are review categories,
+not a prevalence ranking or an attribution checklist. Establish each path with
+platform-specific evidence and benign alternatives.
 
-3. Identity-mapped / passthrough domains
-   Legacy drivers request 1:1 mapping; modern strict-mode rejects it
+### Failure-Mode Evidence
 
-4. Driver mapping over-allocation (Thunderclap class)
-   OS maps full 4 KB page when buffer is smaller; adjacent kernel data exposed
-
-5. Legitimate-path data exfiltration
-   Cheat spoofed as NIC; OS network stack passes game packets through
-   NIC's RX ring buffer (legitimately IOMMU-mapped). Cheat reads game data
-   without leaving allowed mappings. Undetectable at IOMMU layer.
-
-6. IOMMU page-table manipulation via kernel compromise
-   BYOVD / vulnerable driver reprograms IOMMU tables.
-   Requires code execution on gaming PC.
-
-Approaches 1–3 are the foundation of most current DMA cheats.
-```
-
-### IOMMU Bypass Catalog (16 Techniques)
-```
-#   Technique                   Mechanism                           Mitigation
-─────────────────────────────────────────────────────────────────────────────────
-1   IOMMU disabled              VT-d/AMD-Vi off in BIOS             Refuse misconfigured platforms
-2   Pre-boot DMA                Firmware leaves injection window     UEFI updates; verify ACPI indicators
-3   Identity/passthrough        1:1 IOVA-to-physical mapping        Strict-mode IOMMU policy
-4   Driver over-allocation      Full 4 KB page, adjacent data       OS bounce buffers; strict mappings
-5   ATS abuse                   AT=10 TLPs with arbitrary addrs     ATS Untrusted mode for non-allowlisted
-6   ACS missing on bridge       P2P or spoofed Requester ID         Verify ACS state on all bridges
-7   Lazy IOTLB invalidation    Stale translations valid briefly    Strict invalidation mode
-8   FLR race                    FLR/Hot Reset race window           Synchronized FLR handling
-9   SMM bypass                  SMM code exempt from IOMMU          Boot Guard / Platform Secure Boot
-10  DMA-remapping driver bugs   Bugs in OS IOMMU manager            OS patching
-11  Hypervisor trust failure    Compromised hypervisor              Platform remediation; boot evidence is not runtime proof
-12  Interrupt injection (no IR) Write arbitrary interrupts           Mandatory IR enforcement
-13  RMRR/IVMD scope abuse       Fake ACPI tables cover attacker     Measured boot; runtime RMRR audit
-                                physical ranges
-14  Snoop-bit manipulation      Stale cache lines visible           Strict snoop enforcement
-15  PASID confusion             Misconfigured PASID Table           PASID-aware IOMMU programming
-16  DMAR/IVRS spoofing          Compromised firmware, fake tables   Measured boot covering firmware
-
-Techniques 1–6: active attack surface for current commercial DMA cheats
-Techniques 7–13: academic, APT, firmware-level contexts
-Techniques 14–16: largely theoretical
-```
+Do not present a generic bypass catalog or prevalence ranking as a current
+threat assessment. Relate each suspected failure to the four separate properties
+in [IOMMU state verification](iommu-state-verification.md): advertised firmware
+table, Windows policy, live remapping-unit state, and requester coverage. Add
+boot measurements, runtime fault evidence, ACS/ATS state or driver-mapping
+analysis only when the source and scope are documented. A failed or unavailable
+observation remains unknown; a finding is not an attribution of intent.
 
 ## Hypervisor-Level Defense
 

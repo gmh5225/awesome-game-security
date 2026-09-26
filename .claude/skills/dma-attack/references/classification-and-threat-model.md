@@ -59,7 +59,7 @@ configuration, policy state, and available fault telemetry are different
 observations, none of which alone establishes malicious intent.
 ```
 
-### Three Defense Layers
+### Complementary Control Families
 
 | Layer | Property evaluated | Limits |
 |---|---|---|
@@ -67,5 +67,9 @@ observations, none of which alone establishes malicious intent.
 | IOMMU enforcement | Device requests permitted by the active remapping policy | Verify actual path, mappings, lifecycle, and available fault evidence; enforcement and observation are separate |
 | External attestation | Authenticity and policy appraisal of selected measurements | Boot evidence does not automatically cover current device behavior or runtime mapping state |
 
-Use the [assurance reference](assurance-boundaries.md) for the
-underlying platform contracts and the evidence required at each layer.
+This control-family map is not a staged detector or a four-step verdict. For
+anti-cheat inventory and IOMMU-state collection, use the [defensive PCIe pipeline](detection-and-forensics.md#defensive-anti-cheat-inventory-and-correlation)
+and [IOMMU state verification](iommu-state-verification.md).
+
+Use the [assurance reference](assurance-boundaries.md) for the underlying
+platform contracts and the limits of each evidence source.
