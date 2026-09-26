@@ -1304,6 +1304,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/gmh5225/magiskboot-linux [Use GitHub Actions to build magiskboot]
 - https://github.com/the-dise/EasyPixel [Magisk module that disguises a device under Google Pixel]
 - https://github.com/mrx7014/SpoofingCollection [Magisk and LSPosed module collection for spoofing Android device fingerprints (manufacturer, model, build props)]
+- https://github.com/AlirezaParsi/COPG [Zygisk module for rooted Android with per-app device, CPU, and GPU spoofing, build-property and Android ID spoofing, and an on-device WebUI; supports KernelSU, Magisk, and APatch]
 - https://github.com/gmh5225/MagiskHide [Portable MagiskHide]
 - https://github.com/lico-n/ZygiskFrida [Injects frida gadget using zygisk]
 - https://github.com/Admirepowered/Zygisk_mod [Standalone implementation of Zygisk]
