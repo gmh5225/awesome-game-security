@@ -897,7 +897,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Dark Souls III Cheat Engine Guide](entities/dark-souls-iii-cheat-engine-guide.md) — The Grand Archives DS3 Cheat Engine table guide (cheat / game:dark souls [Cheat Engine])
 - [darksword-kexploit-fun](entities/darksword-kexploit-fun.md) — DarkSword kernel r/w playground (iOS 17.0–26.0.1; sandbox/SSV/PAC; ObjC/C)
 - [darwin-vm](entities/darwin-vm.md) — QEMU Darwin VM boot iOS/macOS to root shell; virtual iPhone 12–17 (A14–A19) and M1–M5 Macs; SPTM/TXM/MIE kernel debug; no GUI/SpringBoard (jprx; IOS Emulator)
-- [dae](entities/dae.md) — Rust CLI Dart/Flutter AOT snapshot debug-symbol and struct exporter for Mach-O/ELF/PE; IDA/radare2/Frida scripts; Dart 2.7–3.14; no Dart SDK required (ejfkdev; Cheat / RE Tools)
+- [dae](entities/dae.md) — config-driven Rust CLI Dart/Flutter AOT snapshot debug-info exporter for Mach-O/ELF/PE; IDA/radare2/Frida scripts; Dart 2.7–3.14; blutter-compatible; no Dart SDK (ejfkdev; Cheat / RE Tools)
 - [dayu](entities/dayu.md) — Open/HarmonyOS `.abc` parser and decompiler (mobile RE; maintenance not guaranteed)
 
 - [DayZ-Cheat](entities/dayz-cheat.md) — DayZ external cheat (ESP, aimbot, item ESP; external memory reads + overlay; gmh5225)

@@ -302,6 +302,7 @@ sources:
   - wiki/sources/descriptions/zengfr__XrefsExt.md
   - wiki/sources/descriptions/zboralski__unflutter.md
   - wiki/sources/descriptions/Guardsquare__flutter-re-demo.md
+  - wiki/sources/descriptions/ejfkdev__dae.md
   - wiki/sources/descriptions/za233__IDADeflat.md
   - wiki/sources/descriptions/z1ko__mutaben.md
   - wiki/sources/descriptions/nhpcc502__MBA-Obfuscator.md
