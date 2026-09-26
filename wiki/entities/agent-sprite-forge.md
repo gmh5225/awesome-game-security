@@ -20,4 +20,4 @@ Targets game developers and tooling builders in the README **Game Develop → AI
 
 ## Related
 
-[[overviews/game-engine]] · [[overviews/overview]] · [[image-cockpit-for-codex-workflows]] · [[sprite-sheet-creator]] · [[3d-asset-factory]] · [[image-blaster]] · [[awesome-gamedev-agent-skills]]
+[[overviews/game-engine]] · [[overviews/overview]] · [[sprite-gen]] · [[image-cockpit-for-codex-workflows]] · [[sprite-sheet-creator]] · [[3d-asset-factory]] · [[image-blaster]] · [[awesome-gamedev-agent-skills]]

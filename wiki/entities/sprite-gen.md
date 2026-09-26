@@ -11,9 +11,27 @@ confidence: medium
 
 # sprite-gen
 
-Python CLI and AI coding-agent skill that turns a single base character image into game-ready transparent sprite atlases or motion loops. Drives image and video generation through providers such as Codex, OpenAI, and Grok Imagine; locks character identity row by row; converts chroma backgrounds to real alpha; extracts clean frames; and emits runtime atlases with `manifest.json` frame layouts. A separate video pipeline generates seamless transparent GIF, WebP, or frame-strip loops per motion state, with optional curation tooling for comparing, rejecting, and nudging frames before export. Built with Python, Pillow, and NumPy; supports recoloring, layer composition, pixel-grid alignment, and exports to engines including Aseprite, Phaser, and Flame. (source: wiki/sources/descriptions/aldegad__sprite-gen.md)
+**sprite-gen** (aldegad/sprite-gen) is a Python CLI and AI coding-agent skill that turns a single base character image into game-ready transparent sprite atlases or motion loops. Listed under README **Game Assets**. (source: wiki/sources/descriptions/aldegad__sprite-gen.md)
 
-Sits in the README **Game Assets** lane beside fal.ai web generators such as [[sprite-sheet-creator]] and Codex skillsets such as [[agent-sprite-forge]] — production-quality 2D sprite atlases from generative models rather than unusable demo sheets.
+## Component-row atlas pipeline
+
+Drives image and video generation through providers such as Codex, OpenAI, and Grok Imagine; locks character identity row by row; converts chroma backgrounds to real alpha; extracts clean frames; and emits runtime atlases with machine-readable `manifest.json` frame layouts. (source: wiki/sources/descriptions/aldegad__sprite-gen.md)
+
+## Video and motion pipeline
+
+A separate video pipeline generates seamless transparent GIF, WebP, or frame-strip loops per motion state, with optional curation tooling for comparing, rejecting, and nudging frames before export. (source: wiki/sources/descriptions/aldegad__sprite-gen.md)
+
+## Post-processing and alignment
+
+Built with Python, Pillow, and NumPy; supports recoloring, layer composition, and pixel-grid alignment so generative output lands on engine-ready grids rather than unusable demo sheets. (source: wiki/sources/descriptions/aldegad__sprite-gen.md)
+
+## Export targets
+
+Exports to engines and tooling including Aseprite, Phaser, and Flame — production-quality 2D sprite atlases from generative models for game developers and asset pipelines. (source: wiki/sources/descriptions/aldegad__sprite-gen.md)
+
+## Positioning
+
+Sits in the README **Game Assets** lane beside fal.ai web generators such as [[sprite-sheet-creator]] and Codex skillsets such as [[agent-sprite-forge]] and [[image-cockpit-for-codex-workflows]] — component-row state pipelines with alpha cleanup, frame extraction, and runtime atlas output rather than raw generative sheets.
 
 ## Links
 
