@@ -11,13 +11,17 @@ confidence: medium
 
 # KPA Root
 
-**KPA Root** (tbc0309/KPA-Root) is a Windows-based **bootloader unlock, Magisk root, and stock restore toolkit** for the KONKR Pocket Advance Android gaming handheld. PowerShell and batch launchers bundle ADB, Fastboot, USB drivers, and Magisk 30.7 with Zygisk for guided workflows that verify device model, firmware version, bootloader state, active A/B slot, and SHA-256 image hashes before flashing. (source: wiki/sources/descriptions/tbc0309__KPA-Root.md)
+**KPA Root** (tbc0309/KPA-Root) is a Windows-based **bootloader unlock, Magisk root, and stock restore toolkit** for the KONKR Pocket Advance Android gaming handheld. PowerShell and batch launchers bundle ADB, Fastboot, USB drivers, and Magisk 30.7 with Zygisk for guided workflows. (source: wiki/sources/descriptions/tbc0309__KPA-Root.md)
 
 README category: Cheat / Android Root.
 
-## Guided workflows
+## Pre-flash safeguards
 
-Pre-flash checks cover supported GT78-VN firmware builds; operations write only the active boot slot to reduce brick risk. Optional Magisk modules (Play Integrity Fork, Shamiko, device-specific font/RGB controls) ship disabled by default for manual enablement.
+Guided workflows verify device model, firmware version, bootloader state, active A/B slot, and SHA-256 image hashes before flashing. Operations target supported GT78-VN firmware builds and write only the active boot slot to reduce user error and brick risk. (source: wiki/sources/descriptions/tbc0309__KPA-Root.md)
+
+## Optional modules
+
+Optional Magisk modules — Play Integrity Fork, Shamiko, and device-specific font/RGB controls — ship installed but disabled by default so users enable them manually. (source: wiki/sources/descriptions/tbc0309__KPA-Root.md)
 
 ## Positioning
 
@@ -29,4 +33,4 @@ Targets handheld modders and Android/game-security researchers who need root on 
 
 ## Related
 
-[[overviews/mobile-security]] · [[overviews/game-hacking]] · [[magisk]] · [[kernelsu]] · [[mobile-anti-cheat]] · [[securify]]
+[[overviews/mobile-security]] · [[overviews/game-hacking]] · [[magisk]] · [[zygisk]] · [[kernelsu]] · [[mobile-anti-cheat]] · [[jerrymanager]] · [[shamiko]]

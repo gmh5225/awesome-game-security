@@ -2199,7 +2199,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [KoTR Modern Patch](entities/kotr-modern-patch.md) — King of the Road / Hard Truck 2 ASI patch (collision, camera, physics, AI traffic, trailer, UI; ModUtils + Ultimate ASI Loader; complements D2GI; DirectX Compatibility)
 - [Krunker Loader](entities/krunker-loader.md) — keyless Tampermonkey userscript stack for Krunker.io (aimbot, ESP, Quirify license-emulation loader)
 - [KPDB](entities/kpdb.md) — kernel-mode PDB parser (GetRektBoy724 pure C symbol+type streams; rbmm C++; runtime symbol resolution in drivers)
-- [kpa-root](entities/kpa-root.md) — KONKR Pocket Advance bootloader unlock, Magisk root, and stock restore toolkit with bundled ADB/Fastboot, SHA-256 image checks, and optional integrity modules (tbc0309; Cheat / Android Root)
+- [kpa-root](entities/kpa-root.md) — Windows host toolkit for KONKR Pocket Advance gaming handheld: bootloader unlock, Magisk 30.7 + Zygisk root, stock restore; bundled ADB/Fastboot; GT78-VN SHA-256/A/B-slot safeguards; optional Play Integrity Fork/Shamiko (tbc0309; Cheat / Android Root)
 - [KPM-MemReader](entities/kpm-memreader.md) — KernelPatch/APatch KPM cross-process memory read via ioctl hook (C/C++; libtersafe; cheat / Android kernel driver)
 - [kptnhook](entities/kptnhook.md) — system-wide KM DLL inject + function hook (every process; cheat / injection:windows)
 - [krnl-gdi-render](entities/krnl-gdi-render.md) — KM GDI overlay framework (WDK; GDI hooks + sigscan; Dxgkrnl + GDI)
