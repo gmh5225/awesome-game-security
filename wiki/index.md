@@ -64,7 +64,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Resource Selection](concepts/resource-selection.md) — domain routing, provenance fields, data-layer order, `repository_index.py` lookup, README maintenance convention
 - [Source NetVars](concepts/source-netvars.md) — ClientClass/RecvTable offset maps; CreateInterface exports (Source 1/2); SDK license vs shipped-binary ground truth
 - [Stack Spoofing](concepts/stack-spoofing.md) — synthetic return stacks vs RtlWalkFrameChain / unwind validation
-- [Static–Runtime Evidence](concepts/static-runtime-evidence.md) — artifact baseline (hash/format/arch/tool/environment/addresses); static inference vs runtime observation; protection-induced uncertainty labeling; reference-trace validation ([[jsrf-recomp]] diagnostics vs emulator traces); TTD trace behavioral capability via [[ttd-capa-cpp]]; pairs [[binary-evidence]] question tables
+- [Static–Runtime Evidence](concepts/static-runtime-evidence.md) — artifact baseline (hash/format/arch/tool/environment/addresses); static inference vs runtime observation; protection-induced uncertainty labeling; reference-trace validation ([[jsrf-recomp]] diagnostics vs emulator traces; [[saturnkit]] Saturn static-recomp/runtime split); TTD trace behavioral capability via [[ttd-capa-cpp]]; pairs [[binary-evidence]] question tables
 - [Unreal Object Model](concepts/unreal-object-model.md) — UObject hierarchy; reflection vs native layout; GObjects/GNames/GWorld; baseline prerequisites + [[dumper-7]] SDK workflow
 - [Vanguard](concepts/vanguard.md)
 - [World-to-Screen](concepts/world-to-screen.md) — 3D view-matrix projection for ESP/aim FOV; client-state observation + graphics/composition defensive context
@@ -3242,7 +3242,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [sac-the-server-anticheat](entities/sac-the-server-anticheat.md) — CS2 server-side algorithmic AC for Metamod:Source and CounterStrikeSharp (IDELd; C#/.NET 8; 17 detection modules; progressive enforcement; Open Source Anti Cheat System)
 - [sakura](entities/sakura.md) — CS1.6 public cheat (C++; DirectX + OpenGL + anti-cheat research; cheat / game:cs1.6; bit-paper)
 - [Sako RE Studio](entities/sako-restudio.md) — mobile-first Android disassembler/decompiler (Maxamedxasa; Capstone + IR decompiler; APK/ELF/PE/DEX; ptrace debugger; call graph; SakoScript plugins; SQLite projects; optional AI explain; offline Jetpack Compose; Cheat RE Tools)
-- [Saturnkit](entities/saturnkit.md) — Sega Saturn RE toolkit: disc/IP.BIN parsing, SH-2 decode, static recompilation to C++, hardware runtime for native PC ports (Cheat / RE Tools)
+- [Saturnkit](entities/saturnkit.md) — Sega Saturn RE toolkit: Python disc/SH-2 analysis + static recomp to C++; C++20 VDP1/2/SCU/SMPC/CD/SCSP runtime (SDL3/OpenGL); submodule per-title port layout (Cheat / RE Tools)
 - [saturn-mapper](entities/saturn-mapper.md) — Windows kernel PE manual mapper (iqvw64e.sys; BYOVD / unsigned map)
 - [sumap (ekknod)](entities/sumap.md) — EFI manual map (C/C++; pre-boot unsigned driver PE mapping; driver development / memory analysis; cheat / EFI Manual Map)
 - [sapphire](entities/sapphire.md) — FFXIV private-server emulator (patch 3.3 branch; in development; Private Server / MMORPG; gmh5225)

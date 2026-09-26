@@ -5,7 +5,8 @@ topics: [reverse-engineering, anti-cheat]
 sources:
   - wiki/sources/skills/reverse-engineering.md
   - wiki/sources/descriptions/HullaBrian__ttd-capa-cpp.md
-updated: 2026-09-22
+  - wiki/sources/descriptions/vs-sr-dev__saturnkit.md
+updated: 2026-09-26
 confidence: high
 ---
 
@@ -47,7 +48,7 @@ State which protections were identified, which recovery steps were applied, and 
 
 ## Reference-trace validation
 
-Static recompilation projects such as [[jsrf-recomp]] (OG Xbox XBE→native macOS ARM64 via xboxrecomp) pair translated C output with an extensive diagnostics harness that validates behavior against reference emulator traces—illustrating how static translation claims should be corroborated with runtime or trace-aligned evidence before treating recompiled builds as faithful. (source: wiki/sources/descriptions/andeecollard__jsrf-recomp.md)
+Static recompilation projects such as [[jsrf-recomp]] (OG Xbox XBE→native macOS ARM64 via xboxrecomp) pair translated C output with an extensive diagnostics harness that validates behavior against reference emulator traces—illustrating how static translation claims should be corroborated with runtime or trace-aligned evidence before treating recompiled builds as faithful. (source: wiki/sources/descriptions/andeecollard__jsrf-recomp.md) [[saturnkit]] (vs-sr-dev; Python SH-2 analysis + static recomp to C++ with a C++20 Saturn hardware runtime for native PC ports) splits the same static/runtime boundary across analysis tooling and an embedded per-title port submodule model. (source: wiki/sources/descriptions/vs-sr-dev__saturnkit.md)
 
 ## Behavioral capability from TTD traces
 
@@ -55,4 +56,4 @@ Full-process **Time Travel Debugging (TTD)** recordings capture executed API cal
 
 ## Related
 
-[[binary-evidence]] · [[binary-diffing]] · [[dynamic-binary-instrumentation]] · [[jsrf-recomp]] · [[ttd-capa-cpp]] · [[mixed-boolean-arithmetic]] · [[control-flow-flattening]] · [[research-rigor]] · [[overviews/reverse-engineering]] · [[overviews/windows-kernel]] · [[overviews/game-engine]]
+[[binary-evidence]] · [[binary-diffing]] · [[dynamic-binary-instrumentation]] · [[jsrf-recomp]] · [[saturnkit]] · [[ttd-capa-cpp]] · [[mixed-boolean-arithmetic]] · [[control-flow-flattening]] · [[research-rigor]] · [[overviews/reverse-engineering]] · [[overviews/windows-kernel]] · [[overviews/game-engine]]

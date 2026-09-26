@@ -11,19 +11,27 @@ confidence: medium
 
 # Saturnkit
 
-Game-agnostic toolkit for Sega Saturn reverse engineering and building native PC ports. Pure Python modules parse disc images, decode and analyze SH-2 executables, map hardware registers, discover functions, match code across programs, and statically recompile SH-2 binaries to C++. A C++20 runtime emulates Saturn hardware — both SH-2 CPUs, VDP1/VDP2 graphics, SCU, SMPC, CD block, and SCSP sound with a Musashi 68000 — and runs recompiled code in an SDL3/OpenGL window with gamepad support. Designed as a submodule in per-game port projects, separating shared Saturn platform knowledge from title-specific logic. (source: wiki/sources/descriptions/vs-sr-dev__saturnkit.md)
+**Saturnkit** (vs-sr-dev/saturnkit) is a game-agnostic toolkit for Sega Saturn reverse engineering and building native PC ports of Saturn titles. Listed under README **Cheat / RE Tools**. (source: wiki/sources/descriptions/vs-sr-dev__saturnkit.md)
 
-Sits in the Cheat **RE Tools** lane beside title-specific retro format docs such as [[pc-wackywheels-doc]] and [[omikron-tns-omk-engine]] — platform toolkit for Saturn disc/CPU analysis and static recompilation rather than a single-game write-up.
+## Analysis toolchain
 
-## Scope
+Pure **Python** modules parse disc images and **IP.BIN** boot metadata, decode and analyze **SH-2** executables, map hardware registers, discover functions, and match code across programs. (source: wiki/sources/descriptions/vs-sr-dev__saturnkit.md)
 
-| Area | Focus |
-|------|-------|
-| **Disc / IP.BIN** | Disc image parsing and boot metadata |
-| **SH-2** | Decode, function discovery, cross-program matching |
-| **Static recomp** | SH-2 → C++ translation pipeline |
-| **Runtime** | VDP1/2, SCU, SMPC, CD block, SCSP emulation |
-| **Integration** | Submodule layout for per-title port repos |
+## Static recompilation
+
+Translates SH-2 binaries to **C++** through a static recompilation pipeline, separating platform translation from per-title port logic. (source: wiki/sources/descriptions/vs-sr-dev__saturnkit.md)
+
+## Hardware runtime
+
+A **C++20** runtime emulates Saturn hardware — dual **SH-2** CPUs, **VDP1** and **VDP2** graphics, **SCU**, **SMPC**, **CD block**, and **SCSP** sound with a **Musashi 68000** — and runs recompiled code in an **SDL3** and **OpenGL** window with gamepad support. (source: wiki/sources/descriptions/vs-sr-dev__saturnkit.md)
+
+## Integration model
+
+Designed to embed as a **git submodule** in per-game port projects so shared Saturn platform knowledge stays separate from title-specific logic. (source: wiki/sources/descriptions/vs-sr-dev__saturnkit.md)
+
+## Positioning
+
+Sits in the retro-console RE lane beside title-specific format docs such as [[pc-wackywheels-doc]] and [[omikron-tns-omk-engine]] — a platform toolkit for Saturn disc/CPU analysis and static recompilation rather than a single-game write-up. Targets reverse engineers and developers porting or analyzing Sega Saturn titles.
 
 ## Links
 
@@ -31,4 +39,4 @@ Sits in the Cheat **RE Tools** lane beside title-specific retro format docs such
 
 ## Related
 
-[[pc-wackywheels-doc]] · [[omikron-tns-omk-engine]] · [[awesome-game-file-format-reversing]] · [[overviews/reverse-engineering]] · [[overviews/game-hacking]]
+[[pc-wackywheels-doc]] · [[omikron-tns-omk-engine]] · [[jsrf-recomp]] · [[mcla-pc]] · [[awesome-game-file-format-reversing]] · [[static-runtime-evidence]] · [[overviews/reverse-engineering]] · [[overviews/game-hacking]]
