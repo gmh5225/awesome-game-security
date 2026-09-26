@@ -753,6 +753,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/dsasmblr/game-hacking
 - https://github.com/dsasmblr/hacking-online-games
 - https://github.com/jbro129/android-modding [A collection of repositories related to Android game modding]
+- https://github.com/liuyiyi0219-arch/unity-apk-reverse [40-chapter hands-on Unity mobile APK reverse-engineering course covering IL2CPP, Lua, DEX, Frida, and asset extraction with runnable demos and auto-graded labs]
 - https://github.com/kovidomi/game-reversing
 - https://github.com/TheZong/Game-Hacking
 - https://github.com/mytechnotalent/Reverse-Engineering
