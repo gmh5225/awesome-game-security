@@ -4,7 +4,7 @@ kind: concept
 topics: [dma-attack, anti-cheat, windows-kernel]
 sources:
   - wiki/sources/skills/dma-attack.md
-updated: 2026-09-13
+updated: 2026-09-26
 confidence: high
 ---
 
@@ -22,7 +22,7 @@ EPT concerns processor memory virtualization; VT-d/AMD-Vi supplies independent d
 
 ## Separate platform features and deployment state
 
-Memory integrity ([[hvci]]) isolates kernel code-integrity decisions using VBS. Treat code integrity, vulnerable-driver blocking, and DMA policy as distinct controls—a blocklist cannot cover every vulnerable driver. Kernel DMA Protection does not require VBS; device DMA remapping can be enabled independently. Runtime protection and firmware pre-boot responsibilities are separate. Review actual device/driver remapping and platform policy, not one UI flag. A missing feature is a policy/compatibility question, not a misconduct finding.
+Memory integrity ([[hvci]]) isolates kernel code-integrity decisions using VBS. Treat code integrity, vulnerable-driver blocking, and DMA policy as distinct controls—a blocklist cannot cover every vulnerable driver. Kernel DMA Protection does not require VBS; device DMA remapping can be enabled independently. Runtime protection and firmware pre-boot responsibilities are separate. Review actual device/driver remapping and platform policy, not one UI flag—use [[iommu-state-verification]] to keep ACPI advertisement, Windows policy, live unit state, and per-requester coverage separate rather than one `iommu_enabled` boolean. A missing feature is a policy/compatibility question, not a misconduct finding. (source: wiki/sources/skills/dma-attack.md)
 
 ## Attestation has a defined subject
 
@@ -34,4 +34,4 @@ Windows reserves PCI configuration headers and capability registers to the OS; s
 
 ## Related
 
-[[memory-acquisition-path]] · [[iommu]] · [[hvci]] · [[dma]] · [[research-rigor]] · [[overviews/dma-attack]] · [[overviews/anti-cheat]] · [[overviews/windows-kernel]]
+[[memory-acquisition-path]] · [[iommu]] · [[iommu-state-verification]] · [[hvci]] · [[dma]] · [[research-rigor]] · [[overviews/dma-attack]] · [[overviews/anti-cheat]] · [[overviews/windows-kernel]]

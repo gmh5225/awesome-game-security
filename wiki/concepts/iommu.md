@@ -9,7 +9,7 @@ sources:
   - wiki/sources/descriptions/cutecatsandvirtualmachines__DmaProtect.md
   - wiki/sources/descriptions/BigAnteater__KVM-GPU-Passthrough.md
   - wiki/sources/descriptions/kEv1nZ0__VTD-Bypass.md
-updated: 2026-09-25
+updated: 2026-09-26
 confidence: high
 ---
 
@@ -83,10 +83,14 @@ Techniques 1–6 are the active surface for most commercial DMA cheats; 7–13 a
 - Per-device fault rate: sustained faults need driver-bug and reset exclusions before attributing malicious out-of-domain access
 - Lab setup guides such as [[kvm-gpu-passthrough]] (BigAnteater; Arch Linux GRUB/libvirt/QEMU templates; IOMMU/VT-d and AMD/Intel BIOS prerequisites for GPU passthrough VMs) document the **host-side isolation topology** researchers must validate before assigning devices to VFIO guests. (source: wiki/sources/descriptions/BigAnteater__KVM-GPU-Passthrough.md)
 
+## State verification
+
+Claims that IOMMU is "enabled" or that KDP covers a device require separating four properties: ACPI **advertisement** (DMAR/IVRS), Windows **policy** (KDP, per-device DMA Remapping Policy), **live unit state**, and **requester coverage**. KDP On does not prove every internal endpoint is remapped; a valid ACPI table does not prove runtime mappings. See [[iommu-state-verification]] for the evidence checklist and read-only collection discipline. (source: wiki/sources/skills/dma-attack.md)
+
 ## Limits
 
 Misconfigured BIOS, pre-boot DMA, ACS holes, ATS abuse, over-mapped pages, legitimate-path exfil, or kernel compromise reprogramming tables can defeat IOMMU alone—hence layered PCIe fingerprinting, hypervisor EPT, and TPM/measured-boot attestation with [[hvci]].
 
 ## Related
 
-[[dma]] · [[memory-acquisition-path]] · [[assurance-boundaries]] · [[helloiommupkg]] · [[dmaprotect]] · [[diedmaprotection]] · [[kvm-gpu-passthrough]] · [[byovd]] · [[hvci]] · [[overviews/dma-attack]] · [[overviews/anti-cheat]]
+[[dma]] · [[memory-acquisition-path]] · [[assurance-boundaries]] · [[iommu-state-verification]] · [[helloiommupkg]] · [[dmaprotect]] · [[diedmaprotection]] · [[kvm-gpu-passthrough]] · [[byovd]] · [[hvci]] · [[overviews/dma-attack]] · [[overviews/anti-cheat]]
