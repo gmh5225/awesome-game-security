@@ -1836,6 +1836,7 @@ sources:
   - wiki/sources/descriptions/DeNA__mempatch.md
   - wiki/sources/descriptions/Compiled-Code__be-injector.md
   - wiki/sources/descriptions/Compiled-Code__external-il2cpp.md
+  - wiki/sources/descriptions/Cristallin2006__ghidra-skill-for-dsh.md
   - wiki/sources/descriptions/CodeCracker-Tools__MegaDumper.md
   - wiki/sources/descriptions/Codeusa__Borderless-Gaming.md
   - wiki/sources/descriptions/CoderYiXin__PalOpsWeb.md
@@ -2178,6 +2179,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - C#/.NET x64dbg MCP plugin via [[x64dbgmcpserver]] (AgentSmithers; MCP-compatible HTTP interface; self-hosted listener; memory/disasm/register/label/automation commands; AI-assisted RE and scripted game security analysis; Cheat Debugging / agent-RE lane) (source: wiki/sources/descriptions/AgentSmithers__x64DbgMCPServer.md)
 - Agent-native integrated RE lab via [[open-reverselab]] (LING71671; Python; 180+ technique articles + 100+ MCP automation tools; knowledge router maps signals to attack chains; Ghidra/Frida/x64dbg/jadx; web CTF, Android APK/DEX, Windows PE, crypto, game cheating/AC boards; authorized binary/malware/game-protection investigation; Cheat agent-RE lane) (source: wiki/sources/descriptions/LING71671__open-reverselab.md)
 - AI-assisted RE with deterministic byte-level verification via [[reverify]] (2akouwu; MCP server + CLI; pairs LLM analysis with auditable byte-level checks; Cheat RE Tools) (source: wiki/sources/README-categories.md)
+- DSH Ghidra headless RPC skill family via [[ghidra-skill-for-dsh]] (Cristallin2006; seven scenario workflows—triage, unpack, static, vuln audit, Frida/Qiling dynamic, PCAP traffic, pure-DEX APK; oracle-based verification; Cheat RE Tools) (source: wiki/sources/descriptions/Cristallin2006__ghidra-skill-for-dsh.md)
 - Node.js MCP orchestrator via [[skid-factory]] (wrong-commit; TypeScript + Lua/Python bridges; Cheat Engine/x64dbg/Ghidra memory scan, hardware write breakpoints, pointer-chain trace, and patch workflows; Cursor CLI advise loop; Cheat RE Tools) (source: wiki/sources/descriptions/wrong-commit__skid_factory.md)
 - Windows x86/x64 debugger [[syser]] (C/C++; RE / plugin development / modding) complements [[x64dbg]] in the Cheat Debugging lane for game-security offensive debug workflows. (source: wiki/sources/descriptions/marakew__syser.md)
 - Extension-plugin disassembler/debugger [[xdv]] (C/C++; plugin development / modding / SDK generation) complements [[x64dbg]] and [[syser]] in the Cheat Debugging lane for game-security offensive RE. (source: wiki/sources/descriptions/imugee__xdv.md)
