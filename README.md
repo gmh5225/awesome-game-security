@@ -923,6 +923,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/mentebinaria/retoolkit [Reverse Engineer's Toolkit]
 - https://github.com/lilyco-42/rev-tools-setup [One-click Windows RE toolchain installer (Scoop) with Cheat Engine MCP setup and AI agent pitfalls guide]
 - https://github.com/rollingrock/bethesda-modding-starter [Bootstrap for Bethesda script-extender plugin dev plus Ghidra/x64dbg MCP reverse-engineering toolchain]
+- https://github.com/jlagedo/dreams-to-reality-re [Reverse-engineering research toolkit for Dreams to Reality (1997): Python asset decoders, Ghidra scripts, format documentation, and a Babylon.js viewer—tools only, no copyrighted game data]
 - https://github.com/ling71671/open-reverselab [Agent-native RE lab with knowledge base, 100+ MCP tools, and APK/PE/game-cheating analysis workflows]
 - https://github.com/2akouwu/reverify [AI-assisted reverse engineering with deterministic byte-level verification via MCP server and CLI]
 - https://github.com/LargoScript/n0xis [Cross-platform Rust RE pipeline with static PE/ELF analysis, SSA decompilation, live memory scanning, hardware watchpoints, and MCP/JSON automation for game reversing]
@@ -2823,6 +2824,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/tgillam/HumanMouseMovement
 - https://github.com/AsfhtgkDavid/windmouse [Human-like mouse movement using WindMouse algorithm]
 - https://github.com/Chaoses-Ib/IbInputSimulator [Simulating keyboard, mouse]
+- https://github.com/guvenada/Titanium-Macro [Kernel-level input automation engine using an Interception driver wrapper to inject HID events with microsecond timing, aimed at bypassing user-mode input restrictions imposed by anti-cheat and game engines]
 - https://github.com/ekknod/logitech-cve [logitech]
 - https://github.com/gmh5225/razer-rzctl [Razer]
 - https://github.com/vsaint1/kernel-mouse [MouClass]
@@ -4456,6 +4458,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/sodium-CrispyWafer/CrispyWafer-Anti-Cheat-Assistant-WaferACA [Minecraft Forge 1.20.1 client anti-cheat mod that detects other players' installed client mods and alerts when known cheat mods (e.g., Gun Tracker) are present]
 - https://github.com/Charlie328402/Sentinel-Anti-Cheat [NeoForge server-side Minecraft anti-cheat mod with movement, combat, and x-ray checks plus a Discord violation bot]
 - https://github.com/clementine44613/seiun-ac [Fabric server/client mod that hashes and whitelists client mods and resource packs, with gray-list warnings, Discord alerts, and mid-session pack-change detection for Minecraft 1.21.11]
+- https://github.com/TypeThe0ry/MCAce [Fabric client/server anti-cheat pipeline that reports loaded mod and resource-pack inventory over an authenticated channel, correlates server-side signals, and applies signed per-connection policy for Minecraft]
 - https://github.com/XuJun05/FairCount [Fabric server/client mod that whitelists loaded mods (including nested JARs) and kicks clients with unauthorized mods or without FairCount installed]
 - https://github.com/no1qq/UAGC [Context-aware PaperMC 1.21 anti-cheat plugin with check framework, confidence/evidence model, exemptions, and staff bypass visibility]
 - https://github.com/Benardelys/H-AC [Paper 1.21 server-side Minecraft anti-cheat plugin with modular combat/movement checks, latency-compensated reach raytracing, and asynchronous violation logging]
