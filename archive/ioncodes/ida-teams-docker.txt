@@ -1,0 +1,271 @@
+Project Path: arc_ioncodes_ida-teams-docker_3wrmnmib
+
+Source Tree:
+
+```txt
+arc_ioncodes_ida-teams-docker_3wrmnmib
+├── Dockerfile.Hexvault
+├── Dockerfile.Lumina
+├── README.md
+├── docker-compose.yml
+└── files
+    ├── .gitkeep
+    ├── hexvault_entry.sh
+    ├── lumina.conf
+    ├── lumina_entry.sh
+    └── server_common.sh
+
+```
+
+`Dockerfile.Hexvault`:
+
+```Hexvault
+# syntax=docker/dockerfile:1
+FROM debian:bookworm-slim
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends openssl ca-certificates python3 \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY files/hexvault.run /tmp/hexvault.run
+RUN chmod +x /tmp/hexvault.run \
+    && /tmp/hexvault.run --mode unattended --initialization 0 --service 0 --prefix /opt/hexvault \
+    && rm /tmp/hexvault.run
+
+RUN --mount=type=bind,source=files/setup_hexvault.py,target=/tmp/setup_hexvault.py \
+    python3 /tmp/setup_hexvault.py
+
+RUN cp /opt/hexvault/hexvault.conf.example /opt/hexvault/hexvault.conf \
+    && chmod 640 /opt/hexvault/hexvault.conf
+
+COPY --chmod=755 files/server_common.sh files/hexvault_entry.sh /usr/local/bin/
+WORKDIR /opt/hexvault
+VOLUME ["/opt/hexvault/files", "/opt/hexvault/tls"]
+EXPOSE 65433
+ENTRYPOINT ["/usr/local/bin/hexvault_entry.sh"]
+
+```
+
+`Dockerfile.Lumina`:
+
+```Lumina
+# syntax=docker/dockerfile:1
+FROM debian:bookworm-slim
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends openssl ca-certificates python3 default-mysql-client \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY files/lumina.run /tmp/lumina.run
+RUN chmod +x /tmp/lumina.run \
+    && /tmp/lumina.run --mode unattended --initialization 0 --service 0 --prefix /opt/lumina \
+    && rm /tmp/lumina.run
+
+RUN --mount=type=bind,source=files/setup_lumina.py,target=/tmp/setup_lumina.py \
+    python3 /tmp/setup_lumina.py
+
+COPY --chmod=640 files/lumina.conf /opt/lumina/lumina.conf
+COPY --chmod=755 files/server_common.sh files/lumina_entry.sh /usr/local/bin/
+WORKDIR /opt/lumina
+VOLUME ["/opt/lumina/tls"]
+EXPOSE 65432
+ENTRYPOINT ["/usr/local/bin/lumina_entry.sh"]
+
+```
+
+`README.md`:
+
+```md
+# Hexvault and Lumina
+
+IDA Hexvault and Lumina dockerized with Docker Compose.
+
+## Setup
+
+1. Put the Hexvault installer at `files/hexvault.run`.
+2. Put the Lumina installer at `files/lumina.run`.
+3. Put `setup_hexvault.py` and `setup_lumina.py` in `files/`.
+4. Copy `.env.example` to `.env` and adjust it if needed.
+5. Run:
+
+   ```sh
+   docker compose up --build -d
+   ```
+
+The setup scripts run during their respective image builds and create the
+license files in the server directories. The scripts themselves are not stored
+in the resulting images.
+
+## Connect
+
+- Hexvault: `127.0.0.1:65433`
+- Lumina: `127.0.0.1:443`
+
+Change the bind address or ports in `.env` if needed.
+
+## Notes
+
+Hexvault data, Lumina's MySQL data and both servers' TLS certificates are kept
+in Docker volumes.
+
+```
+
+`docker-compose.yml`:
+
+```yml
+services:
+  hexvault:
+    build:
+      context: .
+      dockerfile: Dockerfile.Hexvault
+    platform: linux/amd64
+    restart: unless-stopped
+    mac_address: "${HEXVAULT_MAC_ADDRESS:-02:42:ac:10:00:02}"
+    ports:
+      - "${BIND_ADDRESS:-127.0.0.1}:${HEXVAULT_PORT:-65433}:65433"
+    volumes:
+      - hexvault:/opt/hexvault/files
+      - hexvault-tls:/opt/hexvault/tls
+
+  lumina:
+    build:
+      context: .
+      dockerfile: Dockerfile.Lumina
+    platform: linux/amd64
+    restart: unless-stopped
+    mac_address: "${LUMINA_MAC_ADDRESS:-02:42:ac:10:00:03}"
+    ports:
+      - "${BIND_ADDRESS:-127.0.0.1}:${LUMINA_PORT:-443}:65432"
+    depends_on:
+      lumina-mysql:
+        condition: service_healthy
+    networks:
+      - default
+      - internal_db
+    volumes:
+      - lumina-tls:/opt/lumina/tls
+
+  lumina-mysql:
+    image: mysql:8.0
+    command: --default-authentication-plugin=mysql_native_password
+    restart: unless-stopped
+    environment:
+      MYSQL_USER: lumina
+      MYSQL_PASSWORD: lumina
+      MYSQL_ROOT_PASSWORD: lumina
+      MYSQL_DATABASE: lumina
+    healthcheck:
+      test: ["CMD-SHELL", "MYSQL_PWD=$$MYSQL_PASSWORD mysql -h 127.0.0.1 -u lumina lumina -e 'SELECT 1' >/dev/null 2>&1"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 30s
+    networks:
+      - internal_db
+    volumes:
+      - lumina:/var/lib/mysql
+
+networks:
+  internal_db:
+    internal: true
+
+volumes:
+  lumina:
+  hexvault:
+  lumina-tls:
+  hexvault-tls:
+
+```
+
+`files/hexvault_entry.sh`:
+
+```sh
+#!/bin/sh
+set -eu
+. /usr/local/bin/server_common.sh
+
+prepare_server /opt/hexvault teams_server.hexlic hexvault
+mkdir -p /opt/hexvault/files
+set -- /opt/hexvault/vault_server \
+    --license-file /opt/hexvault/teams_server.hexlic \
+    --config-file /opt/hexvault/hexvault.conf \
+    --vault-dir /opt/hexvault/files \
+    --certchain-file /opt/hexvault/tls/server.crt \
+    --privkey-file /opt/hexvault/tls/server.key
+
+if [ ! -e /opt/hexvault/files/hexvault.sqlite3 ]; then
+    # Never recreate a missing database over an existing vault's files.
+    if [ -n "$(find /opt/hexvault/files -mindepth 1 -maxdepth 1 -print -quit)" ]; then
+        echo "Vault directory is not empty but hexvault.sqlite3 is missing; refusing to initialize." >&2
+        exit 1
+    fi
+    "$@" --recreate-schema
+fi
+"$@" --upgrade-schema
+exec "$@" --port-number 65433
+
+```
+
+`files/lumina.conf`:
+
+```conf
+CONNSTR="mysql;Server=lumina-mysql;Port=3306;Database=lumina;Uid=lumina;Pwd=lumina"
+```
+
+`files/lumina_entry.sh`:
+
+```sh
+#!/bin/sh
+set -eu
+. /usr/local/bin/server_common.sh
+
+prepare_server /opt/lumina lumina_server.hexlic lumina
+set -- /opt/lumina/lumina_server \
+    --license-file /opt/lumina/lumina_server.hexlic \
+    --config-file /opt/lumina/lumina.conf \
+    --certchain-file /opt/lumina/tls/server.crt \
+    --privkey-file /opt/lumina/tls/server.key
+
+# A failed connection must abort startup, never trigger schema recreation.
+tables=$(MYSQL_PWD=lumina mysql --connect-timeout=10 \
+    -h lumina-mysql -P 3306 -u lumina -N -B lumina -e 'SHOW TABLES')
+if [ -z "$tables" ]; then
+    "$@" --recreate-schema lumina
+else
+    "$@" --upgrade-schema
+fi
+exec "$@" --port-number 65432
+
+```
+
+`files/server_common.sh`:
+
+```sh
+#!/bin/sh
+
+prepare_server() {
+    server_dir=$1
+    license_name=$2
+    certificate_name=$3
+    if [ ! -s "$server_dir/$license_name" ]; then
+        echo "Missing $server_dir/$license_name; the setup script must create it." >&2
+        exit 1
+    fi
+    umask 027
+    chmod 640 "$server_dir/$license_name"
+
+    mkdir -p "$server_dir/tls"
+    if [ ! -e "$server_dir/tls/server.key" ] && [ ! -e "$server_dir/tls/server.crt" ]; then
+        openssl req -x509 -newkey rsa:4096 \
+            -keyout "$server_dir/tls/server.key" \
+            -out "$server_dir/tls/server.crt" \
+            -days 365 -nodes -subj "/CN=$certificate_name"
+    fi
+    if [ ! -s "$server_dir/tls/server.key" ] || [ ! -s "$server_dir/tls/server.crt" ]; then
+        echo "Both tls/server.key and tls/server.crt must exist and be nonempty." >&2
+        exit 1
+    fi
+    chmod 640 "$server_dir/tls/server.key" "$server_dir/tls/server.crt"
+}
+
+```
