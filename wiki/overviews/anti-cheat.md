@@ -936,6 +936,7 @@ sources:
   - wiki/sources/descriptions/ablanchard-dev__dexcheck.md
   - wiki/sources/descriptions/Jdgshsvejevhevejeve__NOVA-AntiCheat.md
   - wiki/sources/descriptions/GeneralsOnlineDevelopmentTeam__AntiCheatPlugin_EasyAntiCheat.md
+  - wiki/sources/descriptions/TypeThe0ry__MCAce.md
 updated: 2026-09-27
 confidence: high
 ---
@@ -1226,6 +1227,8 @@ Long-form kernel AC architecture primer [How Kernel Anti-Cheats Work](https://s4
 **Version-neutral AC foundation:** [[inertia]] (InertiaOrg; Java; version-neutral player-behavior engine; movement/packet/world/collision contracts, evidence accumulation with confidence/decay and false-positive context; version profiles + movement-prediction skeleton; `inertia-api`/`inertia-core`/`inertia-testkit`; scenario tests without live server; Anti Cheat / game:minecraft). (source: wiki/sources/descriptions/InertiaOrg__Inertia.md)
 
 **Fabric mod/resource-pack whitelist AC:** [[faircount]] (XuJun05; Java Fabric mod; join-time client mod inventory incl. nested jar-in-jar; SHA-256 hash verification against server whitelists; disconnects clients missing FairCount or carrying unauthorized mods; external resource-pack whitelist/hash checks; auto-permits Fabric API modules; admin commands + localized kick messages; Anti Cheat / game:minecraft) for competitive PvP and vanilla-fair hosts beside hash-tier mods such as [[seiun-ac]]. (source: wiki/sources/descriptions/XuJun05__FairCount.md)
+
+**Fabric consent-based client visibility + admission:** [[mcace]] (TypeThe0ry; Java/Kotlin Gradle; Fabric client mod + Velocity/BungeeCord proxy + Paper/Folia backend; MC 1.21.11/26.1.2/26.2; per-connection user consent; signed telemetry for loaded mods, resource packs, and shader selections; Ed25519-signed evidence frames; correlates client-reported facts with independent server-side AC signals via Grim and Vulcan integrations; fail-closed policy evaluation with bounded dispositions—observe, warn, challenge, quarantine; auditable reversible admission for network administrators; Anti Cheat / game:minecraft) distinct from hash-whitelist mods such as [[faircount]] and consensual PC screenshare such as [[error-pc-check]]. (source: wiki/sources/descriptions/TypeThe0ry__MCAce.md)
 
 **Fabric client+server AC:** [[the-dreamers-guards]] (IamFriendly0242u; Java Fabric mod; encrypted join-time network payloads; mod blacklist scanning; progressive four-phase suspension; anti-evasion logout-bypass checks; operator kick/ban/pardon/trust commands; Discord webhook alerts; Anti Cheat / game:minecraft) for Fabric administrators needing combined client-integrity verification and automated server-side enforcement. (source: wiki/sources/descriptions/IamFriendly0242u__The-Dreamers-Guards.md)
 
