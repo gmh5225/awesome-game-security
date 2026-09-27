@@ -26,4 +26,4 @@ Integrates with OneConfig for settings. Intended for PvP players and security re
 
 ## Related
 
-[[phantom-client]] · [[avaanticheat]] · [[dakotaac]] · [[minecraft-anticheatai]] · [[lenrete-mod]] · [[minecpp]] · [[oomph]] · [[overviews/anti-cheat]] · [[overviews/game-hacking]]
+[[rain-injectable]] · [[phantom-client]] · [[avaanticheat]] · [[dakotaac]] · [[minecraft-anticheatai]] · [[lenrete-mod]] · [[minecpp]] · [[oomph]] · [[overviews/anti-cheat]] · [[overviews/game-hacking]]
