@@ -4435,6 +4435,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/GrimAnticheat/Grim [Minecraft]
 - https://github.com/InertiaOrg/Inertia [Open-source Minecraft anti-cheat foundation with version-neutral movement/packet modeling, evidence accumulation, and testable detection core]
 - https://github.com/freezato/LocalAnticheat-1.8.9 [Client-side Forge 1.8.9 mod that passively flags local/remote cheat signals from observed packet flow in local chat without server reports]
+- https://github.com/maximumemails-cmd/RainInjectable [Injectable Windows C++/Java runtime that rebuilds the Rain 1.8.9 client-side cheat observer for Forge and Badlion, with JNI bootstrap, detection research docs, and local-only evidence review]
 - https://github.com/YcbrYL1/YCBR-AntiCheat [Paper 1.8.9 Minecraft anti-cheat plugin with 19 combat/movement/protocol checks, auth, DDoS protection, and admin GUI]
 - https://github.com/NoCheatPlus/NoCheatPlus [Open-source anti-cheat plugin for Minecraft (Bukkit/Spigot)]
 - https://github.com/ThoriumAC/Thorium-Minecraft-Plugin [Open-source Paper/Spigot/Folia plugin that streams movement, combat, and world-interaction telemetry to the Thorium engine for server-side anti-cheat enforcement]
