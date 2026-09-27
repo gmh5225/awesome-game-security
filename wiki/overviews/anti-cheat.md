@@ -419,6 +419,7 @@ sources:
   - wiki/sources/descriptions/KuryCat__GhostJoin.md
   - wiki/sources/descriptions/Eangly99__AstroX-AntiCheat.md
   - wiki/sources/descriptions/GhostNgEnd__Ghost-AntiCheat.md
+  - wiki/sources/descriptions/getawife__nofly.md
   - wiki/sources/descriptions/Gingerbeard5773__dino-printer.md
   - wiki/sources/descriptions/Charlie328402__Sentinel-Anti-Cheat.md
   - wiki/sources/descriptions/NaySurGithub__Amethyst.md
@@ -932,7 +933,7 @@ sources:
   - wiki/sources/descriptions/lsxll666__AntiCheatToggle.md
   - wiki/sources/descriptions/BUNNY-19C__DLSSG-30s-manager.md
   - wiki/sources/descriptions/ablanchard-dev__dexcheck.md
-updated: 2026-09-26
+updated: 2026-09-27
 confidence: high
 ---
 
@@ -1257,6 +1258,8 @@ Long-form kernel AC architecture primer [How Kernel Anti-Cheats Work](https://s4
 **Paper/Folia heuristic AC:** [[bs-anticheat]] (BoondockSulfur; Java Paper **1.21.10+** plugin; full Folia support; movement/combat/world-interaction/inventory/vehicle/packet checks—speed, fly, reach, killaura, nuker, autoclicker, x-ray mining; transaction-based lag compensation; configurable violation-level punishments with optional setbacks; SQLite logging; PacketEvents, Discord webhooks, PlaceholderAPI, and LuckPerms integrations; false-positive-conscious tunable heuristics for server administrators; Anti Cheat / game:minecraft) for Paper/Folia operators beside physics-prediction AC such as [[grim]] and alert-focused NeoForge mods such as [[sentinel-anticheat-neoforge]]. (source: wiki/sources/descriptions/BoondockSulfur__BS-AntiCheat.md)
 
 **Paper modular MC AC:** [[h-ac]] (Benardelys; Java Paper **1.21** plugin; modular combat/movement/world checks with latency-compensated reach raytracing, violation decay, asynchronous logging, Discord alerts, client brand fingerprinting, and injector detection; Anti Cheat / game:minecraft) for Paper operators beside heuristic plugins such as [[bs-anticheat]] and [[larping-anti-cheat]]. (source: wiki/sources/descriptions/Benardelys__H-AC.md)
+
+**Paper fly-focused AC:** [[nofly]] (getawife; Java Paper **1.21.x** plugin; synchronous movement analysis + PacketEvents packet sanity checks; gravity simulation with configurable buffers/leniency for hover/sustained ascent/glide; exemptions for creative/vehicles/elytra/potions; staff alerts, disk logging, setback rubber-banding; lightweight fly-only scope rather than general exploit prevention; Anti Cheat / game:minecraft) for Paper operators wanting narrow fly detection beside modular plugins such as [[h-ac]] and heuristic Paper plugins such as [[bs-anticheat]]. (source: wiki/sources/descriptions/getawife__nofly.md)
 
 **Offline CS2 demo review:** [[cs2-overwatch]] (magicnothief; Python offline demo pipeline; hard rules, ray-cast visibility, ML behavior scoring on CS2CD, calibrated suspicion tiers, optional local LLM summaries; browser UI + CLI; privacy-preserving local review; Anti Cheat / Analysis Framework) beside demo-telemetry research such as [[yaacs-anticheat]] and explainable scoring tools such as [[cs2-tracker]]. (source: wiki/sources/descriptions/magicnothief__cs2-overwatch.md)
 
