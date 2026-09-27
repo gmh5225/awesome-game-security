@@ -13,7 +13,8 @@ sources:
   - wiki/sources/descriptions/Chaoses-Ib__IbInputSimulator.md
   - wiki/sources/descriptions/BatogiX__logitech-cve.md
   - wiki/sources/descriptions/ablanchard-dev__dexcheck.md
-updated: 2026-09-23
+  - wiki/sources/descriptions/guvenada__Titanium-Macro.md
+updated: 2026-09-27
 confidence: medium
 ---
 
@@ -30,7 +31,7 @@ Input paths that emit **protocol-conformant HID reports** (USB keyboard/mouse) o
 | Logitech driver abuse | Inject into G HUB/LGS; internal move APIs | No extra hardware; version-patched |
 
 Logitech-focused driver/CVE research such as [[logitech-cve]] spans ekknod C/C++ driver-development PoCs (cheat / triggerbot & aimbot) and BatogiX Rust typed libraries over Logitech virtual driver IOCTL handles (input-emulation research, automation, vulnerable-driver attack-surface analysis). (source: wiki/sources/descriptions/ekknod__logitech-cve.md) (source: wiki/sources/descriptions/BatogiX__logitech-cve.md) Unified multi-backend Windows input libraries such as [[ib-input-simulator]] (Chaoses-Ib; Logitech, Razer Synapse, MouClassInputInjection, DD virtual devices; AHK integration; driver-backed keyboard/mouse when user-mode APIs are blocked) sit beside single-vendor PoCs like [[razer-rzctl]]. (source: wiki/sources/descriptions/Chaoses-Ib__IbInputSimulator.md)
-| interception.sys | Filter driver inject | Known signature; widely flagged |
+| interception.sys | Filter driver inject | Known signature; widely flagged; full macro record/replay stacks such as [[titanium-macro]] (guvenada; Python/PyQt6; Interception wrapper; raw HID trajectories + scan codes; sub-ms performance-counter timing; Bézier humanization; OpenCV/Tesseract vision scripting) illustrate the filter-driver macro lane (source: wiki/sources/descriptions/guvenada__Titanium-Macro.md) |
 | KVM middleman | Hardware between mouse and host | Complex setup; limited host software |
 
 KMBox Net example command families (firmware-dependent): connect, `mouse_move`, interpolated `mouse_automove`, Bézier `mouse_beizer`, button/wheel events; encrypted `enc_*` variants resist passive packet sniffing.
@@ -62,4 +63,4 @@ Defensive pairing: [[ai-aimbot-detection]] (hardware enumeration, input micro-si
 
 ## Related
 
-[[ib-input-simulator]] · [[logitech-cve]] · [[razer-rzctl]] · [[qortroller]] · [[dexcheck]] · [[alibi]] · [[kernel-mouse]] · [[usbmon]] · [[input-provenance]] · [[network-environment-evidence]] · [[ai-aimbot-detection]] · [[overviews/game-hacking]] · [[overviews/anti-cheat]]
+[[titanium-macro]] · [[ib-input-simulator]] · [[logitech-cve]] · [[razer-rzctl]] · [[qortroller]] · [[dexcheck]] · [[alibi]] · [[kernel-mouse]] · [[usbmon]] · [[input-provenance]] · [[network-environment-evidence]] · [[ai-aimbot-detection]] · [[overviews/game-hacking]] · [[overviews/anti-cheat]]
