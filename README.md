@@ -4423,6 +4423,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/danielkrupinski/VAC [Reversed VAC]
 - https://github.com/ApexLegendsUC/anti-cheat-emulator
 - https://github.com/ch4ncellor/EAC-Reversal [Reversed EAC]
+- https://github.com/generalsonlinedevelopmentteam/anticheatplugin_easyanticheat [C++ Easy Anti-Cheat middleware plugin integrating Epic Online Services EAC callbacks, P2P auth, and integrity-violation handling for game servers]
 - https://github.com/weak1337/BE-Shellcode [Reversed BE Shellcode]
 - https://github.com/gmh5225/be_shellcode_dump [Reversed BE Shellcode]
 - https://github.com/codetronik/AndroidAntiCheat [Android Platform]
@@ -4459,6 +4460,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/Benardelys/H-AC [Paper 1.21 server-side Minecraft anti-cheat plugin with modular combat/movement checks, latency-compensated reach raytracing, and asynchronous violation logging]
 - https://github.com/realkyx29-design/LarpingAntiCheat [Paper 1.21+ Minecraft anti-cheat plugin (Hyphon) with combat/movement/world checks, honeypot ESP decoys, and custom-enchant/modifier capability analysis]
 - https://github.com/EpicLizard05013/UltimateMeteorAntiCheat [Paper 1.21.11 Minecraft server plugin with combat, movement, world, anti-dupe, and packet-desync checks plus violation logging and punishment management]
+- https://github.com/jdgshsvejevhevejeve/nova-anticheat [Paper 1.21 server-side anti-cheat plugin with movement, combat, and block checks, violation levels, and configurable warn/setback/kick actions]
 - https://github.com/getawife/nofly [Paper 1.21.x Minecraft server plugin combining synchronous movement analysis with PacketEvents checks to detect fly hackers]
 - https://github.com/Lazyzouo/ICUAC [Open-source bilingual Paper/Folia server-side rule enforcement for commands, items/NBT, effects, and end-crystal combat]
 - https://github.com/StelGR/ArrowAntiCheat [Open-source Minecraft Java/Bedrock packet-based anti-cheat with combat and movement checks]
