@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-27** — ingest `readme:categories`: Anti Cheat ~756 (+2; getawife/[[nofly]] Paper fly plugin + jdgshsvejevhevejeve/nova-anticheat starter Paper AC + generalsonlinedevelopmentteam/anticheatplugin_easyanticheat EAC EOS middleware) / Cheat ~2842 (+1; TwoSevenOneT/InjectSetConsole console stdin-pipe injection) / other major section counts stable; 41 sections; synced projected README-map counts (~2842/~756) on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/game-hacking]], [[overviews/reverse-engineering]], and [[overviews/dma-attack]]; light `index.md` section notes (no per-category pages).
+
 - **2026-09-27** — ingest `description:getawife/nofly`: entity [[nofly]] (getawife; Java Paper 1.21.x fly-hack detection plugin; synchronous movement analysis + PacketEvents packet sanity checks; gravity simulation; configurable buffers/leniency; exemptions for creative/vehicles/elytra/potions; staff alerts, disk logging, setback rubber-banding; lightweight fly-only AC; Anti Cheat / game:minecraft); cited on [[overviews/anti-cheat]] Paper fly-focused lane + [[overviews/game-hacking]] Paper movement heuristic lane; frontmatter source on [[overviews/anti-cheat]] + [[overviews/game-hacking]]; `index.md` entity + overview blurbs updated.
 
 - **2026-09-26** — ingest `readme:categories`: Anti Cheat ~754 (+1; s4dbrd/how-kernel-anti-cheats-work kernel AC architecture deep-dive in Guide) / Cheat ~2841 / other major section counts stable; 41 sections; synced projected README-map counts (~2841/~754) on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/reverse-engineering]], and [[overviews/dma-attack]]; light `index.md` section notes (no per-category pages).
