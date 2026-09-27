@@ -2021,6 +2021,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [inject-all-the-things](entities/inject-all-the-things.md) — Educational Visual Studio DLL injection samples (DanielRTeixeira; seven techniques in isolated source files; CreateRemoteThread through reflective load; x86/x64; Injection Testing)
 - [InjectARM64](entities/inject-arm64.md) — no-root ARM Android inject platform (Java/Kotlin + C/C++ hooks; virtualized app space; ARM32/ARM64; configurable flows; cheat / Non-root injection; NepMods)
 - [InjectFix](entities/injectfix.md) — Tencent Unity C# logic hotfix (IL inject/route patched gameplay at runtime; broad Unity version/platform; Game Hot Patch / live bugfix)
+- [InjectSetConsole](entities/injectsetconsole.md) — console child stdin-pipe shellcode injection (TwoSevenOneT; C++; remote marker scan + VirtualProtectEx + NtSetContextThread; no VirtualAllocEx/WriteProcessMemory; EDR/injection research; Injection Testing)
 - [Injectors](entities/injectors.md) — injection-testing harness (C/C++; AC stress)
 - [injection](entities/injection.md) — Windows injection-testing corpus (Conhost/PROPagate/ALPC/KernelCallbackTable/KnownDlls and related PoCs; Injection Testing; gmh5225)
 - [ImpulsiveDLLHijack](entities/impulsive-dll-hijack.md) — automated Windows DLL hijack research workflow (stages orchestration; cheat / DLL Hijack)
