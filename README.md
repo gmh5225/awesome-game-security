@@ -367,6 +367,8 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/chronoxor/CppServer
 - https://github.com/Qihoo360/evpp
 - https://github.com/ValveSoftware/GameNetworkingSockets [Steam]
+- https://github.com/pond3r/ggpo [Rollback networking SDK using input prediction and speculative execution; includes the Vector War sample]
+- https://github.com/gschup/ggrs [Safe Rust reimagining of GGPO with a request-based API; includes P2P, spectator, and sync-test examples]
 - https://github.com/skywind3000/kcp [KCP]
 - https://github.com/Unit-X/kcp-cpp [KCP]
 - https://github.com/TLeonardUK/ds3os [Dark Souls 3]
