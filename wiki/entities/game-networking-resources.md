@@ -12,7 +12,7 @@ confidence: medium
 
 Curated knowledge base of multiplayer game networking resources (MFatihMAR). Primarily a Markdown collection organizing articles, talks, libraries, and tools around netcode topics such as **latency compensation**, **rollback**, **prediction**, and **replication**. Content spans practical engineering references across engines, languages, and architecture styles—aimed at developers and researchers studying game networking design and implementation tradeoffs. (source: wiki/sources/descriptions/MFatihMAR__Game-Networking-Resources.md)
 
-Sits in the README **Game Network** lane as a documentation-centric discovery index beside transport libraries such as [[game-networking-sockets]] and [[kcp]], netcode frameworks such as [[lightyear]] and rollback SDKs such as [[ggpo]], and broader gamedev learning indexes such as [[learn-awesome-gamedev]].
+Sits in the README **Game Network** lane as a documentation-centric discovery index beside transport libraries such as [[game-networking-sockets]] and [[kcp]], client/server netcode stacks such as [[yojimbo]], netcode frameworks such as [[lightyear]] and rollback SDKs such as [[ggpo]], and broader gamedev learning indexes such as [[learn-awesome-gamedev]].
 
 ## Links
 
@@ -20,4 +20,4 @@ Sits in the README **Game Network** lane as a documentation-centric discovery in
 
 ## Related
 
-[[overviews/game-engine]] · [[overviews/overview]] · [[lightyear]] · [[ggpo]] · [[game-networking-sockets]] · [[kcp]] · [[kcp-cpp]] · [[bevy-personal-test]] · [[learn-awesome-gamedev]]
+[[overviews/game-engine]] · [[overviews/overview]] · [[yojimbo]] · [[lightyear]] · [[ggpo]] · [[game-networking-sockets]] · [[kcp]] · [[kcp-cpp]] · [[bevy-personal-test]] · [[learn-awesome-gamedev]]
