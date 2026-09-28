@@ -12,7 +12,7 @@ confidence: medium
 
 Android **FLAG_SECURE** and **screenshot-listener** bypass reference in the Cheat / Magisk lane: documentation and reference material for disabling `WindowManager.LayoutParams.FLAG_SECURE` enforcement and related screenshot-capture listeners so protected app surfaces become capturable. Useful for game-security researchers and reverse engineers studying offensive mobile techniques opposite Android screen-capture protections used by banking apps and some mobile anti-cheat flows. (source: wiki/sources/descriptions/j-hc__FlagSecurePatcher.md)
 
-Sits beside Magisk module ecosystem on [[magisk]] and Android capture-evasion research under [[anti-screenshot-capture]].
+Sits beside Magisk module ecosystem on [[magisk]] and Android capture-evasion research under [[anti-screenshot-capture]]. Install-time framework patcher [[simple-flag-secure]] (ShivamXD6; dexlib2 `services.jar` smali patch; Magisk/KernelSU/APatch; Android 14+ screenshot-detection suppression) implements the same capture lane without in-process hooks.
 
 ## Links
 
@@ -20,4 +20,4 @@ Sits beside Magisk module ecosystem on [[magisk]] and Android capture-evasion re
 
 ## Related
 
-[[overviews/mobile-security]] · [[anti-screenshot-capture]] · [[magisk]] · [[mobile-anti-cheat]] · [[hideroot]] · [[rescuex]]
+[[overviews/mobile-security]] · [[anti-screenshot-capture]] · [[simple-flag-secure]] · [[magisk]] · [[mobile-anti-cheat]] · [[hideroot]] · [[rescuex]]

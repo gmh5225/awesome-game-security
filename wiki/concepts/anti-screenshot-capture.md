@@ -7,6 +7,7 @@ sources:
   - wiki/sources/skills/anti-cheat.md
   - wiki/sources/descriptions/lainswork__dwm-screen-shot.md
   - wiki/sources/descriptions/j-hc__FlagSecurePatcher.md
+  - wiki/sources/descriptions/ShivamXD6__Simple-Flag-Secure.md
   - wiki/sources/descriptions/gmh5225__ScreenShot.md
   - wiki/sources/descriptions/g8tsz__deadlock-anti-cheat.md
   - wiki/sources/descriptions/bmharper__WindowsDesktopDuplicationSample.md
@@ -17,7 +18,7 @@ sources:
   - wiki/sources/descriptions/GuidoBartoli__sherloq.md
   - wiki/sources/descriptions/TheCruZ__nvidiaCapture.md
   - wiki/sources/descriptions/vmguard__dwm-window-capture.md
-updated: 2026-09-10
+updated: 2026-09-28
 confidence: medium
 ---
 
@@ -67,7 +68,7 @@ Comparative Windows capture samples such as [[screenshot]] (gmh5225; BitBlt, DXG
 - **DWM composition** — separate surfaces that survive `PrintWindow` but not all BitBlt paths; kernel DC blocking in extreme cases.
 - **Hardware overlay planes** — content on dedicated scan-out planes may be absent from software duplication.
 - **Off-screen render** — secondary display, capture card, or virtual camera feed outside the game window.
-- **Android `FLAG_SECURE`** — apps set `WindowManager.LayoutParams.FLAG_SECURE` to block screenshots/recents; Magisk-lane references such as [[flagsecurepatcher]] document disabling the flag and screenshot listeners for capture research. (source: wiki/sources/descriptions/j-hc__FlagSecurePatcher.md)
+- **Android `FLAG_SECURE`** — apps set `WindowManager.LayoutParams.FLAG_SECURE` to block screenshots/recents; Magisk-lane references such as [[flagsecurepatcher]] document disabling the flag and screenshot listeners for capture research (source: wiki/sources/descriptions/j-hc__FlagSecurePatcher.md); install-time **`services.jar`** smali patching via [[simple-flag-secure]] (ShivamXD6; dexlib2; Magisk/KernelSU/APatch; Android 14+ screenshot-detection suppression; no Zygisk/LSPosed in-process hooks; root-hide compatible) extends that lane with framework-level patching. (source: wiki/sources/descriptions/ShivamXD6__Simple-Flag-Secure.md)
 
 Evasion samples in the corpus include [[disablenvidiascreenshot]] (DWM / NVIDIA capture lane), [[dwm-screen-shot]] (DWM; AC/screenshot research for defensive engineers) (source: wiki/sources/descriptions/lainswork__dwm-screen-shot.md), [[wda-monitor-trick]] (monitor-level capture research), and [[eac-overlay]] (alternate surfaces vs overlay monitoring).
 
@@ -77,4 +78,4 @@ Screenshot evidence is rarely sufficient alone—correlate with [[present-hook]]
 
 ## Related
 
-[[nvidia-capture]] · [[dwm-window-capture]] · [[obs-game-capture]] · [[present-hook]] · [[flagsecurepatcher]] · [[sherloq]] · [[overviews/graphics-api]] · [[overviews/anti-cheat]] · [[overviews/game-hacking]] · [[overviews/mobile-security]]
+[[nvidia-capture]] · [[dwm-window-capture]] · [[obs-game-capture]] · [[present-hook]] · [[flagsecurepatcher]] · [[simple-flag-secure]] · [[sherloq]] · [[overviews/graphics-api]] · [[overviews/anti-cheat]] · [[overviews/game-hacking]] · [[overviews/mobile-security]]
