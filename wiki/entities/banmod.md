@@ -20,7 +20,7 @@ BepInEx moderation and anti-cheat plugin for Among Us that helps hosts protect l
 - **Moderator tooling** — in-game UI for kicks, bans, warnings, and player reports; chat and meeting controls.
 - **Lobby extras** — custom roles, lobby discovery, optional premium features via remote API, multi-language support.
 
-Targets Among Us hosts and community moderators who want integrated anti-cheat enforcement and lobby management rather than manual moderation alone. Sits beside lightweight host plugins such as [[wellsanticheat]]; distinct from kernel or server-authoritative products such as [[easy-anti-cheat]], [[certael]], or [[magnetite]].
+Targets Among Us hosts and community moderators who want integrated anti-cheat enforcement and lobby management rather than manual moderation alone. Sits beside lightweight host plugins such as [[wellsanticheat]] and client-side detectors such as [[among-us-anti-cheat]]; distinct from kernel or server-authoritative products such as [[easy-anti-cheat]], [[certael]], or [[magnetite]].
 
 ## Links
 
@@ -28,4 +28,4 @@ Targets Among Us hosts and community moderators who want integrated anti-cheat e
 
 ## Related
 
-[[wellsanticheat]] · [[bepinex-il2cppbase]] · [[il2cpp]] · [[overviews/anti-cheat]] · [[overviews/game-hacking]]
+[[wellsanticheat]] · [[among-us-anti-cheat]] · [[bepinex-il2cppbase]] · [[il2cpp]] · [[overviews/anti-cheat]] · [[overviews/game-hacking]]
