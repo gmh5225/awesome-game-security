@@ -1,0 +1,1707 @@
+Project Path: arc_ShivamXD6_Simple-Flag-Secure_hshuq9kj
+
+Source Tree:
+
+```txt
+arc_ShivamXD6_Simple-Flag-Secure_hshuq9kj
+├── META-INF
+│   └── com
+│       └── google
+│           └── android
+│               ├── update-binary
+│               └── updater-script
+├── README.md
+├── action.sh
+├── build_zip.py
+├── changelog.md
+├── customize.sh
+├── disable.sh
+├── module.prop
+├── patcher_src
+│   ├── SfsPatcher.java
+│   └── smali-fat.jar
+├── post-fs-data.sh
+├── service.sh
+├── system
+│   └── bin
+│       └── sfs.jar
+└── update.json
+
+```
+
+`META-INF/com/google/android/update-binary`:
+
+```
+#!/sbin/sh
+
+#################
+# Initialization
+#################
+
+umask 022
+
+# echo before loading util_functions
+ui_print() { echo "$1"; }
+
+require_new_magisk() {
+  ui_print "*******************************"
+  ui_print " Please install Magisk v20.4+! "
+  ui_print "*******************************"
+  exit 1
+}
+
+#########################
+# Load util_functions.sh
+#########################
+
+OUTFD=$2
+ZIPFILE=$3
+
+mount /data 2>/dev/null
+
+[ -f /data/adb/magisk/util_functions.sh ] || require_new_magisk
+. /data/adb/magisk/util_functions.sh
+[ $MAGISK_VER_CODE -lt 20400 ] && require_new_magisk
+
+install_module
+exit 0
+
+```
+
+`META-INF/com/google/android/updater-script`:
+
+```
+#MAGISK
+
+```
+
+`README.md`:
+
+```md
+# Simple Flag Secure
+   
+> 👀 Lightweight root module that disables FLAG_SECURE, enabling screenshots & screen recording in restricted apps. Hides screenshot detection on Android 14+. Includes a toggleable privacy mode to block screenshots system-wide. Supports Magisk, KernelSU, APatch & forks with no extra dependencies.
+
+[![Downloads](https://img.shields.io/github/downloads/ShivamXD6/Simple-Flag-Secure/total?color=green&style=for-the-badge)](https://github.com/ShivamXD6/Simple-Flag-Secure/releases/latest)
+[![Release](https://img.shields.io/github/v/release/ShivamXD6/Simple-Flag-Secure?style=for-the-badge)](https://github.com/ShivamXD6/Simple-Flag-Secure/releases/latest)
+[![Join Build Bytes](https://img.shields.io/badge/Join-Build%20Bytes-2CA5E0?style=for-the-badge&logo=telegram)](https://telegram.me/BuildBytes)
+[![Join Chat](https://img.shields.io/badge/Join%20Chat-Build%20Bytes%20Discussion-2CA5E0?style=for-the-badge&logo=telegram)](https://telegram.me/BuildBytesDiscussion)
+![Android](https://img.shields.io/badge/Android-3DDC84?style=for-the-badge&logo=android&logoColor=white)
+![Root](https://img.shields.io/badge/Root-ff0000?style=for-the-badge&logo=superuser&logoColor=white)
+![Magisk](https://img.shields.io/badge/Magisk-8A2BE2?style=for-the-badge&logo=magisk&logoColor=white)
+![KernelSU](https://img.shields.io/badge/KernelSU-000000?style=for-the-badge&logo=linux&logoColor=white)
+![APatch](https://img.shields.io/badge/APatch-FF6B00?style=for-the-badge&logo=android&logoColor=white)
+
+## ❔ Why Simple Flag Secure?
+
+You may be wondering: **Why use this when other FLAG_SECURE modules (dependent on Zygisk / LSPosed) already exists?**
+
+Simple Flag Secure focuses on being lightweight, maintainable, and compatible with newer Android versions and root solutions.
+
+- 🛠️ **No Zygisk or LSPosed Required** — 100% standalone, no extra frameworks or meta-modules needed.
+- 🪶 **Ultra-Compact (286 KB)** — Shrunk by 75% with zero bloat; patcher runs once and cleans up immediately.
+- 🔋 **Zero Battery Drain & RAM Friendly** — Patched once at install time; zero background services or daemons running.
+- 🚫 **Screenshot Detection Blocking** — Prevents apps from detecting screenshots (WhatsApp, Snapchat, etc. on Android 14+).
+- 🔕 **Suppresses Screen Share Warnings** — Hides the irritating _"App content hidden from screen share"_ popup on Android 15/16.
+- 🎛️ **Interactive Volume Key Menu** — Switch between ALLOWED and BLOCKED (`[Vol +]`) or run live diagnostics (`[Vol -]`) without rebooting.
+- 🩺 **Built-in Auto Diagnostics** — Saves diagnostic logs (`sfs_debug.log`) & `services.jar` directly to your Downloads folder.
+- ⭐ **Modern Root Manager Support** — Works seamlessly with Magisk, KernelSU, APatch, and forks.
+- 🔄 **In-App Manager Updates** — Native one-click updates directly inside root managers via `updateJson`.
+- 📱 **Broad OEM Compatibility** — Full support for HyperOS, MIUI, OxygenOS, ColorOS, Realme UI, and One UI.
+
+### 📊 How Does Simple Flag Secure Compare?
+
+| Feature                                   |           **Simple Flag Secure**            |                             **ih8SecureLock**                              |             **DisableFlagSecure**              |
+| :---------------------------------------- | :-----------------------------------------: | :------------------------------------------------------------------------: | :--------------------------------------------: |
+| **Architecture**                          | **System Framework Patch** (`services.jar`) |                       Zygisk In-Process Hook (`.so`)                       |        Xposed In-Process Hook (LSPosed)        |
+| **Dependencies**                          |            **None (Standalone)**            |                        Requires Zygisk / ZygiskNext                        |           Requires LSPosed + Zygisk            |
+| **Works with Banking Apps / Denylist**    |           ✅ **100% Compatible**            | ❌ **Broken on Denylist** _(stops working if unmount/hide root is active)_ |    ⚠️ **Fails or triggers root detection**     |
+| **Client App Tamper Detection**           |         🛡️ **Zero (Undetectable)**          |              ⚠️ High (Foreign `.so` injected into app memory)              | ❌ High (Xposed hooks easily flagged by banks) |
+| **Battery & CPU Overhead**                |           🔋 **0% (Zero drain)**            |                         ⚠️ In-memory hook overhead                         |     ❌ High drain (Xposed daemon + bridge)     |
+| **Runtime RAM Usage**                     |    ⚡ **0 MB (No background processes)**    |                     Persistent memory overhead per app                     |       Heavy (~50MB+ for LSPosed daemon)        |
+| **Hides Screenshot Alerts (Android 14+)** |         ✅ **Built-in System-wide**         |                          ⚠️ Only for hooked apps                           |                ❌ Not supported                |
+| **Dynamic Privacy Mode (Block / Allow)**  |      ✅ **Interactive Vol Key Toggle**      |                                  ❌ None                                   |                    ❌ None                     |
+
+#### 💡 Why Standalone Framework Patching is Better:
+
+1. **Works with Banking Apps & Denylist:**
+   Zygisk and LSPosed modules inject code into apps. When you hide root from banking apps using Magisk/KernelSU's **Denylist** (Unmount Modules), Zygisk and LSPosed are disabled — breaking screenshots for the apps where you need them most! Simple Flag Secure patches the Android system itself, so screenshots work everywhere even with full root hiding enabled.
+2. **Zero Detection by Apps:**
+   Restricted apps are never modified or injected with foreign code. Banking and streaming apps cannot detect that screenshots are unlocked.
+3. **Zero Battery Drain:**
+   No background services, hook bridges, or daemons running. Simple Flag Secure patches once during install and leaves behind 0 MB RAM usage and 0% battery drain.
+
+## 📥 Installation
+
+Removing screenshot restrictions is straightforward:
+
+1. **Install the Module**
+   Open your Magisk, KernelSU, or APatch manager → **Modules** → **Install from storage** → Select the **Simple Flag Secure** ZIP.
+
+> [!NOTE]
+> **For ReSuKiSU / KernelSU Users:** If your manager displays a warning saying _"This module requires a meta-module to mount"_, you can **safely ignore it**. Simple Flag Secure has built-in standalone mounting (`post-fs-data.sh`) and does **not** need any meta-module (such as NoMount, Mountify, or Hybrid Mount). In fact, running SFS standalone avoids filesystem mount leaks, keeping your banking apps from detecting root!
+
+2. **Automatic Installation Logs**
+   Installation logs are **automatically saved** to `/sdcard/Download/sfs_install.log` (and inside the module folder). No need to manually press the save button!
+
+3. **Reboot**
+   Restart your device to apply the changes.
+
+4. **Test**
+   Try taking a screenshot or recording your screen in an app that normally blocks it, such as a WhatsApp profile picture or Chrome Incognito.
+
+## 🧰 Troubleshooting
+
+### 🔄 Bootloop / System Doesn't Boot
+
+If the module causes a bootloop or prevents Android from starting:
+
+1. Reboot into **Recovery** (TWRP or another recovery).
+2. Navigate to:
+   `/data/adb/modules/simple_flag_secure`
+3. Delete the `simple_flag_secure` directory.
+4. Reboot into System.
+5. Report the issue in the **[Build Bytes Discussion](https://telegram.me/BuildBytesDiscussion)** group.
+
+### 🚫 Module Doesn't Work / Need Help?
+
+Taking diagnostic logs is now super easy directly from your root manager:
+
+1. Tap the **Action** button in Magisk, KernelSU, or APatch (or run `su -c "sh /data/adb/modules/simple_flag_secure/action.sh record"` in Termux).
+2. Press **Volume Down [Vol -]** within 30 seconds to start the live recording session.
+3. Switch to your restricted app and try taking a screenshot.
+4. Press **ANY hardware button** (Volume Up, Volume Down, or Power) — recording stops instantly with 0ms delay!
+5. Both `sfs_debug.log` and your system's `services.jar` are automatically saved to your **`Downloads`** folder (`/sdcard/Download/`), and Telegram opens directly to **[Build Bytes Discussion](https://telegram.me/BuildBytesDiscussion)**.
+6. Share **BOTH** files (`sfs_debug.log` & `services.jar`) in the group for instant help!
+
+## 🙏 Support & Donations
+
+If you find Simple Flag Secure useful and would like to support its development:
+
+- 💲 **Bhim (International UPI):** UPI ID - `shivamdhage@upi` | [Donate via QR](https://i.ibb.co/ZRm2xN2L/bhimupi.jpg)
+- 💵 **GPay / UPI:** UPI ID - `shivamashokdhage6@oksbi` | [Donate via QR](https://i.ibb.co/5g4J2RXR/1f38d6d7-a8a2-4696-88e6-9cf503e0592c.png)
+- 💰 **PayPal:** Username - `ShivamXD6` [Donate via PayPal](https://www.paypal.com/paypalme/ShivamXD6)
+
+Your support helps keep the project maintained and improve compatibility with newer Android versions.
+
+## 🙌 Credits
+
+- **[ShirigiriPatil](https://telegram.me/BosadBillaHun)**
+  Tested the module on KernelSU.
+
+- **[LazyMeao](https://telegram.me/lazymeao)** & [@Black_luciferS](https://github.com/Blacklucifer82)
+  Tested the module on Realme UI 2.0 for compatibility and Toggle Action of Block / Unblock.
+
+- **[ShishirThakur](https://telegram.me/Shishirsthakur)**
+  Tested screenshot detection functionality on Android 14+.
+
+- **[Marmot](https://telegram.me/aptgo)**
+  Tested the module on MIUI Android 11 using SukiSU, a KernelSU fork, helping verify compatibility and stability.
+
+- **[@nyxnrv](https://github.com/777kzn)**
+  Tested the module on HyperOS Android 17 Kernel SU.
+
+- **[@Vikrant_R_Rajput](https://telegram.me/DeskAestheticx)**
+  Tested the module on Samsung's OneUI Port Magisk.
+
+- **[@idral](https://telegram.me/idral)**
+  Tested the module without MetaModule for standalone mounting test.
+
+- **[@pocexa](https://telegram.me/pocexa)**
+  Tested the module on Poco X6 Pro for Screeenshot timeout issues.
+
+```
+
+`action.sh`:
+
+```sh
+#!/system/bin/sh
+MODDIR="${0%/*}"
+[ "$MODDIR" = "$0" ] && MODDIR="."
+[ -d "$MODDIR" ] || MODDIR="/data/adb/modules/simple_flag_secure"
+LOG_FILE="$MODDIR/sfs_debug.log"
+LOGCAT_PID_FILE="$MODDIR/.logcat.pid"
+LOGCAT_TMP="$MODDIR/.logcat_recording.tmp"
+
+BASE_DESC="Bypasses screenshot restrictions and hides screenshot detection (A14+). Supports Magisk, KernelSU and APatch, no Zygisk, LSPosed or Meta Module required."
+
+notify() {
+    local TITLE="$1"
+    local MSG="$2"
+    local ICON="${3:-@android:drawable/ic_dialog_info}"
+    local TAG="${4:-SFS_STATUS}"
+    local SAFE_MSG=$(printf '%b' "$MSG" | sed "s/'/'\\\\''/g")
+    su 2000 -c "cmd notification post -i '$ICON' -t '$TITLE' -S bigtext '$TAG' '$SAFE_MSG'" >/dev/null 2>&1 || \
+    cmd notification post -i "$ICON" -t "$TITLE" -S bigtext "$TAG" "$SAFE_MSG" >/dev/null 2>&1
+}
+
+if [ -d "/data/adb/magisk" ] && magisk -V >/dev/null 2>&1; then
+    ROOT="Magisk"
+elif [ -d "/data/adb/ksu" ] && ksud -V >/dev/null 2>&1; then
+    ROOT="KernelSU"
+elif [ -d "/data/adb/ap" ] && apd -V >/dev/null 2>&1; then
+    ROOT="APatch"
+else
+    ROOT="Unknown"
+fi
+
+MOD_JAR="$MODDIR/system/framework/services.jar"
+SYS_JAR="/system/framework/services.jar"
+if [ -f "$MOD_JAR" ] && cmp -s "$MOD_JAR" "$SYS_JAR" 2>/dev/null; then
+    MOUNT_OK=true
+    MOUNT_LABEL="OK"
+else
+    MOUNT_OK=false
+    MOUNT_LABEL="FAIL"
+fi
+
+is_logging_active() {
+    if [ -f "$LOGCAT_PID_FILE" ]; then
+        local PID=$(cat "$LOGCAT_PID_FILE" 2>/dev/null)
+        if [ -n "$PID" ] && kill -0 "$PID" 2>/dev/null; then
+            return 0
+        fi
+        rm -f "$LOGCAT_PID_FILE"
+    fi
+    return 1
+}
+
+finalize_debug_log() {
+    local PID=$(cat "$LOGCAT_PID_FILE" 2>/dev/null)
+    [ -n "$PID" ] && kill -9 "$PID" 2>/dev/null
+    rm -f "$LOGCAT_PID_FILE"
+    killall getevent 2>/dev/null
+
+    local DUMP_WIN=$(dumpsys window 2>/dev/null)
+    local FOCUSED_PKG=$(echo "$DUMP_WIN" | grep -E 'mCurrentFocus|mFocusedApp' | grep -oE '[a-zA-Z0-9._]+/[a-zA-Z0-9._]+' | head -n 1 | cut -d/ -f1)
+
+    if [ ! -f "$LOGCAT_TMP" ]; then
+        logcat -d -t 3000 > "$LOGCAT_TMP" 2>/dev/null
+    else
+        logcat -d -t 300 >> "$LOGCAT_TMP" 2>/dev/null
+    fi
+
+    {
+        echo "=================================================="
+        echo "       Simple Flag Secure - Diagnostic Log"
+        echo "=================================================="
+        echo "Time: $(date)"
+        echo "Module Version: $(grep '^version=' "$MODDIR/module.prop" 2>/dev/null | cut -d= -f2)"
+        echo "Device: $(getprop ro.product.brand) $(getprop ro.product.model) ($(getprop ro.product.device))"
+        echo "Android: $(getprop ro.build.version.release) (SDK $(getprop ro.build.version.sdk))"
+        echo "ROM Build: $(getprop ro.build.display.id)"
+        echo "SELinux: $(getenforce 2>/dev/null)"
+        echo "Root Manager: $ROOT"
+        echo
+        echo "--- [services.jar Mount Check] ---"
+        echo "Stock JAR:   $SYS_JAR"
+        echo "Module JAR:  $MOD_JAR"
+        if [ "$MOUNT_OK" = "true" ]; then
+            echo "Mount Status: [OK] Patched services.jar is mounted!"
+        else
+            echo "Mount Status: [FAIL] services.jar is NOT mounted or differs from module!"
+        fi
+        echo
+        echo "--- [Active Mounts] ---"
+        grep 'services.jar' /proc/mounts 2>/dev/null || echo "No direct bind mounts found for services.jar"
+        echo
+        echo "--- [SFS Properties] ---"
+        echo "persist.sys.sfs.screenshot: $(getprop persist.sys.sfs.screenshot)"
+        echo
+        echo "--- [Window Focus & Secure State] ---"
+        echo "$DUMP_WIN" | grep -E 'mCurrentFocus|mFocusedApp' | head -n 5
+        dumpsys activity recents 2>/dev/null | grep -E 'Recent #[0-4]:' | head -n 5
+        echo "$DUMP_WIN" | grep -iE 'mHasSecure|isSecure|FLAG_SECURE|canBeScreenshotTarget|notAllowCaptureDisplay|hasSecure|isAllowedDisableScreenshot|shouldBlockScreenCapture' | head -n 25
+        echo
+        echo "--- [Window Policy & Screenshot Strategies] ---"
+        dumpsys window policy 2>/dev/null | grep -iE 'screenshot|secure|Strategy|KeyCombination|mSafeMode|mSystemReady' | head -n 25
+        echo
+
+        awk -v pkg="$FOCUSED_PKG" '
+        {
+            line = $0
+            llow = tolower(line)
+
+            if (llow ~ /capturedisplay|notallowcapturedisplay|isalloweddisablescreenshot|accessscreencontent|timed out waiting for screenshot|flag_secure|issecurelocked|hassecure|blackscreenshot|sensitivecontent|shouldblockscreencapture/) {
+                crit[cc++] = line
+            }
+
+            if (llow ~ /sfs|screenshot|globalscreenshot|screenshotcontroller|surfaceflinger.*capture/) {
+                act[ac++] = line
+            }
+
+            if (pkg != "" && index(line, pkg) > 0) {
+                if (llow ~ /window|secure|capture|screenshot|surface|flags|block|denied|timeout|null/) {
+                    app[apc++] = line
+                }
+            }
+
+            if (llow ~ /avc:.*denied|sfs.*fatal|dex2oat.*services\.jar/) {
+                den[dc++] = line
+            }
+        }
+        END {
+            print "--- [Screenshot Decision & Gatekeeper Logs (Critical)] ---"
+            start = (cc > 60) ? cc - 60 : 0
+            for (i = start; i < cc; i++) print crit[i]
+            print ""
+
+            print "--- [Live Recorded Screenshot Activity (Context)] ---"
+            start = (ac > 60) ? ac - 60 : 0
+            for (i = start; i < ac; i++) print act[i]
+            print ""
+
+            if (pkg != "") {
+                print "--- [Logs for Focused App: " pkg "] ---"
+                start = (apc > 35) ? apc - 35 : 0
+                for (i = start; i < apc; i++) print app[i]
+                print ""
+            }
+
+            print "--- [System & SELinux Denials] ---"
+            start = (dc > 25) ? dc - 25 : 0
+            for (i = start; i < dc; i++) print den[i]
+            print ""
+        }
+        ' "$LOGCAT_TMP" 2>/dev/null
+
+        echo "=================================================="
+        echo "Send this sfs_debug.log AND services.jar from Downloads to:"
+        echo "👥 @BuildBytesDiscussion on Telegram"
+        echo "🔗 https://telegram.me/BuildBytesDiscussion"
+        echo "=================================================="
+    } > "$LOG_FILE" 2>&1
+    chmod 644 "$LOG_FILE" 2>/dev/null
+    rm -f "$LOGCAT_TMP"
+
+    local SAVED_PATH=""
+    for d in "/sdcard/Download" "/storage/emulated/0/Download" "/sdcard" "/storage/emulated/0"; do
+        if [ -d "$d" ]; then
+            cp -f "$LOG_FILE" "$d/sfs_debug.log" 2>/dev/null
+            chmod 666 "$d/sfs_debug.log" 2>/dev/null
+            SAVED_PATH="$d/sfs_debug.log"
+            cp -f "$SYS_JAR" "$d/services.jar" 2>/dev/null
+            chmod 666 "$d/services.jar" 2>/dev/null
+            break
+        fi
+    done
+
+    echo "=================================================="
+    echo "       Simple Flag Secure - Log Saved"
+    echo "=================================================="
+    echo "  ✅ Debug sfs_debug.log & services.jar saved successfully!"
+    echo "  📁 Saved to Downloads folder:"
+    echo "     • sfs_debug.log"
+    echo "     • services.jar"
+    echo "  👉 Please share BOTH files to @BuildBytesDiscussion"
+    echo "=================================================="
+
+    notify "✅ LOG SAVED • Simple Flag Secure" "sfs_debug.log & services.jar saved to Downloads! Please share BOTH files to @BuildBytesDiscussion." "@android:drawable/ic_menu_save" "SFS_STATUS"
+
+    ( am start -a android.intent.action.VIEW -d "tg://resolve?domain=BuildBytesDiscussion" 2>/dev/null || \
+      am start -a android.intent.action.VIEW -d https://telegram.me/BuildBytesDiscussion 2>/dev/null ) >/dev/null 2>&1 &
+}
+
+start_debug_logging() {
+    logcat -c 2>/dev/null
+    rm -f "$LOGCAT_TMP"
+    ( logcat -v threadtime > "$LOGCAT_TMP" 2>&1 ) </dev/null >/dev/null 2>&1 &
+    echo $! > "$LOGCAT_PID_FILE"
+
+    echo "=================================================="
+    echo "      Simple Flag Secure - Debug Logging"
+    echo "=================================================="
+    echo "  🔴 Recording Started!"
+    echo "--------------------------------------------------    "
+    echo "  1. Switch to your restricted app."
+    echo "  2. Try taking a screenshot now."
+    echo "  3. Press ANY button (Vol / Power) to save."
+    echo "=================================================="
+    echo "  ⏳ Listening for key press..."
+
+    notify "📸 RECORDING • Simple Flag Secure" "Logging Active: Try screenshot in app, then press ANY button to save." "@android:drawable/ic_menu_camera" "SFS_STATUS"
+
+    WATCH_KEY_LOG="/data/local/tmp/.sfs_watch_$$"
+    rm -f "$WATCH_KEY_LOG"
+    getevent -l > "$WATCH_KEY_LOG" 2>/dev/null &
+    G_PID=$!
+
+    ( sleep 300; kill -9 "$G_PID" 2>/dev/null; rm -f "$WATCH_KEY_LOG" ) </dev/null >/dev/null 2>&1 &
+    TIMER_PID=$!
+
+    while [ -f "$LOGCAT_PID_FILE" ]; do
+        if [ -s "$WATCH_KEY_LOG" ]; then
+            if grep -q 'KEY_.*DOWN' "$WATCH_KEY_LOG" 2>/dev/null; then
+                break
+            fi
+        fi
+        sleep 0.1
+    done
+
+    kill -9 "$G_PID" 2>/dev/null
+    kill -9 "$TIMER_PID" 2>/dev/null
+    killall getevent 2>/dev/null
+    rm -f "$WATCH_KEY_LOG"
+
+    echo ""
+    echo "=================================================="
+    echo "  ⏳ Recording stopped! Compiling diagnostic log..."
+    echo "=================================================="
+
+    notify "⏳ SAVING LOG • Simple Flag Secure" "Recording stopped! Compiling diagnostic log..." "@android:drawable/ic_menu_save" "SFS_STATUS"
+    finalize_debug_log
+}
+
+if is_logging_active; then
+    finalize_debug_log
+    exit 0
+fi
+
+case "$1" in
+  start_log|record|"log start")
+    start_debug_logging
+    exit 0
+    ;;
+  stop_log|"log stop"|debug)
+    finalize_debug_log
+    [ -t 1 ] && cat "$LOG_FILE" 2>/dev/null
+    exit 0
+    ;;
+  status|STATUS)
+    CURRENT=$(getprop persist.sys.sfs.screenshot)
+    echo "Status: ${CURRENT:-true}"
+    echo "Mount:  $MOUNT_LABEL"
+    exit 0
+    ;;
+esac
+
+if [ "$MOUNT_OK" != "true" ]; then
+    sed -i "s#^description=.*#description=[ ⚠️ NOT WORKING ] $BASE_DESC#" "$MODDIR/module.prop" 2>/dev/null
+    echo "=================================================="
+    echo "        Simple Flag Secure - Action"
+    echo "=================================================="
+    echo "  ❌ Mount Error: services.jar is NOT mounted!"
+    echo "  Cannot toggle modes while module is inactive."
+    echo "  Help: https://telegram.me/BuildBytesDiscussion"
+    echo "=================================================="
+    notify "Simple Flag Secure" "❌ services.jar is not mounted! Module is inactive."
+    exit 1
+fi
+
+TARGET=""
+case "$1" in
+  allow|ALLOW|true|1) TARGET="true" ;;
+  block|BLOCK|false|0) TARGET="false" ;;
+  toggle|TOGGLE)
+    CURRENT=$(getprop persist.sys.sfs.screenshot)
+    [ "$CURRENT" = "false" ] && TARGET="true" || TARGET="false"
+    ;;
+esac
+
+if [ -z "$TARGET" ]; then
+    CURRENT=$(getprop persist.sys.sfs.screenshot)
+    if [ "$CURRENT" = "false" ]; then
+        CUR_STATUS="[ ❌ BLOCKED ]"
+        VOL_UP_TEXT="Switch to ALLOWED (✅)"
+    else
+        CUR_STATUS="[ ✅ ALLOWED ]"
+        VOL_UP_TEXT="Switch to BLOCKED (❌)"
+    fi
+
+    echo "=================================================="
+    echo "        Simple Flag Secure - Action Menu"
+    echo "=================================================="
+    echo "  Current Mode: $CUR_STATUS"
+    echo "  Mount Status: ✅ OK"
+    echo "--------------------------------------------------"
+    echo "  👉 Press a Volume Button within 30s:"
+    echo "  [Vol +]  $VOL_UP_TEXT"
+    echo "  [Vol -]  Start Debug Log Recording"
+    echo "=================================================="
+
+    KEY_LOG="/data/local/tmp/.sfs_menu_$$"
+    rm -f "$KEY_LOG"
+    getevent -l > "$KEY_LOG" 2>/dev/null &
+    G_PID=$!
+
+    COUNT=0
+    CHOICE=""
+    while [ "$COUNT" -lt 300 ]; do
+        if [ -s "$KEY_LOG" ]; then
+            if grep -q 'KEY_VOLUMEUP.*DOWN' "$KEY_LOG" 2>/dev/null; then
+                CHOICE="UP"
+                break
+            elif grep -q 'KEY_VOLUMEDOWN.*DOWN' "$KEY_LOG" 2>/dev/null; then
+                CHOICE="DOWN"
+                break
+            fi
+        fi
+        sleep 0.1
+        COUNT=$((COUNT + 1))
+    done
+
+    kill -9 "$G_PID" 2>/dev/null
+    killall getevent 2>/dev/null
+    rm -f "$KEY_LOG"
+
+    if [ "$CHOICE" = "DOWN" ]; then
+        start_debug_logging
+        exit 0
+    elif [ "$CHOICE" = "UP" ]; then
+        [ "$CURRENT" = "false" ] && TARGET="true" || TARGET="false"
+    else
+        echo "  ⏱️ Timeout: No volume key pressed in 30s. Exiting."
+        exit 0
+    fi
+fi
+
+if [ "$TARGET" = "true" ]; then
+  STATUS="ALLOWED"
+  ICON="✅"
+  NOTIF_ICON="@android:drawable/ic_menu_view"
+  DESC="Screenshots and recordings allowed everywhere"
+else
+  STATUS="BLOCKED"
+  ICON="❌"
+  NOTIF_ICON="@android:drawable/ic_menu_close_clear_cancel"
+  DESC="Screenshots and recordings blocked everywhere - Privacy Mode"
+fi
+
+setprop persist.sys.sfs.screenshot "$TARGET"
+sed -i "s#^description=.*#description=[ $ICON $STATUS ] $BASE_DESC#" "$MODDIR/module.prop" 2>/dev/null
+
+echo "=================================================="
+echo "        Simple Flag Secure - Action Toggle"
+echo "=================================================="
+echo "  Status: $ICON $STATUS"
+echo "  Mount:  ✅ OK"
+echo "  Prop:   persist.sys.sfs.screenshot = $TARGET"
+echo "  Help:   https://telegram.me/BuildBytesDiscussion"
+echo "--------------------------------------------------"
+echo "  💡 Tip: If any secure app was already open, swipe it"
+echo "     away from Recents & reopen to refresh its screen."
+echo "--------------------------------------------------"
+echo "  ⏳ Restarting SystemUI in 3 seconds to apply..."
+echo "  (Screen will reload briefly, don't panic! 😊)"
+echo "=================================================="
+
+notify "$ICON $STATUS • Simple Flag Secure" "Switched to $STATUS: $DESC. Restarting SystemUI in 3s..." "$NOTIF_ICON" "SFS_STATUS"
+
+sleep 3
+killall com.android.systemui 2>/dev/null || pkill -f com.android.systemui 2>/dev/null || kill -9 $(pidof com.android.systemui) 2>/dev/null
+
+```
+
+`build_zip.py`:
+
+```py
+#!/usr/bin/env python3
+import os
+import zipfile
+
+OUTPUT_ZIP = "Simple_Flag_Secure_v7.7.zip"
+
+FILES_TO_ADD = [
+    ("META-INF/com/google/android/update-binary", "META-INF/com/google/android/update-binary"),
+    ("META-INF/com/google/android/updater-script", "META-INF/com/google/android/updater-script"),
+    ("action.sh", "action.sh"),
+    ("customize.sh", "customize.sh"),
+    ("disable.sh", "disable.sh"),
+    ("module.prop", "module.prop"),
+    ("post-fs-data.sh", "post-fs-data.sh"),
+    ("service.sh", "service.sh"),
+    ("system/bin/sfs.jar", "system/bin/sfs.jar"),
+]
+
+if os.path.exists(OUTPUT_ZIP):
+    os.remove(OUTPUT_ZIP)
+
+with zipfile.ZipFile(OUTPUT_ZIP, "w", zipfile.ZIP_DEFLATED) as zf:
+    for src, arc in FILES_TO_ADD:
+        # Force forward slash for Android / Linux compatibility
+        arc_posix = arc.replace("\\", "/")
+        zf.write(src, arc_posix)
+        print(f"  added: {arc_posix}")
+
+size_mb = os.path.getsize(OUTPUT_ZIP) / (1024 * 1024)
+print(f"\nBuilt {OUTPUT_ZIP} ({size_mb:.2f} MB) successfully with POSIX paths!")
+
+```
+
+`changelog.md`:
+
+```md
+# 👀 Simple Flag Secure v7.7 - (_Thala for a Reason_)
+
+- 🪶 **75% Smaller Size**: Shrunk from 1.1 MB down to just **286 KB** while keeping all features intact.
+- 📱 **Fixed Xiaomi & POCO (HyperOS / MIUI)**: Fixed screenshot blocking and capture timeouts on HyperOS and MIUI.
+- 🔕 **Removed Screen Share Warning**: Suppressed the annoying _"App content hidden from screen share for security"_ popup on Android 15/16.
+- 🎛️ **Volume Key Action Menu**:
+  - **[Vol +]**: Instantly toggle between **Allowed** and **Blocked** (Privacy Mode) without rebooting.
+  - **[Vol -]**: Starts a live debug recording session with simple step-by-step guidance.
+- ⚡ **Easy 1-Click Log Recording**: Press any button (Power or Volume) to finish recording. Both `sfs_debug.log` and `services.jar` are automatically saved to your **Downloads** folder.
+- 🔋 **Zero Battery Drain**: 100% stock battery life with zero background services or daemons running.
+- 🎨 **Cleaner System Icons**: Clean notifications with official system icons for Allowed, Blocked, and Saved states.
+
+```
+
+`customize.sh`:
+
+```sh
+#!/system/bin/sh
+
+if ! $BOOTMODE; then
+  ui_print " ! Only uninstall is supported in recovery"
+  sleep 1
+  ui_print " - Uninstalling Simple Flag Secure!"
+  sleep 1
+  ui_print " - You can report me @ShastikXD if the module gave bootloop"
+  sleep 1
+  touch $MODPATH/remove
+  rm -rf $NVBASE/modules_update/$MODID $TMPDIR 2>/dev/null
+  exit 0
+fi
+
+INSTALL_LOG="$MODPATH/sfs_install.log"
+EXIT_FILE="$TMPDIR/.sfs_exit"
+
+(sh "$MODPATH/disable.sh"; echo $? > "$EXIT_FILE") 2>&1 | tee "$INSTALL_LOG"
+STATUS=$(cat "$EXIT_FILE" 2>/dev/null || echo 0)
+rm -f "$EXIT_FILE"
+
+if [ -f "$INSTALL_LOG" ]; then
+  chmod 644 "$INSTALL_LOG" 2>/dev/null
+  for d in "/sdcard/Download" "/storage/emulated/0/Download" "/sdcard" "/storage/emulated/0"; do
+    if [ -d "$d" ]; then
+      cp -f "$INSTALL_LOG" "$d/sfs_install.log" 2>/dev/null
+      chmod 666 "$d/sfs_install.log" 2>/dev/null
+      break
+    fi
+  done
+fi
+
+[ "$STATUS" -eq 0 ] || abort "❌ Failed to patch services.jar! Check sfs_install.log"
+```
+
+`disable.sh`:
+
+```sh
+#!/system/bin/sh
+
+MODPATH="${0%/*}"
+BIN="$MODPATH/system/bin"
+STOCK="/system/framework"
+MOD="$MODPATH/system/framework"
+ARCH=$(getprop ro.product.cpu.abi)
+
+mkdir -p "$MOD" "$BIN"
+
+LAST_MSG=""
+notify() {
+    local TITLE="$1"
+    local MSG="$2"
+    local ICON="${3:-@android:drawable/stat_sys_download_done}"
+    if [ "$MSG" != "$LAST_MSG" ]; then
+        local SAFE_MSG=$(printf '%b' "$MSG" | sed "s/'/'\\\\''/g")
+        su -lp 2000 -c "cmd notification post -i '$ICON' -S bigtext -t '$TITLE' 'SFS_INSTALL' '$SAFE_MSG'" >/dev/null 2>&1
+        LAST_MSG="$MSG"
+    fi
+}
+
+padh() {
+  grep -m 1 "^$1=" "$2" 2>/dev/null | sed 's/^.*=//'
+}
+
+ADBDIR="/data/adb"
+if [ -d "$ADBDIR/magisk" ] && magisk -V >/dev/null 2>&1; then
+  ROOT="Magisk"
+elif [ -d "$ADBDIR/ksu" ] && ksud -V >/dev/null 2>&1; then
+  ROOT="KernelSU"
+elif [ -d "$ADBDIR/ap" ] && apd -V >/dev/null 2>&1; then
+  ROOT="APatch"
+else
+  ROOT="Unknown"
+fi
+
+if [ "$ROOT" != "Magisk" ] && [ -d "$ADBDIR/metamodule" ]; then
+  MOUNT_MODE="Meta-Module"
+else
+  MOUNT_MODE="Standalone"
+fi
+
+echo "###################################"
+echo " 👀 $(padh "name" "$MODPATH/module.prop")"
+echo " 🌟 Made By $(padh "author" "$MODPATH/module.prop")"
+echo " ⚡ Version - $(padh "version" "$MODPATH/module.prop")"
+echo " 💻 Architecture - $ARCH"
+echo " 📂 Mounted: $MOUNT_MODE"
+if [ "$MOUNT_MODE" = "Standalone" ]; then
+  echo " ℹ️ Notice: Standalone mode (No Meta-Module required, but compatible)"
+fi
+echo "###################################"
+echo
+
+jar_path="$STOCK/services.jar"
+jar_name="services.jar"
+
+if [ ! -f "$jar_path" ]; then
+  echo "❌ $jar_path not found!"
+  exit 1
+fi
+
+if ! unzip -l "$jar_path" | grep -q classes.dex; then
+  echo "❌ You need a deodexed $jar_name"
+  exit 1
+fi
+
+echo "=================================================="
+echo " ⚡ Patching $jar_name (parallel dexlib2)..."
+echo "=================================================="
+
+setprop persist.sys.sfs.screenshot true
+
+dalvikvm -Xmx512m -Djava.io.tmpdir="$MOD" -cp "$BIN/sfs.jar" build.bytes.sfs.SfsPatcher "$jar_path" "$MOD/$jar_name" || {
+  echo "💥 Dalvik patcher failed for $jar_name"
+  exit 1
+}
+
+[ -f "$MODPATH/action.sh" ] && chmod 755 "$MODPATH/action.sh"
+[ -f "$MODPATH/service.sh" ] && chmod 755 "$MODPATH/service.sh"
+[ -f "$MODPATH/post-fs-data.sh" ] && chmod 755 "$MODPATH/post-fs-data.sh"
+
+rm -f "$MODPATH/disable.sh"
+rm -rf "$BIN"
+
+rm -rf /data/dalvik-cache/* 2>/dev/null
+
+echo
+echo "**************************************************"
+echo " 🎛️ Action Button: Enabled in Magisk/KSU/APatch"
+echo " 🔄 You can toggle mode anytime via Action button"
+echo " 📝 Install Log: Auto-saved to /sdcard/Download"
+echo " ✨ All done! Please reboot your device now."
+echo "**************************************************"
+
+notify "✨ INSTALLED • Simple Flag Secure" "Install done! Please reboot now. Join @BuildBytes for future projects that save your time & headache!"
+sleep 3
+am start -a android.intent.action.VIEW -d "tg://resolve?domain=BuildBytes" >/dev/null 2>&1 || \
+am start -a android.intent.action.VIEW -d https://telegram.me/BuildBytes >/dev/null 2>&1
+```
+
+`module.prop`:
+
+```prop
+id=simple_flag_secure
+name=Simple Flag Secure
+version=v7.7
+versionCode=77
+author=@BuildBytes (@ShivamXD6 aka @ShastikXD)
+updateJson=https://raw.githubusercontent.com/ShivamXD6/Simple-Flag-Secure/main/update.json
+description=Bypasses screenshot restrictions and hides screenshot detection (A14+). Supports Magisk, KernelSU and APatch, no Zygisk, LSPosed or Meta Module required.
+
+```
+
+`patcher_src/SfsPatcher.java`:
+
+```java
+package build.bytes.sfs;
+
+import com.android.tools.smali.dexlib2.AccessFlags;
+import com.android.tools.smali.dexlib2.DexFileFactory;
+import com.android.tools.smali.dexlib2.Opcode;
+import com.android.tools.smali.dexlib2.Opcodes;
+import com.android.tools.smali.dexlib2.iface.ClassDef;
+import com.android.tools.smali.dexlib2.iface.DexFile;
+import com.android.tools.smali.dexlib2.iface.Method;
+import com.android.tools.smali.dexlib2.iface.MethodImplementation;
+import com.android.tools.smali.dexlib2.iface.MethodParameter;
+import com.android.tools.smali.dexlib2.iface.MultiDexContainer;
+import com.android.tools.smali.dexlib2.iface.instruction.FiveRegisterInstruction;
+import com.android.tools.smali.dexlib2.iface.instruction.Instruction;
+import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction;
+import com.android.tools.smali.dexlib2.iface.instruction.RegisterRangeInstruction;
+import com.android.tools.smali.dexlib2.iface.reference.MethodReference;
+import com.android.tools.smali.dexlib2.immutable.ImmutableClassDef;
+import com.android.tools.smali.dexlib2.immutable.ImmutableMethod;
+import com.android.tools.smali.dexlib2.immutable.ImmutableMethodParameter;
+import com.android.tools.smali.dexlib2.immutable.ImmutableMethodImplementation;
+import com.android.tools.smali.dexlib2.immutable.instruction.ImmutableInstruction10x;
+import com.android.tools.smali.dexlib2.immutable.instruction.ImmutableInstruction11n;
+import com.android.tools.smali.dexlib2.immutable.instruction.ImmutableInstruction11x;
+import com.android.tools.smali.dexlib2.immutable.instruction.ImmutableInstruction21c;
+import com.android.tools.smali.dexlib2.immutable.instruction.ImmutableInstruction21s;
+import com.android.tools.smali.dexlib2.immutable.instruction.ImmutableInstruction21t;
+import com.android.tools.smali.dexlib2.immutable.instruction.ImmutableInstruction22b;
+import com.android.tools.smali.dexlib2.immutable.instruction.ImmutableInstruction35c;
+import com.android.tools.smali.dexlib2.immutable.instruction.ImmutableInstruction3rc;
+import com.android.tools.smali.dexlib2.immutable.reference.ImmutableMethodReference;
+import com.android.tools.smali.dexlib2.immutable.reference.ImmutableStringReference;
+import com.android.tools.smali.dexlib2.immutable.reference.ImmutableTypeReference;
+import com.android.tools.smali.dexlib2.rewriter.ClassDefRewriter;
+import com.android.tools.smali.dexlib2.rewriter.DexRewriter;
+import com.android.tools.smali.dexlib2.rewriter.Rewriter;
+import com.android.tools.smali.dexlib2.rewriter.RewriterModule;
+import com.android.tools.smali.dexlib2.rewriter.Rewriters;
+
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.zip.Deflater;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
+import java.util.zip.ZipOutputStream;
+
+public class SfsPatcher {
+
+    public enum PatchAction {
+        RETURN_TRUE,
+        RETURN_FALSE,
+        RETURN_LIST,
+        DYNAMIC_PROP_DIRECT,
+        DYNAMIC_PROP_INVERT
+    }
+
+    private static final Map<String, PatchAction> SERVICES_PRESET = new HashMap<>();
+
+    static {
+        // Patch rules with dynamic toggle
+        SERVICES_PRESET.put("isSecureLocked", PatchAction.DYNAMIC_PROP_INVERT);          // WindowState
+        SERVICES_PRESET.put("hasSecureWindowOnScreen", PatchAction.DYNAMIC_PROP_INVERT); // DisplayContent
+        SERVICES_PRESET.put("notifyScreenshotListeners", PatchAction.RETURN_LIST);       // A14+ Anti-detection
+        SERVICES_PRESET.put("canBeScreenshotTarget", PatchAction.DYNAMIC_PROP_DIRECT);   // RootWindowContainer
+        SERVICES_PRESET.put("notAllowCaptureDisplay", PatchAction.DYNAMIC_PROP_INVERT);  // Xiaomi HyperOS/MIUI Stub
+        SERVICES_PRESET.put("accessScreenContentEnable", PatchAction.RETURN_TRUE);       // Xiaomi HyperOS/MIUI Stub
+        SERVICES_PRESET.put("hasSecure", PatchAction.DYNAMIC_PROP_INVERT);               // OPPO/OnePlus/Realme
+        SERVICES_PRESET.put("shouldBlockScreenCaptureForApp", PatchAction.RETURN_FALSE);  // Android 15/16: Suppress irritating screen share security toast
+        SERVICES_PRESET.put("isAllowedDisableScreenshot", PatchAction.DYNAMIC_PROP_INVERT);     // Xiaomi HyperOS WindowStateAnimator
+    }
+
+    public static void main(String[] args) {
+        long startTime = System.currentTimeMillis();
+        if (args.length < 2) {
+            System.err.println("Usage: SfsPatcher <input.jar> <output.jar>");
+            System.exit(1);
+        }
+
+        File inputFile = new File(args[0]);
+        File outputFile = new File(args[1]);
+
+        System.out.println("⚡ SFS Parallel DEX Patcher (dexlib2)");
+        System.out.println("📁 Target: " + inputFile.getName() + " (" + SERVICES_PRESET.size() + " essential rules)");
+
+        try {
+            boolean success = patchJarParallel(inputFile, outputFile, SERVICES_PRESET);
+            if (!success) {
+                System.err.println("❌ Patching failed or no target methods were modified!");
+                System.exit(2);
+            }
+            long elapsed = System.currentTimeMillis() - startTime;
+            System.out.println("✨ All done in " + (elapsed / 1000.0) + "s!");
+            System.exit(0);
+        } catch (Exception e) {
+            System.err.println("💥 Fatal error during patching: " + e.getMessage());
+            e.printStackTrace();
+            System.exit(1);
+        }
+    }
+
+    private static boolean patchJarParallel(File inputFile, File outputFile, Map<String, PatchAction> patchRules) throws Exception {
+        long phaseStart = System.currentTimeMillis();
+        Opcodes opcodes = Opcodes.getDefault();
+        MultiDexContainer<? extends DexFile> container = DexFileFactory.loadDexContainer(inputFile, opcodes);
+        List<String> entryNames = container.getDexEntryNames();
+
+        if (entryNames.isEmpty()) {
+            throw new IOException("No DEX entries found in " + inputFile.getName());
+        }
+
+        Map<String, File> modifiedDexFiles = new ConcurrentHashMap<>();
+        AtomicInteger totalPatchedMethods = new AtomicInteger(0);
+
+        File outDir = outputFile.getParentFile();
+        if (outDir == null) outDir = new File(".");
+        outDir.mkdirs();
+        final File tempDir = outDir;
+
+        entryNames.parallelStream().forEach(entryName -> {
+            try {
+                DexFile origDex = container.getEntry(entryName).getDexFile();
+
+                Set<String> recordClasses = new HashSet<>();
+                Set<String> targetClasses = new HashSet<>();
+                for (ClassDef classDef : origDex.getClasses()) {
+                    String classType = classDef.getType();
+                    if (!classType.startsWith("Lcom/android/server/") &&
+                        !classType.startsWith("Lcom/miui/") &&
+                        !classType.startsWith("Lcom/oplus/") &&
+                        !classType.startsWith("Lcom/samsung/")) {
+                        continue;
+                    }
+                    if ("Ljava/lang/Record;".equals(classDef.getSuperclass())) {
+                        recordClasses.add(classType);
+                    }
+                    for (Method method : classDef.getMethods()) {
+                        if (patchRules.containsKey(method.getName())) {
+                            targetClasses.add(classType);
+                            break;
+                        }
+                        MethodImplementation impl = method.getImplementation();
+                        if (impl != null) {
+                            for (Instruction inst : impl.getInstructions()) {
+                                if (inst instanceof ReferenceInstruction) {
+                                    Object ref = ((ReferenceInstruction) inst).getReference();
+                                    if (ref instanceof MethodReference) {
+                                        if ("notAllowCaptureDisplay".equals(((MethodReference) ref).getName())) {
+                                            targetClasses.add(classType);
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if (targetClasses.isEmpty()) {
+                    return;
+                }
+
+                List<String> patchedDetails = new ArrayList<>();
+                DexRewriter rewriter = new DexRewriter(new RewriterModule() {
+                    @Override
+                    public Rewriter<ClassDef> getClassDefRewriter(Rewriters rewriters) {
+                        return new ClassDefRewriter(rewriters) {
+                            @Override
+                            public ClassDef rewrite(ClassDef classDef) {
+                                String type = classDef.getType();
+                                if (!targetClasses.contains(type) && !recordClasses.contains(type)) {
+                                    return classDef;
+                                }
+
+                                boolean needsCaptureHelper = false;
+                                MethodReference captureTargetRef = null;
+                                Opcode origCaptureInvokeOp = Opcode.INVOKE_INTERFACE;
+
+                                List<Method> rewrittenMethods = new ArrayList<>();
+                                for (Method method : classDef.getMethods()) {
+                                    String name = method.getName();
+                                    String definingClass = method.getDefiningClass();
+
+                                    // Fix Android 14/15 Java Record ART verification errors
+                                    if (recordClasses.contains(definingClass) &&
+                                        ("equals".equals(name) || "hashCode".equals(name) || "toString".equals(name))) {
+                                        MethodImplementation fixedImpl = buildRecordImplementation(method);
+                                        String log = entryName + " -> " + definingClass + "->" + name + "() [FIX_RECORD_VERIFY]";
+                                        synchronized (System.out) {
+                                            System.out.println("   ✓ " + log);
+                                        }
+                                        patchedDetails.add(log);
+                                        rewrittenMethods.add(new ImmutableMethod(
+                                                definingClass,
+                                                name,
+                                                method.getParameters(),
+                                                method.getReturnType(),
+                                                method.getAccessFlags(),
+                                                method.getAnnotations(),
+                                                method.getHiddenApiRestrictions(),
+                                                fixedImpl
+                                        ));
+                                        continue;
+                                    }
+
+                                    PatchAction action = patchRules.get(name);
+                                    if (action != null) {
+                                        int flags = method.getAccessFlags();
+                                        if ((flags & AccessFlags.ABSTRACT.getValue()) != 0 ||
+                                            (flags & AccessFlags.NATIVE.getValue()) != 0) {
+                                            rewrittenMethods.add(method);
+                                            continue;
+                                        }
+
+                                        if (action == PatchAction.RETURN_LIST) {
+                                            String origName = name + "$sfs_orig";
+                                            boolean isStatic = (flags & AccessFlags.STATIC.getValue()) != 0;
+                                            int origFlags = isStatic ? flags : ((flags & ~AccessFlags.PUBLIC.getValue() & ~AccessFlags.PROTECTED.getValue()) | AccessFlags.PRIVATE.getValue());
+
+                                            ImmutableMethod origMethod = new ImmutableMethod(
+                                                    definingClass,
+                                                    origName,
+                                                    method.getParameters(),
+                                                    method.getReturnType(),
+                                                    origFlags,
+                                                    method.getAnnotations(),
+                                                    method.getHiddenApiRestrictions(),
+                                                    method.getImplementation()
+                                            );
+                                            rewrittenMethods.add(origMethod);
+
+                                            MethodImplementation wrapperImpl = buildNotifyScreenshotImplementation(method, origName);
+                                            ImmutableMethod wrapperMethod = new ImmutableMethod(
+                                                    definingClass,
+                                                    name,
+                                                    method.getParameters(),
+                                                    method.getReturnType(),
+                                                    method.getAccessFlags(),
+                                                    method.getAnnotations(),
+                                                    method.getHiddenApiRestrictions(),
+                                                    wrapperImpl
+                                            );
+                                            rewrittenMethods.add(wrapperMethod);
+                                        } else {
+                                            MethodImplementation newImpl = buildImplementation(method, action);
+                                            rewrittenMethods.add(new ImmutableMethod(
+                                                    definingClass,
+                                                    name,
+                                                    method.getParameters(),
+                                                    method.getReturnType(),
+                                                    method.getAccessFlags(),
+                                                    method.getAnnotations(),
+                                                    method.getHiddenApiRestrictions(),
+                                                    newImpl
+                                            ));
+                                        }
+
+                                        String log = entryName + " -> " + definingClass + "->" + name + "() [" + action + "]";
+                                        synchronized (System.out) {
+                                            System.out.println("   ✓ " + log);
+                                        }
+                                        patchedDetails.add(log);
+                                        continue;
+                                    }
+
+                                    // Intercept invocations of notAllowCaptureDisplay inside caller methods (e.g. WindowManagerService.captureDisplay)
+                                    MethodImplementation impl = method.getImplementation();
+                                    if (impl != null) {
+                                        boolean methodChanged = false;
+                                        List<Instruction> newInstructions = new ArrayList<>();
+                                        for (Instruction inst : impl.getInstructions()) {
+                                            if (inst instanceof ReferenceInstruction) {
+                                                Object ref = ((ReferenceInstruction) inst).getReference();
+                                                if (ref instanceof MethodReference) {
+                                                    MethodReference mr = (MethodReference) ref;
+                                                    if ("notAllowCaptureDisplay".equals(mr.getName())) {
+                                                        captureTargetRef = mr;
+                                                        origCaptureInvokeOp = inst.getOpcode();
+                                                        List<String> helperParams = new ArrayList<>();
+                                                        helperParams.add(mr.getDefiningClass());
+                                                        for (CharSequence p : mr.getParameterTypes()) {
+                                                            helperParams.add(p.toString());
+                                                        }
+                                                        ImmutableMethodReference sfsRef = new ImmutableMethodReference(
+                                                                definingClass,
+                                                                "sfs$notAllowCaptureDisplay",
+                                                                helperParams,
+                                                                mr.getReturnType()
+                                                        );
+                                                        if (inst instanceof FiveRegisterInstruction) {
+                                                            FiveRegisterInstruction fri = (FiveRegisterInstruction) inst;
+                                                            newInstructions.add(new ImmutableInstruction35c(
+                                                                    Opcode.INVOKE_STATIC,
+                                                                    fri.getRegisterCount(),
+                                                                    fri.getRegisterC(),
+                                                                    fri.getRegisterD(),
+                                                                    fri.getRegisterE(),
+                                                                    fri.getRegisterF(),
+                                                                    fri.getRegisterG(),
+                                                                    sfsRef
+                                                            ));
+                                                            methodChanged = true;
+                                                            needsCaptureHelper = true;
+                                                            continue;
+                                                        } else if (inst instanceof RegisterRangeInstruction) {
+                                                            RegisterRangeInstruction rri = (RegisterRangeInstruction) inst;
+                                                            newInstructions.add(new ImmutableInstruction3rc(
+                                                                    Opcode.INVOKE_STATIC_RANGE,
+                                                                    rri.getStartRegister(),
+                                                                    rri.getRegisterCount(),
+                                                                    sfsRef
+                                                            ));
+                                                            methodChanged = true;
+                                                            needsCaptureHelper = true;
+                                                            continue;
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                            newInstructions.add(inst);
+                                        }
+
+                                        if (methodChanged) {
+                                            MethodImplementation newImpl = new ImmutableMethodImplementation(
+                                                    impl.getRegisterCount(),
+                                                    newInstructions,
+                                                    impl.getTryBlocks(),
+                                                    impl.getDebugItems()
+                                            );
+                                            rewrittenMethods.add(new ImmutableMethod(
+                                                    definingClass,
+                                                    name,
+                                                    method.getParameters(),
+                                                    method.getReturnType(),
+                                                    method.getAccessFlags(),
+                                                    method.getAnnotations(),
+                                                    method.getHiddenApiRestrictions(),
+                                                    newImpl
+                                            ));
+                                            String log = entryName + " -> " + definingClass + "->" + name + "() [INTERCEPT_CAPTURE_DISPLAY]";
+                                            synchronized (System.out) {
+                                                System.out.println("   ✓ " + log);
+                                            }
+                                            patchedDetails.add(log);
+                                            continue;
+                                        }
+                                    }
+
+                                    rewrittenMethods.add(method);
+                                }
+
+                                if (needsCaptureHelper && captureTargetRef != null) {
+                                    Method helper = createSfsNotAllowCaptureDisplayMethod(type, captureTargetRef, origCaptureInvokeOp);
+                                    rewrittenMethods.add(helper);
+                                    String log = entryName + " -> " + type + "->sfs$notAllowCaptureDisplay() [HELPER_ADDED]";
+                                    synchronized (System.out) {
+                                        System.out.println("   ✓ " + log);
+                                    }
+                                    patchedDetails.add(log);
+                                }
+
+                                return new ImmutableClassDef(
+                                        classDef.getType(),
+                                        classDef.getAccessFlags(),
+                                        classDef.getSuperclass(),
+                                        classDef.getInterfaces(),
+                                        classDef.getSourceFile(),
+                                        classDef.getAnnotations(),
+                                        classDef.getFields(),
+                                        rewrittenMethods
+                                );
+                            }
+                        };
+                    }
+                });
+
+                DexFile rewrittenDex = rewriter.getDexFileRewriter().rewrite(origDex);
+
+                String safePrefix = "sfs_" + entryName.replaceAll("[^a-zA-Z0-9]", "_") + "_";
+                File tempDex = File.createTempFile(safePrefix, ".dex", tempDir);
+                tempDex.deleteOnExit();
+                DexFileFactory.writeDexFile(tempDex.getAbsolutePath(), rewrittenDex);
+                modifiedDexFiles.put(entryName, tempDex);
+                totalPatchedMethods.addAndGet(patchedDetails.size());
+            } catch (Exception e) {
+                throw new RuntimeException("Error processing " + entryName, e);
+            }
+        });
+
+        if (totalPatchedMethods.get() == 0) {
+            System.out.println("⚠️ Warning: No target methods matched in any DEX file!");
+            for (File f : modifiedDexFiles.values()) {
+                if (f.exists()) f.delete();
+            }
+            return false;
+        }
+
+        long patchDuration = System.currentTimeMillis() - phaseStart;
+        System.out.println("⏱️ Bytecode patched in " + (patchDuration / 1000.0) + "s");
+
+        long repackStart = System.currentTimeMillis();
+        System.out.println("🖇️ Repacking archive (updating " + modifiedDexFiles.size() + " DEX file(s))...");
+        if (outputFile.getParentFile() != null) {
+            outputFile.getParentFile().mkdirs();
+        }
+
+        try (ZipFile zipIn = new ZipFile(inputFile);
+             ZipOutputStream zos = new ZipOutputStream(new BufferedOutputStream(new FileOutputStream(outputFile), 65536))) {
+
+            zos.setLevel(Deflater.BEST_SPEED);
+            Enumeration<? extends ZipEntry> entries = zipIn.entries();
+            while (entries.hasMoreElements()) {
+                ZipEntry entry = entries.nextElement();
+                String name = entry.getName();
+
+                if (modifiedDexFiles.containsKey(name)) {
+                    File patchedDex = modifiedDexFiles.get(name);
+                    ZipEntry newEntry = new ZipEntry(name);
+                    newEntry.setTime(System.currentTimeMillis());
+                    zos.putNextEntry(newEntry);
+                    try (InputStream fis = new BufferedInputStream(new FileInputStream(patchedDex), 65536)) {
+                        copyStream(fis, zos);
+                    }
+                    zos.closeEntry();
+                    patchedDex.delete();
+                } else {
+                    ZipEntry newEntry = new ZipEntry(name);
+                    newEntry.setTime(entry.getTime());
+                    if (entry.getMethod() == ZipEntry.STORED) {
+                        newEntry.setMethod(ZipEntry.STORED);
+                        newEntry.setSize(entry.getSize());
+                        newEntry.setCompressedSize(entry.getCompressedSize());
+                        newEntry.setCrc(entry.getCrc());
+                    }
+                    zos.putNextEntry(newEntry);
+                    try (InputStream is = zipIn.getInputStream(entry)) {
+                        copyStream(is, zos);
+                    }
+                    zos.closeEntry();
+                }
+            }
+        } finally {
+            for (File f : modifiedDexFiles.values()) {
+                if (f.exists()) f.delete();
+            }
+        }
+
+        long repackDuration = System.currentTimeMillis() - repackStart;
+        System.out.println("⏱️ Repack completed in " + (repackDuration / 1000.0) + "s");
+
+        return true;
+    }
+
+    private static int countParamRegisters(Method method) {
+        boolean isStatic = (method.getAccessFlags() & AccessFlags.STATIC.getValue()) != 0;
+        int paramRegs = isStatic ? 0 : 1;
+        for (MethodParameter param : method.getParameters()) {
+            String type = param.getType();
+            if ("J".equals(type) || "D".equals(type)) {
+                paramRegs += 2;
+            } else {
+                paramRegs += 1;
+            }
+        }
+        return paramRegs;
+    }
+
+    private static MethodImplementation buildRecordImplementation(Method method) {
+        String name = method.getName();
+        int paramRegs = countParamRegisters(method);
+        int totalRegisters = Math.max(1, paramRegs + 1);
+
+        List<Instruction> instructions = new ArrayList<>();
+        if ("toString".equals(name)) {
+            instructions.add(new ImmutableInstruction21c(Opcode.CONST_STRING, 0, new ImmutableStringReference("")));
+            instructions.add(new ImmutableInstruction11x(Opcode.RETURN_OBJECT, 0));
+        } else if ("equals".equals(name) || "hashCode".equals(name)) {
+            instructions.add(new ImmutableInstruction11n(Opcode.CONST_4, 0, 0));
+            instructions.add(new ImmutableInstruction11x(Opcode.RETURN, 0));
+        } else {
+            return buildImplementation(method, PatchAction.RETURN_FALSE);
+        }
+
+        return new ImmutableMethodImplementation(totalRegisters, instructions, null, null);
+    }
+
+    private static MethodImplementation buildImplementation(Method method, PatchAction action) {
+        if (action == PatchAction.DYNAMIC_PROP_DIRECT || action == PatchAction.DYNAMIC_PROP_INVERT) {
+            return buildDynamicBooleanImplementation(method, action == PatchAction.DYNAMIC_PROP_INVERT);
+        }
+
+        int paramRegs = countParamRegisters(method);
+        int totalRegisters = Math.max(1, paramRegs + 1);
+
+        List<Instruction> instructions = new ArrayList<>();
+        String retType = method.getReturnType();
+
+        if (action == PatchAction.RETURN_LIST && (retType.startsWith("L") || retType.startsWith("["))) {
+            instructions.add(new ImmutableInstruction21c(Opcode.NEW_INSTANCE, 0, new ImmutableTypeReference("Ljava/util/ArrayList;")));
+            instructions.add(new ImmutableInstruction35c(Opcode.INVOKE_DIRECT, 1, 0, 0, 0, 0, 0,
+                    new ImmutableMethodReference("Ljava/util/ArrayList;", "<init>", Collections.emptyList(), "V")));
+            instructions.add(new ImmutableInstruction11x(Opcode.RETURN_OBJECT, 0));
+        } else {
+            int val = (action == PatchAction.RETURN_TRUE) ? 1 : 0;
+            if ("J".equals(retType) || "D".equals(retType)) {
+                instructions.add(new ImmutableInstruction21s(Opcode.CONST_WIDE_16, 0, val));
+                instructions.add(new ImmutableInstruction11x(Opcode.RETURN_WIDE, 0));
+            } else if ("Z".equals(retType) || "B".equals(retType) || "S".equals(retType) || "C".equals(retType) || "I".equals(retType) || "F".equals(retType)) {
+                instructions.add(new ImmutableInstruction11n(Opcode.CONST_4, 0, val));
+                instructions.add(new ImmutableInstruction11x(Opcode.RETURN, 0));
+            } else {
+                instructions.add(new ImmutableInstruction11n(Opcode.CONST_4, 0, 0));
+                instructions.add(new ImmutableInstruction11x(Opcode.RETURN_OBJECT, 0));
+            }
+        }
+
+        return new ImmutableMethodImplementation(totalRegisters, instructions, null, null);
+    }
+
+    private static MethodImplementation buildDynamicBooleanImplementation(Method method, boolean invert) {
+        int paramRegs = countParamRegisters(method);
+        int totalRegisters = Math.max(2, paramRegs + 2);
+
+        List<Instruction> instructions = new ArrayList<>();
+        // Read property (default true)
+        instructions.add(new ImmutableInstruction21c(Opcode.CONST_STRING, 0, new ImmutableStringReference("persist.sys.sfs.screenshot")));
+        instructions.add(new ImmutableInstruction11n(Opcode.CONST_4, 1, 1));
+        instructions.add(new ImmutableInstruction35c(Opcode.INVOKE_STATIC, 2, 0, 1, 0, 0, 0,
+                new ImmutableMethodReference("Landroid/os/SystemProperties;", "getBoolean", Arrays.asList("Ljava/lang/String;", "Z"), "Z")));
+        instructions.add(new ImmutableInstruction11x(Opcode.MOVE_RESULT, 0));
+
+        if (invert) {
+            // Invert for block mode
+            instructions.add(new ImmutableInstruction22b(Opcode.XOR_INT_LIT8, 0, 0, 1));
+        }
+
+        instructions.add(new ImmutableInstruction11x(Opcode.RETURN, 0));
+
+        return new ImmutableMethodImplementation(totalRegisters, instructions, null, null);
+    }
+
+    interface InstItem {
+        int getCodeUnits();
+    }
+
+    static class RealInst implements InstItem {
+        final Instruction inst;
+        RealInst(Instruction inst) { this.inst = inst; }
+        public int getCodeUnits() { return inst.getCodeUnits(); }
+    }
+
+    static class LabelItem implements InstItem {
+        final String name;
+        LabelItem(String name) { this.name = name; }
+        public int getCodeUnits() { return 0; }
+    }
+
+    static class Branch21t implements InstItem {
+        final Opcode opcode;
+        final int reg;
+        final String targetLabel;
+        Branch21t(Opcode opcode, int reg, String targetLabel) {
+            this.opcode = opcode;
+            this.reg = reg;
+            this.targetLabel = targetLabel;
+        }
+        public int getCodeUnits() { return 2; }
+    }
+
+    private static List<Instruction> resolveInstructions(List<InstItem> items) {
+        Map<String, Integer> labelOffsets = new HashMap<>();
+        int currentUnit = 0;
+        for (InstItem item : items) {
+            if (item instanceof LabelItem) {
+                labelOffsets.put(((LabelItem) item).name, currentUnit);
+            } else {
+                currentUnit += item.getCodeUnits();
+            }
+        }
+        List<Instruction> result = new ArrayList<>();
+        currentUnit = 0;
+        for (InstItem item : items) {
+            if (item instanceof RealInst) {
+                result.add(((RealInst) item).inst);
+                currentUnit += item.getCodeUnits();
+            } else if (item instanceof Branch21t) {
+                Branch21t b = (Branch21t) item;
+                int offset = labelOffsets.get(b.targetLabel) - currentUnit;
+                result.add(new ImmutableInstruction21t(b.opcode, b.reg, offset));
+                currentUnit += b.getCodeUnits();
+            }
+        }
+        return result;
+    }
+
+    private static MethodImplementation buildNotifyScreenshotImplementation(Method method, String origMethodName) {
+        boolean isStatic = (method.getAccessFlags() & AccessFlags.STATIC.getValue()) != 0;
+        int paramRegs = countParamRegisters(method);
+        int localRegs = 2; // v0, v1
+        int totalRegisters = Math.max(2, paramRegs + localRegs);
+        int p0 = totalRegisters - paramRegs;
+
+        List<InstItem> items = new ArrayList<>();
+        // Read property (default true)
+        items.add(new RealInst(new ImmutableInstruction21c(Opcode.CONST_STRING, 0, new ImmutableStringReference("persist.sys.sfs.screenshot"))));
+        items.add(new RealInst(new ImmutableInstruction11n(Opcode.CONST_4, 1, 1)));
+        items.add(new RealInst(new ImmutableInstruction35c(Opcode.INVOKE_STATIC, 2, 0, 1, 0, 0, 0,
+                new ImmutableMethodReference("Landroid/os/SystemProperties;", "getBoolean", Arrays.asList("Ljava/lang/String;", "Z"), "Z"))));
+        items.add(new RealInst(new ImmutableInstruction11x(Opcode.MOVE_RESULT, 0)));
+
+        // If blocked, delegate to original
+        items.add(new Branch21t(Opcode.IF_EQZ, 0, "delegate_orig"));
+
+        // Suppress detection with empty list
+        items.add(new RealInst(new ImmutableInstruction21c(Opcode.NEW_INSTANCE, 0, new ImmutableTypeReference("Ljava/util/ArrayList;"))));
+        items.add(new RealInst(new ImmutableInstruction35c(Opcode.INVOKE_DIRECT, 1, 0, 0, 0, 0, 0,
+                new ImmutableMethodReference("Ljava/util/ArrayList;", "<init>", Collections.emptyList(), "V"))));
+        items.add(new RealInst(new ImmutableInstruction11x(Opcode.RETURN_OBJECT, 0)));
+
+        // Delegate to original
+        items.add(new LabelItem("delegate_orig"));
+        Opcode invOp = isStatic ? Opcode.INVOKE_STATIC : Opcode.INVOKE_DIRECT;
+        int r0 = (paramRegs > 0) ? p0 : 0;
+        int r1 = (paramRegs > 1) ? p0 + 1 : 0;
+        int r2 = (paramRegs > 2) ? p0 + 2 : 0;
+        int r3 = (paramRegs > 3) ? p0 + 3 : 0;
+        int r4 = (paramRegs > 4) ? p0 + 4 : 0;
+        List<String> paramTypes = new ArrayList<>();
+        for (MethodParameter p : method.getParameters()) {
+            paramTypes.add(p.getType());
+        }
+        ImmutableMethodReference ref = new ImmutableMethodReference(method.getDefiningClass(), origMethodName, paramTypes, method.getReturnType());
+
+        if (paramRegs <= 5) {
+            items.add(new RealInst(new ImmutableInstruction35c(invOp, paramRegs, r0, r1, r2, r3, r4, ref)));
+        } else {
+            Opcode rangeOp = isStatic ? Opcode.INVOKE_STATIC_RANGE : Opcode.INVOKE_DIRECT_RANGE;
+            items.add(new RealInst(new ImmutableInstruction3rc(rangeOp, p0, paramRegs, ref)));
+        }
+
+        items.add(new RealInst(new ImmutableInstruction11x(Opcode.MOVE_RESULT_OBJECT, 0)));
+        items.add(new RealInst(new ImmutableInstruction11x(Opcode.RETURN_OBJECT, 0)));
+
+        return new ImmutableMethodImplementation(totalRegisters, resolveInstructions(items), null, null);
+    }
+
+    private static Method createSfsNotAllowCaptureDisplayMethod(String definingClass, MethodReference targetRef, Opcode origInvokeOp) {
+        int paramRegs = 1; // for receiver stub
+        for (CharSequence cs : targetRef.getParameterTypes()) {
+            String pType = cs.toString();
+            if ("J".equals(pType) || "D".equals(pType)) {
+                paramRegs += 2;
+            } else {
+                paramRegs += 1;
+            }
+        }
+        int localRegs = 2; // v0, v1
+        int totalRegisters = Math.max(2, paramRegs + localRegs);
+        int p0 = totalRegisters - paramRegs;
+
+        List<InstItem> items = new ArrayList<>();
+        // Read property (default true)
+        items.add(new RealInst(new ImmutableInstruction21c(Opcode.CONST_STRING, 0, new ImmutableStringReference("persist.sys.sfs.screenshot"))));
+        items.add(new RealInst(new ImmutableInstruction11n(Opcode.CONST_4, 1, 1)));
+        items.add(new RealInst(new ImmutableInstruction35c(Opcode.INVOKE_STATIC, 2, 0, 1, 0, 0, 0,
+                new ImmutableMethodReference("Landroid/os/SystemProperties;", "getBoolean", Arrays.asList("Ljava/lang/String;", "Z"), "Z"))));
+        items.add(new RealInst(new ImmutableInstruction11x(Opcode.MOVE_RESULT, 0)));
+
+        // If SFS is enabled (v0 != 0), branch is NOT taken -> return false (not disallowed = allowed!)
+        items.add(new Branch21t(Opcode.IF_EQZ, 0, "sfs_disabled"));
+        items.add(new RealInst(new ImmutableInstruction11n(Opcode.CONST_4, 0, 0)));
+        items.add(new RealInst(new ImmutableInstruction11x(Opcode.RETURN, 0)));
+
+        // SFS is disabled: delegate to original stub implementation
+        items.add(new LabelItem("sfs_disabled"));
+        items.add(new Branch21t(Opcode.IF_EQZ, p0, "stub_null"));
+
+        Opcode delegateOp = (origInvokeOp == Opcode.INVOKE_INTERFACE || origInvokeOp == Opcode.INVOKE_INTERFACE_RANGE)
+                ? Opcode.INVOKE_INTERFACE : Opcode.INVOKE_VIRTUAL;
+        int r0 = (paramRegs > 0) ? p0 : 0;
+        int r1 = (paramRegs > 1) ? p0 + 1 : 0;
+        int r2 = (paramRegs > 2) ? p0 + 2 : 0;
+        int r3 = (paramRegs > 3) ? p0 + 3 : 0;
+        int r4 = (paramRegs > 4) ? p0 + 4 : 0;
+        if (paramRegs <= 5) {
+            items.add(new RealInst(new ImmutableInstruction35c(delegateOp, paramRegs, r0, r1, r2, r3, r4, targetRef)));
+        } else {
+            Opcode rangeOp = (delegateOp == Opcode.INVOKE_INTERFACE) ? Opcode.INVOKE_INTERFACE_RANGE : Opcode.INVOKE_VIRTUAL_RANGE;
+            items.add(new RealInst(new ImmutableInstruction3rc(rangeOp, p0, paramRegs, targetRef)));
+        }
+        items.add(new RealInst(new ImmutableInstruction11x(Opcode.MOVE_RESULT, 0)));
+        items.add(new RealInst(new ImmutableInstruction11x(Opcode.RETURN, 0)));
+
+        // Stub was null: return false (allowed)
+        items.add(new LabelItem("stub_null"));
+        items.add(new RealInst(new ImmutableInstruction11n(Opcode.CONST_4, 0, 0)));
+        items.add(new RealInst(new ImmutableInstruction11x(Opcode.RETURN, 0)));
+
+        MethodImplementation impl = new ImmutableMethodImplementation(totalRegisters, resolveInstructions(items), null, null);
+
+        List<MethodParameter> params = new ArrayList<>();
+        params.add(new ImmutableMethodParameter(targetRef.getDefiningClass(), Collections.emptySet(), "stub"));
+        int pIdx = 1;
+        for (CharSequence cs : targetRef.getParameterTypes()) {
+            params.add(new ImmutableMethodParameter(cs.toString(), Collections.emptySet(), "param" + (pIdx++)));
+        }
+
+        return new ImmutableMethod(
+                definingClass,
+                "sfs$notAllowCaptureDisplay",
+                params,
+                "Z",
+                AccessFlags.PRIVATE.getValue() | AccessFlags.STATIC.getValue(),
+                Collections.emptySet(),
+                Collections.emptySet(),
+                impl
+        );
+    }
+
+    private static void copyStream(InputStream in, OutputStream out) throws IOException {
+        byte[] buffer = new byte[65536];
+        int read;
+        while ((read = in.read(buffer)) != -1) {
+            out.write(buffer, 0, read);
+        }
+    }
+}
+
+```
+
+`post-fs-data.sh`:
+
+```sh
+#!/system/bin/sh
+MODDIR="${0%/*}"
+PATCHED_JAR="$MODDIR/system/framework/services.jar"
+TARGET_JAR="/system/framework/services.jar"
+
+[ -f "$PATCHED_JAR" ] || exit 0
+
+if cmp -s "$PATCHED_JAR" "$TARGET_JAR" 2>/dev/null; then
+  exit 0
+fi
+
+mount --make-rshared / 2>/dev/null
+chcon --reference="$TARGET_JAR" "$PATCHED_JAR" 2>/dev/null
+
+[ -x /data/adb/ksu/bin/ksu_susfs ] && /data/adb/ksu/bin/ksu_susfs add_sus_kstat "$TARGET_JAR" 2>/dev/null
+
+mount -o bind "$PATCHED_JAR" "$TARGET_JAR"
+
+if [ -x /data/adb/ksu/bin/ksu_susfs ]; then
+  /data/adb/ksu/bin/ksu_susfs update_sus_kstat "$TARGET_JAR" 2>/dev/null
+  /data/adb/ksu/bin/ksu_susfs add_try_umount "$TARGET_JAR" 1 >/dev/null 2>&1
+fi
+if [ -x /data/adb/ksud ]; then
+  /data/adb/ksud kernel umount add "$TARGET_JAR" --flags 2 >/dev/null 2>&1
+fi
+
+exit 0
+
+```
+
+`service.sh`:
+
+```sh
+#!/system/bin/sh
+MODDIR="${0%/*}"
+[ "$MODDIR" = "$0" ] && MODDIR="."
+[ -d "$MODDIR" ] || MODDIR="/data/adb/modules/simple_flag_secure"
+LOG_FILE="$MODDIR/sfs_debug.log"
+
+notify() {
+    local TITLE="$1"
+    local MSG="$2"
+    local ICON="${3:-@android:drawable/ic_dialog_info}"
+    local TAG="${4:-SFS_BOOT}"
+    local SAFE_MSG=$(printf '%b' "$MSG" | sed "s/'/'\\\\''/g")
+    su 2000 -c "cmd notification post -i '$ICON' -t '$TITLE' -S bigtext '$TAG' '$SAFE_MSG'" >/dev/null 2>&1 || \
+    cmd notification post -i "$ICON" -t "$TITLE" -S bigtext "$TAG" "$SAFE_MSG" >/dev/null 2>&1
+}
+
+BASE_DESC="Bypasses screenshot restrictions and hides screenshot detection (A14+). Supports Magisk, KernelSU and APatch, no Zygisk, LSPosed or Meta Module required."
+
+while [ "$(getprop sys.boot_completed)" != "1" ]; do
+    sleep 2
+done
+
+count=0
+while [ ! -d "/storage/emulated/0" ] && [ "$count" -lt 30 ]; do
+    sleep 2
+    count=$((count + 1))
+done
+
+sleep 3
+
+ADBDIR="/data/adb"
+if [ -d "$ADBDIR/magisk" ] && magisk -V >/dev/null 2>&1; then
+  ROOT="Magisk"
+elif [ -d "$ADBDIR/ksu" ] && ksud -V >/dev/null 2>&1; then
+  ROOT="KernelSU"
+elif [ -d "$ADBDIR/ap" ] && apd -V >/dev/null 2>&1; then
+  ROOT="APatch"
+else
+  ROOT="Unknown"
+fi
+
+if [ "$ROOT" != "Magisk" ] && [ -d "$ADBDIR/metamodule" ]; then
+  MOUNT_MODE="Meta-Module"
+else
+  MOUNT_MODE="Standalone"
+fi
+
+MOD_JAR="$MODDIR/system/framework/services.jar"
+SYS_JAR="/system/framework/services.jar"
+
+if [ -f "$MOD_JAR" ] && cmp -s "$MOD_JAR" "$SYS_JAR" 2>/dev/null; then
+    CURRENT=$(getprop persist.sys.sfs.screenshot)
+
+    if [ "$CURRENT" = "false" ]; then
+        STATUS="BLOCKED"
+        ICON="❌"
+        NOTIF_ICON="@android:drawable/ic_menu_close_clear_cancel"
+    else
+        STATUS="ALLOWED"
+        ICON="✅"
+        NOTIF_ICON="@android:drawable/ic_menu_view"
+    fi
+
+    sed -i "s#^description=.*#description=[ $ICON $STATUS ] $BASE_DESC#" "$MODDIR/module.prop" 2>/dev/null
+
+    if [ "$CURRENT" = "false" ]; then
+        NOTIF_BODY="Mounted ($MOUNT_MODE). Privacy Mode active: screenshots blocked everywhere."
+    else
+        NOTIF_BODY="Mounted ($MOUNT_MODE). Screenshots and recordings allowed everywhere!"
+    fi
+    notify "$ICON $STATUS • Simple Flag Secure" "$NOTIF_BODY" "$NOTIF_ICON" "SFS_BOOT"
+else
+    [ -f "$MODDIR/action.sh" ] && sh "$MODDIR/action.sh" debug
+
+    if [ ! -f "$LOG_FILE" ]; then
+        {
+            echo "=================================================="
+            echo "       Simple Flag Secure - Diagnostic Log"
+            echo "=================================================="
+            echo "Time: $(date)"
+            echo "Device: $(getprop ro.product.brand) $(getprop ro.product.model)"
+            echo "Android: $(getprop ro.build.version.release) (SDK $(getprop ro.build.version.sdk))"
+            echo "Root Manager: $ROOT"
+            echo "Mount Mode: $MOUNT_MODE"
+            echo
+            echo "--- [Mount Check: FAILED] ---"
+            echo "Stock JAR:   $SYS_JAR"
+            echo "Module JAR:  $MOD_JAR"
+            echo "services.jar does not match module patched file!"
+            echo "KernelSU/APatch standalone mount or overlayfs failed to mount."
+            echo
+            echo "--- [Active Mounts] ---"
+            grep 'services.jar' /proc/mounts 2>/dev/null || echo "No bind mounts for services.jar found."
+            echo
+            echo "=================================================="
+            echo "Send this log to @BuildBytesDiscussion on Telegram:"
+            echo "🔗 https://telegram.me/BuildBytesDiscussion"
+            echo "=================================================="
+        } > "$LOG_FILE" 2>&1
+        chmod 644 "$LOG_FILE" 2>/dev/null
+    fi
+
+    sed -i "s#^description=.*#description=[ ⚠️ NOT WORKING ] $BASE_DESC#" "$MODDIR/module.prop" 2>/dev/null
+    notify "Simple Flag Secure" "⚠️ Module isn't working: services.jar not mounted! Check sfs_install.log." "@android:drawable/stat_sys_warning"
+fi
+
+```
+
+`update.json`:
+
+```json
+{
+  "version": "v7.7",
+  "versionCode": 77,
+  "zipUrl": "https://github.com/ShivamXD6/Simple-Flag-Secure/releases/latest/download/Simple_Flag_Secure_v7.7.zip",
+  "changelog": "https://raw.githubusercontent.com/ShivamXD6/Simple-Flag-Secure/main/changelog.md"
+}
+
+```
