@@ -2368,6 +2368,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/xBrunoMedeiros/eac-overlay [EAC Overlay]
 - https://github.com/3r4y/imgui-external-overlay [imgui overlay]
 - https://github.com/rabbanyhmm/ImOverlay-DX11 [Lightweight C++20 Win32/DirectX 11 transparent multi-window overlay framework with smart click-through and parent-child hierarchy]
+- https://github.com/husnaintariq577/kx-vision [C++ DirectX overlay for Guild Wars 2 with D3D render hooks, game offsets, and ESP-style world/player visualization]
 - https://github.com/J0xna/Kernel-Overlay-Hider [Kernel Overlay Hider]
 - https://github.com/geeksonsecurity/android-overlay-malware-example [Android]
 - https://github.com/SamuelTulach/OverlayCord [Discord]
@@ -3213,6 +3214,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/WeiNaYongQ/OmniClutch [Fabric mod for automated elytra/fall clutch saves with configurable anti-cheat-aware timing]
 - https://github.com/nekoyahouse/epsilon [Open-source NeoForge and Fabric Minecraft utility client with modular addon system and custom Lumin/PrismRHI rendering stack]
 - https://github.com/lolizei/Lenrete-Mod [Open-source Fabric utility/cheat client for Minecraft 26.2 with modular combat, movement, render, and HUD modules]
+- https://github.com/Marcinator31/Vortex-Client [Open-source Fabric 1.21.11 Minecraft utility client with HUD, ESP, waypoints, combat helpers, and in-game preset configuration]
 - https://github.com/Gingerbeard5773/dino-printer [Meteor Client addon that prints Litematica schematics with BlockState simulation, raytracing, and anti-cheat-aware placement settings]
 
 > Game:Sword With Sauce
