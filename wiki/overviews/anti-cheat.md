@@ -939,6 +939,7 @@ sources:
   - wiki/sources/descriptions/GeneralsOnlineDevelopmentTeam__AntiCheatPlugin_EasyAntiCheat.md
   - wiki/sources/descriptions/TypeThe0ry__MCAce.md
   - wiki/sources/descriptions/maximumemails-cmd__RainInjectable.md
+  - wiki/sources/descriptions/dhehdjebejen-beep__Bastion.md
 updated: 2026-09-28
 confidence: high
 ---
@@ -1261,6 +1262,8 @@ Long-form kernel AC architecture primer [How Kernel Anti-Cheats Work](https://s4
 **Fabric server-side moderation AC:** [[cheatcheck]] (EliGamer154; Java Fabric **26.1.x** mod; `/cheatcheck` spectate menu + safemode stealth watching; freeze/vanish/inventory/radar staff tools; `/report` flags plus reach/x-ray-style ore mining/speed heuristics; configurable offense presets, temp bans, pardons, persistent world storage; no client mod required; vanilla-client-compatible enforcement for Fabric server administrators; Anti Cheat / game:minecraft). (source: wiki/sources/descriptions/EliGamer154__CheatCheck.md)
 
 **Fabric alert-only server-side AC:** [[silent-anticheat]] (danielreytalan635-tech; Java Fabric **26.2** mod; per-tick movement tracking plus attack/block-break reach checks for flight/hover, speed/teleport, and reach; styled console + online-operator alerts only—no kicks, bans, or rubberbanding; conservative tunable thresholds; Fabric API server tick/player event hooks; Gradle-built; no client mod required; Anti Cheat / game:minecraft) for Fabric server operators wanting lightweight non-punitive cheat monitoring beside moderation mods such as [[cheatcheck]] and alert-only NeoForge mods such as [[sentinel-anticheat-neoforge]]. (source: wiki/sources/descriptions/danielreytalan635-tech__silent-anticheat.md)
+
+**Fabric offline-mode security suite:** [[bastion]] (dhehdjebejen-beep; Java Gradle; Fabric **1.21.11** three-mod suite—BastionAuth hardened offline login/registration with Argon2id, pre-login packet firewall, TOTP 2FA, multi-account detection; BastionClaims server-side mixin land protection against explosions/fluids/pistons/hoppers; BastionAC 38 outcome/signature checks with buffered violation decay and Meteor/Wurst coverage; soft reflection bridges for standalone or integrated deployment; staff panels, configurable thresholds, unit tests; no client install; Anti Cheat / game:minecraft) for cracked/offline-mode Fabric server operators needing layered account security, territory protection, and fair-play enforcement beside alert-only mods such as [[silent-anticheat]] and Paper starter plugins such as [[nova-anticheat]]. (source: wiki/sources/descriptions/dhehdjebejen-beep__Bastion.md)
 
 **NeoForge server-side MC AC:** [[sentinel-anticheat-neoforge]] (Charlie328402; Java NeoForge mod; tick- and event-based movement/combat/world checks—speed, flight, water-walking, reach, killaura, autoclicker, x-ray mining—without mixins or packet interception; JSONL violation log + Python Discord bot with cumulative violation-level staff pings, relational DB history, optional FTP mirroring; alert-only, no automatic bans/kicks; Anti Cheat / game:minecraft) for NeoForge server operators beside integrity-focused mods such as [[katapult-anticheat]] and physics-prediction AC such as [[grim]]; distinct from HEEAAP [[sentinel-anti-cheat]] usermode daemon. (source: wiki/sources/descriptions/Charlie328402__Sentinel-Anti-Cheat.md)
 
