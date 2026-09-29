@@ -3581,6 +3581,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 > Game:CODM
 - https://github.com/Poko-Apps/CodMDumper [il2cpp dump]
 - https://github.com/gmh5225/CODM-ESP-Aimbot-Mod-Menu [ESP]
+- https://github.com/hi-bi-hs-13/Codm-Cheat [Research archive: VMProtect unpacking, license-protocol reversal, and anti-cheat bypass analysis of a commercial CODM loader]
 
 > Game:Battlefield 1
 - https://github.com/gmh5225/BF1-ESP-AND-AIMBOT
