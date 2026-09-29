@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-29** — ingest `readme:categories`: Cheat ~2850 (+1; hi-bi-hs-13/Codm-Cheat commercial CODM loader VMProtect unpack + license-protocol reversal research archive in Game:CODM) / Anti Cheat ~760 / other major section counts stable; 41 sections; synced projected README-map counts on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/reverse-engineering]], and [[overviews/dma-attack]]; light `index.md` section notes (no per-category pages).
+
 - **2026-09-29** — ingest `description:AnonymoDGH/cheat-mcp`: entity [[cheat-mcp]] (AnonymoDGH; C++17 Windows-native MCP server; stdio JSON-RPC; process/module inspect, CE-style scan/pointers/patch, DLL/shellcode injection, IAT/speedhack hooks, EAC/BE/Vanguard recon); cited on [[overviews/game-engine]] MCP cluster + [[overviews/game-hacking]] agent memory-MCP lane; cross-linked [[cheatengine-mcp-bridge]], [[ce-mcp-plugin]], [[memmcp]], and [[dsh-cheatengine]]; `index.md` entity + overview blurbs updated.
 
 - **2026-09-29** — ingest `description:RectangleEquals/UnityRuntimeAnalysisAgent`: entity [[unity-runtime-analysis-agent]] (RectangleEquals; BepInEx Unity Mono in-process plugin; assembly/IL/scene/GameObject introspection; authenticated local named pipes/loopback TCP to AgentConsole + UnityLudometryMCP; read-only default + audited Full mode; in-game overlay/emergency stop; Windows; Cheat / BepInEx); cited on [[overviews/game-engine]] MCP runtime-Unity lane + [[overviews/reverse-engineering]] MCP-assisted RE cluster; fixed [[overviews/game-hacking]] Cheat-map wikilink/source; cross-linked [[bepinex]], [[unityexplorer]], and [[unity-mcp]]; `index.md` entity + overview blurbs updated.
