@@ -692,6 +692,7 @@ sources:
   - wiki/sources/descriptions/BepInEx__BepInEx.md
   - wiki/sources/descriptions/BepInEx__BepInEx.Utility.IL2CPP.md
   - wiki/sources/descriptions/4ch12dy__il2cpp.md
+  - wiki/sources/descriptions/AnonymoDGH__cheat-mcp.md
 updated: 2026-09-29
 confidence: high
 ---
@@ -775,7 +776,7 @@ Editor-facing MCP bridges in the README's **MCP server** subcategory let AI agen
 - **MCPup** — [[mcpup]] discover/install/configure/run MCP server infrastructure for Unity AI-assisted dev workflows (source: wiki/sources/descriptions/gmh5225__mcpup.md)
 - **Hex2Dec MCP** — [[hex2dec-mcp]] hex↔decimal number conversion for AI agents (JavaScript/TypeScript; gmh5225) (source: wiki/sources/descriptions/gmh5225__hex2dec-mcp.md)
 - **Binary Ninja Headless MCP** — [[binary-ninja-headless-mcp]] Python headless BN MCP server with 181 RE tools (disasm, IL, patching, types, xrefs, undo/redo; stdio/TCP; read-only default; fake backend for CI; mrphrazer; Game Develop / MCP server) (source: wiki/sources/descriptions/mrphrazer__binary-ninja-headless-mcp.md)
-- **Cheat MCP** — AnonymoDGH/cheat-mcp C++17 MCP server for Windows game memory R/W, scanning, DLL injection, IAT hooking, speedhack, and anti-cheat detection (Game Develop / MCP server) (source: wiki/sources/README-categories.md)
+- **Cheat MCP** — [[cheat-mcp]] (AnonymoDGH; C++17; stdio JSON-RPC MCP; Windows game memory R/W, CE-style scanning, DLL/shellcode injection, IAT hooking, speedhack, EAC/BE/Vanguard recon; Game Develop / MCP server) (source: wiki/sources/descriptions/AnonymoDGH__cheat-mcp.md)
 - **Interactive Feedback macOS MCP** — [[interactive-feedback-macos-mcp]] native AppleScript dialog + image HITL prompts; macOS fork of [[interactive-feedback-mcp]] (source: wiki/sources/descriptions/gmh5225__interactive-feedback-macos-mcp.md)
 - **FastLogs** — [[fastlogs]] remote debug/bug-report engine for Unity and GameMaker when the engine console is unreachable (WebGL, portals, mobile, consoles); self-hosted Node.js/SQLite ingest, crash capture, offline outbox, headless send + remote command channel for QA/agents (source: wiki/sources/descriptions/AitiX__Fastlogs.md)
 - **Airtest** — [[airtest]] cross-platform UI automation for games and mobile apps (Python; image-recognition UI targeting without process injection; device farms, CLI/Python APIs, HTML reports, IDE + Poco object hierarchy; Android/iOS/desktop; UI Automation Framework / Game Testing) (source: wiki/sources/descriptions/AirtestProject__Airtest.md)
