@@ -1,0 +1,3633 @@
+Project Path: arc_AnonymoDGH_cheat-mcp_tyghk25h
+
+Source Tree:
+
+```txt
+arc_AnonymoDGH_cheat-mcp_tyghk25h
+├── CMakeLists.txt
+└── src
+    ├── anticheat.cpp
+    ├── cheatmcp.hpp
+    ├── injector.cpp
+    ├── json.hpp
+    ├── main.cpp
+    ├── mcp.cpp
+    ├── memory.cpp
+    ├── network.cpp
+    ├── runtime.cpp
+    ├── scanner.cpp
+    └── tools.cpp
+
+```
+
+`CMakeLists.txt`:
+
+```txt
+cmake_minimum_required(VERSION 3.16)
+project(cheatmcp CXX)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+if(MSVC)
+  add_compile_options(/utf-8 /W3 /EHsc /MP)
+  add_compile_definitions(_CRT_SECURE_NO_WARNINGS NOMINMAX WIN32_LEAN_AND_MEAN)
+endif()
+
+file(GLOB CHEATMCP_SOURCES CONFIGURE_DEPENDS ${CMAKE_SOURCE_DIR}/src/*.cpp)
+add_executable(cheatmcp ${CHEATMCP_SOURCES})
+target_include_directories(cheatmcp PRIVATE ${CMAKE_SOURCE_DIR}/src)
+
+target_link_libraries(cheatmcp PRIVATE
+  psapi
+  iphlpapi
+  ws2_32
+  advapi32
+  user32
+  ntdll
+)
+
+# Multi-monitor / DPI friendly console
+if(MSVC)
+  target_compile_options(cheatmcp PRIVATE /permissive-)
+endif()
+
+```
+
+`src/anticheat.cpp`:
+
+```cpp
+#include "cheatmcp.hpp"
+
+#include <winternl.h>
+#include <psapi.h>
+#include <algorithm>
+#include <cstdio>
+#include <cstring>
+
+#pragma comment(lib, "psapi.lib")
+
+namespace cmcp {
+
+// =============================================================================
+// NtQuerySystemInformation plumbing for handle enumeration
+// =============================================================================
+typedef NTSTATUS(NTAPI* pNtQuerySystemInformation)(ULONG, PVOID, ULONG, PULONG);
+
+#ifndef SystemExtendedHandleInformation
+#define SystemExtendedHandleInformation 64
+#endif
+#ifndef SystemHandleInformation
+#define SystemHandleInformation 16
+#endif
+
+struct HandleEntryEx {
+    void*     Object;
+    ULONG_PTR UniqueProcessId;
+    ULONG_PTR HandleValue;
+    ULONG     GrantedAccess;
+    USHORT    CreatorBackTraceIndex;
+    USHORT    ObjectTypeIndex;
+    ULONG     HandleAttributes;
+    ULONG     Reserved;
+};
+
+struct HandleInfoEx {
+    ULONG_PTR NumberOfHandles;
+    ULONG_PTR Reserved;
+    HandleEntryEx Handles[1];
+};
+
+struct HandleEntry32 {
+    USHORT UniqueProcessId;
+    USHORT CreatorBackTraceIndex;
+    UCHAR  ObjectTypeIndex;
+    UCHAR  HandleAttributes;
+    USHORT HandleValue;
+    void*  Object;
+    ULONG  GrantedAccess;
+};
+
+struct HandleInfo32 {
+    ULONG_PTR NumberOfHandles;
+    HandleEntry32 Handles[1];
+};
+
+struct FoundHandle {
+    uint32_t from_pid;
+    uint64_t handle;
+    uint32_t access;
+    void*    object;
+};
+
+// scalar target-os object for the process, derived from our own handle
+static std::vector<FoundHandle> scan_handles(uint32_t pid, void*& target_object) {
+    std::vector<FoundHandle> out;
+    target_object = nullptr;
+
+    HMODULE nt = GetModuleHandleA("ntdll.dll");
+    if (!nt) return out;
+    auto ntqsi = (pNtQuerySystemInformation)GetProcAddress(nt, "NtQuerySystemInformation");
+    if (!ntqsi) return out;
+
+    ULONG size = 1 << 20;
+    std::vector<uint8_t> buf;
+    NTSTATUS st = 0;
+    for (int tries = 0; tries < 8; ++tries) {
+        buf.resize(size);
+        ULONG ret = 0;
+        st = ntqsi(SystemExtendedHandleInformation, buf.data(), size, &ret);
+        if (st == 0) break;
+        size = ret + (1 << 16);
+    }
+
+    uint32_t our_pid = GetCurrentProcessId();
+    HANDLE our_handle = (HANDLE)(uintptr_t)get_handle(pid);
+
+    // First locate the kernel object pointer via our own handle to the target.
+    auto info = (HandleInfoEx*)buf.data();
+    if (st == 0 && info->NumberOfHandles < 10'000'000) {
+        for (ULONG_PTR k = 0; k < info->NumberOfHandles; ++k) {
+            auto& e = info->Handles[k];
+            if (e.UniqueProcessId == our_pid && e.HandleValue == (ULONG_PTR)our_handle) {
+                target_object = e.Object;
+                break;
+            }
+        }
+        if (target_object) {
+            for (ULONG_PTR k = 0; k < info->NumberOfHandles; ++k) {
+                auto& e = info->Handles[k];
+                if (e.Object == target_object && e.UniqueProcessId != our_pid) {
+                    out.push_back({ (uint32_t)e.UniqueProcessId, (uint64_t)e.HandleValue,
+                                    (uint32_t)e.GrantedAccess, e.Object });
+                }
+            }
+        }
+    }
+    return out;
+}
+
+// =============================================================================
+// debug checks
+// =============================================================================
+typedef NTSTATUS(NTAPI* pNtQueryInformationProcess)(HANDLE, ULONG, PVOID, ULONG, PULONG);
+
+static Json query_proc(HANDLE h, ULONG cls, const char* label) {
+    Json j = Json::obj();
+    HMODULE nt = GetModuleHandleA("ntdll.dll");
+    auto fn = (pNtQueryInformationProcess)GetProcAddress(nt, "NtQueryInformationProcess");
+    if (!fn) return j;
+    ULONG_PTR val = 0;
+    ULONG ret = 0;
+    NTSTATUS st = fn(h, cls, &val, sizeof(val), &ret);
+    j.set("class", (long long)cls);
+    j.set("label", label);
+    j.set("ntstatus", (long long)st);
+    j.set("value", u64_hex((uint64_t)val));
+    return j;
+}
+
+Json ac_check_debug(uint32_t pid) {
+    Json r = Json::obj();
+    r.set("self_debugger_present", IsDebuggerPresent() != FALSE);
+
+    BOOL remote = FALSE;
+    HANDLE h = get_handle(pid);
+    if (h) CheckRemoteDebuggerPresent(h, &remote);
+    r.set("remote_debugger_present", remote != FALSE);
+
+    Json checks = Json::arr();
+    if (h) {
+        checks.push(query_proc(h, 7,    "ProcessDebugPort"));
+        checks.push(query_proc(h, 0x1F, "ProcessDebugFlags"));
+        checks.push(query_proc(h, 0x1E, "ProcessDebugObjectHandle"));
+    }
+    r.set("nt_queries", std::move(checks));
+    return r;
+}
+
+// =============================================================================
+// anti-cheat detection
+// =============================================================================
+static const char* kAcModules[] = {
+    "easyanticheat", "easyanticheat_eos", "beservice", "beclient", "battleye",
+    "vgk", "vgc", "vgtray", "mhyprot", "gameguard", "nprotect", "xigncode",
+    "xhunter", "byfron", "hyperion", "denuvo", "vmprotect", "themida",
+    "sguard", "ace-base", "ace-game", "tenprotect", "tp3helper",
+    "punkbuster", "pnkbstra", "pnkbstrb", "fairfight", "arbiter", "battleye.exe",
+    "robloxcrashhandler", "robloxplayerbeta",
+};
+
+static const char* kAcDrivers[] = {
+    "vgk.sys", "easyanticheat.sys", "easyanticheat_eos.sys", "bedaisy.sys",
+    "bedaisy64.sys", "mhyprot2.sys", "mhyprot3.sys", "ace-base.sys", "ace-game.sys",
+    "sguard64.sys", "sguardsvc64.sys", "gedriver.sys", "npggnt.sys", "npptnt2.sys",
+    "xhunter1.sys", "dtscsi.sys", "dtb.sys", "kslink.sys", "pnkbstrk.sys",
+    "bprotect.sys", "vboxdrv.sys" /* hypervisor-ish */,
+};
+
+Json ac_kernel_drivers() {
+    Json r = Json::obj();
+    LPVOID drivers[1024];
+    DWORD needed = 0;
+    if (!EnumDeviceDrivers(drivers, sizeof(drivers), &needed)) {
+        r.set("error", "EnumDeviceDrivers failed (need admin)");
+        return r;
+    }
+    DWORD n = needed / sizeof(LPVOID);
+    Json list = Json::arr();
+    Json hits = Json::arr();
+    for (DWORD k = 0; k < n; ++k) {
+        char name[MAX_PATH] = {};
+        if (!GetDeviceDriverBaseNameA(drivers[k], name, sizeof(name) - 1)) continue;
+        Json d = Json::obj();
+        d.set("name", name);
+        d.set("base", u64_hex((uint64_t)(uintptr_t)drivers[k]));
+        list.push(d);
+        std::string ln = lower(name);
+        for (auto* ac : kAcDrivers) {
+            if (ln == lower(ac)) { hits.push(std::string(name)); break; }
+        }
+    }
+    r.set("count", (long long)n);
+    r.set("matched_anticheat", std::move(hits));
+    r.set("drivers", std::move(list));
+    return r;
+}
+
+Json ac_detect(uint32_t pid) {
+    Json r = Json::obj();
+    r.set("pid", (long long)pid);
+
+    Json matched = Json::arr();
+    auto mods = list_modules(pid);
+    for (auto& m : mods) {
+        std::string n = lower(m.name);
+        for (auto* ac : kAcModules) {
+            if (n.find(ac) != std::string::npos) {
+                Json e = Json::obj();
+                e.set("module", m.name);
+                e.set("base", u64_hex(m.base));
+                e.set("signature", ac);
+                matched.push(e);
+                break;
+            }
+        }
+    }
+    r.set("user_mode_matches", std::move(matched));
+    r.set("module_count", (long long)mods.size());
+
+    Json drv = ac_kernel_drivers();
+    r.set("kernel_matches", drv.has("matched_anticheat") ? drv.at("matched_anticheat") : Json::arr());
+
+    HANDLE h = get_handle(pid);
+    r.set("opened", h != nullptr);
+    return r;
+}
+
+// =============================================================================
+// handle enumeration / stripping
+// =============================================================================
+Json ac_list_handles(uint32_t pid) {
+    Json r = Json::obj();
+    void* obj = nullptr;
+    auto found = scan_handles(pid, obj);
+    r.set("target_pid", (long long)pid);
+    r.set("target_object", obj ? u64_hex((uint64_t)(uintptr_t)obj) : std::string("unknown"));
+    r.set("count", (long long)found.size());
+
+    Json arr = Json::arr();
+    for (auto& f : found) {
+        Json e = Json::obj();
+        e.set("from_pid", (long long)f.from_pid);
+        e.set("handle", u64_hex(f.handle));
+        e.set("access", u64_hex(f.access));
+        arr.push(std::move(e));
+    }
+    r.set("handles", std::move(arr));
+    return r;
+}
+
+size_t ac_close_handles(uint32_t pid) {
+    void* obj = nullptr;
+    auto found = scan_handles(pid, obj);
+    size_t closed = 0;
+
+    for (auto& f : found) {
+        HANDLE src = OpenProcess(PROCESS_DUP_HANDLE, FALSE, f.from_pid);
+        if (!src) continue;
+        HANDLE dummy = nullptr;
+        // DUPLICATE_CLOSE_SOURCE without a destination closes the source handle.
+        BOOL ok = DuplicateHandle(src, (HANDLE)(uintptr_t)f.handle, nullptr, &dummy,
+                                  0, FALSE, DUPLICATE_CLOSE_SOURCE);
+        if (ok) ++closed;
+        CloseHandle(src);
+    }
+    return closed;
+}
+
+} // namespace cmcp
+
+```
+
+`src/cheatmcp.hpp`:
+
+```hpp
+// cheat-mcp — public interface for the whole server.
+#pragma once
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#include <windows.h>
+
+#include <cstdint>
+#include <cstddef>
+#include <string>
+#include <vector>
+#include <map>
+#include <mutex>
+#include <atomic>
+#include <thread>
+#include <optional>
+#include <functional>
+
+#include "json.hpp"
+
+namespace cmcp {
+
+// ============================================================ process / modules
+struct ProcInfo {
+    uint32_t pid = 0;
+    uint32_t ppid = 0;
+    std::string name;
+    std::string path;
+    bool wow64 = false;
+};
+
+struct ModInfo {
+    std::string name;
+    std::string path;
+    uint64_t base = 0;
+    uint64_t size = 0;
+};
+
+bool enable_debug_privilege();
+
+std::vector<ProcInfo> list_processes();
+std::vector<ModInfo>  list_modules(uint32_t pid);
+std::vector<ProcInfo> list_threads_owners();                 // (unused helper kept simple)
+std::vector<std::pair<uint32_t, std::string>> list_threads(uint32_t pid);
+
+std::optional<ModInfo>  find_module(uint32_t pid, const std::string& name);
+std::optional<ProcInfo> find_process(const std::string& name);
+
+HANDLE get_handle(uint32_t pid);
+void   drop_handle(uint32_t pid);
+bool   is_process_64(uint32_t pid);
+
+// ============================================================ memory
+bool read_mem(uint32_t pid, uint64_t addr, void* buf, size_t n);
+bool write_mem(uint32_t pid, uint64_t addr, const void* buf, size_t n);
+uint64_t alloc_mem(uint32_t pid, size_t n, uint32_t protect);
+bool free_mem(uint32_t pid, uint64_t addr);
+bool protect_mem(uint32_t pid, uint64_t addr, size_t n, uint32_t newprot, uint32_t* oldprot = nullptr);
+std::vector<MEMORY_BASIC_INFORMATION> query_regions(uint32_t pid, uint64_t start = 0, uint64_t end = ~0ull);
+
+// ============================================================ scanner
+enum class ScanType { I8, I16, I32, I64, F32, F64, Str, Aob };
+
+struct ScanHit {
+    uint64_t addr = 0;
+    std::vector<uint8_t> prev;
+};
+
+struct ScanState {
+    bool active = false;
+    ScanType type = ScanType::I32;
+    size_t width = 4;
+    std::string pattern;
+    std::vector<ScanHit> hits;
+    std::mutex mtx;
+};
+
+ScanState& scan_state();
+
+size_t scan_first(uint32_t pid, ScanType type, const std::string& value, bool writable_only, size_t max_hits);
+size_t scan_aob(uint32_t pid, const std::string& pattern, bool writable_only, size_t max_hits);
+size_t scan_refine(uint32_t pid, const std::string& mode, const std::string& value);
+Json   scan_results(size_t offset, size_t limit, uint32_t pid, const std::string& type_name);
+Json   pointer_scan(uint32_t pid, uint64_t target, size_t max_offset, size_t max_results);
+void   scan_reset();
+
+// ============================================================ injection
+struct InjectResult {
+    bool ok = false;
+    uint64_t value = 0;
+    std::string error;
+};
+
+InjectResult inject_dll(uint32_t pid, const std::string& dll, const std::string& method);
+InjectResult inject_shellcode(uint32_t pid, const std::vector<uint8_t>& code);
+bool eject_dll(uint32_t pid, uint64_t base, std::string& err);
+InjectResult run_remote(uint32_t pid, uint64_t fn, uint64_t arg);
+
+// ============================================================ anticheat
+Json   ac_detect(uint32_t pid);
+Json   ac_list_handles(uint32_t pid);
+Json   ac_check_debug(uint32_t pid);
+Json   ac_kernel_drivers();
+size_t ac_close_handles(uint32_t pid);
+
+// ============================================================ network
+Json net_connections(int pid_filter);
+Json net_resolve(const std::string& host);
+bool net_send_udp(const std::string& host, uint16_t port, const std::vector<uint8_t>& data, std::string& err);
+bool net_send_tcp(const std::string& host, uint16_t port, const std::vector<uint8_t>& data, std::string& err);
+Json net_capture(const std::string& filter_ip, int max_packets, int timeout_ms);
+Json net_send_raw_ip(uint32_t dst_ip_be, const std::vector<uint8_t>& ip_packet);
+
+// ============================================================ runtime features
+Json freeze_add(uint32_t pid, uint64_t addr, const std::vector<uint8_t>& data);
+Json freeze_remove(int id);
+Json freeze_list();
+
+Json watch_add(uint32_t pid, uint64_t addr, size_t width, const std::string& type);
+Json watch_poll(int id);
+Json watch_remove(int id);
+
+Json iat_hook(uint32_t pid, const std::string& module, const std::string& import,
+              const std::vector<uint8_t>& stub);
+Json speedhack(uint32_t pid, double scale, const std::string& which);
+
+void runtime_start();
+void runtime_stop();
+
+// ============================================================ tool registry / mcp
+struct ToolResult {
+    bool is_error = false;
+    std::string text;
+    Json structured;
+};
+
+using ToolFn = std::function<ToolResult(const Json&)>;
+
+struct Tool {
+    std::string name;
+    std::string description;
+    Json schema;
+    ToolFn fn;
+};
+
+class Registry {
+public:
+    void add(const std::string& name, const std::string& desc, Json schema, ToolFn fn);
+    const std::map<std::string, Tool>& all() const { return tools_; }
+    ToolResult call(const std::string& name, const Json& args) const;
+private:
+    std::map<std::string, Tool> tools_;
+};
+
+Registry& registry();
+void register_all_tools();
+
+int run_server();
+
+// ============================================================ helpers
+std::vector<uint8_t> parse_hex(const std::string& s);
+std::string to_hex(const uint8_t* p, size_t n);
+std::string basename(const std::string& p);
+std::string lower(std::string s);
+uint64_t parse_u64(const Json& j);
+std::string u64_hex(uint64_t v);
+
+} // namespace cmcp
+
+```
+
+`src/injector.cpp`:
+
+```cpp
+#include "cheatmcp.hpp"
+
+#include <winternl.h>
+#include <tlhelp32.h>
+#include <fstream>
+#include <cstring>
+#include <cstdio>
+#include <vector>
+#include <string>
+
+namespace cmcp {
+
+// =============================================================================
+// generic helpers
+// =============================================================================
+static uint64_t remote_fn_from_our_offset(uint32_t pid, const char* module_name,
+                                          uint64_t our_fn) {
+    HMODULE our_mod = GetModuleHandleA(module_name);
+    if (!our_mod) return 0;
+    uint64_t offset = our_fn - (uint64_t)(uintptr_t)our_mod;
+
+    auto tm = find_module(pid, module_name);
+    if (!tm) return 0;
+    return tm->base + offset;
+}
+
+static std::vector<uint8_t> read_file_bytes(const std::string& path) {
+    std::ifstream f(path, std::ios::binary);
+    if (!f) return {};
+    return std::vector<uint8_t>((std::istreambuf_iterator<char>(f)),
+                                 std::istreambuf_iterator<char>());
+}
+
+// =============================================================================
+// remote thread creation (x64 / x86)
+// =============================================================================
+typedef NTSTATUS(NTAPI* pNtCreateThreadEx)(
+    PHANDLE ThreadHandle, ACCESS_MASK DesiredAccess, LPVOID ObjectAttributes,
+    HANDLE ProcessHandle, LPVOID StartRoutine, LPVOID Argument, ULONG CreateFlags,
+    SIZE_T ZeroBits, SIZE_T StackSize, SIZE_T MaximumStackSize, LPVOID AttributeList);
+
+static HANDLE create_remote_thread_nt(HANDLE proc, uint64_t start, uint64_t arg) {
+    HMODULE ntdll = GetModuleHandleA("ntdll.dll");
+    if (!ntdll) return nullptr;
+    auto fn = (pNtCreateThreadEx)GetProcAddress(ntdll, "NtCreateThreadEx");
+    if (!fn) return nullptr;
+
+    HANDLE th = nullptr;
+    NTSTATUS st = fn(&th, THREAD_ALL_ACCESS, nullptr, proc,
+                     (LPVOID)(uintptr_t)start, (LPVOID)(uintptr_t)arg,
+                     0, 0, 0, 0, nullptr);
+    if (st < 0) return nullptr;
+    return th;
+}
+
+// =============================================================================
+// LoadLibrary-style injection via several launch mechanisms
+// =============================================================================
+static InjectResult remote_loadlibrary(uint32_t pid, const std::string& dll,
+                                       const std::string& method) {
+    InjectResult res;
+    HANDLE proc = get_handle(pid);
+    if (!proc) { res.error = "cannot open process"; return res; }
+
+    HMODULE k32 = GetModuleHandleA("kernel32.dll");
+    if (!k32) { res.error = "no kernel32 in our process"; return res; }
+
+    uint64_t loadlib = remote_fn_from_our_offset(pid, "kernel32.dll",
+                         (uint64_t)(uintptr_t)GetProcAddress(k32, "LoadLibraryA"));
+    if (!loadlib) { res.error = "cannot locate kernel32!LoadLibraryA in target"; return res; }
+
+    size_t len = dll.size() + 1;
+    uint64_t remote_str = alloc_mem(pid, len, PAGE_READWRITE);
+    if (!remote_str) { res.error = "VirtualAllocEx failed"; return res; }
+    if (!write_mem(pid, remote_str, dll.c_str(), len)) {
+        res.error = "WriteProcessMemory(path) failed";
+        free_mem(pid, remote_str);
+        return res;
+    }
+
+    std::string m = lower(method);
+
+    if (m == "loadlibrary" || m == "") {
+        HANDLE th = CreateRemoteThread(proc, nullptr, 0,
+                        (LPTHREAD_START_ROUTINE)(uintptr_t)loadlib,
+                        (LPVOID)(uintptr_t)remote_str, 0, nullptr);
+        if (!th) { res.error = "CreateRemoteThread failed: " + std::to_string(GetLastError()); return res; }
+        WaitForSingleObject(th, 8000);
+        DWORD code = 0;
+        GetExitCodeThread(th, &code);
+        CloseHandle(th);
+        res.ok = code != 0;
+        res.value = code;
+        if (!res.ok) res.error = "LoadLibrary returned NULL";
+    } else if (m == "nt" || m == "ntcreatethreadex") {
+        HANDLE th = create_remote_thread_nt(proc, loadlib, remote_str);
+        if (!th) { res.error = "NtCreateThreadEx failed"; return res; }
+        WaitForSingleObject(th, 8000);
+        DWORD code = 0;
+        GetExitCodeThread(th, &code);
+        CloseHandle(th);
+        res.ok = code != 0;
+        res.value = code;
+    } else if (m == "hijack" || m == "threadhijack") {
+        HANDLE snap = CreateToolhelp32Snapshot(TH32CS_SNAPTHREAD, 0);
+        if (snap == INVALID_HANDLE_VALUE) { res.error = "thread snapshot failed"; return res; }
+        THREADENTRY32 te{}; te.dwSize = sizeof(te);
+        bool done = false;
+        if (Thread32First(snap, &te)) {
+            do {
+                if (te.th32OwnerProcessID != pid) continue;
+                HANDLE th = OpenThread(THREAD_ALL_ACCESS, FALSE, te.th32ThreadID);
+                if (!th) continue;
+                SuspendThread(th);
+                CONTEXT ctx{};
+                ctx.ContextFlags = CONTEXT_FULL;
+#ifdef _WIN64
+                if (GetThreadContext(th, &ctx)) {
+                    ctx.Rip = loadlib;
+                    ctx.Rcx = remote_str;
+                    SetThreadContext(th, &ctx);
+                    done = true;
+                }
+#else
+                if (GetThreadContext(th, &ctx)) {
+                    ctx.Eip = (DWORD)loadlib;
+                    DWORD sp = ctx.Esp;
+                    DWORD arg = (DWORD)remote_str;
+                    WriteProcessMemory(proc, (LPVOID)(uintptr_t)(sp - 4), &arg, 4, nullptr);
+                    ctx.Esp = sp - 4;
+                    SetThreadContext(th, &ctx);
+                    done = true;
+                }
+#endif
+                ResumeThread(th);
+                CloseHandle(th);
+                if (done) break;
+            } while (Thread32Next(snap, &te));
+        }
+        CloseHandle(snap);
+        res.ok = done;
+        res.value = loadlib;
+        if (!done) res.error = "no hijackable thread found";
+    } else if (m == "apc") {
+        HANDLE snap = CreateToolhelp32Snapshot(TH32CS_SNAPTHREAD, 0);
+        if (snap == INVALID_HANDLE_VALUE) { res.error = "thread snapshot failed"; return res; }
+        THREADENTRY32 te{}; te.dwSize = sizeof(te);
+        int queued = 0;
+        if (Thread32First(snap, &te)) {
+            do {
+                if (te.th32OwnerProcessID != pid) continue;
+                HANDLE th = OpenThread(THREAD_SET_CONTEXT, FALSE, te.th32ThreadID);
+                if (!th) continue;
+                if (QueueUserAPC((PAPCFUNC)(uintptr_t)loadlib, th, (ULONG_PTR)remote_str)) ++queued;
+                CloseHandle(th);
+            } while (Thread32Next(snap, &te));
+        }
+        CloseHandle(snap);
+        res.ok = queued > 0;
+        res.value = loadlib;
+        if (!res.ok) res.error = "no thread accepted the APC (needs alertable wait)";
+    } else if (m == "wndhook" || m == "sethook") {
+        HMODULE local = LoadLibraryA(dll.c_str());
+        if (!local) { res.error = "LoadLibrary locally failed"; return res; }
+        auto tids = list_threads(pid);
+        if (tids.empty()) { res.error = "no threads"; return res; }
+        // A generic export name is required by the caller's DLL; default "HookProc"
+        FARPROC proc_addr = GetProcAddress(local, "HookProc");
+        HHOOK hk = SetWindowsHookExA(WH_CBT, (HOOKPROC)proc_addr, local, tids[0].first);
+        res.ok = hk != nullptr;
+        res.value = (uint64_t)(uintptr_t)hk;
+        if (!res.ok) res.error = "SetWindowsHookEx failed (needs HookProc export)";
+    } else {
+        res.error = "unknown method: " + method;
+    }
+
+    return res;
+}
+
+// =============================================================================
+// manual map
+// =============================================================================
+static uint64_t target_base_for(uint32_t pid, const std::string& dll_name) {
+    auto m = find_module(pid, dll_name);
+    return m ? m->base : 0;
+}
+
+InjectResult manual_map(uint32_t pid, const std::string& dllpath) {
+    InjectResult res;
+
+    std::vector<uint8_t> file = read_file_bytes(dllpath);
+    if (file.size() < sizeof(IMAGE_DOS_HEADER)) { res.error = "cannot read file"; return res; }
+
+    auto dos = (IMAGE_DOS_HEADER*)file.data();
+    if (dos->e_magic != IMAGE_DOS_SIGNATURE) { res.error = "bad MZ"; return res; }
+    auto nt = (IMAGE_NT_HEADERS*)(file.data() + dos->e_lfanew);
+    if (nt->Signature != IMAGE_NT_SIGNATURE) { res.error = "bad PE"; return res; }
+
+    uint64_t preferred = nt->OptionalHeader.ImageBase;
+    size_t image_size = nt->OptionalHeader.SizeOfImage;
+    auto sections = IMAGE_FIRST_SECTION(nt);
+    uint16_t nsec = nt->FileHeader.NumberOfSections;
+    bool is64 = nt->OptionalHeader.Magic == IMAGE_NT_OPTIONAL_HDR64_MAGIC;
+
+    HANDLE proc = get_handle(pid);
+    if (!proc) { res.error = "cannot open process"; return res; }
+
+    // writable scratch image
+    std::vector<uint8_t> img(image_size, 0);
+    std::memcpy(img.data(), file.data(), nt->OptionalHeader.SizeOfHeaders);
+    for (uint16_t s = 0; s < nsec; ++s) {
+        auto& sec = sections[s];
+        if (sec.SizeOfRawData == 0) continue;
+        size_t dst = sec.VirtualAddress;
+        size_t src = sec.PointerToRawData;
+        if (dst + sec.SizeOfRawData > image_size) continue;
+        if (src + sec.SizeOfRawData > file.size()) continue;
+        std::memcpy(img.data() + dst, file.data() + src, sec.SizeOfRawData);
+    }
+
+    // allocate in target (prefer the original base)
+    uint64_t remote = (uint64_t)(uintptr_t)VirtualAllocEx(
+        proc, (LPVOID)(uintptr_t)preferred, image_size, MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);
+    if (!remote)
+        remote = (uint64_t)(uintptr_t)VirtualAllocEx(
+            proc, nullptr, image_size, MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);
+    if (!remote) { res.error = "VirtualAllocEx failed"; return res; }
+
+    int64_t delta = (int64_t)remote - (int64_t)preferred;
+
+    // relocations
+    auto& reloc_dir = nt->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_BASERELOC];
+    if (delta != 0 && reloc_dir.Size) {
+        auto block = (IMAGE_BASE_RELOCATION*)(img.data() + reloc_dir.VirtualAddress);
+        while ((uint8_t*)block < img.data() + reloc_dir.VirtualAddress + reloc_dir.Size &&
+               block->SizeOfBlock > 0) {
+            DWORD n = (block->SizeOfBlock - sizeof(IMAGE_BASE_RELOCATION)) / sizeof(WORD);
+            WORD* items = (WORD*)(block + 1);
+            for (DWORD k = 0; k < n; ++k) {
+                WORD type = items[k] >> 12;
+                WORD off  = items[k] & 0x0FFF;
+                uint8_t* patch = img.data() + block->VirtualAddress + off;
+                if (patch < img.data() || patch >= img.data() + image_size) continue;
+                if (type == IMAGE_REL_BASED_DIR64 && is64) {
+                    *(uint64_t*)patch += (uint64_t)delta;
+                } else if (type == IMAGE_REL_BASED_HIGHLOW) {
+                    *(uint32_t*)patch += (uint32_t)delta;
+                } else if (type == IMAGE_REL_BASED_ABSOLUTE) {
+                    // padding, ignore
+                }
+            }
+            block = (IMAGE_BASE_RELOCATION*)((uint8_t*)block + block->SizeOfBlock);
+        }
+    }
+
+    // imports
+    auto& imp_dir = nt->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT];
+    if (imp_dir.Size) {
+        auto imp = (IMAGE_IMPORT_DESCRIPTOR*)(img.data() + imp_dir.VirtualAddress);
+        for (; imp->Name; ++imp) {
+            const char* dll_name = (const char*)(img.data() + imp->Name);
+            uint64_t tbase = target_base_for(pid, dll_name);
+            if (!tbase) continue; // module not loaded in target; leave for runtime
+
+            HMODULE our_mod = LoadLibraryA(dll_name);
+            if (!our_mod) continue;
+            uint64_t our_base = (uint64_t)(uintptr_t)our_mod;
+
+            auto thunk = (IMAGE_THUNK_DATA*)(img.data() + imp->FirstThunk);
+            auto orig  = (IMAGE_THUNK_DATA*)(img.data() + (imp->OriginalFirstThunk
+                                                          ? imp->OriginalFirstThunk
+                                                          : imp->FirstThunk));
+            for (; orig->u1.AddressOfData; ++orig, ++thunk) {
+                uint64_t fn_addr = 0;
+                if (IMAGE_SNAP_BY_ORDINAL(orig->u1.Ordinal)) {
+                    fn_addr = (uint64_t)(uintptr_t)GetProcAddress(our_mod,
+                                  (LPCSTR)(uintptr_t)IMAGE_ORDINAL(orig->u1.Ordinal));
+                } else {
+                    auto ibn = (IMAGE_IMPORT_BY_NAME*)(img.data() + orig->u1.AddressOfData);
+                    fn_addr = (uint64_t)(uintptr_t)GetProcAddress(our_mod, (LPCSTR)ibn->Name);
+                }
+                if (fn_addr) {
+                    uint64_t tfn = tbase + (fn_addr - our_base);
+                    thunk->u1.Function = tfn;
+                }
+            }
+        }
+    }
+
+    // write the mapped image
+    if (!write_mem(pid, remote, img.data(), image_size)) {
+        res.error = "WriteProcessMemory(image) failed";
+        free_mem(pid, remote);
+        return res;
+    }
+
+    // per-section protections
+    for (uint16_t s = 0; s < nsec; ++s) {
+        auto& sec = sections[s];
+        DWORD ch = sec.Characteristics;
+        DWORD prot = PAGE_READONLY;
+        if (ch & IMAGE_SCN_MEM_EXECUTE) prot = (ch & IMAGE_SCN_MEM_WRITE) ? PAGE_EXECUTE_READWRITE : PAGE_EXECUTE_READ;
+        else if (ch & IMAGE_SCN_MEM_WRITE) prot = PAGE_READWRITE;
+        if (sec.Misc.VirtualSize)
+            protect_mem(pid, remote + sec.VirtualAddress, sec.Misc.VirtualSize, prot);
+    }
+
+    // DllMain stub
+    uint64_t entry = remote + nt->OptionalHeader.AddressOfEntryPoint;
+    std::vector<uint8_t> stub;
+    if (is64) {
+        auto push64 = [&](std::vector<uint8_t>& v, uint64_t x) {
+            for (int k = 0; k < 8; ++k) v.push_back((uint8_t)((x >> (8 * k)) & 0xFF));
+        };
+        stub.push_back(0x48); stub.push_back(0xB9); push64(stub, remote);      // mov rcx, base
+        stub.insert(stub.end(), {0x48,0xC7,0xC2,0x01,0x00,0x00,0x00});         // mov rdx, 1
+        stub.insert(stub.end(), {0x4D,0x31,0xC0});                             // xor r8, r8
+        stub.push_back(0x48); stub.push_back(0xB8); push64(stub, entry);       // mov rax, entry
+        stub.insert(stub.end(), {0xFF,0xD0,0xC3});                             // call rax; ret
+    } else {
+        auto push32 = [&](std::vector<uint8_t>& v, uint32_t x) {
+            for (int k = 0; k < 4; ++k) v.push_back((uint8_t)((x >> (8 * k)) & 0xFF));
+        };
+        stub.insert(stub.end(), {0x6A,0x00,0x6A,0x01});                        // push 0; push 1
+        stub.push_back(0x68); push32(stub, (uint32_t)remote);                  // push base
+        stub.push_back(0xB8); push32(stub, (uint32_t)entry);                   // mov eax, entry
+        stub.insert(stub.end(), {0xFF,0xD0,0xC3});                             // call eax; ret
+    }
+
+    uint64_t stub_addr = alloc_mem(pid, stub.size(), PAGE_EXECUTE_READWRITE);
+    if (!stub_addr) { res.error = "stub alloc failed"; return res; }
+    if (!write_mem(pid, stub_addr, stub.data(), stub.size())) {
+        res.error = "stub write failed";
+        return res;
+    }
+
+    HANDLE th = CreateRemoteThread(proc, nullptr, 0,
+                    (LPTHREAD_START_ROUTINE)(uintptr_t)stub_addr,
+                    nullptr, 0, nullptr);
+    if (th) { WaitForSingleObject(th, 8000); CloseHandle(th); }
+
+    res.ok = true;
+    res.value = remote;
+    return res;
+}
+
+// =============================================================================
+// public API
+// =============================================================================
+InjectResult inject_dll(uint32_t pid, const std::string& dll, const std::string& method) {
+    std::string m = lower(method);
+    if (m == "manualmap" || m == "manual" || m == "map")
+        return manual_map(pid, dll);
+    return remote_loadlibrary(pid, dll, method);
+}
+
+InjectResult inject_shellcode(uint32_t pid, const std::vector<uint8_t>& code) {
+    InjectResult res;
+    if (code.empty()) { res.error = "empty shellcode"; return res; }
+    HANDLE proc = get_handle(pid);
+    if (!proc) { res.error = "cannot open process"; return res; }
+
+    uint64_t mem = alloc_mem(pid, code.size(), PAGE_EXECUTE_READWRITE);
+    if (!mem) { res.error = "alloc failed"; return res; }
+    if (!write_mem(pid, mem, code.data(), code.size())) { res.error = "write failed"; return res; }
+
+    HANDLE th = create_remote_thread_nt(proc, mem, 0);
+    if (!th) th = CreateRemoteThread(proc, nullptr, 0,
+                       (LPTHREAD_START_ROUTINE)(uintptr_t)mem, nullptr, 0, nullptr);
+    if (!th) { res.error = "CreateRemoteThread failed"; return res; }
+
+    res.ok = true;
+    res.value = mem;
+    CloseHandle(th);
+    return res;
+}
+
+bool eject_dll(uint32_t pid, uint64_t base, std::string& err) {
+    HANDLE proc = get_handle(pid);
+    if (!proc) { err = "cannot open process"; return false; }
+
+    HMODULE k32 = GetModuleHandleA("kernel32.dll");
+    uint64_t freelib = remote_fn_from_our_offset(pid, "kernel32.dll",
+                        (uint64_t)(uintptr_t)GetProcAddress(k32, "FreeLibrary"));
+    if (!freelib) { err = "cannot locate FreeLibrary"; return false; }
+
+    HANDLE th = CreateRemoteThread(proc, nullptr, 0,
+                    (LPTHREAD_START_ROUTINE)(uintptr_t)freelib,
+                    (LPVOID)(uintptr_t)base, 0, nullptr);
+    if (!th) { err = "CreateRemoteThread failed"; return false; }
+    WaitForSingleObject(th, 5000);
+    CloseHandle(th);
+    return true;
+}
+
+InjectResult run_remote(uint32_t pid, uint64_t fn, uint64_t arg) {
+    InjectResult res;
+    HANDLE proc = get_handle(pid);
+    if (!proc) { res.error = "cannot open process"; return res; }
+    HANDLE th = create_remote_thread_nt(proc, fn, arg);
+    if (!th) th = CreateRemoteThread(proc, nullptr, 0,
+                       (LPTHREAD_START_ROUTINE)(uintptr_t)fn,
+                       (LPVOID)(uintptr_t)arg, 0, nullptr);
+    if (!th) { res.error = "thread creation failed"; return res; }
+    WaitForSingleObject(th, 8000);
+    DWORD code = 0;
+    GetExitCodeThread(th, &code);
+    CloseHandle(th);
+    res.ok = true;
+    res.value = code;
+    return res;
+}
+
+} // namespace cmcp
+
+```
+
+`src/json.hpp`:
+
+```hpp
+// Minimal, self-contained JSON value + parser/serializer (C++17).
+// No external dependencies: the whole MCP server stays header-only on this side.
+#pragma once
+#include <string>
+#include <vector>
+#include <utility>
+#include <initializer_list>
+#include <cstdint>
+#include <cstdio>
+#include <cmath>
+#include <stdexcept>
+
+namespace cmcp {
+
+class Json {
+public:
+    enum class T { Null, Bool, Int, Dbl, Str, Arr, Obj };
+
+    T t = T::Null;
+    bool b = false;
+    long long i = 0;
+    double d = 0;
+    std::string s;
+    std::vector<Json> a;
+    std::vector<std::pair<std::string, Json>> o;
+
+    Json() = default;
+    Json(std::nullptr_t) : t(T::Null) {}
+    Json(bool v) : t(T::Bool), b(v) {}
+    Json(int v) : t(T::Int), i(v) {}
+    Json(unsigned v) : t(T::Int), i((long long)v) {}
+    Json(long v) : t(T::Int), i((long long)v) {}
+    Json(long long v) : t(T::Int), i(v) {}
+    Json(unsigned long long v) : t(T::Int), i((long long)v) {}
+    Json(double v) : t(T::Dbl), d(v) {}
+    Json(float v) : t(T::Dbl), d((double)v) {}
+    Json(const char* v) : t(T::Str), s(v ? v : "") {}
+    Json(const std::string& v) : t(T::Str), s(v) {}
+    Json(std::string&& v) : t(T::Str), s(std::move(v)) {}
+
+    // object literal: Json{{"key", value}, ...}
+    Json(std::initializer_list<std::pair<std::string, Json>> init) {
+        t = T::Obj;
+        for (auto& kv : init) o.emplace_back(kv.first, kv.second);
+    }
+
+    static Json arr() { Json j; j.t = T::Arr; return j; }
+    static Json obj() { Json j; j.t = T::Obj; return j; }
+
+    bool is_null() const { return t == T::Null; }
+    bool is_obj()  const { return t == T::Obj; }
+    bool is_arr()  const { return t == T::Arr; }
+    bool is_str()  const { return t == T::Str; }
+    bool is_bool() const { return t == T::Bool; }
+    bool is_num()  const { return t == T::Int || t == T::Dbl; }
+
+    void push(Json v) { t = T::Arr; a.push_back(std::move(v)); }
+
+    void set(const std::string& k, Json v) {
+        t = T::Obj;
+        for (auto& kv : o) if (kv.first == k) { kv.second = std::move(v); return; }
+        o.emplace_back(k, std::move(v));
+    }
+
+    const Json* find(const std::string& k) const {
+        if (t != T::Obj) return nullptr;
+        for (auto& kv : o) if (kv.first == k) return &kv.second;
+        return nullptr;
+    }
+
+    Json& operator[](const std::string& k) {
+        if (t != T::Obj) { t = T::Obj; o.clear(); }
+        for (auto& kv : o) if (kv.first == k) return kv.second;
+        o.emplace_back(k, Json());
+        return o.back().second;
+    }
+
+    const Json& at(const std::string& k) const {
+        const Json* p = find(k);
+        if (!p) throw std::runtime_error("missing key: " + k);
+        return *p;
+    }
+    bool has(const std::string& k) const { return find(k) != nullptr; }
+
+    size_t size() const {
+        if (t == T::Arr) return a.size();
+        if (t == T::Obj) return o.size();
+        return 0;
+    }
+
+    long long as_i() const {
+        switch (t) {
+            case T::Int:  return i;
+            case T::Dbl:  return (long long)d;
+            case T::Bool: return b ? 1 : 0;
+            case T::Str:  try { return std::stoll(s, nullptr, 0); } catch (...) { return 0; }
+            default:      return 0;
+        }
+    }
+    double as_d() const {
+        switch (t) {
+            case T::Dbl:  return d;
+            case T::Int:  return (double)i;
+            case T::Str:  try { return std::stod(s); } catch (...) { return 0; }
+            default:      return 0;
+        }
+    }
+    bool as_b() const { return as_i() != 0; }
+
+    std::string as_s() const {
+        if (t == T::Str)  return s;
+        if (t == T::Bool) return b ? "true" : "false";
+        if (t == T::Int) { char buf[40]; std::snprintf(buf, sizeof buf, "%lld", i); return buf; }
+        if (t == T::Dbl) { char buf[64]; std::snprintf(buf, sizeof buf, "%g", d); return buf; }
+        return dump();
+    }
+
+    std::string dump() const { std::string out; out.reserve(256); write(out); return out; }
+
+    // ---------- parser ----------
+    static Json parse(const std::string& in) {
+        Parser p{in, 0};
+        p.ws();
+        Json v = p.value();
+        p.ws();
+        return v;
+    }
+
+private:
+    static void esc(std::string& out, const std::string& v) {
+        out.push_back('"');
+        for (char c : v) {
+            switch (c) {
+                case '"':  out += "\\\""; break;
+                case '\\': out += "\\\\"; break;
+                case '\n': out += "\\n";  break;
+                case '\r': out += "\\r";  break;
+                case '\t': out += "\\t";  break;
+                case '\b': out += "\\b";  break;
+                case '\f': out += "\\f";  break;
+                default:
+                    if ((unsigned char)c < 0x20) {
+                        char buf[8];
+                        std::snprintf(buf, sizeof buf, "\\u%04x", (unsigned)(unsigned char)c);
+                        out += buf;
+                    } else {
+                        out.push_back(c);
+                    }
+            }
+        }
+        out.push_back('"');
+    }
+
+    static void num(std::string& out, double v) {
+        if (std::isnan(v) || std::isinf(v)) { out += "null"; return; }
+        char buf[64];
+        std::snprintf(buf, sizeof buf, "%.17g", v);
+        out += buf;
+    }
+
+    void write(std::string& out) const {
+        switch (t) {
+            case T::Null: out += "null"; break;
+            case T::Bool: out += b ? "true" : "false"; break;
+            case T::Int:  { char buf[40]; std::snprintf(buf, sizeof buf, "%lld", i); out += buf; } break;
+            case T::Dbl:  num(out, d); break;
+            case T::Str:  esc(out, s); break;
+            case T::Arr: {
+                out.push_back('[');
+                for (size_t k = 0; k < a.size(); ++k) { if (k) out.push_back(','); a[k].write(out); }
+                out.push_back(']');
+                break;
+            }
+            case T::Obj: {
+                out.push_back('{');
+                for (size_t k = 0; k < o.size(); ++k) {
+                    if (k) out.push_back(',');
+                    esc(out, o[k].first);
+                    out.push_back(':');
+                    o[k].second.write(out);
+                }
+                out.push_back('}');
+                break;
+            }
+        }
+    }
+
+    struct Parser {
+        const std::string& src;
+        size_t pos;
+
+        [[noreturn]] void fail(const char* msg) const {
+            throw std::runtime_error(std::string("json parse error: ") + msg + " at " + std::to_string(pos));
+        }
+        char peek() const { return pos < src.size() ? src[pos] : '\0'; }
+        char next() { if (pos >= src.size()) fail("eof"); return src[pos++]; }
+        void ws() { while (pos < src.size() && (src[pos]==' '||src[pos]=='\t'||src[pos]=='\n'||src[pos]=='\r')) ++pos; }
+
+        bool lit(const char* l) {
+            size_t n = std::char_traits<char>::length(l);
+            if (src.compare(pos, n, l) == 0) { pos += n; return true; }
+            return false;
+        }
+
+        void utf8(std::string& out, unsigned cp) {
+            if (cp < 0x80) out.push_back((char)cp);
+            else if (cp < 0x800) {
+                out.push_back((char)(0xC0 | (cp >> 6)));
+                out.push_back((char)(0x80 | (cp & 0x3F)));
+            } else {
+                out.push_back((char)(0xE0 | (cp >> 12)));
+                out.push_back((char)(0x80 | ((cp >> 6) & 0x3F)));
+                out.push_back((char)(0x80 | (cp & 0x3F)));
+            }
+        }
+
+        Json string() {
+            if (next() != '"') fail("expected string");
+            std::string out;
+            while (true) {
+                char c = next();
+                if (c == '"') break;
+                if (c == '\\') {
+                    char e = next();
+                    switch (e) {
+                        case '"':  out.push_back('"');  break;
+                        case '\\': out.push_back('\\'); break;
+                        case '/':  out.push_back('/');  break;
+                        case 'n':  out.push_back('\n'); break;
+                        case 'r':  out.push_back('\r'); break;
+                        case 't':  out.push_back('\t'); break;
+                        case 'b':  out.push_back('\b'); break;
+                        case 'f':  out.push_back('\f'); break;
+                        case 'u': {
+                            unsigned cp = 0;
+                            for (int k = 0; k < 4; ++k) {
+                                char h = next();
+                                cp <<= 4;
+                                if (h >= '0' && h <= '9') cp |= (unsigned)(h - '0');
+                                else if (h >= 'a' && h <= 'f') cp |= (unsigned)(h - 'a' + 10);
+                                else if (h >= 'A' && h <= 'F') cp |= (unsigned)(h - 'A' + 10);
+                                else fail("bad \\u");
+                            }
+                            utf8(out, cp);
+                            break;
+                        }
+                        default: fail("bad escape");
+                    }
+                } else {
+                    out.push_back(c);
+                }
+            }
+            Json j; j.t = T::Str; j.s = std::move(out); return j;
+        }
+
+        Json number() {
+            size_t start = pos;
+            if (peek() == '-') ++pos;
+            bool isdbl = false;
+            while (pos < src.size()) {
+                char c = src[pos];
+                if (c >= '0' && c <= '9') ++pos;
+                else if (c == '.' || c == 'e' || c == 'E' || c == '+' || c == '-') { isdbl = true; ++pos; }
+                else break;
+            }
+            std::string n = src.substr(start, pos - start);
+            Json j;
+            if (!isdbl) {
+                try { j.t = T::Int; j.i = std::stoll(n); return j; } catch (...) {}
+            }
+            j.t = T::Dbl; j.d = std::stod(n); return j;
+        }
+
+        Json value() {
+            ws();
+            char c = peek();
+            if (c == '{') return object();
+            if (c == '[') return array();
+            if (c == '"') return string();
+            if (lit("true"))  { Json j; j.t = T::Bool; j.b = true;  return j; }
+            if (lit("false")) { Json j; j.t = T::Bool; j.b = false; return j; }
+            if (lit("null"))  { return Json(); }
+            return number();
+        }
+
+        Json array() {
+            next(); // [
+            Json j = Json::arr();
+            ws();
+            if (peek() == ']') { ++pos; return j; }
+            while (true) {
+                j.a.push_back(value());
+                ws();
+                char c = next();
+                if (c == ',') { ws(); continue; }
+                if (c == ']') break;
+                fail("expected , or ]");
+            }
+            return j;
+        }
+
+        Json object() {
+            next(); // {
+            Json j = Json::obj();
+            ws();
+            if (peek() == '}') { ++pos; return j; }
+            while (true) {
+                ws();
+                Json k = string();
+                ws();
+                if (next() != ':') fail("expected :");
+                j.o.emplace_back(k.s, value());
+                ws();
+                char c = next();
+                if (c == ',') continue;
+                if (c == '}') break;
+                fail("expected , or }");
+            }
+            return j;
+        }
+    };
+};
+
+} // namespace cmcp
+
+```
+
+`src/main.cpp`:
+
+```cpp
+#include "cheatmcp.hpp"
+
+int main() {
+    // Elevate our token as far as we can for cross-process access.
+    cmcp::enable_debug_privilege();
+
+    // Build the tool surface and start the background freeze/watch worker.
+    cmcp::register_all_tools();
+    cmcp::runtime_start();
+
+    int rc = cmcp::run_server();
+
+    cmcp::runtime_stop();
+    return rc;
+}
+
+```
+
+`src/mcp.cpp`:
+
+```cpp
+// MCP server core: JSON-RPC 2.0 over stdio (newline-delimited messages).
+#include "cheatmcp.hpp"
+
+#include <iostream>
+#include <string>
+#include <exception>
+
+namespace cmcp {
+
+// =============================================================================
+// registry
+// =============================================================================
+void Registry::add(const std::string& name, const std::string& desc, Json sch, ToolFn fn) {
+    Tool t;
+    t.name = name;
+    t.description = desc;
+    t.schema = std::move(sch);
+    t.fn = std::move(fn);
+    tools_[name] = std::move(t);
+}
+
+ToolResult Registry::call(const std::string& name, const Json& args) const {
+    auto it = tools_.find(name);
+    if (it == tools_.end()) {
+        ToolResult r;
+        r.is_error = true;
+        Json j = Json::obj();
+        j.set("error", "unknown tool: " + name);
+        r.structured = j;
+        r.text = j.dump();
+        return r;
+    }
+    try {
+        return it->second.fn(args);
+    } catch (const std::exception& e) {
+        ToolResult r;
+        r.is_error = true;
+        Json j = Json::obj();
+        j.set("error", std::string("exception: ") + e.what());
+        r.structured = j;
+        r.text = j.dump();
+        return r;
+    } catch (...) {
+        ToolResult r;
+        r.is_error = true;
+        Json j = Json::obj();
+        j.set("error", "unknown exception");
+        r.structured = j;
+        r.text = j.dump();
+        return r;
+    }
+}
+
+Registry& registry() {
+    static Registry r;
+    return r;
+}
+
+// =============================================================================
+// JSON-RPC
+// =============================================================================
+static Json rpc_result(const Json& id, Json result) {
+    Json r = Json::obj();
+    r.set("jsonrpc", "2.0");
+    r["id"] = id;
+    r.set("result", std::move(result));
+    return r;
+}
+
+static Json rpc_error(const Json& id, int code, const std::string& message) {
+    Json r = Json::obj();
+    r.set("jsonrpc", "2.0");
+    r["id"] = id;
+    Json err = Json::obj();
+    err.set("code", code);
+    err.set("message", message);
+    r.set("error", std::move(err));
+    return r;
+}
+
+static Json handle_request(const Json& req, bool& is_notification) {
+    is_notification = false;
+
+    Json id = req.has("id") ? req.at("id") : Json();
+    std::string method = req.has("method") ? req.at("method").as_s() : "";
+
+    if (!req.has("id")) is_notification = true;
+
+    Json params = req.has("params") ? req.at("params") : Json::obj();
+
+    // ---- initialize ----
+    if (method == "initialize") {
+        std::string pv = "2024-11-05";
+        if (params.has("protocolVersion")) pv = params.at("protocolVersion").as_s();
+
+        Json result = Json::obj();
+        result.set("protocolVersion", pv);
+        Json caps = Json::obj();
+        caps.set("tools", Json::obj());
+        result.set("capabilities", std::move(caps));
+
+        Json info = Json::obj();
+        info.set("name", "cheat-mcp");
+        info.set("version", "1.0.0");
+        info.set("title", "cheat-mcp — memory manipulation toolkit");
+        result.set("serverInfo", std::move(info));
+        result.set("instructions",
+            "Low-level game memory toolkit: process/module enumeration, read/write/scan, "
+            "pointer chains, DLL injection (loadlibrary/nt/hijack/apc/wndhook/manualmap), "
+            "IAT hooking, speedhack, anti-cheat detection and handle stripping, network tools.");
+        return rpc_result(id, std::move(result));
+    }
+
+    // ---- notifications (no reply) ----
+    if (method == "notifications/initialized" || method == "initialized") {
+        is_notification = true;
+        return Json();
+    }
+    if (method == "notifications/cancelled") {
+        is_notification = true;
+        return Json();
+    }
+
+    // ---- ping ----
+    if (method == "ping") {
+        return rpc_result(id, Json::obj());
+    }
+
+    // ---- tools/list ----
+    if (method == "tools/list") {
+        Json tools = Json::arr();
+        for (auto& kv : registry().all()) {
+            Json t = Json::obj();
+            t.set("name", kv.second.name);
+            t.set("description", kv.second.description);
+            t.set("inputSchema", kv.second.schema);
+            tools.push(std::move(t));
+        }
+        Json result = Json::obj();
+        result.set("tools", std::move(tools));
+        return rpc_result(id, std::move(result));
+    }
+
+    // ---- tools/call ----
+    if (method == "tools/call") {
+        std::string name = params.has("name") ? params.at("name").as_s() : "";
+        Json args = params.has("arguments") ? params.at("arguments") : Json::obj();
+
+        ToolResult tr = registry().call(name, args);
+
+        Json content = Json::arr();
+        Json text = Json::obj();
+        text.set("type", "text");
+        text.set("text", tr.text);
+        content.push(std::move(text));
+
+        Json result = Json::obj();
+        result.set("content", std::move(content));
+        result.set("isError", tr.is_error);
+        if (!tr.structured.is_null()) result.set("structuredContent", tr.structured);
+        return rpc_result(id, std::move(result));
+    }
+
+    if (is_notification) return Json();
+    return rpc_error(id, -32601, "method not found: " + method);
+}
+
+// =============================================================================
+// stdio loop
+// =============================================================================
+int run_server() {
+    std::ios::sync_with_stdio(false);
+
+    std::string line;
+    while (std::getline(std::cin, line)) {
+        // trim
+        while (!line.empty() && (line.back() == '\r' || line.back() == '\n' || line.back() == ' '))
+            line.pop_back();
+        if (line.empty()) continue;
+
+        Json req;
+        try {
+            req = Json::parse(line);
+        } catch (const std::exception& e) {
+            Json err = rpc_error(Json(), -32700, std::string("parse error: ") + e.what());
+            std::cout << err.dump() << "\n" << std::flush;
+            continue;
+        }
+
+        bool note = false;
+        Json resp = handle_request(req, note);
+        if (!note && !resp.is_null()) {
+            std::cout << resp.dump() << "\n" << std::flush;
+        }
+    }
+    return 0;
+}
+
+} // namespace cmcp
+
+```
+
+`src/memory.cpp`:
+
+```cpp
+#include "cheatmcp.hpp"
+
+#include <psapi.h>
+#include <tlhelp32.h>
+#include <algorithm>
+#include <cctype>
+#include <cstdio>
+#include <cstring>
+
+#pragma comment(lib, "psapi.lib")
+
+namespace cmcp {
+
+// -----------------------------------------------------------------------------
+// helpers
+// -----------------------------------------------------------------------------
+std::string lower(std::string s) {
+    std::transform(s.begin(), s.end(), s.begin(),
+                   [](unsigned char c) { return (char)std::tolower(c); });
+    return s;
+}
+
+std::string basename(const std::string& p) {
+    size_t s = p.find_last_of("\\/");
+    return s == std::string::npos ? p : p.substr(s + 1);
+}
+
+std::string u64_hex(uint64_t v) {
+    char buf[32];
+    std::snprintf(buf, sizeof buf, "0x%llX", (unsigned long long)v);
+    return buf;
+}
+
+uint64_t parse_u64(const Json& j) {
+    if (j.is_num()) return (uint64_t)j.as_i();
+    if (j.is_str()) {
+        const std::string& s = j.s;
+        try {
+            if (s.rfind("0x", 0) == 0 || s.rfind("0X", 0) == 0)
+                return std::stoull(s.substr(2), nullptr, 16);
+            return std::stoull(s, nullptr, 0);
+        } catch (...) { return 0; }
+    }
+    return 0;
+}
+
+std::vector<uint8_t> parse_hex(const std::string& s) {
+    std::vector<uint8_t> out;
+    int hi = -1;
+    for (char c : s) {
+        int v;
+        if (c >= '0' && c <= '9') v = c - '0';
+        else if (c >= 'a' && c <= 'f') v = c - 'a' + 10;
+        else if (c >= 'A' && c <= 'F') v = c - 'A' + 10;
+        else continue; // skip spaces, commas, 0x, etc.
+        if (hi < 0) hi = v;
+        else { out.push_back((uint8_t)((hi << 4) | v)); hi = -1; }
+    }
+    return out;
+}
+
+std::string to_hex(const uint8_t* p, size_t n) {
+    static const char* d = "0123456789ABCDEF";
+    std::string out;
+    out.reserve(n * 3);
+    for (size_t k = 0; k < n; ++k) {
+        if (k) out.push_back(' ');
+        out.push_back(d[p[k] >> 4]);
+        out.push_back(d[p[k] & 15]);
+    }
+    return out;
+}
+
+// -----------------------------------------------------------------------------
+// privileges
+// -----------------------------------------------------------------------------
+bool enable_debug_privilege() {
+    HANDLE tok = nullptr;
+    if (!OpenProcessToken(GetCurrentProcess(), TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY, &tok))
+        return false;
+    LUID luid{};
+    if (!LookupPrivilegeValueA(nullptr, SE_DEBUG_NAME, &luid)) { CloseHandle(tok); return false; }
+    TOKEN_PRIVILEGES tp{};
+    tp.PrivilegeCount = 1;
+    tp.Privileges[0].Luid = luid;
+    tp.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
+    BOOL ok = AdjustTokenPrivileges(tok, FALSE, &tp, sizeof(tp), nullptr, nullptr);
+    DWORD err = GetLastError();
+    CloseHandle(tok);
+    return ok && err == ERROR_SUCCESS;
+}
+
+// -----------------------------------------------------------------------------
+// process enumeration
+// -----------------------------------------------------------------------------
+std::vector<ProcInfo> list_processes() {
+    std::vector<ProcInfo> out;
+    HANDLE snap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+    if (snap == INVALID_HANDLE_VALUE) return out;
+
+    PROCESSENTRY32W pe{};
+    pe.dwSize = sizeof(pe);
+    // Process PPID field exists in PROCESSENTRY32 (th32ParentProcessID)
+    if (Process32FirstW(snap, &pe)) {
+        do {
+            ProcInfo pi;
+            pi.pid = pe.th32ProcessID;
+            pi.ppid = pe.th32ParentProcessID;
+
+            char narrow[MAX_PATH] = {};
+            WideCharToMultiByte(CP_UTF8, 0, pe.szExeFile, -1, narrow, sizeof(narrow) - 1, nullptr, nullptr);
+            pi.name = narrow;
+
+            HANDLE h = OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, FALSE, pi.pid);
+            if (h) {
+                char path[MAX_PATH * 2] = {};
+                DWORD sz = sizeof(path) - 1;
+                if (QueryFullProcessImageNameA(h, 0, path, &sz)) pi.path = path;
+                BOOL isWow = FALSE;
+                if (IsWow64Process(h, &isWow)) pi.wow64 = isWow != FALSE;
+                CloseHandle(h);
+            }
+            out.push_back(std::move(pi));
+        } while (Process32NextW(snap, &pe));
+    }
+    CloseHandle(snap);
+    return out;
+}
+
+std::vector<ProcInfo> list_threads_owners() { return {}; }
+
+std::vector<std::pair<uint32_t, std::string>> list_threads(uint32_t pid) {
+    std::vector<std::pair<uint32_t, std::string>> out;
+    HANDLE snap = CreateToolhelp32Snapshot(TH32CS_SNAPTHREAD, 0);
+    if (snap == INVALID_HANDLE_VALUE) return out;
+
+    THREADENTRY32 te{};
+    te.dwSize = sizeof(te);
+    if (Thread32First(snap, &te)) {
+        do {
+            if (pid == 0 || te.th32OwnerProcessID == pid)
+                out.emplace_back(te.th32ThreadID, "");
+        } while (Thread32Next(snap, &te));
+    }
+    CloseHandle(snap);
+    return out;
+}
+
+std::optional<ProcInfo> find_process(const std::string& name) {
+    std::string want = lower(name);
+    for (auto& p : list_processes()) {
+        if (lower(p.name) == want) return p;
+    }
+    // substring fallback
+    for (auto& p : list_processes()) {
+        if (lower(p.name).find(want) != std::string::npos) return p;
+    }
+    return std::nullopt;
+}
+
+// -----------------------------------------------------------------------------
+// handle cache
+// -----------------------------------------------------------------------------
+static std::mutex g_handle_mtx;
+static std::map<uint32_t, HANDLE> g_handles;
+
+HANDLE get_handle(uint32_t pid) {
+    std::lock_guard<std::mutex> lk(g_handle_mtx);
+    auto it = g_handles.find(pid);
+    if (it != g_handles.end()) return it->second;
+
+    HANDLE h = OpenProcess(PROCESS_ALL_ACCESS, FALSE, pid);
+    if (!h) h = OpenProcess(
+        PROCESS_QUERY_INFORMATION | PROCESS_VM_READ | PROCESS_VM_WRITE | PROCESS_VM_OPERATION |
+        PROCESS_CREATE_THREAD | PROCESS_SUSPEND_RESUME,
+        FALSE, pid);
+    if (h) g_handles[pid] = h;
+    return h;
+}
+
+void drop_handle(uint32_t pid) {
+    std::lock_guard<std::mutex> lk(g_handle_mtx);
+    auto it = g_handles.find(pid);
+    if (it != g_handles.end()) {
+        CloseHandle(it->second);
+        g_handles.erase(it);
+    }
+}
+
+bool is_process_64(uint32_t pid) {
+    HANDLE h = get_handle(pid);
+    if (!h) return false;
+    BOOL meWow = FALSE, targetWow = FALSE;
+    IsWow64Process(GetCurrentProcess(), &meWow);
+    IsWow64Process(h, &targetWow);
+    return meWow ? false : (targetWow ? false : true);
+}
+
+// -----------------------------------------------------------------------------
+// modules
+// -----------------------------------------------------------------------------
+std::vector<ModInfo> list_modules(uint32_t pid) {
+    std::vector<ModInfo> out;
+    HANDLE h = get_handle(pid);
+    if (!h) return out;
+
+    HMODULE mods[1024];
+    DWORD needed = 0;
+    if (!EnumProcessModulesEx(h, mods, sizeof(mods), &needed, LIST_MODULES_ALL)) {
+        // fall back to 32-bit listing
+        if (!EnumProcessModules(h, mods, sizeof(mods), &needed)) return out;
+    }
+    DWORD count = needed / sizeof(HMODULE);
+    if (count > 1024) count = 1024;
+
+    for (DWORD k = 0; k < count; ++k) {
+        ModInfo mi;
+        char name[MAX_PATH] = {};
+        if (GetModuleBaseNameA(h, mods[k], name, sizeof(name) - 1)) mi.name = name;
+        char path[MAX_PATH * 2] = {};
+        if (GetModuleFileNameExA(h, mods[k], path, sizeof(path) - 1)) mi.path = path;
+
+        MODULEINFO info{};
+        if (GetModuleInformation(h, mods[k], &info, sizeof(info))) {
+            mi.base = (uint64_t)(uintptr_t)info.lpBaseOfDll;
+            mi.size = info.SizeOfImage;
+        } else {
+            mi.base = (uint64_t)(uintptr_t)mods[k];
+        }
+        out.push_back(std::move(mi));
+    }
+    return out;
+}
+
+std::optional<ModInfo> find_module(uint32_t pid, const std::string& name) {
+    std::string want = lower(basename(name));
+    auto mods = list_modules(pid);
+    for (auto& m : mods) if (lower(m.name) == want) return m;
+    for (auto& m : mods) if (lower(m.name).find(want) != std::string::npos) return m;
+    return std::nullopt;
+}
+
+// -----------------------------------------------------------------------------
+// memory primitives
+// -----------------------------------------------------------------------------
+bool read_mem(uint32_t pid, uint64_t addr, void* buf, size_t n) {
+    HANDLE h = get_handle(pid);
+    if (!h) return false;
+    SIZE_T got = 0;
+    return ReadProcessMemory(h, (LPCVOID)(uintptr_t)addr, buf, n, &got) && got == n;
+}
+
+bool write_mem(uint32_t pid, uint64_t addr, const void* buf, size_t n) {
+    HANDLE h = get_handle(pid);
+    if (!h) return false;
+
+    SIZE_T done = 0;
+    if (WriteProcessMemory(h, (LPVOID)(uintptr_t)addr, buf, n, &done) && done == n) return true;
+
+    // retry after lifting page protection
+    DWORD oldp = 0;
+    if (VirtualProtectEx(h, (LPVOID)(uintptr_t)addr, n, PAGE_EXECUTE_READWRITE, &oldp)) {
+        bool ok = WriteProcessMemory(h, (LPVOID)(uintptr_t)addr, buf, n, &done) && done == n;
+        VirtualProtectEx(h, (LPVOID)(uintptr_t)addr, n, oldp, &oldp);
+        return ok;
+    }
+    return false;
+}
+
+uint64_t alloc_mem(uint32_t pid, size_t n, uint32_t protect) {
+    HANDLE h = get_handle(pid);
+    if (!h) return 0;
+    LPVOID p = VirtualAllocEx(h, nullptr, n, MEM_COMMIT | MEM_RESERVE, protect);
+    return (uint64_t)(uintptr_t)p;
+}
+
+bool free_mem(uint32_t pid, uint64_t addr) {
+    HANDLE h = get_handle(pid);
+    if (!h) return false;
+    return VirtualFreeEx(h, (LPVOID)(uintptr_t)addr, 0, MEM_RELEASE) != FALSE;
+}
+
+bool protect_mem(uint32_t pid, uint64_t addr, size_t n, uint32_t newprot, uint32_t* oldprot) {
+    HANDLE h = get_handle(pid);
+    if (!h) return false;
+    DWORD oldp = 0;
+    BOOL ok = VirtualProtectEx(h, (LPVOID)(uintptr_t)addr, n, newprot, &oldp);
+    if (oldprot) *oldprot = oldp;
+    return ok != FALSE;
+}
+
+std::vector<MEMORY_BASIC_INFORMATION> query_regions(uint32_t pid, uint64_t start, uint64_t end) {
+    std::vector<MEMORY_BASIC_INFORMATION> out;
+    HANDLE h = get_handle(pid);
+    if (!h) return out;
+
+    uint64_t addr = start;
+    MEMORY_BASIC_INFORMATION mbi{};
+    while (addr < end &&
+           VirtualQueryEx(h, (LPCVOID)(uintptr_t)addr, &mbi, sizeof(mbi)) == sizeof(mbi)) {
+        out.push_back(mbi);
+        uint64_t next = (uint64_t)(uintptr_t)mbi.BaseAddress + mbi.RegionSize;
+        if (next <= addr) break;
+        addr = next;
+    }
+    return out;
+}
+
+} // namespace cmcp
+
+```
+
+`src/network.cpp`:
+
+```cpp
+#define WIN32_LEAN_AND_MEAN
+#define NOMINMAX
+#include <winsock2.h>
+#include <ws2tcpip.h>
+#include <windows.h>
+#include <iphlpapi.h>
+
+#include "cheatmcp.hpp"
+
+#include <cstring>
+#include <cstdio>
+
+#pragma comment(lib, "iphlpapi.lib")
+#pragma comment(lib, "ws2_32.lib")
+
+namespace cmcp {
+
+static bool wsa_ready() {
+    static bool init = false;
+    static bool ok = false;
+    if (!init) {
+        WSADATA w{};
+        ok = WSAStartup(MAKEWORD(2, 2), &w) == 0;
+        init = true;
+    }
+    return ok;
+}
+
+static std::string fmt_v4(DWORD addr) {
+    in_addr a{};
+    a.S_un.S_addr = addr;
+    char buf[INET_ADDRSTRLEN] = {};
+    inet_ntop(AF_INET, &a, buf, sizeof(buf) - 1);
+    return buf;
+}
+
+static std::string fmt_v6(const UCHAR* addr) {
+    char buf[INET6_ADDRSTRLEN] = {};
+    inet_ntop(AF_INET6, (void*)addr, buf, sizeof(buf) - 1);
+    return buf;
+}
+
+static int port_nbo(DWORD p) { return ntohs((u_short)p); }
+
+static const char* tcp_state(DWORD s) {
+    switch (s) {
+        case 1: return "CLOSED"; case 2: return "LISTEN"; case 3: return "SYN_SENT";
+        case 4: return "SYN_RECV"; case 5: return "ESTABLISHED"; case 6: return "FIN_WAIT1";
+        case 7: return "FIN_WAIT2"; case 8: return "CLOSE_WAIT"; case 9: return "CLOSING";
+        case 10: return "LAST_ACK"; case 11: return "TIME_WAIT"; case 12: return "DELETE_TCB";
+        default: return "?";
+    }
+}
+
+// =============================================================================
+// connection table
+// =============================================================================
+Json net_connections(int pid_filter) {
+    Json r = Json::obj();
+    Json arr = Json::arr();
+    wsa_ready();
+
+    // ---- TCP IPv4 ----
+    DWORD size = 0;
+    if (GetExtendedTcpTable(nullptr, &size, FALSE, AF_INET, TCP_TABLE_OWNER_PID_ALL, 0) == ERROR_INSUFFICIENT_BUFFER) {
+        std::vector<uint8_t> buf(size);
+        if (GetExtendedTcpTable(buf.data(), &size, FALSE, AF_INET, TCP_TABLE_OWNER_PID_ALL, 0) == NO_ERROR) {
+            auto* t = (MIB_TCPTABLE_OWNER_PID*)buf.data();
+            for (DWORD k = 0; k < t->dwNumEntries; ++k) {
+                auto& row = t->table[k];
+                if (pid_filter >= 0 && (int)row.dwOwningPid != pid_filter) continue;
+                Json e = Json::obj();
+                e.set("proto", "tcp4");
+                e.set("local", fmt_v4(row.dwLocalAddr) + ":" + std::to_string(port_nbo(row.dwLocalPort)));
+                e.set("remote", fmt_v4(row.dwRemoteAddr) + ":" + std::to_string(port_nbo(row.dwRemotePort)));
+                e.set("state", tcp_state(row.dwState));
+                e.set("pid", (long long)row.dwOwningPid);
+                arr.push(std::move(e));
+            }
+        }
+    }
+
+    // ---- TCP IPv6 ----
+    size = 0;
+    if (GetExtendedTcpTable(nullptr, &size, FALSE, AF_INET6, TCP_TABLE_OWNER_PID_ALL, 0) == ERROR_INSUFFICIENT_BUFFER) {
+        std::vector<uint8_t> buf(size);
+        if (GetExtendedTcpTable(buf.data(), &size, FALSE, AF_INET6, TCP_TABLE_OWNER_PID_ALL, 0) == NO_ERROR) {
+            auto* t = (MIB_TCP6TABLE_OWNER_PID*)buf.data();
+            for (DWORD k = 0; k < t->dwNumEntries; ++k) {
+                auto& row = t->table[k];
+                if (pid_filter >= 0 && (int)row.dwOwningPid != pid_filter) continue;
+                Json e = Json::obj();
+                e.set("proto", "tcp6");
+                e.set("local", std::string("[") + fmt_v6(row.ucLocalAddr) + "]:" + std::to_string(port_nbo(row.dwLocalPort)));
+                e.set("remote", std::string("[") + fmt_v6(row.ucRemoteAddr) + "]:" + std::to_string(port_nbo(row.dwRemotePort)));
+                e.set("state", tcp_state(row.dwState));
+                e.set("pid", (long long)row.dwOwningPid);
+                arr.push(std::move(e));
+            }
+        }
+    }
+
+    // ---- UDP IPv4 ----
+    size = 0;
+    if (GetExtendedUdpTable(nullptr, &size, FALSE, AF_INET, UDP_TABLE_OWNER_PID, 0) == ERROR_INSUFFICIENT_BUFFER) {
+        std::vector<uint8_t> buf(size);
+        if (GetExtendedUdpTable(buf.data(), &size, FALSE, AF_INET, UDP_TABLE_OWNER_PID, 0) == NO_ERROR) {
+            auto* t = (MIB_UDPTABLE_OWNER_PID*)buf.data();
+            for (DWORD k = 0; k < t->dwNumEntries; ++k) {
+                auto& row = t->table[k];
+                if (pid_filter >= 0 && (int)row.dwOwningPid != pid_filter) continue;
+                Json e = Json::obj();
+                e.set("proto", "udp4");
+                e.set("local", fmt_v4(row.dwLocalAddr) + ":" + std::to_string(port_nbo(row.dwLocalPort)));
+                e.set("remote", "");
+                e.set("state", "");
+                e.set("pid", (long long)row.dwOwningPid);
+                arr.push(std::move(e));
+            }
+        }
+    }
+
+    r.set("count", (long long)arr.size());
+    r.set("connections", std::move(arr));
+    return r;
+}
+
+// =============================================================================
+// DNS
+// =============================================================================
+Json net_resolve(const std::string& host) {
+    Json r = Json::obj();
+    r.set("host", host);
+    Json arr = Json::arr();
+    wsa_ready();
+
+    addrinfo hints{};
+    hints.ai_family = AF_UNSPEC;
+    hints.ai_socktype = SOCK_STREAM;
+    addrinfo* res = nullptr;
+    if (getaddrinfo(host.c_str(), nullptr, &hints, &res) != 0) {
+        r.set("error", "resolution failed");
+        return r;
+    }
+    for (auto* p = res; p; p = p->ai_next) {
+        char buf[INET6_ADDRSTRLEN] = {};
+        if (p->ai_family == AF_INET)
+            inet_ntop(AF_INET, &((sockaddr_in*)p->ai_addr)->sin_addr, buf, sizeof(buf) - 1);
+        else if (p->ai_family == AF_INET6)
+            inet_ntop(AF_INET6, &((sockaddr_in6*)p->ai_addr)->sin6_addr, buf, sizeof(buf) - 1);
+        else continue;
+        arr.push(std::string(buf));
+    }
+    freeaddrinfo(res);
+    r.set("addresses", std::move(arr));
+    return r;
+}
+
+// =============================================================================
+// simple senders
+// =============================================================================
+bool net_send_udp(const std::string& host, uint16_t port, const std::vector<uint8_t>& data, std::string& err) {
+    if (!wsa_ready()) { err = "winsock init failed"; return false; }
+    SOCKET s = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+    if (s == INVALID_SOCKET) { err = "socket failed"; return false; }
+
+    sockaddr_in dst{};
+    dst.sin_family = AF_INET;
+    dst.sin_port = htons(port);
+    if (inet_pton(AF_INET, host.c_str(), &dst.sin_addr) != 1) {
+        addrinfo hints{}; hints.ai_family = AF_INET; hints.ai_socktype = SOCK_DGRAM;
+        addrinfo* res = nullptr;
+        if (getaddrinfo(host.c_str(), nullptr, &hints, &res) != 0 || !res) {
+            closesocket(s); err = "bad address"; return false;
+        }
+        dst.sin_addr = ((sockaddr_in*)res->ai_addr)->sin_addr;
+        freeaddrinfo(res);
+    }
+    int sent = sendto(s, (const char*)data.data(), (int)data.size(), 0,
+                      (sockaddr*)&dst, sizeof(dst));
+    closesocket(s);
+    if (sent < 0) { err = "sendto failed: " + std::to_string(WSAGetLastError()); return false; }
+    return true;
+}
+
+bool net_send_tcp(const std::string& host, uint16_t port, const std::vector<uint8_t>& data, std::string& err) {
+    if (!wsa_ready()) { err = "winsock init failed"; return false; }
+    addrinfo hints{}; hints.ai_family = AF_INET; hints.ai_socktype = SOCK_STREAM;
+    addrinfo* res = nullptr;
+    if (getaddrinfo(host.c_str(), std::to_string(port).c_str(), &hints, &res) != 0 || !res) {
+        err = "bad address"; return false;
+    }
+    SOCKET s = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
+    if (s == INVALID_SOCKET) { freeaddrinfo(res); err = "socket failed"; return false; }
+    if (connect(s, res->ai_addr, (int)res->ai_addrlen) != 0) {
+        closesocket(s); freeaddrinfo(res);
+        err = "connect failed: " + std::to_string(WSAGetLastError());
+        return false;
+    }
+    freeaddrinfo(res);
+    int sent = send(s, (const char*)data.data(), (int)data.size(), 0);
+    closesocket(s);
+    if (sent < 0) { err = "send failed"; return false; }
+    return true;
+}
+
+// =============================================================================
+// raw IP capture (SIO_RCVALL) — needs admin
+// =============================================================================
+Json net_capture(const std::string& filter_ip, int max_packets, int timeout_ms) {
+    Json r = Json::obj();
+    Json arr = Json::arr();
+    if (max_packets <= 0) max_packets = 20;
+    if (timeout_ms <= 0) timeout_ms = 1500;
+    if (!wsa_ready()) { r.set("error", "winsock init failed"); return r; }
+
+    SOCKET s = socket(AF_INET, SOCK_RAW, IPPROTO_IP);
+    if (s == INVALID_SOCKET) { r.set("error", "raw socket failed (run as admin)"); return r; }
+
+    // bind to the first local IPv4 address
+    char hostname[256] = {};
+    gethostname(hostname, sizeof(hostname) - 1);
+    addrinfo hints{}; hints.ai_family = AF_INET;
+    addrinfo* res = nullptr;
+    if (getaddrinfo(hostname, nullptr, &hints, &res) != 0 || !res) {
+        closesocket(s); r.set("error", "cannot resolve local host"); return r;
+    }
+    sockaddr_in local = *(sockaddr_in*)res->ai_addr;
+    freeaddrinfo(res);
+
+    if (bind(s, (sockaddr*)&local, sizeof(local)) != 0) {
+        closesocket(s); r.set("error", "bind failed"); return r;
+    }
+    DWORD on = 1;
+    if (WSAIoctl(s, SIO_RCVALL, &on, sizeof(on), nullptr, 0, nullptr, nullptr, nullptr) != 0) {
+        closesocket(s); r.set("error", "SIO_RCVALL failed (admin required)"); return r;
+    }
+
+    DWORD tv = timeout_ms;
+    setsockopt(s, SOL_SOCKET, SO_RCVTIMEO, (const char*)&tv, sizeof(tv));
+
+    std::vector<uint8_t> buf(65536);
+    for (int got = 0; got < max_packets;) {
+        int n = recv(s, (char*)buf.data(), (int)buf.size(), 0);
+        if (n <= 0) break;
+        auto* ip = (unsigned char*)buf.data();
+        if (n < 20) continue;
+        int ihl = (ip[0] & 0x0F) * 4;
+        char src[32], dst[32];
+        snprintf(src, sizeof src, "%u.%u.%u.%u", ip[12], ip[13], ip[14], ip[15]);
+        snprintf(dst, sizeof dst, "%u.%u.%u.%u", ip[16], ip[17], ip[18], ip[19]);
+        int proto = ip[9];
+        if (!filter_ip.empty() && filter_ip != src && filter_ip != dst) continue;
+
+        Json e = Json::obj();
+        e.set("src", src);
+        e.set("dst", dst);
+        e.set("proto", proto);
+        e.set("length", (long long)n);
+        e.set("header", to_hex(buf.data(), (size_t)ihl));
+        e.set("payload_len", (long long)(n - ihl));
+        arr.push(std::move(e));
+        ++got;
+    }
+
+    closesocket(s);
+    r.set("count", (long long)arr.size());
+    r.set("packets", std::move(arr));
+    return r;
+}
+
+// =============================================================================
+// raw IP send (spoofing-capable with IP_HDRINCL) — needs admin
+// =============================================================================
+Json net_send_raw_ip(uint32_t dst_ip_be, const std::vector<uint8_t>& ip_packet) {
+    Json r = Json::obj();
+    if (!wsa_ready()) { r.set("error", "winsock init failed"); return r; }
+
+    SOCKET s = socket(AF_INET, SOCK_RAW, IPPROTO_RAW);
+    if (s == INVALID_SOCKET) { r.set("error", "raw socket failed (admin required)"); return r; }
+
+    DWORD on = 1;
+    if (setsockopt(s, IPPROTO_IP, IP_HDRINCL, (const char*)&on, sizeof(on)) != 0) {
+        closesocket(s); r.set("error", "IP_HDRINCL failed"); return r;
+    }
+    sockaddr_in dst{};
+    dst.sin_family = AF_INET;
+    dst.sin_addr.S_un.S_addr = dst_ip_be;
+    int sent = sendto(s, (const char*)ip_packet.data(), (int)ip_packet.size(), 0,
+                      (sockaddr*)&dst, sizeof(dst));
+    closesocket(s);
+    if (sent < 0) { r.set("error", "sendto failed: " + std::to_string(WSAGetLastError())); return r; }
+    r.set("sent", (long long)sent);
+    return r;
+}
+
+} // namespace cmcp
+
+```
+
+`src/runtime.cpp`:
+
+```cpp
+#include "cheatmcp.hpp"
+
+#include <cstring>
+#include <cstdio>
+#include <vector>
+#include <atomic>
+#include <chrono>
+
+namespace cmcp {
+
+// =============================================================================
+// freeze manager
+// =============================================================================
+struct FreezeEntry {
+    int id;
+    uint32_t pid;
+    uint64_t addr;
+    std::vector<uint8_t> data;
+    bool active = true;
+};
+
+static std::mutex g_freeze_mtx;
+static std::vector<FreezeEntry> g_freezes;
+static std::atomic<int> g_next_id{1};
+
+Json freeze_add(uint32_t pid, uint64_t addr, const std::vector<uint8_t>& data) {
+    std::lock_guard<std::mutex> lk(g_freeze_mtx);
+    FreezeEntry e;
+    e.id = g_next_id++;
+    e.pid = pid;
+    e.addr = addr;
+    e.data = data;
+    g_freezes.push_back(e);
+    Json r = Json::obj();
+    r.set("id", (long long)e.id);
+    r.set("pid", (long long)pid);
+    r.set("address", u64_hex(addr));
+    r.set("bytes", to_hex(data.data(), data.size()));
+    return r;
+}
+
+Json freeze_remove(int id) {
+    std::lock_guard<std::mutex> lk(g_freeze_mtx);
+    Json r = Json::obj();
+    for (size_t k = 0; k < g_freezes.size(); ++k) {
+        if (g_freezes[k].id == id) { g_freezes.erase(g_freezes.begin() + k); r.set("removed", true); return r; }
+    }
+    r.set("removed", false);
+    return r;
+}
+
+Json freeze_list() {
+    std::lock_guard<std::mutex> lk(g_freeze_mtx);
+    Json arr = Json::arr();
+    for (auto& e : g_freezes) {
+        Json j = Json::obj();
+        j.set("id", (long long)e.id);
+        j.set("pid", (long long)e.pid);
+        j.set("address", u64_hex(e.addr));
+        j.set("bytes", to_hex(e.data.data(), e.data.size()));
+        arr.push(std::move(j));
+    }
+    Json r = Json::obj();
+    r.set("count", (long long)arr.size());
+    r.set("freezes", std::move(arr));
+    return r;
+}
+
+// =============================================================================
+// watch manager
+// =============================================================================
+struct WatchEntry {
+    int id;
+    uint32_t pid;
+    uint64_t addr;
+    size_t width;
+    std::string type;
+    std::vector<uint8_t> last;
+};
+
+static std::mutex g_watch_mtx;
+static std::vector<WatchEntry> g_watches;
+static std::atomic<int> g_watch_next{1};
+
+Json watch_add(uint32_t pid, uint64_t addr, size_t width, const std::string& type) {
+    std::lock_guard<std::mutex> lk(g_watch_mtx);
+    WatchEntry e;
+    e.id = g_watch_next++;
+    e.pid = pid;
+    e.addr = addr;
+    e.width = width ? width : 4;
+    e.type = type;
+    g_watches.push_back(e);
+    Json r = Json::obj();
+    r.set("id", (long long)e.id);
+    return r;
+}
+
+Json watch_poll(int id) {
+    std::lock_guard<std::mutex> lk(g_watch_mtx);
+    Json r = Json::obj();
+    for (auto& e : g_watches) {
+        if (e.id != id) continue;
+        std::vector<uint8_t> cur(e.width);
+        if (!read_mem(e.pid, e.addr, cur.data(), e.width)) { r.set("error", "read failed"); return r; }
+        bool changed = !e.last.empty() && std::memcmp(cur.data(), e.last.data(), e.width) != 0;
+        r.set("id", (long long)e.id);
+        r.set("changed", changed);
+        r.set("value", to_hex(cur.data(), cur.size()));
+        if (!e.last.empty()) r.set("previous", to_hex(e.last.data(), e.last.size()));
+        e.last = cur;
+        return r;
+    }
+    r.set("error", "watch not found");
+    return r;
+}
+
+Json watch_remove(int id) {
+    std::lock_guard<std::mutex> lk(g_watch_mtx);
+    for (size_t k = 0; k < g_watches.size(); ++k)
+        if (g_watches[k].id == id) { g_watches.erase(g_watches.begin() + k); Json r = Json::obj(); r.set("removed", true); return r; }
+    Json r = Json::obj(); r.set("removed", false); return r;
+}
+
+// =============================================================================
+// PE import (IAT) hooking — no instruction relocation needed
+// =============================================================================
+static bool read_remote_pe(uint32_t pid, uint64_t base,
+                           IMAGE_NT_HEADERS& nth, std::vector<uint8_t>& dd) {
+    IMAGE_DOS_HEADER dos{};
+    if (!read_mem(pid, base, &dos, sizeof(dos))) return false;
+    if (dos.e_magic != IMAGE_DOS_SIGNATURE) return false;
+    if (!read_mem(pid, base + dos.e_lfanew, &nth, sizeof(nth))) return false;
+    if (nth.Signature != IMAGE_NT_SIGNATURE) return false;
+    (void)dd;
+    return true;
+}
+
+struct IatSlot {
+    bool found = false;
+    uint64_t slot_addr = 0;   // address of the IAT entry
+    uint64_t orig = 0;        // current resolved function pointer
+};
+
+static IatSlot find_iat_slot(uint32_t pid, uint64_t mod_base, const std::string& module_name,
+                             const std::string& import_name) {
+    IatSlot out;
+    IMAGE_NT_HEADERS nth{};
+    std::vector<uint8_t> dummy;
+    if (!read_remote_pe(pid, mod_base, nth, dummy)) return out;
+
+    bool is64 = nth.OptionalHeader.Magic == IMAGE_NT_OPTIONAL_HDR64_MAGIC;
+    size_t ptr = is64 ? 8 : 4;
+    (void)ptr;
+
+    auto& imp_dir = nth.OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT];
+    if (imp_dir.Size == 0) return out;
+
+    std::string want_mod = lower(basename(module_name));
+    std::string want_fn  = lower(import_name);
+
+    uint64_t desc_addr = mod_base + imp_dir.VirtualAddress;
+    for (int di = 0; di < 256; ++di) {
+        IMAGE_IMPORT_DESCRIPTOR desc{};
+        if (!read_mem(pid, desc_addr + di * sizeof(desc), &desc, sizeof(desc))) return out;
+        if (desc.Name == 0 && desc.FirstThunk == 0) break;
+
+        char dll_name[256] = {};
+        read_mem(pid, mod_base + desc.Name, dll_name, sizeof(dll_name) - 1);
+        std::string dll = lower(basename(dll_name));
+        if (dll.find(want_mod) == std::string::npos) continue;
+
+        uint64_t oft = desc.OriginalFirstThunk ? desc.OriginalFirstThunk : desc.FirstThunk;
+        uint64_t thunk_addr = mod_base + oft;
+        uint64_t iat_base = mod_base + desc.FirstThunk;
+
+        for (int k = 0; k < 65536; ++k) {
+            uint64_t thunk = 0;
+            if (!read_mem(pid, thunk_addr + (uint64_t)k * ptr, &thunk, ptr)) return out;
+            if (thunk == 0) break;
+
+            bool by_ord = !is64 ? ((thunk & 0x80000000ull) != 0) : ((thunk & 0x8000000000000000ull) != 0);
+            std::string fname;
+            if (!by_ord) {
+                char namebuf[256] = {};
+                read_mem(pid, mod_base + thunk + 2, namebuf, sizeof(namebuf) - 1);
+                fname = lower(namebuf);
+            }
+            if (!by_ord && fname.find(want_fn) != std::string::npos) {
+                uint64_t slot = iat_base + (uint64_t)k * ptr;
+                uint64_t cur = 0;
+                if (!read_mem(pid, slot, &cur, ptr)) return out;
+                out.found = true;
+                out.slot_addr = slot;
+                out.orig = cur;
+                return out;
+            }
+        }
+    }
+    return out;
+}
+
+Json iat_hook(uint32_t pid, const std::string& module, const std::string& import,
+              const std::vector<uint8_t>& stub) {
+    Json r = Json::obj();
+    auto mod = find_module(pid, module);
+    if (!mod) { r.set("error", "module not loaded in target: " + module); return r; }
+
+    IatSlot slot = find_iat_slot(pid, mod->base, mod->name, import);
+    if (!slot.found) { r.set("error", "import not found: " + import); return r; }
+
+    if (stub.empty()) { r.set("error", "empty stub"); return r; }
+
+    uint64_t stub_addr = alloc_mem(pid, stub.size(), PAGE_EXECUTE_READWRITE);
+    if (!stub_addr) { r.set("error", "stub alloc failed"); return r; }
+    if (!write_mem(pid, stub_addr, stub.data(), stub.size())) { r.set("error", "stub write failed"); return r; }
+
+    uint8_t buf[8] = {};
+    std::memcpy(buf, &stub_addr, sizeof(stub_addr));
+    if (!write_mem(pid, slot.slot_addr, buf, is_process_64(pid) ? 8 : 4)) {
+        r.set("error", "IAT write failed");
+        return r;
+    }
+
+    r.set("ok", true);
+    r.set("module", mod->name);
+    r.set("import", import);
+    r.set("iat_slot", u64_hex(slot.slot_addr));
+    r.set("original", u64_hex(slot.orig));
+    r.set("stub", u64_hex(stub_addr));
+    return r;
+}
+
+// =============================================================================
+// speedhack — IAT hook with a generated fixed-point time-scaling stub (x64)
+// =============================================================================
+static void put64(std::vector<uint8_t>& v, uint64_t x) {
+    for (int k = 0; k < 8; ++k) v.push_back((uint8_t)((x >> (8 * k)) & 0xFF));
+}
+
+static std::vector<uint8_t> make_scale_stub(uint64_t orig, uint64_t base, uint64_t factor,
+                                            bool qpc, bool is64ret) {
+    std::vector<uint8_t> s;
+    if (qpc) {
+        s.push_back(0x53);                                   // push rbx
+        s.insert(s.end(), {0x48, 0x89, 0xCB});               // mov rbx, rcx
+    }
+    s.push_back(0x48); s.push_back(0xB8); put64(s, orig);    // mov rax, orig
+    s.insert(s.end(), {0xFF, 0xD0});                         // call rax
+    if (!is64ret && !qpc) s.insert(s.end(), {0x89, 0xC0});   // mov eax, eax
+    if (qpc) { s.insert(s.end(), {0x48, 0x8B, 0x03}); }      // mov rax, [rbx]
+    s.push_back(0x48); s.push_back(0xB9); put64(s, base);    // mov rcx, base
+    s.insert(s.end(), {0x48, 0x29, 0xC8});                   // sub rax, rcx
+    s.push_back(0x48); s.push_back(0xB9); put64(s, factor);  // mov rcx, factor
+    s.insert(s.end(), {0x48, 0x0F, 0xAF, 0xC1});             // imul rax, rcx
+    s.insert(s.end(), {0x48, 0xC1, 0xE8, 0x20});             // shr rax, 32
+    s.push_back(0x48); s.push_back(0xB9); put64(s, base);    // mov rcx, base
+    s.insert(s.end(), {0x48, 0x01, 0xC8});                   // add rax, rcx
+    if (qpc) { s.insert(s.end(), {0x48, 0x89, 0x03}); }      // mov [rbx], rax
+    if (qpc) { s.push_back(0x5B); }                          // pop rbx
+    if (qpc) s.insert(s.end(), {0xB8, 0x01, 0x00, 0x00, 0x00}); // mov eax, 1
+    s.push_back(0xC3);                                       // ret
+    return s;
+}
+
+Json speedhack(uint32_t pid, double scale, const std::string& which) {
+    Json r = Json::obj();
+    if (!is_process_64(pid)) { r.set("error", "speedhack requires a 64-bit target"); return r; }
+
+    std::string w = lower(which.empty() ? "qpc" : which);
+    uint64_t factor = (uint64_t)(scale * 4294967296.0); // 32.32 fixed point
+
+    LARGE_INTEGER qpc{}; QueryPerformanceCounter(&qpc);
+    uint64_t base_tick = GetTickCount64();
+
+    struct Item { const char* name; bool is_qpc; bool is64ret; uint64_t base; };
+    std::vector<Item> items;
+    if (w == "qpc" || w == "all")            items.push_back({"QueryPerformanceCounter", true, true, (uint64_t)qpc.QuadPart});
+    if (w == "tick" || w == "all")           items.push_back({"GetTickCount", false, false, (uint64_t)(GetTickCount())});
+    if (w == "tick64" || w == "all")         items.push_back({"GetTickCount64", false, true, base_tick});
+
+    Json installed = Json::arr();
+    for (auto& it : items) {
+        bool done = false;
+        for (auto& mod : list_modules(pid)) {
+            IatSlot slot = find_iat_slot(pid, mod.base, mod.name, it.name);
+            if (!slot.found || !slot.orig) continue;
+
+            auto stub = make_scale_stub(slot.orig, it.base, factor, it.is_qpc, it.is64ret);
+            uint64_t stub_addr = alloc_mem(pid, stub.size(), PAGE_EXECUTE_READWRITE);
+            if (!stub_addr) continue;
+            if (!write_mem(pid, stub_addr, stub.data(), stub.size())) continue;
+
+            uint8_t buf[8] = {};
+            std::memcpy(buf, &stub_addr, 8);
+            if (!write_mem(pid, slot.slot_addr, buf, 8)) continue;
+
+            Json e = Json::obj();
+            e.set("function", it.name);
+            e.set("module", mod.name);
+            e.set("iat_slot", u64_hex(slot.slot_addr));
+            e.set("stub", u64_hex(stub_addr));
+            e.set("original", u64_hex(slot.orig));
+            installed.push(std::move(e));
+            done = true;
+            break;
+        }
+        if (!done) {
+            Json e = Json::obj();
+            e.set("function", it.name);
+            e.set("status", "no IAT import found (call may be inlined/dynamic)");
+            installed.push(std::move(e));
+        }
+    }
+
+    r.set("scale", scale);
+    r.set("factor_32_32", u64_hex(factor));
+    r.set("installed", std::move(installed));
+    return r;
+}
+
+// =============================================================================
+// background thread (keeps frozen values pinned)
+// =============================================================================
+static std::atomic<bool> g_running{false};
+static std::thread g_thread;
+
+void runtime_start() {
+    if (g_running.exchange(true)) return;
+    g_thread = std::thread([]() {
+        while (g_running.load()) {
+            {
+                std::lock_guard<std::mutex> lk(g_freeze_mtx);
+                for (auto& e : g_freezes) {
+                    if (e.active && !e.data.empty())
+                        write_mem(e.pid, e.addr, e.data.data(), e.data.size());
+                }
+            }
+            std::this_thread::sleep_for(std::chrono::milliseconds(8));
+        }
+    });
+}
+
+void runtime_stop() {
+    if (!g_running.exchange(false)) return;
+    if (g_thread.joinable()) g_thread.join();
+}
+
+} // namespace cmcp
+
+```
+
+`src/scanner.cpp`:
+
+```cpp
+#include "cheatmcp.hpp"
+
+#include <cctype>
+#include <cstring>
+#include <cstdio>
+#include <cstdlib>
+#include <vector>
+#include <string>
+
+namespace cmcp {
+
+ScanState& scan_state() {
+    static ScanState s;
+    return s;
+}
+
+// -----------------------------------------------------------------------------
+// value <-> bytes
+// -----------------------------------------------------------------------------
+static size_t type_width(ScanType t) {
+    switch (t) {
+        case ScanType::I8:  return 1;
+        case ScanType::I16: return 2;
+        case ScanType::I32: return 4;
+        case ScanType::I64: return 8;
+        case ScanType::F32: return 4;
+        case ScanType::F64: return 8;
+        default:            return 0;
+    }
+}
+
+static ScanType type_from_string(const std::string& s) {
+    std::string v = lower(s);
+    if (v == "i8"  || v == "byte"  || v == "int8")   return ScanType::I8;
+    if (v == "i16" || v == "short" || v == "int16")  return ScanType::I16;
+    if (v == "i32" || v == "int"   || v == "int32" || v == "dword") return ScanType::I32;
+    if (v == "i64" || v == "int64" || v == "qword")  return ScanType::I64;
+    if (v == "f32" || v == "float")                  return ScanType::F32;
+    if (v == "f64" || v == "double")                 return ScanType::F64;
+    if (v == "str" || v == "string")                 return ScanType::Str;
+    if (v == "aob" || v == "bytes")                  return ScanType::Aob;
+    return ScanType::I32;
+}
+
+static std::vector<uint8_t> value_to_bytes(ScanType t, const std::string& text) {
+    std::vector<uint8_t> out;
+    switch (t) {
+        case ScanType::I8: {
+            int64_t v = std::strtoll(text.c_str(), nullptr, 0);
+            out.push_back((uint8_t)v);
+            break;
+        }
+        case ScanType::I16: {
+            int64_t v = std::strtoll(text.c_str(), nullptr, 0);
+            out.resize(2); std::memcpy(out.data(), &v, 2);
+            break;
+        }
+        case ScanType::I32: {
+            int64_t v = std::strtoll(text.c_str(), nullptr, 0);
+            out.resize(4); std::memcpy(out.data(), &v, 4);
+            break;
+        }
+        case ScanType::I64: {
+            int64_t v = std::strtoll(text.c_str(), nullptr, 0);
+            out.resize(8); std::memcpy(out.data(), &v, 8);
+            break;
+        }
+        case ScanType::F32: {
+            float v = (float)std::strtod(text.c_str(), nullptr);
+            out.resize(4); std::memcpy(out.data(), &v, 4);
+            break;
+        }
+        case ScanType::F64: {
+            double v = std::strtod(text.c_str(), nullptr);
+            out.resize(8); std::memcpy(out.data(), &v, 8);
+            break;
+        }
+        case ScanType::Str: {
+            out.assign(text.begin(), text.end());
+            out.push_back(0); // null-terminated match
+            break;
+        }
+        case ScanType::Aob:
+            out = parse_hex(text);
+            break;
+    }
+    return out;
+}
+
+static bool numeric_from_bytes(ScanType t, const uint8_t* p, double& out) {
+    switch (t) {
+        case ScanType::I8:  { int8_t v;  std::memcpy(&v, p, 1); out = v; return true; }
+        case ScanType::I16: { int16_t v; std::memcpy(&v, p, 2); out = v; return true; }
+        case ScanType::I32: { int32_t v; std::memcpy(&v, p, 4); out = v; return true; }
+        case ScanType::I64: { int64_t v; std::memcpy(&v, p, 8); out = (double)v; return true; }
+        case ScanType::F32: { float v;   std::memcpy(&v, p, 4); out = v; return true; }
+        case ScanType::F64: { double v;  std::memcpy(&v, p, 8); out = v; return true; }
+        default: return false;
+    }
+}
+
+// -----------------------------------------------------------------------------
+// region iteration
+// -----------------------------------------------------------------------------
+struct Region {
+    uint64_t base;
+    uint64_t size;
+};
+
+static std::vector<Region> scannable_regions(uint32_t pid, bool writable_only) {
+    std::vector<Region> out;
+    for (auto& m : query_regions(pid)) {
+        if (m.State != MEM_COMMIT) continue;
+        if (m.Protect & PAGE_GUARD) continue;
+        if (m.Protect & PAGE_NOACCESS) continue;
+        DWORD prot = m.Protect & 0xFF;
+        bool readable = (prot == PAGE_READONLY || prot == PAGE_READWRITE ||
+                         prot == PAGE_WRITECOPY || prot == PAGE_EXECUTE_READ ||
+                         prot == PAGE_EXECUTE_READWRITE || prot == PAGE_EXECUTE_WRITECOPY);
+        if (!readable) continue;
+        bool writable = (prot == PAGE_READWRITE || prot == PAGE_WRITECOPY ||
+                         prot == PAGE_EXECUTE_READWRITE || prot == PAGE_EXECUTE_WRITECOPY);
+        if (writable_only && !writable) continue;
+        out.push_back({ (uint64_t)(uintptr_t)m.BaseAddress, (uint64_t)m.RegionSize });
+    }
+    return out;
+}
+
+// -----------------------------------------------------------------------------
+// first scan
+// -----------------------------------------------------------------------------
+size_t scan_first(uint32_t pid, ScanType type, const std::string& value,
+                  bool writable_only, size_t max_hits) {
+    ScanState& st = scan_state();
+    std::lock_guard<std::mutex> lk(st.mtx);
+
+    st.active = true;
+    st.type = type;
+    st.pattern = value;
+    st.hits.clear();
+
+    std::vector<uint8_t> needle = value_to_bytes(type, value);
+    size_t w = (type == ScanType::Str) ? needle.size() - 1 : needle.size();
+    if (type == ScanType::Str || type == ScanType::Aob) w = needle.size();
+    st.width = w;
+    if (w == 0) return 0;
+
+    const size_t CHUNK = 1 << 20; // 1 MiB
+    std::vector<uint8_t> buf(CHUNK + w);
+
+    for (auto& r : scannable_regions(pid, writable_only)) {
+        uint64_t off = 0;
+        while (off < r.size) {
+            size_t want = (size_t)std::min<uint64_t>(CHUNK, r.size - off);
+            if (!read_mem(pid, r.base + off, buf.data(), want)) {
+                off += want;
+                continue;
+            }
+            if (want >= w) {
+                for (size_t k = 0; k + w <= want; ++k) {
+                    if (std::memcmp(buf.data() + k, needle.data(), w) == 0) {
+                        st.hits.push_back({ r.base + off + k, {} });
+                        if (st.hits.size() >= max_hits) return st.hits.size();
+                    }
+                }
+            }
+            off += want;
+        }
+    }
+    return st.hits.size();
+}
+
+// -----------------------------------------------------------------------------
+// AOB scan (pattern supports ?? wildcards)
+// -----------------------------------------------------------------------------
+struct AobByte { uint8_t value; bool wild; };
+
+static std::vector<AobByte> parse_aob(const std::string& pattern) {
+    std::vector<AobByte> out;
+    size_t k = 0;
+    while (k < pattern.size()) {
+        char c = pattern[k];
+        if (c == '?') {
+            out.push_back({ 0, true });
+            ++k;
+            if (k < pattern.size() && pattern[k] == '?') ++k;
+            continue;
+        }
+        if (std::isxdigit((unsigned char)c)) {
+            // read up to two hex chars
+            int v = 0, n = 0;
+            while (n < 2 && k < pattern.size() && std::isxdigit((unsigned char)pattern[k])) {
+                char h = pattern[k];
+                int d = (h >= '0' && h <= '9') ? h - '0'
+                      : (h >= 'a' && h <= 'f') ? h - 'a' + 10
+                      : h - 'A' + 10;
+                v = (v << 4) | d;
+                ++k; ++n;
+            }
+            out.push_back({ (uint8_t)v, false });
+            continue;
+        }
+        ++k; // skip separators
+    }
+    return out;
+}
+
+size_t scan_aob(uint32_t pid, const std::string& pattern, bool writable_only, size_t max_hits) {
+    ScanState& st = scan_state();
+    std::lock_guard<std::mutex> lk(st.mtx);
+
+    auto needle = parse_aob(pattern);
+    st.active = true;
+    st.type = ScanType::Aob;
+    st.pattern = pattern;
+    st.width = needle.size();
+    st.hits.clear();
+    if (needle.empty()) return 0;
+
+    const size_t CHUNK = 1 << 20;
+    std::vector<uint8_t> buf(CHUNK + needle.size());
+
+    for (auto& r : scannable_regions(pid, writable_only)) {
+        uint64_t off = 0;
+        while (off < r.size) {
+            size_t want = (size_t)std::min<uint64_t>(CHUNK, r.size - off);
+            if (!read_mem(pid, r.base + off, buf.data(), want)) { off += want; continue; }
+            if (want >= needle.size()) {
+                for (size_t k = 0; k + needle.size() <= want; ++k) {
+                    bool match = true;
+                    for (size_t j = 0; j < needle.size(); ++j) {
+                        if (!needle[j].wild && buf[k + j] != needle[j].value) { match = false; break; }
+                    }
+                    if (match) {
+                        st.hits.push_back({ r.base + off + k, {} });
+                        if (st.hits.size() >= max_hits) return st.hits.size();
+                    }
+                }
+            }
+            off += want;
+        }
+    }
+    return st.hits.size();
+}
+
+// -----------------------------------------------------------------------------
+// refine / next scan
+// -----------------------------------------------------------------------------
+size_t scan_refine(uint32_t pid, const std::string& mode, const std::string& value) {
+    ScanState& st = scan_state();
+    std::lock_guard<std::mutex> lk(st.mtx);
+
+    if (!st.active) return 0;
+
+    std::string m = lower(mode);
+    std::vector<uint8_t> needle = value_to_bytes(st.type, value);
+    size_t w = st.width;
+
+    std::vector<uint8_t> cur(w);
+    std::vector<ScanHit> keep;
+    keep.reserve(st.hits.size() / 2 + 8);
+
+    for (auto& hit : st.hits) {
+        if (!read_mem(pid, hit.addr, cur.data(), w)) continue;
+
+        bool pass = false;
+        if (m == "exact") {
+            pass = !needle.empty() && std::memcmp(cur.data(), needle.data(), w) == 0;
+        } else if (m == "changed") {
+            pass = hit.prev.empty() ? true : (std::memcmp(cur.data(), hit.prev.data(), w) != 0);
+        } else if (m == "unchanged") {
+            pass = hit.prev.empty() ? true : (std::memcmp(cur.data(), hit.prev.data(), w) == 0);
+        } else if (m == "increased" || m == "decreased") {
+            double a = 0, b = 0;
+            if (numeric_from_bytes(st.type, cur.data(), a) &&
+                numeric_from_bytes(st.type, hit.prev.empty() ? cur.data() : hit.prev.data(), b)) {
+                pass = (m == "increased") ? (a > b) : (a < b);
+            }
+        } else {
+            pass = true; // unknown mode: keep
+        }
+
+        if (pass) {
+            ScanHit nh = hit;
+            nh.prev = cur;
+            keep.push_back(std::move(nh));
+        }
+    }
+
+    st.hits.swap(keep);
+    return st.hits.size();
+}
+
+// -----------------------------------------------------------------------------
+// results
+// -----------------------------------------------------------------------------
+Json scan_results(size_t offset, size_t limit, uint32_t pid, const std::string& type_name) {
+    ScanState& st = scan_state();
+    std::lock_guard<std::mutex> lk(st.mtx);
+
+    Json r = Json::obj();
+    r.set("active", st.active);
+    r.set("total", (long long)st.hits.size());
+    r.set("offset", (long long)offset);
+
+    Json arr = Json::arr();
+    size_t end = std::min(st.hits.size(), offset + limit);
+    for (size_t k = offset; k < end; ++k) {
+        Json h = Json::obj();
+        h.set("address", u64_hex(st.hits[k].addr));
+        if (pid && st.width && st.width <= 16) {
+            std::vector<uint8_t> cur(st.width);
+            if (read_mem(pid, st.hits[k].addr, cur.data(), st.width))
+                h.set("value", to_hex(cur.data(), cur.size()));
+        }
+        arr.push(std::move(h));
+    }
+    r.set("results", std::move(arr));
+    return r;
+}
+
+// -----------------------------------------------------------------------------
+// reverse pointer scan (one level: who points into [target-max_offset, target])
+// -----------------------------------------------------------------------------
+Json pointer_scan(uint32_t pid, uint64_t target, size_t max_offset, size_t max_results) {
+    Json r = Json::obj();
+    Json arr = Json::arr();
+
+    bool is64 = is_process_64(pid);
+    const size_t pw = is64 ? 8 : 4;
+    const size_t CHUNK = 1 << 20;
+    std::vector<uint8_t> buf(CHUNK + pw);
+
+    uint64_t lo = (target > max_offset) ? (target - max_offset) : 0;
+
+    for (auto& reg : scannable_regions(pid, false)) {
+        uint64_t off = 0;
+        while (off < reg.size && arr.size() < max_results) {
+            size_t want = (size_t)std::min<uint64_t>(CHUNK, reg.size - off);
+            if (!read_mem(pid, reg.base + off, buf.data(), want)) { off += want; continue; }
+            if (want >= pw) {
+                for (size_t k = 0; k + pw <= want; k += (is64 ? 4 : 2)) {
+                    uint64_t v = 0;
+                    std::memcpy(&v, buf.data() + k, pw);
+                    if (is64) v &= 0x0000FFFFFFFFFFFFull; // canonical user-space
+                    if (v >= lo && v <= target) {
+                        Json h = Json::obj();
+                        h.set("address", u64_hex(reg.base + off + k));
+                        h.set("points_to", u64_hex(v));
+                        h.set("offset", (long long)(target - v));
+                        arr.push(std::move(h));
+                        if (arr.size() >= max_results) break;
+                    }
+                }
+            }
+            off += want;
+        }
+    }
+
+    r.set("target", u64_hex(target));
+    r.set("pointer_width", (long long)pw);
+    r.set("count", (long long)arr.size());
+    r.set("results", std::move(arr));
+    return r;
+}
+
+void scan_reset() {
+    ScanState& st = scan_state();
+    std::lock_guard<std::mutex> lk(st.mtx);
+    st.active = false;
+    st.hits.clear();
+    st.pattern.clear();
+}
+
+} // namespace cmcp
+
+```
+
+`src/tools.cpp`:
+
+```cpp
+#include "cheatmcp.hpp"
+
+#include <fstream>
+#include <cstring>
+#include <cstdio>
+#include <algorithm>
+
+namespace cmcp {
+
+// =============================================================================
+// schema helpers
+// =============================================================================
+static Json prop(const std::string& type, const std::string& desc) {
+    Json j = Json::obj();
+    j.set("type", type);
+    j.set("description", desc);
+    return j;
+}
+
+static Json schema(Json props, std::vector<std::string> required = {}) {
+    if (!props.is_obj()) props = Json::obj();
+    Json s = Json::obj();
+    s.set("type", "object");
+    s.set("properties", std::move(props));
+    Json req = Json::arr();
+    for (auto& r : required) req.push(r);
+    s.set("required", std::move(req));
+    return s;
+}
+
+static ToolResult ok(Json j) {
+    ToolResult r;
+    r.is_error = false;
+    r.structured = j;
+    r.text = j.dump();
+    return r;
+}
+
+static ToolResult fail(const std::string& msg) {
+    ToolResult r;
+    r.is_error = true;
+    Json j = Json::obj();
+    j.set("error", msg);
+    r.structured = j;
+    r.text = j.dump();
+    return r;
+}
+
+static void reg(const char* name, const char* desc, Json s, ToolFn fn) {
+    registry().add(name, desc, std::move(s), std::move(fn));
+}
+
+static ScanType stype(const std::string& s) {
+    std::string v = lower(s);
+    if (v == "i8"  || v == "byte")   return ScanType::I8;
+    if (v == "i16" || v == "short")  return ScanType::I16;
+    if (v == "i32" || v == "int")    return ScanType::I32;
+    if (v == "i64" || v == "int64")  return ScanType::I64;
+    if (v == "f32" || v == "float")  return ScanType::F32;
+    if (v == "f64" || v == "double") return ScanType::F64;
+    if (v == "str" || v == "string") return ScanType::Str;
+    if (v == "aob" || v == "bytes")  return ScanType::Aob;
+    return ScanType::I32;
+}
+
+static DWORD protect_from_string(const std::string& s) {
+    std::string v = lower(s);
+    if (v == "r"   || v == "read")      return PAGE_READONLY;
+    if (v == "rw"  || v == "readwrite") return PAGE_READWRITE;
+    if (v == "rx"  || v == "execute")   return PAGE_EXECUTE_READ;
+    if (v == "rwx" || v == "all")       return PAGE_EXECUTE_READWRITE;
+    if (v == "x")                       return PAGE_EXECUTE;
+    if (v == "wc")                      return PAGE_WRITECOPY;
+    try { return (DWORD)std::stoul(s, nullptr, 0); } catch (...) { return PAGE_READWRITE; }
+}
+
+static std::string protect_to_string(DWORD p) {
+    if (p & PAGE_GUARD) p &= ~PAGE_GUARD;
+    switch (p & 0xFF) {
+        case PAGE_NOACCESS:          return "NOACCESS";
+        case PAGE_READONLY:          return "R";
+        case PAGE_READWRITE:         return "RW";
+        case PAGE_WRITECOPY:         return "WC";
+        case PAGE_EXECUTE:           return "X";
+        case PAGE_EXECUTE_READ:      return "RX";
+        case PAGE_EXECUTE_READWRITE: return "RWX";
+        case PAGE_EXECUTE_WRITECOPY: return "XWC";
+        default:                     return "?";
+    }
+}
+
+static bool is_admin() {
+    BOOL admin = FALSE;
+    PSID grp = nullptr;
+    SID_IDENTIFIER_AUTHORITY nt = SECURITY_NT_AUTHORITY;
+    if (AllocateAndInitializeSid(&nt, 2, SECURITY_BUILTIN_DOMAIN_RID,
+            DOMAIN_ALIAS_RID_ADMINS, 0, 0, 0, 0, 0, 0, &grp)) {
+        CheckTokenMembership(nullptr, grp, &admin);
+        FreeSid(grp);
+    }
+    return admin != FALSE;
+}
+
+static uint32_t require_pid(const Json& a) {
+    if (a.has("pid")) return (uint32_t)parse_u64(a.at("pid"));
+    for (const char* key : { "process", "name" }) {
+        if (a.has(key)) {
+            auto p = find_process(a.at(key).as_s());
+            if (p) return p->pid;
+        }
+    }
+    return 0;
+}
+
+// =============================================================================
+// registration
+// =============================================================================
+void register_all_tools() {
+    // ---------------------------------------------------------------- system
+    reg("enable_privilege", "Enable SeDebugPrivilege (needed to touch most games).",
+        schema(Json::obj()),
+        [](const Json&) {
+            bool okp = enable_debug_privilege();
+            Json j = Json::obj(); j.set("debug_privilege", okp); return ok(j);
+        });
+
+    reg("system_info", "OS version, architecture, elevation and privilege status.",
+        schema(Json::obj()),
+        [](const Json&) {
+            Json j = Json::obj();
+            j.set("architecture", sizeof(void*) == 8 ? "x64" : "x86");
+            j.set("is_admin", is_admin());
+            j.set("debug_privilege_enabled", enable_debug_privilege());
+            Json os = Json::obj();
+            OSVERSIONINFOEXA v{}; v.dwOSVersionInfoSize = sizeof(v);
+#pragma warning(suppress : 4996)
+            GetVersionExA((OSVERSIONINFOA*)&v);
+            os.set("major", (long long)v.dwMajorVersion);
+            os.set("minor", (long long)v.dwMinorVersion);
+            os.set("build", (long long)v.dwBuildNumber);
+            j.set("os", std::move(os));
+            return ok(j);
+        });
+
+    reg("convert", "Convert values between hex/decimal and decode byte buffers.",
+        schema(Json::obj(), {}),
+        [](const Json& a) {
+            Json j = Json::obj();
+            if (a.has("hex")) {
+                auto b = parse_hex(a.at("hex").as_s());
+                j.set("bytes", (long long)b.size());
+                uint64_t v = 0;
+                for (size_t k = 0; k < b.size() && k < 8; ++k) v |= (uint64_t)b[k] << (8 * k);
+                j.set("as_u64_le", u64_hex(v));
+                j.set("as_i64_le", (long long)v);
+            }
+            if (a.has("value")) {
+                uint64_t v = parse_u64(a.at("value"));
+                j.set("hex", u64_hex(v));
+                j.set("dec", (long long)v);
+            }
+            return ok(j);
+        });
+
+    // ---------------------------------------------------------------- process
+    reg("process_list", "List running processes (pid, ppid, name, path).",
+        schema({ {"filter", prop("string", "optional name substring filter")} }),
+        [](const Json& a) {
+            std::string f = a.has("filter") ? lower(a.at("filter").as_s()) : "";
+            Json arr = Json::arr();
+            for (auto& p : list_processes()) {
+                if (!f.empty() && lower(p.name).find(f) == std::string::npos) continue;
+                Json e = Json::obj();
+                e.set("pid", (long long)p.pid);
+                e.set("ppid", (long long)p.ppid);
+                e.set("name", p.name);
+                e.set("path", p.path);
+                e.set("wow64", p.wow64);
+                arr.push(std::move(e));
+            }
+            Json j = Json::obj();
+            j.set("count", (long long)arr.size());
+            j.set("processes", std::move(arr));
+            return ok(j);
+        });
+
+    reg("process_open", "Open a handle to a process by pid or name (cached).",
+        schema({ {"pid", prop("integer", "process id")}, {"name", prop("string", "process name")} }),
+        [](const Json& a) {
+            uint32_t pid = require_pid(a);
+            if (!pid) return fail("pid or name required");
+            HANDLE h = get_handle(pid);
+            Json j = Json::obj();
+            j.set("pid", (long long)pid);
+            j.set("opened", h != nullptr);
+            j.set("is_64bit", h ? is_process_64(pid) : false);
+            return ok(j);
+        });
+
+    reg("process_close", "Close and forget the cached handle for a process.",
+        schema({ {"pid", prop("integer", "process id")} }, {"pid"}),
+        [](const Json& a) {
+            uint32_t pid = (uint32_t)parse_u64(a.at("pid"));
+            drop_handle(pid);
+            Json j = Json::obj(); j.set("closed", true); return ok(j);
+        });
+
+    reg("process_info", "Basic information about a process.",
+        schema({ {"pid", prop("integer", "")} }, {"pid"}),
+        [](const Json& a) {
+            uint32_t pid = (uint32_t)parse_u64(a.at("pid"));
+            HANDLE h = get_handle(pid);
+            Json j = Json::obj();
+            j.set("pid", (long long)pid);
+            j.set("opened", h != nullptr);
+            j.set("is_64bit", is_process_64(pid));
+            char path[MAX_PATH * 2] = {};
+            DWORD sz = sizeof(path) - 1;
+            if (h && QueryFullProcessImageNameA(h, 0, path, &sz)) j.set("path", path);
+            DWORD code = 0;
+            if (h && GetExitCodeProcess(h, &code)) j.set("exit_code", (long long)code);
+            auto mods = list_modules(pid);
+            j.set("module_count", (long long)mods.size());
+            return ok(j);
+        });
+
+    reg("process_threads", "List thread ids belonging to a process.",
+        schema({ {"pid", prop("integer", "")} }, {"pid"}),
+        [](const Json& a) {
+            uint32_t pid = (uint32_t)parse_u64(a.at("pid"));
+            Json arr = Json::arr();
+            for (auto& t : list_threads(pid)) arr.push((long long)t.first);
+            Json j = Json::obj();
+            j.set("tid_list", std::move(arr));
+            return ok(j);
+        });
+
+    reg("process_windows", "Enumerate top-level windows owned by a process.",
+        schema({ {"pid", prop("integer", "")} }, {"pid"}),
+        [](const Json& a) {
+            uint32_t pid = (uint32_t)parse_u64(a.at("pid"));
+            struct Ctx { uint32_t pid; Json* arr; } ctx{ pid, nullptr };
+            Json arr = Json::arr();
+            ctx.arr = &arr;
+            EnumWindows([](HWND hwnd, LPARAM lp) -> BOOL {
+                auto* c = (Ctx*)lp;
+                DWORD wpid = 0;
+                GetWindowThreadProcessId(hwnd, &wpid);
+                if (wpid == c->pid) {
+                    char title[256] = {}, cls[256] = {};
+                    GetWindowTextA(hwnd, title, sizeof(title) - 1);
+                    GetClassNameA(hwnd, cls, sizeof(cls) - 1);
+                    Json e = Json::obj();
+                    e.set("hwnd", u64_hex((uint64_t)(uintptr_t)hwnd));
+                    e.set("title", title);
+                    e.set("class", cls);
+                    e.set("visible", IsWindowVisible(hwnd) != FALSE);
+                    c->arr->push(std::move(e));
+                }
+                return TRUE;
+            }, (LPARAM)&ctx);
+            Json j = Json::obj();
+            j.set("count", (long long)arr.size());
+            j.set("windows", std::move(arr));
+            return ok(j);
+        });
+
+    // ---------------------------------------------------------------- modules
+    reg("module_list", "List loaded modules (name, base, size, path).",
+        schema({ {"pid", prop("integer", "")} }, {"pid"}),
+        [](const Json& a) {
+            uint32_t pid = (uint32_t)parse_u64(a.at("pid"));
+            Json arr = Json::arr();
+            for (auto& m : list_modules(pid)) {
+                Json e = Json::obj();
+                e.set("name", m.name);
+                e.set("base", u64_hex(m.base));
+                e.set("size", u64_hex(m.size));
+                e.set("end", u64_hex(m.base + m.size));
+                e.set("path", m.path);
+                arr.push(std::move(e));
+            }
+            Json j = Json::obj();
+            j.set("count", (long long)arr.size());
+            j.set("modules", std::move(arr));
+            return ok(j);
+        });
+
+    reg("module_base", "Resolve the base address of a module by name.",
+        schema({ {"pid", prop("integer", "")}, {"name", prop("string", "")} }, {"pid", "name"}),
+        [](const Json& a) {
+            uint32_t pid = (uint32_t)parse_u64(a.at("pid"));
+            auto m = find_module(pid, a.at("name").as_s());
+            if (!m) return fail("module not found");
+            Json j = Json::obj();
+            j.set("name", m->name);
+            j.set("base", u64_hex(m->base));
+            j.set("size", u64_hex(m->size));
+            return ok(j);
+        });
+
+    reg("module_resolve", "Resolve module+offset (or export) into an absolute address.",
+        schema({ {"pid", prop("integer", "")}, {"module", prop("string", "")},
+                  {"offset", prop("string", "hex or dec offset")},
+                  {"export", prop("string", "optional export name")} }, {"pid", "module"}),
+        [](const Json& a) {
+            uint32_t pid = (uint32_t)parse_u64(a.at("pid"));
+            std::string mod = a.at("module").as_s();
+            auto m = find_module(pid, mod);
+            if (!m) return fail("module not found");
+
+            uint64_t addr = m->base;
+            if (a.has("offset")) addr += parse_u64(a.at("offset"));
+            if (a.has("export")) {
+                HMODULE hm = LoadLibraryA(mod.c_str());
+                if (hm) {
+                    auto fn = (uint64_t)(uintptr_t)GetProcAddress(hm, a.at("export").as_s().c_str());
+                    if (fn) addr = m->base + (fn - (uint64_t)(uintptr_t)hm);
+                }
+            }
+            Json j = Json::obj();
+            j.set("address", u64_hex(addr));
+            return ok(j);
+        });
+
+    // ---------------------------------------------------------------- memory
+    reg("memory_read", "Read memory from a process (hex + optional typed decode).",
+        schema({ {"pid", prop("integer", "")}, {"address", prop("string", "")},
+                  {"size", prop("integer", "bytes to read (default 256)")},
+                  {"type", prop("string", "optional i32/i64/f32/f64/i8/i16")} },
+               {"pid", "address"}),
+        [](const Json& a) {
+            uint32_t pid = (uint32_t)parse_u64(a.at("pid"));
+            uint64_t addr = parse_u64(a.at("address"));
+            size_t n = a.has("size") ? (size_t)parse_u64(a.at("size")) : 256;
+            if (n == 0 || n > (1 << 20)) n = 256;
+            std::vector<uint8_t> buf(n);
+            if (!read_mem(pid, addr, buf.data(), n)) return fail("read failed");
+            Json j = Json::obj();
+            j.set("address", u64_hex(addr));
+            j.set("size", (long long)n);
+            j.set("hex", to_hex(buf.data(), n));
+            if (a.has("type")) {
+                std::string t = lower(a.at("type").as_s());
+                if (t == "i32" && n >= 4) { int32_t v; std::memcpy(&v, buf.data(), 4); j.set("i32", (long long)v); }
+                else if (t == "i64" && n >= 8) { int64_t v; std::memcpy(&v, buf.data(), 8); j.set("i64", (long long)v); }
+                else if (t == "i16" && n >= 2) { int16_t v; std::memcpy(&v, buf.data(), 2); j.set("i16", (long long)v); }
+                else if (t == "i8"  && n >= 1) { j.set("i8", (long long)(int8_t)buf[0]); }
+                else if (t == "f32" && n >= 4) { float v; std::memcpy(&v, buf.data(), 4); j.set("f32", (double)v); }
+                else if (t == "f64" && n >= 8) { double v; std::memcpy(&v, buf.data(), 8); j.set("f64", v); }
+            }
+            return ok(j);
+        });
+
+    reg("memory_write", "Write raw bytes (hex) into process memory.",
+        schema({ {"pid", prop("integer", "")}, {"address", prop("string", "")},
+                  {"data", prop("string", "hex bytes, e.g. '48 8B 05'")} }, {"pid", "address", "data"}),
+        [](const Json& a) {
+            uint32_t pid = (uint32_t)parse_u64(a.at("pid"));
+            uint64_t addr = parse_u64(a.at("address"));
+            auto bytes = parse_hex(a.at("data").as_s());
+            if (bytes.empty()) return fail("no bytes");
+            bool okw = write_mem(pid, addr, bytes.data(), bytes.size());
+            Json j = Json::obj();
+            j.set("written", okw);
+            j.set("bytes", (long long)bytes.size());
+            return okw ? ok(j) : fail("write failed");
+        });
+
+    reg("memory_alloc", "Allocate memory inside the target process.",
+        schema({ {"pid", prop("integer", "")}, {"size", prop("integer", "")},
+                  {"protect", prop("string", "rwx|rw|rx|r")} }, {"pid", "size"}),
+        [](const Json& a) {
+            uint32_t pid = (uint32_t)parse_u64(a.at("pid"));
+            size_t n = (size_t)parse_u64(a.at("size"));
+            DWORD p = a.has("protect") ? protect_from_string(a.at("protect").as_s()) : PAGE_READWRITE;
+            uint64_t addr = alloc_mem(pid, n, p);
+            if (!addr) return fail("alloc failed");
+            Json j = Json::obj(); j.set("address", u64_hex(addr)); return ok(j);
+        });
+
+    reg("memory_free", "Free memory previously allocated in the target.",
+        schema({ {"pid", prop("integer", "")}, {"address", prop("string", "")} }, {"pid", "address"}),
+        [](const Json& a) {
+            uint32_t pid = (uint32_t)parse_u64(a.at("pid"));
+            bool okf = free_mem(pid, parse_u64(a.at("address")));
+            Json j = Json::obj(); j.set("freed", okf); return ok(j);
+        });
+
+    reg("memory_protect", "Change page protection inside the target process.",
+        schema({ {"pid", prop("integer", "")}, {"address", prop("string", "")},
+                  {"size", prop("integer", "")}, {"protect", prop("string", "rwx|rw|rx|r")} },
+               {"pid", "address", "size", "protect"}),
+        [](const Json& a) {
+            uint32_t pid = (uint32_t)parse_u64(a.at("pid"));
+            uint32_t oldp = 0;
+            bool okp = protect_mem(pid, parse_u64(a.at("address")), (size_t)parse_u64(a.at("size")),
+                                   protect_from_string(a.at("protect").as_s()), &oldp);
+            Json j = Json::obj();
+            j.set("changed", okp);
+            j.set("old", protect_to_string(oldp));
+            return ok(j);
+        });
+
+    reg("memory_regions", "Dump virtual memory regions (VirtualQueryEx).",
+        schema({ {"pid", prop("integer", "")}, {"start", prop("string", "")}, {"end", prop("string", "")} },
+               {"pid"}),
+        [](const Json& a) {
+            uint32_t pid = (uint32_t)parse_u64(a.at("pid"));
+            uint64_t s = a.has("start") ? parse_u64(a.at("start")) : 0;
+            uint64_t e = a.has("end") ? parse_u64(a.at("end")) : ~0ull;
+            Json arr = Json::arr();
+            for (auto& m : query_regions(pid, s, e)) {
+                Json j = Json::obj();
+                j.set("base", u64_hex((uint64_t)(uintptr_t)m.BaseAddress));
+                j.set("size", u64_hex((uint64_t)m.RegionSize));
+                j.set("protect", protect_to_string(m.Protect));
+                j.set("state", (long long)m.State);
+                j.set("type", m.Type == MEM_IMAGE ? "image" : m.Type == MEM_MAPPED ? "mapped" : "private");
+                arr.push(std::move(j));
+            }
+            Json j = Json::obj();
+            j.set("count", (long long)arr.size());
+            j.set("regions", std::move(arr));
+            return ok(j);
+        });
+
+    reg("memory_dump", "Dump a region of target memory to a local file.",
+        schema({ {"pid", prop("integer", "")}, {"address", prop("string", "")},
+                  {"size", prop("integer", "")}, {"path", prop("string", "")} },
+               {"pid", "address", "size", "path"}),
+        [](const Json& a) {
+            uint32_t pid = (uint32_t)parse_u64(a.at("pid"));
+            uint64_t addr = parse_u64(a.at("address"));
+            size_t n = (size_t)parse_u64(a.at("size"));
+            std::string path = a.at("path").as_s();
+            std::vector<uint8_t> buf(n);
+            if (!read_mem(pid, addr, buf.data(), n)) return fail("read failed");
+            std::ofstream f(path, std::ios::binary);
+            if (!f) return fail("cannot open output file");
+            f.write((const char*)buf.data(), (std::streamsize)n);
+            Json j = Json::obj();
+            j.set("path", path);
+            j.set("bytes", (long long)n);
+            return ok(j);
+        });
+
+    reg("pointer_read", "Follow a multi-level pointer chain (module/address + offsets).",
+        schema({ {"pid", prop("integer", "")}, {"module", prop("string", "base module (or use base)")},
+                  {"base", prop("string", "absolute base address (alternative to module)")},
+                  {"offsets", prop("array", "list of offsets applied in order")} }, {"pid"}),
+        [](const Json& a) {
+            uint32_t pid = (uint32_t)parse_u64(a.at("pid"));
+            uint64_t cur = 0;
+            if (a.has("module")) {
+                auto m = find_module(pid, a.at("module").as_s());
+                if (!m) return fail("module not found");
+                cur = m->base;
+            } else if (a.has("base")) {
+                cur = parse_u64(a.at("base"));
+            } else return fail("module or base required");
+
+            size_t ptr = is_process_64(pid) ? 8 : 4;
+            if (a.has("offsets")) {
+                for (auto& off : a.at("offsets").a) {
+                    cur += parse_u64(off);
+                    uint64_t next = 0;
+                    if (!read_mem(pid, cur, &next, ptr)) { Json j = Json::obj(); j.set("error", "read failed"); j.set("address", u64_hex(cur)); return ok(j); }
+                    cur = next;
+                }
+            }
+            Json j = Json::obj();
+            j.set("address", u64_hex(cur));
+            return ok(j);
+        });
+
+    // ---------------------------------------------------------------- scanner
+    reg("scan_value", "First value scan across the target's memory.",
+        schema({ {"pid", prop("integer", "")}, {"type", prop("string", "i8|i16|i32|i64|f32|f64|str")},
+                  {"value", prop("string", "")},
+                  {"writable_only", prop("boolean", "default true")},
+                  {"max_hits", prop("integer", "default 1000000")} }, {"pid", "type", "value"}),
+        [](const Json& a) {
+            uint32_t pid = (uint32_t)parse_u64(a.at("pid"));
+            bool wo = a.has("writable_only") ? a.at("writable_only").as_b() : true;
+            size_t maxh = a.has("max_hits") ? (size_t)parse_u64(a.at("max_hits")) : 1000000;
+            size_t n = scan_first(pid, stype(a.at("type").as_s()), a.at("value").as_s(), wo, maxh);
+            Json j = Json::obj();
+            j.set("hits", (long long)n);
+            return ok(j);
+        });
+
+    reg("scan_aob", "Array-of-bytes signature scan (supports ?? wildcards).",
+        schema({ {"pid", prop("integer", "")}, {"pattern", prop("string", "e.g. '48 8B ?? ? ? C3'")},
+                  {"writable_only", prop("boolean", "default false")},
+                  {"max_hits", prop("integer", "")} }, {"pid", "pattern"}),
+        [](const Json& a) {
+            uint32_t pid = (uint32_t)parse_u64(a.at("pid"));
+            bool wo = a.has("writable_only") ? a.at("writable_only").as_b() : false;
+            size_t maxh = a.has("max_hits") ? (size_t)parse_u64(a.at("max_hits")) : 1000;
+            size_t n = scan_aob(pid, a.at("pattern").as_s(), wo, maxh);
+            Json j = Json::obj(); j.set("hits", (long long)n); return ok(j);
+        });
+
+    reg("scan_refine", "Next-scan: filter previous results (exact/changed/unchanged/increased/decreased).",
+        schema({ {"pid", prop("integer", "")}, {"mode", prop("string", "")}, {"value", prop("string", "")} },
+               {"pid", "mode"}),
+        [](const Json& a) {
+            uint32_t pid = (uint32_t)parse_u64(a.at("pid"));
+            size_t n = scan_refine(pid, a.at("mode").as_s(),
+                                   a.has("value") ? a.at("value").as_s() : "");
+            Json j = Json::obj(); j.set("hits", (long long)n); return ok(j);
+        });
+
+    reg("scan_results", "Return current scan results (paginated, with live values).",
+        schema({ {"pid", prop("integer", "")}, {"offset", prop("integer", "")},
+                  {"limit", prop("integer", "default 100")}, {"type", prop("string", "")} }),
+        [](const Json& a) {
+            uint32_t pid = a.has("pid") ? (uint32_t)parse_u64(a.at("pid")) : 0;
+            size_t off = a.has("offset") ? (size_t)parse_u64(a.at("offset")) : 0;
+            size_t lim = a.has("limit") ? (size_t)parse_u64(a.at("limit")) : 100;
+            return ok(scan_results(off, lim, pid, a.has("type") ? a.at("type").as_s() : ""));
+        });
+
+    reg("scan_reset", "Clear the current scan session.", schema(Json::obj()),
+        [](const Json&) { scan_reset(); Json j = Json::obj(); j.set("reset", true); return ok(j); });
+
+    reg("pointer_scan", "Reverse pointer scan: find addresses pointing near a target.",
+        schema({ {"pid", prop("integer", "")}, {"address", prop("string", "")},
+                  {"max_offset", prop("integer", "default 0x1000")},
+                  {"max_results", prop("integer", "default 500")} }, {"pid", "address"}),
+        [](const Json& a) {
+            uint32_t pid = (uint32_t)parse_u64(a.at("pid"));
+            size_t mo = a.has("max_offset") ? (size_t)parse_u64(a.at("max_offset")) : 0x1000;
+            size_t mr = a.has("max_results") ? (size_t)parse_u64(a.at("max_results")) : 500;
+            return ok(pointer_scan(pid, parse_u64(a.at("address")), mo, mr));
+        });
+
+    // ---------------------------------------------------------------- patching
+    reg("patch_bytes", "Patch code/data with raw bytes (auto-lifts page protection).",
+        schema({ {"pid", prop("integer", "")}, {"address", prop("string", "")},
+                  {"data", prop("string", "hex")} }, {"pid", "address", "data"}),
+        [](const Json& a) {
+            uint32_t pid = (uint32_t)parse_u64(a.at("pid"));
+            auto bytes = parse_hex(a.at("data").as_s());
+            bool okw = write_mem(pid, parse_u64(a.at("address")), bytes.data(), bytes.size());
+            Json j = Json::obj(); j.set("patched", okw); return ok(j);
+        });
+
+    reg("patch_nop", "Write NOP (0x90) sled over a range — disables instructions.",
+        schema({ {"pid", prop("integer", "")}, {"address", prop("string", "")},
+                  {"size", prop("integer", "")} }, {"pid", "address", "size"}),
+        [](const Json& a) {
+            uint32_t pid = (uint32_t)parse_u64(a.at("pid"));
+            size_t n = (size_t)parse_u64(a.at("size"));
+            std::vector<uint8_t> nops(n, 0x90);
+            bool okw = write_mem(pid, parse_u64(a.at("address")), nops.data(), nops.size());
+            Json j = Json::obj(); j.set("noped", (long long)n); j.set("ok", okw); return ok(j);
+        });
+
+    reg("patch_string", "Overwrite memory with an ASCII/UTF-8 string.",
+        schema({ {"pid", prop("integer", "")}, {"address", prop("string", "")},
+                  {"text", prop("string", "")}, {"wide", prop("boolean", "")} }, {"pid", "address", "text"}),
+        [](const Json& a) {
+            uint32_t pid = (uint32_t)parse_u64(a.at("pid"));
+            std::string t = a.at("text").as_s();
+            std::vector<uint8_t> bytes;
+            if (a.has("wide") && a.at("wide").as_b()) {
+                for (char c : t) { bytes.push_back((uint8_t)c); bytes.push_back(0); }
+                bytes.push_back(0); bytes.push_back(0);
+            } else {
+                bytes.assign(t.begin(), t.end());
+            }
+            bool okw = write_mem(pid, parse_u64(a.at("address")), bytes.data(), bytes.size());
+            Json j = Json::obj(); j.set("ok", okw); return ok(j);
+        });
+
+    // ---------------------------------------------------------------- injection
+    reg("inject_dll", "Inject a DLL using loadlibrary|nt|hijack|apc|wndhook|manualmap.",
+        schema({ {"pid", prop("integer", "")}, {"path", prop("string", "absolute dll path")},
+                  {"method", prop("string", "default loadlibrary")} }, {"pid", "path"}),
+        [](const Json& a) {
+            uint32_t pid = (uint32_t)parse_u64(a.at("pid"));
+            std::string method = a.has("method") ? a.at("method").as_s() : "loadlibrary";
+            auto r = inject_dll(pid, a.at("path").as_s(), method);
+            Json j = Json::obj();
+            j.set("ok", r.ok);
+            j.set("result", u64_hex(r.value));
+            j.set("method", method);
+            if (!r.error.empty()) j.set("error", r.error);
+            return r.ok ? ok(j) : fail(r.error);
+        });
+
+    reg("eject_dll", "Unload a DLL from the target via remote FreeLibrary.",
+        schema({ {"pid", prop("integer", "")}, {"address", prop("string", "module base")},
+                  {"module", prop("string", "or module name")} }, {"pid"}),
+        [](const Json& a) {
+            uint32_t pid = (uint32_t)parse_u64(a.at("pid"));
+            uint64_t base = a.has("address") ? parse_u64(a.at("address")) : 0;
+            if (!base && a.has("module")) {
+                auto m = find_module(pid, a.at("module").as_s());
+                if (!m) return fail("module not found");
+                base = m->base;
+            }
+            std::string err;
+            bool okx = eject_dll(pid, base, err);
+            return okx ? ok(Json::obj()) : fail(err);
+        });
+
+    reg("inject_shellcode", "Write executable shellcode into the target and run it.",
+        schema({ {"pid", prop("integer", "")}, {"code", prop("string", "hex shellcode")} },
+               {"pid", "code"}),
+        [](const Json& a) {
+            uint32_t pid = (uint32_t)parse_u64(a.at("pid"));
+            auto r = inject_shellcode(pid, parse_hex(a.at("code").as_s()));
+            Json j = Json::obj();
+            j.set("ok", r.ok);
+            j.set("address", u64_hex(r.value));
+            if (!r.error.empty()) j.set("error", r.error);
+            return r.ok ? ok(j) : fail(r.error);
+        });
+
+    reg("execute_remote", "Call a function address inside the target with one argument.",
+        schema({ {"pid", prop("integer", "")}, {"function", prop("string", "absolute address")},
+                  {"arg", prop("string", "argument (default 0)")} }, {"pid", "function"}),
+        [](const Json& a) {
+            uint32_t pid = (uint32_t)parse_u64(a.at("pid"));
+            uint64_t fn = parse_u64(a.at("function"));
+            uint64_t arg = a.has("arg") ? parse_u64(a.at("arg")) : 0;
+            auto r = run_remote(pid, fn, arg);
+            Json j = Json::obj();
+            j.set("ok", r.ok);
+            j.set("return", u64_hex(r.value));
+            if (!r.error.empty()) j.set("error", r.error);
+            return r.ok ? ok(j) : fail(r.error);
+        });
+
+    reg("call_export", "Call an exported function (by name) inside the target.",
+        schema({ {"pid", prop("integer", "")}, {"module", prop("string", "")},
+                  {"export", prop("string", "")}, {"arg", prop("string", "")} },
+               {"pid", "module", "export"}),
+        [](const Json& a) {
+            uint32_t pid = (uint32_t)parse_u64(a.at("pid"));
+            std::string mod = a.at("module").as_s();
+            auto tm = find_module(pid, mod);
+            if (!tm) return fail("module not loaded in target");
+            HMODULE hm = LoadLibraryA(mod.c_str());
+            if (!hm) return fail("cannot load module locally");
+            auto fn = (uint64_t)(uintptr_t)GetProcAddress(hm, a.at("export").as_s().c_str());
+            if (!fn) return fail("export not found");
+            uint64_t remote_fn = tm->base + (fn - (uint64_t)(uintptr_t)hm);
+            uint64_t arg = a.has("arg") ? parse_u64(a.at("arg")) : 0;
+            auto r = run_remote(pid, remote_fn, arg);
+            Json j = Json::obj();
+            j.set("ok", r.ok);
+            j.set("remote_function", u64_hex(remote_fn));
+            j.set("return", u64_hex(r.value));
+            return r.ok ? ok(j) : fail(r.error);
+        });
+
+    // ---------------------------------------------------------------- anticheat
+    reg("ac_detect", "Detect anti-cheat modules/drivers associated with a process.",
+        schema({ {"pid", prop("integer", "")} }, {"pid"}),
+        [](const Json& a) { return ok(ac_detect((uint32_t)parse_u64(a.at("pid")))); });
+
+    reg("ac_kernel_drivers", "List kernel drivers and flag known anti-cheat ones.",
+        schema(Json::obj()),
+        [](const Json&) { return ok(ac_kernel_drivers()); });
+
+    reg("ac_check_debug", "Check debugger presence for self and target process.",
+        schema({ {"pid", prop("integer", "")} }, {"pid"}),
+        [](const Json& a) { return ok(ac_check_debug((uint32_t)parse_u64(a.at("pid")))); });
+
+    reg("ac_list_handles", "List handles other processes hold to the target.",
+        schema({ {"pid", prop("integer", "")} }, {"pid"}),
+        [](const Json& a) { return ok(ac_list_handles((uint32_t)parse_u64(a.at("pid")))); });
+
+    reg("ac_close_handles", "Strip (close) foreign handles pointing at the target process.",
+        schema({ {"pid", prop("integer", "")} }, {"pid"}),
+        [](const Json& a) {
+            size_t n = ac_close_handles((uint32_t)parse_u64(a.at("pid")));
+            Json j = Json::obj(); j.set("closed", (long long)n); return ok(j);
+        });
+
+    // ---------------------------------------------------------------- network
+    reg("net_connections", "List TCP/UDP connections with owning pid.",
+        schema({ {"pid", prop("integer", "filter by pid (-1 = all)")} }),
+        [](const Json& a) {
+            int pf = a.has("pid") ? (int)parse_u64(a.at("pid")) : -1;
+            return ok(net_connections(pf));
+        });
+
+    reg("net_resolve", "Resolve a hostname to IP addresses.",
+        schema({ {"host", prop("string", "")} }, {"host"}),
+        [](const Json& a) { return ok(net_resolve(a.at("host").as_s())); });
+
+    reg("net_send_udp", "Send a UDP datagram (payload as hex).",
+        schema({ {"host", prop("string", "")}, {"port", prop("integer", "")},
+                  {"data", prop("string", "hex payload")} }, {"host", "port", "data"}),
+        [](const Json& a) {
+            std::string err;
+            bool okx = net_send_udp(a.at("host").as_s(), (uint16_t)parse_u64(a.at("port")),
+                                    parse_hex(a.at("data").as_s()), err);
+            return okx ? ok(Json::obj()) : fail(err);
+        });
+
+    reg("net_send_tcp", "Send a TCP payload to host:port.",
+        schema({ {"host", prop("string", "")}, {"port", prop("integer", "")},
+                  {"data", prop("string", "hex payload")} }, {"host", "port", "data"}),
+        [](const Json& a) {
+            std::string err;
+            bool okx = net_send_tcp(a.at("host").as_s(), (uint16_t)parse_u64(a.at("port")),
+                                    parse_hex(a.at("data").as_s()), err);
+            return okx ? ok(Json::obj()) : fail(err);
+        });
+
+    reg("net_capture", "Capture raw IP packets (SIO_RCVALL — needs admin).",
+        schema({ {"filter_ip", prop("string", "only packets to/from this IP")},
+                  {"max_packets", prop("integer", "")}, {"timeout_ms", prop("integer", "")} }),
+        [](const Json& a) {
+            std::string f = a.has("filter_ip") ? a.at("filter_ip").as_s() : "";
+            int mp = a.has("max_packets") ? (int)parse_u64(a.at("max_packets")) : 20;
+            int to = a.has("timeout_ms") ? (int)parse_u64(a.at("timeout_ms")) : 1500;
+            return ok(net_capture(f, mp, to));
+        });
+
+    reg("net_send_raw_ip", "Send a raw IP packet (IP_HDRINCL, spoof-capable, admin).",
+        schema({ {"dst_ip", prop("string", "numeric IPv4 bytes, e.g. 0x0100007F")},
+                  {"packet", prop("string", "full hex IP packet")} }, {"dst_ip", "packet"}),
+        [](const Json& a) {
+            uint32_t dst = (uint32_t)parse_u64(a.at("dst_ip"));
+            return ok(net_send_raw_ip(dst, parse_hex(a.at("packet").as_s())));
+        });
+
+    // ---------------------------------------------------------------- runtime
+    reg("freeze_add", "Freeze a memory value (rewritten continuously in background).",
+        schema({ {"pid", prop("integer", "")}, {"address", prop("string", "")},
+                  {"data", prop("string", "hex bytes")} }, {"pid", "address", "data"}),
+        [](const Json& a) {
+            return ok(freeze_add((uint32_t)parse_u64(a.at("pid")), parse_u64(a.at("address")),
+                                 parse_hex(a.at("data").as_s())));
+        });
+
+    reg("freeze_remove", "Remove a freeze by id.",
+        schema({ {"id", prop("integer", "")} }, {"id"}),
+        [](const Json& a) { return ok(freeze_remove((int)parse_u64(a.at("id")))); });
+
+    reg("freeze_list", "List active freezes.", schema(Json::obj()),
+        [](const Json&) { return ok(freeze_list()); });
+
+    reg("watch_add", "Watch a memory value and detect changes on poll.",
+        schema({ {"pid", prop("integer", "")}, {"address", prop("string", "")},
+                  {"width", prop("integer", "default 4")}, {"type", prop("string", "")} },
+               {"pid", "address"}),
+        [](const Json& a) {
+            size_t w = a.has("width") ? (size_t)parse_u64(a.at("width")) : 4;
+            return ok(watch_add((uint32_t)parse_u64(a.at("pid")), parse_u64(a.at("address")),
+                                w, a.has("type") ? a.at("type").as_s() : ""));
+        });
+
+    reg("watch_poll", "Poll a watch: returns value and whether it changed.",
+        schema({ {"id", prop("integer", "")} }, {"id"}),
+        [](const Json& a) { return ok(watch_poll((int)parse_u64(a.at("id")))); });
+
+    reg("watch_remove", "Remove a watch by id.",
+        schema({ {"id", prop("integer", "")} }, {"id"}),
+        [](const Json& a) { return ok(watch_remove((int)parse_u64(a.at("id")))); });
+
+    reg("iat_hook", "Redirect an imported function via IAT hooking (no code relocation).",
+        schema({ {"pid", prop("integer", "")}, {"module", prop("string", "module owning the import")},
+                  {"import", prop("string", "imported function name")},
+                  {"stub", prop("string", "hex of the stub to redirect to")} },
+               {"pid", "module", "import", "stub"}),
+        [](const Json& a) {
+            return ok(iat_hook((uint32_t)parse_u64(a.at("pid")), a.at("module").as_s(),
+                               a.at("import").as_s(), parse_hex(a.at("stub").as_s())));
+        });
+
+    reg("speedhack", "Install a time-scaling IAT hook (qpc|tick|tick64|all).",
+        schema({ {"pid", prop("integer", "")}, {"scale", prop("number", "e.g. 2.0 = 2x speed")},
+                  {"which", prop("string", "qpc|tick|tick64|all")} }, {"pid", "scale"}),
+        [](const Json& a) {
+            double sc = a.has("scale") ? a.at("scale").as_d() : 1.0;
+            std::string w = a.has("which") ? a.at("which").as_s() : "qpc";
+            return ok(speedhack((uint32_t)parse_u64(a.at("pid")), sc, w));
+        });
+}
+
+} // namespace cmcp
+
+```
