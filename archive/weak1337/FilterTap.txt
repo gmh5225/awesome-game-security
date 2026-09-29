@@ -1,0 +1,719 @@
+Project Path: arc_weak1337_FilterTap_rys2h0s9
+
+Source Tree:
+
+```txt
+arc_weak1337_FilterTap_rys2h0s9
+├── CMakeLists.txt
+├── CMakePresets.json
+├── FindWdk.cmake
+├── README.md
+├── scripts
+│   └── sign.ps1
+└── src
+    └── Driver.cpp
+
+```
+
+`CMakeLists.txt`:
+
+```txt
+cmake_minimum_required(VERSION 3.20)
+
+project(NetworkFilter LANGUAGES C CXX)
+
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}")
+set(WDK_WINVER "0x0A00" CACHE STRING "" FORCE)
+find_package(WDK REQUIRED)
+
+wdk_add_driver(NetworkFilter
+    src/Driver.cpp
+)
+
+target_include_directories(NetworkFilter PRIVATE src)
+target_link_libraries(NetworkFilter WDK::CNG WDK::FWPKCLNT WDK::NDIS)
+
+find_program(SIGNTOOL_EXE
+    NAMES signtool
+    PATHS
+        "${WDK_ROOT}/bin/${WDK_VERSION}/x64"
+        "${WDK_ROOT}/bin/x64"
+    NO_DEFAULT_PATH
+)
+
+if(NOT SIGNTOOL_EXE)
+    message(WARNING "signtool not found under ${WDK_ROOT}/bin — driver will not be test-signed")
+else()
+    message(STATUS "signtool: ${SIGNTOOL_EXE}")
+    add_custom_command(TARGET NetworkFilter POST_BUILD
+        COMMAND powershell.exe -NoProfile -ExecutionPolicy Bypass
+            -File "${CMAKE_CURRENT_SOURCE_DIR}/scripts/sign.ps1"
+            -Signtool "${SIGNTOOL_EXE}"
+            -File     "$<TARGET_FILE:NetworkFilter>"
+            -PfxPath  "${CMAKE_CURRENT_SOURCE_DIR}/NetworkFilter.pfx"
+        COMMENT "Test-signing NetworkFilter.sys"
+        VERBATIM
+    )
+endif()
+
+```
+
+`CMakePresets.json`:
+
+```json
+{
+  "version": 3,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 20,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "x64-debug",
+      "displayName": "x64 Debug",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/${presetName}",
+      "architecture": {
+        "value": "x64",
+        "strategy": "external"
+      },
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_C_COMPILER": "cl.exe",
+        "CMAKE_CXX_COMPILER": "cl.exe"
+      },
+      "vendor": {
+        "microsoft.com/VisualStudioSettings/CMake/1.0": {
+          "hostOS": [ "Windows" ]
+        }
+      }
+    },
+    {
+      "name": "x64-release",
+      "displayName": "x64 Release",
+      "inherits": "x64-debug",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
+      }
+    }
+  ],
+  "buildPresets": [
+    { "name": "x64-debug",   "configurePreset": "x64-debug" },
+    { "name": "x64-release", "configurePreset": "x64-release" }
+  ]
+}
+
+```
+
+`FindWdk.cmake`:
+
+```cmake
+# Redistribution and use is allowed under the OSI-approved 3-clause BSD license.
+# Copyright (c) 2018 Sergey Podobry (sergey.podobry at gmail.com). All rights reserved.
+
+#.rst:
+# FindWDK
+# ----------
+#
+# This module searches for the installed Windows Development Kit (WDK) and
+# exposes commands for creating kernel drivers and kernel libraries.
+#
+# Output variables:
+# - `WDK_FOUND` -- if false, do not try to use WDK
+# - `WDK_ROOT` -- where WDK is installed
+# - `WDK_VERSION` -- the version of the selected WDK
+# - `WDK_WINVER` -- the WINVER used for kernel drivers and libraries
+#        (default value is `0x0601` and can be changed per target or globally)
+# - `WDK_NTDDI_VERSION` -- the NTDDI_VERSION used for kernel drivers and libraries,
+#                          if not set, the value will be automatically calculated by WINVER
+#        (default value is left blank and can be changed per target or globally)
+#
+# Example usage:
+#
+#   find_package(WDK REQUIRED)
+#
+#   wdk_add_library(KmdfCppLib STATIC KMDF 1.15
+#       KmdfCppLib.h
+#       KmdfCppLib.cpp
+#       )
+#   target_include_directories(KmdfCppLib INTERFACE .)
+#
+#   wdk_add_driver(KmdfCppDriver KMDF 1.15
+#       Main.cpp
+#       )
+#   target_link_libraries(KmdfCppDriver KmdfCppLib)
+#
+
+if(DEFINED ENV{WDKContentRoot})
+    file(GLOB WDK_NTDDK_FILES
+        "$ENV{WDKContentRoot}/Include/*/km/ntddk.h" # WDK 10
+        "$ENV{WDKContentRoot}/Include/km/ntddk.h" # WDK 8.0, 8.1
+    )
+else()
+    file(GLOB WDK_NTDDK_FILES
+        "C:/Program Files*/Windows Kits/*/Include/*/km/ntddk.h" # WDK 10
+        "C:/Program Files*/Windows Kits/*/Include/km/ntddk.h" # WDK 8.0, 8.1
+    )
+endif()
+
+if(WDK_NTDDK_FILES)
+    if (NOT CMAKE_VERSION VERSION_LESS 3.18.0)
+        list(SORT WDK_NTDDK_FILES COMPARE NATURAL) # sort to use the latest available WDK
+    endif()
+    list(GET WDK_NTDDK_FILES -1 WDK_LATEST_NTDDK_FILE)
+endif()
+
+include(FindPackageHandleStandardArgs)
+find_package_handle_standard_args(WDK REQUIRED_VARS WDK_LATEST_NTDDK_FILE)
+
+if(NOT WDK_LATEST_NTDDK_FILE)
+    return()
+endif()
+
+get_filename_component(WDK_ROOT ${WDK_LATEST_NTDDK_FILE} DIRECTORY)
+get_filename_component(WDK_ROOT ${WDK_ROOT} DIRECTORY)
+get_filename_component(WDK_VERSION ${WDK_ROOT} NAME)
+get_filename_component(WDK_ROOT ${WDK_ROOT} DIRECTORY)
+if (NOT WDK_ROOT MATCHES ".*/[0-9][0-9.]*$") # WDK 10 has a deeper nesting level
+    get_filename_component(WDK_ROOT ${WDK_ROOT} DIRECTORY) # go up once more
+    set(WDK_LIB_VERSION "${WDK_VERSION}")
+    set(WDK_INC_VERSION "${WDK_VERSION}")
+else() # WDK 8.0, 8.1
+    set(WDK_INC_VERSION "")
+    foreach(VERSION winv6.3 win8 win7)
+        if (EXISTS "${WDK_ROOT}/Lib/${VERSION}/")
+            set(WDK_LIB_VERSION "${VERSION}")
+            break()
+        endif()
+    endforeach()
+    set(WDK_VERSION "${WDK_LIB_VERSION}")
+endif()
+
+if(NOT WDK_FIND_QUIETLY)
+    message(STATUS "WDK_ROOT: " ${WDK_ROOT})
+    message(STATUS "WDK_VERSION: " ${WDK_VERSION})
+endif()
+
+set(WDK_WINVER "0x0601" CACHE STRING "Default WINVER for WDK targets")
+set(WDK_NTDDI_VERSION "" CACHE STRING "Specified NTDDI_VERSION for WDK targets if needed")
+
+set(WDK_ADDITIONAL_FLAGS_FILE "${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/wdkflags.h")
+file(WRITE ${WDK_ADDITIONAL_FLAGS_FILE} "#pragma runtime_checks(\"suc\", off)")
+
+set(WDK_COMPILE_FLAGS
+    "/Zp8" # set struct alignment
+    "/GF"  # enable string pooling
+    "/GR-" # disable RTTI
+    "/Gz" # __stdcall by default
+    "/kernel"  # create kernel mode binary
+    "/FIwarning.h" # disable warnings in WDK headers
+    "/FI${WDK_ADDITIONAL_FLAGS_FILE}" # include file to disable RTC
+	"/Oi" # enable intrinsic functions so that you can use functions like _disable or _enable
+    )
+
+set(WDK_COMPILE_DEFINITIONS "WINNT=1")
+set(WDK_COMPILE_DEFINITIONS_DEBUG "MSC_NOOPT;DEPRECATE_DDK_FUNCTIONS=1;DBG=1")
+
+if(CMAKE_SIZEOF_VOID_P EQUAL 4)
+    list(APPEND WDK_COMPILE_DEFINITIONS "_X86_=1;i386=1;STD_CALL")
+    set(WDK_PLATFORM "x86")
+elseif(CMAKE_SIZEOF_VOID_P EQUAL 8 AND CMAKE_CXX_COMPILER_ARCHITECTURE_ID STREQUAL "ARM64")
+    list(APPEND WDK_COMPILE_DEFINITIONS "_ARM64_;ARM64;_USE_DECLSPECS_FOR_SAL=1;STD_CALL")
+    set(WDK_PLATFORM "arm64")
+elseif(CMAKE_SIZEOF_VOID_P EQUAL 8)
+    list(APPEND WDK_COMPILE_DEFINITIONS "_AMD64_;AMD64")
+    set(WDK_PLATFORM "x64")
+else()
+    message(FATAL_ERROR "Unsupported architecture")
+endif()
+
+string(CONCAT WDK_LINK_FLAGS
+    "/MANIFEST:NO " #
+    "/DRIVER " #
+    "/OPT:REF " #
+    "/INCREMENTAL:NO " #
+    "/OPT:ICF " #
+    "/SUBSYSTEM:NATIVE " #
+    "/MERGE:_TEXT=.text;_PAGE=PAGE " #
+    "/NODEFAULTLIB " # do not link default CRT
+    "/SECTION:INIT,d " #
+    "/VERSION:10.0 " #
+    )
+
+# Generate imported targets for WDK lib files
+file(GLOB WDK_LIBRARIES "${WDK_ROOT}/Lib/${WDK_LIB_VERSION}/km/${WDK_PLATFORM}/*.lib")
+foreach(LIBRARY IN LISTS WDK_LIBRARIES)
+    get_filename_component(LIBRARY_NAME ${LIBRARY} NAME_WE)
+    string(TOUPPER ${LIBRARY_NAME} LIBRARY_NAME)
+    add_library(WDK::${LIBRARY_NAME} INTERFACE IMPORTED)
+    set_property(TARGET WDK::${LIBRARY_NAME} PROPERTY INTERFACE_LINK_LIBRARIES ${LIBRARY})
+endforeach(LIBRARY)
+unset(WDK_LIBRARIES)
+
+function(wdk_add_driver _target)
+    cmake_parse_arguments(WDK "" "KMDF;WINVER;NTDDI_VERSION" "" ${ARGN})
+
+    add_executable(${_target} ${WDK_UNPARSED_ARGUMENTS})
+
+    set_target_properties(${_target} PROPERTIES SUFFIX ".sys")
+    set_target_properties(${_target} PROPERTIES COMPILE_OPTIONS "${WDK_COMPILE_FLAGS}")
+    set_target_properties(${_target} PROPERTIES COMPILE_DEFINITIONS
+        "${WDK_COMPILE_DEFINITIONS};$<$<CONFIG:Debug>:${WDK_COMPILE_DEFINITIONS_DEBUG}>;_WIN32_WINNT=${WDK_WINVER}"
+        )
+    set_target_properties(${_target} PROPERTIES LINK_FLAGS "${WDK_LINK_FLAGS}")
+    if(WDK_NTDDI_VERSION)
+        target_compile_definitions(${_target} PRIVATE NTDDI_VERSION=${WDK_NTDDI_VERSION})
+    endif()
+
+    target_include_directories(${_target} SYSTEM PRIVATE
+        "${WDK_ROOT}/Include/${WDK_INC_VERSION}/shared"
+        "${WDK_ROOT}/Include/${WDK_INC_VERSION}/km"
+        "${WDK_ROOT}/Include/${WDK_INC_VERSION}/km/crt"
+        )
+
+    target_link_libraries(${_target} WDK::NTOSKRNL WDK::HAL WDK::WMILIB)
+
+    if(WDK_WINVER LESS "0x0602") # If WINVER < 0x0602 (Windows 7 or lower)
+        target_link_libraries(${_target} WDK::BUFFEROVERFLOWK)
+    else() # Windows 8 and above
+        target_link_libraries(${_target} WDK::BUFFEROVERFLOWFASTFAILK)
+    endif()
+
+    if(CMAKE_CXX_COMPILER_ARCHITECTURE_ID STREQUAL "ARM64")
+        target_link_libraries(${_target} "arm64rt.lib")
+    endif()
+
+    if(CMAKE_SIZEOF_VOID_P EQUAL 4)
+        target_link_libraries(${_target} WDK::MEMCMP)
+    endif()
+
+    if(DEFINED WDK_KMDF)
+        target_include_directories(${_target} SYSTEM PRIVATE "${WDK_ROOT}/Include/wdf/kmdf/${WDK_KMDF}")
+        target_link_libraries(${_target}
+            "${WDK_ROOT}/Lib/wdf/kmdf/${WDK_PLATFORM}/${WDK_KMDF}/WdfDriverEntry.lib"
+            "${WDK_ROOT}/Lib/wdf/kmdf/${WDK_PLATFORM}/${WDK_KMDF}/WdfLdr.lib"
+            )
+
+        if(CMAKE_SIZEOF_VOID_P EQUAL 4)
+            set_property(TARGET ${_target} APPEND_STRING PROPERTY LINK_FLAGS "/ENTRY:FxDriverEntry@8")
+        elseif(CMAKE_SIZEOF_VOID_P EQUAL 8)
+            set_property(TARGET ${_target} APPEND_STRING PROPERTY LINK_FLAGS "/ENTRY:FxDriverEntry")
+        endif()
+    else()
+        if(CMAKE_SIZEOF_VOID_P EQUAL 4)
+            set_property(TARGET ${_target} APPEND_STRING PROPERTY LINK_FLAGS "/ENTRY:GsDriverEntry@8")
+        elseif(CMAKE_SIZEOF_VOID_P EQUAL 8)
+            set_property(TARGET ${_target} APPEND_STRING PROPERTY LINK_FLAGS "/ENTRY:GsDriverEntry")
+        endif()
+    endif()
+endfunction()
+
+function(wdk_add_library _target)
+    cmake_parse_arguments(WDK "" "KMDF;WINVER;NTDDI_VERSION" "" ${ARGN})
+
+    add_library(${_target} ${WDK_UNPARSED_ARGUMENTS})
+
+    set_target_properties(${_target} PROPERTIES COMPILE_OPTIONS "${WDK_COMPILE_FLAGS}")
+    set_target_properties(${_target} PROPERTIES COMPILE_DEFINITIONS
+        "${WDK_COMPILE_DEFINITIONS};$<$<CONFIG:Debug>:${WDK_COMPILE_DEFINITIONS_DEBUG};>_WIN32_WINNT=${WDK_WINVER}"
+        )
+    if(WDK_NTDDI_VERSION)
+        target_compile_definitions(${_target} PRIVATE NTDDI_VERSION=${WDK_NTDDI_VERSION})
+    endif()
+
+    target_include_directories(${_target} SYSTEM PRIVATE
+        "${WDK_ROOT}/Include/${WDK_INC_VERSION}/shared"
+        "${WDK_ROOT}/Include/${WDK_INC_VERSION}/km"
+        "${WDK_ROOT}/Include/${WDK_INC_VERSION}/km/crt"
+        )
+
+    if(DEFINED WDK_KMDF)
+        target_include_directories(${_target} SYSTEM PRIVATE "${WDK_ROOT}/Include/wdf/kmdf/${WDK_KMDF}")
+    endif()
+endfunction()
+```
+
+`README.md`:
+
+```md
+# FilterTap
+
+A lightweight WFP (Windows Filtering Platform) kernel driver that captures network metadata at L2: local interface MAC, gateway MAC, and DNS queries.
+
+## What it does
+
+The driver registers two WFP callout filters at the Ethernet frame layer (`FWPM_LAYER_INBOUND_MAC_FRAME_ETHERNET` and outbound), receiving every L2 frame. It extracts:
+
+- **Local NIC MAC** — from the source MAC of the first outbound IPv4 frame to a public address
+- **Local NIC IP** — from the same packet's IPv4 source field
+- **Gateway MAC** — from the destination MAC of that frame (the L2 next hop for public traffic)
+- **DNS queries** — hostname lookups (A/AAAA/MX/etc.), logged as they pass
+
+Once local + gateway MAC are captured, it prints both and stops inspecting.
+
+## Output
+
+```
+FilterTap LOCAL   AA:BB:CC:DD:EE:FF  192.168.1.100
+FilterTap ROUTER  11:22:33:44:55:66
+FilterTap DNS Q type=1 example.com
+FilterTap DNS Q type=1 google.com
+```
+
+Visible in DbgView (Capture Kernel enabled, filter `IHVDRIVER`).
+
+## How EAC uses this
+
+EAC installs filters identical to this driver to obtain a machine's hardware ID (HWID). Retrieving the MAC via WFP sidesteps user-mode API-level spoofing (IOCTL paths, `NsiGetAllParametersEx`) because it reads directly from frames traversing the network stack at kernel layer. The MAC is stable per NIC and difficult to forge without driver-level intervention.
+
+DNS visibility is a side effect of L2 inspection: DNS queries are visible in plaintext until encrypted (DoH/DoT), so a comprehensive frame tap sees all non-encrypted lookups.
+
+## Build
+
+```
+cmake --preset default
+cmake --build --preset default
+```
+
+Requires Windows Driver Kit (WDK 10.0.x). The CMake will test-sign the binary on first build using a self-signed cert.
+
+## Load
+
+Elevated, unsigned driver load (requires test-signing or a valid cert):
+
+```powershell
+# Enable test-signing mode (one-time)
+Bcdedit.exe /set testsigning on
+# Restart required
+
+# Load driver
+sc create FilterTap binPath= "C:\path\to\NetworkFilter.sys"
+sc start FilterTap
+
+# Generate traffic to trigger capture
+ping 8.8.8.8
+curl https://example.com
+
+# View output in DbgView
+```
+
+Unload:
+
+```powershell
+sc stop FilterTap
+sc delete FilterTap
+```
+
+## Security & Privacy
+
+This driver (and EAC's version) has full visibility into all network frames passing through your interface for the duration it's active. While this one only logs MAC and DNS, the capability to read payloads is present. For encrypted traffic (HTTPS, VPN) the payload is ciphertext; DNS-over-TLS or DoH hides queries. Unencrypted protocols (HTTP, IMAP without TLS, etc.) are fully visible.
+
+Running anti-cheat drivers is a choice to make informed about. This driver documents what's technically happening at L2.
+
+```
+
+`scripts/sign.ps1`:
+
+```ps1
+[CmdletBinding()]
+param(
+    [Parameter(Mandatory)][string] $Signtool,
+    [Parameter(Mandatory)][string] $File,
+    [Parameter(Mandatory)][string] $PfxPath,
+    [string] $PfxPassword = 'test',
+    [string] $Subject     = 'CN=NetworkFilter Test'
+)
+
+$ErrorActionPreference = 'Stop'
+
+if (-not (Test-Path $PfxPath)) {
+    Write-Host "sign.ps1: creating self-signed cert -> $PfxPath"
+    $cert = New-SelfSignedCertificate `
+        -Type          CodeSigningCert `
+        -Subject       $Subject `
+        -CertStoreLocation Cert:\CurrentUser\My `
+        -KeyUsage      DigitalSignature `
+        -KeyAlgorithm  RSA `
+        -KeyLength     2048 `
+        -HashAlgorithm SHA256 `
+        -NotAfter      ((Get-Date).AddYears(10))
+    $pw = ConvertTo-SecureString -String $PfxPassword -Force -AsPlainText
+    Export-PfxCertificate -Cert $cert -FilePath $PfxPath -Password $pw | Out-Null
+
+    $cerPath = [System.IO.Path]::ChangeExtension($PfxPath, '.cer')
+    Export-Certificate -Cert $cert -FilePath $cerPath | Out-Null
+    Write-Host "sign.ps1: exported public cert -> $cerPath"
+}
+
+& $Signtool sign /fd sha256 /f $PfxPath /p $PfxPassword $File
+if ($LASTEXITCODE -ne 0) { throw "signtool failed with exit code $LASTEXITCODE" }
+
+```
+
+`src/Driver.cpp`:
+
+```cpp
+#include <ntddk.h>
+#define NDIS_SUPPORT_NDIS6 1
+#include <ndis.h>
+#include <initguid.h>
+#include <fwpsk.h>
+#include <fwpmk.h>
+
+DEFINE_GUID(FT_SUBLAYER,    0x1e61a5c1, 0x90be, 0x4c00, 0x76, 0x25, 0x88, 0x82, 0xea, 0x38, 0xdd, 0x89);
+DEFINE_GUID(FT_CALLOUT_IN,  0xbc52e90a, 0x4878, 0xde4d, 0xc5, 0x4d, 0x02, 0x6e, 0x6d, 0x50, 0xe4, 0x12);
+DEFINE_GUID(FT_CALLOUT_OUT, 0x5b54e759, 0xa5e7, 0xfde4, 0x9f, 0x63, 0x85, 0xe4, 0xcc, 0x25, 0xe4, 0x59);
+
+static HANDLE gEngine;
+static PDEVICE_OBJECT gDevice;
+static UINT32 gIdIn, gIdOut;
+
+static KSPIN_LOCK gLock;
+static BOOLEAN gDone, gHaveLocal, gHaveGwMac, gHaveGwIp;
+static UCHAR gLocalMac[6], gLocalIp[4], gGwMac[6], gGwIp[4];
+
+static BOOLEAN UnicastMac(const UCHAR* m) { return (m[0] & 1) == 0; }
+
+static BOOLEAN PublicIp(const UCHAR* a)
+{
+    if (a[0] == 0 || a[0] == 127 || a[0] >= 224) return FALSE;
+    if (a[0] == 10) return FALSE;
+    if (a[0] == 172 && a[1] >= 16 && a[1] <= 31) return FALSE;
+    if (a[0] == 192 && a[1] == 168) return FALSE;
+    if (a[0] == 169 && a[1] == 254) return FALSE;
+    return TRUE;
+}
+
+static void Inspect(const NET_BUFFER_LIST* nbl, BOOLEAN outbound)
+{
+    if (gDone || !nbl) return;
+    NET_BUFFER* nb = NET_BUFFER_LIST_FIRST_NB((NET_BUFFER_LIST*)nbl);
+    if (!nb) return;
+
+    UCHAR b[42];
+    UCHAR* p = (UCHAR*)NdisGetDataBuffer(nb, 14, b, 1, 0);
+    if (!p) return;
+    USHORT eth = (USHORT)((p[12] << 8) | p[13]);
+
+    KIRQL irql;
+    KeAcquireSpinLock(&gLock, &irql);
+    
+    if (eth == 0x0800)
+    {
+        UCHAR* q = (UCHAR*)NdisGetDataBuffer(nb, 34, b, 1, 0);
+        if (q)
+        {
+            UCHAR* lm  = outbound ? q + 6  : q + 0;
+            UCHAR* gm  = outbound ? q + 0  : q + 6;
+            UCHAR* lip = outbound ? q + 26 : q + 30;
+            UCHAR* rip = outbound ? q + 30 : q + 26;
+            if (!gHaveLocal && UnicastMac(lm) && lip[0] != 0)
+            {
+                RtlCopyMemory(gLocalMac, lm, 6); RtlCopyMemory(gLocalIp, lip, 4); gHaveLocal = TRUE;
+                DbgPrintEx(DPFLTR_IHVDRIVER_ID, DPFLTR_INFO_LEVEL, "FilterTap: got LOCAL\n");
+            }
+            if (!gHaveGwMac && UnicastMac(gm) && PublicIp(rip))
+            {
+                RtlCopyMemory(gGwMac, gm, 6); gHaveGwMac = TRUE;
+                DbgPrintEx(DPFLTR_IHVDRIVER_ID, DPFLTR_INFO_LEVEL, "FilterTap: got GW MAC\n");
+            }
+        }
+    }
+    else if (eth == 0x0806)
+    {
+        UCHAR* a = (UCHAR*)NdisGetDataBuffer(nb, 42, b, 1, 0);
+        if (a && gHaveGwMac && !gHaveGwIp)
+        {
+            if (RtlEqualMemory(a + 22, gGwMac, 6))      { RtlCopyMemory(gGwIp, a + 28, 4); gHaveGwIp = TRUE; }
+            else if (RtlEqualMemory(a + 32, gGwMac, 6)) { RtlCopyMemory(gGwIp, a + 38, 4); gHaveGwIp = TRUE; }
+            if (gHaveGwIp) DbgPrintEx(DPFLTR_IHVDRIVER_ID, DPFLTR_INFO_LEVEL, "FilterTap: got GW IP\n");
+        }
+    }
+    
+    //Not actively used just POC
+    if ( eth == 0x0800 && outbound )
+    {
+        UCHAR  dbuf[320];
+        ULONG  avail = NET_BUFFER_DATA_LENGTH( nb );
+        ULONG  want = avail < sizeof( dbuf ) ? avail : sizeof( dbuf );
+        if ( want < 14 + 20 + 8 + 12 ) goto dns_done;
+
+        UCHAR* pkt = (UCHAR*)NdisGetDataBuffer( nb, want, dbuf, 1, 0 );
+        if ( !pkt ) goto dns_done;
+
+        UCHAR* iph = pkt + 14;
+        ULONG  ihl = ( iph[0] & 0x0F ) * 4;
+        UCHAR  prot = iph[9];
+
+        if ( prot == 17 && ihl >= 20 && 14 + ihl + 8 + 12 <= want )
+        {
+            UCHAR* udp = iph + ihl;
+            USHORT dport = (USHORT)( ( udp[2] << 8 ) | udp[3] );
+
+            if ( dport == 53 )
+            {
+                UCHAR* dns = udp + 8;
+                USHORT flags = (USHORT)( ( dns[2] << 8 ) | dns[3] );
+                USHORT qd = (USHORT)( ( dns[4] << 8 ) | dns[5] );
+
+                if ( ( flags & 0x8000 ) == 0 && qd >= 1 )
+                {
+                    UCHAR* name = dns + 12;
+                    UCHAR* end = pkt + want;
+                    CHAR   out[256];
+                    ULONG  oi = 0;
+
+                    while ( name < end && *name && oi + 1 < sizeof( out ) )
+                    {
+                        UCHAR len = *name++;
+                        if ( len & 0xC0 ) break;
+                        if ( len == 0 || name + len > end ) break;
+                        if ( oi ) out[oi++] = '.';
+                        for ( UCHAR i = 0; i < len && oi + 1 < sizeof( out ); i++ )
+                        {
+                            CHAR c = (CHAR)name[i];
+                            out[oi++] = ( c >= 0x20 && c < 0x7F ) ? c : '?';
+                        }
+                        name += len;
+                    }
+                    out[oi] = 0;
+
+                    if ( oi )
+                    {
+                        USHORT qtype = 0;
+                        if ( name < end && *name == 0 && name + 5 <= end )
+                            qtype = (USHORT)( ( name[1] << 8 ) | name[2] );
+
+                        DbgPrintEx( DPFLTR_IHVDRIVER_ID, DPFLTR_INFO_LEVEL,
+                            "FilterTap DNS Q type=%u %s\n", qtype, out );
+                    }
+                }
+            }
+        }
+    dns_done:;
+    }
+
+    if (gHaveLocal && gHaveGwMac && !gDone)
+    {
+        gDone = TRUE;
+        DbgPrintEx(DPFLTR_IHVDRIVER_ID, DPFLTR_INFO_LEVEL,
+            "FilterTap LOCAL   %02X:%02X:%02X:%02X:%02X:%02X  %u.%u.%u.%u\n",
+            gLocalMac[0], gLocalMac[1], gLocalMac[2], gLocalMac[3], gLocalMac[4], gLocalMac[5],
+            gLocalIp[0], gLocalIp[1], gLocalIp[2], gLocalIp[3]);
+        DbgPrintEx(DPFLTR_IHVDRIVER_ID, DPFLTR_INFO_LEVEL,
+            "FilterTap ROUTER  %02X:%02X:%02X:%02X:%02X:%02X\n",
+            gGwMac[0], gGwMac[1], gGwMac[2], gGwMac[3], gGwMac[4], gGwMac[5]);
+    }
+
+    KeReleaseSpinLock(&gLock, irql);
+}
+
+static void NTAPI ClassifyIn(const FWPS_INCOMING_VALUES0* in, const FWPS_INCOMING_METADATA_VALUES0* m,
+    void* layerData, const void* ctx, const FWPS_FILTER1* f, UINT64 flow, FWPS_CLASSIFY_OUT0* out)
+{
+    UNREFERENCED_PARAMETER(in); UNREFERENCED_PARAMETER(m); UNREFERENCED_PARAMETER(ctx);
+    UNREFERENCED_PARAMETER(f); UNREFERENCED_PARAMETER(flow);
+    Inspect((const NET_BUFFER_LIST*)layerData, FALSE);
+    out->actionType = FWP_ACTION_CONTINUE;
+}
+
+static void NTAPI ClassifyOut(const FWPS_INCOMING_VALUES0* in, const FWPS_INCOMING_METADATA_VALUES0* m,
+    void* layerData, const void* ctx, const FWPS_FILTER1* f, UINT64 flow, FWPS_CLASSIFY_OUT0* out)
+{
+    UNREFERENCED_PARAMETER(in); UNREFERENCED_PARAMETER(m); UNREFERENCED_PARAMETER(ctx);
+    UNREFERENCED_PARAMETER(f); UNREFERENCED_PARAMETER(flow);
+    Inspect((const NET_BUFFER_LIST*)layerData, TRUE);
+    out->actionType = FWP_ACTION_CONTINUE;
+}
+
+static NTSTATUS NTAPI Notify(FWPS_CALLOUT_NOTIFY_TYPE t, const GUID* k, FWPS_FILTER1* f)
+{
+    UNREFERENCED_PARAMETER(t); UNREFERENCED_PARAMETER(k); UNREFERENCED_PARAMETER(f);
+    return STATUS_SUCCESS;
+}
+
+static NTSTATUS AddFilter(const GUID* layer, const GUID* callout, const wchar_t* name)
+{
+    FWPM_FILTER0 fl = { 0 };
+    fl.layerKey = *layer;
+    fl.subLayerKey = FT_SUBLAYER;
+    fl.displayData.name = (wchar_t*)name;
+    fl.action.type = FWP_ACTION_CALLOUT_INSPECTION;
+    fl.action.calloutKey = *callout;
+    fl.weight.type = FWP_UINT8;
+    fl.weight.uint8 = 15;
+    return FwpmFilterAdd0(gEngine, &fl, NULL, NULL);
+}
+
+static NTSTATUS Register(PDEVICE_OBJECT dev, const GUID* key, FWPS_CALLOUT_CLASSIFY_FN1 fn,
+    const GUID* layer, UINT32* id, const wchar_t* name)
+{
+    FWPS_CALLOUT1 c = { 0 };
+    c.calloutKey = *key;
+    c.classifyFn = fn;
+    c.notifyFn = Notify;
+    NTSTATUS s = FwpsCalloutRegister1(dev, &c, id);
+    if (!NT_SUCCESS(s)) return s;
+
+    FWPM_CALLOUT0 mc = { 0 };
+    mc.calloutKey = *key;
+    mc.displayData.name = (wchar_t*)name;
+    mc.applicableLayer = *layer;
+    return FwpmCalloutAdd0(gEngine, &mc, NULL, NULL);
+}
+
+static void Cleanup()
+{
+    if (gEngine) { FwpmEngineClose0(gEngine); gEngine = NULL; }
+    if (gIdIn)  { FwpsCalloutUnregisterById0(gIdIn);  gIdIn = 0; }
+    if (gIdOut) { FwpsCalloutUnregisterById0(gIdOut); gIdOut = 0; }
+    if (gDevice) { IoDeleteDevice(gDevice); gDevice = NULL; }
+}
+
+static void NTAPI Unload(PDRIVER_OBJECT drv)
+{
+    UNREFERENCED_PARAMETER(drv);
+    Cleanup();
+}
+
+extern "C" NTSTATUS DriverEntry(PDRIVER_OBJECT drv, PUNICODE_STRING reg)
+{
+    DbgPrintEx( DPFLTR_IHVDRIVER_ID, DPFLTR_INFO_LEVEL, "LOADED" );
+
+    UNREFERENCED_PARAMETER(reg);
+    drv->DriverUnload = Unload;
+    KeInitializeSpinLock(&gLock);
+
+    NTSTATUS s = IoCreateDevice(drv, 0, NULL, FILE_DEVICE_NETWORK, 0, FALSE, &gDevice);
+    if (!NT_SUCCESS(s)) return s;
+
+    FWPM_SESSION0 sess = { 0 };
+    sess.flags = FWPM_SESSION_FLAG_DYNAMIC;
+    s = FwpmEngineOpen0(NULL, RPC_C_AUTHN_WINNT, NULL, &sess, &gEngine);
+    if (!NT_SUCCESS(s)) { Cleanup(); return s; }
+
+    s = FwpmTransactionBegin0(gEngine, 0);
+    if (!NT_SUCCESS(s)) { Cleanup(); return s; }
+
+    FWPM_SUBLAYER0 sub = { 0 };
+    sub.subLayerKey = FT_SUBLAYER;
+    sub.displayData.name = (wchar_t*)L"FilterTap";
+    sub.weight = 0xffff;
+
+    s = FwpmSubLayerAdd0(gEngine, &sub, NULL);
+    if (NT_SUCCESS(s)) s = Register(gDevice, &FT_CALLOUT_IN, ClassifyIn,
+        &FWPM_LAYER_INBOUND_MAC_FRAME_ETHERNET, &gIdIn, L"FilterTap IN");
+    if (NT_SUCCESS(s)) s = Register(gDevice, &FT_CALLOUT_OUT, ClassifyOut,
+        &FWPM_LAYER_OUTBOUND_MAC_FRAME_ETHERNET, &gIdOut, L"FilterTap OUT");
+    if (NT_SUCCESS(s)) s = AddFilter(&FWPM_LAYER_INBOUND_MAC_FRAME_ETHERNET, &FT_CALLOUT_IN, L"FilterTap IN");
+    if (NT_SUCCESS(s)) s = AddFilter(&FWPM_LAYER_OUTBOUND_MAC_FRAME_ETHERNET, &FT_CALLOUT_OUT, L"FilterTap OUT");
+
+    if (!NT_SUCCESS(s)) { FwpmTransactionAbort0(gEngine); Cleanup(); return s; }
+
+    s = FwpmTransactionCommit0(gEngine);
+    if (!NT_SUCCESS(s)) { Cleanup(); return s; }
+
+    return STATUS_SUCCESS;
+}
+```
