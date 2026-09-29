@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-29** — lint (agent pass): index vs disk scan — 9 overviews, 51 concepts, 3980 entities (4040 index entries); index.md fully synced (0 missing, 0 dead, 0 duplicate entries); overview wikilink spot-check (9 pages, 12104 links) — 0 broken links; concept spot-check (51 pages, 2345 links) — 0 broken links; index.md wikilink scan (717 links) — 0 broken links; 6 cross-kind slug collisions ([[game-hacking]], [[anti-cheat]], [[reverse-engineering]], [[il2cpp]], [[byovd]], [[dma]]) — expected, no repair needed; no structural edits required.
+
 - **2026-09-29** — ingest `description:weak1337/FilterTap`: entity [[filtertap]] (weak1337; WFP callout kernel driver; passive L2 Ethernet capture of local NIC/gateway MAC, IP, plaintext DNS hostnames; DbgPrint logging; PoC for EAC-style kernel network HWID fingerprinting bypassing user-mode MAC spoof APIs; Anti Cheat / Detection:HWID); cited on [[overviews/anti-cheat]] Detection:HWID lane + [[overviews/windows-kernel]] WFP packet-diversion cluster; cross-linked [[easy-anti-cheat]], [[hwid-spoofing]], [[divert]], and [[win-shaper]]; `index.md` entity + overview blurbs updated.
 
 - **2026-09-29** — ingest `readme:categories`: Anti Cheat ~761 (+1; weak1337/FilterTap WFP L2 NIC/gateway MAC + DNS query HWID fingerprinting PoC in Detection:HWID) / Cheat ~2850 / other major section counts stable; 41 sections; corrected stale Cheat (~2847) and Xbox (~9) drift on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; synced projected README-map counts (~2850/~761) on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], and [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
