@@ -1828,6 +1828,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/TrungNguyen1909/aarch64-sysreg-ida [A IDA plugin to show ARM MSRs nicely]
 - https://github.com/danielplohmann/gui-plugin-template [A template for cross-compatible GUI plugins]
 - https://github.com/williballenthin/ida-settings [Python library and GUI plugin for fetching and editing IDA Pro plugin configuration via Hex-Rays HCLI/ida-config.json]
+- https://github.com/3641397194-wq/ida-zh-cn [Runtime Simplified-Chinese UI plugin for IDA Pro 9.x that localizes menus and dialogs without patching IDA binaries]
 - https://github.com/gmh5225/IDA-MapSymbolParser [IDA Map File Symbol Renamer]
 - https://github.com/gmh5225/IDA-KallsymsSymbolRenamer [IDA kallsyms Renamer]
 - https://github.com/XMCVE/import-kallsyms [IDA Pro Plugin to import /proc/kallsyms for Linux Kernel]
@@ -4520,6 +4521,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/AlSch092/UltimateAntiCheat
 - https://github.com/JonathanBerkeley/Quack
 - [Source Engine serverside anti-cheat plugin. (CS:S, CS:GO, CS:P, TF2)](https://github.com/kanekikun420/NoCheatZ-3)
+- https://github.com/srcdslab/sm-plugin-AntiBhopCheat [SourceMod plugin that analyzes bunny-hop streaks on Source-engine servers and flags, limits, or kicks suspected bhop cheaters]
 - [This is the Anti Cheat System for Knight Online Gamesoft vversion](https://github.com/luisfelipe18/GamesoftACS)
 - [User-mode C++ Anti-Cheat written for German Roleplay Server GVMP.de](https://github.com/divodeuxsevres/gvmp-anticheat)
 - https://github.com/ricardoofnl/open.mp-anticheat [Native open.mp C++ component that detects client mods via self-memory reads vs known cheat signatures]
