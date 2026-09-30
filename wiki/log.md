@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-30** — ingest `description:3641397194-wq/ida-zh-cn`: entity [[ida-zh-cn]] (3641397194-wq; runtime Simplified-Chinese IDA Pro 9.x UI localization; IDAPython + PyQt5 QProxyStyle paint-time translation; ~1860-entry dictionary; preserves English widget IDs; one-click English restore; Windows/macOS/Linux; Cheat / RE Tools); cited on [[overviews/reverse-engineering]] IDA theme/localization cluster + README map and [[overviews/game-hacking]] RE Tools lane; cross-linked [[idapro-muils]], [[ida-settings]], and [[ida-plugin-repository]]; `index.md` entity + overview blurbs updated.
+
 - **2026-09-30** — ingest `description:srcdslab/sm-plugin-AntiBhopCheat`: entity [[sm-plugin-antibhopcheat]] (srcdslab; SourceMod SourcePawn plugin; jump-timing/velocity/tick-input streak analysis for scripted bhop and hyperscroll; admin review, SelectiveBhop limits, auto-kick; CS and other SourceMod titles; For Source Games); cited on [[overviews/anti-cheat]] and [[overviews/game-engine]]; cross-linked [[little-anti-cheat]], [[nocheatz-3]], [[corner-culling-source-engine]], [[source-engine]], and [[input-provenance]]; `index.md` updated.
 
 - **2026-09-30** — ingest `readme:categories`: Cheat ~2852 (+1; 3641397194-wq/ida-zh-cn runtime Simplified-Chinese IDA Pro 9.x UI localization in RE Tools) / Anti Cheat ~762 (+1; srcdslab/sm-plugin-AntiBhopCheat SourceMod bunny-hop streak analyzer) / other major section counts stable; 41 sections; synced projected README-map counts (~2852/~762) on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/game-hacking]], [[overviews/reverse-engineering]], and [[overviews/dma-attack]]; light `index.md` section notes (no per-category pages).
