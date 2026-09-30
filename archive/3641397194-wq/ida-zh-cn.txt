@@ -1,0 +1,3851 @@
+Project Path: arc_3641397194-wq_ida-zh-cn_9e5jgh4q
+
+Source Tree:
+
+```txt
+arc_3641397194-wq_ida-zh-cn_9e5jgh4q
+├── CHANGELOG.md
+├── CONTRIBUTING.md
+├── LICENSE
+├── NOTICE.md
+├── README.en.md
+├── README.md
+├── assets
+│   └── qq
+├── docs
+│   └── how-it-works.md
+├── install.ps1
+├── install.sh
+├── plugin
+│   ├── ida_zh_cn.py
+│   └── zh_cn.json
+└── tools
+    ├── check_dict.py
+    └── design
+        ├── banner.html
+        ├── base.css
+        ├── build.ps1
+        ├── compare-dialog.html
+        ├── compare-main.html
+        ├── compare-menus.html
+        ├── hexwall.js
+        ├── shots
+        └── social.html
+
+```
+
+`CHANGELOG.md`:
+
+```md
+# 更新日志
+
+格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，版本号遵循 [SemVer](https://semver.org/lang/zh-CN/)。
+
+## [未发布]
+
+### 新增
+- `install.sh`：macOS / Linux 安装 / 卸载脚本，逻辑与 `install.ps1` 对齐（默认 `$IDAUSR/plugins` 或 `~/.idapro/plugins`，`--target`/`--uninstall`）。
+- CI 矩阵扩展到 `windows-latest` / `ubuntu-latest` / `macos-latest`，三个平台都跑安装器往返测试。
+- README（中/英）补充 macOS / Linux 安装步骤，兼容性表格标注插件本体在这两个平台上尚未用真实 IDA 验证。
+
+## [1.0.0] — 2026-09-30
+
+首个公开版本。
+
+### 新增
+- 运行时汉化插件 `ida_zh_cn`：菜单栏、菜单、标签页、列表表头在绘制层翻译；标签、按钮、提示、对话框标题直接替换并可还原。
+- 1860 条词典 `zh_cn.json`（主体来自两个 MIT 社区词典，另新增 148 条，见 `NOTICE.md`）。
+- `Edit → Plugins → 中文界面 开/关`，状态持久化；`Alt+F7` 直接运行 `ida_zh_cn.py` 可免重启生效。
+- `zh_cn_user.json` 用户词典覆盖；`ida_zh_cn_missing.txt` 记录未命中的界面英文。
+- `install.ps1` 安装 / 卸载脚本，`tools/check_dict.py` 词典校验，`tools/design/` 设计图源文件与渲染脚本，GitHub Actions CI。
+
+### 已验证
+- IDA Professional 9.1 · Windows 11 · Qt 5.15.3 · Python 3.12：窗口标识与菜单路径不受影响；8 轮开关压力测试无崩溃；重绘内存不增长；关闭后完整还原。
+
+### 已知限制
+- IDA 内核直接输出的文字（Output 窗口消息等）无法翻译；列表底部自绘状态行暂未处理。
+- 仅在 IDA 9.1 上测试；使用 Qt6 / PySide6 的版本暂不支持。
+
+```
+
+`CONTRIBUTING.md`:
+
+```md
+# 参与贡献
+
+谢谢你愿意帮忙！最有价值的贡献是**补词条**，其次是报告 bug 和适配其他 IDA 版本。
+
+## 补词条
+
+1. 找到没翻的英文。最省事的办法：装上插件用一阵，打开 `ida_zh_cn.py` 同目录下的 `ida_zh_cn_missing.txt`，
+   里面是插件没找到译文的界面英文（仅本地、已过滤掉带下划线的标识符和全大写缩写）。
+2. 在 [`plugin/zh_cn.json`](plugin/zh_cn.json) 里加一行 `"英文原文": "中文译文"`。**键要规范化**：
+   - 不写 `&` 快捷键标记；
+   - 不写结尾的 `...`；
+   - 大小写与界面完全一致（精确匹配）。
+3. 译文里**不要**写 `(&X)` 助记符或结尾的 `...`，插件会按原文自动补回。
+4. 校验：
+
+   ```powershell
+   python tools\check_dict.py
+   ```
+
+   它会报出空译文、没有汉字的译文、以及规范化后重复但译法不同的条目。
+5. 提交 PR，说明你在哪个 IDA 版本的哪个窗口看到的这条文字。
+
+只想自己用、不想提 PR？在 `ida_zh_cn.py` 同目录新建 `zh_cn_user.json`，格式相同，会覆盖内置词典。
+
+### 术语约定
+
+尽量与逆向社区的通行叫法一致，例如：导入表 / 导出表、反汇编、交叉引用、段、调试器、转储、伪代码、
+栈变量、结构体、联合体。拿不准时优先直白，不要意译。
+
+## 改代码前请读
+
+[`docs/how-it-works.md`](docs/how-it-works.md) 第 4 节“必须遵守的安全守则”。其中两条最重要：
+
+- **不要改任何会被脚本当作标识的文字**（停靠窗口 `windowTitle`、菜单项 `QAction.text`）。
+- **在 `QProxyStyle` 里读样式选项之前必须校验类型码**，否则可能让 IDA 访问违规崩溃。
+
+PR 清单：
+
+- [ ] `python -m py_compile plugin/ida_zh_cn.py` 通过，`python tools/check_dict.py` 通过
+- [ ] 在真实的 IDA 里验证过：不崩溃；开启后 `find_widget("Output window")` 仍能找到；关闭后文字完整还原
+- [ ] 如果新增了 `setText` 类的替换，说明为什么这个文字不会被 IDA / 脚本反查
+- [ ] 如果改了设计图源文件，附上 `tools/design/build.ps1` 重新渲染出的 `assets/*.png`
+
+## 报告问题
+
+请用 Issue 模板，并附上：IDA 版本、操作系统、Output 窗口里 `[ida_zh_cn]` 开头的那几行。
+如果是崩溃，在 `plugin/ida_zh_cn.py` 里把 `FLAGS` 的 `style` / `text` 分别设为 `False` 试一次，告诉我们哪一个会崩，能省很多时间。
+
+## 行为准则
+
+友善、就事论事。这是个小项目，我们希望它保持轻松。
+
+```
+
+`LICENSE`:
+
+```
+MIT License
+
+Copyright (c) 2026 3641397194-wq
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
+`NOTICE.md`:
+
+```md
+# 第三方声明 · Third-party notices
+
+## 哪些是原创，哪些不是
+
+| 部分 | 来源 |
+|---|---|
+| `plugin/ida_zh_cn.py`（插件本体）、`install.ps1`、`tools/`、`docs/`、`assets/` 下的全部设计与文档 | 本项目原创，MIT 许可 |
+| `plugin/zh_cn.json`（词典） | **主体来自下面两个 MIT 许可的社区项目**，由本项目合并、规范化，并补充了表头、窗口名、图例、工具栏与提示语等词条 |
+
+词典共 1860 条：其中 1712 条（约 92%）的英文原文与下列两个项目的词条重合，
+本项目新增 148 条。重合词条的译文由本项目在两者之间择优取用（取舍规则见 `docs/how-it-works.md`）。
+
+没有复制这两个项目的任何程序代码：本项目的插件实现方式（绘制层翻译 + 可还原的文字替换）与它们不同，
+且为独立编写。
+
+## 词典来源
+
+### 0x-focus/IDA-Pro-9.0-Chinese-Translation
+<https://github.com/0x-focus/IDA-Pro-9.0-Chinese-Translation> —— `zh_CN.json`
+
+```
+MIT License
+
+Copyright (c) 2026 IDA Pro-CH contributors
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```
+
+### tuxi/ida-i18n
+<https://github.com/tuxi/ida-i18n> —— `ida_i18n_zh_CN.json`
+
+```
+MIT License
+
+Copyright (c) 2026 ida-i18n contributors
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```
+
+## 商标与无关声明
+
+IDA、IDA Pro、Hex-Rays 是 Hex-Rays SA 的商标。本项目为非官方社区项目，与 Hex-Rays 无隶属或授权关系；
+仓库中不包含、也不分发任何 IDA 或 Hex-Rays 的文件。使用 IDA 需要你自己持有合法授权。
+
+*IDA, IDA Pro and Hex-Rays are trademarks of Hex-Rays SA. This is an unofficial community project, not affiliated
+with or endorsed by Hex-Rays. It contains no Hex-Rays files. You need your own valid IDA license.*
+
+```
+
+`README.en.md`:
+
+```md
+<div align="center">
+
+<img src="assets/banner.png" alt="IDA Chinese UI — runtime localization plugin" width="100%">
+
+<br>
+
+[![CI](https://github.com/3641397194-wq/ida-zh-cn/actions/workflows/ci.yml/badge.svg)](https://github.com/3641397194-wq/ida-zh-cn/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-6e86ff?labelColor=0a1020)](LICENSE)
+[![IDA Pro](https://img.shields.io/badge/IDA%20Pro-9.1%20tested-21e0d0?labelColor=0a1020)](#compatibility)
+
+**A runtime Simplified-Chinese UI for IDA Pro 9.x — patches nothing, toggles with one click, and never breaks your scripts.**
+
+[简体中文](README.md)
+
+</div>
+
+## Why another localization?
+
+IDA has no official language pack. The usual community approach walks the Qt widget tree and rewrites every string.
+On IDA 9.1 that has two silent side effects (both verified):
+
+| If you rewrite… | …this happens |
+|---|---|
+| a dock widget's `windowTitle` | that *is* IDA's widget identifier — `ida_kernwin.find_widget("Output window")` starts returning `None` |
+| a menu `QAction.text` | `attach_action_to_menu("Options/")` fails; `Edit/Plugins/` grows a duplicate English `Plugins` submenu |
+
+`ida_zh_cn` keeps identifiers untouched:
+
+- **menu bar / menus / tab bars / list headers** are translated at *paint time* through a `QProxyStyle` — the widgets still hold English;
+- **labels, buttons, tooltips, real dialog titles** are display-only, so their text is replaced and the original is remembered for a clean revert;
+- dock `windowTitle`s are never modified.
+
+Details and the crash you can cause if you get this wrong: [docs/how-it-works.md](docs/how-it-works.md) (Chinese).
+
+## Install
+
+Windows / macOS / Linux, IDA Pro 9.x built on **Qt5 / PyQt5**, IDAPython working.
+
+**Windows**
+
+```powershell
+git clone https://github.com/3641397194-wq/ida-zh-cn.git
+cd ida-zh-cn
+powershell -ExecutionPolicy Bypass -File .\install.ps1     # add -Uninstall to remove
+```
+
+**macOS / Linux**
+
+```bash
+git clone https://github.com/3641397194-wq/ida-zh-cn.git
+cd ida-zh-cn
+chmod +x install.sh
+./install.sh          # add --uninstall to remove, --target <dir> for a custom path
+```
+
+Either script copies `plugin/ida_zh_cn.py` and `plugin/zh_cn.json` into IDA's **user** plugin directory
+(`$IDAUSR/plugins` if set, otherwise `%APPDATA%\Hex-Rays\IDA Pro\plugins` on Windows or `~/.idapro/plugins` on macOS/Linux).
+Then either restart IDA, or press **Alt+F7** (File → Script file…) and pick `ida_zh_cn.py` to switch on immediately.
+
+Toggle back to English any time: `Edit → Plugins → 中文界面 开/关`.
+
+## Compatibility
+
+| Environment | Status |
+|---|---|
+| IDA Professional **9.1**, Windows 11, Qt 5.15.3, Python 3.12 | ✅ tested |
+| Other Qt5 / PyQt5 builds (e.g. 9.0) | ⚠️ untested, should work |
+| Qt6 / PySide6 builds | ❌ not supported yet (PRs welcome) |
+| macOS, Linux (installer `install.sh` provided, copy/uninstall paths covered by CI) | ⚠️ the plugin itself is unverified on a real IDA there — feedback welcome |
+
+Not translatable from a plugin: text the IDA kernel writes itself (Output-window messages, some status-bar text)
+and, of course, data (disassembly, hex view).
+
+## Community (Chinese-speaking, QQ)
+
+Bug reports, dictionary contributions, or general IDA/reverse-engineering chat — these QQ groups are Chinese-speaking:
+
+| Group | Number |
+|---|---|
+| ai交流1群 | 1057540028 |
+| ai交流2群 | 1077074552 |
+| Cool coffeeAI交流 | 618179023 |
+
+QR codes: see the [Chinese README](README.md#交流群).
+
+## Contributing
+
+Adding words is the most useful contribution — see [CONTRIBUTING.md](CONTRIBUTING.md).
+Put your own strings in `zh_cn_user.json` next to the plugin to override the built-in dictionary.
+
+## License & credits
+
+Code, scripts, docs and artwork: [MIT](LICENSE), original to this project.
+The dictionary is mostly a merge of two MIT-licensed community dictionaries —
+[0x-focus/IDA-Pro-9.0-Chinese-Translation](https://github.com/0x-focus/IDA-Pro-9.0-Chinese-Translation) and
+[tuxi/ida-i18n](https://github.com/tuxi/ida-i18n) — plus 148 entries added here; see [NOTICE.md](NOTICE.md).
+No program code was copied from either.
+
+IDA, IDA Pro and Hex-Rays are trademarks of Hex-Rays SA. This is an unofficial project, not affiliated with Hex-Rays,
+and contains no Hex-Rays files. You need your own valid IDA license.
+
+```
+
+`README.md`:
+
+```md
+<div align="center">
+
+<img src="assets/banner.png" alt="IDA 汉化版 · 运行时汉化插件" width="100%">
+
+<br>
+
+[![CI](https://github.com/3641397194-wq/ida-zh-cn/actions/workflows/ci.yml/badge.svg)](https://github.com/3641397194-wq/ida-zh-cn/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-6e86ff?labelColor=0a1020)](LICENSE)
+[![IDA Pro](https://img.shields.io/badge/IDA%20Pro-9.1%20已测试-21e0d0?labelColor=0a1020)](#兼容性与测试)
+[![Qt](https://img.shields.io/badge/Qt5%20·%20PyQt5-ffc46b?labelColor=0a1020)](#兼容性与测试)
+[![Platform](https://img.shields.io/badge/Windows%20·%20macOS%20·%20Linux-8ea2ff?labelColor=0a1020)](#兼容性与测试)
+
+**运行时汉化插件 · 不改 IDA 一个字节 · 一键开关 · 脚本与其他插件零破坏**
+
+[安装](#安装) · [效果](#效果) · [原理](#为什么和别的汉化不一样) · [兼容性](#兼容性与测试) · [常见问题](#常见问题) · [交流群](#交流群) · [English](README.en.md)
+
+</div>
+
+<br>
+
+## 亮点
+
+<table>
+<tr>
+<td width="33%" valign="top">
+
+### 🧬 零补丁
+不修改 `ida.dll`，不改安装目录里的任何文件。插件放在用户插件目录，**卸载 = 删两个文件**。
+
+</td>
+<td width="33%" valign="top">
+
+### 🧭 标识不变
+窗口标题、菜单路径在内部保持英文，`find_widget("Output window")`、`attach_action_to_menu("Edit/Plugins/")` 之类的脚本与插件**照常工作**。
+
+</td>
+<td width="33%" valign="top">
+
+### 🎛 一键开关
+`Edit → Plugins → 中文界面 开/关`。关闭后所有文字、样式**完整还原**，不留残余。
+
+</td>
+</tr>
+<tr>
+<td valign="top">
+
+### ⚡ 即时生效
+`Alt+F7` 选中脚本即可，**无需重启**，正在分析的数据库不受打扰。
+
+</td>
+<td valign="top">
+
+### 📚 1860 词条
+主菜单与全部子菜单、列表表头、窗口名、导航带图例、工具栏提示、常见对话框。
+
+</td>
+<td valign="top">
+
+### 🛠 可扩展
+同目录放一个 `zh_cn_user.json` 即可覆盖或补充；没翻到的界面文字会记入本地日志，方便补词。
+
+</td>
+</tr>
+</table>
+
+<br>
+
+## 效果
+
+同一个窗口、同一份数据库，只差一个插件：
+
+<p align="center"><img src="assets/compare-main.png" alt="主界面前后对比" width="100%"></p>
+
+菜单整条翻译，快捷键原样保留：
+
+<p align="center"><img src="assets/compare-menus.png" alt="菜单前后对比" width="100%"></p>
+
+对话框里的标签页、单选框、按钮一并翻译（示例代码是数据，不动）：
+
+<p align="center"><img src="assets/compare-dialog.png" alt="对话框前后对比" width="100%"></p>
+
+<br>
+
+## 安装
+
+> 需要：Windows / macOS / Linux、IDA Pro 9.x（PyQt5 / Qt5 版本）、**IDAPython 已可用**（IDA 启动时 Output 窗口会打印 Python 版本）。
+
+### 方式一：脚本安装（推荐）
+
+**Windows**
+
+```powershell
+git clone https://github.com/3641397194-wq/ida-zh-cn.git
+cd ida-zh-cn
+powershell -ExecutionPolicy Bypass -File .\install.ps1
+```
+
+**macOS / Linux**
+
+```bash
+git clone https://github.com/3641397194-wq/ida-zh-cn.git
+cd ida-zh-cn
+bash install.sh
+```
+
+没装 git？到 [Releases](https://github.com/3641397194-wq/ida-zh-cn/releases/latest) 下载 zip，解压后在目录里运行同一条安装命令即可。
+
+脚本把 `plugin/` 下的两个文件复制到 IDA 的**用户**插件目录，不碰 IDA 安装目录：
+
+| 系统 | 默认目录（设置了 `IDAUSR` 则用 `$IDAUSR/plugins`） | 想装到别处 | 卸载 |
+|---|---|---|---|
+| Windows | `%APPDATA%\Hex-Rays\IDA Pro\plugins` | `-Target D:\path\plugins` | `-Uninstall` |
+| macOS / Linux | `~/.idapro/plugins` | `--target /path/plugins` | `--uninstall` |
+
+### 方式二：手动复制
+
+把 [`plugin/ida_zh_cn.py`](plugin/ida_zh_cn.py) 和 [`plugin/zh_cn.json`](plugin/zh_cn.json) 放进上表对应的用户插件目录（不存在就新建）。
+
+### 让它生效
+
+| 你想要 | 怎么做 |
+|---|---|
+| 下次启动自动汉化 | 重启 IDA，插件自动加载 |
+| **现在就汉化，不重启** | IDA 里按 **`Alt+F7`**（File → Script file…），选中用户插件目录里的 `ida_zh_cn.py` |
+
+<br>
+
+## 使用
+
+- **开/关**：`Edit → Plugins → 中文界面 开/关`，状态会记住，下次启动沿用。
+- **自定义词条**：在 `ida_zh_cn.py` 同目录新建 `zh_cn_user.json`，键是英文原文，值是译文，会覆盖内置词典：
+
+  ```json
+  {
+    "Rename": "重命名",
+    "Jump to address": "跳转到地址"
+  }
+  ```
+
+  键不需要写 `&` 快捷键标记，也不需要写结尾的 `...`；插件会自己处理，并保留原文里的省略号、冒号和空白。
+- **补词**：没翻到的界面英文会追加到 `ida_zh_cn_missing.txt`（仅本地、已过滤）。把它发进 [Issue](../../issues/new/choose)，或直接提交 PR，见 [CONTRIBUTING.md](CONTRIBUTING.md)。
+
+<br>
+
+## 为什么和别的汉化不一样
+
+IDA 没有官方语言包，社区常见做法是遍历界面控件、把文字直接改成中文。这在 IDA 里有两个隐蔽的坑，我们在 9.1 上逐一验证过：
+
+| 直接改这个 | 会发生什么 |
+|---|---|
+| 停靠窗口的 `windowTitle` | 那就是 IDA 的窗口标识。改成「输出」后，`find_widget("Output window")` 返回 `None`，依赖它的脚本和插件全部失效，保存的桌面布局也对不上 |
+| 菜单项文字 | `attach_action_to_menu("Options/")` 返回 `False`；`Edit/Plugins/` 会在中文的「编辑」下面再冒出一个英文的 `Plugins` 子菜单 |
+
+所以本插件分两条通道，**标识永远不动**：
+
+```mermaid
+flowchart LR
+    A["界面上的英文"] --> B{"会被脚本 / IDA 当成标识吗？"}
+    B -- "会：菜单栏 · 菜单 · 标签页 · 表头" --> C["绘制层翻译<br/>QProxyStyle：控件里仍是英文，屏幕上画出中文"]
+    B -- "不会：标签 · 按钮 · 提示 · 对话框标题" --> D["直接替换文字<br/>并记住原文，随时可还原"]
+    B -- "停靠窗口 windowTitle" --> E["从不修改"]
+```
+
+想看细节（以及在 IDA 自带的 PyQt5 + sip + Python 3.12 下踩过的、会让 IDA 崩溃的坑）：[docs/how-it-works.md](docs/how-it-works.md)。
+
+<br>
+
+## 兼容性与测试
+
+| 环境 | 状态 |
+|---|---|
+| IDA Professional **9.1** · Windows 11 · Qt 5.15.3 · Python 3.12 | ✅ 已测试 |
+| IDA 9.0 及其他 Qt5 / PyQt5 版本 | ⚠️ 未测试，理论上兼容，欢迎反馈 |
+| 改用 Qt6 / PySide6 的 IDA 版本 | ❌ 暂不支持（欢迎 PR） |
+| macOS · Linux | ⚠️ 已提供 `install.sh`，安装 / 卸载流程在 CI 的 Ubuntu 与 macOS 上验证；**插件本体尚未在真实的 macOS / Linux IDA 上运行测试**，欢迎反馈 |
+
+在隔离的 IDA 实例里做过的验证：
+
+- 开启后 7 个常用窗口的 `find_widget()` 全部可找到；`attach_action_to_menu()` 路径正常且不产生重复菜单
+- 反复打开、关闭对话框与字符串 / 名称 / 段 / 问题等停靠窗口，共 8 轮，无崩溃
+- 300 次整窗重绘，Python 内存不增长
+- 关闭插件后菜单、表头、标签页、按钮与提示全部还原为英文，残留样式为 0
+- 经 IDA 真实的插件加载器自动加载，并可反复开关
+
+### 已知限制
+
+- **IDA 内核直接输出的文字无法翻译**：Output 窗口里的消息、部分状态栏文字。
+- **数据不翻译**：反汇编、十六进制视图、函数名等内容本来就不该翻译。
+- 列表窗口底部自绘的「Line 97 of 103」状态行暂未处理。
+- 绘制层翻译的菜单不显示 `(F)` 这类助记符下划线（快捷键本身仍然有效）。
+- 词典没收录的对话框文字会保持英文，用上面的「补词」流程即可逐步补全。
+
+<br>
+
+## 常见问题
+
+<details>
+<summary><b>会影响我的 IDAPython 脚本或其他插件吗？</b></summary>
+
+不会——这正是本项目的设计目标。窗口标题和菜单路径在内部保持英文，`find_widget()`、`attach_action_to_menu()` 等接口的行为与未汉化时一致。
+</details>
+
+<details>
+<summary><b>装了没反应 / Output 窗口里没有 <code>[ida_zh_cn]</code> 提示</b></summary>
+
+先确认 IDAPython 已加载：启动时 Output 窗口应当打印 `Python 3.x ...`。如果看到 `Python 3 is not configured (Python3TargetDLL value is not set)`，在 IDA 安装目录运行一次 `idapyswitch --auto-apply`（Windows 是 `idapyswitch.exe`）。然后重启 IDA，或用 `Alt+F7` 直接运行 `ida_zh_cn.py`。
+</details>
+
+<details>
+<summary><b>怎么恢复英文？</b></summary>
+
+`Edit → Plugins → 中文界面 开/关` 点一下即可，无需重启。彻底卸载：Windows 用 `install.ps1 -Uninstall`，macOS / Linux 用 `bash install.sh --uninstall`，或手动删掉 `ida_zh_cn.py` 与 `zh_cn.json`。
+</details>
+
+<details>
+<summary><b>可以和别的汉化插件一起用吗？</b></summary>
+
+不建议。两个插件会争着改同一批控件。请只保留一个。
+</details>
+
+<details>
+<summary><b>为什么有些地方是英文？</b></summary>
+
+见上面的[已知限制](#已知限制)。其中「词典没收录」的部分可以自己补：编辑 `zh_cn_user.json`，或把 `ida_zh_cn_missing.txt` 发给我们。
+</details>
+
+<br>
+
+## 交流群
+
+装完有问题、想补词条、或者单纯想聊 IDA / 逆向，欢迎进 QQ 群，扫码或搜群号都行：
+
+<table>
+<tr>
+<td align="center" width="33%">
+
+<img src="assets/qq/qq-group-1-1057540028.jpg" width="180"><br>
+<b>ai交流1群</b><br>群号：1057540028
+
+</td>
+<td align="center" width="33%">
+
+<img src="assets/qq/qq-group-2-1077074552.jpg" width="180"><br>
+<b>ai交流2群</b><br>群号：1077074552
+
+</td>
+<td align="center" width="33%">
+
+<img src="assets/qq/qq-group-3-618179023.jpg" width="180"><br>
+<b>Cool coffeeAI交流</b><br>群号：618179023
+
+</td>
+</tr>
+</table>
+
+<br>
+
+## 参与贡献
+
+欢迎补词条、报告问题、适配其他 IDA 版本。词条格式、检查脚本与 PR 清单见 [CONTRIBUTING.md](CONTRIBUTING.md)。
+
+```powershell
+python tools\check_dict.py        # 校验词典
+powershell -File tools\design\build.ps1   # 重新渲染 README 里的设计图
+```
+
+<br>
+
+## 许可与致谢
+
+- 代码、脚本、文档与设计：[MIT](LICENSE)。
+- 词典的主体来自两个同样以 MIT 协议发布的社区项目，本项目在其基础上合并、规范化并补充了 148 条：
+  [0x-focus/IDA-Pro-9.0-Chinese-Translation](https://github.com/0x-focus/IDA-Pro-9.0-Chinese-Translation)、
+  [tuxi/ida-i18n](https://github.com/tuxi/ida-i18n)。原作者的版权声明见 [NOTICE.md](NOTICE.md)。
+  **本项目没有复制它们的程序代码。**
+- IDA、IDA Pro、Hex-Rays 是 Hex-Rays SA 的商标。本项目是非官方社区项目，与 Hex-Rays 无关联，不含也不分发任何 IDA 文件；使用 IDA 需自行持有合法授权。
+
+<div align="center"><sub>如果它帮到了你，点个 ⭐ 就是最好的鼓励</sub></div>
+
+```
+
+`docs/how-it-works.md`:
+
+```md
+# 工作原理
+
+本文说明 `ida_zh_cn` 为什么这样设计，以及在 IDA 9.1（Qt 5.15.3、IDA 自带 PyQt5、Python 3.12）上实测得到的几条经验。
+读完你应该能判断：某个改动是否安全。
+
+## 1. 问题：直接改控件文字会弄坏什么
+
+以下结论均由对照实验得到（同一个 IDA 实例，改前改后各测一次）：
+
+| 操作 | 结果 |
+|---|---|
+| 只改 `QTabBar` 里的标签页文字 | `find_widget("Imports")` 仍为 `True`，`get_widget_title()` 仍为 `Imports` —— 安全 |
+| 改停靠窗口 `QWidget.windowTitle` | `find_widget("Imports")` 变为 `False`，`get_widget_title()` 变成中文 —— **`windowTitle` 就是窗口标识** |
+| 把菜单栏里 `Options` 的 `QAction.text` 改成中文 | `attach_action_to_menu("Options/", …)` 返回 `False` |
+| 把 `Edit` 和 `Plugins` 的 `QAction.text` 改成中文 | `attach_action_to_menu("Edit/Plugins/", …)` 在中文「编辑」下另建一个英文 `Plugins` 子菜单 |
+| 对列表的 `chooser_table_widget_model_t` 调用 `setHeaderData()` | 返回 `False`，表头不变（自定义 C++ 模型） |
+
+所以：**凡是会被脚本或 IDA 当作标识的文字，都不能改。** 这类文字集中在停靠窗口标题、菜单项文字，其中列表表头压根改不了。
+
+## 2. 方案：两条通道
+
+```
+界面文字
+├─ 标识类：菜单栏、菜单、标签页、表头
+│    └─ 绘制层翻译：给这些控件挂一个 QProxyStyle，只覆盖 drawControl，
+│       在绘制那一刻把选项里的 text 换成中文；控件本身的文字仍是英文。
+├─ 纯显示类：QLabel、按钮、工具提示、对话框标题、QComboBox 项、QTreeWidget 表头……
+│    └─ setText，并把原文存进控件的动态属性 _zh_*，关闭插件时原样写回。
+└─ 停靠窗口 / TWidget 的 windowTitle：从不修改
+```
+
+`ZhStyle` 通过 `QWidget.setStyle()` 挂到目标控件上（应用样式表 `QStyleSheetStyle` 会把它包成基础样式，
+所以 IDA 的 QSS 主题外观不变）。所有控件共用同一个 `ZhStyle` 实例，实例由插件状态对象持有。
+
+一个 700 ms 的定时器扫一遍 `QApplication.allWidgets()`（645 个控件约 7 ms），再加一个 `Polish` 事件过滤器，
+让新弹出的对话框和菜单在第一次显示前就完成翻译。
+
+对话框标题只改 `QDialog` 且 `find_widget(title)` 找不到的，即真正的对话框而不是 IDA 的停靠窗口。
+
+## 3. 词典与翻译规则
+
+`plugin/zh_cn.json` 是扁平的 `{"英文": "中文"}`，键是**规范化**的英文：去掉 `&` 快捷键标记、去掉结尾的 `...`。
+翻译时（`translate()`）：
+
+1. 记下原文里的 `&X` 助记符、结尾的 `...`/`…`、结尾冒号、首尾空白；
+2. 用去掉这些之后的键查词典；再试一次去掉冒号；再试 `_RULE_SRC` 里的正则（状态栏、按序号命名的窗口）；
+3. 把助记符（仅按钮/标签类，写成 `(&X)`）、省略号、冒号、空白按原样接回去。
+
+绘制层（菜单/标签页/表头）不追加 `(&X)`：中文菜单项几乎都比英文窄，不需要额外宽度。
+
+**合并规则。** 词典由两个 MIT 社区词典与本项目新增词条合并而成。冲突时默认取 `tuxi/ida-i18n` 的译法
+（术语更规范，如「导入表」「调试器」「转储」），少数它译得别扭的（`Down`→向下、`Reset desktop`→重置桌面布局、
+`Offset…`→偏移量… 等）改取 `0x-focus` 的；本项目新增的词条最后覆盖。来源与版权见 [NOTICE.md](../NOTICE.md)。
+
+## 4. 必须遵守的安全守则
+
+这些是踩坑后写下来的，改代码前请读一遍。
+
+### 4.1 不要在 `sizeFromContents` / `drawControl` 里不加校验地读样式选项
+
+样式选项（`QStyleOptionMenuItem` 等）是 Qt 栈上的临时对象。在 IDA 自带的 PyQt5 + sip + Python 3.12 下，
+sip 有时会把**同一地址上一个已过期、类型不同的包装器**交给你。用 `faulthandler` 抓到的现场：
+
+```
+size ctype 8 QStyleOptionHeader opt.type 4 opt.version 1     # ← 接着读 option.text，访问违规
+```
+
+`ctype 8` 是菜单栏项，选项的类型码 `4` 是 `SO_MenuItem`，可 Python 侧拿到的包装类型却是 `QStyleOptionHeader`。
+按错误的偏移读 `QString` → `0xC0000005`，整个 IDA 崩溃。触发点出现在打开/关闭对话框的过程中，很难联想到样式。
+
+因此：
+
+- 读任何字段之前先核对 `option.type == 包装类型对应的 SO_*`，不一致就原样放行（`_patched_option`）；
+- 不覆盖 `sizeFromContents`（它曾是崩溃入口，而且没有必要）；
+- 任何 `try/except` 都救不了访问违规，只能靠事前校验。
+
+### 4.2 不要用 `PluginForm.TWidgetToPyQtWidget` / `FormToPyQtWidget`
+
+在 sip 来自 site-packages、Qt 绑定来自 IDA 自带 `python\PyQt5` 的环境里，它们会直接崩溃。
+要找某个窗口对应的 Qt 控件，遍历 `QApplication.allWidgets()` 按标题/类名匹配。
+
+### 4.3 不要给控件共用样式后再把样式挂到控件名下（`setParent`）
+
+试过给每个控件各建一个样式并 `setParent(widget)`：不再崩溃，但菜单栏、表头、标签页又变回英文——
+Python 端重写的 `drawControl` 看起来不再被调用（推测与 sip 对象所有权转移有关，未深究）。
+**不崩不等于修好了**——每次改动都要同时确认：不崩溃，并且翻译仍在生效。
+
+### 4.4 只改显示，不改标识
+
+见第 1 节。新增任何 `setText` / `setWindowTitle` 之前先想：这个文字会不会被 IDA 或脚本反查？
+
+## 5. 怎么测试而不动你正在用的 IDA
+
+在同一台机器上另起一个 IDA 实例，只加载一个小 exe：
+
+```
+ida.exe -A -c -o<临时>\t.i64 -S<测试脚本> <某个小 exe>
+```
+
+- 该实例需要 `HKCU\Software\Hex-Rays\IDA\Python3TargetDLL`（指向 `python3.dll`）才会加载 IDAPython。
+  若你的注册表里没有，测试时临时写入、结束后删除；**只结束你自己启动的那个 PID**。
+- 在脚本里 `faulthandler.enable(file=...)`，访问违规时能拿到 Python 调用栈。
+- 截图用 `widget.grab()`，只渲染 IDA 自己的窗口；不要用整屏截图（会把桌面上别的窗口带进来）。
+- 开关压力测试：反复 `process_ui_action("SetColors")` 并 `reject()`，以及打开/关闭字符串、名称、段、问题等窗口，
+  每轮检查 `find_widget()` 与控件数量，并对比 `sys.getallocatedblocks()`。
+
+`tools/design/` 里的对比图就是这样采集的真实界面。
+
+## 6. 调试开关
+
+`plugin/ida_zh_cn.py` 顶部有 `FLAGS = {"style": True, "text": True}`：把其中一项改成 `False`，再用 `Alt+F7` 重新运行该文件，
+即可分别关掉绘制层翻译或文字替换。本项目定位崩溃时就是这样二分的。
+
+```
+
+`install.ps1`:
+
+```ps1
+<#
+.SYNOPSIS
+  Installs (or removes) the ida_zh_cn plugin for IDA Pro 9.x on Windows.
+
+.DESCRIPTION
+  Copies plugin\ida_zh_cn.py and plugin\zh_cn.json into IDA's *user* plugin directory.
+  Nothing inside the IDA install directory is touched.
+
+  Default target:  %IDAUSR%\plugins   if the IDAUSR environment variable is set,
+                   %APPDATA%\Hex-Rays\IDA Pro\plugins   otherwise.
+
+.EXAMPLE
+  powershell -ExecutionPolicy Bypass -File .\install.ps1
+
+.EXAMPLE
+  powershell -ExecutionPolicy Bypass -File .\install.ps1 -Uninstall
+
+.EXAMPLE
+  powershell -ExecutionPolicy Bypass -File .\install.ps1 -Target D:\ida-user\plugins
+#>
+[CmdletBinding()]
+param(
+  [string]$Target,
+  [switch]$Uninstall
+)
+$ErrorActionPreference = 'Stop'
+
+if (-not $Target) {
+  $Target = if ($env:IDAUSR) { Join-Path (($env:IDAUSR -split ';')[0]) 'plugins' }
+            else { Join-Path $env:APPDATA 'Hex-Rays\IDA Pro\plugins' }
+}
+
+$src   = Join-Path $PSScriptRoot 'plugin'
+$files = @('ida_zh_cn.py', 'zh_cn.json')
+
+if ($Uninstall) {
+  foreach ($f in $files + @('ida_zh_cn.conf.json', 'ida_zh_cn_missing.txt')) {
+    $p = Join-Path $Target $f
+    if (Test-Path $p) { Remove-Item $p -Force; Write-Host "removed  $p" }
+  }
+  Write-Host "`nUninstalled. (zh_cn_user.json, if you made one, was left in place.)"
+  return
+}
+
+foreach ($f in $files) {
+  if (-not (Test-Path (Join-Path $src $f))) { throw "missing $src\$f -- run this script from a full checkout" }
+}
+
+New-Item -ItemType Directory -Force -Path $Target | Out-Null
+foreach ($f in $files) {
+  Copy-Item (Join-Path $src $f) (Join-Path $Target $f) -Force
+  Write-Host "copied   $f"
+}
+
+$script = Join-Path $Target 'ida_zh_cn.py'
+Write-Host @"
+
+Installed to: $Target
+
+Next step -- pick one:
+  1) Restart IDA. The plugin loads by itself.
+  2) Without restarting: in IDA press Alt+F7 (File > Script file...) and choose
+       $script
+
+Switch back to English any time:  Edit > Plugins > "中文界面 开/关"
+"@
+
+```
+
+`install.sh`:
+
+```sh
+#!/usr/bin/env bash
+# Installs (or removes) the ida_zh_cn plugin for IDA Pro 9.x on macOS / Linux.
+#
+# Copies plugin/ida_zh_cn.py and plugin/zh_cn.json into IDA's *user* plugin
+# directory. Nothing inside the IDA install directory is touched.
+#
+# Default target: $IDAUSR/plugins   if the IDAUSR environment variable is set,
+#                  $HOME/.idapro/plugins   otherwise.
+#
+# Usage:
+#   ./install.sh                       # install
+#   ./install.sh --uninstall           # remove
+#   ./install.sh --target /some/path   # install to a custom user dir's plugins/
+#
+set -euo pipefail
+
+target=""
+uninstall=0
+
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --target)
+      target="$2"
+      shift 2
+      ;;
+    --target=*)
+      target="${1#--target=}"
+      shift
+      ;;
+    --uninstall)
+      uninstall=1
+      shift
+      ;;
+    -h|--help)
+      sed -n '2,17p' "$0"
+      exit 0
+      ;;
+    *)
+      echo "unknown argument: $1" >&2
+      exit 1
+      ;;
+  esac
+done
+
+if [ -z "$target" ]; then
+  if [ -n "${IDAUSR:-}" ]; then
+    first="${IDAUSR%%:*}"
+    target="$first/plugins"
+  else
+    target="$HOME/.idapro/plugins"
+  fi
+fi
+
+script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+src="$script_dir/plugin"
+files=(ida_zh_cn.py zh_cn.json)
+
+if [ "$uninstall" -eq 1 ]; then
+  for f in "${files[@]}" ida_zh_cn.conf.json ida_zh_cn_missing.txt; do
+    p="$target/$f"
+    if [ -e "$p" ]; then
+      rm -f "$p"
+      echo "removed  $p"
+    fi
+  done
+  echo
+  echo "Uninstalled. (zh_cn_user.json, if you made one, was left in place.)"
+  exit 0
+fi
+
+for f in "${files[@]}"; do
+  if [ ! -f "$src/$f" ]; then
+    echo "missing $src/$f -- run this script from a full checkout" >&2
+    exit 1
+  fi
+done
+
+mkdir -p "$target"
+for f in "${files[@]}"; do
+  cp -f "$src/$f" "$target/$f"
+  echo "copied   $f"
+done
+
+cat <<EOF
+
+Installed to: $target
+
+Next step -- pick one:
+  1) Restart IDA. The plugin loads by itself.
+  2) Without restarting: in IDA press Alt+F7 (File > Script file...) and choose
+       $target/ida_zh_cn.py
+
+Switch back to English any time:  Edit > Plugins > "中文界面 开/关"
+EOF
+
+```
+
+`plugin/ida_zh_cn.py`:
+
+```py
+# -*- coding: utf-8 -*-
+"""
+ida_zh_cn -- IDA Pro 9.x 简体中文界面 (运行时汉化插件, Qt5 / PyQt5)
+
+  版权所有 (c) 2026 3641397194-wq    许可证: MIT (词典的第三方来源见 NOTICE.md)
+  项目主页: https://github.com/3641397194-wq/ida-zh-cn
+
+不修改 IDA 的任何文件。卸载: 删除 ida_zh_cn.py 和 zh_cn.json 即可。
+菜单 Edit > Plugins > "中文界面 开/关" 可随时切回英文界面。
+
+设计要点 -- 为什么不直接把所有控件文字都改成中文:
+  * 停靠窗口的 windowTitle 就是 IDA 的窗口标识, find_widget("Output window") 之类的脚本靠它查找;
+    菜单项文字则被 attach_action_to_menu("Edit/Plugins/") 之类的路径查找使用。
+    直接改这些文字会让脚本和其他插件失效。所以本插件分两条路:
+      - 菜单栏 / 菜单 / 标签页 / 表头: 在"绘制层"翻译 (QProxyStyle), 控件上的真实文字保持英文。
+      - 标签、按钮、提示、对话框标题: 纯显示文字, 直接替换, 并记住原文以便还原。
+      - 停靠窗口 / TWidget 的 windowTitle 从不修改。
+  * 词典: zh_cn.json (英文 -> 中文, 精确匹配)。同目录放 zh_cn_user.json 可覆盖/补充。
+  * 未命中的界面英文会记录到 ida_zh_cn_missing.txt (仅本地、已过滤), 方便补词。
+
+详见 docs/how-it-works.md。
+"""
+
+__version__ = "1.0.0"
+
+import json
+import os
+import re
+import sys
+import warnings
+
+# IDA 自带的 PyQt5 在 Python 3.12 下定义 Qt 子类时会打印 sipPyTypeDict 弃用警告, 屏蔽之
+warnings.filterwarnings("ignore", message=".*sipPyTypeDict.*")
+warnings.filterwarnings("ignore", category=DeprecationWarning)
+
+import ida_idaapi
+import ida_kernwin
+
+from PyQt5 import QtCore, QtWidgets  # noqa: E402
+
+try:
+    _HERE = os.path.dirname(os.path.abspath(__file__))
+except NameError:  # 通过 exec() 热加载时没有 __file__
+    import ida_diskio
+    _HERE = os.path.join(ida_diskio.get_user_idadir(), "plugins")
+
+DICT_PATH = os.path.join(_HERE, "zh_cn.json")
+USER_DICT_PATH = os.path.join(_HERE, "zh_cn_user.json")
+CONF_PATH = os.path.join(_HERE, "ida_zh_cn.conf.json")
+MISSING_PATH = os.path.join(_HERE, "ida_zh_cn_missing.txt")
+
+STATE_ATTR = "_ida_zh_cn_state"
+SWEEP_MS = 700
+
+P_STYLE = "_zh_style"
+P_TEXT = "_zh_text"
+P_TIP = "_zh_tip"
+P_STIP = "_zh_stip"
+P_TITLE = "_zh_title"
+P_PLACE = "_zh_place"
+
+# 动态文本 (正则). 用于状态栏、按序号命名的窗口等
+_RULE_SRC = [
+    (r"^IDA View-([A-Za-z0-9]+)$", r"IDA 视图-\1"),
+    (r"^Hex View-(\d+)$", r"十六进制视图-\1"),
+    (r"^Pseudocode-([A-Za-z0-9]+)$", r"伪代码-\1"),
+    (r"^Structures?-?(\d*)$", r"结构体\1"),
+    (r"^Stack view-?(.*)$", r"栈视图\1"),
+    (r"^Line (\d+) of (\d+)(.*)$", r"第 \1 行,共 \2 行\3"),
+    (r"^AU:(\s+)idle(\s*)$", r"自动分析:\1空闲\2"),
+    (r"^AU:(\s+)(.+)$", r"自动分析:\1\2"),
+    (r"^Disk: (.+)$", r"磁盘: \1"),
+    (r"^\(Synchronized with (.+)\)$", r"(与 \1 同步)"),
+    (r"^xrefs to (.+)$", r"\1 的交叉引用"),
+    (r"^xrefs from (.+)$", r"来自 \1 的交叉引用"),
+]
+
+_RE_MNEM = re.compile(r"&([A-Za-z0-9])")
+_RE_UI_TEXT = re.compile(r"^[A-Za-z][A-Za-z &'/,.()\-:]{2,70}$")
+
+# 调试开关: 出问题时可分别关闭 "绘制层样式" 或 "文字替换" 来定位
+FLAGS = {"style": True, "text": True}
+
+DICT = {}
+RULES = [(re.compile(p), r) for p, r in _RULE_SRC]
+_missing_seen = set()
+
+
+# --------------------------------------------------------------------------- #
+# 词典与翻译
+# --------------------------------------------------------------------------- #
+def _core(v):
+    v = re.sub(r"\(&.\)", "", v).replace("&", "")
+    for e in ("...", "…"):
+        if v.endswith(e):
+            v = v[: -len(e)]
+    return v.strip()
+
+
+def load_dict():
+    global DICT
+    d = {}
+    for p in (DICT_PATH, USER_DICT_PATH):
+        if not os.path.isfile(p):
+            continue
+        try:
+            with open(p, encoding="utf-8") as f:
+                raw = json.load(f)
+        except Exception as e:  # noqa: BLE001
+            ida_kernwin.msg("[ida_zh_cn] 读取词典失败 %s: %s\n" % (p, e))
+            continue
+        for k, v in raw.items():
+            if k.startswith("_") or not isinstance(v, str):
+                continue
+            nk = k.replace("&", "").replace("~", "").strip()
+            for e in ("...", "…"):
+                if nk.endswith(e):
+                    nk = nk[: -len(e)].rstrip()
+            d[nk] = _core(v)
+    DICT = d
+    return len(d)
+
+
+def translate(raw, mnemonic=True):
+    """英文 -> 中文, 没有对应译文返回 None。保留省略号、冒号、首尾空白;
+    mnemonic=True 时在译文后追加助记符 (&X) (用于按钮/标签, 绘制层菜单不加)。"""
+    if not raw or not isinstance(raw, str) or len(raw) > 300:
+        return None
+    if raw.lstrip().startswith("<") and ">" in raw:  # 富文本, 不动
+        return None
+    lead = raw[: len(raw) - len(raw.lstrip())]
+    trail = raw[len(raw.rstrip()):]
+    s = raw.strip()
+    if not s:
+        return None
+    m = _RE_MNEM.search(s)
+    mn = m.group(1) if m else None
+    k = s.replace("&&", "\0").replace("&", "").replace("\0", "&").replace("~", "")
+    ell = ""
+    for e in ("...", "…"):
+        if k.endswith(e):
+            k = k[: -len(e)].rstrip()
+            ell = e
+            break
+    colon = ""
+    zh = DICT.get(k)
+    if zh is None and k.endswith(":"):
+        zh = DICT.get(k[:-1].rstrip())
+        colon = ":"
+    if zh is None:
+        for pat, rep in RULES:
+            if pat.match(s):
+                return lead + pat.sub(rep, s) + trail
+        return None
+    if zh == k:
+        return None
+    out = zh
+    if mn and mnemonic:
+        end = ""
+        if out and out[-1] in ":：":     # 词典值自带冒号时, 助记符放在冒号前
+            out, end = out[:-1], out[-1]
+        out += "(&%s)" % mn.upper() + end
+    return lead + out + colon + ell + trail
+
+
+def translate_menu(text):
+    """绘制层文字 (菜单/标签页/表头): 可能带 '\\t快捷键' 后缀, 只翻译前半段; 不追加助记符后缀。"""
+    if not text:
+        return None
+    left, sep, right = text.partition("\t")
+    z = translate(left, mnemonic=False)
+    if z is None or z == left:
+        return None
+    return z + sep + right
+
+
+def _note_missing(raw):
+    if raw in _missing_seen or len(_missing_seen) > 4000:
+        return
+    if not _RE_UI_TEXT.match(raw) or "_" in raw or raw.isupper() or not any(c.islower() for c in raw):
+        return
+    _missing_seen.add(raw)
+    try:
+        with open(MISSING_PATH, "a", encoding="utf-8") as f:
+            f.write(raw + "\n")
+    except Exception:  # noqa: BLE001
+        pass
+
+
+# --------------------------------------------------------------------------- #
+# 绘制层翻译: 菜单栏 / 菜单 / 标签页 / 表头
+# --------------------------------------------------------------------------- #
+_QS = QtWidgets.QStyle
+_QO = QtWidgets.QStyleOption
+_PAINT_ELEMENTS = {
+    _QS.CE_MenuBarItem, _QS.CE_MenuItem, _QS.CE_HeaderLabel, _QS.CE_Header,
+    _QS.CE_TabBarTabLabel, _QS.CE_TabBarTab,
+}
+
+
+def _expected_option_type(option):
+    """包装类型 -> 选项自带的类型码。"""
+    if isinstance(option, QtWidgets.QStyleOptionMenuItem):
+        return _QO.SO_MenuItem
+    if isinstance(option, QtWidgets.QStyleOptionHeader):
+        return _QO.SO_Header
+    if isinstance(option, QtWidgets.QStyleOptionTab):
+        return _QO.SO_Tab
+    return None
+
+
+def _patched_option(option):
+    """返回文字已翻译的选项副本; 无需翻译时返回原对象。
+
+    关键的安全校验: 样式选项是 Qt 栈上的临时对象, 在 IDA 自带 PyQt5 + sip + Python 3.12 下,
+    sip 可能把同一地址上一个已过期、类型不同的包装器交回来 (实测: 选项真实类型是 MenuItem,
+    包装器却是 QStyleOptionHeader), 读它的 .text 会访问违规、直接崩掉 IDA。
+    所以读取任何字段之前先核对 "选项自带的类型码 == 包装类型对应的类型码", 不一致就原样放行。
+    """
+    try:
+        exp = _expected_option_type(option)
+        if exp is None or option.type != exp:
+            return option
+        t = option.text
+        if not t:
+            return option
+        z = translate_menu(t)
+        if z is None:
+            _note_missing(t.replace("&", "").split(chr(9))[0].strip())
+            return option
+        o2 = type(option)(option)
+        o2.text = z
+        return o2
+    except Exception:  # noqa: BLE001
+        return option
+
+
+class ZhStyle(QtWidgets.QProxyStyle):
+    # 只覆盖 drawControl。不要覆盖 sizeFromContents: 那条路径里读选项字段曾导致崩溃,
+    # 而中文菜单项几乎都比英文窄, 不需要重算宽度。
+    def drawControl(self, element, option, painter, widget=None):
+        if element in _PAINT_ELEMENTS:
+            option = _patched_option(option)
+        super().drawControl(element, option, painter, widget)
+
+
+# --------------------------------------------------------------------------- #
+# 文字替换: 标签 / 按钮 / 提示 / 对话框标题 (可还原)
+# --------------------------------------------------------------------------- #
+def _swap(obj, getter, setter, prop):
+    try:
+        raw = getter()
+    except Exception:  # noqa: BLE001
+        return
+    if not raw:
+        return
+    z = translate(raw)
+    if z is None:
+        _note_missing(raw.strip())
+        return
+    if z != raw:
+        try:
+            obj.setProperty(prop, raw)
+            setter(z)
+        except Exception:  # noqa: BLE001
+            pass
+
+
+def _restore(obj, getter_prop, setter):
+    try:
+        orig = obj.property(getter_prop)
+        if orig:
+            setter(orig)
+            obj.setProperty(getter_prop, None)
+    except Exception:  # noqa: BLE001
+        pass
+
+
+def _is_ida_dock_title(title):
+    try:
+        return ida_kernwin.find_widget(title) is not None
+    except Exception:  # noqa: BLE001
+        return True  # 拿不准就当作是窗口标识, 不动它
+
+
+def _visit(w, st):
+    """翻译单个控件。"""
+    if isinstance(w, (QtWidgets.QMenu, QtWidgets.QMenuBar, QtWidgets.QTabBar, QtWidgets.QHeaderView)):
+        if FLAGS["style"] and not w.property(P_STYLE):
+            w.setStyle(st.style)
+            w.setProperty(P_STYLE, True)
+    if not FLAGS["text"]:
+        return
+    if isinstance(w, QtWidgets.QAbstractButton):
+        if not (isinstance(w, QtWidgets.QToolButton) and w.defaultAction() is not None):
+            _swap(w, w.text, w.setText, P_TEXT)
+    elif isinstance(w, QtWidgets.QLabel):
+        _swap(w, w.text, w.setText, P_TEXT)
+    elif isinstance(w, QtWidgets.QGroupBox):
+        _swap(w, w.title, w.setTitle, P_TEXT)
+    elif isinstance(w, QtWidgets.QLineEdit):
+        _swap(w, w.placeholderText, w.setPlaceholderText, P_PLACE)
+    elif isinstance(w, QtWidgets.QComboBox):
+        for i in range(min(w.count(), 200)):
+            raw = w.itemText(i)
+            z = translate(raw)
+            if z is not None and z != raw:
+                w.setItemText(i, z)
+    elif isinstance(w, QtWidgets.QTreeWidget):
+        hi = w.headerItem()
+        if hi is not None:
+            for c in range(hi.columnCount()):
+                z = translate(hi.text(c))
+                if z is not None:
+                    hi.setText(c, z)
+    elif isinstance(w, QtWidgets.QListWidget):
+        for i in range(min(w.count(), 200)):
+            it = w.item(i)
+            z = translate(it.text())
+            if z is not None and z != it.text():
+                it.setText(z)
+
+    # 工具提示 / 状态栏提示 (纯显示)
+    if w.toolTip():
+        _swap(w, w.toolTip, w.setToolTip, P_TIP)
+    if isinstance(w, (QtWidgets.QToolBar, QtWidgets.QMenu, QtWidgets.QMenuBar)):
+        for a in w.actions():
+            if a.isSeparator():
+                continue
+            _swap(a, a.toolTip, a.setToolTip, P_TIP)
+            _swap(a, a.statusTip, a.setStatusTip, P_STIP)
+
+    # 对话框标题: 只改真正的对话框, 且不是 IDA 的停靠窗口
+    if w.isWindow() and isinstance(w, QtWidgets.QDialog):
+        t = w.windowTitle()
+        if t and not _is_ida_dock_title(t):
+            _swap(w, w.windowTitle, w.setWindowTitle, P_TITLE)
+
+
+# --------------------------------------------------------------------------- #
+# 安装 / 卸载
+# --------------------------------------------------------------------------- #
+class _Filter(QtCore.QObject):
+    def __init__(self, st):
+        super().__init__()
+        self.st = st
+
+    def eventFilter(self, obj, ev):
+        try:
+            if ev.type() == QtCore.QEvent.Polish and obj.isWidgetType():
+                if obj.isWindow() or isinstance(obj, (QtWidgets.QMenu, QtWidgets.QMenuBar,
+                                                      QtWidgets.QTabBar, QtWidgets.QHeaderView)):
+                    self.st.visit_tree(obj)
+        except Exception:  # noqa: BLE001
+            pass
+        return False
+
+
+class _State:
+    def __init__(self):
+        self.style = ZhStyle()
+        self.filter = _Filter(self)
+        self.timer = QtCore.QTimer()
+        self.timer.setInterval(SWEEP_MS)
+        self.timer.timeout.connect(self.sweep)
+        self.busy = False
+        self.installed = False
+
+    def visit_tree(self, root):
+        if self.busy:
+            return
+        self.busy = True
+        try:
+            _visit(root, self)
+            for c in root.findChildren(QtWidgets.QWidget):
+                try:
+                    _visit(c, self)
+                except RuntimeError:
+                    pass
+        finally:
+            self.busy = False
+
+    def sweep(self):
+        if self.busy:
+            return
+        app = QtWidgets.QApplication.instance()
+        if app is None:
+            return
+        self.busy = True
+        try:
+            for w in app.allWidgets():
+                try:
+                    _visit(w, self)
+                except RuntimeError:
+                    pass  # C++ 对象已销毁
+        except Exception:  # noqa: BLE001
+            pass
+        finally:
+            self.busy = False
+
+    def install(self):
+        app = QtWidgets.QApplication.instance()
+        if app is None or self.installed:
+            return False
+        app.installEventFilter(self.filter)
+        self.timer.start()
+        self.installed = True
+        QtCore.QTimer.singleShot(50, self.sweep)
+        return True
+
+    def uninstall(self):
+        app = QtWidgets.QApplication.instance()
+        self.timer.stop()
+        if app is not None:
+            try:
+                app.removeEventFilter(self.filter)
+            except Exception:  # noqa: BLE001
+                pass
+            for w in app.allWidgets():
+                try:
+                    if w.property(P_STYLE):
+                        w.setStyle(None)
+                        w.setProperty(P_STYLE, None)
+                    if isinstance(w, (QtWidgets.QAbstractButton, QtWidgets.QLabel)):
+                        _restore(w, P_TEXT, w.setText)
+                    elif isinstance(w, QtWidgets.QGroupBox):
+                        _restore(w, P_TEXT, w.setTitle)
+                    elif isinstance(w, QtWidgets.QLineEdit):
+                        _restore(w, P_PLACE, w.setPlaceholderText)
+                    _restore(w, P_TIP, w.setToolTip)
+                    _restore(w, P_TITLE, w.setWindowTitle)
+                    if isinstance(w, (QtWidgets.QToolBar, QtWidgets.QMenu, QtWidgets.QMenuBar)):
+                        for a in w.actions():
+                            _restore(a, P_TIP, a.setToolTip)
+                            _restore(a, P_STIP, a.setStatusTip)
+                except RuntimeError:
+                    pass
+        self.installed = False
+
+
+def _load_conf():
+    try:
+        with open(CONF_PATH, encoding="utf-8") as f:
+            return bool(json.load(f).get("enabled", True))
+    except Exception:  # noqa: BLE001
+        return True
+
+
+def _save_conf(on):
+    try:
+        with open(CONF_PATH, "w", encoding="utf-8") as f:
+            json.dump({"enabled": bool(on)}, f)
+    except Exception:  # noqa: BLE001
+        pass
+
+
+def get_state():
+    return getattr(sys, STATE_ATTR, None)
+
+
+def enable(save=True):
+    st = get_state()
+    if st is None:
+        st = _State()
+        setattr(sys, STATE_ATTR, st)
+    n = load_dict()
+    ok = st.install()
+    if save:
+        _save_conf(True)
+    ida_kernwin.msg("[ida_zh_cn] 中文界面已开启 (词典 %d 条)\n" % n)
+    return ok
+
+
+def disable(save=True):
+    st = get_state()
+    if st is not None:
+        st.uninstall()
+    if save:
+        _save_conf(False)
+    ida_kernwin.msg("[ida_zh_cn] 中文界面已关闭, 已还原英文\n")
+
+
+def toggle():
+    st = get_state()
+    if st is not None and st.installed:
+        disable()
+    else:
+        enable()
+
+
+# --------------------------------------------------------------------------- #
+# 插件入口
+# --------------------------------------------------------------------------- #
+class ZhCnPlugin(ida_idaapi.plugin_t):
+    flags = ida_idaapi.PLUGIN_FIX
+    comment = "IDA 简体中文界面"
+    help = "运行时把 IDA 界面翻译成简体中文; 运行本插件可开/关"
+    wanted_name = "中文界面 开/关"
+    wanted_hotkey = ""
+
+    def init(self):
+        if QtWidgets.QApplication.instance() is None:
+            return ida_idaapi.PLUGIN_SKIP
+        if _load_conf():
+            enable(save=False)
+        return ida_idaapi.PLUGIN_KEEP
+
+    def run(self, arg):
+        toggle()
+
+    def term(self):
+        st = get_state()
+        if st is not None:
+            st.uninstall()
+
+
+def PLUGIN_ENTRY():
+    return ZhCnPlugin()
+
+
+def reload_and_enable():
+    """热加载入口: 在 IDAPython 控制台 exec 本文件后自动调用。"""
+    old = get_state()
+    if old is not None:
+        old.uninstall()
+        delattr(sys, STATE_ATTR)
+    enable(save=False)
+
+
+if __name__ == "__main__":  # File > Script file... (Alt+F7) 直接运行本文件即可立即开启, 无需重启 IDA
+    reload_and_enable()
+
+```
+
+`plugin/zh_cn.json`:
+
+```json
+{
+"...     (unassigned)": "...     (未分配)",
+"1-byte Integer": "1 字节整数",
+"2-byte Integer": "2 字节整数",
+"4-byte Integer": "4 字节整数",
+"8-byte Integer": "8 字节整数",
+"<b>Thank you for using our demo version!</b>": "<b>感谢您使用我们的演示版本！</b>",
+"API Documentation": "API 文档",
+"Abort": "中止",
+"Abort selection": "中止选择",
+"About program": "关于程序",
+"Add": "添加",
+"Add Filter": "添加过滤器",
+"Add a breakpoint to the current address": "在当前地址处添加断点",
+"Add a function argument": "添加函数参数",
+"Add a read/write trace to the current address": "在当前地址添加读/写跟踪",
+"Add a variable to watch": "添加监视变量",
+"Add a write trace to the current address": "在当前地址添加写入跟踪",
+"Add address": "添加地址",
+"Add an execution trace to the current address": "在当前地址添加执行跟踪",
+"Add argument": "添加参数",
+"Add breakpoint": "添加断点",
+"Add debugger memory region": "添加调试器内存区域",
+"Add empty line": "添加空行",
+"Add encoding": "添加编码",
+"Add execution trace": "添加执行跟踪",
+"Add file extension association": "添加文件扩展名关联",
+"Add file to list": "添加文件到列表",
+"Add mapping": "添加映射",
+"Add missing fields": "添加缺失字段",
+"Add name": "添加名称",
+"Add node by address": "按地址添加节点",
+"Add node by name": "按名称添加节点",
+"Add pseudocode comments": "添加伪代码注释",
+"Add read/write trace": "添加读/写跟踪",
+"Add standard enum": "添加标准枚举",
+"Add to the translation list": "添加到翻译列表",
+"Add to vault": "添加到保管库",
+"Add type": "添加类型",
+"Add user": "添加用户",
+"Add variadic argument": "添加可变参数",
+"Add watch": "添加监视",
+"Add write trace": "添加写跟踪",
+"Add xrefs": "添加交叉引用",
+"Add xrefs from node": "添加来自节点的交叉引用",
+"Add xrefs to node": "添加指向节点的交叉引用",
+"Add xrefs to/from node": "添加节点双向交叉引用",
+"Additional binary file": "附加二进制文件",
+"Additional display visible": "附加显示可见",
+"Additional display:": "附加显示：",
+"Address": "地址",
+"Address bookmarks": "地址书签",
+"Address details": "地址详情",
+"Address prefix color": "地址前缀颜色",
+"Address representation": "地址表示",
+"Addresses with dereferencing": "带解引用的地址",
+"Addresses with names": "带名称的地址",
+"Addresses with text": "带文本的地址",
+"Advanced": "高级",
+"Align": "对齐",
+"All": "全部",
+"All error operands": "所有错误操作数",
+"All files": "所有文件",
+"All void operands": "所有空白操作数",
+"Alternative operand": "替代操作数",
+"Always convert": "总是转换",
+"Amiga hunk file": "Amiga hunk 文件",
+"Analysis": "分析",
+"Analysis disabled": "分析已禁用",
+"Analysis indicator": "分析指示器",
+"Analyze module": "分析模块",
+"Analyze selected area": "分析选定区域",
+"Analyze stack-allocated blocks (current function)": "分析栈分配块(当前函数)",
+"Analyze stack-allocated blocks (entire database)": "分析栈分配块(整个数据库)",
+"Appearance": "外观",
+"Append function tail": "追加函数尾部",
+"Apple Software Renderer": "Apple 软件渲染器",
+"Apply": "应用",
+"Apply all differences in this step (keep local)": "应用本步骤全部差异(保留本地)",
+"Apply all differences in this step (pick remote)": "应用本步骤全部差异(采用远端)",
+"Apply all differences until this step (pick local)": "应用截至本步骤全部差异(采用本地)",
+"Apply all differences until this step (pick remote)": "应用截至本步骤全部差异(采用远端)",
+"Apply all in this step (keep changes in 'local' for conflicts)": "应用此步骤中的全部更改(冲突时保留“本地”更改)",
+"Apply all in this step (pick changes in 'remote' for conflicts)": "应用此步骤中的全部更改(冲突时采用“远程”更改)",
+"Apply all non-conflicting differences in this step": "应用本步骤全部无冲突差异",
+"Apply changes": "应用更改",
+"Apply patches to input file": "将补丁应用到输入文件",
+"Apply selection": "应用选择",
+"Arguments": "参数",
+"Array": "数组",
+"Arrows": "箭头",
+"Ask to convert": "询问是否转换",
+"Ask to convert or not": "询问是否转换",
+"Assemble": "汇编",
+"Assemble an instruction": "汇编一条指令",
+"Assembler directive": "汇编器指示符",
+"Assembler directives": "汇编器指示符",
+"Associate .IDB file extension with IDA": "将 .IDB 扩展名关联到 IDA",
+"Attach": "附加",
+"Attach the debugger to a running process": "将调试器附加到正在运行的进程",
+"Attach to process": "附加到进程",
+"Auto": "自动",
+"Auto comments": "自动注释",
+"Auto fit graph into window": "自动适应图形到窗口",
+"Auto highlight the current identifier": "自动高亮当前标识符",
+"Auto re-layout graph": "自动重新布局图形",
+"Auto resolve (if no conflicts)": "自动解决(如无冲突)",
+"Auto resolve, prefer local": "自动解决，优先本地",
+"Auto resolve, prefer remote": "自动解决，优先远端",
+"Auto-scroll": "自动滚动",
+"Autogenerated name": "自动生成的名称",
+"Automatic comment": "自动注释",
+"Automatically use Lumina server for analysis": "自动使用 Lumina 服务器分析",
+"Automation of COM analysis": "COM 分析自动化",
+"Available Type Libraries": "可用类型库",
+"Available breakpoint slot": "可用断点槽",
+"Available licenses": "可用许可证",
+"Available seats": "可用席位",
+"Back": "上一步",
+"Back complete": "后退完成",
+"Back to previous view": "返回上一视图",
+"Background": "背景",
+"Background colors:": "背景颜色：",
+"Bad -z switch": "错误的 -z 开关",
+"Bad desktop structure": "桌面结构已损坏",
+"Bad keyboard assignment": "键盘绑定无效",
+"Bad type": "类型无效",
+"Base": "基址",
+"Base path (current revision):": "基本路径(当前修订)：",
+"Basic block boundaries": "基本块边界",
+"Basic block tracing": "基本块跟踪",
+"Basic blocks": "基本块",
+"Begin selection": "开始选择",
+"Binary": "二进制",
+"Binary file": "二进制文件",
+"Bitwise negate": "按位取反",
+"Bookmark star outline": "书签星形轮廓",
+"Bookmarks": "书签",
+"Bookmarks highlight": "书签高亮",
+"Bookmarks symbol outline": "书签符号轮廓",
+"Borders between data/code": "数据/代码之间的边界",
+"Borrow chooser": "借用选择器",
+"Borrow license": "借用许可证",
+"Borrow or return license": "借用或归还许可证",
+"Borrow the selected license": "借用所选许可证",
+"Borrowed licenses": "已借用的许可证",
+"Borrowed until": "借用截止",
+"Bottom color": "底部颜色",
+"Break on access": "访问时中断",
+"Breakpoint background": "断点背景",
+"Breakpoint list": "断点列表",
+"Breakpoint possible": "可能的断点",
+"Breakpoint settings": "断点设置",
+"Breakpoints": "断点",
+"Browse": "浏览",
+"Building deltas": "正在构建差异",
+"Building list of .til files": "正在构建 .til 文件列表",
+"Building list of the signatures": "正在构建签名列表",
+"Bytes": "字节",
+"C-like format": "类 C 格式",
+"C-style (0 terminated)": "C 风格(以 0 结尾)",
+"Calculating array end": "正在计算数组末尾",
+"Calculating maximum array size": "正在计算最大数组大小",
+"Calculator": "计算器",
+"Call Stack": "调用栈",
+"Call flow of": "调用流程",
+"Call stack": "调用栈",
+"Cancel": "取消",
+"Cancel changes": "取消更改",
+"Caret (cursor)": "插入符(光标)",
+"Caret blinking interval (ms, 0 to disable)": "光标闪烁间隔(毫秒，0 为禁用)",
+"Case sensitive": "区分大小写",
+"Center chunk": "居中块",
+"Center chunk on screen": "在屏幕上居中显示块",
+"Center in window": "在窗口中居中",
+"Change Focus": "更改焦点",
+"Change byte": "更改字节",
+"Change calling convention": "更改调用约定",
+"Change color": "更改颜色",
+"Change program bytes": "更改程序字节",
+"Change program words": "更改程序字",
+"Change segment attributes": "更改段属性",
+"Change segment register value": "更改段寄存器值",
+"Change segment translation": "更改段翻译",
+"Change sign": "更改符号",
+"Change stack pointer": "更改栈指针",
+"Change tab size": "更改制表符宽度",
+"Change the callee address": "更改被调用者地址",
+"Change the current segment boundaries": "更改当前段边界",
+"Change the current segment translation table": "更改当前段转换表",
+"Change the function end address": "更改函数结束地址",
+"Change the search direction": "切换搜索方向",
+"Change the sign of the current operand": "更改当前操作数的符号",
+"Change trace description": "更改跟踪描述",
+"Change word": "更改字",
+"Changed": "已更改",
+"Char": "字符",
+"Char constant": "字符常量",
+"Char constant in data directive": "数据指示符中的字符常量",
+"Character": "字符",
+"Check for free update": "检查免费更新",
+"Checking files": "正在检查文件",
+"Checkout for copy": "检出以复制",
+"Checkout for delete": "检出以删除",
+"Checkout for edit": "检出以编辑",
+"Checkout for move/rename": "检出以移动/重命名",
+"Choose a name": "选择名称",
+"Choose a structure": "选择结构体",
+"Choose a type": "选择类型",
+"Choose function to jump to": "选择要跳转的函数",
+"Choose process to attach to": "选择要附加的进程",
+"Choose processor": "选择处理器",
+"Choose the representation of a union member": "选择联合体成员的表示方式",
+"Choose worklist": "选择工作列表",
+"Circle layout": "环形布局",
+"Class": "类",
+"Clear": "清除",
+"Clear Search": "清除搜索",
+"Clear mark": "清除标记",
+"Clear overlay": "清除覆盖层",
+"Clear search and close search section": "清除搜索并关闭搜索栏",
+"Clear trace": "清除跟踪",
+"Client host": "客户端主机",
+"Clone": "克隆",
+"Close": "关闭",
+"Close Tab": "关闭标签页",
+"Close the current window": "关闭当前窗口",
+"Close the database without saving it": "关闭数据库且不保存",
+"Close window": "关闭窗口",
+"Code": "代码",
+"Code reference": "代码引用",
+"Code reference color": "代码引用颜色",
+"Code reference to tail byte": "指向尾字节的代码引用",
+"Collapse all": "全部折叠",
+"Collapse children": "折叠子节点",
+"Collapse declarations": "折叠声明",
+"Collapse entire tree": "折叠整棵树",
+"Collapse group": "折叠分组",
+"Collapse item": "折叠项",
+"Collapse parents": "折叠父节点",
+"Collapse selected folders": "折叠所选文件夹",
+"Collapsed line": "已折叠的行",
+"Collecting local files": "正在收集本地文件",
+"Color instruction": "指令着色",
+"Colors": "颜色",
+"Columns": "列",
+"Combine": "组合",
+"Command palette": "命令面板",
+"Comment": "注释",
+"Comment string references": "注释字符串引用",
+"Comments": "注释",
+"Comments indentation": "注释缩进",
+"Commit": "提交",
+"Commit files to new worklist": "将文件提交到新工作列表",
+"Commit time": "提交时间",
+"Commits": "提交",
+"Compilation successful": "编译成功",
+"Compiler": "编译器",
+"Compiler options": "编译器选项",
+"Complete": "完成",
+"Configure feature flags": "配置功能标志",
+"Conflicting only": "仅冲突项",
+"Connect": "连接",
+"Connection string": "连接字符串",
+"Connection string for the debugger": "调试器的连接字符串",
+"Continue": "继续",
+"Continue backwards": "向后继续",
+"Continue execution backwards in a trace (with supported debuggers)": "在跟踪中向后继续执行(需调试器支持)",
+"Continue process": "继续进程",
+"Convert IDB": "转换 IDB",
+"Convert already defined bytes": "转换已定义的字节",
+"Convert the current operand to a binary number": "将当前操作数转换为二进制数",
+"Convert the current operand to a character constant": "将当前操作数转换为字符常量",
+"Convert the current operand to a decimal number": "将当前操作数转换为十进制数",
+"Convert the current operand to a hexadecimal number": "将当前操作数转换为十六进制数",
+"Convert the current operand to a number": "将当前操作数转换为数值",
+"Convert the current operand to a octal number": "将当前操作数转换为八进制数",
+"Convert the current operand to a segment base": "将当前操作数转换为段基址",
+"Convert the current operand to a stack variable": "将当前操作数转换为栈变量",
+"Convert the current operand to a structure offset": "将当前操作数转换为结构体偏移",
+"Convert the current operand to a symbolic constant": "将当前操作数转换为符号常量",
+"Convert the current operand to an offset in any segment": "将当前操作数转换为任意段中的偏移",
+"Convert the current operand to an offset in the current segment": "将当前操作数转换为当前段中的偏移",
+"Convert the current operand to an offset in the data segment": "将当前操作数转换为数据段中的偏移",
+"Convert the current operand to an offset with any base": "将当前操作数转换为任意基址的偏移",
+"Convert to array": "转换为数组",
+"Convert to data": "转换为数据",
+"Convert to floating point": "转换为浮点",
+"Convert to instruction": "转换为指令",
+"Convert to string": "转换为字符串",
+"Convert to struct *": "转换为结构体指针 *",
+"Convert to undefined": "转换为未定义",
+"Converting files": "正在转换文件",
+"Copies the full type(s) and its dependencies": "复制完整类型及其依赖项",
+"Copy": "复制",
+"Copy address": "复制地址",
+"Copy address to command line": "复制地址到命令行",
+"Copy all": "全部复制",
+"Copy content": "复制内容",
+"Copy field info to pointed addresses": "复制字段信息到指向的地址",
+"Copy field info to pointers": "复制字段信息到指针",
+"Copy full type(s)": "复制完整类型",
+"Copy line": "复制行",
+"Copy location": "复制位置",
+"Copy of:": "副本：",
+"Copy pseudocode to disassembly": "复制伪代码到反汇编",
+"Copy reference to clipboard": "复制引用到剪贴板",
+"Copy selection to clipboard": "复制选择到剪贴板",
+"Copy size to command line": "复制大小到命令行",
+"Copy to CLI": "复制到命令行",
+"Copy to assembly": "复制到汇编",
+"Copy value": "复制值",
+"Copyright warning": "版权警告",
+"Could not create enum": "无法创建枚举",
+"Count": "数量",
+"Create ASM file": "创建 ASM 文件",
+"Create C file": "创建 C 文件",
+"Create C header file": "创建 C 头文件",
+"Create DIF file": "创建 DIF 文件",
+"Create EXE file": "创建 EXE 文件",
+"Create FLAT group": "创建 FLAT 组",
+"Create HTML file": "创建 HTML 文件",
+"Create INC file": "创建 INC 文件",
+"Create LST file": "创建 LST 文件",
+"Create MAP file": "创建 MAP 文件",
+"Create SIG file": "创建 SIG 文件",
+"Create a HTML file": "创建 HTML 文件",
+"Create a difference file": "创建差异文件",
+"Create a listing file": "创建列表文件",
+"Create a map information file": "创建映射信息文件",
+"Create a new database": "新建数据库",
+"Create a new function in the disassembly": "在反汇编中创建新函数",
+"Create a new function or edit its attributes": "创建新函数或编辑其属性",
+"Create a new segment": "新建段",
+"Create a structure from the selected data": "根据所选数据创建结构体",
+"Create a structure, union, or enumeration": "创建结构体、联合体或枚举",
+"Create a structures, unions, or enumerations": "创建结构体、联合体或枚举",
+"Create alignment directive": "创建对齐指示符",
+"Create an assembler file": "创建汇编文件",
+"Create an executable file": "创建可执行文件",
+"Create an include file": "创建包含文件",
+"Create call graph GDL": "创建调用图 GDL",
+"Create flow chart GDL": "创建流程图 GDL",
+"Create folder": "创建文件夹",
+"Create folder with items": "创建含内容的文件夹",
+"Create function": "创建函数",
+"Create imports segment": "创建导入段",
+"Create new struct type": "新建结构体类型",
+"Create new worklist for files": "为文件新建工作列表",
+"Create or edit a function": "创建或编辑函数",
+"Create segment": "创建段",
+"Create segments": "创建段",
+"Create struct from selection": "从选择创建结构体",
+"Creates a header file from local types": "根据本地类型创建头文件",
+"Cross reference depth": "交叉引用深度",
+"Cross reference parts": "交叉引用部分",
+"Cross reference search": "交叉引用搜索",
+"Cross references": "交叉引用",
+"Cross references tree": "交叉引用树",
+"Current IP line background overlay": "当前 IP 行背景叠加",
+"Current diff region (conflict)": "当前差异区域(冲突)",
+"Current diff region (leave as-is)": "当前差异区域(保持原样)",
+"Current diff region (pick)": "当前差异区域(选择)",
+"Current diff region boundaries (conflict)": "当前差异区域边界(冲突)",
+"Current diff region boundaries (pick)": "当前差异区域边界(选择)",
+"Current line background overlay": "当前行背景叠加",
+"Current location": "当前位置",
+"Current mappings:": "当前映射：",
+"Current offset in the input file": "输入文件中的当前偏移",
+"Current theme:": "当前主题：",
+"Current title": "当前标题",
+"Custom Help": "自定义帮助",
+"Cut": "剪切",
+"Cut text color": "剪切文本颜色",
+"Cut text color (selected row)": "剪切文本颜色(选中行)",
+"DBG file": "DBG 文件",
+"DOS style ($ terminated)": "DOS 风格(以 $ 结尾)",
+"Data": "数据",
+"Data inspector": "数据检查器",
+"Data item": "数据项",
+"Data item (highlighted)": "数据项(高亮)",
+"Data name color": "数据名称颜色",
+"Data numeric color": "数据数值颜色",
+"Data reference": "数据引用",
+"Data reference color": "数据引用颜色",
+"Data reference to tail byte": "指向尾字节的数据引用",
+"Data string color": "数据字符串颜色",
+"Database has been saved": "数据库已保存",
+"Database notepad": "数据库记事本",
+"Database snapshot manager": "数据库快照管理器",
+"Database snapshot options": "数据库快照选项",
+"De-obfuscate arithmetic expressions": "反混淆算术表达式",
+"Debug View": "调试视图",
+"Debug application setup:": "调试应用设置：",
+"Debug registers": "调试寄存器",
+"Debug/Take memory": "调试/创建内存快照",
+"Debugger": "调试器",
+"Debugger options": "调试器选项",
+"Debugger setup": "调试器设置",
+"Debugger window": "调试器窗口",
+"Debugger windows": "调试器窗口",
+"Debugger: detached from process": "调试器：已从进程分离",
+"Debugging": "调试",
+"Decimal": "十进制",
+"Declare a structure variable": "声明结构体变量",
+"Decompile as call": "反编译为调用",
+"Decompiler SDK": "反编译器 SDK",
+"Decrease Font Size": "减小字号",
+"Decrement value": "值减一",
+"Default": "默认",
+"Default 8-bit": "默认 8 位",
+"Default debugger": "默认调试器",
+"Default string literal type": "默认字符串字面量类型",
+"Definition": "定义",
+"Delay for identifier hints": "标识符提示延迟",
+"Delete": "删除",
+"Delete Segment": "删除段",
+"Delete a type": "删除类型",
+"Delete a type member": "删除类型成员",
+"Delete breakpoint": "删除断点",
+"Delete desktop": "删除桌面布局",
+"Delete filter": "删除过滤器",
+"Delete function": "删除函数",
+"Delete function metadata": "删除函数元数据",
+"Delete function start": "删除函数起始",
+"Delete function(s)": "删除函数",
+"Delete group": "删除分组",
+"Delete hidden range": "删除隐藏范围",
+"Delete instruction": "删除指令",
+"Delete orphan comments": "删除孤立注释",
+"Delete pseudocode comments": "删除伪代码注释",
+"Delete segment": "删除段",
+"Delete selected nodes": "删除所选节点",
+"Delete the breakpoint at the current address": "删除当前地址处的断点",
+"Delete the current hidden range, or all hidden ranges in a range": "删除当前隐藏范围,或某范围内的所有隐藏范围",
+"Delete type": "删除类型",
+"Delete type member": "删除类型成员",
+"Delete variadic argument": "删除可变参数",
+"Delete watch": "删除监视",
+"Delete worklist(s) / file(s)": "删除工作列表/文件",
+"Delphi (4 byte length)": "Delphi(4 字节长度)",
+"Demangled Name": "还原后的名称",
+"Demangled names": "还原名称",
+"Dereference depth limit": "解引用深度限制",
+"Dereferencing options": "解引用选项",
+"Description": "描述",
+"Deselect all": "取消全选",
+"Detach from process": "从进程分离",
+"Detach the debugger from the debugged process": "使调试器与被调试进程分离",
+"Details": "详情",
+"Dialog": "对话框",
+"Diff against": "与...对比",
+"Diff against previous revision": "与上一修订对比",
+"Diff against the local file": "与本地文件对比",
+"Diff operation canceled": "差异操作已取消",
+"Diff region (conflict)": "差异区域(冲突)",
+"Diff region (leave as-is)": "差异区域(保持原样)",
+"Diff region (pick)": "差异区域(选择)",
+"Diff region boundaries (conflict)": "差异区域边界(冲突)",
+"Diff region boundaries (leave as-is)": "差异区域边界(保持原样)",
+"Diff region boundaries (pick)": "差异区域边界(选择)",
+"Digraph layout": "有向图布局",
+"Disable": "禁用",
+"Disable breakpoint": "禁用断点",
+"Disable the breakpoint": "禁用断点",
+"Disable undo": "禁用撤销",
+"Disabled breakpoint background": "已禁用断点背景",
+"Disassemble a new file": "反汇编新文件",
+"Disassembly": "反汇编",
+"Disassembly memory organization": "反汇编内存组织",
+"Discard": "放弃",
+"Disconnect": "断开连接",
+"Disconnected from the server": "已断开与服务器的连接",
+"Discriminate on: text length": "区分依据：文本长度",
+"Display at startup": "启动时显示",
+"Display chart of xrefs to current identifier": "显示指向当前标识符的交叉引用图表",
+"Display disassembly line parts": "显示反汇编行的组成部分",
+"Display disassembly lines": "显示反汇编行",
+"Display function offsets": "显示函数偏移",
+"Display graph of function calls": "显示函数调用图",
+"Display graph of xrefs from current identifier": "显示来自当前标识符的交叉引用图",
+"Display graph of xrefs specified by the user": "显示用户指定的交叉引用图",
+"Display list of the currently open windows": "显示当前打开的窗口列表",
+"Display segments in xrefs": "在交叉引用中显示段",
+"Display the current view in full screen": "全屏显示当前视图",
+"Display the graph overview if hidden": "若隐藏则显示图概览",
+"Display the output window if hidden": "若隐藏则显示输出窗口",
+"Display the quick start window": "显示快速开始窗口",
+"Display xref type mark": "显示交叉引用类型标记",
+"Display xref values": "显示交叉引用值",
+"Domain API": "域 API",
+"Don't display this message again": "不再显示此消息",
+"Don't save": "不保存",
+"Double": "双精度",
+"Double Float (64-bit)": "双精度浮点 (64 位)",
+"Double word": "双字",
+"Double word (4 bytes)": "双字(4 字节)",
+"Down": "向下",
+"Drag a file here to disassemble it": "将文件拖到此处进行反汇编",
+"Drag items": "拖动项",
+"Drag this title to dock somewhere else": "拖动此标题以停靠到其他位置",
+"Draw node shadows": "绘制节点阴影",
+"Draw shadows for graph nodes": "为图形节点绘制阴影",
+"Dump UI texts": "转储 UI 文本",
+"Dump database to IDC file": "转储数据库到 IDC 文件",
+"Dump file": "转储文件",
+"Dump history": "转储历史",
+"Dump type information to IDC file": "将类型信息转储到 IDC 文件",
+"Dump typeinfo to IDC file": "转储类型信息到 IDC 文件",
+"Duplicate a structure/union type": "复制结构体/联合类型",
+"Duplicate struct type": "复制结构体类型",
+"Dword": "双字",
+"Edges": "边",
+"Edit": "编辑",
+"Edit a symbolic constant": "编辑符号常量",
+"Edit argument location": "编辑参数位置",
+"Edit block comment": "编辑块注释",
+"Edit breakpoint": "编辑断点",
+"Edit breakpoint settings": "编辑断点设置",
+"Edit comment": "编辑注释",
+"Edit debugger memory region": "编辑调试器内存区域",
+"Edit debugger options": "编辑调试器选项",
+"Edit debugger specific options": "编辑调试器特定选项",
+"Edit enum member": "编辑枚举成员",
+"Edit exceptions": "编辑异常",
+"Edit function": "编辑函数",
+"Edit function attributes": "编辑函数属性",
+"Edit function prototype": "编辑函数原型",
+"Edit group text": "编辑分组文本",
+"Edit imported function": "编辑导入函数",
+"Edit location": "编辑位置",
+"Edit location:": "编辑位置：",
+"Edit script": "编辑脚本",
+"Edit segment": "编辑段",
+"Edit segment attributes": "编辑段属性",
+"Edit shortcuts": "编辑快捷键",
+"Edit type": "编辑类型",
+"Edit user": "编辑用户",
+"Edit worklist": "编辑工作列表",
+"Edited": "已编辑",
+"Empty lines": "空行",
+"Empty navigation stack": "清空导航栈",
+"Enable": "启用",
+"Enable autocomplete for curly braces": "启用花括号自动补全",
+"Enable autocomplete for types": "启用类型自动补全",
+"Enable autocomplete in forms": "启用表单自动补全",
+"Enable breakpoint": "启用断点",
+"Enable dereferencing": "启用解引用",
+"Enable graph animation": "启用图形动画",
+"Enable history sharing": "启用历史共享",
+"Enable the breakpoint": "启用断点",
+"Enable type hints": "启用类型提示",
+"Enable undo": "启用撤销",
+"Enabled": "已启用",
+"Enabled only": "仅启用项",
+"Encoding name": "编码名称",
+"Encoding of output files": "输出文件的编码",
+"End": "结束",
+"End address": "结束地址",
+"End offset": "结束偏移",
+"Enter a comment": "输入注释",
+"Enter a new worklist description": "输入新的工作列表描述",
+"Enter a regular comment": "输入常规注释",
+"Enter an encoding name": "输入编码名称",
+"Enter anterior lines": "插入前置行",
+"Enter any Python expression": "输入任意 Python 表达式",
+"Enter comment": "输入注释",
+"Enter lines following the generated lines": "输入生成行之后的行",
+"Enter lines preceding the generated lines": "输入生成行之前的行",
+"Enter mark description": "输入标记描述",
+"Enter new path or name": "输入新路径或名称",
+"Enter posterior lines": "插入后置行",
+"Enter repeatable comment": "输入可重复注释",
+"Enter search substring": "输入搜索子串",
+"Enter snapshot description": "输入快照描述",
+"Enter snippet name": "输入片段名称",
+"Enter the current operand manually": "手动输入当前操作数",
+"Enter the new site data": "输入新的站点数据",
+"Enter the search substring": "输入搜索子串",
+"Enter the signature file": "输入签名文件",
+"Enter the type library file": "输入类型库文件",
+"Entry points": "入口点",
+"Enum": "枚举",
+"Enum member": "枚举成员",
+"Enums": "枚举",
+"Error": "错误",
+"Error operand": "错误操作数",
+"Exception handler code": "异常处理代码",
+"Exception handling": "异常处理",
+"Exception table has been reloaded": "异常表已重载",
+"Exception with this code already exists": "该代码的异常已存在",
+"Exception with this name already exists": "该名称的异常已存在",
+"Execute": "执行",
+"Execute a script command": "执行脚本命令",
+"Execute a script file": "执行脚本文件",
+"Execute each instruction": "逐条执行指令",
+"Execute each instruction backwards": "向后逐条执行指令",
+"Execute instructions backwards without entering into functions": "向后执行指令,不进入函数",
+"Execute instructions until instruction under the cursor is reached": "执行指令,直到到达光标所在指令",
+"Execute instructions without entering into functions": "执行指令,不进入函数",
+"Execute script": "执行脚本",
+"Exit": "退出",
+"Expand all": "全部展开",
+"Expand children": "展开子节点",
+"Expand current node": "展开当前节点",
+"Expand entire tree": "展开整棵树",
+"Expand node": "展开节点",
+"Expand parents": "展开父节点",
+"Expand selected folders": "展开所选文件夹",
+"Experimental version": "实验版本",
+"Export": "导出",
+"Export data": "导出数据",
+"Export local types": "导出本地类型",
+"Export script to file": "导出脚本到文件",
+"Export selected breakpoints": "导出所选断点",
+"Export to file": "导出到文件",
+"Export to header file": "导出到头文件",
+"Export trace to text file": "导出跟踪到文本文件",
+"Exports": "导出表",
+"External symbol": "外部符号",
+"External symbol (highlighted)": "外部符号(高亮)",
+"Extra Comments": "附加注释",
+"Extra line": "附加行",
+"Extract function": "提取函数",
+"FLIRT signature file": "FLIRT 签名文件",
+"Failed": "失败",
+"Far Code": "远代码",
+"Far Data": "远数据",
+"Far function": "远函数",
+"Feature Flags": "功能标志",
+"Field type": "字段类型",
+"File": "文件",
+"File extension associations": "文件扩展名关联",
+"File history": "文件历史",
+"Fill segment gaps": "填充段间隙",
+"Filter": "筛选",
+"Filter list": "过滤器列表",
+"Find": "查找",
+"Find a register value": "查找寄存器值",
+"Find breakpoint in list": "在列表中查找断点",
+"Find functions": "查找函数",
+"Find in vault": "在保管库中查找",
+"Find next": "查找下一个",
+"Find path": "查找路径",
+"Find register definition": "查找寄存器定义",
+"Find register use": "查找寄存器使用",
+"Find the next fixup in the code": "查找代码中的下一个修正项",
+"Finish": "完成",
+"Fit whole program": "适应整个程序",
+"Fit window": "适应窗口",
+"Flags": "标志",
+"Float": "浮动",
+"Floating point": "浮点数",
+"Floating/integer type mismatch": "浮点/整数类型不匹配",
+"Flow chart": "流程图",
+"Focus command line": "聚焦命令行",
+"Focus other widget": "聚焦其他窗口",
+"Folder": "文件夹",
+"Follow in disassembly": "在反汇编中跟随",
+"Follow in hex dump": "在十六进制转储中跟随",
+"Font": "字体",
+"For information about purchases please visit:": "如需购买信息，请访问：",
+"Forbid assignment propagation": "禁止赋值传播",
+"Force BL call": "强制 BL 调用",
+"Force BL jump": "强制 BL 跳转",
+"Force call type": "强制调用类型",
+"Force zero offset field": "强制零偏移字段",
+"Foreign node": "外部节点",
+"Full screen": "全屏",
+"Fullscreen": "全屏",
+"Function": "函数",
+"Function calls": "函数调用",
+"Function has prototype": "函数有原型",
+"Function name": "函数名称",
+"Function name color": "函数名称颜色",
+"Function offsets": "函数偏移",
+"Function returns": "函数返回",
+"Function tracing": "函数跟踪",
+"Functions": "函数",
+"Functions window": "函数窗口",
+"Fuzzy matching": "模糊匹配",
+"General": "常规",
+"General notes about the current database": "当前数据库的常规说明",
+"General registers": "通用寄存器",
+"Generate HTML": "生成 HTML",
+"Generate microcode": "生成微码",
+"Generate names": "生成名称",
+"Generate pseudocode": "生成伪代码",
+"Generate serial names": "生成序列名称",
+"Get revision": "获取修订",
+"Get revision options": "获取修订选项",
+"Get revision with options": "带选项获取修订",
+"Get the latest revision": "获取最新修订",
+"Go": "开始",
+"Go to the next saved position": "转到下一个保存的位置",
+"Graph": "图",
+"Graph Overview": "图形概览",
+"Graph origin": "图原点",
+"Graph overview": "图概览",
+"Graph print page layout": "图形打印页面布局",
+"Graph view": "图形视图",
+"Graphs": "图形",
+"Group frame": "分组框架",
+"Group nodes": "分组节点",
+"Header color": "表头颜色",
+"Help": "帮助",
+"Hex View": "十六进制视图",
+"Hex View-1": "十六进制视图-1",
+"Hex display": "十六进制显示",
+"Hex dump": "十六进制转储",
+"Hex view": "十六进制视图",
+"Hex-Rays Decompiler Options": "Hex-Rays 反编译器选项",
+"Hex-Rays End User License Agreement": "Hex-Rays 最终用户许可协议",
+"HexVault Client Name": "HexVault 客户端名称",
+"HexVault Local Site": "HexVault 本地站点",
+"HexVault Root Directory": "HexVault 根目录",
+"HexVault Server Address": "HexVault 服务器地址",
+"HexVault User": "HexVault 用户",
+"HexVault: Disconnected": "HexVault：已断开",
+"HexVault: No info available": "HexVault：无可用信息",
+"Hexadecimal": "十六进制",
+"Hidden Messages": "已隐藏消息",
+"Hidden name": "隐藏名称",
+"Hide": "隐藏",
+"Hide 'Common' panel": "隐藏“常用”面板",
+"Hide all": "全部隐藏",
+"Hide all functions, structs or enums": "隐藏所有函数、结构体或枚举",
+"Hide all groups": "隐藏所有分组",
+"Hide all toolbars": "隐藏所有工具栏",
+"Hide column": "隐藏列",
+"Hide default debugger segment names": "隐藏默认调试器段名",
+"Hide function": "隐藏函数",
+"Hide function from xref tree": "从交叉引用树中隐藏函数",
+"Hide group": "隐藏分组",
+"Hide library functions": "隐藏库函数",
+"Hide node": "隐藏节点",
+"Hide sub structures without sub unions": "隐藏无子联合的子结构体",
+"High register": "高寄存器",
+"High suspiciousness limit": "高可疑度上限",
+"Highlight color": "高亮颜色",
+"Highlight color (selected row)": "高亮颜色(选中行)",
+"Highlight color 1": "高亮颜色 1",
+"Highlight color 2": "高亮颜色 2",
+"Highlight outline": "高亮轮廓",
+"Highlighted edge": "高亮的边",
+"Hint View": "提示视图",
+"Hints": "提示",
+"How to buy IDA": "如何购买 IDA",
+"I Agree": "我同意",
+"I Disagree": "我不同意",
+"IDA Colors": "IDA 颜色",
+"IDA Feeds": "IDA 订阅源",
+"IDA SDK": "IDA SDK",
+"IDA View-A": "IDA 视图-A",
+"IDA home page": "IDA 主页",
+"IDA support forum": "IDA 支持论坛",
+"IDA: Quick start": "IDA: 快速开始",
+"IDC Functions": "IDC 函数",
+"IDS/IDT file": "IDS/IDT 文件",
+"If column": "If 列",
+"Ignore": "忽略",
+"Illegal address range": "非法地址范围",
+"Illegal configuration keyword": "非法的配置关键字",
+"Illegal hotkey": "非法热键",
+"Illegal memory region boundaries": "非法内存区域边界",
+"Immediate value": "立即数",
+"Immediately convert": "立即转换",
+"Import": "导入",
+"Import from file": "从文件导入",
+"Import script from file": "从文件导入脚本",
+"Imported function color": "导入函数颜色",
+"Imported name": "导入名称",
+"Imports": "导入表",
+"Include Local": "包含本地",
+"Include in names list": "包含在名称列表中",
+"Include segment addresses": "包含段地址",
+"Increase Font Size": "增大字号",
+"Increment value": "值加一",
+"Indexer preview": "索引器预览",
+"Indexer type listing": "索引器类型列表",
+"Indicator enabled": "指示器已启用",
+"Information": "信息",
+"Input file": "输入文件",
+"Insert": "插入",
+"Insert assertion": "插入断言",
+"Insert bytes into a structure": "向结构体插入字节",
+"Insert gap": "插入空隙",
+"Instruction": "指令",
+"Instruction (highlighted)": "指令(高亮)",
+"Instruction indentation": "指令缩进",
+"Instruction tracing": "指令跟踪",
+"Intel 80x86 processors": "Intel 80x86 处理器",
+"Interactive merge": "交互式合并",
+"Invert": "反选",
+"Invert selection": "反选",
+"Invert sign": "反转符号",
+"Jump": "跳转",
+"Jump by name": "按名称跳转",
+"Jump by selector": "按选择器跳转",
+"Jump external to function": "跳转到函数外部",
+"Jump in a new hex window": "在新十六进制窗口中跳转",
+"Jump in a new window": "在新窗口中跳转",
+"Jump in current function": "在当前函数内跳转",
+"Jump target": "跳转目标",
+"Jump to": "跳转到",
+"Jump to IP": "跳转到 IP",
+"Jump to a cross reference from current location": "从当前位置跳转到交叉引用",
+"Jump to a neighboring node (down)": "跳转到相邻节点(下)",
+"Jump to a neighboring node (up)": "跳转到相邻节点(上)",
+"Jump to address": "跳转到地址",
+"Jump to end of line/window bottom/end": "跳转到行尾/窗口底部/末尾",
+"Jump to entry point": "跳转到入口点",
+"Jump to file offset": "跳转到文件偏移",
+"Jump to function": "跳转到函数",
+"Jump to listing end": "跳转到列表末尾",
+"Jump to listing start": "跳转到列表开头",
+"Jump to local type": "跳转到本地类型",
+"Jump to marked position": "跳转到标记位置",
+"Jump to matching brace": "跳转到匹配的括号",
+"Jump to module base": "跳转到模块基址",
+"Jump to next fixup": "跳转到下一修正",
+"Jump to next function": "跳转到下一个函数",
+"Jump to next position": "跳转到下一个位置",
+"Jump to offset": "跳转到偏移",
+"Jump to operand": "跳转到操作数",
+"Jump to prev function": "跳转到上一个函数",
+"Jump to previous position": "跳转到上一个位置",
+"Jump to problem": "跳转到问题",
+"Jump to pseudocode": "跳转到伪代码",
+"Jump to pseudocode in a new view": "在新视图中跳转到伪代码",
+"Jump to segment": "跳转到段",
+"Jump to segment register": "跳转到段寄存器",
+"Jump to start of line/window top/start": "跳转到行首/窗口顶部/开头",
+"Jump to structure definition": "跳转到结构体定义",
+"Jump to the bottom of the window": "跳转到窗口底部",
+"Jump to the next function": "跳转到下一个函数",
+"Jump to the previous function": "跳转到上一个函数",
+"Jump to the selected cross reference": "跳转到所选交叉引用",
+"Jump to the selected cross reference to operand": "跳转到所选的操作数交叉引用",
+"Jump to the selected entry point": "跳转到所选入口点",
+"Jump to the selected function": "跳转到所选函数",
+"Jump to the selected marked position": "跳转到所选标记位置",
+"Jump to the selected name": "跳转到所选名称",
+"Jump to the selected problematic location": "跳转到所选问题位置",
+"Jump to the selected segment": "跳转到所选段",
+"Jump to the selected segment register change point": "跳转到所选的段寄存器变化点",
+"Jump to the specified address": "跳转到指定地址",
+"Jump to the top of the window": "跳转到窗口顶部",
+"Jump to xref": "跳转到交叉引用",
+"Jump to xref globally": "全局跳转到交叉引用",
+"Jump to xref to operand": "跳转到操作数的交叉引用",
+"Jump under the cursor": "跳转到光标下",
+"Just continue": "继续执行",
+"Keep 'local' change": "保留“本地”更改",
+"Keep local change": "保留本地更改",
+"Kernel analysis options": "内核分析选项",
+"Kernel options": "内核选项",
+"Keyboard definition syntax is:": "键盘定义语法为：",
+"Keyword 1": "关键字 1",
+"Keyword 2": "关键字 2",
+"Keyword 3": "关键字 3",
+"Keyword color": "关键字颜色",
+"Keywords": "关键字",
+"Keywords (offset, byte ptr, near)": "关键字(offset, byte ptr, near)",
+"Kind": "种类",
+"Language": "语言",
+"Last active": "最近活动的",
+"Last changed": "最近更改的",
+"Last used": "最近使用的",
+"Layout calculation": "布局计算",
+"Layout graph": "布局图形",
+"Layout sample": "布局示例",
+"Lazy jumps": "惰性跳转",
+"Legend visible": "图例可见",
+"Length": "长度",
+"Library": "库",
+"Library function": "库函数",
+"Library function (highlighted)": "库函数(高亮)",
+"Library function color": "库函数颜色",
+"Library function name": "库函数名称",
+"Library name": "库名称",
+"License": "许可",
+"License Id": "许可证 ID",
+"License chooser": "许可证选择器",
+"License expires on": "许可证到期于",
+"License manager": "许可证管理器",
+"Line": "行",
+"Line background: Default": "行背景：默认",
+"Line background: Selected": "行背景：选中",
+"Line padding bottom": "行底部内边距",
+"Line padding top": "行顶部内边距",
+"Line prefix": "行前缀",
+"Line prefix example:": "行前缀示例：",
+"Line prefix: Current item": "行前缀：当前项",
+"Line prefix: Current line": "行前缀：当前行",
+"Line prefix: Data bytes": "行前缀：数据字节",
+"Line prefix: Hidden line": "行前缀：隐藏行",
+"Line prefix: Library function": "行前缀：库函数",
+"Line prefix: Lumina": "行前缀：Lumina",
+"Line prefix: Regular function": "行前缀：常规函数",
+"Line prefix: Single instruction": "行前缀：单条指令",
+"Line prefix: Unexplored byte": "行前缀：未探索字节",
+"Line prefixes": "行前缀",
+"List cross references from": "列出从...的交叉引用",
+"List cross references to": "列出到...的交叉引用",
+"List of applied library modules": "已应用库模块列表",
+"List of available library modules": "可用库模块列表",
+"List of problems": "问题列表",
+"Little endian": "小端",
+"Load": "加载",
+"Load DWARF file": "加载 DWARF 文件",
+"Load a FLIRT signature file": "加载 FLIRT 签名文件",
+"Load a debug information file (DBG)": "加载调试信息文件 (DBG)",
+"Load a debug information file (PDB)": "加载调试信息文件 (PDB)",
+"Load a debug information file (TDS)": "加载调试信息文件 (TDS)",
+"Load a new file": "加载新文件",
+"Load a new file or database": "加载新文件或数据库",
+"Load a symbol file (IDS)": "加载符号文件 (IDS)",
+"Load additional binary file": "加载附加二进制文件",
+"Load as code segment": "作为代码段加载",
+"Load debug information from a DWARF file": "从 DWARF 文件加载调试信息",
+"Load debug symbols": "加载调试符号",
+"Load desktop": "加载桌面布局",
+"Load file": "加载文件",
+"Load overlay": "加载覆盖层",
+"Load resources": "加载资源",
+"Load script": "加载脚本",
+"Load the old disassembly": "加载旧反汇编",
+"Load trace": "加载跟踪",
+"Loaded Type Libraries": "已加载的类型库",
+"Loading offset": "加载偏移",
+"Loading options": "加载选项",
+"Loading segment": "加载段",
+"Local Bochs debugger": "本地 Bochs 调试器",
+"Local PIN debugger": "本地 PIN 调试器",
+"Local Replayer debugger": "本地 Replayer 调试器",
+"Local Types": "本地类型",
+"Local Types bookmarks": "本地类型书签",
+"Local Types: Tree": "本地类型：树",
+"Local Windows debugger": "本地 Windows 调试器",
+"Local files": "本地文件",
+"Local name": "本地名称",
+"Local name/parameter color": "本地名称/参数颜色",
+"Local types": "本地类型",
+"Local variable name": "局部变量名称",
+"Locals": "局部变量",
+"Lock graph layout": "锁定图形布局",
+"Lock highlight": "锁定高亮",
+"Lock highlight color 8": "锁定高亮颜色 8",
+"Lock/unlock highlight color 1": "锁定/解锁高亮颜色 1",
+"Lock/unlock highlight color 2": "锁定/解锁高亮颜色 2",
+"Lock/unlock highlight color 3": "锁定/解锁高亮颜色 3",
+"Lock/unlock highlight color 4": "锁定/解锁高亮颜色 4",
+"Lock/unlock highlight color 5": "锁定/解锁高亮颜色 5",
+"Lock/unlock highlight color 6": "锁定/解锁高亮颜色 6",
+"Lock/unlock highlight color 7": "锁定/解锁高亮颜色 7",
+"Lock/unlock the current highlight": "锁定/解锁当前高亮",
+"Long Double (80-bit)": "长双精度 (80 位)",
+"Low register": "低寄存器",
+"Low suspiciousness limit": "低可疑度上限",
+"Lower maturity level": "降低成熟度",
+"Lumina": "Lumina",
+"Lumina Metadata History": "Lumina 元数据历史",
+"Lumina function": "Lumina 函数",
+"Lumina function (highlighted)": "Lumina 函数(高亮)",
+"MCP Configuration": "MCP 配置",
+"Main form splitter": "主窗体分隔条",
+"Main splitter": "主分隔条",
+"Main window": "主窗口",
+"Manage": "管理",
+"Manual": "手动",
+"Manual instruction": "手动指令",
+"Manual load": "手动加载",
+"Manual memory regions": "手动内存区域",
+"Manual operand": "手动操作数",
+"Map to another type": "映射到其他类型",
+"Map to another variable": "映射到其他变量",
+"Map to other widget": "映射到其他窗口",
+"Mark as autogenerated": "标记为自动生成",
+"Mark as decompiled": "标记为已反编译",
+"Mark position": "标记位置",
+"Marked positions": "标记的位置",
+"Match case": "区分大小写",
+"Max children recursion": "最大子节点递归",
+"Max nodes per level": "每层最大节点数",
+"Max number of nodes": "最大节点数",
+"Max parents recursion": "最大父节点递归",
+"Memory mapping": "内存映射",
+"Merge environments": "合并环境",
+"Message window": "消息窗口",
+"Messages background color": "消息背景颜色",
+"Messages color": "消息颜色",
+"Metadata History": "元数据历史",
+"Migrate to another worklist": "迁移到其他工作列表",
+"Minimap": "缩略图",
+"Misc": "杂项",
+"Miscellaneous": "杂项",
+"Mnemonic": "助记符",
+"Modified by user": "用户已修改",
+"Modify filters": "修改过滤器",
+"Modify register value": "修改寄存器值",
+"Modify value": "修改值",
+"Module": "模块",
+"Module list": "模块列表",
+"Modules": "模块",
+"More hidden nodes": "更多隐藏节点",
+"Mouse": "鼠标",
+"Mouse wheel resizes hint window": "滚轮调整提示窗口大小",
+"Move current segment": "移动当前段",
+"Move multiple segments": "移动多个段",
+"Move one character left": "左移一个字符",
+"Move one character right": "右移一个字符",
+"Move one line down": "下移一行",
+"Move one line up": "上移一行",
+"Move one page down": "下移一页",
+"Move one page up": "上移一页",
+"Move one word left": "左移一个单词",
+"Move one word right": "右移一个单词",
+"Move previous char, in current column": "移到当前列的前一字符",
+"Move segment(s)": "移动段",
+"Move to beginning of current column": "移到当前列开头",
+"Move to beginning of line": "移到行首",
+"Move to beginning of text": "移到文本开头",
+"Move to end of line": "移到行尾",
+"Move to end of text": "移到文本末尾",
+"Move to folder": "移动到文件夹",
+"Move to next conflict": "移到下一个冲突",
+"Move to next difference": "移到下一个差异",
+"Move to previous conflict": "移到上一个冲突",
+"Move to previous difference": "移到上一个差异",
+"Name": "名称",
+"Name generation": "名称生成",
+"Name of the remote host": "远程主机名称",
+"Name representation": "名称表示",
+"Names": "名称",
+"Names window": "名称窗口",
+"Navigate to next search match": "导航到下一个搜索匹配",
+"Navigate to previous search match": "导航到上一个搜索匹配",
+"Navigation Band": "导航带",
+"Navigation band": "导航带",
+"Navigation band refresh interval (miliseconds)": "导航带刷新间隔(毫秒)",
+"Navigation dock": "导航停靠窗",
+"Navigation history": "导航历史",
+"Navigator": "导航器",
+"Near 8bit, Far 16bit": "近 8 位，远 16 位",
+"Near Code": "近代码",
+"Near Data": "近数据",
+"Never convert": "从不转换",
+"New": "新建",
+"New exception": "新异常",
+"New instance": "新建实例",
+"New name": "新名称",
+"New prototype": "新原型",
+"New search - Alt+T": "新搜索 - Alt+T",
+"New worklist": "新工作列表",
+"Next": "下一步",
+"Next CLI": "下一个命令行",
+"Next Match": "下一个匹配",
+"Next chunk": "下一块",
+"Next code": "下一个代码",
+"Next conflict": "下一个冲突",
+"Next data": "下一个数据",
+"Next explored": "下一个已探索",
+"Next immediate value": "下一个立即数",
+"Next match": "下一个匹配",
+"Next search result": "下一个搜索结果",
+"Next sequence of bytes": "下一个字节序列",
+"Next text": "下一个文本",
+"Next unexplored": "下一个未探索",
+"Next void": "下一个空白",
+"Next window": "下一个窗口",
+"No": "否",
+"No arguments": "无参数",
+"No debugger": "无调试器",
+"No edge": "无边",
+"No editor configured": "未配置编辑器",
+"No function to operate on": "没有可操作的函数",
+"No hints if debugger is active": "调试器活动时不显示提示",
+"No matches": "无匹配",
+"No openable files have been found": "未找到可打开的文件",
+"No value found": "未找到值",
+"No view to search": "没有可搜索的视图",
+"No, I have changed my mind": "不，我改主意了",
+"Node shadow": "节点阴影",
+"Nodes": "节点",
+"None": "无",
+"Normal edge": "普通边",
+"Normal title": "普通标题",
+"Not function": "非函数",
+"Notepad": "记事本",
+"Nothing found": "未找到任何内容",
+"Number": "数值",
+"Number (default)": "数值（默认）",
+"Number of displayed xrefs": "显示的交叉引用数量",
+"Number of items in navigation stack drop-down menus": "导航栈下拉菜单中的项数",
+"Number of lines for auto scroll": "自动滚动的行数",
+"Number of lines for identifier hints": "标识符提示的行数",
+"Number of opcode bytes": "操作码字节数",
+"Number of spaces for tabulations": "制表符空格数",
+"Numeric constant": "数值常量",
+"Numeric constant color": "数值常量颜色",
+"Numeric constant in data directive": "数据指示符中的数值常量",
+"OK": "确定",
+"Objective-C Options": "Objective-C 选项",
+"Occurrences of notyped number": "无类型数字的出现次数",
+"Occurrences of void operands": "void 操作数的出现次数",
+"Occurrences of:": "出现次数：",
+"Octa word": "八字",
+"Octal": "八进制",
+"Offset": "偏移量",
+"Offset (current segment)": "偏移量（当前段）",
+"Offset (data segment)": "偏移量（数据段）",
+"Offset (struct)": "偏移量（结构体）",
+"Offset (user-defined)": "偏移量（用户定义）",
+"Offset by (any segment)": "偏移量（任意段）",
+"Offset delta:": "偏移增量：",
+"Offset from the loading segment": "相对于加载段的偏移",
+"Offset in the stack frame": "栈帧中的偏移",
+"Online help": "在线帮助",
+"Only scalar values can be set": "只能设置标量值",
+"Opcode bytes": "操作码字节",
+"Open": "打开",
+"Open IDA Feeds": "打开 IDA Feeds",
+"Open Search": "打开搜索",
+"Open a new IDA instance": "打开新的 IDA 实例",
+"Open a new watch window": "打开新的监视窗口",
+"Open a source file": "打开源文件",
+"Open bookmarks window": "打开书签窗口",
+"Open breakpoints window": "打开断点窗口",
+"Open calculator": "打开计算器",
+"Open cross references tree": "打开交叉引用树",
+"Open cross references window": "打开交叉引用窗口",
+"Open debugging window": "打开调试窗口",
+"Open disassembly view": "打开反汇编视图",
+"Open exports window": "打开导出窗口",
+"Open file": "打开文件",
+"Open function calls window": "打开函数调用窗口",
+"Open functions window": "打开函数窗口",
+"Open hexadecimal view": "打开十六进制视图",
+"Open imports window": "打开导入窗口",
+"Open license manager": "打开许可证管理器",
+"Open local type definitions window": "打开本地类型定义窗口",
+"Open local variables window": "打开局部变量窗口",
+"Open modules window": "打开模块窗口",
+"Open names window": "打开名称窗口",
+"Open new proximity browser": "打开新的邻近浏览器",
+"Open options dialog": "打开选项对话框",
+"Open picture": "打开图片",
+"Open picture in default viewer": "用默认查看器打开图片",
+"Open problems window": "打开问题窗口",
+"Open register window": "打开寄存器窗口",
+"Open remote file": "打开远程文件",
+"Open search section in xref tree": "在交叉引用树中打开搜索栏",
+"Open segment registers window": "打开段寄存器窗口",
+"Open segments window": "打开段窗口",
+"Open selectors window": "打开选择子窗口",
+"Open signatures window": "打开签名窗口",
+"Open source file": "打开源文件",
+"Open string window": "打开字符串窗口",
+"Open subviews": "打开子视图",
+"Open the containing folder": "打开所在文件夹",
+"Open the stack trace window": "打开栈回溯窗口",
+"Open the stack variables window": "打开栈变量窗口",
+"Open the watch list window": "打开监视列表窗口",
+"Open this revision": "打开此修订",
+"Open threads window": "打开线程窗口",
+"Open tracing window": "打开跟踪窗口",
+"Open type editor for type": "为类型打开类型编辑器",
+"Open types window": "打开类型窗口",
+"Operand": "操作数",
+"Operand representation": "操作数表示",
+"Operand type": "操作数类型",
+"Options": "选项",
+"Ordinal": "序号",
+"Original bytes": "原始字节",
+"Orthogonal layout": "正交布局",
+"Other": "其他",
+"Out of memory": "内存不足",
+"Outlined code": "轮廓代码",
+"Output": "输出",
+"Output window": "输出窗口",
+"Overview": "概览",
+"Overview uses gradients": "概览使用渐变",
+"PDB file": "PDB 文件",
+"Packed real": "压缩实数",
+"Pan the screen down one line": "屏幕下移一行",
+"Pan the screen up one line": "屏幕上移一行",
+"Paragraph (16 bytes)": "节(16 字节)",
+"Parse C header file": "解析 C 头文件",
+"Pascal style (1 byte length)": "Pascal 风格(1 字节长度)",
+"Pass count": "通过次数",
+"Passed to": "传递给",
+"Password for the remote host": "远程主机的密码",
+"Paste": "粘贴",
+"Patch program": "补丁程序",
+"Patched bytes": "已修补字节",
+"Patches": "补丁",
+"Path": "路径",
+"Path of the application to launch": "要启动的应用程序路径",
+"Pause or continue the debugged process": "暂停或继续被调试进程",
+"Pause process": "暂停进程",
+"Perform bitwise negation of the current operand": "对当前操作数按位取反",
+"Perm": "权限",
+"Pick 'remote' change": "采用“远端”更改",
+"Pick all changes": "采用所有更改",
+"Pick other (removal)": "采用其他(删除)",
+"Pick remote change": "采用远端更改",
+"Pick this": "采用此项",
+"Pin node(s)": "固定节点",
+"Please choose a folder": "请选择文件夹",
+"Please choose a structure": "请选择结构体",
+"Please choose a symbol": "请选择符号",
+"Please choose an enum": "请选择枚举",
+"Please choose how to continue": "请选择如何继续",
+"Please confirm": "请确认",
+"Please enter a description": "请输入描述",
+"Please enter a number": "请输入数字",
+"Please enter a segment base paragraph": "请输入段基址节",
+"Please enter a string": "请输入字符串",
+"Please enter a unique argument name": "请输入唯一的参数名称",
+"Please enter a unique field name": "请输入唯一的字段名称",
+"Please enter an address": "请输入地址",
+"Please enter file path": "请输入文件路径",
+"Please enter folder name": "请输入文件夹名称",
+"Please enter new node text": "请输入新的节点文本",
+"Please enter new type declaration": "请输入新的类型声明",
+"Please enter search string": "请输入搜索字符串",
+"Please enter text": "请输入文本",
+"Please enter the argument name": "请输入参数名称",
+"Please enter the function name": "请输入函数名称",
+"Please enter the watch address": "请输入监视地址",
+"Please enter trace description": "请输入跟踪描述",
+"Please provide a license file": "请提供许可证文件",
+"Please select a license": "请选择许可证",
+"Please select a node": "请选择节点",
+"Please select a trace": "请选择跟踪",
+"Please select an output file": "请选择输出文件",
+"Please select data to export": "请选择要导出的数据",
+"Please select mapping to remove": "请选择要移除的映射",
+"Please select the destination type": "请选择目标类型",
+"Please select the file to copy": "请选择要复制的文件",
+"Please select the function parent(s)": "请选择父函数",
+"Please select the parent function": "请选择父函数",
+"Please specify a new memory region": "请指定新的内存区域",
+"Please specify a search string": "请指定搜索字符串",
+"Please specify a viewer application": "请指定查看器应用程序",
+"Please specify register": "请指定寄存器",
+"Please specify the application name": "请指定应用程序名称",
+"Please specify the output file": "请指定输出文件",
+"Please specify the remote host name": "请指定远程主机名称",
+"Please wait": "请稍候",
+"Plugins": "插件",
+"Polar layout": "极坐标布局",
+"Position where indented comments begin": "缩进注释的起始位置",
+"Position where instructions begin": "指令的起始位置",
+"Preferences": "首选项",
+"Preprocessor": "预处理器",
+"Preserve case": "保留大小写",
+"Previous": "上一步",
+"Previous CLI": "上一个命令行",
+"Previous Match": "上一个匹配",
+"Previous chunk": "上一块",
+"Previous conflict": "上一个冲突",
+"Previous match": "上一个匹配",
+"Previous search result": "上一个搜索结果",
+"Previous window": "上一个窗口",
+"Print flow chart labels": "打印流程图标签",
+"Print graph": "打印图形",
+"Print internal flags": "打印内部标志",
+"Print internal flags in the messages window": "在消息窗口中打印内部标志",
+"Print register value": "打印寄存器值",
+"Print segment registers": "打印段寄存器",
+"Print segment registers in the messages window": "在消息窗口中打印段寄存器",
+"Private server authentication": "私有服务器认证",
+"Problems": "问题",
+"Proceed to the next step": "进入下一步",
+"Proceed to this step": "进入本步骤",
+"Process exit": "进程退出",
+"Process options": "进程选项",
+"Process start": "进程启动",
+"Processor analysis options": "处理器分析选项",
+"Processor options": "处理器选项",
+"Processor specific analysis options": "处理器特定的分析选项",
+"Processor specific options": "处理器特定选项",
+"Processor type (double-click to set)": "处理器类型(双击设置)",
+"Produce file": "生成文件",
+"Program Segmentation": "程序分段",
+"Properties": "属性",
+"Prototype (user-defined):": "原型(用户定义)：",
+"Proximity browser": "邻近浏览器",
+"Proximity view": "邻近视图",
+"Pseudocode": "伪代码",
+"Public": "公开",
+"Public name": "公开名称",
+"Pull all": "全部拉取",
+"Pull all metadata from the primary server": "从主服务器拉取所有元数据",
+"Pull all metadata from the secondary server": "从备用服务器拉取所有元数据",
+"Pull function": "拉取函数",
+"Pull function metadata from the primary server": "从主服务器拉取函数元数据",
+"Pull function metadata from the secondary server": "从备用服务器拉取函数元数据",
+"Pull function start": "拉取函数起始",
+"Push all": "全部推送",
+"Push all metadata to the primary server": "向主服务器推送所有元数据",
+"Push all metadata to the secondary server": "向备用服务器推送所有元数据",
+"Push function": "推送函数",
+"Push function metadata to the primary server": "向主服务器推送函数元数据",
+"Push function metadata to the secondary server": "向备用服务器推送函数元数据",
+"Push function start": "推送函数起始",
+"Python API": "Python API",
+"Quadro word": "四字",
+"Quadro word (8 bytes)": "四字(8 字节)",
+"Question": "询问",
+"Quick debug view": "快速调试视图",
+"Quick filter": "快速过滤",
+"Quick plugins view": "快速插件视图",
+"Quick rename": "快速重命名",
+"Quick run plugins": "快速运行插件",
+"Quick start": "快速开始",
+"Quick view": "快速视图",
+"Quickly open a debug view": "快速打开调试视图",
+"Quickly open a view": "快速打开视图",
+"Quickly run a plugin": "快速运行插件",
+"Quit": "退出",
+"Qword": "四字",
+"Radial tree layout": "径向树布局",
+"Raise maturity level": "提升成熟度",
+"Re-analyze global block functions": "重新分析全局块函数",
+"Read only data": "只读数据",
+"Real name": "真实名称",
+"Reanalyze program": "重新分析程序",
+"Reanalyze the whole program": "重新分析整个程序",
+"Rebase program": "重设程序基址",
+"Rebuild": "重建",
+"Recent scripts": "最近的脚本",
+"Recurse into library functions": "递归进入库函数",
+"Redo": "重做",
+"References From": "引用来源",
+"References To": "引用目标",
+"Refresh": "刷新",
+"Refresh memory": "刷新内存",
+"Register": "寄存器",
+"Register name": "寄存器名称",
+"Register name color": "寄存器名称颜色",
+"Register pair": "寄存器对",
+"Register target": "寄存器目标",
+"Register value": "寄存器值",
+"Registered Addons": "已注册插件",
+"Registers": "寄存器",
+"Registers (changed)": "寄存器(已更改)",
+"Registers (edited)": "寄存器(已编辑)",
+"Registers (unavailable)": "寄存器(不可用)",
+"Regular Code Name": "常规代码名称",
+"Regular Data Name": "常规数据名称",
+"Regular Unknown Name": "常规未知名称",
+"Regular comment": "常规注释",
+"Regular data name color": "常规数据名称颜色",
+"Regular expression": "正则表达式",
+"Regular function": "常规函数",
+"Regular function (highlighted)": "常规函数(高亮)",
+"Reload Objective-C info": "重载 Objective-C 信息",
+"Reload exceptions": "重载异常",
+"Reload the input file": "重新加载输入文件",
+"Reloading the input file": "正在重新加载输入文件",
+"Remember the current position in the disassembly": "记住反汇编中的当前位置",
+"Remote": "远程",
+"Remote ARM Linux/Android debugger": "远程 ARM Linux/Android 调试器",
+"Remote ARM Mac OS debugger": "远程 ARM Mac OS 调试器",
+"Remote GDB debugger": "远程 GDB 调试器",
+"Remote Linux debugger": "远程 Linux 调试器",
+"Remote Mac OS X debugger": "远程 Mac OS X 调试器",
+"Remote Windows debugger": "远程 Windows 调试器",
+"Remote XNU debugger": "远程 XNU 调试器",
+"Remote iOS debugger": "远程 iOS 调试器",
+"Remote path (last revision):": "远程路径(上次修订)：",
+"Remote port number": "远程端口号",
+"Remove": "移除",
+"Remove Last Filter": "移除最后一个过滤器",
+"Remove bytes from a structure": "从结构体移除字节",
+"Remove everything from the jumps stack": "清空跳转栈",
+"Remove from the translation list": "从翻译列表移除",
+"Remove function argument/retval": "移除函数参数/返回值",
+"Remove function tail": "移除函数尾部",
+"Remove gap": "移除空隙",
+"Remove last filter from xref tree": "从交叉引用树移除最后一个过滤器",
+"Remove signature(s) from the list": "从列表移除签名",
+"Remove/Add function retval": "移除/添加函数返回值",
+"Rename": "重命名",
+"Rename DLL entries": "重命名 DLL 项",
+"Rename Type": "重命名类型",
+"Rename a general processor register": "重命名通用处理器寄存器",
+"Rename address": "重命名地址",
+"Rename enum member": "重命名枚举成员",
+"Rename folder": "重命名文件夹",
+"Rename item": "重命名项",
+"Rename register": "重命名寄存器",
+"Rename the current location": "重命名当前位置",
+"Repeat last palette command": "重复上一个面板命令",
+"Repeat search - Ctrl+T": "重复搜索 - Ctrl+T",
+"Repeat search for immediate value": "重复搜索立即数",
+"Repeat search for sequence of bytes": "重复搜索字节序列",
+"Repeat search for text": "重复搜索文本",
+"Repeatable comment": "可重复注释",
+"Repeatable comments": "可重复注释",
+"Replace": "替换",
+"Replace all": "全部替换",
+"Report a bug or an issue": "报告缺陷或问题",
+"Report a bug/issue": "报告缺陷/问题",
+"Reset": "重置",
+"Reset Column Widths": "重置列宽",
+"Reset Font Size": "重置字号",
+"Reset color": "重置颜色",
+"Reset decompiler information": "重置反编译器信息",
+"Reset desktop": "重置桌面布局",
+"Reset filters": "重置过滤器",
+"Reset graph": "重置图形",
+"Reset hidden messages": "重置已隐藏消息",
+"Reset natural order": "重置为自然顺序",
+"Reset pointer type": "重置指针类型",
+"Reset undo history": "重置撤销历史",
+"Restore Defaults": "恢复默认值",
+"Restore selection": "恢复选择",
+"Resume thread": "恢复线程",
+"Retry": "重试",
+"Return license": "归还许可证",
+"Return the borrowed license": "归还借用的许可证",
+"Return to the previous saved position": "返回到上一个保存的位置",
+"Revert": "还原",
+"Revert CONTAINING_RECORD": "还原 CONTAINING_RECORD",
+"Revert function": "还原函数",
+"Revert function metadata": "还原函数元数据",
+"Revert function start": "还原函数起始",
+"Revert if unchanged": "若未更改则还原",
+"Revert subtraction": "还原减法",
+"Revert to defaults": "恢复默认值",
+"Right margin": "右边距",
+"Run": "运行",
+"Run current": "运行当前",
+"Run currently selected script": "运行当前选中的脚本",
+"Run script": "运行脚本",
+"Run to cursor": "运行到光标处",
+"Run to cursor (backwards)": "运行到光标处(向后)",
+"Run until execution returns from the current function": "运行直到从当前函数返回",
+"Run until message received": "运行直到收到消息",
+"Run until return": "运行直到返回",
+"Rust language helper": "Rust 语言助手",
+"SVD file management": "SVD 文件管理",
+"Sample plugin": "示例插件",
+"Save": "保存",
+"Save As": "另存为",
+"Save as": "另存为",
+"Save current desktop": "保存当前桌面",
+"Save desktop": "保存桌面布局",
+"Save everything and exit IDA": "保存全部内容并退出 IDA",
+"Save network settings as default": "将网络设置保存为默认",
+"Save picture": "保存图片",
+"Save script": "保存脚本",
+"Save snippet": "保存片段",
+"Save the database": "保存数据库",
+"Save the database as": "将数据库另存为",
+"Save to file": "保存到文件",
+"Save trace": "保存跟踪",
+"Save trace file": "保存跟踪文件",
+"Scan vault": "扫描保管库",
+"Screen position": "屏幕位置",
+"Script command": "脚本命令",
+"Script file": "脚本文件",
+"Scroll down": "向下滚动",
+"Scroll the disassembly listing down": "向下滚动反汇编列表",
+"Scroll the disassembly listing up": "向上滚动反汇编列表",
+"Scroll up": "向上滚动",
+"Search": "搜索",
+"Search Again": "再次搜索",
+"Search aborted": "搜索已中止",
+"Search again": "再次搜索",
+"Search completed": "搜索完成",
+"Search direction": "搜索方向",
+"Search for immediate value": "搜索立即数",
+"Search for instruction not belonging to any function": "搜索不属于任何函数的指令",
+"Search for pictures": "搜索图片",
+"Search for sequence of bytes": "搜索字节序列",
+"Search for text": "搜索文本",
+"Search for the next data item": "搜索下一个数据项",
+"Search for the next instruction": "搜索下一条指令",
+"Search for the next instruction or data": "搜索下一条指令或数据",
+"Search for the next instruction with void operand": "搜索下一条带 void 操作数的指令",
+"Search for the next item": "搜索下一项",
+"Search for the next unexplored byte": "搜索下一个未探索字节",
+"Search highlight down": "向下搜索高亮",
+"Search highlight up": "向上搜索高亮",
+"Search match highlight": "搜索匹配高亮",
+"Search next": "搜索下一个",
+"Search nodes": "搜索节点",
+"Searching for a binary pattern": "正在搜索二进制模式",
+"Searching for an immediate value": "正在搜索立即数",
+"Searching for an untyped immediate value": "正在搜索无类型立即数",
+"Second trace line background overlay": "第二条跟踪行背景叠加",
+"Secondary server": "辅助服务器",
+"Segment": "段",
+"Segment Registers": "段寄存器",
+"Segment name": "段名称",
+"Segment registers": "段寄存器",
+"Segment translation": "段翻译",
+"Segments": "段",
+"Select": "选择",
+"Select All": "全选",
+"Select a debugger": "选择调试器",
+"Select all": "全选",
+"Select all text": "全选文本",
+"Select debugger": "选择调试器",
+"Select desktop to save": "选择要保存的桌面",
+"Select file to open": "选择要打开的文件",
+"Select identifier": "选择标识符",
+"Select name to add": "选择要添加的名称",
+"Select nodes of this color": "选择此颜色的节点",
+"Select union field": "选择联合字段",
+"Select union member": "选择联合成员",
+"Selected edge": "选中的边",
+"Selected node frame": "选中节点边框",
+"Selected title": "选中的标题",
+"Selectors": "选择子",
+"Send database": "发送数据库",
+"Sequence of bytes": "字节序列",
+"Serial names": "序列名称",
+"Set IP": "设置 IP",
+"Set call type": "设置调用类型",
+"Set comment": "设置注释",
+"Set default segment register value": "设置默认段寄存器值",
+"Set function end": "设置函数结束",
+"Set node color": "设置节点颜色",
+"Set node color to default": "将节点颜色设为默认",
+"Set operand type": "设置操作数类型",
+"Set password": "设置密码",
+"Set tab size": "设置制表符宽度",
+"Set the current operand's type": "设置当前操作数的类型",
+"Set type": "设置类型",
+"Set type information for an item or current function": "为条目或当前函数设置类型信息",
+"Settings": "设置",
+"Setup": "设置",
+"Setup assembler directive generation": "设置汇编器指示符生成",
+"Setup colors": "设置颜色",
+"Setup data types": "设置数据类型",
+"Setup font": "设置字体",
+"Setup graph colors": "设置图形颜色",
+"Setup graph options": "设置图形选项",
+"Setup hidden items": "设置隐藏项",
+"Setup name representation": "设置名称表示",
+"Setup options": "设置选项",
+"Setup source paths": "设置源码路径",
+"Setup string literal style": "设置字符串字面量风格",
+"Setup string window": "设置字符串窗口",
+"Setup target compiler and its parameteres": "设置目标编译器及其参数",
+"Short name": "短名称",
+"Shortcuts": "快捷键",
+"Show": "显示",
+"Show Address": "显示地址",
+"Show Argument Values": "显示参数值",
+"Show Data Items": "显示数据项",
+"Show Duplicates": "显示重复项",
+"Show Offset": "显示偏移",
+"Show Segment": "显示段",
+"Show Types": "显示类型",
+"Show all": "全部显示",
+"Show all call decompilations": "显示所有调用的反编译",
+"Show all toolbars": "显示所有工具栏",
+"Show all xref decompilations": "显示所有交叉引用的反编译",
+"Show annotations": "显示注解",
+"Show arguments location": "显示参数位置",
+"Show collapsed nodes": "显示已折叠节点",
+"Show command palette": "显示命令面板",
+"Show completions": "显示补全",
+"Show data references": "显示数据引用",
+"Show deleted files": "显示已删除文件",
+"Show demangled": "显示还原后的名称",
+"Show expand/collapse markers": "显示展开/折叠标记",
+"Show folders": "显示文件夹",
+"Show ignored files": "显示已忽略文件",
+"Show in Local files": "在本地文件中显示",
+"Show in Vault files": "在保管库文件中显示",
+"Show other users' worklists": "显示其他用户的工作列表",
+"Show overlay info": "显示覆盖层信息",
+"Show proximity browser": "显示邻近浏览器",
+"Show selection only": "仅显示选中项",
+"Show the database snapshot manager": "显示数据库快照管理器",
+"Show timestamps": "显示时间戳",
+"Show trace call graph": "显示跟踪调用图",
+"Show trace info": "显示跟踪信息",
+"Show/hide data items in the tree": "在树中显示/隐藏数据项",
+"Show/hide the Address column": "显示/隐藏地址列",
+"Show/hide the Offset column": "显示/隐藏偏移列",
+"Show/hide the Segment column": "显示/隐藏段列",
+"Show/hide type definitions and members": "显示/隐藏类型定义与成员",
+"Signatures": "签名",
+"Signed": "有符号",
+"Simplified view": "简化视图",
+"Single Float (32-bit)": "单精度浮点 (32 位)",
+"Sites": "站点",
+"Size": "大小",
+"Snapshot of": "快照：",
+"Source line numbers": "源码行号",
+"Source paths": "源码路径",
+"Source view:": "源码视图：",
+"Spaces for tabulation": "制表符空格",
+"Specify alternate representation of the current instruction": "指定当前指令的替代表示",
+"Specify switch idiom": "指定 switch 惯用形式",
+"Split expression": "拆分表达式",
+"Split memory access": "拆分内存访问",
+"Split variable": "拆分变量",
+"Stack of": "栈：",
+"Stack offset": "栈偏移",
+"Stack pointer": "栈指针",
+"Stack trace": "栈回溯",
+"Stack variable": "栈变量",
+"Stack variables": "栈变量",
+"Stack view": "栈视图",
+"Stack, variadic arguments": "栈、可变参数",
+"Start": "起始",
+"Start a new process in the debugger or continue a debugged process": "在调试器中启动新进程,或继续被调试进程",
+"Start address": "起始地址",
+"Start offset": "起始偏移",
+"Start process": "启动进程",
+"State": "状态",
+"Static function": "静态函数",
+"Step into": "单步步入",
+"Step into (backwards)": "单步步入(向后)",
+"Step over": "单步跳过",
+"Step over (backwards)": "单步跳过(向后)",
+"Stock comments": "常用注释",
+"String": "字符串",
+"String constant": "字符串常量",
+"String constant in data directive": "数据指示符中的字符串常量",
+"String literal color": "字符串字面量颜色",
+"String literal next line char (forces next line)": "字符串字面量换行符(强制换行)",
+"String literals": "字符串字面量",
+"Strings": "字符串",
+"Strings from": "字符串来自",
+"Strings window": "字符串窗口",
+"Struct offset": "结构体偏移",
+"Struct var": "结构体变量",
+"Structs": "结构体",
+"Structure": "结构体",
+"Structure offset": "结构体偏移",
+"Structure offsets": "结构体偏移",
+"Structure size": "结构体大小",
+"Structured data views": "结构化数据视图",
+"Structures": "结构体",
+"Structures and Unions": "结构体与联合",
+"Subtract overlay": "减去覆盖层",
+"Success": "成功",
+"Successfully borrowed the license": "成功借用许可证",
+"Suspend thread": "挂起线程",
+"Switch debugger": "切换调试器",
+"Switch from disassembly to source view": "从反汇编切换到源码视图",
+"Switch to graph disassembly view": "切换到图形反汇编视图",
+"Switch to source": "切换到源码",
+"Switch to text diassembly view": "切换到文本反汇编视图",
+"Switch to the next window": "切换到下一个窗口",
+"Switch to the previous window": "切换到上一个窗口",
+"Switch to window #1": "切换到窗口 #1",
+"Switch to window #2": "切换到窗口 #2",
+"Switch to window #3": "切换到窗口 #3",
+"Switch to window #4": "切换到窗口 #4",
+"Switch to window #5": "切换到窗口 #5",
+"Switch to window #6": "切换到窗口 #6",
+"Switch to window #7": "切换到窗口 #7",
+"Switch to window #8": "切换到窗口 #8",
+"Switch to window #9": "切换到窗口 #9",
+"Symbol/punctuation color": "符号/标点颜色",
+"Symbolic constant": "符号常量",
+"Sync to this revision": "同步到此修订",
+"Synchronization": "同步",
+"Synchronize with": "同步于",
+"Synchronized": "已同步",
+"Syntax": "语法",
+"Syntax elements": "语法元素",
+"TDS file": "TDS 文件",
+"Tabular views": "表格视图",
+"Take database snapshot": "创建数据库快照",
+"Take memory snapshot": "创建内存快照",
+"Take snapshot": "创建快照",
+"Target assembler": "目标汇编器",
+"Target processor": "目标处理器",
+"Teams": "团队",
+"Terminate process": "终止进程",
+"Terminate the debugged process": "终止被调试进程",
+"Text": "文本",
+"Text colors:": "文本颜色：",
+"Text input": "文本输入",
+"Text view": "文本视图",
+"The first string termination character": "第一个字符串终止字符",
+"The input file has been reloaded": "输入文件已重新加载",
+"The resolve method is:": "解决方式为：",
+"The right margin of disassembly lines": "反汇编行的右边距",
+"The second string termination character": "第二个字符串终止字符",
+"Themes: Computed user overrides:": "主题：计算出的用户覆盖：",
+"Thread": "线程",
+"Thread exit": "线程退出",
+"Thread list": "线程列表",
+"Thread start": "线程启动",
+"Threads": "线程",
+"Toggle 'Common' panel": "切换“常用”面板",
+"Toggle 'Details'": "切换“详情”",
+"Toggle SSE intrinsics": "切换 SSE 内建",
+"Toggle Sync with cursor": "切换与光标同步",
+"Toggle basic block tracing": "切换基本块跟踪",
+"Toggle between assembly & C-like representation": "在汇编与类 C 表示之间切换",
+"Toggle border": "切换边框",
+"Toggle breakpoint": "切换断点",
+"Toggle contents": "切换内容",
+"Toggle display casts": "切换显示类型转换",
+"Toggle function tracing": "切换函数跟踪",
+"Toggle hex/dec": "十六进制/十进制切换",
+"Toggle instruction tracing": "切换指令跟踪",
+"Toggle leading zeroes": "切换前导零",
+"Toggle renderer": "切换渲染器",
+"Toggle skippable instructions": "切换可跳过指令",
+"Toggle the display of a border between code and data": "切换代码与数据之间边界的显示",
+"Toggle value": "切换值",
+"Too long string value": "字符串值过长",
+"Toolbar": "工具栏",
+"Toolbars": "工具栏",
+"Top color": "顶部颜色",
+"Trace": "跟踪",
+"Trace ON": "跟踪开启",
+"Trace description": "跟踪描述",
+"Trace information": "跟踪信息",
+"Trace line background overlay": "跟踪行背景叠加",
+"Trace window": "跟踪窗口",
+"Tracing": "跟踪",
+"Tracing options": "跟踪选项",
+"Tracing window": "跟踪窗口",
+"Translation for segment:": "段翻译：",
+"Tree background color": "树背景颜色",
+"Tree layout": "树形布局",
+"Truncate at the right margin": "在右边距截断",
+"Truncate history": "截断历史",
+"Try block lines": "try 块行",
+"Type": "类型",
+"Type Libraries": "类型库",
+"Type definition": "类型定义",
+"Type libraries": "类型库",
+"Type library:": "类型库：",
+"Types autocompletion": "类型自动补全",
+"Unavailable": "不可用",
+"Unavailable breakpoint background": "不可用断点背景",
+"Uncollapse declarations": "展开声明",
+"Uncollapse group": "展开分组",
+"Uncollapse item": "展开项",
+"Undefine": "取消定义",
+"Undefine operand": "取消定义操作数",
+"Undo": "撤销",
+"Undo history": "撤销历史",
+"Unexplored": "未探索",
+"Unexplored (highlighted)": "未探索(高亮)",
+"Ungroup nodes": "取消节点分组",
+"Unhandled exception:": "未处理的异常：",
+"Unhide": "取消隐藏",
+"Unhide all": "全部取消隐藏",
+"Unhide all functions, structs or enums": "取消隐藏所有函数、结构体或枚举",
+"Unhide all groups": "取消隐藏所有分组",
+"Unhide collapsed items automatically when jumping to them": "跳转到已折叠项时自动展开",
+"Unhide group": "取消隐藏分组",
+"Unicode": "Unicode",
+"Unicode pascal (2 byte length)": "Unicode pascal(2 字节长度)",
+"Unicode wide pascal (4 byte length)": "Unicode wide pascal(4 字节长度)",
+"Unknown location": "未知位置",
+"Unlimited children recursion": "不限子节点递归",
+"Unload": "卸载",
+"Unmap variable(s)": "取消映射变量",
+"Unmapped segments": "未映射的段",
+"Unmark as decompiled": "取消标记为已反编译",
+"Unsaved changes": "未保存的更改",
+"Unsigned": "无符号",
+"Unsort": "取消排序",
+"Unsplit expression": "取消拆分表达式",
+"Unsplit memory access": "取消拆分内存访问",
+"Unsplit variable": "取消拆分变量",
+"Unsupported breakpoint type": "不支持的断点类型",
+"Up": "向上",
+"Use floating license server": "使用浮动许可证服务器",
+"Use graph view by default": "默认使用图形视图",
+"Use local, discard remote": "使用本地，丢弃远端",
+"Use new shortcuts": "使用新快捷键",
+"Use nice names for addresses": "为地址使用友好名称",
+"Use predefined color 1": "使用预定义颜色 1",
+"Use predefined color 2": "使用预定义颜色 2",
+"Use public": "使用公开",
+"Use remote, discard local": "使用远端，丢弃本地",
+"Use segment names": "使用段名称",
+"Use source-level debugging": "使用源码级调试",
+"Use standard symbolic constant": "使用标准符号常量",
+"Use this site": "使用此站点",
+"User 1": "用户 1",
+"User 2": "用户 2",
+"User 3": "用户 3",
+"User 4": "用户 4",
+"User comments": "用户注释",
+"User labels": "用户标签",
+"User unions": "用户联合",
+"User xrefs chart": "用户交叉引用图",
+"User-defined call": "用户定义的调用",
+"User-defined funcargs": "用户定义的函数参数",
+"User-defined lvar info": "用户定义的局部变量信息",
+"User-defined variable mapping": "用户定义的变量映射",
+"Usercall ellipsis": "Usercall 省略号",
+"Users": "用户",
+"Value": "值",
+"Value (in paragraphs)": "值(以节为单位)",
+"Vault files": "保管库文件",
+"Version": "版本",
+"View": "视图",
+"View all": "查看全部",
+"View all metadata from the primary server": "查看主服务器上的所有元数据",
+"View all metadata from the secondary server": "查看备用服务器上的所有元数据",
+"View commit": "查看提交",
+"View function": "查看函数",
+"View function start": "查看函数起始",
+"View type": "查看类型",
+"View type library contents": "查看类型库内容",
+"View worklist": "查看工作列表",
+"Viewport crosshairs": "视口十字准线",
+"Viewport fog": "视口雾效",
+"Visible columns only": "仅可见列",
+"Void operand": "void 操作数",
+"Void operands": "void 操作数",
+"Warning": "警告",
+"Watch List": "监视列表",
+"Watch list": "监视列表",
+"Watch view": "监视视图",
+"Watches": "监视",
+"Weak name": "弱名称",
+"Whole words": "全字匹配",
+"Wide pascal (2 byte length)": "Wide pascal(2 字节长度)",
+"Windbg debugger": "WinDbg 调试器",
+"Window title": "窗口标题",
+"Windows": "窗口",
+"Windows list": "窗口列表",
+"Windows list (next)": "窗口列表(下一个)",
+"Windows list (prev)": "窗口列表(上一个)",
+"Word": "字",
+"Work on your own": "自行处理",
+"Worklists": "工作列表",
+"Writable code": "可写代码",
+"Writing System": "书写系统",
+"Wrong alignment value": "对齐值错误",
+"Wrong breakpoint location": "断点位置错误",
+"Xrefs from": "引用自",
+"Xrefs graph from": "来自...的交叉引用图",
+"Xrefs graph to": "到...的交叉引用图",
+"Xrefs to": "引用到",
+"Xrefs to collapsed node": "指向已折叠节点的交叉引用",
+"Yes": "是",
+"Yes edge": "是分支边",
+"Ymm word": "Ymm 字",
+"You can reset the arguments": "你可以重置参数",
+"Zero value": "值清零",
+"Zmm word": "Zmm 字",
+"Zoom": "缩放",
+"Zoom 100%": "缩放 100%",
+"Zoom in": "放大",
+"Zoom out": "缩小",
+"_credits": "Merged from MIT-licensed community dictionaries: 0x-focus/IDA-Pro-9.0-Chinese-Translation (zh_CN.json) and tuxi/ida-i18n (ida_i18n_zh_CN.json), plus additions for IDA 9.1. Keys are normalized English (no '&', no trailing '...'); values are Chinese without mnemonic or ellipsis - the plugin re-adds them.",
+"detect and parse golang metadata": "检测并解析 golang 元数据"
+}
+```
+
+`tools/check_dict.py`:
+
+```py
+#!/usr/bin/env python3
+"""Sanity-check plugin/zh_cn.json (and an optional zh_cn_user.json).
+
+    python tools/check_dict.py                # check the shipped dictionary
+    python tools/check_dict.py path/to.json   # check another file
+
+Exit status is non-zero if a hard problem is found, so CI can gate on it.
+
+Hard errors
+  * not valid UTF-8 JSON / not a flat {"english": "中文"} object
+  * a value that is empty or has no CJK character (untranslated)
+  * two keys that collapse to the same normalized key with *different* translations
+Warnings
+  * a key that still contains '&' or a trailing '...' (harmless: the plugin normalizes them, but the
+    canonical form has neither)
+  * a value that carries its own '(&X)' mnemonic or trailing '...' (the plugin strips and re-adds them)
+"""
+import json
+import re
+import sys
+from pathlib import Path
+
+CJK = re.compile(r"[㐀-鿿豈-﫿]")
+# words that are legitimately left in English (brand names, protocol names, ...)
+KEEP_ENGLISH_OK = {"Lumina", "IDA", "Python", "FLIRT", "Swift", "COM Helper"}
+
+
+def norm(key: str) -> str:
+    k = key.replace("&", "").replace("~", "").strip()
+    for tail in ("...", "…"):
+        if k.endswith(tail):
+            k = k[: -len(tail)].rstrip()
+    return k
+
+
+def main(argv):
+    path = Path(argv[1]) if len(argv) > 1 else Path(__file__).resolve().parent.parent / "plugin" / "zh_cn.json"
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except Exception as exc:  # noqa: BLE001
+        print(f"ERROR: cannot read {path}: {exc}")
+        return 1
+    if not isinstance(data, dict):
+        print("ERROR: top level must be a JSON object")
+        return 1
+
+    errors, warnings = [], []
+    seen = {}
+    total = 0
+    for key, val in data.items():
+        if key.startswith("_"):
+            continue
+        total += 1
+        if not isinstance(val, str) or not val.strip():
+            errors.append(f"empty or non-string value for {key!r}")
+            continue
+        nk = norm(key)
+        if norm(val) == nk and nk not in KEEP_ENGLISH_OK:
+            pass  # identical to source: allowed but useless
+        elif not CJK.search(val) and nk not in KEEP_ENGLISH_OK and val.strip() != nk:
+            errors.append(f"no Chinese characters in translation of {key!r}: {val!r}")
+        if nk in seen and seen[nk][1] != val:
+            errors.append(f"conflicting entries for {nk!r}: {seen[nk][0]!r}={seen[nk][1]!r} vs {key!r}={val!r}")
+        seen.setdefault(nk, (key, val))
+        if "&" in key or key.endswith("..."):
+            warnings.append(f"key not in canonical form: {key!r}")
+        if re.search(r"\(&.\)", val) or val.endswith("..."):
+            warnings.append(f"value carries mnemonic/ellipsis (will be stripped): {key!r} -> {val!r}")
+
+    print(f"{path.name}: {total} entries, {len(seen)} unique normalized keys")
+    for w in warnings[:20]:
+        print("  warn :", w)
+    if len(warnings) > 20:
+        print(f"  ... and {len(warnings) - 20} more warnings")
+    for e in errors:
+        print("  ERROR:", e)
+    print("OK" if not errors else f"FAILED ({len(errors)} errors)")
+    return 1 if errors else 0
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv))
+
+```
+
+`tools/design/banner.html`:
+
+```html
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>ida-zh-cn banner</title>
+<link rel="stylesheet" href="base.css">
+<style>
+  html, body { width: 1600px; height: 520px; }
+  .stage { width: 1600px; height: 520px; }
+
+  .left { position: absolute; left: 88px; top: 74px; width: 780px; }
+  .brand { display: flex; align-items: center; gap: 26px; margin-top: 26px; }
+  .mark { width: 112px; height: 112px; flex: none; filter: drop-shadow(0 10px 30px rgba(33,224,208,.35)); }
+  h1 { font-size: 112px; line-height: 1.05; font-weight: 800; letter-spacing: -2px; }
+  h1 small { font-size: 112px; font-weight: 300; letter-spacing: -2px; opacity: .92; }
+  .sub { margin-top: 26px; font-size: 30px; line-height: 1.5; color: var(--ink-dim); }
+  .sub b { color: var(--ink); font-weight: 600; }
+  .chips { margin-top: 34px; display: flex; gap: 14px; flex-wrap: wrap; }
+
+  .card { position: absolute; left: 930px; top: 92px; width: 590px; padding: 26px 30px 28px;
+          background: linear-gradient(180deg, rgba(19,27,54,.93), rgba(9,14,30,.95)); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); }
+  .dots { display: flex; gap: 8px; margin-bottom: 22px; }
+  .dots span { width: 11px; height: 11px; border-radius: 50%; background: rgba(255,255,255,.18); }
+  .cap { font: 600 13px var(--mono); letter-spacing: 2.4px; color: var(--ink-faint); text-transform: uppercase; margin-bottom: 10px; }
+  .row-en { font: 500 18px var(--mono); color: #7d8db6; display: flex; justify-content: space-between; padding-bottom: 6px; }
+  .row-en span { text-decoration: line-through; text-decoration-color: rgba(255,120,100,.45); }
+  .arrow { display: flex; align-items: center; gap: 12px; margin: 14px 0 16px; color: var(--cyan); font: 600 14px var(--mono); letter-spacing: 2px; }
+  .arrow::before, .arrow::after { content: ""; flex: 1; height: 1px; background: linear-gradient(90deg, transparent, rgba(33,224,208,.55), transparent); }
+  .row-zh { font-size: 28px; font-weight: 700; display: flex; justify-content: space-between; color: #fff; text-shadow: 0 0 24px rgba(110,134,255,.55); }
+
+  .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 26px; }
+  .stat { padding: 14px 14px 12px; border-radius: 14px; background: rgba(255,255,255,.04); border: 1px solid var(--line); }
+  .stat b { display: block; font: 700 30px var(--mono); color: #fff; letter-spacing: -.5px; }
+  .stat span { display: block; margin-top: 4px; font-size: 15px; color: var(--ink-dim); }
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="hexwall" data-rows="26" data-cols="3"></div>
+  <div class="grain"></div>
+
+  <div class="left">
+    <div class="eyebrow">IDA Pro 9.x &nbsp;·&nbsp; 简体中文 &nbsp;·&nbsp; zero-patch</div>
+    <div class="brand">
+      <svg class="mark" viewBox="0 0 120 120" aria-hidden="true">
+        <defs>
+          <linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#8ea2ff"/><stop offset="1" stop-color="#21e0d0"/></linearGradient>
+          <linearGradient id="f" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#141c38"/><stop offset="1" stop-color="#0a1024"/></linearGradient>
+        </defs>
+        <polygon points="60,6 108,33 108,87 60,114 12,87 12,33" fill="url(#f)" stroke="url(#g)" stroke-width="4" stroke-linejoin="round"/>
+        <polygon points="60,20 96,40 96,80 60,100 24,80 24,40" fill="none" stroke="rgba(142,162,255,.28)" stroke-width="1.5"/>
+        <text x="60" y="78" text-anchor="middle" font-size="58" font-weight="800" fill="url(#g)" font-family="'Microsoft YaHei UI','Microsoft YaHei','PingFang SC','Noto Sans SC',sans-serif">汉</text>
+      </svg>
+      <h1><span class="gradient-text">IDA 汉化版</span></h1>
+    </div>
+    <p class="sub">运行时汉化插件 &nbsp;<b>不改 IDA 一个字节</b>，一键开关。<br>菜单、表头、对话框全覆盖，脚本与其他插件<b>零破坏</b>。</p>
+    <div class="chips">
+      <span class="pill"><i></i>Alt+F7 即时生效</span>
+      <span class="pill warm"><i></i>find_widget 不受影响</span>
+      <span class="pill indigo"><i></i>MIT 开源</span>
+    </div>
+  </div>
+
+  <div class="card glass">
+    <div class="dots"><span></span><span></span><span></span></div>
+    <div class="cap">before</div>
+    <div class="row-en"><span>File</span><span>Edit</span><span>Jump</span><span>Search</span><span>View</span><span>Debugger</span><span>Options</span></div>
+    <div class="arrow">ida_zh_cn</div>
+    <div class="cap" style="color:var(--cyan)">after</div>
+    <div class="row-zh"><span>文件</span><span>编辑</span><span>跳转</span><span>搜索</span><span>视图</span><span>调试器</span><span>选项</span></div>
+    <div class="stats">
+      <div class="stat"><b>1,860</b><span>词条</span></div>
+      <div class="stat"><b>0 B</b><span>IDA 文件改动</span></div>
+      <div class="stat"><b>8 / 8</b><span>开关压力测试</span></div>
+    </div>
+  </div>
+</div>
+<script src="hexwall.js"></script>
+</body>
+</html>
+
+```
+
+`tools/design/base.css`:
+
+```css
+/* ida-zh-cn design tokens -- shared by every page in tools/design */
+:root {
+  --bg-0: #050810;
+  --bg-1: #0a1020;
+  --ink: #eaf0ff;
+  --ink-dim: #93a3cc;
+  --ink-faint: #5d6c92;
+  --line: rgba(160, 180, 255, .16);
+  --glass: rgba(255, 255, 255, .045);
+  --indigo: #6e86ff;
+  --cyan: #21e0d0;
+  --amber: #ffc46b;
+  --sans: "Microsoft YaHei UI", "Microsoft YaHei", "PingFang SC", "Noto Sans SC", "Segoe UI", sans-serif;
+  --mono: "Cascadia Mono", "Cascadia Code", Consolas, "SFMono-Regular", monospace;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { background: var(--bg-0); color: var(--ink); font-family: var(--sans); -webkit-font-smoothing: antialiased; overflow: hidden; }
+
+.stage {
+  position: relative; overflow: hidden;
+  background:
+    radial-gradient(900px 520px at 10% -5%, rgba(110, 134, 255, .34), transparent 62%),
+    radial-gradient(820px 520px at 100% 108%, rgba(33, 224, 208, .26), transparent 62%),
+    linear-gradient(180deg, var(--bg-1), var(--bg-0));
+}
+
+/* faint hex-dump wall; filled by hexwall.js. contains the UTF-8 bytes of "汉化" in amber */
+.hexwall {
+  position: absolute; inset: 0; white-space: pre; overflow: hidden;
+  font: 13px/21px var(--mono); letter-spacing: .4px; color: #86a0e6; opacity: .13;
+  -webkit-mask-image: linear-gradient(90deg, rgba(0,0,0,.28) 0%, rgba(0,0,0,.55) 45%, #000 75%);
+          mask-image: linear-gradient(90deg, rgba(0,0,0,.28) 0%, rgba(0,0,0,.55) 45%, #000 75%);
+}
+.hexwall b { color: var(--amber); font-weight: 400; }
+
+.grain {
+  position: absolute; inset: 0; pointer-events: none; opacity: .5;
+  background-image: linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px);
+  background-size: 100% 4px;
+}
+
+.gradient-text {
+  background: linear-gradient(100deg, #ffffff 0%, #cfe0ff 45%, #8ff3ea 100%);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+
+.pill {
+  display: inline-flex; align-items: center; gap: 10px;
+  padding: 9px 18px; border-radius: 999px;
+  font-size: 19px; color: #cdd8f5;
+  border: 1px solid var(--line); background: var(--glass);
+}
+.pill i { width: 8px; height: 8px; border-radius: 50%; background: var(--cyan); box-shadow: 0 0 12px var(--cyan); display: inline-block; }
+.pill.warm i { background: var(--amber); box-shadow: 0 0 12px var(--amber); }
+.pill.indigo i { background: var(--indigo); box-shadow: 0 0 12px var(--indigo); }
+
+.glass {
+  border-radius: 22px; border: 1px solid var(--line);
+  background: linear-gradient(180deg, rgba(255,255,255,.075), rgba(255,255,255,.028));
+  box-shadow: 0 30px 80px rgba(0, 0, 0, .45), inset 0 1px 0 rgba(255,255,255,.08);
+}
+
+.eyebrow { font: 600 15px var(--mono); letter-spacing: 3.2px; color: var(--cyan); text-transform: uppercase; }
+
+.shot {
+  border-radius: 14px; overflow: hidden; border: 1px solid rgba(190, 205, 255, .22);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, .55), 0 0 0 6px rgba(255, 255, 255, .03);
+  background: #fff;
+}
+.shot img { display: block; }
+
+.tag {
+  display: inline-flex; align-items: center; gap: 10px; height: 34px; padding: 0 16px 0 12px; border-radius: 999px;
+  font: 700 15px var(--mono); letter-spacing: 1.6px; text-transform: uppercase;
+}
+.tag.before { color: #ffb4a8; background: rgba(255, 110, 90, .12); border: 1px solid rgba(255, 130, 110, .35); }
+.tag.after  { color: #8ff3ea; background: rgba(33, 224, 208, .12); border: 1px solid rgba(33, 224, 208, .38); }
+.tag::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: currentColor; box-shadow: 0 0 10px currentColor; }
+
+```
+
+`tools/design/build.ps1`:
+
+```ps1
+<#
+  Renders the README artwork (assets\*.png) from the HTML pages in this folder using headless Edge/Chrome.
+  Usage:  powershell -ExecutionPolicy Bypass -File tools\design\build.ps1
+#>
+$ErrorActionPreference = 'Stop'
+$here = Split-Path -Parent $MyInvocation.MyCommand.Path
+$out  = Join-Path (Split-Path -Parent (Split-Path -Parent $here)) 'assets'
+New-Item -ItemType Directory -Force -Path $out | Out-Null
+
+$candidates = @(
+  "${env:ProgramFiles(x86)}\Microsoft\Edge\Application\msedge.exe",
+  "$env:ProgramFiles\Microsoft\Edge\Application\msedge.exe",
+  "$env:ProgramFiles\Google\Chrome\Application\chrome.exe",
+  "${env:ProgramFiles(x86)}\Google\Chrome\Application\chrome.exe"
+)
+$browser = $candidates | Where-Object { Test-Path $_ } | Select-Object -First 1
+if (-not $browser) { throw 'Edge or Chrome not found' }
+
+# page, output name, width, height, device scale factor
+$pages = @(
+  @('banner',          'banner',          1600, 520, 2),
+  @('social',          'social-preview',  1280, 640, 1),
+  @('compare-main',    'compare-main',    1600, 690, 2),
+  @('compare-menus',   'compare-menus',   1600, 640, 2),
+  @('compare-dialog',  'compare-dialog',  1600, 720, 2)
+)
+
+$profile = Join-Path $env:TEMP 'ida-zh-cn-design-profile'
+foreach ($p in $pages) {
+  $src = 'file:///' + ((Join-Path $here ($p[0] + '.html')) -replace '\\', '/')
+  $dst = Join-Path $out ($p[1] + '.png')
+  $args = @('--headless=new', '--disable-gpu', '--hide-scrollbars', "--force-device-scale-factor=$($p[4])",
+            "--user-data-dir=$profile", "--window-size=$($p[2]),$($p[3])", '--virtual-time-budget=4000',
+            "--screenshot=$dst", $src)
+  Start-Process -FilePath $browser -ArgumentList $args -Wait -WindowStyle Hidden | Out-Null
+  '{0,-16} -> {1}' -f $p[0], $dst
+}
+
+```
+
+`tools/design/compare-dialog.html`:
+
+```html
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>ida-zh-cn compare: dialog</title>
+<link rel="stylesheet" href="base.css">
+<style>
+  html, body { width: 1600px; height: 720px; }
+  .stage { width: 1600px; height: 720px; padding: 50px 60px; }
+  .head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 26px; }
+  h2 { font-size: 40px; font-weight: 800; letter-spacing: -.5px; }
+  .head p { font-size: 20px; color: var(--ink-dim); }
+  .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 44px; justify-items: center; }
+  .cell { display: flex; flex-direction: column; align-items: center; gap: 16px; }
+  .shot img { width: 640px; height: auto; }
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="head">
+    <h2><span class="gradient-text">对话框：标签页、单选框、按钮一并翻译</span></h2>
+    <p>Options → Colors…</p>
+  </div>
+  <div class="pair">
+    <div class="cell"><div class="tag before">Before</div><div class="shot"><img src="shots/off_colors.png" alt=""></div></div>
+    <div class="cell"><div class="tag after">After</div><div class="shot"><img src="shots/on_colors.png" alt=""></div></div>
+  </div>
+</div>
+</body>
+</html>
+
+```
+
+`tools/design/compare-main.html`:
+
+```html
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>ida-zh-cn compare: main window</title>
+<link rel="stylesheet" href="base.css">
+<style>
+  html, body { width: 1600px; height: 690px; }
+  .stage { width: 1600px; height: 690px; padding: 46px 60px; }
+  .head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 24px; }
+  h2 { font-size: 40px; font-weight: 800; letter-spacing: -.5px; }
+  .head p { font-size: 20px; color: var(--ink-dim); }
+  .col { margin-bottom: 22px; }
+  .lab { display: flex; align-items: center; gap: 16px; margin-bottom: 14px; }
+  .lab span.note { font-size: 18px; color: var(--ink-dim); }
+  .shot { width: 720px; }
+  .pair { display: grid; grid-template-columns: 720px 720px; gap: 40px; }
+  .shot img { width: 720px; height: auto; }
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="head">
+    <h2><span class="gradient-text">同一个窗口，同一份数据库</span></h2>
+    <p>菜单栏 · 工具栏 · 导航带图例 · 停靠窗口标题 · 列表表头 · 标签页</p>
+  </div>
+  <div class="pair">
+    <div class="col">
+      <div class="lab"><span class="tag before">Before · English</span><span class="note">IDA 9.1 原版</span></div>
+      <div class="shot"><img src="shots/off_main.png" alt="before"></div>
+    </div>
+    <div class="col">
+      <div class="lab"><span class="tag after">After · 简体中文</span><span class="note">启用 ida_zh_cn</span></div>
+      <div class="shot"><img src="shots/on_main.png" alt="after"></div>
+    </div>
+  </div>
+  <div class="pair" style="margin-top:6px">
+    <div class="glass" style="padding:20px 24px; font-size:19px; line-height:1.7; color:var(--ink-dim)">
+      <b style="color:#fff">窗口标识保持英文。</b>标题栏、标签页上的中文只是"画"上去的，<br>
+      <code style="font-family:var(--mono);color:var(--amber)">find_widget("Output window")</code> 之类的脚本照常工作。
+    </div>
+    <div class="glass" style="padding:20px 24px; font-size:19px; line-height:1.7; color:var(--ink-dim)">
+      <b style="color:#fff">一键还原。</b>Edit → Plugins → 中文界面 开/关，<br>
+      关闭后所有文字、样式立即回到英文，不留残余。
+    </div>
+  </div>
+</div>
+</body>
+</html>
+
+```
+
+`tools/design/compare-menus.html`:
+
+```html
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>ida-zh-cn compare: menus</title>
+<link rel="stylesheet" href="base.css">
+<style>
+  html, body { width: 1600px; height: 640px; }
+  .stage { width: 1600px; height: 640px; padding: 50px 60px; }
+  .head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 26px; }
+  h2 { font-size: 40px; font-weight: 800; letter-spacing: -.5px; }
+  .head p { font-size: 20px; color: var(--ink-dim); }
+  .row { display: grid; grid-template-columns: 1fr 74px 1fr 1fr 74px 1fr; align-items: center; gap: 0; justify-items: center; }
+  .cell { display: flex; flex-direction: column; align-items: center; gap: 14px; }
+  .shot { width: max-content; }
+  .shot img { height: 400px; width: auto; }
+  .arrow { color: var(--cyan); font: 700 40px var(--mono); }
+  .div { width: 1px; height: 380px; background: var(--line); }
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="head">
+    <h2><span class="gradient-text">菜单：整条翻译，快捷键原样保留</span></h2>
+    <p>Jump 菜单 · Options 菜单</p>
+  </div>
+  <div class="row">
+    <div class="cell"><div class="tag before">Before</div><div class="shot"><img src="shots/off_menu_jump.png" alt=""></div></div>
+    <div class="arrow">→</div>
+    <div class="cell"><div class="tag after">After</div><div class="shot"><img src="shots/on_menu_jump.png" alt=""></div></div>
+    <div class="cell"><div class="tag before">Before</div><div class="shot"><img src="shots/off_menu_options.png" alt=""></div></div>
+    <div class="arrow">→</div>
+    <div class="cell"><div class="tag after">After</div><div class="shot"><img src="shots/on_menu_options.png" alt=""></div></div>
+  </div>
+</div>
+</body>
+</html>
+
+```
+
+`tools/design/hexwall.js`:
+
+```js
+// Fills every .hexwall element with a deterministic hex-dump. The bytes of "汉化" (UTF-8) are planted in amber.
+(function () {
+  let seed = 0x1DA9;                              // deterministic: same picture on every build
+  const rnd = () => (seed = (seed * 1664525 + 1013904223) >>> 0) / 4294967296;
+  const hex = n => n.toString(16).toUpperCase().padStart(2, "0");
+  const HANHUA = [0xE6, 0xB1, 0x89, 0xE5, 0x8C, 0x96];          // 汉 化
+  const WORDS = "File Edit Jump Search View Debugger Options Windows Help".split(" ");
+
+  document.querySelectorAll(".hexwall").forEach(el => {
+    const rows = parseInt(el.dataset.rows || "30", 10);
+    const cols = parseInt(el.dataset.cols || "1", 10);
+    const plant = new Set([Math.floor(rows * 0.36), Math.floor(rows * 0.71)]);
+    let out = "";
+    for (let r = 0; r < rows; r++) {
+      const parts = [];
+      for (let c = 0; c < cols; c++) {
+        const addr = (0x140001000 + (r + c * rows) * 16).toString(16).toUpperCase().padStart(9, "0");
+        const bytes = Array.from({ length: 16 }, () => Math.floor(rnd() * 256));
+        let startPlant = -1;
+        if (c === Math.min(1, cols - 1) && plant.has(r)) {
+          startPlant = 3 + Math.floor(rnd() * 6);
+          HANHUA.forEach((b, i) => (bytes[startPlant + i] = b));
+        }
+        const cells = bytes.map((b, i) => {
+          const s = hex(b);
+          return startPlant >= 0 && i >= startPlant && i < startPlant + 6 ? "<b>" + s + "</b>" : s;
+        });
+        const ascii = bytes.map(b => (b >= 0x20 && b < 0x7f ? String.fromCharCode(b) : ".")).join("");
+        parts.push(addr + "  " + cells.slice(0, 8).join(" ") + "  " + cells.slice(8).join(" ") + "  |" + ascii.replace(/</g, "&lt;") + "|");
+      }
+      out += parts.join("      ") + "\n";
+    }
+    el.innerHTML = out;
+  });
+})();
+
+```
+
+`tools/design/social.html`:
+
+```html
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>ida-zh-cn social preview</title>
+<link rel="stylesheet" href="base.css">
+<style>
+  html, body { width: 1280px; height: 640px; }
+  .stage { width: 1280px; height: 640px; }
+  .center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+  .mark { width: 132px; height: 132px; filter: drop-shadow(0 12px 34px rgba(33,224,208,.4)); margin-bottom: 26px; }
+  h1 { font-size: 118px; line-height: 1.05; font-weight: 800; letter-spacing: -2px; }
+  .sub { margin-top: 20px; font-size: 32px; color: var(--ink-dim); }
+  .sub b { color: var(--ink); font-weight: 600; }
+  .strip { margin-top: 42px; display: flex; align-items: center; gap: 22px; padding: 16px 28px; border-radius: 18px; border: 1px solid var(--line); background: rgba(12,18,38,.92); }
+  .strip .en { font: 500 19px var(--mono); color: #7d8db6; letter-spacing: .5px; }
+  .strip .ar { color: var(--cyan); font: 700 22px var(--mono); }
+  .strip .zh { font-size: 28px; font-weight: 700; letter-spacing: 3px; }
+  .veil { position: absolute; inset: 0; background: radial-gradient(ellipse 60% 62% at 50% 50%, rgba(5,8,16,.92), rgba(5,8,16,.55) 60%, transparent 100%); }
+  .url { position: absolute; bottom: 28px; left: 0; right: 0; text-align: center; font: 500 18px var(--mono); color: var(--ink-faint); letter-spacing: 1.5px; }
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="hexwall" data-rows="30" data-cols="3" style="opacity:.10"></div>
+  <div class="veil"></div>
+  <div class="grain"></div>
+  <div class="center">
+    <svg class="mark" viewBox="0 0 120 120" aria-hidden="true">
+      <defs>
+        <linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#8ea2ff"/><stop offset="1" stop-color="#21e0d0"/></linearGradient>
+        <linearGradient id="f" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#141c38"/><stop offset="1" stop-color="#0a1024"/></linearGradient>
+      </defs>
+      <polygon points="60,6 108,33 108,87 60,114 12,87 12,33" fill="url(#f)" stroke="url(#g)" stroke-width="4" stroke-linejoin="round"/>
+      <polygon points="60,20 96,40 96,80 60,100 24,80 24,40" fill="none" stroke="rgba(142,162,255,.28)" stroke-width="1.5"/>
+      <text x="60" y="78" text-anchor="middle" font-size="58" font-weight="800" fill="url(#g)" font-family="'Microsoft YaHei UI','Microsoft YaHei','PingFang SC','Noto Sans SC',sans-serif">汉</text>
+    </svg>
+    <h1><span class="gradient-text">IDA 汉化版</span></h1>
+    <p class="sub">运行时汉化插件 · <b>不改 IDA 一个字节</b> · 一键开关</p>
+    <div class="strip"><span class="en">File Edit Jump Search View</span><span class="ar">→</span><span class="zh">文件 编辑 跳转 搜索 视图</span></div>
+  </div>
+  <div class="url">github.com/3641397194-wq/ida-zh-cn</div>
+</div>
+<script src="hexwall.js"></script>
+</body>
+</html>
+
+```

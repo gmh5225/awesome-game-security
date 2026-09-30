@@ -1,0 +1,1186 @@
+Project Path: arc_srcdslab_sm-plugin-AntiBhopCheat_67271zip
+
+Source Tree:
+
+```txt
+arc_srcdslab_sm-plugin-AntiBhopCheat_67271zip
+├── README.md
+└── addons
+    └── sourcemod
+        └── scripting
+            ├── AntiBhopCheat.sp
+            └── include
+                ├── AntiBhopCheat.inc
+                ├── CJump.inc
+                ├── CPlayer.inc
+                └── CStreak.inc
+
+```
+
+`README.md`:
+
+```md
+# AntiBhopCheat
+Detect any kinds of bhop cheat, limit bhop of flagged player or kick it.
+
+## Usage
+```
+sm_stats <target>
+sm_streak <target>
+```
+
+## Config
+```
+sm_antibhopcheat_detection_sound <value> Emit a beep sound when someone gets flagged [0 = disabled, 1 = enabled]
+sm_antibhopcheat_kick_hack <value> Automaticly Kick if a player is flagged for HACK? [0 = disabled, 1 = enabled]
+sm_antibhopcheat_count_bots <value> Should we count bots as players ?[0 = No, 1 = Yes]
+```
+
+
+## Discord support
+[sm-plugin-AntiBhopCheat-discord](https://github.com/srcdslab/sm-plugin-AntiBhopCheat-discord)
+
+![Preview](https://i.imgur.com/T2NYkTc.png)
+
+```
+
+`addons/sourcemod/scripting/AntiBhopCheat.sp`:
+
+```sp
+#include <sourcemod>
+#include <sdktools>
+#include <multicolors>
+
+#define MAX_PRESSES 64
+#define MAX_STREAKS 10
+#define VALID_MIN_JUMPS 3
+#define VALID_MAX_TICKS 5
+#define VALID_MIN_VELOCITY 250
+
+#define STREAK_HACK "bhop hack streak"
+#define STREAK_HYPER "hyperscroll streak"
+#define GLOBAL_HACK "global bhop hack"
+#define GLOBAL_HYPER "global hyperscroll"
+
+#include <CJump>
+#include <CStreak>
+#include <CPlayer>
+
+#undef REQUIRE_PLUGIN
+#tryinclude <SelectiveBhop>
+#define REQUIRE_PLUGIN
+
+CPlayer g_aPlayers[MAXPLAYERS + 1];
+EngineVersion gEV_Type = Engine_Unknown;
+
+ConVar g_cvEnabled, g_cvSvGravity, g_cvSvAutoBhop, g_cDetectionSound = null, g_cvMaxDetections;
+ConVar g_cvCurrentJumps, g_cvCurrentHyper, g_cvCurrentHack, g_cvCurrentHackKick;
+ConVar g_cvGlobalJumps, g_cvGlobalHyper, g_cvGlobalHack, g_cvGlobalHackKick;
+#if defined _SelectiveBhop_Included
+ConVar g_cvCurrentStreakLimitBhop, g_cvGlobalStreakLimitBhop, g_cvCurrentHackLimitBhop, g_cvGlobalHackLimitBhop;
+#endif
+
+char g_sStats[1993], g_sBeepSound[PLATFORM_MAX_PATH];
+
+float g_fCurrentHyper
+	, g_fCurrentHack
+	, g_fGlobalHyper
+	, g_fGlobalHack;
+
+bool g_bOnGround[MAXPLAYERS + 1]
+	, g_bHoldingJump[MAXPLAYERS + 1]
+	, g_bInJump[MAXPLAYERS + 1]
+	, g_bFlagged[MAXPLAYERS + 1] = { false, ... }
+	, g_bCurrentHackKick
+	, g_bGlobalHackKick
+	, g_bCurrentStreakHyperLimited
+	, g_bCurrentHackHyperLimited
+	, g_bGlobalStreakHyperLimited
+	, g_bGlobalHackHyperLimited
+	, g_bLate = false
+	, g_bNoSound = false
+	, g_bPluginEnabled = true
+#if defined _SelectiveBhop_Included
+	, g_Plugin_SelectiveBhop = false
+#endif
+	, g_bSvAutoBhop;
+
+int g_iCurrentJumps,
+	g_iGlobalJumps,
+	g_iMaxFlags,
+	g_iSvGravity = 800,
+	g_iButtons[MAXPLAYERS + 1],
+	g_iFlagged[MAXPLAYERS + 1];
+
+GlobalForward g_hOnClientDetected;
+
+public Plugin myinfo =
+{
+	name			= "AntiBhopCheat",
+	author			= "BotoX, .Rushaway",
+	description		= "Detect all kinds of bhop cheats",
+	version			= "1.9.0",
+	url				= ""
+};
+
+public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max)
+{
+	g_bLate = late;
+	RegPluginLibrary("AntiBhopCheat");
+	g_hOnClientDetected = new GlobalForward("AntiBhopCheat_OnClientDetected", ET_Ignore, Param_Cell, Param_String, Param_String);
+
+	return APLRes_Success;
+}
+
+public void OnPluginStart()
+{
+	LoadTranslations("common.phrases");
+
+	g_cvEnabled = CreateConVar("sm_antibhopcheat_enabled", "1", "Enable/Disable AntiBhopCheat plugin [0 = disabled, 1 = enabled]", FCVAR_NOTIFY, true, 0.0, true, 1.0);
+
+	g_cvSvGravity = FindConVar("sv_gravity");
+	g_cvSvAutoBhop = FindConVar("sv_autobunnyhopping");
+	g_cDetectionSound = CreateConVar("sm_antibhopcheat_detection_sound", "1", "Emit a beep sound when someone gets flagged [0 = disabled, 1 = enabled]", 0, true, 0.0, true, 1.0);
+	g_cvMaxDetections = CreateConVar("sm_antibhopcheat_max_detection", "2", "When player reach this value start apply punishements.", FCVAR_PROTECTED);
+
+	/* Current Streak */
+	g_cvCurrentJumps = CreateConVar("sm_antibhopcheat_current_jumps", "6", "Current Streak: Numbers of jumps to reach to analyze the streak", FCVAR_PROTECTED, true, 1.0);
+	g_cvCurrentHyper = CreateConVar("sm_antibhopcheat_current_hyper", "0.95", "Current Streak: Threshold percentage required to detect Hyperscroll. Set to < 0.0 to disable detection", FCVAR_PROTECTED, true, 0.0, true, 1.0);
+	g_cvCurrentHack = CreateConVar("sm_antibhopcheat_current_hack", "0.90", "Current Streak: Threshold percentage for detecting Hacks. Set to < 0.0 to disable detection", FCVAR_PROTECTED, true, 0.0, true, 1.0);
+	g_cvCurrentHackKick = CreateConVar("sm_antibhopcheat_current_hack_kick", "0", "Current Streak: Kick if a player is flagged for HACK? [0 = disabled, 1 = enabled]", FCVAR_NOTIFY, true, 0.0, true, 1.0);
+
+	/* Global Streak */
+	g_cvGlobalJumps = CreateConVar("sm_antibhopcheat_global_jumps", "30", "Global Streak: Numbers of jumps to reach to analyze all player streaks", FCVAR_PROTECTED, true, 20.0);
+	g_cvGlobalHyper = CreateConVar("sm_antibhopcheat_global_hyper", "0.80", "Global Streak: Threshold percentage required to detect Hyperscroll. Set to < 0.0 to disable detection", FCVAR_PROTECTED, true, 0.0, true, 1.0);
+	g_cvGlobalHack = CreateConVar("sm_antibhopcheat_global_hack", "0.75", "Global Streak: Threshold percentage for detecting Hacks. Set to < 0.0 to disable detection", FCVAR_PROTECTED, true, 0.0, true, 1.0);
+	g_cvGlobalHackKick = CreateConVar("sm_antibhopcheat_global_hack_kick", "0", "Global Streak: Kick if a player is flagged for HACK? [0 = disabled, 1 = enabled]", FCVAR_NOTIFY, true, 0.0, true, 1.0);
+
+#if defined _SelectiveBhop_Included
+	/* Limit Bhop */
+	g_cvCurrentStreakLimitBhop = CreateConVar("sm_antibhopcheat_current_streak_limitbhop", "1", "Current Streak: Limit bhop if a player is flagged for Hyperscroll [0 = disabled, 1 = enabled]", FCVAR_NOTIFY, true, 0.0, true, 1.0);
+	g_cvCurrentHackLimitBhop = CreateConVar("sm_antibhopcheat_current_hack_limitbhop", "1", "Current Streak: Limit bhop if a player is flagged for Hack [0 = disabled, 1 = enabled]", FCVAR_NOTIFY, true, 0.0, true, 1.0);
+	g_cvGlobalStreakLimitBhop = CreateConVar("sm_antibhopcheat_global_streak_limitbhop", "1", "Global Streak: Limit bhop if a player is flagged for Hyperscroll [0 = disabled, 1 = enabled]", FCVAR_NOTIFY, true, 0.0, true, 1.0);
+	g_cvGlobalHackLimitBhop = CreateConVar("sm_antibhopcheat_global_hack_limitbhop", "1", "Global Streak: Limit bhop if a player is flagged for Hack [0 = disabled, 1 = enabled]", FCVAR_NOTIFY, true, 0.0, true, 1.0);
+#endif
+	RegAdminCmd("sm_stats", Command_Stats, ADMFLAG_GENERIC, "sm_stats <#userid|name>");
+	RegAdminCmd("sm_streak", Command_Streak, ADMFLAG_GENERIC, "sm_streak <#userid|name> [streak]");
+
+	AutoExecConfig(true);
+	OnConfigsExecuted();
+
+	if (g_cvSvAutoBhop != null)
+		g_cvSvAutoBhop.AddChangeHook(OnConVarChanged);
+
+	g_cvEnabled.AddChangeHook(OnConVarChanged);
+	g_cvSvGravity.AddChangeHook(OnConVarChanged);
+	g_cDetectionSound.AddChangeHook(OnConVarChanged);
+	g_cvMaxDetections.AddChangeHook(OnConVarChanged);
+	g_cvCurrentJumps.AddChangeHook(OnConVarChanged);
+	g_cvCurrentHyper.AddChangeHook(OnConVarChanged);
+	g_cvCurrentHack.AddChangeHook(OnConVarChanged);
+	g_cvCurrentHackKick.AddChangeHook(OnConVarChanged);
+	g_cvGlobalJumps.AddChangeHook(OnConVarChanged);
+	g_cvGlobalHyper.AddChangeHook(OnConVarChanged);
+	g_cvGlobalHack.AddChangeHook(OnConVarChanged);
+	g_cvGlobalHackKick.AddChangeHook(OnConVarChanged);
+#if defined _SelectiveBhop_Included
+	g_cvCurrentStreakLimitBhop.AddChangeHook(OnConVarChanged);
+	g_cvCurrentHackLimitBhop.AddChangeHook(OnConVarChanged);
+	g_cvGlobalStreakLimitBhop.AddChangeHook(OnConVarChanged);
+	g_cvGlobalHackLimitBhop.AddChangeHook(OnConVarChanged);
+#endif
+
+	if (g_bLate)
+	{
+		for (int client = 1; client <= MaxClients; client++)
+		{
+			if (IsClientConnected(client))
+			{
+				if (IsClientInGame(client))
+					ResetPlayerData(client);
+			}
+		}
+	}
+}
+
+#if defined _SelectiveBhop_Included
+public void OnAllPluginsLoaded()
+{
+	g_Plugin_SelectiveBhop = LibraryExists("SelectiveBhop");
+}
+
+public void OnLibraryAdded(const char[] sName)
+{
+	if (strcmp(sName, "SelectiveBhop", false) == 0)
+		g_Plugin_SelectiveBhop = true;
+}
+
+public void OnLibraryRemoved(const char[] sName)
+{
+	if (strcmp(sName, "SelectiveBhop", false) == 0)
+		g_Plugin_SelectiveBhop = false;
+}
+#endif
+
+public void OnConfigsExecuted()
+{
+	g_bPluginEnabled = g_cvEnabled.BoolValue;
+	g_iSvGravity = g_cvSvGravity.IntValue;
+
+	if (g_cvSvAutoBhop != null)
+	    g_bSvAutoBhop = g_cvSvAutoBhop.BoolValue;
+	else
+	    g_bSvAutoBhop = false;
+
+	g_bNoSound = g_cDetectionSound.BoolValue;
+	g_iMaxFlags = g_cvMaxDetections.IntValue;
+	g_iCurrentJumps = g_cvCurrentJumps.IntValue;
+	g_fCurrentHyper = g_cvCurrentHyper.FloatValue;
+	g_fCurrentHack = g_cvCurrentHack.FloatValue;
+	g_bCurrentHackKick = g_cvCurrentHackKick.BoolValue;
+	g_iGlobalJumps = g_cvGlobalJumps.IntValue;
+	g_fGlobalHyper = g_cvGlobalHyper.FloatValue;
+	g_fGlobalHack = g_cvGlobalHack.FloatValue;
+	g_bGlobalHackKick = g_cvGlobalHackKick.BoolValue;
+
+#if defined _SelectiveBhop_Included
+	g_bCurrentStreakHyperLimited = g_cvCurrentStreakLimitBhop.BoolValue;
+	g_bCurrentHackHyperLimited = g_cvCurrentHackLimitBhop.BoolValue;
+	g_bGlobalStreakHyperLimited = g_cvGlobalStreakLimitBhop.BoolValue;
+	g_bGlobalHackHyperLimited = g_cvGlobalHackLimitBhop.BoolValue;
+#endif
+}
+
+void OnConVarChanged(ConVar convar, const char[] oldValue, const char[] newValue)
+{
+	if (convar == g_cvEnabled)
+	{
+		g_bPluginEnabled = convar.BoolValue;
+		if (!g_bPluginEnabled)
+		{
+			for (int client = 1; client <= MaxClients; client++)
+			{
+				if (!IsClientInGame(client))
+					continue;
+				OnClientDisconnect(client);
+			}
+		}
+	}
+	else if (convar == g_cvSvGravity)
+		g_iSvGravity = convar.IntValue;
+	else if (convar == g_cvSvAutoBhop)
+		g_bSvAutoBhop = convar.BoolValue;
+	else if (convar == g_cDetectionSound)
+		g_bNoSound = convar.BoolValue;
+	else if (convar == g_cvMaxDetections)
+		g_iMaxFlags = convar.IntValue;
+	else if (convar == g_cvCurrentJumps)
+		g_iCurrentJumps = convar.IntValue;
+	else if (convar == g_cvCurrentHyper)
+		g_fCurrentHyper = convar.FloatValue;
+	else if (convar == g_cvCurrentHack)
+		g_fCurrentHack = convar.FloatValue;
+	else if (convar == g_cvCurrentHackKick)
+		g_bCurrentHackKick = convar.BoolValue;
+	else if (convar == g_cvGlobalJumps)
+		g_iGlobalJumps = convar.IntValue;
+	else if (convar == g_cvGlobalHyper)
+		g_fGlobalHyper = convar.FloatValue;
+	else if (convar == g_cvGlobalHack)
+		g_fGlobalHack = convar.FloatValue;
+	else if (convar == g_cvGlobalHackKick)
+		g_bGlobalHackKick = convar.BoolValue;
+#if defined _SelectiveBhop_Included
+	else if (convar == g_cvCurrentStreakLimitBhop)
+		g_bCurrentStreakHyperLimited = convar.BoolValue;
+	else if (convar == g_cvCurrentHackLimitBhop)
+		g_bCurrentHackHyperLimited = convar.BoolValue;
+	else if (convar == g_cvGlobalStreakLimitBhop)
+		g_bGlobalStreakHyperLimited = convar.BoolValue;
+	else if (convar == g_cvGlobalHackLimitBhop)
+		g_bGlobalHackHyperLimited = convar.BoolValue;
+#endif
+}
+
+public void OnMapStart()
+{
+	GameData hConfig = new GameData("funcommands.games");
+
+	if (hConfig == null)
+	{
+		SetFailState("Unable to load game config funcommands.games");
+		return;
+	}
+
+	if (hConfig.GetKeyValue("SoundBeep", g_sBeepSound, PLATFORM_MAX_PATH))
+		PrecacheSound(g_sBeepSound, true);
+
+	delete hConfig;
+}
+
+public void OnClientConnected(int client)
+{
+	InitPlayerData(client);
+}
+
+public void OnClientDisconnect(int client)
+{
+	g_aPlayers[client].Reset();
+	ResetValues(client);
+	g_iFlagged[client] = 0;
+	g_bFlagged[client] = false;
+}
+
+public Action OnPlayerRunCmd(int client, int &buttons)
+{
+	if (!g_bPluginEnabled ||g_bSvAutoBhop || IsFakeClient(client) || !IsPlayerAlive(client))
+		return Plugin_Continue;
+
+	g_iButtons[client] = buttons;
+	return Plugin_Continue;
+}
+
+public void OnPlayerRunCmdPost(int client, int buttons, int impulse, const float vel[3], const float angles[3], int weapon, int subtype, int cmdnum, int tickcount, int seed, const int mouse[2])
+{
+	if (!g_bPluginEnabled || g_bSvAutoBhop || g_iSvGravity != 800 || !IsClientInGame(client) || IsFakeClient(client) || !IsPlayerAlive(client) || IsClientSourceTV(client))
+		return;
+
+	float fVecVelocity[3];
+	GetEntPropVector(client, Prop_Data, "m_vecAbsVelocity", fVecVelocity);
+	fVecVelocity[2] = 0.0;
+	float fVelocity = GetVectorLength(fVecVelocity);
+
+	// With this velocity in 99% the player will be flagged (and can create false positives)
+	if (fVelocity > 700.0)
+		return;
+
+	MoveType ClientMoveType = GetEntityMoveType(client);
+
+	bool bPrevOnGround = g_bOnGround[client];
+	bool bInWater = GetEntProp(client, Prop_Send, "m_nWaterLevel") >= 2;
+	bool bOnGround = !bInWater && GetEntityFlags(client) & FL_ONGROUND;
+	bool bPrevHoldingJump = g_bHoldingJump[client];
+	bool bHoldingJump = view_as<bool>(g_iButtons[client] & IN_JUMP);
+	bool bInJump = g_bInJump[client];
+
+	if (bInJump && (bInWater || ClientMoveType == MOVETYPE_LADDER || ClientMoveType == MOVETYPE_NOCLIP) && GetEntityGravity(client) == 0.0)
+		bOnGround = true;
+
+	// Debug with PrinToChatAll
+	// PrintToChatAll("bInJump = %s", bInJump ? "true" : "false");
+	// PrintToChatAll("ClientMoveType = %d", ClientMoveType);
+	// PrintToChatAll("GetEntityGravity(client) = %f", GetEntityGravity(client));
+	// PrintToChatAll("g_iSvGravity = %d", g_iSvGravity);
+	// PrintToChatAll("bInWater = %d", bInWater);
+
+	if (bOnGround)
+	{
+		if (!bPrevOnGround)
+		{
+			g_bOnGround[client] = true;
+			g_bInJump[client] = false;
+			if (bInJump)
+				OnTouchGround(client, tickcount, fVelocity);
+		}
+	}
+	else
+	{
+		if (bPrevOnGround)
+			g_bOnGround[client] = false;
+	}
+
+	if (bHoldingJump)
+	{
+		if (!bPrevHoldingJump && !bOnGround && (bPrevOnGround || bInJump))
+		{
+			g_bHoldingJump[client] = true;
+			g_bInJump[client] = true;
+			OnPressJump(client, tickcount, fVelocity, bPrevOnGround);
+		}
+	}
+	else
+	{
+		if (bPrevHoldingJump)
+		{
+			g_bHoldingJump[client] = false;
+			OnReleaseJump(client, tickcount);
+		}
+	}
+}
+
+// TODO: Release after touch ground
+
+void OnTouchGround(int client, int iTick, float fVelocity)
+{
+	//PrintToChatAll("%d : %f - OnTouchGround", iTick, fVelocity);
+
+	CStreak CurStreak;
+	CurStreak = g_aPlayers[client].hStreak;
+
+	ArrayList hJumps = CurStreak.hJumps;
+
+	int iLength = hJumps.Length;
+
+	CJump hJump;
+	hJumps.GetArray(iLength - 1, hJump, sizeof(CJump));
+
+	hJump.iEndTick = iTick;
+	hJump.fEndVel = fVelocity;
+
+	hJumps.SetArray(iLength - 1, hJump, sizeof(CJump));
+
+	if (iLength == VALID_MIN_JUMPS)
+	{
+		g_aPlayers[client].hStreak.bValid = true;
+
+		// Run DoStats first so that counters are populated before we snapshot the streak.
+		for (int i = 0; i < iLength - 1; i++)
+		{
+			CJump hJump_;
+			hJumps.GetArray(i, hJump_, sizeof(CJump));
+
+			DoStats(client, hJump_);
+			hJumps.SetArray(i, hJump_, sizeof(CJump));
+		}
+
+		// Current streak is valid — push a snapshot onto hStreaks.
+		ArrayList hStreaks = g_aPlayers[client].hStreaks;
+		if (hStreaks.Length == MAX_STREAKS)
+		{
+			// Keep the last 10 streaks
+			CStreak hStreak;
+			hStreaks.GetArray(0, hStreak, sizeof(CStreak));
+			hStreak.Reset();
+			hStreaks.Erase(0);
+		}
+
+		// Clone the Jumps ArrayList
+		ArrayList hJumpsCopy = hJumps.Clone();
+
+		CStreak newStreak;
+		newStreak = g_aPlayers[client].hStreak;
+		newStreak.hJumps = hJumpsCopy;
+		hStreaks.PushArray(newStreak);
+		
+		for (int i = 0; i < iLength - 1; i++)
+		{
+			CJump hJump_;
+			hJumps.GetArray(i, hJump_, sizeof(CJump));
+			DoStats(client, hJump_);
+		}
+	}
+	else if (iLength > VALID_MIN_JUMPS)
+	{
+		CJump hJump_;
+		hJumps.GetArray(iLength - 2, hJump_, sizeof(CJump));
+
+		DoStats(client, hJump_);
+		hJumps.SetArray(iLength - 2, hJump_, sizeof(CJump));
+	}
+}
+
+void OnPressJump(int client, int iTick, float fVelocity, bool bLeaveGround)
+{
+	//PrintToChatAll("%d : %f - OnPressJump %d", iTick, fVelocity, bLeaveGround);
+
+	if (g_aPlayers[client].hStreak.hJumps == null)
+		g_aPlayers[client].hStreak.hJumps = new ArrayList(sizeof(CJump));
+
+	CStreak CurStreak;
+	CurStreak = g_aPlayers[client].hStreak;
+	ArrayList hJumps = CurStreak.hJumps;
+	CJump hJump;
+
+	int iLength = hJumps.Length;
+	int iJumpIndex = 0;
+
+	if (bLeaveGround)
+	{
+		int iPrevJump = -1;
+		// Check if we should start a new streak
+		if (iLength)
+		{
+			// Last jump was more than VALID_MAX_TICKS ticks ago or not valid and fVelocity < VALID_MIN_VELOCITY
+			iJumpIndex = iLength - 1;
+			hJumps.GetArray(iJumpIndex, hJump, sizeof(CJump));
+			if (hJump.iEndTick < iTick - VALID_MAX_TICKS || fVelocity < VALID_MIN_VELOCITY)
+			{
+				if (CurStreak.bValid)
+				{
+					CurStreak.iEndTick = iTick;
+
+					DoStats(client, hJump);
+					hJumps.SetArray(iLength - 1, hJump, sizeof(CJump));
+				}
+				else
+					CurStreak.Reset();
+
+				CStreak newStreak;
+				newStreak.Reset();
+				CurStreak = newStreak;
+				CurStreak.hJumps = new ArrayList(sizeof(CJump));
+
+				g_aPlayers[client].hStreak = CurStreak;
+				hJumps = CurStreak.hJumps;
+			}
+			else
+			{
+				iPrevJump = iTick - hJump.iEndTick;
+				hJump.iNextJump = iPrevJump;
+				hJumps.SetArray(iLength - 1, hJump, sizeof(CJump));
+			}
+		}
+
+		CJump newJump;
+		newJump.Reset();
+		hJump = newJump;
+
+		hJump.iStartTick = iTick;
+		hJump.fStartVel = fVelocity;
+		if (iPrevJump != -1)
+			hJump.iPrevJump = iPrevJump;
+		iJumpIndex = hJumps.PushArray(hJump);
+	}
+	else
+	{
+		iJumpIndex = iLength - 1;
+		hJumps.GetArray(iJumpIndex, hJump, sizeof(CJump));
+	}
+
+	if (hJump.iCurrentPress >= MAX_PRESSES)
+	{
+		hJump.iCurrentPress = 0;
+		hJumps.SetArray(iJumpIndex, hJump, sizeof(hJump));
+	}
+
+	hJump.iPresses[hJump.iCurrentPress++] = iTick;
+	hJumps.SetArray(iJumpIndex, hJump, sizeof(hJump));
+}
+
+void OnReleaseJump(int client, int iTick)
+{
+	CJump hJump;
+	g_aPlayers[client].hStreak.hJumps.GetArray(g_aPlayers[client].hStreak.hJumps.Length - 1, hJump, sizeof(CJump));
+
+	hJump.iPresses[hJump.iCurrentPress - 1] = iTick;
+	g_aPlayers[client].hStreak.hJumps.SetArray(g_aPlayers[client].hStreak.hJumps.Length - 1, hJump, sizeof(CJump));
+}
+
+void DoStats(int client, CJump hJump)
+{
+	int aJumps[3] = {0, 0, 0};
+	int iPresses = 0;
+	int iTicks = 0;
+	int iLastJunk = 0;
+
+	// Write directly to g_aPlayers[client].hStreak — CStreak is an enum struct and is
+	// always passed by value, so mutations to the local CurStreak copy are discarded.
+	g_aPlayers[client].hStreak.iJumps++;
+	g_aPlayers[client].iJumps++;
+
+	int iStartTick = hJump.iStartTick;
+	int iEndTick = hJump.iEndTick;
+	int iPrevJump = hJump.iPrevJump;
+	int iNextJump = hJump.iNextJump;
+
+	if (iPrevJump > 0)
+	{
+		int iPerf = iPrevJump - 1;
+		if (iPerf > 2)
+			iPerf = 2;
+
+		aJumps[iPerf]++;
+	}
+
+	iPresses = hJump.iCurrentPress;
+	iTicks = iEndTick - iStartTick;
+	iLastJunk = iEndTick - hJump.iPresses[iPresses - 1];
+
+	float PressesPerTick = (iPresses * 4.0) / float(iTicks);
+	if (PressesPerTick >= 0.85)
+	{
+		g_aPlayers[client].hStreak.iHyperJumps++;
+		g_aPlayers[client].iHyperJumps++;
+	}
+
+	if (iNextJump != -1 && iNextJump <= 1 && (iLastJunk > 5 || iPresses <= 2) && hJump.fEndVel >= 285.0)
+	{
+		g_aPlayers[client].hStreak.iHackJumps++;
+		g_aPlayers[client].iHackJumps++;
+	}
+
+	g_aPlayers[client].aJumps[0] += aJumps[0];
+	g_aPlayers[client].aJumps[1] += aJumps[1];
+	g_aPlayers[client].aJumps[2] += aJumps[2];
+
+	g_aPlayers[client].hStreak.aJumps[0] += aJumps[0];
+	g_aPlayers[client].hStreak.aJumps[1] += aJumps[1];
+	g_aPlayers[client].hStreak.aJumps[2] += aJumps[2];
+
+	int iStreakJumps = g_aPlayers[client].hStreak.iJumps;
+	int iGlobalJumps = g_aPlayers[client].iJumps;
+
+	if (iStreakJumps >= g_iCurrentJumps)
+	{
+		float HackRatio = g_aPlayers[client].hStreak.iHackJumps / float(iStreakJumps);
+		float HyperRatio = g_aPlayers[client].hStreak.iHyperJumps / float(iStreakJumps);
+
+		if (HackRatio >= g_fCurrentHack && g_fCurrentHack > 0.0)
+		{
+			HandleFlagging(client, STREAK_HACK);
+			return;
+		}
+
+		if (HyperRatio >= g_fCurrentHyper && g_fCurrentHyper > 0.0)
+		{
+			HandleFlagging(client, STREAK_HYPER);
+			return;
+		}
+	}
+
+	if (iGlobalJumps >= g_iGlobalJumps)
+	{
+		float HackRatio = g_aPlayers[client].iHackJumps / float(iGlobalJumps);
+		float HyperRatio = g_aPlayers[client].iHyperJumps / float(iGlobalJumps);
+
+		if (HackRatio >= g_fGlobalHack && g_fGlobalHack > 0.0)
+		{
+			HandleFlagging(client, GLOBAL_HACK);
+			return;
+		}
+
+		if (HyperRatio >= g_fGlobalHyper && g_fGlobalHyper > 0.0)
+		{
+			HandleFlagging(client, GLOBAL_HYPER);
+			return;
+		}
+	}
+}
+
+void HandleFlagging(int client, const char[] reason)
+{
+	g_iFlagged[client]++;
+
+	// Only notify suspected players once
+	if (g_iFlagged[client] == 1)
+	{
+		NotifyAdmins(client, reason, false);
+		ResetValues(client);
+		return;
+	}
+
+	// Player is now flagged - Flag him only once
+	if (!g_bFlagged[client] && g_iFlagged[client] >= g_iMaxFlags)
+	{
+		g_bFlagged[client] = true;
+		NotifyAdmins(client, reason, true);
+		Forward_OnDetected(client, reason, g_sStats);
+		ResetValues(client);
+
+		if (strcmp(reason, STREAK_HACK, false) == 0 && g_bCurrentHackKick || strcmp(reason, GLOBAL_HACK, false) == 0 && g_bGlobalHackKick)
+		{
+			LogAction(-1, client, "[AntiBhopCheat] \"%L\" was kicked for using %s", client, reason);
+			KickClient(client, "Turn off your hack!");
+			return;
+		}
+	#if defined _SelectiveBhop_Included
+		else
+		{
+			// Limit bhop if applicable
+			bool bIsBhopLimited = CanTestFeatures() && GetFeatureStatus(FeatureType_Native, "IsBhopLimited") == FeatureStatus_Available;
+			bool bLimitBhop = CanTestFeatures() && GetFeatureStatus(FeatureType_Native, "LimitBhop") == FeatureStatus_Available;
+
+			if (g_Plugin_SelectiveBhop && bLimitBhop && bIsBhopLimited && !IsBhopLimited(client) &&
+				(strcmp(reason, STREAK_HYPER, false) == 0 && g_bCurrentStreakHyperLimited || strcmp(reason, GLOBAL_HYPER, false) == 0 && g_bGlobalStreakHyperLimited ||
+				strcmp(reason, STREAK_HACK, false) == 0 && g_bCurrentHackHyperLimited || strcmp(reason ,GLOBAL_HACK, false) == 0 && g_bGlobalHackHyperLimited))
+			{
+				LimitBhop(client, true);
+				CPrintToChat(client, "{green}[SM]{red} Your jump settings appear to not be legit.");
+				CPrintToChat(client, "{green}[SM]{red} Your bhop has been {fullred}turned off{red} until the end of the map.");
+				NotifyAdmins(client, "", false, true);
+			}
+		}
+	#endif
+	}
+}
+
+void NotifyAdmins(int client, const char[] sReason, bHighSus = false, bLimitBhop = false)
+{
+	int iUserID = GetClientUserId(client);
+
+	for (int i = 1; i <= MaxClients; i++)
+	{
+		if (IsClientInGame(i) && !IsFakeClient(i) && CheckCommandAccess(i, "sm_stats", ADMFLAG_BAN))
+		{
+			if (bLimitBhop)
+			{
+				CPrintToChat(i, "{green}[SM] {red}The bhop of {olive}%N {red}has been turned off{default} until the end of the map.", client);
+				return;
+			}
+
+			CPrintToChat(i, "{green}[SM] {olive}%N %s suspected of using %s", client, bHighSus ? "{red}is highly" : "{orange}is", sReason);
+			CPrintToChat(i, "{green}[SM] {red}Spectate {orange}the player by typing {red}/spec #%d", iUserID);
+			CPrintToChat(i, "{green}[SM] {fullred}Do not take any actions %s", bHighSus ? "until the player has been spectated and you are 100% sure of the cheat" : "yet");
+
+			PrintStats(i, client);
+			PrintStreak(i, client, -1, true);
+
+			if (bHighSus && g_bNoSound)
+			{
+				if (gEV_Type == Engine_CSS || gEV_Type == Engine_TF2)
+					EmitSoundToClient(i, g_sBeepSound);
+				else
+					ClientCommand(i, "play */%s", g_sBeepSound);
+			}
+		}
+	}
+
+	// Fully reset player stats. We want to analyse a new whole streak.
+	// Pass the UserID (not the client index) so the timer is safe if the player
+	// disconnects before the 0.3 s fires.
+	CreateTimer(0.3, Timer_OnDetected, GetClientUserId(client), TIMER_FLAG_NO_MAPCHANGE);
+}
+
+public Action Timer_OnDetected(Handle timer, int userid)
+{
+	int client = GetClientOfUserId(userid);
+	if (!client || !IsClientInGame(client))
+		return Plugin_Stop;
+
+	ResetPlayerData(client);
+	return Plugin_Continue;
+}
+
+public Action Command_Stats(int client, int argc)
+{
+	if (argc < 1 || argc > 2)
+	{
+		CReplyToCommand(client, "{green}[SM] {default}Usage: sm_stats <#userid|name>");
+		return Plugin_Handled;
+	}
+
+	char sArg[65];
+	char sTargetName[MAX_TARGET_LENGTH];
+	int iTargets[MAXPLAYERS];
+	int iTargetCount;
+	bool bIsML;
+
+	GetCmdArg(1, sArg, sizeof(sArg));
+
+	if ((iTargetCount = ProcessTargetString(sArg, client, iTargets, MAXPLAYERS,
+		COMMAND_FILTER_NO_MULTI | COMMAND_FILTER_NO_BOTS | COMMAND_FILTER_NO_IMMUNITY, sTargetName, sizeof(sTargetName), bIsML)) <= 0)
+	{
+		ReplyToTargetError(client, iTargetCount);
+		return Plugin_Handled;
+	}
+
+	for (int i = 0; i < iTargetCount; i++)
+	{
+		PrintStats(client, iTargets[i]);
+	}
+
+	return Plugin_Handled;
+}
+
+void PrintStats(int client, int iTarget)
+{
+	PrintToConsole(client, "[SM] Bunnyhop stats for %L", iTarget);
+
+	int iGlobalJumps = g_aPlayers[iTarget].iJumps;
+	float HyperRatio = g_aPlayers[iTarget].iHyperJumps / float(iGlobalJumps);
+	float HackRatio = g_aPlayers[iTarget].iHackJumps / float(iGlobalJumps);
+
+	PrintToConsole(client, "Global jumps: %d | Hyper?: %.1f%% | Hack?: %.1f%%",
+		iGlobalJumps, HyperRatio * 100.0, HackRatio * 100.0);
+
+	PrintToConsole(client, "Global jumps perf group (1 2 +): %1.f%%  %1.f%%  %1.f%%",
+		(g_aPlayers[iTarget].aJumps[0] / float(iGlobalJumps)) * 100.0,
+		(g_aPlayers[iTarget].aJumps[1] / float(iGlobalJumps)) * 100.0,
+		(g_aPlayers[iTarget].aJumps[2] / float(iGlobalJumps)) * 100.0);
+
+
+	PrintToConsole(client, "more to come...");
+}
+
+public Action Command_Streak(int client, int argc)
+{
+	if (argc < 1 || argc > 2)
+	{
+		CReplyToCommand(client, "{green}[SM] {default}Usage: sm_streak <#userid|name> [streak]");
+		return Plugin_Handled;
+	}
+
+	char sArg[65];
+	char sArg2[8];
+	char sTargetName[MAX_TARGET_LENGTH];
+	int iTargets[MAXPLAYERS];
+	int iTargetCount;
+	bool bIsML;
+	int iStreak = -1;
+
+	GetCmdArg(1, sArg, sizeof(sArg));
+
+	if (argc == 2)
+	{
+		GetCmdArg(2, sArg2, sizeof(sArg2));
+		iStreak = StringToInt(sArg2);
+	}
+
+	if ((iTargetCount = ProcessTargetString(sArg, client, iTargets, MAXPLAYERS,
+		COMMAND_FILTER_NO_MULTI | COMMAND_FILTER_NO_BOTS | COMMAND_FILTER_NO_IMMUNITY, sTargetName, sizeof(sTargetName), bIsML)) <= 0)
+	{
+		ReplyToTargetError(client, iTargetCount);
+		return Plugin_Handled;
+	}
+
+	for (int i = 0; i < iTargetCount; i++)
+	{
+		PrintStreak(client, iTargets[i], iStreak);
+	}
+
+	return Plugin_Handled;
+}
+
+void PrintStreak(int client, int iTarget, int iStreak, bool bDetected=false)
+{
+	g_sStats = "";
+
+	PrintToConsole(client, "[SM] Bunnyhop streak %d for %L", iStreak, iTarget);
+
+	if (bDetected)
+		FormatEx(g_sStats, sizeof(g_sStats), "%sBunnyhop streak %d for %L\n",
+		g_sStats, iStreak, iTarget);
+
+	ArrayList hStreaks = g_aPlayers[iTarget].hStreaks;
+	CStreak hStreak;
+	hStreak = g_aPlayers[iTarget].hStreak;
+	int iStreaks = hStreaks.Length;
+
+	// Try showing latest valid streak
+	if (iStreak <= 0 && !hStreak.bValid)
+	{
+		if (iStreaks)
+			hStreaks.GetArray(iStreaks - 1, hStreak, sizeof(CStreak));
+	}
+	else if (iStreak > 0)
+	{
+		if (iStreak > MAX_STREAKS)
+		{
+			CReplyToCommand(client, "{green}[SM] {default}Streak is out of bounds (max. %d)!", MAX_STREAKS);
+			return;
+		}
+
+		int iIndex = iStreaks - iStreak;
+		if (iIndex < 0)
+		{
+			CReplyToCommand(client, "{green}[SM] {default}Only {olive}%d {default}streaks are available for this player right now!", iStreaks);
+			return;
+		}
+
+		hStreaks.GetArray(iIndex, hStreak, sizeof(CStreak));
+	}
+
+	int iStreakJumps = hStreak.iJumps;
+	float HyperRatio = hStreak.iHyperJumps / float(iStreakJumps);
+	float HackRatio = hStreak.iHackJumps / float(iStreakJumps);
+
+	PrintToConsole(client, "Streak jumps: %d | Hyper?: %.1f%% | Hack?: %.1f%%",
+		iStreakJumps, HyperRatio * 100.0, HackRatio * 100.0);
+
+	if (bDetected)
+		FormatEx(g_sStats, sizeof(g_sStats), "%sStreak jumps: %d | Hyper?: %.1f%% | Hack?: %.1f%%\n",
+		g_sStats, iStreakJumps, HyperRatio * 100.0, HackRatio * 100.0);
+
+	PrintToConsole(client, "Streak jumps perf group (1 2 +): %1.f%%  %1.f%%  %1.f%%",
+		(hStreak.aJumps[0] / float(iStreakJumps)) * 100.0,
+		(hStreak.aJumps[1] / float(iStreakJumps)) * 100.0,
+		(hStreak.aJumps[2] / float(iStreakJumps)) * 100.0);
+
+	if (bDetected)
+		Format(g_sStats, sizeof(g_sStats), "%sStreak jumps perf group (1 2 +): %1.f%%  %1.f%%  %1.f%%\n",
+		g_sStats,
+		(hStreak.aJumps[0] / float(iStreakJumps)) * 100.0,
+		(hStreak.aJumps[1] / float(iStreakJumps)) * 100.0,
+		(hStreak.aJumps[2] / float(iStreakJumps)) * 100.0);
+
+	PrintToConsole(client, "#%2s %5s %7s %7s %5s %5s %8s %4s %6s   %s",
+		"id", " diff", "  invel", " outvel", " gain", " comb", " avgdist", " num", " avg+-", "pattern");
+
+	if (bDetected)
+		FormatEx(g_sStats, sizeof(g_sStats), "%s#%2s %5s %7s %7s %5s %5s %8s %4s %6s   %s\n",
+		g_sStats, "id", " diff", "  invel", " outvel", " gain", " comb", " avgdist", " num", " avg+-", "pattern");
+
+	ArrayList hJumps = hStreak.hJumps;
+	float fPrevVel = 0.0;
+	int iPrevEndTick = -1;
+
+	for (int i = 0; i < hJumps.Length; i++)
+	{
+		CJump hJump;
+		hJumps.GetArray(i, hJump, sizeof(CJump));
+
+		float fInVel = hJump.fStartVel;
+		float fOutVel = hJump.fEndVel;
+		int iEndTick = hJump.iEndTick;
+
+		static char sPattern[1024];
+		int iPatternLen = 0;
+		int iPrevTick = -1;
+		int iTicks;
+
+		if (iPrevEndTick != -1)
+		{
+			iTicks = hJump.iStartTick - iPrevEndTick;
+			for (int k = 0; k < iTicks && k < 16; k++)
+				sPattern[iPatternLen++] = '|';
+		}
+
+		float fAvgDist = 0.0;
+		float fAvgDownUp = 0.0;
+
+		int iPresses = hJump.iCurrentPress;
+		for (int j = iPresses - 1; j >= 0; j--)
+		{
+			if (iPrevTick != -1)
+			{
+				iTicks = hJump.iPresses[j] - iPrevTick;
+				for (int k = 0; k < iTicks && k < 16; k++)
+					sPattern[iPatternLen++] = '.';
+
+				fAvgDist += iTicks;
+			}
+
+			sPattern[iPatternLen++] = '^';
+
+			iTicks = hJump.iPresses[j] - hJump.iPresses[j];
+			for (int k = 0; k < iTicks && k < 16; k++)
+				sPattern[iPatternLen++] = ',';
+
+			fAvgDownUp += iTicks;
+
+			sPattern[iPatternLen++] = 'v';
+
+			iPrevTick = hJump.iPresses[(j-1 >= 0) ? j-1 : 0];
+		}
+
+		fAvgDist /= iPresses;
+		fAvgDownUp /= iPresses;
+
+		iTicks = iEndTick - iPrevTick;
+		for (int k = 0; k < iTicks && k < 16; k++)
+			sPattern[iPatternLen++] = '.';
+
+		sPattern[iPatternLen++] = '|';
+		sPattern[iPatternLen++] = '\0';
+
+		if (fPrevVel == 0.0)
+			fPrevVel = fInVel;
+
+		PrintToConsole(client, "#%2d %4d%% %7.1f %7.1f %4d%% %4d%% %8.2f %4d %6.2f   %s",
+			i,
+			fPrevVel == 0.0 ? 100 : RoundFloat((fInVel / fPrevVel) * 100.0 - 100.0),
+			fInVel,
+			fOutVel,
+			fInVel == 0.0 ? 100 : RoundFloat((fOutVel / fInVel) * 100.0 - 100.0),
+			fPrevVel == 0.0 ? 100 : RoundFloat((fOutVel / fPrevVel) * 100.0 - 100.0),
+			fAvgDist,
+			iPresses,
+			fAvgDownUp,
+			sPattern);
+
+		if (bDetected)
+			FormatEx(g_sStats, sizeof(g_sStats), "%s#%2d %4d%% %7.1f %7.1f %4d%% %4d%% %8.2f %4d %6.2f   %s\n",
+			g_sStats,
+			i,
+			fPrevVel == 0.0 ? 100 : RoundFloat((fInVel / fPrevVel) * 100.0 - 100.0),
+			fInVel,
+			fOutVel,
+			fInVel == 0.0 ? 100 : RoundFloat((fOutVel / fInVel) * 100.0 - 100.0),
+			fPrevVel == 0.0 ? 100 : RoundFloat((fOutVel / fPrevVel) * 100.0 - 100.0),
+			fAvgDist,
+			iPresses,
+			fAvgDownUp,
+			sPattern);
+
+		iPrevEndTick = iEndTick;
+		fPrevVel = fOutVel;
+	}
+}
+
+void Forward_OnDetected(int client, const char[] reason, const char[] stats)
+{
+	Call_StartForward(g_hOnClientDetected);
+	Call_PushCell(client);
+	Call_PushString(reason);
+	Call_PushString(stats);
+	Call_Finish();
+
+	g_sStats = "";
+}
+
+stock void InitPlayerData(int client)
+{
+	g_aPlayers[client].hStreaks = new ArrayList(sizeof(CStreak));
+	g_aPlayers[client].hStreak.hJumps = new ArrayList(sizeof(CJump));
+	ResetValues(client);
+}
+
+stock void ResetValues(int client)
+{
+	g_bOnGround[client] = false;
+	g_bHoldingJump[client] = false;
+	g_bInJump[client] = false;
+}
+
+stock void ResetPlayerData(int client)
+{
+	g_aPlayers[client].Reset();
+	InitPlayerData(client);
+}
+
+```
+
+`addons/sourcemod/scripting/include/AntiBhopCheat.inc`:
+
+```inc
+#if defined _AntiBhopCheat_Included
+	#endinput
+#endif
+#define _AntiBhopCheat_Included
+
+forward void AntiBhopCheat_OnClientDetected(int client, char[] sReason, char[] sStats);
+```
+
+`addons/sourcemod/scripting/include/CJump.inc`:
+
+```inc
+#if defined _class_cjump_
+  #endinput
+#endif
+#define _class_cjump_
+
+enum struct CJump
+{
+	int iStartTick;
+	int iEndTick;
+	float fStartVel;
+	float fEndVel;
+	
+	int iPrevJump;
+	int iNextJump;
+	
+	int iPresses[MAX_PRESSES];
+	int iCurrentPress;
+
+	void Reset()
+	{
+		this.iStartTick = -1;
+		this.iEndTick = -1;
+		this.fStartVel = 0.0;
+		this.fEndVel = 0.0;
+		
+		this.iPrevJump = -1;
+		this.iNextJump = -1;
+
+		for (int i = 0; i < MAX_PRESSES; i++)
+			this.iPresses[i] = -1;
+	}
+}
+
+```
+
+`addons/sourcemod/scripting/include/CPlayer.inc`:
+
+```inc
+#if defined _class_cplayer_
+  #endinput
+#endif
+#define _class_cplayer_
+
+enum struct CPlayer
+{
+	bool bFlagged;
+	
+	int iJumps;
+	int iHyperJumps;
+	int iHackJumps;
+	int aJumps[3];
+	
+	CStreak hStreak;
+	ArrayList hStreaks;
+
+	void Reset()
+	{
+		this.bFlagged = false;
+		this.iJumps = 0;
+		this.iHyperJumps = 0;
+		this.iHackJumps = 0;
+		this.aJumps = { 0, 0, 0 };
+
+		if (this.hStreaks != null)
+		{
+			CStreak hStreak;
+			for (int i = 0; i < this.hStreaks.Length; i++)
+			{
+				this.hStreaks.GetArray(i, hStreak, sizeof(CStreak));
+				hStreak.Reset();
+			}
+			delete this.hStreaks;
+		}
+
+		this.hStreak.Reset();
+	}
+}
+
+```
+
+`addons/sourcemod/scripting/include/CStreak.inc`:
+
+```inc
+#if defined _class_cstreak_
+  #endinput
+#endif
+#define _class_cstreak_
+
+enum struct CStreak
+{
+	bool bValid;
+	int iStartTick;
+	int iEndTick;
+	float fStartVel;
+	float fEndVel;
+	
+	int iJumps;
+	int iHyperJumps;
+	int iHackJumps;
+	int aJumps[3];
+	
+	ArrayList hJumps;
+	
+	void Reset()
+	{
+		this.bValid = false;
+		this.iStartTick = -1;
+		this.iEndTick = -1;
+		this.fStartVel = 0.0;
+		this.fEndVel = 0.0;
+		
+		this.iJumps = 0;
+		this.iHyperJumps = 0;
+		this.iHackJumps = 0;
+		this.aJumps = { 0, 0, 0 };
+
+		if (this.hJumps != null)
+		{
+			for (int i = 0; i < this.hJumps.Length; i++)
+			{
+				CJump hJump;
+				this.hJumps.GetArray(i, hJump, sizeof(CJump));
+				hJump.Reset();
+			}
+			delete this.hJumps;
+		}
+	}
+}
+
+```
