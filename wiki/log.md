@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-30** — lint (agent pass): index vs disk scan — 9 overviews, 51 concepts, 3983 entities (4043 index entries); index.md fully synced (0 missing, 0 dead, 0 duplicate entries); overview wikilink spot-check (9 pages, 12114 links) — 0 broken links; concept spot-check (51 pages, 2345 links) — 0 broken links; index.md wikilink scan (726 links) — 0 broken links; 6 cross-kind slug collisions ([[game-hacking]], [[anti-cheat]], [[reverse-engineering]], [[il2cpp]], [[byovd]], [[dma]]) — expected, no repair needed; no structural edits required.
+
 - **2026-09-30** — ingest `description:3641397194-wq/ida-zh-cn`: entity [[ida-zh-cn]] (3641397194-wq; runtime Simplified-Chinese IDA Pro 9.x UI localization; IDAPython + PyQt5 QProxyStyle paint-time translation; ~1860-entry dictionary; preserves English widget IDs; one-click English restore; Windows/macOS/Linux; Cheat / RE Tools); cited on [[overviews/reverse-engineering]] IDA theme/localization cluster + README map and [[overviews/game-hacking]] RE Tools lane; cross-linked [[idapro-muils]], [[ida-settings]], and [[ida-plugin-repository]]; `index.md` entity + overview blurbs updated.
 
 - **2026-09-30** — ingest `description:srcdslab/sm-plugin-AntiBhopCheat`: entity [[sm-plugin-antibhopcheat]] (srcdslab; SourceMod SourcePawn plugin; jump-timing/velocity/tick-input streak analysis for scripted bhop and hyperscroll; admin review, SelectiveBhop limits, auto-kick; CS and other SourceMod titles; For Source Games); cited on [[overviews/anti-cheat]] and [[overviews/game-engine]]; cross-linked [[little-anti-cheat]], [[nocheatz-3]], [[corner-culling-source-engine]], [[source-engine]], and [[input-provenance]]; `index.md` updated.
