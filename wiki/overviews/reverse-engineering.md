@@ -82,6 +82,7 @@ sources:
   - wiki/sources/descriptions/LordNoteworthy__al-khaser.md
   - wiki/sources/descriptions/LongWayHomie__PolyEngine.md
   - wiki/sources/descriptions/Lucyferek-nunu__vmp-unpacker.md
+  - wiki/sources/descriptions/datcathuh__vmprotect-unpacker.md
   - wiki/sources/descriptions/LSPosed__DexBuilder.md
   - wiki/sources/descriptions/LSPosed__AndroidHiddenApiBypass.md
   - wiki/sources/descriptions/LLeavesG__eBPFDexDumper.md

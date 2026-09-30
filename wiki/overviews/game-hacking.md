@@ -1699,6 +1699,7 @@ sources:
   - wiki/sources/descriptions/notahacker8__RobloxCheats.md
   - wiki/sources/descriptions/LyeDevGit__WonTree-RBLX-Dumper.md
   - wiki/sources/descriptions/Lucyferek-nunu__vmp-unpacker.md
+  - wiki/sources/descriptions/datcathuh__vmprotect-unpacker.md
   - wiki/sources/descriptions/nologic__idaref.md
   - wiki/sources/descriptions/samaBR85__OcarinaCTRComposer.md
   - wiki/sources/descriptions/samaBR85__CTRComposer.md
