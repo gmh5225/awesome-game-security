@@ -26,4 +26,4 @@ Optional **interpolation** and **backtrack countermeasures**, **high-ping enforc
 
 ## Related
 
-[[overviews/anti-cheat]] · [[overviews/game-engine]] · [[nocheatz-3]] · [[cs2ac]] · [[csgo-ac]] · [[source-engine]] · [[hl2sdk]] · [[source-netvars]] · [[ai-aimbot-detection]]
+[[overviews/anti-cheat]] · [[overviews/game-engine]] · [[sm-plugin-antibhopcheat]] · [[nocheatz-3]] · [[cs2ac]] · [[csgo-ac]] · [[source-engine]] · [[hl2sdk]] · [[source-netvars]] · [[ai-aimbot-detection]]
