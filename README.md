@@ -1322,6 +1322,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/anasfanani/Magisk-Tailscaled [Magisk module for running Tailscale]
 - https://github.com/j-hc/FlagSecurePatcher [Disable flag secure and screenshot listeners]
 - https://github.com/ShivamXD6/Simple-Flag-Secure [Standalone Magisk/KernelSU/APatch module that patches services.jar to disable FLAG_SECURE and block screenshot detection on Android 14+]
+- https://github.com/saadnahid7/smalipatcher_reborn [Magisk/KernelSU/APatch module that patches services.jar on-device for mock-location spoofing and secure-window screenshot bypass on Android 10–17]
 - https://github.com/hackcatml/zygisk-memdump [A zygisk module that dumps so file from process memory]
 - https://github.com/PerformanC/ReZygisk [Transparent implementation of Zygisk]
 - https://github.com/jiqiu2022/Zygisk-MyInjector [Zygisk Injector]
