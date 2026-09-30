@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-30** — ingest `readme:categories`: Cheat ~2853 (+1; saadnahid7/smalipatcher_reborn Magisk/KernelSU/APatch on-device services.jar smali patcher for mock-location + FLAG_SECURE bypass; Android 10–17) / Anti Cheat ~762 / other major section counts stable; 41 sections; synced projected README-map counts (~2853/~762) on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/mobile-security]], [[overviews/reverse-engineering]], and [[overviews/dma-attack]]; entity [[smalipatcher-reborn]]; light `index.md` section notes (no per-category pages).
+
 - **2026-09-30** — lint (agent pass): index vs disk scan — 9 overviews, 51 concepts, 3983 entities (4043 index entries); index.md fully synced (0 missing, 0 dead, 0 duplicate entries); overview wikilink spot-check (9 pages, 12114 links) — 0 broken links; concept spot-check (51 pages, 2345 links) — 0 broken links; index.md wikilink scan (726 links) — 0 broken links; 6 cross-kind slug collisions ([[game-hacking]], [[anti-cheat]], [[reverse-engineering]], [[il2cpp]], [[byovd]], [[dma]]) — expected, no repair needed; no structural edits required.
 
 - **2026-09-30** — ingest `description:3641397194-wq/ida-zh-cn`: entity [[ida-zh-cn]] (3641397194-wq; runtime Simplified-Chinese IDA Pro 9.x UI localization; IDAPython + PyQt5 QProxyStyle paint-time translation; ~1860-entry dictionary; preserves English widget IDs; one-click English restore; Windows/macOS/Linux; Cheat / RE Tools); cited on [[overviews/reverse-engineering]] IDA theme/localization cluster + README map and [[overviews/game-hacking]] RE Tools lane; cross-linked [[idapro-muils]], [[ida-settings]], and [[ida-plugin-repository]]; `index.md` entity + overview blurbs updated.

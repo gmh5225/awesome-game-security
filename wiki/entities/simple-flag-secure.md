@@ -23,7 +23,7 @@ confidence: medium
 
 Because it modifies the Android system framework rather than injecting into individual apps, it stays compatible with **root hiding** and banking-app denylists while using no background services or runtime overhead. Intended for rooted Android users and security researchers who need reliable screen capture in protected apps for testing, debugging, or mobile security analysis.
 
-Listed in the README under **Cheat → Magisk** beside documentation reference [[flagsecurepatcher]].
+Listed in the README under **Cheat → Magisk** beside documentation reference [[flagsecurepatcher]] and selectable-patch successor [[smalipatcher-reborn]].
 
 ## Links
 
@@ -31,4 +31,4 @@ Listed in the README under **Cheat → Magisk** beside documentation reference [
 
 ## Related
 
-[[overviews/mobile-security]] · [[overviews/game-hacking]] · [[anti-screenshot-capture]] · [[flagsecurepatcher]] · [[magisk]] · [[mobile-anti-cheat]] · [[rom-shifter]]
+[[overviews/mobile-security]] · [[overviews/game-hacking]] · [[anti-screenshot-capture]] · [[flagsecurepatcher]] · [[smalipatcher-reborn]] · [[magisk]] · [[mobile-anti-cheat]] · [[rom-shifter]]
