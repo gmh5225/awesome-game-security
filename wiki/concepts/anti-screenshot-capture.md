@@ -18,7 +18,8 @@ sources:
   - wiki/sources/descriptions/GuidoBartoli__sherloq.md
   - wiki/sources/descriptions/TheCruZ__nvidiaCapture.md
   - wiki/sources/descriptions/vmguard__dwm-window-capture.md
-updated: 2026-09-28
+  - wiki/sources/descriptions/saadnahid7__smalipatcher_reborn.md
+updated: 2026-09-30
 confidence: medium
 ---
 
