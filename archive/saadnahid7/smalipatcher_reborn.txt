@@ -1,0 +1,1305 @@
+Project Path: arc_saadnahid7_smalipatcher_reborn_vtm4_ukh
+
+Source Tree:
+
+```txt
+arc_saadnahid7_smalipatcher_reborn_vtm4_ukh
+├── LICENSE
+├── META-INF
+│   └── com
+│       └── google
+│           └── android
+│               ├── update-binary
+│               └── updater-script
+├── README.md
+├── action.sh
+├── bin
+│   └── engine.jar
+├── customize.sh
+├── engine-source
+│   ├── scripts
+│   │   ├── build.ps1
+│   │   ├── dex.ps1
+│   │   └── fetch-libs.ps1
+│   └── src
+│       └── reborn
+│           ├── Action.java
+│           ├── Actions.java
+│           ├── Catalog.java
+│           ├── Engine.java
+│           ├── Main.java
+│           └── Patch.java
+├── lib.sh
+├── module.prop
+├── post-fs-data.sh
+├── repatch.sh
+├── service.sh
+├── uninstall.sh
+└── webroot
+    └── index.html
+
+```
+
+`LICENSE`:
+
+```
+MIT License
+
+Copyright (c) 2026 saadnahid7
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
+`META-INF/com/google/android/update-binary`:
+
+```
+#!/sbin/sh
+
+#################
+# Initialization
+#################
+
+umask 022
+
+# echo before loading util_functions
+ui_print() { echo "$1"; }
+
+require_new_magisk() {
+  ui_print "*******************************"
+  ui_print " Please install Magisk v20.4+! "
+  ui_print "*******************************"
+  exit 1
+}
+
+#########################
+# Load util_functions.sh
+#########################
+
+OUTFD=$2
+ZIPFILE=$3
+
+mount /data 2>/dev/null
+
+[ -f /data/adb/magisk/util_functions.sh ] || require_new_magisk
+. /data/adb/magisk/util_functions.sh
+[ $MAGISK_VER_CODE -lt 20400 ] && require_new_magisk
+
+install_module
+exit 0
+
+```
+
+`META-INF/com/google/android/updater-script`:
+
+```
+#MAGISK
+
+```
+
+`README.md`:
+
+```md
+# smalipatcher_reborn
+
+Magisk / KernelSU / APatch module. On the phone, at install time, it patches the ROM's own `services.jar` (mock-location flag, mock without the developer setting, optional screenshots in secure windows) and overlays the patched copy. Android 10 - 17.
+
+This is the module-only repository (module id = repository name). Desktop app, manual-patch mode, tests and documentation live in the main project:
+https://github.com/saadnahid7/SmaliPatcherReborn
+
+## Contents
+- `module.prop`, `customize.sh`, `lib.sh`, `post-fs-data.sh`, `service.sh`, `action.sh`, `repatch.sh`, `uninstall.sh`: plain shell scripts (not obfuscated).
+- `webroot/index.html`: WebUI (plain HTML/JS).
+- `bin/engine.jar`: the patch engine, built from `engine-source/` (Java, dexlib2). Build: `engine-source/scripts/fetch-libs.ps1`, then `dex.ps1` (needs JDK 17+ and an Android SDK with build-tools).
+
+## License
+MIT, see `LICENSE`.
+```
+
+`action.sh`:
+
+```sh
+#!/system/bin/sh
+# Action button (Magisk 28+ / KernelSU): show status.
+MODDIR=${0%/*}
+CFG=/data/adb/smalipatcher
+echo "Smali Patcher Reborn"
+echo "Patches applied : $(cat "$MODDIR/patches.applied" 2>/dev/null)"
+echo "Patches wanted  : $(sed -n 's/=1$//p' "$CFG/patches.conf" 2>/dev/null | tr '\n' ' ')"
+echo "Build           : $(cat "$MODDIR/fingerprint" 2>/dev/null)"
+echo "Current build   : $(getprop ro.build.fingerprint)"
+echo "Boot counter    : $(cat "$CFG/boot_count" 2>/dev/null)"
+[ -f "$CFG/guard.log" ] && { echo "Guard log:"; tail -n 5 "$CFG/guard.log"; }
+echo
+echo "Open the module's WebUI to change patches."
+
+```
+
+`customize.sh`:
+
+```sh
+#!/system/bin/sh
+# Smali Patcher Reborn - install-time patching on the device itself.
+SKIPUNZIP=1
+
+ui_print "*******************************************"
+ui_print "          Smali Patcher Reborn             "
+ui_print "   on-device patcher - Android 10 to 17    "
+ui_print "*******************************************"
+ui_print "  by saadnahid7 - droidrooter.com"
+ui_print "  Thanks to fOmey (Smali Patcher) and"
+ui_print "  sabpprook (SmaliPatcherEx)"
+ui_print ""
+
+unzip -o "$ZIPFILE" -x 'META-INF/*' -d "$MODPATH" >&2
+. "$MODPATH/lib.sh"
+
+API=$(getprop ro.build.version.sdk)
+[ "$API" -ge 29 ] 2>/dev/null || abort "! Android 10+ (API 29+) required, this is API $API"
+ui_print "- Device API $API"
+ui_print "- $(getprop ro.build.fingerprint)"
+
+if [ -f "$MODPATH/orig.sha256" ]; then
+  # ---- module built on a PC from a jar copied off a phone: apply only if this phone has that exact jar ----
+  ui_print "- Pre-patched module (made on a PC)"
+  find_source || abort "! services.jar not found or hidden by the active module"
+  have=$(sha256sum "$SRC" | cut -d' ' -f1)
+  want=$(cat "$MODPATH/orig.sha256")
+  if [ "$have" != "$want" ]; then
+    ui_print "  this phone : $have"
+    ui_print "  module for : $want"
+    abort "! This module was made from a different services.jar (other ROM or build). Nothing was changed."
+  fi
+  PATCHES=$(cat "$MODPATH/patches.applied")
+  ui_print "- services.jar matches. Patches: $PATCHES"
+  [ -s "$MODPATH/system/framework/services.jar" ] || abort "! Module has no patched jar"
+  finish_module "$PATCHES" || abort "! Nothing was changed on your system"
+else
+  # ---- choose patches: volume keys, unless a config already exists (WebUI writes the same file) ----
+  ask() { # ask "<question>" <default y|n>   Vol+ = yes, Vol- = no, 10 s timeout = default
+    ui_print ""
+    ui_print "  $1"
+    ui_print "  [Vol+] yes   [Vol-] no   (default: $2, 10s)"
+    local end=$(( $(date +%s) + 10 )) ev
+    while [ "$(date +%s)" -lt "$end" ]; do
+      ev=$(timeout 1 getevent -lqc 1 2>/dev/null | grep -m1 'KEY_VOLUME.*DOWN')
+      case "$ev" in
+        *KEY_VOLUMEUP*)   return 0 ;;
+        *KEY_VOLUMEDOWN*) return 1 ;;
+      esac
+    done
+    [ "$2" = y ]
+  }
+
+  mkdir -p "$CFG"
+  if [ -f "$CFG/patches.conf" ]; then
+    ui_print "- Using existing $CFG/patches.conf"
+  else
+    ui_print "- Choose patches (do nothing to keep the defaults)"
+    : > "$CFG/patches.conf"
+    if ask "Hide mock-location flag (Location.isMock)?" y;              then echo "mock-hide=1"       >> "$CFG/patches.conf"; else echo "mock-hide=0"       >> "$CFG/patches.conf"; fi
+    if ask "Allow mock apps without the mock-app developer setting?" y; then echo "mock-permission=1" >> "$CFG/patches.conf"; else echo "mock-permission=0" >> "$CFG/patches.conf"; fi
+    if ask "Allow screenshots in secure (FLAG_SECURE) windows?" n;      then echo "secure-flag=1"     >> "$CFG/patches.conf"; else echo "secure-flag=0"     >> "$CFG/patches.conf"; fi
+  fi
+
+  PATCHES=$(selected_patches)
+  [ -n "$PATCHES" ] || abort "! No patch selected"
+  ui_print ""
+  ui_print "- Patches: $PATCHES"
+
+  find_source || abort "! services.jar not found or hidden by the active module"
+  run_patch "$PATCHES" || abort "! Nothing was changed on your system"
+
+
+fi
+
+set_perm_recursive "$MODPATH" 0 0 0755 0644
+ui_print ""
+ui_print "- Done. Reboot to apply."
+
+```
+
+`engine-source/scripts/build.ps1`:
+
+```ps1
+$ErrorActionPreference = 'Stop'
+$root = Split-Path -Parent $PSScriptRoot
+if (-not $env:JAVA_HOME) { throw 'Set JAVA_HOME to a JDK 17+ (Android Studio ships one in its jbr folder).' }
+$jdk  = Join-Path $env:JAVA_HOME 'bin'
+$out  = Join-Path $root 'build\classes'
+Remove-Item $out -Recurse -Force -EA 0
+New-Item -ItemType Directory -Force $out | Out-Null
+$src = Get-ChildItem (Join-Path $root 'src') -Recurse -Filter *.java | % FullName
+& "$jdk\javac.exe" --release 17 -encoding UTF-8 -cp "$root\libs\*" -d $out $src
+if ($LASTEXITCODE) { throw 'javac failed' }
+"built -> $out"
+
+```
+
+`engine-source/scripts/dex.ps1`:
+
+```ps1
+# Builds build\dist\engine.jar : the engine + dexlib2 converted to dex so it runs on the phone via app_process.
+# Needs: JAVA_HOME (JDK 17+), ANDROID_HOME (SDK with build-tools and a platform), and reborn\libs (scripts\fetch-libs.ps1).
+$ErrorActionPreference = 'Stop'
+$root = Split-Path -Parent $PSScriptRoot
+if (-not $env:JAVA_HOME) { throw 'Set JAVA_HOME to a JDK 17+.' }
+$sdk = if ($env:ANDROID_HOME) { $env:ANDROID_HOME } elseif ($env:ANDROID_SDK_ROOT) { $env:ANDROID_SDK_ROOT } else { throw 'Set ANDROID_HOME to your Android SDK.' }
+$bt   = (Get-ChildItem (Join-Path $sdk 'build-tools') -Directory | Sort-Object Name | Select-Object -Last 1).FullName
+$plat = (Get-ChildItem (Join-Path $sdk 'platforms') -Directory | Sort-Object Name | Select-Object -Last 1).FullName
+& "$PSScriptRoot\build.ps1" | Out-Null
+New-Item -ItemType Directory -Force "$root\build\dist" | Out-Null
+& "$env:JAVA_HOME\bin\jar.exe" cf "$root\build\dist\reborn-classes.jar" -C "$root\build\classes" .
+$libs = 'failureaccess-1.0.1', 'guava-31.1-android', 'jsr305-3.0.2', 'smali-dexlib2-3.0.10', 'smali-util-3.0.10' | ForEach-Object { "$root\libs\$_.jar" }
+Remove-Item "$root\build\dist\engine.jar" -ErrorAction SilentlyContinue
+& "$bt\d8.bat" --release --min-api 29 --lib "$plat\android.jar" --output "$root\build\dist\engine.jar" "$root\build\dist\reborn-classes.jar" @libs 2>&1 | Select-Object -Last 15
+"{0:N0} bytes" -f (Get-Item "$root\build\dist\engine.jar").Length
+
+```
+
+`engine-source/scripts/fetch-libs.ps1`:
+
+```ps1
+# Downloads the dexlib2/smali jars the engine builds against into reborn\libs (not committed to git).
+$ErrorActionPreference = 'Stop'
+$l = Join-Path (Split-Path -Parent $PSScriptRoot) 'libs'
+New-Item -ItemType Directory -Force $l | Out-Null
+$g = 'https://maven.google.com/com/android/tools/smali'; $c = 'https://repo1.maven.org/maven2'
+@("$g/smali-dexlib2/3.0.10/smali-dexlib2-3.0.10.jar", "$g/smali-baksmali/3.0.10/smali-baksmali-3.0.10.jar",
+  "$g/smali-util/3.0.10/smali-util-3.0.10.jar", "$g/smali/3.0.10/smali-3.0.10.jar",
+  "$c/com/google/guava/guava/31.1-android/guava-31.1-android.jar", "$c/com/google/guava/failureaccess/1.0.1/failureaccess-1.0.1.jar",
+  "$c/com/google/code/findbugs/jsr305/3.0.2/jsr305-3.0.2.jar", "$c/org/jcommander/jcommander/1.85/jcommander-1.85.jar",
+  "$c/org/antlr/antlr-runtime/3.5.2/antlr-runtime-3.5.2.jar", "$c/org/antlr/stringtemplate/3.2.1/stringtemplate-3.2.1.jar") | ForEach-Object {
+    $f = Join-Path $l (Split-Path $_ -Leaf)
+    if (-not (Test-Path $f)) { Invoke-WebRequest $_ -OutFile $f -UseBasicParsing }
+}
+"libs ready: $l"
+
+```
+
+`engine-source/src/reborn/Action.java`:
+
+```java
+package reborn;
+
+import com.android.tools.smali.dexlib2.iface.Method;
+import com.android.tools.smali.dexlib2.iface.MethodImplementation;
+
+/** One low-level edit applied to matching methods. */
+public interface Action {
+    /** Does this action want to look at the method at all? */
+    boolean matches(Method m);
+
+    /** Returns a rewritten implementation, or null if nothing changed. */
+    MethodImplementation apply(Method m, MethodImplementation impl);
+
+    /** Short human readable description for reports. */
+    String describe();
+}
+
+```
+
+`engine-source/src/reborn/Actions.java`:
+
+```java
+package reborn;
+
+import com.android.tools.smali.dexlib2.Opcode;
+import com.android.tools.smali.dexlib2.iface.Method;
+import com.android.tools.smali.dexlib2.iface.MethodImplementation;
+import com.android.tools.smali.dexlib2.iface.instruction.Instruction;
+import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction;
+import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction;
+import com.android.tools.smali.dexlib2.iface.reference.MethodReference;
+import com.android.tools.smali.dexlib2.immutable.ImmutableMethodImplementation;
+import com.android.tools.smali.dexlib2.immutable.instruction.ImmutableInstruction;
+import com.android.tools.smali.dexlib2.immutable.instruction.ImmutableInstruction10x;
+import com.android.tools.smali.dexlib2.immutable.instruction.ImmutableInstruction11n;
+import com.android.tools.smali.dexlib2.immutable.instruction.ImmutableInstruction11x;
+import com.android.tools.smali.dexlib2.util.ReferenceUtil;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+
+/** The small set of bytecode edits the patch definitions are built from. */
+public final class Actions {
+    private Actions() {}
+
+    static int paramRegisters(Method m) {
+        int n = (m.getAccessFlags() & 0x8) != 0 ? 0 : 1;
+        for (CharSequence p : m.getParameterTypes()) {
+            n += (p.charAt(0) == 'J' || p.charAt(0) == 'D') ? 2 : 1;
+        }
+        return n;
+    }
+
+    static boolean paramsMatch(Method m, String paramDesc) {
+        if (paramDesc == null) return true;
+        StringBuilder sb = new StringBuilder();
+        for (CharSequence p : m.getParameterTypes()) sb.append(p);
+        return sb.toString().equals(paramDesc);
+    }
+
+    static boolean isInvokeOf(Instruction i, String targetDescriptor) {
+        if (!(i instanceof ReferenceInstruction)) return false;
+        if (!i.getOpcode().name.startsWith("invoke-")) return false;
+        Object ref = ((ReferenceInstruction) i).getReference();
+        return ref instanceof MethodReference
+                && ReferenceUtil.getMethodDescriptor((MethodReference) ref).equals(targetDescriptor);
+    }
+
+    static List<Instruction> toList(Iterable<? extends Instruction> it) {
+        List<Instruction> l = new ArrayList<>();
+        for (Instruction t : it) l.add(t);
+        return l;
+    }
+
+    /**
+     * Replace the whole body of name(params) with "return value".
+     * Supports V, Z, B, S, C, I (value must fit a signed nibble) and object returns (null).
+     */
+    public static Action returnConst(String name, String paramDesc, int value) {
+        return new Action() {
+            @Override public boolean matches(Method m) {
+                return m.getName().equals(name) && paramsMatch(m, paramDesc) && m.getImplementation() != null;
+            }
+
+            @Override public MethodImplementation apply(Method m, MethodImplementation impl) {
+                char r = m.getReturnType().charAt(0);
+                List<ImmutableInstruction> ins = new ArrayList<>();
+                int regs = paramRegisters(m);
+                if (r == 'V') {
+                    ins.add(new ImmutableInstruction10x(Opcode.RETURN_VOID));
+                } else if (r == 'J' || r == 'D') {
+                    throw new IllegalStateException("wide return not supported: " + m);
+                } else {
+                    regs += 1;
+                    ins.add(new ImmutableInstruction11n(Opcode.CONST_4, 0, value));
+                    boolean obj = r == 'L' || r == '[';
+                    ins.add(new ImmutableInstruction11x(obj ? Opcode.RETURN_OBJECT : Opcode.RETURN, 0));
+                }
+                return new ImmutableMethodImplementation(regs, ins, null, null);
+            }
+
+            @Override public String describe() {
+                return "return " + value + " from " + name + (paramDesc == null ? "(*)" : "(" + paramDesc + ")");
+            }
+        };
+    }
+
+    /** Replace every call to targetDescriptor (a void method) with nops, inside the named methods. */
+    public static Action nopInvoke(Set<String> inMethods, String targetDescriptor) {
+        return new Action() {
+            @Override public boolean matches(Method m) {
+                return m.getImplementation() != null && (inMethods == null || inMethods.contains(m.getName()));
+            }
+
+            @Override public MethodImplementation apply(Method m, MethodImplementation impl) {
+                ImmutableMethodImplementation b = ImmutableMethodImplementation.of(impl);
+                List<ImmutableInstruction> out = new ArrayList<>();
+                boolean changed = false;
+                for (Instruction i : b.getInstructions()) {
+                    if (isInvokeOf(i, targetDescriptor)) {
+                        for (int k = 0; k < i.getCodeUnits(); k++) out.add(new ImmutableInstruction10x(Opcode.NOP));
+                        changed = true;
+                    } else {
+                        out.add(ImmutableInstruction.of(i));
+                    }
+                }
+                if (!changed) return null;
+                return new ImmutableMethodImplementation(b.getRegisterCount(), out, b.getTryBlocks(), b.getDebugItems());
+            }
+
+            @Override public String describe() {
+                return "nop calls to " + targetDescriptor + (inMethods == null ? "" : " in " + inMethods);
+            }
+        };
+    }
+
+    /** After every call to targetDescriptor, overwrite the move-result register with a constant. */
+    public static Action forceResult(Set<String> inMethods, String targetDescriptor, int value) {
+        return new Action() {
+            @Override public boolean matches(Method m) {
+                return m.getImplementation() != null && (inMethods == null || inMethods.contains(m.getName()));
+            }
+
+            @Override public MethodImplementation apply(Method m, MethodImplementation impl) {
+                ImmutableMethodImplementation b = ImmutableMethodImplementation.of(impl);
+                List<Instruction> src = toList(b.getInstructions());
+                List<ImmutableInstruction> out = new ArrayList<>();
+                boolean changed = false;
+                for (int idx = 0; idx < src.size(); idx++) {
+                    Instruction i = src.get(idx);
+                    boolean callThenResult = isInvokeOf(i, targetDescriptor) && idx + 1 < src.size()
+                            && src.get(idx + 1).getOpcode() == Opcode.MOVE_RESULT;
+                    if (callThenResult) {
+                        // The call itself may throw (AppOps SecurityException), so drop it and set the result directly.
+                        int reg = ((OneRegisterInstruction) src.get(idx + 1)).getRegisterA();
+                        if (reg > 15) throw new IllegalStateException("v" + reg + " too high for const/4 in " + m);
+                        for (int k = 0; k < i.getCodeUnits(); k++) out.add(new ImmutableInstruction10x(Opcode.NOP));
+                        out.add(new ImmutableInstruction11n(Opcode.CONST_4, reg, value));
+                        idx++;
+                        changed = true;
+                    } else {
+                        out.add(ImmutableInstruction.of(i));
+                    }
+                }
+                if (!changed) return null;
+                return new ImmutableMethodImplementation(b.getRegisterCount(), out, b.getTryBlocks(), b.getDebugItems());
+            }
+
+            @Override public String describe() {
+                return "replace call to " + targetDescriptor + " with constant " + value
+                        + (inMethods == null ? "" : " in " + inMethods);
+            }
+        };
+    }
+}
+
+```
+
+`engine-source/src/reborn/Catalog.java`:
+
+```java
+package reborn;
+
+import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+/** Built-in patch definitions. Class lists are the places AOSP has kept this logic across releases. */
+public final class Catalog {
+    private Catalog() {}
+
+    @SafeVarargs private static <T> List<T> L(T... a) { return Arrays.asList(a); }
+    @SafeVarargs private static <T> Set<T> S(T... a) { return new java.util.HashSet<>(Arrays.asList(a)); }
+
+    private static final String APPOPS_NOTEOP =
+            "Lcom/android/server/location/injector/AppOpsHelper;->noteOp(ILandroid/location/util/identity/CallerIdentity;)Z";
+    private static final String SET_MOCK =
+            "Landroid/location/Location;->setIsFromMockProvider(Z)V";
+
+    public static Map<String, Patch> all() {
+        Map<String, Patch> m = new LinkedHashMap<>();
+
+        m.put("mock-hide", new Patch("mock-hide",
+                "Locations from mock providers are not flagged as mock (Location.isMock() stays false)", 28, 99,
+                L("MockLocationProvider", "LocationManagerService"),
+                L(
+                        new Patch.Step("MockLocationProvider", L(
+                                "Lcom/android/server/location/provider/MockLocationProvider;",
+                                "Lcom/android/server/location/MockProvider;",
+                                "Lcom/android/server/location/MockLocationProvider;"),
+                                Actions.nopInvoke(null, SET_MOCK), false),
+                        new Patch.Step("LocationManagerService", L(
+                                "Lcom/android/server/location/LocationManagerService;",
+                                "Lcom/android/server/LocationManagerService;"),
+                                Actions.nopInvoke(null, SET_MOCK), false))));
+
+        m.put("mock-permission", new Patch("mock-permission",
+                "Apps can register test providers without being selected as the mock location app", 28, 99,
+                L("testProviderAppOp", "canCallerAccessMockLocation", "noteMockLocationAccess"),
+                L(
+                        new Patch.Step("testProviderAppOp", L(
+                                "Lcom/android/server/location/LocationManagerService;"),
+                                Actions.forceResult(S("addTestProvider", "removeTestProvider",
+                                        "setTestProviderEnabled", "setTestProviderLocation"), APPOPS_NOTEOP, 1), false),
+                        new Patch.Step("canCallerAccessMockLocation", L(
+                                "Lcom/android/server/LocationManagerService;",
+                                "Lcom/android/server/location/LocationManagerService;"),
+                                Actions.returnConst("canCallerAccessMockLocation", null, 1), false),
+                        new Patch.Step("noteMockLocationAccess", L(
+                                "Lcom/android/server/location/AppOpsHelper;"),
+                                Actions.returnConst("noteMockLocationAccess", null, 1), false))));
+
+        m.put("secure-flag", new Patch("secure-flag",
+                "Screenshots and screen recording allowed in FLAG_SECURE windows", 28, 99,
+                L("isSecureLocked", "wmIsSecureLocked", "setSecure"),
+                L(
+                        new Patch.Step("isSecureLocked", L("Lcom/android/server/wm/WindowState;"),
+                                Actions.returnConst("isSecureLocked", "", 0), false),
+                        new Patch.Step("wmIsSecureLocked", L("Lcom/android/server/wm/WindowManagerService;"),
+                                Actions.returnConst("isSecureLocked", null, 0), false),
+                        new Patch.Step("setSecure", L("Lcom/android/server/wm/WindowSurfaceController;"),
+                                Actions.returnConst("setSecure", "Z", 0), false),
+                        new Patch.Step("dpmAllowed", L("Lcom/android/server/devicepolicy/DevicePolicyCacheImpl;"),
+                                Actions.returnConst("isScreenCaptureAllowed", null, 1), false),
+                        new Patch.Step("dpmDisabled", L("Lcom/android/server/devicepolicy/DevicePolicyManagerService;"),
+                                Actions.returnConst("getScreenCaptureDisabled", null, 0), false))));
+        return m;
+    }
+
+    public static List<Patch> select(String csv) {
+        Map<String, Patch> all = all();
+        if (csv == null || csv.trim().isEmpty()) return new java.util.ArrayList<>(all.values());
+        List<Patch> out = new java.util.ArrayList<>();
+        for (String raw : csv.split(",")) {
+            String id = raw.trim();
+            Patch p = all.get(id);
+            if (p == null) throw new IllegalArgumentException("unknown patch: " + id + " (known: " + all.keySet() + ")");
+            out.add(p);
+        }
+        return out;
+    }
+}
+
+```
+
+`engine-source/src/reborn/Engine.java`:
+
+```java
+package reborn;
+
+import com.android.tools.smali.dexlib2.DexFileFactory;
+import com.android.tools.smali.dexlib2.Opcodes;
+import com.android.tools.smali.dexlib2.iface.ClassDef;
+import com.android.tools.smali.dexlib2.iface.DexFile;
+import com.android.tools.smali.dexlib2.iface.Method;
+import com.android.tools.smali.dexlib2.iface.MethodImplementation;
+import com.android.tools.smali.dexlib2.immutable.ImmutableClassDef;
+import com.android.tools.smali.dexlib2.immutable.ImmutableMethod;
+import com.android.tools.smali.dexlib2.dexbacked.DexBackedDexFile;
+import com.android.tools.smali.dexlib2.writer.pool.DexPool;
+import com.android.tools.smali.dexlib2.writer.io.MemoryDataStore;
+
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.regex.Pattern;
+import java.util.zip.CRC32;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
+import java.util.zip.ZipOutputStream;
+
+/** Applies patches to the dex files inside a jar and writes a new jar; every other entry is copied untouched. */
+public final class Engine {
+    private static final Pattern DEX = Pattern.compile("classes\\d*\\.dex");
+
+    public static final class Result {
+        public final Map<String, Integer> hits = new LinkedHashMap<>();
+        public final List<String> log = new ArrayList<>();
+        public final List<String> errors = new ArrayList<>();
+        public final List<String> modifiedDex = new ArrayList<>();
+        public boolean ok() { return errors.isEmpty(); }
+    }
+
+    private Engine() {}
+
+    public static Result patch(File inJar, File outJar, int api, List<Patch> patches) throws IOException {
+        Result res = new Result();
+        Opcodes opcodes = Opcodes.forApi(Math.min(api, 36));
+        Map<String, byte[]> newDex = new LinkedHashMap<>();
+
+        Set<String> candidates = new HashSet<>();
+        List<Patch> active = new ArrayList<>();
+        for (Patch p : patches) {
+            if (!p.appliesTo(api)) {
+                res.log.add("skip " + p.id + " (not for API " + api + ")");
+                continue;
+            }
+            active.add(p);
+            for (Patch.Step s : p.steps) candidates.addAll(s.classes);
+        }
+
+        try (ZipFile zip = new ZipFile(inJar)) {
+            List<String> dexNames = new ArrayList<>();
+            for (Enumeration<? extends ZipEntry> e = zip.entries(); e.hasMoreElements(); ) {
+                String n = e.nextElement().getName();
+                if (DEX.matcher(n).matches()) dexNames.add(n);
+            }
+            if (dexNames.isEmpty()) {
+                res.errors.add("no classes*.dex in " + inJar.getName() + " (stripped jar? needs the odex/vdex path)");
+                return res;
+            }
+
+            for (String name : dexNames) {
+                DexFile dex = DexFileFactory.loadDexEntry(inJar, name, true, opcodes).getDexFile();
+                boolean has = false;
+                for (ClassDef c : dex.getClasses()) {
+                    if (candidates.contains(c.getType())) { has = true; break; }
+                }
+                if (!has) continue;
+
+                List<ClassDef> outClasses = new ArrayList<>();
+                boolean changed = false;
+                for (ClassDef c : dex.getClasses()) {
+                    if (!candidates.contains(c.getType())) { outClasses.add(c); continue; }
+                    ClassDef patched = patchClass(c, active, res);
+                    if (patched != null) { outClasses.add(patched); changed = true; } else outClasses.add(c);
+                }
+                if (!changed) continue;
+
+                DexPool pool = new DexPool(Opcodes.forApi(Math.min(api, 34)));
+                for (ClassDef c : outClasses) pool.internClass(c);
+                MemoryDataStore store = new MemoryDataStore();
+                pool.writeTo(store);
+                byte[] bytes = java.util.Arrays.copyOf(store.getBuffer(), store.getSize());
+                newDex.put(name, bytes);
+                res.modifiedDex.add(name);
+            }
+
+            for (Patch p : active) {
+                int required = 0;
+                for (Patch.Step s : p.steps) {
+                    res.hits.merge(p.id + "/" + s.name, s.hits, Integer::sum);
+                    if (p.requireAny.contains(s.name)) required += s.hits;
+                    if (s.hits == 0) res.log.add("no match: " + p.id + "/" + s.name);
+                }
+                if (!p.requireAny.isEmpty() && required == 0) {
+                    res.errors.add(p.id + ": none of " + p.requireAny + " matched on this ROM");
+                }
+            }
+            if (!res.ok()) return res;
+            if (newDex.isEmpty()) { res.errors.add("nothing was modified"); return res; }
+
+            writeJar(zip, outJar, newDex);
+        }
+
+        // verify by re-reading every method of every class of the result
+        verify(outJar, opcodes, res);
+        return res;
+    }
+
+    private static ClassDef patchClass(ClassDef c, List<Patch> active, Result res) {
+        List<Method> direct = new ArrayList<>();
+        List<Method> virt = new ArrayList<>();
+        boolean changed = false;
+        for (Method m : c.getDirectMethods()) { Method n = patchMethod(c, m, active, res); direct.add(n == null ? m : n); changed |= n != null; }
+        for (Method m : c.getVirtualMethods()) { Method n = patchMethod(c, m, active, res); virt.add(n == null ? m : n); changed |= n != null; }
+        if (!changed) return null;
+        return new ImmutableClassDef(c.getType(), c.getAccessFlags(), c.getSuperclass(), c.getInterfaces(),
+                c.getSourceFile(), c.getAnnotations(), c.getStaticFields(), c.getInstanceFields(), direct, virt);
+    }
+
+    private static Method patchMethod(ClassDef c, Method m, List<Patch> active, Result res) {
+        MethodImplementation impl = m.getImplementation();
+        if (impl == null) return null;
+        MethodImplementation cur = impl;
+        boolean changed = false;
+        for (Patch p : active) {
+            for (Patch.Step s : p.steps) {
+                if (!s.classes.contains(c.getType()) || !s.action.matches(m)) continue;
+                MethodImplementation r;
+                try {
+                    r = s.action.apply(m, cur);
+                } catch (RuntimeException ex) {
+                    res.errors.add(p.id + "/" + s.name + ": " + ex.getMessage());
+                    continue;
+                }
+                if (r != null) {
+                    cur = r;
+                    changed = true;
+                    s.hits++;
+                    res.log.add("patched " + p.id + "/" + s.name + " -> " + c.getType() + "->" + m.getName() + "  [" + s.action.describe() + "]");
+                }
+            }
+        }
+        if (!changed) return null;
+        return new ImmutableMethod(m.getDefiningClass(), m.getName(), m.getParameters(), m.getReturnType(),
+                m.getAccessFlags(), m.getAnnotations(), m.getHiddenApiRestrictions(), cur);
+    }
+
+    // ---- jar writing -------------------------------------------------------------------------
+
+    private static final class Counting extends java.io.FilterOutputStream {
+        long count;
+        Counting(java.io.OutputStream o) { super(o); }
+        @Override public void write(int b) throws IOException { out.write(b); count++; }
+        @Override public void write(byte[] b, int off, int len) throws IOException { out.write(b, off, len); count += len; }
+    }
+
+    private static void writeJar(ZipFile in, File out, Map<String, byte[]> replaced) throws IOException {
+        try (java.io.FileOutputStream fos = new java.io.FileOutputStream(out);
+             Counting cnt = new Counting(new java.io.BufferedOutputStream(fos));
+             ZipOutputStream zos = new ZipOutputStream(cnt)) {
+            for (Enumeration<? extends ZipEntry> e = in.entries(); e.hasMoreElements(); ) {
+                ZipEntry src = e.nextElement();
+                byte[] data = replaced.get(src.getName());
+                if (data == null) data = readAll(in.getInputStream(src));
+                boolean stored = src.getMethod() == ZipEntry.STORED;
+                ZipEntry dst = new ZipEntry(src.getName());
+                if (src.getTime() != -1) dst.setTime(src.getTime());
+                if (stored) {
+                    dst.setMethod(ZipEntry.STORED);
+                    dst.setSize(data.length);
+                    dst.setCompressedSize(data.length);
+                    CRC32 crc = new CRC32();
+                    crc.update(data);
+                    dst.setCrc(crc.getValue());
+                    long dataStart = cnt.count + 30 + dst.getName().getBytes("UTF-8").length;
+                    int pad = (int) ((4 - (dataStart % 4)) % 4);
+                    if (pad != 0) {
+                        int len = pad + 4; // extra header is 4 bytes; pad via the payload
+                        byte[] extra = new byte[len];
+                        extra[0] = (byte) 0x35; extra[1] = (byte) 0xd9; // zipalign's padding field id 0xd935
+                        extra[2] = (byte) (len - 4); extra[3] = 0;
+                        dst.setExtra(extra);
+                    }
+                } else {
+                    dst.setMethod(ZipEntry.DEFLATED);
+                }
+                zos.putNextEntry(dst);
+                zos.write(data);
+                zos.closeEntry();
+            }
+        }
+    }
+
+    private static byte[] readAll(InputStream is) throws IOException {
+        try (InputStream in = is) {
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            byte[] buf = new byte[65536];
+            int n;
+            while ((n = in.read(buf)) > 0) bos.write(buf, 0, n);
+            return bos.toByteArray();
+        }
+    }
+
+    // ---- verification ------------------------------------------------------------------------
+
+    private static void verify(File jar, Opcodes opcodes, Result res) throws IOException {
+        try (ZipFile zip = new ZipFile(jar)) {
+            for (Enumeration<? extends ZipEntry> e = zip.entries(); e.hasMoreElements(); ) {
+                String n = e.nextElement().getName();
+                if (!DEX.matcher(n).matches()) continue;
+                DexFile dex = DexFileFactory.loadDexEntry(jar, n, true, opcodes).getDexFile();
+                int classes = 0, methods = 0;
+                for (ClassDef c : dex.getClasses()) {
+                    classes++;
+                    for (Method m : c.getMethods()) {
+                        methods++;
+                        MethodImplementation i = m.getImplementation();
+                        if (i != null) for (Object ins : i.getInstructions()) { /* force decode */ }
+                    }
+                }
+                res.log.add("verified " + n + ": " + classes + " classes, " + methods + " methods");
+            }
+        } catch (RuntimeException ex) {
+            res.errors.add("verification failed: " + ex);
+        }
+    }
+}
+
+```
+
+`engine-source/src/reborn/Main.java`:
+
+```java
+package reborn;
+
+import com.android.tools.smali.dexlib2.DexFileFactory;
+import com.android.tools.smali.dexlib2.Opcodes;
+import com.android.tools.smali.dexlib2.iface.ClassDef;
+import com.android.tools.smali.dexlib2.iface.DexFile;
+import com.android.tools.smali.dexlib2.iface.Method;
+
+import java.io.File;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.regex.Pattern;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
+
+public class Main {
+    public static void main(String[] a) throws Exception {
+        if (a.length == 0) { usage(); return; }
+        Map<String, String> o = new HashMap<>();
+        for (int i = 1; i < a.length - 1; i += 2) o.put(a[i], a[i + 1]);
+        switch (a[0]) {
+            case "patch" -> {
+                int api = Integer.parseInt(o.getOrDefault("--api", "36"));
+                Engine.Result r = Engine.patch(new File(o.get("--in")), new File(o.get("--out")), api,
+                        Catalog.select(o.get("--patches")));
+                r.log.forEach(System.out::println);
+                System.out.println("hits: " + r.hits);
+                System.out.println("modified: " + r.modifiedDex);
+                if (!r.ok()) { r.errors.forEach(e -> System.err.println("ERROR: " + e)); System.exit(2); }
+                System.out.println("OK");
+            }
+            case "find" -> find(new File(o.get("--jar")), Pattern.compile(o.get("--re")), Integer.parseInt(o.getOrDefault("--api", "36")));
+            case "baksmali" -> Class.forName("com.android.tools.smali.baksmali.Main").getMethod("main", String[].class)
+                    .invoke(null, (Object) java.util.Arrays.copyOfRange(a, 1, a.length));
+            default -> usage();
+        }
+    }
+
+    static void usage() {
+        System.out.println("""
+                smalipatcher-reborn engine
+                  patch --in services.jar --out out.jar --api 36 [--patches mock-hide,mock-permission,secure-flag]
+                  find  --jar services.jar --re <regex> [--api 36]     (matches Lclass;->method)
+                  baksmali <baksmali args...>""");
+    }
+
+    static void find(File jar, Pattern re, int api) throws Exception {
+        Opcodes op = Opcodes.forApi(Math.min(api, 36));
+        try (ZipFile z = new ZipFile(jar)) {
+            for (Enumeration<? extends ZipEntry> e = z.entries(); e.hasMoreElements(); ) {
+                String n = e.nextElement().getName();
+                if (!n.matches("classes\\d*\\.dex")) continue;
+                DexFile d = DexFileFactory.loadDexEntry(jar, n, true, op).getDexFile();
+                for (ClassDef c : d.getClasses()) {
+                    if (re.matcher(c.getType()).find()) System.out.println(n + " " + c.getType());
+                    for (Method m : c.getMethods()) {
+                        String s = c.getType() + "->" + m.getName();
+                        if (re.matcher(s).find()) {
+                            StringBuilder p = new StringBuilder();
+                            for (CharSequence t : m.getParameterTypes()) p.append(t);
+                            System.out.println(n + " " + s + "(" + p + ")" + m.getReturnType());
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+```
+
+`engine-source/src/reborn/Patch.java`:
+
+```java
+package reborn;
+
+import java.util.List;
+
+/** A named group of steps with an API window. */
+public final class Patch {
+    public final String id;
+    public final String description;
+    public final int minApi;
+    public final int maxApi;
+    public final List<Step> steps;
+    /** Step names of which at least one must match, or the build fails. */
+    public final List<String> requireAny;
+
+    public Patch(String id, String description, int minApi, int maxApi, List<String> requireAny, List<Step> steps) {
+        this.id = id;
+        this.description = description;
+        this.minApi = minApi;
+        this.maxApi = maxApi;
+        this.steps = steps;
+        this.requireAny = requireAny;
+    }
+
+    public boolean appliesTo(int api) {
+        return api >= minApi && api <= maxApi;
+    }
+
+    /**
+     * One action restricted to a list of candidate classes (exact type descriptors).
+     * Several candidates exist because AOSP moved code between packages across releases.
+     */
+    public static final class Step {
+        public final String name;
+        public final List<String> classes;
+        public final Action action;
+        /** If true and the step matches nothing, the build fails. */
+        public final boolean required;
+        public int hits;
+
+        public Step(String name, List<String> classes, Action action, boolean required) {
+            this.name = name;
+            this.classes = classes;
+            this.action = action;
+            this.required = required;
+        }
+    }
+}
+
+```
+
+`lib.sh`:
+
+```sh
+#!/system/bin/sh
+# Shared by customize.sh (install) and repatch.sh (WebUI / action button).
+# Expects: MODPATH = directory that will hold system/framework/services.jar.
+
+CFG=/data/adb/smalipatcher
+LIVE=/data/adb/modules/smalipatcher_reborn
+ALL_PATCHES="mock-hide mock-permission secure-flag"
+DEFAULT_CONF="mock-hide=1
+mock-permission=1
+secure-flag=0"
+
+say() { if command -v ui_print >/dev/null 2>&1; then ui_print "$1"; else echo "$1"; fi; }
+
+ensure_conf() {
+  mkdir -p "$CFG"
+  [ -f "$CFG/patches.conf" ] || printf '%s\n' "$DEFAULT_CONF" > "$CFG/patches.conf"
+}
+
+selected_patches() {
+  local out="" p v
+  for p in $ALL_PATCHES; do
+    v=$(sed -n "s/^$p=//p" "$CFG/patches.conf" 2>/dev/null | tail -n1)
+    [ "$v" = 1 ] && out="${out:+$out,}$p"
+  done
+  echo "$out"
+}
+
+# Finds the ORIGINAL services.jar. A previously installed copy of this module is mounted over /system,
+# so prefer the root manager's untouched mirror of the system partition.
+find_source() {
+  SRC=""
+  local tmp c
+  tmp=$(magisk --path 2>/dev/null)
+  for c in "$tmp/.magisk/mirror/system/framework/services.jar" \
+           "$tmp/.magisk/mirror/system_root/system/framework/services.jar" \
+           "/debug_ramdisk/.magisk/mirror/system/framework/services.jar" \
+           /system/framework/services.jar; do
+    [ -f "$c" ] && { SRC="$c"; break; }
+  done
+  [ -n "$SRC" ] || return 1
+  if [ "$SRC" = /system/framework/services.jar ] && [ -f "$LIVE/system/framework/services.jar" ] && [ ! -f "$LIVE/disable" ] \
+     && cmp -s "$LIVE/system/framework/services.jar" "$SRC"; then
+    say "! Original services.jar is hidden behind the active module (no mirror available)."
+    say "! Disable the module, reboot, then patch again."
+    return 2
+  fi
+  return 0
+}
+
+
+# Placeholders for stale AOT artifacts, plus the files the boot-time guards rely on.
+finish_module() {
+  local patches="$1" out="$MODPATH/system/framework/services.jar" fp f
+  fp=$(getprop ro.build.fingerprint)
+  # stale ahead-of-time artifacts of the original jar must not be used with the patched one
+  for f in /system/framework/services.jar.prof /system/framework/services.jar.bprof            /system/framework/services.jar.fsv_meta            /system/framework/oat/*/services.odex /system/framework/oat/*/services.vdex /system/framework/oat/*/services.art            /system/framework/oat/*/services.odex.fsv_meta /system/framework/oat/*/services.vdex.fsv_meta; do
+    [ -f "$f" ] || continue
+    mkdir -p "$MODPATH$(dirname "$f")"
+    : > "$MODPATH$f"
+  done
+  echo "$fp" > "$MODPATH/fingerprint"
+  echo "$patches" > "$MODPATH/patches.applied"
+  sha256sum "$out" | cut -d' ' -f1 > "$MODPATH/patched.sha256"
+  mkdir -p "$CFG"
+  echo 0 > "$CFG/boot_count"
+  return 0
+}
+
+# run_patch <csv patches>  -> writes $MODPATH/system/framework/services.jar
+run_patch() {
+  local patches="$1" api fp out log rc
+  api=$(getprop ro.build.version.sdk)
+  fp=$(getprop ro.build.fingerprint)
+  out="$MODPATH/system/framework/services.jar"
+  log="$CFG/last-patch.log"
+  mkdir -p "$MODPATH/system/framework"
+  say "- Source: $SRC"
+  say "- Patching (this can take a minute)..."
+  app_process -Djava.class.path="$MODPATH/bin/engine.jar" /system/bin reborn.Main patch \
+      --in "$SRC" --out "$out.new" --api "$api" --patches "$patches" > "$log" 2>&1
+  rc=$?
+  tail -n 3 "$log" | while read -r l; do say "  $l"; done
+  if [ $rc -ne 0 ] || [ ! -s "$out.new" ]; then
+    rm -f "$out.new"
+    say "! Patch failed. Full log: $log"
+    grep ERROR "$log" | head -n 5 | while read -r l; do say "  $l"; done
+    return 1
+  fi
+  mv -f "$out.new" "$out"
+
+  finish_module "$patches" || return 1
+  return 0
+}
+
+```
+
+`module.prop`:
+
+```prop
+id=smalipatcher_reborn
+name=Smali Patcher Reborn
+version=v0.3.0-dev
+versionCode=300
+author=saadnahid7
+description=Patches your own services.jar on the device at install time: hide mock location, mock without mock-app permission, allow screenshots in secure windows. Android 10 - 17.
+updateJson=https://raw.githubusercontent.com/saadnahid7/SmaliPatcherReborn/main/update.json
+
+```
+
+`post-fs-data.sh`:
+
+```sh
+#!/system/bin/sh
+# Runs before the module is mounted: boot-loop guard, ROM-update guard, ART cache cleanup.
+MODDIR=${0%/*}
+CFG=/data/adb/smalipatcher
+mkdir -p "$CFG"
+
+disable_now() {
+  # Magisk mounts whatever is in $MODDIR/system after this script, so moving it away takes effect this boot.
+  mv "$MODDIR/system" "$MODDIR/system.disabled" 2>/dev/null
+  touch "$MODDIR/disable"
+  echo "$(date) $1" >> "$CFG/guard.log"
+}
+
+# 1. boot-loop guard: service.sh resets the counter once the system has fully booted
+n=$(cat "$CFG/boot_count" 2>/dev/null); n=${n:-0}; n=$((n + 1))
+echo "$n" > "$CFG/boot_count"
+if [ "$n" -ge 3 ]; then
+  echo 0 > "$CFG/boot_count"
+  disable_now "boot did not complete $((n - 1)) times in a row - module disabled"
+  exit 0
+fi
+
+# 2. ROM update guard: patched jar only matches the build it was made on
+cur=$(getprop ro.build.fingerprint)
+if [ -f "$MODDIR/fingerprint" ] && [ "$cur" != "$(cat "$MODDIR/fingerprint")" ]; then
+  disable_now "build fingerprint changed, re-install the module to re-patch"
+  exit 0
+fi
+
+# 3. after (re)install, drop compiled code of the old services.jar once
+if [ "$(cat "$MODDIR/patched.sha256" 2>/dev/null)" != "$(cat "$CFG/applied.sha256" 2>/dev/null)" ]; then
+  for f in /data/dalvik-cache/*/*services.jar* /data/misc/apexdata/com.android.art/dalvik-cache/*/*services.jar*; do
+    [ -e "$f" ] && rm -f "$f"
+  done
+  cp "$MODDIR/patched.sha256" "$CFG/applied.sha256" 2>/dev/null
+fi
+
+```
+
+`repatch.sh`:
+
+```sh
+#!/system/bin/sh
+# Re-patch from the current $CFG/patches.conf without reflashing (called by the WebUI / action button).
+MODDIR=${0%/*}
+MODPATH=$MODDIR
+. "$MODDIR/lib.sh"
+
+ensure_conf
+PATCHES=$(selected_patches)
+[ -n "$PATCHES" ] || { echo "No patch selected"; exit 1; }
+echo "Patches: $PATCHES"
+find_source || exit 1
+[ -d "$MODDIR/system.disabled" ] && rm -rf "$MODDIR/system.disabled"
+rm -f "$MODDIR/disable"
+run_patch "$PATCHES" || exit 1
+echo "Done. Reboot to apply."
+
+```
+
+`service.sh`:
+
+```sh
+#!/system/bin/sh
+# Late boot: the system came up, so the boot-loop counter can be reset.
+CFG=/data/adb/smalipatcher
+until [ "$(getprop sys.boot_completed)" = 1 ]; do sleep 3; done
+sleep 20
+echo 0 > "$CFG/boot_count"
+
+```
+
+`uninstall.sh`:
+
+```sh
+#!/system/bin/sh
+rm -rf /data/adb/smalipatcher
+for f in /data/dalvik-cache/*/*services.jar* /data/misc/apexdata/com.android.art/dalvik-cache/*/*services.jar*; do
+  [ -e "$f" ] && rm -f "$f"
+done
+
+```
+
+`webroot/index.html`:
+
+```html
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Smali Patcher Reborn</title>
+<style>
+  :root {
+    --bg:#f4f5f7; --card:#fff; --ink:#15181d; --dim:#5d6673; --line:#e1e4ea;
+    --accent:#2f6df6; --accent-ink:#fff; --ok:#1a8f4c; --warn:#b76e00; --bad:#c62f3a;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#0f1115; --card:#181b21; --ink:#e8eaee; --dim:#9aa3b0; --line:#272b33; --accent:#6b9bff; --accent-ink:#0b1020; --ok:#4cc585; --warn:#e3a03a; --bad:#ff7a84; }
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:15px/1.45 system-ui, sans-serif; padding:16px 16px 40px; max-width:640px; margin-inline:auto; }
+  h1 { font-size:20px; margin:4px 0 2px; }
+  .sub { color:var(--dim); font-size:13px; margin-bottom:16px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:14px 16px; margin-bottom:14px; }
+  .card h2 { font-size:12px; letter-spacing:.06em; text-transform:uppercase; color:var(--dim); margin:0 0 10px; font-weight:600; }
+  .row { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:10px 0; border-top:1px solid var(--line); }
+  .row:first-of-type { border-top:0; padding-top:0; }
+  .row b { display:block; font-weight:600; }
+  .row small { color:var(--dim); }
+  .kv { display:grid; grid-template-columns:auto 1fr; gap:4px 12px; font-size:13px; }
+  .kv span:nth-child(odd) { color:var(--dim); }
+  .kv span:nth-child(even) { word-break:break-all; }
+  .pill { display:inline-block; padding:1px 9px; border-radius:99px; font-size:12px; font-weight:600; border:1px solid currentColor; }
+  .ok { color:var(--ok); } .warn { color:var(--warn); } .bad { color:var(--bad); }
+  input[type=checkbox] { appearance:none; width:46px; height:26px; border-radius:99px; background:var(--line); position:relative; flex:none; transition:background .15s; cursor:pointer; }
+  input[type=checkbox]::after { content:""; position:absolute; top:3px; left:3px; width:20px; height:20px; border-radius:50%; background:#fff; transition:transform .15s; }
+  input[type=checkbox]:checked { background:var(--accent); }
+  input[type=checkbox]:checked::after { transform:translateX(20px); }
+  button { font:inherit; font-weight:600; border:0; border-radius:10px; padding:11px 16px; background:var(--accent); color:var(--accent-ink); cursor:pointer; }
+  button.ghost { background:transparent; color:var(--accent); border:1px solid var(--line); }
+  button:disabled { opacity:.5; cursor:default; }
+  .actions { display:flex; gap:10px; flex-wrap:wrap; margin-top:12px; }
+  pre { margin:10px 0 0; padding:10px; border-radius:10px; background:var(--bg); border:1px solid var(--line); font:12px/1.4 ui-monospace, monospace; max-height:220px; overflow:auto; white-space:pre-wrap; word-break:break-all; }
+  .note { font-size:13px; color:var(--dim); margin-top:10px; }
+  .banner { padding:10px 12px; border-radius:10px; font-size:13px; margin-bottom:14px; border:1px solid var(--warn); color:var(--warn); }
+  [hidden] { display:none !important; }
+</style>
+</head>
+<body>
+<h1>Smali Patcher Reborn</h1>
+<div class="sub">Patches the framework on this device. Changes take effect after a reboot.</div>
+
+<div id="devbanner" class="banner" hidden>Preview mode: no root manager detected, showing sample data.</div>
+
+<div class="card">
+  <h2>Status</h2>
+  <div class="kv" id="status"></div>
+</div>
+
+<div class="card">
+  <h2>Patches</h2>
+  <div id="patches"></div>
+  <div class="actions">
+    <button id="apply">Save &amp; re-patch</button>
+    <button id="reload" class="ghost">Reload</button>
+  </div>
+  <div class="note" id="applyNote">Re-patching rebuilds services.jar from your current ROM. Reboot afterwards.</div>
+  <pre id="out" hidden></pre>
+</div>
+
+<div class="card">
+  <h2>Safety</h2>
+  <div class="note" style="margin-top:0">If the device fails to finish booting three times in a row, the module disables itself. After a ROM update it also disables itself until you re-patch.</div>
+  <pre id="guard" hidden></pre>
+  <div class="actions">
+    <button id="showlog" class="ghost">Last patch log</button>
+    <button id="reboot" class="ghost">Reboot</button>
+  </div>
+  <pre id="log" hidden></pre>
+</div>
+
+<script>
+const MOD  = '/data/adb/modules/smalipatcher_reborn';
+const CFG  = '/data/adb/smalipatcher';
+const INFO = {
+  'mock-hide':       ['Hide mock-location flag',            'Apps that check Location.isMock() see a normal location.'],
+  'mock-permission': ['Mock apps without developer setting','Test providers work without picking a "mock location app".'],
+  'secure-flag':     ['Allow screenshots in secure windows','Ignores FLAG_SECURE for capture and screen recording.'],
+};
+
+// ---- shell bridge: KernelSU / APatch / WebUI-X inject window.ksu; otherwise run in preview mode ----
+const preview = typeof ksu === 'undefined';
+const fake = { conf:'mock-hide=1\nmock-permission=1\nsecure-flag=0\n', applied:'mock-hide,mock-permission\n' };
+function sh(cmd) {
+  if (preview) return Promise.resolve(previewShell(cmd));
+  return new Promise(res => {
+    const cb = 'cb_' + Math.random().toString(36).slice(2);
+    window[cb] = (code, out, err) => { delete window[cb]; res({ code, out: out || '', err: err || '' }); };
+    ksu.exec(cmd, '{}', cb);
+  });
+}
+function previewShell(cmd) {
+  const o = s => ({ code:0, out:s, err:'' });
+  if (cmd.includes('patches.conf') && cmd.startsWith('cat')) return o(fake.conf);
+  if (cmd.includes('printf')) { fake.conf = cmd.match(/printf '%s' '([\s\S]*?)' >/)[1]; return o(''); }
+  if (cmd.includes('patches.applied')) return o(fake.applied);
+  if (cmd.includes('getprop ro.build.version.release')) return o('16');
+  if (cmd.includes('getprop ro.build.version.sdk')) return o('36');
+  if (cmd.includes('getprop ro.build.fingerprint')) return o('google/sample/device:16/BE2A.250530.026/1:user/release-keys');
+  if (cmd.includes('fingerprint') && cmd.startsWith('cat')) return o('google/sample/device:16/BE2A.250530.026/1:user/release-keys');
+  if (cmd.includes('repatch.sh')) return o('Patches: ' + fake.conf.split('\n').filter(l => l.endsWith('=1')).map(l => l.split('=')[0]).join(',') + '\n- Patching...\n  OK\nDone. Reboot to apply.');
+  if (cmd.includes('boot_count')) return o('0');
+  if (cmd.includes('guard.log')) return o('');
+  if (cmd.includes('last-patch.log')) return o('hits: {mock-hide/MockLocationProvider=1, ...}\nOK');
+  if (cmd.includes('disable')) return o('active');
+  return o('');
+}
+
+const $ = id => document.getElementById(id);
+let conf = {};
+
+function parseConf(t) { const c = {}; t.split('\n').forEach(l => { const m = l.match(/^([\w-]+)=(\d)$/); if (m) c[m[1]] = m[2] === '1'; }); return c; }
+function confText() { return Object.keys(INFO).map(k => k + '=' + ($('p_' + k).checked ? 1 : 0)).join('\n') + '\n'; }
+
+async function load() {
+  $('devbanner').hidden = !preview;
+  const [rel, api, fp, fpMod, applied, boot, disabled, guard, confRaw] = await Promise.all([
+    sh('getprop ro.build.version.release'), sh('getprop ro.build.version.sdk'), sh('getprop ro.build.fingerprint'),
+    sh('cat ' + MOD + '/fingerprint 2>/dev/null'), sh('cat ' + MOD + '/patches.applied 2>/dev/null'),
+    sh('cat ' + CFG + '/boot_count 2>/dev/null'),
+    sh('[ -f ' + MOD + '/disable ] && echo disabled || { [ -d ' + MOD + '/system ] && echo active || echo nosystem; }'),
+    sh('cat ' + CFG + '/guard.log 2>/dev/null'), sh('cat ' + CFG + '/patches.conf 2>/dev/null'),
+  ]);
+  const same = fp.out.trim() === fpMod.out.trim() && fpMod.out.trim() !== '';
+  const st = disabled.out.trim();
+  const stateHtml = st === 'active' && same ? '<span class="pill ok">active</span>'
+                  : st === 'disabled' ? '<span class="pill bad">disabled</span>'
+                  : !same ? '<span class="pill warn">needs re-patch (ROM changed)</span>' : '<span class="pill warn">not patched</span>';
+  $('status').innerHTML =
+    '<span>State</span><span>' + stateHtml + '</span>' +
+    '<span>Android</span><span>' + rel.out.trim() + ' (API ' + api.out.trim() + ')</span>' +
+    '<span>Applied</span><span>' + (applied.out.trim() || 'none') + '</span>' +
+    '<span>Boot counter</span><span>' + (boot.out.trim() || '0') + '</span>';
+  const g = guard.out.trim();
+  $('guard').hidden = !g; $('guard').textContent = g;
+
+  conf = parseConf(confRaw.out);
+  $('patches').innerHTML = Object.entries(INFO).map(([k, [t, d]]) =>
+    '<label class="row"><span><b>' + t + '</b><small>' + d + '</small></span><input type="checkbox" id="p_' + k + '"' + (conf[k] ? ' checked' : '') + '></label>').join('');
+}
+
+$('apply').onclick = async () => {
+  const b = $('apply'); b.disabled = true; b.textContent = 'Patching...';
+  $('out').hidden = false; $('out').textContent = 'Working...';
+  const w = await sh("printf '%s' '" + confText() + "' > " + CFG + '/patches.conf');
+  const r = await sh('sh ' + MOD + '/repatch.sh 2>&1');
+  $('out').textContent = (r.out + r.err).trim() || '(no output)';
+  b.disabled = false; b.textContent = 'Save & re-patch';
+  load();
+};
+$('reload').onclick = load;
+$('showlog').onclick = async () => { const r = await sh('tail -n 40 ' + CFG + '/last-patch.log'); $('log').hidden = false; $('log').textContent = r.out.trim() || '(empty)'; };
+$('reboot').onclick = () => { if (confirm('Reboot now?')) sh('svc power reboot || reboot'); };
+load();
+</script>
+<div class="note" style="text-align:center;margin-top:8px">By <b>saadnahid7</b> · <a href="https://droidrooter.com" style="color:var(--accent)">droidrooter.com</a> · <a href="https://github.com/saadnahid7/SmaliPatcherReborn" style="color:var(--accent)">GitHub</a><br>Thanks to <b>fOmey</b> (original Smali Patcher) and <b>sabpprook</b> (SmaliPatcherEx)</div>
+</body>
+</html>
+
+```
