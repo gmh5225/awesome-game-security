@@ -580,6 +580,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/beamstar/cheatengine-mcp-bridge [MCP for Cheat Engine]
 - https://github.com/illegal-instruction-co/processhacker-mcp [MCP for runtime analysis and process hacking; ProcessHacker for AI agents, extensible with DLL plugins]
 - https://github.com/AnonymoDGH/cheat-mcp [C++17 MCP server for Windows game memory R/W, scanning, DLL injection, IAT hooking, speedhack, and anti-cheat detection]
+- https://github.com/0111-0222/uc-mcp [Read-only, date-aware MCP server for searching UnknownCheats forum threads via your own session cookies]
 - https://github.com/zinja-coder/apktool-mcp-server [A MCP Server for APK Tool (Part of Android Reverse Engineering MCP Suites)]
 - https://github.com/xjoker/delamain [Headless JADX MCP server for AI-driven Android APK/DEX/AAB reverse engineering]
 - https://github.com/azw413/Glass [Built-in MCP for mobile RE — CLI verbs (disasm, search, cfg-of, dex-callers, bin-search, insn-search, etc.) as MCP tools on APK/IPA/AArch64; `glass mcp`]
