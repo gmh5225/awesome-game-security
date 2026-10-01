@@ -1,0 +1,2054 @@
+Project Path: arc_Kotsasmin_key-value-checker_vo054bsz
+
+Source Tree:
+
+```txt
+arc_Kotsasmin_key-value-checker_vo054bsz
+├── LICENSE
+├── README.md
+├── build.gradle.kts
+├── gradle
+│   └── wrapper
+│       ├── gradle-wrapper.jar
+│       └── gradle-wrapper.properties
+├── gradle.properties
+├── gradlew
+├── gradlew.bat
+├── settings.gradle.kts
+└── src
+    └── main
+        ├── java
+        │   └── org
+        │       └── kotsasmin
+        │           └── keyValueChecker
+        │               ├── KeyValueChecker.java
+        │               ├── command
+        │               │   ├── KvcCommand.java
+        │               │   └── WhitelistCommand.java
+        │               ├── config
+        │               │   └── ConfigManager.java
+        │               ├── data
+        │               │   ├── DataManager.java
+        │               │   ├── PlayerRecord.java
+        │               │   └── TranslationCheckItem.java
+        │               ├── detector
+        │               │   ├── CheckData.java
+        │               │   ├── CheckManager.java
+        │               │   └── SignPacketListener.java
+        │               └── webhook
+        │                   └── DiscordWebhookNotifier.java
+        └── resources
+            ├── config.yml
+            └── plugin.yml
+
+```
+
+`LICENSE`:
+
+```
+MIT License
+
+Copyright (c) 2026 Kotsasmin
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
+`README.md`:
+
+```md
+# KeyValueChecker
+
+KeyValueChecker is a lightweight, anti-cheat Minecraft server plugin designed to detect specific client-side mods (like Meteor Client, Freecam, AutoTotem) that are otherwise invisible to the server.
+
+## Installation
+
+1. Download the latest version from [Releases](https://github.com/Kotsasmin/key-value-checker/releases).
+2. Download [PacketEvents](https://modrinth.com/plugin/packetevents) (required dependency).
+3. Put both `.jar` files in your server's `plugins/` folder.
+4. Customize what you want to block in `config.yml`, and you are ready!
+
+## History
+
+So here is my journey of how I found out about this. Well, someone would say, exploit of Minecraft.
+
+I was trying to figure out how on earth DonutSMP could display the (now I know) Paper Adventure emojis in their dialogue system by inspecting each and every packet my client sent to the server. I had set up a proxy for that. As I was doing it, I saw many signs being placed around me with names like `key.freecam.toggle`, `key.category.voicechat.voicechat`, and such.
+
+After some research, I figured out about the exploit and thought of it as a really clever technique to finally get rid of most cheating players on a server that I was about to open.
+
+Well, after a couple of weeks of work, I made the plugin a reality and it worked almost flawlessly. I also had my dearest friend ToxicManiax help me discover the most well-known translation keys found in commonly used cheat clients or mods.
+
+Here it is out in the public now.
+
+I don't, of course, promote any kind of illegal activity or breaking the Minecraft EULA in any way. Quite the opposite, actually. I want everyone to play fair. I really despised the fact that 90% of the people who initially tried to enter my server had cheats on, and I didn't even know it was that bad. I want everyone to play fair, and to make those script kiddies with paid clients and cheating mods rethink what they are doing.
+
+Of course, if you know of any clients like this and want to contribute to the project, you might as well open an issue/pr stating a few flags/keys that I should add by default. I know of some clients (I might have added some by now, like Crypton for instance), but I don't have all their translation keys.
+
+If you like the project, feel free to give it a star! If you want to contribute, contact me on Discord or simply open an issue. I really enjoyed building this for everyone. I wish you all a happy and fair day! Love ya all!
+
+## How it Works (Technical Details)
+
+The plugin exploits the way the Minecraft client handles **Translation Components** on signs. It works entirely via packets using the `PacketEvents` library to bypass Bukkit serialization bugs (which otherwise cause "void future" disconnects on Paper 1.21+).
+
+1. **Fake Sign Injection:** When a player joins, the server sends a block update packet creating a fake sign at `Y = 0`.
+2. **Translation Payload:** The server sends an `OpenSignEditor` packet for that sign. The text lines of the sign are set to JSON translation components containing the specific language keys injected by disallowed mods (e.g., `{"translate":"key.freecam.toggle"}`).
+3. **Client-Side Resolution:**
+   - If the player **has the mod installed**, their client's language map will successfully translate the key into a localized string (e.g., "Freecam").
+   - If the player **does not have the mod**, the client fails to translate it and falls back to the raw string (e.g., "key.freecam.toggle").
+4. **Packet Interception:** When the sign editor is forcibly closed, the client sends an `UpdateSign` packet back to the server containing the text it evaluated.
+5. **Detection Validation:** The plugin intercepts the `UpdateSign` packet. If the received text does *not* match the raw translation key, the server mathematically proves the client has the mod installed.
+6. **Batch Processing:** To remain performant, the plugin processes translation keys in batches of 4 (since signs have exactly 4 lines), re-sending packets until all configured keys are verified.
+
+## License
+
+This project is licensed under the [MIT License](LICENSE).
+
+```
+
+`build.gradle.kts`:
+
+```kts
+plugins {
+    id("java-library")
+    id("xyz.jpenilla.run-paper") version "3.0.2"
+}
+
+repositories {
+    mavenCentral()
+    maven("https://repo.papermc.io/repository/maven-public/")
+    maven("https://repo.codemc.io/repository/maven-releases/")
+}
+
+dependencies {
+    compileOnly("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT")
+    compileOnly("com.github.retrooper:packetevents-spigot:2.5.0")
+}
+
+java {
+    toolchain.languageVersion = JavaLanguageVersion.of(21)
+}
+
+tasks {
+    jar {
+        // Stop shading PacketEvents into the jar!
+    }
+
+    runServer {
+        // Configure the Minecraft version for our task.
+        // This is the only required configuration besides applying the plugin.
+        // Your plugin's jar (or shadowJar if present) will be used automatically.
+        minecraftVersion("1.21.11")
+        jvmArgs("-Xms2G", "-Xmx2G")
+    }
+
+    processResources {
+        val props = mapOf("version" to version)
+        filesMatching("plugin.yml") {
+            expand(props)
+        }
+    }
+}
+
+```
+
+`gradle.properties`:
+
+```properties
+group=org.kotsasmin
+version=1.0.0
+org.gradle.configuration-cache=true
+org.gradle.parallel=true
+org.gradle.caching=true
+
+```
+
+`gradle/wrapper/gradle-wrapper.properties`:
+
+```properties
+distributionBase=GRADLE_USER_HOME
+distributionPath=wrapper/dists
+distributionUrl=https\://services.gradle.org/distributions/gradle-9.5.1-bin.zip
+networkTimeout=10000
+validateDistributionUrl=true
+zipStoreBase=GRADLE_USER_HOME
+zipStorePath=wrapper/dists
+
+```
+
+`gradlew`:
+
+```
+#!/bin/sh
+
+#
+# Copyright © 2015 the original authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+##############################################################################
+#
+#   Gradle start up script for POSIX generated by Gradle.
+#
+#   Important for running:
+#
+#   (1) You need a POSIX-compliant shell to run this script. If your /bin/sh is
+#       noncompliant, but you have some other compliant shell such as ksh or
+#       bash, then to run this script, type that shell name before the whole
+#       command line, like:
+#
+#           ksh Gradle
+#
+#       Busybox and similar reduced shells will NOT work, because this script
+#       requires all of these POSIX shell features:
+#         * functions;
+#         * expansions «$var», «${var}», «${var:-default}», «${var+SET}»,
+#           «${var#prefix}», «${var%suffix}», and «$( cmd )»;
+#         * compound commands having a testable exit status, especially «case»;
+#         * various built-in commands including «command», «set», and «ulimit».
+#
+#   Important for patching:
+#
+#   (2) This script targets any POSIX shell, so it avoids extensions provided
+#       by Bash, Ksh, etc; in particular arrays are avoided.
+#
+#       The "traditional" practice of packing multiple parameters into a
+#       space-separated string is a well documented source of bugs and security
+#       problems, so this is (mostly) avoided, by progressively accumulating
+#       options in "$@", and eventually passing that to Java.
+#
+#       Where the inherited environment variables (DEFAULT_JVM_OPTS, JAVA_OPTS,
+#       and GRADLE_OPTS) rely on word-splitting, this is performed explicitly;
+#       see the in-line comments for details.
+#
+#       There are tweaks for specific operating systems such as AIX, CygWin,
+#       Darwin, MinGW, and NonStop.
+#
+#   (3) This script is generated from the Groovy template
+#       https://github.com/gradle/gradle/blob/b631911858264c0b6e4d6603d677ff5218766cee/platforms/jvm/plugins-application/src/main/resources/org/gradle/api/internal/plugins/unixStartScript.txt
+#       within the Gradle project.
+#
+#       You can find Gradle at https://github.com/gradle/gradle/.
+#
+##############################################################################
+
+# Attempt to set APP_HOME
+
+# Resolve links: $0 may be a link
+app_path=$0
+
+# Need this for daisy-chained symlinks.
+while
+    APP_HOME=${app_path%"${app_path##*/}"}  # leaves a trailing /; empty if no leading path
+    [ -h "$app_path" ]
+do
+    ls=$( ls -ld "$app_path" )
+    link=${ls#*' -> '}
+    case $link in             #(
+      /*)   app_path=$link ;; #(
+      *)    app_path=$APP_HOME$link ;;
+    esac
+done
+
+# This is normally unused
+# shellcheck disable=SC2034
+APP_BASE_NAME=${0##*/}
+# Discard cd standard output in case $CDPATH is set (https://github.com/gradle/gradle/issues/25036)
+APP_HOME=$( cd -P "${APP_HOME:-./}" > /dev/null && printf '%s\n' "$PWD" ) || exit
+
+# Use the maximum available, or set MAX_FD != -1 to use that value.
+MAX_FD=maximum
+
+warn () {
+    echo "$*"
+} >&2
+
+die () {
+    echo
+    echo "$*"
+    echo
+    exit 1
+} >&2
+
+# OS specific support (must be 'true' or 'false').
+cygwin=false
+msys=false
+darwin=false
+nonstop=false
+case "$( uname )" in                #(
+  CYGWIN* )         cygwin=true  ;; #(
+  Darwin* )         darwin=true  ;; #(
+  MSYS* | MINGW* )  msys=true    ;; #(
+  NONSTOP* )        nonstop=true ;;
+esac
+
+
+
+# Determine the Java command to use to start the JVM.
+if [ -n "$JAVA_HOME" ] ; then
+    if [ -x "$JAVA_HOME/jre/sh/java" ] ; then
+        # IBM's JDK on AIX uses strange locations for the executables
+        JAVACMD=$JAVA_HOME/jre/sh/java
+    else
+        JAVACMD=$JAVA_HOME/bin/java
+    fi
+    if [ ! -x "$JAVACMD" ] ; then
+        die "ERROR: JAVA_HOME is set to an invalid directory: $JAVA_HOME
+
+Please set the JAVA_HOME variable in your environment to match the
+location of your Java installation."
+    fi
+else
+    JAVACMD=java
+    if ! command -v java >/dev/null 2>&1
+    then
+        die "ERROR: JAVA_HOME is not set and no 'java' command could be found in your PATH.
+
+Please set the JAVA_HOME variable in your environment to match the
+location of your Java installation."
+    fi
+fi
+
+# Increase the maximum file descriptors if we can.
+if ! "$cygwin" && ! "$darwin" && ! "$nonstop" ; then
+    case $MAX_FD in #(
+      max*)
+        # In POSIX sh, ulimit -H is undefined. That's why the result is checked to see if it worked.
+        # shellcheck disable=SC2039,SC3045
+        MAX_FD=$( ulimit -H -n ) ||
+            warn "Could not query maximum file descriptor limit"
+    esac
+    case $MAX_FD in  #(
+      '' | soft) :;; #(
+      *)
+        # In POSIX sh, ulimit -n is undefined. That's why the result is checked to see if it worked.
+        # shellcheck disable=SC2039,SC3045
+        ulimit -n "$MAX_FD" ||
+            warn "Could not set maximum file descriptor limit to $MAX_FD"
+    esac
+fi
+
+# Collect all arguments for the java command, stacking in reverse order:
+#   * args from the command line
+#   * the main class name
+#   * -classpath
+#   * -D...appname settings
+#   * --module-path (only if needed)
+#   * DEFAULT_JVM_OPTS, JAVA_OPTS, and GRADLE_OPTS environment variables.
+
+# For Cygwin or MSYS, switch paths to Windows format before running java
+if "$cygwin" || "$msys" ; then
+    APP_HOME=$( cygpath --path --mixed "$APP_HOME" )
+
+    JAVACMD=$( cygpath --unix "$JAVACMD" )
+
+    # Now convert the arguments - kludge to limit ourselves to /bin/sh
+    for arg do
+        if
+            case $arg in                                #(
+              -*)   false ;;                            # don't mess with options #(
+              /?*)  t=${arg#/} t=/${t%%/*}              # looks like a POSIX filepath
+                    [ -e "$t" ] ;;                      #(
+              *)    false ;;
+            esac
+        then
+            arg=$( cygpath --path --ignore --mixed "$arg" )
+        fi
+        # Roll the args list around exactly as many times as the number of
+        # args, so each arg winds up back in the position where it started, but
+        # possibly modified.
+        #
+        # NB: a `for` loop captures its iteration list before it begins, so
+        # changing the positional parameters here affects neither the number of
+        # iterations, nor the values presented in `arg`.
+        shift                   # remove old arg
+        set -- "$@" "$arg"      # push replacement arg
+    done
+fi
+
+
+# Add default JVM options here. You can also use JAVA_OPTS and GRADLE_OPTS to pass JVM options to this script.
+DEFAULT_JVM_OPTS='"-Xmx64m" "-Xms64m"'
+
+# Collect all arguments for the java command:
+#   * DEFAULT_JVM_OPTS, JAVA_OPTS, and optsEnvironmentVar are not allowed to contain shell fragments,
+#     and any embedded shellness will be escaped.
+#   * For example: A user cannot expect ${Hostname} to be expanded, as it is an environment variable and will be
+#     treated as '${Hostname}' itself on the command line.
+
+set -- \
+        "-Dorg.gradle.appname=$APP_BASE_NAME" \
+        -jar "$APP_HOME/gradle/wrapper/gradle-wrapper.jar" \
+        "$@"
+
+# Stop when "xargs" is not available.
+if ! command -v xargs >/dev/null 2>&1
+then
+    die "xargs is not available"
+fi
+
+# Use "xargs" to parse quoted args.
+#
+# With -n1 it outputs one arg per line, with the quotes and backslashes removed.
+#
+# In Bash we could simply go:
+#
+#   readarray ARGS < <( xargs -n1 <<<"$var" ) &&
+#   set -- "${ARGS[@]}" "$@"
+#
+# but POSIX shell has neither arrays nor command substitution, so instead we
+# post-process each arg (as a line of input to sed) to backslash-escape any
+# character that might be a shell metacharacter, then use eval to reverse
+# that process (while maintaining the separation between arguments), and wrap
+# the whole thing up as a single "set" statement.
+#
+# This will of course break if any of these variables contains a newline or
+# an unmatched quote.
+#
+
+eval "set -- $(
+        printf '%s\n' "$DEFAULT_JVM_OPTS $JAVA_OPTS $GRADLE_OPTS" |
+        xargs -n1 |
+        sed ' s~[^-[:alnum:]+,./:=@_]~\\&~g; ' |
+        tr '\n' ' '
+    )" '"$@"'
+
+exec "$JAVACMD" "$@"
+
+```
+
+`gradlew.bat`:
+
+```bat
+@rem
+@rem Copyright 2015 the original author or authors.
+@rem
+@rem Licensed under the Apache License, Version 2.0 (the "License");
+@rem you may not use this file except in compliance with the License.
+@rem You may obtain a copy of the License at
+@rem
+@rem      https://www.apache.org/licenses/LICENSE-2.0
+@rem
+@rem Unless required by applicable law or agreed to in writing, software
+@rem distributed under the License is distributed on an "AS IS" BASIS,
+@rem WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+@rem See the License for the specific language governing permissions and
+@rem limitations under the License.
+@rem
+@rem SPDX-License-Identifier: Apache-2.0
+@rem
+
+@if "%DEBUG%"=="" @echo off
+@rem ##########################################################################
+@rem
+@rem  Gradle startup script for Windows
+@rem
+@rem ##########################################################################
+
+@rem Set local scope for the variables with windows NT shell
+if "%OS%"=="Windows_NT" setlocal
+
+set DIRNAME=%~dp0
+if "%DIRNAME%"=="" set DIRNAME=.
+@rem This is normally unused
+set APP_BASE_NAME=%~n0
+set APP_HOME=%DIRNAME%
+
+@rem Resolve any "." and ".." in APP_HOME to make it shorter.
+for %%i in ("%APP_HOME%") do set APP_HOME=%%~fi
+
+@rem Add default JVM options here. You can also use JAVA_OPTS and GRADLE_OPTS to pass JVM options to this script.
+set DEFAULT_JVM_OPTS="-Xmx64m" "-Xms64m"
+
+@rem Find java.exe
+if defined JAVA_HOME goto findJavaFromJavaHome
+
+set JAVA_EXE=java.exe
+%JAVA_EXE% -version >NUL 2>&1
+if %ERRORLEVEL% equ 0 goto execute
+
+echo. 1>&2
+echo ERROR: JAVA_HOME is not set and no 'java' command could be found in your PATH. 1>&2
+echo. 1>&2
+echo Please set the JAVA_HOME variable in your environment to match the 1>&2
+echo location of your Java installation. 1>&2
+
+goto fail
+
+:findJavaFromJavaHome
+set JAVA_HOME=%JAVA_HOME:"=%
+set JAVA_EXE=%JAVA_HOME%/bin/java.exe
+
+if exist "%JAVA_EXE%" goto execute
+
+echo. 1>&2
+echo ERROR: JAVA_HOME is set to an invalid directory: %JAVA_HOME% 1>&2
+echo. 1>&2
+echo Please set the JAVA_HOME variable in your environment to match the 1>&2
+echo location of your Java installation. 1>&2
+
+goto fail
+
+:execute
+@rem Setup the command line
+
+
+
+@rem Execute Gradle
+"%JAVA_EXE%" %DEFAULT_JVM_OPTS% %JAVA_OPTS% %GRADLE_OPTS% "-Dorg.gradle.appname=%APP_BASE_NAME%" -jar "%APP_HOME%\gradle\wrapper\gradle-wrapper.jar" %*
+
+:end
+@rem End local scope for the variables with windows NT shell
+if %ERRORLEVEL% equ 0 goto mainEnd
+
+:fail
+rem Set variable GRADLE_EXIT_CONSOLE if you need the _script_ return code instead of
+rem the _cmd.exe /c_ return code!
+set EXIT_CODE=%ERRORLEVEL%
+if %EXIT_CODE% equ 0 set EXIT_CODE=1
+if not ""=="%GRADLE_EXIT_CONSOLE%" exit %EXIT_CODE%
+exit /b %EXIT_CODE%
+
+:mainEnd
+if "%OS%"=="Windows_NT" endlocal
+
+:omega
+
+```
+
+`settings.gradle.kts`:
+
+```kts
+rootProject.name = "key-value-checker"
+
+```
+
+`src/main/java/org/kotsasmin/keyValueChecker/KeyValueChecker.java`:
+
+```java
+package org.kotsasmin.keyValueChecker;
+
+import com.github.retrooper.packetevents.PacketEvents;
+import com.github.retrooper.packetevents.event.PacketListenerAbstract;
+import org.bukkit.command.PluginCommand;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.plugin.java.JavaPlugin;
+import org.kotsasmin.keyValueChecker.command.KvcCommand;
+import org.kotsasmin.keyValueChecker.command.WhitelistCommand;
+import org.kotsasmin.keyValueChecker.config.ConfigManager;
+import org.kotsasmin.keyValueChecker.data.DataManager;
+import org.kotsasmin.keyValueChecker.detector.CheckManager;
+import org.kotsasmin.keyValueChecker.detector.SignPacketListener;
+import org.kotsasmin.keyValueChecker.webhook.DiscordWebhookNotifier;
+
+public final class KeyValueChecker extends JavaPlugin implements Listener {
+
+    private ConfigManager configManager;
+    private DataManager dataManager;
+    private DiscordWebhookNotifier webhookNotifier;
+    private CheckManager checkManager;
+    private PacketListenerAbstract packetListener;
+
+    @Override
+    public void onEnable() {
+        // elegxos an leipei to packetevents dependency
+        if (getServer().getPluginManager().getPlugin("packetevents") == null) {
+            getLogger().severe("[KVC] PacketEvents is missing! KeyValueChecker requires PacketEvents to work.");
+            getLogger().severe("[KVC] Download it from: https://modrinth.com/plugin/packetevents");
+            getServer().getPluginManager().disablePlugin(this);
+            return;
+        }
+
+        saveDefaultConfig();
+
+        configManager = new ConfigManager(this);
+        configManager.loadConfigValues();
+
+        dataManager = new DataManager(this);
+        dataManager.loadData();
+
+        webhookNotifier = new DiscordWebhookNotifier(this, configManager);
+        checkManager = new CheckManager(this, configManager, dataManager, webhookNotifier);
+
+        // vazoume to packet listener kai kratame to reference gia na einai reload safe
+        packetListener = new SignPacketListener(this, checkManager, dataManager);
+        PacketEvents.getAPI().getEventManager().registerListener(packetListener);
+
+        getServer().getPluginManager().registerEvents(this, this);
+
+        // commands
+        KvcCommand kvcCommand = new KvcCommand(configManager, dataManager);
+        PluginCommand reloadCmd = getCommand("kvc-reload");
+        if (reloadCmd != null) reloadCmd.setExecutor(kvcCommand);
+
+        PluginCommand listCmd = getCommand("kvc-list");
+        if (listCmd != null) listCmd.setExecutor(kvcCommand);
+
+        PluginCommand whitelistCmd = getCommand("kvc-whitelist");
+        if (whitelistCmd != null) {
+            WhitelistCommand wlHandler = new WhitelistCommand(dataManager);
+            whitelistCmd.setExecutor(wlHandler);
+            whitelistCmd.setTabCompleter(wlHandler);
+        }
+
+        getLogger().info("KeyValueChecker enabled via pure PacketEvents NBT.");
+    }
+
+    @Override
+    public void onDisable() {
+        // vgazoume to packet listener sto reload gia na min diplo-akouei
+        if (packetListener != null) {
+            try {
+                if (PacketEvents.getAPI() != null && PacketEvents.getAPI().getEventManager() != null) {
+                    PacketEvents.getAPI().getEventManager().unregisterListener(packetListener);
+                }
+            } catch (Exception e) {
+                getLogger().warning("[KVC] Failed to unregister PacketEvents listener: " + e.getMessage());
+            }
+            packetListener = null;
+        }
+
+        // akyrwsi twn pending checks
+        if (checkManager != null) {
+            checkManager.cancelAllChecks();
+        }
+
+        // synchronous save gia na min petaksei IllegalPluginAccessException sto shutdown
+        if (dataManager != null) {
+            dataManager.saveData(false);
+        }
+
+        getLogger().info("KeyValueChecker disabled successfully.");
+    }
+
+    @EventHandler
+    public void onPlayerJoin(PlayerJoinEvent event) {
+        if (checkManager != null) {
+            checkManager.handlePlayerJoin(event.getPlayer());
+        }
+    }
+
+    @EventHandler
+    public void onPlayerQuit(PlayerQuitEvent event) {
+        if (checkManager != null) {
+            checkManager.handlePlayerQuit(event.getPlayer());
+        }
+    }
+
+    public ConfigManager getConfigManager() {
+        return configManager;
+    }
+
+    public DataManager getDataManager() {
+        return dataManager;
+    }
+
+    public CheckManager getCheckManager() {
+        return checkManager;
+    }
+}
+
+```
+
+`src/main/java/org/kotsasmin/keyValueChecker/command/KvcCommand.java`:
+
+```java
+package org.kotsasmin.keyValueChecker.command;
+
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandExecutor;
+import org.bukkit.command.CommandSender;
+import org.kotsasmin.keyValueChecker.config.ConfigManager;
+import org.kotsasmin.keyValueChecker.data.DataManager;
+import org.kotsasmin.keyValueChecker.data.PlayerRecord;
+
+import java.util.Map;
+import java.util.UUID;
+
+public class KvcCommand implements CommandExecutor {
+    private final ConfigManager configManager;
+    private final DataManager dataManager;
+
+    public KvcCommand(ConfigManager configManager, DataManager dataManager) {
+        this.configManager = configManager;
+        this.dataManager = dataManager;
+    }
+
+    @Override
+    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+        // reload tis rithmiseis
+        if (command.getName().equalsIgnoreCase("kvc-reload")) {
+            if (!sender.hasPermission("keyvaluechecker.reload")) {
+                sender.sendMessage("§cYou do not have permission to execute this command.");
+                return true;
+            }
+            configManager.loadConfigValues();
+            sender.sendMessage("§aKeyValueChecker config reloaded.");
+            return true;
+        }
+
+        // emfanish log h katharisma me rotate
+        if (command.getName().equalsIgnoreCase("kvc-list")) {
+            if (!sender.hasPermission("keyvaluechecker.list")) {
+                sender.sendMessage("§cYou do not have permission to execute this command.");
+                return true;
+            }
+
+            if (args.length > 0 && args[0].equalsIgnoreCase("rotate")) {
+                dataManager.clearRecords();
+                dataManager.saveData(true);
+                sender.sendMessage("§a[KVC] Log history wiped successfully.");
+                return true;
+            }
+
+            sender.sendMessage("§6--- Detected Mods History ---");
+            Map<UUID, PlayerRecord> records = dataManager.getPersistentRecords();
+            if (records.isEmpty()) {
+                sender.sendMessage("§eNo detections on record.");
+            } else {
+                for (Map.Entry<UUID, PlayerRecord> entry : records.entrySet()) {
+                    PlayerRecord rec = entry.getValue();
+                    String timeAgo = DataManager.formatTimeAgo(rec.getLastIncidentTime());
+                    sender.sendMessage("§c" + rec.getPlayerName() + " §7[" + timeAgo + "] §8(Last: " + rec.getLastAction() + ")");
+                    sender.sendMessage("  §7Flags: §e" + String.join(", ", rec.getDetectedMods()));
+                }
+            }
+            return true;
+        }
+
+        return false;
+    }
+}
+
+```
+
+`src/main/java/org/kotsasmin/keyValueChecker/command/WhitelistCommand.java`:
+
+```java
+package org.kotsasmin.keyValueChecker.command;
+
+import org.bukkit.Bukkit;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandExecutor;
+import org.bukkit.command.CommandSender;
+import org.bukkit.command.TabCompleter;
+import org.bukkit.entity.Player;
+import org.kotsasmin.keyValueChecker.data.DataManager;
+import org.kotsasmin.keyValueChecker.data.PlayerRecord;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
+
+public class WhitelistCommand implements CommandExecutor, TabCompleter {
+    private final DataManager dataManager;
+
+    public WhitelistCommand(DataManager dataManager) {
+        this.dataManager = dataManager;
+    }
+
+    @Override
+    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+        if (!sender.hasPermission("keyvaluechecker.whitelist")) {
+            sender.sendMessage("§cYou do not have permission to execute this command.");
+            return true;
+        }
+
+        if (args.length == 0) {
+            sender.sendMessage("§cUsage: /kvc-whitelist <add|remove|list> [player]");
+            return true;
+        }
+
+        String sub = args[0].toLowerCase();
+        if (sub.equals("list")) {
+            sender.sendMessage("§6--- Whitelisted Players ---");
+            List<String> whitelist = dataManager.getWhitelist();
+            if (whitelist.isEmpty()) {
+                sender.sendMessage("§eNo players are whitelisted.");
+            } else {
+                for (String name : whitelist) {
+                    sender.sendMessage("§7- §a" + name);
+                }
+            }
+            return true;
+        }
+
+        // prosthiki sto whitelist
+        if (sub.equals("add")) {
+            if (args.length < 2) {
+                sender.sendMessage("§cUsage: /kvc-whitelist add <player>");
+                return true;
+            }
+            String targetName = args[1];
+            if (!dataManager.addToWhitelist(targetName)) {
+                sender.sendMessage("§cPlayer §e" + targetName + " §cis already whitelisted.");
+                return true;
+            }
+            dataManager.saveData(true);
+            sender.sendMessage("§aAdded §e" + targetName + " §ato the whitelist.");
+            return true;
+        }
+
+        // afairesi apo to whitelist
+        if (sub.equals("remove")) {
+            if (args.length < 2) {
+                sender.sendMessage("§cUsage: /kvc-whitelist remove <player>");
+                return true;
+            }
+            String targetName = args[1];
+            if (!dataManager.removeFromWhitelist(targetName)) {
+                sender.sendMessage("§cPlayer §e" + targetName + " §cis not on the whitelist.");
+                return true;
+            }
+            dataManager.saveData(true);
+            sender.sendMessage("§aRemoved §e" + targetName + " §afrom the whitelist.");
+            return true;
+        }
+
+        sender.sendMessage("§cUnknown subcommand. Use add, remove, or list.");
+        return true;
+    }
+
+    @Override
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+        if (!sender.hasPermission("keyvaluechecker.whitelist")) {
+            return new ArrayList<>();
+        }
+
+        List<String> suggestions = new ArrayList<>();
+        if (args.length == 1) {
+            String input = args[0].toLowerCase();
+            if ("add".startsWith(input)) suggestions.add("add");
+            if ("remove".startsWith(input)) suggestions.add("remove");
+            if ("list".startsWith(input)) suggestions.add("list");
+            return suggestions;
+        }
+
+        if (args.length == 2) {
+            String sub = args[0].toLowerCase();
+            String input = args[1].toLowerCase();
+
+            // tab completion me online kai cached paiktes gia na min kanei lag spike to getOfflinePlayers
+            if (sub.equals("add")) {
+                Set<String> names = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
+                for (Player p : Bukkit.getOnlinePlayers()) {
+                    names.add(p.getName());
+                }
+                for (PlayerRecord rec : dataManager.getPersistentRecords().values()) {
+                    if (rec.getPlayerName() != null) {
+                        names.add(rec.getPlayerName());
+                    }
+                }
+                for (String name : names) {
+                    if (name.toLowerCase().startsWith(input)) {
+                        suggestions.add(name);
+                    }
+                }
+                return suggestions;
+            } else if (sub.equals("remove")) {
+                for (String name : dataManager.getWhitelist()) {
+                    if (name.toLowerCase().startsWith(input)) {
+                        suggestions.add(name);
+                    }
+                }
+                return suggestions;
+            }
+        }
+
+        return new ArrayList<>();
+    }
+}
+
+```
+
+`src/main/java/org/kotsasmin/keyValueChecker/config/ConfigManager.java`:
+
+```java
+package org.kotsasmin.keyValueChecker.config;
+
+import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.plugin.java.JavaPlugin;
+import org.kotsasmin.keyValueChecker.data.TranslationCheckItem;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+
+public class ConfigManager {
+    private final JavaPlugin plugin;
+    private final List<TranslationCheckItem> checkQueue = new ArrayList<>();
+    private int sendDelayTicks;
+
+    public ConfigManager(JavaPlugin plugin) {
+        this.plugin = plugin;
+    }
+
+    public void loadConfigValues() {
+        migrateConfigIfNeeded();
+        plugin.reloadConfig();
+
+        checkQueue.clear();
+
+        // Load Blacklist groups (required = false)
+        ConfigurationSection blacklist = plugin.getConfig().getConfigurationSection("blacklist");
+        if (blacklist != null) {
+            for (String group : blacklist.getKeys(false)) {
+                if (plugin.getConfig().getBoolean("blacklist." + group + ".enabled", true)) {
+                    parseKeysSection("blacklist." + group + ".keys", false);
+                }
+            }
+        }
+
+        // Fallback for old configs if blacklist is empty but translation-keys exists
+        if (checkQueue.isEmpty() && plugin.getConfig().contains("translation-keys")) {
+            for (String k : plugin.getConfig().getStringList("translation-keys")) {
+                if (k != null && !k.isEmpty()) {
+                    checkQueue.add(new TranslationCheckItem(k, false));
+                }
+            }
+        }
+
+        // Load Whitelist groups (required = true)
+        ConfigurationSection whitelist = plugin.getConfig().getConfigurationSection("whitelist");
+        if (whitelist != null) {
+            for (String group : whitelist.getKeys(false)) {
+                if (plugin.getConfig().getBoolean("whitelist." + group + ".enabled", false)) {
+                    parseKeysSection("whitelist." + group + ".keys", true);
+                }
+            }
+        }
+
+        // metatropi tou delay se ticks (default 2 ticks gia elegxo sto loading screen)
+        if (plugin.getConfig().contains("initial-check-delay-ticks")) {
+            sendDelayTicks = plugin.getConfig().getInt("initial-check-delay-ticks", 2);
+        } else if (plugin.getConfig().contains("initial-check-delay-seconds")) {
+            sendDelayTicks = plugin.getConfig().getInt("initial-check-delay-seconds", 0) * 20;
+        } else {
+            sendDelayTicks = plugin.getConfig().getInt("send-delay-ticks", 2);
+        }
+        if (sendDelayTicks < 1) {
+            sendDelayTicks = 1;
+        }
+
+        plugin.getLogger().info("[KVC] Loaded " + checkQueue.size() + " total translation keys to check.");
+    }
+
+    private void migrateConfigIfNeeded() {
+        int version = plugin.getConfig().getInt("config-version", 0);
+        if (version != 2) {
+            plugin.getLogger().warning("[KVC] Config is outdated (version " + version + ", expected 2).");
+            plugin.getLogger().warning("[KVC] Backing up old config.yml and creating a new Version 2 config.yml...");
+            File configFile = new File(plugin.getDataFolder(), "config.yml");
+            if (configFile.exists()) {
+                File backupFile = new File(plugin.getDataFolder(), "config.backup." + System.currentTimeMillis() + ".yml");
+                boolean renamed = configFile.renameTo(backupFile);
+                if (renamed) {
+                    plugin.getLogger().info("[KVC] Backed up old config to: " + backupFile.getName());
+                } else {
+                    plugin.getLogger().warning("[KVC] Could not rename old config.yml to backup file!");
+                }
+            }
+            plugin.saveDefaultConfig();
+            plugin.reloadConfig();
+            plugin.getLogger().info("[KVC] New default config.yml (Version 2) has been generated and loaded.");
+        }
+    }
+
+    private void parseKeysSection(String path, boolean required) {
+        List<?> list = plugin.getConfig().getList(path);
+        if (list == null) return;
+
+        for (Object obj : list) {
+            if (obj instanceof Map) {
+                Map<?, ?> map = (Map<?, ?>) obj;
+                String key = String.valueOf(map.get("key"));
+                String name = map.containsKey("name") && map.get("name") != null ? String.valueOf(map.get("name")) : key;
+                if (key != null && !key.isEmpty() && !"null".equals(key)) {
+                    checkQueue.add(new TranslationCheckItem(key, name, required));
+                }
+            } else if (obj instanceof String) {
+                String str = (String) obj;
+                if (str != null && !str.isEmpty()) {
+                    checkQueue.add(new TranslationCheckItem(str, str, required));
+                }
+            }
+        }
+    }
+
+    public List<TranslationCheckItem> getCheckQueue() {
+        return Collections.unmodifiableList(checkQueue);
+    }
+
+    public int getSendDelayTicks() {
+        return sendDelayTicks;
+    }
+
+    public boolean isKickOnBlockedCheck() {
+        return plugin.getConfig().getBoolean("kick-on-blocked-check", false);
+    }
+
+    public String getActionType(boolean isMissingRequired) {
+        String sectionPrefix = isMissingRequired ? "whitelist-action" : "action";
+        return plugin.getConfig().getString(sectionPrefix + ".type", "kick");
+    }
+
+    public List<String> getActionContent(boolean isMissingRequired) {
+        String sectionPrefix = isMissingRequired ? "whitelist-action" : "action";
+        return plugin.getConfig().getStringList(sectionPrefix + ".content");
+    }
+
+    public String getAdminAlertFormat(boolean isMissingRequired) {
+        String defaultAlert = isMissingRequired
+                ? "&8[&cKVC&8] &e%player% &7tried to join without a required modification (&c%mod%&7)."
+                : "&8[&cKVC&8] &e%player% &7tried to join with disallowed modifications.";
+        String alertKey = isMissingRequired ? "whitelist-admin-alert" : "admin-alert";
+        return plugin.getConfig().getString(alertKey, defaultAlert);
+    }
+
+    public String getBlockedCheckAdminAlertFormat() {
+        return plugin.getConfig().getString("admin-alert", "&8[&cKVC&8] &e%player% &7blocked the sign update check.");
+    }
+
+    public boolean isDiscordWebhookEnabled() {
+        return plugin.getConfig().getBoolean("discord-webhook.enabled", false);
+    }
+
+    public boolean isDiscordSendOnBlockedCheck() {
+        return plugin.getConfig().getBoolean("discord-webhook.send-on-blocked-check", false);
+    }
+
+    public String getDiscordWebhookUrl() {
+        return plugin.getConfig().getString("discord-webhook.url", "");
+    }
+
+    public String getDiscordWebhookUsername() {
+        return plugin.getConfig().getString("discord-webhook.username", "KeyValueChecker");
+    }
+
+    public String getDiscordWebhookAvatarUrl() {
+        return plugin.getConfig().getString("discord-webhook.avatar-url", "");
+    }
+
+    public int getDiscordWebhookColor() {
+        return plugin.getConfig().getInt("discord-webhook.embed.color", 16711680);
+    }
+
+    public String getDiscordWebhookTitle() {
+        return plugin.getConfig().getString("discord-webhook.embed.title", "Cheater Detected!");
+    }
+
+    public String getDiscordWebhookDescription() {
+        return plugin.getConfig().getString("discord-webhook.embed.description", "");
+    }
+
+    public String getDiscordWebhookFooter() {
+        return plugin.getConfig().getString("discord-webhook.embed.footer", "");
+    }
+}
+
+```
+
+`src/main/java/org/kotsasmin/keyValueChecker/data/DataManager.java`:
+
+```java
+package org.kotsasmin.keyValueChecker.data;
+
+import org.bukkit.Bukkit;
+import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.plugin.Plugin;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
+
+public class DataManager {
+    private final Plugin plugin;
+    private final Object fileLock = new Object(); // lock gia to arxeio
+    private final Map<UUID, PlayerRecord> persistentRecords = new ConcurrentHashMap<>();
+    private final List<String> whitelist = new CopyOnWriteArrayList<>();
+
+    private File dataFile;
+    private FileConfiguration dataConfig;
+
+    public DataManager(Plugin plugin) {
+        this.plugin = plugin;
+    }
+
+    public void loadData() {
+        dataFile = new File(plugin.getDataFolder(), "data.yml");
+        if (!dataFile.exists()) {
+            try {
+                if (!plugin.getDataFolder().exists()) {
+                    plugin.getDataFolder().mkdirs();
+                }
+                dataFile.createNewFile();
+            } catch (IOException e) {
+                plugin.getLogger().severe("Could not create data.yml: " + e.getMessage());
+            }
+        }
+        dataConfig = YamlConfiguration.loadConfiguration(dataFile);
+        persistentRecords.clear();
+
+        // fortwnoume ta records apo to data.yml
+        ConfigurationSection recordsSection = dataConfig.getConfigurationSection("records");
+        if (recordsSection != null) {
+            for (String uuidStr : recordsSection.getKeys(false)) {
+                try {
+                    UUID uuid = UUID.fromString(uuidStr);
+                    String name = dataConfig.getString("records." + uuidStr + ".name");
+                    long time = dataConfig.getLong("records." + uuidStr + ".time");
+                    String action = dataConfig.getString("records." + uuidStr + ".action");
+                    List<String> mods = dataConfig.getStringList("records." + uuidStr + ".mods");
+                    persistentRecords.put(uuid, new PlayerRecord(name, time, action, mods));
+                } catch (IllegalArgumentException e) {
+                    plugin.getLogger().warning("Skipping invalid UUID in data.yml: " + uuidStr);
+                }
+            }
+        }
+
+        // kai to whitelist twn paiktwn pou kanoun bypass
+        whitelist.clear();
+        if (dataConfig.contains("whitelist")) {
+            whitelist.addAll(dataConfig.getStringList("whitelist"));
+        }
+    }
+
+    // async sto kanoniko gameplay, sync sto shutdown gia na min troei exception
+    public void saveData(boolean async) {
+        if (dataFile == null || dataConfig == null) {
+            return;
+        }
+
+        if (async && plugin.isEnabled()) {
+            Bukkit.getScheduler().runTaskAsynchronously(plugin, this::writeToDisk);
+        } else {
+            writeToDisk();
+        }
+    }
+
+    private void writeToDisk() {
+        synchronized (fileLock) {
+            try {
+                dataConfig.set("records", null);
+                for (Map.Entry<UUID, PlayerRecord> entry : persistentRecords.entrySet()) {
+                    String path = "records." + entry.getKey().toString();
+                    PlayerRecord rec = entry.getValue();
+                    dataConfig.set(path + ".name", rec.getPlayerName());
+                    dataConfig.set(path + ".time", rec.getLastIncidentTime());
+                    dataConfig.set(path + ".action", rec.getLastAction());
+                    dataConfig.set(path + ".mods", new ArrayList<>(rec.getDetectedMods()));
+                }
+                dataConfig.set("whitelist", new ArrayList<>(whitelist));
+                dataConfig.save(dataFile);
+            } catch (IOException e) {
+                plugin.getLogger().severe("Failed to save data.yml: " + e.getMessage());
+            }
+        }
+    }
+
+    public Map<UUID, PlayerRecord> getPersistentRecords() {
+        return persistentRecords;
+    }
+
+    public PlayerRecord getOrCreateRecord(UUID uuid, String playerName, String initialAction) {
+        return persistentRecords.computeIfAbsent(uuid, k ->
+                new PlayerRecord(playerName, System.currentTimeMillis(), initialAction, new ArrayList<>())
+        );
+    }
+
+    public void clearRecords() {
+        persistentRecords.clear();
+    }
+
+    public List<String> getWhitelist() {
+        return whitelist;
+    }
+
+    public boolean isWhitelisted(String playerName) {
+        return whitelist.stream().anyMatch(playerName::equalsIgnoreCase);
+    }
+
+    public boolean addToWhitelist(String playerName) {
+        if (isWhitelisted(playerName)) {
+            return false;
+        }
+        return whitelist.add(playerName);
+    }
+
+    public boolean removeFromWhitelist(String playerName) {
+        String match = whitelist.stream()
+                .filter(playerName::equalsIgnoreCase)
+                .findFirst()
+                .orElse(null);
+        if (match != null) {
+            return whitelist.remove(match);
+        }
+        return false;
+    }
+
+    public static String formatTimeAgo(long timestamp) {
+        long diffSeconds = (System.currentTimeMillis() - timestamp) / 1000;
+        if (diffSeconds < 60) return diffSeconds + " secs ago";
+        if (diffSeconds < 3600) return (diffSeconds / 60) + " mins ago";
+        if (diffSeconds < 86400) return (diffSeconds / 3600) + " hours ago";
+        return (diffSeconds / 86400) + " days ago";
+    }
+}
+
+```
+
+`src/main/java/org/kotsasmin/keyValueChecker/data/PlayerRecord.java`:
+
+```java
+package org.kotsasmin.keyValueChecker.data;
+
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
+
+public class PlayerRecord {
+    private final String playerName;
+    private volatile long lastIncidentTime;
+    private volatile String lastAction;
+    // CopyOnWriteArrayList gia na min exoume ConcurrentModificationException sto netty thread
+    private final CopyOnWriteArrayList<String> detectedMods;
+
+    public PlayerRecord(String playerName, long lastIncidentTime, String lastAction, Collection<String> detectedMods) {
+        this.playerName = playerName;
+        this.lastIncidentTime = lastIncidentTime;
+        this.lastAction = lastAction;
+        this.detectedMods = new CopyOnWriteArrayList<>(detectedMods != null ? detectedMods : Collections.emptyList());
+    }
+
+    public String getPlayerName() {
+        return playerName;
+    }
+
+    public long getLastIncidentTime() {
+        return lastIncidentTime;
+    }
+
+    public void setLastIncidentTime(long lastIncidentTime) {
+        this.lastIncidentTime = lastIncidentTime;
+    }
+
+    public String getLastAction() {
+        return lastAction;
+    }
+
+    public void setLastAction(String lastAction) {
+        this.lastAction = lastAction;
+    }
+
+    public List<String> getDetectedMods() {
+        return detectedMods;
+    }
+
+    public boolean addDetectedMod(String mod) {
+        return detectedMods.addIfAbsent(mod);
+    }
+}
+
+```
+
+`src/main/java/org/kotsasmin/keyValueChecker/data/TranslationCheckItem.java`:
+
+```java
+package org.kotsasmin.keyValueChecker.data;
+
+public class TranslationCheckItem {
+    private final String key;
+    private final String name;
+    private final boolean required; // false = blacklist (den prepei na ginei translate), true = whitelist (prepei na ginei translate)
+
+    public TranslationCheckItem(String key, String name, boolean required) {
+        this.key = key;
+        this.name = name != null ? name : key;
+        this.required = required;
+    }
+
+    public TranslationCheckItem(String key, boolean required) {
+        this(key, key, required);
+    }
+
+    public String getKey() {
+        return key;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public boolean isRequired() {
+        return required;
+    }
+}
+
+```
+
+`src/main/java/org/kotsasmin/keyValueChecker/detector/CheckData.java`:
+
+```java
+package org.kotsasmin.keyValueChecker.detector;
+
+import com.github.retrooper.packetevents.util.Vector3i;
+import org.bukkit.scheduler.BukkitTask;
+import org.kotsasmin.keyValueChecker.data.TranslationCheckItem;
+
+import java.util.List;
+
+// data gia to trexwn check tou paikti
+public class CheckData {
+    private final int startIndex;
+    private final List<TranslationCheckItem> currentKeys;
+    private final Vector3i signLoc;
+    private final BukkitTask timeoutTask;
+
+    public CheckData(int startIndex, List<TranslationCheckItem> currentKeys, Vector3i signLoc, BukkitTask timeoutTask) {
+        this.startIndex = startIndex;
+        this.currentKeys = currentKeys;
+        this.signLoc = signLoc;
+        this.timeoutTask = timeoutTask;
+    }
+
+    public int getStartIndex() {
+        return startIndex;
+    }
+
+    public List<TranslationCheckItem> getCurrentKeys() {
+        return currentKeys;
+    }
+
+    public Vector3i getSignLoc() {
+        return signLoc;
+    }
+
+    public BukkitTask getTimeoutTask() {
+        return timeoutTask;
+    }
+}
+
+```
+
+`src/main/java/org/kotsasmin/keyValueChecker/detector/CheckManager.java`:
+
+```java
+package org.kotsasmin.keyValueChecker.detector;
+
+import com.github.retrooper.packetevents.PacketEvents;
+import com.github.retrooper.packetevents.protocol.nbt.NBTByte;
+import com.github.retrooper.packetevents.protocol.nbt.NBTCompound;
+import com.github.retrooper.packetevents.protocol.nbt.NBTList;
+import com.github.retrooper.packetevents.protocol.nbt.NBTString;
+import com.github.retrooper.packetevents.protocol.nbt.NBTType;
+import com.github.retrooper.packetevents.protocol.world.blockentity.BlockEntityTypes;
+import com.github.retrooper.packetevents.protocol.world.states.WrappedBlockState;
+import com.github.retrooper.packetevents.util.Vector3i;
+import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerBlockChange;
+import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerBlockEntityData;
+import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerCloseWindow;
+import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerOpenSignEditor;
+import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerOpenWindow;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.entity.Player;
+import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitTask;
+import org.kotsasmin.keyValueChecker.config.ConfigManager;
+import org.kotsasmin.keyValueChecker.data.DataManager;
+import org.kotsasmin.keyValueChecker.data.PlayerRecord;
+import org.kotsasmin.keyValueChecker.data.TranslationCheckItem;
+import org.kotsasmin.keyValueChecker.webhook.DiscordWebhookNotifier;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+
+public class CheckManager {
+    private final JavaPlugin plugin;
+    private final ConfigManager configManager;
+    private final DataManager dataManager;
+    private final DiscordWebhookNotifier webhookNotifier;
+
+    private final Map<UUID, CheckData> checkingPlayers = new ConcurrentHashMap<>();
+
+    public CheckManager(JavaPlugin plugin, ConfigManager configManager, DataManager dataManager, DiscordWebhookNotifier webhookNotifier) {
+        this.plugin = plugin;
+        this.configManager = configManager;
+        this.dataManager = dataManager;
+        this.webhookNotifier = webhookNotifier;
+    }
+
+    public void handlePlayerJoin(Player player) {
+        // an o paiktis einai whitelisted, skip
+        if (dataManager.isWhitelisted(player.getName())) {
+            plugin.getLogger().info("[KVC] Skipped check for whitelisted player: " + player.getName());
+            return;
+        }
+
+        // skip gia bedrock / floodgate giati den exoun ta java translations
+        if (isBedrockPlayer(player.getUniqueId())) {
+            plugin.getLogger().info("[KVC] Skipped check for Bedrock player: " + player.getName());
+            return;
+        }
+
+        // perimenoume ligo delay prin ksekinisei to check
+        Bukkit.getScheduler().runTaskLater(plugin, () -> {
+            if (player.isOnline() && !configManager.getCheckQueue().isEmpty()) {
+                plugin.getLogger().info("[KVC] Starting check for player: " + player.getName());
+                runDetectionBatch(player, 0);
+            }
+        }, configManager.getSendDelayTicks());
+    }
+
+    public void handlePlayerQuit(Player player) {
+        CheckData check = checkingPlayers.remove(player.getUniqueId());
+        if (check != null && check.getTimeoutTask() != null) {
+            check.getTimeoutTask().cancel();
+        }
+    }
+
+    public void cancelAllChecks() {
+        for (CheckData check : checkingPlayers.values()) {
+            if (check.getTimeoutTask() != null) {
+                check.getTimeoutTask().cancel();
+            }
+        }
+        checkingPlayers.clear();
+    }
+
+    public CheckData getActiveCheck(UUID uuid) {
+        return checkingPlayers.get(uuid);
+    }
+
+    public CheckData removeActiveCheck(UUID uuid) {
+        return checkingPlayers.remove(uuid);
+    }
+
+    public void runDetectionBatch(Player player, int startIndex) {
+        List<TranslationCheckItem> checkQueue = configManager.getCheckQueue();
+        if (startIndex >= checkQueue.size()) {
+            return; // Finished checking all keys
+        }
+
+        // Place sign above head to guarantee loaded chunk
+        Location loc = player.getLocation().clone();
+        loc.setY(0);
+
+        Vector3i v3i = new Vector3i(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ());
+
+        // 1 - Send Fake Sign Block Change
+        int signStateId = WrappedBlockState.getByString(Material.OAK_SIGN.createBlockData().getAsString()).getGlobalId();
+        WrapperPlayServerBlockChange blockChange = new WrapperPlayServerBlockChange(v3i, signStateId);
+        PacketEvents.getAPI().getPlayerManager().sendPacket(player, blockChange);
+
+        // 2 - Build NBT Data for Sign
+        List<NBTCompound> messagesList = new ArrayList<>();
+        List<TranslationCheckItem> currentKeys = new ArrayList<>();
+        for (int i = 0; i < 4; i++) {
+            if (startIndex + i < checkQueue.size()) {
+                TranslationCheckItem item = checkQueue.get(startIndex + i);
+                currentKeys.add(item);
+
+                NBTCompound translationMessage = new NBTCompound();
+                translationMessage.setTag("translate", new NBTString(item.getKey()));
+                translationMessage.setTag("fallback", new NBTString("fallb"));
+                messagesList.add(translationMessage);
+            } else {
+                currentKeys.add(null);
+
+                NBTCompound emptyMessage = new NBTCompound();
+                emptyMessage.setTag("text", new NBTString(""));
+                messagesList.add(emptyMessage);
+            }
+        }
+
+        NBTList<NBTCompound> messages = new NBTList<>(NBTType.COMPOUND, messagesList);
+        NBTCompound text = new NBTCompound();
+        text.setTag("messages", messages);
+        text.setTag("color", new NBTString("black"));
+        text.setTag("has_glowing_text", new NBTByte((byte) 0));
+
+        NBTCompound nbt = new NBTCompound();
+        nbt.setTag("id", new NBTString("minecraft:sign"));
+        nbt.setTag("front_text", text);
+        nbt.setTag("back_text", text);
+        nbt.setTag("is_waxed", new NBTByte((byte) 0));
+
+        // 3 - Send Block Entity Data (NBT) to apply translation components
+        WrapperPlayServerBlockEntityData blockEntityData = new WrapperPlayServerBlockEntityData(v3i, BlockEntityTypes.SIGN, nbt);
+        PacketEvents.getAPI().getPlayerManager().sendPacket(player, blockEntityData);
+
+        // 4 - Send Open Sign Editor
+        WrapperPlayServerOpenSignEditor openSign = new WrapperPlayServerOpenSignEditor(v3i, true);
+        PacketEvents.getAPI().getPlayerManager().sendPacket(player, openSign);
+
+        // 5 - Send a fake container window to force the client to replace the sign screen, triggering UPDATE_SIGN silently
+        WrapperPlayServerOpenWindow openWindow = new WrapperPlayServerOpenWindow(1, 0, Component.empty());
+        PacketEvents.getAPI().getPlayerManager().sendPacket(player, openWindow);
+
+        // 6 - Instantly close the fake window
+        WrapperPlayServerCloseWindow closeWindow = new WrapperPlayServerCloseWindow(1);
+        PacketEvents.getAPI().getPlayerManager().sendPacket(player, closeWindow);
+
+        // 7 - Instantly restore the block
+        clearFakeBlock(player, v3i);
+
+        // Safety timeout
+        BukkitTask timeoutTask = Bukkit.getScheduler().runTaskLater(plugin, () -> {
+            CheckData staleData = checkingPlayers.remove(player.getUniqueId());
+            if (staleData != null) {
+                // an den apantisei se 3 deuterolepta, mallon to kovei to cheat
+                plugin.getLogger().warning("[KVC] FLAG: " + player.getName() + " blocked sign update. Possible cheat.");
+
+                if (configManager.isKickOnBlockedCheck()) {
+                    enforceAction(player, "Blocked check", false);
+                } else {
+                    PlayerRecord record = dataManager.getOrCreateRecord(player.getUniqueId(), player.getName(), "Blocked check");
+                    record.addDetectedMod("Blocked check");
+                    record.setLastIncidentTime(System.currentTimeMillis());
+                    record.setLastAction("Blocked check");
+                    dataManager.saveData(true);
+
+                    if (configManager.isDiscordSendOnBlockedCheck()) {
+                        webhookNotifier.sendWebhook(player, "Blocked check", "Blocked sign update");
+                    }
+
+                    // Notify admins without kicking
+                    String alertFormat = configManager.getBlockedCheckAdminAlertFormat();
+                    if (alertFormat != null && !alertFormat.isEmpty()) {
+                        String formattedAlert = alertFormat.replace("%player%", player.getName()).replace("%mod%", "Blocked check");
+                        Component adminAlert = LegacyComponentSerializer.legacyAmpersand().deserialize(formattedAlert);
+                        for (Player p : Bukkit.getOnlinePlayers()) {
+                            if (p.hasPermission("keyvaluechecker.notify")) {
+                                p.sendMessage(adminAlert);
+                            }
+                        }
+                    }
+
+                    // Continue to next batch
+                    Bukkit.getScheduler().runTask(plugin, () -> {
+                        if (player.isOnline()) {
+                            runDetectionBatch(player, staleData.getStartIndex() + 4);
+                        }
+                    });
+                }
+            }
+        }, 60L);
+
+        checkingPlayers.put(player.getUniqueId(), new CheckData(startIndex, currentKeys, v3i, timeoutTask));
+    }
+
+    private void clearFakeBlock(Player player, Vector3i loc) {
+        // epanafora tou kanonikou block sto client
+        if (player.isOnline()) {
+            Location bukkitLoc = new Location(player.getWorld(), loc.getX(), loc.getY(), loc.getZ());
+            int globalId = WrappedBlockState.getByString(player.getWorld().getBlockAt(bukkitLoc).getBlockData().getAsString()).getGlobalId();
+            WrapperPlayServerBlockChange restore = new WrapperPlayServerBlockChange(loc, globalId);
+            PacketEvents.getAPI().getPlayerManager().sendPacket(player, restore);
+        }
+    }
+
+    public void enforceAction(Player player, String modName, boolean isMissingRequired) {
+        Bukkit.getScheduler().runTaskLater(plugin, () -> {
+            if (!player.isOnline()) return;
+
+            String actionLabel = isMissingRequired ? "Missing Required Mod" : "Kicked";
+            PlayerRecord record = dataManager.getOrCreateRecord(player.getUniqueId(), player.getName(), actionLabel);
+            record.setLastAction(actionLabel);
+            record.setLastIncidentTime(System.currentTimeMillis());
+            dataManager.saveData(true);
+
+            String webhookAction = isMissingRequired ? "Kicked (Missing Required Mod)" : "Kicked";
+            if (!"Blocked check".equals(modName) || configManager.isDiscordSendOnBlockedCheck()) {
+                webhookNotifier.sendWebhook(player, webhookAction, String.join(", ", record.getDetectedMods()));
+            }
+
+            String actionType = configManager.getActionType(isMissingRequired);
+            List<String> content = configManager.getActionContent(isMissingRequired);
+
+            if (content == null || content.isEmpty()) return;
+
+            Component finalMessage = Component.empty();
+            for (String line : content) {
+                String formatted = line.replace("%mod%", modName).replace("%player%", player.getName());
+                if (!finalMessage.equals(Component.empty())) {
+                    finalMessage = finalMessage.append(Component.newline());
+                }
+                finalMessage = finalMessage.append(LegacyComponentSerializer.legacyAmpersand().deserialize(formatted));
+            }
+
+            if ("message".equalsIgnoreCase(actionType)) {
+                player.sendMessage(finalMessage);
+            } else if ("command".equalsIgnoreCase(actionType)) {
+                for (String line : content) {
+                    Bukkit.dispatchCommand(Bukkit.getConsoleSender(), line.replace("%mod%", modName).replace("%player%", player.getName()));
+                }
+            } else {
+                player.kick(finalMessage);
+            }
+
+            // Notify admins in-game
+            String alertFormat = configManager.getAdminAlertFormat(isMissingRequired);
+            if (alertFormat != null && !alertFormat.isEmpty()) {
+                String formattedAlert = alertFormat.replace("%player%", player.getName()).replace("%mod%", modName);
+                Component adminAlert = LegacyComponentSerializer.legacyAmpersand().deserialize(formattedAlert);
+                for (Player p : Bukkit.getOnlinePlayers()) {
+                    if (p.hasPermission("keyvaluechecker.notify")) {
+                        p.sendMessage(adminAlert);
+                    }
+                }
+            }
+        }, 5L);
+    }
+
+    private boolean isBedrockPlayer(UUID uuid) {
+        // elegxos me reflection gia floodgate/geyser xwris hard dependency
+        try {
+            Class<?> floodgateApiClass = Class.forName("org.geysermc.floodgate.api.FloodgateApi");
+            Object api = floodgateApiClass.getMethod("getInstance").invoke(null);
+            if ((boolean) floodgateApiClass.getMethod("isFloodgatePlayer", UUID.class).invoke(api, uuid)) {
+                return true;
+            }
+        } catch (Exception ignored) {}
+
+        try {
+            Class<?> geyserApiClass = Class.forName("org.geysermc.geyser.api.GeyserApi");
+            Object api = geyserApiClass.getMethod("api").invoke(null);
+            if ((boolean) geyserApiClass.getMethod("isBedrockPlayer", UUID.class).invoke(api, uuid)) {
+                return true;
+            }
+        } catch (Exception ignored) {}
+
+        // Fallback check for default Floodgate UUID format
+        return uuid.toString().startsWith("00000000-0000-0000-");
+    }
+}
+
+```
+
+`src/main/java/org/kotsasmin/keyValueChecker/detector/SignPacketListener.java`:
+
+```java
+package org.kotsasmin.keyValueChecker.detector;
+
+import com.github.retrooper.packetevents.event.PacketListenerAbstract;
+import com.github.retrooper.packetevents.event.PacketReceiveEvent;
+import com.github.retrooper.packetevents.protocol.packettype.PacketType;
+import com.github.retrooper.packetevents.wrapper.play.client.WrapperPlayClientUpdateSign;
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
+import org.bukkit.plugin.java.JavaPlugin;
+import org.kotsasmin.keyValueChecker.data.DataManager;
+import org.kotsasmin.keyValueChecker.data.PlayerRecord;
+import org.kotsasmin.keyValueChecker.data.TranslationCheckItem;
+
+import java.util.List;
+
+public class SignPacketListener extends PacketListenerAbstract {
+    private final JavaPlugin plugin;
+    private final CheckManager checkManager;
+    private final DataManager dataManager;
+
+    public SignPacketListener(JavaPlugin plugin, CheckManager checkManager, DataManager dataManager) {
+        this.plugin = plugin;
+        this.checkManager = checkManager;
+        this.dataManager = dataManager;
+    }
+
+    @Override
+    public void onPacketReceive(PacketReceiveEvent event) {
+        if (event.getPacketType() == PacketType.Play.Client.UPDATE_SIGN) {
+            Player player = (Player) event.getPlayer();
+            CheckData check = checkManager.getActiveCheck(player.getUniqueId());
+
+            if (check == null) return;
+
+            WrapperPlayClientUpdateSign updateSign = new WrapperPlayClientUpdateSign(event);
+            if (updateSign.getBlockPosition().equals(check.getSignLoc())) {
+                // Cancel the vanilla server processing to bypass "non-editable" warnings
+                event.setCancelled(true);
+                checkManager.removeActiveCheck(player.getUniqueId());
+                if (check.getTimeoutTask() != null) {
+                    check.getTimeoutTask().cancel();
+                }
+
+                boolean flag = false;
+                String detectedMod = null;
+                boolean isMissingRequired = false;
+                String[] lines = updateSign.getTextLines();
+                List<TranslationCheckItem> currentKeys = check.getCurrentKeys();
+
+                for (int i = 0; i < currentKeys.size(); i++) {
+                    TranslationCheckItem item = currentKeys.get(i);
+                    if (item == null || item.getKey() == null) continue;
+
+                    String clientText = (i < lines.length && lines[i] != null) ? lines[i] : "";
+
+                    if (!item.isRequired()) {
+                        // Blacklist check: if client translated it, they have a disallowed mod
+                        // an to metefrazei to client simainei exei to cheat/mod
+                        if (!clientText.isEmpty() && !clientText.equals("fallb") && !clientText.equals(item.getKey())) {
+                            flag = true;
+                            detectedMod = item.getName();
+                            isMissingRequired = false;
+                            PlayerRecord record = dataManager.getOrCreateRecord(player.getUniqueId(), player.getName(), "detected");
+                            record.addDetectedMod(item.getName());
+                            record.setLastIncidentTime(System.currentTimeMillis());
+                            plugin.getLogger().warning("[KVC] FLAG (Blacklist): " + player.getName() + " is using " + item.getName() + " (" + item.getKey() + ")");
+                            break; // Only need to detect one per batch to flag
+                        }
+                    } else {
+                        // Whitelist check: if client failed to translate it, they are MISSING a required mod
+                        // an den to metefrazei tote leipei to mod apo to client
+                        if (clientText.isEmpty() || clientText.equals("fallb") || clientText.equals(item.getKey())) {
+                            flag = true;
+                            detectedMod = item.getName();
+                            isMissingRequired = true;
+                            PlayerRecord record = dataManager.getOrCreateRecord(player.getUniqueId(), player.getName(), "missing required");
+                            String missingLabel = "Missing: " + item.getName();
+                            record.addDetectedMod(missingLabel);
+                            record.setLastIncidentTime(System.currentTimeMillis());
+                            plugin.getLogger().warning("[KVC] FLAG (Whitelist/Missing): " + player.getName() + " is missing required mod: " + item.getName() + " (" + item.getKey() + ")");
+                            break;
+                        }
+                    }
+                }
+
+                if (flag) {
+                    checkManager.enforceAction(player, detectedMod, isMissingRequired);
+                } else {
+                    // sinexizoume me to epomeno batch twn 4
+                    Bukkit.getScheduler().runTask(plugin, () -> {
+                        if (player.isOnline()) {
+                            checkManager.runDetectionBatch(player, check.getStartIndex() + 4);
+                        }
+                    });
+                }
+            }
+        }
+    }
+}
+
+```
+
+`src/main/java/org/kotsasmin/keyValueChecker/webhook/DiscordWebhookNotifier.java`:
+
+```java
+package org.kotsasmin.keyValueChecker.webhook;
+
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
+import org.kotsasmin.keyValueChecker.config.ConfigManager;
+
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.time.Duration;
+
+public class DiscordWebhookNotifier {
+    private final Plugin plugin;
+    private final ConfigManager configManager;
+    private final HttpClient httpClient;
+
+    public DiscordWebhookNotifier(Plugin plugin, ConfigManager configManager) {
+        this.plugin = plugin;
+        this.configManager = configManager;
+        this.httpClient = HttpClient.newBuilder()
+                .connectTimeout(Duration.ofSeconds(5))
+                .build();
+    }
+
+    // apostoli discord webhook me gson gia na apofygoume manual string formatting
+    public void sendWebhook(Player player, String action, String modsStr) {
+        if (!configManager.isDiscordWebhookEnabled()) {
+            return;
+        }
+
+        String url = configManager.getDiscordWebhookUrl();
+        if (url == null || url.trim().isEmpty()) {
+            return;
+        }
+
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+            try {
+                String username = configManager.getDiscordWebhookUsername();
+                String avatarUrl = configManager.getDiscordWebhookAvatarUrl().replace("%player%", player.getName());
+                int color = configManager.getDiscordWebhookColor();
+                String title = configManager.getDiscordWebhookTitle();
+                String desc = configManager.getDiscordWebhookDescription()
+                        .replace("%player%", player.getName())
+                        .replace("%action%", action)
+                        .replace("%mods%", modsStr);
+                String footer = configManager.getDiscordWebhookFooter();
+
+                // ftiaksimo tou json payload
+                JsonObject payload = new JsonObject();
+                payload.addProperty("username", username);
+                payload.addProperty("avatar_url", avatarUrl);
+
+                JsonArray embeds = new JsonArray();
+                JsonObject embed = new JsonObject();
+                embed.addProperty("title", title);
+                embed.addProperty("description", desc);
+                embed.addProperty("color", color);
+
+                if (footer != null && !footer.isEmpty()) {
+                    JsonObject footerObj = new JsonObject();
+                    footerObj.addProperty("text", footer);
+                    embed.add("footer", footerObj);
+                }
+
+                embeds.add(embed);
+                payload.add("embeds", embeds);
+
+                HttpRequest request = HttpRequest.newBuilder()
+                        .uri(URI.create(url))
+                        .header("Content-Type", "application/json")
+                        .POST(HttpRequest.BodyPublishers.ofString(payload.toString()))
+                        .build();
+
+                httpClient.send(request, HttpResponse.BodyHandlers.discarding());
+            } catch (Exception e) {
+                plugin.getLogger().warning("[KVC] Failed to send Discord webhook: " + e.getMessage());
+            }
+        });
+    }
+}
+
+```
+
+`src/main/resources/config.yml`:
+
+```yml
+config-version: 2
+# Delay in ticks before starting the check (2 ticks = runs while player is on "Loading terrain" screen)
+initial-check-delay-ticks: 2
+kick-on-blocked-check: false
+
+# Groups are only for cosmetics and mass disable feature, doesn't affect it otherwise.
+blacklist:
+  cheat-clients:
+    enabled: true
+    keys:
+      - key: "key.meteor-client.open-gui"
+        name: "Meteor Client"
+      - key: "liquidbounce.command.binds.description"
+        name: "LiquidBounce"
+      - key: "key.lumina.open_click_gui"
+        name: "Lumina Client"
+      - key: "bleachhack.module.killaura"
+        name: "BleachHack"
+      - key: "emc.module.killaura.name"
+        name: "EMC Client"
+      - key: "coffee.module.killaura.name"
+        name: "Coffee Client"
+      - key: "key.zergatul.cheatutils.reserved0"
+        name: "CheatUtils"
+      - key: "opsec.config.title"
+        name: "OpSec Client"
+  combat-cheats:
+    enabled: true
+    keys:
+      - key: "key.autototem.toggle"
+        name: "AutoTotem"
+      - key: "key.smartoffhand.totem_swap"
+        name: "SmartOffhand"
+      - key: "key.killaura"
+        name: "KillAura"
+      - key: "key.autoswitch.toggle"
+        name: "AutoSwitch"
+      - key: "autoclicker-fabric.hud.holding"
+        name: "Fabric AutoClicker"
+      - key: "key.auto-clicker_.toggle"
+        name: "AutoClicker"
+  movement-and-render-cheats:
+    enabled: true
+    keys:
+      - key: "key.invmove.category.general"
+        name: "InvMove"
+      - key: "key.healthindicators.renderingEnabled"
+        name: "Health Indicators"
+      - key: "key.freecam.toggle"
+        name: "Freecam"
+      - key: "text.autoconfig.chestesp.option.enable"
+        name: "Chest ESP"
+      - key: "key.category.customfov.general"
+        name: "Custom FOV"
+      - key: "key.tweakeroo.freecam"
+        name: "Tweakeroo (Freecam)"
+      - key: "xray.config.toggle"
+        name: "X-Ray Mod"
+  minimaps:
+    enabled: true
+    keys:
+      - key: "gui.xaero_minimap"
+        name: "Xaero's Minimap"
+      - key: "gui.xaero_open_map"
+        name: "Xaero's World Map"
+      - key: "options.minimap.radar"
+        name: "Voxel Minimap Radar"
+  seed-crackers:
+    enabled: true
+    keys:
+      - key: "cracker.enabled"
+        name: "SeedCrackerX"
+      - key: "generator.seedfindermod.seed_finder_world"
+        name: "Seed Finder Mod"
+  automation-and-macros:
+    enabled: true
+    keys:
+      - key: "net.clayborn.accurateblockplacement.togglevanillaplacement"
+        name: "Accurate Block Placement"
+      - key: "easyplacefix.config.name.enableFix"
+        name: "Easy Place Fix"
+      - key: "text.globalmacros.title"
+        name: "Global Macros"
+      - key: "jsmacrosce.close"
+        name: "JsMacros"
+      - key: "key.autofish.open_gui"
+        name: "AutoFish"
+  inventory-and-qol:
+    enabled: true
+    keys:
+      - key: "key.anything"
+        name: "Unauthorized Keybind"
+      - key: "key.soundboard.open_config"
+        name: "Soundboard Mod"
+      - key: "itemscroller.config.generic.name.carpetCtrlQCraftingEnabledOnServer"
+        name: "ItemScroller"
+      - key: "option.moremousetweaks.matching"
+        name: "More Mouse Tweaks"
+      - key: "oinventoryprofiles.common.gui.config.reset"
+        name: "Inventory Profiles"
+      - key: "key.wdl.startStop"
+        name: "World Downloader (WDL)"
+
+# Any groups put here and enabled will be checked from the client. If the player fails to translate it, they are missing the mod and will be kicked.
+whitelist:
+  example-required-mod:
+    enabled: false
+    keys:
+      - key: "example.required.mod.key"
+        name: "Example Required Mod"
+  voice-chat:
+    enabled: false
+    keys:
+      - key: "key.category.voicechat.voicechat"
+        name: "Simple Voice Chat"
+
+action:
+  type: "kick"
+  content:
+    - "&cYou have been kicked for using disallowed modifications! (%mod%)"
+
+whitelist-action:
+  type: "kick"
+  content:
+    - "&cYou have been kicked for missing a required client modification: &e%mod%"
+
+admin-alert: "&8[&cKVC&8] &e%player% &7tried to join with disallowed modifications."
+
+discord-webhook:
+  enabled: false
+  send-on-blocked-check: false
+  url: "https://discord.com/api/hahahahahahahahahahaha"
+  username: "KeyValueChecker"
+  avatar-url: "https://minotar.net/helm/%player%/256.png"
+  embed:
+    color: 16711680 # Red
+    title: "Cheater Detected!"
+    description: "**Player:** %player%\n**Action:** %action%\n**Mods:** %mods%"
+    footer: "KeyValueChecker Security System"
+
+```
+
+`src/main/resources/plugin.yml`:
+
+```yml
+name: key-value-checker
+version: '${version}'
+
+main: org.kotsasmin.keyValueChecker.KeyValueChecker
+api-version: '1.21'
+load: POSTWORLD
+softdepend: [packetevents]
+
+commands:
+  kvc-reload:
+    description: Reloads the KeyValueChecker config
+    permission: keyvaluechecker.reload
+  kvc-list:
+    description: Lists all players currently detected with mods
+    permission: keyvaluechecker.list
+  kvc-whitelist:
+    description: Manages the player whitelist for bypassing checks
+    permission: keyvaluechecker.whitelist
+
+permissions:
+  keyvaluechecker.reload:
+    description: Allows reloading the KeyValueChecker configuration.
+    default: op
+  keyvaluechecker.list:
+    description: Allows viewing the detected modifications history.
+    default: op
+  keyvaluechecker.notify:
+    description: Allows admins to see in-game alerts when a player is detected with a disallowed mod.
+    default: op
+  keyvaluechecker.whitelist:
+    description: Allows managing the player whitelist for bypassing checks.
+    default: op
+
+
+```
