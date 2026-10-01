@@ -1918,7 +1918,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ida-unity-pdb-downloader](entities/ida-unity-pdb-downloader.md) — IDA Pro plugin: download PDB symbols from Unity symbol server (C++; automates matching debug-symbol retrieval; game/Unity RE; cheat / IDA Plugins; SamuelTulach)
 - [ida-vtable-explorer](entities/ida-vtable-explorer.md) — IDA Pro 9.x C++ plugin: GCC/MSVC vtable detection, class extraction, virtual-function index/offset annotation, RTTI inheritance analysis, override comparison, hierarchy visualization (K4ryuu; cheat / IDA Plugins)
 - [ida-vtable-tools](entities/ida-vtable-tools.md) — IDA 9.X vtable ops: `.hpp` skeleton / rename / `this` type / slot index (Python; IDA Plugins)
-- [ida-vmx128-helper](entities/ida-vmx128-helper.md) — IDA Pro Python plugin correcting VMX128 A/B/C/D register operands on PowerPC Xenon/Xbox 360 XEX disassembly (Goatman13; Cheat / RE Tools)
+- [ida-vmx128-helper](entities/ida-vmx128-helper.md) — IDA Pro Python plugin; processor-module hook correcting VMX128 A/B/C/D register operands on PowerPC Xenon/Xbox 360 XEX disassembly (`vaddfp128`, `vperm128`, `vsldoi128`; Goatman13; Cheat / RE Tools)
 - [ida-vmware-windows-gdb](entities/ida-vmware-windows-gdb.md) — IDA Pro + VMware GDB stub Windows kernel debugging guide (live breakpoints/memory/step; cheat / guide)
 - [ida-wakatime-py](entities/ida-wakatime-py.md) — IDA Pro WakaTime plugin (Python; background heartbeats; tracks analyzed binaries and RE session time; es3n1n; cheat / IDA Plugins)
 - [ida-wpp-remover](entities/ida-wpp-remover.md) — IDA Pro plugin: Hex-Rays microcode pass strips WPP_SF* trace-call noise from Windows PE pseudocode (L4ys; Python; cheat / IDA Plugins)

@@ -1611,6 +1611,7 @@ sources:
   - wiki/sources/descriptions/0x5abe__vifterpreter.md
   - wiki/sources/descriptions/Goatman13__ps2_ida_vu_micro.md
   - wiki/sources/descriptions/Goatman13__spu2c.md
+  - wiki/sources/descriptions/Goatman13__ida_vmx128_helper.md
   - wiki/sources/descriptions/Benardelys__H-AC.md
   - wiki/sources/descriptions/getawife__nofly.md
   - wiki/sources/descriptions/Jdgshsvejevhevejeve__NOVA-AntiCheat.md
@@ -2908,6 +2909,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Sega Saturn disc/SH-2 static recompilation to native PC via [[saturnkit]] (vs-sr-dev; Python disc/IP.BIN parse + SH-2 decode/function matching + SH-2→C++ static recomp; C++20 VDP1/2/SCU/SMPC/CD/SCSP runtime with Musashi 68000; SDL3/OpenGL + gamepad; submodule per-title port layout; Cheat / RE Tools) for Saturn binary RE and preservation without full-system HLE. (source: wiki/sources/descriptions/vs-sr-dev__saturnkit.md)
 - Xbox 360 emulator [[xbox360-emu]] (C/C++; kernel-level work, modding, memory analysis) sits in the console `Xbox` lane for emulator developers and Xbox researchers. (source: wiki/sources/descriptions/exjam__xbox360-emu.md)
 - Xbox 360 XEX static analysis in IDA Pro via [[idaxex]] (C++ loader; XEX format parse, PE extraction, import/export + kernel symbol naming; IDA 9) sits in the console `Xbox` lane for reverse engineers and console security researchers. (source: wiki/sources/descriptions/emoose__idaxex.md)
+- Xbox 360 VMX128 operand decode correction in IDA Pro via [[ida-vmx128-helper]] (Goatman13; Python IDAPython; processor-module hook; accurate A/B/C/D register fields on `vaddfp128`, `vperm128`, `vsldoi128`; auto-loads for PPC/XEX targets; Cheat / RE Tools) complements [[idaxex]] XEX loading when analyzing VMX128-heavy Xenon game code beside static-recomp projects such as [[mcla-pc]]. (source: wiki/sources/descriptions/Goatman13__ida_vmx128_helper.md)
 - Xbox 360 modded-console backup install and XEX/package patching via [[x360gamehack2025]] (IcyModz420; C# WinForms/.NET Framework; RGH/JTAG/Bad Update/Bad Avatar/devkit + OG Xbox ISO/XBE; XEX encrypt/decrypt/compress, Title ID/Media ID changes, ISO→GOD/STFS, FTP/USB deploy; without Xbox Neighborhood) sits in the console `Xbox` lane for homebrew/modding and backup-deployment workflows. (source: wiki/sources/descriptions/IcyModz420__X360GameHack2025.md)
 - Xbox 360 live XBDM trainer/debug via [[toastylink]] (WoahToasty; from-scratch C++17; RGH/JTAG; pointer chains, CE-style scan/freeze, PPC patch assembler, JSON cheat tables, LAN discovery; Cheat Debugging) sits beside [[x360gamehack2025]] for network memory RE on modded consoles. (source: wiki/sources/descriptions/WoahToasty__ToastyLink.md)
 - Xbox 360 fuse/bootloader/NAND dump for LLE emulator prep via [[xenondumper]] (Byrom90; C/C++; modified retail/devkit; fuses, bootloader, NAND artifacts; console RE, preservation, emulator preparation research) sits in the console `Xbox` lane beside [[x360gamehack2025]] and [[toastylink]] for modded-console artifact extraction before PC emulation. (source: wiki/sources/descriptions/Byrom90__XenonDumper.md)
