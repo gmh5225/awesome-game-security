@@ -11,11 +11,16 @@ confidence: medium
 
 # KeyValueChecker
 
-**KeyValueChecker** (Kotsasmin/key-value-checker) is a lightweight **Paper/Spigot 1.21+** Minecraft server anti-cheat plugin that fingerprints **client-side cheat mods invisible to ordinary server telemetry**. It exploits Minecraft **translation components** by injecting fake signs bearing known mod language keys through **PacketEvents**, then comparing returned **UpdateSign** packet text to prove whether a client resolved those keys. Configurable blacklist/whitelist groups target popular clients such as **Meteor Client**, **Freecam**, and **AutoTotem**; flagged players can be kicked with optional **Discord webhook** alerts. (source: wiki/sources/descriptions/Kotsasmin__key-value-checker.md)
+**KeyValueChecker** (Kotsasmin/key-value-checker) is a lightweight **Java** **Paper/Spigot 1.21+** Minecraft server anti-cheat plugin that fingerprints **client-side cheat mods invisible to ordinary server telemetry**. It exploits Minecraft **translation components** by injecting fake signs bearing known mod language keys through **PacketEvents**, then comparing returned **UpdateSign** packet text to prove whether a client resolved those keys during **player join**. Configurable blacklist/whitelist groups target popular clients such as **Meteor Client**, **Freecam**, and **AutoTotem**; flagged players can be kicked with optional **Discord webhook** alerts. (source: wiki/sources/descriptions/Kotsasmin__key-value-checker.md)
 
 ## Detection mechanism
 
 **Translation-key probe** — server sends sign payloads referencing mod-localization keys; honest vanilla clients leave probe text unchanged while cheat clients that ship those translation tables resolve recognizable strings, yielding packet-level evidence without client-side instrumentation.
+
+## Configuration
+
+- **Blacklist/whitelist groups** — per-mod translation-key sets for allowed or disallowed client modifications
+- **Enforcement** — kick on positive match; optional Discord webhook alerts for staff review
 
 ## Positioning
 

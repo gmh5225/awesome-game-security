@@ -2100,7 +2100,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [KasperskyHook](entities/kaspersky-hook.md) — Kaspersky `klhk.sys` hypervisor syscall hook (`IA32_LSTAR` dispatch redirect + custom driver; gmh5225)
 - [KawaiiPhysics](entities/kawaii-physics.md) — UE4/UE5 simple fake physics (animation / secondary motion; Game Develop / Unreal)
 - [KCP](entities/kcp.md) — reliable-UDP ARQ (C; low-latency multiplayer; Game Network)
-- [key-value-checker](entities/key-value-checker.md) — Paper/Spigot 1.21+ MC server plugin; translation-key probes via PacketEvents detect Meteor/Freecam/AutoTotem client mods (Kotsasmin; Anti Cheat)
+- [key-value-checker](entities/key-value-checker.md) — Paper/Spigot 1.21+ Java MC plugin; join-time PacketEvents translation-key sign probes detect Meteor/Freecam/AutoTotem client mods; blacklist/whitelist groups + optional Discord kicks (Kotsasmin; Anti Cheat)
 - [kcp-cpp](entities/kcp-cpp.md) — lightweight C++17 KCP wrapper (client/server; callback-driven; configurable low-latency transport; game networking prototypes; README [KCP]; Unit-X)
 - [kajiya](entities/kajiya.md) — EmbarkStudios; experimental real-time global illumination renderer (Rust + Vulkan + HLSL hybrid raster/compute/RT; dynamic GI without probes, temporal reconstruction, RT shadows/reflections, reference path-tracing validation; advanced rendering research; Renderer)
 - [kakhack](entities/kakhack.md) — CS:GO internal cheat (reversed SDK, multi-hook, ImGui+FreeType menu, JSON config, visuals; x86 VS2022 DLL; cazzwastaken [Internal])
