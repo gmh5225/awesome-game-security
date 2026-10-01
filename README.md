@@ -834,6 +834,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/daveymcq/SimpleMemoryEditor [Portable Windows game memory scanner/editor in C with process attach, value scan, and freeze UI]
 - https://github.com/HeathHowren/Pointer-Lab [Windows x64 user-mode memory scanner and debugger with pointer chains, disassembly, patching, and ImGui UI]
 - https://github.com/digital-dev/Apprentice [Open-source Windows game trainer and memory editor (Electron + C++ N-API) with value freezes, code patches, Mono/IL2CPP support, and .CT import/export]
+- https://github.com/JeanExtreme002/PyMemoryEditor [Pure-Python (ctypes) memory scanner/editor for Windows, Linux and macOS with value scans, pointer chains, a Qt UI and an MCP server]
 - https://github.com/WoahToasty/ToastyLink [From-scratch C++17 XBDM trainer/debug toolkit for Xbox 360 (RGH/JTAG): pointer chains, value scanning, freeze engine, PPC patches, and shareable JSON cheat tables]
 - https://github.com/TASEmulators/BizHawk [Multi-system C# emulator with memory inspection, rerecording, and per-core debugging tools for retro game analysis]
 - https://github.com/SinaKarvandi/Hypervisor-From-Scratch [Hypervisor]
