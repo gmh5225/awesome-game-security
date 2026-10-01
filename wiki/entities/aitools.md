@@ -19,7 +19,7 @@ confidence: medium
 - **Skills framework** with on-demand expert prompts for structure dissection, pointer scanning, Mono/IL2CPP runtime scripting, and Unreal Engine object traversal
 - **Bundled RE skills** covering memory/pointer scan, Unreal, and auto-assembler workflows (source: wiki/sources/README-categories.md)
 
-Unlike external MCP bridges such as [[cheatengine-mcp-bridge]] that pipe agent commands into CE from outside the process, AITools runs as an in-CE extension with direct access to the Lua engine and scanner. Pairs with verification-oriented agent tooling such as [[reverify]] and orchestrators such as [[skid-factory]] when LLM output must be grounded in tool evidence rather than model speculation alone.
+Unlike external MCP bridges such as [[cheatengine-mcp-bridge]] that pipe agent commands into CE from outside the process, AITools runs as an in-CE extension with direct access to the Lua engine and scanner. Pairs with verification-oriented agent tooling such as [[reverify]] and orchestrators such as [[skid-factory]] when LLM output must be grounded in tool evidence rather than model speculation alone. Complements official CE Lua extensions such as [[unreal-engine-tools]] and Mono helpers such as [[cheatengine-mono-helper]] for the IL2CPP/Mono skills bundled in its framework.
 
 ## Role in the README map
 
@@ -31,4 +31,4 @@ Listed under **Cheat → RE Tools** beside official CE Lua extensions such as [[
 
 ## Related
 
-[[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[cheatengine-mcp-bridge]] · [[reverify]] · [[skid-factory]] · [[ceasta]] · [[unreal-engine-tools]] · [[research-rigor]]
+[[cheat-engine]] · [[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[cheatengine-mcp-bridge]] · [[reverify]] · [[skid-factory]] · [[ceasta]] · [[unreal-engine-tools]] · [[cheatengine-mono-helper]] · [[research-rigor]]
