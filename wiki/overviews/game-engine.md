@@ -18,6 +18,7 @@ sources:
   - wiki/sources/descriptions/noopstudios__interactive-feedback-mcp.md
   - wiki/sources/descriptions/gmh5225__interactive-feedback-macos-mcp.md
   - wiki/sources/descriptions/lannden1245__Void-Engine.md
+  - wiki/sources/descriptions/GloriousBrendon__rearguard.md
   - wiki/sources/descriptions/modcommunity__dot-server-security.md
   - wiki/sources/descriptions/Parko-Developer__guard-game.md
   - wiki/sources/descriptions/n24q02m__better-godot-mcp.md
@@ -766,6 +767,7 @@ Editor-facing MCP bridges in the README's **MCP server** subcategory let AI agen
 - **Unity Skills** — [[unity-skills]] editor plugin with AI automation skills for animator, audio, camera, materials, NavMesh, physics, rendering, shaders, terrain, UI, batch execution, and localization (Besty0728; Game Develop / AI Agents) (source: wiki/sources/descriptions/Besty0728__Unity-Skills.md)
 - **Godot MCP** — [[better-godot-mcp]] scenes/GDScript control
 - **Void Engine** — [[void-engine]] Godot 4.x plugin with WhiteVoid AntiCheat autoload (debugger/process/window detection, honeypot integrity checks, HWID ban enforcement), VoidNet multiplayer stack, and VoidForge editor tooling (lannden1245; Anti Cheat / Open Source Anti Cheat System) (source: wiki/sources/descriptions/lannden1245__Void-Engine.md)
+- **Rearguard** — [[rearguard]] Godot 4 GDExtension + Rust server zero-access AC SDK (per-match server-seeded mouse/recoil input probes; aimbot/recoil-macro detection; telemetry pipeline + simulation/evaluation harness; Linux/Windows without kernel driver; GloriousBrendon; Anti Cheat / Open Source Anti Cheat System) (source: wiki/sources/descriptions/GloriousBrendon__rearguard.md)
 - **dot-server-security** — [[dot-server-security]] Godot 4 dedicated-server security addon (GDScript rule engine; movement re-simulation + shot validation; sliding-window rate limits; warn/gag/mute/kick/ban escalation; external ban feeds; dry-run default; modcommunity; Anti Cheat / Open Source Anti Cheat System) (source: wiki/sources/descriptions/modcommunity__dot-server-security.md)
 - **guard-game** — [[guard-game]] Node.js engine-agnostic server-side AC (Parko-Developer; world-profile movement/action validation; TCP JSON lines + HTTP ingest; Unity/Godot/Roblox/JS SDKs; strike ladder + admin API; optional HMAC signing; Anti Cheat / Open Source Anti Cheat System) (source: wiki/sources/descriptions/Parko-Developer__guard-game.md)
 - **DayZ MCP** — [[dayz-mcp]] Enfusion mod-dev automation (Python MCP + Enforce Script bridge; 53 server-authoritative tools for addon pack/build, test instances, entity/vehicle control, telemetry, screenshots, structured state assertions; localhost session leases; willy92wins) (source: wiki/sources/descriptions/willy92wins__dayz-mcp.md)

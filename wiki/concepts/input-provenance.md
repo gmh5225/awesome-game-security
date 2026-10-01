@@ -5,7 +5,8 @@ topics: [anti-cheat, game-hacking]
 sources:
   - wiki/sources/skills/anti-cheat.md
   - wiki/sources/descriptions/AtakanKeser__BlastScale.md
-updated: 2026-09-17
+  - wiki/sources/descriptions/GloriousBrendon__rearguard.md
+updated: 2026-10-01
 confidence: high
 ---
 
@@ -67,6 +68,8 @@ Before interpreting absent callbacks, ETW events, or input samples as evasion:
 
 Behavioral features remain hypotheses until provenance, units, and collector coverage are documented. (source: wiki/sources/skills/anti-cheat.md)
 
+Open-source SDKs such as [[rearguard]] (GloriousBrendon; Rust server + Godot 4 GDExtension; per-match server-seeded probes in mouse sensitivity and recoil parameters—clients reacting to hidden cues expose automation; treat probe parameters as **server-derived** gameplay state and client input reactions as **client-reported** evidence requiring corroboration) illustrate probe-based input-trust labeling without kernel drivers. (source: wiki/sources/descriptions/GloriousBrendon__rearguard.md)
+
 ## Related
 
-[[ai-aimbot-detection]] · [[blastscale]] · [[hardware-input-injection]] · [[research-rigor]] · [[overviews/anti-cheat]] · [[overviews/game-hacking]]
+[[ai-aimbot-detection]] · [[blastscale]] · [[rearguard]] · [[hardware-input-injection]] · [[research-rigor]] · [[overviews/anti-cheat]] · [[overviews/game-hacking]]
