@@ -5,7 +5,8 @@ topics: [anti-cheat]
 sources:
   - wiki/sources/skills/anti-cheat.md
   - wiki/sources/descriptions/aryribeiro__cobra.md
-updated: 2026-09-13
+  - wiki/sources/descriptions/pealz1__cheeto.md
+updated: 2026-10-01
 confidence: medium
 ---
 
@@ -26,6 +27,8 @@ Evidence about **shared networks**, account/device association, reported connect
 Neither retry delay nor error code alone establishes a game sanction. (source: wiki/sources/skills/anti-cheat.md)
 
 Browser leaderboard backends such as [[cobra-snake]] apply **submission rate limits** on score POST endpoints separately from plausibility checks and HMAC session binding—throttled requests are a service-level control, not proof of account sanction. (source: wiki/sources/descriptions/aryribeiro__cobra.md)
+
+Roblox networking compilers such as [[cheeto]] apply **compile-time rate limits and policy hooks** that reject malformed or unauthorized remote packets before application handlers—transport rejection is a boundary control, not proof of account sanction. (source: wiki/sources/descriptions/pealz1__cheeto.md)
 
 ## Event separation
 

@@ -652,7 +652,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [CheekyBlinder](entities/cheeky-blinder.md) — enumerate/modify kernel callbacks via signed vulnerable MSI driver (BYOVD PoC; br-sn)
 - [checkhv_um](entities/checkhv-um.md) — user-mode HV detection (CPUID / RDTSC / VMCS / signatures)
 - [cheese](entities/cheese.md) — Quest 3/3S root via Adreno CVE-2025-21479 (Magisk, no boot rewrite)
-- [cheeto](entities/cheeto.md) — schema-driven Roblox networking compiler; typed buffer-packed Luau client/server modules with validation, rate limits, and policy hooks; optional max-security honeypots/movement AC helpers; CLI + Studio plugin (pealz1; Anti Cheat)
+- [cheeto](entities/cheeto.md) — schema-driven Roblox networking compiler; declarative schema language emits typed buffer-packed Luau client/server modules with validation, rate limits, and policy hooks; delta replication, client prediction, packet capture/replay; optional max-security honeypots/movement AC helpers; CLI + Studio plugin + roblox-ts types + schema lockfile (pealz1; Anti Cheat)
 - [Chess King](entities/chessking.md) — Rust Axum multiplayer chess platform (server-side AC: risk scoring, device fingerprint, match integrity, CAPTCHA step-up, ban escalation; shakmaty; admin dashboard; Anti Cheat / educational)
 - [cheat-mcp](entities/cheat-mcp.md) — AnonymoDGH C++17 Windows MCP server (stdio JSON-RPC; process/module inspect, CE-style scan/pointers/patch, DLL/shellcode injection, IAT/speedhack hooks, EAC/BE/Vanguard recon; Game Develop / MCP server)
 - [cheatengine-mcp-bridge](entities/cheatengine-mcp-bridge.md) — MCP bridge: CE named pipe + Lua/FastMCP; 40+ tools (scan/read/pointers/RTTI/HWBP/DBVM); sub-2ms; miscusi-peek / beamstar forks
