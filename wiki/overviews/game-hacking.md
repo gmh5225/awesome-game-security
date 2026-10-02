@@ -27,6 +27,7 @@ sources:
   - wiki/sources/descriptions/kotae4__intro-to-gamehacking.md
   - wiki/sources/descriptions/jbro129__android-modding.md
   - wiki/sources/descriptions/1401199262__RemoteCall.md
+  - wiki/sources/descriptions/0111-0222__uc-mcp.md
   - wiki/sources/descriptions/0xenia__remem.md
   - wiki/sources/descriptions/0xPrimo__KMDllInjector.md
   - wiki/sources/descriptions/0xGREG__registry-callbacks.md
@@ -1875,7 +1876,7 @@ sources:
   - wiki/sources/descriptions/husnaintariq577__kx-vision.md
   - wiki/sources/descriptions/Marcinator31__Vortex-Client.md
   - wiki/sources/descriptions/AnonymoDGH__cheat-mcp.md
-updated: 2026-10-01
+updated: 2026-10-02
 confidence: high
 ---
 
@@ -2194,6 +2195,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Dedicated x64dbg MCP server via [[x64dbg-mcp]] (TypeScript; 23 mega-tools / 151 REST endpoints; native plugin REST bridge; stepping/breakpoints/memory/disasm/tracing/anti-debug bypass/CFA/PE dump; Claude/Cursor/Windsurf; Cheat Debugging / agent-RE lane) (source: wiki/sources/descriptions/bromoket__x64dbg_mcp.md)
 - C#/.NET x64dbg MCP plugin via [[x64dbgmcpserver]] (AgentSmithers; MCP-compatible HTTP interface; self-hosted listener; memory/disasm/register/label/automation commands; AI-assisted RE and scripted game security analysis; Cheat Debugging / agent-RE lane) (source: wiki/sources/descriptions/AgentSmithers__x64DbgMCPServer.md)
 - Agent-native integrated RE lab via [[open-reverselab]] (LING71671; Python; 180+ technique articles + 100+ MCP automation tools; knowledge router maps signals to attack chains; Ghidra/Frida/x64dbg/jadx; web CTF, Android APK/DEX, Windows PE, crypto, game cheating/AC boards; authorized binary/malware/game-protection investigation; Cheat agent-RE lane) (source: wiki/sources/descriptions/LING71671__open-reverselab.md)
+- UnknownCheats forum knowledge retrieval via [[uc-mcp]] (0111-0222; Python read-only MCP; session-cookie keyword search, thread read, subforum browse, page fetch, and health check; UTC staleness labels; curl_cffi Cloudflare bypass + vBulletin parse; rate limits + URL guards + SQLite cache; Claude Code/Cursor; Cheat agent-RE / community-knowledge lane) (source: wiki/sources/descriptions/0111-0222__uc-mcp.md)
 - AI-assisted RE with deterministic byte-level verification via [[reverify]] (2akouwu; MCP server + CLI; pairs LLM analysis with auditable byte-level checks; Cheat RE Tools) (source: wiki/sources/README-categories.md)
 - DSH Ghidra headless RPC skill family via [[ghidra-skill-for-dsh]] (Cristallin2006; seven scenario workflows—triage, unpack, static, vuln audit, Frida/Qiling dynamic, PCAP traffic, pure-DEX APK; oracle-based verification; Cheat RE Tools) (source: wiki/sources/descriptions/Cristallin2006__ghidra-skill-for-dsh.md)
 - Node.js MCP orchestrator via [[skid-factory]] (wrong-commit; TypeScript + Lua/Python bridges; Cheat Engine/x64dbg/Ghidra memory scan, hardware write breakpoints, pointer-chain trace, and patch workflows; Cursor CLI advise loop; Cheat RE Tools) (source: wiki/sources/descriptions/wrong-commit__skid_factory.md)
