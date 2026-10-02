@@ -3045,7 +3045,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [PyClassInformer](entities/pyclassinformer.md) — IDA Pro C++ RTTI plugin: hierarchy viz, auto-rename, method/library classification (cheat / IDA Plugins)
 - [Pyda](entities/pyda.md) — Python QEMU user-mode DBI (hook / mem / syscall / insn; Cheat DBI)
 - [PyAsmPatch](entities/pyasm-patch.md) — Python ARM ELF inline hooking for Unity IL2CPP `libil2cpp.so` (LIEF + Keystone + Capstone; static section merge, GOT patch, LDR fixup; InitArray hooks; axhlzy)
-- [PyMemoryEditor](entities/pymemory-editor.md) — pure-Python cross-platform memory scanner/editor (ctypes; Windows/Linux/macOS; CE-style value/AOB scans, pointer chains, reverse pointer scan; PySide6 Qt GUI + optional MCP server; JeanExtreme002; Cheat / Debugging)
+- [PyMemoryEditor](entities/pymemory-editor.md) — pure-Python cross-platform memory scanner/editor (ctypes; Windows/Linux/macOS; CE-style value/AOB scans, pointer chains, reverse pointer scan; optional NumPy; PySide6 Qt GUI + optional MCP server; game modding / RE / game-security research; JeanExtreme002; Cheat / Debugging)
 - [PythonPlantsVsZombies](entities/python-plants-vs-zombies.md) — Python PvZ clone (graphics-focused; Game Develop / source)
 - [pythoncs2](entities/pythoncs2.md) — external CS2 cheat study (Python; PyMeow memory + overlay; DearPyGui config; ESP / recoil control; educational; Vekor64; cheat / game:cs2 [Python External])
 - [q3vm](entities/q3vm.md) — Quake III embeddable `.qvm` bytecode VM + LCC compiler (AC dynamic-script prototyping)
