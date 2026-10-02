@@ -2978,7 +2978,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [PolyHook](entities/polyhook.md) — x86/x64 C++11 multi-method hooking lib (cheat / hook research)
 - [PolyHook 2.0](entities/polyhook-2-0.md) — C++ PolyHook2 hooking lib (vcpkg; cheat / hook research)
 - [Ponce](entities/ponce.md) — IDA Pro symbolic + taint execution plugin (Triton; path constraints, tainted data flow, input generation; Cheat Symbolic Execution; gmh5225)
-- [Ponce4Ghidra](entities/ponce4ghidra.md) — interactive Ghidra symbolic execution plugin (angr + Z3; symbolize inputs, Find/Avoid from decompiler UI; license/anti-cheat constraint solving; overkazaf; Cheat / RE Tools)
+- [Ponce4Ghidra](entities/ponce4ghidra.md) — interactive Ghidra symbolic execution plugin (Java UI + Python angr/Z3 JSON/TCP backend; symbolize inputs, Find/Avoid from decompiler; Mach-O/ELF/Android; veritesting, Unicorn concrete exec; crackmes/license/anti-cheat constraint solving; overkazaf; Cheat / RE Tools)
 - [Poseidon](entities/poseidon.md) — NtConvertBetweenAuxiliaryCounterAndPerformanceCounter KM↔UM channel (BE/EAC notes)
 - [PoseidonVK](entities/poseidonvk.md) — Vulkan modernization fork of Poseidon/CWR-CE (Arma: Cold War Assault; libFuzzer format tooling)
 - [Positron](entities/positron.md) — JS runtime inject via manual-map DLL (QuickJS/Electron; named-pipe IPC; REPL/SDK)

@@ -16,6 +16,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__VACDumper.md
   - wiki/sources/descriptions/gmh5225__PreventVAC.md
   - wiki/sources/descriptions/gmh5225__Ponce.md
+  - wiki/sources/descriptions/overkazaf__Ponce4Ghidra.md
   - wiki/sources/descriptions/shefben__VALVeAntiCheat1.md
   - wiki/sources/descriptions/ianveig29__como-funciona-vac.md
   - wiki/sources/descriptions/kouzhudong__AntiHook.md
