@@ -2016,6 +2016,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/TrackAndTruckDevs/SPF_GhidraPatternHelper [Ghidra script to generate and search byte signatures with SPF-style templates for ATS/ETS2 plugin RE]
 - https://github.com/danbrodsky/GFred [Command Palette]
 - https://github.com/Nalen98/AngryGhidra [Use angr in Ghidra]
+- https://github.com/overkazaf/Ponce4Ghidra [Interactive symbolic execution Ghidra plugin with angr and Z3 — symbolize inputs, set find/avoid targets, and solve constraints from the decompiler UI]
 - https://github.com/justfoxing/ghidra_bridge [Python 3 bridge to Ghidra's Python scripting]
 - https://github.com/GalaxyBatMan111/dsh-plugins [DSH plugin bundle with PyGhidra Ghidra bridge for binary import, decompilation, strings, and xrefs]
 - https://github.com/Cristallin2006/ghidra-skill-for-dsh [dsh agent skill family: Ghidra headless RPC daemon plus seven RE scenarios (triage, unpack, static, vuln audit, dynamic, traffic, Android APK)]
