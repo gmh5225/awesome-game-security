@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-02** — ingest `readme:categories`: Cheat ~2856 (+1; JeanExtreme002/[[pymemory-editor]] pure-Python cross-platform memory scanner/editor with Qt GUI and optional MCP server in Cheat / Debugging) / Anti Cheat ~765 / Game Develop ~191 / other major section counts stable; 41 sections; synced projected README-map count (~2856) on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/reverse-engineering]], and [[overviews/dma-attack]]; entity [[pymemory-editor]]; light `index.md` section notes (no per-category pages).
+
 - **2026-10-02** — ingest `description:0111-0222/uc-mcp`: refreshed entity [[uc-mcp]] (0111-0222; Python read-only MCP; five UnknownCheats forum tools via session cookies; UTC staleness labels; curl_cffi Cloudflare bypass + vBulletin parse; rate limits + URL guards + SQLite cache; Claude Code/Cursor); cited on [[overviews/game-hacking]] agent-RE community-knowledge lane + [[concepts/research-rigor]] forum-provenance staleness guidance; `index.md` entity blurb updated; [[overviews/reverse-engineering]] and [[overviews/game-engine]] already carried description projection from prior readme pass.
 
 - **2026-10-02** — ingest `readme:categories`: Game Develop ~191 (+1; 0111-0222/[[uc-mcp]] read-only date-aware UnknownCheats forum MCP via session cookies) / Cheat ~2855 / Anti Cheat ~765 / other major section counts stable; 41 sections; synced projected README-map count (~191) on [[overviews/overview]] and [[overviews/game-engine]]; entity [[uc-mcp]]; cited on [[overviews/reverse-engineering]] MCP knowledge-retrieval lane; light `index.md` section notes (no per-category pages).
