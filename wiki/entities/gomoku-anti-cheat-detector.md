@@ -15,15 +15,25 @@ confidence: medium
 
 README category: Anti Cheat / Open Source Anti Cheat System.
 
-## Features
+## Detection mechanism
 
-- Live overlay, archive viewer, sample library with threshold learning, player blacklist, and multilingual chat questioning (thirteen-language UI).
-- Optional Supabase activation for cloud sync without restricting free offline analysis.
-- Intended for **moderators, organizers, and players** doing practical game-security triage—not a substitute for official platform rulings.
+- **Move capture** — records full move sequences while spectating or playing on supported Gomoku sites.
+- **Local engine replay** — post-game WASM replay via Rapfi with optional KataGomo HTTP or custom Rapfi weight backends.
+- **Scoring signals** — engine agreement, win-rate gaps, sharp-move streaks, evasion patterns, and shape-based fingerprints fused into a 0–100 risk score.
+- **Threshold learning** — sample library lets moderators tune suspicion cutoffs from labeled games before acting on scores.
+
+## Architecture
+
+- **Browser extension** — Chrome/Edge; no server-side game integration required.
+- **Live overlay** — in-session suspicion hints during spectating or play.
+- **Archive viewer** — review past games and score history offline.
+- **Player blacklist** — persistent watchlist for repeat suspects.
+- **Multilingual chat questioning** — thirteen-language UI plus in-chat challenge prompts for human review.
+- **Optional Supabase sync** — cloud activation for cross-device archive sync without restricting free offline analysis.
 
 ## Positioning
 
-Complements federation-scale chess integrity platforms such as [[sentinel-anticheat-chess]] with a **browser-side, post-game engine-replay scorer** for casual online board titles—similar offline demo ML stacks such as [[cs2-overwatch]] and [[yaacs-anticheat]] in FPS titles, but scoped to Gomoku move telemetry and WASM engine agreement.
+Complements federation-scale chess integrity platforms such as [[sentinel-anticheat-chess]] with a **browser-side, post-game engine-replay scorer** for casual online board titles—similar offline demo ML stacks such as [[cs2-overwatch]] and [[yaacs-anticheat]] in FPS titles, but scoped to Gomoku move telemetry and WASM engine agreement. Intended for **moderators, organizers, and players** doing practical game-security triage—not a substitute for official platform rulings.
 
 ## Peers
 

@@ -38,8 +38,9 @@ sources:
   - wiki/sources/descriptions/oykuoner__YAACS-AntiCheat.md
   - wiki/sources/descriptions/magicnothief__cs2-overwatch.md
   - wiki/sources/descriptions/AbdulAmi09__SentinelAntiCheat.md
+  - wiki/sources/descriptions/AODOJUST__gomoku-anti-cheat-detector.md
   - wiki/sources/descriptions/NetVar1337__apex-anticheat-lab.md
-updated: 2026-09-25
+updated: 2026-10-03
 confidence: medium
 ---
 
@@ -100,6 +101,7 @@ Tabular engagement features (reaction time, curvature stats, dx/dy correlation, 
 - [[yaacs-anticheat]] — oykuoner CS2 demo pitch/yaw telemetry research pipeline (Python; demoparser2 HLTV parsing; 100-tick spatiotemporal features from Fitts' Law + Minimum Jerk Model; heuristic rule engine vs Random Forest; synthetic + real datasets for honest/pro/aimbot/humanised-evasion profiles; privacy-preserving server-side aimbot detection without client memory probes; Anti Cheat / Machine Learning) (source: wiki/sources/descriptions/oykuoner__YAACS-AntiCheat.md)
 - [[cs2-overwatch]] — magicnothief CPU-friendly offline CS2 demo review pipeline (Python; hard rules + ray-cast visibility + CS2CD-trained ML behavior scoring + calibrated suspicion tiers; optional local LLM evidence summaries via llama.cpp; browser UI + CLI; ONNX inference; optional YOLO vision cross-checks; privacy-preserving local review; Anti Cheat / Analysis Framework) (source: wiki/sources/descriptions/magicnothief__cs2-overwatch.md)
 - [[sentinel-anticheat-chess]] — AbdulAmi09 chess integrity platform (Python FastAPI + Next.js; Regan-style move-quality baseline + seven statistical signal layers—complexity, timing, historical play, behavioral/online/environmental cues—fused to explainable risk tiers; Stockfish PGN + Maia human-likeness; optional XGBoost/Isolation Forest; hash-chained audit logging, case management, live monitoring, partner API; human-review-first engine-assistance detection; Anti Cheat / Open Source Anti Cheat System) (source: wiki/sources/descriptions/AbdulAmi09__SentinelAntiCheat.md)
+- [[gomoku-anti-cheat-detector]] — AODOJUST/Baishen Chrome/Edge browser extension; gomoku.com/papergames.io move capture; local Rapfi WASM replay with optional KataGomo/Rapfi weight backends; 0–100 AI-assistance risk scores from engine agreement, win-rate gaps, sharp-move streaks, and evasion patterns; live overlay, archive viewer, sample-library threshold learning, player blacklist; optional Supabase sync; moderator triage for casual online board play—not official platform rulings; Anti Cheat / Open Source Anti Cheat System) (source: wiki/sources/descriptions/AODOJUST__gomoku-anti-cheat-detector.md)
 - [[apex-anticheat-lab]] — NetVar1337 FPS anti-cheat research lab (Python server-side input telemetry; aim kinematics, reaction times, recoil regularity, triggerbot signatures; per-cohort baselines; analyst-review ranking; YARA loader/HWID-spoofer rules; read-only PowerShell host driver/PCIe/vulnerable-driver-blocklist survey; match-integrity SQL; FPS cheat taxonomy + threshold calibration docs; Anti Cheat / Open Source Anti Cheat System) (source: wiki/sources/descriptions/NetVar1337__apex-anticheat-lab.md)
 - [[nuremx]] — Apex Legends Python YOLOv5 screen-capture cheat (enemy detection, overlay, aiming; trained weights; no memory hooking; Windows/Linux; Zurek0x; cheat / [AI])
 - [[clickpic]] — screen pixel color detection + auto-click (OpenCV + triggerbot; monitors regions for target colors; gmh5225)
