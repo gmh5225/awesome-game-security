@@ -339,6 +339,7 @@ sources:
   - wiki/sources/descriptions/ValveSoftware__Proton.md
   - wiki/sources/descriptions/TuncorReUnion__TLAC-MODERN-LOCAL-ANTI-CHEAT-REUNIONED.md
   - wiki/sources/descriptions/TOSTcRa__vigil.md
+  - wiki/sources/descriptions/vylorq__anti-cheat.md
   - wiki/sources/descriptions/mikio815__linux-anticheat.md
   - wiki/sources/descriptions/daswareinfach__Battleye-VAC-EAC-Kernel-Bypass.md
   - wiki/sources/descriptions/dashingsoft__pyarmor.md
@@ -1302,7 +1303,7 @@ Long-form kernel AC architecture primer [How Kernel Anti-Cheats Work](https://s4
 
 **Paper modular production AC:** [[novaguard]] (Novastudio953; Kotlin Paper **1.21** plugin; 44 individually toggleable movement/combat/world/macro/x-ray checks with per-check violation thresholds, punishments, and ban commands; suspects GUI, player freeze, ban waves, violation history, player reports, Discord webhooks; grace periods, lag shields, Bedrock exemptions, VPN blocking; Anti Cheat / game:minecraft) for administrators needing granular staff tooling beside modular plugins such as [[h-ac]] and heuristic Paper plugins such as [[bs-anticheat]]. (source: wiki/sources/descriptions/Novastudio953__NovaGuard.md)
 
-**Fabric review-first AC + protection:** [[vylorq-vigil]] (vylorq; Java Fabric **1.21.11** mod; movement upper-bound prediction, lag-compensated reach/aim/autoclick checks, anti-x-ray ore hiding; violations scored into admin review cases with evidence clips—not auto-bans; claims, barriers, jails, PvP arenas, secure trading, watchlists, rollback, Vigil Panel GUI; optional Geyser/Floodgate Java+Bedrock crossplay; CI gametest coverage; Anti Cheat / game:minecraft) beside offline-mode suites such as [[bastion]] and alert-only mods such as [[silent-anticheat]]. Distinct from [[vigil]] (TOSTcRa eBPF Linux AC). (source: wiki/sources/descriptions/vylorq__anti-cheat.md)
+**Fabric review-first AC + protection:** [[vylorq-vigil]] (vylorq; Java Fabric **1.21.11** mod; movement upper-bound prediction, lag-compensated reach/aim/autoclick checks, anti-x-ray ore hiding; Watcher telemetry; violations scored into admin review cases with evidence clips—not auto-bans; claims, barriers, jails, PvP arenas, secure trading, watchlists, rollback, Vigil Panel GUI; optional Geyser/Floodgate Java+Bedrock crossplay; CI gametest coverage; Anti Cheat / game:minecraft) beside offline-mode suites such as [[bastion]] and alert-only mods such as [[silent-anticheat]]. Distinct from [[vigil]] (TOSTcRa eBPF Linux AC). (source: wiki/sources/descriptions/vylorq__anti-cheat.md)
 
 **Server-log FPS evidence pipeline:** [[detect-fps-hackers]] (Nimdy/fpsdet; Python 3.11+ CLI; ingests dedicated-server JSON combat/movement logs; scores gear violations, statistical outliers, information-theoretic aim signals, and cross-account humanizer patterns; human-review case files without client installs or auto-bans; Unity/Unreal/Godot emitter examples; Grafana/Kibana/Splunk mappings; Anti Cheat / Open Source Anti Cheat System) beside demo-telemetry research such as [[yaacs-anticheat]] and behavioral labs such as [[apex-anticheat-lab]]. (source: wiki/sources/descriptions/Nimdy__detect-FPS-hackers.md)
 
