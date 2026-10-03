@@ -1308,6 +1308,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/Fox2Code/FoxMagiskModuleManager [A module manager for Magisk]
 - https://github.com/MMRLApp/WebUI-X-Portable [Portable Android app providing the MMRL WebUI X interface for browsing, installing, and managing Magisk/APatch/KernelSU modules]
 - https://github.com/zelect0r/zamr [Curated MMRL module repository for Magisk/KernelSU/APatch (Play Integrity Fix, Zygisk, root-hide, TEESimulator)]
+- https://github.com/Yass5002/magisk-hub [Active-source directory and static site for Magisk/KernelSU/APatch modules with schema validation and automated release sync]
 - https://github.com/Elcapitanoe/pif-config-generator [Automated pipeline to track upstream Android build.prop tags and publish validated Play Integrity Fix (PIF) JSON profiles]
 - https://github.com/wajahatnaeem056/jerrymanager [KernelSU/APatch/Magisk module with Web UI for Play Integrity attestation, keybox injection, root hiding, and banking-app detection cleanup]
 - https://github.com/bufanchen121101/AxManagerD [Root-free Magisk-style Android module framework with property injection, runtime modules, and built-in LSPatch Xposed hooking]
