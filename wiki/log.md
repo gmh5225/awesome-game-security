@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-03** — ingest `readme:categories`: Anti Cheat ~767 (+1; AODOJUST/[[gomoku-anti-cheat-detector]] Baishen Chrome/Edge browser extension — gomoku.com/papergames.io Rapfi WASM local replay with multi-engine AI-assistance scoring) / Cheat ~2857 / other major section counts stable; 41 sections; synced projected README-map count (~767) on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], and [[overviews/reverse-engineering]]; entity [[gomoku-anti-cheat-detector]]; light `index.md` section notes (no per-category pages).
+
 - **2026-10-03** — ingest `description:Chanhne-dev/AntiCheat`: refreshed entity [[chanhne-dev-anticheat]] (Java Paper/Folia plugin; periodic scan tasks; fly/movement and illegal-item checks; Meteor/TrouserStreak/NoraTweaks client-specific modules; violation tracking, Discord webhooks, optional movement logging; optional entity-culling anti-ESP; server-side MC AC for operators); cited on [[concepts/detector-operations]] periodic-scan enforcement lane; `index.md` entity blurb sync.
 
 - **2026-10-03** — ingest `readme:categories`: Anti Cheat ~766 (+1; Chanhne-dev/[[chanhne-dev-anticheat]] Paper/Folia fly checks, Meteor/TrouserStreak client-specific detectors, and illegal-item enforcement) / Cheat ~2857 / other major section counts stable; 41 sections; synced projected README-map count (~766) on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], and [[overviews/reverse-engineering]]; entity [[chanhne-dev-anticheat]]; cited on [[overviews/game-hacking]] Paper/Folia MC AC lane; light `index.md` section notes (no per-category pages).
