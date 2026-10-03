@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-03** — ingest `description:shaylanger/Kenshi-Automation-Harness`: refreshed entity [[kenshi-automation-harness]] (shaylanger; C++ KenshiLib/Ogre/MyGUI RE_Kenshi plugin + Python/PowerShell client; file-based command interface for scripts/AI agents; spawn/world/AI/UI checks + mod C extension API; scenario-based tests; Game Testing); cited on [[overviews/game-engine]] and [[overviews/overview]]; `index.md` entity blurb sync.
+
 - **2026-10-03** — ingest `readme:categories`: Cheat ~2858 (+1; myso-kr/[[hell-is-us-mod]] Rust external Hell Is Us UE companion — minimap/quest overlays + optional single-player cheats; no on-disk mods) / Game Testing ~20 (+1; shaylanger/[[kenshi-automation-harness]] Kenshi in-game mod test automation via RE_Kenshi plugin + CLI) / Anti Cheat ~770 / other major section counts stable; 41 sections; synced projected README-map counts on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/reverse-engineering]], [[overviews/dma-attack]], and [[overviews/game-engine]]; entities [[hell-is-us-mod]], [[kenshi-automation-harness]]; light `index.md` section notes (no per-category pages).
 
 - **2026-10-03** — lint (agent pass): index vs disk scan — 9 overviews, 51 concepts, 3997 entities (4057 index entries); index.md fully synced (0 missing, 0 dead, 0 duplicate entries); overview wikilink spot-check (9 pages, 12201 links) — 0 broken links; concept spot-check (51 pages, 2360 links) — 0 broken links; index.md wikilink scan (770 links) — 0 broken links; 6 cross-kind slug collisions ([[game-hacking]], [[anti-cheat]], [[reverse-engineering]], [[il2cpp]], [[byovd]], [[dma]]) — expected, no repair needed; no structural edits required.

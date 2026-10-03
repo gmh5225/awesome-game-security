@@ -2134,7 +2134,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [KSword](entities/ksword.md) — game-security Qt ARK with custom kernel driver (process/kernel object/memory/driver/callback/SSDT panels; Win32 API monitor; CE plugin; DWM; VirusTotal/ThreatBook; KSwordDEV; Cheat / Windows Kernel Explorer)
 - [ksentinel](entities/ksentinel.md) — Linux LKM kernel integrity monitor (MatheuZSecurity; syscall table + LSTAR + prologue-hash checks; configurable intervals + anti-unload; rootkit hook-tampering detection research)
 - [ksurusda](entities/ksurusda.md) — Android Zygisk module: Rusda anti-detection Frida gadget on KernelSU/Magisk/APatch; WebUI, listen/offline modes, library remapping (cheat / Frida)
-- [kenshi-automation-harness](entities/kenshi-automation-harness.md) — Kenshi in-game mod test automation (RE_Kenshi plugin + CLI; scriptable spawn/teleport/combat/crafting/UI checks; shaylanger; Game Testing)
+- [kenshi-automation-harness](entities/kenshi-automation-harness.md) — Kenshi in-game mod test automation (C++ RE_Kenshi DLL + Python/PowerShell CLI; file-based spawn/world/AI/UI commands + mod C extension API; shaylanger; Game Testing)
 - [keusermodecallback](entities/keusermodecallback.md) — ExpLife0011; Windows kernel demo invoking user-mode via KeUserModeCallback; IOCTL driver; PEB/module export resolution; 32/64-bit callback stubs; kernel-to-user transition research; README [KeUserModeCallBack]
 - [kevboy](entities/kevboy.md) — Rust Game Boy emulator (CPU / memory / graphics / input)
 - [KExecDD](entities/kexecdd.md) — KSecDD.sys IOCTL PoC (LSASS inject; arbitrary kernel exec; DSE via ci.dll!g_CiOptions; gmh5225)
