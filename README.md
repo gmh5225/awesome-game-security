@@ -4487,6 +4487,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/Benardelys/H-AC [Paper 1.21 server-side Minecraft anti-cheat plugin with modular combat/movement checks, latency-compensated reach raytracing, and asynchronous violation logging]
 - https://github.com/realkyx29-design/LarpingAntiCheat [Paper 1.21+ Minecraft anti-cheat plugin (Hyphon) with combat/movement/world checks, honeypot ESP decoys, and custom-enchant/modifier capability analysis]
 - https://github.com/EpicLizard05013/UltimateMeteorAntiCheat [Paper 1.21.11 Minecraft server plugin with combat, movement, world, anti-dupe, and packet-desync checks plus violation logging and punishment management]
+- https://github.com/Chanhne-dev/AntiCheat [Paper/Folia Minecraft anti-cheat plugin with fly checks, Meteor/TrouserStreak client-specific detectors, and illegal-item enforcement]
 - https://github.com/jdgshsvejevhevejeve/nova-anticheat [Paper 1.21 server-side anti-cheat plugin with movement, combat, and block checks, violation levels, and configurable warn/setback/kick actions]
 - https://github.com/getawife/nofly [Paper 1.21.x Minecraft server plugin combining synchronous movement analysis with PacketEvents checks to detect fly hackers]
 - https://github.com/Lazyzouo/ICUAC [Open-source bilingual Paper/Folia server-side rule enforcement for commands, items/NBT, effects, and end-crystal combat]
