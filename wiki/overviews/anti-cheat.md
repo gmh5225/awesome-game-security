@@ -13,6 +13,7 @@ sources:
   - wiki/sources/descriptions/Driw0x__CS2Guard.md
   - wiki/sources/descriptions/oykuoner__YAACS-AntiCheat.md
   - wiki/sources/descriptions/NetVar1337__apex-anticheat-lab.md
+  - wiki/sources/descriptions/Nimdy__detect-FPS-hackers.md
   - wiki/sources/descriptions/zelect0r__zamr.md
   - wiki/sources/descriptions/Lixense__ff-ace-anticheat-analysis.md
   - wiki/sources/descriptions/LordeTyrael__PokeAllianceAntiCheatAnalysis.md
