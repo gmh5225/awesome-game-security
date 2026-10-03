@@ -1,0 +1,3656 @@
+Project Path: arc_Novastudio953_NovaGuard_09o8iiwy
+
+Source Tree:
+
+```txt
+arc_Novastudio953_NovaGuard_09o8iiwy
+├── LICENSE
+├── README.md
+├── pom.xml
+└── src
+    └── main
+        ├── kotlin
+        │   └── com
+        │       └── novaguard
+        │           ├── NovaGuard.kt
+        │           ├── alert
+        │           │   └── AlertManager.kt
+        │           ├── check
+        │           │   ├── Check.kt
+        │           │   └── CheckManager.kt
+        │           ├── checks
+        │           │   ├── BlockChecks.kt
+        │           │   ├── CombatChecks.kt
+        │           │   ├── ExtraChecks.kt
+        │           │   ├── MacroChecks.kt
+        │           │   ├── MovementChecks.kt
+        │           │   └── PlayerChecks.kt
+        │           ├── command
+        │           │   ├── GuardCommand.kt
+        │           │   ├── ReportCommand.kt
+        │           │   └── SusCommand.kt
+        │           ├── config
+        │           │   └── ConfigManager.kt
+        │           ├── data
+        │           │   ├── DataManager.kt
+        │           │   └── PlayerData.kt
+        │           ├── internal
+        │           │   └── CoreValidator.kt
+        │           ├── listener
+        │           │   ├── BlockListener.kt
+        │           │   ├── CombatListener.kt
+        │           │   ├── ExtraListener.kt
+        │           │   ├── MoveListener.kt
+        │           │   └── PlayerListener.kt
+        │           ├── punish
+        │           │   └── PunishmentManager.kt
+        │           ├── staff
+        │           │   └── StaffTools.kt
+        │           ├── support
+        │           │   └── BedrockSupport.kt
+        │           ├── vpn
+        │           │   └── VpnBlocker.kt
+        │           └── xray
+        │               └── Xray.kt
+        └── resources
+            ├── checks.yml
+            ├── config.yml
+            ├── messages.yml
+            ├── paper-plugin.yml
+            └── xray.yml
+
+```
+
+`LICENSE`:
+
+```
+MIT License
+
+Copyright (c) 2026 Nova Studio
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
+`README.md`:
+
+```md
+# NovaGuard
+
+A high-performance anti-cheat for **Paper 1.21** servers, crafted by **Nova Studio**.
+
+[![Version](https://img.shields.io/badge/version-1.6.0-blue)](https://github.com/reach1234889)
+[![Paper](https://img.shields.io/badge/paper-1.21-orange)](https://papermc.io)
+[![Kotlin](https://img.shields.io/badge/kotlin-2.x-purple)](https://kotlinlang.org)
+[![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+
+NovaGuard ships **44 toggleable checks** covering movement, combat, exploits, and macro-style automation — with a violation-level (VL) system, staff tooling, and smart false-positive protection built in.
+
+---
+
+## Features
+
+### Detection
+Every check is individually toggleable and carries its own max-VL, punishment, and ban-command configuration.
+
+**Movement** — Fly, Speed, Timer, Jesus, Step, NoFall, Spider, Scaffold, Phase, ElytraFly, NoSlow, Sprint, BoatFly
+
+**Combat** — KillAura (Rate / Angle / Cooldown), Reach, AutoClicker, Criticals, Velocity, CrystalAura, AutoTotem, FastBow
+
+**Exploit** — FastPlace, FastBreak, Nuker, FastEat, BadPackets, InventoryMove, PingSpoof, ChestStealer, InventoryClicker, GhostHand, Derp, Baritone, BookBan, IllegalItems, Xray
+
+**Anti-macro / client** — Macro interval detection, ClickSignature timing, AFKMacro micro-movement, InventoryBot loops, ChatMacro timing, ClientBrand blocklist
+
+### Anti-Xray
+Honeypot ores hidden inside solid rock, unexposed-ore ratio tracking, and diamond-per-hour alerts catch xrayers even when texture packs expose every ore. (Paper's built-in anti-xray is still recommended as the first layer.)
+
+### Staff tools
+- `/sus` — suspects GUI with threat scores, top detections, ping, Java/Bedrock status; click to teleport or view history
+- `/novaguard freeze` — freeze a suspect in place
+- Ban waves — queue bans and execute them all at once
+- Player reports (`/report`), violation history, click-to-teleport alerts
+- Discord webhook notifications
+
+### False-positive protection
+- **Grace period** — brand-new players need 2x VL before any punishment lands
+- **Lag shield** — punishments auto-pause when TPS drops, alerts continue
+- **Bedrock support** — Geyser/Floodgate players are exempt from checks that don't translate reliably to Bedrock
+- **VPN / proxy / hosting blocker** — screens datacenter IPs at login (fails open, exempt list included)
+
+---
+
+## Commands
+
+| Command | Description | Permission |
+|---|---|---|
+| `/novaguard reload` | Reload all configuration | `novaguard.admin` |
+| `/novaguard list` | List all checks and their status | `novaguard.admin` |
+| `/novaguard toggle <check>` | Enable/disable a check live | `novaguard.admin` |
+| `/novaguard vl <player>` | View a player's violation levels | `novaguard.admin` |
+| `/novaguard vlreset <player>` | Clear a player's violations | `novaguard.admin` |
+| `/novaguard alerts` | Toggle staff alert messages | `novaguard.alerts` |
+| `/novaguard freeze <player>` | Freeze / unfreeze a suspect | `novaguard.admin` |
+| `/novaguard wave` | Execute the queued ban wave | `novaguard.admin` |
+| `/novaguard wavelist` | View queued ban-wave targets | `novaguard.admin` |
+| `/novaguard reports` | View open player reports | `novaguard.admin` |
+| `/novaguard history <player>` | View a player's violation history | `novaguard.admin` |
+| `/report <player> <reason>` | Report a suspected cheater | — |
+| `/sus` | Open the suspects GUI | `novaguard.sus` |
+
+Aliases: `/ng`, `/guard` for `/novaguard` · `/suspects` for `/sus`
+
+**Other permissions:** `novaguard.bypass` — fully exempt a player from all checks.
+
+---
+
+## Configuration
+
+| File | Purpose |
+|---|---|
+| `config.yml` | Global settings — Bedrock handling, VPN blocker, grace period, lag shield, Discord webhook |
+| `checks.yml` | Per-check toggles, max-VL, punishments, ban commands |
+| `messages.yml` | Every player-facing and staff message |
+| `xray.yml` | Anti-xray honeypot and alert tuning |
+
+All files generate with sane defaults on first run.
+
+---
+
+## Installation
+
+1. Download the latest `NovaGuard-1.6.0.jar` from the releases page.
+2. Drop it into your server's `plugins/` folder.
+3. Restart the server. Configuration files generate automatically.
+
+**Requirements:** Paper 1.21+ (or a fork), Java 21.
+
+---
+
+## Building from source
+
+Requirements: JDK 21, Kotlin 2.x compiler, and the Paper 1.21 API jar.
+
+```bash
+# compile all sources
+kotlinc -no-stdlib -no-reflect \
+  -cp "paper-api.jar:kotlin-stdlib.jar:adventure-api.jar:adventure-key.jar:examination-api.jar" \
+  -d build/classes $(find src/main/kotlin -name "*.kt")
+
+# add resources, shade the Kotlin stdlib, and package
+cp -r src/main/resources/* build/classes/
+jar cf NovaGuard-1.6.0.jar -C build/classes .
+```
+
+---
+
+## License
+
+MIT — see [LICENSE](LICENSE). Copyright (c) 2026 Nova Studio.
+
+```
+
+`pom.xml`:
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.novaguard</groupId>
+    <artifactId>NovaGuard</artifactId>
+    <version>1.6.0</version>
+    <packaging>jar</packaging>
+    <properties>
+        <kotlin.version>2.0.0</kotlin.version>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+    <dependencies>
+        <dependency>
+            <groupId>io.papermc.paper</groupId>
+            <artifactId>paper-api</artifactId>
+            <version>1.21-R0.1-SNAPSHOT</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jetbrains.kotlin</groupId>
+            <artifactId>kotlin-stdlib</artifactId>
+            <version>${kotlin.version}</version>
+        </dependency>
+    </dependencies>
+</project>
+
+```
+
+`src/main/kotlin/com/novaguard/NovaGuard.kt`:
+
+```kt
+package com.novaguard
+
+import com.novaguard.alert.AlertManager
+import com.novaguard.check.CheckManager
+import com.novaguard.checks.ExtraChecks
+import com.novaguard.command.GuardCommand
+import com.novaguard.command.ReportCommand
+import com.novaguard.command.SusCommand
+import com.novaguard.config.ConfigManager
+import com.novaguard.data.DataManager
+import com.novaguard.listener.BlockListener
+import com.novaguard.listener.CombatListener
+import com.novaguard.listener.ExtraListener
+import com.novaguard.listener.MoveListener
+import com.novaguard.listener.PlayerListener
+import com.novaguard.punish.PunishmentManager
+import com.novaguard.staff.StaffTools
+import com.novaguard.xray.XrayManager
+import org.bukkit.plugin.java.JavaPlugin
+
+class NovaGuard : JavaPlugin() {
+
+    lateinit var data: DataManager
+        private set
+    lateinit var xray: XrayManager
+        private set
+    lateinit var checks: CheckManager
+        private set
+    lateinit var alerts: AlertManager
+        private set
+    lateinit var punishments: PunishmentManager
+        private set
+    lateinit var staff: StaffTools
+        private set
+    lateinit var configs: ConfigManager
+        private set
+
+    /** Bedrock (Geyser) leniency state, loaded from config. */
+    var bedrockLeniency: Boolean = true
+    var bedrockExempt: Set<String> = emptySet()
+
+    /** Grace period for brand-new players. */
+    var graceEnabled: Boolean = true
+    var graceMinutes: Long = 60
+    var graceMultiplier: Double = 2.0
+
+    /** Lag shield: pause punishments when TPS collapses. */
+    var lagShieldEnabled: Boolean = true
+    var lagShieldThreshold: Double = 18.0
+
+    override fun onEnable() {
+        saveDefaultConfig()
+        // internal consistency bootstrap
+        if (!com.novaguard.internal.CoreValidator.check(this)) {
+            logger.severe("NovaGuard failed its internal consistency check and will now disable itself.")
+            server.pluginManager.disablePlugin(this)
+            return
+        }
+        com.novaguard.support.BedrockSupport.init(this)
+        configs = ConfigManager(this)
+        configs.load()
+        data = DataManager()
+        xray = XrayManager(this)          // before CheckManager (registers xray check)
+        checks = CheckManager(this)
+        alerts = AlertManager(this)
+        punishments = PunishmentManager(this)
+        staff = StaffTools(this)
+        checks.load()
+        alerts.load()
+        punishments.load()
+        xray.start()
+
+        server.pluginManager.registerEvents(MoveListener(this), this)
+        server.pluginManager.registerEvents(CombatListener(this), this)
+        server.pluginManager.registerEvents(BlockListener(this), this)
+        server.pluginManager.registerEvents(PlayerListener(this), this)
+        server.pluginManager.registerEvents(ExtraListener(this), this)
+
+        val cmd = GuardCommand(this)
+        getCommand("novaguard")?.setExecutor(cmd)
+        getCommand("novaguard")?.tabCompleter = cmd
+        val report = ReportCommand(this)
+        getCommand("report")?.setExecutor(report)
+        getCommand("report")?.tabCompleter = report
+        val sus = SusCommand(this)
+        getCommand("sus")?.setExecutor(sus)
+        getCommand("sus")?.tabCompleter = sus
+
+        // client brand detection (minecraft:brand channel)
+        server.messenger.registerIncomingPluginChannel(this, "minecraft:brand",
+            org.bukkit.plugin.messaging.PluginMessageListener { _, player, message ->
+                try {
+                    val brand = readBrand(message).take(64)
+                    val d = data.get(player.uniqueId)
+                    if (d.isExempt(player)) return@PluginMessageListener
+                    val check = checks.get("clientbrand") as? com.novaguard.checks.MacroChecks.ClientBrand
+                    if (check?.enabled == true) {
+                        server.scheduler.runTask(this, Runnable {
+                            if (player.isOnline) check.onBrand(player, d, brand.ifBlank { "unknown" })
+                        })
+                    } else d.clientBrand = brand.ifBlank { "unknown" }
+                } catch (_: Exception) { }
+            })
+
+        // VL decay task
+        server.scheduler.runTaskTimerAsynchronously(this, Runnable {
+            data.decayVls(config.getDouble("settings.vl-decay-per-minute", 1.0))
+        }, 1200L, 1200L)
+
+        // periodic consistency re-check
+        server.scheduler.runTaskTimerAsynchronously(this, Runnable {
+            if (!com.novaguard.internal.CoreValidator.check(this)) {
+                logger.severe("NovaGuard consistency re-check failed — disabling.")
+                server.scheduler.runTask(this, Runnable {
+                    server.pluginManager.disablePlugin(this)
+                })
+            }
+        }, 12000L, 12000L)
+
+        // illegal item scanner (main thread: touches inventories)
+        val scanSecs = config.getLong("settings.illegal-scan-seconds", 60)
+        server.scheduler.runTaskTimer(this, Runnable {
+            val check = checks.get("illegals") as? ExtraChecks.IllegalItems ?: return@Runnable
+            if (!check.enabled) return@Runnable
+            for (p in server.onlinePlayers) {
+                val d = data.get(p.uniqueId)
+                if (d.isExempt(p)) continue
+                check.scan(p, d)
+            }
+        }, scanSecs * 20, scanSecs * 20)
+
+        logger.info("NovaGuard v${pluginMeta.version} enabled with ${checks.all.size} checks.")
+    }
+
+    override fun onDisable() {
+        try {
+            server.messenger.unregisterIncomingPluginChannel(this, "minecraft:brand")
+        } catch (_: Exception) { }
+        data.clear()
+        logger.info("NovaGuard disabled.")
+    }
+
+    /** Reads a VarInt-prefixed UTF string (the minecraft:brand payload format). */
+    private fun readBrand(bytes: ByteArray): String {
+        var numRead = 0
+        var result = 0
+        var idx = 0
+        do {
+            if (idx >= bytes.size) return "unknown"
+            val read = bytes[idx++].toInt()
+            result = result or ((read and 0b01111111) shl (7 * numRead))
+            numRead++
+            if (numRead > 5) return "unknown"
+        } while ((read and 0b10000000) != 0)
+        if (idx + result > bytes.size) return "unknown"
+        return bytes.copyOfRange(idx, idx + result).toString(Charsets.UTF_8)
+    }
+
+    fun reloadAll() {
+        reloadConfig()
+        configs.load()
+        checks.load()
+        alerts.load()
+        punishments.load()
+    }
+}
+
+```
+
+`src/main/kotlin/com/novaguard/alert/AlertManager.kt`:
+
+```kt
+package com.novaguard.alert
+
+import com.novaguard.NovaGuard
+import com.novaguard.check.Check
+import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.event.ClickEvent
+import net.kyori.adventure.text.event.HoverEvent
+import net.kyori.adventure.text.format.NamedTextColor
+import net.kyori.adventure.text.format.TextDecoration
+import org.bukkit.Bukkit
+import org.bukkit.entity.Player
+
+class AlertManager(private val plugin: NovaGuard) {
+
+    var enabled: Boolean = true
+
+    fun load() {
+        enabled = plugin.config.getBoolean("settings.alerts-enabled", true)
+    }
+
+    fun alert(player: Player, check: Check, vl: Double, info: String) {
+        if (!enabled) return
+        val prefix = color(plugin.configs.msg("alert-format",
+            "player" to player.name,
+            "check" to check.displayName,
+            "vl" to "%.1f".format(vl),
+            "info" to info))
+        val hover = Component.text()
+            .append(Component.text("NovaGuard", NamedTextColor.AQUA, TextDecoration.BOLD)
+            .append(Component.text(" Detection", NamedTextColor.DARK_AQUA, TextDecoration.BOLD))).append(Component.newline())
+            .append(Component.text("──────────────────", NamedTextColor.DARK_GRAY)).append(Component.newline())
+            .append(Component.text("Player  ", NamedTextColor.GRAY))
+            .append(Component.text(player.name, NamedTextColor.WHITE)).append(Component.newline())
+            .append(Component.text("Check   ", NamedTextColor.GRAY))
+            .append(Component.text(check.displayName, NamedTextColor.RED)).append(Component.newline())
+            .append(Component.text("Type     ", NamedTextColor.GRAY))
+            .append(Component.text(check.type.name, NamedTextColor.GOLD)).append(Component.newline())
+            .append(Component.text("Level    ", NamedTextColor.GRAY))
+            .append(Component.text("%.1f".format(vl) + " VL", NamedTextColor.YELLOW)).append(Component.newline())
+            .append(Component.text("Ping     ", NamedTextColor.GRAY))
+            .append(Component.text("${safePing(player)} ms", NamedTextColor.YELLOW))
+            .append(Component.newline())
+            .append(Component.text("──────────────────", NamedTextColor.DARK_GRAY)).append(Component.newline())
+            .append(Component.text("Click to teleport to player", NamedTextColor.GREEN, TextDecoration.ITALIC))
+            .build()
+        val message = Component.text()
+            .append(prefix)
+            .clickEvent(ClickEvent.runCommand("/tp ${player.name}"))
+            .hoverEvent(HoverEvent.showText(hover))
+            .build()
+        for (viewer in Bukkit.getOnlinePlayers()) {
+            if (!viewer.hasPermission("novaguard.alerts")) continue
+            val data = plugin.data.get(viewer.uniqueId)
+            if (!data.alertsEnabled) continue
+            viewer.sendMessage(message)
+        }
+        if (plugin.config.getBoolean("settings.log-to-console", true)) {
+            plugin.logger.info("[ALERT] ${player.name} failed ${check.displayName} (VL ${"%.1f".format(vl)}) $info")
+        }
+    }
+
+    private fun safePing(p: Player): Int = try { p.ping } catch (_: Exception) { -1 }
+
+    private fun color(s: String): Component {
+        // § color code support (messages.yml already converts & -> §)
+        val codes = mapOf(
+            "§0" to NamedTextColor.BLACK, "§1" to NamedTextColor.DARK_BLUE,
+            "§2" to NamedTextColor.DARK_GREEN, "§3" to NamedTextColor.DARK_AQUA,
+            "§4" to NamedTextColor.DARK_RED, "§5" to NamedTextColor.DARK_PURPLE,
+            "§6" to NamedTextColor.GOLD, "§7" to NamedTextColor.GRAY,
+            "§8" to NamedTextColor.DARK_GRAY, "§9" to NamedTextColor.BLUE,
+            "§a" to NamedTextColor.GREEN, "§b" to NamedTextColor.AQUA,
+            "§c" to NamedTextColor.RED, "§d" to NamedTextColor.LIGHT_PURPLE,
+            "§e" to NamedTextColor.YELLOW, "§f" to NamedTextColor.WHITE,
+            "§l" to TextDecoration.BOLD
+        )
+        var comp = Component.empty()
+        var current: Any = NamedTextColor.WHITE
+        var bold = false
+        var buf = StringBuilder()
+        var i = 0
+        fun flush() {
+            if (buf.isNotEmpty()) {
+                var c = Component.text(buf.toString(), current as NamedTextColor)
+                if (bold) c = c.decorate(TextDecoration.BOLD)
+                comp = comp.append(c)
+                buf = StringBuilder()
+            }
+        }
+        while (i < s.length) {
+            if (s[i] == '§' && i + 1 < s.length) {
+                val code = s.substring(i, i + 2).lowercase()
+                if (code == "§r") {
+                    flush(); current = NamedTextColor.WHITE; bold = false; i += 2; continue
+                }
+                if (codes.containsKey(code)) {
+                    flush()
+                    val v = codes[code]!!
+                    if (v is TextDecoration) bold = true else { current = v; }
+                    i += 2
+                    continue
+                }
+            }
+            buf.append(s[i]); i++
+        }
+        flush()
+        return comp
+    }
+}
+
+```
+
+`src/main/kotlin/com/novaguard/check/Check.kt`:
+
+```kt
+package com.novaguard.check
+
+import com.novaguard.NovaGuard
+import com.novaguard.data.PlayerData
+import org.bukkit.entity.Player
+
+enum class CheckType { MOVEMENT, COMBAT, BLOCK, PLAYER }
+
+/**
+ * Base class for every detection check. Each check is toggleable
+ * and has its own violation threshold + punishment, like Vulcan.
+ */
+abstract class Check(
+    val id: String,
+    val displayName: String,
+    val type: CheckType,
+    protected val plugin: NovaGuard
+) {
+    var enabled: Boolean = true
+    var maxVl: Double = 10.0
+    var punishment: String = "kick {player} Unfair advantage ({check})"
+    var banCommand: String = "ban {player} Cheating ({check})"
+    var banVlMultiplier: Double = 3.0
+
+    fun flag(player: Player, data: PlayerData, info: String = "") {
+        if (!enabled) return
+        if (data.isExempt(player)) return
+        if (plugin.bedrockLeniency && data.checkBedrock() && plugin.bedrockExempt.contains(id)) return
+        val vl = data.addVl(id, vlAmount())
+        val inGrace = plugin.graceEnabled && System.currentTimeMillis() < data.graceUntil
+        data.addHistory(id, vl, if (inGrace) "$info [grace]" else info)
+        plugin.alerts.alert(player, this, vl, if (inGrace) "$info [grace]" else info)
+        // grace period: brand-new players need 2x VL before punishment
+        val effectiveMax = if (inGrace) maxVl * plugin.graceMultiplier else maxVl
+        if (vl >= effectiveMax * banVlMultiplier) {
+            plugin.punishments.execute(player, this, banCommand, vl, true)
+            data.resetVl(id)
+        } else if (vl >= effectiveMax) {
+            plugin.punishments.execute(player, this, punishment, vl, false)
+            data.setVl(id, effectiveMax * 0.5) // keep half so repeat offenders escalate
+        }
+    }
+
+    /** How much VL one detection adds. Override for weighted checks. */
+    open fun vlAmount(): Double = 1.0
+}
+
+```
+
+`src/main/kotlin/com/novaguard/check/CheckManager.kt`:
+
+```kt
+package com.novaguard.check
+
+import com.novaguard.NovaGuard
+import com.novaguard.checks.BlockChecks
+import com.novaguard.checks.CombatChecks
+import com.novaguard.checks.ExtraChecks
+import com.novaguard.checks.MacroChecks
+import com.novaguard.checks.MovementChecks
+import com.novaguard.checks.PlayerChecks
+
+class CheckManager(private val plugin: NovaGuard) {
+
+    private val checks = mutableMapOf<String, Check>()
+    val all: Collection<Check> get() = checks.values
+
+    init {
+        MovementChecks.registerAll(plugin, ::register)
+        CombatChecks.registerAll(plugin, ::register)
+        BlockChecks.registerAll(plugin, ::register)
+        PlayerChecks.registerAll(plugin, ::register)
+        ExtraChecks.registerAll(plugin, ::register)
+        MacroChecks.registerAll(plugin, ::register)
+        plugin.xray.registerHook(::register)
+    }
+
+    private fun register(check: Check) {
+        checks[check.id.lowercase()] = check
+    }
+
+    fun get(id: String): Check? = checks[id.lowercase()]
+
+    fun byType(type: CheckType): List<Check> = checks.values.filter { it.type == type }
+
+    /** Load per-check toggles from checks.yml, Vulcan-style. */
+    fun load() {
+        val cfg = plugin.configs.checks
+        for (check in checks.values) {
+            val path = "checks.${check.id}"
+            check.enabled = cfg.getBoolean("$path.enabled", true)
+            check.maxVl = cfg.getDouble("$path.max-vl", 10.0)
+            check.punishment = cfg.getString("$path.punishment", check.punishment)!!
+            check.banCommand = cfg.getString("$path.ban-command", check.banCommand)!!
+            check.banVlMultiplier = cfg.getDouble("$path.ban-vl-multiplier", 3.0)
+        }
+        plugin.bedrockLeniency = plugin.config.getBoolean("bedrock.enabled", true)
+        plugin.bedrockExempt = plugin.config.getStringList("bedrock.exempt-checks")
+            .map { it.lowercase() }.toSet()
+        plugin.graceEnabled = plugin.config.getBoolean("settings.grace-period.enabled", true)
+        plugin.graceMinutes = plugin.config.getLong("settings.grace-period.minutes", 60)
+        plugin.graceMultiplier = plugin.config.getDouble("settings.grace-period.vl-multiplier", 2.0)
+    }
+}
+
+```
+
+`src/main/kotlin/com/novaguard/checks/BlockChecks.kt`:
+
+```kt
+package com.novaguard.checks
+
+import com.novaguard.NovaGuard
+import com.novaguard.check.Check
+import com.novaguard.check.CheckType
+import com.novaguard.data.PlayerData
+import org.bukkit.entity.Player
+import org.bukkit.event.block.BlockBreakEvent
+import org.bukkit.event.block.BlockPlaceEvent
+import org.bukkit.event.player.PlayerItemConsumeEvent
+
+object BlockChecks {
+
+    fun registerAll(plugin: NovaGuard, register: (Check) -> Unit) {
+        register(FastPlace(plugin)); register(FastBreak(plugin))
+        register(Nuker(plugin)); register(FastEat(plugin))
+    }
+
+    /** FastPlace (A): placing blocks faster than possible. */
+    class FastPlace(plugin: NovaGuard) : Check("fastplace", "FastPlace", CheckType.BLOCK, plugin) {
+        fun onPlace(p: Player, d: PlayerData, e: BlockPlaceEvent) {
+            val now = System.currentTimeMillis()
+            val window = d.getLong("fp_window")
+            if (now - window > 1000) {
+                val count = d.getInt("fp_count")
+                if (count > 8 && window != 0L) flag(p, d, "$count/s")
+                d.setLong("fp_window", now); d.setInt("fp_count", 1)
+            } else d.addInt("fp_count", 1)
+        }
+    }
+
+    /** FastBreak (A): breaking blocks faster than possible. */
+    class FastBreak(plugin: NovaGuard) : Check("fastbreak", "FastBreak", CheckType.BLOCK, plugin) {
+        fun onBreak(p: Player, d: PlayerData, e: BlockBreakEvent) {
+            val now = System.currentTimeMillis()
+            val window = d.getLong("fb_window")
+            if (now - window > 1000) {
+                val count = d.getInt("fb_count")
+                if (count > 10 && window != 0L) flag(p, d, "$count/s")
+                d.setLong("fb_window", now); d.setInt("fb_count", 1)
+            } else d.addInt("fb_count", 1)
+        }
+    }
+
+    /** Nuker (A): breaking multiple blocks in a single tick. */
+    class Nuker(plugin: NovaGuard) : Check("nuker", "Nuker", CheckType.BLOCK, plugin) {
+        fun onBreak(p: Player, d: PlayerData) {
+            val tick = p.world.gameTime
+            val lastTick = d.getLong("nuker_tick")
+            if (tick == lastTick) {
+                if (d.addInt("nuker_c", 1) >= 3) {
+                    flag(p, d, "${d.getInt("nuker_c")} blocks in one tick")
+                }
+            } else {
+                d.setLong("nuker_tick", tick)
+                d.setInt("nuker_c", 1)
+            }
+        }
+    }
+
+    /** FastEat (A): consuming food faster than the eat animation. */
+    class FastEat(plugin: NovaGuard) : Check("fasteat", "FastEat", CheckType.BLOCK, plugin) {
+        fun onEatStart(p: Player, d: PlayerData) {
+            d.setLong("fe_start", System.currentTimeMillis())
+        }
+        fun onEat(p: Player, d: PlayerData, e: PlayerItemConsumeEvent) {
+            val start = d.getLong("fe_start")
+            if (start == 0L) return
+            val took = System.currentTimeMillis() - start
+            if (took < 1200) {
+                if (d.addInt("fe_c", 1) > 2) {
+                    flag(p, d, "ate in ${took}ms")
+                    d.setInt("fe_c", 0)
+                }
+            } else d.setInt("fe_c", 0)
+            d.setLong("fe_start", 0L)
+        }
+    }
+}
+
+```
+
+`src/main/kotlin/com/novaguard/checks/CombatChecks.kt`:
+
+```kt
+package com.novaguard.checks
+
+import com.novaguard.NovaGuard
+import com.novaguard.check.Check
+import com.novaguard.check.CheckType
+import com.novaguard.data.PlayerData
+import org.bukkit.entity.Player
+import kotlin.math.sqrt
+
+object CombatChecks {
+
+    fun registerAll(plugin: NovaGuard, register: (Check) -> Unit) {
+        register(KillAuraRate(plugin)); register(KillAuraAngle(plugin))
+        register(KillAuraCooldown(plugin)); register(Reach(plugin))
+        register(AutoClicker(plugin)); register(Criticals(plugin))
+        register(Velocity(plugin))
+    }
+
+    private fun prune(list: MutableList<Long>, windowMs: Long): MutableList<Long> {
+        val now = System.currentTimeMillis()
+        list.removeIf { now - it > windowMs }
+        return list
+    }
+
+    /** KillAura (A): inhuman attack rate. */
+    class KillAuraRate(plugin: NovaGuard) : Check("killaura-rate", "KillAura (Rate)", CheckType.COMBAT, plugin) {
+        fun onAttack(p: Player, d: PlayerData) {
+            val key = "ka_rate"
+            val now = System.currentTimeMillis()
+            val last = d.getLong("${key}_t")
+            if (now - last < 55) { // faster than humanly possible
+                if (d.addInt("${key}_c", 1) > 8) {
+                    flag(p, d, "interval=${now - last}ms")
+                    d.setInt("${key}_c", 0)
+                }
+            } else d.setInt("${key}_c", 0)
+            d.setLong("${key}_t", now)
+        }
+    }
+
+    /** KillAura (B): hitting entities outside the look cone. */
+    class KillAuraAngle(plugin: NovaGuard) : Check("killaura-angle", "KillAura (Angle)", CheckType.COMBAT, plugin) {
+        fun onAttack(p: Player, target: org.bukkit.entity.Entity, d: PlayerData) {
+            val eye = p.eyeLocation
+            val dir = eye.direction.normalize()
+            val toTarget = target.location.clone().add(0.0, target.height / 2, 0.0)
+                .subtract(eye).toVector().normalize()
+            val dot = dir.dot(toTarget).coerceIn(-1.0, 1.0)
+            val angle = Math.toDegrees(Math.acos(dot))
+            if (angle > 70) {
+                if (d.addInt("ka_angle_c", 1) > 4) {
+                    flag(p, d, "angle=${"%.1f".format(angle)}")
+                    d.setInt("ka_angle_c", 0)
+                }
+            } else d.setInt("ka_angle_c", 0)
+        }
+    }
+
+    /** KillAura (C): attacking without waiting for cooldown. */
+    class KillAuraCooldown(plugin: NovaGuard) : Check("killaura-cooldown", "KillAura (Cooldown)", CheckType.COMBAT, plugin) {
+        fun onAttack(p: Player, d: PlayerData) {
+            try {
+                if (p.attackCooldown < 0.6) {
+                    if (d.addInt("ka_cd_c", 1) > 10) {
+                        flag(p, d, "cooldown=${"%.2f".format(p.attackCooldown)}")
+                        d.setInt("ka_cd_c", 5)
+                    }
+                } else d.setInt("ka_cd_c", 0)
+            } catch (_: Exception) { }
+        }
+    }
+
+    /** Reach (A): hitting beyond 3 blocks. */
+    class Reach(plugin: NovaGuard) : Check("reach", "Reach", CheckType.COMBAT, plugin) {
+        fun onAttack(p: Player, target: org.bukkit.entity.Entity, d: PlayerData) {
+            val dist = p.eyeLocation.distance(target.location.clone().add(0.0, target.height / 2, 0.0))
+            if (dist > 3.4) {
+                if (d.addInt("reach_c", 1) > 5) {
+                    flag(p, d, "dist=${"%.2f".format(dist)}")
+                    d.setInt("reach_c", 2)
+                }
+            } else d.setInt("reach_c", 0)
+        }
+    }
+
+    /** AutoClicker (A): unnaturally consistent click timing. */
+    class AutoClicker(plugin: NovaGuard) : Check("autoclicker", "AutoClicker", CheckType.COMBAT, plugin) {
+        fun onAttack(p: Player, d: PlayerData) {
+            val now = System.currentTimeMillis()
+            val last = d.getLong("ac_last")
+            if (last != 0L) {
+                val interval = now - last
+                if (interval in 20..1000) {
+                    val count = d.getInt("ac_n")
+                    val mean = d.getDouble("ac_mean")
+                    val m2 = d.getDouble("ac_m2")
+                    val n = count + 1
+                    val delta = interval - mean
+                    val newMean = mean + delta / n
+                    val newM2 = m2 + delta * (interval - newMean)
+                    d.setInt("ac_n", n); d.setDouble("ac_mean", newMean); d.setDouble("ac_m2", newM2)
+                    if (n >= 25) {
+                        val variance = newM2 / n
+                        val stddev = sqrt(variance)
+                        val cps = 1000.0 / newMean
+                        if (stddev < 12 && cps > 7) {
+                            flag(p, d, "cps=${"%.1f".format(cps)} sd=${"%.1f".format(stddev)}")
+                            d.setInt("ac_n", 0); d.setDouble("ac_mean", 0.0); d.setDouble("ac_m2", 0.0)
+                        } else if (n >= 60) {
+                            d.setInt("ac_n", 0); d.setDouble("ac_mean", 0.0); d.setDouble("ac_m2", 0.0)
+                        }
+                    }
+                }
+            }
+            d.setLong("ac_last", now)
+        }
+    }
+
+    /** Criticals (A): every hit landing as a critical. */
+    class Criticals(plugin: NovaGuard) : Check("criticals", "Criticals", CheckType.COMBAT, plugin) {
+        fun onAttack(p: Player, d: PlayerData) {
+            val crit = p.fallDistance > 0 && !p.isOnGround && !p.isInWater &&
+                    !p.isClimbing && !p.isGliding && !p.isSprinting
+            if (crit) {
+                if (d.addInt("crit_c", 1) > 12) {
+                    flag(p, d, "12 consecutive crits")
+                    d.setInt("crit_c", 6)
+                }
+            } else d.setInt("crit_c", 0)
+        }
+    }
+
+    /** Velocity (A): taking no knockback. */
+    class Velocity(plugin: NovaGuard) : Check("velocity", "Velocity", CheckType.COMBAT, plugin) {
+        fun onHurt(p: Player, d: PlayerData) {
+            // sample velocity shortly after the hit lands
+            val before = p.velocity.length()
+            plugin.server.scheduler.runTaskLater(plugin, Runnable {
+                if (!p.isOnline) return@Runnable
+                val after = p.velocity.length()
+                // legit knockback spikes velocity; cheaters barely move
+                if (after < 0.12 && before < 0.12) {
+                    if (d.addInt("vel_c", 1) > 5) {
+                        flag(p, d, "no knockback")
+                        d.setInt("vel_c", 2)
+                    }
+                } else d.setInt("vel_c", 0)
+            }, 2L)
+        }
+    }
+}
+
+```
+
+`src/main/kotlin/com/novaguard/checks/ExtraChecks.kt`:
+
+```kt
+package com.novaguard.checks
+
+import com.novaguard.NovaGuard
+import com.novaguard.check.Check
+import com.novaguard.check.CheckType
+import com.novaguard.data.PlayerData
+import org.bukkit.Material
+import org.bukkit.entity.Boat
+import org.bukkit.entity.Player
+import org.bukkit.event.block.Action
+import org.bukkit.event.entity.EntityResurrectEvent
+import org.bukkit.event.entity.EntityShootBowEvent
+import org.bukkit.event.inventory.InventoryClickEvent
+import org.bukkit.event.player.PlayerEditBookEvent
+import org.bukkit.event.player.PlayerInteractEvent
+import org.bukkit.event.player.PlayerMoveEvent
+import org.bukkit.inventory.meta.BookMeta
+
+/**
+ * Wave 2 checks: CrystalAura, AutoTotem, FastBow, NoSlow, Sprint,
+ * BoatFly, ChestStealer, InventoryClicker, GhostHand, Derp, Baritone,
+ * BookBan, IllegalItems.
+ */
+object ExtraChecks {
+
+    fun registerAll(plugin: NovaGuard, register: (Check) -> Unit) {
+        register(CrystalAura(plugin)); register(AutoTotem(plugin)); register(FastBow(plugin))
+        register(NoSlow(plugin)); register(SprintCheck(plugin)); register(BoatFly(plugin))
+        register(ChestStealer(plugin)); register(InventoryClicker(plugin))
+        register(GhostHand(plugin)); register(Derp(plugin)); register(Baritone(plugin))
+        register(BookBan(plugin)); register(IllegalItems(plugin))
+    }
+
+    /** CrystalAura (A): placing end crystals inhumanly fast. */
+    class CrystalAura(plugin: NovaGuard) : Check("crystalaura", "CrystalAura", CheckType.COMBAT, plugin) {
+        fun onPlace(p: Player, d: PlayerData) {
+            val now = System.currentTimeMillis()
+            if (now - d.getLong("ca_window") > 1000) {
+                d.setLong("ca_window", now); d.setInt("ca_c", 1)
+            } else if (d.addInt("ca_c", 1) > 4) {
+                flag(p, d, "${d.getInt("ca_c")} crystals/s")
+                d.setInt("ca_c", 0)
+            }
+        }
+    }
+
+    /** AutoTotem (A): totem equipped suspiciously fast before fatal damage. */
+    class AutoTotem(plugin: NovaGuard) : Check("autototem", "AutoTotem", CheckType.COMBAT, plugin) {
+        fun onTotemEquip(d: PlayerData) { d.setLong("at_equip", System.currentTimeMillis()) }
+        fun onPop(p: Player, d: PlayerData, e: EntityResurrectEvent) {
+            val since = System.currentTimeMillis() - d.getLong("at_equip")
+            if (since in 1..500) {
+                if (d.addInt("at_c", 1) > 2) {
+                    flag(p, d, "totem equipped ${since}ms before pop")
+                    d.setInt("at_c", 0)
+                }
+            } else d.setInt("at_c", 0)
+        }
+    }
+
+    /** FastBow (A): shooting arrows faster than the draw allows. */
+    class FastBow(plugin: NovaGuard) : Check("fastbow", "FastBow", CheckType.COMBAT, plugin) {
+        fun onShoot(p: Player, d: PlayerData, e: EntityShootBowEvent) {
+            val now = System.currentTimeMillis()
+            val last = d.getLong("fbow_last")
+            if (last != 0L && now - last < 400) {
+                if (d.addInt("fbow_c", 1) > 5) {
+                    flag(p, d, "interval=${now - last}ms")
+                    d.setInt("fbow_c", 0)
+                }
+            } else d.setInt("fbow_c", 0)
+            d.setLong("fbow_last", now)
+        }
+    }
+
+    /** NoSlow (A): full movement speed while eating or drawing a bow. */
+    class NoSlow(plugin: NovaGuard) : Check("noslow", "NoSlow", CheckType.MOVEMENT, plugin) {
+        fun onBowDraw(d: PlayerData) { d.setLong("ns_bow", System.currentTimeMillis()) }
+        fun onBowShoot(d: PlayerData) { d.setLong("ns_bow", 0L) }
+        fun onMove(e: PlayerMoveEvent, p: Player, d: PlayerData) {
+            val now = System.currentTimeMillis()
+            val eating = now - d.getLong("fe_start") in 1..30000 && d.getLong("fe_start") != 0L
+            val drawing = now - d.getLong("ns_bow") in 1..6000
+            if (eating || drawing) {
+                val dist = Math.hypot(e.to.x - e.from.x, e.to.z - e.from.z)
+                if (dist > 0.22) {
+                    if (d.addInt("ns_c", 1) > 10) {
+                        flag(p, d, if (eating) "moving while eating" else "moving while drawing bow")
+                        d.setInt("ns_c", 5)
+                    }
+                } else d.setInt("ns_c", 0)
+            } else d.setInt("ns_c", 0)
+        }
+    }
+
+    /** Sprint (A): sprinting while sneaking, or sprinting backwards. */
+    class SprintCheck(plugin: NovaGuard) : Check("sprintcheck", "Sprint", CheckType.MOVEMENT, plugin) {
+        fun onMove(e: PlayerMoveEvent, p: Player, d: PlayerData) {
+            if (!p.isSprinting) { d.setInt("sp_c", 0); return }
+            if (p.isSneaking) {
+                if (d.addInt("sp_c", 1) > 8) { flag(p, d, "sprinting while sneaking"); d.setInt("sp_c", 0) }
+                return
+            }
+            val dx = e.to.x - e.from.x; val dz = e.to.z - e.from.z
+            if (dx * dx + dz * dz < 0.01) return
+            val moveYaw = Math.toDegrees(Math.atan2(-dx, dz))
+            var diff = Math.abs(moveYaw - e.to.yaw) % 360
+            if (diff > 180) diff = 360 - diff
+            if (diff > 110) { // moving backwards while sprinting
+                if (d.addInt("sp_c", 1) > 12) { flag(p, d, "backwards sprint"); d.setInt("sp_c", 6) }
+            } else d.setInt("sp_c", 0)
+        }
+    }
+
+    /** BoatFly (A): vertical flight while riding a boat. */
+    class BoatFly(plugin: NovaGuard) : Check("boatfly", "BoatFly", CheckType.MOVEMENT, plugin) {
+        fun onMove(e: PlayerMoveEvent, p: Player, d: PlayerData, maxPing: Int) {
+            val boat = p.vehicle as? Boat ?: run { d.setInt("boat_c", 0); return }
+            if (d.isLagging(p, maxPing)) return
+            val dy = e.to.y - e.from.y
+            val belowWater = boat.location.clone().add(0.0, -0.5, 0.0).block.type == Material.WATER
+            if (dy > 0.25 && !belowWater) {
+                if (d.addInt("boat_c", 1) > 8) { flag(p, d, "dy=${"%.2f".format(dy)}"); d.setInt("boat_c", 4) }
+            } else d.setInt("boat_c", 0)
+        }
+    }
+
+    /** ChestStealer (A): emptying containers inhumanly fast. */
+    class ChestStealer(plugin: NovaGuard) : Check("cheststealer", "ChestStealer", CheckType.PLAYER, plugin) {
+        fun onTake(p: Player, d: PlayerData, e: InventoryClickEvent) {
+            val top = e.view.topInventory
+            val isContainer = top.holder is org.bukkit.block.Container ||
+                    top.type == org.bukkit.event.inventory.InventoryType.CHEST ||
+                    top.type == org.bukkit.event.inventory.InventoryType.ENDER_CHEST ||
+                    top.type == org.bukkit.event.inventory.InventoryType.SHULKER_BOX
+            if (!isContainer || e.clickedInventory != top) return
+            if (e.currentItem == null || e.currentItem!!.type.isAir) return
+            val now = System.currentTimeMillis()
+            if (now - d.getLong("cs_window") > 1000) {
+                d.setLong("cs_window", now); d.setInt("cs_c", 1)
+            } else if (d.addInt("cs_c", 1) > 10) {
+                flag(p, d, "${d.getInt("cs_c")} items/s from container")
+                d.setInt("cs_c", 0)
+            }
+        }
+    }
+
+    /** InventoryClicker (A): automated inventory clicking. */
+    class InventoryClicker(plugin: NovaGuard) : Check("inventoryclicker", "InventoryClicker", CheckType.PLAYER, plugin) {
+        fun onClick(p: Player, d: PlayerData) {
+            val now = System.currentTimeMillis()
+            if (now - d.getLong("ic_window") > 1000) {
+                val count = d.getInt("ic_c")
+                if (count > 14 && d.getLong("ic_window") != 0L) {
+                    if (d.addInt("ic_sustain", 1) > 2) {
+                        flag(p, d, "$count clicks/s")
+                        d.setInt("ic_sustain", 0)
+                    }
+                } else d.setInt("ic_sustain", 0)
+                d.setLong("ic_window", now); d.setInt("ic_c", 1)
+            } else d.addInt("ic_c", 1)
+        }
+    }
+
+    /** GhostHand (A): interacting with blocks through walls. */
+    class GhostHand(plugin: NovaGuard) : Check("ghosthand", "GhostHand", CheckType.PLAYER, plugin) {
+        fun onInteract(p: Player, d: PlayerData, e: PlayerInteractEvent) {
+            if (e.action != Action.RIGHT_CLICK_BLOCK) return
+            val clicked = e.clickedBlock ?: return
+            if (clicked.location.distanceSquared(p.eyeLocation) > 36) return
+            val ray = p.rayTraceBlocks(6.0) ?: return
+            val hit = ray.hitBlock
+            if (hit != null && hit.location != clicked.location &&
+                hit.location.blockX == clicked.location.blockX &&
+                hit.location.blockY == clicked.location.blockY &&
+                hit.location.blockZ == clicked.location.blockZ) return // same block, fine
+            if (hit == null || hit.location.distanceSquared(clicked.location) > 0.5) {
+                if (d.addInt("gh_c", 1) > 3) { flag(p, d, "interact through wall"); d.setInt("gh_c", 0) }
+            } else d.setInt("gh_c", 0)
+        }
+    }
+
+    /** Derp (A): spinbot-style head snapping. */
+    class Derp(plugin: NovaGuard) : Check("derp", "Derp", CheckType.PLAYER, plugin) {
+        fun onMove(e: PlayerMoveEvent, p: Player, d: PlayerData) {
+            val lastYaw = d.getDouble("derp_yaw")
+            val hasLast = d.getLong("derp_set") != 0L
+            var dyaw = Math.abs(e.to.yaw - lastYaw) % 360
+            if (dyaw > 180) dyaw = 360 - dyaw
+            if (hasLast && dyaw > 120) {
+                if (d.addInt("derp_c", 1) > 5) { flag(p, d, "head snap ${"%.0f".format(dyaw)}°"); d.setInt("derp_c", 0) }
+            } else d.setInt("derp_c", 0)
+            d.setDouble("derp_yaw", e.to.yaw.toDouble())
+            d.setLong("derp_set", 1L)
+        }
+    }
+
+    /** Baritone (A): bot-like perfectly straight movement (alert-weighted). */
+    class Baritone(plugin: NovaGuard) : Check("baritone", "Baritone", CheckType.PLAYER, plugin) {
+        fun onMove(e: PlayerMoveEvent, p: Player, d: PlayerData) {
+            val dx = e.to.x - e.from.x; val dz = e.to.z - e.from.z
+            if (dx * dx + dz * dz < 0.02) { d.setInt("bar_c", 0); return }
+            val lastYaw = d.getDouble("bar_yaw")
+            val hasLast = d.getLong("bar_set") != 0L
+            var dyaw = Math.abs(e.to.yaw - lastYaw) % 360
+            if (dyaw > 180) dyaw = 360 - dyaw
+            if (hasLast && dyaw < 0.4) {
+                if (d.addInt("bar_c", 1) > 600) { // 30s of pixel-perfect straight line
+                    flag(p, d, "bot-like pathing")
+                    d.setInt("bar_c", 300)
+                }
+            } else d.setInt("bar_c", 0)
+            d.setDouble("bar_yaw", e.to.yaw.toDouble())
+            d.setLong("bar_set", 1L)
+        }
+    }
+
+    /** BookBan (A): crash-exploit books are cancelled and flagged. */
+    class BookBan(plugin: NovaGuard) : Check("bookban", "BookBan", CheckType.PLAYER, plugin) {
+        fun onEdit(p: Player, d: PlayerData, e: PlayerEditBookEvent) {
+            val meta = e.newBookMeta as? BookMeta ?: return
+            var bad = false
+            for (page in meta.pages) {
+                if (page.length > 2000) { bad = true; break }
+            }
+            if (meta.pageCount > 100) bad = true
+            if (bad) {
+                e.isCancelled = true
+                flag(p, d, "oversized book (${meta.pageCount} pages)")
+            }
+        }
+    }
+
+    /** IllegalItems (A): strips impossible enchantments and stacked unstackables. */
+    class IllegalItems(plugin: NovaGuard) : Check("illegals", "IllegalItems", CheckType.PLAYER, plugin) {
+        fun scan(p: Player, d: PlayerData): Int {
+            var removed = 0
+            val inv = p.inventory
+            for (i in 0 until inv.size) {
+                val item = inv.getItem(i) ?: continue
+                if (item.type.isAir) continue
+                var illegal = false
+                for ((ench, lvl) in item.enchantments) {
+                    if (lvl > ench.maxLevel || lvl <= 0) { illegal = true; break }
+                }
+                if (!illegal && item.amount > item.maxStackSize) illegal = true
+                if (illegal) {
+                    inv.setItem(i, null)
+                    removed++
+                }
+            }
+            if (removed > 0) flag(p, d, "removed $removed illegal items")
+            return removed
+        }
+    }
+}
+
+```
+
+`src/main/kotlin/com/novaguard/checks/MacroChecks.kt`:
+
+```kt
+package com.novaguard.checks
+
+import com.novaguard.NovaGuard
+import com.novaguard.check.Check
+import com.novaguard.check.CheckType
+import com.novaguard.data.PlayerData
+import org.bukkit.entity.Player
+import org.bukkit.event.player.PlayerMoveEvent
+import kotlin.math.abs
+import kotlin.math.max
+import kotlin.math.min
+
+/**
+ * Anti-macro wave: perfect-interval macros, click signatures,
+ * AFK-evasion micro-movements, inventory bots, chat macros,
+ * and hacked-client brand detection.
+ */
+object MacroChecks {
+
+    fun registerAll(plugin: NovaGuard, register: (Check) -> Unit) {
+        register(Macro(plugin)); register(ClickSignature(plugin))
+        register(AfkMacro(plugin)); register(InventoryBot(plugin))
+        register(ChatMacro(plugin)); register(ClientBrand(plugin))
+    }
+
+    /** Macro (A): actions repeating at mathematically perfect intervals. */
+    class Macro(plugin: NovaGuard) : Check("macro", "Macro", CheckType.PLAYER, plugin) {
+        fun onAction(p: Player, d: PlayerData) {
+            val now = System.currentTimeMillis()
+            val last = d.getLong("macro_last")
+            if (last != 0L) {
+                val interval = now - last
+                if (interval in 30..5000) {
+                    val n = d.getInt("macro_n")
+                    val mn = if (n == 0) interval else min(d.getLong("macro_min"), interval)
+                    val mx = if (n == 0) interval else max(d.getLong("macro_max"), interval)
+                    d.setLong("macro_min", mn); d.setLong("macro_max", mx)
+                    if (d.addInt("macro_n", 1) >= 30) {
+                        if (mx - mn <= 3) flag(p, d, "perfect ${interval}ms interval")
+                        d.setInt("macro_n", 0)
+                    }
+                } else d.setInt("macro_n", 0)
+            }
+            d.setLong("macro_last", now)
+        }
+    }
+
+    /** ClickSignature (A): known auto-clicker timing signatures (exact 50/100/150ms). */
+    class ClickSignature(plugin: NovaGuard) : Check("clicksignature", "ClickSignature", CheckType.PLAYER, plugin) {
+        fun onAction(p: Player, d: PlayerData) {
+            val now = System.currentTimeMillis()
+            val last = d.getLong("csig_last")
+            if (last != 0L) {
+                val interval = now - last
+                if (interval in 20..2000) {
+                    val rounded = Math.round(interval / 50.0) * 50
+                    if (interval >= 40 && abs(interval - rounded) <= 2) {
+                        if (d.addInt("csig_n", 1) >= 40) {
+                            flag(p, d, "signature ${rounded}ms clicks")
+                            d.setInt("csig_n", 0)
+                        }
+                    } else d.setInt("csig_n", 0)
+                }
+            }
+            d.setLong("csig_last", now)
+        }
+    }
+
+    /** AFKMacro (A): periodic micro-movements used to dodge AFK kickers. */
+    class AfkMacro(plugin: NovaGuard) : Check("afkmacro", "AFKMacro", CheckType.PLAYER, plugin) {
+        fun onMove(e: PlayerMoveEvent, p: Player, d: PlayerData) {
+            val dx = e.to.x - e.from.x; val dz = e.to.z - e.from.z
+            val moved = dx * dx + dz * dz
+            var dyaw = abs(e.to.yaw - d.getDouble("afk_yaw")) % 360
+            if (dyaw > 180) dyaw = 360 - dyaw
+            val hasLast = d.getLong("afk_set") != 0L
+            if (hasLast && moved < 0.0025 && dyaw in 0.1..8.0) {
+                val now = System.currentTimeMillis()
+                val last = d.getLong("afk_last")
+                if (last != 0L) {
+                    val interval = now - last
+                    if (interval in 200..30000) {
+                        val n = d.getInt("afk_n")
+                        val mn = if (n == 0) interval else min(d.getLong("afk_min"), interval)
+                        val mx = if (n == 0) interval else max(d.getLong("afk_max"), interval)
+                        d.setLong("afk_min", mn); d.setLong("afk_max", mx)
+                        if (d.addInt("afk_n", 1) >= 15 && mx - mn <= 150) {
+                            flag(p, d, "periodic micro-movement")
+                            d.setInt("afk_n", 0)
+                        }
+                    }
+                }
+                d.setLong("afk_last", now)
+            } else if (moved >= 0.0025) {
+                d.setInt("afk_n", 0)
+            }
+            d.setDouble("afk_yaw", e.to.yaw.toDouble())
+            d.setLong("afk_set", 1L)
+        }
+    }
+
+    /** InventoryBot (A): identical click loops repeated in inventories. */
+    class InventoryBot(plugin: NovaGuard) : Check("invbot", "InventoryBot", CheckType.PLAYER, plugin) {
+        fun onClick(p: Player, d: PlayerData, slot: Int) {
+            val s = slot.coerceIn(0, 63)
+            val idx = d.getInt("invb_i")
+            val pat = (d.getLong("invb_pat") shl 6) or s.toLong()
+            d.setLong("invb_pat", pat)
+            if (idx >= 7) {
+                val window = pat and 0xFFFFFFFFFFFFL
+                val prev = d.getLong("invb_prev")
+                if (prev != 0L && window == prev) {
+                    if (d.addInt("invb_rep", 1) >= 2) {
+                        flag(p, d, "repeated click loop")
+                        d.setInt("invb_rep", 0); d.setLong("invb_prev", 0L)
+                    }
+                } else {
+                    d.setLong("invb_prev", window); d.setInt("invb_rep", 0)
+                }
+                d.setLong("invb_pat", 0L); d.setInt("invb_i", 0)
+            } else d.setInt("invb_i", idx + 1)
+        }
+    }
+
+    /** ChatMacro (A): identical messages/commands at fixed intervals. */
+    class ChatMacro(plugin: NovaGuard) : Check("chatmacro", "ChatMacro", CheckType.PLAYER, plugin) {
+        fun onChat(p: Player, d: PlayerData, message: String) {
+            if (message.length < 4) return
+            val now = System.currentTimeMillis()
+            val h = message.hashCode().toLong()
+            if (h == d.getLong("chatm_hash")) {
+                val interval = now - d.getLong("chatm_last")
+                if (interval in 1000..600000) {
+                    val n = d.getInt("chatm_n")
+                    val mn = if (n == 0) interval else min(d.getLong("chatm_min"), interval)
+                    val mx = if (n == 0) interval else max(d.getLong("chatm_max"), interval)
+                    d.setLong("chatm_min", mn); d.setLong("chatm_max", mx)
+                    if (d.addInt("chatm_n", 1) >= 4 && mx - mn <= 3000) {
+                        val count = d.getInt("chatm_n")
+                        // chat events are async — flag on the main thread
+                        plugin.server.scheduler.runTask(plugin, Runnable {
+                            if (p.isOnline) flag(p, d, "repeated message x$count")
+                        })
+                        d.setInt("chatm_n", 0)
+                    }
+                }
+            } else d.setInt("chatm_n", 0)
+            d.setLong("chatm_hash", h)
+            d.setLong("chatm_last", now)
+        }
+    }
+
+    /** ClientBrand (A): flags known hacked-client brands on the brand channel. */
+    class ClientBrand(plugin: NovaGuard) : Check("clientbrand", "ClientBrand", CheckType.PLAYER, plugin) {
+        fun onBrand(p: Player, d: PlayerData, brand: String) {
+            d.clientBrand = brand
+            val blocked = plugin.configs.checks.getStringList("checks.clientbrand.blocked")
+            val lower = brand.lowercase()
+            for (b in blocked) {
+                if (b.isNotBlank() && lower.contains(b.lowercase())) {
+                    flag(p, d, "brand=$brand")
+                    return
+                }
+            }
+        }
+    }
+}
+
+```
+
+`src/main/kotlin/com/novaguard/checks/MovementChecks.kt`:
+
+```kt
+package com.novaguard.checks
+
+import com.novaguard.NovaGuard
+import com.novaguard.check.Check
+import com.novaguard.check.CheckType
+import com.novaguard.data.PlayerData
+import org.bukkit.Material
+import org.bukkit.entity.Player
+import org.bukkit.event.player.PlayerMoveEvent
+import org.bukkit.potion.PotionEffectType
+
+object MovementChecks {
+
+    fun registerAll(plugin: NovaGuard, register: (Check) -> Unit) {
+        register(Fly(plugin)); register(Speed(plugin)); register(Timer(plugin))
+        register(Jesus(plugin)); register(Step(plugin)); register(NoFall(plugin))
+        register(Spider(plugin)); register(ScaffoldMove(plugin)); register(Phase(plugin))
+        register(ElytraCheck(plugin))
+    }
+
+    private fun speedEffectLevel(p: Player): Int =
+        p.getPotionEffect(PotionEffectType.SPEED)?.amplifier?.plus(1) ?: 0
+
+    private fun onClimbable(p: Player): Boolean {
+        val b = p.location.block.type
+        val below = p.location.clone().add(0.0, -0.5, 0.0).block.type
+        return b == Material.LADDER || b == Material.VINE || b == Material.TWISTING_VINES ||
+                b == Material.WEEPING_VINES || b == Material.SCAFFOLDING ||
+                below == Material.LADDER || below == Material.SCAFFOLDING
+    }
+
+    private fun inLiquid(p: Player): Boolean {
+        val t = p.location.block.type
+        return t == Material.WATER || t == Material.LAVA
+    }
+
+    private fun nearGround(p: Player): Boolean {
+        val loc = p.location.clone()
+        for (dy in 0..2) {
+            val t = loc.clone().add(0.0, -dy * 0.5 - 0.1, 0.0).block.type
+            if (t.isSolid && t.isOccluding) return true
+        }
+        return false
+    }
+
+    /** Fly (A): sustained horizontal air movement without losing altitude. */
+    class Fly(plugin: NovaGuard) : Check("fly", "Fly", CheckType.MOVEMENT, plugin) {
+        fun onMove(e: PlayerMoveEvent, p: Player, d: PlayerData, maxPing: Int) {
+            if (d.isLagging(p, maxPing)) return
+            val from = e.from; val to = e.to
+            val dy = to.y - from.y
+            val dx = to.x - from.x; val dz = to.z - from.z
+            val horizontal = dx * dx + dz * dz
+            if (!p.isOnGround && !p.isGliding && !p.isSwimming && !inLiquid(p) && !onClimbable(p)
+                && !p.isFlying && horizontal > 0.001) {
+                if (dy >= -0.05) {
+                    if (d.addInt("fly_air", 1) > 30) {
+                        flag(p, d, "air=${d.getInt("fly_air")} dy=${"%.3f".format(dy)}")
+                        d.setInt("fly_air", 20)
+                    }
+                } else d.setInt("fly_air", 0)
+            } else d.setInt("fly_air", 0)
+        }
+    }
+
+    /** Speed (A): horizontal velocity beyond legit limits. */
+    class Speed(plugin: NovaGuard) : Check("speed", "Speed", CheckType.MOVEMENT, plugin) {
+        fun onMove(e: PlayerMoveEvent, p: Player, d: PlayerData, maxPing: Int) {
+            if (d.isLagging(p, maxPing)) return
+            val from = e.from; val to = e.to
+            val dist = Math.hypot(to.x - from.x, to.z - from.z)
+            if (dist < 0.01 || p.isGliding || p.isFlying || inLiquid(p)) return
+            var limit = if (p.isSprinting) 0.36 else 0.30
+            limit *= 1.0 + 0.2 * speedEffectLevel(p)
+            if (p.isOnGround) limit *= 1.15 // bunny-hop allowance
+            if (from.block.type == Material.ICE || from.block.type == Material.PACKED_ICE ||
+                from.block.type == Material.BLUE_ICE) limit *= 1.8
+            if (dist > limit) {
+                if (d.addInt("speed_vl_ticks", 1) > 6) {
+                    flag(p, d, "dist=${"%.3f".format(dist)} limit=${"%.3f".format(limit)}")
+                    d.setInt("speed_vl_ticks", 0)
+                }
+            } else d.setInt("speed_vl_ticks", 0)
+        }
+    }
+
+    /** Timer (A): more movement packets than 20/sec allows. */
+    class Timer(plugin: NovaGuard) : Check("timer", "Timer", CheckType.MOVEMENT, plugin) {
+        fun onMove(e: PlayerMoveEvent, p: Player, d: PlayerData, maxPing: Int) {
+            if (d.isLagging(p, maxPing)) return
+            val now = System.currentTimeMillis()
+            val window = d.getLong("timer_window")
+            if (now - window > 1000) {
+                val count = d.getInt("timer_count")
+                if (count > 32 && window != 0L) flag(p, d, "packets=$count/s")
+                d.setLong("timer_window", now)
+                d.setInt("timer_count", 1)
+            } else d.addInt("timer_count", 1)
+        }
+    }
+
+    /** Jesus (A): walking on liquid surfaces. */
+    class Jesus(plugin: NovaGuard) : Check("jesus", "Jesus", CheckType.MOVEMENT, plugin) {
+        fun onMove(e: PlayerMoveEvent, p: Player, d: PlayerData, maxPing: Int) {
+            if (d.isLagging(p, maxPing)) return
+            val feet = p.location.block.type
+            val below = p.location.clone().add(0.0, -0.4, 0.0).block.type
+            val onLiquid = feet == Material.WATER || below == Material.WATER
+            if (onLiquid && !p.isSwimming && !p.isFlying && !p.isGliding) {
+                val dy = Math.abs(e.to.y - e.from.y)
+                val dist = Math.hypot(e.to.x - e.from.x, e.to.z - e.from.z)
+                if (dy < 0.05 && dist > 0.05) {
+                    if (d.addInt("jesus_ticks", 1) > 12) {
+                        flag(p, d, "")
+                        d.setInt("jesus_ticks", 6)
+                    }
+                } else d.setInt("jesus_ticks", 0)
+            } else d.setInt("jesus_ticks", 0)
+        }
+    }
+
+    /** Step (A): climbing more than 0.6 blocks in one move. */
+    class Step(plugin: NovaGuard) : Check("step", "Step", CheckType.MOVEMENT, plugin) {
+        fun onMove(e: PlayerMoveEvent, p: Player, d: PlayerData) {
+            val dy = e.to.y - e.from.y
+            if (dy > 0.65 && p.isOnGround && !onClimbable(p) && !p.isFlying) {
+                flag(p, d, "dy=${"%.2f".format(dy)}")
+            }
+        }
+    }
+
+    /** NoFall (A): surviving falls that should hurt. */
+    class NoFall(plugin: NovaGuard) : Check("nofall", "NoFall", CheckType.MOVEMENT, plugin) {
+        fun onMove(e: PlayerMoveEvent, p: Player, d: PlayerData) {
+            if (p.fallDistance > 4.0) d.setInt("nofall_armed", 1)
+            if (d.getInt("nofall_armed") == 1 && p.isOnGround && p.fallDistance == 0f) {
+                d.setInt("nofall_armed", 0)
+                // landed from a big fall; damage event clears this flag via listener
+                if (d.getLong("nofall_dmg") < System.currentTimeMillis() - 1500 && !inLiquid(p)
+                    && !onClimbable(p) && !p.isGliding) {
+                    flag(p, d, "survived ${"%.1f".format(p.fallDistance)}+ block fall")
+                }
+            }
+            if (p.isOnGround) d.setInt("nofall_armed", 0)
+        }
+        fun onDamage(d: PlayerData) { d.setLong("nofall_dmg", System.currentTimeMillis()) }
+    }
+
+    /** Spider (A): climbing vertical walls without ladders. */
+    class Spider(plugin: NovaGuard) : Check("spider", "Spider", CheckType.MOVEMENT, plugin) {
+        fun onMove(e: PlayerMoveEvent, p: Player, d: PlayerData, maxPing: Int) {
+            if (d.isLagging(p, maxPing)) return
+            val dy = e.to.y - e.from.y
+            if (dy > 0.15 && !onClimbable(p) && !p.isFlying && !inLiquid(p) && !p.isGliding) {
+                // must be against a wall
+                val loc = p.location
+                var wall = false
+                for ((ox, oz) in listOf(0.4 to 0.0, -0.4 to 0.0, 0.0 to 0.4, 0.0 to -0.4)) {
+                    if (loc.clone().add(ox, 0.5, oz).block.type.isOccluding) { wall = true; break }
+                }
+                if (wall) {
+                    if (d.addInt("spider_ticks", 1) > 10) {
+                        flag(p, d, "dy=${"%.2f".format(dy)}")
+                        d.setInt("spider_ticks", 5)
+                    }
+                } else d.setInt("spider_ticks", 0)
+            } else d.setInt("spider_ticks", 0)
+        }
+    }
+
+    /** Scaffold movement component: placing blocks while moving fast. */
+    class ScaffoldMove(plugin: NovaGuard) : Check("scaffold", "Scaffold", CheckType.MOVEMENT, plugin) {
+        fun onPlace(p: Player, d: PlayerData) {
+            val now = System.currentTimeMillis()
+            val last = d.getLong("scaffold_last_place")
+            if (now - last < 120) {
+                if (d.addInt("scaffold_fast", 1) > 14) {
+                    // handled with pitch check in listener
+                }
+            } else d.setInt("scaffold_fast", 0)
+            d.setLong("scaffold_last_place", now)
+        }
+        fun onMove(e: PlayerMoveEvent, p: Player, d: PlayerData) {
+            val dist = Math.hypot(e.to.x - e.from.x, e.to.z - e.from.z)
+            val placing = System.currentTimeMillis() - d.getLong("scaffold_last_place") < 500
+            if (placing && dist > 0.15 && p.location.pitch > 45) {
+                if (d.addInt("scaffold_move", 1) > 12) {
+                    flag(p, d, "bridging while sprinting")
+                    d.setInt("scaffold_move", 0)
+                }
+            } else if (!placing) d.setInt("scaffold_move", 0)
+        }
+    }
+
+    /** Phase (A): ending a move inside a solid block. */
+    class Phase(plugin: NovaGuard) : Check("phase", "Phase", CheckType.MOVEMENT, plugin) {
+        fun onMove(e: PlayerMoveEvent, p: Player, d: PlayerData) {
+            val to = e.to
+            val feet = to.block.type
+            val head = to.clone().add(0.0, 1.0, 0.0).block.type
+            if ((feet.isOccluding || head.isOccluding) && !p.isFlying) {
+                if (d.addInt("phase_ticks", 1) > 4) {
+                    flag(p, d, "inside ${feet.name}")
+                    d.setInt("phase_ticks", 0)
+                }
+            } else d.setInt("phase_ticks", 0)
+        }
+    }
+
+    /** Elytra (A): impossible elytra speeds. */
+    class ElytraCheck(plugin: NovaGuard) : Check("elytra", "ElytraFly", CheckType.MOVEMENT, plugin) {
+        fun onMove(e: PlayerMoveEvent, p: Player, d: PlayerData, maxPing: Int) {
+            if (!p.isGliding || d.isLagging(p, maxPing)) return
+            val dist = Math.hypot(e.to.x - e.from.x, e.to.z - e.from.z)
+            val dy = e.to.y - e.from.y
+            if (dist > 3.2 || dy > 1.2) {
+                if (d.addInt("elytra_ticks", 1) > 8) {
+                    flag(p, d, "dist=${"%.2f".format(dist)} dy=${"%.2f".format(dy)}")
+                    d.setInt("elytra_ticks", 0)
+                }
+            } else d.setInt("elytra_ticks", 0)
+        }
+    }
+}
+
+```
+
+`src/main/kotlin/com/novaguard/checks/PlayerChecks.kt`:
+
+```kt
+package com.novaguard.checks
+
+import com.novaguard.NovaGuard
+import com.novaguard.check.Check
+import com.novaguard.check.CheckType
+import com.novaguard.data.PlayerData
+import org.bukkit.entity.Player
+import org.bukkit.event.player.PlayerMoveEvent
+
+object PlayerChecks {
+
+    fun registerAll(plugin: NovaGuard, register: (Check) -> Unit) {
+        register(BadPackets(plugin)); register(InventoryMove(plugin)); register(PingSpoof(plugin))
+    }
+
+    /** BadPackets (A): impossible client data. */
+    class BadPackets(plugin: NovaGuard) : Check("badpackets", "BadPackets", CheckType.PLAYER, plugin) {
+        fun onMove(e: PlayerMoveEvent, p: Player, d: PlayerData) {
+            val pitch = e.to.pitch
+            if (pitch > 90.5f || pitch < -90.5f) {
+                flag(p, d, "pitch=$pitch")
+            }
+            val yaw = e.to.yaw
+            if (yaw.isNaN() || pitch.isNaN()) {
+                flag(p, d, "NaN rotation")
+            }
+        }
+    }
+
+    /** Inventory (A): sprinting/moving while inventory is open. */
+    class InventoryMove(plugin: NovaGuard) : Check("inventory", "InventoryMove", CheckType.PLAYER, plugin) {
+        fun onMove(e: PlayerMoveEvent, p: Player, d: PlayerData) {
+            if (!d.inventoryOpen) return
+            val dist = Math.hypot(e.to.x - e.from.x, e.to.z - e.from.z)
+            if (dist > 0.2 || p.isSprinting) {
+                if (d.addInt("inv_c", 1) > 6) {
+                    flag(p, d, "moving with inventory open")
+                    d.setInt("inv_c", 0)
+                }
+            } else d.setInt("inv_c", 0)
+        }
+    }
+
+    /** PingSpoof (A): impossible or manipulated ping values. */
+    class PingSpoof(plugin: NovaGuard) : Check("pingspoof", "PingSpoof", CheckType.PLAYER, plugin) {
+        fun onTick(p: Player, d: PlayerData) {
+            val ping = try { p.ping } catch (_: Exception) { return }
+            if (ping < 0) {
+                flag(p, d, "ping=$ping")
+                return
+            }
+            // perfectly frozen ping over a long window is a spoof tell
+            val last = d.getInt("ps_last")
+            if (ping == last && ping < 30) {
+                if (d.addInt("ps_c", 1) > 600) { // 30s of identical low ping
+                    flag(p, d, "frozen ping=${ping}ms")
+                    d.setInt("ps_c", 0)
+                }
+            } else d.setInt("ps_c", 0)
+            d.setInt("ps_last", ping)
+        }
+    }
+}
+
+```
+
+`src/main/kotlin/com/novaguard/command/GuardCommand.kt`:
+
+```kt
+package com.novaguard.command
+
+import com.novaguard.NovaGuard
+import com.novaguard.check.CheckType
+import org.bukkit.Bukkit
+import org.bukkit.command.Command
+import org.bukkit.command.CommandExecutor
+import org.bukkit.command.CommandSender
+import org.bukkit.command.TabCompleter
+import org.bukkit.entity.Player
+
+class GuardCommand(private val plugin: NovaGuard) : CommandExecutor, TabCompleter {
+
+    private fun msg(key: String, vararg vars: Pair<String, String>) =
+        plugin.configs.msg(key, *vars)
+
+    override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
+        if (!sender.hasPermission("novaguard.admin")) {
+            sender.sendMessage(msg("no-permission"))
+            return true
+        }
+        if (args.isEmpty()) {
+            sender.sendMessage(msg("usage", "usage" to "/novaguard <reload|list|toggle|vl|vlreset|alerts|freeze|wave|wavelist|reports|history>"))
+            return true
+        }
+        when (args[0].lowercase()) {
+            "reload" -> {
+                plugin.reloadAll()
+                sender.sendMessage(msg("reloaded"))
+            }
+            "list" -> {
+                sender.sendMessage("§8[§b§lNova§3§lGuard§8] §7Registered checks:")
+                for (type in CheckType.values()) {
+                    val line = plugin.checks.byType(type).joinToString("§8, ") {
+                        (if (it.enabled) "§a" else "§c") + it.id
+                    }
+                    sender.sendMessage("§8▸ §7${type.name}: $line")
+                }
+            }
+            "toggle" -> {
+                if (args.size < 2) { sender.sendMessage(msg("usage", "usage" to "/novaguard toggle <check>")); return true }
+                val check = plugin.checks.get(args[1])
+                if (check == null) { sender.sendMessage(msg("unknown-check", "check" to args[1])); return true }
+                check.enabled = !check.enabled
+                plugin.configs.checks.set("checks.${check.id}.enabled", check.enabled)
+                plugin.configs.saveChecks()
+                val state = msg(if (check.enabled) "state-enabled" else "state-disabled")
+                sender.sendMessage(msg("check-toggled", "check" to check.id, "state" to state))
+            }
+            "vl" -> {
+                if (args.size < 2) { sender.sendMessage(msg("usage", "usage" to "/novaguard vl <player>")); return true }
+                val target = Bukkit.getPlayer(args[1])
+                if (target == null) { sender.sendMessage(msg("player-not-online")); return true }
+                val snap = plugin.data.get(target.uniqueId).vlSnapshot()
+                if (snap.isEmpty()) sender.sendMessage(msg("vl-empty", "player" to target.name))
+                else {
+                    sender.sendMessage(msg("vl-header", "player" to target.name))
+                    snap.entries.sortedByDescending { it.value }.forEach { (id, vl) ->
+                        sender.sendMessage(msg("vl-line", "check" to id, "vl" to "%.1f".format(vl)))
+                    }
+                }
+            }
+            "vlreset" -> {
+                if (args.size < 2) { sender.sendMessage(msg("usage", "usage" to "/novaguard vlreset <player>")); return true }
+                val target = Bukkit.getPlayer(args[1])
+                if (target == null) { sender.sendMessage(msg("player-not-online")); return true }
+                plugin.data.get(target.uniqueId).resetAllVls()
+                sender.sendMessage(msg("vl-cleared", "player" to target.name))
+            }
+            "alerts" -> {
+                val p = sender as? Player ?: run {
+                    sender.sendMessage(msg("player-only")); return true
+                }
+                val d = plugin.data.get(p.uniqueId)
+                d.alertsEnabled = !d.alertsEnabled
+                sender.sendMessage(msg(if (d.alertsEnabled) "alerts-on" else "alerts-off"))
+            }
+            "freeze" -> {
+                if (args.size < 2) { sender.sendMessage(msg("usage", "usage" to "/novaguard freeze <player>")); return true }
+                val target = Bukkit.getPlayer(args[1])
+                if (target == null) { sender.sendMessage(msg("player-not-online")); return true }
+                val staff = sender as? Player ?: run {
+                    sender.sendMessage(msg("player-only")); return true
+                }
+                plugin.staff.toggleFreeze(staff, target)
+            }
+            "wave" -> {
+                plugin.staff.banWave(sender)
+            }
+            "wavelist" -> {
+                if (plugin.staff.waveList.isEmpty()) { sender.sendMessage(msg("wave-empty")); return true }
+                sender.sendMessage(msg("wave-header"))
+                plugin.staff.waveList.forEach { uuid ->
+                    sender.sendMessage("§8▸ §f${Bukkit.getOfflinePlayer(uuid).name ?: uuid}")
+                }
+            }
+            "reports" -> {
+                val p = sender as? Player ?: run {
+                    sender.sendMessage(msg("player-only")); return true
+                }
+                plugin.staff.openReports(p)
+            }
+            "history" -> {
+                if (args.size < 2) { sender.sendMessage(msg("usage", "usage" to "/novaguard history <player>")); return true }
+                val p = sender as? Player ?: run {
+                    sender.sendMessage(msg("player-only")); return true
+                }
+                val target = Bukkit.getPlayer(args[1])
+                if (target == null) { sender.sendMessage(msg("player-not-online")); return true }
+                plugin.staff.openHistory(p, target)
+            }
+            else -> sender.sendMessage(msg("usage", "usage" to "/novaguard <reload|list|toggle|vl|vlreset|alerts|freeze|wave|wavelist|reports|history>"))
+        }
+        return true
+    }
+
+    override fun onTabComplete(sender: CommandSender, command: Command, alias: String, args: Array<out String>): List<String> {
+        if (!sender.hasPermission("novaguard.admin")) return emptyList()
+        if (args.size == 1) return listOf("reload", "list", "toggle", "vl", "vlreset",
+            "alerts", "freeze", "wave", "wavelist", "reports", "history")
+            .filter { it.startsWith(args[0].lowercase()) }
+        if (args.size == 2 && args[0].equals("toggle", true))
+            return plugin.checks.all.map { it.id }.filter { it.startsWith(args[1].lowercase()) }
+        return emptyList()
+    }
+}
+
+```
+
+`src/main/kotlin/com/novaguard/command/ReportCommand.kt`:
+
+```kt
+package com.novaguard.command
+
+import com.novaguard.NovaGuard
+import org.bukkit.Bukkit
+import org.bukkit.command.Command
+import org.bukkit.command.CommandExecutor
+import org.bukkit.command.CommandSender
+import org.bukkit.command.TabCompleter
+import org.bukkit.entity.Player
+
+/** /report <player> <reason...> — any player can report a suspected cheater. */
+class ReportCommand(private val plugin: NovaGuard) : CommandExecutor, TabCompleter {
+
+    override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
+        val p = sender as? Player ?: run {
+            sender.sendMessage(plugin.configs.msg("player-only")); return true
+        }
+        if (args.size < 2) {
+            p.sendMessage(plugin.configs.msg("report-usage"))
+            return true
+        }
+        val target = args[0]
+        if (Bukkit.getPlayer(target) == null) {
+            p.sendMessage(plugin.configs.msg("player-not-online"))
+            return true
+        }
+        if (target.equals(p.name, true)) {
+            p.sendMessage(plugin.configs.msg("report-self"))
+            return true
+        }
+        plugin.staff.fileReport(p, target, args.drop(1).joinToString(" "))
+        return true
+    }
+
+    override fun onTabComplete(sender: CommandSender, command: Command, alias: String, args: Array<out String>): List<String> {
+        if (args.size == 1) return Bukkit.getOnlinePlayers().map { it.name }
+            .filter { it.startsWith(args[0], true) }
+        return emptyList()
+    }
+}
+
+```
+
+`src/main/kotlin/com/novaguard/command/SusCommand.kt`:
+
+```kt
+package com.novaguard.command
+
+import com.novaguard.NovaGuard
+import org.bukkit.command.Command
+import org.bukkit.command.CommandExecutor
+import org.bukkit.command.CommandSender
+import org.bukkit.command.TabCompleter
+import org.bukkit.entity.Player
+
+/** /sus — opens the suspects GUI with every flagged player. */
+class SusCommand(private val plugin: NovaGuard) : CommandExecutor, TabCompleter {
+
+    override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
+        val p = sender as? Player ?: run {
+            sender.sendMessage(plugin.configs.msg("player-only")); return true
+        }
+        if (!sender.hasPermission("novaguard.sus")) {
+            sender.sendMessage(plugin.configs.msg("no-permission"))
+            return true
+        }
+        plugin.staff.openSuspects(p)
+        return true
+    }
+
+    override fun onTabComplete(sender: CommandSender, command: Command, alias: String, args: Array<out String>): List<String> =
+        emptyList()
+}
+
+```
+
+`src/main/kotlin/com/novaguard/config/ConfigManager.kt`:
+
+```kt
+package com.novaguard.config
+
+import com.novaguard.NovaGuard
+import org.bukkit.configuration.file.FileConfiguration
+import org.bukkit.configuration.file.YamlConfiguration
+import java.io.File
+
+/**
+ * Multi-file configuration: config.yml (settings), checks.yml,
+ * messages.yml, xray.yml. Each ships as a real default resource.
+ */
+class ConfigManager(private val plugin: NovaGuard) {
+
+    lateinit var checks: FileConfiguration
+        private set
+    lateinit var messages: FileConfiguration
+        private set
+    lateinit var xray: FileConfiguration
+        private set
+
+    fun load() {
+        checks = loadFile("checks.yml")
+        messages = loadFile("messages.yml")
+        xray = loadFile("xray.yml")
+    }
+
+    private fun loadFile(name: String): FileConfiguration {
+        val file = File(plugin.dataFolder, name)
+        if (!file.exists()) plugin.saveResource(name, false)
+        return YamlConfiguration.loadConfiguration(file)
+    }
+
+    /** Premium message lookup with {prefix} + variable replacement. */
+    fun msg(key: String, vararg vars: Pair<String, String>): String {
+        var s = messages.getString(key, key) ?: key
+        val prefix = messages.getString("prefix", "") ?: ""
+        s = s.replace("{prefix}", prefix)
+        for ((k, v) in vars) s = s.replace("{$k}", v)
+        return s.replace('&', '§')
+    }
+
+    fun saveChecks() {
+        checks.save(File(plugin.dataFolder, "checks.yml"))
+    }
+}
+
+```
+
+`src/main/kotlin/com/novaguard/data/DataManager.kt`:
+
+```kt
+package com.novaguard.data
+
+import java.util.UUID
+import java.util.concurrent.ConcurrentHashMap
+
+class DataManager {
+    private val map = ConcurrentHashMap<UUID, PlayerData>()
+
+    fun get(uuid: UUID): PlayerData = map.computeIfAbsent(uuid) { PlayerData(uuid) }
+
+    fun remove(uuid: UUID) { map.remove(uuid) }
+
+    fun decayVls(amount: Double) {
+        for (data in map.values) data.decay(amount)
+    }
+
+    fun clear() = map.clear()
+}
+
+```
+
+`src/main/kotlin/com/novaguard/data/PlayerData.kt`:
+
+```kt
+package com.novaguard.data
+
+import org.bukkit.GameMode
+import org.bukkit.entity.Player
+import java.util.UUID
+import java.util.concurrent.ConcurrentHashMap
+
+data class ViolationRecord(val checkId: String, val vl: Double, val time: Long, val info: String)
+
+/**
+ * Per-player tracking state. Checks store their counters here
+ * so Check instances stay stateless.
+ */
+class PlayerData(val uuid: UUID) {
+
+    private val vls = ConcurrentHashMap<String, Double>()
+    private val ints = ConcurrentHashMap<String, Int>()
+    private val longs = ConcurrentHashMap<String, Long>()
+    private val doubles = ConcurrentHashMap<String, Double>()
+
+    @Volatile var lastTeleport: Long = 0L
+    @Volatile var inventoryOpen: Boolean = false
+    @Volatile var alertsEnabled: Boolean = true
+    @Volatile var frozen: Boolean = false
+    @Volatile var clientBrand: String = "unknown"
+    @Volatile var graceUntil: Long = 0L
+    @Volatile private var bedrockChecked: Boolean = false
+    @Volatile var isBedrock: Boolean = false
+
+    /** Lazy Bedrock detection (cached after first lookup). */
+    fun checkBedrock(): Boolean {
+        if (!bedrockChecked) {
+            isBedrock = com.novaguard.support.BedrockSupport.isBedrockPlayer(uuid)
+            bedrockChecked = true
+        }
+        return isBedrock
+    }
+
+    private val history = mutableListOf<ViolationRecord>()
+
+    fun addHistory(checkId: String, vl: Double, info: String) {
+        synchronized(history) {
+            history.add(ViolationRecord(checkId, vl, System.currentTimeMillis(), info))
+            if (history.size > 50) history.removeAt(0)
+        }
+    }
+
+    fun historySnapshot(): List<ViolationRecord> = synchronized(history) { history.toList() }
+
+    fun addVl(checkId: String, amount: Double): Double {
+        val vl = (vls[checkId] ?: 0.0) + amount
+        vls[checkId] = vl
+        return vl
+    }
+
+    fun getVl(checkId: String): Double = vls[checkId] ?: 0.0
+    fun setVl(checkId: String, vl: Double) { vls[checkId] = vl }
+    fun resetVl(checkId: String) { vls.remove(checkId) }
+    fun resetAllVls() { vls.clear() }
+    fun vlSnapshot(): Map<String, Double> = HashMap(vls)
+
+    fun decay(amount: Double) {
+        val it = vls.entries.iterator()
+        while (it.hasNext()) {
+            val e = it.next()
+            val left = e.value - amount
+            if (left <= 0) it.remove() else e.setValue(left)
+        }
+    }
+
+    fun getInt(key: String): Int = ints[key] ?: 0
+    fun setInt(key: String, v: Int) { ints[key] = v }
+    fun addInt(key: String, d: Int): Int {
+        val v = getInt(key) + d
+        ints[key] = v
+        return v
+    }
+
+    fun getLong(key: String): Long = longs[key] ?: 0L
+    fun setLong(key: String, v: Long) { longs[key] = v }
+
+    fun getDouble(key: String): Double = doubles[key] ?: 0.0
+    fun setDouble(key: String, v: Double) { doubles[key] = v }
+
+    fun clearTransient() {
+        ints.clear()
+        longs.clear()
+        doubles.clear()
+    }
+
+    /**
+     * Global exemptions: creative/spectator, flight permission, vehicles,
+     * recent teleports, dead players, bypass permission, high ping lag.
+     */
+    fun isExempt(player: Player): Boolean {
+        if (player.hasPermission("novaguard.bypass")) return true
+        val gm = player.gameMode
+        if (gm == GameMode.CREATIVE || gm == GameMode.SPECTATOR) return true
+        if (player.allowFlight && player.isFlying) return true
+        if (player.isInsideVehicle) return true
+        if (player.isDead) return true
+        if (System.currentTimeMillis() - lastTeleport < 3000) return true
+        return false
+    }
+
+    /** Lag compensation: skip movement checks for very laggy players. */
+    fun isLagging(player: Player, maxPing: Int): Boolean {
+        return try { player.ping > maxPing } catch (_: Exception) { false }
+    }
+}
+
+```
+
+`src/main/kotlin/com/novaguard/internal/CoreValidator.kt`:
+
+```kt
+package com.novaguard.internal
+
+import com.novaguard.NovaGuard
+import java.io.File
+import java.security.KeyFactory
+import java.security.MessageDigest
+import java.security.Signature
+import java.security.spec.X509EncodedKeySpec
+import java.util.Base64
+import java.util.jar.JarFile
+
+/**
+ * Internal consistency validator. Ensures the runtime jar matches the
+ * build the studio shipped: same author metadata, same sealed contents.
+ */
+object CoreValidator {
+
+    // sealed payload marker (built from codes so it isn't plainly listed)
+    private fun marker(): String = intArrayOf(
+        77, 69, 84, 65, 45, 73, 78, 70, 47, 78, 79, 86, 65, 71, 85, 65, 82, 68, 46, 83, 70
+    ).map { it.toChar() }.joinToString("")
+
+    // expected author tag (built from codes so it isn't plainly listed)
+    private fun tag(): String = intArrayOf(
+        78, 111, 118, 97, 32, 83, 116, 117, 100, 105, 111
+    ).map { it.toChar() }.joinToString("")
+
+    // sealed public component
+    private const val K0 =
+        "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAvtc4/mt5Uu6ZSHnSZsy3" +
+        "H7l+tMdbrDGdGDRo0KbeoMNHz+EJisCwYiueYDtMhH/RMqoqCzafa7Rm+xLjUsOJ" +
+        "ReYlgeOHHJ592LO3feEESEeHZ0DEexmnntPOhTzwswd2X2AYiXNIFvYduk2TTFPK" +
+        "VTBFJOS0GOSAP3WOg6LO0DkOsMwQRXwrKuANJHcvdx9y+elYJgUsjfsmP2Y98DM" +
+        "iC+ujEReXuSUIh3V1FPaDU0mpOL0CBkPiBsoEh0JE7jDQc4WvAA1mUl6NY99lV0" +
+        "1ooZ4ltqYDsedE3Hs/5vOJclITA63vw2WvLvkrB9oTdc0dE8eXjFQT/tCTmdcBe" +
+        "9nyuQIDAQAB"
+
+    fun check(plugin: NovaGuard): Boolean {
+        if (plugin.pluginMeta.authors.none { it.equals(tag(), ignoreCase = true) }) {
+            plugin.logger.severe("[NovaGuard] Internal consistency check failed (tag).")
+            return false
+        }
+        return try {
+            val jarFile = File(plugin.javaClass.protectionDomain.codeSource.location.toURI())
+            if (!jarFile.isFile) return true
+            checkJar(jarFile) { plugin.logger.severe(it) }
+        } catch (e: Exception) {
+            plugin.logger.severe("[NovaGuard] Internal consistency check failed: ${e.message}")
+            false
+        }
+    }
+
+    fun checkJar(jarFile: File, log: (String) -> Unit = {}): Boolean {
+        return try {
+            val m = marker()
+            val jar = JarFile(jarFile)
+            try {
+                val sigEntry = jar.getJarEntry(m) ?: run {
+                    log("[NovaGuard] Internal consistency check failed (seal).")
+                    return false
+                }
+                val sigBytes = Base64.getDecoder().decode(
+                    jar.getInputStream(sigEntry).readBytes().toString(Charsets.UTF_8).trim()
+                )
+                val index = buildIndex(jar, m)
+                val sig = Signature.getInstance("SHA256withRSA")
+                sig.initVerify(key())
+                sig.update(index.toByteArray(Charsets.UTF_8))
+                val ok = sig.verify(sigBytes)
+                if (!ok) log("[NovaGuard] Internal consistency check failed (integrity).")
+                ok
+            } finally {
+                jar.close()
+            }
+        } catch (e: Exception) {
+            log("[NovaGuard] Internal consistency check failed: ${e.message}")
+            false
+        }
+    }
+
+    fun buildIndex(jar: JarFile, marker: String = marker()): String {
+        val names = jar.entries().asSequence()
+            .map { it.name }
+            .filter { it != marker }
+            .sorted()
+            .toList()
+        val md = MessageDigest.getInstance("SHA-256")
+        val sb = StringBuilder()
+        for (name in names) {
+            val bytes = jar.getInputStream(jar.getJarEntry(name)).readBytes()
+            md.reset()
+            md.update(name.toByteArray(Charsets.UTF_8))
+            md.update(bytes)
+            sb.append(name).append(':')
+                .append(md.digest().joinToString("") { "%02x".format(it) })
+                .append('\n')
+        }
+        return sb.toString()
+    }
+
+    private fun key(): java.security.PublicKey {
+        val bytes = Base64.getDecoder().decode(K0)
+        return KeyFactory.getInstance("RSA").generatePublic(X509EncodedKeySpec(bytes))
+    }
+}
+
+```
+
+`src/main/kotlin/com/novaguard/listener/BlockListener.kt`:
+
+```kt
+package com.novaguard.listener
+
+import com.novaguard.NovaGuard
+import com.novaguard.checks.BlockChecks
+import com.novaguard.checks.MovementChecks
+import org.bukkit.event.EventHandler
+import org.bukkit.event.Listener
+import org.bukkit.event.block.BlockBreakEvent
+import org.bukkit.event.block.BlockPlaceEvent
+
+class BlockListener(private val plugin: NovaGuard) : Listener {
+
+    @EventHandler(ignoreCancelled = true)
+    fun onPlace(e: BlockPlaceEvent) {
+        val p = e.player
+        val d = plugin.data.get(p.uniqueId)
+        if (d.isExempt(p)) return
+        (plugin.checks.get("fastplace") as? BlockChecks.FastPlace)?.let {
+            if (it.enabled) it.onPlace(p, d, e)
+        }
+        (plugin.checks.get("scaffold") as? MovementChecks.ScaffoldMove)?.let {
+            if (it.enabled) it.onPlace(p, d)
+        }
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    fun onBreak(e: BlockBreakEvent) {
+        val p = e.player
+        val d = plugin.data.get(p.uniqueId)
+        if (d.isExempt(p)) return
+        (plugin.checks.get("fastbreak") as? BlockChecks.FastBreak)?.let {
+            if (it.enabled) it.onBreak(p, d, e)
+        }
+        (plugin.checks.get("nuker") as? BlockChecks.Nuker)?.let {
+            if (it.enabled) it.onBreak(p, d)
+        }
+        // xray module
+        if (plugin.xray.check.enabled) plugin.xray.onBreak(p, d, e)
+    }
+}
+
+```
+
+`src/main/kotlin/com/novaguard/listener/CombatListener.kt`:
+
+```kt
+package com.novaguard.listener
+
+import com.novaguard.NovaGuard
+import com.novaguard.checks.CombatChecks
+import com.novaguard.checks.MovementChecks
+import org.bukkit.entity.Player
+import org.bukkit.entity.Projectile
+import org.bukkit.event.EventHandler
+import org.bukkit.event.Listener
+import org.bukkit.event.entity.EntityDamageByEntityEvent
+import org.bukkit.event.entity.EntityDamageEvent
+
+class CombatListener(private val plugin: NovaGuard) : Listener {
+
+    private fun attacker(e: EntityDamageByEntityEvent): Player? {
+        val d = e.damager
+        return when (d) {
+            is Player -> d
+            is Projectile -> d.shooter as? Player
+            else -> null
+        }
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    fun onDamage(e: EntityDamageByEntityEvent) {
+        val p = attacker(e) ?: return
+        val d = plugin.data.get(p.uniqueId)
+        if (d.isExempt(p)) return
+        val target = e.entity
+        if (target is Player && plugin.data.get(target.uniqueId).isExempt(target)) return
+
+        (plugin.checks.get("killaura-rate") as? CombatChecks.KillAuraRate)?.let {
+            if (it.enabled) it.onAttack(p, d)
+        }
+        (plugin.checks.get("killaura-angle") as? CombatChecks.KillAuraAngle)?.let {
+            if (it.enabled) it.onAttack(p, target, d)
+        }
+        (plugin.checks.get("killaura-cooldown") as? CombatChecks.KillAuraCooldown)?.let {
+            if (it.enabled) it.onAttack(p, d)
+        }
+        (plugin.checks.get("reach") as? CombatChecks.Reach)?.let {
+            if (it.enabled) it.onAttack(p, target, d)
+        }
+        (plugin.checks.get("autoclicker") as? CombatChecks.AutoClicker)?.let {
+            if (it.enabled) it.onAttack(p, d)
+        }
+        (plugin.checks.get("criticals") as? CombatChecks.Criticals)?.let {
+            if (it.enabled) it.onAttack(p, d)
+        }
+        // anti-macro action sampling
+        (plugin.checks.get("macro") as? com.novaguard.checks.MacroChecks.Macro)?.let {
+            if (it.enabled) it.onAction(p, d)
+        }
+        (plugin.checks.get("clicksignature") as? com.novaguard.checks.MacroChecks.ClickSignature)?.let {
+            if (it.enabled) it.onAction(p, d)
+        }
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    fun onHurt(e: EntityDamageEvent) {
+        val p = e.entity as? Player ?: return
+        if (e.cause == EntityDamageEvent.DamageCause.FALL) {
+            // feed NoFall: player actually took fall damage = legit
+            (plugin.checks.get("nofall") as? MovementChecks.NoFall)
+                ?.onDamage(plugin.data.get(p.uniqueId))
+            return
+        }
+        if (e is EntityDamageByEntityEvent) {
+            val d = plugin.data.get(p.uniqueId)
+            if (d.isExempt(p)) return
+            (plugin.checks.get("velocity") as? CombatChecks.Velocity)?.let {
+                if (it.enabled) it.onHurt(p, d)
+            }
+        }
+    }
+}
+
+```
+
+`src/main/kotlin/com/novaguard/listener/ExtraListener.kt`:
+
+```kt
+package com.novaguard.listener
+
+import com.novaguard.NovaGuard
+import com.novaguard.checks.ExtraChecks
+import org.bukkit.Material
+import org.bukkit.entity.Player
+import org.bukkit.event.EventHandler
+import org.bukkit.event.Listener
+import org.bukkit.event.entity.EntityResurrectEvent
+import org.bukkit.event.entity.EntityShootBowEvent
+import org.bukkit.event.inventory.InventoryClickEvent
+import org.bukkit.event.player.PlayerEditBookEvent
+import org.bukkit.event.player.PlayerInteractEvent
+
+class ExtraListener(private val plugin: NovaGuard) : Listener {
+
+    private inline fun <reified T : com.novaguard.check.Check> check(id: String): T? {
+        val c = plugin.checks.get(id) as? T
+        return if (c?.enabled == true) c else null
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    fun onInteract(e: PlayerInteractEvent) {
+        val p = e.player
+        val d = plugin.data.get(p.uniqueId)
+        if (d.isExempt(p)) return
+        val item = e.item
+
+        // crystal place detection
+        if (item?.type == Material.END_CRYSTAL && e.clickedBlock != null) {
+            val t = e.clickedBlock!!.type
+            if (t == Material.OBSIDIAN || t == Material.BEDROCK) {
+                check<ExtraChecks.CrystalAura>("crystalaura")?.onPlace(p, d)
+            }
+        }
+        // bow draw tracking
+        if (item?.type == Material.BOW || item?.type == Material.CROSSBOW) {
+            check<ExtraChecks.NoSlow>("noslow")?.onBowDraw(d)
+        }
+        // ghost hand
+        check<ExtraChecks.GhostHand>("ghosthand")?.onInteract(p, d, e)
+        // anti-macro action sampling (clicks / swings)
+        if (e.action == org.bukkit.event.block.Action.LEFT_CLICK_AIR ||
+            e.action == org.bukkit.event.block.Action.LEFT_CLICK_BLOCK) {
+            (plugin.checks.get("macro") as? com.novaguard.checks.MacroChecks.Macro)?.let {
+                if (it.enabled) it.onAction(p, d)
+            }
+            (plugin.checks.get("clicksignature") as? com.novaguard.checks.MacroChecks.ClickSignature)?.let {
+                if (it.enabled) it.onAction(p, d)
+            }
+        }
+    }
+
+    @EventHandler
+    fun onShoot(e: EntityShootBowEvent) {
+        val p = e.entity as? Player ?: return
+        val d = plugin.data.get(p.uniqueId)
+        if (d.isExempt(p)) return
+        check<ExtraChecks.FastBow>("fastbow")?.onShoot(p, d, e)
+        (plugin.checks.get("noslow") as? ExtraChecks.NoSlow)?.let {
+            if (it.enabled) it.onBowShoot(d)
+        }
+    }
+
+    @EventHandler
+    fun onResurrect(e: EntityResurrectEvent) {
+        val p = e.entity as? Player ?: return
+        val d = plugin.data.get(p.uniqueId)
+        if (d.isExempt(p)) return
+        check<ExtraChecks.AutoTotem>("autototem")?.onPop(p, d, e)
+    }
+
+    @EventHandler
+    fun onInventoryClick(e: InventoryClickEvent) {
+        val p = e.whoClicked as? Player ?: return
+        // staff GUI handling first
+        val title = e.view.title
+        if (title.startsWith("§8[§b§lNova§3§lGuard§8]")) {
+            e.isCancelled = true
+            if (title.endsWith("Player Reports")) {
+                val slot = e.rawSlot
+                if (e.isRightClick) {
+                    plugin.staff.dismissReport(slot)
+                    p.sendMessage(plugin.configs.msg("report-dismissed"))
+                    p.closeInventory()
+                } else {
+                    val target = plugin.staff.reportTargetAtSlot(slot)
+                    if (target != null) {
+                        p.closeInventory()
+                        p.performCommand("tp $target")
+                    }
+                }
+            } else if (title.endsWith("Suspects")) {
+                val slot = e.rawSlot
+                val uuid = plugin.staff.suspectAtSlot(p.uniqueId, slot) ?: return
+                val target = org.bukkit.Bukkit.getPlayer(uuid) ?: return
+                p.closeInventory()
+                if (e.isRightClick) {
+                    plugin.staff.openHistory(p, target)
+                } else {
+                    p.performCommand("tp ${target.name}")
+                }
+            }
+            return
+        }
+        val d = plugin.data.get(p.uniqueId)
+        if (d.isExempt(p)) return
+        check<ExtraChecks.ChestStealer>("cheststealer")?.onTake(p, d, e)
+        check<ExtraChecks.InventoryClicker>("inventoryclicker")?.onClick(p, d)
+        (plugin.checks.get("invbot") as? com.novaguard.checks.MacroChecks.InventoryBot)?.let {
+            if (it.enabled) it.onClick(p, d, e.slot)
+        }
+        // totem equip tracking: totem moved to offhand (slot 40)
+        if (e.currentItem?.type == Material.TOTEM_OF_UNDYING && e.slot == 40) {
+            (plugin.checks.get("autototem") as? ExtraChecks.AutoTotem)?.let {
+                if (it.enabled) it.onTotemEquip(d)
+            }
+        }
+    }
+
+    @EventHandler
+    fun onEditBook(e: PlayerEditBookEvent) {
+        val p = e.player
+        val d = plugin.data.get(p.uniqueId)
+        if (d.isExempt(p)) return
+        check<ExtraChecks.BookBan>("bookban")?.onEdit(p, d, e)
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    fun onChat(e: org.bukkit.event.player.AsyncPlayerChatEvent) {
+        val p = e.player
+        val d = plugin.data.get(p.uniqueId)
+        if (d.isExempt(p)) return
+        (plugin.checks.get("chatmacro") as? com.novaguard.checks.MacroChecks.ChatMacro)?.let {
+            if (it.enabled) it.onChat(p, d, e.message)
+        }
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    fun onCommand(e: org.bukkit.event.player.PlayerCommandPreprocessEvent) {
+        val p = e.player
+        val d = plugin.data.get(p.uniqueId)
+        if (d.isExempt(p)) return
+        // command macros (e.g. /home loop bots)
+        if (!e.message.startsWith("/novaguard", true) && !e.message.startsWith("/report", true)) {
+            (plugin.checks.get("chatmacro") as? com.novaguard.checks.MacroChecks.ChatMacro)?.let {
+                if (it.enabled) it.onChat(p, d, "cmd:" + e.message)
+            }
+        }
+    }
+}
+
+```
+
+`src/main/kotlin/com/novaguard/listener/MoveListener.kt`:
+
+```kt
+package com.novaguard.listener
+
+import com.novaguard.NovaGuard
+import com.novaguard.checks.MovementChecks
+import com.novaguard.checks.PlayerChecks
+import org.bukkit.event.EventHandler
+import org.bukkit.event.Listener
+import org.bukkit.event.player.PlayerMoveEvent
+
+class MoveListener(private val plugin: NovaGuard) : Listener {
+
+    @EventHandler(ignoreCancelled = true)
+    fun onMove(e: PlayerMoveEvent) {
+        val to = e.to ?: return
+        val p = e.player
+        val d = plugin.data.get(p.uniqueId)
+        if (d.frozen) {
+            // allow looking around, block position changes
+            if (e.from.x != to.x || e.from.y != to.y || e.from.z != to.z) e.isCancelled = true
+            return
+        }
+        if (e.from.x == to.x && e.from.y == to.y && e.from.z == to.z) {
+            // still run rotation-only checks
+            val derp = plugin.checks.get("derp") as? com.novaguard.checks.ExtraChecks.Derp
+            if (derp?.enabled == true && !d.isExempt(p)) derp.onMove(e, p, d)
+            val afk = plugin.checks.get("afkmacro") as? com.novaguard.checks.MacroChecks.AfkMacro
+            if (afk?.enabled == true && !d.isExempt(p)) afk.onMove(e, p, d)
+            return
+        }
+        if (d.isExempt(p)) return
+        val maxPing = plugin.config.getInt("settings.lag-compensation-max-ping", 350)
+
+        for (check in plugin.checks.byType(com.novaguard.check.CheckType.MOVEMENT)) {
+            if (!check.enabled) continue
+            when (check) {
+                is MovementChecks.Fly -> check.onMove(e, p, d, maxPing)
+                is MovementChecks.Speed -> check.onMove(e, p, d, maxPing)
+                is MovementChecks.Timer -> check.onMove(e, p, d, maxPing)
+                is MovementChecks.Jesus -> check.onMove(e, p, d, maxPing)
+                is MovementChecks.Step -> check.onMove(e, p, d)
+                is MovementChecks.NoFall -> check.onMove(e, p, d)
+                is MovementChecks.Spider -> check.onMove(e, p, d, maxPing)
+                is MovementChecks.ScaffoldMove -> check.onMove(e, p, d)
+                is MovementChecks.Phase -> check.onMove(e, p, d)
+                is MovementChecks.ElytraCheck -> check.onMove(e, p, d, maxPing)
+            }
+        }
+        val bad = plugin.checks.get("badpackets") as? PlayerChecks.BadPackets
+        if (bad?.enabled == true) bad.onMove(e, p, d)
+        val inv = plugin.checks.get("inventory") as? PlayerChecks.InventoryMove
+        if (inv?.enabled == true) inv.onMove(e, p, d)
+        // wave-2 movement/player checks
+        (plugin.checks.get("noslow") as? com.novaguard.checks.ExtraChecks.NoSlow)?.let {
+            if (it.enabled) it.onMove(e, p, d)
+        }
+        (plugin.checks.get("sprintcheck") as? com.novaguard.checks.ExtraChecks.SprintCheck)?.let {
+            if (it.enabled) it.onMove(e, p, d)
+        }
+        (plugin.checks.get("boatfly") as? com.novaguard.checks.ExtraChecks.BoatFly)?.let {
+            if (it.enabled) it.onMove(e, p, d, maxPing)
+        }
+        (plugin.checks.get("derp") as? com.novaguard.checks.ExtraChecks.Derp)?.let {
+            if (it.enabled) it.onMove(e, p, d)
+        }
+        (plugin.checks.get("baritone") as? com.novaguard.checks.ExtraChecks.Baritone)?.let {
+            if (it.enabled) it.onMove(e, p, d)
+        }
+        (plugin.checks.get("afkmacro") as? com.novaguard.checks.MacroChecks.AfkMacro)?.let {
+            if (it.enabled) it.onMove(e, p, d)
+        }
+    }
+}
+
+```
+
+`src/main/kotlin/com/novaguard/listener/PlayerListener.kt`:
+
+```kt
+package com.novaguard.listener
+
+import com.novaguard.NovaGuard
+import com.novaguard.checks.BlockChecks
+import com.novaguard.checks.PlayerChecks
+import org.bukkit.event.EventHandler
+import org.bukkit.event.Listener
+import org.bukkit.event.inventory.InventoryCloseEvent
+import org.bukkit.event.inventory.InventoryOpenEvent
+import org.bukkit.event.player.PlayerInteractEvent
+import org.bukkit.event.player.PlayerItemConsumeEvent
+import org.bukkit.event.player.PlayerJoinEvent
+import org.bukkit.event.player.PlayerQuitEvent
+import org.bukkit.event.player.PlayerTeleportEvent
+
+class PlayerListener(private val plugin: NovaGuard) : Listener {
+
+    init {
+        // ping-spoof sampler, every 3 seconds
+        plugin.server.scheduler.runTaskTimerAsynchronously(plugin, Runnable {
+            val check = plugin.checks.get("pingspoof") as? PlayerChecks.PingSpoof ?: return@Runnable
+            if (!check.enabled) return@Runnable
+            for (p in plugin.server.onlinePlayers) {
+                check.onTick(p, plugin.data.get(p.uniqueId))
+            }
+        }, 60L, 60L)
+    }
+
+    @EventHandler
+    fun onPreLogin(e: org.bukkit.event.player.AsyncPlayerPreLoginEvent) {
+        if (!plugin.config.getBoolean("settings.vpn-block.enabled", false)) return
+        val ip = e.address?.hostAddress ?: return
+        if (plugin.config.getStringList("settings.vpn-block.exempt-ips").contains(ip)) return
+        if (com.novaguard.vpn.VpnBlocker.isBlocked(ip)) {
+            @Suppress("DEPRECATION")
+            e.disallow(
+                org.bukkit.event.player.AsyncPlayerPreLoginEvent.Result.KICK_OTHER,
+                plugin.configs.msg("vpn-kick")
+            )
+            plugin.logger.info("[NovaGuard] Blocked VPN/proxy connection from $ip (${e.name})")
+        }
+    }
+
+    @EventHandler
+    fun onJoin(e: PlayerJoinEvent) {
+        val d = plugin.data.get(e.player.uniqueId) // ensure entry
+        // grace period for brand-new players
+        if (!e.player.hasPlayedBefore()) {
+            d.graceUntil = System.currentTimeMillis() + plugin.graceMinutes * 60_000L
+        }
+        // warm the Bedrock cache early so first checks don't pay lookup cost
+        plugin.server.scheduler.runTaskLaterAsynchronously(plugin, Runnable {
+            d.checkBedrock()
+        }, 40L)
+    }
+
+    @EventHandler
+    fun onQuit(e: PlayerQuitEvent) {
+        plugin.punishments.clearCooldowns(e.player.uniqueId)
+        plugin.data.remove(e.player.uniqueId)
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    fun onTeleport(e: PlayerTeleportEvent) {
+        plugin.data.get(e.player.uniqueId).lastTeleport = System.currentTimeMillis()
+    }
+
+    @EventHandler
+    fun onInventoryOpen(e: InventoryOpenEvent) {
+        (e.player as? org.bukkit.entity.Player)?.let {
+            plugin.data.get(it.uniqueId).inventoryOpen = true
+        }
+    }
+
+    @EventHandler
+    fun onInventoryClose(e: InventoryCloseEvent) {
+        (e.player as? org.bukkit.entity.Player)?.let {
+            val d = plugin.data.get(it.uniqueId)
+            d.inventoryOpen = false
+            d.setInt("inv_c", 0)
+        }
+    }
+
+    @EventHandler
+    fun onInteract(e: PlayerInteractEvent) {
+        val item = e.item ?: return
+        if (!item.type.isEdible) return
+        val p = e.player
+        (plugin.checks.get("fasteat") as? BlockChecks.FastEat)?.let {
+            if (it.enabled) it.onEatStart(p, plugin.data.get(p.uniqueId))
+        }
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    fun onConsume(e: PlayerItemConsumeEvent) {
+        val p = e.player
+        val d = plugin.data.get(p.uniqueId)
+        if (d.isExempt(p)) return
+        (plugin.checks.get("fasteat") as? BlockChecks.FastEat)?.let {
+            if (it.enabled) it.onEat(p, d, e)
+        }
+    }
+}
+
+```
+
+`src/main/kotlin/com/novaguard/punish/PunishmentManager.kt`:
+
+```kt
+package com.novaguard.punish
+
+import com.novaguard.NovaGuard
+import com.novaguard.check.Check
+import org.bukkit.Bukkit
+import org.bukkit.entity.Player
+import java.util.UUID
+import java.util.concurrent.ConcurrentHashMap
+
+class PunishmentManager(private val plugin: NovaGuard) {
+
+    private val cooldowns = ConcurrentHashMap<String, Long>()
+    var cooldownSeconds: Long = 30
+    var broadcastPunishments: Boolean = true
+
+    fun load() {
+        cooldownSeconds = plugin.config.getLong("settings.punishment-cooldown-seconds", 30)
+        broadcastPunishments = plugin.config.getBoolean("settings.broadcast-punishments", true)
+        plugin.lagShieldEnabled = plugin.config.getBoolean("settings.lag-shield.enabled", true)
+        plugin.lagShieldThreshold = plugin.config.getDouble("settings.lag-shield.tps-threshold", 18.0)
+    }
+
+    fun execute(player: Player, check: Check, template: String, vl: Double, isBan: Boolean = false) {
+        val key = "${player.uniqueId}:${check.id}"
+        val now = System.currentTimeMillis()
+        if (now - (cooldowns[key] ?: 0L) < cooldownSeconds * 1000) return
+        cooldowns[key] = now
+
+        // lag shield: never punish while the server itself is lagging
+        if (plugin.lagShieldEnabled) {
+            val tps = try { Bukkit.getTPS()[0] } catch (_: Exception) { 20.0 }
+            if (tps < plugin.lagShieldThreshold) {
+                plugin.logger.info("[LAG-SHIELD] Punishment for ${player.name} (${check.displayName}) skipped — TPS ${"%.1f".format(tps)}")
+                return
+            }
+        }
+
+        // ban-wave mode: defer bans into the wave list instead of banning now
+        if (isBan && plugin.config.getBoolean("settings.ban-wave-mode", false)) {
+            plugin.staff.waveList.add(player.uniqueId)
+            player.kickPlayer(plugin.configs.msg("wave-kick"))
+            plugin.logger.info("[PUNISH] ${player.name} added to ban wave (${check.displayName})")
+            com.novaguard.staff.DiscordHook.send(plugin,
+                plugin.configs.msg("wave-add-discord", "player" to player.name,
+                    "check" to check.displayName, "vl" to "%.1f".format(vl)))
+            return
+        }
+
+        val command = template
+            .replace("{player}", player.name)
+            .replace("{uuid}", player.uniqueId.toString())
+            .replace("{check}", check.displayName)
+            .replace("{vl}", "%.1f".format(vl))
+
+        plugin.logger.info("[PUNISH] ${player.name}: $command")
+        Bukkit.getScheduler().runTask(plugin, Runnable {
+            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command)
+        })
+        com.novaguard.staff.DiscordHook.send(plugin,
+            plugin.configs.msg("punishment-discord", "player" to player.name, "command" to command))
+
+        if (broadcastPunishments) {
+            val msg = plugin.configs.msg("punishment-broadcast",
+                "player" to player.name, "check" to check.displayName)
+            Bukkit.broadcastMessage(msg)
+        }
+    }
+
+    fun clearCooldowns(uuid: UUID) {
+        cooldowns.keys.removeIf { it.startsWith(uuid.toString()) }
+    }
+}
+
+```
+
+`src/main/kotlin/com/novaguard/staff/StaffTools.kt`:
+
+```kt
+package com.novaguard.staff
+
+import com.novaguard.NovaGuard
+import com.novaguard.data.ViolationRecord
+import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.format.NamedTextColor
+import net.kyori.adventure.text.format.TextDecoration
+import org.bukkit.Bukkit
+import org.bukkit.Material
+import org.bukkit.command.CommandSender
+import org.bukkit.entity.Player
+import org.bukkit.inventory.ItemStack
+import java.net.URI
+import java.net.http.HttpClient
+import java.net.http.HttpRequest
+import java.net.http.HttpResponse
+import java.time.Duration
+import java.util.UUID
+import org.bukkit.inventory.meta.SkullMeta
+
+data class Report(val reporter: String, val target: String, val reason: String, val time: Long)
+
+/** Staff tooling: reports, freeze, ban waves, history GUIs, Discord webhooks. */
+class StaffTools(private val plugin: NovaGuard) {
+
+    val reports = mutableListOf<Report>()
+    val waveList = mutableSetOf<UUID>()
+
+    private fun msg(key: String, vararg vars: Pair<String, String>) =
+        plugin.configs.msg(key, *vars)
+
+    // ---------- /report ----------
+    fun fileReport(reporter: Player, targetName: String, reason: String) {
+        reports.add(Report(reporter.name, targetName, reason, System.currentTimeMillis()))
+        if (reports.size > 100) reports.removeAt(0)
+        val notify = msg("report-notify", "reporter" to reporter.name,
+            "target" to targetName, "reason" to reason)
+        for (s in Bukkit.getOnlinePlayers()) {
+            if (s.hasPermission("novaguard.admin")) s.sendMessage(notify)
+        }
+        reporter.sendMessage(msg("report-filed"))
+    }
+
+    // ---------- freeze ----------
+    fun toggleFreeze(staff: Player, target: Player): Boolean {
+        val d = plugin.data.get(target.uniqueId)
+        d.frozen = !d.frozen
+        if (d.frozen) {
+            target.sendMessage(msg("freeze-target-frozen"))
+            staff.sendMessage(msg("freeze-staff-frozen", "player" to target.name))
+        } else {
+            target.sendMessage(msg("freeze-target-unfrozen"))
+            staff.sendMessage(msg("freeze-staff-unfrozen", "player" to target.name))
+        }
+        return d.frozen
+    }
+
+    // ---------- ban wave ----------
+    fun banWave(sender: CommandSender): Int {
+        var count = 0
+        for (uuid in waveList.toList()) {
+            val p = Bukkit.getPlayer(uuid)
+            val name = p?.name ?: Bukkit.getOfflinePlayer(uuid).name ?: uuid.toString()
+            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "ban $name Cheating (NovaGuard ban wave)")
+            p?.kickPlayer(msg("wave-kick"))
+            count++
+        }
+        waveList.clear()
+        sender.sendMessage(msg("wave-executed", "count" to count.toString()))
+        DiscordHook.send(plugin, msg("wave-discord", "count" to count.toString())
+            .replace("§", "").replace(Regex("&[0-9a-fk-or]"), ""))
+        return count
+    }
+
+    // ---------- GUI helpers ----------
+    private fun border(inv: org.bukkit.inventory.Inventory) {
+        val pane = ItemStack(Material.BLACK_STAINED_GLASS_PANE)
+        val meta = pane.itemMeta
+        meta.displayName(Component.text(" "))
+        pane.itemMeta = meta
+        for (i in 0 until 9) inv.setItem(i, pane)
+        for (i in inv.size - 9 until inv.size) inv.setItem(i, pane)
+    }
+
+    private fun title(text: String) = "§8[§b§lNova§3§lGuard§8] §f$text"
+
+    // ---------- history GUI ----------
+    fun openHistory(staff: Player, target: Player) {
+        val history: List<ViolationRecord> = plugin.data.get(target.uniqueId).historySnapshot()
+        val inv = Bukkit.createInventory(null, 54, title("Violation History"))
+        border(inv)
+        val sorted = history.sortedByDescending { it.time }.take(36)
+        for ((i, rec) in sorted.withIndex()) {
+            val item = ItemStack(Material.PAPER)
+            val meta = item.itemMeta
+            meta.displayName(Component.text(rec.checkId, NamedTextColor.RED, TextDecoration.BOLD))
+            val age = (System.currentTimeMillis() - rec.time) / 1000
+            val ago = when {
+                age < 60 -> "${age}s ago"
+                age < 3600 -> "${age / 60}m ago"
+                else -> "${age / 3600}h ago"
+            }
+            meta.lore(listOf(
+                Component.text("Severity  ", NamedTextColor.GRAY)
+                    .append(Component.text("%.1f VL".format(rec.vl), NamedTextColor.YELLOW)),
+                Component.text("When  ", NamedTextColor.GRAY)
+                    .append(Component.text(ago, NamedTextColor.GRAY)),
+                Component.text(rec.info.take(42), NamedTextColor.DARK_GRAY)
+            ))
+            item.itemMeta = meta
+            inv.setItem(9 + i, item)
+        }
+        // summary diamond
+        val total = ItemStack(Material.DIAMOND)
+        val tm = total.itemMeta
+        tm.displayName(Component.text(target.name, NamedTextColor.AQUA, TextDecoration.BOLD))
+        val totalVl = plugin.checks.all.sumOf { plugin.data.get(target.uniqueId).getVl(it.id) }
+        val active = plugin.checks.all.count { plugin.data.get(target.uniqueId).getVl(it.id) > 0 }
+        tm.lore(listOf(
+            Component.text("Total VL  ", NamedTextColor.GRAY)
+                .append(Component.text("%.1f".format(totalVl), NamedTextColor.YELLOW)),
+            Component.text("Flagged checks  ", NamedTextColor.GRAY)
+                .append(Component.text("$active", NamedTextColor.YELLOW)),
+            Component.text("Records  ", NamedTextColor.GRAY)
+                .append(Component.text("${history.size}", NamedTextColor.YELLOW))
+        ))
+        total.itemMeta = tm
+        inv.setItem(49, total)
+        staff.openInventory(inv)
+    }
+
+    // ---------- reports GUI ----------
+    fun openReports(staff: Player) {
+        val inv = Bukkit.createInventory(null, 54, title("Player Reports"))
+        border(inv)
+        for ((i, rep) in reports.take(36).withIndex()) {
+            val item = ItemStack(Material.PLAYER_HEAD)
+            val meta = item.itemMeta as org.bukkit.inventory.meta.SkullMeta
+            meta.displayName(Component.text(rep.target, NamedTextColor.RED, TextDecoration.BOLD))
+            val age = (System.currentTimeMillis() - rep.time) / 1000
+            meta.lore(listOf(
+                Component.text("Reported by  ", NamedTextColor.GRAY)
+                    .append(Component.text(rep.reporter, NamedTextColor.WHITE)),
+                Component.text("Reason  ", NamedTextColor.GRAY)
+                    .append(Component.text(rep.reason.take(32), NamedTextColor.WHITE)),
+                Component.text("${age}s ago", NamedTextColor.DARK_GRAY),
+                Component.empty(),
+                Component.text("▸ Left-click to teleport", NamedTextColor.GREEN),
+                Component.text("▸ Right-click to dismiss", NamedTextColor.RED)
+            ))
+            item.itemMeta = meta
+            inv.setItem(9 + i, item)
+        }
+        staff.openInventory(inv)
+    }
+
+    fun reportTargetAtSlot(slot: Int): String? {
+        val idx = slot - 9
+        return reports.getOrNull(idx)?.target
+    }
+
+    fun dismissReport(slot: Int) {
+        val idx = slot - 9
+        if (idx in reports.indices) reports.removeAt(idx)
+    }
+
+    // ---------- suspects GUI ----------
+    private val suspectCache = mutableMapOf<UUID, List<UUID>>()
+
+    fun openSuspects(staff: Player) {
+        val threshold = plugin.config.getDouble("settings.sus-vl-threshold", 5.0)
+        val suspects = Bukkit.getOnlinePlayers()
+            .map { p -> p.uniqueId to plugin.checks.all.sumOf { c -> plugin.data.get(p.uniqueId).getVl(c.id) } }
+            .filter { it.second >= threshold }
+            .sortedByDescending { it.second }
+        suspectCache[staff.uniqueId] = suspects.map { it.first }
+        val inv = Bukkit.createInventory(null, 54, title("Suspects"))
+        border(inv)
+        for ((i, pair) in suspects.take(36).withIndex()) {
+            val uuid = pair.first
+            val total = pair.second
+            val p = Bukkit.getPlayer(uuid) ?: continue
+            val d = plugin.data.get(uuid)
+            val item = ItemStack(Material.PLAYER_HEAD)
+            val meta = item.itemMeta as SkullMeta
+            meta.owningPlayer = p
+            meta.displayName(Component.text(p.name, NamedTextColor.RED, TextDecoration.BOLD))
+            val top = plugin.checks.all
+                .map { c -> c.displayName to d.getVl(c.id) }
+                .filter { it.second > 0 }
+                .sortedByDescending { it.second }
+                .take(3)
+            val lore = mutableListOf<Component>()
+            lore.add(Component.text("Threat  ", NamedTextColor.GRAY)
+                .append(Component.text("%.1f VL".format(total), NamedTextColor.YELLOW)))
+            val ping = try { p.ping } catch (_: Exception) { -1 }
+            lore.add(Component.text("Ping  ", NamedTextColor.GRAY)
+                .append(Component.text("$ping ms", NamedTextColor.YELLOW)))
+            lore.add(Component.text("Client  ", NamedTextColor.GRAY)
+                .append(Component.text(if (d.checkBedrock()) "Bedrock" else "Java", NamedTextColor.AQUA)))
+            lore.add(Component.empty())
+            lore.add(Component.text("Top detections:", NamedTextColor.GRAY))
+            for ((name, vl) in top) {
+                lore.add(Component.text("▸ $name  ", NamedTextColor.DARK_GRAY)
+                    .append(Component.text("%.1f".format(vl), NamedTextColor.RED)))
+            }
+            lore.add(Component.empty())
+            lore.add(Component.text("▸ Left-click to teleport", NamedTextColor.GREEN))
+            lore.add(Component.text("▸ Right-click for history", NamedTextColor.GOLD))
+            meta.lore(lore)
+            item.itemMeta = meta
+            inv.setItem(9 + i, item)
+        }
+        staff.openInventory(inv)
+    }
+
+    fun suspectAtSlot(staff: UUID, slot: Int): UUID? {
+        val idx = slot - 9
+        return suspectCache[staff]?.getOrNull(idx)
+    }
+}
+
+/** Fire-and-forget Discord webhook posts. */
+object DiscordHook {
+    private val client: HttpClient by lazy { HttpClient.newHttpClient() }
+
+    fun send(plugin: NovaGuard, content: String) {
+        val url = plugin.config.getString("settings.discord-webhook", "") ?: ""
+        if (url.isBlank() || url == "none") return
+        try {
+            val safe = content.replace("\\", "\\\\").replace("\"", "\\\"")
+                .replace("\n", "\\n").take(1800)
+            val body = "{\"content\":\"$safe\"}"
+            val req = HttpRequest.newBuilder(URI.create(url))
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(body))
+                .timeout(Duration.ofSeconds(5))
+                .build()
+            client.sendAsync(req, HttpResponse.BodyHandlers.discarding())
+        } catch (_: Exception) { }
+    }
+}
+
+```
+
+`src/main/kotlin/com/novaguard/support/BedrockSupport.kt`:
+
+```kt
+package com.novaguard.support
+
+import com.novaguard.NovaGuard
+import java.util.UUID
+
+/**
+ * Geyser/Floodgate support: Bedrock players move differently through the
+ * Geyser translation layer, so movement checks false-flag them constantly.
+ * We detect Floodgate players (reflection = no hard dependency) and let
+ * the config exempt them from the unreliable checks.
+ */
+object BedrockSupport {
+
+    private var floodgatePresent = false
+    private var apiInstance: Any? = null
+    private var isFloodgatePlayerMethod: java.lang.reflect.Method? = null
+
+    fun init(plugin: NovaGuard) {
+        try {
+            val apiClass = Class.forName("org.geysermc.floodgate.api.FloodgateApi")
+            apiInstance = apiClass.getMethod("getInstance").invoke(null)
+            isFloodgatePlayerMethod = apiInstance!!.javaClass.getMethod("isFloodgatePlayer", UUID::class.java)
+            floodgatePresent = true
+            plugin.logger.info("[NovaGuard] Floodgate detected — Bedrock leniency active.")
+        } catch (_: Exception) {
+            plugin.logger.info("[NovaGuard] Floodgate not found — Bedrock leniency disabled.")
+        }
+    }
+
+    fun isBedrockPlayer(uuid: UUID): Boolean {
+        if (!floodgatePresent) return false
+        return try {
+            isFloodgatePlayerMethod!!.invoke(apiInstance, uuid) as Boolean
+        } catch (_: Exception) { false }
+    }
+}
+
+```
+
+`src/main/kotlin/com/novaguard/vpn/VpnBlocker.kt`:
+
+```kt
+package com.novaguard.vpn
+
+import java.net.URI
+import java.net.http.HttpClient
+import java.net.http.HttpRequest
+import java.net.http.HttpResponse
+import java.time.Duration
+import java.util.concurrent.ConcurrentHashMap
+
+/**
+ * VPN/proxy/hosting blocker. Checks the connecting IP against the free
+ * ip-api.com database (proxy + hosting flags), cached for 6 hours.
+ * Fails OPEN: if the API is down, nobody gets blocked.
+ */
+object VpnBlocker {
+
+    private val client: HttpClient by lazy { HttpClient.newHttpClient() }
+    private val cache = ConcurrentHashMap<String, Pair<Boolean, Long>>()
+    private const val CACHE_MS = 6 * 3600_000L
+
+    fun isBlocked(ip: String): Boolean {
+        if (isLocal(ip)) return false
+        val now = System.currentTimeMillis()
+        cache[ip]?.let { (blocked, at) -> if (now - at < CACHE_MS) return blocked }
+        val blocked = lookup(ip)
+        cache[ip] = blocked to now
+        return blocked
+    }
+
+    private fun isLocal(ip: String): Boolean =
+        ip == "127.0.0.1" || ip == "0:0:0:0:0:0:0:1" || ip == "::1" ||
+                ip.startsWith("192.168.") || ip.startsWith("10.") ||
+                ip.startsWith("172.16.") || ip.startsWith("172.17.") ||
+                ip.startsWith("172.18.") || ip.startsWith("172.19.") ||
+                ip.startsWith("172.2") || ip.startsWith("172.30.") || ip.startsWith("172.31.")
+
+    private fun lookup(ip: String): Boolean {
+        return try {
+            val req = HttpRequest.newBuilder(
+                URI.create("http://ip-api.com/json/$ip?fields=status,proxy,hosting"))
+                .timeout(Duration.ofSeconds(4))
+                .header("User-Agent", "NovaGuard")
+                .GET().build()
+            val body = client.send(req, HttpResponse.BodyHandlers.ofString())
+                .body().replace(" ", "")
+            body.contains("\"proxy\":true") || body.contains("\"hosting\":true")
+        } catch (_: Exception) {
+            false
+        }
+    }
+}
+
+```
+
+`src/main/kotlin/com/novaguard/xray/Xray.kt`:
+
+```kt
+package com.novaguard.xray
+
+import com.novaguard.NovaGuard
+import com.novaguard.check.Check
+import com.novaguard.check.CheckType
+import com.novaguard.data.PlayerData
+import org.bukkit.Material
+import org.bukkit.block.Block
+import org.bukkit.entity.Player
+import org.bukkit.event.block.BlockBreakEvent
+import java.util.concurrent.ConcurrentHashMap
+import kotlin.random.Random
+
+/**
+ * Anti-Xray that works even against texture-pack X-ray:
+ *  - Honeypot ores: fake valuables hidden in solid rock. Texture packs
+ *    show them as real, but only X-rayers dig straight to them.
+ *  - Unexposed-ore tracking: legit miners expose ores before mining them.
+ *  - Ore-rate alerts: inhuman diamonds/hour.
+ */
+class XrayCheck(plugin: NovaGuard) : Check("xray", "Xray", CheckType.PLAYER, plugin)
+
+class XrayManager(private val plugin: NovaGuard) {
+
+    val check = XrayCheck(plugin)
+    private val honeypots = ConcurrentHashMap<String, Long>()
+    private val valuable = setOf(
+        Material.DIAMOND_ORE, Material.DEEPSLATE_DIAMOND_ORE,
+        Material.EMERALD_ORE, Material.DEEPSLATE_EMERALD_ORE,
+        Material.ANCIENT_DEBRIS, Material.GOLD_ORE, Material.DEEPSLATE_GOLD_ORE,
+        Material.NETHERITE_BLOCK
+    )
+
+    fun registerHook(register: (Check) -> Unit) = register(check)
+
+    fun start() {
+        val interval = plugin.configs.xray.getLong("xray.honeypot-interval-minutes", 10) * 60 * 20
+        plugin.server.scheduler.runTaskTimer(plugin, Runnable { plantHoneypots() }, 200L, interval)
+    }
+
+    private fun key(b: Block) = "${b.world.name}:${b.x}:${b.y}:${b.z}"
+
+    private fun plantHoneypots() {
+        if (!plugin.configs.xray.getBoolean("xray.honeypots-enabled", true)) return
+        val perCycle = plugin.configs.xray.getInt("xray.honeypots-per-cycle", 12)
+        val maxTotal = plugin.configs.xray.getInt("xray.max-honeypots", 200)
+        if (honeypots.size >= maxTotal) return
+        val fakes = listOf(Material.DIAMOND_ORE, Material.DEEPSLATE_DIAMOND_ORE,
+            Material.EMERALD_ORE, Material.ANCIENT_DEBRIS)
+        var planted = 0
+        for (world in plugin.server.worlds) {
+            if (planted >= perCycle) break
+            val chunks = world.loadedChunks.toList()
+            if (chunks.isEmpty()) continue
+            repeat(4) {
+                if (planted >= perCycle) return@repeat
+                val chunk = chunks.random()
+                val x = chunk.x * 16 + Random.nextInt(16)
+                val z = chunk.z * 16 + Random.nextInt(16)
+                val y = Random.nextInt(5, 45)
+                val block = world.getBlockAt(x, y, z)
+                val t = block.type
+                if (t != Material.STONE && t != Material.DEEPSLATE && t != Material.NETHERRACK) return@repeat
+                // must be fully encased in solid rock (no legit way to see it)
+                var encased = true
+                for (dx in -1..1) for (dy in -1..1) for (dz in -1..1) {
+                    if (dx == 0 && dy == 0 && dz == 0) continue
+                    val n = world.getBlockAt(x + dx, y + dy, z + dz).type
+                    if (!n.isOccluding) { encased = false; break }
+                }
+                if (!encased) return@repeat
+                // no players nearby (avoid instant legit hits)
+                val near = world.players.any { it.location.distanceSquared(block.location) < 256 }
+                if (near) return@repeat
+                block.type = fakes.random()
+                honeypots[key(block)] = System.currentTimeMillis()
+                planted++
+            }
+        }
+        if (planted > 0) plugin.logger.info("[NovaGuard] Planted $planted X-ray honeypots.")
+    }
+
+    fun onBreak(p: Player, d: PlayerData, e: BlockBreakEvent) {
+        if (!check.enabled || d.isExempt(p)) return
+        val block = e.block
+        val k = key(block)
+
+        // 1) Honeypot hit: only an X-rayer digs straight to encased fakes
+        if (honeypots.containsKey(k)) {
+            honeypots.remove(k)
+            e.isDropItems = false
+            block.type = Material.STONE
+            d.addVl(check.id, 2.0)
+            val vl = d.getVl(check.id)
+            plugin.alerts.alert(p, check, vl, "mined honeypot ore")
+            d.addHistory(check.id, 2.0, "mined honeypot ore")
+            return
+        }
+
+        if (block.type !in valuable) return
+
+        // 2) Unexposed-ore tracking
+        var exposed = false
+        for (dx in -1..1) for (dy in -1..1) for (dz in -1..1) {
+            if (dx == 0 && dy == 0 && dz == 0) continue
+            if (!block.world.getBlockAt(block.x + dx, block.y + dy, block.z + dz).type.isOccluding) {
+                exposed = true; break
+            }
+        }
+        val total = d.addInt("xray_total", 1)
+        if (!exposed) d.addInt("xray_unexposed", 1)
+        val minSample = plugin.configs.xray.getInt("xray.unexposed-min-sample", 20)
+        if (total >= minSample) {
+            val ratio = d.getInt("xray_unexposed").toDouble() / total
+            if (ratio > plugin.configs.xray.getDouble("xray.unexposed-ratio-threshold", 0.55)) {
+                check.flag(p, d, "unexposed ratio ${"%.0f".format(ratio * 100)}% ($total ores)")
+                d.setInt("xray_total", 0); d.setInt("xray_unexposed", 0)
+            }
+        }
+
+        // 3) Diamonds/hour rate
+        if (block.type == Material.DIAMOND_ORE || block.type == Material.DEEPSLATE_DIAMOND_ORE) {
+            val now = System.currentTimeMillis()
+            if (now - d.getLong("xray_dia_window") > 3600_000) {
+                d.setLong("xray_dia_window", now); d.setInt("xray_dia", 1)
+            } else if (d.addInt("xray_dia", 1) > plugin.configs.xray.getInt("xray.max-diamonds-per-hour", 32)) {
+                check.flag(p, d, "${d.getInt("xray_dia")} diamonds/hour")
+                d.setInt("xray_dia", 0)
+            }
+        }
+    }
+}
+
+```
+
+`src/main/resources/checks.yml`:
+
+```yml
+# ============================================================
+# NovaGuard v1.2.1 — checks
+# Every check: enabled toggle, max-vl, punishment, ban-command.
+# {player} {check} {vl} are replaced in commands.
+# ============================================================
+
+checks:
+  fly:
+    enabled: true
+    max-vl: 8.0
+    punishment: "kick {player} Unfair advantage (Fly)"
+    ban-command: "ban {player} Cheating (Fly)"
+    ban-vl-multiplier: 3.0
+  speed:
+    enabled: true
+    max-vl: 10.0
+    punishment: "kick {player} Unfair advantage (Speed)"
+    ban-command: "ban {player} Cheating (Speed)"
+    ban-vl-multiplier: 3.0
+  timer:
+    enabled: true
+    max-vl: 6.0
+    punishment: "kick {player} Unfair advantage (Timer)"
+    ban-command: "ban {player} Cheating (Timer)"
+    ban-vl-multiplier: 3.0
+  jesus:
+    enabled: true
+    max-vl: 8.0
+    punishment: "kick {player} Unfair advantage (Jesus)"
+    ban-command: "ban {player} Cheating (Jesus)"
+    ban-vl-multiplier: 3.0
+  step:
+    enabled: true
+    max-vl: 6.0
+    punishment: "kick {player} Unfair advantage (Step)"
+    ban-command: "ban {player} Cheating (Step)"
+    ban-vl-multiplier: 3.0
+  nofall:
+    enabled: true
+    max-vl: 6.0
+    punishment: "kick {player} Unfair advantage (NoFall)"
+    ban-command: "ban {player} Cheating (NoFall)"
+    ban-vl-multiplier: 3.0
+  spider:
+    enabled: true
+    max-vl: 8.0
+    punishment: "kick {player} Unfair advantage (Spider)"
+    ban-command: "ban {player} Cheating (Spider)"
+    ban-vl-multiplier: 3.0
+  scaffold:
+    enabled: true
+    max-vl: 8.0
+    punishment: "kick {player} Unfair advantage (Scaffold)"
+    ban-command: "ban {player} Cheating (Scaffold)"
+    ban-vl-multiplier: 3.0
+  phase:
+    enabled: true
+    max-vl: 6.0
+    punishment: "kick {player} Unfair advantage (Phase)"
+    ban-command: "ban {player} Cheating (Phase)"
+    ban-vl-multiplier: 3.0
+  elytra:
+    enabled: true
+    max-vl: 8.0
+    punishment: "kick {player} Unfair advantage (ElytraFly)"
+    ban-command: "ban {player} Cheating (ElytraFly)"
+    ban-vl-multiplier: 3.0
+  killaura-rate:
+    enabled: true
+    max-vl: 8.0
+    punishment: "kick {player} Unfair advantage (KillAura)"
+    ban-command: "ban {player} Cheating (KillAura)"
+    ban-vl-multiplier: 3.0
+  killaura-angle:
+    enabled: true
+    max-vl: 6.0
+    punishment: "kick {player} Unfair advantage (KillAura)"
+    ban-command: "ban {player} Cheating (KillAura)"
+    ban-vl-multiplier: 3.0
+  killaura-cooldown:
+    enabled: true
+    max-vl: 10.0
+    punishment: "kick {player} Unfair advantage (KillAura)"
+    ban-command: "ban {player} Cheating (KillAura)"
+    ban-vl-multiplier: 3.0
+  reach:
+    enabled: true
+    max-vl: 8.0
+    punishment: "kick {player} Unfair advantage (Reach)"
+    ban-command: "ban {player} Cheating (Reach)"
+    ban-vl-multiplier: 3.0
+  autoclicker:
+    enabled: true
+    max-vl: 5.0
+    punishment: "kick {player} Unfair advantage (AutoClicker)"
+    ban-command: "ban {player} Cheating (AutoClicker)"
+    ban-vl-multiplier: 3.0
+  criticals:
+    enabled: true
+    max-vl: 6.0
+    punishment: "kick {player} Unfair advantage (Criticals)"
+    ban-command: "ban {player} Cheating (Criticals)"
+    ban-vl-multiplier: 3.0
+  velocity:
+    enabled: true
+    max-vl: 10.0
+    punishment: "kick {player} Unfair advantage (Velocity)"
+    ban-command: "ban {player} Cheating (Velocity)"
+    ban-vl-multiplier: 3.0
+  fastplace:
+    enabled: true
+    max-vl: 8.0
+    punishment: "kick {player} Unfair advantage (FastPlace)"
+    ban-command: "ban {player} Cheating (FastPlace)"
+    ban-vl-multiplier: 3.0
+  fastbreak:
+    enabled: true
+    max-vl: 8.0
+    punishment: "kick {player} Unfair advantage (FastBreak)"
+    ban-command: "ban {player} Cheating (FastBreak)"
+    ban-vl-multiplier: 3.0
+  nuker:
+    enabled: true
+    max-vl: 5.0
+    punishment: "kick {player} Unfair advantage (Nuker)"
+    ban-command: "ban {player} Cheating (Nuker)"
+    ban-vl-multiplier: 3.0
+  fasteat:
+    enabled: true
+    max-vl: 6.0
+    punishment: "kick {player} Unfair advantage (FastEat)"
+    ban-command: "ban {player} Cheating (FastEat)"
+    ban-vl-multiplier: 3.0
+  badpackets:
+    enabled: true
+    max-vl: 4.0
+    punishment: "kick {player} Unfair advantage (BadPackets)"
+    ban-command: "ban {player} Cheating (BadPackets)"
+    ban-vl-multiplier: 3.0
+  inventory:
+    enabled: true
+    max-vl: 8.0
+    punishment: "kick {player} Unfair advantage (InventoryMove)"
+    ban-command: "ban {player} Cheating (InventoryMove)"
+    ban-vl-multiplier: 3.0
+  pingspoof:
+    enabled: true
+    max-vl: 4.0
+    punishment: "kick {player} Unfair advantage (PingSpoof)"
+    ban-command: "ban {player} Cheating (PingSpoof)"
+    ban-vl-multiplier: 3.0
+  # ---- wave 2 checks ----
+  crystalaura:
+    enabled: true
+    max-vl: 6.0
+    punishment: "kick {player} Unfair advantage (CrystalAura)"
+    ban-command: "ban {player} Cheating (CrystalAura)"
+    ban-vl-multiplier: 3.0
+  autototem:
+    enabled: true
+    max-vl: 6.0
+    punishment: "kick {player} Unfair advantage (AutoTotem)"
+    ban-command: "ban {player} Cheating (AutoTotem)"
+    ban-vl-multiplier: 3.0
+  fastbow:
+    enabled: true
+    max-vl: 8.0
+    punishment: "kick {player} Unfair advantage (FastBow)"
+    ban-command: "ban {player} Cheating (FastBow)"
+    ban-vl-multiplier: 3.0
+  noslow:
+    enabled: true
+    max-vl: 8.0
+    punishment: "kick {player} Unfair advantage (NoSlow)"
+    ban-command: "ban {player} Cheating (NoSlow)"
+    ban-vl-multiplier: 3.0
+  sprintcheck:
+    enabled: true
+    max-vl: 8.0
+    punishment: "kick {player} Unfair advantage (Sprint)"
+    ban-command: "ban {player} Cheating (Sprint)"
+    ban-vl-multiplier: 3.0
+  boatfly:
+    enabled: true
+    max-vl: 8.0
+    punishment: "kick {player} Unfair advantage (BoatFly)"
+    ban-command: "ban {player} Cheating (BoatFly)"
+    ban-vl-multiplier: 3.0
+  cheststealer:
+    enabled: true
+    max-vl: 8.0
+    punishment: "kick {player} Unfair advantage (ChestStealer)"
+    ban-command: "ban {player} Cheating (ChestStealer)"
+    ban-vl-multiplier: 3.0
+  inventoryclicker:
+    enabled: true
+    max-vl: 8.0
+    punishment: "kick {player} Unfair advantage (InventoryClicker)"
+    ban-command: "ban {player} Cheating (InventoryClicker)"
+    ban-vl-multiplier: 3.0
+  ghosthand:
+    enabled: true
+    max-vl: 6.0
+    punishment: "kick {player} Unfair advantage (GhostHand)"
+    ban-command: "ban {player} Cheating (GhostHand)"
+    ban-vl-multiplier: 3.0
+  derp:
+    enabled: true
+    max-vl: 6.0
+    punishment: "kick {player} Unfair advantage (Derp)"
+    ban-command: "ban {player} Cheating (Derp)"
+    ban-vl-multiplier: 3.0
+  baritone:
+    enabled: true
+    max-vl: 30.0
+    punishment: "warn {player} Bot-like movement detected"
+    ban-command: "ban {player} Cheating (Baritone)"
+    ban-vl-multiplier: 3.0
+  bookban:
+    enabled: true
+    max-vl: 3.0
+    punishment: "kick {player} Exploit attempt (BookBan)"
+    ban-command: "ban {player} Exploiting (BookBan)"
+    ban-vl-multiplier: 3.0
+  illegals:
+    enabled: true
+    max-vl: 5.0
+    punishment: "kick {player} Illegal items detected"
+    ban-command: "ban {player} Illegal items"
+    ban-vl-multiplier: 3.0
+  xray:
+    enabled: true
+    max-vl: 8.0
+    punishment: "kick {player} Unfair advantage (Xray)"
+    ban-command: "ban {player} Cheating (Xray)"
+    ban-vl-multiplier: 3.0
+  # ---- anti-macro wave ----
+  macro:
+    enabled: true
+    max-vl: 6.0
+    punishment: "kick {player} Unfair advantage (Macro)"
+    ban-command: "ban {player} Cheating (Macro)"
+    ban-vl-multiplier: 3.0
+  clicksignature:
+    enabled: true
+    max-vl: 5.0
+    punishment: "kick {player} Unfair advantage (AutoClicker)"
+    ban-command: "ban {player} Cheating (AutoClicker)"
+    ban-vl-multiplier: 3.0
+  afkmacro:
+    enabled: true
+    max-vl: 6.0
+    punishment: "kick {player} Unfair advantage (AFK Macro)"
+    ban-command: "ban {player} Cheating (AFK Macro)"
+    ban-vl-multiplier: 3.0
+  invbot:
+    enabled: true
+    max-vl: 6.0
+    punishment: "kick {player} Unfair advantage (Inventory Bot)"
+    ban-command: "ban {player} Cheating (Inventory Bot)"
+    ban-vl-multiplier: 3.0
+  chatmacro:
+    enabled: true
+    max-vl: 5.0
+    punishment: "mute {player} 1h Automated chat (Chat Macro)"
+    ban-command: "ban {player} Cheating (Chat Macro)"
+    ban-vl-multiplier: 3.0
+  clientbrand:
+    enabled: true
+    max-vl: 2.0
+    punishment: "kick {player} Prohibited client detected"
+    ban-command: "ban {player} Prohibited client"
+    ban-vl-multiplier: 3.0
+    # brand substrings (case-insensitive) that trigger the check
+    blocked:
+      - "wurst"
+      - "impact"
+      - "future"
+      - "rusherhack"
+      - "meteor"
+      - "aristois"
+      - "lambda"
+      - "bleachhack"
+
+# ============================================================
+# Anti-Xray — works even against X-ray texture packs
+# ============================================================
+
+```
+
+`src/main/resources/config.yml`:
+
+```yml
+# ============================================================
+# NovaGuard v1.2.1 — main settings
+# ============================================================
+
+settings:
+  alerts-enabled: true
+  alert-format: "&8[&cNovaGuard&8] &f{player} &7failed &c{check} &8(VL: {vl})"
+  log-to-console: true
+  broadcast-punishments: true
+  punishment-broadcast: "&8[&cNovaGuard&8] &f{player} &7was punished for &c{check}"
+  # seconds before the same player can be punished again for the same check
+  punishment-cooldown-seconds: 30
+  # VL lost per minute for every check (forgiveness over time)
+  vl-decay-per-minute: 1.0
+  # players above this ping skip movement checks (lag compensation)
+  lag-compensation-max-ping: 350
+  # Discord webhook URL for punishment alerts ("none" to disable)
+  discord-webhook: "none"
+  # ban-wave mode: bans are deferred into a wave list, run /novaguard wave to ban all at once
+  ban-wave-mode: false
+  # how often (seconds) inventories are scanned for illegal items
+  illegal-scan-seconds: 60
+  # total VL across all checks before a player shows in /sus
+  sus-vl-threshold: 5.0
+  # VPN/proxy/hosting blocker (free ip-api.com lookup, cached 6h, fails open)
+  vpn-block:
+    enabled: true
+    exempt-ips: []
+  # grace period: brand-new players need 2x VL before any punishment
+  grace-period:
+    enabled: true
+    minutes: 60
+    vl-multiplier: 2.0
+  # lag shield: pause all punishments while server TPS is below threshold
+  lag-shield:
+    enabled: true
+    tps-threshold: 18.0
+
+# ============================================================
+# Bedrock (Geyser/Floodgate) leniency
+# Bedrock movement translates differently through Geyser, so the
+# checks below are SKIPPED for Bedrock players instead of
+# false-banning them. Combat/block/exploit checks still apply.
+# No hard dependency: works with or without Floodgate installed.
+# ============================================================
+
+bedrock:
+  enabled: true
+  exempt-checks:
+    - fly
+    - speed
+    - timer
+    - jesus
+    - step
+    - spider
+    - scaffold
+    - phase
+    - elytra
+    - boatfly
+    - noslow
+    - sprintcheck
+    - derp
+    - baritone
+    - reach
+    - killaura-angle
+
+# Per-check settings. enabled = toggle, max-vl = violations before
+# punishment, punishment = command at max-vl, ban-command = command
+# at max-vl * ban-vl-multiplier. {player} {check} {vl} are replaced.
+
+```
+
+`src/main/resources/messages.yml`:
+
+```yml
+# ============================================================
+# NovaGuard v1.2.1 — messages
+# {prefix} is inserted automatically. Available placeholders
+# per message are listed in comments.
+# ============================================================
+
+prefix: "&8[&b&lNova&3&lGuard&8]"
+
+# ---------- general ----------
+no-permission: "{prefix} &cYou do not have permission to use this."
+player-only: "{prefix} &cThis command can only be used in-game."
+player-not-online: "{prefix} &cThat player is not currently online."
+reloaded: "{prefix} &aConfiguration reloaded successfully."
+usage: "{prefix} &7Usage: &f{usage}"
+
+# ---------- checks ----------
+unknown-check: "{prefix} &cUnknown check: &f{check}&c."
+check-toggled: "{prefix} &7Check &f{check} &7is now {state}."
+state-enabled: "&a&lENABLED"
+state-disabled: "&c&lDISABLED"
+
+# ---------- violations ----------
+vl-header: "{prefix} &7Violation record for &f{player}&7:"
+vl-line: "&8▸ &f{check} &8— &e{vl} VL"
+vl-empty: "{prefix} &f{player} &7has a clean record."
+vl-cleared: "{prefix} &7Cleared all violations for &f{player}&7."
+
+# ---------- alerts ----------
+alerts-on: "{prefix} &7Violation alerts &aenabled&7."
+alerts-off: "{prefix} &7Violation alerts &cdisabled&7."
+alert-format: "{prefix} &f{player} &7flagged for &c{check} &8(&e{vl} VL&8)"
+
+# ---------- freeze ----------
+freeze-target-frozen: "{prefix} &cYou have been frozen by the staff team. &7Please remain still and do not log out."
+freeze-target-unfrozen: "{prefix} &aYou have been unfrozen."
+freeze-staff-frozen: "{prefix} &f{player} &7has been &cfrozen&7."
+freeze-staff-unfrozen: "{prefix} &f{player} &7has been &aunfrozen&7."
+
+# ---------- reports ----------
+report-usage: "{prefix} &7Usage: &f/report <player> <reason>"
+report-self: "{prefix} &cYou cannot report yourself."
+report-filed: "{prefix} &aReport submitted. &7A member of staff will review it shortly."
+report-notify: "{prefix} &f{reporter} &7reported &f{target}&8: &f{reason}"
+report-dismissed: "{prefix} &7Report dismissed."
+
+# ---------- ban wave ----------
+wave-executed: "{prefix} &7Ban wave executed — &c{count} &7player(s) removed."
+wave-empty: "{prefix} &7The ban wave queue is currently empty."
+wave-header: "{prefix} &7Players pending ban wave:"
+wave-kick: "&cNovaGuard Security\n\n&7Your account has been flagged for review.\n&7Please contact staff on our Discord."
+wave-discord: "**NovaGuard** — ban wave executed, {count} player(s) removed."
+
+# ---------- punishment ----------
+punishment-broadcast: "{prefix} &f{player} &7was removed for &c{check}&7."
+punishment-discord: "**NovaGuard** — {player} punished: `{command}`"
+wave-add-discord: "**NovaGuard** — {player} queued for ban wave ({check}, {vl} VL)"
+
+# ---------- vpn ----------
+vpn-kick: "{prefix} &cVPNs, proxies and hosting services are not allowed on this server."
+
+```
+
+`src/main/resources/paper-plugin.yml`:
+
+```yml
+name: NovaGuard
+version: 1.6.0
+main: com.novaguard.NovaGuard
+api-version: '1.21'
+author: Nova Studio
+description: Original premium anti-cheat with 44 toggleable checks.
+website: https://github.com/reach1234889
+softdepend: [floodgate, Geyser-Spigot]
+commands:
+  novaguard:
+    description: NovaGuard admin command
+    usage: /novaguard <reload|list|toggle|vl|vlreset|alerts|freeze|wave|wavelist|reports|history>
+    aliases: [ng, guard]
+    permission: novaguard.admin
+  report:
+    description: Report a suspected cheater to staff
+    usage: /report <player> <reason>
+  sus:
+    description: Open the suspects GUI with all flagged players
+    usage: /sus
+    aliases: [suspects]
+    permission: novaguard.sus
+permissions:
+  novaguard.admin:
+    description: Full NovaGuard admin access
+    default: op
+  novaguard.alerts:
+    description: Receive NovaGuard violation alerts
+    default: op
+  novaguard.bypass:
+    description: Exempt from all NovaGuard checks
+    default: op
+  novaguard.sus:
+    description: Access the suspects GUI
+    default: op
+
+```
+
+`src/main/resources/xray.yml`:
+
+```yml
+# ============================================================
+# NovaGuard v1.2.1 — anti-xray
+# ============================================================
+
+xray:
+  honeypots-enabled: true
+  honeypots-per-cycle: 12
+  honeypot-interval-minutes: 10
+  max-honeypots: 200
+  # alert when a player mines more diamonds than this per hour
+  max-diamonds-per-hour: 32
+  # flag when this share of mined valuables was never exposed to air
+  unexposed-ratio-threshold: 0.55
+  unexposed-min-sample: 20
+
+```
