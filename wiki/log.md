@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-03** — ingest `readme:categories`: Anti Cheat ~766 (+1; Chanhne-dev/[[chanhne-dev-anticheat]] Paper/Folia fly checks, Meteor/TrouserStreak client-specific detectors, and illegal-item enforcement) / Cheat ~2857 / other major section counts stable; 41 sections; synced projected README-map count (~766) on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], and [[overviews/reverse-engineering]]; entity [[chanhne-dev-anticheat]]; cited on [[overviews/game-hacking]] Paper/Folia MC AC lane; light `index.md` section notes (no per-category pages).
+
 - **2026-10-03** — lint (agent pass): index vs disk scan — 9 overviews, 51 concepts, 3992 entities (4052 index entries); index.md fully synced (0 missing, 0 dead, 0 duplicate entries); overview wikilink spot-check (9 pages, 12159 links) — 0 broken links; concept spot-check (51 pages, 2354 links) — 0 broken links; index.md wikilink scan (758 links) — 0 broken links; 6 cross-kind slug collisions ([[game-hacking]], [[anti-cheat]], [[reverse-engineering]], [[il2cpp]], [[byovd]], [[dma]]) — expected, no repair needed; no structural edits required.
 
 - **2026-10-02** — lint (agent pass): index vs disk scan — 9 overviews, 51 concepts, 3992 entities (4052 index entries); index.md fully synced (0 missing, 0 dead, 0 duplicate entries); overview wikilink spot-check (9 pages, 12159 links) — 0 broken links; concept spot-check (51 pages, 2354 links) — 0 broken links; index.md wikilink scan — 0 broken links; 6 cross-kind slug collisions ([[game-hacking]], [[anti-cheat]], [[reverse-engineering]], [[il2cpp]], [[byovd]], [[dma]]) — expected, no repair needed; no structural edits required.
