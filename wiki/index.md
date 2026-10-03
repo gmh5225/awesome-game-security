@@ -1737,7 +1737,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [heck_csgo_external](entities/heck-csgo-external.md) — external CS:GO; SDK generation / memory analysis (C++; cheat / game:csgo)
 - [Herpaderping](entities/herpaderping.md) — process/file obfuscation via write→map→modify→execute (SEC_IMAGE; on-disk decoy vs mapped image; cheat / hide)
 - [hekate](entities/hekate.md) — GUI Nintendo Switch bootloader and maintenance toolkit (CTCaer; multi-environment boot, payload launch, firmware patches; eMMC/emuMMC backup-restore, partition tools, hardware diagnostics; console modding / firmware research; README [A GUI based Nintendo Switch Bootloader])
-- [hell-is-us-mod](entities/hell-is-us-mod.md) — Rust external Hell Is Us companion **hiumod** (UE attach; name-pool/`GEngine` scan + UObject-by-name reads; minimap/quest overlays + optional single-player cheats; no on-disk mods; myso-kr; Cheat)
+- [hell-is-us-mod](entities/hell-is-us-mod.md) — Rust external Hell Is Us companion **hiumod** (UE attach; name-pool/`GEngine` scan + UObject-by-name reads; minimap/quest/story overlays + CUE4Parse survey tool + optional single-player cheats; no on-disk mods; myso-kr; Cheat)
 - [hex2dec-mcp](entities/hex2dec-mcp.md) — MCP hex↔decimal conversion for AI agents (JavaScript/TypeScript; Game Develop / MCP; gmh5225)
 - [HexWalk](entities/hexwalk.md) — Qt cross-platform hex editor / binary workbench (Capstone, entropy, binwalk, file diff, YAML PE/ELF overlays; Hex Viewer/Editor/Analyzer)
 - [Hexze Anticheat](entities/hexze-anticheat.md) — Starfish Lua Cheater Detector (NoSlow/AutoBlock/Eagle/Scaffold/Tower/LagRange/NoBreakDelay; movement/equipment/animation/block-break heuristics; staff alerts; Minecraft-style; Hexze; Anti Cheat / game:minecraft)

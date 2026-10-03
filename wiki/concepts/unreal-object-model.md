@@ -38,7 +38,8 @@ sources:
   - wiki/sources/descriptions/Glmour__ue-live-bridge.md
   - wiki/sources/descriptions/BobHUnrealTech__UnrealSDKDumper-4.25.md
   - wiki/sources/descriptions/BadBrojo__UEDumper-MemProcFS.md
-updated: 2026-09-14
+  - wiki/sources/descriptions/myso-kr__hell-is-us-mod.md
+updated: 2026-10-03
 confidence: high
 ---
 
@@ -68,6 +69,8 @@ Unreal reflection exposes **annotated** members through `UProperty` / `FProperty
 | `GWorld` | Current `UWorld*` context |
 | `GEngine` | Engine singleton |
 
+External companions such as [[hell-is-us-mod]] (myso-kr; Rust; Hell Is Us **hiumod**) attach out-of-process, scan for `FNamePool`/`GEngine`, then walk **UObject** reflection to resolve gameplay fields **by name** instead of publishing fixed offsets—useful for live overlay state on offline titles without SDK injection or on-disk mods. (source: wiki/sources/descriptions/myso-kr__hell-is-us-mod.md)
+
 ## UObject memory layout (typical)
 
 Common fields include vtable, flags, internal index, class pointer, name, and outer pointers. **Order, packing, and presence are build-specific.** Encrypted or pooled name tables (e.g. Valorant, Fortnite) need per-title decrypt paths—see [[valorant-fnamepool]], [[fortnite-fnameentry]]. Title-specific vtable/index offset dumps such as [[fortnite-virtual-offsets]] (Fortnite; `GetPlayerViewPoint`, `ProcessEvent`, `LineOfSightTo`, camera helpers; text-only) document per-build virtual dispatch slots for hook and call-site RE beside full SDK dumpers. (source: wiki/sources/descriptions/gmh5225__fortnite-virtual-offsets.md)
@@ -91,4 +94,4 @@ Curated UE tooling indexes such as [[unreal-engine-guide]] complement these SDK 
 
 ## Related
 
-[[engine-trust-boundaries]] · [[unreal-engine]] · [[dumper-7]] · [[zircon-ue-dumper]] · [[source-netvars]] · [[il2cpp]] · [[patternsleuth]] · [[source2gen]] · [[valorant-dumper]] · [[uedumper]] · [[uedumper-memprocfs]] · [[ezfndev-uedumper]] · [[shh0yauedumper]] · [[unrealdumper-4-25]] · [[unrealsdkdumper-4-25]] · [[qemu-unrealdumper-4-25]] · [[unreal-engine-tools]] · [[ue-unreal-engine-sdk]] · [[ue4-cheat-engine]] · [[ue4-injector]] · [[ue4-processevent-intercept]] · [[ue-live-bridge]] · [[unreal-engine-guide]] · [[unrealcpp]] · [[asset-tutorial-plugin]] · [[fortnite-virtual-offsets]] · [[fortnite-sigs]] · [[f0ndo-fortnite-sigs]] · [[fortnite-sigs-updated-every-update]] · [[fortnite-offsets]] · [[trydos-fortnite-offsets]] · [[android1337-fortnite-offsets]] · [[fortnite-offsets-and-sigs]] · [[fortnite-offsets-sigs-and-more]] · [[fortnite-offset-dumper]] · [[fortnite-voyagertf]] · [[fortnite-masterpasta-ihack-source-leak]] · [[fortnite-leak5]] · [[smite-esp-aimbot]] · [[research-rigor]] · [[overviews/game-engine]] · [[overviews/game-hacking]]
+[[engine-trust-boundaries]] · [[unreal-engine]] · [[dumper-7]] · [[zircon-ue-dumper]] · [[source-netvars]] · [[il2cpp]] · [[patternsleuth]] · [[source2gen]] · [[valorant-dumper]] · [[uedumper]] · [[uedumper-memprocfs]] · [[ezfndev-uedumper]] · [[shh0yauedumper]] · [[unrealdumper-4-25]] · [[unrealsdkdumper-4-25]] · [[qemu-unrealdumper-4-25]] · [[unreal-engine-tools]] · [[ue-unreal-engine-sdk]] · [[ue4-cheat-engine]] · [[ue4-injector]] · [[ue4-processevent-intercept]] · [[ue-live-bridge]] · [[unreal-engine-guide]] · [[unrealcpp]] · [[asset-tutorial-plugin]] · [[fortnite-virtual-offsets]] · [[fortnite-sigs]] · [[f0ndo-fortnite-sigs]] · [[fortnite-sigs-updated-every-update]] · [[fortnite-offsets]] · [[trydos-fortnite-offsets]] · [[android1337-fortnite-offsets]] · [[fortnite-offsets-and-sigs]] · [[fortnite-offsets-sigs-and-more]] · [[fortnite-offset-dumper]] · [[fortnite-voyagertf]] · [[fortnite-masterpasta-ihack-source-leak]] · [[fortnite-leak5]] · [[smite-esp-aimbot]] · [[hell-is-us-mod]] · [[research-rigor]] · [[overviews/game-engine]] · [[overviews/game-hacking]]
