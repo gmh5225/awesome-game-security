@@ -4698,6 +4698,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/weak1337/NvidiaApi
 - https://github.com/weak1337/FilterTap [Windows Filtering Platform driver example capturing L2 NIC/gateway MAC data and DNS queries; WDK required]
 - https://github.com/paradoxwastaken/WindowsHardwareInfo
+- https://github.com/odzhan/hwid [Read-only Windows 10/11 x64 console tool inventorying hardware identifiers with provenance, confidence, mutability, and JSON output]
 - https://github.com/gmh5225/query-gpu-name-rs [GPU name for windows]
 - https://github.com/lavoiesl/osx-cpu-temp [CPU temperature for OSX]
 - https://github.com/ashleyhung/WinRing0 [CPU temperature for windows]
