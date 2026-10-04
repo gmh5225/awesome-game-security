@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-04** — ingest `description:Yass5002/magisk-hub`: refreshed entity [[magisk-hub]] (Yass5002; Astro static directory for Magisk/KernelSU/APatch modules; six-hour automated upstream sync with JSON schema validation; categorized Frida, root-hide, Play Integrity, and instrumentation modules; tiered Markdown/JSON records with prerequisites and download links); cited on [[concepts/mobile-anti-cheat]] bypass catalog lane; frontmatter source on [[overviews/mobile-security]]; `index.md` entity blurb unchanged.
+
 - **2026-10-04** — ingest `readme:categories`: Cheat ~2859 (+1; Yass5002/[[magisk-hub]] Astro static Magisk/KernelSU/APatch module directory with schema-validated six-hour upstream sync) / Anti Cheat ~770 / other major section counts stable; 41 sections; synced projected README-map counts on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/mobile-security]], [[overviews/reverse-engineering]], and [[overviews/dma-attack]]; entity [[magisk-hub]]; light `index.md` section notes (no per-category pages).
 
 - **2026-10-03** — ingest `description:myso-kr/hell-is-us-mod`: refreshed entity [[hell-is-us-mod]] (myso-kr; Rust **hiumod** external Hell Is Us UE companion; name-pool/`GEngine` scan + UObject reflection-by-name; minimap/quest/story overlays + CUE4Parse survey tool + optional single-player cheats; no on-disk mods; Capabilities/Architecture/Positioning sections); cited on [[concepts/unreal-object-model]] external name-based introspection lane; `index.md` entity blurb sync.

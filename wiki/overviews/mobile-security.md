@@ -526,6 +526,7 @@ sources:
   - wiki/sources/descriptions/Iviesever__rooted-android-game-vm.md
   - wiki/sources/descriptions/erensariisik03-sudo__Farming-Simulator-12-Mp-Build.md
   - wiki/sources/descriptions/WajahatNaeem056__JerryManager.md
+  - wiki/sources/descriptions/Yass5002__magisk-hub.md
   - wiki/sources/descriptions/tbc0309__KPA-Root.md
   - wiki/sources/descriptions/AtakanKeser__BlastScale.md
 updated: 2026-10-04
