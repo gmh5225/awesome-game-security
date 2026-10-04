@@ -12,7 +12,7 @@ confidence: medium
 
 C++ CLI that queries Windows hardware identifiers via the **WMI (Windows Management Instrumentation)** service. Aimed at anti-cheat engineers and defensive researchers in the Detection:HWID lane who need a simple inventory of hardware info of interest. (source: wiki/sources/descriptions/paradoxwastaken__WindowsHardwareInfo.md)
 
-Complements GPU/board fingerprint tooling such as [[nvidiaapi]], TPM EK ground-truth paths such as [[tpm-mmio]], and sits opposite offensive HWID spoofers such as [[hwidspoofer]] / [[spoofer-amidewin]].
+Complements GPU/board fingerprint tooling such as [[nvidiaapi]], TPM EK ground-truth paths such as [[tpm-mmio]], and richer multi-API inventory tools such as [[odzhan-hwid]] (per-field provenance, confidence, mutability metadata). Sits opposite offensive HWID spoofers such as [[hwidspoofer]] / [[spoofer-amidewin]].
 
 ## Links
 
@@ -20,4 +20,4 @@ Complements GPU/board fingerprint tooling such as [[nvidiaapi]], TPM EK ground-t
 
 ## Related
 
-[[overviews/anti-cheat]] · [[overviews/game-hacking]] · [[nvidiaapi]] · [[tpm-mmio]] · [[hwidspoofer]] · [[spoofer-amidewin]]
+[[overviews/anti-cheat]] · [[overviews/game-hacking]] · [[odzhan-hwid]] · [[nvidiaapi]] · [[tpm-mmio]] · [[hwidspoofer]] · [[spoofer-amidewin]]

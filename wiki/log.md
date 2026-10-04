@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-04** — ingest `description:odzhan/hwid`: refreshed entity [[odzhan-hwid]] (odzhan; read-only C++20 Win10/11 x64 HWID inventory; WMI/SetupAPI/IP Helper/TBS/CNG/NVML; per-field provenance/confidence/mutability/availability; JSON + redaction; no composite fingerprint); cited on [[concepts/hwid-spoofing]] defensive inventory lane + [[overviews/game-hacking]] HWID section; cross-linked [[windows-hardware-info]]; `index.md` entity blurb sync.
+
 - **2026-10-04** — ingest `readme:categories`: Anti Cheat ~771 (+1; odzhan/[[odzhan-hwid]] read-only Win10/11 x64 HWID inventory with per-field provenance/confidence/mutability/JSON) / Game Develop ~192 (+1; monstercameron/[[liberty-flux]] GTA IV RAGE Rust Ghidra-assisted reimplementation) / Cheat ~2859 / other major section counts stable; 41 sections; synced projected README-map counts on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], [[overviews/game-engine]], and [[overviews/reverse-engineering]]; entities [[odzhan-hwid]], [[liberty-flux]]; cited [[concepts/hwid-spoofing]] defensive inventory lane; light `index.md` section notes (no per-category pages).
 
 - **2026-10-04** — ingest `description:Yass5002/magisk-hub`: refreshed entity [[magisk-hub]] (Yass5002; Astro static directory for Magisk/KernelSU/APatch modules; six-hour automated upstream sync with JSON schema validation; categorized Frida, root-hide, Play Integrity, and instrumentation modules; tiered Markdown/JSON records with prerequisites and download links); cited on [[concepts/mobile-anti-cheat]] bypass catalog lane; frontmatter source on [[overviews/mobile-security]]; `index.md` entity blurb unchanged.

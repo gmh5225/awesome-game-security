@@ -11,6 +11,7 @@ sources:
   - wiki/sources/descriptions/nevioo1337__VAC-ModuleDumper.md
   - wiki/sources/descriptions/Gingerbeard5773__dino-printer.md
   - wiki/sources/descriptions/GJR787878__DeviceResetSpoofer.md
+  - wiki/sources/descriptions/odzhan__hwid.md
   - wiki/sources/descriptions/jafarm189__MOABile.md
   - wiki/sources/descriptions/gmh5225__Vac-Emulator.md
   - wiki/sources/descriptions/gmh5225__VACDumper.md
@@ -1968,7 +1969,7 @@ Secure Boot, Windows startup integrity, and measured-boot appraisal address diff
 
 ## HWID spoofing
 
-Account/device bans fingerprint disk serial, NIC MAC, SMBIOS fields, GPU/monitor identifiers, volume serial, and TPM EK. Techniques include filter-driver IOCTL interception, registry cache patching, raw SMBIOS edits, NDIS MAC replacement, and coordinated multi-identifier spoofers. See [[hwid-spoofing]] for targets, techniques, and defensive limits—identifier substitution alone does not establish cheat attribution. (source: wiki/sources/skills/game-hacking.md)
+Account/device bans fingerprint disk serial, NIC MAC, SMBIOS fields, GPU/monitor identifiers, volume serial, and TPM EK. Techniques include filter-driver IOCTL interception, registry cache patching, raw SMBIOS edits, NDIS MAC replacement, and coordinated multi-identifier spoofers. See [[hwid-spoofing]] for targets, techniques, and defensive limits—identifier substitution alone does not establish cheat attribution. Read-only baseline collectors such as [[odzhan-hwid]] (odzhan; C++20; WMI/SetupAPI/IP Helper/TBS/CNG/NVML; per-field provenance, confidence, mutability; JSON + redaction; no composite fingerprint) map what Windows exposes before spoofing. (source: wiki/sources/skills/game-hacking.md) (source: wiki/sources/descriptions/odzhan__hwid.md)
 
 ## Engine-specific surfaces
 

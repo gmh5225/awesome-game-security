@@ -1826,7 +1826,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [hw3d](entities/hw3d.md) — C++ 3D DirectX tutorial (Planet Chili; DirectX / guide)
 - [hardware-breakpoint](entities/hardware-breakpoint.md) — ARM64 Linux kernel HWBP module (APIs + proc; exec/watch breakpoints; trigger stats; Android/embedded debugging; Ylarod; HWBP on linux/android)
 - [hw-call-stack](entities/hw-call-stack.md) — Fortra HWBP call-stack spoofer for syscalls/API calls (C/C++; Cheat Spoof Stack / HWBP)
-- [odzhan-hwid](entities/odzhan-hwid.md) — read-only Win10/11 x64 HWID inventory console (WMI/SetupAPI/TBS/CNG; per-field provenance, confidence, mutability, JSON output; Anti Cheat / Detection:HWID)
+- [odzhan-hwid](entities/odzhan-hwid.md) — read-only Win10/11 x64 HWID inventory console (WMI/SetupAPI/IP Helper/TBS/CNG/NVML; per-field provenance, confidence, mutability, availability; JSON + redaction; no composite fingerprint; Anti Cheat / Detection:HWID)
 - [hwid](entities/hwid.md) — BTBD kernel HWID spoofer (IOCTL hooks for disk/volume/NIC/ARP/SMBIOS/boot/GPU; usermode registry/tracking cleanup; Win10 1507–1903 x64)
 - [hwid-checker-mg](entities/hwid-checker-mg.md) — SMBIOS manufacturer/model/serial HWID checker (Detection:HWID)
 - [Full-Hwid-Spoofer-V6](entities/full-hwid-spoofer-v6.md) — comprehensive HWID spoofer v6 via KdMapper kernel driver + ImGui (disk/NIC/GPU/SMBIOS/registry; AMD/Intel Win10/11; gmh5225)
