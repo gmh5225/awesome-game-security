@@ -1369,6 +1369,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/gmh5225/frida-ue4dump [UE4]
 - https://github.com/jcalabres/hook-updater [Update Frida hooks automatically]
 - https://github.com/gmh5225/frida-boot [A binary instrumentation workshop, with Frida, for beginners]
+- https://github.com/oleavr/frida-module-example [TypeScript Frida library example using frida-compile — ImHex struct patterns, Memory.scanSync scanning, and ARM Thumb hook trampolines]
 - https://github.com/smartdone/Frida-Scripts [Some scripts]
 - https://github.com/0xdea/frida-scripts [Some scripts]
 - https://github.com/SeeFlowerX/frida-smali-trace [Smali trace]
