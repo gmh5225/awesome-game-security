@@ -438,6 +438,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/gmh5225/Game-GTA-re3 [Reversed GTA III, Vice City]
 - https://github.com/gmh5225/reGTA [Reverse Engineered GTA III and GTA VC]
 - https://github.com/gta-reversed/gta-reversed-modern [Reimplementation of GTA:SA 1.0 US]
+- https://github.com/monstercameron/LibertyFlux [GTA IV RAGE engine Rust reimplementation via Ghidra-assisted reverse engineering for 64-bit Windows, Windows on ARM, and macOS; no game assets]
 - https://github.com/ThirteenAG/GTAIV.EFLC.FusionFix [GTA IV: Complete Edition fixes and modern-feature patch (graphics, FPS, QoL, scripting, widescreen)]
 - https://github.com/gmh5225/Grand-Theft-Auto-Modding-Source [Code snippets for Vice City]
 - https://github.com/Harrison1/unrealcpp [UE4 C++ examples]
