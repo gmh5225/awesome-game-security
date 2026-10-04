@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-04** — lint (agent pass): index vs disk scan — 9 overviews, 51 concepts, 4002 entities (4062 index entries); index.md fully synced (0 missing, 0 dead, 0 duplicate entries); overview wikilink spot-check (9 pages, 12216 links) — 0 broken links; concept spot-check (51 pages, 2365 links) — 0 broken links; index.md wikilink scan (781 links) — 0 broken links; 6 cross-kind slug collisions ([[game-hacking]], [[anti-cheat]], [[reverse-engineering]], [[il2cpp]], [[byovd]], [[dma]]) — expected, no repair needed; no structural edits required.
+
 - **2026-10-04** — ingest `description:monstercameron/LibertyFlux`: refreshed entity [[liberty-flux]] (monstercameron; Rust Cargo workspace GTA IV RAGE engine one-function-at-a-time reimplementation; binary format parsers; checker workers + Ghidra validation + hooking/proxy DLL live swap; native 64-bit Windows/ARM/macOS; no game assets; Architecture/Verification workflow/Positioning sections); cited on [[overviews/game-engine]] Game Develop / Source lane + [[overviews/reverse-engineering]] RAGE-era decompilation cluster; cross-linked [[gta-reversed-modern]] and [[game-gta-re3]]; `index.md` entity blurb already current.
 
 - **2026-10-04** — ingest `description:odzhan/hwid`: refreshed entity [[odzhan-hwid]] (odzhan; read-only C++20 Win10/11 x64 HWID inventory; WMI/SetupAPI/IP Helper/TBS/CNG/NVML; per-field provenance/confidence/mutability/availability; JSON + redaction; no composite fingerprint); cited on [[concepts/hwid-spoofing]] defensive inventory lane + [[overviews/game-hacking]] HWID section; cross-linked [[windows-hardware-info]]; `index.md` entity blurb sync.
