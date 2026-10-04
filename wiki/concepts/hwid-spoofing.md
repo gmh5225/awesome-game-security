@@ -8,7 +8,8 @@ sources:
   - wiki/sources/descriptions/Th3Spl__PerfectSMBios.md
   - wiki/sources/descriptions/gmh5225__HWID-Kernel-Spoofer.md
   - wiki/sources/descriptions/GJR787878__DeviceResetSpoofer.md
-updated: 2026-09-09
+  - wiki/sources/descriptions/odzhan__hwid.md
+updated: 2026-10-04
 confidence: medium
 ---
 
@@ -37,6 +38,10 @@ Techniques that **replace or mask hardware identifiers** queried by anti-cheat, 
 - **Coordinated spoofers** — rotate multiple identifiers together to defeat composite fingerprints
 
 Kernel-mode samples such as [[hwid-kernel-spoofer]] (gmh5225; C/C++; kernel driver development; cheat / HWID) and user-mode/registry-oriented tools such as [[negativespoofer]] (SamuelTulach; C++; cheat / HWID) illustrate common implementation lanes. UEFI pre-boot SMBIOS spoofing such as [[perfectsmbios]] (Th3Spl; UEFI; cheat / HWID) operates before the OS loads. Mobile post-clear identity rotation such as [[device-reset-spoofer]] (GJR787878; Android; cheat / HWID) sits in a parallel mobile ban-evasion lane. (source: wiki/sources/descriptions/gmh5225__HWID-Kernel-Spoofer.md) (source: wiki/sources/descriptions/SamuelTulach__negativespoofer.md) (source: wiki/sources/descriptions/Th3Spl__PerfectSMBios.md) (source: wiki/sources/descriptions/GJR787878__DeviceResetSpoofer.md)
+
+## Defensive inventory
+
+Read-only baseline collectors such as [[odzhan-hwid]] (odzhan; C++20 console; WMI/SetupAPI/IP Helper/TBS/CNG/NVML; per-field provenance, confidence, mutability, availability, and JSON output; no composite fingerprint) help AC analysts map which identifiers Windows exposes and how reliably each can be queried before designing spoof detection. (source: wiki/sources/descriptions/odzhan__hwid.md)
 
 ## Defensive limits
 
