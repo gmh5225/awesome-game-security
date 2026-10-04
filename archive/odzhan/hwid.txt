@@ -1,0 +1,2955 @@
+Project Path: arc_odzhan_hwid_hltiprod
+
+Source Tree:
+
+```txt
+arc_odzhan_hwid_hltiprod
+├── CMakeLists.txt
+├── CMakePresets.json
+├── README.md
+├── src
+│   ├── app
+│   │   ├── Cli.cpp
+│   │   └── Cli.h
+│   ├── collectors
+│   │   ├── Collectors.cpp
+│   │   ├── Collectors.h
+│   │   ├── CpuCollector.cpp
+│   │   ├── GpuCollector.cpp
+│   │   ├── NetworkCollector.cpp
+│   │   ├── StorageCollector.cpp
+│   │   ├── TpmCollector.cpp
+│   │   ├── UsbCollector.cpp
+│   │   └── WmiCollectors.cpp
+│   ├── common
+│   │   ├── Error.cpp
+│   │   ├── Error.h
+│   │   ├── HardwareIdentifier.h
+│   │   ├── Strings.cpp
+│   │   ├── Strings.h
+│   │   └── WinHandle.h
+│   ├── main.cpp
+│   ├── output
+│   │   ├── Writers.cpp
+│   │   └── Writers.h
+│   └── windows
+│       ├── DeviceEnumerator.cpp
+│       ├── DeviceEnumerator.h
+│       ├── WmiClient.cpp
+│       └── WmiClient.h
+├── tests
+│   ├── Integration.ps1
+│   └── Tests.cpp
+└── windows_cpp_hardware_identity_plan.md
+
+```
+
+`CMakeLists.txt`:
+
+```txt
+cmake_minimum_required(VERSION 3.24)
+project(hwid VERSION 1.0.0 LANGUAGES CXX)
+if(NOT WIN32 OR NOT MSVC)
+  message(FATAL_ERROR "hwid requires Windows and MSVC (Visual Studio 2022 or newer).")
+endif()
+if(NOT CMAKE_SIZEOF_VOID_P EQUAL 8)
+  message(FATAL_ERROR "Configure an x64 build.")
+endif()
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+add_library(hwid_core
+  src/common/Strings.cpp src/common/Error.cpp
+  src/app/Cli.cpp src/output/Writers.cpp
+  src/windows/WmiClient.cpp src/windows/DeviceEnumerator.cpp
+  src/collectors/WmiCollectors.cpp src/collectors/StorageCollector.cpp
+  src/collectors/NetworkCollector.cpp src/collectors/UsbCollector.cpp
+  src/collectors/GpuCollector.cpp src/collectors/TpmCollector.cpp
+  src/collectors/CpuCollector.cpp src/collectors/Collectors.cpp)
+target_include_directories(hwid_core PUBLIC src)
+target_compile_definitions(hwid_core PUBLIC UNICODE _UNICODE WIN32_LEAN_AND_MEAN NOMINMAX _WIN32_WINNT=0x0A00)
+target_compile_options(hwid_core PUBLIC /W4 /permissive- /utf-8 /EHsc)
+target_link_libraries(hwid_core PUBLIC wbemuuid ole32 oleaut32 iphlpapi setupapi cfgmgr32 dxgi tbs ncrypt bcrypt)
+add_executable(hwid src/main.cpp)
+target_link_libraries(hwid PRIVATE hwid_core)
+include(CTest)
+if(BUILD_TESTING)
+  add_executable(hwid_tests tests/Tests.cpp)
+  target_link_libraries(hwid_tests PRIVATE hwid_core)
+  add_test(NAME unit_and_fixtures COMMAND hwid_tests)
+  add_test(NAME cli_help COMMAND hwid --help)
+  add_test(NAME cli_reject_unknown COMMAND hwid --component invalid)
+  set_tests_properties(cli_reject_unknown PROPERTIES WILL_FAIL TRUE)
+  add_test(NAME inventory_json COMMAND powershell -NoProfile -ExecutionPolicy Bypass -File
+    ${CMAKE_CURRENT_SOURCE_DIR}/tests/Integration.ps1 -Executable $<TARGET_FILE:hwid>)
+  set_tests_properties(inventory_json PROPERTIES TIMEOUT 180 LABELS integration)
+endif()
+install(TARGETS hwid RUNTIME DESTINATION bin)
+
+```
+
+`CMakePresets.json`:
+
+```json
+{
+  "version": 6,
+  "cmakeMinimumRequired": {"major": 3, "minor": 25, "patch": 0},
+  "configurePresets": [{
+    "name": "windows-x64", "displayName": "MSVC x64 (Developer PowerShell)",
+    "generator": "Ninja", "binaryDir": "${sourceDir}/build/windows-x64",
+    "cacheVariables": {"CMAKE_BUILD_TYPE": "Release", "BUILD_TESTING": "ON", "CMAKE_CXX_COMPILER": "cl"}
+  }],
+  "buildPresets": [{"name": "windows-x64", "configurePreset": "windows-x64"}],
+  "testPresets": [{"name": "windows-x64", "configurePreset": "windows-x64", "output": {"outputOnFailure": true}}]
+}
+
+```
+
+`README.md`:
+
+```md
+# Windows hardware identity inventory
+
+`hwid.exe` is a native C++20, read-only Windows 10/11 x64 console tool.
+It inventories what Windows and device drivers expose, with provenance,
+confidence, mutability, availability, and per-field diagnostics. It does not
+compute a combined machine fingerprint or claim that every value is unique.
+
+## Build
+
+Install Visual Studio 2022 or newer with **Desktop development with C++**, a
+Windows 10/11 SDK, CMake 3.25 or newer, and Ninja. In an **x64 Native Tools
+Command Prompt** or an initialized **Developer PowerShell**:
+
+```powershell
+cmake --preset windows-x64
+cmake --build --preset windows-x64
+ctest --preset windows-x64
+.\build\windows-x64\hwid.exe --help
+```
+
+The preset builds Release with tests enabled. No packages are downloaded and
+no third-party build dependencies are required. Alternatively, use a Visual
+Studio generator (no Ninja required):
+
+```powershell
+cmake -S . -B build/vs2022 -G "Visual Studio 17 2022" -A x64
+cmake --build build/vs2022 --config Release
+ctest --test-dir build/vs2022 -C Release --output-on-failure
+.\build\vs2022\Release\hwid.exe --json --redact
+```
+
+Use the generator matching your Visual Studio version. CMake's install target
+can copy the executable to a chosen destination:
+
+```powershell
+cmake --install build/windows-x64 --prefix out
+```
+
+If multiple toolchains are installed, initialize the MSVC x64 environment
+before configuring. An incomplete developer environment can select an unrelated
+MinGW linker. After fixing the environment, use `cmake --fresh --preset windows-x64`.
+The executable uses the MSVC runtime; other machines need the matching Microsoft
+Visual C++ x64 Redistributable.
+
+## Usage
+
+```powershell
+hwid.exe
+hwid.exe --json
+hwid.exe --verbose --redact
+hwid.exe --component motherboard
+hwid.exe --component storage --json
+hwid.exe --tpm-info
+```
+
+Components: `system`, `motherboard`, `bios`, `tpm`, `storage`, `network`,
+`usb`, `gpu`, `sdEmmc` (also `sd-emmc`), and `cpu`.
+`--component` selects one collector; it does not run the other collectors.
+`--tpm-info` is an alias for `--component tpm`.
+
+Each collector also has a direct switch: `--system`, `--motherboard`, `--bios`,
+`--tpm`, `--storage`, `--network`, `--usb`, `--gpu`, `--sd-emmc`, and `--cpu`.
+For example, `hwid.exe --storage --json` runs only the storage collector.
+Use one collector switch at a time; omitting the filter runs all ten.
+Direct switches work with `--json`, `--verbose`, and `--redact`.
+
+By default, stdout contains tables grouped by component and device, with
+`Identifier`, `Value`, and `Status` columns. Values are not truncated.
+Use `--verbose` to include provenance, confidence, mutability, raw values and
+diagnostics below each table. `--json` switches stdout to machine-readable JSON.
+
+Exit codes: **0** means the inventory completed, including partial failures;
+**1** means a fatal application/output error; **2** means invalid arguments.
+Inspect each result's `available`, `status`, and `error` for device failures.
+The application never requests elevation or changes device/TPM configuration.
+
+## Implemented collectors
+
+| Category | Data and source | Limits |
+| --- | --- | --- |
+| System | WMI `Win32_ComputerSystemProduct.UUID`, vendor, name | Rejects malformed, zero and FF UUIDs; virtual/OEM firmware can change them |
+| Motherboard | All WMI `Win32_BaseBoard` rows: manufacturer, product, serial | Retains and flags OEM placeholders |
+| BIOS | WMI `Win32_BIOS` manufacturer, version, serial | Labels the BIOS-reported system/service serial without claiming a ROM-chip ID |
+| Storage | SetupAPI disk interfaces, `IOCTL_STORAGE_QUERY_PROPERTY` descriptor, physical drive number where available | Serial is storage-stack reported; RAID/USB/virtual layers can substitute or hide it |
+| Network | IP Helper adapters; current MAC and `GetIfEntry2` permanent MAC, type/status/hardware flag | Includes virtual interfaces; permanent MAC remains driver-reported |
+| USB | Present USB devnodes, VID/PID, manufacturer, instance ID, unique-ID capability | Labels serial inferred from physical USB instance component; does not read iSerialNumber directly |
+| TPM | TBS presence/version; WMI state and `IsReady`; CNG public EK/certificate blob SHA-256 | Readiness may require admin access; failures remain explicit; no certificate trust or attestation verification |
+| GPU | All DXGI adapters: PCI model IDs, revision, local LUID, software flag; optional NVML UUID and board serial | DXGI LUID is transient; NVML enumeration is separate and not assumed to match DXGI ordering |
+| SD/eMMC | Storage devices reporting SD/MMC bus types, storage-stack serial | CID explicitly unsupported in this version; USB readers may hide the card's bus type |
+| CPU | CPUID vendor/brand/family/model/stepping/features; WMI processors | CPUID describes the current logical processor; modern x86/x64 unique serial explicitly unavailable |
+
+NVIDIA NVML loads dynamically from the Windows system directory using a
+restricted DLL search. Missing DLLs or unsupported functions do not abort the
+scan. AMD/Intel vendor UUID backends are explicitly reported as unimplemented;
+their adapters still receive DXGI inventory.
+
+Protocol-specific NVMe queries, controller-specific SD CID paths, AMD/Intel
+vendor identity backends, TPM key enrollment, and attestation are future
+extensions from the plan. `--create-device-key` and `--tpm-attestation` are not
+implemented; unknown options fail rather than silently doing something else.
+Passive TPM inventory does not create persisted keys or export private keys.
+
+## Results and privacy
+
+JSON has `schemaVersion: 1`, a `redacted` flag, and ten component arrays.
+Unselected component arrays are empty. Each record includes:
+
+```json
+{
+  "component": "storage",
+  "deviceName": "PhysicalDrive0",
+  "identifierType": "Storage serial",
+  "rawValue": "  EXAMPLE  ",
+  "normalizedValue": "EXAMPLE",
+  "source": "IOCTL_STORAGE_QUERY_PROPERTY/STORAGE_DEVICE_DESCRIPTOR.SerialNumberOffset",
+  "confidence": "InterfaceAssigned",
+  "status": "available",
+  "potentiallyMutable": true,
+  "available": true,
+  "error": "Storage-stack-reported serial; bridge, RAID or virtual controller may substitute it. Not an NVMe namespace identifier."
+}
+```
+
+The `error` field may also contain an explanatory caveat on an available result.
+Statuses distinguish missing devices, access denial, unsupported operations,
+unexposed fields, placeholders, and query failures. Numeric API codes and
+HRESULTs are preserved in diagnostics. An empty enumeration produces a
+not-present result. Failure in one collector does not prevent subsequent ones.
+
+Normalization trims boundary whitespace/NULs without removing internal spaces.
+UUIDs become lowercase and MACs uppercase colon-separated hex. Raw values are
+retained, including placeholders. TPM output intentionally contains only hashes
+of public provider blobs, not certificate contents; those hashes are still
+persistent identifiers and are not an authentication proof.
+
+Nothing is automatically transmitted or saved to disk. Both normal output and
+`--json` can expose persistent identifiers. `--redact` masks **all** values,
+device names, and diagnostics in both writers, including verbose raw values.
+Structural metadata and statuses remain visible. Output is UTF-8, with JSON
+escaping and escaped control characters in console strings. To save a report,
+explicitly redirect stdout yourself.
+
+## Validation
+
+CTest includes normalization and malformed descriptor fixtures, Unicode/JSON
+escaping, invalid placeholders, error isolation and access-denied classification,
+missing devices, multiple records, redaction, CLI parsing, and a live inventory
+smoke test. Tests use explicit checks in Release builds, not disabled `assert`s.
+The integration script parses JSON with PowerShell and never logs raw IDs.
+
+Local validation: MSVC 19.44 x64 Release with Windows SDK 10.0.26100.0 built
+without warnings; all four CTest tests passed (35 unit/fixture checks). The
+live scan ran without elevation and returned usable data for system,
+motherboard, BIOS, TPM, storage, network, USB, GPU, and CPU. This host did not
+expose an SD/MMC disk. Restricted and unsupported fields remained explicit.
+
+Validation on this development host does not establish the entire hardware
+matrix in the plan. Repeat `ctest` on Windows 10/11 physical machines and a
+Hyper-V/VMware VM, as standard user, and check NVMe/SATA/RAID, USB bridges,
+multiple NICs/GPUs, SD readers, absent/disabled TPM, and optional NVIDIA hardware.
+No unavailable hardware is emulated as a successful identifier.
+
+## API references
+
+- [Microsoft storage descriptor](https://learn.microsoft.com/en-us/windows/win32/api/winioctl/ns-winioctl-storage_device_descriptor)
+- [Microsoft GetIfEntry2](https://learn.microsoft.com/en-us/windows/win32/api/netioapi/nf-netioapi-getifentry2)
+- [Microsoft USB serial and unique-ID capability](https://devblogs.microsoft.com/windows-music-dev/the-importance-of-including-a-unique-iserialnumber-in-your-usb-midi-devices/)
+- [Microsoft TPM device information](https://learn.microsoft.com/en-us/windows/win32/api/tbs/nf-tbs-tbsi_getdeviceinfo)
+- [Microsoft TPM readiness and access requirements](https://learn.microsoft.com/en-us/windows/win32/secprov/win32-tpm-isready)
+- [NVIDIA NVML reference](https://docs.nvidia.com/deploy/nvml-api/index.html)
+
+```
+
+`src/app/Cli.cpp`:
+
+```cpp
+#include "Cli.h"
+#include "common/HardwareIdentifier.h"
+#include <algorithm>
+#include <stdexcept>
+namespace hwid {
+Options parseCli(std::span<const std::string_view> args) {
+    Options o;
+    auto select = [&](std::string_view name) {
+        if (!o.component.empty()) throw std::invalid_argument("Specify only one component filter");
+        o.component = name == "sd-emmc" ? "sdEmmc" : name;
+        if (std::find(components.begin(), components.end(), o.component) == components.end())
+            throw std::invalid_argument("Unknown component: " + o.component);
+    };
+    for (size_t i = 0; i < args.size(); ++i) {
+        auto a = args[i];
+        if (a == "--help" || a == "-h") o.help = true;
+        else if (a == "--json") o.json = true;
+        else if (a == "--verbose") o.verbose = true;
+        else if (a == "--redact") o.redact = true;
+        else if (a == "--component" || a == "--tpm-info") {
+            if (a == "--tpm-info") select("tpm");
+            else {
+                if (++i == args.size()) throw std::invalid_argument("--component requires a name");
+                select(args[i]);
+            }
+        }
+        else if (a.starts_with("--") && (a == "--sd-emmc" ||
+            std::find(components.begin(), components.end(), a.substr(2)) != components.end())) select(a.substr(2));
+        else throw std::invalid_argument("Unknown option: " + std::string(a));
+    }
+    return o;
+}
+std::string_view usage() {
+    return "hwid - read-only Windows hardware inventory\n"
+        "Usage: hwid [--json] [--verbose] [--redact] [--component NAME]\n"
+        "Default output: console tables grouped by component and device.\n"
+        "Components: system motherboard bios tpm storage network usb gpu sdEmmc cpu\n"
+        "Select one collector (omit to collect all):\n"
+        "  --system      System UUID, vendor and name\n"
+        "  --motherboard Motherboard manufacturer, product and serial\n"
+        "  --bios        BIOS manufacturer, version and reported serial\n"
+        "  --tpm         TPM presence, state and endorsement fingerprints\n"
+        "  --storage     Disk bus, model, revision and serial\n"
+        "  --network     Network addresses and adapter metadata\n"
+        "  --usb         USB device IDs and serial information\n"
+        "  --gpu         GPU identifiers\n"
+        "  --sd-emmc     SD/eMMC storage identifiers and CID availability\n"
+        "  --cpu         CPU identification and features\n"
+        "  --component NAME  Equivalent named component filter\n"
+        "  --tpm-info    Alias for --component tpm\n"
+        "  --json        Versioned UTF-8 JSON with raw and normalized values\n"
+        "  --verbose     Add sources, confidence, raw values and diagnostics below tables\n"
+        "  --redact      Mask all values, device names and diagnostic text\n"
+        "  --help        Show this help\n"
+        "No identifiers are transmitted or saved. Partial failures appear in results.\n"
+        "Exit codes: 0 inventory completed (possibly partial), 1 fatal error, 2 usage error.\n";
+}
+}
+
+```
+
+`src/app/Cli.h`:
+
+```h
+#pragma once
+#include <string>
+#include <span>
+#include <string_view>
+namespace hwid {
+struct Options { bool json = false, verbose = false, redact = false, help = false; std::string component; };
+Options parseCli(std::span<const std::string_view> args);
+std::string_view usage();
+}
+
+```
+
+`src/collectors/Collectors.cpp`:
+
+```cpp
+#include "Collectors.h"
+#include "common/Error.h"
+#include <iterator>
+namespace hwid {
+HardwareResults collectSafely(std::string_view component, const std::function<HardwareResults()>& collector) {
+    try {
+        auto results = collector();
+        if (results.empty()) results.push_back(unavailable(std::string(component), "", "Inventory", "Windows enumeration", "No devices reported", IdStatus::NotPresent));
+        return results;
+    } catch (const WindowsError& e) {
+        return {unavailable(std::string(component), "", "Inventory", "Windows API", e.what(), errorStatus(e.code))};
+    } catch (const std::exception& e) {
+        return {unavailable(std::string(component), "", "Inventory", "Collector", e.what(), IdStatus::QueryFailed)};
+    }
+}
+HardwareResults collectAll(std::string_view component) {
+    using Collector = HardwareResults(*)();
+    constexpr Collector collectors[] = {collectSystem, collectMotherboard, collectBios, collectTpm, collectStorage,
+        collectNetwork, collectUsb, collectGpu, collectSdEmmc, collectCpu};
+    HardwareResults results;
+    for (size_t i = 0; i < components.size(); ++i) {
+        if (!component.empty() && component != components[i]) continue;
+        auto rows = collectSafely(components[i], collectors[i]);
+        results.insert(results.end(), std::make_move_iterator(rows.begin()), std::make_move_iterator(rows.end()));
+    }
+    return results;
+}
+}
+
+```
+
+`src/collectors/Collectors.h`:
+
+```h
+#pragma once
+#include "common/HardwareIdentifier.h"
+#include <functional>
+namespace hwid {
+HardwareResults collectSystem();
+HardwareResults collectMotherboard();
+HardwareResults collectBios();
+HardwareResults collectTpm();
+HardwareResults collectStorage();
+HardwareResults collectNetwork();
+HardwareResults collectUsb();
+HardwareResults collectGpu();
+HardwareResults collectSdEmmc();
+HardwareResults collectCpu();
+HardwareResults collectSafely(std::string_view component, const std::function<HardwareResults()>& collector);
+HardwareResults collectAll(std::string_view component = {});
+}
+
+```
+
+`src/collectors/CpuCollector.cpp`:
+
+```cpp
+#include "Collectors.h"
+#include "common/Strings.h"
+#include "windows/WmiClient.h"
+#include <intrin.h>
+#include <cstring>
+namespace hwid {
+HardwareResults collectCpu() {
+    HardwareResults results;
+    auto add = [&](std::string type, std::string value, std::string source) {
+        results.push_back(identifier("cpu", "Current logical processor", type, value, source, IdConfidence::Informational, true, false));
+    };
+#if defined(_M_X64) || defined(_M_IX86)
+    int regs[4]{};
+    __cpuid(regs, 0);
+    const int maxLeaf = regs[0];
+    char vendor[13]{};
+    std::memcpy(vendor, &regs[1], 4); std::memcpy(vendor + 4, &regs[3], 4); std::memcpy(vendor + 8, &regs[2], 4);
+    add("Vendor", vendor, "CPUID leaf 0");
+    if (maxLeaf >= 1) {
+        __cpuidex(regs, 1, 0);
+        auto eax = static_cast<unsigned>(regs[0]);
+        auto family = (eax >> 8) & 15;
+        auto model = (eax >> 4) & 15;
+        if (family == 6 || family == 15) model |= ((eax >> 16) & 15) << 4;
+        if (family == 15) family += (eax >> 20) & 255;
+        add("Family", std::to_string(family), "CPUID.1.EAX");
+        add("Model", std::to_string(model), "CPUID.1.EAX");
+        add("Stepping", std::to_string(eax & 15), "CPUID.1.EAX");
+        add("Feature bits ECX", hexNumber(static_cast<unsigned>(regs[2]), 8), "CPUID.1.ECX");
+        add("Feature bits EDX", hexNumber(static_cast<unsigned>(regs[3]), 8), "CPUID.1.EDX");
+    }
+    __cpuid(regs, static_cast<int>(0x80000000u));
+    if (static_cast<unsigned>(regs[0]) >= 0x80000004u) {
+        char brand[49]{};
+        for (unsigned i = 0; i < 3; ++i) { __cpuid(regs, static_cast<int>(0x80000002u + i)); std::memcpy(brand + i * 16, regs, 16); }
+        add("Brand", std::string(brand, 48), "CPUID extended brand leaves");
+    }
+#else
+    results.push_back(unavailable("cpu", "", "CPUID", "Compiler architecture", "CPUID is only implemented on x86/x64", IdStatus::NotSupported));
+#endif
+    auto wmi = collectSafely("cpu", [] {
+        WmiClient client;
+        HardwareResults rows;
+        for (const auto& r : client.query(L"SELECT DeviceID, Name, ProcessorId FROM Win32_Processor", {L"DeviceID", L"Name", L"ProcessorId"})) {
+            auto device = r.at(L"DeviceID").text;
+            for (auto property : {L"Name", L"ProcessorId"}) {
+                const auto& value = r.at(property);
+                if (!value.error.empty()) rows.push_back(unavailable("cpu", device, utf8(property), "Win32_Processor." + utf8(property), value.error));
+                else rows.push_back(identifier("cpu", device, utf8(property), value.text, "Win32_Processor." + utf8(property), IdConfidence::Informational, true, false));
+            }
+        }
+        return rows;
+    });
+    results.insert(results.end(), wmi.begin(), wmi.end());
+    results.push_back(unavailable("cpu", "", "Unique CPU serial", "x86/x64 CPU identification semantics",
+        "A generally usable unique CPU serial is not exposed on modern x86/x64 PCs. CPUID and ProcessorId are identification data, not unique serials.", IdStatus::NotSupported));
+    return results;
+}
+}
+
+```
+
+`src/collectors/GpuCollector.cpp`:
+
+```cpp
+#include "Collectors.h"
+#include "common/Error.h"
+#include "common/Strings.h"
+#include <dxgi1_2.h>
+#include <wrl/client.h>
+#include <memory>
+#include <cstring>
+namespace hwid {
+namespace {
+class IGpuIdentityProvider {
+public:
+    virtual ~IGpuIdentityProvider() = default;
+    virtual HardwareResults collect() = 0;
+};
+class DxgiGpuProvider final : public IGpuIdentityProvider {
+public:
+    HardwareResults collect() override {
+        Microsoft::WRL::ComPtr<IDXGIFactory1> factory;
+        checkHr(CreateDXGIFactory1(IID_PPV_ARGS(&factory)), "CreateDXGIFactory1");
+        HardwareResults results;
+        for (UINT i = 0;; ++i) {
+            Microsoft::WRL::ComPtr<IDXGIAdapter1> adapter;
+            auto hr = factory->EnumAdapters1(i, &adapter);
+            if (hr == DXGI_ERROR_NOT_FOUND) break;
+            checkHr(hr, "IDXGIFactory1::EnumAdapters1");
+            DXGI_ADAPTER_DESC1 desc{};
+            hr = adapter->GetDesc1(&desc);
+            if (FAILED(hr)) {
+                results.push_back(unavailable("gpu", "DXGI adapter " + std::to_string(i), "Adapter description", "IDXGIAdapter1::GetDesc1", windowsError("GetDesc1", hr), errorStatus(hr)));
+                continue;
+            }
+            auto name = "DXGI " + std::to_string(i) + " (" + utf8(desc.Description) + ")";
+            auto add = [&](std::string type, std::string value, std::string field) {
+                results.push_back(identifier("gpu", name, type, value, "DXGI_ADAPTER_DESC1." + field, IdConfidence::Informational, true, false));
+            };
+            add("Vendor ID", hexNumber(desc.VendorId, 4), "VendorId");
+            add("Device ID", hexNumber(desc.DeviceId, 4), "DeviceId");
+            add("Subsystem ID", hexNumber(desc.SubSysId, 8), "SubSysId");
+            add("Revision", hexNumber(desc.Revision, 2), "Revision");
+            add("Adapter LUID (local, transient)", hexNumber(static_cast<ULONG>(desc.AdapterLuid.HighPart), 8) + hexNumber(desc.AdapterLuid.LowPart, 8), "AdapterLuid");
+            add("Software adapter", (desc.Flags & DXGI_ADAPTER_FLAG_SOFTWARE) ? "true" : "false", "Flags");
+            results.push_back(unavailable("gpu", name, "Physical GPU UUID/serial", "DXGI",
+                "DXGI does not expose a physical GPU serial/UUID. PCI IDs identify a model; LUID is only locally unique.", IdStatus::NotSupported));
+        }
+        return results;
+    }
+};
+// Minimal stable NVML C ABI; no build-time dependency on NVIDIA headers or libraries.
+class NvidiaGpuProvider final : public IGpuIdentityProvider {
+    using Device = struct nvmlDevice_st*;
+    using Init = int(__cdecl*)();
+    using Shutdown = int(__cdecl*)();
+    using Count = int(__cdecl*)(unsigned*);
+    using GetDevice = int(__cdecl*)(unsigned, Device*);
+    using GetString = int(__cdecl*)(Device, char*, unsigned);
+    HMODULE module_ = nullptr;
+    Shutdown shutdown_ = nullptr;
+    bool initialized_ = false;
+    template<class T> T symbol(const char* name) {
+        auto address = GetProcAddress(module_, name);
+        // GetProcAddress is Windows' documented runtime symbol resolution mechanism.
+        T fn{};
+        static_assert(sizeof(fn) == sizeof(address));
+        std::memcpy(&fn, &address, sizeof(fn));
+        return fn;
+    }
+public:
+    ~NvidiaGpuProvider() override { if (initialized_ && shutdown_) shutdown_(); if (module_) FreeLibrary(module_); }
+    HardwareResults collect() override {
+        module_ = LoadLibraryExW(L"nvml.dll", nullptr, LOAD_LIBRARY_SEARCH_SYSTEM32);
+        if (!module_) return {unavailable("gpu", "NVIDIA provider", "NVML UUID", "NVML (optional)",
+            windowsError("LoadLibraryExW(System32/nvml.dll)", GetLastError()), IdStatus::NotSupported)};
+        auto init = symbol<Init>("nvmlInit_v2"); shutdown_ = symbol<Shutdown>("nvmlShutdown");
+        auto count = symbol<Count>("nvmlDeviceGetCount_v2");
+        auto device = symbol<GetDevice>("nvmlDeviceGetHandleByIndex_v2");
+        auto uuid = symbol<GetString>("nvmlDeviceGetUUID");
+        auto name = symbol<GetString>("nvmlDeviceGetName");
+        auto serial = symbol<GetString>("nvmlDeviceGetSerial");
+        if (!init || !shutdown_ || !count || !device || !uuid) return {unavailable("gpu", "NVIDIA provider", "NVML UUID", "NVML", "Required NVML entry points unavailable", IdStatus::NotSupported)};
+        auto failure = [](std::string deviceName, std::string field, std::string api, int code) {
+            return unavailable("gpu", deviceName, field, api, api + ": NVML return code " + std::to_string(code),
+                code == 4 ? IdStatus::AccessDenied : code == 3 ? IdStatus::NotSupported : IdStatus::QueryFailed);
+        };
+        int code = init();
+        if (code) return {failure("NVIDIA provider", "NVML initialization", "nvmlInit_v2", code)};
+        initialized_ = true;
+        unsigned n = 0;
+        code = count(&n);
+        if (code) return {failure("NVIDIA provider", "Device count", "nvmlDeviceGetCount_v2", code)};
+        if (n > 4096) throw std::runtime_error("Invalid NVML device count");
+        HardwareResults results;
+        for (unsigned i = 0; i < n; ++i) {
+            Device gpu = nullptr;
+            auto label = "NVML device " + std::to_string(i);
+            code = device(i, &gpu);
+            if (code) { results.push_back(failure(label, "Device", "nvmlDeviceGetHandleByIndex_v2", code)); continue; }
+            char description[256]{};
+            if (name && name(gpu, description, sizeof(description)) == 0) { description[255] = 0; label += " (" + std::string(description) + ")"; }
+            auto read = [&](GetString fn, std::string field, std::string api) {
+                if (!fn) { results.push_back(unavailable("gpu", label, field, api, "NVML entry point unavailable", IdStatus::NotSupported)); return; }
+                char value[256]{};
+                auto rc = fn(gpu, value, sizeof(value));
+                if (rc) results.push_back(failure(label, field, api, rc));
+                else { value[255] = 0; results.push_back(identifier("gpu", label, field, value, api, IdConfidence::ManufacturerAssigned)); }
+            };
+            read(uuid, "NVIDIA GPU UUID", "nvmlDeviceGetUUID");
+            read(serial, "NVIDIA board serial", "nvmlDeviceGetSerial");
+        }
+        return results;
+    }
+};
+}
+HardwareResults collectGpu() {
+    DxgiGpuProvider dxgi;
+    NvidiaGpuProvider nvidia;
+    auto results = collectSafely("gpu", [&] { return dxgi.collect(); });
+    auto vendor = collectSafely("gpu", [&] { return nvidia.collect(); });
+    results.insert(results.end(), vendor.begin(), vendor.end());
+    results.push_back(unavailable("gpu", "AMD/Intel providers", "Vendor UUID/serial", "Optional vendor provider",
+        "AMD and Intel vendor identity backends are not implemented; DXGI metadata remains available.", IdStatus::NotSupported));
+    return results;
+}
+}
+
+```
+
+`src/collectors/NetworkCollector.cpp`:
+
+```cpp
+#include "Collectors.h"
+#include "common/Error.h"
+#include "common/Strings.h"
+#include <winsock2.h>
+#include <ws2tcpip.h>
+#include <iphlpapi.h>
+#include <netioapi.h>
+namespace hwid {
+HardwareResults collectNetwork() {
+    ULONG size = 16384;
+    std::vector<unsigned char> buffer;
+    ULONG code = ERROR_BUFFER_OVERFLOW;
+    for (int attempt = 0; attempt < 4 && code == ERROR_BUFFER_OVERFLOW; ++attempt) {
+        if (size > 16 * 1024 * 1024) throw std::runtime_error("Adapter enumeration buffer too large");
+        buffer.resize(size);
+        code = GetAdaptersAddresses(AF_UNSPEC, GAA_FLAG_INCLUDE_ALL_INTERFACES | GAA_FLAG_SKIP_ANYCAST |
+            GAA_FLAG_SKIP_MULTICAST | GAA_FLAG_SKIP_DNS_SERVER, nullptr,
+            reinterpret_cast<IP_ADAPTER_ADDRESSES*>(buffer.data()), &size);
+    }
+    if (code == ERROR_NO_DATA) return {};
+    if (code != NO_ERROR) throw WindowsError("GetAdaptersAddresses", code);
+    HardwareResults results;
+    for (auto adapter = reinterpret_cast<IP_ADAPTER_ADDRESSES*>(buffer.data()); adapter; adapter = adapter->Next) {
+        const auto name = adapter->FriendlyName ? utf8(adapter->FriendlyName) : "Unnamed interface";
+        auto add = [&](std::string type, std::string value, std::string source, IdConfidence confidence, bool validate = false) {
+            results.push_back(identifier("network", name, type, value, source, confidence, true, validate));
+        };
+        if (adapter->PhysicalAddressLength > sizeof(adapter->PhysicalAddress)) {
+            results.push_back(unavailable("network", name, "Current MAC", "GetAdaptersAddresses.PhysicalAddress", "Invalid physical address length", IdStatus::QueryFailed));
+        } else {
+            add("Current MAC", mac({adapter->PhysicalAddress, adapter->PhysicalAddressLength}), "GetAdaptersAddresses.PhysicalAddress", IdConfidence::InterfaceAssigned, true);
+        }
+        add("Interface type", std::to_string(adapter->IfType), "GetAdaptersAddresses.IfType (IANA ifType)", IdConfidence::Informational);
+        add("Operational status", std::to_string(adapter->OperStatus), "GetAdaptersAddresses.OperStatus", IdConfidence::Informational);
+        MIB_IF_ROW2 row{}; row.InterfaceLuid = adapter->Luid;
+        code = GetIfEntry2(&row);
+        if (code != NO_ERROR) {
+            results.push_back(unavailable("network", name, "Permanent MAC", "GetIfEntry2.PermanentPhysicalAddress", windowsError("GetIfEntry2", code), errorStatus(code)));
+            continue;
+        }
+        add("Hardware interface", row.InterfaceAndOperStatusFlags.HardwareInterface ? "true" : "false",
+            "GetIfEntry2.InterfaceAndOperStatusFlags.HardwareInterface", IdConfidence::Informational);
+        if (row.PhysicalAddressLength > sizeof(row.PermanentPhysicalAddress)) {
+            results.push_back(unavailable("network", name, "Permanent MAC", "GetIfEntry2.PermanentPhysicalAddress", "Invalid physical address length", IdStatus::QueryFailed));
+            continue;
+        }
+        auto r = identifier("network", name, "Permanent MAC", mac({row.PermanentPhysicalAddress, row.PhysicalAddressLength}),
+            "GetIfEntry2.PermanentPhysicalAddress", IdConfidence::InterfaceAssigned);
+        if (!r.available) { r.status = IdStatus::NotExposed; r.error = "Driver does not expose a permanent address"; }
+        else r.error = "Driver-reported permanent address; virtual interfaces and firmware can affect its meaning";
+        results.push_back(std::move(r));
+    }
+    return results;
+}
+}
+
+```
+
+`src/collectors/StorageCollector.cpp`:
+
+```cpp
+#include "Collectors.h"
+#include "windows/DeviceEnumerator.h"
+#include "common/Error.h"
+#include "common/Strings.h"
+#include "common/WinHandle.h"
+#include <winioctl.h>
+#include <initguid.h>
+#include <ntddstor.h>
+#include <cstring>
+namespace hwid {
+namespace {
+std::string busName(STORAGE_BUS_TYPE bus) {
+    switch (bus) {
+    case BusTypeNvme: return "NVMe"; case BusTypeSata: return "SATA"; case BusTypeAta: return "ATA";
+    case BusTypeScsi: return "SCSI"; case BusTypeUsb: return "USB"; case BusTypeRAID: return "RAID";
+    case BusTypeSd: return "SD"; case BusTypeMmc: return "MMC/eMMC"; case BusTypeSas: return "SAS";
+    case BusTypeVirtual: return "Virtual"; case BusTypeFileBackedVirtual: return "File-backed virtual";
+    case BusTypeSpaces: return "Storage Spaces"; default: return "Other (" + std::to_string(bus) + ")";
+    }
+}
+HardwareResults storage(bool sdOnly) {
+    const std::string component = sdOnly ? "sdEmmc" : "storage";
+    HardwareResults results;
+    const auto paths = deviceInterfaces(GUID_DEVINTERFACE_DISK);
+    for (const auto& path : paths) {
+        auto name = utf8(path);
+        try {
+            WinHandle handle(CreateFileW(path.c_str(), 0, FILE_SHARE_READ | FILE_SHARE_WRITE, nullptr, OPEN_EXISTING, 0, nullptr));
+            if (!handle.valid()) throw WindowsError("CreateFileW(disk)", GetLastError());
+            STORAGE_PROPERTY_QUERY query{}; query.PropertyId = StorageDeviceProperty; query.QueryType = PropertyStandardQuery;
+            STORAGE_DESCRIPTOR_HEADER header{};
+            DWORD returned = 0;
+            if (!DeviceIoControl(handle.get(), IOCTL_STORAGE_QUERY_PROPERTY, &query, sizeof(query), &header, sizeof(header), &returned, nullptr))
+                throw WindowsError("IOCTL_STORAGE_QUERY_PROPERTY(header)", GetLastError());
+            if (returned < sizeof(header) || header.Size < sizeof(STORAGE_DEVICE_DESCRIPTOR) || header.Size > 1024 * 1024)
+                throw std::runtime_error("Invalid storage descriptor size");
+            std::vector<unsigned char> buffer(header.Size);
+            if (!DeviceIoControl(handle.get(), IOCTL_STORAGE_QUERY_PROPERTY, &query, sizeof(query), buffer.data(), static_cast<DWORD>(buffer.size()), &returned, nullptr))
+                throw WindowsError("IOCTL_STORAGE_QUERY_PROPERTY", GetLastError());
+            if (returned < sizeof(STORAGE_DEVICE_DESCRIPTOR) || returned > buffer.size()) throw std::runtime_error("Truncated storage descriptor");
+            STORAGE_DEVICE_DESCRIPTOR descriptor{};
+            std::memcpy(&descriptor, buffer.data(), sizeof(descriptor));
+            if (descriptor.Size > returned || descriptor.Size < sizeof(descriptor)) throw std::runtime_error("Inconsistent storage descriptor size");
+            buffer.resize(descriptor.Size);
+            const auto bus = descriptor.BusType;
+            if (sdOnly && bus != BusTypeSd && bus != BusTypeMmc) continue;
+            STORAGE_DEVICE_NUMBER number{};
+            if (DeviceIoControl(handle.get(), IOCTL_STORAGE_GET_DEVICE_NUMBER, nullptr, 0, &number, sizeof(number), &returned, nullptr) && returned >= sizeof(number))
+                name = "PhysicalDrive" + std::to_string(number.DeviceNumber);
+            auto add = [&](std::string type, std::string value, std::string field, bool identity = false) {
+                auto r = identifier(component, name, type, value, "IOCTL_STORAGE_QUERY_PROPERTY/STORAGE_DEVICE_DESCRIPTOR." + field,
+                    identity ? IdConfidence::InterfaceAssigned : IdConfidence::Informational, true, identity);
+                if (identity && r.available) r.error = "Storage-stack-reported serial; bridge, RAID or virtual controller may substitute it. Not an NVMe namespace identifier.";
+                if (value.empty()) { r.status = IdStatus::NotExposed; r.error = "Storage driver does not expose this field"; }
+                results.push_back(std::move(r));
+            };
+            add("Bus", busName(bus), "BusType");
+            add("Vendor", descriptorString(buffer, descriptor.VendorIdOffset), "VendorIdOffset");
+            add("Model", descriptorString(buffer, descriptor.ProductIdOffset), "ProductIdOffset");
+            add("Revision", descriptorString(buffer, descriptor.ProductRevisionOffset), "ProductRevisionOffset");
+            add("Storage serial", descriptorString(buffer, descriptor.SerialNumberOffset), "SerialNumberOffset", true);
+            if (sdOnly) results.push_back(unavailable(component, name, "CID", "Windows storage property query",
+                "This storage property does not expose CID. No supported generic CID query is implemented for this controller.", IdStatus::NotSupported));
+        } catch (const WindowsError& e) {
+            results.push_back(unavailable(component, name, "Storage query", "Windows storage API", e.what(), errorStatus(e.code)));
+        } catch (const std::exception& e) {
+            results.push_back(unavailable(component, name, "Storage query", "Storage descriptor parser", e.what(), IdStatus::QueryFailed));
+        }
+    }
+    if (sdOnly && results.empty()) results.push_back(unavailable(component, "", "SD/eMMC inventory", "STORAGE_DEVICE_DESCRIPTOR.BusType",
+        "No disks advertise SD/MMC bus type. USB readers can hide the underlying card type and CID.", IdStatus::NotPresent));
+    return results;
+}
+}
+HardwareResults collectStorage() { return storage(false); }
+HardwareResults collectSdEmmc() { return storage(true); }
+}
+
+```
+
+`src/collectors/TpmCollector.cpp`:
+
+```cpp
+#include "Collectors.h"
+#include "common/Error.h"
+#include "common/Strings.h"
+#include "windows/WmiClient.h"
+#include <tbs.h>
+#include <ncrypt.h>
+#include <bcrypt.h>
+namespace hwid {
+namespace {
+struct Provider {
+    NCRYPT_PROV_HANDLE handle = 0;
+    ~Provider() { if (handle) NCryptFreeObject(handle); }
+};
+HardwareIdentifier endorsement(Provider& provider, const wchar_t* property, std::string type) {
+    const auto source = "NCryptGetProperty(MS_PLATFORM_CRYPTO_PROVIDER, " + utf8(property) + ") + SHA-256";
+    DWORD size = 0;
+    auto code = NCryptGetProperty(provider.handle, property, nullptr, 0, &size, NCRYPT_SILENT_FLAG);
+    if (code) return unavailable("tpm", "Platform TPM", type, source, windowsError("NCryptGetProperty(size)", code), errorStatus(code));
+    if (!size || size > 1024 * 1024) return unavailable("tpm", "Platform TPM", type, source, "Empty or oversized endorsement property", IdStatus::QueryFailed);
+    std::vector<unsigned char> blob(size);
+    code = NCryptGetProperty(provider.handle, property, blob.data(), size, &size, NCRYPT_SILENT_FLAG);
+    if (code) return unavailable("tpm", "Platform TPM", type, source, windowsError("NCryptGetProperty", code), errorStatus(code));
+    if (size > blob.size() || !size) return unavailable("tpm", "Platform TPM", type, source, "Invalid endorsement property length", IdStatus::QueryFailed);
+    unsigned char digest[32]{};
+    auto status = BCryptHash(BCRYPT_SHA256_ALG_HANDLE, nullptr, 0, blob.data(), size, digest, sizeof(digest));
+    if (status < 0) return unavailable("tpm", "Platform TPM", type, source, "BCryptHash NTSTATUS 0x" + hexNumber(static_cast<ULONG>(status), 8), IdStatus::QueryFailed);
+    auto result = identifier("tpm", "Platform TPM", type, hex(digest), source, IdConfidence::HardwareBacked);
+    result.error = "SHA-256 of the exact provider-returned public blob; not private key material or proof of attestation. Certificate trust is not validated.";
+    return result;
+}
+}
+HardwareResults collectTpm() {
+    HardwareResults results;
+    TPM_DEVICE_INFO info{};
+    auto code = Tbsi_GetDeviceInfo(sizeof(info), &info);
+    if (code == TBS_SUCCESS) {
+        results.push_back(identifier("tpm", "Platform TPM", "Present", "true", "Tbsi_GetDeviceInfo", IdConfidence::Informational, true, false));
+        const auto version = info.tpmVersion == TPM_VERSION_20 ? "2.0" : info.tpmVersion == TPM_VERSION_12 ? "1.2" : "Unknown (" + std::to_string(info.tpmVersion) + ")";
+        results.push_back(identifier("tpm", "Platform TPM", "Specification version", version, "TPM_DEVICE_INFO.tpmVersion", IdConfidence::Informational, true, false));
+        results.push_back(identifier("tpm", "Platform TPM", "Interface type", std::to_string(info.tpmInterfaceType), "TPM_DEVICE_INFO.tpmInterfaceType", IdConfidence::Informational, true, false));
+    } else results.push_back(unavailable("tpm", "Platform TPM", "Presence/version", "Tbsi_GetDeviceInfo", windowsError("Tbsi_GetDeviceInfo", code),
+        code == TBS_E_TPM_NOT_FOUND ? IdStatus::NotPresent : errorStatus(code)));
+    auto state = collectSafely("tpm", [] {
+        WmiClient client(L"ROOT\\CIMV2\\Security\\MicrosoftTpm");
+        const std::vector<std::wstring> fields = {L"SpecVersion", L"ManufacturerId", L"ManufacturerVersion", L"IsEnabled_InitialValue", L"IsActivated_InitialValue", L"IsOwned_InitialValue"};
+        HardwareResults rows;
+        for (const auto& row : client.query(L"SELECT SpecVersion, ManufacturerId, ManufacturerVersion, IsEnabled_InitialValue, IsActivated_InitialValue, IsOwned_InitialValue FROM Win32_Tpm", fields)) {
+            for (const auto& f : fields) {
+                const auto& v = row.at(f);
+                auto source = "Win32_Tpm." + utf8(f);
+                if (!v.error.empty()) rows.push_back(unavailable("tpm", "Platform TPM", utf8(f), source, v.error));
+                else rows.push_back(identifier("tpm", "Platform TPM", utf8(f), v.text, source, IdConfidence::Informational, true, false));
+            }
+        }
+        return rows;
+    });
+    results.insert(results.end(), state.begin(), state.end());
+    auto readiness = collectSafely("tpm", [] {
+        WmiClient client(L"ROOT\\CIMV2\\Security\\MicrosoftTpm");
+        HardwareResults rows;
+        for (const auto& instance : client.query(L"SELECT __PATH FROM Win32_Tpm", {L"__PATH"})) {
+            const auto& path = instance.at(L"__PATH");
+            if (!path.error.empty()) throw std::runtime_error(path.error);
+            // WMI object paths for this local class contain ASCII namespace/class/key text.
+            std::wstring objectPath(path.text.begin(), path.text.end());
+            auto output = client.readOnlyMethod(objectPath, L"IsReady", {L"ReturnValue", L"IsReady"});
+            const auto& returnValue = output.at(L"ReturnValue");
+            const auto& ready = output.at(L"IsReady");
+            if (!returnValue.error.empty()) throw std::runtime_error(returnValue.error);
+            auto result = std::stoul(returnValue.text);
+            if (result) throw WindowsError("Win32_Tpm.IsReady", result);
+            if (!ready.error.empty()) throw std::runtime_error(ready.error);
+            rows.push_back(identifier("tpm", "Platform TPM", "Ready", ready.text, "Win32_Tpm.IsReady", IdConfidence::Informational, true, false));
+        }
+        return rows;
+    });
+    results.insert(results.end(), readiness.begin(), readiness.end());
+    Provider provider;
+    auto status = NCryptOpenStorageProvider(&provider.handle, MS_PLATFORM_CRYPTO_PROVIDER, 0);
+    if (status) results.push_back(unavailable("tpm", "Platform TPM", "Public endorsement information", "Microsoft Platform Crypto Provider", windowsError("NCryptOpenStorageProvider", status), errorStatus(status)));
+    else {
+        results.push_back(endorsement(provider, NCRYPT_PCP_EKPUB_PROPERTY, "EK public blob SHA-256"));
+        results.push_back(endorsement(provider, NCRYPT_PCP_EKCERT_PROPERTY, "EK certificate SHA-256"));
+    }
+    results.push_back(unavailable("tpm", "Platform TPM", "Application device identity", "TPM/CNG inventory boundary",
+        "Passive inventory does not create keys or perform attestation. A TPM-backed application identity requires a separate enrollment operation.", IdStatus::NotSupported));
+    return results;
+}
+}
+
+```
+
+`src/collectors/UsbCollector.cpp`:
+
+```cpp
+#include "Collectors.h"
+#include "windows/DeviceEnumerator.h"
+#include "common/Strings.h"
+#include "common/Error.h"
+#include <cfgmgr32.h>
+namespace hwid {
+HardwareResults collectUsb() {
+    DeviceSet set(nullptr, L"USB", DIGCF_PRESENT | DIGCF_ALLCLASSES);
+    HardwareResults results;
+    for (DWORD index = 0;; ++index) {
+        SP_DEVINFO_DATA device{}; device.cbSize = sizeof(device);
+        if (!SetupDiEnumDeviceInfo(set.get(), index, &device)) {
+            auto error = GetLastError();
+            if (error == ERROR_NO_MORE_ITEMS) break;
+            throw WindowsError("SetupDiEnumDeviceInfo", error);
+        }
+        std::string name = "USB device " + std::to_string(index);
+        try {
+            auto friendly = deviceProperty(set.get(), device, SPDRP_FRIENDLYNAME);
+            if (friendly.empty()) friendly = deviceProperty(set.get(), device, SPDRP_DEVICEDESC);
+            if (!friendly.empty()) name += " (" + utf8(friendly) + ")";
+            const auto id = utf8(deviceInstanceId(set.get(), device));
+            results.push_back(identifier("usb", name, "Windows device instance ID", id,
+                "SetupDiGetDeviceInstanceIdW", IdConfidence::InterfaceAssigned));
+            results.push_back(identifier("usb", name, "Manufacturer", utf8(deviceProperty(set.get(), device, SPDRP_MFG)),
+                "SetupDiGetDeviceRegistryPropertyW.SPDRP_MFG", IdConfidence::Informational, true, false));
+            for (const auto& token : {std::string("VID_"), std::string("PID_")}) {
+                const auto pos = id.find(token);
+                if (pos != std::string::npos && pos + 8 <= id.size()) results.push_back(identifier("usb", name, token.substr(0, 3), id.substr(pos + 4, 4),
+                    "USB device instance ID (device type field)", IdConfidence::Informational, true, false));
+            }
+            DWORD capabilities = 0, type = 0, required = 0;
+            if (!SetupDiGetDeviceRegistryPropertyW(set.get(), &device, SPDRP_CAPABILITIES, &type,
+                reinterpret_cast<BYTE*>(&capabilities), sizeof(capabilities), &required)) throw WindowsError("SetupDiGetDeviceRegistryPropertyW(SPDRP_CAPABILITIES)", GetLastError());
+            if (type != REG_DWORD || required != sizeof(capabilities)) throw std::runtime_error("Invalid device capabilities property");
+            auto last = id.rfind('\\');
+            // Only the physical USB devnode, with a bus-declared unique ID, is a serial candidate.
+            // Composite interface suffixes and generated port identities remain instance IDs only.
+            if ((capabilities & CM_DEVCAP_UNIQUEID) && id.starts_with("USB\\VID_") && id.find("&MI_") == std::string::npos && last != std::string::npos) {
+                auto r = identifier("usb", name, "USB serial (bus-reported instance component)", id.substr(last + 1),
+                    "SetupDiGetDeviceInstanceIdW + SPDRP_CAPABILITIES.CM_DEVCAP_UNIQUEID", IdConfidence::ManufacturerAssigned);
+                r.error = "Inferred from USB bus unique-ID capability; not a direct read of the iSerialNumber descriptor";
+                results.push_back(std::move(r));
+            } else results.push_back(unavailable("usb", name, "USB serial", "USB devnode capabilities",
+                "No unambiguous manufacturer serial exposed; Windows instance ID is not substituted"));
+        } catch (const WindowsError& e) {
+            results.push_back(unavailable("usb", name, "USB query", "SetupAPI", e.what(), errorStatus(e.code)));
+        } catch (const std::exception& e) {
+            results.push_back(unavailable("usb", name, "USB query", "SetupAPI", e.what(), IdStatus::QueryFailed));
+        }
+    }
+    return results;
+}
+}
+
+```
+
+`src/collectors/WmiCollectors.cpp`:
+
+```cpp
+#include "Collectors.h"
+#include "windows/WmiClient.h"
+#include "common/Strings.h"
+namespace hwid {
+namespace {
+HardwareResults collect(std::string component, std::wstring klass, std::vector<std::wstring> fields, std::wstring identity, std::string type) {
+    WmiClient wmi;
+    std::wstring query = L"SELECT ";
+    for (const auto& f : fields) { if (query != L"SELECT ") query += L", "; query += f; }
+    auto rows = wmi.query(query + L" FROM " + klass, fields);
+    HardwareResults results;
+    size_t index = 0;
+    for (const auto& row : rows) {
+        auto device = component + " " + std::to_string(index++);
+        for (const auto& field : fields) {
+            const auto& v = row.at(field);
+            auto source = utf8(klass) + "." + utf8(field);
+            auto label = field == identity ? type : utf8(field);
+            if (!v.error.empty()) { results.push_back(unavailable(component, device, label, source, v.error)); continue; }
+            auto r = identifier(component, device, label, v.text, source,
+                field == identity ? IdConfidence::FirmwareAssigned : IdConfidence::Informational, true, field == identity);
+            if (field == L"UUID") {
+                r.normalizedValue = normalizeUuid(r.rawValue);
+                r.available = !r.normalizedValue.empty();
+                r.status = r.available ? IdStatus::Available : IdStatus::Invalid;
+                r.error = r.available ? "" : "Invalid, all-zero or all-FF SMBIOS UUID";
+            }
+            results.push_back(std::move(r));
+        }
+    }
+    return results;
+}
+}
+HardwareResults collectSystem() { return collect("system", L"Win32_ComputerSystemProduct", {L"UUID", L"Vendor", L"Name"}, L"UUID", "SMBIOS System UUID"); }
+HardwareResults collectMotherboard() { return collect("motherboard", L"Win32_BaseBoard", {L"Manufacturer", L"Product", L"SerialNumber"}, L"SerialNumber", "Motherboard serial"); }
+HardwareResults collectBios() { return collect("bios", L"Win32_BIOS", {L"Manufacturer", L"SMBIOSBIOSVersion", L"SerialNumber"}, L"SerialNumber", "BIOS-reported system serial"); }
+}
+
+```
+
+`src/common/Error.cpp`:
+
+```cpp
+#include "Error.h"
+#include "Strings.h"
+#include <wbemcli.h>
+namespace hwid {
+std::string windowsError(std::string_view api, DWORD code) {
+    wchar_t text[2048]{};
+    auto count = FormatMessageW(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, nullptr, code, 0, text, 2048, nullptr);
+    return std::string(api) + ": " + std::to_string(code) + " (0x" + hexNumber(code, 8) + ")" +
+        (count ? ": " + trim(utf8({text, count})) : ": No system message available");
+}
+IdStatus errorStatus(DWORD code) {
+    if (code == ERROR_ACCESS_DENIED || code == static_cast<DWORD>(E_ACCESSDENIED) || code == static_cast<DWORD>(WBEM_E_ACCESS_DENIED) || code == static_cast<DWORD>(NTE_PERM)) return IdStatus::AccessDenied;
+    if (code == ERROR_NOT_SUPPORTED || code == ERROR_INVALID_FUNCTION || code == static_cast<DWORD>(NTE_NOT_SUPPORTED)) return IdStatus::NotSupported;
+    if (code == ERROR_NOT_FOUND || code == ERROR_FILE_NOT_FOUND || code == ERROR_DEVICE_NOT_CONNECTED) return IdStatus::NotPresent;
+    return IdStatus::QueryFailed;
+}
+}
+
+```
+
+`src/common/Error.h`:
+
+```h
+#pragma once
+#include "HardwareIdentifier.h"
+#include <Windows.h>
+#include <stdexcept>
+namespace hwid {
+std::string windowsError(std::string_view api, DWORD code);
+IdStatus errorStatus(DWORD code);
+class WindowsError : public std::runtime_error {
+public:
+    DWORD code;
+    WindowsError(std::string_view api, DWORD value) : std::runtime_error(windowsError(api, value)), code(value) {}
+};
+inline void checkHr(HRESULT hr, std::string_view api) { if (FAILED(hr)) throw WindowsError(api, static_cast<DWORD>(hr)); }
+}
+
+```
+
+`src/common/HardwareIdentifier.h`:
+
+```h
+#pragma once
+#include <string>
+#include <vector>
+#include <array>
+#include <string_view>
+
+namespace hwid {
+enum class IdConfidence { HardwareBacked, ManufacturerAssigned, FirmwareAssigned, InterfaceAssigned, Informational, Unknown };
+enum class IdStatus { Available, NotSupported, NotPresent, AccessDenied, NotExposed, Invalid, QueryFailed };
+struct HardwareIdentifier {
+    std::string component, deviceName, identifierType, rawValue, normalizedValue, source;
+    IdConfidence confidence = IdConfidence::Unknown;
+    bool potentiallyMutable = true;
+    bool available = false;
+    std::string error;
+    IdStatus status = IdStatus::NotExposed;
+};
+using HardwareResults = std::vector<HardwareIdentifier>;
+inline constexpr std::array<std::string_view, 10> components = {
+    "system", "motherboard", "bios", "tpm", "storage", "network", "usb", "gpu", "sdEmmc", "cpu"};
+std::string_view toString(IdConfidence value);
+std::string_view toString(IdStatus value);
+HardwareIdentifier identifier(std::string component, std::string device, std::string type,
+    std::string raw, std::string source, IdConfidence confidence, bool mutableValue = true,
+    bool validateIdentity = true);
+HardwareIdentifier unavailable(std::string component, std::string device, std::string type,
+    std::string source, std::string error, IdStatus status = IdStatus::NotExposed);
+}
+
+```
+
+`src/common/Strings.cpp`:
+
+```cpp
+#include "Strings.h"
+#include "HardwareIdentifier.h"
+#include <Windows.h>
+#include <algorithm>
+#include <cctype>
+#include <iomanip>
+#include <sstream>
+#include <stdexcept>
+#include <limits>
+
+namespace hwid {
+std::string utf8(std::wstring_view v) {
+    if (v.empty()) return {};
+    if (v.size() > static_cast<size_t>(std::numeric_limits<int>::max())) throw std::runtime_error("UTF-16 input too large");
+    const auto size = static_cast<int>(v.size());
+    int n = WideCharToMultiByte(CP_UTF8, WC_ERR_INVALID_CHARS, v.data(), size, nullptr, 0, nullptr, nullptr);
+    if (!n) throw std::runtime_error("Invalid UTF-16 returned by Windows");
+    std::string out(n, '\0');
+    if (!WideCharToMultiByte(CP_UTF8, WC_ERR_INVALID_CHARS, v.data(), size, out.data(), n, nullptr, nullptr))
+        throw std::runtime_error("UTF-16 conversion failed");
+    return out;
+}
+std::string trim(std::string_view v) {
+    auto pad = [](unsigned char c) { return c == 0 || std::isspace(c); };
+    while (!v.empty() && pad(static_cast<unsigned char>(v.front()))) v.remove_prefix(1);
+    while (!v.empty() && pad(static_cast<unsigned char>(v.back()))) v.remove_suffix(1);
+    return std::string(v);
+}
+std::string lower(std::string v) {
+    for (auto& c : v) c = static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
+    return v;
+}
+bool isPlaceholderHardwareId(std::string_view value) {
+    const auto v = lower(trim(value));
+    for (auto p : {"", "to be filled by o.e.m.", "to be filled by o.e.m", "default string", "none", "unknown", "not specified", "not applicable", "n/a"})
+        if (v == p) return true;
+    bool hasDigit = false;
+    for (char c : v) {
+        if (c == '0') hasDigit = true;
+        else if (c != '-' && c != ':' && c != '{' && c != '}' && c != ' ') return false;
+    }
+    return hasDigit;
+}
+std::string normalizeUuid(std::string_view value) {
+    auto v = lower(trim(value));
+    if (v.size() == 38 && v.front() == '{' && v.back() == '}') v = v.substr(1, 36);
+    if (v.size() != 36) return {};
+    bool zero = true, ff = true;
+    for (size_t i = 0; i < v.size(); ++i) {
+        if (i == 8 || i == 13 || i == 18 || i == 23) { if (v[i] != '-') return {}; }
+        else {
+            if (!std::isxdigit(static_cast<unsigned char>(v[i]))) return {};
+            zero &= v[i] == '0'; ff &= v[i] == 'f';
+        }
+    }
+    return zero || ff ? std::string{} : v;
+}
+std::string hex(std::span<const unsigned char> bytes) {
+    constexpr char digits[] = "0123456789ABCDEF";
+    std::string out;
+    for (auto b : bytes) { out += digits[b >> 4]; out += digits[b & 15]; }
+    return out;
+}
+std::string mac(std::span<const unsigned char> bytes) {
+    std::string out;
+    for (auto b : bytes) { if (!out.empty()) out += ':'; out += hex({&b, 1}); }
+    return out;
+}
+std::string hexNumber(std::uint64_t value, int width) {
+    std::ostringstream out;
+    out << std::uppercase << std::hex << std::setfill('0') << std::setw(width) << value;
+    return out.str();
+}
+std::string descriptorString(std::span<const unsigned char> bytes, std::uint32_t offset) {
+    if (!offset) return {};
+    if (offset >= bytes.size()) throw std::runtime_error("Storage descriptor string offset outside buffer");
+    auto start = bytes.begin() + offset;
+    auto end = std::find(start, bytes.end(), 0);
+    if (end == bytes.end()) throw std::runtime_error("Unterminated storage descriptor string");
+    // STORAGE_DEVICE_DESCRIPTOR strings are ASCII. Reject malformed driver data.
+    if (std::any_of(start, end, [](auto c) { return c > 127; })) throw std::runtime_error("Non-ASCII storage descriptor string");
+    return std::string(start, end);
+}
+std::string jsonQuote(std::string_view value) {
+    std::string out = "\"";
+    for (unsigned char c : value) {
+        switch (c) {
+        case '"': out += "\\\""; break;
+        case '\\': out += "\\\\"; break;
+        case '\b': out += "\\b"; break;
+        case '\f': out += "\\f"; break;
+        case '\n': out += "\\n"; break;
+        case '\r': out += "\\r"; break;
+        case '\t': out += "\\t"; break;
+        default: if (c < 32) out += "\\u00" + hex({&c, 1}); else out += static_cast<char>(c);
+        }
+    }
+    return out + '"';
+}
+std::string_view toString(IdConfidence v) {
+    constexpr std::string_view names[] = {"HardwareBacked", "ManufacturerAssigned", "FirmwareAssigned", "InterfaceAssigned", "Informational", "Unknown"};
+    return names[static_cast<size_t>(v)];
+}
+std::string_view toString(IdStatus v) {
+    constexpr std::string_view names[] = {"available", "not supported", "not present", "access denied", "driver does not expose value", "invalid/placeholder", "query failed"};
+    return names[static_cast<size_t>(v)];
+}
+HardwareIdentifier identifier(std::string c, std::string d, std::string t, std::string raw,
+    std::string s, IdConfidence confidence, bool m, bool validate) {
+    auto normalized = trim(raw);
+    bool valid = !normalized.empty() && (!validate || !isPlaceholderHardwareId(normalized));
+    return {std::move(c), std::move(d), std::move(t), std::move(raw), std::move(normalized), std::move(s),
+        confidence, m, valid, valid ? "" : "Empty or placeholder value returned", valid ? IdStatus::Available : IdStatus::Invalid};
+}
+HardwareIdentifier unavailable(std::string c, std::string d, std::string t, std::string s, std::string e, IdStatus status) {
+    return {std::move(c), std::move(d), std::move(t), {}, {}, std::move(s), IdConfidence::Unknown, true, false, std::move(e), status};
+}
+}
+
+```
+
+`src/common/Strings.h`:
+
+```h
+#pragma once
+#include <string>
+#include <string_view>
+#include <span>
+#include <cstdint>
+namespace hwid {
+std::string utf8(std::wstring_view value);
+std::string trim(std::string_view value);
+std::string lower(std::string value);
+bool isPlaceholderHardwareId(std::string_view value);
+std::string normalizeUuid(std::string_view value);
+std::string mac(std::span<const unsigned char> bytes);
+std::string hex(std::span<const unsigned char> bytes);
+std::string hexNumber(std::uint64_t value, int width = 0);
+std::string descriptorString(std::span<const unsigned char> bytes, std::uint32_t offset);
+std::string jsonQuote(std::string_view value);
+}
+
+```
+
+`src/common/WinHandle.h`:
+
+```h
+#pragma once
+#include <Windows.h>
+namespace hwid {
+class WinHandle {
+    HANDLE value_;
+public:
+    explicit WinHandle(HANDLE value = INVALID_HANDLE_VALUE) : value_(value) {}
+    ~WinHandle() { if (valid()) CloseHandle(value_); }
+    WinHandle(const WinHandle&) = delete;
+    WinHandle& operator=(const WinHandle&) = delete;
+    bool valid() const { return value_ && value_ != INVALID_HANDLE_VALUE; }
+    HANDLE get() const { return value_; }
+};
+}
+
+```
+
+`src/main.cpp`:
+
+```cpp
+#include "app/Cli.h"
+#include "collectors/Collectors.h"
+#include "output/Writers.h"
+#include <Windows.h>
+#include <iostream>
+#include <vector>
+int main(int argc, char** argv) {
+    try {
+        std::vector<std::string_view> args;
+        for (int i = 1; i < argc; ++i) args.emplace_back(argv[i]);
+        hwid::Options options;
+        try { options = hwid::parseCli(args); }
+        catch (const std::invalid_argument& e) { std::cerr << e.what() << '\n' << hwid::usage(); return 2; }
+        if (options.help) { std::cout << hwid::usage(); return 0; }
+        // Restore the console code page; redirected output is always UTF-8.
+        struct ConsoleUtf8 {
+            UINT old = GetConsoleOutputCP();
+            ConsoleUtf8() { if (old) SetConsoleOutputCP(CP_UTF8); }
+            ~ConsoleUtf8() { if (old) SetConsoleOutputCP(old); }
+        } console;
+        const auto results = hwid::collectAll(options.component);
+        if (options.json) hwid::writeJson(std::cout, results, options.redact);
+        else hwid::writeConsole(std::cout, results, options.verbose, options.redact);
+        return std::cout ? 0 : 1;
+    } catch (const std::exception& e) { std::cerr << "hwid: " << e.what() << '\n'; return 1; }
+}
+
+```
+
+`src/output/Writers.cpp`:
+
+```cpp
+#include "Writers.h"
+#include "common/Strings.h"
+#include <algorithm>
+#include <array>
+namespace hwid {
+namespace {
+std::string safe(std::string_view s, bool redact) { return redact && !s.empty() ? "[redacted]" : std::string(s); }
+// Escape control characters in device-provided strings, including terminal escape sequences.
+std::string console(std::string_view s) {
+    auto quoted = jsonQuote(s);
+    return quoted.substr(1, quoted.size() - 2);
+}
+}
+void writeJson(std::ostream& out, const HardwareResults& results, bool redact) {
+    out << "{\n  \"schemaVersion\": 1,\n  \"redacted\": " << (redact ? "true" : "false");
+    for (auto component : components) {
+        out << ",\n  " << jsonQuote(component) << ": [";
+        bool first = true;
+        for (const auto& r : results) {
+            if (r.component != component) continue;
+            if (!first) out << ',';
+            first = false;
+            out << "\n    {";
+            auto field = [&](std::string_view k, std::string_view v) { out << jsonQuote(k) << ": " << jsonQuote(v) << ", "; };
+            field("component", r.component); field("deviceName", safe(r.deviceName, redact));
+            field("identifierType", r.identifierType); field("rawValue", safe(r.rawValue, redact));
+            field("normalizedValue", safe(r.normalizedValue, redact)); field("source", r.source);
+            field("confidence", toString(r.confidence)); field("status", toString(r.status));
+            out << "\"potentiallyMutable\": " << (r.potentiallyMutable ? "true" : "false")
+                << ", \"available\": " << (r.available ? "true" : "false") << ", \"error\": " << jsonQuote(safe(r.error, redact)) << '}';
+        }
+        out << (first ? "]" : "\n  ]");
+    }
+    out << "\n}\n";
+}
+void writeConsole(std::ostream& out, const HardwareResults& results, bool verbose, bool redact) {
+    std::string previous;
+    for (size_t begin = 0; begin < results.size();) {
+        const auto& first = results[begin];
+        size_t end = begin + 1;
+        while (end < results.size() && results[end].component == first.component && results[end].deviceName == first.deviceName) ++end;
+        if (first.component != previous) { out << '\n' << first.component << '\n'; previous = first.component; }
+        if (!first.deviceName.empty()) out << "  " << console(safe(first.deviceName, redact)) << '\n';
+
+        using Row = std::array<std::string, 3>;
+        std::vector<Row> rows{{"Identifier", "Value", "Status"}};
+        for (size_t i = begin; i < end; ++i) {
+            const auto& r = results[i];
+            rows.push_back({console(r.identifierType), r.available ? console(safe(r.normalizedValue, redact)) : "-", std::string(toString(r.status))});
+        }
+        // Count UTF-8 characters rather than bytes when padding. Values are never truncated.
+        auto width = [](std::string_view text) {
+            return static_cast<size_t>(std::count_if(text.begin(), text.end(), [](unsigned char c) { return (c & 0xC0) != 0x80; }));
+        };
+        std::array<size_t, 3> widths{};
+        for (const auto& row : rows)
+            for (size_t column = 0; column < widths.size(); ++column) widths[column] = std::max(widths[column], width(row[column]));
+        auto border = [&] {
+            out << "  +";
+            for (auto size : widths) out << std::string(size + 2, '-') << '+';
+            out << '\n';
+        };
+        border();
+        for (size_t i = 0; i < rows.size(); ++i) {
+            out << "  |";
+            for (size_t column = 0; column < widths.size(); ++column)
+                out << ' ' << rows[i][column] << std::string(widths[column] - width(rows[i][column]) + 1, ' ') << '|';
+            out << '\n';
+            if (i == 0) border();
+        }
+        border();
+        if (verbose) {
+            for (size_t i = begin; i < end; ++i) {
+                const auto& r = results[i];
+                out << "    " << console(r.identifierType) << ":\n"
+                    << "      Source: " << console(r.source) << " | Confidence: " << toString(r.confidence)
+                    << " | Mutable: " << (r.potentiallyMutable ? "possibly" : "no") << '\n'
+                    << "      Raw: " << console(safe(r.rawValue, redact)) << '\n';
+                if (!r.error.empty()) out << "      Note: " << console(safe(r.error, redact)) << '\n';
+            }
+        }
+        begin = end;
+    }
+    if (!verbose && !results.empty()) out << "\nUse --verbose for sources, confidence, raw values and diagnostics.\n";
+}
+}
+
+```
+
+`src/output/Writers.h`:
+
+```h
+#pragma once
+#include "common/HardwareIdentifier.h"
+#include <ostream>
+namespace hwid {
+void writeJson(std::ostream& out, const HardwareResults& results, bool redact);
+void writeConsole(std::ostream& out, const HardwareResults& results, bool verbose, bool redact);
+}
+
+```
+
+`src/windows/DeviceEnumerator.cpp`:
+
+```cpp
+#include "DeviceEnumerator.h"
+#include "common/Error.h"
+#include <algorithm>
+namespace hwid {
+DeviceSet::DeviceSet(const GUID* klass, const wchar_t* enumerator, DWORD flags)
+    : value_(SetupDiGetClassDevsW(klass, enumerator, nullptr, flags)) {
+    if (value_ == INVALID_HANDLE_VALUE) throw WindowsError("SetupDiGetClassDevsW", GetLastError());
+}
+DeviceSet::~DeviceSet() { SetupDiDestroyDeviceInfoList(value_); }
+std::vector<std::wstring> deviceInterfaces(const GUID& klass) {
+    DeviceSet set(&klass, nullptr, DIGCF_PRESENT | DIGCF_DEVICEINTERFACE);
+    std::vector<std::wstring> paths;
+    for (DWORD i = 0;; ++i) {
+        SP_DEVICE_INTERFACE_DATA data{}; data.cbSize = sizeof(data);
+        if (!SetupDiEnumDeviceInterfaces(set.get(), nullptr, &klass, i, &data)) {
+            auto error = GetLastError();
+            if (error == ERROR_NO_MORE_ITEMS) break;
+            throw WindowsError("SetupDiEnumDeviceInterfaces", error);
+        }
+        DWORD size = 0;
+        SetupDiGetDeviceInterfaceDetailW(set.get(), &data, nullptr, 0, &size, nullptr);
+        auto error = GetLastError();
+        if (error != ERROR_INSUFFICIENT_BUFFER) throw WindowsError("SetupDiGetDeviceInterfaceDetailW(size)", error);
+        if (size < sizeof(SP_DEVICE_INTERFACE_DETAIL_DATA_W) || size > 1024 * 1024) throw std::runtime_error("Invalid device interface size");
+        std::vector<unsigned char> buffer(size + sizeof(wchar_t), 0);
+        auto detail = reinterpret_cast<SP_DEVICE_INTERFACE_DETAIL_DATA_W*>(buffer.data());
+        detail->cbSize = sizeof(*detail);
+        if (!SetupDiGetDeviceInterfaceDetailW(set.get(), &data, detail, size, nullptr, nullptr))
+            throw WindowsError("SetupDiGetDeviceInterfaceDetailW", GetLastError());
+        paths.emplace_back(detail->DevicePath);
+    }
+    return paths;
+}
+std::wstring deviceInstanceId(HDEVINFO set, SP_DEVINFO_DATA& device) {
+    DWORD size = 0;
+    SetupDiGetDeviceInstanceIdW(set, &device, nullptr, 0, &size);
+    auto error = GetLastError();
+    if (error != ERROR_INSUFFICIENT_BUFFER) throw WindowsError("SetupDiGetDeviceInstanceIdW(size)", error);
+    if (!size || size > 32768) throw std::runtime_error("Invalid device instance ID size");
+    std::vector<wchar_t> buffer(size + 1, 0);
+    if (!SetupDiGetDeviceInstanceIdW(set, &device, buffer.data(), size, nullptr)) throw WindowsError("SetupDiGetDeviceInstanceIdW", GetLastError());
+    return buffer.data();
+}
+std::wstring deviceProperty(HDEVINFO set, SP_DEVINFO_DATA& device, DWORD property) {
+    DWORD size = 0, type = 0;
+    SetupDiGetDeviceRegistryPropertyW(set, &device, property, &type, nullptr, 0, &size);
+    auto error = GetLastError();
+    if (error == ERROR_INVALID_DATA) return {};
+    if (error != ERROR_INSUFFICIENT_BUFFER) throw WindowsError("SetupDiGetDeviceRegistryPropertyW(size)", error);
+    if (size > 1024 * 1024 || size % sizeof(wchar_t)) throw std::runtime_error("Invalid device property size");
+    std::vector<wchar_t> buffer(size / sizeof(wchar_t) + 1, 0);
+    if (!SetupDiGetDeviceRegistryPropertyW(set, &device, property, &type, reinterpret_cast<BYTE*>(buffer.data()), size, nullptr))
+        throw WindowsError("SetupDiGetDeviceRegistryPropertyW", GetLastError());
+    if (type != REG_SZ && type != REG_EXPAND_SZ) throw std::runtime_error("Device property is not a string");
+    return buffer.data();
+}
+}
+
+```
+
+`src/windows/DeviceEnumerator.h`:
+
+```h
+#pragma once
+#include <Windows.h>
+#include <setupapi.h>
+#include <string>
+#include <vector>
+namespace hwid {
+class DeviceSet {
+    HDEVINFO value_;
+public:
+    DeviceSet(const GUID* klass, const wchar_t* enumerator, DWORD flags);
+    ~DeviceSet();
+    DeviceSet(const DeviceSet&) = delete;
+    DeviceSet& operator=(const DeviceSet&) = delete;
+    HDEVINFO get() const { return value_; }
+};
+std::vector<std::wstring> deviceInterfaces(const GUID& klass);
+std::wstring deviceInstanceId(HDEVINFO set, SP_DEVINFO_DATA& device);
+std::wstring deviceProperty(HDEVINFO set, SP_DEVINFO_DATA& device, DWORD property);
+}
+
+```
+
+`src/windows/WmiClient.cpp`:
+
+```cpp
+#include "WmiClient.h"
+#include "common/Error.h"
+#include "common/Strings.h"
+#include <chrono>
+namespace hwid {
+namespace {
+struct Bstr {
+    BSTR value;
+    explicit Bstr(std::wstring_view v) : value(SysAllocStringLen(v.data(), static_cast<UINT>(v.size()))) { if (!value) throw std::bad_alloc(); }
+    ~Bstr() { SysFreeString(value); }
+    Bstr(const Bstr&) = delete;
+    Bstr& operator=(const Bstr&) = delete;
+};
+struct Variant {
+    VARIANT value;
+    Variant() { VariantInit(&value); }
+    ~Variant() { VariantClear(&value); }
+    Variant(const Variant&) = delete;
+    Variant& operator=(const Variant&) = delete;
+};
+WmiValue read(IWbemClassObject* object, const std::wstring& name) {
+    Variant v;
+    HRESULT hr = object->Get(name.c_str(), 0, &v.value, nullptr, nullptr);
+    if (FAILED(hr)) return {{}, windowsError("IWbemClassObject::Get", static_cast<DWORD>(hr))};
+    switch (v.value.vt) {
+    case VT_NULL: case VT_EMPTY: return {{}, "WMI property is null or empty"};
+    case VT_BSTR: return {utf8({v.value.bstrVal, SysStringLen(v.value.bstrVal)}), {}};
+    case VT_BOOL: return {v.value.boolVal == VARIANT_FALSE ? "false" : "true", {}};
+    case VT_UI1: return {std::to_string(v.value.bVal), {}};
+    case VT_I2: return {std::to_string(v.value.iVal), {}};
+    case VT_UI2: return {std::to_string(v.value.uiVal), {}};
+    case VT_I4: return {std::to_string(v.value.lVal), {}};
+    case VT_UI4: return {std::to_string(v.value.ulVal), {}};
+    case VT_I8: return {std::to_string(v.value.llVal), {}};
+    case VT_UI8: return {std::to_string(v.value.ullVal), {}};
+    default: return {{}, "Unsupported WMI VARIANT type " + std::to_string(v.value.vt)};
+    }
+}
+}
+ComApartment::ComApartment() {
+    auto hr = CoInitializeEx(nullptr, COINIT_MULTITHREADED);
+    if (hr != RPC_E_CHANGED_MODE) { checkHr(hr, "CoInitializeEx"); initialized_ = true; }
+}
+ComApartment::~ComApartment() { if (initialized_) CoUninitialize(); }
+WmiClient::WmiClient(std::wstring_view nameSpace) {
+    auto hr = CoInitializeSecurity(nullptr, -1, nullptr, nullptr, RPC_C_AUTHN_LEVEL_DEFAULT,
+        RPC_C_IMP_LEVEL_IMPERSONATE, nullptr, EOAC_NONE, nullptr);
+    if (hr != RPC_E_TOO_LATE) checkHr(hr, "CoInitializeSecurity");
+    Microsoft::WRL::ComPtr<IWbemLocator> locator;
+    checkHr(CoCreateInstance(CLSID_WbemLocator, nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&locator)), "CoCreateInstance(WbemLocator)");
+    Bstr ns(nameSpace);
+    checkHr(locator->ConnectServer(ns.value, nullptr, nullptr, nullptr, WBEM_FLAG_CONNECT_USE_MAX_WAIT, nullptr, nullptr, &services_), "IWbemLocator::ConnectServer");
+    checkHr(CoSetProxyBlanket(services_.Get(), RPC_C_AUTHN_WINNT, RPC_C_AUTHZ_NONE, nullptr,
+        RPC_C_AUTHN_LEVEL_CALL, RPC_C_IMP_LEVEL_IMPERSONATE, nullptr, EOAC_NONE), "CoSetProxyBlanket");
+}
+std::vector<WmiObject> WmiClient::query(std::wstring_view wql, const std::vector<std::wstring>& properties) {
+    Bstr language(L"WQL"), statement(wql);
+    Microsoft::WRL::ComPtr<IEnumWbemClassObject> enumerator;
+    checkHr(services_->ExecQuery(language.value, statement.value, WBEM_FLAG_FORWARD_ONLY | WBEM_FLAG_RETURN_IMMEDIATELY,
+        nullptr, &enumerator), "IWbemServices::ExecQuery");
+    std::vector<WmiObject> result;
+    const auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(15);
+    for (;;) {
+        if (std::chrono::steady_clock::now() >= deadline) throw WindowsError("WMI query timeout", WAIT_TIMEOUT);
+        ULONG count = 0;
+        Microsoft::WRL::ComPtr<IWbemClassObject> object;
+        auto hr = enumerator->Next(1000, 1, &object, &count);
+        checkHr(hr, "IEnumWbemClassObject::Next");
+        if (count) {
+            WmiObject row;
+            for (const auto& name : properties) row.emplace(name, read(object.Get(), name));
+            result.push_back(std::move(row));
+        }
+        if (hr == WBEM_S_FALSE) break;
+    }
+    return result;
+}
+WmiObject WmiClient::readOnlyMethod(std::wstring_view objectPath, std::wstring_view method, const std::vector<std::wstring>& properties) {
+    // Restrict this helper to the single passive TPM method used by inventory.
+    if (method != L"IsReady") throw std::invalid_argument("Only the read-only IsReady method is allowed");
+    Bstr path(objectPath), name(method);
+    Microsoft::WRL::ComPtr<IWbemCallResult> call;
+    checkHr(services_->ExecMethod(path.value, name.value, WBEM_FLAG_RETURN_IMMEDIATELY, nullptr, nullptr, nullptr, &call), "IWbemServices::ExecMethod(IsReady)");
+    Microsoft::WRL::ComPtr<IWbemClassObject> output;
+    auto hr = call->GetResultObject(15000, &output);
+    if (hr == WBEM_S_TIMEDOUT) throw WindowsError("Win32_Tpm.IsReady timeout", WAIT_TIMEOUT);
+    checkHr(hr, "IWbemCallResult::GetResultObject");
+    if (!output) throw std::runtime_error("WMI method returned no result object");
+    WmiObject result;
+    for (const auto& property : properties) result.emplace(property, read(output.Get(), property));
+    return result;
+}
+}
+
+```
+
+`src/windows/WmiClient.h`:
+
+```h
+#pragma once
+#include <Windows.h>
+#include <wbemidl.h>
+#include <wrl/client.h>
+#include <map>
+#include <string>
+#include <string_view>
+#include <vector>
+namespace hwid {
+struct WmiValue { std::string text, error; };
+using WmiObject = std::map<std::wstring, WmiValue>;
+class ComApartment {
+    bool initialized_ = false;
+public:
+    ComApartment();
+    ~ComApartment();
+    ComApartment(const ComApartment&) = delete;
+    ComApartment& operator=(const ComApartment&) = delete;
+};
+class WmiClient {
+    ComApartment apartment_;
+    Microsoft::WRL::ComPtr<IWbemServices> services_;
+public:
+    explicit WmiClient(std::wstring_view nameSpace = L"ROOT\\CIMV2");
+    std::vector<WmiObject> query(std::wstring_view wql, const std::vector<std::wstring>& properties);
+    WmiObject readOnlyMethod(std::wstring_view objectPath, std::wstring_view method, const std::vector<std::wstring>& properties);
+};
+}
+
+```
+
+`tests/Integration.ps1`:
+
+```ps1
+param([Parameter(Mandatory=$true)][string]$Executable)
+$ErrorActionPreference = 'Stop'
+# Keep hardware identifiers out of test logs and artifacts.
+$text = (& $Executable --json --redact) -join "`n"
+if ($LASTEXITCODE -ne 0) { throw 'Inventory failed' }
+$inventory = $text | ConvertFrom-Json
+if ($inventory.schemaVersion -ne 1 -or !$inventory.redacted) { throw 'Incorrect schema or redaction mode' }
+$components = @('system','motherboard','bios','tpm','storage','network','usb','gpu','sdEmmc','cpu')
+foreach ($component in $components) {
+    $rows = @($inventory.$component)
+    if ($rows.Count -eq 0) { throw "Missing results for $component" }
+    foreach ($row in $rows) {
+        if ($row.component -ne $component -or !$row.source -or !$row.identifierType -or !$row.status) { throw "Incomplete row for $component" }
+        if ($row.available -ne ($row.status -eq 'available')) { throw "Inconsistent availability in $component" }
+        foreach ($field in @('rawValue','normalizedValue','deviceName','error')) {
+            if ($row.$field -and $row.$field -ne '[redacted]') { throw "Redaction leaked $component.$field" }
+        }
+    }
+    Write-Output "$component`: $($rows.Count) records; $(@($rows | Where-Object available).Count) available"
+}
+$filtered = ((& $Executable --json --redact --cpu) -join "`n") | ConvertFrom-Json
+if ($LASTEXITCODE -ne 0 -or @($filtered.cpu).Count -eq 0) { throw 'Component filter failed' }
+foreach ($component in $components | Where-Object { $_ -ne 'cpu' }) {
+    if (@($filtered.$component).Count -ne 0) { throw "Filter included $component" }
+}
+if (!($filtered.cpu | Where-Object { $_.identifierType -eq 'Unique CPU serial' -and !$_.available })) { throw 'CPU uniqueness semantics missing' }
+
+```
+
+`tests/Tests.cpp`:
+
+```cpp
+#include "common/Strings.h"
+#include "common/Error.h"
+#include "app/Cli.h"
+#include "collectors/Collectors.h"
+#include "output/Writers.h"
+#include <iostream>
+#include <sstream>
+#include <stdexcept>
+#include <array>
+namespace {
+int checks = 0;
+void require(bool condition, const char* message) { ++checks; if (!condition) throw std::runtime_error(message); }
+template<class F> void rejects(F fn, const char* message) {
+    bool threw = false; try { fn(); } catch (const std::exception&) { threw = true; }
+    require(threw, message);
+}
+}
+int main() {
+    using namespace hwid;
+    try {
+        require(trim(std::string(" \t A  B \0\0", 10)) == "A  B", "serial padding/internal spaces");
+        for (auto value : {"", " To Be Filled By O.E.M. ", "DEFAULT STRING", "None", "Unknown", "Not Specified", "0000", "00:00:00:00:00:00"})
+            require(isPlaceholderHardwareId(value), "placeholder detection");
+        require(!isPlaceholderHardwareId("AB00 123"), "legitimate serial");
+        require(normalizeUuid(" {4C4C4544-0038-3710-8058-CAC04F123456} ") == "4c4c4544-0038-3710-8058-cac04f123456", "UUID case/braces");
+        for (auto value : {"00000000-0000-0000-0000-000000000000", "FFFFFFFF-FFFF-FFFF-FFFF-FFFFFFFFFFFF", "xyz", "4C4C4544_0038-3710-8058-CAC04F123456"})
+            require(normalizeUuid(value).empty(), "reject malformed UUID");
+        unsigned char address[] = {0xaa, 0xbb, 0, 1, 0xee, 0xff};
+        require(mac(address) == "AA:BB:00:01:EE:FF", "MAC canonical form");
+        require(utf8(L"\u6d4b\u8bd5 \U0001f600") == "\xE6\xB5\x8B\xE8\xAF\x95 \xF0\x9F\x98\x80", "Unicode UTF-8");
+        wchar_t invalid[] = {0xd800};
+        rejects([&] { utf8({invalid, 1}); }, "reject invalid UTF-16");
+        require(jsonQuote(std::string("\"\\\n\r\t\b\f\0", 8)) == "\"\\\"\\\\\\n\\r\\t\\b\\f\\u0000\"", "JSON control escaping");
+        std::vector<unsigned char> descriptor = {0, 'A', ' ', 'B', 0};
+        require(descriptorString(descriptor, 0).empty(), "absent descriptor offset");
+        require(descriptorString(descriptor, 1) == "A B", "bounded descriptor string");
+        rejects([&] { descriptorString(descriptor, 9); }, "out of bounds descriptor");
+        descriptor.pop_back();
+        rejects([&] { descriptorString(descriptor, 1); }, "unterminated descriptor");
+        descriptor = {0, 255, 0};
+        rejects([&] { descriptorString(descriptor, 1); }, "malformed ASCII descriptor");
+        auto invalidId = identifier("bios", "board", "serial", " Default string ", "fixture", IdConfidence::FirmwareAssigned);
+        require(!invalidId.available && invalidId.rawValue == " Default string " && invalidId.status == IdStatus::Invalid, "preserve invalid raw value");
+        auto denied = collectSafely("storage", []() -> HardwareResults { throw WindowsError("fixture", ERROR_ACCESS_DENIED); });
+        require(denied.size() == 1 && denied[0].status == IdStatus::AccessDenied, "access denied classification");
+        auto failed = collectSafely("bios", []() -> HardwareResults { throw std::runtime_error("fixture"); });
+        require(!failed[0].available && failed[0].status == IdStatus::QueryFailed, "partial failure handling");
+        auto absent = collectSafely("usb", [] { return HardwareResults{}; });
+        require(absent[0].status == IdStatus::NotPresent, "no-device result");
+        HardwareResults fixtures = {
+            identifier("storage", "secret-device", "Serial", "secret-one", "fixture", IdConfidence::InterfaceAssigned),
+            identifier("storage", "second-device", "Serial", "secret-two", "fixture", IdConfidence::InterfaceAssigned),
+            unavailable("tpm", "secret-device", "Ready", "fixture", "secret-error", IdStatus::AccessDenied)};
+        std::ostringstream json;
+        writeJson(json, fixtures, false);
+        require(json.str().find("secret-one") != std::string::npos && json.str().find("secret-two") != std::string::npos, "multiple devices retained");
+        require(json.str().find("\"schemaVersion\": 1") != std::string::npos, "schema version");
+        std::ostringstream redacted, console;
+        writeJson(redacted, fixtures, true); writeConsole(console, fixtures, true, true);
+        require(redacted.str().find("secret") == std::string::npos && console.str().find("secret") == std::string::npos, "redact values names and errors");
+        std::array<std::string_view, 4> args = {"--json", "--redact", "--component", "sd-emmc"};
+        auto options = parseCli(args);
+        require(options.json && options.redact && options.component == "sdEmmc", "CLI options");
+        for (auto component : components) {
+            const auto flag = "--" + std::string(component == "sdEmmc" ? "sd-emmc" : component);
+            const std::array<std::string_view, 3> selection = {flag, "--json", "--redact"};
+            const auto parsed = parseCli(selection);
+            require(parsed.component == component && parsed.json && parsed.redact, "direct collector switch");
+        }
+        const std::array<std::string_view, 2> conflicting = {"--cpu", "--storage"};
+        rejects([&] { parseCli(conflicting); }, "reject conflicting collector switches");
+        const std::array<std::string_view, 3> mixedFilters = {"--component", "cpu", "--gpu"};
+        rejects([&] { parseCli(mixedFilters); }, "reject mixed collector filters");
+        std::array<std::string_view, 1> missing = {"--component"};
+        rejects([&] { parseCli(missing); }, "CLI missing value");
+        std::array<std::string_view, 2> unknown = {"--component", "nonsense"};
+        rejects([&] { parseCli(unknown); }, "CLI unknown component");
+        std::array<std::string_view, 1> mutation = {"--create-device-key"};
+        rejects([&] { parseCli(mutation); }, "inventory rejects mutation command");
+        std::cout << checks << " checks passed\n";
+        return 0;
+    } catch (const std::exception& e) { std::cerr << "Test failed: " << e.what() << '\n'; return 1; }
+}
+
+```
+
+`windows_cpp_hardware_identity_plan.md`:
+
+```md
+# Windows C++ Hardware Identity Reader --- Implementation Plan
+
+## 1. Objective
+
+Build a native Windows console application in modern C++ that
+inventories hardware identifiers exposed by Windows, device firmware, or
+vendor APIs.
+
+The program should collect identifiers from:
+
+-   Computer system / SMBIOS system UUID
+-   Motherboard serial number
+-   BIOS serial number
+-   TPM 2.0 identity information
+-   NVMe SSD serial numbers
+-   SATA SSD/HDD serial numbers
+-   Network adapter permanent MAC addresses
+-   USB device serial numbers
+-   GPU identifiers / UUIDs where available
+-   SD/eMMC CID or equivalent identifiers where Windows exposes them
+-   CPU identification information, while explicitly reporting that a
+    generally usable unique CPU serial number is not available on modern
+    x86/x64 Windows PCs
+
+The application should **not claim that every returned value is globally
+unique**. Each result should include its provenance and reliability.
+
+------------------------------------------------------------------------
+
+## 2. Recommended Target
+
+### Language and toolchain
+
+-   C++20
+-   Visual Studio 2022 or newer
+-   MSVC x64 build
+-   Windows 10/11
+-   CMake for the build system
+-   Unicode Windows APIs (`W` variants)
+-   RAII wrappers for handles, COM objects, and allocated buffers
+
+### Initial executable
+
+``` text
+hwid.exe
+```
+
+Example usage:
+
+``` text
+hwid.exe
+hwid.exe --json
+hwid.exe --verbose
+hwid.exe --component motherboard
+hwid.exe --component storage
+hwid.exe --component tpm
+```
+
+------------------------------------------------------------------------
+
+## 3. Design Principles
+
+1.  **Read only.** Do not modify firmware, device configuration,
+    registry identifiers, TPM state, or network configuration.
+2.  **Prefer documented Windows APIs.** Use WMI/CIM when Windows does
+    not provide a simpler documented API.
+3.  **Keep raw and normalized values separate.** Preserve the value
+    returned by Windows and create a second normalized representation
+    for comparison.
+4.  **Record provenance.** Every identifier must say where it came from.
+5.  **Treat absence as normal.** OEMs and device manufacturers may omit
+    identifiers.
+6.  **Never silently substitute identifiers.** A missing motherboard
+    serial must remain missing rather than being replaced with another
+    field.
+7.  **Do not call an identifier unique unless its semantics justify that
+    claim.**
+8.  **Support multiple devices.** A PC can have multiple disks, NICs,
+    GPUs, and USB devices.
+9.  **Avoid unnecessary administrator requirements.** Run as a standard
+    user by default and clearly report access-denied cases.
+10. **Separate collection from policy.** Hardware collection should not
+    itself decide whether two machines are the same machine.
+
+------------------------------------------------------------------------
+
+## 4. Result Model
+
+Use one common structure for all collectors.
+
+``` cpp
+enum class IdConfidence
+{
+    HardwareBacked,
+    ManufacturerAssigned,
+    FirmwareAssigned,
+    InterfaceAssigned,
+    Informational,
+    Unknown
+};
+
+struct HardwareIdentifier
+{
+    std::string component;
+    std::string deviceName;
+    std::string identifierType;
+    std::string rawValue;
+    std::string normalizedValue;
+    std::string source;
+    IdConfidence confidence;
+    bool potentiallyMutable;
+    bool available;
+    std::string error;
+};
+```
+
+A collector should return:
+
+``` cpp
+using HardwareResults = std::vector<HardwareIdentifier>;
+```
+
+This permits multiple disks, adapters, GPUs, and USB devices without
+forcing them into a single-machine structure.
+
+------------------------------------------------------------------------
+
+## 5. Proposed Source Layout
+
+``` text
+hwid/
+├── CMakeLists.txt
+├── README.md
+├── src/
+│   ├── main.cpp
+│   ├── app/
+│   │   ├── Cli.cpp
+│   │   └── Cli.h
+│   ├── common/
+│   │   ├── HardwareIdentifier.h
+│   │   ├── Error.cpp
+│   │   ├── Error.h
+│   │   ├── Strings.cpp
+│   │   ├── Strings.h
+│   │   ├── WinHandle.h
+│   │   └── ComPtrHelpers.h
+│   ├── collectors/
+│   │   ├── SystemCollector.cpp
+│   │   ├── SystemCollector.h
+│   │   ├── MotherboardCollector.cpp
+│   │   ├── MotherboardCollector.h
+│   │   ├── BiosCollector.cpp
+│   │   ├── BiosCollector.h
+│   │   ├── TpmCollector.cpp
+│   │   ├── TpmCollector.h
+│   │   ├── StorageCollector.cpp
+│   │   ├── StorageCollector.h
+│   │   ├── NetworkCollector.cpp
+│   │   ├── NetworkCollector.h
+│   │   ├── UsbCollector.cpp
+│   │   ├── UsbCollector.h
+│   │   ├── GpuCollector.cpp
+│   │   ├── GpuCollector.h
+│   │   ├── SdEmmcCollector.cpp
+│   │   ├── SdEmmcCollector.h
+│   │   ├── CpuCollector.cpp
+│   │   └── CpuCollector.h
+│   ├── windows/
+│   │   ├── WmiClient.cpp
+│   │   ├── WmiClient.h
+│   │   ├── DeviceEnumerator.cpp
+│   │   └── DeviceEnumerator.h
+│   └── output/
+│       ├── ConsoleWriter.cpp
+│       ├── ConsoleWriter.h
+│       ├── JsonWriter.cpp
+│       └── JsonWriter.h
+└── tests/
+    ├── NormalizationTests.cpp
+    └── FixtureTests.cpp
+```
+
+------------------------------------------------------------------------
+
+## 6. Windows API Strategy by Hardware Type
+
+### 6.1 System UUID
+
+**Goal:** obtain the SMBIOS/system UUID representing the computer
+system.
+
+Primary implementation:
+
+-   Query WMI class `Win32_ComputerSystemProduct`.
+-   Read its `UUID` property.
+
+Alternative/lower-level implementation:
+
+-   Call `GetSystemFirmwareTable()` with the raw SMBIOS provider.
+-   Parse the SMBIOS System Information structure (Type 1).
+-   Extract the UUID field.
+
+Recommended first implementation: WMI.
+
+Record:
+
+``` text
+component: system
+identifierType: SMBIOS System UUID
+source: Win32_ComputerSystemProduct.UUID
+```
+
+Validation:
+
+-   Reject an all-zero UUID.
+-   Reject an all-`FF` UUID.
+-   Detect known placeholder strings.
+-   Preserve the raw UUID before normalization.
+
+Caveat: virtual machines commonly expose virtual SMBIOS UUIDs, and
+firmware/OEM tooling can sometimes change the value.
+
+------------------------------------------------------------------------
+
+### 6.2 Motherboard Serial Number
+
+Primary implementation:
+
+-   WMI class: `Win32_BaseBoard`
+-   Properties:
+    -   `Manufacturer`
+    -   `Product`
+    -   `SerialNumber`
+
+Record each baseboard returned rather than assuming exactly one.
+
+Validation should recognize placeholders such as:
+
+``` text
+To Be Filled By O.E.M.
+Default string
+None
+Unknown
+Not Specified
+```
+
+Do not discard these silently; mark them invalid/unreliable and retain
+the raw value for diagnostics.
+
+------------------------------------------------------------------------
+
+### 6.3 BIOS / System Firmware Serial
+
+Primary implementation:
+
+-   WMI class: `Win32_BIOS`
+-   Read:
+    -   `SerialNumber`
+    -   `Manufacturer`
+    -   `SMBIOSBIOSVersion`
+
+The BIOS serial frequently corresponds to the OEM system/service serial
+rather than a serial belonging to the BIOS ROM itself. Label it
+according to the Windows field instead of interpreting it as a
+cryptographically unique BIOS chip ID.
+
+------------------------------------------------------------------------
+
+## 7. TPM 2.0
+
+TPM requires special treatment because it is fundamentally different
+from reading a disk serial.
+
+### Goals
+
+Determine:
+
+1.  Whether a TPM exists.
+2.  Whether it is enabled/ready.
+3.  TPM specification/version information.
+4.  Whether an Endorsement Key identity/certificate can be accessed
+    through supported Windows interfaces.
+5.  Whether the application can use TPM-backed keys for a stronger
+    machine identity.
+
+### Recommended Windows interfaces
+
+Investigate and implement against:
+
+-   Windows TPM Base Services (TBS)
+-   CNG / NCrypt platform crypto provider
+-   TPM-related WMI/CIM interfaces where appropriate
+
+Relevant Windows components include:
+
+``` text
+tbs.h
+tbs.lib
+ncrypt.h
+ncrypt.lib
+bcrypt.h
+bcrypt.lib
+```
+
+### Important architecture decision
+
+Do **not** treat an EK private key as a readable serial number. TPM
+private key material is specifically designed not to be exported.
+
+For a robust identity system, prefer:
+
+``` text
+Application creates key pair
+        ↓
+Private key protected by TPM
+        ↓
+Public key exported
+        ↓
+Public-key fingerprint becomes application device identity
+```
+
+The TPM collector can separately expose TPM metadata and, where
+supported and authorized, public endorsement information.
+
+### Optional advanced mode
+
+``` text
+hwid.exe --tpm-attestation
+```
+
+This can later implement attestation rather than merely inventorying TPM
+metadata.
+
+------------------------------------------------------------------------
+
+## 8. NVMe SSD Serial Numbers
+
+Prefer direct storage APIs over WMI.
+
+### Enumeration
+
+Enumerate physical disks using:
+
+``` text
+\\.\PhysicalDrive0
+\\.\PhysicalDrive1
+...
+```
+
+Open each device with `CreateFileW()` using the minimum required access.
+
+### Query
+
+Use:
+
+``` text
+DeviceIoControl()
+IOCTL_STORAGE_QUERY_PROPERTY
+```
+
+Query `StorageDeviceProperty` and parse `STORAGE_DEVICE_DESCRIPTOR`.
+
+Useful fields include:
+
+-   Vendor ID
+-   Product ID
+-   Product revision
+-   Serial number
+
+For NVMe-specific information, investigate the documented storage
+protocol-specific query path where necessary.
+
+### Output
+
+``` text
+Disk 0
+Bus: NVMe
+Model: ...
+Serial: ...
+```
+
+Do not assume disk ordering remains stable between boots or hardware
+changes.
+
+------------------------------------------------------------------------
+
+## 9. SATA SSD/HDD Serial Numbers
+
+Use the same storage abstraction as NVMe where possible.
+
+Primary query:
+
+``` text
+IOCTL_STORAGE_QUERY_PROPERTY
+```
+
+Parse:
+
+``` cpp
+STORAGE_DEVICE_DESCRIPTOR
+```
+
+Inspect bus type to distinguish:
+
+``` text
+SATA
+ATA
+SCSI
+USB
+NVMe
+RAID
+```
+
+Where a controller/RAID layer hides the underlying device serial, report
+that limitation instead of inventing a fallback.
+
+A storage collector should therefore produce zero or more results:
+
+``` cpp
+HardwareResults collectStorageIdentifiers();
+```
+
+------------------------------------------------------------------------
+
+## 10. Network Adapter Permanent MAC Addresses
+
+Do not confuse the currently configured MAC address with a permanent
+hardware address.
+
+### Enumeration
+
+Use IP Helper API:
+
+``` cpp
+GetAdaptersAddresses()
+```
+
+This is useful for:
+
+-   adapter enumeration
+-   interface LUID/index
+-   current physical address
+-   friendly name
+-   adapter status
+
+### Permanent address
+
+For adapters where Windows/network-driver interfaces expose it, query
+the permanent hardware address through the appropriate NDIS/device
+interface rather than assuming `GetAdaptersAddresses()` always
+represents the factory address.
+
+Collect both fields when available:
+
+``` text
+Current MAC
+Permanent MAC
+```
+
+If they differ:
+
+``` text
+potentiallyMutable: true
+```
+
+Normalize MAC values as:
+
+``` text
+AA:BB:CC:DD:EE:FF
+```
+
+Filter carefully rather than blindly excluding:
+
+-   virtual adapters
+-   VPN adapters
+-   Hyper-V adapters
+-   loopback
+-   Bluetooth
+-   Wi-Fi
+-   Ethernet
+
+Expose adapter type in output so the caller can decide what to use.
+
+------------------------------------------------------------------------
+
+## 11. USB Device Serial Numbers
+
+USB serial numbers are optional; many USB devices do not implement them.
+
+### Enumeration
+
+Use Windows device enumeration APIs, preferably Configuration Manager
+APIs or SetupAPI.
+
+Possible interfaces:
+
+``` text
+CM_Get_Device_Interface_List
+SetupDiGetClassDevs
+SetupDiEnumDeviceInfo
+SetupDiGetDeviceInstanceId
+SetupDiGetDeviceRegistryProperty
+```
+
+Useful values:
+
+-   VID
+-   PID
+-   device instance ID
+-   serial component of the device identity where supplied by the device
+-   friendly name
+-   manufacturer
+
+Important distinction:
+
+``` text
+USB\VID_1234&PID_5678\SERIAL123
+```
+
+may contain a manufacturer-provided serial, while some Windows-created
+instance identifiers are not equivalent to a factory serial.
+
+The collector must explicitly label which form was obtained.
+
+------------------------------------------------------------------------
+
+## 12. GPU Identifiers
+
+GPU identity is vendor-dependent.
+
+### Baseline implementation
+
+Enumerate display adapters using:
+
+-   DXGI (`IDXGIFactory`, `IDXGIAdapter`)
+-   Windows device enumeration APIs
+
+Collect:
+
+-   vendor ID
+-   device ID
+-   subsystem ID
+-   revision
+-   adapter description
+-   locally unique Windows adapter identifier where available
+
+These identify the adapter type/instance but are **not necessarily a
+globally unique physical GPU serial**.
+
+### Vendor-specific optional providers
+
+Add optional backends later:
+
+``` text
+NVIDIA → NVML
+AMD    → vendor-supported management/API interfaces
+Intel  → vendor-supported interfaces where applicable
+```
+
+Only expose a GPU UUID/serial as such when the vendor API explicitly
+defines it.
+
+Architecture:
+
+``` cpp
+class IGpuIdentityProvider
+{
+public:
+    virtual ~IGpuIdentityProvider() = default;
+    virtual HardwareResults collect() = 0;
+};
+```
+
+Implement:
+
+``` text
+DxgiGpuProvider
+NvidiaGpuProvider
+AmdGpuProvider
+IntelGpuProvider
+```
+
+The program must continue functioning when vendor libraries are absent.
+
+------------------------------------------------------------------------
+
+## 13. SD Card and eMMC Identity
+
+These devices may expose CID information at the hardware/protocol level,
+but generic Windows applications cannot assume direct CID access for
+every reader/controller.
+
+Implementation strategy:
+
+1.  Enumerate storage devices.
+2.  Determine bus/device type.
+3.  Query documented Windows storage properties first.
+4.  Attempt protocol-specific queries only when supported by the storage
+    stack.
+5.  Report CID as unavailable when the controller or driver does not
+    expose it.
+
+Never substitute the volume serial number for an SD/eMMC CID.
+
+These are fundamentally different:
+
+``` text
+CID                    → hardware/device protocol identity
+Volume serial number   → filesystem/format metadata
+```
+
+------------------------------------------------------------------------
+
+## 14. CPU Information
+
+Modern x86/x64 processors generally should not be expected to expose a
+usable globally unique CPU serial number to ordinary Windows software.
+
+The CPU collector should therefore collect **identification**, not claim
+uniqueness.
+
+Use:
+
+``` cpp
+__cpuid()
+__cpuidex()
+```
+
+Collect:
+
+-   CPU vendor
+-   family
+-   model
+-   stepping
+-   brand string
+-   feature information
+
+Optionally compare this with:
+
+``` text
+Win32_Processor.ProcessorId
+```
+
+Output should explicitly state:
+
+``` text
+Unique CPU serial: unavailable/not supported
+```
+
+Do not incorporate CPUID model information into a device identity under
+the assumption that it is unique.
+
+------------------------------------------------------------------------
+
+## 15. WMI Infrastructure
+
+Because several collectors need WMI, implement one reusable WMI client.
+
+Initialization flow:
+
+``` text
+CoInitializeEx
+      ↓
+CoInitializeSecurity
+      ↓
+CoCreateInstance(IWbemLocator)
+      ↓
+ConnectServer(ROOT\CIMV2)
+      ↓
+CoSetProxyBlanket
+      ↓
+ExecQuery(WQL)
+      ↓
+Enumerate IWbemClassObject
+```
+
+Suggested interface:
+
+``` cpp
+class WmiClient
+{
+public:
+    explicit WmiClient(std::wstring_view nameSpace);
+
+    std::vector<WmiObject> query(std::wstring_view wql);
+};
+```
+
+Example:
+
+``` cpp
+auto rows = wmi.query(
+    L"SELECT UUID, Vendor, Name FROM Win32_ComputerSystemProduct"
+);
+```
+
+Use RAII for COM initialization and COM interface pointers.
+
+------------------------------------------------------------------------
+
+## 16. Normalization
+
+Create one normalization layer instead of embedding cleanup rules inside
+every collector.
+
+Examples:
+
+### UUID
+
+``` text
+raw:        4C4C4544-0038-3710-8058-CAC04F...
+normalized: 4c4c4544-0038-3710-8058-cac04f...
+```
+
+### Disk serial
+
+Trim:
+
+-   leading/trailing whitespace
+-   trailing NULs
+
+Do not remove internal spaces unless the relevant device specification
+says they are padding.
+
+### MAC
+
+``` text
+aabbccddeeff
+→
+AA:BB:CC:DD:EE:FF
+```
+
+### Placeholder detection
+
+Centralize known invalid strings:
+
+``` cpp
+bool isPlaceholderHardwareId(std::string_view value);
+```
+
+Check case-insensitively for known OEM placeholders and empty/all-zero
+values.
+
+------------------------------------------------------------------------
+
+## 17. Output
+
+Default human-readable output:
+
+``` text
+SYSTEM
+  SMBIOS UUID
+    Value:       4C4C4544-....
+    Source:      Win32_ComputerSystemProduct.UUID
+    Confidence:  FirmwareAssigned
+    Mutable:     Possibly
+
+MOTHERBOARD
+  Manufacturer: ...
+  Product:      ...
+  Serial:       ...
+
+TPM
+  Present:      Yes
+  Version:      2.0
+  Ready:        Yes
+
+STORAGE
+  PhysicalDrive0
+    Bus:         NVMe
+    Model:       ...
+    Serial:      ...
+
+NETWORK
+  Ethernet
+    Permanent MAC: ...
+    Current MAC:   ...
+
+CPU
+  Model: ...
+  Processor ID: ...
+  Unique serial: Not exposed
+```
+
+Also support machine-readable JSON:
+
+``` text
+hwid.exe --json
+```
+
+Suggested schema:
+
+``` json
+{
+  "schemaVersion": 1,
+  "system": [],
+  "motherboard": [],
+  "bios": [],
+  "tpm": [],
+  "storage": [],
+  "network": [],
+  "usb": [],
+  "gpu": [],
+  "sdEmmc": [],
+  "cpu": []
+}
+```
+
+------------------------------------------------------------------------
+
+## 18. Error Handling
+
+A hardware inventory utility must expect partial failure.
+
+Do not terminate the complete scan because one collector fails.
+
+Example:
+
+``` text
+[OK]   System UUID
+[OK]   Motherboard serial
+[OK]   BIOS serial
+[OK]   TPM detected
+[OK]   NVMe disk 0
+[WARN] USB device has no serial descriptor
+[WARN] GPU vendor UUID unavailable
+[WARN] SD CID not exposed by driver
+```
+
+Store Windows errors as:
+
+``` text
+API name
+GetLastError() value
+formatted Windows error message
+```
+
+For HRESULT-based APIs, retain the HRESULT.
+
+------------------------------------------------------------------------
+
+## 19. Privilege Model
+
+The program should first run without elevation.
+
+Each collector should classify its result as:
+
+``` text
+available
+not supported
+not present
+access denied
+driver does not expose value
+invalid/placeholder
+query failed
+```
+
+Only document administrator mode for operations that demonstrably
+require it.
+
+Do not automatically relaunch elevated.
+
+------------------------------------------------------------------------
+
+## 20. Security and Privacy
+
+Hardware identifiers are persistent identifiers and can become
+privacy-sensitive when stored or transmitted.
+
+Recommended rules:
+
+-   Never transmit identifiers automatically.
+-   Never write identifiers to disk unless explicitly requested.
+-   Do not log TPM certificate material unnecessarily.
+-   Provide `--redact` for support/debug output.
+-   Avoid using a concatenation of raw serial numbers as a password or
+    cryptographic secret.
+-   Do not assume hashing an identifier makes a low-entropy or guessable
+    identifier secret.
+-   Clearly document what `--json` exposes.
+
+Example redaction:
+
+``` text
+NVMe Serial: S3********92
+MAC:         AA:BB:**:**:EE:FF
+UUID:        4C4C****-****-****-****-********1234
+```
+
+------------------------------------------------------------------------
+
+## 21. Device Fingerprinting Policy
+
+If the eventual objective is a stable machine identifier, keep that
+logic outside the collectors.
+
+Do **not** simply calculate:
+
+``` text
+SHA256(
+    motherboard_serial +
+    disk_serial +
+    mac_address
+)
+```
+
+and assume it permanently identifies the computer.
+
+Hardware changes make that approach brittle.
+
+Instead separate:
+
+``` text
+Hardware inventory
+        ↓
+Identity policy
+        ↓
+Application device identity
+```
+
+For stronger identity:
+
+``` text
+First application enrollment
+        ↓
+Generate asymmetric key
+        ↓
+Protect private key using TPM/CNG
+        ↓
+Export public key
+        ↓
+SHA-256(public key)
+        ↓
+Application Device ID
+```
+
+Hardware serials can then be supporting telemetry rather than the root
+identity.
+
+------------------------------------------------------------------------
+
+## 22. Implementation Phases
+
+### Phase 1 --- Project foundation
+
+Implement:
+
+-   CMake project
+-   CLI parser
+-   common result structure
+-   console output
+-   JSON output
+-   Windows error utilities
+-   UTF-16/UTF-8 conversion
+-   COM RAII initialization
+
+Deliverable:
+
+``` text
+hwid.exe --help
+hwid.exe --json
+```
+
+### Phase 2 --- SMBIOS/WMI identifiers
+
+Implement:
+
+-   System UUID
+-   motherboard serial
+-   BIOS serial
+-   CPU information
+
+This establishes the reusable WMI infrastructure.
+
+### Phase 3 --- Storage
+
+Implement:
+
+-   physical-drive enumeration
+-   `IOCTL_STORAGE_QUERY_PROPERTY`
+-   NVMe/SATA/USB storage classification
+-   disk model and serial extraction
+
+Test with:
+
+-   NVMe SSD
+-   SATA SSD
+-   SATA HDD
+-   USB-to-SATA enclosure
+-   RAID/controller-backed storage if available
+
+### Phase 4 --- Network
+
+Implement:
+
+-   adapter enumeration
+-   current MAC
+-   permanent MAC where the driver exposes it
+-   virtual/physical adapter classification
+
+### Phase 5 --- USB
+
+Implement:
+
+-   device-tree enumeration
+-   VID/PID
+-   instance information
+-   manufacturer serial when available
+
+### Phase 6 --- TPM
+
+Implement:
+
+-   TPM detection
+-   TPM version/state
+-   supported public identity information
+-   optional TPM-backed application key generation
+
+Treat TPM key creation as a separate command rather than silently
+changing TPM state during inventory.
+
+For example:
+
+``` text
+hwid.exe --tpm-info
+hwid.exe --create-device-key
+```
+
+### Phase 7 --- GPU
+
+Implement:
+
+1.  DXGI baseline.
+2.  Optional NVIDIA provider.
+3.  Optional AMD provider.
+4.  Optional Intel provider.
+
+Vendor-specific support must be dynamically optional.
+
+### Phase 8 --- SD/eMMC
+
+Implement Windows storage queries and supported protocol-specific paths.
+
+Explicitly handle systems where the controller does not expose CID.
+
+### Phase 9 --- Hardening
+
+Add:
+
+-   unit tests
+-   integration tests
+-   malformed WMI/property handling
+-   missing-device tests
+-   access-denied tests
+-   virtual-machine tests
+-   Unicode device names
+-   placeholder detection
+-   JSON schema/versioning
+
+------------------------------------------------------------------------
+
+## 23. Testing Matrix
+
+Test on multiple hardware configurations.
+
+  Environment             Key checks
+  ----------------------- ---------------------------------------------
+  Windows 11 desktop      motherboard, BIOS, TPM, NVMe, Ethernet, GPU
+  Windows 11 laptop       SMBIOS, TPM, NVMe, Wi-Fi, integrated GPU
+  Windows 10 machine      API compatibility
+  Hyper-V VM              virtual SMBIOS/NIC/storage behavior
+  VMware VM               virtual identifiers
+  Multiple disks          correct per-device association
+  USB flash drive         optional USB/storage serial
+  USB HDD enclosure       bridge behavior
+  SD reader               CID availability
+  No TPM / disabled TPM   graceful failure
+  Non-admin account       privilege behavior
+
+Tests should verify semantics, not hard-code one developer machine's
+serial numbers.
+
+------------------------------------------------------------------------
+
+## 24. Important Edge Cases
+
+Handle all of the following:
+
+-   OEM returns `"To Be Filled By O.E.M."`
+-   serial field is empty
+-   serial is all zeros
+-   UUID is all zeros or all `FF`
+-   WMI service unavailable
+-   multiple motherboards/baseboards reported
+-   multiple GPUs
+-   multiple NICs
+-   MAC randomization/current MAC differs from permanent MAC
+-   virtual NICs
+-   USB device has no serial descriptor
+-   storage behind RAID controller
+-   USB/SATA bridge substitutes its own serial
+-   NVMe namespace/controller distinctions
+-   TPM disabled in firmware
+-   TPM present but unavailable to current process
+-   GPU vendor library not installed
+-   SD reader hides CID
+-   virtual machine presents synthetic identifiers
+
+------------------------------------------------------------------------
+
+## 25. Suggested API Surface
+
+Each collector should have a narrow interface:
+
+``` cpp
+namespace hwid
+{
+    HardwareResults collectSystem();
+    HardwareResults collectMotherboard();
+    HardwareResults collectBios();
+    HardwareResults collectTpm();
+    HardwareResults collectStorage();
+    HardwareResults collectNetwork();
+    HardwareResults collectUsb();
+    HardwareResults collectGpu();
+    HardwareResults collectSdEmmc();
+    HardwareResults collectCpu();
+}
+```
+
+The application layer then orchestrates them:
+
+``` cpp
+HardwareResults collectAll()
+{
+    HardwareResults result;
+
+    append(result, collectSystem());
+    append(result, collectMotherboard());
+    append(result, collectBios());
+    append(result, collectTpm());
+    append(result, collectStorage());
+    append(result, collectNetwork());
+    append(result, collectUsb());
+    append(result, collectGpu());
+    append(result, collectSdEmmc());
+    append(result, collectCpu());
+
+    return result;
+}
+```
+
+A failure in one function must not prevent subsequent collectors from
+running.
+
+------------------------------------------------------------------------
+
+## 26. Dependencies
+
+Prefer Windows SDK functionality wherever practical.
+
+Likely Windows libraries:
+
+``` text
+wbemuuid.lib
+ole32.lib
+oleaut32.lib
+iphlpapi.lib
+setupapi.lib
+cfgmgr32.lib
+dxgi.lib
+tbs.lib
+ncrypt.lib
+bcrypt.lib
+```
+
+Exact linkage should be added only when the corresponding implementation
+requires it.
+
+For JSON, either:
+
+1.  use a small well-maintained C++ JSON dependency, or
+2.  implement a narrowly scoped JSON writer.
+
+Do not hand-build JSON using unescaped string concatenation.
+
+------------------------------------------------------------------------
+
+## 27. Definition of Done
+
+Version 1 is complete when:
+
+-   The program builds cleanly as x64 C++ on supported Windows versions.
+-   Standard-user execution works for the normal inventory path.
+-   Every requested hardware category has a collector.
+-   Unsupported identifiers are explicitly reported rather than
+    fabricated.
+-   Multiple disks/NICs/GPUs/USB devices are represented independently.
+-   Raw values and normalized values remain distinguishable.
+-   Placeholder OEM values are detected.
+-   Console and JSON output are supported.
+-   Errors from one collector do not abort the entire scan.
+-   The program never describes CPU model data, a volume serial, a
+    transient MAC, or a Windows device instance identifier as a
+    guaranteed globally unique hardware serial.
+-   TPM-backed identity is kept conceptually separate from passive
+    hardware inventory.
+-   Tests cover physical machines and at least one virtualized
+    environment.
+
+------------------------------------------------------------------------
+
+## 28. Recommended Development Order
+
+The lowest-risk implementation sequence is:
+
+``` text
+1. Core result/error/output framework
+2. WMI helper
+3. System UUID
+4. Motherboard
+5. BIOS
+6. CPU
+7. Storage
+8. Network
+9. USB
+10. TPM
+11. DXGI GPU enumeration
+12. Vendor-specific GPU providers
+13. SD/eMMC
+14. TPM-backed application identity
+15. Integration and VM testing
+```
+
+This order gets useful results quickly while leaving the hardware- and
+vendor-specific portions until the common Windows infrastructure is
+stable.
+
+------------------------------------------------------------------------
+
+## 29. Final Architecture
+
+``` text
+                     ┌──────────────────────┐
+                     │       hwid.exe       │
+                     │ CLI / orchestration  │
+                     └──────────┬───────────┘
+                                │
+                ┌───────────────▼────────────────┐
+                │      Collector Interface       │
+                └───────────────┬────────────────┘
+                                │
+       ┌────────────┬───────────┼───────────┬─────────────┐
+       │            │           │           │             │
+       ▼            ▼           ▼           ▼             ▼
+     WMI         Storage      Network      Device        TPM/CNG
+  SMBIOS/CPU      IOCTL       IP Helper   Enumeration
+       │            │           │           │             │
+       └────────────┴───────────┴───────────┴─────────────┘
+                                │
+                                ▼
+                    HardwareIdentifier[]
+                                │
+                   ┌────────────┴────────────┐
+                   ▼                         ▼
+              Console output             JSON output
+```
+
+The critical boundary is between **inventory** and **identity**. The
+inventory layer reports exactly what Windows and the hardware expose; a
+separate identity layer can later decide how those observations should
+participate in licensing, enrollment, authentication, or diagnostics.
+
+```
