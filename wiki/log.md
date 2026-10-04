@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-04** — ingest `readme:categories`: Cheat ~2860 (+1; oleavr/[[frida-module-example]] TypeScript frida-compile modular library — ImHex hexpat scans, ARM Thumb trampolines, inline hooks) / Anti Cheat ~771 / other major section counts stable; 41 sections; synced projected README-map counts on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/reverse-engineering]], [[overviews/dma-attack]], and [[concepts/frida]]; entity [[frida-module-example]]; light `index.md` section notes (no per-category pages).
+
 - **2026-10-04** — lint (agent pass): index vs disk scan — 9 overviews, 51 concepts, 4002 entities (4062 index entries); index.md fully synced (0 missing, 0 dead, 0 duplicate entries); overview wikilink spot-check (9 pages, 12216 links) — 0 broken links; concept spot-check (51 pages, 2365 links) — 0 broken links; index.md wikilink scan (781 links) — 0 broken links; 6 cross-kind slug collisions ([[game-hacking]], [[anti-cheat]], [[reverse-engineering]], [[il2cpp]], [[byovd]], [[dma]]) — expected, no repair needed; no structural edits required.
 
 - **2026-10-04** — lint (scheduled pass): index vs disk — 9 overviews, 51 concepts, 4002 entities (4062 index entries); 0 missing, 0 dead, 0 duplicate; overview wikilink spot-check 12216 links (0 broken); concept spot-check 2365 links (0 broken); index wikilink scan 781 links (0 broken); 6 expected cross-kind slug collisions; wiki not empty — bootstrap not required; no structural edits.
