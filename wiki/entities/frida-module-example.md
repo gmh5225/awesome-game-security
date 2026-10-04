@@ -10,9 +10,20 @@ confidence: medium
 
 # frida-module-example
 
-TypeScript **[[frida]] library module example** using **frida-compile** — shows how to package reusable dynamic instrumentation as an npm library with distributable JavaScript and TypeScript definitions. Helpers scan process memory for player structures defined with **ImHex hexpat** pattern files, build **ARM Thumb trampolines**, and replace function entry points via inline hooks. (source: wiki/sources/descriptions/oleavr__frida-module-example.md)
+**frida-module-example** (oleavr/frida-module-example) is a reference TypeScript **[[frida]] library module** using **frida-compile** — shows how to package reusable dynamic instrumentation as an npm library with distributable JavaScript and TypeScript definitions. Aimed at reverse engineers and game-security researchers who want a template for organizing Frida tooling into modular packages for memory analysis and runtime hooking. (source: wiki/sources/descriptions/oleavr__frida-module-example.md)
 
-Reference for reverse engineers and game-security researchers organizing Frida tooling into modular packages for memory analysis and runtime hooking.
+## Capabilities
+
+- **Memory scanning** — helpers use `Memory.scanSync` to locate player structures defined with **ImHex hexpat** pattern files.
+- **Inline hooking** — utilities build **ARM Thumb trampolines** and replace function entry points through inline hooks.
+
+## Architecture
+
+Built as an **npm library** that compiles to distributable JavaScript with TypeScript type definitions via **frida-compile** — contrasts with one-off Frida JS scripts or Python hook-maintenance tools such as [[hook-updater]].
+
+## Positioning
+
+**Cheat / Frida** lane beside [[ts-ue4dumper]] and [[frida-il2cpp-bridge]] as a modular TypeScript packaging pattern for game memory analysis and runtime hooking research.
 
 ## Links
 
@@ -20,4 +31,4 @@ Reference for reverse engineers and game-security researchers organizing Frida t
 
 ## Related
 
-[[frida]] · [[frida-boot]] · [[hook-updater]] · [[frida-mobile-kit]] · [[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[overviews/mobile-security]]
+[[frida]] · [[frida-boot]] · [[hook-updater]] · [[frida-mobile-kit]] · [[ts-ue4dumper]] · [[frida-il2cpp-bridge]] · [[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[overviews/mobile-security]]

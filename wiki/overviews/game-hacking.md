@@ -717,6 +717,7 @@ sources:
   - wiki/sources/descriptions/tangsilian__android-vuln.md
   - wiki/sources/descriptions/jiayy__android_vuln_poc-exp.md
   - wiki/sources/descriptions/jcalabres__hook-updater.md
+  - wiki/sources/descriptions/oleavr__frida-module-example.md
   - wiki/sources/descriptions/musabcel__android_rom_list.md
   - wiki/sources/descriptions/PixelOS-AOSP__official_devices.md
   - wiki/sources/descriptions/tamirzb__CVE-2021-1961.md

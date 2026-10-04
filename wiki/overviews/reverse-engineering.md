@@ -653,6 +653,7 @@ sources:
 
   - wiki/sources/descriptions/w00tzenheimer__d810-ng.md
   - wiki/sources/descriptions/obpo-project__obpo-plugin.md
+  - wiki/sources/descriptions/oleavr__frida-module-example.md
   - wiki/sources/descriptions/obfuscar__obfuscar.md
   - wiki/sources/descriptions/mkaring__ConfuserEx.md
   - wiki/sources/descriptions/govcert-ch__ConfuserEx_IDAPython.md
