@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-05** — ingest `description:overkazaf/D810G`: refreshed entity [[d810g]] (overkazaf; Ghidra deobfuscation framework — Java plugin + Python Z3/Unicorn/Capstone/Keystone engine; OLLVM/Tigress CFF, MBA/Z3, opaque predicates, BCF, strings, VM devirt multi-pass pipeline; CLI or analyzer; Architecture/Capabilities/Use cases sections); cited on [[concepts/control-flow-flattening]] Ghidra multi-pass CFF lane + [[concepts/mixed-boolean-arithmetic]] Z3-verified MBA lane; `index.md` entity blurb sync.
+
 - **2026-10-05** — ingest `readme:categories`: Cheat ~2861 (+1; overkazaf/[[d810g]] Ghidra deobfuscation framework — OLLVM/Tigress CFF, MBA/Z3, opaque predicates, BCF, strings, VM devirt; CLI + analyzer plugin) / Anti Cheat ~772 / other major section counts stable; 41 sections; synced projected README-map counts on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/reverse-engineering]], and [[overviews/dma-attack]]; entity [[d810g]]; light `index.md` section notes (no per-category pages).
 
 - **2026-10-05** — ingest `description:dancing4am/win-kernel-telemetry`: refreshed entity [[win-kernel-telemetry]] (dancing4am; KMDF/WDM driver lab — four incremental examples for process/image notify + ObRegisterCallbacks process protection with fake-game reader test harness; Capabilities/Architecture/Positioning sections); cited on [[concepts/kernel-callbacks]] educational ObCallback lane; `index.md` entity blurb already current from readme ingest.
