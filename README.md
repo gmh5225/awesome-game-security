@@ -4899,6 +4899,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - [SymlinkCallback](https://github.com/yardenshafir/SymlinkCallback)
 - https://github.com/Archie-osu/PowerHook [Hooking KPRCB IdlePreselect]
 - https://github.com/Dor00tkit/BamExtensionTableHook [bam!BampCreateProcessCallback]
+- https://github.com/dancing4am/win-kernel-telemetry [KMDF/WDM driver lab for process/image-load monitoring and ObRegisterCallbacks process protection]
 
 > Winows User Dump Analysis
 - https://github.com/0vercl0k/udmp-parser
