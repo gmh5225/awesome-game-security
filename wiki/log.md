@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-05** — ingest `description:dancing4am/win-kernel-telemetry`: refreshed entity [[win-kernel-telemetry]] (dancing4am; KMDF/WDM driver lab — four incremental examples for process/image notify + ObRegisterCallbacks process protection with fake-game reader test harness; Capabilities/Architecture/Positioning sections); cited on [[concepts/kernel-callbacks]] educational ObCallback lane; `index.md` entity blurb already current from readme ingest.
+
 - **2026-10-05** — ingest `readme:categories`: Anti Cheat ~772 (+1; dancing4am/[[win-kernel-telemetry]] KMDF/WDM driver lab — process/image-load telemetry + ObRegisterCallbacks protection with fake-game test harness) / Cheat ~2860 / other major section counts stable; 41 sections; synced projected README-map counts on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/windows-kernel]], [[overviews/dma-attack]], and [[overviews/reverse-engineering]]; entity [[win-kernel-telemetry]]; light `index.md` section notes (no per-category pages).
 
 - **2026-10-05** — lint (agent pass): index vs disk scan — 9 overviews, 51 concepts, 4003 entities (4063 index entries); index.md fully synced (0 missing, 0 dead, 0 duplicate entries); overview wikilink spot-check (9 pages, 12219 links) — 0 broken links; concept spot-check (51 pages, 2367 links) — 0 broken links; index.md wikilink scan (783 links) — 0 broken links; 6 cross-kind slug collisions ([[game-hacking]], [[anti-cheat]], [[reverse-engineering]], [[il2cpp]], [[byovd]], [[dma]]) — expected, no repair needed; wiki not empty — bootstrap not required; no structural edits required.

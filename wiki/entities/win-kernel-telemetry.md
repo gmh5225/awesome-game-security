@@ -10,7 +10,28 @@ confidence: medium
 
 # win-kernel-telemetry
 
-Hands-on **Windows kernel driver lab** teaching EDR and anti-cheat primitives through small, commented **KMDF** and **WDM** examples. Four incremental drivers cover a minimal KMDF skeleton, process create/exit monitoring via `PsSetCreateProcessNotifyRoutineEx`, filtered DLL and driver image-load telemetry with `PsSetLoadImageNotifyRoutine`, and anti-cheat-style process memory protection using **ObRegisterCallbacks** with a fake game and reader test harness. C drivers target x64 and ARM64 via the Windows Driver Kit; companion C++ console utilities demonstrate protection behavior. Aimed at security researchers, game-security engineers, and reverse engineers learning how endpoint and AC components observe and protect processes in an isolated VM with test signing enabled. (source: wiki/sources/descriptions/dancing4am__win-kernel-telemetry.md)
+Hands-on **Windows kernel driver lab** (dancing4am/win-kernel-telemetry) teaching EDR and anti-cheat primitives through small, commented **KMDF** and **WDM** examples — not a production anti-cheat product. (source: wiki/sources/descriptions/dancing4am__win-kernel-telemetry.md)
+
+## Capabilities (four incremental drivers)
+
+| Example | APIs / focus |
+|---------|----------------|
+| Minimal KMDF skeleton | WDK driver bring-up baseline |
+| Process create/exit monitor | `PsSetCreateProcessNotifyRoutineEx` |
+| Image-load telemetry | `PsSetLoadImageNotifyRoutine` (filtered DLL and driver loads) |
+| Process memory protection | **ObRegisterCallbacks** with fake game and reader test harness |
+
+## Architecture
+
+| Layer | Role |
+|-------|------|
+| **Kernel drivers (KMDF/WDM)** | Incremental C examples for process/image notify and object callbacks |
+| **User-mode harness** | C++ console utilities demonstrating protection behavior |
+| **Build targets** | x64 and ARM64 via the Windows Driver Kit |
+
+## Positioning
+
+**Anti Cheat / Windows Ring0 Callback** educational lane beside [[kernel-ac]] and [[mini-anti-cheat-v2]] — aimed at security researchers, game-security engineers, and reverse engineers learning how endpoint and AC components observe and protect processes in an isolated VM with test signing enabled.
 
 ## Links
 
