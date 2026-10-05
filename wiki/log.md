@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-05** — ingest `readme:categories`: Cheat ~2861 (+1; overkazaf/[[d810g]] Ghidra deobfuscation framework — OLLVM/Tigress CFF, MBA/Z3, opaque predicates, BCF, strings, VM devirt; CLI + analyzer plugin) / Anti Cheat ~772 / other major section counts stable; 41 sections; synced projected README-map counts on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/reverse-engineering]], and [[overviews/dma-attack]]; entity [[d810g]]; light `index.md` section notes (no per-category pages).
+
 - **2026-10-05** — ingest `description:dancing4am/win-kernel-telemetry`: refreshed entity [[win-kernel-telemetry]] (dancing4am; KMDF/WDM driver lab — four incremental examples for process/image notify + ObRegisterCallbacks process protection with fake-game reader test harness; Capabilities/Architecture/Positioning sections); cited on [[concepts/kernel-callbacks]] educational ObCallback lane; `index.md` entity blurb already current from readme ingest.
 
 - **2026-10-05** — ingest `readme:categories`: Anti Cheat ~772 (+1; dancing4am/[[win-kernel-telemetry]] KMDF/WDM driver lab — process/image-load telemetry + ObRegisterCallbacks protection with fake-game test harness) / Cheat ~2860 / other major section counts stable; 41 sections; synced projected README-map counts on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/windows-kernel]], [[overviews/dma-attack]], and [[overviews/reverse-engineering]]; entity [[win-kernel-telemetry]]; light `index.md` section notes (no per-category pages).
