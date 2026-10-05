@@ -11,24 +11,31 @@ confidence: medium
 
 # IK+ Reforged
 
-Assembly patch and Python tooling project enhancing **International Karate+** on Atari ST from stephane-perez. (source: wiki/sources/descriptions/stephane-perez__ik-plus-reforged.md)
+**IK+ Reforged** (stephane-perez/ik-plus-reforged) is a patch and tooling project that enhances **International Karate+** on Atari ST by applying carefully verified binary fixes to a user-supplied copy of the game. (source: wiki/sources/descriptions/stephane-perez__ik-plus-reforged.md)
+
+## Architecture
+
+| Layer | Role |
+|-------|------|
+| **68000 assembly loaders/hooks** | Motorola assembly patches injected into the game image |
+| **Python patch scripts** | Extract image, validate checksums and original bytes, apply hooks |
+| **Validation toolchain** | vasm assembler, Hatari emulation, Capstone-based disassembly |
 
 ## Capabilities
 
-- Motorola 68000 assembly loaders and hooks applied to a user-supplied game image via Python patch scripts.
 - Checksum and original-byte validation before modification; no copyrighted game data distributed.
 - STE-specific enhancements: DMA sound and blitter-based fighter rendering.
 - Simultaneous three-player support via parallel-port or Jaguar joysticks.
 - Platform compatibility fixes for STE and Mega STE hardware crashes.
-- JOYTEST utility for controller wiring diagnostics.
-
-## Architecture
-
-Patch pipeline extracts the game image, verifies bytes, applies assembly hooks, and optionally enables STE hardware paths. Development and validation use vasm assembler, Hatari emulation, and Capstone-based disassembly utilities.
+- **JOYTEST** utility for diagnosing controller wiring.
 
 ## Use cases
 
-Aimed at retro computing enthusiasts and reverse engineers studying or extending classic Atari ST game binaries. Retro-console binary patch lane beside [[rom-weaver]] ROM delta workflows and [[pc-wackywheels-doc]] DOS format RE — preservation-oriented patching, not live-memory cheating.
+Aimed at retro computing enthusiasts and reverse engineers who want to study or extend classic ST game binaries without distributing copyrighted game data. (source: wiki/sources/descriptions/stephane-perez__ik-plus-reforged.md)
+
+## Positioning
+
+Listed under **Cheat → RE Tools**. In-place 68000 binary patch workflow beside [[rom-weaver]] ROM delta formats and [[pc-wackywheels-doc]] DOS archive RE — preservation-oriented patching and hardware compatibility, not live-memory cheating. Pairs with [[binary-diffing]] retro patch lanes and [[overviews/reverse-engineering]] classic-platform tooling cluster.
 
 ## Links
 
