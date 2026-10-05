@@ -960,6 +960,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/tomvita/SE-tools [Nintendo Switch]
 - https://github.com/StudentBlake/XCI-Explorer [XCI Explorer]
 - https://github.com/rom-weaver/rom-weaver [Local-first browser PWA and Rust CLI to inspect ROMs/disc images, apply and create patches, bake cheat codes, and edit saves offline]
+- https://github.com/stephane-perez/ik-plus-reforged [Assembly patches and Python tooling for International Karate+ on Atari ST: platform compatibility fixes, 3-player mode, STE blitter/DMA enhancements, and JOYTEST joystick diagnostics]
 - https://github.com/0x5abe/vifterpreter [Rust library for parsing PlayStation 2 VIF1 DMA packets and VIF commands]
 - https://github.com/piffd0s/defcon-dreamcast-planetweb-research [DEF CON Dreamcast PlanetWeb exploit chain — Eden loading, memory-write flaw, and MIME stack overflow to run native SH-4 DOOM without a debugger]
 - https://github.com/Anonym0ose/JitDumper [A CIL method body dumper]
