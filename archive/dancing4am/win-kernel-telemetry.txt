@@ -1,0 +1,1884 @@
+Project Path: arc_dancing4am_win-kernel-telemetry_cv5v1v2h
+
+Source Tree:
+
+```txt
+arc_dancing4am_win-kernel-telemetry_cv5v1v2h
+├── 01-hello-world
+│   ├── Driver.c
+│   ├── KmdfHelloWorld.inf
+│   ├── KmdfHelloWorld.slnx
+│   ├── KmdfHelloWorld.vcxproj
+│   └── KmdfHelloWorld.vcxproj.filters
+├── 02-process-monitor
+│   ├── 02-process-monitor.slnx
+│   ├── 02-process-monitor.vcxproj
+│   ├── 02-process-monitor.vcxproj.filters
+│   └── Driver.c
+├── 03-image-load-monitor
+│   ├── 03-image-load-monitor.inf
+│   ├── 03-image-load-monitor.slnx
+│   ├── 03-image-load-monitor.vcxproj
+│   ├── 03-image-load-monitor.vcxproj.filters
+│   └── Driver.c
+├── 04-process-protect
+│   ├── 04-process-protect.inf
+│   ├── 04-process-protect.slnx
+│   ├── 04-process-protect.vcxproj
+│   ├── 04-process-protect.vcxproj.filters
+│   ├── Driver.c
+│   ├── fakegame
+│   │   ├── fakegame.cpp
+│   │   ├── fakegame.slnx
+│   │   ├── fakegame.vcxproj
+│   │   └── fakegame.vcxproj.filters
+│   └── reader
+│       ├── reader.cpp
+│       ├── reader.slnx
+│       ├── reader.vcxproj
+│       └── reader.vcxproj.filters
+└── README.md
+
+```
+
+`01-hello-world/Driver.c`:
+
+```c
+#include <ntddk.h>
+#include <wdf.h>
+
+DRIVER_INITIALIZE DriverEntry;
+EVT_WDF_DRIVER_DEVICE_ADD KmdfHelloWorldEvtDeviceAdd;
+
+// Entry point: called once when the driver is loaded (like main()).
+NTSTATUS
+DriverEntry(_In_ PDRIVER_OBJECT DriverObject, _In_ PUNICODE_STRING RegistryPath) {
+    NTSTATUS status = STATUS_SUCCESS;
+    WDF_DRIVER_CONFIG config;
+
+    KdPrintEx((DPFLTR_IHVDRIVER_ID, DPFLTR_INFO_LEVEL, "KmdfHelloWorld: DriverEntry\n"));
+
+    // Register the EvtDeviceAdd callback
+    WDF_DRIVER_CONFIG_INIT(&config, KmdfHelloWorldEvtDeviceAdd);
+
+    // Create the framework driver object
+    status = WdfDriverCreate(
+        DriverObject, RegistryPath, WDF_NO_OBJECT_ATTRIBUTES, &config, WDF_NO_HANDLE);
+    return status;
+}
+
+// Callback: called by the system when it detects our (virtual) device.
+NTSTATUS
+KmdfHelloWorldEvtDeviceAdd(_In_ WDFDRIVER Driver, _Inout_ PWDFDEVICE_INIT DeviceInit) {
+    UNREFERENCED_PARAMETER(Driver);
+
+    NTSTATUS status;
+    WDFDEVICE hDevice;
+
+    KdPrintEx(
+        (DPFLTR_IHVDRIVER_ID, DPFLTR_INFO_LEVEL, "KmdfHelloWorld: KmdfHelloWorldEvtDeviceAdd\n"));
+
+    // Create the framework device object
+    status = WdfDeviceCreate(&DeviceInit, WDF_NO_OBJECT_ATTRIBUTES, &hDevice);
+    return status;
+}
+
+```
+
+`01-hello-world/KmdfHelloWorld.inf`:
+
+```inf
+;
+; KmdfHelloWorld.inf
+;
+
+[Version]
+Signature   = "$WINDOWS NT$"
+Class       = System ; TODO: specify appropriate Class
+ClassGuid   = {4d36e97d-e325-11ce-bfc1-08002be10318} ; TODO: specify appropriate ClassGuid
+Provider    = %ManufacturerName%
+CatalogFile = KmdfHelloWorld.cat
+DriverVer   = ; TODO: set DriverVer in stampinf property pages
+PnpLockdown = 1
+
+[DestinationDirs]
+DefaultDestDir = 13
+
+[SourceDisksNames]
+1 = %DiskName%,,,""
+
+[SourceDisksFiles]
+KmdfHelloWorld.sys = 1,,
+
+;*****************************************
+; Install Section
+;*****************************************
+
+[Manufacturer]
+%ManufacturerName% = Standard,NT$ARCH$.10.0...16299 ; %13% support introduced in build 16299
+
+[Standard.NT$ARCH$.10.0...16299]
+%KmdfHelloWorld.DeviceDesc% = KmdfHelloWorld_Device, Root\KmdfHelloWorld ; TODO: edit hw-id
+
+[KmdfHelloWorld_Device.NT]
+CopyFiles = File_Copy
+
+[File_Copy]
+KmdfHelloWorld.sys
+
+;-------------- Service installation
+[KmdfHelloWorld_Device.NT.Services]
+AddService = KmdfHelloWorld,%SPSVCINST_ASSOCSERVICE%, KmdfHelloWorld_Service_Inst
+
+; -------------- KmdfHelloWorld driver install sections
+[KmdfHelloWorld_Service_Inst]
+DisplayName    = %KmdfHelloWorld.SVCDESC%
+ServiceType    = 1               ; SERVICE_KERNEL_DRIVER
+StartType      = 3               ; SERVICE_DEMAND_START
+ErrorControl   = 1               ; SERVICE_ERROR_NORMAL
+ServiceBinary  = %13%\KmdfHelloWorld.sys
+
+[KmdfHelloWorld_Device.NT.Wdf]
+KmdfService = KmdfHelloWorld, KmdfHelloWorld_wdfsect
+
+[KmdfHelloWorld_wdfsect]
+KmdfLibraryVersion = $KMDFVERSION$
+
+[Strings]
+SPSVCINST_ASSOCSERVICE = 0x00000002
+ManufacturerName = "<Your manufacturer name>" ;TODO: Replace with your manufacturer name
+DiskName = "KmdfHelloWorld Installation Disk"
+KmdfHelloWorld.DeviceDesc = "KmdfHelloWorld Device"
+KmdfHelloWorld.SVCDESC = "KmdfHelloWorld Service"
+
+```
+
+`01-hello-world/KmdfHelloWorld.slnx`:
+
+```slnx
+<Solution>
+  <Configurations>
+    <Platform Name="ARM64" />
+    <Platform Name="x64" />
+  </Configurations>
+  <Project Path="KmdfHelloWorld.vcxproj">
+    <Deploy />
+  </Project>
+</Solution>
+
+```
+
+`01-hello-world/KmdfHelloWorld.vcxproj`:
+
+```vcxproj
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|ARM64">
+      <Configuration>Debug</Configuration>
+      <Platform>ARM64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|ARM64">
+      <Configuration>Release</Configuration>
+      <Platform>ARM64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{C88B3532-7CDF-C44C-150D-CB26F18F2608}</ProjectGuid>
+    <TemplateGuid>{1bc93793-694f-48fe-9372-81e2b05556fd}</TemplateGuid>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <MinimumVisualStudioVersion>12.0</MinimumVisualStudioVersion>
+    <Configuration>Debug</Configuration>
+    <Platform Condition="'$(Platform)' == ''">x64</Platform>
+    <RootNamespace>KmdfHelloWorld</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <TargetVersion>Windows10</TargetVersion>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>WindowsKernelModeDriver10.0</PlatformToolset>
+    <ConfigurationType>Driver</ConfigurationType>
+    <DriverType>KMDF</DriverType>
+    <DriverTargetPlatform>Universal</DriverTargetPlatform>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <TargetVersion>Windows10</TargetVersion>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>WindowsKernelModeDriver10.0</PlatformToolset>
+    <ConfigurationType>Driver</ConfigurationType>
+    <DriverType>KMDF</DriverType>
+    <DriverTargetPlatform>Universal</DriverTargetPlatform>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'" Label="Configuration">
+    <TargetVersion>Windows10</TargetVersion>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>WindowsKernelModeDriver10.0</PlatformToolset>
+    <ConfigurationType>Driver</ConfigurationType>
+    <DriverType>KMDF</DriverType>
+    <DriverTargetPlatform>Universal</DriverTargetPlatform>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'" Label="Configuration">
+    <TargetVersion>Windows10</TargetVersion>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>WindowsKernelModeDriver10.0</PlatformToolset>
+    <ConfigurationType>Driver</ConfigurationType>
+    <DriverType>KMDF</DriverType>
+    <DriverTargetPlatform>Universal</DriverTargetPlatform>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <DebuggerFlavor>DbgengKernelDebugger</DebuggerFlavor>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <DebuggerFlavor>DbgengKernelDebugger</DebuggerFlavor>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
+    <DebuggerFlavor>DbgengKernelDebugger</DebuggerFlavor>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
+    <DebuggerFlavor>DbgengKernelDebugger</DebuggerFlavor>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <DriverSign>
+      <FileDigestAlgorithm>sha256</FileDigestAlgorithm>
+    </DriverSign>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <DriverSign>
+      <FileDigestAlgorithm>sha256</FileDigestAlgorithm>
+    </DriverSign>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
+    <DriverSign>
+      <FileDigestAlgorithm>sha256</FileDigestAlgorithm>
+    </DriverSign>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
+    <DriverSign>
+      <FileDigestAlgorithm>sha256</FileDigestAlgorithm>
+    </DriverSign>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <Inf Include="KmdfHelloWorld.inf" />
+  </ItemGroup>
+  <ItemGroup>
+    <FilesToPackage Include="$(TargetPath)" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Driver.c" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
+```
+
+`01-hello-world/KmdfHelloWorld.vcxproj.filters`:
+
+```filters
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Driver Files">
+      <UniqueIdentifier>{8E41214B-6785-4CFE-B992-037D68949A14}</UniqueIdentifier>
+      <Extensions>inf;inv;inx;mof;mc;</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <Inf Include="KmdfHelloWorld.inf">
+      <Filter>Driver Files</Filter>
+    </Inf>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Driver.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
+```
+
+`02-process-monitor/02-process-monitor.slnx`:
+
+```slnx
+<Solution>
+  <Configurations>
+    <Platform Name="ARM64" />
+    <Platform Name="x64" />
+  </Configurations>
+  <Project Path="02-process-monitor.vcxproj">
+    <Deploy />
+  </Project>
+</Solution>
+
+```
+
+`02-process-monitor/02-process-monitor.vcxproj`:
+
+```vcxproj
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|ARM64">
+      <Configuration>Debug</Configuration>
+      <Platform>ARM64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|ARM64">
+      <Configuration>Release</Configuration>
+      <Platform>ARM64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{1A80B2BA-F275-26F8-9BC6-B10C718F1E70}</ProjectGuid>
+    <TemplateGuid>{dd38f7fc-d7bd-488b-9242-7d8754cde80d}</TemplateGuid>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <MinimumVisualStudioVersion>12.0</MinimumVisualStudioVersion>
+    <Configuration>Debug</Configuration>
+    <Platform Condition="'$(Platform)' == ''">x64</Platform>
+    <RootNamespace>_02_process_monitor</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <TargetVersion>Windows10</TargetVersion>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>WindowsKernelModeDriver10.0</PlatformToolset>
+    <ConfigurationType>Driver</ConfigurationType>
+    <DriverType>WDM</DriverType>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <TargetVersion>Windows10</TargetVersion>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>WindowsKernelModeDriver10.0</PlatformToolset>
+    <ConfigurationType>Driver</ConfigurationType>
+    <DriverType>WDM</DriverType>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'" Label="Configuration">
+    <TargetVersion>Windows10</TargetVersion>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>WindowsKernelModeDriver10.0</PlatformToolset>
+    <ConfigurationType>Driver</ConfigurationType>
+    <DriverType>WDM</DriverType>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'" Label="Configuration">
+    <TargetVersion>Windows10</TargetVersion>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>WindowsKernelModeDriver10.0</PlatformToolset>
+    <ConfigurationType>Driver</ConfigurationType>
+    <DriverType>WDM</DriverType>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <DebuggerFlavor>DbgengKernelDebugger</DebuggerFlavor>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <DebuggerFlavor>DbgengKernelDebugger</DebuggerFlavor>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
+    <DebuggerFlavor>DbgengKernelDebugger</DebuggerFlavor>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
+    <DebuggerFlavor>DbgengKernelDebugger</DebuggerFlavor>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <DriverSign>
+      <FileDigestAlgorithm>sha256</FileDigestAlgorithm>
+    </DriverSign>
+    <Link>
+      <AdditionalOptions>/INTEGRITYCHECK %(AdditionalOptions)</AdditionalOptions>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <DriverSign>
+      <FileDigestAlgorithm>sha256</FileDigestAlgorithm>
+    </DriverSign>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <FilesToPackage Include="$(TargetPath)" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Driver.c" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
+```
+
+`02-process-monitor/02-process-monitor.vcxproj.filters`:
+
+```filters
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Driver Files">
+      <UniqueIdentifier>{8E41214B-6785-4CFE-B992-037D68949A14}</UniqueIdentifier>
+      <Extensions>inf;inv;inx;mof;mc;</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Driver.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
+```
+
+`02-process-monitor/Driver.c`:
+
+```c
+#include <ntddk.h>
+
+// Forward declarations
+DRIVER_INITIALIZE DriverEntry;
+DRIVER_UNLOAD ProcMonUnload;
+
+// Our process-notify callback.
+// Called by the kernel every time a process is created or exits.
+VOID ProcMonCreateProcessNotify(
+    _Inout_ PEPROCESS Process,
+    _In_ HANDLE ProcessId,
+    _Inout_opt_ PPS_CREATE_NOTIFY_INFO CreateInfo) {
+    UNREFERENCED_PARAMETER(Process);
+
+    if(CreateInfo != NULL) {
+        // A process is STARTING.
+        // CreateInfo->ImageFileName is a UNICODE_STRING (may be NULL).
+        if(CreateInfo->ImageFileName != NULL) {
+            KdPrintEx(
+                (DPFLTR_IHVDRIVER_ID,
+                 DPFLTR_INFO_LEVEL,
+                 "ProcMon: START pid=%llu ppid=%llu  %wZ\n",    // w is wide(unicode), Z is UNICODE_STRING
+                 (ULONG64)(ULONG_PTR)ProcessId,
+                 (ULONG64)(ULONG_PTR)CreateInfo->ParentProcessId,
+                 CreateInfo->ImageFileName));
+        } else {
+            KdPrintEx(
+                (DPFLTR_IHVDRIVER_ID,
+                 DPFLTR_INFO_LEVEL,
+                 "ProcMon: START pid=%llu ppid=%llu  (no image name)\n",
+                 (ULONG64)(ULONG_PTR)ProcessId,
+                 (ULONG64)(ULONG_PTR)CreateInfo->ParentProcessId));
+        }
+    } else {
+        // A process is EXITING.
+        KdPrintEx(
+            (DPFLTR_IHVDRIVER_ID,
+             DPFLTR_INFO_LEVEL,
+             "ProcMon: EXIT  pid=%llu\n",
+             (ULONG64)(ULONG_PTR)ProcessId));
+    }
+}
+
+// Called when the driver loads.
+NTSTATUS
+DriverEntry(_In_ PDRIVER_OBJECT DriverObject, _In_ PUNICODE_STRING RegistryPath) {
+    UNREFERENCED_PARAMETER(RegistryPath);
+    NTSTATUS status;
+
+    KdPrintEx((DPFLTR_IHVDRIVER_ID, DPFLTR_INFO_LEVEL, "ProcMon: DriverEntry\n"));
+
+    // Register the cleanup routine so the driver can be unloaded by sc stop.
+    DriverObject->DriverUnload = ProcMonUnload;
+
+    // Register our callback for process create/exit events.
+    status = PsSetCreateProcessNotifyRoutineEx(ProcMonCreateProcessNotify, FALSE);  // FALSE means register
+    if(!NT_SUCCESS(status)) {
+        KdPrintEx(
+            (DPFLTR_IHVDRIVER_ID, DPFLTR_INFO_LEVEL, "ProcMon: register failed 0x%08X\n", status));
+        return status;
+    }
+
+    return STATUS_SUCCESS;
+}
+
+// Called when the driver unloads (sc stop / sc delete).
+VOID ProcMonUnload(_In_ PDRIVER_OBJECT DriverObject) {
+    UNREFERENCED_PARAMETER(DriverObject);
+
+    // Remove our callback. The TRUE means "remove".
+    // Without this, the kernel would still call us after we're gone -> BSOD.
+    PsSetCreateProcessNotifyRoutineEx(ProcMonCreateProcessNotify, TRUE);    // TRUE mean unregister
+
+    KdPrintEx((DPFLTR_IHVDRIVER_ID, DPFLTR_INFO_LEVEL, "ProcMon: Unload\n"));
+}
+
+```
+
+`03-image-load-monitor/03-image-load-monitor.inf`:
+
+```inf
+;
+; 03-image-load-monitor.inf
+;
+; Primitive driver: no device, loaded as a service (sc create / sc start).
+;
+
+[Version]
+Signature="$WINDOWS NT$"
+Class=System
+ClassGuid={4d36e97d-e325-11ce-bfc1-08002be10318}
+Provider=%ManufacturerName%
+DriverVer=
+CatalogFile=03-image-load-monitor.cat
+PnpLockdown=1
+
+[DestinationDirs]
+DefaultDestDir = 13
+
+[SourceDisksNames]
+1 = %DiskName%,,,""
+
+[SourceDisksFiles]
+03-image-load-monitor.sys = 1
+
+[DefaultInstall.NT$ARCH$]
+CopyFiles = DriverCopyFiles
+
+[DriverCopyFiles]
+03-image-load-monitor.sys
+
+[DefaultInstall.NT$ARCH$.Services]
+AddService = ImageMon,0x2,ServiceInstall
+
+[ServiceInstall]
+DisplayName   = %ServiceName%
+ServiceType   = 1
+StartType     = 3
+ErrorControl  = 1
+ServiceBinary = %13%\03-image-load-monitor.sys
+
+[Strings]
+ManufacturerName = "win-kernel-telemetry"
+ServiceName      = "ImageMon image-load monitor"
+DiskName         = "03-image-load-monitor Source Disk"
+
+```
+
+`03-image-load-monitor/03-image-load-monitor.slnx`:
+
+```slnx
+<Solution>
+  <Configurations>
+    <Platform Name="ARM64" />
+    <Platform Name="x64" />
+  </Configurations>
+  <Project Path="03-image-load-monitor.vcxproj">
+    <Deploy />
+  </Project>
+</Solution>
+
+```
+
+`03-image-load-monitor/03-image-load-monitor.vcxproj`:
+
+```vcxproj
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|ARM64">
+      <Configuration>Debug</Configuration>
+      <Platform>ARM64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|ARM64">
+      <Configuration>Release</Configuration>
+      <Platform>ARM64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{92B68A9C-99D2-E63D-DFE7-B9E10DC8AD71}</ProjectGuid>
+    <TemplateGuid>{dd38f7fc-d7bd-488b-9242-7d8754cde80d}</TemplateGuid>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <MinimumVisualStudioVersion>12.0</MinimumVisualStudioVersion>
+    <Configuration>Debug</Configuration>
+    <Platform Condition="'$(Platform)' == ''">x64</Platform>
+    <RootNamespace>_03_image_load_monitor</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <TargetVersion>Windows10</TargetVersion>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>WindowsKernelModeDriver10.0</PlatformToolset>
+    <ConfigurationType>Driver</ConfigurationType>
+    <DriverType>WDM</DriverType>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <TargetVersion>Windows10</TargetVersion>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>WindowsKernelModeDriver10.0</PlatformToolset>
+    <ConfigurationType>Driver</ConfigurationType>
+    <DriverType>WDM</DriverType>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'" Label="Configuration">
+    <TargetVersion>Windows10</TargetVersion>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>WindowsKernelModeDriver10.0</PlatformToolset>
+    <ConfigurationType>Driver</ConfigurationType>
+    <DriverType>WDM</DriverType>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'" Label="Configuration">
+    <TargetVersion>Windows10</TargetVersion>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>WindowsKernelModeDriver10.0</PlatformToolset>
+    <ConfigurationType>Driver</ConfigurationType>
+    <DriverType>WDM</DriverType>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <DebuggerFlavor>DbgengKernelDebugger</DebuggerFlavor>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <DebuggerFlavor>DbgengKernelDebugger</DebuggerFlavor>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
+    <DebuggerFlavor>DbgengKernelDebugger</DebuggerFlavor>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
+    <DebuggerFlavor>DbgengKernelDebugger</DebuggerFlavor>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <DriverSign>
+      <FileDigestAlgorithm>sha256</FileDigestAlgorithm>
+    </DriverSign>
+    <Link>
+      <AdditionalOptions>/INTEGRITYCHECK %(AdditionalOptions)</AdditionalOptions>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <DriverSign>
+      <FileDigestAlgorithm>sha256</FileDigestAlgorithm>
+    </DriverSign>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <Inf Include="03-image-load-monitor.inf" />
+  </ItemGroup>
+  <ItemGroup>
+    <FilesToPackage Include="$(TargetPath)" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Driver.c" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
+```
+
+`03-image-load-monitor/03-image-load-monitor.vcxproj.filters`:
+
+```filters
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Driver Files">
+      <UniqueIdentifier>{8E41214B-6785-4CFE-B992-037D68949A14}</UniqueIdentifier>
+      <Extensions>inf;inv;inx;mof;mc;</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <Inf Include="03-image-load-monitor.inf">
+      <Filter>Driver Files</Filter>
+    </Inf>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Driver.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
+```
+
+`03-image-load-monitor/Driver.c`:
+
+```c
+#include <ntddk.h>
+
+// Forward declarations
+DRIVER_INITIALIZE DriverEntry;
+DRIVER_UNLOAD ImageMonUnload;
+
+// Case-insensitive check: does 'str' contain 'sub'?
+// Simple scan — fine for the short paths we deal with here.
+static BOOLEAN UnicodeContains(_In_ PCUNICODE_STRING str, _In_ PCWSTR sub) {
+    if(str == NULL || str->Buffer == NULL) {
+        return FALSE;
+    }
+
+    UNICODE_STRING subStr;
+    RtlInitUnicodeString(&subStr, sub);
+
+    USHORT strChars = str->Length / sizeof(WCHAR);
+    USHORT subChars = subStr.Length / sizeof(WCHAR);
+
+    if(subChars == 0 || subChars > strChars) {
+        return FALSE;
+    }
+
+    for(USHORT i = 0; i + subChars <= strChars; i++) {
+        UNICODE_STRING window;
+        window.Buffer = &str->Buffer[i];
+        window.Length = subStr.Length;
+        window.MaximumLength = subStr.Length;
+
+        // TRUE = case-insensitive
+        if(RtlEqualUnicodeString(&window, &subStr, TRUE)) {
+            return TRUE;
+        }
+    }
+    return FALSE;
+}
+
+// Our image-load callback.
+VOID ImageMonLoadImageNotify(
+    _In_opt_ PUNICODE_STRING FullImageName,
+    _In_ HANDLE ProcessId,
+    _In_ PIMAGE_INFO ImageInfo) {
+    BOOLEAN isKernel = (ImageInfo->SystemModeImage != 0);
+
+    // An image counts as "trusted location" if it loads from one of the
+    // normal install roots. NOTE: this is a path heuristic only. Real EDR
+    // checks the digital signature instead, because any of these folders
+    // could in principle hold a malicious file. (-> future: signature check)
+    BOOLEAN trustedPath = UnicodeContains(FullImageName, L"\\Windows\\") ||
+                          UnicodeContains(FullImageName, L"\\Program Files\\") ||
+                          UnicodeContains(FullImageName, L"\\Program Files (x86)\\") ||
+                          UnicodeContains(FullImageName, L"\\ProgramData\\");
+
+    // Log only images loaded from OUTSIDE those trusted locations.
+    // Applies to both kernel and user images.
+    if(trustedPath) {
+        return;
+    }
+
+    PCSTR kind = isKernel ? "KERNEL" : "user ";
+
+    if(FullImageName != NULL) {
+        KdPrintEx(
+            (DPFLTR_IHVDRIVER_ID,
+             DPFLTR_INFO_LEVEL,
+             "ImageMon: [%s] pid=%llu  %wZ\n",
+             kind,
+             (ULONG64)(ULONG_PTR)ProcessId,
+             FullImageName));
+    } else {
+        KdPrintEx(
+            (DPFLTR_IHVDRIVER_ID,
+             DPFLTR_INFO_LEVEL,
+             "ImageMon: [%s] pid=%llu  (no name)\n",
+             kind,
+             (ULONG64)(ULONG_PTR)ProcessId));
+    }
+}
+
+// Called when the driver loads.
+NTSTATUS
+DriverEntry(_In_ PDRIVER_OBJECT DriverObject, _In_ PUNICODE_STRING RegistryPath) {
+    UNREFERENCED_PARAMETER(RegistryPath);
+    NTSTATUS status;
+
+    KdPrintEx((DPFLTR_IHVDRIVER_ID, DPFLTR_INFO_LEVEL, "ImageMon: DriverEntry\n"));
+
+    DriverObject->DriverUnload = ImageMonUnload;
+
+    // Register our callback for image-load events.
+    status = PsSetLoadImageNotifyRoutine(ImageMonLoadImageNotify);
+    if(!NT_SUCCESS(status)) {
+        KdPrintEx((
+            DPFLTR_IHVDRIVER_ID, DPFLTR_INFO_LEVEL, "ImageMon: register failed 0x%08X\n", status));
+        return status;
+    }
+
+    return STATUS_SUCCESS;
+}
+
+// Called when the driver unloads (sc stop / sc delete).
+VOID ImageMonUnload(_In_ PDRIVER_OBJECT DriverObject) {
+    UNREFERENCED_PARAMETER(DriverObject);
+
+    // Remove our callback. Without this, the kernel would still call us
+    // after we're gone -> BSOD.
+    PsRemoveLoadImageNotifyRoutine(ImageMonLoadImageNotify);
+
+    KdPrintEx((DPFLTR_IHVDRIVER_ID, DPFLTR_INFO_LEVEL, "ImageMon: Unload\n"));
+}
+
+```
+
+`04-process-protect/04-process-protect.inf`:
+
+```inf
+;
+; 04-process-protect.inf
+;
+; Primitive driver: no device, loaded as a service (sc create / sc start).
+;
+
+[Version]
+Signature   = "$WINDOWS NT$"
+Class       = System
+ClassGuid   = {4d36e97d-e325-11ce-bfc1-08002be10318}
+Provider    = %ManufacturerName%
+DriverVer   =
+CatalogFile = 04-process-protect.cat
+PnpLockdown = 1
+
+[DestinationDirs]
+DefaultDestDir = 13
+
+[SourceDisksNames]
+1 = %DiskName%,,,""
+
+[SourceDisksFiles]
+04-process-protect.sys = 1
+
+[DefaultInstall.NT$ARCH$]
+CopyFiles = DriverCopyFiles
+
+[DriverCopyFiles]
+04-process-protect.sys
+
+[DefaultInstall.NT$ARCH$.Services]
+AddService = ProcProtect,0x2,ServiceInstall
+
+[ServiceInstall]
+DisplayName   = %ServiceName%
+ServiceType   = 1
+StartType     = 3
+ErrorControl  = 1
+ServiceBinary = %13%\04-process-protect.sys
+
+[Strings]
+ManufacturerName = "win-kernel-telemetry"
+ServiceName      = "ProcProtect process protection"
+DiskName         = "04-process-protect Source Disk"
+
+```
+
+`04-process-protect/04-process-protect.slnx`:
+
+```slnx
+<Solution>
+  <Configurations>
+    <Platform Name="ARM64" />
+    <Platform Name="x64" />
+  </Configurations>
+  <Project Path="04-process-protect.vcxproj">
+    <Deploy />
+  </Project>
+</Solution>
+
+```
+
+`04-process-protect/04-process-protect.vcxproj`:
+
+```vcxproj
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|ARM64">
+      <Configuration>Debug</Configuration>
+      <Platform>ARM64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|ARM64">
+      <Configuration>Release</Configuration>
+      <Platform>ARM64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{560A7169-F5F9-75D1-AD93-812E692CEDEC}</ProjectGuid>
+    <TemplateGuid>{dd38f7fc-d7bd-488b-9242-7d8754cde80d}</TemplateGuid>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <MinimumVisualStudioVersion>12.0</MinimumVisualStudioVersion>
+    <Configuration>Debug</Configuration>
+    <Platform Condition="'$(Platform)' == ''">x64</Platform>
+    <RootNamespace>_04_process_protect</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <TargetVersion>Windows10</TargetVersion>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>WindowsKernelModeDriver10.0</PlatformToolset>
+    <ConfigurationType>Driver</ConfigurationType>
+    <DriverType>WDM</DriverType>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <TargetVersion>Windows10</TargetVersion>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>WindowsKernelModeDriver10.0</PlatformToolset>
+    <ConfigurationType>Driver</ConfigurationType>
+    <DriverType>WDM</DriverType>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'" Label="Configuration">
+    <TargetVersion>Windows10</TargetVersion>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>WindowsKernelModeDriver10.0</PlatformToolset>
+    <ConfigurationType>Driver</ConfigurationType>
+    <DriverType>WDM</DriverType>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'" Label="Configuration">
+    <TargetVersion>Windows10</TargetVersion>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>WindowsKernelModeDriver10.0</PlatformToolset>
+    <ConfigurationType>Driver</ConfigurationType>
+    <DriverType>WDM</DriverType>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <DebuggerFlavor>DbgengKernelDebugger</DebuggerFlavor>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <DebuggerFlavor>DbgengKernelDebugger</DebuggerFlavor>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
+    <DebuggerFlavor>DbgengKernelDebugger</DebuggerFlavor>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
+    <DebuggerFlavor>DbgengKernelDebugger</DebuggerFlavor>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <DriverSign>
+      <FileDigestAlgorithm>sha256</FileDigestAlgorithm>
+    </DriverSign>
+    <Link>
+      <AdditionalOptions>/INTEGRITYCHECK %(AdditionalOptions)</AdditionalOptions>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <DriverSign>
+      <FileDigestAlgorithm>sha256</FileDigestAlgorithm>
+    </DriverSign>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <Inf Include="04-process-protect.inf" />
+  </ItemGroup>
+  <ItemGroup>
+    <FilesToPackage Include="$(TargetPath)" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Driver.c" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
+```
+
+`04-process-protect/04-process-protect.vcxproj.filters`:
+
+```filters
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Driver Files">
+      <UniqueIdentifier>{8E41214B-6785-4CFE-B992-037D68949A14}</UniqueIdentifier>
+      <Extensions>inf;inv;inx;mof;mc;</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <Inf Include="04-process-protect.inf">
+      <Filter>Driver Files</Filter>
+    </Inf>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Driver.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
+```
+
+`04-process-protect/Driver.c`:
+
+```c
+#include <ntifs.h>
+#include <ntddk.h>
+
+#ifndef PROCESS_TERMINATE
+#define PROCESS_TERMINATE    0x0001
+#define PROCESS_VM_OPERATION 0x0008
+#define PROCESS_VM_READ      0x0010
+#define PROCESS_VM_WRITE     0x0020
+#endif
+
+//
+// 04-process-protect : anti-cheat style process protection (LEARNING / VM ONLY)
+//
+// Shows how anti-cheat (and EDR) use ObRegisterCallbacks to trim the access
+// another process receives when it opens a handle to a protected process.
+// The "protected game" here is simply notepad.exe so it is easy to test in an
+// isolated VM. This only trims handle rights (the documented Microsoft
+// technique); it does not hide the process or block inspection.
+//
+
+// Process we treat as "the game" (tail match on the image path, case-insensitive).
+#define PROTECTED_IMAGE_NAME L"fakegame.exe"
+
+// Memory-access rights removed from a handle opened against the protected
+// process: these are what an external tool would need to read or write its
+// memory. VM_OPERATION and TERMINATE are left intact so the OS can still
+// create and manage the process normally.
+#define DENIED_PROCESS_RIGHTS \
+    (PROCESS_VM_READ | PROCESS_VM_WRITE)
+
+static PVOID g_ObHandle = NULL; // registration handle, for unregister on unload
+
+DRIVER_INITIALIZE DriverEntry;
+DRIVER_UNLOAD ProcProtectUnload;
+
+// TRUE if 'fullPath' ends with PROTECTED_IMAGE_NAME.
+static BOOLEAN IsProtectedImage(_In_ PCUNICODE_STRING fullPath) {
+    if(fullPath == NULL || fullPath->Buffer == NULL) {
+        return FALSE;
+    }
+
+    UNICODE_STRING target;
+    RtlInitUnicodeString(&target, PROTECTED_IMAGE_NAME);
+
+    USHORT pathChars = fullPath->Length / sizeof(WCHAR);
+    USHORT targetChars = target.Length / sizeof(WCHAR);
+    if(targetChars == 0 || targetChars > pathChars) {
+        return FALSE;
+    }
+
+    UNICODE_STRING tail;
+    tail.Buffer = &fullPath->Buffer[pathChars - targetChars];
+    tail.Length = target.Length;
+    tail.MaximumLength = target.Length;
+
+    return RtlEqualUnicodeString(&tail, &target, TRUE); // TRUE = case-insensitive
+}
+
+// Is 'Process' our protected "game"?
+static BOOLEAN IsProtectedProcess(_In_ PEPROCESS Process) {
+    PUNICODE_STRING fullName = NULL;
+    if(!NT_SUCCESS(SeLocateProcessImageName(Process, &fullName)) || fullName == NULL) {
+        return FALSE;
+    }
+
+    BOOLEAN match = IsProtectedImage(fullName);
+    ExFreePool(fullName); // SeLocateProcessImageName allocates; we free it
+    return match;
+}
+
+// Pre-operation callback: runs before a handle to a process is created or
+// duplicated. We may lower the requested access here.
+OB_PREOP_CALLBACK_STATUS
+ProcProtectPreOp(_In_ PVOID RegistrationContext, _Inout_ POB_PRE_OPERATION_INFORMATION Info) {
+    UNREFERENCED_PARAMETER(RegistrationContext);
+
+    // Leave kernel-originated handle operations alone.
+    if(Info->KernelHandle) {
+        return OB_PREOP_SUCCESS;
+    }
+
+    PEPROCESS target = (PEPROCESS)Info->Object;
+
+    // Never interfere with a process opening a handle to itself.
+    if(target == PsGetCurrentProcess()) {
+        return OB_PREOP_SUCCESS;
+    }
+
+    if(!IsProtectedProcess(target)) {
+        return OB_PREOP_SUCCESS; // not the game — allow as-is
+    }
+
+    // Strip the dangerous rights from the requested/desired access.
+    if(Info->Operation == OB_OPERATION_HANDLE_CREATE) {
+        Info->Parameters->CreateHandleInformation.DesiredAccess &= ~DENIED_PROCESS_RIGHTS;
+    } else if(Info->Operation == OB_OPERATION_HANDLE_DUPLICATE) {
+        Info->Parameters->DuplicateHandleInformation.DesiredAccess &= ~DENIED_PROCESS_RIGHTS;
+    }
+
+    KdPrintEx(
+        (DPFLTR_IHVDRIVER_ID,
+         DPFLTR_INFO_LEVEL,
+         "ProcProtect: trimmed access to protected process (opener pid=%llu)\n",
+         (ULONG64)(ULONG_PTR)PsGetCurrentProcessId()));
+
+    return OB_PREOP_SUCCESS;
+}
+
+NTSTATUS
+DriverEntry(_In_ PDRIVER_OBJECT DriverObject, _In_ PUNICODE_STRING RegistryPath) {
+    UNREFERENCED_PARAMETER(RegistryPath);
+    NTSTATUS status;
+
+    KdPrintEx((DPFLTR_IHVDRIVER_ID, DPFLTR_INFO_LEVEL, "ProcProtect: DriverEntry\n"));
+
+    DriverObject->DriverUnload = ProcProtectUnload;
+
+    // Describe one operation registration: watch process-handle create/dup.
+    OB_OPERATION_REGISTRATION opReg;
+    RtlZeroMemory(&opReg, sizeof(opReg));
+    opReg.ObjectType = PsProcessType;
+    opReg.Operations = OB_OPERATION_HANDLE_CREATE | OB_OPERATION_HANDLE_DUPLICATE;
+    opReg.PreOperation = ProcProtectPreOp;
+    opReg.PostOperation = NULL;
+
+    OB_CALLBACK_REGISTRATION cbReg;
+    RtlZeroMemory(&cbReg, sizeof(cbReg));
+    cbReg.Version = OB_FLT_REGISTRATION_VERSION;
+    cbReg.OperationRegistrationCount = 1;
+    // Altitude: an ordering string required by the OB callback system.
+    RtlInitUnicodeString(&cbReg.Altitude, L"320000");
+    cbReg.RegistrationContext = NULL;
+    cbReg.OperationRegistration = &opReg;
+
+    status = ObRegisterCallbacks(&cbReg, &g_ObHandle);
+    if(!NT_SUCCESS(status)) {
+        KdPrintEx(
+            (DPFLTR_IHVDRIVER_ID,
+             DPFLTR_INFO_LEVEL,
+             "ProcProtect: ObRegisterCallbacks failed 0x%08X\n",
+             status));
+        return status;
+    }
+
+    return STATUS_SUCCESS;
+}
+
+VOID ProcProtectUnload(_In_ PDRIVER_OBJECT DriverObject) {
+    UNREFERENCED_PARAMETER(DriverObject);
+
+    if(g_ObHandle != NULL) {
+        ObUnRegisterCallbacks(g_ObHandle); // must unregister, or BSOD later
+        g_ObHandle = NULL;
+    }
+
+    KdPrintEx((DPFLTR_IHVDRIVER_ID, DPFLTR_INFO_LEVEL, "ProcProtect: Unload\n"));
+}
+
+```
+
+`04-process-protect/fakegame/fakegame.cpp`:
+
+```cpp
+// fakegame.c  —  stands in for a protected game process.
+// Holds a "secret" value in memory and prints its PID and address,
+// then waits so another process can try to read it.
+
+#include <windows.h>
+#include <stdio.h>
+
+int main(void) {
+    // The value a cheat would want to read (e.g. health, coordinates).
+    volatile int secret = 1337;
+
+    printf("fakegame running\n");
+    printf("  PID     : %lu\n", GetCurrentProcessId());
+    printf("  &secret : %p\n", (void*)&secret);
+    printf("  secret  : %d\n", secret);
+    printf("\nLeave this running, then use reader.exe with the PID and address.\n");
+
+    // Keep the process (and 'secret') alive.
+    while(1) {
+        Sleep(1000);
+    }
+    return 0;
+}
+
+```
+
+`04-process-protect/fakegame/fakegame.slnx`:
+
+```slnx
+<Solution>
+  <Configurations>
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Project Path="fakegame.vcxproj" />
+</Solution>
+
+```
+
+`04-process-protect/fakegame/fakegame.vcxproj`:
+
+```vcxproj
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>18.0</VCProjectVersion>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectGuid>{6ae07588-6280-4ac5-b270-a8dac33824d4}</ProjectGuid>
+    <RootNamespace>fakegame</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v145</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v145</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v145</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v145</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <Manifest>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
+    </Manifest>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <Manifest>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
+    </Manifest>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <Manifest>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
+    </Manifest>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <Manifest>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
+    </Manifest>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="fakegame.cpp" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
+```
+
+`04-process-protect/fakegame/fakegame.vcxproj.filters`:
+
+```filters
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="fakegame.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
+```
+
+`04-process-protect/reader/reader.cpp`:
+
+```cpp
+// reader.c  —  stands in for an external cheat.
+// Prompts for a PID and address, then tries to read that process's memory.
+
+#include <windows.h>
+#include <stdio.h>
+
+int main(void) {
+    DWORD pid = 0;
+    unsigned long long addrVal = 0;
+
+    printf("=== reader (external memory reader) ===\n");
+    printf("target PID: ");
+    if(scanf_s("%lu", &pid) != 1) {
+        printf("bad PID input\n");
+        printf("\nPress Enter to exit...");
+        getchar();
+        getchar();
+        return 1;
+    }
+
+    printf("target address (hex, e.g. 7ff6abcd1234): ");
+    if(scanf_s("%llx", &addrVal) != 1) {
+        printf("bad address input\n");
+        printf("\nPress Enter to exit...");
+        getchar();
+        getchar();
+        return 1;
+    }
+
+    void* addr = (void*)addrVal;
+
+    // Ask for the memory-read right — this is what the driver strips.
+    HANDLE h = OpenProcess(PROCESS_VM_READ, FALSE, pid);
+    if(h == NULL) {
+        printf("OpenProcess failed: %lu\n", GetLastError());
+        printf("\nPress Enter to exit...");
+        getchar();
+        getchar();
+        return 1;
+    }
+    printf("OpenProcess OK (handle=%p)\n", h);
+
+    int value = 0;
+    SIZE_T bytesRead = 0;
+    BOOL ok = ReadProcessMemory(h, addr, &value, sizeof(value), &bytesRead);
+    if(ok) {
+        printf("ReadProcessMemory OK: value = %d\n", value);
+    } else {
+        printf(
+            "ReadProcessMemory FAILED: %lu  (this is what we want when protected)\n",
+            GetLastError());
+    }
+
+    CloseHandle(h);
+
+    printf("\nPress Enter to exit...");
+    getchar();
+    getchar();
+    return 0;
+}
+
+```
+
+`04-process-protect/reader/reader.slnx`:
+
+```slnx
+<Solution>
+  <Configurations>
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Project Path="reader.vcxproj" />
+</Solution>
+
+```
+
+`04-process-protect/reader/reader.vcxproj`:
+
+```vcxproj
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>18.0</VCProjectVersion>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectGuid>{2d44e7bc-1275-4717-bb8a-458a83759414}</ProjectGuid>
+    <RootNamespace>reader</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v145</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v145</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v145</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v145</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <Manifest>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
+    </Manifest>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <Manifest>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
+    </Manifest>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <Manifest>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
+    </Manifest>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <Manifest>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
+    </Manifest>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="reader.cpp" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
+```
+
+`04-process-protect/reader/reader.vcxproj.filters`:
+
+```filters
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="reader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
+```
+
+`README.md`:
+
+```md
+# win-kernel-telemetry
+
+Hands-on Windows kernel driver lab: KMDF/WDM drivers exploring the primitives
+behind endpoint detection (EDR) and anti-cheat — process and image-load
+monitoring, and process protection.
+
+Each driver is small, commented, and built to be understood rather than
+shipped. Everything runs in an isolated VM with test signing enabled; nothing
+here is meant to run on a production machine.
+
+## Drivers
+
+| # | Driver | What it does | Technique |
+|---|--------|--------------|-----------|
+| 01 | `01-hello-world` | Minimal KMDF driver that logs `DriverEntry` and `EvtDeviceAdd` | KMDF skeleton, PnP load via a root-enumerated device |
+| 02 | `02-process-monitor` | Logs every process create/exit, with PID, parent PID, and image path | WDM, `PsSetCreateProcessNotifyRoutineEx` |
+| 03 | `03-image-load-monitor` | Logs DLL/driver image loads, filtered to images loaded from outside trusted install roots | WDM, `PsSetLoadImageNotifyRoutine` |
+| 04 | `04-process-protect` | Blocks other processes from reading/writing a protected process's memory (anti-cheat style), with a fakegame/reader test harness | WDM, `ObRegisterCallbacks` |
+
+## What each driver teaches
+
+### 01 — hello world
+The KMDF skeleton: `DriverEntry`, an `EvtDeviceAdd` callback, and a
+root-enumerated fake device so Plug-and-Play loads the driver. Installed with
+`devcon`.
+
+### 02 — process monitor
+A software-only driver (no device), so it is pure WDM and loaded as a service
+with `sc create` / `sc start` rather than through PnP. Registers a
+process-create callback and logs each start/exit with its PID, parent PID, and
+image path — the parent/child relationship is a core EDR signal (e.g. Word
+spawning PowerShell).
+
+Key gotcha: `PsSetCreateProcessNotifyRoutineEx` requires the driver to be
+linked with `/INTEGRITYCHECK`. Without it, registration fails at load with
+`STATUS_ACCESS_DENIED` (0xC0000022), which surfaces as "Access is denied" from
+`sc start`.
+
+### 03 — image-load monitor
+Same WDM service pattern, registering an image-load callback instead. Every DLL,
+driver, or EXE mapped into any process fires the callback — a firehose, since
+one app loads dozens of DLLs.
+
+To stay useful (and to keep the debugged VM responsive), it filters: images are
+logged only when loaded from outside the normal install roots (`\Windows\`,
+`\Program Files\`, `\Program Files (x86)\`, `\ProgramData\`). This mirrors the
+EDR principle of *normal is quiet, suspicious is loud* — a DLL loading from a
+user's AppData or Temp folder is exactly what you want to see. It is a path
+heuristic, not a trust decision; production EDR checks the image's digital
+signature instead (see Roadmap).
+
+### 04 — process protect
+Where 01–03 observe, this one intervenes. Using `ObRegisterCallbacks`, it runs a
+pre-operation callback before any handle to a process is created, and for the
+protected "game" process it strips `PROCESS_VM_READ` / `PROCESS_VM_WRITE` from
+the requested access. The opener still gets a handle, but the later
+`ReadProcessMemory` fails with access denied. This is the anti-cheat side of the
+same coin as 03: instead of watching the whole system, it protects one process
+from external memory reads — the main defense against external cheats.
+
+Scope choices that matter:
+- Only `VM_READ` / `VM_WRITE` are stripped. Stripping `VM_OPERATION` /
+  `TERMINATE` as well broke normal OS process management (a modern UWP Notepad
+  wouldn't even launch). Trimming just the memory-access rights blocks cheats
+  while leaving the OS able to create and manage the process.
+- The protected target is a plain console exe (`fakegame`), not a UWP app, so
+  the behaviour is clean and testable.
+
+Test harness (`test/fakegame`, `test/reader`):
+- `fakegame` holds a secret value and prints its PID and the value's address.
+- `reader` opens that PID and tries to `ReadProcessMemory` the address.
+- Without the driver: reader reads the value (1337). With the driver loaded:
+  `OpenProcess` still succeeds, but `ReadProcessMemory` fails with error 5
+  (access denied). The test binaries are built `/MT` (static runtime) so they
+  run on a VM with no Visual C++ redistributable installed.
+
+## Cross-cutting lessons
+
+- Callbacks must be cleaned up. A notify/Ob callback left registered after the
+  driver unloads means the kernel calls freed memory on the next event — an
+  instant BSOD. `DriverUnload` always deregisters.
+- Callbacks must be lightweight. Logging over the network inside the callback
+  made the VM stutter, because every image load blocked on I/O. Real EDR
+  captures minimal data in the callback and does heavy work on a worker thread.
+- Protection is a balancing act. Too strict and the protected app (or the OS)
+  breaks; too loose and a cheat gets through. 04 shows this directly.
+- Primitive drivers. A driver with no device doesn't install "on a device".
+  Either remove the INF, or declare it primitive with a `[DefaultInstall]`
+  section and `PnpLockdown=1`.
+
+## Roadmap
+
+- 05 — signature-based filtering / off-thread logging (planned): replace 03's
+  path heuristic with a real image-signature check, and move logging off the
+  callback thread onto a worker queue — both steps toward how production EDR
+  really works.
+- Possible: narrow 04 to also consider the opener (trust OS-core processes),
+  and protect by PID rather than image name.
+
+## Building
+
+- Visual Studio 2026 with the Desktop development with C++ workload and the
+  Windows Driver Kit (WDK) component, plus the Spectre-mitigated libraries.
+- A matching Windows SDK and WDK (build numbers must match).
+- For the callback drivers (02/03/04), add `/INTEGRITYCHECK` under
+  Linker > Command Line > Additional Options.
+- Open the solution in each driver folder, select `Debug | x64`, and Build.
+- Test exes (fakegame/reader) are plain console apps; build them `Release | x64`
+  with Runtime Library set to `/MT` so they need no runtime DLLs on the VM.
+
+## Testing (isolated VM only)
+
+Drivers are test-signed, so they load only on a machine with test signing on:
+
+    bcdedit /set testsigning on
+
+Load a service driver (02/03/04):
+
+    sc create <Name> type= kernel binPath= C:\Windows\System32\drivers\<file>.sys
+    sc start <Name>
+
+(Note the required space after `type=` and `binPath=`.)
+
+Log output is viewed with DebugView (Capture Kernel) or over a WinDbg
+kernel-debug connection (KDNET). For `KdPrintEx` INFO-level messages to appear,
+open the debug print filter:
+
+    reg add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Debug Print Filter" /v IHVDRIVER /t REG_DWORD /d 0xF /f
+
+## Credits
+
+`01-hello-world` is based on Microsoft's official KMDF "Hello World" sample and
+tutorial, adapted with added comments.
+
+## Disclaimer
+
+For learning and defensive research only. These drivers collect telemetry and,
+in 04, restrict handle access to a process you control in a disposable VM. Run
+them in a VM, never on a machine you care about.
+
+```
