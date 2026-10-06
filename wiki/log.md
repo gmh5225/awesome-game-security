@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-06** — lint: index vs disk — 9 overviews, 51 concepts, 4009 entities (4069 index entries); 0 missing, 0 dead, 0 duplicate; overview wikilink spot-check (9 pages, 12246 links) — 0 broken; concept spot-check (51 pages, 2379 links) — 0 broken; index wikilink scan (795 links) — 0 broken; 6 expected cross-kind slug collisions ([[game-hacking]], [[anti-cheat]], [[reverse-engineering]], [[il2cpp]], [[byovd]], [[dma]]); removed duplicate bare `ida-teams-docker/` segment in Overview blurb (entity already linked as [[ida-teams-docker]]); wiki not empty — bootstrap not required.
+
 - **2026-10-06** — lint (agent pass): index vs disk scan — 9 overviews, 51 concepts, 4009 entities (4069 index entries); index.md fully synced (0 missing, 0 dead, 0 duplicate entries); overview wikilink spot-check (9 pages, 12246 links) — 0 broken links; concept spot-check (51 pages, 2379 links) — 0 broken links; index.md wikilink scan (795 links) — 0 broken links; 6 cross-kind slug collisions ([[game-hacking]], [[anti-cheat]], [[reverse-engineering]], [[il2cpp]], [[byovd]], [[dma]]) — expected, no repair needed; wiki not empty — bootstrap not required; no structural edits required.
 
 - **2026-10-06** — ingest `description:LiteLDev/LeviAntiCheat`: refreshed entity [[levi-anticheat]] (Capabilities/Architecture/Positioning; C++ LeviLamina Bedrock BDS plugin — X-ray Anti-Xray engine, fly/speed, reach, auto-click, invalid inventory, malformed packets, dupe/crafter-crash fixes, violation-level ban/mute, JSON + hot reload); cited on [[overviews/game-engine]] server-side AC lane + [[entities/minecraft-anticheat-list]] Bedrock catalog cross-link; `index.md` entity blurb sync.
