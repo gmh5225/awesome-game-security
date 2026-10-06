@@ -531,7 +531,7 @@ sources:
   - wiki/sources/descriptions/Yass5002__magisk-hub.md
   - wiki/sources/descriptions/tbc0309__KPA-Root.md
   - wiki/sources/descriptions/AtakanKeser__BlastScale.md
-updated: 2026-10-04
+updated: 2026-10-06
 confidence: high
 ---
 
