@@ -1397,6 +1397,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/suifei/fridare [Powerful Frida repackaging tool for iOS and Android. Easily modify Frida servers to enhance stealth and bypass detection]
 - https://github.com/kkkbbb/rustFrida [Frida-like Android ARM64 hook — QuickJS, Java/native/stealth hook, QBDI; pairs with wxshadow (mkpms)]
 - https://github.com/dreamland-blog/KSU-Rust-Frida [Android ARM64 dynamic instrumentation module workflow for KernelSU/Magisk: single-binary engine, attach/spawn/watch-so, HTTP RPC control plane, and multi-mode stealth (normal/wxshadow/recomp)]
+- https://github.com/wzxwhxcz/LSPFRIDA [LSPosed module embedding Frida GumJS/QuickJS and LSPlant hooks to write, inject, and debug frida-java-bridge scripts entirely on-device without frida-server or a PC]
 - https://github.com/TheQmaks/phantom-frida [Build anti-detection Frida server from source]
 - https://github.com/Veridiff/Veridiff [Frida Stalker dual-trace engine that pinpoints the branch where two native runs diverge, for anti-cheat checks and OLLVM analysis]
 - https://github.com/1013503897/Morphida [Polymorphic anti-detection Android arm64 frida-server builds that morph static fingerprints per release]
@@ -4507,6 +4508,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/nsharp-collab/AvAAntiCheat [Minecraft Bukkit/Spigot anti-cheat plugin with movement, combat, autoclick, and packet checks]
 - https://github.com/norbertbaricz/DakotaAC [Spigot/Paper Minecraft anti-cheat plugin with combat, movement, and inventory checks using ProtocolLib and Citizens2]
 - https://github.com/Visual1mpact/Paradox_AntiCheat [Open-source anti-cheat for Minecraft Bedrock (Realms/BDS)]
+- https://github.com/LiteLDev/LeviAntiCheat [Open-source LeviLamina plugin anti-cheat for Minecraft Bedrock dedicated servers with X-ray, reach, auto-click, and duplication exploit mitigations]
 - https://github.com/oomph-ac/oomph [Minecraft Bedrock MiTM anti-cheat proxy with server-authoritative movement and combat]
 - https://github.com/GhostNgEnd/Ghost-AntiCheat [Prediction-based movement anti-cheat for Minecraft Bedrock Edition with packet, offset, and ping checks]
 - https://github.com/NaySurGithub/Amethyst [Prediction-based movement anti-cheat plugin for PowerNukkitX that replays Bedrock physics to flag unexplained client positions]
@@ -4582,6 +4584,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/pandora-analysis/pandora
 - https://github.com/cocomelonc/peekaboo [Modular malware-behavior emulator for safe evasion testing, telemetry generation, and detection engineering]
 - https://github.com/BLCCoreStudio/BLCGameSecLab [Authorized game-security validation pipeline with BLCReverseLab intake, evidence graphs, build diffing, and incremental anti-cheat regression planning]
+- https://github.com/ohmk1811/MobSentry [Evidence-first static analyzer for Android APK and iOS IPA with SSL pinning, root/jailbreak, and anti-instrumentation findings plus stack-aware bypass guidance and PDF reports]
 - https://github.com/LooperSalty/cs2-tracker [CS2 stats tracker with local FastAPI, Game State Integration live match feed, and explainable heuristic anti-cheat suspicion scoring]
 - https://github.com/oykuoner/YAACS-AntiCheat [CS2 anti-cheat research pipeline that parses HLTV demos with demoparser2, extracts spatiotemporal aim telemetry, and benchmarks heuristic plus ML aimbot classifiers]
 - https://github.com/magicnothief/cs2-overwatch [Offline CS2 demo review pipeline with aim/behavior models, ray-cast visibility checks, calibrated suspicion scoring, and optional local LLM evidence summaries]
