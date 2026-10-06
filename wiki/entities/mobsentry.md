@@ -11,13 +11,36 @@ confidence: medium
 
 # MobSentry
 
-**Evidence-first static analyzer** for **Android APK** and **iOS IPA** files. Python with a Flask web UI and headless CLI; uses androguard and Mach-O/plist parsing to collect located snippets before grading findings with confidence labels and optional AI-assisted correlation over the evidence database. (source: wiki/sources/descriptions/ohmk1811__MobSentry.md)
+**Evidence-first static analyzer** for **Android APK** and **iOS IPA** files (ohmk1811/MobSentry). Python with a Flask web UI and headless CLI; uses androguard and Mach-O/plist parsing to collect located snippets before grading findings with confidence labels and optional AI-assisted correlation over the evidence database. (source: wiki/sources/descriptions/ohmk1811__MobSentry.md)
 
-Inspects SSL pinning stacks, root and jailbreak detection, anti-debug and Frida instrumentation, secrets and Firebase exposure, manifest and network security misconfigurations, obfuscation, signing issues, and third-party trackers. Provides stack-aware bypass guidance with Frida and objection snippets. Outputs interactive web reports and PDF exports for authorized penetration testers and researchers evaluating mobile app and game protections.
+## Capabilities
 
-Listed in the README under **Anti Cheat → Analysis Framework** beside authorized validation pipelines such as [[blc-gamesec-lab]].
+| Area | Coverage |
+|------|----------|
+| Transport trust | SSL pinning stack identification |
+| Device integrity | Root and jailbreak detection routines |
+| Instrumentation defense | Anti-debug and Frida instrumentation checks |
+| Secrets / config | Hardcoded secrets, Firebase exposure |
+| Platform policy | Manifest and network-security misconfigurations |
+| Binary hygiene | Obfuscation, signing issues, third-party trackers |
+| Bypass guidance | Stack-aware Frida and objection snippets tied to located evidence |
+| Reporting | Interactive web reports and PDF exports |
 
-Complements dynamic instrumentation via [[frida]], [[root-detection-low-level]], and static triage via [[jadx]] and [[sako-restudio]].
+## Architecture
+
+| Layer | Role |
+|-------|------|
+| **Static parsers** | androguard (APK/DEX) + Mach-O/plist (IPA) snippet extraction |
+| **Evidence database** | Located code snippets indexed before finding synthesis |
+| **Finding engine** | Graded findings with confidence labels; optional AI-assisted correlation |
+| **Interfaces** | Flask web UI for interactive review; headless CLI for automation |
+| **Outputs** | Web report viewer + PDF export for authorized assessment workflows |
+
+## Positioning
+
+**Anti Cheat / Analysis Framework** lane beside authorized validation pipelines such as [[blc-gamesec-lab]] — aimed at penetration testers, reverse engineers, and researchers evaluating mobile app and game protections without replacing dynamic instrumentation.
+
+Complements [[jadx]]/[[apktool]] static triage, runtime risk scanners such as [[security-risk-android]], and dynamic hooks via [[frida]] and [[root-detection-low-level]].
 
 ## Links
 

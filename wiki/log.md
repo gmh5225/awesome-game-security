@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-06** — ingest `description:ohmk1811/MobSentry`: refreshed entity [[mobsentry]] (Capabilities/Architecture/Positioning; evidence-first APK/IPA static analyzer with androguard + Mach-O/plist, graded findings, optional AI correlation, Frida/objection bypass snippets, web/PDF reports); cited on [[concepts/mobile-anti-cheat]] static RE lane + [[overviews/reverse-engineering]] initial-analysis mobile triage; `index.md` entity blurb sync.
+
 - **2026-10-06** — ingest `description:wzxwhxcz/LSPFRIDA`: entity [[lspfrida]] (LSPosed GumJS QuickJS + LSPlant; frida-java-bridge on-device without frida-server/ADB/PC); cited on [[overviews/mobile-security]] instrumentation lane + [[concepts/frida]] embedded mode; `index.md` entity entry current.
 
 - **2026-10-06** — ingest `readme:categories`: Cheat ~2863 (+1; wzxwhxcz/[[lspfrida]] LSPosed on-device GumJS/frida-java-bridge without frida-server or PC) / Anti Cheat ~774 (+2; LiteLDev/[[levi-anticheat]] LeviLamina Bedrock BDS plugin + ohmk1811/[[mobsentry]] evidence-first mobile APK/IPA static analyzer) / other major section counts stable; 41 sections; synced projected README-map counts on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/anti-cheat]], [[overviews/mobile-security]], and [[overviews/dma-attack]]; entities [[lspfrida]], [[levi-anticheat]], [[mobsentry]]; light `index.md` section notes (no per-category pages).
