@@ -2275,7 +2275,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [learning-directx12](entities/learning-directx12.md) — D3D12 tutorial series + C++ samples (device/PSO/heaps; triangle → scenes; DirectX / guide)
 - [levo](entities/levo.md) — experimental x86/x64 PE AOT binary translator (Ghidra CFG → XED/Remill lift → LLVM recompile; kernel32 API-intercept runtime)
 - [LetMeGG](entities/letme-gg.md) — C++ PoC; prevent WinDbg break/attach (Some Tricks / Windows Ring0 anti-debug; gmh5225)
-- [LeviAntiCheat](entities/levi-anticheat.md) — LeviLamina C++ Bedrock BDS plugin (X-ray, fly/speed, reach, auto-click, dupe-fix; Anti Cheat / Open Source Anti Cheat System; LiteLDev)
+- [LeviAntiCheat](entities/levi-anticheat.md) — LeviLamina C++ Bedrock BDS plugin (X-ray Anti-Xray engine, fly/speed, reach, auto-click, invalid inventory, malformed packets, dupe/crafter-crash fixes, violation-level ban/mute, JSON + hot reload; Anti Cheat / Open Source Anti Cheat System; LiteLDev)
 - [lightsaber](entities/lightsaber.md) — iOS 18.4–18.6.2 userland exploit; JS inject SpringBoard (DarkSword-derived)
 - [light-hook](entities/light-hook.md) — single-header x86-64 hook library (SamuelTulach; pure C; Windows/Linux/EFI; user/kernel/firmware examples; no heavy disassembler; cross-platform hook library)
 - [lightyear](entities/lightyear.md) — Rust server-authoritative Bevy multiplayer netcode (prediction, rollback, lag compensation, WebTransport/wasm; client-server trust boundaries; cBournhonesque; Game Network / source)

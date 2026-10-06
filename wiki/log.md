@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-06** — ingest `description:LiteLDev/LeviAntiCheat`: refreshed entity [[levi-anticheat]] (Capabilities/Architecture/Positioning; C++ LeviLamina Bedrock BDS plugin — X-ray Anti-Xray engine, fly/speed, reach, auto-click, invalid inventory, malformed packets, dupe/crafter-crash fixes, violation-level ban/mute, JSON + hot reload); cited on [[overviews/game-engine]] server-side AC lane + [[entities/minecraft-anticheat-list]] Bedrock catalog cross-link; `index.md` entity blurb sync.
+
 - **2026-10-06** — ingest `description:ohmk1811/MobSentry`: refreshed entity [[mobsentry]] (Capabilities/Architecture/Positioning; evidence-first APK/IPA static analyzer with androguard + Mach-O/plist, graded findings, optional AI correlation, Frida/objection bypass snippets, web/PDF reports); cited on [[concepts/mobile-anti-cheat]] static RE lane + [[overviews/reverse-engineering]] initial-analysis mobile triage; `index.md` entity blurb sync.
 
 - **2026-10-06** — ingest `description:wzxwhxcz/LSPFRIDA`: entity [[lspfrida]] (LSPosed GumJS QuickJS + LSPlant; frida-java-bridge on-device without frida-server/ADB/PC); cited on [[overviews/mobile-security]] instrumentation lane + [[concepts/frida]] embedded mode; `index.md` entity entry current.

@@ -11,11 +11,33 @@ confidence: medium
 
 # LeviAntiCheat
 
-**Open-source server-side anti-cheat plugin** for **LeviLamina-based Minecraft Bedrock dedicated servers**. Implemented in C++, it detects and punishes client cheats including X-ray vision, fly and speed hacks, reach and auto-click abuse, invalid inventory items, and malicious or malformed packets. (source: wiki/sources/descriptions/LiteLDev__LeviAntiCheat.md)
+**Open-source server-side anti-cheat plugin** for **LeviLamina-based Minecraft Bedrock dedicated servers** (LiteLDev/LeviAntiCheat). Implemented in C++, it detects and punishes client cheats and hardens the host against known Bedrock server exploits. (source: wiki/sources/descriptions/LiteLDev__LeviAntiCheat.md)
 
-Includes an obfuscation-based **Anti-Xray** engine with multiple engine modes, configurable violation-level punishment with ban and mute commands, and fixes for known server exploits including item duplication and crafter crashes. Extensive JSON configuration, hot reload support, and multilingual messaging for server operators.
+## Capabilities
 
-Listed in the README under **Anti Cheat → Open Source Anti Cheat System**. Sits beside Bedrock prediction plugins such as [[amethyst]], [[ghost-anticheat]], and [[blarion-anticheat]], and behavior-pack AC such as [[paradox-anticheat]].
+| Area | Coverage |
+|------|----------|
+| World / vision | X-ray vision; obfuscation-based **Anti-Xray** engine with multiple engine modes |
+| Movement | Fly and speed hacks |
+| Combat | Reach and auto-click abuse |
+| Inventory | Invalid inventory item detection |
+| Network | Malicious or malformed packet checks |
+| Exploit mitigation | Item duplication and crafter crash fixes |
+| Moderation | Configurable violation-level punishment with ban and mute commands |
+| Operations | Extensive JSON configuration, hot reload, multilingual operator messaging |
+
+## Architecture
+
+| Layer | Role |
+|-------|------|
+| **Runtime** | C++ LeviLamina plugin loaded on Bedrock dedicated server (BDS) |
+| **Detection** | Server-side heuristics and packet sanity checks across movement, combat, inventory, and world interaction |
+| **Anti-Xray** | Obfuscation engine with selectable modes to limit ore/block exposure without client mods |
+| **Policy** | JSON-driven thresholds, punishments, and localized messages; hot reload without restart |
+
+## Positioning
+
+Listed in the README under **Anti Cheat → Open Source Anti Cheat System** / **game:minecraft**. Sits beside Bedrock prediction plugins such as [[amethyst]] and [[ghost-anticheat]], behavior-pack AC such as [[paradox-anticheat]] and [[blarion-anticheat]], and catalog hubs such as [[minecraft-anticheat-list]].
 
 ## Links
 
@@ -23,4 +45,4 @@ Listed in the README under **Anti Cheat → Open Source Anti Cheat System**. Sit
 
 ## Related
 
-[[overviews/anti-cheat]] · [[overviews/game-engine]] · [[minecraft-anticheat-list]] · [[amethyst]] · [[ghost-anticheat]]
+[[overviews/anti-cheat]] · [[overviews/game-engine]] · [[minecraft-anticheat-list]] · [[amethyst]] · [[ghost-anticheat]] · [[paradox-anticheat]] · [[blarion-anticheat]]

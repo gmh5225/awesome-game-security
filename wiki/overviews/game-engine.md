@@ -22,6 +22,7 @@ sources:
   - wiki/sources/descriptions/GloriousBrendon__rearguard.md
   - wiki/sources/descriptions/modcommunity__dot-server-security.md
   - wiki/sources/descriptions/Parko-Developer__guard-game.md
+  - wiki/sources/descriptions/LiteLDev__LeviAntiCheat.md
   - wiki/sources/descriptions/n24q02m__better-godot-mcp.md
   - wiki/sources/descriptions/IvanMurzak__GameDev-MCP-Server.md
   - wiki/sources/descriptions/ahujasid__blender-mcp.md
@@ -773,6 +774,7 @@ Editor-facing MCP bridges in the README's **MCP server** subcategory let AI agen
 - **Rearguard** — [[rearguard]] Godot 4 GDExtension + Rust server zero-access AC SDK (per-match server-seeded mouse/recoil input probes; aimbot/recoil-macro detection; telemetry pipeline + simulation/evaluation harness; Linux/Windows without kernel driver; GloriousBrendon; Anti Cheat / Open Source Anti Cheat System) (source: wiki/sources/descriptions/GloriousBrendon__rearguard.md)
 - **dot-server-security** — [[dot-server-security]] Godot 4 dedicated-server security addon (GDScript rule engine; movement re-simulation + shot validation; sliding-window rate limits; warn/gag/mute/kick/ban escalation; external ban feeds; dry-run default; modcommunity; Anti Cheat / Open Source Anti Cheat System) (source: wiki/sources/descriptions/modcommunity__dot-server-security.md)
 - **guard-game** — [[guard-game]] Node.js engine-agnostic server-side AC (Parko-Developer; world-profile movement/action validation; TCP JSON lines + HTTP ingest; Unity/Godot/Roblox/JS SDKs; strike ladder + admin API; optional HMAC signing; Anti Cheat / Open Source Anti Cheat System) (source: wiki/sources/descriptions/Parko-Developer__guard-game.md)
+- **LeviAntiCheat** — [[levi-anticheat]] C++ LeviLamina plugin for Minecraft Bedrock BDS (X-ray/fly/speed/reach/auto-click/invalid-inventory/malformed-packet checks; obfuscation Anti-Xray engine modes; violation-level ban/mute; item-dupe and crafter-crash fixes; JSON config + hot reload; LiteLDev; Anti Cheat / Open Source Anti Cheat System / game:minecraft) (source: wiki/sources/descriptions/LiteLDev__LeviAntiCheat.md)
 - **DayZ MCP** — [[dayz-mcp]] Enfusion mod-dev automation (Python MCP + Enforce Script bridge; 53 server-authoritative tools for addon pack/build, test instances, entity/vehicle control, telemetry, screenshots, structured state assertions; localhost session leases; willy92wins) (source: wiki/sources/descriptions/willy92wins__dayz-mcp.md)
 - **Blender MCP** — [[blender-mcp]] DCC scene inspection/editing via addon + Python MCP server (object/material ops, scene queries, scripted execution; optional external/generated 3D assets) (source: wiki/sources/descriptions/ahujasid__blender-mcp.md)
 - **Figma Context MCP** — [[figma-context-mcp]] Framelink MCP for Figma; TypeScript server; simplified design metadata + referenced image download; stdio/HTTP transports; model-friendly layout/style context from Figma API for design-to-code UI automation (GLips) (source: wiki/sources/descriptions/GLips__Figma-Context-MCP.md)
