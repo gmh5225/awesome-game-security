@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-06** — lint (agent pass): index vs disk scan — 9 overviews, 51 concepts, 4009 entities (4069 index entries); index.md fully synced (0 missing, 0 dead, 0 duplicate entries); overview wikilink spot-check (9 pages, 12246 links) — 0 broken links; concept spot-check (51 pages, 2379 links) — 0 broken links; index.md wikilink scan (795 links) — 0 broken links; 6 cross-kind slug collisions ([[game-hacking]], [[anti-cheat]], [[reverse-engineering]], [[il2cpp]], [[byovd]], [[dma]]) — expected, no repair needed; wiki not empty — bootstrap not required; no structural edits required.
+
 - **2026-10-06** — ingest `description:LiteLDev/LeviAntiCheat`: refreshed entity [[levi-anticheat]] (Capabilities/Architecture/Positioning; C++ LeviLamina Bedrock BDS plugin — X-ray Anti-Xray engine, fly/speed, reach, auto-click, invalid inventory, malformed packets, dupe/crafter-crash fixes, violation-level ban/mute, JSON + hot reload); cited on [[overviews/game-engine]] server-side AC lane + [[entities/minecraft-anticheat-list]] Bedrock catalog cross-link; `index.md` entity blurb sync.
 
 - **2026-10-06** — ingest `description:ohmk1811/MobSentry`: refreshed entity [[mobsentry]] (Capabilities/Architecture/Positioning; evidence-first APK/IPA static analyzer with androguard + Mach-O/plist, graded findings, optional AI correlation, Frida/objection bypass snippets, web/PDF reports); cited on [[concepts/mobile-anti-cheat]] static RE lane + [[overviews/reverse-engineering]] initial-analysis mobile triage; `index.md` entity blurb sync.
