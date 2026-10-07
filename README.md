@@ -5138,6 +5138,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/qemu-gvm/qemu-gvm [QEMU]
 - https://github.com/Droid-VM/DroidVM [Android VM manager on Snapdragon: Gunyah hypervisor; crosvm/QEMU; UEFI Linux/Windows; VirGL/GfxStream GPU, VNC, VirtFS; root required]
 - https://github.com/quarkslab/AERoot [Root]
+- https://github.com/Jordan231111/BluestacksRoot [BlueStacks 5 / MSI App Player one-file root toolkit with embedded Kitsune Magisk (Android 9/11/13) and disk-integrity bypass]
 
 ## IOS Emulator
 - https://github.com/ChefKissInc/qemu-apple-silicon
