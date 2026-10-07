@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-07** — lint (agent pass): index vs disk — 9 overviews, 51 concepts, 4011 entities (4071 index entries); 0 missing, 0 dead, 0 duplicate; overview wikilink spot-check (9 pages, 12262 links) — 0 broken; concept spot-check (51 pages, 2383 links) — 0 broken; index wikilink scan (802 links) — 0 broken; 6 expected cross-kind slug collisions ([[game-hacking]], [[anti-cheat]], [[reverse-engineering]], [[il2cpp]], [[byovd]], [[dma]]); wiki not empty — bootstrap not required; no structural edits required.
+
 - **2026-10-07** — ingest `description:Jordan231111/BluestacksRoot`: entity [[bluestacks-root]] (Jordan231111; single-file Windows BlueStacks 5 / MSI App Player root toolkit; PowerShell/batch + setuid helper; embedded Kitsune Magisk; VHD/VHDX patch, bindmount edit, ADB install, cold-boot verify; factory root toggles off; undo/unroot + denylist guidance; automated test suite; mobile game security RE / AC bypass testing); cited on [[overviews/mobile-security]] App virtualization + Android Emulator README-map lanes + [[overviews/game-hacking]] emulator-root cluster; `index.md` entity + overview blurb sync.
 
 - **2026-10-07** — ingest `readme:categories`: completed README-map footer sync on [[overviews/reverse-engineering]] (Cheat ~2863 + wzxwhxcz/[[lspfrida]]; Anti Cheat ~774 + LiteLDev/[[levi-anticheat]] + ohmk1811/[[mobsentry]]; Xbox ~11 + [[jsrf-recomp]]/[[mcla-pc]]/[[dead-rising-2-case-zero-xenon-recomp]]) and [[overviews/game-hacking]] (Xbox ~11 + XenonRecomp cluster); 41 sections / other major counts unchanged vs prior pass; `index.md` section notes already current.
