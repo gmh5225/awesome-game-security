@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-07** — ingest `description:wivi514/Dead_Rising_2_Case_Zero_Xenon_Recomp`: refreshed entity [[dead-rising-2-case-zero-xenon-recomp]] (Positioning + [[idaxex]]/[[ida-vmx128-helper]] cross-links; XenonRecomp/XenosRecomp static port; Vulkan/SDL + ffmpeg XMA; STFS/XEX + GPU PM4/shader tooling + jump-table recovery; kernel HLE honest-failure stubs; Xbox preservation/RE); cited on [[concepts/static-runtime-evidence]] Xbox 360 static-recomp cluster + [[overviews/reverse-engineering]] Console/QEMU XenonRecomp lane; `index.md` entity blurb sync.
+
 - **2026-10-07** — ingest `readme:categories`: Xbox ~11 (+1; wivi514/[[dead-rising-2-case-zero-xenon-recomp]] Dead Rising 2: Case Zero XBLA XenonRecomp static port — Vulkan/SDL + ffmpeg XMA; Windows/Linux) / Cheat ~2863 / Anti Cheat ~774 / other major section counts stable; 41 sections; synced projected README-map counts on [[overviews/overview]], [[overviews/game-hacking]], and [[overviews/reverse-engineering]]; entity [[dead-rising-2-case-zero-xenon-recomp]]; light `index.md` section notes (no per-category pages).
 
 - **2026-10-07** — lint: index vs disk — 9 overviews, 51 concepts, 4009 entities (4069 index entries); 0 missing, 0 dead, 0 duplicate; overview wikilink spot-check (9 pages, 12246 links) — 0 broken; concept spot-check (51 pages, 2379 links) — 0 broken; index wikilink scan — 0 broken; 6 expected cross-kind slug collisions ([[game-hacking]], [[anti-cheat]], [[reverse-engineering]], [[il2cpp]], [[byovd]], [[dma]]); wiki not empty — bootstrap not required; no structural edits required.

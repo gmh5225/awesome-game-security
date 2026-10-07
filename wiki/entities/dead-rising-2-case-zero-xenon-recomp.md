@@ -25,10 +25,14 @@ Ships Python and C++ utilities for STFS/XEX package extraction, shader translati
 
 Built in C++ and Python with HLSL shaders and CMake. Targets researchers and developers studying Xbox 360 reverse engineering, static recompilation, and game preservation—not live anti-cheat analysis. (source: wiki/sources/descriptions/wivi514__Dead_Rising_2_Case_Zero_Xenon_Recomp.md)
 
+## Positioning
+
+Sits in the README **Xbox** lane beside HLE playback via [[xenia]] and title-specific XenonRecomp ports such as [[mcla-pc]], but targets **static ahead-of-time translation** of a specific XBLA title to native Windows/Linux rather than runtime JIT recompilation or general-purpose emulation. Pair STFS/XEX extraction and jump-table recovery tooling with [[idaxex]] and [[ida-vmx128-helper]] for upstream Xbox 360 binary analysis. (source: wiki/sources/descriptions/wivi514__Dead_Rising_2_Case_Zero_Xenon_Recomp.md)
+
 ## Links
 
 - Repo: https://github.com/wivi514/Dead_Rising_2_Case_Zero_Xenon_Recomp
 
 ## Related
 
-[[mcla-pc]] · [[jsrf-recomp]] · [[recompiler]] · [[xenia]] · [[static-runtime-evidence]] · [[overviews/reverse-engineering]] · [[overviews/graphics-api]] · [[overviews/game-hacking]]
+[[mcla-pc]] · [[jsrf-recomp]] · [[recompiler]] · [[xenia]] · [[idaxex]] · [[ida-vmx128-helper]] · [[static-runtime-evidence]] · [[overviews/reverse-engineering]] · [[overviews/graphics-api]] · [[overviews/game-hacking]]
