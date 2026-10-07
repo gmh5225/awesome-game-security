@@ -1879,6 +1879,7 @@ sources:
   - wiki/sources/descriptions/wrong-commit__skid_factory.md
   - wiki/sources/descriptions/bufanchen121101__AxManagerD.md
   - wiki/sources/descriptions/tbc0309__KPA-Root.md
+  - wiki/sources/descriptions/Jordan231111__BluestacksRoot.md
   - wiki/sources/descriptions/Azteriisk__omarchy-boot-manager.md
   - wiki/sources/descriptions/husnaintariq577__kx-vision.md
   - wiki/sources/descriptions/Marcinator31__Vortex-Client.md
@@ -2488,6 +2489,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 
 - Android Emulator runtime root via [[aeroot]] (Quarkslab Python; debug pipe / ADB root → remount + custom `su`; no system-image rewrite; multi-API) sits in the Cheat `[Root]` / Android Emulator lane. (source: wiki/sources/descriptions/quarkslab__AERoot.md)
 - AVD Magisk/root tooling via [[rootavd]] (kernel-level work / modding / SDK generation; Cheat Magisk / Android Emulator) sits beside that emulator-root lane. (source: wiki/sources/descriptions/newbit1__rootAVD.md)
+- BlueStacks 5 / MSI App Player one-file Magisk root via [[bluestacks-root]] (Jordan231111; PowerShell/batch + setuid helper; embedded Kitsune Magisk; VHD/VHDX patch + bindmount edit; ADB install; cold-boot persistence; factory root toggles off; Cheat Android Emulator / Android Root) sits beside that emulator-root lane. (source: wiki/sources/descriptions/Jordan231111__BluestacksRoot.md)
 - Manual WSA installation guide [[how-to-download-and-install-wsa]] (K3V1991; step-by-step Win11 setup; Developer Mode and Virtual Machine Platform prerequisites; dependency packages; Explorer or PowerShell bundle install; users needing manual WSA install workflow; Cheat WSA / Guide) anchors the Android-on-Windows lane. (source: wiki/sources/descriptions/K3V1991__How-to-download-and-install-WSA.md)
 - Local Magisk/KernelSU+GApps+LSPosed WSA integration via [[magiskonwsalocal]] (Python/shell scripts extract/patch WSA images; installable rooted builds with Play Store and LSPosed; Android security testing on Win11; Cheat Magisk / WSA) extends the same rooted Android-on-Windows lane. (source: wiki/sources/descriptions/LSPosed__MagiskOnWSALocal.md)
 - WSA MSIX compatibility patcher [[wsapatch]] (C++; Win10/older Win11; version-check + Hyper-V requirement bypass; sideload on unsupported Windows; Cheat WSA) sits beside that Android-on-Windows lane. (source: wiki/sources/descriptions/cinit__WSAPatch.md)

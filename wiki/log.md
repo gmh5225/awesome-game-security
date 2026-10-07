@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-07** — ingest `description:Jordan231111/BluestacksRoot`: entity [[bluestacks-root]] (Jordan231111; single-file Windows BlueStacks 5 / MSI App Player root toolkit; PowerShell/batch + setuid helper; embedded Kitsune Magisk; VHD/VHDX patch, bindmount edit, ADB install, cold-boot verify; factory root toggles off; undo/unroot + denylist guidance; automated test suite; mobile game security RE / AC bypass testing); cited on [[overviews/mobile-security]] App virtualization + Android Emulator README-map lanes + [[overviews/game-hacking]] emulator-root cluster; `index.md` entity + overview blurb sync.
+
 - **2026-10-07** — ingest `readme:categories`: completed README-map footer sync on [[overviews/reverse-engineering]] (Cheat ~2863 + wzxwhxcz/[[lspfrida]]; Anti Cheat ~774 + LiteLDev/[[levi-anticheat]] + ohmk1811/[[mobsentry]]; Xbox ~11 + [[jsrf-recomp]]/[[mcla-pc]]/[[dead-rising-2-case-zero-xenon-recomp]]) and [[overviews/game-hacking]] (Xbox ~11 + XenonRecomp cluster); 41 sections / other major counts unchanged vs prior pass; `index.md` section notes already current.
 
 - **2026-10-07** — ingest `description:wivi514/Dead_Rising_2_Case_Zero_Xenon_Recomp`: refreshed entity [[dead-rising-2-case-zero-xenon-recomp]] (Positioning + [[idaxex]]/[[ida-vmx128-helper]] cross-links; XenonRecomp/XenosRecomp static port; Vulkan/SDL + ffmpeg XMA; STFS/XEX + GPU PM4/shader tooling + jump-table recovery; kernel HLE honest-failure stubs; Xbox preservation/RE); cited on [[concepts/static-runtime-evidence]] Xbox 360 static-recomp cluster + [[overviews/reverse-engineering]] Console/QEMU XenonRecomp lane; `index.md` entity blurb sync.
