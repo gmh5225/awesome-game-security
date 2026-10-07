@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-07** — ingest `readme:categories`: completed README-map footer sync on [[overviews/reverse-engineering]] (Cheat ~2863 + wzxwhxcz/[[lspfrida]]; Anti Cheat ~774 + LiteLDev/[[levi-anticheat]] + ohmk1811/[[mobsentry]]; Xbox ~11 + [[jsrf-recomp]]/[[mcla-pc]]/[[dead-rising-2-case-zero-xenon-recomp]]) and [[overviews/game-hacking]] (Xbox ~11 + XenonRecomp cluster); 41 sections / other major counts unchanged vs prior pass; `index.md` section notes already current.
+
 - **2026-10-07** — ingest `description:wivi514/Dead_Rising_2_Case_Zero_Xenon_Recomp`: refreshed entity [[dead-rising-2-case-zero-xenon-recomp]] (Positioning + [[idaxex]]/[[ida-vmx128-helper]] cross-links; XenonRecomp/XenosRecomp static port; Vulkan/SDL + ffmpeg XMA; STFS/XEX + GPU PM4/shader tooling + jump-table recovery; kernel HLE honest-failure stubs; Xbox preservation/RE); cited on [[concepts/static-runtime-evidence]] Xbox 360 static-recomp cluster + [[overviews/reverse-engineering]] Console/QEMU XenonRecomp lane; `index.md` entity blurb sync.
 
 - **2026-10-07** — ingest `readme:categories`: Xbox ~11 (+1; wivi514/[[dead-rising-2-case-zero-xenon-recomp]] Dead Rising 2: Case Zero XBLA XenonRecomp static port — Vulkan/SDL + ffmpeg XMA; Windows/Linux) / Cheat ~2863 / Anti Cheat ~774 / other major section counts stable; 41 sections; synced projected README-map counts on [[overviews/overview]], [[overviews/game-hacking]], and [[overviews/reverse-engineering]]; entity [[dead-rising-2-case-zero-xenon-recomp]]; light `index.md` section notes (no per-category pages).
