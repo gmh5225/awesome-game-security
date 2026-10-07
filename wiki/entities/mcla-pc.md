@@ -31,4 +31,4 @@ Built primarily in C++ with **CMake**, **SDL3**, and **DirectX Shader Compiler**
 
 ## Related
 
-[[jsrf-recomp]] · [[recompiler]] · [[xenia]] · [[static-runtime-evidence]] · [[overviews/reverse-engineering]] · [[overviews/graphics-api]] · [[overviews/game-hacking]]
+[[jsrf-recomp]] · [[dead-rising-2-case-zero-xenon-recomp]] · [[recompiler]] · [[xenia]] · [[static-runtime-evidence]] · [[overviews/reverse-engineering]] · [[overviews/graphics-api]] · [[overviews/game-hacking]]

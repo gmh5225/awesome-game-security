@@ -1883,7 +1883,7 @@ sources:
   - wiki/sources/descriptions/husnaintariq577__kx-vision.md
   - wiki/sources/descriptions/Marcinator31__Vortex-Client.md
   - wiki/sources/descriptions/AnonymoDGH__cheat-mcp.md
-updated: 2026-10-05
+updated: 2026-10-07
 confidence: high
 ---
 
@@ -2921,7 +2921,8 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - macOS port [[xenia-mac]] extends that Xbox 360 HLE stack to Apple hosts for emulator / Xbox research. (source: wiki/sources/descriptions/wmarti__xenia-mac.md)
 - Xbox360→Windows executable porting via [[recompiler]] supports console-emulator / Xbox research without full HLE. (source: wiki/sources/descriptions/rexdex__recompiler.md)
 - Original Xbox XBE static recompilation to native macOS ARM64 via [[jsrf-recomp]] (andeecollard; xboxrecomp fork; Jet Set Radio Future; replacement Xbox kernel + NV2A/MCPX models from xemu + D3D8/DirectSound/controller translation; C/Python/CMake diagnostics harness; Xbox / static recompilation) for preservation and low-level OG Xbox binary RE without runtime emulation. (source: wiki/sources/README-categories.md) (source: wiki/sources/descriptions/andeecollard__jsrf-recomp.md)
-- Xbox 360 PPC static recompilation to native Windows D3D12 via [[mcla-pc]] (3bdull4h2008; Midnight Club: LA; XenonRecomp guest XEX→C++ + Xenos microcode→DXIL shader replay + PSO cache; RPF3 VFS + VMX128 hooks; CMake/SDL3/DXSC; Xbox ~10) for X360 binary RE and native graphics translation without full HLE. (source: wiki/sources/README-categories.md) (source: wiki/sources/descriptions/3bdull4h2008__mcla-pc.md)
+- Xbox 360 PPC static recompilation to native Windows D3D12 via [[mcla-pc]] (3bdull4h2008; Midnight Club: LA; XenonRecomp guest XEX→C++ + Xenos microcode→DXIL shader replay + PSO cache; RPF3 VFS + VMX128 hooks; CMake/SDL3/DXSC; Xbox ~11) for X360 binary RE and native graphics translation without full HLE. (source: wiki/sources/README-categories.md) (source: wiki/sources/descriptions/3bdull4h2008__mcla-pc.md)
+- Xbox 360 PPC static recompilation to native Windows/Linux via [[dead-rising-2-case-zero-xenon-recomp]] (wivi514; Dead Rising 2: Case Zero XBLA; XenonRecomp + XenosRecomp; Vulkan/SDL + ffmpeg XMA; STFS/XEX tooling + jump-table recovery; kernel HLE stubs; Xbox / static recompilation) for X360 binary RE and preservation without full HLE. (source: wiki/sources/README-categories.md) (source: wiki/sources/descriptions/wivi514__Dead_Rising_2_Case_Zero_Xenon_Recomp.md)
 - Sega Saturn disc/SH-2 static recompilation to native PC via [[saturnkit]] (vs-sr-dev; Python disc/IP.BIN parse + SH-2 decode/function matching + SH-2→C++ static recomp; C++20 VDP1/2/SCU/SMPC/CD/SCSP runtime with Musashi 68000; SDL3/OpenGL + gamepad; submodule per-title port layout; Cheat / RE Tools) for Saturn binary RE and preservation without full-system HLE. (source: wiki/sources/descriptions/vs-sr-dev__saturnkit.md)
 - Xbox 360 emulator [[xbox360-emu]] (C/C++; kernel-level work, modding, memory analysis) sits in the console `Xbox` lane for emulator developers and Xbox researchers. (source: wiki/sources/descriptions/exjam__xbox360-emu.md)
 - Xbox 360 XEX static analysis in IDA Pro via [[idaxex]] (C++ loader; XEX format parse, PE extraction, import/export + kernel symbol naming; IDA 9) sits in the console `Xbox` lane for reverse engineers and console security researchers. (source: wiki/sources/descriptions/emoose__idaxex.md)
