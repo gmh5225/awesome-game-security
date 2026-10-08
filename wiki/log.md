@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-08** — ingest `readme:categories`: Cheat ~2865 (+2; spix18/[[dsh-ghidra]] DSH Ghidra bridge with 219 PyGhidra/MCP agent tools + MewDMA/[[mewtools]] Windows DMA FPGA setup utility) / Anti Cheat ~774 / other major section counts stable; 41 sections; synced projected README-map counts on [[overviews/overview]], [[overviews/reverse-engineering]], [[overviews/game-hacking]], and [[overviews/dma-attack]]; entities [[dsh-ghidra]], [[mewtools]]; light `index.md` section notes (no per-category pages).
+
 - **2026-10-08** — lint (agent pass): index vs disk — 9 overviews, 51 concepts, 4011 entities (4071 index entries); 0 missing, 0 dead, 0 duplicate; overview wikilink spot-check (9 pages, 12262 links) — 0 broken; concept spot-check (51 pages, 2383 links) — 0 broken; index wikilink scan (802 links) — 0 broken; 6 expected cross-kind slug collisions ([[game-hacking]], [[anti-cheat]], [[reverse-engineering]], [[il2cpp]], [[byovd]], [[dma]]); wiki not empty — bootstrap not required; no structural edits required.
 
 - **2026-10-07** — lint (agent pass): index vs disk — 9 overviews, 51 concepts, 4011 entities (4071 index entries); 0 missing, 0 dead, 0 duplicate; overview wikilink spot-check (9 pages, 12262 links) — 0 broken; concept spot-check (51 pages, 2383 links) — 0 broken; index wikilink scan (802 links) — 0 broken; 6 expected cross-kind slug collisions ([[game-hacking]], [[anti-cheat]], [[reverse-engineering]], [[il2cpp]], [[byovd]], [[dma]]); wiki not empty — bootstrap not required; no structural edits required.
