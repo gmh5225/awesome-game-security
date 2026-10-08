@@ -1,0 +1,2330 @@
+Project Path: arc_starfallreverie_pfnwatch_yv2eabay
+
+Source Tree:
+
+```txt
+arc_starfallreverie_pfnwatch_yv2eabay
+├── LICENSE
+├── README.md
+├── assets
+│   └── Capture.PNG
+├── pfnwatch
+│   ├── client
+│   │   ├── client.vcxproj
+│   │   ├── client.vcxproj.filters
+│   │   ├── main.cpp
+│   │   └── project
+│   │       ├── core
+│   │       │   ├── console
+│   │       │   │   ├── console.cpp
+│   │       │   │   └── console.hpp
+│   │       │   ├── driver
+│   │       │   │   ├── driver.cpp
+│   │       │   │   └── driver.hpp
+│   │       │   └── reader
+│   │       │       ├── reader.cpp
+│   │       │       └── reader.hpp
+│   │       └── global.hpp
+│   ├── driver
+│   │   ├── driver.inf
+│   │   ├── driver.vcxproj
+│   │   ├── driver.vcxproj.filters
+│   │   ├── entry.cpp
+│   │   └── project
+│   │       ├── common
+│   │       │   └── nt.hpp
+│   │       ├── core
+│   │       │   ├── collector
+│   │       │   │   ├── collector.cpp
+│   │       │   │   └── collector.hpp
+│   │       │   ├── dispatcher
+│   │       │   │   ├── dispatcher.cpp
+│   │       │   │   └── dispatcher.hpp
+│   │       │   ├── kernel
+│   │       │   │   ├── kernel.cpp
+│   │       │   │   └── kernel.hpp
+│   │       │   ├── scanner
+│   │       │   │   ├── scanner.cpp
+│   │       │   │   └── scanner.hpp
+│   │       │   └── worker
+│   │       │       ├── worker.cpp
+│   │       │       └── worker.hpp
+│   │       └── global.hpp
+│   └── shared
+│       └── ioctl.hpp
+└── pfnwatch.slnx
+
+```
+
+`LICENSE`:
+
+```
+MIT License
+
+Copyright (c) 2026 kai
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
+`README.md`:
+
+```md
+## what is this
+
+pfnwatch is a proof of concept for a detection technique discussed in the game security community. the idea is that any remote memory access that goes through Windows paging has to create a PTE. if that PTE points to a physical page owned by your process, someone is accessing your memory
+
+I haven't confirmed whether anti cheats deploy this exact technique, but I  do know many monitor PFN reference counts and pool tags. both of these work off kernel metadata that can be spoofed or avoided. PTE scanning is a lot harder to beat as the cpu has to create the mapping to access the memory, the only ways around it are to not read remotely at all, or exploit holes in the specific implementation
+
+## how it works
+
+the driver attaches to the protected process and walks its page tables to build a bitmap of every PFN it owns. prototype PTEs and non active pages are filtered out to minimize false positives and speed it up *(in production this would be a hole but for a PoC its fine)*
+
+once the bitmap is built, the driver scans all kernel page tables looking for any PTE whose PFN is in our bitmap. if a kernel PTE points to one of the process physical pages, someones accessing our memory. we then record the kernel VA, PTE flags, and PteAddress so we can resolve which address in the target process is being accessed, which is useful for getting rid of false positives and could be used for honey potting
+
+## what it catches
+
+any kernel mode code that maps a target process's physical memory will create a PTE that pfnwatch will find. common APIs used by cheaters this detects:
+
+- `MmCopyMemory` 
+- `MmMapIoSpace` / `MmMapIoSpaceEx`
+- direct pte writes
+
+this does **not** catch:
+- anything that doesn't create a pte, so this would include DMA, hypervisors, KeStackAttachProcess / cr3 switching, or code already executing in the target
+- temporary mappings that unmap before the next scan tick, though persistent access (like cheats do) will be caught in a few minutes to hours anyway
+  
+## output
+
+![pfnwatch](assets/Capture.PNG)
+
+```
+
+`pfnwatch.slnx`:
+
+```slnx
+<Solution>
+  <Configurations>
+    <BuildType Name="Release" />
+    <Platform Name="x64" />
+  </Configurations>
+  <Folder Name="/shared/">
+    <File Path="pfnwatch/shared/ioctl.hpp" />
+  </Folder>
+  <Project Path="pfnwatch/client/client.vcxproj" Id="03eddded-ca6a-4ea6-8637-5798f3948835" />
+  <Project Path="pfnwatch/driver/driver.vcxproj" Id="d59f7487-8398-d47a-449b-5d462ce5e701">
+    <Deploy />
+  </Project>
+</Solution>
+
+```
+
+`pfnwatch/client/client.vcxproj`:
+
+```vcxproj
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>18.0</VCProjectVersion>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectGuid>{03eddded-ca6a-4ea6-8637-5798f3948835}</ProjectGuid>
+    <RootNamespace>client</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v145</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+    <EnableUnitySupport>true</EnableUnitySupport>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutDir>$(SolutionDir)\build\</OutDir>
+    <IntDir>$(SolutionDir)\build\intermediates\$(ProjectName)\</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <DebugInformationFormat>None</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+    </Link>
+    <Manifest>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
+    </Manifest>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="project\core\console\console.cpp" />
+    <ClCompile Include="project\core\driver\driver.cpp" />
+    <ClCompile Include="project\core\reader\reader.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="project\core\console\console.hpp" />
+    <ClInclude Include="project\core\driver\driver.hpp" />
+    <ClInclude Include="project\core\reader\reader.hpp" />
+    <ClInclude Include="project\global.hpp" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
+```
+
+`pfnwatch/client/client.vcxproj.filters`:
+
+```filters
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="project\core\driver\driver.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="project\core\reader\reader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="project\core\console\console.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="project\global.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="project\core\driver\driver.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="project\core\reader\reader.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="project\core\console\console.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
+```
+
+`pfnwatch/client/main.cpp`:
+
+```cpp
+// client/main.cpp
+#include "project/global.hpp"
+
+int main( )
+{
+	g.m_console.initialize( );
+
+	if ( !g.m_driver.open( ) )
+	{
+		std::printf( "failed to open device\n" );
+		return 1;
+	}
+
+	const auto pid = ::GetCurrentProcessId( );
+	if ( !g.m_driver.assign_process( pid ) )
+	{
+		std::printf( "failed to assign process\n" );
+		g.m_driver.close( );
+		return 1;
+	}
+
+	g.m_reader.start( );
+
+	std::unordered_map<std::uint64_t, core::tracked_detection> tracked;
+	auto* snapshot = new shared::ioctl::detection[ 4096 ];
+	auto last_draw = ::GetTickCount64( );
+
+	while ( true )
+	{
+		std::this_thread::sleep_for( std::chrono::milliseconds( 1 ) );
+
+		const auto count = g.m_driver.read_report( snapshot, 4096u );
+		for ( std::uint32_t i{ 0u }; i < count; i++ )
+		{
+			const auto& entry = snapshot[ i ];
+			auto it = tracked.find( entry.pfn );
+
+			if ( it != tracked.end( ) )
+			{
+				it->second.virtual_address = entry.virtual_address;
+				it->second.pte_value = entry.pte_value;
+				it->second.target_address = entry.target_address;
+				it->second.reference_count = entry.reference_count;
+				it->second.cache_type = entry.cache_type;
+				it->second.total_ticks += entry.tick_count;
+			}
+			else {
+				tracked[ entry.pfn ] = { entry.pfn, entry.virtual_address, entry.pte_value, entry.target_address, entry.reference_count, entry.cache_type, entry.tick_count };
+			}
+		}
+
+		const auto now = ::GetTickCount64( );
+		if ( now - last_draw < 250ull ) {
+			continue;
+		}
+
+		last_draw = now;
+
+		std::vector<core::tracked_detection> detections;
+		detections.reserve( tracked.size( ) );
+
+		for ( const auto& [pfn, entry] : tracked ) {
+			detections.push_back( entry );
+		}
+
+		std::sort( detections.begin( ), detections.end( ), [ ]( const auto& a, const auto& b ) { return a.total_ticks > b.total_ticks; } );
+
+		if ( !detections.empty( ) ) {
+			g.m_console.render( detections );
+		}
+	}
+
+	g.m_console.shutdown( );
+	g.m_driver.close( );
+	delete[ ] snapshot;
+
+	return 0;
+}
+
+```
+
+`pfnwatch/client/project/core/console/console.cpp`:
+
+```cpp
+// client/project/core/console/console.cpp
+#include "../../global.hpp"
+
+namespace core {
+
+	static void format_flags( std::uint64_t pte, char* out, std::uint32_t length )
+	{
+		if ( !pte )
+		{
+			std::snprintf( out, length, "-" );
+			return;
+		}
+
+		std::snprintf( out, length, "%s%s%s%s%s%s", ( pte & 1ull ) ? "P" : "-", ( pte & 2ull ) ? "|W" : "|R", ( pte & 4ull ) ? "|U" : "|K", ( pte & ( 1ull << 5 ) ) ? "|A" : "", ( pte & ( 1ull << 6 ) ) ? "|D" : "", ( pte & ( 1ull << 63 ) ) ? "|NX" : "|X" );
+	}
+
+	void console::initialize( )
+	{
+		::SetConsoleTitleA( "pfnwatch" );
+		::SetConsoleOutputCP( CP_UTF8 );
+
+		const auto handle = ::GetStdHandle( STD_OUTPUT_HANDLE );
+
+		unsigned long mode{ 0u };
+		::GetConsoleMode( handle, &mode );
+		::SetConsoleMode( handle, mode | ENABLE_VIRTUAL_TERMINAL_PROCESSING );
+
+		std::printf( "\x1b[?25l" );
+	}
+
+	void console::shutdown( )
+	{
+		std::printf( "\x1b[?25h" );
+	}
+
+	void console::render( const std::vector<tracked_detection>& detections )
+	{
+		CONSOLE_SCREEN_BUFFER_INFO csbi{};
+		::GetConsoleScreenBufferInfo( ::GetStdHandle( STD_OUTPUT_HANDLE ), &csbi );
+
+		const auto max_rows = static_cast< std::uint32_t >( csbi.srWindow.Bottom - csbi.srWindow.Top - 5 );
+		const auto visible = std::min( static_cast< std::uint32_t >( detections.size( ) ), max_rows );
+
+		std::printf( "\x1b[H" );
+		this->render_header( );
+
+		for ( std::uint32_t i{ 0u }; i < visible; i++ ) {
+			this->render_row( detections[ i ] );
+		}
+
+		std::printf( "\x1b[J" );
+		this->render_footer( static_cast< std::uint32_t >( detections.size( ) ) );
+	}
+
+	void console::render_header( )
+	{
+		std::printf( "\n" );
+		std::printf( "  \x1b[2m%-28s %-10s %-20s %5s %7s  %-14s\x1b[0m\n", "target", "pfn", "kernel va", "refs", "caught", "flags" );
+		std::printf( "  \x1b[90m%-28s %-10s %-20s %5s %7s  %-14s\x1b[0m\n\n", "------", "---", "---------", "----", "------", "-----" );
+	}
+
+	void console::render_row( const tracked_detection& detection )
+	{
+		char target[ 256 ]{};
+
+		if ( !detection.target_address ) {
+			std::snprintf( target, sizeof( target ), "unknown" );
+		}
+		else
+		{
+			HMODULE module{};
+			if ( !::GetModuleHandleExW( GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT, reinterpret_cast< LPCWSTR >( detection.target_address ), &module ) ) {
+				std::snprintf( target, sizeof( target ), "0x%llx (private)", detection.target_address );
+			}
+			else
+			{
+				wchar_t path[ MAX_PATH ]{};
+				::GetModuleFileNameW( module, path, MAX_PATH );
+
+				auto* name = ::wcsrchr( path, L'\\' );
+				name = name ? name + 1 : path;
+
+				const auto offset = detection.target_address - reinterpret_cast< std::uint64_t >( module );
+				std::snprintf( target, sizeof( target ), "%ls+0x%llx", name, offset );
+			}
+		}
+
+		char flags[ 64 ]{};
+		format_flags( detection.pte_value, flags, sizeof( flags ) );
+
+		const auto* color = detection.total_ticks >= 50u ? "\x1b[91m" : detection.total_ticks >= 10u ? "\x1b[93m" : "\x1b[97m";
+
+		std::printf( "  \x1b[38;2;140;200;210m%-28s\x1b[0m \x1b[90m0x%-8llx\x1b[0m \x1b[90m0x%016llx\x1b[0m \x1b[2m%5hu\x1b[0m %s%7u\x1b[0m  \x1b[2m%s\x1b[0m\n", target, detection.pfn, detection.virtual_address, detection.reference_count, color, detection.total_ticks, flags );
+	}
+
+	void console::render_footer( std::uint32_t count )
+	{
+		std::printf( "\n  \x1b[90m%u detection(s)\x1b[0m\n", count );
+	}
+
+} // namespace core
+
+```
+
+`pfnwatch/client/project/core/console/console.hpp`:
+
+```hpp
+// client/project/core/console/console.hpp
+#pragma once
+
+namespace core {
+
+	struct tracked_detection
+	{
+		std::uint64_t pfn;
+		std::uint64_t virtual_address;
+		std::uint64_t pte_value;
+		std::uint64_t target_address;
+		std::uint16_t reference_count;
+		std::uint8_t cache_type;
+		std::uint32_t total_ticks;
+	};
+
+	class console
+	{
+	public:
+		void initialize( );
+		void shutdown( );
+		void render( const std::vector<tracked_detection>& detections );
+
+	private:
+		void render_header( );
+		void render_row( const tracked_detection& detection );
+		void render_footer( std::uint32_t count );
+	};
+
+} // namespace core
+
+```
+
+`pfnwatch/client/project/core/driver/driver.cpp`:
+
+```cpp
+// project/core/driver/driver.cpp
+#include "../../global.hpp"
+
+namespace core {
+
+	bool driver::open( )
+	{
+		auto handle = ::CreateFileW( L"\\\\.\\pfnwatch", GENERIC_READ | GENERIC_WRITE, 0, nullptr, OPEN_EXISTING, 0, nullptr );
+		if ( handle == INVALID_HANDLE_VALUE ) {
+			return false;
+		}
+
+		this->m_handle = handle;
+
+		return true;
+	}
+
+	void driver::close( )
+	{
+		::CloseHandle( this->m_handle );
+	}
+
+	bool driver::assign_process( unsigned long pid )
+	{
+		shared::ioctl::request request{};
+		request.assign_process.process_id = pid;
+
+		this->m_pid = pid;
+
+		unsigned long bytes{ 0u };
+		return ::DeviceIoControl( this->m_handle, static_cast< unsigned long >( shared::ioctl::command::assign_process ), &request, sizeof( request ), nullptr, 0, &bytes, nullptr );
+	}
+
+	bool driver::read_virtual_memory( unsigned long long address, void* buffer, unsigned long size )
+	{
+		shared::ioctl::request request{};
+		request.read_virtual_memory.process_id = this->m_pid;
+		request.read_virtual_memory.address = address;
+		request.read_virtual_memory.size = size;
+
+		unsigned long bytes{ 0u };
+		return ::DeviceIoControl( this->m_handle, static_cast< unsigned long >( shared::ioctl::command::read_virtual_memory ), &request, sizeof( request ), buffer, size, &bytes, nullptr );
+	}
+
+	unsigned long driver::read_report( shared::ioctl::detection* buffer, unsigned long max_count )
+	{
+		shared::ioctl::request request{};
+		unsigned long bytes{ 0u };
+
+		if ( !::DeviceIoControl( this->m_handle, static_cast< unsigned long >( shared::ioctl::command::read_report ), &request, sizeof( request ), buffer, max_count * sizeof( shared::ioctl::detection ), &bytes, nullptr ) ) {
+			return 0u;
+		}
+
+		return bytes / sizeof( shared::ioctl::detection );
+	}
+
+} // namespace core
+
+```
+
+`pfnwatch/client/project/core/driver/driver.hpp`:
+
+```hpp
+// project/core/driver/driver.hpp
+#pragma once
+
+namespace core {
+
+	class driver
+	{
+	public:
+		bool open( );
+		void close( );
+
+		bool assign_process( unsigned long pid );
+		bool read_virtual_memory( unsigned long long address, void* buffer, unsigned long size );
+		unsigned long read_report( shared::ioctl::detection* buffer, unsigned long max_count );
+
+	private:
+		unsigned long m_pid;
+		void* m_handle;
+	};
+
+} // namespace core
+
+```
+
+`pfnwatch/client/project/core/reader/reader.cpp`:
+
+```cpp
+// project/core/reader/reader.cpp
+#include "../../global.hpp"
+
+namespace core {
+
+	void reader::start( )
+	{
+		std::thread( [ ] { reader::routine( ); } ).detach( );
+	}
+
+	unsigned long __stdcall reader::routine( )
+	{
+		const auto base = reinterpret_cast< std::uintptr_t >( ::GetModuleHandleW( nullptr ) );
+
+		unsigned char buffer[ 0x1000 ];
+
+		while ( true )
+		{
+			g.m_driver.read_virtual_memory( base + 0x1000, buffer, 0x1000u );
+			g.m_driver.read_virtual_memory( base + 0x2000, buffer, 0x1000u );
+			g.m_driver.read_virtual_memory( base + 0x3000, buffer, 0x1000u );
+			g.m_driver.read_virtual_memory( base + 0x4000, buffer, 0x1000u );
+			g.m_driver.read_virtual_memory( base + 0x5000, buffer, 0x1000u );
+			g.m_driver.read_virtual_memory( base + 0x6000, buffer, 0x1000u );
+		}
+
+		return 0u;
+	}
+
+} // namespace core
+
+```
+
+`pfnwatch/client/project/core/reader/reader.hpp`:
+
+```hpp
+// project/core/reader/reader.hpp
+#pragma once
+
+namespace core {
+
+	class reader
+	{
+	public:
+		void start( );
+
+	private:
+		static unsigned long __stdcall routine( );
+	};
+
+} // namespace core
+
+```
+
+`pfnwatch/client/project/global.hpp`:
+
+```hpp
+// project/global.hpp
+#pragma once
+
+#define NOMINMAX
+
+// windows
+#include <Windows.h>
+
+// standard
+#include <cstdio>
+#include <vector>
+#include <unordered_map>
+#include <utility>
+#include <thread>
+#include <algorithm>
+#include <chrono>
+
+// shared
+#include "../../shared/ioctl.hpp"
+
+// core
+#include "core/console/console.hpp"
+#include "core/driver/driver.hpp"
+#include "core/reader/reader.hpp"
+
+struct global
+{
+	core::console m_console;
+	core::driver m_driver;
+	core::reader m_reader;
+} inline g;
+
+```
+
+`pfnwatch/driver/driver.inf`:
+
+```inf
+;
+; driver.inf
+;
+
+[Version]
+Signature   = "$WINDOWS NT$"
+Class       = System
+ClassGuid   = {4d36e97d-e325-11ce-bfc1-08002be10318}
+Provider    = %ManufacturerName%
+CatalogFile = driver.cat
+DriverVer   = 01/01/2020,1.0.0.0
+PnpLockdown = 1
+
+[DestinationDirs]
+DefaultDestDir = 13
+
+[SourceDisksNames]
+1 = %DiskName%,,,""
+
+[SourceDisksFiles]
+driver.sys = 1,,
+
+;*************DriverVer   ****************************
+; Install Section
+;*****************************************
+
+[Manufacturer]
+%ManufacturerName% = Standard,NTamd64.10.0...16299
+
+[Standard.NTamd64.10.0...16299]
+%driver.DeviceDesc% = driver_Device, Root\pfnwatch
+
+[driver_Device.NT]
+CopyFiles = File_Copy
+
+[File_Copy]
+driver.sys
+
+;-------------- Service installation
+[driver_Device.NT.Services]
+AddService = pfnwatch,%SPSVCINST_ASSOCSERVICE%, driver_Service_Inst
+
+; -------------- driver install sections
+[driver_Service_Inst]
+DisplayName    = %driver.SVCDESC%
+ServiceType    = 1               ; SERVICE_KERNEL_DRIVER
+StartType      = 3               ; SERVICE_DEMAND_START
+ErrorControl   = 1               ; SERVICE_ERROR_NORMAL
+ServiceBinary  = %13%\driver.sys
+
+[driver_Device.NT.Wdf]
+KmdfService = pfnwatch, driver_wdfsect
+
+[driver_wdfsect]
+KmdfLibraryVersion = 1.15
+
+[Strings]
+SPSVCINST_ASSOCSERVICE = 0x00000002
+ManufacturerName = "pfnwatch"
+DiskName = "pfnwatch Installation Disk"
+driver.DeviceDesc = "pfnwatch Device"
+driver.SVCDESC = "pfnwatch Service"
+
+```
+
+`pfnwatch/driver/driver.vcxproj`:
+
+```vcxproj
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{D59F7487-8398-D47A-449B-5D462CE5E701}</ProjectGuid>
+    <TemplateGuid>{1bc93793-694f-48fe-9372-81e2b05556fd}</TemplateGuid>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <MinimumVisualStudioVersion>12.0</MinimumVisualStudioVersion>
+    <Configuration>Debug</Configuration>
+    <Platform Condition="'$(Platform)' == ''">x64</Platform>
+    <RootNamespace>driver</RootNamespace>
+    <WindowsTargetPlatformVersion>$(LatestTargetPlatformVersion)</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <TargetVersion>Windows10</TargetVersion>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>WindowsKernelModeDriver10.0</PlatformToolset>
+    <ConfigurationType>Driver</ConfigurationType>
+    <DriverType>KMDF</DriverType>
+    <DriverTargetPlatform>Universal</DriverTargetPlatform>
+    <EnableUnitySupport>true</EnableUnitySupport>
+    <Driver_SpectreMitigation>Spectre</Driver_SpectreMitigation>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <DebuggerFlavor>DbgengKernelDebugger</DebuggerFlavor>
+    <OutDir>$(SolutionDir)\build\</OutDir>
+    <IntDir>$(SolutionDir)\build\intermediates\$(ProjectName)\</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Inf2Cat>
+      <UseLocalTime>true</UseLocalTime>
+    </Inf2Cat>
+    <DriverSign>
+      <FileDigestAlgorithm>sha256</FileDigestAlgorithm>
+    </DriverSign>
+    <ClCompile>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <TreatWarningAsError>false</TreatWarningAsError>
+      <Optimization>Disabled</Optimization>
+      <FavorSizeOrSpeed>Neither</FavorSizeOrSpeed>
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
+      <DebugInformationFormat>None</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <OptimizeReferences>false</OptimizeReferences>
+      <EnableCOMDATFolding>false</EnableCOMDATFolding>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <Inf Include="driver.inf">
+      <SpecifyDriverVerDirectiveDate>true</SpecifyDriverVerDirectiveDate>
+      <DateStamp>01/01/2024</DateStamp>
+    </Inf>
+  </ItemGroup>
+  <ItemGroup>
+    <FilesToPackage Include="$(TargetPath)" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="entry.cpp" />
+    <ClCompile Include="project\core\collector\collector.cpp" />
+    <ClCompile Include="project\core\dispatcher\dispatcher.cpp" />
+    <ClCompile Include="project\core\kernel\kernel.cpp" />
+    <ClCompile Include="project\core\scanner\scanner.cpp" />
+    <ClCompile Include="project\core\worker\worker.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="project\common\nt.hpp" />
+    <ClInclude Include="project\core\collector\collector.hpp" />
+    <ClInclude Include="project\core\dispatcher\dispatcher.hpp" />
+    <ClInclude Include="project\core\kernel\kernel.hpp" />
+    <ClInclude Include="project\core\scanner\scanner.hpp" />
+    <ClInclude Include="project\core\worker\worker.hpp" />
+    <ClInclude Include="project\global.hpp" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
+```
+
+`pfnwatch/driver/driver.vcxproj.filters`:
+
+```filters
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Driver Files">
+      <UniqueIdentifier>{8E41214B-6785-4CFE-B992-037D68949A14}</UniqueIdentifier>
+      <Extensions>inf;inv;inx;mof;mc;</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <Inf Include="driver.inf">
+      <Filter>Driver Files</Filter>
+    </Inf>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="entry.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="project\core\worker\worker.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="project\core\kernel\kernel.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="project\core\dispatcher\dispatcher.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="project\core\scanner\scanner.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="project\global.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="project\core\worker\worker.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="project\core\kernel\kernel.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="project\common\nt.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="project\core\dispatcher\dispatcher.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="project\core\scanner\scanner.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
+```
+
+`pfnwatch/driver/entry.cpp`:
+
+```cpp
+// entry.cpp
+#include "project/global.hpp"
+
+namespace handlers {
+
+	static NTSTATUS device_add( WDFDRIVER driver, PWDFDEVICE_INIT device_init )
+	{
+		return g.m_dispatcher.device_add( driver, device_init );
+	}
+
+	static void driver_unload( WDFDRIVER driver )
+	{
+		g.m_dispatcher.driver_unload( driver );
+	}
+
+} // namespace entry
+
+extern "C" NTSTATUS DriverEntry( PDRIVER_OBJECT driver_object, PUNICODE_STRING registry_path )
+{
+	WDF_DRIVER_CONFIG config{};
+	WDF_DRIVER_CONFIG_INIT( &config, handlers::device_add );
+	config.EvtDriverUnload = handlers::driver_unload;
+
+	return ::WdfDriverCreate( driver_object, registry_path, WDF_NO_OBJECT_ATTRIBUTES, &config, WDF_NO_HANDLE );
+}
+
+```
+
+`pfnwatch/driver/project/common/nt.hpp`:
+
+```hpp
+// project/common/nt.hpp
+#pragma once
+
+extern "C" PVOID NTAPI RtlPcToFileHeader( PVOID pc_value, PVOID* base_of_image );
+extern "C" PVOID NTAPI PsGetProcessSectionBaseAddress( PEPROCESS process );
+
+namespace nt {
+
+	enum mmlists : unsigned long
+	{
+		zeroed_page_list = 0,
+		free_page_list = 1,
+		standby_page_list = 2,
+		modified_page_list = 3,
+		modified_no_write_page_list = 4,
+		bad_page_list = 5,
+		active_and_valid = 6,
+		transition_page = 7,
+	};
+
+	struct mmpfn_entry1
+	{
+		unsigned char page_location : 3;
+		unsigned char write_in_progress : 1;
+		unsigned char modified : 1;
+		unsigned char read_in_progress : 1;
+		unsigned char cache_attribute : 2;
+	};
+
+	static_assert( sizeof( mmpfn_entry1 ) == 0x1 );
+
+	struct mmpfn_entry3
+	{
+		unsigned char priority : 3;
+		unsigned char on_protected_standby : 1;
+		unsigned char in_page_error : 1;
+		unsigned char system_charged_page : 1;
+		unsigned char removal_requested : 1;
+		unsigned char parity_error : 1;
+	};
+
+	static_assert( sizeof( mmpfn_entry3 ) == 0x1 );
+
+	struct mmpfn
+	{
+		union
+		{
+			unsigned long long flink : 36;
+			void* next;
+		} u1;
+
+		void* pte_address;
+		unsigned long long original_pte;
+		unsigned long long u2;
+
+		union
+		{
+			struct
+			{
+				unsigned short reference_count;
+				mmpfn_entry1 e1;
+				mmpfn_entry3 e3;
+			};
+			unsigned long entire_field;
+		} u3;
+
+		unsigned short node_blink_low;
+
+		unsigned char unused : 4;
+		unsigned char unused2 : 4;
+
+		union
+		{
+			unsigned char view_count;
+			unsigned char node_flink_low;
+			struct
+			{
+				unsigned char modified_list_bucket_index : 4;
+				unsigned char anchor_large_page_size : 2;
+			};
+		};
+
+		union
+		{
+			struct
+			{
+				unsigned long long pte_frame : 36;
+				unsigned long long resident_page : 1;
+				unsigned long long unused1 : 1;
+				unsigned long long unused2 : 1;
+				unsigned long long partition : 10;
+				unsigned long long file_only : 1;
+				unsigned long long pfn_exists : 1;
+				unsigned long long spare : 9;
+				unsigned long long page_identity : 3;
+				unsigned long long prototype_pte : 1;
+			};
+			unsigned long long entire_field;
+		} u4;
+	};
+
+	static_assert( sizeof( mmpfn ) == 0x30 );
+
+} // namespace nt
+
+```
+
+`pfnwatch/driver/project/core/collector/collector.cpp`:
+
+```cpp
+// project/core/collector/collector.cpp
+#include "../../global.hpp"
+
+namespace core {
+
+	NTSTATUS collector::assign( unsigned long pid )
+	{
+		PEPROCESS process{ nullptr };
+		const auto status = ::PsLookupProcessByProcessId( reinterpret_cast< void* >( static_cast< uintptr_t >( pid ) ), &process );
+
+		if ( !NT_SUCCESS( status ) ) {
+			return status;
+		}
+
+		if ( this->m_target_process ) {
+			::ObfDereferenceObject( this->m_target_process );
+		}
+
+		this->m_target_process = process;
+		this->m_tick_count = 0u;
+
+		this->resolve_image_range( );
+
+		return STATUS_SUCCESS;
+	}
+
+	bool collector::collect( )
+	{
+		if ( !this->m_target_process ) {
+			return false;
+		}
+
+		if ( this->m_pfn_bitmap and this->m_tick_count % 100u != 0u )
+		{
+			this->m_tick_count++;
+			return false;
+		}
+
+		this->ensure_bitmap( );
+		if ( !this->m_pfn_bitmap )
+		{
+			this->m_tick_count++;
+			return false;
+		}
+
+		::memset( this->m_pfn_bitmap, 0, this->m_pfn_bitmap_size );
+		this->m_image_pfn_count = 0u;
+
+		KAPC_STATE apc_state{};
+		::KeStackAttachProcess( static_cast< PEPROCESS >( this->m_target_process ), &apc_state );
+
+		const auto* pxe = reinterpret_cast< const unsigned long long* >( g.m_kernel.m_pxe_base );
+		for ( unsigned long i{ 0u }; i < 256u; i++ )
+		{
+			if ( !( pxe[ i ] & 1ull ) ) {
+				continue;
+			}
+
+			this->walk_pdpt( static_cast< unsigned long long >( i ) << 39ull );
+		}
+
+		::KeUnstackDetachProcess( &apc_state );
+
+		this->m_tick_count++;
+		return true;
+	}
+
+	void collector::cleanup( )
+	{
+		if ( this->m_target_process )
+		{
+			::ObfDereferenceObject( this->m_target_process );
+			this->m_target_process = nullptr;
+		}
+
+		if ( this->m_pfn_bitmap )
+		{
+			::ExFreePoolWithTag( this->m_pfn_bitmap, 'pfnw' );
+			this->m_pfn_bitmap = nullptr;
+		}
+
+		if ( this->m_image_pfns )
+		{
+			::ExFreePoolWithTag( this->m_image_pfns, 'pfnw' );
+			this->m_image_pfns = nullptr;
+			this->m_image_pfn_count = 0u;
+			this->m_image_pfn_capacity = 0u;
+		}
+
+		this->m_image_base = 0ull;
+		this->m_image_end = 0ull;
+	}
+
+	bool collector::ready( ) const
+	{
+		return this->m_pfn_bitmap != nullptr;
+	}
+
+	bool collector::check_pfn( unsigned long long pfn ) const
+	{
+		if ( pfn >= this->m_pfn_bitmap_size * 8ull ) {
+			return false;
+		}
+
+		return ( this->m_pfn_bitmap[ pfn >> 3ull ] >> ( pfn & 7ull ) ) & 1u;
+	}
+
+	bool collector::verify_pfn( unsigned long long pfn ) const
+	{
+		const auto* database = static_cast< const nt::mmpfn* >( g.m_kernel.m_pfn_database );
+		const auto& entry = database[ pfn ];
+
+		return entry.u3.e1.page_location == nt::mmlists::active_and_valid;
+	}
+
+	unsigned long long collector::resolve_target_va( unsigned long long pfn ) const
+	{
+		for ( unsigned long i{ 0u }; i < this->m_image_pfn_count; i++ )
+		{
+			if ( this->m_image_pfns[ i ].pfn == pfn ) {
+				return this->m_image_pfns[ i ].va;
+			}
+		}
+
+		const auto* database = static_cast< const nt::mmpfn* >( g.m_kernel.m_pfn_database );
+		const auto pte_addr = reinterpret_cast< unsigned long long >( database[ pfn ].pte_address );
+
+		return ( pte_addr - g.m_kernel.m_pte_base ) << 9ull;
+	}
+
+	void collector::resolve_image_range( )
+	{
+		this->m_image_base = 0ull;
+		this->m_image_end = 0ull;
+
+		const auto base = reinterpret_cast< unsigned long long >( ::PsGetProcessSectionBaseAddress( static_cast< PEPROCESS >( this->m_target_process ) ) );
+		if ( !base ) {
+			return;
+		}
+
+		KAPC_STATE apc_state{};
+		::KeStackAttachProcess( static_cast< PEPROCESS >( this->m_target_process ), &apc_state );
+
+		__try
+		{
+			const auto* dos = reinterpret_cast< const IMAGE_DOS_HEADER* >( base );
+			const auto* nt = reinterpret_cast< const IMAGE_NT_HEADERS* >( base + dos->e_lfanew );
+
+			if ( dos->e_magic == IMAGE_DOS_SIGNATURE and nt->Signature == IMAGE_NT_SIGNATURE )
+			{
+				this->m_image_base = base;
+				this->m_image_end = base + nt->OptionalHeader.SizeOfImage;
+			}
+		}
+		__except ( EXCEPTION_EXECUTE_HANDLER )
+		{
+		}
+
+		::KeUnstackDetachProcess( &apc_state );
+	}
+
+	void collector::ensure_bitmap( )
+	{
+		if ( this->m_pfn_bitmap ) {
+			return;
+		}
+
+		unsigned long long max_pfn{ 0x100000ull };
+
+		const auto* ranges = ::MmGetPhysicalMemoryRanges( );
+		if ( ranges )
+		{
+			for ( unsigned long i{ 0u }; ranges[ i ].BaseAddress.QuadPart or ranges[ i ].NumberOfBytes.QuadPart; i++ )
+			{
+				const auto end = ( ranges[ i ].BaseAddress.QuadPart + ranges[ i ].NumberOfBytes.QuadPart ) >> 12ull;
+				if ( static_cast< unsigned long long >( end ) > max_pfn ) {
+					max_pfn = static_cast< unsigned long long >( end );
+				}
+			}
+
+			::ExFreePool( const_cast< PHYSICAL_MEMORY_RANGE* >( ranges ) );
+		}
+
+		this->m_pfn_bitmap_size = ( max_pfn + 7ull ) / 8ull;
+		this->m_pfn_bitmap = static_cast< unsigned char* >( ::ExAllocatePool2( POOL_FLAG_NON_PAGED, this->m_pfn_bitmap_size, 'pfnw' ) );
+	}
+
+	void collector::walk_pdpt( unsigned long long va_base )
+	{
+		const auto pml4_index = ( va_base >> 39ull ) & 0x1ffull;
+		const auto* table = reinterpret_cast< const unsigned long long* >( g.m_kernel.m_ppe_base + pml4_index * 0x1000ull );
+
+		for ( unsigned long i{ 0u }; i < 512u; i++ )
+		{
+			if ( !( table[ i ] & 1ull ) ) {
+				continue;
+			}
+
+			if ( table[ i ] & 0x80ull )
+			{
+				const auto base_pfn = ( table[ i ] >> 12ull ) & 0xffffffffffull;
+				const auto large_va = va_base | ( static_cast< unsigned long long >( i ) << 30ull );
+
+				for ( unsigned long long j{ 0ull }; j < 0x40000ull; j++ ) {
+					this->mark_pfn( base_pfn + j, large_va + ( j << 12ull ) );
+				}
+				continue;
+			}
+
+			this->walk_pd( va_base | ( static_cast< unsigned long long >( i ) << 30ull ) );
+		}
+	}
+
+	void collector::walk_pd( unsigned long long va_base )
+	{
+		const auto flat_index = ( va_base >> 30ull ) & 0x3ffffull;
+		const auto* table = reinterpret_cast< const unsigned long long* >( g.m_kernel.m_pde_base + flat_index * 0x1000ull );
+
+		for ( unsigned long i{ 0u }; i < 512u; i++ )
+		{
+			if ( !( table[ i ] & 1ull ) ) {
+				continue;
+			}
+
+			if ( table[ i ] & 0x80ull )
+			{
+				const auto base_pfn = ( table[ i ] >> 12ull ) & 0xffffffffffull;
+				const auto large_va = va_base | ( static_cast< unsigned long long >( i ) << 21ull );
+
+				for ( unsigned long long j{ 0ull }; j < 0x200ull; j++ ) {
+					this->mark_pfn( base_pfn + j, large_va + ( j << 12ull ) );
+				}
+				continue;
+			}
+
+			this->walk_pt( va_base | ( static_cast< unsigned long long >( i ) << 21ull ) );
+		}
+	}
+
+	void collector::walk_pt( unsigned long long va_base )
+	{
+		const auto flat_index = ( va_base >> 21ull ) & 0x7ffffffull;
+		const auto* table = reinterpret_cast< const unsigned long long* >( g.m_kernel.m_pte_base + flat_index * 0x1000ull );
+
+		for ( unsigned long i{ 0u }; i < 512u; i++ )
+		{
+			if ( !( table[ i ] & 1ull ) ) {
+				continue;
+			}
+
+			const auto pfn = ( table[ i ] >> 12ull ) & 0xffffffffffull;
+			const auto va = va_base | ( static_cast< unsigned long long >( i ) << 12ull );
+
+			this->mark_pfn( pfn, va );
+		}
+	}
+
+	void collector::mark_pfn( unsigned long long pfn, unsigned long long va )
+	{
+		if ( pfn >= this->m_pfn_bitmap_size * 8ull ) {
+			return;
+		}
+
+		const auto* database = static_cast< const nt::mmpfn* >( g.m_kernel.m_pfn_database );
+		const auto& entry = database[ pfn ];
+
+		if ( entry.u3.e1.page_location != nt::mmlists::active_and_valid ) {
+			return;
+		}
+
+		if ( entry.u4.prototype_pte and ( va < this->m_image_base or va >= this->m_image_end ) ) {
+			return;
+		}
+
+		this->m_pfn_bitmap[ pfn >> 3ull ] |= ( 1u << ( pfn & 7ull ) );
+
+		if ( entry.u4.prototype_pte ) {
+			this->record_image_pfn( pfn, va );
+		}
+	}
+
+	void collector::record_image_pfn( unsigned long long pfn, unsigned long long va )
+	{
+		if ( this->m_image_pfn_count >= this->m_image_pfn_capacity )
+		{
+			const auto new_capacity = this->m_image_pfn_capacity ? this->m_image_pfn_capacity * 2u : 1024u;
+			auto* new_buffer = static_cast< image_pfn* >( ::ExAllocatePool2( POOL_FLAG_NON_PAGED, new_capacity * sizeof( image_pfn ), 'pfnw' ) );
+
+			if ( !new_buffer ) {
+				return;
+			}
+
+			if ( this->m_image_pfns )
+			{
+				::memcpy( new_buffer, this->m_image_pfns, this->m_image_pfn_count * sizeof( image_pfn ) );
+				::ExFreePoolWithTag( this->m_image_pfns, 'pfnw' );
+			}
+
+			this->m_image_pfns = new_buffer;
+			this->m_image_pfn_capacity = new_capacity;
+		}
+
+		auto& entry = this->m_image_pfns[ this->m_image_pfn_count ];
+		entry.pfn = pfn;
+		entry.va = va;
+		this->m_image_pfn_count++;
+	}
+
+} // namespace core
+
+```
+
+`pfnwatch/driver/project/core/collector/collector.hpp`:
+
+```hpp
+// project/core/collector/collector.hpp
+#pragma once
+
+namespace core {
+
+	class collector
+	{
+	public:
+		NTSTATUS assign( unsigned long pid );
+		bool collect( );
+		void cleanup( );
+
+		bool ready( ) const;
+		bool check_pfn( unsigned long long pfn ) const;
+		bool verify_pfn( unsigned long long pfn ) const;
+		unsigned long long resolve_target_va( unsigned long long pfn ) const;
+
+	private:
+		void resolve_image_range( );
+		void ensure_bitmap( );
+
+		void walk_pdpt( unsigned long long va_base );
+		void walk_pd( unsigned long long va_base );
+		void walk_pt( unsigned long long va_base );
+
+		void mark_pfn( unsigned long long pfn, unsigned long long va );
+		void record_image_pfn( unsigned long long pfn, unsigned long long va );
+
+	private:
+		void* m_target_process;
+
+		unsigned long long m_image_base;
+		unsigned long long m_image_end;
+
+		unsigned char* m_pfn_bitmap;
+		unsigned long long m_pfn_bitmap_size;
+
+		unsigned long m_tick_count;
+
+		struct image_pfn
+		{
+			unsigned long long pfn;
+			unsigned long long va;
+		};
+
+		image_pfn* m_image_pfns;
+		unsigned long m_image_pfn_count;
+		unsigned long m_image_pfn_capacity;
+	};
+
+} // namespace core
+
+```
+
+`pfnwatch/driver/project/core/dispatcher/dispatcher.cpp`:
+
+```cpp
+// project/core/dispatcher/dispatcher.cpp
+#include "../../global.hpp"
+
+namespace core {
+
+	NTSTATUS dispatcher::device_add( WDFDRIVER driver, PWDFDEVICE_INIT device_init )
+	{
+		UNREFERENCED_PARAMETER( driver );
+
+		DECLARE_CONST_UNICODE_STRING( device_name, L"\\Device\\pfnwatch" );
+		DECLARE_CONST_UNICODE_STRING( symlink_name, L"\\DosDevices\\pfnwatch" );
+
+		::WdfDeviceInitSetIoType( device_init, WDF_DEVICE_IO_TYPE::WdfDeviceIoBuffered );
+		::WdfDeviceInitAssignName( device_init, &device_name );
+
+		WDFDEVICE device{};
+		auto status = ::WdfDeviceCreate( &device_init, WDF_NO_OBJECT_ATTRIBUTES, &device );
+		if ( !NT_SUCCESS( status ) ) {
+			return status;
+		}
+
+		status = ::WdfDeviceCreateSymbolicLink( device, &symlink_name );
+		if ( !NT_SUCCESS( status ) ) {
+			return status;
+		}
+
+		WDF_IO_QUEUE_CONFIG queue_config{};
+		::WDF_IO_QUEUE_CONFIG_INIT_DEFAULT_QUEUE( &queue_config, WDF_IO_QUEUE_DISPATCH_TYPE::WdfIoQueueDispatchParallel );
+		queue_config.EvtIoDeviceControl = dispatcher::device_control;
+
+		WDFQUEUE queue{};
+		status = ::WdfIoQueueCreate( device, &queue_config, WDF_NO_OBJECT_ATTRIBUTES, &queue );
+		if ( !NT_SUCCESS( status ) ) {
+			return status;
+		}
+
+		if ( !g.m_kernel.initialize( ) ) {
+			return STATUS_FAILED_DRIVER_ENTRY;
+		}
+
+		status = g.m_worker.start( );
+		if ( !NT_SUCCESS( status ) ) {
+			return status;
+		}
+
+		return STATUS_SUCCESS;
+	}
+
+	void dispatcher::driver_unload( WDFDRIVER )
+	{
+		g.m_worker.stop( );
+		g.m_collector.cleanup( );
+		g.m_scanner.cleanup( );
+	}
+
+	void dispatcher::device_control( WDFQUEUE queue, WDFREQUEST request, size_t output_buffer_length, size_t input_buffer_length, ULONG io_control_code )
+	{
+		shared::ioctl::request* input{};
+		auto status = ::WdfRequestRetrieveInputBuffer( request, sizeof( shared::ioctl::request ), reinterpret_cast< void** >( &input ), nullptr );
+
+		if ( !NT_SUCCESS( status ) )
+		{
+			::WdfRequestComplete( request, status );
+			return;
+		}
+
+		switch ( static_cast< shared::ioctl::command >( io_control_code ) )
+		{
+		case shared::ioctl::command::assign_process:
+			status = dispatcher::handle_assign_process( input );
+			break;
+
+		case shared::ioctl::command::read_virtual_memory:
+			status = dispatcher::handle_read_virtual_memory( input, request );
+			if ( NT_SUCCESS( status ) ) {
+				return;
+			}
+			break;
+
+		case shared::ioctl::command::read_report:
+			status = dispatcher::handle_read_report( request );
+			if ( NT_SUCCESS( status ) ) {
+				return;
+			}
+			break;
+
+		default:
+			status = STATUS_INVALID_DEVICE_REQUEST;
+			break;
+		}
+
+		::WdfRequestComplete( request, status );
+	}
+
+	NTSTATUS dispatcher::handle_assign_process( const shared::ioctl::request* input )
+	{
+		g.m_scanner.reset( );
+		return g.m_collector.assign( input->assign_process.process_id );
+	}
+
+	NTSTATUS dispatcher::handle_read_virtual_memory( const shared::ioctl::request* input, WDFREQUEST request )
+	{
+		PEPROCESS process{};
+		auto status = ::PsLookupProcessByProcessId( reinterpret_cast< void* >( static_cast< uintptr_t >( input->read_virtual_memory.process_id ) ), &process );
+
+		if ( !NT_SUCCESS( status ) ) {
+			return status;
+		}
+		 
+		KAPC_STATE apc_state{};
+		::KeStackAttachProcess( process, &apc_state );
+
+		const auto physical = ::MmGetPhysicalAddress( reinterpret_cast< void* >( input->read_virtual_memory.address ) );
+
+		::KeUnstackDetachProcess( &apc_state );
+		::ObfDereferenceObject( process );
+
+		if ( !physical.QuadPart ) {
+			return STATUS_INVALID_ADDRESS;
+		}
+
+		void* output{};
+		status = ::WdfRequestRetrieveOutputBuffer( request, input->read_virtual_memory.size, &output, nullptr );
+
+		if ( !NT_SUCCESS( status ) ) {
+			return status;
+		}
+
+		MM_COPY_ADDRESS source{};
+		source.PhysicalAddress = physical;
+
+		unsigned long long bytes_copied{ 0ull };
+		status = ::MmCopyMemory( output, source, input->read_virtual_memory.size, MM_COPY_MEMORY_PHYSICAL, reinterpret_cast< size_t* >( &bytes_copied ) );
+
+		if ( !NT_SUCCESS( status ) ) {
+			return status;
+		}
+
+		::WdfRequestCompleteWithInformation( request, STATUS_SUCCESS, bytes_copied );
+		return STATUS_SUCCESS;
+	}
+
+	NTSTATUS dispatcher::handle_read_report( WDFREQUEST request )
+	{
+		void* output{};
+		size_t output_length{};
+		const auto status = ::WdfRequestRetrieveOutputBuffer( request, sizeof( shared::ioctl::detection ), &output, &output_length );
+
+		if ( !NT_SUCCESS( status ) ) {
+			return status;
+		}
+
+		const auto max_count = static_cast< unsigned long >( output_length / sizeof( shared::ioctl::detection ) );
+
+		KIRQL old_irql{};
+		KeAcquireSpinLock( &g.m_scanner.m_lock, &old_irql );
+
+		const auto count = g.m_scanner.m_detection_count < max_count ? g.m_scanner.m_detection_count : max_count;
+		const auto size = count * sizeof( shared::ioctl::detection );
+
+		::memcpy( output, g.m_scanner.m_detections, size );
+		g.m_scanner.reset_detections( );
+
+		::KeReleaseSpinLock( &g.m_scanner.m_lock, old_irql );
+
+		::WdfRequestCompleteWithInformation( request, STATUS_SUCCESS, size );
+		return STATUS_SUCCESS;
+	}
+
+} // namespace core
+
+```
+
+`pfnwatch/driver/project/core/dispatcher/dispatcher.hpp`:
+
+```hpp
+// project/core/dispatcher/dispatcher.hpp
+#pragma once
+
+namespace core {
+
+	class dispatcher
+	{
+	public:
+		NTSTATUS device_add( WDFDRIVER driver, PWDFDEVICE_INIT device_init );
+		void driver_unload( WDFDRIVER );
+
+	private:
+		static void device_control( WDFQUEUE queue, WDFREQUEST request, size_t output_buffer_length, size_t input_buffer_length, ULONG io_control_code );
+
+		static NTSTATUS handle_assign_process( const shared::ioctl::request* input );
+		static NTSTATUS handle_read_virtual_memory( const shared::ioctl::request* input, WDFREQUEST request );
+		static NTSTATUS handle_read_report( WDFREQUEST request );
+	};
+
+} // namespace core
+
+```
+
+`pfnwatch/driver/project/core/kernel/kernel.cpp`:
+
+```cpp
+// project/core/kernel/kernel.cpp
+#include "../../global.hpp"
+
+namespace core {
+
+	bool kernel::initialize( )
+	{
+		::RtlPcToFileHeader( reinterpret_cast< void* >( &::MmGetSystemRoutineAddress ), &this->m_ntoskrnl_base );
+		if ( !this->m_ntoskrnl_base ) {
+			return false;
+		}
+
+		const auto* dos = static_cast< IMAGE_DOS_HEADER* >( this->m_ntoskrnl_base );
+		const auto* nt = reinterpret_cast< IMAGE_NT_HEADERS* >( reinterpret_cast< uintptr_t >( this->m_ntoskrnl_base ) + dos->e_lfanew );
+
+		this->m_ntoskrnl_size = nt->OptionalHeader.SizeOfImage;
+
+		const auto pfn_database = this->find_pfn_database( );
+		if ( !pfn_database ) {
+			return false;
+		}
+
+		this->m_pfn_database = pfn_database;
+
+		if ( !this->resolve_pte_base( ) ) {
+			return false;
+		}
+
+		this->resolve_hot_pml4( );
+
+		return true;
+	}
+
+	void* kernel::find_pfn_database( )
+	{
+		UNICODE_STRING name{};
+		::RtlInitUnicodeString( &name, L"MmGetVirtualForPhysical" );
+
+		const auto* function = static_cast< const unsigned char* >( ::MmGetSystemRoutineAddress( &name ) );
+		if ( !function ) {
+			return nullptr;
+		}
+
+		for ( unsigned long i{ 0u }; i < 32u; i++ )
+		{
+			if ( function[ i ] != 0x48u ) {
+				continue;
+			}
+
+			if ( function[ i + 1 ] == 0xb8u )
+			{
+				const auto immediate = *reinterpret_cast< const uintptr_t* >( &function[ i + 2 ] );
+				return reinterpret_cast< void* >( immediate & ~0xfull );
+			}
+
+			if ( function[ i + 1 ] == 0x8bu and ( function[ i + 2 ] & 0xc7u ) == 0x05u )
+			{
+				const auto offset = *reinterpret_cast< const int* >( &function[ i + 3 ] );
+				return *reinterpret_cast< void** >( reinterpret_cast< uintptr_t >( &function[ i + 7 ] ) + offset );
+			}
+		}
+
+		return nullptr;
+	}
+
+	bool kernel::resolve_pte_base( )
+	{
+		const auto cr3 = ::__readcr3( ) & ~0xfffull;
+		const auto cr3_pfn = cr3 >> 12ull;
+
+		auto* pml4 = static_cast< unsigned long long* >( ::ExAllocatePool2( POOL_FLAG_NON_PAGED, 0x1000u, 'pfnw' ) );
+		if ( !pml4 ) {
+			return false;
+		}
+
+		PHYSICAL_ADDRESS pa{};
+		pa.QuadPart = static_cast< long long >( cr3 );
+
+		MM_COPY_ADDRESS source{};
+		source.PhysicalAddress = pa;
+
+		size_t bytes_copied{ 0 };
+		const auto status = ::MmCopyMemory( pml4, source, 0x1000u, MM_COPY_MEMORY_PHYSICAL, &bytes_copied );
+
+		if ( !NT_SUCCESS( status ) )
+		{
+			::ExFreePoolWithTag( pml4, 'pfnw' );
+			return false;
+		}
+
+		auto index = ~0ul;
+		for ( unsigned long i{ 0u }; i < 512u; i++ )
+		{
+			if ( !( pml4[ i ] & 1ull ) ) {
+				continue;
+			}
+
+			if ( ( ( pml4[ i ] >> 12ull ) & 0xffffffffffull ) == cr3_pfn )
+			{
+				index = i;
+				break;
+			}
+		}
+
+		::ExFreePoolWithTag( pml4, 'pfnw' );
+
+		if ( index == ~0ul ) {
+			return false;
+		}
+
+		this->m_self_ref_index = index;
+
+		auto base = static_cast< unsigned long long >( index ) << 39ull;
+		if ( base & ( 1ull << 47ull ) ) {
+			base |= 0xffff000000000000ull;
+		}
+
+		this->m_pte_base = base;
+		this->m_pde_base = base + ( static_cast< unsigned long long >( index ) << 30ull );
+		this->m_ppe_base = this->m_pde_base + ( static_cast< unsigned long long >( index ) << 21ull );
+		this->m_pxe_base = this->m_ppe_base + ( static_cast< unsigned long long >( index ) << 12ull );
+
+		return true;
+	}
+
+	void kernel::resolve_hot_pml4( )
+	{
+		PHYSICAL_ADDRESS pa{};
+		pa.QuadPart = 0x1000ll;
+
+		auto* mapped = ::MmMapIoSpace( pa, 0x1000u, MmNonCached );
+		if ( !mapped ) {
+			return;
+		}
+
+		this->m_hot_pml4_index = static_cast< unsigned long >( ( reinterpret_cast< unsigned long long >( mapped ) >> 39ull ) & 0x1ffull );
+
+		::MmUnmapIoSpace( mapped, 0x1000u );
+	}
+
+} // namespace core
+
+```
+
+`pfnwatch/driver/project/core/kernel/kernel.hpp`:
+
+```hpp
+// project/core/kernel/kernel.hpp
+#pragma once
+
+namespace core {
+
+	class kernel
+	{
+	public:
+		bool initialize( );
+
+		void* m_ntoskrnl_base;
+		unsigned long m_ntoskrnl_size;
+		void* m_pfn_database;
+
+		unsigned long long m_pte_base;
+		unsigned long long m_pde_base;
+		unsigned long long m_ppe_base;
+		unsigned long long m_pxe_base;
+		unsigned long m_self_ref_index;
+		unsigned long m_hot_pml4_index;
+
+	private:
+		void* find_pfn_database( );
+		bool resolve_pte_base( );
+		void resolve_hot_pml4( );
+	};
+
+} // namespace core
+
+```
+
+`pfnwatch/driver/project/core/scanner/scanner.cpp`:
+
+```cpp
+// project/core/scanner/scanner.cpp
+#include "../../global.hpp"
+
+namespace core {
+
+	void scanner::tick( )
+	{
+		if ( g.m_collector.collect( ) ) {
+			this->cache_hot_pt_pages( );
+		}
+
+		if ( !g.m_collector.ready( ) ) {
+			return;
+		}
+
+		this->scan_kernel_ptes( );
+	}
+
+	void scanner::reset( )
+	{
+		this->m_detection_count = 0u;
+		this->m_cold_cursor = 256u;
+		::KeInitializeSpinLock( &this->m_lock );
+	}
+
+	void scanner::cleanup( )
+	{
+		if ( this->m_detections )
+		{
+			::ExFreePoolWithTag( this->m_detections, 'pfnw' );
+			this->m_detections = nullptr;
+			this->m_detection_capacity = 0u;
+		}
+
+		if ( this->m_cached_pts )
+		{
+			::ExFreePoolWithTag( this->m_cached_pts, 'pfnw' );
+			this->m_cached_pts = nullptr;
+			this->m_cached_pt_count = 0u;
+			this->m_cached_pt_capacity = 0u;
+		}
+	}
+
+	void scanner::reset_detections( )
+	{
+		this->m_detection_count = 0u;
+	}
+
+	void scanner::scan_kernel_ptes( )
+	{
+		this->scan_cached_hot( );
+		this->scan_cold_entry( );
+	}
+
+	void scanner::cache_hot_pt_pages( )
+	{
+		this->m_cached_pt_count = 0u;
+
+		const auto* pxe = reinterpret_cast< const unsigned long long* >( g.m_kernel.m_pxe_base );
+		if ( !( pxe[ g.m_kernel.m_hot_pml4_index ] & 1ull ) ) {
+			return;
+		}
+
+		auto va_base = static_cast< unsigned long long >( g.m_kernel.m_hot_pml4_index ) << 39ull;
+		if ( va_base & ( 1ull << 47ull ) ) {
+			va_base |= 0xffff000000000000ull;
+		}
+
+		const auto pml4_index = ( va_base >> 39ull ) & 0x1ffull;
+		const auto* pdpt = reinterpret_cast< const unsigned long long* >( g.m_kernel.m_ppe_base + pml4_index * 0x1000ull );
+
+		for ( unsigned long i{ 0u }; i < 512u; i++ )
+		{
+			if ( !( pdpt[ i ] & 1ull ) or ( pdpt[ i ] & 0x80ull ) ) {
+				continue;
+			}
+
+			const auto pdpt_va = va_base | ( static_cast< unsigned long long >( i ) << 30ull );
+			const auto pd_flat = ( pdpt_va >> 30ull ) & 0x3ffffull;
+			const auto* pd = reinterpret_cast< const unsigned long long* >( g.m_kernel.m_pde_base + pd_flat * 0x1000ull );
+
+			for ( unsigned long j{ 0u }; j < 512u; j++ )
+			{
+				if ( !( pd[ j ] & 1ull ) or ( pd[ j ] & 0x80ull ) ) {
+					continue;
+				}
+
+				const auto pd_va = pdpt_va | ( static_cast< unsigned long long >( j ) << 21ull );
+				const auto pt_flat = ( pd_va >> 21ull ) & 0x7ffffffull;
+
+				if ( this->m_cached_pt_count >= this->m_cached_pt_capacity )
+				{
+					const auto new_capacity = this->m_cached_pt_capacity ? this->m_cached_pt_capacity * 2u : 4096u;
+					auto* new_buffer = static_cast< cached_pt* >( ::ExAllocatePool2( POOL_FLAG_NON_PAGED, new_capacity * sizeof( cached_pt ), 'pfnw' ) );
+
+					if ( !new_buffer ) {
+						return;
+					}
+
+					if ( this->m_cached_pts )
+					{
+						::memcpy( new_buffer, this->m_cached_pts, this->m_cached_pt_count * sizeof( cached_pt ) );
+						::ExFreePoolWithTag( this->m_cached_pts, 'pfnw' );
+					}
+
+					this->m_cached_pts = new_buffer;
+					this->m_cached_pt_capacity = new_capacity;
+				}
+
+				auto& entry = this->m_cached_pts[ this->m_cached_pt_count ];
+				entry.table_va = g.m_kernel.m_pte_base + pt_flat * 0x1000ull;
+				entry.va_base = pd_va;
+				this->m_cached_pt_count++;
+			}
+		}
+	}
+
+	void scanner::scan_cached_hot( )
+	{
+		for ( unsigned long i{ 0u }; i < this->m_cached_pt_count; i++ )
+		{
+			const auto va_base = this->m_cached_pts[ i ].va_base;
+
+			const auto pd_flat = ( va_base >> 30ull ) & 0x3ffffull;
+			const auto pd_index = ( va_base >> 21ull ) & 0x1ffull;
+			const auto* pd = reinterpret_cast< const unsigned long long* >( g.m_kernel.m_pde_base + pd_flat * 0x1000ull );
+
+			if ( !( pd[ pd_index ] & 1ull ) or ( pd[ pd_index ] & 0x80ull ) ) {
+				continue;
+			}
+
+			const auto* table = reinterpret_cast< const unsigned long long* >( this->m_cached_pts[ i ].table_va );
+
+			for ( unsigned long j{ 0u }; j < 512u; j++ )
+			{
+				if ( !( table[ j ] & 1ull ) ) {
+					continue;
+				}
+
+				const auto pfn = ( table[ j ] >> 12ull ) & 0xffffffffffull;
+
+				if ( g.m_collector.check_pfn( pfn ) ) {
+					this->record_detection( pfn, va_base | ( static_cast< unsigned long long >( j ) << 12ull ), table[ j ] );
+				}
+			}
+		}
+	}
+
+	void scanner::scan_cold_entry( )
+	{
+		while ( this->m_cold_cursor == g.m_kernel.m_hot_pml4_index or this->m_cold_cursor == g.m_kernel.m_self_ref_index )
+		{
+			this->m_cold_cursor++;
+			if ( this->m_cold_cursor >= 512u ) {
+				this->m_cold_cursor = 256u;
+			}
+		}
+
+		const auto* pxe = reinterpret_cast< const unsigned long long* >( g.m_kernel.m_pxe_base );
+		if ( pxe[ this->m_cold_cursor ] & 1ull )
+		{
+			auto va_base = static_cast< unsigned long long >( this->m_cold_cursor ) << 39ull;
+			if ( va_base & ( 1ull << 47ull ) ) {
+				va_base |= 0xffff000000000000ull;
+			}
+
+			this->scan_pdpt( va_base );
+		}
+
+		this->m_cold_cursor++;
+		if ( this->m_cold_cursor >= 512u ) {
+			this->m_cold_cursor = 256u;
+		}
+	}
+
+	void scanner::scan_pdpt( unsigned long long va_base )
+	{
+		const auto pml4_index = ( va_base >> 39ull ) & 0x1ffull;
+		const auto* table = reinterpret_cast< const unsigned long long* >( g.m_kernel.m_ppe_base + pml4_index * 0x1000ull );
+
+		for ( unsigned long i{ 0u }; i < 512u; i++ )
+		{
+			if ( !( table[ i ] & 1ull ) ) {
+				continue;
+			}
+
+			if ( table[ i ] & 0x80ull ) {
+				continue;
+			}
+
+			this->scan_pd( va_base | ( static_cast< unsigned long long >( i ) << 30ull ) );
+		}
+	}
+
+	void scanner::scan_pd( unsigned long long va_base )
+	{
+		const auto flat_index = ( va_base >> 30ull ) & 0x3ffffull;
+		const auto* table = reinterpret_cast< const unsigned long long* >( g.m_kernel.m_pde_base + flat_index * 0x1000ull );
+
+		for ( unsigned long i{ 0u }; i < 512u; i++ )
+		{
+			if ( !( table[ i ] & 1ull ) ) {
+				continue;
+			}
+
+			if ( table[ i ] & 0x80ull ) {
+				continue;
+			}
+
+			this->scan_pt( va_base | ( static_cast< unsigned long long >( i ) << 21ull ) );
+		}
+	}
+
+	void scanner::scan_pt( unsigned long long va_base )
+	{
+		const auto flat_index = ( va_base >> 21ull ) & 0x7ffffffull;
+		const auto* table = reinterpret_cast< const unsigned long long* >( g.m_kernel.m_pte_base + flat_index * 0x1000ull );
+
+		for ( unsigned long i{ 0u }; i < 512u; i++ )
+		{
+			if ( !( table[ i ] & 1ull ) ) {
+				continue;
+			}
+
+			const auto pfn = ( table[ i ] >> 12ull ) & 0xffffffffffull;
+
+			if ( g.m_collector.check_pfn( pfn ) ) {
+				this->record_detection( pfn, va_base | ( static_cast< unsigned long long >( i ) << 12ull ), table[ i ] );
+			}
+		}
+	}
+
+	void scanner::record_detection( unsigned long long pfn, unsigned long long virtual_address, unsigned long long pte_value )
+	{
+		if ( !g.m_collector.verify_pfn( pfn ) ) {
+			return;
+		}
+
+		const auto cache = pte_value ? static_cast< unsigned char >( ( ( pte_value >> 5ull ) & 4ull ) | ( ( pte_value >> 3ull ) & 3ull ) ) : static_cast< unsigned char >( 0xffu );
+
+		KIRQL old_irql{};
+		KeAcquireSpinLock( &this->m_lock, &old_irql );
+
+		for ( unsigned long i{ 0u }; i < this->m_detection_count; i++ )
+		{
+			if ( this->m_detections[ i ].pfn == pfn )
+			{
+				this->m_detections[ i ].virtual_address = virtual_address;
+				this->m_detections[ i ].pte_value = pte_value;
+				this->m_detections[ i ].cache_type = cache;
+				this->m_detections[ i ].tick_count++;
+				::KeReleaseSpinLock( &this->m_lock, old_irql );
+				return;
+			}
+		}
+
+		if ( this->m_detection_count >= this->m_detection_capacity )
+		{
+			const auto new_capacity = this->m_detection_capacity ? this->m_detection_capacity * 2u : 64u;
+			auto* new_buffer = static_cast< shared::ioctl::detection* >( ::ExAllocatePool2( POOL_FLAG_NON_PAGED, new_capacity * sizeof( shared::ioctl::detection ), 'pfnw' ) );
+
+			if ( !new_buffer ) 
+			{
+				::KeReleaseSpinLock( &this->m_lock, old_irql );
+				return;
+			}
+
+			if ( this->m_detections )
+			{
+				::memcpy( new_buffer, this->m_detections, this->m_detection_count * sizeof( shared::ioctl::detection ) );
+				::ExFreePoolWithTag( this->m_detections, 'pfnw' );
+			}
+
+			this->m_detections = new_buffer;
+			this->m_detection_capacity = new_capacity;
+		}
+
+		const auto* database = static_cast< const nt::mmpfn* >( g.m_kernel.m_pfn_database );
+
+		auto& entry = this->m_detections[ this->m_detection_count ];
+		entry.pfn = pfn;
+		entry.virtual_address = virtual_address;
+		entry.pte_value = pte_value;
+		entry.target_address = g.m_collector.resolve_target_va( pfn );
+		entry.reference_count = database[ pfn ].u3.reference_count;
+		entry.cache_type = cache;
+		entry.tick_count = 1u;
+
+		this->m_detection_count++;
+		::KeReleaseSpinLock( &this->m_lock, old_irql );
+	}
+
+} // namespace core
+
+```
+
+`pfnwatch/driver/project/core/scanner/scanner.hpp`:
+
+```hpp
+// project/core/scanner/scanner.hpp
+#pragma once
+
+namespace core {
+
+	class scanner
+	{
+	public:
+		void tick( );
+		void reset( );
+		void cleanup( );
+		void reset_detections( );
+
+		shared::ioctl::detection* m_detections;
+		unsigned long m_detection_count;
+		unsigned long m_detection_capacity;
+		KSPIN_LOCK m_lock;
+
+	private:
+		void scan_kernel_ptes( );
+
+		void cache_hot_pt_pages( );
+		void scan_cached_hot( );
+		void scan_cold_entry( );
+
+		void scan_pdpt( unsigned long long va_base );
+		void scan_pd( unsigned long long va_base );
+		void scan_pt( unsigned long long va_base );
+
+		void record_detection( unsigned long long pfn, unsigned long long virtual_address, unsigned long long pte_value );
+
+	private:
+		unsigned long m_cold_cursor;
+
+		struct cached_pt
+		{
+			unsigned long long table_va;
+			unsigned long long va_base;
+		};
+
+		cached_pt* m_cached_pts;
+		unsigned long m_cached_pt_count;
+		unsigned long m_cached_pt_capacity;
+	};
+
+} // namespace core
+
+```
+
+`pfnwatch/driver/project/core/worker/worker.cpp`:
+
+```cpp
+// project/core/worker/worker.cpp
+#include "../../global.hpp"
+
+namespace core {
+
+	NTSTATUS worker::start( )
+	{
+		::KeInitializeEvent( &this->m_stop_event, EVENT_TYPE::NotificationEvent, 0 );
+
+		HANDLE handle{ nullptr };
+		const auto status = ::PsCreateSystemThread( &handle, THREAD_ALL_ACCESS, nullptr, nullptr, nullptr, &worker::routine, this );
+
+		if ( !NT_SUCCESS( status ) ) {
+			return status;
+		}
+
+		::ObReferenceObjectByHandle( handle, THREAD_ALL_ACCESS, *::PsThreadType, MODE::KernelMode, &this->m_thread_object, nullptr );
+		::ZwClose( handle );
+
+		return STATUS_SUCCESS;
+	}
+
+	void worker::stop( )
+	{
+		::KeSetEvent( &this->m_stop_event, 0, 0 );
+
+		if ( this->m_thread_object )
+		{
+			::KeWaitForSingleObject( this->m_thread_object, KWAIT_REASON::Executive, MODE::KernelMode, 0, nullptr );
+			::ObfDereferenceObject( this->m_thread_object );
+			this->m_thread_object = nullptr;
+		}
+	}
+
+	void worker::routine( void* context )
+	{
+		static_cast< worker* >( context )->loop( );
+		::PsTerminateSystemThread( STATUS_SUCCESS );
+	}
+
+	void worker::loop( )
+	{
+		LARGE_INTEGER timeout{};
+
+		while ( ::KeWaitForSingleObject( &this->m_stop_event, KWAIT_REASON::Executive, MODE::KernelMode, 0, &timeout ) == STATUS_TIMEOUT )
+		{
+			g.m_scanner.tick( );
+		}
+	}
+
+} // namespace core
+
+```
+
+`pfnwatch/driver/project/core/worker/worker.hpp`:
+
+```hpp
+// project/core/worker/worker.hpp
+#pragma once
+
+namespace core {
+
+	class worker
+	{
+	public:
+		NTSTATUS start( );
+		void stop( );
+
+	private:
+		static void routine( void* context );
+		void loop( );
+
+	private:
+		void* m_thread_object;
+		KEVENT m_stop_event;
+	};
+
+} // namespace core
+
+```
+
+`pfnwatch/driver/project/global.hpp`:
+
+```hpp
+// project/global.hpp
+#pragma once
+
+// wdk
+#include <ntifs.h>
+#include <wdf.h>
+#include <ntimage.h>
+#include <intrin.h>
+
+// shared
+#include "../../shared/ioctl.hpp"
+
+// common
+#include "common/nt.hpp"
+
+// core
+#include "core/collector/collector.hpp"
+#include "core/dispatcher/dispatcher.hpp"
+#include "core/worker/worker.hpp"
+#include "core/scanner/scanner.hpp"
+#include "core/kernel/kernel.hpp"
+
+struct global
+{
+	core::collector m_collector;
+	core::dispatcher m_dispatcher;
+	core::worker m_worker;
+	core::scanner m_scanner;
+	core::kernel m_kernel;
+} inline g;
+
+```
+
+`pfnwatch/shared/ioctl.hpp`:
+
+```hpp
+// shared/ioctl.hpp
+#pragma once
+
+#ifdef _KERNEL_MODE
+#include <ntdef.h>
+#else
+#include <winioctl.h>
+#include <cstdint>
+#endif
+
+namespace shared::ioctl {
+
+	enum class command : unsigned int
+	{
+		assign_process = CTL_CODE( 0x8000, 0x800, METHOD_BUFFERED, FILE_ANY_ACCESS ),
+		read_virtual_memory = CTL_CODE( 0x8000, 0x801, METHOD_BUFFERED, FILE_ANY_ACCESS ),
+		read_report = CTL_CODE( 0x8000, 0x802, METHOD_BUFFERED, FILE_ANY_ACCESS ),
+	};
+
+	struct request
+	{
+		union
+		{
+			struct
+			{
+				unsigned long process_id;
+			} assign_process;
+
+			struct
+			{
+				unsigned long process_id;
+				unsigned long long address;
+				unsigned long size;
+			} read_virtual_memory;
+		};
+	};
+
+	struct detection
+	{
+		unsigned long long pfn;
+		unsigned long long virtual_address;
+		unsigned long long pte_value;
+		unsigned long long target_address;
+		unsigned short reference_count;
+		unsigned char cache_type;
+		unsigned long tick_count;
+	};
+
+} // namespace shared::ioctl
+
+```
