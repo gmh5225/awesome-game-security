@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-08** — ingest `description:NspxMiguel/NXbox`: refreshed entity [[nxbox]] (Capabilities/Architecture/Positioning; Eden stack on Xbox UWP—Dynarmic ARM64 JIT, Maxwell shader recompiler, Mesa OpenGL→D3D12, UWP filesystem/GPU readback notes); cited on [[overviews/graphics-api]] OpenGL-on-D3D12 lane + [[overviews/reverse-engineering]] Console/QEMU Switch crossover; `index.md` entity blurb sync.
+
 - **2026-10-08** — ingest `readme:categories`: Nintendo Switch ~9 (+1; NspxMiguel/[[nxbox]] experimental Eden UWP port on Xbox Series X|S — ARM64 JIT, OpenGL/D3D12 via Mesa) / Cheat ~2865 / Anti Cheat ~775 / other major section counts stable; 41 sections; synced projected README-map counts on [[overviews/overview]], [[overviews/game-hacking]], and [[overviews/reverse-engineering]]; entity [[nxbox]]; light `index.md` section notes (no per-category pages).
 
 - **2026-10-08** — ingest `description:starfallreverie/pfnwatch`: refreshed entity [[pfnwatch]] (Capabilities/Architecture/Positioning; kernel PTE/PFN scan for protected-process physical page access; IOCTL driver + C++ usermode client); cited on [[concepts/kernel-pool-scanning]] page-table/PFN monitoring lane; `index.md` entity blurb sync.

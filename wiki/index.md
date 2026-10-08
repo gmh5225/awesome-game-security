@@ -2704,7 +2704,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [NuremX](entities/nuremx.md) — Apex Legends Python YOLOv5 screen-capture cheat (enemy detection, overlay, aiming; trained weights; Windows/Linux; no memory hooking; cheat / [AI]; Zurek0x)
 - [nuitka-themida-unpacker](entities/nuitka-themida-unpacker.md) — two-stage Themida/WinLicense + Nuitka onefile unpack pipeline (DimaReverse; Python; unlicense dynamic strip + nuthem KAX/KAY static extract; path-traversal-safe writes; SHA-256 manifests; optional Python recovery; Fix Themida)
 - [nuzu](entities/nuzu.md) — yuzu-based Switch emulator mirror (unofficial fork; Nintendo Switch lane)
-- [NXbox](entities/nxbox.md) — NspxMiguel experimental Eden Switch emulator UWP port for Xbox Series X|S (Dynarmic ARM64 JIT; OpenGL on D3D12 via Mesa; AppContainer sandbox RE; Nintendo Switch)
+- [NXbox](entities/nxbox.md) — NspxMiguel Eden Switch emulator UWP port for Xbox Series X|S (Dynarmic ARM64 JIT; Maxwell shader recompiler; OpenGL on D3D12 via Mesa; UWP/AppxManifest packaging; Horizon compat notes; Nintendo Switch)
 - [OpenSw](entities/opensw.md) — Android ARM64 Switch emulator (Eden/yuzu lineage; dynarmic JIT; Vulkan/OpenGL; build-ID-aware Atmosphere/Eden cheat import; dmnt-style cheat engine; per-game profiles; Cockpit panel; Profile build automation bridge; RemiPelloux)
 - [nzPerspective](entities/nz-perspective.md) — D3D9 hooking sample (C/C++; cheat / game:tgame; gmh5225)
 - [OAC](entities/oac.md) — Open Anti-Cheat demand-start framework (x64 kernel driver + user-mode client; ObCallbacks handle filtering, cross-view integrity checks, PiDDB/MmUnloadedDrivers forensics; lauralex)

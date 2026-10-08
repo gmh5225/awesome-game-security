@@ -11,9 +11,19 @@ confidence: medium
 
 # NXbox
 
-Experimental UWP port of the Eden Nintendo Switch emulator stack for Xbox Series X|S (NspxMiguel/NXbox). C++/CMake tree with Dynarmic ARM64 JIT, Maxwell-oriented shader recompiler, video/audio subsystems, and Horizon OS documentation; ships Xbox packaging under `dist/nxbox` with AppxManifest. Port work covers UWP filesystem integration, OpenGL readback and GPU stall handling, Mesa on Direct3D 12, and title compatibility notes (e.g. Breath of the Wild). For cross-platform emulation, console sandbox limits, and low-level CPU/graphics RE—not production anti-cheat tooling. README category: Nintendo Switch. (source: wiki/sources/descriptions/NspxMiguel__NXbox.md)
+Experimental UWP port of the **Eden** Nintendo Switch emulator stack for **Xbox Series X|S** (NspxMiguel/NXbox). Targets developers and researchers studying cross-platform emulation, **AppContainer** sandbox limits, and low-level CPU/graphics behavior—not production anti-cheat tooling. README category: Nintendo Switch. (source: wiki/sources/descriptions/NspxMiguel__NXbox.md)
 
-Adjacent to [[opensw]] (Android Eden fork with live cheat import) and desktop [[nuzu]] mirrors on the same Eden lineage.
+## Capabilities
+
+Run Switch software on Series hardware via **Dynarmic** ARM64 JIT, a Maxwell-oriented shader recompiler, and Eden video/audio subsystems; includes Horizon OS documentation and Qt, Android, and dedicated **nxbox** launcher frontends. Title compatibility and memory work are documented for games such as *Breath of the Wild*. (source: wiki/sources/descriptions/NspxMiguel__NXbox.md)
+
+## Architecture
+
+C++/CMake tree with Xbox packaging under `dist/nxbox` and **AppxManifest**. Port-specific layers cover UWP filesystem integration, **OpenGL readback** and GPU stall handling, **Mesa on Direct3D 12** driver debugging, and device API research notes. (source: wiki/sources/descriptions/NspxMiguel__NXbox.md)
+
+## Positioning
+
+Cross-console counterpart to Android Eden fork [[opensw]] (live cheat import) and desktop [[nuzu]] mirrors on the same lineage; contrasts with archival [[yuzu-archive]] legal/ecosystem records. Useful when separating guest ARM64/Horizon behavior from host UWP graphics and sandbox constraints.
 
 ## Links
 
