@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-08** — ingest `description:MewDMA/MewTools`: refreshed entity [[mewtools]] (Capabilities/Architecture; Tauri second-PC setup for 35T/75T/100T FPGA cards—signature-checked FTDI/WCH/Silicon Labs drivers, openFPGALoader flash, DNA ID, cable/throughput tests, MAKCU/FERRUM support, reversible Windows tweaks, coded error reports); cited on [[concepts/dma]] FPGA bring-up lane + [[overviews/game-hacking]] DMA hardware setup cluster; `index.md` entity blurb already current.
+
 - **2026-10-08** — ingest `description:spix18/dsh-ghidra`: refreshed entity [[dsh-ghidra]] (Capabilities/Architecture/Target use cases; 219+ DSH tools, composite analysis, malware triage, optional GhidraMCP REST, PyGhidra cross-platform, environment diagnostics + agent skill); cross-linked [[dsh-plugins]] and [[ghidra-skill-for-dsh]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]] MCP/agent-RE lanes; `index.md` entity blurb sync.
 
 - **2026-10-08** — ingest `readme:categories`: Cheat ~2865 (+2; spix18/[[dsh-ghidra]] DSH Ghidra bridge with 219 PyGhidra/MCP agent tools + MewDMA/[[mewtools]] Windows DMA FPGA setup utility) / Anti Cheat ~774 / other major section counts stable; 41 sections; synced projected README-map counts on [[overviews/overview]], [[overviews/reverse-engineering]], [[overviews/game-hacking]], and [[overviews/dma-attack]]; entities [[dsh-ghidra]], [[mewtools]]; light `index.md` section notes (no per-category pages).

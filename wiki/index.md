@@ -2362,7 +2362,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [m0dern_p4cker](entities/m0dern-p4cker.md) — C/C++ ELF binary packer (`[ELF]`; Anti Cheat → Binary Packer)
 - [macroquad](entities/macroquad.md) — Rust 2D game lib (shaders / render / audio; Game Engine / source)
 - [methanekit](entities/methanekit.md) — cross-platform C++ graphics/application framework (D3D12/Vulkan/Metal; shared shader workflows; CMake; tutorials/samples/modular runtime; Game Engine / source)
-- [mewtools](entities/mewtools.md) — Windows Tauri DMA FPGA setup utility for 35T/75T/100T cards: driver install, firmware flash, DNA ID, speed tests, MAKCU/FERRUM support, second-PC optimizer (MewDMA; Cheat / DMA hardware)
+- [mewtools](entities/mewtools.md) — Windows Tauri (Rust + web UI) second-PC DMA FPGA setup utility for 35T/75T/100T cards: signature-checked FTDI/WCH/Silicon Labs drivers, openFPGALoader firmware flash, DNA ID, cable/throughput tests, MAKCU/FERRUM support, reversible Windows tweaks, coded error reports (MewDMA; Cheat / DMA hardware)
 - [magicmida](entities/magicmida.md) — Pascal Themida auto-unpacker (custom user-mode debugger; 32/64-bit PE + .NET dump; import rebuild; ScyllaHide; Fix Themida; Hendi48)
 - [magicmida-rs](entities/magicmida-rs.md) — Rust Themida automatic unpacker (Win32 Debug API; OEP + IAT rebuild; ScyllaHide; Fix Themida)
 - [mega-dumper](entities/mega-dumper.md) — Windows C# WinForms native + .NET assembly dumper (module inspect, anti-dump/hook detect, VM/heap/process explore, AppDomain enum, managed inject + minidump; CodeCracker-Tools)
