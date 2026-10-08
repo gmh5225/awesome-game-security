@@ -29,7 +29,7 @@ CTF reverse engineering, crackme solving, malware triage, vulnerability pre-scre
 
 ## Positioning
 
-Complements [[dsh-plugins]] PyGhidra bridge and [[ghidra-headless-mcp]] MCP paths as a dsh-native, scenario-driven Ghidra automation stack. Pair oracle outputs with [[research-rigor]] when acting on agent summaries.
+Complements [[dsh-plugins]] PyGhidra bridge and [[dsh-ghidra]] DSH tool catalog (219 import/decompile/xref/triage tools) and [[ghidra-headless-mcp]] MCP paths as a dsh-native, scenario-driven Ghidra automation stack. Pair oracle outputs with [[research-rigor]] when acting on agent summaries.
 
 ## Links
 
@@ -37,4 +37,4 @@ Complements [[dsh-plugins]] PyGhidra bridge and [[ghidra-headless-mcp]] MCP path
 
 ## Related
 
-[[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[dsh-plugins]] · [[ghidra-headless-mcp]] · [[research-rigor]] · [[frida]]
+[[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[dsh-plugins]] · [[dsh-ghidra]] · [[ghidra-headless-mcp]] · [[research-rigor]] · [[frida]]

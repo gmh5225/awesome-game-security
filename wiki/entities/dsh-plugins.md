@@ -23,7 +23,7 @@ Plugin bundle for the **DeepSeek Harness (DSH)** desktop AI assistant. Extends D
 
 README category: Cheat / RE Tools.
 
-Complements [[ghidra-bridge]] and [[ghidra-headless-mcp]] agent paths; pairs with [[dsh-cheatengine]] for DSH-side dynamic memory analysis. Pair automated decompile summaries with [[research-rigor]].
+Complements [[ghidra-bridge]] and [[ghidra-headless-mcp]] agent paths; pairs with [[dsh-ghidra]] for a fuller DSH-native Ghidra tool catalog and [[dsh-cheatengine]] for DSH-side dynamic memory analysis. Pair automated decompile summaries with [[research-rigor]].
 
 ## Links
 
@@ -31,4 +31,4 @@ Complements [[ghidra-bridge]] and [[ghidra-headless-mcp]] agent paths; pairs wit
 
 ## Related
 
-[[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[ghidra-bridge]] · [[ghidra-headless-mcp]] · [[reverify]] · [[dsh-cheatengine]] · [[research-rigor]]
+[[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[dsh-ghidra]] · [[ghidra-bridge]] · [[ghidra-headless-mcp]] · [[reverify]] · [[dsh-cheatengine]] · [[research-rigor]]
