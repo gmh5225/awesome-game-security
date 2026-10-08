@@ -10,7 +10,8 @@ sources:
   - wiki/sources/descriptions/hLunaaa__hLunaaa.github.io.md
   - wiki/sources/descriptions/Sentient111__ClearDriverTraces.md
   - wiki/sources/descriptions/gmh5225__Allocating-individual-pages.md
-updated: 2026-09-13
+  - wiki/sources/descriptions/starfallreverie__pfnwatch.md
+updated: 2026-10-08
 confidence: high
 ---
 
@@ -80,6 +81,10 @@ Tools such as [[pooldump]] scan kernel pool pages to list allocation blocks (tag
 
 Offensive research such as [[allocating-individual-pages]] allocates isolated kernel pages via `MmAllocateIndependentPagesEx` and related non-standard paths to avoid pool-tag tracking and BigPool walks — a complementary hide technique to [[nullmap]] pool cleanup and [[revert-mapper]] post-map scrubbing. (source: wiki/sources/descriptions/gmh5225__Allocating-individual-pages.md)
 
+## Page-table / PFN monitoring
+
+Remote kernel reads that map a protected process's physical pages must install PTEs somewhere in kernel address space. PoCs such as [[pfnwatch]] build a PFN bitmap from the target's page tables and periodically scan kernel PTEs for matches — catching `MmCopyMemory`, `MmMapIoSpace`, and direct PTE manipulation without pool-tag or reference-count heuristics alone. Complementary to BigPool walks and Segment Heap scans, not a drop-in replacement. (source: wiki/sources/descriptions/starfallreverie__pfnwatch.md)
+
 ## Related
 
-[[kernel-evidence-baseline]] · [[driver-trust-boundaries]] · [[kernel-callbacks]] · [[byovd]] · [[hvci]] · [[etw-threat-intelligence]] · [[kernel-codecave-poc]] · [[revert-mapper]] · [[allocating-individual-pages]] · [[kn-diff-pool]] · [[pooldump]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]]
+[[kernel-evidence-baseline]] · [[driver-trust-boundaries]] · [[kernel-callbacks]] · [[byovd]] · [[hvci]] · [[etw-threat-intelligence]] · [[kernel-codecave-poc]] · [[revert-mapper]] · [[allocating-individual-pages]] · [[pfnwatch]] · [[kn-diff-pool]] · [[pooldump]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]]

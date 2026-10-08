@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-08** — ingest `description:starfallreverie/pfnwatch`: refreshed entity [[pfnwatch]] (Capabilities/Architecture/Positioning; kernel PTE/PFN scan for protected-process physical page access; IOCTL driver + C++ usermode client); cited on [[concepts/kernel-pool-scanning]] page-table/PFN monitoring lane; `index.md` entity blurb sync.
+
 - **2026-10-08** — ingest `readme:categories`: Anti Cheat ~775 (+1; starfallreverie/[[pfnwatch]] kernel PTE scan PoC for protected-process physical page access — `MmCopyMemory`/`MmMapIoSpace`; Detection:Memory Integrity) / Cheat ~2865 / other major section counts stable; 41 sections; synced projected README-map counts on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], [[overviews/reverse-engineering]], and [[overviews/windows-kernel]]; entity [[pfnwatch]]; light `index.md` section notes (no per-category pages).
 
 - **2026-10-08** — ingest `description:MewDMA/MewTools`: refreshed entity [[mewtools]] (Capabilities/Architecture; Tauri second-PC setup for 35T/75T/100T FPGA cards—signature-checked FTDI/WCH/Silicon Labs drivers, openFPGALoader flash, DNA ID, cable/throughput tests, MAKCU/FERRUM support, reversible Windows tweaks, coded error reports); cited on [[concepts/dma]] FPGA bring-up lane + [[overviews/game-hacking]] DMA hardware setup cluster; `index.md` entity blurb already current.
