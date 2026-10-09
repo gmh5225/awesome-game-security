@@ -517,6 +517,7 @@ sources:
   - wiki/sources/descriptions/AryuInka__Valorant-Cheat-External.md
   - wiki/sources/descriptions/AlSch092__UltimateAntiCheat.md
   - wiki/sources/descriptions/AlSch092__EasyHandles.md
+  - wiki/sources/descriptions/AliShe3a__VortexAC.md
   - wiki/sources/descriptions/Abdelnour2__MiniAntiCheatV2.md
   - wiki/sources/descriptions/AlfredIU__Spoofer.md
   - wiki/sources/descriptions/AsfhtgkDavid__windmouse.md
@@ -1085,6 +1086,7 @@ Long-form kernel AC architecture primer [How Kernel Anti-Cheats Work](https://s4
 - [[kvm-csgo-cheat]] — Rust CS:GO cheat in QEMU/KVM/PVE/VBox lane (gmh5225) for studying VM-isolated / below-OS cheat surface against VAC (source: wiki/sources/descriptions/gmh5225__kvm-csgo-cheat.md)
 - [[cs16-trigger-kvm]] — KVM/QEMU host-side CS1.6 triggerbot (gmh5225; guest memory read + input injection invisible to in-guest AC) for studying hypervisor-based cheat surface (source: wiki/sources/descriptions/gmh5225__cs16-trigger-kvm.md)
 - [[cfclap]] — CrossFire (CF) memory-manipulation cheat sample (gmh5225; ESP / aimbot / combat advantages via client memory reads) for studying title-specific client-side protection and cheat-detection mechanisms (source: wiki/sources/descriptions/gmh5225__cfclap.md)
+- [[vortexac]] — CrossFire private-server user-mode client–server AC + engine patcher (AliShe3a; C++; MS SQL session validation/heartbeats/tiered HWID bans; client D3D9 hook inspection, CRC32 memory integrity, process/debugger scans, Detours Win32 hooks for protected asset decrypt; validation server TCP auth/heartbeat, UDP screen/VOIP, HTTP admin panel, Discord alerts; Open Source Anti Cheat System / game:crossfire) (source: wiki/sources/descriptions/AliShe3a__VortexAC.md)
 - [[lost-ark]] — Lost Ark MMORPG client memory-manipulation cheat sample (gmh5225; ESP / gameplay mods / automation) for studying title-specific UE MMORPG client-side protection and cheat-detection mechanisms (source: wiki/sources/descriptions/gmh5225__LostArk.md)
 - [[unmapper]] — automatic dumped-PE header repair so decompilers load cleanly (Dump Fix) (source: wiki/sources/descriptions/t3ssellate__unmapper.md)
 - [[fix-arxan]] — Arxan PE protector: loader info + decrypted working image for research (Dump Fix) (source: wiki/sources/descriptions/pr701__fix-arxan.md)

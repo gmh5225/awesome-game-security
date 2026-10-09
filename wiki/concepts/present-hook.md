@@ -45,7 +45,8 @@ sources:
   - wiki/sources/descriptions/Ckateowm__ModernWarfare2-Cpp-External.md
   - wiki/sources/descriptions/0mdi__edgegdi_hook.md
   - wiki/sources/descriptions/ASDAlexander77__opengl32_enhancer.md
-updated: 2026-09-18
+  - wiki/sources/descriptions/AliShe3a__VortexAC.md
+updated: 2026-10-09
 confidence: high
 ---
 
@@ -62,6 +63,8 @@ Internal ESP/menus (often Dear ImGui), backbuffer copy for OBS Game Capture–st
 VTable/code integrity on Present, call-stack analysis, known hook DLLs (`obs-graphics-hook64.dll`), staging-texture / GPU→CPU readback at frame rate. AC screenshot paths may also hook Present or DXGI Desktop Duplication. Monitor-level WDA/D3D9 samples such as [[wda-monitor-trick]] show display-output intercept and capture helpers outside a single swap-chain Present. (source: wiki/sources/descriptions/wongfei__wda_monitor_trick.md)
 
 [[present-hook-detection]] reconstructs a [[battleye]]-style check: dummy D3D11 swap chain → Present vtable pointer → compare prologue bytes to clean `dxgi.dll` for JMP patches or vtable overwrite. (source: wiki/sources/descriptions/weak1337__PresentHookDetection.md)
+
+Defensive **Direct3D9 hook inspection** on legacy FPS clients appears in open-source private-server stacks such as [[vortexac]] (CrossFire; user-mode AC alongside CRC32 memory integrity and debugger/process scans). (source: wiki/sources/descriptions/AliShe3a__VortexAC.md)
 
 Overlay-hijack detectors such as [[winbo]] parse dxgkrnl ETW Present events (caller PID vs window-owner PID) and scan the shared GDI handle table for foreign DCs—defensive Detection:Overlay research rather than Present prologue integrity. (source: wiki/sources/descriptions/noahware__winbo.md)
 
