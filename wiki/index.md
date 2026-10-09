@@ -1403,7 +1403,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Finger](entities/finger.md) — cloud function symbol recognition (Python SDK + IDA 7+ plugin; feature extraction → recognition backend → rename/highlight; Recognizing Function By Cloud; aliyunav; cheat / IDA Plugins)
 - [firmeye](entities/firmeye.md) — IDA Pro IoT firmware vuln hunter (Python; argument tracing into sensitive functions; static + debugger-assisted dynamic checks; overflow/command-exec/format-string rules; CLI batch; Vu1nT0tal; cheat / IoT / IDA Plugins)
 - [FRIEND](entities/friend.md) — IDA plugin: register/instruction docs in disasm + Hex-Rays (Capstone extensions; contextual hints; external links; function summaries; C++/CMake; cheat / IDA Plugins)
-- [Flashwright](entities/flashwright.md) — Windows 11 Tauri Pixel factory-flash + Magisk boot-patch + rooted OTA wizard (dry-run, SHA-256 verify, boot/vbmeta backups; Cheat / Android Root)
+- [Flashwright](entities/flashwright.md) — Windows 11 Rust/Tauri plug-in-to-completion Pixel wizard (typed adb/fastboot, factory/OTA SHA-256 verify, Magisk boot patch, dry-run safety gates, boot/vbmeta backup/restore; auditable mobile integrity research workflow; Cheat / Android Root)
 - [FlatRedBall](entities/flatredball.md) — C# / .NET 2D engine (editor + runtime; Game Engine)
 - [FallGuys](entities/fall-guys.md) — Fall Guys kernel cheat (driver communication + memory manipulation; speed/fly/physics exploits; Unity; gmh5225)
 - [FallGuysSharp](entities/fall-guys-sharp.md) — Fall Guys C# IL2CPP cheat (managed injection; movement/gameplay mods; gmh5225)

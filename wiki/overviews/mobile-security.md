@@ -532,6 +532,7 @@ sources:
   - wiki/sources/descriptions/tbc0309__KPA-Root.md
   - wiki/sources/descriptions/AtakanKeser__BlastScale.md
   - wiki/sources/descriptions/Jordan231111__BluestacksRoot.md
+  - wiki/sources/descriptions/contactjayclatty__flashwright.md
 updated: 2026-10-09
 confidence: high
 ---
