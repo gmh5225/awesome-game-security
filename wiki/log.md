@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-09** — ingest `readme:categories`: Anti Cheat ~776 (+1; LB45440078L/[[xray-anticheat]] Paper/Spigot likelihood-ratio X-Ray mining AC — explainable evidence, decaying history, moderator ban waves) / Cheat ~2865 / other major section counts stable; 41 sections; synced projected README-map counts on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], and [[overviews/reverse-engineering]]; entity [[xray-anticheat]]; light `index.md` section notes (no per-category pages).
+
 - **2026-10-09** — lint: index vs disk — 9 overviews, 51 concepts, 4015 entities (4075 index entries); 0 missing, 0 dead, 0 duplicate; overview wikilink spot-check (9 pages, 12283 links) — 0 broken; concept spot-check (51 pages, 2387 links) — 0 broken; index wikilink scan (814 links) — 0 broken; 6 expected cross-kind slug collisions ([[game-hacking]], [[anti-cheat]], [[reverse-engineering]], [[il2cpp]], [[byovd]], [[dma]]); wiki not empty — bootstrap not required; no structural edits required.
 
 - **2026-10-08** — ingest `description:NspxMiguel/NXbox`: refreshed entity [[nxbox]] (Capabilities/Architecture/Positioning; Eden stack on Xbox UWP—Dynarmic ARM64 JIT, Maxwell shader recompiler, Mesa OpenGL→D3D12, UWP filesystem/GPU readback notes); cited on [[overviews/graphics-api]] OpenGL-on-D3D12 lane + [[overviews/reverse-engineering]] Console/QEMU Switch crossover; `index.md` entity blurb sync.
