@@ -22,4 +22,4 @@ Targets game-security researchers and Paper server operators evaluating behavior
 
 ## Related
 
-[[laneguard]] · [[anticheat-qa]] · [[cs2-tracker]] · [[ai-aimbot-detection]] · [[research-rigor]] · [[overviews/anti-cheat]] · [[overviews/game-hacking]]
+[[xray-anticheat]] · [[laneguard]] · [[anticheat-qa]] · [[cs2-tracker]] · [[ai-aimbot-detection]] · [[research-rigor]] · [[overviews/anti-cheat]] · [[overviews/game-hacking]]

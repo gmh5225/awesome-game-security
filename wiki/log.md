@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-09** — ingest `description:LB45440078L/xray-anticheat`: refreshed entity [[xray-anticheat]] (Capabilities/Architecture/Positioning; Paper/Spigot likelihood-ratio ore-vision mining—buried/exposed ore, tunnel geometry, targeting, timing; Maven analytical core + JDBC + web admin + event plugin; human-review-first ban waves); cited on [[concepts/detector-operations]] statistical mining-evidence cluster + [[overviews/anti-cheat]] frontmatter source; cross-linked [[jevcraft-bench]]; `index.md` entity + concept blurbs updated.
+
 - **2026-10-09** — ingest `readme:categories`: Anti Cheat ~776 (+1; LB45440078L/[[xray-anticheat]] Paper/Spigot likelihood-ratio X-Ray mining AC — explainable evidence, decaying history, moderator ban waves) / Cheat ~2865 / other major section counts stable; 41 sections; synced projected README-map counts on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], and [[overviews/reverse-engineering]]; entity [[xray-anticheat]]; light `index.md` section notes (no per-category pages).
 
 - **2026-10-09** — lint: index vs disk — 9 overviews, 51 concepts, 4015 entities (4075 index entries); 0 missing, 0 dead, 0 duplicate; overview wikilink spot-check (9 pages, 12283 links) — 0 broken; concept spot-check (51 pages, 2387 links) — 0 broken; index wikilink scan (814 links) — 0 broken; 6 expected cross-kind slug collisions ([[game-hacking]], [[anti-cheat]], [[reverse-engineering]], [[il2cpp]], [[byovd]], [[dma]]); wiki not empty — bootstrap not required; no structural edits required.

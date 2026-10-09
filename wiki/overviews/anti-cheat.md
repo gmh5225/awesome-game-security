@@ -13,6 +13,7 @@ sources:
   - wiki/sources/descriptions/pealz1__cheeto.md
   - wiki/sources/descriptions/GloriousBrendon__rearguard.md
   - wiki/sources/descriptions/Kotsasmin__key-value-checker.md
+  - wiki/sources/descriptions/LB45440078L__xray-anticheat.md
   - wiki/sources/descriptions/modcommunity__dot-server-security.md
   - wiki/sources/descriptions/Parko-Developer__guard-game.md
   - wiki/sources/descriptions/Driw0x__CS2Guard.md
