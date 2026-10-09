@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-09** — ingest `readme:categories`: Cheat ~2866 (+1; contactjayclatty/[[flashwright]] Windows 11 Tauri Pixel factory-flash + Magisk boot-patch + rooted OTA wizard — dry-run safety checks, SHA-256 verify, boot/vbmeta backups) / Anti Cheat ~776 / Android Emulator ~10 (`[[droidvm]]` Gunyah on-device VM) / other major section counts stable; 41 sections; synced projected README-map counts on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/mobile-security]], [[overviews/reverse-engineering]], and [[overviews/dma-attack]]; entity [[flashwright]]; light `index.md` section notes (no per-category pages).
+
 - **2026-10-09** — ingest `description:LB45440078L/xray-anticheat`: refreshed entity [[xray-anticheat]] (Capabilities/Architecture/Positioning; Paper/Spigot likelihood-ratio ore-vision mining—buried/exposed ore, tunnel geometry, targeting, timing; Maven analytical core + JDBC + web admin + event plugin; human-review-first ban waves); cited on [[concepts/detector-operations]] statistical mining-evidence cluster + [[overviews/anti-cheat]] frontmatter source; cross-linked [[jevcraft-bench]]; `index.md` entity + concept blurbs updated.
 
 - **2026-10-09** — ingest `readme:categories`: Anti Cheat ~776 (+1; LB45440078L/[[xray-anticheat]] Paper/Spigot likelihood-ratio X-Ray mining AC — explainable evidence, decaying history, moderator ban waves) / Cheat ~2865 / other major section counts stable; 41 sections; synced projected README-map counts on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], and [[overviews/reverse-engineering]]; entity [[xray-anticheat]]; light `index.md` section notes (no per-category pages).
