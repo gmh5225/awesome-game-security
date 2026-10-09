@@ -1461,6 +1461,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/vrolife/mypower [Memory scanner]
 - https://github.com/gmh5225/memory_server [Memory scanner & analyzer with REST API]
 - https://github.com/KuhakuPixel/AceTheGame [Game Hacking Tools]
+- https://github.com/thatskymod/Sky-CotL-Scripts [Sky: Children of the Light mod/script hub — Canvas Android modloader, GameGuardian, Lua scripts, PC/Steam assets, and virtual-space setups]
 - https://github.com/dbcyyds/MemDbg [Android CE-style memory debugger with Vulkan+ImGui overlay, root engine, pointer scan, and Lua 5.4]
 - https://github.com/andoridcharlyroot-debug/charlyengine [Open-source Android Cheat Engine clone (Kotlin + NDK) with root memory scan, value inject/freeze, and saved sessions]
 - https://github.com/gmh5225/Android-MemoryTool [RPM]
