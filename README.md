@@ -4454,6 +4454,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/nulli83/Mj-lnir [Windows client-server anti-cheat with C++ core scanner, Rust agent, and self-hosted studio control plane for injection detection and enforcement]
 - https://github.com/JUS7205/cheatguard [Rust engine-agnostic anti-cheat scanner: JSON signature ruleset, loaded-module enumeration, and deterministic 0–100 risk scoring with CLEAN/SUSPICIOUS/MALICIOUS verdicts]
 - https://github.com/g8tsz/deadlock-anti-cheat [User-mode Deadlock anti-cheat client: process logging, game-window screenshots, key input, cheat-process matching, and Discord webhook upload]
+- https://github.com/AliShe3a/VortexAC [Open-source CrossFire private-server anti-cheat with C++ client detections, SQL-backed session validation, server integration, and admin web dashboard]
 - https://github.com/AvivShabtay/Stresser [Anti Virus in fact but also Anti Cheat]
 - https://github.com/D4stiny/PeaceMaker [Anti Virus in fact but also Anti Cheat]
 - https://github.com/danielkrupinski/VAC [Reversed VAC]
