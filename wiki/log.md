@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-09** — ingest `description:morluto/rea`: refreshed entity [[rea]] (Capabilities/Architecture/Target use cases/Positioning; TypeScript/Node CLI + MCP; cross-format local RE with evidence provenance, process runtime, ELF/crash offline diagnostics; Hopper/Ghidra/IDA/JADX/pwntools/mitmproxy bridges); cited on [[overviews/reverse-engineering]] MCP lane; `index.md` entity blurb sync.
+
 - **2026-10-09** — ingest `description:thatskymod/Sky-CotL-Scripts`: refreshed entity [[sky-cotl-scripts]] (Capabilities/Architecture/Positioning; Android GameGuardian Lua + Canvas mod-loader hub, libTSM, virtual-space APKs, legacy offset Lua, server-side outfit-validation notes; PC Frida HTTP traffic hook); cited on [[overviews/mobile-security]] GameGuardian live-service title lane; `index.md` entity blurb sync.
 
 - **2026-10-09** — ingest `readme:categories`: Cheat ~2867 (+1; thatskymod/[[sky-cotl-scripts]] Sky: Children of the Light Canvas/GameGuardian Lua mod hub + PC Frida HTTP hooks) / Game Develop ~193 (+1; morluto/[[rea]] agent-assisted RE MCP/CLI with evidence provenance) / Anti Cheat ~776 / Android Emulator ~10 / other major section counts stable; 41 sections; synced projected README-map counts on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/game-engine]], [[overviews/reverse-engineering]], and [[overviews/dma-attack]]; entities [[sky-cotl-scripts]], [[rea]]; light `index.md` section notes (no per-category pages).
