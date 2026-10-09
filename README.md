@@ -544,6 +544,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/LaurieWired/GhidraMCP [MCP for Ghidra]
 - https://github.com/jtang613/GhidrAssistMCP [MCP for Ghidra]
 - https://github.com/mrphrazer/ghidra-headless-mcp [ghidra-headless-mcp — headless Ghidra over MCP]
+- https://github.com/morluto/rea [Local CLI and MCP server for agent-assisted reverse engineering of native binaries, JavaScript/Electron apps, and .NET assemblies; returns evidence provenance and limitations; native deep analysis needs separately installed Hopper, Ghidra, or IDA]
 - https://github.com/mrexodia/ida-pro-mcp [MCP for IDA pro]
 - https://github.com/bkerler/ida_rpc [IDA Pro JSON-RPC daemon for LLM/agent-assisted RE: decompile, xrefs, types, patches; headless & GUI; ghidra-rpc-compatible CLI]
 - https://github.com/cellebrite-labs/ida-bridge [Agent bridge for IDA Pro 9+ — CLI runs IDAPython/SQL on live UI or headless idalib; supervisor lifecycle; bundled agent skill; macOS]
