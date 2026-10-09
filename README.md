@@ -1319,6 +1319,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/xiaoxindada/magiskboot_ndk_on_linux [Boot Image Modification Tool]
 - https://github.com/ookiineko/magiskboot_build [Boot Image Modification Tool]
 - https://github.com/gmh5225/magiskboot-linux [Use GitHub Actions to build magiskboot]
+- https://github.com/contactjayclatty/flashwright [Windows 11 wizard to flash factory images, patch boot with Magisk, and OTA-update while keeping root (dry-run checks, backups, recovery)]
 - https://github.com/the-dise/EasyPixel [Magisk module that disguises a device under Google Pixel]
 - https://github.com/mrx7014/SpoofingCollection [Magisk and LSPosed module collection for spoofing Android device fingerprints (manufacturer, model, build props)]
 - https://github.com/AlirezaParsi/COPG [Zygisk module for rooted Android with per-app device, CPU, and GPU spoofing, build-property and Android ID spoofing, and an on-device WebUI; supports KernelSU, Magisk, and APatch]
