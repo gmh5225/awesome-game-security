@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-09** — lint: index vs disk — 9 overviews, 51 concepts, 4019 entities (4079 index entries); 0 missing, 0 dead, 0 duplicate; overview wikilink spot-check (9 pages, 12298 links) — 0 broken; concept spot-check (51 pages, 2388 links) — 0 broken; index wikilink scan (820 links) — 0 broken; 6 expected cross-kind slug collisions ([[game-hacking]], [[anti-cheat]], [[reverse-engineering]], [[il2cpp]], [[byovd]], [[dma]]); wiki not empty — bootstrap not required; no structural edits required.
+
 - **2026-10-09** — ingest `description:morluto/rea`: refreshed entity [[rea]] (Capabilities/Architecture/Target use cases/Positioning; TypeScript/Node CLI + MCP; cross-format local RE with evidence provenance, process runtime, ELF/crash offline diagnostics; Hopper/Ghidra/IDA/JADX/pwntools/mitmproxy bridges); cited on [[overviews/reverse-engineering]] MCP lane; `index.md` entity blurb sync.
 
 - **2026-10-09** — ingest `description:thatskymod/Sky-CotL-Scripts`: refreshed entity [[sky-cotl-scripts]] (Capabilities/Architecture/Positioning; Android GameGuardian Lua + Canvas mod-loader hub, libTSM, virtual-space APKs, legacy offset Lua, server-side outfit-validation notes; PC Frida HTTP traffic hook); cited on [[overviews/mobile-security]] GameGuardian live-service title lane; `index.md` entity blurb sync.
