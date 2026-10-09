@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-09** — lint (agent pass): index vs disk — 9 overviews (`anti-cheat`, `dma-attack`, `game-engine`, `game-hacking`, `graphics-api`, `mobile-security`, `overview`, `reverse-engineering`, `windows-kernel`), 51 concepts, 4020 entities (4080 index entries); 0 missing, 0 dead, 0 duplicate paths; overview wikilink spot-check (9 pages, 12302 links) — 0 broken; concept spot-check (51 pages, 2389 links) — 0 broken; index wikilink scan (820 links) — 0 broken; 6 expected cross-kind slug collisions ([[game-hacking]], [[anti-cheat]], [[reverse-engineering]], [[il2cpp]], [[byovd]], [[dma]]); wiki not empty — bootstrap not required; no structural edits required.
+
 - **2026-10-09** — ingest `description:AliShe3a/VortexAC`: entity [[vortexac]] (CrossFire private-server user-mode client–server AC + engine patcher; C++; MS SQL session/HWID bans; D3D9 hook inspection, CRC32 integrity, Detours protected-asset decrypt; validation server TCP/UDP/HTTP/Discord); cited on [[overviews/anti-cheat]] CrossFire OSAC lane + [[concepts/present-hook]] D3D9 hook inspection; `index.md` entity blurb added.
 
 - **2026-10-09** — ingest `readme:categories`: Anti Cheat ~777 (+1; Microsoft vulnerable-driver blocklist mirrors jsecurity101/[[msft-driverblocklist]] + Harvester57/[[code-integrity-driverblocklist]] + gmh5225/[[ms-vulnerable-driver-list]] in Detection:Vulnerable Driver) / Cheat ~2867 / Game Develop ~193 / Android Emulator ~10 / other major section counts stable; 41 sections; synced projected README-map counts on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], and [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
