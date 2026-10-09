@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-09** — ingest `readme:categories`: Cheat ~2867 (+1; thatskymod/[[sky-cotl-scripts]] Sky: Children of the Light Canvas/GameGuardian Lua mod hub + PC Frida HTTP hooks) / Game Develop ~193 (+1; morluto/[[rea]] agent-assisted RE MCP/CLI with evidence provenance) / Anti Cheat ~776 / Android Emulator ~10 / other major section counts stable; 41 sections; synced projected README-map counts on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/game-engine]], [[overviews/reverse-engineering]], and [[overviews/dma-attack]]; entities [[sky-cotl-scripts]], [[rea]]; light `index.md` section notes (no per-category pages).
+
 - **2026-10-09** — ingest `description:contactjayclatty/flashwright`: refreshed entity [[flashwright]] (Capabilities/Architecture/Positioning; Windows 11 Rust/Tauri wizard — typed adb/fastboot, factory/OTA SHA-256 verify, Magisk boot patch, dry-run safety gates, boot/vbmeta backup/restore); cited on [[overviews/game-hacking]] Pixel flash/root lane + [[overviews/mobile-security]] frontmatter source; `index.md` entity blurb sync.
 
 - **2026-10-09** — ingest `readme:categories`: Cheat ~2866 (+1; contactjayclatty/[[flashwright]] Windows 11 Tauri Pixel factory-flash + Magisk boot-patch + rooted OTA wizard — dry-run safety checks, SHA-256 verify, boot/vbmeta backups) / Anti Cheat ~776 / Android Emulator ~10 (`[[droidvm]]` Gunyah on-device VM) / other major section counts stable; 41 sections; synced projected README-map counts on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/mobile-security]], [[overviews/reverse-engineering]], and [[overviews/dma-attack]]; entity [[flashwright]]; light `index.md` section notes (no per-category pages).
