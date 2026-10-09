@@ -4479,6 +4479,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/Kotsasmin/key-value-checker [Paper/Spigot Minecraft server plugin that detects installed cheat clients by scanning client translation keys (Meteor, Freecam, AutoTotem, etc.) via PacketEvents]
 - https://github.com/g4vrk/React [Paper/Folia Minecraft aim-assist anti-cheat using rotation heuristics and optional AI verdict server]
 - https://github.com/RiseShieldDev/AntiXrayViewer [Paper Minecraft plugin that detects X-Ray ore mining, records player sessions, and lets admins replay suspicious activity]
+- https://github.com/LB45440078L/xray-anticheat [Paper/Spigot plugin using likelihood-ratio statistical models to detect ore-vision (X-Ray) mining with explainable evidence, decaying history, and moderator-driven ban waves]
 - https://github.com/boggymc/PetalAntiFreecam [Paper plugin that masks underground blocks in outgoing chunk packets to mitigate Minecraft freecam/wallhack cheats]
 - https://github.com/trevorftp/ServerGuard [Vintage Story server mod that conceals enclosed ore, filters occluded entities, and injects ore/creature decoys before chunk data reaches clients]
 - https://github.com/enis1enis2/WindfallAntiCheatF [Minecraft Fabric packet-based anti-cheat with combat/movement checks and Geyser/Bedrock compatibility]
