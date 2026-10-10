@@ -4,7 +4,7 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
-- **2026-10-10** — lint (agent): catalog scan — **Overviews** (9): `anti-cheat`, `dma-attack`, `game-engine`, `game-hacking`, `graphics-api`, `mobile-security`, `overview`, `reverse-engineering`, `windows-kernel`; **Concepts** (51); **Entities** (4023); index vs disk — 4083 paths, 0 missing, 0 dead, 0 duplicate; overview wikilink spot-check — 0 broken (12313 links); index wikilink scan — 0 broken; 6 expected cross-kind slug collisions ([[game-hacking]], [[anti-cheat]], [[reverse-engineering]], [[il2cpp]], [[byovd]], [[dma]]); wiki populated — bootstrap not required; no structural edits.
+- **2026-10-10** — lint (agent): catalog scan — **Overviews** (9): `anti-cheat`, `dma-attack`, `game-engine`, `game-hacking`, `graphics-api`, `mobile-security`, `overview`, `reverse-engineering`, `windows-kernel`; **Concepts** (51); **Entities** (4023); index vs disk — 4083 paths, 0 missing, 0 dead, 0 duplicate; overview wikilink spot-check — 0 broken (12313 links); index wikilink scan — 0 broken (829 links); 6 expected cross-kind slug collisions ([[game-hacking]], [[anti-cheat]], [[reverse-engineering]], [[il2cpp]], [[byovd]], [[dma]]); wiki populated — bootstrap not required; no structural edits.
 
 - **2026-10-10** — ingest `description:projectsadameyd/AegisAC`: refreshed entity [[aegis-ac]] (Architecture: Paper event-based vs packet simulation; combat/movement heuristic scorers; remote-interaction cancel; VPN pre-login; staged sanctions); cited on [[overviews/anti-cheat]] Paper alert-first lane; `index.md` entity blurb unchanged.
 
