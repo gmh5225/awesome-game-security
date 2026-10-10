@@ -15,9 +15,13 @@ confidence: medium
 
 README category: Anti Cheat / Open Source Anti Cheat System / game:minecraft.
 
+## Architecture
+
+Standard **Paper plugin** (no client mod): cheat signals come from **server-side Bukkit events**, not packet-level movement simulation—conservative **alert-first** defaults with combat and movement analyzers that accumulate heuristic scores until sustained evidence warrants escalation. (source: wiki/sources/descriptions/projectsadameyd__AegisAC.md)
+
 ## Detection surface
 
-Movement and combat checks include **Speed**, **Fly**, **Timer**, **Reach**, **AutoClicker**, **FastPlace**, and **Velocity**, with heuristic scorers that require sustained violations before escalation. **Remote block break, placement, and interaction** beyond server-side reach are canceled to limit freecam-style abuse.
+Movement and combat checks include **Speed**, **Fly**, **Timer**, **Reach**, **AutoClicker**, **FastPlace**, and **Velocity**. **Remote block break, placement, and interaction** beyond server-side reach are canceled to limit freecam-style abuse.
 
 ## Enforcement and ops
 
