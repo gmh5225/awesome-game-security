@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-10** — lint (agent): catalog scan — **Overviews** (9): `anti-cheat`, `dma-attack`, `game-engine`, `game-hacking`, `graphics-api`, `mobile-security`, `overview`, `reverse-engineering`, `windows-kernel`; **Concepts** (51); **Entities** (4021); index vs disk — 4081 paths, 0 missing, 0 dead, 0 duplicate; overview wikilink spot-check — 0 broken (12304 links); concept spot-check — 0 broken (2390 links); index wikilink scan — 0 broken (822 links); 6 expected cross-kind slug collisions ([[game-hacking]], [[anti-cheat]], [[reverse-engineering]], [[il2cpp]], [[byovd]], [[dma]]); wiki populated — bootstrap not required; `index.md` unchanged.
+
 - **2026-10-10** — ingest `description:ahuhu789/pubg-bigdata-analytics`: refreshed entity [[pubg-bigdata-analytics]] (PySpark cleanse, Spark SQL match analytics, MLlib K-Means + game-physics rule flags, Parquet → Cassandra + optional Docker Compose, Streamlit ranked anomaly alerts; offline/server-side batch cheat-signal research); cited on [[overviews/anti-cheat]] and [[concepts/ai-aimbot-detection]]; `index.md` entity blurb sync.
 
 - **2026-10-10** — ingest `readme:categories`: Anti Cheat ~778 (+1; ahuhu789/[[pubg-bigdata-analytics]] PySpark/Cassandra/Streamlit PUBG match analytics + esports cheater anomaly detection) / Cheat ~2867 / other major section counts stable; 41 sections; synced projected README-map counts on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], and [[overviews/reverse-engineering]]; entity [[pubg-bigdata-analytics]]; [[concepts/ai-aimbot-detection]] corpus cross-link; light `index.md` section notes (no per-category pages).
