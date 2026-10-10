@@ -1125,6 +1125,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/guoxing2024/magicmida-rs [Rust reimplementation of Magicmida Themida unpacker with IAT rebuild and OEP discovery]
 - https://github.com/bobalkkagi/bobalkkagi [Themida 3.x unpacking/unwrapping via API-hook emulation (Tiger red64)]
 - https://github.com/stuxnet147/Themida-Research [Themida 3.x research]
+- https://github.com/arcticbyp/seb-re-toolkit [Python RE toolkit for Themida-protected Safe Exam Browser seb_x64.dll: PE/static analysis, packer detection, BSTR export calls, Frida tracing, and GUI]
 - https://github.com/Marisa-Chan/GhidrOrean [Ghidra Python reimplementation of Deathway's Orean's Unvirtualizer — Oreans VM (Themida/Code Virtualizer) CISC/TIGER/RISC/FISH]
 
 > Fix OLLVM
