@@ -1,0 +1,2018 @@
+Project Path: arc_projectsadameyd_AegisAC_6obesk7j
+
+Source Tree:
+
+```txt
+arc_projectsadameyd_AegisAC_6obesk7j
+├── README.md
+├── build.gradle.kts
+├── pom.xml
+├── settings.gradle.kts
+└── src
+    ├── main
+    │   ├── java
+    │   │   └── dev
+    │   │       └── aegisac
+    │   │           └── core
+    │   │               ├── AegisAC.java
+    │   │               ├── AegisAudit.java
+    │   │               ├── AegisCommand.java
+    │   │               ├── AegisListener.java
+    │   │               ├── CheckType.java
+    │   │               ├── CombatAnalyzer.java
+    │   │               ├── EnforcementProfiles.java
+    │   │               ├── Moderation.java
+    │   │               ├── MotionEnvelope.java
+    │   │               ├── MovementAnalyzer.java
+    │   │               ├── PlayerData.java
+    │   │               ├── PlayerDataManager.java
+    │   │               ├── SanctionEvidence.java
+    │   │               ├── ViolationEngine.java
+    │   │               ├── VpnGate.java
+    │   │               └── WorldUtil.java
+    │   └── resources
+    │       ├── config.yml
+    │       └── plugin.yml
+    └── test
+        └── java
+            └── dev
+                └── aegisac
+                    └── core
+                        ├── MotionEnvelopeTest.java
+                        └── SanctionEvidenceTest.java
+
+```
+
+`README.md`:
+
+```md
+<img width="1254" height="1254" alt="AegisAC logo original" src="https://github.com/user-attachments/assets/3ac52706-ffed-48c9-b23f-fabe92974a2d" />
+# AegisAC 0.3.5-alpha
+
+Paper 1.21.11 / Java 21 anti-cheat prototype. Put the built JAR in `plugins/` and restart Paper. Test on a private server before deploying to players.
+
+## Scope and limitations
+
+No server plugin can guarantee detection of every cheat, instant detection, zero false positives, or superior performance to GrimAC without controlled benchmarks. **Passive Freecam is not detectable by this plugin**: a camera moving only on the client sends no distinctive movement to Paper. AegisAC immediately cancels block break, placement, and interaction **beyond the player's server-side block-reach attribute plus a safety margin**. This stops a class of remote actions, not passive viewing. Paper's [built-in Anti-Xray](https://docs.papermc.io/paper/anti-xray/) reduces ore information sent to clients; it does not remove Freecam or hide every visible build.
+
+Severe Speed movement is rejected on the first implausibly large non-exempt movement event. Two spaced severe attempts within five seconds advance one sanction stage, subject to a separate 15-second severe sanction cooldown. Aegis computes a loose movement envelope from the player’s current speed attributes, elapsed movement time, and preceding movement. This is a limited event-level estimate, not packet-level simulation of all possible Minecraft movement. Teleports, recent server velocity or damage, special surfaces, high ping, and low TPS are exempt. Moderate Speed and other checks keep their regular evidence windows. These thresholds need testing on the actual server and can still miss cheats or affect legitimate players.
+
+Speed, Fly, Timer, Reach, AutoClicker, FastPlace, and Velocity checks generate staff alerts. Only sustained, qualifying Speed alerts and remote block interactions are eligible for staged sanctions on new installations. Fly and the other heuristic checks produce staff alerts by default; `/aegis enforcement all on` explicitly opts every check into staged sanctions with a reachable per-check score threshold and sustained evidence. A Speed failed sample or a current buffer above threshold is **not** a sanction event; the debug command shows alert count, heuristic score, and the gate that stopped escalation.
+
+## Sanctions and appeals
+
+New installations have `enforcement.enabled: true` with `FREECAM_INTERACT` and `SPEED` eligible. Speed requires eight qualifying alerts within 90 seconds, spanning at least five seconds, at a heuristic score of at least 92%. The score is a threshold, not a measured probability of cheating. The old eight-consecutive-ground-tick sanction gate rejected real alert sequences and has been removed; legitimate players can still trigger this heuristic. Remote interactions require four qualifying alerts at a 98% heuristic score. By default there is a 10-minute cooldown after a sanction, adjustable with `/aegis enforcement cooldown <seconds>`. **Existing `config.yml` files retain their old eligible-check list**: run `/aegis status`, `/aegis enforcement on` if necessary, then `/aegis enforcement speed on` to add Speed. Test on a private server before enabling sanctions for public players. `/aegis enforcement all on` writes every check to the eligible list and sets distinct score and evidence thresholds; it does not enable permanent IP banning.
+
+| Event | Action |
+| --- | --- |
+| 1–3 | Kick |
+| 4 | Temporary one-hour login block |
+| 5 | Temporary one-day login block |
+| 6 | Permanent account and IP login block **only for remote-interaction evidence** and only if `permanent-ip-ban-enabled: true`; Other checks require staff review |
+
+The ladder survives restarts in `plugins/AegisAC/sanctions.yml`. It does **not** instantly ban on one detection. Keep backups and handle appeals; a shared household, VPN exit, or proxy address can belong to multiple players. Permanent IP banning is separately disabled by default; `/aegis ipban on` enables it. Disabled enforcement does not erase existing bans. `/aegis reset <online-player>` clears a player's sanction stage. `/aegis pardon <uuid>` clears an offline account ban; `/aegis unban-ip <address>` removes an IP ban.
+
+## VPN gate
+
+Optional, requires a [proxycheck.io API key](https://proxycheck.io/api/) in environment variable `AEGIS_PROXYCHECK_KEY` and `vpn.enabled: true`. Lookup uses HTTPS during asynchronous pre-login, with a 1.5-second timeout and a short-lived cache. A positive VPN result rejects that join with a retry message; it is **not a ban** and does not increment sanctions. API failure or unknown result allows the join. This is probabilistic classification, may miss VPNs or reject a normal player, and sends the connecting IP to the provider. If behind Velocity, configure [modern forwarding and proxy security](https://docs.papermc.io/velocity/player-information-forwarding/) before relying on IP controls.
+
+## Commands
+
+| Command | Purpose |
+| --- | --- |
+| `/aegis info` | Version and credits |
+| `/aegis status` | TPS, tracked players, enabled controls |
+| `/aegis debug <online-player>` | Event counts, exemption reason, bypass status, and failed check samples |
+| `/aegis enforcement <on|off>` | Enable or disable eligible automatic sanctions, saved to config |
+| `/aegis enforcement <check> <on|off>` | Opt in or out of one check (for example `fly` or `speed`); `on` sets its evidence thresholds |
+| `/aegis enforcement all <on|off>` | Opt every check in with distinct thresholds, or disable all automatic sanctions |
+| `/aegis enforcement cooldown <0-3600>` | Set the seconds between sanction stages; 0 is for controlled testing |
+| `/aegis ipban <on|off>` | Enable or disable the final IP-ban stage, saved to config |
+| `/aegis alerts` | Toggle personal alerts |
+| `/aegis inspect <online-player>` | Show alert buffers and sanction stage |
+| `/aegis reset <online-player>` | Reset that player's evidence and stage |
+| `/aegis pardon <uuid>` | Clear offline player's ban and stage |
+| `/aegis unban-ip <address>` | Remove an IP ban |
+| `/aegis reload` | Reload configuration and VPN state |
+| `/aegis-ip <online-player>` | Show the IP address seen by Paper, privately to a permitted admin |
+
+Permissions: `aegis.admin`, `aegis.ip`, `aegis.alerts` (default op), `aegis.bypass` (default false). The server-seen IP is not necessarily a player's home IP, especially when behind a proxy. Do not share IPs publicly.
+
+If a check appears idle, inspect `/aegis debug <player>` while that player is moving and interacting. It separates total movement events from **evaluated**, **exempt**, and **rejected severe** positional movements. Alert count, last heuristic score, the sanction gate, current stage, cooldown, and next action explain why a failed sample did not cause a kick or ban. After eight qualifying Speed alerts spanning at least five seconds, the first sanction is a kick; stages persist between reconnects. Check `/aegis info` for the loaded plugin version and `/aegis status` for sanction settings. The CI build tests the sustained-alert and severe-movement thresholds; it does not replace testing on a running Paper server.
+
+### If nothing happens on your server
+
+1. Remove older AegisAC JARs from `plugins/`, install only `AegisAC-0.3.5-alpha.jar`, restart Paper, and check `/aegis info` or `/aegis status` for `0.3.5-alpha`. A config reload cannot replace loaded Java code.
+2. Run `/aegis enforcement all on`, then `/aegis status`. If you want the original narrower setup, use `/aegis enforcement all off`, `/aegis enforcement on`, then `/aegis enforcement speed on` and `/aegis enforcement freecam_interact on`. Check `bypass=false` in `/aegis debug <online-player>`.
+3. Trigger activity while checking `/aegis debug <online-player>` and console `[AUDIT] ALERT` or `[AUDIT] SANCTION` entries. The `gate=` field names the last reason a sanction did not advance. `stage=1` means the first kick worked; stages 1–3 are kicks, and stage 4 is the first temporary ban. After each regular sanction the default cooldown is 10 minutes; severe Speed evidence uses 15 seconds by default. In a private test, run `/aegis enforcement cooldown 0` to immediately allow the next qualifying evidence sequence; restore `/aegis enforcement cooldown 600` afterward. The command takes effect on existing cooldowns. The next sanction is still a kick until stage 4. `/aegis status` warns when a configured minimum score exceeds a check's possible score.
+4. VPN blocking is separate from sanction enforcement and requires `vpn.enabled: true` and the `AEGIS_PROXYCHECK_KEY` environment variable. `/aegis status` reports whether the gate is ready. Remote block actions can be canceled; passive Freecam viewing cannot be identified from Paper events alone.
+
+All-check mode allows kicks and temporary bans from less reliable event heuristics. An alert or a displayed score is not proof of cheating. IP bans remain off unless separately enabled and are never issued for Speed or the other heuristic checks. Review audit logs and player appeals.
+
+Every 30 minutes the plugin broadcasts exactly `Made by @_adam814` by default.
+
+## Console audit
+
+AegisAC logs `[AUDIT]` entries for joins, quits, check alerts, blocked remote interactions, sanctions, VPN login decisions, login denials, and admin changes. Join entries show the address Paper sees beside the player name, for example: `[AUDIT] JOIN Steve [IP: 203.0.113.42] uuid=...`. IP addresses appear only in the server console and server logs; the normal public join message stays as configured by Paper. If you use a proxy, configure secure IP forwarding or the address may be the proxy's. Restrict access to server logs because they contain player IPs. Remote-interaction cancellation messages are limited to one per player every five seconds; normal movement events are not logged.
+
+## Build
+
+With Java 21 and Maven: `mvn package`. Or use Gradle with Java 21: `gradle build`. Paper dependency: `io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT`.
+
+This code does not implement packet-level physics prediction or benchmark faster than GrimAC. See [Grim's source](https://github.com/GrimAnticheat/Grim) for its different scope. Check Paper's [project setup](https://docs.papermc.io/paper/dev/project-setup/) for current API guidance.
+
+```
+
+`build.gradle.kts`:
+
+```kts
+plugins {
+    java
+}
+
+group = "dev.aegisac"
+version = "0.3.5-alpha"
+
+repositories {
+    maven("https://repo.papermc.io/repository/maven-public/")
+}
+
+dependencies {
+    compileOnly("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT")
+}
+
+java {
+    toolchain.languageVersion.set(JavaLanguageVersion.of(21))
+}
+
+tasks.processResources {
+    filesMatching("plugin.yml") {
+        expand("version" to project.version)
+    }
+}
+
+```
+
+`pom.xml`:
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>dev.aegisac</groupId>
+  <artifactId>aegisac</artifactId>
+  <version>0.3.5-alpha</version>
+  <name>AegisAC</name>
+  <description>Conservative alert-first Minecraft anti-cheat for Paper 1.21.11.</description>
+
+  <properties>
+    <maven.compiler.release>21</maven.compiler.release>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
+
+  <repositories>
+    <repository>
+      <id>papermc</id>
+      <url>https://repo.papermc.io/repository/maven-public/</url>
+    </repository>
+  </repositories>
+
+  <dependencies>
+    <dependency>
+      <groupId>io.papermc.paper</groupId>
+      <artifactId>paper-api</artifactId>
+      <version>1.21.11-R0.1-SNAPSHOT</version>
+      <scope>provided</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <finalName>AegisAC-0.3.5-alpha</finalName>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.13.0</version>
+        <configuration>
+          <release>21</release>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>3.4.2</version>
+      </plugin>
+    </plugins>
+  </build>
+</project>
+
+```
+
+`settings.gradle.kts`:
+
+```kts
+rootProject.name = "AegisAC"
+
+```
+
+`src/main/java/dev/aegisac/core/AegisAC.java`:
+
+```java
+package dev.aegisac.core;
+
+import org.bukkit.Bukkit;
+import org.bukkit.command.PluginCommand;
+import org.bukkit.plugin.java.JavaPlugin;
+
+public final class AegisAC extends JavaPlugin {
+    private final PlayerDataManager data = new PlayerDataManager();
+    private ViolationEngine violations;
+    private Moderation moderation;
+    private VpnGate vpnGate;
+
+    @Override
+    public void onEnable() {
+        saveDefaultConfig();
+        moderation = new Moderation(this);
+        vpnGate = new VpnGate(this);
+        violations = new ViolationEngine(this);
+        getServer().getPluginManager().registerEvents(new AegisListener(this), this);
+
+        PluginCommand command = getCommand("aegis");
+        if (command != null) command.setExecutor(new AegisCommand(this));
+        PluginCommand ipCommand = getCommand("aegis-ip");
+        if (ipCommand != null) ipCommand.setExecutor(new AegisCommand(this));
+
+        scheduleCreditBroadcast();
+        AegisAudit.info(this, "STARTUP", "Paper 1.21.11; automatic sanctions="
+                + getConfig().getBoolean("enforcement.enabled", true) + "; VPN gate=" + vpnGate.enabled()
+                + "; eligible checks=" + getConfig().getStringList("enforcement.eligible-checks"));
+        if (!getConfig().getBoolean("enforcement.enabled", true))
+            getLogger().warning("Automatic kicks and bans are disabled in this server's config.yml. Use /aegis enforcement on after reviewing alerts.");
+    }
+
+    @Override
+    public void onDisable() {
+        AegisAudit.info(this, "SHUTDOWN", "AegisAC disabled");
+    }
+
+    private void scheduleCreditBroadcast() {
+        if (!getConfig().getBoolean("broadcast-credit", true)) return;
+        long seconds = Math.max(60L, getConfig().getLong("broadcast-credit-seconds", 1800L));
+        long ticks = seconds * 20L;
+        Bukkit.getScheduler().runTaskTimer(this, () -> Bukkit.broadcastMessage("Made by @_adam814"), ticks, ticks);
+    }
+
+    public PlayerDataManager data() {
+        return data;
+    }
+
+    public ViolationEngine violations() {
+        return violations;
+    }
+
+    public Moderation moderation() { return moderation; }
+
+    public VpnGate vpnGate() { return vpnGate; }
+
+    public double currentTps() {
+        try {
+            double[] values = Bukkit.getServer().getTPS();
+            if (values.length > 0) return Math.min(20.0, values[0]);
+        } catch (Throwable ignored) {
+        }
+        return 20.0;
+    }
+}
+
+```
+
+`src/main/java/dev/aegisac/core/AegisAudit.java`:
+
+```java
+package dev.aegisac.core;
+
+import org.bukkit.entity.Player;
+
+import java.net.InetSocketAddress;
+
+/** Console-only audit messages. Never use this for public join/chat text. */
+final class AegisAudit {
+    private AegisAudit() {}
+
+    static String ip(Player player) {
+        InetSocketAddress address = player.getAddress();
+        return address == null || address.getAddress() == null
+                ? "unavailable" : address.getAddress().getHostAddress();
+    }
+
+    static void info(AegisAC plugin, String action, String detail) {
+        plugin.getLogger().info("[AUDIT] " + action + " " + detail);
+    }
+
+    static void warning(AegisAC plugin, String action, String detail) {
+        plugin.getLogger().warning("[AUDIT] " + action + " " + detail);
+    }
+}
+
+```
+
+`src/main/java/dev/aegisac/core/AegisCommand.java`:
+
+```java
+package dev.aegisac.core;
+
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandExecutor;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
+import org.bukkit.Bukkit;
+import java.net.InetSocketAddress;
+
+public final class AegisCommand implements CommandExecutor {
+    private final AegisAC plugin;
+
+    public AegisCommand(AegisAC plugin) {
+        this.plugin = plugin;
+    }
+
+    @Override
+    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+        if (command.getName().equalsIgnoreCase("aegis-ip")) {
+            if (!sender.hasPermission("aegis.ip")) {
+                sender.sendMessage("§cMissing aegis.ip permission.");
+                return true;
+            }
+            if (args.length != 1) {
+                sender.sendMessage("§7Usage: §f/aegis-ip <online-player>");
+                return true;
+            }
+            Player target = Bukkit.getPlayerExact(args[0]);
+            if (target == null) {
+                sender.sendMessage("§cPlayer must be online. IPs are not kept in AegisAC's player history.");
+                return true;
+            }
+            InetSocketAddress address = target.getAddress();
+            sender.sendMessage(address == null || address.getAddress() == null
+                    ? "§cNo address available." : "§7Server-seen IP for §f" + target.getName() + "§7: §f"
+                    + address.getAddress().getHostAddress() + " §8(proxy configuration affects this value)");
+            AegisAudit.info(plugin, "IP_LOOKUP", "actor=" + sender.getName() + " target=" + target.getName());
+            return true;
+        }
+        if (!sender.hasPermission("aegis.admin")) {
+            sender.sendMessage("§cYou do not have permission to use AegisAC commands.");
+            return true;
+        }
+        if (args.length == 0 || args[0].equalsIgnoreCase("info")) {
+            sender.sendMessage("§bAegisAC §7v" + plugin.getDescription().getVersion() + " §8- §falert-first Paper 1.21.11 anti-cheat");
+            sender.sendMessage("§7Made by §f@_adam814§7. Use /aegis status and /aegis debug <player> to inspect detection.");
+            return true;
+        }
+        if (args[0].equalsIgnoreCase("alerts")) {
+            if (!(sender instanceof Player player)) {
+                sender.sendMessage("§cOnly players can toggle in-game alerts.");
+                return true;
+            }
+            boolean enabled = plugin.violations().toggleAlerts(player);
+            sender.sendMessage(enabled ? "§aAegis alerts enabled." : "§cAegis alerts disabled.");
+            AegisAudit.info(plugin, "ALERTS_TOGGLE", "actor=" + sender.getName() + " enabled=" + enabled);
+            return true;
+        }
+        if (args[0].equalsIgnoreCase("reload")) {
+            plugin.reloadConfig();
+            plugin.vpnGate().reload();
+            sender.sendMessage("§aAegisAC configuration reloaded.");
+            AegisAudit.info(plugin, "CONFIG_RELOAD", "actor=" + sender.getName());
+            return true;
+        }
+        if (args[0].equalsIgnoreCase("status")) {
+            sender.sendMessage("§bAegisAC §f" + plugin.getDescription().getVersion()
+                    + " §7tracking §f" + plugin.data().size() + " §7player record(s). TPS: §f"
+                    + String.format(java.util.Locale.ROOT, "%.2f", plugin.currentTps()));
+            sender.sendMessage("§7Sanctions: §f" + plugin.getConfig().getBoolean("enforcement.enabled", true)
+                    + "§7; cooldown: §f" + (plugin.getConfig().getLong("enforcement.cooldown-ms", 600_000L) / 1000) + "s"
+                    + "§7; remote-interaction IP bans: §f" + plugin.getConfig().getBoolean("enforcement.permanent-ip-ban-enabled", false)
+                    + "§7; VPN gate ready: §f" + plugin.vpnGate().enabled());
+            sender.sendMessage("§7Auto-sanction checks: §f" + plugin.getConfig().getStringList("enforcement.eligible-checks")
+                    + "§7. Other checks produce staff alerts only.");
+            sender.sendMessage("§7Severe Speed rejection: §f" + plugin.getConfig().getBoolean("checks.speed.severe.enabled", true)
+                    + "§7; evidence: §f" + plugin.getConfig().getInt("enforcement.severe-speed.alerts-required", 2)
+                    + "§7 events; fast sanction cooldown: §f"
+                    + (plugin.getConfig().getLong("enforcement.severe-speed.cooldown-ms", 15_000L) / 1000) + "s");
+            for (CheckType type : CheckType.values()) {
+                if (!plugin.getConfig().getStringList("enforcement.eligible-checks").contains(type.name())) continue;
+                double minimum = Math.max(plugin.getConfig().getDouble("alerts.minimum-confidence", 0.72),
+                        plugin.getConfig().getDouble("enforcement.minimum-confidence-by-check." + type.name(),
+                                plugin.getConfig().getDouble("enforcement.minimum-confidence", 0.98)));
+                if (minimum > EnforcementProfiles.get(type).maximumScore() + 1.0E-9)
+                    sender.sendMessage("§c" + type.display() + " can never sanction: effective required score "
+                            + Math.round(minimum * 100) + "% exceeds maximum "
+                            + Math.round(EnforcementProfiles.get(type).maximumScore() * 100)
+                            + "%. Check alerts.minimum-confidence and run /aegis enforcement "
+                            + type.name().toLowerCase(java.util.Locale.ROOT) + " on.");
+            }
+            if (plugin.getConfig().getBoolean("vpn.enabled", false) && !plugin.vpnGate().enabled())
+                sender.sendMessage("§cVPN blocking is configured but unavailable: set the VPN API key environment variable and restart.");
+            return true;
+        }
+        if (args[0].equalsIgnoreCase("enforcement") && args.length == 3
+                && args[1].equalsIgnoreCase("cooldown")) {
+            int seconds;
+            try {
+                seconds = Integer.parseInt(args[2]);
+            } catch (NumberFormatException ex) {
+                sender.sendMessage("§cUsage: /aegis enforcement cooldown <0-3600 seconds>");
+                return true;
+            }
+            if (seconds < 0 || seconds > 3600) {
+                sender.sendMessage("§cCooldown must be between 0 and 3600 seconds.");
+                return true;
+            }
+            plugin.getConfig().set("enforcement.cooldown-ms", seconds * 1000L);
+            plugin.saveConfig();
+            sender.sendMessage("§aSanction cooldown set to " + seconds + "s, effective immediately, including for existing cooldowns.");
+            if (seconds == 0) sender.sendMessage("§eZero cooldown is intended for testing on a private server. Set it back when done.");
+            AegisAudit.warning(plugin, "ENFORCEMENT_COOLDOWN", "actor=" + sender.getName() + " seconds=" + seconds);
+            return true;
+        }
+        if (args[0].equalsIgnoreCase("enforcement") && args.length == 3) {
+            if (!args[2].equalsIgnoreCase("on") && !args[2].equalsIgnoreCase("off")) {
+                sender.sendMessage("§7Usage: §f/aegis enforcement <all|check> <on|off>");
+                return true;
+            }
+            boolean enable = args[2].equalsIgnoreCase("on");
+            if (args[1].equalsIgnoreCase("all")) {
+                if (enable) {
+                    java.util.List<String> all = new java.util.ArrayList<>();
+                    for (CheckType type : CheckType.values()) {
+                        all.add(type.name());
+                        setEnforcementProfile(type);
+                    }
+                    plugin.getConfig().set("enforcement.eligible-checks", all);
+                }
+                plugin.getConfig().set("enforcement.enabled", enable);
+                plugin.saveConfig();
+                sender.sendMessage(enable
+                        ? "§eAll check sanctions enabled with per-check thresholds. Three kicks precede temporary bans."
+                        : "§7All automatic sanctions disabled; eligible checks remain saved for later use.");
+                sender.sendMessage("§7IP bans are separate; VPN blocking requires a configured API key. Run /aegis status.");
+                AegisAudit.warning(plugin, "ALL_ENFORCEMENT", "actor=" + sender.getName() + " enabled=" + enable);
+                return true;
+            }
+            CheckType selected = null;
+            for (CheckType type : CheckType.values()) {
+                if (type.name().equalsIgnoreCase(args[1])) selected = type;
+            }
+            if (selected == null) {
+                sender.sendMessage("§cUnknown check. Use /aegis status or /aegis enforcement all on.");
+                return true;
+            }
+            java.util.List<String> checks = new java.util.ArrayList<>(plugin.getConfig().getStringList("enforcement.eligible-checks"));
+            CheckType check = selected;
+            checks.removeIf(name -> name.equalsIgnoreCase(check.name()));
+            if (enable) {
+                checks.add(selected.name());
+                setEnforcementProfile(selected);
+            }
+            plugin.getConfig().set("enforcement.eligible-checks", checks);
+            plugin.saveConfig();
+            sender.sendMessage("§7" + selected.display() + " sanctions " + (enable ? "enabled" : "disabled")
+                    + "§7. Global enforcement=" + plugin.getConfig().getBoolean("enforcement.enabled", true));
+            AegisAudit.warning(plugin, "CHECK_ENFORCEMENT", "actor=" + sender.getName() + " check=" + selected.name()
+                    + " enabled=" + enable);
+            return true;
+        }
+        if (args[0].equalsIgnoreCase("enforcement") && args.length == 2) {
+            if (!args[1].equalsIgnoreCase("on") && !args[1].equalsIgnoreCase("off")) {
+                sender.sendMessage("§7Usage: §f/aegis enforcement <on|off>");
+                return true;
+            }
+            boolean enabled = args[1].equalsIgnoreCase("on");
+            plugin.getConfig().set("enforcement.enabled", enabled);
+            plugin.saveConfig();
+            sender.sendMessage("§aAutomatic sanctions " + (enabled ? "enabled" : "disabled")
+                    + ". Eligible checks: " + plugin.getConfig().getStringList("enforcement.eligible-checks"));
+            AegisAudit.warning(plugin, "ENFORCEMENT", "actor=" + sender.getName() + " enabled=" + enabled);
+            return true;
+        }
+        if (args[0].equalsIgnoreCase("ipban") && args.length == 2) {
+            if (!args[1].equalsIgnoreCase("on") && !args[1].equalsIgnoreCase("off")) {
+                sender.sendMessage("§7Usage: §f/aegis ipban <on|off>");
+                return true;
+            }
+            boolean enabled = args[1].equalsIgnoreCase("on");
+            plugin.getConfig().set("enforcement.permanent-ip-ban-enabled", enabled);
+            plugin.saveConfig();
+            sender.sendMessage("§7Permanent IP bans " + (enabled ? "enabled" : "disabled")
+                    + ". Shared addresses can affect unrelated players.");
+            AegisAudit.warning(plugin, "IPBAN_SETTING", "actor=" + sender.getName() + " enabled=" + enabled);
+            return true;
+        }
+        if (args[0].equalsIgnoreCase("debug") && args.length == 2) {
+            Player target = Bukkit.getPlayerExact(args[1]);
+            if (target == null) {
+                sender.sendMessage("§cPlayer must be online.");
+                return true;
+            }
+            PlayerData data = plugin.data().get(target.getUniqueId());
+            String reason = WorldUtil.movementExemptionReason(target, data,
+                    plugin.getConfig().getDouble("minimum-tps", 18.0), plugin.currentTps(),
+                    plugin.getConfig().getInt("maximum-ping-ms", 300));
+            sender.sendMessage("§bAegis debug §7v" + plugin.getDescription().getVersion() + ": §f" + target.getName() + " §7bypass=§f"
+                    + target.hasPermission("aegis.bypass") + "§7, mode=§f" + target.getGameMode()
+                    + "§7, ping=§f" + target.getPing());
+            sender.sendMessage("§7Movement: §f" + data.moveEvents + " §7events, §f"
+                    + data.movementEvaluatedEvents + " §7evaluated, §f"
+                    + data.movementExemptEvents + " §7exempt, §f" + data.severeMoves + " §7rejected; current reason: §f"
+                    + (reason == null ? "none" : reason));
+            sender.sendMessage("§7Block interactions: §f" + data.interactionEvents + "§7; canceled as remote: §f"
+                    + data.remoteBlocks + "§7; combat events: §f" + data.combatEvents);
+            sender.sendMessage("§7Checks with failed samples (not proof of cheating):");
+            for (CheckType type : CheckType.values()) {
+                long count = data.failedSamples.getOrDefault(type, 0L);
+                if (count > 0) sender.sendMessage("§7" + type.display() + " samples=§f" + count
+                        + "§7; alerts=§f" + data.alertCounts.getOrDefault(type, 0L)
+                        + "§7; last score=§f" + Math.round(data.lastAlertConfidence.getOrDefault(type, 0.0) * 100) + "%"
+                        + "§7; gate=§f" + data.sanctionGate.getOrDefault(type, "no alert yet"));
+            }
+            sender.sendMessage("§7Sanctions=§f" + plugin.getConfig().getBoolean("enforcement.enabled", true)
+                    + "§7; eligible=§f" + plugin.getConfig().getStringList("enforcement.eligible-checks")
+                    + "§7; stage=§f" + plugin.moderation().stage(target.getUniqueId())
+                    + "§7; cooldown=§f" + ((plugin.moderation().cooldownRemaining(target.getUniqueId()) + 999) / 1000) + "s"
+                    + "§7; severe cooldown=§f" + ((plugin.moderation().cooldownRemainingSevere(target.getUniqueId()) + 999) / 1000) + "s"
+                    + "§7; next=§f" + plugin.moderation().nextAction(target.getUniqueId()));
+            return true;
+        }
+        if (args[0].equalsIgnoreCase("inspect") && args.length == 2) {
+            Player target = Bukkit.getPlayerExact(args[1]);
+            if (target == null) {
+                sender.sendMessage("§cPlayer must be online.");
+                return true;
+            }
+            sender.sendMessage("§b" + target.getName() + "§7 sanctions stage: §f" + plugin.moderation().stage(target.getUniqueId())
+                    + "§7, last reason: §f" + plugin.moderation().reason(target.getUniqueId()));
+            PlayerData data = plugin.data().get(target.getUniqueId());
+            for (CheckType type : CheckType.values()) {
+                if (data.buffer(type) > 0) sender.sendMessage("§7" + type.display() + ": §f"
+                        + String.format(java.util.Locale.ROOT, "%.2f", data.buffer(type)));
+            }
+            return true;
+        }
+        if (args[0].equalsIgnoreCase("reset") && args.length == 2) {
+            Player target = Bukkit.getPlayerExact(args[1]);
+            if (target == null) {
+                sender.sendMessage("§cPlayer must be online; contact staff to review offline bans.");
+                return true;
+            }
+            plugin.moderation().reset(target.getUniqueId());
+            plugin.data().remove(target.getUniqueId());
+            sender.sendMessage("§aCleared AegisAC evidence and sanction stage for " + target.getName() + ".");
+            AegisAudit.warning(plugin, "SANCTION_RESET", "actor=" + sender.getName()
+                    + " target=" + target.getName() + " uuid=" + target.getUniqueId());
+            return true;
+        }
+        if (args[0].equalsIgnoreCase("pardon") && args.length == 2) {
+            try {
+                java.util.UUID uuid = java.util.UUID.fromString(args[1]);
+                plugin.moderation().reset(uuid);
+                plugin.data().remove(uuid);
+                sender.sendMessage("§aCleared AegisAC sanctions for UUID " + uuid + ".");
+                AegisAudit.warning(plugin, "PARDON", "actor=" + sender.getName() + " uuid=" + uuid);
+            } catch (IllegalArgumentException ex) {
+                sender.sendMessage("§cProvide the exact account UUID.");
+            }
+            return true;
+        }
+        if (args[0].equalsIgnoreCase("unban-ip") && args.length == 2) {
+            boolean removed = plugin.moderation().unbanIp(args[1]);
+            sender.sendMessage(removed ? "§aRemoved the IP block."
+                    : "§cNo AegisAC IP block found for that address.");
+            if (removed) AegisAudit.warning(plugin, "IP_UNBAN", "actor=" + sender.getName() + " ip=" + args[1]);
+            return true;
+        }
+        sender.sendMessage("§7Usage: §f/aegis <alerts|status|debug|enforcement [all|check|cooldown] ...|ipban|inspect|reset|pardon|unban-ip|reload|info>");
+        return true;
+    }
+
+    private void setEnforcementProfile(CheckType type) {
+        EnforcementProfiles.Profile profile = EnforcementProfiles.get(type);
+        plugin.getConfig().set("enforcement.minimum-confidence-by-check." + type.name(), profile.minimumScore());
+        plugin.getConfig().set("enforcement.alerts-required-by-check." + type.name(), profile.requiredAlerts());
+        plugin.getConfig().set("enforcement.minimum-evidence-span-ms-by-check." + type.name(), profile.minimumSpanMillis());
+    }
+}
+
+```
+
+`src/main/java/dev/aegisac/core/AegisListener.java`:
+
+```java
+package dev.aegisac.core;
+
+import org.bukkit.Location;
+import org.bukkit.attribute.Attribute;
+import org.bukkit.attribute.AttributeInstance;
+import org.bukkit.block.Block;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.player.*;
+
+public final class AegisListener implements Listener {
+    private final AegisAC plugin;
+    private final MovementAnalyzer movement;
+    private final CombatAnalyzer combat;
+
+    public AegisListener(AegisAC plugin) {
+        this.plugin = plugin;
+        this.movement = new MovementAnalyzer(plugin);
+        this.combat = new CombatAnalyzer(plugin);
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onMove(PlayerMoveEvent event) {
+        // A teleport is a subclass of PlayerMoveEvent, not a client movement sample.
+        if (event instanceof PlayerTeleportEvent) return;
+        movement.handle(event, plugin.data().get(event.getPlayer().getUniqueId()));
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onDamage(EntityDamageByEntityEvent event) {
+        if (event.getDamager() instanceof Player player) {
+            PlayerData data = plugin.data().get(player.getUniqueId());
+            data.combatEvents++;
+            combat.handle(event, data);
+        }
+        if (event.getEntity() instanceof Player victim) {
+            plugin.data().get(victim.getUniqueId()).lastDamageMillis = System.currentTimeMillis();
+        }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onAnyDamage(EntityDamageEvent event) {
+        if (event.getEntity() instanceof Player player) {
+            plugin.data().get(player.getUniqueId()).lastDamageMillis = System.currentTimeMillis();
+        }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onVelocity(PlayerVelocityEvent event) {
+        PlayerData data = plugin.data().get(event.getPlayer().getUniqueId());
+        data.lastVelocityMillis = System.currentTimeMillis();
+        data.expectedVelocity = event.getVelocity().clone();
+        data.velocityStart = event.getPlayer().getLocation().clone();
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onTeleport(PlayerTeleportEvent event) {
+        PlayerData data = plugin.data().get(event.getPlayer().getUniqueId());
+        data.lastTeleportMillis = System.currentTimeMillis();
+        data.lastLocation = event.getTo() == null ? null : event.getTo().clone();
+        data.airTicks = 0;
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onWorldChange(PlayerChangedWorldEvent event) {
+        PlayerData data = plugin.data().get(event.getPlayer().getUniqueId());
+        data.lastTeleportMillis = System.currentTimeMillis();
+        data.airTicks = 0;
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onAnimation(PlayerAnimationEvent event) {
+        Player player = event.getPlayer();
+        if (player.hasPermission("aegis.bypass") || !plugin.getConfig().getBoolean("checks.autoclicker.enabled", true)) return;
+        PlayerData data = plugin.data().get(player.getUniqueId());
+        long now = System.currentTimeMillis();
+        data.swingTimes.addLast(now);
+        while (!data.swingTimes.isEmpty() && now - data.swingTimes.peekFirst() > 1000L) data.swingTimes.removeFirst();
+
+        int minSamples = plugin.getConfig().getInt("checks.autoclicker.min-samples", 30);
+        int maxCps = plugin.getConfig().getInt("checks.autoclicker.max-cps", 22);
+        if (data.swingTimes.size() >= Math.max(8, Math.min(minSamples, maxCps + 2))) {
+            int cps = data.swingTimes.size();
+            double threshold = plugin.getConfig().getDouble("checks.autoclicker.buffer-to-alert", 4.0);
+            if (cps > maxCps) {
+                double confidence = Math.min(0.93, 0.72 + (cps - maxCps) * 0.035);
+                plugin.violations().flag(player, data, CheckType.AUTOCLICKER, 0.75, threshold, confidence,
+                        "cps=" + cps);
+            } else {
+                data.decay(CheckType.AUTOCLICKER, 0.08);
+            }
+        }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onPlace(BlockPlaceEvent event) {
+        Player player = event.getPlayer();
+        if (player.hasPermission("aegis.bypass") || !plugin.getConfig().getBoolean("checks.fastplace.enabled", true)) return;
+        PlayerData data = plugin.data().get(player.getUniqueId());
+        long now = System.currentTimeMillis();
+        data.placeTimes.addLast(now);
+        while (!data.placeTimes.isEmpty() && now - data.placeTimes.peekFirst() > 1000L) data.placeTimes.removeFirst();
+
+        int rate = data.placeTimes.size();
+        int maxRate = plugin.getConfig().getInt("checks.fastplace.max-places-per-second", 17);
+        Location eye = player.getEyeLocation();
+        Location center = event.getBlockPlaced().getLocation().clone().add(0.5, 0.5, 0.5);
+        double distance = eye.getWorld() == center.getWorld() ? eye.distance(center) : 0.0;
+        double maxDistance = plugin.getConfig().getDouble("checks.fastplace.max-eye-distance", 6.25);
+        double threshold = plugin.getConfig().getDouble("checks.fastplace.buffer-to-alert", 3.0);
+
+        if (rate > maxRate || distance > maxDistance) {
+            double confidence = distance > maxDistance ? 0.90 : 0.76;
+            plugin.violations().flag(player, data, CheckType.FASTPLACE, 1.0, threshold, confidence,
+                    "rate=" + rate + "/s, distance=" + fmt(distance));
+        } else {
+            data.decay(CheckType.FASTPLACE, 0.12);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onRemoteBreak(BlockBreakEvent event) {
+        if (remote(event.getPlayer(), event.getBlock(), false)) event.setCancelled(true);
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onRemotePlace(BlockPlaceEvent event) {
+        if (remote(event.getPlayer(), event.getBlockPlaced(), true)) event.setCancelled(true);
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onRemoteInteract(PlayerInteractEvent event) {
+        if (event.getClickedBlock() != null
+                && remote(event.getPlayer(), event.getClickedBlock(), false)) {
+            event.setCancelled(true);
+        }
+    }
+
+    private boolean remote(Player player, Block target, boolean placedBlock) {
+        PlayerData data = plugin.data().get(player.getUniqueId());
+        data.interactionEvents++;
+        if (!plugin.getConfig().getBoolean("checks.remote-interact.enabled", true)
+                || player.hasPermission("aegis.bypass") || player.getGameMode().name().equals("CREATIVE")
+                || player.getGameMode().name().equals("SPECTATOR")) return false;
+        Location eye = player.getEyeLocation();
+        if (eye.getWorld() != target.getWorld()) return false;
+        // Measure to the nearest point of the block, not its center.
+        // Placed blocks can legitimately be one block past the clicked face.
+        org.bukkit.util.BoundingBox box = target.getBoundingBox();
+        double dx = eye.getX() - Math.max(box.getMinX(), Math.min(box.getMaxX(), eye.getX()));
+        double dy = eye.getY() - Math.max(box.getMinY(), Math.min(box.getMaxY(), eye.getY()));
+        double dz = eye.getZ() - Math.max(box.getMinZ(), Math.min(box.getMaxZ(), eye.getZ()));
+        double distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
+        AttributeInstance reach = player.getAttribute(Attribute.BLOCK_INTERACTION_RANGE);
+        double limit = (reach == null ? 4.5 : reach.getValue())
+                + plugin.getConfig().getDouble("checks.remote-interact.reach-margin", 1.25)
+                + (placedBlock ? 1.5 : 0.0);
+        if (distance <= limit) return false;
+        data.remoteBlocks++;
+        long now = System.currentTimeMillis();
+        if (now - data.lastRemoteAuditMillis >= 5000L) {
+            data.lastRemoteAuditMillis = now;
+            AegisAudit.warning(plugin, "REMOTE_BLOCKED", player.getName() + " uuid=" + player.getUniqueId()
+                    + " distance=" + fmt(distance) + " allowed=" + fmt(limit)
+                    + " (further events are rate-limited)");
+        }
+        // Other plugins can teleport players or extend reach. Cancelling is safer than
+        // treating this client-side symptom as proof of a specific Freecam mod.
+        if (now - data.lastTeleportMillis >= 1400L
+                && plugin.currentTps() >= plugin.getConfig().getDouble("minimum-tps", 18.0)
+                && player.getPing() <= plugin.getConfig().getInt("maximum-ping-ms", 300)) {
+            plugin.violations().flag(player, data,
+                    CheckType.FREECAM_INTERACT, 1.0,
+                    plugin.getConfig().getDouble("checks.remote-interact.buffer-to-alert", 2.0),
+                    0.99, "blockDistance=" + fmt(distance));
+        }
+        return true;
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onPreLoginBan(AsyncPlayerPreLoginEvent event) {
+        plugin.moderation().checkLogin(event);
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onPreLoginVpn(AsyncPlayerPreLoginEvent event) {
+        plugin.vpnGate().checkLogin(event);
+    }
+
+    @EventHandler
+    public void onQuit(PlayerQuitEvent event) {
+        AegisAudit.info(plugin, "QUIT", event.getPlayer().getName() + " uuid=" + event.getPlayer().getUniqueId());
+        plugin.moderation().clearEvidence(event.getPlayer().getUniqueId());
+        plugin.data().remove(event.getPlayer().getUniqueId());
+    }
+
+    @EventHandler
+    public void onJoin(PlayerJoinEvent event) {
+        Player player = event.getPlayer();
+        plugin.data().get(player.getUniqueId()).lastTeleportMillis = System.currentTimeMillis();
+        AegisAudit.info(plugin, "JOIN", player.getName() + " [IP: " + AegisAudit.ip(player)
+                + "] uuid=" + player.getUniqueId());
+    }
+
+    private static String fmt(double value) {
+        return String.format(java.util.Locale.ROOT, "%.2f", value);
+    }
+}
+
+```
+
+`src/main/java/dev/aegisac/core/CheckType.java`:
+
+```java
+package dev.aegisac.core;
+
+public enum CheckType {
+    SPEED("Speed", "A"),
+    FLY("Fly", "A"),
+    TIMER("Timer", "A"),
+    REACH("Reach", "A"),
+    AUTOCLICKER("AutoClicker", "A"),
+    FASTPLACE("FastPlace", "A"),
+    FREECAM_INTERACT("RemoteInteract", "A"),
+    VELOCITY("Velocity", "A");
+
+    private final String display;
+    private final String variant;
+
+    CheckType(String display, String variant) {
+        this.display = display;
+        this.variant = variant;
+    }
+
+    public String display() { return display; }
+    public String variant() { return variant; }
+}
+
+```
+
+`src/main/java/dev/aegisac/core/CombatAnalyzer.java`:
+
+```java
+package dev.aegisac.core;
+
+import org.bukkit.Location;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.Player;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.util.BoundingBox;
+
+public final class CombatAnalyzer {
+    private final AegisAC plugin;
+
+    public CombatAnalyzer(AegisAC plugin) {
+        this.plugin = plugin;
+    }
+
+    public void handle(EntityDamageByEntityEvent event, PlayerData data) {
+        if (!(event.getDamager() instanceof Player player)) return;
+        if (player.hasPermission("aegis.bypass")) return;
+        if (!plugin.getConfig().getBoolean("checks.reach.enabled", true)) return;
+        if (player.getGameMode().name().equals("CREATIVE") || player.getGameMode().name().equals("SPECTATOR")) return;
+
+        // 1.21.11 spears can legitimately use an item-provided attack range.
+        String itemName = player.getInventory().getItemInMainHand().getType().name();
+        if (itemName.contains("SPEAR")) {
+            data.decay(CheckType.REACH, 0.35);
+            return;
+        }
+
+        Entity target = event.getEntity();
+        Location eye = player.getEyeLocation();
+        BoundingBox box = target.getBoundingBox();
+        double distance = distanceToBox(eye.getX(), eye.getY(), eye.getZ(), box);
+        double max = plugin.getConfig().getDouble("checks.reach.max-normal-reach", 4.25);
+        if (player.getPing() > 140) {
+            max += plugin.getConfig().getDouble("checks.reach.high-ping-extra", 0.45);
+        }
+        double threshold = plugin.getConfig().getDouble("checks.reach.buffer-to-alert", 2.0);
+        if (distance > max) {
+            double confidence = Math.min(0.99, 0.82 + (distance - max) * 0.12);
+            plugin.violations().flag(player, data, CheckType.REACH, 1.0, threshold, confidence,
+                    "distance=" + fmt(distance) + ", max=" + fmt(max));
+        } else {
+            data.decay(CheckType.REACH, 0.25);
+        }
+    }
+
+    private static double distanceToBox(double x, double y, double z, BoundingBox b) {
+        double cx = clamp(x, b.getMinX(), b.getMaxX());
+        double cy = clamp(y, b.getMinY(), b.getMaxY());
+        double cz = clamp(z, b.getMinZ(), b.getMaxZ());
+        double dx = x - cx;
+        double dy = y - cy;
+        double dz = z - cz;
+        return Math.sqrt(dx * dx + dy * dy + dz * dz);
+    }
+
+    private static double clamp(double value, double min, double max) {
+        return Math.max(min, Math.min(max, value));
+    }
+
+    private static String fmt(double value) {
+        return String.format(java.util.Locale.ROOT, "%.3f", value);
+    }
+}
+
+```
+
+`src/main/java/dev/aegisac/core/EnforcementProfiles.java`:
+
+```java
+package dev.aegisac.core;
+
+import java.util.EnumMap;
+import java.util.Map;
+
+/** Explicit opt-in thresholds for checks with different score ranges. */
+final class EnforcementProfiles {
+    record Profile(double minimumScore, double maximumScore, int requiredAlerts, long minimumSpanMillis) {}
+
+    private static final Map<CheckType, Profile> PROFILES = new EnumMap<>(CheckType.class);
+
+    static {
+        PROFILES.put(CheckType.FREECAM_INTERACT, new Profile(0.98, 0.99, 4, 0));
+        PROFILES.put(CheckType.SPEED, new Profile(0.92, 0.98, 8, 5_000));
+        PROFILES.put(CheckType.FLY, new Profile(0.83, 0.83, 16, 20_000));
+        PROFILES.put(CheckType.TIMER, new Profile(0.96, 0.96, 16, 20_000));
+        PROFILES.put(CheckType.REACH, new Profile(0.98, 0.99, 12, 12_000));
+        PROFILES.put(CheckType.AUTOCLICKER, new Profile(0.93, 0.93, 16, 20_000));
+        PROFILES.put(CheckType.FASTPLACE, new Profile(0.90, 0.90, 16, 20_000));
+        PROFILES.put(CheckType.VELOCITY, new Profile(0.74, 0.74, 16, 20_000));
+        if (PROFILES.size() != CheckType.values().length) throw new ExceptionInInitializerError("Missing check profile");
+    }
+
+    private EnforcementProfiles() {}
+
+    static Profile get(CheckType type) { return PROFILES.get(type); }
+}
+
+```
+
+`src/main/java/dev/aegisac/core/Moderation.java`:
+
+```java
+package dev.aegisac.core;
+
+import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Player;
+import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
+import java.util.ArrayDeque;
+import java.util.Deque;
+import java.util.EnumMap;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+
+/**
+ * Sanctions are persisted by UUID; IP bans are separate because an address can be shared.
+ * Only the server thread mutates records. Pre-login threads read immutable snapshots.
+ */
+public final class Moderation {
+    private record Record(int stage, long until, boolean permanent, String lastReason, String ip) {}
+    private final AegisAC plugin;
+    private final File file;
+    private final Map<UUID, Record> records = new ConcurrentHashMap<>();
+    private final Map<String, Boolean> ipBans = new ConcurrentHashMap<>();
+    private final Map<UUID, Map<CheckType, Deque<Long>>> evidence = new ConcurrentHashMap<>();
+    private final Map<UUID, Deque<Long>> severeSpeedEvidence = new ConcurrentHashMap<>();
+    private final Map<UUID, Long> lastAction = new ConcurrentHashMap<>();
+
+    Moderation(AegisAC plugin) {
+        this.plugin = plugin;
+        file = new File(plugin.getDataFolder(), "sanctions.yml");
+        YamlConfiguration yaml = YamlConfiguration.loadConfiguration(file);
+        if (yaml.isConfigurationSection("players")) {
+            for (String key : yaml.getConfigurationSection("players").getKeys(false)) {
+                try {
+                    UUID uuid = UUID.fromString(key);
+                    String path = "players." + key + ".";
+                    records.put(uuid, new Record(yaml.getInt(path + "stage"), yaml.getLong(path + "until"),
+                            yaml.getBoolean(path + "permanent"), yaml.getString(path + "reason", ""), yaml.getString(path + "ip", "")));
+                } catch (IllegalArgumentException ignored) {
+                    plugin.getLogger().warning("Skipping invalid sanctions UUID.");
+                }
+            }
+        }
+        for (String ip : yaml.getStringList("ip-bans")) ipBans.put(ip, true);
+    }
+
+    public void checkLogin(AsyncPlayerPreLoginEvent event) {
+        if (event.getLoginResult() != AsyncPlayerPreLoginEvent.Result.ALLOWED) return;
+        String ip = event.getAddress().getHostAddress();
+        if (ipBans.containsKey(ip)) {
+            event.disallow(AsyncPlayerPreLoginEvent.Result.KICK_BANNED, "This IP is banned by AegisAC. Contact server staff to appeal.");
+            AegisAudit.warning(plugin, "LOGIN_DENIED", event.getName() + " ip=" + ip + " reason=ip-ban");
+            return;
+        }
+        Record record = records.get(event.getUniqueId());
+        if (record == null) return;
+        if (record.permanent()) {
+            event.disallow(AsyncPlayerPreLoginEvent.Result.KICK_BANNED, "Account banned by AegisAC. Contact server staff to appeal.");
+            AegisAudit.warning(plugin, "LOGIN_DENIED", event.getName() + " ip=" + ip + " reason=account-ban");
+        } else if (record.until() > System.currentTimeMillis()) {
+            event.disallow(AsyncPlayerPreLoginEvent.Result.KICK_BANNED,
+                    "Temporarily blocked by AegisAC until " + java.time.Instant.ofEpochMilli(record.until()) + ". Contact staff to appeal.");
+            AegisAudit.warning(plugin, "LOGIN_DENIED", event.getName() + " ip=" + ip + " reason=temp-ban until=" + record.until());
+        }
+    }
+
+    public void onAlert(Player player, PlayerData data, CheckType type, double confidence, String detail) {
+        onAlert(player, data, type, confidence, detail, false);
+    }
+
+    public void onSevereSpeed(Player player, PlayerData data, String detail) {
+        onAlert(player, data, CheckType.SPEED, 0.99, detail, true);
+    }
+
+    private void onAlert(Player player, PlayerData data, CheckType type, double confidence, String detail, boolean severe) {
+        if (!plugin.getConfig().getBoolean("enforcement.enabled", true)) {
+            data.sanctionGate.put(type, "enforcement disabled");
+            return;
+        }
+        if (player.hasPermission("aegis.bypass")) {
+            data.sanctionGate.put(type, "bypass permission");
+            return;
+        }
+        if (!plugin.getConfig().getStringList("enforcement.eligible-checks").contains(type.name())) {
+            data.sanctionGate.put(type, "check not eligible");
+            return;
+        }
+        double minimum = plugin.getConfig().getDouble("enforcement.minimum-confidence-by-check." + type.name(),
+                plugin.getConfig().getDouble("enforcement.minimum-confidence", 0.98));
+        if (confidence < minimum) {
+            data.sanctionGate.put(type, "score " + Math.round(confidence * 100)
+                    + "% below " + Math.round(minimum * 100) + "%");
+            return;
+        }
+        if (plugin.currentTps() < plugin.getConfig().getDouble("minimum-tps", 18.0)
+                || player.getPing() > plugin.getConfig().getInt("maximum-ping-ms", 300)) {
+            data.sanctionGate.put(type, "TPS or ping exemption");
+            return;
+        }
+        long now = System.currentTimeMillis();
+        UUID uuid = player.getUniqueId();
+        long remaining = severe ? cooldownRemainingSevere(uuid) : cooldownRemaining(uuid);
+        if (remaining > 0L) {
+            data.sanctionGate.put(type, (severe ? "severe " : "") + "cooldown "
+                    + ((remaining + 999) / 1000) + "s; next=" + nextAction(uuid));
+            return;
+        }
+        Deque<Long> hits = severe ? severeSpeedEvidence.computeIfAbsent(uuid, ignored -> new ArrayDeque<>())
+                : evidence.computeIfAbsent(uuid, ignored -> new EnumMap<>(CheckType.class))
+                        .computeIfAbsent(type, ignored -> new ArrayDeque<>());
+        long window = severe ? plugin.getConfig().getLong("enforcement.severe-speed.evidence-window-ms", 5000L)
+                : plugin.getConfig().getLong("enforcement.evidence-window-ms", 90_000L);
+        int required = severe ? Math.max(2, plugin.getConfig().getInt("enforcement.severe-speed.alerts-required", 2))
+                : Math.max(3, plugin.getConfig().getInt("enforcement.alerts-required-by-check." + type.name(),
+                        plugin.getConfig().getInt("enforcement.alerts-required", 4)));
+        long minimumSpan = severe ? Math.max(150L, plugin.getConfig().getLong("enforcement.severe-speed.minimum-span-ms", 150L))
+                : Math.max(0L, plugin.getConfig().getLong("enforcement.minimum-evidence-span-ms-by-check." + type.name(),
+                        type == CheckType.SPEED ? 5000L : 0L));
+        if (!SanctionEvidence.recordAndReady(hits, now, window, required, minimumSpan)) {
+            data.sanctionGate.put(type, (severe ? "severe " : "") + "evidence " + hits.size() + "/" + required
+                    + " alerts; span=" + (hits.isEmpty() ? 0 : now - hits.peekFirst()) + "ms"
+                    + (minimumSpan > 0 ? " (needs " + minimumSpan + "ms)" : ""));
+            return;
+        }
+        hits.clear();
+        data.sanctionGate.put(type, "sanction stage advanced");
+        lastAction.put(uuid, now);
+        Record old = records.getOrDefault(uuid, new Record(0, 0, false, "", ""));
+        int stage = old.stage() + 1;
+        String reason = (severe ? "SEVERE_" : "") + type.name() + ": " + detail;
+        if (stage <= 3) {
+            records.put(uuid, new Record(stage, 0, false, reason, ""));
+            save();
+            AegisAudit.warning(plugin, "SANCTION", player.getName() + " uuid=" + uuid + " stage=" + stage
+                    + " action=kick reason=" + reason);
+            player.kickPlayer("AegisAC: repeated suspicious interactions (" + stage + "/3). Contact staff if this is a mistake.");
+        } else if (stage <= 5) {
+            long duration = stage == 4 ? 3_600_000L : 86_400_000L;
+            records.put(uuid, new Record(stage, now + duration, false, reason, ""));
+            save();
+            AegisAudit.warning(plugin, "SANCTION", player.getName() + " uuid=" + uuid + " stage=" + stage
+                    + " action=temp-ban until=" + (now + duration) + " reason=" + reason);
+            player.kickPlayer("AegisAC: temporary restriction until " + java.time.Instant.ofEpochMilli(now + duration)
+                    + ". Contact staff to appeal.");
+        } else if (type == CheckType.FREECAM_INTERACT
+                && plugin.getConfig().getBoolean("enforcement.permanent-ip-ban-enabled", false)) {
+            InetSocketAddress address = player.getAddress();
+            if (address == null || address.getAddress() == null) return;
+            String ip = address.getAddress().getHostAddress();
+            records.put(uuid, new Record(stage, 0, true, reason, ip));
+            ipBans.put(ip, true);
+            save();
+            AegisAudit.warning(plugin, "SANCTION", player.getName() + " uuid=" + uuid + " ip=" + ip
+                    + " stage=" + stage + " action=permanent-ip-ban reason=" + reason);
+            player.kickPlayer("AegisAC: banned. Contact server staff to appeal.");
+        } else {
+            AegisAudit.warning(plugin, "REVIEW_REQUIRED", player.getName() + " uuid=" + uuid
+                    + " permanent IP banning is disabled or check requires review; reason=" + reason);
+        }
+    }
+
+    public int stage(UUID uuid) { return records.getOrDefault(uuid, new Record(0, 0, false, "", "")).stage(); }
+    public String reason(UUID uuid) { return records.getOrDefault(uuid, new Record(0, 0, false, "", "")).lastReason(); }
+    public String nextAction(UUID uuid) {
+        int current = stage(uuid);
+        if (current < 3) return "kick " + (current + 1) + "/3";
+        if (current == 3) return "temporary ban (one hour)";
+        if (current == 4) return "temporary ban (one day)";
+        return "IP ban only on remote interaction; otherwise staff review";
+    }
+    public long cooldownRemaining(UUID uuid) {
+        long end = lastAction.getOrDefault(uuid, 0L) + plugin.getConfig().getLong("enforcement.cooldown-ms", 600_000L);
+        return Math.max(0L, end - System.currentTimeMillis());
+    }
+
+    public long cooldownRemainingSevere(UUID uuid) {
+        long end = lastAction.getOrDefault(uuid, 0L)
+                + plugin.getConfig().getLong("enforcement.severe-speed.cooldown-ms", 15_000L);
+        return Math.max(0L, end - System.currentTimeMillis());
+    }
+
+    public void clearEvidence(UUID uuid) {
+        evidence.remove(uuid);
+        severeSpeedEvidence.remove(uuid);
+    }
+
+    public void reset(UUID uuid) {
+        Record removed = records.remove(uuid);
+        if (removed != null && !removed.ip().isEmpty()) ipBans.remove(removed.ip());
+        clearEvidence(uuid);
+        lastAction.remove(uuid);
+        save();
+    }
+
+    public boolean unbanIp(String ip) {
+        if (ipBans.remove(ip) == null) return false;
+        // A related account ban remains until it is separately pardoned.
+        save();
+        return true;
+    }
+
+    private void save() {
+        YamlConfiguration yaml = new YamlConfiguration();
+        for (Map.Entry<UUID, Record> e : records.entrySet()) {
+            String path = "players." + e.getKey() + ".";
+            yaml.set(path + "stage", e.getValue().stage());
+            yaml.set(path + "until", e.getValue().until());
+            yaml.set(path + "permanent", e.getValue().permanent());
+            yaml.set(path + "reason", e.getValue().lastReason());
+            yaml.set(path + "ip", e.getValue().ip());
+        }
+        yaml.set("ip-bans", new java.util.ArrayList<>(ipBans.keySet()));
+        try {
+            File temp = new File(file.getParentFile(), "sanctions.yml.tmp");
+            yaml.save(temp);
+            try {
+                Files.move(temp.toPath(), file.toPath(), StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
+            } catch (java.nio.file.AtomicMoveNotSupportedException ex) {
+                Files.move(temp.toPath(), file.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            }
+        } catch (IOException ex) {
+            plugin.getLogger().severe("Could not save sanctions: " + ex.getMessage());
+        }
+    }
+}
+
+```
+
+`src/main/java/dev/aegisac/core/MotionEnvelope.java`:
+
+```java
+package dev.aegisac.core;
+
+/** Conservative horizontal bound using the current attributes and the preceding movement. */
+final class MotionEnvelope {
+    private MotionEnvelope() {}
+
+    static double predictedAllowance(double attributeAllowance, double previousHorizontal, double tickFactor) {
+        return Math.max(attributeAllowance,
+                Math.min(Math.max(0.0, previousHorizontal), attributeAllowance) + 0.10 * tickFactor);
+    }
+
+    static boolean severe(double horizontal, double predictedAllowance, double multiplier, double absoluteDistance) {
+        return horizontal > Math.max(absoluteDistance, predictedAllowance * multiplier);
+    }
+}
+
+```
+
+`src/main/java/dev/aegisac/core/MovementAnalyzer.java`:
+
+```java
+package dev.aegisac.core;
+
+import org.bukkit.Location;
+import org.bukkit.attribute.Attribute;
+import org.bukkit.attribute.AttributeInstance;
+import org.bukkit.entity.Player;
+import org.bukkit.event.player.PlayerMoveEvent;
+
+import java.util.concurrent.TimeUnit;
+
+public final class MovementAnalyzer {
+    private final AegisAC plugin;
+
+    public MovementAnalyzer(AegisAC plugin) {
+        this.plugin = plugin;
+    }
+
+    public void handle(PlayerMoveEvent event, PlayerData data) {
+        data.moveEvents++;
+        Location from = event.getFrom();
+        Location to = event.getTo();
+        if (to == null || from.getWorld() == null || to.getWorld() == null || from.getWorld() != to.getWorld()) return;
+
+        double dx = to.getX() - from.getX();
+        double dy = to.getY() - from.getY();
+        double dz = to.getZ() - from.getZ();
+        boolean positional = Math.abs(dx) + Math.abs(dy) + Math.abs(dz) > 1.0E-7;
+        if (!positional) return;
+
+        Player player = event.getPlayer();
+        long nowNanos = System.nanoTime();
+        long nowMillis = System.currentTimeMillis();
+        long elapsedNanos = data.lastMoveNanos == 0L ? TimeUnit.MILLISECONDS.toNanos(50) : nowNanos - data.lastMoveNanos;
+        data.lastMoveNanos = nowNanos;
+
+        boolean grounded = WorldUtil.isGrounded(to);
+        if (grounded) {
+            data.airTicks = 0;
+            data.stableGroundTicks++;
+        } else {
+            data.airTicks++;
+            data.stableGroundTicks = 0;
+        }
+
+        boolean exempt = WorldUtil.basicMovementExempt(player, data,
+                plugin.getConfig().getDouble("minimum-tps", 18.0), plugin.currentTps(),
+                plugin.getConfig().getInt("maximum-ping-ms", 300), to)
+                || WorldUtil.nearSpecialMovementBlock(from);
+
+        if (!exempt) {
+            data.movementEvaluatedEvents++;
+            if (speed(player, data, from, to, elapsedNanos, grounded, nowMillis)) {
+                event.setCancelled(true);
+                data.severeMoves++;
+                data.previousHorizontal = 0;
+                data.lastLocation = from.clone();
+                return;
+            }
+            timer(player, data, nowMillis);
+            fly(player, data, dy, grounded);
+            velocity(player, data, from, to, nowMillis);
+        } else {
+            data.movementExemptEvents++;
+            data.moveTimes.clear();
+            data.previousHorizontal = 0;
+            data.decay(CheckType.SPEED, 0.40);
+            data.decay(CheckType.FLY, 0.40);
+            data.decay(CheckType.VELOCITY, 0.35);
+        }
+
+        data.lastVerticalDelta = dy;
+        data.lastLocation = to.clone();
+    }
+
+    private boolean speed(Player player, PlayerData data, Location from, Location to, long elapsedNanos,
+                          boolean grounded, long nowMillis) {
+        if (!plugin.getConfig().getBoolean("checks.speed.enabled", true)) return false;
+        double horizontal = WorldUtil.horizontalDistance(from, to);
+        double tickFactor = Math.max(1.0, Math.min(3.0, elapsedNanos / 50_000_000.0));
+        double base = grounded
+                ? plugin.getConfig().getDouble("checks.speed.max-ground-horizontal-per-tick", 0.62)
+                : plugin.getConfig().getDouble("checks.speed.max-air-horizontal-per-tick", 0.78);
+        double allowed = base * tickFactor;
+        if (player.isSprinting()) allowed *= 1.08;
+        allowed *= Math.max(1.0, player.getWalkSpeed() / 0.2f);
+        AttributeInstance movementSpeed = player.getAttribute(Attribute.MOVEMENT_SPEED);
+        if (movementSpeed != null) allowed *= Math.max(1.0, movementSpeed.getValue() / 0.1);
+
+        double predicted = MotionEnvelope.predictedAllowance(allowed, data.previousHorizontal, tickFactor);
+        data.previousHorizontal = horizontal;
+        if (plugin.getConfig().getBoolean("checks.speed.severe.enabled", true)
+                && MotionEnvelope.severe(horizontal, predicted,
+                        plugin.getConfig().getDouble("checks.speed.severe.multiplier", 3.0),
+                        plugin.getConfig().getDouble("checks.speed.severe.absolute-distance", 6.0))) {
+            long spacing = plugin.getConfig().getLong("checks.speed.severe.minimum-alert-spacing-ms", 150L);
+            if (nowMillis - data.lastSevereAlertMillis >= spacing) {
+                data.lastSevereAlertMillis = nowMillis;
+                plugin.violations().flagSevereSpeed(player, data,
+                        "h=" + fmt(horizontal) + ", predictedMax=" + fmt(predicted));
+            }
+            return true;
+        }
+
+        double threshold = plugin.getConfig().getDouble("checks.speed.buffer-to-alert", 4.0);
+        if (horizontal > predicted) {
+            double over = horizontal / Math.max(0.001, predicted);
+            double confidence = Math.min(0.98, 0.72 + (over - 1.0) * 0.22);
+            plugin.violations().flag(player, data, CheckType.SPEED, Math.min(2.0, over - 0.75), threshold,
+                    confidence, "h=" + fmt(horizontal) + ", predictedMax=" + fmt(predicted));
+        } else {
+            data.decay(CheckType.SPEED, 0.18);
+        }
+        return false;
+    }
+
+    private void fly(Player player, PlayerData data, double dy, boolean grounded) {
+        if (!plugin.getConfig().getBoolean("checks.fly.enabled", true)) return;
+        int suspiciousAirTicks = plugin.getConfig().getInt("checks.fly.suspicious-air-ticks", 14);
+        double threshold = plugin.getConfig().getDouble("checks.fly.buffer-to-alert", 5.0);
+
+        if (!grounded && data.airTicks > suspiciousAirTicks) {
+            boolean hovering = Math.abs(dy) < 0.012 && Math.abs(data.lastVerticalDelta) < 0.02;
+            boolean risingTooLong = dy > 0.08 && data.lastVerticalDelta > 0.08 && data.airTicks > suspiciousAirTicks + 4;
+            if (hovering || risingTooLong) {
+                double confidence = hovering ? 0.83 : 0.77;
+                plugin.violations().flag(player, data, CheckType.FLY, 1.0, threshold, confidence,
+                        "airTicks=" + data.airTicks + ", dy=" + fmt(dy));
+                return;
+            }
+        }
+        data.decay(CheckType.FLY, 0.12);
+    }
+
+    private void timer(Player player, PlayerData data, long nowMillis) {
+        if (!plugin.getConfig().getBoolean("checks.timer.enabled", true)) return;
+        data.moveTimes.addLast(nowMillis);
+        while (!data.moveTimes.isEmpty() && nowMillis - data.moveTimes.peekFirst() > 2000L) {
+            data.moveTimes.removeFirst();
+        }
+        if (data.moveTimes.size() < 25) return;
+        long span = Math.max(1L, data.moveTimes.peekLast() - data.moveTimes.peekFirst());
+        double pps = (data.moveTimes.size() - 1) * 1000.0 / span;
+        double max = plugin.getConfig().getDouble("checks.timer.max-moving-packets-per-second", 24.5);
+        double threshold = plugin.getConfig().getDouble("checks.timer.buffer-to-alert", 3.0);
+        if (pps > max && player.getPing() < plugin.getConfig().getInt("maximum-ping-ms", 300)) {
+            double confidence = Math.min(0.96, 0.72 + (pps - max) / 25.0);
+            plugin.violations().flag(player, data, CheckType.TIMER, 0.75, threshold, confidence,
+                    "rate=" + fmt(pps) + "/s");
+        } else {
+            data.decay(CheckType.TIMER, 0.08);
+        }
+    }
+
+    private void velocity(Player player, PlayerData data, Location from, Location to, long nowMillis) {
+        if (!plugin.getConfig().getBoolean("checks.velocity.enabled", true)) return;
+        if (data.expectedVelocity == null || data.velocityStart == null) return;
+        long age = nowMillis - data.lastVelocityMillis;
+        if (age < 150L || age > 750L) {
+            if (age > 750L) {
+                data.expectedVelocity = null;
+                data.velocityStart = null;
+            }
+            return;
+        }
+        double expectedHorizontal = Math.sqrt(data.expectedVelocity.getX() * data.expectedVelocity.getX()
+                + data.expectedVelocity.getZ() * data.expectedVelocity.getZ());
+        if (expectedHorizontal < 0.18) return;
+        double actual = WorldUtil.horizontalDistance(data.velocityStart, to);
+        double ratio = actual / expectedHorizontal;
+        double minimum = plugin.getConfig().getDouble("checks.velocity.minimum-horizontal-response-ratio", 0.06);
+        double threshold = plugin.getConfig().getDouble("checks.velocity.buffer-to-alert", 4.0);
+        if (age > 350L && ratio < minimum) {
+            plugin.violations().flag(player, data, CheckType.VELOCITY, 0.75, threshold, 0.74,
+                    "response=" + fmt(ratio) + ", age=" + age + "ms");
+        } else if (ratio >= minimum) {
+            data.decay(CheckType.VELOCITY, 0.30);
+            data.expectedVelocity = null;
+            data.velocityStart = null;
+        }
+    }
+
+    private static String fmt(double value) {
+        return String.format(java.util.Locale.ROOT, "%.3f", value);
+    }
+}
+
+```
+
+`src/main/java/dev/aegisac/core/PlayerData.java`:
+
+```java
+package dev.aegisac.core;
+
+import org.bukkit.Location;
+import org.bukkit.util.Vector;
+
+import java.util.ArrayDeque;
+import java.util.Deque;
+import java.util.EnumMap;
+import java.util.Map;
+
+public final class PlayerData {
+    Location lastLocation;
+    long lastMoveNanos;
+    long lastTeleportMillis;
+    long lastVelocityMillis;
+    long lastDamageMillis;
+    long lastRemoteAuditMillis;
+    long lastSevereAlertMillis;
+    long severeMoves;
+    long moveEvents;
+    long interactionEvents;
+    long remoteBlocks;
+    long combatEvents;
+    long movementExemptEvents;
+    long movementEvaluatedEvents;
+    int airTicks;
+    int stableGroundTicks;
+    double lastVerticalDelta;
+    double previousHorizontal;
+
+    final Deque<Long> moveTimes = new ArrayDeque<>();
+    final Deque<Long> swingTimes = new ArrayDeque<>();
+    final Deque<Long> placeTimes = new ArrayDeque<>();
+    final Map<CheckType, Double> buffers = new EnumMap<>(CheckType.class);
+    final Map<CheckType, Long> lastAlertMillis = new EnumMap<>(CheckType.class);
+    final Map<CheckType, Long> failedSamples = new EnumMap<>(CheckType.class);
+    final Map<CheckType, Long> alertCounts = new EnumMap<>(CheckType.class);
+    final Map<CheckType, Double> lastAlertConfidence = new EnumMap<>(CheckType.class);
+    final Map<CheckType, String> sanctionGate = new EnumMap<>(CheckType.class);
+
+    Vector expectedVelocity;
+    Location velocityStart;
+
+    double buffer(CheckType type) {
+        return buffers.getOrDefault(type, 0.0);
+    }
+
+    void setBuffer(CheckType type, double value) {
+        buffers.put(type, Math.max(0.0, value));
+    }
+
+    void decay(CheckType type, double amount) {
+        setBuffer(type, buffer(type) - amount);
+    }
+}
+
+```
+
+`src/main/java/dev/aegisac/core/PlayerDataManager.java`:
+
+```java
+package dev.aegisac.core;
+
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+
+public final class PlayerDataManager {
+    private final Map<UUID, PlayerData> data = new ConcurrentHashMap<>();
+
+    public PlayerData get(UUID uuid) {
+        return data.computeIfAbsent(uuid, ignored -> new PlayerData());
+    }
+
+    public void remove(UUID uuid) {
+        data.remove(uuid);
+    }
+
+    public int size() {
+        return data.size();
+    }
+}
+
+```
+
+`src/main/java/dev/aegisac/core/SanctionEvidence.java`:
+
+```java
+package dev.aegisac.core;
+
+import java.util.Deque;
+
+/** A sustained sequence of distinct, already rate-limited alerts. */
+final class SanctionEvidence {
+    private SanctionEvidence() {}
+
+    static boolean recordAndReady(Deque<Long> hits, long now, long windowMillis, int required, long minimumSpanMillis) {
+        while (!hits.isEmpty() && now - hits.peekFirst() > windowMillis) hits.removeFirst();
+        // Clock changes or duplicate timestamps should not count as independent evidence.
+        if (!hits.isEmpty() && now <= hits.peekLast()) return false;
+        hits.addLast(now);
+        return hits.size() >= required && now - hits.peekFirst() >= minimumSpanMillis;
+    }
+}
+
+```
+
+`src/main/java/dev/aegisac/core/ViolationEngine.java`:
+
+```java
+package dev.aegisac.core;
+
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
+
+import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+
+public final class ViolationEngine {
+    private final AegisAC plugin;
+    private final Set<UUID> alertsDisabled = ConcurrentHashMap.newKeySet();
+
+    public ViolationEngine(AegisAC plugin) {
+        this.plugin = plugin;
+    }
+
+    public void flag(Player player, PlayerData data, CheckType type, double weight, double threshold,
+                     double confidence, String detail) {
+        data.failedSamples.merge(type, 1L, Long::sum);
+        double next = data.buffer(type) + weight;
+        data.setBuffer(type, next);
+        if (next < threshold) return;
+
+        double minimumConfidence = plugin.getConfig().getDouble("alerts.minimum-confidence", 0.72);
+        if (confidence < minimumConfidence) return;
+
+        long now = System.currentTimeMillis();
+        long cooldown = plugin.getConfig().getLong("alerts.cooldown-ms", 1250L);
+        long previous = data.lastAlertMillis.getOrDefault(type, 0L);
+        if (now - previous < cooldown) return;
+        data.lastAlertMillis.put(type, now);
+        data.alertCounts.merge(type, 1L, Long::sum);
+        data.lastAlertConfidence.put(type, confidence);
+
+        int ping = player.getPing();
+        double tps = plugin.currentTps();
+        String message = "§8[§bAegis§8] §f" + player.getName()
+                + " §7failed §c" + type.display() + " " + type.variant()
+                + " §8(§7buffer=§f" + round(next)
+                + "§7, heuristic score=§f" + Math.round(confidence * 100.0) + "%"
+                + "§7, ping=§f" + ping + "ms"
+                + "§7, tps=§f" + round(tps)
+                + "§7, " + detail + "§8)";
+
+        for (Player online : Bukkit.getOnlinePlayers()) {
+            if (online.hasPermission("aegis.alerts") && !alertsDisabled.contains(online.getUniqueId())) {
+                online.sendMessage(message);
+            }
+        }
+        AegisAudit.warning(plugin, "ALERT", stripColors(message));
+        plugin.moderation().onAlert(player, data, type, confidence, detail);
+        data.setBuffer(type, Math.max(0.0, threshold * 0.55));
+    }
+
+    public void flagSevereSpeed(Player player, PlayerData data, String detail) {
+        data.failedSamples.merge(CheckType.SPEED, 1L, Long::sum);
+        data.alertCounts.merge(CheckType.SPEED, 1L, Long::sum);
+        data.lastAlertConfidence.put(CheckType.SPEED, 0.99);
+        String message = "[Aegis] " + player.getName() + " severe Speed movement rejected (" + detail
+                + ", ping=" + player.getPing() + "ms, tps=" + round(plugin.currentTps()) + ")";
+        AegisAudit.warning(plugin, "SEVERE_MOVEMENT", message);
+        for (Player online : Bukkit.getOnlinePlayers()) {
+            if (online.hasPermission("aegis.alerts") && !alertsDisabled.contains(online.getUniqueId())) {
+                online.sendMessage("§c" + message);
+            }
+        }
+        plugin.moderation().onSevereSpeed(player, data, detail);
+    }
+
+    public boolean toggleAlerts(Player player) {
+        UUID uuid = player.getUniqueId();
+        if (alertsDisabled.remove(uuid)) return true;
+        alertsDisabled.add(uuid);
+        return false;
+    }
+
+    private static String round(double value) {
+        return String.format(java.util.Locale.ROOT, "%.2f", value);
+    }
+
+    private static String stripColors(String input) {
+        return input.replaceAll("§[0-9A-FK-ORa-fk-or]", "");
+    }
+}
+
+```
+
+`src/main/java/dev/aegisac/core/VpnGate.java`:
+
+```java
+package dev.aegisac.core;
+
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
+
+import java.net.InetAddress;
+import java.net.URI;
+import java.net.URLEncoder;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
+import java.time.Duration;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+/** A bounded login-time lookup. Errors and unknown results allow the player through. */
+public final class VpnGate {
+    private record Entry(boolean vpn, long expiresAt) {}
+    private final AegisAC plugin;
+    private final HttpClient client = HttpClient.newBuilder().connectTimeout(Duration.ofMillis(900)).build();
+    private final Map<String, Entry> cache = new ConcurrentHashMap<>();
+    private volatile boolean enabled;
+    private volatile String apiKey;
+
+    VpnGate(AegisAC plugin) { this.plugin = plugin; reload(); }
+
+    public void reload() {
+        enabled = plugin.getConfig().getBoolean("vpn.enabled", false);
+        String envName = plugin.getConfig().getString("vpn.api-key-env", "AEGIS_PROXYCHECK_KEY");
+        apiKey = envName == null ? null : System.getenv(envName);
+        cache.clear();
+        if (enabled && (apiKey == null || apiKey.isBlank()))
+            plugin.getLogger().warning("VPN gate enabled without an API key; fail-open mode is active.");
+    }
+
+    public boolean enabled() { return enabled && apiKey != null && !apiKey.isBlank(); }
+
+    public void checkLogin(AsyncPlayerPreLoginEvent event) {
+        if (!enabled() || event.getLoginResult() != AsyncPlayerPreLoginEvent.Result.ALLOWED) return;
+        InetAddress address = event.getAddress();
+        if (address.isAnyLocalAddress() || address.isLoopbackAddress() || address.isSiteLocalAddress()) return;
+        String ip = address.getHostAddress();
+        Entry entry = cache.get(ip);
+        boolean cacheHit = entry != null && entry.expiresAt() >= System.currentTimeMillis();
+        if (entry == null || entry.expiresAt() < System.currentTimeMillis()) {
+            Boolean result = query(ip);
+            if (result == null) {
+                AegisAudit.warning(plugin, "VPN_UNKNOWN", event.getName() + " ip=" + ip + " action=allow");
+                return;
+            }
+            entry = new Entry(result, System.currentTimeMillis() + (result ? 30_000L : 300_000L));
+            cache.put(ip, entry);
+            if (cache.size() > 4096) cache.entrySet().removeIf(e -> e.getValue().expiresAt() < System.currentTimeMillis());
+        }
+        if (entry.vpn()) {
+            event.disallow(AsyncPlayerPreLoginEvent.Result.KICK_OTHER,
+                    "This server restricts VPN connections. Turn off your VPN and try again, or contact staff if this is incorrect.");
+            AegisAudit.warning(plugin, "VPN_DENIED", event.getName() + " ip=" + ip
+                    + " source=" + (cacheHit ? "cache" : "lookup"));
+        } else {
+            AegisAudit.info(plugin, "VPN_ALLOWED", event.getName() + " ip=" + ip
+                    + " source=" + (cacheHit ? "cache" : "lookup"));
+        }
+    }
+
+    private Boolean query(String ip) {
+        try {
+            String url = "https://proxycheck.io/v2/" + URLEncoder.encode(ip, StandardCharsets.UTF_8)
+                    + "?key=" + URLEncoder.encode(apiKey, StandardCharsets.UTF_8) + "&vpn=2";
+            HttpRequest request = HttpRequest.newBuilder(URI.create(url)).timeout(Duration.ofMillis(1500))
+                    .header("User-Agent", "AegisAC/0.3.5").GET().build();
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            if (response.statusCode() != 200 || response.body().length() > 16_384) return null;
+            JsonObject root = JsonParser.parseString(response.body()).getAsJsonObject();
+            if (!root.has("status") || !"ok".equalsIgnoreCase(root.get("status").getAsString())) return null;
+            JsonObject result = root.getAsJsonObject(ip);
+            if (result == null || !result.has("proxy")) return null;
+            return "yes".equalsIgnoreCase(result.get("proxy").getAsString())
+                    && result.has("type") && "VPN".equalsIgnoreCase(result.get("type").getAsString());
+        } catch (Exception ex) {
+            return null;
+        }
+    }
+}
+
+```
+
+`src/main/java/dev/aegisac/core/WorldUtil.java`:
+
+```java
+package dev.aegisac.core;
+
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.block.Block;
+import org.bukkit.entity.Player;
+
+import java.util.Set;
+
+public final class WorldUtil {
+    private static final Set<String> WEIRD_MOVEMENT_BLOCKS = Set.of(
+            "ICE", "PACKED_ICE", "BLUE_ICE", "FROSTED_ICE",
+            "SLIME_BLOCK", "HONEY_BLOCK", "SOUL_SAND", "SOUL_SOIL",
+            "COBWEB", "POWDER_SNOW", "SCAFFOLDING", "LADDER", "VINE",
+            "WATER", "LAVA", "BUBBLE_COLUMN"
+    );
+
+    private WorldUtil() {}
+
+    public static boolean nearSpecialMovementBlock(Location location) {
+        if (location == null || location.getWorld() == null) return true;
+        // Only blocks touching the player's feet or body can alter movement.
+        // A 3x3x3 scan exempted ordinary movement merely near stairs or ice.
+        for (int x = floor(location.getX() - 0.32); x <= floor(location.getX() + 0.32); x++) {
+            for (int y = floor(location.getY() - 0.12); y <= floor(location.getY()); y++) {
+                for (int z = floor(location.getZ() - 0.32); z <= floor(location.getZ() + 0.32); z++) {
+                    Block block = location.getWorld().getBlockAt(x, y, z);
+                    if (isSpecial(block.getType())) return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public static boolean isGrounded(Location location) {
+        if (location == null || location.getWorld() == null) return false;
+        Block below = location.getWorld().getBlockAt(
+                floor(location.getX()), floor(location.getY() - 0.08), floor(location.getZ()));
+        return !below.isPassable() && below.getType() != Material.AIR;
+    }
+
+    public static boolean basicMovementExempt(Player player, PlayerData data, double minTps, double currentTps, int maxPing) {
+        return movementExemptionReason(player, data, minTps, currentTps, maxPing) != null;
+    }
+
+    public static boolean basicMovementExempt(Player player, PlayerData data, double minTps, double currentTps,
+                                              int maxPing, Location destination) {
+        return movementExemptionReason(player, data, minTps, currentTps, maxPing, destination) != null;
+    }
+
+    public static String movementExemptionReason(Player player, PlayerData data, double minTps, double currentTps, int maxPing) {
+        return movementExemptionReason(player, data, minTps, currentTps, maxPing, player.getLocation());
+    }
+
+    private static String movementExemptionReason(Player player, PlayerData data, double minTps,
+                                                  double currentTps, int maxPing, Location destination) {
+        if (player.hasPermission("aegis.bypass")) return "aegis.bypass permission";
+        if (player.getGameMode().name().equals("CREATIVE") || player.getGameMode().name().equals("SPECTATOR")) return "creative/spectator mode";
+        if (player.getAllowFlight() || player.isFlying() || player.isInsideVehicle()) return "flight permission/vehicle";
+        if (player.isGliding() || player.isSwimming() || player.isRiptiding()) return "gliding/swimming/riptide";
+        if (player.getPing() > maxPing) return "ping over " + maxPing + "ms";
+        if (currentTps < minTps) return "TPS under " + minTps;
+        long now = System.currentTimeMillis();
+        if (now - data.lastTeleportMillis < 1400L) return "recent teleport/join";
+        if (now - data.lastVelocityMillis < 900L) return "recent velocity";
+        if (now - data.lastDamageMillis < 500L) return "recent damage";
+        if (nearSpecialMovementBlock(destination)) return "touching special block";
+        return null;
+    }
+
+    public static double horizontalDistance(Location a, Location b) {
+        double dx = b.getX() - a.getX();
+        double dz = b.getZ() - a.getZ();
+        return Math.sqrt(dx * dx + dz * dz);
+    }
+
+    private static boolean isSpecial(Material material) {
+        String name = material.name();
+        if (WEIRD_MOVEMENT_BLOCKS.contains(name)) return true;
+        return name.endsWith("_STAIRS") || name.endsWith("_SLAB") || name.endsWith("_TRAPDOOR")
+                || name.endsWith("_FENCE") || name.endsWith("_WALL") || name.endsWith("_DOOR");
+    }
+
+    private static int floor(double value) {
+        int i = (int) value;
+        return value < i ? i - 1 : i;
+    }
+}
+
+```
+
+`src/main/resources/config.yml`:
+
+```yml
+# AegisAC 0.3.5-alpha. Speed sanctions require sustained qualifying alerts.
+
+broadcast-credit: true
+broadcast-credit-seconds: 1800
+
+minimum-tps: 18.0
+maximum-ping-ms: 300
+
+alerts:
+  minimum-confidence: 0.72
+  cooldown-ms: 1250
+
+# Repeated eligible alerts advance a persisted sanction stage.
+# Stages 1-3: kicks; 4: one-hour temp block; 5: one-day temp block;
+# 6: permanent account + IP block only for remote interaction when the extra IP-ban switch is true.
+enforcement:
+  enabled: true
+  permanent-ip-ban-enabled: false
+  eligible-checks: [FREECAM_INTERACT, SPEED]
+  minimum-confidence: 0.98
+  alerts-required: 4
+  minimum-confidence-by-check:
+    SPEED: 0.92
+  alerts-required-by-check:
+    SPEED: 8
+  minimum-evidence-span-ms-by-check:
+    SPEED: 5000
+  evidence-window-ms: 90000
+  cooldown-ms: 600000
+  # Only repeated, exceptionally large Speed movements use this shorter ladder interval.
+  severe-speed:
+    alerts-required: 2
+    evidence-window-ms: 5000
+    minimum-span-ms: 150
+    cooldown-ms: 15000
+
+# Put the key in the server process environment, never in this file.
+# A third-party service receives the connecting IP. Errors allow login.
+vpn:
+  enabled: false
+  api-key-env: AEGIS_PROXYCHECK_KEY
+
+checks:
+  remote-interact:
+    enabled: true
+    # Extra tolerance beyond the player's BLOCK_INTERACTION_RANGE attribute.
+    # Older max-eye-distance settings are no longer used.
+    reach-margin: 1.25
+    buffer-to-alert: 2.0
+  speed:
+    enabled: true
+    max-ground-horizontal-per-tick: 0.62
+    max-air-horizontal-per-tick: 0.78
+    buffer-to-alert: 4.0
+    severe:
+      enabled: true
+      multiplier: 3.0
+      absolute-distance: 6.0
+      minimum-alert-spacing-ms: 150
+  fly:
+    enabled: true
+    suspicious-air-ticks: 14
+    buffer-to-alert: 5.0
+  timer:
+    enabled: true
+    max-moving-packets-per-second: 24.5
+    buffer-to-alert: 3.0
+  reach:
+    enabled: true
+    max-normal-reach: 4.25
+    high-ping-extra: 0.45
+    buffer-to-alert: 2.0
+  autoclicker:
+    enabled: true
+    max-cps: 22
+    min-samples: 30
+    buffer-to-alert: 4.0
+  fastplace:
+    enabled: true
+    max-places-per-second: 17
+    max-eye-distance: 6.25
+    buffer-to-alert: 3.0
+  velocity:
+    enabled: true
+    minimum-horizontal-response-ratio: 0.06
+    buffer-to-alert: 4.0
+
+```
+
+`src/main/resources/plugin.yml`:
+
+```yml
+name: AegisAC
+version: 0.3.5-alpha
+main: dev.aegisac.core.AegisAC
+api-version: '1.21.11'
+author: _adam814
+description: Conservative alert-first anti-cheat for Paper 1.21.11.
+commands:
+  aegis:
+    description: AegisAC administration command
+    usage: /aegis <alerts|status|debug|enforcement [all|check|cooldown] ...|ipban|inspect|reset|pardon|unban-ip|reload|info>
+    permission: aegis.admin
+  aegis-ip:
+    description: Show the server-seen IP address of an online player
+    usage: /aegis-ip <online-player>
+    permission: aegis.ip
+permissions:
+  aegis.admin:
+    description: Access to AegisAC commands
+    default: op
+  aegis.alerts:
+    description: Receive AegisAC alerts
+    default: op
+  aegis.bypass:
+    description: Bypass AegisAC checks
+    default: false
+  aegis.ip:
+    description: View online player's server-seen IP address
+    default: op
+
+```
+
+`src/test/java/dev/aegisac/core/MotionEnvelopeTest.java`:
+
+```java
+package dev.aegisac.core;
+
+import java.util.ArrayDeque;
+import java.util.Deque;
+
+/** Run with java -ea; verifies the severe movement boundary and evidence gate. */
+public final class MotionEnvelopeTest {
+    public static void main(String[] args) {
+        double allowed = MotionEnvelope.predictedAllowance(2.34, 0.0, 3.0);
+        assert allowed >= 2.34 && allowed < 2.65;
+        assert MotionEnvelope.severe(9.548, allowed, 3.0, 6.0)
+                : "the reported 9.548 block displacement should be rejected immediately";
+        assert !MotionEnvelope.severe(2.5, allowed, 3.0, 6.0);
+        assert !MotionEnvelope.severe(9.548, MotionEnvelope.predictedAllowance(10.0, 9.0, 1.0), 3.0, 6.0)
+                : "a legitimate high speed attribute must raise the bound";
+        assert MotionEnvelope.predictedAllowance(2.34, 1000.0, 3.0) < 2.65
+                : "a prior bad movement must not poison the prediction";
+
+        Deque<Long> hits = new ArrayDeque<>();
+        assert !SanctionEvidence.recordAndReady(hits, 100_000L, 5000L, 2, 150L);
+        assert !SanctionEvidence.recordAndReady(hits, 100_000L, 5000L, 2, 150L)
+                : "duplicate attempts are not independent evidence";
+        assert !SanctionEvidence.recordAndReady(hits, 100_100L, 5000L, 2, 150L)
+                : "short bursts must not escalate";
+        assert SanctionEvidence.recordAndReady(hits, 100_150L, 5000L, 2, 150L)
+                : "two spaced attempts should escalate";
+        hits.clear();
+        assert !SanctionEvidence.recordAndReady(hits, 200_000L, 5000L, 2, 150L);
+        assert !SanctionEvidence.recordAndReady(hits, 206_000L, 5000L, 2, 150L)
+                : "an expired attempt must not escalate";
+        System.out.println("MotionEnvelopeTest passed");
+    }
+}
+
+```
+
+`src/test/java/dev/aegisac/core/SanctionEvidenceTest.java`:
+
+```java
+package dev.aegisac.core;
+
+import java.util.ArrayDeque;
+import java.util.Deque;
+
+/** Run with java -ea; tests the sanction threshold independently of Paper. */
+public final class SanctionEvidenceTest {
+    public static void main(String[] args) {
+        Deque<Long> alerts = new ArrayDeque<>();
+        for (int i = 0; i < 7; i++) {
+            assert !SanctionEvidence.recordAndReady(alerts, 100_000L + i * 1250L, 90_000L, 8, 5000L);
+        }
+        assert SanctionEvidence.recordAndReady(alerts, 108_750L, 90_000L, 8, 5000L)
+                : "eight sustained Speed alerts must trigger the first sanction";
+
+        alerts.clear();
+        for (int i = 0; i < 8; i++) {
+            assert !SanctionEvidence.recordAndReady(alerts, 200_000L + i * 500L, 90_000L, 8, 5000L)
+                    : "a short burst must not trigger a sanction";
+        }
+        assert !SanctionEvidence.recordAndReady(alerts, 203_500L, 90_000L, 8, 5000L)
+                : "duplicate timestamps must not count twice";
+        assert SanctionEvidence.recordAndReady(alerts, 205_000L, 90_000L, 8, 5000L);
+
+        alerts.clear();
+        for (int i = 0; i < 7; i++) {
+            assert !SanctionEvidence.recordAndReady(alerts, 300_000L + i * 1250L, 90_000L, 8, 5000L);
+        }
+        assert !SanctionEvidence.recordAndReady(alerts, 400_001L, 90_000L, 8, 5000L)
+                : "expired alerts must not count";
+        assert alerts.size() == 1;
+
+        for (CheckType type : CheckType.values()) {
+            EnforcementProfiles.Profile profile = EnforcementProfiles.get(type);
+            assert profile != null : "missing profile for " + type;
+            assert profile.minimumScore() <= profile.maximumScore() : "unreachable profile for " + type;
+            assert profile.requiredAlerts() >= 4 : "single-alert sanctions for " + type;
+            assert profile.minimumSpanMillis() <= 90_000L : "evidence window too short for " + type;
+        }
+        alerts.clear();
+        EnforcementProfiles.Profile fly = EnforcementProfiles.get(CheckType.FLY);
+        for (int i = 0; i < fly.requiredAlerts() - 1; i++) {
+            assert !SanctionEvidence.recordAndReady(alerts, 500_000L + i * 1250L, 90_000L,
+                    fly.requiredAlerts(), fly.minimumSpanMillis());
+        }
+        assert !SanctionEvidence.recordAndReady(alerts, 518_750L, 90_000L,
+                fly.requiredAlerts(), fly.minimumSpanMillis()) : "all-check mode requires sustained evidence";
+        assert SanctionEvidence.recordAndReady(alerts, 520_000L, 90_000L,
+                fly.requiredAlerts(), fly.minimumSpanMillis());
+        System.out.println("SanctionEvidenceTest passed");
+    }
+}
+
+```
