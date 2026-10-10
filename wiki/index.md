@@ -3042,7 +3042,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Puzzle](entities/puzzle.md) — Kudaes Rust Windows minifilter-abuse PoCs (bind links, ID mapping, cloud sync providers, WIM hash manipulation; persistence/evasion; stealth/concealment; cheat / hide)
 - [pubg](entities/pubg.md) — PUBG-focused OpenGL hooking/modding sample (C/C++; cheat / game:pubgm; gmh5225)
 - [pubg-ai-yolov4](entities/pubg-ai-yolov4.md) — PUBG YOLOv4/Darknet object detection (screenshot-trained; YOLOv4-tiny/YOLOv7 configs; label tools; image/video scripts; cheat / triggerbot & aimbot; dqforgive-sudo)
-- [pubg-bigdata-analytics](entities/pubg-bigdata-analytics.md) — ahuhu789 PySpark/Cassandra/Streamlit big-data pipeline for PUBG match analytics and esports cheater anomaly detection (K-Means + rule flags; Anti Cheat / batch ML research)
+- [pubg-bigdata-analytics](entities/pubg-bigdata-analytics.md) — ahuhu789 end-to-end PUBG match pipeline (PySpark/Spark SQL, K-Means + physics rule flags, Parquet/Cassandra, Streamlit alerts; offline esports anomaly research; Anti Cheat / batch ML)
 - [PUBG-DX](entities/pubg-dx.md) — PUBG internal DX11 ImGui cheat (ESP/aimbot; kernel-driver reads; Xenuine decrypt; return-address spoofing; VMProtect SDK; cheat / game:pubg; gmh5225)
 - [pubg-dump-offset](entities/pubg-dump-offset.md) — PUBG desktop UE4 offset history (v19.1–24.2; Xenuine keys; GObjects/GWorld; cheat / game:pubg [Offset]; gmh5225)
 - [Pubg-demo](entities/pubg-demo.md) — PUBG external cheat demo (C++; UE CppSDK; ESP/aimbot; ImGui D3D11 overlay; DLL inject + separate render pipeline; a0yark)
