@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-10** — ingest `description:Arcticbyp/seb-re-toolkit`: refreshed entity [[seb-re-toolkit]] (Architecture/Positioning/Requirements; native integrity `seb_x64.dll`; pefile + frida-tools; BSTR export calls vs call-site verification; educational exam anti-scraping lane); cited on [[concepts/frida]] Windows desktop tracing; [[overviews/reverse-engineering]] and [[overviews/game-hacking]] cites retained; `index.md` entity blurb sync.
+
 - **2026-10-10** — ingest `readme:categories`: Cheat ~2868 (+1; arcticbyp/[[seb-re-toolkit]] Python Themida-protected Safe Exam Browser `seb_x64.dll` RE — PE static analysis, BSTR exports, Frida tracing, GUI; Fix Themida) / Anti Cheat ~778 / other major section counts stable; 41 sections; synced projected README-map counts on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/dma-attack]], and [[overviews/reverse-engineering]]; entity [[seb-re-toolkit]]; light `index.md` section notes (no per-category pages).
 
 - **2026-10-10** — lint: catalog scan — **Overviews** (9): `anti-cheat`, `dma-attack`, `game-engine`, `game-hacking`, `graphics-api`, `mobile-security`, `overview`, `reverse-engineering`, `windows-kernel`; **Concepts** (51); **Entities** (4021); index vs disk — 4081 paths, 0 missing, 0 dead, 0 duplicate index paths; overview+concept wikilink spot-check — 0 broken (14694 links); index wikilink scan — 0 broken (822 links); 6 expected cross-kind slug collisions ([[game-hacking]], [[anti-cheat]], [[reverse-engineering]], [[il2cpp]], [[byovd]], [[dma]]); wiki populated — bootstrap not required; no structural edits.
