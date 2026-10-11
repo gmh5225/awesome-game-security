@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-11** — lint (agent): scheduled pass — **Overviews** (9), **Concepts** (51), **Entities** (4029); `index.md` vs disk (4089 paths) aligned; overview/concept/index [[wikilink]] spot-check — 0 broken; bootstrap not required; no structural repairs.
+
 - **2026-10-11** — lint (agent): catalog scan — **Overviews** (9): `anti-cheat`, `dma-attack`, `game-engine`, `game-hacking`, `graphics-api`, `mobile-security`, `overview`, `reverse-engineering`, `windows-kernel`; **Concepts** (51); **Entities** (4029); index vs disk — 4089 paths, 0 missing, 0 dead, 0 duplicate; overview wikilink spot-check — 0 broken (12340 links); concept spot-check — 0 broken (2397 links); index wikilink scan — 0 broken (837 links); 6 expected cross-kind slug collisions ([[game-hacking]], [[anti-cheat]], [[reverse-engineering]], [[il2cpp]], [[byovd]], [[dma]]); wiki populated — bootstrap not required; `index.md` unchanged; no link repairs.
 
 - **2026-10-11** — lint (agent): repeated catalog pass — **Overviews** (9), **Concepts** (51), **Entities** (4029); `index.md` vs disk aligned (4089 indexed paths); overview [[wikilink]] spot-check — 0 broken; no structural repairs.
