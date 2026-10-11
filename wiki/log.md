@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-11** — ingest `description:N0tJ03/Investigacion-Kerne`: confirmed entity [[investigacion-kerne]] (Spanish Markdown notebook; kernel-mode AC + endpoint security systems view; three-layer ring-0/ring-3/server model; BattlEye/EAC/Vanguard driver/callback/whitelist/BSOD notes; CrowdStrike Falcon July 2024 File 291 outage analysis; Cheat / Guide); cited on [[overviews/anti-cheat]] kernel AC guide lane + [[overviews/windows-kernel]] architecture-notes sub-area; `index.md` entity + overview blurbs already present.
+
 - **2026-10-11** — ingest `description:VeryBaaad/ZygiskNextNext`: refreshed entity [[zygisk-next-next]] (open-source ZygiskNext module API; C++ in-process loader with multi-backend inline/PLT hooks + HyperOS Runtime; Rust ptrace/eBPF injector; Magisk/KernelSU/APatch; Android 5+; game modding / mobile RE); cited on [[concepts/zygisk]] standalone-runtime lane + [[overviews/game-hacking]] Magisk module cluster; [[overviews/mobile-security]] cite already present; `index.md` entity blurb sync.
 
 - **2026-10-11** — ingest `readme:categories`: Cheat ~2875 (+2; N0tJ03/[[investigacion-kerne]] Spanish kernel-mode AC architecture notebook in Cheat / Guide + VeryBaaad/[[zygisk-next-next]] open-source Zygisk Next API reimplementation in Cheat / Magisk) / Anti Cheat ~782 stable / other major section counts stable; 41 sections (`NeverC & NeverD` placeholder); synced projected README-map counts on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]], [[overviews/anti-cheat]], and [[overviews/mobile-security]]; entities [[investigacion-kerne]], [[zygisk-next-next]]; light `index.md` section notes (no per-category pages).

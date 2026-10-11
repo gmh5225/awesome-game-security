@@ -20,6 +20,7 @@ sources:
   - wiki/sources/descriptions/oykuoner__YAACS-AntiCheat.md
   - wiki/sources/descriptions/gjones01__NullCS.md
   - wiki/sources/descriptions/ImNotVirgola__VirgolaAntiCheat.md
+  - wiki/sources/descriptions/N0tJ03__Investigacion-Kerne.md
   - wiki/sources/descriptions/NetVar1337__apex-anticheat-lab.md
   - wiki/sources/descriptions/Nimdy__detect-FPS-hackers.md
   - wiki/sources/descriptions/zelect0r__zamr.md
