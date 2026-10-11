@@ -6,12 +6,12 @@ sources:
   - wiki/sources/descriptions/Krimziee__SecureBootCheck.md
   - wiki/sources/README-categories.md
 updated: 2026-10-11
-confidence: medium
+confidence: high
 ---
 
 # SecureBootCheck
 
-Read-only Windows diagnostic (Krimziee) that reports whether a PC meets **Secure Boot** and **TPM 2.0** firmware settings many kernel-level anti-cheat systems require before titles launch. Implemented in PowerShell with an optional WPF GUI and batch launcher. (source: wiki/sources/descriptions/Krimziee__SecureBootCheck.md)
+Read-only Windows diagnostic (Krimziee) that reports whether a PC meets **Secure Boot** and **TPM 2.0** firmware settings many kernel-level anti-cheat systems require before titles launch. Implemented in PowerShell with an optional WPF (XAML) GUI and a batch launcher. (source: wiki/sources/descriptions/Krimziee__SecureBootCheck.md)
 
 ## Inspection scope
 

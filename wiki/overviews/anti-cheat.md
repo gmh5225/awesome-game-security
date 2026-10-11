@@ -958,6 +958,7 @@ sources:
   - wiki/sources/descriptions/maximumemails-cmd__RainInjectable.md
   - wiki/sources/descriptions/dhehdjebejen-beep__Bastion.md
   - wiki/sources/descriptions/projectsadameyd__AegisAC.md
+  - wiki/sources/descriptions/Krimziee__SecureBootCheck.md
 updated: 2026-10-11
 confidence: high
 ---

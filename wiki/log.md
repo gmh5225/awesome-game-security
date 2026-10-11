@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-11** — ingest `description:Krimziee/SecureBootCheck`: refreshed entity [[securebootcheck]] (read-only PowerShell + optional WPF/XAML UI; UEFI/GPT, Secure Boot keys, TPM 2.0, BitLocker recovery checks; brand-tailored fix steps; gamer/support troubleshooting for kernel AC launch blocks); cited on [[overviews/windows-kernel]] Windows Security Features lane; [[overviews/anti-cheat]] cite already present; `index.md` entity + Windows Kernel overview blurbs sync.
+
 - **2026-10-11** — ingest `description:Vieuxnorris/farcry-6-hack`: refreshed entity [[farcry-6-hack]] (offline FC6 in-process DLL; aimbot with ballistics/LOS, skeleton ESP, Direct2D overlay, fc6probe + Python research scripts; pattern scan, HWBP hooks without code patches, shared-memory IPC, build-specific offsets; offline SP learning scope); cited on [[concepts/world-to-screen]] skeleton ESP lane + [[overviews/graphics-api]] in-process Direct2D overlay lane; `index.md` entity blurb sync.
 
 - **2026-10-11** — ingest `readme:categories`: Cheat ~2873 (+1; Vieuxnorris/[[farcry-6-hack]] offline FC6 in-process RE learning DLL with D2D overlay, fc6probe, Python tooling) / Anti Cheat ~782 (+1; Krimziee/[[securebootcheck]] read-only Secure Boot/TPM 2.0 diagnostic for blocked kernel AC launches) / other major section counts stable; 41 sections (`NeverC & NeverD` placeholder); synced projected README-map counts on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/anti-cheat]], [[overviews/dma-attack]], and [[overviews/reverse-engineering]]; entities [[farcry-6-hack]], [[securebootcheck]]; light `index.md` section notes (no per-category pages).
