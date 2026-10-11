@@ -11,31 +11,31 @@ confidence: medium
 
 # Far Cry 6 Hack (learning project)
 
-Offline **Far Cry 6** reverse-engineering and learning project (Vieuxnorris) that injects an in-process C++ DLL to read live game memory and reuse engine systems such as aim-assist targets, animated skeletons, Havok collision queries, and item functions. (source: wiki/sources/descriptions/Vieuxnorris__farcry-6-hack.md)
+**farcry-6-hack** (Vieuxnorris/farcry-6-hack) is an offline **Far Cry 6** reverse-engineering and learning project that injects an in-process C++ DLL to read live game memory and reuse engine systems—aim-assist targets, animated skeletons, Havok collision queries, and item functions—for controlled single-player experimentation. (source: wiki/sources/descriptions/Vieuxnorris__farcry-6-hack.md)
 
-## Capabilities
+## Features
 
-- Aimbot with ballistics and line-of-sight checks
-- Skeleton ESP and **Direct2D** overlay with HUD and menu
-- Inventory manipulation
-- External injector, **fc6probe** memory probe executable, and Python research scripts for scanning, tracing, and calibration
+- Aimbot with ballistics and line-of-sight checks (Havok collision queries)
+- Skeleton ESP and in-process **Direct2D** overlay with HUD and menu
+- Inventory manipulation via documented item functions
+- External injector, **fc6probe** memory probe executable, and dozens of Python research scripts for scanning, tracing, and calibration (source: wiki/sources/descriptions/Vieuxnorris__farcry-6-hack.md)
 
-## Techniques
+## RE techniques
 
-Signature and pattern scanning, hardware-breakpoint hooks without patching game code, shared-memory IPC, and documented structure offsets for a specific game build.
+Signature and pattern scanning, **hardware-breakpoint** hooks without patching game code, shared-memory IPC, and structure offsets documented for a specific game build. Pair hooking notes with [[hardware-breakpoint]] (Linux/Android kernel HWBP) only as a cross-platform breakpoint concept—the FC6 project applies the Windows in-process HWBP pattern described in the description projection. (source: wiki/sources/descriptions/Vieuxnorris__farcry-6-hack.md)
 
-## Audience
+## Audience and scope
 
-Researchers and students studying game internals, memory analysis, and in-process overlay design for **offline single-player** experimentation—not multiplayer or anti-cheat evasion.
+Researchers and students studying game internals, memory analysis, and in-process overlay design for **offline single-player** use—not multiplayer or anti-cheat evasion. (source: wiki/sources/descriptions/Vieuxnorris__farcry-6-hack.md)
 
 ## Positioning
 
-Listed under **Cheat** as a title-specific internal beside educational externals such as [[hell-is-us-mod]] and RE curricula such as [[re4f]].
+Listed under README **Cheat** beside educational externals such as [[hell-is-us-mod]] and RE curricula such as [[re4f]]; uses [[world-to-screen]] math for skeleton ESP and pairs with [[overviews/graphics-api]] for the Direct2D overlay lane.
 
 ## Links
 
-- Repo: https://github.com/Vieuxnorris/farcry-6-hack
+- Repo: https://github.com/Vieuxnorris/farcry-6-hack [Offline Far Cry 6 RE learning project: in-process C++ DLL with aimbot, skeleton ESP, D2D overlay, fc6probe scanner, and Python tooling over game systems (Havok, aim-assist targets)]
 
 ## Related
 
-[[world-to-screen]] · [[draw-call-hook]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]] · [[research-rigor]]
+[[world-to-screen]] · [[draw-call-hook]] · [[hardware-breakpoint]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]] · [[overviews/graphics-api]] · [[research-rigor]]

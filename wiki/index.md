@@ -1548,7 +1548,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Gameplay](entities/gameplay.md) — cross-platform C++ 3D game framework (OpenGL ES 2.0/3.0, Bullet, OpenAL, Lua; CMake; Win/macOS/Linux/iOS/Android; FBX/Collada→.gpb encoder; Game Engine / source [2D/3D])
 - [CRYENGINE (GameEngine-CRYENGINE)](entities/gameengine-cryengine.md) — Crytek CRYENGINE source mirror (renderer/physics/audio/AI/animation/editor; AAA; Game Engine / source; gmh5225)
 - [Far Cry (leaked source)](entities/farcry.md) — Far Cry 1 leaked CryEngine 1 full archive (renderer/physics/AI/game logic/editor; Game Engine / source; gmh5225; FarCry + Far-Cry-1-Source-Full)
-- [Far Cry 6 Hack (learning project)](entities/farcry-6-hack.md) — Vieuxnorris offline FC6 in-process C++ DLL (aimbot, skeleton ESP, D2D overlay, fc6probe, Python research tooling; Havok/aim-assist RE; Cheat / game:far-cry-6)
+- [Far Cry 6 Hack (learning project)](entities/farcry-6-hack.md) — Vieuxnorris offline FC6 in-process C++ DLL (ballistics aimbot + skeleton ESP, Direct2D HUD/menu, fc6probe + Python calibration scripts; pattern scan + HWBP hooks, shared-memory IPC, build-specific offsets; Havok LOS / aim-assist RE; Cheat / game:far-cry-6)
 - [CX3D Framework](entities/gameengine-cx3d.md) — easy-to-use C++ 3D game framework (Game Develop / source; README [3D]; gmh5225)
 - [MapleEngine](entities/gameengine-mapleengine.md) — MapleStory-inspired custom game engine (rendering/networking/game logic; 2D side-scrolling MMORPG; Game Develop / source / game:maplestory; gmh5225)
 - [gamedev_libraries](entities/gamedev-libraries.md) — data-oriented C/C++ gamedev library collection (POD/flat arrays; Game Develop / guide)
