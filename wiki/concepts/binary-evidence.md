@@ -4,7 +4,8 @@ kind: concept
 topics: [reverse-engineering, anti-cheat]
 sources:
   - wiki/sources/skills/reverse-engineering.md
-updated: 2026-09-13
+  - wiki/sources/descriptions/mytechnotalent__rea.md
+updated: 2026-10-11
 confidence: high
 ---
 
@@ -40,6 +41,8 @@ Report supporting addresses/artifacts and explain each inference. Treat these as
 
 Preserve missing symbols, incomplete dumps, generated code, and unexecuted paths as explicit limitations.
 
+Agent-assisted **first-pass triage** tools such as [[rea-mytechnotalent]] (offline PE/ELF/Mach-O + JS/Electron inventory, local RAG, propose–review–gate multi-agent workflow) still owe the same granularity: each automated claim should cite static artifacts (imports, strings, section layout) rather than collapsing imported API, reachable path, and observed call. (source: wiki/sources/descriptions/mytechnotalent__rea.md)
+
 ## Related
 
-[[static-runtime-evidence]] · [[research-rigor]] · [[binary-diffing]] · [[dynamic-binary-instrumentation]] · [[mixed-boolean-arithmetic]] · [[control-flow-flattening]] · [[overviews/reverse-engineering]] · [[overviews/anti-cheat]]
+[[static-runtime-evidence]] · [[research-rigor]] · [[binary-diffing]] · [[dynamic-binary-instrumentation]] · [[mixed-boolean-arithmetic]] · [[control-flow-flattening]] · [[rea-mytechnotalent]] · [[overviews/reverse-engineering]] · [[overviews/anti-cheat]]

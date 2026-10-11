@@ -15,14 +15,30 @@ confidence: medium
 
 README category: **Cheat → RE Tools**.
 
+## Static analysis
+
+One-shot scans inventory **ELF, Mach-O, and PE** layouts and symbols through standard host tooling without executing the sample, and walks packaged **JavaScript/Electron** trees without running the app. Output is meant as a readable **first-pass** map before deeper work in Ghidra, IDA, or dynamic instrumentation. (source: wiki/sources/descriptions/mytechnotalent__rea.md)
+
+## Agent workflow
+
+Local **RAG** grounds narrative summaries in analyst-supplied documents. A **multi-agent propose–review–gate** harness separates draft findings from reviewer gates so each claim carries traceable evidence rather than undifferentiated model prose—aligned with [[binary-evidence]] finding granularity. (source: wiki/sources/descriptions/mytechnotalent__rea.md)
+
+## Interfaces
+
+**CLI** and **MCP** share one tool catalog so terminal triage and IDE agents (Cursor, Claude Code, etc.) drive the same offline analysis surface. (source: wiki/sources/descriptions/mytechnotalent__rea.md)
+
+## Audience
+
+Reverse engineers, **malware analysts**, and security researchers who need quick assessment of unknown executables and packaged apps—including **game clients and anti-cheat-related binaries**—with offline defaults. (source: wiki/sources/descriptions/mytechnotalent__rea.md)
+
 ## Positioning
 
-Distinct from morluto/[[rea]] (TypeScript cross-format MCP orchestrator listed under **Game Develop → MCP server**). This repo targets **fast, readable first-pass triage** of game clients, packers, and anti-cheat-related binaries with offline defaults. Pair agent summaries with [[research-rigor]]; use [[reverify]] when conclusions must be byte-verified.
+Distinct from morluto/[[rea]] (TypeScript cross-format MCP orchestrator listed under **Game Develop → MCP server**). Pair agent summaries with [[research-rigor]]; use [[reverify]] when conclusions must be byte-verified.
 
 ## Links
 
-- Repo: https://github.com/mytechnotalent/rea
+- Repo: https://github.com/mytechnotalent/rea [Offline-first RE assistant with one-shot binary scan, native PE/ELF/Mach-O and JavaScript/Electron static inventory, local RAG, multi-agent harness, and MCP server]
 
 ## Related
 
-[[reverify]] · [[pymemory-editor]] · [[open-reverselab]] · [[skid-factory]] · [[research-rigor]] · [[overviews/reverse-engineering]] · [[overviews/game-hacking]]
+[[reverify]] · [[pymemory-editor]] · [[open-reverselab]] · [[skid-factory]] · [[binary-evidence]] · [[research-rigor]] · [[overviews/reverse-engineering]] · [[overviews/game-hacking]]
