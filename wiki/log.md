@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-11** — lint (agent): catalog scan — **Overviews** (9): `anti-cheat`, `dma-attack`, `game-engine`, `game-hacking`, `graphics-api`, `mobile-security`, `overview`, `reverse-engineering`, `windows-kernel`; **Concepts** (51); **Entities** (4033); `index.md` vs disk — 4093 indexed paths, 4093 unique, 0 missing, 0 dead, 0 duplicate entries; overview/concept/index [[wikilink]] spot-check — 0 broken (12356 + 2400 + 849 links); 6 expected cross-kind slug collisions ([[game-hacking]], [[anti-cheat]], [[reverse-engineering]], [[il2cpp]], [[byovd]], [[dma]]); wiki populated — bootstrap not required; `index.md` unchanged; no link repairs.
+
 - **2026-10-11** — ingest `description:N0tJ03/Investigacion-Kerne`: confirmed entity [[investigacion-kerne]] (Spanish Markdown notebook; kernel-mode AC + endpoint security systems view; three-layer ring-0/ring-3/server model; BattlEye/EAC/Vanguard driver/callback/whitelist/BSOD notes; CrowdStrike Falcon July 2024 File 291 outage analysis; Cheat / Guide); cited on [[overviews/anti-cheat]] kernel AC guide lane + [[overviews/windows-kernel]] architecture-notes sub-area; `index.md` entity + overview blurbs already present.
 
 - **2026-10-11** — ingest `description:VeryBaaad/ZygiskNextNext`: refreshed entity [[zygisk-next-next]] (open-source ZygiskNext module API; C++ in-process loader with multi-backend inline/PLT hooks + HyperOS Runtime; Rust ptrace/eBPF injector; Magisk/KernelSU/APatch; Android 5+; game modding / mobile RE); cited on [[concepts/zygisk]] standalone-runtime lane + [[overviews/game-hacking]] Magisk module cluster; [[overviews/mobile-security]] cite already present; `index.md` entity blurb sync.
