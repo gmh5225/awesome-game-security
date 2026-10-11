@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-11** — lint (agent): catalog scan — **Overviews** (9): `anti-cheat`, `dma-attack`, `game-engine`, `game-hacking`, `graphics-api`, `mobile-security`, `overview`, `reverse-engineering`, `windows-kernel`; **Concepts** (51); **Entities** (4031); `index.md` vs disk — 4091 indexed paths, 4085 unique, 0 missing, 0 dead, 6 expected cross-kind slug duplicates ([[game-hacking]], [[anti-cheat]], [[reverse-engineering]], [[il2cpp]], [[byovd]], [[dma]]); overview [[wikilink]] spot-check — 0 broken (12347 links); wiki populated — bootstrap not required; `index.md` unchanged; no link repairs.
+
 - **2026-10-11** — ingest `description:Krimziee/SecureBootCheck`: refreshed entity [[securebootcheck]] (read-only PowerShell + optional WPF/XAML UI; UEFI/GPT, Secure Boot keys, TPM 2.0, BitLocker recovery checks; brand-tailored fix steps; gamer/support troubleshooting for kernel AC launch blocks); cited on [[overviews/windows-kernel]] Windows Security Features lane; [[overviews/anti-cheat]] cite already present; `index.md` entity + Windows Kernel overview blurbs sync.
 
 - **2026-10-11** — ingest `description:Vieuxnorris/farcry-6-hack`: refreshed entity [[farcry-6-hack]] (offline FC6 in-process DLL; aimbot with ballistics/LOS, skeleton ESP, Direct2D overlay, fc6probe + Python research scripts; pattern scan, HWBP hooks without code patches, shared-memory IPC, build-specific offsets; offline SP learning scope); cited on [[concepts/world-to-screen]] skeleton ESP lane + [[overviews/graphics-api]] in-process Direct2D overlay lane; `index.md` entity blurb sync.
