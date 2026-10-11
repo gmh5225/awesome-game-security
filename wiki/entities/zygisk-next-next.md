@@ -6,7 +6,7 @@ sources:
   - wiki/sources/descriptions/VeryBaaad__ZygiskNextNext.md
   - wiki/sources/README-categories.md
 updated: 2026-10-11
-confidence: medium
+confidence: high
 ---
 
 # Zygisk Next Next
@@ -18,6 +18,10 @@ confidence: medium
 A native C++ loader injected into target processes loads matching modules and exposes **inline and PLT hooking** through backends such as Dobby, ShadowHook, rv64hook, LSPlt, ByteHook, xHook, and PLTI, plus **HyperOS Runtime** support for advanced injection scenarios. (source: wiki/sources/descriptions/VeryBaaad__ZygiskNextNext.md)
 
 A Rust injector daemon handles process injection and control (ptrace-based operations, optional eBPF helpers). Gradle packages builds for Android 5 through current releases. (source: wiki/sources/descriptions/VeryBaaad__ZygiskNextNext.md)
+
+## Module API
+
+Targets the **ZygiskNext** module contract so existing ZygiskNext-style `.so` modules can load against this open runtime instead of the upstream closed-source ZygiskNext binary—useful when auditing hook timing, backend selection, or injection control paths. (source: wiki/sources/descriptions/VeryBaaad__ZygiskNextNext.md)
 
 ## Positioning
 

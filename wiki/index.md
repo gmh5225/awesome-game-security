@@ -4125,7 +4125,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [zyemu](entities/zyemu.md) — WIP x86-64 user-mode emulator (JIT handlers + code cache; Zydis decode/encode; CPU/memory core; C++; low-level emulation / binary analysis; ZehMatt)
 - [zygisk-dump-dex](entities/zygisk-dump-dex.md) — Zygisk `libdexfile.so` DEX dump (Android 14/15; Cheat Magisk)
 - [zygisk-memdump](entities/zygisk-memdump.md) — Zygisk module dumps `.so` from process memory (C/C++; modding / hooking / memory analysis; Cheat Magisk)
-- [Zygisk Next Next](entities/zygisk-next-next.md) — VeryBaaad; Magisk/KernelSU/APatch module reimplementing Zygisk Next API for ZygiskNext-style modules (inline/PLT hooks, HyperOS Runtime; Cheat / Magisk)
+- [Zygisk Next Next](entities/zygisk-next-next.md) — VeryBaaad; open-source Magisk/KernelSU/APatch ZygiskNext module API reimplementation (C++ loader + Rust ptrace/eBPF injector; inline/PLT hook backends, HyperOS Runtime; Android 5+; Cheat / Magisk)
 - [Zygisk-MagiskHide](entities/zygisk-magiskhide.md) — Zygisk Magisk module recreating MagiskHide-style root concealment (mount hide + system-property patching; multi-ABI; PShocker)
 - [Zygisk-Il2CppDumper](entities/zygisk-il2cppdumper.md) — Zygisk runtime IL2CPP dump module (Perfare; C/C++; post-load metadata; bypasses static encryption/obfuscation/packing; [Il2Cpp Dump for Android Platform])
 - [Zygisk-Il2CppFucker](entities/zygisk-il2cppfucker.md) — Zygisk IL2CPP in-process RE engine (Darlenepurpleblack444; fork of Il2CppDumper; dump.cs + HybridCLR; memory R/W, instance scan, method invoke; Lua 5.4 + overlay; live Android Unity analysis)
