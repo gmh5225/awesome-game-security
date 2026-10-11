@@ -1,7 +1,7 @@
 ---
 title: Kabus 22 Linux
 kind: entity
-topics: [reverse-engineering, game-hacking, graphics-api]
+topics: [reverse-engineering, game-hacking, game-engine, graphics-api]
 sources:
   - wiki/sources/descriptions/sergen213__kabus22-linux.md
   - wiki/sources/README-categories.md
@@ -31,4 +31,4 @@ Targets reverse engineers, engine porters, and researchers studying legacy Windo
 
 ## Related
 
-[[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[concepts/static-runtime-evidence]] · [[motorstorm-mv-recomp]]
+[[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[overviews/game-engine]] · [[concepts/static-runtime-evidence]] · [[motorstorm-mv-recomp]]
