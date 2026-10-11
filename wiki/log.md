@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-11** — ingest `readme:categories`: Cheat ~2872 (+1; mytechnotalent/[[rea-mytechnotalent]] offline-first PE/ELF/Mach-O + JS/Electron one-shot scan, local RAG, multi-agent MCP; Cheat / RE Tools) / Anti Cheat ~781 stable / other major section counts stable; 41 sections (`NeverC & NeverD` placeholder); synced projected README-map counts on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/dma-attack]], and [[overviews/reverse-engineering]]; entity [[rea-mytechnotalent]] + [[rea]] disambiguation; light `index.md` section notes (no per-category pages).
+
 - **2026-10-11** — ingest `description:ImNotVirgola/VirgolaAntiCheat`: confirmed entity [[virgola-anticheat]] (Paper **1.21.11** server-side MC AC; Java 21 Maven; PacketEvents + Bukkit hooks; movement/combat/packet modules with lag compensation and violation tracking; staff GUI, freeze, Discord alerts); cited on [[concepts/detector-operations]] Paper plugin moderation lane; [[overviews/anti-cheat]] / [[overviews/game-hacking]] cites already present; `index.md` entity blurb unchanged.
 
 - **2026-10-11** — ingest `readme:categories`: Cheat ~2871 stable / Anti Cheat ~781 (+1; ImNotVirgola/[[virgola-anticheat]] Paper **1.21.11** modular movement/combat/packet checks, PacketEvents, staff GUI, Discord alerts) / other major section counts stable; 41 sections (`NeverC & NeverD` placeholder); synced projected README-map counts on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], [[overviews/reverse-engineering]], and [[overviews/game-hacking]]; entity [[virgola-anticheat]]; light `index.md` section notes (no per-category pages).

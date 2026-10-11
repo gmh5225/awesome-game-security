@@ -5,7 +5,7 @@ topics: [reverse-engineering, game-engine]
 sources:
   - wiki/sources/descriptions/morluto__rea.md
   - wiki/sources/README-categories.md
-updated: 2026-10-09
+updated: 2026-10-11
 confidence: medium
 ---
 
@@ -30,6 +30,8 @@ Reverse engineers, security researchers, and developers who need deep visibility
 ## Positioning
 
 Sits in the README **Game Develop → MCP server** lane beside single-backend bridges such as [[binary-ninja-headless-mcp]] and [[ghidra-headless-mcp]], but targets **cross-format agent-assisted RE** with explicit limitation reporting. Pair agent summaries with [[research-rigor]] before enforcement or attribution conclusions; complement deterministic verifiers such as [[reverify]] when claims must be machine-checked.
+
+**Not** mytechnotalent/rea — that separate Python offline-first triage + local RAG assistant lives under **Cheat → RE Tools** as [[rea-mytechnotalent]].
 
 ## Links
 
