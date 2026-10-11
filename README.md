@@ -4481,6 +4481,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/PalassCQ/GuardAC [AI-assisted open-source Minecraft anti-cheat plugin for Spigot/Paper/Folia]
 - https://github.com/KaelusAI/Shard [AI-powered open-source Minecraft Paper/Folia anti-cheat plugin]
 - https://github.com/TheMille-Dev/AntiGuard [Self-contained Paper/Purpur Minecraft anti-cheat plugin with Fly/Speed/Reach/KillAura checks, embedded SQLite storage, and built-in web dashboard plus REST API]
+- https://github.com/ImNotVirgola/VirgolaAntiCheat [Paper 1.21.11 Minecraft anti-cheat plugin with modular movement/combat/packet checks (fly, speed, killaura, scaffold, bad packets), PacketEvents, staff GUI, and Discord alerts]
 - https://github.com/boondocksulfur/bs-anticheat [Lightweight Paper/Folia Minecraft anti-cheat with movement, combat, world, inventory, and packet checks plus SQLite logging]
 - https://github.com/llsgllsg/Minecraft_AntiCheatAI [DeepGuard: Paper Minecraft anti-cheat with ONNX scaffold AI detection, behavior recorder, and training pipeline]
 - https://github.com/gravemaulr/mlanticheat [Paper Minecraft anti-cheat that trains per-server ML models on combat/aim behavior with shadow mode and PacketEvents integration]
