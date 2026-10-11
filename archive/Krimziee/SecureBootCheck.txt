@@ -1,0 +1,2293 @@
+Project Path: arc_Krimziee_SecureBootCheck_td0wih6a
+
+Source Tree:
+
+```txt
+arc_Krimziee_SecureBootCheck_td0wih6a
+├── Check Secure Boot.cmd
+├── LICENSE
+├── README.md
+├── SecureBootCheck.ps1
+├── modules
+│   ├── Page.ps1
+│   └── Ui.ps1
+├── run.ps1
+└── ui
+    ├── MainWindow.xaml
+    ├── Page.xaml
+    └── Theme.xaml
+
+```
+
+`Check Secure Boot.cmd`:
+
+```cmd
+@echo off
+rem Opens the Secure Boot and TPM 2.0 check window. It asks for admin rights itself,
+rem only to READ the settings - this check makes no changes to your PC.
+rem (For the text version: powershell -ExecutionPolicy Bypass -File SecureBootCheck.ps1)
+start "" powershell.exe -NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File "%~dp0SecureBootCheck.ps1" -Window
+
+```
+
+`LICENSE`:
+
+```
+BSD Zero Clause License
+
+Copyright (C) 2026 by Krimz
+
+Permission to use, copy, modify, and/or distribute this software for any
+purpose with or without fee is hereby granted.
+
+THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
+REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
+AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
+INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+LOSS OF USE, DATA OR PROFIT, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
+OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+PERFORMANCE OF THIS SOFTWARE.
+
+```
+
+`README.md`:
+
+```md
+# Secure Boot & TPM 2.0 Check
+
+Games with kernel anti-cheat often refuse to start unless **Secure Boot** and **TPM 2.0** are turned on. This tool tells you whether your PC is ready and, if it isn't, **exactly why** and how to fix it, step by step.
+
+> [!IMPORTANT]
+> **This tool makes no changes to your PC.**
+> It only *reads* your settings. It does not change BIOS settings, files, disks, BitLocker or the TPM, and it never restarts your PC. Every fix is shown as instructions: nothing happens unless you decide to do it yourself.
+
+## How to use it
+
+### Option 1: one command (quickest)
+
+Right-click the Start button, open **Terminal** or **PowerShell**, then paste this and press Enter:
+
+```powershell
+irm https://raw.githubusercontent.com/Krimziee/SecureBootCheck/main/run.ps1 | iex
+```
+
+Click **Yes** when Windows asks for admin rights. The firmware settings can only be read with them. The check opens in a new window.
+
+Nothing is downloaded to your PC: the newest version is loaded straight from this repository into memory and run.
+
+### Option 2: download it
+
+1. Download the latest zip from **[Releases](https://github.com/Krimziee/SecureBootCheck/releases/latest)** and unpack it.
+2. Double-click **`Check Secure Boot.cmd`**.
+3. Click **Yes** when Windows asks for admin rights.
+
+This opens the check in a window: your PC and every check on the left, the result and the fix steps on the right. Commands in the fix steps can be selected and copied, but the window never runs them. It has no button that changes anything. **Check again** runs the check once more after you've made a change.
+
+The one-command version (Option 1) shows the same check as text.
+
+Works on Windows 10 and Windows 11. The check is also a tab in Krimz's Toolkit, which shows the same window.
+
+## What it checks
+
+| Check | What it finds |
+|---|---|
+| Boot mode | Whether Windows started in UEFI mode or old Legacy / CSM mode (Secure Boot needs UEFI), and whether the motherboard supports UEFI at all |
+| Windows disk | Whether the disk is GPT or MBR, and whether it can be converted without reinstalling Windows |
+| Secure Boot | Whether it's on, and if not, why: switched off in the BIOS, keys wiped, audit mode, custom keys without Microsoft's certificate, or a motherboard that has no Secure Boot at all |
+| Secure Boot keys | Missing Microsoft certificates, insecure test keys from the PC maker, and whether the 2023 certificate update is installed |
+| TPM 2.0 | Whether a TPM is there, switched on, version 2.0 and ready, and which BIOS setting to turn on (AMD fTPM / Intel PTT). If none is found, it uses your processor to tell whether it's most likely just switched off or your processor has none. Also warns if the TPM is locked after too many wrong PINs |
+| BitLocker | Whether your drive is encrypted and has a recovery key, so changing BIOS settings won't lock you out |
+
+It also detects your PC or motherboard brand and tells you which key opens its BIOS setup.
+
+**If it finds several problems**, it lists them as steps in the order you need to do them. For example, converting the disk comes before switching the BIOS to UEFI. Some settings can only be checked once the earlier steps are done, so run the check again afterwards.
+
+**If your hardware can't do it**, it says so plainly instead of sending you hunting for settings that don't exist. That covers a motherboard without UEFI, a UEFI firmware without Secure Boot, and a processor without a built-in TPM 2.0. It also never suggests converting your disk on a motherboard that can't start in UEFI mode.
+
+**What it can't see:** Windows can't look inside the BIOS menus, so it can't tell whether an option is greyed out or protected by a BIOS password. It also can't tell whether your motherboard has a connector for a separate TPM module; check the manual for that. It also can't predict problems that only appear after Secure Boot is turned on, such as an old graphics card showing a black screen. In those cases it gives you the most likely settings to check.
+
+## Example
+
+```
+ Result
+ ------
+  [FAIL] Secure Boot                  OFF
+  [ OK ] TPM 2.0                      ready
+
+  1 thing to fix before games that require Secure Boot / TPM 2.0 will run.
+
+  BEFORE YOU CHANGE ANYTHING - protect your files
+  ----------------------------------------------
+
+  Your Windows drive (C:) is encrypted with BitLocker / Device Encryption.
+  ...
+
+  HOW TO OPEN THE BIOS/UEFI SETUP
+  -------------------------------
+     - Gigabyte PC or motherboard: turn it on and keep pressing Del until the setup screen opens.
+     ...
+
+  WHY, AND HOW TO FIX IT  (do the steps in this order)
+  ----------------------------------------------------
+  These are instructions for you. This tool has not run any of these commands
+  or changed any setting - nothing happens unless you do it yourself.
+
+  Step 1. Secure Boot is turned off in the BIOS/UEFI settings.
+     - The keys are installed correctly - Secure Boot is simply switched off. In the BIOS/UEFI setup,
+       open the Secure Boot page and set it to "Enabled".
+     ...
+
+  After these steps, run this check again to confirm everything is fixed.
+
+  Check finished. Nothing on your PC was changed.
+```
+
+## Is it really read-only?
+
+Yes. The script only reads firmware settings, the registry, the TPM status and the disk layout. Commands like `mbr2gpt /convert` or `manage-bde` appear only as text in the fix steps, and the script never runs them.
+
+The one thing it writes: on a PC still in Legacy mode with an MBR disk, it runs Windows' own check-only command `mbr2gpt /validate` to see whether the disk can be converted. Like every run of that tool, it writes its log files (`setupact.log`, `setuperr.log`) to `C:\Windows`. It doesn't touch the disk itself.
+
+## Protecting your data
+
+Some fixes can affect your files if they're done carelessly, so the tool warns you before listing them:
+
+- **BitLocker:** changing Secure Boot, TPM or boot settings makes Windows ask for your BitLocker recovery key. The tool checks that a key exists, shows how to view and save it, and how to pause BitLocker first.
+- **Converting the disk (MBR to GPT):** this is built to keep your files, but a power cut while it runs can stop Windows from starting. The tool tells you to back up first and what to do afterwards.
+
+## Windows warning when you start it
+
+Windows may show **"Windows protected your PC"** because the file was downloaded from the internet. Click **More info → Run anyway**. The whole tool is plain PowerShell: you can open `SecureBootCheck.ps1` in Notepad and read exactly what it does.
+
+## Running it from PowerShell
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\SecureBootCheck.ps1
+```
+
+This shows the text version. Add `-NoPause` to close the window right away when it's finished, or `-Window` to open the window instead.
+
+## License
+
+[0BSD](LICENSE): use, change and share it freely, no credit needed.
+
+```
+
+`SecureBootCheck.ps1`:
+
+```ps1
+<#
+    Checks whether Secure Boot and TPM 2.0 are set up properly - what
+    anti-cheat in many games requires - and, if they aren't, works out
+    exactly why and what to change.
+
+    THIS TOOL MAKES NO CHANGES TO THE PC. Every check only reads firmware
+    variables, the registry, the TPM status and the disk layout. Fix
+    commands are only printed as text for the user to run themselves.
+    Anyone changing this script must keep it that way.
+
+    The one side effect: "mbr2gpt /validate" (a check-only mode, run only on
+    Legacy PCs with an MBR disk) writes Windows' usual setupact.log and
+    setuperr.log files to C:\Windows.
+
+    Run:  powershell -ExecutionPolicy Bypass -File SecureBootCheck.ps1
+          (text version; double-click "Check Secure Boot.cmd" for the window)
+          -Window     opens the window (modules\Ui.ps1) instead of the text version
+          -LoadOnly   only loads the checks (used by the window and Krimz's Toolkit);
+                      Invoke-SecureBootCheck then runs them and returns the results
+#>
+param([switch]$NoPause, [switch]$Window, [switch]$LoadOnly)
+
+$script:Version = '1.0.2'
+
+# ------------------------------------------------------------------
+#  Admin rights: the firmware variables can only be read as admin
+# ------------------------------------------------------------------
+
+$principal = New-Object Security.Principal.WindowsPrincipal([Security.Principal.WindowsIdentity]::GetCurrent())
+if (-not $LoadOnly -and -not $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
+    Write-Host 'Admin rights are needed to READ the Secure Boot and TPM settings - click "Yes" on the prompt.'
+    Write-Host 'They are only used for reading. This tool makes no changes to your PC.'
+    if ($PSCommandPath) {
+        $arguments = '-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', "`"$PSCommandPath`""
+        if ($Window) { $arguments = @('-WindowStyle', 'Hidden') + $arguments + '-Window' }
+    } else {
+        # Started from memory (irm ... | iex): load it from GitHub again in the admin window
+        $url = 'https://raw.githubusercontent.com/Krimziee/SecureBootCheck/main/SecureBootCheck.ps1'
+        $command = "[Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor [Net.SecurityProtocolType]::Tls12; " +
+                   "& ([scriptblock]::Create((Invoke-RestMethod -Uri '$url' -UseBasicParsing)))"
+        $arguments = '-NoProfile', '-ExecutionPolicy', 'Bypass', '-EncodedCommand', [Convert]::ToBase64String([Text.Encoding]::Unicode.GetBytes($command))
+    }
+    try {
+        Start-Process powershell.exe -Verb RunAs -ArgumentList $arguments
+    } catch {
+        if ($Window) {
+            # The window's launcher hides the console, so say it in a message box
+            Add-Type -AssemblyName PresentationFramework
+            [System.Windows.MessageBox]::Show('Could not get admin rights. They are only used to READ the Secure Boot and TPM settings. Start the check again and click "Yes".',
+                'Secure Boot & TPM 2.0 Check', 'OK', 'Information') | Out-Null
+        } else {
+            Write-Host 'Could not get admin rights. Start the check again and click "Yes".' -ForegroundColor Red
+            if (-not $NoPause) { Read-Host 'Press Enter to close' | Out-Null }
+        }
+    }
+    return   # not "exit": when run with "irm ... | iex", exit would close the player's PowerShell window
+}
+
+# ------------------------------------------------------------------
+#  Output helpers
+#  Every check records what it found in $script:Report (shown by the window)
+#  and, in the text version, also prints it straight away.
+# ------------------------------------------------------------------
+
+$script:ConsoleOutput = $false      # the text version sets this before running the checks
+$script:Report = New-Object System.Collections.Generic.List[object]
+$script:Problems = New-Object System.Collections.Generic.List[object]
+$script:Warnings = New-Object System.Collections.Generic.List[object]
+$script:BitLocker = $null           # filled in by Test-BitLocker
+$script:NeedsConversion = $false    # the fix includes mbr2gpt /convert
+
+function Write-Section {
+    param([string]$Title)
+    $script:Report.Add([pscustomobject]@{ Title = $Title; Items = New-Object System.Collections.Generic.List[object] })
+    if (-not $script:ConsoleOutput) { return }
+    Write-Host ''
+    Write-Host " $Title" -ForegroundColor Cyan
+    Write-Host (' ' + ('-' * $Title.Length)) -ForegroundColor DarkCyan
+}
+
+function Write-Item {
+    param(
+        [string]$Label,
+        [string]$Value = '',
+        [ValidateSet('Ok', 'Warn', 'Fail', 'Info')] [string]$Status = 'Info'
+    )
+    if ($script:Report.Count) {
+        $script:Report[$script:Report.Count - 1].Items.Add([pscustomobject]@{ Label = $Label.Trim(); Value = $Value; Status = $Status })
+    }
+    if (-not $script:ConsoleOutput) { return }
+    $tag, $color = switch ($Status) {
+        'Ok'   { '[ OK ]', 'Green' }
+        'Warn' { '[WARN]', 'Yellow' }
+        'Fail' { '[FAIL]', 'Red' }
+        'Info' { '[INFO]', 'Gray' }
+    }
+    Write-Host "  $tag " -ForegroundColor $color -NoNewline
+    Write-Host ("{0,-28} {1}" -f $Label, $Value)
+}
+
+function Write-Wrapped {
+    # Prints text word-wrapped to the console width; continuation lines get the same indent
+    param([string]$Text, [string]$First = '  ', [string]$Rest = '  ', [string]$Color)
+    $width = 100
+    try { $width = [math]::Min(100, [Console]::WindowWidth - 1) } catch { }
+    $line = $First
+    $hasWords = $false
+    $lines = @()
+    foreach ($word in $Text -split ' ') {
+        if ($hasWords -and ($line.Length + 1 + $word.Length) -gt $width) { $lines += $line; $line = $Rest + $word }
+        elseif ($hasWords) { $line += " $word" }
+        else { $line += $word }
+        $hasWords = $true
+    }
+    $lines += $line
+    foreach ($l in $lines) { if ($Color) { Write-Host $l -ForegroundColor $Color } else { Write-Host $l } }
+}
+
+function Write-Advice {
+    # Prints advice lines from Get-DataSafety (headings, paragraphs and bullet points)
+    param($Lines)
+    $colors = @{ Normal = $null; Warn = 'Yellow'; Fail = 'Red' }
+    $previous = $null
+    foreach ($l in $Lines) {
+        $color = $colors[$l.Tone]
+        switch ($l.Kind) {
+            'Heading' { Write-Host ''; Write-Wrapped $l.Text -Color $(if ($color) { $color } else { 'Yellow' }) }
+            'Text'    { if ($previous -ne 'Heading') { Write-Host '' }; Write-Wrapped $l.Text -Color $color }
+            'Bullet'  { Write-Wrapped $l.Text -First '     - ' -Rest '       ' -Color $color }
+        }
+        $previous = $l.Kind
+    }
+}
+
+# The order problems must be fixed in. Problems are listed in this order, not
+# in the order they were found: e.g. the disk must be converted to GPT before
+# the BIOS is switched to UEFI, and Secure Boot can only be turned on after that.
+$script:FixOrder = @{ Disk = 1; BootMode = 2; SecureBoot = 3; Tpm = 4; ReadError = 5 }
+
+function Add-Problem {
+    # A problem that stops Secure Boot or TPM 2.0 from working, with the steps to fix it
+    param([string]$Cause, [string[]]$Fix, [ValidateSet('Disk', 'BootMode', 'SecureBoot', 'Tpm', 'ReadError')] [string]$Area)
+    $script:Problems.Add([pscustomobject]@{
+        Cause = $Cause; Fix = $Fix
+        Order = $script:FixOrder[$Area]
+        Index = $script:Problems.Count   # keeps problems of the same area in the order they were found
+    })
+}
+
+function Add-Warning {
+    # Secure Boot works, but something about it should be looked at
+    param([string]$Cause, [string[]]$Fix)
+    $script:Warnings.Add([pscustomobject]@{ Cause = $Cause; Fix = $Fix })
+}
+
+# ------------------------------------------------------------------
+#  Firmware readers
+# ------------------------------------------------------------------
+
+function Get-FirmwareType {
+    # Asks Windows directly how it was booted: 1 = Legacy BIOS, 2 = UEFI.
+    # Declared in memory, not with Add-Type: that runs the C# compiler, which writes temporary files.
+    try {
+        $assembly = [AppDomain]::CurrentDomain.GetAssemblies() | Where-Object { $_.GetName().Name -eq 'SecureBootCheckFirmware' } | Select-Object -First 1
+        $native = if ($assembly) { $assembly.GetType('FirmwareNative') }
+        if (-not $native) {
+            $builder = [AppDomain]::CurrentDomain.DefineDynamicAssembly((New-Object Reflection.AssemblyName 'SecureBootCheckFirmware'), 'Run')
+            $type = $builder.DefineDynamicModule('SecureBootCheckFirmware').DefineType('FirmwareNative', 'Public, Class')
+            $method = $type.DefinePInvokeMethod('GetFirmwareType', 'kernel32.dll', 'Public, Static, PinvokeImpl', 'Standard', [bool],
+                                                [Type[]]@([uint32].MakeByRefType()), 'Winapi', 'Auto')
+            $method.SetImplementationFlags('PreserveSig')
+            $native = $type.CreateType()
+        }
+        $firmware = [uint32]0
+        if ($native::GetFirmwareType([ref]$firmware)) {
+            switch ($firmware) { 1 { return 'Legacy' } 2 { return 'UEFI' } }
+        }
+    } catch { }
+    # Fallback: Windows also sets this variable at boot
+    if ($env:firmware_type) { return $env:firmware_type }
+    'Unknown'
+}
+
+function Get-UefiVariable {
+    # Returns the raw bytes of a Secure Boot variable, or $null if it doesn't exist
+    param([string]$Name)
+    try {
+        $var = Get-SecureBootUEFI -Name $Name -ErrorAction Stop
+        if ($var -and $var.Bytes -and $var.Bytes.Length -gt 0) { return , $var.Bytes }
+    } catch { }
+    $null
+}
+
+function Get-UefiFlag {
+    # Reads a one-byte on/off variable (SecureBoot, SetupMode...): 1, 0 or $null
+    param([string]$Name)
+    $bytes = Get-UefiVariable $Name
+    if ($bytes) { [int]$bytes[0] } else { $null }
+}
+
+function Get-SignatureCertificates {
+    <#
+        Splits a key database (PK, KEK, db, dbx) into its certificates.
+        The format is a list of EFI_SIGNATURE_LIST blocks; only the
+        X.509 blocks hold certificates, the rest are file hashes.
+    #>
+    param([byte[]]$Bytes)
+    $x509 = [guid]'a5c059a1-94e4-4aa7-87b5-ab155c2bf072'
+    $offset = 0
+    while ($Bytes -and $offset + 28 -le $Bytes.Length) {
+        $type       = New-Object guid (, [byte[]]$Bytes[$offset..($offset + 15)])
+        $listSize   = [BitConverter]::ToUInt32($Bytes, $offset + 16)
+        $headerSize = [BitConverter]::ToUInt32($Bytes, $offset + 20)
+        $sigSize    = [BitConverter]::ToUInt32($Bytes, $offset + 24)
+        if ($listSize -lt 28 -or $offset + $listSize -gt $Bytes.Length) { break }   # damaged data
+
+        if ($type -eq $x509 -and $sigSize -gt 16) {
+            $sig = $offset + 28 + $headerSize
+            while ($sig + $sigSize -le $offset + $listSize) {
+                # Each entry is a 16-byte owner GUID followed by the certificate
+                $der = [byte[]]$Bytes[($sig + 16)..($sig + $sigSize - 1)]
+                try { New-Object Security.Cryptography.X509Certificates.X509Certificate2 (, $der) } catch { }
+                $sig += $sigSize
+            }
+        }
+        $offset += $listSize
+    }
+}
+
+function Get-UefiSupportFlag {
+    <#
+        Reads the firmware's own description of itself (the SMBIOS "BIOS
+        Information" table) and returns whether it says it supports UEFI:
+        $true, $false, or $null when the firmware is too old to say.
+        Layout: byte 0 = table type (0 = BIOS info), byte 1 = length,
+        byte 0x13 = "characteristics extension byte 2", bit 3 = UEFI supported
+        (defined since SMBIOS 2.7, so older firmware can't be judged).
+    #>
+    try {
+        $raw = Get-CimInstance -Namespace root\wmi -ClassName MSSmBios_RawSMBiosTables -ErrorAction Stop | Select-Object -First 1
+    } catch { return $null }
+    if (-not $raw -or -not $raw.SMBiosData) { return $null }
+    if ($raw.SmbiosMajorVersion -lt 2 -or ($raw.SmbiosMajorVersion -eq 2 -and $raw.SmbiosMinorVersion -lt 7)) { return $null }
+
+    $data = [byte[]]$raw.SMBiosData
+    $offset = 0
+    while ($offset + 4 -le $data.Length) {
+        $type = $data[$offset]; $length = $data[$offset + 1]
+        if ($length -lt 4) { break }   # damaged table
+        if ($type -eq 0) {
+            if ($length -le 0x13 -or $offset + 0x13 -ge $data.Length) { return $null }
+            return [bool]($data[$offset + 0x13] -band 0x08)
+        }
+        if ($type -eq 127) { break }   # end of table
+        # Skip the fixed part, then the text strings that end with two zero bytes
+        $offset += $length
+        while ($offset + 1 -lt $data.Length -and -not ($data[$offset] -eq 0 -and $data[$offset + 1] -eq 0)) { $offset++ }
+        $offset += 2
+    }
+    $null
+}
+
+function Get-CpuTpmSupport {
+    <#
+        Guesses from the processor whether it has a TPM 2.0 built in
+        (Intel PTT / AMD fTPM / Microsoft Pluton): 'Yes', 'Maybe', 'No' or 'Unknown'.
+        Known old processors are recognised by name. Anything else - including
+        processors released after this script was written - is judged by the
+        age of the firmware, so new processors count as having one.
+        A strong hint, not proof.
+    #>
+    param([string]$Name, [string]$Vendor, $BiosDate)
+
+    if ($Vendor -eq 'Qualcomm' -or $Name -match 'Snapdragon|Qualcomm') { return 'Yes' }   # every Windows-on-ARM PC
+
+    if ($Vendor -eq 'AMD') {
+        if ($Name -match 'Ryzen|Threadripper|EPYC') { return 'Yes' }           # every Zen processor has fTPM
+        if ($Name -match 'Athlon.*\b(2\d\dGE?|3\d\d\dG[EU]?|Gold|Silver)\b') { return 'Yes' }   # Zen-based Athlons
+        if ($Name -match '\bFX(\(tm\))?-|Phenom|Athlon(\(tm\))? (II|64)|Sempron|Opteron') { return 'No' }
+    }
+
+    if ($Vendor -eq 'Intel') {
+        if ($Name -match 'Core\(TM\) Ultra|Core Ultra') { return 'Yes' }                     # Core Ultra, every generation
+        if ($Name -match 'Core(\(TM\))? [3579] \d{3}') { return 'Yes' }                       # Core 3/5/7/9 without the "i" (2024+)
+        if ($Name -match 'Intel(\(R\))? (Processor )?N\d{2,3}\b|Core(\(TM\))? i3-N\d{3}') { return 'Yes' }   # N100, N150, N200, N305...
+        if ($Name -match 'Core\(TM\)2|Core 2|Pentium\(R\) (4|D)\b') { return 'No' }
+        if ($Name -match '\bi[3579]-(\d{3,5})') {
+            $model = $Matches[1]
+            # i7-920 = 1st gen, i5-2500 = 2nd ... i7-9700 = 9th, i7-10700 / i5-1135G7 = 10th/11th, i7-12700 = 12th
+            $gen = if ($model.Length -eq 3) { 1 }
+                   elseif ($model.Length -eq 5 -or $model[0] -eq '1') { [int]$model.Substring(0, 2) }
+                   else { [int]"$($model[0])" }
+            if ($gen -ge 8) { return 'Yes' }     # every 8th gen and newer Core has PTT
+            if ($gen -ge 4) { return 'Maybe' }   # PTT exists, but not every motherboard offers it
+            return 'No'
+        }
+    }
+
+    # Not recognised by name (Pentium, Celeron, Xeon, other or future processors): go by the firmware's age.
+    # Built-in TPMs arrived around 2013 and are in practically every PC since about 2018.
+    # A BIOS update makes the date newer, so this leans towards "Yes" - hence only a hint.
+    if ($Vendor -in 'Intel', 'AMD' -and $BiosDate) {
+        $year = ([datetime]$BiosDate).Year
+        if ($year -ge 2018) { return 'Yes' }
+        if ($year -ge 2013) { return 'Maybe' }
+        return 'No'
+    }
+    'Unknown'
+}
+
+function Get-CommonName {
+    param($Certificate)
+    if ($Certificate.Subject -match 'CN=([^,]+)') { $Matches[1].Trim('"') } else { $Certificate.Subject }
+}
+
+# ------------------------------------------------------------------
+#  Checks
+# ------------------------------------------------------------------
+
+function Test-IsLaptop {
+    $laptopChassis = 8, 9, 10, 11, 12, 14, 18, 21, 30, 31, 32
+    $chassis = (Get-CimInstance Win32_SystemEnclosure).ChassisTypes
+    [bool](($chassis | Where-Object { $_ -in $laptopChassis }) -or
+           (Get-CimInstance Win32_ComputerSystem).PCSystemType -eq 2 -or
+           (Get-CimInstance Win32_Battery))
+}
+
+function Get-BiosKey {
+    <#
+        Returns the brand and the key that opens the BIOS/UEFI setup, or $null
+        for unknown brands. Prebuilt PCs and laptops report their brand as the
+        system maker; self-built PCs often report a placeholder ("System
+        manufacturer", "To Be Filled By O.E.M."), so the motherboard maker is
+        checked as well.
+    #>
+    param($ComputerSystem, [bool]$IsLaptop)
+    $board = Get-CimInstance Win32_BaseBoard
+
+    # Regex on the maker name -> brand, key on desktops, key on laptops
+    $brands = @(
+        ,@('ASUS',                'ASUS',              'Del (or F2)',           'F2')
+        ,@('Micro-Star|^MSI',     'MSI',               'Del',                   'Del')
+        ,@('Gigabyte|AORUS',      'Gigabyte',          'Del',                   'F2')
+        ,@('ASRock',              'ASRock',            'F2 or Del',             'F2')
+        ,@('Biostar',             'Biostar',           'Del',                   'Del')
+        ,@('EVGA',                'EVGA',              'Del',                   'Del')
+        ,@('Alienware',           'Alienware',         'F2',                    'F2')
+        ,@('Dell',                'Dell',              'F2',                    'F2')
+        ,@('^HP|Hewlett',         'HP',                'F10 (or Esc, then F10)', 'F10 (or Esc, then F10)')
+        ,@('Lenovo',              'Lenovo',            'F1 or F2',              'F2 (or the small Novo button next to the power button)')
+        ,@('Acer',                'Acer',              'F2 (or Del)',           'F2')
+        ,@('Samsung',             'Samsung',           'F2',                    'F2')
+        ,@('Toshiba|Dynabook',    'Toshiba / Dynabook','F2',                    'F2')
+        ,@('Fujitsu',             'Fujitsu',           'F2',                    'F2')
+        ,@('Framework',           'Framework',         'F2',                    'F2')
+        ,@('Microsoft',           'Microsoft Surface', $null,                   $null)
+    )
+
+    foreach ($maker in $ComputerSystem.Manufacturer, $board.Manufacturer) {
+        foreach ($b in $brands) {
+            if ($maker -notmatch $b[0]) { continue }
+            $key = if ($IsLaptop) { $b[3] } else { $b[2] }
+
+            if ($b[1] -eq 'Lenovo' -and "$($ComputerSystem.SystemFamily) $($ComputerSystem.Model)" -match 'Think') {
+                $key = 'F1'   # ThinkPad, ThinkCentre, ThinkStation
+            }
+            if ($b[1] -eq 'Microsoft Surface') {
+                if ("$($ComputerSystem.Model)" -notmatch 'Surface') { continue }   # Hyper-V also says "Microsoft"
+                return [pscustomobject]@{ Brand = $b[1]; Key = $null
+                    How = 'Turn the Surface off. Hold the Volume Up button, press and release Power, and keep holding Volume Up until the Surface logo goes away.' }
+            }
+            return [pscustomobject]@{ Brand = $b[1]; Key = $key; How = $null }
+        }
+    }
+    $null
+}
+
+function Test-System {
+    Write-Section 'Your PC'
+    $cs   = Get-CimInstance Win32_ComputerSystem
+    $bios = Get-CimInstance Win32_BIOS
+    $os   = Get-CimInstance Win32_OperatingSystem
+    $cpu  = Get-CimInstance Win32_Processor | Select-Object -First 1
+    $board = Get-CimInstance Win32_BaseBoard
+    Write-Item 'Model' ("$($cs.Manufacturer) $($cs.Model)".Trim())
+    if ($board.Manufacturer -and "$($cs.Manufacturer)" -notmatch [regex]::Escape("$($board.Manufacturer)".Split(' ')[0])) {
+        Write-Item 'Motherboard' ("$($board.Manufacturer) $($board.Product)".Trim())
+    }
+    Write-Item 'Firmware' ("$($bios.Manufacturer) $($bios.SMBIOSBIOSVersion)".Trim())
+    Write-Item 'CPU' ("$($cpu.Name)".Trim())
+    Write-Item 'Windows' "$($os.Caption -replace '^Microsoft ', '') (build $($os.BuildNumber))"
+
+    $model = "$($cs.Manufacturer) $($cs.Model)"
+    $vm = switch -Regex ($model) {
+        'Microsoft Corporation Virtual' { 'Hyper-V'; break }
+        'VMware'                        { 'VMware'; break }
+        'VirtualBox|innotek'            { 'VirtualBox'; break }
+        'QEMU|KVM'                      { 'QEMU/KVM'; break }
+        'Parallels'                     { 'Parallels'; break }
+    }
+    if ($vm) { Write-Item 'Virtual machine' $vm }
+
+    $isLaptop = Test-IsLaptop
+    [pscustomobject]@{
+        Vm        = $vm
+        IsLaptop  = $isLaptop
+        CpuName   = "$($cpu.Name)".Trim()
+        CpuVendor = switch -Wildcard ($cpu.Manufacturer) { 'AuthenticAMD' { 'AMD' } 'GenuineIntel' { 'Intel' } '*Qualcomm*' { 'Qualcomm' } default { 'Other' } }
+        BiosDate  = $bios.ReleaseDate
+        IsWin11   = [int]$os.BuildNumber -ge 22000
+        Bios      = if (-not $vm) { Get-BiosKey -ComputerSystem $cs -IsLaptop $isLaptop }
+    }
+}
+
+function Test-BootMode {
+    param($Pc)
+    $Vm = $Pc.Vm
+    Write-Section 'Boot mode'
+    $firmware = Get-FirmwareType
+    $script:UefiSupport = 'Yes'
+    if ($firmware -eq 'UEFI') {
+        Write-Item 'Firmware boot mode' 'UEFI' 'Ok'
+        return $firmware
+    }
+
+    Write-Item 'Firmware boot mode' "$firmware (Secure Boot needs UEFI)" 'Fail'
+
+    # Is UEFI there at all? The firmware's self-description says so on most boards since about 2011;
+    # for older firmware that can't say, the BIOS date is the best hint (Secure Boot arrived around 2012).
+    $flag = Get-UefiSupportFlag
+    $year = if ($Pc.BiosDate) { ([datetime]$Pc.BiosDate).Year } else { $null }
+    $script:UefiSupport = if ($flag -eq $true) { 'Yes' }
+                          elseif ($flag -eq $false) { 'No' }
+                          elseif ($year -and $year -lt 2012) { 'Unlikely' }
+                          else { 'Unknown' }
+    if (-not $Vm) {
+        switch ($script:UefiSupport) {
+            'Yes'      { Write-Item 'UEFI support' 'yes (reported by the motherboard)' 'Ok' }
+            'No'       { Write-Item 'UEFI support' 'NO - the motherboard reports it has no UEFI' 'Fail' }
+            'Unlikely' { Write-Item 'UEFI support' "unlikely - BIOS from $year" 'Warn' }
+            default    { Write-Item 'UEFI support' 'the motherboard does not say' 'Info' }
+        }
+    }
+
+    if ($Vm -eq 'Hyper-V') {
+        Add-Problem -Area BootMode 'This is a Generation 1 Hyper-V virtual machine. Those boot with a legacy BIOS and can never use Secure Boot.' @(
+            'Create a new Generation 2 virtual machine and install Windows in it (a VM cannot be converted from Gen 1 to Gen 2).'
+        )
+    } elseif ($Vm) {
+        Add-Problem -Area BootMode "The $Vm virtual machine is set to boot with a legacy BIOS." @(
+            'Shut down the VM and switch its firmware to EFI / UEFI in the VM settings, then turn on Secure Boot there.',
+            'The virtual disk must use GPT first - if it uses MBR, that step is listed before this one.'
+        )
+    } elseif ($script:UefiSupport -eq 'No') {
+        Add-Problem -Area BootMode 'This motherboard does not support UEFI, so it cannot use Secure Boot. Its firmware reports a legacy BIOS only.' @(
+            'Check the PC or motherboard maker''s support page for a BIOS update - a few older boards got UEFI in a later update.',
+            'If there is none, this PC cannot run games that require Secure Boot. Only a newer motherboard (or PC) can fix that.',
+            'Do NOT convert the disk to GPT on this PC: without UEFI, Windows would no longer start.',
+            'If your BIOS setup does show a "UEFI" boot mode option anyway, the report is wrong - then follow the usual steps: convert the disk to GPT, switch to UEFI, disable CSM and enable Secure Boot.'
+        )
+    } else {
+        $steps = @()
+        if ($script:UefiSupport -eq 'Unlikely') {
+            $steps += "Your BIOS is from $year - many boards that old have no UEFI and no Secure Boot. First open the BIOS setup and check that it has a `"UEFI`" boot mode option. If it has none, this PC cannot use Secure Boot, and you should not convert the disk."
+        }
+        Add-Problem -Area BootMode 'Windows was started in Legacy BIOS / CSM mode. Secure Boot only exists in UEFI mode, so it cannot be turned on yet.' ($steps + @(
+            'If the Windows disk still uses MBR, convert it to GPT first (that step is listed before this one) - otherwise Windows will not start in UEFI mode.',
+            'In the BIOS/UEFI setup: set Boot mode to "UEFI" (not "Legacy" or "UEFI and Legacy") and disable CSM / Compatibility Support Module.',
+            'Then enable Secure Boot (on some boards: set "OS Type" to "Windows UEFI mode", or Secure Boot mode to "Standard").',
+            'Very old graphics cards (around 2012 and older) have no UEFI support and show a black screen without CSM. Use the integrated graphics or a newer card in that case.'
+        ))
+    }
+    $firmware
+}
+
+function Test-BootDisk {
+    param([string]$Firmware)
+    Write-Section 'Windows disk'
+    try {
+        $partition = Get-Partition -DriveLetter $env:SystemDrive[0] -ErrorAction Stop
+        $disk = Get-Disk -Number $partition.DiskNumber -ErrorAction Stop
+    } catch {
+        Write-Item 'Partition style' 'could not be read' 'Warn'
+        return
+    }
+    Write-Item 'Disk' "#$($disk.Number) $($disk.FriendlyName)"
+
+    if ($disk.PartitionStyle -eq 'GPT') {
+        Write-Item 'Partition style' 'GPT' 'Ok'
+        return
+    }
+
+    $status = if ($Firmware -eq 'UEFI') { 'Warn' } else { 'Fail' }
+    Write-Item 'Partition style' "$($disk.PartitionStyle) (UEFI needs GPT)" $status
+    if ($Firmware -eq 'UEFI') { return }   # booted fine anyway, nothing to fix
+
+    # Converting only makes sense if the board can start in UEFI mode - without it Windows would not start at all
+    if ($script:UefiSupport -eq 'No') {
+        Write-Item 'Convert to GPT' 'not suggested - this motherboard has no UEFI' 'Info'
+        return
+    }
+
+    # MBR2GPT can convert the disk without reinstalling. /validate only checks, it changes nothing.
+    $mbr2gpt = Join-Path $env:windir 'System32\mbr2gpt.exe'
+    if (-not (Test-Path $mbr2gpt)) {
+        Write-Item 'Convert without reinstall' 'MBR2GPT not available on this Windows' 'Warn'
+        Add-Problem -Area Disk 'The Windows disk uses MBR. UEFI (and so Secure Boot) needs a GPT disk.' @(
+            'Update Windows (MBR2GPT ships with Windows 10 1703 and later), or back up and reinstall Windows in UEFI mode.'
+        )
+        return
+    }
+
+    $output = & $mbr2gpt /validate /allowFullOS /disk:$($disk.Number) 2>&1 | Out-String
+    if ($LASTEXITCODE -eq 0) {
+        Write-Item 'Convert without reinstall' 'possible (MBR2GPT check passed)' 'Ok'
+        $script:NeedsConversion = $true
+        $steps = @()
+        if ($script:UefiSupport -ne 'Yes') {
+            $steps += 'Before converting, open the BIOS setup and make sure it has a "UEFI" boot mode option. Without one, Windows will not start after the conversion.'
+        }
+        Add-Problem -Area Disk 'The Windows disk uses MBR. UEFI (and so Secure Boot) needs a GPT disk.' ($steps + @(
+            'First read "Before you change anything" above: back up your files and take care of BitLocker.',
+            "Convert the disk (takes a minute, designed to keep all files):  mbr2gpt /convert /allowFullOS /disk:$($disk.Number)",
+            'Immediately afterwards switch the BIOS to UEFI mode - after the conversion Windows no longer starts in Legacy mode.'
+        ))
+    } else {
+        $reason = ($output -split "`r?`n" | Where-Object { $_ -match 'fail|error|cannot|unable|not ' } | Select-Object -First 3) -join ' '
+        if (-not $reason) { $reason = "exit code $LASTEXITCODE" }
+        Write-Item 'Convert without reinstall' 'not possible' 'Fail'
+        Write-Item '  MBR2GPT says' $reason
+        Add-Problem -Area Disk "The Windows disk uses MBR and MBR2GPT cannot convert it: $reason" @(
+            'Most common causes: more than 3 primary partitions, no free space for the EFI partition, or a non-Windows partition layout.',
+            'Details are in C:\Windows\setupact.log and setuperr.log.',
+            'If it cannot be fixed: back up your files and reinstall Windows with the USB stick booted in UEFI mode.'
+        )
+    }
+}
+
+function Test-SecureBootState {
+    Write-Section 'Secure Boot'
+    $enabled = $null
+    try {
+        $enabled = Confirm-SecureBootUEFI -ErrorAction Stop
+    } catch [System.PlatformNotSupportedException] {
+        Write-Item 'Secure Boot' 'not supported on this boot mode' 'Fail'
+        return $false
+    } catch {
+        Write-Item 'Secure Boot' "could not be read: $($_.Exception.Message)" 'Warn'
+    }
+    $reg = (Get-ItemProperty 'HKLM:\SYSTEM\CurrentControlSet\Control\SecureBoot\State' -ErrorAction SilentlyContinue).UEFISecureBootEnabled
+    if ($null -eq $enabled -and $null -ne $reg) { $enabled = $reg -eq 1 }
+
+    if ($enabled) { Write-Item 'Secure Boot' 'ON' 'Ok' } else { Write-Item 'Secure Boot' 'OFF' 'Fail' }
+    [bool]$enabled
+}
+
+function Test-FirmwareKeys {
+    param([bool]$Enabled, [string]$Vm)
+
+    $setupMode    = Get-UefiFlag 'SetupMode'
+    $secureBoot   = Get-UefiFlag 'SecureBoot'
+    $auditMode    = Get-UefiFlag 'AuditMode'
+    $deployedMode = Get-UefiFlag 'DeployedMode'
+
+    # Firmware with Secure Boot always has these two settings, even with the keys wiped.
+    # If both are missing, the firmware has no Secure Boot feature at all.
+    if ($null -eq $setupMode -and $null -eq $secureBoot) {
+        Write-Item 'Secure Boot support' 'NO - the firmware has no Secure Boot settings' 'Fail'
+        if ($Vm) {
+            Add-Problem -Area SecureBoot "This $Vm virtual machine's firmware has no Secure Boot." @(
+                "Shut down the VM and turn on Secure Boot in the $Vm VM settings (it may need a newer $Vm version)."
+            )
+        } else {
+            Add-Problem -Area SecureBoot 'This motherboard''s firmware uses UEFI but has no Secure Boot feature (common on boards from around 2011-2012).' @(
+                'Check the PC or motherboard maker''s support page for a BIOS update - some boards got Secure Boot in a later update.',
+                'If there is none, this PC cannot run games that require Secure Boot. Only a newer motherboard (or PC) can fix that.'
+            )
+        }
+        return
+    }
+
+    $pkBytes  = Get-UefiVariable 'PK'
+    $pk  = @(if ($pkBytes)  { Get-SignatureCertificates $pkBytes })
+    $kek = @(Get-SignatureCertificates (Get-UefiVariable 'KEK'))
+    $db  = @(Get-SignatureCertificates (Get-UefiVariable 'db'))
+    $dbx = Get-UefiVariable 'dbx'
+
+    # ---- Mode -----------------------------------------------------
+    $modeText = if ($setupMode -eq 1) { 'Setup mode (no Platform Key)' }
+                elseif ($auditMode -eq 1) { 'Audit mode' }
+                elseif ($deployedMode -eq 1) { 'Deployed mode' }
+                elseif ($setupMode -eq 0) { 'User mode' }
+                else { 'unknown' }
+    Write-Item 'Firmware key mode' $modeText $(if ($setupMode -eq 1 -or $auditMode -eq 1) { 'Fail' } else { 'Info' })
+
+    # ---- Platform Key ---------------------------------------------
+    Write-Section 'Secure Boot keys'
+    if (-not $pkBytes) {
+        Write-Item 'Platform Key (PK)' 'missing' 'Fail'
+    } elseif ($pk.Count) {
+        $pkName = Get-CommonName $pk[0]
+        if ($pkName -match 'DO NOT TRUST|DO NOT SHIP|\bTest\b') {
+            Write-Item 'Platform Key (PK)' "$pkName  (test key!)" 'Warn'
+            Add-Warning "The firmware uses a public test Platform Key (`"$pkName`"). Its private key is public, so anyone can bypass Secure Boot on this PC (known as PKfail)." @(
+                'Install the latest BIOS/UEFI update from the PC or motherboard maker - fixed firmware ships a real key.'
+            )
+        } else {
+            Write-Item 'Platform Key (PK)' $pkName 'Ok'
+        }
+    } else {
+        Write-Item 'Platform Key (PK)' 'present' 'Ok'
+    }
+
+    # ---- KEK and db: the Microsoft certificates Windows relies on ---
+    $kekNames = $kek | ForEach-Object { Get-CommonName $_ }
+    $dbNames  = $db  | ForEach-Object { Get-CommonName $_ }
+
+    $kek2011 = $kekNames -match 'Microsoft Corporation KEK CA 2011'
+    $kek2023 = $kekNames -match 'KEK 2K CA 2023|KEK CA 2023'
+    $win2011 = $dbNames -match 'Windows Production PCA 2011'
+    $win2023 = $dbNames -match 'Windows UEFI CA 2023'
+    $uefi2011 = $dbNames -match 'Microsoft Corporation UEFI CA 2011'
+    $uefi2023 = $dbNames -match 'Microsoft UEFI CA 2023|Microsoft Option ROM UEFI CA 2023'
+
+    $kekStatus = if ($kek2011 -or $kek2023) { 'Ok' } else { 'Fail' }
+    Write-Item 'Microsoft KEK' $(if ($kek2023) { '2023 key' } elseif ($kek2011) { '2011 key only' } else { 'missing' }) $kekStatus
+
+    $winStatus = if ($win2011 -or $win2023) { 'Ok' } else { 'Fail' }
+    Write-Item 'Windows boot certificate' $(if ($win2023 -and $win2011) { '2011 + 2023' } elseif ($win2023) { '2023' } elseif ($win2011) { '2011 only' } else { 'missing' }) $winStatus
+
+    $thirdStatus = if ($uefi2011 -or $uefi2023) { 'Ok' } else { 'Warn' }
+    Write-Item 'Third-party UEFI cert.' $(if ($uefi2011 -or $uefi2023) { 'present' } else { 'missing' }) $thirdStatus
+
+    Write-Item 'Revocation list (dbx)' $(if ($dbx) { "present ($($dbx.Length) bytes)" } else { 'empty' }) $(if ($dbx) { 'Ok' } else { 'Warn' })
+
+    $otherKeys = @($kekNames | Where-Object { $_ -notmatch 'Microsoft' })
+    foreach ($name in $otherKeys) { Write-Item 'Other KEK' $name }
+
+    # ---- Work out why it's off --------------------------------------
+    if (-not $Enabled) {
+        if ($setupMode -eq 1 -or -not $pkBytes) {
+            $steps = @(
+                'In the BIOS/UEFI setup, open the Secure Boot page and choose "Restore Factory Keys" or "Install default Secure Boot keys".',
+                'On some boards you first need to set Secure Boot mode to "Custom" to see that option, then back to "Standard".'
+            )
+            if ($Vm) { $steps += "In $Vm`: turn Secure Boot off and on again in the VM settings, or pick the Microsoft Windows Secure Boot template." }
+            Add-Problem -Area SecureBoot 'The Secure Boot keys have been cleared (the firmware is in Setup mode, no Platform Key is installed). Secure Boot cannot switch on without keys.' $steps
+        } elseif ($auditMode -eq 1) {
+            Add-Problem -Area SecureBoot 'The firmware is in Audit mode: it checks signatures but does not enforce them.' @(
+                'In the BIOS/UEFI setup, leave Audit mode (or restore the factory Secure Boot keys) and enable Secure Boot.'
+            )
+        } elseif (-not ($win2011 -or $win2023)) {
+            Add-Problem -Area SecureBoot 'The firmware key database (db) does not contain the Microsoft Windows certificate, so the Windows boot manager would be blocked. Someone installed custom keys.' @(
+                'In the BIOS/UEFI setup, choose "Restore Factory Keys" / "Install default Secure Boot keys", then enable Secure Boot.'
+            )
+        } elseif ($setupMode -eq 0 -and $secureBoot -eq 0) {
+            $steps = @('The keys are installed correctly - Secure Boot is simply switched off. In the BIOS/UEFI setup, open the Secure Boot page and set it to "Enabled".')
+            if (-not $Vm) {
+                $steps += 'If the option is grey: disable CSM first, or set "OS Type" to "Windows UEFI mode" (ASUS) / Secure Boot mode to "Standard" (MSI, Gigabyte).'
+                $steps += 'The change only counts after "Save & Exit" and a restart - run this check again afterwards.'
+            } else {
+                $steps += "Shut down the VM and enable Secure Boot in the $Vm VM settings."
+            }
+            Add-Problem -Area SecureBoot 'Secure Boot is turned off in the BIOS/UEFI settings.' $steps
+        } else {
+            Add-Problem -Area SecureBoot 'Secure Boot is off, but the firmware does not report why.' @(
+                'In the BIOS/UEFI setup: restore the factory Secure Boot keys, disable CSM and enable Secure Boot.',
+                'If that does not help, update the BIOS/UEFI firmware from the PC or motherboard maker.'
+            )
+        }
+
+        if (-not ($uefi2011 -or $uefi2023) -and -not $Vm) {
+            Add-Warning 'The "Microsoft UEFI CA" certificate is missing. Graphics cards and network cards sign their firmware with it - with Secure Boot on, they may show a black screen or not work.' @(
+                'Restore the factory Secure Boot keys in the BIOS/UEFI setup; they include this certificate.'
+            )
+        }
+    }
+
+    # ---- Certificate update (the 2011 certificates expire in 2026) ---
+    if (($win2011 -or $kek2011) -and -not ($win2023 -and $kek2023)) {
+        $servicing = Get-ItemProperty 'HKLM:\SYSTEM\CurrentControlSet\Control\SecureBoot\Servicing' -ErrorAction SilentlyContinue
+        $state = if ($servicing.UEFICA2023Status) { " (Windows status: $($servicing.UEFICA2023Status))" } else { '' }
+        Write-Item '2023 certificate update' "not installed yet$state" 'Warn'
+        Add-Warning "The firmware still only has Microsoft's 2011 Secure Boot certificates, which expire in 2026. Secure Boot keeps working, but this PC cannot receive new boot security fixes until the 2023 certificates are added.$state" @(
+            'Install all Windows updates and reboot twice - Windows adds the 2023 certificates automatically.',
+            'If it stays stuck, install the latest BIOS/UEFI update from the PC or motherboard maker.'
+        )
+    } elseif ($win2023 -and $kek2023) {
+        Write-Item '2023 certificate update' 'installed' 'Ok'
+    }
+}
+
+function Test-Tpm {
+    # Many anti-cheats require TPM 2.0 as well as Secure Boot. Returns $true when it is usable.
+    param($Pc)
+    Write-Section 'TPM 2.0 (security chip)'
+
+    # The BIOS calls the TPM built into the CPU by different names
+    $chipName = switch ($Pc.CpuVendor) {
+        'AMD'   { 'AMD fTPM (may be called "AMD CPU fTPM" or "Firmware TPM")' }
+        'Intel' { 'Intel PTT (Platform Trust Technology, may be called "Firmware TPM")' }
+        default { 'the TPM (may be called "Security Device Support" or "Trusted Computing")' }
+    }
+
+    $wmi = $null; $tpm = $null; $readErrors = 0
+    try { $wmi = Get-CimInstance -Namespace 'root\cimv2\Security\MicrosoftTpm' -ClassName Win32_Tpm -ErrorAction Stop } catch { $readErrors++ }
+    try { $tpm = Get-Tpm -ErrorAction Stop } catch { $readErrors++ }
+
+    # Both ways failing (e.g. access denied) says nothing about the TPM - don't guess
+    if ($readErrors -eq 2) {
+        Write-Item 'TPM' 'could not be read - run this check as admin' 'Warn'
+        Add-Problem -Area ReadError 'The TPM status could not be read, so this check cannot tell whether it is set up.' @(
+            'Close this window, start "Check Secure Boot.cmd" again and click "Yes" on the admin prompt.'
+        )
+        return $false
+    }
+
+    if (-not (($tpm -and $tpm.TpmPresent) -or $wmi)) {
+        Write-Item 'TPM' 'not found' 'Fail'
+        if ($Pc.Vm -eq 'Hyper-V') {
+            Add-Problem -Area Tpm 'This virtual machine has no TPM.' @(
+                'Shut down the VM, open its Settings -> Security and tick "Enable Trusted Platform Module" (Generation 2 VMs only).'
+            )
+        } elseif ($Pc.Vm) {
+            Add-Problem -Area Tpm 'This virtual machine has no TPM.' @(
+                "Shut down the VM and add a virtual TPM (vTPM) in the $($Pc.Vm) VM settings."
+            )
+        } else {
+            # A switched-off TPM is invisible to Windows, so the processor decides how likely each answer is
+            $cpuTpm = Get-CpuTpmSupport -Name $Pc.CpuName -Vendor $Pc.CpuVendor -BiosDate $Pc.BiosDate
+            $module = 'A separate TPM 2.0 module that plugs into the motherboard - only if the board has a "TPM" connector (check the motherboard manual). Without one, this PC cannot get TPM 2.0.'
+            switch ($cpuTpm) {
+                'Yes' {
+                    Write-Item 'Built into processor' 'yes - so it is most likely just switched off' 'Info'
+                    Add-Problem -Area Tpm "No TPM was found. Your processor ($($Pc.CpuName)) has a TPM 2.0 built in, so it is most likely just switched off in the BIOS." @(
+                        "In the BIOS/UEFI setup turn on $chipName. It is usually on the Security, Advanced or Trusted Computing page."
+                    )
+                }
+                'Maybe' {
+                    Write-Item 'Built into processor' 'possibly - depends on the motherboard' 'Info'
+                    Add-Problem -Area Tpm "No TPM was found. Your processor ($($Pc.CpuName)) has a built-in TPM 2.0, but not every motherboard of that age offers it." @(
+                        "In the BIOS/UEFI setup look for $chipName and turn it on. It is usually on the Security, Advanced or Trusted Computing page.",
+                        "If the BIOS has no such option (also after a BIOS update), the only way is: $module"
+                    )
+                }
+                'No' {
+                    Write-Item 'Built into processor' 'no - this processor has no TPM 2.0' 'Fail'
+                    Add-Problem -Area Tpm "No TPM was found, and your processor ($($Pc.CpuName)) is too old to have a TPM 2.0 built in." @(
+                        "The only way is: $module",
+                        'If a TPM module is already fitted, it may be switched off - look for "TPM" or "Security Device Support" in the BIOS setup.'
+                    )
+                }
+                default {
+                    Add-Problem -Area Tpm 'No TPM was found. It is either switched off in the BIOS, or this PC has none.' @(
+                        "In the BIOS/UEFI setup turn on $chipName. It is usually on the Security, Advanced or Trusted Computing page.",
+                        'Most Intel and AMD processors from the last several years have a TPM 2.0 built in - it only needs to be switched on.',
+                        "If there is no such option: $module"
+                    )
+                }
+            }
+        }
+        return $false
+    }
+
+    $spec = if ($wmi.SpecVersion) { ("$($wmi.SpecVersion)" -split ',')[0].Trim() } else { $null }
+    $specStatus = if ($spec -eq '2.0') { 'Ok' } elseif ($spec) { 'Fail' } else { 'Warn' }
+    Write-Item 'TPM version' $(if ($spec) { $spec } else { 'unknown' }) $specStatus
+    if ($tpm.ManufacturerIdTxt) { Write-Item 'TPM maker' ("$($tpm.ManufacturerIdTxt) $($tpm.ManufacturerVersion)".Trim()) }
+
+    if ($spec -and $spec -ne '2.0') {
+        Add-Problem -Area Tpm "This PC has an older TPM $spec. Games that require a TPM need version 2.0." @(
+            "If your BIOS offers $chipName, switch to it: look for `"TPM Device Selection`" and choose Firmware TPM / PTT / fTPM instead of Discrete TPM.",
+            'Some Dell, HP and Lenovo PCs can update their TPM from 1.2 to 2.0 with a tool from the PC maker - check the support page for your model.'
+        )
+        return $false
+    }
+
+    $enabled   = if ($null -ne $tpm.TpmEnabled)   { $tpm.TpmEnabled }   else { $wmi.IsEnabled_InitialValue }
+    $activated = if ($null -ne $tpm.TpmActivated) { $tpm.TpmActivated } else { $wmi.IsActivated_InitialValue }
+    if ($enabled -eq $false -or $activated -eq $false) {
+        Write-Item 'TPM status' 'switched off' 'Fail'
+        Add-Problem -Area Tpm 'The TPM is there but switched off.' @(
+            "In the BIOS/UEFI setup turn on $chipName. It is usually on the Security, Advanced or Trusted Computing page."
+        )
+        return $false
+    }
+
+    # Too many wrong PIN attempts lock the TPM for a while; it doesn't stop it
+    # from counting as TPM 2.0, but Windows Hello and some keys stop working
+    if ($tpm -and $tpm.LockedOut) {
+        $heal = if ($tpm.LockoutHealTime) { " It unlocks by itself after about $($tpm.LockoutHealTime) with the PC switched on." } else { '' }
+        Write-Item 'TPM lockout' 'locked (too many wrong PIN attempts)' 'Warn'
+        Add-Warning "The TPM is temporarily locked because of too many wrong PIN or password attempts.$heal" @(
+            'Leave the PC switched on (not asleep) until the lock wears off. Do not try more PINs, each wrong try can extend it.',
+            'Do not use "Clear TPM" to get rid of the lock unless you have your BitLocker recovery key: clearing deletes the keys stored in the TPM.'
+        )
+    }
+
+    if ($tpm -and $tpm.TpmReady -eq $false) {
+        Write-Item 'TPM status' 'on, but not ready yet' 'Warn'
+        Add-Warning 'The TPM is on, but Windows has not finished setting it up.' @(
+            'Restart the PC and install all Windows updates - Windows sets it up by itself.',
+            'Press Win+R and run tpm.msc to see what Windows reports about it.',
+            'Do not use "Clear TPM" unless you have your BitLocker recovery key: clearing deletes the keys stored in the TPM.'
+        )
+        return $true
+    }
+
+    Write-Item 'TPM status' 'on and ready' 'Ok'
+    $true
+}
+
+function Get-BitLockerState {
+    <#
+        Reads BitLocker / Device Encryption for the Windows drive. Returns
+        $null if the drive isn't encrypted or the state can't be read.
+        Device Encryption is often switched on automatically on Windows Home
+        when you sign in with a Microsoft account, so many players don't know they have it.
+    #>
+    try {
+        $v = Get-BitLockerVolume -MountPoint $env:SystemDrive -ErrorAction Stop
+        $types = @($v.KeyProtector | ForEach-Object { "$($_.KeyProtectorType)" })
+        return [pscustomobject]@{
+            Encrypted   = "$($v.VolumeStatus)" -ne 'FullyDecrypted'
+            Protected   = "$($v.ProtectionStatus)" -eq 'On'
+            Percent     = [int]$v.EncryptionPercentage
+            HasRecovery = $types -contains 'RecoveryPassword'
+        }
+    } catch { }
+
+    # Fallback for systems without the BitLocker PowerShell module
+    try {
+        $v = Get-CimInstance -Namespace 'root\cimv2\security\microsoftvolumeencryption' -ClassName Win32_EncryptableVolume `
+            -Filter "DriveLetter='$env:SystemDrive'" -ErrorAction Stop
+        if (-not $v) { return $null }
+        $keys = Invoke-CimMethod -InputObject $v -MethodName GetKeyProtectors -Arguments @{ KeyProtectorType = [uint32]3 } -ErrorAction Stop
+        $pct  = Invoke-CimMethod -InputObject $v -MethodName GetConversionStatus -ErrorAction Stop
+        return [pscustomobject]@{
+            Encrypted   = $v.ConversionStatus -ne 0
+            Protected   = $v.ProtectionStatus -eq 1
+            Percent     = [int]$pct.EncryptionPercentage
+            HasRecovery = @($keys.VolumeKeyProtectorID).Count -gt 0
+        }
+    } catch { }
+    $null
+}
+
+function Test-BitLocker {
+    # Firmware changes make BitLocker ask for the recovery key - warn before the user goes into the BIOS
+    Write-Section 'Drive encryption (BitLocker)'
+    $state = Get-BitLockerState
+    $script:BitLocker = $state
+    if (-not $state -or -not $state.Encrypted) {
+        Write-Item "Drive $env:SystemDrive" 'not encrypted' 'Ok'
+        return
+    }
+    if ($state.Protected) {
+        Write-Item "Drive $env:SystemDrive" "encrypted, protection on ($($state.Percent)%)" 'Info'
+    } else {
+        Write-Item "Drive $env:SystemDrive" "encrypted, protection suspended ($($state.Percent)%)" 'Info'
+    }
+    if ($state.HasRecovery) {
+        Write-Item 'Recovery key' 'exists' 'Ok'
+    } else {
+        Write-Item 'Recovery key' 'NONE - a recovery screen would lock you out' 'Fail'
+    }
+}
+
+function Get-DataSafety {
+    <#
+        Shown before the fixes: what each fix can do to the player's files, and
+        how to stay safe. Returns lines of advice (Kind: Heading, Text or Bullet;
+        Tone: Normal, Warn or Fail), or nothing when there is no risk to point out.
+    #>
+    $bl = $script:BitLocker
+    $blActive = $bl -and $bl.Encrypted
+    if (-not ($blActive -or $script:NeedsConversion)) { return }
+
+    $drive = $env:SystemDrive
+    $line = { param($Kind, $Text, $Tone = 'Normal') [pscustomobject]@{ Kind = $Kind; Text = $Text; Tone = $Tone } }
+
+    if ($blActive) {
+        & $line 'Heading' "Your Windows drive ($drive) is encrypted with BitLocker / Device Encryption." 'Warn'
+        & $line 'Text' 'Changing Secure Boot, CSM, boot mode, TPM settings or the disk layout makes Windows ask for the 48-digit BitLocker recovery key at the next start. Without that key, everything on the drive is lost for good - nobody, not even Microsoft, can unlock it.'
+        if (-not $bl.HasRecovery) {
+            & $line 'Text' 'This drive has NO recovery key. Do not change any BIOS setting until you add one:' 'Fail'
+            & $line 'Bullet' "Add a key (admin PowerShell):  manage-bde -protectors -add $drive -RecoveryPassword" 'Fail'
+        }
+        & $line 'Text' 'To stay safe:'
+        & $line 'Bullet' "Show your recovery key now:  manage-bde -protectors -get $drive"
+        & $line 'Bullet' 'Write the 48-digit "Numerical Password" down or photograph it with your phone. If you sign in with a Microsoft account it may also be at aka.ms/myrecoverykey.'
+        if ($bl.Protected) {
+            & $line 'Bullet' "Then pause BitLocker:  manage-bde -protectors -disable $drive -RebootCount 2"
+            & $line 'Bullet' 'Your files stay encrypted; pausing only stops the key prompt and turns itself back on after 2 restarts. Do your BIOS changes within those 2 restarts.'
+        } else {
+            & $line 'Bullet' 'BitLocker is already paused, but it turns back on by itself after a restart. Keep the recovery key at hand anyway.'
+        }
+        if ($bl.Percent -lt 100) {
+            & $line 'Bullet' "Encryption is still running ($($bl.Percent)%). Let it finish before you change anything." 'Warn'
+        }
+    }
+
+    if ($script:NeedsConversion) {
+        & $line 'Heading' 'About converting the disk (mbr2gpt /convert):' 'Warn'
+        & $line 'Bullet' 'It is built to keep all your files, but it rewrites the layout of the disk. A power cut, crash or forced shutdown while it runs can leave Windows unable to start.'
+        & $line 'Bullet' 'Only convert if your BIOS setup has a "UEFI" boot mode option - without one, Windows will not start after converting.'
+        & $line 'Bullet' 'Back up anything you cannot re-download first (game saves, screenshots, documents, photos) to a USB drive or cloud storage.'
+        & $line 'Bullet' 'On a laptop, plug in the charger. Close all programs and do not turn the PC off while it runs.'
+        & $line 'Bullet' 'Right after converting, Windows ONLY starts in UEFI mode. If you see "no bootable device", your files are fine - switch the BIOS to UEFI mode. Switching back to Legacy will not work.'
+        & $line 'Bullet' 'If Linux or another system is installed on the same disk, it may stop starting.'
+        & $line 'Bullet' 'Do not use third-party "convert MBR to GPT" tools; mbr2gpt is the one built into Windows.'
+    }
+}
+
+function Get-BiosAccess {
+    # How to get into the BIOS/UEFI setup, where almost every fix is made. Returns one line per tip.
+    param($Pc, [string]$Firmware)
+    if ($Pc.Vm) { return }   # VM fixes are made in the VM settings
+    $b = $Pc.Bios
+    if ($b -and $b.How) {
+        "$($b.Brand): $($b.How)"
+    } elseif ($b) {
+        "$($b.Brand) PC or motherboard: turn it on and keep pressing $($b.Key) until the setup screen opens."
+    } else {
+        'Turn the PC on and keep pressing Del or F2 (some PCs use F1, F10 or Esc). The right key is often shown for a moment on the start screen.'
+    }
+    if ($Firmware -eq 'UEFI') {
+        $path = if ($Pc.IsWin11) { 'Settings -> System -> Recovery -> Advanced startup' } else { 'Settings -> Update & Security -> Recovery -> Advanced startup' }
+        "Or from Windows: $path -> Restart now, then Troubleshoot -> Advanced options -> UEFI Firmware Settings -> Restart."
+    }
+    'If Windows starts too fast to press the key: hold Shift while clicking Shut down, then try again.'
+    'Changes only count after you choose "Save & Exit" (often F10).'
+}
+
+# ------------------------------------------------------------------
+#  Run
+# ------------------------------------------------------------------
+
+function Invoke-SecureBootCheck {
+    <#
+        Runs every check and returns everything the text version and the
+        window show. Only reads; can be run again (the window's "Check again").
+    #>
+    $script:Report   = New-Object System.Collections.Generic.List[object]
+    $script:Problems = New-Object System.Collections.Generic.List[object]
+    $script:Warnings = New-Object System.Collections.Generic.List[object]
+    $script:BitLocker = $null
+    $script:NeedsConversion = $false
+
+    $pc       = Test-System
+    $firmware = Test-BootMode -Pc $pc
+    Test-BootDisk -Firmware $firmware
+    $enabled  = $false
+    $keysChecked = $firmware -eq 'UEFI'
+    if ($keysChecked) {
+        $enabled = Test-SecureBootState
+        Test-FirmwareKeys -Enabled $enabled -Vm $pc.Vm
+    } else {
+        # The Secure Boot settings don't exist in Legacy mode, so they can only be checked after the switch to UEFI
+        Write-Section 'Secure Boot'
+        Write-Item 'Secure Boot' 'OFF (not available in Legacy mode)' 'Fail'
+        Write-Item 'Secure Boot keys' 'can only be checked once Windows starts in UEFI mode' 'Warn'
+    }
+    $tpmOk = Test-Tpm -Pc $pc
+    Test-BitLocker
+
+    [pscustomobject]@{
+        Version      = $script:Version
+        Pc           = $pc
+        Firmware     = $firmware
+        SecureBootOn = [bool]$enabled
+        TpmOk        = [bool]$tpmOk
+        KeysChecked  = $keysChecked
+        Sections     = $script:Report.ToArray()
+        Problems     = @($script:Problems | Sort-Object Order, Index)
+        Warnings     = $script:Warnings.ToArray()
+        DataSafety   = @(Get-DataSafety)
+        BiosAccess   = @(Get-BiosAccess -Pc $pc -Firmware $firmware)
+    }
+}
+
+if ($LoadOnly) { return }
+
+if ($Window) {
+    # The window: same checks, shown as cards (modules\Ui.ps1)
+    try {
+        . (Join-Path $PSScriptRoot 'modules\Ui.ps1')
+        Show-SecureBootWindow -Root $PSScriptRoot
+    } catch {
+        Add-Type -AssemblyName PresentationFramework
+        [System.Windows.MessageBox]::Show("The Secure Boot check couldn't open its window:`n$($_.Exception.Message)",
+            'Secure Boot & TPM 2.0 Check', 'OK', 'Error') | Out-Null
+    }
+    return
+}
+
+$script:ConsoleOutput = $true
+Clear-Host
+Write-Host " Secure Boot & TPM 2.0 check  v$script:Version" -ForegroundColor White
+Write-Host ''
+Write-Host ' +----------------------------------------------------------------+' -ForegroundColor Green
+Write-Host ' |  THIS TOOL MAKES NO CHANGES TO YOUR PC.                        |' -ForegroundColor Green
+Write-Host ' |  It only reads your settings. It does not change BIOS settings, |' -ForegroundColor Green
+Write-Host ' |  files, disks, BitLocker or the TPM, and it never restarts.     |' -ForegroundColor Green
+Write-Host ' |  Any fix it shows is for you to decide on and do yourself.      |' -ForegroundColor Green
+Write-Host ' +----------------------------------------------------------------+' -ForegroundColor Green
+
+$result = Invoke-SecureBootCheck
+
+Write-Section 'Result'
+Write-Item 'Secure Boot' $(if ($result.SecureBootOn) { 'ON' } else { 'OFF' }) $(if ($result.SecureBootOn) { 'Ok' } else { 'Fail' })
+Write-Item 'TPM 2.0' $(if ($result.TpmOk) { 'ready' } else { 'not ready' }) $(if ($result.TpmOk) { 'Ok' } else { 'Fail' })
+Write-Host ''
+if ($result.SecureBootOn -and $result.TpmOk -and -not $result.Problems.Count) {
+    Write-Host '  Secure Boot and TPM 2.0 are set up properly - games that require them should run.' -ForegroundColor Green
+} else {
+    $count = $result.Problems.Count
+    Write-Host "  $count thing$(if ($count -ne 1) { 's' }) to fix before games that require Secure Boot / TPM 2.0 will run." -ForegroundColor Red
+    if ($result.DataSafety.Count) {
+        Write-Host ''
+        Write-Host '  BEFORE YOU CHANGE ANYTHING - protect your files' -ForegroundColor Yellow
+        Write-Host '  ----------------------------------------------' -ForegroundColor Yellow
+        Write-Advice $result.DataSafety
+    }
+    if ($result.BiosAccess.Count) {
+        Write-Host ''
+        Write-Host '  HOW TO OPEN THE BIOS/UEFI SETUP' -ForegroundColor Cyan
+        Write-Host '  -------------------------------' -ForegroundColor Cyan
+        foreach ($tip in $result.BiosAccess) { Write-Wrapped $tip -First '     - ' -Rest '       ' }
+    }
+    Write-Host ''
+    Write-Host '  WHY, AND HOW TO FIX IT  (do the steps in this order)' -ForegroundColor Red
+    Write-Host '  ----------------------------------------------------' -ForegroundColor Red
+    Write-Host '  These are instructions for you. This tool has not run any of these commands' -ForegroundColor DarkGray
+    Write-Host '  or changed any setting - nothing happens unless you do it yourself.' -ForegroundColor DarkGray
+}
+
+$n = 0
+foreach ($problem in $result.Problems) {
+    $n++
+    Write-Host ''
+    Write-Host "  Step $n. $($problem.Cause)" -ForegroundColor Red
+    foreach ($step in $problem.Fix) { Write-Host "     - $step" }
+}
+
+if ($result.Problems.Count) {
+    Write-Host ''
+    if (-not $result.KeysChecked) {
+        Write-Host '  After these steps, run this check again. Some Secure Boot settings can only be' -ForegroundColor Cyan
+        Write-Host '  checked once Windows starts in UEFI mode, so more steps may show up then.' -ForegroundColor Cyan
+    } else {
+        Write-Host '  After these steps, run this check again to confirm everything is fixed.' -ForegroundColor Cyan
+    }
+}
+
+foreach ($warning in $result.Warnings) {
+    Write-Host ''
+    Write-Host "  Note: $($warning.Cause)" -ForegroundColor Yellow
+    foreach ($step in $warning.Fix) { Write-Host "     - $step" }
+}
+
+Write-Host ''
+Write-Host '  Check finished. Nothing on your PC was changed.' -ForegroundColor Green
+Write-Host ''
+if (-not $NoPause) { Read-Host 'Press Enter to close' | Out-Null }
+
+```
+
+`modules/Page.ps1`:
+
+```ps1
+<#
+    The Secure Boot tab in Krimz's Toolkit. The toolkit loads this file in its
+    own private module and calls the functions below. The page is the same one
+    the standalone window shows (ui\Page.xaml, built by Ui.ps1), and it only reads.
+#>
+
+. (Join-Path $PSScriptRoot 'Ui.ps1')
+
+function New-ToolPage {
+    param([string]$Root, [hashtable]$Shell)
+    # The version is the one in SecureBootCheck.ps1 (read from the file, nothing is run)
+    $version = if ((Get-Content (Join-Path $Root 'SecureBootCheck.ps1') -Raw) -match "\`$script:Version = '([^']+)'") { $Matches[1] }
+    New-SecureBootPage -Root $Root -Version $version -OnBusy $Shell.SetBusy
+}
+
+# The check runs the first time the tab is opened; "Check again" runs it after that
+function Enter-ToolPage { if (-not $script:SbState.Started) { Start-SecureBootCheck } }
+
+function Close-ToolPage { Stop-SecureBootCheck }
+
+```
+
+`modules/Ui.ps1`:
+
+```ps1
+<#
+    The Secure Boot & TPM 2.0 Check window (WPF, built into Windows).
+
+    THE WINDOW ONLY SHOWS RESULTS. The checks are the ones in
+    SecureBootCheck.ps1 and only read. They run in a background runspace (a
+    second PowerShell inside the same program), so the window never freezes.
+    Fix steps are shown as text the player can select and copy - the window
+    has no button that changes anything, and must never get one.
+    Windows functions are declared in memory (not with Add-Type, which runs the
+    C# compiler and writes temporary files).
+#>
+
+Add-Type -AssemblyName PresentationFramework, PresentationCore, WindowsBase
+
+$script:Ui      = @{}   # named controls from ui\Page.xaml
+$script:SbState = @{}   # everything that changes while the page is open
+
+$script:Glyph  = @{ Ok = [char]0xE73E; Fail = [char]0xE711; Warn = [char]0xE7BA; Info = [char]0xE946 }
+$script:Colors = @{ Ok = '#6CCB5F'; Warn = '#FCE100'; Fail = '#FF99A4'; Info = '#8A8A8A'; Accent = '#4CA6FF'; Muted = '#A6A6A6'; Text = '#F3F3F3' }
+$script:BadgeBack = @{ Ok = '#1F3A26'; Warn = '#3A3415'; Fail = '#3A1F22' }
+
+# ------------------------------------------------------------------
+#  Windows functions (in memory, no files)
+# ------------------------------------------------------------------
+
+function Get-NativeMethods {
+    if ($script:Native) { return $script:Native }
+    $assembly = [AppDomain]::CurrentDomain.DefineDynamicAssembly((New-Object Reflection.AssemblyName 'SecureBootCheckWindow'), 'Run')
+    $type = $assembly.DefineDynamicModule('SecureBootCheckWindow').DefineType('WindowNative', 'Public, Class')
+    $functions = @(
+        @{ Dll = 'user32.dll'; Name = 'SetProcessDpiAwarenessContext'; Returns = [bool]; Parameters = @([IntPtr]) }
+        @{ Dll = 'user32.dll'; Name = 'SetProcessDPIAware';            Returns = [bool]; Parameters = @() }
+        @{ Dll = 'dwmapi.dll'; Name = 'DwmSetWindowAttribute';         Returns = [int];  Parameters = @([IntPtr], [int], [int].MakeByRefType(), [int]) }
+    )
+    foreach ($f in $functions) {
+        $method = $type.DefinePInvokeMethod($f.Name, $f.Dll, 'Public, Static, PinvokeImpl', 'Standard', $f.Returns,
+                                            [Type[]]$f.Parameters, 'Winapi', 'Auto')
+        $method.SetImplementationFlags('PreserveSig')
+    }
+    $script:Native = $type.CreateType()
+    $script:Native
+}
+
+function Enable-DpiAwareness {
+    # Sharp text on high-resolution screens (otherwise Windows stretches the window and it looks blurry)
+    try {
+        $native = Get-NativeMethods
+        if (-not $native::SetProcessDpiAwarenessContext([IntPtr]::new(-4))) { [void]$native::SetProcessDPIAware() }
+    } catch { }
+}
+
+# ------------------------------------------------------------------
+#  Small helpers
+# ------------------------------------------------------------------
+
+function Invoke-UiSafely {
+    # An error inside a button or timer handler must never close the window
+    param([scriptblock]$Action)
+    try { & $Action }
+    catch {
+        [System.Windows.MessageBox]::Show("Something went wrong in the window:`n$($_.Exception.Message)", 'Secure Boot & TPM 2.0 Check', 'OK', 'Warning') | Out-Null
+    }
+}
+
+function New-Text {
+    param([string]$Text, [string]$Color = $script:Colors.Text, [double]$Size = 14, [string]$Weight = 'Normal', [string]$Margin = '0')
+    $t = New-Object System.Windows.Controls.TextBlock
+    $t.Text = $Text
+    $t.Foreground = $Color
+    $t.FontSize = $Size
+    $t.FontWeight = $Weight
+    $t.Margin = $Margin
+    $t.TextWrapping = 'Wrap'
+    $t
+}
+
+function New-Icon {
+    param([string]$Glyph, [string]$Color = $script:Colors.Accent, [double]$Size = 16)
+    $t = New-Text $Glyph $Color $Size
+    $t.FontFamily = 'Segoe Fluent Icons, Segoe MDL2 Assets'
+    $t.VerticalAlignment = 'Top'
+    $t
+}
+
+function New-SelectableText {
+    # Text the player can select and copy (for example a command to type themselves)
+    param([string]$Text, [string]$Color = $script:Colors.Text, [double]$Size = 13.5, [string]$Weight = 'Normal', [string]$Font)
+    $t = New-Object System.Windows.Controls.TextBox
+    $t.Text = $Text
+    $t.IsReadOnly = $true
+    $t.BorderThickness = 0
+    $t.Background = 'Transparent'
+    $t.Foreground = $Color
+    $t.FontSize = $Size
+    $t.FontWeight = $Weight
+    $t.TextWrapping = 'Wrap'
+    $t.Padding = '0'
+    $t.Margin = '-2,0,0,0'   # the box adds 2 pixels on the left; line it up with normal text
+    $t.SelectionBrush = $script:Colors.Accent
+    if ($Font) { $t.FontFamily = $Font }
+    $t
+}
+
+function New-AdviceText {
+    <#
+        One line of advice. A command after two spaces ("Show your recovery key
+        now:  manage-bde ...") is shown on its own line in a code box.
+    #>
+    param([string]$Text, [string]$Color = $script:Colors.Text, [string]$Weight = 'Normal')
+    if ($Text -notmatch '^(.*?:)\s{2,}(\S.*)$') { return (New-SelectableText $Text $Color -Weight $Weight) }
+    $panel = New-Object System.Windows.Controls.StackPanel
+    [void]$panel.Children.Add((New-SelectableText $Matches[1] $Color -Weight $Weight))
+    $code = New-Object System.Windows.Controls.Border
+    $code.Background = '#1A1A1A'
+    $code.BorderBrush = $script:Ui.Page.FindResource('Line')
+    $code.BorderThickness = 1
+    $code.CornerRadius = 5
+    $code.Padding = '10,6'
+    $code.Margin = '0,6,0,2'
+    $code.HorizontalAlignment = 'Left'
+    $code.Child = New-SelectableText $Matches[2] '#E6E6E6' 13 -Font 'Cascadia Mono, Consolas'
+    $code.ToolTip = 'Select the text to copy it. This tool never runs it - only you can.'
+    [void]$panel.Children.Add($code)
+    $panel
+}
+
+function New-Bullet {
+    param([string]$Text, [string]$Color = $script:Colors.Text, [string]$Margin = '0,4,0,0')
+    $row = New-Object System.Windows.Controls.Grid
+    $row.Margin = $Margin
+    $row.ColumnDefinitions.Add((New-Object System.Windows.Controls.ColumnDefinition -Property @{ Width = '18' }))
+    $row.ColumnDefinitions.Add((New-Object System.Windows.Controls.ColumnDefinition))
+    $dot = New-Text ([string][char]0x2022) $script:Colors.Muted 14
+    $content = New-AdviceText $Text $Color
+    [System.Windows.Controls.Grid]::SetColumn($content, 1)
+    [void]$row.Children.Add($dot); [void]$row.Children.Add($content)
+    $row
+}
+
+function New-Card {
+    param([string]$Margin = '0,0,0,12', [string]$Background, [string]$BorderBrush)
+    $b = New-Object System.Windows.Controls.Border
+    $b.Style = $script:Ui.Page.FindResource('Card')
+    $b.Margin = $Margin
+    if ($Background)  { $b.Background = $Background }
+    if ($BorderBrush) { $b.BorderBrush = $BorderBrush }
+    $b
+}
+
+function New-Label {
+    param([string]$Text, [string]$Margin = '0,6,0,8')
+    $t = New-Text $Text $script:Colors.Muted 12 -Margin $Margin
+    $t
+}
+
+function Get-WorstStatus {
+    param($Items)
+    $statuses = @($Items | ForEach-Object Status)
+    foreach ($s in 'Fail', 'Warn', 'Ok') { if ($s -in $statuses) { return $s } }
+    'Info'
+}
+
+# ------------------------------------------------------------------
+#  Showing the results
+# ------------------------------------------------------------------
+
+function Show-PcInfo {
+    param($Section)
+    $panel = $script:Ui.PcInfoPanel
+    $panel.Children.Clear()
+    $table = New-Object System.Windows.Controls.Grid
+    $table.ColumnDefinitions.Add((New-Object System.Windows.Controls.ColumnDefinition -Property @{ Width = '96' }))
+    $table.ColumnDefinitions.Add((New-Object System.Windows.Controls.ColumnDefinition))
+    $row = 0
+    foreach ($item in $Section.Items) {
+        $table.RowDefinitions.Add((New-Object System.Windows.Controls.RowDefinition))
+        $name  = New-Text $item.Label $script:Colors.Muted 12.5 -Margin '0,3'
+        $value = New-Text "$($item.Value)".Trim() -Size 13 -Margin '0,3'
+        [System.Windows.Controls.Grid]::SetRow($name, $row); [System.Windows.Controls.Grid]::SetRow($value, $row)
+        [System.Windows.Controls.Grid]::SetColumn($value, 1)
+        [void]$table.Children.Add($name); [void]$table.Children.Add($value)
+        $row++
+    }
+    [void]$panel.Children.Add($table)
+}
+
+function Show-CheckCards {
+    # One card per check (Boot mode, Windows disk, ...): its worst result as the icon, then every line
+    param($Sections)
+    $panel = $script:Ui.ChecksPanel
+    $panel.Children.Clear()
+    foreach ($section in $Sections) {
+        if ($section.Title -in 'Your PC', 'Result' -or -not $section.Items.Count) { continue }
+        $worst = Get-WorstStatus $section.Items
+        $card = New-Card '0,0,0,10'
+        $stack = New-Object System.Windows.Controls.StackPanel
+
+        $head = New-Object System.Windows.Controls.StackPanel
+        $head.Orientation = 'Horizontal'
+        $head.Margin = '0,0,0,6'
+        $icon = New-Icon $script:Glyph[$worst] $script:Colors[$worst] 15
+        $icon.Margin = '0,2,10,0'
+        [void]$head.Children.Add($icon)
+        [void]$head.Children.Add((New-Text $section.Title -Weight 'SemiBold'))
+        [void]$stack.Children.Add($head)
+
+        foreach ($item in $section.Items) {
+            $row = New-Object System.Windows.Controls.Grid
+            $row.Margin = '0,3'
+            $row.ColumnDefinitions.Add((New-Object System.Windows.Controls.ColumnDefinition -Property @{ Width = '25' }))
+            $row.ColumnDefinitions.Add((New-Object System.Windows.Controls.ColumnDefinition -Property @{ Width = '128' }))
+            $row.ColumnDefinitions.Add((New-Object System.Windows.Controls.ColumnDefinition))
+            $mark = New-Icon $script:Glyph[$item.Status] $script:Colors[$item.Status] 11
+            $mark.Margin = '2,3,0,0'
+            if ($item.Status -eq 'Info') { $mark.Text = '' }
+            $label = New-Text $item.Label $script:Colors.Muted 12.5
+            $valueColor = if ($item.Status -in 'Warn', 'Fail') { $script:Colors[$item.Status] } else { $script:Colors.Text }
+            $value = New-Text "$($item.Value)".Trim() $valueColor 12.5 -Margin '8,0,0,0'
+            [System.Windows.Controls.Grid]::SetColumn($label, 1)
+            [System.Windows.Controls.Grid]::SetColumn($value, 2)
+            [void]$row.Children.Add($mark); [void]$row.Children.Add($label); [void]$row.Children.Add($value)
+            [void]$stack.Children.Add($row)
+        }
+        $card.Child = $stack
+        [void]$panel.Children.Add($card)
+    }
+}
+
+function Show-Verdict {
+    param($Result)
+    $ready = $Result.SecureBootOn -and $Result.TpmOk -and -not $Result.Problems.Count
+    $notes = $Result.Warnings.Count
+    $count = $Result.Problems.Count
+
+    $level = if (-not $ready) { 'Fail' } elseif ($notes) { 'Warn' } else { 'Ok' }
+    $script:Ui.ResultBadge.Background = $script:BadgeBack[$level]
+    $script:Ui.ResultIcon.Text = $script:Glyph[$level]
+    $script:Ui.ResultIcon.Foreground = $script:Colors[$level]
+
+    if ($ready) {
+        $script:Ui.ResultTitle.Text = 'Secure Boot and TPM 2.0 are ready'
+        $script:Ui.ResultSubtitle.Text = 'Games that require them should run.' +
+            $(if ($notes) { " $notes note$(if ($notes -ne 1) { 's' }) below $(if ($notes -ne 1) { 'are' } else { 'is' }) worth a look." })
+    } else {
+        $script:Ui.ResultTitle.Text = if ($count) { "$count thing$(if ($count -ne 1) { 's' }) to fix" } else { 'Not ready yet' }
+        $script:Ui.ResultSubtitle.Text = 'Games that require Secure Boot / TPM 2.0 won''t run until this is fixed. Do the steps below in order.' +
+            $(if (-not $Result.KeysChecked) { ' More steps may show up once Windows starts in UEFI mode.' })
+    }
+
+    # Two chips: the two things games ask for
+    $chips = $script:Ui.ChipsPanel
+    $chips.Children.Clear()
+    foreach ($chip in @(
+        @{ Text = "Secure Boot $(if ($Result.SecureBootOn) { 'on' } else { 'off' })"; Ok = $Result.SecureBootOn }
+        @{ Text = "TPM 2.0 $(if ($Result.TpmOk) { 'ready' } else { 'not ready' })";  Ok = $Result.TpmOk }
+    )) {
+        $status = if ($chip.Ok) { 'Ok' } else { 'Fail' }
+        $border = New-Object System.Windows.Controls.Border
+        $border.Background = $script:BadgeBack[$status]
+        $border.CornerRadius = 12
+        $border.Padding = '10,3,12,4'
+        $border.Margin = '0,0,8,4'
+        $line = New-Object System.Windows.Controls.StackPanel
+        $line.Orientation = 'Horizontal'
+        $icon = New-Icon $script:Glyph[$status] $script:Colors[$status] 11
+        $icon.Margin = '0,3,7,0'
+        [void]$line.Children.Add($icon)
+        [void]$line.Children.Add((New-Text $chip.Text $script:Colors[$status] 13))
+        $border.Child = $line
+        [void]$chips.Children.Add($border)
+    }
+}
+
+function Show-Advice {
+    # Right column under the verdict: protect your files, how to open the BIOS, the steps, notes
+    param($Result)
+    $panel = $script:Ui.AdvicePanel
+    $panel.Children.Clear()
+    $count = $Result.Problems.Count
+
+    if ($count -and $Result.DataSafety.Count) {
+        $card = New-Card -Background '#2A2716' -BorderBrush '#5A5122'
+        $stack = New-Object System.Windows.Controls.StackPanel
+        $head = New-Object System.Windows.Controls.StackPanel
+        $head.Orientation = 'Horizontal'
+        $icon = New-Icon $script:Glyph.Warn $script:Colors.Warn 15
+        $icon.Margin = '0,1,10,0'
+        [void]$head.Children.Add($icon)
+        [void]$head.Children.Add((New-Text 'Before you change anything - protect your files' $script:Colors.Warn 14.5 'SemiBold'))
+        [void]$stack.Children.Add($head)
+        foreach ($l in $Result.DataSafety) {
+            $color = switch ($l.Tone) { 'Warn' { $script:Colors.Warn } 'Fail' { $script:Colors.Fail } default { $script:Colors.Text } }
+            switch ($l.Kind) {
+                'Heading' { [void]$stack.Children.Add((New-Text $l.Text $color 13.5 'SemiBold' '0,14,0,2')) }
+                'Text'    { $t = New-AdviceText $l.Text $color; $t.Margin = '0,8,0,0'; [void]$stack.Children.Add($t) }
+                'Bullet'  { [void]$stack.Children.Add((New-Bullet $l.Text $color)) }
+            }
+        }
+        $card.Child = $stack
+        [void]$panel.Children.Add($card)
+    }
+
+    if ($count -and $Result.BiosAccess.Count) {
+        $card = New-Card
+        $stack = New-Object System.Windows.Controls.StackPanel
+        $head = New-Object System.Windows.Controls.StackPanel
+        $head.Orientation = 'Horizontal'
+        $icon = New-Icon ([char]0xE713) $script:Colors.Accent 15
+        $icon.Margin = '0,1,10,0'
+        [void]$head.Children.Add($icon)
+        [void]$head.Children.Add((New-Text 'How to open the BIOS/UEFI setup' -Size 14.5 -Weight 'SemiBold'))
+        [void]$stack.Children.Add($head)
+        foreach ($tip in $Result.BiosAccess) { [void]$stack.Children.Add((New-Bullet $tip)) }
+        $card.Child = $stack
+        [void]$panel.Children.Add($card)
+    }
+
+    if ($count) {
+        [void]$panel.Children.Add((New-Label 'WHY, AND HOW TO FIX IT  -  DO THE STEPS IN THIS ORDER' '0,10,0,2'))
+        [void]$panel.Children.Add((New-Text 'These are instructions for you. This tool has not run any of these commands or changed any setting - nothing happens unless you do it yourself.' $script:Colors.Muted 12.5 -Margin '0,0,0,10'))
+        $n = 0
+        foreach ($problem in $Result.Problems) {
+            $n++
+            $card = New-Card
+            $grid = New-Object System.Windows.Controls.Grid
+            $grid.ColumnDefinitions.Add((New-Object System.Windows.Controls.ColumnDefinition -Property @{ Width = 'Auto' }))
+            $grid.ColumnDefinitions.Add((New-Object System.Windows.Controls.ColumnDefinition))
+            $number = New-Object System.Windows.Controls.Border
+            $number.Width = 28; $number.Height = 28; $number.CornerRadius = 14
+            $number.Background = $script:BadgeBack.Fail
+            $number.VerticalAlignment = 'Top'
+            $digit = New-Text "$n" $script:Colors.Fail 13.5 'SemiBold'
+            $digit.HorizontalAlignment = 'Center'; $digit.VerticalAlignment = 'Center'
+            $number.Child = $digit
+            $stack = New-Object System.Windows.Controls.StackPanel
+            $stack.Margin = '14,3,0,0'
+            [void]$stack.Children.Add((New-AdviceText $problem.Cause -Weight 'SemiBold'))
+            foreach ($step in $problem.Fix) { [void]$stack.Children.Add((New-Bullet $step -Margin '0,6,0,0')) }
+            [System.Windows.Controls.Grid]::SetColumn($stack, 1)
+            [void]$grid.Children.Add($number); [void]$grid.Children.Add($stack)
+            $card.Child = $grid
+            [void]$panel.Children.Add($card)
+        }
+        $again = if (-not $Result.KeysChecked) {
+            'After these steps, run this check again. Some Secure Boot settings can only be checked once Windows starts in UEFI mode, so more steps may show up then.'
+        } else {
+            'After these steps, run this check again to confirm everything is fixed.'
+        }
+        [void]$panel.Children.Add((New-Text $again $script:Colors.Accent 13 -Margin '2,2,0,14'))
+    }
+
+    foreach ($warning in $Result.Warnings) {
+        $card = New-Card
+        $stack = New-Object System.Windows.Controls.StackPanel
+        $head = New-Object System.Windows.Controls.Grid
+        $head.ColumnDefinitions.Add((New-Object System.Windows.Controls.ColumnDefinition -Property @{ Width = 'Auto' }))
+        $head.ColumnDefinitions.Add((New-Object System.Windows.Controls.ColumnDefinition))
+        $icon = New-Icon $script:Glyph.Warn $script:Colors.Warn 15
+        $icon.Margin = '0,2,12,0'
+        $cause = New-AdviceText "Note: $($warning.Cause)" -Weight 'SemiBold'
+        [System.Windows.Controls.Grid]::SetColumn($cause, 1)
+        [void]$head.Children.Add($icon); [void]$head.Children.Add($cause)
+        [void]$stack.Children.Add($head)
+        foreach ($step in $warning.Fix) { [void]$stack.Children.Add((New-Bullet $step -Margin '27,6,0,0')) }
+        $card.Child = $stack
+        [void]$panel.Children.Add($card)
+    }
+
+    if (-not $count -and -not $Result.Warnings.Count) {
+        $card = New-Card
+        $card.Child = New-Text 'Nothing to fix. If a game still says Secure Boot or TPM 2.0 is missing, restart the PC and start the game again - some games only check when they start.' $script:Colors.Muted 13.5
+        [void]$panel.Children.Add($card)
+    }
+}
+
+function Show-SecureBootResult {
+    param($Result)
+    $s = $script:SbState
+    $s.Result = $Result
+    $script:Ui.VersionText.Text = "v$($Result.Version)"
+    Show-PcInfo ($Result.Sections | Where-Object Title -eq 'Your PC' | Select-Object -First 1)
+    Show-CheckCards $Result.Sections
+    Show-Verdict $Result
+    Show-Advice $Result
+    $script:Ui.CheckingPage.Visibility = 'Collapsed'
+    $script:Ui.ResultPage.Visibility = 'Visible'
+    $script:Ui.FooterText.Text = "Checked at $((Get-Date).ToString('t')). Nothing on your PC was changed."
+}
+
+function Show-CheckFailed {
+    param([string]$Message)
+    $script:Ui.CheckingPage.Visibility = 'Visible'
+    $script:Ui.ResultPage.Visibility = 'Collapsed'
+    $script:Ui.CheckingTitle.Text = 'The check could not finish'
+    $script:Ui.CheckingText.Text = "$Message`nNothing on your PC was changed. Press Check again to try once more."
+    $script:Ui.FooterText.Text = ''
+}
+
+# ------------------------------------------------------------------
+#  Running the check in the background
+# ------------------------------------------------------------------
+
+function Set-CheckBusy {
+    param([bool]$Busy)
+    $script:Ui.CheckButton.IsEnabled = -not $Busy
+    if ($script:SbState.OnBusy) { try { & $script:SbState.OnBusy $Busy } catch { } }
+}
+
+function Start-SecureBootCheck {
+    $s = $script:SbState
+    if ($s.PowerShell) { return }   # already checking
+    $s.Started = $true
+    $script:Ui.ResultPage.Visibility = 'Collapsed'
+    $script:Ui.CheckingPage.Visibility = 'Visible'
+    $script:Ui.CheckingTitle.Text = 'Checking your PC...'
+    $script:Ui.CheckingText.Text = 'Reading the firmware settings, the TPM and the disk layout. This takes a few seconds and changes nothing.'
+    $script:Ui.FooterText.Text = ''
+    Set-CheckBusy $true
+
+    $iss = [System.Management.Automation.Runspaces.InitialSessionState]::CreateDefault()
+    $iss.ExecutionPolicy = 'Bypass'
+    $runspace = [runspacefactory]::CreateRunspace($iss)
+    $runspace.Open()
+    $ps = [powershell]::Create()
+    $ps.Runspace = $runspace
+    [void]$ps.AddScript({
+        param($File)
+        $ErrorActionPreference = 'Continue'
+        . $File -LoadOnly
+        Invoke-SecureBootCheck
+    }.ToString()).AddArgument($s.ScriptFile)
+    $s.PowerShell = $ps
+    $s.Handle = $ps.BeginInvoke()
+
+    $s.Timer = New-Object System.Windows.Threading.DispatcherTimer
+    $s.Timer.Interval = [TimeSpan]::FromMilliseconds(120)
+    $s.Timer.Add_Tick({ Invoke-UiSafely { Receive-CheckResult } })
+    $s.Timer.Start()
+}
+
+function Receive-CheckResult {
+    $s = $script:SbState
+    if (-not $s.Handle -or -not $s.Handle.IsCompleted) { return }
+    $s.Timer.Stop()
+    $ps = $s.PowerShell
+    $result = $null; $problem = $null
+    try {
+        $output = $ps.EndInvoke($s.Handle)
+        $result = $output | Where-Object { $_.PSObject.Properties['Sections'] } | Select-Object -Last 1
+        if (-not $result) {
+            $problem = @($ps.Streams.Error | ForEach-Object { $_.ToString() }) -join ' '
+            if (-not $problem) { $problem = 'The check stopped without a result.' }
+        }
+    } catch {
+        $problem = $_.Exception.Message
+    } finally {
+        Stop-SecureBootCheck
+    }
+    if ($result) { Show-SecureBootResult $result } else { Show-CheckFailed $problem }
+}
+
+function Stop-SecureBootCheck {
+    # Ends the background check (also when the window closes while it is still running)
+    $s = $script:SbState
+    if ($s.Timer) { $s.Timer.Stop(); $s.Timer = $null }
+    if ($s.PowerShell) {
+        try { if (-not $s.Handle.IsCompleted) { $s.PowerShell.Stop() } } catch { }
+        try { $s.PowerShell.Runspace.Dispose(); $s.PowerShell.Dispose() } catch { }
+        $s.PowerShell = $null; $s.Handle = $null
+    }
+    Set-CheckBusy $false
+}
+
+# ------------------------------------------------------------------
+#  Page and window
+# ------------------------------------------------------------------
+
+function Import-SecureBootTheme {
+    # The shared look (Theme.xaml) becomes the application's resources. Krimz's Toolkit does this itself.
+    param([string]$Root)
+    [xml]$xaml = Get-Content (Join-Path $Root 'ui\Theme.xaml') -Raw -Encoding UTF8
+    $theme = [Windows.Markup.XamlReader]::Load((New-Object System.Xml.XmlNodeReader $xaml))
+    $app = [System.Windows.Application]::Current
+    if (-not $app) { $app = New-Object System.Windows.Application }
+    $app.ShutdownMode = 'OnExplicitShutdown'
+    $app.Resources = $theme
+}
+
+function New-SecureBootPage {
+    <#
+        Builds the page (ui\Page.xaml). Used by the standalone window below and
+        by Krimz's Toolkit (modules\Page.ps1). The check starts with
+        Start-SecureBootCheck. -OnBusy is called with $true / $false around it.
+    #>
+    param([string]$Root, [string]$Version, [scriptblock]$OnBusy)
+
+    [xml]$xaml = Get-Content (Join-Path $Root 'ui\Page.xaml') -Raw -Encoding UTF8
+    $page = [Windows.Markup.XamlReader]::Load((New-Object System.Xml.XmlNodeReader $xaml))
+    $script:Ui.Page = $page
+    $xaml.SelectNodes('//*[@*[local-name()="Name"]]') | ForEach-Object {
+        $name = $_.GetAttribute('Name', 'http://schemas.microsoft.com/winfx/2006/xaml')
+        if ($name) { $script:Ui[$name] = $page.FindName($name) }
+    }
+    $s = $script:SbState
+    $s.ScriptFile = Join-Path $Root 'SecureBootCheck.ps1'
+    $s.OnBusy = $OnBusy
+    $s.Started = $false
+    if ($Version) { $script:Ui.VersionText.Text = "v$Version" }
+
+    $script:Ui.CheckButton.Add_Click({ Invoke-UiSafely { Start-SecureBootCheck } })
+    $page
+}
+
+function Show-SecureBootWindow {
+    # The standalone window. -NoShow builds it without opening it (used for automated screenshots)
+    param([string]$Root, [string]$Version = $script:Version, [switch]$NoShow)
+
+    Enable-DpiAwareness
+    Import-SecureBootTheme $Root
+    [xml]$xaml = Get-Content (Join-Path $Root 'ui\MainWindow.xaml') -Raw -Encoding UTF8
+    $window = [Windows.Markup.XamlReader]::Load((New-Object System.Xml.XmlNodeReader $xaml))
+    $script:Ui.Window = $window
+    $window.Content = New-SecureBootPage -Root $Root -Version $Version
+
+    # Dark title bar to match the window (Windows 10 2004+ / Windows 11)
+    $window.Add_SourceInitialized({
+        try {
+            $hwnd = (New-Object System.Windows.Interop.WindowInteropHelper $script:Ui.Window).Handle
+            $on = 1
+            [void](Get-NativeMethods)::DwmSetWindowAttribute($hwnd, 20, [ref]$on, 4)
+        } catch { }
+    })
+    $window.Add_ContentRendered({ Invoke-UiSafely { Start-SecureBootCheck } })
+    $window.Add_Closing({ Stop-SecureBootCheck })
+
+    if ($NoShow) { return $window }
+    [void]$window.ShowDialog()
+}
+
+```
+
+`run.ps1`:
+
+```ps1
+<#
+    Secure Boot & TPM 2.0 Check - online starter
+
+    Run this in PowerShell:
+
+        irm https://raw.githubusercontent.com/Krimziee/SecureBootCheck/main/run.ps1 | iex
+
+    What it does:
+      1. Opens a new PowerShell window with admin rights (Windows asks "Yes/No")
+      2. That window loads the newest SecureBootCheck.ps1 from GitHub into
+         memory and runs it
+
+    Nothing is saved to disk and nothing on the PC is changed.
+#>
+
+& {
+    $url = 'https://raw.githubusercontent.com/Krimziee/SecureBootCheck/main/SecureBootCheck.ps1'
+
+    # The admin window downloads the check itself and runs it from memory.
+    # Passed as an encoded command so no quoting can break on the way.
+    $command = "[Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor [Net.SecurityProtocolType]::Tls12; " +
+               "& ([scriptblock]::Create((Invoke-RestMethod -Uri '$url' -UseBasicParsing)))"
+    $encoded = [Convert]::ToBase64String([Text.Encoding]::Unicode.GetBytes($command))
+
+    Write-Host ''
+    Write-Host ' Secure Boot & TPM 2.0 Check' -ForegroundColor Cyan
+    Write-Host ' This check makes no changes to your PC - it only reads your settings.' -ForegroundColor Gray
+    Write-Host ' Click "Yes" when Windows asks for permission (needed to READ the settings).' -ForegroundColor Gray
+    try {
+        Start-Process -FilePath 'powershell.exe' -Verb RunAs -ArgumentList @(
+            '-NoProfile', '-ExecutionPolicy', 'Bypass', '-EncodedCommand', $encoded
+        )
+        Write-Host ' The check is opening in a new window. You can close this one.' -ForegroundColor Green
+    } catch {
+        Write-Host " Couldn't start the check: $($_.Exception.Message)" -ForegroundColor Red
+        Write-Host ' Run the command again and click "Yes" on the admin prompt.' -ForegroundColor Gray
+    }
+}
+
+```
+
+`ui/MainWindow.xaml`:
+
+```xaml
+<!--
+    Standalone Secure Boot & TPM 2.0 Check window: an empty frame that shows
+    Page.xaml. (In Krimz's Toolkit the same page is shown in the Secure Boot tab.)
+-->
+<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Secure Boot &amp; TPM 2.0 Check" Width="1100" Height="780" MinWidth="900" MinHeight="600"
+        WindowStartupLocation="CenterScreen" Background="{StaticResource Background}"
+        FontFamily="Segoe UI Variable Text, Segoe UI" FontSize="14" Foreground="#F3F3F3"
+        TextOptions.TextFormattingMode="Display" UseLayoutRounding="True">
+</Window>
+
+```
+
+`ui/Page.xaml`:
+
+```xaml
+<!--
+    Secure Boot & TPM 2.0 Check page. Used by the standalone window
+    (MainWindow.xaml) and by the Secure Boot tab in Krimz's Toolkit.
+    Left: your PC and one card per check. Right: the verdict and, when
+    something is wrong, what to do. Filled in by modules\Ui.ps1.
+    Styles come from Theme.xaml (loaded as the application's resources).
+-->
+<UserControl xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Background="{StaticResource Background}" Foreground="#F3F3F3"
+             FontFamily="Segoe UI Variable Text, Segoe UI" FontSize="14" MinHeight="540">
+    <Grid Margin="28,22,28,20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <StackPanel Grid.Row="0" Margin="0,0,0,18">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="Secure Boot &amp; TPM 2.0" FontFamily="{StaticResource Display}" FontSize="26" FontWeight="SemiBold"/>
+                <TextBlock x:Name="VersionText" Foreground="{StaticResource Muted}" FontSize="13" Margin="10,0,0,4" VerticalAlignment="Bottom"/>
+                <Border Background="#1F3A26" CornerRadius="4" Padding="8,2" Margin="12,0,0,4" VerticalAlignment="Bottom">
+                    <TextBlock Text="Read-only: changes nothing on your PC" Foreground="#6CCB5F" FontSize="12"/>
+                </Border>
+            </StackPanel>
+            <TextBlock Foreground="{StaticResource Muted}" Margin="0,4,0,0" TextWrapping="Wrap"
+                       Text="Checks whether Secure Boot and TPM 2.0 are set up the way games with anti-cheat need them, and if not, exactly why."/>
+        </StackPanel>
+
+        <!-- ============================ Results ============================ -->
+        <Grid x:Name="ResultPage" Grid.Row="1" Visibility="Collapsed">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="340"/>
+                <ColumnDefinition Width="24"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <ScrollViewer Grid.Column="0" VerticalScrollBarVisibility="Auto">
+                <StackPanel Margin="0,0,6,0">
+                    <TextBlock Text="YOUR PC" Style="{StaticResource Label}"/>
+                    <Border Style="{StaticResource Card}" Margin="0,0,0,20">
+                        <StackPanel x:Name="PcInfoPanel"/>
+                    </Border>
+                    <TextBlock Text="WHAT WAS CHECKED" Style="{StaticResource Label}"/>
+                    <StackPanel x:Name="ChecksPanel"/>
+                </StackPanel>
+            </ScrollViewer>
+
+            <Grid Grid.Column="2">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <TextBlock Grid.Row="0" Text="RESULT" Style="{StaticResource Label}"/>
+                <Border Grid.Row="1" Style="{StaticResource Card}" Padding="18,16">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Border x:Name="ResultBadge" Width="52" Height="52" CornerRadius="26" Background="#1F3A26" VerticalAlignment="Top">
+                            <TextBlock x:Name="ResultIcon" Text="&#xE73E;" FontFamily="{StaticResource Icons}" FontSize="24" Foreground="#6CCB5F"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <StackPanel Grid.Column="1" Margin="16,0,0,0" VerticalAlignment="Center">
+                            <TextBlock x:Name="ResultTitle" FontSize="22" FontWeight="SemiBold" TextWrapping="Wrap"/>
+                            <TextBlock x:Name="ResultSubtitle" Foreground="{StaticResource Muted}" Margin="0,2,0,0" TextWrapping="Wrap"/>
+                            <WrapPanel x:Name="ChipsPanel" Margin="0,10,0,0"/>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+                <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" Margin="0,18,0,0">
+                    <StackPanel x:Name="AdvicePanel" Margin="0,0,6,0"/>
+                </ScrollViewer>
+            </Grid>
+        </Grid>
+
+        <!-- ============================ Checking ============================ -->
+        <StackPanel x:Name="CheckingPage" Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,0,0,40">
+            <TextBlock Text="&#xE895;" FontFamily="{StaticResource Icons}" FontSize="30" Foreground="{StaticResource Accent}"
+                       HorizontalAlignment="Center" RenderTransformOrigin="0.5,0.5">
+                <TextBlock.RenderTransform>
+                    <RotateTransform/>
+                </TextBlock.RenderTransform>
+                <TextBlock.Triggers>
+                    <EventTrigger RoutedEvent="Loaded">
+                        <BeginStoryboard>
+                            <Storyboard RepeatBehavior="Forever">
+                                <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(RotateTransform.Angle)"
+                                                 From="0" To="360" Duration="0:0:1.4"/>
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </EventTrigger>
+                </TextBlock.Triggers>
+            </TextBlock>
+            <TextBlock x:Name="CheckingTitle" Text="Checking your PC..." FontSize="18" FontWeight="SemiBold" HorizontalAlignment="Center" Margin="0,16,0,4"/>
+            <TextBlock x:Name="CheckingText" Foreground="{StaticResource Muted}" HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap" MaxWidth="460"
+                       Text="Reading the firmware settings, the TPM and the disk layout. This takes a few seconds and changes nothing."/>
+        </StackPanel>
+
+        <!-- Footer -->
+        <Grid Grid.Row="2" Margin="0,18,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock x:Name="FooterText" Foreground="{StaticResource Muted}" VerticalAlignment="Center" TextWrapping="Wrap" Margin="0,0,16,0"/>
+            <Button x:Name="CheckButton" Grid.Column="1" Style="{StaticResource AccentButton}" Content="Check again" MinWidth="140" IsEnabled="False"/>
+        </Grid>
+    </Grid>
+</UserControl>
+
+```
+
+`ui/Theme.xaml`:
+
+```xaml
+<!--
+    Shared look for every tab: colors, buttons, check boxes, cards, scroll bars,
+    tool tips and the tab bar. Taken from Windows Setup's window.
+    The toolkit loads this once as the application's resources, so every page
+    can use these styles with {StaticResource ...} without loading it again.
+-->
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <SolidColorBrush x:Key="Background"   Color="#1C1C1C"/>
+    <SolidColorBrush x:Key="Surface"      Color="#272727"/>
+    <SolidColorBrush x:Key="Surface2"     Color="#2F2F2F"/>
+    <SolidColorBrush x:Key="SurfaceHover" Color="#383838"/>
+    <SolidColorBrush x:Key="Line"         Color="#3A3A3A"/>
+    <SolidColorBrush x:Key="Text"         Color="#F3F3F3"/>
+    <SolidColorBrush x:Key="Muted"        Color="#A6A6A6"/>
+    <SolidColorBrush x:Key="Accent"       Color="#4CA6FF"/>
+    <SolidColorBrush x:Key="AccentHover"  Color="#6BB6FF"/>
+    <SolidColorBrush x:Key="Ok"           Color="#6CCB5F"/>
+    <SolidColorBrush x:Key="Warn"         Color="#FCE100"/>
+    <SolidColorBrush x:Key="Fail"         Color="#FF99A4"/>
+    <FontFamily x:Key="Icons">Segoe Fluent Icons, Segoe MDL2 Assets</FontFamily>
+    <FontFamily x:Key="Display">Segoe UI Variable Display, Segoe UI</FontFamily>
+
+    <!-- Buttons -->
+    <Style TargetType="Button">
+        <Setter Property="Foreground" Value="#F3F3F3"/>
+        <Setter Property="Background" Value="{StaticResource Surface2}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource Line}"/>
+        <Setter Property="Padding" Value="18,8"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="Bd" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="1" CornerRadius="6" Padding="{TemplateBinding Padding}">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Bd" Property="Background" Value="{StaticResource SurfaceHover}"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="Bd" Property="Opacity" Value="0.45"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+    <Style x:Key="AccentButton" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+        <Setter Property="Background" Value="{StaticResource Accent}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource Accent}"/>
+        <Setter Property="Foreground" Value="#0B1A2A"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="Bd" Background="{TemplateBinding Background}" CornerRadius="6" Padding="{TemplateBinding Padding}">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Bd" Property="Background" Value="{StaticResource AccentHover}"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="Bd" Property="Opacity" Value="0.45"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+    <Style x:Key="LinkButton" TargetType="Button">
+        <Setter Property="Foreground" Value="{StaticResource Accent}"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="FontSize" Value="13"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <ContentPresenter x:Name="Cp" Margin="0,2"/>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Foreground" Value="{StaticResource AccentHover}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Check boxes -->
+    <Style TargetType="CheckBox">
+        <Setter Property="Foreground" Value="#F3F3F3"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="Margin" Value="0,4"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="CheckBox">
+                    <!-- A Grid (not a StackPanel) so long text can wrap -->
+                    <Grid Background="Transparent">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Border x:Name="Box" Width="18" Height="18" CornerRadius="4" BorderThickness="1"
+                                BorderBrush="#8A8A8A" Background="#262626" VerticalAlignment="Center">
+                            <Grid>
+                                <TextBlock x:Name="Tick" Text="&#xE73E;" FontFamily="{StaticResource Icons}" FontSize="12"
+                                           Foreground="#0B1A2A" HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="Collapsed"/>
+                                <!-- "Partly selected": some, but not all, items are ticked -->
+                                <Rectangle x:Name="Partial" Width="8" Height="2" Fill="#0B1A2A" Visibility="Collapsed"/>
+                            </Grid>
+                        </Border>
+                        <ContentPresenter Grid.Column="1" Margin="10,0,0,0" VerticalAlignment="Center"/>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="Box" Property="Background" Value="{StaticResource Accent}"/>
+                            <Setter TargetName="Box" Property="BorderBrush" Value="{StaticResource Accent}"/>
+                            <Setter TargetName="Tick" Property="Visibility" Value="Visible"/>
+                        </Trigger>
+                        <Trigger Property="IsChecked" Value="{x:Null}">
+                            <Setter TargetName="Box" Property="Background" Value="{StaticResource Accent}"/>
+                            <Setter TargetName="Box" Property="BorderBrush" Value="{StaticResource Accent}"/>
+                            <Setter TargetName="Partial" Property="Visibility" Value="Visible"/>
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Box" Property="BorderBrush" Value="#C8C8C8"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Opacity" Value="0.45"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Radio buttons drawn as selectable cards -->
+    <Style x:Key="CardRadio" TargetType="RadioButton">
+        <Setter Property="Foreground" Value="#F3F3F3"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="Margin" Value="0,0,0,8"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="RadioButton">
+                    <Border x:Name="Bd" Background="{StaticResource Surface}" BorderBrush="{StaticResource Line}"
+                            BorderThickness="1" CornerRadius="8" Padding="14,10">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Border x:Name="Dot" Width="18" Height="18" CornerRadius="9" BorderThickness="1" BorderBrush="#8A8A8A"
+                                    VerticalAlignment="Center" Margin="0,0,12,0">
+                                <Ellipse x:Name="Inner" Width="8" Height="8" Fill="#0B1A2A" Visibility="Collapsed"/>
+                            </Border>
+                            <ContentPresenter Grid.Column="1" VerticalAlignment="Center"/>
+                        </Grid>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="Bd" Property="BorderBrush" Value="{StaticResource Accent}"/>
+                            <Setter TargetName="Dot" Property="Background" Value="{StaticResource Accent}"/>
+                            <Setter TargetName="Dot" Property="BorderBrush" Value="{StaticResource Accent}"/>
+                            <Setter TargetName="Inner" Property="Visibility" Value="Visible"/>
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Bd" Property="Background" Value="#2C2C2C"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Header tabs: muted text, white with a blue underline when selected -->
+    <Style x:Key="TabButton" TargetType="RadioButton">
+        <Setter Property="Foreground" Value="{StaticResource Muted}"/>
+        <Setter Property="FontSize" Value="14"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="RadioButton">
+                    <Grid x:Name="Root" Background="Transparent">
+                        <Border x:Name="Bd" CornerRadius="6" Margin="2,8,2,10" Padding="14,6">
+                            <ContentPresenter VerticalAlignment="Center"/>
+                        </Border>
+                        <Border x:Name="Underline" Height="3" CornerRadius="1.5" Margin="16,0" VerticalAlignment="Bottom"
+                                Background="{StaticResource Accent}" Visibility="Hidden"/>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Bd" Property="Background" Value="#262626"/>
+                            <Setter Property="Foreground" Value="#E0E0E0"/>
+                        </Trigger>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="Underline" Property="Visibility" Value="Visible"/>
+                            <Setter Property="Foreground" Value="#F3F3F3"/>
+                        </Trigger>
+                        <Trigger Property="IsKeyboardFocused" Value="True">
+                            <Setter TargetName="Bd" Property="BorderBrush" Value="{StaticResource Accent}"/>
+                            <Setter TargetName="Bd" Property="BorderThickness" Value="1"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Thin progress bar -->
+    <Style TargetType="ProgressBar">
+        <Setter Property="Height" Value="6"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ProgressBar">
+                    <Grid>
+                        <Border x:Name="PART_Track" CornerRadius="3" Background="#333333"/>
+                        <Border x:Name="PART_Indicator" CornerRadius="3" Background="{StaticResource Accent}" HorizontalAlignment="Left"/>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Slim dark scroll bars -->
+    <Style TargetType="ScrollBar">
+        <Setter Property="Width" Value="10"/>
+        <Setter Property="MinWidth" Value="10"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ScrollBar">
+                    <Track x:Name="PART_Track" IsDirectionReversed="True">
+                        <Track.Thumb>
+                            <Thumb>
+                                <Thumb.Template>
+                                    <ControlTemplate TargetType="Thumb">
+                                        <Border CornerRadius="3" Background="#5A5A5A" Margin="2,0"/>
+                                    </ControlTemplate>
+                                </Thumb.Template>
+                            </Thumb>
+                        </Track.Thumb>
+                    </Track>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+        <Style.Triggers>
+            <Trigger Property="Orientation" Value="Horizontal">
+                <Setter Property="Visibility" Value="Collapsed"/>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style x:Key="Card" TargetType="Border">
+        <Setter Property="Background" Value="{StaticResource Surface}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource Line}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="CornerRadius" Value="8"/>
+        <Setter Property="Padding" Value="16,14"/>
+    </Style>
+
+    <!-- Dark hover boxes with wrapped text -->
+    <Style TargetType="ToolTip">
+        <Setter Property="Foreground" Value="#F3F3F3"/>
+        <Setter Property="FontSize" Value="13"/>
+        <Setter Property="MaxWidth" Value="360"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ToolTip">
+                    <Border Background="#2B2B2B" BorderBrush="#454545" BorderThickness="1" CornerRadius="6" Padding="12,8">
+                        <ContentPresenter>
+                            <ContentPresenter.Resources>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="TextWrapping" Value="Wrap"/>
+                                    <Setter Property="LineHeight" Value="19"/>
+                                </Style>
+                            </ContentPresenter.Resources>
+                        </ContentPresenter>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="Label" TargetType="TextBlock">
+        <Setter Property="Foreground" Value="{StaticResource Muted}"/>
+        <Setter Property="FontSize" Value="12"/>
+        <Setter Property="Margin" Value="0,0,0,8"/>
+    </Style>
+</ResourceDictionary>
+
+```
