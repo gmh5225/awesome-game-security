@@ -1,0 +1,141 @@
+Project Path: arc_N0tJ03_Investigacion-Kerne_vr7f82kh
+
+Source Tree:
+
+```txt
+arc_N0tJ03_Investigacion-Kerne_vr7f82kh
+└── Investigacion-Kernel.md
+
+```
+
+`Investigacion-Kernel.md`:
+
+```md
+
+Investigación:
+
+-Buscar información técnica sobre el funcionamiento de los sistemas anticheat a nivel de kernel (Ej: BattlEye, Easy Anti-Cheat, Vanguard...)
+-Investigación del fallo de crowdstrike en Julio de 2024.
+# Sistemas AntiCheat
+**Como funcionan:**
+
+Dependiendo del tipo de anti-cheat cambia el funcionamiento, pero la mayoría tienen en común que primero se ejecutan a nivel de kernel.
+
+La mayoría de anti-cheat tienen una estructura de 3 capas normalmente:
+
+La primera es el controlador de kernel (ring 0) que es un driver que se ejecuta cuando se enciende el ordenador, este se ejecuta con los privilegios máximos.
+
+La segunda es el servicio, es la que usa el modo usuario (ring 3), revisa los archivos de juego, verifica la integridad de los drivers…
+
+Y la tercera es a nivel de servidor, en esta se monitorizan las partidas comúnmente con inteligencia artificial para ver el comportamiento de los jugadores y detectar posibles trampas. Algunas también usan machine learning para ir aprendiendo nuevos tipos de trampas y “banearlas” más rápido.
+
+**Posibles formas de evadirlos:**
+
+**Ejemplos:**
+
+BattleEye:
+
+BattleEye se ejecuta directamente sobre el kernel como los demás.
+
+Está centrado en el controlador de kernel BEDaisy.sys, registra callbacks para procesos, hilos y carga de imágenes.
+
+ También inserta instrucciones int3 antes de las llamadas a la API de Windows enganchadas para evitar que se ejecute cualquier aplicación antes que el.
+
+Easy Anti-Cheat:
+
+Este anti-cheat se ejecuta a nivel de kernel pero solo cuando ejecutamos el juego, así que en el momento en el que se ejecuta monitoriza todos los procesos que estén corriendo en ese momento.
+
+Es el que más trampas permite ya que no se ejecuta desde que se inicia el ordenador, además de que hay múltiples usuarios que reportan el mismo problema, porque si el controlador EAC falla,  accede a memoria que no debe o choca con otros drivers o con funciones de seguridad de Windows, el sistema operativo se protege deteniendo todo y mostrando un BSOD (Pantalla azul)
+
+VANGUARD:
+
+Carga vgk.sys durante el arranque y aplica un modelo de “Whitelist” de drivers para tener mucho control sobre el sistema, por este motivo bloquea muchísimas cosas, entre ellas:  controladores de kernel sin firma, controladores que no son de confianza, controladores que son vulnerables, herramientas de depuración y inspección…
+
+Este anticheat no se puede ejecutar dentro de un entorno que no sea “Seguro” para el,  por ejemplo,  si no tienes el secure-boot activado o estas dentro de una vm no se ejecuta.(Esto evita que puedas ejecutar algún software de trampas antes de que se ejecute este)
+
+No podría meter este antivirus en una categoría concreta ya que usa detección eurística y por firma, además de detección en tiempo real con IA tras ejecutar el juego.
+
+Usa detección heurística y por firma, además de detección en tiempo real con IA tras ejecutar el juego.
+
+**Fuentes:**
+
+**Funcionamiento de anti-cheats en general:**
+
+[Cómo funcionan los anti-cheat de kernel | GeekNews](https://es.news.hada.io/topic?id=27539)
+
+**BattleEye:**
+
+[https://www.reddit.com/r/TibiaMMO/comments/1h290ff/how_does_battleeye_work/?tl=es-es](https://www.reddit.com/r/TibiaMMO/comments/1h290ff/how_does_battleeye_work/?tl=es-es)
+
+**Easy Anti-Cheat:**
+
+Funcionamiento:
+
+[https://hardzone.es/noticias/juegos/anti-cheat-invasivos-nivel-kernel-problemas-privacidad-jugar-online/](https://hardzone.es/noticias/juegos/anti-cheat-invasivos-nivel-kernel-problemas-privacidad-jugar-online/)
+
+**Pantallazo azul:**
+
+[Evitar BSOD por Easy Anti-Cheat en Windows paso a paso](https://mundobytes.com/como-evitar-el-bsod-provocado-por-easy-anti-cheat-en-windows/)
+
+**Vanguard:**
+
+Bloqueo de vanguard a archivos legítimos de sys32:
+
+[https://www.reddit.com/r/ValorantTechSupport/comments/wotrqz/vanguard_blocked_a_system32_file/?tl=es-es](https://www.reddit.com/r/ValorantTechSupport/comments/wotrqz/vanguard_blocked_a_system32_file/?tl=es-es)
+
+Funcionamiento vanguard a nivel de kernel:
+
+[https://tuta.com/es/blog/riot-requires-kernel-level-anticheat](https://tuta.com/es/blog/riot-requires-kernel-level-anticheat)
+
+[Vanguard Anti-Cheat (Valorant): qué bloquea y cómo funciona | IVSOFTE](https://ivsofte.biz/es/articles/vanguard-guide/)
+
+Técnicas de evasión de antivirus:
+
+[Detection Vectors | DMA Cheating](https://dma.lystic.dev/anticheat-evasion/detection-vectors)
+
+
+# CrowdStrike
+
+## Origen y Causa
+
+Todo se debió a una actualización de contenido de Falcon para los dispositivos Windows
+
+Fue una actualización de configuración de sensores para los dispositivos con Windows q desencadeno en un error lógico que provoco un fallo en el sistema provocando un pantallazo azul o Pantalla azul de la muerte (BSOD)
+
+La causa técnica fue porque en el File 291 tuvo un error lógico, es un archivo de configuración que valida patrones de seguridad por expresiones regulares. El archivo contenía un formato con 20 datos y el interprete de contenido del sensor esperaba 21 datos
+
+Este diferencia de datos enviados con los esperados produjo un buffer overflow que es cuando una aplicación excede el uso de memoria asignada por el sistema operativo el cual
+## Impacto
+
+Microsoft estima que el fallo afecto a 8,5 millones de dispositivos Windows en todo el mundo
+
+El incidente afecto a los siguientes servicios:
+- **Aviación**: Aerolíneas como American Airlines, Delta Airlines y United Airlines tuvieron que suspender vuelos, causando caos en aeropuertos y afectando a miles de pasajeros
+
+- **Banca y Finanzas**: Instituciones financieras reportaron interrupciones en sus servicios, afectando transacciones y operaciones bancarias.
+
+- **Salud**: Sistemas de reservas médicas quedaron fuera de línea, complicando la gestión de citas y procedimientos médicos.
+
+- **Medios de Comunicación**: Difusores como Sky News en el Reino Unido experimentaron interrupciones, afectando la transmisión de noticias.
+
+- **Servicios Públicos**: Servicios gubernamentales y centros de llamadas de emergencia (911) también se vieron afectados, comprometiendo la seguridad y la respuesta a emergencias.
+
+- **Impacto Global**: La interrupción afectó a organizaciones en todo el mundo, incluyendo países como Estados Unidos, Australia, Nueva Zelanda y España
+### Solución
+
+La actualización de remediación de CrowdStrike consistió en revertir el contenido defectuoso del archivo de configuración del sensor Falcon
+
+Lo que hizo CrowdStrike después del incidente para que este incidente no vuelva a suceder fue:
+
+Mejora de los procedimientos de prueba del software
+Mejora de la resiliencia y la capacidad de recuperación
+Perfección de la estrategia de implementación
+Validación por terceros
+## Fuentes:
+
+https://www.crowdstrike.com/en-us/blog/falcon-update-for-windows-hosts-technical-details/
+https://www.crowdstrike.com/wp-content/uploads/2024/07/CrowdStrike-PIR-Executive-Summary_es-ES.pdf
+https://www.startupdefense.io/es-us/blog/understanding-the-crowdstrike-outage-detailed-analysis#remediacion
+https://eye.security/blog/crowdstrike-falcon-blue-screen-issue-updates/
+
+```
