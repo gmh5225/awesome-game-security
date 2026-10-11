@@ -764,6 +764,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/jbro129/android-modding [A collection of repositories related to Android game modding]
 - https://github.com/liuyiyi0219-arch/unity-apk-reverse [40-chapter hands-on Unity mobile APK reverse-engineering course covering IL2CPP, Lua, DEX, Frida, and asset extraction with runnable demos and auto-graded labs]
 - https://github.com/kovidomi/game-reversing
+- https://github.com/Vieuxnorris/farcry-6-hack [Offline Far Cry 6 RE learning project: in-process C++ DLL with aimbot, skeleton ESP, D2D overlay, fc6probe scanner, and Python tooling over game systems (Havok, aim-assist targets)]
 - https://github.com/TheZong/Game-Hacking
 - https://github.com/mytechnotalent/Reverse-Engineering
 - https://github.com/wtsxDev/reverse-engineering
@@ -4060,6 +4061,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/Solaree/pairipcore [Public researchings of the Google's Android apps protection]
 - https://github.com/bad-antics/rce-shield [RCE Shield - Remote Code Execution hardening toolkit for PC gamers. Scans game launchers, anti-cheat, mods, overlays, peripherals & network for vulnerabilities]
 - https://github.com/ablanchard-dev/dexcheck [Read-only PC forensics check for Call of Duty / Warzone screen-share vetting. Reads execution and existence traces that survive deletion of the binary and reboots (Prefetch, BAM/DAM, UserAssist, Shimcache, PCA, raw USN journal), plus DMA/PCIe hardware, HWID spoof indicators, kernel driver signatures and Code Integrity refusals. Never writes to the machine. PowerShell 5.1, 40 probes, double-click launcher.]
+- https://github.com/Krimziee/SecureBootCheck [Read-only PowerShell diagnostic that explains why Secure Boot or TPM 2.0 blocks kernel anti-cheat titles and gives step-by-step fixes without modifying the system]
 
 > Stress Testing
 - https://github.com/niemand-sec/AntiCheat-Testing-Framework [Testing Framework]
