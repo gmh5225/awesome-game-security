@@ -39,6 +39,7 @@ sources:
   - wiki/sources/descriptions/magicnothief__cs2-overwatch.md
   - wiki/sources/descriptions/gjones01__NullCS.md
   - wiki/sources/descriptions/AbdulAmi09__SentinelAntiCheat.md
+  - wiki/sources/descriptions/Alexramirezzz__TFG-AntiCheat-ServerSide.md
   - wiki/sources/descriptions/AODOJUST__gomoku-anti-cheat-detector.md
   - wiki/sources/descriptions/NetVar1337__apex-anticheat-lab.md
   - wiki/sources/README-categories.md
@@ -114,6 +115,7 @@ Tabular engagement features (reaction time, curvature stats, dx/dy correlation, 
 - [[battlerite-bot]] — Battlerite arena brawler automation bot (memory or screen recognition; ability casting, targeting, movement; gmh5225)
 - [[auto-simulated-universe]] — Honkai: Star Rail Simulated Universe automation bot (screen recognition + input; pathfinding, combat rotation, blessing selection; gmh5225)
 - [[minecraft-anticheatai]] — Minecraft Paper DeepGuard; ONNX 1D-CNN over server-side behavior sequences (scaffold-bridging focus; BehaviorRecorder + PyTorch training pipeline)
+- [[tfg-anticheat-serverside]] — Alexramirezzz Paper/Spigot **1.18.2** thesis autoclicker defense; labelled sessions from cleaned swing/interact streams; threshold rules vs isolation forest/one-class SVM/ensemble/sequence-CNN baselines with adversarial and lag robustness studies; ONNX off-thread inference and CPS rule fail-safe; auditable low-overhead server timing under man-at-the-end client distrust (source: wiki/sources/descriptions/Alexramirezzz__TFG-AntiCheat-ServerSide.md)
 - [[mlanticheat]] — Minecraft Paper 1.21.4+ combat AC; per-server ensemble neural + logistic models + anomaly detection over combat rotations; operator labeling, Shadow Mode review, optional PacketEvents rotation tracking, automatic retraining (gravemaulr)
 - [[model-anti-cheat]] — DayZ server-side ML pipeline; mission-script per-second telemetry (position, view, weapon, raycast line-of-sight) + Python feature extraction + RandomForest aimbot/movement anomaly classifier (sample cheater sessions)
 - [[deep-learning-anti-cheat-csgo]] — CS:GO deep-learning anti-cheat implementation (memory scan, code integrity, process/debugger checks, network packet validation; detection-to-response pipeline; gmh5225)

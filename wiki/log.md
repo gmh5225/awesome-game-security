@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-11** — ingest `description:Alexramirezzz/TFG-AntiCheat-ServerSide`: refreshed entity [[tfg-anticheat-serverside]] (Paper/Spigot 1.18.2 thesis server-side autoclicker defense; labelled swing/interact sessions; explainable rules + Python ML with adversarial/lag studies; ONNX off-thread inference; CPS rule fail-safe; auditable low-overhead man-at-the-end threat model); cited on [[concepts/detector-operations]] Paper ONNX fail-safe lane + [[concepts/ai-aimbot-detection]] Minecraft timing-ML corpus; `index.md` entity + concept blurbs sync.
+
 - **2026-10-11** — ingest `description:sergen213/kabus22-linux`: confirmed entity [[kabus22-linux]] from projected description (C++20 WDL/ODE/SDL2, OpenGL/Vulkan, GTK/Ed25519 updater, user-supplied assets); short cite on [[overviews/game-engine]] legacy engine-reimplementation lane; `index.md` Game Engine blurb + entity topics/related cross-links.
 
 - **2026-10-11** — ingest `readme:categories`: Cheat ~2876 (+1; sergen213/[[kabus22-linux]] Kabus 22 native Linux engine RE port with GTK launcher and OpenGL/Vulkan runtime; user-supplied assets) / Anti Cheat ~783 (+1; Alexramirezzz/[[tfg-anticheat-serverside]] Paper/Spigot 1.18.2 thesis server-side autoclicker ML with ONNX export and CPS fail-safe) / other major section counts stable; 41 sections (`NeverC & NeverD` placeholder); synced projected README-map counts on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/reverse-engineering]], [[overviews/anti-cheat]], and [[overviews/dma-attack]]; entities [[kabus22-linux]], [[tfg-anticheat-serverside]]; light `index.md` section notes (no per-category pages).

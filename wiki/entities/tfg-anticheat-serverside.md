@@ -13,6 +13,10 @@ confidence: medium
 
 Thesis-grade **server-side anti-cheat** for **Minecraft Paper/Spigot 1.18.2** (Alexramirezzz/TFG-AntiCheat-ServerSide). A Java plugin records **labelled sessions**, cleans swing and interact event streams, and scores timing windows with explainable rules plus ML models trained in a companion **Python** pipeline—under a man-at-the-end model where the client cannot be trusted. (source: wiki/sources/descriptions/Alexramirezzz__TFG-AntiCheat-ServerSide.md)
 
+## Audience
+
+Paper operators and AC researchers who need **auditable, low-overhead** autoclicker defense from server-observable timing only—no client install or kernel stack. (source: wiki/sources/descriptions/Alexramirezzz__TFG-AntiCheat-ServerSide.md)
+
 ## Detection focus
 
 Primary target is **click automation / autoclicker** patterns observable from server-side event timing (CPS and interaction cadence), not kernel or client-memory integrity. (source: wiki/sources/descriptions/Alexramirezzz__TFG-AntiCheat-ServerSide.md)
