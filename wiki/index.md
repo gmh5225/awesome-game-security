@@ -289,7 +289,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [android-kernel-exploitation-lab](entities/android-kernel-exploitation-lab.md) — CVE-2019-2215 Binder UAF reproduction lab (env setup, kernel source prep/patching, emulator, privesc analysis, GDB/syzkaller/AFL++; 0xbinder; cheat / CVE-2019-2215)
 - [android-kernel-gki-common-5-10](entities/android-kernel-gki-common-5-10.md) — Custom Android GKI common 5.10 kernel (multi-vendor ABI; ZenX build; Redmi Note 11T Pro(+)/POCO X4 GT; ExWhyZed9; cheat / Android Kernel Source)
 - [android-kernel-hacking-toolkit](entities/android-kernel-hacking-toolkit.md) — Android aarch64 LKM toolkit (filecopy / hideproc / propedit / syscall_hijack)
-- [android-kernel-kit](entities/android-kernel-kit.md) — orhpel AKK Bash Android kernel build, boot.img repack, flash, and post-boot log/debug workflows (Cheat / kernel build)
+- [android-kernel-kit](entities/android-kernel-kit.md) — orhpel AKK pure-Bash kernel build→AIK/magiskboot repack→ADB flash→post-boot log/debug bundles; DTB + schema-driven project config; tmux build streaming (Cheat / kernel build)
 - [android-kernel-huawei-mt6761](entities/android-kernel-huawei-mt6761.md) — Huawei MT6761 (Helio P22) Android kernel source (cheat / Android Kernel Source)
 - [android-kernel-huawei-hi6250-8-exp](entities/android-kernel-huawei-hi6250-8-exp.md) — Huawei hi6250 Android kernel + KernelSU (cheat / Android Kernel Source)
 - [android-kernel-inline-hook-framework](entities/android-kernel-inline-hook-framework.md) — ChwnWang0 ARM64 Android kernel inline hook framework (instruction relocation B/BL/ADRP/LDR literal/CBZ/TBZ; 64-bit trampoline long jumps; automatic WP/memory-permission bypass; kernel RE / hook research)

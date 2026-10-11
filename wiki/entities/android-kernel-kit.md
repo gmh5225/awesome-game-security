@@ -6,7 +6,7 @@ sources:
   - wiki/sources/descriptions/orhpel__android-kernel-kit.md
   - wiki/sources/README-categories.md
 updated: 2026-10-11
-confidence: medium
+confidence: high
 ---
 
 # Android Kernel Kit

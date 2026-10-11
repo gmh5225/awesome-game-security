@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-11** — ingest `description:orhpel/android-kernel-kit`: entity [[android-kernel-kit]] (confidence high; AKK Bash compile→repack→flash→on-device verification; AIK/`magiskboot`, DTB, tmux streaming); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; `index.md` entity blurb refresh.
+
 - **2026-10-11** — ingest `readme:categories`: Cheat ~2877 (+1; orhpel/[[android-kernel-kit]] AKK Bash Android kernel build→repack→flash→post-boot debug; AIK/magiskboot; tmux streaming) / Anti Cheat ~783 stable / other major section counts stable; 41 sections (`NeverC & NeverD` placeholder); synced projected README-map counts on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/mobile-security]], [[overviews/dma-attack]], and [[overviews/reverse-engineering]]; entity [[android-kernel-kit]]; light `index.md` section notes (no per-category pages).
 
 - **2026-10-11** — lint (agent): read `wiki/AGENTS.md`; listed **Overviews** (9): `anti-cheat`, `dma-attack`, `game-engine`, `game-hacking`, `graphics-api`, `mobile-security`, `overview`, `reverse-engineering`, `windows-kernel`; **Concepts** (51) under `wiki/concepts/`; **Entities** (4035) under `wiki/entities/`; `index.md` vs disk — 4095 indexed paths, 4095 unique, 0 missing, 0 dead, 0 duplicate entries; overview [[wikilink]] spot-check — 0 broken (12362 links); 6 expected cross-kind slug collisions ([[game-hacking]], [[anti-cheat]], [[reverse-engineering]], [[il2cpp]], [[byovd]], [[dma]]); wiki populated — bootstrap not required; `index.md` unchanged; no link repairs.

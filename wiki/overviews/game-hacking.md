@@ -1793,6 +1793,7 @@ sources:
   - wiki/sources/descriptions/TheMille-Dev__AntiGuard.md
   - wiki/sources/descriptions/TheZong__Game-Hacking.md
   - wiki/sources/descriptions/TheWildJames__kernel_build_scripts.md
+  - wiki/sources/descriptions/orhpel__android-kernel-kit.md
   - wiki/sources/descriptions/Vekor64__PythonCS2.md
   - wiki/sources/descriptions/VitorMob__GHInterfacesCSGO.md
   - wiki/sources/descriptions/Vector35__scc.md

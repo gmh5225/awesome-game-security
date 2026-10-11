@@ -118,6 +118,7 @@ sources:
   - wiki/sources/descriptions/astra1dev__MalumMenu-Android.md
   - wiki/sources/descriptions/dabao1955__kernel_build_action.md
   - wiki/sources/descriptions/TheWildJames__kernel_build_scripts.md
+  - wiki/sources/descriptions/orhpel__android-kernel-kit.md
   - wiki/sources/descriptions/Andrea-lyz__oppo_oplus_realme_sm8750.md
 
   - wiki/sources/descriptions/xProHackerx__imgui-ios-mod-menu.md
@@ -535,7 +536,7 @@ sources:
   - wiki/sources/descriptions/AtakanKeser__BlastScale.md
   - wiki/sources/descriptions/Jordan231111__BluestacksRoot.md
   - wiki/sources/descriptions/contactjayclatty__flashwright.md
-updated: 2026-10-10
+updated: 2026-10-11
 confidence: high
 ---
 
