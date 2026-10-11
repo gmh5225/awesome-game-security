@@ -1595,6 +1595,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/dabao1955/kernel_build_action [a action to build kernel automatically]
 - https://github.com/systemnb/compile_android_driver [kade — lyenv-based Android kernel driver automation for GKI/non-GKI builds via kadeflow.yaml, ABI patching, and GitHub Actions]
 - https://github.com/TheWildJames/kernel_build_scripts [kernel build scripts]
+- https://github.com/orhpel/android-kernel-kit [Bash toolkit (AKK) for Android kernel build, boot.img repack, flash, and post-boot log/debug workflows]
 - https://github.com/fuqiuluo/android-wuwa [Android aarch64 rootkit]
 - https://github.com/fuqiuluo/ovo [Android aarch64 kernel driver module providing efficient memory operations, touch simulation and IPC. Features include fast memory remapping]
 - https://github.com/qq703048949/event_replay [Android touch-event replay toolkit: Magisk module + command socket + gesture trace analyze/generate; supports left/right/up/down/click]
