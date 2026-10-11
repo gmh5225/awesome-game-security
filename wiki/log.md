@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-11** — ingest `readme:categories`: Cheat ~2873 (+1; Vieuxnorris/[[farcry-6-hack]] offline FC6 in-process RE learning DLL with D2D overlay, fc6probe, Python tooling) / Anti Cheat ~782 (+1; Krimziee/[[securebootcheck]] read-only Secure Boot/TPM 2.0 diagnostic for blocked kernel AC launches) / other major section counts stable; 41 sections (`NeverC & NeverD` placeholder); synced projected README-map counts on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/anti-cheat]], [[overviews/dma-attack]], and [[overviews/reverse-engineering]]; entities [[farcry-6-hack]], [[securebootcheck]]; light `index.md` section notes (no per-category pages).
+
 - **2026-10-11** — lint (agent): scheduled pass — **Overviews** (9), **Concepts** (51), **Entities** (4029); `index.md` vs disk (4089 paths) aligned; overview/concept/index [[wikilink]] spot-check — 0 broken; bootstrap not required; no structural repairs.
 
 - **2026-10-11** — lint (agent): catalog scan — **Overviews** (9): `anti-cheat`, `dma-attack`, `game-engine`, `game-hacking`, `graphics-api`, `mobile-security`, `overview`, `reverse-engineering`, `windows-kernel`; **Concepts** (51); **Entities** (4029); index vs disk — 4089 paths, 0 missing, 0 dead, 0 duplicate; overview wikilink spot-check — 0 broken (12340 links); concept spot-check — 0 broken (2397 links); index wikilink scan — 0 broken (837 links); 6 expected cross-kind slug collisions ([[game-hacking]], [[anti-cheat]], [[reverse-engineering]], [[il2cpp]], [[byovd]], [[dma]]); wiki populated — bootstrap not required; `index.md` unchanged; no link repairs.
