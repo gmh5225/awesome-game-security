@@ -3365,7 +3365,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Shard](entities/shard.md) — Paper/Folia Minecraft AI anti-cheat plugin (Kotlin Gradle; PacketEvents; player tick data to remote inference API; SQLite/MySQL/MariaDB + Redis cross-server alerts; monitoring, profiling, punishment rules, WorldGuard/Geyser integrations; KaelusAI; Anti Cheat / game:minecraft)
 - [Shark](entities/shark.md) — Windows kernel research toolkit (9176324; C/C++/assembly; x86/x64 driver + loader; runtime PatchGuard disable; VS/NMAKE builds; virtualization-assisted loading references; cheat / PatchGuard-related)
 - [Shadow](entities/shadow.md) — iOS jailbreak detection bypass for modern jailbreaks (cheat / iOS jailbreak; per-app success not guaranteed)
-- [shieldguard-anticheat](entities/shieldguard-anticheat.md) — ShieldGuard Paper 1.21.x MC plugin (Tobias1205; PacketEvents freecam/x-ray/storage ESP masking + staff reports; Open Source Anti Cheat System)
+- [shieldguard-anticheat](entities/shieldguard-anticheat.md) — ShieldGuard Paper 1.21.x MC plugin (Tobias1205; Java 21 Maven; PacketEvents per-player chunk/block rewriting; freecam + LOS-gated ore masking + storage ESP hiding; staff report GUI + Discord webhooks; Open Source Anti Cheat System)
 - [shadow-stack-walk](entities/shadow-stack-walk.md) — CET/HSP shadow-stack stack walk to catch thread stack spoofing (`CaptureStackBackTrace` / `StackWalk64`; gabriellandau; Detection:Spoof Stack)
 - [shprotect-ac](entities/shprotect-ac.md) — server-first Roblox Luau AC (movement/remote spam/fly/noclip; heartbeat/watchdog; scoring/rollback/kick)
 - [shredder-rs](entities/shredder-rs.md) — x86_64 polymorphic instruction shredding (Rust)
