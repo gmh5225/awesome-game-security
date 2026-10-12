@@ -4616,6 +4616,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/gjones01/NullCS [Offline CS2 demo (.dem) pipeline that extracts tick-level aim/visibility features and ranks players with evidence tables for human review—not automated bans]
 - https://github.com/AODOJUST/gomoku-anti-cheat-detector [Browser extension (Baishen) that replays gomoku.com and papergames.io games locally with Rapfi WASM to score AI-assistance suspicion via multi-engine move analysis and feature fingerprinting]
 - https://github.com/NetVar1337/apex-anticheat-lab [FPS anti-cheat research lab with cheat taxonomy docs, Python aim-kinematics detectors, match-integrity SQL, YARA loader rules, and PowerShell host driver/PCIe surveys]
+- https://github.com/saadahmedscse/kac-inspector [Windows CLI that enumerates known kernel anti-cheat drivers via SCM, driver store, and EnumDeviceDrivers with running/stale/orphaned states]
 - https://github.com/Nimdy/detect-FPS-hackers [Server-side FPS anti-cheat evidence pipeline (fpsdet): ingests dedicated-server shot/movement logs, scores players with heuristics and baselines, and outputs human-review case files without client installs or auto-bans]
 - https://github.com/nft-syou/jevcraft-bench [Behavioral anti-cheat research bench for Minecraft Paper: mining telemetry, typed LLM evaluation, and offline X-Ray heuristic benchmarking in shadow mode]
 - https://github.com/baldspots440/R6Intel [Rainbow Six Siege player stat analyzer with explainable heuristic suspicion scoring via R6Data API]
