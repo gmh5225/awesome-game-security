@@ -8,7 +8,8 @@ sources:
   - wiki/sources/descriptions/vs-sr-dev__saturnkit.md
   - wiki/sources/descriptions/wivi514__Dead_Rising_2_Case_Zero_Xenon_Recomp.md
   - wiki/sources/descriptions/robbe1912__motorstorm-mv-recomp.md
-updated: 2026-10-11
+  - wiki/sources/descriptions/mattgodbolt__pipeline-disasm.md
+updated: 2026-10-12
 confidence: high
 ---
 
@@ -52,10 +53,12 @@ State which protections were identified, which recovery steps were applied, and 
 
 Static recompilation projects such as [[jsrf-recomp]] (OG Xbox XBE→native macOS ARM64 via xboxrecomp) pair translated C output with an extensive diagnostics harness that validates behavior against reference emulator traces—illustrating how static translation claims should be corroborated with runtime or trace-aligned evidence before treating recompiled builds as faithful. (source: wiki/sources/descriptions/andeecollard__jsrf-recomp.md) [[saturnkit]] (vs-sr-dev; Python SH-2 analysis + static recomp to C++ with a C++20 Saturn hardware runtime for native PC ports) splits the same static/runtime boundary across analysis tooling and an embedded per-title port submodule model. (source: wiki/sources/descriptions/vs-sr-dev__saturnkit.md) Xbox 360 XenonRecomp ports such as [[dead-rising-2-case-zero-xenon-recomp]] (wivi514; Case Zero XBLA; XenonRecomp + XenosRecomp; kernel high-level emulation with **honest-failure stubs**; jump-table recovery + recompilation-pitfall documentation) and [[mcla-pc]] (Midnight Club: LA; XenonRecomp + Xenos→DXIL replay) show how partially implemented kernel/GPU runtime services must be labeled explicitly when static PPC translation outruns host emulation coverage. (source: wiki/sources/descriptions/wivi514__Dead_Rising_2_Case_Zero_Xenon_Recomp.md) [[motorstorm-mv-recomp]] (robbe1912; PS3 *MotorStorm: Monument Valley* WIP; static PPU/SPU translation via ps3recomp instead of full Cell emulation; **source-coverage auditing** with retail binaries and lift output kept local) illustrates the same uncertainty labeling for incomplete native ports aimed at preservation RE rather than finished gameplay. (source: wiki/sources/descriptions/robbe1912__motorstorm-mv-recomp.md)
 
+BBC Micro preservation rebuilds such as [[pipeline-disasm]] (mattgodbolt; annotated 6502 + BBC BASIC reassembly; baron toolchain; Python/Node disc compare; jsbeeb headless runs) treat **byte-identical disc and flux images** plus symbol dumps and execution traces as the baseline that every reassembly step must match—static disassembly claims are not accepted without that retail-aligned output check. (source: wiki/sources/descriptions/mattgodbolt__pipeline-disasm.md)
+
 ## Behavioral capability from TTD traces
 
 Full-process **Time Travel Debugging (TTD)** recordings capture executed API calls and unpacked/runtime-generated code paths that static PE analysis may miss. [[ttd-capa-cpp]] replays `.run` traces through the TTD SDK, decodes Win32/native call arguments, and matches observed behavior against capa rules—including optional code-region scanning and capability timelines—so analysts can label **observed calls** vs static import/reachability claims. (source: wiki/sources/descriptions/HullaBrian__ttd-capa-cpp.md)
 
 ## Related
 
-[[binary-evidence]] · [[binary-diffing]] · [[dynamic-binary-instrumentation]] · [[jsrf-recomp]] · [[saturnkit]] · [[motorstorm-mv-recomp]] · [[dead-rising-2-case-zero-xenon-recomp]] · [[mcla-pc]] · [[ttd-capa-cpp]] · [[mixed-boolean-arithmetic]] · [[control-flow-flattening]] · [[research-rigor]] · [[overviews/reverse-engineering]] · [[overviews/windows-kernel]] · [[overviews/game-engine]]
+[[binary-evidence]] · [[binary-diffing]] · [[dynamic-binary-instrumentation]] · [[jsrf-recomp]] · [[saturnkit]] · [[motorstorm-mv-recomp]] · [[dead-rising-2-case-zero-xenon-recomp]] · [[mcla-pc]] · [[pipeline-disasm]] · [[ttd-capa-cpp]] · [[mixed-boolean-arithmetic]] · [[control-flow-flattening]] · [[research-rigor]] · [[overviews/reverse-engineering]] · [[overviews/windows-kernel]] · [[overviews/game-engine]]

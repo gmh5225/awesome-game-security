@@ -8,7 +8,8 @@ sources:
   - wiki/sources/descriptions/rom-weaver__rom-weaver.md
   - wiki/sources/descriptions/ngwg__ceasta.md
   - wiki/sources/descriptions/stephane-perez__ik-plus-reforged.md
-updated: 2026-10-05
+  - wiki/sources/descriptions/mattgodbolt__pipeline-disasm.md
+updated: 2026-10-12
 confidence: high
 ---
 
@@ -31,6 +32,8 @@ Retro modding and preservation workflows also use delta patch formats (IPS/BPS/x
 
 Some classic-platform projects patch executables in place with assembly hooks and pre-modification byte checks rather than external delta files — stephane-perez/[[ik-plus-reforged]] validates checksums and original bytes on a user-supplied Atari ST International Karate+ image before applying 68000 loaders (STE blitter/DMA, 3-player mode). (source: wiki/sources/descriptions/stephane-perez__ik-plus-reforged.md)
 
+Full-tree disassembly rebuilds such as mattgodbolt/[[pipeline-disasm]] (BBC Micro PIPELINE; annotated 6502 + BBC BASIC; byte-identical disc/flux verification) complement delta-patch workflows when the research goal is documented sources and copy-protection anatomy rather than distributing IPS/BPS patches. (source: wiki/sources/descriptions/mattgodbolt__pipeline-disasm.md)
+
 Integrated RE workbenches such as [[ceasta]] bundle binary diffing beside disassembly, decompilation, and debugging in one vendored environment—useful for quick build-to-build triage before exporting into dedicated differ plugins. (source: wiki/sources/descriptions/ngwg__ceasta.md)
 
 Game-security uses include tracking anti-cheat driver updates between versions, reviewing changed behavior and trust-boundary assumptions in supplied builds, and comparing obfuscated builds to isolate logic changes.
@@ -50,4 +53,4 @@ Similarity scores and decompiled differences suggest where to look—they do not
 
 ## Related
 
-[[static-runtime-evidence]] · [[binary-evidence]] · [[research-rigor]] · [[diaphora]] · [[ghidriff]] · [[turbodiff]] · [[rom-weaver]] · [[ik-plus-reforged]] · [[ceasta]] · [[mixed-boolean-arithmetic]] · [[control-flow-flattening]] · [[overviews/reverse-engineering]]
+[[static-runtime-evidence]] · [[binary-evidence]] · [[research-rigor]] · [[diaphora]] · [[ghidriff]] · [[turbodiff]] · [[rom-weaver]] · [[ik-plus-reforged]] · [[pipeline-disasm]] · [[ceasta]] · [[mixed-boolean-arithmetic]] · [[control-flow-flattening]] · [[overviews/reverse-engineering]]

@@ -373,6 +373,7 @@ sources:
   - wiki/sources/descriptions/yellowbyte__opaque-predicates-detective.md
   - wiki/sources/descriptions/yaxinsn__vermagic.md
   - wiki/sources/descriptions/marin-m__vmlinux-to-elf.md
+  - wiki/sources/descriptions/mattgodbolt__pipeline-disasm.md
   - wiki/sources/descriptions/sad0p__venom.md
   - wiki/sources/descriptions/yardenshafir__WinDbg_Scripts.md
   - wiki/sources/descriptions/xxFURYWOLFxx__veh-dumper.md
