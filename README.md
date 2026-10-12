@@ -4886,6 +4886,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/codedevdev/irontrace [Windows hardware and forensic integrity scanner for game-server anti-cheat with DMA/PCIe/USB watchlists and explainable integrity reports]
 - https://github.com/hawkeye-Leo/hawkeye [Official GitHub Pages site for Hawkeye — Windows kernel security and anti-cheat research console with live probing, ETW, and automated detection reports (GPL source in hawkeye-community)]
 - https://github.com/winzysss/JarAnalyzer [Windows Minecraft screenshare cheat forensics scanner — MFT-walks disks, scans JAR constant pools against blacklists, flags obfuscated archives, exports evidence reports]
+- https://github.com/klasscripts/ffs-explorer [Cross-platform PySide6 viewer for iOS/Android GrayKey and Cellebrite UFED Full File System ZIP extractions — stream-browse without unpacking, vendor metadata reconstruction, SQLite/WAL preview, and artefact shortcuts]
 - https://github.com/NotSkrib/error-pc-check [Open-source consensual Minecraft Java screenshare workflow: signed C# client agent, staff web panel, and Supabase backend for live forensic scans and severity-ranked cheat evidence reports]
 
 > Dynamic Script
