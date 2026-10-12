@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-12** — ingest `description:FPSZ/ida-better-information`: refreshed entity [[ida-better-information]] (confidence high; single-file IDA Pro plugin + Python CLI; glibc/musl/Go/MSVC runtime fingerprinting; optional FLIRT; libc + MMX/SSE Hex-Rays annotations; bilingual UI; offline undo); cited on [[overviews/reverse-engineering]] stripped-native triage lane + [[overviews/game-hacking]] library-ID cluster; `index.md` entity blurb sync.
+
 - **2026-10-12** — ingest `description:dybeky/custos`: refreshed entity [[custos]] (confidence high; read-only Electron/TypeScript desktop scanner; twenty-one offline artifact lanes + optional admin Live Scan; risk-engine reports with integrity hashing; minimal session persistence); cited on [[concepts/detector-operations]] PC-check review-evidence lane + [[concepts/static-runtime-evidence]] offline execution traces vs live observation; `index.md` entity blurb sync.
 
 - **2026-10-12** — ingest `description:iniGlowee/headless-asset-re`: refreshed entity [[headless-asset-re]] (confidence high; reference-first mesh/animation/texture/blendshape decode; Python decoders + glTF/Blender bridge; headless render oracles, PNG CI checks, visual bisection; IP-safe workflows; Cheat / RE Tools); cited on [[overviews/overview]], [[overviews/game-engine]], and existing [[overviews/game-hacking]]/[[overviews/reverse-engineering]] lanes; `index.md` entity blurb sync.

@@ -1303,6 +1303,7 @@ sources:
   - wiki/sources/descriptions/Snoopy-Sec__Localroot-ALL-CVE.md
   - wiki/sources/descriptions/FreeER__CE-Examples.md
   - wiki/sources/descriptions/FreeER__CE-Extensions.md
+  - wiki/sources/descriptions/FPSZ__ida-better-information.md
   - wiki/sources/descriptions/Skyrimfus__CE-lua-extensions.md
   - wiki/sources/descriptions/Skengdo__battlefield-2042-internal-sdk.md
   - wiki/sources/descriptions/SilentVoid13__Silent_Packer.md
@@ -1498,6 +1499,7 @@ Portable PyQt/PySide GUI scaffolding via [[gui-plugin-template]] (Python; harmon
 
 - Game-targeted x86 ROP compiler [[rop-compiler]] (Speedi13; C++; assembly-like scripts → ROP chains with gadget scanning and offset handling; CS:GO/BF3/BF4 cheat payload examples—triggerbot, glow ESP, minimap spotting; exploit-style cheat execution and AC evasion research; cheat / ROP Generation) sits beside fast C++ gadget finder [[rp]] (0vercl0k; rp++; PE/ELF/Mach-O x86/x64/ARM/ARM64; instruction gadgets + useful pointer values; cross-platform build; exploit dev / binary attack-surface audit; cheat / ROP Finder), [[ropgadget]] (JonathanSalwan; Python CLI; Capstone; ELF/PE/Mach-O/raw multi-arch gadget search, filter, optional chain generation; cheat / ROP Finder), [[ropium]] (Boyan-MILANOV; C++ core + Python bindings; gadget extract/analyze + semantic query chain builder; CLI + scriptable workflows; exploit dev / binary security education; cheat / ROP Generation), [[ropgadget-rs]], [[agafi]], [[exrop]], and [[angrop]] in the ROP chain synthesis lane. (source: wiki/sources/descriptions/Speedi13__ROP-COMPILER.md) (source: wiki/sources/descriptions/JonathanSalwan__ROPgadget.md) (source: wiki/sources/descriptions/Boyan-MILANOV__ropium.md) (source: wiki/sources/descriptions/0vercl0k__rp.md)
 - Multi-version AssaultCube cheat practice such as [[assaultcube-cheat]] (201580ag; internal/external samples; aimbot, ESP, overlays, memory utilities, offset handling; C/C++/C#; ImGui and OpenGL hooks; controlled training for game hacking and RE) complements [[assault-cube-cheat]], [[simple-ac-internal-cheat]], and [[external-esp-hack-assaultcube]] on the open-source [[assaultcube]] learning title. (source: wiki/sources/descriptions/201580ag__AssaultCube_Cheat.md)
+- Stripped native triage via [[ida-better-information]] (FPSZ; single-file IDA Pro plugin + Python CLI; glibc/musl/Go/MSVC runtime fingerprinting; optional FLIRT apply; libc call-site comments + Hex-Rays MMX/SSE math notes; bilingual UI; one-click undo; offline; Cheat / IDA Plugins) complements [[idenlib]] and [[sig-database]] library-ID lanes on stripped game and native binaries. (source: wiki/sources/descriptions/FPSZ__ida-better-information.md)
 
 ## Related concepts
 

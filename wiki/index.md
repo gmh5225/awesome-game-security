@@ -1867,7 +1867,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ida2llvm](entities/ida2llvm.md) — IDA→LLVM IR lifting (loyaltypollution cursor-sync disassembly lift; Sandspeare microcode→IR via llvmlite; cheat / IDA Plugins)
 - [ida2obj](entities/ida2obj.md) — IDA Pro database → linkable COFF/ELF object export (relocations, symbols, sections; binary patching / recompilation; cheat / COFF Relink; gmh5225)
 - [ida-android-breakpoint](entities/ida-android-breakpoint.md) — IDA plugin: Android native `.so` breakpoint setup (Python; cheat / IDA Plugins)
-- [IDA Better Information](entities/ida-better-information.md) — single-file IDA Pro plugin + CLI; glibc/musl/Go/MSVC runtime detect, FLIRT apply, libc + MMX/SSE Hex-Rays annotations (FPSZ; offline undo; Cheat / IDA Plugins)
+- [IDA Better Information](entities/ida-better-information.md) — single-file IDA Pro plugin + Python CLI; byte-fingerprint glibc/musl/Go/MSVC on stripped/static targets; optional FLIRT; libc call-site + MMX/SSE Hex-Rays math notes; bilingual UI; offline one-click undo (FPSZ; Cheat / IDA Plugins)
 - [ida-bochs-windows](entities/ida-bochs-windows.md) — IDA Pro + Bochs debugger backend on Windows (software CPU emulation; full-system + kernel-mode stepping; cheat / guide)
 - [ida_bitfields](entities/ida-bitfields.md) — IDA plugin: bitfield structure visualization (register/structure bit flags; driver IOCTL / flag-heavy RE; Windows Kernel Enhance)
 - [ida-bridge](entities/ida-bridge.md) — Python WebSocket agent bridge for IDA Pro 9+ (IDAPython/SQL; UI + headless idalib; supervisor lifecycle; bundled agent skill; macOS; Game Develop / MCP + IDA Plugins)
