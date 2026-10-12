@@ -244,6 +244,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/orkitec/orkige [C++20 game engine with dual OGRE renderers, Lua scripting, and AI-native editor over MCP]
 - https://github.com/Bloom-Engine/engine [Native TypeScript game engine compiling to Metal, DirectX 12, Vulkan, OpenGL, and WebGPU]
 - https://github.com/Krilliac/SparkEngine [Open-source C++23 3D engine with DirectX 12/Vulkan RHI, ECS, Jolt Physics, and ImGui editor]
+- https://github.com/HyperionGameTech/HyperionEngine [C++/C# game engine with DirectX 12 and Vulkan, editor, multiplayer, and Glimmer GI with clustered deferred rendering]
 - https://github.com/doriaxengine/doriax [Cross-platform C++ ECS game engine with editor, Lua/C++ scripting, and DirectX/OpenGL/Metal/Vulkan backends]
 - https://github.com/wh1t3lord/kotek [Modular C++20 game/application framework with OpenGL ES, Vulkan, DirectX, and BGFX backends]
 - https://github.com/oxylusengine/Oxylus [Data-driven C++ game engine with modular Vulkan renderer, flecs ECS, Lua scripting, and ImGui editor]
