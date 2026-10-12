@@ -6,7 +6,7 @@ sources:
   - wiki/sources/descriptions/xshxdex98__OpenMCM2.md
   - wiki/sources/README-categories.md
 updated: 2026-10-12
-confidence: medium
+confidence: high
 ---
 
 # OpenMCM2
@@ -23,7 +23,7 @@ Added runtime is mostly **C**, including an **OpenGL** implementation of **Direc
 
 ## Audience
 
-Reverse engineers and preservation researchers studying legacy protected PC titles—similar lanes to [[kabus22-linux]], [[motorstorm-mv-recomp]], and [[pipeline-disasm]] static rebuild workflows. (source: wiki/sources/descriptions/xshxdex98__OpenMCM2.md)
+Reverse engineers and game preservation researchers who want a **measured decompilation pipeline** for legacy protected PC titles—not operational anti-cheat or live-game bypass tooling. Comparable preservation lanes include [[kabus22-linux]], [[motorstorm-mv-recomp]], and [[pipeline-disasm]]. (source: wiki/sources/descriptions/xshxdex98__OpenMCM2.md)
 
 ## Links
 

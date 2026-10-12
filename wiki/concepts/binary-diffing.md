@@ -9,6 +9,7 @@ sources:
   - wiki/sources/descriptions/ngwg__ceasta.md
   - wiki/sources/descriptions/stephane-perez__ik-plus-reforged.md
   - wiki/sources/descriptions/mattgodbolt__pipeline-disasm.md
+  - wiki/sources/descriptions/xshxdex98__OpenMCM2.md
 updated: 2026-10-12
 confidence: high
 ---
@@ -34,6 +35,8 @@ Some classic-platform projects patch executables in place with assembly hooks an
 
 Full-tree disassembly rebuilds such as mattgodbolt/[[pipeline-disasm]] (BBC Micro PIPELINE; annotated 6502 + BBC BASIC; byte-identical disc/flux verification) complement delta-patch workflows when the research goal is documented sources and copy-protection anatomy rather than distributing IPS/BPS patches. (source: wiki/sources/descriptions/mattgodbolt__pipeline-disasm.md)
 
+Ghidra-driven PE relink projects such as xshxdex98/[[openmcm2]] (MSVC 6.0 fixed-base harness; RTTI mapping; per-function C replacements verified against retail sections) sit in the same **documented rebuild** lane as function-level differs when the artifact is a legacy protected Windows executable rather than a ROM or disc image. (source: wiki/sources/descriptions/xshxdex98__OpenMCM2.md)
+
 Integrated RE workbenches such as [[ceasta]] bundle binary diffing beside disassembly, decompilation, and debugging in one vendored environment—useful for quick build-to-build triage before exporting into dedicated differ plugins. (source: wiki/sources/descriptions/ngwg__ceasta.md)
 
 Game-security uses include tracking anti-cheat driver updates between versions, reviewing changed behavior and trust-boundary assumptions in supplied builds, and comparing obfuscated builds to isolate logic changes.
@@ -53,4 +56,4 @@ Similarity scores and decompiled differences suggest where to look—they do not
 
 ## Related
 
-[[static-runtime-evidence]] · [[binary-evidence]] · [[research-rigor]] · [[diaphora]] · [[ghidriff]] · [[turbodiff]] · [[rom-weaver]] · [[ik-plus-reforged]] · [[pipeline-disasm]] · [[ceasta]] · [[mixed-boolean-arithmetic]] · [[control-flow-flattening]] · [[overviews/reverse-engineering]]
+[[static-runtime-evidence]] · [[binary-evidence]] · [[research-rigor]] · [[diaphora]] · [[ghidriff]] · [[turbodiff]] · [[rom-weaver]] · [[ik-plus-reforged]] · [[pipeline-disasm]] · [[openmcm2]] · [[ceasta]] · [[mixed-boolean-arithmetic]] · [[control-flow-flattening]] · [[overviews/reverse-engineering]]

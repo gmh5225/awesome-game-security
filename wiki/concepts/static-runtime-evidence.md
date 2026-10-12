@@ -9,6 +9,7 @@ sources:
   - wiki/sources/descriptions/wivi514__Dead_Rising_2_Case_Zero_Xenon_Recomp.md
   - wiki/sources/descriptions/robbe1912__motorstorm-mv-recomp.md
   - wiki/sources/descriptions/mattgodbolt__pipeline-disasm.md
+  - wiki/sources/descriptions/xshxdex98__OpenMCM2.md
 updated: 2026-10-12
 confidence: high
 ---
@@ -55,10 +56,12 @@ Static recompilation projects such as [[jsrf-recomp]] (OG Xbox XBE→native macO
 
 BBC Micro preservation rebuilds such as [[pipeline-disasm]] (mattgodbolt; annotated 6502 + BBC BASIC reassembly; baron toolchain; Python/Node disc compare; jsbeeb headless runs) treat **byte-identical disc and flux images** plus symbol dumps and execution traces as the baseline that every reassembly step must match—static disassembly claims are not accepted without that retail-aligned output check. (source: wiki/sources/descriptions/mattgodbolt__pipeline-disasm.md)
 
+Windows PE32 relink harnesses such as xshxdex98/[[openmcm2]] (*Motocross Madness 2*; fixed-base MSVC 6.0 image; Ghidra export + assembly/link verification) keep **retail sections byte-for-byte** while selectively replacing routines with ported C that must match retail behavior; optional DirectDraw tracing compares renderer calls against the original path. (source: wiki/sources/descriptions/xshxdex98__OpenMCM2.md)
+
 ## Behavioral capability from TTD traces
 
 Full-process **Time Travel Debugging (TTD)** recordings capture executed API calls and unpacked/runtime-generated code paths that static PE analysis may miss. [[ttd-capa-cpp]] replays `.run` traces through the TTD SDK, decodes Win32/native call arguments, and matches observed behavior against capa rules—including optional code-region scanning and capability timelines—so analysts can label **observed calls** vs static import/reachability claims. (source: wiki/sources/descriptions/HullaBrian__ttd-capa-cpp.md)
 
 ## Related
 
-[[binary-evidence]] · [[binary-diffing]] · [[dynamic-binary-instrumentation]] · [[jsrf-recomp]] · [[saturnkit]] · [[motorstorm-mv-recomp]] · [[dead-rising-2-case-zero-xenon-recomp]] · [[mcla-pc]] · [[pipeline-disasm]] · [[ttd-capa-cpp]] · [[mixed-boolean-arithmetic]] · [[control-flow-flattening]] · [[research-rigor]] · [[overviews/reverse-engineering]] · [[overviews/windows-kernel]] · [[overviews/game-engine]]
+[[binary-evidence]] · [[binary-diffing]] · [[dynamic-binary-instrumentation]] · [[jsrf-recomp]] · [[saturnkit]] · [[motorstorm-mv-recomp]] · [[dead-rising-2-case-zero-xenon-recomp]] · [[mcla-pc]] · [[pipeline-disasm]] · [[openmcm2]] · [[ttd-capa-cpp]] · [[mixed-boolean-arithmetic]] · [[control-flow-flattening]] · [[research-rigor]] · [[overviews/reverse-engineering]] · [[overviews/windows-kernel]] · [[overviews/game-engine]]
