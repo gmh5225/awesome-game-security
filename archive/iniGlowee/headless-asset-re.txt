@@ -1,0 +1,160 @@
+Project Path: arc_iniGlowee_headless-asset-re_2p9a81gz
+
+Source Tree:
+
+```txt
+arc_iniGlowee_headless-asset-re_2p9a81gz
+├── LICENSE
+└── README.md
+
+```
+
+`LICENSE`:
+
+```
+MIT License
+
+Copyright (c) 2026 headless-asset-re contributors
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
+`README.md`:
+
+```md
+# Headless game-asset reverse engineering, without the original toolchain
+
+*A method, not a tool — how to get a game's meshes, animations, textures and
+blendshapes into Blender or a modern engine when the original editor/SDK is gone,
+closed, or unusable. Written from the asset pipeline behind the AE1 engine, across
+three very different games' formats.*
+
+This is a devlog about **process**. It contains no extracted data, no proprietary
+format dumps, and no game files — just the working method and the habits that make it
+reliable. Point your own tools at files **you legally own**.
+
+---
+
+## The situation
+
+You want a model/animation/texture out of a game and into Blender, three.js, Unreal —
+somewhere you can actually use it. But the official exporter never existed, or it's a
+closed plugin for a DCC you don't run, or it's a decade dead. So you decode the files
+yourself. Done carelessly this is an endless swamp of "it's *almost* right": the mesh
+loads but lies on its side; the character animates but her face melts; the texture
+reads but the foliage is black.
+
+The method below is what turned that swamp into a repeatable pipeline.
+
+## 1. Find the maintained reference first — don't decode blind
+
+Before writing a byte of decoder, go find the people who already mapped the format.
+Almost every game engine with a modding scene has a **reference implementation** or
+format notes maintained by someone who's been at it for years. Read it. Transcribe the
+tricky parts **verbatim** — the keyframe codec table, the quantization constants, the
+chunk layout — and **cite it** in your code. A codec you reimplement "from
+understanding" will be subtly wrong in the one branch you didn't hit; a codec you
+transcribe from a maintained reference is wrong only where the reference is.
+
+> The RE Engine work leaned on a maintained community library's decoders; the OSRS
+> cache work stood on the shoulders of the archival/runtime-client community. In both
+> cases the fastest path to correct was "read the reference, transcribe exactly, then
+> verify," not "reverse it from scratch."
+
+Finding the reference is itself a skill: search the format's magic bytes and extension,
+the game engine's name, "modding"/"ripping"/"research," and the repos of the people
+whose names keep appearing. Budget an hour for this before you touch a hex editor. It
+pays for itself ten times over.
+
+## 2. Fix the decode — no hacks, no band-aids
+
+When the output is wrong, the **decode** is wrong. Resist the urge to paper over it
+downstream — flipping a sign in the renderer, scaling by a magic 0.01, nudging a bone
+in Blender. Those "fixes" accumulate into a pipeline nobody can reason about, and they
+break the moment you touch a different asset.
+
+Find the real cause. "The character's face distorts" turned out to be a **keyframe
+codec** branch decoded with the wrong axis order and bit width — not a skinning or
+retarget bug, which is where everyone first looks. "Foliage mips to black" was the
+**transparent texels keyed to black RGB** bleeding under mipmapping — a texture-data
+problem, fixed in the data (edge-pad the colour), not a shader hack. Fixing the
+decode once fixes every asset; a band-aid fixes one and lies about the rest.
+
+## 3. Judge with ground truth — and bisect visually
+
+You cannot eyeball a 4×4 matrix or a packed-float dequant and know it's right. You
+need a **reference** and a **render**.
+
+- **Reference render.** Get a known-good image of the asset — an in-game screenshot,
+  the game's own model viewer, the reference library's output. That's your oracle.
+- **Headless render loop.** Script Blender (`blender --background --python
+  render.py`) or your engine to load the decoded asset and render a PNG from a fixed
+  camera/light. Read the PNG, compare to the oracle, iterate. No GUI, no clicking —
+  the render *is* the test, and it runs in CI.
+- **Bisect the image, not just the code.** Two techniques isolate "which piece is
+  wrong" faster than any debugger:
+  - **Flat-colour** every material. Strips lighting/texture noise so you see pure
+    geometry/orientation — is the *shape* right?
+  - **Hide one mesh** (or show only one). The eye you thought was rolled back was an
+    untextured **cornea rendering opaque**; hiding shells one at a time found it in
+    minutes. When something's wrong, the fastest question is "which submesh?"
+
+These three — oracle, headless render, visual bisection — are the whole QA loop. Trust
+the render over your mental model of the math every time.
+
+## 4. Report honest status
+
+"Diana: 13 animation sets baked, faces correct, hair cutouts clean. 2B: locomotion
+works, one driver clip stalls — deferred." That's a status. "Done" when it's "mostly"
+costs you (and anyone building on it) far more later than the honest line costs now.
+Keep a per-session findings log: what you proved, what you measured, what's still
+wrong, and the exact repro. Future-you reads it before future-you re-derives it.
+
+## 5. IP discipline — ship code, never assets
+
+Everything you extract is someone else's copyrighted content. Keep it **out of version
+control** (a `.gitignore` for the bytes, the caches, the renders) and out of releases.
+Your *tools* are yours to share — decoders point at the user's own legally-owned files,
+exactly like the maintained references you learned from operate. The rule that keeps
+this clean: **release code and knowledge, distribute no assets**, and when in doubt
+look at how the established community tools draw that line.
+
+## The headless toolchain, in one breath
+
+Dependency-light Python decoders (parse the container, honour the reference's codec
+tables) → a glTF/Blender bridge → a headless render-to-PNG oracle check → a findings
+log → assets gitignored. No original SDK, no DCC clicking, every step scriptable and
+verifiable.
+
+## Why "headless" matters
+
+A GUI pipeline is a pipeline only you can run, once, by hand. A **headless** one — pure
+scripts from file-in to render-out — is a pipeline that runs in CI, bisects itself, and
+tells the truth on every asset, not just the one you happened to open. That's the
+difference between "I got it working" and "it works."
+
+---
+
+*From the AE1 ("Angel's Egg") engine project's asset-pipeline research. Method only —
+no game assets included. Released under [MIT](LICENSE) (covers the prose and any
+snippets); the games and tools named are credited as references, not endorsed by their
+rights-holders.*
+
+```
