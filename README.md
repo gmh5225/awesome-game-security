@@ -4501,6 +4501,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/RiseShieldDev/AntiXrayViewer [Paper Minecraft plugin that detects X-Ray ore mining, records player sessions, and lets admins replay suspicious activity]
 - https://github.com/LB45440078L/xray-anticheat [Paper/Spigot plugin using likelihood-ratio statistical models to detect ore-vision (X-Ray) mining with explainable evidence, decaying history, and moderator-driven ban waves]
 - https://github.com/boggymc/PetalAntiFreecam [Paper plugin that masks underground blocks in outgoing chunk packets to mitigate Minecraft freecam/wallhack cheats]
+- https://github.com/Tobias1205/AntiCheat [ShieldGuard Paper 1.21.x plugin: PacketEvents-based anti-freecam, anti-xray ore masking, storage-entity hiding, and in-game report tooling]
 - https://github.com/trevorftp/ServerGuard [Vintage Story server mod that conceals enclosed ore, filters occluded entities, and injects ore/creature decoys before chunk data reaches clients]
 - https://github.com/enis1enis2/WindfallAntiCheatF [Minecraft Fabric packet-based anti-cheat with combat/movement checks and Geyser/Bedrock compatibility]
 - https://github.com/IamFriendly0242u/The-Dreamers-Guards [Fabric server/client anti-cheat suite with mod blacklist scanning, encrypted auth, progressive punishments, and Discord alerts]
