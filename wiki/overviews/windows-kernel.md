@@ -793,7 +793,8 @@ sources:
   - wiki/sources/descriptions/4d61726b__VirtualKD-Redux.md
   - wiki/sources/descriptions/Krimziee__SecureBootCheck.md
   - wiki/sources/descriptions/N0tJ03__Investigacion-Kerne.md
-updated: 2026-10-11
+  - wiki/sources/descriptions/saadahmedscse__kac-inspector.md
+updated: 2026-10-12
 confidence: high
 ---
 
@@ -843,6 +844,7 @@ Trusted hypervisors can enforce separate guest-memory protection boundaries, but
 - **Kernel licensing / policy path:** [[windows-software-policy]] (KiFilterFiberContext; documents `SystemPolicyInformation` `NtQuerySystemInformation` class; user-mode licensing components ↔ kernel policy driver; where policy data is handled; C source/headers + Python binary helper; Windows internals / software protection RE) (source: wiki/sources/descriptions/KiFilterFiberContext__windows-software-policy.md)
 - **AC driver runtime logger:** [[badlion-logger]] (KiFilterFiberContext; PoC kernel logger; IAT hooks during image-load callbacks; black-box monitoring of VMProtect-virtualized AC driver module; C++; educational driver instrumentation—not production-hardened) (source: wiki/sources/descriptions/KiFilterFiberContext__BadlionLogger.md)
 - **Kernel AC / endpoint architecture notes:** Spanish Markdown notebook [[investigacion-kerne]] (N0tJ03; ring-0 driver / ring-3 service / server-side telemetry three-layer model; BattlEye, EAC, and Vanguard driver and [[kernel-callbacks]] comparison; whitelisting and BSOD failure modes; CrowdStrike Falcon July 2024 File 291 configuration outage postmortem; curated references—not executable code; Cheat / Guide) (source: wiki/sources/descriptions/N0tJ03__Investigacion-Kerne.md)
+- **Kernel AC driver census (read-only):** [[kac-inspector]] (saadahmedscse; Rust CLI; `EnumDeviceDrivers` + SCM + driver-store correlation against dozens of known kernel AC signatures + heuristics for self-identified AC drivers; running/loaded/stopped/idle/orphaned/stale labels and related usermode services; no install/patch/network—launch troubleshooting and privacy triage beside [[securebootcheck]] and host surveys such as [[apex-anticheat-lab]]) (source: wiki/sources/descriptions/saadahmedscse__kac-inspector.md)
 - **User-mode ntdll unhooking:** Rust tool/library [[nt-unhooker]] (Teach2Breach; inline/IAT hook state analysis; in-memory vs clean reference PE compare; symbol-based clean DLL retrieval; restore modified regions with safety checks; CLI + programmatic API; malware analysis / red team / defender hook-tampering study) (source: wiki/sources/descriptions/Teach2Breach__nt_unhooker.md)
 - **User-mode hook detection:** GUI tool [[hook-detector]] (0x6461726B; C++20; scans loaded modules/processes for inline/IAT hooks; remote PE parsing + manual PEB traversal vs expected executable layouts; DX11/ImGui; x86/x64; anti-cheat / RE hook-tampering inspection) (source: wiki/sources/descriptions/0x6461726B__Hook-Detector.md)
 - **KnownDlls `.text` unhooking:** [[known-dll-unhook]] (ORCx41; iterates loaded DLLs; maps trusted copies from `\KnownDlls`; replaces hooked `.text` sections and restores protections; native syscalls for memory/map ops; EDR/anti-cheat hook evasion research) (source: wiki/sources/descriptions/ORCx41__KnownDllUnhook.md)

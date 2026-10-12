@@ -6,17 +6,17 @@ sources:
   - wiki/sources/descriptions/saadahmedscse__kac-inspector.md
   - wiki/sources/README-categories.md
 updated: 2026-10-12
-confidence: medium
+confidence: high
 ---
 
 # KAC Inspector
 
-**KAC Inspector** (saadahmedscse/kac-inspector) is a read-only **Windows CLI** that inventories kernel-mode anti-cheat drivers and labels each match as actively running, loaded-but-stopped, orphaned on disk, or stale. Rust correlates `EnumDeviceDrivers` module lists, Service Control Manager state, and the driver store against a built-in signature database (with heuristics for unlisted drivers that self-identify as anti-cheat), optionally surfacing related user-mode services—no installs, kernel patches, or network I/O. Targets players troubleshooting launch conflicts, privacy reviewers, and researchers who need a quick kernel AC presence snapshot before deeper forensics. (source: wiki/sources/descriptions/saadahmedscse__kac-inspector.md)
+**KAC Inspector** (saadahmedscse/kac-inspector) is a read-only **Windows CLI** that scans for kernel-mode anti-cheat drivers and reports whether each match is actively loaded, idle, running, or leftover on disk. Rust correlates the kernel module list (`EnumDeviceDrivers`), Service Control Manager service state, and the system driver store against a built-in database of dozens of known anti-cheat signatures, plus heuristics for unlisted drivers that identify themselves as anti-cheat. Output includes a concise overall verdict and per-driver labels (running, loaded, stopped, orphaned, stale) and can surface related user-mode services—without installing software, modifying the system, or using the network. Aimed at players troubleshooting launch conflicts, privacy assessment, and researchers who need a read-only kernel AC presence snapshot before deeper game-security or host forensics. (source: wiki/sources/descriptions/saadahmedscse__kac-inspector.md)
 
 ## Evidence model
 
 - **Multi-source correlation** — kernel module list vs SCM vs driver-store paths reduce false positives from stale `.sys` files alone.
-- **Status labels** — running, loaded, stopped, orphaned, stale; concise overall verdict for triage.
+- **Status labels** — running, loaded, stopped, idle, orphaned, stale; concise overall verdict for triage.
 - **Read-only scope** — observation-only; pair conclusions with [[kernel-evidence-baseline]] build/symbol context when attributing behavior to a specific AC product.
 
 ## Positioning
