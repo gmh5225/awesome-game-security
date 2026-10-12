@@ -5,7 +5,8 @@ topics: [game-engine]
 sources:
   - wiki/sources/skills/game-engine.md
   - wiki/sources/descriptions/apistol78__traktor.md
-updated: 2026-09-13
+  - wiki/sources/descriptions/HyperionGameTech__HyperionEngine.md
+updated: 2026-10-12
 confidence: high
 ---
 
@@ -31,6 +32,7 @@ A benign version mismatch, unavailable symbols, cooked data, or an editor-only c
 | `Game Engine > Game Engine Plugins:Unreal`: RiderSourceCodeAccess | Classifying an editor integration in a plugin or build inventory | Editor source-editor integration ≠ shipped player module; check plugin descriptors and packaged artifacts | Editor/build/runtime role ledger, declared compatibility, packaged modules, required privileges |
 | `Game Assets`: [[uassetapi]] | Interpreting owned serialized Unreal assets or explaining a reader mismatch | Asset library ≠ live object reflection or native memory layout; parse failure alone is not corruption | Asset provenance, reader revision, format/version assumptions, supported fields, unresolved parse evidence |
 | `Game Engine > Source`: [[traktor]] | Studying full OSS engine architecture—multi-backend rendering (DX11/Vulkan/Metal), Lua scripting, P2P replication, Avalanche asset server, editor MCP—against shipped commercial titles | Engine source tree ≠ a specific game's protected binaries; match platform/backend when comparing to Steam/PSN/iOS/macOS releases | Engine submodule map, active backend, platform target, observation scope, gaps vs shipped title |
+| `Game Engine > Source`: [[hyperion-engine]] | Inspecting bundled `.hmf` materials/prefabs/mesh blobs (index/vertex buffers, BVH) and skeletal clip keyframe tracks in editor + runtime samples | Engine `.hmf` layout ≠ a commercial title's cooked packages; match desktop/mobile JSON settings and active DX12/Vulkan backend | Asset field map, clip/bone track scope, backend tier, observation vs shipped game data |
 
 These are selection examples from the skill resource guide—not endorsements of every repository in the same category. Use [[resource-selection]] provenance fields and [[repository-navigation]] for local lookup, casing, and snapshot limits. (source: wiki/sources/skills/game-engine.md)
 
