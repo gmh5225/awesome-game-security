@@ -890,7 +890,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [custom-data-ptr-swap-sample](entities/custom-data-ptr-swap-sample.md) — NtQueryLicenseValue KM↔UM channel (C++; driver development; cheat / driver communication; gmh5225)
 - [custom-dpapi](entities/custom-dpapi.md) — C++ PoC; undocumented DPAPI RPC via NdrClientCall3 to lsass protected_storage; bypasses CryptUnprotectData; dpapi.dll RE (EvilBytecode)
 - [custom-VEH](entities/custom-veh.md) — RtlpCallVectoredHandlers hook for fast pre-vanilla VEH registration (Ring3 callback research; gmh5225)
-- [Custos](entities/custos.md) — Windows Electron desktop forensic anti-cheat scanner for game-server vetting (dybeky; offline Prefetch/BAM/registry/DNS/hash artifact lanes + optional admin Live Scan; exportable reports; Anti Cheat / Guide)
+- [Custos](entities/custos.md) — read-only Windows Electron forensic anti-cheat scanner for game-server vetting (dybeky; twenty-one offline Prefetch/BAM/registry/DNS/hash/anti-forensics artifact scanners + optional admin Live Scan; integrity-hashed exportable reports; Anti Cheat / Guide)
 - [cunthook](entities/cunthook.md) — TF2/Source open hacking framework (full SDK; hooks / ESP / aimbot / gameplay mods; internal interfaces + Boost; Linux; gmh5225)
 - [CUTracer](entities/cutracer.md) — CUDA kernel instruction DBI (GPU-side trace + host-side analysis; Cheat / DBI)
 - [Cyberpunk Better Shaders (Callisto SSS)](entities/cyberpunk-better-shaders.md) — Callisto SSS Cyberpunk 2077 path-traced skin mod; Callisto BRDF + reshaped SSS; `VkLayer_callisto_spvswap` SPIR-V hot-swap via Proton/Linux + RED4ext CopyTextureRegion hooks; DXIL fingerprint match; SPIR-V census/patch/A-B toolchain; skin-pixel gating (BlaneC; Vulkan / graphics modding)

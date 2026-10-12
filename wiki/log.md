@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-12** — ingest `description:dybeky/custos`: refreshed entity [[custos]] (confidence high; read-only Electron/TypeScript desktop scanner; twenty-one offline artifact lanes + optional admin Live Scan; risk-engine reports with integrity hashing; minimal session persistence); cited on [[concepts/detector-operations]] PC-check review-evidence lane + [[concepts/static-runtime-evidence]] offline execution traces vs live observation; `index.md` entity blurb sync.
+
 - **2026-10-12** — ingest `description:iniGlowee/headless-asset-re`: refreshed entity [[headless-asset-re]] (confidence high; reference-first mesh/animation/texture/blendshape decode; Python decoders + glTF/Blender bridge; headless render oracles, PNG CI checks, visual bisection; IP-safe workflows; Cheat / RE Tools); cited on [[overviews/overview]], [[overviews/game-engine]], and existing [[overviews/game-hacking]]/[[overviews/reverse-engineering]] lanes; `index.md` entity blurb sync.
 
 - **2026-10-12** — ingest `readme:categories`: Anti Cheat ~786 (+1; dybeky/[[custos]] Windows desktop forensic vetting scanner) / Cheat ~2881 (+2; iniGlowee/[[headless-asset-re]] headless asset RE methodology + FPSZ/[[ida-better-information]] IDA libc/FLIRT runtime assist) / Game Engine ~159 / other major section counts stable; 41 sections (`NeverC & NeverD` placeholder); synced projected README-map counts on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/game-hacking]], [[overviews/reverse-engineering]], and [[overviews/dma-attack]]; entities [[custos]], [[headless-asset-re]], [[ida-better-information]]; light `index.md` section notes (no per-category pages).

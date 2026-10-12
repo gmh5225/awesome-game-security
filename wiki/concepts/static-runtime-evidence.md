@@ -10,6 +10,7 @@ sources:
   - wiki/sources/descriptions/robbe1912__motorstorm-mv-recomp.md
   - wiki/sources/descriptions/mattgodbolt__pipeline-disasm.md
   - wiki/sources/descriptions/xshxdex98__OpenMCM2.md
+  - wiki/sources/descriptions/dybeky__custos.md
 updated: 2026-10-12
 confidence: high
 ---
@@ -62,6 +63,10 @@ Windows PE32 relink harnesses such as xshxdex98/[[openmcm2]] (*Motocross Madness
 
 Full-process **Time Travel Debugging (TTD)** recordings capture executed API calls and unpacked/runtime-generated code paths that static PE analysis may miss. [[ttd-capa-cpp]] replays `.run` traces through the TTD SDK, decodes Win32/native call arguments, and matches observed behavior against capa rules—including optional code-region scanning and capability timelines—so analysts can label **observed calls** vs static import/reachability claims. (source: wiki/sources/descriptions/HullaBrian__ttd-capa-cpp.md)
 
+## Host execution traces vs live process observation
+
+Game-server PC checks often combine **offline host artifacts** (Prefetch, Amcache, BAM, registry/browser traces, DNS cache, file hashes, anti-forensics tampering indicators) with optional **live** module/hook/thread/memory signature probes against a running title. [[custos]] (dybeky; read-only Electron desktop scanner; twenty-one offline artifact lanes plus optional admin Live Scan; integrity-hashed reports) illustrates separating persisted execution-trace evidence from in-session runtime observation—label which lane produced each finding before moderation or appeal decisions. (source: wiki/sources/descriptions/dybeky__custos.md)
+
 ## Related
 
-[[binary-evidence]] · [[binary-diffing]] · [[dynamic-binary-instrumentation]] · [[jsrf-recomp]] · [[saturnkit]] · [[motorstorm-mv-recomp]] · [[dead-rising-2-case-zero-xenon-recomp]] · [[mcla-pc]] · [[pipeline-disasm]] · [[openmcm2]] · [[ttd-capa-cpp]] · [[mixed-boolean-arithmetic]] · [[control-flow-flattening]] · [[research-rigor]] · [[overviews/reverse-engineering]] · [[overviews/windows-kernel]] · [[overviews/game-engine]]
+[[binary-evidence]] · [[binary-diffing]] · [[dynamic-binary-instrumentation]] · [[jsrf-recomp]] · [[saturnkit]] · [[motorstorm-mv-recomp]] · [[dead-rising-2-case-zero-xenon-recomp]] · [[mcla-pc]] · [[pipeline-disasm]] · [[openmcm2]] · [[ttd-capa-cpp]] · [[custos]] · [[mixed-boolean-arithmetic]] · [[control-flow-flattening]] · [[research-rigor]] · [[overviews/reverse-engineering]] · [[overviews/windows-kernel]] · [[overviews/game-engine]]
