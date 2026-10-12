@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-12** — ingest `readme:categories`: Cheat ~2882 (+1; mattgodbolt/[[frogman]] BBC Micro FROGMAN BeebASM byte-exact rebuild with VIA-timer XOR loader RE) / Anti Cheat ~787 / Game Engine ~159 / other major section counts stable; 41 sections (`NeverC & NeverD` placeholder); synced projected README-map counts on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/reverse-engineering]], and [[overviews/dma-attack]]; corrected stale Anti Cheat (~785) drift on [[overviews/reverse-engineering]]; entity [[frogman]]; light `index.md` section notes (no per-category pages).
+
 - **2026-10-12** — ingest `description:ThoriaDevelopment/Iustitia`: refreshed entity [[iustitia]] (Checks/Staff UX sections; Fabric 1.21.11 Kotlin passive packet-model AC, 36 violation-scored checks, clip-replay ghosts, local-only staff alerts); cited on [[overviews/anti-cheat]] Fabric 1.21.x passive-observer lane + [[concepts/detector-operations]] human-in-the-loop client evidence cluster; `index.md` entity blurb sync.
 
 - **2026-10-12** — ingest `readme:categories`: Anti Cheat ~787 (+1; ThoriaDevelopment/[[iustitia]] Fabric 1.21.11 client-side passive MC AC with clip replay) / Cheat ~2881 / Game Engine ~159 / other major section counts stable; 41 sections (`NeverC & NeverD` placeholder); synced projected README-map counts on [[overviews/overview]], [[overviews/anti-cheat]], and [[overviews/dma-attack]]; entity [[iustitia]]; light `index.md` section notes (no per-category pages).
