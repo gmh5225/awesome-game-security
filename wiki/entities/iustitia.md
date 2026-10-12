@@ -11,7 +11,15 @@ confidence: medium
 
 # Iustitia
 
-Fabric **1.21.11** client-side Minecraft Java mod (ThoriaDevelopment/Iustitia; Kotlin/Gradle; Fabric mixins) that passively models other players from inbound server-rebroadcast packets—no server plugin and no outbound reporting. It runs **36** configurable detection checks with violation-level scoring (reach, kill aura, fly, speed, scaffold, and related combat/movement anomalies spanning legacy 1.8-style and modern 1.21-era patterns), preset moderation profiles, in-game commands, HUD/nametag indicators, and **clip replay** that reconstructs recent motion as in-world ghost models for staff review. Intended for moderators and anticheat researchers who need local inspection and evidence rather than automated kicks or bans. (source: wiki/sources/descriptions/ThoriaDevelopment__Iustitia.md)
+Fabric **1.21.11** client-side Minecraft Java mod (ThoriaDevelopment/Iustitia; Kotlin/Gradle; Fabric mixins) that passively models other players from inbound server-rebroadcast packets—no server plugin and no outbound reporting. Intended for moderators, anticheat researchers, and anyone studying Minecraft client-side game security who needs local inspection and evidence rather than automated kicks or bans. (source: wiki/sources/descriptions/ThoriaDevelopment__Iustitia.md)
+
+## Checks
+
+**36** configurable modules observe combat and movement via mixins over server-rebroadcast traffic: reach, kill aura, fly, speed, scaffold, and related combat anomalies, covering both legacy **1.8-style** and modern **1.21-era** cheat patterns. Violation-level scoring aggregates hits per player; preset profiles span everyday play through strict moderation.
+
+## Staff UX
+
+In-game commands, HUD and nametag indicators, and **clip replay** tooling reconstruct recent player motion as in-world ghost models for staff review—local-only alerts with no outbound reporting path.
 
 ## Operations
 
