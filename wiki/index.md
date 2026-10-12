@@ -1745,7 +1745,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [hayday-bot](entities/hayday-bot.md) — Frida-based Hay Day in-memory crop automation on LDPlayer 9 (AshrafMorningstar; guest ARM64 libg.so hooks; Promon SHIELD gadget bypass, Quago telemetry block, emulator/root fingerprint spoof; cheat / Frida)
 - [hashdb-ida](entities/hashdb-ida.md) — OALabs IDA Pro plugin; HashDB API/string hash lookup; bulk module import; XOR-aware matching; hash-algorithm hunt + enum annotation (cheat / IDA Plugins)
 - [hazel](entities/hazel.md) — TheCherno C++ interactive app + rendering engine (engine/editor/sandbox; Vulkan SDK setup; educational engine architecture + real-time rendering prototyping; Game Engine / source)
-- [Headless Asset RE](entities/headless-asset-re.md) — documented headless game-asset RE methodology without original SDK (iniGlowee; reference decoders, render validation, IP-safe workflows; Cheat / RE Tools)
+- [Headless Asset RE](entities/headless-asset-re.md) — documented headless game-asset RE methodology without original SDK (iniGlowee; reference-first decode, Python→glTF/Blender bridge, PNG render oracles/CI, visual bisection; IP-safe; Cheat / RE Tools)
 - [headless-ida](entities/headless-ida.md) — Python toolkit for headless IDA Pro workflows (IDAPython scripts/one-liners/interactive sessions; RPyC remote server; idat64/idalib; malware/binary/game-security RE automation; DennyDai)
 - [headless-ida-mcp-server](entities/headless-ida-mcp-server.md) — MCP for IDA Pro (headless; binary analysis; function/variable MCP tools; Game Develop / MCP server; cnitlrt)
 - [heck_csgo_external](entities/heck-csgo-external.md) — external CS:GO; SDK generation / memory analysis (C++; cheat / game:csgo)
