@@ -1,0 +1,2135 @@
+Project Path: arc_Tobias1205_AntiCheat_rnqjqq_h
+
+Source Tree:
+
+```txt
+arc_Tobias1205_AntiCheat_rnqjqq_h
+├── README.md
+├── pom.xml
+└── src
+    └── main
+        ├── java
+        │   └── nl
+        │       └── shieldguard
+        │           ├── ShieldGuard.java
+        │           ├── protection
+        │           │   ├── ChunkPacketListener.java
+        │           │   ├── Ids.java
+        │           │   ├── MaskManager.java
+        │           │   ├── RevealListener.java
+        │           │   └── Revealer.java
+        │           └── reports
+        │               ├── Report.java
+        │               ├── ReportCommand.java
+        │               ├── ReportManager.java
+        │               ├── ReportsCommand.java
+        │               └── ReportsGui.java
+        └── resources
+            ├── config.yml
+            └── plugin.yml
+
+```
+
+`README.md`:
+
+```md
+# ShieldGuard
+
+Anti-freecam, anti-xray en een reportsysteem voor Paper 1.21.x.
+
+## Installeren
+
+1. Zet de **PacketEvents**-plugin (spigot-versie, 2.7.0 of nieuwer) in `plugins/`.
+2. Bouw ShieldGuard: `mvn package` (Java 21). De jar staat daarna in `target/ShieldGuard-1.0.0.jar`.
+3. Zet de jar in `plugins/`, start de server en pas `plugins/ShieldGuard/config.yml` aan
+   (vooral `worlds:` — alleen overworld-achtige werelden!).
+
+## Wat doet het
+
+**Anti-freecam**: de server stuurt alleen echt ondergronds spul als deepslate/stone naar de client:
+blokken die dieper liggen dan (jouw Y - 32) **én** dieper dan (terreinoppervlak - 12). Op een berg zie je dus
+gewoon de echte vallei onder je; het masker volgt het terrein in plaats van een vlak stuk stone te zijn.
+Ga je omlaag, dan worden de chunks om je heen automatisch opnieuw verstuurd met de echte blokken.
+
+**Anti-xray**: ALLE erts (ook in grotten) is voor de client stone/deepslate. Erts wordt pas getoond als je er
+binnen `reveal-radius` (standaard 6 blokken) bent en er een vrije zichtlijn naartoe is. Door muren heen zien kan dus niet.
+
+**Anti storage-ESP**: kisten, trapped chests, ender chests, barrels, hoppers, droppers, dispensers, crafters, ovens,
+brewing stands, spawners en shulker boxes worden net zo behandeld (standaard zichtbaar binnen 10 blokken en in zicht).
+Minecarts met kisten/hoppers/spawners en chest-boats zijn per speler onzichtbaar tot ze dichtbij en in zicht zijn.
+
+**Reports**
+- `/report <speler> <reden>` — cooldown, geen dubbele reports, tab-completion op redenen
+- `/reports` — GUI met open reports (linksklik = teleporteren, rechtsklik = afsluiten)
+- `/reports list | view <id> | tp <id> | close <id> [notitie] | reload`
+- Staff met `shieldguard.reports.notify` krijgt een klikbare melding; optioneel ook een Discord-webhook
+- Extra waarschuwing zodra een speler 3 (instelbaar) open reports heeft
+
+## Permissions
+
+| Permission | Standaard | Doel |
+|---|---|---|
+| `shieldguard.report` | iedereen | reports indienen |
+| `shieldguard.reports.manage` | op | reports beheren |
+| `shieldguard.reports.notify` | op | meldingen ontvangen |
+| `shieldguard.bypass` | op | niet gemaskeerd worden |
+
+Let op: met `shieldguard.bypass` zie je gewoon alles. Test de bescherming dus met een account zonder die permission.
+
+## Afstellen
+
+Alles staat in `config.yml`:
+- `freecam-protection.surface-margin`: hoger = ondiepe grotten blijven zichtbaar, lager = ook ondiepe bases verborgen.
+- `xray-protection.reveal-radius` / `storage-protection.reveal-radius`: hoe dichtbij je iets moet zijn om het te zien.
+- `xray-protection.hide-exposed-ores: false`: erts in grotten blijft dan gewoon zichtbaar (alleen ingesloten erts verborgen).
+- `storage-protection.hide-entities: false`: minecarts met kisten niet verbergen.
+- Na `/reports reload` worden de instellingen herladen (behalve `reveal-interval-ticks`: daarvoor even herstarten).
+
+## Bekende beperkingen
+
+- Kleine reveal-vertraging (max ~0,25 s) bij het naderen van erts/kisten, door `reveal-interval-ticks`.
+- Een overhang of boom boven een grot telt als "oppervlak": ondiepe grotten daaronder blijven binnen de marge zichtbaar.
+- Erts of kisten achter glas of bladeren worden pas getoond als de zichtlijn vrij is.
+
+```
+
+`pom.xml`:
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>nl.shieldguard</groupId>
+    <artifactId>ShieldGuard</artifactId>
+    <version>1.0.0</version>
+    <packaging>jar</packaging>
+
+    <properties>
+        <maven.compiler.release>21</maven.compiler.release>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <repositories>
+        <repository>
+            <id>papermc</id>
+            <url>https://repo.papermc.io/repository/maven-public/</url>
+        </repository>
+        <repository>
+            <id>codemc-releases</id>
+            <url>https://repo.codemc.io/repository/maven-releases/</url>
+        </repository>
+    </repositories>
+
+    <dependencies>
+        <dependency>
+            <groupId>io.papermc.paper</groupId>
+            <artifactId>paper-api</artifactId>
+            <version>1.21.4-R0.1-SNAPSHOT</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.github.retrooper</groupId>
+            <artifactId>packetevents-spigot</artifactId>
+            <version>2.7.0</version>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <finalName>ShieldGuard-${project.version}</finalName>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
+    </build>
+</project>
+
+```
+
+`src/main/java/nl/shieldguard/ShieldGuard.java`:
+
+```java
+package nl.shieldguard;
+
+import com.github.retrooper.packetevents.PacketEvents;
+import com.github.retrooper.packetevents.event.PacketListenerCommon;
+import com.github.retrooper.packetevents.event.PacketListenerPriority;
+import nl.shieldguard.protection.MaskManager;
+import nl.shieldguard.protection.ChunkPacketListener;
+import nl.shieldguard.protection.Revealer;
+import nl.shieldguard.reports.ReportManager;
+import nl.shieldguard.reports.ReportsCommand;
+import nl.shieldguard.reports.ReportCommand;
+import nl.shieldguard.reports.ReportsGui;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
+import org.bukkit.command.PluginCommand;
+import org.bukkit.plugin.java.JavaPlugin;
+
+public final class ShieldGuard extends JavaPlugin {
+
+    private static final MiniMessage MM = MiniMessage.miniMessage();
+
+    private MaskManager maskManager;
+    private Revealer revealer;
+    private ReportManager reportManager;
+    private ReportsGui reportsGui;
+    private PacketListenerCommon packetListener;
+
+    @Override
+    public void onEnable() {
+        saveDefaultConfig();
+
+        maskManager = new MaskManager(this);
+        getServer().getPluginManager().registerEvents(maskManager, this);
+        maskManager.start();
+
+        revealer = new Revealer(this, maskManager);
+        getServer().getPluginManager().registerEvents(revealer, this);
+        revealer.start();
+
+        packetListener = new ChunkPacketListener(maskManager).asAbstract(PacketListenerPriority.HIGH);
+        PacketEvents.getAPI().getEventManager().registerListener(packetListener);
+
+        reportManager = new ReportManager(this);
+        reportsGui = new ReportsGui(this, reportManager);
+        getServer().getPluginManager().registerEvents(reportsGui, this);
+
+        PluginCommand report = getCommand("report");
+        if (report != null) {
+            ReportCommand rc = new ReportCommand(this, reportManager);
+            report.setExecutor(rc);
+            report.setTabCompleter(rc);
+        }
+        PluginCommand reports = getCommand("reports");
+        if (reports != null) {
+            ReportsCommand rc = new ReportsCommand(this, reportManager, reportsGui);
+            reports.setExecutor(rc);
+            reports.setTabCompleter(rc);
+        }
+
+        getLogger().info("ShieldGuard actief.");
+    }
+
+    @Override
+    public void onDisable() {
+        if (packetListener != null) {
+            PacketEvents.getAPI().getEventManager().unregisterListener(packetListener);
+        }
+        if (revealer != null) {
+            revealer.stop();
+        }
+        if (maskManager != null) {
+            maskManager.stop();
+        }
+        if (reportManager != null) {
+            reportManager.save();
+        }
+    }
+
+    public void reload() {
+        reloadConfig();
+        maskManager.reloadSettings();
+    }
+
+    /** Bericht uit config.yml als Component (MiniMessage), inclusief prefix. */
+    public Component msg(String key, TagResolver... resolvers) {
+        String prefix = getConfig().getString("messages.prefix", "");
+        String raw = getConfig().getString("messages." + key, "<red>Ontbrekend bericht: " + key + "</red>");
+        return MM.deserialize(prefix + raw, resolvers);
+    }
+
+    /** Bericht zonder prefix. */
+    public Component rawMsg(String key, TagResolver... resolvers) {
+        String raw = getConfig().getString("messages." + key, key);
+        return MM.deserialize(raw, resolvers);
+    }
+}
+
+```
+
+`src/main/java/nl/shieldguard/protection/ChunkPacketListener.java`:
+
+```java
+package nl.shieldguard.protection;
+
+import com.github.retrooper.packetevents.event.PacketListener;
+import com.github.retrooper.packetevents.event.PacketSendEvent;
+import com.github.retrooper.packetevents.protocol.packettype.PacketType;
+import com.github.retrooper.packetevents.protocol.player.ClientVersion;
+import com.github.retrooper.packetevents.protocol.player.User;
+import com.github.retrooper.packetevents.protocol.world.chunk.BaseChunk;
+import com.github.retrooper.packetevents.protocol.world.chunk.Column;
+import com.github.retrooper.packetevents.util.Vector3i;
+import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerBlockChange;
+import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerChunkData;
+import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerMultiBlockChange;
+import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerUnloadChunk;
+
+import java.util.Arrays;
+
+/**
+ * Past uitgaande packets per speler aan:
+ *  1. alles diep onder het oppervlak EN diep onder de speler wordt deepslate/stone (anti-freecam)
+ *  2. ALLE erts en storage-blokken worden stone/deepslate, tenzij de speler ze dichtbij en in zicht heeft
+ *     (anti-xray, anti-storage-ESP). Het tonen gebeurt in {@link Revealer}.
+ */
+public final class ChunkPacketListener implements PacketListener {
+
+    /** Binnen zoveel blokken worden nieuw geplaatste/veranderde blokken meteen echt getoond. */
+    private static final int NEAR = 6;
+
+    private final MaskManager masks;
+
+    public ChunkPacketListener(MaskManager masks) {
+        this.masks = masks;
+    }
+
+    @Override
+    public void onPacketSend(PacketSendEvent event) {
+        if (event.getPacketType() == PacketType.Play.Server.CHUNK_DATA) {
+            handleChunk(event);
+        } else if (event.getPacketType() == PacketType.Play.Server.UNLOAD_CHUNK) {
+            User user = event.getUser();
+            if (user == null) return;
+            MaskManager.State st = masks.state(user.getUUID());
+            if (st == null) return;
+            WrapperPlayServerUnloadChunk w = new WrapperPlayServerUnloadChunk(event);
+            st.sent.remove(MaskManager.key(w.getChunkX(), w.getChunkZ()));
+        } else if (event.getPacketType() == PacketType.Play.Server.BLOCK_CHANGE) {
+            handleBlockChange(event);
+        } else if (event.getPacketType() == PacketType.Play.Server.MULTI_BLOCK_CHANGE) {
+            handleMultiBlockChange(event);
+        }
+    }
+
+    // ------------------------------------------------------------ chunk data
+
+    private void handleChunk(PacketSendEvent event) {
+        User user = event.getUser();
+        if (user == null) return;
+        MaskManager.State st = masks.state(user.getUUID());
+        if (st == null || !masks.active(st)) return;
+
+        WrapperPlayServerChunkData wrapper = new WrapperPlayServerChunkData(event);
+        Column column = wrapper.getColumn();
+        long chunkKey = MaskManager.key(column.getX(), column.getZ());
+
+        int cutoff = masks.cutoff(st);
+        boolean hide = masks.blocksHidden(st);
+        if (cutoff == MaskManager.NO_MASK && !hide) {
+            st.sent.put(chunkKey, MaskManager.NO_MASK);
+            return;
+        }
+
+        ClientVersion version = user.getClientVersion();
+        Ids ids = masks.ids(version);
+        BaseChunk[] sections = column.getChunks();
+        int minY = st.minY;
+        int margin = masks.surfaceMargin();
+        boolean hideExposed = masks.hideExposedOres();
+        int baseX = column.getX() * 16;
+        int baseZ = column.getZ() * 16;
+
+        // Oppervlakte per kolom bepalen vóórdat we iets aanpassen.
+        int[] surface = cutoff != MaskManager.NO_MASK ? surface(sections, minY, ids) : null;
+
+        for (int i = 0; i < sections.length; i++) {
+            BaseChunk section = sections[i];
+            if (section == null) continue;
+            int y0 = minY + i * 16;
+            boolean belowCutoff = cutoff != MaskManager.NO_MASK && y0 < cutoff;
+            if (!belowCutoff && (!hide || section.isEmpty())) continue;
+
+            for (int lz = 0; lz < 16; lz++) {
+                for (int lx = 0; lx < 16; lx++) {
+                    // Alles onder 'limit' is "diep onder de grond" en wordt gevuld.
+                    int limit = Integer.MIN_VALUE;
+                    if (belowCutoff) {
+                        limit = Math.min(cutoff, surface[lz * 16 + lx] - margin);
+                    }
+                    for (int ly = 0; ly < 16; ly++) {
+                        int y = y0 + ly;
+                        if (y < limit) {
+                            section.set(version, lx, ly, lz, ids.fillFor(y));
+                            continue;
+                        }
+                        if (!hide) continue;
+                        byte cls = ids.classify(section.getBlockId(lx, ly, lz));
+                        if (cls != Ids.ORE && cls != Ids.STORAGE) continue;
+                        if (cls == Ids.ORE && !hideExposed && exposed(sections, i, lx, ly, lz, ids)) continue;
+                        if (st.revealed.containsKey(MaskManager.pos(baseX + lx, y, baseZ + lz))) continue;
+                        section.set(version, lx, ly, lz, ids.fillFor(y));
+                    }
+                }
+            }
+        }
+
+        st.sent.put(chunkKey, cutoff);
+        event.markForReEncode(true);
+    }
+
+    /** Y van het hoogste niet-open blok per kolom (index z*16+x), of minY-1 als de kolom leeg is. */
+    private static int[] surface(BaseChunk[] sections, int minY, Ids ids) {
+        int[] result = new int[256];
+        Arrays.fill(result, minY - 1);
+        boolean[] done = new boolean[256];
+        int remaining = 256;
+        for (int i = sections.length - 1; i >= 0 && remaining > 0; i--) {
+            BaseChunk section = sections[i];
+            if (section == null || section.isEmpty()) continue;
+            int y0 = minY + i * 16;
+            for (int z = 0; z < 16; z++) {
+                for (int x = 0; x < 16; x++) {
+                    int idx = z * 16 + x;
+                    if (done[idx]) continue;
+                    for (int y = 15; y >= 0; y--) {
+                        if (ids.classify(section.getBlockId(x, y, z)) != Ids.OPEN) {
+                            result[idx] = y0 + y;
+                            done[idx] = true;
+                            remaining--;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        return result;
+    }
+
+    // ----------------------------------------------------------- block changes
+
+    private void handleBlockChange(PacketSendEvent event) {
+        User user = event.getUser();
+        if (user == null) return;
+        MaskManager.State st = masks.state(user.getUUID());
+        if (st == null || !masks.blocksHidden(st)) return;
+
+        WrapperPlayServerBlockChange w = new WrapperPlayServerBlockChange(event);
+        Ids ids = masks.ids(user.getClientVersion());
+        byte cls = ids.classify(w.getBlockId());
+        if (cls != Ids.ORE && cls != Ids.STORAGE) return;
+
+        Vector3i p = w.getBlockPosition();
+        if (allow(st, p.getX(), p.getY(), p.getZ())) return;
+
+        w.setBlockId(ids.fillFor(p.getY()));
+        event.markForReEncode(true);
+    }
+
+    private void handleMultiBlockChange(PacketSendEvent event) {
+        User user = event.getUser();
+        if (user == null) return;
+        MaskManager.State st = masks.state(user.getUUID());
+        if (st == null || !masks.blocksHidden(st)) return;
+
+        WrapperPlayServerMultiBlockChange w = new WrapperPlayServerMultiBlockChange(event);
+        Ids ids = masks.ids(user.getClientVersion());
+        WrapperPlayServerMultiBlockChange.EncodedBlock[] blocks = w.getBlocks();
+        boolean changed = false;
+        for (WrapperPlayServerMultiBlockChange.EncodedBlock b : blocks) {
+            byte cls = ids.classify(b.getBlockId());
+            if (cls != Ids.ORE && cls != Ids.STORAGE) continue;
+            if (allow(st, b.getX(), b.getY(), b.getZ())) continue;
+            b.setBlockId(ids.fillFor(b.getY()));
+            changed = true;
+        }
+        if (changed) {
+            w.setBlocks(blocks);
+            event.markForReEncode(true);
+        }
+    }
+
+    /** Mag dit blok echt getoond worden (al onthuld of vlak bij de speler)? Zo ja, dan wordt het onthuld. */
+    private static boolean allow(MaskManager.State st, int x, int y, int z) {
+        long key = MaskManager.pos(x, y, z);
+        if (st.revealed.containsKey(key)) return true;
+        if (Math.abs(x - st.x) <= NEAR && Math.abs(y - st.y) <= NEAR && Math.abs(z - st.z) <= NEAR) {
+            st.revealed.put(key, Boolean.TRUE);
+            return true;
+        }
+        return false;
+    }
+
+    // ------------------------------------------------------------- hulpjes
+
+    /** (Alleen als hide-exposed-ores uit staat) erts blijft zichtbaar als een buur lucht/water/lava is. */
+    private static boolean exposed(BaseChunk[] sections, int index, int x, int y, int z, Ids ids) {
+        if (x == 0 || x == 15 || z == 0 || z == 15) return true;
+        return open(sections, index, x, y + 1, z, ids)
+                || open(sections, index, x, y - 1, z, ids)
+                || open(sections, index, x + 1, y, z, ids)
+                || open(sections, index, x - 1, y, z, ids)
+                || open(sections, index, x, y, z + 1, ids)
+                || open(sections, index, x, y, z - 1, ids);
+    }
+
+    private static boolean open(BaseChunk[] sections, int index, int x, int y, int z, Ids ids) {
+        int si = index;
+        if (y < 0) {
+            si--;
+            y += 16;
+        } else if (y > 15) {
+            si++;
+            y -= 16;
+        }
+        if (si < 0 || si >= sections.length || sections[si] == null) return true;
+        return ids.classify(sections[si].getBlockId(x, y, z)) == Ids.OPEN;
+    }
+}
+
+```
+
+`src/main/java/nl/shieldguard/protection/Ids.java`:
+
+```java
+package nl.shieldguard.protection;
+
+import com.github.retrooper.packetevents.protocol.player.ClientVersion;
+import com.github.retrooper.packetevents.protocol.world.states.WrappedBlockState;
+import com.github.retrooper.packetevents.protocol.world.states.type.StateType;
+import com.github.retrooper.packetevents.protocol.world.states.type.StateTypes;
+
+import java.util.Set;
+
+/** Per client-versie: block-id's classificeren en de vul-blokken kennen. */
+public final class Ids {
+
+    public static final byte SOLID = 1;
+    public static final byte ORE = 2;
+    public static final byte OPEN = 3;
+    public static final byte STORAGE = 4;
+
+    private final ClientVersion version;
+    private final Set<String> ores;
+    private final Set<String> storage;
+    private final byte[] classes = new byte[1 << 17];
+
+    public final int stone;
+    public final int deepslate;
+
+    public Ids(ClientVersion version, Set<String> ores, Set<String> storage) {
+        this.version = version;
+        this.ores = ores;
+        this.storage = storage;
+        this.stone = StateTypes.STONE.createBlockState(version).getGlobalId();
+        this.deepslate = StateTypes.DEEPSLATE.createBlockState(version).getGlobalId();
+    }
+
+    public byte classify(int id) {
+        if (id < 0 || id >= classes.length) return SOLID;
+        byte c = classes[id];
+        if (c == 0) {
+            c = compute(id);
+            classes[id] = c;
+        }
+        return c;
+    }
+
+    private byte compute(int id) {
+        WrappedBlockState state = WrappedBlockState.getByGlobalId(version, id);
+        StateType type = state.getType();
+        String name = MaskManager.normalize(type.getName());
+        if (ores.contains(name)) return ORE;
+        if (storage.contains(name)) return STORAGE;
+        if (!type.isSolid()) return OPEN;
+        return SOLID;
+    }
+
+    public int fillFor(int worldY) {
+        return worldY < 0 ? deepslate : stone;
+    }
+}
+
+```
+
+`src/main/java/nl/shieldguard/protection/MaskManager.java`:
+
+```java
+package nl.shieldguard.protection;
+
+import com.github.retrooper.packetevents.protocol.player.ClientVersion;
+import nl.shieldguard.ShieldGuard;
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.World;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.PlayerRespawnEvent;
+import org.bukkit.scheduler.BukkitTask;
+
+import java.util.ArrayDeque;
+import java.util.EnumSet;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+
+/**
+ * Houdt per speler bij waar hij is en welke "diepte-grens" hij nodig heeft,
+ * stuurt chunks opnieuw als die grens verschuift, en bewaart de instellingen.
+ */
+public final class MaskManager implements Listener {
+
+    public static final int NO_MASK = Integer.MIN_VALUE;
+
+    /** Status per speler. Wordt vanuit de main thread geschreven en vanuit de netty-thread gelezen. */
+    public static final class State {
+        public volatile String world = "";
+        public volatile int minY = -64;
+        public volatile int x = 0;
+        public volatile int y = 64;
+        public volatile int z = 0;
+        public volatile boolean enabled;
+        public volatile boolean bypass;
+        /** chunkKey -> cutoff waarmee die chunk is verstuurd (NO_MASK = niet gemaskeerd) */
+        public final Map<Long, Integer> sent = new ConcurrentHashMap<>();
+        /** Blokposities (zie MaskManager#pos) die deze speler echt mag zien: erts/storage dat dichtbij is en in zicht. */
+        public final Map<Long, Boolean> revealed = new ConcurrentHashMap<>();
+        // Alleen main thread:
+        public final Set<UUID> shownEntities = new HashSet<>();
+        public long lastBlock = Long.MIN_VALUE;
+        final ArrayDeque<Long> queue = new ArrayDeque<>();
+        final Set<Long> queued = new HashSet<>();
+        long lastScanSignature = Long.MIN_VALUE;
+    }
+
+    private final ShieldGuard plugin;
+    private final Map<UUID, State> states = new ConcurrentHashMap<>();
+    private final Map<ClientVersion, Ids> idCache = new ConcurrentHashMap<>();
+
+    private BukkitTask task;
+
+    // Instellingen (volatile: worden bij reload vervangen)
+    private volatile Set<String> worlds = Set.of();
+    private volatile boolean freecamEnabled;
+    private volatile boolean xrayEnabled;
+    private volatile boolean storageEnabled;
+    private volatile boolean hideExposedOres;
+    private volatile boolean hideEntities;
+    private volatile int depth;
+    private volatile int surfaceMargin;
+    private volatile int radius;
+    private volatile int perRun;
+    private volatile int remaskGap;
+    private volatile int interval;
+    private volatile int oreRadius;
+    private volatile int storageRadius;
+    private volatile Set<String> oreNames = Set.of();
+    private volatile Set<String> storageNames = Set.of();
+    private volatile Set<Material> oreMaterials = Set.of();
+    private volatile Set<Material> storageMaterials = Set.of();
+    private volatile String bypassPermission;
+
+    public MaskManager(ShieldGuard plugin) {
+        this.plugin = plugin;
+        reloadSettings();
+    }
+
+    public void reloadSettings() {
+        var cfg = plugin.getConfig();
+        Set<String> w = new HashSet<>(cfg.getStringList("worlds"));
+        worlds = w;
+
+        freecamEnabled = cfg.getBoolean("freecam-protection.enabled", true);
+        depth = Math.max(16, cfg.getInt("freecam-protection.depth-below-player", 32));
+        surfaceMargin = Math.max(0, cfg.getInt("freecam-protection.surface-margin", 12));
+        radius = Math.max(1, cfg.getInt("freecam-protection.refresh-radius-chunks", 8));
+        perRun = Math.max(1, cfg.getInt("freecam-protection.chunks-per-run", 6));
+        remaskGap = Math.max(16, cfg.getInt("freecam-protection.remask-gap-blocks", 32));
+        interval = Math.max(1, cfg.getInt("freecam-protection.refresh-interval-ticks", 10));
+
+        xrayEnabled = cfg.getBoolean("xray-protection.enabled", true);
+        hideExposedOres = cfg.getBoolean("xray-protection.hide-exposed-ores", true);
+        oreRadius = Math.max(0, cfg.getInt("xray-protection.reveal-radius", 6));
+
+        storageEnabled = cfg.getBoolean("storage-protection.enabled", true);
+        hideEntities = storageEnabled && cfg.getBoolean("storage-protection.hide-entities", true);
+        storageRadius = Math.max(0, cfg.getInt("storage-protection.reveal-radius", 10));
+
+        List<String> ores = xrayEnabled ? cfg.getStringList("xray-protection.hidden-blocks") : List.of();
+        List<String> storage = storageEnabled ? cfg.getStringList("storage-protection.hidden-blocks") : List.of();
+        oreNames = names(ores);
+        storageNames = names(storage);
+        oreMaterials = materials(ores);
+        storageMaterials = materials(storage);
+
+        bypassPermission = cfg.getString("bypass-permission", "shieldguard.bypass");
+        idCache.clear();
+        // Speler-status opnieuw bepalen
+        for (Player p : Bukkit.getOnlinePlayers()) {
+            init(p, p.getLocation());
+        }
+    }
+
+    private static Set<String> names(List<String> list) {
+        Set<String> out = new HashSet<>();
+        for (String s : list) out.add(normalize(s));
+        return out;
+    }
+
+    private Set<Material> materials(List<String> list) {
+        Set<Material> out = EnumSet.noneOf(Material.class);
+        for (String s : list) {
+            Material m = Material.matchMaterial(normalize(s));
+            if (m != null) {
+                out.add(m);
+            } else {
+                plugin.getLogger().warning("Onbekend blok in config: " + s);
+            }
+        }
+        return out;
+    }
+
+    public void start() {
+        task = Bukkit.getScheduler().runTaskTimer(plugin, this::tick, 20L, interval);
+    }
+
+    public void stop() {
+        if (task != null) task.cancel();
+        states.clear();
+    }
+
+    public static String normalize(String name) {
+        String n = name.toLowerCase(Locale.ROOT);
+        return n.startsWith("minecraft:") ? n.substring(10) : n;
+    }
+
+    /** Zelfde codering als vanilla BlockPos#asLong. */
+    public static long pos(int x, int y, int z) {
+        return ((long) (x & 0x3FFFFFF) << 38) | ((long) (z & 0x3FFFFFF) << 12) | (long) (y & 0xFFF);
+    }
+
+    public static int posX(long p) {
+        return (int) (p >> 38);
+    }
+
+    public static int posY(long p) {
+        return (int) (p << 52 >> 52);
+    }
+
+    public static int posZ(long p) {
+        return (int) (p << 26 >> 38);
+    }
+
+    public static long key(int cx, int cz) {
+        return ((long) cx << 32) | (cz & 0xFFFFFFFFL);
+    }
+
+    public State state(UUID uuid) {
+        return uuid == null ? null : states.get(uuid);
+    }
+
+    public Ids ids(ClientVersion version) {
+        return idCache.computeIfAbsent(version, v -> new Ids(v, oreNames, storageNames));
+    }
+
+    public boolean hideExposedOres() {
+        return hideExposedOres;
+    }
+
+    public boolean hideEntities() {
+        return hideEntities;
+    }
+
+    public int surfaceMargin() {
+        return surfaceMargin;
+    }
+
+    public int oreRadius() {
+        return oreRadius;
+    }
+
+    public int storageRadius() {
+        return storageRadius;
+    }
+
+    public Set<Material> oreMaterials() {
+        return oreMaterials;
+    }
+
+    public Set<Material> storageMaterials() {
+        return storageMaterials;
+    }
+
+    /** Is er voor deze speler iets te verbergen (erts en/of storage)? */
+    public boolean blocksHidden(State st) {
+        return st.enabled && !st.bypass && (!oreMaterials.isEmpty() || !storageMaterials.isEmpty());
+    }
+
+    public boolean active(State st) {
+        return st != null && st.enabled && !st.bypass;
+    }
+
+    /** Grens (wereld-Y) waaronder het diepte-masker geldt, of NO_MASK. */
+    public int cutoff(State st) {
+        if (!freecamEnabled || !st.enabled || st.bypass) return NO_MASK;
+        int c = Math.floorDiv(st.y - depth, 16) * 16;
+        if (c <= st.minY) return NO_MASK;
+        return c;
+    }
+
+    // ---------------------------------------------------------------- events
+
+    private void init(Player p, Location loc) {
+        State st = states.computeIfAbsent(p.getUniqueId(), u -> new State());
+        World w = loc.getWorld();
+        boolean worldChanged = !w.getName().equals(st.world);
+        st.world = w.getName();
+        st.minY = w.getMinHeight();
+        st.x = loc.getBlockX();
+        st.y = loc.getBlockY();
+        st.z = loc.getBlockZ();
+        st.enabled = worlds.contains(w.getName());
+        st.bypass = p.hasPermission(bypassPermission);
+        if (worldChanged) {
+            st.sent.clear();
+            st.revealed.clear();
+            st.queue.clear();
+            st.queued.clear();
+            st.lastScanSignature = Long.MIN_VALUE;
+            st.lastBlock = Long.MIN_VALUE;
+        }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onJoin(PlayerJoinEvent e) {
+        init(e.getPlayer(), e.getPlayer().getLocation());
+    }
+
+    @EventHandler
+    public void onQuit(PlayerQuitEvent e) {
+        states.remove(e.getPlayer().getUniqueId());
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onMove(PlayerMoveEvent e) {
+        Location to = e.getTo();
+        State st = states.get(e.getPlayer().getUniqueId());
+        if (st == null) {
+            init(e.getPlayer(), to);
+            return;
+        }
+        if (!to.getWorld().getName().equals(st.world)) {
+            init(e.getPlayer(), to); // ook bij teleports (PlayerTeleportEvent is een PlayerMoveEvent)
+            return;
+        }
+        st.x = to.getBlockX();
+        st.y = to.getBlockY();
+        st.z = to.getBlockZ();
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onRespawn(PlayerRespawnEvent e) {
+        init(e.getPlayer(), e.getRespawnLocation());
+    }
+
+    // ------------------------------------------------------- refresh-routine
+
+    private void tick() {
+        for (Player p : Bukkit.getOnlinePlayers()) {
+            State st = states.get(p.getUniqueId());
+            if (st == null || !st.enabled || st.bypass) continue;
+            int needed = cutoff(st);
+            Location loc = p.getLocation();
+            int pcx = loc.getBlockX() >> 4;
+            int pcz = loc.getBlockZ() >> 4;
+
+            long signature = ((long) needed << 40) ^ ((long) pcx << 20) ^ (pcz & 0xFFFFFL);
+            if (st.queue.isEmpty() && signature != st.lastScanSignature) {
+                st.lastScanSignature = signature;
+                scan(st, needed, pcx, pcz);
+            }
+
+            World world = p.getWorld();
+            int done = 0;
+            while (done < perRun && !st.queue.isEmpty()) {
+                long key = st.queue.poll();
+                st.queued.remove(key);
+                int cx = (int) (key >> 32);
+                int cz = (int) key;
+                if (world.isChunkLoaded(cx, cz)) {
+                    //noinspection deprecation
+                    world.refreshChunk(cx, cz);
+                    done++;
+                }
+            }
+        }
+    }
+
+    private void scan(State st, int needed, int pcx, int pcz) {
+        for (int dx = -radius; dx <= radius; dx++) {
+            for (int dz = -radius; dz <= radius; dz++) {
+                long key = key(pcx + dx, pcz + dz);
+                Integer sent = st.sent.get(key);
+                if (sent == null) continue;
+                boolean unmaskNeeded = sent > needed;
+                boolean remaskNeeded = needed != NO_MASK && ((long) needed - (long) sent) >= remaskGap;
+                if ((unmaskNeeded || remaskNeeded) && st.queued.add(key)) {
+                    st.queue.add(key);
+                }
+            }
+        }
+    }
+}
+
+```
+
+`src/main/java/nl/shieldguard/protection/RevealListener.java`:
+
+```java
+package nl.shieldguard.protection;
+
+import nl.shieldguard.ShieldGuard;
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockExplodeEvent;
+import org.bukkit.event.entity.EntityExplodeEvent;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
+
+/**
+ * Wanneer een blok verdwijnt kan erts ernaast ineens "bloot" liggen.
+ * Dan sturen we het echte blok naar nabije spelers.
+ */
+public final class RevealListener implements Listener {
+
+    private static final BlockFace[] FACES = {
+            BlockFace.UP, BlockFace.DOWN, BlockFace.NORTH, BlockFace.SOUTH, BlockFace.EAST, BlockFace.WEST
+    };
+
+    private final ShieldGuard plugin;
+    private final MaskManager masks;
+
+    public RevealListener(ShieldGuard plugin, MaskManager masks) {
+        this.plugin = plugin;
+        this.masks = masks;
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onBreak(BlockBreakEvent e) {
+        reveal(List.of(e.getBlock()));
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onEntityExplode(EntityExplodeEvent e) {
+        reveal(new ArrayList<>(e.blockList()));
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onBlockExplode(BlockExplodeEvent e) {
+        reveal(new ArrayList<>(e.blockList()));
+    }
+
+    private void reveal(Collection<Block> removed) {
+        if (!masks.xrayEnabled() || removed.isEmpty()) return;
+        Set<String> hidden = masks.hiddenNames();
+
+        Set<Block> targets = new LinkedHashSet<>();
+        for (Block b : removed) {
+            for (BlockFace face : FACES) {
+                Block n = b.getRelative(face);
+                if (hidden.contains(MaskManager.normalize(n.getType().getKey().getKey()))) {
+                    targets.add(n);
+                }
+            }
+        }
+        if (targets.isEmpty()) return;
+
+        // Een tick later, zodat het wegvallen van het blok al verwerkt is
+        Bukkit.getScheduler().runTask(plugin, () -> {
+            double dist = plugin.getConfig().getDouble("xray-protection.reveal-distance", 96);
+            double distSq = dist * dist;
+            for (Block target : targets) {
+                if (target.getType() == Material.AIR) continue;
+                Location loc = target.getLocation();
+                for (Player p : target.getWorld().getPlayers()) {
+                    if (p.getLocation().distanceSquared(loc) <= distSq) {
+                        p.sendBlockChange(loc, target.getBlockData());
+                    }
+                }
+            }
+        });
+    }
+}
+
+```
+
+`src/main/java/nl/shieldguard/protection/Revealer.java`:
+
+```java
+package nl.shieldguard.protection;
+
+import com.destroystokyo.paper.event.entity.EntityAddToWorldEvent;
+import nl.shieldguard.ShieldGuard;
+import org.bukkit.Bukkit;
+import org.bukkit.Chunk;
+import org.bukkit.FluidCollisionMode;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.World;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
+import org.bukkit.block.BlockState;
+import org.bukkit.entity.ChestBoat;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.Player;
+import org.bukkit.entity.minecart.HopperMinecart;
+import org.bukkit.entity.minecart.SpawnerMinecart;
+import org.bukkit.entity.minecart.StorageMinecart;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.scheduler.BukkitTask;
+import org.bukkit.util.RayTraceResult;
+import org.bukkit.util.Vector;
+
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+
+/**
+ * Alle erts en storage is voor de client standaard stone/deepslate. Deze klasse toont het echte blok pas
+ * als de speler er dichtbij is EN er een vrije zichtlijn naartoe bestaat. Hetzelfde geldt voor
+ * minecarts met kisten/hoppers/spawners en chest-boats (die worden per speler verborgen).
+ */
+public final class Revealer implements Listener {
+
+    private static final BlockFace[] FACES = {
+            BlockFace.UP, BlockFace.DOWN, BlockFace.NORTH, BlockFace.SOUTH, BlockFace.EAST, BlockFace.WEST
+    };
+
+    private final ShieldGuard plugin;
+    private final MaskManager masks;
+    private BukkitTask task;
+    private int runCounter;
+
+    public Revealer(ShieldGuard plugin, MaskManager masks) {
+        this.plugin = plugin;
+        this.masks = masks;
+    }
+
+    public void start() {
+        int interval = Math.max(1, plugin.getConfig().getInt("reveal-interval-ticks", 5));
+        task = Bukkit.getScheduler().runTaskTimer(plugin, this::tick, 20L, interval);
+    }
+
+    public void stop() {
+        if (task != null) task.cancel();
+    }
+
+    // ------------------------------------------------------- entities verbergen
+
+    private static boolean isStorageEntity(Entity e) {
+        return e instanceof StorageMinecart || e instanceof HopperMinecart
+                || e instanceof SpawnerMinecart || e instanceof ChestBoat;
+    }
+
+    private static java.util.Collection<Entity> storageEntities(World w) {
+        return w.getEntitiesByClasses(StorageMinecart.class, HopperMinecart.class,
+                SpawnerMinecart.class, ChestBoat.class);
+    }
+
+    /** Nieuwe/geladen storage-entities meteen verbergen, nog voordat ze naar spelers gestuurd worden. */
+    @EventHandler
+    public void onEntityAdd(EntityAddToWorldEvent e) {
+        if (!masks.hideEntities() || !isStorageEntity(e.getEntity())) return;
+        for (Player p : Bukkit.getOnlinePlayers()) {
+            MaskManager.State st = masks.state(p.getUniqueId());
+            if (masks.active(st)) p.hideEntity(plugin, e.getEntity());
+        }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onJoin(PlayerJoinEvent e) {
+        if (!masks.hideEntities()) return;
+        Player p = e.getPlayer();
+        MaskManager.State st = masks.state(p.getUniqueId());
+        if (!masks.active(st)) return;
+        for (World w : Bukkit.getWorlds()) {
+            for (Entity entity : storageEntities(w)) p.hideEntity(plugin, entity);
+        }
+    }
+
+    // ----------------------------------------------------------------- tick
+
+    private void tick() {
+        runCounter++;
+        boolean periodic = runCounter % 8 == 0;
+        Map<World, java.util.Collection<Entity>> entityCache = new HashMap<>();
+
+        for (Player p : Bukkit.getOnlinePlayers()) {
+            MaskManager.State st = masks.state(p.getUniqueId());
+            if (!masks.active(st)) continue;
+            World w = p.getWorld();
+            Location eye = p.getEyeLocation();
+
+            if (masks.hideEntities()) {
+                var entities = entityCache.computeIfAbsent(w, Revealer::storageEntities);
+                updateEntities(p, st, eye, entities, periodic);
+            }
+
+            if (masks.blocksHidden(st)) {
+                long cur = MaskManager.pos(p.getLocation().getBlockX(), p.getLocation().getBlockY(),
+                        p.getLocation().getBlockZ());
+                if (cur != st.lastBlock || periodic) {
+                    st.lastBlock = cur;
+                    scanBlocks(p, st, w, eye);
+                    prune(st);
+                }
+            }
+        }
+    }
+
+    // --------------------------------------------------------- entity logic
+
+    private void updateEntities(Player p, MaskManager.State st, Location eye,
+                                java.util.Collection<Entity> entities, boolean cleanup) {
+        double r = masks.storageRadius();
+        double r2 = r * r;
+        Set<UUID> alive = cleanup ? new HashSet<>() : null;
+
+        for (Entity e : entities) {
+            if (alive != null) alive.add(e.getUniqueId());
+            boolean should = false;
+            if (r > 0) {
+                Vector center = e.getBoundingBox().getCenter();
+                if (center.distanceSquared(eye.toVector()) <= r2) {
+                    should = rayTo(eye.getWorld(), eye, null, center.getX(), center.getY(), center.getZ());
+                }
+            }
+            boolean shown = st.shownEntities.contains(e.getUniqueId());
+            if (should && !shown) {
+                p.showEntity(plugin, e);
+                st.shownEntities.add(e.getUniqueId());
+            } else if (!should) {
+                if (shown) {
+                    st.shownEntities.remove(e.getUniqueId());
+                    p.hideEntity(plugin, e);
+                } else if (p.canSee(e)) {
+                    p.hideEntity(plugin, e);
+                }
+            }
+        }
+        if (alive != null) st.shownEntities.retainAll(alive);
+    }
+
+    // ---------------------------------------------------------- block logic
+
+    private void scanBlocks(Player p, MaskManager.State st, World w, Location eye) {
+        int bx = eye.getBlockX();
+        int by = eye.getBlockY();
+        int bz = eye.getBlockZ();
+
+        // Erts: kubus rond de speler
+        int r = masks.oreRadius();
+        Set<Material> ores = masks.oreMaterials();
+        if (r > 0 && !ores.isEmpty()) {
+            int r2 = r * r;
+            int minY = Math.max(w.getMinHeight(), by - r);
+            int maxY = Math.min(w.getMaxHeight() - 1, by + r);
+            for (int x = bx - r; x <= bx + r; x++) {
+                for (int z = bz - r; z <= bz + r; z++) {
+                    if (!w.isChunkLoaded(x >> 4, z >> 4)) continue;
+                    for (int y = minY; y <= maxY; y++) {
+                        int dx = x - bx, dy = y - by, dz = z - bz;
+                        if (dx * dx + dy * dy + dz * dz > r2) continue;
+                        Block b = w.getBlockAt(x, y, z);
+                        if (!ores.contains(b.getType())) continue;
+                        tryReveal(p, st, w, eye, b);
+                    }
+                }
+            }
+        }
+
+        // Storage: via de tile entities van de chunks eromheen
+        int sr = masks.storageRadius();
+        Set<Material> storage = masks.storageMaterials();
+        if (sr > 0 && !storage.isEmpty()) {
+            long sr2 = (long) sr * sr;
+            int cr = (sr + 15) >> 4;
+            for (int cx = (bx >> 4) - cr; cx <= (bx >> 4) + cr; cx++) {
+                for (int cz = (bz >> 4) - cr; cz <= (bz >> 4) + cr; cz++) {
+                    if (!w.isChunkLoaded(cx, cz)) continue;
+                    Chunk chunk = w.getChunkAt(cx, cz);
+                    for (BlockState bs : chunk.getTileEntities(false)) {
+                        if (!storage.contains(bs.getType())) continue;
+                        long dx = bs.getX() - bx, dy = bs.getY() - by, dz = bs.getZ() - bz;
+                        if (dx * dx + dy * dy + dz * dz > sr2) continue;
+                        tryReveal(p, st, w, eye, bs.getBlock());
+                    }
+                }
+            }
+        }
+    }
+
+    private void tryReveal(Player p, MaskManager.State st, World w, Location eye, Block b) {
+        long key = MaskManager.pos(b.getX(), b.getY(), b.getZ());
+        if (st.revealed.containsKey(key)) return;
+        if (!hasOpenNeighbor(b)) return;      // goedkope voorfilter: ingesloten = nooit zichtbaar
+        if (!visible(w, eye, b)) return;
+        st.revealed.put(key, Boolean.TRUE);   // eerst markeren, anders maskeert de packet-listener het weer
+        p.sendBlockChange(b.getLocation(), b.getBlockData());
+    }
+
+    private static boolean hasOpenNeighbor(Block b) {
+        for (BlockFace f : FACES) {
+            if (!b.getRelative(f).getType().isOccluding()) return true;
+        }
+        return false;
+    }
+
+    /** Zichtlijn naar het midden van het blok, of naar de drie vlakken die naar de speler gericht zijn. */
+    private boolean visible(World w, Location eye, Block b) {
+        double cx = b.getX() + 0.5, cy = b.getY() + 0.5, cz = b.getZ() + 0.5;
+        if (rayTo(w, eye, b, cx, cy, cz)) return true;
+        double sx = Math.signum(eye.getX() - cx);
+        double sy = Math.signum(eye.getY() - cy);
+        double sz = Math.signum(eye.getZ() - cz);
+        if (sx != 0 && rayTo(w, eye, b, cx + sx * 0.49, cy, cz)) return true;
+        if (sy != 0 && rayTo(w, eye, b, cx, cy + sy * 0.49, cz)) return true;
+        return sz != 0 && rayTo(w, eye, b, cx, cy, cz + sz * 0.49);
+    }
+
+    /**
+     * target != null: waar als de eerste geraakte blok het target is.
+     * target == null (voor entities): waar als er geen blok tussen eye en punt zit.
+     */
+    private static boolean rayTo(World w, Location eye, Block target, double x, double y, double z) {
+        Vector dir = new Vector(x - eye.getX(), y - eye.getY(), z - eye.getZ());
+        double len = dir.length();
+        if (len < 0.01) return true;
+        dir.multiply(1.0 / len);
+        if (target == null) {
+            RayTraceResult hit = w.rayTraceBlocks(eye, dir, len, FluidCollisionMode.NEVER, true);
+            return hit == null || hit.getHitBlock() == null;
+        }
+        RayTraceResult hit = w.rayTraceBlocks(eye, dir, len + 0.75, FluidCollisionMode.NEVER, true);
+        return hit != null && target.equals(hit.getHitBlock());
+    }
+
+    /** Onthulde posities ver van de speler weer vergeten (zodat een herlaadde chunk ze weer verbergt). */
+    private void prune(MaskManager.State st) {
+        int keep = Math.max(masks.oreRadius(), masks.storageRadius()) + 12;
+        long keep2 = (long) keep * keep;
+        Iterator<Long> it = st.revealed.keySet().iterator();
+        while (it.hasNext()) {
+            long k = it.next();
+            long dx = MaskManager.posX(k) - st.x;
+            long dy = MaskManager.posY(k) - st.y;
+            long dz = MaskManager.posZ(k) - st.z;
+            if (dx * dx + dy * dy + dz * dz > keep2) it.remove();
+        }
+    }
+}
+
+```
+
+`src/main/java/nl/shieldguard/reports/Report.java`:
+
+```java
+package nl.shieldguard.reports;
+
+import java.util.UUID;
+
+public final class Report {
+    public final int id;
+    public final UUID reporter;
+    public final String reporterName;
+    public final UUID target;
+    public final String targetName;
+    public final String reason;
+    public final long time;
+    public final String world;
+    public final double x, y, z;
+
+    public boolean closed;
+    public String handledBy = "";
+    public String note = "";
+
+    public Report(int id, UUID reporter, String reporterName, UUID target, String targetName,
+                  String reason, long time, String world, double x, double y, double z) {
+        this.id = id;
+        this.reporter = reporter;
+        this.reporterName = reporterName;
+        this.target = target;
+        this.targetName = targetName;
+        this.reason = reason;
+        this.time = time;
+        this.world = world;
+        this.x = x;
+        this.y = y;
+        this.z = z;
+    }
+}
+
+```
+
+`src/main/java/nl/shieldguard/reports/ReportCommand.java`:
+
+```java
+package nl.shieldguard.reports;
+
+import nl.shieldguard.ShieldGuard;
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
+import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandExecutor;
+import org.bukkit.command.CommandSender;
+import org.bukkit.command.TabCompleter;
+import org.bukkit.entity.Player;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Locale;
+
+/** /report <speler> <reden> */
+public final class ReportCommand implements CommandExecutor, TabCompleter {
+
+    private final ShieldGuard plugin;
+    private final ReportManager reports;
+
+    public ReportCommand(ShieldGuard plugin, ReportManager reports) {
+        this.plugin = plugin;
+        this.reports = reports;
+    }
+
+    @Override
+    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+        if (!(sender instanceof Player player)) {
+            sender.sendMessage(plugin.msg("players-only"));
+            return true;
+        }
+        if (!player.hasPermission("shieldguard.report")) {
+            player.sendMessage(plugin.msg("no-permission"));
+            return true;
+        }
+        if (args.length < 2) {
+            player.sendMessage(plugin.msg("report-usage"));
+            return true;
+        }
+
+        String targetName = args[0];
+        OfflinePlayer target = Bukkit.getPlayerExact(targetName);
+        if (target == null) {
+            OfflinePlayer off = Bukkit.getOfflinePlayerIfCached(targetName);
+            if (off != null && off.hasPlayedBefore()) target = off;
+        }
+        if (target == null) {
+            player.sendMessage(plugin.msg("report-unknown-player"));
+            return true;
+        }
+        String shownName = target.getName() != null ? target.getName() : targetName;
+
+        if (target.getUniqueId().equals(player.getUniqueId())) {
+            player.sendMessage(plugin.msg("report-self"));
+            return true;
+        }
+
+        String reason = String.join(" ", Arrays.copyOfRange(args, 1, args.length)).trim();
+        int min = plugin.getConfig().getInt("reports.min-reason-length", 4);
+        if (reason.length() < min) {
+            player.sendMessage(plugin.msg("report-reason-short"));
+            return true;
+        }
+        if (reason.length() > 200) reason = reason.substring(0, 200);
+
+        long left = reports.cooldownLeft(player.getUniqueId());
+        if (left > 0) {
+            player.sendMessage(plugin.msg("report-cooldown",
+                    Placeholder.unparsed("seconds", String.valueOf(left))));
+            return true;
+        }
+        if (reports.hasOpenFrom(player.getUniqueId(), target.getUniqueId())) {
+            player.sendMessage(plugin.msg("report-duplicate", Placeholder.unparsed("target", shownName)));
+            return true;
+        }
+
+        Report r = reports.create(player, target.getUniqueId(), shownName, reason);
+        player.sendMessage(plugin.msg("report-sent",
+                Placeholder.unparsed("target", shownName),
+                Placeholder.unparsed("id", String.valueOf(r.id))));
+        return true;
+    }
+
+    @Override
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+        List<String> out = new ArrayList<>();
+        if (args.length == 1) {
+            String prefix = args[0].toLowerCase(Locale.ROOT);
+            for (Player p : Bukkit.getOnlinePlayers()) {
+                if (p.getName().toLowerCase(Locale.ROOT).startsWith(prefix)) out.add(p.getName());
+            }
+        } else if (args.length == 2) {
+            String prefix = args[1].toLowerCase(Locale.ROOT);
+            for (String s : plugin.getConfig().getStringList("reports.suggested-reasons")) {
+                if (s.toLowerCase(Locale.ROOT).startsWith(prefix)) out.add(s);
+            }
+        }
+        return out;
+    }
+}
+
+```
+
+`src/main/java/nl/shieldguard/reports/ReportManager.java`:
+
+```java
+package nl.shieldguard.reports;
+
+import nl.shieldguard.ShieldGuard;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.event.HoverEvent;
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Player;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URI;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+
+public final class ReportManager {
+
+    private final ShieldGuard plugin;
+    private final File file;
+    private final Map<Integer, Report> reports = new LinkedHashMap<>();
+    private final Map<UUID, Long> cooldowns = new ConcurrentHashMap<>();
+    private int nextId = 1;
+
+    public ReportManager(ShieldGuard plugin) {
+        this.plugin = plugin;
+        this.file = new File(plugin.getDataFolder(), "reports.yml");
+        load();
+    }
+
+    // ------------------------------------------------------------- opslag
+
+    private void load() {
+        if (!file.exists()) return;
+        YamlConfiguration yaml = YamlConfiguration.loadConfiguration(file);
+        nextId = yaml.getInt("next-id", 1);
+        ConfigurationSection section = yaml.getConfigurationSection("reports");
+        if (section == null) return;
+        for (String key : section.getKeys(false)) {
+            ConfigurationSection s = section.getConfigurationSection(key);
+            if (s == null) continue;
+            try {
+                Report r = new Report(
+                        Integer.parseInt(key),
+                        UUID.fromString(s.getString("reporter", "")),
+                        s.getString("reporter-name", "?"),
+                        UUID.fromString(s.getString("target", "")),
+                        s.getString("target-name", "?"),
+                        s.getString("reason", ""),
+                        s.getLong("time"),
+                        s.getString("world", ""),
+                        s.getDouble("x"), s.getDouble("y"), s.getDouble("z"));
+                r.closed = s.getBoolean("closed");
+                r.handledBy = s.getString("handled-by", "");
+                r.note = s.getString("note", "");
+                reports.put(r.id, r);
+                nextId = Math.max(nextId, r.id + 1);
+            } catch (IllegalArgumentException ex) {
+                plugin.getLogger().warning("Ongeldig report " + key + " overgeslagen.");
+            }
+        }
+    }
+
+    public synchronized void save() {
+        YamlConfiguration yaml = new YamlConfiguration();
+        yaml.set("next-id", nextId);
+        for (Report r : reports.values()) {
+            String p = "reports." + r.id + ".";
+            yaml.set(p + "reporter", r.reporter.toString());
+            yaml.set(p + "reporter-name", r.reporterName);
+            yaml.set(p + "target", r.target.toString());
+            yaml.set(p + "target-name", r.targetName);
+            yaml.set(p + "reason", r.reason);
+            yaml.set(p + "time", r.time);
+            yaml.set(p + "world", r.world);
+            yaml.set(p + "x", r.x);
+            yaml.set(p + "y", r.y);
+            yaml.set(p + "z", r.z);
+            yaml.set(p + "closed", r.closed);
+            yaml.set(p + "handled-by", r.handledBy);
+            yaml.set(p + "note", r.note);
+        }
+        try {
+            plugin.getDataFolder().mkdirs();
+            yaml.save(file);
+        } catch (IOException ex) {
+            plugin.getLogger().severe("Kon reports.yml niet opslaan: " + ex.getMessage());
+        }
+    }
+
+    // ------------------------------------------------------------ queries
+
+    public synchronized Report get(int id) {
+        return reports.get(id);
+    }
+
+    public synchronized List<Report> open() {
+        List<Report> list = new ArrayList<>();
+        for (Report r : reports.values()) if (!r.closed) list.add(r);
+        list.sort(Comparator.comparingLong((Report r) -> r.time).reversed());
+        return list;
+    }
+
+    public synchronized int openAgainst(UUID target) {
+        int n = 0;
+        for (Report r : reports.values()) if (!r.closed && r.target.equals(target)) n++;
+        return n;
+    }
+
+    public synchronized boolean hasOpenFrom(UUID reporter, UUID target) {
+        for (Report r : reports.values()) {
+            if (!r.closed && r.reporter.equals(reporter) && r.target.equals(target)) return true;
+        }
+        return false;
+    }
+
+    /** Resterende cooldown in seconden, 0 als de speler mag reporten. */
+    public long cooldownLeft(UUID reporter) {
+        Long until = cooldowns.get(reporter);
+        if (until == null) return 0;
+        long left = (until - System.currentTimeMillis() + 999) / 1000;
+        return Math.max(0, left);
+    }
+
+    // ------------------------------------------------------------- acties
+
+    public Report create(Player reporter, UUID targetUuid, String targetName, String reason) {
+        Location loc = reporter.getLocation();
+        Report r;
+        synchronized (this) {
+            Player online = Bukkit.getPlayer(targetUuid);
+            Location where = online != null ? online.getLocation() : loc;
+            r = new Report(nextId++, reporter.getUniqueId(), reporter.getName(), targetUuid, targetName,
+                    reason, System.currentTimeMillis(), where.getWorld().getName(),
+                    where.getX(), where.getY(), where.getZ());
+            reports.put(r.id, r);
+        }
+        long cooldown = plugin.getConfig().getLong("reports.cooldown-seconds", 60);
+        cooldowns.put(reporter.getUniqueId(), System.currentTimeMillis() + cooldown * 1000);
+
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, this::save);
+        notifyStaff(r);
+        sendWebhook(r);
+        return r;
+    }
+
+    public synchronized boolean close(int id, String by, String note) {
+        Report r = reports.get(id);
+        if (r == null || r.closed) return false;
+        r.closed = true;
+        r.handledBy = by;
+        r.note = note;
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, this::save);
+        return true;
+    }
+
+    private void notifyStaff(Report r) {
+        Component line = plugin.msg("staff-new-report",
+                        Placeholder.unparsed("id", String.valueOf(r.id)),
+                        Placeholder.unparsed("reporter", r.reporterName),
+                        Placeholder.unparsed("target", r.targetName),
+                        Placeholder.unparsed("reason", r.reason))
+                .clickEvent(ClickEvent.runCommand("/reports tp " + r.id))
+                .hoverEvent(HoverEvent.showText(Component.text("Klik om naar " + r.targetName + " te teleporteren")));
+
+        int count = openAgainst(r.target);
+        int threshold = plugin.getConfig().getInt("reports.alert-threshold", 3);
+
+        for (Player p : Bukkit.getOnlinePlayers()) {
+            if (!p.hasPermission("shieldguard.reports.notify")) continue;
+            p.sendMessage(line);
+            if (count >= threshold) {
+                p.sendMessage(plugin.msg("staff-alert",
+                        Placeholder.unparsed("target", r.targetName),
+                        Placeholder.unparsed("count", String.valueOf(count))));
+            }
+        }
+    }
+
+    private void sendWebhook(Report r) {
+        String url = plugin.getConfig().getString("reports.discord-webhook-url", "");
+        if (url == null || url.isBlank()) return;
+        String text = "**Report #" + r.id + "** — " + r.reporterName + " meldt " + r.targetName
+                + ": " + r.reason;
+        String json = "{\"content\":\"" + escape(text) + "\"}";
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+            try {
+                HttpURLConnection c = (HttpURLConnection) URI.create(url).toURL().openConnection();
+                c.setRequestMethod("POST");
+                c.setRequestProperty("Content-Type", "application/json");
+                c.setConnectTimeout(5000);
+                c.setReadTimeout(5000);
+                c.setDoOutput(true);
+                try (OutputStream out = c.getOutputStream()) {
+                    out.write(json.getBytes(StandardCharsets.UTF_8));
+                }
+                c.getResponseCode();
+                c.disconnect();
+            } catch (Exception ex) {
+                plugin.getLogger().warning("Discord webhook mislukt: " + ex.getMessage());
+            }
+        });
+    }
+
+    private static String escape(String s) {
+        StringBuilder sb = new StringBuilder();
+        for (char ch : s.toCharArray()) {
+            switch (ch) {
+                case '"' -> sb.append("\\\"");
+                case '\\' -> sb.append("\\\\");
+                case '\n' -> sb.append("\\n");
+                case '\r' -> { }
+                default -> sb.append(ch < 0x20 ? ' ' : ch);
+            }
+        }
+        return sb.toString();
+    }
+}
+
+```
+
+`src/main/java/nl/shieldguard/reports/ReportsCommand.java`:
+
+```java
+package nl.shieldguard.reports;
+
+import nl.shieldguard.ShieldGuard;
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.World;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandExecutor;
+import org.bukkit.command.CommandSender;
+import org.bukkit.command.TabCompleter;
+import org.bukkit.entity.Player;
+
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
+
+/** /reports [list|view <id>|tp <id>|close <id> [notitie]|reload] — zonder argumenten opent de GUI. */
+public final class ReportsCommand implements CommandExecutor, TabCompleter {
+
+    private static final List<String> SUB = List.of("gui", "list", "view", "tp", "close", "reload");
+
+    private final ShieldGuard plugin;
+    private final ReportManager reports;
+    private final ReportsGui gui;
+
+    public ReportsCommand(ShieldGuard plugin, ReportManager reports, ReportsGui gui) {
+        this.plugin = plugin;
+        this.reports = reports;
+        this.gui = gui;
+    }
+
+    @Override
+    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+        if (!sender.hasPermission("shieldguard.reports.manage")) {
+            sender.sendMessage(plugin.msg("no-permission"));
+            return true;
+        }
+
+        String sub = args.length == 0 ? (sender instanceof Player ? "gui" : "list") : args[0].toLowerCase(Locale.ROOT);
+        switch (sub) {
+            case "gui" -> {
+                if (sender instanceof Player p) gui.open(p);
+                else sender.sendMessage(plugin.msg("players-only"));
+            }
+            case "list" -> list(sender);
+            case "view" -> {
+                Report r = parse(sender, args);
+                if (r != null) view(sender, r);
+            }
+            case "tp" -> {
+                if (!(sender instanceof Player p)) {
+                    sender.sendMessage(plugin.msg("players-only"));
+                    return true;
+                }
+                Report r = parse(sender, args);
+                if (r != null) teleport(p, r);
+            }
+            case "close" -> {
+                Report r = parse(sender, args);
+                if (r == null) return true;
+                String note = args.length > 2 ? String.join(" ", Arrays.copyOfRange(args, 2, args.length)) : "";
+                if (reports.close(r.id, sender.getName(), note)) {
+                    sender.sendMessage(plugin.msg("report-closed", Placeholder.unparsed("id", String.valueOf(r.id))));
+                } else {
+                    sender.sendMessage(plugin.msg("report-already-closed", Placeholder.unparsed("id", String.valueOf(r.id))));
+                }
+            }
+            case "reload" -> {
+                plugin.reload();
+                sender.sendMessage(plugin.msg("reload-done"));
+            }
+            default -> sender.sendMessage(plugin.msg("report-usage"));
+        }
+        return true;
+    }
+
+    private Report parse(CommandSender sender, String[] args) {
+        if (args.length < 2) {
+            sender.sendMessage(plugin.msg("report-not-found", Placeholder.unparsed("id", "?")));
+            return null;
+        }
+        String raw = args[1].startsWith("#") ? args[1].substring(1) : args[1];
+        try {
+            int id = Integer.parseInt(raw);
+            Report r = reports.get(id);
+            if (r == null) {
+                sender.sendMessage(plugin.msg("report-not-found", Placeholder.unparsed("id", raw)));
+            }
+            return r;
+        } catch (NumberFormatException ex) {
+            sender.sendMessage(plugin.msg("report-not-found", Placeholder.unparsed("id", raw)));
+            return null;
+        }
+    }
+
+    private void list(CommandSender sender) {
+        List<Report> open = reports.open();
+        if (open.isEmpty()) {
+            sender.sendMessage(plugin.msg("reports-none"));
+            return;
+        }
+        sender.sendMessage(plugin.rawMsg("reports-list-header",
+                Placeholder.unparsed("count", String.valueOf(open.size()))));
+        for (Report r : open) {
+            sender.sendMessage(plugin.rawMsg("reports-list-entry",
+                    Placeholder.unparsed("id", String.valueOf(r.id)),
+                    Placeholder.unparsed("target", r.targetName),
+                    Placeholder.unparsed("reporter", r.reporterName),
+                    Placeholder.unparsed("reason", r.reason)));
+        }
+    }
+
+    private void view(CommandSender sender, Report r) {
+        String date = new SimpleDateFormat("dd-MM-yyyy HH:mm").format(new Date(r.time));
+        sender.sendMessage(net.kyori.adventure.text.Component.text(
+                "Report #" + r.id + (r.closed ? " (afgesloten door " + r.handledBy + ")" : " (open)")
+                        + "\nSpeler: " + r.targetName
+                        + "\nGemeld door: " + r.reporterName
+                        + "\nReden: " + r.reason
+                        + "\nTijd: " + date
+                        + "\nPlek: " + r.world + " " + (int) r.x + " " + (int) r.y + " " + (int) r.z
+                        + (r.note.isEmpty() ? "" : "\nNotitie: " + r.note)));
+    }
+
+    /** Teleporteert naar de gerapporteerde speler (online) of naar de plek van het report. */
+    public void teleport(Player staff, Report r) {
+        Player target = Bukkit.getPlayer(r.target);
+        if (target != null) {
+            staff.teleportAsync(target.getLocation());
+            staff.sendMessage(plugin.msg("report-tp-done", Placeholder.unparsed("target", r.targetName)));
+            return;
+        }
+        World world = Bukkit.getWorld(r.world);
+        if (world == null) {
+            staff.sendMessage(plugin.msg("report-not-found", Placeholder.unparsed("id", String.valueOf(r.id))));
+            return;
+        }
+        staff.sendMessage(plugin.msg("report-tp-offline", Placeholder.unparsed("target", r.targetName)));
+        staff.teleportAsync(new Location(world, r.x, r.y, r.z));
+    }
+
+    @Override
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+        List<String> out = new ArrayList<>();
+        if (!sender.hasPermission("shieldguard.reports.manage")) return out;
+        if (args.length == 1) {
+            String prefix = args[0].toLowerCase(Locale.ROOT);
+            for (String s : SUB) if (s.startsWith(prefix)) out.add(s);
+        } else if (args.length == 2 && List.of("view", "tp", "close").contains(args[0].toLowerCase(Locale.ROOT))) {
+            for (Report r : reports.open()) out.add(String.valueOf(r.id));
+        }
+        return out;
+    }
+}
+
+```
+
+`src/main/java/nl/shieldguard/reports/ReportsGui.java`:
+
+```java
+package nl.shieldguard.reports;
+
+import nl.shieldguard.ShieldGuard;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
+import org.bukkit.Bukkit;
+import org.bukkit.Material;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.ClickType;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryHolder;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.SkullMeta;
+import org.jetbrains.annotations.NotNull;
+
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+/** Chest-GUI met open reports. Linksklik = teleporteren, rechtsklik = afsluiten. */
+public final class ReportsGui implements Listener {
+
+    private static final int SIZE = 54;
+    private static final int MAX_REPORTS = 45;
+
+    private final ShieldGuard plugin;
+    private final ReportManager reports;
+
+    public ReportsGui(ShieldGuard plugin, ReportManager reports) {
+        this.plugin = plugin;
+        this.reports = reports;
+    }
+
+    private static final class Holder implements InventoryHolder {
+        final Map<Integer, Integer> slotToReport = new HashMap<>();
+        private Inventory inventory;
+
+        @Override
+        public @NotNull Inventory getInventory() {
+            return inventory;
+        }
+    }
+
+    public void open(Player staff) {
+        Holder holder = new Holder();
+        Inventory inv = Bukkit.createInventory(holder, SIZE, plugin.rawMsg("gui-title"));
+        holder.inventory = inv;
+        fill(inv, holder);
+        staff.openInventory(inv);
+    }
+
+    private void fill(Inventory inv, Holder holder) {
+        inv.clear();
+        holder.slotToReport.clear();
+        SimpleDateFormat fmt = new SimpleDateFormat("dd-MM HH:mm");
+        List<Report> open = reports.open();
+        for (int i = 0; i < open.size() && i < MAX_REPORTS; i++) {
+            Report r = open.get(i);
+            ItemStack head = new ItemStack(Material.PLAYER_HEAD);
+            SkullMeta meta = (SkullMeta) head.getItemMeta();
+            meta.setOwningPlayer(Bukkit.getOfflinePlayer(r.target));
+            meta.displayName(Component.text("#" + r.id + " " + r.targetName, NamedTextColor.RED)
+                    .decoration(TextDecoration.ITALIC, false));
+            List<Component> lore = new ArrayList<>();
+            lore.add(line("Reden: ", r.reason));
+            lore.add(line("Door: ", r.reporterName));
+            lore.add(line("Tijd: ", fmt.format(new Date(r.time))));
+            lore.add(line("Open reports op speler: ", String.valueOf(reports.openAgainst(r.target))));
+            lore.add(Component.empty());
+            lore.add(Component.text("Linksklik: teleporteren", NamedTextColor.GREEN)
+                    .decoration(TextDecoration.ITALIC, false));
+            lore.add(Component.text("Rechtsklik: afsluiten", NamedTextColor.YELLOW)
+                    .decoration(TextDecoration.ITALIC, false));
+            meta.lore(lore);
+            head.setItemMeta(meta);
+            inv.setItem(i, head);
+            holder.slotToReport.put(i, r.id);
+        }
+        if (open.size() > MAX_REPORTS) {
+            ItemStack more = new ItemStack(Material.PAPER);
+            var m = more.getItemMeta();
+            m.displayName(Component.text("+" + (open.size() - MAX_REPORTS) + " oudere reports (/reports list)",
+                    NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false));
+            more.setItemMeta(m);
+            inv.setItem(SIZE - 1, more);
+        }
+    }
+
+    private static Component line(String label, String value) {
+        return Component.text(label, NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false)
+                .append(Component.text(value, NamedTextColor.WHITE));
+    }
+
+    @EventHandler
+    public void onClick(InventoryClickEvent e) {
+        if (!(e.getInventory().getHolder() instanceof Holder holder)) return;
+        e.setCancelled(true);
+        if (!(e.getWhoClicked() instanceof Player staff)) return;
+        if (e.getClickedInventory() != e.getInventory()) return;
+        if (!staff.hasPermission("shieldguard.reports.manage")) return;
+
+        Integer id = holder.slotToReport.get(e.getSlot());
+        if (id == null) return;
+        Report r = reports.get(id);
+        if (r == null) return;
+
+        if (e.getClick() == ClickType.LEFT || e.getClick() == ClickType.SHIFT_LEFT) {
+            staff.closeInventory();
+            teleport(staff, r);
+        } else if (e.getClick() == ClickType.RIGHT || e.getClick() == ClickType.SHIFT_RIGHT) {
+            if (reports.close(id, staff.getName(), "")) {
+                staff.sendMessage(plugin.msg("report-closed", Placeholder.unparsed("id", String.valueOf(id))));
+            }
+            fill(e.getInventory(), holder);
+        }
+    }
+
+    @EventHandler
+    public void onDrag(InventoryDragEvent e) {
+        if (e.getInventory().getHolder() instanceof Holder) e.setCancelled(true);
+    }
+
+    private void teleport(Player staff, Report r) {
+        Player target = Bukkit.getPlayer(r.target);
+        if (target != null) {
+            staff.teleportAsync(target.getLocation());
+            staff.sendMessage(plugin.msg("report-tp-done", Placeholder.unparsed("target", r.targetName)));
+            return;
+        }
+        var world = Bukkit.getWorld(r.world);
+        if (world == null) return;
+        staff.sendMessage(plugin.msg("report-tp-offline", Placeholder.unparsed("target", r.targetName)));
+        staff.teleportAsync(new org.bukkit.Location(world, r.x, r.y, r.z));
+    }
+}
+
+```
+
+`src/main/resources/config.yml`:
+
+```yml
+# ShieldGuard configuratie
+# Werelden waarin de bescherming actief is (alleen overworld-achtige werelden aanbevolen:
+# in de Nether/End zou erts door stone/deepslate worden vervangen).
+worlds:
+  - world
+
+# Staff met deze permission worden niet gemaskeerd
+bypass-permission: shieldguard.bypass
+
+# Hoe vaak (in ticks) gekeken wordt welke verborgen blokken/minecarts je nu mag zien
+reveal-interval-ticks: 5
+
+freecam-protection:
+  enabled: true
+  # Alles dat dieper ligt dan (jouw Y - dit aantal) EN dieper dan (terreinoppervlak - surface-margin)
+  # wordt als deepslate/stone naar de client gestuurd. Daardoor zie je op een berg gewoon de echte
+  # vallei onder je: alleen echt ondergronds spul wordt gevuld.
+  depth-below-player: 32
+  # Hoeveel blokken onder het oppervlak nog "echt" blijven. Hoger = veiliger tegen freecam, maar
+  # ondiepe grotten blijven zichtbaar. Lager = meer verborgen (ondiepe bases ook).
+  surface-margin: 12
+  # Hoe ver (in chunks) om de speler heen we chunks opnieuw sturen als de grens verschuift
+  refresh-radius-chunks: 8
+  refresh-interval-ticks: 10
+  # Maximaal aantal chunk-refreshes per speler per run (voorkomt lag)
+  chunks-per-run: 6
+  # Pas opnieuw maskeren als de speler minstens zoveel blokken omhoog is gegaan
+  remask-gap-blocks: 32
+
+xray-protection:
+  enabled: true
+  # true  = ALLE erts is verborgen (ook in grotten) tot je er dichtbij bent en het kunt zien
+  # false = erts dat aan lucht/water/lava grenst blijft gewoon zichtbaar
+  hide-exposed-ores: true
+  # Erts binnen dit aantal blokken en in zicht wordt getoond. 0 = nooit tonen (je ziet pas wat je
+  # hebt gevonden zodra je het stuk hebt gemined; wel vervelend voor spelers).
+  reveal-radius: 6
+  hidden-blocks:
+    - coal_ore
+    - deepslate_coal_ore
+    - copper_ore
+    - deepslate_copper_ore
+    - iron_ore
+    - deepslate_iron_ore
+    - gold_ore
+    - deepslate_gold_ore
+    - nether_gold_ore
+    - redstone_ore
+    - deepslate_redstone_ore
+    - lapis_ore
+    - deepslate_lapis_ore
+    - diamond_ore
+    - deepslate_diamond_ore
+    - emerald_ore
+    - deepslate_emerald_ore
+    - nether_quartz_ore
+    - ancient_debris
+
+# Tegen storage-ESP: kisten, spawners, hoppers e.d. zijn voor de client stone/deepslate
+# tot je er dichtbij bent en er een vrije zichtlijn is (dus niet door muren heen).
+storage-protection:
+  enabled: true
+  reveal-radius: 10
+  # Ook minecarts met kisten/hoppers/spawners en chest-boats verbergen
+  hide-entities: true
+  hidden-blocks:
+    - chest
+    - trapped_chest
+    - ender_chest
+    - barrel
+    - hopper
+    - dropper
+    - dispenser
+    - crafter
+    - furnace
+    - blast_furnace
+    - smoker
+    - brewing_stand
+    - spawner
+    - trial_spawner
+    - shulker_box
+    - white_shulker_box
+    - orange_shulker_box
+    - magenta_shulker_box
+    - light_blue_shulker_box
+    - yellow_shulker_box
+    - lime_shulker_box
+    - pink_shulker_box
+    - gray_shulker_box
+    - light_gray_shulker_box
+    - cyan_shulker_box
+    - purple_shulker_box
+    - blue_shulker_box
+    - brown_shulker_box
+    - green_shulker_box
+    - red_shulker_box
+    - black_shulker_box
+
+reports:
+  cooldown-seconds: 60
+  min-reason-length: 4
+  # Voorgestelde redenen bij tab-completion
+  suggested-reasons:
+    - Xray
+    - Freecam
+    - Killaura
+    - Fly
+    - Speed
+    - Scaffold
+    - Beledigen
+    - Spam
+    - Griefing
+  # Als zoveel open reports op dezelfde speler staan krijgt staff een extra waarschuwing
+  alert-threshold: 3
+  discord-webhook-url: ""
+
+messages:
+  prefix: "<dark_gray>[<red>ShieldGuard</red>]</dark_gray> "
+  no-permission: "<red>Daar heb je geen toestemming voor.</red>"
+  players-only: "<red>Dit commando kan alleen door spelers worden gebruikt.</red>"
+  report-usage: "<gray>Gebruik: <white>/report <speler> <reden></white></gray>"
+  report-self: "<red>Je kunt jezelf niet reporten.</red>"
+  report-unknown-player: "<red>Die speler is nog nooit op de server geweest.</red>"
+  report-reason-short: "<red>Geef een duidelijkere reden op.</red>"
+  report-cooldown: "<red>Wacht nog <seconds> seconden voordat je opnieuw reportet.</red>"
+  report-duplicate: "<red>Je hebt <target> al gereport; een staff-lid bekijkt dit nog.</red>"
+  report-sent: "<green>Bedankt! Je report over <white><target></white> is verstuurd (#<id>).</green>"
+  staff-new-report: "<yellow>Nieuw report <white>#<id></white>: <white><reporter></white> meldt <red><target></red> — <gray><reason></gray> <aqua>[klik om te teleporteren]</aqua></yellow>"
+  staff-alert: "<red><bold>Let op:</bold> <target> heeft nu <count> open reports!</red>"
+  reports-none: "<gray>Er zijn geen open reports.</gray>"
+  reports-list-header: "<gold>Open reports (<count>):</gold>"
+  reports-list-entry: "<gray>#<id> <white><target></white> ← <reporter>: <reason></gray>"
+  report-not-found: "<red>Report #<id> bestaat niet.</red>"
+  report-closed: "<green>Report #<id> is afgesloten.</green>"
+  report-already-closed: "<red>Report #<id> is al afgesloten.</red>"
+  report-tp-offline: "<yellow><target> is offline; je wordt naar de plek van het report geteleporteerd.</yellow>"
+  report-tp-done: "<green>Geteleporteerd naar <target>.</green>"
+  reload-done: "<green>Configuratie herladen.</green>"
+  gui-title: "Open reports"
+
+```
+
+`src/main/resources/plugin.yml`:
+
+```yml
+name: ShieldGuard
+version: '${project.version}'
+main: nl.shieldguard.ShieldGuard
+api-version: '1.21'
+description: Anti-freecam, anti-xray en reportsysteem
+depend: [packetevents]
+
+commands:
+  report:
+    description: Rapporteer een speler
+    usage: /report <speler> <reden>
+  reports:
+    description: Beheer reports (staff)
+    usage: /reports [list|view|tp|close|reload]
+    permission: shieldguard.reports.manage
+
+permissions:
+  shieldguard.report:
+    description: Spelers mogen reports indienen
+    default: true
+  shieldguard.reports.manage:
+    description: Reports bekijken en afhandelen
+    default: op
+  shieldguard.reports.notify:
+    description: Meldingen van nieuwe reports ontvangen
+    default: op
+  shieldguard.bypass:
+    description: Geen freecam/xray-masking (voor staff)
+    default: op
+
+```
