@@ -11,7 +11,7 @@ confidence: high
 
 # FROGMAN Disasm
 
-**frogman** (mattgodbolt/frogman) rebuilds an unreleased **1993 BBC Micro flip-screen platformer** as fully annotated **BeebASM 6502** that reassembles into a bootable disc image matching the original byte for byte. (source: wiki/sources/descriptions/mattgodbolt__frogman.md)
+**frogman** (mattgodbolt/frogman) is a preservation and reverse-engineering effort that rebuilds an unreleased **1993 BBC Micro flip-screen platformer** as fully annotated **BeebASM 6502**, reassembling into a bootable disc image that matches the original byte for byte. (source: wiki/sources/descriptions/mattgodbolt__frogman.md)
 
 ## Architecture
 
@@ -20,6 +20,7 @@ confidence: high
 | **Annotated 6502 / BeebASM** | Engine and level logic with baron/BeebASM assembly workflow |
 | **BBC BASIC boot loaders** | Disc boot path beside hand-written assembly |
 | **Python utilities** | Runtime memory dumps, disassembly helpers, Tiled level editing |
+| **Verification scripts** | Automated checks that reassembly output still matches retail bytes |
 | **jsbeeb** | Emulator capture when static images hide encrypted stages |
 
 ## Capabilities

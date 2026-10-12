@@ -9,6 +9,7 @@ sources:
   - wiki/sources/descriptions/ngwg__ceasta.md
   - wiki/sources/descriptions/stephane-perez__ik-plus-reforged.md
   - wiki/sources/descriptions/mattgodbolt__pipeline-disasm.md
+  - wiki/sources/descriptions/mattgodbolt__frogman.md
   - wiki/sources/descriptions/xshxdex98__OpenMCM2.md
 updated: 2026-10-12
 confidence: high
@@ -33,7 +34,7 @@ Retro modding and preservation workflows also use delta patch formats (IPS/BPS/x
 
 Some classic-platform projects patch executables in place with assembly hooks and pre-modification byte checks rather than external delta files — stephane-perez/[[ik-plus-reforged]] validates checksums and original bytes on a user-supplied Atari ST International Karate+ image before applying 68000 loaders (STE blitter/DMA, 3-player mode). (source: wiki/sources/descriptions/stephane-perez__ik-plus-reforged.md)
 
-Full-tree disassembly rebuilds such as mattgodbolt/[[pipeline-disasm]] (BBC Micro PIPELINE; annotated 6502 + BBC BASIC; byte-identical disc/flux verification) complement delta-patch workflows when the research goal is documented sources and copy-protection anatomy rather than distributing IPS/BPS patches. (source: wiki/sources/descriptions/mattgodbolt__pipeline-disasm.md)
+Full-tree disassembly rebuilds such as mattgodbolt/[[pipeline-disasm]] (BBC Micro PIPELINE; annotated 6502 + BBC BASIC; byte-identical disc/flux verification) and [[frogman]] (unreleased BBC Micro platformer; BeebASM + verification scripts; **radare2** + runtime dumps + systematic binary comparison) complement delta-patch workflows when the research goal is documented sources and copy-protection anatomy rather than distributing IPS/BPS patches. (source: wiki/sources/descriptions/mattgodbolt__pipeline-disasm.md) (source: wiki/sources/descriptions/mattgodbolt__frogman.md)
 
 Ghidra-driven PE relink projects such as xshxdex98/[[openmcm2]] (MSVC 6.0 fixed-base harness; RTTI mapping; per-function C replacements verified against retail sections) sit in the same **documented rebuild** lane as function-level differs when the artifact is a legacy protected Windows executable rather than a ROM or disc image. (source: wiki/sources/descriptions/xshxdex98__OpenMCM2.md)
 
@@ -56,4 +57,4 @@ Similarity scores and decompiled differences suggest where to look—they do not
 
 ## Related
 
-[[static-runtime-evidence]] · [[binary-evidence]] · [[research-rigor]] · [[diaphora]] · [[ghidriff]] · [[turbodiff]] · [[rom-weaver]] · [[ik-plus-reforged]] · [[pipeline-disasm]] · [[openmcm2]] · [[ceasta]] · [[mixed-boolean-arithmetic]] · [[control-flow-flattening]] · [[overviews/reverse-engineering]]
+[[static-runtime-evidence]] · [[binary-evidence]] · [[research-rigor]] · [[diaphora]] · [[ghidriff]] · [[turbodiff]] · [[rom-weaver]] · [[ik-plus-reforged]] · [[pipeline-disasm]] · [[frogman]] · [[openmcm2]] · [[ceasta]] · [[mixed-boolean-arithmetic]] · [[control-flow-flattening]] · [[overviews/reverse-engineering]]

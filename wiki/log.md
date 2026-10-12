@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-12** — ingest `description:mattgodbolt/frogman`: refreshed entity [[frogman]] (preservation RE framing; verification scripts; VIA-timer XOR loader + jsbeeb runtime dumps); cited on [[concepts/static-runtime-evidence]] static-vs-runtime copy-protection lane + [[concepts/binary-diffing]] full-tree BBC Micro rebuild cluster; `index.md` entity blurb sync.
+
 - **2026-10-12** — ingest `readme:categories`: Cheat ~2882 (+1; mattgodbolt/[[frogman]] BBC Micro FROGMAN BeebASM byte-exact rebuild with VIA-timer XOR loader RE) / Anti Cheat ~787 / Game Engine ~159 / other major section counts stable; 41 sections (`NeverC & NeverD` placeholder); synced projected README-map counts on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/reverse-engineering]], and [[overviews/dma-attack]]; corrected stale Anti Cheat (~785) drift on [[overviews/reverse-engineering]]; entity [[frogman]]; light `index.md` section notes (no per-category pages).
 
 - **2026-10-12** — ingest `description:ThoriaDevelopment/Iustitia`: refreshed entity [[iustitia]] (Checks/Staff UX sections; Fabric 1.21.11 Kotlin passive packet-model AC, 36 violation-scored checks, clip-replay ghosts, local-only staff alerts); cited on [[overviews/anti-cheat]] Fabric 1.21.x passive-observer lane + [[concepts/detector-operations]] human-in-the-loop client evidence cluster; `index.md` entity blurb sync.
