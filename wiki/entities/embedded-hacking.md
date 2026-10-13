@@ -5,7 +5,7 @@ topics: [reverse-engineering, game-hacking, mobile-security]
 sources:
   - wiki/sources/descriptions/mytechnotalent__Embedded-Hacking.md
   - wiki/sources/descriptions/mytechnotalent__embedded-hacking.md
-updated: 2026-08-05
+updated: 2026-10-13
 confidence: medium
 ---
 
@@ -15,6 +15,8 @@ Free hands-on embedded hacking course and lab collection for the Raspberry Pi Pi
 
 Targets embedded security practitioners, firmware reverse engineers, and anyone building low-level hardware-hacking / IoT security skills.
 
+Consumer smart-speaker unlock workflows such as [[firebreak]] (Echo Dot 2nd gen; Fire OS ↔ amonet rooted targets via MediaTek bootrom and USB tooling) complement lab-style RP2350 firmware RE here. (source: wiki/sources/descriptions/bboe__firebreak.md)
+
 Complements the same author's multi-arch RE curriculum [[mytechnotalent-reverse-engineering]], Windows RE guide [[hacking-windows]], and language-specific RE courses [[hacking-rust]] and [[go-hacking]].
 
 ## Links
@@ -23,4 +25,4 @@ Complements the same author's multi-arch RE curriculum [[mytechnotalent-reverse-
 
 ## Related
 
-[[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[overviews/mobile-security]] · [[mytechnotalent-reverse-engineering]] · [[hacking-windows]] · [[hacking-rust]] · [[go-hacking]] · [[mcp-gdb]] · [[sjcam]]
+[[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[overviews/mobile-security]] · [[mytechnotalent-reverse-engineering]] · [[hacking-windows]] · [[hacking-rust]] · [[go-hacking]] · [[mcp-gdb]] · [[sjcam]] · [[firebreak]]

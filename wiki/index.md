@@ -3399,7 +3399,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Silent AntiCheat](entities/silent-anticheat.md) — Fabric server-side-only Minecraft **26.2** alert-only AC mod (Java; per-tick movement + reach checks for flight/speed/teleport; console + operator alerts; no kicks/bans/rubberband; tunable thresholds; no client mod; danielreytalan635-tech; Anti Cheat / game:minecraft)
 - [SilentMoonwalk](entities/silent-moonwalk.md) — TRUE call-stack spoofer PoC from joint stack-spoofing research (klezVirus; Cheat Spoof Stack)
 - [Silent Packer](entities/silent-packer.md) — pure C ELF/PE packer (section insert, code caves, text infection; XOR/AES; loader/asm unpack stub; RE/obfuscation/defensive packed-binary study; Anti Cheat → Binary Packer)
-- [Firebreak](entities/firebreak.md) — Python CLI USB unlock/root/reflash for Amazon Echo Dot 2nd gen (MediaTek bootrom, amonet targets, Fire OS restore; bboe; Cheat / IoT)
+- [Firebreak](entities/firebreak.md) — Python CLI USB unlock/root/reflash for Amazon Echo Dot 2nd gen (plugin unlock plans, GPT/boot/OTA handling, MediaTek bootrom, amonet/TWRP, eMMC recovery, diagnostics + simulator; bboe; Cheat / IoT)
 - [SJCAM](entities/sjcam.md) — SJ4000 Air (Allwinner V3) firmware RE; AVIOCTRL TCP client; Lelouch Android ARM CFW; EGON/BCL1 parsers; CVE-2026-52656 PoC
 - [SkipHook](entities/skiphook.md) — trampoline skips first insn (bypass JMP/INT3 AC hooks; HDE)
 - [sk3wldbg](entities/sk3wldbg.md) — IDA Pro Unicorn in-IDA emulation (x86/ARM/MIPS; register/memory setup; step without live target; Cheat Unicorn)

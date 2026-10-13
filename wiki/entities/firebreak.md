@@ -6,14 +6,30 @@ sources:
   - wiki/sources/descriptions/bboe__firebreak.md
   - wiki/sources/README-categories.md
 updated: 2026-10-13
-confidence: medium
+confidence: high
 ---
 
 # Firebreak
 
-**Firebreak** (bboe/firebreak) is a Python command-line tool that unlocks and reflashes the Amazon Echo Dot (2nd Generation, codename *biscuit*) over USB from macOS, Linux, or Windows. It automates transitions between stock Fire OS builds and several amonet-based rooted targets with custom bootloaders and TWRP recovery, using fastboot, adb, MediaTek bootrom USB download, and partition writes under recovery or bootrom. (source: wiki/sources/descriptions/bboe__firebreak.md)
+**Firebreak** (bboe/firebreak) is a Python command-line tool that unlocks and reflashes the Amazon Echo Dot (2nd Generation, codename *biscuit*) over USB from macOS, Linux, or Windows. It automates transitions between stock Fire OS builds and several amonet-based rooted targets with custom bootloaders and TWRP recovery. (source: wiki/sources/descriptions/bboe__firebreak.md)
 
-Plugin-driven unlock plans cover GPT and boot image handling, OTA-aware layouts, and optional hardware recovery via eMMC shorting when the device shows no boot indication. Diagnostic modes support support reporting and cable versus eMMC failure isolation; a simulator exercises flows without physical hardware. Listed under README **Cheat → IoT / Smart devices** for embedded device security, bootloader trust, and practical unlock or restore workflows on MediaTek-based smart speakers.
+## Architecture
+
+| Layer | Role |
+|-------|------|
+| **Plugin-driven unlock plans** | Orchestrate multi-step stock ↔ rooted transitions |
+| **GPT / boot images** | Partition layout and boot image handling, OTA-aware layouts |
+| **USB tooling** | fastboot, adb, MediaTek bootrom USB download, partition writes under recovery or bootrom |
+| **Diagnostics** | Support reporting; isolate eMMC vs cable failures |
+| **Simulator** | Exercise unlock/reflash flows without physical hardware |
+
+## Capabilities
+
+- Cross-platform CLI for **unlock, root, and reflash** on MediaTek-based Echo Dot 2nd gen hardware.
+- Optional **eMMC shorting** hardware recovery when the device shows no boot indication.
+- Aimed at researchers and enthusiasts studying **embedded device security**, **bootloader trust**, and practical unlock or restore workflows on smart speakers.
+
+Listed under README **Cheat → IoT / Smart devices**.
 
 ## Links
 
