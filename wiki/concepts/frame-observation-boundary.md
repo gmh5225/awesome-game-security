@@ -4,7 +4,8 @@ kind: concept
 topics: [graphics-api, anti-cheat, game-hacking]
 sources:
   - wiki/sources/skills/graphics-api.md
-updated: 2026-09-13
+  - wiki/sources/descriptions/Nn1ff__crosshair-z.md
+updated: 2026-10-13
 confidence: high
 ---
 
@@ -50,7 +51,7 @@ Classify claims by required capability before attribution:
 | Separate-process overlay | Layered HWND, DWM draw, Steam/NVIDIA hijack | Window affinity, composition surface, ETW/GDI signals |
 | Frame access for analysis | OBS Game Capture, DDA, AC screenshot | Active capture API, inject footprint, readback bandwidth |
 
-Include **counterexamples**: legitimate streaming (OBS), accessibility overlays, vendor tools (GeForce Experience, Steam), debug visualization, and post-processing injectors such as [[reshade]].
+Include **counterexamples**: legitimate streaming (OBS), accessibility overlays, vendor tools (GeForce Experience, Steam), debug visualization, post-processing injectors such as [[reshade]], and crosshair-only external HWND tools such as [[crosshair-z]] (no game inject; separate topmost window—classify under separate-process overlay, not Present-hook attribution). (source: wiki/sources/descriptions/Nn1ff__crosshair-z.md)
 
 ## Capture vs enforcement
 
@@ -62,4 +63,4 @@ For owned applications or lab repros, document: API, OS/driver build, windowed v
 
 ## Related
 
-[[present-hook]] · [[draw-call-hook]] · [[anti-screenshot-capture]] · [[obs-game-capture]] · [[world-to-screen]] · [[cheat-attack-surface]] · [[research-rigor]] · [[overviews/graphics-api]] · [[overviews/game-hacking]] · [[overviews/anti-cheat]]
+[[present-hook]] · [[draw-call-hook]] · [[anti-screenshot-capture]] · [[obs-game-capture]] · [[world-to-screen]] · [[crosshair-z]] · [[cheat-attack-surface]] · [[research-rigor]] · [[overviews/graphics-api]] · [[overviews/game-hacking]] · [[overviews/anti-cheat]]

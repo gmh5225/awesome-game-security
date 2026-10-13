@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-13** — ingest `description:Nn1ff/crosshair-z`: enriched entity [[crosshair-z]] (confidence high; Electron/koffi portable offline crosshair overlay; no inject/hooks; designer + spread animation + Crosshair X import; AC posture); cited on [[overviews/graphics-api]] external layered-window lane + [[concepts/frame-observation-boundary]] separate-process overlay counterexample; `index.md` entity blurb sync.
+
 - **2026-10-13** — ingest `readme:categories`: Cheat ~2885 (+1; Nn1ff/[[crosshair-z]] Electron click-through crosshair overlay without injection/hooks) / Anti Cheat ~788 / Game Engine ~159 / Game Network ~34 / other major section counts stable; 41 sections (`NeverC & NeverD` placeholder); synced projected README-map counts on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/dma-attack]], and [[overviews/reverse-engineering]]; entity [[crosshair-z]]; light `index.md` section notes (no per-category pages).
 
 - **2026-10-13** — lint (agent): read `wiki/AGENTS.md`; listed **Overviews** (9): `anti-cheat`, `dma-attack`, `game-engine`, `game-hacking`, `graphics-api`, `mobile-security`, `overview`, `reverse-engineering`, `windows-kernel`; **Concepts** (51) under `wiki/concepts/`; **Entities** (4050) under `wiki/entities/`; `index.md` vs disk — 4110 indexed paths (9+51+4050), 4110 unique, 0 missing, 0 dead, 0 duplicate index entries; overview + concept [[wikilink]] spot-check — 0 broken; index overview-blurb [[wikilink]] scan — 0 broken; 6 expected cross-kind slug collisions ([[anti-cheat]], [[game-hacking]], [[reverse-engineering]], [[byovd]], [[dma]], [[il2cpp]]); wiki populated — bootstrap not required; `index.md` unchanged; no link repairs (`log.md` only).
