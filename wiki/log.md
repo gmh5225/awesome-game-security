@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-13** — lint (agent): read `wiki/AGENTS.md`; listed **Overviews** (9): `anti-cheat`, `dma-attack`, `game-engine`, `game-hacking`, `graphics-api`, `mobile-security`, `overview`, `reverse-engineering`, `windows-kernel`; **Concepts** (51) under `wiki/concepts/`; **Entities** (4054) under `wiki/entities/`; `index.md` vs disk — 4114 indexed paths (9+51+4054), 4114 unique, 0 missing, 0 dead, 0 duplicate index entries; overview + concept + index overview-blurb [[wikilink]] spot-check — 0 broken (15522 links); wiki populated — bootstrap not required; `index.md` unchanged; no link repairs (`log.md` only).
+
 - **2026-10-13** — ingest `description:GQS5/VAntiCheat`: enriched entity [[vanticheat]] (confidence high; Java 21 Paper/Folia 1.21.x config-driven mod/client fingerprint via passive plugin messages, optional sign translation-key probes, corroboration rules, Apollo/Geyser/Floodgate/Forge denylist; default non-interactive join); cited on [[overviews/anti-cheat]] Paper/Folia mod-fingerprint lane + [[overviews/game-hacking]] Minecraft fingerprint cluster beside [[key-value-checker]]; `index.md` entity blurb sync.
 
 - **2026-10-13** — ingest `description:TechMecca/kiln-ida`: enriched entity [[kiln-ida]] (confidence medium; Streamable HTTP MCP, main-thread marshaling, debugger trace/long-poll); cited on [[overviews/reverse-engineering]] AI-assisted RE (MCP) lane + [[overviews/game-hacking]] IDA Plugins cluster; `index.md` entity blurb sync.
