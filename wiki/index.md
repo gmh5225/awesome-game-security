@@ -106,7 +106,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [BaiZe](entities/baize.md) — Magisk/KernelSU/APatch graded cache, log, APK-residue, and deep junk cleanup (Kotlin/C; risk tiers, quarantine)
 - [bam-extension-table-hook](entities/bam-extension-table-hook.md) — BAM extension-table process-notify hook PoC (Dor00tkit; swaps `bam!BampCreateProcessCallback`; ntoskrnl offset lookup + notify-mask handling; AC/EDR callback bypass research)
 - [Among Us Anti-Cheat (ACE)](entities/among-us-anti-cheat.md) — hckerelauk-git; Apex Cheat Ender; Among Us BepInEx 6 IL2CPP client-side ACE (mod signature scan, kinematic teleport/speed/wall-clip analysis, verdict engine, in-game UI, RPC flood protection)
-- [AU-Anticheat](entities/au-anticheat.md) — xav0dev; Among Us BepInEx IL2CPP host-side AC and lobby moderation (evidence-based RPC checks; configurable host tools; Anti Cheat / game:among us)
+- [AU-Anticheat](entities/au-anticheat.md) — xav0dev; Among Us BepInEx IL2CPP defensive plugin (C# .NET 6; RPC/packet validation, movement/role scoring, point-based kick/ban, lobby rules, chat filters, friend-code lists; no remote telemetry; Anti Cheat / game:among us)
 - [BanMod](entities/banmod.md) — Among Us BepInEx host-side moderation + AntiCheat (Harmony IL2CPP; synced ban lists; AFK/camera/follow detectors; GiannBart)
 - [BareSVM](entities/baresvm.md) — Rust AMD SVM hacked-hypervisor testing (Detection:HV)
 - [Bastion](entities/bastion.md) — dhehdjebejen-beep; Fabric **1.21.11** offline-mode server-side security suite (Java Gradle; BastionAuth Argon2id login/TOTP 2FA/packet firewall; BastionClaims mixin land protection; BastionAC 38-check engine with violation decay + Meteor/Wurst coverage; no client install; Anti Cheat / game:minecraft)
