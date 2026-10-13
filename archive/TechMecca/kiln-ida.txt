@@ -1,0 +1,3301 @@
+Project Path: arc_TechMecca_kiln-ida_rcbbqf0f
+
+Source Tree:
+
+```txt
+arc_TechMecca_kiln-ida_rcbbqf0f
+├── README.md
+├── kiln_ida.py
+└── tests
+    └── live_test.py
+
+```
+
+`README.md`:
+
+```md
+# Kiln IDA — an MCP server inside IDA Pro 9.1
+
+`kiln_ida.py` is a native IDA Pro plugin that exposes the open database to AI over the
+[Model Context Protocol](https://modelcontextprotocol.io) (Streamable HTTP). It was written for
+[Kiln](https://github.com/TechMecca/kiln-releases), where `/ida` attaches one or more running IDA
+sessions to a chat and the model works on the real database: functions, pseudocode, assembly,
+cross-references, callers and callees, imports, exports, strings, segments, names, types, data,
+stack frames, memory, bookmarks, the debugger, navigation — and, with your permission per call,
+renames, comments, types, local variables, calling conventions, new functions, patches, breakpoints,
+running / stepping the program, and IDAPython. It can also **push debugger events** so a client watches a
+session and reviews each stop (Kiln's `/ida` → *review stops*).
+
+Any MCP client that speaks Streamable HTTP can use it; the session file (below) has the URL and key.
+
+- IDA Pro **9.1** (SDK 910) with IDAPython on Python 3.10+. Hex-Rays is optional (`decompile`,
+  `decompile_many`, `get_pseudocode_lines`, `rename_local_variable`, `set_lvar_type`,
+  `set_lvar_comment` need it).
+- Standard library only — nothing to `pip install`.
+- Windows is what it is tested on. The code has no Windows-only parts except the process-liveness
+  check, which falls back to `os.kill(pid, 0)` elsewhere.
+
+## Install
+
+1. Copy `kiln_ida.py` into your IDA user plugin folder:
+   - Windows: `%APPDATA%\Hex-Rays\IDA Pro\plugins\`
+   - Linux / macOS: `~/.idapro/plugins/`
+
+   Kiln can do this for you: **Settings → Capabilities → IDA Pro → Install plugin into IDA** (the
+   `/ida` dialog has the same button). Updating is the same copy; restart IDA after either.
+2. Start IDA and open a database. The server starts on its own (autostart is on by default) and
+   the Output window shows:
+
+   ```
+   [Kiln IDA] server ON — session 50a47088 at http://127.0.0.1:24137/mcp (65 tools, Hex-Rays yes)
+   ```
+
+3. In Kiln, type `/ida` in any chat, tick the session, Done. The chip above the composer shows
+   what is attached.
+
+## Controls in IDA
+
+| Where | What |
+|---|---|
+| **Edit → Plugins → Kiln IDA → Start / Stop server** | Enable / disable. Also **Ctrl-Alt-K**. |
+| **… → Status…** | Session id, URL, uptime, calls served, errors, whether Hex-Rays is available. |
+| **… → Copy session id** | Puts the id on the clipboard (handy with `/ida <id>`). |
+| **… → Start automatically when a database opens** | Toggle autostart (saved in `%APPDATA%\Kiln\ida\plugin.json`). |
+
+The Output window logs every start/stop, each modifying call, and errors. The same lines go to
+`%APPDATA%\Kiln\ida\plugin.log` (2 MB, one rotation).
+
+Every IDA instance gets its **own session**: a random 8-hex-digit id, its own port (24137 upward,
+first free of 100) and its own secret key. Closing the database or IDA stops the server and removes
+the session file. Opening another database in the same IDA starts a fresh session.
+
+## How Kiln finds it — the session file
+
+While the server is on, the plugin keeps `%APPDATA%\Kiln\ida\sessions\<id>.json`:
+
+```json
+{
+  "id": "50a47088", "plugin": "kiln-ida", "version": "0.5.0",
+  "name": "whoami.exe", "binary": "whoami.exe",
+  "input_path": "C:\\dumps\\whoami.exe", "idb_path": "C:\\dumps\\whoami.exe.i64",
+  "pid": 10216, "host": "127.0.0.1", "port": 24137, "url": "http://127.0.0.1:24137/mcp",
+  "token": "…secret…", "ida_version": "9.1", "sdk": 910, "python": "3.10.5",
+  "hexrays": true, "processor": "metapc", "bits": 64, "gui": true,
+  "started_at": "2026-10-13T10:00:00Z", "tools": 65
+}
+```
+
+Kiln watches that folder, drops files whose `pid` is gone, pings `/health` every 15 s, and shows
+each session's name, id, database, pid, IDA version, Hex-Rays and status (connected / not answering
+/ gone). A chat remembers its sessions by id **and** database path, so an IDA you restart (new id,
+new port) is picked up again without re-attaching.
+
+## Security
+
+- Binds **127.0.0.1 only**. Never reachable from the network.
+- Every request must carry the session's key: `Authorization: Bearer <token>`. Requests without it
+  get **401**, including `/health`.
+- Requests with an `Origin` header (a browser page) are refused with **403**, as are non-local
+  `Host` values. This blocks DNS-rebinding and drive-by pages.
+- The key lives only in the session file (your user profile) and is rotated every start.
+- `GET /mcp` is **405** — no server-initiated streams, so nothing can be pushed to a client.
+
+## Transport
+
+MCP **Streamable HTTP**, JSON-RPC 2.0 over `POST /mcp`:
+
+| Method | Behaviour |
+|---|---|
+| `initialize` | Protocol versions `2025-06-18`, `2025-03-26`, `2024-11-05`; returns a `Mcp-Session-Id` header. Capabilities: `tools` only. |
+| `ping`, `tools/list`, `tools/call` | As specified. `resources/list` and `prompts/list` return empty lists. |
+| notifications | `202 Accepted`, no body. Batches (JSON arrays) are accepted. |
+| `GET /mcp` | `405` (no SSE stream). `DELETE /mcp` → `204`. |
+| `GET /health` | `{ ok, session, binary, pid, calls, busy, events_seq }` — needs the key. |
+
+Tool results are `content: [{ type: "text", text: <JSON> }]` (and the same object as
+`structuredContent`); failures are `isError: true` with a one-line message (`No function at
+0x401000`, `Hex-Rays decompiler is not available in this IDA`, `Couldn't parse the pattern`, …).
+Every tool carries MCP annotations: `readOnlyHint`, `destructiveHint`, `title`. Schemas are strict
+(`additionalProperties: false`); an argument a model invents (`"action": "search_names"` is a
+favourite) is dropped, the call still runs, and the result lists it under `ignored_arguments`.
+
+## Execution model
+
+- The HTTP server runs on a **daemon thread**; every IDA API call is marshalled to IDA's main thread
+  with `execute_sync` (`MFF_READ` for read-only tools, `MFF_WRITE` for modifying ones). The UI never
+  runs IDA calls concurrently with you or with another tool.
+- One tool runs at a time (a lock); parallel requests queue. `/health` reports `busy` with the name
+  of the running tool.
+- **Chunked tools** (`search_text`, `search_bytes`, `decompile_many`, `find_similar_functions`) run on
+  the server thread and send *windows* of work to the main thread (3000 items, 4 MB, one function,
+  300 functions), so IDA's UI breathes between windows and you can keep working. They take
+  `budget_ms` (default 20 s; 60 s for `decompile_many`): when it runs out they return what they
+  have with `truncated: true` and `resume_from` / `remaining` so the next call continues.
+- Lists are **paged** (`offset`, `limit`, `total`, `next_offset`). `list_strings` caches the string
+  list for 5 minutes (`refresh=true` rebuilds it).
+- Addresses accept an int, hex (`0x401000` / `401000h`), or a name (mangled or demangled).
+
+## Breakpoints are hardware only
+
+`set_breakpoint` uses the CPU's debug registers (`kind=exec` by default, or `write` / `read` / `access` to watch
+data). Not one byte of the program is modified, so code that checksums itself sees nothing. Software `0xCC`
+breakpoints are deliberately **not** offered: they patch the instruction and any self-check can spot them. The
+trade-off is that x86 has only four debug registers, so delete breakpoints you have finished with.
+
+A breakpoint stops the whole process when it is hit — every thread. To watch a hot function without freezing the
+target, give the breakpoint an IDC `condition` that does its logging and then evaluates false: IDA resumes on its
+own. Note that such a breakpoint produces no stop, so nothing appears in the live card or the review.
+
+## Tracing: getting information without stopping
+
+A breakpoint stops the program. To watch something busy without freezing it, make the breakpoint **non-suspending**
+with `set_breakpoint(..., suspend=false)`: IDA records each hit in the trace and lets the program run straight on.
+Call `trace_start` first, then read the hits back whenever you like with `read_trace`. This is the way to watch a hot
+function on an interactive target — the client never pauses, so it cannot time out or disconnect while you think.
+
+`trace_start` also offers two heavier modes. `function` records every call and return, so a short burst tells you
+what a function actually does at runtime; `instruction` records every instruction. Both work by single-stepping the
+process, which is hundreds of times slower — fine for a few seconds of a specific path, hopeless as a background
+setting. Measured on a small console program, a two second burst of function tracing recorded about 2,500 events
+with callee names resolved.
+
+`read_trace` returns the newest events by default and is paged, so a long recording can be read in chunks.
+
+## Watching the debugger
+
+While the server is on the plugin hooks IDA's debugger. Every stop — a breakpoint, an exception, a pause,
+a step, the process starting or exiting — is snapshotted (instruction, function, registers, top of the
+stack, the breakpoint that fired) and queued with a sequence number. `wait_for_debugger_event` is a
+**long-poll**: give it the last `seq` you saw and it returns as soon as there is a newer event, or after
+`timeout_s` with an empty list. It runs off IDA's main thread, so stepping and reading still work while a
+client waits.
+
+A stop inside a function also carries that function's **arguments**, read out of the live process: each one's name
+and type from the prototype, its value, `text` for a `char *` / `wchar_t *` (the string itself), and `points_to` for
+a pointer into something named. They are only read at the function's first instruction, where a breakpoint on the
+function's address stops — once the prologue has run the incoming values are no longer where the ABI says, so the
+event says so rather than guessing. A function with no prototype falls back to the raw stack slots a caller pushed.
+
+Each event carries a `source`: the Kiln tool that was running when it happened (`debugger_start`,
+`debugger_step`, …), or `null` when nothing was — i.e. the user drove IDA, or a running process stopped on
+its own. A client watches by looping `wait_for_debugger_event` and reviewing the `null`-source stops (the
+tool-driven ones are already in that tool's own result). In Kiln this is `/ida` → **review stops**: the chat
+posts each stop and the model looks at what is going on, then drives on with `debugger_step`.
+
+## Tools
+
+65 tools. Read-only ones Kiln runs without asking (except in Manual mode); modifying ones ask before
+each call (except in Bypass mode) and Plan mode never offers them; ⚠ = `destructiveHint`, which the
+approval card says.
+
+### Understanding the code (read-only)
+
+| Tool | Arguments | What it returns |
+|---|---|---|
+| `get_database_info` | — | binary, database file, processor, bitness, image base, entry point, range, function/segment counts, Hex-Rays, analysis done, debugger on |
+| `list_segments` | — | name, class, start, end, size, permissions, bitness |
+| `list_functions` | `filter?`, `regex?`, `offset?`, `limit?` | address, name, size — paged |
+| `get_function` | `address` | bounds, size, name, prototype, comments, chunks, callers count, frame size, library / thunk / no-return |
+| `get_functions` | `addresses[]` | the same for up to 50 functions in one call (`error` per bad address) |
+| `get_callers` | `address`, paging | who calls it: one row per calling function with call count and sites |
+| `get_callees` | `address`, paging | what it calls: one row per target with kind (function / import / thunk / data), call count, sites |
+| `decompile` | `address` | Hex-Rays pseudocode of the function |
+| `decompile_many` | `addresses[]`, `max_chars_each?`, `budget_ms?` | pseudocode of up to 20 functions; `remaining` when the budget ran out |
+| `get_pseudocode_lines` | `address` | pseudocode as numbered lines, each with the address it came from |
+| `disassemble` | `address`, `count?`, `max_lines?` | the whole function, or `count` instructions from an address |
+| `get_xrefs_to` | `address`, paging | who calls / jumps to / reads / writes it |
+| `get_xrefs_from` | `address`, `whole_function?`, paging | what it calls, jumps to, reads, writes |
+| `list_imports` | `filter?`, paging | module, name, address, ordinal |
+| `list_exports` | paging | name, address, ordinal |
+| `list_strings` | `filter?`, `min_length?`, `refresh?`, paging | address, length, type, text |
+| `search_names` | `query`, `regex?`, paging | names containing text / matching a regex, with demangled form |
+| `search_text` | `text`, `case_sensitive?`, `start?`, `end?`, `limit?`, `budget_ms?` | disassembly lines (and comments) containing text; `resume_from` |
+| `search_bytes` | `pattern`, `start?`, `end?`, `limit?`, `budget_ms?` | addresses of a hex pattern (`??` wildcards) and their functions; `resume_from` |
+| `find_similar_functions` | `address`, `limit?`, `min_similarity?`, `budget_ms?` | functions with the same instruction shapes (inlined / duplicated / templated copies), scored 0..1 |
+| `suggest_struct_from_accesses` | `address`, `register?`, `name?` | a draft C struct from the `[reg+off]` accesses in a function, with the access list |
+| `read_bytes` | `address`, `size?`, `debugger?` | hex + printable ASCII, up to 64 KB, from the database or the live process |
+| `get_data_item` | `address`, `max_elements?` | a data item decoded: string, number / array, pointer (and target), struct instance (member values), or code |
+| `list_types` | `filter?`, paging | local types: ordinal, name, kind, size |
+| `get_type` | `name?`, `ordinal?` | a type's full C definition |
+| `get_stack_frame` | `address` | a function's frame: variables / arguments with offset, size, type |
+| `list_signatures` | — | FLIRT signatures applied: name, library, matches |
+| `list_bookmarks` | — | IDA bookmarks: slot, address, name, description, function |
+| `list_breakpoints` | — | address, enabled, type, size, condition, pass count |
+| `get_cursor` | — | the address under the user's cursor and its function |
+| `get_debugger_state` | — | debugging?, state, threads, registers; when suspended: `ip`, the instruction, the function |
+| `get_arguments` | `address?` | the stopped function's arguments read out of the live process: name, type and value, strings followed, pointers named |
+| `wait_for_debugger_event` | `since?`, `timeout_s?` | long-poll: the debugger stops after `since` (instruction, registers, stack, breakpoint, `source`). Kiln uses it for the live debugger card and for reviewing stops |
+| `jump_to` | `address` | moves IDA's view (changes nothing) |
+
+### Changing the database (modifying)
+
+| Tool | Arguments | Effect |
+|---|---|---|
+| `set_name` | `address`, `name` | rename a function / label / global (empty = remove) |
+| `set_comment` | `address`, `comment`, `repeatable?` | instruction / data comment |
+| `set_function_comment` | `address`, `comment`, `repeatable?` | the comment at the top of a function |
+| `set_type` | `address`, `declaration` | apply a prototype or a variable type |
+| `set_calling_convention` | `address`, `convention` | cdecl / stdcall / fastcall / thiscall / pascal / usercall / userpurge, keeping the rest of the prototype |
+| `mark_as_noreturn` | `address`, `noreturn?` | mark a function as never returning (callers re-analysed), or clear it |
+| `declare_types` | `declarations` | add / replace structs, unions, enums, typedefs |
+| `rename_local_variable` | `function`, `old_name`, `new_name` | rename a pseudocode local (Hex-Rays) |
+| `set_lvar_type` | `function`, `name`, `type` | type a pseudocode local / argument (Hex-Rays) |
+| `set_lvar_comment` | `function`, `name`, `comment` | comment on a pseudocode local (Hex-Rays) |
+| `create_function` | `address` | like pressing **P** |
+| `undefine` ⚠ | `address`, `size?` | like pressing **U** — destructive |
+| `patch_bytes` ⚠ | `address`, `hex` | patch the database (IDA keeps the originals for *Apply patches*) — destructive |
+| `apply_signature` | `name` | queue a FLIRT signature (then `wait_for_analysis`, `list_signatures`) |
+| `add_bookmark` | `address`, `description` | an IDA bookmark (Ctrl-M) — a trail the user can walk |
+| `delete_bookmark` | `slot` | remove one (higher slots move down, as IDA does) |
+| `wait_for_analysis` | — | block until auto-analysis finishes |
+| `save_database` | — | save the IDB |
+| `run_python` ⚠ | `code` | run IDAPython in IDA and return stdout / the result — anything the API can do |
+
+### Driving the debugger (modifying)
+
+The debugger selected in IDA is used (win32 is loaded on Windows if none is). IDA may show its own
+confirmation the first time a process is started; the call waits for it.
+
+| Tool | Arguments | Effect |
+|---|---|---|
+| `set_breakpoint` | `address`, `kind?` (exec / write / read / access), `size?`, `suspend?`, `condition?`, `enabled?` | add or update a **hardware** breakpoint — debug registers, no byte of the program is changed, so self-checks see nothing. Software (`0xCC`) breakpoints are deliberately not offered. Only 4 debug registers exist. A condition that evaluates false logs without stopping the process |
+| `delete_breakpoint` | `address` | remove it |
+| `trace_start` | `kind?`, `size?`, `clear?` | start recording: `breakpoints` (logging breakpoints only, full speed), `function` (every call and return) or `instruction` (every instruction) |
+| `trace_stop` | — | stop recording; what was recorded stays readable |
+| `trace_clear` | — | throw the recording away |
+| `read_trace` | `offset?`, `limit?`, `newest?`, `kind?` | the recorded events: index, kind (bpt / call / ret / insn), thread, function + offset, and what a call called |
+| `debugger_start` ⚠ | `path?`, `args?`, `directory?`, `break_at?`, `timeout_s?` | **runs the program** under IDA and waits until it is suspended (at `break_at`, a breakpoint, or the entry); returns the stop event, instruction, registers |
+| `debugger_attach` ⚠ | `pid`, `timeout_s?` | attach to a running process and suspend it |
+| `debugger_step` | `action` (step_over / step_into / step_out / continue / run_to), `address?`, `timeout_s?` | drive the process and wait for the next stop; `event: timeout` means it is still running |
+| `set_register` | `name`, `value` | set a register of the suspended process |
+| `write_memory` ⚠ | `address`, `hex` | write the live process's memory (the database is untouched) |
+| `debugger_stop` ⚠ | `detach?` | kill the process (or detach) and end the session |
+
+## Testing
+
+`tests/live_test.py` is a plain-Python MCP client (urllib, no dependencies). With IDA open and the
+server on:
+
+```bash
+set PYTHONIOENCODING=utf-8
+python tests/live_test.py
+```
+
+It reads the newest session file and runs 80 checks: security (401 / 403 / 405), `/health`,
+`initialize`, notifications → 202, `tools/list`, every read-only tool, each modifying tool followed
+by its undo, the searches with limits and budgets, unknown-argument handling, bookmarks, breakpoints,
+a real debugger run (start at the target, read the pushed debugger events, step, set a register, write
+memory back, continue, stop — set `KILN_LIVE_DEBUGGER=0` to skip it) and 6 concurrent calls. Last run
+against IDA 9.1 + Hex-Rays on `whoami.exe`: **80 passed, 0 failed**.
+
+## Troubleshooting
+
+| Symptom | Cause / fix |
+|---|---|
+| Nothing in `Edit → Plugins` | The file isn't in the plugin folder, or IDAPython failed to load it: check the Output window at startup for a traceback. |
+| `server OFF` / `/ida` shows **not answering** | The server was stopped (toggle it back on, Ctrl-Alt-K) or IDA is modal (a dialog is open) and can't service calls. |
+| `/ida` shows **gone** | That IDA process has exited; the chat keeps the attachment and reconnects when the same database is opened again. |
+| Port in use | The plugin scans 24137…24236. To start elsewhere set `"port"` in `%APPDATA%\Kiln\ida\plugin.json`. |
+| `Hex-Rays decompiler is not available` | No decompiler licence for this processor; `disassemble` still works. |
+| A call takes long and IDA's UI freezes | A single IDA call (one `decompile`, building `list_strings`) runs on IDA's main thread — the IDA API requires it. The searches, batch decompiles and similarity scans are chunked with a `budget_ms`, so the UI breathes between windows. |
+| `debugger_start` fails or hangs | Pick a debugger in IDA (Debugger → Select debugger) and check Debugger → Process options; the input file must exist. A confirmation dialog in IDA blocks the call until answered. |
+| `401` from a script | Send `Authorization: Bearer <token>` from the session file — every endpoint needs it. |
+| `ConnectionAbortedError` / `ConnectionResetError` traceback in the Output window | Fixed in **0.3.1**. An HTTP/1.1 client (Kiln included) keeps sockets open between calls and closes them when idle; older builds let Python print a traceback for that. It never affected a call — the one before it still says `ok`. Update the plugin and restart IDA. |
+| Headless `idat -S` | Cross-thread `execute_sync` is only serviced by the GUI event loop; the server needs the IDA GUI (`ida.exe`). |
+
+## Limitations
+
+- IDA 9.x API only (no 7.x / 8.x compatibility layer).
+- A non-chunked tool runs to completion on the main thread (no per-call timeout there). Kiln times a
+  call out after 10 minutes on its side; the chunked tools honour `budget_ms`.
+- `suggest_struct_from_accesses` reads operands as text (`[rcx+18h]`), which is right for x86 / x64
+  and ARM-style `[x0,#0x18]` is not handled yet.
+- `find_similar_functions` compares instruction shapes, not semantics: it finds copies and near
+  copies, not reimplementations.
+- `read_bytes` with `debugger=true` needs a suspended debuggee.
+- One session per IDA instance — one database at a time, as in IDA itself.
+
+```
+
+`kiln_ida.py`:
+
+```py
+"""Kiln IDA — an MCP server inside IDA Pro 9.x.
+
+Lets Kiln (and any MCP client) read and work with the open database: functions, pseudocode, assembly,
+cross-references, imports, exports, strings, segments, names, types, the stack frame, memory, the debugger — and,
+when you allow it, change the database (names, comments, types, functions, patches) or run Python.
+
+How it works
+- An HTTP server on 127.0.0.1 (one port per IDA instance) speaks MCP (JSON-RPC 2.0, Streamable HTTP, POST /mcp).
+- Every IDA call runs on IDA's main thread, one at a time (execute_sync), so the database is never touched
+  concurrently; the server thread only does I/O, so IDA stays responsive.
+- While the server is on, the session is registered as a small JSON file in %APPDATA%\\Kiln\\ida\\sessions\\<id>.json
+  (id, binary, database, port, key, IDA version, Hex-Rays…). Kiln reads these to list sessions for /ida.
+- Every request needs the session's key (Authorization: Bearer …); browsers (requests with an Origin header) are
+  refused. Nothing is reachable from other computers.
+- Tools are marked read-only or modifying (MCP annotations); a client can ask before the modifying ones.
+
+Install: copy this file to %APPDATA%\\Hex-Rays\\IDA Pro\\plugins\\ (or IDA's plugins folder) and restart IDA.
+Menu: Edit → Plugins → Kiln IDA (start/stop, status, autostart). Hotkey Ctrl-Alt-K toggles the server.
+Standard library only — nothing to pip-install into IDA's Python.
+"""
+
+import collections
+import contextlib
+import ctypes
+import datetime
+import io
+import json
+import os
+import re
+import secrets
+import socket
+import struct
+import sys
+import threading
+import time
+import traceback
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+
+import idaapi
+import ida_auto
+import ida_bytes
+import ida_dbg
+import ida_entry
+import ida_frame
+import ida_funcs
+import ida_ida
+import ida_idc
+import ida_idd
+import ida_idp
+import ida_kernwin
+import ida_lines
+import ida_loader
+import ida_nalt
+import ida_name
+import ida_search
+import ida_segment
+import ida_typeinf
+import ida_ua
+import ida_xref
+import idautils
+import idc
+
+try:
+    import ida_hexrays
+except ImportError:  # no decompiler in this installation
+    ida_hexrays = None
+
+PLUGIN_VERSION = "0.5.0"
+PLUGIN_NAME = "Kiln IDA"
+DEFAULT_PORT = 24137
+PORT_RANGE = 100
+BADADDR = idaapi.BADADDR
+PROTOCOL_VERSIONS = ("2025-06-18", "2025-03-26", "2024-11-05")
+MAX_BODY = 4 * 1024 * 1024
+LOG_MAX_BYTES = 2 * 1024 * 1024
+
+
+# ───────────────────────── files: sessions, preferences, log ─────────────────────────
+
+def kiln_dir() -> str:
+    base = os.environ.get("APPDATA") if sys.platform == "win32" else os.path.join(os.path.expanduser("~"), ".config")
+    return os.path.join(base or os.path.expanduser("~"), "Kiln", "ida")
+
+
+def sessions_dir() -> str:
+    return os.path.join(kiln_dir(), "sessions")
+
+
+def prefs_file() -> str:
+    return os.path.join(kiln_dir(), "plugin.json")
+
+
+def load_prefs() -> dict:
+    try:
+        with open(prefs_file(), "r", encoding="utf-8") as f:
+            p = json.load(f)
+        return p if isinstance(p, dict) else {}
+    except (OSError, ValueError):
+        return {}
+
+
+def save_prefs(p: dict) -> None:
+    os.makedirs(kiln_dir(), exist_ok=True)
+    _atomic_write(prefs_file(), json.dumps(p, indent=2))
+
+
+def _atomic_write(path: str, text: str) -> None:
+    tmp = f"{path}.{os.getpid()}.tmp"
+    with open(tmp, "w", encoding="utf-8") as f:
+        f.write(text)
+    os.replace(tmp, path)
+
+
+_log_lock = threading.Lock()
+
+
+def log(text: str) -> None:
+    """To IDA's Output window (from any thread) and to %APPDATA%\\Kiln\\ida\\plugin.log."""
+    line = f"[{PLUGIN_NAME}] {text}"
+    try:
+        if _executor and _executor.on_main_thread():
+            ida_kernwin.msg(line + "\n")
+        else:
+            ida_kernwin.execute_sync(lambda: ida_kernwin.msg(line + "\n") or 0, ida_kernwin.MFF_NOWAIT | ida_kernwin.MFF_FAST)
+    except Exception:
+        pass
+    try:
+        with _log_lock:
+            os.makedirs(kiln_dir(), exist_ok=True)
+            path = os.path.join(kiln_dir(), "plugin.log")
+            if os.path.exists(path) and os.path.getsize(path) > LOG_MAX_BYTES:
+                os.replace(path, path + ".old")
+            with open(path, "a", encoding="utf-8") as f:
+                f.write(f"{datetime.datetime.now().isoformat(timespec='seconds')} pid={os.getpid()} {text}\n")
+    except OSError:
+        pass
+
+
+def pid_alive(pid: int) -> bool:
+    if sys.platform == "win32":
+        # Never os.kill(pid, 0) on Windows: it terminates the process.
+        h = ctypes.windll.kernel32.OpenProcess(0x1000, False, int(pid))  # PROCESS_QUERY_LIMITED_INFORMATION
+        if not h:
+            return False
+        try:
+            code = ctypes.c_ulong()
+            ok = ctypes.windll.kernel32.GetExitCodeProcess(h, ctypes.byref(code))
+            return bool(ok) and code.value == 259  # STILL_ACTIVE
+        finally:
+            ctypes.windll.kernel32.CloseHandle(h)
+    try:
+        os.kill(int(pid), 0)
+        return True
+    except OSError:
+        return False
+
+
+# ───────────────────────── running on IDA's main thread ─────────────────────────
+
+class ToolError(Exception):
+    """A tool couldn't do what was asked: the message goes back to the client as the result (isError)."""
+
+
+class _Executor:
+    """Runs a callable on IDA's main thread (execute_sync), one at a time. Created on the main thread at plugin init."""
+
+    def __init__(self):
+        self.main_tid = threading.get_ident()
+        self.lock = threading.Lock()
+        self.busy_with = None
+        self.busy_since = 0.0
+
+    def on_main_thread(self) -> bool:
+        return threading.get_ident() == self.main_tid
+
+    def run(self, fn, write: bool, label: str = ""):
+        if self.on_main_thread():
+            return fn()
+        box = {}
+
+        def job():
+            try:
+                box["r"] = fn()
+            except BaseException as e:  # handed to the waiting thread
+                box["e"] = e
+                box["tb"] = traceback.format_exc()
+            return 1
+
+        with self.lock:
+            self.busy_with, self.busy_since = label, time.monotonic()
+            try:
+                ida_kernwin.execute_sync(job, ida_kernwin.MFF_WRITE if write else ida_kernwin.MFF_READ)
+            finally:
+                self.busy_with = None
+        if "e" in box:
+            e = box["e"]
+            if not isinstance(e, ToolError):
+                log(f"tool {label} failed:\n{box.get('tb', '')}")
+            raise e
+        return box.get("r")
+
+
+_executor: "_Executor | None" = None
+
+
+# ───────────────────────── helpers ─────────────────────────
+
+def hexa(ea: int) -> str:
+    return f"0x{ea:X}"
+
+
+def parse_ea(value, what: str = "address") -> int:
+    """An address: a number, "0x401000" / "401000" (hex), or a name (sub_401000, main, …)."""
+    if isinstance(value, bool) or value is None:
+        raise ToolError(f"Give the {what} (hex like 0x401000, or a name).")
+    if isinstance(value, (int, float)):
+        ea = int(value)
+    else:
+        s = str(value).strip()
+        if not s:
+            raise ToolError(f"Give the {what} (hex like 0x401000, or a name).")
+        if re.fullmatch(r"(0[xX])?[0-9a-fA-F]+[hH]?", s):
+            ea = int(s.rstrip("hH"), 16)
+        else:
+            ea = ida_name.get_name_ea(BADADDR, s)
+            if ea == BADADDR:
+                # Demangled / display names: search the name list once.
+                for cand_ea, cand in idautils.Names():
+                    if cand == s or ida_name.demangle_name(cand, 0) == s:
+                        ea = cand_ea
+                        break
+            if ea == BADADDR:
+                raise ToolError(f"No such name: {s} (search_names finds names; addresses are hex like 0x401000).")
+    if ea < 0:
+        raise ToolError(f"{value} isn't a valid address.")
+    return ea
+
+
+def check_in_db(ea: int) -> int:
+    if ida_segment.getseg(ea) is None and not (ida_dbg.is_debugger_on() and ida_bytes.is_loaded(ea)):
+        raise ToolError(f"{hexa(ea)} is not inside any segment of this database.")
+    return ea
+
+
+def int_arg(args: dict, key: str, default: int, lo: int, hi: int) -> int:
+    v = args.get(key, default)
+    try:
+        n = int(v) if v is not None else default
+    except (TypeError, ValueError):
+        raise ToolError(f"{key} must be a number.")
+    return max(lo, min(hi, n))
+
+
+def page(items: list, args: dict, default_limit: int = 100, max_limit: int = 1000) -> dict:
+    offset = int_arg(args, "offset", 0, 0, 10_000_000)
+    limit = int_arg(args, "limit", default_limit, 1, max_limit)
+    chunk = items[offset: offset + limit]
+    out = {"total": len(items), "offset": offset, "count": len(chunk), "items": chunk}
+    if offset + limit < len(items):
+        out["next_offset"] = offset + limit
+    return out
+
+
+def name_at(ea: int) -> str:
+    return ida_name.get_name(ea) or ""
+
+
+def func_of(ea: int):
+    return ida_funcs.get_func(ea)
+
+
+def func_summary(pfn) -> dict:
+    return {
+        "address": hexa(pfn.start_ea), "end": hexa(pfn.end_ea), "size": pfn.end_ea - pfn.start_ea,
+        "name": ida_funcs.get_func_name(pfn.start_ea) or "",
+    }
+
+
+def xref_dict(x) -> dict:
+    return {"from": hexa(x.frm), "to": hexa(x.to), "type": idautils.XrefTypeName(x.type), "code": bool(x.iscode)}
+
+
+def hexrays_ok() -> bool:
+    return bool(ida_hexrays) and bool(_state.hexrays)
+
+
+_strings_cache = {"at": 0.0, "minlen": 0, "items": None}
+
+
+def strings_list(min_length: int, refresh: bool) -> list:
+    now = time.monotonic()
+    c = _strings_cache
+    if refresh or c["items"] is None or c["minlen"] != min_length or now - c["at"] > 300:
+        s = idautils.Strings(default_setup=False)
+        s.setup(strtypes=[ida_nalt.STRTYPE_C, ida_nalt.STRTYPE_C_16], minlen=min_length, only_7bit=False, ignore_instructions=True)
+        items = []
+        for it in s:
+            try:
+                if ida_bytes.is_code(ida_bytes.get_flags(ida_bytes.get_item_head(it.ea))):
+                    continue  # instruction bytes that happen to look like text (often starting mid-instruction)
+                items.append({"address": hexa(it.ea), "length": it.length, "type": "utf16" if it.strtype == ida_nalt.STRTYPE_C_16 else "c", "text": str(it)})
+            except Exception:
+                continue
+        c.update(at=now, minlen=min_length, items=items)
+    return c["items"]
+
+
+# ───────────────────────── tools ─────────────────────────
+
+TOOLS: "dict[str, dict]" = {}
+
+
+def tool(name: str, description: str, params: dict | None = None, required: list | None = None, *, write: bool = False, destructive: bool = False, title: str | None = None, chunked: bool = False):
+    """Registers a tool. `write`: runs under MFF_WRITE and is marked as modifying the database. `chunked`: the function
+    runs on the server thread and sends its own windows of work to IDA's main thread (on_main) so the UI breathes
+    between them and a budget_ms can stop it."""
+    def deco(fn):
+        TOOLS[name] = {
+            "fn": fn, "write": write, "chunked": chunked,
+            "def": {
+                "name": name, "description": description,
+                "inputSchema": {"type": "object", "properties": params or {}, **({"required": required} if required else {}), "additionalProperties": False},
+                "annotations": {"title": title or name.replace("_", " "), "readOnlyHint": not write, "destructiveHint": destructive, "idempotentHint": not write, "openWorldHint": False},
+            },
+        }
+        return fn
+    return deco
+
+
+ADDR = {"type": "string", "description": "An address (hex, e.g. 0x401000) or a name (e.g. sub_401000, main)."}
+BUDGET = {"type": "integer", "description": "Time budget in milliseconds: stop after this long and return what was found so far, with resume_from (default 20000, max 180000)."}
+
+
+def budget_deadline(args: dict, default_ms: int = 20000, max_ms: int = 180000) -> float:
+    return time.monotonic() + int_arg(args, "budget_ms", default_ms, 100, max_ms) / 1000
+
+
+def on_main(fn, write: bool = False, label: str = ""):
+    """From a chunked tool (server thread): run one window of work on IDA's main thread."""
+    return _executor.run(fn, write, label)
+PAGING = {"offset": {"type": "integer", "description": "Skip this many (paging)."}, "limit": {"type": "integer", "description": "At most this many (default 100, max 1000)."}}
+
+
+@tool("get_database_info", "What is open in this IDA session: the binary, the database file, processor and bitness, image base, entry point, address range, function and segment counts, whether the Hex-Rays decompiler is available, whether auto-analysis has finished, and whether the debugger is running.")
+def t_db_info(args):
+    return {
+        "session": _state.session_id, "binary": ida_nalt.get_root_filename() or "", "input_path": ida_nalt.get_input_file_path() or "",
+        "database": idc.get_idb_path() or "", "ida_version": ida_kernwin.get_kernel_version(), "sdk": idaapi.IDA_SDK_VERSION,
+        "processor": ida_ida.inf_get_procname(), "bits": 64 if ida_ida.inf_is_64bit() else (32 if ida_ida.inf_is_32bit_exactly() else 16),
+        "image_base": hexa(ida_nalt.get_imagebase()), "entry_point": hexa(ida_ida.inf_get_start_ea()),
+        "min_address": hexa(ida_ida.inf_get_min_ea()), "max_address": hexa(ida_ida.inf_get_max_ea()),
+        "functions": ida_funcs.get_func_qty(), "segments": ida_segment.get_segm_qty(), "hexrays": hexrays_ok(),
+        "analysis_done": bool(ida_auto.auto_is_ok()), "debugger_on": bool(ida_dbg.is_debugger_on()),
+        "plugin_version": PLUGIN_VERSION,
+    }
+
+
+@tool("list_segments", "The database's segments: name, class, start, end, size, permissions and bitness.")
+def t_segments(args):
+    out = []
+    for i in range(ida_segment.get_segm_qty()):
+        s = ida_segment.getnseg(i)
+        if not s:
+            continue
+        perm = "".join(c for c, bit in (("r", ida_segment.SEGPERM_READ), ("w", ida_segment.SEGPERM_WRITE), ("x", ida_segment.SEGPERM_EXEC)) if s.perm & bit)
+        out.append({"name": ida_segment.get_segm_name(s), "class": ida_segment.get_segm_class(s), "start": hexa(s.start_ea), "end": hexa(s.end_ea), "size": s.end_ea - s.start_ea, "permissions": perm, "bits": 64 if s.bitness == 2 else (32 if s.bitness == 1 else 16)})
+    return {"segments": out}
+
+
+@tool("list_functions", "Functions in the database (address, name, size), with an optional name filter (substring, or a regular expression with regex=true). Paged.", {"filter": {"type": "string", "description": "Only names containing this (case-insensitive)."}, "regex": {"type": "boolean"}, **PAGING})
+def t_functions(args):
+    q = str(args.get("filter") or "")
+    rx = re.compile(q, re.I) if q and args.get("regex") else None
+    out = []
+    for ea in idautils.Functions():
+        name = ida_funcs.get_func_name(ea) or ""
+        if q and (not rx.search(name) if rx else q.lower() not in name.lower()):
+            continue
+        pfn = ida_funcs.get_func(ea)
+        out.append({"address": hexa(ea), "name": name, "size": (pfn.end_ea - pfn.start_ea) if pfn else 0})
+    return page(out, args)
+
+
+@tool("get_function", "Details of one function: bounds, size, name, prototype, comments, chunks, how many places call it, the stack frame size, and whether it is a library / thunk / no-return function.", {"address": ADDR}, ["address"])
+def t_function(args):
+    ea = parse_ea(args.get("address"))
+    pfn = func_of(ea)
+    if not pfn:
+        raise ToolError(f"{hexa(ea)} is not inside a function (create_function can make one).")
+    return _function_info(pfn)
+
+
+@tool("decompile", "Hex-Rays pseudocode of the function containing the address (needs the decompiler). Returns the C code with the function's name and bounds.", {"address": ADDR}, ["address"])
+def t_decompile(args):
+    if not hexrays_ok():
+        raise ToolError("The Hex-Rays decompiler isn't available in this IDA installation (or not for this processor). Use disassemble.")
+    ea = parse_ea(args.get("address"))
+    pfn = func_of(ea)
+    if not pfn:
+        raise ToolError(f"{hexa(ea)} is not inside a function.")
+    try:
+        cfunc = ida_hexrays.decompile(pfn.start_ea)
+    except ida_hexrays.DecompilationFailure as e:
+        raise ToolError(f"Decompilation failed: {e}")
+    if cfunc is None:
+        raise ToolError("Decompilation failed (no result).")
+    return {**func_summary(pfn), "code": str(cfunc)}
+
+
+@tool("disassemble", "Assembly listing. Give a function (any address inside it) for the whole function, or address + count for that many instructions from there. Each line: address, the instruction, and any comment / label.", {"address": ADDR, "count": {"type": "integer", "description": "Instructions to list from the address (when not a whole function). Max 2000."}, "max_lines": {"type": "integer", "description": "Cap for a whole function (default 2000)."}}, ["address"])
+def t_disasm(args):
+    ea = parse_ea(args.get("address"))
+    check_in_db(ea)
+    count = args.get("count")
+    pfn = func_of(ea)
+    lines = []
+    cap = int_arg(args, "max_lines", 2000, 1, 5000)
+    if count is None and pfn:
+        heads = list(idautils.FuncItems(pfn.start_ea))
+        truncated = len(heads) > cap
+        heads = heads[:cap]
+        where = func_summary(pfn)
+    else:
+        n = int_arg(args, "count", 50, 1, 2000)
+        heads, cur = [], ida_bytes.get_item_head(ea) if ida_bytes.is_loaded(ea) else ea
+        end = ida_ida.inf_get_max_ea()
+        while len(heads) < n and cur != BADADDR and cur < end:
+            heads.append(cur)
+            cur = ida_bytes.next_head(cur, end)
+        truncated = False
+        where = {"address": hexa(ea), "count": len(heads)}
+    for h in heads:
+        text = ida_lines.generate_disasm_line(h, ida_lines.GENDSM_REMOVE_TAGS) or ""
+        row = {"address": hexa(h), "text": text.strip()}
+        label = name_at(h)
+        if label:
+            row["label"] = label
+        cmt = ida_bytes.get_cmt(h, False) or ida_bytes.get_cmt(h, True)
+        if cmt:
+            row["comment"] = cmt
+        lines.append(row)
+    return {**where, "lines": lines, **({"truncated": True} if truncated else {})}
+
+
+@tool("get_xrefs_to", "Cross-references TO an address: who calls / jumps to / reads / writes it. Each: from, type, and the function it is in.", {"address": ADDR, **PAGING}, ["address"])
+def t_xrefs_to(args):
+    ea = parse_ea(args.get("address"))
+    out = []
+    for x in idautils.XrefsTo(ea):
+        d = xref_dict(x)
+        pf = func_of(x.frm)
+        if pf:
+            d["function"] = ida_funcs.get_func_name(pf.start_ea)
+            d["function_address"] = hexa(pf.start_ea)
+        out.append(d)
+    return {"address": hexa(ea), "name": name_at(ea), **page(out, args)}
+
+
+@tool("get_xrefs_from", "Cross-references FROM an address or a whole function: what it calls, jumps to, reads and writes.", {"address": ADDR, "whole_function": {"type": "boolean", "description": "true (default when the address is in a function): every reference from the function; false: only from that instruction."}, **PAGING}, ["address"])
+def t_xrefs_from(args):
+    ea = parse_ea(args.get("address"))
+    pfn = func_of(ea)
+    whole = args.get("whole_function", pfn is not None)
+    heads = list(idautils.FuncItems(pfn.start_ea)) if (whole and pfn) else [ea]
+    out = []
+    for h in heads:
+        for x in idautils.XrefsFrom(h):
+            if x.type == ida_xref.fl_F:  # ordinary flow to the next instruction
+                continue
+            d = xref_dict(x)
+            d["target_name"] = name_at(x.to)
+            out.append(d)
+    return {"address": hexa(ea), **({"function": func_summary(pfn)} if pfn and whole else {}), **page(out, args, 200)}
+
+
+@tool("list_imports", "Imported functions, by module (DLL): module, name, address, ordinal. Optional name filter. Paged.", {"filter": {"type": "string"}, **PAGING})
+def t_imports(args):
+    q = str(args.get("filter") or "").lower()
+    out = []
+    for i in range(ida_nalt.get_import_module_qty()):
+        mod = ida_nalt.get_import_module_name(i) or ""
+
+        def cb(ea, name, ordinal, _mod=mod):
+            n = name or ""
+            if not q or q in n.lower() or q in _mod.lower():
+                out.append({"module": _mod, "name": n, "address": hexa(ea), **({"ordinal": ordinal} if ordinal else {})})
+            return True
+        ida_nalt.enum_import_names(i, cb)
+    return page(out, args, 200)
+
+
+@tool("list_exports", "Exported symbols and entry points: name, address, ordinal.", PAGING)
+def t_exports(args):
+    out = [{"ordinal": ordinal, "address": hexa(ea), "name": name or ""} for _i, ordinal, ea, name in idautils.Entries()]
+    return page(out, args, 200)
+
+
+@tool("list_strings", "Strings found in the binary (address, length, type, text). Filter by a substring (case-insensitive). Paged. Building the list the first time can take a few seconds on a big database.", {"filter": {"type": "string"}, "min_length": {"type": "integer", "description": "Default 5."}, "refresh": {"type": "boolean", "description": "Rebuild the string list (after analysis changed)."}, **PAGING})
+def t_strings(args):
+    q = str(args.get("filter") or "").lower()
+    items = strings_list(int_arg(args, "min_length", 5, 1, 1000), bool(args.get("refresh")))
+    out = [s for s in items if not q or q in s["text"].lower()]
+    return page(out, args)
+
+
+@tool("search_names", "Find names (functions, labels, globals) containing text, or matching a regular expression with regex=true. Returns address, name, demangled name, and whether it is a function.", {"query": {"type": "string"}, "regex": {"type": "boolean"}, **PAGING}, ["query"])
+def t_search_names(args):
+    q = str(args.get("query") or "")
+    if not q:
+        raise ToolError("Give the query.")
+    rx = re.compile(q, re.I) if args.get("regex") else None
+    out, seen = [], set()
+    # The names list, then functions with automatic names (sub_401000 …), which the list leaves out.
+    entries = [(ea, name) for ea, name in idautils.Names()]
+    entries += [(ea, ida_funcs.get_func_name(ea) or "") for ea in idautils.Functions()]
+    for ea, name in entries:
+        if not name or (ea, name) in seen:
+            continue
+        seen.add((ea, name))
+        dem = ida_name.demangle_name(name, 0) or ""
+        hay = f"{name} {dem}"
+        if (rx.search(hay) if rx else q.lower() in hay.lower()):
+            pf = ida_funcs.get_func(ea)
+            out.append({"address": hexa(ea), "name": name, **({"demangled": dem} if dem else {}), "function": pf is not None and pf.start_ea == ea})
+    out.sort(key=lambda x: int(x["address"], 16))
+    return page(out, args)
+
+
+@tool("read_bytes", "Raw bytes at an address (from the database, or from the live process when the debugger is running and debugger=true): hex, and the printable ASCII. Up to 65536 bytes.", {"address": ADDR, "size": {"type": "integer", "description": "Default 64."}, "debugger": {"type": "boolean", "description": "Read the debugged process's memory instead of the database."}}, ["address"])
+def t_read_bytes(args):
+    ea = parse_ea(args.get("address"))
+    size = int_arg(args, "size", 64, 1, 65536)
+    if args.get("debugger"):
+        if not ida_dbg.is_debugger_on():
+            raise ToolError("The debugger isn't running.")
+        data = ida_idd.dbg_read_memory(ea, size)
+        if not data:
+            raise ToolError(f"Couldn't read {size} bytes at {hexa(ea)} from the process.")
+    else:
+        check_in_db(ea)
+        data = ida_bytes.get_bytes(ea, size)
+        if data is None:
+            raise ToolError(f"No bytes at {hexa(ea)} (not loaded).")
+    return {"address": hexa(ea), "size": len(data), "hex": data.hex(" "), "ascii": "".join(chr(b) if 32 <= b < 127 else "." for b in data)}
+
+
+@tool("search_bytes", "Find a byte pattern (hex, ? for a wildcard byte, e.g. \"48 8B 05 ?? ?? ?? ??\"). Returns the addresses found and the function each is in. Scans in windows so IDA stays responsive; stops at `limit` hits or when budget_ms runs out (then `resume_from` says where to continue).", {"pattern": {"type": "string"}, "start": ADDR, "end": ADDR, "limit": {"type": "integer", "description": "Default 100."}, "budget_ms": BUDGET}, ["pattern"], chunked=True)
+def t_search_bytes(args):
+    pat = str(args.get("pattern") or "").strip()
+    if not pat:
+        raise ToolError("Give the pattern.")
+    limit = int_arg(args, "limit", 100, 1, 1000)
+    deadline = budget_deadline(args)
+
+    def setup():
+        start = parse_ea(args["start"]) if args.get("start") else ida_ida.inf_get_min_ea()
+        end = parse_ea(args["end"]) if args.get("end") else ida_ida.inf_get_max_ea()
+        vec = ida_bytes.compiled_binpat_vec_t()
+        # IDA 9: returns an error message, '' on success (older versions: a bool).
+        r = ida_bytes.parse_binpat_str(vec, start, pat, 16)
+        if (isinstance(r, str) and r) or r is False or len(vec) == 0:
+            raise ToolError(f"Couldn't parse the pattern “{pat}” — hex bytes separated by spaces, ? or ?? for any byte.{(' ' + r) if isinstance(r, str) and r else ''}")
+        return start, end, vec, max(len(vec[0].bytes), 1)
+    ea, end, vec, patlen = on_main(setup, label="search_bytes")
+    flags = getattr(ida_bytes, "BIN_SEARCH_FORWARD", 0) | getattr(ida_bytes, "BIN_SEARCH_NOBREAK", 0)
+    hits, WINDOW, truncated = [], 4 * 1024 * 1024, False
+    while ea < end and len(hits) < limit:
+        wend = min(end, ea + WINDOW + patlen)
+
+        def window():
+            found, cur = [], ea
+            while cur < wend and len(hits) + len(found) < limit:
+                r = ida_bytes.bin_search(cur, wend, vec, flags)
+                at = r[0] if isinstance(r, tuple) else r
+                if at is None or at == BADADDR:
+                    break
+                pf = func_of(at)
+                found.append({"address": hexa(at), **({"function": ida_funcs.get_func_name(pf.start_ea), "function_address": hexa(pf.start_ea)} if pf else {})})
+                cur = at + 1
+            return found
+        hits.extend(on_main(window, label="search_bytes"))
+        ea = wend - patlen + 1 if wend < end else end
+        if time.monotonic() > deadline and ea < end:
+            truncated = True
+            break
+    out = {"pattern": pat, "count": len(hits), "hits": hits}
+    if len(hits) >= limit:
+        out.update(truncated=True, resume_from=hexa(int(hits[-1]["address"], 16) + 1))
+    elif truncated:
+        out.update(truncated=True, resume_from=hexa(ea), reason="budget_ms")
+    return out
+
+
+@tool("search_text", "Search the disassembly text (instructions, operands, names, comments) for a string. Returns matching lines with their addresses. Scans in windows so IDA stays responsive; stops at `limit` hits or when budget_ms runs out (then `resume_from` says where to continue).", {"text": {"type": "string"}, "case_sensitive": {"type": "boolean"}, "start": ADDR, "end": ADDR, "limit": {"type": "integer", "description": "Default 50."}, "budget_ms": BUDGET}, ["text"], chunked=True)
+def t_search_text(args):
+    text = str(args.get("text") or "")
+    if not text:
+        raise ToolError("Give the text.")
+    cs = bool(args.get("case_sensitive"))
+    needle = text if cs else text.lower()
+    limit = int_arg(args, "limit", 50, 1, 500)
+    deadline = budget_deadline(args)
+
+    def setup():
+        a = parse_ea(args["start"]) if args.get("start") else ida_ida.inf_get_min_ea()
+        b = parse_ea(args["end"]) if args.get("end") else ida_ida.inf_get_max_ea()
+        return a, b
+    ea, end = on_main(setup, label="search_text")
+    hits, WINDOW, truncated = [], 3000, False
+    while ea < end and ea != BADADDR and len(hits) < limit:
+        def window():
+            cur, n, found = ea, 0, []
+            while n < WINDOW and cur < end and cur != BADADDR and len(hits) + len(found) < limit:
+                flags = ida_bytes.get_flags(cur)
+                if ida_bytes.is_unknown(flags):
+                    # Skip the unexplored run in one go (every byte of it would be an item otherwise).
+                    try:
+                        nxt = ida_bytes.next_that(cur, end, lambda f, *_: not ida_bytes.is_unknown(f))
+                    except Exception:
+                        nxt = BADADDR
+                    cur = nxt if nxt != BADADDR and nxt > cur else ida_bytes.next_head(cur, end)
+                    n += 1
+                    continue
+                line = ida_lines.generate_disasm_line(cur, ida_lines.GENDSM_REMOVE_TAGS) or ""
+                hay = line if cs else line.lower()
+                if needle not in hay:
+                    for rep_ in (False, True):
+                        cmt = ida_bytes.get_cmt(cur, rep_) or ""
+                        if cmt and needle in (cmt if cs else cmt.lower()):
+                            line = line.rstrip() + "  ; " + cmt
+                            hay = needle
+                            break
+                if needle in hay:
+                    pf = func_of(cur)
+                    found.append({"address": hexa(cur), "text": line.strip(), **({"function": ida_funcs.get_func_name(pf.start_ea)} if pf else {})})
+                cur = ida_bytes.next_head(cur, end)
+                n += 1
+            return cur, found
+        ea, found = on_main(window, label="search_text")
+        hits.extend(found)
+        if time.monotonic() > deadline and ea < end and len(hits) < limit:
+            truncated = True
+            break
+    out = {"text": text, "count": len(hits), "hits": hits}
+    if len(hits) >= limit and ea < end:
+        out.update(truncated=True, resume_from=hexa(ea))
+    elif truncated:
+        out.update(truncated=True, resume_from=hexa(ea), reason="budget_ms")
+    return out
+
+
+def _tif_kind(tif) -> str:
+    for k in ("struct", "union", "enum", "typedef", "func", "ptr", "array"):
+        if getattr(tif, f"is_{k}")():
+            return k
+    return "other"
+
+
+@tool("list_types", "Local types (structs, unions, enums, typedefs) in the database: ordinal, name, kind, size. Optional name filter. Paged.", {"filter": {"type": "string"}, **PAGING})
+def t_list_types(args):
+    q = str(args.get("filter") or "").lower()
+    out = []
+    for ordinal in range(1, ida_typeinf.get_ordinal_limit(None)):
+        tif = ida_typeinf.tinfo_t()
+        if not tif.get_numbered_type(None, ordinal):
+            continue
+        name = tif.get_type_name() or ""
+        if q and q not in name.lower():
+            continue
+        out.append({"ordinal": ordinal, "name": name, "kind": _tif_kind(tif), "size": tif.get_size() if tif.get_size() != BADADDR else None})
+    return page(out, args, 200)
+
+
+@tool("get_type", "A local type's full C definition (struct members with offsets, enum values, typedef), by name or ordinal.", {"name": {"type": "string"}, "ordinal": {"type": "integer"}})
+def t_get_type(args):
+    tif = ida_typeinf.tinfo_t()
+    if args.get("name"):
+        if not tif.get_named_type(None, str(args["name"])):
+            raise ToolError(f"No local type called {args['name']} (list_types lists them).")
+    elif args.get("ordinal") is not None:
+        if not tif.get_numbered_type(None, int(args["ordinal"])):
+            raise ToolError(f"No local type with ordinal {args['ordinal']}.")
+    else:
+        raise ToolError("Give name or ordinal.")
+    name = tif.get_type_name() or str(args.get("name") or "")
+    text = ida_typeinf.print_tinfo("", 0, 0, ida_typeinf.PRTYPE_MULTI | ida_typeinf.PRTYPE_TYPE | ida_typeinf.PRTYPE_SEMI | ida_typeinf.PRTYPE_DEF, tif, name, "")
+    out = {"name": name, "kind": _tif_kind(tif), "size": tif.get_size() if tif.get_size() != BADADDR else None, "definition": text or str(tif)}
+    if tif.is_struct() or tif.is_union():
+        udt = ida_typeinf.udt_type_data_t()
+        if tif.get_udt_details(udt):
+            out["members"] = [{"name": m.name, "offset": m.offset // 8, "size": m.size // 8, "type": str(m.type)} for m in udt]
+    return out
+
+
+@tool("get_stack_frame", "A function's stack frame: each variable / argument with its offset, size and type (offsets are from the frame's start; the return address and saved registers show as such).", {"address": ADDR}, ["address"])
+def t_frame(args):
+    ea = parse_ea(args.get("address"))
+    pfn = func_of(ea)
+    if not pfn:
+        raise ToolError(f"{hexa(ea)} is not inside a function.")
+    tif = ida_typeinf.tinfo_t()
+    if not ida_frame.get_func_frame(tif, pfn):
+        raise ToolError("This function has no stack frame.")
+    udt = ida_typeinf.udt_type_data_t()
+    members = []
+    if tif.get_udt_details(udt):
+        members = [{"name": m.name, "offset": m.offset // 8, "size": m.size // 8, "type": str(m.type)} for m in udt]
+    return {**func_summary(pfn), "frame_size": ida_frame.get_frame_size(pfn), "local_size": pfn.frsize, "saved_registers": pfn.frregs, "argument_size": pfn.argsize, "members": members}
+
+
+@tool("get_cursor", "Where the user is in IDA right now: the address under the cursor, its name, and the function it is in.")
+def t_cursor(args):
+    ea = ida_kernwin.get_screen_ea()
+    pfn = func_of(ea) if ea != BADADDR else None
+    return {"address": hexa(ea) if ea != BADADDR else None, "name": name_at(ea) if ea != BADADDR else "", **({"function": func_summary(pfn)} if pfn else {})}
+
+
+def _reg_names() -> list:
+    """Registers worth showing: the full-width ones on x86 / x64 (IDA's own list starts with ax, bx, …), else the processor's."""
+    proc = (ida_ida.inf_get_procname() or "").lower()
+    if proc == "metapc":
+        if ida_ida.inf_is_64bit():
+            return ["rax", "rbx", "rcx", "rdx", "rsi", "rdi", "rbp", "rsp", "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15", "rip", "efl", "cs", "ds", "es", "fs", "gs", "ss"]
+        return ["eax", "ebx", "ecx", "edx", "esi", "edi", "ebp", "esp", "eip", "efl", "cs", "ds", "es", "fs", "gs", "ss"]
+    return list(ida_idp.ph_get_regnames())[:64]
+
+
+@tool("get_arguments", "The arguments of the function the debugged process is stopped in, read out of the live process: each argument's name, type and value, with strings followed and pointers named. Accurate at the function's first instruction (before its prologue runs), which is exactly where a breakpoint on the function's address stops.", {"address": {**ADDR, "description": "Which function (default: where the process is stopped)."}})
+def t_get_args(args):
+    if not ida_dbg.is_debugger_on():
+        raise ToolError("The debugger isn't running.")
+    if ida_dbg.get_process_state() != ida_dbg.DSTATE_SUSP:
+        raise ToolError("The process is running — it has to be stopped to read its arguments.")
+    ip = int(ida_dbg.get_ip_val() or BADADDR)
+    ea = parse_ea(args["address"]) if args.get("address") else ip
+    pfn = func_of(ea)
+    if not pfn:
+        raise ToolError("%s is not inside a function." % hexa(ea))
+    out = {"function": func_summary(pfn), "ip": hexa(ip) if ip != BADADDR else None}
+    out.update(_read_args(pfn, ip))
+    if "arguments" not in out and "arguments_note" not in out:
+        out["arguments_note"] = "no arguments could be read here"
+    return out
+
+
+@tool("get_debugger_state", "The debugger: whether a process is being debugged, its state, threads, and the current thread's registers.")
+def t_dbg(args):
+    if not ida_dbg.is_debugger_on():
+        return {"debugger_on": False}
+    st = ida_dbg.get_process_state()
+    state = {ida_dbg.DSTATE_SUSP: "suspended", ida_dbg.DSTATE_RUN: "running", ida_dbg.DSTATE_NOTASK: "no process"}.get(st, str(st))
+    threads = [{"id": ida_dbg.getn_thread(i), "name": ida_dbg.getn_thread_name(i) or ""} for i in range(ida_dbg.get_thread_qty())]
+    regs = {}
+    if st == ida_dbg.DSTATE_SUSP:
+        for r in _reg_names():
+            try:
+                v = ida_dbg.get_reg_val(r)
+                regs[r] = hexa(int(v)) if isinstance(v, int) else v
+            except Exception:
+                continue
+    out = {"debugger_on": True, "state": state, "current_thread": ida_dbg.get_current_thread(), "threads": threads, "registers": regs}
+    if st == ida_dbg.DSTATE_SUSP:
+        try:
+            ip = int(ida_dbg.get_ip_val() or BADADDR)
+            if ip != BADADDR:
+                out["ip"] = hexa(ip)
+                out["instruction"] = (ida_lines.generate_disasm_line(ip, ida_lines.GENDSM_REMOVE_TAGS) or "").strip()
+                pf = func_of(ip)
+                if pf:
+                    out["function"] = func_summary(pf)
+        except Exception:
+            pass
+    return out
+
+
+@tool("jump_to", "Move IDA's view to an address (shows it to the user). Changes nothing in the database.", {"address": ADDR}, ["address"])
+def t_jump(args):
+    ea = parse_ea(args.get("address"))
+    check_in_db(ea)
+    ok = ida_kernwin.jumpto(ea)
+    return {"address": hexa(ea), "jumped": bool(ok)}
+
+
+# ── modifying tools ──
+
+@tool("set_name", "Rename an address: a function, label or global. Empty name removes the name.", {"address": ADDR, "name": {"type": "string"}}, ["address", "name"], write=True, title="rename")
+def t_set_name(args):
+    ea = parse_ea(args.get("address"))
+    check_in_db(ea)
+    name = str(args.get("name") or "")
+    old = name_at(ea)
+    if not ida_name.set_name(ea, name, ida_name.SN_NOCHECK | ida_name.SN_NOWARN):
+        raise ToolError(f"IDA refused the name “{name}” at {hexa(ea)} (already used, or not a valid identifier).")
+    return {"address": hexa(ea), "old_name": old, "name": name_at(ea)}
+
+
+@tool("set_comment", "Set (or clear with an empty string) the comment on an instruction or data item. repeatable=true for a repeatable comment (shown at every reference).", {"address": ADDR, "comment": {"type": "string"}, "repeatable": {"type": "boolean"}}, ["address", "comment"], write=True)
+def t_set_comment(args):
+    ea = parse_ea(args.get("address"))
+    check_in_db(ea)
+    if not ida_bytes.set_cmt(ea, str(args.get("comment") or ""), bool(args.get("repeatable"))):
+        raise ToolError(f"Couldn't set the comment at {hexa(ea)}.")
+    return {"address": hexa(ea), "comment": str(args.get("comment") or "")}
+
+
+@tool("set_function_comment", "Set (or clear) the comment shown at the top of a function.", {"address": ADDR, "comment": {"type": "string"}, "repeatable": {"type": "boolean"}}, ["address", "comment"], write=True)
+def t_set_func_comment(args):
+    ea = parse_ea(args.get("address"))
+    pfn = func_of(ea)
+    if not pfn:
+        raise ToolError(f"{hexa(ea)} is not inside a function.")
+    ida_funcs.set_func_cmt(pfn, str(args.get("comment") or ""), bool(args.get("repeatable")))
+    return {**func_summary(pfn), "comment": str(args.get("comment") or "")}
+
+
+@tool("set_type", "Apply a C declaration to an address: a function prototype (e.g. \"int __fastcall sub_401000(int a, char *b)\") or a variable's type (e.g. \"struct Player *g_player\"). The name in the declaration is ignored for functions.", {"address": ADDR, "declaration": {"type": "string"}}, ["address", "declaration"], write=True)
+def t_set_type(args):
+    ea = parse_ea(args.get("address"))
+    check_in_db(ea)
+    decl = str(args.get("declaration") or "").strip()
+    if not decl:
+        raise ToolError("Give the declaration.")
+    if not decl.endswith(";"):
+        decl += ";"
+    tif = ida_typeinf.tinfo_t()
+    if ida_typeinf.parse_decl(tif, None, decl, ida_typeinf.PT_SIL) is None:
+        raise ToolError(f"IDA couldn't parse “{decl}”. Unknown types must be declared first (declare_types).")
+    if not ida_typeinf.apply_tinfo(ea, tif, ida_typeinf.TINFO_DEFINITE):
+        raise ToolError(f"IDA refused to apply the type at {hexa(ea)}.")
+    return {"address": hexa(ea), "type": ida_typeinf.print_type(ea, ida_typeinf.PRTYPE_1LINE) or str(tif)}
+
+
+@tool("declare_types", "Add or replace local types from C declarations: structs, unions, enums, typedefs (several at once, e.g. \"struct Vec3 { float x, y, z; }; typedef Vec3 *PVec3;\").", {"declarations": {"type": "string"}}, ["declarations"], write=True)
+def t_declare_types(args):
+    text = str(args.get("declarations") or "").strip()
+    if not text:
+        raise ToolError("Give the declarations.")
+    before = ida_typeinf.get_ordinal_limit(None)
+    errors = ida_typeinf.parse_decls(None, text, None, ida_typeinf.HTI_DCL)
+    if errors:
+        raise ToolError(f"IDA reported {errors} error(s) parsing the declarations (check the Output window for details).")
+    return {"ok": True, "new_types": max(0, ida_typeinf.get_ordinal_limit(None) - before)}
+
+
+@tool("rename_local_variable", "Rename a local variable or argument in a function's pseudocode (Hex-Rays).", {"function": ADDR, "old_name": {"type": "string"}, "new_name": {"type": "string"}}, ["function", "old_name", "new_name"], write=True)
+def t_rename_lvar(args):
+    if not hexrays_ok():
+        raise ToolError("The Hex-Rays decompiler isn't available.")
+    ea = parse_ea(args.get("function"), "function")
+    pfn = func_of(ea)
+    if not pfn:
+        raise ToolError(f"{hexa(ea)} is not inside a function.")
+    old, new = str(args.get("old_name") or ""), str(args.get("new_name") or "")
+    if not old or not new:
+        raise ToolError("Give old_name and new_name.")
+    if not ida_hexrays.rename_lvar(pfn.start_ea, old, new):
+        raise ToolError(f"Couldn't rename {old} → {new} (is {old} a variable of this function? decompile to see them).")
+    return {**func_summary(pfn), "old_name": old, "new_name": new}
+
+
+@tool("create_function", "Make IDA treat the code at an address as a function (like pressing P).", {"address": ADDR}, ["address"], write=True)
+def t_create_func(args):
+    ea = parse_ea(args.get("address"))
+    check_in_db(ea)
+    if func_of(ea):
+        raise ToolError(f"{hexa(ea)} is already inside {ida_funcs.get_func_name(func_of(ea).start_ea)}.")
+    if not ida_funcs.add_func(ea):
+        raise ToolError(f"IDA couldn't create a function at {hexa(ea)} (is it code?).")
+    return func_summary(func_of(ea))
+
+
+@tool("undefine", "Undefine bytes (turn an instruction or data item back into raw bytes, like pressing U). Destructive: analysis and names there are lost.", {"address": ADDR, "size": {"type": "integer", "description": "Bytes to undefine (default: the item at the address)."}}, ["address"], write=True, destructive=True)
+def t_undefine(args):
+    ea = parse_ea(args.get("address"))
+    check_in_db(ea)
+    size = int_arg(args, "size", ida_bytes.get_item_size(ea) or 1, 1, 1 << 20)
+    if not ida_bytes.del_items(ea, ida_bytes.DELIT_SIMPLE, size):
+        raise ToolError(f"Couldn't undefine {size} byte(s) at {hexa(ea)}.")
+    return {"address": hexa(ea), "size": size}
+
+
+@tool("patch_bytes", "Patch bytes in the database (hex, e.g. \"90 90\"). Destructive: the original bytes are replaced (IDA keeps the originals for Edit → Patch program → Apply patches).", {"address": ADDR, "hex": {"type": "string"}}, ["address", "hex"], write=True, destructive=True)
+def t_patch(args):
+    ea = parse_ea(args.get("address"))
+    check_in_db(ea)
+    try:
+        data = bytes.fromhex(re.sub(r"[\s,]", "", str(args.get("hex") or "")))
+    except ValueError:
+        raise ToolError("hex must be bytes like \"90 90\".")
+    if not data:
+        raise ToolError("Nothing to patch.")
+    before = ida_bytes.get_bytes(ea, len(data)) or b""
+    ida_bytes.patch_bytes(ea, data)
+    return {"address": hexa(ea), "size": len(data), "before": before.hex(" "), "after": data.hex(" ")}
+
+
+@tool("wait_for_analysis", "Wait until IDA's auto-analysis is finished (after creating functions or patching). Can take a while on a big database.", write=True)
+def t_wait(args):
+    ida_auto.auto_wait()
+    return {"analysis_done": bool(ida_auto.auto_is_ok())}
+
+
+@tool("save_database", "Save the database (.i64 / .idb) to disk.", write=True)
+def t_save(args):
+    ok = ida_loader.save_database(None, 0)
+    if not ok:
+        raise ToolError("IDA couldn't save the database.")
+    return {"saved": True, "database": idc.get_idb_path()}
+
+
+@tool("run_python", "Run Python inside IDA (IDAPython: idaapi, idautils, idc, ida_* are available). Returns what it prints and the value of `result` if the code sets it. Can do anything to the database — use the other tools where they fit.", {"code": {"type": "string"}}, ["code"], write=True, destructive=True)
+def t_python(args):
+    code = str(args.get("code") or "")
+    if not code.strip():
+        raise ToolError("Give the code.")
+    env = {"__name__": "__kiln_ida__", "idaapi": idaapi, "idautils": idautils, "idc": idc}
+    buf = io.StringIO()
+    try:
+        with contextlib.redirect_stdout(buf), contextlib.redirect_stderr(buf):
+            exec(compile(code, "<kiln_ida>", "exec"), env)
+    except Exception:
+        return {"ok": False, "output": buf.getvalue(), "error": traceback.format_exc(limit=3)}
+    out = {"ok": True, "output": buf.getvalue()[:60000]}
+    if "result" in env:
+        try:
+            json.dumps(env["result"])
+            out["result"] = env["result"]
+        except (TypeError, ValueError):
+            out["result"] = repr(env["result"])[:10000]
+    return out
+
+
+# ───────────────────────── calls graph, batches, decompiler extras ─────────────────────────
+
+CALL_TYPES = None  # set lazily: the xref types that are calls / jumps
+
+
+def _is_call_xref(x) -> bool:
+    global CALL_TYPES
+    if CALL_TYPES is None:
+        CALL_TYPES = {ida_xref.fl_CN, ida_xref.fl_CF, ida_xref.fl_JN, ida_xref.fl_JF}
+    return x.iscode and x.type in CALL_TYPES
+
+
+def _callee_kind(ea: int) -> str:
+    """What a call target is: a function here, an import (thunk / IAT slot), or plain data."""
+    pf = func_of(ea)
+    seg = ida_segment.getseg(ea)
+    segname = (ida_segment.get_segm_name(seg) or "") if seg else ""
+    if segname.lower() in (".idata", "idata", ".plt", ".got", "extern", "UNDEF") or (seg and seg.type == ida_segment.SEG_XTRN):
+        return "import"
+    if pf and (pf.flags & ida_funcs.FUNC_THUNK):
+        return "thunk"
+    if pf:
+        return "function"
+    n = name_at(ea)
+    return "import" if n.startswith("__imp_") else "data"
+
+
+def _call_sites_of(pfn) -> list:
+    """Every call / jump out of a function: (site, target)."""
+    out = []
+    for h in idautils.FuncItems(pfn.start_ea):
+        for x in idautils.XrefsFrom(h):
+            if _is_call_xref(x) and not (pfn.start_ea <= x.to < pfn.end_ea):
+                out.append((h, x.to))
+    return out
+
+
+def _group_calls(pairs, key_index: int, max_sites: int = 5) -> list:
+    groups: "dict[int, dict]" = {}
+    for site, other in pairs:
+        k = (site, other)[key_index]
+        g = groups.get(k)
+        if g is None:
+            g = groups[k] = {"calls": 0, "sites": []}
+        g["calls"] += 1
+        if len(g["sites"]) < max_sites:
+            g["sites"].append(hexa(site))
+    return sorted(groups.items(), key=lambda kv: -kv[1]["calls"])
+
+
+@tool("get_callers", "Who calls a function: each calling function with its name, how many call sites it has, and where they are (grouped — one entry per caller, most calls first). Paged.", {"address": ADDR, **PAGING}, ["address"])
+def t_callers(args):
+    ea = parse_ea(args.get("address"))
+    pfn = func_of(ea)
+    target = pfn.start_ea if pfn else ea
+    pairs = []
+    for x in idautils.XrefsTo(target):
+        if _is_call_xref(x):
+            pf = func_of(x.frm)
+            pairs.append((x.frm, pf.start_ea if pf else BADADDR))
+    items = []
+    for caller_ea, g in _group_calls(pairs, 1):
+        row = {"calls": g["calls"], "sites": g["sites"]}
+        if caller_ea == BADADDR:
+            row.update(function=None, address=None, note="call from outside any function")
+        else:
+            row.update(function=ida_funcs.get_func_name(caller_ea) or "", address=hexa(caller_ea))
+        items.append(row)
+    return {"address": hexa(target), "name": name_at(target), "total_call_sites": len(pairs), **page(items, args)}
+
+
+@tool("get_callees", "What a function calls: each target with its name, kind (function / import / thunk / data), how many times it is called from here, and the call sites (grouped, most calls first). The fastest way to see a function's dependencies without reading its code. Paged.", {"address": ADDR, **PAGING}, ["address"])
+def t_callees(args):
+    ea = parse_ea(args.get("address"))
+    pfn = func_of(ea)
+    if not pfn:
+        raise ToolError(f"{hexa(ea)} is not inside a function.")
+    pairs = _call_sites_of(pfn)
+    items = []
+    for target, g in _group_calls(pairs, 1):
+        name = name_at(target)
+        tf = func_of(target)
+        items.append({"address": hexa(target), "name": ida_funcs.get_func_name(tf.start_ea) if tf else (ida_name.demangle_name(name, 0) or name), "kind": _callee_kind(target), "calls": g["calls"], "sites": g["sites"]})
+    return {**func_summary(pfn), "total_call_sites": len(pairs), "distinct_targets": len(items), **page(items, args)}
+
+
+ADDR_LIST = {"type": "array", "items": {"type": "string"}, "description": "Addresses or names (max 50)."}
+
+
+def _addr_list(args, key: str = "addresses", max_n: int = 50) -> list:
+    raw = args.get(key)
+    if isinstance(raw, str):
+        raw = [p for p in re.split(r"[,\s]+", raw) if p]
+    if not isinstance(raw, list) or not raw:
+        raise ToolError(f"Give {key}: a list of addresses or names.")
+    return raw[:max_n]
+
+
+def _function_info(pfn) -> dict:
+    callers = sum(1 for x in idautils.XrefsTo(pfn.start_ea) if x.iscode)
+    chunks = [{"start": hexa(start), "end": hexa(end)} for start, end in idautils.Chunks(pfn.start_ea)]
+    f = pfn.flags
+    return {
+        **func_summary(pfn), "prototype": ida_typeinf.print_type(pfn.start_ea, ida_typeinf.PRTYPE_1LINE) or "",
+        "comment": ida_funcs.get_func_cmt(pfn, False) or "", "repeatable_comment": ida_funcs.get_func_cmt(pfn, True) or "",
+        "callers": callers, "chunks": chunks, "frame_size": ida_frame.get_frame_size(pfn),
+        "library": bool(f & ida_funcs.FUNC_LIB), "thunk": bool(f & ida_funcs.FUNC_THUNK), "noreturn": bool(f & ida_funcs.FUNC_NORET),
+        "decompilable": hexrays_ok(),
+    }
+
+
+@tool("get_functions", "Details of several functions in one call (same fields as get_function, one entry per address; an entry carries `error` when an address isn't a function). Up to 50.", {"addresses": ADDR_LIST}, ["addresses"])
+def t_functions_many(args):
+    out = []
+    for a in _addr_list(args):
+        try:
+            pfn = func_of(parse_ea(a))
+            if not pfn:
+                raise ToolError("not inside a function")
+            out.append(_function_info(pfn))
+        except ToolError as e:
+            out.append({"address": str(a), "error": str(e)})
+    return {"count": len(out), "items": out}
+
+
+def _decompile_one(ea: int, max_chars: int) -> dict:
+    pfn = func_of(ea)
+    if not pfn:
+        raise ToolError(f"{hexa(ea)} is not inside a function.")
+    try:
+        cfunc = ida_hexrays.decompile(pfn.start_ea)
+    except ida_hexrays.DecompilationFailure as e:
+        raise ToolError(f"Decompilation failed: {e}")
+    if cfunc is None:
+        raise ToolError("Decompilation failed (no result).")
+    code = str(cfunc)
+    out = {**func_summary(pfn), "code": code[:max_chars]}
+    if len(code) > max_chars:
+        out["truncated"] = True
+        out["chars"] = len(code)
+    return out
+
+
+@tool("decompile_many", "Hex-Rays pseudocode of several functions in one call (one entry per address, each with `code` or `error`). Up to 20 functions; stops early when budget_ms runs out and says which addresses are left in `remaining`.", {"addresses": {**ADDR_LIST, "description": "Functions (addresses or names), max 20."}, "max_chars_each": {"type": "integer", "description": "Cut each function's code at this many characters (default 20000)."}, "budget_ms": {"type": "integer", "description": "Time budget in milliseconds (default 60000)."}}, ["addresses"], chunked=True)
+def t_decompile_many(args):
+    if not hexrays_ok():
+        raise ToolError("The Hex-Rays decompiler isn't available in this IDA installation. Use disassemble.")
+    addrs = _addr_list(args, max_n=20)
+    max_chars = int_arg(args, "max_chars_each", 20000, 200, 200000)
+    deadline = budget_deadline(args, 60000)
+    items, i = [], 0
+    while i < len(addrs):
+        a = addrs[i]
+
+        def one():
+            try:
+                return _decompile_one(parse_ea(a), max_chars)
+            except ToolError as e:
+                return {"address": str(a), "error": str(e)}
+        items.append(on_main(one, label="decompile_many"))
+        i += 1
+        if time.monotonic() > deadline and i < len(addrs):
+            break
+    return {"count": len(items), "items": items, **({"remaining": [str(a) for a in addrs[i:]], "truncated": True} if i < len(addrs) else {})}
+
+
+@tool("get_pseudocode_lines", "Hex-Rays pseudocode as numbered lines, each with the address of the instruction it came from (when known) — so a finding can be tied back to an exact address and a comment can be placed on the right line. Needs the decompiler.", {"address": ADDR}, ["address"])
+def t_pseudocode_lines(args):
+    if not hexrays_ok():
+        raise ToolError("The Hex-Rays decompiler isn't available.")
+    ea = parse_ea(args.get("address"))
+    pfn = func_of(ea)
+    if not pfn:
+        raise ToolError(f"{hexa(ea)} is not inside a function.")
+    try:
+        cfunc = ida_hexrays.decompile(pfn.start_ea)
+    except ida_hexrays.DecompilationFailure as e:
+        raise ToolError(f"Decompilation failed: {e}")
+    if cfunc is None:
+        raise ToolError("Decompilation failed (no result).")
+    pseudocode = cfunc.get_pseudocode()  # generates the text; item coordinates exist only after this
+    line_ea: "dict[int, int]" = {}
+    for item in cfunc.treeitems:
+        iea = item.ea
+        if iea == BADADDR:
+            continue
+        try:
+            coords = cfunc.find_item_coords(item)
+        except Exception:
+            continue
+        if not coords:
+            continue
+        y = coords[1]
+        if y not in line_ea or iea < line_ea[y]:
+            line_ea[y] = iea
+    lines = []
+    for n, sl in enumerate(pseudocode):
+        row = {"line": n + 1, "text": ida_lines.tag_remove(sl.line)}
+        if n in line_ea:
+            row["address"] = hexa(line_ea[n])
+        lines.append(row)
+    return {**func_summary(pfn), "lines": lines}
+
+
+def _find_lvar(cfunc, name: str):
+    for lv in cfunc.get_lvars():
+        if lv.name == name:
+            return lv
+    return None
+
+
+def _parse_type(text: str):
+    tif = ida_typeinf.tinfo_t()
+    decl = text.strip().rstrip(";")
+    if not decl:
+        raise ToolError("Give the type (C syntax, e.g. \"struct Player *\" or \"unsigned int\").")
+    if ida_typeinf.parse_decl(tif, None, decl + ";", ida_typeinf.PT_SIL | ida_typeinf.PT_TYP) is None:
+        # Maybe a declaration with a name ("int x"): take its type.
+        if ida_typeinf.parse_decl(tif, None, decl + ";", ida_typeinf.PT_SIL) is None:
+            raise ToolError(f"Couldn't parse the type “{text}”.")
+    return tif
+
+
+@tool("set_lvar_type", "Set the type of a local variable or argument in a function's pseudocode (Hex-Rays), e.g. name=\"v3\", type=\"struct Player *\". The variable keeps its name.", {"function": ADDR, "name": {"type": "string"}, "type": {"type": "string", "description": "C type, e.g. \"int\", \"char *\", \"struct Foo *\"."}}, ["function", "name", "type"], write=True)
+def t_set_lvar_type(args):
+    if not hexrays_ok():
+        raise ToolError("The Hex-Rays decompiler isn't available.")
+    ea = parse_ea(args.get("function"), "function")
+    pfn = func_of(ea)
+    if not pfn:
+        raise ToolError(f"{hexa(ea)} is not inside a function.")
+    name = str(args.get("name") or "")
+    cfunc = ida_hexrays.decompile(pfn.start_ea)
+    lv = _find_lvar(cfunc, name) if cfunc else None
+    if lv is None:
+        raise ToolError(f"No variable called {name} in {ida_funcs.get_func_name(pfn.start_ea)} (decompile to see them).")
+    tif = _parse_type(str(args.get("type") or ""))
+    lsi = ida_hexrays.lvar_saved_info_t()
+    lsi.ll = lv
+    lsi.type = tif
+    if not ida_hexrays.modify_user_lvar_info(pfn.start_ea, ida_hexrays.MLI_TYPE, lsi):
+        raise ToolError(f"IDA refused the type {tif} for {name}.")
+    return {**func_summary(pfn), "name": name, "type": str(tif)}
+
+
+@tool("set_lvar_comment", "Set (or clear with an empty string) the comment shown next to a local variable's declaration in the pseudocode (Hex-Rays).", {"function": ADDR, "name": {"type": "string"}, "comment": {"type": "string"}}, ["function", "name", "comment"], write=True)
+def t_set_lvar_comment(args):
+    if not hexrays_ok():
+        raise ToolError("The Hex-Rays decompiler isn't available.")
+    ea = parse_ea(args.get("function"), "function")
+    pfn = func_of(ea)
+    if not pfn:
+        raise ToolError(f"{hexa(ea)} is not inside a function.")
+    name = str(args.get("name") or "")
+    cfunc = ida_hexrays.decompile(pfn.start_ea)
+    lv = _find_lvar(cfunc, name) if cfunc else None
+    if lv is None:
+        raise ToolError(f"No variable called {name} in {ida_funcs.get_func_name(pfn.start_ea)}.")
+    lsi = ida_hexrays.lvar_saved_info_t()
+    lsi.ll = lv
+    lsi.cmt = str(args.get("comment") or "")
+    if not ida_hexrays.modify_user_lvar_info(pfn.start_ea, ida_hexrays.MLI_CMT, lsi):
+        raise ToolError(f"Couldn't set the comment on {name}.")
+    return {**func_summary(pfn), "name": name, "comment": lsi.cmt}
+
+
+@tool("mark_as_noreturn", "Mark a function as never returning (like exit / abort / a panic handler) — or clear the mark with noreturn=false. Callers are re-analysed so code after their calls is treated correctly.", {"address": ADDR, "noreturn": {"type": "boolean", "description": "Default true."}}, ["address"], write=True)
+def t_noreturn(args):
+    ea = parse_ea(args.get("address"))
+    pfn = func_of(ea)
+    if not pfn:
+        raise ToolError(f"{hexa(ea)} is not inside a function.")
+    flag = args.get("noreturn", True)
+    flag = bool(flag) if not isinstance(flag, str) else flag.lower() not in ("false", "0", "no")
+    if flag:
+        pfn.flags |= ida_funcs.FUNC_NORET
+    else:
+        pfn.flags &= ~ida_funcs.FUNC_NORET
+    ida_funcs.update_func(pfn)
+    ida_auto.reanalyze_callers(pfn.start_ea, flag)
+    return {**func_summary(pfn), "noreturn": flag}
+
+
+CALLING_CONVENTIONS = {
+    "cdecl": "CM_CC_CDECL", "stdcall": "CM_CC_STDCALL", "fastcall": "CM_CC_FASTCALL", "thiscall": "CM_CC_THISCALL",
+    "pascal": "CM_CC_PASCAL", "usercall": "CM_CC_SPECIAL", "userpurge": "CM_CC_SPECIALP", "ellipsis": "CM_CC_ELLIPSIS",
+    "unknown": "CM_CC_UNKNOWN",
+}
+
+
+@tool("set_calling_convention", "Change a function's calling convention (cdecl, stdcall, fastcall, thiscall, pascal, usercall, userpurge) keeping its return type and arguments. On x64 Windows, fastcall is the normal convention.", {"address": ADDR, "convention": {"type": "string", "enum": list(CALLING_CONVENTIONS)}}, ["address", "convention"], write=True)
+def t_set_cc(args):
+    ea = parse_ea(args.get("address"))
+    pfn = func_of(ea)
+    if not pfn:
+        raise ToolError(f"{hexa(ea)} is not inside a function.")
+    conv = str(args.get("convention") or "").lower().lstrip("_")
+    const = CALLING_CONVENTIONS.get(conv)
+    if not const:
+        raise ToolError(f"Unknown convention {conv!r}; one of {', '.join(CALLING_CONVENTIONS)}.")
+    tif = ida_typeinf.tinfo_t()
+    if not ida_nalt.get_tinfo(tif, pfn.start_ea):
+        if ida_typeinf.guess_tinfo(tif, pfn.start_ea) != ida_typeinf.GUESS_FUNC_OK:
+            raise ToolError("IDA has no prototype for this function yet — set_type one first.")
+    fi = ida_typeinf.func_type_data_t()
+    if not tif.get_func_details(fi):
+        raise ToolError("Couldn't read the function's prototype.")
+    fi.cc = (fi.cc & ~ida_typeinf.CM_CC_MASK) | getattr(ida_typeinf, const)
+    new_tif = ida_typeinf.tinfo_t()
+    if not new_tif.create_func(fi) or not ida_typeinf.apply_tinfo(pfn.start_ea, new_tif, ida_typeinf.TINFO_DEFINITE):
+        raise ToolError("IDA refused the new prototype.")
+    return {**func_summary(pfn), "convention": conv, "prototype": ida_typeinf.print_type(pfn.start_ea, ida_typeinf.PRTYPE_1LINE) or ""}
+
+
+# ───────────────────────── structure recovery ─────────────────────────
+
+_FRAME_REGS = {"rbp", "rsp", "ebp", "esp", "sp", "fp", "x29", "r11"}
+_SIZE_TYPES = {1: "unsigned __int8", 2: "unsigned __int16", 4: "unsigned __int32", 8: "unsigned __int64", 16: "__m128"}
+
+
+def _operand_access(ea: int, n: int, op, insn):
+    """A memory operand [reg+off] → (base register, offset, size, is_write) or None."""
+    if op.type not in (ida_ua.o_displ, ida_ua.o_phrase):
+        return None
+    text = ida_lines.tag_remove(ida_ua.print_operand(ea, n) or "")
+    m = re.search(r"\[([^\]]+)\]", text)
+    if not m:
+        return None
+    parts = [p.strip() for p in re.split(r"\+", m.group(1))]
+    if not parts:
+        return None
+    base = parts[0].lower()
+    if not re.fullmatch(r"[a-z][a-z0-9]{0,4}", base) or base in _FRAME_REGS:
+        return None
+    off = 0
+    for p in parts[1:]:
+        pl = p.lower()
+        if re.fullmatch(r"[0-9a-f]+h", pl):
+            off += int(pl[:-1], 16)
+        elif re.fullmatch(r"\d+", pl):
+            off += int(pl)
+        elif re.fullmatch(r"[a-z][a-z0-9]{0,4}(\*\d)?", pl):
+            continue  # an index register: still the same base object
+        else:
+            return None  # a stack variable, a named global, …
+    size = ida_ua.get_dtype_size(op.dtype) or 0
+    feature = insn.get_canon_feature()
+    is_write = bool(feature & getattr(ida_idp, f"CF_CHG{n + 1}", 0))
+    return base, off, size, is_write
+
+
+@tool("suggest_struct_from_accesses", "Recover a structure from how a function uses a pointer: every [register+offset] memory access in the function is collected per base register, and for the busiest registers (or the one you name) a draft C struct is returned with a field per distinct offset (typed by access size), plus the access list (offset, size, read/write, where). Edit the draft and feed it to declare_types, then set_type / set_lvar_type the pointer.", {"address": ADDR, "register": {"type": "string", "description": "Only this base register (e.g. rcx). Default: the 3 most-used."}, "name": {"type": "string", "description": "Name for the draft struct (default: from the function)."}}, ["address"])
+def t_suggest_struct(args):
+    ea = parse_ea(args.get("address"))
+    pfn = func_of(ea)
+    if not pfn:
+        raise ToolError(f"{hexa(ea)} is not inside a function.")
+    want = str(args.get("register") or "").lower() or None
+    per_reg: "dict[str, list]" = {}
+    insn = ida_ua.insn_t()
+    for h in idautils.FuncItems(pfn.start_ea):
+        if not ida_ua.decode_insn(insn, h):
+            continue
+        for n in range(8):
+            op = insn.ops[n]
+            if op.type == ida_ua.o_void:
+                break
+            acc = _operand_access(h, n, op, insn)
+            if not acc:
+                continue
+            base, off, size, is_write = acc
+            if want and base != want:
+                continue
+            per_reg.setdefault(base, []).append({"offset": off, "size": size, "access": "write" if is_write else "read", "at": hexa(h)})
+    if not per_reg:
+        raise ToolError("No [register+offset] accesses in this function" + (f" through {want}" if want else "") + ".")
+    fname = ida_funcs.get_func_name(pfn.start_ea) or hexa(pfn.start_ea)
+    base_name = str(args.get("name") or "").strip() or re.sub(r"\W+", "_", fname) + "_obj"
+    regs = sorted(per_reg.items(), key=lambda kv: -len(kv[1]))[: (1 if want else 3)]
+    results = []
+    for reg, accesses in regs:
+        fields: "dict[int, int]" = {}
+        for a in accesses:
+            fields[a["offset"]] = max(fields.get(a["offset"], 0), a["size"] or 0)
+        lines, last_end = [], 0
+        for off in sorted(fields):
+            size = fields[off] or 1
+            if off > last_end:
+                lines.append(f"  unsigned __int8 gap_{last_end:X}[{off - last_end}];")
+            ctype = _SIZE_TYPES.get(size)
+            lines.append(f"  {ctype} field_{off:X};" if ctype else f"  unsigned __int8 field_{off:X}[{size}];")
+            last_end = off + size
+        sname = base_name if len(regs) == 1 else f"{base_name}_{reg}"
+        results.append({
+            "register": reg, "accesses": len(accesses), "fields": len(fields), "size": last_end,
+            "struct_c": f"struct {sname} {{\n" + "\n".join(lines) + "\n};",
+            "access_list": sorted(accesses, key=lambda a: (a["offset"], a["at"]))[:400],
+        })
+    return {**func_summary(pfn), "registers": results}
+
+
+# ───────────────────────── signatures and similar code ─────────────────────────
+
+@tool("list_signatures", "FLIRT signatures applied to this database: name, library, how many functions each matched.")
+def t_list_sigs(args):
+    out = []
+    for i in range(ida_funcs.get_idasgn_qty()):
+        try:
+            d = ida_funcs.get_idasgn_desc_with_matches(i)
+            out.append({"index": i, "name": d[0], "library": d[1], "matches": d[2]})
+        except Exception:
+            d = ida_funcs.get_idasgn_desc(i)
+            out.append({"index": i, "name": d[0], "library": d[1]})
+    return {"count": len(out), "signatures": out}
+
+
+@tool("apply_signature", "Apply a FLIRT signature file (from IDA's sig folder, e.g. \"vc64ucrt\" or \"vc64seh\") to recognise library functions. The matching runs in IDA's auto-analysis: call wait_for_analysis, then list_signatures to see how many matched.", {"name": {"type": "string", "description": "Signature file name without extension (e.g. vc64ucrt)."}}, ["name"], write=True)
+def t_apply_sig(args):
+    name = str(args.get("name") or "").strip()
+    if not name:
+        raise ToolError("Give the signature name.")
+    r = ida_funcs.plan_to_apply_idasgn(name)
+    if not r:
+        raise ToolError(f"IDA couldn't find or queue the signature {name!r} (look in IDA's sig/<processor> folder for the file name).")
+    return {"name": name, "queued": True, "signature_index": r}
+
+
+def _func_sig(pfn) -> list:
+    """Instruction shape of a function: canonical mnemonic + operand kinds, one token per instruction."""
+    insn = ida_ua.insn_t()
+    toks = []
+    for h in idautils.FuncItems(pfn.start_ea):
+        if not ida_ua.decode_insn(insn, h):
+            continue
+        kinds = []
+        for n in range(8):
+            t = insn.ops[n].type
+            if t == ida_ua.o_void:
+                break
+            kinds.append(str(t))
+        toks.append(insn.get_canon_mnem() + ":" + ",".join(kinds))
+    return toks
+
+
+def _ngrams(toks: list, n: int = 3) -> set:
+    if len(toks) < n:
+        return {tuple(toks)} if toks else set()
+    return {tuple(toks[i:i + n]) for i in range(len(toks) - n + 1)}
+
+
+@tool("find_similar_functions", "Functions whose code looks like a given one (same instruction shapes, ignoring addresses and register names — finds inlined / duplicated / templated copies). Compares functions of comparable size, scores by shared instruction trigrams (0..1), returns the best matches. Stops when budget_ms runs out and says how far it got.", {"address": ADDR, "limit": {"type": "integer", "description": "Best N matches (default 10)."}, "min_similarity": {"type": "number", "description": "0..1, default 0.5."}, "budget_ms": {"type": "integer", "description": "Time budget in milliseconds (default 20000)."}}, ["address"], chunked=True)
+def t_similar(args):
+    limit = int_arg(args, "limit", 10, 1, 100)
+    try:
+        min_sim = float(args.get("min_similarity", 0.5))
+    except (TypeError, ValueError):
+        raise ToolError("min_similarity must be a number between 0 and 1.")
+    deadline = budget_deadline(args, 20000)
+
+    def setup():
+        pfn = func_of(parse_ea(args.get("address")))
+        if not pfn:
+            raise ToolError("Not inside a function.")
+        toks = _func_sig(pfn)
+        if len(toks) < 3:
+            raise ToolError("The function is too small to compare (fewer than 3 instructions).")
+        return func_summary(pfn), pfn.start_ea, _ngrams(toks), len(toks), list(idautils.Functions())
+    me, me_ea, me_grams, me_len, all_funcs = on_main(setup, label="find_similar_functions")
+    lo, hi = me_len * 0.5, me_len * 2.0
+    found, i, scanned, WINDOW = [], 0, 0, 300
+    while i < len(all_funcs):
+        chunk = all_funcs[i:i + WINDOW]
+
+        def window():
+            res, n = [], 0
+            for fea in chunk:
+                if fea == me_ea:
+                    continue
+                pfn = ida_funcs.get_func(fea)
+                if not pfn:
+                    continue
+                # Cheap size gate before decoding anything.
+                if not (lo * 2 <= (pfn.end_ea - pfn.start_ea) <= hi * 16):
+                    continue
+                toks = _func_sig(pfn)
+                n += 1
+                if not (lo <= len(toks) <= hi):
+                    continue
+                g = _ngrams(toks)
+                inter = len(me_grams & g)
+                if not inter:
+                    continue
+                sim = inter / len(me_grams | g)
+                if sim >= min_sim:
+                    res.append({"address": hexa(pfn.start_ea), "name": ida_funcs.get_func_name(pfn.start_ea) or "", "size": pfn.end_ea - pfn.start_ea, "instructions": len(toks), "similarity": round(sim, 3)})
+            return res, n
+        res, n = on_main(window, label="find_similar_functions")
+        found.extend(res)
+        scanned += n
+        i += WINDOW
+        if time.monotonic() > deadline and i < len(all_funcs):
+            break
+    found.sort(key=lambda r: -r["similarity"])
+    return {"function": me, "instructions": me_len, "compared": scanned, "functions_total": len(all_funcs), "matches": found[:limit], **({"truncated": True, "scanned_up_to": i} if i < len(all_funcs) else {})}
+
+
+# ───────────────────────── data ─────────────────────────
+
+def _int_at(ea: int, size: int) -> "int | None":
+    b = ida_bytes.get_bytes(ea, size)
+    return int.from_bytes(b, "little") if b and len(b) == size else None
+
+
+@tool("get_data_item", "What is at a data address, decoded: a string (its text and encoding), a number / array (each element's value), a pointer (and what it points to), a structure instance (each member's value), or code (the instruction). Also the item's name, size, type and how many places reference it.", {"address": ADDR, "max_elements": {"type": "integer", "description": "For arrays, default 64."}}, ["address"])
+def t_data_item(args):
+    ea = parse_ea(args.get("address"))
+    check_in_db(ea)
+    head = ida_bytes.get_item_head(ea)
+    flags = ida_bytes.get_flags(head)
+    size = ida_bytes.get_item_size(head)
+    out = {"address": hexa(head), "name": name_at(head), "size": size, "references": sum(1 for _ in idautils.XrefsTo(head))}
+    if head != ea:
+        out["note"] = f"{hexa(ea)} is inside the item that starts at {hexa(head)}"
+    tif = ida_typeinf.tinfo_t()
+    if ida_nalt.get_tinfo(tif, head):
+        out["type"] = str(tif)
+    if ida_bytes.is_code(flags):
+        out.update(kind="code", text=(ida_lines.generate_disasm_line(head, ida_lines.GENDSM_REMOVE_TAGS) or "").strip())
+        pf = func_of(head)
+        if pf:
+            out["function"] = func_summary(pf)
+        return out
+    if ida_bytes.is_strlit(flags):
+        st = ida_nalt.get_str_type(head)
+        raw = ida_bytes.get_strlit_contents(head, size, st) or b""
+        enc = "utf-16" if (st & 0xFF) in (ida_nalt.STRTYPE_C_16, ida_nalt.STRTYPE_PASCAL_16, ida_nalt.STRTYPE_LEN2_16) else ("utf-32" if (st & 0xFF) == ida_nalt.STRTYPE_C_32 else "utf-8")
+        try:
+            text = raw.decode(enc, errors="replace") if enc != "utf-8" else raw.decode("utf-8", errors="replace")
+        except Exception:
+            text = raw.decode("latin-1", errors="replace")
+        out.update(kind="string", encoding=enc, text=text[:20000], length=len(text))
+        return out
+    if ida_bytes.is_struct(flags):
+        udt = ida_typeinf.udt_type_data_t()
+        members = []
+        if tif.is_struct() and tif.get_udt_details(udt):
+            for m in udt:
+                off, msize = m.offset // 8, max(1, m.size // 8)
+                row = {"name": m.name, "offset": off, "size": msize, "type": str(m.type)}
+                v = _int_at(head + off, msize) if msize <= 8 else None
+                if v is not None:
+                    row["value"] = v
+                    row["hex"] = hexa(v)
+                else:
+                    b = ida_bytes.get_bytes(head + off, min(msize, 64)) or b""
+                    row["hex"] = b.hex(" ")
+                members.append(row)
+        out.update(kind="struct", members=members)
+        return out
+    if ida_bytes.is_data(flags):
+        elsize = ida_bytes.get_data_elsize(head, flags) or 1
+        count = max(1, size // elsize)
+        max_el = int_arg(args, "max_elements", 64, 1, 4096)
+        values = []
+        is_float = ida_bytes.is_float(flags) or ida_bytes.is_double(flags)
+        for i in range(min(count, max_el)):
+            at = head + i * elsize
+            if is_float and elsize in (4, 8):
+                b = ida_bytes.get_bytes(at, elsize)
+                values.append(struct.unpack("<f" if elsize == 4 else "<d", b)[0] if b else None)
+            else:
+                v = _int_at(at, elsize) if elsize <= 8 else None
+                values.append(hexa(v) if v is not None else (ida_bytes.get_bytes(at, elsize) or b"").hex())
+        out.update(kind="float" if is_float else "data", element_size=elsize, count=count, values=values)
+        if count > max_el:
+            out["truncated"] = True
+        if ida_bytes.is_off0(flags) and elsize in (4, 8):
+            targets = []
+            for i in range(min(count, max_el)):
+                v = _int_at(head + i * elsize, elsize)
+                if v is not None:
+                    targets.append({"address": hexa(v), "name": name_at(v)})
+            out.update(kind="pointer", targets=targets)
+        if elsize == 1 and count > 1:
+            b = ida_bytes.get_bytes(head, min(size, 256)) or b""
+            out["ascii"] = "".join(chr(x) if 32 <= x < 127 else "." for x in b)
+        return out
+    b = ida_bytes.get_bytes(head, min(max(size, 16), 64)) or b""
+    out.update(kind="undefined", hex=b.hex(" "), ascii="".join(chr(x) if 32 <= x < 127 else "." for x in b))
+    return out
+
+
+# ───────────────────────── bookmarks ─────────────────────────
+
+MAX_BOOKMARKS = 1024
+
+
+def _bookmarks() -> list:
+    out = []
+    for slot in range(1, MAX_BOOKMARKS + 1):
+        ea = ida_idc.get_marked_pos(slot)
+        if ea == BADADDR:
+            continue
+        pf = func_of(ea)
+        out.append({"slot": slot, "address": hexa(ea), "name": name_at(ea), "description": ida_idc.get_mark_comment(slot) or "", **({"function": ida_funcs.get_func_name(pf.start_ea)} if pf else {})})
+    return out
+
+
+@tool("list_bookmarks", "IDA's bookmarks (Ctrl-M marks): slot, address, name, description, function.")
+def t_list_bookmarks(args):
+    bm = _bookmarks()
+    return {"count": len(bm), "bookmarks": bm}
+
+
+@tool("add_bookmark", "Add an IDA bookmark at an address with a description — a trail the user can walk with Ctrl-M. Returns the slot.", {"address": ADDR, "description": {"type": "string"}}, ["address", "description"], write=True)
+def t_add_bookmark(args):
+    ea = parse_ea(args.get("address"))
+    check_in_db(ea)
+    desc = str(args.get("description") or "").strip() or name_at(ea) or hexa(ea)
+    for slot in range(1, MAX_BOOKMARKS + 1):
+        if ida_idc.get_marked_pos(slot) == BADADDR:
+            ida_idc.mark_position(ea, 0, 0, 0, slot, desc)
+            if ida_idc.get_marked_pos(slot) != ea:
+                raise ToolError("IDA didn't keep the bookmark.")
+            return {"slot": slot, "address": hexa(ea), "description": desc}
+    raise ToolError("All 1024 bookmark slots are used.")
+
+
+@tool("delete_bookmark", "Remove an IDA bookmark by slot (see list_bookmarks).", {"slot": {"type": "integer"}}, ["slot"], write=True)
+def t_del_bookmark(args):
+    slot = int_arg(args, "slot", 0, 1, MAX_BOOKMARKS)
+    ea = ida_idc.get_marked_pos(slot)
+    if ea == BADADDR:
+        raise ToolError(f"No bookmark in slot {slot}.")
+    desc = ida_idc.get_mark_comment(slot) or ""
+    before = len(_bookmarks())
+    ida_idc.mark_position(BADADDR, 0, 0, 0, slot, "")
+    after = len(_bookmarks())
+    # IDA erases the entry and shifts the ones above it down a slot.
+    return {"slot": slot, "was": hexa(ea), "description": desc, "deleted": after < before, "bookmarks_left": after, "note": "bookmarks in higher slots moved down by one" if after < before and after >= slot else ""}
+
+
+# ───────────────────────── debugger control ─────────────────────────
+
+DBG_EVENTS = None
+
+
+def _dbg_event_name(code: int) -> str:
+    global DBG_EVENTS
+    if DBG_EVENTS is None:
+        DBG_EVENTS = {}
+        for n in ("NO_EVENT", "PROCESS_STARTED", "PROCESS_EXITED", "THREAD_STARTED", "THREAD_EXITED", "BREAKPOINT", "STEP", "EXCEPTION", "LIB_LOADED", "LIB_UNLOADED", "INFORMATION", "PROCESS_ATTACHED", "PROCESS_DETACHED", "PROCESS_SUSPENDED", "TRACE_FULL"):
+            v = getattr(ida_idd, n, None)
+            if isinstance(v, int):
+                DBG_EVENTS[v] = n.lower()
+    if code == -1:
+        return "timeout"
+    return DBG_EVENTS.get(code, str(code))
+
+
+def _dbg_snapshot() -> dict:
+    base = t_dbg({})
+    if not base.get("debugger_on"):
+        return base
+    if base.get("state") == "suspended":
+        ip = ida_dbg.get_ip_val()
+        if ip is not None and ip != BADADDR:
+            base["ip"] = hexa(int(ip))
+            base["instruction"] = (ida_lines.generate_disasm_line(int(ip), ida_lines.GENDSM_REMOVE_TAGS) or "").strip()
+            pf = func_of(int(ip))
+            if pf:
+                base["function"] = func_summary(pf)
+        sp = ida_dbg.get_sp_val()
+        if sp is not None and sp != BADADDR:
+            base["sp"] = hexa(int(sp))
+    return base
+
+
+def _wait_suspended(timeout_s: float) -> dict:
+    code = ida_dbg.wait_for_next_event(ida_dbg.WFNE_SUSP, int(max(1, timeout_s)))
+    return {"event": _dbg_event_name(code), **_dbg_snapshot()}
+
+
+def _timeout_arg(args, default: int = 15) -> int:
+    return int_arg(args, "timeout_s", default, 1, 120)
+
+
+@tool("debugger_start", "Start the program under IDA's debugger (the one selected in IDA, win32 by default on Windows) and run until it is suspended: at break_at (a temporary stop), at the first breakpoint, or at the process entry if IDA is set to stop there. This RUNS the binary on this PC. Returns the stop event, the current instruction and the registers.", {"path": {"type": "string", "description": "Executable to run (default: the database's input file)."}, "args": {"type": "string", "description": "Command line."}, "directory": {"type": "string", "description": "Working directory."}, "break_at": ADDR, "timeout_s": {"type": "integer", "description": "How long to wait for the stop (default 15, max 120)."}}, write=True, destructive=True)
+def t_dbg_start(args):
+    if ida_dbg.is_debugger_on():
+        raise ToolError("A process is already being debugged (debugger_stop first).")
+    if ida_idd.get_dbg() is None:
+        name = "win32" if sys.platform == "win32" else ("mac" if sys.platform == "darwin" else "linux")
+        if not ida_dbg.load_debugger(name, False):
+            raise ToolError(f"Couldn't load the {name} debugger — pick one in IDA (Debugger → Select debugger).")
+    path = str(args.get("path") or "")
+    cmdline = str(args.get("args") or "")
+    sdir = str(args.get("directory") or "")
+    if path or cmdline or sdir:
+        ida_dbg.set_process_options(path or ida_nalt.get_input_file_path(), cmdline, sdir, "", "", 0)
+    if args.get("break_at"):
+        ea = parse_ea(args["break_at"], "break_at")
+        if not ida_dbg.run_to(ea):
+            raise ToolError("IDA couldn't start the process (run_to failed) — check Debugger → Process options.")
+    else:
+        r = ida_dbg.start_process(path, cmdline, sdir)
+        if r == 0:
+            raise ToolError("Starting the process was cancelled in IDA.")
+        if r != 1:
+            raise ToolError("IDA couldn't start the process — check Debugger → Process options and the debugger's log.")
+    return _wait_suspended(_timeout_arg(args))
+
+
+@tool("debugger_attach", "Attach IDA's debugger to a running process by pid and suspend it.", {"pid": {"type": "integer"}, "timeout_s": {"type": "integer"}}, ["pid"], write=True, destructive=True)
+def t_dbg_attach(args):
+    if ida_dbg.is_debugger_on():
+        raise ToolError("A process is already being debugged (debugger_stop first).")
+    pid = int_arg(args, "pid", 0, 1, 1 << 31)
+    if ida_idd.get_dbg() is None:
+        name = "win32" if sys.platform == "win32" else ("mac" if sys.platform == "darwin" else "linux")
+        if not ida_dbg.load_debugger(name, False):
+            raise ToolError(f"Couldn't load the {name} debugger.")
+    r = ida_dbg.attach_process(pid, -1)
+    if r != 1:
+        raise ToolError(f"Couldn't attach to pid {pid} (result {r}).")
+    return _wait_suspended(_timeout_arg(args))
+
+
+@tool("debugger_step", "Drive the debugged process: action = step_over, step_into, step_out (run until the current function returns), continue (run until a breakpoint / exception / exit), or run_to (run until `address`). Waits up to timeout_s for the process to stop again and returns where it is (event, instruction, registers). A `timeout` event means it is still running.", {"action": {"type": "string", "enum": ["step_over", "step_into", "step_out", "continue", "run_to"]}, "address": {**ADDR, "description": "For run_to: where to stop."}, "timeout_s": {"type": "integer", "description": "Default 15, max 120."}}, ["action"], write=True)
+def t_dbg_step(args):
+    if not ida_dbg.is_debugger_on():
+        raise ToolError("The debugger isn't running (debugger_start or debugger_attach first).")
+    action = str(args.get("action") or "")
+    if ida_dbg.get_process_state() != ida_dbg.DSTATE_SUSP and action != "continue":
+        raise ToolError("The process is running — it must be suspended to step (wait for a breakpoint, or debugger_stop).")
+    ok = True
+    if action == "step_over":
+        ok = ida_dbg.step_over()
+    elif action == "step_into":
+        ok = ida_dbg.step_into()
+    elif action == "step_out":
+        ok = ida_dbg.step_until_ret()
+    elif action == "continue":
+        ok = ida_dbg.continue_process()
+    elif action == "run_to":
+        ok = ida_dbg.run_to(parse_ea(args.get("address")))
+    else:
+        raise ToolError("action must be step_over, step_into, step_out, continue or run_to.")
+    if not ok:
+        raise ToolError(f"IDA refused {action}.")
+    return {"action": action, **_wait_suspended(_timeout_arg(args))}
+
+
+@tool("debugger_stop", "End the debugging session: kill the process (default) or detach from it and let it run.", {"detach": {"type": "boolean", "description": "true: detach instead of killing."}}, write=True, destructive=True)
+def t_dbg_stop(args):
+    if not ida_dbg.is_debugger_on():
+        return {"debugger_on": False, "note": "nothing was being debugged"}
+    detach = bool(args.get("detach"))
+    ok = ida_dbg.detach_process() if detach else ida_dbg.exit_process()
+    code, deadline = -1, time.monotonic() + 15
+    while ida_dbg.is_debugger_on() and time.monotonic() < deadline:
+        code = ida_dbg.wait_for_next_event(ida_dbg.WFNE_ANY, 2)
+        if code in (getattr(ida_idd, "PROCESS_EXITED", -2), getattr(ida_idd, "PROCESS_DETACHED", -3)):
+            break
+    return {"stopped": bool(ok), "detached": detach, "last_event": _dbg_event_name(code), "debugger_on": ida_dbg.is_debugger_on()}
+
+
+def _bpt_row(b) -> dict:
+    kinds = {ida_idd.BPT_SOFT: "software", ida_idd.BPT_EXEC: "hardware exec", ida_idd.BPT_WRITE: "hardware write", ida_idd.BPT_READ: "hardware read", ida_idd.BPT_RDWR: "hardware read/write"}
+    suspend = bool(b.flags & ida_dbg.BPT_BRK)
+    return {"address": hexa(b.ea), "enabled": b.enabled(), "type": kinds.get(b.type, str(b.type)), "size": b.size,
+            "condition": b.condition or "", "pass_count": b.pass_count, "name": name_at(b.ea),
+            "suspend": suspend, "traced": bool(b.flags & ida_dbg.BPT_TRACE) or not suspend}
+
+
+@tool("list_breakpoints", "The debugger's breakpoints: address, enabled, type, size, condition, pass count.")
+def t_list_bpts(args):
+    out = []
+    for i in range(ida_dbg.get_bpt_qty()):
+        b = ida_dbg.bpt_t()
+        if ida_dbg.getn_bpt(i, b):
+            out.append(_bpt_row(b))
+    return {"count": len(out), "breakpoints": out}
+
+
+@tool("set_breakpoint", "Add (or update) a HARDWARE breakpoint — the CPU's debug registers, so not one byte of the program changes and code that checksums itself sees nothing. kind=exec (default) breaks when the address is executed; kind=write|read|access watches DATA at the address (give size). There are only 4 debug registers, so delete breakpoints you no longer need. **suspend=false makes it a logging breakpoint**: every hit is recorded in the trace and the program carries straight on, so you can watch a hot function without freezing the target — read the hits back with read_trace (call trace_start first). Software (0xCC) breakpoints are deliberately not available: they patch the code and any self-check can see them.", {"address": ADDR, "kind": {"type": "string", "enum": ["exec", "write", "read", "access"], "description": "Default exec (break when it runs)."}, "size": {"type": "integer", "description": "Bytes watched by a data breakpoint (1, 2, 4, 8)."}, "suspend": {"type": "boolean", "description": "Default true: stop the program on a hit. false: record the hit and keep running."}, "condition": {"type": "string"}, "enabled": {"type": "boolean"}}, ["address"], write=True)
+def t_set_bpt(args):
+    ea = parse_ea(args.get("address"))
+    # Hardware only: a software breakpoint writes 0xCC into the code, which a self-checking target can detect.
+    kind = str(args.get("kind") or "exec")
+    btype = {"exec": ida_idd.BPT_EXEC, "write": ida_idd.BPT_WRITE, "read": ida_idd.BPT_READ, "access": ida_idd.BPT_RDWR}.get(kind)
+    if btype is None:
+        raise ToolError("kind must be exec, write, read or access (hardware only — software breakpoints patch the code and are not offered).")
+    size = int_arg(args, "size", 1, 1, 8)
+    existing = ida_dbg.bpt_t()
+    if not ida_dbg.get_bpt(ea, existing):
+        if not ida_dbg.add_bpt(ea, size, btype):
+            raise ToolError(f"IDA couldn't add a hardware {kind} breakpoint at {hexa(ea)}: they need a running process and a free debug register, and x86 has only 4. Delete one (list_breakpoints / delete_breakpoint) and try again.")
+    b = ida_dbg.bpt_t()
+    ida_dbg.get_bpt(ea, b)
+    changed = False
+    if "condition" in args:
+        b.condition = str(args.get("condition") or "")
+        changed = True
+    if "suspend" in args:
+        # BPT_BRK is what stops the program; without it IDA records the hit (BPT_TRACE) and resumes by itself.
+        if args.get("suspend"):
+            b.flags |= ida_dbg.BPT_BRK
+        else:
+            b.flags &= ~ida_dbg.BPT_BRK
+            b.flags |= ida_dbg.BPT_TRACE
+        changed = True
+    if changed and not ida_dbg.update_bpt(b):
+        raise ToolError("Couldn't update the breakpoint.")
+    if "enabled" in args:
+        ida_dbg.enable_bpt(ea, bool(args.get("enabled")))
+    ida_dbg.get_bpt(ea, b)
+    return _bpt_row(b)
+
+
+@tool("delete_breakpoint", "Remove the breakpoint at an address.", {"address": ADDR}, ["address"], write=True)
+def t_del_bpt(args):
+    ea = parse_ea(args.get("address"))
+    if not ida_dbg.del_bpt(ea):
+        raise ToolError(f"No breakpoint at {hexa(ea)}.")
+    return {"address": hexa(ea), "deleted": True}
+
+
+@tool("set_register", "Set a register of the suspended process (e.g. rax = 0, rip = an address).", {"name": {"type": "string"}, "value": {"type": "string", "description": "Hex (0x…) or decimal."}}, ["name", "value"], write=True)
+def t_set_reg(args):
+    if not ida_dbg.is_debugger_on() or ida_dbg.get_process_state() != ida_dbg.DSTATE_SUSP:
+        raise ToolError("The process must be suspended under the debugger.")
+    name = str(args.get("name") or "").strip()
+    v = args.get("value")
+    try:
+        val = int(v) if isinstance(v, (int, float)) and not isinstance(v, bool) else int(str(v).strip(), 0)
+    except (TypeError, ValueError):
+        raise ToolError("value must be a number (hex 0x… or decimal).")
+    if not ida_dbg.set_reg_val(name, val):
+        raise ToolError(f"Couldn't set {name} (unknown register?).")
+    return {"name": name, "value": hexa(val), "now": ida_dbg.get_reg_val(name)}
+
+
+@tool("write_memory", "Write bytes into the debugged process's memory (hex, e.g. \"90 90\"). Only the live process changes — the database is untouched (patch_bytes changes the database).", {"address": ADDR, "hex": {"type": "string"}}, ["address", "hex"], write=True, destructive=True)
+def t_write_mem(args):
+    if not ida_dbg.is_debugger_on():
+        raise ToolError("The debugger isn't running.")
+    ea = parse_ea(args.get("address"))
+    try:
+        data = bytes.fromhex(re.sub(r"[^0-9a-fA-F]", "", str(args.get("hex") or "")))
+    except ValueError:
+        raise ToolError("hex must be hex bytes, e.g. \"90 90\".")
+    if not data:
+        raise ToolError("Give the bytes.")
+    n = ida_idd.dbg_write_memory(ea, data)
+    if n is False or n is None or (isinstance(n, int) and n <= 0 and n is not True):
+        raise ToolError(f"Couldn't write {len(data)} bytes at {hexa(ea)} in the process.")
+    back = ida_idd.dbg_read_memory(ea, len(data)) or b""
+    return {"address": hexa(ea), "size": len(data), "now": back.hex(" ")}
+
+
+# ───────────────────────── reading a function's arguments at a stop ─────────────────────────
+
+STR_PTR_TYPES = ("char *", "char*", "CHAR *", "LPSTR", "LPCSTR", "PCSTR", "PSTR")
+WSTR_PTR_TYPES = ("wchar_t *", "wchar_t*", "WCHAR *", "LPWSTR", "LPCWSTR", "PCWSTR", "PWSTR", "OLECHAR *", "BSTR")
+
+
+def _dbg_bytes(ea: int, size: int) -> bytes:
+    try:
+        return ida_idd.dbg_read_memory(ea, size) or b""
+    except Exception:
+        return b""
+
+
+def _dbg_int(ea: int, size: int) -> "int | None":
+    b = _dbg_bytes(ea, size)
+    return int.from_bytes(b, "little") if len(b) == size else None
+
+
+def _dbg_cstring(ea: int, wide: bool = False, limit: int = 300) -> "str | None":
+    """Read a NUL-terminated string out of the debugged process (not the database: the process may have changed it)."""
+    if not ea:
+        return None
+    step, raw = 2 if wide else 1, b""
+    term = b"\x00\x00" if wide else b"\x00"
+    while len(raw) < limit * step:
+        chunk = _dbg_bytes(ea + len(raw), 64)
+        if not chunk:
+            break
+        raw += chunk
+        end = raw.find(term)
+        if end >= 0:
+            if wide:
+                end += end % 2  # the match starts on the previous character's zero high byte
+            raw = raw[:end]
+            break
+    if not raw:
+        return ""
+    try:
+        return raw.decode("utf-16-le" if wide else "utf-8", errors="replace")
+    except Exception:
+        return raw.decode("latin-1", errors="replace")
+
+
+def _reg(name: str) -> "int | None":
+    try:
+        v = ida_dbg.get_reg_val(name)
+        return int(v) if isinstance(v, (int, float)) else None
+    except Exception:
+        return None
+
+
+def _func_prototype(pfn):
+    """The function's argument list (name + type), from its prototype or IDA's guess. [] when unknown."""
+    tif = ida_typeinf.tinfo_t()
+    if not ida_nalt.get_tinfo(tif, pfn.start_ea):
+        try:
+            if ida_typeinf.guess_tinfo(tif, pfn.start_ea) != ida_typeinf.GUESS_FUNC_OK:
+                return None, []
+        except Exception:
+            return None, []
+    fi = ida_typeinf.func_type_data_t()
+    if not tif.get_func_details(fi):
+        return None, []
+    return fi, [(a.name or ("arg%d" % i), str(a.type)) for i, a in enumerate(fi)]
+
+
+def _arg_slots(cc, count: int, bits: int) -> list:
+    """Where each argument sits at the function's FIRST instruction (none of the prologue has run yet)."""
+    slots = []
+    if bits == 64:
+        # Windows x64: the first four integer arguments are in registers, the rest above the shadow space.
+        regs = ["rcx", "rdx", "r8", "r9"]
+        for i in range(count):
+            slots.append(("reg", regs[i]) if i < 4 else ("stack", 8 * (i + 1)))
+        return slots
+    masked = (cc & ida_typeinf.CM_CC_MASK) if isinstance(cc, int) else None
+    lead = []
+    if masked == ida_typeinf.CM_CC_THISCALL:
+        lead = ["ecx"]
+    elif masked == ida_typeinf.CM_CC_FASTCALL:
+        lead = ["ecx", "edx"]
+    for i in range(count):
+        slots.append(("reg", lead[i]) if i < len(lead) else ("stack", 4 * (i - len(lead) + 1)))
+    return slots
+
+
+def _format_arg(name: str, type_str: str, value, size: int) -> dict:
+    out = {"name": name, "type": type_str}
+    if value is None:
+        out["error"] = "couldn't read it"
+        return out
+    out["value"] = hexa(value)
+    t = type_str.replace("const ", "").strip()
+    one_level = t.count("*") <= 1  # char ** is an array of pointers, not a string
+    if one_level and any(t.startswith(x) or t == x for x in WSTR_PTR_TYPES):
+        out["text"] = _dbg_cstring(value, wide=True)
+    elif one_level and any(t.startswith(x) or t == x for x in STR_PTR_TYPES):
+        out["text"] = _dbg_cstring(value)
+    elif t.endswith("*"):
+        nm = name_at(value)
+        if nm:
+            out["points_to"] = nm
+    else:
+        out["int"] = value - (1 << (size * 8)) if value >= (1 << (size * 8 - 1)) else value
+    return out
+
+
+def _read_args(pfn, ip: int) -> dict:
+    """The function's arguments, read from the suspended process. Only trustworthy at its first instruction."""
+    if pfn is None or ida_dbg.get_process_state() != ida_dbg.DSTATE_SUSP:
+        return {}
+    bits = 64 if ida_ida.inf_is_64bit() else 32
+    at_entry = ip == pfn.start_ea
+    fi, args = _func_prototype(pfn)
+    size = bits // 8
+    sp = _reg("rsp" if bits == 64 else "esp")
+    if not args:
+        if not at_entry or sp is None:
+            return {}
+        # No prototype: show the raw slots a caller would have pushed, so there is still something to go on.
+        raw = []
+        for i in range(6):
+            v = _dbg_int(sp + size * (i + 1), size)
+            raw.append({"name": "arg%d" % i, "type": "?", **({"value": hexa(v)} if v is not None else {"error": "couldn't read it"})})
+        return {"arguments": raw, "arguments_note": "no prototype for this function — these are the raw stack slots at its entry"}
+    if not at_entry:
+        return {"arguments_note": "arguments are only read at the function's first instruction (%s); the prologue has already run here" % hexa(pfn.start_ea)}
+    if sp is None:
+        return {}
+    out = []
+    for (name, type_str), slot in zip(args, _arg_slots(getattr(fi, "cc", None), len(args), bits)):
+        value = _reg(slot[1]) if slot[0] == "reg" else _dbg_int(sp + slot[1], size)
+        out.append(_format_arg(name, type_str, value, size))
+    return {"arguments": out}
+
+
+# ───────────────────────── debugger events (pushed by IDA, long-polled by Kiln) ─────────────────────────
+
+EVENTS_KEEP = 200
+_events: "collections.deque" = collections.deque(maxlen=EVENTS_KEEP)
+_events_cv = threading.Condition()
+_events_seq = 0
+
+
+def _stack_top(n: int = 8) -> list:
+    """The top n stack slots of the suspended thread: value and, when it points into a function, its name."""
+    try:
+        sp = int(ida_dbg.get_sp_val() or BADADDR)
+    except Exception:
+        return []
+    if sp == BADADDR:
+        return []
+    width = 8 if ida_ida.inf_is_64bit() else 4
+    data = ida_idd.dbg_read_memory(sp, width * n) or b""
+    out = []
+    for i in range(len(data) // width):
+        v = int.from_bytes(data[i * width:(i + 1) * width], "little")
+        row = {"offset": i * width, "value": hexa(v)}
+        pf = func_of(v)
+        if pf:
+            row["points_to"] = f"{ida_funcs.get_func_name(pf.start_ea)}+{v - pf.start_ea:#x}"
+        else:
+            nm = name_at(v)
+            if nm:
+                row["points_to"] = nm
+        out.append(row)
+    return out
+
+
+def _push_event(kind: str, ea: "int | None" = None, tid: "int | None" = None, extra: "dict | None" = None) -> None:
+    """Called from IDA's debugger hooks (main thread). Snapshots the stop and wakes anyone waiting."""
+    global _events_seq
+    ev = {"event": kind, "time": datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds"), "source": _executor.busy_with if _executor else None}
+    if tid is not None:
+        ev["thread"] = tid
+    try:
+        if kind not in ("process_exited",) and ida_dbg.is_debugger_on():
+            ip = int(ida_dbg.get_ip_val() or BADADDR) if ea is None else int(ea)
+            if ip != BADADDR:
+                ev["ip"] = hexa(ip)
+                ev["instruction"] = (ida_lines.generate_disasm_line(ip, ida_lines.GENDSM_REMOVE_TAGS) or "").strip()
+                pf = func_of(ip)
+                if pf:
+                    ev["function"] = {**func_summary(pf), "offset": ip - pf.start_ea}
+                nm = name_at(ip)
+                if nm:
+                    ev["name"] = nm
+            if ida_dbg.get_process_state() == ida_dbg.DSTATE_SUSP:
+                regs = {}
+                for r in _reg_names():
+                    try:
+                        v = ida_dbg.get_reg_val(r)
+                        regs[r] = hexa(int(v)) if isinstance(v, int) else v
+                    except Exception:
+                        continue
+                ev["registers"] = regs
+                ev["stack"] = _stack_top()
+                try:
+                    ev.update(_read_args(func_of(ip) if ip != BADADDR else None, ip))
+                except Exception as e:
+                    ev["arguments_note"] = "couldn't read the arguments: %s: %s" % (type(e).__name__, e)
+            if kind == "breakpoint" and ea is not None:
+                b = ida_dbg.bpt_t()
+                if ida_dbg.get_bpt(int(ea), b):
+                    ev["breakpoint"] = _bpt_row(b)
+    except Exception as e:  # never let a snapshot problem break the debugger
+        ev["snapshot_error"] = f"{type(e).__name__}: {e}"
+    if extra:
+        ev.update(extra)
+    with _events_cv:
+        _events_seq += 1
+        ev["seq"] = _events_seq
+        _events.append(ev)
+        _events_cv.notify_all()
+    log(f"debugger event #{ev['seq']}: {kind}{' at ' + ev['ip'] if ev.get('ip') else ''}{' (during ' + ev['source'] + ')' if ev.get('source') else ''}")
+
+
+class _DbgHooks(ida_dbg.DBG_Hooks):
+    """IDA's debugger notifications → the event queue. Installed while the server is on."""
+
+    def dbg_process_start(self, *a):
+        _push_event("process_started", ea=a[2] if len(a) > 2 else None, tid=a[1] if len(a) > 1 else None, extra={"pid": a[0] if a else None, "module": a[3] if len(a) > 3 else ""})
+        return 0
+
+    def dbg_process_attach(self, *a):
+        _push_event("process_attached", ea=a[2] if len(a) > 2 else None, tid=a[1] if len(a) > 1 else None, extra={"pid": a[0] if a else None})
+        return 0
+
+    def dbg_process_exit(self, *a):
+        _push_event("process_exited", extra={"pid": a[0] if a else None, "exit_code": a[3] if len(a) > 3 else None})
+        return 0
+
+    def dbg_process_detach(self, *a):
+        _push_event("process_detached", extra={"pid": a[0] if a else None})
+        return 0
+
+    def dbg_bpt(self, tid, ea, *rest):
+        _push_event("breakpoint", ea=ea, tid=tid)
+        return 0
+
+    def dbg_exception(self, *a):
+        # (pid, tid, ea, exc_code, exc_can_cont, exc_ea, exc_info)
+        _push_event("exception", ea=a[2] if len(a) > 2 else None, tid=a[1] if len(a) > 1 else None,
+                    extra={"code": hexa(int(a[3])) if len(a) > 3 and isinstance(a[3], int) else (a[3] if len(a) > 3 else None), "can_continue": bool(a[4]) if len(a) > 4 else None,
+                           "exception_address": hexa(int(a[5])) if len(a) > 5 and isinstance(a[5], int) else None, "info": a[6] if len(a) > 6 else ""})
+        return 0
+
+    def dbg_suspend_process(self, *a):
+        _push_event("suspended")
+        return 0
+
+    def dbg_step_into(self, *a):
+        _push_event("step")
+        return 0
+
+    def dbg_step_over(self, *a):
+        _push_event("step")
+        return 0
+
+    def dbg_step_until_ret(self, *a):
+        _push_event("step")
+        return 0
+
+
+def _hook_debugger() -> None:
+    if _state.dbg_hooks is None:
+        try:
+            _state.dbg_hooks = _DbgHooks()
+            _state.dbg_hooks.hook()
+        except Exception as e:
+            _state.dbg_hooks = None
+            log(f"debugger hooks not installed: {e}")
+
+
+def _unhook_debugger() -> None:
+    if _state.dbg_hooks is not None:
+        try:
+            _state.dbg_hooks.unhook()
+        except Exception:
+            pass
+        _state.dbg_hooks = None
+
+
+@tool("wait_for_debugger_event", "Wait for the debugged process to stop (a breakpoint, an exception, a pause, a step, the process starting or exiting) and return the events after `since` — each with the instruction, function, registers, top of the stack and the breakpoint that fired. Returns at once when there already are newer events, or after timeout_s with an empty list. Does not touch IDA's main thread while waiting. `source` names the Kiln tool that was running when the event happened (its result already reported it); events without a source came from the user or from a running process.", {"since": {"type": "integer", "description": "The last seq you have seen (0 = from the beginning of this session; the response's `seq` is the newest)."}, "timeout_s": {"type": "integer", "description": "How long to wait for a new event (default 25, max 60)."}}, chunked=True)
+def t_wait_dbg_event(args):
+    since = int_arg(args, "since", 0, 0, 1 << 31)
+    timeout = int_arg(args, "timeout_s", 25, 0, 60)
+    deadline = time.monotonic() + timeout
+    with _events_cv:
+        while True:
+            fresh = [e for e in _events if e["seq"] > since]
+            if fresh:
+                break
+            left = deadline - time.monotonic()
+            if left <= 0:
+                break
+            _events_cv.wait(min(left, 5))
+        newest = _events_seq
+        oldest = _events[0]["seq"] if _events else 0
+    return {"since": since, "seq": newest, "events": fresh, **({"dropped": True} if since and oldest > since + 1 else {})}
+
+
+
+# ───────────────────────── tracing ─────────────────────────
+
+TEV_NAMES = None
+
+
+def _tev_name(t: int) -> str:
+    global TEV_NAMES
+    if TEV_NAMES is None:
+        TEV_NAMES = {}
+        for n in ("tev_none", "tev_insn", "tev_call", "tev_ret", "tev_bpt", "tev_mem"):
+            v = getattr(ida_dbg, n, None)
+            if isinstance(v, int):
+                TEV_NAMES[v] = n[4:]
+    return TEV_NAMES.get(t, str(t))
+
+
+def _where(ea: int) -> dict:
+    out = {"address": hexa(ea)}
+    pf = func_of(ea)
+    if pf:
+        out["function"] = ida_funcs.get_func_name(pf.start_ea) or hexa(pf.start_ea)
+        if ea != pf.start_ea:
+            out["offset"] = ea - pf.start_ea
+    else:
+        nm = name_at(ea)
+        if nm:
+            out["name"] = nm
+    return out
+
+
+@tool("trace_start", "Start recording a trace. kind=breakpoints (default) records only the hits of breakpoints you made non-suspending (set_breakpoint with suspend=false) — the program runs at full speed and you read the hits back with read_trace. kind=function records every call and return, kind=instruction records every instruction: both single-step the process, which is hundreds of times slower and will make an interactive program crawl. The buffer keeps the most recent `size` events.", {"kind": {"type": "string", "enum": ["breakpoints", "function", "instruction"], "description": "Default breakpoints."}, "size": {"type": "integer", "description": "How many events to keep (default 100000, 0 = unlimited)."}, "clear": {"type": "boolean", "description": "Throw away what is already recorded (default true)."}}, write=True)
+def t_trace_start(args):
+    if not ida_dbg.is_debugger_on():
+        raise ToolError("The debugger isn't running — start or attach to the program first.")
+    kind = str(args.get("kind") or "breakpoints")
+    if kind not in ("breakpoints", "function", "instruction"):
+        raise ToolError("kind must be breakpoints, function or instruction.")
+    size = int_arg(args, "size", 100000, 0, 10_000_000)
+    ida_dbg.set_trace_size(size)
+    if args.get("clear", True):
+        ida_dbg.clear_trace()
+    ida_dbg.enable_insn_trace(kind == "instruction")
+    ida_dbg.enable_func_trace(kind == "function")
+    if kind == "breakpoints":
+        ida_dbg.enable_step_trace(False)
+    else:
+        ida_dbg.enable_step_trace(True)
+    return {"tracing": kind, "size": size, "events": ida_dbg.get_tev_qty(),
+            "note": "non-suspending breakpoints are recorded in every mode; function and instruction tracing single-step the process and are very slow"}
+
+
+@tool("trace_stop", "Stop recording. What was recorded stays readable with read_trace until trace_clear.", write=True)
+def t_trace_stop(args):
+    ida_dbg.enable_insn_trace(False)
+    ida_dbg.enable_func_trace(False)
+    ida_dbg.enable_step_trace(False)
+    return {"tracing": False, "events": ida_dbg.get_tev_qty()}
+
+
+@tool("trace_clear", "Throw away everything recorded so far.", write=True)
+def t_trace_clear(args):
+    ida_dbg.clear_trace()
+    return {"events": ida_dbg.get_tev_qty()}
+
+
+@tool("read_trace", "The recorded trace events, newest last: each one's index, kind (bpt / call / ret / insn), thread, where it happened (function + offset) and, for a call, what it called. Paged — read the end with a large offset, or pass only `limit` to get the most recent ones.", {"offset": {"type": "integer", "description": "Skip this many from the start."}, "limit": {"type": "integer", "description": "At most this many (default 200, max 2000)."}, "newest": {"type": "boolean", "description": "true (default when no offset): return the most recent ones."}, "kind": {"type": "string", "enum": ["bpt", "call", "ret", "insn", "mem"], "description": "Only events of this kind."}}, chunked=True)
+def t_read_trace(args):
+    limit = int_arg(args, "limit", 200, 1, 2000)
+    want = str(args.get("kind") or "")
+    deadline = budget_deadline(args, 20000)
+
+    def total():
+        return ida_dbg.get_tev_qty()
+    n = on_main(total, label="read_trace")
+    if n == 0:
+        return {"total": 0, "events": [], "note": "nothing recorded — call trace_start, and make the breakpoints you want logged non-suspending (set_breakpoint suspend=false)"}
+    newest = args.get("newest", "offset" not in args)
+    start = int_arg(args, "offset", max(0, n - limit) if newest else 0, 0, max(0, n))
+    out, i, WINDOW = [], start, 400
+    while i < n and len(out) < limit:
+        hi = min(n, i + WINDOW)
+
+        def window():
+            rows = []
+            tev = ida_dbg.tev_info_t()
+            for k in range(i, hi):
+                if len(out) + len(rows) >= limit:
+                    break
+                if not ida_dbg.get_tev_info(k, tev):
+                    continue
+                kind = _tev_name(tev.type)
+                if want and kind != want:
+                    continue
+                row = {"index": k, "kind": kind, "thread": tev.tid, **_where(tev.ea)}
+                if kind == "call":
+                    callee = ida_dbg.get_call_tev_callee(k)
+                    if callee != BADADDR:
+                        row["calls"] = _where(callee)
+                elif kind == "ret":
+                    to = ida_dbg.get_ret_tev_return(k)
+                    if to != BADADDR:
+                        row["returns_to"] = _where(to)
+                elif kind == "bpt":
+                    at = ida_dbg.get_bpt_tev_ea(k)
+                    if at != BADADDR:
+                        row["breakpoint"] = hexa(at)
+                rows.append(row)
+            return rows
+        out.extend(on_main(window, label="read_trace"))
+        i = hi
+        if time.monotonic() > deadline:
+            break
+    return {"total": n, "offset": start, "count": len(out), "events": out, **({"next_offset": i} if i < n else {})}
+
+
+# ───────────────────────── MCP (JSON-RPC 2.0 over HTTP) ─────────────────────────
+
+class _State:
+    session_id = ""
+    token = ""
+    port = 0
+    hexrays = False
+    started_at = ""
+    # Read on the main thread at start: the server thread must not touch the database itself.
+    binary = ""
+    ida_version = ""
+    calls = 0
+    errors = 0
+    server: "ThreadingHTTPServer | None" = None
+    thread: "threading.Thread | None" = None
+    dbg_hooks = None
+
+
+_state = _State()
+
+
+def rpc_error(id_, code: int, message: str) -> dict:
+    return {"jsonrpc": "2.0", "id": id_, "error": {"code": code, "message": message}}
+
+
+def handle_rpc(msg: dict) -> "dict | None":
+    """One JSON-RPC message → its response (None for a notification)."""
+    if not isinstance(msg, dict) or msg.get("jsonrpc") != "2.0" or not isinstance(msg.get("method"), str):
+        return rpc_error(msg.get("id") if isinstance(msg, dict) else None, -32600, "Not a JSON-RPC 2.0 request")
+    method, id_, params = msg["method"], msg.get("id"), msg.get("params") or {}
+    if id_ is None:  # notification (initialized, cancelled, …)
+        return None
+    if method == "initialize":
+        want = str(params.get("protocolVersion") or "")
+        return {"jsonrpc": "2.0", "id": id_, "result": {
+            "protocolVersion": want if want in PROTOCOL_VERSIONS else PROTOCOL_VERSIONS[1],
+            "capabilities": {"tools": {"listChanged": False}},
+            "serverInfo": {"name": "kiln-ida", "version": PLUGIN_VERSION},
+            "instructions": f"IDA Pro {_state.ida_version} session for {_state.binary}. Addresses are hex (0x401000) or names. Tools marked read-only never change the database; the others do.",
+        }}
+    if method == "ping":
+        return {"jsonrpc": "2.0", "id": id_, "result": {}}
+    if method == "tools/list":
+        return {"jsonrpc": "2.0", "id": id_, "result": {"tools": [t["def"] for t in TOOLS.values()]}}
+    if method in ("resources/list", "resources/templates/list", "prompts/list"):
+        return {"jsonrpc": "2.0", "id": id_, "result": {method.split("/")[0]: [], **({"resourceTemplates": []} if "templates" in method else {})}}
+    if method == "tools/call":
+        name = str(params.get("name") or "")
+        t = TOOLS.get(name)
+        if not t:
+            return rpc_error(id_, -32602, f"Unknown tool: {name}")
+        args = params.get("arguments") or {}
+        if not isinstance(args, dict):
+            return rpc_error(id_, -32602, "arguments must be an object")
+        known = set(t["def"]["inputSchema"]["properties"])
+        ignored = sorted(k for k in args if k not in known)
+        if ignored:  # a model that invents arguments (e.g. "action") still gets its call
+            args = {k: v for k, v in args.items() if k in known}
+        _state.calls += 1
+        started = time.monotonic()
+        try:
+            result = t["fn"](args) if t.get("chunked") else _executor.run(lambda: t["fn"](args), t["write"], name)
+            if ignored and isinstance(result, dict):
+                result["ignored_arguments"] = ignored
+            text = json.dumps(result, ensure_ascii=False, default=str)
+            log(f"{name} ok ({(time.monotonic() - started) * 1000:.0f} ms)")
+            return {"jsonrpc": "2.0", "id": id_, "result": {"content": [{"type": "text", "text": text}], "structuredContent": result if isinstance(result, dict) else {"result": result}}}
+        except ToolError as e:
+            _state.errors += 1
+            log(f"{name}: {e}")
+            return {"jsonrpc": "2.0", "id": id_, "result": {"content": [{"type": "text", "text": str(e)}], "isError": True}}
+        except Exception as e:
+            _state.errors += 1
+            return {"jsonrpc": "2.0", "id": id_, "result": {"content": [{"type": "text", "text": f"Internal error in {name}: {type(e).__name__}: {e}"}], "isError": True}}
+    return rpc_error(id_, -32601, f"Method not supported: {method}")
+
+
+class _Handler(BaseHTTPRequestHandler):
+    protocol_version = "HTTP/1.1"
+    server_version = f"KilnIDA/{PLUGIN_VERSION}"
+
+    def log_message(self, *_args):  # quiet: our own log is enough
+        pass
+
+    def handle_one_request(self):
+        """As the base class, but a client hanging up on an idle keep-alive connection ends it quietly.
+
+        Kiln (and any HTTP/1.1 client with a connection pool) keeps sockets open between calls and closes them when
+        idle. The base class lets the resulting ConnectionAbortedError / ConnectionResetError escape, and socketserver
+        prints a traceback for it — noise in IDA's Output window for something completely normal.
+        """
+        try:
+            return BaseHTTPRequestHandler.handle_one_request(self)
+        except (ConnectionAbortedError, ConnectionResetError, BrokenPipeError, socket.timeout):
+            self.close_connection = True
+
+    def _send(self, code: int, body: bytes = b"", ctype: str = "application/json", extra: "dict | None" = None):
+        self.send_response(code)
+        self.send_header("Content-Type", ctype)
+        self.send_header("Content-Length", str(len(body)))
+        self.send_header("Cache-Control", "no-store")
+        for k, v in (extra or {}).items():
+            self.send_header(k, v)
+        self.end_headers()
+        if body:
+            self.wfile.write(body)
+
+    def _json(self, code: int, obj, extra=None):
+        self._send(code, json.dumps(obj).encode("utf-8"), extra=extra)
+
+    def _authorized(self) -> bool:
+        if self.headers.get("Origin"):  # a browser page: never
+            self._json(403, {"error": "browsers are not allowed"})
+            return False
+        host = (self.headers.get("Host") or "").split(":")[0].lower()
+        if host not in ("127.0.0.1", "localhost", "[::1]", "::1"):
+            self._json(403, {"error": "local connections only"})
+            return False
+        auth = self.headers.get("Authorization") or ""
+        got = auth[7:].strip() if auth.lower().startswith("bearer ") else ""
+        if not got or not secrets.compare_digest(got, _state.token):
+            self._json(401, {"error": "missing or wrong session key"})
+            return False
+        return True
+
+    def do_GET(self):
+        path = self.path.split("?")[0]
+        if path == "/health":
+            if not self._authorized():
+                return
+            self._json(200, {"ok": True, "session": _state.session_id, "binary": _state.binary, "pid": os.getpid(), "calls": _state.calls, "busy": _executor.busy_with if _executor else None, "events_seq": _events_seq})
+        elif path == "/mcp":
+            self._json(405, {"error": "no server-to-client stream; POST JSON-RPC to /mcp"}, {"Allow": "POST, DELETE"})
+        else:
+            self._json(404, {"error": "not found"})
+
+    def do_DELETE(self):
+        if not self._authorized():
+            return
+        self._send(204)
+
+    def do_POST(self):
+        if self.path.split("?")[0] != "/mcp":
+            return self._json(404, {"error": "not found"})
+        if not self._authorized():
+            return
+        length = int(self.headers.get("Content-Length") or 0)
+        if length > MAX_BODY:
+            return self._json(413, {"error": "request too large"})
+        raw = self.rfile.read(length) if length else b""
+        try:
+            msg = json.loads(raw.decode("utf-8"))
+        except (ValueError, UnicodeDecodeError):
+            return self._json(200, rpc_error(None, -32700, "Invalid JSON"))
+        if isinstance(msg, list):
+            responses = [r for r in (handle_rpc(m) for m in msg) if r is not None]
+            if not responses:
+                return self._send(202)
+            return self._json(200, responses, {"Mcp-Session-Id": _state.session_id})
+        resp = handle_rpc(msg)
+        if resp is None:
+            return self._send(202)
+        self._json(200, resp, {"Mcp-Session-Id": _state.session_id})
+
+
+class _Server(ThreadingHTTPServer):
+    daemon_threads = True
+    allow_reuse_address = False  # a port in use must fail, not be shared
+
+    def handle_error(self, request, client_address):
+        """Never print a traceback to IDA's Output window: a dropped connection is normal, anything else goes to the log."""
+        e = sys.exc_info()[1]
+        if isinstance(e, (ConnectionAbortedError, ConnectionResetError, BrokenPipeError, socket.timeout)):
+            return
+        log(f"HTTP error from {client_address[0] if client_address else '?'}: {traceback.format_exc(limit=4)}")
+
+
+# ───────────────────────── session registration ─────────────────────────
+
+def session_file() -> str:
+    return os.path.join(sessions_dir(), f"{_state.session_id}.json")
+
+
+def register_session() -> None:
+    info = {
+        "id": _state.session_id, "plugin": "kiln-ida", "version": PLUGIN_VERSION,
+        "name": ida_nalt.get_root_filename() or os.path.basename(idc.get_idb_path() or "") or "IDA",
+        "binary": ida_nalt.get_root_filename() or "", "input_path": ida_nalt.get_input_file_path() or "", "idb_path": idc.get_idb_path() or "",
+        "pid": os.getpid(), "host": "127.0.0.1", "port": _state.port, "url": f"http://127.0.0.1:{_state.port}/mcp", "token": _state.token,
+        "ida_version": ida_kernwin.get_kernel_version(), "sdk": idaapi.IDA_SDK_VERSION, "python": sys.version.split()[0],
+        "hexrays": _state.hexrays, "processor": ida_ida.inf_get_procname(), "bits": 64 if ida_ida.inf_is_64bit() else 32,
+        "gui": bool(ida_kernwin.is_idaq()), "started_at": _state.started_at, "tools": len(TOOLS),
+    }
+    os.makedirs(sessions_dir(), exist_ok=True)
+    _atomic_write(session_file(), json.dumps(info, indent=2))
+    # Files left by IDA instances that are gone (crashed, killed) are cleaned up here.
+    for fn in os.listdir(sessions_dir()):
+        if not fn.endswith(".json") or fn == f"{_state.session_id}.json":
+            continue
+        p = os.path.join(sessions_dir(), fn)
+        try:
+            with open(p, "r", encoding="utf-8") as f:
+                pid = int(json.load(f).get("pid") or 0)
+            if not pid_alive(pid):
+                os.remove(p)
+        except (OSError, ValueError):
+            continue
+
+
+def unregister_session() -> None:
+    try:
+        os.remove(session_file())
+    except OSError:
+        pass
+
+
+# ───────────────────────── start / stop ─────────────────────────
+
+def server_on() -> bool:
+    return _state.server is not None
+
+
+def start_server(base_port: int) -> str:
+    """Starts the server; returns the status line. Must be called on the main thread."""
+    if server_on():
+        return f"already running on port {_state.port}"
+    if ida_hexrays:
+        try:
+            _state.hexrays = bool(ida_hexrays.init_hexrays_plugin())
+        except Exception:
+            _state.hexrays = False
+    _state.binary = ida_nalt.get_root_filename() or ""
+    _state.ida_version = ida_kernwin.get_kernel_version()
+    last = None
+    for port in range(base_port, base_port + PORT_RANGE):
+        try:
+            srv = _Server(("127.0.0.1", port), _Handler)
+        except OSError as e:
+            last = e
+            continue
+        _state.server, _state.port = srv, port
+        _state.session_id = secrets.token_hex(4)
+        _state.token = secrets.token_urlsafe(24)
+        _state.started_at = datetime.datetime.now(datetime.timezone.utc).isoformat()
+        _state.calls = _state.errors = 0
+        _hook_debugger()
+        t = threading.Thread(target=srv.serve_forever, name="kiln-ida-mcp", daemon=True)
+        _state.thread = t
+        t.start()
+        register_session()
+        log(f"server ON — session {_state.session_id}, http://127.0.0.1:{port}/mcp, {len(TOOLS)} tools, Hex-Rays {'yes' if _state.hexrays else 'no'}")
+        return f"on, port {port}, session {_state.session_id}"
+    raise OSError(f"no free port in {base_port}–{base_port + PORT_RANGE - 1}: {last}")
+
+
+def stop_server(reason: str = "stopped") -> None:
+    _unhook_debugger()
+    srv = _state.server
+    if not srv:
+        return
+    unregister_session()
+    _state.server = None
+    try:
+        srv.shutdown()
+        srv.server_close()
+    except Exception:
+        pass
+    log(f"server OFF ({reason}) — session {_state.session_id} after {_state.calls} call(s)")
+    _state.session_id = _state.token = ""
+    _state.port = 0
+
+
+# ───────────────────────── IDA plugin: menu, actions, lifecycle ─────────────────────────
+
+ACT_TOGGLE, ACT_STATUS, ACT_AUTOSTART, ACT_COPY = "kilnida:toggle", "kilnida:status", "kilnida:autostart", "kilnida:copy"
+MENU = "Edit/Plugins/Kiln IDA/"
+
+
+class _Action(ida_kernwin.action_handler_t):
+    def __init__(self, fn):
+        super().__init__()
+        self.fn = fn
+
+    def activate(self, ctx):
+        try:
+            self.fn()
+        except Exception as e:
+            log(f"error: {e}")
+            ida_kernwin.warning(f"{PLUGIN_NAME}: {e}")
+        return 1
+
+    def update(self, ctx):
+        return ida_kernwin.AST_ENABLE_ALWAYS
+
+
+class _UIHooks(ida_kernwin.UI_Hooks):
+    def __init__(self, plugin):
+        super().__init__()
+        self.plugin = plugin
+
+    def ready_to_run(self):
+        for act in (ACT_TOGGLE, ACT_STATUS, ACT_COPY, ACT_AUTOSTART):
+            ida_kernwin.attach_action_to_menu(MENU, act, ida_kernwin.SETMENU_APP)
+        self.plugin.refresh_labels()
+        if self.plugin.prefs.get("autostart", True):
+            self.plugin.toggle(start=True)
+        self.unhook()
+
+
+class KilnIdaPlugin(idaapi.plugin_t):
+    flags = idaapi.PLUGIN_KEEP
+    comment = "Kiln IDA — MCP server for Kiln and other AI clients"
+    help = "Edit → Plugins → Kiln IDA"
+    wanted_name = PLUGIN_NAME
+    wanted_hotkey = "Ctrl-Alt-K"
+
+    def init(self):
+        global _executor
+        _executor = _Executor()
+        self.prefs = load_prefs()
+        ida_kernwin.register_action(ida_kernwin.action_desc_t(ACT_TOGGLE, "Start MCP server", _Action(self.toggle), None, "Start or stop the Kiln IDA MCP server for this database"))
+        ida_kernwin.register_action(ida_kernwin.action_desc_t(ACT_STATUS, "Status…", _Action(self.show_status), None, "Session id, port and call counts"))
+        ida_kernwin.register_action(ida_kernwin.action_desc_t(ACT_COPY, "Copy connection details", _Action(self.copy_details), None, "Copy the MCP address and session key to the clipboard"))
+        ida_kernwin.register_action(ida_kernwin.action_desc_t(ACT_AUTOSTART, "Start automatically when a database opens", _Action(self.toggle_autostart), None, "Autostart on/off (for every database)"))
+        self._hooks = _UIHooks(self)
+        self._hooks.hook()
+        log(f"plugin {PLUGIN_VERSION} loaded (IDA {ida_kernwin.get_kernel_version()}, Python {sys.version.split()[0]}); autostart {'on' if self.prefs.get('autostart', True) else 'off'}")
+        return idaapi.PLUGIN_KEEP
+
+    def run(self, arg):  # the hotkey / Edit → Plugins → Kiln IDA
+        self.toggle()
+
+    def term(self):
+        try:
+            self._hooks.unhook()
+        except Exception:
+            pass
+        stop_server("database closed")
+        for act in (ACT_TOGGLE, ACT_STATUS, ACT_COPY, ACT_AUTOSTART):
+            ida_kernwin.unregister_action(act)
+
+    # ── actions ──
+
+    def toggle(self, start: "bool | None" = None):
+        if server_on() and start is not True:
+            stop_server("stopped by the user")
+            ida_kernwin.msg(f"[{PLUGIN_NAME}] Server is OFF — this session is no longer available to Kiln.\n")
+        elif not server_on():
+            try:
+                status = start_server(int(self.prefs.get("port") or DEFAULT_PORT))
+                ida_kernwin.msg(f"[{PLUGIN_NAME}] Server is ON ({status}). In Kiln, type /ida to attach this session.\n")
+            except OSError as e:
+                log(f"couldn't start: {e}")
+                ida_kernwin.warning(f"{PLUGIN_NAME} couldn't start its server: {e}")
+        self.refresh_labels()
+
+    def toggle_autostart(self):
+        self.prefs["autostart"] = not self.prefs.get("autostart", True)
+        save_prefs(self.prefs)
+        log(f"autostart {'on' if self.prefs['autostart'] else 'off'}")
+        self.refresh_labels()
+
+    def refresh_labels(self):
+        on = server_on()
+        ida_kernwin.update_action_label(ACT_TOGGLE, f"Stop MCP server (ON — port {_state.port}, session {_state.session_id})" if on else "Start MCP server (OFF)")
+        ida_kernwin.update_action_label(ACT_AUTOSTART, f"Start automatically when a database opens [{'on' if self.prefs.get('autostart', True) else 'off'}]")
+
+    def show_status(self):
+        if server_on():
+            busy = _executor.busy_with if _executor else None
+            text = (f"{PLUGIN_NAME} {PLUGIN_VERSION}\n\nServer: ON\nSession: {_state.session_id}\nAddress: http://127.0.0.1:{_state.port}/mcp\n"
+                    f"Database: {idc.get_idb_path()}\nHex-Rays: {'available' if _state.hexrays else 'not available'}\nTools: {len(TOOLS)}\n"
+                    f"Calls served: {_state.calls} ({_state.errors} failed)\nNow: {('running ' + busy) if busy else 'idle'}\n\nRegistered for Kiln in:\n{session_file()}")
+        else:
+            text = f"{PLUGIN_NAME} {PLUGIN_VERSION}\n\nServer: OFF — this session is offline for Kiln.\nEdit → Plugins → Kiln IDA → Start MCP server (or Ctrl-Alt-K)."
+        ida_kernwin.info(text)
+
+    def copy_details(self):
+        if not server_on():
+            ida_kernwin.warning(f"{PLUGIN_NAME}: the server is off.")
+            return
+        text = f"url=http://127.0.0.1:{_state.port}/mcp\nkey={_state.token}\nsession={_state.session_id}"
+        try:
+            from PyQt5 import QtWidgets
+            QtWidgets.QApplication.clipboard().setText(text)
+            ida_kernwin.msg(f"[{PLUGIN_NAME}] Connection details copied to the clipboard.\n")
+        except Exception:
+            ida_kernwin.info(text)
+
+
+def PLUGIN_ENTRY():
+    return KilnIdaPlugin()
+
+```
+
+`tests/live_test.py`:
+
+```py
+"""Drives a running Kiln IDA session end to end (plain Python, no IDA): reads the session file Kiln would read,
+speaks MCP to the plugin, calls every read-only tool, and the modifying ones in a way that leaves the database as it
+was (a comment set then cleared, a name set then restored, a patch written then written back).
+
+  python tests/live_test.py [session-id]   (default: the newest session)
+"""
+import glob
+import json
+import os
+import sys
+import time
+import urllib.error
+import urllib.request
+
+SESSIONS = os.path.join(os.environ.get("APPDATA", ""), "Kiln", "ida", "sessions")
+passed = failed = 0
+
+
+def check(cond, what):
+    global passed, failed
+    if cond:
+        passed += 1
+        print(f"  ok  {what}")
+    else:
+        failed += 1
+        print(f"  FAIL {what}")
+
+
+def newest_session(want=None):
+    files = sorted(glob.glob(os.path.join(SESSIONS, "*.json")), key=os.path.getmtime)
+    if want:
+        files = [f for f in files if os.path.basename(f) == f"{want}.json"]
+    if not files:
+        raise SystemExit(f"no session file in {SESSIONS} — is IDA open with the plugin's server on?")
+    with open(files[-1], "r", encoding="utf-8") as f:
+        return json.load(f)
+
+
+class Client:
+    def __init__(self, s):
+        self.url, self.token, self.n = s["url"], s["token"], 0
+
+    def raw(self, body, token=None, headers=None, method="POST", path=None):
+        req = urllib.request.Request(path or self.url, data=json.dumps(body).encode() if body is not None else None, method=method)
+        req.add_header("Content-Type", "application/json")
+        req.add_header("Accept", "application/json, text/event-stream")
+        if token or token is None and self.token:
+            req.add_header("Authorization", f"Bearer {token or self.token}")
+        for k, v in (headers or {}).items():
+            req.add_header(k, v)
+        try:
+            with urllib.request.urlopen(req, timeout=120) as r:
+                data = r.read()
+                return r.status, (json.loads(data) if data else None)
+        except urllib.error.HTTPError as e:
+            data = e.read()
+            return e.code, (json.loads(data) if data else None)
+
+    def rpc(self, method, params=None):
+        self.n += 1
+        status, body = self.raw({"jsonrpc": "2.0", "id": self.n, "method": method, "params": params or {}})
+        assert status == 200, f"{method}: HTTP {status} {body}"
+        return body
+
+    def call(self, tool_name, **args):
+        r = self.rpc("tools/call", {"name": tool_name, "arguments": args})
+        res = r.get("result") or {}
+        text = "".join(c.get("text", "") for c in res.get("content", []))
+        if res.get("isError"):
+            return None, text
+        try:
+            return json.loads(text), None
+        except ValueError:
+            return text, None
+
+
+def hexa_norm(ea):
+    return f"0x{int(ea):X}"
+
+
+def main():
+    s = newest_session(sys.argv[1] if len(sys.argv) > 1 else None)
+    print(f"session {s['id']} · {s['name']} · {s['url']} · IDA {s['ida_version']} · Hex-Rays {s['hexrays']} · {s['tools']} tools")
+    c = Client(s)
+
+    # Protocol and security.
+    status, body = c.raw({"jsonrpc": "2.0", "id": 1, "method": "ping"}, token="wrong")
+    check(status == 401, "a wrong key is refused (401)")
+    status, _ = c.raw({"jsonrpc": "2.0", "id": 1, "method": "ping"}, headers={"Origin": "http://evil.example"})
+    check(status == 403, "a browser (Origin header) is refused (403)")
+    status, _ = c.raw(None, method="GET", path=s["url"])
+    check(status == 405, "GET /mcp is 405 (no server stream)")
+    status, health = c.raw(None, method="GET", path=s["url"].replace("/mcp", "/health"))
+    check(status == 200 and health.get("ok") and health.get("session") == s["id"], f"health: {health}")
+    init = c.rpc("initialize", {"protocolVersion": "2025-06-18", "capabilities": {}, "clientInfo": {"name": "live-test", "version": "0"}})
+    check(init.get("result", {}).get("protocolVersion") == "2025-06-18" and init["result"]["serverInfo"]["name"] == "kiln-ida", "initialize")
+    status, _ = c.raw({"jsonrpc": "2.0", "method": "notifications/initialized"})
+    check(status == 202, "a notification gets 202")
+    tools = c.rpc("tools/list")["result"]["tools"]
+    names = [t["name"] for t in tools]
+    ro = [t["name"] for t in tools if t["annotations"]["readOnlyHint"]]
+    check(len(tools) >= 25 and "decompile" in names and "set_name" in names, f"tools/list: {len(tools)} tools, {len(ro)} read-only")
+    bad = c.rpc("tools/call", {"name": "nope", "arguments": {}})
+    check(bad.get("error", {}).get("code") == -32602, "unknown tool → JSON-RPC error")
+
+    # Read-only tools.
+    info, err = c.call("get_database_info")
+    check(info and info["binary"] == s["binary"] and info["functions"] > 0, f"get_database_info: {info and info['binary']}, {info and info['functions']} functions, {info and info['processor']} {info and info['bits']}-bit")
+    segs, _ = c.call("list_segments")
+    check(segs and any(x["name"] == ".text" for x in segs["segments"]), f"list_segments: {segs and [x['name'] for x in segs['segments']]}")
+    funcs, _ = c.call("list_functions", limit=5)
+    check(funcs and funcs["count"] == 5 and funcs["total"] == info["functions"], f"list_functions: {funcs and funcs['total']} total, paged")
+    first = funcs["items"][0]
+    f, err = c.call("get_function", address=first["address"])
+    check(f and f["name"] == first["name"] and "prototype" in f, f"get_function by address: {err or (f['name'] + ' ' + f['prototype'][:60])}")
+    f2, err = c.call("get_function", address=first["name"])
+    check(f2 and f2["address"] == first["address"], f"get_function by name: {err or 'ok'}")
+    f = f or {"name": first["name"]}
+    _, err = c.call("get_function", address="0x1")
+    check(err and "not inside" in err, f"a bad address is a clear error: {err}")
+    _, err = c.call("get_function", address="no_such_name_xyz")
+    check(err and "No such name" in err, f"an unknown name is a clear error: {err}")
+    main_ea = None
+    for cand in ("main", "wmain", "WinMain", "start"):
+        r, _ = c.call("search_names", query=cand)
+        hit = r and next((i for i in r["items"] if i["name"] == cand), None)
+        if hit:
+            main_ea = hit["address"]
+            break
+    target = main_ea or first["address"]
+    if s["hexrays"]:
+        d, err = c.call("decompile", address=target)
+        check(d and "code" in d and ("(" in d["code"]), f"decompile {target}: {len(d['code']) if d else err} chars")
+    else:
+        _, err = c.call("decompile", address=target)
+        check(err and "decompiler" in err, "no Hex-Rays: decompile explains")
+    dis, _ = c.call("disassemble", address=target)
+    check(dis and len(dis["lines"]) > 3 and all("address" in l and "text" in l for l in dis["lines"]), f"disassemble (function): {dis and len(dis['lines'])} lines")
+    dis2, _ = c.call("disassemble", address=target, count=3)
+    check(dis2 and len(dis2["lines"]) == 3, "disassemble (count)")
+    xt, _ = c.call("get_xrefs_to", address=target)
+    xf, _ = c.call("get_xrefs_from", address=target)
+    check(xt is not None and xf is not None, f"xrefs: {xt and xt['total']} to, {xf and xf['total']} from")
+    imps, _ = c.call("list_imports", limit=5)
+    check(imps and imps["total"] > 0 and "module" in imps["items"][0], f"list_imports: {imps and imps['total']} ({imps and imps['items'][0]['module']})")
+    exps, _ = c.call("list_exports")
+    check(exps is not None, f"list_exports: {exps and exps['total']}")
+    strs, _ = c.call("list_strings", limit=5)
+    check(strs and strs["total"] > 0 and "text" in strs["items"][0], f"list_strings: {strs and strs['total']}")
+    strf, _ = c.call("list_strings", filter=strs["items"][0]["text"][:4], limit=5)
+    check(strf and strf["total"] >= 1, "list_strings with a filter")
+    names_r, _ = c.call("search_names", query=first["name"][:6], limit=3)
+    check(names_r and names_r["total"] >= 1 and any(i["name"] == first["name"] for i in names_r["items"]), f"search_names “{first['name'][:6]}”: {names_r and names_r['total']}")
+    names_rx, _ = c.call("search_names", query="^sub_[0-9A-F]+$", regex=True, limit=3)
+    check(names_rx is not None, f"search_names with a regex: {names_rx and names_rx['total']} automatic names")
+    rb, _ = c.call("read_bytes", address=target, size=8)
+    check(rb and rb["size"] == 8 and len(rb["hex"].split()) == 8, f"read_bytes: {rb and rb['hex']}")
+    pat = " ".join(rb["hex"].split()[:4])
+    sb, err = c.call("search_bytes", pattern=pat, limit=5)
+    check(sb and sb["count"] >= 1 and any(h["address"].lower() == target.lower() for h in sb["hits"]), f"search_bytes “{pat}”: {err or str(sb['count']) + ' hit(s), includes the target'}")
+    parts = pat.split(); parts[1] = "??"
+    sbw, err = c.call("search_bytes", pattern=" ".join(parts), limit=5)
+    check(sbw and sbw["count"] >= 1, f"search_bytes with a wildcard: {err or sbw['count']}")
+    st_r, _ = c.call("search_text", text="call", limit=3)
+    check(st_r and st_r["count"] == 3, f"search_text: {st_r and st_r['count']}")
+    types, _ = c.call("list_types", limit=5)
+    check(types is not None, f"list_types: {types and types['total']}")
+    if types and types["total"]:
+        t0 = types["items"][0]
+        gt, err = c.call("get_type", ordinal=t0["ordinal"])
+        check(gt and gt["definition"], f"get_type #{t0['ordinal']} {t0['name']}: {gt and gt['definition'][:50]!r}")
+    fr, err = c.call("get_stack_frame", address=target)
+    check(fr is not None or (err and "no stack frame" in err), f"get_stack_frame: {fr and len(fr['members'])} members" if fr else f"get_stack_frame: {err}")
+    cur, _ = c.call("get_cursor")
+    check(cur is not None, f"get_cursor: {cur and cur['address']}")
+    dbg, _ = c.call("get_debugger_state")
+    check(dbg is not None and dbg["debugger_on"] is False, "get_debugger_state (off)")
+    j, _ = c.call("jump_to", address=target)
+    check(j and j["jumped"], f"jump_to {target}")
+    cur2, _ = c.call("get_cursor")
+    check(cur2 and cur2["address"].lower() == target.lower(), f"the cursor moved there: {cur2 and cur2['address']}")
+
+    # Modifying tools, each undone.
+    sc, err = c.call("set_comment", address=target, comment="kiln live test")
+    check(sc and sc["comment"] == "kiln live test", f"set_comment: {err or 'ok'}")
+    dis3, _ = c.call("disassemble", address=target, count=1)
+    check(dis3 and dis3["lines"][0].get("comment") == "kiln live test", "the comment shows in the disassembly")
+    c.call("set_comment", address=target, comment="")
+    dis4, _ = c.call("disassemble", address=target, count=1)
+    check(dis4 and not dis4["lines"][0].get("comment"), "cleared again")
+    sn, err = c.call("set_name", address=target, name="kiln_live_test_fn")
+    check(sn and sn["name"] == "kiln_live_test_fn", f"set_name: {err or sn}")
+    old = (sn or {}).get("old_name") or ""
+    c.call("set_name", address=target, name=old if not old.startswith("sub_") else "")
+    back, _ = c.call("get_function", address=target)
+    check(back and back["name"] == old, f"name restored: {back and back['name']}")
+    fc, err = c.call("set_function_comment", address=target, comment="live test fn comment")
+    check(fc and fc["comment"] == "live test fn comment", f"set_function_comment: {err or 'ok'}")
+    c.call("set_function_comment", address=target, comment="")
+    dt, err = c.call("declare_types", declarations="struct KilnLiveTest { int a; char b[4]; float c; };")
+    check(dt and dt["ok"], f"declare_types: {err or dt}")
+    gt2, err = c.call("get_type", name="KilnLiveTest")
+    check(gt2 and gt2["size"] == 12 and [m["name"] for m in gt2["members"]] == ["a", "b", "c"], f"get_type of the new struct: {gt2 and gt2['members']}")
+    pb, err = c.call("patch_bytes", address=target, hex=rb["hex"])
+    check(pb and pb["after"] == rb["hex"], f"patch_bytes (same bytes back): {err or 'ok'}")
+    py, err = c.call("run_python", code="import ida_funcs\nprint('hello from ida')\nresult = ida_funcs.get_func_qty()")
+    check(py and py["ok"] and "hello from ida" in py["output"] and py["result"] == info["functions"], f"run_python: {err or py}")
+    py2, _ = c.call("run_python", code="raise ValueError('boom')")
+    check(py2 and py2["ok"] is False and "boom" in py2["error"], "run_python reports exceptions")
+    if s["hexrays"] and d:
+        import re
+        m = re.search(r"\b(v\d+|a\d+|result)\b", d["code"])
+        if m:
+            rl, err = c.call("rename_local_variable", function=target, old_name=m.group(1), new_name="kiln_tmp_var")
+            check(rl is not None, f"rename_local_variable {m.group(1)} → kiln_tmp_var: {err or 'ok'}")
+            if rl:
+                c.call("rename_local_variable", function=target, old_name="kiln_tmp_var", new_name=m.group(1))
+    w, _ = c.call("wait_for_analysis")
+    check(w and w["analysis_done"], "wait_for_analysis")
+
+    # 0.2: calls graph, batches, decompiler extras, struct recovery, signatures, similarity, data, bookmarks, searches with
+    # a budget, unknown arguments, breakpoints and the debugger (the program is started and stopped under IDA).
+    cs, err = c.call("get_callees", address=target)
+    check(cs and cs["distinct_targets"] >= 1 and all(k in cs["items"][0] for k in ("name", "kind", "calls", "sites")), f"get_callees: {err or (str(cs['distinct_targets']) + ' targets, e.g. ' + cs['items'][0]['name'])}")
+    callee = next((it for it in (cs or {}).get("items", []) if it["kind"] == "function"), None)
+    if callee:
+        cr, err = c.call("get_callers", address=callee["address"])
+        check(cr and any((it.get("address") or "").lower() == str(target).lower() for it in cr["items"]), f"get_callers of {callee['name']} includes the target: {err or cr['total']}")
+    gf, err = c.call("get_functions", addresses=[target, "0x1"])
+    check(gf and gf["count"] == 2 and "prototype" in gf["items"][0] and "error" in gf["items"][1], f"get_functions: one result per address, errors per item: {err or 'ok'}")
+    ia, err = c.call("get_cursor", action="get_cursor", bogus=1)
+    check(ia is not None and ia.get("ignored_arguments") == ["action", "bogus"], f"unknown arguments are ignored and reported: {err or ia.get('ignored_arguments')}")
+    st, err = c.call("search_text", text="call", limit=2, budget_ms=3000)
+    check(st and st["count"] == 2 and st.get("resume_from"), f"search_text with limit: resume_from {st and st.get('resume_from')}")
+    st2, err = c.call("search_text", text="zz_not_in_this_binary_zz", budget_ms=200)
+    check(st2 is not None and st2["count"] == 0, f"search_text with a 200 ms budget returns: {err or st2}")
+    seed, _ = c.call("read_bytes", address=target, size=2)
+    pat = " ".join(seed["hex"].split()[:2]) if seed else "90"
+    sb, err = c.call("search_bytes", pattern=pat, limit=1, budget_ms=3000)
+    check(sb and sb["count"] == 1 and sb.get("resume_from"), f"search_bytes for {pat!r} with limit 1: {err or sb.get('resume_from')}")
+    di, err = c.call("get_data_item", address=target)
+    check(di and di["kind"] == "code", f"get_data_item on code: {err or di['kind']}")
+    strs, _ = c.call("list_strings", limit=1)
+    if strs and strs["items"]:
+        di2, err = c.call("get_data_item", address=strs["items"][0]["address"])
+        check(di2 and di2["kind"] == "string" and di2["text"], f"get_data_item on a string: {err or repr(di2['text'][:30])}")
+    ss, err = c.call("suggest_struct_from_accesses", address=target)
+    check((ss and ss["registers"] and "struct_c" in ss["registers"][0]) or (err and "No [register+offset]" in err), f"suggest_struct_from_accesses: {err or (ss['registers'][0]['register'] + ' ' + str(ss['registers'][0]['fields']) + ' fields')}")
+    ls, err = c.call("list_signatures")
+    check(ls is not None and "signatures" in ls, f"list_signatures: {err or ls['count']}")
+    sim, err = c.call("find_similar_functions", address=target, min_similarity=0.1, limit=3, budget_ms=10000)
+    check(sim is not None and "matches" in sim and sim["compared"] >= 0, f"find_similar_functions: {err or (str(sim['compared']) + ' compared, ' + str(len(sim['matches'])) + ' matches')}")
+    bm_before, _ = c.call("list_bookmarks")
+    ab, err = c.call("add_bookmark", address=target, description="kiln live test")
+    check(ab and ab["slot"] >= 1, f"add_bookmark: {err or ab}")
+    bl, _ = c.call("list_bookmarks")
+    check(bl and bl["count"] == bm_before["count"] + 1 and any(b["description"] == "kiln live test" for b in bl["bookmarks"]), "list_bookmarks shows it")
+    db, err = c.call("delete_bookmark", slot=ab["slot"]) if ab else (None, "no slot")
+    bl2, _ = c.call("list_bookmarks")
+    check(db and db["deleted"] and bl2["count"] == bm_before["count"], f"delete_bookmark: {err or 'ok'}")
+    mn, err = c.call("mark_as_noreturn", address=target, noreturn=True)
+    mn2, _ = c.call("mark_as_noreturn", address=target, noreturn=False)
+    check(mn and mn["noreturn"] is True and mn2 and mn2["noreturn"] is False, f"mark_as_noreturn on and off: {err or 'ok'}")
+    cc, err = c.call("set_calling_convention", address=target, convention="stdcall")
+    cc2, _ = c.call("set_calling_convention", address=target, convention="fastcall")
+    check(cc and "__stdcall" in cc["prototype"] and cc2 and "__fastcall" in cc2["prototype"], f"set_calling_convention stdcall then fastcall: {err or cc2 and cc2['prototype']}")
+    if s["hexrays"] and d:
+        pl, err = c.call("get_pseudocode_lines", address=target)
+        check(pl and any("address" in ln for ln in pl["lines"]) and pl["lines"][0]["line"] == 1, f"get_pseudocode_lines: {err or (str(len(pl['lines'])) + ' lines, ' + str(sum(1 for ln in pl['lines'] if 'address' in ln)) + ' with addresses')}")
+        dm, err = c.call("decompile_many", addresses=[target, callee["address"] if callee else target], max_chars_each=200)
+        cut_ok = dm and all(not it.get("truncated") or (it.get("chars", 0) > len(it["code"]) and len(it["code"]) <= 200) for it in dm["items"])
+        check(dm and dm["count"] == 2 and all("code" in it for it in dm["items"]) and cut_ok,
+              f"decompile_many: {err or ('two functions, ' + ', '.join(('cut' if it.get('truncated') else 'whole') + ' ' + str(len(it['code'])) + ' chars' for it in dm['items'])) }")
+        import re as _re
+        m = _re.search(r"^\s+(\S.*?) (v\d+); //", d["code"], _re.M)
+        if m:
+            old_type, var = m.group(1), m.group(2)
+            lt, err = c.call("set_lvar_type", function=target, name=var, type="char *")
+            lt2, _ = c.call("set_lvar_type", function=target, name=var, type=old_type)
+            check(lt and lt["type"] == "char *" and lt2, f"set_lvar_type {var}: char * then back to {old_type}: {err or 'ok'}")
+            lc, err = c.call("set_lvar_comment", function=target, name=var, comment="kiln")
+            lc2, _ = c.call("set_lvar_comment", function=target, name=var, comment="")
+            check(lc and lc["comment"] == "kiln" and lc2 and lc2["comment"] == "", f"set_lvar_comment set and cleared: {err or 'ok'}")
+    # Breakpoints and the debugger: the program runs under IDA (needs the input file next to the database).
+    bp, err = c.call("set_breakpoint", address=target, condition="1")
+    bl3, _ = c.call("list_breakpoints")
+    dbp, _ = c.call("delete_breakpoint", address=target)
+    check(bp and bp["condition"] == "1" and bl3 and bl3["count"] >= 1 and dbp and dbp["deleted"], f"set / list / delete breakpoint: {err or 'ok'}")
+    if os.environ.get("KILN_LIVE_DEBUGGER", "1") == "1" and os.path.exists(info.get("input_path") or ""):
+        ds, err = c.call("debugger_start", break_at=target, timeout_s=60)
+        check(ds and ds["state"] == "suspended" and ds.get("ip") and ds["event"] in ("breakpoint", "process_started", "step"), f"debugger_start stops at the target: {err or (ds['event'] + ' at ' + str(ds.get('ip')))}")
+        if ds and ds["state"] == "suspended":
+            ip0 = ds["ip"]
+            # At the function's first instruction its arguments are still where the ABI puts them.
+            ga, err = c.call("get_arguments")
+            check(ga is not None and ga.get("arguments"), f"get_arguments at the entry: {err or json.dumps(ga.get('arguments'))[:170]}")
+            if ga and ga.get("arguments"):
+                check(all("value" in a or "error" in a for a in ga["arguments"]), "each argument has a value read from the process")
+            # The debugger events the plugin pushed (what Kiln's watch long-polls): the stop is there with its state.
+            ev, err = c.call("wait_for_debugger_event", since=0, timeout_s=2)
+            stops = [e for e in (ev or {}).get("events", []) if e["event"] in ("process_started", "breakpoint")]
+            check(ev is not None and ev.get("seq", 0) >= 1 and stops, f"wait_for_debugger_event returned the stops: {[e['event'] for e in (ev or {}).get('events', [])]}")
+            bpe = next((e for e in stops if e["event"] == "breakpoint"), None)
+            check(bpe is None or (bpe.get("ip") and "registers" in bpe and bpe.get("source") == "debugger_start"), f"the breakpoint event carries ip/registers and its source: {err or (bpe and bpe.get('source'))}")
+            check(bpe is None or "arguments" in bpe or "arguments_note" in bpe, "and the function's arguments (or why they could not be read)")
+            so, err = c.call("debugger_step", action="step_over", timeout_s=20)
+            check(so and so["state"] == "suspended" and so["ip"] != ip0, f"debugger_step step_over moved from {ip0} to {so and so.get('ip')}: {err or 'ok'}")
+            ga2, _ = c.call("get_arguments")
+            check(ga2 is not None and not ga2.get("arguments"), f"past the entry it says why it can't read them instead of guessing: {str(ga2 and ga2.get('arguments_note'))[:90]}")
+            regs = so["registers"] if so else {}
+            reg = "rax" if "rax" in regs else ("eax" if "eax" in regs else None)
+            if reg:
+                sr, err = c.call("set_register", name=reg, value="0x1234")
+                st3, _ = c.call("get_debugger_state")
+                check(sr and st3 and st3["registers"][reg] == "0x1234", f"set_register {reg}: {err or st3 and st3['registers'][reg]}")
+            rb2, _ = c.call("read_bytes", address=ip0, size=4, debugger=True)
+            wm, err = c.call("write_memory", address=ip0, hex=rb2["hex"]) if rb2 else (None, "no read")
+            check(wm and wm["now"] == rb2["hex"], f"write_memory (same bytes back): {err or 'ok'}")
+            if callee:
+                c.call("set_breakpoint", address=callee["address"])
+            ct, err = c.call("debugger_step", action="continue", timeout_s=30)
+            check(ct and ct["event"] in ("breakpoint", "process_exited", "exception", "timeout"), f"debugger_step continue: {err or ct['event']}")
+            if callee:
+                c.call("delete_breakpoint", address=callee["address"])
+        # Tracing: a logging breakpoint records hits without ever holding the program.
+        tgt_fn = (callee or {}).get("address") or target
+        lb, err = c.call("set_breakpoint", address=tgt_fn, suspend=False)
+        check(lb is not None and lb.get("suspend") is False and lb.get("traced") is True, f"a logging breakpoint (suspend=false): {err or json.dumps(lb)[:120]}")
+        ts, err = c.call("trace_start", kind="breakpoints", size=20000)
+        check(ts is not None and ts.get("tracing") == "breakpoints", f"trace_start: {err or ts}")
+        c.call("debugger_step", action="continue", timeout_s=3)
+        time.sleep(2)
+        tr, err = c.call("read_trace", limit=20)
+        check(tr is not None and "events" in tr, f"read_trace: {err or (str(tr.get('total')) + ' event(s) recorded')}")
+        st_now, _ = c.call("get_debugger_state")
+        held = st_now and st_now.get("debugger_on") and st_now.get("state") == "suspended" and (st_now.get("ip") or "").lower() == str(lb and lb.get("address")).lower()
+        check(not held, "the logging breakpoint never held the program at its address")
+        c.call("trace_stop")
+        tc, _ = c.call("trace_clear")
+        check(tc is not None and tc.get("events") == 0, "trace_clear empties the trace")
+        c.call("delete_breakpoint", address=tgt_fn)
+        stp, err = c.call("debugger_stop")
+        st4, _ = c.call("get_debugger_state")
+        check(stp and st4 and st4["debugger_on"] is False, f"debugger_stop ends the session: {err or stp}")
+    else:
+        print("  (debugger run skipped: KILN_LIVE_DEBUGGER=0 or the input file isn't there)")
+
+    # Concurrency: several requests at once are served (serialized inside IDA).
+    import threading
+    results = []
+
+    def one():
+        r, e = c.call("get_function", address=target)
+        results.append(r is not None)
+    ts = [threading.Thread(target=one) for _ in range(6)]
+    t0 = time.monotonic()
+    for t in ts:
+        t.start()
+    for t in ts:
+        t.join()
+    check(len(results) == 6 and all(results), f"6 concurrent calls all answered ({(time.monotonic() - t0) * 1000:.0f} ms)")
+
+    print(f"\n{passed} passed, {failed} failed")
+    sys.exit(1 if failed else 0)
+
+
+if __name__ == "__main__":
+    main()
+
+```
