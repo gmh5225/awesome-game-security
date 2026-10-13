@@ -2176,7 +2176,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [KiSystemStartupMeme (ekknod)](entities/ki-system-startup-meme.md) — custom KiSystemStartup hook (C/C++; kernel-level / driver development / graphics; cheat / EFI driver area)
 - [Killer](entities/killer.md) — kernel driver process terminator via kernel process-structure manipulation (protected AC/EDR/AV; gmh5225)
 - [Killer-Exercice](entities/killer-exercice.md) — red-team RE/exploit lab for protected-process kill (handle table, APC injection, EPROCESS; valid BYOVD; not HVCI-blocklisted / not LOLBIN; gmh5225)
-- [kiln-ida](entities/kiln-ida.md) — TechMecca; IDA Pro 9.1 Streamable HTTP MCP plugin (functions, xrefs, debugger control, optional IDB edits; Cheat / IDA Plugins)
+- [kiln-ida](entities/kiln-ida.md) — TechMecca; IDA Pro 9.1 Streamable HTTP MCP (localhost); IDAPython tools for functions, pseudocode, xrefs, debugger, guarded IDB edits; Cheat / IDA Plugins
 - [Kiroshi](entities/kiroshi.md) — IDA Pro plugin: detect common Anti-Cheat artifacts (cheat / IDA Plugins)
 - [kinject](entities/kinject.md) — kernel map + APC inject (C/C++; cheat / injection:windows)
 - [kli](entities/kli.md) — header-only KM lazy import resolver (C++; Anti Cheat / Lazy Importer)

@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-13** — ingest `description:TechMecca/kiln-ida`: enriched entity [[kiln-ida]] (confidence medium; Streamable HTTP MCP, main-thread marshaling, debugger trace/long-poll); cited on [[overviews/reverse-engineering]] AI-assisted RE (MCP) lane + [[overviews/game-hacking]] IDA Plugins cluster; `index.md` entity blurb sync.
+
 - **2026-10-13** — ingest `description:xav0dev/AU-Anticheat`: enriched entity [[au-anticheat]] (confidence high; BepInEx IL2CPP Among Us host-side RPC/packet validation, movement/role scoring, point-based moderation, local friend-code lists; no remote telemetry); cited on [[overviews/anti-cheat]] Anti Cheat map lane + [[overviews/game-hacking]] Among Us host defensive cluster beside [[banmod]]; `index.md` entity blurb sync.
 
 - **2026-10-13** — ingest `readme:categories`: Cheat ~2886 (+1; TechMecca/[[kiln-ida]] IDA Pro Streamable HTTP MCP) / Anti Cheat ~790 (+2; GQS5/[[vanticheat]] Paper/Folia 1.21.11 plugin-message + sign-probe mod detection / xav0dev/[[au-anticheat]] Among Us host-side BepInEx IL2CPP AC) / Game Engine ~159 / other major section counts stable; 41 sections (`NeverC & NeverD` placeholder); synced README-map counts on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]], and [[overviews/anti-cheat]]; entities [[kiln-ida]], [[vanticheat]], [[au-anticheat]]; light `index.md` section notes (no per-category pages).
