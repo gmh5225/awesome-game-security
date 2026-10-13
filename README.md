@@ -1522,6 +1522,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 > IoT / Smart devices
 - https://github.com/TaszkSecLabs/xiaomi-c400-pwn [Xiaomi Smart Camera exploits and jailbreak]
 - https://github.com/keowu/sjcam [SJCAM SJ4000 Air (Allwinner V3) firmware reverse engineering, parsers, custom CFW (Lelouch), and CVE-2026-52656 PoC]
+- https://github.com/bboe/firebreak [Python CLI to USB-unlock, root, and reflash Amazon Echo Dot (2nd gen) via amonet targets or restore stock Fire OS]
 
 > Android ROM
 - https://xdaforums.com [Guide]
