@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-13** — lint (agent): read `wiki/AGENTS.md`; listed **Overviews** (9): `anti-cheat`, `dma-attack`, `game-engine`, `game-hacking`, `graphics-api`, `mobile-security`, `overview`, `reverse-engineering`, `windows-kernel`; **Concepts** (51) under `wiki/concepts/`; **Entities** (4050) under `wiki/entities/`; `index.md` vs disk — 4110 indexed paths (9+51+4050), 4110 unique, 0 missing, 0 dead, 0 duplicate index entries; overview [[wikilink]] spot-check — 0 broken (12429 links); concept pages — 0 broken (2421 links); index overview-blurb [[wikilink]] scan — 0 broken (648 links); 6 expected cross-kind slug collisions ([[anti-cheat]], [[game-hacking]], [[reverse-engineering]], [[byovd]], [[dma]], [[il2cpp]]); wiki populated — bootstrap not required; `index.md` unchanged; no link repairs (`log.md` only).
+
 - **2026-10-13** — ingest `description:ljagiello/lastwar-client`: enriched entity [[lastwar-client]] (live-validated wire protocol/command catalog, ShuMei anti-fraud + session recovery, PCAP→session JSON, research audience); cited on [[overviews/mobile-security]] network lane + [[overviews/reverse-engineering]] mobile protocol RE; `index.md` entity blurb sync.
 
 - **2026-10-13** — ingest `description:oldboysonnt/mobile-harness`: refreshed entity [[mobile-harness]] (confidence high; AI agent orchestration, static audit verification/reporting, bug-bounty/lab/CTF framing, Play Integrity on hardened game clients); cited on [[overviews/mobile-security]] network/pinning MCP lane + [[concepts/mobile-anti-cheat]] authorized lab-assessment cluster; `index.md` entity blurb sync.
