@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-13** — ingest `description:GQS5/VAntiCheat`: enriched entity [[vanticheat]] (confidence high; Java 21 Paper/Folia 1.21.x config-driven mod/client fingerprint via passive plugin messages, optional sign translation-key probes, corroboration rules, Apollo/Geyser/Floodgate/Forge denylist; default non-interactive join); cited on [[overviews/anti-cheat]] Paper/Folia mod-fingerprint lane + [[overviews/game-hacking]] Minecraft fingerprint cluster beside [[key-value-checker]]; `index.md` entity blurb sync.
+
 - **2026-10-13** — ingest `description:TechMecca/kiln-ida`: enriched entity [[kiln-ida]] (confidence medium; Streamable HTTP MCP, main-thread marshaling, debugger trace/long-poll); cited on [[overviews/reverse-engineering]] AI-assisted RE (MCP) lane + [[overviews/game-hacking]] IDA Plugins cluster; `index.md` entity blurb sync.
 
 - **2026-10-13** — ingest `description:xav0dev/AU-Anticheat`: enriched entity [[au-anticheat]] (confidence high; BepInEx IL2CPP Among Us host-side RPC/packet validation, movement/role scoring, point-based moderation, local friend-code lists; no remote telemetry); cited on [[overviews/anti-cheat]] Anti Cheat map lane + [[overviews/game-hacking]] Among Us host defensive cluster beside [[banmod]]; `index.md` entity blurb sync.

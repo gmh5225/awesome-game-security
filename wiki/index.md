@@ -3802,7 +3802,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [VAC-ModuleDumper](entities/vac-module-dumper.md) — VAC module dump for offline RE (C/C++; explore anticheat:vac)
 - [VACKeyRetrieval](entities/vackeyretrieval.md) — VAC module ICE encryption key retrieval (C++; explore anticheat:vac)
 - [VALVeAntiCheat1](entities/valveanticheat1.md) — GoldSrc/WON-era VAC1 ModuleC/ModuleS bytecode VM rebuild (2002–2004; RE notes + tooling)
-- [VAntiCheat](entities/vanticheat.md) — GQS5; Paper/Folia **1.21.11** config-driven MC client/mod detection (plugin messages + interactive sign probes; Anti Cheat / game:minecraft)
+- [VAntiCheat](entities/vanticheat.md) — GQS5; Java 21 Paper/Folia **1.21.x** evidence-based mod/client fingerprint (passive plugin messages, optional sign translation-key probes, corroboration-gated kick/ban; Apollo/Geyser/Floodgate; Forge denylist; Anti Cheat / game:minecraft)
 - [vac-hooks](entities/vac-hooks.md) — WinAPI hook/logging on VAC-used APIs (C DLL; danielkrupinski; explore anticheat:vac)
 - [Vook](entities/vook.md) — VAC hook research (explore anticheat:vac)
 - [vanguard-import-resolver](entities/vanguard-import-resolver.md) — Resolve Vanguard `vgk.sys` protected kernel imports; document import-resolution mechanism (gmh5225)
