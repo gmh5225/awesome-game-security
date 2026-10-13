@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-13** — ingest `description:ljagiello/lastwar-client`: enriched entity [[lastwar-client]] (live-validated wire protocol/command catalog, ShuMei anti-fraud + session recovery, PCAP→session JSON, research audience); cited on [[overviews/mobile-security]] network lane + [[overviews/reverse-engineering]] mobile protocol RE; `index.md` entity blurb sync.
+
 - **2026-10-13** — ingest `description:oldboysonnt/mobile-harness`: refreshed entity [[mobile-harness]] (confidence high; AI agent orchestration, static audit verification/reporting, bug-bounty/lab/CTF framing, Play Integrity on hardened game clients); cited on [[overviews/mobile-security]] network/pinning MCP lane + [[concepts/mobile-anti-cheat]] authorized lab-assessment cluster; `index.md` entity blurb sync.
 
 - **2026-10-13** — ingest `readme:categories`: Cheat ~2884 (+1; oldboysonnt/[[mobile-harness]] Android Frida MCP pentest harness) / Game Network ~34 (+1; ljagiello/[[lastwar-client]] Last War headless SFS2X client) / Anti Cheat ~788 / Game Engine ~159 / 41 sections (`NeverC & NeverD` placeholder); synced README-map counts on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]], [[overviews/game-engine]], and [[overviews/mobile-security]]; entities [[mobile-harness]], [[lastwar-client]]; light `index.md` section notes (no per-category pages).

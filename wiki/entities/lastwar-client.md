@@ -1,7 +1,7 @@
 ---
 title: Last War Client (Go)
 kind: entity
-topics: [game-engine, reverse-engineering, mobile-security]
+topics: [game-engine, reverse-engineering, mobile-security, game-hacking]
 sources:
   - wiki/sources/descriptions/ljagiello__lastwar-client.md
   - wiki/sources/README-categories.md
@@ -23,7 +23,11 @@ confidence: high
 | **CLI automation** | Login, resource collection, alliance actions, and related account tasks |
 | **PCAP tooling** | Decode captured login traffic into reusable session JSON |
 
-Companion documentation catalogs commands, entity IDs, ShuMei anti-fraud fields, and session recovery against live servers—useful for **mobile game protocol RE** and headless client research (not proof of server authorization). Listed under README **Game Network / Source**.
+Extensive documentation catalogs the wire protocol, command set, entity IDs, ShuMei anti-fraud fields, and session recovery workflows, with behavior **live-validated against production servers**—useful for **mobile game protocol RE** and headless client research (not proof of server authorization). Listed under README **Game Network / Source**. (source: wiki/sources/descriptions/ljagiello__lastwar-client.md)
+
+## Research audience
+
+Game security and reverse-engineering researchers who need a **compatible headless client** and a detailed reference for Unity mobile TCP/SmartFoxServer-style sessions without running the official app. PCAP-derived session JSON supports repeatable login replay beside CLI automation for account-oriented tasks. (source: wiki/sources/descriptions/ljagiello__lastwar-client.md)
 
 ## Links
 

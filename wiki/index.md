@@ -2281,7 +2281,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [l-assemblies](entities/l-assemblies.md) — C# LeagueSharp champion plugins (Orbwalker/TargetSelector combos; ward/cooldown minimap tracker; gmh5225; cheat / game:lol)
 - [lazysight](entities/lazysight.md) — internal Ironsight multihack (DirectX overlay ESP/aimbot; entity lists, weapon managers, W2S SDK reads; Internal; gmh5225; cheat / game:ironsight)
 - [last-island-of-survival-ioscheat-source](entities/last-island-of-survival-ioscheat-source.md) — Last Island of Survival / Last Day Rules iOS cheat source (Objective-C runtime manipulation; gameplay mods; gmh5225; cheat / iOS)
-- [lastwar-client](entities/lastwar-client.md) — Go headless Last War mobile client (GSL RSA/AES, SFS2X/SFSObject; protocol docs; Game Network / source)
+- [lastwar-client](entities/lastwar-client.md) — Go headless Last War mobile client (GSL RSA/AES, SFS2X/SFSObject; PCAP session JSON; ShuMei anti-fraud protocol docs; live-validated; Game Network / source)
 - [lab-esp-and-aimbot](entities/lab-esp-and-aimbot.md) — educational ESP/aimbot lab (3D target app + external cheat; W2S / RPM; cheat / guide)
 - [lanternlight](entities/lanternlight.md) — Mistfall Hunter anti-cheat-safe Python companion (game log + UE5 GVAS saves + passive screen capture; Emberforge build math; no injection/RPM/hooks; Remus3)
 - [launcher-abuser](entities/launcher-abuser.md) — stealth external RPM via Steam/Battle.net launcher-held game handles (shared-memory IPC; minimal shellcode + thread hijack; syscall NtReadVirtualMemory/NtWriteVirtualMemory; Ricardonacif; Cheat / Launcher Abuser)
