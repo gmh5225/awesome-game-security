@@ -2412,6 +2412,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/horoni/android_imgui_menu [Rust Android cdylib mod menu with EGL/Vulkan render-chain hooks and ARM64 inline hooking]
 - https://github.com/xBrunoMedeiros/eac-overlay [EAC Overlay]
 - https://github.com/3r4y/imgui-external-overlay [imgui overlay]
+- https://github.com/Nn1ff/crosshair-z [Lightweight Electron crosshair overlay for Windows: click-through topmost window, no game injection or hooks, portable offline build]
 - https://github.com/rabbanyhmm/ImOverlay-DX11 [Lightweight C++20 Win32/DirectX 11 transparent multi-window overlay framework with smart click-through and parent-child hierarchy]
 - https://github.com/husnaintariq577/kx-vision [C++ DirectX overlay for Guild Wars 2 with D3D render hooks, game offsets, and ESP-style world/player visualization]
 - https://github.com/myso-kr/hell-is-us-mod [External Hell Is Us companion (hiumod) that attaches to the running game, reads memory for minimap/quest overlays, and exposes optional single-player cheats without modifying game files]
