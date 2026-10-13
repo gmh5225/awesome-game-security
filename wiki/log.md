@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-13** — lint (agent): read `wiki/AGENTS.md`; **Overviews** (9), **Concepts** (51), **Entities** (4051) on disk; `index.md` catalog aligned (0 missing, 0 dead, 0 duplicate); overview + concept + index overview-blurb [[wikilink]] spot-check — 0 broken; bootstrap not required; structural repairs none (`log.md` only).
+
 - **2026-10-13** — lint (agent): read `wiki/AGENTS.md`; listed **Overviews** (9): `anti-cheat`, `dma-attack`, `game-engine`, `game-hacking`, `graphics-api`, `mobile-security`, `overview`, `reverse-engineering`, `windows-kernel`; **Concepts** (51) under `wiki/concepts/`; **Entities** (4051) under `wiki/entities/`; `index.md` vs disk — 4111 indexed paths (9+51+4051), 4111 unique, 0 missing, 0 dead, 0 duplicate index entries; overview [[wikilink]] spot-check — 0 broken (12434 links); concept pages — 0 broken (2423 links); index overview-blurb [[wikilink]] scan — 0 broken (650 links); 6 expected cross-kind slug collisions ([[anti-cheat]], [[game-hacking]], [[reverse-engineering]], [[byovd]], [[dma]], [[il2cpp]]); wiki populated — bootstrap not required; `index.md` unchanged; no link repairs (`log.md` only).
 
 - **2026-10-13** — lint (agent): read `wiki/AGENTS.md`; **Overviews** (9) on disk match `index.md`; **Concepts** (51); **Entities** (4051); catalog 4111 paths, 0 missing/dead/duplicate; overview + concept + index overview-blurb [[wikilink]] spot-check — 0 broken; bootstrap not required; structural repairs none (`log.md` only).
