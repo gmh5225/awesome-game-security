@@ -1442,7 +1442,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [vscode-frida](entities/vscode-frida.md) — Unofficial VS Code Frida workbench; target selection, script dispatch, REPL, device logs, iOS/Android helper tooling; TypeScript + Python; frida-tools integration (ChiChou; cheat / Frida)
 - [frida-il2cpp-bridge](entities/frida-il2cpp-bridge.md) — Frida dump Il2Cpp (Unity 5.3–6000.1.x; game engine explorer:Unity)
 - [frida-il2cpp-datacollector](entities/frida-il2cpp-datacollector.md) — Frida IL2CPP runtime metadata harvester (Android/iOS; CE MonoDataCollector port; SDK generation)
-- [frida-ios-dump](entities/frida-ios-dump.md) — Frida-based jailbroken iOS decrypted IPA pull; Python driver, ObjC agent, parallel SFTP over USB/SSH, Frida 17 bridge (AloneMonkey; cheat / IOS App Packaging)
+- [frida-ios-dump](entities/frida-ios-dump.md) — jailbroken iOS decrypted IPA pull; Python host, Frida ObjC agent, FairPlay-stripped Mach-O dump, parallel SFTP USB/SSH, app list by name/bundle ID, Frida 17 (AloneMonkey; cheat / IOS App Packaging)
 - [Frida-RS](entities/frida-rs.md) — KernelSU module wrapping official frida-server; Rust supervisor + Material 3 WebUI; multi-ABI; loopback + token-gated TCP (MiChongs)
 - [Frida-Scripts](entities/frida-scripts.md) — Frida JS/Python scripts (editor tooling / hooking; cheat / Frida)
 - [frida-seccomp](entities/frida-seccomp.md) — Android syscall tracing/hooking (Frida + seccomp trap; SVC capture, stack/reg args; Python orchestration + CModule; Abbbbbi)

@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-14** — ingest `description:AloneMonkey/frida-ios-dump`: enriched entity [[frida-ios-dump]] (mechanism, catalog lane, positioning vs [[bagbak]]; confidence high); cited jailbroken iOS IPA acquisition on [[concepts/frida]] and [[overviews/reverse-engineering]] README map; synced `index.md` entity blurb.
+
 - **2026-10-14** — ingest `readme:categories`: Cheat ~2891 (+1; AloneMonkey/[[frida-ios-dump]] Frida jailbroken iOS decrypted IPA pull over USB/SSH; IOS App Packaging) / Anti Cheat ~792 / Game Engine ~159 / other major section counts stable; 41 sections (`NeverC & NeverD` placeholder); synced README-map counts on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/reverse-engineering]], [[overviews/dma-attack]], and [[overviews/mobile-security]]; entity [[frida-ios-dump]]; light `index.md` section notes (no per-category pages).
 
 - **2026-10-14** — lint (agent): read `wiki/AGENTS.md`; listed **Overviews** (9): `anti-cheat`, `dma-attack`, `game-engine`, `game-hacking`, `graphics-api`, `mobile-security`, `overview`, `reverse-engineering`, `windows-kernel`; **Concepts** (51) under `wiki/concepts/`; **Entities** (4061) under `wiki/entities/`; `index.md` vs disk — 4121 indexed paths (9+51+4061), 4121 unique, 0 missing, 0 dead, 0 duplicate index entries; overview pages + index overview-blurb + concept [[wikilink]] spot-check — 0 broken (13140 overview-scope + 2426 concept links); 6 expected cross-kind slug collisions ([[anti-cheat]], [[game-hacking]], [[reverse-engineering]], [[byovd]], [[dma]], [[il2cpp]]); wiki populated — bootstrap not required; `index.md` unchanged; no link repairs (`log.md` only).
