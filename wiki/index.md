@@ -491,7 +491,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [avhook](entities/avhook.md) — CS:GO training software (Windows; joke features; gmh5225; cheat / game:csgo)
 - [awesome-anti-virtualization](entities/awesome-anti-virtualization.md) — curated anti-virtualization resources (Detection:Virtual Environments)
 - [awesome-android-root](entities/awesome-android-root.md) — curated Android root resources (Magisk/KernelSU/APatch; Play Integrity Android 14/15 notes; cheat / Android root)
-- [Awesome AI Reverse Engineering](entities/awesome-ai-reverse-engineering.md) — curated AI-agent RE catalog (~122 vetted MCP/mobile/skill repos; security grades + JSON metadata; zhuyansen)
+- [Awesome AI Reverse Engineering](entities/awesome-ai-reverse-engineering.md) — curated AI-agent RE catalog (~122 vetted Ghidra/IDA/BN/r2/x64dbg MCP + jadx/apktool/Frida mobile + web/JS protocol + skill packs; README security grades + JSON metadata; malware/AC RE; zhuyansen)
 - [awesome-android-security](entities/awesome-android-security.md) — curated Android security learning index (theory/tools/write-ups/PoCs/CVEs; kernel exploitation, app testing, Frida; Samsung research references)
 - [awesome-android-aosp](entities/awesome-android-aosp.md) — curated AOSP/custom-ROM platform index (build systems, kernels, device trees, Treble, SELinux, debugging, vendor workflows; low-level platform engineering; Akipe; cheat / Guide)
 - [awesome-educational-games](entities/awesome-educational-games.md) — curated educational games (editors / languages / programming; Game Develop Guide)
