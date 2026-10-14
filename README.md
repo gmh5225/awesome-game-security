@@ -1080,6 +1080,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/azw413/Glass [Rust mobile-first disassembler for APK/DEX/smali and AArch64 .so/.dylib; CFG, xref, CLI/MCP automation]
 - https://github.com/0xbigshaq/apatchy [Fuzzing Framework for Apache HTTPD Server]
 - https://github.com/HullaBrian/ttd-capa-cpp [TTD capa]
+- https://binarybacktrace.com/tools/rubber_room [Rubber Room, a browser tool for PE analysis, x86-64 disassembly, decompilation and Win32 emulation; alpha, nothing is uploaded]
 
 
 > Mixed boolean-arithmetic
