@@ -1,0 +1,4394 @@
+Project Path: arc_MaksymSakundiak_chess-anti-cheat_h17yf_ek
+
+Source Tree:
+
+```txt
+arc_MaksymSakundiak_chess-anti-cheat_h17yf_ek
+├── FIXES_SUMMARY.md
+├── HDF5_FORMAT_GUIDE.md
+├── QUICK_START.md
+├── README.md
+├── cheater_players.json
+├── convert_to_hdf5.py
+├── fetch_games.py
+├── fetched_players.json
+├── fix_data_format_proper.py
+├── hdf5_preprocess.py
+├── hdf5_vocab.pkl
+├── honest_players.json
+├── improved_tensorflow_model.py
+├── predict_tensorflow.py
+├── requirements.txt
+└── train_tensorflow.py
+
+```
+
+`FIXES_SUMMARY.md`:
+
+```md
+# 🛠️ Fixes Applied - Chess Anti-Cheat System
+
+## ✅ **Issues Resolved**
+
+### **1. PGN Parsing Issue - Only 1 Game Per Player**
+
+**Problem**: System was only fetching 1 game per player even when requesting multiple games.
+
+**Root Cause**:
+
+- Lichess API returns complete PGN games separated by triple newlines (`\n\n\n`)
+- Original code was splitting by double newlines and trying to manually combine headers with moves
+- This caused only the first game to be parsed correctly
+
+**Solution**:
+
+- Changed PGN parsing to split by triple newlines (`\n\n\n`)
+- Each game is already a complete PGN with headers + moves
+- Added validation to ensure games contain both `[Event` (headers) and `1.` (moves)
+
+**Result**: ✅ Now successfully fetches multiple games per player (e.g., 5 games instead of 1)
+
+### **2. HDF5 Saving Error - Missing PyTables**
+
+**Problem**: `❌ Error appending to HDF5: Missing optional dependency 'pytables'`
+
+**Root Cause**:
+
+- Pandas requires `tables` package for HDF5 saving
+- This dependency wasn't installed in the virtual environment
+
+**Solution**:
+
+- Installed `tables>=3.10.0` package
+- Updated `requirements.txt` to include this dependency
+
+**Result**: ✅ HDF5 saving now works correctly
+
+### **3. Rate Limiting Issues - 429 Too Many Requests**
+
+**Problem**: Getting 429 errors when fetching from many players
+
+**Root Cause**:
+
+- Lichess API rate limiting
+- Only 1-second delay between requests
+
+**Solution**:
+
+- Increased rate limiting from 1 second to 2 seconds between players
+- Added specific handling for 429 errors with 5-second wait
+- Better error handling for HTTP errors
+
+**Result**: ✅ Reduced rate limiting errors
+
+### **4. HDF5 File Corruption - Empty/Corrupted Files**
+**Problem**: HDF5 files were 0 bytes, causing "file signature not found" errors
+
+**Root Cause**:
+- Previous HDF5 files were corrupted or empty
+- No validation of file integrity before reading
+
+**Solution**:
+- Removed all corrupted HDF5 files
+- Added file size validation before reading
+- Improved error handling with emergency backups
+- Added graceful fallback when files are corrupted
+
+**Result**: ✅ HDF5 saving now works reliably with error recovery
+
+## 📊 **System Status**
+
+### **✅ Working Features**:
+
+- ✅ **Multiple Games Fetching**: Now fetches requested number of games per player
+- ✅ **HDF5 Data Storage**: Properly saves data in your specified format with error recovery
+- ✅ **Player-Level Data**: Each record represents one player's moves
+- ✅ **Complete History**: Fetches from account creation date
+- ✅ **Rate Limiting**: Handles API limits gracefully
+- ✅ **Error Handling**: Robust error handling for network and file issues
+- ✅ **Data Integrity**: Automatic backups and corruption recovery
+
+### **📈 Performance**:
+
+- **Before**: 1 game per player, HDF5 saving failed
+- **After**: Multiple games per player, successful HDF5 saving
+- **Rate Limiting**: 2-second delays, 5-second waits on 429 errors
+
+### **🎯 Data Format Achieved**:
+
+```
+| game_id | player_color | player_id | opponent_id | moves (only own) | move_times | result | label |
+|----------|--------------|-----------|-------------|------------------|------------|--------|-------|
+| seos01e2 | white | player_seos01e2_white | player_seos01e2_black | e4,e5,Bc4... | [3.47,2.82...] | loss | 0 |
+```
+
+## 🚀 **Ready for Production**
+
+The system is now fully functional and ready for large-scale data collection:
+
+- Fetches multiple games per player
+- Saves to HDF5 format correctly
+- Handles rate limiting gracefully
+- Maintains data integrity with backups
+- Supports both honest and cheater player lists
+
+**Next Steps**: Run the full data collection process to build your training dataset!
+
+```
+
+`HDF5_FORMAT_GUIDE.md`:
+
+```md
+# HDF5 Format for Chess Anti-Cheat Detection
+
+## 🎯 Overview
+
+This document explains the new HDF5 data format that enables **player-level cheating detection** instead of game-level detection. The system now analyzes individual players (white/black) separately, allowing for more granular and accurate cheating detection.
+
+## 📊 Data Format
+
+### HDF5 Structure
+The data is stored in HDF5 format with the following structure:
+
+| Column | Type | Description | Example |
+|--------|------|-------------|---------|
+| `game_id` | string | Unique game identifier | `"001_000001"` |
+| `player_color` | string | Player's color | `"white"` or `"black"` |
+| `player_id` | string | Unique player identifier | `"player_001_000001_white"` |
+| `opponent_id` | string | Opponent's identifier | `"player_001_000001_black"` |
+| `moves` | string | Comma-separated moves | `"e4,Nf3,Bb5,Nc6,O-O"` |
+| `move_times` | string | Comma-separated move times | `"2.1,1.9,2.3,2.0,1.8"` |
+| `result` | string | Game result for this player | `"win"`, `"loss"`, or `"draw"` |
+| `label` | int | Cheating label (0=honest, 1=cheater) | `0` or `1` |
+
+### Example Data
+```python
+# Sample HDF5 record
+{
+    'game_id': '001_000001',
+    'player_color': 'white',
+    'player_id': 'player_001_000001_white',
+    'opponent_id': 'player_001_000001_black',
+    'moves': 'e4,Nf3,Bb5,Nc6,O-O',
+    'move_times': '2.1,1.9,2.3,2.0,1.8',
+    'result': 'win',
+    'label': 1  # Cheater
+}
+```
+
+## 🔄 Conversion Process
+
+### From CSV to HDF5
+The conversion process transforms game-level data to player-level data:
+
+1. **Parse Games**: Split each game into white and black perspectives
+2. **Extract Moves**: Separate moves by player color
+3. **Generate Times**: Create realistic move times based on complexity
+4. **Determine Results**: Calculate game results for each player
+5. **Create Records**: Generate separate records for each player
+
+### Conversion Script
+```bash
+python convert_to_hdf5.py
+```
+
+This script:
+- Converts `data/cheater_games.csv` → `data/cheater_games.h5`
+- Converts `data/honest_games.csv` → `data/honest_games.h5`
+- Combines into `data/combined_games.h5`
+
+## 🎯 Key Advantages
+
+### 1. **Player-Level Granularity**
+- **Before**: Model analyzed entire games (both players combined)
+- **After**: Model analyzes individual players separately
+- **Benefit**: Can identify which specific player is cheating
+
+### 2. **Improved Accuracy**
+- **Focused Analysis**: Model sees only one player's moves at a time
+- **Cleaner Patterns**: No mixing of different playing styles
+- **Better Training**: More precise training data
+
+### 3. **Enhanced Detection**
+- **White vs Black**: Can detect if white or black player is cheating
+- **Individual Assessment**: Each player gets their own cheating score
+- **Pattern Recognition**: Better identification of player-specific patterns
+
+### 4. **Real-World Application**
+- **Live Games**: Can analyze individual players in real-time
+- **Tournament Monitoring**: Track specific players across multiple games
+- **Player Profiling**: Build individual player risk profiles
+
+## 🚀 Usage
+
+### Training with HDF5 Data
+```bash
+python train_hdf5.py
+```
+
+### Prediction with HDF5 Model
+```bash
+python predict_hdf5.py
+```
+
+### Interactive Analysis
+```python
+from predict_hdf5 import HDF5ChessPredictor
+
+# Initialize predictor
+predictor = HDF5ChessPredictor()
+
+# Analyze player moves
+result = predictor.predict_player_moves("e4,Nf3,Bb5,Nc6,O-O")
+print(f"Prediction: {result['prediction']}")
+print(f"Confidence: {result['confidence']:.4f}")
+```
+
+## 📈 Data Statistics
+
+### Current Dataset
+- **Total Player Records**: 138,234
+- **Cheaters**: 64,914 (47%)
+- **Honest Players**: 73,320 (53%)
+- **White Players**: 69,117
+- **Black Players**: 69,117
+- **Unique Games**: 69,117
+
+### Game Results Distribution
+- **Draws**: 100,270 (72.5%)
+- **Wins**: 18,982 (13.7%)
+- **Losses**: 18,982 (13.7%)
+
+### Move Statistics
+- **Average Moves per Player**: 47.6
+- **Median Moves per Player**: 43.0
+- **Min Moves**: 5
+- **Max Moves**: 300
+
+### Time Statistics
+- **Average Move Time**: 3.11 seconds
+- **Median Move Time**: 3.15 seconds
+- **Min Move Time**: 0.80 seconds
+- **Max Move Time**: 5.40 seconds
+
+## 🔧 Technical Implementation
+
+### Data Processing Pipeline
+1. **CSV Loading**: Load original game data
+2. **Move Parsing**: Split moves by player color
+3. **Time Generation**: Create realistic move times
+4. **Record Creation**: Generate player-level records
+5. **HDF5 Storage**: Save in efficient HDF5 format
+
+### Model Architecture
+- **Input**: Player moves (comma-separated)
+- **Processing**: Transformer-LSTM hybrid
+- **Output**: Cheating probability (0-1)
+- **Features**: Move patterns, timing, complexity
+
+### Training Process
+- **Dataset Split**: 70% train, 10% validation, 20% test
+- **Loss Function**: Focal Loss (handles class imbalance)
+- **Optimization**: Adam with learning rate scheduling
+- **Regularization**: Early stopping, gradient clipping
+
+## 🎯 Detection Capabilities
+
+### Player-Level Analysis
+- **Move Complexity**: Analyze individual move sophistication
+- **Tactical Accuracy**: Assess tactical precision
+- **Timing Patterns**: Examine move timing consistency
+- **Style Consistency**: Check for player-specific patterns
+
+### Risk Factors
+- **High Tactical Accuracy**: Suspicious engine-like precision
+- **Consistent Timing**: Unrealistic move time consistency
+- **Complex Move Patterns**: Unusually sophisticated play
+- **Low Move Variety**: Limited repertoire
+
+### Confidence Levels
+- **Very High**: >80% confidence
+- **High**: 60-80% confidence
+- **Medium**: 40-60% confidence
+- **Low**: 30-40% confidence
+- **Very Low**: <30% confidence
+
+## 📁 File Structure
+
+```
+chess-anti-cheat/
+├── convert_to_hdf5.py          # Convert CSV to HDF5
+├── hdf5_preprocess.py          # HDF5 data preprocessing
+├── train_hdf5.py              # Train model on HDF5 data
+├── predict_hdf5.py            # Predict with HDF5 model
+├── data/
+│   ├── cheater_games.h5       # Cheater data (HDF5)
+│   ├── honest_games.h5        # Honest data (HDF5)
+│   └── combined_games.h5      # Combined dataset (HDF5)
+├── hdf5_vocab.pkl            # Vocabulary for HDF5 data
+├── hdf5_chess_classifier.pt  # Trained HDF5 model
+└── HDF5_FORMAT_GUIDE.md      # This guide
+```
+
+## 🔄 Migration from Old Format
+
+### Old Format (Game-Level)
+```python
+# Old CSV format
+{
+    'moves': 'e4 e5 Nf3 Nc6 Bb5 a6 Ba4 Nf6 O-O',
+    'label': 1  # Entire game labeled as cheater
+}
+```
+
+### New Format (Player-Level)
+```python
+# New HDF5 format
+{
+    'game_id': '001_000001',
+    'player_color': 'white',
+    'player_id': 'player_001_000001_white',
+    'moves': 'e4,Nf3,Bb5,Ba4,O-O',
+    'label': 1  # Only white player labeled as cheater
+}
+```
+
+## 🎯 Benefits Summary
+
+1. **Granular Detection**: Identify specific cheating players
+2. **Improved Accuracy**: Better pattern recognition
+3. **Real-Time Analysis**: Analyze individual players live
+4. **Enhanced Features**: Player-specific move and timing analysis
+5. **Scalable Architecture**: Efficient HDF5 storage and processing
+6. **Better Training**: Cleaner, more focused training data
+
+This new HDF5 format represents a significant advancement in chess anti-cheat detection, enabling more precise and actionable cheating detection at the individual player level. 
+```
+
+`QUICK_START.md`:
+
+```md
+# Quick Start Guide - TensorFlow Chess Anti-Cheat
+
+## 🚀 Fast Setup (5 minutes)
+
+### 1. Install Dependencies
+```bash
+pip install -r requirements.txt
+```
+
+### 2. Train TensorFlow Model
+```bash
+python train_tensorflow.py
+```
+
+### 3. Make Predictions
+```bash
+python predict_tensorflow.py
+```
+
+## 📊 What's New in TensorFlow Version
+
+### ✅ **Improved Architecture**
+- **Bidirectional LSTM**: Better sequence understanding
+- **Conv1D Layers**: Local pattern detection
+- **Batch Normalization**: Stable training
+- **Advanced Callbacks**: TensorBoard, early stopping
+
+### ✅ **Better Pattern Recognition**
+- **Multi-Modal Input**: Moves + timing + color
+- **Real Move Times**: Taken from Lichess clock data
+- **Risk Factor Analysis**: Comprehensive cheating detection
+
+### ✅ **Clean Data Pipeline**
+- **Essential Features Only**: Removed useless columns
+- **Optimized Format**: Faster processing
+- **Player-Level Split**: Test players are never seen in training
+
+## 🎯 Example Usage
+
+### Interactive Prediction
+```bash
+python predict_tensorflow.py
+
+# Enter game data:
+White moves: e4,e5,Nf3,Nc6,Bb5
+Black moves: d5,d6,Nf6,Nd7,Bd7
+White times: 2.1,1.8,3.2,2.9,4.1
+Black times: 1.9,2.4,3.1,2.6,3.8
+White result: win
+Black result: loss
+```
+
+### Expected Output
+```
+============================================================
+WHITE PLAYER ANALYSIS
+============================================================
+Player Color: white
+PREDICTION: Honest
+Confidence: 0.2345 (Low)
+Move Count: 5
+Average Move Time: 2.82s
+
+Explanation: The TensorFlow model shows low confidence in this prediction. 
+Analyzed 5 moves. Average move time: 2.8s. Found 2 tactical moves. 
+Player color: white. 1 medium-risk factors detected.
+
+Risk Factors:
+  1. High move complexity (Risk: MEDIUM)
+     Value: 0.800
+     Description: Unusually complex moves, which might indicate engine assistance
+============================================================
+```
+
+## 📈 Model Performance
+
+### Training Metrics
+Training prints test-set accuracy next to the always-"honest" baseline, plus
+balanced accuracy, cheater precision/recall/F1 and AUC. With ~13% cheater
+games, accuracy alone is misleading: judge the model by balanced accuracy,
+cheater recall and AUC on the player-level test split.
+
+### Detection Capabilities
+- **Timing Patterns**: Suspiciously fast/consistent moves
+- **Tactical Accuracy**: Unrealistic precision
+- **Move Complexity**: Engine-like sophistication
+- **Move Variety**: Limited variety detection
+
+## 🔧 Configuration Options
+
+### Model Parameters
+```python
+# In improved_tensorflow_model.py
+class AdvancedChessClassifier:
+    def __init__(self, vocab_size: int, max_len: int = 300, embed_dim: int = 128):
+        # Adjust for different performance
+```
+
+### Training Parameters
+```python
+# In train_tensorflow.py
+history = classifier.train(
+    df=train_df, 
+    vocab=vocab, 
+    epochs=10,        # More epochs = better performance
+    batch_size=64,    # Adjust based on memory
+    val_df=val_df     # Validation players, split by player
+)
+```
+
+## 🛠️ Troubleshooting
+
+### Common Issues
+
+**1. TensorFlow not found**
+```bash
+pip install tensorflow
+```
+
+**2. Model file not found**
+```bash
+# Train the model first
+python train_tensorflow.py
+```
+
+**3. Memory issues**
+```bash
+# Reduce batch size in train_tensorflow.py
+batch_size=32  # Instead of 64
+```
+
+**4. Training too slow**
+```bash
+# Use GPU if available
+# Or reduce epochs
+epochs=5  # Instead of 10
+```
+
+## 📊 Data Requirements
+
+### Input Format
+- **Moves**: Comma-separated chess notation
+- **Times**: Comma-separated seconds
+- **Color**: "white" or "black"
+- **Result**: "win", "loss", or "draw"
+
+### Example Data
+```
+White moves: e4,e5,Nf3,Nc6,Bb5
+White times: 2.1,1.8,3.2,2.9,4.1
+Player color: white
+Result: win
+```
+
+## 🎯 Key Features
+
+### ✅ **Advanced TensorFlow Model**
+- Bidirectional LSTM + Conv1D layers
+- Multi-modal input processing
+- Batch normalization and dropout
+
+### ✅ **Comprehensive Analysis**
+- Risk factor detection
+- Timing pattern analysis
+- Tactical accuracy assessment
+- Move complexity evaluation
+
+### ✅ **Real-time Prediction**
+- Interactive command-line interface
+- Detailed player analysis
+- Game summary assessment
+- Confidence level reporting
+
+## 🚀 Next Steps
+
+1. **Train the model**: `python train_tensorflow.py`
+2. **Test predictions**: `python predict_tensorflow.py`
+3. **Analyze results**: Review risk factors and confidence levels
+4. **Fine-tune parameters**: Adjust model configuration as needed
+
+## 📈 Performance Tips
+
+### For Better Accuracy
+- Increase training epochs (30-50)
+- Use larger batch sizes (if memory allows)
+- Add more training data
+- Fine-tune hyperparameters
+
+### For Faster Training
+- Reduce batch size
+- Use GPU if available
+- Reduce model complexity
+- Use fewer epochs
+
+## 🎯 Success Metrics
+
+### Good Model Performance
+- **Balanced Accuracy**: clearly above 0.5
+- **AUC**: clearly above 0.5 on unseen test players
+- **Accuracy**: above the always-"honest" baseline printed during training
+
+### Expected Detection Rates
+- **High Confidence**: >80% confidence
+- **Medium Confidence**: 60-80% confidence
+- **Low Confidence**: <60% confidence
+
+## 📞 Support
+
+If you encounter issues:
+1. Check the troubleshooting section
+2. Verify TensorFlow installation
+3. Ensure data format is correct
+4. Review error messages carefully
+
+---
+
+**Ready to detect chess cheating with TensorFlow! 🎯**
+
+```
+
+`README.md`:
+
+```md
+# Chess Anti-Cheat Detection with TensorFlow
+
+Advanced chess anti-cheat detection system using TensorFlow/Keras for better pattern recognition.
+
+## 🚀 Features
+
+- **Advanced TensorFlow Model**: Bidirectional LSTM + Conv1D layers for superior pattern recognition
+- **Multi-Modal Input**: Processes moves, timing, and player color simultaneously
+- **Real-time Analysis**: Interactive prediction for both white and black players
+- **Comprehensive Risk Analysis**: Detects timing patterns, tactical accuracy, and move complexity
+- **Clean Data Pipeline**: Optimized HDF5 data format with essential features only
+
+## 📊 Model Architecture
+
+```
+Input Layers:
+├── Moves (Embedding + Bidirectional LSTM)
+├── Move Times (Dense + Normalization)
+└── Player Color (Dense)
+
+Feature Extraction:
+├── Conv1D Layers (3, 5, 7 kernel sizes)
+├── Batch Normalization
+└── Global Max Pooling
+
+Classification:
+├── Dense Layers (512 → 256 → 128)
+├── Dropout (0.4 → 0.3 → 0.2)
+└── Sigmoid Output
+```
+
+## 🛠️ Installation
+
+```bash
+# Clone the repository
+git clone https://github.com/MaksymSakundiak/chess-anti-cheat.git
+cd chess-anti-cheat
+
+# Install dependencies
+pip install -r requirements.txt
+```
+
+## 📁 Project Structure
+
+```
+chess-anti-cheat/
+├── data/
+│   ├── combined_games.h5          # Clean dataset
+│   ├── cheater_games.h5           # Cheater games
+│   └── honest_games.h5            # Honest games
+├── improved_tensorflow_model.py    # Advanced TensorFlow model
+├── train_tensorflow.py            # Training script
+├── predict_tensorflow.py          # Prediction script
+├── fetch_games.py                 # Data fetching
+├── convert_to_hdf5.py            # Data conversion
+├── hdf5_preprocess.py            # Data preprocessing
+└── requirements.txt               # Dependencies
+```
+
+## 🎯 Quick Start
+
+### 1. Fetch Data
+
+```bash
+python fetch_games.py
+```
+
+### 2. Train TensorFlow Model
+
+```bash
+python train_tensorflow.py
+```
+
+### 3. Make Predictions
+
+```bash
+python predict_tensorflow.py
+```
+
+## 📈 Model Performance
+
+The TensorFlow model provides:
+
+- **Better Pattern Recognition**: Conv1D layers detect local patterns
+- **Real Timing Analysis**: Per-move think times from Lichess clock data
+- **Enhanced Architecture**: Bidirectional LSTM + Conv1D
+- **Advanced Callbacks**: Early stopping, learning rate reduction, TensorBoard
+
+## 🔍 Usage Examples
+
+### Interactive Prediction
+
+```bash
+python predict_tensorflow.py
+
+# Enter game data:
+# White moves: e4,e5,Nf3,Nc6
+# Black moves: d5,d6,Nf6,Nd7
+# White times: 2.1,1.8,3.2,2.9
+# Black times: 1.9,2.4,3.1,2.6
+# White result: win
+# Black result: loss
+```
+
+### Programmatic Usage
+
+```python
+from predict_tensorflow import TensorFlowChessPredictor
+
+# Load model and vocabulary (advanced_chess_model.keras, hdf5_vocab.pkl)
+predictor = TensorFlowChessPredictor()
+
+# Make prediction
+result = predictor.predict_player_moves(
+    "e4,Nf3,Bb5,O-O",       # this player's moves
+    "0.0,3.2,4.1,2.9",      # seconds spent on each move
+    player_color="white"
+)
+```
+
+## 📊 Data Format
+
+The cleaned dataset contains only essential features:
+
+| Column         | Description                      | Example           |
+| -------------- | -------------------------------- | ----------------- |
+| `player_color` | "white" or "black"               | "white"           |
+| `moves`        | Comma-separated chess moves      | "e4,e5,Nf3,Nc6"   |
+| `move_times`   | Comma-separated times in seconds | "2.1,1.8,3.2,2.9" |
+| `result`       | "win", "loss", or "draw"         | "win"             |
+| `label`        | 0 (honest) or 1 (cheater)        | 1                 |
+
+## 🎯 Key Improvements
+
+### TensorFlow Advantages
+
+- **Better Pattern Recognition**: Conv1D layers detect local move patterns
+- **Real Timing Analysis**: Think times derived from Lichess `[%clk]` annotations, log-scaled
+- **Enhanced Architecture**: Bidirectional LSTM + Conv1D
+- **Advanced Training**: Early stopping, learning rate reduction, TensorBoard logging
+
+### Data Pipeline Improvements
+
+- **Clean Dataset**: Removed useless columns (game_id, player_id, opponent_id)
+- **Optimized Format**: Only essential features for cheating detection
+- **Honest Evaluation**: Train/validation/test split by player, so no player appears in more than one set
+
+### Model Architecture
+
+- **Multi-Modal Input**: Processes moves, timing, and player color simultaneously
+- **Advanced Layers**: Conv1D, Bidirectional LSTM, Batch Normalization
+- **Comprehensive Analysis**: Risk factors, timing patterns, tactical accuracy
+
+## 🔧 Configuration
+
+### Model Parameters
+
+```python
+# In improved_tensorflow_model.py
+class AdvancedChessClassifier:
+    def __init__(self, vocab_size: int, max_len: int = 300, embed_dim: int = 128):
+        # Adjust these parameters for different performance
+```
+
+### Training Parameters
+
+```python
+# In train_tensorflow.py
+history = classifier.train(
+    df=train_df,
+    vocab=vocab,
+    epochs=10,        # Increase for better performance
+    batch_size=64,    # Adjust based on memory
+    val_df=val_df     # Validation players, split by player
+)
+```
+
+## 📈 Performance Metrics
+
+The TensorFlow model tracks:
+
+- **Accuracy**: Overall prediction accuracy, shown next to the always-"honest" baseline
+- **Balanced Accuracy**: Mean of per-class recall, robust to class imbalance
+- **Precision**: Share of flagged players who are cheaters
+- **Recall**: Share of cheaters who get flagged
+- **F1 Score**: Harmonic mean of cheater precision and recall
+- **AUC**: Area under ROC curve
+
+## 🚀 Advanced Features
+
+### Risk Factor Analysis
+
+- **Timing Patterns**: Detects suspiciously fast or consistent move times
+- **Tactical Accuracy**: Identifies unusually high tactical move ratios
+- **Move Complexity**: Analyzes move complexity patterns
+- **Move Variety**: Detects limited move variety (engine-like behavior)
+
+### Real-time Analysis
+
+- **Interactive Interface**: Easy-to-use command-line interface
+- **Comprehensive Reports**: Detailed analysis for both players
+- **Risk Assessment**: Multiple risk factors with confidence levels
+- **Game Summary**: Overall assessment of the game
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Test with the TensorFlow model
+5. Submit a pull request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## 🙏 Acknowledgments
+
+- TensorFlow/Keras for advanced neural network capabilities
+- Lichess API for chess game data
+- Chess community for feedback and testing
+
+```
+
+`cheater_players.json`:
+
+```json
+[
+  "ToromBot",
+  "Weiawaga",
+  "RaspFish",
+  "YoBot_v2",
+  "ArasanX",
+  "ResoluteBot",
+  "duchessAI",
+  "pawn_git",
+  "odonata-bot",
+  "bot_adario",
+  "PZChessBot",
+  "bot64jaques",
+  "Cheszter",
+  "MaggiChess16",
+  "Endogenetic-Bot",
+  "cinder-bot",
+  "InvinxibleFlxsh",
+  "VEER-OMEGA-BOT",
+  "Classic_BOT-v2",
+  "BOT_Stockfish13",
+  "Exogenetic-Bot",
+  "NNUE_Drift",
+  "Alexandrya",
+  "AttackKing_Bot",
+  "BOT_DeChess",
+  "Gold_Engine",
+  "OliThink-5",
+  "Lynx_BOT",
+  "Boris-Trapsky",
+  "InanisBot"
+]
+```
+
+`convert_to_hdf5.py`:
+
+```py
+#!/usr/bin/env python3
+"""
+Convert Chess Data to HDF5 Format
+Converts current CSV format to HDF5 with player-level granularity
+"""
+
+import pandas as pd
+import numpy as np
+import h5py
+import chess
+import chess.pgn
+from typing import List, Dict, Tuple
+import os
+import re
+from datetime import datetime
+import warnings
+warnings.filterwarnings('ignore')
+
+class ChessDataConverter:
+    """Convert chess data to HDF5 format with player-level granularity"""
+    
+    def __init__(self):
+        self.game_counter = 0
+        
+    def parse_moves_to_players(self, moves_str: str) -> Tuple[List[str], List[str]]:
+        """Parse moves string into white and black moves"""
+        if not moves_str or moves_str.strip() == '':
+            return [], []
+            
+        moves = moves_str.strip().split()
+        white_moves = []
+        black_moves = []
+        
+        for i, move in enumerate(moves):
+            if i % 2 == 0:  # White's move
+                white_moves.append(move)
+            else:  # Black's move
+                black_moves.append(move)
+                
+        return white_moves, black_moves
+    
+    def determine_game_result(self, moves: List[str]) -> str:
+        """Determine game result based on final move"""
+        if not moves:
+            return "draw"
+            
+        last_move = moves[-1]
+        
+        if last_move.endswith('#'):
+            return "win"  # Checkmate
+        elif last_move.endswith('+'):
+            return "win"  # Check (likely leading to mate)
+        elif last_move in ['1-0', '0-1', '1/2-1/2']:
+            return "win" if last_move == '1-0' else "loss" if last_move == '0-1' else "draw"
+        else:
+            return "draw"  # Default to draw for incomplete games
+    
+    def create_player_records(self, game_id: str, moves_str: str, label: int) -> List[Dict]:
+        """Create player-level records from a game"""
+        white_moves, black_moves = self.parse_moves_to_players(moves_str)
+        
+        records = []
+        
+        # White player record
+        if white_moves:
+            white_result = self.determine_game_result(white_moves + black_moves)
+            
+            records.append({
+                'game_id': game_id,
+                'player_color': 'white',
+                'player_id': f'player_{game_id}_white',
+                'opponent_id': f'player_{game_id}_black',
+                'moves': ','.join(white_moves),
+                'move_times': [],  # CSV input has no clock data; use fetch_games.py for real times
+                'result': white_result,
+                'label': label
+            })
+        
+        # Black player record
+        if black_moves:
+            black_result = self.determine_game_result(white_moves + black_moves)
+            # Invert result for black
+            if black_result == 'win':
+                black_result = 'loss'
+            elif black_result == 'loss':
+                black_result = 'win'
+            
+            records.append({
+                'game_id': game_id,
+                'player_color': 'black',
+                'player_id': f'player_{game_id}_black',
+                'opponent_id': f'player_{game_id}_white',
+                'moves': ','.join(black_moves),
+                'move_times': [],  # CSV input has no clock data; use fetch_games.py for real times
+                'result': black_result,
+                'label': label
+            })
+        
+        return records
+    
+    def convert_csv_to_hdf5(self, csv_file: str, output_file: str, label: int):
+        """Convert CSV file to HDF5 format"""
+        print(f"Converting {csv_file} to {output_file}...")
+        
+        # Read CSV
+        df = pd.read_csv(csv_file)
+        
+        all_records = []
+        
+        for idx, row in df.iterrows():
+            game_id = f"{label:03d}_{idx:06d}"  # Format: 001_000001
+            moves_str = row['moves']
+            
+            records = self.create_player_records(game_id, moves_str, label)
+            all_records.extend(records)
+            
+            if idx % 1000 == 0:
+                print(f"Processed {idx}/{len(df)} games...")
+        
+        # Create DataFrame
+        result_df = pd.DataFrame(all_records)
+        
+        # Convert move_times lists to strings for HDF5 compatibility
+        result_df['move_times'] = result_df['move_times'].apply(lambda x: ','.join(map(str, x)) if isinstance(x, list) else str(x))
+        
+        # Save to HDF5
+        result_df.to_hdf(output_file, key='chess_data', mode='w', format='table')
+        
+        print(f"✅ Converted {len(df)} games to {len(result_df)} player records")
+        print(f"📊 Statistics:")
+        print(f"   - Total player records: {len(result_df)}")
+        print(f"   - White players: {len(result_df[result_df['player_color'] == 'white'])}")
+        print(f"   - Black players: {len(result_df[result_df['player_color'] == 'black'])}")
+        print(f"   - Cheaters (label=1): {len(result_df[result_df['label'] == 1])}")
+        print(f"   - Honest players (label=0): {len(result_df[result_df['label'] == 0])}")
+        
+        return result_df
+    
+    def combine_datasets(self, cheater_file: str, honest_file: str, output_file: str):
+        """Combine cheater and honest datasets"""
+        print("Combining datasets...")
+        
+        # Read both datasets
+        cheater_df = pd.read_hdf(cheater_file, key='chess_data')
+        honest_df = pd.read_hdf(honest_file, key='chess_data')
+        
+        # Combine
+        combined_df = pd.concat([cheater_df, honest_df], ignore_index=True)
+        
+        # Shuffle
+        combined_df = combined_df.sample(frac=1, random_state=42).reset_index(drop=True)
+        
+        # Save combined dataset
+        combined_df.to_hdf(output_file, key='chess_data', mode='w', format='table')
+        
+        print(f"✅ Combined dataset saved to {output_file}")
+        print(f"📊 Combined Statistics:")
+        print(f"   - Total player records: {len(combined_df)}")
+        print(f"   - Cheaters: {len(combined_df[combined_df['label'] == 1])}")
+        print(f"   - Honest players: {len(combined_df[combined_df['label'] == 0])}")
+        
+        return combined_df
+    
+    def analyze_hdf5_data(self, hdf5_file: str):
+        """Analyze HDF5 dataset"""
+        print(f"Analyzing {hdf5_file}...")
+        
+        df = pd.read_hdf(hdf5_file, key='chess_data')
+        
+        print("📊 Dataset Analysis:")
+        print(f"   - Total records: {len(df)}")
+        print(f"   - Unique games: {df['game_id'].nunique()}")
+        print(f"   - Unique players: {df['player_id'].nunique()}")
+        print(f"   - White players: {len(df[df['player_color'] == 'white'])}")
+        print(f"   - Black players: {len(df[df['player_color'] == 'black'])}")
+        print(f"   - Cheaters: {len(df[df['label'] == 1])}")
+        print(f"   - Honest players: {len(df[df['label'] == 0])}")
+        
+        print("\n🏆 Game Results:")
+        result_counts = df['result'].value_counts()
+        for result, count in result_counts.items():
+            print(f"   - {result}: {count}")
+        
+        print("\n⏱️ Move Times Statistics:")
+        all_times = []
+        for times_str in df['move_times']:
+            if isinstance(times_str, str):
+                times = [float(t.strip()) for t in times_str.split(',') if t.strip()]
+                all_times.extend(times)
+            elif isinstance(times_str, list):
+                all_times.extend(times_str)
+        
+        if all_times:
+            all_times = [float(t) for t in all_times if isinstance(t, (int, float)) or str(t).replace('.', '').isdigit()]
+            if all_times:
+                print(f"   - Average move time: {np.mean(all_times):.2f}s")
+                print(f"   - Median move time: {np.median(all_times):.2f}s")
+                print(f"   - Min move time: {np.min(all_times):.2f}s")
+                print(f"   - Max move time: {np.max(all_times):.2f}s")
+            else:
+                print("   - No valid time data found")
+        else:
+            print("   - No time data available")
+        
+        return df
+
+def main():
+    """Main conversion process"""
+    converter = ChessDataConverter()
+    
+    # File paths
+    cheater_csv = "data/cheater_games.csv"
+    honest_csv = "data/honest_games.csv"
+    cheater_hdf5 = "data/cheater_games.h5"
+    honest_hdf5 = "data/honest_games.h5"
+    combined_hdf5 = "data/combined_games.h5"
+    
+    # Create data directory if it doesn't exist
+    os.makedirs("data", exist_ok=True)
+    
+    print("🔄 Converting Chess Data to HDF5 Format")
+    print("=" * 50)
+    
+    # Convert cheater games
+    if os.path.exists(cheater_csv):
+        converter.convert_csv_to_hdf5(cheater_csv, cheater_hdf5, label=1)
+    else:
+        print(f"❌ {cheater_csv} not found")
+    
+    # Convert honest games
+    if os.path.exists(honest_csv):
+        converter.convert_csv_to_hdf5(honest_csv, honest_hdf5, label=0)
+    else:
+        print(f"❌ {honest_csv} not found")
+    
+    # Combine datasets
+    if os.path.exists(cheater_hdf5) and os.path.exists(honest_hdf5):
+        converter.combine_datasets(cheater_hdf5, honest_hdf5, combined_hdf5)
+        
+        # Analyze combined dataset
+        print("\n" + "=" * 50)
+        converter.analyze_hdf5_data(combined_hdf5)
+    
+    print("\n✅ Conversion complete!")
+    print(f"📁 Output files:")
+    print(f"   - {cheater_hdf5}")
+    print(f"   - {honest_hdf5}")
+    print(f"   - {combined_hdf5}")
+
+if __name__ == "__main__":
+    main() 
+```
+
+`fetch_games.py`:
+
+```py
+#!/usr/bin/env python3
+"""
+Enhanced Lichess Game Fetcher for HDF5 Format
+Fetch rated rapid chess games from Lichess API and append to existing HDF5 dataset
+"""
+
+import os
+import time
+import json
+import re
+import pandas as pd
+import numpy as np
+import requests
+from datetime import datetime, timedelta
+from typing import List, Dict, Optional, Set, Tuple
+from dotenv import load_dotenv
+from tqdm import tqdm
+import warnings
+warnings.filterwarnings('ignore')
+
+PGN_TOKEN_RE = re.compile(r'\{[^}]*\}|\S+')
+MOVE_NUMBER_RE = re.compile(r'\d+\.(\.\.)?')
+CLOCK_RE = re.compile(r'\[%clk (\d+):(\d+):(\d+(?:\.\d+)?)\]')
+PGN_RESULTS = {'1-0', '0-1', '1/2-1/2', '*'}
+
+class LichessHDF5Fetcher:
+    """Enhanced Lichess data fetcher for HDF5 format with player-level granularity"""
+    
+    def __init__(self, api_token: Optional[str] = None):
+        """Initialize the fetcher"""
+        load_dotenv()
+        
+        # Use provided token or load from .env
+        self.api_token = api_token or os.getenv('LICHESS_API_TOKEN')
+        
+        if not self.api_token:
+            print("Warning: No Lichess API token found. Using public API (limited rate).")
+        
+        self.session = requests.Session()
+        if self.api_token:
+            self.session.headers.update({'Authorization': f'Bearer {self.api_token}'})
+            print("Using authenticated Lichess API")
+        else:
+            print("Using public Lichess API")
+        
+        # Track fetched players to avoid duplicates
+        self.fetched_players_file = 'fetched_players.json'
+        self.fetched_players = self._load_fetched_players()
+        
+        # Player lists files
+        self.cheater_players_file = 'cheater_players.json'
+        self.honest_players_file = 'honest_players.json'
+        
+        # HDF5 file paths
+        self.cheater_hdf5 = "data/cheater_games.h5"
+        self.honest_hdf5 = "data/honest_games.h5"
+        self.combined_hdf5 = "data/combined_games.h5"
+        
+        # Create data directory if it doesn't exist
+        os.makedirs("data", exist_ok=True)
+    
+    def _load_fetched_players(self) -> Dict[str, Dict]:
+        """Load tracking of previously fetched players"""
+        try:
+            if os.path.exists(self.fetched_players_file):
+                with open(self.fetched_players_file, 'r') as f:
+                    return json.load(f)
+            return {}
+        except Exception as e:
+            print(f"Warning: Could not load fetched players tracking: {e}")
+            return {}
+    
+    def _save_fetched_players(self):
+        """Save tracking of fetched players"""
+        try:
+            with open(self.fetched_players_file, 'w') as f:
+                json.dump(self.fetched_players, f, indent=2)
+        except Exception as e:
+            print(f"Warning: Could not save fetched players tracking: {e}")
+    
+    def _load_player_list(self, file_path: str) -> List[str]:
+        """Load list of players from file"""
+        try:
+            if os.path.exists(file_path):
+                with open(file_path, 'r') as f:
+                    return json.load(f)
+            return []
+        except Exception as e:
+            print(f"Warning: Could not load player list from {file_path}: {e}")
+            return []
+    
+    def _save_player_list(self, players: List[str], file_path: str):
+        """Save list of players to file"""
+        try:
+            with open(file_path, 'w') as f:
+                json.dump(players, f, indent=2)
+            print(f"✅ Saved {len(players)} players to {file_path}")
+        except Exception as e:
+            print(f"❌ Error saving player list to {file_path}: {e}")
+    
+    def add_cheater_players(self, usernames: List[str]):
+        """Add players to the cheater list"""
+        current_cheaters = self._load_player_list(self.cheater_players_file)
+        
+        # Add new players (avoid duplicates)
+        for username in usernames:
+            if username not in current_cheaters:
+                current_cheaters.append(username)
+        
+        self._save_player_list(current_cheaters, self.cheater_players_file)
+        print(f"✅ Added {len(usernames)} players to cheater list. Total: {len(current_cheaters)}")
+    
+    def add_honest_players(self, usernames: List[str]):
+        """Add players to the honest list"""
+        current_honest = self._load_player_list(self.honest_players_file)
+        
+        # Add new players (avoid duplicates)
+        for username in usernames:
+            if username not in current_honest:
+                current_honest.append(username)
+        
+        self._save_player_list(current_honest, self.honest_players_file)
+        print(f"✅ Added {len(usernames)} players to honest list. Total: {len(current_honest)}")
+    
+    def remove_cheater_players(self, usernames: List[str]):
+        """Remove players from the cheater list"""
+        current_cheaters = self._load_player_list(self.cheater_players_file)
+        
+        # Remove specified players
+        for username in usernames:
+            if username in current_cheaters:
+                current_cheaters.remove(username)
+        
+        self._save_player_list(current_cheaters, self.cheater_players_file)
+        print(f"✅ Removed {len(usernames)} players from cheater list. Total: {len(current_cheaters)}")
+    
+    def remove_honest_players(self, usernames: List[str]):
+        """Remove players from the honest list"""
+        current_honest = self._load_player_list(self.honest_players_file)
+        
+        # Remove specified players
+        for username in usernames:
+            if username in current_honest:
+                current_honest.remove(username)
+        
+        self._save_player_list(current_honest, self.honest_players_file)
+        print(f"✅ Removed {len(usernames)} players from honest list. Total: {len(current_honest)}")
+    
+    def get_cheater_players(self) -> List[str]:
+        """Get list of cheater players"""
+        return self._load_player_list(self.cheater_players_file)
+    
+    def get_honest_players(self) -> List[str]:
+        """Get list of honest players"""
+        return self._load_player_list(self.honest_players_file)
+    
+    def show_player_lists(self):
+        """Show current player lists"""
+        cheaters = self.get_cheater_players()
+        honest = self.get_honest_players()
+        
+        print("\n📊 Current Player Lists:")
+        print(f"  Cheater Players ({len(cheaters)}):")
+        for i, player in enumerate(cheaters, 1):
+            print(f"    {i}. {player}")
+        
+        print(f"\n  Honest Players ({len(honest)}):")
+        for i, player in enumerate(honest, 1):
+            print(f"    {i}. {player}")
+    
+    def _get_player_creation_date(self, username: str) -> datetime:
+        """Get the date when a player's account was created"""
+        try:
+            # Fetch player profile from Lichess API
+            url = f"https://lichess.org/api/user/{username}"
+            response = self.session.get(url)
+            response.raise_for_status()
+            
+            player_data = response.json()
+            
+            # Show player info
+            title = player_data.get('title', '')
+            title_str = f" {title}" if title else ""
+            print(f"👤 {username}{title_str}")
+            
+            # Extract creation date
+            created_at = player_data.get('createdAt', None)
+            if created_at:
+                # Convert from milliseconds to datetime
+                creation_date = datetime.fromtimestamp(created_at / 1000)
+                print(f"📅 Account created: {creation_date.strftime('%Y-%m-%d')}")
+                return creation_date
+            else:
+                print(f"⚠️ Could not get creation date for {username}, using 2020 as fallback")
+                return datetime(2020, 1, 1)
+                
+        except requests.exceptions.RequestException as e:
+            print(f"⚠️ Error fetching profile for {username}: {e}")
+            print(f"⚠️ Using 2020 as fallback creation date")
+            return datetime(2020, 1, 1)
+        except Exception as e:
+            print(f"⚠️ Unexpected error getting creation date for {username}: {e}")
+            print(f"⚠️ Using 2020 as fallback creation date")
+            return datetime(2020, 1, 1)
+    
+    def _update_player_tracking(self, username: str, games_fetched: int, last_fetch: str):
+        """Update tracking for a player"""
+        self.fetched_players[username] = {
+            'games_fetched': games_fetched,
+            'last_fetch': last_fetch,
+            'total_games_fetched': self.fetched_players.get(username, {}).get('total_games_fetched', 0) + games_fetched
+        }
+        self._save_fetched_players()
+    
+    def fetch_player_games(self, 
+                          username: str, 
+                          max_games: int = 100,
+                          since: Optional[datetime] = None,
+                          until: Optional[datetime] = None,
+                          force_refetch: bool = False) -> List[Dict]:
+        """Fetch rated rapid games for a specific player"""
+        
+        print(f"Fetching rated rapid games for player: {username}")
+        
+        # Check if player was recently fetched
+        if not force_refetch and username in self.fetched_players:
+            last_fetch = self.fetched_players[username].get('last_fetch', '')
+            total_fetched = self.fetched_players[username].get('total_games_fetched', 0)
+            print(f"Player {username} was last fetched on {last_fetch} (total: {total_fetched} games)")
+            
+            # Automatically refetch without asking
+            print(f"🔄 Automatically refetching games for {username}")
+        
+        try:
+            # Get player's account creation date
+            account_created = self._get_player_creation_date(username)
+            
+            # Calculate date range
+            if since is None:
+                since = account_created  # Since account creation
+            
+            if until is None:
+                until = datetime.now()
+            
+            # Convert to timestamp (milliseconds)
+            since_ts = int(since.timestamp() * 1000)
+            until_ts = int(until.timestamp() * 1000)
+            
+            # Fetch games from Lichess API
+            url = f"https://lichess.org/api/games/user/{username}"
+            params = {
+                'perfType': 'rapid',
+                'rated': 'true',
+                'max': max_games,
+                'since': since_ts,
+                'until': until_ts,
+                'clocks': 'true',
+                'evals': 'true'
+            }
+            
+            print(f"📊 Fetching games from account creation ({since.strftime('%Y-%m-%d')}) to {until.strftime('%Y-%m-%d')}")
+            
+            response = self.session.get(url, params=params)
+            response.raise_for_status()
+            
+            # Parse games (Lichess API returns PGN format, not JSON)
+            games_data = response.text.strip()
+            games = []
+            
+            # Parse multiple games from the PGN response
+            # The Lichess API returns complete PGN games separated by double newlines
+            # Each game has headers followed by moves
+            pgn_games = games_data.split('\n\n\n')  # Split by triple newlines
+            
+            # Filter out empty games and games without moves
+            valid_games = []
+            for pgn_game in pgn_games:
+                if pgn_game.strip() and '[Event' in pgn_game and '1.' in pgn_game:
+                    valid_games.append(pgn_game)
+            
+            # Each valid_game is already a complete PGN game
+            combined_games = valid_games
+            
+            for combined_game in combined_games:
+                try:
+                    game = self._parse_pgn_game(combined_game, username)
+                    if game:
+                        games.append(game)
+                except Exception as e:
+                    print(f"Error parsing PGN game: {e}")
+                    continue
+            
+            print(f"✅ Fetched {len(games)} games for {username}")
+            
+            # Update tracking
+            self._update_player_tracking(username, len(games), datetime.now().isoformat())
+            
+            return games
+            
+        except requests.exceptions.HTTPError as e:
+            if e.response.status_code == 429:
+                print(f"⚠️ Rate limited for {username}, waiting 5 seconds...")
+                time.sleep(5)
+                return []
+            else:
+                print(f"❌ HTTP Error fetching games for {username}: {e}")
+                return []
+        except requests.exceptions.RequestException as e:
+            print(f"❌ Error fetching games for {username}: {e}")
+            return []
+        except Exception as e:
+            print(f"❌ Unexpected error for {username}: {e}")
+            return []
+    
+    def _determine_player_result(self, game_result: str, player_color: str) -> str:
+        """Determine game result for the specific player from a PGN Result header"""
+        winner = {'1-0': 'white', '0-1': 'black'}.get(game_result)
+        if winner is None:
+            return 'draw'
+        return 'win' if winner == player_color else 'loss'
+    
+    def _parse_time_control(self, time_control: str) -> Optional[Tuple[int, int]]:
+        """Parse a PGN TimeControl header like '600+5' into (base_seconds, increment_seconds)"""
+        try:
+            base, increment = time_control.split('+')
+            return int(base), int(increment)
+        except ValueError:
+            return None  # Correspondence ('-') or malformed
+    
+    def _parse_pgn_game(self, pgn_text: str, username: str) -> Optional[Dict]:
+        """Parse a PGN game, extracting this player's moves and real per-move think times"""
+        try:
+            game_info = {}
+            movetext_lines = []
+            
+            # Split PGN into [Key "Value"] headers and movetext
+            for line in pgn_text.strip().split('\n'):
+                line = line.strip()
+                if line.startswith('[') and line.endswith(']'):
+                    key_value = line[1:-1].split(' ', 1)
+                    if len(key_value) == 2:
+                        game_info[key_value[0]] = key_value[1].strip('"')
+                elif line:
+                    movetext_lines.append(line)
+            
+            # Walk the movetext: moves, move numbers ("12." / "12..."), results,
+            # NAGs ($1) and comments like { [%eval 0.18] [%clk 0:10:00] }
+            moves = []
+            clocks = []  # Remaining clock (seconds) after each move
+            for token in PGN_TOKEN_RE.findall(' '.join(movetext_lines)):
+                if token.startswith('{'):
+                    clock = CLOCK_RE.search(token)
+                    if clock and moves:
+                        hours, minutes, seconds = clock.groups()
+                        clocks[-1] = int(hours) * 3600 + int(minutes) * 60 + float(seconds)
+                elif MOVE_NUMBER_RE.fullmatch(token) or token in PGN_RESULTS or token.startswith('$'):
+                    continue
+                else:
+                    # Drop Lichess's engine annotations (?!, ??, !) so tokens are plain SAN
+                    moves.append(token.rstrip('?!'))
+                    clocks.append(None)
+            
+            # Determine if the fetched player is white or black
+            white_player = game_info.get('White', '').lower()
+            black_player = game_info.get('Black', '').lower()
+            if white_player == username.lower():
+                player_color = 'white'
+            elif black_player == username.lower():
+                player_color = 'black'
+            else:
+                return None  # Player not in this game
+            
+            # Real move times need clock data on every move and a known increment
+            time_control = self._parse_time_control(game_info.get('TimeControl', ''))
+            if time_control is None or not moves or None in clocks:
+                return None
+            base_time, increment = time_control
+            
+            # Extract this player's moves and how long each took:
+            # time spent = clock before the move - clock after the move + increment.
+            # Lichess doesn't run the clock for each side's first move, so it counts as 0.
+            first_index = 0 if player_color == 'white' else 1
+            player_moves = []
+            move_times = []
+            for i in range(first_index, len(moves), 2):
+                player_moves.append(moves[i])
+                if i < 2:
+                    move_times.append(0.0)
+                else:
+                    spent = clocks[i - 2] - clocks[i] + increment
+                    move_times.append(round(max(spent, 0.0), 2))
+            
+            if not player_moves:
+                return None
+            
+            # Determine game result for this player
+            result = game_info.get('Result', '')
+            player_result = self._determine_player_result(result, player_color)
+            
+            # Determine cheating label
+            label = self._determine_game_label_from_pgn(game_info, player_moves, username)
+            
+            return {
+                'game_id': game_info.get('Site', '').rsplit('/', 1)[-1],
+                'username': username,
+                'player_color': player_color,
+                'moves': ','.join(player_moves),
+                'move_times': ','.join(map(str, move_times)),
+                'result': player_result,
+                'label': label
+            }
+            
+        except Exception as e:
+            print(f"Error parsing PGN game: {e}")
+            return None
+    
+    def _determine_game_label_from_pgn(self, game_info: Dict, player_moves: List[str], username: str) -> int:
+        """Determine if the game involves cheating based on PGN data"""
+        # Pattern-based heuristics (not tactical chess analysis)
+        if len(player_moves) < 5:
+            return 0  # Not enough moves to analyze
+        
+        # Check for repetitive move patterns
+        if len(player_moves) > 10:
+            move_chunks = [player_moves[i:i+3] for i in range(len(player_moves)-2)]
+            unique_chunks = len(set(tuple(chunk) for chunk in move_chunks))
+            pattern_variety = unique_chunks / len(move_chunks)
+            
+            # Low pattern variety might indicate engine usage
+            if pattern_variety < 0.3:
+                return 1  # Potential cheater
+        
+        # Check for move length consistency patterns
+        if len(player_moves) > 5:
+            move_lengths = [len(m) for m in player_moves]
+            length_std = np.std(move_lengths)
+            if length_std < 0.5:
+                return 1  # Potential cheater
+        
+        return 0  # Honest player
+    
+    def fetch_multiple_players(self, 
+                             usernames: List[str], 
+                             games_per_player: int = 50,
+                             force_refetch: bool = False,
+                             **kwargs) -> pd.DataFrame:
+        """Fetch games for multiple players"""
+        
+        all_games = []
+        
+        for username in tqdm(usernames, desc="Fetching players"):
+            games = self.fetch_player_games(
+                username=username,
+                max_games=games_per_player, 
+                force_refetch=force_refetch,
+                **kwargs
+            )
+            all_games.extend(games)
+            
+            # Rate limiting - increased to avoid 429 errors
+            time.sleep(2)
+        
+        if all_games:
+            df = pd.DataFrame(all_games)
+            print(f"✅ Fetched {len(df)} total player records")
+            return df
+        else:
+            print("❌ No games fetched")
+            return pd.DataFrame()
+    
+    def append_to_hdf5(self, new_games_df: pd.DataFrame, label: int, backup: bool = True):
+        """Append new games to existing HDF5 files"""
+        
+        if new_games_df.empty:
+            print("No new games to append")
+            return
+        
+        # Determine which HDF5 file to append to
+        if label == 1:
+            target_file = self.cheater_hdf5
+            print(f"Appending {len(new_games_df)} cheater records to {target_file}")
+        else:
+            target_file = self.honest_hdf5
+            print(f"Appending {len(new_games_df)} honest records to {target_file}")
+        
+        # Backup existing file if requested
+        if backup and os.path.exists(target_file):
+            backup_file = f"{target_file}.backup_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+            print(f"Creating backup: {backup_file}")
+            import shutil
+            shutil.copy2(target_file, backup_file)
+        
+        try:
+            # Load existing data
+            if os.path.exists(target_file) and os.path.getsize(target_file) > 0:
+                try:
+                    existing_df = pd.read_hdf(target_file, key='chess_data')
+                    print(f"Loaded {len(existing_df)} existing records")
+                    
+                    # Combine with new data
+                    combined_df = pd.concat([existing_df, new_games_df], ignore_index=True)
+                    print(f"Combined dataset has {len(combined_df)} records")
+                except Exception as e:
+                    print(f"⚠️ Error reading existing file, creating new one: {e}")
+                    combined_df = new_games_df
+                    print(f"Creating new file with {len(combined_df)} records")
+            else:
+                combined_df = new_games_df
+                print(f"Creating new file with {len(combined_df)} records")
+            
+            # Save to HDF5 with error handling
+            try:
+                combined_df.to_hdf(target_file, key='chess_data', mode='w', format='table')
+                print(f"✅ Successfully saved to {target_file}")
+                
+                # Update combined dataset
+                self._update_combined_dataset()
+            except Exception as e:
+                print(f"❌ Error saving to HDF5: {e}")
+                # Try to save to a backup file
+                backup_file = f"{target_file}.emergency_backup_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+                try:
+                    combined_df.to_hdf(backup_file, key='chess_data', mode='w', format='table')
+                    print(f"✅ Saved emergency backup to {backup_file}")
+                except Exception as backup_e:
+                    print(f"❌ Failed to create emergency backup: {backup_e}")
+            
+        except Exception as e:
+            print(f"❌ Error appending to HDF5: {e}")
+    
+    def _update_combined_dataset(self):
+        """Update the combined dataset with all data"""
+        try:
+            cheater_df = pd.DataFrame()
+            honest_df = pd.DataFrame()
+            
+            # Load cheater data
+            if os.path.exists(self.cheater_hdf5):
+                cheater_df = pd.read_hdf(self.cheater_hdf5, key='chess_data')
+                print(f"Loaded {len(cheater_df)} cheater records")
+            
+            # Load honest data
+            if os.path.exists(self.honest_hdf5):
+                honest_df = pd.read_hdf(self.honest_hdf5, key='chess_data')
+                print(f"Loaded {len(honest_df)} honest records")
+            
+            # Combine and shuffle
+            if not cheater_df.empty or not honest_df.empty:
+                combined_df = pd.concat([cheater_df, honest_df], ignore_index=True)
+                combined_df = combined_df.sample(frac=1, random_state=42).reset_index(drop=True)
+                
+                # Save combined dataset
+                combined_df.to_hdf(self.combined_hdf5, key='chess_data', mode='w', format='table')
+                print(f"✅ Updated combined dataset: {len(combined_df)} total records")
+            
+        except Exception as e:
+            print(f"❌ Error updating combined dataset: {e}")
+    
+    def fetch_known_cheaters(self, 
+                           cheater_usernames: List[str], 
+                           games_per_player: int = 100,
+                           force_refetch: bool = False) -> pd.DataFrame:
+        """Fetch games from known cheaters"""
+        print(f"🎯 Fetching games from {len(cheater_usernames)} known cheaters")
+        
+        df = self.fetch_multiple_players(
+            usernames=cheater_usernames,
+            games_per_player=games_per_player,
+            force_refetch=force_refetch
+        )
+        
+        if not df.empty:
+            # All games from cheaters get label 1
+            df['label'] = 1
+            self.append_to_hdf5(df, label=1)
+        
+        return df
+    
+    def fetch_known_honest_players(self, 
+                                 honest_usernames: List[str], 
+                                 games_per_player: int = 100,
+                                 force_refetch: bool = False) -> pd.DataFrame:
+        """Fetch games from known honest players"""
+        print(f"🎯 Fetching games from {len(honest_usernames)} known honest players")
+        
+        df = self.fetch_multiple_players(
+            usernames=honest_usernames,
+            games_per_player=games_per_player,
+            force_refetch=force_refetch
+        )
+        
+        if not df.empty:
+            # All games from honest players get label 0
+            df['label'] = 0
+            self.append_to_hdf5(df, label=0)
+        
+        return df
+    
+    def fetch_all_stored_players(self, cheater_games_per_player: int = 50, honest_games_per_player: int = 50, force_refetch: bool = False):
+        """Fetch games from all stored players with separate limits for cheaters and honest players"""
+        cheaters = self.get_cheater_players()
+        honest = self.get_honest_players()
+        
+        print(f"🎯 Fetching from stored players:")
+        print(f"  Cheaters: {len(cheaters)} (games per player: {cheater_games_per_player})")
+        print(f"  Honest: {len(honest)} (games per player: {honest_games_per_player})")
+        
+        if cheaters:
+            print(f"\n📥 Fetching cheater games...")
+            self.fetch_known_cheaters(cheaters, cheater_games_per_player, force_refetch)
+        
+        if honest:
+            print(f"\n📥 Fetching honest games...")
+            self.fetch_known_honest_players(honest, honest_games_per_player, force_refetch)
+        
+        if not cheaters and not honest:
+            print("❌ No stored players found. Add players first.")
+    
+    def get_fetch_summary(self) -> Dict:
+        """Get summary of fetched data"""
+        summary = {
+            'fetched_players': len(self.fetched_players),
+            'total_games_fetched': sum(p.get('total_games_fetched', 0) for p in self.fetched_players.values()),
+            'hdf5_files': {},
+            'stored_players': {
+                'cheaters': len(self.get_cheater_players()),
+                'honest': len(self.get_honest_players())
+            }
+        }
+        
+        # Check HDF5 files
+        for file_path, label_name in [(self.cheater_hdf5, 'cheaters'), 
+                                     (self.honest_hdf5, 'honest'), 
+                                     (self.combined_hdf5, 'combined')]:
+            if os.path.exists(file_path):
+                try:
+                    df = pd.read_hdf(file_path, key='chess_data')
+                    summary['hdf5_files'][label_name] = len(df)
+                except Exception as e:
+                    summary['hdf5_files'][label_name] = f"Error: {e}"
+            else:
+                summary['hdf5_files'][label_name] = "File not found"
+        
+        return summary
+
+def main():
+    """Main function for fetching games"""
+    print("🎯 Lichess HDF5 Game Fetcher")
+    print("=" * 50)
+    
+    # Initialize fetcher
+    fetcher = LichessHDF5Fetcher()
+    
+    # Main menu
+    while True:
+        print("\nChoose an option:")
+        print("1. Manage player lists")
+        print("2. Fetch from known cheaters")
+        print("3. Fetch from known honest players")
+        print("4. Fetch from custom player list")
+        print("5. Fetch from all stored players")
+        print("6. Show fetch summary")
+        print("7. Exit")
+        
+        choice = input("\nEnter your choice (1-7): ").strip()
+        
+        if choice == '1':
+            # Player list management
+            print("\nPlayer List Management:")
+            print("1. Add cheater players")
+            print("2. Add honest players")
+            print("3. Remove cheater players")
+            print("4. Remove honest players")
+            print("5. Show current lists")
+            print("6. Back to main menu")
+            
+            sub_choice = input("\nEnter choice (1-6): ").strip()
+            
+            if sub_choice == '1':
+                usernames = input("Enter cheater usernames (comma-separated): ").strip().split(',')
+                usernames = [u.strip() for u in usernames if u.strip()]
+                if usernames:
+                    fetcher.add_cheater_players(usernames)
+                else:
+                    print("No usernames provided")
+            
+            elif sub_choice == '2':
+                usernames = input("Enter honest usernames (comma-separated): ").strip().split(',')
+                usernames = [u.strip() for u in usernames if u.strip()]
+                if usernames:
+                    fetcher.add_honest_players(usernames)
+                else:
+                    print("No usernames provided")
+            
+            elif sub_choice == '3':
+                usernames = input("Enter cheater usernames to remove (comma-separated): ").strip().split(',')
+                usernames = [u.strip() for u in usernames if u.strip()]
+                if usernames:
+                    fetcher.remove_cheater_players(usernames)
+                else:
+                    print("No usernames provided")
+            
+            elif sub_choice == '4':
+                usernames = input("Enter honest usernames to remove (comma-separated): ").strip().split(',')
+                usernames = [u.strip() for u in usernames if u.strip()]
+                if usernames:
+                    fetcher.remove_honest_players(usernames)
+                else:
+                    print("No usernames provided")
+            
+            elif sub_choice == '5':
+                fetcher.show_player_lists()
+            
+            elif sub_choice == '6':
+                continue
+        
+        elif choice == '2':
+            # Fetch from stored cheaters
+            cheaters = fetcher.get_cheater_players()
+            if cheaters:
+                games_per_player = int(input("Games per player (default 50): ") or "50")
+                fetcher.fetch_known_cheaters(cheaters, games_per_player)
+            else:
+                print("❌ No cheater players stored. Add them first in option 1.")
+        
+        elif choice == '3':
+            # Fetch from stored honest players
+            honest = fetcher.get_honest_players()
+            if honest:
+                games_per_player = int(input("Games per player (default 50): ") or "50")
+                fetcher.fetch_known_honest_players(honest, games_per_player)
+            else:
+                print("❌ No honest players stored. Add them first in option 1.")
+        
+        elif choice == '4':
+            # Fetch from custom list
+            usernames = input("Enter usernames (comma-separated): ").strip().split(',')
+            usernames = [u.strip() for u in usernames if u.strip()]
+            
+            if usernames:
+                games_per_player = int(input("Games per player (default 50): ") or "50")
+                label = int(input("Label (0=honest, 1=cheater): ") or "0")
+                
+                df = fetcher.fetch_multiple_players(usernames, games_per_player)
+                if not df.empty:
+                    df['label'] = label
+                    fetcher.append_to_hdf5(df, label)
+            else:
+                print("No usernames provided")
+        
+        elif choice == '5':
+            # Fetch from all stored players
+            print("\n🎯 Fetch from all stored players")
+            print("Enter game limits for each player type:")
+            
+            cheater_games = int(input("Games per cheater player (default 50): ") or "50")
+            honest_games = int(input("Games per honest player (default 50): ") or "50")
+            
+            print(f"\n📊 Will fetch {cheater_games} games per cheater and {honest_games} games per honest player")
+            fetcher.fetch_all_stored_players(cheater_games, honest_games)
+        
+        elif choice == '6':
+            # Show summary
+            summary = fetcher.get_fetch_summary()
+            print("\n📊 Fetch Summary:")
+            print(f"  Players tracked: {summary['fetched_players']}")
+            print(f"  Total games fetched: {summary['total_games_fetched']}")
+            print(f"  Stored players:")
+            print(f"    Cheaters: {summary['stored_players']['cheaters']}")
+            print(f"    Honest: {summary['stored_players']['honest']}")
+            print(f"  HDF5 files:")
+            for name, count in summary['hdf5_files'].items():
+                print(f"    {name}: {count}")
+        
+        elif choice == '7':
+            print("Goodbye!")
+            break
+    
+    else:
+            print("Invalid choice. Please enter 1-7.")
+
+if __name__ == "__main__":
+    main() 
+```
+
+`fetched_players.json`:
+
+```json
+{
+  "ToromBot": {
+    "games_fetched": 9990,
+    "last_fetch": "2025-08-14T10:47:33.524526",
+    "total_games_fetched": 9990
+  },
+  "Weiawaga": {
+    "games_fetched": 9990,
+    "last_fetch": "2025-08-14T10:53:24.028972",
+    "total_games_fetched": 9990
+  },
+  "RaspFish": {
+    "games_fetched": 9989,
+    "last_fetch": "2025-08-14T10:59:11.066764",
+    "total_games_fetched": 9989
+  },
+  "YoBot_v2": {
+    "games_fetched": 9990,
+    "last_fetch": "2025-08-14T11:04:51.901433",
+    "total_games_fetched": 9990
+  },
+  "ArasanX": {
+    "games_fetched": 9990,
+    "last_fetch": "2025-08-14T11:10:32.915043",
+    "total_games_fetched": 9990
+  },
+  "ResoluteBot": {
+    "games_fetched": 9399,
+    "last_fetch": "2025-08-14T11:16:27.998978",
+    "total_games_fetched": 9399
+  },
+  "duchessAI": {
+    "games_fetched": 9989,
+    "last_fetch": "2025-08-14T11:22:07.445938",
+    "total_games_fetched": 9989
+  },
+  "pawn_git": {
+    "games_fetched": 6307,
+    "last_fetch": "2025-08-14T11:26:05.147966",
+    "total_games_fetched": 6307
+  },
+  "odonata-bot": {
+    "games_fetched": 9788,
+    "last_fetch": "2025-08-14T11:31:39.049979",
+    "total_games_fetched": 9788
+  },
+  "bot_adario": {
+    "games_fetched": 6097,
+    "last_fetch": "2025-08-14T11:35:08.607285",
+    "total_games_fetched": 6097
+  },
+  "PZChessBot": {
+    "games_fetched": 5846,
+    "last_fetch": "2025-08-14T11:38:28.332225",
+    "total_games_fetched": 5846
+  },
+  "bot64jaques": {
+    "games_fetched": 3725,
+    "last_fetch": "2025-08-14T11:40:36.601074",
+    "total_games_fetched": 3725
+  },
+  "Cheszter": {
+    "games_fetched": 489,
+    "last_fetch": "2025-08-14T11:40:55.433796",
+    "total_games_fetched": 489
+  },
+  "MaggiChess16": {
+    "games_fetched": 522,
+    "last_fetch": "2025-08-14T11:41:15.294747",
+    "total_games_fetched": 522
+  },
+  "Endogenetic-Bot": {
+    "games_fetched": 209,
+    "last_fetch": "2025-08-14T11:41:24.625898",
+    "total_games_fetched": 209
+  },
+  "cinder-bot": {
+    "games_fetched": 2762,
+    "last_fetch": "2025-08-14T11:43:04.608875",
+    "total_games_fetched": 2762
+  },
+  "InvinxibleFlxsh": {
+    "games_fetched": 1616,
+    "last_fetch": "2025-08-14T11:44:16.358493",
+    "total_games_fetched": 1616
+  },
+  "VEER-OMEGA-BOT": {
+    "games_fetched": 724,
+    "last_fetch": "2025-08-14T11:44:42.953075",
+    "total_games_fetched": 724
+  },
+  "Classic_BOT-v2": {
+    "games_fetched": 137,
+    "last_fetch": "2025-08-14T11:44:49.742171",
+    "total_games_fetched": 137
+  },
+  "BOT_Stockfish13": {
+    "games_fetched": 49,
+    "last_fetch": "2025-08-14T11:44:53.608769",
+    "total_games_fetched": 49
+  },
+  "Exogenetic-Bot": {
+    "games_fetched": 0,
+    "last_fetch": "2025-08-14T11:44:55.863766",
+    "total_games_fetched": 0
+  },
+  "NNUE_Drift": {
+    "games_fetched": 255,
+    "last_fetch": "2025-08-14T11:45:06.740228",
+    "total_games_fetched": 255
+  },
+  "Alexandrya": {
+    "games_fetched": 133,
+    "last_fetch": "2025-08-14T11:45:13.455437",
+    "total_games_fetched": 133
+  },
+  "Gold_Engine": {
+    "games_fetched": 64,
+    "last_fetch": "2025-08-14T11:45:43.184964",
+    "total_games_fetched": 64
+  },
+  "OliThink-5": {
+    "games_fetched": 39,
+    "last_fetch": "2025-08-14T11:45:46.677800",
+    "total_games_fetched": 39
+  },
+  "Lynx_BOT": {
+    "games_fetched": 9988,
+    "last_fetch": "2025-08-14T11:51:29.056315",
+    "total_games_fetched": 9988
+  },
+  "Boris-Trapsky": {
+    "games_fetched": 9989,
+    "last_fetch": "2025-08-14T11:57:30.650800",
+    "total_games_fetched": 9989
+  },
+  "InanisBot": {
+    "games_fetched": 9989,
+    "last_fetch": "2025-08-14T12:03:25.664257",
+    "total_games_fetched": 9989
+  },
+  "Pap-G": {
+    "games_fetched": 479,
+    "last_fetch": "2025-08-14T12:04:08.472171",
+    "total_games_fetched": 479
+  },
+  "ilqar_7474": {
+    "games_fetched": 1233,
+    "last_fetch": "2025-08-14T12:05:59.659778",
+    "total_games_fetched": 1233
+  },
+  "Rakhmanov_Aleksandr": {
+    "games_fetched": 504,
+    "last_fetch": "2025-08-14T12:06:19.112719",
+    "total_games_fetched": 504
+  },
+  "yuuki-asuna": {
+    "games_fetched": 160,
+    "last_fetch": "2025-08-14T12:06:26.939118",
+    "total_games_fetched": 160
+  },
+  "Kurald_Galain": {
+    "games_fetched": 1077,
+    "last_fetch": "2025-08-14T12:07:05.530623",
+    "total_games_fetched": 1077
+  },
+  "BiletskiyDanylo": {
+    "games_fetched": 99,
+    "last_fetch": "2025-08-14T12:07:11.115525",
+    "total_games_fetched": 99
+  },
+  "Sharkfang": {
+    "games_fetched": 1608,
+    "last_fetch": "2025-08-14T12:08:31.174309",
+    "total_games_fetched": 1608
+  },
+  "einstein_79": {
+    "games_fetched": 99,
+    "last_fetch": "2025-08-14T12:08:36.781236",
+    "total_games_fetched": 99
+  },
+  "Arteler": {
+    "games_fetched": 308,
+    "last_fetch": "2025-08-14T12:08:49.955204",
+    "total_games_fetched": 308
+  },
+  "chessmem": {
+    "games_fetched": 637,
+    "last_fetch": "2025-08-14T12:09:14.181006",
+    "total_games_fetched": 637
+  },
+  "Aristarch_Kukuev": {
+    "games_fetched": 369,
+    "last_fetch": "2025-08-14T12:09:28.853351",
+    "total_games_fetched": 369
+  },
+  "MatthewG-p4p": {
+    "games_fetched": 532,
+    "last_fetch": "2025-08-14T12:09:49.458002",
+    "total_games_fetched": 532
+  },
+  "Cf3paraCg1": {
+    "games_fetched": 453,
+    "last_fetch": "2025-08-14T12:10:07.037700",
+    "total_games_fetched": 453
+  },
+  "byebob": {
+    "games_fetched": 428,
+    "last_fetch": "2025-08-14T12:11:04.053958",
+    "total_games_fetched": 428
+  },
+  "Matinghffarifar": {
+    "games_fetched": 114,
+    "last_fetch": "2025-08-14T12:11:10.610463",
+    "total_games_fetched": 114
+  },
+  "Svuezoz": {
+    "games_fetched": 173,
+    "last_fetch": "2025-08-14T12:11:18.713810",
+    "total_games_fetched": 173
+  },
+  "Frankeinsteinzombie": {
+    "games_fetched": 348,
+    "last_fetch": "2025-08-14T12:11:32.807334",
+    "total_games_fetched": 348
+  },
+  "Andrey11976": {
+    "games_fetched": 1341,
+    "last_fetch": "2025-08-14T12:15:08.897193",
+    "total_games_fetched": 1341
+  },
+  "LittlePumpkin": {
+    "games_fetched": 1937,
+    "last_fetch": "2025-08-14T12:17:11.398720",
+    "total_games_fetched": 1937
+  },
+  "snakeice": {
+    "games_fetched": 83,
+    "last_fetch": "2025-08-14T12:17:16.696772",
+    "total_games_fetched": 83
+  },
+  "sotirakis": {
+    "games_fetched": 2107,
+    "last_fetch": "2025-08-14T12:18:33.452413",
+    "total_games_fetched": 2107
+  },
+  "bearhardy": {
+    "games_fetched": 592,
+    "last_fetch": "2025-08-14T12:18:55.578455",
+    "total_games_fetched": 592
+  },
+  "NorthWind05": {
+    "games_fetched": 982,
+    "last_fetch": "2025-08-14T12:19:30.983422",
+    "total_games_fetched": 982
+  },
+  "Anonimous-1981": {
+    "games_fetched": 315,
+    "last_fetch": "2025-08-14T12:19:43.999098",
+    "total_games_fetched": 315
+  },
+  "Herobrine_Undefeated": {
+    "games_fetched": 65,
+    "last_fetch": "2025-08-14T12:19:48.401462",
+    "total_games_fetched": 65
+  },
+  "IDISJUDA": {
+    "games_fetched": 2900,
+    "last_fetch": "2025-08-14T12:21:30.784172",
+    "total_games_fetched": 2900
+  },
+  "ChessGenius-Alphazeo": {
+    "games_fetched": 60,
+    "last_fetch": "2025-08-14T12:21:35.026237",
+    "total_games_fetched": 60
+  },
+  "shidfar2007": {
+    "games_fetched": 1234,
+    "last_fetch": "2025-08-14T12:22:19.000496",
+    "total_games_fetched": 1234
+  },
+  "Hossein_MZ": {
+    "games_fetched": 633,
+    "last_fetch": "2025-08-14T12:22:43.225815",
+    "total_games_fetched": 633
+  },
+  "AllGunsBlazing22": {
+    "games_fetched": 316,
+    "last_fetch": "2025-08-14T12:22:56.140973",
+    "total_games_fetched": 316
+  },
+  "interestinglandscape": {
+    "games_fetched": 415,
+    "last_fetch": "2025-08-14T12:23:12.406826",
+    "total_games_fetched": 415
+  },
+  "OjaiJoao": {
+    "games_fetched": 5579,
+    "last_fetch": "2025-08-14T12:26:24.189084",
+    "total_games_fetched": 5579
+  },
+  "OpeningScientist": {
+    "games_fetched": 646,
+    "last_fetch": "2025-08-14T12:26:48.190888",
+    "total_games_fetched": 646
+  },
+  "A-X-L": {
+    "games_fetched": 3308,
+    "last_fetch": "2025-08-14T12:28:54.744610",
+    "total_games_fetched": 3308
+  },
+  "NedamReddam": {
+    "games_fetched": 1053,
+    "last_fetch": "2025-08-14T12:29:32.565435",
+    "total_games_fetched": 1053
+  },
+  "Mazen_Ahmed2008": {
+    "games_fetched": 104,
+    "last_fetch": "2025-08-14T12:29:38.291282",
+    "total_games_fetched": 104
+  },
+  "TheCableBox": {
+    "games_fetched": 666,
+    "last_fetch": "2025-08-14T12:30:03.163335",
+    "total_games_fetched": 666
+  },
+  "catanalyst": {
+    "games_fetched": 100,
+    "last_fetch": "2025-08-14T12:30:08.725787",
+    "total_games_fetched": 100
+  },
+  "CHESS_Toxik": {
+    "games_fetched": 503,
+    "last_fetch": "2025-08-14T12:30:28.429962",
+    "total_games_fetched": 503
+  },
+  "QuCaNi": {
+    "games_fetched": 829,
+    "last_fetch": "2025-08-14T12:31:08.437038",
+    "total_games_fetched": 829
+  },
+  "OX528354": {
+    "games_fetched": 314,
+    "last_fetch": "2025-08-14T12:31:21.549344",
+    "total_games_fetched": 314
+  },
+  "Haunting_Games": {
+    "games_fetched": 352,
+    "last_fetch": "2025-08-14T12:31:35.847409",
+    "total_games_fetched": 352
+  },
+  "Suleyman_Chess06": {
+    "games_fetched": 410,
+    "last_fetch": "2025-08-14T12:31:52.153009",
+    "total_games_fetched": 410
+  },
+  "AnIndianChessplayer": {
+    "games_fetched": 894,
+    "last_fetch": "2025-08-14T12:32:25.428718",
+    "total_games_fetched": 894
+  },
+  "Paxavarica": {
+    "games_fetched": 295,
+    "last_fetch": "2025-08-14T12:32:41.474297",
+    "total_games_fetched": 295
+  },
+  "maksattamsat": {
+    "games_fetched": 96,
+    "last_fetch": "2025-08-14T12:32:47.004250",
+    "total_games_fetched": 96
+  },
+  "The_Supreme_Judge": {
+    "games_fetched": 354,
+    "last_fetch": "2025-08-14T12:33:01.290343",
+    "total_games_fetched": 354
+  },
+  "Mr_StarrySky": {
+    "games_fetched": 152,
+    "last_fetch": "2025-08-14T12:33:08.636861",
+    "total_games_fetched": 152
+  },
+  "AlexChessChamp": {
+    "games_fetched": 485,
+    "last_fetch": "2025-08-14T12:33:27.275947",
+    "total_games_fetched": 485
+  },
+  "ShellingFord92": {
+    "games_fetched": 1308,
+    "last_fetch": "2025-08-14T12:34:18.449490",
+    "total_games_fetched": 1308
+  },
+  "AtalikS": {
+    "games_fetched": 1055,
+    "last_fetch": "2025-08-14T12:34:57.437690",
+    "total_games_fetched": 1055
+  },
+  "schachinator999": {
+    "games_fetched": 970,
+    "last_fetch": "2025-08-14T12:35:33.465774",
+    "total_games_fetched": 970
+  },
+  "DarkNebula-B": {
+    "games_fetched": 279,
+    "last_fetch": "2025-08-14T12:35:45.201114",
+    "total_games_fetched": 279
+  },
+  "TheMagnet": {
+    "games_fetched": 303,
+    "last_fetch": "2025-08-14T12:35:57.724901",
+    "total_games_fetched": 303
+  },
+  "OwnYulix": {
+    "games_fetched": 3510,
+    "last_fetch": "2025-08-14T12:38:01.848380",
+    "total_games_fetched": 3510
+  },
+  "Hammurapi65": {
+    "games_fetched": 9910,
+    "last_fetch": "2025-08-14T12:43:38.716560",
+    "total_games_fetched": 9910
+  },
+  "SpecterYamasaki": {
+    "games_fetched": 0,
+    "last_fetch": "2025-08-14T12:43:42.504688",
+    "total_games_fetched": 0
+  },
+  "tommy_pug": {
+    "games_fetched": 400,
+    "last_fetch": "2025-08-14T12:43:58.215315",
+    "total_games_fetched": 400
+  },
+  "StochasticVolatility": {
+    "games_fetched": 598,
+    "last_fetch": "2025-08-14T12:44:34.219384",
+    "total_games_fetched": 598
+  },
+  "Henryletennisman26": {
+    "games_fetched": 212,
+    "last_fetch": "2025-08-14T12:44:44.093241",
+    "total_games_fetched": 212
+  },
+  "albowiem": {
+    "games_fetched": 464,
+    "last_fetch": "2025-08-14T12:45:02.096558",
+    "total_games_fetched": 464
+  },
+  "adhamyas": {
+    "games_fetched": 114,
+    "last_fetch": "2025-08-14T12:45:08.159367",
+    "total_games_fetched": 114
+  },
+  "Mahlermaniaco": {
+    "games_fetched": 749,
+    "last_fetch": "2025-08-14T12:45:35.679793",
+    "total_games_fetched": 749
+  },
+  "TryingNewThings1": {
+    "games_fetched": 203,
+    "last_fetch": "2025-08-14T12:45:44.702235",
+    "total_games_fetched": 203
+  },
+  "Mikevs": {
+    "games_fetched": 623,
+    "last_fetch": "2025-08-14T12:46:08.537267",
+    "total_games_fetched": 623
+  },
+  "MassterofMayhem": {
+    "games_fetched": 3995,
+    "last_fetch": "2025-08-14T12:48:25.462546",
+    "total_games_fetched": 3995
+  },
+  "Breathing_water": {
+    "games_fetched": 479,
+    "last_fetch": "2025-08-14T12:48:44.225307",
+    "total_games_fetched": 479
+  },
+  "Lion_King11": {
+    "games_fetched": 2053,
+    "last_fetch": "2025-08-14T12:49:58.209894",
+    "total_games_fetched": 2053
+  },
+  "bullishmoves": {
+    "games_fetched": 184,
+    "last_fetch": "2025-08-14T12:50:06.851460",
+    "total_games_fetched": 184
+  },
+  "Postnova_Margarita12": {
+    "games_fetched": 504,
+    "last_fetch": "2025-08-14T12:50:28.422177",
+    "total_games_fetched": 504
+  },
+  "LObbyist6": {
+    "games_fetched": 96,
+    "last_fetch": "2025-08-14T12:50:33.859448",
+    "total_games_fetched": 96
+  },
+  "happykid0000": {
+    "games_fetched": 3413,
+    "last_fetch": "2025-08-14T12:52:31.360493",
+    "total_games_fetched": 3413
+  },
+  "ORACLEof64": {
+    "games_fetched": 33,
+    "last_fetch": "2025-08-14T12:52:34.669249",
+    "total_games_fetched": 33
+  },
+  "YaaasQueen": {
+    "games_fetched": 729,
+    "last_fetch": "2025-08-14T12:53:01.563400",
+    "total_games_fetched": 729
+  },
+  "Bandhawk": {
+    "games_fetched": 477,
+    "last_fetch": "2025-08-14T12:53:19.907055",
+    "total_games_fetched": 477
+  },
+  "love_you_one": {
+    "games_fetched": 241,
+    "last_fetch": "2025-08-14T12:53:30.301199",
+    "total_games_fetched": 241
+  },
+  "Kradstalmund": {
+    "games_fetched": 25,
+    "last_fetch": "2025-08-14T12:53:33.349586",
+    "total_games_fetched": 25
+  },
+  "Volga_Tiger": {
+    "games_fetched": 59,
+    "last_fetch": "2025-08-14T12:53:37.597133",
+    "total_games_fetched": 59
+  },
+  "tireDemocrat": {
+    "games_fetched": 365,
+    "last_fetch": "2025-08-14T12:53:52.150535",
+    "total_games_fetched": 365
+  },
+  "Amin_NH": {
+    "games_fetched": 581,
+    "last_fetch": "2025-08-14T12:54:13.891837",
+    "total_games_fetched": 581
+  },
+  "C01B01": {
+    "games_fetched": 86,
+    "last_fetch": "2025-08-14T12:54:39.634532",
+    "total_games_fetched": 86
+  },
+  "edziomobil": {
+    "games_fetched": 211,
+    "last_fetch": "2025-08-14T12:54:49.013237",
+    "total_games_fetched": 211
+  },
+  "IgnatevDP": {
+    "games_fetched": 984,
+    "last_fetch": "2025-08-14T12:55:24.424587",
+    "total_games_fetched": 984
+  },
+  "Qcfxi_dizsdicx": {
+    "games_fetched": 823,
+    "last_fetch": "2025-08-14T12:55:54.371662",
+    "total_games_fetched": 823
+  },
+  "Larrythecabledude": {
+    "games_fetched": 1552,
+    "last_fetch": "2025-08-14T12:56:49.039298",
+    "total_games_fetched": 1552
+  },
+  "newaccwhothis": {
+    "games_fetched": 477,
+    "last_fetch": "2025-08-14T12:57:07.513572",
+    "total_games_fetched": 477
+  },
+  "daddystrength": {
+    "games_fetched": 4504,
+    "last_fetch": "2025-08-14T12:59:41.929909",
+    "total_games_fetched": 4504
+  },
+  "Max05": {
+    "games_fetched": 1174,
+    "last_fetch": "2025-08-14T13:00:24.096682",
+    "total_games_fetched": 1174
+  },
+  "Monarch2023": {
+    "games_fetched": 806,
+    "last_fetch": "2025-08-14T13:00:54.257389",
+    "total_games_fetched": 806
+  },
+  "SergeyNadeev": {
+    "games_fetched": 603,
+    "last_fetch": "2025-08-14T13:01:16.970655",
+    "total_games_fetched": 603
+  },
+  "nepoloh686": {
+    "games_fetched": 1431,
+    "last_fetch": "2025-08-14T13:02:07.509656",
+    "total_games_fetched": 1431
+  },
+  "rehbwf": {
+    "games_fetched": 936,
+    "last_fetch": "2025-08-14T13:02:42.271894",
+    "total_games_fetched": 936
+  },
+  "Estonicca": {
+    "games_fetched": 207,
+    "last_fetch": "2025-08-14T13:02:51.518788",
+    "total_games_fetched": 207
+  },
+  "Mind05": {
+    "games_fetched": 412,
+    "last_fetch": "2025-08-14T13:03:07.746136",
+    "total_games_fetched": 412
+  },
+  "PathtoVictory3000": {
+    "games_fetched": 142,
+    "last_fetch": "2025-08-14T13:03:14.816541",
+    "total_games_fetched": 142
+  },
+  "bagera9": {
+    "games_fetched": 412,
+    "last_fetch": "2025-08-14T13:03:44.022852",
+    "total_games_fetched": 412
+  },
+  "ChessTheory64": {
+    "games_fetched": 990,
+    "last_fetch": "2025-08-14T13:04:20.240753",
+    "total_games_fetched": 990
+  },
+  "Knight_ofthelight73": {
+    "games_fetched": 304,
+    "last_fetch": "2025-08-14T13:04:32.688849",
+    "total_games_fetched": 304
+  },
+  "Kysylyn": {
+    "games_fetched": 214,
+    "last_fetch": "2025-08-14T13:04:42.117529",
+    "total_games_fetched": 214
+  },
+  "FianuioAspas12": {
+    "games_fetched": 547,
+    "last_fetch": "2025-08-14T13:05:02.970289",
+    "total_games_fetched": 547
+  },
+  "Kodrut": {
+    "games_fetched": 421,
+    "last_fetch": "2025-08-14T13:05:19.539466",
+    "total_games_fetched": 421
+  },
+  "LevGLev": {
+    "games_fetched": 1279,
+    "last_fetch": "2025-08-14T13:06:06.251827",
+    "total_games_fetched": 1279
+  },
+  "MasteringHW": {
+    "games_fetched": 548,
+    "last_fetch": "2025-08-14T13:06:27.056884",
+    "total_games_fetched": 548
+  },
+  "Dynamicus": {
+    "games_fetched": 300,
+    "last_fetch": "2025-08-14T13:06:39.469294",
+    "total_games_fetched": 300
+  },
+  "jbking07": {
+    "games_fetched": 1232,
+    "last_fetch": "2025-08-14T13:07:24.526607",
+    "total_games_fetched": 1232
+  },
+  "Roman2001": {
+    "games_fetched": 317,
+    "last_fetch": "2025-08-14T13:07:37.910425",
+    "total_games_fetched": 317
+  },
+  "Jossbros": {
+    "games_fetched": 1072,
+    "last_fetch": "2025-08-14T13:08:16.460702",
+    "total_games_fetched": 1072
+  },
+  "Idvan": {
+    "games_fetched": 637,
+    "last_fetch": "2025-08-14T13:08:40.482251",
+    "total_games_fetched": 637
+  },
+  "C0mB1n0v1tch": {
+    "games_fetched": 97,
+    "last_fetch": "2025-08-14T13:08:45.948780",
+    "total_games_fetched": 97
+  },
+  "Tiamo_Firenze": {
+    "games_fetched": 298,
+    "last_fetch": "2025-08-14T13:09:17.490119",
+    "total_games_fetched": 298
+  },
+  "JB2906": {
+    "games_fetched": 46,
+    "last_fetch": "2025-08-14T13:09:21.613727",
+    "total_games_fetched": 46
+  },
+  "QLS-Xagavan": {
+    "games_fetched": 170,
+    "last_fetch": "2025-08-14T13:09:29.618233",
+    "total_games_fetched": 170
+  },
+  "tramvay": {
+    "games_fetched": 992,
+    "last_fetch": "2025-08-14T13:10:06.096099",
+    "total_games_fetched": 992
+  },
+  "joeALT30": {
+    "games_fetched": 834,
+    "last_fetch": "2025-08-14T13:10:36.396360",
+    "total_games_fetched": 834
+  },
+  "mr-a7aaaa17a7a": {
+    "games_fetched": 552,
+    "last_fetch": "2025-08-14T13:10:57.287693",
+    "total_games_fetched": 552
+  },
+  "Crichero2024": {
+    "games_fetched": 551,
+    "last_fetch": "2025-08-14T13:11:18.122234",
+    "total_games_fetched": 551
+  },
+  "BudiRizkiansyah": {
+    "games_fetched": 104,
+    "last_fetch": "2025-08-14T13:11:23.846446",
+    "total_games_fetched": 104
+  },
+  "ArieWerksma": {
+    "games_fetched": 1494,
+    "last_fetch": "2025-08-14T13:12:17.359438",
+    "total_games_fetched": 1494
+  },
+  "Super_BrainPower": {
+    "games_fetched": 352,
+    "last_fetch": "2025-08-14T13:12:31.434106",
+    "total_games_fetched": 352
+  },
+  "HamedManoochehri": {
+    "games_fetched": 2688,
+    "last_fetch": "2025-08-14T13:14:26.402659",
+    "total_games_fetched": 2688
+  },
+  "TheDestinedOne": {
+    "games_fetched": 36,
+    "last_fetch": "2025-08-14T13:14:29.815754",
+    "total_games_fetched": 36
+  },
+  "Sadykov_Ilgiz-2006": {
+    "games_fetched": 367,
+    "last_fetch": "2025-08-14T13:14:45.072524",
+    "total_games_fetched": 367
+  },
+  "MATRIXTRINITY": {
+    "games_fetched": 1708,
+    "last_fetch": "2025-08-14T13:15:46.544086",
+    "total_games_fetched": 1708
+  },
+  "JesusChristConquers": {
+    "games_fetched": 140,
+    "last_fetch": "2025-08-14T13:15:53.459301",
+    "total_games_fetched": 140
+  },
+  "Weerasekara": {
+    "games_fetched": 4175,
+    "last_fetch": "2025-08-14T13:18:24.190997",
+    "total_games_fetched": 4175
+  },
+  "Prepstoring": {
+    "games_fetched": 426,
+    "last_fetch": "2025-08-14T13:18:40.934125",
+    "total_games_fetched": 426
+  },
+  "nmiq": {
+    "games_fetched": 650,
+    "last_fetch": "2025-08-14T13:19:05.306652",
+    "total_games_fetched": 650
+  },
+  "Nidmas": {
+    "games_fetched": 288,
+    "last_fetch": "2025-08-14T13:19:36.108774",
+    "total_games_fetched": 288
+  },
+  "Tictoocchess": {
+    "games_fetched": 1246,
+    "last_fetch": "2025-08-14T13:20:21.768177",
+    "total_games_fetched": 1246
+  },
+  "dkodwkc": {
+    "games_fetched": 724,
+    "last_fetch": "2025-08-14T13:20:48.996783",
+    "total_games_fetched": 724
+  },
+  "b31b6Consultant": {
+    "games_fetched": 441,
+    "last_fetch": "2025-08-14T13:21:06.126394",
+    "total_games_fetched": 441
+  },
+  "Heisenberg9115": {
+    "games_fetched": 632,
+    "last_fetch": "2025-08-14T13:21:29.736503",
+    "total_games_fetched": 632
+  },
+  "BlindMonster": {
+    "games_fetched": 825,
+    "last_fetch": "2025-08-14T13:21:59.845379",
+    "total_games_fetched": 825
+  },
+  "MarkosianDavid": {
+    "games_fetched": 2124,
+    "last_fetch": "2025-08-14T13:23:16.294411",
+    "total_games_fetched": 2124
+  },
+  "littleprince1981": {
+    "games_fetched": 133,
+    "last_fetch": "2025-08-14T13:23:23.075188",
+    "total_games_fetched": 133
+  },
+  "zanycolourfulwindow": {
+    "games_fetched": 2834,
+    "last_fetch": "2025-08-14T13:25:08.010167",
+    "total_games_fetched": 2834
+  },
+  "Jai_Gurudev": {
+    "games_fetched": 214,
+    "last_fetch": "2025-08-14T13:25:17.455033",
+    "total_games_fetched": 214
+  },
+  "Stephen31": {
+    "games_fetched": 182,
+    "last_fetch": "2025-08-14T13:25:25.873889",
+    "total_games_fetched": 182
+  },
+  "Atomrod": {
+    "games_fetched": 647,
+    "last_fetch": "2025-08-14T13:25:53.589073",
+    "total_games_fetched": 647
+  },
+  "putpressureonapinned": {
+    "games_fetched": 176,
+    "last_fetch": "2025-08-14T13:26:01.685164",
+    "total_games_fetched": 176
+  },
+  "AntiberserkM": {
+    "games_fetched": 1763,
+    "last_fetch": "2025-08-14T13:27:05.881115",
+    "total_games_fetched": 1763
+  },
+  "HandKnit": {
+    "games_fetched": 383,
+    "last_fetch": "2025-08-14T13:27:33.090211",
+    "total_games_fetched": 383
+  },
+  "OnlyRapid11": {
+    "games_fetched": 112,
+    "last_fetch": "2025-08-14T13:27:39.326343",
+    "total_games_fetched": 112
+  },
+  "Quorvex": {
+    "games_fetched": 49,
+    "last_fetch": "2025-08-14T13:27:43.173240",
+    "total_games_fetched": 49
+  },
+  "lada23new": {
+    "games_fetched": 207,
+    "last_fetch": "2025-08-14T13:27:52.347850",
+    "total_games_fetched": 207
+  },
+  "Smash_01": {
+    "games_fetched": 278,
+    "last_fetch": "2025-08-14T13:28:03.929958",
+    "total_games_fetched": 278
+  },
+  "Bennerbeatbox": {
+    "games_fetched": 352,
+    "last_fetch": "2025-08-14T13:28:18.320388",
+    "total_games_fetched": 352
+  },
+  "Victorterror1": {
+    "games_fetched": 679,
+    "last_fetch": "2025-08-14T13:28:44.020082",
+    "total_games_fetched": 679
+  },
+  "I_WANT_MORE": {
+    "games_fetched": 359,
+    "last_fetch": "2025-08-14T13:28:58.350123",
+    "total_games_fetched": 359
+  },
+  "JJPlayz": {
+    "games_fetched": 8843,
+    "last_fetch": "2025-08-14T13:34:05.702675",
+    "total_games_fetched": 8843
+  },
+  "Grempsi": {
+    "games_fetched": 27,
+    "last_fetch": "2025-08-14T13:34:09.128533",
+    "total_games_fetched": 27
+  },
+  "i_love_1C": {
+    "games_fetched": 58,
+    "last_fetch": "2025-08-14T13:34:13.474171",
+    "total_games_fetched": 58
+  },
+  "d-pawn": {
+    "games_fetched": 1168,
+    "last_fetch": "2025-08-14T13:35:35.404241",
+    "total_games_fetched": 1168
+  },
+  "FrozenWords": {
+    "games_fetched": 37,
+    "last_fetch": "2025-08-14T13:35:38.904535",
+    "total_games_fetched": 37
+  },
+  "bobmarley1love": {
+    "games_fetched": 61,
+    "last_fetch": "2025-08-14T13:35:43.208234",
+    "total_games_fetched": 61
+  },
+  "Odette_de_Crecy": {
+    "games_fetched": 1151,
+    "last_fetch": "2025-08-14T13:36:24.277432",
+    "total_games_fetched": 1151
+  },
+  "nikolarasss": {
+    "games_fetched": 1512,
+    "last_fetch": "2025-08-14T13:37:17.664965",
+    "total_games_fetched": 1512
+  },
+  "Jspace02": {
+    "games_fetched": 910,
+    "last_fetch": "2025-08-14T13:37:50.675423",
+    "total_games_fetched": 910
+  },
+  "kotikribolow": {
+    "games_fetched": 509,
+    "last_fetch": "2025-08-14T13:38:10.192520",
+    "total_games_fetched": 509
+  },
+  "CoachCai": {
+    "games_fetched": 253,
+    "last_fetch": "2025-08-14T13:38:20.972165",
+    "total_games_fetched": 253
+  },
+  "RubinsteinsMonster": {
+    "games_fetched": 3535,
+    "last_fetch": "2025-08-14T13:40:26.032510",
+    "total_games_fetched": 3535
+  },
+  "froggykermit": {
+    "games_fetched": 273,
+    "last_fetch": "2025-08-14T13:40:37.524709",
+    "total_games_fetched": 273
+  },
+  "Daddy_economics": {
+    "games_fetched": 59,
+    "last_fetch": "2025-08-14T13:40:41.727620",
+    "total_games_fetched": 59
+  },
+  "CzechWarrior": {
+    "games_fetched": 273,
+    "last_fetch": "2025-08-14T13:40:53.130952",
+    "total_games_fetched": 273
+  },
+  "STN_Chess": {
+    "games_fetched": 362,
+    "last_fetch": "2025-08-14T13:41:07.564264",
+    "total_games_fetched": 362
+  },
+  "Sameh2023": {
+    "games_fetched": 428,
+    "last_fetch": "2025-08-14T13:41:26.030805",
+    "total_games_fetched": 428
+  },
+  "komodo54": {
+    "games_fetched": 6402,
+    "last_fetch": "2025-08-14T13:45:15.170673",
+    "total_games_fetched": 6402
+  },
+  "d1rector": {
+    "games_fetched": 907,
+    "last_fetch": "2025-08-14T13:45:55.280014",
+    "total_games_fetched": 907
+  },
+  "mystisking": {
+    "games_fetched": 1774,
+    "last_fetch": "2025-08-14T13:47:00.450835",
+    "total_games_fetched": 1774
+  },
+  "ppom12": {
+    "games_fetched": 115,
+    "last_fetch": "2025-08-14T13:47:06.610628",
+    "total_games_fetched": 115
+  },
+  "redsheep": {
+    "games_fetched": 352,
+    "last_fetch": "2025-08-14T13:47:20.704879",
+    "total_games_fetched": 352
+  },
+  "Maziko_02": {
+    "games_fetched": 60,
+    "last_fetch": "2025-08-14T13:47:24.901443",
+    "total_games_fetched": 60
+  },
+  "andy2342": {
+    "games_fetched": 38,
+    "last_fetch": "2025-08-14T13:47:28.368995",
+    "total_games_fetched": 38
+  },
+  "h5h6h7": {
+    "games_fetched": 1059,
+    "last_fetch": "2025-08-14T13:48:06.408082",
+    "total_games_fetched": 1059
+  },
+  "Daniel-Ortega": {
+    "games_fetched": 793,
+    "last_fetch": "2025-08-14T13:48:35.410154",
+    "total_games_fetched": 793
+  },
+  "Aleph_Vox": {
+    "games_fetched": 129,
+    "last_fetch": "2025-08-14T13:48:41.918859",
+    "total_games_fetched": 129
+  },
+  "Suhov549": {
+    "games_fetched": 1994,
+    "last_fetch": "2025-08-14T13:49:53.355904",
+    "total_games_fetched": 1994
+  },
+  "Nikita272005": {
+    "games_fetched": 1814,
+    "last_fetch": "2025-08-14T13:50:58.710744",
+    "total_games_fetched": 1814
+  },
+  "PinkWafflePig": {
+    "games_fetched": 4002,
+    "last_fetch": "2025-08-14T13:53:17.722609",
+    "total_games_fetched": 4002
+  },
+  "BeatrizRuvieri": {
+    "games_fetched": 1322,
+    "last_fetch": "2025-08-14T13:54:05.315204",
+    "total_games_fetched": 1322
+  },
+  "powerking96": {
+    "games_fetched": 543,
+    "last_fetch": "2025-08-14T13:54:25.830428",
+    "total_games_fetched": 543
+  },
+  "FlyyElloW_2000YO": {
+    "games_fetched": 125,
+    "last_fetch": "2025-08-14T13:54:32.271248",
+    "total_games_fetched": 125
+  },
+  "bosspotato": {
+    "games_fetched": 7479,
+    "last_fetch": "2025-08-14T13:58:52.263064",
+    "total_games_fetched": 7479
+  },
+  "a_boring_username": {
+    "games_fetched": 345,
+    "last_fetch": "2025-08-14T13:59:06.193050",
+    "total_games_fetched": 345
+  },
+  "Opening_Master9": {
+    "games_fetched": 122,
+    "last_fetch": "2025-08-14T13:59:12.554175",
+    "total_games_fetched": 122
+  },
+  "A10-Thunderbolt": {
+    "games_fetched": 118,
+    "last_fetch": "2025-08-14T13:59:18.747782",
+    "total_games_fetched": 118
+  },
+  "Magnus_misr": {
+    "games_fetched": 530,
+    "last_fetch": "2025-08-14T13:59:38.930885",
+    "total_games_fetched": 530
+  },
+  "MW1966": {
+    "games_fetched": 3386,
+    "last_fetch": "2025-08-14T14:01:39.530759",
+    "total_games_fetched": 3386
+  },
+  "terzic64": {
+    "games_fetched": 501,
+    "last_fetch": "2025-08-14T14:01:59.050747",
+    "total_games_fetched": 501
+  },
+  "ankof": {
+    "games_fetched": 549,
+    "last_fetch": "2025-08-14T14:02:19.838266",
+    "total_games_fetched": 549
+  },
+  "Proward05": {
+    "games_fetched": 535,
+    "last_fetch": "2025-08-14T14:02:40.239680",
+    "total_games_fetched": 535
+  },
+  "HoMeEeEr": {
+    "games_fetched": 717,
+    "last_fetch": "2025-08-14T14:03:07.464726",
+    "total_games_fetched": 717
+  },
+  "Summon_Cerberus": {
+    "games_fetched": 1448,
+    "last_fetch": "2025-08-14T14:03:58.517005",
+    "total_games_fetched": 1448
+  },
+  "Aichyy": {
+    "games_fetched": 128,
+    "last_fetch": "2025-08-14T14:04:05.223343",
+    "total_games_fetched": 128
+  },
+  "JG2001": {
+    "games_fetched": 242,
+    "last_fetch": "2025-08-14T14:04:15.724261",
+    "total_games_fetched": 242
+  },
+  "chesslh": {
+    "games_fetched": 4066,
+    "last_fetch": "2025-08-14T14:06:40.344146",
+    "total_games_fetched": 4066
+  },
+  "FranciscoMw": {
+    "games_fetched": 260,
+    "last_fetch": "2025-08-14T14:06:51.585000",
+    "total_games_fetched": 260
+  }
+}
+```
+
+`hdf5_preprocess.py`:
+
+```py
+#!/usr/bin/env python3
+"""
+HDF5 Preprocessing for Chess Anti-Cheat Detection
+Handles player-level data from HDF5 format
+"""
+
+import pandas as pd
+import numpy as np
+import torch
+from torch.utils.data import Dataset, DataLoader
+from sklearn.model_selection import train_test_split
+from collections import Counter
+import pickle
+import os
+from typing import Dict, List, Tuple, Any
+import warnings
+warnings.filterwarnings('ignore')
+
+class ChessHDF5Dataset(Dataset):
+    """Dataset class for HDF5 chess data with player-level granularity"""
+    
+    def __init__(self, data_df, vocab, max_len=300, include_times=True):
+        self.data_df = data_df
+        self.vocab = vocab
+        self.max_len = max_len
+        self.include_times = include_times
+        
+    def __len__(self):
+        return len(self.data_df)
+    
+    def __getitem__(self, idx):
+        row = self.data_df.iloc[idx]
+        
+        # Tokenize moves
+        moves = row['moves'].split(',') if isinstance(row['moves'], str) else []
+        tokens = [self.vocab.get(move.strip(), self.vocab['<unk>']) for move in moves]
+        
+        # Pad or truncate
+        if len(tokens) > self.max_len:
+            tokens = tokens[:self.max_len]
+        else:
+            tokens = tokens + [self.vocab['<PAD>']] * (self.max_len - len(tokens))
+        
+        # Create side information (all moves are from the same player)
+        sides = [0] * self.max_len  # All moves are from the same player
+        
+        # Move times (if available)
+        if self.include_times and 'move_times' in row:
+            times_str = row['move_times']
+            if isinstance(times_str, str):
+                times = [float(t.strip()) for t in times_str.split(',') if t.strip()]
+            else:
+                times = times_str if isinstance(times_str, list) else []
+            
+            if len(times) > self.max_len:
+                times = times[:self.max_len]
+            else:
+                times = times + [0.0] * (self.max_len - len(times))
+        else:
+            times = [0.0] * self.max_len
+        
+        # Convert to tensors
+        tokens_tensor = torch.tensor(tokens, dtype=torch.long)
+        sides_tensor = torch.tensor(sides, dtype=torch.long)
+        times_tensor = torch.tensor(times, dtype=torch.float)
+        label_tensor = torch.tensor(row['label'], dtype=torch.float)
+        
+        return {
+            'tokens': tokens_tensor,
+            'sides': sides_tensor,
+            'times': times_tensor,
+            'label': label_tensor,
+            'player_color': row['player_color']
+        }
+
+def load_hdf5_data(file_path: str) -> pd.DataFrame:
+    """Load data from HDF5 file"""
+    try:
+        df = pd.read_hdf(file_path, key='chess_data')
+        print(f"✅ Loaded {len(df)} player records from {file_path}")
+        return df
+    except Exception as e:
+        print(f"❌ Error loading {file_path}: {e}")
+        return pd.DataFrame()
+
+def build_vocab_from_hdf5(df: pd.DataFrame, min_freq: int = 3) -> Dict[str, int]:
+    """Build vocabulary from HDF5 data"""
+    print("Building vocabulary from HDF5 data...")
+    
+    move_counts = Counter()
+    
+    for moves_str in df['moves']:
+        if isinstance(moves_str, str):
+            moves = moves_str.split(',')
+            for move in moves:
+                move = move.strip()
+                if move:
+                    move_counts[move] += 1
+    
+    # Filter by minimum frequency
+    vocab = {'<PAD>': 0, '<unk>': 1}
+    for move, count in move_counts.items():
+        if count >= min_freq:
+            vocab[move] = len(vocab)
+    
+    print(f"✅ Vocabulary size: {len(vocab)}")
+    return vocab
+
+def prepare_hdf5_dataset(df: pd.DataFrame, vocab: Dict[str, int], 
+                        test_size: float = 0.2, val_size: float = 0.1,
+                        max_len: int = 300, batch_size: int = 32,
+                        random_state: int = 42) -> Tuple[DataLoader, DataLoader, DataLoader]:
+    """Prepare HDF5 dataset for training"""
+    
+    print("Preparing HDF5 dataset...")
+    
+    # Split data
+    train_df, test_df = train_test_split(df, test_size=test_size, 
+                                        random_state=random_state, stratify=df['label'])
+    train_df, val_df = train_test_split(train_df, test_size=val_size/(1-test_size), 
+                                       random_state=random_state, stratify=train_df['label'])
+    
+    # Create datasets
+    train_dataset = ChessHDF5Dataset(train_df, vocab, max_len)
+    val_dataset = ChessHDF5Dataset(val_df, vocab, max_len)
+    test_dataset = ChessHDF5Dataset(test_df, vocab, max_len)
+    
+    # Create dataloaders
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
+    val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
+    test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
+    
+    print(f"✅ Dataset prepared:")
+    print(f"   - Training: {len(train_dataset)} samples")
+    print(f"   - Validation: {len(val_dataset)} samples")
+    print(f"   - Test: {len(test_dataset)} samples")
+    
+    return train_loader, val_loader, test_loader
+
+def analyze_player_patterns(df: pd.DataFrame) -> Dict[str, Any]:
+    """Analyze player patterns in HDF5 data"""
+    print("Analyzing player patterns...")
+    
+    analysis = {}
+    
+    # Player color distribution
+    color_counts = df['player_color'].value_counts()
+    analysis['color_distribution'] = color_counts.to_dict()
+    
+    # Label distribution
+    label_counts = df['label'].value_counts()
+    analysis['label_distribution'] = label_counts.to_dict()
+    
+    # Game results
+    result_counts = df['result'].value_counts()
+    analysis['result_distribution'] = result_counts.to_dict()
+    
+    # Move statistics
+    move_lengths = []
+    for moves_str in df['moves']:
+        if isinstance(moves_str, str):
+            moves = moves_str.split(',')
+            move_lengths.append(len(moves))
+    
+    if move_lengths:
+        analysis['move_statistics'] = {
+            'avg_moves_per_player': np.mean(move_lengths),
+            'median_moves_per_player': np.median(move_lengths),
+            'min_moves_per_player': np.min(move_lengths),
+            'max_moves_per_player': np.max(move_lengths)
+        }
+    
+    # Time statistics
+    all_times = []
+    for times_str in df['move_times']:
+        if isinstance(times_str, str):
+            times = [float(t.strip()) for t in times_str.split(',') if t.strip()]
+            all_times.extend(times)
+        elif isinstance(times_str, list):
+            all_times.extend(times_str)
+    
+    if all_times:
+        analysis['time_statistics'] = {
+            'avg_move_time': np.mean(all_times),
+            'median_move_time': np.median(all_times),
+            'min_move_time': np.min(all_times),
+            'max_move_time': np.max(all_times)
+        }
+    
+    print("✅ Analysis complete")
+    return analysis
+
+def save_vocab(vocab: Dict[str, int], file_path: str):
+    """Save vocabulary to file"""
+    with open(file_path, 'wb') as f:
+        pickle.dump(vocab, f)
+    print(f"✅ Vocabulary saved to {file_path}")
+
+def load_vocab(file_path: str) -> Dict[str, int]:
+    """Load vocabulary from file"""
+    with open(file_path, 'rb') as f:
+        vocab = pickle.load(f)
+    print(f"✅ Vocabulary loaded from {file_path}")
+    return vocab
+
+# def get_player_features(df: pd.DataFrame, player_id: str) -> Dict[str, Any]:
+#     """Get features for a specific player - DEPRECATED: player_id no longer exists"""
+#     # This function is deprecated since we removed player_id from the dataset
+#     # Use player_color and other available features instead
+#     return {}
+
+def main():
+    """Test HDF5 preprocessing"""
+    # Load data
+    hdf5_file = "data/combined_games.h5"
+    
+    if not os.path.exists(hdf5_file):
+        print(f"❌ {hdf5_file} not found. Please run fetch_games.py first.")
+        return
+    
+    df = load_hdf5_data(hdf5_file)
+    
+    if len(df) == 0:
+        return
+    
+    # Build vocabulary
+    vocab = build_vocab_from_hdf5(df)
+    
+    # Save vocabulary
+    save_vocab(vocab, "hdf5_vocab.pkl")
+    
+    # Analyze patterns
+    analysis = analyze_player_patterns(df)
+    
+    print("\n📊 Analysis Results:")
+    for key, value in analysis.items():
+        print(f"   {key}: {value}")
+    
+    # Prepare dataset
+    train_loader, val_loader, test_loader = prepare_hdf5_dataset(df, vocab)
+    
+    print("\n✅ HDF5 preprocessing complete!")
+
+if __name__ == "__main__":
+    main() 
+```
+
+`honest_players.json`:
+
+```json
+[
+  "Pap-G",
+  "ilqar_7474",
+  "Rakhmanov_Aleksandr",
+  "yuuki-asuna",
+  "Kurald_Galain",
+  "BiletskiyDanylo",
+  "Sharkfang",
+  "einstein_79",
+  "Arteler",
+  "chessmem",
+  "Aristarch_Kukuev",
+  "MatthewG-p4p",
+  "Cf3paraCg1",
+  "byebob",
+  "Matinghffarifar",
+  "Svuezoz",
+  "Frankeinsteinzombie",
+  "chessmount",
+  "Andrey11976",
+  "Prettyfishy",
+  "LittlePumpkin",
+  "snakeice",
+  "sotirakis",
+  "bearhardy",
+  "NorthWind05",
+  "Anonimous-1981",
+  "Herobrine_Undefeated",
+  "IDISJUDA",
+  "ChessGenius-Alphazeo",
+  "shidfar2007",
+  "Hossein_MZ",
+  "AllGunsBlazing22",
+  "interestinglandscape",
+  "OjaiJoao",
+  "OpeningScientist",
+  "A-X-L",
+  "NedamReddam",
+  "Mazen_Ahmed2008",
+  "TheCableBox",
+  "catanalyst",
+  "CHESS_Toxik",
+  "QuCaNi",
+  "OX528354",
+  "Haunting_Games",
+  "Suleyman_Chess06",
+  "AnIndianChessplayer",
+  "Paxavarica",
+  "maksattamsat",
+  "The_Supreme_Judge",
+  "Mr_StarrySky",
+  "AlexChessChamp",
+  "ShellingFord92",
+  "AtalikS",
+  "schachinator999",
+  "DarkNebula-B",
+  "TheMagnet",
+  "OwnYulix",
+  "Hammurapi65",
+  "SpecterYamasaki",
+  "tommy_pug",
+  "StochasticVolatility",
+  "Henryletennisman26",
+  "albowiem",
+  "adhamyas",
+  "Mahlermaniaco",
+  "TryingNewThings1",
+  "Mikevs",
+  "MassterofMayhem",
+  "Breathing_water",
+  "Lion_King11",
+  "bullishmoves",
+  "Postnova_Margarita12",
+  "LObbyist6",
+  "happykid0000",
+  "ORACLEof64",
+  "YaaasQueen",
+  "Bandhawk",
+  "love_you_one",
+  "Kradstalmund",
+  "Volga_Tiger",
+  "tireDemocrat",
+  "Amin_NH",
+  "C01B01",
+  "edziomobil",
+  "IgnatevDP",
+  "Qcfxi_dizsdicx",
+  "Larrythecabledude",
+  "newaccwhothis",
+  "daddystrength",
+  "Max05",
+  "Monarch2023",
+  "SergeyNadeev",
+  "nepoloh686",
+  "rehbwf",
+  "Estonicca",
+  "Mind05",
+  "PathtoVictory3000",
+  "bagera9",
+  "ChessTheory64",
+  "Knight_ofthelight73",
+  "Kysylyn",
+  "FianuioAspas12",
+  "Kodrut",
+  "LevGLev",
+  "MasteringHW",
+  "Dynamicus",
+  "jbking07",
+  "Roman2001",
+  "Jossbros",
+  "Idvan",
+  "C0mB1n0v1tch",
+  "Tiamo_Firenze",
+  "JB2906",
+  "QLS-Xagavan",
+  "tramvay",
+  "joeALT30",
+  "mr-a7aaaa17a7a",
+  "Crichero2024",
+  "BudiRizkiansyah",
+  "ArieWerksma",
+  "Super_BrainPower",
+  "HamedManoochehri",
+  "TheDestinedOne",
+  "Sadykov_Ilgiz-2006",
+  "MATRIXTRINITY",
+  "JesusChristConquers",
+  "Weerasekara",
+  "Prepstoring",
+  "nmiq",
+  "Nidmas",
+  "Tictoocchess",
+  "dkodwkc",
+  "b31b6Consultant",
+  "Heisenberg9115",
+  "BlindMonster",
+  "MarkosianDavid",
+  "littleprince1981",
+  "zanycolourfulwindow",
+  "Jai_Gurudev",
+  "Stephen31",
+  "Atomrod",
+  "putpressureonapinned",
+  "AntiberserkM",
+  "HandKnit",
+  "OnlyRapid11",
+  "Quorvex",
+  "lada23new",
+  "Smash_01",
+  "Bennerbeatbox",
+  "Victorterror1",
+  "I_WANT_MORE",
+  "JJPlayz",
+  "Grempsi",
+  "i_love_1C",
+  "d-pawn",
+  "FrozenWords",
+  "bobmarley1love",
+  "Odette_de_Crecy",
+  "nikolarasss",
+  "Jspace02",
+  "kotikribolow",
+  "CoachCai",
+  "RubinsteinsMonster",
+  "froggykermit",
+  "Daddy_economics",
+  "CzechWarrior",
+  "STN_Chess",
+  "Sameh2023",
+  "komodo54",
+  "d1rector",
+  "mystisking",
+  "ppom12",
+  "redsheep",
+  "Maziko_02",
+  "andy2342",
+  "h5h6h7",
+  "Daniel-Ortega",
+  "Aleph_Vox",
+  "Suhov549",
+  "Nikita272005",
+  "PinkWafflePig",
+  "BeatrizRuvieri",
+  "powerking96",
+  "FlyyElloW_2000YO",
+  "bosspotato",
+  "a_boring_username",
+  "Opening_Master9",
+  "A10-Thunderbolt",
+  "Magnus_misr",
+  "MW1966",
+  "terzic64",
+  "ankof",
+  "Proward05",
+  "HoMeEeEr",
+  "Summon_Cerberus",
+  "Aichyy",
+  "JG2001",
+  "chesslh",
+  "FranciscoMw"
+]
+```
+
+`improved_tensorflow_model.py`:
+
+```py
+#!/usr/bin/env python3
+"""
+Advanced TensorFlow/Keras Model for Chess Anti-Cheat Detection
+Simplified architecture with better pattern recognition capabilities
+"""
+
+import tensorflow as tf
+from tensorflow.keras.models import Sequential, Model
+from tensorflow.keras.layers import (
+    Dense, LSTM, Bidirectional, Dropout, Embedding, 
+    Conv1D, MaxPooling1D, GlobalMaxPooling1D,
+    Input, Concatenate, BatchNormalization, Flatten,
+    Reshape, Lambda
+)
+from tensorflow.keras.callbacks import (
+    EarlyStopping, ReduceLROnPlateau, ModelCheckpoint,
+    TensorBoard
+)
+from tensorflow.keras.optimizers import Adam
+from tensorflow.keras.losses import BinaryCrossentropy
+from tensorflow.keras.metrics import BinaryAccuracy, Precision, Recall, AUC
+import numpy as np
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+import pickle
+import os
+from typing import Dict, List, Tuple, Any
+from collections import Counter
+import warnings
+warnings.filterwarnings('ignore')
+
+def build_vocab(df: pd.DataFrame, min_freq: int = 3) -> Dict[str, int]:
+    """Build a move vocabulary; moves seen fewer than min_freq times map to <unk>"""
+    move_counts = Counter(
+        move.strip()
+        for moves_str in df['moves'] if isinstance(moves_str, str)
+        for move in moves_str.split(',') if move.strip()
+    )
+    vocab = {'<PAD>': 0, '<unk>': 1}
+    for move, count in move_counts.items():
+        if count >= min_freq:
+            vocab[move] = len(vocab)
+    return vocab
+
+def encode_moves(moves_str: str, vocab: Dict[str, int], max_len: int) -> List[int]:
+    """Tokenize comma-separated moves, truncated / padded to max_len"""
+    moves = moves_str.split(',') if isinstance(moves_str, str) else []
+    tokens = [vocab.get(move.strip(), vocab['<unk>']) for move in moves if move.strip()]
+    tokens = tokens[:max_len]
+    return tokens + [vocab['<PAD>']] * (max_len - len(tokens))
+
+def encode_times(times_str, max_len: int) -> np.ndarray:
+    """Encode move times (seconds) as log1p, truncated / zero-padded to max_len.
+
+    A fixed transform keeps absolute speed and consistency visible to the model
+    (per-game z-scoring erased both) and leaves padding at exactly 0.
+    """
+    if isinstance(times_str, str):
+        times = [float(t) for t in times_str.split(',') if t.strip()]
+    else:
+        times = list(times_str) if isinstance(times_str, (list, np.ndarray)) else []
+    encoded = np.zeros(max_len, dtype=np.float32)
+    times = np.log1p(np.clip(times[:max_len], 0, None))
+    encoded[:len(times)] = times
+    return encoded
+
+# Keras' default (0.99) leaves inference-time BatchNorm statistics lagging far
+# behind training on datasets this small, squashing predictions toward the prior
+BN_MOMENTUM = 0.9
+
+class AdvancedChessClassifier:
+    """Advanced TensorFlow/Keras model for chess anti-cheat detection"""
+    
+    def __init__(self, vocab_size: int, max_len: int = 300, embed_dim: int = 128):
+        self.vocab_size = vocab_size
+        self.max_len = max_len
+        self.embed_dim = embed_dim
+        self.model = None
+        self.scaler = StandardScaler()
+        
+    def build_model(self) -> Model:
+        """Build advanced neural network architecture"""
+        
+        # Input layers
+        moves_input = Input(shape=(self.max_len,), name='moves_input')
+        times_input = Input(shape=(self.max_len,), name='times_input')
+        color_input = Input(shape=(1,), name='color_input')
+        
+        # Move embedding and processing
+        move_embedding = Embedding(self.vocab_size, self.embed_dim, 
+                                 input_length=self.max_len, 
+                                 mask_zero=True)(moves_input)
+        
+        # Bidirectional LSTM for move sequence
+        lstm_out = Bidirectional(LSTM(128, return_sequences=True))(move_embedding)
+        lstm_out = Dropout(0.3)(lstm_out)
+        
+        # Conv1D layers for local pattern detection
+        conv1 = Conv1D(64, 3, activation='relu', padding='same')(lstm_out)
+        conv1 = BatchNormalization(momentum=BN_MOMENTUM)(conv1)
+        conv1 = MaxPooling1D(2)(conv1)
+        
+        conv2 = Conv1D(128, 5, activation='relu', padding='same')(conv1)
+        conv2 = BatchNormalization(momentum=BN_MOMENTUM)(conv2)
+        conv2 = MaxPooling1D(2)(conv2)
+        
+        conv3 = Conv1D(256, 7, activation='relu', padding='same')(conv2)
+        conv3 = BatchNormalization(momentum=BN_MOMENTUM)(conv3)
+        conv3 = GlobalMaxPooling1D()(conv3)
+        
+        # Time features processing - FIXED: Reshape to 3D for GlobalMaxPooling1D
+        times_reshaped = Reshape((self.max_len, 1))(times_input)
+        times_dense = Dense(64, activation='relu')(times_reshaped)
+        times_dense = Dropout(0.2)(times_dense)
+        times_pooled = GlobalMaxPooling1D()(times_dense)
+        
+        # Color features
+        color_dense = Dense(32, activation='relu')(color_input)
+        color_dense = Dropout(0.1)(color_dense)
+        
+        # Combine all features
+        combined = Concatenate()([conv3, times_pooled, color_dense])
+        
+        # Dense layers with residual connections
+        dense1 = Dense(512, activation='relu')(combined)
+        dense1 = BatchNormalization(momentum=BN_MOMENTUM)(dense1)
+        dense1 = Dropout(0.4)(dense1)
+        
+        dense2 = Dense(256, activation='relu')(dense1)
+        dense2 = BatchNormalization(momentum=BN_MOMENTUM)(dense2)
+        dense2 = Dropout(0.3)(dense2)
+        
+        dense3 = Dense(128, activation='relu')(dense2)
+        dense3 = BatchNormalization(momentum=BN_MOMENTUM)(dense3)
+        dense3 = Dropout(0.2)(dense3)
+        
+        # Output layer
+        output = Dense(1, activation='sigmoid', name='output')(dense3)
+        
+        # Create model
+        self.model = Model(
+            inputs=[moves_input, times_input, color_input],
+            outputs=output,
+            name='AdvancedChessClassifier'
+        )
+        
+        return self.model
+    
+    def compile_model(self, learning_rate: float = 0.001):
+        """Compile the model with advanced settings"""
+        
+        optimizer = Adam(learning_rate=learning_rate)
+        loss = BinaryCrossentropy(label_smoothing=0.1)
+        
+        metrics = [
+            BinaryAccuracy(name='accuracy'),
+            Precision(name='precision'),
+            Recall(name='recall'),
+            AUC(name='auc')
+        ]
+        
+        self.model.compile(
+            optimizer=optimizer,
+            loss=loss,
+            metrics=metrics
+        )
+        
+        print(f"✅ Model compiled successfully")
+        print(f"📊 Model parameters: {self.model.count_params():,}")
+        
+    def get_callbacks(self, model_path: str = 'best_tensorflow_model.keras'):
+        """Get advanced callbacks for training"""
+        
+        callbacks = [
+            # Early stopping with patience
+            EarlyStopping(
+                monitor='val_loss',
+                patience=10,
+                restore_best_weights=True,
+                verbose=1
+            ),
+            
+            # Learning rate reduction
+            ReduceLROnPlateau(
+                monitor='val_loss',
+                factor=0.5,
+                patience=5,
+                min_lr=1e-7,
+                verbose=1
+            ),
+            
+            # Model checkpoint (native Keras format)
+            ModelCheckpoint(
+                filepath=model_path,
+                monitor='val_auc',
+                save_best_only=True,
+                save_weights_only=False,
+                verbose=1
+            ),
+            
+            # TensorBoard logging
+            TensorBoard(
+                log_dir='./logs',
+                histogram_freq=1,
+                write_graph=True,
+                write_images=True
+            )
+        ]
+        
+        return callbacks
+    
+    def prepare_data(self, df: pd.DataFrame, vocab: Dict[str, int]) -> Tuple:
+        """Prepare data for TensorFlow model"""
+        
+        print("🔄 Preparing data for TensorFlow model...")
+        
+        # Prepare move sequences
+        moves_sequences = []
+        times_sequences = []
+        color_sequences = []
+        labels = []
+        
+        for _, row in df.iterrows():
+            tokens = encode_moves(row['moves'], vocab, self.max_len)
+            times = encode_times(row['move_times'], self.max_len)
+            
+            # Color encoding (white=1, black=0)
+            color = 1.0 if row['player_color'] == 'white' else 0.0
+            
+            moves_sequences.append(tokens)
+            times_sequences.append(times)
+            color_sequences.append([color])
+            labels.append(row['label'])
+        
+        # Convert to numpy arrays
+        X_moves = np.array(moves_sequences)
+        X_times = np.array(times_sequences)
+        X_color = np.array(color_sequences)
+        y = np.array(labels)
+        
+        print(f"✅ Data prepared:")
+        print(f"   - Moves shape: {X_moves.shape}")
+        print(f"   - Times shape: {X_times.shape}")
+        print(f"   - Color shape: {X_color.shape}")
+        print(f"   - Labels shape: {y.shape}")
+        
+        return X_moves, X_times, X_color, y
+    
+    def train(self, df: pd.DataFrame, vocab: Dict[str, int], 
+              epochs: int = 50, batch_size: int = 32, 
+              validation_split: float = 0.2,
+              val_df: pd.DataFrame = None) -> Dict:
+        """Train the advanced model.
+
+        Pass val_df (split by player) to validate on unseen players; otherwise
+        Keras holds out the last validation_split of df.
+        """
+        
+        print("🚀 Starting advanced TensorFlow training...")
+        
+        # Prepare data
+        X_moves, X_times, X_color, y = self.prepare_data(df, vocab)
+        if val_df is not None:
+            X_moves_val, X_times_val, X_color_val, y_val = self.prepare_data(val_df, vocab)
+            validation = {'validation_data': ([X_moves_val, X_times_val, X_color_val], y_val)}
+        else:
+            validation = {'validation_split': validation_split}
+        
+        # Weight classes inversely to frequency so the minority (cheaters) isn't ignored
+        counts = np.bincount(y.astype(int), minlength=2)
+        class_weight = {c: len(y) / (2 * counts[c]) for c in (0, 1) if counts[c] > 0}
+        print(f"⚖️ Class weights: {class_weight}")
+        
+        # Build and compile model
+        self.build_model()
+        self.compile_model()
+        
+        # Get callbacks
+        callbacks = self.get_callbacks()
+        
+        # Train model
+        history = self.model.fit(
+            [X_moves, X_times, X_color],
+            y,
+            epochs=epochs,
+            batch_size=batch_size,
+            class_weight=class_weight,
+            callbacks=callbacks,
+            **validation,
+            verbose=1
+        )
+        
+        print("✅ Training completed!")
+        return history
+    
+    def evaluate(self, X_moves: np.ndarray, X_times: np.ndarray, 
+                X_color: np.ndarray, y: np.ndarray) -> Dict:
+        """Evaluate the model"""
+        
+        print("🔍 Evaluating model...")
+        
+        # Make predictions
+        predictions = self.model.predict([X_moves, X_times, X_color])
+        
+        # Calculate metrics
+        from sklearn.metrics import (
+            accuracy_score, balanced_accuracy_score, confusion_matrix,
+            precision_recall_fscore_support, roc_auc_score
+        )
+        
+        # Convert predictions to binary
+        y_pred_binary = (predictions > 0.5).astype(int)
+        
+        # Precision / recall / F1 for the cheater class: weighted averages are
+        # dominated by the honest majority and hide missed cheaters
+        precision, recall, f1, _ = precision_recall_fscore_support(
+            y, y_pred_binary, pos_label=1, average='binary', zero_division=0
+        )
+        cm = confusion_matrix(y, y_pred_binary, labels=[0, 1])
+        auc = roc_auc_score(y, predictions)
+        
+        results = {
+            'accuracy': accuracy_score(y, y_pred_binary),
+            'balanced_accuracy': balanced_accuracy_score(y, y_pred_binary),
+            'baseline_accuracy': max(np.mean(y), 1 - np.mean(y)),
+            'precision': precision,
+            'recall': recall,
+            'f1': f1,
+            'auc': auc,
+            'confusion_matrix': cm,
+            'predictions': predictions.flatten(),
+            'binary_predictions': y_pred_binary.flatten()
+        }
+        
+        print("📊 Evaluation Results:")
+        print(f"  Accuracy: {results['accuracy']:.4f} (always-majority baseline: {results['baseline_accuracy']:.4f})")
+        print(f"  Balanced Accuracy: {results['balanced_accuracy']:.4f}")
+        print(f"  Cheater Precision: {results['precision']:.4f}")
+        print(f"  Cheater Recall: {results['recall']:.4f}")
+        print(f"  Cheater F1 Score: {results['f1']:.4f}")
+        print(f"  AUC: {results['auc']:.4f}")
+        print(f"  Confusion matrix [[TN FP] [FN TP]]: {cm.tolist()}")
+        
+        return results
+    
+    def save_model(self, model_path: str = 'advanced_chess_model.keras'):
+        """Save the trained model (native Keras format)"""
+        self.model.save(model_path)
+        print(f"✅ Model saved to {model_path}")
+    
+    def load_model(self, model_path: str = 'advanced_chess_model.keras'):
+        """Load a trained model"""
+        self.model = tf.keras.models.load_model(model_path)
+        print(f"✅ Model loaded from {model_path}")
+
+def main():
+    """Train via train_tensorflow.py, which splits by player and builds the vocabulary"""
+    import train_tensorflow
+    train_tensorflow.main()
+
+if __name__ == "__main__":
+    main()
+
+```
+
+`predict_tensorflow.py`:
+
+```py
+#!/usr/bin/env python3
+"""
+TensorFlow Prediction Script for Chess Anti-Cheat Detection
+Analyzes both players in a chess game for cheating detection
+"""
+
+import tensorflow as tf
+import numpy as np
+import pandas as pd
+import pickle
+import os
+from typing import Dict, List, Any
+import warnings
+warnings.filterwarnings('ignore')
+
+# Fallback: import the model builder to reconstruct architecture if needed
+from improved_tensorflow_model import AdvancedChessClassifier, encode_moves, encode_times
+
+class TensorFlowChessPredictor:
+    """TensorFlow-based predictor for chess anti-cheat detection"""
+    
+    def __init__(self, model_path: str | None = None, vocab_path="hdf5_vocab.pkl"):
+        # Decide model path
+        if model_path is None:
+            if os.path.exists("advanced_chess_model.keras"):
+                model_path = "advanced_chess_model.keras"
+            elif os.path.exists("advanced_chess_model.h5"):
+                model_path = "advanced_chess_model.h5"
+            else:
+                raise FileNotFoundError("No TensorFlow model found (.keras or .h5)")
+        
+        # Load vocabulary
+        with open(vocab_path, "rb") as f:
+            self.vocab = pickle.load(f)
+        
+        # Load TensorFlow model
+        self.model = None
+        load_error = None
+        try:
+            if model_path.endswith('.h5'):
+                import keras
+                self.model = keras.saving.load_model(model_path, compile=False, safe_mode=False)
+            else:
+                self.model = tf.keras.models.load_model(model_path)
+        except Exception as e:
+            load_error = e
+        
+        # Fallback: rebuild architecture and load weights from legacy .h5
+        if self.model is None and model_path.endswith('.h5'):
+            try:
+                classifier = AdvancedChessClassifier(vocab_size=len(self.vocab))
+                classifier.build_model()
+                classifier.compile_model()
+                classifier.model.load_weights(model_path, skip_mismatch=True)
+                self.model = classifier.model
+                load_error = None
+            except Exception as e2:
+                load_error = e2
+        
+        if self.model is None and load_error is not None:
+            raise RuntimeError(f"Failed to load model '{model_path}': {load_error}")
+        
+        print(f"✅ TensorFlow model loaded successfully from {model_path}")
+        
+        # Confidence thresholds
+        self.high_confidence_threshold = 0.8
+        self.low_confidence_threshold = 0.3
+        
+    def predict_player_moves(self, moves_str: str, move_times_str: str = "", player_color: str = "white", max_len: int = 300) -> Dict[str, Any]:
+        """Predict if a player's moves indicate cheating using TensorFlow model"""
+        
+        if not moves_str or moves_str.strip() == '':
+            return {
+                'prediction': 'Invalid',
+                'confidence': 0.0,
+                'explanation': 'No moves provided',
+                'risk_factors': [],
+                'player_color': player_color
+            }
+        
+        # Encode exactly as in training
+        moves = [m.strip() for m in moves_str.split(',') if m.strip()]
+        tokens = encode_moves(moves_str, self.vocab, max_len)
+        times = encode_times(move_times_str, max_len)
+        
+        # Color encoding (white=1, black=0)
+        color = 1.0 if player_color == 'white' else 0.0
+        
+        # Prepare input for TensorFlow model
+        X_moves = np.array([tokens])
+        X_times = np.array([times])
+        X_color = np.array([[color]])
+        
+        # Get prediction
+        prediction = self.model.predict([X_moves, X_times, X_color], verbose=0)
+        confidence = float(prediction[0][0])
+        
+        # Determine prediction
+        prediction_label = "Cheater" if confidence > 0.5 else "Honest"
+        
+        # Analyze risk factors including timing
+        risk_factors = self._analyze_risk_factors_with_timing(moves, times, confidence, player_color)
+        
+        # Generate explanation
+        explanation = self._generate_explanation_with_context(moves, times, confidence, risk_factors, player_color)
+        
+        # Calculate confidence level
+        confidence_level = self._get_confidence_level(confidence)
+        
+        return {
+            'prediction': prediction_label,
+            'confidence': confidence,
+            'confidence_level': confidence_level,
+            'explanation': explanation,
+            'risk_factors': risk_factors,
+            'move_count': len(moves),
+            'player_color': player_color
+        }
+    
+    def _analyze_risk_factors_with_timing(self, moves: List[str], times: np.ndarray, confidence: float, player_color: str) -> List[Dict]:
+        """Analyze risk factors based purely on pattern recognition"""
+        risk_factors = []
+        
+        if not moves:
+            return risk_factors
+        
+        # Pure pattern recognition - no derived statistics
+        if len(moves) > 10:
+            # Look for repetitive move patterns (3-move sequences)
+            move_chunks = [moves[i:i+3] for i in range(len(moves)-2)]
+            unique_chunks = len(set(tuple(chunk) for chunk in move_chunks))
+            pattern_variety = unique_chunks / len(move_chunks)
+            
+            if pattern_variety < 0.3:
+                risk_factors.append({
+                    'factor': 'Repetitive move patterns',
+                    'value': pattern_variety,
+                    'risk_level': 'medium',
+                    'description': f'Low move pattern variety ({pattern_variety:.2f}), might indicate engine usage'
+                })
+        
+        # Check for move length consistency patterns
+        if len(moves) > 5:
+            move_lengths = [len(m) for m in moves]
+            length_std = np.std(move_lengths)
+            if length_std < 0.5:
+                risk_factors.append({
+                    'factor': 'Consistent move lengths',
+                    'value': length_std,
+                    'risk_level': 'medium',
+                    'description': f'Very consistent move lengths (std: {length_std:.2f}), typical of engines'
+                })
+        
+        # Move variety pattern
+        unique_moves = len(set(moves))
+        variety_ratio = unique_moves / len(moves) if len(moves) else 0.0
+        if variety_ratio < 0.3:
+            risk_factors.append({
+                'factor': 'Low move variety',
+                'value': variety_ratio,
+                'risk_level': 'medium',
+                'description': 'Limited move variety, might indicate engine usage'
+            })
+        
+        return risk_factors
+    
+    def _generate_explanation_with_context(self, moves: List[str], times: np.ndarray, confidence: float, 
+                                         risk_factors: List[Dict], player_color: str) -> str:
+        """Generate human-readable explanation with context"""
+        if confidence > 0.8:
+            base_explanation = "The TensorFlow model is highly confident in this prediction."
+        elif confidence > 0.6:
+            base_explanation = "The TensorFlow model shows moderate confidence in this prediction."
+        else:
+            base_explanation = "The TensorFlow model shows low confidence in this prediction."
+        
+        if moves:
+            base_explanation += f" Analyzed {len(moves)} moves."
+            # Pattern analysis summary
+            if len(moves) > 10:
+                move_chunks = [moves[i:i+3] for i in range(len(moves)-2)]
+                unique_chunks = len(set(tuple(chunk) for chunk in move_chunks))
+                pattern_variety = unique_chunks / len(move_chunks)
+                base_explanation += f" Move pattern variety: {pattern_variety:.2f}."
+        
+        base_explanation += f" Player color: {player_color}."
+        if risk_factors:
+            high_risk = [rf for rf in risk_factors if rf['risk_level'] == 'high']
+            medium_risk = [rf for rf in risk_factors if rf['risk_level'] == 'medium']
+            if high_risk:
+                base_explanation += f" {len(high_risk)} high-risk factors detected."
+            if medium_risk:
+                base_explanation += f" {len(medium_risk)} medium-risk factors detected."
+        return base_explanation
+    
+    def _get_confidence_level(self, confidence: float) -> str:
+        if confidence > self.high_confidence_threshold:
+            return "Very High"
+        elif confidence > 0.6:
+            return "High"
+        elif confidence > 0.4:
+            return "Medium"
+        elif confidence > self.low_confidence_threshold:
+            return "Low"
+        else:
+            return "Very Low"
+
+def print_player_analysis(result: Dict[str, Any], player_name: str):
+    if 'error' in result:
+        print(f"❌ {result['error']}")
+        return
+    print("=" * 60)
+    print(f"{player_name.upper()} ANALYSIS")
+    print("=" * 60)
+    print(f"Player Color: {result['player_color']}")
+    print(f"PREDICTION: {result['prediction']}")
+    print(f"Confidence: {result['confidence']:.4f} ({result['confidence_level']})")
+    print(f"Move Count: {result['move_count']}")
+    print(f"\nExplanation: {result['explanation']}")
+    if result['risk_factors']:
+        print(f"\nRisk Factors:")
+        for i, factor in enumerate(result['risk_factors'], 1):
+            print(f"  {i}. {factor['factor']} (Risk: {factor['risk_level'].upper()})")
+            print(f"     Value: {factor['value']:.3f}")
+            print(f"     Description: {factor['description']}")
+    else:
+        print(f"\nRisk Factors: None detected")
+    print("=" * 60)
+
+def main():
+    print("🎯 TensorFlow Chess Anti-Cheat Prediction")
+    print("=" * 50)
+    
+    # Determine model path preference
+    model_path = None
+    if os.path.exists("advanced_chess_model.keras"):
+        model_path = "advanced_chess_model.keras"
+    elif os.path.exists("advanced_chess_model.h5"):
+        model_path = "advanced_chess_model.h5"
+    else:
+        print("❌ No model file found. Train the model first: python train_tensorflow.py")
+        return
+    
+    vocab_path = "hdf5_vocab.pkl"
+    if not os.path.exists(vocab_path):
+        print(f"❌ {vocab_path} not found. Please run training first.")
+        return
+    
+    try:
+        predictor = TensorFlowChessPredictor(model_path, vocab_path)
+    except Exception as e:
+        print(f"❌ Error loading TensorFlow model: {e}")
+        return
+    
+    print("\n" + "=" * 60)
+    print("INTERACTIVE GAME ANALYSIS (TensorFlow)")
+    print("=" * 60)
+    print("Enter game data in the following format:")
+    print("1. White moves (comma-separated)")
+    print("2. Black moves (comma-separated)")
+    print("3. White move times (comma-separated seconds)")
+    print("4. Black move times (comma-separated seconds)")
+    print("5. White result (win/loss/draw)")
+    print("6. Black result (win/loss/draw)")
+    print("Type 'quit' to exit")
+    print("=" * 60)
+    
+    while True:
+        try:
+            print("\n" + "-" * 40)
+            print("Enter game data:")
+            print("-" * 40)
+            print("Enter white moves (comma-separated):")
+            white_moves = input().strip()
+            if white_moves.lower() == 'quit':
+                break
+            print("Enter black moves (comma-separated):")
+            black_moves = input().strip()
+            if black_moves.lower() == 'quit':
+                break
+            print("Enter white move times (comma-separated seconds):")
+            white_times = input().strip()
+            if white_times.lower() == 'quit':
+                break
+            print("Enter black move times (comma-separated seconds):")
+            black_times = input().strip()
+            if black_times.lower() == 'quit':
+                break
+            print("Enter white result (win/loss/draw):")
+            white_result = input().strip()
+            if white_result.lower() == 'quit':
+                break
+            print("Enter black result (win/loss/draw):")
+            black_result = input().strip()
+            if black_result.lower() == 'quit':
+                break
+            if not white_moves or not black_moves:
+                print("❌ Both white and black moves are required!")
+                continue
+            print("\n" + "🔍" * 20)
+            print("ANALYZING WHITE PLAYER (TensorFlow)")
+            print("🔍" * 20)
+            white_result_analysis = predictor.predict_player_moves(white_moves, white_times, "white")
+            print_player_analysis(white_result_analysis, "WHITE PLAYER")
+            print("\n" + "🔍" * 20)
+            print("ANALYZING BLACK PLAYER (TensorFlow)")
+            print("🔍" * 20)
+            black_result_analysis = predictor.predict_player_moves(black_moves, black_times, "black")
+            print_player_analysis(black_result_analysis, "BLACK PLAYER")
+            print("\n" + "📊" * 20)
+            print("GAME SUMMARY (TensorFlow)")
+            print("📊" * 20)
+            print(f"White Player: {white_result_analysis['prediction']} (Confidence: {white_result_analysis['confidence']:.3f})")
+            print(f"Black Player: {black_result_analysis['prediction']} (Confidence: {black_result_analysis['confidence']:.3f})")
+            print(f"White Result: {white_result}")
+            print(f"Black Result: {black_result}")
+            white_cheating = white_result_analysis['prediction'] == 'Cheater'
+            black_cheating = black_result_analysis['prediction'] == 'Cheater'
+            if white_cheating and black_cheating:
+                game_assessment = "BOTH PLAYERS SUSPICIOUS"
+            elif white_cheating:
+                game_assessment = "WHITE PLAYER SUSPICIOUS"
+            elif black_cheating:
+                game_assessment = "BLACK PLAYER SUSPICIOUS"
+            else:
+                game_assessment = "BOTH PLAYERS APPEAR HONEST"
+            print(f"\n🎯 GAME ASSESSMENT: {game_assessment}")
+            print("📊" * 20)
+        except Exception as e:
+            print(f"Error analyzing game: {e}")
+            print("Please check your data format and try again.")
+
+if __name__ == "__main__":
+    main()
+
+```
+
+`requirements.txt`:
+
+```txt
+tensorflow>=2.20.0
+tensorboard>=2.20.0
+pandas>=1.5.0
+numpy>=1.21.0
+scikit-learn>=1.0.0
+matplotlib>=3.5.0
+seaborn>=0.11.0
+h5py>=3.11.0
+tqdm>=4.64.0
+requests>=2.25.0
+python-dotenv>=1.0.0
+
+```
+
+`train_tensorflow.py`:
+
+```py
+#!/usr/bin/env python3
+"""
+TensorFlow Training Script for Chess Anti-Cheat Detection
+Advanced pattern recognition with TensorFlow/Keras
+"""
+
+import tensorflow as tf
+import numpy as np
+import pandas as pd
+import pickle
+import os
+import matplotlib.pyplot as plt
+from sklearn.model_selection import StratifiedGroupKFold
+from sklearn.metrics import classification_report, confusion_matrix, roc_auc_score
+import warnings
+warnings.filterwarnings('ignore')
+
+# Import our advanced model
+try:
+    from improved_tensorflow_model import AdvancedChessClassifier, build_vocab
+except ImportError:
+    print("❌ improved_tensorflow_model not found. Make sure improved_tensorflow_model.py is in the current directory.")
+    exit(1)
+
+def plot_training_history(history):
+    """Plot TensorFlow training history"""
+    fig, axes = plt.subplots(2, 2, figsize=(15, 10))
+    
+    # Loss
+    axes[0, 0].plot(history.history['loss'], label='Training Loss')
+    axes[0, 0].plot(history.history['val_loss'], label='Validation Loss')
+    axes[0, 0].set_title('Model Loss')
+    axes[0, 0].set_xlabel('Epoch')
+    axes[0, 0].set_ylabel('Loss')
+    axes[0, 0].legend()
+    axes[0, 0].grid(True)
+    
+    # Accuracy
+    axes[0, 1].plot(history.history['accuracy'], label='Training Accuracy')
+    axes[0, 1].plot(history.history['val_accuracy'], label='Validation Accuracy')
+    axes[0, 1].set_title('Model Accuracy')
+    axes[0, 1].set_xlabel('Epoch')
+    axes[0, 1].set_ylabel('Accuracy')
+    axes[0, 1].legend()
+    axes[0, 1].grid(True)
+    
+    # AUC
+    axes[1, 0].plot(history.history['auc'], label='Training AUC')
+    axes[1, 0].plot(history.history['val_auc'], label='Validation AUC')
+    axes[1, 0].set_title('Model AUC')
+    axes[1, 0].set_xlabel('Epoch')
+    axes[1, 0].set_ylabel('AUC')
+    axes[1, 0].legend()
+    axes[1, 0].grid(True)
+    
+    # Precision
+    axes[1, 1].plot(history.history['precision'], label='Training Precision')
+    axes[1, 1].plot(history.history['val_precision'], label='Validation Precision')
+    axes[1, 1].set_title('Model Precision')
+    axes[1, 1].set_xlabel('Epoch')
+    axes[1, 1].set_ylabel('Precision')
+    axes[1, 1].legend()
+    axes[1, 1].grid(True)
+    
+    plt.tight_layout()
+    plt.savefig('tensorflow_training_history.png', dpi=300, bbox_inches='tight')
+    plt.show()
+
+def split_by_player(df, test_fraction=0.2, random_state=42):
+    """Split so each player's games land in exactly one side, keeping the
+    cheater/honest ratio. A row-level split puts the same player's games in
+    both sides, letting the model memorize players instead of detecting cheating."""
+    n_splits = round(1 / test_fraction)
+    splitter = StratifiedGroupKFold(n_splits=n_splits, shuffle=True, random_state=random_state)
+    train_idx, test_idx = next(splitter.split(df, df['label'], groups=df['username'].str.lower()))
+    return df.iloc[train_idx], df.iloc[test_idx]
+
+def main():
+    """Main TensorFlow training function"""
+    print("🎯 TensorFlow Chess Anti-Cheat Training")
+    print("=" * 50)
+    
+    # Check TensorFlow version
+    print(f"✅ TensorFlow version: {tf.__version__}")
+    
+    # Check for GPU
+    gpus = tf.config.list_physical_devices('GPU')
+    if gpus:
+        print(f"🚀 Found {len(gpus)} GPU(s): {gpus}")
+        # Enable memory growth to avoid GPU memory issues
+        for gpu in gpus:
+            tf.config.experimental.set_memory_growth(gpu, True)
+    else:
+        print("🖥️ Using CPU for training")
+    
+    # Load data
+    hdf5_file = "data/combined_games.h5"
+    if not os.path.exists(hdf5_file):
+        print(f"❌ {hdf5_file} not found. Please run fetch_games.py first.")
+        return
+    
+    df = pd.read_hdf(hdf5_file, key='chess_data')
+    print(f"✅ Loaded {len(df)} records from {hdf5_file}")
+    
+    if 'username' not in df.columns:
+        print("❌ Dataset has no 'username' column (it predates the player-level split). "
+              "Delete the files in data/ and re-run fetch_games.py.")
+        return
+    
+    # Split by player: test players and validation players are never seen in training
+    print("🔄 Splitting data by player...")
+    train_df, test_df = split_by_player(df, test_fraction=0.2)
+    train_df, val_df = split_by_player(train_df, test_fraction=0.2)
+    
+    print(f"📊 Data split:")
+    for name, part in [("Training", train_df), ("Validation", val_df), ("Testing", test_df)]:
+        players = part.groupby(part['username'].str.lower())['label'].first()
+        print(f"   - {name}: {len(part)} games from {len(players)} players "
+              f"({int(players.sum())} cheaters, {int(part['label'].sum())} cheater games)")
+    
+    # Build vocabulary from training players only, so test moves can't leak in
+    vocab = build_vocab(train_df)
+    vocab_file = "hdf5_vocab.pkl"
+    with open(vocab_file, 'wb') as f:
+        pickle.dump(vocab, f)
+    print(f"✅ Built vocabulary with {len(vocab)} tokens -> {vocab_file}")
+    
+    # Create and train model
+    print("🏗️ Building advanced TensorFlow model...")
+    classifier = AdvancedChessClassifier(vocab_size=len(vocab))
+    
+    # Train the model
+    print("🚀 Starting training...")
+    history = classifier.train(
+        df=train_df, 
+        vocab=vocab, 
+        epochs=10,  # Reduced epochs for faster training
+        batch_size=64,
+        val_df=val_df
+    )
+    
+    # Plot training history
+    print("📈 Plotting training history...")
+    plot_training_history(history)
+    
+    # Evaluate on test set
+    print("🔍 Evaluating on test set...")
+    X_moves_test, X_times_test, X_color_test, y_test = classifier.prepare_data(test_df, vocab)
+    results = classifier.evaluate(X_moves_test, X_times_test, X_color_test, y_test)
+    
+    # Save the model (native Keras format)
+    out_path = 'advanced_chess_model.keras'
+    classifier.save_model(out_path)
+    
+    # Print final summary
+    print("\n" + "=" * 50)
+    print("🎉 TRAINING COMPLETE!")
+    print("=" * 50)
+    print(f"📊 Final Test Results:")
+    print(f"   - Accuracy: {results['accuracy']:.4f} (always-majority baseline: {results['baseline_accuracy']:.4f})")
+    print(f"   - Balanced Accuracy: {results['balanced_accuracy']:.4f}")
+    print(f"   - Cheater Precision: {results['precision']:.4f}")
+    print(f"   - Cheater Recall: {results['recall']:.4f}")
+    print(f"   - Cheater F1 Score: {results['f1']:.4f}")
+    print(f"   - AUC: {results['auc']:.4f}")
+    print(f"\n💾 Model saved as: {out_path}")
+    print(f"📈 Training plot saved as: tensorflow_training_history.png")
+    
+    # Comparison note
+    if os.path.exists('best_hdf5_model.pt'):
+        print(f"\n📊 Comparison:")
+        print(f"   - TensorFlow model: {results['auc']:.4f} AUC")
+        print(f"   - PyTorch model: legacy (best_hdf5_model.pt)")
+        print(f"   - Recommendation: Use the model with higher AUC")
+
+if __name__ == "__main__":
+    main()
+
+```
