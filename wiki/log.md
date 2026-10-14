@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-14** — ingest `readme:categories`: Cheat ~2890 (+1; Coldzer0/[[re4f]] Obsidian Windows RE curriculum: x86/x64, PE, static/dynamic analysis, anti-analysis) / Anti Cheat ~792 / Game Engine ~159 / other major section counts stable; 41 sections (`NeverC & NeverD` placeholder); synced README-map counts on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/reverse-engineering]], and [[overviews/dma-attack]]; entity [[re4f]] README projection cite; light `index.md` section notes (no per-category pages).
+
 - **2026-10-14** — ingest `description:FPSZ/ida-better-reverse`: confirmed entity [[ida-better-reverse]] against description projection (Python IDAPython, headless libc-detect CLI, CTF/pwn/static-ELF focus; confidence high); short library-ID lane cite on [[overviews/game-hacking]]; synced `index.md` entity blurb.
 
 - **2026-10-14** — ingest `readme:categories`: Cheat ~2889 (+1; FPSZ/[[ida-better-reverse]] stripped static ELF IDA plugin: build FLIRT, Hex-Rays libc/syscall notes, flowcharts) / Anti Cheat ~792 / Game Engine ~159 / other major section counts stable; 41 sections (`NeverC & NeverD` placeholder); synced README-map counts on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/reverse-engineering]], and [[overviews/dma-attack]]; entity [[ida-better-reverse]]; light `index.md` section notes (no per-category pages).

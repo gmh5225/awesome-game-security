@@ -4,8 +4,9 @@ kind: entity
 topics: [reverse-engineering, game-hacking]
 sources:
   - wiki/sources/descriptions/Coldzer0__RE4F.md
-updated: 2026-09-12
-confidence: medium
+  - wiki/sources/README-categories.md
+updated: 2026-10-14
+confidence: high
 ---
 
 # RE4F
