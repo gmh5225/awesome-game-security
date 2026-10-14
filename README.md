@@ -5112,6 +5112,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/boratanrikulu/gecit [DPI bypass research tool: fake TLS ClientHello desync + built-in DoH; eBPF sock_ops on Linux, TUN proxy on macOS/Windows]
 - https://github.com/gigbh/d-process [Lightweight Linux tool to spawn decoy processes with arbitrary names to evade process-based anti-cheat and tracker checks]
 - https://github.com/Azteriisk/omarchy-boot-manager [Omarchy plugin for sbctl Secure Boot enrollment, Limine Windows chainloading, and reboot controls so Vanguard/EAC/FACEIT titles work on Windows+Linux dual-boot]
+- https://github.com/OTAKUWeBer/arch-linux-secure-boot-guide [Step-by-step Arch and DIY-distro Secure Boot guide with sbctl, Microsoft key retention, and dual-boot notes for Vanguard, FACEIT, and other kernel anti-cheats]
 
 > Android
 - https://github.com/quarkslab/android-hardware-attestation-demo [Relay hardware Key Attestation from a clean device to defeat backend integrity checks on a rooted analysis phone — Frida hook + attestation oracle, no TEE tampering]
