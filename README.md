@@ -1733,6 +1733,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/gmh5225/bytecode-viewer [Java]
 - https://github.com/gmh5225/deobfuscator [Java]
 - https://github.com/Coldzer0/LuaDecompiler [Lua bytecode disassembler and decompiler for Lua 5.1, 5.2, 5.3, 5.4, and 5.5 binary chunks]
+- https://github.com/xV4L3x/hermit [Hermes bytecode (HBC) toolkit: parse, disassemble, decompile to JavaScript, and structurally patch React Native Hermes bundles with round-trip fidelity]
 - https://github.com/gmh5225/binsync [Sync]
 - https://github.com/gmh5225/ethersplay [EVM dissassembler]
 - https://github.com/Hexorg/Ouroboros [A Symbolic-Execution Decompiler written in Rust]
