@@ -1,0 +1,1978 @@
+Project Path: arc_AloneMonkey_frida-ios-dump_cmxnn_ry
+
+Source Tree:
+
+```txt
+arc_AloneMonkey_frida-ios-dump_cmxnn_ry
+├── LICENSE
+├── README.md
+├── SKILL.md
+├── assets
+├── dump.js
+├── dump.py
+├── package.json
+├── pnpm-lock.yaml
+├── process.sh
+├── requirements.txt
+└── tests
+    └── test_dump.py
+
+```
+
+`LICENSE`:
+
+```
+MIT License
+
+Copyright (c) 2017 Alone_Monkey
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
+`README.md`:
+
+```md
+# frida-ios-dump
+Pull a decrypted IPA from a jailbroken device
+
+## AI automation
+
+Give your AI tool the link to [SKILL.md](SKILL.md) and ask it to follow the instructions to set up the environment and export your chosen app. The file covers repository download, dependencies, direct USB SSH, SSH aliases, optional key setup, and IPA validation. A jailbroken device with Frida and SSH running is required.
+
+
+## Usage
+
+ 1. Install [Frida](https://frida.re/) on the jailbroken device. Use the same Frida version on the device and host (current target: 17.23.3).
+ 2. Set up Python 3.10+ and the Objective-C bridge dependency (requires Node.js/npm):
+
+    ```sh
+    python3 -m venv .venv
+    source .venv/bin/activate
+    python -m pip install --upgrade -r requirements.txt
+    npm install
+    ```
+
+    Alternatively, `pnpm install --frozen-lockfile` installs the bridge using the included lockfile.
+
+ 3. Connect the unlocked device over USB and ensure its SSH service is running. The script connects directly to device SSH port 22 through Frida's USB channel. No local port forwarding or `iproxy` is required. `-p` selects the device SSH port. An explicit remote hostname/IP uses TCP; a localhost alias on port 22 uses USB.
+ 4. Run `python dump.py 'Display name'` or `python dump.py Bundle.identifier`. Use `python dump.py -l` to list installed apps.
+
+The agent explicitly imports `frida-objc-bridge`, and `dump.py` bundles it with `frida.Compiler` before injection. This is required because Frida 17 no longer includes the Objective-C bridge in scripts loaded through the Python API. No separate agent build command is needed. See the official [bridge documentation](https://frida.re/docs/bridges/) and [Frida 17 migration notes](https://frida.re/news/2025/05/17/frida-17-0-0-released/).
+
+Dumped binaries are downloaded once, with up to four downloads running in parallel as the agent finishes each module. After all binary downloads complete, app directories are scanned and discovered resource files are immediately queued for up to four parallel downloads using the existing Paramiko SFTP dependency, skipping the exact paths of those binaries. During scanning, progress shows downloaded bytes and scanned entries; once the total size is known, it shows the overall percentage without resetting downloaded bytes. Directory structure, permissions and symbolic links are preserved before the decrypted binaries are placed into the IPA.
+
+For SSH/SCP make sure you have your public key added to the target device's ~/.ssh/authorized_keys file.
+
+The default SSH credentials are `root` / `alpine`. For a different account, use `./dump.py -u mobile -P 'YOUR_SSH_PASSWORD' Bundle.identifier`, or supply a private key with `-K`. Keys are tried first; the configured default password or explicit `-P` remains available as a fallback if key authentication fails.
+
+`-H` also accepts aliases from `~/.ssh/config`, reading `HostName`, `Port`, `User` and `IdentityFile`. Command-line options override these settings. For example:
+
+```sshconfig
+Host iphone
+    HostName 127.0.0.1
+    Port 22
+    User mobile
+    IdentityFile ~/.ssh/frida_ios_dump_ed25519
+```
+
+Then run `./dump.py -H iphone Bundle.identifier`. The USB transport is provided by `dump.py`; this alias alone does not establish a USB connection for the system `ssh` command.
+
+```
+./dump.py Aftenposten
+Start the target app Aftenposten
+Dumping Aftenposten to /var/folders/wn/9v1hs8ds6nv_xj7g95zxyl140000gn/T
+start dump /var/containers/Bundle/Application/66423A80-0AFE-471C-BC9B-B571107D3C27/AftenpostenApp.app/AftenpostenApp
+start dump /private/var/containers/Bundle/Application/66423A80-0AFE-471C-BC9B-B571107D3C27/AftenpostenApp.app/Frameworks/AFNetworking.framework/AFNetworking
+start dump /private/var/containers/Bundle/Application/66423A80-0AFE-471C-BC9B-B571107D3C27/AftenpostenApp.app/Frameworks/ATInternet_iOS_ObjC_SDK.framework/ATInternet_iOS_ObjC_SDK
+start dump /private/var/containers/Bundle/Application/66423A80-0AFE-471C-BC9B-B571107D3C27/AftenpostenApp.app/Frameworks/SPTEventCollector.framework/SPTEventCollector
+start dump /private/var/containers/Bundle/Application/66423A80-0AFE-471C-BC9B-B571107D3C27/AftenpostenApp.app/Frameworks/SPiDSDK.framework/SPiDSDK
+start dump /private/var/containers/Bundle/Application/66423A80-0AFE-471C-BC9B-B571107D3C27/AftenpostenApp.app/Frameworks/libswiftCore.dylib
+start dump /private/var/containers/Bundle/Application/66423A80-0AFE-471C-BC9B-B571107D3C27/AftenpostenApp.app/Frameworks/libswiftCoreData.dylib
+start dump /private/var/containers/Bundle/Application/66423A80-0AFE-471C-BC9B-B571107D3C27/AftenpostenApp.app/Frameworks/libswiftCoreGraphics.dylib
+start dump /private/var/containers/Bundle/Application/66423A80-0AFE-471C-BC9B-B571107D3C27/AftenpostenApp.app/Frameworks/libswiftCoreImage.dylib
+start dump /private/var/containers/Bundle/Application/66423A80-0AFE-471C-BC9B-B571107D3C27/AftenpostenApp.app/Frameworks/libswiftCoreLocation.dylib
+start dump /private/var/containers/Bundle/Application/66423A80-0AFE-471C-BC9B-B571107D3C27/AftenpostenApp.app/Frameworks/libswiftDarwin.dylib
+start dump /private/var/containers/Bundle/Application/66423A80-0AFE-471C-BC9B-B571107D3C27/AftenpostenApp.app/Frameworks/libswiftDispatch.dylib
+start dump /private/var/containers/Bundle/Application/66423A80-0AFE-471C-BC9B-B571107D3C27/AftenpostenApp.app/Frameworks/libswiftFoundation.dylib
+start dump /private/var/containers/Bundle/Application/66423A80-0AFE-471C-BC9B-B571107D3C27/AftenpostenApp.app/Frameworks/libswiftObjectiveC.dylib
+start dump /private/var/containers/Bundle/Application/66423A80-0AFE-471C-BC9B-B571107D3C27/AftenpostenApp.app/Frameworks/libswiftQuartzCore.dylib
+start dump /private/var/containers/Bundle/Application/66423A80-0AFE-471C-BC9B-B571107D3C27/AftenpostenApp.app/Frameworks/libswiftUIKit.dylib
+Generating Aftenposten.ipa
+
+Done.
+```
+
+Congratulations!!! You've got a decrypted IPA file.
+
+Drag to [MonkeyDev](https://github.com/AloneMonkey/MonkeyDev), Happy hacking!
+
+## Support
+
+Python 3.10+ and Frida 17.23.3 / 17.x. Python 2 is no longer supported.
+
+Validated with Frida 17.23.3 on a jailbroken iPhone X running iOS 16.7.16: app enumeration, agent injection, module dumping, direct USB SSH/SCP download using the `mobile` user and SSH alias, and IPA packaging. The exported IPA passed ZIP integrity checks, and the main executable's encryption flag changed from `cryptid=1` to `cryptid=0` with different bytes in the encrypted region. Keep the device unlocked during startup and dumping.
+
+Run the host regression tests with `python -m unittest discover -s tests -v`.
+
+
+## Troubleshooting
+
+| Problem | What to check |
+| --- | --- |
+| Cannot start or attach to the app | Unlock the device, open the target app manually, then retry. |
+| `ObjC is not defined` or missing bridge | Run `npm install` in the repository and use this version of `dump.py`. |
+| Frida connection or protocol error | Check that frida-server is running and the host and device Frida versions match. |
+| SSH authentication failed | Check the SSH username, password or private key, and any settings in your SSH alias. |
+
+If the problem persists, open an issue with the full error output, iOS version, and host/device Frida versions. Remove passwords and other private information from the logs.
+
+## 认识更多同行 · 新识 HiNexus
+
+除了分享代码，也欢迎来我做的社群网站 [新识 HiNexus](https://hinexus.me) 认识更多有趣的人。
+
+免费创建你的职业个人主页，展示经历、专业方向、能提供的帮助和正在寻找的合作，让志同道合的人更容易找到你。无论你关注移动安全、逆向工程、独立开发还是 AI，都欢迎来介绍自己、交流想法、寻找合作伙伴。
+
+**[来新识，认识一下 →](https://hinexus.me)**
+
+## 关注我的公众号
+
+欢迎扫码关注我的微信公众号，一起交流技术与实践。
+
+<img src="assets/wechat-official-account.png" alt="微信公众号关注二维码" width="280" />
+
+```
+
+`SKILL.md`:
+
+```md
+---
+name: frida-ios-dump
+description: 自动安装和配置 AloneMonkey/frida-ios-dump，连接 USB 越狱 iPhone，枚举应用并导出解密 IPA。适用于用户要求搭建 iOS 砸壳环境、使用 SSH 别名或密钥连接设备、拉取指定应用的场景。
+---
+
+# frida-ios-dump 自动化工作流
+
+你负责实际执行仓库获取、依赖安装、连接检查和指定应用导出，直到交付经过验证的 IPA，或说明具体阻碍。用户只要求安装时，完成安装和连接验证即可。此文件可独立通过链接读取，无需预先安装本仓库或其他 skill。
+
+仓库：<https://github.com/AloneMonkey/frida-ios-dump>
+
+## 1. 确定环境与任务
+
+- 优先复用用户已提供的工作目录、设备、SSH 别名、账号、密钥和应用名称。只询问仍缺少的信息；可以先获取仓库、检查运行时和 SSH 配置，不要为可自动发现的信息中断工作。
+- 主机需要 Python 3.10+、Node.js/npm（或 pnpm）、Git 和 `zip`。优先使用现有运行时和项目虚拟环境；缺少工具时用适合当前系统的包管理器补齐，不执行来历不明的远程安装脚本。
+- 设备需要已越狱、运行 frida-server 和 SSH 服务，通过 USB 连接并信任主机。解锁、确认信任等物理操作需要用户完成；本工作流不负责越狱。
+- 本仓库要求 Frida `>=17.23.3,<18`，主机与设备应使用相同版本。不要把“更新依赖”解释为无条件升级设备服务或切换 Frida 主版本。
+- 导出前明确目标应用，优先使用枚举得到的 Bundle ID。未指定目标时先列出应用供用户选择。
+
+## 2. 获取仓库
+
+新目录中执行（目录可按用户需求调整）：
+
+```sh
+git clone https://github.com/AloneMonkey/frida-ios-dump.git
+cd frida-ios-dump
+```
+
+用户提供了分支、标签或提交时使用该版本。通过某个分支或提交的链接读取本文件时，优先获取同一版本的仓库。没有 Git 时可下载对应版本的 GitHub 源码 ZIP 并用 Python `zipfile` 解压，不必增加 `tar` 依赖。
+
+已有仓库时先检查 remote、当前分支和 `git status --short`。复用本地修改；仅在适合更新且工作区干净时快进拉取，不执行 `reset --hard`、`clean` 或覆盖用户文件。
+
+确认该版本同时包含 `SKILL.md`、`requirements.txt`、`package.json`、`dump.py`、`dump.js`；`package.json` 应包含 `frida-objc-bridge`。缺少新版本文件时报告版本不符，不用旧版脚本冒充完成安装。
+
+## 3. 先读取设备 Frida 版本
+
+先确定设备实际运行的 frida-server 版本，再决定主机 Frida 的安装版本。不能先装主机最新版、再默认要求设备升级。
+
+1. 优先通过已有可用的 SSH 连接查询。先确定运行服务的可执行文件路径，再执行该文件的 `--version`。可用 `command -v frida-server`、进程信息和服务配置定位；常见路径为 `/var/jb/usr/sbin/frida-server`、`/usr/sbin/frida-server`。有多个安装副本时，以运行服务使用的路径为准，不能只取 PATH 中的第一个文件。
+2. 只有 USB 连接时，先参考第 5 节的账号和别名规则。USB 别名不能直接用于系统 `ssh`。优先复用主机已有 Frida，通过设备 USB SSH 通道执行查询；可以按 `dump.py` 中 `USBSSHForwarder` 的实现建立 Paramiko 连接，不需要 attach 应用或枚举应用。
+3. 如果主机尚无 Frida，且没有其他可用 SSH 通道，可以先在项目虚拟环境安装用于 USB 查询的临时依赖：`frida>=17.23.3,<18` 和 `paramiko>=3`。此时安装的 Frida 仅用于引导查询，不代表已匹配设备。读取版本后必须按下一节重新锁定。不要为查询版本新增 2222 转发流程。
+4. 如果查询失败，说明具体连接或认证问题；仍无法自动获取时，请用户提供设备终端执行实际 `frida-server --version` 的结果。不能把主机 `frida.__version__` 或应用枚举成功当作设备的准确版本。
+
+将查询结果保存为 `DEVICE_FRIDA_VERSION`。它必须是版本号，不能将未校验的远端输出直接拼接进 shell 命令。与仓库 `requirements.txt` 的支持范围比较：满足范围则安装完全相同版本；不满足时明确说明当前仓库无法直接匹配，结合用户要求处理兼容性或设备升级，不擅自修改设备服务，也不绕过依赖约束声称兼容。
+
+## 4. 按设备版本安装依赖
+
+以下命令在仓库根目录执行。先确认 `python3` 版本满足要求；如不满足，选择已有的新版 Python 创建 `.venv`，已有可用虚拟环境则复用：
+
+```sh
+python3 -m venv .venv
+```
+
+将上一节读到并校验过的设备版本写入项目虚拟环境的约束文件。以下 `DEVICE_FRIDA_VERSION` 是待替换值，必须替换为实际版本号后执行：
+
+```text
+# .venv/frida-device-constraints.txt
+frida==DEVICE_FRIDA_VERSION
+```
+
+在同一次依赖求解中安装 requirements 并应用约束，避免 `frida-tools` 或后续更新将 Frida 升到其他版本：
+
+```sh
+./.venv/bin/python -m pip install --upgrade -r requirements.txt -c .venv/frida-device-constraints.txt
+./.venv/bin/python -m pip check
+npm install
+./.venv/bin/python dump.py --help
+```
+
+如果 pip 报冲突，先检查设备版本是否在支持范围内，再检查 `frida-tools` 的依赖要求；让 pip 在约束下选择兼容版本，不使用 `--no-deps` 强行安装。后续安装或更新 Python 依赖时继续使用这个约束文件。
+
+已安装 pnpm 时可用 `pnpm install --frozen-lockfile` 替代 `npm install`。仓库没有 npm 的 lockfile，不使用 `npm ci`。后续命令均使用虚拟环境中的 Python，无需依赖跨工具调用保留 shell 激活状态。
+
+Frida 17 的 Objective-C bridge 由 npm/pnpm 安装，`dump.py` 会自动编译 agent，不需要手动运行 `frida-compile`。
+
+核对主机实际版本与 `DEVICE_FRIDA_VERSION` 完全一致后，再枚举应用：
+
+```sh
+./.venv/bin/python -c 'import frida; print(frida.__version__)'
+./.venv/bin/python dump.py -l
+```
+
+枚举应用本身无需 SSH 凭据。记录设备与主机两端的版本及设备版本查询方式，便于后续排查。
+
+## 5. 配置 SSH
+
+### 直接通过 USB
+
+默认连接设备 SSH 22 端口，账号密码为 `root` / `alpine`。不需要 `iproxy` 或本机 2222 转发。
+
+```sh
+./.venv/bin/python dump.py 'BUNDLE_ID'
+```
+
+账号不同时使用 `-u`，密钥使用 `-K`；密码使用 `-P`。不需要用户提供凭据时不要索取密码。确需密码时避免将其写入仓库、示例文档或最终报告；命令行 `-P` 会使密码可能出现在进程参数中，优先复用已有密钥。
+
+### 复用 SSH 别名
+
+先读取用户指定别名的配置。`-H` 支持 `~/.ssh/config` 中的 `HostName`、`Port`、`User`、`IdentityFile`；命令行选项覆盖配置。不能假定支持系统 OpenSSH 的全部选项，例如跳板机或任意 `ProxyCommand`。
+
+下面是 USB 别名示例，仅在用户需要创建别名时合并到已有配置；用户名和密钥路径按实际情况选择，密钥不存在时省略 `IdentityFile`：
+
+```sshconfig
+Host iphone
+    HostName 127.0.0.1
+    Port 22
+    User mobile
+    IdentityFile ~/.ssh/frida_ios_dump_ed25519
+```
+
+```sh
+./.venv/bin/python dump.py -H iphone 'BUNDLE_ID'
+```
+
+localhost 别名且端口为 22 时使用 USB。显式远程主机名/IP 使用 TCP；不指定主机时 `-p` 设置设备 SSH 端口。USB 通道由 `dump.py` 提供，上面的别名本身不能让系统 `ssh iphone` 或 `ssh-copy-id iphone` 自动走 USB。密钥认证失败时仍可回退到默认密码或显式 `-P`。
+
+### 可选：用户要求免密登录时
+
+复用已有密钥，或创建专用于该设备的密钥。通过已经认证的 SSH/SFTP 连接，将公钥去重追加到对应远端用户的 `~/.ssh/authorized_keys`，保留已有内容，目录权限 700、文件权限 600。私钥留在主机，不能上传。
+
+USB 场景可读取本仓库 `dump.py` 的 `resolve_ssh_options` 和 `connect_ssh`，用 `frida.get_usb_device(timeout=10)` 获取设备，复用 `connect_ssh(..., use_usb=True)` 建立 Paramiko 连接，再执行配置或使用 SFTP。按当前函数签名调用，结束时关闭 SSH 客户端和返回的 USB forwarder。不为配置密钥引入本机端口转发依赖。
+
+配置后用 `password=None`、`allow_agent=False`、`look_for_keys=False` 和指定私钥建立一次独立连接，确认成功来自该密钥，再报告免密可用。不要关闭设备密码登录或替换其他公钥。
+
+## 6. 导出应用
+
+从枚举结果确认 Bundle ID，确认设备保持解锁。选择不存在的输出路径，避免重复使用已有 ZIP 导致旧条目残留。例如：
+
+```sh
+./.venv/bin/python dump.py -H iphone -o './exported-app.ipa' 'BUNDLE_ID'
+```
+
+没有别名时省略 `-H iphone`，其他 SSH 参数按已验证的配置添加。
+
+同一主机一次只运行一个导出进程：当前实现共用临时目录中的 `Payload`。脚本内部已经并行下载二进制和资源，不要为了加速再启动多个独立导出。
+
+`start dump` 表示设备正在生成解密文件；随后才是传输。已下载的二进制按精确相对路径从资源传输中跳过，只传一次。资源目录边扫描边提交下载，扫描期间显示字节和条目数，总量确定后显示百分比，不额外运行一次全目录扫描或 tar 打包。
+
+运行期间观察输出和进程状态，持续向用户说明当前阶段。需要中断时发送 Ctrl+C，等待进程退出后再重试，避免遗留并行传输。
+
+## 7. 验证与交付
+
+退出码为 0 后，确认输出文件存在且非空。用 Python 标准库检查 ZIP 完整性，并读取主应用信息，例如（替换路径）：
+
+```sh
+./.venv/bin/python - './exported-app.ipa' <<'PY'
+import plistlib
+import sys
+import zipfile
+
+with zipfile.ZipFile(sys.argv[1]) as archive:
+    bad = archive.testzip()
+    if bad is not None:
+        raise RuntimeError(f'Corrupt ZIP entry: {bad}')
+    infos = [name for name in archive.namelist()
+             if name.startswith('Payload/') and name.endswith('.app/Info.plist')
+             and name.count('/') == 2]
+    if len(infos) != 1:
+        raise RuntimeError(f'Expected one main app, found {len(infos)}')
+    info = plistlib.loads(archive.read(infos[0]))
+    executable = infos[0].rsplit('/', 1)[0] + '/' + info['CFBundleExecutable']
+    if archive.getinfo(executable).file_size == 0:
+        raise RuntimeError('Empty executable')
+    print(info.get('CFBundleIdentifier'), executable)
+PY
+```
+
+需要确认砸壳结果时，解析主程序 Mach-O 的 `LC_ENCRYPTION_INFO` / `LC_ENCRYPTION_INFO_64`，检查 `cryptid=0`。原本无加密标志的文件不能仅凭此证明发生了解密；严格验证可与设备原文件的加密区域比较。将 ZIP 完整性和解密验证的结论分别说明，不把“命令成功”当作全部验证完成。
+
+交付仓库路径、实际 Frida 版本、目标 Bundle ID、IPA 绝对路径、大小和完成的验证。仅安装任务则报告环境和连接验证结果。不要自动重签名或安装导出的 IPA。
+
+## 常见阻碍
+
+| 现象 | 处理 |
+| --- | --- |
+| 找不到 USB 设备 | 检查线缆、USB 连接、信任状态及设备 Frida 服务；需要用户确认信任时说明具体操作。 |
+| 设备锁定或无法启动应用 | 请用户解锁并手动打开目标应用，保持亮屏后再试。 |
+| SSH 认证失败 | 检查实际账号、别名和密钥；默认 root/alpine 并非所有越狱环境通用。请求缺少的认证信息，不反复猜密码。 |
+| 缺少 ObjC / bridge | 在仓库根目录安装 npm 依赖，确认使用本版本 `dump.py` 和虚拟环境。 |
+| 协议或版本不匹配 | 检查主机和设备实际 Frida 版本并对齐。 |
+| 长时间 0 B 或异常脱离 | 记录最后日志与进程状态，排查设备锁定、SSH、应用退出和版本；处理原因后重试，避免无限重试或默认重启设备。 |
+
+如果必须修改下载代码，保持 Frida 消息回调只入队，传输在回调之外执行，否则会阻塞 USB 事件循环。修改后运行 `./.venv/bin/python -m unittest discover -s tests -v`，再按用户任务验证真机。
+
+```
+
+`dump.js`:
+
+```js
+import ObjC from 'frida-objc-bridge';
+
+Process.getModuleByName('Foundation').ensureInitialized();
+if (!ObjC.available) {
+    throw new Error('Objective-C runtime is not available in the target process');
+}
+
+var O_RDONLY = 0;
+var O_WRONLY = 1;
+var O_RDWR = 2;
+var O_CREAT = 512;
+var O_TRUNC = 1024;
+
+var SEEK_SET = 0;
+var SEEK_CUR = 1;
+var SEEK_END = 2;
+
+function allocStr(str) {
+    return Memory.allocUtf8String(str);
+}
+
+function putStr(addr, str) {
+    if (typeof addr == "number") {
+        addr = ptr(addr);
+    }
+    return addr.writeUtf8String(str);
+}
+
+function getByteArr(addr, l) {
+    if (typeof addr == "number") {
+        addr = ptr(addr);
+    }
+    return addr.readByteArray(l);
+}
+
+function getU8(addr) {
+    if (typeof addr == "number") {
+        addr = ptr(addr);
+    }
+    return addr.readU8();
+}
+
+function putU8(addr, n) {
+    if (typeof addr == "number") {
+        addr = ptr(addr);
+    }
+    return addr.writeU8(n);
+}
+
+function getU16(addr) {
+    if (typeof addr == "number") {
+        addr = ptr(addr);
+    }
+    return addr.readU16();
+}
+
+function putU16(addr, n) {
+    if (typeof addr == "number") {
+        addr = ptr(addr);
+    }
+    return addr.writeU16(n);
+}
+
+function getU32(addr) {
+    if (typeof addr == "number") {
+        addr = ptr(addr);
+    }
+    return addr.readU32();
+}
+
+function putU32(addr, n) {
+    if (typeof addr == "number") {
+        addr = ptr(addr);
+    }
+    return addr.writeU32(n);
+}
+
+function getU64(addr) {
+    if (typeof addr == "number") {
+        addr = ptr(addr);
+    }
+    return addr.readU64();
+}
+
+function putU64(addr, n) {
+    if (typeof addr == "number") {
+        addr = ptr(addr);
+    }
+    return addr.writeU64(n);
+}
+
+function getPt(addr) {
+    if (typeof addr == "number") {
+        addr = ptr(addr);
+    }
+    return addr.readPointer();
+}
+
+function putPt(addr, n) {
+    if (typeof addr == "number") {
+        addr = ptr(addr);
+    }
+    if (typeof n == "number") {
+        n = ptr(n);
+    }
+    return addr.writePointer(n);
+}
+
+function malloc(size) {
+    return Memory.alloc(size);
+}
+
+function getExportFunction(type, name, ret, args) {
+    var nptr;
+    nptr = Module.findGlobalExportByName(name);
+    if (nptr === null) {
+        throw new Error("Cannot find native export: " + name);
+    } else {
+        if (type === "f") {
+            var funclet = new NativeFunction(nptr, ret, args);
+            if (typeof funclet === "undefined") {
+                console.log("parse error " + name);
+                return null;
+            }
+            return funclet;
+        } else if (type === "d") {
+            var datalet = nptr.readPointer();
+            if (typeof datalet === "undefined") {
+                console.log("parse error " + name);
+                return null;
+            }
+            return datalet;
+        }
+    }
+}
+
+var NSSearchPathForDirectoriesInDomains = getExportFunction("f", "NSSearchPathForDirectoriesInDomains", "pointer", ["int", "int", "int"]);
+var wrapper_open = getExportFunction("f", "open", "int", ["pointer", "int", "...", "int"]);
+var nativeRead = getExportFunction("f", "read", "long", ["int", "pointer", "ulong"]);
+var write = getExportFunction("f", "write", "long", ["int", "pointer", "ulong"]);
+var lseek = getExportFunction("f", "lseek", "int64", ["int", "int64", "int"]);
+var close = getExportFunction("f", "close", "int", ["int"]);
+var remove = getExportFunction("f", "remove", "int", ["pointer"]);
+var access = getExportFunction("f", "access", "int", ["pointer", "int"]);
+var dlopen = getExportFunction("f", "dlopen", "pointer", ["pointer", "int"]);
+
+function read(fd, buffer, size) {
+    var result = nativeRead(fd, buffer, size);
+    // ssize_t is an Int64 on arm64; buffer lengths passed to write() are numbers.
+    return typeof result === "number" ? result : result.toNumber();
+}
+
+function getDocumentDir() {
+    var NSDocumentDirectory = 9;
+    var NSUserDomainMask = 1;
+    var npdirs = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, 1);
+    return ObjC.Object(npdirs).objectAtIndex_(0).toString();
+}
+
+function open(pathname, flags, mode) {
+    if (typeof pathname == "string") {
+        pathname = allocStr(pathname);
+    }
+    return wrapper_open(pathname, flags, mode);
+}
+
+var modules = null;
+function getAllAppModules() {
+    modules = new Array();
+    var tmpmods = Process.enumerateModules();
+    for (var i = 0; i < tmpmods.length; i++) {
+        if (tmpmods[i].path.indexOf(".app") != -1) {
+            modules.push(tmpmods[i]);
+        }
+    }
+    return modules;
+}
+
+var FAT_MAGIC = 0xcafebabe;
+var FAT_CIGAM = 0xbebafeca;
+var MH_MAGIC = 0xfeedface;
+var MH_CIGAM = 0xcefaedfe;
+var MH_MAGIC_64 = 0xfeedfacf;
+var MH_CIGAM_64 = 0xcffaedfe;
+var LC_SEGMENT = 0x1;
+var LC_SEGMENT_64 = 0x19;
+var LC_ENCRYPTION_INFO = 0x21;
+var LC_ENCRYPTION_INFO_64 = 0x2C;
+
+function pad(str, n) {
+    return Array(n-str.length+1).join("0")+str;
+}
+
+function swap32(value) {
+    value = pad(value.toString(16),8)
+    var result = "";
+    for(var i = 0; i < value.length; i=i+2){
+        result += value.charAt(value.length - i - 2);
+        result += value.charAt(value.length - i - 1);
+    }
+    return parseInt(result,16)
+}
+
+function dumpModule(name) {
+    if (modules == null) {
+        modules = getAllAppModules();
+    }
+
+    var targetmod = null;
+    for (var i = 0; i < modules.length; i++) {
+        if (modules[i].path.indexOf(name) != -1) {
+            targetmod = modules[i];
+            break;
+        }
+    }
+    if (targetmod == null) {
+        throw new Error("Cannot find module: " + name);
+    }
+    var modbase = modules[i].base;
+    var modsize = modules[i].size;
+    var newmodname = modules[i].name;
+    var newmodpath = getDocumentDir() + "/" + newmodname + ".fid";
+    var oldmodpath = modules[i].path;
+
+
+    if(!access(allocStr(newmodpath),0)){
+        remove(allocStr(newmodpath));
+    }
+
+    var fmodule = open(newmodpath, O_CREAT | O_TRUNC | O_RDWR, 0o644);
+    var foldmodule = open(oldmodpath, O_RDONLY, 0);
+
+    if (fmodule == -1 || foldmodule == -1) {
+        if (fmodule !== -1) close(fmodule);
+        if (foldmodule !== -1) close(foldmodule);
+        throw new Error("Cannot open module files: " + oldmodpath + " -> " + newmodpath);
+    }
+
+    try {
+        var is64bit = false;
+        var size_of_mach_header = 0;
+        var magic = getU32(modbase);
+        var cur_cpu_type = getU32(modbase.add(4));
+        var cur_cpu_subtype = getU32(modbase.add(8));
+        if (magic == MH_MAGIC || magic == MH_CIGAM) {
+            is64bit = false;
+            size_of_mach_header = 28;
+        }else if (magic == MH_MAGIC_64 || magic == MH_CIGAM_64) {
+            is64bit = true;
+            size_of_mach_header = 32;
+        }
+
+        var BUFSIZE = 64 * 1024;
+        var buffer = malloc(BUFSIZE);
+
+        read(foldmodule, buffer, BUFSIZE);
+
+        var fileoffset = 0;
+        var filesize = 0;
+        magic = getU32(buffer);
+        if(magic == FAT_CIGAM || magic == FAT_MAGIC){
+            var off = 4;
+            var archs = swap32(getU32(buffer.add(off)));
+            for (var i = 0; i < archs; i++) {
+                var cputype = swap32(getU32(buffer.add(off + 4)));
+                var cpusubtype = swap32(getU32(buffer.add(off + 8)));
+                if(cur_cpu_type == cputype && cur_cpu_subtype == cpusubtype){
+                    fileoffset = swap32(getU32(buffer.add(off + 12)));
+                    filesize = swap32(getU32(buffer.add(off + 16)));
+                    break;
+                }
+                off += 20;
+            }
+
+            if(fileoffset == 0 || filesize == 0) {
+                throw new Error("Cannot find matching architecture in " + oldmodpath);
+            }
+
+            lseek(fmodule, 0, SEEK_SET);
+            lseek(foldmodule, fileoffset, SEEK_SET);
+            for(var i = 0; i < parseInt(filesize / BUFSIZE); i++) {
+                read(foldmodule, buffer, BUFSIZE);
+                write(fmodule, buffer, BUFSIZE);
+            }
+            if(filesize % BUFSIZE){
+                read(foldmodule, buffer, filesize % BUFSIZE);
+                write(fmodule, buffer, filesize % BUFSIZE);
+            }
+        }else{
+            var readLen = 0;
+            lseek(foldmodule, 0, SEEK_SET);
+            lseek(fmodule, 0, SEEK_SET);
+            while ((readLen = read(foldmodule, buffer, BUFSIZE)) > 0) {
+                write(fmodule, buffer, readLen);
+            }
+        }
+
+        var ncmds = getU32(modbase.add(16));
+        var off = size_of_mach_header;
+        var offset_cryptid = -1;
+        var crypt_off = 0;
+        var crypt_size = 0;
+        var segments = [];
+        for (var i = 0; i < ncmds; i++) {
+            var cmd = getU32(modbase.add(off));
+            var cmdsize = getU32(modbase.add(off + 4));
+            if (cmd == LC_ENCRYPTION_INFO || cmd == LC_ENCRYPTION_INFO_64) {
+                offset_cryptid = off + 16;
+                crypt_off = getU32(modbase.add(off + 8));
+                crypt_size = getU32(modbase.add(off + 12));
+            }
+            off += cmdsize;
+        }
+
+        if (offset_cryptid != -1) {
+            var tpbuf = malloc(8);
+            putU64(tpbuf, 0);
+            lseek(fmodule, offset_cryptid, SEEK_SET);
+            write(fmodule, tpbuf, 4);
+            lseek(fmodule, crypt_off, SEEK_SET);
+            write(fmodule, modbase.add(crypt_off), crypt_size);
+        }
+
+        if (readLen < 0) {
+            throw new Error("Cannot read module: " + oldmodpath);
+        }
+        return newmodpath
+    } finally {
+        close(fmodule);
+        close(foldmodule);
+    }
+}
+
+function loadAllDynamicLibrary(app_path) {
+    var defaultManager = ObjC.classes.NSFileManager.defaultManager();
+    var errorPtr = Memory.alloc(Process.pointerSize);
+    errorPtr.writePointer(NULL);
+    var filenames = defaultManager.contentsOfDirectoryAtPath_error_(app_path, errorPtr);
+    for (var i = 0, l = filenames.count(); i < l; i++) {
+        var file_name = filenames.objectAtIndex_(i);
+        var file_path = app_path.stringByAppendingPathComponent_(file_name);
+        if (file_name.hasSuffix_(".framework")) {
+            var bundle = ObjC.classes.NSBundle.bundleWithPath_(file_path);
+            if (bundle.isLoaded()) {
+                console.log("[frida-ios-dump]: " + file_name + " has been loaded. ");
+            } else {
+                if (bundle.load()) {
+                    console.log("[frida-ios-dump]: Load " + file_name + " success. ");
+                } else {
+                    console.log("[frida-ios-dump]: Load " + file_name + " failed. ");
+                }
+            }
+        } else if (file_name.hasSuffix_(".bundle") ||
+                   file_name.hasSuffix_(".momd") ||
+                   file_name.hasSuffix_(".strings") ||
+                   file_name.hasSuffix_(".appex") ||
+                   file_name.hasSuffix_(".app") ||
+                   file_name.hasSuffix_(".lproj") ||
+                   file_name.hasSuffix_(".storyboardc")) {
+            continue;
+        } else {
+            var isDirPtr = Memory.alloc(Process.pointerSize);
+            isDirPtr.writePointer(NULL);
+            defaultManager.fileExistsAtPath_isDirectory_(file_path, isDirPtr);
+            if (isDirPtr.readU8() !== 0) {
+                loadAllDynamicLibrary(file_path);
+            } else {
+                if (file_name.hasSuffix_(".dylib")) {
+                    var is_loaded = 0;
+                    for (var j = 0; j < modules.length; j++) {
+                        if (modules[j].path.indexOf(file_name) != -1) {
+                            is_loaded = 1;
+                            console.log("[frida-ios-dump]: " + file_name + " has been dlopen.");
+                            break;
+                        }
+                    }
+
+                    if (!is_loaded) {
+                        if (!dlopen(allocStr(file_path.toString()), 9).isNull()) {
+                            console.log("[frida-ios-dump]: dlopen " + file_name + " success. ");
+                        } else {
+                            console.log("[frida-ios-dump]: dlopen " + file_name + " failed. ");
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+function handleMessage(message) {
+    modules = getAllAppModules();
+    var app_path = ObjC.classes.NSBundle.mainBundle().bundlePath();
+    loadAllDynamicLibrary(app_path);
+    // start dump
+    modules = getAllAppModules();
+    for (var i = 0; i  < modules.length; i++) {
+        console.log("start dump " + modules[i].path);
+        var result = dumpModule(modules[i].path);
+        send({ dump: result, path: modules[i].path});
+    }
+    send({app: app_path.toString()});
+    send({done: "ok"});
+    recv(handleMessage);
+}
+
+// A spawned app must reach its main run loop before Foundation is used to dump it.
+ObjC.schedule(ObjC.mainQueue, function () {
+    // recv() may deliver an already queued message synchronously.
+    // Register it on the script thread so dumping never blocks the app's main queue.
+    setImmediate(function () {
+        recv(handleMessage);
+    });
+});
+
+```
+
+`dump.py`:
+
+```py
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+# Author : AloneMonkey
+# blog: www.alonemonkey.com
+
+import sys
+import frida
+import threading
+import os
+import shutil
+import argparse
+import tempfile
+import subprocess
+import re
+import paramiko
+from scp import SCPClient
+from tqdm import tqdm
+import traceback
+import socket
+import queue
+import stat
+import posixpath
+import time
+from concurrent.futures import ThreadPoolExecutor
+
+script_dir = os.path.dirname(os.path.realpath(__file__))
+
+DUMP_JS = os.path.join(script_dir, 'dump.js')
+
+User = 'root'
+Password = 'alpine'
+Host = 'localhost'
+Port = 22
+KeyFileName = None
+
+TEMP_DIR = tempfile.gettempdir()
+PAYLOAD_DIR = 'Payload'
+PAYLOAD_PATH = os.path.join(TEMP_DIR, PAYLOAD_DIR)
+file_dict = {}
+
+finished = threading.Event()
+dump_error = None
+message_queue = queue.Queue()
+
+
+def get_usb_iphone():
+    print('Waiting for USB device...')
+    return frida.get_usb_device(timeout=10)
+
+
+class USBSSHForwarder:
+    """Expose a Frida USB channel as a socket with Paramiko's timeout support."""
+
+    def __init__(self, device, port=22):
+        self._stream = device.open_channel('tcp:{}'.format(port))
+        try:
+            self.socket, self._peer = socket.socketpair()
+        except Exception:
+            self._stream.close()
+            raise
+        self._closed = threading.Event()
+        self._close_lock = threading.Lock()
+        for direction in (self._to_device, self._from_device):
+            threading.Thread(target=self._relay, args=(direction,), daemon=True).start()
+
+    def _to_device(self):
+        while not self._closed.is_set():
+            data = self._peer.recv(65536)
+            if not data:
+                break
+            self._stream.write_all(data)
+
+    def _from_device(self):
+        while not self._closed.is_set():
+            data = self._stream.read(65536)
+            if not data:
+                break
+            self._peer.sendall(data)
+
+    def _relay(self, direction):
+        try:
+            direction()
+        except Exception:
+            # Closing the socket wakes Paramiko, which reports transport failures.
+            pass
+        finally:
+            self.close()
+
+    def close(self):
+        with self._close_lock:
+            if self._closed.is_set():
+                return
+            self._closed.set()
+        for endpoint in (self.socket, self._peer):
+            try:
+                endpoint.shutdown(socket.SHUT_RDWR)
+            except OSError:
+                pass
+            endpoint.close()
+        try:
+            self._stream.close()
+        except Exception:
+            pass
+
+
+def resolve_ssh_options(args, config_path=None):
+    host = args.ssh_host or Host
+    config = {}
+    config_path = config_path or os.path.expanduser('~/.ssh/config')
+    if os.path.isfile(config_path):
+        with open(config_path, encoding='utf-8') as handle:
+            config = paramiko.SSHConfig.from_file(handle).lookup(host)
+    hostname = config.get('hostname', host)
+    port = int(args.ssh_port or config.get('port', Port))
+    identity = args.ssh_key_filename or config.get('identityfile') or KeyFileName
+    password = args.ssh_password if args.ssh_password is not None else Password
+    use_usb = not args.ssh_host or (hostname in ('localhost', '127.0.0.1', '::1') and port == 22)
+    return dict(host=hostname, port=port, username=args.ssh_user or config.get('user', User),
+                password=password, key_filename=identity,
+                use_usb=use_usb)
+
+
+def connect_ssh(ssh, device, host, port, username, password, key_filename, use_usb=False):
+    options = dict(port=port, username=username, password=password,
+                   key_filename=key_filename, timeout=10)
+    if not use_usb:
+        ssh.connect(host, **options)
+        return None
+    print('Connecting to device SSH over USB...')
+    forwarder = USBSSHForwarder(device, port=port)
+    try:
+        ssh.connect(host, sock=forwarder.socket, **options)
+    except BaseException:
+        forwarder.close()
+        raise
+    return forwarder
+
+
+def generate_ipa(path, display_name):
+    ipa_filename = display_name + '.ipa'
+
+    print('Generating "{}"'.format(ipa_filename))
+    app_name = file_dict['app']
+
+    for key, value in file_dict.items():
+        from_dir = os.path.join(path, key)
+        to_dir = os.path.join(path, app_name, value)
+        if key != 'app':
+            shutil.move(from_dir, to_dir)
+
+    target_dir = './' + PAYLOAD_DIR
+    zip_args = ('zip', '-qry', os.path.join(os.getcwd(), ipa_filename), target_dir)
+    subprocess.check_call(zip_args, cwd=TEMP_DIR)
+    shutil.rmtree(PAYLOAD_PATH)
+
+
+def on_message(message, data):
+    # Frida callbacks must return promptly: USB SSH also needs its event loop.
+    message_queue.put((message, data))
+
+
+def process_message(message, data):
+    global dump_error
+    if dump_error is not None:
+        return
+    try:
+        if message.get('type') == 'error':
+            raise RuntimeError(message.get('stack') or message.get('description', 'Agent error'))
+        if message.get('type') == 'send':
+            handle_payload(message['payload'])
+    except Exception as e:
+        dump_error = e
+        finished.set()
+
+
+def abort_downloads(executor, ssh_client):
+    """Cancel queued jobs and unblock active channel reads before joining workers."""
+    if executor is not None:
+        executor.shutdown(wait=False, cancel_futures=True)
+    if ssh_client is not None:
+        try:
+            ssh_client.close()
+        except Exception:
+            pass
+
+
+def download_app(ssh_client, app_path, destination, excluded, progress, set_total=None,
+                 scan_progress=None):
+    """Download bundle resources over SFTP, skipping already dumped binaries."""
+    app_path = app_path.rstrip('/')
+    local_app = os.path.join(destination, posixpath.basename(app_path))
+    excluded = set(excluded)
+    sftp = ssh_client.open_sftp()
+    futures = []
+    total_size = 0
+    directories = []
+    worker_state = threading.local()
+    worker_clients = []
+    progress_lock = threading.Lock()
+    first_error = []
+
+    def file_finished(future):
+        if not future.cancelled():
+            error = future.exception()
+            if error is not None:
+                with progress_lock:
+                    if not first_error:
+                        first_error.append(error)
+                abort_downloads(executor, ssh_client)
+
+    def copy_directory(remote, local, relative=''):
+        nonlocal total_size
+        os.makedirs(local, exist_ok=True)
+        for entry in sftp.listdir_attr(remote):
+            if first_error:
+                raise first_error[0]
+            if scan_progress is not None:
+                with progress_lock:
+                    scan_progress(1)
+            relative_path = posixpath.join(relative, entry.filename)
+            if relative_path in excluded:
+                continue
+            remote_path = posixpath.join(remote, entry.filename)
+            local_path = os.path.join(local, entry.filename)
+            if stat.S_ISDIR(entry.st_mode):
+                copy_directory(remote_path, local_path, relative_path)
+                directories.append((local_path, stat.S_IMODE(entry.st_mode)))
+            elif stat.S_ISLNK(entry.st_mode):
+                os.symlink(sftp.readlink(remote_path), local_path)
+            elif stat.S_ISREG(entry.st_mode):
+                total_size += entry.st_size
+                future = executor.submit(copy_file, (remote_path, local_path, entry))
+                futures.append(future)
+                future.add_done_callback(file_finished)
+            else:
+                raise RuntimeError('Unsupported file in app bundle: {}'.format(remote_path))
+
+    def copy_file(item):
+        remote_path, local_path, entry = item
+        if not hasattr(worker_state, 'sftp'):
+            client = ssh_client.open_sftp()
+            with progress_lock:
+                worker_clients.append(client)
+            client.get_channel().settimeout(60)
+            worker_state.sftp = client
+        last_sent = [0]
+
+        def on_progress(sent, size):
+            with progress_lock:
+                progress(sent - last_sent[0])
+            last_sent[0] = sent
+
+        worker_state.sftp.get(remote_path, local_path, callback=on_progress)
+        os.chmod(local_path, stat.S_IMODE(entry.st_mode))
+        if entry.st_atime is not None and entry.st_mtime is not None:
+            os.utime(local_path, (entry.st_atime, entry.st_mtime))
+
+    executor = None
+    try:
+        sftp.get_channel().settimeout(60)
+        executor = ThreadPoolExecutor(max_workers=4)
+        copy_directory(app_path, local_app)
+        if set_total is not None:
+            with progress_lock:
+                set_total(total_size)
+        for future in futures:
+            future.result()
+        # Apply read-only directory modes only after all children have been written.
+        for local_path, mode in directories:
+            os.chmod(local_path, mode)
+    except BaseException as error:
+        if isinstance(error, Exception):
+            with progress_lock:
+                if not first_error:
+                    first_error.append(error)
+        abort_downloads(executor, ssh_client)
+        if isinstance(error, Exception) and first_error:
+            raise first_error[0]
+        raise
+    finally:
+        if executor is not None:
+            executor.shutdown(wait=True, cancel_futures=True)
+        for client in worker_clients:
+            try:
+                client.close()
+            except Exception:
+                pass
+        try:
+            sftp.close()
+        except Exception:
+            pass
+
+
+def handle_payload(payload):
+    if 'done' in payload:
+        finished.set()
+        return
+    t = tqdm(unit='B',unit_scale=True,unit_divisor=1024,miniters=1)
+    last_sent = [0]
+
+    def progress(filename, size, sent):
+        baseName = os.path.basename(filename)
+        if isinstance(baseName, bytes):
+            t.desc = baseName.decode("utf-8")
+        else:
+            t.desc = baseName
+        t.total = size
+        t.update(sent - last_sent[0])
+        last_sent[0] = 0 if size == sent else sent
+
+    try:
+        if 'dump' in payload:
+            origin_path = payload['path']
+            dump_path = payload['dump']
+            if not dump_path:
+                raise RuntimeError('Agent did not produce a dump for {}'.format(origin_path))
+
+            scp_from = dump_path
+            scp_to = PAYLOAD_PATH + '/'
+
+            with SCPClient(ssh.get_transport(), progress = progress, socket_timeout = 60) as scp:
+                scp.get(scp_from, scp_to)
+
+            chmod_dir = os.path.join(PAYLOAD_PATH, os.path.basename(dump_path))
+            chmod_args = ('chmod', '655', chmod_dir)
+            try:
+                subprocess.check_call(chmod_args)
+            except subprocess.CalledProcessError as err:
+                print(err)
+
+            index = origin_path.find('.app/')
+            file_dict[os.path.basename(dump_path)] = origin_path[index + 5:]
+
+        if 'app' in payload:
+            app_path = payload['app']
+            excluded = [value for key, value in file_dict.items() if key != 'app']
+
+            scanned = [0]
+            last_scan_refresh = [0.0]
+            t.set_description_str('App resources (scanning...)')
+
+            def scan_progress(count):
+                scanned[0] += count
+                t.set_description_str('App resources (scanning: {} entries)'.format(scanned[0]),
+                                      refresh=False)
+                now = time.monotonic()
+                if now - last_scan_refresh[0] >= t.mininterval:
+                    t.refresh()
+                    last_scan_refresh[0] = now
+
+            def finish_scan(total):
+                # Downloads have already started; preserve their byte count and timer.
+                t.total = total
+                t.set_description_str('App resources (skipping {} dumped binaries)'.format(len(excluded)),
+                                      refresh=True)
+
+            download_app(ssh, app_path, PAYLOAD_PATH, excluded, t.update,
+                         set_total=finish_scan, scan_progress=scan_progress)
+
+            chmod_dir = os.path.join(PAYLOAD_PATH, os.path.basename(app_path))
+            chmod_args = ('chmod', '755', chmod_dir)
+            try:
+                subprocess.check_call(chmod_args)
+            except subprocess.CalledProcessError as err:
+                print(err)
+
+            file_dict['app'] = os.path.basename(app_path)
+
+    finally:
+        t.close()
+
+def compare_applications(a, b):
+    a_is_running = a.pid != 0
+    b_is_running = b.pid != 0
+    if a_is_running == b_is_running:
+        if a.name > b.name:
+            return 1
+        elif a.name < b.name:
+            return -1
+        else:
+            return 0
+    elif a_is_running:
+        return -1
+    else:
+        return 1
+
+
+def cmp_to_key(mycmp):
+    """Convert a cmp= function into a key= function"""
+
+    class K:
+        def __init__(self, obj):
+            self.obj = obj
+
+        def __lt__(self, other):
+            return mycmp(self.obj, other.obj) < 0
+
+        def __gt__(self, other):
+            return mycmp(self.obj, other.obj) > 0
+
+        def __eq__(self, other):
+            return mycmp(self.obj, other.obj) == 0
+
+        def __le__(self, other):
+            return mycmp(self.obj, other.obj) <= 0
+
+        def __ge__(self, other):
+            return mycmp(self.obj, other.obj) >= 0
+
+        def __ne__(self, other):
+            return mycmp(self.obj, other.obj) != 0
+
+    return K
+
+
+def get_applications(device):
+    try:
+        applications = device.enumerate_applications()
+    except Exception as e:
+        sys.exit('Failed to enumerate applications: %s' % e)
+
+    return applications
+
+
+def list_applications(device):
+    applications = get_applications(device)
+
+    if len(applications) > 0:
+        pid_column_width = max(map(lambda app: len('{}'.format(app.pid)), applications))
+        name_column_width = max(map(lambda app: len(app.name), applications))
+        identifier_column_width = max(map(lambda app: len(app.identifier), applications))
+    else:
+        pid_column_width = 0
+        name_column_width = 0
+        identifier_column_width = 0
+
+    header_format = '%' + str(pid_column_width) + 's  ' + '%-' + str(name_column_width) + 's  ' + '%-' + str(
+        identifier_column_width) + 's'
+    print(header_format % ('PID', 'Name', 'Identifier'))
+    print('%s  %s  %s' % (pid_column_width * '-', name_column_width * '-', identifier_column_width * '-'))
+    line_format = '%' + str(pid_column_width) + 's  ' + '%-' + str(name_column_width) + 's  ' + '%-' + str(
+        identifier_column_width) + 's'
+    for application in sorted(applications, key=cmp_to_key(compare_applications)):
+        if application.pid == 0:
+            print(line_format % ('-', application.name, application.identifier))
+        else:
+            print(line_format % (application.pid, application.name, application.identifier))
+
+
+def load_js_file(session, filename):
+    bridge_path = os.path.join(script_dir, 'node_modules', 'frida-objc-bridge')
+    if not os.path.isdir(bridge_path):
+        raise RuntimeError('Missing frida-objc-bridge. Run npm install in {}'.format(script_dir))
+    compiler = frida.Compiler()
+    compiler.on('diagnostics', lambda diagnostics: print('Agent diagnostics:', diagnostics))
+    source = compiler.build(os.path.basename(filename), project_root=os.path.dirname(filename))
+    script = session.create_script(source)
+    script.on('message', on_message)
+    script.load()
+
+    return script
+
+
+def create_dir(path):
+    path = path.strip()
+    path = path.rstrip('\\')
+    if os.path.exists(path):
+        shutil.rmtree(path)
+    try:
+        os.makedirs(path)
+    except os.error as err:
+        print(err)
+
+
+def open_target_app(device, name_or_bundleid):
+    print('Start the target app {}'.format(name_or_bundleid))
+
+    pid = ''
+    session = None
+    display_name = ''
+    bundle_identifier = ''
+    for application in get_applications(device):
+        if name_or_bundleid == application.identifier or name_or_bundleid == application.name:
+            pid = application.pid
+            display_name = application.name
+            bundle_identifier = application.identifier
+
+    if not bundle_identifier:
+        raise ValueError('Application not found: {}'.format(name_or_bundleid))
+    if not pid:
+        pid = device.spawn([bundle_identifier])
+        try:
+            session = device.attach(pid)
+        finally:
+            device.resume(pid)
+    else:
+        session = device.attach(pid)
+
+    return session, display_name, bundle_identifier
+
+
+def start_dump(session, ipa_name, ssh_client=None):
+    global dump_error, message_queue
+    print('Dumping {} to {}'.format(ipa_name, TEMP_DIR))
+    finished.clear()
+    file_dict.clear()
+    dump_error = None
+    message_queue = queue.Queue()
+    if ssh_client is None:
+        ssh_client = globals().get('ssh')
+
+    def on_detached(reason, crash=None):
+        on_message({'type': 'error', 'description': 'Target session detached: {}'.format(reason)}, None)
+
+    pending_downloads = []
+    download_errors = []
+    download_pool = ThreadPoolExecutor(max_workers=4)
+
+    def download_finished(future):
+        if not future.cancelled():
+            error = future.exception()
+            if error is not None:
+                download_errors.append(error)
+                message_queue.put((error, None))
+                abort_downloads(download_pool, ssh_client)
+
+    session.on('detached', on_detached)
+    try:
+        script = load_js_file(session, DUMP_JS)
+        if not finished.is_set():
+            script.post('dump')
+        while not finished.is_set():
+            try:
+                message, data = message_queue.get(timeout=120)
+            except queue.Empty:
+                raise RuntimeError('No response from the dump agent for 120 seconds. Keep the device unlocked.')
+            if download_errors:
+                raise download_errors[0]
+            if isinstance(message, BaseException):
+                raise message
+            payload = message.get('payload', {}) if message.get('type') == 'send' else {}
+            if 'dump' in payload:
+                future = download_pool.submit(handle_payload, payload)
+                pending_downloads.append(future)
+                future.add_done_callback(download_finished)
+                continue
+            if 'app' in payload or 'done' in payload:
+                # Resource exclusions and packaging need every completed dump mapping.
+                for future in pending_downloads:
+                    future.result()
+            process_message(message, data)
+        if dump_error is not None:
+            raise dump_error
+        generate_ipa(PAYLOAD_PATH, ipa_name)
+    except BaseException as error:
+        primary_error = download_errors[0] if isinstance(error, Exception) and download_errors else error
+        abort_downloads(download_pool, ssh_client)
+        if primary_error is not error:
+            raise primary_error
+        raise
+    finally:
+        download_pool.shutdown(wait=True, cancel_futures=True)
+        session.off('detached', on_detached)
+        if not session.is_detached:
+            session.detach()
+
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='frida-ios-dump (by AloneMonkey, Frida 17+)')
+    parser.add_argument('-l', '--list', dest='list_applications', action='store_true', help='List the installed apps')
+    parser.add_argument('-o', '--output', dest='output_ipa', help='Specify name of the decrypted IPA')
+    parser.add_argument('-H', '--host', dest='ssh_host', help='SSH hostname or alias from ~/.ssh/config')
+    parser.add_argument('-p', '--port', dest='ssh_port', help='Specify SSH port')
+    parser.add_argument('-u', '--user', dest='ssh_user', help='Specify SSH username')
+    parser.add_argument('-P', '--password', dest='ssh_password', help='Specify SSH password')
+    parser.add_argument('-K', '--key_filename', dest='ssh_key_filename', help='Specify SSH private key file path')
+    parser.add_argument('target', nargs='?', help='Bundle identifier or display name of the target app')
+
+    args = parser.parse_args()
+
+    exit_code = 0
+    ssh = None
+    usb_ssh = None
+
+    if not len(sys.argv[1:]):
+        parser.print_help()
+        sys.exit(exit_code)
+
+    if not args.list_applications and not args.target:
+        parser.error('target is required unless --list is specified')
+
+    try:
+        device = get_usb_iphone()
+    except Exception as e:
+        sys.exit('Failed to connect to USB device: {}'.format(e))
+
+    if args.list_applications:
+        list_applications(device)
+    else:
+        name_or_bundleid = args.target
+        output_ipa = args.output_ipa
+        try:
+            ssh_options = resolve_ssh_options(args)
+            ssh = paramiko.SSHClient()
+            ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+            usb_ssh = connect_ssh(ssh, device, **ssh_options)
+
+            create_dir(PAYLOAD_PATH)
+            (session, display_name, bundle_identifier) = open_target_app(device, name_or_bundleid)
+            if output_ipa is None:
+                output_ipa = display_name
+            output_ipa = re.sub(r'\.ipa$', '', output_ipa)
+            if session:
+                start_dump(session, output_ipa, ssh_client=ssh)
+        except KeyboardInterrupt:
+            print('\nInterrupted; downloads cancelled.')
+            exit_code = 130
+        except paramiko.ssh_exception.NoValidConnectionsError as e:
+            print(e)
+            print('Try specifying -H/--host and/or -p/--port')
+            exit_code = 1
+        except paramiko.AuthenticationException as e:
+            print(e)
+            print('Try specifying -u/--user and/or -P/--password')
+            exit_code = 1
+        except Exception as e:
+            print('*** Caught exception: %s: %s' % (e.__class__, e))
+            traceback.print_exc()
+            exit_code = 1
+
+    if ssh:
+        ssh.close()
+    if usb_ssh:
+        usb_ssh.close()
+
+    if os.path.exists(PAYLOAD_PATH):
+        shutil.rmtree(PAYLOAD_PATH)
+
+    sys.exit(exit_code)
+
+```
+
+`package.json`:
+
+```json
+{
+  "name": "frida-ios-dump",
+  "private": true,
+  "version": "3.0.0",
+  "description": "Objective-C bridge dependency for the Frida dump agent",
+  "dependencies": {
+    "frida-objc-bridge": "^8.0.0"
+  }
+}
+
+```
+
+`pnpm-lock.yaml`:
+
+```yaml
+lockfileVersion: '9.0'
+
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
+importers:
+
+  .:
+    dependencies:
+      frida-objc-bridge:
+        specifier: ^8.0.0
+        version: 8.0.6
+
+packages:
+
+  frida-objc-bridge@8.0.6:
+    resolution: {integrity: sha512-FafCVXbh8837VIyYv9OjJFwPv8w3EiJbDpdQbK50316TfY1paK8URiICzEQIboRLgAjtoi9MugXnys2DOZbiUg==}
+
+snapshots:
+
+  frida-objc-bridge@8.0.6: {}
+
+```
+
+`process.sh`:
+
+```sh
+#!/bin/bash
+
+ORIGINAL_IPA_FOLDER="${HOME}/Music/iTunes/iTunes Media/Mobile Applications"
+DECRYPTED_IPA_FOLDER="${HOME}/Hacking/Decrypted Apps"
+
+IOS_DEPLOY="/usr/local/bin/ios-deploy"
+PLISTBUDDY="/usr/libexec/PlistBuddy"
+FRIDA_DUMP_PY="./dump.py"
+# CFBundleIdentifier in Info.plist to uninstall
+
+ORIGINAL_IPAS=()
+while IFS=  read -r -d $'\0'; do
+    ORIGINAL_IPA=$( echo "${REPLY}" )
+    ORIGINAL_IPAS+=( "${ORIGINAL_IPA}" )
+done < <(find "${ORIGINAL_IPA_FOLDER}" -type f -name '*.ipa' -print0)
+
+echo "Decrypting ${#ORIGINAL_IPAS[@]} apps"
+APP_COUNTER=0
+for ORIGINAL_IPA in "${ORIGINAL_IPAS[@]}"; do
+    APP_COUNTER=$((APP_COUNTER + 1))
+    echo "#### Decryting app number: ${APP_COUNTER}"
+    APP_BUNDLE_ID=""
+    ESCAPED_IPA_PATH=$( echo "${ORIGINAL_IPA}" | sed 's/ /\\ /g' | sed 's/&/\\&/g' )
+
+    IPA_NAME=$( basename "${ESCAPED_IPA_PATH}" )
+
+    # Make a temp file for the iTunesMetadata.plist
+    ITUNESMETADATA_TMP_FILE=$( mktemp "/tmp/iTunesMetadata.plist.XXXXXX" ) || exit 1
+
+    # Unzip iTunesMetadata.plist to temp file
+    UNZIP_CMD="unzip -p ${ESCAPED_IPA_PATH} iTunesMetadata.plist > ${ITUNESMETADATA_TMP_FILE}"
+    echo "${UNZIP_CMD}"
+    eval "${UNZIP_CMD}" || exit 1
+
+    # Extract softwareVersionBundleId from plist file
+    APP_BUNDLE_ID=$( "${PLISTBUDDY}" -c 'Print softwareVersionBundleId' "${ITUNESMETADATA_TMP_FILE}" )
+    echo "App bundle identifier: ${APP_BUNDLE_ID}"
+    rm "${ITUNESMETADATA_TMP_FILE}"
+
+    # Install the app
+    IOS_DEPLOY_INSTALL="${IOS_DEPLOY} -W --bundle ${ESCAPED_IPA_PATH}"
+    echo "${IOS_DEPLOY_INSTALL}"
+    eval "${IOS_DEPLOY_INSTALL}"
+
+    if [ $? -eq 0 ]; then
+        sleep 1
+
+        echo "Dumping ${APP_BUNDLE_ID}"
+        FRIDA_DUMP_CMD="${FRIDA_DUMP_PY} --output ${IPA_NAME} ${APP_BUNDLE_ID}"
+        echo "${FRIDA_DUMP_CMD}"
+        eval "${FRIDA_DUMP_CMD}"
+    fi
+
+    # Uninstall the app
+    IOS_DEPLOY_UNINSTALL="${IOS_DEPLOY} -W --uninstall_only --bundle_id ${APP_BUNDLE_ID}"
+    echo "${IOS_DEPLOY_UNINSTALL}"
+    eval "${IOS_DEPLOY_UNINSTALL}"
+done
+```
+
+`requirements.txt`:
+
+```txt
+frida>=17.23.3,<18
+frida-tools>=14
+paramiko>=3
+scp>=0.15
+tqdm>=4.66
+
+```
+
+`tests/test_dump.py`:
+
+```py
+from pathlib import Path
+import argparse
+import tempfile
+import unittest
+from unittest.mock import Mock, patch
+import zipfile
+import paramiko
+import queue
+import threading
+import os
+import shutil
+import stat
+import io
+
+import dump
+
+
+class DumpTests(unittest.TestCase):
+    def setUp(self):
+        dump.dump_error = None
+        dump.finished.clear()
+        dump.file_dict.clear()
+        dump.message_queue = queue.Queue()
+
+    def test_bundle_download_skips_exact_binary_paths_and_keeps_resources(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            app = root / "Example's App.app"
+            framework = app / 'Frameworks' / 'Test.framework'
+            framework.mkdir(parents=True)
+            (app / 'Empty').mkdir()
+            (app / 'Resources').mkdir()
+            (app / 'Example').write_bytes(b'encrypted main')
+            (framework / 'Test').write_bytes(b'encrypted framework')
+            (app / 'Info.plist').write_bytes(b'plist')
+            (app / 'Resources' / 'Example').write_bytes(b'resource with same basename')
+            (app / 'Resources' / 'helper').write_bytes(b'helper')
+            (app / 'Resources' / 'helper').chmod(0o755)
+            (app / 'InfoLink').symlink_to('Info.plist')
+            destination = root / 'Payload'
+            def get(remote, local, callback):
+                shutil.copyfile(remote, local)
+                size = Path(remote).stat().st_size
+                callback(size, size)
+
+            clients = []
+
+            def open_sftp():
+                client = Mock()
+                client.listdir_attr.side_effect = lambda path: [
+                    paramiko.SFTPAttributes.from_stat(entry.lstat(), entry.name)
+                    for entry in Path(path).iterdir()]
+                client.readlink.side_effect = os.readlink
+                client.get.side_effect = get
+                clients.append(client)
+                return client
+
+            ssh = Mock()
+            ssh.open_sftp.side_effect = open_sftp
+            received = []
+            totals = []
+            scanned = []
+            dump.download_app(ssh, str(app), str(destination),
+                              ['Example', 'Frameworks/Test.framework/Test'], received.append,
+                              set_total=totals.append,
+                              scan_progress=scanned.append)
+            downloaded = {Path(call.args[0]).relative_to(app).as_posix()
+                          for client in clients for call in client.get.call_args_list}
+            self.assertEqual(downloaded, {'Info.plist', 'Resources/Example', 'Resources/helper'})
+            copied_app = destination / app.name
+            self.assertTrue((copied_app / 'Empty').is_dir())
+            self.assertTrue((copied_app / 'Frameworks' / 'Test.framework').is_dir())
+            self.assertFalse((copied_app / 'Example').exists())
+            self.assertFalse((copied_app / 'Frameworks' / 'Test.framework' / 'Test').exists())
+            self.assertEqual(os.readlink(copied_app / 'InfoLink'), 'Info.plist')
+            self.assertEqual(stat.S_IMODE((copied_app / 'Resources' / 'helper').stat().st_mode), 0o755)
+            self.assertEqual(sum(received), sum((app / name).stat().st_size for name in downloaded))
+            self.assertEqual(totals, [sum(received)])
+            self.assertEqual(sum(scanned), len(list(app.rglob('*'))))
+            self.assertLessEqual(len(clients), 5)
+            for client in clients:
+                client.close.assert_called_once()
+
+    def test_download_starts_before_directory_scan_finishes(self):
+        downloaded = threading.Event()
+        file_entry, directory_entry = paramiko.SFTPAttributes(), paramiko.SFTPAttributes()
+        file_entry.filename, file_entry.st_mode, file_entry.st_size = 'resource', stat.S_IFREG | 0o644, 1
+        directory_entry.filename, directory_entry.st_mode = 'Subdir', stat.S_IFDIR | 0o755
+        listing, worker = Mock(), Mock()
+
+        def list_directory(path):
+            if path == '/Test.app':
+                return [file_entry, directory_entry]
+            self.assertTrue(downloaded.wait(timeout=2), 'Download must start while scanning is in progress')
+            return []
+
+        def get(remote, local, callback):
+            Path(local).write_bytes(b'x')
+            callback(1, 1)
+            downloaded.set()
+
+        listing.listdir_attr.side_effect = list_directory
+        worker.get.side_effect = get
+        ssh = Mock()
+        ssh.open_sftp.side_effect = [listing, worker]
+        totals, received = [], []
+        with tempfile.TemporaryDirectory() as directory:
+            dump.download_app(ssh, '/Test.app', directory, [], received.append, set_total=totals.append)
+        self.assertEqual(totals, [1])
+        self.assertEqual(sum(received), 1)
+
+    def test_bundle_download_failure_is_reported_and_sftp_closed(self):
+        sftp = Mock()
+        sftp.listdir_attr.side_effect = OSError('connection lost')
+        ssh = Mock()
+        ssh.open_sftp.return_value = sftp
+        with tempfile.TemporaryDirectory() as directory:
+            with self.assertRaisesRegex(OSError, 'connection lost'):
+                dump.download_app(ssh, '/Test.app', directory, [], Mock())
+        sftp.close.assert_called_once()
+
+    def test_parallel_file_failure_is_reported_and_all_channels_closed(self):
+        entry = paramiko.SFTPAttributes()
+        entry.filename = 'resource'
+        entry.st_mode = stat.S_IFREG | 0o644
+        entry.st_size = 1
+        listing, worker = Mock(), Mock()
+        listing.listdir_attr.return_value = [entry]
+        worker.get.side_effect = OSError('file download failed')
+        ssh = Mock()
+        ssh.open_sftp.side_effect = [listing, worker]
+        with tempfile.TemporaryDirectory() as directory:
+            with self.assertRaisesRegex(OSError, 'file download failed'):
+                dump.download_app(ssh, '/Test.app', directory, [], Mock())
+        listing.close.assert_called_once()
+        worker.close.assert_called_once()
+
+    def test_resource_total_preserves_bytes_downloaded_during_scan(self):
+        output = io.StringIO()
+        real_tqdm = dump.tqdm
+
+        def download(ssh, app, destination, excluded, progress, set_total=None, scan_progress=None):
+            scan_progress(1000)
+            progress(40 * 1024 * 1024)
+            set_total(80 * 1024 * 1024)
+            progress(40 * 1024 * 1024)
+
+        with patch.object(dump, 'ssh', Mock(), create=True), \
+                patch.object(dump, 'download_app', side_effect=download), \
+                patch.object(dump.subprocess, 'check_call'), \
+                patch.object(dump, 'tqdm', side_effect=lambda **kwargs: real_tqdm(file=output, **kwargs)):
+            dump.handle_payload({'app': '/Test.app'})
+        rendered = output.getvalue()
+        self.assertIn('scanning: 1000 entries', rendered)
+        self.assertIn('40.0M/80.0M', rendered)
+        self.assertIn('50%', rendered)
+        self.assertIn('100%', rendered)
+
+    def test_message_callback_returns_without_running_transfer(self):
+        message = {'type': 'send', 'payload': {'dump': '/tmp/test.fid'}}
+        with patch.object(dump, 'handle_payload') as transfer:
+            callback = threading.Thread(target=dump.on_message, args=(message, None), daemon=True)
+            callback.start()
+            callback.join(timeout=1)
+            self.assertFalse(callback.is_alive(), 'Frida callback must return without waiting for SCP')
+            transfer.assert_not_called()
+            queued_message, data = dump.message_queue.get_nowait()
+            dump.process_message(queued_message, data)
+            transfer.assert_called_once_with(message['payload'])
+
+    def test_done_waits_for_all_queued_transfers(self):
+        session = Mock(is_detached=False)
+        script = Mock()
+        transfers = []
+
+        def post(_):
+            for payload in ({'dump': '/tmp/test.fid'}, {'app': '/tmp/Test.app'}, {'done': 'ok'}):
+                dump.on_message({'type': 'send', 'payload': payload}, None)
+
+        def transfer(payload):
+            transfers.append(payload)
+            if 'done' in payload:
+                dump.finished.set()
+
+        script.post.side_effect = post
+        with patch.object(dump, 'load_js_file', return_value=script), \
+                patch.object(dump, 'handle_payload', side_effect=transfer), \
+                patch.object(dump, 'generate_ipa') as package:
+            package.side_effect = lambda *args: self.assertEqual(
+                transfers, [{'dump': '/tmp/test.fid'}, {'app': '/tmp/Test.app'}, {'done': 'ok'}])
+            dump.start_dump(session, 'test')
+        package.assert_called_once()
+
+    def test_dump_downloads_overlap_and_finish_before_resources(self):
+        session = Mock(is_detached=False)
+        script = Mock()
+        lock = threading.Lock()
+        both_started = threading.Event()
+        started, completed = set(), set()
+
+        def post(_):
+            for payload in ({'dump': 'main'}, {'dump': 'framework'}, {'app': '/Test.app'}, {'done': 'ok'}):
+                dump.on_message({'type': 'send', 'payload': payload}, None)
+
+        def transfer(payload):
+            if 'dump' in payload:
+                with lock:
+                    started.add(payload['dump'])
+                    if len(started) == 2:
+                        both_started.set()
+                self.assertTrue(both_started.wait(timeout=2), 'Dump downloads must overlap')
+                with lock:
+                    completed.add(payload['dump'])
+            elif 'app' in payload:
+                self.assertEqual(completed, {'main', 'framework'})
+            elif 'done' in payload:
+                dump.finished.set()
+
+        script.post.side_effect = post
+        with patch.object(dump, 'load_js_file', return_value=script), \
+                patch.object(dump, 'handle_payload', side_effect=transfer), \
+                patch.object(dump, 'generate_ipa') as package:
+            dump.start_dump(session, 'test')
+        package.assert_called_once()
+
+    def test_async_dump_failure_wakes_consumer_without_agent_done(self):
+        session = Mock(is_detached=False)
+        script = Mock()
+        script.post.side_effect = lambda _: dump.on_message(
+            {'type': 'send', 'payload': {'dump': '/test.fid'}}, None)
+        with patch.object(dump, 'load_js_file', return_value=script), \
+                patch.object(dump, 'handle_payload', side_effect=OSError('dump download failed')), \
+                patch.object(dump, 'generate_ipa') as package:
+            with self.assertRaisesRegex(OSError, 'dump download failed'):
+                dump.start_dump(session, 'test')
+        package.assert_not_called()
+
+    def test_interrupt_closes_active_download_before_joining(self):
+        started, closed = threading.Event(), threading.Event()
+        session = Mock(is_detached=False)
+        ssh, script = Mock(), Mock()
+        ssh.close.side_effect = closed.set
+
+        def post(_):
+            dump.on_message({'type': 'send', 'payload': {'dump': '/test.fid'}}, None)
+
+            def interrupt():
+                if started.wait(timeout=2):
+                    dump.message_queue.put((KeyboardInterrupt(), None))
+
+            threading.Thread(target=interrupt, daemon=True).start()
+
+        def transfer(_):
+            started.set()
+            self.assertTrue(closed.wait(timeout=2), 'SSH must close before waiting for downloads')
+            raise OSError('channel closed during cancellation')
+
+        script.post.side_effect = post
+        with patch.object(dump, 'load_js_file', return_value=script), \
+                patch.object(dump, 'handle_payload', side_effect=transfer), \
+                patch.object(dump, 'generate_ipa') as package:
+            with self.assertRaises(KeyboardInterrupt):
+                dump.start_dump(session, 'test', ssh_client=ssh)
+        self.assertTrue(closed.is_set())
+        package.assert_not_called()
+        session.detach.assert_called_once()
+
+    def test_failed_dump_closes_other_active_download_and_preserves_error(self):
+        started, closed = threading.Event(), threading.Event()
+        session = Mock(is_detached=False)
+        ssh, script = Mock(), Mock()
+        ssh.close.side_effect = closed.set
+
+        def post(_):
+            for payload in ({'dump': 'blocked'}, {'dump': 'failed'}, {'app': '/Test.app'}, {'done': 'ok'}):
+                dump.on_message({'type': 'send', 'payload': payload}, None)
+
+        def transfer(payload):
+            if payload['dump'] == 'blocked':
+                started.set()
+                self.assertTrue(closed.wait(timeout=2), 'Failure must cancel other active downloads')
+                raise EOFError('secondary connection error')
+            self.assertTrue(started.wait(timeout=2))
+            raise OSError('original download failure')
+
+        script.post.side_effect = post
+        with patch.object(dump, 'load_js_file', return_value=script), \
+                patch.object(dump, 'handle_payload', side_effect=transfer), \
+                patch.object(dump, 'generate_ipa') as package:
+            with self.assertRaisesRegex(OSError, 'original download failure'):
+                dump.start_dump(session, 'test', ssh_client=ssh)
+        package.assert_not_called()
+
+    def test_scan_error_closes_active_sftp_download_and_preserves_error(self):
+        started, closed = threading.Event(), threading.Event()
+        file_entry, subdir = paramiko.SFTPAttributes(), paramiko.SFTPAttributes()
+        file_entry.filename, file_entry.st_mode, file_entry.st_size = 'resource', stat.S_IFREG | 0o644, 1
+        subdir.filename, subdir.st_mode = 'Subdir', stat.S_IFDIR | 0o755
+        listing, worker, ssh = Mock(), Mock(), Mock()
+        ssh.open_sftp.side_effect = [listing, worker]
+        ssh.close.side_effect = closed.set
+
+        def list_directory(path):
+            if path == '/Test.app':
+                return [file_entry, subdir]
+            self.assertTrue(started.wait(timeout=2))
+            raise OSError('original scan failure')
+
+        def get(*args, **kwargs):
+            started.set()
+            self.assertTrue(closed.wait(timeout=2), 'Scan failure must close active SFTP reads')
+            raise EOFError('secondary SFTP error')
+
+        listing.listdir_attr.side_effect = list_directory
+        worker.get.side_effect = get
+        with tempfile.TemporaryDirectory() as directory:
+            with self.assertRaisesRegex(OSError, 'original scan failure'):
+                dump.download_app(ssh, '/Test.app', directory, [], Mock())
+        worker.close.assert_called_once()
+
+    def test_interrupt_during_scan_preserves_keyboard_interrupt(self):
+        listing, ssh = Mock(), Mock()
+        ssh.open_sftp.return_value = listing
+        listing.listdir_attr.side_effect = KeyboardInterrupt()
+        with tempfile.TemporaryDirectory() as directory:
+            with self.assertRaises(KeyboardInterrupt):
+                dump.download_app(ssh, '/Test.app', directory, [], Mock())
+        ssh.close.assert_called()
+
+    def test_ssh_alias_uses_config_and_uses_usb(self):
+        args = argparse.Namespace(ssh_host='iphone', ssh_port=None, ssh_user=None,
+                                  ssh_password=None, ssh_key_filename=None)
+        with tempfile.TemporaryDirectory() as directory:
+            config = Path(directory) / 'config'
+            config.write_text('Host iphone\n HostName 127.0.0.1\n Port 22\n'
+                              ' User mobile\n IdentityFile ~/.ssh/test_key\n')
+            options = dump.resolve_ssh_options(args, str(config))
+            self.assertEqual(options['host'], '127.0.0.1')
+            self.assertEqual(options['username'], 'mobile')
+            self.assertTrue(options['key_filename'][0].endswith('/.ssh/test_key'))
+            self.assertEqual(options['password'], dump.Password)
+            self.assertTrue(options['use_usb'])
+            args.ssh_user = 'other'
+            args.ssh_port = '2200'
+            options = dump.resolve_ssh_options(args, str(config))
+            self.assertEqual(options['username'], 'other')
+            self.assertEqual(options['port'], 2200)
+            self.assertFalse(options['use_usb'])
+            args.ssh_password = 'explicit-password'
+            self.assertEqual(dump.resolve_ssh_options(args, str(config))['password'], 'explicit-password')
+
+    def test_usb_connects_without_attempting_local_tcp(self):
+        ssh = Mock()
+        with patch.object(dump, 'USBSSHForwarder') as forwarder:
+            result = dump.connect_ssh(ssh, Mock(), 'localhost', 22, 'mobile', 'test', None,
+                                      use_usb=True)
+        self.assertIs(result, forwarder.return_value)
+        ssh.connect.assert_called_once()
+        forwarder.assert_called_once_with(unittest.mock.ANY, port=22)
+        self.assertIs(ssh.connect.call_args.kwargs['sock'], result.socket)
+
+    def test_explicit_connection_does_not_fall_back(self):
+        ssh = Mock()
+        ssh.connect.side_effect = paramiko.ssh_exception.NoValidConnectionsError(
+            {('127.0.0.1', 2223): ConnectionRefusedError()})
+        with patch.object(dump, 'USBSSHForwarder') as forwarder:
+            with self.assertRaises(paramiko.ssh_exception.NoValidConnectionsError):
+                dump.connect_ssh(ssh, Mock(), 'localhost', 2223, 'mobile', 'test', None)
+        forwarder.assert_not_called()
+
+    def test_usb_authentication_failure_closes_forwarder(self):
+        ssh = Mock()
+        ssh.connect.side_effect = paramiko.AuthenticationException()
+        with patch.object(dump, 'USBSSHForwarder') as forwarder:
+            with self.assertRaises(paramiko.AuthenticationException):
+                dump.connect_ssh(ssh, Mock(), 'localhost', 22, 'mobile', 'test', None,
+                                 use_usb=True)
+        forwarder.return_value.close.assert_called_once()
+
+    def test_agent_exception_aborts_without_packaging(self):
+        session = Mock(is_detached=False)
+        script = Mock()
+        script.post.side_effect = lambda _: dump.on_message(
+            {'type': 'error', 'description': 'access violation', 'stack': 'agent stack'}, None)
+        with patch.object(dump, 'load_js_file', return_value=script), \
+                patch.object(dump, 'generate_ipa') as package:
+            with self.assertRaisesRegex(RuntimeError, 'agent stack'):
+                dump.start_dump(session, 'test')
+        package.assert_not_called()
+        session.detach.assert_called_once()
+
+    def test_transfer_failure_wakes_waiter_and_ignores_done(self):
+        with patch.object(dump, 'handle_payload', side_effect=OSError('SCP disconnected')) as handler:
+            dump.process_message({'type': 'send', 'payload': {'dump': '/tmp/test.fid'}}, None)
+            dump.process_message({'type': 'send', 'payload': {'done': 'ok'}}, None)
+        self.assertTrue(dump.finished.is_set())
+        self.assertIsInstance(dump.dump_error, OSError)
+        handler.assert_called_once()
+
+    def test_unexpected_detach_aborts_without_packaging(self):
+        session = Mock(is_detached=True)
+        script = Mock()
+        session.on.side_effect = lambda signal, callback: setattr(session, 'detached_callback', callback)
+        script.post.side_effect = lambda _: session.detached_callback('process-terminated')
+        with patch.object(dump, 'load_js_file', return_value=script), \
+                patch.object(dump, 'generate_ipa') as package:
+            with self.assertRaisesRegex(RuntimeError, 'process-terminated'):
+                dump.start_dump(session, 'test')
+        package.assert_not_called()
+        session.detach.assert_not_called()
+
+    def test_missing_bridge_gives_install_instruction(self):
+        with patch.object(dump.os.path, 'isdir', return_value=False):
+            with self.assertRaisesRegex(RuntimeError, 'npm install'):
+                dump.load_js_file(Mock(), dump.DUMP_JS)
+
+    def test_ipa_contains_replaced_binary(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            payload = root / 'Payload'
+            (payload / 'Example.app' / 'Frameworks').mkdir(parents=True)
+            (payload / 'Example.app' / 'Frameworks' / 'Example').write_bytes(b'encrypted')
+            (payload / 'Example.app' / 'BinaryLink').symlink_to('Frameworks/Example')
+            (payload / 'Example.fid').write_bytes(b'decrypted')
+            dump.file_dict.update({'app': 'Example.app', 'Example.fid': 'Frameworks/Example'})
+            with patch.object(dump, 'TEMP_DIR', temporary), \
+                    patch.object(dump, 'PAYLOAD_PATH', str(payload)):
+                dump.generate_ipa(str(payload), str(root / 'output'))
+            with zipfile.ZipFile(root / 'output.ipa') as archive:
+                self.assertEqual(archive.read('Payload/Example.app/Frameworks/Example'), b'decrypted')
+                link = archive.getinfo('Payload/Example.app/BinaryLink')
+                self.assertTrue(stat.S_ISLNK(link.external_attr >> 16))
+                self.assertEqual(archive.read(link), b'Frameworks/Example')
+                self.assertIsNone(archive.testzip())
+            self.assertFalse(payload.exists())
+
+
+if __name__ == '__main__':
+    unittest.main()
+
+```
