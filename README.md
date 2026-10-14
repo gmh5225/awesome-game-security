@@ -942,6 +942,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/iniGlowee/headless-asset-re [Documented methodology for headless game-asset reverse engineering without the original SDK—reference-first decode, render validation, and IP-safe workflows (no bundled game data).]
 - https://github.com/xshxdex98/OpenMCM2 [Native Motocross Madness 2 rebuild: Ghidra export/relink harness, retail section verification, and integrated OpenGL renderer]
 - https://github.com/ling71671/open-reverselab [Agent-native RE lab with knowledge base, 100+ MCP tools, and APK/PE/game-cheating analysis workflows]
+- https://github.com/zhuyansen/awesome-ai-reverse-engineering [Curated AI-agent RE stack: Ghidra/IDA MCP servers, mobile tooling (jadx, Frida), agent skills, and security-graded open-source RE projects]
 - https://github.com/2akouwu/reverify [AI-assisted reverse engineering with deterministic byte-level verification via MCP server and CLI]
 - https://github.com/mytechnotalent/rea [Offline-first RE assistant with one-shot binary scan, native PE/ELF/Mach-O and JavaScript/Electron static inventory, local RAG, multi-agent harness, and MCP server]
 - https://github.com/LargoScript/n0xis [Cross-platform Rust RE pipeline with static PE/ELF analysis, SSA decompilation, live memory scanning, hardware watchpoints, and MCP/JSON automation for game reversing]
