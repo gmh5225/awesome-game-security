@@ -1,0 +1,480 @@
+Project Path: arc_OTAKUWeBer_arch-linux-secure-boot-guide_nldj9yq6
+
+Source Tree:
+
+```txt
+arc_OTAKUWeBer_arch-linux-secure-boot-guide_nldj9yq6
+└── README.md
+
+```
+
+`README.md`:
+
+```md
+# How to Enable Secure Boot on Linux
+
+> **The definitive, beginner-friendly guide to setting up and maintaining Secure Boot on Arch Linux and other DIY distributions (EndeavourOS, CachyOS, Manjaro, Gentoo, Void, NixOS).**  
+> *Supports both Standalone Linux systems and Dual-Boot setups with Windows 10/11 (for Valorant, FACEIT, and Anti-Cheat).*
+
+---
+
+## Table of Contents
+
+- [Why This Guide Exists: The Secure Boot Dilemma](#why-this-guide-exists-the-secure-boot-dilemma)
+  - [Pre-Signed Distros vs. "DIY" Distros](#pre-signed-distros-vs-diy-distros)
+  - [Why Arch is Used as Our Primary Example](#why-arch-is-used-as-our-primary-example)
+  - [Dual-Booting with Windows (Valorant, Vanguard, Anti-Cheat)](#dual-booting-with-windows-valorant-vanguard-anti-cheat)
+  - [Standalone Linux: Firmware & Rootkit Protection](#standalone-linux-firmware--rootkit-protection)
+- [Supported Distributions](#supported-distributions)
+- [Prerequisites & Safety Precautions](#prerequisites--safety-precautions)
+  - [1. UEFI & GPT Verification](#1-uefi--gpt-verification)
+  - [2. Locate Your EFI Partition (ESP)](#2-locate-your-efi-partition-esp)
+  - [3. Windows BitLocker Recovery Key (Crucial for Dual-Booters)](#3-windows-bitlocker-recovery-key-crucial-for-dual-booters)
+- [Recommended BIOS / UEFI Settings](#recommended-bios--uefi-settings)
+- [Step-by-Step Setup Guide using `sbctl`](#step-by-step-setup-guide-using-sbctl)
+  - [Step 1: Install `sbctl` on Your System](#step-1-install-sbctl-on-your-system)
+  - [Step 2: Inspect Initial Secure Boot Status](#step-2-inspect-initial-secure-boot-status)
+  - [Step 3: Put BIOS into Setup Mode (Clear Factory Keys)](#step-3-put-bios-into-setup-mode-clear-factory-keys)
+  - [Step 4: Generate Your Custom Cryptographic Keys](#step-4-generate-your-custom-cryptographic-keys)
+  - [Step 5: Enroll Keys (CRITICAL: Retain Microsoft Signatures)](#step-5-enroll-keys-critical-retain-microsoft-signatures)
+  - [Step 6: Set Up Fallback Bootloader & Sign Boot Binaries](#step-6-set-up-fallback-bootloader--sign-boot-binaries)
+  - [Step 7: Verify File Signatures and Firmware Trust](#step-7-verify-file-signatures-and-firmware-trust)
+  - [Step 8: Re-Enable Secure Boot in BIOS](#step-8-re-enable-secure-boot-in-bios)
+  - [Step 9: Confirm Active Status](#step-9-confirm-active-status)
+- [Bootloader Specifics](#bootloader-specifics)
+  - [GRUB](#grub)
+  - [systemd-boot](#systemd-boot)
+  - [rEFInd](#refind)
+  - [Unified Kernel Images (UKI)](#unified-kernel-images-uki)
+- [How System Updates Work (Automatic Signing Hooks)](#how-system-updates-work-automatic-signing-hooks)
+- [Troubleshooting & Common Pitfalls](#troubleshooting--common-pitfalls)
+  - [1. `sbctl enroll-keys` fails: "Setup Mode is not enabled"](#1-sbctl-enroll-keys-fails-setup-mode-is-not-enabled)
+  - [2. Windows fails to boot or prompts for BitLocker recovery](#2-windows-fails-to-boot-or-prompts-for-bitlocker-recovery)
+  - [3. Black screen on boot with dedicated graphics card](#3-black-screen-on-boot-with-dedicated-graphics-card)
+  - [4. "Invalid Signature" / "Security Violation" error on boot](#4-invalid-signature--security-violation-error-on-boot)
+  - [5. Windows Fast Startup causing dual-boot drive lockups](#5-windows-fast-startup-causing-dual-boot-drive-lockups)
+  - [6. UEFI boot entry disappeared or order reset](#6-uefi-boot-entry-disappeared-or-order-reset)
+- [Verification Checklist](#verification-checklist)
+- [Quick Reference Cheatsheet](#quick-reference-cheatsheet)
+- [Official Resources & Documentation](#official-resources--documentation)
+- [Disclaimer & Liability Notice](#disclaimer--liability-notice)
+
+---
+
+## Why This Guide Exists: The Secure Boot Dilemma
+
+Secure Boot is a UEFI security protocol designed to ensure that your computer only boots verified, trusted code before loading your operating system.
+
+### Pre-Signed Distros vs. "DIY" Distros
+
+| Category | Distributions | How Secure Boot is Handled |
+| :--- | :--- | :--- |
+| **Out-of-the-Box Distros** | Ubuntu, Fedora, Debian, openSUSE, RHEL | Ship a pre-compiled bootloader (**Shim**) signed by Microsoft's 3rd-Party UEFI CA. Secure Boot works immediately without user setup. |
+| **"DIY" & Rolling Distros** | **Arch Linux, EndeavourOS, CachyOS, Manjaro, Gentoo, Void, NixOS, Alpine** | **Do not ship pre-signed kernels or bootloaders.** Enabling Secure Boot causes an immediate `"Security Violation"` or `"Invalid Signature"` error. |
+
+### Why Arch is Used as Our Primary Example
+
+Arch Linux and its family (EndeavourOS, CachyOS, Manjaro) represent the most common desktop distributions that do not ship pre-signed Microsoft shims. 
+
+Arch values **user ownership, transparency, and simplicity**:
+- Instead of relying on a third-party corporate shim, Arch empowers **you** to become the certificate authority of your own machine.
+- We use [sbctl](https://github.com/Foxboron/sbctl), the open-source Secure Boot manager created by Arch Linux developer Foxboron, to generate your personal keys, enroll them directly into your motherboard's NVRAM, and sign your boot binaries.
+- *Users of other DIY distros (Gentoo, Void, NixOS) can follow this exact guide—simply adjust the package manager command in Step 1.*
+
+### Dual-Booting with Windows (Valorant, Vanguard, Anti-Cheat)
+
+If you dual-boot Linux with Windows 10 or 11:
+- **Windows 11 Hardware Baseline:** Windows 11 officially requires UEFI, TPM 2.0, and Secure Boot.
+- **Kernel-Level Anti-Cheats:** Competitive games like **Valorant (Riot Vanguard)**, **FACEIT (Counter-Strike 2)**, **EA Sports FC**, and **Battlefield** refuse to launch on Windows 11 unless Secure Boot is active in firmware (see [Riot Vanguard VAN9001/VAN9003 Notice](https://support-valorant.riotgames.com/hc/en-us/articles/16941145448979-VAN9001-and-VAN9003-Vanguard-Errors-on-Windows-11)).
+- **The Dual-Boot Hassle:** Without this setup, you are forced to reboot into BIOS and toggle Secure Boot on and off every time you switch between gaming on Windows and working on Linux. This guide solves that permanently: both systems boot cleanly with Secure Boot always on.
+
+### Standalone Linux: Firmware & Rootkit Protection
+
+Even on a single-boot Linux PC, Secure Boot provides essential defense:
+- **Bootkit and Rootkit Defense:** Stops unauthorized malicious code from infecting the EFI partition or hijacking execution before your Linux kernel loads.
+- **Evil Maid Protection:** Prevents someone with physical access to your PC from booting an altered kernel or malicious live USB drive.
+
+---
+
+## Supported Distributions
+
+This guide is tested and confirmed on:
+- **Arch Linux & Derivatives:** EndeavourOS, CachyOS, Manjaro, Garuda, Artix.
+- **Independent Distros:** Gentoo, Void Linux, NixOS, Alpine Linux.
+- **Custom Kernels:** Standard `linux`, `linux-zen`, `linux-lts`, `linux-hardened`, or custom liquorix/tkg kernels.
+
+---
+
+## Prerequisites & Safety Precautions
+
+### 1. UEFI & GPT Verification
+Your motherboard must boot in **UEFI mode** and your drive must use a **GPT** partition scheme. Legacy MBR / CSM mode is incompatible with Secure Boot.
+
+### 2. Locate Your EFI Partition (ESP)
+Open a terminal and check where your EFI System Partition is mounted:
+```bash
+df -h | grep -E '/boot|/efi'
+```
+- Most Arch systems mount ESP directly to `/boot` (so files are at `/boot/vmlinuz-linux` and `/boot/EFI/`).
+- Some setups mount ESP to `/efi` or `/boot/efi`. Adjust the file paths in the signing step accordingly.
+
+### 3. Windows BitLocker Recovery Key (Crucial for Dual-Booters)
+> [!WARNING]
+> If Windows has BitLocker or Device Encryption enabled, altering Secure Boot keys in UEFI will trigger a BitLocker recovery prompt on the next Windows boot.
+> **Back up your 48-digit recovery key** from the [Microsoft Account Recovery Portal](https://account.microsoft.com/devices/recoverykey) or the Windows Control Panel before proceeding!
+
+---
+
+## Recommended BIOS / UEFI Settings
+
+Reboot your computer and tap `Del` or `F2` to enter BIOS/UEFI setup. Ensure these baseline settings:
+
+| Setting | Recommended Value | Reason |
+| :--- | :--- | :--- |
+| **Boot Mode** | UEFI Only | Required for Secure Boot |
+| **CSM (Compatibility Support Module)** | Disabled | Legacy BIOS mode is incompatible with Secure Boot |
+| **Fast Boot** | Disabled | Ensures full keyboard detection and clean BIOS access |
+| **Security / TPM (fTPM / PTT)** | Enabled | Required by Windows 11 and cryptographic integrity |
+| **Secure Boot** | Custom / Setup Mode (temporarily) | Allows enrolling custom keys |
+
+---
+
+## Step-by-Step Setup Guide using `sbctl`
+
+[sbctl](https://github.com/Foxboron/sbctl) (Secure Boot Control) automates generating keys, enrolling certificates into your motherboard, signing your boot files, and setting up automatic hooks.
+
+### Step 1: Install `sbctl` on Your System
+
+Install `sbctl` using your distribution's package manager:
+
+```bash
+# Arch Linux / EndeavourOS / CachyOS / Manjaro
+sudo pacman -S sbctl
+
+# Gentoo
+sudo emerge app-crypt/sbctl
+
+# Void Linux
+sudo xbps-install -S sbctl
+
+# NixOS (add to configuration.nix)
+# environment.systemPackages = [ pkgs.sbctl ];
+
+# Generic / Other (Go required)
+go install github.com/foxboron/sbctl/cmd/sbctl@latest
+```
+
+---
+
+### Step 2: Inspect Initial Secure Boot Status
+
+Check your current firmware state:
+
+```bash
+sudo sbctl status
+```
+
+Example initial output:
+
+```text
+Installed:          ✓ sbctl is installed
+Owner GUID:         00000000-0000-0000-0000-000000000000
+Setup Mode:         ✗ Disabled
+Secure Boot:        ✗ Disabled
+Vendor Keys:        microsoft builtin-db builtin-db builtin-KEK builtin-PK
+```
+
+- **`Setup Mode: ✗ Disabled`** means your firmware is currently locked with factory vendor keys. You must unlock it by putting your BIOS into **Setup Mode**.
+
+---
+
+### Step 3: Put BIOS into Setup Mode (Clear Factory Keys)
+
+1. Reboot your PC and enter the BIOS setup (`Del` or `F2`).
+2. Navigate to **Security** or **Boot** → **Secure Boot**.
+3. Set Secure Boot Mode to **Custom** (if prompted).
+4. In the Key Management menu, select **Clear Secure Boot Keys**, **Delete All Keys**, or **Reset to Setup Mode**.
+   > [!TIP]
+   > **Common BIOS Prompt Trap:**
+   > Many motherboards (e.g., Gigabyte, ASUS, ASRock) pop up a confusing dialog: *"Reset Without Saving?"*. Choose the confirmation that allows key deletion to take effect. If you exit without saving the key reset, Setup Mode remains disabled.
+5. Save changes and exit (`F10`).
+6. Boot back into Linux and run:
+
+```bash
+sudo sbctl status
+```
+
+Verify that **`Setup Mode: ✓ Enabled`** is now displayed:
+
+```text
+Installed:          ✓ sbctl is installed
+Setup Mode:         ✓ Enabled
+Secure Boot:        ✗ Disabled
+Vendor Keys:        none
+```
+
+---
+
+### Step 4: Generate Your Custom Cryptographic Keys
+
+Create your personal Secure Boot keys (saved securely in `/usr/share/secureboot/keys`):
+
+```bash
+sudo sbctl create-keys
+```
+
+---
+
+### Step 5: Enroll Keys (CRITICAL: Retain Microsoft Signatures)
+
+Write your new keys into the motherboard NVRAM while **keeping Microsoft's certificates**:
+
+```bash
+sudo sbctl enroll-keys -m
+```
+*(or `sudo sbctl enroll-keys --microsoft`)*
+
+> [!IMPORTANT]
+> **Why the `-m` flag is mandatory:**
+> - The `-m` flag enrolls Microsoft's OEM certificates alongside your personal custom keys.
+> - **Without `-m`:** Windows will refuse to boot, and modern graphics cards (NVIDIA / AMD) whose DisplayPort/HDMI firmware (Option ROMs) are signed by Microsoft will produce a black screen on boot.
+> - **Always use `sudo sbctl enroll-keys -m`.**
+
+---
+
+### Step 6: Set Up Fallback Bootloader & Sign Boot Binaries
+
+Check what EFI files currently exist on your system and whether they are signed:
+
+```bash
+sudo sbctl verify
+```
+
+#### 1. Set Up Fallback Bootloader (`BOOTX64.EFI`)
+Firmware updates or CMOS battery resets can sometimes wipe NVRAM boot entries. Creating a signed fallback bootloader ensures your PC always boots:
+
+```bash
+# If using GRUB:
+sudo install -D /boot/EFI/GRUB/grubx64.efi /boot/EFI/BOOT/BOOTX64.EFI
+sudo sbctl sign -s /boot/EFI/BOOT/BOOTX64.EFI
+
+# If using systemd-boot:
+# sudo install -D /boot/EFI/systemd/systemd-bootx64.efi /boot/EFI/BOOT/BOOTX64.EFI
+# sudo sbctl sign -s /boot/EFI/BOOT/BOOTX64.EFI
+```
+
+#### 2. Sign Your Kernel and Bootloader
+Sign your boot files with the **`-s` (save)** flag:
+
+```bash
+# Sign Linux kernel(s):
+sudo sbctl sign -s /boot/vmlinuz-linux
+
+# (If using Zen, LTS, or hardened kernels, sign them too):
+# sudo sbctl sign -s /boot/vmlinuz-linux-zen
+# sudo sbctl sign -s /boot/vmlinuz-linux-lts
+
+# Sign your primary bootloader:
+sudo sbctl sign -s /boot/EFI/GRUB/grubx64.efi
+```
+
+> [!NOTE]
+> The `-s` flag registers the file path in `/var/lib/sbctl/files.db`.
+> Every time the Linux kernel or bootloader package updates in the future, `sbctl` automatically re-signs the newly created files through automated hooks.
+
+---
+
+### Step 7: Verify File Signatures and Firmware Trust
+
+#### 1. Check File Signatures
+```bash
+sudo sbctl verify
+```
+All tracked EFI binaries must display `✓ is signed`.
+
+#### 2. Check Firmware Enrolled Keys
+```bash
+sudo sbctl list-enrolled-keys
+```
+Confirm you see:
+- `PK`: Platform Key (Your custom key)
+- `KEK`: Key Exchange Key (Your custom key + Microsoft)
+- `DB`: Database Key (Your custom key + Microsoft Corporation)
+
+---
+
+### Step 8: Re-Enable Secure Boot in BIOS
+
+1. Reboot your PC and enter the BIOS setup.
+2. Navigate back to **Secure Boot**.
+3. Toggle **Secure Boot** to **Enabled** (keep mode as **Custom**).
+4. Save and reboot (`F10`).
+
+---
+
+### Step 9: Confirm Active Status
+
+1. Boot into Linux and run:
+   ```bash
+   sudo sbctl status
+   ```
+   Expected output:
+   ```text
+   Setup Mode:     ✓ Disabled (or ✗ Disabled, meaning locked & protected)
+   Secure Boot:    ✓ Enabled
+   Vendor Keys:    microsoft
+   ```
+2. If dual-booting, reboot and boot into **Windows**.
+3. Launch your anti-cheat games (e.g., *Valorant* / Vanguard or *FACEIT*). Both operating systems now boot without altering any BIOS settings!
+
+---
+
+## Bootloader Specifics
+
+### GRUB
+
+- Ensure both primary and fallback binaries are signed:
+  ```bash
+  sudo sbctl sign -s /boot/EFI/GRUB/grubx64.efi
+  sudo sbctl sign -s /boot/EFI/BOOT/BOOTX64.EFI
+  ```
+- If you reinstall GRUB with `grub-install`, re-verify with `sudo sbctl verify` and sign any newly created binary.
+
+### systemd-boot
+
+- Sign the default loader and fallback binary:
+  ```bash
+  sudo sbctl sign -s /boot/EFI/systemd/systemd-bootx64.efi
+  sudo sbctl sign -s /boot/EFI/BOOT/BOOTX64.EFI
+  ```
+- Package updates to `systemd` are automatically re-signed via pacman hooks.
+
+### rEFInd
+
+- Sign the rEFInd binary and driver files:
+  ```bash
+  sudo sbctl sign -s /boot/EFI/refind/refind_x64.efi
+  sudo sbctl sign -s /boot/EFI/BOOT/BOOTX64.EFI
+  ```
+
+### Unified Kernel Images (UKI)
+
+[Unified Kernel Images (UKI)](https://wiki.archlinux.org/title/Unified_kernel_image) combine the UEFI stub, kernel, initramfs, and kernel command line into a single signed `.efi` binary:
+- Sign the generated UKI:
+  ```bash
+  sudo sbctl sign -s /boot/EFI/Linux/arch-linux.efi
+  ```
+- UKI combined with `sbctl` provides the cleanest, most tamper-resistant boot chain on Linux.
+
+---
+
+## How System Updates Work (Automatic Signing Hooks)
+
+A common worry for users of rolling-release distributions: *"Will running `sudo pacman -Syu` break my boot when the kernel updates?"*
+
+**No!**
+- **On Arch / EndeavourOS / CachyOS / Manjaro:** When you use `sbctl sign -s`, `sbctl` installs an ALPM hook at:
+  `/usr/share/libalpm/hooks/95-sbctl-sign.hook`
+  Whenever packages like `linux`, `linux-zen`, `grub`, or `systemd` update, pacman automatically signs the new binaries before the transaction finishes.
+- **On other distros (Gentoo, Void, NixOS):** You can trigger `sbctl sign -s` within `/etc/kernel/postinst.d/` or through `kernel-install`.
+
+To view your currently tracked files at any time:
+```bash
+sudo sbctl list-files
+```
+
+---
+
+## Troubleshooting & Common Pitfalls
+
+### 1. `sbctl enroll-keys` fails: "Setup Mode is not enabled"
+- **Cause:** Firmware NVRAM is locked in User Mode.
+- **Solution:** Enter BIOS, open Secure Boot Key Management, and select **Clear Secure Boot Keys** or **Reset To Setup Mode**. Watch for ambiguous confirmation popups like *"Reset Without Saving?"* and confirm the reset.
+
+### 2. Windows fails to boot or prompts for BitLocker recovery
+- **Cause:** Keys were enrolled without the `-m` flag, stripping Microsoft's certificates from firmware.
+- **Solution:** Boot into Linux (or live USB), put firmware into Setup Mode, and run `sudo sbctl enroll-keys -m`. If prompted once on Windows boot, enter your BitLocker recovery key.
+
+### 3. Black screen on boot with dedicated graphics card
+- **Cause:** GPU DisplayPort/HDMI firmware (Option ROM) is signed by Microsoft UEFI CA. Omitting `-m` prevents the GPU firmware from initializing in UEFI.
+- **Solution:** Re-enroll keys with `-m`. If your display remains blank in BIOS, temporarily plug your monitor into your motherboard's integrated HDMI/DP port.
+
+### 4. "Invalid Signature" / "Security Violation" error on boot
+- **Cause:** An EFI binary (kernel or bootloader) was updated without being signed.
+- **Solution:** Disable Secure Boot in BIOS, boot into Linux, run `sudo sbctl verify` to find unsigned files (`sudo sbctl sign -s <path>`), and re-enable Secure Boot in BIOS.
+
+### 5. Windows Fast Startup causing dual-boot drive lockups
+- **Cause:** Windows Fast Startup puts NTFS drives into hybrid hibernation, locking filesystems.
+- **Solution:** In Windows, open **Control Panel** → **Power Options** → **Choose what the power buttons do** → **Change settings that are currently unavailable** → uncheck **Turn on fast startup**.
+
+### 6. UEFI boot entry disappeared or order reset
+- **Cause:** Firmware or Windows updates reset the default UEFI boot order to Windows Boot Manager.
+- **Solution:** Inspect and restore the boot order using [efibootmgr](https://wiki.archlinux.org/title/Unified_Extensible_Firmware_Interface#efibootmgr):
+  ```bash
+  # View boot entries:
+  efibootmgr -v
+
+  # Set boot order (e.g., Boot0003 is GRUB, Boot0000 is Windows):
+  sudo efibootmgr -o 0003,0000
+  ```
+
+---
+
+## Verification Checklist
+
+Follow this checklist sequentially to confirm your setup:
+
+- [ ] UEFI Boot Mode set to UEFI (CSM Disabled).
+- [ ] Motherboard fTPM / TPM 2.0 Enabled.
+- [ ] Windows BitLocker recovery key safely backed up (if dual-booting).
+- [ ] Firmware placed into Setup Mode (factory keys cleared in BIOS).
+- [ ] `sbctl create-keys` executed.
+- [ ] `sbctl enroll-keys -m` executed (preserving Microsoft keys).
+- [ ] Fallback binary `/boot/EFI/BOOT/BOOTX64.EFI` created and signed.
+- [ ] Kernel(s) and bootloader signed with `sbctl sign -s`.
+- [ ] `sbctl verify` confirms all EFI binaries are signed (`✓`).
+- [ ] `sbctl list-enrolled-keys` confirms Custom + Microsoft certificates in NVRAM.
+- [ ] Secure Boot re-enabled in UEFI / BIOS.
+- [ ] `sbctl status` shows `Secure Boot: ✓ Enabled`.
+- [ ] Windows boots normally without BitLocker errors (if dual-booting).
+- [ ] Secure-Boot-enforced games (e.g., *Valorant*) launch without errors.
+
+---
+
+## Quick Reference Cheatsheet
+
+| Task | Command |
+| :--- | :--- |
+| **Check Secure Boot Status** | `sudo sbctl status` |
+| **Verify Signed Files** | `sudo sbctl verify` |
+| **List Enrolled Firmware Keys** | `sudo sbctl list-enrolled-keys` |
+| **List Tracked Database Files** | `sudo sbctl list-files` |
+| **Sign and Track Binary** | `sudo sbctl sign -s <path_to_efi_binary>` |
+| **Remove Tracked Binary** | `sudo sbctl remove-file <path_to_efi_binary>` |
+| **Enroll Custom + MS Keys** | `sudo sbctl enroll-keys -m` |
+| **Check EFI Boot Order** | `efibootmgr -v` |
+
+---
+
+## Official Resources & Documentation
+
+- [sbctl Upstream Repository (GitHub)](https://github.com/Foxboron/sbctl) — Source code, documentation, and releases by Morten Linderud.
+- [ArchWiki: Secure Boot](https://wiki.archlinux.org/title/Unified_Extensible_Firmware_Interface/Secure_Boot) — Arch Linux's comprehensive Secure Boot manual.
+- [ArchWiki: sbctl](https://wiki.archlinux.org/title/Sbctl) — Dedicated ArchWiki page for `sbctl`.
+- [ArchWiki: Unified Kernel Image (UKI)](https://wiki.archlinux.org/title/Unified_kernel_image) — Documentation for signing and running UKIs.
+- [Microsoft Account BitLocker Recovery Portal](https://account.microsoft.com/devices/recoverykey) — Official Microsoft dashboard to retrieve 48-digit encryption recovery keys.
+- [Riot Games Support: Vanguard Errors (VAN9001 / VAN9003)](https://support-valorant.riotgames.com/hc/en-us/articles/16941145448979-VAN9001-and-VAN9003-Vanguard-Errors-on-Windows-11) — Official Riot Games documentation for Windows 11 Secure Boot enforcement.
+
+---
+
+## Disclaimer & Liability Notice
+
+> [!CAUTION]
+> **Use at Your Own Risk:** This guide is provided for educational and informational purposes only, "AS IS", without warranties of any kind, express or implied.
+>
+> 1. **Firmware & Data Risks:** Modifying UEFI firmware variables, deleting factory keys, altering NVRAM, and reconfiguring bootloaders involve low-level operations. If executed improperly, you could temporarily lose access to your operating systems or trigger security lockouts.
+> 2. **No Liability:** The author(s) and contributors shall not be held liable or responsible for any direct, indirect, incidental, or consequential damages—including but not limited to hardware bricking, data loss, corrupted partitions, Windows BitLocker lockouts, or system downtime—arising from following this guide.
+> 3. **Backups are Mandatory:** You are solely responsible for verifying your system compatibility, maintaining independent backups of your personal data, and safely storing your Windows BitLocker / encryption recovery keys before modifying any UEFI or Secure Boot settings.
+> 4. **Trademarks:** All product names, logos, and brands (including Arch Linux, Microsoft, Windows, Riot Games, Vanguard, etc.) are the property of their respective owners and are used strictly for identification and educational reference.
+
+```
