@@ -439,6 +439,7 @@ sources:
   - wiki/sources/descriptions/mgeeky__ntfs-journal-viewer.md
   - wiki/sources/descriptions/MahmoudZohdy__IAT-Obfuscation.md
   - wiki/sources/descriptions/MahmoudZohdy__Process-Injection-Techniques.md
+  - wiki/sources/descriptions/MaksymSakundiak__chess-anti-cheat.md
   - wiki/sources/descriptions/KuryCat__GhostJoin.md
   - wiki/sources/descriptions/Eangly99__AstroX-AntiCheat.md
   - wiki/sources/descriptions/GhostNgEnd__Ghost-AntiCheat.md
