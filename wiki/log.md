@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-14** — ingest `readme:categories`: Game Develop ~194 (+1; TastSong/[[tastsong-game-programmer-study-notes]] Unity C# study notes / guide) / Game Assets ~13 (+1; laurentvv/[[universal-asset-ripper]] multi-engine MCP asset extractor) / Cheat ~2891 / Anti Cheat ~792 / other major section counts stable; 41 sections (`NeverC & NeverD` placeholder); synced README-map counts on [[overviews/overview]] and [[overviews/game-engine]]; entity [[universal-asset-ripper]]; light `index.md` section notes (no per-category pages).
+
 - **2026-10-14** — lint (agent): read `wiki/AGENTS.md`; listed **Overviews** (9): `anti-cheat`, `dma-attack`, `game-engine`, `game-hacking`, `graphics-api`, `mobile-security`, `overview`, `reverse-engineering`, `windows-kernel`; **Concepts** (51) under `wiki/concepts/`; **Entities** (4062) under `wiki/entities/`; `index.md` vs disk — 4122 indexed paths (9+51+4062), 4122 unique, 0 missing, 0 dead, 0 duplicate index entries; overview pages + index overview-blurb + concept [[wikilink]] spot-check — 0 broken (15574 links); 6 expected cross-kind slug collisions ([[anti-cheat]], [[game-hacking]], [[reverse-engineering]], [[byovd]], [[dma]], [[il2cpp]]); wiki populated — bootstrap not required; `index.md` unchanged; no link repairs (`log.md` only).
 
 - **2026-10-14** — lint (agent, index/wikilink pass): read `wiki/AGENTS.md`; inventoried `wiki/overviews/` (9), `wiki/concepts/` (51), `wiki/entities/` (4062); reconciled `index.md` — 4122 paths, 0 missing, 0 dead, 0 duplicate; overview + index overview-blurb + concept [[wikilink]] spot-check — 0 broken (15574 links); 6 expected cross-kind slug collisions; bootstrap not required; structural repairs none (`log.md` only).
