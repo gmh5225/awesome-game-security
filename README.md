@@ -1770,6 +1770,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/gmh5225/FindFunc [Recognizing Function By Pattern]
 - https://github.com/kirovgrad/Renamaida [IDA Pro plugin to build JSON instruction signatures from debug libraries and rename unknown library functions via Jaro-Winkler matching]
 - https://github.com/FPSZ/ida-better-information [Single-file IDA Pro plugin and CLI to detect C runtime on stripped binaries, apply FLIRT, rename libc calls, and annotate MMX/SSE math in Hex-Rays (undoable, offline).]
+- https://github.com/FPSZ/ida-better-reverse [IDA Pro plugin and CLI for stripped static ELF: glibc/musl build detection, link-aware FLIRT naming, Hex-Rays libc/syscall notes, variable data-flow views, and zoomable call flowcharts]
 - https://github.com/gmh5225/sigmakerex [Signature Maker]
 - https://github.com/gmh5225/IDA-Pro-SigMaker [Signature Maker]
 - https://github.com/mahmoudimus/ida-sigmaker [Zero-dependency IDA Pro 9+ cross-platform signature maker with optional SIMD speedups]
