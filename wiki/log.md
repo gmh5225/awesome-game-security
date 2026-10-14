@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-14** — ingest `description:CalebFenton/PZ_DevHarness`: enriched entity [[pz-devharness]] (test model / launch stack / MP validation sections; confidence high); fixed [[overviews/overview]] Game Testing cite (split from [[kenshi-automation-harness]]); cited on [[overviews/game-engine]] Game Testing bullet + description source frontmatter; `index.md` entity blurb sync.
+
 - **2026-10-14** — ingest `description:MaksymSakundiak/chess-anti-cheat`: enriched entity [[chess-anti-cheat]] (Pipeline: Lichess API→HDF5, move vocabulary, clock-annotation timing/low-variance features, player-split leakage control; confidence high); cited on [[concepts/ai-aimbot-detection]] chess engine-assistance ML corpus; [[overviews/anti-cheat]] description source frontmatter; `index.md` entity blurb sync.
 
 - **2026-10-14** — ingest `readme:categories`: Anti Cheat ~792 (+1; MaksymSakundiak/[[chess-anti-cheat]] TensorFlow/Keras chess engine-assistance ML) / Game Testing ~21 (+1; CalebFenton/[[pz-devharness]] Project Zomboid B42 headless mod CI harness) / Cheat ~2886 / Game Engine ~159 / other major section counts stable; 41 sections (`NeverC & NeverD` placeholder); synced README-map counts on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], [[overviews/game-engine]], and [[overviews/reverse-engineering]]; entities [[chess-anti-cheat]], [[pz-devharness]]; light `index.md` section notes (no per-category pages).
