@@ -4,7 +4,8 @@ kind: entity
 topics: [windows-kernel, game-hacking, anti-cheat]
 sources:
   - wiki/sources/descriptions/gmh5225__Allocating-individual-pages.md
-updated: 2026-08-15
+  - wiki/sources/README-categories.md
+updated: 2026-10-14
 confidence: medium
 ---
 
