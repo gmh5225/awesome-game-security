@@ -4464,6 +4464,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/vul-os/magnetite [Rust self-hostable game platform with magnetite-anticheat: server-authoritative deterministic replay verification and composable cheat validators]
 - https://github.com/web-coder-lab/chessking [Rust server-side anti-cheat for multiplayer chess: risk scoring, device fingerprinting, match integrity, captcha, and ban escalation]
 - https://github.com/AbdulAmi09/SentinelAntiCheat [Chess integrity platform with seven-layer statistical engine-assistance detection, explainable risk tiers, arbiter case management, and hash-chained audit logging]
+- https://github.com/MaksymSakundiak/chess-anti-cheat [TensorFlow/Keras engine-assistance detector with bidirectional LSTM and Conv1D over moves, timing, and color for interactive risk scoring]
 - https://github.com/XX-Batsu/bevy-personal-test [Rust Bevy multiplayer framework with sandboxed Rhai script VM, rollback netcode, and shadow-VM anti-cheat verification]
 - https://github.com/joeltco/ff3mmo [Browser-based NES FF3 MMO with server-authoritative PvE/PvP/economy arbiters, inventory mirror anti-dup, wire validation, and moderation tooling]
 - https://github.com/nocoo/pew-game [Browser twin-stick shooter with server-side HMAC session tokens, replay protection, and score/wave plausibility checks for leaderboard anti-cheat]
