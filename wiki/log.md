@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-14** — lint (agent): read `wiki/AGENTS.md`; listed **Overviews** (9): `anti-cheat`, `dma-attack`, `game-engine`, `game-hacking`, `graphics-api`, `mobile-security`, `overview`, `reverse-engineering`, `windows-kernel`; **Concepts** (51) under `wiki/concepts/`; **Entities** (4060) under `wiki/entities/`; `index.md` vs disk — 4120 indexed paths (9+51+4060), 4120 unique, 0 missing, 0 dead, 0 duplicate index entries; overview + index overview-blurb [[wikilink]] spot-check — 0 broken (13129 links); concept pages — 0 broken (2426 links); 6 expected cross-kind slug collisions ([[anti-cheat]], [[game-hacking]], [[reverse-engineering]], [[byovd]], [[dma]], [[il2cpp]]); wiki populated — bootstrap not required; `index.md` unchanged; no link repairs (`log.md` only).
+
 - **2026-10-14** — ingest `description:xV4L3x/hermit`: enriched entity [[hermit]] (audience, C++/Python architecture from description projection; confidence high); cited React Native Hermes HBC static lane on [[overviews/mobile-security]]; synced `index.md` entity + Mobile Security blurb.
 
 - **2026-10-14** — ingest `readme:categories`: Cheat ~2888 (+1; xV4L3x/[[hermit]] Hermes HBC parse/disasm/decompile/structural patch for React Native) / Anti Cheat ~792 / Game Engine ~159 / other major section counts stable; 41 sections (`NeverC & NeverD` placeholder); synced README-map counts on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/reverse-engineering]], and [[overviews/dma-attack]]; entity [[hermit]]; light `index.md` section notes (no per-category pages).
