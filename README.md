@@ -1700,6 +1700,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/azw413/Glass [IPA/Mach-O: fat slice selection, Info.plist, Frameworks disassembly, CFG, xref; AArch64 native RE in the same bundle workflow as Android]
 
 > IOS App Packaging
+- https://github.com/AloneMonkey/frida-ios-dump [Frida-based tool to pull decrypted IPAs from jailbroken iOS devices over USB SSH, with parallel module downloads and Frida 17 bridge support]
 - https://github.com/addrianyy/ios_packager [Package and sign iOS applications]
 - https://github.com/xscope0/xkvm-ios-injector [Go CLI toolbox to inject, extract, and convert iOS tweak packages for sideloaded IPAs]
 
