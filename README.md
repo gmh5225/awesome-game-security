@@ -543,6 +543,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/n24q02m/better-godot-mcp [Composite MCP server for Godot Engine AI-assisted game development]
 - https://github.com/gmh5225/vibe-blocks-mcp [MCP for Roblox Studio]
 - https://github.com/willy92wins/dayz-mcp [DayZ MCP server with 53 tools for mod build/run, server-authoritative world control, telemetry, and automated in-game testing]
+- https://github.com/rehan-remade/universal-modder [Agent skills, fal MCP, and um CLI for game recon, RE, mod building, and in-game verification]
 - https://github.com/LaurieWired/GhidraMCP [MCP for Ghidra]
 - https://github.com/jtang613/GhidrAssistMCP [MCP for Ghidra]
 - https://github.com/mrphrazer/ghidra-headless-mcp [ghidra-headless-mcp — headless Ghidra over MCP]
@@ -625,6 +626,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/UETools/UETools [Accessing, reading and deserializing UE4 assets]
 - https://github.com/atenfyr/UAssetAPI [A low-level .NET library for reading and writing Unreal Engine game assets]
 - https://github.com/r6e/paksmith [Rust cross-platform Unreal Engine pak/UAsset explorer and extractor (pak v3–v11, textures/meshes/audio export)]
+- https://github.com/laurentvv/universal-asset-ripper [Multi-engine asset extractor (Godot, Unreal, Unity, Windows PE) with MCP-backed inspection and binary RE helpers]
 
 ## Game Hot Patch
 - https://github.com/Tencent/xLua
