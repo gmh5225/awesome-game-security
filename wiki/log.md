@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-14** — ingest `description:OTAKUWeBer/arch-linux-secure-boot-guide`: entity [[arch-linux-secure-boot-guide]] (OTAKUWeBer; sbctl enrollment + multi-bootloader signing hooks; Microsoft key retention; dual-boot Vanguard/FACEIT/Valorant + BitLocker notes; Linux bootkit framing; confidence high); cited on [[overviews/anti-cheat]] Platform trust lane; cross-linked [[omarchy-boot-manager]] + [[securebootcheck]]; `index.md` entity blurb sync.
+
 - **2026-10-14** — ingest `readme:categories`: Some Tricks ~120 (+1; gmh5225/[[allocating-individual-pages]] `MmAllocateIndependentPagesEx` Ring0 PoC) / Anti Cheat ~792 / Cheat ~2886 / Game Testing ~21 / Game Engine ~159 / other major section counts stable; 41 sections (`NeverC & NeverD` placeholder); synced README-map counts on [[overviews/overview]], [[overviews/game-hacking]], and [[overviews/windows-kernel]]; entity [[allocating-individual-pages]]; light `index.md` section notes (no per-category pages).
 
 - **2026-10-14** — lint (agent): read `wiki/AGENTS.md`; listed **Overviews** (9): `anti-cheat`, `dma-attack`, `game-engine`, `game-hacking`, `graphics-api`, `mobile-security`, `overview`, `reverse-engineering`, `windows-kernel`; **Concepts** (51) under `wiki/concepts/`; **Entities** (4057) under `wiki/entities/`; `index.md` vs disk — 4117 indexed paths (9+51+4057), 0 missing, 0 dead; overview [[wikilink]] spot-check — 0 broken (12456 links); index overview-blurb scan — 0 broken; wiki populated — bootstrap not required; `index.md` unchanged; no link repairs (`log.md` only).

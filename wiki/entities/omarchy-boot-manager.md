@@ -29,7 +29,7 @@ Windows-side helper uses **bcdedit** and a scheduled task for zero-UAC swaps bac
 
 ## Positioning
 
-Complements Ring3 utility workarounds such as [[discord-dpi-bridge]] (avoids WinDivert drivers that EAC/Denuvo reject) by addressing the **Secure Boot posture** requirement that blocks many dual-boot Linux setups from running Vanguard/EAC/FACEIT titles on Windows without disabling firmware protections.
+Complements Ring3 utility workarounds such as [[discord-dpi-bridge]] (avoids WinDivert drivers that EAC/Denuvo reject) by addressing the **Secure Boot posture** requirement that blocks many dual-boot Linux setups from running Vanguard/EAC/FACEIT titles on Windows without disabling firmware protections. For manual Arch/DIY distro enrollment, see the documentation guide [[arch-linux-secure-boot-guide]].
 
 ## Links
 
