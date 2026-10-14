@@ -649,6 +649,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/RomanceTheHeart/Automation_Examples [Automating certain tasks in the Unreal editor]
 - https://github.com/DaedalicEntertainment/ue4-test-automation [Facilitates setting up integration test suits with Unreal Engine 4 Gauntlet]
 - https://github.com/shaylanger/Kenshi-Automation-Harness [In-game test automation harness for Kenshi mod development — scriptable spawn, teleport, combat, crafting, and UI checks via an RE_Kenshi plugin and CLI client]
+- https://github.com/CalebFenton/PZ_DevHarness [Headless in-game test harness for Project Zomboid Build 42 mods with Java reflection launchers, fast SP/MP runs, desync checks, and CI-friendly exit codes]
 - https://github.com/DenuvoSoftwareSolutions/Onlooker [Tool to collect and visualize memory usage of a process tree]
 - https://github.com/milostosic/rprof [CPU scope based profiling library]
 - https://github.com/DarknessFX/DFoundryFX [UE Performance]
