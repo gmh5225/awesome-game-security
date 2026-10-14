@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-14** — ingest `description:laurentvv/universal-asset-ripper`: confirmed entity [[universal-asset-ripper]] against description projection (multi-engine parsers, entropy AES-key scans, evidence bundles, MCP; confidence high); cited Game Assets / packaged-content lane on [[overviews/game-engine]] and [[overviews/reverse-engineering]]; synced `index.md` entity blurb.
+
 - **2026-10-14** — ingest `description:rehan-remade/universal-modder`: entity [[universal-modder]]; cited on [[overviews/game-engine]] (AI gamedev lane) and [[overviews/reverse-engineering]] (AI-assisted RE / modding agent stack); synced `index.md` entity blurb + Game Engine overview note.
 
 - **2026-10-14** — ingest `readme:categories`: Game Develop ~194 (+1; TastSong/[[tastsong-game-programmer-study-notes]] Unity C# study notes / guide) / Game Assets ~13 (+1; laurentvv/[[universal-asset-ripper]] multi-engine MCP asset extractor) / Cheat ~2891 / Anti Cheat ~792 / other major section counts stable; 41 sections (`NeverC & NeverD` placeholder); synced README-map counts on [[overviews/overview]] and [[overviews/game-engine]]; entity [[universal-asset-ripper]]; light `index.md` section notes (no per-category pages).

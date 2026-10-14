@@ -938,7 +938,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [d3d12book](entities/d3d12book.md) — DX12 educational sample (shader/rendering/animation; DirectX / guide)
 - [d3dhook_imgui](entities/d3dhook-imgui.md) — D3D/OpenGL/Vulkan ImGui hook base (C/C++; x86/x64; DirectX Hook)
 - [d3doverlay-nvidia-hijack](entities/d3doverlay-nvidia-hijack.md) — D3D9 ImGui overlay via NVIDIA GeForce window hijack (Brattlof; click-through; external game tooling)
-- [Universal Asset Ripper](entities/universal-asset-ripper.md) — multi-engine Godot/Unreal/Unity/PE asset extractor with MCP-backed inspection (laurentvv; Game Assets)
+- [Universal Asset Ripper](entities/universal-asset-ripper.md) — TypeScript/Node multi-engine Godot/Unreal/Unity/PE extractor; entropy AES-key scans, evidence bundles, MCP for agents (laurentvv; Game Assets)
 - [Universal Modder](entities/universal-modder.md) — Agent Skills + `um` CLI for owned-game recon, mod build/verify, fal MCP, Blender sprites, CE/Ghidra/Frida RE playbooks; mod field-notes KB; single-player legitimate scope (rehan-remade; Game Develop / AI Agents)
 - [UniversalHookX](entities/universalhookx.md) — universal DX9–12/OpenGL/Vulkan ImGui hook library (dummy-device vtable bootstrap; compile-time backend selection; bruhmoment21)
 - [Universal Dear ImGui Hook](entities/universal-dear-imgui-hook.md) — Windows D3D9–12 + partial Vulkan Dear ImGui overlay hook (backend-specific hooks; toggleable in-process menu; overlay prototyping / debug UI; Sh0ckFR)
