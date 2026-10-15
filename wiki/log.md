@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-15** — ingest `description:pablocpas/OpenCMR2`: entity [[opencmr2]] (CMR2Decomp C++ + SDL3/Vulkan/Metal platform layer; DirectX 7-era API replacement; retail bit-exact fixed-point physics; UDP multiplayer; Clang/CMake; Android Kotlin; user-supplied game data); cited on [[overviews/reverse-engineering]] and [[overviews/game-engine]]; cross-linked [[axis-web]] and [[devilution]]; `index.md` entity blurb.
+
 - **2026-10-15** — ingest `description:radareorg/r4ghidra`: entity [[r4ghidra]] (Ghidra extension; radare2-style REPL + r2web/r2pipe; Java Gradle module; embedded HTTP; seek/flags/comments/analysis/decompile handlers; Python/Ruby headless r2↔Ghidra sync); cited on [[overviews/reverse-engineering]] Ghidra bridge cluster beside [[gdbghidra]]; `index.md` entity blurb.
 
 - **2026-10-15** — ingest `description:reikop/axis-web`: entity [[axis-web]] (2005 AXIS OpenGL client → C/WASM + WebGL/WebAudio/WebSocket; living file/network RE spec; eight byte-exact decoders; WebSocket relay multiplayer with RNG lockstep validation; user-supplied game data); cited on [[overviews/reverse-engineering]] and [[overviews/game-engine]]; cross-linked [[zelda3]] and [[webcheat]]; `index.md` entity blurb.
