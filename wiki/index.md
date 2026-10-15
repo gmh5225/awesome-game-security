@@ -1622,6 +1622,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ghidra-openai](entities/ghidra-openai.md) — Ghidra OpenAI GPT plugin (decompiled-function explain/rename/vuln hints; ChatGPT lane)
 - [ghidra-scripts](entities/ghidra-scripts.md) — CTF-oriented GhidraScript collection (automated common RE challenge patterns; cheat / Scripts)
 - [ghidra-struct-importer](entities/ghidra-struct-importer.md) — GhidraScript targeted C struct importer (Java; per-struct dependency resolution beyond Parse C Source; SDK-leak/decompiled-header layout reconstruction; Katharsas; cheat / Struct Importer)
+- [ghidra-teak-dsp](entities/ghidra-teak-dsp.md) — Ghidra SLEIGH extension + CDC/DSP1 loader for Nintendo 3DS/DSi CEVA XpertTeak DSP firmware (Home Menu, Sound App disasm/decomp; Java/SLEIGH; PSI-Rockin; WIP console DSP firmware RE)
 - [pagalaxylab-ghidra-scripts](entities/pagalaxylab-ghidra-scripts.md) — Python Ghidra scripts (P-Code param tracing, ObjC msgSend, error-print rename, OLLVM CFF deobfuscation; shared helpers; firmware/binary RE; PAGalaxyLab; cheat / Scripts)
 - [ghidrascripts](entities/ghidrascripts.md) — Maintained ATR GhidraScript automation (Java; AI rename, complexity viz, Golang, BSim/FunctionID, SHAREM/Malpedia; advanced-threat-research; cheat / Some scripts)
 - [ghidra-vxd-tools](entities/ghidra-vxd-tools.md) — Ghidra Jython Windows 9x VxD INT 20h annotator (VxDCall struct + VMDisp9x service decode; legacy kernel driver / historical game-protection RE; andrew-hoffman)

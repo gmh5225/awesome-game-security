@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-15** — ingest `description:PSI-Rockin/ghidra-teak-dsp`: entity [[ghidra-teak-dsp]] (Ghidra SLEIGH + CDC/DSP1 loader for Nintendo 3DS/DSi XpertTeak DSP; Home Menu/Sound App firmware RE); cited on [[overviews/reverse-engineering]] console/3DS lane beside [[3beans]]; `index.md` entity blurb.
+
 - **2026-10-15** — ingest `description:stuffed-cat/hide-ace-kernel`: entity [[hide-ace-kernel]]; cited on [[mobile-anti-cheat]] and [[overviews/mobile-security]]; cross-linked [[kernelsu]].
 
 - **2026-10-15** — ingest `readme:categories`: Cheat ~2894 (+3) / Anti Cheat ~792 / Game Engine ~159 / Game Develop ~194 (fixed ~193 drift on [[overviews/overview]] README map) / other major section counts stable; 41 sections (`NeverC & NeverD` placeholder); synced README-map counts on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/reverse-engineering]], and [[overviews/dma-attack]]; light `index.md` section notes (no per-category pages).
