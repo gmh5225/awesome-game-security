@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-15** — lint (agent): read `wiki/AGENTS.md`; listed **Overviews** (9): `anti-cheat`, `dma-attack`, `game-engine`, `game-hacking`, `graphics-api`, `mobile-security`, `overview`, `reverse-engineering`, `windows-kernel`; **Concepts** (51) under `wiki/concepts/`; **Entities** (4068) under `wiki/entities/`; reconciled `index.md` vs disk — 4128 indexed paths (9+51+4068), 4128 unique, 0 missing, 0 dead, 0 duplicate index entries; overview pages + index overview-blurb + concept [[wikilink]] spot-check — 0 broken (15603 links), 0 malformed `]]]`; 6 expected cross-kind slug collisions ([[anti-cheat]], [[game-hacking]], [[reverse-engineering]], [[byovd]], [[dma]], [[il2cpp]]); wiki populated — bootstrap not required; `index.md` unchanged; no link repairs (`log.md` only).
+
 - **2026-10-15** — ingest `description:notmaj0r/CheatRunner_Patches`: entity [[cheatrunner-patches]] (CheatRunner loader PS4/PS5 Title-ID XML patch library; CUSA/PPSA folders; versioned `eboot.bin` byte edits for FPS/resolution/tweaks); cited on [[overviews/reverse-engineering]] PlayStation runtime patch lane; cross-linked [[ida-ps4-helper]] and [[ida-ps5-elf-plugin]]; `index.md` entity blurb.
 
 - **2026-10-15** — ingest `readme:categories`: PlayStation ~8 (+1; notmaj0r/[[cheatrunner-patches]] CheatRunner Title-ID XML patch collection); Cheat ~2894 / Anti Cheat ~792 / Game Engine ~159 / Game Develop ~194 and other major section counts stable; 41 sections (`NeverC & NeverD` placeholder); synced README-map counts on [[overviews/overview]], [[overviews/game-hacking]], and [[overviews/reverse-engineering]]; entity [[cheatrunner-patches]]; light `index.md` section notes (no per-category pages).
