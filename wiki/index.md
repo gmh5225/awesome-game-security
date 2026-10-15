@@ -2314,6 +2314,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Learn FPGA Programming](entities/learn-fpga-programming.md) — Packt book companion; chapter-organized SystemVerilog (logic design → I2C/PS/2/VGA/DDR; FPGA fundamentals for DMA/custom hardware; Guide)
 - [learnopengl](entities/learnopengl.md) — LearnOpenGL tutorial companion source (JoeyDeVries; progressive C++ OpenGL fundamentals through advanced rendering; lighting, Assimp, shadow mapping, deferred shading, PBR, post-processing; GLFW/GLEW/GLM; README [OpenGL])
 - [learning-directx12](entities/learning-directx12.md) — D3D12 tutorial series + C++ samples (device/PSO/heaps; triangle → scenes; DirectX / guide)
+- [OpenLeaderboard](entities/leaderboard.md) — Go/Redis multi-tenant leaderboard API; durable ingest log; HMAC-signed score submits + replay window; split API/player credentials; dashboard, SDKs, Unity client; Docker/Terraform/AWS; Prometheus/Grafana (kodeni-am; Anti Cheat / backend)
 - [levo](entities/levo.md) — experimental x86/x64 PE AOT binary translator (Ghidra CFG → XED/Remill lift → LLVM recompile; kernel32 API-intercept runtime)
 - [LetMeGG](entities/letme-gg.md) — C++ PoC; prevent WinDbg break/attach (Some Tricks / Windows Ring0 anti-debug; gmh5225)
 - [LeviAntiCheat](entities/levi-anticheat.md) — LeviLamina C++ Bedrock BDS plugin (X-ray Anti-Xray engine, fly/speed, reach, auto-click, invalid inventory, malformed packets, dupe/crafter-crash fixes, violation-level ban/mute, JSON + hot reload; Anti Cheat / Open Source Anti Cheat System; LiteLDev)

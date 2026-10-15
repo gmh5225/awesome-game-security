@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-15** — ingest `description:kodeni-am/leaderboard`: entity [[leaderboard]] (OpenLeaderboard; Go/Redis multi-tenant ranks + durable ingest log; optional HMAC-signed score submits with replay window; split publishable/secret API keys and player tokens; dashboard, Go/TS SDKs, Unity client; Docker/Terraform/AWS + Prometheus/Grafana); cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[pew-game]] and [[cobra-snake]]; `index.md` entity blurb.
+
 - **2026-10-15** — ingest `readme:categories`: Anti Cheat ~795 (+1; yuonsovann5656-netizen/[[nexora-anticheat]] Paper/Folia Java 21 lag-compensated MC plugin) / Cheat ~2896 / Game Engine ~159 / Game Develop ~194 and other major section counts stable; 41 sections (`NeverC & NeverD` placeholder); synced README-map counts on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], and [[overviews/reverse-engineering]]; fixed stale Cheat ~2871 drift on [[overviews/anti-cheat]] README map; light `index.md` section notes (no per-category pages).
 
 - **2026-10-15** — lint: read `wiki/AGENTS.md`; **Overviews** (9), **Concepts** (51), **Entities** (4072); `index.md` ↔ disk — 0 missing, 0 dead, 0 duplicate paths; overview/index/concept [[wikilink]] spot-check — 0 broken (15867), 0 malformed `]]]`; 6 cross-kind slug collisions (expected); bootstrap not required; no structural repairs beyond this log line.

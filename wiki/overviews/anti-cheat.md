@@ -971,6 +971,7 @@ sources:
   - wiki/sources/descriptions/dhehdjebejen-beep__Bastion.md
   - wiki/sources/descriptions/projectsadameyd__AegisAC.md
   - wiki/sources/descriptions/Krimziee__SecureBootCheck.md
+  - wiki/sources/descriptions/kodeni-am__leaderboard.md
 updated: 2026-10-15
 confidence: high
 ---
@@ -1195,6 +1196,7 @@ Long-form kernel AC architecture primer [How Kernel Anti-Cheats Work](https://s4
 - [[gatewarden-public]] — Godot 4.7 tower defense prototype with published PathValidator placement-abuse rejection codes (flow-field softlock/maze checks; 30 Hz deterministic sim; 59 GUT tests + headless bot; test-driven validation reference; euuuuuuan) (source: wiki/sources/descriptions/euuuuuuan__gatewarden-public.md)
 - [[shinobix]] — live browser MMORPG with server-authoritative combat and documented auth/reward-integrity anti-cheat patterns (settlement receipts, currency ledgers, save locks; HTTP hardening + parity/settlement test coverage; Timehue; Open Source Anti Cheat System) (source: wiki/sources/descriptions/Timehue__ShinobiX.md)
 - [[cobra-snake]] — production web Snake (TypeScript/Next.js/React; HTML5 Canvas; LibSQL Top 10 leaderboard) with HMAC-signed game sessions, score plausibility checks, rate-limited submissions, and silent forged-score rejection; Anti-Cheat Programming reference (aryribeiro) (source: wiki/sources/descriptions/aryribeiro__cobra.md)
+- [[leaderboard]] — OpenLeaderboard multi-tenant Go/Redis leaderboard API (kodeni-am; durable ingest log + Redis sorted-set ranks; optional per-app HMAC-signed score submits with replay window; split publishable/secret API keys and player tokens; dashboard, Go/TS SDKs, Unity client; Docker/Terraform/AWS + Prometheus/Grafana; production self-hosted score-submission hardening) (source: wiki/sources/descriptions/kodeni-am__leaderboard.md)
 - [[blastscale]] — server-authoritative mobile puzzle backend (AtakanKeser; Java Spring Boot + Unity client; deterministic move replay through board engine; chain-of-responsibility AC pipeline for sessions/timing/score bounds/move sequences; exactly-once rewards via idempotency keys + append-only ledger; Redis leaderboards + LiveOps; Open Source Anti Cheat System) (source: wiki/sources/descriptions/AtakanKeser__BlastScale.md)
 - [[pokealliance-anti-cheat-analysis]] — PokeAlliance OTCv8 Pokémon MMO client static/dynamic audit (LordeTyrael; server-triggered process/module/window enumeration, login hardware fingerprinting, Lua startup blacklists, server-driven bot checks over traditional anti-debug; Frida JS hooks + Python live tracer; Anti Cheat defensive research) (source: wiki/sources/descriptions/LordeTyrael__PokeAllianceAntiCheatAnalysis.md)
 - [[r6-siege-battleye-launch-bug]] — R6 Siege Y11S3 BattlEye/Sentinel handshake failure on standard launch paths with BEDaisy telemetry, checksum evidence, and working bypass via RainbowSixHelper.exe (brandenbailey23; Explore AntiCheat System:BE launch regression report) (source: wiki/sources/descriptions/brandenbailey23__r6-siege-battleye-launch-bug.md)
