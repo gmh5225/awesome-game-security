@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-15** — ingest `description:radareorg/r4ghidra`: entity [[r4ghidra]] (Ghidra extension; radare2-style REPL + r2web/r2pipe; Java Gradle module; embedded HTTP; seek/flags/comments/analysis/decompile handlers; Python/Ruby headless r2↔Ghidra sync); cited on [[overviews/reverse-engineering]] Ghidra bridge cluster beside [[gdbghidra]]; `index.md` entity blurb.
+
 - **2026-10-15** — ingest `description:reikop/axis-web`: entity [[axis-web]] (2005 AXIS OpenGL client → C/WASM + WebGL/WebAudio/WebSocket; living file/network RE spec; eight byte-exact decoders; WebSocket relay multiplayer with RNG lockstep validation; user-supplied game data); cited on [[overviews/reverse-engineering]] and [[overviews/game-engine]]; cross-linked [[zelda3]] and [[webcheat]]; `index.md` entity blurb.
 
 - **2026-10-15** — ingest `readme:categories`: Cheat ~2899 (+3) / Anti Cheat ~795 / Game Engine ~159 / Game Develop ~194 and other major section counts stable; 41 sections (`NeverC & NeverD` placeholder); synced README-map counts on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/reverse-engineering]], [[overviews/dma-attack]], and [[overviews/anti-cheat]]; fixed `index.md` Game Develop ~193 drift in Sources notes; light overview index blurbs (no per-category pages).

@@ -3187,6 +3187,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [r2garlic](entities/r2garlic.md) — radare2 Garlic DEX/Dalvik decompiler plugin (DEX/APK/ELF/PE/Mach-O; Cheat Radare Plugins)
 - [r2morph](entities/r2morph.md) — radare2/r2pipe metamorphic binary transform (Python+C; Cheat Radare Plugins)
 - [r2smt](entities/r2smt.md) — radare2 SMT opaque-predicate deobfuscator (Rust; Z3/CVC5/Bitwuzla; Cheat Radare Plugins)
+- [r4ghidra](entities/r4ghidra.md) — Ghidra extension with radare2-style REPL + r2pipe/r2web (Java Gradle module; HTTP shell; r2 ops on Ghidra program DB; Python/Ruby headless sync; radareorg; Cheat / RE Tools)
 - [RaceCondition](entities/racecondition.md) — Ahora57; C++ Visual Studio anti-anti-debug PoC; native NT API debug-port/hidden-thread probes; race-condition timing bypasses against userland hide mechanisms; RE technique research (Anti Debugging)
 - [radare2-mcp](entities/radare2-mcp.md) — radare2 MCP server (C; r2pipe disasm/decompile/xrefs; CLI/plugin modes; sandbox/readonly; MCP for radare2)
 - [radius2](entities/radius2.md) — radare2 fast binary emulation + symbolic execution (Rust/C; Cheat Radare Plugins)
