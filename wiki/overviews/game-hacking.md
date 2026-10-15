@@ -1888,6 +1888,7 @@ sources:
   - wiki/sources/descriptions/lsxll666__AntiCheatToggle.md
   - wiki/sources/descriptions/IZxMD__ac-compat-research.md
   - wiki/sources/descriptions/erensariisik03-sudo__Farming-Simulator-12-Mp-Build.md
+  - wiki/sources/descriptions/heaven-hm__cheat-agent.md
   - wiki/sources/descriptions/wrong-commit__skid_factory.md
   - wiki/sources/descriptions/bufanchen121101__AxManagerD.md
   - wiki/sources/descriptions/tbc0309__KPA-Root.md
@@ -2226,7 +2227,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - DSH Ghidra headless RPC skill family via [[ghidra-skill-for-dsh]] (Cristallin2006; seven scenario workflows—triage, unpack, static, vuln audit, Frida/Qiling dynamic, PCAP traffic, pure-DEX APK; oracle-based verification; Cheat RE Tools) (source: wiki/sources/descriptions/Cristallin2006__ghidra-skill-for-dsh.md)
 - DSH Ghidra bridge with 219+ agent tools via [[dsh-ghidra]] (spix18; JavaScript/Python DSH plugin; PyGhidra cross-platform import/decompile, xrefs, call graphs, persistent renames/comments/prototypes, composite analysis, malware triage—crypto constants, API heuristics, IOC extraction, anti-analysis patterns; optional GhidraMCP REST; environment diagnostics + agent skill; Cheat RE Tools) (source: wiki/sources/descriptions/spix18__dsh-ghidra.md)
 - Node.js MCP orchestrator via [[skid-factory]] (wrong-commit; TypeScript + Lua/Python bridges; Cheat Engine/x64dbg/Ghidra memory scan, hardware write breakpoints, pointer-chain trace, and patch workflows; Cursor CLI advise loop; Cheat RE Tools) (source: wiki/sources/descriptions/wrong-commit__skid_factory.md)
-- Cross-platform C++/Rust autonomous RE agent via [[cheat-agent]] (heaven-hm; native scan + pointer chains, five-stage closed-loop trainer verification, MCP or CLI with OpenAI/Anthropic/Ollama; authorized offline SP / test processes; Cheat / RE Tools) (source: wiki/sources/descriptions/heaven-hm__cheat-agent.md) (source: wiki/sources/README-categories.md)
+- Cross-platform C++/Rust autonomous RE agent via [[cheat-agent]] (heaven-hm; native scan + pointer chains, five-stage closed-loop trainer verification, MCP or CLI with OpenAI/Anthropic/OpenRouter/Ollama; authorized offline SP / test processes; Cheat / RE Tools) (source: wiki/sources/descriptions/heaven-hm__cheat-agent.md)
 - Official Cheat Engine LLM integration via [[aitools]] (cheat-engine; Lua + Lazarus in-app AI dialog; registerAITool callbacks drive memory scan, disasm, watchpoints, pointer chains, and Auto Assembler validation; skills for structure dissection, Mono/IL2CPP, Unreal; Google Gemini or local backends; Cheat / RE Tools) (source: wiki/sources/descriptions/cheat-engine__AITools.md)
 - Windows x86/x64 debugger [[syser]] (C/C++; RE / plugin development / modding) complements [[x64dbg]] in the Cheat Debugging lane for game-security offensive debug workflows. (source: wiki/sources/descriptions/marakew__syser.md)
 - Extension-plugin disassembler/debugger [[xdv]] (C/C++; plugin development / modding / SDK generation) complements [[x64dbg]] and [[syser]] in the Cheat Debugging lane for game-security offensive RE. (source: wiki/sources/descriptions/imugee__xdv.md)
