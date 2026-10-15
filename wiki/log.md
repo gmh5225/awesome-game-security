@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-15** — ingest `description:heaven-hm/gtlibcpp`: entity [[gtlibcpp]] (C++17 MemorySession, CE 7.x `.CT` parser, freeze restore, policy audit/kill-switch, local JSON-RPC agent, Windows named-pipe attach); cited on [[overviews/game-hacking]] RE Tools + CE-table library lanes; cross-linked [[cheat-agent]]; `index.md` entity blurb.
+
 - **2026-10-15** — ingest `readme:categories`: Cheat ~2896 (+1) / Anti Cheat ~793 / Game Engine ~159 / Game Develop ~194 and other major section counts stable; 41 sections (`NeverC & NeverD` placeholder); synced README-map counts on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/reverse-engineering]], and [[overviews/dma-attack]]; light `index.md` section notes (no per-category pages).
 
 - **2026-10-15** — lint (agent): read `wiki/AGENTS.md`; listed **Overviews** (9): `anti-cheat`, `dma-attack`, `game-engine`, `game-hacking`, `graphics-api`, `mobile-security`, `overview`, `reverse-engineering`, `windows-kernel`; **Concepts** (51) under `wiki/concepts/`; **Entities** (4070) under `wiki/entities/`; reconciled `index.md` vs disk — 4130 indexed paths (9+51+4070), 4130 unique, 0 missing, 0 dead, 0 duplicate index entries; overview pages + index overview-blurb + concept [[wikilink]] spot-check — 0 broken (15613 links), 0 malformed `]]]`; 6 expected cross-kind slug collisions ([[anti-cheat]], [[game-hacking]], [[reverse-engineering]], [[byovd]], [[dma]], [[il2cpp]]); wiki populated — bootstrap not required; `index.md` unchanged; no link repairs (`log.md` only).

@@ -1738,6 +1738,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [GTAIII-DE-GoldHook](entities/gtaiii-de-goldhook.md) — GTA III Definitive Edition internal hook cheat (ImGui overlay via DirectX hook; gameplay mods / visual enhancements; gmh5225)
 - [GTAV_DragResize](entities/gtav-dragresize.md) — GTA V drag-to-resize mod (in-game UI/HUD overlay resizing; rendering + input hooks; gmh5225)
 - [gtav-sourcecode-build-guide](entities/gtav-sourcecode-build-guide.md) — GTA V source code build tutorial (VM recommended; Game Develop / guide)
+- [gtlibcpp](entities/gtlibcpp.md) — heaven-hm C++17 memory/trainer library (CE 7.x `.CT` parse, freeze restore, policy gates, local JSON-RPC agent; Windows x86/x64 named-pipe attach; authorized offline trainer workflows; Cheat / RE Tools)
 - [regta](entities/regta.md) — Reverse-engineered GTA III & Vice City (Switch / PS Vita / Wii U ports; Game Develop / source)
 - [reGS](entities/regs.md) — reverse-engineered GoldSource engine (HL1; networking / rendering / physics; Game Engine / RE)
 - [rehlds](entities/rehlds.md) — reverse-engineered HLDS dedicated server (builds 6152/6153; DWARF-guided Linux RE; GoldSource protocol / HLTV / mod compatibility; Game Engine / RE)

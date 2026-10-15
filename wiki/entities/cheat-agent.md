@@ -36,4 +36,4 @@ Targets educators, game-security researchers, and QA teams who need reproducible
 
 ## Related
 
-[[research-rigor]] · [[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[skid-factory]] · [[reverify]] · [[n0xis]] · [[pymemory-editor]] · [[cheat-engine]]
+[[research-rigor]] · [[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[gtlibcpp]] · [[skid-factory]] · [[reverify]] · [[n0xis]] · [[pymemory-editor]] · [[cheat-engine]]
