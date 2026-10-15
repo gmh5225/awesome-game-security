@@ -1,21 +1,32 @@
 ---
 title: PluginsKers Shield
 kind: entity
-topics: [anti-cheat]
+topics: [anti-cheat, game-hacking]
 sources:
   - wiki/sources/descriptions/PluginsKers__Shield.md
   - wiki/sources/README-categories.md
 updated: 2026-10-15
-confidence: medium
+confidence: high
 ---
 
 # PluginsKers Shield
 
-**Shield** (PluginsKers/Shield) is an open-source Minecraft server plugin for Paper, Folia, and Purpur that streams movement, combat, and interaction telemetry to the remote Shield analysis service for inference and human review. Kotlin on Java 21 with Gradle; ProtocolLib for packet capture, rate limiting, and disk-backed retry when HTTPS delivery fails. Signed batched events feed cloud review; the plugin applies configurable warnings and authorized kicks while avoiding automatic bans. Operators register via the Shield dashboard and configure a server key—detection depends on that service rather than fully offline on-server models. (source: wiki/sources/descriptions/PluginsKers__Shield.md)
+**Shield** (PluginsKers/Shield) is an open-source Minecraft server plugin for **Paper**, **Folia**, and **Purpur** that collects player movement, combat, and interaction events for anti-cheat and behavior monitoring. Written in **Kotlin** (Gradle, **Java 21**), it targets operators who want cloud-assisted review rather than fully offline on-server inference. (source: wiki/sources/descriptions/PluginsKers__Shield.md)
 
-## Detection stack
+## Architecture
 
-Server-side event capture (movement, combat, interaction); ProtocolLib packet path; HTTPS batching with retry; remote Shield review; warnings and kicks only (no ban automation in-plugin).
+- **Capture** — Bukkit-style gameplay events plus **ProtocolLib** packet-oriented capture; local **rate limiting** before export.
+- **Transport** — **Signed**, batched events over **HTTPS** to the remote Shield analysis service (remote inference plus human review).
+- **Reliability** — In-memory queuing with **disk-backed retry** when HTTPS delivery fails.
+- **Enrollment** — Operators register through the **Shield dashboard** and configure a **server key**; behavior analysis depends on that cloud service, not offline models on the game host. (source: wiki/sources/descriptions/PluginsKers__Shield.md)
+
+## Enforcement
+
+Configurable **warnings** and **authorized kicks**; the plugin deliberately **avoids automatic bans**—high-impact sanctions remain operator-controlled after remote review. (source: wiki/sources/descriptions/PluginsKers__Shield.md)
+
+## Positioning
+
+**Open telemetry + cloud review** on the authoritative Java server—beside WebSocket/protobuf remote-engine plugins such as [[thorium-minecraft-plugin]], HTTPS inference plugins such as [[shard]] and [[guardac]], and on-server heuristic stacks such as [[bs-anticheat]]. Catalog context: [[minecraft-anticheat-list]]. Operational patterns: [[detector-operations]]. (source: wiki/sources/descriptions/PluginsKers__Shield.md)
 
 ## Links
 
@@ -23,4 +34,4 @@ Server-side event capture (movement, combat, interaction); ProtocolLib packet pa
 
 ## Related
 
-[[overviews/anti-cheat]] · [[thorium-minecraft-plugin]] · [[shard]] · [[bs-anticheat]] · [[detector-operations]] · [[minecraft-anticheat-list]]
+[[overviews/anti-cheat]] · [[overviews/game-hacking]] · [[thorium-minecraft-plugin]] · [[shard]] · [[guardac]] · [[bs-anticheat]] · [[detector-operations]] · [[minecraft-anticheat-list]]

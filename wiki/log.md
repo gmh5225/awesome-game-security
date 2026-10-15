@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-15** — ingest `description:PluginsKers/Shield`: refreshed entity [[pluginskers-shield]] (confidence high; Kotlin Java 21; ProtocolLib capture with rate limiting; signed HTTPS batches to remote Shield inference and human review; disk-backed retry; kick-only enforcement without in-plugin auto-bans; dashboard server-key enrollment); cited on [[overviews/game-hacking]] remote-engine Paper/Folia lane + [[concepts/detector-operations]] cloud-review collector health; synced `index.md` entity blurb; [[overviews/anti-cheat]] frontmatter source.
+
 - **2026-10-15** — ingest `description:heaven-hm/cheat-agent`: refined entity [[cheat-agent]] (explicit five-stage closed-loop verifier); cited on [[overviews/reverse-engineering]] MCP-assisted memory-RE lane; synced [[overviews/game-hacking]] bullet + frontmatter sources; `index.md` entity blurb + duplicate wikilink fix.
 
 - **2026-10-15** — ingest `readme:categories`: Cheat ~2895 (+1; heaven-hm/[[cheat-agent]] autonomous C++/Rust RE agent with closed-loop trainer verification + MCP/CLI) / Anti Cheat ~793 (+1; PluginsKers/[[pluginskers-shield]] Paper/Folia/Purpur remote Shield telemetry plugin) / Game Engine ~159 / Game Develop ~194 and other major section counts stable; 41 sections (`NeverC & NeverD` placeholder); synced README-map counts on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/reverse-engineering]], [[overviews/dma-attack]], and [[overviews/anti-cheat]]; entities [[cheat-agent]], [[pluginskers-shield]]; light `index.md` section notes (no per-category pages).

@@ -19,6 +19,7 @@ sources:
   - wiki/sources/descriptions/LB45440078L__xray-anticheat.md
   - wiki/sources/descriptions/modcommunity__dot-server-security.md
   - wiki/sources/descriptions/Parko-Developer__guard-game.md
+  - wiki/sources/descriptions/PluginsKers__Shield.md
   - wiki/sources/descriptions/Driw0x__CS2Guard.md
   - wiki/sources/descriptions/oykuoner__YAACS-AntiCheat.md
   - wiki/sources/descriptions/gjones01__NullCS.md
@@ -969,7 +970,7 @@ sources:
   - wiki/sources/descriptions/dhehdjebejen-beep__Bastion.md
   - wiki/sources/descriptions/projectsadameyd__AegisAC.md
   - wiki/sources/descriptions/Krimziee__SecureBootCheck.md
-updated: 2026-10-14
+updated: 2026-10-15
 confidence: high
 ---
 
