@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-15** — ingest `description:AlonSoko/karta-x-configs`: entity [[karta-x-configs]] (Karta-x IDA library-ID config packs; GCC/clang/MSVC; Lua/SQLite/zlib/MinHook/LZ4); cited on [[overviews/reverse-engineering]] stripped library-ID lane and [[overviews/game-hacking]] IDA RE Tools; cross-linked [[ida-plugin-lens]]; `index.md` entity blurb.
+
 - **2026-10-15** — ingest `description:PSI-Rockin/ghidra-teak-dsp`: entity [[ghidra-teak-dsp]] (Ghidra SLEIGH + CDC/DSP1 loader for Nintendo 3DS/DSi XpertTeak DSP; Home Menu/Sound App firmware RE); cited on [[overviews/reverse-engineering]] console/3DS lane beside [[3beans]]; `index.md` entity blurb.
 
 - **2026-10-15** — ingest `description:stuffed-cat/hide-ace-kernel`: entity [[hide-ace-kernel]]; cited on [[mobile-anti-cheat]] and [[overviews/mobile-security]]; cross-linked [[kernelsu]].

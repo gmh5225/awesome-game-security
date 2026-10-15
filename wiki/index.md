@@ -2146,6 +2146,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [kcp-cpp](entities/kcp-cpp.md) — lightweight C++17 KCP wrapper (client/server; callback-driven; configurable low-latency transport; game networking prototypes; README [KCP]; Unit-X)
 - [kajiya](entities/kajiya.md) — EmbarkStudios; experimental real-time global illumination renderer (Rust + Vulkan + HLSL hybrid raster/compute/RT; dynamic GI without probes, temporal reconstruction, RT shadows/reflections, reference path-tracing validation; advanced rendering research; Renderer)
 - [kakhack](entities/kakhack.md) — CS:GO internal cheat (reversed SDK, multi-hook, ImGui+FreeType menu, JSON config, visuals; x86 VS2022 DLL; cazzwastaken [Internal])
+- [karta-x-configs](entities/karta-x-configs.md) — Karta-x IDA plugin release config packs (GCC/clang/MSVC build fingerprints; Lua/SQLite/zlib/MinHook/LZ4; manifest + verified fetch; embedded OSS function naming in stripped game/native binaries; AlonSoko; cheat / RE Tools)
 - [kavanoz](entities/kavanoz.md) — Python automated Android DEX/resource unpacker (Bangcle/Ijiami/Qihoo 360+ packer ID + decrypt; banker malware; static APK analysis; eybisi)
 - [kazmath](entities/kazmath.md) — lightweight portable C 3D math library (vectors/matrices/transforms; CMake; examples/tests; Mathematics)
 - [kbotext](entities/kbotext.md) — LoL LCU bot extension framework (automated scripting and client control; README `[LCU]`; gmh5225; cheat / game:lol)

@@ -30,4 +30,4 @@ Workflow infrastructure—not decompilation or automation. Complements [[ida-set
 
 ## Related
 
-[[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[ida-settings]] · [[ida-plugin-repository]] · [[list-of-ida-plugins]]
+[[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[ida-settings]] · [[ida-plugin-repository]] · [[karta-x-configs]] · [[list-of-ida-plugins]]
