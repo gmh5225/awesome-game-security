@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-15** — ingest `description:yuonsovann5656-netizen/Nexora-AntiCheat`: entity [[nexora-anticheat]] (Paper/Folia Java 21 lag-compensated modular checks; SQLite/MySQL persistence; kick-to-ban + Discord; optional license heartbeat; React/Node Supabase fleet panel); cited on [[overviews/anti-cheat]] Paper/Folia heuristic lane; `index.md` entity blurb.
+
 - **2026-10-15** — ingest `readme:categories`: Anti Cheat ~794 (+1) / Cheat ~2896 / Game Engine ~159 / Game Develop ~194 and other major section counts stable; 41 sections (`NeverC & NeverD` placeholder); synced README-map counts on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], [[overviews/reverse-engineering]], and [[overviews/game-hacking]]; cross-linked heaven-hm/[[gtlibcpp]] on README Cheat RE Tools lanes; light `index.md` section notes (no per-category pages).
 
 - **2026-10-15** — lint (agent): read `wiki/AGENTS.md`; listed **Overviews** (9): `anti-cheat`, `dma-attack`, `game-engine`, `game-hacking`, `graphics-api`, `mobile-security`, `overview`, `reverse-engineering`, `windows-kernel`; **Concepts** (51) under `wiki/concepts/`; **Entities** (4071) under `wiki/entities/`; reconciled `index.md` vs disk — 4131 indexed paths (9+51+4071), 4131 unique, 0 missing, 0 dead, 0 duplicate index entries; overview pages + index overview-blurb + concept [[wikilink]] spot-check — 0 broken (15617 links), 0 malformed `]]]`; 6 expected cross-kind slug collisions ([[anti-cheat]], [[game-hacking]], [[reverse-engineering]], [[byovd]], [[dma]], [[il2cpp]]); wiki populated — bootstrap not required; `index.md` unchanged; no link repairs (`log.md` only).

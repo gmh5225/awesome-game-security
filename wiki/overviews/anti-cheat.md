@@ -207,6 +207,7 @@ sources:
   - wiki/sources/descriptions/zer0condition__gexec.md
   - wiki/sources/descriptions/ytk2128__pe32-password.md
   - wiki/sources/descriptions/ykus4__kagura.md
+  - wiki/sources/descriptions/yuonsovann5656-netizen__Nexora-AntiCheat.md
   - wiki/sources/descriptions/Neo23x0__Raccine.md
   - wiki/sources/descriptions/NeverSight__NeverC.md
   - wiki/sources/descriptions/romainthomas__the-poor-mans-obfuscator.md
@@ -1313,6 +1314,8 @@ Long-form kernel AC architecture primer [How Kernel Anti-Cheats Work](https://s4
 **LeviLamina Bedrock dedicated-server AC:** [[levi-anticheat]] (LiteLDev; C++ LeviLamina plugin; X-ray, fly/speed, reach, auto-click, invalid inventory, and malformed-packet checks; obfuscation-based Anti-Xray engine modes; violation-level ban/mute; item-duplication and crafter-crash exploit fixes; JSON config + hot reload; Open Source Anti Cheat System / game:minecraft) for Bedrock BDS operators on LeviLamina beside PowerNukkitX plugins such as [[amethyst]] and behavior-pack AC such as [[blarion-anticheat]]. (source: wiki/sources/descriptions/LiteLDev__LeviAntiCheat.md)
 
 **Paper/Folia heuristic AC:** [[bs-anticheat]] (BoondockSulfur; Java Paper **1.21.10+** plugin; full Folia support; movement/combat/world-interaction/inventory/vehicle/packet checks—speed, fly, reach, killaura, nuker, autoclicker, x-ray mining; transaction-based lag compensation; configurable violation-level punishments with optional setbacks; SQLite logging; PacketEvents, Discord webhooks, PlaceholderAPI, and LuckPerms integrations; false-positive-conscious tunable heuristics for server administrators; Anti Cheat / game:minecraft) for Paper/Folia operators beside physics-prediction AC such as [[grim]] and alert-focused NeoForge mods such as [[sentinel-anticheat-neoforge]]. (source: wiki/sources/descriptions/BoondockSulfur__BS-AntiCheat.md)
+
+**Paper/Folia lag-compensated AC + fleet panel:** [[nexora-anticheat]] (yuonsovann5656-netizen; Java **21** Maven plugin; modular speed/fly/kill aura/reach/scaffold/x-ray checks with statistical analysis, vector ray-tracing, ping-aware reach, velocity validation, and Geyser/Bedrock tolerance; async SQLite/MySQL violation persistence; progressive kick-to-ban, staff GUI, Discord webhooks, optional license heartbeat; bundled React/Node operator panel with Supabase PostgreSQL for licensing and remote fleet management; Open Source Anti Cheat System / game:minecraft) for network operators beside on-server heuristics such as [[bs-anticheat]] and cloud telemetry plugins such as [[pluginskers-shield]]. (source: wiki/sources/descriptions/yuonsovann5656-netizen__Nexora-AntiCheat.md)
 
 **Paper modular MC AC:** [[h-ac]] (Benardelys; Java Paper **1.21** plugin; modular combat/movement/world checks with latency-compensated reach raytracing, violation decay, asynchronous logging, Discord alerts, client brand fingerprinting, and injector detection; Anti Cheat / game:minecraft) for Paper operators beside heuristic plugins such as [[bs-anticheat]] and [[larping-anti-cheat]]. (source: wiki/sources/descriptions/Benardelys__H-AC.md)
 
