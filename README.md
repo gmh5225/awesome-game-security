@@ -2166,6 +2166,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/Hexorg/CheatEngineTables [Collection of Cheat Engine tables curated from CE forums (offline-focused)]
 - https://github.com/antaresjay/freeplay [Rust Windows trainer that converts Cheat Engine .CT tables to TOML and runs Auto Assembler scripts]
 - https://github.com/abhijeetadarsh/CTTrainer [Standalone Windows ImGui/DX11 trainer that parses Cheat Engine .CT tables and reads, writes, and freezes values in attached 32/64-bit game processes]
+- https://github.com/heaven-hm/gtlibcpp [C++17 memory/trainer library with Cheat Engine .CT parsing, freeze management, and a local JSON-RPC agent for authorized offline trainer workflows on Windows]
 - https://github.com/inuNorii/Elden-Ring-CT-TGA [Elden Ring]
 - https://github.com/gmh5225/CE-remap-plugin [Remap]
 - https://github.com/gmh5225/overwatch-iat-fixer [Overwatch IAT Fixer]
