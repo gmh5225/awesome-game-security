@@ -1768,6 +1768,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [hex-rays-deob](entities/hex-rays-deob.md) — Hex-Rays microcode plugin; pattern-based expr simplify + CFF unflatten; obfuscated game/malware RE (RolfRolles; Hex-Rays Microcode)
 - [hrtng](entities/hrtng.md) — KasperskyLab IDA Pro plugin; Hex-Rays deobfuscation/decryption/patching transforms; CFF unflatten, API-hash scan, microcode sigs (cheat / IDA Plugins)
 - [hi3-ace-b](entities/hi3-ace-b.md) — Honkai Impact 3rd ACE bypass (integrity-check / detection circumvention; modified clients; explore anticheat; gmh5225)
+- [hide-ace-kernel](entities/hide-ace-kernel.md) — KernelSU module; bind-mount empty placeholders over Tencent ACE `/proc/inte_*` kernel integrity nodes on Oplus/Tencent builds (mobile AC research)
 - [hide-file](entities/hide-file.md) — C kernel file-hide driver (cheat / hide; Detection:Hide-adjacent)
 - [hideroot](entities/hideroot.md) — Android root-hide sample (C/C++; Cheat / Magisk)
 - [hiearchy-eac](entities/hiearchy-eac.md) — EAC self-integrity bypass PoC (call-hierarchy + memory-read manipulation; verification hooks; cleaned-image redirect; stack/register spoofing; Sinclairq [Integrity Checks])
