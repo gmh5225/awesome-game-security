@@ -1989,6 +1989,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 
 > IDA Signature Database
 - https://github.com/push0ebp/sig-database
+- https://github.com/AlonSoko/karta-x-configs [Release-packaged Karta-x library identification configs (GCC/clang/MSVC) for matching and naming embedded open-source functions in game and native binaries]
 - https://github.com/cpkt9762/solana-sbpf-rlib [Solana sBPF rlib files for IDA Pro / Ghidra / Binary Ninja signature generation]
 
 > Binary Ninja Plugins
@@ -2038,6 +2039,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/CENSUS/ghidra-frida-hook-gen
 - https://github.com/mitros123/DragonHook [Ghidra plugin exposing GhidraDB queries to Frida at runtime for dynamic call-target resolution, backtraces, and live xref/comment updates]
 - https://github.com/Gekkio/GhidraBoy [Sharp SM83 / Game Boy extension for Ghidra]
+- https://github.com/PSI-Rockin/ghidra-teak-dsp [Ghidra SLEIGH extension and CDC/DSP1 loader for Nintendo 3DS/DSi XpertTeak DSP firmware (Home Menu, Sound App disassembly)]
 - https://github.com/CUB3D/ghidra-hexagon-sleigh [Ghidra SLEIGH extension for Qualcomm Hexagon QDSP6 decompilation and analysis]
 - https://github.com/thixotropist/ghidra_decompiler_plugins [Loadable Ghidra decompiler plugins and rules that simplify RISC-V vector-instruction analysis in the decompiler window]
 - https://github.com/sengi12/ghidra-hexEditor [Dockable hex editor Ghidra plugin for byte-level memory editing during RE]
@@ -3192,6 +3194,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/wwweeeqqu/honor-of-kings-RE-research [Honor of Kings mobile RE: KernelPatch KPM reads, Tencent ACE analysis, IL2CPP/native notes]
 - https://github.com/not1cyyy/Anti-Cheat-Amateur [Stealth kdmapper kernel driver and virtualized UE memory scanner for Tencent ACE evasion research]
 - https://github.com/Lixense/ff-ace-anticheat-analysis [Byte-level RE post-mortem on Tencent ACE (libanogs/libanort) in Free Fire, with IDA tooling and detection catalog]
+- https://github.com/stuffed-cat/hide-ace-kernel [KernelSU module that bind-mounts empty files over Tencent ACE kernel `/proc/inte_*` integrity nodes to hide KO/syscall-table reports from user space]
 
 > Explore AntiCheat System:G-Presto
 - https://github.com/ARandomPerson7/G-Presto-Anti-Cheat-Reverse-Engineered/blob/main/Main.cpp
