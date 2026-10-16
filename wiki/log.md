@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-16** — ingest `description:adriank56793/rdc-cli`: entity [[rdc-cli]] (Python RenderDoc replay CLI; `.rdc` TSV/JSON streams + virtual FS; draws/shaders/textures/buffers/pixel debug; daemon, two-frame diffs, CI/remote/Android; D3D/Vulkan/OpenGL); cited on [[overviews/graphics-api]] frame-capture lane and [[overviews/reverse-engineering]] Debugging / RE Tools; `index.md` entity + graphics-api blurb.
+
 - **2026-10-16** — ingest `description:bliper2/jsaclient`: entity [[jsaclient]] (Gradle core/fabric/loader; **1.6.4–26.3** reflective multi-version MC utility client; platform abstraction, era maps, optional Fabric/Meteor; single-player/open-LAN scope); cited on [[overviews/game-hacking]] cross-version Java client lane; `index.md` entity blurb.
 
 - **2026-10-16** — ingest `readme:categories`: Cheat ~2903 (+2) / Anti Cheat ~798 / Game Engine ~159 / Game Develop ~194 and other major section counts stable; 41 sections (`NeverC & NeverD` placeholder); synced README-map counts on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/dma-attack]], and [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
