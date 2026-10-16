@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-16** — lint (agent): read `wiki/AGENTS.md`; listed **Overviews** (9): `anti-cheat`, `dma-attack`, `game-engine`, `game-hacking`, `graphics-api`, `mobile-security`, `overview`, `reverse-engineering`, `windows-kernel`; **Concepts** (51) under `wiki/concepts/`; **Entities** (4080) under `wiki/entities/`; reconciled `index.md` vs disk — 4140 indexed paths (9+51+4080), 4140 unique, 0 missing, 0 dead, 0 duplicate index entries; overview pages + concept pages [[wikilink]] spot-check — 0 broken (14974 links), 0 malformed `]]]`; 6 expected cross-kind slug collisions ([[anti-cheat]], [[game-hacking]], [[reverse-engineering]], [[byovd]], [[dma]], [[il2cpp]]); wiki populated — bootstrap not required; `index.md` unchanged; no link repairs (`log.md` only).
+
 - **2026-10-16** — ingest `description:megarohas/nhl-legacy-remaster`: entity [[nhl-legacy-remaster]] (ReXGlue X360 NHL Legacy Edition→x86-64 PC port; C++/CMake + Python EA archive/roster/uniform mod RE; DX12/Vulkan; user-supplied assets); cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]] Xbox static-recomp lane; `index.md` entity blurb + wikilink sync.
 
 - **2026-10-16** — ingest `readme:categories`: Xbox ~12 (+1; megarohas/nhl-legacy-remaster NHL Legacy Edition X360 ReXGlue static recomp → native PC + mod tooling) / Cheat ~2900 / Anti Cheat ~797 / Game Engine ~159 / Game Develop ~194 and other major section counts stable; 41 sections (`NeverC & NeverD` placeholder); synced README-map counts on [[overviews/overview]], [[overviews/game-hacking]], and [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
