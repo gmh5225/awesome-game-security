@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-16** — lint (agent): read `wiki/AGENTS.md`; listed **Overviews** (9): `anti-cheat`, `dma-attack`, `game-engine`, `game-hacking`, `graphics-api`, `mobile-security`, `overview`, `reverse-engineering`, `windows-kernel`; **Concepts** (51) under `wiki/concepts/`; **Entities** (4079) under `wiki/entities/`; reconciled `index.md` vs disk — 4139 indexed paths (9+51+4079), 4139 unique, 0 missing, 0 dead, 0 duplicate index entries; overview pages + `index.md` overview/concept-blurb [[wikilink]] spot-check — 0 broken (13304 links), 0 malformed `]]]`; 6 expected cross-kind slug collisions ([[anti-cheat]], [[game-hacking]], [[reverse-engineering]], [[byovd]], [[dma]], [[il2cpp]]); wiki populated — bootstrap not required; `index.md` unchanged; no link repairs (`log.md` only).
+
 - **2026-10-16** — ingest `description:is-fo/drelay`: entity [[drelay]] (Darza's Dominion Java loopback TCP relay decode/log/rewrite + pre-Main C++/.NET MinHook IL-hash hook; build fingerprint gate; dodge/escape solvers; wire + in-frame decision RE); cited on [[overviews/game-hacking]] packet relay lane and [[overviews/reverse-engineering]] Network/NDIS lane; `index.md` entity blurb.
 
 - **2026-10-16** — ingest `readme:categories`: Cheat ~2900 (+1) / Anti Cheat ~797 / Game Engine ~159 / Game Develop ~194 and other major section counts stable; 41 sections (`NeverC & NeverD` placeholder); synced README-map counts on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]], and [[overviews/anti-cheat]]; light `index.md` section notes (no per-category pages).
