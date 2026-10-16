@@ -27,6 +27,7 @@ sources:
   - wiki/sources/descriptions/YouNeverKnow00__Rust-Auto-Weapon-Detection-OpenCV-Example.md
   - wiki/sources/descriptions/gravemaulr__MLAntiCheat.md
   - wiki/sources/descriptions/RootKit-Org__AI-Aimbot.md
+  - wiki/sources/descriptions/ai-aimbot__AIMr.md
   - wiki/sources/descriptions/Passer1072__RookieAI_yolov8.md
   - wiki/sources/descriptions/Leksa667__YOLOv8-Overlay-CS2.md
   - wiki/sources/descriptions/AMXZzzz__SF_TRT_61.md
@@ -45,7 +46,7 @@ sources:
   - wiki/sources/descriptions/NetVar1337__apex-anticheat-lab.md
   - wiki/sources/README-categories.md
   - wiki/sources/descriptions/ahuhu789__pubg-bigdata-analytics.md
-updated: 2026-10-14
+updated: 2026-10-16
 confidence: medium
 ---
 
@@ -95,6 +96,7 @@ Tabular engagement features (reaction time, curvature stats, dx/dy correlation, 
 - [[opencv-smart-aimbot]] — OpenCV + triggerbot (C++; classical CV; cheat / triggerbot & aimbot; gmh5225)
 - [[ai-fps-b00m-h3adsh0t]] — external FPS aimbot (Python/C++; screen capture + YOLO player detection + mouse aim; cheat / Neural Network; gmh5225)
 - [[ai-aimbot]] — RootKit-Org YOLOv5 screen-capture aimbot (Conda; Fortnite/Rust custom models; detection sensitivity + aim tuning; cheat / Machine Learning YOLOv5)
+- [[aimr]] — ai-aimbot Python external CV aimbot (OpenCV + YOLO-style detection; bettercam capture; CustomTkinter CLI/GUI; optional DirectML; triggerbot/recoil/silent aim/prediction/humanized smooth aim; optional Arduino/KMBOX hardware input; evasion-oriented external pipeline; cheat / Machine Learning YOLO) (source: wiki/sources/descriptions/ai-aimbot__AIMr.md)
 - [[rookieai-yolov8]] — Passer1072 YOLOv8 Ultralytics FPS aim-assist framework (Python; multi-process capture/inference; PyTorch/TensorRT/ONNX; Win32/Logitech/kmNet input; configurable aim/trigger; cheat / Machine Learning YOLOv8)
 - [[yolov8-overlay-cs2]] — Leksa667 CS2 Python real-time overlay (YOLOv8 ONNX via ONNX Runtime; mss capture; Pygame + Win32 transparent topmost overlay; optional CUDA, confidence filter, hotkeys, smooth aim-assist; computer-vision cheat prototyping + AC research; cheat / game:cs2 [YOLOv8 in CS2])
 - [[auto-aim]] — Fragmentaim C++ real-time AI aiming assistant core (DXGI Desktop Duplication capture; YOLO via ONNX Runtime/TensorRT; OpenCV; driver-level mouse simulation; CV game-automation research; DXGI + TensorRT + driver-level input)

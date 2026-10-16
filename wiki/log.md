@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-16** — ingest `description:ai-aimbot/AIMr`: entity [[aimr]] (Python external CV aimbot; OpenCV + YOLO-style detection; bettercam; CustomTkinter CLI/GUI; optional DirectML; triggerbot/recoil/silent aim/prediction/humanized smooth aim; optional Arduino/KMBOX; evasion-oriented); cited on [[concepts/ai-aimbot-detection]] corpus + [[overviews/game-hacking]] AI visual pipeline; `index.md` entity + game-hacking blurb.
+
 - **2026-10-16** — ingest `description:winstxnhdw/lc-hax`: entity [[lc-hax]] (Lethal Company Unity Mono internal; CLI launcher C# inject; Harmony-style patches + Roslyn command analysers; ESP/godmode/noclip/lobby host controls); cited on [[overviews/game-hacking]] Unity Mono in-process lane; `index.md` entity + game-hacking blurb.
 
 - **2026-10-16** — ingest `readme:categories`: Cheat ~2905 (+2) / DirectX ~42 (+1) / Anti Cheat ~798 / Game Engine ~159 / Game Develop ~194 and other major section counts stable; 41 sections (`NeverC & NeverD` placeholder); synced README-map counts on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]], and [[overviews/graphics-api]] (`Mathematics` ~7 [[omath]] sample); light `index.md` section notes (no per-category pages).
