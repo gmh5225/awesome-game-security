@@ -345,6 +345,7 @@ sources:
   - wiki/sources/descriptions/ssyuqixe__obfCoder.md
   - wiki/sources/descriptions/javascript-obfuscator__javascript-obfuscator.md
   - wiki/sources/descriptions/levifrsn63__krunker-loader.md
+  - wiki/sources/descriptions/leviitin__oficina-cheat-e-anticheat.md
   - wiki/sources/descriptions/sfr-development__Lua-Obfuscator-Clyde-Protection.md
   - wiki/sources/descriptions/ssnob__hidden_syscall_monitoring.md
   - wiki/sources/descriptions/wpdk__wdutf.md
@@ -1142,6 +1143,7 @@ Long-form kernel AC architecture primer [How Kernel Anti-Cheats Work](https://s4
 - [[irontrace]] — Windows hardware and forensic integrity scanner for game-server administrators (codedevdev; C# WPF/CLI + optional ASP.NET Core server; PCI/PCIe/USB/driver inventory, DMA masquerade indicators, BYOVD/HWID/execution-artifact layers, LOLDrivers correlation; explainable JSON verdicts without auto-ban; optional self-hosted admin triage; Detection:DMA / hardware integrity auditing) (source: wiki/sources/descriptions/codedevdev__irontrace.md)
 - [[hawkeye]] — Windows kernel security research console for anti-cheat analysis and live forensics (hawkeye-Leo; host-native driver Win10/11 x64; `!probe` symbol/module inspection, `!etw` execution sampling + call-stack tracing, `!kernel_region` VA classification; Hawkeye Lab `!analyze` scored memory-mapping/active-page/kernel-injection reports; GPL Community + paid Lab; authorized AC/kernel RE) (source: wiki/sources/descriptions/hawkeye-Leo__hawkeye.md)
 - [[basic-anti-cheat]] — basic C/C++ anti-cheat teaching sample (process integrity, cheat signature scan, debugger detection, suspicious module enum, memory region validation; gmh5225; beginners) (source: wiki/sources/descriptions/gmh5225__Basic_Anti-Cheat.md)
+- [[oficina-cheat-e-anticheat]] — Portuguese workshop slide deck *The Invisible War: Cheats vs Anticheats* (local HTML/JS deck, SVG architecture diagrams, glossary, optional SHA-256/log-analysis Python demos; internal/external/kernel/DMA cheats vs UM/KM/server AC layers; defensive classroom orientation; leviitin) (source: wiki/sources/descriptions/leviitin__oficina-cheat-e-anticheat.md)
 - [[uac]] — anti-cheat development platform with Visual Studio kernel-mode driver (common cheat-technique detection routines; C++ framework for testing/validating kernel-level detection; cheat-dev weakness probing; c4kef; Cheat developer platform) (source: wiki/sources/descriptions/c4kef__UAC.md)
 - [[quack]] — universal anti-cheat research kit (C++; modular client-side monitoring, game integration examples, documentation, companion red-team adversarial tooling; experimentation/validation—not production; JonathanBerkeley) (source: wiki/sources/descriptions/JonathanBerkeley__Quack.md)
 - [[blc-gamesec-lab]] — authorized game-security validation and regression orchestration CLI (Python; BLCReverseLab intake, evidence graphs, build diffing, incremental anti-cheat retest scoping; `blc.gamesec.report/v1`; BLCCoreStudio; defensive authorized regression testing) (source: wiki/sources/descriptions/BLCCoreStudio__BLCGameSecLab.md)

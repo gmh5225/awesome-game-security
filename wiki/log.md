@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-16** — ingest `description:leviitin/oficina-cheat-e-anticheat`: entity [[oficina-cheat-e-anticheat]] (Portuguese *The Invisible War* workshop kit; local HTML/JS slides + SVG architecture diagrams, glossary, optional SHA-256/log-analysis Python demos; cheat/AC layer taxonomy incl. DMA; defensive classroom orientation); cited on [[overviews/anti-cheat]] educational corpus; `index.md` entity + anti-cheat blurb.
+
 - **2026-10-16** — ingest `readme:categories`: Anti Cheat ~799 (+1) / Cheat ~2905 / DirectX ~42 / Game Engine ~159 / Game Develop ~194 and other major section counts stable; 41 sections (`NeverC & NeverD` placeholder); synced README-map counts on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], and [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
 
 - **2026-10-16** — lint (agent): read `wiki/AGENTS.md`; listed **Overviews** (9): `anti-cheat`, `dma-attack`, `game-engine`, `game-hacking`, `graphics-api`, `mobile-security`, `overview`, `reverse-engineering`, `windows-kernel`; **Concepts** (51) under `wiki/concepts/`; **Entities** (4087) under `wiki/entities/`; reconciled `index.md` vs disk — 4147 indexed paths (9+51+4087), 4147 unique, 0 missing, 0 dead, 0 duplicate index entries; overview pages + `index.md` overview-blurb [[wikilink]] spot-check — 0 broken (13242 links), 0 malformed `]]]`; 6 expected cross-kind slug collisions ([[anti-cheat]], [[game-hacking]], [[reverse-engineering]], [[byovd]], [[dma]], [[il2cpp]]); wiki populated — bootstrap not required; `index.md` unchanged; no link repairs (`log.md` only).
