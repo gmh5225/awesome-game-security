@@ -1091,6 +1091,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [dota2dumped](entities/dota2dumped.md) — Dota 2 Source 2 offset dumper (C++ headers; netvars / interfaces / class layouts; `[Offset dumper]`)
 - [draw-ida](entities/draw-ida.md) — lightweight IDA Pro whiteboard plugin (sketch/brainstorm in-IDA; MIT; cheat / IDA Plugins)
 - [Dreams to Reality RE](entities/dreams-to-reality-re.md) — Cryo Interactive Dreams to Reality (1997) RE toolkit; Python asset decoders, Ghidra Watcom scripts, OpenDreams C++17/SDL3 runtime; CryoLib/LZ/HNM formats; retail-exec verified; tools only (jlagedo; Cheat / RE Tools)
+- [drelay](entities/drelay.md) — Darza's Dominion Java loopback TCP relay (decode/log/rewrite) + pre-Main C++/.NET MinHook IL-hash hook; pinned build fingerprint; dodge/escape solvers; wire-level session RE (is-fo; Cheat / Packet Sniffer&Filter)
 - [drive-cloning-for-ps4-ps5](entities/drive-cloning-for-ps4-ps5.md) — PS4/PS5 extended-storage drive cloning (DrYenyen; Linux dd + sparse images; installed-app transfer between consoles; PlayStation)
 - [Driver-intel-PEBs-LoopHPCs](entities/driver-intel-pebs-loophpcs.md) — LoopHPCs filter-driver framework; PEBS + LBR loop-centric hot-loop telemetry for unpacking/malware RE (gmh5225; Intel PEBs)
 - [driver-efi-bootkit](entities/driver-efi-bootkit.md) — UEFI boot-stage implant: EFI→kernel staged chain; loader hook + pre-OS driver patch; Python BOOTDOOR inject (gmh5225)
