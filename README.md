@@ -711,6 +711,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 
 > Tools
 - https://github.com/visotw/3d9 [Fixing broken stereoscopic effects in DX11 games]
+- https://github.com/adriank56793/rdc-cli [Scriptable CLI to query RenderDoc .rdc captures (draws, shaders, diffs) for terminal, CI, and agent workflows on D3D/Vulkan/OpenGL frames]
 
 > Emulation 
 - https://github.com/code-tom-code/Software_D3D9 [DX9]
@@ -1042,6 +1043,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/vs-sr-dev/pc-wackywheels-doc [RE documentation for Wacky Wheels (1994): WACKY.DAT archive, track/sprite formats, and fixed-point LUTs behind its pseudo-3D renderer]
 - https://github.com/vs-sr-dev/saturnkit [Game-agnostic Sega Saturn RE toolkit: disc/IP.BIN parsing, SH-2 decode, static recompilation to C++, and a hardware runtime (VDP1/2, SCU, SMPC, CD block, SCSP) for native PC ports]
 - https://github.com/robbe1912/motorstorm-mv-recomp [Source-only PS3 MotorStorm Monument Valley static recompilation and translation tooling (ps3recomp-based) for authorized local RE and native Windows experiments]
+- https://github.com/TalhaMudo/NFSU2Recomp [Static recompilation pipeline and runtime lifting Need for Speed: Underground 2 (Win32/x86, D3D9) to native ARM64 macOS with documented RE tooling]
 - https://github.com/sosso33/omikron-tns-omk-engine [From-scratch C++20 reimplementation of Omikron: The Nomad Soul (1999) with documented format reverse engineering and evidence-backed asset readers]
 - https://github.com/sergen213/kabus22-linux [Reverse-engineered native Linux Kabus 22 engine with GTK installer/launcher, OpenGL/Vulkan rendering, and RE notes; requires user-supplied original game assets]
 - https://github.com/LyeDevGit/WonTree-RBLX-Dumper [Universal Roblox game analysis dumper: Luau decompile stack, remote call graph, live remote logger, framework and anti-cheat pattern detection, markdown/CSV reports]
@@ -3283,6 +3285,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/lolizei/Lenrete-Mod [Open-source Fabric utility/cheat client for Minecraft 26.2 with modular combat, movement, render, and HUD modules]
 - https://github.com/Marcinator31/Vortex-Client [Open-source Fabric 1.21.11 Minecraft utility client with HUD, ESP, waypoints, combat helpers, and in-game preset configuration]
 - https://github.com/Gingerbeard5773/dino-printer [Meteor Client addon that prints Litematica schematics with BlockState simulation, raytracing, and anti-cheat-aware placement settings]
+- https://github.com/bliper2/jsaclient [Multi-version Minecraft Java utility client (Gradle core/fabric/loader) with movement, visuals, and open-LAN modules; integrates with Meteor when installed]
 
 > Game:Sword With Sauce
 - https://github.com/1hAck-0/UE4-Cheat-Source-Code
