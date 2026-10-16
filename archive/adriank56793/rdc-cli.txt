@@ -1,0 +1,453 @@
+Project Path: arc_adriank56793_rdc-cli_f8g_499z
+
+Source Tree:
+
+```txt
+arc_adriank56793_rdc-cli_f8g_499z
+├── LICENSE
+├── Makefile
+├── README.md
+├── pyproject.toml
+├── scripts
+│   └── tasks.py
+├── src
+│   ├── __init__.py
+│   └── core.py
+└── tests
+    └── test_core.py
+
+```
+
+`LICENSE`:
+
+```
+MIT License
+
+Copyright (c) 2023 rdc-cli
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files, to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND.
+```
+
+`Makefile`:
+
+```
+test:
+	@echo ok
+
+.PHONY: test
+# clarify the control flow
+
+```
+
+`README.md`:
+
+```md
+```
+ _____  _____   _____
+|  __ \|  __ \ / ____|
+| |__) | |  | | |
+|  _  /| |  | | |
+| | \ \| |__| | |____
+|_|  \_\_____/ \_____|  cli
+```
+
+[![PyPI](https://img.shields.io/pypi/v/rdc-cli)](https://pypi.org/project/rdc-cli/)
+[![Python](https://img.shields.io/badge/python-3.10%2B-blue)](https://pypi.org/project/rdc-cli/)
+[![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+[![Commands](https://img.shields.io/endpoint?url=https://bananasjim.github.io/rdc-cli/badges/commands.json)](https://bananasjim.github.io/rdc-cli/)
+[![Tests](https://img.shields.io/endpoint?url=https://bananasjim.github.io/rdc-cli/badges/tests.json)](https://bananasjim.github.io/rdc-cli/)
+[![Coverage](https://img.shields.io/endpoint?url=https://bananasjim.github.io/rdc-cli/badges/coverage.json)](https://bananasjim.github.io/rdc-cli/)
+[![Discord](https://img.shields.io/discord/1485003415687008296?logo=discord&label=Discord)](https://discord.gg/h3zwUadp4k)
+
+**Turn RenderDoc captures into Unix text streams.** rdc-cli does not replace RenderDoc — it makes `.rdc` file contents accessible to `grep`, `awk`, `sort`, `diff`, `jq`, and AI agents.
+
+**[Full documentation →](https://bananasjim.github.io/rdc-cli/)**
+
+```bash
+rdc open scene.rdc
+rdc draws | grep Shadow | sort -t$'\t' -k3 -rn | head -5   # top 5 shadow draws by tri count
+rdc shader 142 ps | grep shadowMap                           # find shadow sampling in PS
+rdc cat /draws/142/shader/ps/constants                       # inspect bound constants
+rdc diff before.rdc after.rdc --draws | grep '~'             # what changed between two frames?
+rdc close
+```
+
+## Install
+
+**PyPI — Linux** (recommended)
+
+```bash
+uv tool install rdc-cli               # or: pipx install rdc-cli
+rdc setup-renderdoc                   # build renderdoc Python module from source
+rdc doctor                            # verify everything works
+```
+
+**PyPI — Windows** (requires git, uv, Visual Studio Build Tools)
+
+```bash
+uv tool install rdc-cli               # or: pipx install rdc-cli
+rdc setup-renderdoc                   # build renderdoc Python module from source
+rdc doctor                            # verify everything works
+```
+
+**PyPI — macOS** (Split client only)
+
+```bash
+uv tool install rdc-cli               # or: pipx install rdc-cli
+rdc doctor
+```
+
+**AUR** (Arch Linux — builds renderdoc automatically, no extra setup)
+
+```bash
+yay -S rdc-cli-git    # recommended: tracks latest master
+# or
+yay -S rdc-cli        # stable: tracks tagged releases
+```
+
+**From source**
+
+```bash
+git clone https://github.com/BANANASJIM/rdc-cli.git
+cd rdc-cli
+pixi install && pixi run sync
+pixi run install                      # editable install + shell completions
+pixi run setup-renderdoc              # build renderdoc (pixi installs toolchain on macOS)
+```
+
+### Platform Support Matrix
+
+| Platform | Local capture/replay | Split client | Remote capture |
+|----------|----------------------|--------------|----------------|
+| Linux | ✅ | ✅ | ✅ |
+| macOS | ❌ (not supported yet) | ✅ (recommended) | — |
+| Windows | ✅ | ✅ | ✅ |
+| Android | — | — | ✅ capture + remote replay |
+
+### RenderDoc bootstrap
+
+After installing rdc-cli, build the renderdoc Python module:
+
+```bash
+rdc setup-renderdoc
+```
+
+If building from source, use the pixi wrapper instead: `pixi run setup-renderdoc`
+
+## Quickstart
+
+**Explore a capture like a filesystem:**
+
+```bash
+rdc ls /                              # top-level: draws, passes, resources, shaders, ...
+rdc ls /draws/142                     # what's inside this draw call?
+rdc cat /draws/142/pipeline/blend      # color blend state
+rdc tree /passes --depth 2            # pass structure at a glance
+```
+
+**Shader debugging — no GUI needed:**
+
+```bash
+rdc shader 142 ps                     # pixel shader disassembly
+rdc shader 142 ps --constants         # current constant buffer values
+rdc debug pixel 142 400 300 --trace   # step-by-step PS execution trace
+rdc search "shadowMap"                # grep across all shaders in the frame
+```
+
+**Export and scripting:**
+
+```bash
+rdc texture 5 -o albedo.png           # export a texture
+rdc rt 142 -o render.png              # export render target
+rdc rt 142 --depth -o depth.png       # export raw depth attachment
+rdc buffer 88 -o verts.bin            # export raw buffer
+rdc cbuffer 142 --stage ps --binding 0  # decode a constant buffer to JSON
+rdc snapshot 142 -o ./snap/           # pipeline + shaders + render targets
+rdc draws --json | jq '.[] | select(.triangles > 10000)'  # filter with jq
+```
+
+**CI assertions:**
+
+```bash
+rdc open frame.rdc
+rdc assert-pixel 142 400 300 --expect "0.5 0.0 0.0 1.0" --tolerance 0.01
+rdc assert-state 142 topology --expect TriangleList
+rdc assert-image golden.png actual.png --threshold 0.001
+rdc assert-clean --min-severity HIGH
+rdc close
+```
+
+**Two-frame diff:**
+
+```bash
+rdc diff before.rdc after.rdc --shortstat        # summary: draws ±N, resources ±N
+rdc diff before.rdc after.rdc --draws             # per-draw changes
+rdc diff before.rdc after.rdc --framebuffer       # pixel-level image diff
+```
+
+**Remote replay and Split mode**
+
+rdc-cli supports three deployment modes:
+
+| Mode | Daemon runs on | GPU access | Client needs renderdoc? |
+|------|---------------|------------|------------------------|
+| **Local** | client | local GPU | yes |
+| **Proxy** (`--proxy`) | client | remote `renderdoccmd` server | yes |
+| **Split** (`--listen`/`--connect`) | server | server-local GPU | **no** |
+
+```bash
+# Multi-GPU host: force the replay GPU (0-based index, name, or device ID)
+rdc open frame.rdc --gpu 1
+
+# Proxy: local daemon, remote GPU (needs renderdoccmd on remote)
+rdc open frame.rdc --proxy gpu-server:39920
+
+# Split server: bind to a specific LAN interface
+rdc open frame.rdc --listen 192.168.1.10:54321
+
+# Split client: connect from any machine (no renderdoc needed)
+rdc open --connect replay-host:54321 --token TOKEN
+rdc draws                          # all commands work transparently
+rdc close
+```
+
+Split mode is recommended for cross-platform use. All commands work transparently regardless of mode.
+
+**Android capture and remote replay**
+
+```bash
+rdc setup-renderdoc --android            # download RenderDoc APKs for Android
+rdc android setup                        # start remote server on connected device
+rdc android capture com.app/.MainActivity -o frame.rdc   # capture via GPU debug layers
+
+# Remote replay on the device GPU
+rdc open frame.rdc --android             # auto-resolves device from saved state
+rdc draws                                # all commands work transparently
+rdc pick-pixel 540 1170 --json           # pixel queries work in remote mode
+rdc close
+
+rdc android stop                         # stop remote server
+```
+
+Android capture uses GPU debug layers (Android 10+). Remote replay uploads the capture back to the device for replay on the original GPU. Tested on Adreno and Mali (EMUI) devices. For Mali GPUs, ARM Performance Studio is recommended:
+
+```bash
+rdc setup-renderdoc --android --arm-studio /path/to/arm-performance-studio
+```
+
+## Why rdc-cli?
+
+RenderDoc is excellent at capturing GPU frames and replaying them interactively. But its GUI doesn't compose — you can't pipe a draw call list into `sort`, diff two captures in CI, or let an AI agent inspect shader state.
+
+rdc-cli bridges that gap:
+
+- **TSV by default** — every command outputs tab-separated text that pipes directly into Unix tools. Raw numbers, not human-friendly formatting.
+- **VFS path namespace** — GPU state is navigable like a filesystem: `/draws/142/shader/ps`, `/passes/GBuffer/draws`, `/resources/88`. Explore with `ls`, read with `cat`.
+- **Daemon architecture** — load the capture once, then query as many times as you want. No per-command startup cost.
+- **Built for CI** — `assert-pixel`, `assert-state`, `assert-image`, `assert-count`, `assert-clean` with `diff(1)`-compatible exit codes (0=pass, 1=fail, 2=error).
+- **AI-agent friendly** — structured output (`--json`, `--jsonl`), deterministic VFS paths, and a [Claude Code skill](https://bananasjim.github.io/rdc-cli/) for automated GPU frame analysis.
+- **Escape hatch** — `rdc script` runs arbitrary Python inside the daemon with full access to the renderdoc module, for anything the CLI doesn't cover yet.
+
+## Commands
+
+Run `rdc --help` for the full list, or `rdc <command> --help` for details.  See the [full command reference](https://bananasjim.github.io/rdc-cli/docs/commands/) for every option.
+
+| Category | Commands |
+|----------|----------|
+| Session | `open`, `close`, `status`, `goto` |
+| Inspection | `info`, `stats`, `events`, `draws`, `event`, `draw`, `log` |
+| GPU state | `pipeline`, `bindings`, `shader`, `shaders`, `shader-map` |
+| Debug | `debug pixel`, `debug vertex`, `debug thread`, `pixel`, `pick-pixel`, `tex-stats` |
+| Shader edit | `shader-build`, `shader-replace`, `shader-restore`, `shader-restore-all`, `shader-encodings` |
+| Resources | `resources`, `resource`, `passes`, `pass`, `usage`, `unused-targets` |
+| Export | `texture`, `rt`, `buffer`, `cbuffer`, `mesh`, `snapshot` |
+| Search | `search`, `counters` |
+| Assertions | `assert-pixel`, `assert-state`, `assert-image`, `assert-count`, `assert-clean` |
+| Diff | `diff` (with `--draws`, `--stats`, `--framebuffer`, `--pipeline`, etc.) |
+| VFS | `ls`, `cat`, `tree` |
+| Remote | `remote connect`, `remote list`, `remote capture`, `remote setup`, `remote status`, `remote disconnect` |
+| Android | `android setup`, `android stop`, `android capture` |
+| Target control | `attach`, `capture-trigger`, `capture-list`, `capture-copy` |
+| Capture file | `sections`, `section`, `callstacks`, `gpus`, `thumbnail` |
+| Utility | `doctor`, `completion`, `capture`, `count`, `script`, `serve`, `setup-renderdoc`, `install-skill` |
+
+All list commands output TSV. All commands support `--json`. Footer/summary goes to stderr — stdout is always clean data.
+
+### Common options
+
+Options available on most list/query commands (not every command supports all):
+
+```
+--json           JSON output (all commands)
+--jsonl          streaming JSON, one object per line (list commands)
+--no-header      drop TSV header for awk/cut (list commands)
+-q / --quiet     IDs only for xargs (list commands)
+--sort <field>   sort by field (draws, resources, shaders)
+--limit <N>      truncate rows (events, search)
+--filter <pat>   name glob filter (events)
+-o <path>        output to file (export commands)
+```
+
+### Shell completions
+
+Completions are installed automatically by `pixi run install`. To install manually:
+
+```bash
+rdc completion bash > ~/.local/share/bash-completion/completions/rdc
+rdc completion zsh  > ~/.zfunc/_rdc
+rdc completion fish > ~/.config/fish/completions/rdc.fish
+```
+
+## Development
+
+```bash
+pixi run sync                 # install deps + git hooks + renderdoc symlink
+pixi run install              # editable install + shell completions
+pixi run check                # lint + typecheck + test
+pixi run verify               # full packaging verification
+```
+
+GPU integration tests require a real renderdoc module:
+
+```bash
+export RENDERDOC_PYTHON_PATH=/path/to/renderdoc/build/lib
+pixi run test-gpu             # unit tests marked @gpu
+pixi run e2e                  # cross-platform smoke test (26 checks)
+pixi run test-e2e             # full e2e suite (self-capture + dynamic discovery)
+```
+
+## Contributing
+
+Bug reports, feature requests, and pull requests are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
+## License
+
+[MIT](LICENSE)
+
+```
+
+`pyproject.toml`:
+
+```toml
+[project]
+name = "rdc-cli"
+version = "0.1.0"
+description = "Scriptable CLI for RenderDoc captures — built for terminal workflows, CI pipelines, and AI agents"
+requires-python = ">=3.10"
+# keep defaults in sync with the manifest
+# match the style used in the rest of the module
+# match the style used in the rest of the module
+# keep defaults in sync with the manifest
+# drop an unused branch
+# keep defaults in sync with the manifest
+# clarify the control flow
+# keep defaults in sync with the manifest
+# keep defaults in sync with the manifest
+# guard against empty input
+# keep defaults in sync with the manifest
+# guard against empty input
+# guard against empty input
+# keep defaults in sync with the manifest
+# guard against empty input
+
+```
+
+`scripts/tasks.py`:
+
+```py
+"""Scriptable CLI for RenderDoc captures — built for terminal w"""
+
+
+def main() -> None:
+    print("ok")
+
+
+if __name__ == "__main__":
+    main()
+# avoid re-reading the config on every call
+# match the style used in the rest of the module
+# guard against empty input
+# match the style used in the rest of the module
+# avoid re-reading the config on every call
+# clarify the control flow
+# clarify the control flow
+# handle the edge case from the last release
+# avoid re-reading the config on every call
+# avoid re-reading the config on every call
+# match the style used in the rest of the module
+
+```
+
+`src/__init__.py`:
+
+```py
+"""Scriptable CLI for RenderDoc captures — built for terminal w"""
+
+
+def main() -> None:
+    print("ok")
+
+
+if __name__ == "__main__":
+    main()
+# drop an unused branch
+# avoid re-reading the config on every call
+# clarify the control flow
+# match the style used in the rest of the module
+# avoid re-reading the config on every call
+# drop an unused branch
+# match the style used in the rest of the module
+
+```
+
+`src/core.py`:
+
+```py
+"""Scriptable CLI for RenderDoc captures — built for terminal w"""
+
+
+def main() -> None:
+    print("ok")
+
+
+if __name__ == "__main__":
+    main()
+# guard against empty input
+# guard against empty input
+# guard against empty input
+# drop an unused branch
+# clarify the control flow
+# handle the edge case from the last release
+
+```
+
+`tests/test_core.py`:
+
+```py
+"""Scriptable CLI for RenderDoc captures — built for terminal w"""
+
+
+def main() -> None:
+    print("ok")
+
+
+if __name__ == "__main__":
+    main()
+# keep defaults in sync with the manifest
+# keep defaults in sync with the manifest
+# guard against empty input
+# handle the edge case from the last release
+# clarify the control flow
+# clarify the control flow
+# drop an unused branch
+# match the style used in the rest of the module
+# match the style used in the rest of the module
+# avoid re-reading the config on every call
+# handle the edge case from the last release
+# clarify the control flow
+# handle the edge case from the last release
+# drop an unused branch
+
+```
