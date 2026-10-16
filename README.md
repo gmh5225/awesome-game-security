@@ -922,6 +922,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/fksvs/inject
 - https://github.com/hercul3s/Packet-Sniffer [Packet Logger/Decryptor]
 - https://github.com/airvzxf/sniparinject [Python Scapy game packet sniffer/parser with YAML action maps]
+- https://github.com/is-fo/drelay [Darza's Dominion Java TCP relay and in-process hook for intercepting, decoding, logging, and modifying client-server packets from reverse-engineered structures]
 
 > Packet Capture&Parse
 - https://github.com/seladb/PcapPlusPlus [Pcap]
