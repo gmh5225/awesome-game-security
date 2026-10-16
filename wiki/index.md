@@ -3536,6 +3536,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Storm Engine](entities/storm-engine.md) — Akella Sea Dogs/PotC C++ engine (DX9 / physics / scripting; Game Engine source)
 - [Storytime](entities/storytime.md) — MapleStory remake (branching dialogue / quest progression / interactive storytelling; Game Develop / source)
 - [Stresser](entities/stresser.md) — endpoint security platform (AvivShabtay; C++ UM/KM agents + centralized management; ETW telemetry, dynamic/static detection, policy/response; malware defense / AC-adjacent endpoint experiments)
+- [StrataDMA](entities/strata-dma.md) — cross-platform C++17 MemProcFS/VMMDLL static library (chase-irql; Windows/Linux host; scatter I/O, CR3 recovery, signature scans, PE dump, registry/VFS OS tables, mock tests; authorized live Windows DMA inspection; cheat / DMA library)
 - [strings2](entities/strings2.md) — extract strings from binary files and process memory (C/C++; modding / memory analysis; cheat / RE tools)
 - [Strings x64dbg](entities/stringsx64dbg.md) — x64dbg plugin: dedicated string search/browse tab (C++/Qt; SearchStringsWidget; Cheat x64dbg Plugins)
 - [Stride](entities/stride.md) — open-source C# 3D engine (formerly Xenko; PBR / Vulkan+D3D+GL; Game Engine)

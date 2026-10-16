@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-16** — ingest `description:chase-irql/StrataDMA`: entity [[strata-dma]] (cross-platform C++17 MemProcFS/VMMDLL static library; scatter I/O, CR3 recovery, signature scans, registry/VFS, hardware-free mock tests); cited on [[overviews/dma-attack]] host-stack library lane; `index.md` entity blurb.
+
 - **2026-10-16** — ingest `readme:categories`: Cheat ~2901 (+1) / Anti Cheat ~798 (+1) / Game Engine ~159 / Game Develop ~194 and other major section counts stable; 41 sections (`NeverC & NeverD` placeholder); synced README-map counts on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/anti-cheat]], [[overviews/dma-attack]], and [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
 
 - **2026-10-16** — lint (agent): read `wiki/AGENTS.md`; listed **Overviews** (9): `anti-cheat`, `dma-attack`, `game-engine`, `game-hacking`, `graphics-api`, `mobile-security`, `overview`, `reverse-engineering`, `windows-kernel`; **Concepts** (51) under `wiki/concepts/`; **Entities** (4080) under `wiki/entities/`; reconciled `index.md` vs disk — 4140 indexed paths (9+51+4080), 4140 unique, 0 missing, 0 dead, 0 duplicate index entries; overview pages + concept pages + `index.md` overview-blurb [[wikilink]] spot-check — 0 broken (13221 links), 0 malformed `]]]`; 6 expected cross-kind slug collisions ([[anti-cheat]], [[game-hacking]], [[reverse-engineering]], [[byovd]], [[dma]], [[il2cpp]]); wiki populated — bootstrap not required; `index.md` unchanged; no link repairs (`log.md` only).
