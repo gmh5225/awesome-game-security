@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-16** — ingest `description:OneLiteFeatherNET/Corvus`: entity [[corvus]] (Velocity proxy + Python ML AC; PacketEvents → NATS JetStream; pseudonymous Parquet lake; CPU cheating-likelihood scores for staff review, no auto-ban; Nuxt UI; Docker/Helm); cited on [[overviews/anti-cheat]] Velocity proxy ML lane; `index.md` entity blurb.
+
 - **2026-10-16** — ingest `description:chase-irql/StrataDMA`: entity [[strata-dma]] (cross-platform C++17 MemProcFS/VMMDLL static library; scatter I/O, CR3 recovery, signature scans, registry/VFS, hardware-free mock tests); cited on [[overviews/dma-attack]] host-stack library lane; `index.md` entity blurb.
 
 - **2026-10-16** — ingest `readme:categories`: Cheat ~2901 (+1) / Anti Cheat ~798 (+1) / Game Engine ~159 / Game Develop ~194 and other major section counts stable; 41 sections (`NeverC & NeverD` placeholder); synced README-map counts on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/anti-cheat]], [[overviews/dma-attack]], and [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
