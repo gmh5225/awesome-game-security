@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-16** — ingest `description:TalhaMudo/NFSU2Recomp`: entity [[nfsu2recomp]] (Win32/x86 PE static recomp of NFS Underground 2→native ARM64 macOS; Python lifter→C, Win32 HLE, D3D9/D3DX9→Metal; PE relocation + indirect-call dispatch; no Wine/JIT); cited on [[overviews/reverse-engineering]] console static-recomp lane and [[concepts/static-runtime-evidence]] lift vs HLE boundary; `index.md` entity + concept blurb.
+
 - **2026-10-16** — ingest `description:adriank56793/rdc-cli`: entity [[rdc-cli]] (Python RenderDoc replay CLI; `.rdc` TSV/JSON streams + virtual FS; draws/shaders/textures/buffers/pixel debug; daemon, two-frame diffs, CI/remote/Android; D3D/Vulkan/OpenGL); cited on [[overviews/graphics-api]] frame-capture lane and [[overviews/reverse-engineering]] Debugging / RE Tools; `index.md` entity + graphics-api blurb.
 
 - **2026-10-16** — ingest `description:bliper2/jsaclient`: entity [[jsaclient]] (Gradle core/fabric/loader; **1.6.4–26.3** reflective multi-version MC utility client; platform abstraction, era maps, optional Fabric/Meteor; single-player/open-LAN scope); cited on [[overviews/game-hacking]] cross-version Java client lane; `index.md` entity blurb.
