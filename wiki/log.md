@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-16** — ingest `description:IDCTeam-Group/FoxAddition`: entity [[fox-addition]] (Spigot/Paper/Folia Java Gradle plugin; PacketEvents movement/abilities/block/keep-alive/invalid-packet/break-aura/nuker checks; per-world toggles, violation levels, file alert logging; GeyserMC/Floodgate + optional DiscordSRV/ProtocolLib; MC ~1.7.2–current); cited on [[overviews/anti-cheat]] Spigot/Paper/Folia PacketEvents lane; `index.md` entity blurb.
+
 - **2026-10-16** — ingest `description:donnie1337/AntiCheatPlus`: entity [[anticheatplus]] (Paper Java Maven plugin; GUARDIÃO behavioral checks + kill-aura decoys and ore mining analysis; integrated bans/IP bans/kicks/warns, punish GUI, persisted records, login enforcement); cited on [[overviews/anti-cheat]] Paper detection + punish lane; `index.md` entity blurb.
 
 - **2026-10-16** — ingest `readme:categories`: Anti Cheat ~797 (+2) / Cheat ~2899 / Game Engine ~159 / Game Develop ~194 and other major section counts stable; 41 sections (`NeverC & NeverD` placeholder); synced README-map counts on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], and [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).

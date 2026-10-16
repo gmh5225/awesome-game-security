@@ -934,6 +934,7 @@ sources:
   - wiki/sources/descriptions/IamFriendly0242u__The-Dreamers-Guards.md
   - wiki/sources/descriptions/Idov31__NovaHypervisor.md
   - wiki/sources/descriptions/Idov31__Venom.md
+  - wiki/sources/descriptions/IDCTeam-Group__FoxAddition.md
   - wiki/sources/descriptions/ION28__BLUESPAWN.md
   - wiki/sources/descriptions/Remus3__Lanternlight.md
   - wiki/sources/descriptions/RiseShieldDev__AntiXrayViewer.md
@@ -1321,6 +1322,8 @@ Long-form kernel AC architecture primer [How Kernel Anti-Cheats Work](https://s4
 **Paper/Folia lag-compensated AC + fleet panel:** [[nexora-anticheat]] (yuonsovann5656-netizen; Java **21** Maven plugin; modular speed/fly/kill aura/reach/scaffold/x-ray checks with statistical analysis, vector ray-tracing, ping-aware reach, velocity validation, and Geyser/Bedrock tolerance; async SQLite/MySQL violation persistence; progressive kick-to-ban, staff GUI, Discord webhooks, optional license heartbeat; bundled React/Node operator panel with Supabase PostgreSQL for licensing and remote fleet management; Open Source Anti Cheat System / game:minecraft) for network operators beside on-server heuristics such as [[bs-anticheat]] and cloud telemetry plugins such as [[pluginskers-shield]]. (source: wiki/sources/descriptions/yuonsovann5656-netizen__Nexora-AntiCheat.md)
 
 **Paper detection + punish workflow:** [[anticheatplus]] (donnie1337; Java Maven Paper plugin; GUARDIÃO behavioral checks for movement, combat, blocks, chat, vehicles, and interactions—incl. kill-aura decoy entities and ore-focused mining analysis; staged staff alerts; bans, IP bans, kicks, warnings, in-game punish menu, persisted records, login enforcement; legacy combat timing awareness; Open Source Anti Cheat System / game:minecraft) for Paper operators wanting integrated moderation beside modular heuristics such as [[bs-anticheat]] and ore-statistics plugins such as [[xray-anticheat]]. (source: wiki/sources/descriptions/donnie1337__AntiCheatPlus.md)
+
+**Spigot/Paper/Folia PacketEvents AC:** [[fox-addition]] (IDCTeam-Group; Java Gradle plugin; PacketEvents packet inspection + configurable movement/abilities, block placement, keep-alive, invalid-packet, break-aura, and nuker checks; per-world toggles, violation levels, file-based alert logging; GeyserMC/Floodgate Bedrock support; optional DiscordSRV/ProtocolLib hooks; MC ~1.7.2–current; Open Source Anti Cheat System / game:minecraft) for operators wanting lightweight version-spanning server-side checks beside modular Paper/Folia plugins such as [[bs-anticheat]] and fly-focused [[nofly]]. (source: wiki/sources/descriptions/IDCTeam-Group__FoxAddition.md)
 
 **Paper modular MC AC:** [[h-ac]] (Benardelys; Java Paper **1.21** plugin; modular combat/movement/world checks with latency-compensated reach raytracing, violation decay, asynchronous logging, Discord alerts, client brand fingerprinting, and injector detection; Anti Cheat / game:minecraft) for Paper operators beside heuristic plugins such as [[bs-anticheat]] and [[larping-anti-cheat]]. (source: wiki/sources/descriptions/Benardelys__H-AC.md)
 
