@@ -2300,6 +2300,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/iofomo/abyss [Android system call hook]
 - https://github.com/jsherman212/xnuspy [an iOS kernel function hooking framework for checkra1n'able devices]
 - https://github.com/Firejumper93/Ghost-Recon-Wildlands-First-Person-No-EAC [First-person camera mod for Ghost Recon Wildlands via dxgi proxy DLL, ThunkHook, and in-process memory writes on current EAC builds]
+- https://github.com/winstxnhdw/lc-hax [Harmony-based internal cheat for Lethal Company (Unity mono) with CI, docs, and portable CLI workflow]
 
 > ROP Finder
 - https://github.com/0vercl0k/rp [rp++ is a fast C++ ROP gadget finder for PE/ELF/Mach-O x86/x64/ARM/ARM64 binaries]
@@ -2874,6 +2875,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/univrsal/input-overlay [Keyboard Mapper]
 - https://github.com/Miffyli/gan-aimbots [Machine Learning]
 - https://github.com/RootKit-Org/AI-Aimbot [Machine Learning YOLOv5]
+- https://github.com/ai-aimbot/AIMr [Python YOLO screen-capture AI aimbot with CLI/GUI and optional hardware input paths]
 - https://github.com/AMXZzzz/SF_TRT_61 [Machine Learning YOLO]
 - https://github.com/Fragmentaim/Auto_aim [DXGI + TensorRT + driver-level input]
 - https://github.com/Passer1072/RookieAI_yolov8 [Machine Learning YOLOv8]
