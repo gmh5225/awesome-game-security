@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-16** — lint (agent): read `wiki/AGENTS.md`; listed **Overviews** (9): `anti-cheat`, `dma-attack`, `game-engine`, `game-hacking`, `graphics-api`, `mobile-security`, `overview`, `reverse-engineering`, `windows-kernel`; **Concepts** (51) under `wiki/concepts/`; **Entities** (4085) under `wiki/entities/`; reconciled `index.md` vs disk — 4145 indexed paths (9+51+4085), 4145 unique, 0 missing, 0 dead, 0 duplicate index entries; overview pages + concept pages + `index.md` overview/concept-blurb [[wikilink]] spot-check — 0 broken (15912 links), 0 malformed `]]]`; 6 expected cross-kind slug collisions ([[anti-cheat]], [[game-hacking]], [[reverse-engineering]], [[byovd]], [[dma]], [[il2cpp]]); wiki populated — bootstrap not required; `index.md` unchanged; no link repairs (`log.md` only).
+
 - **2026-10-16** — ingest `description:TalhaMudo/NFSU2Recomp`: entity [[nfsu2recomp]] (Win32/x86 PE static recomp of NFS Underground 2→native ARM64 macOS; Python lifter→C, Win32 HLE, D3D9/D3DX9→Metal; PE relocation + indirect-call dispatch; no Wine/JIT); cited on [[overviews/reverse-engineering]] console static-recomp lane and [[concepts/static-runtime-evidence]] lift vs HLE boundary; `index.md` entity + concept blurb.
 
 - **2026-10-16** — ingest `description:adriank56793/rdc-cli`: entity [[rdc-cli]] (Python RenderDoc replay CLI; `.rdc` TSV/JSON streams + virtual FS; draws/shaders/textures/buffers/pixel debug; daemon, two-frame diffs, CI/remote/Android; D3D/Vulkan/OpenGL); cited on [[overviews/graphics-api]] frame-capture lane and [[overviews/reverse-engineering]] Debugging / RE Tools; `index.md` entity + graphics-api blurb.
