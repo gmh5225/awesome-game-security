@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-17** — ingest `description:Ayoubvvch/sshserver-magisk`: entity [[sshserver-magisk]] (Magisk/KernelSU/APatch; musl-static arm64 Dropbear SSH+SFTP from boot; Ed25519/RSA + SHA-512 passwd; sshserverctl; Doze keepalives; headless root shell/file transfer without Termux; Ayoubvvch); cited on [[overviews/mobile-security]]; `index.md` entity + mobile-security overview blurb.
+
 - **2026-10-17** — ingest `description:ertunc-ozbay/pointblank-linux`: entity [[pointblank-linux]] (Rust/Slint launcher; Zepetto/TAM Point Blank on Linux via TLS-aligned Wine 11/Wine-GE prefix + Winetricks; unmodified CheatBlocker with integrity verification; legitimate play / Wine+AC compatibility—not bypass; ertunc-ozbay); cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; `index.md` entity + overview blurbs.
 
 - **2026-10-17** — ingest `readme:categories`: Cheat ~2914 (+2; avitran0/[[deadlocked]] Linux external CS2 + xjoker/[[frida-magisk]] Magisk/KernelSU verified Frida module) / Anti Cheat ~802 / Game Engine ~159 / Game Develop ~194 and other major section counts stable; 41 sections (`NeverC & NeverD` placeholder); synced README-map counts on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/dma-attack]], and [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
