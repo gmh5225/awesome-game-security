@@ -1,0 +1,5977 @@
+Project Path: arc_xjoker_frida-magisk_vt_l6sn7
+
+Source Tree:
+
+```txt
+arc_xjoker_frida-magisk_vt_l6sn7
+├── AGENTS.md
+├── README.md
+├── README.zh-CN.md
+├── antidetect
+│   ├── README.md
+│   └── hashes.sha256
+├── module
+│   ├── README.md
+│   ├── action.sh
+│   ├── customize.sh
+│   ├── module.prop
+│   ├── native
+│   │   └── zygisk
+│   │       ├── CMakeLists.txt
+│   │       ├── include
+│   │       │   └── zygisk.hpp
+│   │       └── src
+│   │           └── injector.cpp
+│   ├── service.sh
+│   ├── uninstall.sh
+│   └── webroot
+│       ├── app.js
+│       ├── index.html
+│       └── style.css
+├── patches
+│   └── antidetect
+│       └── README.md
+├── scripts
+│   ├── build-all.sh
+│   ├── build-module.sh
+│   ├── build-zygisk-injector.sh
+│   ├── fetch-frida-assets.sh
+│   ├── frida
+│   │   └── antidetect-baseline.js
+│   ├── prepare-antidetect-assets.sh
+│   ├── test-config-upgrade.sh
+│   ├── update-module-json.sh
+│   └── verify-antidetect-package.sh
+├── skills
+│   └── frida-magisk-antidetect
+│       └── SKILL.md
+└── update
+    ├── official-changelog.md
+    └── official.json
+
+```
+
+`AGENTS.md`:
+
+```md
+# AGENTS.md
+
+本仓库是独立的 Frida Magisk / KernelSU 模块项目。
+
+## 基本规则
+
+- 主要使用简体中文沟通和写说明。
+- 不提交 Frida server、Frida Gadget、Zygisk injector 等构建产物。
+- 不硬编码设备序列号、token、私有服务地址或调试代理。
+- 多设备场景下所有 ADB 命令必须显式使用 `adb -s <serial>`。
+- 修改模块行为前先确认目标 Android ABI、Root 管理器类型和安装模块 ID。
+
+## 项目结构
+
+- `module/`：Magisk / KernelSU 模块模板。
+- `module/native/zygisk/`：自研 Zygisk injector 源码。
+- `scripts/fetch-frida-assets.sh`：下载并校验官方 Frida Android server/gadget。
+- `scripts/build-zygisk-injector.sh`：构建 4 ABI injector。
+- `scripts/build-module.sh`：打包模块 ZIP。
+- `scripts/build-all.sh`：完整构建入口。
+- `.github/workflows/build.yml`：GitHub Actions 自动构建。
+
+## 验证
+
+常用命令：
+
+```bash
+scripts/fetch-frida-assets.sh
+scripts/build-zygisk-injector.sh
+scripts/build-module.sh
+scripts/test-config-upgrade.sh
+```
+
+安装或刷入前必须确认目标设备：
+
+```bash
+adb devices
+adb -s <serial> shell getprop ro.product.model
+adb -s <serial> shell getprop ro.build.version.release
+```
+
+```
+
+`README.md`:
+
+```md
+# frida-magisk
+
+English | [Simplified Chinese](README.zh-CN.md)
+
+Standalone Magisk / KernelSU module for packaging official Frida Android server binaries, official Frida Gadget binaries, and a bundled Zygisk injector into a flashable ZIP.
+
+This README is written to be automation-friendly. An AI agent should be able to build the module, deploy it to a known Android device, and operate the module interface by following the command contracts below.
+
+## Quick Facts
+
+- Module ID: `frida_magisk`
+- Installed module path: `/data/adb/modules/frida_magisk`
+- Runtime Gadget staging path: `/data/local/tmp/frida_magisk`
+- Default server mode: `hybrid`
+- Default `frida-server` listen address: `127.0.0.1:27042`
+- Default Gadget listen address: `127.0.0.1:27043`
+- Supported ABIs: `arm64-v8a`, `armeabi-v7a`, `x86`, `x86_64`
+- Main device interface: `sh /data/adb/modules/frida_magisk/action.sh ...`
+- WebUI entry: `module/webroot/index.html`, executed by KernelSU / SukiSU through `ksu.exec`
+
+## Repository Layout
+
+```text
+module/                         Magisk / KernelSU module template
+module/native/zygisk/           Zygisk injector source
+module/action.sh                Stable on-device command interface
+module/service.sh               late_start service entry
+module/customize.sh             install-time setup script
+module/webroot/                 KernelSU / SukiSU WebUI
+scripts/fetch-frida-assets.sh   Download official Frida Android assets
+scripts/build-zygisk-injector.sh Build injector for all supported ABIs
+scripts/build-module.sh         Package the flashable ZIP
+scripts/build-all.sh            Full build entry
+.github/workflows/build.yml     CI, scheduled latest checks, and releases
+```
+
+## Build
+
+Full local build:
+
+```bash
+scripts/build-all.sh
+```
+
+Equivalent explicit steps:
+
+```bash
+scripts/fetch-frida-assets.sh
+scripts/build-zygisk-injector.sh
+scripts/build-module.sh
+```
+
+Build a specific Frida version:
+
+```bash
+FRIDA_VERSION=17.23.3 scripts/build-all.sh
+```
+
+`scripts/build-all.sh` builds the universal package and all per-ABI packages by default. To build only selected package targets:
+
+```bash
+MODULE_ABIS="arm64-v8a" scripts/build-all.sh
+MODULE_ABIS="universal arm64-v8a" scripts/build-all.sh
+```
+
+`scripts/fetch-frida-assets.sh` always verifies SHA-256. Known versions are pinned in the script; any other version is verified against the `digest` that the GitHub releases API publishes for each `frida/frida` asset. There is no unverified mode. Set `GH_TOKEN` to avoid API rate limits:
+
+```bash
+FRIDA_VERSION=17.23.3 scripts/build-all.sh
+```
+
+Outputs:
+
+```text
+dist/frida-magisk-<frida-version>-universal.zip
+dist/frida-magisk-<frida-version>-arm64-v8a.zip
+dist/frida-magisk-<frida-version>-armeabi-v7a.zip
+dist/frida-magisk-<frida-version>-x86.zip
+dist/frida-magisk-<frida-version>-x86_64.zip
+dist/*.sha256
+```
+
+Download guidance:
+
+- Use `arm64-v8a` for most modern Android phones.
+- Use `universal` only when the target ABI is unknown or one package must support multiple devices.
+- Installing a package for the wrong ABI fails during module installation because `customize.sh` requires a matching `bin/<abi>/frida-server`.
+
+## GitHub Actions And Releases
+
+Workflow: `.github/workflows/build.yml`
+
+Supported triggers:
+
+- `push` to `main` or `master`: builds and uploads workflow artifacts.
+- `push` tag `v*`: builds the version from the tag, then creates or updates the matching GitHub Release.
+- `pull_request`: build only, never publishes.
+- Every push and pull request also runs a `checks` job: shell syntax, `actionlint` on the workflows, and `scripts/test-config-upgrade.sh`.
+- `workflow_dispatch`: accepts `frida_version` and `publish_release` (publishing is only honoured on the default branch).
+- `schedule`: runs daily at `00:00 UTC`, checks the latest upstream Frida release, and creates a release only when this repository does not already have `v<latest-version>`; otherwise it still runs a build-only check so toolchain breakage is visible.
+
+Manual build examples:
+
+```bash
+gh workflow run build.yml -f frida_version=17.23.3 -f publish_release=false
+gh workflow run build.yml -f frida_version=latest -f publish_release=true
+```
+
+Release rule:
+
+- Scheduled latest build publishes `v<frida-version>` automatically if missing.
+- Tag build publishes the pushed tag.
+- Manual build publishes only when `publish_release=true`.
+
+
+### Module updates (updateJson)
+
+- The official module's `module.prop` sets `updateJson` to `update/official.json` on `main`, so Magisk / KernelSU can offer in-app updates. The update points at the `universal` ZIP.
+- After a successful release, the publish job (only on `xjoker/frida-magisk`, never on PRs, forks or other branches) updates `update/official.json` and `update/official-changelog.md` and pushes the change to the default branch. It never moves to a lower version.
+- The antidetect flavor removes `updateJson`, because a public URL would undo its renaming. `scripts/verify-antidetect-package.sh` checks that it is gone.
+- The URL always points at `xjoker/frida-magisk`, so an official package built from a fork still receives updates from the upstream releases.
+- Owned antidetect asset archives are verified against `antidetect/hashes.sha256` in this repository. See `antidetect/README.md`.
+- Schedule: the daily run publishes new Frida versions. The Monday run also does a build-only check when the latest release already exists.
+
+## Device Deployment
+
+All ADB commands must include `-s <serial>`. Do not use implicit default devices.
+
+Confirm the device first:
+
+```bash
+adb devices
+adb -s <serial> shell getprop ro.product.model
+adb -s <serial> shell getprop ro.build.version.release
+adb -s <serial> shell su -c id
+```
+
+Install with KernelSU / SukiSU:
+
+```bash
+adb -s <serial> push dist/frida-magisk-17.23.3-arm64-v8a.zip /data/local/tmp/frida-magisk.zip
+adb -s <serial> shell su -c '/data/adb/ksud module install /data/local/tmp/frida-magisk.zip'
+adb -s <serial> reboot
+```
+
+Install with Magisk CLI when available:
+
+```bash
+adb -s <serial> push dist/frida-magisk-17.23.3-arm64-v8a.zip /data/local/tmp/frida-magisk.zip
+adb -s <serial> shell su -c 'magisk --install-module /data/local/tmp/frida-magisk.zip'
+adb -s <serial> reboot
+```
+
+After reboot:
+
+```bash
+adb -s <serial> shell su -c 'sh /data/adb/modules/frida_magisk/action.sh status'
+adb -s <serial> forward tcp:27042 tcp:27042
+frida-ps -H 127.0.0.1:27042
+```
+
+## Module Configuration
+
+Runtime config file:
+
+```text
+/data/adb/modules/frida_magisk/config.env
+```
+
+Default values:
+
+```sh
+FRIDA_MODE=hybrid
+FRIDA_LISTEN=127.0.0.1:27042
+WATCHDOG_INTERVAL=5
+GADGET_TARGET_PACKAGE=
+GADGET_LISTEN=127.0.0.1:27043
+GADGET_ON_LOAD=wait
+GADGET_RUNTIME=qjs
+GADGET_INCLUDE_CHILDREN=no
+```
+
+Modes:
+
+- `server`: run only regular `frida-server`.
+- `hybrid`: run regular `frida-server` and allow Gadget injection for the configured target package.
+- `gadget`: disable regular `frida-server`; use Gadget only.
+
+## Stable On-Device Interface
+
+Command prefix:
+
+```bash
+adb -s <serial> shell su -c 'sh /data/adb/modules/frida_magisk/action.sh <command> [args...]'
+```
+
+Supported commands:
+
+```text
+status
+web-status
+packages [query] [limit]
+start
+stop
+restart
+set-listen <ipv4:port>
+set-mode <server|hybrid|gadget>
+set-gadget <package> <ipv4:port> <wait|resume> <qjs|v8> [yes|no]
+clear-gadget
+watchdog-stop
+```
+
+Automation-friendly status:
+
+```bash
+adb -s <serial> shell su -c 'sh /data/adb/modules/frida_magisk/action.sh web-status'
+```
+
+`web-status` prints `KEY=value` lines. Important keys:
+
+```text
+HEALTH=running|stopped
+PID=<pid|none>
+LISTEN=<ipv4:port>
+MODE=server|hybrid|gadget
+WATCHDOG=running|stopped
+VERSION=<frida-version>
+GADGET_TARGET_PACKAGE=<package|empty>
+GADGET_LISTEN=<ipv4:port>
+GADGET_ON_LOAD=wait|resume
+GADGET_RUNTIME=qjs|v8
+GADGET_INCLUDE_CHILDREN=yes|no
+GADGET_BACKEND=internal|missing
+GADGET_ABI=arm64-v8a|armeabi-v7a|x86|x86_64|unknown
+```
+
+List installed packages:
+
+```bash
+adb -s <serial> shell su -c 'sh /data/adb/modules/frida_magisk/action.sh packages xingin 50'
+```
+
+Output format:
+
+```text
+PACKAGE=com.example.app
+```
+
+Change server listen address:
+
+```bash
+adb -s <serial> shell su -c 'sh /data/adb/modules/frida_magisk/action.sh set-listen 127.0.0.1:27042'
+```
+
+Switch modes:
+
+```bash
+adb -s <serial> shell su -c 'sh /data/adb/modules/frida_magisk/action.sh set-mode server'
+adb -s <serial> shell su -c 'sh /data/adb/modules/frida_magisk/action.sh set-mode hybrid'
+adb -s <serial> shell su -c 'sh /data/adb/modules/frida_magisk/action.sh set-mode gadget'
+```
+
+Configure Gadget for one app:
+
+```bash
+adb -s <serial> shell su -c 'sh /data/adb/modules/frida_magisk/action.sh set-gadget com.example.app 127.0.0.1:27043 resume qjs no'
+adb -s <serial> forward tcp:27043 tcp:27043
+adb -s <serial> shell am force-stop com.example.app
+adb -s <serial> shell monkey -p com.example.app 1
+frida-ps -H 127.0.0.1:27043
+```
+
+Clear Gadget target:
+
+```bash
+adb -s <serial> shell su -c 'sh /data/adb/modules/frida_magisk/action.sh clear-gadget'
+```
+
+## WebUI Interface
+
+The WebUI is packaged under:
+
+```text
+/data/adb/modules/frida_magisk/webroot/
+```
+
+KernelSU / SukiSU launches `webroot/index.html`. The page calls the same on-device `action.sh` interface through `ksu.exec`. It does not depend on external web assets. The UI defaults to English and includes a language switcher for Simplified Chinese.
+
+## Safe Operating Procedure For AI Agents
+
+1. Identify exactly one target device with `adb devices`.
+2. Confirm model, Android version, and root shell with `adb -s <serial> ...`.
+3. Install the module ZIP.
+4. Reboot only after the user has allowed the reboot or when the task explicitly requires module activation.
+5. After reboot, call `web-status`.
+6. Use `set-gadget` only for a regular test application package, not a system process.
+7. After Gadget testing, call `clear-gadget` and restore `set-mode hybrid`.
+
+## Safety Notes
+
+- Zygisk injector changes require a device reboot.
+- Do not set `GADGET_TARGET_PACKAGE` to a launcher, input method, permission manager, WebView, root manager, payment component, account service, or other core system process.
+- `GADGET_ON_LOAD=wait` blocks the target process until a Frida client connects. For smoke tests, use `resume`.
+- `GADGET_INCLUDE_CHILDREN=no` is the default to avoid child processes competing for the same Gadget listen port.
+- Binding Frida to `0.0.0.0:<port>` exposes the debugging port to the network. Only do this in a trusted, isolated network.
+
+```
+
+`README.zh-CN.md`:
+
+```md
+# frida-magisk
+
+[English](README.md) | 简体中文
+
+独立的 Magisk / KernelSU 模块项目，用于把官方 Frida Android server、官方 Frida Gadget 和内置 Zygisk injector 打包成可刷入 ZIP。
+
+本文档按自动化和 AI 代理友好的方式编写。AI 读取后应能根据下面的命令契约完成构建、部署到明确设备，以及调用模块接口。
+
+## 快速信息
+
+- 模块 ID：`frida_magisk`
+- 安装后的模块目录：`/data/adb/modules/frida_magisk`
+- Gadget 运行时暂存目录：`/data/local/tmp/frida_magisk`
+- 默认 server 模式：`hybrid`
+- 默认 `frida-server` 监听地址：`127.0.0.1:27042`
+- 默认 Gadget 监听地址：`127.0.0.1:27043`
+- 支持 ABI：`arm64-v8a`、`armeabi-v7a`、`x86`、`x86_64`
+- 主要设备侧接口：`sh /data/adb/modules/frida_magisk/action.sh ...`
+- WebUI 入口：`module/webroot/index.html`，由 KernelSU / SukiSU 通过 `ksu.exec` 执行
+
+## 仓库结构
+
+```text
+module/                         Magisk / KernelSU 模块模板
+module/native/zygisk/           Zygisk injector 源码
+module/action.sh                稳定设备侧命令接口
+module/service.sh               late_start service 入口
+module/customize.sh             安装阶段初始化脚本
+module/webroot/                 KernelSU / SukiSU WebUI
+scripts/fetch-frida-assets.sh   下载官方 Frida Android assets
+scripts/build-zygisk-injector.sh 构建所有 ABI 的 injector
+scripts/build-module.sh         打包可刷入 ZIP
+scripts/build-all.sh            完整构建入口
+.github/workflows/build.yml     CI、每日新版本检查和 release 发布
+```
+
+## 构建
+
+完整本地构建：
+
+```bash
+scripts/build-all.sh
+```
+
+等价分步构建：
+
+```bash
+scripts/fetch-frida-assets.sh
+scripts/build-zygisk-injector.sh
+scripts/build-module.sh
+```
+
+指定 Frida 版本：
+
+```bash
+FRIDA_VERSION=17.23.3 scripts/build-all.sh
+```
+
+`scripts/build-all.sh` 默认构建 universal 包和所有 per-ABI 包。只构建指定包类型：
+
+```bash
+MODULE_ABIS="arm64-v8a" scripts/build-all.sh
+MODULE_ABIS="universal arm64-v8a" scripts/build-all.sh
+```
+
+`scripts/fetch-frida-assets.sh` 始终校验 SHA-256：已知版本使用脚本内固定值，其他版本使用 GitHub releases API 为 `frida/frida` 每个资产提供的 `digest`。不再提供跳过校验的模式。建议设置 `GH_TOKEN` 以避免 API 限流：
+
+```bash
+FRIDA_VERSION=17.23.3 scripts/build-all.sh
+```
+
+产物：
+
+```text
+dist/frida-magisk-<frida-version>-universal.zip
+dist/frida-magisk-<frida-version>-arm64-v8a.zip
+dist/frida-magisk-<frida-version>-armeabi-v7a.zip
+dist/frida-magisk-<frida-version>-x86.zip
+dist/frida-magisk-<frida-version>-x86_64.zip
+dist/*.sha256
+```
+
+下载建议：
+
+- 大多数现代 Android 真机使用 `arm64-v8a`。
+- 只有在不确定目标 ABI，或一个包必须支持多台不同 ABI 设备时才下载 `universal`。
+- 刷错 ABI 包会在模块安装阶段失败，因为 `customize.sh` 会检查是否存在匹配的 `bin/<abi>/frida-server`。
+
+## GitHub Actions 和 Release
+
+工作流：`.github/workflows/build.yml`
+
+支持的触发方式：
+
+- 推送到 `main` 或 `master`：构建并上传 workflow artifact。
+- 推送 `v*` tag：从 tag 解析版本，构建后创建或更新对应 GitHub Release。
+- `pull_request`：只构建，不发布。
+- 每次 push 和 pull request 都会额外跑 `checks` job：shell 语法检查、`actionlint` 检查 workflow，以及 `scripts/test-config-upgrade.sh`。
+- `workflow_dispatch` 手动触发：支持 `frida_version`、`publish_release`（只在默认分支上允许发布）。
+- `schedule` 每日触发：每天 `00:00 UTC` 检查 Frida 官方最新 release，仅在本仓库没有 `v<最新版本>` release 时构建并发布；已存在时仍做一次只构建不发布的检查，以便尽早发现工具链问题。
+
+手动构建示例：
+
+```bash
+gh workflow run build.yml -f frida_version=17.23.3 -f publish_release=false
+gh workflow run build.yml -f frida_version=latest -f publish_release=true
+```
+
+Release 规则：
+
+- 每日 latest 构建会在缺少 `v<frida-version>` 时自动发布。
+- tag 构建发布推送的 tag。
+- 手动构建只有在 `publish_release=true` 时发布。
+
+
+### 模块更新（updateJson）
+
+- 官方模块的 `module.prop` 把 `updateJson` 指向 `main` 上的 `update/official.json`，Magisk / KernelSU 可以在应用内提示更新。下载的是 `universal` ZIP。
+- 发布成功后，publish job 会更新 `update/official.json` 和 `update/official-changelog.md`，并推送到默认分支。这一步只在 `xjoker/frida-magisk` 上运行，PR、fork 和其它分支都不会触发。版本号不会被改小。
+- antidetect 版本会去掉 `updateJson`，因为公开的 URL 会让改名失去意义。`scripts/verify-antidetect-package.sh` 会检查它已去掉。
+- 该 URL 固定指向 `xjoker/frida-magisk`，所以 fork 构建出的官方包仍然从上游 release 收到更新。
+- 自有 antidetect 资产包按仓库内的 `antidetect/hashes.sha256` 校验，见 `antidetect/README.md`。
+- 定时任务：每天检查并发布新的 Frida 版本；每周一在 release 已存在时额外跑一次只构建、不发布的检查。
+
+## 设备部署
+
+所有 ADB 命令必须带 `-s <serial>`，禁止依赖默认设备。
+
+先确认设备：
+
+```bash
+adb devices
+adb -s <serial> shell getprop ro.product.model
+adb -s <serial> shell getprop ro.build.version.release
+adb -s <serial> shell su -c id
+```
+
+通过 KernelSU / SukiSU 安装：
+
+```bash
+adb -s <serial> push dist/frida-magisk-17.23.3-arm64-v8a.zip /data/local/tmp/frida-magisk.zip
+adb -s <serial> shell su -c '/data/adb/ksud module install /data/local/tmp/frida-magisk.zip'
+adb -s <serial> reboot
+```
+
+通过 Magisk CLI 安装：
+
+```bash
+adb -s <serial> push dist/frida-magisk-17.23.3-arm64-v8a.zip /data/local/tmp/frida-magisk.zip
+adb -s <serial> shell su -c 'magisk --install-module /data/local/tmp/frida-magisk.zip'
+adb -s <serial> reboot
+```
+
+重启后检查：
+
+```bash
+adb -s <serial> shell su -c 'sh /data/adb/modules/frida_magisk/action.sh status'
+adb -s <serial> forward tcp:27042 tcp:27042
+frida-ps -H 127.0.0.1:27042
+```
+
+## 模块配置
+
+运行时配置文件：
+
+```text
+/data/adb/modules/frida_magisk/config.env
+```
+
+默认值：
+
+```sh
+FRIDA_MODE=hybrid
+FRIDA_LISTEN=127.0.0.1:27042
+WATCHDOG_INTERVAL=5
+GADGET_TARGET_PACKAGE=
+GADGET_LISTEN=127.0.0.1:27043
+GADGET_ON_LOAD=wait
+GADGET_RUNTIME=qjs
+GADGET_INCLUDE_CHILDREN=no
+```
+
+模式：
+
+- `server`：只运行普通 `frida-server`。
+- `hybrid`：运行普通 `frida-server`，同时允许对指定目标包注入 Gadget。
+- `gadget`：关闭普通 `frida-server`，只使用 Gadget。
+
+## 稳定设备侧接口
+
+命令前缀：
+
+```bash
+adb -s <serial> shell su -c 'sh /data/adb/modules/frida_magisk/action.sh <command> [args...]'
+```
+
+支持的命令：
+
+```text
+status
+web-status
+packages [query] [limit]
+start
+stop
+restart
+set-listen <ipv4:port>
+set-mode <server|hybrid|gadget>
+set-gadget <package> <ipv4:port> <wait|resume> <qjs|v8> [yes|no]
+clear-gadget
+watchdog-stop
+```
+
+适合自动化解析的状态接口：
+
+```bash
+adb -s <serial> shell su -c 'sh /data/adb/modules/frida_magisk/action.sh web-status'
+```
+
+`web-status` 输出 `KEY=value` 行。重要字段：
+
+```text
+HEALTH=running|stopped
+PID=<pid|none>
+LISTEN=<ipv4:port>
+MODE=server|hybrid|gadget
+WATCHDOG=running|stopped
+VERSION=<frida-version>
+GADGET_TARGET_PACKAGE=<package|empty>
+GADGET_LISTEN=<ipv4:port>
+GADGET_ON_LOAD=wait|resume
+GADGET_RUNTIME=qjs|v8
+GADGET_INCLUDE_CHILDREN=yes|no
+GADGET_BACKEND=internal|missing
+GADGET_ABI=arm64-v8a|armeabi-v7a|x86|x86_64|unknown
+```
+
+列出已安装包：
+
+```bash
+adb -s <serial> shell su -c 'sh /data/adb/modules/frida_magisk/action.sh packages xingin 50'
+```
+
+输出格式：
+
+```text
+PACKAGE=com.example.app
+```
+
+修改 server 监听地址：
+
+```bash
+adb -s <serial> shell su -c 'sh /data/adb/modules/frida_magisk/action.sh set-listen 127.0.0.1:27042'
+```
+
+切换模式：
+
+```bash
+adb -s <serial> shell su -c 'sh /data/adb/modules/frida_magisk/action.sh set-mode server'
+adb -s <serial> shell su -c 'sh /data/adb/modules/frida_magisk/action.sh set-mode hybrid'
+adb -s <serial> shell su -c 'sh /data/adb/modules/frida_magisk/action.sh set-mode gadget'
+```
+
+为单个 App 配置 Gadget：
+
+```bash
+adb -s <serial> shell su -c 'sh /data/adb/modules/frida_magisk/action.sh set-gadget com.example.app 127.0.0.1:27043 resume qjs no'
+adb -s <serial> forward tcp:27043 tcp:27043
+adb -s <serial> shell am force-stop com.example.app
+adb -s <serial> shell monkey -p com.example.app 1
+frida-ps -H 127.0.0.1:27043
+```
+
+清空 Gadget 目标：
+
+```bash
+adb -s <serial> shell su -c 'sh /data/adb/modules/frida_magisk/action.sh clear-gadget'
+```
+
+## WebUI 接口
+
+WebUI 安装路径：
+
+```text
+/data/adb/modules/frida_magisk/webroot/
+```
+
+KernelSU / SukiSU 会打开 `webroot/index.html`。页面通过 `ksu.exec` 调用同一个设备侧 `action.sh` 接口，不依赖外部在线资源。界面默认英文，并提供简体中文切换。
+
+## AI 代理安全操作流程
+
+1. 用 `adb devices` 确认唯一目标设备。
+2. 用 `adb -s <serial> ...` 确认型号、Android 版本和 root shell。
+3. 安装模块 ZIP。
+4. 只有在用户允许重启或任务明确要求模块生效时才执行 reboot。
+5. 重启后先调用 `web-status`。
+6. `set-gadget` 只能用于普通测试 App，不要用于系统进程。
+7. Gadget 测试结束后调用 `clear-gadget`，并恢复 `set-mode hybrid`。
+
+## 安全边界
+
+- Zygisk injector 变更需要重启设备后生效。
+- 不要把 `GADGET_TARGET_PACKAGE` 设置为系统桌面、输入法、权限管理器、WebView、root 管理器、支付组件、账号服务或其他核心系统进程。
+- `GADGET_ON_LOAD=wait` 会阻塞目标进程直到 Frida 客户端连接；冒烟测试建议使用 `resume`。
+- 默认 `GADGET_INCLUDE_CHILDREN=no`，避免子进程抢占同一个 Gadget 监听端口。
+- 把 Frida 监听地址绑定到 `0.0.0.0:<port>` 会向网络暴露调试端口，只应在可信隔离网络中使用。
+
+```
+
+`antidetect/README.md`:
+
+```md
+# Antidetect asset hashes
+
+`hashes.sha256` is the trust anchor for owned antidetect asset archives
+(`frida-antidetect-assets-<version>.tar.xz` by default). The archive is
+downloaded from a release, but its expected SHA-256 must come from this
+committed file, so a tampered release asset (or its `.sha256` side file)
+cannot vouch for itself.
+
+To add or update an archive:
+
+```bash
+sha256sum frida-antidetect-assets-17.23.3.tar.xz >> antidetect/hashes.sha256
+git add antidetect/hashes.sha256 && git commit -m "antidetect: pin assets 17.23.3"
+```
+
+Compute the hash from the file you built yourself, not from a downloaded copy.
+Lines starting with `#` are ignored. If an entry is missing or does not match,
+the build fails. `allow_unverified=true` (workflow_dispatch only) is an explicit
+opt-in to skip this check and is noted in the release notes.
+
+`scripts/prepare-antidetect-assets.sh` reads this file by default; override with
+`ANTIDETECT_ARCHIVE_SHA256_FILE` for local experiments.
+
+```
+
+`antidetect/hashes.sha256`:
+
+```sha256
+# Trusted SHA-256 hashes for owned antidetect asset archives (sha256sum format).
+# One line per archive: <sha256>  <archive file name>
+# CI verifies the archive downloaded from the asset release against this file and
+# fails closed if the entry is missing or does not match. See antidetect/README.md.
+
+```
+
+`module/README.md`:
+
+```md
+# Frida Magisk Module
+
+这个目录是 Magisk / KernelSU 兼容模块模板。构建脚本会把官方 Frida server、Frida Gadget 和本项目的 Zygisk injector 复制进此模板，再输出可刷入 ZIP。
+
+构建脚本会输出 `universal` 包和 per-ABI 包。per-ABI 包只包含对应 ABI 的 `frida-server`、Frida Gadget 和 Zygisk injector；刷入错误 ABI 时安装脚本会失败并提示缺少对应 ABI 的 `frida-server`。
+
+## 模块 ID
+
+```text
+frida_magisk
+```
+
+安装后的模块目录：
+
+```text
+/data/adb/modules/frida_magisk
+```
+
+Gadget 运行时复制目录：
+
+```text
+/data/local/tmp/frida_magisk
+```
+
+## 默认行为
+
+- 默认模式为 `hybrid`。
+- `service.sh` 在 late_start service 阶段启动普通 `frida-server`。
+- 守护循环每 5 秒检查一次 `frida-server`，进程退出后自动重启。
+- 默认监听 `127.0.0.1:27042`。
+- Zygisk injector 只在 `FRIDA_MODE=hybrid|gadget` 且进程名匹配 `GADGET_TARGET_PACKAGE` 时加载 Gadget。
+
+## 配置
+
+安装后配置文件位于：
+
+```text
+/data/adb/modules/frida_magisk/config.env
+```
+
+默认配置：
+
+```sh
+FRIDA_MODE=hybrid
+FRIDA_LISTEN=127.0.0.1:27042
+WATCHDOG_INTERVAL=5
+GADGET_TARGET_PACKAGE=
+GADGET_LISTEN=127.0.0.1:27043
+GADGET_ON_LOAD=wait
+GADGET_RUNTIME=qjs
+GADGET_INCLUDE_CHILDREN=no
+```
+
+## Action 命令
+
+```bash
+adb -s <serial> shell su -c 'sh /data/adb/modules/frida_magisk/action.sh status'
+adb -s <serial> shell su -c 'sh /data/adb/modules/frida_magisk/action.sh restart'
+adb -s <serial> shell su -c 'sh /data/adb/modules/frida_magisk/action.sh stop'
+adb -s <serial> shell su -c 'sh /data/adb/modules/frida_magisk/action.sh start'
+adb -s <serial> shell su -c 'sh /data/adb/modules/frida_magisk/action.sh set-mode hybrid'
+adb -s <serial> shell su -c 'sh /data/adb/modules/frida_magisk/action.sh set-gadget com.example.app 127.0.0.1:27043 wait qjs no'
+adb -s <serial> shell su -c 'sh /data/adb/modules/frida_magisk/action.sh clear-gadget'
+```
+
+## 风险边界
+
+- Zygisk injector 需要重启设备后生效。
+- 不要把 Gadget 目标设置为系统桌面、输入法、权限管理器、WebView、root 管理器或其他核心系统进程。
+- `GADGET_ON_LOAD=wait` 会阻塞目标进程直到控制端连接；普通验收建议使用 `resume`。
+
+```
+
+`module/action.sh`:
+
+```sh
+#!/system/bin/sh
+
+MODDIR=${0%/*}
+MODID=frida_magisk
+CONFIG="$MODDIR/config.env"
+RUNDIR="$MODDIR/run"
+GADGET_DIR="$MODDIR/gadget"
+
+FRIDA_MODE=hybrid
+FRIDA_LISTEN=127.0.0.1:27042
+WATCHDOG_INTERVAL=5
+FRIDA_SERVER_BASENAME=frida-server
+FRIDA_PID_BASENAME=frida-server
+FRIDA_RUNTIME_DIR=/data/local/tmp/frida_magisk
+GADGET_BASENAME=libfrida-gadget.so
+GADGET_CONFIG_BASENAME=libfrida-gadget.config.so
+GADGET_TARGET_PACKAGE=
+GADGET_LISTEN=127.0.0.1:27043
+GADGET_ON_LOAD=wait
+GADGET_RUNTIME=qjs
+GADGET_INCLUDE_CHILDREN=no
+
+if [ -f "$CONFIG" ]; then
+  [ -f "$MODDIR/package.env" ] && . "$MODDIR/package.env"
+  . "$CONFIG"
+elif [ -f "$MODDIR/package.env" ]; then
+  . "$MODDIR/package.env"
+fi
+
+BIN="$MODDIR/bin/$FRIDA_SERVER_BASENAME"
+PIDFILE="$RUNDIR/$FRIDA_PID_BASENAME.pid"
+WATCHDOG_PIDFILE="$RUNDIR/$FRIDA_PID_BASENAME.watchdog.pid"
+STATE="$RUNDIR/$FRIDA_PID_BASENAME.status.env"
+MANUAL_STOP="$RUNDIR/$FRIDA_PID_BASENAME.manual_stop"
+GADGET_PROFILE="$GADGET_DIR/profile.json"
+RUNTIME_DIR="$FRIDA_RUNTIME_DIR"
+RUNTIME_GADGET_DIR="$RUNTIME_DIR/gadget"
+
+ensure_rundir() {
+  [ -d "$RUNDIR" ] || mkdir -p "$RUNDIR"
+}
+
+now_epoch() {
+  date +%s 2>/dev/null || echo 0
+}
+
+now_text() {
+  date '+%Y-%m-%d %H:%M:%S' 2>/dev/null || now_epoch
+}
+
+is_alive() {
+  [ -n "$1" ] && [ -d "/proc/$1" ]
+}
+
+read_file() {
+  [ -f "$1" ] && cat "$1"
+}
+
+pid_cmdline() {
+  tr '\000' ' ' < "/proc/$1/cmdline" 2>/dev/null
+}
+
+is_frida_pid() {
+  # -F: the basename may contain dots (profiled names); treat it literally.
+  is_alive "$1" && pid_cmdline "$1" | grep -qF -- "$FRIDA_SERVER_BASENAME"
+}
+
+find_frida_pid() {
+  local pid
+  pid=$(read_file "$PIDFILE")
+  if is_frida_pid "$pid"; then
+    echo "$pid"
+    return 0
+  fi
+
+  for pid in $(pidof "$FRIDA_SERVER_BASENAME" 2>/dev/null); do
+    if is_frida_pid "$pid"; then
+      echo "$pid"
+      return 0
+    fi
+  done
+
+  return 1
+}
+
+write_state() {
+  local status="$1"
+  local message="$2"
+  local pid="$3"
+  local restarts="$4"
+  local tmp="$STATE.tmp.$$"
+  ensure_rundir
+  {
+    echo "STATUS=$status"
+    echo "MESSAGE=$message"
+    echo "PID=$pid"
+    echo "LISTEN=$FRIDA_LISTEN"
+    echo "RESTARTS=$restarts"
+    echo "UPDATED_AT=$(now_epoch)"
+    echo "UPDATED_TEXT=$(now_text)"
+  } > "$tmp"
+  mv "$tmp" "$STATE"
+}
+
+start_frida() {
+  local pid
+  if [ "$FRIDA_MODE" = "gadget" ]; then
+    write_state "disabled" "server disabled by gadget mode" "" "${1:-0}"
+    return 2
+  fi
+
+  if [ -f "$MANUAL_STOP" ]; then
+    write_state "stopped" "manual stop flag exists" "" "${1:-0}"
+    return 2
+  fi
+
+  if [ ! -x "$BIN" ]; then
+    chmod 0755 "$BIN" 2>/dev/null
+  fi
+  if [ ! -x "$BIN" ]; then
+    write_state "failed" "server binary is missing or not executable" "" "${1:-0}"
+    return 1
+  fi
+
+  pid=$(find_frida_pid)
+  if [ -n "$pid" ]; then
+    ensure_rundir
+    echo "$pid" > "$PIDFILE"
+    write_state "running" "already running" "$pid" "${1:-0}"
+    return 0
+  fi
+
+  ensure_rundir
+  "$BIN" -l "$FRIDA_LISTEN" >/dev/null 2>&1 &
+  pid=$!
+  echo "$pid" > "$PIDFILE"
+  sleep 1
+
+  if is_frida_pid "$pid"; then
+    write_state "running" "started" "$pid" "${1:-0}"
+    return 0
+  fi
+
+  write_state "failed" "process exited after start" "$pid" "${1:-0}"
+  return 1
+}
+
+stop_frida() {
+  local pid="$1"
+  [ -n "$pid" ] || pid=$(find_frida_pid)
+  if [ -n "$pid" ]; then
+    kill "$pid" 2>/dev/null
+    sleep 1
+    if is_alive "$pid"; then
+      kill -9 "$pid" 2>/dev/null
+    fi
+  fi
+  rm -f "$PIDFILE"
+  write_state "stopped" "stopped by action" "" "${2:-0}"
+}
+
+watchdog_alive() {
+  local pid
+  pid=$(read_file "$WATCHDOG_PIDFILE")
+  is_alive "$pid"
+}
+
+daemon_loop() {
+  local restarts=0
+  local failures=0
+  local sleep_seconds="$WATCHDOG_INTERVAL"
+  local pid
+
+  if watchdog_alive; then
+    exit 0
+  fi
+  ensure_rundir
+  # Two quick starts used to both pass the watchdog_alive check above and end
+  # up running two competing daemon loops. Both write their pid and then the
+  # loser verifies it still owns the pidfile and exits; portable across
+  # mksh/toybox (no noclobber support required).
+  echo "$$" > "$WATCHDOG_PIDFILE"
+  sleep 1
+  [ "$(read_file "$WATCHDOG_PIDFILE")" = "$$" ] || exit 0
+  stage_gadget_runtime
+
+  while true; do
+    if [ -f "$MODDIR/disable" ] || [ -f "$MODDIR/remove" ]; then
+      stop_frida "" "$restarts"
+      rm -f "$WATCHDOG_PIDFILE"
+      exit 0
+    fi
+
+    if [ -f "$MANUAL_STOP" ]; then
+      write_state "stopped" "manual stop flag exists" "" "$restarts"
+      sleep "$WATCHDOG_INTERVAL"
+      continue
+    fi
+
+    if [ "$FRIDA_MODE" = "gadget" ]; then
+      stop_frida "" "$restarts"
+      write_state "disabled" "server disabled by gadget mode" "" "$restarts"
+      sleep "$WATCHDOG_INTERVAL"
+      continue
+    fi
+
+    pid=$(find_frida_pid)
+    if [ -n "$pid" ]; then
+      echo "$pid" > "$PIDFILE"
+      failures=0
+      sleep_seconds="$WATCHDOG_INTERVAL"
+      write_state "running" "watchdog heartbeat" "$pid" "$restarts"
+    else
+      restarts=$((restarts + 1))
+      if start_frida "$restarts"; then
+        failures=0
+        sleep_seconds="$WATCHDOG_INTERVAL"
+      else
+        failures=$((failures + 1))
+        sleep_seconds=$((WATCHDOG_INTERVAL + failures * 5))
+        [ "$sleep_seconds" -gt 60 ] && sleep_seconds=60
+      fi
+    fi
+
+    sleep "$sleep_seconds"
+  done
+}
+
+start_watchdog() {
+  if watchdog_alive; then
+    echo "Watchdog: running pid=$(read_file "$WATCHDOG_PIDFILE")"
+    return 0
+  fi
+  sh "$MODDIR/action.sh" daemon >/dev/null 2>&1 &
+  echo "Watchdog: started"
+}
+
+stop_watchdog() {
+  local pid
+  pid=$(read_file "$WATCHDOG_PIDFILE")
+  if is_alive "$pid"; then
+    kill "$pid" 2>/dev/null
+  fi
+  rm -f "$WATCHDOG_PIDFILE"
+}
+
+valid_listen() {
+  local value="$1"
+  local host="${value%:*}"
+  local port="${value##*:}"
+
+  echo "$host" | grep -Eq '^([0-9]{1,3}\.){3}[0-9]{1,3}$' || return 1
+  echo "$port" | grep -Eq '^[0-9]{1,5}$' || return 1
+  [ "$port" -ge 1 ] 2>/dev/null && [ "$port" -le 65535 ] 2>/dev/null
+}
+
+valid_mode() {
+  [ "$1" = "server" ] || [ "$1" = "gadget" ] || [ "$1" = "hybrid" ]
+}
+
+valid_package() {
+  [ -n "$1" ] && echo "$1" | grep -Eq '^[A-Za-z0-9_.-]+$'
+}
+
+valid_on_load() {
+  [ "$1" = "wait" ] || [ "$1" = "resume" ]
+}
+
+valid_runtime() {
+  [ "$1" = "qjs" ] || [ "$1" = "v8" ]
+}
+
+valid_yes_no() {
+  [ "$1" = "yes" ] || [ "$1" = "no" ]
+}
+
+device_abi() {
+  local abi
+  abi=$(getprop ro.product.cpu.abi 2>/dev/null)
+  case "$abi" in
+    arm64-v8a|armeabi-v7a|x86|x86_64)
+      echo "$abi"
+      ;;
+    *)
+      echo "unknown"
+      ;;
+  esac
+}
+
+current_gadget_library() {
+  echo "$GADGET_DIR/$(device_abi)/$GADGET_BASENAME"
+}
+
+current_gadget_config() {
+  echo "$GADGET_DIR/$(device_abi)/$GADGET_CONFIG_BASENAME"
+}
+
+runtime_gadget_library() {
+  echo "$RUNTIME_GADGET_DIR/$(device_abi)/$GADGET_BASENAME"
+}
+
+runtime_gadget_config() {
+  echo "$RUNTIME_GADGET_DIR/$(device_abi)/$GADGET_CONFIG_BASENAME"
+}
+
+stage_gadget_runtime() {
+  local abi
+  local src_dir
+  local dst_dir
+  local src_so
+  local dst_so
+  local tmp_so
+  local src_config
+  local dst_config
+  local tmp_config
+  abi=$(device_abi)
+  src_dir="$GADGET_DIR/$abi"
+  dst_dir="$RUNTIME_GADGET_DIR/$abi"
+  src_so="$src_dir/$GADGET_BASENAME"
+  dst_so="$dst_dir/$GADGET_BASENAME"
+  src_config="$src_dir/$GADGET_CONFIG_BASENAME"
+  dst_config="$dst_dir/$GADGET_CONFIG_BASENAME"
+  tmp_so="$dst_so.tmp.$$"
+  tmp_config="$dst_config.tmp.$$"
+
+  [ -f "$src_so" ] || return 0
+  mkdir -p "$dst_dir" || return 0
+  chmod 0755 "$RUNTIME_DIR" "$RUNTIME_GADGET_DIR" "$dst_dir" 2>/dev/null || true
+  chcon u:object_r:apk_data_file:s0 "$RUNTIME_DIR" "$RUNTIME_GADGET_DIR" "$dst_dir" 2>/dev/null || true
+
+  if [ ! -f "$dst_so" ] || ! cmp -s "$src_so" "$dst_so" 2>/dev/null; then
+    cp -f "$src_so" "$tmp_so" 2>/dev/null || {
+      rm -f "$tmp_so" 2>/dev/null || true
+      return 0
+    }
+    chmod 0755 "$tmp_so" 2>/dev/null || true
+    chcon u:object_r:apk_data_file:s0 "$tmp_so" 2>/dev/null || true
+    mv -f "$tmp_so" "$dst_so" 2>/dev/null || rm -f "$tmp_so" 2>/dev/null || true
+  fi
+
+  if [ -f "$src_config" ]; then
+    if [ ! -f "$dst_config" ] || ! cmp -s "$src_config" "$dst_config" 2>/dev/null; then
+      cp -f "$src_config" "$tmp_config" 2>/dev/null || true
+      if [ -f "$tmp_config" ]; then
+        chmod 0644 "$tmp_config" 2>/dev/null || true
+        chcon u:object_r:apk_data_file:s0 "$tmp_config" 2>/dev/null || true
+        mv -f "$tmp_config" "$dst_config" 2>/dev/null || rm -f "$tmp_config" 2>/dev/null || true
+      fi
+    fi
+  fi
+  chmod 0755 "$dst_so" 2>/dev/null || true
+  chmod 0644 "$dst_config" 2>/dev/null || true
+  chcon u:object_r:apk_data_file:s0 "$dst_so" "$dst_config" 2>/dev/null || true
+}
+
+write_config() {
+  local tmp="$CONFIG.tmp.$$"
+  # Persist package flavor so module upgrades can tell official vs antidetect
+  # apart and keep user listen/mode/gadget settings (see customize.sh).
+  if [ -z "${FRIDA_MAGISK_PACKAGE_FLAVOR:-}" ] && [ -f "$MODDIR/package.env" ]; then
+    # shellcheck disable=SC1090
+    . "$MODDIR/package.env"
+  fi
+  FRIDA_MAGISK_PACKAGE_FLAVOR=${FRIDA_MAGISK_PACKAGE_FLAVOR:-official}
+  {
+    echo "# Frida Magisk runtime config."
+    echo "FRIDA_MODE=$FRIDA_MODE"
+    echo "FRIDA_LISTEN=$FRIDA_LISTEN"
+    echo "WATCHDOG_INTERVAL=$WATCHDOG_INTERVAL"
+    echo "FRIDA_SERVER_BASENAME=$FRIDA_SERVER_BASENAME"
+    echo "FRIDA_PID_BASENAME=$FRIDA_PID_BASENAME"
+    echo "FRIDA_RUNTIME_DIR=$FRIDA_RUNTIME_DIR"
+    echo "GADGET_BASENAME=$GADGET_BASENAME"
+    echo "GADGET_CONFIG_BASENAME=$GADGET_CONFIG_BASENAME"
+    echo "GADGET_TARGET_PACKAGE=$GADGET_TARGET_PACKAGE"
+    echo "GADGET_LISTEN=$GADGET_LISTEN"
+    echo "GADGET_ON_LOAD=$GADGET_ON_LOAD"
+    echo "GADGET_RUNTIME=$GADGET_RUNTIME"
+    echo "GADGET_INCLUDE_CHILDREN=$GADGET_INCLUDE_CHILDREN"
+    echo "FRIDA_MAGISK_PACKAGE_FLAVOR=$FRIDA_MAGISK_PACKAGE_FLAVOR"
+  } > "$tmp"
+  mv "$tmp" "$CONFIG"
+  chmod 0644 "$CONFIG"
+}
+
+gadget_backend_status() {
+  local abi
+  abi=$(device_abi)
+  if [ -f "$MODDIR/zygisk/$abi.so" ] && [ -f "$GADGET_DIR/$abi/$GADGET_BASENAME" ]; then
+    echo "internal"
+    return 0
+  fi
+  echo "missing"
+}
+
+write_gadget_config() {
+  local address="${GADGET_LISTEN%:*}"
+  local port="${GADGET_LISTEN##*:}"
+  local abi_dir
+  local config_path
+  local profile_tmp="$GADGET_PROFILE.tmp.$$"
+  local config_tmp
+
+  mkdir -p "$GADGET_DIR"
+  {
+    echo "{"
+    echo "  \"target_package\": \"$GADGET_TARGET_PACKAGE\","
+    echo "  \"listen\": \"$GADGET_LISTEN\","
+    echo "  \"on_load\": \"$GADGET_ON_LOAD\","
+    echo "  \"runtime\": \"$GADGET_RUNTIME\","
+    echo "  \"include_children\": \"$GADGET_INCLUDE_CHILDREN\","
+    echo "  \"backend\": \"$(gadget_backend_status)\""
+    echo "}"
+  } > "$profile_tmp"
+  mv "$profile_tmp" "$GADGET_PROFILE"
+
+  for abi_dir in "$GADGET_DIR"/*; do
+    [ -d "$abi_dir" ] || continue
+    [ -f "$abi_dir/$GADGET_BASENAME" ] || continue
+    config_path="$abi_dir/$GADGET_CONFIG_BASENAME"
+    config_tmp="$config_path.tmp.$$"
+    {
+      echo "{"
+      echo "  \"interaction\": {"
+      echo "    \"type\": \"listen\","
+      echo "    \"address\": \"$address\","
+      echo "    \"port\": $port,"
+      echo "    \"on_load\": \"$GADGET_ON_LOAD\""
+      echo "  },"
+      echo "  \"runtime\": \"$GADGET_RUNTIME\""
+      echo "}"
+    } > "$config_tmp"
+    mv "$config_tmp" "$config_path"
+    chmod 0644 "$config_path"
+  done
+  chmod 0644 "$GADGET_PROFILE"
+  stage_gadget_runtime
+}
+
+set_listen() {
+  local listen="$1"
+  if ! valid_listen "$listen"; then
+    echo "Invalid listen address. Expected IPv4:port with port 1-65535." >&2
+    return 2
+  fi
+
+  FRIDA_LISTEN="$listen"
+  write_config
+  ensure_rundir
+  rm -f "$MANUAL_STOP"
+  stop_watchdog
+  stop_frida
+  start_frida
+  start_watchdog
+}
+
+set_mode() {
+  local mode="$1"
+  if ! valid_mode "$mode"; then
+    echo "Invalid mode. Expected server, gadget, or hybrid." >&2
+    return 2
+  fi
+
+  FRIDA_MODE="$mode"
+  write_config
+  write_gadget_config
+  ensure_rundir
+
+  if [ "$FRIDA_MODE" = "gadget" ]; then
+    touch "$MANUAL_STOP"
+    stop_watchdog
+    stop_frida
+    write_state "disabled" "server disabled by gadget mode" "" "0"
+    return 0
+  fi
+
+  rm -f "$MANUAL_STOP"
+  stop_watchdog
+  start_frida
+  start_watchdog
+}
+
+set_gadget() {
+  local target="$1"
+  local listen="$2"
+  local on_load="$3"
+  local runtime="$4"
+  local include_children="${5:-no}"
+
+  valid_package "$target" || {
+    echo "Invalid package name." >&2
+    return 2
+  }
+  valid_listen "$listen" || {
+    echo "Invalid Gadget listen address." >&2
+    return 2
+  }
+  valid_on_load "$on_load" || {
+    echo "Invalid on_load. Expected wait or resume." >&2
+    return 2
+  }
+  valid_runtime "$runtime" || {
+    echo "Invalid runtime. Expected qjs or v8." >&2
+    return 2
+  }
+  valid_yes_no "$include_children" || {
+    echo "Invalid include_children. Expected yes or no." >&2
+    return 2
+  }
+
+  GADGET_TARGET_PACKAGE="$target"
+  GADGET_LISTEN="$listen"
+  GADGET_ON_LOAD="$on_load"
+  GADGET_RUNTIME="$runtime"
+  GADGET_INCLUDE_CHILDREN="$include_children"
+  write_config
+  write_gadget_config
+}
+
+clear_gadget() {
+  GADGET_TARGET_PACKAGE=
+  write_config
+  write_gadget_config
+}
+
+print_status() {
+  local pid
+  local health="stopped"
+  pid=$(find_frida_pid)
+  if [ -n "$pid" ]; then
+    health="running"
+  fi
+
+  echo "== Frida Magisk =="
+  grep -E '^(id|name|version|versionCode|description)=' "$MODDIR/module.prop" 2>/dev/null
+  echo
+  echo "Module dir: $MODDIR"
+  echo "Binary: $BIN"
+  echo "Mode: $FRIDA_MODE"
+  echo "Listen: $FRIDA_LISTEN"
+  echo "Device ABI: $(device_abi)"
+  echo "Gadget target: ${GADGET_TARGET_PACKAGE:-none}"
+  echo "Gadget listen: $GADGET_LISTEN"
+  echo "Gadget include children: $GADGET_INCLUDE_CHILDREN"
+  echo "Gadget backend: $(gadget_backend_status)"
+  echo "Gadget library: $(current_gadget_library)"
+  echo "Gadget config: $(current_gadget_config)"
+  echo "Runtime Gadget library: $(runtime_gadget_library)"
+  echo "Runtime Gadget config: $(runtime_gadget_config)"
+  echo "Watchdog interval: ${WATCHDOG_INTERVAL}s"
+  echo "Watchdog: $(watchdog_alive && echo running || echo stopped)"
+  echo "Manual stop: $([ -f "$MANUAL_STOP" ] && echo yes || echo no)"
+  echo "Health: $health"
+  echo "PID: ${pid:-none}"
+  if [ -n "$pid" ]; then
+    echo "Cmdline: $(pid_cmdline "$pid")"
+  fi
+  echo
+  echo "Last state:"
+  if [ -f "$STATE" ]; then
+    cat "$STATE"
+  else
+    echo "none"
+  fi
+}
+
+print_web_status() {
+  local pid
+  local health="stopped"
+  local watchdog="stopped"
+  local manual_stop="no"
+  local version="unknown"
+  local version_code="unknown"
+  local message=""
+  local restarts="0"
+  local updated_text="none"
+
+  pid=$(find_frida_pid)
+  [ -n "$pid" ] && health="running"
+  watchdog_alive && watchdog="running"
+  [ -f "$MANUAL_STOP" ] && manual_stop="yes"
+  if [ -f "$STATE" ]; then
+    message=$(sed -n 's/^MESSAGE=//p' "$STATE")
+    restarts=$(sed -n 's/^RESTARTS=//p' "$STATE")
+    updated_text=$(sed -n 's/^UPDATED_TEXT=//p' "$STATE")
+  fi
+  version=$(sed -n 's/^version=//p' "$MODDIR/module.prop" 2>/dev/null)
+  version_code=$(sed -n 's/^versionCode=//p' "$MODDIR/module.prop" 2>/dev/null)
+
+  echo "HEALTH=$health"
+  echo "PID=${pid:-none}"
+  echo "LISTEN=$FRIDA_LISTEN"
+  echo "MODE=$FRIDA_MODE"
+  echo "WATCHDOG=$watchdog"
+  echo "WATCHDOG_INTERVAL=$WATCHDOG_INTERVAL"
+  echo "MANUAL_STOP=$manual_stop"
+  echo "VERSION=${version:-unknown}"
+  echo "VERSION_CODE=${version_code:-unknown}"
+  echo "RESTARTS=$restarts"
+  echo "MESSAGE=$message"
+  echo "UPDATED_TEXT=$updated_text"
+  echo "GADGET_TARGET_PACKAGE=$GADGET_TARGET_PACKAGE"
+  echo "GADGET_LISTEN=$GADGET_LISTEN"
+  echo "GADGET_ON_LOAD=$GADGET_ON_LOAD"
+  echo "GADGET_RUNTIME=$GADGET_RUNTIME"
+  echo "GADGET_INCLUDE_CHILDREN=$GADGET_INCLUDE_CHILDREN"
+  echo "GADGET_BACKEND=$(gadget_backend_status)"
+  echo "GADGET_ABI=$(device_abi)"
+  echo "GADGET_LIBRARY=$(current_gadget_library)"
+  echo "GADGET_PROFILE=$GADGET_PROFILE"
+  echo "GADGET_CONFIG=$(current_gadget_config)"
+  echo "GADGET_RUNTIME_LIBRARY=$(runtime_gadget_library)"
+  echo "GADGET_RUNTIME_CONFIG=$(runtime_gadget_config)"
+}
+
+print_packages() {
+  local query="${1:-}"
+  local limit="${2:-100}"
+  local count=0
+  local package
+
+  case "$limit" in
+    ''|*[!0-9]*)
+      limit=100
+      ;;
+  esac
+  [ "$limit" -gt 0 ] 2>/dev/null || limit=100
+
+  pm list packages 2>/dev/null | sed 's/^package://' | while IFS= read -r package; do
+    if [ -n "$query" ] && ! echo "$package" | grep -qiF -- "$query"; then
+      continue
+    fi
+    echo "PACKAGE=$package"
+    count=$((count + 1))
+    [ "$count" -ge "$limit" ] && break
+  done
+}
+
+interactive_action() {
+  print_status
+  echo
+  echo "Actions: [s]tart  [r]estart  s[t]op  [q]uit"
+  printf "Select action: "
+  if read -r -t 20 choice; then
+    case "$choice" in
+      s|S)
+        rm -f "$MANUAL_STOP"
+        start_watchdog
+        start_frida
+        ;;
+      r|R)
+        rm -f "$MANUAL_STOP"
+        stop_frida
+        start_watchdog
+        start_frida
+        ;;
+      t|T)
+        ensure_rundir
+        touch "$MANUAL_STOP"
+        stop_frida
+        ;;
+      *)
+        echo "No action."
+        ;;
+    esac
+  else
+    echo
+    echo "No action."
+  fi
+  echo
+  print_status
+}
+
+case "$1" in
+  daemon)
+    daemon_loop
+    ;;
+  status)
+    print_status
+    ;;
+  web-status)
+    print_web_status
+    ;;
+  packages)
+    print_packages "$2" "$3"
+    ;;
+  start)
+    ensure_rundir
+    rm -f "$MANUAL_STOP"
+    start_watchdog
+    start_frida
+    ;;
+  stop)
+    ensure_rundir
+    touch "$MANUAL_STOP"
+    stop_frida
+    ;;
+  restart)
+    ensure_rundir
+    rm -f "$MANUAL_STOP"
+    stop_frida
+    start_watchdog
+    start_frida
+    ;;
+  set-listen)
+    set_listen "$2"
+    ;;
+  set-mode)
+    set_mode "$2"
+    ;;
+  set-gadget)
+    set_gadget "$2" "${3:-$GADGET_LISTEN}" "${4:-$GADGET_ON_LOAD}" "${5:-$GADGET_RUNTIME}" "${6:-$GADGET_INCLUDE_CHILDREN}"
+    ;;
+  clear-gadget)
+    clear_gadget
+    ;;
+  watchdog-stop)
+    stop_watchdog
+    ;;
+  *)
+    interactive_action
+    ;;
+esac
+
+```
+
+`module/customize.sh`:
+
+```sh
+#!/system/bin/sh
+
+ui_print "- Frida Magisk"
+ui_print "- Bundled frida-server watchdog module"
+ui_print "- ARCH=$ARCH IS64BIT=$IS64BIT API=$API"
+
+if [ -f "$MODPATH/package.env" ]; then
+  . "$MODPATH/package.env"
+fi
+ui_print "- Package ABI: ${FRIDA_MAGISK_PACKAGE_ABI:-universal}"
+
+FRIDA_SERVER_BASENAME=${FRIDA_SERVER_BASENAME:-frida-server}
+FRIDA_PID_BASENAME=${FRIDA_PID_BASENAME:-frida-server}
+FRIDA_RUNTIME_DIR=${FRIDA_RUNTIME_DIR:-/data/local/tmp/frida_magisk}
+FRIDA_MODE=${FRIDA_MODE:-hybrid}
+FRIDA_LISTEN=${FRIDA_LISTEN:-127.0.0.1:27042}
+GADGET_BASENAME=${GADGET_BASENAME:-libfrida-gadget.so}
+GADGET_CONFIG_BASENAME=${GADGET_CONFIG_BASENAME:-libfrida-gadget.config.so}
+GADGET_LISTEN=${GADGET_LISTEN:-127.0.0.1:27043}
+GADGET_ON_LOAD=${GADGET_ON_LOAD:-wait}
+GADGET_RUNTIME=${GADGET_RUNTIME:-qjs}
+GADGET_INCLUDE_CHILDREN=${GADGET_INCLUDE_CHILDREN:-no}
+
+case "$ARCH" in
+  arm64)
+    MODULE_ABI=arm64-v8a
+    ;;
+  arm)
+    MODULE_ABI=armeabi-v7a
+    ;;
+  x64)
+    MODULE_ABI=x86_64
+    ;;
+  x86)
+    MODULE_ABI=x86
+    ;;
+  *)
+    abort "Unsupported ARCH=$ARCH."
+    ;;
+esac
+
+if [ ! -f "$MODPATH/bin/$MODULE_ABI/$FRIDA_SERVER_BASENAME" ]; then
+  abort "Missing frida-server for ABI=$MODULE_ABI."
+fi
+cp -f "$MODPATH/bin/$MODULE_ABI/$FRIDA_SERVER_BASENAME" "$MODPATH/bin/$FRIDA_SERVER_BASENAME"
+
+mkdir -p "$MODPATH/run"
+touch "$MODPATH/skip_mount"
+
+if [ -f "/data/adb/modules/$MODID/config.env" ]; then
+  cp -f "/data/adb/modules/$MODID/config.env" "$MODPATH/config.env"
+fi
+
+if [ ! -f "$MODPATH/config.env" ]; then
+cat > "$MODPATH/config.env" <<'EOF'
+# Frida Magisk runtime config.
+# Frida default USB port. Use frida-ps -U after Android finishes booting.
+FRIDA_MODE=hybrid
+FRIDA_LISTEN=127.0.0.1:27042
+WATCHDOG_INTERVAL=5
+FRIDA_SERVER_BASENAME=frida-server
+FRIDA_PID_BASENAME=frida-server
+FRIDA_RUNTIME_DIR=/data/local/tmp/frida_magisk
+GADGET_BASENAME=libfrida-gadget.so
+GADGET_CONFIG_BASENAME=libfrida-gadget.config.so
+GADGET_TARGET_PACKAGE=
+GADGET_LISTEN=127.0.0.1:27043
+GADGET_ON_LOAD=wait
+GADGET_RUNTIME=qjs
+GADGET_INCLUDE_CHILDREN=no
+FRIDA_MAGISK_PACKAGE_FLAVOR=official
+EOF
+fi
+
+set_config_value() {
+  local key="$1"
+  local value="$2"
+  local tmp="$MODPATH/config.env.tmp.$$"
+  if grep -q "^$key=" "$MODPATH/config.env" 2>/dev/null; then
+    sed "s|^$key=.*|$key=$value|" "$MODPATH/config.env" > "$tmp"
+    mv "$tmp" "$MODPATH/config.env"
+  else
+    echo "$key=$value" >> "$MODPATH/config.env"
+  fi
+}
+
+config_value() {
+  local key="$1"
+  sed -n "s|^$key=||p" "$MODPATH/config.env" 2>/dev/null | tail -n 1
+}
+
+set_config_if_default() {
+  local key="$1"
+  local value="$2"
+  local default_value="$3"
+  local current
+  current="$(config_value "$key")"
+  if [ -z "$current" ] || [ "$current" = "$default_value" ]; then
+    set_config_value "$key" "$value"
+  fi
+}
+
+PACKAGE_FLAVOR_CURRENT=${FRIDA_MAGISK_PACKAGE_FLAVOR:-official}
+PACKAGE_FLAVOR_PREVIOUS=$(config_value FRIDA_MAGISK_PACKAGE_FLAVOR)
+PACKAGE_PROFILE_CHANGED=no
+if [ -n "$PACKAGE_FLAVOR_PREVIOUS" ] && [ "$PACKAGE_FLAVOR_PREVIOUS" != "$PACKAGE_FLAVOR_CURRENT" ]; then
+  PACKAGE_PROFILE_CHANGED=yes
+elif [ -z "$PACKAGE_FLAVOR_PREVIOUS" ]; then
+  # Older installs / Action writes may omit FRIDA_MAGISK_PACKAGE_FLAVOR.
+  # Infer the previous profile from basenames so a same-flavor upgrade keeps
+  # user listen/mode/gadget settings, while a real profile switch still resets.
+  previous_server_basename=$(config_value FRIDA_SERVER_BASENAME)
+  previous_gadget_basename=$(config_value GADGET_BASENAME)
+  case "$PACKAGE_FLAVOR_CURRENT" in
+    official)
+      if { [ -n "$previous_server_basename" ] && [ "$previous_server_basename" != "frida-server" ]; } ||
+         { [ -n "$previous_gadget_basename" ] && [ "$previous_gadget_basename" != "libfrida-gadget.so" ]; }; then
+        PACKAGE_PROFILE_CHANGED=yes
+      fi
+      ;;
+    *)
+      if [ -n "$previous_server_basename" ] && [ "$previous_server_basename" != "$FRIDA_SERVER_BASENAME" ]; then
+        PACKAGE_PROFILE_CHANGED=yes
+      elif [ -n "$previous_gadget_basename" ] && [ "$previous_gadget_basename" != "$GADGET_BASENAME" ]; then
+        PACKAGE_PROFILE_CHANGED=yes
+      elif { [ -z "$previous_server_basename" ] || [ "$previous_server_basename" = "frida-server" ]; } &&
+           { [ -z "$previous_gadget_basename" ] || [ "$previous_gadget_basename" = "libfrida-gadget.so" ]; }; then
+        # Fresh install heredoc / previous official-looking config → apply package defaults.
+        PACKAGE_PROFILE_CHANGED=yes
+      fi
+      ;;
+  esac
+fi
+
+set_config_value FRIDA_SERVER_BASENAME "$FRIDA_SERVER_BASENAME"
+set_config_value FRIDA_PID_BASENAME "$FRIDA_PID_BASENAME"
+set_config_value FRIDA_RUNTIME_DIR "$FRIDA_RUNTIME_DIR"
+set_config_value GADGET_BASENAME "$GADGET_BASENAME"
+set_config_value GADGET_CONFIG_BASENAME "$GADGET_CONFIG_BASENAME"
+set_config_value FRIDA_MAGISK_PACKAGE_FLAVOR "$PACKAGE_FLAVOR_CURRENT"
+
+if [ "$PACKAGE_PROFILE_CHANGED" = "yes" ]; then
+  set_config_value FRIDA_MODE "$FRIDA_MODE"
+  set_config_value FRIDA_LISTEN "$FRIDA_LISTEN"
+  set_config_value GADGET_LISTEN "$GADGET_LISTEN"
+  set_config_value GADGET_ON_LOAD "$GADGET_ON_LOAD"
+  set_config_value GADGET_RUNTIME "$GADGET_RUNTIME"
+  set_config_value GADGET_INCLUDE_CHILDREN "$GADGET_INCLUDE_CHILDREN"
+else
+  set_config_if_default FRIDA_MODE "$FRIDA_MODE" "hybrid"
+  set_config_if_default FRIDA_LISTEN "$FRIDA_LISTEN" "127.0.0.1:27042"
+  set_config_if_default GADGET_LISTEN "$GADGET_LISTEN" "127.0.0.1:27043"
+  set_config_if_default GADGET_ON_LOAD "$GADGET_ON_LOAD" "wait"
+  set_config_if_default GADGET_RUNTIME "$GADGET_RUNTIME" "qjs"
+  set_config_if_default GADGET_INCLUDE_CHILDREN "$GADGET_INCLUDE_CHILDREN" "no"
+fi
+
+set_perm_recursive "$MODPATH/bin" 0 0 0755 0644
+[ -d "$MODPATH/gadget" ] && set_perm_recursive "$MODPATH/gadget" 0 0 0755 0644
+[ -d "$MODPATH/zygisk" ] && set_perm_recursive "$MODPATH/zygisk" 0 0 0755 0644
+set_perm "$MODPATH/bin/$FRIDA_SERVER_BASENAME" 0 0 0755
+set_perm "$MODPATH/bin/$MODULE_ABI/$FRIDA_SERVER_BASENAME" 0 0 0755
+set_perm "$MODPATH/action.sh" 0 0 0755
+set_perm "$MODPATH/service.sh" 0 0 0755
+[ -f "$MODPATH/uninstall.sh" ] && set_perm "$MODPATH/uninstall.sh" 0 0 0755
+set_perm "$MODPATH/config.env" 0 0 0644
+
+ui_print "- Selected ABI: $MODULE_ABI"
+ui_print "- Default listen: $FRIDA_LISTEN"
+if [ -f "$MODPATH/zygisk/$MODULE_ABI.so" ] && [ -f "$MODPATH/gadget/$MODULE_ABI/$GADGET_BASENAME" ]; then
+  ui_print "- Gadget backend: bundled for $MODULE_ABI"
+else
+  ui_print "- Gadget backend: not bundled for $MODULE_ABI"
+fi
+ui_print "- Use module Action to view status or restart frida-server"
+ui_print "- Reboot is required for automatic start"
+
+```
+
+`module/module.prop`:
+
+```prop
+id=frida_magisk
+name=Frida Magisk
+version=17.23.3
+versionCode=172303
+author=xjoker
+description=Run bundled frida-server at boot with watchdog restart and Action status/control entry.
+updateJson=https://raw.githubusercontent.com/xjoker/frida-magisk/main/update/official.json
+
+```
+
+`module/native/zygisk/CMakeLists.txt`:
+
+```txt
+cmake_minimum_required(VERSION 3.22)
+project(frida_magisk_zygisk LANGUAGES CXX)
+
+set(ZYGISK_LOG_TAG "FridaMagiskZygisk" CACHE STRING "Zygisk module log tag")
+set(ZYGISK_MODULE_FALLBACK "/data/adb/modules/frida_magisk" CACHE STRING "Fallback module path")
+set(ZYGISK_RUNTIME_FALLBACK "/data/local/tmp/frida_magisk" CACHE STRING "Fallback runtime path")
+set(ZYGISK_GADGET_FALLBACK "libfrida-gadget.so" CACHE STRING "Fallback Gadget basename")
+set(ZYGISK_MODULE_CLASS "FridaToolboxInjector" CACHE STRING "Zygisk module C++ class name")
+set(ZYGISK_OUTPUT_NAME "frida_magisk_zygisk" CACHE STRING "Native library output name")
+# 1 compiles the logcat output out entirely: no LOGI/LOGW call, no liblog linkage.
+# postAppSpecialize runs inside the target app process, so those lines are readable
+# from the app's own log buffer and confirm the injection.
+set(ZYGISK_QUIET "0" CACHE STRING "Compile out Zygisk logcat output (1 = silent)")
+
+add_library(frida_magisk_zygisk SHARED src/injector.cpp)
+set_target_properties(frida_magisk_zygisk PROPERTIES OUTPUT_NAME "${ZYGISK_OUTPUT_NAME}")
+
+target_include_directories(frida_magisk_zygisk PRIVATE include)
+target_compile_features(frida_magisk_zygisk PRIVATE cxx_std_17)
+target_compile_definitions(frida_magisk_zygisk PRIVATE
+  ZYGISK_LOG_TAG="${ZYGISK_LOG_TAG}"
+  ZYGISK_MODULE_FALLBACK="${ZYGISK_MODULE_FALLBACK}"
+  ZYGISK_RUNTIME_FALLBACK="${ZYGISK_RUNTIME_FALLBACK}"
+  ZYGISK_GADGET_FALLBACK="${ZYGISK_GADGET_FALLBACK}"
+  ZYGISK_MODULE_CLASS=${ZYGISK_MODULE_CLASS}
+  ZYGISK_QUIET=${ZYGISK_QUIET}
+)
+target_compile_options(frida_magisk_zygisk PRIVATE
+  -Wall
+  -Wextra
+  -Werror
+  -fvisibility=hidden
+  -fno-exceptions
+  -fno-rtti
+)
+target_link_options(frida_magisk_zygisk PRIVATE -Wl,--gc-sections)
+if(ZYGISK_QUIET)
+  target_link_libraries(frida_magisk_zygisk PRIVATE dl)
+else()
+  target_link_libraries(frida_magisk_zygisk PRIVATE log dl)
+endif()
+
+```
+
+`module/native/zygisk/include/zygisk.hpp`:
+
+```hpp
+/* Copyright 2022-2023 John "topjohnwu" Wu
+ *
+ * Permission to use, copy, modify, and/or distribute this software for any
+ * purpose with or without fee is hereby granted.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
+ * REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
+ * AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
+ * INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+ * LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
+ * OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+ * PERFORMANCE OF THIS SOFTWARE.
+ */
+
+// This is the public API for Zygisk modules.
+// DO NOT MODIFY ANY CODE IN THIS HEADER.
+
+#pragma once
+
+#include <jni.h>
+
+#define ZYGISK_API_VERSION 4
+
+/*
+
+***************
+* Introduction
+***************
+
+On Android, all app processes are forked from a special daemon called "Zygote".
+For each new app process, zygote will fork a new process and perform "specialization".
+This specialization operation enforces the Android security sandbox on the newly forked
+process to make sure that 3rd party application code is only loaded after it is being
+restricted within a sandbox.
+
+On Android, there is also this special process called "system_server". This single
+process hosts a significant portion of system services, which controls how the
+Android operating system and apps interact with each other.
+
+The Zygisk framework provides a way to allow developers to build modules and run custom
+code before and after system_server and any app processes' specialization.
+This enable developers to inject code and alter the behavior of system_server and app processes.
+
+Please note that modules will only be loaded after zygote has forked the child process.
+THIS MEANS ALL OF YOUR CODE RUNS IN THE APP/SYSTEM_SERVER PROCESS, NOT THE ZYGOTE DAEMON!
+
+*********************
+* Development Guide
+*********************
+
+Define a class and inherit zygisk::ModuleBase to implement the functionality of your module.
+Use the macro REGISTER_ZYGISK_MODULE(className) to register that class to Zygisk.
+
+Example code:
+
+static jint (*orig_logger_entry_max)(JNIEnv *env);
+static jint my_logger_entry_max(JNIEnv *env) { return orig_logger_entry_max(env); }
+
+class ExampleModule : public zygisk::ModuleBase {
+public:
+    void onLoad(zygisk::Api *api, JNIEnv *env) override {
+        this->api = api;
+        this->env = env;
+    }
+    void preAppSpecialize(zygisk::AppSpecializeArgs *args) override {
+        JNINativeMethod methods[] = {
+            { "logger_entry_max_payload_native", "()I", (void*) my_logger_entry_max },
+        };
+        api->hookJniNativeMethods(env, "android/util/Log", methods, 1);
+        *(void **) &orig_logger_entry_max = methods[0].fnPtr;
+    }
+private:
+    zygisk::Api *api;
+    JNIEnv *env;
+};
+
+REGISTER_ZYGISK_MODULE(ExampleModule)
+
+-----------------------------------------------------------------------------------------
+
+Since your module class's code runs with either Zygote's privilege in pre[XXX]Specialize,
+or runs in the sandbox of the target process in post[XXX]Specialize, the code in your class
+never runs in a true superuser environment.
+
+If your module require access to superuser permissions, you can create and register
+a root companion handler function. This function runs in a separate root companion
+daemon process, and an Unix domain socket is provided to allow you to perform IPC between
+your target process and the root companion process.
+
+Example code:
+
+static void example_handler(int socket) { ... }
+
+REGISTER_ZYGISK_COMPANION(example_handler)
+
+*/
+
+namespace zygisk {
+
+struct Api;
+struct AppSpecializeArgs;
+struct ServerSpecializeArgs;
+
+class ModuleBase {
+public:
+
+    // This method is called as soon as the module is loaded into the target process.
+    // A Zygisk API handle will be passed as an argument.
+    virtual void onLoad([[maybe_unused]] Api *api, [[maybe_unused]] JNIEnv *env) {}
+
+    // This method is called before the app process is specialized.
+    // At this point, the process just got forked from zygote, but no app specific specialization
+    // is applied. This means that the process does not have any sandbox restrictions and
+    // still runs with the same privilege of zygote.
+    //
+    // All the arguments that will be sent and used for app specialization is passed as a single
+    // AppSpecializeArgs object. You can read and overwrite these arguments to change how the app
+    // process will be specialized.
+    //
+    // If you need to run some operations as superuser, you can call Api::connectCompanion() to
+    // get a socket to do IPC calls with a root companion process.
+    // See Api::connectCompanion() for more info.
+    virtual void preAppSpecialize([[maybe_unused]] AppSpecializeArgs *args) {}
+
+    // This method is called after the app process is specialized.
+    // At this point, the process has all sandbox restrictions enabled for this application.
+    // This means that this method runs with the same privilege of the app's own code.
+    virtual void postAppSpecialize([[maybe_unused]] const AppSpecializeArgs *args) {}
+
+    // This method is called before the system server process is specialized.
+    // See preAppSpecialize(args) for more info.
+    virtual void preServerSpecialize([[maybe_unused]] ServerSpecializeArgs *args) {}
+
+    // This method is called after the system server process is specialized.
+    // At this point, the process runs with the privilege of system_server.
+    virtual void postServerSpecialize([[maybe_unused]] const ServerSpecializeArgs *args) {}
+};
+
+struct AppSpecializeArgs {
+    // Required arguments. These arguments are guaranteed to exist on all Android versions.
+    jint &uid;
+    jint &gid;
+    jintArray &gids;
+    jint &runtime_flags;
+    jobjectArray &rlimits;
+    jint &mount_external;
+    jstring &se_info;
+    jstring &nice_name;
+    jstring &instruction_set;
+    jstring &app_data_dir;
+
+    // Optional arguments. Please check whether the pointer is null before de-referencing
+    jintArray *const fds_to_ignore;
+    jboolean *const is_child_zygote;
+    jboolean *const is_top_app;
+    jobjectArray *const pkg_data_info_list;
+    jobjectArray *const whitelisted_data_info_list;
+    jboolean *const mount_data_dirs;
+    jboolean *const mount_storage_dirs;
+
+    AppSpecializeArgs() = delete;
+};
+
+struct ServerSpecializeArgs {
+    jint &uid;
+    jint &gid;
+    jintArray &gids;
+    jint &runtime_flags;
+    jlong &permitted_capabilities;
+    jlong &effective_capabilities;
+
+    ServerSpecializeArgs() = delete;
+};
+
+namespace internal {
+struct api_table;
+template <class T> void entry_impl(api_table *, JNIEnv *);
+}
+
+// These values are used in Api::setOption(Option)
+enum Option : int {
+    // Force Magisk's denylist unmount routines to run on this process.
+    //
+    // Setting this option only makes sense in preAppSpecialize.
+    // The actual unmounting happens during app process specialization.
+    //
+    // Set this option to force all Magisk and modules' files to be unmounted from the
+    // mount namespace of the process, regardless of the denylist enforcement status.
+    FORCE_DENYLIST_UNMOUNT = 0,
+
+    // When this option is set, your module's library will be dlclose-ed after post[XXX]Specialize.
+    // Be aware that after dlclose-ing your module, all of your code will be unmapped from memory.
+    // YOU MUST NOT ENABLE THIS OPTION AFTER HOOKING ANY FUNCTIONS IN THE PROCESS.
+    DLCLOSE_MODULE_LIBRARY = 1,
+};
+
+// Bit masks of the return value of Api::getFlags()
+enum StateFlag : uint32_t {
+    // The user has granted root access to the current process
+    PROCESS_GRANTED_ROOT = (1u << 0),
+
+    // The current process was added on the denylist
+    PROCESS_ON_DENYLIST = (1u << 1),
+};
+
+// All API methods will stop working after post[XXX]Specialize as Zygisk will be unloaded
+// from the specialized process afterwards.
+struct Api {
+
+    // Connect to a root companion process and get a Unix domain socket for IPC.
+    //
+    // This API only works in the pre[XXX]Specialize methods due to SELinux restrictions.
+    //
+    // The pre[XXX]Specialize methods run with the same privilege of zygote.
+    // If you would like to do some operations with superuser permissions, register a handler
+    // function that would be called in the root process with REGISTER_ZYGISK_COMPANION(func).
+    // Another good use case for a companion process is that if you want to share some resources
+    // across multiple processes, hold the resources in the companion process and pass it over.
+    //
+    // The root companion process is ABI aware; that is, when calling this method from a 32-bit
+    // process, you will be connected to a 32-bit companion process, and vice versa for 64-bit.
+    //
+    // Returns a file descriptor to a socket that is connected to the socket passed to your
+    // module's companion request handler. Returns -1 if the connection attempt failed.
+    int connectCompanion();
+
+    // Get the file descriptor of the root folder of the current module.
+    //
+    // This API only works in the pre[XXX]Specialize methods.
+    // Accessing the directory returned is only possible in the pre[XXX]Specialize methods
+    // or in the root companion process (assuming that you sent the fd over the socket).
+    // Both restrictions are due to SELinux and UID.
+    //
+    // Returns -1 if errors occurred.
+    int getModuleDir();
+
+    // Set various options for your module.
+    // Please note that this method accepts one single option at a time.
+    // Check zygisk::Option for the full list of options available.
+    void setOption(Option opt);
+
+    // Get information about the current process.
+    // Returns bitwise-or'd zygisk::StateFlag values.
+    uint32_t getFlags();
+
+    // Exempt the provided file descriptor from being automatically closed.
+    //
+    // This API only make sense in preAppSpecialize; calling this method in any other situation
+    // is either a no-op (returns true) or an error (returns false).
+    //
+    // When false is returned, the provided file descriptor will eventually be closed by zygote.
+    bool exemptFd(int fd);
+
+    // Hook JNI native methods for a class
+    //
+    // Lookup all registered JNI native methods and replace it with your own methods.
+    // The original function pointer will be saved in each JNINativeMethod's fnPtr.
+    // If no matching class, method name, or signature is found, that specific JNINativeMethod.fnPtr
+    // will be set to nullptr.
+    void hookJniNativeMethods(JNIEnv *env, const char *className, JNINativeMethod *methods, int numMethods);
+
+    // Hook functions in the PLT (Procedure Linkage Table) of ELFs loaded in memory.
+    //
+    // Parsing /proc/[PID]/maps will give you the memory map of a process. As an example:
+    //
+    //       <address>       <perms>  <offset>   <dev>  <inode>           <pathname>
+    // 56b4346000-56b4347000  r-xp    00002000   fe:00    235       /system/bin/app_process64
+    // (More details: https://man7.org/linux/man-pages/man5/proc.5.html)
+    //
+    // The `dev` and `inode` pair uniquely identifies a file being mapped into memory.
+    // For matching ELFs loaded in memory, replace function `symbol` with `newFunc`.
+    // If `oldFunc` is not nullptr, the original function pointer will be saved to `oldFunc`.
+    void pltHookRegister(dev_t dev, ino_t inode, const char *symbol, void *newFunc, void **oldFunc);
+
+    // Commit all the hooks that was previously registered.
+    // Returns false if an error occurred.
+    bool pltHookCommit();
+
+private:
+    internal::api_table *tbl;
+    template <class T> friend void internal::entry_impl(internal::api_table *, JNIEnv *);
+};
+
+// Register a class as a Zygisk module
+
+#define REGISTER_ZYGISK_MODULE(clazz) \
+void zygisk_module_entry(zygisk::internal::api_table *table, JNIEnv *env) { \
+    zygisk::internal::entry_impl<clazz>(table, env);                        \
+}
+
+// Register a root companion request handler function for your module
+//
+// The function runs in a superuser daemon process and handles a root companion request from
+// your module running in a target process. The function has to accept an integer value,
+// which is a Unix domain socket that is connected to the target process.
+// See Api::connectCompanion() for more info.
+//
+// NOTE: the function can run concurrently on multiple threads.
+// Be aware of race conditions if you have globally shared resources.
+
+#define REGISTER_ZYGISK_COMPANION(func) \
+void zygisk_companion_entry(int client) { func(client); }
+
+/*********************************************************
+ * The following is internal ABI implementation detail.
+ * You do not have to understand what it is doing.
+ *********************************************************/
+
+namespace internal {
+
+struct module_abi {
+    long api_version;
+    ModuleBase *impl;
+
+    void (*preAppSpecialize)(ModuleBase *, AppSpecializeArgs *);
+    void (*postAppSpecialize)(ModuleBase *, const AppSpecializeArgs *);
+    void (*preServerSpecialize)(ModuleBase *, ServerSpecializeArgs *);
+    void (*postServerSpecialize)(ModuleBase *, const ServerSpecializeArgs *);
+
+    module_abi(ModuleBase *module) : api_version(ZYGISK_API_VERSION), impl(module) {
+        preAppSpecialize = [](auto m, auto args) { m->preAppSpecialize(args); };
+        postAppSpecialize = [](auto m, auto args) { m->postAppSpecialize(args); };
+        preServerSpecialize = [](auto m, auto args) { m->preServerSpecialize(args); };
+        postServerSpecialize = [](auto m, auto args) { m->postServerSpecialize(args); };
+    }
+};
+
+struct api_table {
+    // Base
+    void *impl;
+    bool (*registerModule)(api_table *, module_abi *);
+
+    void (*hookJniNativeMethods)(JNIEnv *, const char *, JNINativeMethod *, int);
+    void (*pltHookRegister)(dev_t, ino_t, const char *, void *, void **);
+    bool (*exemptFd)(int);
+    bool (*pltHookCommit)();
+    int  (*connectCompanion)(void * /* impl */);
+    void (*setOption)(void * /* impl */, Option);
+    int  (*getModuleDir)(void * /* impl */);
+    uint32_t (*getFlags)(void * /* impl */);
+};
+
+template <class T>
+void entry_impl(api_table *table, JNIEnv *env) {
+    static Api api;
+    api.tbl = table;
+    static T module;
+    ModuleBase *m = &module;
+    static module_abi abi(m);
+    if (!table->registerModule(table, &abi)) return;
+    m->onLoad(&api, env);
+}
+
+} // namespace internal
+
+inline int Api::connectCompanion() {
+    return tbl->connectCompanion ? tbl->connectCompanion(tbl->impl) : -1;
+}
+inline int Api::getModuleDir() {
+    return tbl->getModuleDir ? tbl->getModuleDir(tbl->impl) : -1;
+}
+inline void Api::setOption(Option opt) {
+    if (tbl->setOption) tbl->setOption(tbl->impl, opt);
+}
+inline uint32_t Api::getFlags() {
+    return tbl->getFlags ? tbl->getFlags(tbl->impl) : 0;
+}
+inline bool Api::exemptFd(int fd) {
+    return tbl->exemptFd != nullptr && tbl->exemptFd(fd);
+}
+inline void Api::hookJniNativeMethods(JNIEnv *env, const char *className, JNINativeMethod *methods, int numMethods) {
+    if (tbl->hookJniNativeMethods) tbl->hookJniNativeMethods(env, className, methods, numMethods);
+}
+inline void Api::pltHookRegister(dev_t dev, ino_t inode, const char *symbol, void *newFunc, void **oldFunc) {
+    if (tbl->pltHookRegister) tbl->pltHookRegister(dev, inode, symbol, newFunc, oldFunc);
+}
+inline bool Api::pltHookCommit() {
+    return tbl->pltHookCommit != nullptr && tbl->pltHookCommit();
+}
+
+} // namespace zygisk
+
+extern "C" {
+
+[[gnu::visibility("default"), maybe_unused]]
+void zygisk_module_entry(zygisk::internal::api_table *, JNIEnv *);
+
+[[gnu::visibility("default"), maybe_unused]]
+void zygisk_companion_entry(int);
+
+} // extern "C"
+
+```
+
+`module/native/zygisk/src/injector.cpp`:
+
+```cpp
+#include <dlfcn.h>
+#include <fcntl.h>
+#include <jni.h>
+#include <sys/syscall.h>
+#include <unistd.h>
+
+#include <cstdio>
+#include <cstring>
+
+#include <linux/memfd.h>
+
+#include "zygisk.hpp"
+
+#ifndef ZYGISK_QUIET
+#define ZYGISK_QUIET 0
+#endif
+
+#if !ZYGISK_QUIET
+#include <android/log.h>
+#endif
+
+namespace {
+
+#ifndef ZYGISK_LOG_TAG
+#define ZYGISK_LOG_TAG "FridaMagiskZygisk"
+#endif
+#ifndef ZYGISK_MODULE_FALLBACK
+#define ZYGISK_MODULE_FALLBACK "/data/adb/modules/frida_magisk"
+#endif
+#ifndef ZYGISK_RUNTIME_FALLBACK
+#define ZYGISK_RUNTIME_FALLBACK "/data/local/tmp/frida_magisk"
+#endif
+#ifndef ZYGISK_GADGET_FALLBACK
+#define ZYGISK_GADGET_FALLBACK "libfrida-gadget.so"
+#endif
+#ifndef ZYGISK_MODULE_CLASS
+#define ZYGISK_MODULE_CLASS FridaToolboxInjector
+#endif
+
+#if !ZYGISK_QUIET
+constexpr char kTag[] = ZYGISK_LOG_TAG;
+#endif
+constexpr char kModuleFallback[] = ZYGISK_MODULE_FALLBACK;
+constexpr char kRuntimeBase[] = ZYGISK_RUNTIME_FALLBACK;
+constexpr char kGadgetBasename[] = ZYGISK_GADGET_FALLBACK;
+
+#if defined(__aarch64__)
+constexpr char kAbi[] = "arm64-v8a";
+#elif defined(__arm__)
+constexpr char kAbi[] = "armeabi-v7a";
+#elif defined(__x86_64__)
+constexpr char kAbi[] = "x86_64";
+#elif defined(__i386__)
+constexpr char kAbi[] = "x86";
+#else
+constexpr char kAbi[] = "unknown";
+#endif
+
+#if ZYGISK_QUIET
+// The injection logs run inside the target app process, so the app can read its
+// own log buffer and learn both that it was injected and from where. Silent build
+// drops the call, the tag and the liblog dependency.
+#define LOGI(...) ((void)0)
+#define LOGW(...) ((void)0)
+#else
+#define LOGI(...) __android_log_print(ANDROID_LOG_INFO, kTag, __VA_ARGS__)
+#define LOGW(...) __android_log_print(ANDROID_LOG_WARN, kTag, __VA_ARGS__)
+#endif
+
+void copy_string(char *dst, size_t dst_size, const char *src) {
+  if (dst_size == 0) return;
+  if (src == nullptr) {
+    dst[0] = '\0';
+    return;
+  }
+  std::snprintf(dst, dst_size, "%s", src);
+}
+
+bool read_fd_path(int fd, char *out, size_t out_size) {
+  char link_path[64];
+  std::snprintf(link_path, sizeof(link_path), "/proc/self/fd/%d", fd);
+  ssize_t len = readlink(link_path, out, out_size - 1);
+  if (len <= 0) return false;
+  out[len] = '\0';
+  return true;
+}
+
+bool read_config_value(int dir_fd, const char *key, char *out, size_t out_size) {
+  out[0] = '\0';
+  int fd = openat(dir_fd, "config.env", O_RDONLY | O_CLOEXEC);
+  if (fd < 0) return false;
+
+  char buffer[4096];
+  ssize_t len = read(fd, buffer, sizeof(buffer) - 1);
+  close(fd);
+  if (len <= 0) return false;
+  buffer[len] = '\0';
+
+  const size_t key_len = std::strlen(key);
+  char *line = buffer;
+  while (line != nullptr && *line != '\0') {
+    char *next = std::strchr(line, '\n');
+    if (next != nullptr) {
+      *next = '\0';
+      ++next;
+    }
+    if (std::strncmp(line, key, key_len) == 0 && line[key_len] == '=') {
+      copy_string(out, out_size, line + key_len + 1);
+      return true;
+    }
+    line = next;
+  }
+  return false;
+}
+
+bool mode_allows_gadget(const char *mode) {
+  return std::strcmp(mode, "hybrid") == 0 || std::strcmp(mode, "gadget") == 0;
+}
+
+bool process_matches_target(const char *process, const char *target, const char *include_children) {
+  if (process == nullptr || target == nullptr || target[0] == '\0') return false;
+  const size_t target_len = std::strlen(target);
+  if (std::strcmp(process, target) == 0) return true;
+  return std::strcmp(include_children, "yes") == 0 &&
+         std::strncmp(process, target, target_len) == 0 &&
+         process[target_len] == ':';
+}
+
+bool file_exists_at(int dir_fd, const char *relative_path) {
+  int fd = openat(dir_fd, relative_path, O_RDONLY | O_CLOEXEC);
+  if (fd < 0) return false;
+  close(fd);
+  return true;
+}
+
+// Copy the staged Gadget into an anonymous memfd and dlopen it through
+// /proc/self/fd/N so the filesystem path never appears in the target
+// process maps. Returns nullptr on any failure so the caller can fall
+// back to a direct dlopen of the staged path.
+void *load_gadget_via_memfd(const char *path, const char *name) {
+  int src = open(path, O_RDONLY | O_CLOEXEC);
+  if (src < 0) return nullptr;
+
+  int mfd = static_cast<int>(syscall(SYS_memfd_create, name, MFD_CLOEXEC));
+  if (mfd < 0) {
+    close(src);
+    return nullptr;
+  }
+
+  char buffer[65536];
+  ssize_t len;
+  bool ok = true;
+  while ((len = read(src, buffer, sizeof(buffer))) > 0) {
+    char *cursor = buffer;
+    ssize_t remaining = len;
+    while (remaining > 0) {
+      ssize_t written = write(mfd, cursor, remaining);
+      if (written <= 0) {
+        ok = false;
+        break;
+      }
+      cursor += written;
+      remaining -= written;
+    }
+    if (!ok) break;
+  }
+  if (len < 0) ok = false;
+  close(src);
+  if (!ok || lseek(mfd, 0, SEEK_SET) < 0) {
+    close(mfd);
+    return nullptr;
+  }
+
+  char fd_path[64];
+  std::snprintf(fd_path, sizeof(fd_path), "/proc/self/fd/%d", mfd);
+  void *handle = dlopen(fd_path, RTLD_NOW | RTLD_GLOBAL);
+  close(mfd);
+  return handle;
+}
+
+class ZYGISK_MODULE_CLASS : public zygisk::ModuleBase {
+public:
+  void onLoad(zygisk::Api *api, JNIEnv *env) override {
+    api_ = api;
+    env_ = env;
+  }
+
+  void preAppSpecialize(zygisk::AppSpecializeArgs *args) override {
+    if (args == nullptr || args->nice_name == nullptr) {
+      api_->setOption(zygisk::DLCLOSE_MODULE_LIBRARY);
+      return;
+    }
+
+    const char *process = env_->GetStringUTFChars(args->nice_name, nullptr);
+    if (process == nullptr) {
+      api_->setOption(zygisk::DLCLOSE_MODULE_LIBRARY);
+      return;
+    }
+
+    int module_fd = api_->getModuleDir();
+    if (module_fd < 0) {
+      env_->ReleaseStringUTFChars(args->nice_name, process);
+      api_->setOption(zygisk::DLCLOSE_MODULE_LIBRARY);
+      return;
+    }
+
+    char mode[32] = "hybrid";
+    char target[256] = "";
+    char include_children[8] = "no";
+    char runtime_base[512] = "";
+    char gadget_basename[128] = "";
+    read_config_value(module_fd, "FRIDA_MODE", mode, sizeof(mode));
+    read_config_value(module_fd, "GADGET_TARGET_PACKAGE", target, sizeof(target));
+    read_config_value(module_fd, "GADGET_INCLUDE_CHILDREN", include_children, sizeof(include_children));
+    read_config_value(module_fd, "FRIDA_RUNTIME_DIR", runtime_base, sizeof(runtime_base));
+    read_config_value(module_fd, "GADGET_BASENAME", gadget_basename, sizeof(gadget_basename));
+    if (runtime_base[0] == '\0') copy_string(runtime_base, sizeof(runtime_base), kRuntimeBase);
+    if (gadget_basename[0] == '\0') copy_string(gadget_basename, sizeof(gadget_basename), kGadgetBasename);
+
+    const bool should_inject = mode_allows_gadget(mode) &&
+                               process_matches_target(process, target, include_children);
+    if (!should_inject) {
+      close(module_fd);
+      env_->ReleaseStringUTFChars(args->nice_name, process);
+      api_->setOption(zygisk::DLCLOSE_MODULE_LIBRARY);
+      return;
+    }
+
+    char module_dir[512] = "";
+    if (!read_fd_path(module_fd, module_dir, sizeof(module_dir))) {
+      copy_string(module_dir, sizeof(module_dir), kModuleFallback);
+    }
+
+    char relative_gadget[256];
+    std::snprintf(relative_gadget, sizeof(relative_gadget), "gadget/%s/%s", kAbi, gadget_basename);
+    if (!file_exists_at(module_fd, relative_gadget)) {
+      LOGW("missing payload for abi=%s process=%s target=%s", kAbi, process, target);
+      close(module_fd);
+      env_->ReleaseStringUTFChars(args->nice_name, process);
+      return;
+    }
+
+    should_inject_ = true;
+    copy_string(process_, sizeof(process_), process);
+    copy_string(gadget_name_, sizeof(gadget_name_), gadget_basename);
+    std::snprintf(gadget_path_, sizeof(gadget_path_), "%s/%s", runtime_base, relative_gadget);
+
+    close(module_fd);
+    env_->ReleaseStringUTFChars(args->nice_name, process);
+  }
+
+  void postAppSpecialize(const zygisk::AppSpecializeArgs *args) override {
+    (void)args;
+    if (!should_inject_) return;
+
+    // memfd first so the staged path stays out of the app's own /proc maps;
+    // fall back to the staged path on kernels or SELinux policies where the
+    // memfd path is not usable.
+    void *handle = load_gadget_via_memfd(gadget_path_, gadget_name_);
+    if (handle == nullptr) {
+      handle = dlopen(gadget_path_, RTLD_NOW | RTLD_GLOBAL);
+    }
+#if ZYGISK_QUIET
+    (void)handle;
+#else
+    if (handle == nullptr) {
+      LOGW("dlopen failed abi=%s process=%s path=%s error=%s", kAbi, process_, gadget_path_, dlerror());
+    } else {
+      LOGI("loaded payload abi=%s process=%s path=%s handle=%p", kAbi, process_, gadget_path_, handle);
+    }
+#endif
+  }
+
+private:
+  zygisk::Api *api_ = nullptr;
+  JNIEnv *env_ = nullptr;
+  bool should_inject_ = false;
+  char process_[256] = "";
+  char gadget_path_[768] = "";
+  char gadget_name_[128] = "";
+};
+
+}  // namespace
+
+REGISTER_ZYGISK_MODULE(ZYGISK_MODULE_CLASS)
+
+```
+
+`module/service.sh`:
+
+```sh
+#!/system/bin/sh
+
+MODDIR=${0%/*}
+
+if [ -x "$MODDIR/action.sh" ]; then
+  (
+    until [ "$(getprop sys.boot_completed)" = "1" ]; do
+      sleep 2
+    done
+    sh "$MODDIR/action.sh" daemon >/dev/null 2>&1
+  ) &
+fi
+
+```
+
+`module/uninstall.sh`:
+
+```sh
+#!/system/bin/sh
+
+MODDIR=${0%/*}
+
+if [ -x "$MODDIR/action.sh" ]; then
+  "$MODDIR/action.sh" watchdog-stop >/dev/null 2>&1
+  "$MODDIR/action.sh" stop >/dev/null 2>&1
+fi
+
+```
+
+`module/webroot/app.js`:
+
+```js
+const MODULE_DIR = "/data/adb/modules/frida_magisk";
+const ACTION = `sh ${MODULE_DIR}/action.sh`;
+const AUTO_REFRESH_MS = 3000;
+const EXEC_TIMEOUT_MS = 20000;
+const QUIET_FAILURE_LIMIT = 3;
+const MAX_PACKAGE_OPTIONS = 500;
+const LANGUAGE_KEY = "frida-magisk-language";
+const DEFAULT_LANGUAGE = "en";
+
+const translations = {
+  en: {
+    autoRefreshOn: "Auto refresh: on",
+    autoRefreshPaused: "Auto refresh: paused",
+    languageLabel: "Language",
+    refreshStatus: "Refresh status",
+    runningStatus: "Running Status",
+    healthCheck: "Service Health",
+    checking: "Checking",
+    currentMode: "Current Mode",
+    restartCount: "Restart Count",
+    gadgetBackend: "Gadget Backend",
+    deviceAbi: "Device ABI",
+    serviceActions: "Service actions",
+    loading: "Loading",
+    checkingServerDetail: "Checking frida-server and watchdog status",
+    startService: "Start Service",
+    stopService: "Stop Service",
+    restart: "Restart",
+    modeSwitch: "Mode Switch",
+    runtimeMode: "Runtime mode",
+    modeServer: "Server",
+    modeServerLabel: "Server",
+    modeHybrid: "Hybrid",
+    modeHybridLabel: "Hybrid",
+    gadgetMissingWarning: "The current ABI does not have a bundled Gadget backend. Regular frida-server still works in hybrid mode, but Zygisk Gadget injection will not take effect.",
+    modeHint: "Hybrid mode keeps regular frida-server available and enables the bundled Zygisk native injector. Gadget mode stops regular frida-server and relies only on the Gadget listen endpoint.",
+    basicInfo: "Basic Info",
+    moduleConnection: "Module And Connection",
+    moduleVersion: "Module Version",
+    listenAddress: "Listen Address",
+    checkInterval: "Check Interval",
+    lastStatus: "Last Status",
+    updatedAt: "Updated At",
+    connectionSettings: "Connection Settings",
+    commonMode: "Preset",
+    presetUsb: "USB direct · 127.0.0.1:27042",
+    presetForward: "ADB forward · 127.0.0.1:65000",
+    presetLan: "LAN · 0.0.0.0:65000",
+    custom: "Custom",
+    ipv4Port: "IPv4:port",
+    listenHint: "Saving restarts frida-server immediately. LAN mode exposes the debugging port to the same network.",
+    saveListen: "Save Listen Address",
+    gadgetConfig: "Gadget Config",
+    targetInjection: "Target Injection",
+    targetPackage: "Target Package",
+    installedApps: "Installed Apps",
+    loadPackagesFirst: "Load package list first",
+    loadList: "Load List",
+    gadgetListen: "Gadget Listen Address",
+    onLoad: "On Load",
+    runtime: "Runtime",
+    gadgetHint: "This writes Frida Gadget config for every bundled ABI. Restart the target app process after changing the target package to trigger early injection.",
+    saveGadget: "Save Gadget Config",
+    healthRunning: "Healthy",
+    healthStopped: "Stopped",
+    running: "Running",
+    stopped: "Stopped",
+    serverStarted: "frida-server is running",
+    serverStopped: "frida-server is stopped",
+    gadgetModeDetail: "Regular frida-server stays stopped in Gadget mode",
+    runningWithWatchdog: "Listening on {listen}; watchdog is active",
+    runningWithoutWatchdog: "Listening on {listen}; watchdog is not running",
+    manualStopDetail: "Stopped manually. Starting service restores watchdog supervision.",
+    noServerProcess: "No frida-server process detected",
+    internalBackend: "Bundled injector",
+    missingBackend: "Missing",
+    unknown: "unknown",
+    none: "none",
+    seconds: "{value} seconds",
+    noMessage: "None",
+    gadgetMissingFeedback: "Current ABI is missing the bundled Gadget backend. Settings will be saved, but early injection will not take effect.",
+    commandFailed: "Command failed: {code}",
+    commandTimeout: "Command timed out. The WebUI bridge did not answer; try refreshing.",
+    refreshReading: "Reading service status...",
+    refreshDone: "Status refreshed",
+    readFailed: "Read failed",
+    actionRunning: "{label}...",
+    actionDone: "{label} completed",
+    saveRestart: "Save and restart",
+    switchMode: "Switch to {mode}",
+    clearGadget: "Clear Gadget target",
+    invalidListen: "Listen address must be IPv4:port",
+    invalidPackage: "Target package may contain only letters, numbers, underscores, dots, and hyphens",
+    invalidGadgetListen: "Gadget listen address must be IPv4:port",
+    loadingPackages: "Reading installed package list...",
+    packagesLoaded: "Loaded {count} package names",
+    selectPackage: "Select package",
+    selectPackageLimited: "Select package (showing first {count})",
+    localPreview: "Local preview data",
+  },
+  "zh-CN": {
+    autoRefreshOn: "自动刷新：开启",
+    autoRefreshPaused: "自动刷新：暂停",
+    languageLabel: "语言",
+    refreshStatus: "刷新状态",
+    runningStatus: "运行状态",
+    healthCheck: "服务健康检查",
+    checking: "检查中",
+    currentMode: "当前模式",
+    restartCount: "自动重启次数",
+    gadgetBackend: "Gadget 后端",
+    deviceAbi: "设备 ABI",
+    serviceActions: "服务操作",
+    loading: "读取中",
+    checkingServerDetail: "正在检查 frida-server 和 watchdog 状态",
+    startService: "开启服务",
+    stopService: "关闭服务",
+    restart: "重启",
+    modeSwitch: "模式切换",
+    runtimeMode: "运行模式",
+    modeServer: "普通 Server",
+    modeServerLabel: "普通 Server",
+    modeHybrid: "混合",
+    modeHybridLabel: "混合",
+    gadgetMissingWarning: "当前 ABI 缺少内置 Gadget 后端；混合模式下普通 frida-server 仍会运行，Zygisk Gadget 注入暂不生效。",
+    modeHint: "混合模式会保持普通 frida-server 可用，并启用内置 Zygisk native injector。纯 Gadget 模式会停止普通 frida-server，只依赖 Gadget 监听入口。",
+    basicInfo: "基础信息",
+    moduleConnection: "模块与连接",
+    moduleVersion: "模块版本",
+    listenAddress: "监听地址",
+    checkInterval: "检查间隔",
+    lastStatus: "最近状态",
+    updatedAt: "更新时间",
+    connectionSettings: "连接设置",
+    commonMode: "常用模式",
+    presetUsb: "USB 直连 · 127.0.0.1:27042",
+    presetForward: "ADB 转发 · 127.0.0.1:65000",
+    presetLan: "局域网 · 0.0.0.0:65000",
+    custom: "自定义",
+    ipv4Port: "IPv4:端口",
+    listenHint: "保存后会立即重启 frida-server。局域网模式会把调试端口暴露给同一网络。",
+    saveListen: "保存监听地址",
+    gadgetConfig: "Gadget 配置",
+    targetInjection: "目标注入配置",
+    targetPackage: "目标包名",
+    installedApps: "已安装应用",
+    loadPackagesFirst: "先读取应用列表",
+    loadList: "读取列表",
+    gadgetListen: "Gadget 监听地址",
+    onLoad: "加载策略",
+    runtime: "运行时",
+    gadgetHint: "这里会为每个已内置 ABI 写入 Frida Gadget 配置；修改目标包名后，需要重启目标 App 进程才会触发早期注入。",
+    saveGadget: "保存 Gadget 配置",
+    healthRunning: "运行正常",
+    healthStopped: "服务已停止",
+    running: "运行中",
+    stopped: "已停止",
+    serverStarted: "frida-server 已开启",
+    serverStopped: "frida-server 已关闭",
+    gadgetModeDetail: "Gadget 模式下普通 frida-server 会保持关闭",
+    runningWithWatchdog: "监听 {listen}，watchdog 正在守护",
+    runningWithoutWatchdog: "监听 {listen}，watchdog 未运行",
+    manualStopDetail: "已手动关闭，开启后会恢复 watchdog 守护",
+    noServerProcess: "未检测到 frida-server 进程",
+    internalBackend: "内置注入器",
+    missingBackend: "未安装",
+    unknown: "未知",
+    none: "无",
+    seconds: "{value} 秒",
+    noMessage: "无",
+    gadgetMissingFeedback: "当前 ABI 缺少内置 Gadget 后端：配置会保存，但早期注入不会生效。",
+    commandFailed: "命令失败: {code}",
+    commandTimeout: "命令执行超时，WebUI 桥接无响应，请尝试刷新。",
+    refreshReading: "正在读取服务状态...",
+    refreshDone: "状态已刷新",
+    readFailed: "读取失败",
+    actionRunning: "{label}中...",
+    actionDone: "{label}完成",
+    saveRestart: "保存并重启",
+    switchMode: "切换到{mode}",
+    clearGadget: "清空 Gadget 目标",
+    invalidListen: "监听地址格式必须是 IPv4:端口",
+    invalidPackage: "目标包名只能包含字母、数字、下划线、点和短横线",
+    invalidGadgetListen: "Gadget 监听地址格式必须是 IPv4:端口",
+    loadingPackages: "正在读取已安装应用列表...",
+    packagesLoaded: "已读取 {count} 个包名",
+    selectPackage: "选择包名",
+    selectPackageLimited: "选择包名（显示前 {count} 个）",
+    localPreview: "本地预览数据",
+  },
+};
+
+let language = loadLanguage();
+let currentStatus = {};
+let refreshInFlight = false;
+let refreshPromise = null;
+let quietFailures = 0;
+let actionInFlight = false;
+let packageList = [];
+
+const elements = {
+  language: document.querySelector("#language"),
+  refresh: document.querySelector("#refresh"),
+  autoRefresh: document.querySelector("#auto-refresh"),
+  serviceToggle: document.querySelector("#service-toggle"),
+  restart: document.querySelector("#restart"),
+  modeButtons: Array.from(document.querySelectorAll(".mode-button")),
+  listenPreset: document.querySelector("#listen-preset"),
+  listenInput: document.querySelector("#listen-input"),
+  saveListen: document.querySelector("#save-listen"),
+  gadgetPackage: document.querySelector("#gadget-package"),
+  packageSelect: document.querySelector("#package-select"),
+  loadPackages: document.querySelector("#load-packages"),
+  gadgetListen: document.querySelector("#gadget-listen"),
+  gadgetOnLoad: document.querySelector("#gadget-on-load"),
+  gadgetRuntime: document.querySelector("#gadget-runtime"),
+  saveGadget: document.querySelector("#save-gadget"),
+  healthBadge: document.querySelector("#health-badge"),
+  modeStatus: document.querySelector("#mode-status"),
+  serverStatus: document.querySelector("#server-status"),
+  serverDot: document.querySelector("#server-dot"),
+  serverStateTitle: document.querySelector("#server-state-title"),
+  serverStateDetail: document.querySelector("#server-state-detail"),
+  watchdogStatus: document.querySelector("#watchdog-status"),
+  gadgetBackend: document.querySelector("#gadget-backend"),
+  gadgetAbi: document.querySelector("#gadget-abi"),
+  gadgetWarning: document.querySelector("#gadget-warning"),
+  pid: document.querySelector("#pid"),
+  restarts: document.querySelector("#restarts"),
+  version: document.querySelector("#version"),
+  listen: document.querySelector("#listen"),
+  interval: document.querySelector("#interval"),
+  message: document.querySelector("#message"),
+  updated: document.querySelector("#updated"),
+  gadgetProfile: document.querySelector("#gadget-profile"),
+  gadgetConfig: document.querySelector("#gadget-config"),
+  feedback: document.querySelector("#feedback"),
+};
+
+function loadLanguage() {
+  try {
+    const stored = localStorage.getItem(LANGUAGE_KEY);
+    return translations[stored] ? stored : DEFAULT_LANGUAGE;
+  } catch (_) {
+    return DEFAULT_LANGUAGE;
+  }
+}
+
+function saveLanguage(value) {
+  try {
+    localStorage.setItem(LANGUAGE_KEY, value);
+  } catch (_) {
+    // Ignore storage errors in restricted WebUI containers.
+  }
+}
+
+function t(key, values = {}) {
+  let value = translations[language]?.[key] ?? translations.en[key] ?? key;
+  for (const [name, replacement] of Object.entries(values)) {
+    value = value.replaceAll(`{${name}}`, String(replacement));
+  }
+  return value;
+}
+
+function applyTranslations(options = {}) {
+  const rerender = options.rerender !== false;
+  document.documentElement.lang = language;
+  elements.language.value = language;
+
+  for (const element of document.querySelectorAll("[data-i18n]")) {
+    element.textContent = t(element.dataset.i18n);
+  }
+  for (const element of document.querySelectorAll("[data-i18n-title]")) {
+    element.title = t(element.dataset.i18nTitle);
+  }
+  for (const element of document.querySelectorAll("[data-i18n-aria]")) {
+    element.setAttribute("aria-label", t(element.dataset.i18nAria));
+  }
+
+  if (packageList.length > 0) {
+    renderPackageOptions(packageList);
+  }
+  if (rerender && Object.keys(currentStatus).length > 0) {
+    render(currentStatus);
+  }
+  updateAutoRefreshText();
+}
+
+function setLanguage(value) {
+  if (!translations[value]) return;
+  language = value;
+  saveLanguage(value);
+  applyTranslations();
+}
+
+function parseKeyValues(text) {
+  return Object.fromEntries(
+    String(text)
+      .split("\n")
+      .map(line => line.trim())
+      .filter(line => line.includes("="))
+      .map(line => {
+        const index = line.indexOf("=");
+        return [line.slice(0, index), line.slice(index + 1)];
+      }),
+  );
+}
+
+function parsePackages(text) {
+  return String(text)
+    .split("\n")
+    .map(line => line.trim())
+    .filter(line => line.startsWith("PACKAGE="))
+    .map(line => line.slice("PACKAGE=".length))
+    .filter(value => /^[A-Za-z0-9_.-]+$/.test(value))
+    .sort((left, right) => left.localeCompare(right));
+}
+
+function canUpdateField(element) {
+  return document.activeElement !== element;
+}
+
+function exec(command) {
+  if (window.ksu?.exec) {
+    return new Promise((resolve, reject) => {
+      const callback = `frida_magisk_${Date.now()}_${Math.random().toString(16).slice(2)}`;
+      let settled = false;
+      // Some bridge versions never invoke the callback when the shell layer
+      // dies. Without this timer the pending promise keeps refreshInFlight
+      // pinned and the whole panel locks up until the page is reopened.
+      const timer = setTimeout(() => {
+        if (settled) return;
+        settled = true;
+        delete window[callback];
+        reject(new Error(t("commandTimeout")));
+      }, EXEC_TIMEOUT_MS);
+      window[callback] = (errno, stdout, stderr) => {
+        if (settled) return;
+        settled = true;
+        clearTimeout(timer);
+        delete window[callback];
+        errno === 0 ? resolve({ stdout, stderr }) : reject(new Error(stderr || t("commandFailed", { code: errno })));
+      };
+      try {
+        window.ksu.exec(command, "{}", callback);
+      } catch (error) {
+        if (settled) return;
+        settled = true;
+        clearTimeout(timer);
+        delete window[callback];
+        reject(error);
+      }
+    });
+  }
+
+  return Promise.resolve({
+    stdout: [
+      "HEALTH=running",
+      "MODE=hybrid",
+      "PID=2791",
+      "LISTEN=127.0.0.1:27042",
+      "WATCHDOG=running",
+      "WATCHDOG_INTERVAL=5",
+      "MANUAL_STOP=no",
+      "VERSION=17.23.3",
+      "VERSION_CODE=170233",
+      "RESTARTS=0",
+      `MESSAGE=${t("localPreview")}`,
+      "UPDATED_TEXT=2026-06-10 16:12:00",
+      "GADGET_TARGET_PACKAGE=com.example.app",
+      "GADGET_LISTEN=127.0.0.1:27043",
+      "GADGET_ON_LOAD=wait",
+      "GADGET_RUNTIME=qjs",
+      "GADGET_BACKEND=internal",
+      "GADGET_ABI=arm64-v8a",
+      "GADGET_PROFILE=/data/adb/modules/frida_magisk/gadget/profile.json",
+      "GADGET_CONFIG=/data/adb/modules/frida_magisk/gadget/arm64-v8a/libfrida-gadget.config.so",
+    ].join("\n"),
+    stderr: "",
+  });
+}
+
+function setBusy(busy) {
+  for (const button of [
+    elements.refresh,
+    elements.serviceToggle,
+    elements.restart,
+    elements.saveListen,
+    elements.saveGadget,
+    elements.loadPackages,
+    ...elements.modeButtons,
+  ]) {
+    button.disabled = busy;
+  }
+  elements.listenPreset.disabled = busy;
+  elements.listenInput.disabled = busy;
+  elements.gadgetPackage.disabled = busy;
+  elements.packageSelect.disabled = busy;
+  elements.gadgetListen.disabled = busy;
+  elements.gadgetOnLoad.disabled = busy;
+  elements.gadgetRuntime.disabled = busy;
+  if (!busy) {
+    applyControlState(currentStatus);
+  }
+}
+
+function render(status) {
+  currentStatus = status;
+  const mode = status.MODE || "server";
+  const running = status.HEALTH === "running";
+  const gadgetReady = status.GADGET_BACKEND === "internal";
+  const watchdogRunning = status.WATCHDOG === "running";
+
+  elements.healthBadge.textContent = running ? t("healthRunning") : t("healthStopped");
+  elements.healthBadge.className = `badge ${running ? "ok" : "error"}`;
+  elements.modeStatus.textContent = modeLabel(mode);
+  elements.serverStatus.textContent = running ? t("running") : t("stopped");
+  elements.serverDot.className = `state-dot ${running ? "running" : "stopped"}`;
+  elements.serverStateTitle.textContent = running ? t("serverStarted") : t("serverStopped");
+  elements.serverStateDetail.textContent = serviceDetail(status, running, watchdogRunning, mode);
+  elements.serviceToggle.textContent = running ? t("stopService") : t("startService");
+  elements.serviceToggle.className = running ? "danger" : "primary";
+  applyControlState(status);
+  elements.watchdogStatus.textContent = watchdogRunning ? t("running") : t("stopped");
+  elements.gadgetBackend.textContent = gadgetBackendLabel(status.GADGET_BACKEND);
+  elements.gadgetBackend.className = status.GADGET_BACKEND === "missing" ? "status-warning" : "";
+  elements.gadgetAbi.textContent = status.GADGET_ABI || t("unknown");
+  elements.gadgetWarning.hidden = status.GADGET_BACKEND !== "missing";
+  elements.pid.textContent = status.PID || t("none");
+  elements.restarts.textContent = status.RESTARTS || "0";
+  elements.version.textContent = `${status.VERSION || t("unknown")} (${status.VERSION_CODE || t("unknown")})`;
+  elements.listen.textContent = status.LISTEN || t("unknown");
+  elements.interval.textContent = t("seconds", { value: status.WATCHDOG_INTERVAL || t("unknown") });
+  elements.message.textContent = status.MESSAGE || t("noMessage");
+  elements.updated.textContent = status.UPDATED_TEXT || t("none");
+  if (canUpdateField(elements.gadgetPackage)) {
+    elements.gadgetPackage.value = status.GADGET_TARGET_PACKAGE || "";
+  }
+  if (canUpdateField(elements.gadgetListen)) {
+    elements.gadgetListen.value = status.GADGET_LISTEN || "127.0.0.1:27043";
+  }
+  if (canUpdateField(elements.gadgetOnLoad)) {
+    elements.gadgetOnLoad.value = status.GADGET_ON_LOAD || "wait";
+  }
+  if (canUpdateField(elements.gadgetRuntime)) {
+    elements.gadgetRuntime.value = status.GADGET_RUNTIME || "qjs";
+  }
+  elements.gadgetProfile.textContent = status.GADGET_PROFILE || "-";
+  elements.gadgetConfig.textContent = status.GADGET_CONFIG || "-";
+  if (canUpdateField(elements.listenInput)) {
+    elements.listenInput.value = status.LISTEN || "127.0.0.1:27042";
+  }
+  const preset = Array.from(elements.listenPreset.options).some(option => option.value === status.LISTEN)
+    ? status.LISTEN
+    : "custom";
+  if (canUpdateField(elements.listenPreset)) {
+    elements.listenPreset.value = preset;
+  }
+  if (packageList.length > 0 && canUpdateField(elements.packageSelect)) {
+    elements.packageSelect.value = elements.gadgetPackage.value;
+  }
+  for (const button of elements.modeButtons) {
+    button.classList.toggle("active", button.dataset.mode === mode);
+  }
+  if (mode !== "server" && !gadgetReady) {
+    const hint = t("gadgetMissingFeedback");
+    if (elements.feedback.textContent !== hint) {
+      elements.feedback.textContent = hint;
+    }
+  }
+}
+
+function applyControlState(status) {
+  elements.restart.disabled = status.HEALTH !== "running" || status.MODE === "gadget";
+}
+
+function serviceDetail(status, running, watchdogRunning, mode) {
+  if (mode === "gadget") {
+    return t("gadgetModeDetail");
+  }
+  if (running && watchdogRunning) {
+    return t("runningWithWatchdog", { listen: status.LISTEN || t("unknown") });
+  }
+  if (running) {
+    return t("runningWithoutWatchdog", { listen: status.LISTEN || t("unknown") });
+  }
+  if (status.MANUAL_STOP === "yes") {
+    return t("manualStopDetail");
+  }
+  return t("noServerProcess");
+}
+
+function modeLabel(mode) {
+  return {
+    server: t("modeServerLabel"),
+    gadget: "Gadget",
+    hybrid: t("modeHybridLabel"),
+  }[mode] || mode;
+}
+
+function gadgetBackendLabel(value) {
+  return {
+    internal: t("internalBackend"),
+    missing: t("missingBackend"),
+  }[value] || t("unknown");
+}
+
+async function refreshStatus(feedback = "", options = {}) {
+  const quiet = options.quiet === true;
+  if (quiet && (refreshInFlight || actionInFlight)) {
+    return;
+  }
+  if (!quiet && refreshPromise) {
+    // Queue behind the in-flight refresh so two web-status reads never race
+    // and a stale result cannot overwrite a newer one.
+    try {
+      await refreshPromise;
+    } catch (_) {
+      // Already reported by the refresh that owned it.
+    }
+  }
+  refreshInFlight = true;
+  if (!quiet) {
+    setBusy(true);
+    elements.feedback.textContent = feedback || t("refreshReading");
+  }
+  const running = (async () => {
+    try {
+      const result = await exec(`${ACTION} web-status`);
+      quietFailures = 0;
+      render(parseKeyValues(result.stdout));
+      if (!quiet) {
+        elements.feedback.textContent = feedback || t("refreshDone");
+      }
+    } catch (error) {
+      if (!quiet) {
+        elements.healthBadge.textContent = t("readFailed");
+        elements.healthBadge.className = "badge error";
+        elements.feedback.textContent = String(error.message || error);
+      } else {
+        quietFailures += 1;
+        // Silent failures would leave a stale "running" status on screen with
+        // no hint; surface the error once the failures repeat.
+        if (quietFailures >= QUIET_FAILURE_LIMIT) {
+          elements.healthBadge.textContent = t("readFailed");
+          elements.healthBadge.className = "badge error";
+          elements.feedback.textContent = String(error.message || error);
+        }
+      }
+    } finally {
+      refreshInFlight = false;
+      refreshPromise = null;
+      if (!quiet) {
+        setBusy(false);
+      }
+    }
+  })();
+  refreshPromise = running;
+  return running;
+}
+
+async function runAction(action, label) {
+  actionInFlight = true;
+  setBusy(true);
+  elements.feedback.textContent = t("actionRunning", { label });
+  try {
+    await exec(`${ACTION} ${action}`);
+    await new Promise(resolve => setTimeout(resolve, 900));
+    await refreshStatus(t("actionDone", { label }));
+  } catch (error) {
+    elements.feedback.textContent = String(error.message || error);
+    setBusy(false);
+  } finally {
+    actionInFlight = false;
+  }
+}
+
+async function saveListen() {
+  const listen = elements.listenInput.value.trim();
+  if (!/^(\d{1,3}\.){3}\d{1,3}:\d{1,5}$/.test(listen)) {
+    elements.feedback.textContent = t("invalidListen");
+    return;
+  }
+  await runAction(`set-listen ${listen}`, t("saveRestart"));
+}
+
+async function setMode(mode) {
+  await runAction(`set-mode ${mode}`, t("switchMode", { mode: modeLabel(mode) }));
+}
+
+async function toggleService() {
+  const running = currentStatus.HEALTH === "running";
+  await runAction(running ? "stop" : "start", running ? t("stopService") : t("startService"));
+}
+
+async function saveGadget() {
+  const target = elements.gadgetPackage.value.trim();
+  const listen = elements.gadgetListen.value.trim();
+  const onLoad = elements.gadgetOnLoad.value;
+  const runtime = elements.gadgetRuntime.value;
+
+  if (target === "") {
+    await runAction("clear-gadget", t("clearGadget"));
+    return;
+  }
+  if (!/^[A-Za-z0-9_.-]+$/.test(target)) {
+    elements.feedback.textContent = t("invalidPackage");
+    return;
+  }
+  if (!/^(\d{1,3}\.){3}\d{1,3}:\d{1,5}$/.test(listen)) {
+    elements.feedback.textContent = t("invalidGadgetListen");
+    return;
+  }
+  await runAction(`set-gadget ${target} ${listen} ${onLoad} ${runtime}`, t("saveGadget"));
+}
+
+async function loadPackages() {
+  actionInFlight = true;
+  setBusy(true);
+  elements.feedback.textContent = t("loadingPackages");
+  try {
+    const result = await exec(`${ACTION} packages "" ${MAX_PACKAGE_OPTIONS}`);
+    packageList = parsePackages(result.stdout);
+    renderPackageOptions(packageList);
+    elements.feedback.textContent = t("packagesLoaded", { count: packageList.length });
+  } catch (error) {
+    elements.feedback.textContent = String(error.message || error);
+  } finally {
+    actionInFlight = false;
+    setBusy(false);
+  }
+}
+
+function renderPackageOptions(packages) {
+  const selected = elements.gadgetPackage.value.trim();
+  const visiblePackages = packages.slice(0, MAX_PACKAGE_OPTIONS);
+  elements.packageSelect.replaceChildren();
+
+  const placeholder = document.createElement("option");
+  placeholder.value = "";
+  placeholder.textContent = packages.length > MAX_PACKAGE_OPTIONS
+    ? t("selectPackageLimited", { count: MAX_PACKAGE_OPTIONS })
+    : t("selectPackage");
+  elements.packageSelect.appendChild(placeholder);
+
+  for (const packageName of visiblePackages) {
+    const option = document.createElement("option");
+    option.value = packageName;
+    option.textContent = packageName;
+    option.selected = packageName === selected;
+    elements.packageSelect.appendChild(option);
+  }
+}
+
+function updateAutoRefreshText() {
+  const visible = document.visibilityState === "visible";
+  elements.autoRefresh.textContent = visible ? t("autoRefreshOn") : t("autoRefreshPaused");
+}
+
+elements.language.addEventListener("change", () => setLanguage(elements.language.value));
+elements.refresh.addEventListener("click", () => refreshStatus());
+elements.serviceToggle.addEventListener("click", toggleService);
+elements.restart.addEventListener("click", () => runAction("restart", t("restart")));
+for (const button of elements.modeButtons) {
+  button.addEventListener("click", () => setMode(button.dataset.mode));
+}
+elements.listenPreset.addEventListener("change", () => {
+  if (elements.listenPreset.value !== "custom") {
+    elements.listenInput.value = elements.listenPreset.value;
+  }
+});
+elements.loadPackages.addEventListener("click", loadPackages);
+elements.packageSelect.addEventListener("change", () => {
+  if (elements.packageSelect.value) {
+    elements.gadgetPackage.value = elements.packageSelect.value;
+  }
+});
+elements.saveListen.addEventListener("click", saveListen);
+elements.saveGadget.addEventListener("click", saveGadget);
+document.addEventListener("visibilitychange", () => {
+  updateAutoRefreshText();
+  if (document.visibilityState === "visible") {
+    refreshStatus("", { quiet: true });
+  }
+});
+
+applyTranslations({ rerender: false });
+refreshStatus();
+setInterval(() => {
+  if (document.visibilityState === "visible") {
+    refreshStatus("", { quiet: true });
+  }
+}, AUTO_REFRESH_MS);
+
+```
+
+`module/webroot/index.html`:
+
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <title>Frida Magisk</title>
+    <link rel="stylesheet" href="/internal/insets.css" />
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <main>
+      <header>
+        <div>
+          <p class="eyebrow">frida-magisk</p>
+          <h1>Frida Server</h1>
+          <p id="auto-refresh" class="auto-refresh" data-i18n="autoRefreshOn">Auto refresh: on</p>
+        </div>
+        <div class="header-actions">
+          <label class="language-field" for="language">
+            <span data-i18n="languageLabel">Language</span>
+            <select id="language" aria-label="Language">
+              <option value="en">English</option>
+              <option value="zh-CN">简体中文</option>
+            </select>
+          </label>
+          <button id="refresh" class="icon-button" type="button" aria-label="Refresh status" title="Refresh status" data-i18n-aria="refreshStatus" data-i18n-title="refreshStatus">↻</button>
+        </div>
+      </header>
+
+      <section class="status-panel" aria-labelledby="health-title">
+        <div class="section-heading">
+          <div>
+            <p class="section-label" data-i18n="runningStatus">Running Status</p>
+            <h2 id="health-title" data-i18n="healthCheck">Service Health</h2>
+          </div>
+          <span id="health-badge" class="badge neutral" data-i18n="checking">Checking</span>
+        </div>
+
+        <dl class="status-grid">
+          <div>
+            <dt data-i18n="currentMode">Current Mode</dt>
+            <dd id="mode-status" data-i18n="checking">Checking</dd>
+          </div>
+          <div>
+            <dt>frida-server</dt>
+            <dd id="server-status" data-i18n="checking">Checking</dd>
+          </div>
+          <div>
+            <dt>Watchdog</dt>
+            <dd id="watchdog-status" data-i18n="checking">Checking</dd>
+          </div>
+          <div>
+            <dt>PID</dt>
+            <dd id="pid">-</dd>
+          </div>
+          <div>
+            <dt data-i18n="restartCount">Restart Count</dt>
+            <dd id="restarts">-</dd>
+          </div>
+          <div>
+            <dt data-i18n="gadgetBackend">Gadget Backend</dt>
+            <dd id="gadget-backend">-</dd>
+          </div>
+          <div>
+            <dt data-i18n="deviceAbi">Device ABI</dt>
+            <dd id="gadget-abi">-</dd>
+          </div>
+        </dl>
+
+        <div class="service-control" aria-label="Service actions" data-i18n-aria="serviceActions">
+          <div class="state-line">
+            <span class="state-dot" id="server-dot" aria-hidden="true"></span>
+            <div>
+              <p class="state-title" id="server-state-title" data-i18n="loading">Loading</p>
+              <p class="state-detail" id="server-state-detail" data-i18n="checkingServerDetail">Checking frida-server and watchdog status</p>
+            </div>
+          </div>
+          <div class="control-buttons">
+            <button id="service-toggle" class="primary" type="button" data-i18n="startService">Start Service</button>
+            <button id="restart" type="button" data-i18n="restart">Restart</button>
+          </div>
+        </div>
+      </section>
+
+      <section aria-labelledby="mode-title">
+        <div class="section-heading">
+          <div>
+            <p class="section-label" data-i18n="modeSwitch">Mode Switch</p>
+            <h2 id="mode-title">Server / Gadget</h2>
+          </div>
+        </div>
+
+        <div class="segmented" role="group" aria-label="Runtime mode" data-i18n-aria="runtimeMode">
+          <button class="mode-button" data-mode="server" type="button" data-i18n="modeServer">Server</button>
+          <button class="mode-button" data-mode="gadget" type="button">Gadget</button>
+          <button class="mode-button" data-mode="hybrid" type="button" data-i18n="modeHybrid">Hybrid</button>
+        </div>
+        <p id="gadget-warning" class="notice warning" hidden data-i18n="gadgetMissingWarning">The current ABI does not have a bundled Gadget backend. Regular frida-server still works in hybrid mode, but Zygisk Gadget injection will not take effect.</p>
+        <p class="hint" data-i18n="modeHint">Hybrid mode keeps regular frida-server available and enables the bundled Zygisk native injector. Gadget mode stops regular frida-server and relies only on the Gadget listen endpoint.</p>
+      </section>
+
+      <section aria-labelledby="info-title">
+        <div class="section-heading">
+          <div>
+            <p class="section-label" data-i18n="basicInfo">Basic Info</p>
+            <h2 id="info-title" data-i18n="moduleConnection">Module And Connection</h2>
+          </div>
+        </div>
+
+        <dl class="rows">
+          <div>
+            <dt data-i18n="moduleVersion">Module Version</dt>
+            <dd id="version">-</dd>
+          </div>
+          <div>
+            <dt data-i18n="listenAddress">Listen Address</dt>
+            <dd id="listen">-</dd>
+          </div>
+          <div>
+            <dt data-i18n="checkInterval">Check Interval</dt>
+            <dd id="interval">-</dd>
+          </div>
+          <div>
+            <dt data-i18n="lastStatus">Last Status</dt>
+            <dd id="message">-</dd>
+          </div>
+          <div>
+            <dt data-i18n="updatedAt">Updated At</dt>
+            <dd id="updated">-</dd>
+          </div>
+        </dl>
+      </section>
+
+      <section aria-labelledby="settings-title">
+        <div class="section-heading">
+          <div>
+            <p class="section-label" data-i18n="connectionSettings">Connection Settings</p>
+            <h2 id="settings-title" data-i18n="listenAddress">Listen Address</h2>
+          </div>
+        </div>
+
+        <label class="field">
+          <span data-i18n="commonMode">Preset</span>
+          <select id="listen-preset">
+            <option value="127.0.0.1:27042" data-i18n="presetUsb">USB direct · 127.0.0.1:27042</option>
+            <option value="127.0.0.1:65000" data-i18n="presetForward">ADB forward · 127.0.0.1:65000</option>
+            <option value="0.0.0.0:65000" data-i18n="presetLan">LAN · 0.0.0.0:65000</option>
+            <option value="custom" data-i18n="custom">Custom</option>
+          </select>
+        </label>
+
+        <label class="field">
+          <span data-i18n="ipv4Port">IPv4:port</span>
+          <input id="listen-input" type="text" inputmode="decimal" autocomplete="off" value="127.0.0.1:27042" />
+        </label>
+
+        <p class="hint" data-i18n="listenHint">Saving restarts frida-server immediately. LAN mode exposes the debugging port to the same network.</p>
+        <button id="save-listen" class="primary save-button" type="button" data-i18n="saveListen">Save Listen Address</button>
+      </section>
+
+      <section aria-labelledby="gadget-title">
+        <div class="section-heading">
+          <div>
+            <p class="section-label" data-i18n="gadgetConfig">Gadget Config</p>
+            <h2 id="gadget-title" data-i18n="targetInjection">Target Injection</h2>
+          </div>
+        </div>
+
+        <label class="field">
+          <span data-i18n="targetPackage">Target Package</span>
+          <input id="gadget-package" type="text" autocomplete="off" placeholder="com.example.app" />
+        </label>
+
+        <div class="package-row">
+          <label class="field">
+            <span data-i18n="installedApps">Installed Apps</span>
+            <select id="package-select">
+              <option value="" data-i18n="loadPackagesFirst">Load package list first</option>
+            </select>
+          </label>
+          <button id="load-packages" type="button" data-i18n="loadList">Load List</button>
+        </div>
+
+        <label class="field">
+          <span data-i18n="gadgetListen">Gadget Listen Address</span>
+          <input id="gadget-listen" type="text" inputmode="decimal" autocomplete="off" value="127.0.0.1:27043" />
+        </label>
+
+        <div class="two-fields">
+          <label class="field">
+            <span data-i18n="onLoad">On Load</span>
+            <select id="gadget-on-load">
+              <option value="wait">wait</option>
+              <option value="resume">resume</option>
+            </select>
+          </label>
+
+          <label class="field">
+            <span data-i18n="runtime">Runtime</span>
+            <select id="gadget-runtime">
+              <option value="qjs">qjs</option>
+              <option value="v8">v8</option>
+            </select>
+          </label>
+        </div>
+
+        <dl class="rows compact">
+          <div>
+            <dt>Profile</dt>
+            <dd id="gadget-profile">-</dd>
+          </div>
+          <div>
+            <dt>Config</dt>
+            <dd id="gadget-config">-</dd>
+          </div>
+        </dl>
+
+        <p class="hint" data-i18n="gadgetHint">This writes Frida Gadget config for every bundled ABI. Restart the target app process after changing the target package to trigger early injection.</p>
+        <button id="save-gadget" class="primary save-button" type="button" data-i18n="saveGadget">Save Gadget Config</button>
+      </section>
+
+      <p id="feedback" class="feedback" role="status" aria-live="polite"></p>
+    </main>
+
+    <script>
+      if (window.apatch !== undefined && window.apatch.ksu === undefined) {
+        window.ksu = window.apatch;
+      }
+    </script>
+    <script src="./app.js"></script>
+  </body>
+</html>
+
+```
+
+`module/webroot/style.css`:
+
+```css
+:root {
+  color-scheme: light dark;
+  --bg: #f6f7f9;
+  --surface: #ffffff;
+  --surface-muted: #f1f3f5;
+  --border: #dfe3e8;
+  --text: #202327;
+  --muted: #687078;
+  --accent: #087f5b;
+  --accent-bg: #dff5ea;
+  --danger: #c92a2a;
+  --danger-bg: #fff0f0;
+  --shadow: 0 1px 2px rgba(20, 25, 30, 0.06);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  letter-spacing: 0;
+}
+
+main {
+  width: min(100%, 760px);
+  margin: 0 auto;
+  padding: calc(var(--window-inset-top, 0px) + 28px) 18px calc(var(--window-inset-bottom, 0px) + 28px);
+}
+
+header,
+.section-heading,
+.actions,
+.state-line,
+.control-buttons,
+.rows > div {
+  display: flex;
+  align-items: center;
+}
+
+header {
+  gap: 14px;
+  justify-content: space-between;
+  margin-bottom: 22px;
+}
+
+h1,
+h2,
+p {
+  margin: 0;
+}
+
+h1 {
+  margin-top: 2px;
+  font-size: 28px;
+  line-height: 1.2;
+}
+
+h2 {
+  margin-top: 3px;
+  font-size: 18px;
+  line-height: 1.3;
+}
+
+.eyebrow,
+.section-label {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.auto-refresh {
+  margin-top: 5px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.header-actions {
+  display: flex;
+  align-items: end;
+  gap: 8px;
+}
+
+.language-field {
+  display: grid;
+  gap: 5px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.language-field select {
+  width: auto;
+  min-width: 126px;
+  min-height: 42px;
+}
+
+section {
+  margin-bottom: 14px;
+  padding: 18px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.section-heading {
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.badge {
+  flex: 0 0 auto;
+  padding: 6px 9px;
+  border-radius: 999px;
+  background: var(--surface-muted);
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.badge.ok {
+  background: var(--accent-bg);
+  color: var(--accent);
+}
+
+.badge.error {
+  background: var(--danger-bg);
+  color: var(--danger);
+}
+
+.status-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1px;
+  margin: 0 0 18px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--border);
+}
+
+.status-grid > div {
+  min-width: 0;
+  padding: 14px;
+  background: var(--surface);
+}
+
+dt {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+dd {
+  margin: 5px 0 0;
+  overflow-wrap: anywhere;
+  font-size: 15px;
+  font-weight: 650;
+}
+
+.actions,
+.control-buttons {
+  gap: 8px;
+}
+
+.service-control {
+  display: grid;
+  gap: 14px;
+}
+
+.state-line {
+  gap: 12px;
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface-muted);
+}
+
+.state-dot {
+  width: 12px;
+  height: 12px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: var(--muted);
+}
+
+.state-dot.running {
+  background: var(--accent);
+}
+
+.state-dot.stopped {
+  background: var(--danger);
+}
+
+.state-title {
+  font-size: 15px;
+  font-weight: 750;
+  line-height: 1.3;
+}
+
+.state-detail {
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.control-buttons button {
+  flex: 1 1 0;
+}
+
+.segmented {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+  padding: 4px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface-muted);
+}
+
+button {
+  min-height: 42px;
+  padding: 0 16px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-weight: 700;
+}
+
+button:disabled {
+  opacity: 0.5;
+}
+
+button.primary {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: #ffffff;
+}
+
+button.danger {
+  border-color: #f3c7c7;
+  background: var(--danger-bg);
+  color: var(--danger);
+}
+
+.mode-button {
+  min-width: 0;
+  border-color: transparent;
+  background: transparent;
+}
+
+.mode-button.active {
+  border-color: var(--accent);
+  background: var(--surface);
+  color: var(--accent);
+}
+
+.field {
+  display: grid;
+  gap: 7px;
+  margin-top: 14px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+select,
+input {
+  width: 100%;
+  min-height: 44px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: 15px;
+}
+
+.hint {
+  margin-top: 12px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.notice {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.notice.warning {
+  border: 1px solid #ffd8a8;
+  background: #fff4e6;
+  color: #9a4d00;
+}
+
+.status-warning {
+  color: #9a4d00;
+}
+
+.two-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.package-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: end;
+}
+
+.package-row .field {
+  margin-top: 14px;
+}
+
+.save-button {
+  width: 100%;
+  margin-top: 14px;
+}
+
+.icon-button {
+  width: 42px;
+  padding: 0;
+  font-size: 25px;
+}
+
+.rows {
+  margin: 0;
+}
+
+.rows > div {
+  justify-content: space-between;
+  gap: 20px;
+  min-height: 52px;
+  border-top: 1px solid var(--border);
+}
+
+.rows > div:first-child {
+  border-top: 0;
+}
+
+.rows.compact {
+  margin-top: 14px;
+}
+
+.rows dd {
+  max-width: 62%;
+  margin: 0;
+  text-align: right;
+}
+
+.feedback {
+  min-height: 20px;
+  padding: 0 4px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+@media (max-width: 520px) {
+  main {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  header {
+    align-items: flex-start;
+    margin-bottom: 14px;
+  }
+
+  .header-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .language-field select {
+    width: 100%;
+    min-width: 0;
+  }
+
+  h1 {
+    font-size: 24px;
+  }
+
+  section {
+    padding: 14px;
+  }
+
+  .status-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .section-heading {
+    align-items: flex-start;
+  }
+
+  .segmented,
+  .two-fields,
+  .package-row {
+    grid-template-columns: 1fr;
+  }
+
+  .package-row button {
+    width: 100%;
+  }
+
+  .actions button,
+  .control-buttons button {
+    flex: 1 1 0;
+    padding: 0 8px;
+  }
+
+  .control-buttons {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .rows > div {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 4px;
+    padding: 12px 0;
+  }
+
+  .rows dd {
+    max-width: 100%;
+    text-align: left;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #111315;
+    --surface: #1a1d20;
+    --surface-muted: #262a2e;
+    --border: #34393e;
+    --text: #f1f3f5;
+    --muted: #adb5bd;
+    --accent: #63e6be;
+    --accent-bg: #163f35;
+    --danger: #ff8787;
+    --danger-bg: #482323;
+    --shadow: none;
+  }
+
+  .notice.warning {
+    border-color: #744b1f;
+    background: #382615;
+    color: #ffc078;
+  }
+
+  .status-warning {
+    color: #ffc078;
+  }
+}
+
+```
+
+`patches/antidetect/README.md`:
+
+```md
+# Antidetect Patchset
+
+This directory is reserved for this repository's own anti-detection patchset.
+
+The antidetect release track must be built from changes owned in this repository
+or from private build artifacts produced by this repository's own pipeline.
+
+Do not vendor third-party patch files, scripts, or release binaries directly.
+External projects may only be used to identify detection vectors, design ideas,
+and verification methods. Every file that enters this repository must be
+re-authored for this project and reviewed against the checks below.
+
+## Intake Rules
+
+1. Extract the detection vector or behavior being addressed.
+2. Reimplement the fix in this repository's structure and naming style.
+3. Keep public workflow, script, and release metadata free of upstream project
+   names.
+4. Run syntax and surface checks before committing the file.
+5. Document what the change is meant to hide or verify, not where the idea came
+   from.
+
+## Patch Goals
+
+- Keep the public repository as a parameterized build framework only. Real
+  antidetect profile values belong in a private fork, CI secret, or local
+  profile file.
+- Rename static runtime surfaces: process labels, thread labels, exported helper
+  names, IPC labels, and generated agent names.
+- Reduce filesystem fingerprints: runtime directory names, staged Gadget
+  basenames, module package metadata, and predictable temporary paths.
+- Reduce in-process string fingerprints in server and Gadget binaries.
+- Keep official and antidetect outputs separate at package and release level.
+- Add verification for observable surfaces before treating a build as useful.
+
+## Non-Goals
+
+- Do not claim complete undetectability.
+- Do not add generic Java-layer bypass logic as a default module behavior.
+- Do not hook high-risk target functions in the module itself.
+- Do not bypass app-specific integrity checks without target-specific evidence.
+
+## Required Verification
+
+Every antidetect build should be checked against at least:
+
+- Owned asset archives should use a separate archive checksum; unpacked payloads
+  may additionally provide a `SHA256SUMS` manifest for the server/Gadget files.
+- `strings` output for common Frida/Gadget/runtime markers. When
+  `ANTIDETECT_SCAN_BINARIES=1` is set, `scripts/verify-antidetect-package.sh`
+  performs this scan on the packaged server/Gadget binaries and fails the build
+  on any upstream runtime marker. The CI workflow enables it on the owned-asset
+  path; official-baseline inputs are unmodified upstream binaries and skip it.
+- packaged text files free of the upstream name. The
+  `FRIDA_*` config keys stay, because the Zygisk injector reads them at
+  runtime; everything else, including brand words, must be rewritten.
+  `scripts/verify-antidetect-package.sh` fails the build on any leftover
+  `frida` token outside that key namespace.
+- logcat written from inside the target app process. Those lines are readable
+  from the app's own log buffer, so the antidetect Zygisk build compiles its
+  logging out (`ZYGISK_QUIET=1`, no liblog dependency) and the verifier fails if
+  the packaged injector still carries log lines or `__android_log_print`.
+- process command line and thread names.
+- `/proc/<pid>/maps` and file descriptor exposure.
+- server and Gadget attach smoke tests.
+- target-specific business-path checks when a target app is being evaluated.
+
+## Profile Contract
+
+Antidetect builds default to the `tamaya` profile so forks can run the full
+automation without first defining a private profile. Users who need private
+surfaces can override any value through `ANTIDETECT_PROFILE_FILE`, the
+`ANTIDETECT_PROFILE` CI secret, `workflow_dispatch` profile overrides, or
+explicit environment variables. Public placeholder values are rejected by the
+build and verification scripts.
+
+If no owned server/Gadget asset archive is configured, the CI workflow downloads
+official Frida assets as a baseline input and still applies the antidetect
+module/Zygisk profile. This validates the automation path, but the server and
+Gadget binary internals are only as stealthy as the asset archive supplied to
+the workflow.
+
+`ANTIDETECT_PROFILE_NAME` is optional and defaults to `tamaya`. When no
+overrides are provided, the build derives module identity, filenames, runtime
+paths, listen ports, and native Zygisk surfaces from that profile.
+
+Default-derived keys:
+
+- `ANTIDETECT_MODULE_ID`
+- `ANTIDETECT_MODULE_NAME`
+- `ANTIDETECT_MODULE_DESCRIPTION`
+- `ANTIDETECT_SERVER_BASENAME`
+- `ANTIDETECT_RUNTIME_DIR`
+- `ANTIDETECT_FRIDA_LISTEN`
+- `ANTIDETECT_GADGET_BASENAME`
+- `ANTIDETECT_GADGET_CONFIG_BASENAME`
+- `ANTIDETECT_GADGET_LISTEN`
+
+Optional keys:
+
+- `ANTIDETECT_PROFILE_NAME`
+- `ANTIDETECT_PID_BASENAME`
+- `ANTIDETECT_FRIDA_MODE`
+- `ANTIDETECT_GADGET_ON_LOAD`
+- `ANTIDETECT_GADGET_RUNTIME`
+- `ANTIDETECT_GADGET_INCLUDE_CHILDREN`
+- `ANTIDETECT_ZYGISK_LOG_TAG`
+- `ANTIDETECT_ZYGISK_MODULE_CLASS`
+- `ANTIDETECT_ZYGISK_MODULE_FALLBACK`
+- `ANTIDETECT_ZYGISK_RUNTIME_FALLBACK`
+- `ANTIDETECT_ZYGISK_GADGET_FALLBACK`
+- `ANTIDETECT_ZYGISK_OUTPUT_NAME`
+
+```
+
+`scripts/build-all.sh`:
+
+```sh
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+
+"$ROOT/scripts/fetch-frida-assets.sh"
+"$ROOT/scripts/build-zygisk-injector.sh"
+
+module_abis=(${MODULE_ABIS:-universal arm64-v8a armeabi-v7a x86 x86_64})
+for abi in "${module_abis[@]}"; do
+  MODULE_ABI="$abi" "$ROOT/scripts/build-module.sh"
+done
+
+```
+
+`scripts/build-module.sh`:
+
+```sh
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+MODULE_SRC="$ROOT/module"
+BINARY_DIR="${FRIDA_ASSET_DIR:-$ROOT/assets/frida}"
+OUT_DIR="$ROOT/dist"
+MODULE_ABI="${1:-${MODULE_ABI:-universal}}"
+PACKAGE_FLAVOR="${FRIDA_PACKAGE_FLAVOR:-official}"
+SUPPORTED_ABIS=(arm64-v8a armeabi-v7a x86 x86_64)
+
+apply_antidetect_profile_assignment() {
+  local key="$1"
+  local value="$2"
+  case "$key" in
+    ANTIDETECT_PROFILE_NAME|ANTIDETECT_MODULE_ID|ANTIDETECT_MODULE_NAME|ANTIDETECT_MODULE_DESCRIPTION|\
+    ANTIDETECT_SERVER_BASENAME|ANTIDETECT_PID_BASENAME|ANTIDETECT_RUNTIME_DIR|\
+    ANTIDETECT_FRIDA_MODE|ANTIDETECT_FRIDA_LISTEN|ANTIDETECT_GADGET_BASENAME|\
+    ANTIDETECT_GADGET_CONFIG_BASENAME|ANTIDETECT_GADGET_LISTEN|\
+    ANTIDETECT_GADGET_ON_LOAD|ANTIDETECT_GADGET_RUNTIME|\
+    ANTIDETECT_GADGET_INCLUDE_CHILDREN|ANTIDETECT_ZYGISK_LOG_TAG|\
+    ANTIDETECT_ZYGISK_MODULE_CLASS|ANTIDETECT_ZYGISK_MODULE_FALLBACK|\
+    ANTIDETECT_ZYGISK_RUNTIME_FALLBACK|ANTIDETECT_ZYGISK_GADGET_FALLBACK|\
+    ANTIDETECT_ZYGISK_OUTPUT_NAME)
+      ;;
+    *)
+      echo "Unsupported key in antidetect profile: $key" >&2
+      exit 1
+      ;;
+  esac
+  if [[ -z "${!key+x}" ]]; then
+    export "$key=$value"
+  fi
+}
+
+load_antidetect_profile() {
+  local profile="${ANTIDETECT_PROFILE_FILE:-}"
+  [[ -z "$profile" ]] && return 0
+  if [[ ! -f "$profile" ]]; then
+    echo "ANTIDETECT_PROFILE_FILE does not exist: $profile" >&2
+    exit 1
+  fi
+  local line key value
+  while IFS= read -r line || [[ -n "$line" ]]; do
+    line="${line%$'\r'}"
+    [[ -z "$line" || "$line" == \#* ]] && continue
+    if [[ ! "$line" =~ ^[A-Za-z_][A-Za-z0-9_]*= ]]; then
+      echo "Invalid antidetect profile line: $line" >&2
+      exit 1
+    fi
+    key="${line%%=*}"
+    value="${line#*=}"
+    apply_antidetect_profile_assignment "$key" "$value"
+  done < "$profile"
+}
+
+require_antidetect_value() {
+  local key="$1"
+  if [[ -z "${!key:-}" ]]; then
+    echo "Missing required antidetect profile value: $key" >&2
+    echo "Set it in ANTIDETECT_PROFILE_FILE or pass it as an environment override." >&2
+    exit 1
+  fi
+}
+
+profile_token_from_name() {
+  local value="$1"
+  value="${value//-/_}"
+  value="${value//./_}"
+  value="$(printf '%s' "$value" | tr '[:upper:]' '[:lower:]')"
+  if [[ ! "$value" =~ ^[A-Za-z_] ]]; then
+    value="p_$value"
+  fi
+  echo "$value"
+}
+
+if [[ "$PACKAGE_FLAVOR" == "antidetect" ]]; then
+  load_antidetect_profile
+fi
+
+MODULE_ID=frida_magisk
+PROFILE_NAME=official
+MODULE_NAME="Frida Magisk"
+MODULE_DESCRIPTION="Run bundled frida-server at boot with watchdog restart and Action status/control entry."
+FRIDA_SERVER_BASENAME=frida-server
+FRIDA_PID_BASENAME=frida-server
+FRIDA_RUNTIME_DIR=/data/local/tmp/frida_magisk
+FRIDA_MODE=hybrid
+FRIDA_LISTEN=127.0.0.1:27042
+GADGET_BASENAME=libfrida-gadget.so
+GADGET_CONFIG_BASENAME=libfrida-gadget.config.so
+GADGET_LISTEN=127.0.0.1:27043
+GADGET_ON_LOAD=wait
+GADGET_RUNTIME=qjs
+GADGET_INCLUDE_CHILDREN=no
+
+if [[ "$PACKAGE_FLAVOR" == "antidetect" ]]; then
+  PROFILE_NAME="${ANTIDETECT_PROFILE_NAME:-tamaya}"
+  PROFILE_TOKEN="$(profile_token_from_name "$PROFILE_NAME")"
+
+  MODULE_ID="${ANTIDETECT_MODULE_ID:-${PROFILE_TOKEN}_bridge}"
+  MODULE_NAME="${ANTIDETECT_MODULE_NAME:-$PROFILE_NAME}"
+  MODULE_DESCRIPTION="${ANTIDETECT_MODULE_DESCRIPTION:-Run bundled $PROFILE_NAME bridge at boot with watchdog restart and Action status/control entry.}"
+  FRIDA_SERVER_BASENAME="${ANTIDETECT_SERVER_BASENAME:-${PROFILE_TOKEN}d}"
+  FRIDA_PID_BASENAME="${ANTIDETECT_PID_BASENAME:-$FRIDA_SERVER_BASENAME}"
+  FRIDA_RUNTIME_DIR="${ANTIDETECT_RUNTIME_DIR:-/data/local/tmp/.${PROFILE_TOKEN}}"
+  FRIDA_MODE="${ANTIDETECT_FRIDA_MODE:-hybrid}"
+  FRIDA_LISTEN="${ANTIDETECT_FRIDA_LISTEN:-127.0.0.1:37642}"
+  GADGET_BASENAME="${ANTIDETECT_GADGET_BASENAME:-lib${PROFILE_TOKEN}.so}"
+  GADGET_CONFIG_BASENAME="${ANTIDETECT_GADGET_CONFIG_BASENAME:-lib${PROFILE_TOKEN}.config.so}"
+  GADGET_LISTEN="${ANTIDETECT_GADGET_LISTEN:-127.0.0.1:37643}"
+  GADGET_ON_LOAD="${ANTIDETECT_GADGET_ON_LOAD:-resume}"
+  GADGET_RUNTIME="${ANTIDETECT_GADGET_RUNTIME:-qjs}"
+  GADGET_INCLUDE_CHILDREN="${ANTIDETECT_GADGET_INCLUDE_CHILDREN:-no}"
+fi
+
+android_to_module_abi() {
+  case "$1" in
+    arm64) echo "arm64-v8a" ;;
+    arm) echo "armeabi-v7a" ;;
+    x86) echo "x86" ;;
+    x86_64) echo "x86_64" ;;
+    *) return 1 ;;
+  esac
+}
+
+is_supported_abi() {
+  local abi="$1"
+  [[ "$abi" == "universal" ]] && return 0
+  local supported
+  for supported in "${SUPPORTED_ABIS[@]}"; do
+    [[ "$abi" == "$supported" ]] && return 0
+  done
+  return 1
+}
+
+should_include_abi() {
+  local abi="$1"
+  [[ "$MODULE_ABI" == "universal" || "$MODULE_ABI" == "$abi" ]]
+}
+
+included_abis() {
+  if [[ "$MODULE_ABI" == "universal" ]]; then
+    printf '%s\n' "${SUPPORTED_ABIS[@]}"
+  else
+    printf '%s\n' "$MODULE_ABI"
+  fi
+}
+
+package_suffix() {
+  if [[ "$MODULE_ABI" == "universal" ]]; then
+    echo "universal"
+  else
+    echo "$MODULE_ABI"
+  fi
+}
+
+package_prefix() {
+  if [[ "$PACKAGE_FLAVOR" == "official" ]]; then
+    echo "frida-magisk"
+  else
+    echo "frida-magisk-$PACKAGE_FLAVOR"
+  fi
+}
+
+validate_basename() {
+  local label="$1"
+  local value="$2"
+  if [[ ! "$value" =~ ^[A-Za-z0-9._-]+$ || "$value" == "." || "$value" == ".." ]]; then
+    echo "Unsupported $label=$value" >&2
+    echo "Expected a plain file basename using letters, digits, dot, underscore, or dash." >&2
+    exit 1
+  fi
+}
+
+validate_module_id() {
+  local value="$1"
+  if [[ ! "$value" =~ ^[A-Za-z][A-Za-z0-9_]*$ ]]; then
+    echo "Unsupported module id=$value" >&2
+    echo "Expected a letter followed by letters, digits, or underscore." >&2
+    exit 1
+  fi
+}
+
+validate_text_value() {
+  local label="$1"
+  local value="$2"
+  if [[ -z "$value" || "$value" == *$'\n'* || "$value" == *$'\r'* ||
+        "$value" == *"|"* || "$value" == *"&"* || "$value" == *"\\"* ]]; then
+    echo "Unsupported $label=$value" >&2
+    echo "Expected a non-empty single-line value without sed replacement metacharacters." >&2
+    exit 1
+  fi
+}
+
+validate_runtime_dir() {
+  local value="$1"
+  if [[ ! "$value" =~ ^/data/local/tmp(/[A-Za-z0-9._-]+)+$ ||
+        "$value" == *"/../"* ||
+        "$value" == */.. ]]; then
+    echo "Unsupported FRIDA_RUNTIME_DIR=$value" >&2
+    echo "Expected an absolute /data/local/tmp/... path without parent traversal." >&2
+    exit 1
+  fi
+}
+
+validate_listen() {
+  local label="$1"
+  local value="$2"
+  local host="${value%:*}"
+  local port="${value##*:}"
+  if [[ ! "$host" =~ ^([0-9]{1,3}\.){3}[0-9]{1,3}$ || ! "$port" =~ ^[0-9]{1,5}$ ]]; then
+    echo "Unsupported $label=$value" >&2
+    echo "Expected IPv4:port with port 1-65535." >&2
+    exit 1
+  fi
+  if (( port < 1 || port > 65535 )); then
+    echo "Unsupported $label=$value" >&2
+    echo "Expected IPv4:port with port 1-65535." >&2
+    exit 1
+  fi
+}
+
+validate_mode() {
+  local value="$1"
+  if [[ "$value" != "server" && "$value" != "gadget" && "$value" != "hybrid" ]]; then
+    echo "Unsupported FRIDA_MODE=$value" >&2
+    echo "Expected server, gadget, or hybrid." >&2
+    exit 1
+  fi
+}
+
+validate_on_load() {
+  local value="$1"
+  if [[ "$value" != "wait" && "$value" != "resume" ]]; then
+    echo "Unsupported GADGET_ON_LOAD=$value" >&2
+    echo "Expected wait or resume." >&2
+    exit 1
+  fi
+}
+
+validate_runtime() {
+  local value="$1"
+  if [[ "$value" != "qjs" && "$value" != "v8" ]]; then
+    echo "Unsupported GADGET_RUNTIME=$value" >&2
+    echo "Expected qjs or v8." >&2
+    exit 1
+  fi
+}
+
+validate_yes_no() {
+  local label="$1"
+  local value="$2"
+  if [[ "$value" != "yes" && "$value" != "no" ]]; then
+    echo "Unsupported $label=$value" >&2
+    echo "Expected yes or no." >&2
+    exit 1
+  fi
+}
+
+reject_public_antidetect_value() {
+  local label="$1"
+  local value="$2"
+  local lower
+  lower="$(printf '%s' "$value" | tr '[:upper:]' '[:lower:]')"
+  case "$lower" in
+    *replace_me*|*changeme*|*change_me*|*placeholder*|*example*|*sample*|*todo*)
+      echo "Antidetect $label uses a placeholder-like value." >&2
+      exit 1
+      ;;
+  esac
+  case "$value" in
+    frida_magisk|frida-server|Frida\ Magisk|\
+    /data/local/tmp/frida_magisk|/data/adb/modules/frida_magisk|\
+    127.0.0.1:27042|127.0.0.1:27043|\
+    libfrida-gadget.so|libfrida-gadget.config.so)
+      echo "Antidetect $label still uses a public default value." >&2
+      exit 1
+      ;;
+  esac
+}
+
+if ! is_supported_abi "$MODULE_ABI"; then
+  echo "Unsupported MODULE_ABI=$MODULE_ABI" >&2
+  echo "Expected one of: universal ${SUPPORTED_ABIS[*]}" >&2
+  exit 1
+fi
+if [[ "$PACKAGE_FLAVOR" != "official" && "$PACKAGE_FLAVOR" != "antidetect" ]]; then
+  echo "Unsupported FRIDA_PACKAGE_FLAVOR=$PACKAGE_FLAVOR" >&2
+  echo "Expected official or antidetect." >&2
+  exit 1
+fi
+validate_module_id "$MODULE_ID"
+validate_text_value MODULE_NAME "$MODULE_NAME"
+validate_text_value MODULE_DESCRIPTION "$MODULE_DESCRIPTION"
+validate_basename FRIDA_MAGISK_PROFILE_NAME "$PROFILE_NAME"
+validate_basename FRIDA_SERVER_BASENAME "$FRIDA_SERVER_BASENAME"
+validate_basename FRIDA_PID_BASENAME "$FRIDA_PID_BASENAME"
+validate_basename GADGET_BASENAME "$GADGET_BASENAME"
+validate_basename GADGET_CONFIG_BASENAME "$GADGET_CONFIG_BASENAME"
+validate_runtime_dir "$FRIDA_RUNTIME_DIR"
+validate_mode "$FRIDA_MODE"
+validate_listen FRIDA_LISTEN "$FRIDA_LISTEN"
+validate_listen GADGET_LISTEN "$GADGET_LISTEN"
+validate_on_load "$GADGET_ON_LOAD"
+validate_runtime "$GADGET_RUNTIME"
+validate_yes_no GADGET_INCLUDE_CHILDREN "$GADGET_INCLUDE_CHILDREN"
+
+if [[ "$PACKAGE_FLAVOR" == "antidetect" ]]; then
+  reject_public_antidetect_value MODULE_ID "$MODULE_ID"
+  reject_public_antidetect_value MODULE_NAME "$MODULE_NAME"
+  reject_public_antidetect_value MODULE_DESCRIPTION "$MODULE_DESCRIPTION"
+  reject_public_antidetect_value FRIDA_SERVER_BASENAME "$FRIDA_SERVER_BASENAME"
+  reject_public_antidetect_value FRIDA_PID_BASENAME "$FRIDA_PID_BASENAME"
+  reject_public_antidetect_value FRIDA_RUNTIME_DIR "$FRIDA_RUNTIME_DIR"
+  reject_public_antidetect_value FRIDA_LISTEN "$FRIDA_LISTEN"
+  reject_public_antidetect_value GADGET_BASENAME "$GADGET_BASENAME"
+  reject_public_antidetect_value GADGET_CONFIG_BASENAME "$GADGET_CONFIG_BASENAME"
+  reject_public_antidetect_value GADGET_LISTEN "$GADGET_LISTEN"
+fi
+
+server_binaries=()
+while IFS= read -r path; do
+  server_binaries+=("$path")
+done < <(find "$BINARY_DIR" -maxdepth 1 -type f -name 'frida-server-*-android-*' ! -name '*.xz' | sort -V)
+
+if [[ "${#server_binaries[@]}" -eq 0 ]]; then
+  echo "No frida-server binaries found under $BINARY_DIR" >&2
+  exit 1
+fi
+
+base="$(basename "${server_binaries[0]}")"
+version="${base#frida-server-}"
+version="${version%-android-*}"
+IFS=. read -r major minor patch _ <<< "$version"
+major="${major:-0}"
+minor="${minor:-0}"
+patch="${patch:-0}"
+version_code=$((10#$major * 10000 + 10#$minor * 100 + 10#$patch))
+
+tmp="$(mktemp -d "${TMPDIR:-/tmp}/frida-magisk-module.XXXXXX")"
+trap 'rm -rf "$tmp"' EXIT
+
+mkdir -p "$tmp/bin" "$tmp/gadget" "$tmp/zygisk" "$OUT_DIR"
+cp -R "$MODULE_SRC"/. "$tmp"/
+rm -rf "$tmp/native"
+
+for binary in "${server_binaries[@]}"; do
+  base="$(basename "$binary")"
+  binary_version="${base#frida-server-}"
+  android_arch="${binary_version##*-android-}"
+  binary_version="${binary_version%-android-*}"
+  if [[ "$binary_version" != "$version" ]]; then
+    echo "Mixed frida-server versions are not supported: $base vs $version" >&2
+    exit 1
+  fi
+  abi="$(android_to_module_abi "$android_arch")"
+  should_include_abi "$abi" || continue
+  mkdir -p "$tmp/bin/$abi"
+  cp "$binary" "$tmp/bin/$abi/$FRIDA_SERVER_BASENAME"
+done
+
+while IFS= read -r gadget; do
+  base="$(basename "$gadget")"
+  gadget_version="${base#frida-gadget-}"
+  android_arch="${gadget_version##*-android-}"
+  android_arch="${android_arch%.so}"
+  gadget_version="${gadget_version%-android-*}"
+  [[ "$gadget_version" == "$version" ]] || continue
+  abi="$(android_to_module_abi "$android_arch")"
+  should_include_abi "$abi" || continue
+  mkdir -p "$tmp/gadget/$abi"
+  cp "$gadget" "$tmp/gadget/$abi/$GADGET_BASENAME"
+done < <(find "$BINARY_DIR" -maxdepth 1 -type f -name 'frida-gadget-*-android-*.so' | sort -V)
+
+if [[ -d "$BINARY_DIR/zygisk" ]]; then
+  while IFS= read -r injector; do
+    abi="$(basename "$injector" .so)"
+    should_include_abi "$abi" || continue
+    cp "$injector" "$tmp/zygisk/$abi.so"
+  done < <(find "$BINARY_DIR/zygisk" -maxdepth 1 -type f -name '*.so' | sort)
+fi
+
+if [[ ! -d "$tmp/bin/$MODULE_ABI" && "$MODULE_ABI" != "universal" ]]; then
+  echo "Missing frida-server for MODULE_ABI=$MODULE_ABI under $BINARY_DIR" >&2
+  exit 1
+fi
+
+if [[ "$MODULE_ABI" == "universal" ]]; then
+  for abi in "${SUPPORTED_ABIS[@]}"; do
+    if [[ ! -d "$tmp/bin/$abi" ]]; then
+      echo "Missing frida-server for universal package ABI=$abi under $BINARY_DIR" >&2
+      exit 1
+    fi
+  done
+fi
+
+if [[ "$PACKAGE_FLAVOR" == "antidetect" ]]; then
+  while IFS= read -r abi; do
+    if [[ ! -f "$tmp/gadget/$abi/$GADGET_BASENAME" ]]; then
+      echo "Missing Gadget for antidetect package ABI=$abi under $BINARY_DIR" >&2
+      exit 1
+    fi
+    if [[ ! -f "$tmp/zygisk/$abi.so" ]]; then
+      echo "Missing Zygisk injector for antidetect package ABI=$abi under $BINARY_DIR/zygisk" >&2
+      exit 1
+    fi
+  done < <(included_abis)
+fi
+
+{
+  echo "FRIDA_MAGISK_PACKAGE_ABI=$MODULE_ABI"
+  echo "FRIDA_MAGISK_PACKAGE_FLAVOR=$PACKAGE_FLAVOR"
+  echo "FRIDA_MAGISK_PROFILE_NAME=$PROFILE_NAME"
+  echo "FRIDA_MAGISK_VERSION=$version"
+  echo "FRIDA_MAGISK_MODULE_ID=$MODULE_ID"
+  echo "FRIDA_MAGISK_MODULE_NAME=$MODULE_NAME"
+  echo "FRIDA_SERVER_BASENAME=$FRIDA_SERVER_BASENAME"
+  echo "FRIDA_PID_BASENAME=$FRIDA_PID_BASENAME"
+  echo "FRIDA_RUNTIME_DIR=$FRIDA_RUNTIME_DIR"
+  echo "FRIDA_MODE=$FRIDA_MODE"
+  echo "FRIDA_LISTEN=$FRIDA_LISTEN"
+  echo "GADGET_BASENAME=$GADGET_BASENAME"
+  echo "GADGET_CONFIG_BASENAME=$GADGET_CONFIG_BASENAME"
+  echo "GADGET_LISTEN=$GADGET_LISTEN"
+  echo "GADGET_ON_LOAD=$GADGET_ON_LOAD"
+  echo "GADGET_RUNTIME=$GADGET_RUNTIME"
+  echo "GADGET_INCLUDE_CHILDREN=$GADGET_INCLUDE_CHILDREN"
+} > "$tmp/package.env"
+
+chmod 0755 "$tmp/action.sh" "$tmp/service.sh" "$tmp/customize.sh" "$tmp/uninstall.sh"
+find "$tmp/bin" -type f -name "$FRIDA_SERVER_BASENAME" -exec chmod 0755 {} +
+find "$tmp/gadget" "$tmp/zygisk" -type f -name '*.so' -exec chmod 0644 {} +
+chmod 0644 "$tmp/module.prop" "$tmp/README.md" "$tmp/package.env"
+
+if [[ "$PACKAGE_FLAVOR" == "antidetect" ]]; then
+  for profile_file in "$tmp/action.sh" "$tmp/customize.sh"; do
+    sed -i.bak \
+    -e "s|Frida Magisk|$MODULE_NAME|g" \
+    -e "s|frida-server|$FRIDA_SERVER_BASENAME|g" \
+    -e "s|/data/local/tmp/frida_magisk|$FRIDA_RUNTIME_DIR|g" \
+    -e "s|127.0.0.1:27042|$FRIDA_LISTEN|g" \
+    -e "s|127.0.0.1:27043|$GADGET_LISTEN|g" \
+    -e "s|libfrida-gadget.config.so|$GADGET_CONFIG_BASENAME|g" \
+    -e "s|libfrida-gadget.so|$GADGET_BASENAME|g" \
+    -e "s|^FRIDA_SERVER_BASENAME=.*|FRIDA_SERVER_BASENAME=$FRIDA_SERVER_BASENAME|" \
+    -e "s|^FRIDA_PID_BASENAME=.*|FRIDA_PID_BASENAME=$FRIDA_PID_BASENAME|" \
+    -e "s|^FRIDA_RUNTIME_DIR=.*|FRIDA_RUNTIME_DIR=$FRIDA_RUNTIME_DIR|" \
+    -e "s|^FRIDA_MODE=.*|FRIDA_MODE=$FRIDA_MODE|" \
+    -e "s|^FRIDA_LISTEN=.*|FRIDA_LISTEN=$FRIDA_LISTEN|" \
+    -e "s|^GADGET_BASENAME=.*|GADGET_BASENAME=$GADGET_BASENAME|" \
+    -e "s|^GADGET_CONFIG_BASENAME=.*|GADGET_CONFIG_BASENAME=$GADGET_CONFIG_BASENAME|" \
+    -e "s|^GADGET_LISTEN=.*|GADGET_LISTEN=$GADGET_LISTEN|" \
+    -e "s|^GADGET_ON_LOAD=.*|GADGET_ON_LOAD=$GADGET_ON_LOAD|" \
+    -e "s|^GADGET_RUNTIME=.*|GADGET_RUNTIME=$GADGET_RUNTIME|" \
+    -e "s|^GADGET_INCLUDE_CHILDREN=.*|GADGET_INCLUDE_CHILDREN=$GADGET_INCLUDE_CHILDREN|" \
+    -e "s|frida-magisk|$MODULE_ID|g" \
+    -e "s|frida-ps -U|your client|g" \
+    -e "s|frida_pid|svc_pid|g" \
+    -e "s|start_frida|start_svc|g" \
+    -e "s|stop_frida|stop_svc|g" \
+    -e "s|Frida Gadget|Gadget backend|g" \
+    -e "s|Frida|$MODULE_NAME|g" \
+      "$profile_file"
+    rm -f "$profile_file.bak"
+  done
+
+  module_path="/data/adb/modules/$MODULE_ID"
+  gadget_runtime_config="$FRIDA_RUNTIME_DIR/gadget/arm64-v8a/$GADGET_CONFIG_BASENAME"
+  module_readme_title="$MODULE_NAME Module"
+  sed -i.bak \
+    -e "s|^MODID=.*|MODID=$MODULE_ID|" \
+    "$tmp/action.sh"
+  rm -f "$tmp/action.sh.bak"
+
+  sed -i.bak \
+    -e "s|^id=.*|id=$MODULE_ID|" \
+    -e "s|^name=.*|name=$MODULE_NAME|" \
+    -e "s|^description=.*|description=$MODULE_DESCRIPTION|" \
+    -e "/^updateJson=/d" \
+    "$tmp/module.prop"
+  rm -f "$tmp/module.prop.bak"
+
+  sed -i.bak \
+    -e "s|Frida Magisk Module|$module_readme_title|g" \
+    -e "s|Frida Magisk|$MODULE_NAME|g" \
+    -e "s|frida_magisk|$MODULE_ID|g" \
+    -e "s|/data/adb/modules/$MODULE_ID|$module_path|g" \
+    -e "s|/data/local/tmp/frida_magisk|$FRIDA_RUNTIME_DIR|g" \
+    -e "s|frida-server|$FRIDA_SERVER_BASENAME|g" \
+    -e "s|Frida Gadget|Gadget backend|g" \
+    -e "s|127.0.0.1:27042|$FRIDA_LISTEN|g" \
+    -e "s|127.0.0.1:27043|$GADGET_LISTEN|g" \
+    -e "s|libfrida-gadget.config.so|$GADGET_CONFIG_BASENAME|g" \
+    -e "s|libfrida-gadget.so|$GADGET_BASENAME|g" \
+    -e "s|GADGET_ON_LOAD=wait|GADGET_ON_LOAD=$GADGET_ON_LOAD|g" \
+    -e "s|frida-magisk|$MODULE_ID|g" \
+    -e "s|Frida Gadget|Gadget backend|g" \
+    -e "s|Frida|$MODULE_NAME|g" \
+    "$tmp/README.md"
+  rm -f "$tmp/README.md.bak"
+
+  if [[ -f "$tmp/webroot/app.js" ]]; then
+    sed -i.bak \
+      -e "s|Frida Magisk|$MODULE_NAME|g" \
+      -e "s|frida_magisk|$MODULE_ID|g" \
+      -e "s|/data/adb/modules/$MODULE_ID|$module_path|g" \
+      -e "s|frida-server|$FRIDA_SERVER_BASENAME|g" \
+      -e "s|127.0.0.1:27042|$FRIDA_LISTEN|g" \
+      -e "s|127.0.0.1:27043|$GADGET_LISTEN|g" \
+      -e "s|/data/local/tmp/frida_magisk|$FRIDA_RUNTIME_DIR|g" \
+      -e "s|libfrida-gadget.config.so|$GADGET_CONFIG_BASENAME|g" \
+      -e "s|libfrida-gadget.so|$GADGET_BASENAME|g" \
+      -e "s|GADGET_CONFIG=$module_path/gadget/arm64-v8a/$GADGET_CONFIG_BASENAME|GADGET_CONFIG=$gadget_runtime_config|g" \
+      -e "s|frida-magisk|$MODULE_ID|g" \
+      -e "s|Frida Gadget|Gadget backend|g" \
+      -e "s|Frida|$MODULE_NAME|g" \
+      "$tmp/webroot/app.js"
+    rm -f "$tmp/webroot/app.js.bak"
+  fi
+  if [[ -f "$tmp/webroot/index.html" ]]; then
+    sed -i.bak \
+      -e "s|Frida Magisk|$MODULE_NAME|g" \
+      -e "s|frida-server|$FRIDA_SERVER_BASENAME|g" \
+      -e "s|127.0.0.1:27042|$FRIDA_LISTEN|g" \
+      -e "s|127.0.0.1:27043|$GADGET_LISTEN|g" \
+      -e "s|frida-magisk|$MODULE_ID|g" \
+      -e "s|Frida Gadget|Gadget backend|g" \
+      -e "s|Frida|$MODULE_NAME|g" \
+      "$tmp/webroot/index.html"
+    rm -f "$tmp/webroot/index.html.bak"
+  fi
+fi
+
+sed -i.bak \
+  -e "s/^version=.*/version=$version/" \
+  -e "s/^versionCode=.*/versionCode=$version_code/" \
+  "$tmp/module.prop"
+rm -f "$tmp/module.prop.bak"
+
+suffix="$(package_suffix)"
+out="$OUT_DIR/$(package_prefix)-$version-$suffix.zip"
+rm -f "$out"
+(
+  cd "$tmp"
+  zip -qr "$out" .
+)
+
+if command -v shasum >/dev/null 2>&1; then
+  (cd "$OUT_DIR" && shasum -a 256 "$(basename "$out")" > "$(basename "$out").sha256")
+elif command -v sha256sum >/dev/null 2>&1; then
+  (cd "$OUT_DIR" && sha256sum "$(basename "$out")" > "$(basename "$out").sha256")
+fi
+
+echo "$out"
+
+```
+
+`scripts/build-zygisk-injector.sh`:
+
+```sh
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+SRC="$ROOT/module/native/zygisk"
+OUT="${FRIDA_ASSET_DIR:-$ROOT/assets/frida}/zygisk"
+BUILD_ROOT="$ROOT/build/zygisk"
+PACKAGE_FLAVOR="${FRIDA_PACKAGE_FLAVOR:-official}"
+
+apply_antidetect_profile_assignment() {
+  local key="$1"
+  local value="$2"
+  case "$key" in
+    ANTIDETECT_PROFILE_NAME|ANTIDETECT_MODULE_ID|ANTIDETECT_RUNTIME_DIR|ANTIDETECT_GADGET_BASENAME|\
+    ANTIDETECT_ZYGISK_LOG_TAG|ANTIDETECT_ZYGISK_MODULE_CLASS|\
+    ANTIDETECT_ZYGISK_MODULE_FALLBACK|ANTIDETECT_ZYGISK_RUNTIME_FALLBACK|\
+    ANTIDETECT_ZYGISK_GADGET_FALLBACK|ANTIDETECT_ZYGISK_OUTPUT_NAME|\
+    ANTIDETECT_MODULE_NAME|ANTIDETECT_MODULE_DESCRIPTION|\
+    ANTIDETECT_SERVER_BASENAME|ANTIDETECT_PID_BASENAME|\
+    ANTIDETECT_FRIDA_MODE|ANTIDETECT_FRIDA_LISTEN|\
+    ANTIDETECT_GADGET_CONFIG_BASENAME|ANTIDETECT_GADGET_LISTEN|\
+    ANTIDETECT_GADGET_ON_LOAD|ANTIDETECT_GADGET_RUNTIME|\
+    ANTIDETECT_GADGET_INCLUDE_CHILDREN)
+      ;;
+    *)
+      echo "Unsupported key in antidetect profile: $key" >&2
+      exit 1
+      ;;
+  esac
+  if [[ -z "${!key+x}" ]]; then
+    export "$key=$value"
+  fi
+}
+
+load_antidetect_profile() {
+  local profile="${ANTIDETECT_PROFILE_FILE:-}"
+  [[ -z "$profile" ]] && return 0
+  if [[ ! -f "$profile" ]]; then
+    echo "ANTIDETECT_PROFILE_FILE does not exist: $profile" >&2
+    exit 1
+  fi
+  local line key value
+  while IFS= read -r line || [[ -n "$line" ]]; do
+    line="${line%$'\r'}"
+    [[ -z "$line" || "$line" == \#* ]] && continue
+    if [[ ! "$line" =~ ^[A-Za-z_][A-Za-z0-9_]*= ]]; then
+      echo "Invalid antidetect profile line: $line" >&2
+      exit 1
+    fi
+    key="${line%%=*}"
+    value="${line#*=}"
+    apply_antidetect_profile_assignment "$key" "$value"
+  done < "$profile"
+}
+
+require_antidetect_value() {
+  local key="$1"
+  if [[ -z "${!key:-}" ]]; then
+    echo "Missing required antidetect profile value: $key" >&2
+    exit 1
+  fi
+}
+
+profile_token_from_name() {
+  local value="$1"
+  value="${value//-/_}"
+  value="${value//./_}"
+  value="$(printf '%s' "$value" | tr '[:upper:]' '[:lower:]')"
+  if [[ ! "$value" =~ ^[A-Za-z_] ]]; then
+    value="p_$value"
+  fi
+  echo "$value"
+}
+
+validate_identifier() {
+  local label="$1"
+  local value="$2"
+  if [[ ! "$value" =~ ^[A-Za-z_][A-Za-z0-9_]*$ ]]; then
+    echo "Unsupported $label=$value" >&2
+    echo "Expected a C/C++ identifier." >&2
+    exit 1
+  fi
+}
+
+validate_basename() {
+  local label="$1"
+  local value="$2"
+  if [[ ! "$value" =~ ^[A-Za-z0-9._-]+$ || "$value" == "." || "$value" == ".." ]]; then
+    echo "Unsupported $label=$value" >&2
+    exit 1
+  fi
+}
+
+validate_cmake_string() {
+  local label="$1"
+  local value="$2"
+  if [[ -z "$value" || "$value" == *$'\n'* || "$value" == *$'\r'* ||
+        "$value" == *'"'* || "$value" == *"\\"* || "$value" == *";"* ]]; then
+    echo "Unsupported $label=$value" >&2
+    echo "Expected a non-empty single-line value without quotes, backslashes, or semicolons." >&2
+    exit 1
+  fi
+}
+
+reject_public_antidetect_value() {
+  local label="$1"
+  local value="$2"
+  local lower
+  lower="$(printf '%s' "$value" | tr '[:upper:]' '[:lower:]')"
+  case "$lower" in
+    *replace_me*|*changeme*|*change_me*|*placeholder*|*example*|*sample*|*todo*)
+      echo "Antidetect $label uses a placeholder-like value." >&2
+      exit 1
+      ;;
+  esac
+  case "$value" in
+    FridaMagiskZygisk|FridaToolboxInjector|\
+    /data/adb/modules/frida_magisk|/data/local/tmp/frida_magisk|\
+    libfrida-gadget.so|frida_magisk_zygisk)
+      echo "Antidetect $label still uses a public default value." >&2
+      exit 1
+      ;;
+  esac
+}
+
+find_ndk() {
+  if [[ -n "${ANDROID_NDK_HOME:-}" && -f "$ANDROID_NDK_HOME/build/cmake/android.toolchain.cmake" ]]; then
+    echo "$ANDROID_NDK_HOME"
+    return 0
+  fi
+  if [[ -n "${ANDROID_NDK_ROOT:-}" && -f "$ANDROID_NDK_ROOT/build/cmake/android.toolchain.cmake" ]]; then
+    echo "$ANDROID_NDK_ROOT"
+    return 0
+  fi
+  local sdk_ndk
+  for sdk_ndk in \
+    "${ANDROID_HOME:-}/ndk" \
+    "${ANDROID_SDK_ROOT:-}/ndk" \
+    "$HOME/Library/Android/sdk/ndk" \
+    "$HOME/Android/Sdk/ndk" \
+    "/usr/local/lib/android/sdk/ndk"; do
+    if [[ -d "$sdk_ndk" ]]; then
+      find "$sdk_ndk" -mindepth 4 -maxdepth 4 -path '*/build/cmake/android.toolchain.cmake' -type f \
+        | sed 's#/build/cmake/android.toolchain.cmake$##' \
+        | sort -V \
+        | tail -n 1
+      return 0
+    fi
+  done
+  return 1
+}
+
+ndk_host_tag() {
+  case "$(uname -s)" in
+    Darwin)
+      if [[ -d "$NDK/toolchains/llvm/prebuilt/darwin-x86_64" ]]; then
+        echo "darwin-x86_64"
+        return 0
+      fi
+      ;;
+    Linux)
+      echo "linux-x86_64"
+      return 0
+      ;;
+  esac
+  return 1
+}
+
+NDK="$(find_ndk)"
+if [[ -z "$NDK" || ! -f "$NDK/build/cmake/android.toolchain.cmake" ]]; then
+  echo "Android NDK not found. Set ANDROID_NDK_HOME or ANDROID_NDK_ROOT." >&2
+  exit 1
+fi
+HOST_TAG="$(ndk_host_tag)"
+STRIP="$NDK/toolchains/llvm/prebuilt/$HOST_TAG/bin/llvm-strip"
+
+mkdir -p "$OUT"
+abis=(${ZYGISK_ABIS:-arm64-v8a armeabi-v7a x86 x86_64})
+
+zygisk_log_tag="FridaMagiskZygisk"
+zygisk_module_fallback="/data/adb/modules/frida_magisk"
+zygisk_runtime_fallback="/data/local/tmp/frida_magisk"
+zygisk_gadget_fallback="libfrida-gadget.so"
+zygisk_module_class="FridaToolboxInjector"
+zygisk_output_name="frida_magisk_zygisk"
+zygisk_quiet=0
+
+if [[ "$PACKAGE_FLAVOR" == "antidetect" ]]; then
+  load_antidetect_profile
+  profile_name="${ANTIDETECT_PROFILE_NAME:-tamaya}"
+  profile_token="$(profile_token_from_name "$profile_name")"
+  module_id="${ANTIDETECT_MODULE_ID:-${profile_token}_bridge}"
+  runtime_dir="${ANTIDETECT_RUNTIME_DIR:-/data/local/tmp/.${profile_token}}"
+  gadget_basename="${ANTIDETECT_GADGET_BASENAME:-lib${profile_token}.so}"
+  zygisk_log_tag="${ANTIDETECT_ZYGISK_LOG_TAG:-${profile_token}_zygisk}"
+  zygisk_module_fallback="${ANTIDETECT_ZYGISK_MODULE_FALLBACK:-/data/adb/modules/$module_id}"
+  zygisk_runtime_fallback="${ANTIDETECT_ZYGISK_RUNTIME_FALLBACK:-$runtime_dir}"
+  zygisk_gadget_fallback="${ANTIDETECT_ZYGISK_GADGET_FALLBACK:-$gadget_basename}"
+  zygisk_module_class="${ANTIDETECT_ZYGISK_MODULE_CLASS:-${profile_token}_zygisk}"
+  zygisk_output_name="${ANTIDETECT_ZYGISK_OUTPUT_NAME:-${profile_token}_zygisk}"
+  # Antidetect never writes logcat: those lines are emitted from inside the target
+  # process, so the app can read them from its own log buffer.
+  zygisk_quiet=1
+fi
+
+validate_cmake_string ZYGISK_LOG_TAG "$zygisk_log_tag"
+validate_cmake_string ZYGISK_MODULE_FALLBACK "$zygisk_module_fallback"
+validate_cmake_string ZYGISK_RUNTIME_FALLBACK "$zygisk_runtime_fallback"
+validate_cmake_string ZYGISK_GADGET_FALLBACK "$zygisk_gadget_fallback"
+validate_identifier ZYGISK_MODULE_CLASS "$zygisk_module_class"
+validate_basename ZYGISK_OUTPUT_NAME "$zygisk_output_name"
+
+if [[ "$PACKAGE_FLAVOR" == "antidetect" ]]; then
+  reject_public_antidetect_value ZYGISK_LOG_TAG "$zygisk_log_tag"
+  reject_public_antidetect_value ZYGISK_MODULE_FALLBACK "$zygisk_module_fallback"
+  reject_public_antidetect_value ZYGISK_RUNTIME_FALLBACK "$zygisk_runtime_fallback"
+  reject_public_antidetect_value ZYGISK_GADGET_FALLBACK "$zygisk_gadget_fallback"
+  reject_public_antidetect_value ZYGISK_MODULE_CLASS "$zygisk_module_class"
+  reject_public_antidetect_value ZYGISK_OUTPUT_NAME "$zygisk_output_name"
+fi
+
+for abi in "${abis[@]}"; do
+  build_dir="$BUILD_ROOT/$abi"
+  cmake -S "$SRC" -B "$build_dir" \
+    -DCMAKE_TOOLCHAIN_FILE="$NDK/build/cmake/android.toolchain.cmake" \
+    -DANDROID_ABI="$abi" \
+    -DANDROID_PLATFORM=android-23 \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_LIBRARY_OUTPUT_DIRECTORY="$build_dir/out" \
+    -DZYGISK_LOG_TAG="$zygisk_log_tag" \
+    -DZYGISK_MODULE_FALLBACK="$zygisk_module_fallback" \
+    -DZYGISK_RUNTIME_FALLBACK="$zygisk_runtime_fallback" \
+    -DZYGISK_GADGET_FALLBACK="$zygisk_gadget_fallback" \
+    -DZYGISK_MODULE_CLASS="$zygisk_module_class" \
+    -DZYGISK_OUTPUT_NAME="$zygisk_output_name" \
+    -DZYGISK_QUIET="$zygisk_quiet"
+  cmake --build "$build_dir" --config Release
+  cp "$build_dir/out/lib$zygisk_output_name.so" "$OUT/$abi.so"
+  if [[ -x "$STRIP" ]]; then
+    "$STRIP" --strip-unneeded "$OUT/$abi.so"
+  fi
+  echo "$OUT/$abi.so"
+done
+
+```
+
+`scripts/fetch-frida-assets.sh`:
+
+```sh
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+OUT="${FRIDA_ASSET_DIR:-$ROOT/assets/frida}"
+VERSION="${FRIDA_VERSION:-17.23.3}"
+BASE_URL="https://github.com/frida/frida/releases/download/$VERSION"
+
+sha256_file() {
+  if command -v shasum >/dev/null 2>&1; then
+    shasum -a 256 "$1" | awk '{print $1}'
+  elif command -v sha256sum >/dev/null 2>&1; then
+    sha256sum "$1" | awk '{print $1}'
+  else
+    echo "Neither shasum nor sha256sum is available." >&2
+    return 1
+  fi
+}
+
+sha256_for() {
+  case "$1" in
+    frida-server-17.9.1-android-arm.xz) echo "5f9e16f93d8dd7b1745e1e328835113a92d9e0795030d1c3069a234a6077c696" ;;
+    frida-server-17.9.1-android-arm64.xz) echo "9200b4f31a6cf2aa8e847201e70ffa2c9621f5990d7a3fd96d5ed627c6f2d396" ;;
+    frida-server-17.9.1-android-x86.xz) echo "c5bab5aa2272d74e0d1fc3d24772e27824284ec0b41ebb87539a36261343a65a" ;;
+    frida-server-17.9.1-android-x86_64.xz) echo "f5f1205ffb3cb145de9264a8c6aa7aa8724a2e33df319d476f2ef67cac453c5f" ;;
+    frida-gadget-17.9.1-android-arm.so.xz) echo "90f271810fbbf0e6fef6cdea761a105f8ae1630a1dd4f8133ea67c27104fa829" ;;
+    frida-gadget-17.9.1-android-arm64.so.xz) echo "6ebc1cb0eb5fa539bb8084e8683530084788781fd201291a965c886718f0af1f" ;;
+    frida-gadget-17.9.1-android-x86.so.xz) echo "49509f6866026869b78acb071493854a9b5c8bce022043a24c7a21a962682e43" ;;
+    frida-gadget-17.9.1-android-x86_64.so.xz) echo "9bbc68bb28bd34d1b98a2a75bb403660f8d367f8649d17aa54ca1c3e08cf9195" ;;
+    frida-server-17.23.3-android-arm.xz) echo "9d0aac3654d0fa0086c77ae3da9e66548f8f827ab4c20d94ac529de19a2ba44a" ;;
+    frida-server-17.23.3-android-arm64.xz) echo "f61e98db10dc1692be1cfe209e4ec32f5381759c722ab1a3f79db36730e6234e" ;;
+    frida-server-17.23.3-android-x86.xz) echo "7825046c19fa6e505eb19df57f4903a127011cbaa9f65fc85cf8ef9d99754968" ;;
+    frida-server-17.23.3-android-x86_64.xz) echo "5413e802fc2edbbd7f933352542e517d8ecd55aacd5f403fe51d8170bfeaa9b6" ;;
+    frida-gadget-17.23.3-android-arm.so.xz) echo "f01ce2f982a34d95c7f9a44ba787b6577d844bc14015da6e41289dbf80af2d23" ;;
+    frida-gadget-17.23.3-android-arm64.so.xz) echo "aeb3109844d69f5745438597667841a9141e8701a174341999e1479a4c97925f" ;;
+    frida-gadget-17.23.3-android-x86.so.xz) echo "b9646fdb044f55ccf30bb13828ed2effd17c25bdec88c4c3041b45955319beff" ;;
+    frida-gadget-17.23.3-android-x86_64.so.xz) echo "31c0210da61880ed7c4cb614e0e118b9d83e7a27768bdd393ffaa9520e7d20bb" ;;
+    *) return 1 ;;
+  esac
+}
+
+release_digests=""
+
+# Resolve the expected SHA-256 from the GitHub releases API `digest` field
+# (computed by GitHub at upload time). Used for every version that is not
+# pinned locally above. There is no unverified fallback.
+#
+# Runs in the calling shell so `release_digests` is fetched once per run, not
+# once per asset. A command substitution would isolate it in a subshell.
+load_release_digests() {
+  if [[ -n "$release_digests" ]]; then
+    return 0
+  fi
+  local api="https://api.github.com/repos/frida/frida/releases/tags/$VERSION"
+  local auth=()
+  if [[ -n "${GITHUB_TOKEN:-${GH_TOKEN:-}}" ]]; then
+    auth=(-H "Authorization: Bearer ${GITHUB_TOKEN:-${GH_TOKEN:-}}")
+  fi
+  release_digests="$(curl -fsSL --retry 3 \
+    -H "Accept: application/vnd.github+json" \
+    -H "X-GitHub-Api-Version: 2022-11-28" \
+    "${auth[@]}" "$api" \
+    | python3 -c 'import json, sys
+for a in json.load(sys.stdin).get("assets", []):
+    d = a.get("digest") or ""
+    if d.startswith("sha256:"):
+        print(a["name"], d[len("sha256:"):])')" || {
+    echo "Failed to query $api for asset digests." >&2
+    return 1
+  }
+  [[ -n "$release_digests" ]]
+}
+
+download_one() {
+  local name="$1"
+  local archive="$OUT/$name"
+  local expected="" actual=""
+  if ! expected="$(sha256_for "$name")"; then
+    if ! load_release_digests ||
+       ! expected="$(awk -v n="$name" '$1 == n { print $2; found = 1 } END { exit !found }' <<<"$release_digests")" ||
+       [[ ! "$expected" =~ ^[0-9a-f]{64}$ ]]; then
+      echo "No SHA-256 available for $name (not pinned locally and no digest from the GitHub releases API)." >&2
+      exit 1
+    fi
+  fi
+
+  mkdir -p "$OUT"
+  if [[ ! -f "$archive" ]]; then
+    curl -L --fail --show-error --retry 3 --output "$archive.part" "$BASE_URL/$name"
+    mv "$archive.part" "$archive"
+  fi
+
+  actual="$(sha256_file "$archive")"
+  if [[ "$actual" != "$expected" ]]; then
+    echo "SHA-256 mismatch for $name: expected $expected got $actual" >&2
+    rm -f "$archive"
+    exit 1
+  fi
+  echo "Verified $name sha256=$actual" >&2
+
+  xz -dkf "$archive"
+  chmod 0755 "${archive%.xz}"
+  echo "${archive%.xz}"
+}
+
+if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+  echo "Unsupported FRIDA_VERSION=$VERSION (expected X.Y.Z)." >&2
+  exit 1
+fi
+
+for arch in arm arm64 x86 x86_64; do
+  download_one "frida-server-$VERSION-android-$arch.xz"
+  download_one "frida-gadget-$VERSION-android-$arch.so.xz"
+done
+
+```
+
+`scripts/frida/antidetect-baseline.js`:
+
+```js
+'use strict';
+
+/*
+ * Optional observe-only runtime probe for authorized testing.
+ *
+ * This script intentionally does not hide or rewrite /proc output by default.
+ * Use it to learn which detection surfaces a target actually reads, then keep
+ * any target-specific bypass logic outside default module behavior.
+ */
+
+const state = {
+  enabled: false,
+  targetPackage: '',
+  allowGlobal: false,
+  observeProc: false,
+  observeLoads: true,
+  logBacktrace: false,
+};
+
+const installed = {
+  proc: false,
+  loads: false,
+};
+
+function log(event, fields) {
+  const body = Object.assign({ event, pid: Process.id }, fields || {});
+  send(body);
+}
+
+function readCString(pointerValue) {
+  if (pointerValue.isNull()) return '';
+  try {
+    return pointerValue.readCString() || '';
+  } catch (_) {
+    return '';
+  }
+}
+
+function currentPackageName() {
+  if (!Java.available) return '';
+  let packageName = '';
+  Java.perform(function () {
+    try {
+      const ActivityThread = Java.use('android.app.ActivityThread');
+      const app = ActivityThread.currentApplication();
+      if (app) packageName = app.getPackageName();
+    } catch (_) {
+      packageName = '';
+    }
+  });
+  return packageName;
+}
+
+function shouldRunForCurrentProcess() {
+  if (!state.enabled) return false;
+  if (!state.targetPackage) return state.allowGlobal === true;
+  return currentPackageName() === state.targetPackage;
+}
+
+function maybeBacktrace(context) {
+  if (!state.logBacktrace) return undefined;
+  try {
+    return Thread.backtrace(context, Backtracer.ACCURATE)
+      .map(DebugSymbol.fromAddress)
+      .map(String);
+  } catch (_) {
+    return undefined;
+  }
+}
+
+function observePathCall(exportName, pathArgIndex) {
+  const address = Module.findGlobalExportByName(exportName);
+  if (!address) return;
+  Interceptor.attach(address, {
+    onEnter(args) {
+      if (!shouldRunForCurrentProcess() || !state.observeProc) return;
+      const path = readCString(args[pathArgIndex]);
+      if (path.indexOf('/proc/') === -1) return;
+      log('proc_path_read', {
+        api: exportName,
+        path,
+        backtrace: maybeBacktrace(this.context),
+      });
+    },
+  });
+}
+
+function observeLibraryLoad(exportName) {
+  const address = Module.findGlobalExportByName(exportName);
+  if (!address) return;
+  Interceptor.attach(address, {
+    onEnter(args) {
+      if (!shouldRunForCurrentProcess() || !state.observeLoads) return;
+      const path = readCString(args[0]);
+      if (!path) return;
+      log('library_load', {
+        api: exportName,
+        path,
+        backtrace: maybeBacktrace(this.context),
+      });
+    },
+  });
+}
+
+function installProcObservers() {
+  if (installed.proc) return;
+  installed.proc = true;
+  observePathCall('open', 0);
+  observePathCall('open64', 0);
+  observePathCall('openat', 1);
+  observePathCall('fopen', 0);
+  observePathCall('fopen64', 0);
+  observePathCall('access', 0);
+  observePathCall('readlink', 0);
+  observePathCall('readlinkat', 1);
+}
+
+function installLoadObservers() {
+  if (installed.loads) return;
+  installed.loads = true;
+  observeLibraryLoad('android_dlopen_ext');
+}
+
+function applyObserverProfile() {
+  if (!state.enabled) return;
+  if (!shouldRunForCurrentProcess()) return;
+  if (state.observeLoads) installLoadObservers();
+  if (state.observeProc) installProcObservers();
+}
+
+rpc.exports = {
+  configure(config) {
+    const next = config || {};
+    state.enabled = next.enabled === true;
+    state.targetPackage = String(next.targetPackage || '');
+    state.allowGlobal = next.allowGlobal === true;
+    state.observeProc = next.observeProc === true;
+    state.observeLoads = next.observeLoads !== false;
+    state.logBacktrace = next.logBacktrace === true;
+    applyObserverProfile();
+    return Object.assign({}, state, {
+      currentPackage: currentPackageName(),
+      installed: Object.assign({}, installed),
+    });
+  },
+  status() {
+    return Object.assign({}, state, {
+      currentPackage: currentPackageName(),
+      installed: Object.assign({}, installed),
+    });
+  },
+};
+
+log('antidetect_baseline_loaded', { enabled: state.enabled });
+
+```
+
+`scripts/prepare-antidetect-assets.sh`:
+
+```sh
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+OUT="${FRIDA_ASSET_DIR:-$ROOT/assets/antidetect}"
+VERSION="${ANTIDETECT_VERSION:-${FRIDA_VERSION:-}}"
+SOURCE_DIR="${ANTIDETECT_ASSET_DIR:-$ROOT/assets/antidetect-source}"
+SOURCE_ARCHIVE="${ANTIDETECT_ASSET_ARCHIVE:-}"
+# Trusted archive hashes come from a file committed to this repository, never from
+# the same release/location as the archive itself.
+ARCHIVE_SHA256_FILE="${ANTIDETECT_ARCHIVE_SHA256_FILE:-$ROOT/antidetect/hashes.sha256}"
+PAYLOAD_SHA256SUMS_FILE="${ANTIDETECT_PAYLOAD_SHA256SUMS_FILE:-${ANTIDETECT_SHA256SUMS_FILE:-}}"
+ALLOW_UNVERIFIED="${ANTIDETECT_ALLOW_UNVERIFIED:-0}"
+ARCHES=(arm arm64 x86 x86_64)
+
+if [[ -z "$VERSION" ]]; then
+  echo "ANTIDETECT_VERSION or FRIDA_VERSION is required." >&2
+  exit 1
+fi
+
+sha256_file() {
+  if command -v shasum >/dev/null 2>&1; then
+    shasum -a 256 "$1" | awk '{print $1}'
+  elif command -v sha256sum >/dev/null 2>&1; then
+    sha256sum "$1" | awk '{print $1}'
+  else
+    echo "Neither shasum nor sha256sum is available." >&2
+    return 1
+  fi
+}
+
+expected_sha256() {
+  local file="$1"
+  local sums_file="$2"
+  local name
+  name="$(basename "$file")"
+  awk -v name="$name" '
+    $2 == name || $2 == "./" name { print $1; found = 1; exit }
+    END { if (!found) exit 1 }
+  ' "$sums_file"
+}
+
+verify_file() {
+  local file="$1"
+  local sums_file="$2"
+  local expected actual
+  expected="$(expected_sha256 "$file" "$sums_file")"
+  actual="$(sha256_file "$file")"
+  if [[ "$actual" != "$expected" ]]; then
+    echo "SHA-256 mismatch for $(basename "$file"): expected $expected got $actual" >&2
+    exit 1
+  fi
+}
+
+extract_archive() {
+  local archive="$1"
+  local dst="$2"
+  mkdir -p "$dst"
+  case "$archive" in
+    *.tar.xz|*.txz) tar -xJf "$archive" -C "$dst" ;;
+    *.tar.gz|*.tgz) tar -xzf "$archive" -C "$dst" ;;
+    *.zip) unzip -q "$archive" -d "$dst" ;;
+    *)
+      echo "Unsupported ANTIDETECT_ASSET_ARCHIVE format: $archive" >&2
+      exit 1
+      ;;
+  esac
+}
+
+find_asset() {
+  local base="$1"
+  local candidate
+  local matches=()
+  for candidate in "$SOURCE_DIR/$base" "$SOURCE_DIR/$base.xz" "$SOURCE_DIR/$base.gz"; do
+    [[ -f "$candidate" ]] && matches+=("$candidate")
+  done
+  if [[ "${#matches[@]}" -eq 0 ]]; then
+    while IFS= read -r candidate; do
+      matches+=("$candidate")
+    done < <(find "$SOURCE_DIR" -type f \( -name "$base" -o -name "$base.xz" -o -name "$base.gz" \) | sort)
+  fi
+  if [[ "${#matches[@]}" -ne 1 ]]; then
+    echo "Expected exactly one asset for $base under $SOURCE_DIR, found ${#matches[@]}." >&2
+    return 1
+  fi
+  echo "${matches[0]}"
+}
+
+copy_asset() {
+  local src="$1"
+  local dst="$2"
+  case "$src" in
+    *.xz) xz -dc "$src" > "$dst" ;;
+    *.gz) gzip -dc "$src" > "$dst" ;;
+    *) cp "$src" "$dst" ;;
+  esac
+}
+
+prepare_source() {
+  if [[ -n "$SOURCE_ARCHIVE" ]]; then
+    [[ -f "$SOURCE_ARCHIVE" ]] || {
+      echo "ANTIDETECT_ASSET_ARCHIVE does not exist: $SOURCE_ARCHIVE" >&2
+      exit 1
+    }
+    SOURCE_DIR="$(mktemp -d "${TMPDIR:-/tmp}/antidetect-assets.XXXXXX")"
+    cleanup_dirs+=("$SOURCE_DIR")
+
+    if [[ -f "$ARCHIVE_SHA256_FILE" ]] && expected_sha256 "$SOURCE_ARCHIVE" "$ARCHIVE_SHA256_FILE" >/dev/null; then
+      verify_file "$SOURCE_ARCHIVE" "$ARCHIVE_SHA256_FILE"
+      archive_verified=1
+      echo "Verified $(basename "$SOURCE_ARCHIVE") against $ARCHIVE_SHA256_FILE" >&2
+    elif [[ "$ALLOW_UNVERIFIED" == "1" ]]; then
+      echo "WARNING: no trusted SHA-256 for $(basename "$SOURCE_ARCHIVE") in $ARCHIVE_SHA256_FILE; continuing because ANTIDETECT_ALLOW_UNVERIFIED=1." >&2
+    else
+      echo "No trusted SHA-256 for $(basename "$SOURCE_ARCHIVE") in $ARCHIVE_SHA256_FILE." >&2
+      echo "Add '<sha256>  $(basename "$SOURCE_ARCHIVE")' to antidetect/hashes.sha256 (see antidetect/README.md)." >&2
+      exit 1
+    fi
+    extract_archive "$SOURCE_ARCHIVE" "$SOURCE_DIR"
+  elif [[ ! -d "$SOURCE_DIR" ]]; then
+    echo "Antidetect assets are missing." >&2
+    echo "Provide ANTIDETECT_ASSET_DIR or ANTIDETECT_ASSET_ARCHIVE from this project's own build output." >&2
+    exit 1
+  fi
+
+  # An embedded SHA256SUMS is only meaningful once the archive itself was verified.
+  if [[ -z "$PAYLOAD_SHA256SUMS_FILE" && ( "$archive_verified" == "1" || -z "$SOURCE_ARCHIVE" ) && -f "$SOURCE_DIR/SHA256SUMS" ]]; then
+    PAYLOAD_SHA256SUMS_FILE="$SOURCE_DIR/SHA256SUMS"
+  fi
+}
+
+require_verification_or_opt_in() {
+  local file="$1"
+  if [[ -n "$PAYLOAD_SHA256SUMS_FILE" ]]; then
+    verify_file "$file" "$PAYLOAD_SHA256SUMS_FILE"
+  elif [[ "${archive_verified:-0}" != "1" && "$ALLOW_UNVERIFIED" != "1" ]]; then
+    echo "No SHA-256 verification available for $(basename "$file")." >&2
+    echo "Provide ANTIDETECT_PAYLOAD_SHA256SUMS_FILE, ANTIDETECT_ARCHIVE_SHA256_FILE, or set ANTIDETECT_ALLOW_UNVERIFIED=1." >&2
+    exit 1
+  fi
+}
+
+cleanup_dirs=()
+archive_verified=0
+trap 'for dir in "${cleanup_dirs[@]}"; do rm -rf "$dir"; done' EXIT
+
+prepare_source
+stage_dir="$(mktemp -d "${TMPDIR:-/tmp}/antidetect-stage.XXXXXX")"
+cleanup_dirs+=("$stage_dir")
+
+for arch in "${ARCHES[@]}"; do
+  server_base="frida-server-$VERSION-android-$arch"
+  gadget_base="frida-gadget-$VERSION-android-$arch.so"
+  server_src="$(find_asset "$server_base")"
+  gadget_src="$(find_asset "$gadget_base")"
+
+  if [[ -z "$server_src" || ! -f "$server_src" ]]; then
+    echo "Missing $server_base under $SOURCE_DIR" >&2
+    exit 1
+  fi
+  if [[ -z "$gadget_src" || ! -f "$gadget_src" ]]; then
+    echo "Missing $gadget_base under $SOURCE_DIR" >&2
+    exit 1
+  fi
+
+  require_verification_or_opt_in "$server_src"
+  require_verification_or_opt_in "$gadget_src"
+  copy_asset "$server_src" "$stage_dir/$server_base"
+  copy_asset "$gadget_src" "$stage_dir/$gadget_base"
+  chmod 0755 "$stage_dir/$server_base"
+  chmod 0644 "$stage_dir/$gadget_base"
+done
+
+mkdir -p "$OUT"
+find "$OUT" -maxdepth 1 -type f \( -name 'frida-server-*-android-*' -o -name 'frida-gadget-*-android-*.so' \) -delete
+for asset in "$stage_dir"/*; do
+  mv "$asset" "$OUT/"
+  echo "$OUT/$(basename "$asset")"
+done
+
+```
+
+`scripts/test-config-upgrade.sh`:
+
+```sh
+#!/usr/bin/env bash
+# Local harness: simulate Magisk customize.sh fresh-install vs upgrade for
+# official and antidetect packages, including an Action write_config round-trip.
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+TMP="$(mktemp -d "${TMPDIR:-/tmp}/frida-config-upgrade.XXXXXX")"
+trap 'rm -rf "$TMP"' EXIT
+PASS=0
+FAIL=0
+
+assert_eq() {
+  local label="$1" got="$2" want="$3"
+  if [[ "$got" == "$want" ]]; then
+    echo "  PASS  $label ($got)"
+    PASS=$((PASS + 1))
+  else
+    echo "  FAIL  $label: got '$got' want '$want'" >&2
+    FAIL=$((FAIL + 1))
+  fi
+}
+
+config_get() {
+  sed -n "s|^$2=||p" "$1" 2>/dev/null | tail -n 1
+}
+
+# Magisk stubs used by customize.sh
+ui_print() { :; }
+abort() { echo "abort: $*" >&2; exit 1; }
+set_perm() { :; }
+set_perm_recursive() { :; }
+
+run_customize() {
+  local work="$1"
+  local flavor="$2"
+  local prev_modules="${3:-}"
+  local modpath="$work/new"
+  local modules_root="$work/modules"
+  mkdir -p "$modpath/bin/arm64-v8a" "$modules_root"
+  # Minimal files customize.sh expects
+  : > "$modpath/action.sh"
+  : > "$modpath/service.sh"
+  : > "$modpath/uninstall.sh"
+  : > "$modpath/bin/arm64-v8a/PLACEHOLDER"
+  if [[ "$flavor" == "antidetect" ]]; then
+    cat > "$modpath/package.env" <<'PE'
+FRIDA_MAGISK_PACKAGE_FLAVOR=antidetect
+FRIDA_SERVER_BASENAME=tamayad
+FRIDA_PID_BASENAME=tamayad
+FRIDA_RUNTIME_DIR=/data/local/tmp/.tamaya
+FRIDA_MODE=hybrid
+FRIDA_LISTEN=127.0.0.1:37642
+GADGET_BASENAME=libtamaya.so
+GADGET_CONFIG_BASENAME=libtamaya.config.so
+GADGET_LISTEN=127.0.0.1:37643
+GADGET_ON_LOAD=resume
+GADGET_RUNTIME=qjs
+GADGET_INCLUDE_CHILDREN=no
+PE
+    # Antidetect packaging rewrites these defaults into customize.sh / action.sh.
+    # Emulate that by exporting the package.env values before sourcing.
+    # shellcheck disable=SC1090
+    set -a
+    # shellcheck disable=SC1091
+    . "$modpath/package.env"
+    set +a
+    mv "$modpath/bin/arm64-v8a/PLACEHOLDER" "$modpath/bin/arm64-v8a/tamayad"
+  else
+    cat > "$modpath/package.env" <<'PE'
+FRIDA_MAGISK_PACKAGE_FLAVOR=official
+FRIDA_SERVER_BASENAME=frida-server
+FRIDA_PID_BASENAME=frida-server
+FRIDA_RUNTIME_DIR=/data/local/tmp/frida_magisk
+FRIDA_MODE=hybrid
+FRIDA_LISTEN=127.0.0.1:27042
+GADGET_BASENAME=libfrida-gadget.so
+GADGET_CONFIG_BASENAME=libfrida-gadget.config.so
+GADGET_LISTEN=127.0.0.1:27043
+GADGET_ON_LOAD=wait
+GADGET_RUNTIME=qjs
+GADGET_INCLUDE_CHILDREN=no
+PE
+    set -a
+    # shellcheck disable=SC1091
+    . "$modpath/package.env"
+    set +a
+    mv "$modpath/bin/arm64-v8a/PLACEHOLDER" "$modpath/bin/arm64-v8a/frida-server"
+  fi
+
+  if [[ -n "$prev_modules" && -d "$prev_modules" ]]; then
+    local prev_id
+    prev_id="$(sed -n 's/^FRIDA_MAGISK_MODULE_ID=//p' "$prev_modules/package.env" 2>/dev/null || true)"
+    [[ -z "$prev_id" ]] && prev_id=$( [[ "$flavor" == antidetect ]] && echo tamaya_bridge || echo frida_magisk )
+    mkdir -p "$modules_root/$prev_id"
+    cp -a "$prev_modules/." "$modules_root/$prev_id/"
+  fi
+
+  (
+    cd "$modpath"
+    export MODPATH="$modpath"
+    export ARCH=arm64
+    export IS64BIT=true
+    export API=34
+    # MODID used when copying previous config
+    if [[ "$flavor" == "antidetect" ]]; then
+      export MODID=tamaya_bridge
+    else
+      export MODID=frida_magisk
+    fi
+    # Redirect /data/adb/modules lookups: customize uses absolute path.
+    # Patch a copy of customize.sh to use our modules_root.
+    sed "s|/data/adb/modules|$modules_root|g" "$ROOT/module/customize.sh" > "$work/customize.sh"
+    # shellcheck disable=SC1090
+    . "$work/customize.sh"
+  )
+  echo "$modpath"
+}
+
+# Simulate action.sh write_config against an installed module tree.
+run_write_config() {
+  local modpath="$1"
+  local listen="$2"
+  (
+    export MODDIR="$modpath"
+    # shellcheck disable=SC1091
+    . "$modpath/package.env" 2>/dev/null || true
+    # shellcheck disable=SC1091
+    . "$modpath/config.env"
+    FRIDA_LISTEN="$listen"
+    CONFIG="$modpath/config.env"
+    # Inline the fixed write_config body from action.sh
+    # shellcheck disable=SC1090
+    eval "$(sed -n '/^write_config() {/,/^}/p' "$ROOT/module/action.sh")"
+    write_config
+  )
+}
+
+echo "== 1. Official fresh install =="
+W1="$TMP/official-fresh"
+mkdir -p "$W1"
+M1="$(run_customize "$W1" official)"
+assert_eq "flavor" "$(config_get "$M1/config.env" FRIDA_MAGISK_PACKAGE_FLAVOR)" "official"
+assert_eq "listen" "$(config_get "$M1/config.env" FRIDA_LISTEN)" "127.0.0.1:27042"
+
+echo "== 2. Official Action write_config keeps flavor =="
+run_write_config "$M1" "127.0.0.1:28080"
+assert_eq "flavor after write" "$(config_get "$M1/config.env" FRIDA_MAGISK_PACKAGE_FLAVOR)" "official"
+assert_eq "listen after write" "$(config_get "$M1/config.env" FRIDA_LISTEN)" "127.0.0.1:28080"
+
+echo "== 3. Official upgrade preserves user listen =="
+W3="$TMP/official-up"
+mkdir -p "$W3"
+# Previous install tree = M1 (with custom listen, with flavor)
+cp -a "$M1/." "$W3/prev/"
+# Ensure package.env has module id for copy path
+echo "FRIDA_MAGISK_MODULE_ID=frida_magisk" >> "$W3/prev/package.env"
+M3="$(run_customize "$W3" official "$W3/prev")"
+assert_eq "flavor" "$(config_get "$M3/config.env" FRIDA_MAGISK_PACKAGE_FLAVOR)" "official"
+assert_eq "listen preserved" "$(config_get "$M3/config.env" FRIDA_LISTEN)" "127.0.0.1:28080"
+
+echo "== 4. Antidetect fresh install applies package defaults =="
+W4="$TMP/anti-fresh"
+mkdir -p "$W4"
+M4="$(run_customize "$W4" antidetect)"
+assert_eq "flavor" "$(config_get "$M4/config.env" FRIDA_MAGISK_PACKAGE_FLAVOR)" "antidetect"
+assert_eq "listen" "$(config_get "$M4/config.env" FRIDA_LISTEN)" "127.0.0.1:37642"
+assert_eq "server basename" "$(config_get "$M4/config.env" FRIDA_SERVER_BASENAME)" "tamayad"
+
+echo "== 5. Antidetect Action write_config keeps flavor (the P1 regression) =="
+run_write_config "$M4" "127.0.0.1:39999"
+assert_eq "flavor after write" "$(config_get "$M4/config.env" FRIDA_MAGISK_PACKAGE_FLAVOR)" "antidetect"
+assert_eq "listen after write" "$(config_get "$M4/config.env" FRIDA_LISTEN)" "127.0.0.1:39999"
+
+echo "== 6. Antidetect upgrade preserves user listen =="
+W6="$TMP/anti-up"
+mkdir -p "$W6"
+cp -a "$M4/." "$W6/prev/"
+echo "FRIDA_MAGISK_MODULE_ID=tamaya_bridge" >> "$W6/prev/package.env"
+M6="$(run_customize "$W6" antidetect "$W6/prev")"
+assert_eq "flavor" "$(config_get "$M6/config.env" FRIDA_MAGISK_PACKAGE_FLAVOR)" "antidetect"
+assert_eq "listen preserved" "$(config_get "$M6/config.env" FRIDA_LISTEN)" "127.0.0.1:39999"
+assert_eq "mode preserved" "$(config_get "$M6/config.env" FRIDA_MODE)" "hybrid"
+
+echo "== 7. Antidetect upgrade when flavor was dropped (legacy Action) still preserves =="
+W7="$TMP/anti-legacy"
+mkdir -p "$W7"
+cp -a "$M4/." "$W7/prev/"
+# Simulate pre-fix write_config that omitted flavor but kept antidetect basenames + user listen
+grep -v '^FRIDA_MAGISK_PACKAGE_FLAVOR=' "$W7/prev/config.env" > "$W7/prev/config.env.tmp"
+mv "$W7/prev/config.env.tmp" "$W7/prev/config.env"
+# Ensure user listen still there
+grep -q 'FRIDA_LISTEN=127.0.0.1:39999' "$W7/prev/config.env"
+echo "FRIDA_MAGISK_MODULE_ID=tamaya_bridge" >> "$W7/prev/package.env"
+M7="$(run_customize "$W7" antidetect "$W7/prev")"
+assert_eq "flavor restored" "$(config_get "$M7/config.env" FRIDA_MAGISK_PACKAGE_FLAVOR)" "antidetect"
+assert_eq "listen preserved" "$(config_get "$M7/config.env" FRIDA_LISTEN)" "127.0.0.1:39999"
+
+echo "== 8. Official→antidetect profile switch resets listen =="
+W8="$TMP/switch"
+mkdir -p "$W8"
+# Start from official install with custom listen
+cp -a "$M1/." "$W8/prev/"
+# Same module id path used by antidetect in this harness would differ; force copy by id
+echo "FRIDA_MAGISK_MODULE_ID=tamaya_bridge" >> "$W8/prev/package.env"
+# Official basenames still in config
+M8="$(run_customize "$W8" antidetect "$W8/prev")"
+assert_eq "flavor" "$(config_get "$M8/config.env" FRIDA_MAGISK_PACKAGE_FLAVOR)" "antidetect"
+assert_eq "listen reset to package default" "$(config_get "$M8/config.env" FRIDA_LISTEN)" "127.0.0.1:37642"
+
+echo
+echo "Result: $PASS passed, $FAIL failed"
+[[ "$FAIL" -eq 0 ]]
+
+```
+
+`scripts/update-module-json.sh`:
+
+```sh
+#!/usr/bin/env bash
+# Rewrite update/official.json + changelog for a published release.
+# Usage: scripts/update-module-json.sh <frida-version> <release-tag> <owner/repo>
+# Exits 0 without changes when the version is not newer than the current one
+# (e.g. re-publishing an older tag), so update.json never goes backwards.
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+VERSION="$1"
+TAG="$2"
+REPO="$3"
+JSON="$ROOT/update/official.json"
+CHANGELOG="$ROOT/update/official-changelog.md"
+
+if [[ ! "$VERSION" =~ ^([0-9]+)\.([0-9]+)\.([0-9]+)$ ]]; then
+  echo "Unsupported version: $VERSION" >&2
+  exit 1
+fi
+code=$((10#${BASH_REMATCH[1]} * 10000 + 10#${BASH_REMATCH[2]} * 100 + 10#${BASH_REMATCH[3]}))
+
+current=0
+if [[ -f "$JSON" ]]; then
+  current="$(python3 -c 'import json,sys; print(int(json.load(open(sys.argv[1]))["versionCode"]))' "$JSON")"
+fi
+if (( code <= current )); then
+  echo "update.json already at versionCode $current >= $code; leaving it unchanged."
+  exit 0
+fi
+
+python3 - "$JSON" "$VERSION" "$code" "$TAG" "$REPO" <<'PY'
+import json, sys
+path, version, code, tag, repo = sys.argv[1:]
+data = {
+    "version": version,
+    "versionCode": int(code),
+    "zipUrl": f"https://github.com/{repo}/releases/download/{tag}/frida-magisk-{version}-universal.zip",
+    "changelog": f"https://raw.githubusercontent.com/{repo}/main/update/official-changelog.md",
+}
+with open(path, "w") as f:
+    json.dump(data, f, indent=2)
+    f.write("\n")
+PY
+
+cat > "$CHANGELOG" <<MD
+# Frida Magisk $VERSION
+
+Automated build for Frida $VERSION.
+
+Release: https://github.com/$REPO/releases/tag/$TAG
+MD
+echo "update.json -> $VERSION ($code)"
+
+```
+
+`scripts/verify-antidetect-package.sh`:
+
+```sh
+#!/usr/bin/env bash
+set -euo pipefail
+
+zip_path="${1:-}"
+if [[ -z "$zip_path" || ! -f "$zip_path" ]]; then
+  echo "Usage: $0 <frida-magisk-antidetect.zip>" >&2
+  exit 2
+fi
+
+tmp="$(mktemp -d "${TMPDIR:-/tmp}/frida-magisk-verify.XXXXXX")"
+trap 'rm -rf "$tmp"' EXIT
+
+unzip -q "$zip_path" package.env -d "$tmp"
+
+read_env_value() {
+  local key="$1"
+  awk -F= -v key="$key" '
+    $1 == key {
+      sub(/^[^=]*=/, "")
+      print
+      exit
+    }
+  ' "$tmp/package.env"
+}
+
+package_flavor="$(read_env_value FRIDA_MAGISK_PACKAGE_FLAVOR)"
+if [[ "$package_flavor" != "antidetect" ]]; then
+  echo "Package is not marked as antidetect: $zip_path" >&2
+  exit 1
+fi
+
+module_id="$(read_env_value FRIDA_MAGISK_MODULE_ID)"
+module_name="$(read_env_value FRIDA_MAGISK_MODULE_NAME)"
+server_name="$(read_env_value FRIDA_SERVER_BASENAME)"
+gadget_name="$(read_env_value GADGET_BASENAME)"
+runtime_dir="$(read_env_value FRIDA_RUNTIME_DIR)"
+gadget_config_name="$(read_env_value GADGET_CONFIG_BASENAME)"
+mode="$(read_env_value FRIDA_MODE)"
+server_listen="$(read_env_value FRIDA_LISTEN)"
+gadget_listen="$(read_env_value GADGET_LISTEN)"
+gadget_on_load="$(read_env_value GADGET_ON_LOAD)"
+gadget_runtime="$(read_env_value GADGET_RUNTIME)"
+gadget_include_children="$(read_env_value GADGET_INCLUDE_CHILDREN)"
+package_abi="$(read_env_value FRIDA_MAGISK_PACKAGE_ABI)"
+package_abi="${package_abi:-universal}"
+
+for value in "$module_id" "$module_name" "$server_name" "$gadget_name" "$runtime_dir" \
+             "$gadget_config_name" "$mode" "$server_listen" "$gadget_listen" \
+             "$gadget_on_load" "$gadget_runtime" "$gadget_include_children"; do
+  if [[ -z "$value" ]]; then
+    echo "Missing surface profile value in package.env" >&2
+    exit 1
+  fi
+done
+
+reject_public_or_placeholder() {
+  local label="$1"
+  local value="$2"
+  local lower
+  lower="$(printf '%s' "$value" | tr '[:upper:]' '[:lower:]')"
+  case "$lower" in
+    *replace_me*|*changeme*|*change_me*|*placeholder*|*example*|*sample*|*todo*)
+      echo "Antidetect $label uses a placeholder-like value." >&2
+      exit 1
+      ;;
+  esac
+  case "$value" in
+    frida_magisk|frida-server|Frida\ Magisk|\
+    /data/local/tmp/frida_magisk|/data/adb/modules/frida_magisk|\
+    127.0.0.1:27042|127.0.0.1:27043|\
+    libfrida-gadget.so|libfrida-gadget.config.so)
+      echo "Antidetect $label still uses a public default value." >&2
+      exit 1
+      ;;
+  esac
+}
+
+reject_public_or_placeholder MODULE_ID "$module_id"
+reject_public_or_placeholder MODULE_NAME "$module_name"
+reject_public_or_placeholder FRIDA_SERVER_BASENAME "$server_name"
+reject_public_or_placeholder FRIDA_RUNTIME_DIR "$runtime_dir"
+reject_public_or_placeholder FRIDA_LISTEN "$server_listen"
+reject_public_or_placeholder GADGET_BASENAME "$gadget_name"
+reject_public_or_placeholder GADGET_CONFIG_BASENAME "$gadget_config_name"
+reject_public_or_placeholder GADGET_LISTEN "$gadget_listen"
+
+if [[ "$mode" != "hybrid" ]]; then
+  echo "Antidetect package must keep both server and Gadget available by default." >&2
+  exit 1
+fi
+if [[ "$server_listen" == "127.0.0.1:27042" || "$gadget_listen" == "127.0.0.1:27043" ]]; then
+  echo "Default Frida listen ports are still present in package.env." >&2
+  exit 1
+fi
+if [[ "$server_listen" == "$gadget_listen" ]]; then
+  echo "Server and Gadget listen addresses must be different." >&2
+  exit 1
+fi
+if [[ "$runtime_dir" == "/data/local/tmp/frida_magisk" ||
+      "$gadget_config_name" == "libfrida-gadget.config.so" ]]; then
+  echo "Default runtime or Gadget config surface is still present in package.env." >&2
+  exit 1
+fi
+if [[ "$gadget_on_load" != "resume" || "$gadget_include_children" != "no" ]]; then
+  echo "Unsafe default Gadget policy in package.env." >&2
+  exit 1
+fi
+if [[ "$gadget_runtime" != "qjs" && "$gadget_runtime" != "v8" ]]; then
+  echo "Invalid Gadget runtime in package.env." >&2
+  exit 1
+fi
+
+unzip -Z1 "$zip_path" > "$tmp/entries.txt"
+unzip -p "$zip_path" action.sh customize.sh > "$tmp/scripts.txt"
+unzip -p "$zip_path" module.prop README.md package.env webroot/app.js webroot/index.html \
+  webroot/style.css action.sh customize.sh service.sh uninstall.sh > "$tmp/static-surfaces.txt"
+
+if grep -Eq '^(FRIDA_RUNTIME_DIR=/data/local/tmp/frida_magisk|FRIDA_LISTEN=127\.0\.0\.1:27042|GADGET_CONFIG_BASENAME=libfrida-gadget\.config\.so|GADGET_LISTEN=127\.0\.0\.1:27043|GADGET_ON_LOAD=wait)$' "$tmp/scripts.txt"; then
+  echo "Default runtime profile values are still present in packaged scripts." >&2
+  exit 1
+fi
+if grep -Eq '127\.0\.0\.1:27042|127\.0\.0\.1:27043' "$tmp/static-surfaces.txt"; then
+  echo "Default Frida listen ports are still present in packaged text files." >&2
+  exit 1
+fi
+if unzip -p "$zip_path" module.prop | grep -q '^updateJson='; then
+  echo "Antidetect module.prop must not carry the public updateJson URL." >&2
+  exit 1
+fi
+if grep -Eiq 'replace_me|changeme|change_me' "$tmp/static-surfaces.txt"; then
+  echo "Placeholder-like values are still present in packaged text files." >&2
+  exit 1
+fi
+
+# Naming gate: the FRIDA_* keys are the config contract the Zygisk injector reads
+# at runtime, so they stay. Everything else must be free of the upstream name,
+# including brand words such as "Frida Server" or the "frida-magisk" prefix.
+sed -E 's/FRIDA_[A-Z0-9_]*//g' "$tmp/static-surfaces.txt" > "$tmp/static-stripped.txt"
+if grep -Eiq 'frida' "$tmp/static-stripped.txt"; then
+  echo "Frida naming is still present in packaged text files:" >&2
+  grep -Eioh '[A-Za-z_.-]*frida[A-Za-z_.-]*' "$tmp/static-stripped.txt" | sort -u | sed 's/^/  /' >&2
+  exit 1
+fi
+
+if grep -Eq '^bin/[^/]+/frida-server$|^bin/frida-server$' "$tmp/entries.txt"; then
+  echo "Default server basename is still present in ZIP entries." >&2
+  exit 1
+fi
+if grep -Eq '^gadget/[^/]+/libfrida-gadget\.so$|^gadget/[^/]+/libfrida-gadget\.config\.so$' "$tmp/entries.txt"; then
+  echo "Default Gadget basename is still present in ZIP entries." >&2
+  exit 1
+fi
+
+expected_abis=(arm64-v8a armeabi-v7a x86 x86_64)
+if [[ "$package_abi" != "universal" ]]; then
+  expected_abis=("$package_abi")
+fi
+
+for abi in "${expected_abis[@]}"; do
+  grep -qx "bin/$abi/$server_name" "$tmp/entries.txt" || {
+    echo "Missing profiled server entry for $abi." >&2
+    exit 1
+  }
+  grep -qx "gadget/$abi/$gadget_name" "$tmp/entries.txt" || {
+    echo "Missing profiled Gadget entry for $abi." >&2
+    exit 1
+  }
+  grep -qx "zygisk/$abi.so" "$tmp/entries.txt" || {
+    echo "Missing Zygisk injector entry for $abi." >&2
+    exit 1
+  }
+  unzip -p "$zip_path" "zygisk/$abi.so" > "$tmp/zygisk-$abi.so"
+  if grep -aEq 'FridaMagiskZygisk|FridaToolboxInjector|frida_magisk_zygisk|/data/adb/modules/frida_magisk|/data/local/tmp/frida_magisk|libfrida-gadget\.so' "$tmp/zygisk-$abi.so"; then
+    echo "Default native Zygisk surfaces are still present for $abi." >&2
+    exit 1
+  fi
+  # The injector runs inside the target app process, so its log lines land in the
+  # app's own log buffer and confirm both the injection and its paths.
+  if grep -aEq 'loaded payload|missing payload|dlopen failed|__android_log_print' "$tmp/zygisk-$abi.so"; then
+    echo "Zygisk injector still logs to logcat for $abi." >&2
+    exit 1
+  fi
+  if grep -aEiq 'replace_me|changeme|change_me' "$tmp/zygisk-$abi.so"; then
+    echo "Placeholder-like native Zygisk value is still present for $abi." >&2
+    exit 1
+  fi
+
+  # Owned server/Gadget binaries must not carry upstream runtime markers. This
+  # is opt-in because official-baseline inputs are unmodified upstream
+  # binaries; CI enables it only on the owned-asset path (fail-closed there).
+  if [[ "${ANTIDETECT_SCAN_BINARIES:-0}" == "1" ]]; then
+    unzip -p "$zip_path" "bin/$abi/$server_name" > "$tmp/server-$abi.bin"
+    unzip -p "$zip_path" "gadget/$abi/$gadget_name" > "$tmp/gadget-$abi.bin"
+    for payload in "$tmp/server-$abi.bin" "$tmp/gadget-$abi.bin"; do
+      if grep -aEiq 'frida|gum-js' "$payload"; then
+        echo "Upstream runtime markers remain in $(basename "$payload") for $abi:" >&2
+        { grep -aEioh '[A-Za-z_.:/-]*(frida|gum-js)[A-Za-z_.:/-]*' "$payload" | sort -u | head -20; } 2>/dev/null | sed 's/^/  /' >&2 || true
+        exit 1
+      fi
+    done
+  fi
+done
+
+echo "Verified antidetect package surface: $zip_path"
+
+```
+
+`skills/frida-magisk-antidetect/SKILL.md`:
+
+```md
+---
+name: frida-magisk-antidetect
+description: Use this when working on this repository's official/antidetect module flavors, server/Gadget runtime profiles, or optional Frida JS probes for authorized target testing.
+---
+
+# Frida Magisk Antidetect Workflow
+
+Use this skill only inside this repository.
+
+## Hard Rules
+
+- Do not copy external patch files, scripts, binaries, workflow fragments, or release metadata.
+- Do not write specific third-party stealth project names into repository files, CI, release notes, or artifact names.
+- Keep official and antidetect release tracks separate.
+- Keep runtime bypass logic optional and target-scoped. Do not enable global Java/native hooks by default.
+- Prefer root-cause, verifiable changes over broad string replacement.
+
+## Build Tracks
+
+- Official package:
+  - `FRIDA_PACKAGE_FLAVOR=official`
+  - keeps default server/Gadget names and ports.
+- Antidetect package:
+  - `FRIDA_PACKAGE_FLAVOR=antidetect`
+  - defaults to the `tamaya` profile when no private profile is supplied.
+  - uses `package.env` as the surface profile for server basename, Gadget basename, runtime dir, ports, and Gadget load policy.
+  - must include server, Gadget, and Zygisk injector entries for each packaged ABI.
+
+## Private Profile
+
+Antidetect builds run with the default `tamaya` profile when no private profile
+is supplied. Use `ANTIDETECT_PROFILE_FILE` locally or the `ANTIDETECT_PROFILE`
+CI secret in forks when private surfaces are needed. The file format is plain
+`KEY=VALUE` lines. Environment variables override file values. GitHub
+`workflow_dispatch` supports a `profile_overrides` input for manual `KEY=VALUE`
+overrides, but those inputs are not as private as secrets.
+
+`ANTIDETECT_PROFILE_NAME` is optional and defaults to `tamaya`. The default
+profile derives paths, ports, module IDs, file names, and native names from this
+value unless a specific `ANTIDETECT_*` override is set.
+
+When no owned server/Gadget archive is configured in CI, the workflow downloads
+official Frida assets as baseline input and applies the antidetect module/Zygisk
+profile. Treat that as an automation smoke path, not proof that server/Gadget
+binary internals are stealth hardened.
+
+Default-derived profile keys:
+
+- `ANTIDETECT_MODULE_ID`
+- `ANTIDETECT_MODULE_NAME`
+- `ANTIDETECT_MODULE_DESCRIPTION`
+- `ANTIDETECT_SERVER_BASENAME`
+- `ANTIDETECT_RUNTIME_DIR`
+- `ANTIDETECT_FRIDA_LISTEN`
+- `ANTIDETECT_GADGET_BASENAME`
+- `ANTIDETECT_GADGET_CONFIG_BASENAME`
+- `ANTIDETECT_GADGET_LISTEN`
+
+Optional native keys:
+
+- `ANTIDETECT_ZYGISK_LOG_TAG`
+- `ANTIDETECT_ZYGISK_MODULE_CLASS`
+- `ANTIDETECT_ZYGISK_MODULE_FALLBACK`
+- `ANTIDETECT_ZYGISK_RUNTIME_FALLBACK`
+- `ANTIDETECT_ZYGISK_GADGET_FALLBACK`
+- `ANTIDETECT_ZYGISK_OUTPUT_NAME`
+
+## Recommended Flow
+
+1. Build or fetch this repository's own server/Gadget assets.
+2. Run `scripts/prepare-antidetect-assets.sh` for antidetect assets.
+3. Set `FRIDA_PACKAGE_FLAVOR=antidetect`; optionally provide `ANTIDETECT_PROFILE_FILE`.
+4. Build the Zygisk injector with `scripts/build-zygisk-injector.sh`.
+5. Build packages with `scripts/build-module.sh`.
+6. Verify antidetect ZIPs with `scripts/verify-antidetect-package.sh`.
+7. For runtime testing, start with observe-only JS probes before adding any target-specific hook.
+
+## Optional Runtime JS
+
+Use `scripts/frida/antidetect-baseline.js` as the starting point.
+
+Default behavior:
+
+- requires explicit opt-in configuration through `rpc.exports.configure`.
+- requires a non-empty target package name unless `allowGlobal: true` is explicitly set for a short experiment.
+- installs no Interceptor hooks at load time.
+- observes `android_dlopen_ext` only after opt-in.
+- observes `/proc` reads only when `observeProc: true` is explicitly set.
+- does not rewrite `/proc` output or hide mappings by default.
+
+Only add target-specific bypass logic after observe mode shows which probe is actually being used. Keep any such logic outside default module behavior.
+
+## Low-Touch Rules
+
+- Avoid broad Java hooks as a default.
+- Avoid hooking hot target functions first.
+- Avoid hooking normal `dlopen` first; prefer narrower loader points when a load event is required.
+- Prefer static offsets, passive memory reads, and target-scoped probes before adding Interceptor hooks.
+- Treat every extra hook as a detectable behavior change and validate app survival plus the business path.
+
+## Checks Before Finishing
+
+- `bash -n module/action.sh module/customize.sh scripts/*.sh`
+- YAML parse for workflows.
+- `scripts/verify-antidetect-package.sh dist/frida-magisk-antidetect-*.zip`
+- scan repository changes for forbidden external project names.
+- explain remaining detection surfaces honestly; never claim complete undetectability.
+
+The verifier also fails when the packaged antidetect text still carries a
+`frida` token outside the `FRIDA_*` config keys, or when the packaged Zygisk
+injector still logs to logcat (`ZYGISK_QUIET=1` builds link no liblog).
+
+```
+
+`update/official-changelog.md`:
+
+```md
+# Frida Magisk 17.24.0
+
+Automated build for Frida 17.24.0.
+
+Release: https://github.com/xjoker/frida-magisk/releases/tag/v17.24.0
+
+```
+
+`update/official.json`:
+
+```json
+{
+  "version": "17.24.0",
+  "versionCode": 172400,
+  "zipUrl": "https://github.com/xjoker/frida-magisk/releases/download/v17.24.0/frida-magisk-17.24.0-universal.zip",
+  "changelog": "https://raw.githubusercontent.com/xjoker/frida-magisk/main/update/official-changelog.md"
+}
+
+```
