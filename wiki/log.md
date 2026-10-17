@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-17** — ingest `description:ReSo7200/molt-dex`: entity [[molt-dex]] (staged Claude skill + doc pipeline; apktool/smali, DexKit, adb/scrcpy, LSPosed/LSPatch/Frida, obfuscation ladder; authorized Android RE/modding; ReSo7200); cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]]; `index.md` entity + overview blurbs.
+
 - **2026-10-17** — ingest `description:avitran0/deadlocked`: entity [[deadlocked]] (Linux external CS2; Rust; schema offsets, BVH visibility/ray tests, egui/OpenGL HUD, optional TCP/WebSocket web radar; uinput; avitran0); cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[counterstrike2-linux-cheat]], [[proext]], [[cs2-webradar]], and [[cs2-dumper]]; `index.md` entity entry.
 
 - **2026-10-17** — ingest `readme:categories`: Cheat ~2911 (+2) / Anti Cheat ~800 / Game Engine ~159 / Game Develop ~194 and other major section counts stable; 41 sections (`NeverC & NeverD` placeholder); synced README-map counts on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/dma-attack]], and [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
