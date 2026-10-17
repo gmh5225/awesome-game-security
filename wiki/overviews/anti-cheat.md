@@ -445,6 +445,7 @@ sources:
   - wiki/sources/descriptions/MahmoudZohdy__Process-Injection-Techniques.md
   - wiki/sources/descriptions/MaksymSakundiak__chess-anti-cheat.md
   - wiki/sources/descriptions/KuryCat__GhostJoin.md
+  - wiki/sources/descriptions/xuanfeng0316__MCBotMod.md
   - wiki/sources/descriptions/Eangly99__AstroX-AntiCheat.md
   - wiki/sources/descriptions/GhostNgEnd__Ghost-AntiCheat.md
   - wiki/sources/descriptions/getawife__nofly.md
@@ -1285,6 +1286,8 @@ Long-form kernel AC architecture primer [How Kernel Anti-Cheats Work](https://s4
 **NeoForge client+server mod integrity AC:** [[katapult-anticheat]] (Gitex68; Java NeoForge **1.21.1** mod; SHA-256 checksums on client mod JARs and resource packs against server whitelists; real-time join/reload pack monitoring incl. renamed X-ray textures; hot-reloadable config, whitelist regeneration, live re-validation commands; Gson whitelist management; Anti Cheat / game:minecraft) for NeoForge modded-server operators needing file-integrity enforcement beyond gameplay packet checks. (source: wiki/sources/descriptions/Gitex68__Katapult-AntiCheat.md)
 
 **Headless protocol stress testing:** [[ghostjoin]] (KuryCat; pure Python stdlib Minecraft Java client; connects and stays online without rendering; full modern login/configuration/play flow with compression and Keep Alive; protocol ~773–776; authorized anti-bot/anti-cheat probe tool for offline-mode servers you own or have permission to test; Anti Cheat / game:minecraft) complements server-side plugins indexed by [[minecraft-anticheat-list]] for evaluating bot-connection defenses. (source: wiki/sources/descriptions/KuryCat__GhostJoin.md)
+
+**Live-client automation research:** [[mcbotmod]] (xuanfeng0316; Fabric mod; TCP/JSON remote API over a fully rendered Java client—native method automation vs headless/protocol bots; A* pathfinding; human+API coexistence; AI tool-call samples; cheat / game:minecraft) for studying how real-client bot orchestration surfaces to mod fingerprinting and movement/combat heuristics beside probes such as [[ghostjoin]] and QA clients such as [[anticheat-qa]]. (source: wiki/sources/descriptions/xuanfeng0316__MCBotMod.md)
 
 **Fabric client-side AC QA:** [[anticheat-qa]] (u8012146108-bit; Java Fabric **1.21.11** client mod; ClickGUI/HUD monitors for reach/movement/rotation/CPS/velocity/ping; ESP/tracers/FreeCam visualization; test simulator + Y-Level Probe for server-side data-stripping validation; observes and simulates detections without enabling cheats; Anti Cheat / Stress Testing / game:minecraft) for engineers validating server AC behavior from a dedicated QA client. (source: wiki/sources/descriptions/u8012146108-bit__anticheat-qa.md)
 
