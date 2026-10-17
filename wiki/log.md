@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-17** — ingest `description:xjoker/frida-magisk`: entity [[frida-magisk]] (Magisk/KernelSU flashable module; SHA-256-verified official Frida server + Gadget; custom Zygisk injector; server-only/hybrid/Gadget-only; per-app Gadget targets; shell + optional KernelSU WebUI; optional antidetect asset rename; CI multi-ABI; xjoker); cited on [[concepts/frida]] deployment lane + [[overviews/mobile-security]] managed DI (rooted) + [[entities/magisk]] adjacent modules; `index.md` entity entry.
+
 - **2026-10-17** — ingest `description:xuanfeng0316/MCBotMod`: entity [[mcbotmod]] (Fabric; Kotlin/Java Mixins; TCP/JSON remote API over live rendered Java client—movement/camera/blocks/entities/inventory/chat; A* pathfinding, concurrent tasks, human+API coexistence; OpenAI-compatible tool samples; bot behavior + real-client automation vs multiplayer AC; cheat / game:minecraft); cited on [[overviews/game-hacking]] live-client remote-control lane + [[overviews/anti-cheat]] live-client automation research beside [[ghostjoin]]; `index.md` entity + game-hacking blurb.
 
 - **2026-10-17** — ingest `description:zheedevVn/Rea-Unlock`: entity [[rea-unlock]] (TypeScript/Node MCP + CLI; unified static/dynamic RE bridges incl. Ghidra/Frida/decompilers; PE/ELF/Mach-O, mobile, WASM/EVM, firmware, traffic capture; game-security client/protocol/anti-tamper workflows); cited on [[overviews/reverse-engineering]] AI-assisted MCP lane; `index.md` entity entry.

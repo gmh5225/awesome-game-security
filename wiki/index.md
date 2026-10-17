@@ -1454,6 +1454,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [frida-il2cpp-bridge](entities/frida-il2cpp-bridge.md) — Frida dump Il2Cpp (Unity 5.3–6000.1.x; game engine explorer:Unity)
 - [frida-il2cpp-datacollector](entities/frida-il2cpp-datacollector.md) — Frida IL2CPP runtime metadata harvester (Android/iOS; CE MonoDataCollector port; SDK generation)
 - [frida-ios-dump](entities/frida-ios-dump.md) — jailbroken iOS decrypted IPA pull; Python host, Frida ObjC agent, FairPlay-stripped Mach-O dump, parallel SFTP USB/SSH, app list by name/bundle ID, Frida 17 (AloneMonkey; cheat / IOS App Packaging)
+- [frida-magisk](entities/frida-magisk.md) — Magisk/KernelSU module; verified official Frida server + Gadget; Zygisk injector; server/hybrid/Gadget modes; per-app targets; shell + optional KernelSU WebUI; antidetect flavor (xjoker; cheat / Magisk / Frida)
 - [Frida-RS](entities/frida-rs.md) — KernelSU module wrapping official frida-server; Rust supervisor + Material 3 WebUI; multi-ABI; loopback + token-gated TCP (MiChongs)
 - [Frida-Scripts](entities/frida-scripts.md) — Frida JS/Python scripts (editor tooling / hooking; cheat / Frida)
 - [frida-seccomp](entities/frida-seccomp.md) — Android syscall tracing/hooking (Frida + seccomp trap; SVC capture, stack/reg args; Python orchestration + CModule; Abbbbbi)
