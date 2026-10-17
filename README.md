@@ -951,6 +951,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/zhuyansen/awesome-ai-reverse-engineering [Curated AI-agent RE stack: Ghidra/IDA MCP servers, mobile tooling (jadx, Frida), agent skills, and security-graded open-source RE projects]
 - https://github.com/2akouwu/reverify [AI-assisted reverse engineering with deterministic byte-level verification via MCP server and CLI]
 - https://github.com/mytechnotalent/rea [Offline-first RE assistant with one-shot binary scan, native PE/ELF/Mach-O and JavaScript/Electron static inventory, local RAG, multi-agent harness, and MCP server]
+- https://github.com/zheedevVn/Rea-Unlock [MCP server unifying static and dynamic reverse engineering (Frida, Ghidra, decompilers) for binary and application analysis]
 - https://github.com/LargoScript/n0xis [Cross-platform Rust RE pipeline with static PE/ELF analysis, SSA decompilation, live memory scanning, hardware watchpoints, and MCP/JSON automation for game reversing]
 - https://github.com/heaven-hm/cheat-agent [Cross-platform C++/Rust autonomous RE agent with native memory scanning, closed-loop trainer verification, and optional MCP hosting for Codex/Claude Code]
 - https://github.com/wrong-commit/skid_factory [Node.js orchestrator that automates game reverse engineering and cheat development via MCP bridges to Cheat Engine, x64dbg, and Ghidra, with pointer-trace and memory-patch workflows]
@@ -1349,6 +1350,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/AlirezaParsi/COPG [Zygisk module for rooted Android with per-app device, CPU, and GPU spoofing, build-property and Android ID spoofing, and an on-device WebUI; supports KernelSU, Magisk, and APatch]
 - https://github.com/gmh5225/MagiskHide [Portable MagiskHide]
 - https://github.com/lico-n/ZygiskFrida [Injects frida gadget using zygisk]
+- https://github.com/xjoker/frida-magisk [Magisk/KernelSU module bundling official Frida server and Gadget plus a Zygisk injector, with scripted builds and on-device WebUI]
 - https://github.com/Admirepowered/Zygisk_mod [Standalone implementation of Zygisk]
 - https://github.com/anasfanani/Magisk-Tailscaled [Magisk module for running Tailscale]
 - https://github.com/j-hc/FlagSecurePatcher [Disable flag secure and screenshot listeners]
@@ -3289,6 +3291,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/Marcinator31/Vortex-Client [Open-source Fabric 1.21.11 Minecraft utility client with HUD, ESP, waypoints, combat helpers, and in-game preset configuration]
 - https://github.com/Gingerbeard5773/dino-printer [Meteor Client addon that prints Litematica schematics with BlockState simulation, raytracing, and anti-cheat-aware placement settings]
 - https://github.com/bliper2/jsaclient [Multi-version Minecraft Java utility client (Gradle core/fabric/loader) with movement, visuals, and open-LAN modules; integrates with Meteor when installed]
+- https://github.com/xuanfeng0316/MCBotMod [Fabric mod exposing a live Minecraft Java client over TCP/JSON so external tools can drive native client methods for bots and automation]
 
 > Game:Sword With Sauce
 - https://github.com/1hAck-0/UE4-Cheat-Source-Code
