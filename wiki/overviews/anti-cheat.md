@@ -722,6 +722,7 @@ sources:
   - wiki/sources/descriptions/gavz__Jektor.md
   - wiki/sources/descriptions/g8tsz__deadlock-anti-cheat.md
   - wiki/sources/descriptions/g91__PalAntiCheat-poc.md
+  - wiki/sources/descriptions/Kiyogitpy__wardogs-data-docs.md
   - wiki/sources/descriptions/guided-hacking__GuidedHacking-Injector.md
   - wiki/sources/descriptions/tingwei1111__maplestory-worlds-automation.md
   - wiki/sources/descriptions/thesecretclub__CVEAC-2020.md
@@ -976,7 +977,7 @@ sources:
   - wiki/sources/descriptions/projectsadameyd__AegisAC.md
   - wiki/sources/descriptions/Krimziee__SecureBootCheck.md
   - wiki/sources/descriptions/kodeni-am__leaderboard.md
-updated: 2026-10-16
+updated: 2026-10-17
 confidence: high
 ---
 
@@ -1191,6 +1192,7 @@ Long-form kernel AC architecture primer [How Kernel Anti-Cheats Work](https://s4
 - [[little-anti-cheat]] — open-source SourceMod anti-cheat plugin for Source engine servers (SourcePawn; aimbot/aimlock, abnormal angles, bhop automation, fast duck, suspicious ConVar states; interpolation/backtrack countermeasures, optional high-ping enforcement, logging/translation; TF2/CS community servers; J-Tanzanite; For Source Games) (source: wiki/sources/descriptions/J-Tanzanite__Little-Anti-Cheat.md)
 - [[sm-plugin-antibhopcheat]] — SourceMod SourcePawn plugin analyzing bunny-hop streak timing, velocity, and tick-level input to flag scripted bhop/hyperscroll; admin review commands, optional SelectiveBhop limits, and auto-kick for repeat offenders on CS and other SourceMod titles (srcdslab; For Source Games) (source: wiki/sources/descriptions/srcdslab__sm-plugin-AntiBhopCheat.md)
 - [[corner-culling]] — server-side occlusion-culling system (87andrewh; C++ + Unreal Engine; analytical ray casts, BVH + recent-occluder caching, latency-aware lookahead; reduces wallhack visibility in multiplayer shooters; scalable line-of-sight enforcement research) (source: wiki/sources/descriptions/87andrewh__CornerCulling.md)
+- [[wardogs-data-docs]] — Wardogs (UE 5.7) defensive-research reference (Kiyogitpy; Jekyll docs + exported balance/config JSON; design notes on damage pipelines, aim assist, teamkill tracking, account watermarking; UEDumper SDK + mappings; responsible disclosure; ground-truth for server-side heuristics and integrity research) (source: wiki/sources/descriptions/Kiyogitpy__wardogs-data-docs.md)
 - [[corner-culling-source-engine]] — Source engine anti-wallhack extension (87andrewh; C++ extension + SourceMod + map occluders; strict server-side visibility culling; ray-cast correctness, low overhead, latency-safe; competitive Source servers; For Source Games) (source: wiki/sources/descriptions/87andrewh__CornerCullingSourceEngine.md)
 - [[anticheatsystem]] — CS2 MetaMod:Source 2 native module for dedicated Linux servers (pavelinbs-afk; C++17/CMake; modular aim snap, wallhack visibility, movement speed, session stats, and client integrity analyzers; JSON-configured suspicion scoring; AdminPlugin/PlaytimeReporter ban and ticket integration; Docker HL2SDK-CS2 linuxsteamrt64 builds; Open Source Anti Cheat System) (source: wiki/sources/descriptions/pavelinbs-afk__anticheatsystem.md)
 - [[sac-the-server-anticheat]] — CS2 server-side algorithmic AC for Metamod:Source and CounterStrikeSharp (IDELd; C#/.NET 8; 17 detection modules for aimbot/silent aim/bhop/injection/invalid input; in-game reporting; four-stage progressive warning/ban; mass-check sensitivity after multiple reports; optional demo recording + anonymized event logs; Open Source Anti Cheat System) (source: wiki/sources/descriptions/IDELd__SAC-The-server-AntiCheat.md)
