@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-17** — lint (agent): read `wiki/AGENTS.md`; listed **Overviews** (9): `anti-cheat`, `dma-attack`, `game-engine`, `game-hacking`, `graphics-api`, `mobile-security`, `overview`, `reverse-engineering`, `windows-kernel`; **Concepts** (51) under `wiki/concepts/`; **Entities** (4095) under `wiki/entities/`; reconciled `index.md` vs disk — 4155 indexed paths (9+51+4095), 4155 unique, 0 missing, 0 dead, 0 duplicate index entries; overview pages + `index.md` overview/concept-blurb [[wikilink]] spot-check — 0 broken (13372 links), 0 malformed `]]]`; 6 expected cross-kind slug collisions ([[anti-cheat]], [[game-hacking]], [[reverse-engineering]], [[byovd]], [[dma]], [[il2cpp]]); wiki populated — bootstrap not required; `index.md` unchanged; no link repairs (`log.md` only).
+
 - **2026-10-17** — ingest `description:ReSo7200/molt-dex`: entity [[molt-dex]] (staged Claude skill + doc pipeline; apktool/smali, DexKit, adb/scrcpy, LSPosed/LSPatch/Frida, obfuscation ladder; authorized Android RE/modding; ReSo7200); cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]]; `index.md` entity + overview blurbs.
 
 - **2026-10-17** — ingest `description:avitran0/deadlocked`: entity [[deadlocked]] (Linux external CS2; Rust; schema offsets, BVH visibility/ray tests, egui/OpenGL HUD, optional TCP/WebSocket web radar; uinput; avitran0); cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[counterstrike2-linux-cheat]], [[proext]], [[cs2-webradar]], and [[cs2-dumper]]; `index.md` entity entry.
