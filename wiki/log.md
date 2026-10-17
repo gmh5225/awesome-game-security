@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-17** — lint (agent): read `wiki/AGENTS.md`; listed **Overviews** (9): `anti-cheat`, `dma-attack`, `game-engine`, `game-hacking`, `graphics-api`, `mobile-security`, `overview`, `reverse-engineering`, `windows-kernel`; **Concepts** (51) under `wiki/concepts/`; **Entities** (4101) under `wiki/entities/`; reconciled `index.md` vs disk — 4161 indexed paths (9+51+4101), 4161 unique, 0 missing, 0 dead, 0 duplicate index entries; overview pages + `index.md` overview/concept-blurb [[wikilink]] spot-check — 0 broken (13409 links), 0 malformed `]]]`; 6 expected cross-kind slug collisions ([[anti-cheat]], [[game-hacking]], [[reverse-engineering]], [[byovd]], [[dma]], [[il2cpp]]); wiki populated — bootstrap not required; `index.md` unchanged; no link repairs (`log.md` only).
+
 - **2026-10-17** — ingest `description:Ayoubvvch/sshserver-magisk`: entity [[sshserver-magisk]] (Magisk/KernelSU/APatch; musl-static arm64 Dropbear SSH+SFTP from boot; Ed25519/RSA + SHA-512 passwd; sshserverctl; Doze keepalives; headless root shell/file transfer without Termux; Ayoubvvch); cited on [[overviews/mobile-security]]; `index.md` entity + mobile-security overview blurb.
 
 - **2026-10-17** — ingest `description:ertunc-ozbay/pointblank-linux`: entity [[pointblank-linux]] (Rust/Slint launcher; Zepetto/TAM Point Blank on Linux via TLS-aligned Wine 11/Wine-GE prefix + Winetricks; unmodified CheatBlocker with integrity verification; legitimate play / Wine+AC compatibility—not bypass; ertunc-ozbay); cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; `index.md` entity + overview blurbs.
