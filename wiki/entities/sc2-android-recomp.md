@@ -24,7 +24,7 @@ README category: Cheat / RE Tools (static recompilation pipeline).
 
 ## Audience
 
-Researchers studying PE lifting, binary translation correctness, legacy DirectX interoperability, and offline personal-use engine porting—not live multiplayer anti-cheat bypass. (source: wiki/sources/descriptions/elkir0__sc2-android-recomp.md)
+Researchers studying PE lifting, binary translation correctness, legacy DirectX and graphics/audio interoperability, and offline personal-use engine porting—not live multiplayer anti-cheat bypass. (source: wiki/sources/descriptions/elkir0__sc2-android-recomp.md)
 
 ## Links
 

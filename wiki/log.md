@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-17** — ingest `description:elkir0/sc2-android-recomp`: entity [[sc2-android-recomp]] (Win32 x86-32→ARM64 static recomp toolkit; Unicorn difftest oracle; D3D9→SPIR-V; MPQ + pcrecomp extensions; Android Bionic/Vulkan NDK helpers; tooling only—no assets; elkir0); cited on [[concepts/static-runtime-evidence]] and [[overviews/mobile-security]]; `index.md` mobile-security overview blurb.
+
 - **2026-10-17** — ingest `readme:categories`: Cheat ~2912 (+1; elkir0/[[sc2-android-recomp]] StarCraft II x86-32→ARM64 static recomp toolkit) / Anti Cheat ~802 / Game Engine ~159 / Game Develop ~194 and other major section counts stable; 41 sections (`NeverC & NeverD` placeholder); synced README-map counts on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/dma-attack]], and [[overviews/reverse-engineering]]; entity [[sc2-android-recomp]]; light `index.md` section notes (no per-category pages).
 
 - **2026-10-17** — lint: read `wiki/AGENTS.md`; **Overviews** (9), **Concepts** (51), **Entities** (4098); `index.md` ↔ disk — 4158 paths, 0 missing, 0 dead; overview [[wikilink]] spot-check — 0 broken (13384); bootstrap not required; structural repairs none (`log.md` only).
