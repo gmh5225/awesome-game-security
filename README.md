@@ -1356,6 +1356,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/xjoker/frida-magisk [Magisk/KernelSU module bundling official Frida server and Gadget plus a Zygisk injector, with scripted builds and on-device WebUI]
 - https://github.com/Admirepowered/Zygisk_mod [Standalone implementation of Zygisk]
 - https://github.com/anasfanani/Magisk-Tailscaled [Magisk module for running Tailscale]
+- https://github.com/ayoubvvch/sshserver-magisk [Magisk/KernelSU/APatch module with statically linked Dropbear SSH and SFTP for headless root shell access from boot]
 - https://github.com/j-hc/FlagSecurePatcher [Disable flag secure and screenshot listeners]
 - https://github.com/ShivamXD6/Simple-Flag-Secure [Standalone Magisk/KernelSU/APatch module that patches services.jar to disable FLAG_SECURE and block screenshot detection on Android 14+]
 - https://github.com/saadnahid7/smalipatcher_reborn [Magisk/KernelSU/APatch module that patches services.jar on-device for mock-location spoofing and secure-window screenshot bypass on Android 10–17]
@@ -2786,6 +2787,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/redecorate/Holodori-Kernel-Bypass [Userspace emulation of Hololive Dreams usrdrv017964 kernel anti-cheat for Wine/Proton]
 - https://github.com/dazi2011/crossover-patcher [Experimental CrossOver patcher to improve compatibility with Windows games protected by anti-cheat]
 - https://github.com/CDJuaum/RunEXE [Python PE analyzer and Wine launcher that flags kernel anti-cheat/DRM blockers and auto-provisions prefixes and dependencies before running Windows games on Linux]
+- https://github.com/ertunc-ozbay/pointblank-linux [Rust standalone launcher to run Point Blank (Zepetto/TAM) on Linux with unmodified CheatBlocker anti-cheat via Wine-GE/Proton, TLS-aligned runner, and prefix setup]
 - https://github.com/BlaMacfly/ArchMod [Native Rust/Tauri cheat panel for Steam games on Proton: launch Windows trainers in the correct prefix, scan memory natively, and share community address profiles]
 
 > Anti Screenshot
