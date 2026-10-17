@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-17** — ingest `readme:categories`: Cheat ~2912 (+1; elkir0/[[sc2-android-recomp]] StarCraft II x86-32→ARM64 static recomp toolkit) / Anti Cheat ~802 / Game Engine ~159 / Game Develop ~194 and other major section counts stable; 41 sections (`NeverC & NeverD` placeholder); synced README-map counts on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/dma-attack]], and [[overviews/reverse-engineering]]; entity [[sc2-android-recomp]]; light `index.md` section notes (no per-category pages).
+
 - **2026-10-17** — lint: read `wiki/AGENTS.md`; **Overviews** (9), **Concepts** (51), **Entities** (4098); `index.md` ↔ disk — 4158 paths, 0 missing, 0 dead; overview [[wikilink]] spot-check — 0 broken (13384); bootstrap not required; structural repairs none (`log.md` only).
 
 - **2026-10-17** — lint (agent): read `wiki/AGENTS.md`; listed **Overviews** (9): `anti-cheat`, `dma-attack`, `game-engine`, `game-hacking`, `graphics-api`, `mobile-security`, `overview`, `reverse-engineering`, `windows-kernel`; **Concepts** (51) under `wiki/concepts/`; **Entities** (4098) under `wiki/entities/`; reconciled `index.md` vs disk — 4158 indexed paths (9+51+4098), 4158 unique, 0 missing, 0 dead, 0 duplicate index entries; overview pages + `index.md` overview/concept-blurb [[wikilink]] spot-check — 0 broken (13384 links), 0 malformed `]]]`; 6 expected cross-kind slug collisions ([[anti-cheat]], [[game-hacking]], [[reverse-engineering]], [[byovd]], [[dma]], [[il2cpp]]); wiki populated — bootstrap not required; `index.md` unchanged; no link repairs (`log.md` only).
