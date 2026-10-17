@@ -361,6 +361,7 @@ sources:
   - wiki/sources/descriptions/TuncorReUnion__TLAC-MODERN-LOCAL-ANTI-CHEAT-REUNIONED.md
   - wiki/sources/descriptions/TOSTcRa__vigil.md
   - wiki/sources/descriptions/vylorq__anti-cheat.md
+  - wiki/sources/descriptions/ertunc-ozbay__pointblank-linux.md
   - wiki/sources/descriptions/mikio815__linux-anticheat.md
   - wiki/sources/descriptions/daswareinfach__Battleye-VAC-EAC-Kernel-Bypass.md
   - wiki/sources/descriptions/dashingsoft__pyarmor.md
@@ -1170,6 +1171,7 @@ Long-form kernel AC architecture primer [How Kernel Anti-Cheats Work](https://s4
 - [[tlac-modern-local-anti-cheat-reunioned]] — lightweight open-source local anti-cheat for Linux (Rust + C eBPF/kernel module + Python ONNX; user-space wildcard memory signature scan, SHA256 self-integrity, HWID bans, Tokio local IPC; optional eBPF tracepoints on open/exec/ptrace/clone; behavioral anomaly detection; MIT-licensed; Steam Deck; TuncorReUnion; Open Source Anti Cheat System) (source: wiki/sources/descriptions/TuncorReUnion__TLAC-MODERN-LOCAL-ANTI-CHEAT-REUNIONED.md)
 - [[vigil]] — Rust eBPF Linux-native anti-cheat (BPF ELF loading, perf events, CLI, client–server distributed monitoring; kernel-level event tracing and threat detection; TOSTcRa; Open Source Anti Cheat System) (source: wiki/sources/descriptions/TOSTcRa__vigil.md)
 - [[linux-anticheat]] — WIP kernel-level Linux console AC (mikio815; Rust daemon + LSM eBPF ptrace/W^X/bpf() detection + thin C kernel module for eBPF integrity + planned BitVisor EPT write-protect; Aya; Linux 5.17+ BTF + BPF LSM; Steam Deck target; Open Source Anti Cheat System) (source: wiki/sources/descriptions/mikio815__linux-anticheat.md)
+- [[pointblank-linux]] — Rust/Slint community launcher for Zepetto/TAM Point Blank on Linux via isolated Wine prefix + TLS-aligned Wine 11/Wine-GE; Winetricks VC++/DX9/DX11/WebView2; unmodified native CheatBlocker with binary integrity verification; legitimate play / reproducible Wine+AC compatibility research—not bypass (ertunc-ozbay) (source: wiki/sources/descriptions/ertunc-ozbay__pointblank-linux.md)
 - [[ac-compat-research]] — vendor-agnostic Linux kernel AC hosting feasibility study (IZxMD; LSM/signing/isolation/ABI constraints; non-virtualized architecture dossier + knowledge graph; no bypass material; Anti Cheat / Guide) (source: wiki/sources/descriptions/IZxMD__ac-compat-research.md)
 - [[gexec]] — register-machine bytecode interpreter for Windows kernel drivers (gasm, gvmlift PE lifter, embeddable host API; updatable portable logic without native recompile; zer0condition; kernel AC development research) (source: wiki/sources/descriptions/zer0condition__gexec.md)
 - [[anti-debug]] — Windows C++ PoC; `ResumeThread` suspend-count detects debugger attachment via WinAPI return value; minimal single-signal anti-debug study sample (Metick; Anti Debugging) (source: wiki/sources/descriptions/Metick__Anti-Debug.md)
