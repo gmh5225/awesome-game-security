@@ -312,6 +312,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 ## Renderer
 - https://github.com/bkaradzic/bgfx [Rendering library]
 - https://github.com/DiligentGraphics/DiligentEngine [Rendering library]
+- https://github.com/LukasBanana/LLGL [Thin C++ abstraction over OpenGL, D3D11/12, Vulkan, and Metal with C/C#/Go wrappers]
 - https://github.com/kanition/pbrtbook [Physically Based Rendering: From Theory To Implementation]
 - https://github.com/keith2018/SoftGLRender
 - https://github.com/DQLin/VolumetricReSTIRRelease
@@ -4336,6 +4337,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/aryribeiro/cobra [Production web snake game with server-side HMAC game sessions, score plausibility checks, and rate-limited leaderboard submission anti-cheat]
 - https://github.com/kodeni-am/leaderboard [Open-source multi-tenant leaderboard API (Go/Redis) with durable ingest, scalable ranking, and optional per-app HMAC-signed score submits with replay protection]
 - https://github.com/AtakanKeser/BlastScale [Server-authoritative mobile puzzle backend with move-replay anti-cheat, exactly-once rewards, and LiveOps tooling]
+- https://github.com/StanislawGolec/Ultimo [Java 21 authoritative multiplayer card-game server with fog-of-war hand hiding, virtual threads, and WebSockets]
 
 > Compile Time
 - https://github.com/ManulMap/malstring [Using c++23 compile-time magic to produce obfuscated PIC strings and arrays]
