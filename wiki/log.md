@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-17** — ingest `description:tahad4492-svg/Astral-AntiCheat`: entity [[astral-anticheat]] (Paper **1.21.11** Java 21 plugin; ClientTickEndEvent movement physics replay; packet-order checks; lag-compensated combat; block-mode setbacks; staff GUI; simulation tests; tahad4492-svg); cited on [[overviews/anti-cheat]]; `index.md` entity + overview blurb.
+
 - **2026-10-17** — ingest `readme:categories`: Cheat ~2911 / Anti Cheat ~801 (+1) / Game Engine ~159 / Game Develop ~194 and other major section counts stable; 41 sections (`NeverC & NeverD` placeholder); synced README-map counts on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], and [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
 
 - **2026-10-17** — lint (agent): read `wiki/AGENTS.md`; listed **Overviews** (9): `anti-cheat`, `dma-attack`, `game-engine`, `game-hacking`, `graphics-api`, `mobile-security`, `overview`, `reverse-engineering`, `windows-kernel`; **Concepts** (51) under `wiki/concepts/`; **Entities** (4095) under `wiki/entities/`; reconciled `index.md` vs disk — 4155 indexed paths (9+51+4095), 4155 unique, 0 missing, 0 dead, 0 duplicate index entries; overview pages + `index.md` overview/concept-blurb [[wikilink]] spot-check — 0 broken (13372 links), 0 malformed `]]]`; 6 expected cross-kind slug collisions ([[anti-cheat]], [[game-hacking]], [[reverse-engineering]], [[byovd]], [[dma]], [[il2cpp]]); wiki populated — bootstrap not required; structural repairs none (`log.md` only).

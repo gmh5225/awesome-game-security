@@ -979,6 +979,7 @@ sources:
   - wiki/sources/descriptions/Krimziee__SecureBootCheck.md
   - wiki/sources/descriptions/kodeni-am__leaderboard.md
   - wiki/sources/descriptions/hahasc26-lang__ArgusAC.md
+  - wiki/sources/descriptions/tahad4492-svg__Astral-AntiCheat.md
 updated: 2026-10-17
 confidence: high
 ---
@@ -1275,6 +1276,8 @@ Long-form kernel AC architecture primer [How Kernel Anti-Cheats Work](https://s4
 **Minecraft catalog:** Cross-platform anticheat index [[minecraft-anticheat-list]] (Kotlin/JS + Gradle; hundreds of validated JSON entries; searchable platform/version/pricing/maintenance table; GitHub + Spigot API enrichment; Bukkit/Sponge/Fabric/Forge/Nukkit/PocketMine; Java + Bedrock) for server operators and AC researchers comparing server-side cheat detection. (source: wiki/sources/descriptions/ManInMyVan__Minecraft-Anticheat-List.md)
 
 **Paper/Spigot movement simulation AC:** [[grim]] (GrimAnticheat; Java/Kotlin; open-source Minecraft anticheat for modern server versions and protocol combinations; detailed movement simulation, world replication, latency-aware validation; heavily asynchronous multithreaded architecture to scale checks and reduce false positives; server-side cheat detection for actively maintained Java communities; Anti Cheat / game:minecraft). (source: wiki/sources/descriptions/GrimAnticheat__Grim.md)
+
+**Paper ClientTickEnd movement replay AC:** [[astral-anticheat]] (tahad4492-svg; Java 21 Maven Paper **1.21.11** plugin; rebuilds vanilla movement physics from per-tick client data and **ClientTickEndEvent**; packet-order checks for silent rotations/swaps; lag-compensated reach/aura/aim combat; movement/world/packet/macro coverage; configurable block mode with setbacks vs watch-only alerts; staff GUI/logs; minigame FP reduction; simulation tests against known cheat clients; Anti Cheat / game:minecraft) beside open-source simulators such as [[grim]] and alert-first Paper plugins such as [[aegis-ac]]. (source: wiki/sources/descriptions/tahad4492-svg__Astral-AntiCheat.md)
 
 **Version-neutral AC foundation:** [[inertia]] (InertiaOrg; Java; version-neutral player-behavior engine; movement/packet/world/collision contracts, evidence accumulation with confidence/decay and false-positive context; version profiles + movement-prediction skeleton; `inertia-api`/`inertia-core`/`inertia-testkit`; scenario tests without live server; Anti Cheat / game:minecraft). (source: wiki/sources/descriptions/InertiaOrg__Inertia.md)
 
