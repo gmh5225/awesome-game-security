@@ -1,0 +1,2956 @@
+Project Path: arc_ReSo7200_molt-dex_5iqxt5vd
+
+Source Tree:
+
+```txt
+arc_ReSo7200_molt-dex_5iqxt5vd
+├── DISCLAIMER.md
+├── LICENSE
+├── README.md
+├── SKILL.md
+├── references
+│   ├── 00-authorization.md
+│   ├── 01-acquire.md
+│   ├── 02-decode-inventory.md
+│   ├── 03-static-understanding.md
+│   ├── 04-secrets-misconfig.md
+│   ├── 05-dynamic-analysis.md
+│   ├── 06-verify-report.md
+│   ├── 07-runtime-resolution-instrumentation.md
+│   ├── device-loop.md
+│   ├── obfuscation-ladder.md
+│   └── tooling-setup.md
+├── scripts
+│   ├── acquire.sh
+│   ├── build-string-index.py
+│   ├── device-helpers.sh
+│   ├── manifest-summary.py
+│   ├── secret-patterns.tsv
+│   └── secrets-sweep.sh
+└── templates
+    ├── engagement-log.md
+    └── report.md
+
+```
+
+`DISCLAIMER.md`:
+
+```md
+# Disclaimer
+
+molt-DEX is for reverse engineering and security assessment that you are **authorized** to
+perform: your own apps, targets explicitly in scope of a bug-bounty program, systems covered by a
+written penetration-test agreement, CTF challenges, and deliberately-vulnerable training apps.
+
+Do not use it against apps, accounts, data, or backend systems you do not own or do not have
+written permission to test. Reverse engineering and security testing may be restricted by an
+app's terms of service and by local law; it is your responsibility to have the right to do the
+work before you start.
+
+The authors provide this skill for education and authorized security work and accept no
+responsibility for misuse.
+
+```
+
+`LICENSE`:
+
+```
+MIT License
+
+Copyright (c) 2026 ReSo7200
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
+`README.md`:
+
+```md
+<div align="center">
+
+# molt-DEX
+
+**Shed an app's skin and read what's underneath.**
+
+A staged, evidence-first skill for reverse-engineering, modding, and assessing Android apps,
+from plain APKs to heavily obfuscated ones. Built on apktool, adb and scrcpy, with runtime
+resolution and hooking through DexKit and the Xposed API.
+
+<p>
+  <img alt="Platform" src="https://img.shields.io/badge/platform-Android-3ddc84?style=for-the-badge&logo=android&logoColor=white&labelColor=0d0d0d"/>
+  <img alt="Type" src="https://img.shields.io/badge/type-Claude%20skill-8a63d2?style=for-the-badge&labelColor=0d0d0d"/>
+  <img alt="Tooling" src="https://img.shields.io/badge/tooling-apktool%20%C2%B7%20adb%20%C2%B7%20scrcpy-1a1a2e?style=for-the-badge&labelColor=0d0d0d"/>
+  <img alt="License" src="https://img.shields.io/badge/license-MIT-1a1a2e?style=for-the-badge&labelColor=0d0d0d"/>
+</p>
+
+</div>
+
+---
+
+## What it is
+
+molt-DEX is a [Claude skill](https://docs.claude.com/en/docs/claude-code/skills): a packaged
+pipeline that takes an Android app from "here is an APK" to "here is how it is built, how it
+behaves, and where its weaknesses are."
+
+It was distilled from real work, reverse-engineering and modding a large, obfuscated app
+(Instagram) across many versions. The techniques that survived version after version are the ones
+baked in here.
+
+- **Full obfuscation spectrum.** Plain apps, R8/ProGuard name obfuscation, string encryption,
+  reflection, packing, native stubs, and anti-tamper, each with a way to detect it and a way
+  through it.
+- **apktool, not JADX.** It reasons over apktool-decoded smali and resources, which round-trip
+  (you can rebuild and reinstall). A Java decompile is an optional convenience, never the source
+  of truth.
+- **Static to understand, device to confirm.** Read the code to form a hypothesis, then prove or
+  kill it on a real device with adb and scrcpy. Every claim cites evidence: a smali method, a
+  string-table hit, a logcat line, a screenshot.
+
+## Why it holds up: resolve by shape, not by name
+
+This is the whole idea. In an obfuscated app you almost never have the real name of a class or
+method, and whatever name it has changes on the next release. So you never anchor on names. You
+anchor on things that stay put:
+
+- **literal strings** a method uses (log lines, error text, QPL tags),
+- **JSON / wire keys** it parses,
+- **method shape** (parameter types, return type, static vs instance, arity),
+- **class relationships** (superclass, implemented interface, callers and callees),
+- **resource names**.
+
+Find the member by that description, statically (a string index over the decoded tree) and at
+runtime (a DexKit query inside the live app). When the app updates and the method moves, you
+re-run the same description and find it again. This is why a module built this way keeps working
+when Instagram ships a new build, and it is the backbone of every stage below.
+
+## Authorization: what the work touches
+
+The line that matters is **self-contained work vs reaching other people's systems**, not static
+vs dynamic.
+
+| Category | Examples | Needs |
+|---|---|---|
+| **Static analysis** | Decode, read, index, map a local APK | Always fine |
+| **Local modding / on-device** | Install on *your* device and account, drive the UI, instrument with Frida / LSPosed / LSPatch, build a module that changes *your own* copy | Fine, no authorization. This is the Instagram-module case |
+| **Assessment of a target** | Test a backend with crafted traffic, probe another account, a pentest or VA you were engaged for | **Gated**: state target, basis, scope; record it in an engagement log |
+
+It refuses, regardless of stated purpose, to touch third-party accounts or data, to hit backends
+you are not authorized to test, to harvest credentials, or to build something to harm others.
+See [`references/00-authorization.md`](references/00-authorization.md).
+
+> Use it only for work you have the right to do. See the [disclaimer](DISCLAIMER.md).
+
+## The pipeline
+
+```mermaid
+flowchart TD
+    LOCAL["local APK"] --> A
+    BUNDLE[".apkm / .xapk / split bundle"] --> A
+    DEVICE["pull from a device"] --> A
+
+    A["A. Acquire and identify"] --> B["B. Decode and inventory<br/>apktool, string index, manifest"]
+    B --> C["C. Static understanding<br/>entry points, data flow, behaviour map"]
+    C --> D["D. Secrets and misconfig sweep"]
+    D --> E["E. Dynamic analysis<br/>drive device, instrument, correlate"]
+    C -. hypotheses .-> E
+    E --> F["F. Verify and report"]
+
+    B -. "resolve by shape, not name" .-> RES["string index, static<br/>DexKit, runtime"]
+    E -. hooks .-> HOOK["Xposed API<br/>LSPosed / LSPatch / Frida"]
+
+    classDef stage fill:#1a1a2e,stroke:#8a63d2,color:#ffffff;
+    classDef tool fill:#0d0d0d,stroke:#3ddc84,color:#99aadd;
+    class A,B,C,D,E,F stage
+    class RES,HOOK tool
+```
+
+Static reading (A to D) runs on a local file and is always fine. The device work in E is local
+modding on your own device unless an action reaches a backend or another account, which is the one
+gated case. Each stage is resumable and writes to a working directory and a findings ledger.
+
+| Stage | Page | What it does |
+|---|---|---|
+| **A. Acquire & identify** | [`01-acquire.md`](references/01-acquire.md) | Get the artifact (local, pulled from a device, or an `.apkm`/`.xapk`/split bundle); record identity and hashes |
+| **B. Decode & inventory** | [`02-decode-inventory.md`](references/02-decode-inventory.md) | apktool decode, build the string index, parse the manifest, map the attack surface |
+| **C. Static understanding** | [`03-static-understanding.md`](references/03-static-understanding.md) | Entry points, data flow, network layer, and a behaviour map |
+| **D. Secrets & misconfig** | [`04-secrets-misconfig.md`](references/04-secrets-misconfig.md) | Sweep for hardcoded secrets and misconfiguration |
+| **E. Dynamic analysis** | [`05-dynamic-analysis.md`](references/05-dynamic-analysis.md) | Install, drive with scrcpy + adb, instrument, correlate against the static model |
+| **F. Verify & report** | [`06-verify-report.md`](references/06-verify-report.md) | Re-prove each finding, then write the report |
+
+Supporting references:
+
+- [`07-runtime-resolution-instrumentation.md`](references/07-runtime-resolution-instrumentation.md)
+  , DexKit (resolve by query at runtime), the Xposed hooking API, and the frameworks that provide
+  it: LSPosed (root), LSPatch (no root), and Frida.
+- [`obfuscation-ladder.md`](references/obfuscation-ladder.md), the none -> name -> string ->
+  packer playbook, each rung with how to detect it and the tactic.
+- [`tooling-setup.md`](references/tooling-setup.md), install and sanity-check the tools.
+- [`device-loop.md`](references/device-loop.md), the scrcpy + adb screenshot/act loop with every
+  gotcha and its fix.
+
+## Tooling
+
+| Tool | Role |
+|---|---|
+| [apktool](https://github.com/iBotPeaches/Apktool) | Decode and rebuild smali + resources (the core; **not** JADX) |
+| [adb](https://developer.android.com/tools/adb) (platform-tools) | Install, logcat, UI dump, file pull, device introspection |
+| [scrcpy](https://github.com/Genymobile/scrcpy) | Mirror and drive the device while watching behaviour |
+| [ripgrep](https://github.com/BurntSushi/ripgrep) + a string index | Anchor on literals across the decoded tree |
+| [DexKit](https://github.com/LuckyPray/DexKit) | Resolve obfuscated members by string / shape / relationship at runtime |
+| Xposed API via [LSPosed](https://github.com/JingMatrix/LSPosed) / [LSPatch](https://github.com/JingMatrix/LSPatch) / [Frida](https://github.com/frida/frida) | Hook and observe a running app (root, no-root, or no-install) |
+| apksigner, a native disassembler, an intercepting proxy | Re-pack testing, `.so` logic, traffic (in scope) |
+
+The minimum to start: **apktool** and **ripgrep** for static work. Add **adb** and **scrcpy** for
+on-device work. See [`tooling-setup.md`](references/tooling-setup.md).
+
+## Helper scripts
+
+Conveniences in [`scripts/`](scripts/). Each has its manual equivalent in a header comment, so the
+pipeline works by hand without them.
+
+| Script | Does |
+|---|---|
+| `acquire.sh` | Fetch a local APK, unzip a bundle, or pull an installed package; record identity |
+| `build-string-index.py` | Build the `path \| method \| string` TSV that anchors everything |
+| `manifest-summary.py` | Parse the decoded manifest into an attack-surface summary |
+| `secrets-sweep.sh` | ripgrep the decoded tree for keys, tokens, and cleartext endpoints |
+| `device-helpers.sh` | The adb + scrcpy loop: screenshot, UI dump, tap-by-text, logcat, app logs |
+
+Every script reads only the local path you give it. None reads your environment or credentials,
+and none makes a network connection, so nothing leaves your machine. `secrets-sweep.sh` searches
+the decoded *target* app for secrets; its patterns live in `secret-patterns.tsv` beside it.
+
+## Quick start
+
+```bash
+# 1. static understanding of an app you have (no device, always fine)
+scripts/acquire.sh app.apk work/myapp
+apktool d -r -f -o work/myapp/decoded work/myapp/input/base.apk
+scripts/build-string-index.py work/myapp/decoded work/myapp/strings.tsv
+scripts/manifest-summary.py work/myapp/decoded
+scripts/secrets-sweep.sh work/myapp/decoded
+
+# 2. confirm on your own device (local modding, still no authorization)
+#    see references/05-dynamic-analysis.md and device-loop.md
+scripts/device-helpers.sh shot
+```
+
+## Example: finding a feature in an obfuscated app
+
+Say you are modding your own copy of an app and want the method that decides whether a "download"
+button appears, but every class is named `X.0aB` and changes each release. You do not search for a
+name. You search for something stable the feature touches.
+
+```bash
+# 1. The feature's menu shows an internal label. Find who references that string.
+rg -F '"[INTERNAL] Pause Playback"' work/app/strings.tsv
+#    work/app/decoded/smali_classes3/X/05fU.smali   ...builds the option list
+
+# 2. In that class, the builder you want has a recognisable shape, not a name:
+#    returns a CharSequence[] (the menu entries). Read it in the decoded smali.
+rg -n 'CharSequence;' work/app/decoded/smali_classes3/X/05fU.smali
+
+# 3. Confirm on your own device: hook that method, log what it returns, append your row.
+#    (references/07-runtime-resolution-instrumentation.md: resolve with DexKit, hook with Xposed)
+```
+
+When the next version renames `X.05fU` to something else, step 1 finds it again by the same
+string. That is the whole point: **the anchor is the string and the shape, never the name.** The
+`03-static-understanding.md` page walks this end to end, including what to do when the method moves
+into a subclass between versions (you climb the superclass relationship and match the shape
+again).
+
+## Layout
+
+```
+SKILL.md                                  entry point: the gate, principles, pipeline map
+references/
+  00-authorization.md                     what the work touches: local vs assessment (read first)
+  01-acquire.md .. 06-verify-report.md     the six pipeline stages
+  07-runtime-resolution-instrumentation.md DexKit + Xposed API (LSPosed / LSPatch / Frida)
+  obfuscation-ladder.md                    none -> name -> string -> packer playbook
+  tooling-setup.md                         install and sanity-check the tools
+  device-loop.md                           the scrcpy + adb screenshot/act loop
+scripts/                                   acquire, string index, manifest, secrets, device
+templates/                                 engagement-log.md, report.md
+```
+
+## Using it with Claude
+
+This repo **is** the skill (it has `SKILL.md` at its root), so there is nothing to build.
+
+- **For yourself or your team:** copy the folder into your skills directory and Claude picks it up.
+  - Claude Code: `~/.claude/skills/molt-dex/`, or a project's `.claude/skills/molt-dex/`.
+  - Then just ask for the work; Claude loads `SKILL.md` and follows the pipeline.
+```bash
+# personal install, one line
+git clone https://github.com/ReSo7200/molt-dex.git ~/.claude/skills/molt-dex
+```
+
+- **As an installable plugin:** this repo is also its own plugin marketplace (see
+  `.claude-plugin/`). On Claude Code 2.1.275 or later, one step:
+
+  ```
+  /plugin install molt-dex --marketplace ReSo7200/molt-dex
+  ```
+
+  or, on any version, two steps:
+
+  ```
+  /plugin marketplace add ReSo7200/molt-dex
+  /plugin install molt-dex@molt-dex
+  ```
+
+> **Do you need to "add it to Claude's skills"?** No, not for your own use: a skill is just a
+> folder with a `SKILL.md`, and copying it in is the whole install. Anthropic's built-in catalog is
+> curated by Anthropic and is a separate thing. The plugin-marketplace lines above are only for
+> handing it to other people. They fetch over GitHub, so the installing person needs access to the
+> repo: public for anyone, or a collaborator while it stays private.
+
+## License
+
+[MIT](LICENSE). For authorized reverse engineering, modding, and assessment only; see the
+[disclaimer](DISCLAIMER.md).
+
+```
+
+`SKILL.md`:
+
+```md
+---
+name: molt-dex
+description: >-
+  Reverse-engineer and assess Android apps, from unobfuscated to heavily obfuscated, using a
+  staged, evidence-first pipeline built on apktool, adb and scrcpy. Use when the user wants to
+  understand how an APK is built, what it does, where its secrets and misconfigurations are, or
+  wants to drive an app on a device to observe its behaviour. Dynamic testing (anything that
+  touches a running system or backend) is authorization-gated and must be in scope.
+---
+
+# molt-DEX
+
+A pipeline for taking an Android app from "here is an APK (or an installed package)" to "here is
+how it is built, how it behaves, and where its weaknesses are." It works on a spectrum from plain
+apps to ones with name obfuscation, string encryption, packing and anti-tamper.
+
+It reasons over **apktool**-decoded smali and resources (not a Java decompile), confirms on a
+device with **adb** + **scrcpy**, and cites evidence for every claim.
+
+## Before anything: what kind of work is this?
+
+Load `references/00-authorization.md` first, every session. The line that matters is not "static
+vs dynamic", it is **self-contained work vs reaching other people's systems**:
+
+- **Static analysis** of an artifact the user supplied: always fine. (`local_allowed`)
+- **Local modding and on-device analysis** on your own device and account, installing, driving
+  the UI, instrumenting with Frida / LSPosed / LSPatch, and building a module that changes how
+  your own copy behaves: fine, no pentest authorization needed. This is how the Instagram work
+  was done. (`local_allowed`)
+- **Assessment of a target** that reaches beyond your own instance (sending crafted traffic to
+  backends to test them, probing another account, a pentest / VA you were engaged for): **gated**.
+  State the target, basis, and scope, and record it in an engagement log. (`assessment_allowed`)
+
+Refuse, regardless of stated purpose: touching accounts/data that are not the user's own and not
+in authorized scope, hitting backends you do not own and are not authorized to test, harvesting
+third-party credentials, or building something to harm others. Modding your own app on your own
+device is not any of these.
+
+This skill needs no credentials and reads none from the user's machine. Every mention of secrets,
+tokens, or keys below refers to *finding them inside the target app being analysed* (Stage D), not
+to collecting the user's own. There is nothing here to put behind a `user_config` option, because
+the skill asks the user for nothing sensitive.
+
+## Core principles
+
+1. **Evidence over claims.** Every finding cites a smali file + method, a string-table hit, a
+   logcat line, a screenshot, or a captured request. Never "it probably does X".
+2. **Resolve by shape, not by name.** Obfuscated names change every build. Anchor on things that
+   do not: literal strings, resource names, method signatures and shapes, superclass chains,
+   JSON keys. This is the single most important habit; it is what makes analysis survive version
+   bumps.
+3. **Stage the work, cache between stages.** Decode once, index once, reuse. Keep a per-target
+   working directory and a findings ledger.
+4. **Fail soft and say so.** A lookup that misses reports what it tried; it never fabricates.
+5. **Static first, dynamic to confirm.** Read code to form a hypothesis, then prove or kill it on
+   the device. Correlating the two is a first-class step.
+6. **Human-paced device loop.** Screenshot, read, act, screenshot. Stay in scope; never touch
+   other people's content.
+
+## The pipeline
+
+Run the stages in order; each writes to the working dir and the findings ledger, and each is
+resumable. Load the matching reference page when you start a stage.
+
+The "needs" column: `local` = your own device/app/account, always fine; `assessment` = only when
+an action reaches a backend or another user's data (see category 3 in `00-authorization.md`).
+
+| Stage | Page | What it does | Needs |
+|---|---|---|---|
+| A. Acquire & identify | `references/01-acquire.md` | Get the artifact (local / pulled / bundle), record identity, hashes | local |
+| B. Decode & inventory | `references/02-decode-inventory.md` | apktool decode, string index, manifest & attack surface | local |
+| C. Static understanding | `references/03-static-understanding.md` | Entry points, data flow, network layer, behaviour map | local |
+| D. Secrets & misconfig | `references/04-secrets-misconfig.md` | Hardcoded secrets and misconfiguration sweep | local |
+| E. Dynamic analysis | `references/05-dynamic-analysis.md` | Install on your device, drive with scrcpy+adb, logcat, instrument, correlate | local; **assessment** only if you probe backends / other accounts |
+| F. Verify & report | `references/06-verify-report.md` | Re-prove each finding, write the report | local |
+
+Supporting references, loaded when relevant:
+
+- `references/07-runtime-resolution-instrumentation.md` - resolving obfuscated members at runtime
+  with **DexKit**, the **Xposed hooking API** (before/after/replace, `setResult`, reflection
+  helpers), and the frameworks that provide it: **LSPosed** (root), **LSPatch** (no root), plus
+  **Frida**. This is the bridge from static shape to live confirmation.
+- `references/obfuscation-ladder.md` - the none -> name -> string -> packer playbook and detectors.
+- `references/tooling-setup.md` - installing and sanity-checking apktool, adb, scrcpy and friends.
+- `references/device-loop.md` - the scrcpy + adb screenshot/act loop in detail, with gotchas.
+
+Templates:
+
+- `templates/engagement-log.md` - the authorization + action record (also the report's method).
+- `templates/report.md` - the final findings report.
+
+Scripts (helpers, see `scripts/`): acquire, build-string-index, manifest-summary, secrets-sweep,
+device helpers. They are conveniences; the pipeline works by hand without them.
+
+## Tooling, in one line
+
+apktool (decode/rebuild, **not** JADX), adb (device), scrcpy (mirror + control), ripgrep +
+a string index (anchoring), a disassembler for native `.so`, a proxy for traffic (in scope),
+apksigner (re-pack testing). JADX is an optional read-only convenience only.
+
+## Untrusted-artifact hygiene
+
+Every downloaded APK/bundle is untrusted input. Put each in its own empty directory, keep your
+scripts elsewhere, pass paths as arguments, and never run an interpreter or build tool from
+inside the artifact's directory. Run analysis scripts that read artifacts with the interpreter's
+isolated mode where available.
+
+```
+
+`references/00-authorization.md`:
+
+```md
+# Stage 0: What kind of work is this?
+
+Read this first, every session. It is not a disclaimer; it is a control that decides which later
+steps are allowed to run. The question it answers is simple: **does the action stay inside your
+own device, app copy, and account, or does it reach other people's systems, accounts, or data?**
+
+That line, not "static vs dynamic", is what matters. Reverse-engineering an app and modding it on
+your own phone is a normal, legitimate activity (the whole Xposed / LSPosed modding scene works
+this way). Testing someone else's backend or touching other users' data is a different thing and
+needs real authorization.
+
+## Three kinds of work
+
+### 1. Static analysis (always fine on an artifact you have)
+Decoding, reading, indexing and mapping a local APK the user supplied. You are looking at a file.
+Turn this on as soon as an artifact is in the working directory. No scope needed.
+
+### 2. Local modding and on-device analysis (fine on your own device + account)
+Installing the app on your own device or emulator, driving its UI, reading its logs, instrumenting
+it with Frida / LSPosed / LSPatch, and building a mod or module that changes how **your** copy
+behaves for **you**. This is exactly how the Instagram work went: the app ran on the user's own
+phone, with the user's own account, and the module changed that one install's behaviour.
+
+This does **not** need a pentest authorization. What it does need is that it stays self-contained:
+
+- Your own device (or an emulator you control).
+- Your own account(s), or test accounts you own.
+- Changes that affect only your install and your view, not other users.
+- No crafted traffic sent to the app's servers to probe or attack them.
+- Lawful use: reverse engineering and modding can still be restricted by an app's terms of service
+  and by local law. Having the right to do it is the user's responsibility; note it and move on,
+  do not interrogate.
+
+Capability name for the pipeline: `local_allowed`. It covers Stages A to F as long as the work
+stays on your own device and account.
+
+### 3. Assessment of a target (needs authorization)
+Anything that reaches beyond your own instance: sending crafted or fuzzed requests to the app's
+backends to test them, probing another account's data, exploiting a server-side flaw, or doing a
+pentest / VA you were engaged to perform. This is the only category that needs the gate below.
+
+Capability name: `assessment_allowed`. Off until the gate passes, and it carries the scope.
+
+## The gate (only for category 3)
+
+Before any action that tests or reaches a backend, a third-party system, or another user's data,
+get these and record them in `templates/engagement-log.md`:
+
+1. **Target** - what system/app and who owns it.
+2. **Basis** - one of: you own the backend; a written penetration-test authorization (name,
+   dates); an active bug-bounty program that lists this target in scope; a CTF / lab.
+3. **Scope** - which hosts/endpoints, which accounts (test accounts only), which actions, and the
+   data rule (no real user data touched or exfiltrated).
+
+Missing any of these for a category-3 request? Do not run it. Stay in categories 1 and 2, or ask.
+
+## Hard refusals (purpose does not matter)
+
+Stop and refuse, even with a stated reason:
+
+- Touching an account, profile, message, or data that is not the user's own and is not explicitly
+  in authorized scope.
+- Sending traffic to hit or exploit backends you do not own and are not authorized to test.
+- Harvesting third-party credentials, tokens, or personal data.
+- Building or running something whose point is to harm others or to defeat a protection on a
+  system the user is not authorized to test. (Modding your own app's behaviour on your own device
+  is not this; attacking someone else's service is.)
+
+"It is just a test / a prop / for research" does not convert any of the above into allowed work.
+If you refuse, name the boundary and stop; do not offer a workaround to the same prohibited end.
+
+## Secrets handling
+
+When the sweep (Stage D) finds credentials or keys, record them as **class + location** ("Google
+Maps API key in `assets/config.json`"), not by pasting the full secret into shared outputs.
+Verify a secret only against a system you own or are in scope to test. Never test a found
+third-party key against that third party.
+
+## The engagement log
+
+Category-3 work keeps `templates/engagement-log.md` current: target, basis, scope, and a
+timestamped action list. It makes the work auditable and becomes the report's methodology. Local
+modding (categories 1 and 2) does not need an engagement log; a short note of what you are
+building and for which app is enough.
+
+```
+
+`references/01-acquire.md`:
+
+```md
+# Stage A: Acquire & identify
+
+Goal: get the app's artifact into a clean working directory, record exactly what it is, and set
+up the ledger the rest of the pipeline writes to. Nothing here decompiles yet; this stage is
+about provenance and hygiene.
+
+Working on a file the user hands you is always fine. **Pulling an app off a device is a
+dynamic action** (it touches a running system), so it needs the gate from
+`references/00-authorization.md` to have passed.
+
+## 1. Set up the working directory
+
+One target, one working dir, kept separate from your scripts and from the skill itself.
+
+```bash
+export TARGET=com.example.app          # the package, used as a label
+export WORK="$HOME/recon/$TARGET"
+mkdir -p "$WORK/artifact" "$WORK/decoded" "$WORK/evidence" "$WORK/notes"
+cp templates/engagement-log.md "$WORK/notes/engagement-log.md"
+cp templates/report.md        "$WORK/notes/report.md"
+```
+
+- `artifact/` holds the untrusted input (APK, splits, bundle).
+- `decoded/` is where apktool output lands in Stage B.
+- `evidence/` collects screenshots, logcat snippets, captured requests.
+- `notes/engagement-log.md` is the **findings ledger and audit trail**. Start filling it now with
+  the artifact details below.
+
+## 2. Get the artifact (three ways)
+
+### a. A local file the user supplies
+
+The simplest and lowest-risk path. Copy it into `artifact/` as-is and move to identity.
+
+```bash
+cp "/path/they/gave/app.apk" "$WORK/artifact/"
+```
+
+### b. Pull an installed package from a device
+
+Pulling from your own device is fine; pulling to analyse a target you were engaged to assess is
+category-3 work (see `00-authorization.md`). Modern apps are split, so list every path and pull
+all of them, not just `base.apk`.
+
+```bash
+# every APK that makes up the installed app (base + splits)
+adb shell pm path "$TARGET"
+# -> package:/data/app/~~.../base.apk
+#    package:/data/app/~~.../split_config.arm64_v8a.apk
+#    package:/data/app/~~.../split_config.xxhdpi.apk   ...
+
+mkdir -p "$WORK/artifact/installed"
+adb shell pm path "$TARGET" | sed 's/^package://' | tr -d '\r' | while read -r p; do
+  adb pull "$p" "$WORK/artifact/installed/"
+done
+```
+
+On Windows / Git Bash, device paths like `/data/app/...` get mangled by path conversion. Prefix
+the adb command with `MSYS_NO_PATHCONV=1` (this bites throughout the device loop; see
+`references/device-loop.md`).
+
+### c. A bundle: .apkm, .xapk, .aab
+
+`.apkm` (APKMirror) and `.xapk` are just zip files that contain `base.apk` plus `split_*.apk`.
+Unzip and treat the result like a split install.
+
+```bash
+cd "$WORK/artifact"
+unzip -o app.apkm -d bundle/        # -> bundle/base.apk, bundle/split_config.*.apk, ...
+```
+
+`.aab` (Android App Bundle) is the publishing format, not an installable one. If you only have an
+`.aab`, generate a device-specific APK set with `bundletool build-apks` and then `extract-apks`,
+or just work from `base/` inside the bundle for static analysis.
+
+### Merging splits
+
+Most code lives in `base.apk`. Resources, per-ABI native libs, and occasionally a class live in a
+`split_*.apk`. When Stage C says a class is referenced but you cannot find its definition in the
+decoded base, decode the relevant split too and search there. You do not usually need to physically
+merge; decoding base + the feature/config splits into sibling dirs and searching across both is
+enough.
+
+> Real example: Instagram ships as `base.apk` + a dozen `split_*.apk` (config, DPI, feature). We
+> pulled the full set into `insta452/` and decoded `base.apk`; that held the Java/Kotlin classes
+> we needed, while the splits carried resources and native code.
+
+## 3. Record identity
+
+Write all of this into the engagement log. It is how you tell two builds apart later and how a
+reader reproduces your work.
+
+```bash
+cd "$WORK/artifact"
+APK=base.apk                           # or bundle/base.apk
+
+# hash first, always
+sha256sum "$APK"
+
+# package, versions, SDK levels (aapt from build-tools, or aapt2)
+aapt dump badging "$APK" | grep -E "package:|sdkVersion|targetSdkVersion"
+# package: name='...' versionCode='...' versionName='...'
+# sdkVersion:'24'
+# targetSdkVersion:'34'
+
+# signing certificate (who signed it, and the digest you compare across builds)
+apksigner verify --print-certs "$APK"
+# Signer #1 certificate SHA-256 digest: ...
+# (or: keytool -printcert -jarfile "$APK")
+
+# split layout and size
+ls -la .
+du -h "$APK"
+```
+
+Minimum to capture:
+
+| Field | Command source |
+|---|---|
+| package name | `aapt dump badging` |
+| versionName / versionCode | `aapt dump badging` |
+| minSdk / targetSdk | `aapt dump badging` |
+| signing cert SHA-256 | `apksigner verify --print-certs` |
+| split layout | `ls` of the bundle |
+| file size + sha256 | `du`, `sha256sum` |
+
+The signing cert digest matters twice: it tells you whether two APKs are from the same signer
+(official vs repacked), and it is what a device checks when you later try to install a modified
+build over an existing one (a different signer means you must uninstall first).
+
+## 4. Untrusted-artifact hygiene
+
+Treat every APK and bundle as hostile input:
+
+- Keep it in its own `artifact/` dir, separate from your scripts.
+- Pass paths as arguments to tools; do not `cd` into the artifact dir and run interpreters or
+  build tools there (a planted `json.py` next to it would be imported before the real one).
+- Run any analysis script that reads the artifact with the interpreter's isolated mode
+  (`python -I script.py "$APK"`), so it will not load code from the artifact's directory.
+- Do not execute anything from inside the artifact. You are reading it, not running it, until the
+  authorized dynamic stage.
+
+## Done when
+
+- The artifact (and all splits) is in `artifact/`.
+- The engagement log has package, versions, SDK levels, signer digest, and sha256.
+- You know whether you are static-only or cleared for dynamic work.
+
+Next: `references/02-decode-inventory.md`.
+
+```
+
+`references/02-decode-inventory.md`:
+
+```md
+# Stage B: Decode & inventory
+
+Goal: turn the APK into readable smali and resources with **apktool**, build the one index that
+every later stage leans on (the string index), and read the manifest to map the attack surface.
+
+This is static work on a local file, always fine. This stage is the backbone; time spent here pays back in every
+later lookup.
+
+## 1. Decode with apktool
+
+```bash
+cd "$WORK"
+apktool d -r -f -o decoded/base artifact/base.apk
+```
+
+- `-r` ("no res") skips decoding resources back to source XML. It is much faster and gives you
+  the raw compiled resources plus `AndroidManifest.xml` already made readable. Use it by default,
+  it is what you want for code analysis.
+- **Drop `-r`** when you specifically need the real resource XML: `res/values/strings.xml`,
+  layouts, `res/xml/network_security_config.xml`, drawables by name. Then run a full decode:
+  `apktool d -f -o decoded/base-full artifact/base.apk`. The network-security-config and string
+  resources matter for Stage D, so a full decode of at least `res/` is usually worth it.
+- `-f` overwrites a previous decode.
+
+Decode the splits you need the same way (`decoded/split_feature`, etc.) when a class or resource
+is missing from base.
+
+Rebuild (for Stage E re-pack testing, noted here so it is in one place):
+
+```bash
+apktool b -o rebuilt.apk decoded/base      # then zipalign + apksigner sign with a debug key
+```
+
+## 2. Build the string index (the anchor backbone)
+
+Obfuscated builds rename classes and methods every release, but the **string literals do not
+change**: log tags, QPL/telemetry markers, JSON keys, URL fragments, resource names, error
+messages. The string index is a flat table that lets you jump from "a string I can see in the UI
+or the docs" to "the exact method that uses it". Almost every method you locate in Stage C starts
+from a string hit here.
+
+A practical index is a TSV of `(smali file, method, string literal)`:
+
+```bash
+cd "$WORK/decoded/base"
+python3 -I - "$PWD" > "$WORK/notes/strings.tsv" <<'PY'
+import os, re, sys
+root = sys.argv[1]
+meth = re.compile(r'^\.method\b.*?(\S+\(.*)')   # capture the method signature line
+strg = re.compile(r'const-string(?:/jumbo)?\s+\w+,\s+"((?:\\.|[^"\\])*)"')
+for dp, _, fns in os.walk(root):
+    for fn in fns:
+        if not fn.endswith(".smali"):
+            continue
+        path = os.path.relpath(os.path.join(dp, fn), root)
+        cur = "<class>"
+        with open(os.path.join(dp, fn), encoding="utf-8", errors="replace") as f:
+            for line in f:
+                m = meth.match(line.strip())
+                if m:
+                    cur = m.group(1); continue
+                if line.strip() == ".end method":
+                    cur = "<class>"; continue
+                s = strg.search(line)
+                if s:
+                    print(f"{path}\t{cur}\t{s.group(1)}")
+PY
+wc -l "$WORK/notes/strings.tsv"
+```
+
+Now a string becomes a one-line lookup:
+
+```bash
+# which method builds the feed request?
+grep -F 'homecoming_all' "$WORK/notes/strings.tsv"
+# res\...  Media.smali   A01(...)   "reel_mentions"   <- file, method, the string
+```
+
+ripgrep straight over the tree works too, but the TSV gives you the enclosing method for free,
+which is what you actually want:
+
+```bash
+rg -n 'const-string .*"IgFeedVideoPlayer' decoded/base   # file + line, but you then hunt for the method
+```
+
+Keep the TSV in `notes/`. You will `grep` it constantly.
+
+## 3. Class and method inventory
+
+A couple of cheap inventories help you navigate and spot the shape of the app:
+
+```bash
+cd "$WORK/decoded/base"
+# every class, by smali path
+find . -name '*.smali' | sed 's#^\./##; s#\.smali$##' > "$WORK/notes/classes.txt"
+wc -l "$WORK/notes/classes.txt"
+
+# obfuscation smell test: how many classes are single/double-letter or in X/
+grep -cE '(^|/)[A-Za-z0-9]{1,2}(/|$)' "$WORK/notes/classes.txt"
+rg -c '^\.method' $(find . -name '*.smali') | awk -F: '{s+=$2} END{print s" methods"}'
+```
+
+If most classes live under `X/` or have one and two character names, you are on the name-obfuscation
+rung (see `references/obfuscation-ladder.md`). If class names are real (`com.example.net.ApiClient`),
+Stage C is mostly reading.
+
+## 4. Read the manifest (the attack surface)
+
+`decoded/base/AndroidManifest.xml` is readable after apktool. Every item below is attack surface;
+list each one into the engagement log with a note on why it matters.
+
+### Exported components
+
+A component is reachable by other apps if `android:exported="true"`, or implicitly when it has an
+`<intent-filter>` and no explicit `exported` (behaviour varies by target SDK; on target SDK 31+ an
+explicit value is required, so an intent-filter without `exported` is worth a closer look).
+
+```bash
+cd "$WORK/decoded/base"
+rg -n 'android:exported="true"' AndroidManifest.xml
+rg -n '<(activity|service|receiver|provider)\b' AndroidManifest.xml
+```
+
+| Component | Why it is surface |
+|---|---|
+| exported activity | can be started by any app; check what intent extras it trusts |
+| exported service | can be bound/started externally; check what commands it accepts |
+| exported receiver | can be sent broadcasts externally; check the actions it handles |
+| exported provider | can be queried/written externally; check `grantUriPermissions`, path permissions, SQL built from the URI (traversal / injection) |
+
+### Permissions
+
+```bash
+rg -n '<uses-permission|<permission\b' AndroidManifest.xml
+```
+
+- Requested permissions tell you what the app can do (location, SMS, accounts, storage).
+- **Custom-defined** `<permission>` entries with a weak `protectionLevel` (`normal`/`dangerous`
+  instead of `signature`) are a classic hole: a component "protected" by a custom permission any
+  app can request is not protected at all.
+
+### Flags that are findings on their own
+
+```bash
+rg -n 'android:debuggable|usesCleartextTraffic|networkSecurityConfig|allowBackup|taskAffinity' AndroidManifest.xml
+```
+
+| Flag | Meaning |
+|---|---|
+| `android:debuggable="true"` | anyone can attach a debugger / run as the app on any device. Should never ship. |
+| `android:usesCleartextTraffic="true"` | plaintext HTTP allowed app-wide |
+| `android:networkSecurityConfig` | points to `res/xml/...`; read it (pins, cleartext exceptions, trusted user CAs). A config that trusts user-added CAs makes proxying trivial and weakens pinning. |
+| `android:allowBackup="true"` | app data can be extracted via `adb backup` on many devices |
+| `android:taskAffinity` set oddly | task-hijack / StrandHogg style surface |
+
+### Deep links
+
+```bash
+rg -n '<data ' AndroidManifest.xml      # android:scheme / android:host / android:pathPrefix
+```
+
+Each `<data>` scheme+host is an externally reachable entry point. Note them; Stage C traces what
+the handler does with the URL (does it trust host/path, open a WebView, pass params to a privileged
+action), and Stage E can fire them with `adb shell am start -a android.intent.action.VIEW -d`.
+
+### Provider authorities
+
+```bash
+rg -n 'android:authorities' AndroidManifest.xml
+```
+
+List authorities and whether the provider is exported and uses `grantUriPermissions`. Exported
+providers are a top source of path-traversal and data-leak bugs.
+
+## 5. Output: the attack-surface summary
+
+Write a short table into the ledger before leaving this stage:
+
+- Exported activities / services / receivers / providers (with the intents/actions they take).
+- Custom permissions and their protection level.
+- debuggable / cleartext / backup / network-security-config findings.
+- Deep-link schemes and hosts.
+- Provider authorities.
+
+This is the menu Stage C investigates and Stage E exercises.
+
+## Done when
+
+- `decoded/base` exists and (if you need resource XML) `decoded/base-full`.
+- `notes/strings.tsv` and `notes/classes.txt` are built.
+- The manifest attack-surface summary is in the ledger.
+
+Next: `references/03-static-understanding.md`.
+
+```
+
+`references/03-static-understanding.md`:
+
+```md
+# Stage C: Static understanding
+
+Goal: turn the decoded tree into a model of how the app is built, where its data lives, and how it
+talks to its backend. The output is a behaviour map you can test against on the device in Stage E.
+
+This is static work on a local file, always fine. The one technique that makes this stage possible on an obfuscated
+app, resolving code by shape instead of by name, is below and is worth reading before you start.
+
+## 1. Entry points
+
+Start where execution starts. These are where you pick up the threads to follow.
+
+- **Application subclass.** `<application android:name=...>` in the manifest. Its `onCreate` wires
+  up the app: dependency graph, network client, analytics, crash reporting, feature flags, often
+  the first place keys and base URLs appear.
+- **Launcher activity.** The `<activity>` with `MAIN` / `LAUNCHER` in its intent-filter. The first
+  screen and its navigation.
+- **Exported component handlers.** Every exported activity/service/receiver/provider from the
+  Stage B attack-surface list: these are entry points reachable from outside the app, so trace
+  what each does with the intent/URI it receives.
+- **`JNI_OnLoad` and native entry points.** If the app loads native libraries (`System.loadLibrary`),
+  `JNI_OnLoad` in the `.so` runs at load time. Relevant when crypto, string decryption, or
+  anti-tamper lives in native code (see `references/obfuscation-ladder.md`).
+
+```bash
+cd "$WORK/decoded/base"
+rg -n 'android:name' AndroidManifest.xml | rg -i 'application|activity'
+rg -rn 'loadLibrary|System\.load' --include '*.smali' | head
+```
+
+## 2. Data flow: where secrets and state live
+
+Follow the data, not just the code. For each sensitive item (auth token, session, API key, device
+id, user id) find where it is produced, where it is stored, and where it is read.
+
+| Store | Look for | Notes |
+|---|---|---|
+| SharedPreferences | `getSharedPreferences`, `.edit()`, `putString` | plaintext XML in the app's data dir unless the app uses EncryptedSharedPreferences |
+| SQLite | `openOrCreateDatabase`, `SQLiteDatabase`, `.db` assets | tokens and PII often cached here |
+| Android Keystore | `AndroidKeyStore`, `KeyGenParameterSpec`, `Cipher` | the right place for keys; check whether the app actually uses it or just stores raw secrets |
+| Bundled assets | `assets/`, `res/raw/` | config files, default credentials, certificates, seed data |
+| Hardcoded constants | `const-string` in init code | the Stage D sweep covers these; note the ones in the data path here |
+
+```bash
+rg -rn 'getSharedPreferences|AndroidKeyStore|openOrCreateDatabase' --include '*.smali' | head
+```
+
+Note which prefs file and which keys hold what. Stage E confirms the on-device values
+(`adb ... run-as` or root, reading the data dir).
+
+## 3. Network layer
+
+How the app reaches its backend is usually the richest surface.
+
+- **Base URLs and endpoints.** Search the string index for `https://`, API hostnames, path
+  fragments. Endpoint builders are often one class that assembles paths.
+- **Auth header construction.** Find where `Authorization`, a bearer token, an HMAC signature, or
+  a custom header is added. This is where request-signing secrets show up and where you learn how
+  to replay or forge a request (in scope).
+- **Certificate pinning.** The app may pin to defeat proxying:
+  - OkHttp `CertificatePinner` (`.add(` with `sha256/...` pins),
+  - a custom `X509TrustManager` / `HostnameVerifier`,
+  - pins declared in `res/xml/network_security_config.xml` (`<pin-set>`).
+
+```bash
+grep -F 'https://' "$WORK/notes/strings.tsv" | sort -u | head
+rg -rn 'CertificatePinner|X509TrustManager|HostnameVerifier' --include '*.smali'
+rg -n '<pin-set|<domain-config|cleartextTrafficPermitted' decoded/base-full/res/xml/*.xml 2>/dev/null
+```
+
+Record each pin location. Stage E decides how to handle pinning (user-CA trust if the config
+allows it; otherwise a documented runtime bypass, only under authorization).
+
+## 4. The central technique: resolve by shape, not by name
+
+On an obfuscated build a method is named `A0M` on one class called `X.05fU`, and both names change
+next release. You cannot search for the name. You search for what does not change, then confirm the
+shape.
+
+Four stable anchors, best first:
+
+1. **A literal string the method uses.** A log tag, a QPL marker, an error message, a JSON key.
+   This is why the string index exists. One `grep` gives you file + method.
+2. **The method's shape.** Parameter types, return type, static vs instance, parameter count.
+   "The `(Media, ...) -> boolean` method on this class", "the paramless `-> List` getter", "the
+   `(Context, OnClickListener, String, int) -> void` adder". Shapes survive renames.
+3. **The declaring class's relationships.** Its superclass, the interface it implements. "The
+   class that extends the one holding this string", "the implementors of this interface".
+4. **A stable data key.** A JSON field name the method parses (`"reel_mentions"`, `"story_cta"`).
+   App protocols keep their wire keys stable across builds even when code is renamed.
+
+### Worked example (Instagram, obfuscated)
+
+Find the feed video player's "start playing this media" method, so you can hook playback:
+
+- **Step 1, anchor on a string.** The player class logs a unique line. Search the index:
+
+  ```bash
+  grep -F 'IgFeedVideoPlayer: Persistent Visible Cover Image' "$WORK/notes/strings.tsv"
+  # -> smali_classesN/X/05fU.smali   <clinit or a method>   "IgFeedVideoPlayer: ..."
+  ```
+
+  That pins the player class, `X.05fU`, by a string that cannot be renamed away.
+
+- **Step 2, find the method by shape.** The start method is not named anything meaningful; it is
+  the instance method that takes a `Media` and returns `boolean`:
+
+  ```bash
+  rg -n '^\.method .*\(Lcom/instagram/feed/media/Media;.*\)Z$' decoded/base/smali*/X/05fU.smali
+  # -> A0M(Lcom/instagram/feed/media/Media; ... )Z
+  ```
+
+  You matched it by its signature, not its name.
+
+- **Step 3, follow relationships when the code moves.** In a later build the player class became a
+  base class and the start method moved to a subclass. The string still anchored the base class;
+  to find the real method you searched for classes whose superclass is that base and checked each
+  for the same `(Media, ...)Z` shape:
+
+  ```bash
+  rg -ln '^\.super LX/05fU;' decoded/base/smali*     # subclasses of the anchored base
+  # then grep each for the (Media,...)Z method
+  ```
+
+  Same anchor, one more hop, no reliance on a single name.
+
+### The recipe, generalized
+
+1. Pick a stable anchor you can see from outside: a string in the UI/logs/docs, or a wire key.
+2. `grep` the string index to land on a class/method.
+3. Confirm you have the right one by its shape (params, return, static/instance) and its role.
+4. If the exact method is not on the anchored class, climb the relationships: its superclass,
+   subclasses, implemented interfaces, or the callers/callees of a nearby method.
+5. Write down the anchor you used, not the obfuscated name. Next release you re-run the anchor;
+   the name you wrote down would be stale. (This is the difference between analysis that survives
+   an app update and analysis that breaks on the next one.)
+
+For string encryption, packing, and other rungs where even strings are hidden, see
+`references/obfuscation-ladder.md`. Where static reading runs out, confirm the hypothesis at
+runtime: `references/05-dynamic-analysis.md`.
+
+The same "anchor by string/shape/relationship" recipe runs at runtime with **DexKit**, which
+queries the loaded app for a member matching that description and returns the real `Method` for
+this build (and follows a method that moved by querying subclasses of the anchored class). That is
+also where you hook it with the **Xposed API** (LSPosed for root, LSPatch for no root) or Frida to
+log its arguments and confirm the shape you inferred: see
+`references/07-runtime-resolution-instrumentation.md`.
+
+## 5. The behaviour map
+
+Pull it together into one table in the ledger: component to behaviour to data to endpoint.
+
+| Component | What it does | Data it touches | Endpoint / sink |
+|---|---|---|---|
+| `LoginActivity` | credential entry | writes session token to `prefs/auth.xml` | `POST /api/v1/login`, bearer added in `ApiClient` |
+| exported `ShareReceiver` | handles share intents | reads clipboard, user id | `POST /api/v1/share` |
+| `FeedVideoPlayer` (anchored by string) | plays feed video | media id | video CDN URL from `video_versions` |
+
+The map is the thing you hand to Stage E to confirm ("does `ShareReceiver` really trust the intent
+extra?") and the skeleton of the Stage F report.
+
+## Done when
+
+- Entry points listed.
+- Sensitive data stores and their keys identified.
+- Network base URLs, auth construction, and pinning located.
+- A behaviour map in the ledger, with anchors (strings/shapes), not obfuscated names, recorded for
+  each located method.
+
+Next: `references/04-secrets-misconfig.md`, then confirm on device with
+`references/05-dynamic-analysis.md`.
+
+```
+
+`references/04-secrets-misconfig.md`:
+
+```md
+# Stage D: Secrets & misconfig
+
+Goal: sweep the decoded app for hardcoded secrets and for configuration mistakes. Two passes, a
+secrets sweep and a misconfig checklist, each producing findings in the format at the bottom.
+
+This is static work on a local file, always fine. Per `references/00-authorization.md`, record every secret as
+**class + location**, not by pasting the raw value into shared output, and verify a secret only
+against the in-scope system it belongs to.
+
+## Pass 1: secrets sweep
+
+### Where to look
+
+| Location | What hides there |
+|---|---|
+| `const-string` in smali | API keys, tokens, HMAC/signing secrets, hardcoded passwords, base URLs |
+| `assets/`, `res/raw/` | config JSON, `.properties`, certificates, keystores, seed credentials |
+| `res/values/strings.xml` (full decode) | keys devs put in string resources (very common) |
+| native libs `lib/*/*.so` | keys moved to native to look "hidden"; `strings` still finds many |
+| config / override files | default configs, feature-flag dumps, backend lists |
+| `AndroidManifest.xml` `<meta-data>` | Maps/Firebase/ad-network keys declared as meta-data |
+
+### High-signal patterns
+
+Run these over the decoded tree and the string index. Treat hits as leads to confirm, not as
+confirmed secrets.
+
+```bash
+cd "$WORK/decoded"
+
+# Google / Firebase / Maps API keys
+rg -rn 'AIza[0-9A-Za-z_\-]{35}' .
+
+# AWS access key id, and nearby secret
+rg -rn 'AKIA[0-9A-Z]{16}' .
+rg -rn -i 'aws.?secret.?access.?key' .
+
+# Google OAuth client ids
+rg -rn '[0-9]{10,12}-[0-9a-z]{32}\.apps\.googleusercontent\.com' .
+
+# Slack / GitHub / Stripe style tokens
+rg -rn 'xox[baprs]-[0-9A-Za-z-]{10,}' .
+rg -rn 'gh[pousr]_[0-9A-Za-z]{36}' .
+rg -rn 'sk_(live|test)_[0-9A-Za-z]{24,}' .
+
+# JWTs
+rg -rn 'eyJ[A-Za-z0-9_\-]{10,}\.eyJ[A-Za-z0-9_\-]{10,}\.' .
+
+# private keys and keystores
+rg -rn -- '-----BEGIN (RSA |EC |OPENSSH |)PRIVATE KEY-----' .
+find . -name '*.jks' -o -name '*.keystore' -o -name '*.p12' -o -name '*.pem'
+
+# generic secret-shaped assignments
+rg -rn -i '(secret|passwd|password|api[_-]?key|token|private[_-]?key)\s*[:=]\s*["'\''][^"'\'' ]{8,}' .
+
+# backend hosts (map the surface even when not secret)
+grep -oE 'https?://[A-Za-z0-9._-]+' "$WORK/notes/strings.tsv" | sort -u
+```
+
+For native libs, pull printable strings before assuming nothing is there:
+
+```bash
+for so in $(find . -name '*.so'); do echo "== $so"; strings -n 8 "$so" | rg -i 'key|secret|token|https?://'; done
+```
+
+### Reduce false positives
+
+A match is a lead. Before reporting, confirm the value is actually a live secret and not a
+placeholder, a public key, a sample from a library, or a test fixture. Check the surrounding code:
+is it passed to an auth header, a signing routine, a cloud SDK init? A key that is only used to
+talk to a first-party backend in scope is in scope to verify; a third-party key (someone else's
+service) is reported but **not** tested against that third party.
+
+## Pass 2: misconfig checklist
+
+Most of these come straight from the Stage B manifest read; confirm and write them up here.
+
+| Check | How to find it | Why it matters |
+|---|---|---|
+| Debuggable build | `android:debuggable="true"` | anyone can run-as the app, read its data, attach a debugger |
+| Cleartext traffic | `usesCleartextTraffic="true"`, or no `network_security_config` on older target SDK | plaintext HTTP, trivially intercepted |
+| Weak network-security-config | `res/xml/*.xml`: `cleartextTrafficPermitted="true"`, `<trust-anchors>` including `user` CAs, no `<pin-set>` | weakens or removes TLS protection; user-CA trust makes proxying easy |
+| Exported + unprotected components | exported with no permission or a `normal`/`dangerous` custom permission | externally invokable; check what they trust |
+| Exported content provider | `android:exported="true"` provider, `grantUriPermissions`, path rules | path traversal (`../`) and SQL injection via the query URI |
+| World-readable storage | `MODE_WORLD_READABLE/WRITEABLE`, files written to external storage | other apps can read app data |
+| Insecure deep-link handling | deep-link handler passes host/path to a WebView, a redirect, or a privileged action without validation | open redirect, WebView loadUrl with attacker URL, auth bypass |
+| Broken / absent pinning | no `CertificatePinner`, a no-op `TrustManager`, pins only in a config that also trusts user CAs | MITM on a hostile network |
+| Backup enabled | `allowBackup="true"` | `adb backup` can extract app data on many devices |
+| Janus / v1-only signing | signed only with the v1 (JAR) scheme | historical tampering class; note the signing scheme from `apksigner verify -v` |
+
+```bash
+cd "$WORK/decoded"
+rg -n 'MODE_WORLD_READABLE|MODE_WORLD_WRITEABLE' --include '*.smali' -r .
+cat base-full/res/xml/network_security_config.xml 2>/dev/null
+apksigner verify -v "$WORK/artifact/base.apk" | rg -i 'scheme|verified'
+```
+
+Each misconfig becomes a finding; the exported-component and deep-link ones usually get confirmed
+for real in Stage E by actually invoking them (`am start`, `am broadcast`, `content query`) within
+scope.
+
+## Finding format
+
+Write each finding into the ledger like this:
+
+```
+[severity] <short title>
+  where:   res/values/strings.xml:48   (or X.0aB.smali:142, assets/config.json)
+  class:   Google Maps API key   (class + location, not the raw value in shared output)
+  impact:  one line on what an attacker gains
+  verify:  how to confirm, against the in-scope system only
+```
+
+Example:
+
+```
+[medium] Hardcoded first-party API signing secret
+  where:   smali_classes3/X/0aB.smali:142  (anchored by const-string "x-sig")
+  class:   HMAC request-signing secret for api.example.com (in scope)
+  impact:  lets a client forge signed requests to the first-party API
+  verify:  replay a signed request to the in-scope api.example.com with a test account
+```
+
+Keep raw secret values only in the restricted working notes if the engagement needs them, never in
+anything shared, and never test a third-party key against the third party.
+
+## Done when
+
+- Secrets sweep run over smali, assets, resources, native libs, and config; leads confirmed.
+- Misconfig checklist walked; each hit written up.
+- Every finding is in the ledger in the format above, as class + location.
+
+Next: confirm the exploitable ones on device with `references/05-dynamic-analysis.md`, then write
+them up with `references/06-verify-report.md`.
+
+```
+
+`references/05-dynamic-analysis.md`:
+
+```md
+# Stage E: Dynamic analysis
+
+**Know which category you are in (see `00-authorization.md`).** Running the app on your own device
+or emulator, with your own account, and instrumenting it to understand or mod it is `local` work:
+fine, no authorization record needed. That covers almost everything in this stage, and it is
+exactly how the Instagram work was done. The moment an action reaches past your own instance,
+sending crafted traffic to the backend to test it, probing another account, exploiting a
+server-side flaw, it becomes `assessment` work: stop and make sure the gate has passed and the
+scope is in `templates/engagement-log.md` first.
+
+Static reading (Stages B to D) told you how the app is *supposed* to work and where the
+interesting code is. This stage proves or kills each of those hypotheses against the running app.
+A method you suspect handles auth either fires with the arguments you expected, or it does not.
+That confirmation is the whole point, not just "poking the app".
+
+Log every action with a timestamp in the engagement log as you go.
+
+## 1. Set up the test device
+
+Use a device or emulator you control, in scope, with test accounts only.
+
+```bash
+adb devices                      # confirm the device is attached and authorized
+adb shell getprop ro.build.version.release   # Android version
+adb shell getprop ro.product.model
+```
+
+Install the build you are testing:
+
+```bash
+adb install -r target.apk        # -r replaces an existing install (same signing key)
+# split bundle:
+adb install-multiple base.apk split_config.*.apk
+```
+
+Grant only the permissions the test needs, nothing broad "to be safe". Runtime permissions and
+special app-ops are set per package:
+
+```bash
+adb shell pm grant <pkg> android.permission.CAMERA
+adb shell appops set <pkg> MANAGE_EXTERNAL_STORAGE allow   # "all files access"
+```
+
+Note in the log: **a reinstall resets runtime permissions and special app-ops.** If the app
+silently stops writing files or loses a permission after you reinstall a new build, re-grant
+before you conclude anything is broken. This bites every time you iterate on builds.
+
+## 2. The screenshot to read to act loop
+
+This is how you actually operate the app. Full mechanics and gotchas are in
+`references/device-loop.md`; the short version:
+
+1. Have `scrcpy` mirroring so you can watch what happens.
+2. `adb exec-out screencap -p > shot.png`, then read the screenshot.
+3. When you need to tap a specific control, dump the view tree
+   (`adb shell uiautomator dump`), find the node by its `text` / `content-desc` /
+   `resource-id`, compute the centre of its `bounds`, and `adb shell input tap x y`.
+4. Screenshot again to confirm the result before the next action.
+
+Stay inside scope. Drive your own test accounts and test content. Never tap into another person's
+profile, chat, or data to "see what happens".
+
+## 3. Observe the running app
+
+### Logcat, filtered to the package
+
+Unfiltered logcat is noise. Scope it to the process:
+
+```bash
+pid=$(adb shell pidof <pkg> | tr -d '\r')
+adb logcat --pid="$pid"
+# or filter by a tag the app uses, or by your own instrumentation tag:
+adb logcat -s MyHookTag:V
+adb logcat | grep -a <pkg>
+```
+
+Look for: stack traces, the app's own debug logging, URLs, request/response fragments, and
+anything your instrumentation prints.
+
+### File writes under the app's data dir
+
+The app's private storage shows you what it persists: shared-prefs XML, SQLite DBs, cached
+tokens, downloaded config.
+
+```bash
+# rooted device / emulator:
+adb shell su -c 'ls -la /data/data/<pkg>/shared_prefs /data/data/<pkg>/files'
+adb shell su -c 'cat /data/data/<pkg>/shared_prefs/<name>.xml'
+
+# debuggable app, no root:
+adb shell run-as <pkg> ls -la shared_prefs
+adb shell run-as <pkg> cat shared_prefs/<name>.xml
+```
+
+Reading a file to find where a setting lives, or to confirm a token is stored in cleartext, is
+exactly the kind of evidence a finding needs. Record the path.
+
+### Network traffic (in scope only)
+
+Route the device through a proxy and read the API calls: base URLs, auth headers, what data goes
+out, whether TLS is enforced, whether the app pins. Only point it at hosts inside the stated
+scope. Cert pinning and user-CA trust are handled in `references/tooling-setup.md` and the
+pinning rung in `references/obfuscation-ladder.md`.
+
+### Runtime-decrypted strings and in-memory values
+
+When the static tree had no readable literals (string encryption, see the obfuscation ladder),
+the plaintext still exists at runtime. Capture it where it is produced rather than trying to
+reimplement the decryptor. Likewise, the real value of a token or key is whatever is in memory
+when the app uses it, not necessarily what is stored at rest.
+
+## 4. Instrumentation under authorization
+
+To watch specific methods, attach a hooking framework (Frida for a quick, root-or-gadget attach;
+the Xposed API via LSPosed for root or LSPatch for no root, as a persistent module) and log the
+arguments and return values of the methods you anchored in Stage C. In an obfuscated app, resolve
+the member first with DexKit, then hook it. The tools, the Xposed before/after/replace callbacks,
+and the exact patterns are in `references/07-runtime-resolution-instrumentation.md`. Keep it to
+observation and confirmation, inside scope.
+
+The habit that makes this productive is the same one from static analysis: **you already located
+the method by shape, now you log it to learn the shape better.** Concretely, the pattern that
+works again and again:
+
+- Hook the method you suspect is a dispatcher or a builder, print its declaring class, its
+  parameter types, and the live values. You often find that one logical action (say, building a
+  menu, or entering a screen) is handled by *different* methods in different code paths, for
+  example a `static` helper for one case and an instance method for another. Logging all the
+  candidates behind a shared string anchor, then checking which actually fires, is how you find
+  the real one without guessing from names that changed between versions.
+- Print a value tree for an opaque object (walk its fields, call its no-arg getters) to learn
+  which field holds the thing you care about, instead of hardcoding a field name.
+- Dump the arguments of a serializer or a network call to recover plaintext that the static tree
+  encrypted or built dynamically.
+
+Remove or gate your instrumentation when done; do not leave a live hook running past the
+engagement.
+
+## 5. Correlate static and runtime (the heart of the stage)
+
+For each hypothesis from Stage C, write down the prediction, then test it:
+
+| Static hypothesis | Runtime check | Outcome |
+|---|---|---|
+| `X.0aB.A05(Media, Context)` builds the download menu | Hook it, open the menu, confirm it fires with those arg types | confirmed / wrong method / never fires |
+| Auth token is HMAC-signed with a hardcoded key | Hook the signer, compare the key bytes to the static constant | confirmed / key comes from elsewhere |
+| Deep link `app://x` reaches an exported activity unguarded | `adb shell am start -a VIEW -d 'app://x' <pkg>/...` and watch | reachable / blocked / needs auth |
+
+A hypothesis that fires as predicted becomes a confirmed finding with runtime evidence. One that
+does not is either wrong (drop it) or points at a code path you have not found yet (go back to
+Stage C). Either way you now know, instead of guessing. Record the result and the evidence path
+(log excerpt, screenshot, pcap) in the findings ledger.
+
+Carry confirmed findings into `references/06-verify-report.md`.
+
+```
+
+`references/06-verify-report.md`:
+
+```md
+# Stage F: Verify and report
+
+Everything up to here produced candidate findings. This stage turns them into a report you would
+be willing to put your name on: each finding re-proven, ranked, and written up with its evidence
+and a fix.
+
+## 1. Verify before you claim
+
+A finding you cannot reproduce on demand is not a finding yet. Before anything goes in the
+report, run it again, cleanly.
+
+- **Static findings** (a hardcoded secret, an exported component, a cleartext flag): re-open the
+  exact file and line, confirm the string or attribute is still there and means what you said.
+  Quote it.
+- **Dynamic findings** (a reachable deep link, a token in cleartext, a signer using a constant
+  key): reproduce the action from a known starting state and capture fresh evidence (a logcat
+  excerpt, a screenshot, a captured request, a file dump). If it only worked once and you cannot
+  make it happen again, say so and downgrade or drop it.
+
+This is the discipline that keeps the report honest. "It probably does X" and "I saw it do X
+once" are not the same as "here is X reproduced with this evidence". Downgrade anything that does
+not survive a second run; drop anything that evaporates.
+
+Record the verification status against each item in the findings ledger: `confirmed`,
+`downgraded`, or `dropped`, with the evidence path.
+
+## 2. Rank by severity
+
+Rank on impact times likelihood, or map to whatever rubric the engagement expects (CVSS, or a
+simple Critical / High / Medium / Low / Info scale). Keep it defensible, not dramatic.
+
+- **Impact**: what an attacker gains (account takeover, data disclosure, privilege escalation,
+  denial of service, information leak).
+- **Likelihood**: how reachable it is (remote and unauthenticated beats local-and-needs-root;
+  an exported component beats one that needs a crafted companion app; a hardcoded third-party key
+  with wide scope beats one that is already public or useless).
+
+A hardcoded backend admin key reachable from an exported component is Critical. A verbose log
+line that leaks a non-sensitive internal id is Info. Say why each sits where it does.
+
+## 3. Write the report
+
+Build it from two sources you already have:
+
+- **The engagement log** (`templates/engagement-log.md`) is your methodology and scope section.
+  It already records the authorization, the target, the environment, and the actions you took.
+  That is not boilerplate; it is what makes the work auditable and reproducible.
+- **The findings ledger** is the body.
+
+Use `templates/report.md`. Its shape:
+
+1. **Summary** - what was assessed, the headline results, the count by severity.
+2. **Scope and methodology** - lifted from the engagement log: target, authorization basis,
+   what was and was not in scope, tools and versions, device.
+3. **Attack surface** - the picture from Stage B: exported components, permissions, deep links,
+   network posture. Orient the reader before the findings.
+4. **Findings** - one per item, ranked most severe first. Each: title, severity and why, where
+   (file + line, or endpoint, or component), evidence, reproduction steps, and remediation.
+5. **Remediation summary** - the fixes collected in one place, so a developer can work the list.
+6. **Appendix** - tool versions, artifact hashes, anything long.
+
+## 4. How much exploit detail
+
+Default to **class of problem plus location**: name the weakness and point at exactly where it
+is, with enough evidence to prove it and enough direction to fix it. For example: "the session
+token is stored in cleartext in `shared_prefs/auth.xml`, readable by any process with the app's
+uid or by a backup", with the relevant line and a note on how you read it.
+
+Give full step-by-step exploit detail only when the engagement explicitly asks for it (some
+pentest deliverables want a working proof of concept). Even then, keep secrets as class and
+location, not pasted in full, and keep it inside the authorized scope.
+
+If the finding is a security vulnerability class, describe the class and the fix, not a weaponized
+recipe for use against systems outside scope.
+
+## 5. Remediation, concretely
+
+Pair every finding with an actionable fix, not just "this is bad":
+
+| Finding class | Typical remediation |
+|---|---|
+| Hardcoded secret | Move to a server-side exchange or the device keystore; rotate the exposed secret |
+| Cleartext storage of a token | Use `EncryptedSharedPreferences` / the Keystore; do not persist long-lived secrets |
+| Exported, unprotected component | Set `exported=false`, or guard with a signature-level permission and validate all input |
+| Cleartext traffic | Enforce HTTPS, set a strict `networkSecurityConfig`, remove `usesCleartextTraffic` |
+| Broken or absent cert pinning | Pin correctly, and fail closed |
+| Debuggable release | Ship with `debuggable=false` |
+| Weak deep-link handling | Validate and authorize every deep-link path; do not trust the URI |
+
+Close the report by confirming the verification status of each finding, so the reader knows every
+item in it was reproduced, not assumed.
+
+```
+
+`references/07-runtime-resolution-instrumentation.md`:
+
+```md
+# Runtime resolution and instrumentation (DexKit, LSPosed, LSPatch, Frida)
+
+This is the bridge between static reading (Stages B and C) and dynamic confirmation (Stage E).
+Static anchoring tells you *what shape* a method has; these tools *find it in the live app by that
+shape* and *watch or change it while it runs*. Everything here that attaches to a running process
+runs on a device, so it is at least `local` work (your own device and account; see
+`00-authorization.md`). It only becomes `assessment` work, needing the gate, if you use it to
+reach past your own instance, for example to probe a backend or another account.
+
+The recurring idea: you almost never have the real name of a class or method in an obfuscated
+app. You have a string it uses, a signature, a superclass, a JSON key. These tools let you turn
+that description into the actual runtime member, and keep working when the next app version
+renames everything.
+
+## DexKit: resolve by query at runtime
+
+[DexKit](https://github.com/LuckyPray/DexKit) is a fast DEX analysis library. Instead of grepping
+smali and hoping a name holds, you ask the loaded app's DEX for members that match a *description*
+and get back the real `Method`/`Class` for this exact build. It is the runtime counterpart of the
+string index from Stage B.
+
+What you can query on:
+
+- **Strings a method uses** (equal, contains, or a set it references). This is the strongest
+  anchor. Example from the Instagram work: find the feed video player by the class that uses
+  `"IgFeedVideoPlayer: Persistent Visible Cover Image"`.
+- **Method shape**: parameter types, return type, parameter count, static vs instance,
+  declaring class.
+- **Relationships**: callers and callees of a method, who reads/writes a field, implementers of
+  an interface, subclasses of a class. This is how you follow a method that *moved*: when
+  Instagram 452.0.0.22 relocated the player's start method into a subclass, the fix was to search
+  classes whose superclass was the one holding the anchor string, then match the
+  `(Media, ...) -> boolean` shape in those subclasses.
+
+A practical pattern that pays off:
+
+1. In Stage B/C, pick the most stable anchor you can (a literal log/QPL string, a JSON key like
+   `"reel_mentions"`, a hardcoded error message). Literal strings and JSON keys survive version
+   bumps; names do not.
+2. Query DexKit for the method/class by that anchor plus a shape constraint, so you land on one
+   member, not a list.
+3. **Cache the resolution keyed by the app's versionCode.** Re-resolve when the version changes.
+   (We cached by versionCode and had to clear the cache after a new build; a different build
+   reusing stale lookups is a real bug source.)
+4. If a query returns nothing, log *what was tried* (the anchor and the shape) and fall back to a
+   second anchor. Never guess a name.
+
+DexKit runs inside the target process, so you reach it through an instrumentation framework
+(below) or a Frida gadget. It is the tool that makes "resolve by shape, not by name" practical at
+runtime.
+
+## The Xposed hooking API (what LSPosed and LSPatch actually provide)
+
+LSPosed and LSPatch are *frameworks*; the thing you write code against is the **Xposed API**. It
+is a method-hooking mechanism: you take a resolved `Method` (from static analysis or a DexKit
+query) and attach a callback that runs before, after, or instead of it, with full access to the
+arguments, the return value, and `this`.
+
+The primitives you use constantly:
+
+- **Attach a hook**: `XposedBridge.hookMethod(method, callback)` for a `Method`/`Constructor` you
+  already resolved, or `XposedHelpers.findAndHookMethod(clazz, "name", paramTypes..., callback)`
+  when the name is stable. Resolving the member first (by string/shape/DexKit) and then calling
+  `hookMethod` is the obfuscation-proof path.
+- **The callback**: subclass `XC_MethodHook` and override:
+  - `beforeHookedMethod(param)` runs before the original. Read or rewrite inputs via
+    `param.args[i]`; short-circuit the original entirely with `param.setResult(x)` or
+    `param.setThrowable(t)` (the original never runs).
+  - `afterHookedMethod(param)` runs after. Read the real return with `param.getResult()` and
+    replace it with `param.setResult(x)`; inspect `param.thisObject` and `param.args`.
+  - `XC_MethodReplacement.replaceHookedMethod(param)` replaces the body outright.
+- **Reflection helpers**: `XposedHelpers` wraps the reflection you need inside a hook:
+  `getObjectField` / `setObjectField`, `callMethod`, `getStaticObjectField`, `newInstance`. Handy
+  when you are walking an obfuscated object graph to pull out a value.
+
+How this was used on Instagram, concretely:
+
+- Hook a `CharSequence[]`-returning option-builder (found by its menu string), read
+  `param.getResult()`, append your own entry, and `setResult` the extended array, to add a row to
+  a native menu.
+- Hook the tap dispatcher (found by its strings), check which label was tapped in
+  `beforeHookedMethod`, and `setResult(null)` to consume the event when it is yours.
+- Hook an entry/parse method and log `param.args` to *learn the shape* of an object you could not
+  read statically.
+
+Discipline inside a hook:
+
+- **Fail soft.** Wrap the body so a bad reflection call logs and returns instead of crashing the
+  host process. A crash in a hook is a crash in the app.
+- **Guard the callback top** where the framework/ART version needs it (some Android versions have
+  ART/JIT edge cases around hooked stubs; put the framework's recommended guard first).
+- **Hooks stack**, so independent observers can share one method without knowing about each other.
+- The modern API is **libxposed** (the newer, versioned Xposed API that LSPosed targets); the
+  classic `de.robv.android.xposed.*` API above is still what most material shows and what the
+  frameworks keep compatible. Either way the before/after/replace model is the same.
+
+You still need DexKit (or static resolution) to *get* the `Method` in an obfuscated app; the
+Xposed API is what you do with it once you have it.
+
+## LSPosed: instrument with root
+
+[LSPosed](https://github.com/JingMatrix/LSPosed) (the JingMatrix fork is the maintained one) is an
+Xposed framework that runs on a rooted device or an emulator with root. You write a module that
+hooks methods (resolved statically or via DexKit) and logs or alters their arguments and returns.
+
+Use it to:
+
+- **Observe**: log the arguments and return of a method you anchored statically, to confirm it
+  does what you think. In the Instagram work this is how we learned the shape of thread entries
+  and of the `CharSequence[]` option-builder methods, by logging what flowed through them.
+- **Probe data flow**: dump the object a method receives, walk its fields, see the real values
+  (including strings that were encrypted on disk but are plaintext in memory).
+- **Confirm a hypothesis cheaply**: hook the suspected auth method; either it fires with the
+  expected args or it does not.
+
+Notes:
+
+- Scope the module to the target package only.
+- Hooks stack, so you can attach several independent observers to one method.
+- Keep a guard at the top of each hook callback (frameworks differ; some ART/JIT interactions on
+  certain Android versions need care). Fail soft inside hooks so a bad reflection call never
+  crashes the host.
+- Prefer observation. If the engagement authorizes changing behaviour (for example, forcing a
+  gate open to reach a screen in scope), treat it as an explicit, logged action, not a default.
+
+## LSPatch: instrument without root
+
+[LSPatch](https://github.com/JingMatrix/LSPatch) applies the same Xposed modules to an app
+**without** root by patching the APK (or wrapping it at install time) to load a loader dex. Use it
+when:
+
+- You cannot or should not root the test device.
+- You want the instrumentation to live only inside your patched copy of the in-scope app, not
+  system-wide.
+
+Flow: install LSPatch, pick the target APK (or installed app), choose local patch mode, inject the
+loader dex, start the patch, install the patched APK, then enable your module against it. The
+patched app is its own signed build, so it installs alongside or in place of the original on a
+test device (different signature means uninstall-first if the original was present).
+
+LSPatch is the no-root path; LSPosed is the root path. The module and the DexKit queries inside it
+are identical either way.
+
+## Frida: no-persistence instrumentation
+
+[Frida](https://github.com/frida/frida) attaches to a process and runs JavaScript to hook, trace, and dump,
+with nothing left installed. Good for:
+
+- Quick, exploratory tracing without building a module (`frida-trace`, interactive REPL).
+- Dumping decrypted DEX or strings from memory (useful against string encryption and packers,
+  under authorization).
+- Bypassing a protection *only when the engagement authorizes it* and documenting it as a
+  finding, for example SSL-pinning bypass to see traffic you are allowed to see.
+
+Root runs a `frida-server`; non-root uses a gadget injected into a repackaged in-scope app (the
+same idea as LSPatch, different payload).
+
+## Choosing between them
+
+| Situation | Reach for |
+|---|---|
+| Find an obfuscated member by string/shape/relationship at runtime | DexKit (inside a module or gadget) |
+| Persistent, structured instrumentation on a rooted test device | LSPosed module |
+| Same, but no root allowed | LSPatch + the same module |
+| Quick exploration, memory dumps, one-off traces, no install | Frida |
+
+All of them serve Stage E's real job: **correlate static and runtime.** You formed a hypothesis by
+reading apktool output; here you prove or kill it against the live app, in scope, with the result
+written to the engagement log.
+
+```
+
+`references/device-loop.md`:
+
+```md
+# The device loop: driving the app with adb and scrcpy
+
+This is the concrete mechanic behind Stage E's "screenshot to read to act" loop. It is all
+`local` work when it drives your own device and account (see `00-authorization.md`); it only
+needs the `assessment` gate if an action reaches past your own instance. Either way you stay inside
+scope, on your own test accounts and content.
+
+The loop is simple and you repeat it constantly:
+
+1. **Watch** with scrcpy.
+2. **Capture** the screen and read it.
+3. **Locate** the control you want (by its view-tree node).
+4. **Act** (tap, swipe, type, key).
+5. **Capture again** and confirm before the next action.
+
+## Watch: scrcpy
+
+Mirror the device so you can see what each action does:
+
+```bash
+scrcpy --stay-awake --window-title "test-device"
+```
+
+Keep it running in the background. You act through `adb`; scrcpy is your eyes. You can also click
+in the scrcpy window directly, but scripted `adb input` is reproducible and goes in the log.
+
+## Capture: screenshot
+
+```bash
+adb exec-out screencap -p > shot.png
+```
+
+Read `shot.png`. `exec-out` streams the PNG straight to the file without the shell mangling line
+endings. Take one before and after every meaningful action, so you always know the state you are
+acting on.
+
+## Locate: the view tree
+
+When you need to tap a *specific* control rather than a fixed pixel, dump the accessibility view
+tree and find the node:
+
+```bash
+# dump on the device, then read it
+adb shell uiautomator dump /sdcard/ui.xml
+adb shell cat /sdcard/ui.xml
+```
+
+Each node carries `text`, `content-desc`, `resource-id`, `clickable`, and `bounds`. Find your
+target by whichever attribute is stable (prefer `resource-id`, then `content-desc`, then visible
+`text`), read its `bounds="[x1,y1][x2,y2]"`, and tap the centre:
+
+```
+centre_x = (x1 + x2) / 2
+centre_y = (y1 + y2) / 2
+```
+
+```bash
+adb shell input tap "$centre_x" "$centre_y"
+```
+
+Resolving the tap target from the tree instead of hardcoding coordinates means your steps survive
+a different screen size or a shifted layout, and they read clearly in the log.
+
+## Act: input
+
+```bash
+adb shell input tap X Y
+adb shell input swipe X1 Y1 X2 Y2 DURATION_MS      # scroll / drag; longer duration = slower
+adb shell input keyevent 4                          # BACK
+adb shell input keyevent 3                          # HOME
+adb shell input keyevent 66                         # ENTER
+adb shell input text "hello%sworld"                 # %s is a literal space
+```
+
+`input text` does not accept raw spaces; use `%s`. For a long-press, use `input swipe x y x y 800`
+(same point, long duration).
+
+Launch a specific screen or deep link directly instead of navigating by hand when you can:
+
+```bash
+adb shell monkey -p <pkg> -c android.intent.category.LAUNCHER 1
+adb shell am start -a android.intent.action.VIEW -d 'app://path' <pkg>/.SomeActivity
+```
+
+## Read the app's own logs
+
+Beyond logcat, an app (or your instrumentation) often writes a log file under its data dir. Read
+it the same way as any private file:
+
+```bash
+adb shell su -c 'cat /data/data/<pkg>/files/<app>.log'      # rooted
+adb shell run-as <pkg> cat files/<app>.log                   # debuggable app
+```
+
+## Gotchas and their exact fixes
+
+These are the ones that waste time if you have not seen them before.
+
+**Git-Bash rewrites `/sdcard` into a Windows path.** On Windows under Git-Bash / MSYS, a path
+like `/sdcard/ui.xml` gets "helpfully" converted to something like `C:/Program Files/Git/sdcard/...`
+and the device command fails with "No such file or directory". Disable the conversion for those
+commands:
+
+```bash
+export MSYS_NO_PATHCONV=1
+adb shell uiautomator dump /sdcard/ui.xml      # now the path reaches the device intact
+```
+
+Set it for any `adb shell` command that contains a device-side absolute path.
+
+**`adb` goes `unauthorized` or `offline`.** After a reboot, a cable reconnect, or sometimes a
+reinstall, the device shows as `unauthorized` or `offline` and nothing works. Restart the adb
+server and re-accept the prompt on the device:
+
+```bash
+adb kill-server
+adb start-server
+adb devices            # watch for the "Allow USB debugging?" prompt on the phone; tick "always"
+```
+
+`adb reconnect offline` sometimes clears a stuck `offline` without a full restart.
+
+**`uiautomator dump` says "could not get idle state".** This happens when the UI never settles,
+for example a screen with a looping animation or an auto-scrolling carousel. The dump waits for
+the view tree to be idle and gives up. Options: wait and retry, interact to stop the animation
+first, or skip the tree entirely and act off a screenshot by reading the control's position
+visually.
+
+**Coordinates look wrong by a constant factor.** When you read a control's position off a
+screenshot that your viewer displayed downscaled, the pixel coordinates you read are in the
+*displayed* size, not the device's real resolution. Multiply back to real pixels before you
+`input tap`. The view-tree `bounds` are always in real device pixels, which is another reason to
+prefer them over eyeballing a shrunk image.
+
+**The app vanished mid-session.** On a low-memory device the low-memory killer can kill the app
+while it is backgrounded (for example while you are reading logs). A screenshot showing the home
+screen or a different app, when you expected yours, is the tell. Relaunch and continue; note it in
+the log so you do not misread it as a crash.
+
+**A reinstall silently dropped a permission.** Covered in Stage E: reinstalling a new build
+resets runtime permissions and special app-ops. If a feature stops working right after you push a
+new build, re-grant before concluding it regressed.
+
+## Scope, every time
+
+Everything here drives a real app on a real device. Act only on your own test accounts and your
+own test content, only against hosts in scope. Do not open, tap into, or capture another person's
+profile, messages, or data to "check behaviour". If a step would touch something outside scope,
+stop and go back to the gate.
+
+```
+
+`references/obfuscation-ladder.md`:
+
+```md
+# The obfuscation ladder
+
+Apps sit on a spectrum from "real names, read it like source" to "packed, encrypted, and actively
+fighting you". Work out which rungs a target is on, because that decides your tactics for Stage C
+and often pushes work into Stage E.
+
+For each rung: how to **detect** it, and the **tactic**. One theme runs through all of them, and
+it is the core habit from `SKILL.md`: **resolve by shape, not by name.** Names are the first thing
+obfuscation takes away; strings, resource names, method shapes, class relationships and JSON keys
+are what survive.
+
+A second theme for the protective rungs: **document a protection as a finding, do not treat
+defeating it as the goal.** Bypassing anti-tamper, pinning, or root detection is only in scope
+when the authorization explicitly covers it, and even then it is reported, not silently removed.
+
+---
+
+## Rung 0: none or light
+
+**Detect.** Real class and method names (`com.example.auth.TokenStore.refresh`), readable string
+literals, a clear package structure.
+
+**Tactic.** Read it directly. Grep for the feature's strings and resource names, follow the call
+graph, done. Most of your effort goes into understanding behaviour, not fighting the binary.
+
+---
+
+## Rung 1: name obfuscation (R8 / ProGuard)
+
+**Detect.** Classes and methods renamed to `a`, `b`, `X.0aB`, single letters and short tokens in
+an `X` package; no human-meaningful names; the ProGuard/R8 mapping file is not shipped (it never
+is in a release you did not build).
+
+**Tactic.** This is the main event for most large apps, and the recipe is the one to internalize.
+Anchor on what did **not** get renamed:
+
+- **String literals.** Log tags, error messages, API path fragments, analytics event names,
+  internal debug strings. These are rarely obfuscated and they pin a class or method precisely.
+  Build the string index (Stage B) and search it.
+- **Resource names.** Layout ids, view ids, drawable and string resource names stay readable in
+  the decoded resources, and the code references them. A `R.id.login_button` reference locates the
+  login screen even when its class is named `q`.
+- **Method shape.** Parameter types and return type, in order. "A `void` method taking
+  `(Media, SomeBuilder)`" or "a static method returning `CharSequence[]`" identifies the method
+  across versions even as its name churns.
+- **Superclass and interface.** `X.0dJg` is meaningless, but "the subclass of the class holding
+  the `IgFeedVideoPlayer` string" is stable. Walk `.super` and `.implements` relationships.
+- **JSON keys.** Serializers and model classes are renamed, but the wire JSON keys
+  (`reel_mentions`, `story_link_stickers`, `expiring_at`) are part of the protocol and do not
+  change. Find the getter guarded by a given JSON key rather than by name.
+
+See `03-static-understanding.md` for how these anchors drive the behaviour map. The payoff: an
+analysis anchored this way keeps working when the app updates and every name shifts. One anchored
+on `X.05fU.A0M` breaks on the next build.
+
+Note too that **the same logical action can be handled by different methods in different code
+paths** (for example a `static` helper for one case and an instance method for another). When one
+anchor finds several candidates, hook or check them all and let runtime tell you which fires,
+rather than picking by name.
+
+---
+
+## Rung 2: string encryption
+
+**Detect.** Almost no readable literals in the string index, yet the app clearly uses URLs, keys,
+and tags. One small method (or a few) is called from everywhere, taking an int or a byte array and
+returning a `String`. That is the decryptor.
+
+**Tactic.** Do not try to reimplement the decryptor from the smali and guess plaintexts; that is
+slow and error-prone. Recover the plaintext **dynamically**: hook the decrypt method (Stage E) and
+log its return value, ideally alongside the caller, so you learn both the plaintext and where it
+is used. The encrypted form is static; the plaintext exists the moment the app runs.
+
+---
+
+## Rung 3: reflection and dynamic loading
+
+**Detect.** Calls into `Class.forName`, `getMethod`/`getDeclaredMethod`, `invoke`,
+`DexClassLoader`/`PathClassLoader`; target names assembled at runtime (often from the encrypted
+strings of rung 2) rather than written literally.
+
+**Tactic.** The static tree will not show you the target of a reflective call whose name is built
+at runtime. Trace it live: hook the reflection entry points and log the class and method names
+being resolved and invoked. Now you know what the indirection actually reaches.
+
+---
+
+## Rung 4: packing (encrypted DEX)
+
+**Detect.** A thin outer app whose real code is not in the visible DEX; a large encrypted blob in
+`assets/` or `lib/`; a custom `Application` class that loads a DEX at startup; little meaningful
+logic in what apktool decoded.
+
+**Tactic (authorization-gated).** The real DEX is decrypted into memory at runtime. Under explicit
+authorization, dump the decrypted DEX from the running process (from memory, or by hooking the
+class loader as it loads), then decode that with apktool and analyse it like any other DEX.
+Without authorization to run and instrument the app, you document that it is packed and stop.
+
+---
+
+## Rung 5: native stubs and JNI logic
+
+**Detect.** Key logic is missing from the Java/smali side; `native` method declarations; `.so`
+libraries in `lib/<abi>/`; `System.loadLibrary` calls. Crypto, signing, and anti-tamper often live
+here specifically to be harder to read.
+
+**Tactic.** Inspect the native libraries: `readelf` and `strings` for a first look (exported
+symbols, embedded strings, obvious constants), then a disassembler (radare2, Ghidra, or similar)
+for the logic. Trace across the JNI boundary: which Java `native` method maps to which native
+function, what crosses in each direction. Confirm behaviour dynamically by hooking at the JNI
+boundary when the engagement allows.
+
+---
+
+## Rung 6: anti-analysis protections
+
+These are protections, not obfuscation of logic: root detection, debugger and emulator detection,
+tamper/signature checks, and TLS certificate pinning. They exist to stop exactly the dynamic work
+in Stage E.
+
+**Detect.** Startup checks that read `su` paths, build props, debugger flags, or the app's own
+signature; the app refusing to run, crashing, or behaving differently under a proxy, on an
+emulator, on a rooted device, or when repackaged. Pinning shows up as TLS failures the moment you
+insert your proxy CA.
+
+**Tactic.** First and always: **document the protection as a finding** (or as a constraint on the
+assessment). It is part of the app's security posture and belongs in the report either way.
+
+Only when the authorization explicitly covers it do you work around a protection to continue
+testing, and then you report both the protection and that you bypassed it for the engagement. The
+goal is to assess the app, not to produce a reusable bypass. Never frame defeating a protection as
+the objective, and never do it against a system you are not authorized to test.
+
+---
+
+## Putting it together
+
+A heavily obfuscated app is usually several rungs at once: R8 names, encrypted strings, some
+native logic, and pinning. Identify which rungs apply early, because it tells you how much of the
+answer lives in static reading versus how much you will only get at runtime in Stage E. The more
+rungs, the more the work shifts to "anchor statically, confirm dynamically", which is the whole
+shape of this pipeline.
+
+The runtime half of every tactic above (resolving a renamed or moved member by query, hooking a
+decrypt routine, logging reflection targets, dumping DEX from memory) is covered in
+`07-runtime-resolution-instrumentation.md`: DexKit for resolving by string/shape/relationship, and
+the Xposed API via LSPosed (root) or LSPatch (no root), or Frida, for the hooks. All of it stays
+authorization-gated per `00-authorization.md`.
+
+```
+
+`references/tooling-setup.md`:
+
+```md
+# Tooling setup
+
+Install and sanity-check the tools the pipeline uses. The core is deliberately small: **apktool**
+to decode and rebuild, **adb** to talk to a device, **scrcpy** to watch and drive it,
+**ripgrep** to search the decoded tree. The rest come in when a target needs them.
+
+**apktool first, not JADX.** This pipeline reasons over apktool's decoded smali and resources,
+which round-trip (you can rebuild and reinstall). JADX is an optional, read-only convenience for
+eyeballing a decompiled Java view; nothing in the pipeline depends on it, so it is not required.
+
+## Core tools
+
+### apktool
+
+Decodes resources and `AndroidManifest.xml` to readable XML and the DEX to smali, and can rebuild.
+
+- Get the latest `apktool.jar` from the official releases, plus the small wrapper script for your
+  OS. Many package managers also ship it (`brew install apktool`, `apt install apktool`).
+- Sanity check:
+
+```bash
+apktool --version          # if using the wrapper
+java -jar apktool.jar --version   # if calling the jar directly
+```
+
+- Decode / rebuild:
+
+```bash
+java -jar apktool.jar d target.apk -o work/target_src      # decode
+java -jar apktool.jar b work/target_src -o work/rebuilt.apk # rebuild
+```
+
+### Android platform-tools (adb)
+
+The device bridge. Install the platform-tools package from the Android SDK (or `brew install
+android-platform-tools`, `apt install android-tools-adb`).
+
+```bash
+adb version
+adb devices        # a device should show as "device", not "unauthorized"/"offline"
+```
+
+If it shows `unauthorized` or `offline`, see the adb gotchas in `references/device-loop.md`
+(`kill-server` / `start-server` and accept the on-device prompt).
+
+### scrcpy
+
+Mirror and control the device over adb.
+
+```bash
+scrcpy --version
+scrcpy --stay-awake
+```
+
+### ripgrep
+
+Fast search over the decoded tree and the string index.
+
+```bash
+rg --version
+rg -n "some_string" work/target_src/
+```
+
+## Supporting tools (as needed)
+
+### apksigner and keytool
+
+To install a rebuilt APK on a test device you must sign it. A debug key is fine for testing.
+
+```bash
+keytool -genkey -v -keystore debug.keystore -alias a -keyalg RSA -keysize 2048 -validity 10000 \
+  -storepass android -keypass android -dname "CN=debug"
+apksigner sign --ks debug.keystore --ks-pass pass:android work/rebuilt.apk
+apksigner verify work/rebuilt.apk
+```
+
+Note: an app already installed with a different signing key will refuse an update signed with your
+key. Uninstall first on the test device.
+
+### Native disassembler (for `.so`)
+
+When logic lives in native libraries (rung 5 of the obfuscation ladder), start with the basics and
+reach for a disassembler for the real work.
+
+```bash
+readelf -a lib/arm64-v8a/libfoo.so | less     # headers, exported symbols
+strings -n 6 lib/arm64-v8a/libfoo.so | less    # embedded strings, constants
+```
+
+For the logic: radare2 (`r2 libfoo.so`) or Ghidra (GUI, strong decompiler) are both good options.
+Pick whichever you know.
+
+### Proxy for traffic
+
+To read API traffic (in scope only), run an intercepting proxy (mitmproxy-style), point the test
+device's Wi-Fi proxy at it, and install the proxy's CA on the device.
+
+Two Android facts to know:
+
+- **Android 7+ ignores user-added CAs for app traffic by default.** An app only trusts a
+  user-installed CA if its `networkSecurityConfig` opts in (`<certificates src="user"/>`). For an
+  app you can rebuild in-scope, you can add a debug network-security-config; for one you cannot,
+  you are limited to what the app already trusts.
+- **Certificate pinning** defeats even a trusted CA. That is the pinning rung in
+  `references/obfuscation-ladder.md`: document it, and only work around it under explicit
+  authorization.
+
+### Runtime resolution and hooking (Stage E, gated)
+
+For resolving and instrumenting an obfuscated app at runtime, see
+`references/07-runtime-resolution-instrumentation.md`. In short:
+
+- **DexKit** (library, runs inside the target) to resolve a member by string / shape /
+  relationship when the name is obfuscated.
+- The **Xposed API** for the hooks, delivered by **LSPosed** (needs a rooted device or rooted
+  emulator) or **LSPatch** (patches the in-scope APK, no root). Install the framework, then load
+  your module.
+- **Frida** (`frida-server` on root, or a gadget in a repackaged in-scope app) for quick traces
+  and memory dumps with nothing left installed.
+
+These only matter once dynamic work is authorized.
+
+## Windows / Git-Bash notes
+
+If you run the tooling under Git-Bash / MSYS on Windows, two things from our experience:
+
+- **Device-side absolute paths get rewritten.** A command like
+  `adb shell uiautomator dump /sdcard/ui.xml` fails because MSYS turns `/sdcard/...` into a Windows
+  path. Export `MSYS_NO_PATHCONV=1` for those commands (see `references/device-loop.md`).
+- **Prefer forward slashes and quote paths** when invoking `java -jar` with Windows paths, and use
+  absolute paths for the jar and the APK to avoid surprises with the working directory.
+
+## Minimum to start
+
+For static-only work (Stages A to D) you need just **apktool** and **ripgrep**. Add **adb** and
+**scrcpy** when you move to dynamic analysis (Stage E), which is gated anyway. Everything else is
+per-target.
+
+```
+
+`scripts/acquire.sh`:
+
+```sh
+#!/usr/bin/env bash
+# acquire.sh - Stage A: acquire and identify an Android app artifact.
+#
+# Usage:
+#   acquire.sh <file.apk | file.apkm | file.xapk | file.aab>  [workdir]
+#   acquire.sh pkg:<com.example.app>                          [workdir]
+#
+# What it does:
+#   - Local file: copies a plain .apk through; for a bundle (.apkm/.xapk/.aab) it unzips into
+#     workdir/decoded-input/ and finds base.apk plus the split APKs.
+#   - pkg:<name>: pulls the installed app off a connected device. Pulling from YOUR OWN device is
+#     fine (local work); pulling to assess a target you were engaged for is category-3 work per
+#     references/00-authorization.md. The script warns and waits for a typed confirmation.
+#   - Records identity to workdir/identity.txt (package, versions, sdk, sha256, signing cert).
+#   - Lays out the per-target working dir and a findings-ledger stub.
+#
+# Manual equivalent (do this by hand if you prefer):
+#   mkdir -p work/<target>/input && cp app.apk work/<target>/input/base.apk
+#   unzip -o app.apkm -d work/<target>/input            # for a bundle
+#   adb shell pm path com.example.app                   # list split paths (your own device)
+#   adb pull <each /data/app/.../base.apk> work/<target>/input/
+#   aapt dump badging base.apk | head                   # identity
+#   sha256sum base.apk
+#   apksigner verify --print-certs base.apk             # signing cert
+#
+# Untrusted-artifact hygiene: the artifact is untrusted input. It lands in its own input/ dir.
+# Never run an interpreter or build tool from inside that dir; always pass explicit paths. Keep
+# this script and all analysis scripts OUTSIDE the artifact tree.
+#
+# Requires: unzip, sha256sum (or shasum). Optional but recommended: aapt/aapt2, apksigner, adb.
+
+set -u
+
+say()  { printf '%s\n' "$*"; }
+warn() { printf 'WARN: %s\n' "$*" >&2; }
+die()  { printf 'ERROR: %s\n' "$*" >&2; exit 1; }
+have() { command -v "$1" >/dev/null 2>&1; }
+
+[ $# -ge 1 ] || die "usage: acquire.sh <file.apk|.apkm|.xapk|.aab | pkg:<name>> [workdir]"
+
+TARGET="$1"
+WORKDIR="${2:-}"
+
+sha256() {
+  if have sha256sum; then sha256sum "$1" | awk '{print $1}'
+  elif have shasum; then shasum -a 256 "$1" | awk '{print $1}'
+  else echo "(no sha256 tool)"; fi
+}
+
+# ---- resolve first copy of aapt/aapt2 from PATH or ANDROID_SDK build-tools ----
+find_aapt() {
+  if have aapt2; then echo aapt2; return; fi
+  if have aapt;  then echo aapt;  return; fi
+  local sdk="${ANDROID_SDK_ROOT:-${ANDROID_HOME:-}}"
+  if [ -n "$sdk" ] && [ -d "$sdk/build-tools" ]; then
+    local a
+    a=$(ls -1 "$sdk"/build-tools/*/aapt2 2>/dev/null | sort -V | tail -1)
+    [ -n "$a" ] && { echo "$a"; return; }
+    a=$(ls -1 "$sdk"/build-tools/*/aapt 2>/dev/null | sort -V | tail -1)
+    [ -n "$a" ] && { echo "$a"; return; }
+  fi
+}
+AAPT="$(find_aapt || true)"
+
+record_identity() {
+  # $1 = base.apk, writes to $IDENT
+  local apk="$1"
+  {
+    echo "# identity"
+    echo "artifact: $apk"
+    echo "sha256: $(sha256 "$apk")"
+    echo "size_bytes: $(wc -c < "$apk" 2>/dev/null || echo '?')"
+    if [ -n "$AAPT" ]; then
+      "$AAPT" dump badging "$apk" 2>/dev/null \
+        | grep -E "^package:|sdkVersion:|targetSdkVersion:|application-label:" | head -8
+    else
+      echo "(aapt/aapt2 not found: package/version/sdk unknown - install Android build-tools)"
+    fi
+    echo "# signing cert"
+    if have apksigner; then
+      apksigner verify --print-certs "$apk" 2>/dev/null | grep -Ei "Signer|SHA-256|DN:" | head -12 \
+        || echo "(apksigner could not verify; is it a split-only apk?)"
+    elif have keytool; then
+      echo "(apksigner missing; extract META-INF/*.RSA and run: keytool -printcert -file <that>)"
+    else
+      echo "(no apksigner/keytool; signing cert unknown)"
+    fi
+  } > "$IDENT"
+  say "identity -> $IDENT"
+}
+
+# ---------------------------------------------------------------------------
+# pkg:<name>  -> DYNAMIC pull from device
+# ---------------------------------------------------------------------------
+if [ "${TARGET#pkg:}" != "$TARGET" ]; then
+  PKG="${TARGET#pkg:}"
+  WORKDIR="${WORKDIR:-work/$PKG}"
+  mkdir -p "$WORKDIR/input" "$WORKDIR/decoded" "$WORKDIR/evidence"
+  IDENT="$WORKDIR/identity.txt"
+
+  say ""
+  say "============================================================"
+  say " Pulling '$PKG' from the connected device. Fine for your own device; for a target you were engaged to assess, confirm scope first (see 00-authorization.md)."
+  say " This touches a running system. It is ONLY allowed if you"
+  say " are authorized (see references/00-authorization.md) and"
+  say " have recorded target/basis/scope in the engagement log."
+  say "============================================================"
+  printf "Proceed? type 'yes' to continue: "
+  read -r ans
+  [ "$ans" = "yes" ] || die "aborted (no authorization confirmation)"
+
+  have adb || die "adb not found (install Android platform-tools)"
+  # /sdcard and device paths: on Windows Git-Bash export MSYS_NO_PATHCONV=1 so paths are not mangled.
+  paths=$(adb shell pm path "$PKG" 2>/dev/null | tr -d '\r' | sed 's/^package://')
+  [ -n "$paths" ] || die "pm path returned nothing - is '$PKG' installed and the device authorized? (adb devices)"
+
+  i=0
+  base=""
+  while IFS= read -r p; do
+    [ -n "$p" ] || continue
+    out="$WORKDIR/input/$(basename "$p")"
+    say "pull $p"
+    adb pull "$p" "$out" >/dev/null 2>&1 || warn "pull failed: $p"
+    case "$(basename "$p")" in base.apk) base="$out";; esac
+    i=$((i+1))
+  done <<EOF
+$paths
+EOF
+  say "pulled $i file(s) to $WORKDIR/input/"
+  [ -n "$base" ] || base=$(ls -1 "$WORKDIR"/input/*.apk 2>/dev/null | head -1)
+  [ -n "$base" ] && record_identity "$base" || warn "no base.apk found to identify"
+
+# ---------------------------------------------------------------------------
+# local file
+# ---------------------------------------------------------------------------
+else
+  [ -f "$TARGET" ] || die "no such file: $TARGET"
+  stem=$(basename "$TARGET"); stem="${stem%.*}"
+  WORKDIR="${WORKDIR:-work/$stem}"
+  mkdir -p "$WORKDIR/input" "$WORKDIR/decoded" "$WORKDIR/evidence"
+  IDENT="$WORKDIR/identity.txt"
+  base=""
+
+  case "$TARGET" in
+    *.apk)
+      cp "$TARGET" "$WORKDIR/input/base.apk"
+      base="$WORKDIR/input/base.apk"
+      say "copied apk -> $base"
+      ;;
+    *.apkm|*.xapk|*.aab|*.zip)
+      have unzip || die "unzip not found"
+      ext="$WORKDIR/input/decoded-input"
+      mkdir -p "$ext"
+      unzip -o -q "$TARGET" -d "$ext" || die "unzip failed for $TARGET"
+      # find the base apk inside the bundle (names vary: base.apk, <pkg>.apk, *.apk at root)
+      base=$(ls -1 "$ext"/base.apk 2>/dev/null | head -1)
+      [ -n "$base" ] || base=$(find "$ext" -maxdepth 2 -name '*.apk' ! -name 'split_*' ! -name 'config.*' 2>/dev/null | head -1)
+      [ -n "$base" ] || base=$(find "$ext" -maxdepth 2 -name '*.apk' 2>/dev/null | head -1)
+      say "bundle unzipped to $ext"
+      say "splits:"
+      find "$ext" -maxdepth 2 -name '*.apk' 2>/dev/null | sed 's/^/  /'
+      [ "${TARGET##*.}" = "aab" ] && warn "this is an .aab (app bundle), not installable directly; base module apk is inside"
+      ;;
+    *)
+      die "unrecognised extension: $TARGET (want .apk/.apkm/.xapk/.aab)"
+      ;;
+  esac
+  [ -n "$base" ] && record_identity "$base" || warn "no base.apk located inside the bundle"
+fi
+
+# ---- findings-ledger stub, shared layout ----
+LEDGER="$WORKDIR/findings.md"
+if [ ! -f "$LEDGER" ]; then
+  cat > "$LEDGER" <<EOF
+# Findings ledger
+
+Working dir: $WORKDIR
+Started: $(date '+%Y-%m-%d %H:%M:%S' 2>/dev/null || echo '?')
+
+| ID | Stage | Finding | Evidence | Status |
+|----|-------|---------|----------|--------|
+EOF
+  say "ledger  -> $LEDGER"
+fi
+
+say ""
+say "working dir ready: $WORKDIR"
+say "next: apktool d \"$base\" -o \"$WORKDIR/decoded\"   (Stage B)"
+
+```
+
+`scripts/build-string-index.py`:
+
+```py
+#!/usr/bin/env python3
+# build-string-index.py - Stage B: build the string index that anchors everything.
+#
+# Usage:
+#   python3 -I build-string-index.py <apktool-decoded-dir> [out.tsv]
+#
+# The -I flag runs Python in isolated mode (ignores the current dir and user site-packages),
+# which is the right habit when pointing a script at an untrusted, decoded artifact tree.
+#
+# Why this exists:
+#   Obfuscated class and method names change on every app build. String literals do not. The
+#   backbone of "resolve by shape, not by name" is a flat index of every string literal, the
+#   smali file it lives in, and the method that holds it. You grep THIS to find the code that
+#   builds a given endpoint, reads a given JSON key, or logs a given marker, then you anchor your
+#   analysis on that stable string instead of the obfuscated name.
+#
+# Output: tab-separated, three columns, one row per const-string:
+#   <smali_path>\t<method_signature>\t<string_literal>
+#
+# Manual equivalent (rougher, no method column):
+#   grep -rn 'const-string' <decoded>/smali* | sed -E 's/.*const-string[^"]*"(.*)"/\1/'
+#
+# Example use after it runs:
+#   grep -P '\treel_mentions$' strings.tsv          # who references this JSON key
+#   grep -i 'https://' strings.tsv | grep -i api    # candidate endpoints
+#
+# Fail-soft: unreadable files are counted and skipped, never fatal.
+
+import os
+import re
+import sys
+
+# const-string vN, "literal"      and      const-string/jumbo vN, "literal"
+# smali escapes: \" \\ \n \t \uXXXX. We capture the raw escaped literal and unescape the common ones.
+CONST_RE = re.compile(r'const-string(?:/jumbo)?\s+[vp]\d+\s*,\s*"((?:\\.|[^"\\])*)"')
+METHOD_RE = re.compile(r'^\s*\.method\b(.*)$')
+ENDMETHOD_RE = re.compile(r'^\s*\.end method\b')
+
+UNESCAPE = {'\\n': '\n', '\\t': '\t', '\\r': '\r', '\\"': '"', '\\\\': '\\', "\\'": "'"}
+
+
+def unescape(s):
+    # handle \uXXXX then the simple pairs; keep it best-effort, never throw
+    def u(m):
+        try:
+            return chr(int(m.group(1), 16))
+        except Exception:
+            return m.group(0)
+    s = re.sub(r'\\u([0-9a-fA-F]{4})', u, s)
+    for k, v in UNESCAPE.items():
+        s = s.replace(k, v)
+    return s
+
+
+def clean_field(s):
+    # keep the TSV flat: collapse tabs/newlines in a literal so columns stay aligned
+    return s.replace('\t', '\\t').replace('\r', '\\r').replace('\n', '\\n')
+
+
+def main():
+    if len(sys.argv) < 2:
+        print("usage: build-string-index.py <apktool-decoded-dir> [out.tsv]", file=sys.stderr)
+        return 2
+    root = sys.argv[1]
+    out_path = sys.argv[2] if len(sys.argv) > 2 else os.path.join(root, 'strings.tsv')
+    if not os.path.isdir(root):
+        print("ERROR: not a directory: %s" % root, file=sys.stderr)
+        return 2
+
+    files = 0
+    skipped = 0
+    rows = 0
+    try:
+        out = open(out_path, 'w', encoding='utf-8', newline='\n')
+    except Exception as e:
+        print("ERROR: cannot write %s: %s" % (out_path, e), file=sys.stderr)
+        return 2
+
+    with out:
+        for dirpath, _dirs, names in os.walk(root):
+            for name in names:
+                if not name.endswith('.smali'):
+                    continue
+                path = os.path.join(dirpath, name)
+                rel = os.path.relpath(path, root)
+                files += 1
+                try:
+                    with open(path, encoding='utf-8', errors='replace') as fh:
+                        method = '<class>'
+                        for line in fh:
+                            m = METHOD_RE.match(line)
+                            if m:
+                                # ".method public final A0M(...)Z" -> keep the signature tail
+                                method = m.group(1).strip().split()[-1] if m.group(1).strip() else '<method>'
+                                continue
+                            if ENDMETHOD_RE.match(line):
+                                method = '<class>'
+                                continue
+                            for cm in CONST_RE.finditer(line):
+                                lit = unescape(cm.group(1))
+                                out.write('%s\t%s\t%s\n' % (rel, clean_field(method), clean_field(lit)))
+                                rows += 1
+                except Exception as e:
+                    skipped += 1
+                    print("WARN: skipped %s (%s)" % (rel, e), file=sys.stderr)
+
+    print("indexed %d string(s) from %d smali file(s)%s -> %s"
+          % (rows, files, (" (%d skipped)" % skipped) if skipped else "", out_path))
+    if files == 0:
+        print("note: found no .smali files. Did you decode with apktool first? "
+              "(apktool d base.apk -o <decoded>)", file=sys.stderr)
+    return 0
+
+
+if __name__ == '__main__':
+    sys.exit(main())
+
+```
+
+`scripts/device-helpers.sh`:
+
+```sh
+#!/usr/bin/env bash
+# device-helpers.sh - Stage E: the adb + scrcpy screenshot/act loop, as reusable subcommands.
+#
+# Drives or reads a live device. On your OWN device and account (RE, modding) this is fine, no
+# authorization record needed (see references/00-authorization.md, category "local"). It only
+# becomes gated "assessment" work if you use it to reach past your own instance (probing a backend
+# or another account). Never touch accounts or data that are not yours or not in authorized scope.
+#
+# Usage:
+#   device-helpers.sh shot [out.png]                 # screenshot to a local file
+#   device-helpers.sh uidump [ui.xml]                # dump the current UI tree to a local file
+#   device-helpers.sh tap-text "<text>" [ui.xml]     # find a node by text/content-desc and tap its center
+#   device-helpers.sh logcat-pkg <pkg>               # stream logcat filtered to the app's pid(s)
+#   device-helpers.sh applog <pkg> <relpath>         # cat an app-private file (needs root/run-as)
+#   device-helpers.sh mirror                          # launch scrcpy (mirror + control)
+#
+# WINDOWS / GIT-BASH: export MSYS_NO_PATHCONV=1 before using any subcommand that passes a device
+# path like /sdcard/..., or Git-Bash rewrites it into a Windows path and the command fails.
+#   export MSYS_NO_PATHCONV=1
+#
+# adb recovery: if 'adb devices' shows "unauthorized" or "offline", re-accept the prompt on the
+# phone, then:  adb kill-server && adb start-server && adb devices
+#
+# App-private files (/data/data/<pkg>/...) need either root (su) or a debuggable app (run-as).
+# This script tries su first, then run-as, and says so if neither works.
+#
+# Manual equivalents are given inline per subcommand.
+#
+# Requires: adb. 'mirror' needs scrcpy. 'tap-text' needs python3 for bounds math.
+
+set -u
+ADB="${ADB:-adb}"
+cmd="${1:-}"; shift || true
+
+die() { printf 'ERROR: %s\n' "$*" >&2; exit 1; }
+need_device() {
+  command -v "$ADB" >/dev/null 2>&1 || die "adb not found"
+  local state
+  state=$("$ADB" get-state 2>/dev/null | tr -d '\r')
+  [ "$state" = "device" ] || die "no authorized device (adb devices says '${state:-none}'). If 'unauthorized'/'offline': re-accept on phone, then adb kill-server && adb start-server"
+}
+
+case "$cmd" in
+  shot)
+    # manual: adb exec-out screencap -p > out.png
+    need_device
+    out="${1:-shot-$(date +%H%M%S).png}"
+    "$ADB" exec-out screencap -p > "$out" 2>/dev/null && echo "$out" || die "screencap failed"
+    ;;
+
+  uidump)
+    # manual: adb shell uiautomator dump /sdcard/ui.xml && adb pull /sdcard/ui.xml ui.xml
+    need_device
+    out="${1:-ui.xml}"
+    export MSYS_NO_PATHCONV=1
+    "$ADB" shell uiautomator dump /sdcard/ui.xml >/dev/null 2>&1 \
+      || die "uiautomator dump failed (a fullscreen video or secure screen can block it)"
+    "$ADB" pull /sdcard/ui.xml "$out" >/dev/null 2>&1 && echo "$out" || die "pull ui.xml failed"
+    ;;
+
+  tap-text)
+    # manual: read ui.xml, find text="..."/content-desc="..." bounds="[x1,y1][x2,y2]", tap center:
+    #   adb shell input tap $(( (x1+x2)/2 )) $(( (y1+y2)/2 ))
+    need_device
+    want="${1:-}"; ui="${2:-ui.xml}"
+    [ -n "$want" ] || die "usage: tap-text \"<text>\" [ui.xml]"
+    export MSYS_NO_PATHCONV=1
+    if [ ! -f "$ui" ]; then
+      "$ADB" shell uiautomator dump /sdcard/ui.xml >/dev/null 2>&1
+      "$ADB" pull /sdcard/ui.xml "$ui" >/dev/null 2>&1 || die "could not get ui.xml"
+    fi
+    command -v python3 >/dev/null 2>&1 || die "python3 needed for bounds math"
+    coords=$(python3 - "$ui" "$want" <<'PY'
+import re, sys
+ui, want = sys.argv[1], sys.argv[2]
+data = open(ui, encoding='utf-8', errors='replace').read()
+# match a node whose text or content-desc equals or contains `want`, grab its bounds
+best = None
+for m in re.finditer(r'<node[^>]*>', data):
+    tag = m.group(0)
+    t = re.search(r'text="([^"]*)"', tag)
+    d = re.search(r'content-desc="([^"]*)"', tag)
+    b = re.search(r'bounds="\[(\d+),(\d+)\]\[(\d+),(\d+)\]"', tag)
+    if not b:
+        continue
+    label = (t.group(1) if t else '') + '\x00' + (d.group(1) if d else '')
+    if want == (t.group(1) if t else '') or want == (d.group(1) if d else ''):
+        best = b; break
+    if best is None and want in label:
+        best = b
+if not best:
+    sys.exit(1)
+x1, y1, x2, y2 = map(int, best.groups())
+print((x1 + x2) // 2, (y1 + y2) // 2)
+PY
+) || die "no node matching '$want' in $ui (dump again; the screen may have changed)"
+    set -- $coords
+    "$ADB" shell input tap "$1" "$2" && echo "tapped '$want' at $1 $2"
+    ;;
+
+  logcat-pkg)
+    # manual: pid=$(adb shell pidof <pkg>); adb logcat --pid=$pid
+    need_device
+    pkg="${1:-}"; [ -n "$pkg" ] || die "usage: logcat-pkg <pkg>"
+    pid=$("$ADB" shell pidof "$pkg" 2>/dev/null | tr -d '\r' | awk '{print $1}')
+    [ -n "$pid" ] || die "'$pkg' not running (launch it first: adb shell monkey -p $pkg 1)"
+    echo "streaming logcat for $pkg (pid $pid); Ctrl-C to stop" >&2
+    "$ADB" logcat --pid="$pid"
+    ;;
+
+  applog)
+    # manual (root):   adb shell su -c 'cat /data/data/<pkg>/<relpath>'
+    #        (debug):  adb shell run-as <pkg> cat <relpath>
+    need_device
+    pkg="${1:-}"; rel="${2:-}"
+    [ -n "$pkg" ] && [ -n "$rel" ] || die "usage: applog <pkg> <relpath under /data/data/<pkg>/>"
+    export MSYS_NO_PATHCONV=1
+    full="/data/data/$pkg/$rel"
+    if "$ADB" shell su -c "cat $full" 2>/dev/null; then
+      :
+    elif "$ADB" shell run-as "$pkg" cat "$rel" 2>/dev/null; then
+      :
+    else
+      die "could not read $full (need root 'su' or a debuggable app for 'run-as $pkg')"
+    fi
+    ;;
+
+  mirror)
+    # manual: scrcpy --stay-awake
+    command -v scrcpy >/dev/null 2>&1 || die "scrcpy not found (install it to mirror + control the screen)"
+    need_device
+    exec scrcpy --stay-awake "$@"
+    ;;
+
+  *)
+    sed -n '2,40p' "$0"   # print the header/usage
+    exit 2
+    ;;
+esac
+
+```
+
+`scripts/manifest-summary.py`:
+
+```py
+#!/usr/bin/env python3
+# manifest-summary.py - Stage B: turn AndroidManifest.xml into an attack-surface summary.
+#
+# Usage:
+#   python3 -I manifest-summary.py <apktool-decoded-dir>
+#
+# apktool already decodes AndroidManifest.xml into plain text XML, so this just parses that file
+# (no aapt, no binary-xml decoding needed). It prints the facts that decide where an app can be
+# poked from the outside:
+#   - package, min/target SDK
+#   - debuggable, usesCleartextTraffic, networkSecurityConfig, allowBackup
+#   - exported activities/services/receivers/providers, with the permission that guards them
+#     (a component is exported if android:exported="true", OR it has an intent-filter and does
+#      not set android:exported="false" - the classic implicitly-exported case)
+#   - custom permissions declared, and their protectionLevel
+#   - notable requested permissions
+#   - deep-link schemes and hosts (intent-filters with a data scheme)
+#   - content-provider authorities and grantUriPermissions
+#
+# Attack-surface items are marked with [*]. An exported component with no permission, a provider
+# that grants URI permissions, a debuggable build, or cleartext traffic each widen it.
+#
+# Manual equivalent:
+#   less <decoded>/AndroidManifest.xml   and read for exported=, intent-filter, permission, data
+#
+# Fail-soft: missing or unreadable manifest is reported, not fatal. Uses only the stdlib.
+
+import os
+import sys
+import xml.etree.ElementTree as ET
+
+A = '{http://schemas.android.com/apk/res/android}'   # android: namespace
+
+
+def attr(el, name):
+    return el.get(A + name)
+
+
+def is_exported(el):
+    exp = attr(el, 'exported')
+    if exp is not None:
+        return exp == 'true'
+    # no explicit exported: implicitly exported iff it has an intent-filter
+    return el.find('intent-filter') is not None
+
+
+def comp_line(el, kind):
+    name = attr(el, 'name') or '?'
+    perm = attr(el, 'permission')
+    exported = is_exported(el)
+    flag = '[*]' if exported and not perm else '   '
+    extra = []
+    if perm:
+        extra.append('perm=%s' % perm)
+    if attr(el, 'exported') is None and el.find('intent-filter') is not None:
+        extra.append('implicitly-exported')
+    tail = ('  (' + ', '.join(extra) + ')') if extra else ''
+    return '  %s %-9s %s%s' % (flag, kind, name, tail)
+
+
+def deeplinks(app):
+    out = []
+    for comp in list(app):
+        for intf in comp.findall('intent-filter'):
+            for data in intf.findall('data'):
+                scheme = attr(data, 'scheme')
+                host = attr(data, 'host')
+                path = attr(data, 'pathPrefix') or attr(data, 'path') or attr(data, 'pathPattern')
+                if scheme:
+                    s = '%s://' % scheme
+                    if host:
+                        s += host
+                    if path:
+                        s += path
+                    out.append((attr(comp, 'name') or '?', s))
+    return out
+
+
+def main():
+    if len(sys.argv) < 2:
+        print("usage: manifest-summary.py <apktool-decoded-dir>", file=sys.stderr)
+        return 2
+    root = sys.argv[1]
+    man = root if root.endswith('.xml') else os.path.join(root, 'AndroidManifest.xml')
+    if not os.path.isfile(man):
+        print("ERROR: no AndroidManifest.xml at %s (decode with apktool first)" % man, file=sys.stderr)
+        return 2
+    try:
+        tree = ET.parse(man)
+    except Exception as e:
+        print("ERROR: cannot parse manifest: %s" % e, file=sys.stderr)
+        return 2
+    rootel = tree.getroot()
+    app = rootel.find('application')
+
+    print("== package ==")
+    print("  package: %s" % rootel.get('package'))
+    uses_sdk = rootel.find('uses-sdk')
+    if uses_sdk is not None:
+        print("  minSdk: %s  targetSdk: %s" % (attr(uses_sdk, 'minSdkVersion'), attr(uses_sdk, 'targetSdkVersion')))
+    print("  versionCode: %s  versionName: %s" % (rootel.get(A + 'versionCode'), rootel.get(A + 'versionName')))
+
+    if app is not None:
+        print("\n== application flags ==")
+        for f in ('debuggable', 'usesCleartextTraffic', 'allowBackup', 'networkSecurityConfig'):
+            v = attr(app, f)
+            if v is not None:
+                mark = ''
+                if f == 'debuggable' and v == 'true':
+                    mark = '  [*] debuggable build'
+                if f == 'usesCleartextTraffic' and v == 'true':
+                    mark = '  [*] cleartext allowed'
+                if f == 'allowBackup' and v == 'true':
+                    mark = '  [*] backups allowed'
+                print("  %s = %s%s" % (f, v, mark))
+
+    # permissions
+    declared = rootel.findall('permission')
+    if declared:
+        print("\n== custom permissions declared ==")
+        for p in declared:
+            print("  %s  protectionLevel=%s" % (attr(p, 'name'), attr(p, 'protectionLevel')))
+
+    uses = [attr(p, 'name') for p in rootel.findall('uses-permission')]
+    notable = [u for u in uses if u and any(k in u for k in (
+        'SYSTEM_ALERT_WINDOW', 'WRITE_EXTERNAL', 'READ_EXTERNAL', 'MANAGE_EXTERNAL',
+        'READ_SMS', 'RECEIVE_SMS', 'READ_CONTACTS', 'ACCESS_FINE_LOCATION', 'RECORD_AUDIO',
+        'CAMERA', 'READ_PHONE_STATE', 'QUERY_ALL_PACKAGES', 'REQUEST_INSTALL_PACKAGES',
+        'BIND_ACCESSIBILITY', 'PACKAGE_USAGE_STATS', 'INTERNET'))]
+    if notable:
+        print("\n== notable requested permissions ==")
+        for u in notable:
+            print("  %s" % u)
+
+    # components
+    if app is not None:
+        for kind, tag in (('activity', 'activity'), ('activity-alias', 'activity-alias'),
+                          ('service', 'service'), ('receiver', 'receiver'), ('provider', 'provider')):
+            comps = app.findall(tag)
+            exported = [c for c in comps if is_exported(c)]
+            if exported:
+                print("\n== exported %s(s) ==  ([*] = exported with no permission)" % kind)
+                for c in exported:
+                    print(comp_line(c, kind))
+
+        provs = app.findall('provider')
+        if provs:
+            print("\n== content providers ==")
+            for p in provs:
+                auth = attr(p, 'authorities')
+                grant = attr(p, 'grantUriPermissions')
+                mark = '  [*] grants URI permissions' if grant == 'true' else ''
+                print("  authority=%s exported=%s%s" % (auth, is_exported(p), mark))
+
+    dl = deeplinks(app) if app is not None else []
+    if dl:
+        print("\n== deep links (scheme/host) ==")
+        seen = set()
+        for comp, uri in dl:
+            if uri in seen:
+                continue
+            seen.add(uri)
+            print("  [*] %s   (%s)" % (uri, comp))
+
+    print("\nnote: [*] marks widen the attack surface. Exported-and-unprotected components, "
+          "URI-granting providers, deep links, debuggable and cleartext are the usual first stops.")
+    return 0
+
+
+if __name__ == '__main__':
+    sys.exit(main())
+
+```
+
+`scripts/secret-patterns.tsv`:
+
+```tsv
+TSV Schema (1 sample row):
+Headers: # secret-patterns.tsv - detection patterns for secrets-sweep.sh (DATA, not a command).
+Sample: "#"
+... [21 more rows omitted]
+
+```
+
+`scripts/secrets-sweep.sh`:
+
+```sh
+#!/usr/bin/env bash
+# secrets-sweep.sh - Stage D: sweep a decoded app for hardcoded secrets and cleartext.
+#
+# Usage:
+#   secrets-sweep.sh <apktool-decoded-dir | extracted-root>
+#
+# WHAT THIS DOES, PLAINLY:
+#   It reads ONE local directory (the decoded target app you pass as the argument) and prints
+#   file:line locations of candidate secrets. That is all. It makes NO network connection, reads
+#   NO environment variable, and reads NONE of your own credentials. There is no curl/wget/nc
+#   here and nothing leaves your machine. The "secret" patterns it looks for live in the data
+#   file secret-patterns.tsv beside this script; they are search terms aimed at the TARGET app,
+#   not values read from you.
+#
+#   This is a first pass, not proof: it finds candidates. Every hit still needs a human to
+#   confirm it is a live secret and not a placeholder, a test fixture, or a public key.
+#
+# HANDLING (per references/00-authorization.md):
+#   - Report every finding as CLASS + LOCATION ("Stripe key in assets/config.json",
+#     "HMAC secret in X.0aB.smali:142"), NOT by pasting the raw secret into the report body or
+#     any shared output.
+#   - Verify a secret ONLY against the in-scope system it belongs to. Never test a found
+#     third-party key (a maps key, a cloud key) against that third party.
+#
+# Manual equivalent (one pattern at a time, same idea):
+#   rg -n 'AIza[0-9A-Za-z_-]{35}' <root>
+#   rg -n -i 'api[_-]?key|secret|password|token' <root>
+#   rg -n '-----BEGIN' <root>
+#   rg -n 'http://' <root>                    # cleartext
+#
+# Requires: ripgrep (rg). Falls back to grep -rn if rg is missing (slower, fewer features).
+
+set -u
+ROOT="${1:-}"
+[ -n "$ROOT" ] || { echo "usage: secrets-sweep.sh <decoded-dir>" >&2; exit 2; }
+[ -d "$ROOT" ] || { echo "ERROR: not a directory: $ROOT" >&2; exit 2; }
+
+# Patterns live in an inert data file next to this script (not baked into this command).
+SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" && pwd)
+PATTERNS="$SCRIPT_DIR/secret-patterns.tsv"
+[ -f "$PATTERNS" ] || { echo "ERROR: patterns file not found: $PATTERNS" >&2; exit 2; }
+
+if command -v rg >/dev/null 2>&1; then
+  SCAN()  { rg -n --no-heading -o -e "$1" "$ROOT" 2>/dev/null | head -80; }
+  SCANF() { rg -n --no-heading    -e "$1" "$ROOT" 2>/dev/null | head -80; }
+else
+  echo "note: ripgrep not found, using grep -rn (slower)" >&2
+  SCAN()  { grep -rEno "$1" "$ROOT" 2>/dev/null | head -80; }
+  SCANF() { grep -rEn  "$1" "$ROOT" 2>/dev/null | head -80; }
+fi
+
+section() {
+  local title="$1" out="$2"
+  echo ""
+  echo "== $title =="
+  if [ -n "$out" ]; then echo "$out"; else echo "  (none)"; fi
+}
+
+echo "secrets sweep: $ROOT"
+echo "reminder: report as class+location; do not paste raw third-party secrets; verify only in scope."
+
+# Read each pattern from the data file and run it against the local directory only.
+while IFS=$'\t' read -r label mode pat; do
+  case "$label" in ''|'#'*) continue;; esac   # skip blanks and comments
+  [ -n "${pat:-}" ] || continue
+  if [ "$mode" = "full" ]; then out=$(SCANF "$pat"); else out=$(SCAN "$pat"); fi
+  section "$label" "$out"
+done < "$PATTERNS"
+
+echo ""
+echo "also check by hand:"
+echo "  - assets/ for bundled config (json/properties/.env), keystores, db files"
+echo "  - res/values/strings.xml and res/raw/ for embedded keys"
+echo "  - lib/*/*.so with: strings lib.so | grep -iE 'key|secret|http'  (native secrets)"
+echo "  - the app's own config/override files (e.g. a bundled feature-flag / MC override json)"
+echo ""
+echo "done. Confirm each candidate before you call it a finding; placeholders and public keys are common."
+
+```
+
+`templates/engagement-log.md`:
+
+```md
+# Engagement log
+
+> Fill this before any dynamic action. It is the authorization record and the report's methodology.
+
+## Authorization
+
+- **Target (package + owner):**
+- **Basis:** (own app / written PT authorization / in-scope bounty / CTF / lab)
+- **Authorization reference:** (engagement name + dates, program URL, or "self-owned")
+- **Scope - in:** (hosts, endpoints, components, accounts)
+- **Scope - out:**
+- **Data rule:** (test accounts only; no real user data touched or exfiltrated)
+- **Date / analyst:**
+
+## Environment
+
+- **Artifact:** (path, versionName, versionCode, sha256)
+- **Device / emulator:** (model, Android version, root state)
+- **Tooling:** (apktool, adb, scrcpy versions)
+
+## Action log
+
+| Time | Stage | Action | Result / evidence path |
+|---|---|---|---|
+|  |  |  |  |
+
+## Scope changes
+
+| Time | What changed | Re-authorized? |
+|---|---|---|
+|  |  |  |
+
+```
+
+`templates/report.md`:
+
+```md
+# Android app assessment: <APP NAME> <VERSION>
+
+- **Package:** `com.example.app`
+- **Version:** versionName / versionCode
+- **Date:** YYYY-MM-DD
+- **Analyst:**
+- **Assessment type:** static only / static + dynamic
+
+---
+
+## 1. Scope and authorization
+
+Pulled from `templates/engagement-log.md`.
+
+- **Basis:** (own app / written PT authorization <name, dates> / in-scope bounty <program URL> / CTF / lab)
+- **In scope:** (hosts, endpoints, components, accounts)
+- **Out of scope:**
+- **Data rule:** test accounts only; no real user data touched or exfiltrated.
+
+---
+
+## 2. Summary
+
+Two or three sentences: what the app is, what was assessed, and the headline result.
+
+| Severity | Count |
+|----------|-------|
+| Critical |       |
+| High     |       |
+| Medium   |       |
+| Low      |       |
+| Info     |       |
+
+---
+
+## 3. Methodology
+
+From the engagement log. The pipeline that was run:
+
+- **A. Acquire:** how the artifact was obtained (local / pulled / bundle), hashes.
+- **B. Decode & inventory:** apktool decode, string index built, manifest parsed.
+- **C. Static understanding:** entry points, data flow, network layer, behaviour map.
+- **D. Secrets & misconfig:** sweep results.
+- **E. Dynamic (if run):** device, how the app was driven, what was observed (logcat, traffic).
+- **F. Verify:** each finding re-proved before inclusion.
+
+Obfuscation level: none / name (R8-ProGuard) / string encryption / packing / anti-tamper.
+Note how anchors were chosen (strings, resource names, method shapes) rather than obfuscated names.
+
+---
+
+## 4. Attack surface
+
+- Exported components and whether each is guarded by a permission.
+- Deep-link schemes and hosts.
+- Content-provider authorities and URI-permission grants.
+- Flags: debuggable, cleartext traffic, allowBackup, network-security-config.
+- Backend endpoints and how the app authenticates to them.
+
+---
+
+## 5. Findings
+
+| ID | Title | Severity | Component / location | Evidence | Status |
+|----|-------|----------|----------------------|----------|--------|
+| F-01 |  |  |  | `evidence/...` | Verified / Plausible |
+| F-02 |  |  |  |  |  |
+
+### F-01 <title>
+
+- **Severity:** Critical / High / Medium / Low / Info
+- **Component / location:** exported activity / `assets/config.json` / `X.0aB.smali:142` / endpoint
+- **Description:** what the weakness is, in plain terms.
+- **Impact:** what an attacker gains, under what preconditions.
+- **Evidence:** the smali method + string anchor, the manifest line, the logcat line, the
+  screenshot or captured request. Reference paths under `evidence/`. Keep secrets as
+  class + location, not pasted in full.
+- **Reproduction:** the minimal steps or shape that triggers it, at the class + location level.
+- **Remediation:** the concrete fix (set `exported="false"`, add a permission, move the secret
+  server-side, enforce pinning, remove cleartext, and so on).
+
+### F-02 <title>
+
+(repeat)
+
+---
+
+## 6. Appendix
+
+- **Tooling versions:** apktool, adb, scrcpy, ripgrep, aapt/aapt2, apksigner.
+- **Artifact hashes:** sha256 of base.apk and each split.
+- **Working directory:** `work/<target>/` layout (input, decoded, evidence, findings.md).
+- **Signing certificate:** issuer / subject / SHA-256 fingerprint.
+
+```
