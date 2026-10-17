@@ -4,7 +4,8 @@ kind: entity
 topics: [reverse-engineering, game-hacking]
 sources:
   - wiki/sources/descriptions/mytechnotalent__hacking-rust.md
-updated: 2026-07-29
+  - wiki/sources/README-categories.md
+updated: 2026-10-17
 confidence: medium
 ---
 
