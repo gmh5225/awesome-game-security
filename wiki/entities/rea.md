@@ -39,4 +39,4 @@ Sits in the README **Game Develop → MCP server** lane beside single-backend br
 
 ## Related
 
-[[binary-ninja-headless-mcp]] · [[ghidra-headless-mcp]] · [[ida-pro-mcp]] · [[delamain]] · [[dnspymcp]] · [[reverify]] · [[research-rigor]] · [[overviews/reverse-engineering]] · [[overviews/game-engine]]
+[[binary-ninja-headless-mcp]] · [[ghidra-headless-mcp]] · [[ida-pro-mcp]] · [[delamain]] · [[dnspymcp]] · [[rea-unlock]] · [[reverify]] · [[research-rigor]] · [[overviews/reverse-engineering]] · [[overviews/game-engine]]

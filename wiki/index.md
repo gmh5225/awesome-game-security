@@ -927,6 +927,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [DayZ-Cheat](entities/dayz-cheat.md) — DayZ external cheat (ESP, aimbot, item ESP; external memory reads + overlay; gmh5225)
 - [rea](entities/rea.md) — morluto REA CLI + MCP agent-assisted RE (native/JS/.NET/web/mobile/firmware, process runtime, ELF/crash diagnostics; evidence provenance + limitations; bridges Hopper/Ghidra/IDA/JADX/pwntools/mitmproxy; Game Develop / MCP)
 - [rea-mytechnotalent](entities/rea-mytechnotalent.md) — mytechnotalent offline-first Python RE assistant (one-shot PE/ELF/Mach-O + JS/Electron inventory via readelf/objdump/nm/strings, local RAG, propose-review-gate multi-agent evidence; CLI + MCP; malware/game/AC triage; Cheat / RE Tools)
+- [rea-unlock](entities/rea-unlock.md) — zheedevVn agent RE platform (TypeScript/Node MCP + CLI; Ghidra/Frida/decompiler bridges; multi-format static+dynamic + network capture; game-security client/protocol workflows; Cheat / RE Tools)
 - [dayz-mcp](entities/dayz-mcp.md) — DayZ MCP server (53 tools; Enforce Script bridge; server-authoritative world control, telemetry, automated in-game testing; willy92wins)
 - [dayz-server-battleye-remover](entities/dayz-server-battleye-remover.md) — DayZ server BE disable patch (C++ pattern scan + binary patch; reprocessable after updates; JonathanEke; Disable battleye)
 - [DayZzz](entities/dayzzz.md) — DayZ cheat/modding: SDK generation + overlays (C/C++)
