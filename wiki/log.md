@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-17** — ingest `description:LukasBanana/LLGL`: entity [[llgl]] (C++11 thin multi-API rendering library—D3D11/12, Vulkan, OpenGL/ES, WebGL, Metal; runtime pluggable renderer modules; OpenXR optional; C99/C#/Go bindings; CMake pipeline/compute/tessellation/shadow examples; swap-chain and shader-pipeline reference for graphics-hook/presentation research; LukasBanana); cited on [[overviews/graphics-api]] and [[overviews/game-engine]]; `index.md` entity + graphics-api overview blurb.
+
 - **2026-10-17** — ingest `description:StanislawGolec/Ultimo`: entity [[ultimo]] (Java 21 authoritative Uno-style card server; TCP + RFC 6455 WebSocket + HTML5; virtual threads; per-room actor loop; fog-of-war hand hiding; backend move/shuffle/penalty validation; Docker/Cloud Run; StanislawGolec); cited on [[overviews/anti-cheat]]; `index.md` entity + anti-cheat overview blurb.
 
 - **2026-10-17** — ingest `readme:categories`: Anti Cheat ~802 (+1) / Renderer ~18 (+1; harukumo/[[horizon-engine]] sample) / Cheat ~2911 / Game Engine ~159 / Game Develop ~194 and other major section counts stable; 41 sections (`NeverC & NeverD` placeholder); synced README-map counts on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], [[overviews/reverse-engineering]], [[overviews/graphics-api]], and [[overviews/game-engine]]; light `index.md` section notes (no per-category pages).
