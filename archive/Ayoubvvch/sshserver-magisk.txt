@@ -1,0 +1,761 @@
+Project Path: arc_Ayoubvvch_sshserver-magisk_hrkfgia4
+
+Source Tree:
+
+```txt
+arc_Ayoubvvch_sshserver-magisk_hrkfgia4
+├── LICENSE
+├── README.md
+├── customize.sh
+├── module.prop
+├── post-fs-data.sh
+├── service.sh
+├── sshserver
+│   ├── bin
+│   │   ├── dropbear
+│   │   └── dropbearkey
+│   ├── config.env
+│   └── sftp
+├── system
+│   ├── bin
+│   │   └── sshserverctl
+│   └── etc
+│       ├── passwd
+│       └── shells
+└── uninstall.sh
+
+```
+
+`LICENSE`:
+
+```
+MIT License
+
+Copyright (c) 2026 Ayoubvvch
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
+`README.md`:
+
+```md
+# Dropbear SSH & SFTP Server for Android (Magisk / KernelSU / APatch)
+
+[![Release](https://img.shields.io/github/v/release/Ayoubvvch/sshserver-magisk?style=flat-square&color=blue)](https://github.com/Ayoubvvch/sshserver-magisk/releases)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
+[![Platform](https://img.shields.io/badge/Platform-Android%2010--15%2B-green.svg?style=flat-square)](https://github.com/Ayoubvvch/sshserver-magisk)
+[![Architecture](https://img.shields.io/badge/Architecture-arm64-red.svg?style=flat-square)](https://github.com/Ayoubvvch/sshserver-magisk)
+
+A lightweight, standalone, statically-compiled **Dropbear SSH and SFTP server** module for Android. Provides persistent, headless root access over SSH (port 22) and SFTP file management from boot without requiring Termux, userland apps, or interactive terminal setups.
+
+---
+
+## ✨ Features
+
+- **🚀 100% Headless & Background**: Starts automatically at boot via Magisk `late_start` service. Runs silently without battery-draining UI wrappers.
+- **⚡ Static Musl Compilation (arm64)**: Dropbear v2025.88 and SFTP are statically linked against musl libc. Completely bypasses Android Bionic linker namespace restrictions, ensuring flawless compatibility on Android 10, 11, 12, 13, 14, and Android 15+.
+- **📁 Native SFTP Server**: Includes statically built `sftp` hardcoded to `/data/adb/sshserver/sftp`. Compatible out-of-the-box with **WinSCP**, **FileZilla**, **Cyberduck**, and **VS Code Remote - SSH**.
+- **🔑 Dual Authentication**:
+  - **Public Key Authentication**: High-security Ed25519 and RSA keys via standard `authorized_keys`.
+  - **Password Authentication**: Crypt SHA-512 hashed passwords.
+- **🪄 Dynamic Systemless `/system/etc/passwd`**: Android does not ship with standard `/etc/passwd`. This module dynamically generates a systemless passwd file during `post-fs-data` boot stage, allowing standard Unix authentication routines to work seamlessly.
+- **⏱️ Sleep & Doze Proof**: Configured with a 30-second TCP keepalive (`-K 30`) to keep SSH sessions stable even when Android enters deep sleep (Doze mode).
+- **🛠️ Management CLI (`sshserverctl`)**: Global command mounted to `/system/bin/sshserverctl` for starting, stopping, restarting, inspecting status, or changing root password interactively.
+- **🌐 Full Environment Export**: Sessions automatically inherit Magisk binaries (`/data/adb/magisk`), Android utilities (`/system/bin`, `/vendor/bin`, `/apex`), and user environment.
+
+---
+
+## 📦 Installation
+
+1. Download the latest **`sshserver-magisk.zip`** from [GitHub Releases](https://github.com/Ayoubvvch/sshserver-magisk/releases).
+2. Open **Magisk**, **KernelSU**, or **APatch** app on your phone.
+3. Go to **Modules** ➔ **Install from storage** ➔ Select `sshserver-magisk.zip`.
+4. Once installation completes, **reboot your device**.
+
+---
+
+## 🚀 Quick Start & Connecting
+
+### 1. Default Password Login
+By default, the server listens on **port 22** with password authentication enabled:
+- **Username**: `root`
+- **Default Password**: `crdroid`
+- **Port**: `22`
+
+From your computer terminal (PowerShell, Command Prompt, or Linux/macOS shell):
+```bash
+ssh root@<PHONE_IP_ADDRESS>
+```
+*(Replace `<PHONE_IP_ADDRESS>` with your phone's Wi-Fi IP address, visible in Android Settings ➔ Wi-Fi).*
+
+### 2. Passwordless Public Key Login (Recommended)
+For the best security and convenience, use SSH keys:
+
+1. Copy your PC's public key (e.g. `~/.ssh/id_ed25519.pub`) into `/data/adb/sshserver/.ssh/authorized_keys` on your phone:
+   ```bash
+   # From your PC (if ssh-copy-id is available):
+   ssh-copy-id -i ~/.ssh/id_ed25519.pub root@<PHONE_IP_ADDRESS>
+   ```
+   Or manually append your public key directly to `/data/adb/sshserver/.ssh/authorized_keys`.
+
+2. Add a convenient alias in your PC's `~/.ssh/config`:
+   ```ssh-config
+   Host phone
+       HostName 192.168.1.50
+       User root
+       Port 22
+       IdentityFile ~/.ssh/id_ed25519
+   ```
+   Now you can simply connect by typing:
+   ```bash
+   ssh phone
+   ```
+
+---
+
+## 🛠️ CLI Management (`sshserverctl`)
+
+Run `sshserverctl` in any root shell or terminal on your phone:
+
+| Command | Action |
+| :--- | :--- |
+| `sshserverctl start` | Starts the SSH daemon if stopped. |
+| `sshserverctl stop` | Stops the running SSH daemon. |
+| `sshserverctl restart` | Restarts the SSH daemon. |
+| `sshserverctl status` | Checks PID and running status. |
+| `sshserverctl passwd` | Interactively prompts for and updates the root password instantly. |
+
+---
+
+## ⚙️ Configuration (`config.env`)
+
+Configuration is stored in `/data/adb/sshserver/config.env` and preserved across module updates:
+
+```sh
+# Listening port (default: 22)
+PORT=22
+
+# Password authentication (1 = enabled, 0 = disabled / key-only)
+ALLOW_PASSWORD=1
+
+# Root logins (1 = allowed, 0 = disallowed)
+ALLOW_ROOT=1
+
+# Plaintext password (auto-hashed on boot, then cleared)
+PASSWORD=""
+
+# Pre-computed SHA-512 crypt hash (always use single quotes)
+PASSWORD_HASH='$6$saltsalt$hashedpassword...'
+```
+
+> [!TIP]
+> To disable password logins completely and enforce public key authentication only, set `ALLOW_PASSWORD=0` in `config.env` and restart the service (`sshserverctl restart`).
+
+---
+
+## 📁 File Structure
+
+```text
+/data/adb/sshserver/
+├── bin/
+│   ├── dropbear           # Dropbear server binary (static musl arm64)
+│   └── dropbearkey        # Dropbear key generator
+├── keys/
+│   └── dropbear_ed25519_host_key  # Host key
+├── .ssh/
+│   └── authorized_keys    # Your authorized public keys
+├── log/
+│   ├── service.log        # Boot launch logs
+│   └── dropbear.log       # Dropbear daemon runtime output
+├── sftp                   # SFTP subsystem binary
+├── config.env             # User configuration file
+└── dropbear.pid           # Running daemon PID file
+```
+
+---
+
+## 🔨 Building the Flashable ZIP
+
+To build the flashable zip package from source:
+
+```bash
+# Clone the repository
+git clone https://github.com/Ayoubvvch/sshserver-magisk.git
+cd sshserver-magisk
+
+# Create flashable zip (excluding git files)
+zip -r9 sshserver-magisk.zip . -x ".git*" ".github*" "*.zip" "README.md" "LICENSE"
+```
+
+---
+
+## 📄 License
+
+This project is licensed under the [MIT License](LICENSE).
+Dropbear SSH is created by Matt Johnston and licensed under a BSD-style license.
+
+```
+
+`customize.sh`:
+
+```sh
+#!/system/bin/sh
+# Dropbear SSH & SFTP Server Magisk Module Installer
+
+LOGDIR=/data/adb/sshserver/log
+mkdir -p "$LOGDIR"
+INSTALL_LOG="$LOGDIR/install.log"
+
+log() {
+  local msg="$1"
+  echo "$msg" >> "$INSTALL_LOG"
+  ui_print "$msg"
+}
+
+log ""
+log "- Installing Dropbear SSH & SFTP Server..."
+
+MODDIR="$MODPATH"
+OK=0
+
+# Ensure directories exist with secure permissions
+mkdir -p /data/adb/sshserver/bin
+mkdir -p /data/adb/sshserver/keys
+mkdir -p /data/adb/sshserver/.ssh
+chmod 700 /data/adb/sshserver
+chmod 700 /data/adb/sshserver/bin
+chmod 700 /data/adb/sshserver/keys
+chmod 700 /data/adb/sshserver/.ssh
+
+# Copy binaries shipped in module
+if [ -f "$MODDIR/sshserver/bin/dropbear" ] && [ -f "$MODDIR/sshserver/bin/dropbearkey" ] && [ -f "$MODDIR/sshserver/sftp" ]; then
+  cp "$MODDIR/sshserver/bin/dropbear" /data/adb/sshserver/bin/dropbear &&   cp "$MODDIR/sshserver/bin/dropbearkey" /data/adb/sshserver/bin/dropbearkey &&   cp "$MODDIR/sshserver/sftp" /data/adb/sshserver/sftp &&   chmod 700 /data/adb/sshserver/bin/dropbear /data/adb/sshserver/bin/dropbearkey /data/adb/sshserver/sftp
+  log "- Copied dropbear & sftp binaries"
+else
+  abort "! ERROR: Missing binaries in module package. Installation aborted."
+fi
+
+# Copy default configuration if not already present (preserves user settings on upgrade)
+if [ ! -f /data/adb/sshserver/config.env ]; then
+  if cp "$MODDIR/sshserver/config.env" /data/adb/sshserver/config.env && chmod 600 /data/adb/sshserver/config.env; then
+    log "- Installed default configuration to /data/adb/sshserver/config.env"
+  else
+    abort "! ERROR: Failed to install default configuration"
+  fi
+else
+  log "- Existing configuration detected; preserving settings"
+fi
+
+# Create default root profile if not present
+if [ ! -f /data/adb/sshserver/.profile ]; then
+  cat << 'EOF' > /data/adb/sshserver/.profile
+# Dropbear interactive shell environment
+export PATH=/data/adb/magisk:/data/adb/sshserver/bin:$PATH:/system/bin:/system/xbin:/vendor/bin:/apex/com.android.runtime/bin
+export HOME=/data/adb/sshserver
+export TERM=xterm-256color
+alias ll='ls -la'
+EOF
+  chmod 600 /data/adb/sshserver/.profile
+  chown 0:0 /data/adb/sshserver/.profile
+  log "- Configured root shell environment"
+fi
+
+# Verification
+if [ -x /data/adb/sshserver/bin/dropbear ] && [ -x /data/adb/sshserver/bin/dropbearkey ] && [ -x /data/adb/sshserver/sftp ]; then
+  OK=1
+fi
+
+if [ "$OK" = "1" ]; then
+  log "- Installation completed successfully!"
+  log "- Default password is 'crdroid' (change via 'sshserverctl passwd')"
+  log "- Place public keys in /data/adb/sshserver/.ssh/authorized_keys"
+  log "- Please reboot your device to start the SSH server."
+else
+  abort "! Installation incomplete or verification failed."
+fi
+
+```
+
+`module.prop`:
+
+```prop
+id=sshserverpwd
+name=Dropbear SSH & SFTP Server
+version=v1.2.0
+versionCode=10200
+author=Ayoubvvch
+description=Statically-linked Dropbear SSH and SFTP server for Android with public key and password authentication. Generates systemless passwd file dynamically on boot. Android 10-15+ compatible.
+
+```
+
+`post-fs-data.sh`:
+
+```sh
+#!/system/bin/sh
+# This script runs in post-fs-data mode (early boot stage)
+
+MODDIR=${0%/*}
+CONFIG_FILE="/data/adb/sshserver/config.env"
+
+# Create directories and ensure secure permissions
+mkdir -p /data/adb/sshserver/bin
+mkdir -p /data/adb/sshserver/keys
+mkdir -p /data/adb/sshserver/log
+mkdir -p /data/adb/sshserver/.ssh
+
+chmod 700 /data/adb/sshserver
+chmod 700 /data/adb/sshserver/bin
+chmod 700 /data/adb/sshserver/keys
+chmod 700 /data/adb/sshserver/.ssh
+
+# If authorized_keys exists, ensure secure permissions
+if [ -f /data/adb/sshserver/.ssh/authorized_keys ]; then
+  chmod 600 /data/adb/sshserver/.ssh/authorized_keys
+  chown -R 0:0 /data/adb/sshserver/.ssh
+fi
+
+# Ensure default profile for interactive root sessions exists
+if [ ! -f /data/adb/sshserver/.profile ]; then
+  cat << 'EOF' > /data/adb/sshserver/.profile
+# Dropbear interactive shell environment
+export PATH=/data/adb/magisk:/data/adb/sshserver/bin:$PATH:/system/bin:/system/xbin:/vendor/bin:/apex/com.android.runtime/bin
+export HOME=/data/adb/sshserver
+export TERM=xterm-256color
+alias ll='ls -la'
+EOF
+  chmod 600 /data/adb/sshserver/.profile
+  chown 0:0 /data/adb/sshserver/.profile
+fi
+
+# Default configurations
+PORT=22
+ALLOW_PASSWORD=1
+ALLOW_ROOT=1
+PASSWORD=""
+PASSWORD_HASH=""
+
+# Safely extract raw PASSWORD_HASH without shell variable expansion
+if [ -f "$CONFIG_FILE" ]; then
+  RAW_HASH=$(grep -E '^[[:space:]]*PASSWORD_HASH=' "$CONFIG_FILE" 2>/dev/null | head -n1 | sed -e 's/^[[:space:]]*PASSWORD_HASH=//' -e 's/^["']//' -e 's/["']$//')
+  if [ -n "$RAW_HASH" ]; then
+    PASSWORD_HASH="$RAW_HASH"
+  fi
+  . "$CONFIG_FILE"
+  # Re-apply extracted hash if it was mangled by shell sourcing
+  if [ -n "$RAW_HASH" ]; then
+    PASSWORD_HASH="$RAW_HASH"
+  fi
+fi
+
+# If password authentication is allowed and plaintext password is provided, generate hash
+if [ "$ALLOW_PASSWORD" = "1" ]; then
+  if [ -z "$PASSWORD_HASH" ] && [ -n "$PASSWORD" ]; then
+    if [ -x /data/adb/magisk/busybox ]; then
+      PASSWORD_HASH=$(echo -n "$PASSWORD" | /data/adb/magisk/busybox cryptpw -m sha512 2>/dev/null)
+    fi
+    if [ -z "$PASSWORD_HASH" ] && which busybox >/dev/null 2>&1; then
+      PASSWORD_HASH=$(echo -n "$PASSWORD" | busybox cryptpw -m sha512 2>/dev/null)
+    fi
+    if [ -z "$PASSWORD_HASH" ] && which cryptpw >/dev/null 2>&1; then
+      PASSWORD_HASH=$(echo -n "$PASSWORD" | cryptpw -m sha512 2>/dev/null)
+    fi
+    if [ -z "$PASSWORD_HASH" ] && [ -x /data/adb/magisk/busybox ]; then
+      PASSWORD_HASH=$(echo -n "$PASSWORD" | /data/adb/magisk/busybox cryptpw 2>/dev/null)
+    fi
+    if [ -z "$PASSWORD_HASH" ] && which busybox >/dev/null 2>&1; then
+      PASSWORD_HASH=$(echo -n "$PASSWORD" | busybox cryptpw 2>/dev/null)
+    fi
+    if [ -z "$PASSWORD_HASH" ] && which openssl >/dev/null 2>&1; then
+      PASSWORD_HASH=$(echo -n "$PASSWORD" | openssl passwd -1 -stdin 2>/dev/null)
+    fi
+    if [ -z "$PASSWORD_HASH" ]; then
+      # Fallback SHA-512 hash for 'crdroid'
+      PASSWORD_HASH='$6$xR50rJ0RcmaVH0X9$WQQHov4xxfBKvfhssC2exMoDD8ZUoWc5ne2QsOwBtXBxiBQR7IOOEZhUzGLk1seTvQG2bxbCM392ehPyVqWF5.'
+    fi
+
+    # Update config.env to save hash with single quotes and clear plaintext password
+    if [ -f "$CONFIG_FILE" ] && [ -n "$PASSWORD_HASH" ]; then
+      TEMP_CONF=$(grep -v "^PASSWORD=" "$CONFIG_FILE" | grep -v "^PASSWORD_HASH=")
+      echo "$TEMP_CONF" > "$CONFIG_FILE"
+      echo "PASSWORD_HASH='$PASSWORD_HASH'" >> "$CONFIG_FILE"
+      echo "PASSWORD=''" >> "$CONFIG_FILE"
+    fi
+  fi
+fi
+
+# If password login is disabled or no hash exists, set to *
+if [ "$ALLOW_PASSWORD" = "0" ] || [ -z "$PASSWORD_HASH" ]; then
+  PASSWORD_HASH="*"
+fi
+
+# Dynamically generate systemless /system/etc/passwd file
+mkdir -p "$MODDIR/system/etc"
+echo "root:$PASSWORD_HASH:0:0:root:/data/adb/sshserver:/system/bin/sh" > "$MODDIR/system/etc/passwd"
+chmod 644 "$MODDIR/system/etc/passwd"
+chown 0:0 "$MODDIR/system/etc/passwd"
+
+```
+
+`service.sh`:
+
+```sh
+#!/system/bin/sh
+# This script starts the dropbear SSH server at boot via Magisk late_start service
+
+LOGDIR=/data/adb/sshserver/log
+mkdir -p "$LOGDIR"
+SERVICE_LOG="$LOGDIR/service.log"
+
+log() {
+  echo "$(date '+%Y-%m-%d %H:%M:%S') $1" >> "$SERVICE_LOG"
+}
+
+log "[service] Launching dropbear service..."
+
+# Export comprehensive PATH so child processes inherit all system and Magisk tools
+export PATH=/data/adb/magisk:/data/adb/sshserver/bin:$PATH:/system/bin:/system/xbin:/vendor/bin:/apex/com.android.runtime/bin
+export HOME=/data/adb/sshserver
+
+# Load configuration variables from config.env if present
+CONFIG_FILE="/data/adb/sshserver/config.env"
+PORT=22
+ALLOW_PASSWORD=1
+ALLOW_ROOT=1
+
+if [ -f "$CONFIG_FILE" ]; then
+  . "$CONFIG_FILE"
+fi
+PORT=${PORT:-22}
+ALLOW_PASSWORD=${ALLOW_PASSWORD:-1}
+ALLOW_ROOT=${ALLOW_ROOT:-1}
+
+PIDFILE=/data/adb/sshserver/dropbear.pid
+HOSTKEY=/data/adb/sshserver/keys/dropbear_ed25519_host_key
+
+# Check that dropbear binaries exist
+if [ ! -x /data/adb/sshserver/bin/dropbear ]; then
+  log "[service] ERROR: dropbear binary is missing or not executable. Aborting startup."
+  exit 1
+fi
+if [ ! -x /data/adb/sshserver/bin/dropbearkey ]; then
+  log "[service] ERROR: dropbearkey binary is missing or not executable. Aborting startup."
+  exit 1
+fi
+
+# Generate host key if it does not exist
+if [ ! -f "$HOSTKEY" ]; then
+  log "[service] Generating Ed25519 host key at $HOSTKEY"
+  /data/adb/sshserver/bin/dropbearkey -t ed25519 -f "$HOSTKEY" >> "$SERVICE_LOG" 2>&1
+fi
+
+# Stop any existing dropbear process to avoid duplicate instances
+if [ -f "$PIDFILE" ]; then
+  OLD_PID=$(cat "$PIDFILE" 2>/dev/null)
+  if [ -n "$OLD_PID" ] && kill -0 "$OLD_PID" 2>/dev/null; then
+    log "[service] Stopping existing dropbear process ($OLD_PID)"
+    kill "$OLD_PID"
+    sleep 1
+  fi
+  rm -f "$PIDFILE"
+fi
+
+# Compose arguments:
+# -r <hostkey>: Ed25519 host key
+# -p <port>: listening TCP port
+# -P <pidfile>: process ID file
+# -E: log to stderr (redirected to dropbear.log)
+# -e: pass server process environment (PATH, etc.) to child sessions
+# -K 30: keepalive ping every 30 seconds to prevent Wi-Fi sleep timeouts
+ARGS="-r $HOSTKEY -p $PORT -P $PIDFILE -E -e -K 30"
+
+# Disable password logins if configured
+if [ "$ALLOW_PASSWORD" = "0" ]; then
+  ARGS="$ARGS -s"
+fi
+
+# Disallow root logins if configured
+if [ "$ALLOW_ROOT" = "0" ]; then
+  ARGS="$ARGS -w"
+fi
+
+# Start dropbear in background
+log "[service] Starting dropbear with arguments: $ARGS"
+/data/adb/sshserver/bin/dropbear $ARGS >> "$LOGDIR/dropbear.log" 2>&1 &
+log "[service] dropbear started with PID $!"
+
+```
+
+`sshserver/config.env`:
+
+```env
+# Dropbear SSH & SFTP Server Configuration
+# Stored at /data/adb/sshserver/config.env
+
+# Port to listen on (default: 22)
+PORT=22
+
+# Allow password authentication (1 = enabled, 0 = disabled / keys only)
+ALLOW_PASSWORD=1
+
+# Allow root login (1 = allowed, 0 = disallowed)
+ALLOW_ROOT=1
+
+# Plaintext password (will be automatically hashed on first boot, then cleared)
+PASSWORD="crdroid"
+
+# Pre-hashed SHA-512 password.
+# IMPORTANT: Always use single quotes ('...') to avoid shell variable expansion ($)
+# Example: PASSWORD_HASH='$6$saltsalt$hashedpassword...'
+PASSWORD_HASH=''
+
+```
+
+`system/bin/sshserverctl`:
+
+```
+#!/system/bin/sh
+# Control script for Dropbear SSH Server
+
+CONFIG_FILE="/data/adb/sshserver/config.env"
+PIDFILE="/data/adb/sshserver/dropbear.pid"
+HOSTKEY="/data/adb/sshserver/keys/dropbear_ed25519_host_key"
+
+# Ensure root utilities, Magisk, and our bin folder are in PATH
+export PATH=/data/adb/magisk:/data/adb/sshserver/bin:$PATH:/system/bin:/system/xbin:/vendor/bin:/apex/com.android.runtime/bin:/data/data/com.termux/files/usr/bin
+export HOME=/data/adb/sshserver
+
+# Load config
+PORT=22
+ALLOW_PASSWORD=1
+ALLOW_ROOT=1
+PASSWORD_HASH=""
+
+if [ -f "$CONFIG_FILE" ]; then
+  . "$CONFIG_FILE"
+fi
+
+PORT=${PORT:-22}
+ALLOW_PASSWORD=${ALLOW_PASSWORD:-1}
+ALLOW_ROOT=${ALLOW_ROOT:-1}
+
+case "$1" in
+  start)
+    if [ -f "$PIDFILE" ]; then
+      PID=$(cat "$PIDFILE" 2>/dev/null)
+      if [ -n "$PID" ] && kill -0 "$PID" 2>/dev/null; then
+        echo "SSH Server is already running (PID $PID)"
+        exit 0
+      fi
+    fi
+
+    # Check if hostkey exists, if not generate it
+    if [ ! -f "$HOSTKEY" ]; then
+      echo "Generating Ed25519 host key at $HOSTKEY..."
+      /data/adb/sshserver/bin/dropbearkey -t ed25519 -f "$HOSTKEY"
+    fi
+
+    # Compose arguments
+    ARGS="-r $HOSTKEY -p $PORT -P $PIDFILE -E -e -K 30"
+    if [ "$ALLOW_PASSWORD" = "0" ]; then
+      ARGS="$ARGS -s"
+    fi
+    if [ "$ALLOW_ROOT" = "0" ]; then
+      ARGS="$ARGS -w"
+    fi
+
+    echo "Starting Dropbear SSH server on port $PORT..."
+    /data/adb/sshserver/bin/dropbear $ARGS
+    if [ $? -eq 0 ]; then
+      echo "SSH Server started successfully."
+    else
+      echo "Failed to start SSH Server."
+    fi
+    ;;
+  stop)
+    if [ -f "$PIDFILE" ]; then
+      PID=$(cat "$PIDFILE" 2>/dev/null)
+      if [ -n "$PID" ] && kill -0 "$PID" 2>/dev/null; then
+        echo "Stopping SSH Server (PID $PID)..."
+        kill "$PID"
+        rm -f "$PIDFILE"
+        echo "SSH Server stopped."
+      else
+        echo "SSH Server is not running, cleaning stale PID file."
+        rm -f "$PIDFILE"
+      fi
+    else
+      echo "SSH Server is not running."
+    fi
+    ;;
+  restart)
+    $0 stop
+    sleep 1
+    $0 start
+    ;;
+  status)
+    if [ -f "$PIDFILE" ]; then
+      PID=$(cat "$PIDFILE" 2>/dev/null)
+      if [ -n "$PID" ] && kill -0 "$PID" 2>/dev/null; then
+        echo "SSH Server is running (PID $PID) on port $PORT."
+      else
+        echo "SSH Server PID file found but process is not running (stale PID)."
+      fi
+    else
+      echo "SSH Server is not running."
+    fi
+    ;;
+  passwd)
+    # Check if we have a way to generate the hash
+    GEN_METHOD=""
+    if which openssl >/dev/null 2>&1; then
+      GEN_METHOD="openssl"
+    elif [ -x /data/adb/magisk/busybox ] && /data/adb/magisk/busybox --list | grep -q "^cryptpw$"; then
+      GEN_METHOD="magisk-busybox"
+    elif which busybox >/dev/null 2>&1 && busybox --list | grep -q "^cryptpw$"; then
+      GEN_METHOD="system-busybox"
+    elif which python3 >/dev/null 2>&1; then
+      if python3 -c "import crypt" 2>/dev/null; then
+        GEN_METHOD="python3"
+      fi
+    fi
+
+    if [ -z "$GEN_METHOD" ]; then
+      echo "------------------------------------------------------------------"
+      echo "ERROR: No password hashing tool (openssl/busybox/python) found."
+      echo "To change the password, please generate a SHA-512 crypt hash on your PC:"
+      echo "  openssl passwd -6 'your_password'"
+      echo "Then, open /data/adb/sshserver/config.env and set:"
+      echo "  PASSWORD_HASH='your_generated_hash'"
+      echo "------------------------------------------------------------------"
+      exit 1
+    fi
+
+    # Read password interactively
+    echo -n "Enter new root password: "
+    stty -echo 2>/dev/null
+    read -r NEW_PASS
+    stty echo 2>/dev/null
+    echo ""
+
+    echo -n "Confirm new root password: "
+    stty -echo 2>/dev/null
+    read -r CONFIRM_PASS
+    stty echo 2>/dev/null
+    echo ""
+
+    if [ "$NEW_PASS" != "$CONFIRM_PASS" ]; then
+      echo "Error: Passwords do not match!"
+      exit 1
+    fi
+
+    if [ -z "$NEW_PASS" ]; then
+      echo "Error: Password cannot be empty!"
+      exit 1
+    fi
+
+    # Generate hash based on available tool
+    HASH=""
+    case "$GEN_METHOD" in
+      openssl)
+        HASH=$(openssl passwd -6 "$NEW_PASS" 2>/dev/null)
+        ;;
+      magisk-busybox)
+        HASH=$(echo -n "$NEW_PASS" | /data/adb/magisk/busybox cryptpw -m sha512 2>/dev/null)
+        ;;
+      system-busybox)
+        HASH=$(echo -n "$NEW_PASS" | busybox cryptpw -m sha512 2>/dev/null)
+        ;;
+      python3)
+        HASH=$(python3 -c "import crypt; print(crypt.crypt('$NEW_PASS', crypt.mksalt(crypt.METHOD_SHA512)))" 2>/dev/null)
+        ;;
+    esac
+
+    if [ -z "$HASH" ]; then
+      echo "Error: Failed to generate password hash!"
+      exit 1
+    fi
+
+    # Save to config.env with SINGLE QUOTES to avoid shell expansion ($)
+    if [ -f "$CONFIG_FILE" ]; then
+      TEMP_CONFIG=$(grep -v "^PASSWORD=" "$CONFIG_FILE" | grep -v "^PASSWORD_HASH=")
+      echo "$TEMP_CONFIG" > "$CONFIG_FILE"
+      echo "PASSWORD_HASH='$HASH'" >> "$CONFIG_FILE"
+      echo "PASSWORD=''" >> "$CONFIG_FILE"
+    else
+      echo "PORT=22" > "$CONFIG_FILE"
+      echo "ALLOW_PASSWORD=1" >> "$CONFIG_FILE"
+      echo "ALLOW_ROOT=1" >> "$CONFIG_FILE"
+      echo "PASSWORD_HASH='$HASH'" >> "$CONFIG_FILE"
+      echo "PASSWORD=''" >> "$CONFIG_FILE"
+    fi
+
+    # Write immediately to systemless passwd file
+    MOD_PASSWD="/data/adb/modules/sshserverpwd/system/etc/passwd"
+    if [ -d "/data/adb/modules/sshserverpwd/system/etc" ]; then
+      echo "root:$HASH:0:0:root:/data/adb/sshserver:/system/bin/sh" > "$MOD_PASSWD"
+      chmod 644 "$MOD_PASSWD"
+      chown 0:0 "$MOD_PASSWD"
+
+      # Try to bind-mount to system instantly so it works without rebooting
+      if mount -o bind "$MOD_PASSWD" /system/etc/passwd 2>/dev/null; then
+        echo "Password updated successfully! Applied instantly."
+      else
+        if mount -o bind "$MOD_PASSWD" /etc/passwd 2>/dev/null; then
+          echo "Password updated successfully! Applied instantly."
+        else
+          echo "Password updated! Please reboot your device to apply."
+        fi
+      fi
+    else
+      echo "Password updated in config! Please reboot your device to apply."
+    fi
+    ;;
+  *)
+    echo "Usage: sshserverctl {start|stop|restart|status|passwd}"
+    exit 1
+    ;;
+esac
+
+```
+
+`system/etc/passwd`:
+
+```
+root:*:0:0:root:/data/adb/sshserver:/system/bin/sh
+
+```
+
+`system/etc/shells`:
+
+```
+/system/bin/sh
+/system/bin/ash
+/vendor/bin/sh
+
+```
+
+`uninstall.sh`:
+
+```sh
+#!/system/bin/sh
+# Cleanup on uninstall
+rm -rf /data/adb/sshserver
+
+```
