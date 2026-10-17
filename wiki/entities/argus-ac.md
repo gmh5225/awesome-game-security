@@ -17,7 +17,7 @@ README category: Anti Cheat / Open Source Anti Cheat System / game:minecraft.
 
 ## Enforcement and audit
 
-**HARD** and **SOFT setbacks** return players to last-known-valid positions. Violation tracking drives staff alerts and punishments. Audit tooling emits **JSON Lines** logs with **SHA-256 hash-chain** verification, query helpers, and **movement replay** for post-incident review—operator-focused enforcement with investigatable history rather than research-only demos.
+**HARD** and **SOFT setbacks** return players to last-known-valid positions. Configurable violation thresholds drive staff alerts and automated punishments. Audit tooling emits **JSON Lines** logs with **SHA-256 hash-chain** verification, log queries, and **movement replay** for post-incident review—aimed at server operators who need practical in-game enforcement and investigatable violation history rather than research-only demos. (source: wiki/sources/descriptions/hahasc26-lang__ArgusAC.md)
 
 ## Notable checks
 
