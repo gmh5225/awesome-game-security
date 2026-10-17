@@ -2970,6 +2970,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/trumank/jmap [Unreal Engine reflection data format and extractor]
 - https://github.com/Encryqed/Dumper-7 [SDK Dump for all of UE4 and UE5]
 - https://github.com/TheHolyOneZ/Zircon-UE-Dumper [Runtime UE 4.22–5.7 reflection dumper: C++ SDK, .usmap, IDA/Ghidra/BN types, Frida bindings, and Python stubs from live process, minidump, or disk]
+- https://github.com/Kiyogitpy/wardogs-data-docs [Defensive-research Wardogs (UE 5.7) reference: cooked data exports, UEDumper C++ SDK, mappings, and cross-linked docs with responsible disclosure]
 - https://github.com/Spuckwaffel/UEDumper [SDK Dump for UE 4.19 - 5.2]
 - https://github.com/BadBrojo/UEDumper-MemProcFS [UEDumper+MemProcFS 4.19 - 5.2]
 - https://github.com/BobHUnrealTech/UnrealSDKDumper-4.25 [SDK Dump for UE 4.23 - 4.27]
