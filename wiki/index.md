@@ -1935,7 +1935,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ida-ps4-helper](entities/ida-ps4-helper.md) — IDA helper plugin for PS4 module loader (ps4-module-loader companion)
 - [ida-ps5-elf-plugin](entities/ida-ps5-elf-plugin.md) — IDA Pro PS5 ELF loader (PS5 ELF extensions, segments, dynamic linking; console security RE)
 - [ps2-ida-vu-micro](entities/ps2-ida-vu-micro.md) — IDA Python plugin: PS2 VU microcode search/disassembly (VIF MPG auto-discovery; vector-unit program RE)
-- [PS2 Port Engine](entities/ps2-port-engine.md) — danielgomesvieira2000; verified PS2 decomp toolchain + native PC port runtime (ps2decomp R5900/VU lift; EE/IOP/GS/VU Vulkan host; SDL3; no bundled assets; Cheat / RE Tools)
+- [PS2 Port Engine](entities/ps2-port-engine.md) — danielgomesvieira2000; verified PS2 decomp toolchain + native PC port runtime (ps2decomp ELF/disc, R5900/VU lift + R5900 interpreter difftest; C++17 EE/IOP/DMA/SPU2/VIF/VU host; Vulkan GS + SDL3; user-owned disc images; Cheat / RE Tools)
 - [spu2c](entities/spu2c.md) — IDA Python plugin: PS3 Cell SPU opcode C-style annotation (vector lanes; shuffle masks; function scan; firmware/library/anti-cheat RE)
 - [ida-jm-xorstr-decrypt-plugin](entities/ida-jm-xorstr-decrypt-plugin.md) — IDA Pro JM Xorstr decrypt (x64; Python)
 - [ida-gameguard-str-dec](entities/ida-gameguard-str-dec.md) — IDA Pro nProtect GameGuard string decrypt (Python; modding; cheat / IDA Plugins; crtdll)
