@@ -985,6 +985,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/mattgodbolt/frogman [Annotated BeebASM disassembly of unreleased BBC Micro platformer with jsbeeb runtime-dump RE, multi-stage VIA-timer XOR loader analysis, and byte-exact rebuild tooling]
 - https://github.com/0x5abe/vifterpreter [Rust library for parsing PlayStation 2 VIF1 DMA packets and VIF commands]
 - https://github.com/danielgomesvieira2000/ps2-port-engine [Verified PS2 decompilation toolchain and native PC port runtime (EE/IOP/GS/VU, Vulkan host) with no bundled game assets]
+- https://github.com/byroweb/AC1_RE [RE reference and tooling for Armored Core (PS1, SLUS-01323): docs, Ghidra pipeline, disc/PA/mission parsers, and behavioral C models (BYO disc)]
 - https://github.com/piffd0s/defcon-dreamcast-planetweb-research [DEF CON Dreamcast PlanetWeb exploit chain — Eden loading, memory-write flaw, and MIME stack overflow to run native SH-4 DOOM without a debugger]
 - https://github.com/Anonym0ose/JitDumper [A CIL method body dumper]
 - https://github.com/cfig/Android_boot_image_editor [A tool for reverse engineering Android ROM images]
@@ -1050,6 +1051,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/TalhaMudo/NFSU2Recomp [Static recompilation pipeline and runtime lifting Need for Speed: Underground 2 (Win32/x86, D3D9) to native ARM64 macOS with documented RE tooling]
 - https://github.com/elkir0/sc2-android-recomp [StarCraft II static recompilation toolkit (x86-32 to ARM64): per-function difftest oracle, D3D9 shader translation, MPQ tools, pcrecomp closure extensions, and Android porting helpers—method and tooling only, no game assets]
 - https://github.com/gamboozino/ngbrecomp [Static recompilation of Ninja Gaiden Black (Xbox OG) to native Linux/Windows with a custom Vulkan renderer; BYO game assets]
+- https://github.com/Coz-0/smo-recomp [Static recompilation of Super Mario Odyssey (Switch 1.4.1) to native Windows x64 with custom runtime and Vulkan renderer; BYO dump, no assets in repo]
 - https://github.com/sosso33/omikron-tns-omk-engine [From-scratch C++20 reimplementation of Omikron: The Nomad Soul (1999) with documented format reverse engineering and evidence-backed asset readers]
 - https://github.com/sergen213/kabus22-linux [Reverse-engineered native Linux Kabus 22 engine with GTK installer/launcher, OpenGL/Vulkan rendering, and RE notes; requires user-supplied original game assets]
 - https://github.com/LyeDevGit/WonTree-RBLX-Dumper [Universal Roblox game analysis dumper: Luau decompile stack, remote call graph, live remote logger, framework and anti-cheat pattern detection, markdown/CSV reports]
@@ -5296,6 +5298,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/ntfargo/CSSFontFace-Exploit [WebKit CSSFontFace UAF for PS4/PS5; PS4 6.00-11.02 (kernel chain 7.00-11.02); PS5 needs separate ASLR/vtable defeat; writeup: linearfox.com]
 - https://github.com/ArabPixel/PSFree-Enhanced [Feature-rich PS4 WebKit jailbreak exploit host — chains PSFree/Bad Hoist/CSSFontFace userland with Lapse/NetCtrl/sleirsgoevy kernel exploits (FW 6.00-11.02), auto fw/console detection, GoldHEN/HEN selector, payload loader on port 9020]
 - https://github.com/notmaj0r/CheatRunner_Patches [Community PS4/PS5 Title-ID patch XML collection for CheatRunner (FPS, resolution, and in-game byte patches)]
+- https://github.com/mohasi/game-cheats [Community PS3 cheat database (Artemis-sourced) for simple-cheat-menu: editable source per TITLEID, compiled console files, and vote-driven reliability scores]
 
 
 ## Donate
