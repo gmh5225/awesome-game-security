@@ -4509,6 +4509,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/wflores9/Ironwall [Open-source anti-cheat protocol stack with thin client, TEE attestation, ZK-SNARK human-input proofs, and Hedera HCS + XRPL dual-anchored match receipts]
 - https://github.com/Abdelnour2/MiniAntiCheatV2 [Educational Windows kernel anti-cheat PoC: process blacklist plus ObCallbacks handle shield]
 - https://github.com/LucasAlgera/Kernel-AC [Educational Windows kernel anti-cheat graduation project with WDM driver (ObCallbacks, IOCTL) and usermode client]
+- https://github.com/Optccopa/SaturnAntiCheat [Educational Windows kernel anti-cheat with a WDM driver (thread origin checks) and a launcher that manages driver load/unload for -insecure game sessions]
 - https://github.com/HEEAAP/Sentinel-Anti-Cheat [Educational usermode anti-cheat daemon with remote debugger checks, hardware-breakpoint scanning, PEB-based memory reads, and configurable threat response policies]
 - https://github.com/vovasicidk/sentinelac [Open-source anti-cheat skeleton with usermode SDK, ObRegisterCallbacks kernel stub, overlay isolation, and stack-walk injection detection]
 - https://github.com/nulli83/Mj-lnir [Windows client-server anti-cheat with C++ core scanner, Rust agent, and self-hosted studio control plane for injection detection and enforcement]
@@ -4820,6 +4821,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/gmh5225/Driver-WatchOwl [ImageNotify+Stack Trace]
 - https://github.com/xuanxuan0/TiEtwAgent [ETW]
 - https://github.com/JingMatrix/Demo [A demo app to detect (Zygisk) library injections]
+- https://github.com/seyifalode-cmd/process-injection-detection-lab [Defender lab documenting classic Windows process injection telemetry via Sysinternals and Sysmon (MITRE T1055), with Splunk SPL and KQL detection queries tied to anti-cheat visibility]
 
 > Detection:Spoof Stack
 - https://github.com/gabriellandau/ShadowStackWalk
