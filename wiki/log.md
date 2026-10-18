@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-18** — ingest `description:Sylnar/NexusForge`: entity [[nexus-forge]] (Sylnar; Windows .NET 8/Avalonia; Artix-7/Kintex-7 CH347 OpenOCD JTAG; DNA + DNA-locked SPI/volatile flash; CH347/FT601 drivers; PCIe BAR enum + DMA read speedtest; Vivado-free FPGA DMA board management); cited on [[overviews/dma-attack]] and [[concepts/dma]]; cross-linked [[fpga-dma-multi-tool]], [[dma-tools-rs]], [[mewtools]], [[pcileech-fpga]], and [[dma-speedtest-memflow-rs]]; `index.md` entity blurb updated.
+
 - **2026-10-18** — ingest `description:luluovo1/Oboro`: entity [[oboro]] (luluovo1; customized LLVM Clang+BOLT monorepo; prebuilt Android NDK LLVM 21 / OLLVM toolchain with FLA, BCF, indirection, string/constant encryption for native `.so` hardening; Obfuscation Engine); cited on [[overviews/reverse-engineering]] and [[overviews/mobile-security]]; cross-linked [[control-flow-flattening]], [[dll-ollvm]], [[amice]], [[ollvm-unflattener]], [[deobfbr]], and [[dprotect]]; `index.md` entity blurb updated.
 
 - **2026-10-18** — ingest `readme:categories`: **Cheat** link_count **2916** (+1; TwoSevenOneT/[[phantom-buffer]] WM_SETTEXT Edit-control injection staging) / **Anti Cheat** **807** (+1; Optccopa/[[saturn-anti-cheat]] educational CS2 `-insecure` WDM kernel AC) / **Game Engine** ~159 / **Game Develop** ~194 / **DirectX** ~42 / **Game Network** ~34 and other major README sections unchanged; 41 top-level sections (`NeverC & NeverD` placeholder); synced [[overviews/overview]], [[overviews/game-hacking]], [[overviews/anti-cheat]], [[overviews/dma-attack]], and [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).

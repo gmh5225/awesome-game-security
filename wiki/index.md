@@ -2666,6 +2666,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [NeoTTY](entities/neotty.md) — experimental Termux fork (Android terminal; full Linux system usage; cheat / Android Terminal Emulator; gmh5225)
 - [NeoTerm](entities/neoterm.md) — modern Android terminal emulator (NeoTerrm; Java/Kotlin; Termux-oriented workflow; mobile shell usability; portable CLI for mobile security practitioners)
 - [NEXUS](entities/nexus.md) — AtawurRahmanTanvir; root-required Kotlin/Compose Android utility; macro-execution via su into device-identity spoofing, build.prop/network/DNS reset, cache purge, Google telemetry cleanup; Ghost Module silent ops; live terminal console; device fingerprint evasion / anti-ban identity rotation; cheat / Android
+- [NexusForge](entities/nexus-forge.md) — Sylnar; Windows .NET 8/Avalonia FPGA DMA board manager (Artix-7/Kintex-7 CH347 OpenOCD JTAG; DNA read + DNA-locked SPI/volatile flash; CH347/FT601 drivers; PCIe BAR enum + DMA read speedtest; Vivado-free bring-up)
 - [netcrypt](entities/netcrypt.md) — C# .NET PE packer (encrypted/compressed managed assembly in CLR loader stub; SimplePacker GUI; Anti Cheat → Binary Packer / `.NET`)
 - [netImgui](entities/netimgui.md) — Dear ImGui remote access (input + draw-command forward; engine/plugin UI)
 - [neverc](entities/neverc.md) — AI-friendly C23 security compiler (custom LLVM backend; integrated linker; compile-time string encryption/hash + mimalloc; DynCode PIC runtime codegen; 130+ phase plugin API; PE/ELF/Mach-O; Windows/Linux/Android; NeverSight)
