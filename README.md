@@ -984,6 +984,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/mattgodbolt/pipeline-disasm [Annotated 6502 disassembly and byte-identical rebuild of BBC Micro PIPELINE with hidden-sector and deleted-mark copy protection, flux verification, and jsbeeb tooling]
 - https://github.com/mattgodbolt/frogman [Annotated BeebASM disassembly of unreleased BBC Micro platformer with jsbeeb runtime-dump RE, multi-stage VIA-timer XOR loader analysis, and byte-exact rebuild tooling]
 - https://github.com/0x5abe/vifterpreter [Rust library for parsing PlayStation 2 VIF1 DMA packets and VIF commands]
+- https://github.com/danielgomesvieira2000/ps2-port-engine [Verified PS2 decompilation toolchain and native PC port runtime (EE/IOP/GS/VU, Vulkan host) with no bundled game assets]
 - https://github.com/piffd0s/defcon-dreamcast-planetweb-research [DEF CON Dreamcast PlanetWeb exploit chain — Eden loading, memory-write flaw, and MIME stack overflow to run native SH-4 DOOM without a debugger]
 - https://github.com/Anonym0ose/JitDumper [A CIL method body dumper]
 - https://github.com/cfig/Android_boot_image_editor [A tool for reverse engineering Android ROM images]
@@ -4027,6 +4028,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - [Open-source cheat software for Grand Theft Auto V (PC)](https://github.com/gmh5225/GrandTheftAutoV-Cheat)
 - https://github.com/gmh5225/BigBaseV2
 - https://github.com/YimMenu/YimMenu
+- https://github.com/YimMenu-Lua/Samurais-Scripts [GPL-3.0 Lua script collection and base for YimMenu-focused GTA Online roleplay and menu automation]
 - https://github.com/gmh5225/SpookiMystic-GTA-Leak [Menu]
 - https://github.com/gmh5225/gta5view [Viewer/Editor]
 - https://github.com/gmh5225/pHake [Mod Menu]
