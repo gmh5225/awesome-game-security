@@ -1,7 +1,7 @@
 ---
 title: game-cheats (PS3)
 kind: entity
-topics: [game-hacking]
+topics: [game-hacking, reverse-engineering]
 sources:
   - wiki/sources/descriptions/mohasi__game-cheats.md
   - wiki/sources/README-categories.md
@@ -11,7 +11,11 @@ confidence: medium
 
 # game-cheats
 
-Community PlayStation 3 cheat database keyed by retail TITLEID (BLUS, BLES, BCES, BCAS, NPUx, and related prefixes). Maintains parallel **source** and **compiled** trees covering thousands of NA/EU/Asia/JP releases, Artemis-sourced definitions editable per title, with vote-driven reliability scores for simple-cheat-menu import. Data-centric layout (plain text per title) supports browsing, diffing, and feeding PS3 homebrew cheat tools and memory-patch workflows—modders, custom-firmware users, and RE studying legacy PS3 in-game modifications. (source: wiki/sources/descriptions/mohasi__game-cheats.md)
+Large **community PlayStation 3 cheat database**: plain-text definitions organized by official retail **TITLEID** (BLUS, BLES, BCES, BCAS, NPUx, and related prefixes). Maintains parallel **source** and **compiled** trees spanning thousands of **retail and PSN** releases across North America, Europe, Asia, and Japan. Definitions are **Artemis-sourced**, editable per title, and carry **vote-driven reliability scores** for import into **simple-cheat-menu** and other PS3 homebrew cheat tools. The layout is **data-centric** (not application code), so cheats can be browsed, diffed, versioned, and fed into memory-patch workflows—useful for custom-firmware modders and reverse engineers studying legacy PS3 in-game modifications. (source: wiki/sources/descriptions/mohasi__game-cheats.md)
+
+## Technical notes
+
+One plain-text cheat file per TITLEID; dual source vs compiled export trees; regional ID prefix conventions (BLUS/BLES/BCES/BCAS/NPUx); community reliability voting before console import.
 
 ## Links
 

@@ -1910,6 +1910,7 @@ sources:
   - wiki/sources/descriptions/xuanfeng0316__MCBotMod.md
   - wiki/sources/descriptions/winstxnhdw__lc-hax.md
   - wiki/sources/descriptions/elkir0__sc2-android-recomp.md
+  - wiki/sources/descriptions/mohasi__game-cheats.md
 updated: 2026-10-18
 confidence: high
 ---

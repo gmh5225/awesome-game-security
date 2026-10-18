@@ -1565,7 +1565,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [fortnite-voyagertf](entities/fortnite-voyagertf.md) — VoyagerTF external Fortnite cheat (ESP/aimbot/UE game-state reads via out-of-process memory; gmh5225; [External])
 - [fortnite-virtual-offsets](entities/fortnite-virtual-offsets.md) — Fortnite vtable/view offset dump (text; gmh5225; cheat / game:fortnite [Virtual Table Offsets])
 - [game-cheating-exploit-detection-agent-skill (dungnotnull)](entities/game-cheating-exploit-detection-agent-skill.md) — Claude Code skill + Python engine; six-step statistical/invariant aimbot, wallhack, macro, memory-tamper, and exploit detectors with CI-tested harness (Anti Cheat → Detection)
-- [game-cheats (PS3)](entities/game-cheats.md) — community PS3 TITLEID cheat database (Artemis-sourced source/compiled trees; simple-cheat-menu import; vote-driven reliability; mohasi; PlayStation)
+- [game-cheats (PS3)](entities/game-cheats.md) — community PS3 TITLEID plain-text cheat corpus (Artemis-sourced; parallel source/compiled trees for thousands of retail/PSN releases; simple-cheat-menu import; vote-driven reliability; mohasi; PlayStation / CFW)
 - [game-design-documents](entities/game-design-documents.md) — curated classic game design docs and PDFs (Doom, GTA, Fallout, Planescape: Torment, etc.; Game Develop / guide)
 - [game-engine-detector](entities/game-engine-detector.md) — Python APK/IPA game-engine detector (Mobile Game)
 - [gamedev](entities/gamedev.md) — Chinese-language curated gamedev resource index (tools, mixed reality, engine frameworks, learning; README [Unity]; Game Develop / guide)
