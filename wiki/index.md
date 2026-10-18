@@ -3004,6 +3004,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [petoy](entities/petoy.md) — PE-focused binary packer (C/C++ + JS; Anti Cheat → Binary Packer `[PE]`)
 - [PEzor](entities/pezor.md) — C++/C PE packer (hooking-oriented; Anti Cheat → Binary Packer)
 - [Phantasm x86 Virtualizer](entities/phantasm-x86-virtualizer.md) — x86 code virtualizer (static-link or manual VM-runtime embed; AC Obfuscation Engine `[VM]`)
+- [PhantomBuffer](entities/phantom-buffer.md) — WM_SETTEXT Edit-control shellcode staging + cdb RIP redirect (TwoSevenOneT; C++; remote pattern scan + VirtualProtectEx; no VirtualAllocEx/WriteProcessMemory; EDR/injection research; Injection Testing)
 - [PhantomKiller](entities/phantomkiller.md) — BYOVD via Lenovo BootRepair.sys (IOCTL 0x222014 ZwTerminateProcess; PPL AV/EDR)
 - [phantom-client](entities/phantom-client.md) — Lunar Client 1.8.9 internal DLL (JNI/JVMTI; wglSwapBuffers/MinHook ImGui; evasion profiles; cheat / game:minecraft)
 - [phantom-frida](entities/phantom-frida.md) — Build anti-detection Frida server from source (Python patch scripts; string/symbol/artifact randomization; WSL build; JS tests; TheQmaks)

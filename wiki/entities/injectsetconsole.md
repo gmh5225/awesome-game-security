@@ -14,7 +14,7 @@ confidence: medium
 
 README lane: **Injection Testing** — console stdin-pipe shellcode inject without cross-process WPM/alloc APIs.
 
-Sits in the **stdin-pipe / console-child** injection lane beside Debug API injectors such as [[dbgnexum]] (file-mapping + HWBP orchestration without WPM/RPM/VirtualAllocEx) and thread-hijack PoCs such as [[threadject]], within broader corpora such as [[windows-process-injection]] and [[process-injection-techniques]].
+Sits in the **stdin-pipe / console-child** injection lane beside sibling TwoSevenOneT **Edit-control `WM_SETTEXT`** staging such as [[phantom-buffer]] (SendMessage shellcode delivery + cdb RIP redirect—no WPM/VirtualAllocEx) and Debug API injectors such as [[dbgnexum]] (file-mapping + HWBP orchestration without WPM/RPM/VirtualAllocEx) and thread-hijack PoCs such as [[threadject]], within broader corpora such as [[windows-process-injection]] and [[process-injection-techniques]].
 
 ## Technique summary
 
@@ -30,4 +30,4 @@ Sits in the **stdin-pipe / console-child** injection lane beside Debug API injec
 
 ## Related
 
-[[overviews/game-hacking]] · [[overviews/anti-cheat]] · [[overviews/reverse-engineering]] · [[dbgnexum]] · [[threadject]] · [[earlycascade-injection]] · [[windows-process-injection]] · [[process-injection-techniques]] · [[injectors]]
+[[overviews/game-hacking]] · [[overviews/anti-cheat]] · [[overviews/reverse-engineering]] · [[phantom-buffer]] · [[dbgnexum]] · [[threadject]] · [[earlycascade-injection]] · [[windows-process-injection]] · [[process-injection-techniques]] · [[injectors]]
