@@ -3375,7 +3375,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [sumap (ekknod)](entities/sumap.md) — EFI manual map (C/C++; pre-boot unsigned driver PE mapping; driver development / memory analysis; cheat / EFI Manual Map)
 - [sapphire](entities/sapphire.md) — FFXIV private-server emulator (patch 3.3 branch; in development; Private Server / MMORPG; gmh5225)
 - [saphire](entities/saphire.md) — internal CS:GO cheat framework (M3351AN; C++; DirectX 9 ImGui overlay menu; FreeType fonts + custom widgets; built-in code editor; modular cheat interface with config; cheat UI framework study; [Internal])
-- [Samurais Scripts](entities/samurais-scripts.md) — YimMenu-Lua; GPL-3.0 Lua script collection/base for YimMenu GTA Online roleplay and menu automation (Cheat / game:gta5)
+- [Samurais Scripts](entities/samurais-scripts.md) — YimMenu-Lua SSV2; Lua 5.4/SmallBase modular framework (ImGui, RE'd class bindings, script globals; online/heist/stat tools; Legacy/Online); GPL-3.0 (Cheat / game:gta5)
 - [Samidare](entities/samidare.md) — M3351AN external CS2 cheat (C++; FIFO-based kernel driver comm + DirectX overlay; offset management + game-data reads + coordinate math; driver-assisted external cheat + overlay rendering research; cheat / game:cs2 [External Ring3/Ring0])
 - [Sanctum](entities/sanctum.md) — experimental Windows EDR PoC (0xflux; Rust; kernel driver + user-mode engine + Tauri UI; process/thread/filesystem/syscall monitoring; ETW consumers, minifilter, kernel hooking/containment; low-level defensive tooling research; README [EDR])
 - [sea-of-choros](entities/sea-of-choros.md) — Sea of Thieves modding / SDK generation / hooking scaffold (C/C++; Unreal; cheat / game:sea of thieves; gmh5225)
