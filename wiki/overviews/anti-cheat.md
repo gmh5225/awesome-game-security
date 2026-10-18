@@ -30,6 +30,7 @@ sources:
   - wiki/sources/descriptions/saadahmedscse__kac-inspector.md
   - wiki/sources/descriptions/dybeky__custos.md
   - wiki/sources/descriptions/ThoriaDevelopment__Iustitia.md
+  - wiki/sources/descriptions/3iden-del__fasds-anti-cheat.md
   - wiki/sources/descriptions/Nimdy__detect-FPS-hackers.md
   - wiki/sources/descriptions/zelect0r__zamr.md
   - wiki/sources/descriptions/Lixense__ff-ace-anticheat-analysis.md
@@ -1302,6 +1303,8 @@ Long-form kernel AC architecture primer [How Kernel Anti-Cheats Work](https://s4
 **Injectable 1.8.9 client-side passive observer:** [[rain-injectable]] (maximumemails-cmd; Windows C++/CMake native injector + JNI bootstrap + Java 8 detection runtime; loads Rain Anti-Cheat passive observer into Minecraft **1.8.9** Forge and Badlion Client processes; temporal analysis + observation engine watches other players for killaura, auto-block, scaffold, and aim-related behavior without server telemetry or gameplay mutation; evidence export + configurable GUI overlays present review candidates locally rather than automatic bans; defensive research for authorized legacy **1.8.9** multiplayer; Anti Cheat / game:minecraft) distinct from Forge mod monitors such as [[local-anticheat-1-8-9]]. (source: wiki/sources/descriptions/maximumemails-cmd__RainInjectable.md)
 
 **Fabric 1.21.x client-side passive observer:** [[iustitia]] (ThoriaDevelopment; Kotlin/Gradle Fabric **1.21.11** mod; mixins model other players from inbound server-rebroadcast packets only—**36** violation-scored checks for reach, kill aura, fly, speed, scaffold, and related combat/movement patterns spanning legacy 1.8-style and modern 1.21-era hacks; preset moderation profiles, HUD/nametag indicators, and **clip replay** ghost models for staff review; no server plugin and no outbound enforcement; Anti Cheat / Open Source Anti Cheat System / game:minecraft) beside QA clients such as [[anticheat-qa]] and legacy passive monitors such as [[local-anticheat-1-8-9]]. (source: wiki/sources/descriptions/ThoriaDevelopment__Iustitia.md)
+
+**Fabric 1.21.11 client-side heuristic reporter:** [[fasds-anti-cheat]] (3iden-del; Java Gradle Loom; Fabric Loader + Fabric API; CI-built jar; accumulates violation levels for speed, flight/hover, high jump, water walking, extended reach, kill aura / aim snap, and autoclicker swing rates from server-sent nearby-player data only; **K** ranked in-game cheat report and **J** clear stored flags; optional violation decay; heuristic lag/unusual-mechanics false-positive caveats; Anti Cheat / Open Source Anti Cheat System / game:minecraft) beside richer passive observers such as [[iustitia]]. (source: wiki/sources/descriptions/3iden-del__fasds-anti-cheat.md)
 
 **Paper mining-telemetry research bench:** [[jevcraft-bench]] (nft-syou; Minecraft **Paper** behavioral anti-cheat research bench; mining telemetry collection, typed LLM evaluation, and offline X-Ray heuristic benchmarking in shadow mode; Anti Cheat / Stress Testing / game:minecraft) for Paper operators and researchers calibrating mining-cheat heuristics before live enforcement—beside mobile skill-game benches such as [[laneguard]] and CS2 explainable-scoring tools such as [[cs2-tracker]]. (source: wiki/sources/README-categories.md)
 

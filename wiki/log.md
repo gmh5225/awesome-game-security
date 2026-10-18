@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-18** — ingest `description:3iden-del/fasds-anti-cheat`: entity [[fasds-anti-cheat]] (Fabric **1.21.11** client mod; server-sent nearby-player heuristic violation scoring—speed/flight/reach/kill aura/autoclicker; **K** ranked report / **J** clear; optional decay; lag false-positive caveats; 3iden-del); cited on [[overviews/anti-cheat]] and [[concepts/detector-operations]]; `index.md` detector-operations blurb.
+
 - **2026-10-18** — ingest `description:urcool626/Level-Hash`: entity [[level-hash]] (Geode Geometry Dash; SHA-256 serialized level-string digest on level info UI; player/reviewer tampering compare; Level Edit / undisclosed-nerf integrity; C++23/Geode SDK; CMake; Win/macOS/iOS/Android; urcool626); cited on [[overviews/game-hacking]]; corrected anti-cheat `index.md` blurb grouping for [[level-hash]].
 
 - **2026-10-18** — ingest `readme:categories`: Anti Cheat ~804 (+2; urcool626/[[level-hash]] Geode Geometry Dash level SHA-256 fingerprint + 3iden-del/[[fasds-anti-cheat]] Fabric **1.21.11** client-side heuristic reporter) / Cheat ~2914 / Game Engine ~159 / Game Develop ~194 and other major section counts stable; 41 sections (`NeverC & NeverD` placeholder); synced README-map counts on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], and [[overviews/reverse-engineering]]; entities [[level-hash]], [[fasds-anti-cheat]]; light `index.md` section notes (no per-category pages).

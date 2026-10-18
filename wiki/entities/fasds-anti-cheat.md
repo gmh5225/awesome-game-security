@@ -19,13 +19,20 @@ Accumulates violation levels for categories such as speed, flight/hover, high ju
 
 ## UX
 
-Press a key to print a ranked cheat report; another key clears stored flags. README notes results are **heuristic** and can false-positive on lag or unusual mechanics.
+Default keybinds: **K** prints a ranked cheat report for flagged nearby players; **J** clears stored flags. README notes results are **heuristic** and can false-positive on lag or unusual mechanics. (source: wiki/sources/descriptions/3iden-del__fasds-anti-cheat.md)
+
+## Operations
+
+Local-only ranked reports with optional violation **decay**—no server plugin, outbound telemetry, or automatic sanctions. Treat accumulated violation levels as review hints corroborated with independent signals, not authoritative verdicts.
 
 ## Positioning
 
-Same **passive client observer** lane as [[iustitia]] and [[rain-injectable]]—local awareness for multiplayer players, moderators, or researchers, not authoritative server anti-cheat.
+Same **passive client observer** lane as [[iustitia]] and [[rain-injectable]]—lightweight cheat awareness for multiplayer players, moderators, or researchers, not authoritative server anti-cheat.
 
 ## Links
 
 - Repo: https://github.com/3iden-del/fasds-anti-cheat
-- Overview: [[overviews/anti-cheat]]
+
+## Related
+
+[[overviews/anti-cheat]] · [[concepts/detector-operations]] · [[iustitia]] · [[anticheat-qa]]
