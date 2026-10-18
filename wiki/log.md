@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-18** — lint (agent): read `wiki/AGENTS.md`; listed **Overviews** (9): `anti-cheat`, `dma-attack`, `game-engine`, `game-hacking`, `graphics-api`, `mobile-security`, `overview`, `reverse-engineering`, `windows-kernel`; **Concepts** (51) under `wiki/concepts/`; **Entities** (4103) under `wiki/entities/`; reconciled `index.md` vs disk — 4163 indexed paths (9+51+4103), 4163 unique, 0 missing, 0 dead, 0 duplicate index entries; overview pages + `index.md` overview/concept-blurb [[wikilink]] spot-check — 0 broken (13575 links), 0 malformed `]]]`; 6 expected cross-kind slug collisions ([[anti-cheat]], [[game-hacking]], [[reverse-engineering]], [[byovd]], [[dma]], [[il2cpp]]); wiki populated — bootstrap not required; `index.md` unchanged; no link repairs (`log.md` only).
+
 - **2026-10-18** — ingest `description:3iden-del/fasds-anti-cheat`: entity [[fasds-anti-cheat]] (Fabric **1.21.11** client mod; server-sent nearby-player heuristic violation scoring—speed/flight/reach/kill aura/autoclicker; **K** ranked report / **J** clear; optional decay; lag false-positive caveats; 3iden-del); cited on [[overviews/anti-cheat]] and [[concepts/detector-operations]]; `index.md` detector-operations blurb.
 
 - **2026-10-18** — ingest `description:urcool626/Level-Hash`: entity [[level-hash]] (Geode Geometry Dash; SHA-256 serialized level-string digest on level info UI; player/reviewer tampering compare; Level Edit / undisclosed-nerf integrity; C++23/Geode SDK; CMake; Win/macOS/iOS/Android; urcool626); cited on [[overviews/game-hacking]]; corrected anti-cheat `index.md` blurb grouping for [[level-hash]].
