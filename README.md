@@ -2391,6 +2391,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/sh1ftd/dma-speedtest-memflow-rs [Windows CLI/GUI for benchmarking DMA read/write throughput and latency via memflow (pcileech/native)]
 - https://github.com/sh1ftd/dma-tools-rs [Rust Windows GUI for flashing Artix-7 FPGA bitstreams, reading device DNA, and validating PCILeech/memflow DMA setups via CH347 or RS232 JTAG]
 - https://github.com/sercanarga/fpga-dma-multi-tool [Windows Go utility to detect/configure Artix-7 FPGA DMA boards, flash bitstreams, and measure DMA throughput]
+- https://github.com/Sylnar/NexusForge [Windows .NET tool to detect Artix-7 FPGA DMA boards, read device DNA, flash firmware, install CH347/FT601 drivers, and run DMA speed tests]
 - https://github.com/MewDMA/MewTools [Windows DMA setup utility for 35T/75T/100T FPGA cards: driver install, firmware flashing, DNA ID, speed tests, MAKCU/FERRUM support, and second-PC optimizer]
 - https://github.com/sercanarga/pcileechgen [Go tool to clone a real PCI/PCIe donor via VFIO and synthesize ready-to-flash PCILeech FPGA bitstreams through Vivado]
 - https://github.com/sonodima/physpatch [Scanning and patching of the entire Windows Kernel using DMA]
@@ -4412,6 +4413,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/es3n1n/obfuscator
 - https://github.com/ykus4/kagura [LLVM pass plugin for CFG/string obfuscation, anti-tamper, and anti-debug across mobile/desktop/Wasm]
 - https://github.com/fuqiuluo/amice [Rust LLVM pass plugin for compile-time obfuscation and instruction-level VM virtualization on C/C++/Rust (LLVM 11–22; Android NDK supported)]
+- https://github.com/luluovo1/Oboro [Prebuilt Android NDK LLVM 21 / OLLVM toolchain with FLA, BCF, indirection, and string/constant encryption for native .so hardening]
 - https://github.com/nkhmelni/Obscura [Hassle-free LLVM pass-plugin obfuscator for C/C++/ObjC/Swift]
 - https://github.com/jnastarot/furikuri
 - https://github.com/nickcano/RelocBonus [Attack Reloc]
