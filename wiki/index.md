@@ -2675,7 +2675,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [neverd](entities/neverd.md) — AI-friendly native binary analysis engine (Capstone→LLVM IR lift; structured C decomp; in-place rewrite; strict mode; `libneverd` C SDK; PE/ELF/Mach-O; JSON CLI; NeverSight)
 - [nhl-legacy-remaster](entities/nhl-legacy-remaster.md) — Xbox 360 NHL Legacy Edition→native PC via ReXGlue static recompilation (C++/CMake port + Python EA archive/roster/uniform mod tooling; DX12/Vulkan; user-supplied assets; megarohas; Xbox)
 - [nfsu2recomp](entities/nfsu2recomp.md) — Win32/x86 PE static recompilation of Need for Speed: Underground 2 to native ARM64 macOS (Python lifter→C; Win32 HLE; D3D9/D3DX9→Metal; PE relocation + indirect-call dispatch; no Wine/JIT; TalhaMudo; Cheat / RE Tools)
-- [ngbrecomp](entities/ngbrecomp.md) — Ninja Gaiden Black OG Xbox XBE static recomp to native Linux/Windows (xboxrecomp lift; D3D→Vulkan runtime; BYO disc assets; gamboozino; Cheat / Source)
+- [ngbrecomp](entities/ngbrecomp.md) — Ninja Gaiden Black OG Xbox XBE static recomp to native Linux/Windows/macOS (xboxrecomp lift; custom kernel/audio/input; D3D→Vulkan; not full-system emulation; BYO disc assets; gamboozino; Cheat / Source)
 - [nvidia-rtx-godot](entities/nvidia-rtx-godot.md) — NVIDIA RTX fork of Godot Engine (RTX rendering-server/editor/scene-tree optimizations; ray tracing; Game Engine / source)
 - [mergen](entities/mergen.md) — binary lifting framework (assembly→LLVM IR; symbolic exec, CFG recovery, deobfuscation/devirtualization; C/C++; protected game-binary RE; NaC-L)
 - [Netview](entities/netview.md) — AD domain host enumeration (`-d` current/specified domain; AC/IS forensics)

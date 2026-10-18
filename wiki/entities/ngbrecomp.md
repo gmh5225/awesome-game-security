@@ -11,7 +11,7 @@ confidence: medium
 
 # ngbrecomp
 
-Static recompilation port of *Ninja Gaiden Black* (2005 original Xbox) to native Linux and Windows. The xboxrecomp toolchain lifts the retail XBE into generated C; a custom runtime replaces Xbox kernel, audio, input, and graphics services. Direct3D calls are intercepted and rendered through a Vulkan backend (with optional xemu NV2A reference paths). Modern PC features include high resolution, widescreen, and keyboard-and-mouse input. Users supply their own disc assets. (source: wiki/sources/descriptions/gamboozino__ngbrecomp.md)
+Native PC port of *Ninja Gaiden Black* (2005 original Xbox) for Linux, Windows, and macOS. The retail game’s machine code runs through **static recompilation** rather than full-system emulation: the xboxrecomp toolchain lifts the retail XBE into generated C, and a custom runtime (CMake/C/C++) replaces Xbox kernel, audio, input, and graphics services. Direct3D calls are intercepted and rendered through a Vulkan backend, with optional xemu NV2A reference paths. Modern PC features include high resolution, widescreen, and keyboard-and-mouse input. Users supply their own disc assets. (source: wiki/sources/descriptions/gamboozino__ngbrecomp.md)
 
 ## Stack
 
@@ -21,7 +21,7 @@ Static recompilation port of *Ninja Gaiden Black* (2005 original Xbox) to native
 
 ## Audience
 
-Preservationists and reverse engineers studying OG Xbox binary lifting, runtime recreation, and title-specific static recompilation beside emulator and other xboxrecomp forks such as [[jsrf-recomp]].
+Players who own the disc and want a performant re-release, plus preservationists and reverse engineers studying OG Xbox binary lifting, runtime recreation, and how classic titles can be rebuilt for contemporary hardware—beside emulator and other xboxrecomp forks such as [[jsrf-recomp]].
 
 ## Links
 
