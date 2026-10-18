@@ -3,8 +3,8 @@ title: Level Hash
 kind: entity
 topics: [anti-cheat, game-hacking]
 sources:
-  - wiki/sources/README-categories.md
   - wiki/sources/descriptions/urcool626__Level-Hash.md
+  - wiki/sources/README-categories.md
 updated: 2026-10-18
 confidence: medium
 ---
@@ -16,6 +16,10 @@ Geode mod for **Geometry Dash** (urcool626/Level-Hash; C++23; Geode SDK; CMake) 
 ## Mechanics
 
 Hashes the level serialization payload clients already use for upload/download; depends on companion Geode mods for level data access. Ships as a shared library for Windows, macOS, iOS, and Android Geometry Dash builds.
+
+## Community use
+
+Players and level reviewers can compare in-game SHA-256 digests to spot tampering—hidden **Level Edit** changes, undisclosed nerfs, or other edits relative to a known-good fingerprint—without server-side authority. (source: wiki/sources/descriptions/urcool626__Level-Hash.md)
 
 ## Positioning
 
