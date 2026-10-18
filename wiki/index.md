@@ -656,7 +656,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [cgl](entities/cgl.md) — single-header C graphics/utility library (Jaysmito101; cross-platform windowing, rendering, noise, math, data structures, networking, threading; Rust/Python wrappers; bloom/audio/node editing; prototyping/demo scenes; Game Engine / source)
 - [cheap-engine](entities/cheap-engine.md) — lightweight Android memory scanner (scan/edit, exact/range/changed search, pointer scan; simplified CE alternative; gmh5225)
 - [charlyengine](entities/charlyengine.md) — open-source Android CE clone (Kotlin + NDK; Jetpack Compose UI + native `/proc` daemon; scan/rescan/inject/freeze, per-title saved sessions, Termux text protocol; andoridcharlyroot-debug; cheat / Android Memory Explorer)
-- [sephile](entities/sephile.md) — rooted Android memory scanner/editor (Compose UI, ptrace NDK; search, freeze, live hex inspector, CI APKs; vastobb; Cheat / Android Memory Explorer)
+- [sephile](entities/sephile.md) — rooted Android memory analysis/editor (Compose + NDK ptrace/proc maps; typed scan/refine, freeze, hex viewer, process browser, optional Lua; su root; educational/offline RE; CI APKs; vastobb; Cheat / Android Memory Explorer)
 - [ChainOfFools](entities/chainoffools.md) — CVE-2020-0601 Windows CryptoAPI ECC root-spoof PoC (Python + OpenSSL; CurveBall/ChainOfFools; gmh5225)
 - [ChaiScript Plugin](entities/chaiscript-plugin.md) — x64dbg plugin: ChaiScript automation (three commands; thorough API; Cheat x64dbg Plugins)
 - [Chasm](entities/chasm.md) — high-performance runtime x86-64 assembler library (C; instruction IR, relative ref linking, AVX-256; JIT/emulator/runtime optimization; aqilc)

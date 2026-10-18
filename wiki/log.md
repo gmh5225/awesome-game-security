@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-18** — ingest `description:vastobb/sephile`: refreshed entity [[sephile]] (rooted Android runtime memory analysis; Kotlin Compose + C++ NDK ptrace/proc maps; typed scan/refine, edit/freeze, live hex viewer, process browser, optional Lua automation, su root; educational/offline RE positioning); cited on [[overviews/game-hacking]] Android Memory Explorer lane and [[overviews/mobile-security]] memory-manipulation section; `index.md` entity blurb updated.
+
 - **2026-10-18** — ingest `description:worstpoetGIT/Crystal-Hunt`: refreshed entity [[crystal-hunt]] (Unity 2D URP location-aware multiplayer; Mapbox; Firebase Auth/Realtime DB + App Check; WebSocket lobbies/sessions; host-authoritative UDP + host-side speed clamp; client simulator + unit tests); cited on [[overviews/anti-cheat]] Open Source AC list and [[overviews/mobile-security]] location/Firebase integrity lane; `index.md` entity blurb updated.
 
 - **2026-10-18** — ingest `readme:categories`: **Cheat** link_count **2920** (+1; vastobb/[[sephile]] rooted Android ptrace memory scanner/editor) / **Anti Cheat** **809** (+1; worstpoetGIT/[[crystal-hunt]] Unity host-authoritative UDP with host-side speed clamp) / **Game Engine** ~159 / **Game Develop** ~194 / **DirectX** ~42 / **Game Network** ~34 and other major README sections unchanged; 41 top-level sections (`NeverC & NeverD` placeholder); synced [[overviews/overview]], [[overviews/game-hacking]], [[overviews/anti-cheat]], [[overviews/dma-attack]], and [[overviews/reverse-engineering]]; entities [[sephile]], [[crystal-hunt]]; light `index.md` section notes (no per-category pages).
