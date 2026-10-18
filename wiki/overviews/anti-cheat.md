@@ -983,6 +983,7 @@ sources:
   - wiki/sources/descriptions/kodeni-am__leaderboard.md
   - wiki/sources/descriptions/hahasc26-lang__ArgusAC.md
   - wiki/sources/descriptions/tahad4492-svg__Astral-AntiCheat.md
+  - wiki/sources/descriptions/seyifalode-cmd__process-injection-detection-lab.md
 updated: 2026-10-18
 confidence: high
 ---
@@ -1141,6 +1142,7 @@ Long-form kernel AC architecture primer [How Kernel Anti-Cheats Work](https://s4
 - [[peregrine-anticheat]] — educational full-stack Windows AC (kernel minifilter, ObCallbacks, APC injection, MinHook API hooks, ETW-TI, YARA, in-process stack/HWBP scans, named-pipe backend reports, Tauri GUI, cheat test suite; PatchRequest) (source: wiki/sources/descriptions/PatchRequest__PeregrineAntiCheat.md)
 - [[sentinel-anti-cheat]] — educational usermode AC daemon (HEEAAP; suspended launch + pre-resume attach; remote-debugger checks, HWBP/debug-register scans, PEB-based memory reads, INT 3 code-section breakpoints; configurable log/suspend/terminate policies; TaskDialog splash; Open Source Anti Cheat System) (source: wiki/sources/descriptions/HEEAAP__Sentinel-Anti-Cheat.md)
 - [[pi-defender]] — kernel security driver blocking process injection by filtering dangerous handle rights (remote memory write / operation permissions); docs/tests for hollowing, doppelgänging, ghosting, and DLL injection; defensive AC hardening research (PI-Defender) (source: wiki/sources/descriptions/PI-Defender__pi-defender.md)
+- [[process-injection-detection-lab]] — defender Windows lab (seyifalode-cmd; Sysinternals + Sysmon ProcessAccess/CreateRemoteThread/Image Load for MITRE T1055; Splunk SPL + Sentinel/Defender KQL; GrantedAccess masks + debugger allowlists; detection engineering without running injectors; maps external-cheat OpenProcess/WriteProcessMemory primitives to AC/EDR visibility) (source: wiki/sources/descriptions/seyifalode-cmd__process-injection-detection-lab.md)
 - [[raccine]] — lightweight Windows anti-ransomware (Neo23x0; debugger registration for `vssadmin`/`wmic`; YARA command-line rules; parent-chain termination + event logging; no resident agent; blocks shadow-copy deletion; C/C++/C#; README [EDR]) (source: wiki/sources/descriptions/Neo23x0__Raccine.md)
 - [[bluespawn]] — open-source Windows active defense / EDR platform (ION28; Hunt/Mitigate/Monitor/Scan workflows; ATT&CK-oriented detections, YARA scanning, ETW monitoring, automated quarantine/process suspension; C++; rule-driven content; blue-team endpoint defense; README [EDR]) (source: wiki/sources/descriptions/ION28__BLUESPAWN.md)
 - [[openedr]] — open-source EDR platform (Comodo Security; C++; system monitoring, event collection, threat detection, AWS SDK cloud analysis integration; real-time Windows endpoint telemetry/response; EDR architecture / endpoint monitoring study; README [EDR]) (source: wiki/sources/descriptions/ComodoSecurity__openedr.md)

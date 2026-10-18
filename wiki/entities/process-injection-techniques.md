@@ -4,7 +4,8 @@ kind: entity
 topics: [game-hacking, anti-cheat, reverse-engineering]
 sources:
   - wiki/sources/descriptions/MahmoudZohdy__Process-Injection-Techniques.md
-updated: 2026-08-23
+  - wiki/sources/descriptions/seyifalode-cmd__process-injection-detection-lab.md
+updated: 2026-10-18
 confidence: medium
 ---
 
@@ -14,7 +15,7 @@ C/C++ **Windows process injection and persistence** technique collection (Mahmou
 
 README lane: **Injection Testing** — broad inject + persistence lab corpus for AC/EDR evaluation.
 
-Complements broader catalogs such as [[windows-process-injection]], unified C# CLI toolkit [[process-injection]] (3xpl01tc0d3r; vanilla/DLL/hollowing/APC queue/KernelCallbackTable; P/Invoke/D/Invoke/syscalls; shellcode formats, encryption, PPID spoof), focused PoCs such as [[thread-hijacking-injector]] and [[frankenstein-apc-injection]], harnesses such as [[injectors]], and defensive blockers such as [[pi-defender]] and [[ghost]].
+Complements broader catalogs such as [[windows-process-injection]], unified C# CLI toolkit [[process-injection]] (3xpl01tc0d3r; vanilla/DLL/hollowing/APC queue/KernelCallbackTable; P/Invoke/D/Invoke/syscalls; shellcode formats, encryption, PPID spoof), focused PoCs such as [[thread-hijacking-injector]] and [[frankenstein-apc-injection]], harnesses such as [[injectors]], defensive blockers such as [[pi-defender]] and [[ghost]], and defender-side Sysmon/SIEM detection labs such as [[process-injection-detection-lab]] (Sysinternals + T1055 telemetry; Splunk/KQL; no injector build).
 
 ## Links
 
