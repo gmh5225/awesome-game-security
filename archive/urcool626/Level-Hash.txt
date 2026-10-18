@@ -1,0 +1,215 @@
+Project Path: arc_urcool626_Level-Hash_vrq_g4_g
+
+Source Tree:
+
+```txt
+arc_urcool626_Level-Hash_vrq_g4_g
+├── CMakeLists.txt
+├── README.md
+├── about.md
+├── changelog.md
+├── mod.json
+├── resources
+└── src
+    └── main.cpp
+
+```
+
+`CMakeLists.txt`:
+
+```txt
+cmake_minimum_required(VERSION 3.21)
+set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+if ("${CMAKE_SYSTEM_NAME}" STREQUAL "iOS" OR IOS)
+    set(CMAKE_OSX_ARCHITECTURES "arm64")
+else()
+    set(CMAKE_OSX_ARCHITECTURES "arm64;x86_64")
+endif()
+set(CMAKE_CXX_VISIBILITY_PRESET hidden)
+
+project(LevelHash VERSION 1.0.0)
+
+file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS src/*.cpp)
+
+add_library(${PROJECT_NAME} SHARED ${SOURCES})
+
+if (NOT DEFINED ENV{GEODE_SDK})
+    message(FATAL_ERROR "Unable to find Geode SDK! Please define GEODE_SDK environment variable to point to Geode")
+else()
+    message(STATUS "Found Geode: $ENV{GEODE_SDK}")
+endif()
+
+add_subdirectory($ENV{GEODE_SDK} ${CMAKE_CURRENT_BINARY_DIR}/geode)
+
+setup_geode_mod(${PROJECT_NAME})
+
+```
+
+`README.md`:
+
+```md
+# Level Hash
+Level Hash is a mod that can generate a fingerprint for Geometry Dash levels to help detect cheating such as Level Edit.
+
+<img src="logo.png" width="150" alt="the mod's logo" />
+
+## Features
+- SHA-256 Hash Generation for levels
+- That's it
+
+## Dependencies
+This mod requires [GDShare](https://github.com/HJfod/GDShare)
+
+```
+
+`about.md`:
+
+```md
+# Level Hash
+
+Mod that can retrieve the fingerprint for Geometry Dash levels to help detect cheating such as Level Edit.
+
+```
+
+`changelog.md`:
+
+```md
+# 1.0.0
+- Official Release! Includes basic support for hash generation.
+
+```
+
+`mod.json`:
+
+```json
+{
+	"geode": "5.11.2",
+	"gd": {
+		"win": "2.2081",
+		"android": "2.2081",
+		"mac": "2.2081",
+		"ios": "2.2081"
+	},
+	"resources": {
+		"spritesheets": {
+			"LevelHash": [
+				"resources/GJ_levelHashIcon.png"
+			]
+		}
+	},
+	"id": "urcool626.levelhash",
+	"name": "Level Hash",
+	"version": "v1.0.0",
+	"developer": "urcool626",
+	"description": "Mod that can retrieve the fingerprint for Geometry Dash levels to help detect cheating such as Level Edit.",
+	"dependencies": {
+		"geode.node-ids": ">=v1.23.3",
+		"hjfod.gmd-api": "1.5.0"
+	},
+	"tags": [
+		"utility",
+		"enhancement"
+    ]
+}
+
+```
+
+`src/main.cpp`:
+
+```cpp
+#include <Geode/Geode.hpp>
+#include <Geode/modify/LevelInfoLayer.hpp>
+#include <Geode/ui/BasedButtonSprite.hpp>
+
+// Simple SHA-256 hashing system for fingerprinting Geometry Dash levels.
+// This can be used to determine whether level edit or something similar was used to make nerfs to a level secretly.
+// Made by urcool626
+
+using namespace geode::prelude;
+
+class $modify(LevelHashLayer, LevelInfoLayer) {
+	bool init(GJGameLevel* level, bool challenge) {
+		if (!LevelInfoLayer::init(level, challenge))
+			return false;
+
+		auto menu = this->getChildByID("left-side-menu");
+
+		if (!menu) {
+			// Fallback
+			log::warn("Could not find left-side-menu!");
+			return true;
+		}
+
+		// Create the mod's button
+		auto sprite = CircleButtonSprite::createWithSpriteFrameName(
+			"GJ_levelHashIcon.png"_spr,
+			0.8f,
+			CircleBaseColor::Green,
+			CircleBaseSize::Medium
+		);
+
+		if (!sprite) {
+			// Fallback
+			log::warn("Failed to load GJ_levelHashIcon.png");
+			return true;
+		}
+
+		auto button = CCMenuItemExt::createSpriteExtra(
+			sprite,
+			[this](CCMenuItemSpriteExtra*) {
+				this->showLevelFingerprint();
+			}
+		);
+
+		if (!button)
+			return true;
+
+		button->setID("level-fingerprint-button");
+		button->setPosition({0.f, -100.f});
+
+		menu->addChild(button);
+
+		return true;
+	}
+
+	void showLevelFingerprint() {
+		if (!m_level) {
+			FLAlertLayer::create(
+				"Level Hash",
+				"No level is available.",
+				"OK"
+			)->show();
+			return;
+		}
+
+		// Hash the level data
+		auto const& levelData = m_level->m_levelString;
+
+		if (levelData.empty()) {
+			// Fallback
+			FLAlertLayer::create(
+				"Level Hash",
+				"The level data is empty or has not loaded yet.",
+				"OK"
+			)->show();
+			return;
+		}
+
+		geode::Sha256Hasher hasher;
+		hasher.update(levelData.data(), levelData.size());
+
+		auto fingerprint = hasher.finish().toString();
+
+		// Return hashed level data
+		FLAlertLayer::create(
+			"Level Hash",
+			fingerprint.c_str(),
+							 "OK"
+		)->show();
+
+		log::info("Level Hash: {}", fingerprint);
+	}
+};
+
+```
