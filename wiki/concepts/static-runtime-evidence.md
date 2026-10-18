@@ -15,6 +15,7 @@ sources:
   - wiki/sources/descriptions/TalhaMudo__NFSU2Recomp.md
   - wiki/sources/descriptions/elkir0__sc2-android-recomp.md
   - wiki/sources/descriptions/gamboozino__ngbrecomp.md
+  - wiki/sources/descriptions/Coz-0__smo-recomp.md
 updated: 2026-10-18
 confidence: high
 ---
@@ -67,6 +68,8 @@ Win32 PE32 static recompilation such as [[nfsu2recomp]] (TalhaMudo; *Need for Sp
 
 Win32 PE32 x86-32 static recompilation to Android ARM64 such as [[sc2-android-recomp]] (elkir0; StarCraft II reference target; per-function differential testing against Unicorn as a lift oracle; offline D3D9 SM2/3→SPIR-V plus Bionic/Vulkan porting helpers; users supply lifted artifacts from legitimate installs) requires the same split—label which graphics, audio, and Win32 runtime paths are translated vs stubbed before treating the ARM64 build as a fidelity reference. (source: wiki/sources/descriptions/elkir0__sc2-android-recomp.md)
 
+Switch AArch64 static recompilation to native Windows x64 such as [[smo-recomp]] (Coz-0; *Super Mario Odyssey* 1.4.1; Python AOT lifter→C with Clang build; Unicorn per-function difftest as lift oracle; custom host runtime for Switch system libraries, file I/O, audio, SDL3 input, and NVN-style graphics on Vulkan with Maxwell→SPIR-V shader translation; users supply decrypted dumps—no bundled assets) illustrates the same boundary between lifted guest code and reimplemented platform services when studying commercial porting without a CPU interpreter or JIT. (source: wiki/sources/descriptions/Coz-0__smo-recomp.md)
+
 ## Behavioral capability from TTD traces
 
 Full-process **Time Travel Debugging (TTD)** recordings capture executed API calls and unpacked/runtime-generated code paths that static PE analysis may miss. [[ttd-capa-cpp]] replays `.run` traces through the TTD SDK, decodes Win32/native call arguments, and matches observed behavior against capa rules—including optional code-region scanning and capability timelines—so analysts can label **observed calls** vs static import/reachability claims. (source: wiki/sources/descriptions/HullaBrian__ttd-capa-cpp.md)
@@ -77,4 +80,4 @@ Game-server PC checks often combine **offline host artifacts** (Prefetch, Amcach
 
 ## Related
 
-[[binary-evidence]] · [[binary-diffing]] · [[dynamic-binary-instrumentation]] · [[jsrf-recomp]] · [[ngbrecomp]] · [[nfsu2recomp]] · [[sc2-android-recomp]] · [[saturnkit]] · [[motorstorm-mv-recomp]] · [[dead-rising-2-case-zero-xenon-recomp]] · [[mcla-pc]] · [[pipeline-disasm]] · [[frogman]] · [[openmcm2]] · [[ttd-capa-cpp]] · [[custos]] · [[mixed-boolean-arithmetic]] · [[control-flow-flattening]] · [[research-rigor]] · [[overviews/reverse-engineering]] · [[overviews/windows-kernel]] · [[overviews/game-engine]]
+[[binary-evidence]] · [[binary-diffing]] · [[dynamic-binary-instrumentation]] · [[jsrf-recomp]] · [[ngbrecomp]] · [[nfsu2recomp]] · [[sc2-android-recomp]] · [[smo-recomp]] · [[saturnkit]] · [[motorstorm-mv-recomp]] · [[dead-rising-2-case-zero-xenon-recomp]] · [[mcla-pc]] · [[pipeline-disasm]] · [[frogman]] · [[openmcm2]] · [[ttd-capa-cpp]] · [[custos]] · [[mixed-boolean-arithmetic]] · [[control-flow-flattening]] · [[research-rigor]] · [[overviews/reverse-engineering]] · [[overviews/windows-kernel]] · [[overviews/game-engine]]

@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-18** — ingest `description:Coz-0/smo-recomp`: refreshed entity [[smo-recomp]] (Coz-0; *Super Mario Odyssey* Switch 1.4.1; Python AOT lifter→C + Unicorn difftest + custom NVN→Vulkan/Maxwell→SPIR-V runtime; SDL3 input; BYO decrypted dump; no CPU JIT); cited on [[concepts/static-runtime-evidence]] Switch static-recomp cluster and [[overviews/reverse-engineering]] Console / QEMU lane; `index.md` entity + concept blurb updated.
+
 - **2026-10-18** — ingest `description:byroweb/AC1_RE`: refreshed entity [[ac1-re]] (PS1 SLUS-01323 v1.1 *Armored Core* format/mission-script VM, level pipeline, combat physics; Python disc reinject; Ghidra + DuckStation workflows; C/MIPS verification; BYO disc); cited on [[overviews/reverse-engineering]] Console / QEMU section and [[overviews/game-hacking]] retro PlayStation lane; `index.md` entity blurb updated.
 
 - **2026-10-18** — ingest `description:mohasi/game-cheats`: refreshed entity [[game-cheats]] (PS3 TITLEID plain-text cheat corpus; Artemis-sourced; parallel source/compiled trees for thousands of retail/PSN releases; simple-cheat-menu import; vote-driven reliability; data-centric browse/diff/memory-patch workflows); cited on [[overviews/game-hacking]] PlayStation lane and [[overviews/reverse-engineering]] Console section; `index.md` entity blurb updated.
