@@ -984,6 +984,7 @@ sources:
   - wiki/sources/descriptions/hahasc26-lang__ArgusAC.md
   - wiki/sources/descriptions/tahad4492-svg__Astral-AntiCheat.md
   - wiki/sources/descriptions/seyifalode-cmd__process-injection-detection-lab.md
+  - wiki/sources/descriptions/Optccopa__SaturnAntiCheat.md
 updated: 2026-10-18
 confidence: high
 ---
@@ -1139,6 +1140,7 @@ Long-form kernel AC architecture primer [How Kernel Anti-Cheats Work](https://s4
 - [[kernel-ac]] — educational Windows kernel anti-cheat graduation project (LucasAlgera; KMDF driver + C++ SCM launcher; ObRegisterCallbacks on process/thread handle create/duplicate; strips dangerous access rights; trusted-process whitelist e.g. explorer.exe/discord.exe; IOCTL game-PID registration; learner-oriented) (source: wiki/sources/descriptions/LucasAlgera__Kernel-AC.md)
 - [[mini-anti-cheat-v2]] — educational Windows kernel anti-cheat PoC (Abdelnour2; user-mode game + kernel driver; IOCTL blacklist checks, game PID registration, shield disable; process-creation notify blocks Notepad.exe at start and runtime; V2 ObRegisterCallbacks memory shield strips VM read/write and terminate from other processes; learner-oriented; not production AC) (source: wiki/sources/descriptions/Abdelnour2__MiniAntiCheatV2.md)
 - [[win-kernel-telemetry]] — KMDF/WDM driver lab (dancing4am; incremental process/image-load telemetry + ObRegisterCallbacks process-protection examples with fake-game reader test harness; x64/ARM64 WDK; EDR/AC primitive teaching in isolated test-signing VM; Anti Cheat / Windows Ring0 Callback) (source: wiki/sources/descriptions/dancing4am__win-kernel-telemetry.md)
+- [[saturn-anti-cheat]] — educational Windows kernel anti-cheat for CS2 `-insecure` sessions (Optccopa; WDM driver + native GUI launcher; SCM service load + IOCTL heartbeat; process/thread/image-load callbacks; game/Steam/System32 module allowlists; logs remote threads with entry outside mapped PE images and unsigned or non-allowlisted DLL loads; CMake/WDK; custom AC design study; Anti Cheat) (source: wiki/sources/descriptions/Optccopa__SaturnAntiCheat.md)
 - [[peregrine-anticheat]] — educational full-stack Windows AC (kernel minifilter, ObCallbacks, APC injection, MinHook API hooks, ETW-TI, YARA, in-process stack/HWBP scans, named-pipe backend reports, Tauri GUI, cheat test suite; PatchRequest) (source: wiki/sources/descriptions/PatchRequest__PeregrineAntiCheat.md)
 - [[sentinel-anti-cheat]] — educational usermode AC daemon (HEEAAP; suspended launch + pre-resume attach; remote-debugger checks, HWBP/debug-register scans, PEB-based memory reads, INT 3 code-section breakpoints; configurable log/suspend/terminate policies; TaskDialog splash; Open Source Anti Cheat System) (source: wiki/sources/descriptions/HEEAAP__Sentinel-Anti-Cheat.md)
 - [[pi-defender]] — kernel security driver blocking process injection by filtering dangerous handle rights (remote memory write / operation permissions); docs/tests for hollowing, doppelgänging, ghosting, and DLL injection; defensive AC hardening research (PI-Defender) (source: wiki/sources/descriptions/PI-Defender__pi-defender.md)
