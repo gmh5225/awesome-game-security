@@ -1,0 +1,3668 @@
+Project Path: arc_vastobb_sephile_2ysq5ipq
+
+Source Tree:
+
+```txt
+arc_vastobb_sephile_2ysq5ipq
+├── README.md
+├── app
+│   ├── build.gradle.kts
+│   ├── proguard-rules.pro
+│   └── src
+│       └── main
+│           ├── AndroidManifest.xml
+│           ├── java
+│           │   └── com
+│           │       └── sephile
+│           │           └── app
+│           │               ├── SephileApp.kt
+│           │               ├── di
+│           │               │   └── Module.kt
+│           │               ├── model
+│           │               │   └── ValueType.kt
+│           │               ├── repository
+│           │               │   ├── LuaRepository.kt
+│           │               │   ├── MemoryRepository.kt
+│           │               │   └── ProcessRepository.kt
+│           │               ├── root
+│           │               │   ├── NativeBridge.kt
+│           │               │   ├── RootManager.kt
+│           │               │   ├── ScanForegroundService.kt
+│           │               │   └── SuShell.kt
+│           │               ├── ui
+│           │               │   ├── LiveMemoryInspectorScreen.kt
+│           │               │   ├── MainActivity.kt
+│           │               │   ├── ProcessListScreen.kt
+│           │               │   ├── ScannerScreen.kt
+│           │               │   ├── ScriptEditorScreen.kt
+│           │               │   └── theme
+│           │               │       └── AppTheme.kt
+│           │               └── viewmodel
+│           │                   ├── LuaViewModel.kt
+│           │                   ├── ProcessListViewModel.kt
+│           │                   └── ScannerViewModel.kt
+│           ├── jni
+│           │   ├── CMakeLists.txt
+│           │   ├── MemoryScanner.cpp
+│           │   ├── MemoryScanner.h
+│           │   ├── ProcessMemory.cpp
+│           │   ├── ProcessMemory.h
+│           │   └── native_bridge.cpp
+│           └── res
+│               ├── drawable
+│               │   └── splash_background.xml
+│               ├── menu
+│               │   └── main_menu.xml
+│               ├── mipmap-hdpi
+│               │   ├── ic_launcher.xml
+│               │   └── ic_launcher_round.xml
+│               ├── mipmap-mdpi
+│               │   ├── ic_launcher.xml
+│               │   └── ic_launcher_round.xml
+│               ├── mipmap-xhdpi
+│               │   ├── ic_launcher.xml
+│               │   └── ic_launcher_round.xml
+│               ├── mipmap-xxhdpi
+│               │   ├── ic_launcher.xml
+│               │   └── ic_launcher_round.xml
+│               ├── mipmap-xxxhdpi
+│               │   ├── ic_launcher.xml
+│               │   └── ic_launcher_round.xml
+│               ├── values
+│               │   ├── colors.xml
+│               │   ├── night
+│               │   │   └── colors.xml
+│               │   ├── strings.xml
+│               │   └── themes.xml
+│               └── xml
+│                   └── file_paths.xml
+├── build.gradle.kts
+├── gradle
+│   ├── libs.versions.toml
+│   └── wrapper
+│       └── gradle-wrapper.properties
+├── gradle.properties
+├── gradlew
+├── gradlew.bat
+└── settings.gradle.kts
+
+```
+
+`README.md`:
+
+```md
+# Sephile
+
+**Sephile** is a modern, beginner-friendly yet powerful Android runtime analysis and memory editing tool — think Game Guardian, but with a clean new UI, easier onboarding, and powerful runtime tools.
+
+> ⚠️ **Educational / research tool.** Sephile requires **root** (`CAP_SYS_PTRACE`) to read and write the memory of other processes. Only build and run it on devices you own and have authorized. The authors are not responsible for misuse.
+
+## What it does
+
+- **Attach** to any running process by PID (root via `ptrace`)
+- **Scan memory** for exact values: byte, short, 4-byte, 8-byte, float, double
+- **Unknown initial value** and **fuzzy/changed** searches
+- **Refine ("next")** scans to narrow down candidates
+- **Edit** values live in a running process
+- **Freeze** values so they stay constant
+- **Process list** browser with refresh
+- **Live Memory Inspector / offset finder**: enter an address, continuously read bytes, changed bytes highlight green (use this to hunt values like a Minecraft block state), tap any byte to poke/edit it live
+- **Hex dump editor** built into the live inspector
+- **Lua scripting screen** (engine binding stub — wire in lua-5.4 source to activate, see below)
+- Modern **Jetpack Compose** UI (Material 3, dark by default)
+- **GitHub Actions** CI builds debug/release APKs automatically
+
+## Architecture
+
+| Layer | Tech |
+|-------|------|
+| UI | Kotlin + Jetpack Compose (Material 3), single Activity |
+| State | ViewModel + StateFlow |
+| Logic | Clean-ish: Repository → Native bridge |
+| Native | C++20 NDK (CMake), `ptrace` + `/proc/<pid>/maps` |
+| Root | `su` shell wrapper, root detection |
+| CI | GitHub Actions (JDK 17, Android SDK + NDK r27) |
+
+```
+app/src/main/java/com/sephile/app/
+├── root/          # RootManager, SuShell, NativeBridge, ScanForegroundService
+├── repository/    # ProcessRepository, MemoryRepository
+├── viewmodel/     # ProcessListViewModel, ScannerViewModel
+├── di/            # Module (DI)
+├── model/         # ValueType, SearchType, ScanCandidate, ProcessInfo
+└── ui/            # Compose screens + theme
+app/src/main/jni/
+├── ProcessMemory.{h,cpp}   # ptrace attach/read/write
+├── MemoryScanner.{h,cpp}   # first/next scan, edit, freeze
+└── native_bridge.cpp       # JNI entry points
+```
+
+## Build
+
+### Prerequisites
+- Android Studio / Gradle 8.6+
+- Android SDK (API 34)
+- NDK r27
+- JDK 17
+
+### Debug build
+```bash
+git clone https://github.com/vastobb/sephile.git
+cd sephile
+./gradlew :app:assembleDebug
+```
+The debug APK will be at `app/build/outputs/apk/debug/app-debug.apk`.
+
+### CI
+Pushes and PRs run `.github/workflows/android-ci.yml` which builds the debug APK, runs lint and unit tests. Releases build a signed APK and attach it to the GitHub Release (requires `ANDROID_KEYSTORE`, `KEYSTORE_PASSWORD`, `KEY_ALIAS`, `KEY_PASSWORD` secrets).
+
+## Lua scripting
+
+A Lua script screen + `LuaRepository` + JNI binding stubs (`nativeLuaLoad`, `nativeLuaExec`, `nativeLuaBindApi`) are included. To make Lua actually run:
+
+1. Download lua-5.4 source from lua.org
+2. Copy the `src/` tree into `app/src/main/jni/lua/`
+3. Add the lua source files to `app/src/main/jni/CMakeLists.txt`
+4. Define `SEPHILE_LUA_ENABLED` and replace the stub bodies in `native_bridge.cpp` with real `luaL_loadstring`/`lua_pcall` calls, exposing `sephile.scan`, `sephile.edit`, `sephile.freeze`, `sephile.attach` to Lua.
+
+## Root setup
+
+Sephile needs root on the device/emulator:
+- Magisk / Zygisk / KernelSU / APatch
+- Or an emulator with root (e.g. AVD with Google Play + root image)
+
+On first launch, Sephile checks for `su` and `uid=0`. If root isn't available, attaching to other processes will fail.
+
+## Disclaimer
+
+Memory editing of other apps may violate their Terms of Service and can break games/apps. Online games with server-side validation or anti-cheat will detect and may ban accounts. Use only on offline, single-player apps you own, for learning and research.
+
+## License
+
+MIT — see `LICENSE`.
+
+```
+
+`app/build.gradle.kts`:
+
+```kts
+plugins {
+    alias(libs.plugins.android.application)
+    alias(libs.plugins.kotlin.android)
+    id("org.jetbrains.kotlin.plugin.compose") version "2.0.20"
+}
+
+android {
+    namespace = "com.sephile.app"
+    compileSdk = 34
+
+    defaultConfig {
+        applicationId = "com.sephile.app"
+        minSdk = 24
+        targetSdk = 34
+        versionCode = 1
+        versionName = "1.0.0"
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        externalNativeBuild {
+            cmake {
+                abiFilters("arm64-v8a", "armeabi-v7a", "x86_64")
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            isMinifyEnabled = false
+            isShrinkResources = false
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+            signingConfig = signingConfigs.getByName("debug")
+        }
+        debug {
+            isDebuggable = true
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
+    }
+
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+
+    buildFeatures {
+        buildConfig = true
+        compose = true
+    }
+
+    composeOptions {
+        kotlinCompilerExtensionVersion = "1.6.10"
+    }
+
+    packaging {
+        resources {
+            excludes += "/META-INF/{AL2.0,LGPL2.1}"
+        }
+    }
+
+    externalNativeBuild {
+        cmake {
+            path = file("src/main/jni/CMakeLists.txt")
+            version = "3.22.1"
+        }
+    }
+}
+
+dependencies {
+    implementation(platform(libs.compose.bom))
+    implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.androidx.lifecycle.runtime.compose)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.hilt.navigation.compose)
+    implementation(libs.androidx.material3)
+    implementation(libs.androidx.concurrent)
+    implementation(libs.kotlinx.coroutines.android)
+
+    debugImplementation(libs.androidx.compose.ui.tooling)
+    debugImplementation(libs.androidx.compose.ui.tooling.preview)
+
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.junit)
+    androidTestImplementation(libs.androidx.test.runner)
+    androidTestImplementation(libs.androidx.espresso.core)
+}
+
+```
+
+`app/proguard-rules.pro`:
+
+```pro
+# Sephile ProGuard/R8 rules
+# Keep JNI entry points so the native bridge is not stripped/renamed.
+-keep class com.sephile.app.root.NativeBridge {
+    native <methods>;
+}
+-keepclasseswithmembernames class com.sephile.app.root.NativeBridge {
+    native <methods>;
+}
+
+# Keep model classes used reflectively
+-keep class com.sephile.app.model.** { *; }
+
+# Keep entry points
+-keep class com.sephile.app.SephileApp { *; }
+-keep class com.sephile.app.ui.MainActivity { *; }
+
+# R8 may remove unused native libs; keep them
+-keepattributes *Annotation*, Signature
+-keepattributes SourceFile, LineNumberTable
+
+```
+
+`app/src/main/AndroidManifest.xml`:
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.sephile.app">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32" />
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+
+    <application
+        android:name=".SephileApp"
+        android:allowBackup="false"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.Sephile"
+        android:usesCleartextTraffic="true">
+
+        <activity
+            android:name=".ui.MainActivity"
+            android:exported="true"
+            android:launchMode="singleTop"
+            android:theme="@style/Theme.Sephile.Splash"
+            android:windowSoftInputMode="adjustResize">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <service
+            android:name=".root.ScanForegroundService"
+            android:exported="false"
+            android:foregroundServiceType="dataSync" />
+
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
+
+    </application>
+
+</manifest>
+
+```
+
+`app/src/main/java/com/sephile/app/SephileApp.kt`:
+
+```kt
+package com.sephile.app
+
+import android.app.Application
+import com.sephile.app.root.RootManager
+
+class SephileApp : Application() {
+
+    override fun onCreate() {
+        super.onCreate()
+        // Keep the UI responsive; battery optimizations can be requested by the user.
+        // RootManager.requestIgnoreBatteryOptimizations(this)
+    }
+}
+
+```
+
+`app/src/main/java/com/sephile/app/di/Module.kt`:
+
+```kt
+package com.sephile.app.di
+
+import android.content.Context
+import com.sephile.app.repository.MemoryRepository
+import com.sephile.app.repository.ProcessRepository
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.CoroutineScope
+
+object Module {
+
+    fun processRepository(context: Context): ProcessRepository =
+        ProcessRepository(context.applicationContext)
+
+    fun memoryRepository(): MemoryRepository = MemoryRepository()
+
+    val dispatcher = Dispatchers.Default
+    val supervisorJob = SupervisorJob()
+    val coroutineScope = CoroutineScope(supervisorJob + Dispatchers.Default)
+}
+
+```
+
+`app/src/main/java/com/sephile/app/model/ValueType.kt`:
+
+```kt
+package com.sephile.app.model
+
+enum class ValueType(val id: Int, val label: String, val size: Int) {
+    BYTE(0, "Byte", 1),
+    SHORT(1, "Short (2 bytes)", 2),
+    DWORD(2, "4 bytes", 4),
+    QWORD(3, "8 bytes", 8),
+    FLOAT(4, "Float", 4),
+    DOUBLE(5, "Double", 8);
+
+    companion object {
+        fun fromId(id: Int): ValueType = values().firstOrNull { it.id == id } ?: DWORD
+    }
+}
+
+enum class SearchType(val id: Int, val label: String) {
+    EXACT(0, "Exact value"),
+    UNKNOWN(1, "Unknown initial value"),
+    FUZZY(2, "Value changed / fuzzy"),
+    GREATER_THAN(3, "Greater than"),
+    LESS_THAN(4, "Less than");
+
+    companion object {
+        fun fromId(id: Int): SearchType = values().firstOrNull { it.id == id } ?: EXACT
+    }
+}
+
+data class ScanCandidate(
+    val address: Long = 0L,
+    val regionPath: String = "",
+    val regionStart: Long = 0L,
+    val regionEnd: Long = 0L,
+    val type: ValueType = ValueType.DWORD,
+    val hexDump: String = "",
+    val frozen: Boolean = false,
+    val freezeValue: String = ""
+)
+
+data class ProcessInfo(
+    val pid: Int,
+    val name: String,
+    val uid: Int = 0,
+    val isSystem: Boolean = false
+)
+
+```
+
+`app/src/main/java/com/sephile/app/repository/LuaRepository.kt`:
+
+```kt
+package com.sephile.app.root
+
+import com.sephile.app.root.NativeBridge
+
+class LuaRepository {
+
+    private val bridge = NativeBridge()
+    private var handle: Long = 0L
+
+    init {
+        handle = bridge.nativeInit()
+        bridge.nativeLuaLoad(handle)
+        bridge.nativeLuaBindApi(handle)
+    }
+
+    fun release() {
+        if (handle != 0L) {
+            bridge.nativeDestroy(handle)
+            handle = 0L
+        }
+    }
+
+    fun isLoaded(): Boolean = handle != 0L
+
+    fun exec(script: String): String {
+        if (handle == 0L) return "Lua not initialized"
+        return bridge.nativeLuaExec(handle, script)
+    }
+}
+
+```
+
+`app/src/main/java/com/sephile/app/repository/MemoryRepository.kt`:
+
+```kt
+package com.sephile.app.repository
+
+import com.sephile.app.model.SearchType
+import com.sephile.app.model.ValueType
+import com.sephile.app.root.NativeBridge
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.Dispatchers
+
+class MemoryRepository {
+
+    private val bridge = NativeBridge()
+    private var handle: Long = 0L
+
+    init {
+        handle = bridge.nativeInit()
+    }
+
+    fun release() {
+        if (handle != 0L) {
+            bridge.nativeDetach(handle)
+            bridge.nativeDestroy(handle)
+            handle = 0L
+        }
+    }
+
+    fun hasRoot(): Boolean = bridge.nativeHasRoot()
+
+    fun attach(pid: Int): Boolean {
+        if (handle == 0L) handle = bridge.nativeInit()
+        return bridge.nativeAttach(handle, pid)
+    }
+
+    fun detach() {
+        if (handle != 0L) bridge.nativeDetach(handle)
+    }
+
+    fun isAttached(): Boolean = handle != 0L && bridge.nativeIsAttached(handle)
+
+    fun firstScan(
+        pid: Int, type: ValueType, searchType: SearchType,
+        targetValue: Long, targetValueF: Double, fuzzyDelta: Long, onlyWritable: Boolean
+    ): Long {
+        return bridge.nativeFirstScan(
+            handle, pid, type.id, searchType.id,
+            targetValue, targetValueF, fuzzyDelta, onlyWritable
+        )
+    }
+
+    fun nextScan(
+        type: ValueType, searchType: SearchType,
+        targetValue: Long, targetValueF: Double, fuzzyDelta: Long, onlyWritable: Boolean
+    ): Long {
+        return bridge.nativeNextScan(
+            handle, type.id, searchType.id,
+            targetValue, targetValueF, fuzzyDelta, onlyWritable
+        )
+    }
+
+    fun candidateCount(): Int = bridge.nativeCandidateCount(handle)
+
+    fun candidateAddress(index: Int): Long = bridge.nativeCandidateAddress(handle, index)
+
+    fun candidateHex(index: Int): String = bridge.nativeCandidateHex(handle, index)
+
+    fun editValue(address: Long, type: ValueType, intVal: Long, floatVal: Double): Boolean {
+        return bridge.nativeEditValue(handle, address, type.id, intVal, floatVal)
+    }
+
+    fun freeze(address: Long, enabled: Boolean, value: String) {
+        bridge.nativeFreeze(handle, address, enabled, value)
+    }
+
+    /** Read raw bytes from the attached process at `address` (returns null on failure). */
+    fun peekMemory(address: Long, length: Int): ByteArray? {
+        if (handle == 0L || !isAttached()) return null
+        return bridge.nativePeekMemory(handle, address, length)
+    }
+}
+
+```
+
+`app/src/main/java/com/sephile/app/repository/ProcessRepository.kt`:
+
+```kt
+package com.sephile.app.repository
+
+import android.app.ActivityManager
+import android.content.Context
+import android.os.Process
+import com.sephile.app.model.ProcessInfo
+import com.sephile.app.root.SuShell
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.Dispatchers
+
+class ProcessRepository(private val context: Context) {
+
+    fun listRunningProcesses(): List<ProcessInfo> {
+        val am = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+        val apps = am.runningAppProcesses ?: return emptyList()
+        return apps.mapNotNull { proc ->
+            val name = proc.processName ?: ""
+            val pid = proc.pid
+            // Skip the tool itself and kernel threads
+            if (pid == Process.myPid()) return@mapNotNull null
+            if (name.isEmpty()) return@mapNotNull null
+            ProcessInfo(pid = pid, name = name, uid = proc.uid)
+        }.sortedBy { it.name }
+    }
+
+    fun findPidByName(processName: String): Int? {
+        return SuShell.pidof(processName)
+    }
+
+    fun observeProcesses(): Flow<List<ProcessInfo>> = flow {
+        while (true) {
+            emit(listRunningProcesses())
+            withContext(Dispatchers.Default) {
+                kotlinx.coroutines.delay(3000)
+            }
+        }
+    }.flowOn(Dispatchers.Default)
+}
+
+```
+
+`app/src/main/java/com/sephile/app/root/NativeBridge.kt`:
+
+```kt
+package com.sephile.app.root
+
+import com.sephile.app.model.SearchType
+import com.sephile.app.model.ValueType
+
+class NativeBridge {
+    init {
+        System.loadLibrary("sephile_jni")
+    }
+
+    external fun nativeInit(): Long
+    external fun nativeDestroy(handle: Long)
+    external fun nativeAttach(handle: Long, pid: Int): Boolean
+    external fun nativeDetach(handle: Long)
+    external fun nativeIsAttached(handle: Long): Boolean
+    external fun nativeFirstScan(
+        handle: Long, pid: Int, type: Int, searchType: Int,
+        targetValue: Long, targetValueF: Double, fuzzyDelta: Long, onlyWritable: Boolean
+    ): Long
+    external fun nativeNextScan(
+        handle: Long, type: Int, searchType: Int,
+        targetValue: Long, targetValueF: Double, fuzzyDelta: Long, onlyWritable: Boolean
+    ): Long
+    external fun nativeCandidateCount(handle: Long): Int
+    external fun nativeCandidateAddress(handle: Long, index: Int): Long
+    external fun nativeCandidateHex(handle: Long, index: Int): String
+    external fun nativeEditValue(handle: Long, address: Long, type: Int, intVal: Long, floatVal: Double): Boolean
+    external fun nativeFreeze(handle: Long, address: Long, enabled: Boolean, value: String)
+    external fun nativeHasRoot(): Boolean
+    external fun nativeLuaLoad(handle: Long): Boolean
+    external fun nativeLuaExec(handle: Long, script: String): String
+    external fun nativeLuaBindApi(handle: Long): Boolean
+    external fun nativePeekMemory(handle: Long, address: Long, length: Int): ByteArray?
+}
+
+```
+
+`app/src/main/java/com/sephile/app/root/RootManager.kt`:
+
+```kt
+package com.sephile.app.root
+
+import android.content.Context
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.net.Uri
+import android.os.Build
+import android.provider.Settings
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlin.concurrent.thread
+
+/**
+ * Root & su availability checks. Sephile requires root to ptrace-attach into
+ * other processes (Game Guardian style).
+ */
+object RootManager {
+
+    fun isRootAvailable(): Boolean {
+        return suBinaryExists() || canRunSu()
+    }
+
+    private fun suBinaryExists(): Boolean {
+        val suPaths = listOf(
+            "/system/bin/su", "/system/xbin/su",
+            "/system/bin/.ext/.su", "/system/xbin/daemonsu",
+            "/sbin/su", "/bin/su", "/data/local/su",
+            "/data/local/bin/su", "/data/local/xbin/su",
+            "/cache/su", "/cache/xbin/su"
+        )
+        return suPaths.any { java.io.File(it).exists() }
+    }
+
+    private fun canRunSu(): Boolean {
+        return try {
+            val proc = java.lang.Runtime.getRuntime().exec("su -c id")
+            val out = java.io.BufferedReader(
+                java.io.InputStreamReader(proc.inputStream)).readText()
+            proc.waitFor()
+            out.contains("uid=0")
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+    fun isRootMgmtInstalled(): Boolean {
+        val pkgs = listOf(
+            "com.topjohnwu.magisk", "com.topjohnwu.magisk.debug",
+            "com.kuroiku.zygisk", "org.chainfire.supersu",
+            "me.phh.superuser", "com.koushikdutta.superuser"
+        )
+        // check via package manager would need context; keep simple here
+        return pkgs.any { p ->
+            try {
+                java.lang.Class.forName("android.app.Application")
+                false
+            } catch (_: Exception) {
+                false
+            }
+        }
+    }
+
+    fun requestIgnoreBatteryOptimizations(context: Context) {
+        val intent = Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS)
+                .setData(Uri.parse("package:${context.packageName}"))
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        context.startActivity(intent)
+    }
+
+    fun runInBackground(scope: CoroutineScope, block: () -> Unit) {
+        scope.launch(Dispatchers.Default) {
+            thread(isDaemon = true, start = true) {
+                block()
+            }
+        }
+    }
+}
+
+```
+
+`app/src/main/java/com/sephile/app/root/ScanForegroundService.kt`:
+
+```kt
+package com.sephile.app.root
+
+import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
+import android.app.Service
+import android.content.Context
+import android.content.Intent
+import android.os.Build
+import android.os.IBinder
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
+import com.sephile.app.R
+import com.sephile.app.ui.MainActivity
+
+/**
+ * Foreground service that keeps long memory scans/edits alive while the app is
+ * in the background. Required on Android 10+ for anything that runs persistently.
+ */
+class ScanForegroundService : Service() {
+
+    private val CHANNEL_ID = "sephile_scan_channel"
+    private val NOTIFICATION_ID = 1001
+
+    override fun onCreate() {
+        super.onCreate()
+        createNotificationChannel()
+    }
+
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        val notification = buildNotification()
+        startForeground(NOTIFICATION_ID, notification)
+        return START_NOT_STICKY
+    }
+
+    override fun onBind(intent: Intent?): IBinder? = null
+
+    override fun onDestroy() {
+        super.onDestroy()
+        stopForeground(true)
+    }
+
+    private fun createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(
+                CHANNEL_ID,
+                "Sephile scan",
+                NotificationManager.IMPORTANCE_LOW
+            ).apply {
+                description = "Keeps memory scans running in the background"
+                enableLights(false)
+                enableVibration(false)
+            }
+            val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            manager.createNotificationChannel(channel)
+        }
+    }
+
+    private fun buildNotification(): Notification {
+        val context = applicationContext
+        val intent = Intent(context, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+        }
+        val pendingIntent = PendingIntent.getActivity(
+            context, 0, intent,
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+        )
+
+        return NotificationCompat.Builder(context, CHANNEL_ID)
+            .setContentTitle("Sephile")
+            .setContentText("Memory scan running in background")
+            .setSmallIcon(R.mipmap.ic_launcher)
+            .setContentIntent(pendingIntent)
+            .setOngoing(true)
+            .setPriority(NotificationCompat.PRIORITY_LOW)
+            .build()
+    }
+}
+
+```
+
+`app/src/main/java/com/sephile/app/root/SuShell.kt`:
+
+```kt
+package com.sephile.app.root
+
+import java.io.BufferedReader
+import java.io.InputStreamReader
+import java.io.OutputStreamWriter
+import java.io.PrintWriter
+
+/**
+ * Tiny helper to run shell commands through `su` and capture stdout.
+ */
+object SuShell {
+
+    fun run(cmd: String, timeoutMillis: Long = 5000): SuResult {
+        return try {
+            val process = java.lang.Runtime.getRuntime().exec("su")
+            val writer = PrintWriter(OutputStreamWriter(process.outputStream), true)
+            writer.println(cmd)
+            writer.println("exit")
+            writer.flush()
+
+            val outBuf = StringBuilder()
+            val errBuf = StringBuilder()
+            val outReader = BufferedReader(InputStreamReader(process.inputStream))
+            val errReader = BufferedReader(InputStreamReader(process.errorStream))
+
+            var outLine: String? = outReader.readLine()
+            while (outLine != null) {
+                outBuf.append(outLine).append("\n")
+                outLine = outReader.readLine()
+            }
+            var errLine: String? = errReader.readLine()
+            while (errLine != null) {
+                errBuf.append(errLine).append("\n")
+                errLine = errReader.readLine()
+            }
+
+            val finished = process.waitFor(timeoutMillis, java.util.concurrent.TimeUnit.MILLISECONDS)
+            val result = SuResult(
+                exitCode = if (finished) process.exitValue() else -1,
+                stdout = outBuf.toString(),
+                stderr = errBuf.toString(),
+                timedOut = !finished
+            )
+            process.destroyForcibly()
+            result
+        } catch (e: Exception) {
+            SuResult(exitCode = -1, stdout = "", stderr = e.message ?: "unknown", timedOut = false)
+        }
+    }
+
+    fun pidof(processName: String): Int? {
+        val res = run("pidof $processName")
+        val trimmed = res.stdout.trim()
+        return if (trimmed.isNotEmpty()) trimmed.split(" ").first().toIntOrNull() else null
+    }
+}
+
+data class SuResult(
+    val exitCode: Int,
+    val stdout: String,
+    val stderr: String,
+    val timedOut: Boolean
+) {
+    val success: Boolean get() = exitCode == 0
+}
+
+```
+
+`app/src/main/java/com/sephile/app/ui/LiveMemoryInspectorScreen.kt`:
+
+```kt
+package com.sephile.app.ui
+
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.unit.dp
+import com.sephile.app.repository.MemoryRepository
+import com.sephile.app.model.ValueType
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.update
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+
+/**
+ * Live Memory Inspector ("offset finder").
+ *
+ * Enter a target address, tap Start to continuously read N bytes from the
+ * attached process and display them as hex + ASCII. Changed bytes highlight
+ * green so you can spot the value that changes in-game. Tap any byte to
+ * poke/edit it live into the target process.
+ */
+@Composable
+fun LiveMemoryInspectorScreen(repo: MemoryRepository) {
+    val viewModel = remember { LiveMemoryInspectorViewModel(repo) }
+    val ui: StateFlow<LiveMemoryInspectorUiState> = viewModel.ui
+    val uiState by ui.collectAsStateWithLifecycle()
+    val scope = rememberCoroutineScope()
+
+    val addressState = remember { mutableStateOf<String>("") }
+    val lengthState = remember { mutableStateOf<String>("64") }
+
+    Column(modifier = Modifier.fillMaxSize().padding(12.dp)) {
+        TopAppBar(
+            title = { Text(text = "Live Memory Inspector") },
+            colors = TopAppBarDefaults.mediumTopAppBarColors(containerColor = Color.Transparent)
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Row(modifier = Modifier.fillMaxWidth()) {
+            OutlinedTextField(
+                value = addressState.value,
+                onValueChange = { addressState.value = it },
+                modifier = Modifier.weight(1f),
+                label = { Text(text = "Address (e.g. 0x7f123000)") },
+                colors = TextFieldDefaults.textFieldColors(
+                    containerColor = MaterialTheme.colorScheme.surface
+                )
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            OutlinedTextField(
+                value = lengthState.value,
+                onValueChange = { lengthState.value = it },
+                modifier = Modifier.width(80.dp),
+                label = { Text(text = "Bytes") },
+                colors = TextFieldDefaults.textFieldColors(
+                    containerColor = MaterialTheme.colorScheme.surface
+                )
+            )
+        }
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Row {
+            Button(
+                onClick = {
+                    scope.launch {
+                        val addrText = addressState.value.trim().removePrefix("0x").removePrefix("0X")
+                        val longAddr = addrText.toLongOrNull() ?: -1L
+                        val len = lengthState.value.toIntOrNull() ?: 64
+                        if (longAddr == -1L) {
+                            viewModel.setError("Invalid address")
+                        } else if (!viewModel.attached) {
+                            viewModel.setError("Not attached to a process")
+                        } else {
+                            viewModel.setError("")
+                            viewModel.startWatch(longAddr, len)
+                        }
+                    }
+                },
+                enabled = viewModel.attached && !uiState.watching,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = if (viewModel.attached) MaterialTheme.colorScheme.primary
+                    else MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            ) {
+                Text(text = if (uiState.watching) "Stop" else "Start watch")
+            }
+            Spacer(modifier = Modifier.width(8.dp))
+            Button(
+                onClick = { viewModel.stopWatch() },
+                enabled = uiState.watching,
+                colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent)
+            ) {
+                Text(text = "Stop")
+            }
+            Spacer(modifier = Modifier.width(8.dp))
+            Button(
+                onClick = { viewModel.refreshOnce() },
+                enabled = uiState.watching,
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary)
+            ) {
+                Text(text = "Read once")
+            }
+        }
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Text(
+            text = if (viewModel.attached) "Attached to PID ${viewModel.targetPid}"
+            else "Not attached — open Scanner and attach to a process first",
+            style = MaterialTheme.typography.bodyMedium,
+            color = if (viewModel.attached) Color(0xFF50FA7B) else Color(0xFFFFB86C)
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+
+        if (uiState.error.isNotEmpty()) {
+            Text(text = uiState.error, style = MaterialTheme.typography.bodyMedium,
+                color = Color(0xFFFF5555))
+            Spacer(modifier = Modifier.height(8.dp))
+        }
+
+        if (uiState.watching) {
+            Text(
+                text = "Watching ${uiState.byteCount} bytes @ 0x${uiState.address.toString(16).uppercase()}",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+        }
+
+        HexDumpEditor(
+            bytes = uiState.bytes,
+            changed = uiState.changed,
+            baseAddress = uiState.address,
+            onByteEdit = { index, newValue ->
+                scope.launch {
+                    viewModel.pokeByte(index, newValue)
+                }
+            }
+        )
+    }
+}
+
+class LiveMemoryInspectorViewModel(private val repo: MemoryRepository) {
+
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+    private var watchJob: kotlinx.coroutines.Job? = null
+
+    private val _ui = MutableStateFlow(LiveMemoryInspectorUiState())
+    val ui: StateFlow<LiveMemoryInspectorUiState> = _ui
+
+    val attached: Boolean
+        get() = repo.isAttached()
+    val targetPid: Int
+        get() = 0
+        private set
+
+    fun setError(err: String) {
+        _ui.update { it.copy(error = err) }
+    }
+
+    fun startWatch(address: Long, length: Int) {
+        stopWatch()
+        _ui.update { it.copy(address = address, byteCount = length,
+            bytes = ByteArray(length), changed = BooleanArray(length), watching = true, error = "") }
+        var previous: ByteArray? = null
+        watchJob = scope.launch {
+            while (isActive) {
+                val buf = repo.peekMemory(address, length) ?: break
+                val changed = BooleanArray(length)
+                for (i in buf.indices) {
+                    val prev = previous?.getOrElse(i) { 0 }
+                    if (buf[i] != prev) {
+                        changed[i] = true
+                    }
+                }
+                previous = buf.copyOf()
+                _ui.update { it.copy(bytes = buf, changed = changed) }
+                delay(400)
+            }
+            _ui.update { it.copy(watching = false) }
+        }
+    }
+
+    fun stopWatch() {
+        watchJob?.cancel()
+        watchJob = null
+        _ui.update { it.copy(watching = false) }
+    }
+
+    fun refreshOnce() {}
+
+    fun pokeByte(index: Int, newValue: Int) {
+        val addr = _ui.value.address + index
+        val ok = repo.editValue(addr, ValueType.BYTE, newValue.toLong(), 0.0)
+        _ui.update {
+            it.copy(error = if (ok) "" else "Poke failed")
+        }
+    }
+}
+
+data class LiveMemoryInspectorUiState(
+    val attached: Boolean = false,
+    val targetPid: Int = -1,
+    val watching: Boolean = false,
+    val address: Long = 0L,
+    val byteCount: Int = 0,
+    val bytes: ByteArray = byteArrayOf(),
+    val changed: BooleanArray = booleanArrayOf(),
+    val error: String = ""
+)
+
+@Composable
+private fun HexDumpEditor(
+    bytes: ByteArray,
+    changed: BooleanArray,
+    baseAddress: Long,
+    onByteEdit: (index: Int, newValue: Int) -> Unit
+) {
+    val columns = 16
+    val rows = if (bytes.isEmpty()) 0 else ((bytes.size + columns - 1) / columns)
+
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(vertical = 4.dp)
+    ) {
+        items(count = rows, key = { it }) { row ->
+            Row(modifier = Modifier.fillMaxWidth()) {
+                Box(
+                    modifier = Modifier.width(56.dp),
+                    contentAlignment = Alignment.CenterEnd
+                ) {
+                    Text(
+                        text = "0x${(baseAddress + (row * columns)).toString(16).uppercase()}",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                repeat(columns) { col ->
+                    val index = row * columns + col
+                    val inRange = index < bytes.size
+                    val b = if (inRange) bytes[index] else 0
+                    val isChanged = inRange && changed[index]
+                    val hex = "%02X".format(b.toInt() and 0xFF)
+                    Box(
+                        modifier = Modifier
+                            .width(26.dp)
+                            .height(26.dp)
+                            .clickable(enabled = inRange, onClick = { if (inRange) onByteEdit(index, b.toInt() and 0xFF) }),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = hex,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = if (isChanged) Color(0xFF7CFC00)
+                            else if (inRange) Color(0xFFE6E6E6)
+                            else Color(0xFF4A5568)
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.width(8.dp))
+                repeat(columns) { col ->
+                    val index = row * columns + col
+                    val inRange = index < bytes.size
+                    val c = if (inRange) bytes[index].toInt() else 0
+                    val printable = if (inRange && c >= 32 && c <= 126) c.toChar() else '.'
+                    Box(
+                        modifier = Modifier.width(16.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = printable.toString(),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = if (inRange) Color(0xFFE6E6E6) else Color(0xFF4A5568)
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+```
+
+`app/src/main/java/com/sephile/app/ui/MainActivity.kt`:
+
+```kt
+package com.sephile.app.ui
+
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
+import com.sephile.app.di.Module
+import com.sephile.app.repository.LuaRepository
+import com.sephile.app.repository.MemoryRepository
+import com.sephile.app.repository.ProcessRepository
+import com.sephile.app.root.RootManager
+import com.sephile.app.ui.theme.SephileTheme
+import com.sephile.app.ui.theme.forceSephileColors
+
+class MainActivity : ComponentActivity() {
+
+    private val processRepo = Module.processRepository(this)
+    private val memoryRepo = Module.memoryRepository()
+    private val luaRepo = LuaRepository()
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContent {
+            SephileTheme(darkTheme = true) {
+                forceSephileColors()
+                var showRootCheck by rememberSaveable { mutableStateOf<Boolean>(!RootManager.isRootAvailable()) }
+
+                if (showRootCheck) {
+                    RootGate(onRootConfirmed = { showRootCheck = false })
+                } else {
+                    SephileNavigator(
+                        processRepo = processRepo,
+                        memoryRepo = memoryRepo,
+                        luaRepo = luaRepo
+                    )
+                }
+            }
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        memoryRepo.release()
+        luaRepo.release()
+    }
+}
+
+@Composable
+private fun RootGate(onRootConfirmed: () -> Unit) {
+    val rootAvailable = RootManager.isRootAvailable()
+
+    SephileTheme(darkTheme = true) {
+        androidx.compose.material3.Scaffold(
+            topBar = TopAppBar(
+                title = { Text(text = "Sephile — Root Check") },
+                colors = androidx.compose.material3.TopAppBarDefaults.smallTopAppBarColors(
+                    containerColor = Color(0xFF121826)
+                )
+            )
+        ) { padding ->
+            androidx.compose.foundation.layout.Column(
+                modifier = Modifier.fillMaxSize().padding(padding),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = androidx.compose.foundation.layout.Arrangement.Center
+            ) {
+                Text(
+                    text = if (rootAvailable) "Root detected" else "Root not detected",
+                    style = androidx.compose.material3.MaterialTheme.typography.headlineMedium,
+                    color = if (rootAvailable) Color(0xFF50FA7B) else Color(0xFFFF5555)
+                )
+                androidx.compose.foundation.layout.Spacer(modifier = Modifier.height(16.dp))
+                Text(
+                    text = "Sephile requires root to read/write other processes' memory.",
+                    style = androidx.compose.material3.MaterialTheme.typography.bodyMedium,
+                    color = Color(0xFF9AA0A6)
+                )
+                androidx.compose.foundation.layout.Spacer(modifier = Modifier.height(24.dp))
+                androidx.compose.material3.Button(
+                    onClick = {
+                        RootManager.requestIgnoreBatteryOptimizations(
+                            androidx.compose.ui.platform.LocalContext.current
+                        )
+                        if (rootAvailable) onRootConfirmed()
+                    },
+                    colors = androidx.compose.material3.ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF7CFC00)
+                    )
+                ) {
+                    Text(if (rootAvailable) "Continue" else "Retry root check")
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun SephileNavigator(
+    processRepo: ProcessRepository,
+    memoryRepo: MemoryRepository,
+    luaRepo: LuaRepository
+) {
+    var screen by rememberSaveable { mutableStateOf(Screen.Processes) }
+    var target by rememberSaveable { mutableStateOf(Pair(-1, "")) }
+
+    androidx.compose.material3.Scaffold(
+        topBar = TopAppBar(
+            title = { Text(text = when (screen) {
+                Screen.Processes -> "Processes"
+                Screen.Scanner -> "Scanner"
+                Screen.LiveInspector -> "Live Inspector"
+                Screen.Lua -> "Lua Scripts"
+                Screen.Settings -> "Settings"
+            }) },
+            colors = androidx.compose.material3.TopAppBarDefaults.mediumTopAppBarColors(
+                containerColor = Color(0xFF0B0E14)
+            )
+        )
+    ) { padding ->
+        when (screen) {
+            Screen.Processes -> ProcessListScreen(
+                repo = processRepo,
+                onAttach = { pid, name ->
+                    target = Pair(pid, name)
+                    screen = Screen.Scanner
+                }
+            )
+            Screen.Scanner -> ScannerScreen(
+                repo = memoryRepo,
+                targetPid = target.first,
+                targetName = target.second,
+                onBack = { screen = Screen.Processes }
+            )
+            Screen.LiveInspector -> LiveMemoryInspectorScreen(repo = memoryRepo)
+            Screen.Lua -> ScriptEditorScreen(luaRepo = luaRepo)
+            Screen.Settings -> SettingsScreen()
+        }
+    }
+}
+
+private enum class Screen {
+    Processes, Scanner, LiveInspector, Lua, Settings
+}
+
+```
+
+`app/src/main/java/com/sephile/app/ui/ProcessListScreen.kt`:
+
+```kt
+package com.sephile.app.ui
+
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.*
+import androidx.compose.runtime.Composable
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
+import com.sephile.app.model.ProcessInfo
+import com.sephile.app.repository.ProcessRepository
+import kotlinx.coroutines.launch
+
+@Composable
+fun ProcessListScreen(
+    repo: ProcessRepository,
+    onAttach: (pid: Int, name: String) -> Unit
+) {
+    val scope = rememberCoroutineScope()
+    val processes by repo.observeProcesses().collectAsStateWithLifecycle()
+    var refresh by remember { mutableStateOf(false) }
+
+    Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+        Text(
+            text = "Running processes",
+            style = MaterialTheme.typography.titleLarge,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+        Spacer(modifier = Modifier.height(12.dp))
+
+        TextButton(
+            onClick = { refresh = true },
+            colors = ButtonDefaults.textButtonColors(
+                containerColor = Color.Transparent,
+                contentColor = MaterialTheme.colorScheme.primary
+            )
+        ) {
+            Text(text = "Refresh", style = MaterialTheme.typography.labelMedium)
+        }
+        Spacer(modifier = Modifier.height(8.dp))
+
+        if (processes.isEmpty()) {
+            Text(text = "No processes found", style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant)
+        } else {
+            LazyColumn(
+                modifier = Modifier.weight(1f),
+                contentPadding = PaddingValues(vertical = 8.dp)
+            ) {
+                items(processes, key = { it.pid }) { proc ->
+                    ProcessListItem(
+                        process = proc,
+                        onClick = {
+                            scope.launch {
+                                onAttach(proc.pid, proc.name)
+                            }
+                        }
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ProcessListItem(process: ProcessInfo, onClick: () -> Unit) {
+    val isSystem = process.uid < 10000
+    Card(
+        modifier = Modifier.fillMaxWidth().clickable(onClick = onClick),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant
+        ),
+        elevation = 2.dp
+    ) {
+        Row(
+            modifier = Modifier.padding(12.dp).fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            IconButton(onClick = onClick) {
+                Icon(
+                    imageVector = androidx.compose.material.icons.Icons.Default.PlayCircleOutline,
+                    contentDescription = "Attach to ${process.name}",
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            }
+            Spacer(modifier = Modifier.width(12.dp))
+            Column {
+                Text(
+                    text = process.name,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Text(
+                    text = "PID ${process.pid}  ·  UID ${process.uid}  ·  ${if (isSystem) "system" else "user"}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+    }
+}
+
+```
+
+`app/src/main/java/com/sephile/app/ui/ScannerScreen.kt`:
+
+```kt
+package com.sephile.app.ui
+
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.unit.dp
+import com.sephile.app.model.SearchType
+import com.sephile.app.model.ValueType
+import com.sephile.app.repository.MemoryRepository
+import kotlinx.coroutines.launch
+
+@Composable
+fun ScannerScreen(
+    repo: MemoryRepository,
+    targetPid: Int,
+    targetName: String,
+    onBack: () -> Unit
+) {
+    val ui by remember { mutableStateOf(com.sephile.app.viewmodel.ScannerUiState()) }
+
+    // Note: In a production build this screen would observe a ViewModel StateFlow.
+    // Here we wire directly to MemoryRepository for the MVP.
+    val scope = rememberCoroutineScope()
+
+    Column(modifier = Modifier.fillMaxSize().padding(12.dp)) {
+        TopAppBar(
+            title = { Text(text = "Scanner") },
+            navigationIcon = {
+                IconButton(onClick = onBack) {
+                    Icon(
+                        imageVector = androidx.compose.material.icons.Icons.Default.ArrowBack,
+                        contentDescription = "Back"
+                    )
+                }
+            },
+            colors = TopAppBarDefaults.mediumTopAppBarColors(
+                containerColor = Color.Transparent
+            )
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+
+        // Target chip
+        val attached = ui.attached
+        val targetText = if (attached) "Attached: $targetName (PID $targetPid)" else "Not attached"
+        Chip(
+            modifier = Modifier.fillMaxWidth(),
+            onClick = null,
+            colors = ChipDefaults.colors(
+                containerColor = if (attached) Color(0xFF2E5E00) else Color(0xFF3A1E1E)
+            ),
+            label = {
+                Text(
+                    text = targetText,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color.White
+                )
+            }
+        )
+        Spacer(modifier = Modifier.height(12.dp))
+
+        // Controls card
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+            elevation = 4.dp
+        ) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                Row {
+                    Text(
+                        text = "Value type",
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(modifier = Modifier.weight(1f))
+                    DropdownMenu(
+                        expanded = true,
+                        onDismissRequest = {},
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        ValueType.values().forEach { vt ->
+                            DropdownMenuItem(
+                                text = { Text(text = vt.label) },
+                                onClick = { /* selection handled via state in full VM */ }
+                            )
+                        }
+                    }
+                }
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Row {
+                    Text(
+                        text = "Target value",
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(modifier = Modifier.weight(1f))
+                    BasicTextField(
+                        value = TextFieldValue(""),
+                        onValueChange = {},
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = TextFieldDefaults.textFieldColors(
+                            containerColor = MaterialTheme.colorScheme.surface
+                        )
+                    )
+                }
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Row {
+                    Checkbox(
+                        checked = true,
+                        onCheckedChange = {}
+                    )
+                    Text(
+                        text = "Writable regions only",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                }
+            }
+        }
+        Spacer(modifier = Modifier.height(12.dp))
+
+        // Action buttons
+        Row {
+            Button(
+                onClick = {
+                    scope.launch {
+                        val count = repo.firstScan(
+                            pid = targetPid,
+                            type = ValueType.DWORD,
+                            searchType = SearchType.EXACT,
+                            targetValue = 0,
+                            targetValueF = 0.0,
+                            fuzzyDelta = 0,
+                            onlyWritable = true
+                        )
+                    }
+                },
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+            ) {
+                Text(text = "First scan")
+            }
+            Spacer(modifier = Modifier.width(8.dp))
+            Button(
+                onClick = {
+                    scope.launch {
+                        val count = repo.nextScan(
+                            type = ValueType.DWORD,
+                            searchType = SearchType.EXACT,
+                            targetValue = 0,
+                            targetValueF = 0.0,
+                            fuzzyDelta = 0,
+                            onlyWritable = true
+                        )
+                    }
+                },
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary)
+            ) {
+                Text(text = "Next scan")
+            }
+        }
+        Spacer(modifier = Modifier.height(12.dp))
+
+        // Results
+        Text(
+            text = "${ui.candidateCount} candidate(s)",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+
+        if (ui.candidateCount > 0) {
+            LazyColumn(
+                modifier = Modifier.weight(1f),
+                contentPadding = PaddingValues(vertical = 4.dp)
+            ) {
+                items(0 until ui.candidateCount, key = { it }) { index ->
+                    CandidateItem(
+                        index = index,
+                        address = repo.candidateAddress(index),
+                        hex = repo.candidateHex(index),
+                        onEdit = {},
+                        onFreeze = {}
+                    )
+                }
+            }
+        } else {
+            Text(text = "No candidates yet. Run a first scan.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+    }
+}
+
+@Composable
+private fun CandidateItem(
+    index: Int,
+    address: Long,
+    hex: String,
+    onEdit: () -> Unit,
+    onFreeze: () -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = 2.dp
+    ) {
+        Row(
+            modifier = Modifier.padding(12.dp).fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column {
+                Text(
+                    text = "0x${address.toString(16).uppercase()}",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Text(
+                    text = hex,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            Spacer(modifier = Modifier.weight(1f))
+            Row {
+                IconButton(onClick = onEdit) {
+                    Icon(
+                        imageVector = androidx.compose.material.icons.Icons.Default.Edit,
+                        contentDescription = "Edit",
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
+                IconButton(onClick = onFreeze) {
+                    Icon(
+                        imageVector = androidx.compose.material.icons.Icons.Default.Lock,
+                        contentDescription = "Freeze",
+                        tint = MaterialTheme.colorScheme.success
+                    )
+                }
+            }
+        }
+    }
+}
+
+```
+
+`app/src/main/java/com/sephile/app/ui/ScriptEditorScreen.kt`:
+
+```kt
+package com.sephile.app.ui
+
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.style.FontFamily
+import androidx.compose.ui.unit.dp
+import com.sephile.app.repository.LuaRepository
+import com.sephile.app.viewmodel.LuaViewModel
+import kotlinx.coroutines.launch
+
+@Composable
+fun ScriptEditorScreen(luaRepo: com.sephile.app.repository.LuaRepository) {
+    // This screen is instantiated via MainActivity with a real LuaViewModel.
+    ScriptEditorContent(viewModel = remember { com.sephile.app.viewmodel.LuaViewModel(luaRepo) })
+}
+
+@Composable
+private fun ScriptEditorContent(viewModel: LuaViewModel) {
+    val ui by collectAsStateWithLifecycle(viewModel.ui)
+    val scope = rememberCoroutineScope()
+
+    val script by remember { mutableStateOf("""
+-- Sephile Lua example (engine not yet bound --)
+-- print("hello from sephile")
+-- attach(1234)
+-- scan(100, "dword")
+""".trimIndent()) }
+
+    Column(modifier = Modifier.fillMaxSize().padding(12.dp)) {
+        TopAppBar(
+            title = { Text(text = "Lua Scripts") },
+            navigationIcon = {
+                IconButton(onClick = { /* back handled by nav */ }) {
+                    Icon(
+                        imageVector = androidx.compose.material.icons.Icons.Default.ArrowBack,
+                        contentDescription = "Back"
+                    )
+                }
+            },
+            colors = TopAppBarDefaults.mediumTopAppBarColors(containerColor = Color.Transparent)
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Text(
+            text = if (ui.loaded) "Lua engine loaded" else "Lua engine: stub (not bound)",
+            style = MaterialTheme.typography.bodyMedium,
+            color = if (ui.loaded) Color(0xFF50FA7B) else Color(0xFFFFB86C)
+        )
+        Spacer(modifier = Modifier.height(12.dp))
+
+        BasicTextField(
+            value = androidx.compose.ui.text.input.TextFieldValue(script),
+            onValueChange = { script = it.text },
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f)
+                .background(Color(0xFF121826)),
+            colors = TextFieldDefaults.textFieldColors(
+                containerColor = Color(0xFF121826),
+                focusedContainerColor = Color(0xFF121826)
+            ),
+            keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
+                imeAction = androidx.compose.foundation.text.ImeAction.Done
+            )
+        )
+        Spacer(modifier = Modifier.height(12.dp))
+
+        Row {
+            Button(
+                onClick = {
+                    scope.launch { viewModel.runScript(script) }
+                },
+                enabled = ui.loaded,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = if (ui.loaded) MaterialTheme.colorScheme.primary
+                    else MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            ) {
+                Text(text = "Run script")
+            }
+            Spacer(modifier = Modifier.width(8.dp))
+            Button(
+                onClick = { viewModel.clearOutput() },
+                colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent)
+            ) {
+                Text(text = "Clear")
+            }
+        }
+        Spacer(modifier = Modifier.height(12.dp))
+
+        Card(
+            modifier = Modifier.fillMaxWidth().weight(1f),
+            colors = CardDefaults.cardColors(containerColor = Color(0xFF0B0E14)),
+            elevation = 0.dp
+        ) {
+            Column(modifier = Modifier.padding(12.dp)) {
+                Text(
+                    text = "Output",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = if (ui.output.isNotEmpty()) ui.output else "(no output yet)",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    fontFamily = FontFamily.Monospace
+                )
+                ui.error?.let { err ->
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = err,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = Color(0xFFFF5555)
+                    )
+                }
+            }
+        }
+    }
+}
+
+```
+
+`app/src/main/java/com/sephile/app/ui/theme/AppTheme.kt`:
+
+```kt
+package com.sephile.app.ui.theme
+
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.dynamicDarkColorScheme
+import androidx.compose.material3.dynamicLightColorScheme
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.readOnlyComposable
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
+import android.view.View
+
+@Composable
+fun SephileTheme(
+    darkTheme: Boolean = isSystemInDarkTheme(),
+    content: @Composable () -> Unit
+) {
+    val colorScheme = when {
+        darkTheme -> dynamicDarkColorScheme()
+        else -> dynamicLightColorScheme()
+    }
+    // Enforce the dark Sephile surface palette regardless of system dynamic color
+    val sephileColors = darkColorScheme()
+    MaterialTheme(
+        colorScheme = sephileColors,
+        content = content
+    )
+}
+
+@Composable
+private fun darkColorScheme() = androidx.compose.material3.darkColorScheme(
+    background = androidx.compose.ui.graphics.Color(0xFF0B0E14),
+    surface = androidx.compose.ui.graphics.Color(0xFF121826),
+    primary = androidx.compose.ui.graphics.Color(0xFF7CFC00),
+    onPrimary = androidx.compose.ui.graphics.Color(0xFF0B0E14),
+    secondary = androidx.compose.ui.graphics.Color(0xFF3EA700),
+    onSecondary = androidx.compose.ui.graphics.Color(0xFFFFFFFF),
+    error = androidx.compose.ui.graphics.Color(0xFFFF5555),
+    onError = androidx.compose.ui.graphics.Color(0xFF000000),
+    surfaceVariant = androidx.compose.ui.graphics.Color(0xFF1E2636),
+    onSurfaceVariant = androidx.compose.ui.graphics.Color(0xFF9AA0A6),
+    outline = androidx.compose.ui.graphics.Color(0xFF2A3446),
+    inverseSurface = androidx.compose.ui.graphics.Color(0xFF121826),
+    inverseOnSurface = androidx.compose.ui.graphics.Color(0xFFE6E6E6),
+    inversePrimary = androidx.compose.ui.graphics.Color(0xFF7CFC00)
+)
+
+/** Force the Compose view to use a dark surface (sephile look) in previews and edge cases. */
+@Composable
+fun forceSephileColors() {
+    SideEffect {
+        val view = LocalView.current
+        view.setBackgroundColor(androidx.compose.ui.graphics.Color(0xFF0B0E14).toArgb())
+    }
+}
+
+```
+
+`app/src/main/java/com/sephile/app/viewmodel/LuaViewModel.kt`:
+
+```kt
+package com.sephile.app.viewmodel
+
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.sephile.app.repository.LuaRepository
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.Dispatchers
+
+data class LuaUiState(
+    val loaded: Boolean = false,
+    val isRunning: Boolean = false,
+    val output: String = "",
+    val error: String? = null
+)
+
+class LuaViewModel(private val repo: LuaRepository) : ViewModel() {
+
+    private val _ui = MutableStateFlow(LuaUiState(loaded = repo.isLoaded()))
+    val ui: StateFlow<LuaUiState> = _ui.stateIn(viewModelScope, replay = 1)
+
+    fun runScript(script: String) {
+        viewModelScope.launch {
+            _ui.update { it.copy(isRunning = true, error = null, output = "") }
+            val result = withContext(Dispatchers.Default) { repo.exec(script) }
+            _ui.update {
+                it.copy(
+                    isRunning = false,
+                    output = result,
+                    error = if (result.contains("not bound") || result.contains("not initialized"))
+                        "Lua engine not enabled — see LuaRepository setup" else null
+                )
+            }
+        }
+    }
+
+    fun clearOutput() {
+        _ui.update { it.copy(output = "", error = null) }
+    }
+}
+
+```
+
+`app/src/main/java/com/sephile/app/viewmodel/ProcessListViewModel.kt`:
+
+```kt
+package com.sephile.app.viewmodel
+
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.sephile.app.model.ProcessInfo
+import com.sephile.app.repository.ProcessRepository
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+
+class ProcessListViewModel(private val repo: ProcessRepository) : ViewModel() {
+
+    val processes: StateFlow<List<ProcessInfo>> =
+        repo.observeProcesses().stateIn(viewModelScope, replay = 0)
+
+    fun refresh() {
+        viewModelScope.launch {
+            // flow auto-emits; this is a placeholder for manual refresh triggers
+        }
+    }
+
+    fun selectProcess(process: ProcessInfo) {
+        viewModelScope.launch {
+            _selectedProcess.value = process
+        }
+    }
+
+    private val _selectedProcess = androidx.lifecycle.MutableStateFlow<ProcessInfo?>(null)
+    val selectedProcess: StateFlow<ProcessInfo?> = _selectedProcess.asStateFlow()
+}
+
+```
+
+`app/src/main/java/com/sephile/app/viewmodel/ScannerViewModel.kt`:
+
+```kt
+package com.sephile.app.viewmodel
+
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.sephile.app.model.SearchType
+import com.sephile.app.model.ValueType
+import com.sephile.app.repository.MemoryRepository
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.Dispatchers
+
+data class ScannerUiState(
+    val attached: Boolean = false,
+    val targetPid: Int = -1,
+    val targetName: String = "",
+    val candidateCount: Int = 0,
+    val isScanning: Boolean = false,
+    val lastResult: String = "",
+    val error: String? = null
+)
+
+class ScannerViewModel(private val repo: MemoryRepository) : ViewModel() {
+
+    private val _ui = MutableStateFlow(ScannerUiState())
+    val ui: StateFlow<ScannerUiState> = _ui.stateIn(viewModelScope, replay = 1)
+
+    fun attachToProcess(pid: Int, name: String) {
+        viewModelScope.launch {
+            _ui.update { it.copy(error = null, isScanning = true) }
+            val ok = withContext(Dispatchers.Default) { repo.attach(pid) }
+            _ui.update {
+                it.copy(
+                    attached = ok,
+                    targetPid = if (ok) pid else -1,
+                    targetName = name,
+                    isScanning = false,
+                    error = if (ok) null else "Attach failed. Root required?"
+                )
+            }
+        }
+    }
+
+    fun detach() {
+        viewModelScope.launch {
+            repo.detach()
+            _ui.update { it.copy(attached = false, targetPid = -1, candidateCount = 0) }
+        }
+    }
+
+    fun firstScan(
+        type: ValueType, searchType: SearchType,
+        targetValue: Long, targetValueF: Double, fuzzyDelta: Long, onlyWritable: Boolean
+    ) {
+        val pid = _ui.value.targetPid
+        if (pid == -1) {
+            _ui.update { it.copy(error = "Select a process first") }
+            return
+        }
+        viewModelScope.launch {
+            _ui.update { it.copy(isScanning = true, error = null) }
+            val count = withContext(Dispatchers.Default) {
+                repo.firstScan(pid, type, searchType, targetValue, targetValueF, fuzzyDelta, onlyWritable)
+            }
+            _ui.update {
+                it.copy(
+                    isScanning = false,
+                    candidateCount = repo.candidateCount(),
+                    lastResult = "First scan: $count candidates"
+                )
+            }
+        }
+    }
+
+    fun nextScan(
+        type: ValueType, searchType: SearchType,
+        targetValue: Long, targetValueF: Double, fuzzyDelta: Long, onlyWritable: Boolean
+    ) {
+        viewModelScope.launch {
+            _ui.update { it.copy(isScanning = true, error = null) }
+            val count = withContext(Dispatchers.Default) {
+                repo.nextScan(type, searchType, targetValue, targetValueF, fuzzyDelta, onlyWritable)
+            }
+            _ui.update {
+                it.copy(
+                    isScanning = false,
+                    candidateCount = repo.candidateCount(),
+                    lastResult = "Next scan: $count candidates"
+                )
+            }
+        }
+    }
+
+    fun editCandidate(index: Int, type: ValueType, intVal: Long, floatVal: Double) {
+        val address = repo.candidateAddress(index)
+        if (address == 0L) return
+        viewModelScope.launch {
+            val ok = withContext(Dispatchers.Default) {
+                repo.editValue(address, type, intVal, floatVal)
+            }
+            _ui.update {
+                it.copy(lastResult = if (ok) "Edited 0x${address.toString(16)}" else "Edit failed")
+            }
+        }
+    }
+
+    fun toggleFreeze(index: Int, enabled: Boolean, value: String) {
+        val address = repo.candidateAddress(index)
+        if (address == 0L) return
+        repo.freeze(address, enabled, value)
+        _ui.update {
+            it.copy(lastResult = if (enabled) "Frozen 0x${address.toString(16)}" else "Unfrozen")
+        }
+    }
+
+    fun clearCandidates() {
+        _ui.update { it.copy(candidateCount = 0, lastResult = "Cleared") }
+    }
+}
+
+```
+
+`app/src/main/jni/CMakeLists.txt`:
+
+```txt
+cmake_minimum_required(VERSION 3.22.1)
+
+project("sephile-native")
+
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+# Optimize for size & speed on Android
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -ffast-math -funroll-loops")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3")
+
+# Locate Android NDK libraries
+find_library(log-lib log)
+find_library(android-lib android)
+
+include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+
+# Native shared library: libsephile_jni.so
+add_library(sephile_jni SHARED
+    ProcessMemory.cpp
+    MemoryScanner.cpp
+    native_bridge.cpp
+)
+
+target_link_libraries(sephile_jni
+    ${log-lib}
+    ${android-lib}
+    c++_shared
+)
+
+# Set output name & visibility
+set_target_properties(sephile_jni PROPERTIES
+    PREFIX "lib"
+    POSITION_INDEPENDENT_CODE ON
+)
+
+```
+
+`app/src/main/jni/MemoryScanner.cpp`:
+
+```cpp
+#include "MemoryScanner.h"
+
+#include <algorithm>
+#include <cmath>
+#include <cstring>
+#include <sstream>
+
+namespace sephile {
+
+MemoryScanner::MemoryScanner() = default;
+MemoryScanner::~MemoryScanner() { detach(); }
+
+bool MemoryScanner::attach(pid_t pid) {
+    pid_ = pid;
+    return mem_.attach(pid);
+}
+void MemoryScanner::detach() {
+    mem_.detach();
+    pid_ = -1;
+}
+bool MemoryScanner::isAttached() const { return mem_.isAttached(); }
+
+void MemoryScanner::clearCandidates() { candidates_.clear(); }
+
+std::string MemoryScanner::bytesToHex(const uint8_t* data, size_t len) const {
+    static const char* hex = "0123456789ABCDEF";
+    std::string out;
+    out.reserve(len * 2);
+    for (size_t i = 0; i < len; ++i) {
+        out.push_back(hex[(data[i] >> 4) & 0xF]);
+        out.push_back(hex[data[i] & 0xF]);
+    }
+    return out;
+}
+
+bool MemoryScanner::readCandidateBytes(const ScanCandidate& c, std::vector<uint8_t>& out) const {
+    size_t typeSize = 1;
+    switch (c.type) {
+        case ValueType::Byte:   typeSize = 1; break;
+        case ValueType::Short:  typeSize = 2; break;
+        case ValueType::Dword:
+        case ValueType::Float:  typeSize = 4; break;
+        case ValueType::Qword:
+        case ValueType::Double: typeSize = 8; break;
+        default: typeSize = 4; break;
+    }
+    out.resize(typeSize);
+    return mem_.read(c.address, out.data(), typeSize) == typeSize;
+}
+
+bool MemoryScanner::matches(const std::vector<uint8_t>& curBytes, ValueType type,
+                            const ScanOptions& opts, bool isFirst) const {
+    if (curBytes.empty()) return false;
+
+    switch (type) {
+        case ValueType::Byte: {
+            int8_t cur; std::memcpy(&cur, curBytes.data(), 1);
+            int8_t target = static_cast<int8_t>(opts.targetValue);
+            if (opts.searchType == SearchType::Exact) return cur == target;
+            if (opts.searchType == SearchType::UnknownInitial) return true; // accept anything
+            if (opts.searchType == SearchType::Fuzzy) return std::abs(cur - target) >= opts.fuzzyDelta;
+            if (opts.searchType == SearchType::GreaterThan) return cur > target;
+            if (opts.searchType == SearchType::LessThan) return cur < target;
+            return false;
+        }
+        case ValueType::Short: {
+            int16_t cur; std::memcpy(&cur, curBytes.data(), 2);
+            int16_t target = static_cast<int16_t>(opts.targetValue);
+            if (opts.searchType == SearchType::Exact) return cur == target;
+            if (opts.searchType == SearchType::UnknownInitial) return true;
+            if (opts.searchType == SearchType::Fuzzy) return std::abs(cur - target) >= opts.fuzzyDelta;
+            if (opts.searchType == SearchType::GreaterThan) return cur > target;
+            if (opts.searchType == SearchType::LessThan) return cur < target;
+            return false;
+        }
+        case ValueType::Dword: {
+            int32_t cur; std::memcpy(&cur, curBytes.data(), 4);
+            int32_t target = static_cast<int32_t>(opts.targetValue);
+            if (opts.searchType == SearchType::Exact) return cur == target;
+            if (opts.searchType == SearchType::UnknownInitial) return true;
+            if (opts.searchType == SearchType::Fuzzy) return std::abs(cur - target) >= opts.fuzzyDelta;
+            if (opts.searchType == SearchType::GreaterThan) return cur > target;
+            if (opts.searchType == SearchType::LessThan) return cur < target;
+            return false;
+        }
+        case ValueType::Qword: {
+            int64_t cur; std::memcpy(&cur, curBytes.data(), 8);
+            int64_t target = opts.targetValue;
+            if (opts.searchType == SearchType::Exact) return cur == target;
+            if (opts.searchType == SearchType::UnknownInitial) return true;
+            if (opts.searchType == SearchType::Fuzzy) return std::abs(cur - target) >= opts.fuzzyDelta;
+            if (opts.searchType == SearchType::GreaterThan) return cur > target;
+            if (opts.searchType == SearchType::LessThan) return cur < target;
+            return false;
+        }
+        case ValueType::Float: {
+            float cur; std::memcpy(&cur, curBytes.data(), 4);
+            float target = static_cast<float>(opts.targetValueF);
+            if (opts.searchType == SearchType::Exact) return cur == target;
+            if (opts.searchType == SearchType::UnknownInitial) return true;
+            if (opts.searchType == SearchType::Fuzzy) return std::fabs(cur - target) >= static_cast<float>(opts.fuzzyDelta);
+            if (opts.searchType == SearchType::GreaterThan) return cur > target;
+            if (opts.searchType == SearchType::LessThan) return cur < target;
+            return false;
+        }
+        case ValueType::Double: {
+            double cur; std::memcpy(&cur, curBytes.data(), 8);
+            double target = opts.targetValueF;
+            if (opts.searchType == SearchType::Exact) return cur == target;
+            if (opts.searchType == SearchType::UnknownInitial) return true;
+            if (opts.searchType == SearchType::Fuzzy) return std::fabs(cur - target) >= opts.fuzzyDelta;
+            if (opts.searchType == SearchType::GreaterThan) return cur > target;
+            if (opts.searchType == SearchType::LessThan) return cur < target;
+            return false;
+        }
+        default:
+            return false;
+    }
+}
+
+int64_t MemoryScanner::scanRegion(const MemoryRegion& region, const ScanOptions& opts,
+                                   bool isFirst, ScanProgress progress) {
+    if (!region.readable) return 0;
+    if (opts.onlyWritable && !region.writable) return 0;
+
+    // Address filter
+    uintptr_t start = region.start;
+    uintptr_t end = region.end;
+    if (opts.regionStart > start) start = opts.regionStart;
+    if (opts.regionEnd < end) end = opts.regionEnd;
+    if (end <= start) return 0;
+
+    size_t typeSize = 1;
+    switch (opts.type) {
+        case ValueType::Byte: typeSize = 1; break;
+        case ValueType::Short: typeSize = 2; break;
+        case ValueType::Dword:
+        case ValueType::Float: typeSize = 4; break;
+        case ValueType::Qword:
+        case ValueType::Double: typeSize = 8; break;
+        default: typeSize = 4; break;
+    }
+
+    // Read region in chunks
+    const size_t chunk = 64 * 1024;
+    std::vector<uint8_t> buf(chunk);
+    int64_t found = 0;
+    int64_t scanned = 0;
+
+    for (uintptr_t off = start; off + typeSize <= end; off += typeSize) {
+        size_t toRead = typeSize;
+        // Reuse a small read; for simplicity read typeSize bytes per candidate addr.
+        // (Perf-conscious: refactor to chunked reads later.)
+        std::vector<uint8_t> tb(typeSize);
+        if (mem_.read(off, tb.data(), typeSize) != typeSize) continue;
+
+        scanned++;
+        if (matches(tb, opts.type, opts, isFirst)) {
+            ScanCandidate c;
+            c.address = off;
+            c.region = region;
+            c.type = opts.type;
+            c.hexDump = bytesToHex(tb.data(), typeSize);
+            candidates_.push_back(c);
+            found++;
+        }
+
+        if (progress && (scanned % 4096 == 0)) {
+            progress(scanned, found);
+        }
+    }
+
+    if (progress) progress(scanned, found);
+    return found;
+}
+
+int64_t MemoryScanner::firstScan(const ScanOptions& opts, ScanProgress progress) {
+    candidates_.clear();
+    pid_ = opts.targetPid;
+    if (!mem_.isAttached() || mem_.pid() != pid_) {
+        if (!mem_.attach(pid_)) return -1;
+    }
+
+    int64_t totalFound = 0;
+    auto regions = mem_.enumerateRegions();
+    for (const auto& r : regions) {
+        totalFound += scanRegion(r, opts, true, progress);
+    }
+    return totalFound;
+}
+
+int64_t MemoryScanner::nextScan(const ScanOptions& opts, ScanProgress progress) {
+    // Refine: re-read existing candidates and keep those that still match.
+    std::vector<ScanCandidate> next;
+    next.reserve(candidates_.size());
+    int64_t scanned = 0;
+
+    for (auto& c : candidates_) {
+        std::vector<uint8_t> tb;
+        if (!readCandidateBytes(c, tb)) continue;
+        scanned++;
+        if (matches(tb, c.type, opts, false)) {
+            c.hexDump = bytesToHex(tb.data(), tb.size());
+            next.push_back(std::move(c));
+        }
+        if (progress && (scanned % 256 == 0)) {
+            progress(scanned, static_cast<int64_t>(next.size()));
+        }
+    }
+    candidates_ = std::move(next);
+    if (progress) progress(scanned, static_cast<int64_t>(candidates_.size()));
+    return static_cast<int64_t>(candidates_.size());
+}
+
+bool MemoryScanner::editValue(uintptr_t address, ValueType type, int64_t intVal, double floatVal) {
+    if (!mem_.isAttached()) return false;
+
+    switch (type) {
+        case ValueType::Byte: {
+            int8_t v = static_cast<int8_t>(intVal);
+            return mem_.writeT(address, v);
+        }
+        case ValueType::Short: {
+            int16_t v = static_cast<int16_t>(intVal);
+            return mem_.writeT(address, v);
+        }
+        case ValueType::Dword: {
+            int32_t v = static_cast<int32_t>(intVal);
+            return mem_.writeT(address, v);
+        }
+        case ValueType::Qword: {
+            return mem_.writeT(address, intVal);
+        }
+        case ValueType::Float: {
+            float v = static_cast<float>(floatVal);
+            return mem_.writeT(address, v);
+        }
+        case ValueType::Double: {
+            return mem_.writeT(address, floatVal);
+        }
+        default:
+            return false;
+    }
+}
+
+void MemoryScanner::freeze(uintptr_t address, bool enabled, const std::string& value) {
+    for (auto& c : candidates_) {
+        if (c.address == address) {
+            c.frozen = enabled;
+            c.freezeValue = value;
+            break;
+        }
+    }
+}
+
+}  // namespace sephile
+
+```
+
+`app/src/main/jni/MemoryScanner.h`:
+
+```h
+#pragma once
+
+#include "ProcessMemory.h"
+
+#include <cstdint>
+#include <functional>
+#include <string>
+#include <vector>
+
+namespace sephile {
+
+enum class ValueType : int8_t {
+    Unknown = -1,
+    Byte = 0,        // 1 byte, signed
+    Short = 1,       // 2 bytes
+    Dword = 2,       // 4 bytes (int32)
+    Qword = 3,       // 8 bytes (int64)
+    Float = 4,       // 4 bytes IEEE754
+    Double = 5,      // 8 bytes IEEE754
+};
+
+enum class SearchType : int8_t {
+    Exact = 0,
+    UnknownInitial = 1,
+    Fuzzy = 2,       // value changed (used with "next")
+    GreaterThan = 3,
+    LessThan = 4,
+};
+
+// A single candidate result from scanning
+struct ScanCandidate {
+    uintptr_t address = 0;
+    MemoryRegion region;
+    ValueType type = ValueType::Unknown;
+    std::string hexDump;     // hex representation of current bytes
+    bool frozen = false;
+    std::string freezeValue; // value to repeatedly write when frozen
+};
+
+struct ScanOptions {
+    pid_t targetPid = -1;
+    ValueType type = ValueType::Dword;
+    SearchType searchType = SearchType::Exact;
+    int64_t targetValue = 0;          // exact/int target
+    double targetValueF = 0.0;        // float/double target
+    uintptr_t regionStart = 0;        // optional start address filter
+    uintptr_t regionEnd = 0;          // optional end address filter
+    bool onlyWritable = true;
+    int64_t fuzzyDelta = 0;           // for fuzzy/changed searches
+};
+
+// Results callback: invoked as scanning progresses (streaming UI)
+using ScanProgress = std::function<void(int64_t scanned, int64_t found)>;
+
+class MemoryScanner {
+public:
+    MemoryScanner();
+    ~MemoryScanner();
+
+    // Attach to target process (root required). Returns true on success.
+    bool attach(pid_t pid);
+    void detach();
+    bool isAttached() const;
+
+    // First scan: populate candidate list from scratch.
+    // Returns number of candidates found.
+    int64_t firstScan(const ScanOptions& opts, ScanProgress progress = nullptr);
+
+    // Next scan: refine existing candidates by re-reading their addresses.
+    int64_t nextScan(const ScanOptions& opts, ScanProgress progress = nullptr);
+
+    // Current candidates
+    const std::vector<ScanCandidate>& candidates() const { return candidates_; }
+    void clearCandidates();
+
+    // Edit a candidate's value at its address
+    bool editValue(uintptr_t address, ValueType type, int64_t intVal, double floatVal);
+
+    // Freeze / unfreeze a candidate (freeze = keep writing value)
+    void freeze(uintptr_t address, bool enabled, const std::string& value);
+
+    // Get the attached ProcessMemory for direct ops
+    ProcessMemory& memory() { return mem_; }
+
+private:
+    ProcessMemory mem_;
+    std::vector<ScanCandidate> candidates_;
+    pid_t pid_ = -1;
+
+    bool readCandidateBytes(const ScanCandidate& c, std::vector<uint8_t>& out) const;
+    bool matches(const std::vector<uint8_t>& curBytes, ValueType type,
+                 const ScanOptions& opts, bool isFirst) const;
+    int64_t scanRegion(const MemoryRegion& region, const ScanOptions& opts,
+                       bool isFirst, ScanProgress progress);
+    std::string bytesToHex(const uint8_t* data, size_t len) const;
+};
+
+}  // namespace sephile
+
+```
+
+`app/src/main/jni/ProcessMemory.cpp`:
+
+```cpp
+#include "ProcessMemory.h"
+
+#include <android/log.h>
+#include <cstdio>
+#include <cstring>
+#include <fstream>
+#include <sstream>
+#include <sys/ptrace.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <unistd.h>
+
+#define TAG "SephileNative"
+#define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, TAG, __VA_ARGS__)
+#define LOGI(...) __android_log_print(ANDROID_LOG_INFO, TAG, __VA_ARGS__)
+
+namespace sephile {
+
+ProcessMemory::~ProcessMemory() {
+    detach();
+}
+
+bool ProcessMemory::attach(pid_t pid) {
+    if (attached_ && pid_ == pid) {
+        return true;
+    }
+    if (attached_) {
+        detach();
+    }
+
+    // PTRACE_ATTACH stops the target and makes us its tracer. Requires root
+    // on modern Android (yama ptrace_scope + SELinux).
+    if (ptrace(PTRACE_ATTACH, pid, nullptr, nullptr) != 0) {
+        LOGE("PTRACE_ATTACH failed for pid %d (errno=%d). Root required.", pid, errno);
+        return false;
+    }
+
+    int status = 0;
+    if (waitpid(pid, &status, __WALL) < 0) {
+        LOGE("waitpid after ATTACH failed for pid %d", pid);
+        ptrace(PTRACE_DETACH, pid, nullptr, nullptr);
+        return false;
+    }
+
+    pid_ = pid;
+    attached_ = true;
+    LOGI("Attached to pid %d", pid);
+    return true;
+}
+
+void ProcessMemory::detach() {
+    if (!attached_) return;
+    ptrace(PTRACE_DETACH, pid_, nullptr, nullptr);
+    attached_ = false;
+    LOGI("Detached from pid %d", pid_);
+    pid_ = -1;
+}
+
+std::vector<MemoryRegion> ProcessMemory::enumerateRegions() const {
+    std::vector<MemoryRegion> regions;
+    if (!attached_) return regions;
+
+    std::ostringstream path;
+    path << "/proc/" << pid_ << "/maps";
+    std::ifstream maps(path.str());
+    if (!maps.is_open()) {
+        LOGE("Cannot open /proc/%d/maps", pid_);
+        return regions;
+    }
+
+    std::string line;
+    while (std::getline(maps, line)) {
+        MemoryRegion r;
+        unsigned long start, end, offset, major, minor;
+        char perms[5] = {0};
+        char pathname[4096] = {0};
+        int inode = 0;
+
+        int n = sscanf(line.c_str(), "%lx-%lx %4s %lx %x:%x %d %4095s",
+                       &start, &end, perms, &offset, &major, &minor, &inode, pathname);
+        if (n < 7) continue;
+
+        r.start = static_cast<uintptr_t>(start);
+        r.end = static_cast<uintptr_t>(end);
+        r.size = static_cast<size_t>(end - start);
+        r.offset = static_cast<uintptr_t>(offset);
+        r.major = major;
+        r.minor = minor;
+
+        r.readable = (perms[0] == 'r');
+        r.writable = (perms[1] == 'w');
+        r.executable = (perms[2] == 'x');
+
+        if (pathname[0] != '\0') {
+            r.pathname = pathname;
+        }
+
+        // Only keep readable regions (scannable). Writable ones are editable.
+        if (r.readable && r.size > 0) {
+            regions.push_back(r);
+        }
+    }
+    return regions;
+}
+
+long ProcessMemory::ptraceRead(pid_t pid, uintptr_t addr) {
+    errno = 0;
+    long val = ptrace(PTRACE_PEEKTEXT, pid, reinterpret_cast<void*>(addr), nullptr);
+    return val;
+}
+
+bool ProcessMemory::ptraceWrite(pid_t pid, uintptr_t addr, long data) {
+    errno = 0;
+    if (ptrace(PTRACE_POKETEXT, pid, reinterpret_cast<void*>(addr), reinterpret_cast<void*>(data)) != 0) {
+        return false;
+    }
+    return true;
+}
+
+size_t ProcessMemory::read(uintptr_t addr, void* buf, size_t len) const {
+    if (!attached_) return 0;
+    if (len == 0) return 0;
+
+    size_t total = 0;
+    uint8_t* dst = static_cast<uint8_t*>(buf);
+
+    // ptrace reads/writes one word (long) at a time. Align to word boundary.
+    const size_t word = sizeof(long);
+    uintptr_t cur = addr;
+
+    // Handle leading unaligned bytes
+    size_t lead = cur % word;
+    if (lead) {
+        long chunk = ptraceRead(pid_, cur - lead);
+        size_t copy = word - lead;
+        if (copy > len) copy = len;
+        std::memcpy(dst, reinterpret_cast<uint8_t*>(&chunk) + lead, copy);
+        dst += copy;
+        total += copy;
+        cur += copy;
+    }
+
+    // Aligned word-sized chunks
+    while (total + word <= len) {
+        long chunk = ptraceRead(pid_, cur);
+        std::memcpy(dst, &chunk, word);
+        dst += word;
+        total += word;
+        cur += word;
+    }
+
+    // Trailing bytes
+    if (total < len) {
+        long chunk = ptraceRead(pid_, cur);
+        size_t remaining = len - total;
+        std::memcpy(dst, &chunk, remaining);
+        total += remaining;
+    }
+
+    return total;
+}
+
+size_t ProcessMemory::write(uintptr_t addr, const void* buf, size_t len) const {
+    if (!attached_) return 0;
+    if (len == 0) return 0;
+
+    size_t total = 0;
+    const uint8_t* src = static_cast<const uint8_t*>(buf);
+    const size_t word = sizeof(long);
+    uintptr_t cur = addr;
+
+    // Leading unaligned bytes: read-modify-write the word
+    size_t lead = cur % word;
+    if (lead) {
+        long chunk = ptraceRead(pid_, cur - lead);
+        size_t copy = word - lead;
+        if (copy > len) copy = len;
+        std::memcpy(reinterpret_cast<uint8_t*>(&chunk) + lead, src, copy);
+        if (!ptraceWrite(pid_, cur - lead, chunk)) return total;
+        src += copy;
+        total += copy;
+        cur += copy;
+    }
+
+    // Aligned words
+    while (total + word <= len) {
+        long chunk;
+        std::memcpy(&chunk, src, word);
+        if (!ptraceWrite(pid_, cur, chunk)) return total;
+        src += word;
+        total += word;
+        cur += word;
+    }
+
+    // Trailing bytes
+    if (total < len) {
+        long chunk = ptraceRead(pid_, cur);
+        size_t remaining = len - total;
+        std::memcpy(&chunk, src, remaining);
+        if (!ptraceWrite(pid_, cur, chunk)) return total;
+        total += remaining;
+    }
+
+    return total;
+}
+
+}  // namespace sephile
+
+```
+
+`app/src/main/jni/ProcessMemory.h`:
+
+```h
+#pragma once
+
+#include <cstdint>
+#include <string>
+#include <vector>
+
+namespace sephile {
+
+// A single readable/writable memory region parsed from /proc/<pid>/maps
+struct MemoryRegion {
+    uintptr_t start = 0;
+    uintptr_t end = 0;
+    size_t size = 0;
+    bool readable = false;
+    bool writable = false;
+    bool executable = false;
+    std::string pathname;
+    uintptr_t offset = 0;
+    int major = 0;
+    int minor = 0;
+};
+
+// Low-level ptrace-based process memory reader/writer.
+// Designed to run on Android (ARM64/ARM/x86_64) and requires root (ptrace ATTACH).
+class ProcessMemory {
+public:
+    ProcessMemory() = default;
+    ~ProcessMemory();
+
+    // Attach to target process via ptrace (requires root). Call once before read/write.
+    bool attach(pid_t pid);
+    void detach();
+
+    bool isAttached() const { return attached_; }
+    pid_t pid() const { return pid_; }
+
+    // Enumerate all readable memory regions of the target from /proc/<pid>/maps.
+    std::vector<MemoryRegion> enumerateRegions() const;
+
+    // Read raw bytes from target memory. Returns number of bytes actually read.
+    size_t read(uintptr_t addr, void* buf, size_t len) const;
+
+    // Write raw bytes to target memory. Returns number of bytes actually written.
+    size_t write(uintptr_t addr, const void* buf, size_t len) const;
+
+    // Convenience typed reads
+    template <typename T>
+    bool readT(uintptr_t addr, T& out) const {
+        return read(addr, &out, sizeof(T)) == sizeof(T);
+    }
+
+    // Convenience typed writes
+    template <typename T>
+    bool writeT(uintptr_t addr, const T& val) const {
+        return write(addr, &val, sizeof(T)) == sizeof(T);
+    }
+
+private:
+    pid_t pid_ = -1;
+    bool attached_ = false;
+
+    // ptrace helpers
+    static long ptraceRead(pid_t pid, uintptr_t addr);
+    static bool ptraceWrite(pid_t pid, uintptr_t addr, long data);
+};
+
+}  // namespace sephile
+
+```
+
+`app/src/main/jni/native_bridge.cpp`:
+
+```cpp
+#include <jni.h>
+#include <string>
+#include <cstring>
+#include <cstdio>
+
+#include "ProcessMemory.h"
+#include "MemoryScanner.h"
+
+using namespace sephile;
+
+// We keep a single global scanner instance for simplicity.
+// A production app would use a per-session registry (jlong handles).
+static MemoryScanner* g_scanner = nullptr;
+
+extern "C" JNIEXPORT jlong JNICALL
+Java_com_sephile_app_root_NativeBridge_nativeInit(JNIEnv* env, jobject /*thiz*/) {
+    if (!g_scanner) g_scanner = new MemoryScanner();
+    return reinterpret_cast<jlong>(g_scanner);
+}
+
+extern "C" JNIEXPORT void JNICALL
+Java_com_sephile_app_root_NativeBridge_nativeDestroy(JNIEnv* env, jobject /*thiz*/, jlong handle) {
+    auto* s = reinterpret_cast<MemoryScanner*>(handle);
+    if (s) {
+        s->detach();
+        delete s;
+    }
+    if (g_scanner == s) g_scanner = nullptr;
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+Java_com_sephile_app_root_NativeBridge_nativeAttach(JNIEnv* env, jobject /*thiz*/, jlong handle, jint pid) {
+    auto* s = reinterpret_cast<MemoryScanner*>(handle);
+    if (!s) return JNI_FALSE;
+    return s->attach(static_cast<pid_t>(pid)) ? JNI_TRUE : JNI_FALSE;
+}
+
+extern "C" JNIEXPORT void JNICALL
+Java_com_sephile_app_root_NativeBridge_nativeDetach(JNIEnv* env, jobject /*thiz*/, jlong handle) {
+    auto* s = reinterpret_cast<MemoryScanner*>(handle);
+    if (s) s->detach();
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+Java_com_sephile_app_root_NativeBridge_nativeIsAttached(JNIEnv* env, jobject /*thiz*/, jlong handle) {
+    auto* s = reinterpret_cast<MemoryScanner*>(handle);
+    if (!s) return JNI_FALSE;
+    return s->isAttached() ? JNI_TRUE : JNI_FALSE;
+}
+
+extern "C" JNIEXPORT jlong JNICALL
+Java_com_sephile_app_root_NativeBridge_nativeFirstScan(JNIEnv* env, jobject /*thiz*/,
+                                                       jlong handle, jint pid, jint type,
+                                                       jint searchType, jlong targetValue,
+                                                       jdouble targetValueF, jlong fuzzyDelta,
+                                                       jboolean onlyWritable) {
+    auto* s = reinterpret_cast<MemoryScanner*>(handle);
+    if (!s) return -1;
+
+    ScanOptions opts;
+    opts.targetPid = pid;
+    opts.type = static_cast<ValueType>(type);
+    opts.searchType = static_cast<SearchType>(searchType);
+    opts.targetValue = targetValue;
+    opts.targetValueF = targetValueF;
+    opts.fuzzyDelta = fuzzyDelta;
+    opts.onlyWritable = onlyWritable == JNI_TRUE;
+
+    return s->firstScan(opts);
+}
+
+extern "C" JNIEXPORT jlong JNICALL
+Java_com_sephile_app_root_NativeBridge_nativeNextScan(JNIEnv* env, jobject /*thiz*/,
+                                                      jlong handle, jint type, jint searchType,
+                                                      jlong targetValue, jdouble targetValueF,
+                                                      jlong fuzzyDelta, jboolean onlyWritable) {
+    auto* s = reinterpret_cast<MemoryScanner*>(handle);
+    if (!s) return -1;
+
+    ScanOptions opts;
+    opts.targetPid = s->memory().pid();
+    opts.type = static_cast<ValueType>(type);
+    opts.searchType = static_cast<SearchType>(searchType);
+    opts.targetValue = targetValue;
+    opts.targetValueF = targetValueF;
+    opts.fuzzyDelta = fuzzyDelta;
+    opts.onlyWritable = onlyWritable == JNI_TRUE;
+
+    return s->nextScan(opts);
+}
+
+extern "C" JNIEXPORT jint JNICALL
+Java_com_sephile_app_root_NativeBridge_nativeCandidateCount(JNIEnv* env, jobject /*thiz*/, jlong handle) {
+    auto* s = reinterpret_cast<MemoryScanner*>(handle);
+    if (!s) return 0;
+    return static_cast<jint>(s->candidates().size());
+}
+
+extern "C" JNIEXPORT jlong JNICALL
+Java_com_sephile_app_root_NativeBridge_nativeCandidateAddress(JNIEnv* env, jobject /*thiz*/,
+                                                              jlong handle, jint index) {
+    auto* s = reinterpret_cast<MemoryScanner*>(handle);
+    if (!s) return 0;
+    const auto& c = s->candidates();
+    if (index < 0 || index >= static_cast<jint>(c.size())) return 0;
+    return static_cast<jlong>(c[static_cast<size_t>(index)].address);
+}
+
+extern "C" JNIEXPORT jstring JNICALL
+Java_com_sephile_app_root_NativeBridge_nativeCandidateHex(JNIEnv* env, jobject /*thiz*/,
+                                                          jlong handle, jint index) {
+    auto* s = reinterpret_cast<MemoryScanner*>(handle);
+    if (!s) return env->NewStringUTF("");
+    const auto& c = s->candidates();
+    if (index < 0 || index >= static_cast<jint>(c.size())) return env->NewStringUTF("");
+    return env->NewStringUTF(c[static_cast<size_t>(index)].hexDump.c_str());
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+Java_com_sephile_app_root_NativeBridge_nativeEditValue(JNIEnv* env, jobject /*thiz*/,
+                                                       jlong handle, jlong address, jint type,
+                                                       jlong intVal, jdouble floatVal) {
+    auto* s = reinterpret_cast<MemoryScanner*>(handle);
+    if (!s) return JNI_FALSE;
+    return s->editValue(static_cast<uintptr_t>(address),
+                        static_cast<ValueType>(type),
+                        intVal, floatVal) ? JNI_TRUE : JNI_FALSE;
+}
+
+extern "C" JNIEXPORT void JNICALL
+Java_com_sephile_app_root_NativeBridge_nativeFreeze(JNIEnv* env, jobject /*thiz*/,
+                                                    jlong handle, jlong address, jboolean enabled,
+                                                    jstring value) {
+    auto* s = reinterpret_cast<MemoryScanner*>(handle);
+    if (!s || !value) return;
+    const char* cstr = env->GetStringUTFChars(value, nullptr);
+    std::string val(cstr ? cstr : "");
+    if (cstr) env->ReleaseStringUTFChars(value, cstr);
+    s->freeze(static_cast<uintptr_t>(address), enabled == JNI_TRUE, val);
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+Java_com_sephile_app_root_NativeBridge_nativeHasRoot(JNIEnv* env, jobject /*thiz*/) {
+    // Simple root probe: try running "id" via su. Real check happens in Kotlin RootManager.
+    FILE* f = popen("su -c id 2>/dev/null", "r");
+    if (!f) return JNI_FALSE;
+    char buf[128];
+    bool ok = false;
+    if (fgets(buf, sizeof(buf), f)) {
+        ok = std::strstr(buf, "uid=0") != nullptr;
+    }
+    pclose(f);
+    return ok ? JNI_TRUE : JNI_FALSE;
+}
+
+// -------- Lua scripting bindings --------
+// NOTE: To enable real Lua 5.4, drop the lua-5.4 src tree into
+// app/src/main/jni/lua/, add it to CMakeLists.txt, define SEPHILE_LUA_ENABLED,
+// and replace these stubs with calls into luaL_loadstring/lua_pcall.
+extern "C" JNIEXPORT jboolean JNICALL
+Java_com_sephile_app_root_NativeBridge_nativeLuaLoad(JNIEnv* /*env*/, jobject /*thiz*/) {
+    // Stub: real implementation would luaL_newstate() here and store it.
+    return JNI_FALSE;
+}
+
+extern "C" JNIEXPORT jstring JNICALL
+Java_com_sephile_app_root_NativeBridge_nativeLuaExec(JNIEnv* env, jobject /*thiz*/, jstring script) {
+    const char* s = env->GetStringUTFChars(script, nullptr);
+    std::string out = std::string("Lua engine not bound yet. ")
+        + "Add lua-5.4 source under app/src/main/jni/lua/ and implement "
+        + "nativeLuaLoad/nativeLuaExec/nativeLuaBindApi in native_bridge.cpp.\n"
+        + "Script received (" + std::to_string(std::strlen(s)) + " bytes): "
+        + std::string(s);
+    env->ReleaseStringUTFChars(script, s);
+    return env->NewStringUTF(out.c_str());
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+Java_com_sephile_app_root_NativeBridge_nativeLuaBindApi(JNIEnv* /*env*/, jobject /*thiz*/) {
+    // Stub: would expose sephile.{scan, edit, freeze, attach, getCandidates} to Lua.
+    return JNI_FALSE;
+}
+
+// -------- Raw memory peek (for hex editor / live inspector) --------
+extern "C" JNIEXPORT jbyteArray JNICALL
+Java_com_sephile_app_root_NativeBridge_nativePeekMemory(JNIEnv* env, jobject /*thiz*/,
+                                                        jlong handle, jlong address, jint length) {
+    auto* s = reinterpret_cast<MemoryScanner*>(handle);
+    if (!s || length <= 0) return env->NewByteArray(0);
+    jbyteArray out = env->NewByteArray(length);
+    if (out == nullptr) return nullptr;
+    std::vector<uint8_t> buf(length);
+    size_t got = s->memory().read(static_cast<uintptr_t>(address), buf.data(), length);
+    if (got == 0) return env->NewByteArray(0);
+    env->SetByteArrayRegion(out, 0, static_cast<jint>(got),
+                            reinterpret_cast<const jbyte*>(buf.data()));
+    return out;
+}
+
+```
+
+`app/src/main/res/drawable/splash_background.xml`:
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@color/sephile_dark" />
+    <item>
+        <bitmap
+            android:gravity="center"
+            android:src="@mipmap/ic_launcher" />
+    </item>
+</layer-list>
+
+```
+
+`app/src/main/res/menu/main_menu.xml`:
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/action_refresh"
+        android:icon="@android:drawable/ic_popup_sync"
+        android:title="@string/process_refresh"
+        android:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/action_settings"
+        android:icon="@android:drawable/ic_menu_preferences"
+        android:title="@string/screen_settings" />
+</menu>
+
+```
+
+`app/src/main/res/mipmap-hdpi/ic_launcher.xml`:
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="oval">
+    <solid android:color="#7CFC00" />
+    <size android:width="48dp" android:height="48dp" />
+</shape>
+
+```
+
+`app/src/main/res/mipmap-hdpi/ic_launcher_round.xml`:
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="oval">
+    <solid android:color="#7CFC00" />
+    <size android:width="48dp" android:height="48dp" />
+</shape>
+
+```
+
+`app/src/main/res/mipmap-mdpi/ic_launcher.xml`:
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="oval">
+    <solid android:color="#7CFC00" />
+    <size android:width="48dp" android:height="48dp" />
+</shape>
+
+```
+
+`app/src/main/res/mipmap-mdpi/ic_launcher_round.xml`:
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="oval">
+    <solid android:color="#7CFC00" />
+    <size android:width="48dp" android:height="48dp" />
+</shape>
+
+```
+
+`app/src/main/res/mipmap-xhdpi/ic_launcher.xml`:
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="oval">
+    <solid android:color="#7CFC00" />
+    <size android:width="48dp" android:height="48dp" />
+</shape>
+
+```
+
+`app/src/main/res/mipmap-xhdpi/ic_launcher_round.xml`:
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="oval">
+    <solid android:color="#7CFC00" />
+    <size android:width="48dp" android:height="48dp" />
+</shape>
+
+```
+
+`app/src/main/res/mipmap-xxhdpi/ic_launcher.xml`:
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="oval">
+    <solid android:color="#7CFC00" />
+    <size android:width="48dp" android:height="48dp" />
+</shape>
+
+```
+
+`app/src/main/res/mipmap-xxhdpi/ic_launcher_round.xml`:
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="oval">
+    <solid android:color="#7CFC00" />
+    <size android:width="48dp" android:height="48dp" />
+</shape>
+
+```
+
+`app/src/main/res/mipmap-xxxhdpi/ic_launcher.xml`:
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="oval">
+    <solid android:color="#7CFC00" />
+    <size android:width="48dp" android:height="48dp" />
+</shape>
+
+```
+
+`app/src/main/res/mipmap-xxxhdpi/ic_launcher_round.xml`:
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="oval">
+    <solid android:color="#7CFC00" />
+    <size android:width="48dp" android:height="48dp" />
+</shape>
+
+```
+
+`app/src/main/res/values/colors.xml`:
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="sephile_dark">#0B0E14</color>
+    <color name="sephile_surface">#121826</color>
+    <color name="sephile_accent">#7CFC00</color>
+    <color name="sephile_accent_dim">#3EA700</color>
+    <color name="sephile_error">#FF5555</color>
+    <color name="sephile_warning">#FFB86C</color>
+    <color name="sephile_success">#50FA7B</color>
+    <color name="sephile_on_surface">#E6E6E6</color>
+    <color name="sephile_on_surface_variant">#9AA0A6</color>
+</resources>
+
+```
+
+`app/src/main/res/values/night/colors.xml`:
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="sephile_dark">#0A0D15</color>
+    <color name="sephile_surface">#141A28</color>
+    <color name="sephile_accent">#7CFC00</color>
+    <color name="sephile_accent_dim">#2E5E00</color>
+    <color name="sephile_error">#FF5555</color>
+    <color name="sephile_warning">#FFB86C</color>
+    <color name="sephile_success">#50FA7B</color>
+    <color name="sephile_on_surface">#E6E6E6</color>
+    <color name="sephile_on_surface_variant">#8A9096</color>
+</resources>
+
+```
+
+`app/src/main/res/values/strings.xml`:
+
+```xml
+<resources>
+    <string name="app_name">Sephile</string>
+    <string name="sephile_tagline">Runtime analysis · Memory editor · Root tools</string>
+
+    <!-- Process list -->
+    <string name="screen_processes">Processes</string>
+    <string name="process_list_empty">No processes found</string>
+    <string name="process_attach">Attach</string>
+    <string name="process_detach">Detach</string>
+    <string name="process_root_required">Root required to attach</string>
+    <string name="process_refresh">Refresh</string>
+
+    <!-- Scanner -->
+    <string name="screen_scanner">Scanner</string>
+    <string name="scanner_target">Target: %s (PID %d)</string>
+    <string name="scanner_not_attached">Not attached to any process</string>
+    <string name="scanner_value_type">Value type</string>
+    <string name="scanner_search_type">Search type</string>
+    <string name="scanner_target_value">Target value</string>
+    <string name="scanner_fuzzy_delta">Fuzzy delta</string>
+    <string name="scanner_only_writable">Writable regions only</string>
+    <string name="scanner_first_scan">First scan</string>
+    <string name="scanner_next_scan">Next scan</string>
+    <string name="scanner_clear">Clear</string>
+    <string name="scanner_edit">Edit</string>
+    <string name="scanner_freeze">Freeze</string>
+    <string name="scanner_unfreeze">Unfreeze</string>
+    <string name="scanner_candidates_found">%d candidate(s)</string>
+    <string name="scanner_scanning">Scanning…</string>
+    <string name="scanner_done">Done</string>
+
+    <!-- Root -->
+    <string name="root_available">Root detected</string>
+    <string name="root_unavailable">Root not available</string>
+    <string name="root_attach_fail">Attach failed — root required</string>
+
+    <!-- Settings -->
+    <string name="screen_settings">Settings</string>
+    <string name="setting_theme">Theme</string>
+    <string name="theme_light">Light</string>
+    <string name="theme_dark">Dark</string>
+    <string name="theme_system">System</string>
+</resources>
+
+```
+
+`app/src/main/res/values/themes.xml`:
+
+```xml
+<resources>
+    <style name="Theme.Sephile" parent="android:Theme.DeviceDefault.NoActionBar">
+        <item name="android:windowBackground">@color/sephile_dark</item>
+    </style>
+
+    <style name="Theme.Sephile.Splash" parent="Theme.Sephile">
+        <item name="android:windowBackground">@drawable/splash_background</item>
+    </style>
+</resources>
+
+```
+
+`app/src/main/res/xml/file_paths.xml`:
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<files-paths>
+    <files-path name="sephile_files" path="." />
+    <cache-path name="sephile_cache" path="." />
+    <external-cache-path name="sephile_external_cache" path="." />
+</files-paths>
+
+```
+
+`build.gradle.kts`:
+
+```kts
+buildscript {
+    dependencies {
+        classpath("com.android.tools.build:gradle:8.5.0")
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:2.0.20")
+        classpath("org.jetbrains.kotlin:kotlin-compose-compiler-plugin:2.0.20")
+    }
+}
+
+plugins {
+    alias(libs.plugins.android.application) apply false
+    alias(libs.plugins.kotlin.android) apply false
+}
+
+```
+
+`gradle.properties`:
+
+```properties
+android.useAndroidX=true
+android.enableJetifier=true
+org.gradle.jvmargs=-Xmx2048m -XX:MaxMetaspaceSize=512m
+
+```
+
+`gradle/libs.versions.toml`:
+
+```toml
+[versions]
+agp = "8.5.0"
+kotlin = "2.0.20"
+compose-bom = "2024.10.00"
+compose-compiler = "1.6.10"
+core-ktx = "1.13.1"
+activity-compose = "1.9.0"
+lifecycle-runtime-ktx = "2.8.4"
+lifecycle-runtime-compose = "2.8.4"
+lifecycle-viewmodel-compose = "2.8.4"
+hilt-navigation-compose = "1.2.0"
+material3 = "1.3.0"
+concurrent = "1.1.0"
+okio = "3.8.1"
+kotlinx-coroutines = "1.10.1"
+coil-compose = "2.7.0"
+junit = "1.1.5"
+androidx-test-runner = "1.6.1"
+espresso-core = "3.6.1"
+compose-ui-tooling = "1.7.3"
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "agp" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+
+[bundles]
+compose-bom = ["compose-bom"]
+
+[libraries]
+compose-bom = { module = "androidx.compose:compose-bom", version.ref = "compose-bom" }
+androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activity-compose" }
+androidx-core-ktx = { module = "androidx.core:core-ktx", version.ref = "core-ktx" }
+androidx-lifecycle-runtime-ktx = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "lifecycle-runtime-ktx" }
+androidx-lifecycle-runtime-compose = { module = "androidx.lifecycle:lifecycle-runtime-compose", version.ref = "lifecycle-runtime-compose" }
+androidx-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycle-viewmodel-compose" }
+androidx-hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hilt-navigation-compose" }
+androidx-compose-ui-tooling = { module = "androidx.compose.ui:ui-tooling", version.ref = "compose-ui-tooling" }
+androidx-compose-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview", version.ref = "compose-ui-tooling" }
+androidx-material3 = { module = "androidx.compose.material3:material3", version.ref = "material3" }
+androidx-concurrent = { module = "androidx.concurrent:concurrent-futures", version.ref = "concurrent" }
+okio = { module = "square.okio:okio", version.ref = "okio" }
+kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "kotlinx-coroutines" }
+coil-compose = { module = "io.coil-kt.coil:coil-compose", version.ref = "coil-compose" }
+junit = { module = "junit:junit", version.ref = "junit" }
+androidx-test-runner = { module = "androidx.test:runner", version.ref = "androidx-test-runner" }
+androidx-espresso-core = { module = "androidx.test.espresso:espresso-core", version.ref = "espresso-core" }
+
+```
+
+`gradle/wrapper/gradle-wrapper.properties`:
+
+```properties
+distributionBase=GRADLE_USER_HOME
+distributionPath=wrapper/dists
+distributionUrl=https\://services.gradle.org/distributions/gradle-8.10-bin.zip
+zipStoreBase=GRADLE_USER_HOME
+zipStorePath=wrapper/dists
+
+```
+
+`gradlew`:
+
+```
+#!/usr/bin/env sh
+
+##############################################################################
+##
+##  Gradle start up script for UN*X
+##
+##############################################################################
+
+# Attempt to set APP_HOME
+# Resolve links: $0 may be a link
+PRG="$0"
+while [ -h "$PRG" ] ; do
+    ls=`ls -ld "$PRG"`
+    link=`expr "$ls" : '.*-> \(.*\)$'`
+    if expr "$link" : '/.*' > /dev/null; then
+        PRG="$link"
+    else
+        PRG=`dirname "$PRG"`"/$link"
+    fi
+done
+SAVED="`pwd`"
+cd "`dirname \"$PRG\"`/" >/dev/null
+APP_HOME="`pwd -P`"
+cd "$SAVED" >/dev/null
+
+APP_NAME="Gradle"
+APP_BASE_NAME=`basename "$0"`
+
+# Add default JVM options here. You can also use JAVA_OPTS and GRADLE_OPTS to pass JVM options to this script.
+DEFAULT_JVM_OPTS="-Xmx64m"
+
+# Use the maximum available, or set MAX_FD != -1 to use that value.
+MAX_FD="maximum"
+
+warn () {
+    echo "$*"
+}
+
+die () {
+    echo
+    echo "$*"
+    echo
+    exit 1
+}
+
+# OS specific support (must be 'true' or 'false').
+cygwin=false
+msys=false
+darwin=false
+nonstop=false
+case "`uname`" in
+  CYGWIN* )
+    cygwin=true
+    ;;
+  Darwin* )
+    darwin=true
+    ;;
+  MINGW* )
+    msys=true
+    ;;
+  NONSTOP* )
+    nonstop=true
+    ;;
+esac
+
+CLASSPATH=$APP_HOME/gradle/wrapper/gradle-wrapper.jar
+
+# Determine the Java command to use to start the JVM.
+if [ -n "$JAVA_HOME" ] ; then
+    if [ -x "$JAVA_HOME/jre/sh/java" ] ; then
+        # IBM's JDK on AIX uses strange locations for the executables
+        JAVACMD="$JAVA_HOME/jre/sh/java"
+    else
+        JAVACMD="$JAVA_HOME/bin/java"
+    fi
+    if [ ! -x "$JAVACMD" ] ; then
+        die "ERROR: JAVA_HOME is set to an invalid directory: $JAVA_HOME
+Please set the JAVA_HOME variable in your environment to match the
+location of your Java installation."
+    fi
+else
+    JAVACMD="java"
+    which java >/dev/null 2>&1 || die "ERROR: JAVA_HOME is not set and no 'java' command could be found in your PATH.
+Please set the JAVA_HOME variable in your environment to match the
+location of your Java installation."
+fi
+
+# Increase the maximum file descriptors if we can.
+if [ "$cygwin" = "false" -a "$darwin" = "false" ] ; then
+    MAX_FD_LIMIT=`ulimit -H -n`
+    if [ $? -eq 0 ] ; then
+        if [ "$MAX_FD" = "maximum" -o "$MAX_FD" = "max" ] ; then
+            MAX_FD="$MAX_FD_LIMIT"
+        fi
+        ulimit -n $MAX_FD 2>/dev/null ||
+            warn "Could not set maximum file descriptor limit: $ulimit"
+    else
+        warn "Could not query maximum file descriptor limit: $ulimit"
+    fi
+fi
+
+# For Darwin, add options to specify how the application appears in the dock
+if $darwin; then
+    GRADLE_OPTS="$GRADLE_OPTS \"-Xdock:name=$APP_NAME\" \"-Xdock:icon=$APP_HOME/media/gradle.icns\""
+fi
+
+# For Cygwin, switch paths to Windows format before running java
+if $cygwin ; then
+    APP_HOME=`cygpath --path --mixed "$APP_HOME"`
+    CLASSPATH=`cygpath --path --mixed "$CLASSPATH"`
+    JAVACMD=`cygpath --unix "$JAVACMD"`
+fi
+
+# Escape application args
+save () {
+    for i do printf %s\\n "$i" >> "$APP_HOME/.rawargs"; done
+    cp "$APP_HOME/.rawargs" "$APP_HOME/.rawargs.save"
+}
+rawargs=""
+for i in "$@"; do
+    case $i in
+        -*) rawargs="$rawargs \"$i\"" ;;
+        *)  rawargs="$rawargs \"$i\"" ;;
+    esac
+done
+
+# Split up the JVM_OPTS and GRADLE_OPTS values into an array
+eval set -- $DEFAULT_JVM_OPTS $JAVA_OPTS $GRADLE_OPTS "\"$rawargs\""
+
+exec "$JAVACMD" "$@"
+
+```
+
+`gradlew.bat`:
+
+```bat
+@rem
+@rem Copyright 2015 the original author or authors.
+@rem
+@rem Licensed under the Apache License, Version 2.0 (the "License");
+@rem you may not use this file except in compliance with the License.
+@rem You may obtain a copy of the License at
+@rem
+@rem      https://www.apache.org/licenses/LICENSE-2.0
+@rem
+@rem Unless required by applicable law or agreed to in writing, software
+@rem distributed under the License is distributed on an "AS IS" BASIS,
+@rem WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+@rem See the License for the specific language governing permissions and
+@rem limitations under the License.
+@rem
+
+@if "%DEBUG%"=="" @echo off
+@rem %DEBUG% cmd("echo *")
+@rem %DEBUG% cmd("echo")
+@rem %DEBUG% cmd("echo ...")
+
+setlocal EnableDelayedExpansion
+
+if NOT "%~f0"=="%~dp0" (
+    if exist "%~dp0%~nx0.bat" (
+        set "GRADLE_FILE=%~dp0%~nx0.bat"
+    ) else (
+        set "GRADLE_FILE=%~f0"
+    )
+) else (
+    set "GRADLE_FILE=%~f0"
+)
+
+set APP_HOME=%~dp0%
+
+set APP_NAME=Gradle
+set APP_BASE_NAME=%~n0
+
+set DEFAULT_JVM_OPTS="-Xmx64m"
+
+if not "%JAVA_HOME%"=="" goto findJavaFromJavaHome
+set JAVA_EXE=java.exe
+%JAVA_EXE% -version >NUL 2>&1
+if "%ERRORLEVEL%"=="0" goto init
+echo.
+echo ERROR: JAVA_HOME is not set and no 'java' command could be found in your PATH.
+echo.
+echo Please set the JAVA_HOME variable in your environment to match the
+echo location of your Java installation.
+goto fail
+
+:findJavaFromJavaHome
+set JAVA_HOME=%JAVA_HOME:"=%
+set JAVA_EXE=%JAVA_HOME%/bin/java.exe
+if exist "%JAVA_EXE%" goto init
+echo.
+echo ERROR: JAVA_HOME is set to an invalid directory: %JAVA_HOME%
+echo.
+echo Please set the JAVA_HOME variable in your environment to match the
+echo location of your Java installation.
+goto fail
+
+:init
+rem Get command-line arguments, handling Windowz variants
+if not "%OS%"=="Windows_NT" goto win9xME_args
+:win9xME_args
+rem Slurp the command line arguments.
+set CMD_LINE_ARGS=
+set _SKIP=2
+
+:win9xME_args_slurp
+if "x%~1"=="x" goto execute
+set CMD_LINE_ARGS=%*
+goto execute
+
+:execute
+rem Setup the command line
+set CLASSPATH=%APP_HOME%\gradle\wrapper\gradle-wrapper.jar
+
+rem Execute Gradle
+"%JAVA_EXE%" %DEFAULT_JVM_OPTS% %JAVA_OPTS% %GRADLE_OPTS% "-Dorg.gradle.appname=%APP_BASE_NAME%" -classpath "%CLASSPATH%" org.gradle.wrapper.GradleWrapperMain %CMD_LINE_ARGS%
+
+:end
+rem End local scope.
+endlocal & set ERRORLEVEL=%ERRORLEVEL%
+
+if %ERRORLEVEL% NEQ 0 goto fail
+
+goto end
+
+:fail
+rem Set variable GRADLE_EXIT_CONSOLE if you need the _script_ return code instead of
+rem the _cmd.exe /c_ return code.
+set EXIT_CODE=%ERRORLEVEL%
+if %EXIT_CODE% LEQ 0 set EXIT_CODE=1
+goto end
+
+:fail
+echo.
+echo ERROR: %EXIT_CODE%
+goto end
+
+```
+
+`settings.gradle.kts`:
+
+```kts
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        google()
+        mavenCentral()
+    }
+}
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+rootProject.name = "sephile"
+include(":app")
+
+```
