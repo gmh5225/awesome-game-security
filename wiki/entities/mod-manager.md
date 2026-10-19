@@ -10,7 +10,7 @@ confidence: medium
 
 # mod-manager
 
-**Axon** (B6sse/modManager) is a Windows **Star Wars Battlefront (2015)** mod manager (.NET Framework 4.8 WPF + Inno Setup) that applies only **SHA-256–verified, community-approved** `.fbmod` packages in memory at launch via bundled **Auric** loader DLL beside the game executable. The UI omits custom import/removal so organized competitive or private-server play can enforce a fixed mod allowlist—documented memory-loading pipeline with CI checks on public Auric builds. (source: wiki/sources/descriptions/B6sse__modManager.md)
+**Axon** (Basses Mod Manager; B6sse/modManager) is a Windows desktop mod manager for **Star Wars Battlefront (2015)**. Players pick from a **fixed, pre-installed** set of **SHA-256–verified, community-approved** mods; the manager writes **launch metadata** and starts the game so bundled **Auric** (loader DLL beside the executable) applies **Frosty-style `.fbmod`** packages **in memory at startup**—no on-disk game patches. Stack: **C# WPF** on **.NET Framework 4.8**, **Inno Setup** installer with bundled prerequisites. The UI deliberately omits custom import/removal so competitive or private-server organizers can enforce mod integrity; repo docs cover the memory-loading pipeline and **CI** gates that ship only public Auric builds—useful for studying **controlled client-side mod injection** and fair-play mod tooling. (source: wiki/sources/descriptions/B6sse__modManager.md)
 
 ## Links
 
@@ -18,4 +18,4 @@ confidence: medium
 
 ## Related
 
-[[overviews/anti-cheat]] · [[overviews/game-hacking]] · [[rearguard]] · [[dot-server-security]] · [[research-rigor]]
+[[overviews/anti-cheat]] · [[overviews/game-hacking]] · [[rearguard]] · [[rce-shield]] · [[dot-server-security]] · [[research-rigor]]

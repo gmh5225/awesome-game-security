@@ -1913,6 +1913,7 @@ sources:
   - wiki/sources/descriptions/byroweb__AC1_RE.md
   - wiki/sources/descriptions/mohasi__game-cheats.md
   - wiki/sources/descriptions/okiedocus__orress.md
+  - wiki/sources/descriptions/B6sse__modManager.md
 updated: 2026-10-19
 confidence: high
 ---
@@ -2119,6 +2120,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Cross-platform pure-Python memory scanner/editor [[pymemory-editor]] (JeanExtreme002; ctypes OS APIs; Windows/Linux/macOS; CE-style value/AOB scans, pointer chains, reverse pointer scan; optional NumPy acceleration; PySide6 Qt GUI + optional MCP server for AI-assisted scan/refine loops; game modding, RE, and game-security research; Cheat / Debugging) sits beside [[cheat-engine]], [[simple-memory-editor]], [[pointer-lab]], and [[mhsx]] as a cross-platform Python alternative. (source: wiki/sources/descriptions/JeanExtreme002__PyMemoryEditor.md)
 - Cross-platform Rust unified static+dynamic RE pipeline [[n0xis]] (LargoScript; PE/ELF SSA decompilation + live value/AOB scan, pointer-path discovery, struct dissection, hooks, cheat tables; CLI + MCP JSON artifacts; Unity IL2CPP + Lua/LuaJIT; N0xHUD; agent-native game reversing beside [[cheat-engine]] GUI workflows) (source: wiki/sources/descriptions/LargoScript__n0xis.md)
 - Pure-Rust integrated RE workbench [[orress]] (okiedocus; PE/ELF/Mach-O/.NET/Java/DEX/Wasm; x86/x64/ARM64 disasm; Rust-syntax decompiler; native debug; x86-64 time-travel emulator + symbolic solve; YARA-X/sandbox triage; Rhai/extensions; ORRESS Academy crackmes incl. anti-debug; Cheat / RE Tools) (source: wiki/sources/descriptions/okiedocus__orress.md)
+- Battlefront (2015) approved-mod launcher [[mod-manager]] (B6sse; Axon C# WPF manager + Auric loader DLL; SHA-256 `.fbmod` allowlist applied in memory at startup via launch metadata; no unauthorized import—controlled client-side mod injection for fair-play/private-server integrity study; Anti Cheat / Open Source Anti Cheat System) (source: wiki/sources/descriptions/B6sse__modManager.md)
 - JIT-intercept CIL method-body dumper [[jit-dumper]] (Anonym0ose; C# analysis app + C++ Detours hook component; symbol/PDB data; multi-generation .NET; metadata reconstruction for inspecting compiled managed methods; reverse engineering / software-protection analysis; README A CIL method body dumper) (source: wiki/sources/descriptions/Anonym0ose__JitDumper.md)
 - Headless .NET assembly MCP server [[dnspymcp]] (rabbanyhmm; C# .NET 8; dnlib + ICSharpCode.Decompiler; 31 tools for Unity/IL2CPP offset+RVA lookup, dump.cs bridging, cross-refs, IL patch, packet-handler/crypto/secret scans; stdio JSON-RPC for Cursor/Claude Code; agent-native managed RE beside [[dnspy]] GUI workflows) (source: wiki/sources/descriptions/rabbanyhmm__DnSpyMCP.md)
 - GUI .NET assembly patcher [[acepatcher]] (BataBo; C#; dnlib + Harmony; method-map patching, import/export patch sets, optional password protection; packed/obfuscated managed game binaries; repeatable patch automation beside [[dnspy]] / [[bepinex]] Harmony workflows) (source: wiki/sources/descriptions/BataBo__ACEPatcher.md)

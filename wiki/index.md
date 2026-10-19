@@ -2610,7 +2610,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [modded-voyager](entities/modded-voyager.md) — Voyager-style UEFI hypervisor loader (NurdAlert; Intel/AMD VM-exit handlers + GPA/GVA primitives; hooks bootmgfw/winload + Hyper-V paths pre-OS; boot-time virtualization / AC bypass research)
 - [modmap](entities/modmap.md) — kernel-assisted extend-manual-map DLL injector (MiAllocateVad + LDR SizeOfImage extension; blends with host module list; btbd; Extend Manual Map)
 - [modly](entities/modly.md) — local image→3D mesh desktop app (open-source GPU AI; TypeScript/Python; Windows/Linux; AI category)
-- [mod-manager](entities/mod-manager.md) — Battlefront (2015) SHA-256-verified approved-mod WPF launcher; in-memory Auric apply; no custom import (B6sse; Anti Cheat)
+- [mod-manager](entities/mod-manager.md) — Axon Battlefront (2015) C# WPF allowlist launcher; Frosty `.fbmod` in-memory Auric apply via launch metadata; no custom import; fair-play mod integrity (B6sse; Anti Cheat)
 - [modreveal](entities/modreveal.md) — find hidden Linux kernel modules (C; Detection:Hide; AC / rootkit RE)
 - [momentarius](entities/momentarius.md) — A12/A13 Apple PPL bypass via IOMobileFramebuffer GPU firmware (C; IOSurface physmem + kernel R/W; staturnzz and Clarity)
 - [mordhau-simple-auto-block-cheat](entities/mordhau-simple-auto-block-cheat.md) — Mordhau internal melee automation (Skengdo; C++; auto-block/auto-stab; large generated UE SDK; injected combat module; cheat / game:mordhau [Internal])
