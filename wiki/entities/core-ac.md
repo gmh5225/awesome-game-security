@@ -11,7 +11,25 @@ confidence: medium
 
 # Core_ac
 
-Modular **Windows x64 WDM kernel anti-cheat reference driver** (AmenHermano144; C; VS 2022 + WDK) aimed at competitive multiplayer games—not a production product. Uses Windows **CNG (BCrypt)** and a hardened usermode **IOCTL** channel sealed with per-session **AES-GCM**. Detection modules cover **BYOVD** and driver timestamp blacklists, kernel module inventory and executable-region scans, **PiDDBCache** and **MmUnloadedDrivers** tamper monitoring, PML4-based process watching, NMI watchdog and environment checks, and mouse/keyboard class input-path integrity. Defers heavy init from `DriverEntry`, applies strict device DACLs, and streams telemetry to a SYSTEM-level companion via an event ring buffer. (source: wiki/sources/descriptions/AmenHermano144__Anti-cheat-Kernel-Driver.md)
+Modular **Windows x64 WDM kernel anti-cheat reference driver** (AmenHermano144; C; Visual Studio 2022 + WDK) aimed at competitive multiplayer games—not a production product. Uses Windows **CNG (BCrypt)** and a hardened usermode **IOCTL** channel sealed with per-session **AES-GCM**. (source: wiki/sources/descriptions/AmenHermano144__Anti-cheat-Kernel-Driver.md)
+
+## Detection modules
+
+| Area | Mechanism |
+|------|-----------|
+| **BYOVD / drivers** | BYOVD and driver timestamp blacklists; kernel module inventory; executable-region scans |
+| **Load-artifact integrity** | **PiDDBCache** and **MmUnloadedDrivers** tamper monitoring (see [[byovd]]) |
+| **Process watch** | PML4-based process watching |
+| **Environment** | NMI watchdog and environment checks |
+| **Input path** | Mouse and keyboard class driver integrity |
+
+## Architecture
+
+Defers heavy initialization out of `DriverEntry`, applies strict device **DACLs** on the IOCTL device, and streams detection telemetry to a **SYSTEM**-level user-mode companion through an **event ring buffer**. Usermode comms rely on CNG (BCrypt) with per-session AES-GCM sealing on the IOCTL channel. (source: wiki/sources/descriptions/AmenHermano144__Anti-cheat-Kernel-Driver.md)
+
+## Audience
+
+Game security engineers and authorized anti-cheat researchers who want readable, verifiable kernel detection modules and a baseline for studying how modern kernel anti-cheats are structured.
 
 ## Positioning
 

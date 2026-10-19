@@ -690,7 +690,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [CoBRA](entities/cobra.md) — Trail of Bits MBA expression simplifier (C++; Cheat Mixed boolean-arithmetic)
 - [Cobra (web Snake)](entities/cobra-snake.md) — Next.js/React HTML5 Canvas Snake; LibSQL Top 10 leaderboard; HMAC game sessions, score plausibility, rate-limited silent forged-score rejection (aryribeiro; Anti Cheat / Anti-Cheat Programming)
 - [Cognitor](entities/cognitor.md) — Go Windows kernel driver static analysis (IDA/Ghidra exports; IOCTL/access-check/ALPC/COM rules; Patch Tuesday diff)
-- [Core_ac](entities/core-ac.md) — AmenHermano144; modular Windows x64 WDM kernel AC reference (BYOVD/blacklist scans, PiDDBCache/MmUnloadedDrivers tamper checks, AES-GCM IOCTL + event ring buffer; Open Source Anti Cheat System)
+- [Core_ac](entities/core-ac.md) — AmenHermano144; modular Windows x64 WDM kernel AC reference (BYOVD/blacklist scans, PiDDBCache/MmUnloadedDrivers tamper watch, PML4 process watch, NMI/input-path checks; AES-GCM IOCTL + event ring; VS 2022/WDK; Open Source Anti Cheat System)
 - [COD-boiii](entities/cod-boiii.md) — BOIII client modification/research: patches, SDK structures, runtime engine tooling (gmh5225; Reverse engineering and analysis)
 - [CoD_Hacks](entities/cod-hacks.md) — Call of Duty v1.5 educational hack collection: Desk.dll multi-hack, internal W2S ESP, OpenGL `glDrawElements` wallhack, syscall wallhack, pattern-scan trainer (attilathedud; cheat / game:cod)
 - [COD7-Tools](entities/cod7-tools.md) — COD7 (Black Ops) research tooling (VcPkg; cheat / game:cod7)
