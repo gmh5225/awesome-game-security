@@ -1161,6 +1161,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 
 > Fix OLLVM
 - https://github.com/w00tzenheimer/d810-ng [D-810ng (Next Generation) is an evolution of d810 to deobfuscate code at decompilation time]
+- https://github.com/woye969/Oo0l1IVvMm [Opt-in IDA Pro 9.x Hex-Rays plugin for OLLVM CFF deobfuscation (MIN/MAX modes) with D-810/unflat orchestration and chain-walking CFG recovery]
 - https://bbs.pediy.com/thread-272414.htm
 - https://github.com/obpo-project/obpo-plugin
 - https://github.com/IIIImmmyyy/AntiOllvm [AntiOllvm Fla with Fake Runtime]
@@ -4503,6 +4504,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/Rycooop/Bloom-Anticheat
 - https://github.com/Vasieco/Kernel-Anticheat [Kernel Anticheat]
 - https://github.com/PatchRequest/PeregrineAntiCheat [Educational Windows anti-cheat: kernel minifilter, ObCallbacks, APC injection, MinHook API hooks, ETW-TI, YARA, Tauri GUI, cheat test suite]
+- https://github.com/AmenHermano144/Anti-cheat-Kernel-Driver [Core_ac — modular Windows x64 kernel anti-cheat reference driver with detection modules, BYOVD scanning, and AES-GCM–sealed usermode IOCTL channel]
 - https://github.com/lauralex/OAC [Open Anti-Cheat: x64 Windows kernel driver plus user-mode scanner reference implementation with ObCallbacks handle filtering and cross-view integrity checks]
 - https://github.com/violetweather/Certael [Server-authoritative open-source anti-cheat framework with Godot/Unity/Unreal adapters]
 - https://github.com/lannden1245/Void-Engine [Godot 4.x plugin with WhiteVoid AntiCheat: debugger/process/window detection, honeypot integrity checks, and HWID ban enforcement]
