@@ -1,0 +1,3217 @@
+Project Path: arc_woye969_Oo0l1IVvMm_2hv1roks
+
+Source Tree:
+
+```txt
+arc_woye969_Oo0l1IVvMm_2hv1roks
+├── CHANGELOG.md
+├── CONTRIBUTING.md
+├── LICENSE
+├── Oo0l1IVvMm.py
+├── README.md
+├── docs
+│   ├── blog-ollvm-deobf.md
+│   ├── obfuscation-tutorial.md
+│   ├── plugin-ecosystem.md
+│   └── snapshot_collect.py
+├── install.ps1
+└── seagull_core.py
+
+```
+
+`CHANGELOG.md`:
+
+```md
+# Changelog
+
+## 1.1.0 - 2026-10-19
+
+- Runtime snapshot support: `resolve_chain(seeds=..., mem_overlay=...)` pins
+  concrete dispatch-key registers and overlays runtime-captured table memory.
+- New action `Oo0l1IVvMm: load runtime snapshot` (manifest + region bins).
+- `docs/snapshot_collect.py`: in-debugger collector for snapshot manifests.
+
+## 1.0.0 - 2026-10-19
+
+- Renamed plugin to **Oo0l1IVvMm**; file renamed to `Oo0l1IVvMm.py`.
+- Two modes with an opt-in chooser (plugin entry / menu / Ctrl+Shift+Alt+D):
+  - **MIN** - classic OLLVM flattening: materialization + jtbl lifting +
+    unflat valrange + D-810 instruction simplification (chain resolver off).
+  - **MAX** - encoded inline dispatch (`jmp reg` family): everything in MIN
+    plus the concrete chain resolver, microcode direct-edge/jz rewriting and
+    dead-dispatcher removal.
+- Disarmed by default: vanilla F5 speed, zero background work.
+
+## 0.9.0 - 2026-10-19
+
+- Manual arming model; capstone lookup generalized
+  (`SEAGULL_CAPSTONE_PATH` > `vendor/` > `sys.path`).
+
+## 0.8.0 - 2026-10-19
+
+- All-around orchestration: D-810 instruction-only profile (177 rules)
+  conflict-guarded against the flow engines; user profile selection restored.
+
+## 0.7.0 - 2026-10-18
+
+- Full dispatch-chain resolution (74/74 sites on the reference sample) with
+  two-phase microcode serial rewriting (fixes renumbering corruption),
+  fallthrough goto-blocks, jcc taken-edge retargeting, glbopt dead-chain
+  removal. GUI F5: 98390 -> 2965 chars, switch 175 -> 0, goto 131 -> 0.
+
+## 0.6.0 - 2026-10-18
+
+- Concrete chain walker (sticky single-writer stack slots + per-value split).
+
+## 0.5.x - 2026-10-18
+
+- Materialization + unflat integration + finite `ijmp -> jtbl` lifting.
+
+```
+
+`CONTRIBUTING.md`:
+
+```md
+# Contributing
+
+Thanks for your interest in improving Oo0l1IVvMm!
+
+## Development setup
+
+1. Copy `Oo0l1IVvMm.py` and `seagull_core.py` into your IDA plugins directory
+   (or run `install.ps1`).
+2. Make sure `capstone` is importable from IDA's Python
+   (set `SEAGULL_CAPSTONE_PATH` or place it under `plugins/vendor/capstone`).
+3. Restart IDA, then `Edit -> Plugins -> Oo0l1IVvMm` to pick a mode.
+
+## Testing
+
+There is no public sample shipped with the repo. Before submitting a change,
+please re-verify on your own flattened binary that:
+
+- disarmed mode: F5 output identical to vanilla Hex-Rays, plugin silent;
+- MIN mode: no crashes on non-flattened functions (regression safety);
+- MAX mode: previously-working samples keep resolving, no INTERR popups.
+
+## Code style
+
+- Pure `idaapi`/`ida_hexrays` public API only; guard anything version-specific.
+- Never patch process memory outside the debugger or fake control-flow edges:
+  every rewritten edge must come from a proven (concretely executed) state.
+- Keep `seagull_core.py` importable outside IDA (it must not import idaapi at
+  module level) so the analyzer stays testable standalone.
+
+## Reporting issues
+
+Include: IDA/Hex-Rays version, OS, the plugin's message-log lines
+(`[Oo0l1IVvMm] ...`), and - if possible - a **sanitized** description of the
+obfuscation shape (stub protocol, where the state/key live). Do not upload
+samples you are not allowed to share.
+
+```
+
+`LICENSE`:
+
+```
+MIT License
+
+Copyright (c) 2026 Seagull Deobfuscator contributors
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
+`Oo0l1IVvMm.py`:
+
+```py
+"""Oo0l1IVvMm - IDA Pro 7.4+ / 8.x / 9.x deobfuscation plugin
+
+Opt-in deobfuscation stack with two modes, both selected from
+Edit -> Plugins -> Oo0l1IVvMm (or its menu actions); nothing runs
+until a mode is picked, and F5 stays at native speed while disarmed:
+
+  MIN - classic OLLVM flattening (central dispatcher):
+        unflat valrange unflattener + D-810 instruction simplification,
+        plus materialization / jtbl lifting for truncated functions.
+  MAX - encoded inline dispatch (the `jmp reg` family):
+        everything in MIN plus the concrete dispatch-chain resolver,
+        microcode direct-edge / jz rewriting and dead dispatcher removal.
+
+After a mode is armed, plain F5 decompilation goes through the recovery
+chain. The scanner actions (scan current/all, recover encoded CFG targets)
+only annotate and report; they never patch bytes.
+
+Hotkey: Ctrl+Shift+Alt+D (opens the mode chooser)
+"""
+
+from __future__ import print_function
+
+import json
+import os
+import re
+import traceback
+from collections import Counter, defaultdict
+
+import idaapi
+import ida_auto
+import ida_bytes
+import ida_funcs
+import ida_hexrays
+import ida_kernwin
+import ida_segment
+import ida_ua
+import ida_xref
+import idautils
+import idc
+
+
+PLUGIN_NAME = "Oo0l1IVvMm"
+PLUGIN_VERSION = "1.1.0"
+COMMENT_TAG = "[SEAGULL-DEOB]"
+_MICROCODE_UNFLAT = None
+_UNFLAT_ACTIVE = False
+_D810_STATE = None
+_HEX_HOOK = None
+_HEX_ANALYSIS = {}
+_UI_HOOK = None
+_UI_TIMER = None
+_REWIRED_ENTRIES = set()
+_ARMED = False
+_MODE = None   # None | 'min' (classic OLLVM) | 'max' (encoded jmp-reg dispatch)
+
+
+def _is_unflat_active():
+    """Detect our hook even if IDA loaded a second module instance."""
+    if _UNFLAT_ACTIVE:
+        return True
+    try:
+        import unflat.new_unflattener as unflat
+        return getattr(unflat, "hook_instance", None) is not None
+    except Exception:
+        return False
+
+
+def _analysis_for_entry(entry_ea):
+    """Build the bounded abstract state graph used by the F5 microcode hook."""
+    entry_ea = int(entry_ea)
+    cached = _HEX_ANALYSIS.get(entry_ea)
+    if cached is not None:
+        return cached
+    try:
+        import seagull_core
+        Analyzer = seagull_core.Analyzer
+        if not seagull_core.CAPSTONE_AVAILABLE:
+            raise RuntimeError("Capstone decoder unavailable: %s" % seagull_core._CAPSTONE_ERROR)
+        func = ida_funcs.get_func(entry_ea)
+        if not func:
+            return None
+        seg = ida_segment.getseg(entry_ea)
+        # Flattened functions are usually truncated by IDA at their first
+        # encoded jump. Bound the exploration to the executable segment, while
+        # the analyzer itself follows calls only as invalidating operations.
+        end = int(seg.end_ea) if seg and (seg.perm & idaapi.SEGPERM_EXEC) else int(func.end_ea)
+        if end <= entry_ea or end - entry_ea > 0x200000:
+            end = int(func.end_ea)
+        result = Analyzer(ida_bytes.get_bytes, entry_ea, end).run()
+        # Resolve the real next block for every state-update site that feeds
+        # a compare-and-table dispatch chain. This is what plain
+        # valrange-based unflatteners cannot recover when the state base is
+        # kept in a stack slot: the resolver re-executes the chain once per
+        # site with that site's concrete state values.
+        try:
+            if _MODE == "max" and any(v for v in result.edges.values()):
+                resolution = seagull_core.resolve_chain(
+                    ida_bytes.get_bytes, entry_ea, end,
+                    seeds=_SNAPSHOT_SEEDS.get(entry_ea),
+                    mem_overlay=_SNAPSHOT_MEM.get(entry_ea))
+                if resolution is not None:
+                    result.chain_rewires = resolution.rewires
+                    result.chain_head = resolution.chain_head
+                    result.chain_state_reg = resolution.state_reg
+                    result.chain_key_reg = resolution.key_reg
+                    result.chain_site_kinds = resolution.site_kinds
+                    singles = sum(1 for p in resolution.rewires.values() if len(p) == 1)
+                    print("[%s] chain resolver: %d sites (%d direct, %d conditional splits; state=%s key=%s head=0x%X)" %
+                          (PLUGIN_NAME, len(resolution.rewires), singles,
+                           len(resolution.rewires) - singles,
+                           resolution.state_reg, resolution.key_reg,
+                           resolution.chain_head))
+        except Exception:
+            print("[%s] chain resolver failed\n%s" % (PLUGIN_NAME, traceback.format_exc()))
+        # Materialize only the recursively decoded instruction heads. This
+        # gives Hex-Rays a block boundary for every recovered destination and
+        # avoids linear-sweeping junk bytes. If IDA truncated the function at
+        # the first ijmp, rebuild that one bounded function around the decoded
+        # region; callers and neighboring functions remain untouched outside
+        # the recovered range.
+        try:
+            for address in sorted(result.insns):
+                ida_ua.create_insn(int(address))
+            max_state = max(result.states) if result.states else entry_ea
+            if max_state >= int(func.end_ea) and max_state + 1 <= end:
+                for other in list(idautils.Functions(entry_ea, max_state + 1)):
+                    if other == entry_ea or int(ida_funcs.get_func(other).end_ea) <= max_state + 1:
+                        old_func = ida_funcs.get_func(other)
+                        old_start = int(old_func.start_ea)
+                        old_end = int(old_func.end_ea)
+                        ida_funcs.del_func(other)
+                        # Junk calls can make IDA create an overlapping fake
+                        # function (e.g. in the middle of a conditional jump).
+                        # Remove only that function's simple item heads so the
+                        # recursively decoded instruction can be recreated.
+                        if old_start != entry_ea:
+                            cursor = old_start
+                            while cursor < old_end:
+                                head = ida_bytes.get_item_head(cursor)
+                                if head == idaapi.BADADDR:
+                                    cursor += 1
+                                else:
+                                    size = max(1, int(ida_bytes.get_item_size(head)))
+                                    ida_bytes.del_items(head, ida_bytes.DELIT_SIMPLE)
+                                    cursor = max(cursor + 1, head + size)
+                ida_funcs.add_func(entry_ea, max_state + 1)
+                for address in sorted(result.insns):
+                    ida_ua.create_insn(int(address))
+        except Exception:
+            print("[%s] function boundary materialization failed\n%s" %
+                  (PLUGIN_NAME, traceback.format_exc()))
+        _HEX_ANALYSIS[entry_ea] = result
+        # Arm the full recovery chain from any context that discovers finite
+        # dispatches, not only from the UI timer. Without this, a scripted
+        # ida_hexrays.decompile() silently decompiles the truncated database
+        # function: everything past the first unresolved `jmp reg` is
+        # unreachable and gets dropped, which looks like a clean result while
+        # actually being a truncation artifact.
+        try:
+            _install_hexrays_hook()
+        except Exception:
+            pass
+        print("[%s] microcode analysis 0x%X..0x%X: %d instructions, %d dispatches" %
+              (PLUGIN_NAME, entry_ea, end, len(result.insns),
+               sum(1 for v in result.edges.values() if v)))
+        return result
+    except Exception:
+        print("[%s] microcode analysis failed at 0x%X\n%s" %
+              (PLUGIN_NAME, entry_ea, traceback.format_exc()))
+        return None
+
+
+def _replace_indirect_jumps(mba, analysis):
+    """Turn finite abstractly-resolved ijmps into valid Hex-Rays jtbl nodes."""
+    import ida_hexrays
+    import ida_pro
+    changed = 0
+    for i in range(mba.qty):
+        block = mba.get_mblock(i)
+        tail = block.tail
+        if not tail or tail.opcode != ida_hexrays.m_ijmp:
+            continue
+        jump_ea = int(tail.ea)
+        addresses = sorted(analysis.edges.get(jump_ea, ()))
+        if not addresses:
+            continue
+        serials = []
+        for target in addresses:
+            found = None
+            for n in range(mba.qty):
+                if int(mba.get_mblock(n).start) == int(target):
+                    found = n
+                    break
+            if found is None:
+                serials = []
+                break
+            serials.append(found)
+        if not serials or len(serials) != len(addresses):
+            continue
+
+        # A duplicate synthetic 'def' target makes IDA reject the microcode
+        # with INTERR 50860. A finite explicit list is legal and preserves all
+        # statically recovered destinations.
+        cases = ida_hexrays.mcases_t()
+        for value, serial in zip(addresses, serials):
+            values = ida_pro.svalvec_t()
+            values.push_back(int(value))
+            cases.values.push_back(values)
+            cases.targets.push_back(int(serial))
+
+        selector = ida_hexrays.mop_t()
+        selector.assign(tail.d)
+        tail.opcode = ida_hexrays.m_jtbl
+        tail.l = selector
+        tail.r.erase()
+        tail.r._make_cases(cases)
+        tail.d.erase()
+
+        block.type = ida_hexrays.BLT_NWAY
+        block.flags = 512  # MBL_GOTO in IDA 9.1; native jtbl blocks carry it.
+        block.succset.clear()
+        for serial in serials:
+            block.succset.push_back(int(serial))
+        for serial in serials:
+            destination = mba.get_mblock(serial)
+            if block.serial not in list(destination.predset):
+                destination.predset.push_back(block.serial)
+            destination.mark_lists_dirty()
+        block.mark_lists_dirty()
+        changed += 1
+    if changed:
+        mba.mark_chains_dirty()
+        _REWIRED_ENTRIES.add(int(mba.entry_ea))
+    return changed
+
+
+def _chain_state_mreg(mba, analysis):
+    """Microcode register holding the dispatch state, from the chain's cmp."""
+    import ida_hexrays
+    head = getattr(analysis, "chain_head", None)
+    state_reg = getattr(analysis, "chain_state_reg", None)
+    if head is None or state_reg is None:
+        return None, 4
+    want = state_reg.lower()
+    for n in range(mba.qty):
+        block = mba.get_mblock(n)
+        if int(block.start) != int(head):
+            continue
+        # x86 `cmp` lowers to setcmp/jcnd in microcode (no m_cmp exists), so
+        # locate the state register by matching operand names
+        ins = block.head
+        while ins:
+            for mop in (ins.l, ins.r):
+                try:
+                    if mop.t == ida_hexrays.mop_r:
+                        name = ida_hexrays.get_mreg_name(int(mop.r), int(mop.size))
+                        if name and name.split(".")[0].lower() == want:
+                            return int(mop.r), int(mop.size) or 4
+                except Exception:
+                    pass
+            ins = ins.next
+        break
+    return None, 4
+
+
+def _apply_chain_rewires(mba, analysis):
+    """Turn resolved state transitions into direct or conditional edges.
+
+    Single-value sites get a direct edge to the recovered state block. Join
+    sites (the obfuscator folded the original if/else into the state value,
+    usually via cmov) get a chain of m_jz blocks on the state register - one
+    comparison per candidate value - which restores the original branch.
+    With every site bypassing the dispatcher chain, the chain becomes
+    unreachable and is dropped at glbopt.
+
+    Two phases are mandatory: inserting blocks renumbers every later serial,
+    so all insertions happen first and every goto/jz instruction and edge is
+    written afterwards with the final serial numbers. Writing a target early
+    lets later insertions silently redirect it onto an unrelated block.
+    """
+    import ida_hexrays
+    rewires = getattr(analysis, "chain_rewires", None) or {}
+    site_kinds = getattr(analysis, "chain_site_kinds", None) or {}
+    if not rewires:
+        return 0
+    state_mreg, state_size = _chain_state_mreg(mba, analysis)
+    _CONDS = (ida_hexrays.m_ja, ida_hexrays.m_jae, ida_hexrays.m_jb,
+              ida_hexrays.m_jbe, ida_hexrays.m_jcnd, ida_hexrays.m_jg,
+              ida_hexrays.m_jge, ida_hexrays.m_jl, ida_hexrays.m_jle,
+              ida_hexrays.m_jz, ida_hexrays.m_jnz)
+
+    import unflat.cfgUtil as cfg
+
+    def block_containing(ea):
+        for n in range(mba.qty):
+            b = mba.get_mblock(n)
+            bs, be = int(b.start), int(b.end)
+            if bs <= ea < be and be - ea <= 16:
+                return b
+        return None
+
+    def serial_by_start():
+        m = {}
+        for n in range(mba.qty):
+            m.setdefault(int(mba.get_mblock(n).start), n)
+        return m
+
+    # Phase 1: decide per site and insert every new block first.
+    plans = []
+    for ea, pairs in sorted(rewires.items()):
+        blk = block_containing(ea)
+        ins = analysis.insns.get(ea)
+        if blk is None or ins is None:
+            continue
+        kind = site_kinds.get(ea)
+        if kind in ("jmp", "jcc"):
+            old_target = int(ins.operands[0].imm)
+        else:
+            old_target = ea + int(ins.size)
+        tail = blk.tail
+        is_jcc = kind == "jcc" and tail is not None and tail.opcode in _CONDS
+        is_goto = tail is not None and tail.opcode == ida_hexrays.m_goto
+        if len(pairs) == 1 and (is_jcc or is_goto):
+            plans.append((ea, kind, pairs, 0, old_target))
+            continue
+        # fallthrough-type site, or a conditional split: dedicated blocks
+        # packed directly after the site block
+        count = 1 if len(pairs) == 1 else len(pairs)
+        base = blk.serial
+        for k in range(count):
+            cfg.create_mblock(blk, base + 1 + k)
+        plans.append((ea, kind, pairs, count, old_target))
+
+    # Phase 2: write instructions and edges with the final serial numbers.
+    changed = 0
+    for ea, kind, pairs, count, old_target in plans:
+        try:
+            smap = serial_by_start()
+            blk = block_containing(ea)
+            if blk is None:
+                continue
+            old_serial = smap.get(old_target)
+            if old_serial is not None:
+                succs = [int(x) for x in blk.succset]
+                if succs and old_serial not in succs:
+                    continue
+            tgts = [smap.get(int(t)) for _, t in pairs]
+            if any(t is None for t in tgts):
+                continue
+
+            if count == 0:
+                serial = tgts[0]
+                if serial in (None, blk.serial, old_serial):
+                    continue
+                tail = blk.tail
+                try:
+                    if tail.opcode == ida_hexrays.m_goto:
+                        tail.l.erase()
+                        tail.l.make_blkref(serial)
+                    else:
+                        tail.d.erase()
+                        tail.d.make_blkref(serial)
+                except Exception:
+                    pass
+                if old_serial is not None:
+                    cfg.modify_edge(mba, blk.serial, serial, old_serial)
+                else:
+                    cfg.modify_edge(mba, blk.serial, serial)
+                blk.mark_lists_dirty()
+                changed += 1
+                continue
+
+            news = [mba.get_mblock(blk.serial + 1 + k) for k in range(count)]
+            if len(pairs) == 1:
+                g = news[0]
+                cfg.insert_goto(g, tgts[0])
+                g.type = ida_hexrays.BLT_1WAY
+                g.flags |= 512  # MBL_GOTO in IDA 9.1
+                cfg.modify_edge(mba, g.serial, tgts[0])
+                cfg.modify_edge(mba, blk.serial, g.serial,
+                                old_serial if old_serial is not None else 0)
+                g.mark_lists_dirty()
+            else:
+                for k, (value, target) in enumerate(pairs[:-1]):
+                    jz = news[k]
+                    if value is None:
+                        break
+                    cfg.insert_jz(jz, tgts[k],
+                                  int(value) & ((1 << (state_size * 8)) - 1),
+                                  state_mreg, state_size, state_size)
+                    jz.type = ida_hexrays.BLT_2WAY
+                    jz.flags |= 512  # MBL_GOTO in IDA 9.1
+                    cfg.modify_edge(mba, jz.serial, jz.serial + 1)
+                    cfg.modify_edge(mba, jz.serial, tgts[k])
+                    jz.mark_lists_dirty()
+                else:
+                    g = news[-1]
+                    cfg.insert_goto(g, tgts[-1])
+                    g.type = ida_hexrays.BLT_1WAY
+                    g.flags |= 512  # MBL_GOTO in IDA 9.1
+                    cfg.modify_edge(mba, g.serial, tgts[-1])
+                    g.mark_lists_dirty()
+                    first = news[0]
+                    tail = blk.tail
+                    if tail is not None and tail.opcode == ida_hexrays.m_goto:
+                        try:
+                            tail.l.erase()
+                            tail.l.make_blkref(first.serial)
+                        except Exception:
+                            pass
+                    elif kind == "jcc" and tail is not None and tail.opcode in _CONDS:
+                        try:
+                            tail.d.erase()
+                            tail.d.make_blkref(first.serial)
+                        except Exception:
+                            pass
+                    cfg.modify_edge(mba, blk.serial, first.serial,
+                                    old_serial if old_serial is not None else 0)
+                    blk.mark_lists_dirty()
+            changed += 1
+        except Exception:
+            print("[%s] chain rewire failed at 0x%X: %s" %
+                  (PLUGIN_NAME, ea, traceback.format_exc()))
+    if changed:
+        mba.mark_chains_dirty()
+        _REWIRED_ENTRIES.add(int(mba.entry_ea))
+    return changed
+
+
+class _SeagullHexraysHook(ida_hexrays.Hexrays_Hooks):
+    """Reachability and finite-jump lifting hook used by normal F5 decompilation."""
+    def __init__(self):
+        ida_hexrays.Hexrays_Hooks.__init__(self)
+
+    def hook(self):
+        return ida_hexrays.Hexrays_Hooks.hook(self)
+
+    def unhook(self):
+        return ida_hexrays.Hexrays_Hooks.unhook(self)
+
+    def flowchart(self, fc, mba, reachable_blocks, decomp_flags):
+        analysis = _analysis_for_entry(mba.entry_ea)
+        if analysis is None:
+            return 0
+        # IDA often truncates a flattened function at its first ijmp. Extend
+        # that database function before Hex-Rays finalizes the reachability
+        # graph. The hook remains bounded by the executable segment.
+        try:
+            func = ida_funcs.get_func(mba.entry_ea)
+            max_state = max(analysis.states) if analysis.states else 0
+            if func and max_state >= int(func.end_ea):
+                ida_funcs.set_func_end(func, max_state + 1)
+        except Exception:
+            pass
+        for n in range(fc.size()):
+            if int(fc[n].start_ea) in analysis.states:
+                reachable_blocks.add(n)
+        return 0
+
+    def prolog(self, mba, fc, reachable_blocks, decomp_flags):
+        # This callback runs before Hex-Rays freezes the initial flowchart.
+        # Materializing the decoded heads here lets a plain F5 see the full
+        # flattened region on its first decompilation.
+        _analysis_for_entry(mba.entry_ea)
+        return 0
+
+    def glbopt(self, mba):
+        # After the stage-0 chain rewires every site bypasses the dispatcher
+        # chain, but the chain blocks were pinned reachable at flowchart time
+        # and Hex-Rays keeps rendering them. At this maturity the block lists
+        # are consistent, so dead blocks can be dropped safely.
+        if int(mba.entry_ea) in _REWIRED_ENTRIES:
+            try:
+                mba.remove_empty_and_unreachable_blocks()
+            except Exception:
+                print("[%s] unreachable-block removal failed: %s" %
+                      (PLUGIN_NAME, traceback.format_exc()))
+        return 0
+
+    def microcode(self, mba):
+        analysis = _analysis_for_entry(mba.entry_ea)
+        if analysis is not None:
+            try:
+                changed = _replace_indirect_jumps(mba, analysis)
+                if changed:
+                    print("[%s] lifted %d finite indirect jumps for F5 at 0x%X" %
+                          (PLUGIN_NAME, changed, mba.entry_ea))
+                rewired = _apply_chain_rewires(mba, analysis)
+                if rewired:
+                    print("[%s] rewired %d state transitions to direct edges at 0x%X" %
+                          (PLUGIN_NAME, rewired, mba.entry_ea))
+            except Exception:
+                print("[%s] microcode lift failed at 0x%X\n%s" %
+                      (PLUGIN_NAME, mba.entry_ea, traceback.format_exc()))
+        return 0
+
+
+def _install_hexrays_hook():
+    global _HEX_HOOK
+    if _HEX_HOOK is not None:
+        return True
+    try:
+        import ida_hexrays
+        # init_hexrays_plugin() can transiently report false while IDA is
+        # loading the decompiler. The hook itself is safe to attempt again on
+        # the first F5 action, so do not make that status a hard gate.
+        ida_hexrays.init_hexrays_plugin()
+        _HEX_HOOK = _SeagullHexraysHook()
+        if not _HEX_HOOK.hook():
+            _HEX_HOOK = None
+            return False
+        print("[%s] F5 finite-CFG Hex-Rays hook enabled" % PLUGIN_NAME)
+        return True
+    except Exception:
+        _HEX_HOOK = None
+        print("[%s] F5 hook unavailable\n%s" % (PLUGIN_NAME, traceback.format_exc()))
+        return False
+
+
+def _open_deobfuscated_pseudocode(ea):
+    """Open a fresh Hex-Rays view after the optimizer is armed.
+
+    The ordinary F5 action can be disabled or consumed by another IDA view
+    (for example the graph overview). Calling open_pseudocode directly keeps
+    the user from falling back to the database's truncated `jmp rdx` flow.
+    """
+    try:
+        import ida_hexrays
+        if not ida_hexrays.init_hexrays_plugin():
+            return False
+        vu = ida_hexrays.open_pseudocode(int(ea), ida_hexrays.OPF_REUSE)
+        return vu is not None
+    except Exception:
+        print("[%s] direct pseudocode open failed\n%s" %
+              (PLUGIN_NAME, traceback.format_exc()))
+        return False
+
+
+class _SeagullUIHook(ida_kernwin.UI_Hooks):
+    """Prepare a truncated CFF function once the database UI is ready."""
+    def ready_to_run(self):
+        if not _ARMED:
+            return 0
+        try:
+            ida_auto.auto_wait()
+            ea = ida_kernwin.get_screen_ea()
+            if ea == idaapi.BADADDR:
+                # IDA 9.x removed get_inf_structure(); the module-level
+                # getters are the supported replacement.
+                try:
+                    import ida_ida
+                    ea = ida_ida.inf_get_start_ea()
+                except Exception:
+                    ea = idaapi.BADADDR
+            func = ida_funcs.get_func(ea)
+            if func:
+                # Materialization is cached and only expands when finite
+                # dispatches are actually discovered.
+                _analysis_for_entry(func.start_ea)
+        except Exception:
+            print("[%s] UI preparation failed\n%s" % (PLUGIN_NAME, traceback.format_exc()))
+        return 0
+
+    def screen_ea_changed(self, ea, prev_ea):
+        if not _ARMED:
+            return 0
+        try:
+            func = ida_funcs.get_func(ea)
+            if func:
+                # Delay the expensive pass until the analyst navigates into a
+                # function; this keeps plugin startup fast on large binaries.
+                _analysis_for_entry(func.start_ea)
+        except Exception:
+            pass
+        return 0
+
+    def preprocess_action(self, name):
+        # F5 is dispatched as an action by the Hex-Rays UI. Prepare the
+        # truncated function before the decompiler builds its flowchart.
+        if not _ARMED:
+            return 0
+        try:
+            lname = str(name).lower()
+            # A real F5 keypress in the IDA 9.1 GUI dispatches
+            # ``hx:GenPseudo`` (the message log shows "Executing action:
+            # hx:GenPseudo"); ``hx:HexDec``/``hx:decompile`` are other
+            # builds' spellings and hx:HexDec even fails process_ui_action()
+            # on 9.1.  Match only the single-function decompile actions so
+            # "decompile all" keeps its default behavior.
+            is_hexrays_action = (
+                lname in ("hx:genpseudo", "hx:hexdec", "hx:decompile", "hx:hx_decompile") or
+                (lname.startswith("hx:") and "decomp" in lname and "all" not in lname)
+            )
+            if is_hexrays_action:
+                # If the analyst opened D-810's own GUI after our instruction
+                # state was armed, release ours so exactly one D-810 manager
+                # owns the optimizers (done here, outside any decompilation).
+                try:
+                    if _D810_INSTR_STATE is not None and                             _d810_already_running() is not _D810_INSTR_STATE:
+                        print("[%s] user-started D-810 detected - releasing ours" % PLUGIN_NAME)
+                        _stop_d810_instructions()
+                except Exception:
+                    pass
+                func = ida_funcs.get_func(ida_kernwin.get_screen_ea())
+                if func:
+                    _analysis_for_entry(func.start_ea)
+                _start_preferred_unflattener()
+                _start_d810_instructions()
+                _install_hexrays_hook()
+                print("[%s] intercepted Hex-Rays action %s" % (PLUGIN_NAME, name))
+                if func:
+                    try:
+                        ida_hexrays.mark_cfunc_dirty(func.start_ea, True)
+                    except Exception:
+                        pass
+                target_ea = func.start_ea if func else ida_kernwin.get_screen_ea()
+                if target_ea != idaapi.BADADDR and _open_deobfuscated_pseudocode(target_ea):
+                    print("[%s] F5 opened deobfuscated pseudocode at 0x%X" %
+                          (PLUGIN_NAME, target_ea))
+                    return 1
+        except Exception:
+            pass
+        return 0
+
+
+def _install_ui_hook():
+    global _UI_HOOK
+    if _UI_HOOK is not None:
+        return True
+    try:
+        _UI_HOOK = _SeagullUIHook()
+        if not _UI_HOOK.hook():
+            _UI_HOOK = None
+            print("[%s] UI F5 hook rejected by IDA" % PLUGIN_NAME)
+            return False
+        print("[%s] UI F5 hook enabled" % PLUGIN_NAME)
+        return True
+    except Exception:
+        _UI_HOOK = None
+        print("[%s] UI F5 hook unavailable\n%s" % (PLUGIN_NAME, traceback.format_exc()))
+        return False
+
+
+def _late_hook_tick():
+    """Install the (inert when disarmed) UI hook once the UI is up.
+
+    Nothing heavy is armed here on purpose: while the plugin is disarmed
+    every decompilation goes through vanilla Hex-Rays at native speed and
+    navigation triggers no analysis. The whole recovery stack is started
+    only by an explicit Seagull action.
+    """
+    global _UI_TIMER
+    _install_ui_hook()
+    _UI_TIMER = None
+    return -1
+
+
+def _schedule_late_hooks():
+    global _UI_TIMER
+    if _UI_TIMER is None:
+        try:
+            _UI_TIMER = ida_kernwin.register_timer(500, _late_hook_tick)
+        except Exception:
+            _UI_TIMER = None
+
+
+def _start_preferred_unflattener():
+    """Start the direct-edge OLLVM hook before the first F5 decompile."""
+    global _MICROCODE_UNFLAT, _UNFLAT_ACTIVE
+    if _UNFLAT_ACTIVE:
+        return True
+    try:
+        import importlib
+        unflat = importlib.import_module("unflat.new_unflattener")
+        unflat.main()
+        _MICROCODE_UNFLAT = unflat
+        _UNFLAT_ACTIVE = True
+        print("[%s] preferred direct-edge unflattener enabled" % PLUGIN_NAME)
+        return True
+    except Exception as exc:
+        _UNFLAT_ACTIVE = False
+        print("[%s] preferred unflattener unavailable: %s" % (PLUGIN_NAME, exc))
+        return False
+
+
+_D810_INSTR_STATE = None
+_D810_SAVED_INDEX = None
+
+D810_INSTRUCTION_PROFILE = 0    # default_instruction_only.json
+D810_OLLVM_PROFILE = 1          # default_unflattening_ollvm.json
+D810_SWITCH_CASE_PROFILE = 2    # default_unflattening_switch_case.json
+
+
+def _d810_already_running():
+    try:
+        import d810.manager as d810_manager
+        state = getattr(d810_manager, "d810_state", None)
+        if state is not None and getattr(state, "manager", None) is not None:
+            return state
+    except Exception:
+        pass
+    return None
+
+
+def _start_d810_instructions(project_index=D810_INSTRUCTION_PROFILE):
+    """Arm D-810's instruction-level simplification stack.
+
+    The instruction-only profile carries 177 rules: the MBA families
+    (AddXor / HackersDelight / Ollvm / SpecialConstant / Factor / Mba),
+    22 constant-folding rules, the Pred* opaque-predicate rules and the
+    Z3 SMT rules, while its only block rule is the harmless JumpFixer.
+    That is exactly the complement to this plugin: Seagull and unflat own
+    the control-flow recovery, D-810 owns the arithmetic obfuscation.
+    Its flow unflattener is deliberately NOT enabled here - three CFG
+    rewriters racing on one mba corrupt each other.
+
+    start_d810() persists last_project_index into the user's options.json,
+    so the original selection is restored immediately afterwards.
+    """
+    global _D810_INSTR_STATE, _D810_SAVED_INDEX
+    if _D810_INSTR_STATE is not None:
+        return True
+    running = _d810_already_running()
+    if running is not None and running is not _D810_INSTR_STATE:
+        print("[%s] D-810 already active (user profile) - not overriding" % PLUGIN_NAME)
+        return False
+    try:
+        from d810.conf import D810Configuration
+        from d810.manager import D810State
+        cfg = D810Configuration()
+        _D810_SAVED_INDEX = cfg.get("last_project_index")
+        state = D810State(cfg)
+        state.load_project(project_index)
+        state.start_d810()
+        # keep the user's own D-810 profile selection intact
+        cfg.set("last_project_index", _D810_SAVED_INDEX)
+        cfg.save()
+        _D810_INSTR_STATE = state
+        print("[%s] D-810 instruction-level simplifier enabled (MBA/constants/opaque predicates/Z3)" % PLUGIN_NAME)
+        return True
+    except Exception as exc:
+        print("[%s] D-810 instruction simplifier unavailable: %s" % (PLUGIN_NAME, exc))
+        return False
+
+
+def _stop_d810_instructions():
+    global _D810_INSTR_STATE
+    if _D810_INSTR_STATE is None:
+        return
+    try:
+        _D810_INSTR_STATE.stop_d810()
+    except Exception:
+        pass
+    _D810_INSTR_STATE = None
+    print("[%s] D-810 instruction-level simplifier disabled" % PLUGIN_NAME)
+
+
+def _toggle_unflat_classic():
+    """Mirror the flatPlugin toggles so one menu controls the whole stack."""
+    try:
+        import unflat.config as unflat_config
+        unflat_config.enable_ollvm_unflatten = not unflat_config.enable_ollvm_unflatten
+        state = "on" if unflat_config.enable_ollvm_unflatten else "off"
+        print("[%s] classic OLLVM unflattener (unflat) %s" % (PLUGIN_NAME, state))
+        _refresh_decompiler()
+        return True
+    except Exception as exc:
+        print("[%s] unflat toggle failed: %s" % (PLUGIN_NAME, exc))
+        return False
+
+
+def _recover_static_cfg(ea=None):
+    """Recover finite encoded jump targets with a bounded abstract interpreter.
+
+    This pass only adds user xrefs/comments; it never patches bytes or merges
+    unrelated IDA functions.  The report is therefore safe to run repeatedly.
+    """
+    try:
+        from seagull_core import Analyzer
+        f = ida_funcs.get_func(ea or ida_kernwin.get_screen_ea())
+        if not f:
+            return None
+        seg = ida_segment.getseg(f.start_ea)
+        # IDA stops at the first unresolved jmp.  Analyze the executable
+        # segment as a bounded region, while following only direct branches;
+        # calls are recorded but never traversed, so neighboring functions are
+        # not silently merged into the recovered graph.
+        end = int(seg.end_ea) if seg and (seg.perm & idaapi.SEGPERM_EXEC) and (int(f.end_ea) - int(f.start_ea) < 0x1000) else int(f.end_ea)
+        a = Analyzer(ida_bytes.get_bytes, int(f.start_ea), end).run()
+        count = 0
+        for jump, targets in a.edges.items():
+            if not targets:
+                continue
+            for target in targets:
+                if ida_bytes.is_code(ida_bytes.get_flags(target)):
+                    ida_xref.add_cref(jump, target, ida_xref.fl_JN | ida_xref.XREF_USER)
+            _add_comment(jump, "%s static targets: %s" % (COMMENT_TAG, ", ".join("0x%X" % x for x in sorted(targets))))
+            count += 1
+        report = {"function": int(f.start_ea), "end": end, "instructions": len(a.insns),
+                  "steps": a.steps, "indirect_jumps": {"0x%X" % k: ["0x%X" % x for x in sorted(v)] for k,v in a.edges.items() if v}}
+        out = os.path.splitext(idc.get_input_file_path())[0] + ".seagull.cfg.json"
+        with open(out, "w", encoding="utf-8") as fp:
+            json.dump(report, fp, indent=2, sort_keys=True)
+        print("[%s] recovered %d indirect dispatches; %d edges; report %s" % (PLUGIN_NAME, count, sum(len(x) for x in a.edges.values() if x), out))
+        return report
+    except Exception:
+        print("[%s] static CFG recovery failed\n%s" % (PLUGIN_NAME, traceback.format_exc()))
+        return None
+
+
+class _AnalysisRange(object):
+    """Small function-like object used when IDA split an obfuscated region."""
+
+    def __init__(self, start_ea, end_ea):
+        self.start_ea = int(start_ea)
+        self.end_ea = int(end_ea)
+
+
+def _is_code(ea):
+    return ea != idaapi.BADADDR and ida_bytes.is_code(ida_bytes.get_flags(ea))
+
+
+def _func_bounds(func):
+    return int(func.start_ea), int(func.end_ea)
+
+
+def _instruction_rows(func):
+    """Return (ea, size, mnemonic, op0, op1, text) without relying on IDA text parsing."""
+    start, end = _func_bounds(func)
+    ea = start
+    rows = []
+    while ea < end:
+        insn = ida_ua.insn_t()
+        size = ida_ua.decode_insn(insn, ea)
+        if not size:
+            ea = ida_bytes.next_head(ea, end)
+            if ea == idaapi.BADADDR or ea <= 0:
+                break
+            continue
+        mnem = idc.print_insn_mnem(ea).lower()
+        max_ops = getattr(idaapi, "UA_MAXOP", 8)
+        ops = [idc.print_operand(ea, i).lower() for i in range(max_ops)]
+        rows.append({
+            "ea": int(ea),
+            "size": int(size),
+            "mnem": mnem,
+            "op0": ops[0],
+            "op1": ops[1],
+            "text": idc.generate_disasm_line(ea, 0) or "",
+            "insn": insn,
+        })
+        ea += size
+    return rows
+
+
+def _is_indirect_jump(row):
+    if row["mnem"] not in ("jmp", "ijmp"):
+        return False
+    op = row["op0"]
+    # Immediate/direct jumps are resolved by IDA and do not need this pass.
+    return bool(op) and not op.startswith("0x") and not re.match(r"^[0-9a-f]+h$", op)
+
+
+def _is_register(op):
+    op = op.strip().lower()
+    if op in {
+        "rax", "rbx", "rcx", "rdx", "rsi", "rdi", "rbp", "rsp",
+        "eax", "ebx", "ecx", "edx", "esi", "edi", "ebp", "esp",
+        "ax", "bx", "cx", "dx", "al", "bl", "cl", "dl",
+        "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
+        "r8d", "r9d", "r10d", "r11d", "r12d", "r13d", "r14d", "r15d",
+    }:
+        return True
+    return bool(re.match(r"^r\d+(?:d|w|b)?$", op))
+
+
+def _direct_target(ea):
+    try:
+        op_type = idc.get_operand_type(ea, 0)
+        if op_type in (idaapi.o_near, idaapi.o_far):
+            value = idc.get_operand_value(ea, 0)
+            if value != idaapi.BADADDR:
+                return int(value)
+    except Exception:
+        pass
+    return None
+
+
+def _add_comment(ea, text):
+    old = idc.get_cmt(ea, 0) or ""
+    if text in old:
+        return
+    merged = (old + " " + text).strip() if old else text
+    idc.set_cmt(ea, merged[:2047], 0)
+
+
+def _set_name(ea, name):
+    if ea == idaapi.BADADDR:
+        return False
+    try:
+        current = idc.get_name(ea) or ""
+        if current.startswith("sub_") or not current:
+            return bool(idc.set_name(ea, name, idc.SN_CHECK))
+    except Exception:
+        return False
+    return False
+
+
+def _parse_imm(text):
+    text = text.strip().lower().replace("0x", "")
+    text = text.rstrip("h")
+    try:
+        return int(text, 16)
+    except ValueError:
+        try:
+            return int(text, 10)
+        except ValueError:
+            return None
+
+
+def _looks_like_state_update(row):
+    """Recognize common CFF state transitions without assuming one compiler."""
+    m, a, b = row["mnem"], row["op0"], row["op1"]
+    if m in ("add", "sub", "xor", "rol", "ror", "inc", "dec", "lea") and a in (
+        "eax", "ebx", "ecx", "edx", "esi", "edi", "r8d", "r9d", "r10d", "r11d",
+    ):
+        return True
+    if m == "mov" and a in (
+        "eax", "ebx", "ecx", "edx", "esi", "edi", "r8d", "r9d", "r10d", "r11d",
+    ) and _parse_imm(b) is not None:
+        return True
+    if m.startswith("cmov") or m.startswith("set"):
+        return True
+    return False
+
+
+def _memory_base(text):
+    # This is only a hint extractor.  It deliberately avoids claiming that a
+    # displacement is a valid table address when relocations/segment bases are
+    # unknown.
+    m = re.search(r"\[([^\]]+)\]", text.lower())
+    if not m:
+        return None
+    expr = m.group(1).replace(" ", "")
+    regs = re.findall(r"(?:r\d+|e?[abcd]x|e?[sd]i|e?[sb]p|rip)", expr)
+    return regs[0] if regs else None
+
+
+def _stack_slot(text):
+    """Return a normalized stack/frame slot such as rsp+0xc or rbp-0x20."""
+    expr = text.lower().replace(" ", "")
+    m = re.search(r"\[(rsp|rbp)([+-](?:0x)?[0-9a-f]+)?\]", expr)
+    if not m:
+        return None
+    return m.group(1) + (m.group(2) or "+0")
+
+
+def _rip_target(ea, text):
+    """Best-effort RIP-relative address recovery for table annotations."""
+    if "rip" not in text.lower():
+        return None
+    try:
+        value = int(idc.get_operand_value(ea, 1))
+        # IDA versions differ: some return the displacement, others the
+        # already-resolved address.  Prefer an address in a mapped segment.
+        if ida_segment.getseg(value):
+            return value
+        end = ida_bytes.next_head(ea, idaapi.BADADDR)
+        candidate = end + value
+        if ida_segment.getseg(candidate):
+            return candidate
+    except Exception:
+        pass
+    return None
+
+
+def _norm_reg(reg):
+    reg = reg.lower().strip()
+    if reg.startswith("r") and reg.endswith("d"):
+        return reg[:-1]
+    return reg
+
+
+def _resolve_indirect_targets(rows, index):
+    """Resolve encoded jump-table entries used by the sample's dispatcher.
+
+    Recognized shape (with arbitrary registers/constants):
+        mov  index, IMM
+        mov  base, [rip+global]
+        mov  target, [base + index*SCALE + DISP]
+        add  target, ADJUST_REG
+        jmp  target
+
+    The global qword and table entries are read from the IDB, so no input or
+    network execution is required.  Unknown shapes simply return no edges.
+    """
+    row = rows[index]
+    if not _is_indirect_jump(row):
+        return []
+    target_reg = row["op0"].strip().lower()
+    prev = rows[max(0, index - 40):index]
+    constants = {}
+    indices = []
+    load = None
+    adjust_reg = None
+    for p in prev:
+        if p["mnem"] == "mov":
+            dst, src = p["op0"].strip().lower(), p["op1"].strip().lower()
+            imm = _parse_imm(src)
+            if imm is not None and _is_register(dst):
+                constants[_norm_reg(dst)] = imm & 0xFFFFFFFFFFFFFFFF
+            if dst == target_reg and "[" in src and "rdx" in src:
+                load = p
+            if dst in ("edx", "rdx") and imm is not None:
+                indices.append(imm)
+        if p["mnem"] == "add" and p["op0"].strip().lower() == target_reg:
+            rhs = p["op1"].strip().lower()
+            if _is_register(rhs):
+                adjust_reg = _norm_reg(rhs)
+            else:
+                imm = _parse_imm(rhs)
+                if imm is not None:
+                    constants["__adjust__"] = imm & 0xFFFFFFFFFFFFFFFF
+    if load is None or not indices:
+        return []
+
+    expr = load["op1"].lower().replace(" ", "")
+    scale_match = re.search(r"rdx(?:\*(\d+))?", expr)
+    if not scale_match:
+        return []
+    scale = int(scale_match.group(1) or "1", 10)
+    disp_match = re.search(r"rdx(?:\*\d+)?([+-])(0x[0-9a-f]+)", expr)
+    if not disp_match:
+        return []
+    disp = int(disp_match.group(2), 16)
+    if disp_match.group(1) == "-":
+        disp = -disp
+
+    # Find the RIP-relative global pointer feeding the table base.
+    global_ea = None
+    for p in reversed(prev):
+        if p["mnem"] == "mov" and p["op0"].strip().lower() in ("rax", "rdx") and "rip" in p["op1"]:
+            global_ea = _rip_target(p["ea"], p["op1"])
+            if global_ea:
+                break
+    if global_ea is None:
+        return []
+    try:
+        encoded_base = ida_bytes.get_qword(global_ea)
+    except Exception:
+        return []
+    table = (encoded_base + disp) & 0xFFFFFFFFFFFFFFFF
+    adjust = constants.get(adjust_reg) if adjust_reg else constants.get("__adjust__")
+    if adjust is None:
+        return []
+
+    result = []
+    for value in sorted(set(indices)):
+        entry_ea = (table + value * scale) & 0xFFFFFFFFFFFFFFFF
+        if not ida_segment.getseg(entry_ea):
+            continue
+        try:
+            encoded_target = ida_bytes.get_qword(entry_ea)
+        except Exception:
+            continue
+        target = (encoded_target + adjust) & 0xFFFFFFFFFFFFFFFF
+        target_seg = ida_segment.getseg(target)
+        if not target_seg or not (target_seg.perm & idaapi.SEGPERM_EXEC):
+            continue
+        result.append({"target": int(target), "index": int(value), "entry": int(entry_ea), "table": int(table)})
+    return result
+
+
+def _resolve_region_edges(func):
+    rows = _instruction_rows(func)
+    edges = []
+    for i, row in enumerate(rows):
+        for item in _resolve_indirect_targets(rows, i):
+            edge = {"from": int(row["ea"]), **item}
+            edges.append(edge)
+            try:
+                ida_xref.add_cref(row["ea"], item["target"], ida_xref.fl_JN)
+            except Exception:
+                pass
+            _add_comment(row["ea"], "%s resolved edge -> 0x%X (state/index=0x%X)" % (
+                COMMENT_TAG, item["target"], item["index"]))
+    return edges
+
+
+def _classify_function(func):
+    rows = _instruction_rows(func)
+    indirect = [r for r in rows if _is_indirect_jump(r)]
+    direct_back = []
+    start, end = _func_bounds(func)
+    for r in rows:
+        target = _direct_target(r["ea"])
+        if target is not None and start <= target < end and target <= r["ea"]:
+            direct_back.append((r["ea"], target))
+
+    # Dispatcher candidates are indirect branches with a table-like load or a
+    # state update immediately before them.  This catches OLLVM-style code and
+    # the sample's mov [base+index]; add const; jmp reg sequence.
+    dispatcher_sites = []
+    state_updates = []
+    opaque = []
+    anti_disasm = []
+    table_hints = []
+    stack_accesses = Counter()
+    stack_writes = Counter()
+
+    for i, row in enumerate(rows):
+        for operand in (row["op0"], row["op1"]):
+            slot = _stack_slot(operand)
+            if slot:
+                stack_accesses[slot] += 1
+                if row["mnem"] in ("mov", "stos", "push", "pop", "add", "sub", "xor") and operand == row["op0"]:
+                    stack_writes[slot] += 1
+        if _looks_like_state_update(row):
+            state_updates.append(row["ea"])
+        if _is_indirect_jump(row):
+            prev = rows[max(0, i - 8):i]
+            mem_load = next((p for p in reversed(prev) if p["mnem"] in ("mov", "lea") and "[" in p["op1"]), None)
+            add_const = next((p for p in reversed(prev) if p["mnem"] in ("add", "sub") and _parse_imm(p["op1"]) is not None), None)
+            if mem_load or add_const:
+                dispatcher_sites.append(row["ea"])
+                hint = {
+                    "jump": int(row["ea"]),
+                    "register": row["op0"],
+                    "load": int(mem_load["ea"]) if mem_load else None,
+                    "load_text": mem_load["text"] if mem_load else None,
+                    "adjust": int(add_const["ea"]) if add_const else None,
+                    "adjust_text": add_const["text"] if add_const else None,
+                    "base_register": _memory_base(mem_load["text"]) if mem_load else None,
+                    "rip_target": _rip_target(mem_load["ea"], mem_load["op1"]) if mem_load else None,
+                }
+                table_hints.append(hint)
+
+        # Obvious local opaque predicates: cmp/test of a register against
+        # itself, or an immediate written and compared immediately afterwards.
+        if row["mnem"] in ("cmp", "test") and row["op0"] and row["op0"] == row["op1"]:
+            opaque.append({"ea": int(row["ea"]), "kind": "self_compare", "text": row["text"]})
+        if row["mnem"] == "cmp" and i and rows[i - 1]["mnem"] == "mov":
+            prev = rows[i - 1]
+            if prev["op0"] == row["op0"] and _parse_imm(prev["op1"]) is not None and _parse_imm(row["op1"]) is not None:
+                if _parse_imm(prev["op1"]) == _parse_imm(row["op1"]):
+                    opaque.append({"ea": int(row["ea"]), "kind": "constant_compare", "text": row["text"]})
+        if row["mnem"] in ("push", "call") and i + 1 < len(rows):
+            nxt = rows[i + 1]
+            if row["mnem"] == "push" and nxt["mnem"] == "ret":
+                anti_disasm.append({"ea": int(row["ea"]), "kind": "push_ret_jump", "text": row["text"]})
+            if row["mnem"] == "call" and "[rsp" in nxt["op0"] and nxt["mnem"] in ("add", "sub"):
+                anti_disasm.append({"ea": int(row["ea"]), "kind": "call_stack_delta", "text": row["text"]})
+
+    # A high ratio of indirect jumps plus repeated back edges is a strong CFF
+    # signal.  The score is surfaced so analysts can tune it for their sample.
+    score = 0
+    score += min(len(indirect), 20) * 2
+    score += min(len(dispatcher_sites), 20) * 3
+    score += min(len(direct_back), 20)
+    if len(rows) and len(indirect) / float(len(rows)) > 0.01:
+        score += 5
+    is_cff = score >= 18 and len(dispatcher_sites) >= 2
+
+    dispatcher = None
+    # Flatteners commonly return to one small dispatcher block via dozens of
+    # direct jumps.  Prefer the most frequently targeted backward edge over an
+    # arbitrary indirect-jump site.
+    if direct_back:
+        target, count = Counter(t for _, t in direct_back).most_common(1)[0]
+        if count >= 3:
+            dispatcher = target
+    if dispatcher is None and dispatcher_sites:
+        dispatcher = dispatcher_sites[0]
+    return {
+        "function": int(start),
+        "end": int(end),
+        "instruction_count": len(rows),
+        "indirect_jumps": [int(r["ea"]) for r in indirect],
+        "dispatcher_sites": [int(x) for x in dispatcher_sites],
+        "dispatcher": int(dispatcher) if dispatcher else None,
+        "back_edges": [{"from": int(a), "to": int(b)} for a, b in direct_back],
+        "state_updates": [int(x) for x in state_updates],
+        "table_hints": table_hints,
+        "state_slots": [
+            {"slot": slot, "accesses": count, "writes": stack_writes.get(slot, 0)}
+            for slot, count in stack_accesses.most_common()
+            if stack_writes.get(slot, 0) and count >= 2
+        ],
+        "opaque_predicates": opaque,
+        "anti_disassembly": anti_disasm,
+        "resolved_edges": _resolve_region_edges(func),
+        "score": score,
+        "cff": bool(is_cff),
+    }
+
+
+def _annotate(report):
+    func = ida_funcs.get_func(report["function"])
+    if not func:
+        return
+    fn = "sub_%X" % report["function"]
+    if report["cff"]:
+        _set_name(report["function"], "seagull_cff_%X" % report["function"])
+        _add_comment(report["function"], "%s CFF candidate score=%d; dispatcher=%s" % (
+            COMMENT_TAG, report["score"],
+            ("0x%X" % report["dispatcher"]) if report["dispatcher"] else "unknown"))
+    if report["dispatcher"]:
+        _set_name(report["dispatcher"], "seagull_dispatch_%X" % report["dispatcher"])
+        _add_comment(report["dispatcher"], "%s likely dispatcher/state dispatch" % COMMENT_TAG)
+
+    for slot in report.get("state_slots", [])[:4]:
+        _add_comment(report["function"], "%s state-slot candidate %s (accesses=%d writes=%d)" % (
+            COMMENT_TAG, slot["slot"], slot["accesses"], slot["writes"]))
+
+    for ea in report["indirect_jumps"]:
+        _add_comment(ea, "%s indirect branch; inspect table/state producer" % COMMENT_TAG)
+    for item in report["table_hints"]:
+        text = "%s jump-table hint: %s" % (COMMENT_TAG, item.get("load_text") or "computed target")
+        if item.get("rip_target"):
+            text += "; RIP target=0x%X" % item["rip_target"]
+        _add_comment(item["jump"], text)
+    for item in report.get("resolved_edges", []):
+        _add_comment(item["from"], "%s static target 0x%X via table 0x%X" % (
+            COMMENT_TAG, item["target"], item["table"]))
+    for item in report["opaque_predicates"]:
+        _add_comment(item["ea"], "%s possible opaque predicate (%s); verify before patching" % (COMMENT_TAG, item["kind"]))
+    for item in report["anti_disassembly"]:
+        _add_comment(item["ea"], "%s anti-disassembly idiom: %s" % (COMMENT_TAG, item["kind"]))
+
+
+def analyze_current():
+    ea = ida_kernwin.get_screen_ea()
+    func = ida_funcs.get_func(ea)
+    if not func:
+        ida_kernwin.warning("No function at the current address")
+        return None
+    report = _classify_function(func)
+    # Aggressive indirect branches often make IDA terminate a function at the
+    # first unresolved jmp.  Retry over the containing executable segment so a
+    # flattened region is analyzed as a whole.
+    seg = ida_segment.getseg(func.start_ea)
+    if (seg and seg.end_ea - func.start_ea >= 0x1000 and
+            len(report["indirect_jumps"]) < 8):
+        region = _classify_function(_AnalysisRange(func.start_ea, seg.end_ea))
+        if region["score"] > report["score"]:
+            region["region_scan"] = True
+            region["ida_function_end"] = int(func.end_ea)
+            report = region
+    _annotate(report)
+    print("[%s] %s" % (PLUGIN_NAME, json.dumps(report, indent=2, sort_keys=True)))
+    ida_kernwin.info("Seagull: score=%d, CFF=%s, indirect jumps=%d" % (
+        report["score"], report["cff"], len(report["indirect_jumps"])))
+    return report
+
+
+def analyze_all():
+    reports = []
+    for func_ea in idautils.Functions():
+        func = ida_funcs.get_func(func_ea)
+        if not func:
+            continue
+        try:
+            report = _classify_function(func)
+            if report["cff"] or report["anti_disassembly"] or report["opaque_predicates"]:
+                _annotate(report)
+                reports.append(report)
+        except Exception:
+            print("[%s] failed at 0x%X\n%s" % (PLUGIN_NAME, func_ea, traceback.format_exc()))
+    # Add one segment-level pass for binaries whose control-flow flattening
+    # prevents IDA from forming a useful function boundary in the first place.
+    seen_regions = set()
+    for idx in range(ida_segment.get_segm_qty()):
+        seg = ida_segment.getnseg(idx)
+        if not seg or not (seg.perm & idaapi.SEGPERM_EXEC):
+            continue
+        if seg.end_ea - seg.start_ea < 0x1000:
+            continue
+        try:
+            region = _classify_function(_AnalysisRange(seg.start_ea, seg.end_ea))
+            if region["cff"]:
+                key = (region["function"], region["end"])
+                if key not in seen_regions:
+                    region["region_scan"] = True
+                    _annotate(region)
+                    reports.append(region)
+                    seen_regions.add(key)
+        except Exception:
+            print("[%s] segment scan failed at 0x%X\n%s" % (PLUGIN_NAME, seg.start_ea, traceback.format_exc()))
+    out = os.path.splitext(idc.get_input_file_path())[0] + ".seagull.json"
+    try:
+        with open(out, "w", encoding="utf-8") as fp:
+            json.dump({"plugin": PLUGIN_VERSION, "functions": reports}, fp, indent=2, sort_keys=True)
+        ida_kernwin.info("Seagull: annotated %d functions; report written to %s" % (len(reports), out))
+    except Exception as exc:
+        ida_kernwin.warning("Could not write report: %s" % exc)
+    return reports
+
+
+def _refresh_decompiler(ea=None):
+    """Invalidate and refresh the current Hex-Rays view after CFG rewriting."""
+    try:
+        import ida_hexrays
+        if ea is None:
+            ea = ida_kernwin.get_screen_ea()
+        func = ida_funcs.get_func(ea)
+        if func:
+            ida_hexrays.mark_cfunc_dirty(func.start_ea, True)
+        vdui = ida_hexrays.get_widget_vdui(ida_kernwin.get_current_widget())
+        if vdui:
+            vdui.refresh_view(True)
+            return True
+    except Exception:
+        print("[%s] decompiler refresh failed\n%s" % (PLUGIN_NAME, traceback.format_exc()))
+    return False
+
+
+def _expand_flattened_function(ea=None):
+    # Removed: merging an executable segment destroys real function boundaries.
+    return False
+
+
+def enable_microcode_deflatten(refresh=True):
+    """Install the IDA 9.1 Hex-Rays microcode unflattener shipped with the setup.
+
+    The existing unflat implementation rewrites mblock successors during
+    glbopt(), which is the right layer for making F5 show real control flow.
+    Keeping the import optional lets the scanner still work on machines that
+    do not have that helper installed.
+    """
+    global _MICROCODE_UNFLAT, _D810_STATE
+    try:
+        import ida_hexrays
+        if not ida_hexrays.init_hexrays_plugin():
+            raise RuntimeError("Hex-Rays decompiler is unavailable")
+
+        if _start_preferred_unflattener():
+            _start_d810_instructions()
+            changed = _refresh_decompiler() if refresh else False
+            msg = "direct-edge unflattener enabled"
+            if changed:
+                msg += "; current pseudocode refreshed"
+            ida_kernwin.info("Seagull: %s" % msg)
+            return True
+
+        # D-810 is present in the target IDA 9.1 installation and has a more
+        # complete generic dispatcher emulator than the small bundled helper.
+        # Start its OLLVM project without opening its GUI.  It rewrites
+        # mblock_t successors during Hex-Rays optimization.
+        try:
+            if _D810_STATE is None:
+                from d810.conf import D810Configuration
+                from d810.manager import D810State
+                cfg = D810Configuration()
+                _D810_STATE = D810State(cfg)
+                _D810_STATE.start_d810()
+                print("[%s] D-810 OLLVM microcode optimizer enabled" % PLUGIN_NAME)
+                changed = _refresh_decompiler() if refresh else False
+                msg = "D-810 OLLVM deflatten enabled"
+                if changed:
+                    msg += "; current pseudocode refreshed"
+                ida_kernwin.info("Seagull: %s" % msg)
+                return True
+            changed = _refresh_decompiler() if refresh else False
+            return True
+        except Exception as d810_exc:
+            if _D810_STATE is not None:
+                try:
+                    _D810_STATE.stop_d810()
+                except Exception:
+                    pass
+                _D810_STATE = None
+            print("[%s] D-810 unavailable, falling back to unflat: %s" % (PLUGIN_NAME, d810_exc))
+
+        import importlib
+        # Do not reload a live hook: the helper stores its hook instance in a
+        # module global, and reloading would lose the reference needed to
+        # unhook the previous instance.
+        if _MICROCODE_UNFLAT is not None:
+            unflat = _MICROCODE_UNFLAT
+        else:
+            unflat = importlib.import_module("unflat.new_unflattener")
+        unflat.main()
+        _MICROCODE_UNFLAT = unflat
+        changed = _refresh_decompiler() if refresh else False
+        msg = "microcode deflatten enabled"
+        if changed:
+            msg += "; current pseudocode refreshed"
+        print("[%s] %s" % (PLUGIN_NAME, msg))
+        ida_kernwin.info("Seagull: %s" % msg)
+        return True
+    except Exception as exc:
+        print("[%s] microcode deflatten unavailable: %s\n%s" % (PLUGIN_NAME, exc, traceback.format_exc()))
+        ida_kernwin.warning("Seagull microcode deflatten failed: %s" % exc)
+        return False
+
+
+def load_runtime_snapshot(path=None):
+    """Load a runtime snapshot captured from a live process.
+
+    Expected JSON manifest next to a set of .bin region files:
+      { "seeds": {"<entry_ea_hex>": {"ecx": 305419896, ...}},
+        "regions": [{"entry": "140094e0", "ea": "1a2b3000", "bytes": "f.bin"}] }
+
+    regions describe runtime-built dispatch tables (heap blocks) keyed to the
+    function that consumes them; seeds carry concrete register values captured
+    at the same moment (e.g. the dispatch key the real input provided).
+    resolve_chain then reads those regions instead of the file image and walks
+    the chain with the pinned seeds - recovering CFG for samples whose tables
+    never exist in the file.
+    """
+    import json
+    global _SNAPSHOT_FILE
+    path = path or ida_kernwin.ask_file(True, "*.json", "Oo0l1IVvMm: choose runtime snapshot manifest")
+    if not path:
+        return False
+    try:
+        with open(path, "r", encoding="utf-8") as fp:
+            man = json.load(fp)
+        base_dir = os.path.dirname(path)
+        _SNAPSHOT_SEEDS.clear()
+        _SNAPSHOT_MEM.clear()
+        for ea_hex, regs in (man.get("seeds") or {}).items():
+            _SNAPSHOT_SEEDS[int(ea_hex, 16)] = {k: int(v) for k, v in regs.items()}
+        for reg in man.get("regions") or []:
+            entry = int(reg["entry"], 16)
+            ea = int(reg["ea"], 16)
+            with open(os.path.join(base_dir, reg["bytes"]), "rb") as fp:
+                _SNAPSHOT_MEM[entry] = {ea: fp.read()}
+        _SNAPSHOT_FILE = path
+        _HEX_ANALYSIS.clear()
+        n_seed = len(_SNAPSHOT_SEEDS)
+        n_mem = len(_SNAPSHOT_MEM)
+        print("[%s] snapshot loaded: %d seeded entries, %d memory regions (re-analyze with F5)" %
+              (PLUGIN_NAME, n_seed, n_mem))
+        return True
+    except Exception:
+        print("[%s] snapshot load failed: %s" % (PLUGIN_NAME, traceback.format_exc()))
+        return False
+
+
+def seagull_armed():
+    return _ARMED
+
+
+def arm_seagull(mode="max"):
+    """Explicitly start the deobfuscation stack for this session.
+
+    Modes:
+      'min' - classic OLLVM flattening (central dispatcher): unflat's
+              valrange unflattener + D-810 instruction simplification, plus
+              materialization/jtbl lifting for truncated functions. The
+              expensive dispatch-chain resolver stays off.
+      'max' - encoded inline dispatch (the `jmp reg` family): everything in
+              'min' plus the concrete chain resolver, microcode direct-edge
+              /jz rewriting and dead dispatcher removal.
+
+    While armed, every F5 goes through the recovery chain; while disarmed,
+    decompilation is vanilla Hex-Rays with zero overhead.
+    """
+    global _ARMED, _MODE
+    if _ARMED and _MODE == mode:
+        return True
+    if _MODE != mode:
+        # cached analyses depend on the mode (chain resolver side effects)
+        _HEX_ANALYSIS.clear()
+    _MODE = mode
+    _ARMED = True
+    ok_hook = _install_hexrays_hook()
+    ok_unflat = _start_preferred_unflattener()
+    ok_mba = _start_d810_instructions()
+    # release our D-810 instance if the analyst opened D-810's own GUI first
+    try:
+        if _D810_INSTR_STATE is not None and _d810_already_running() is not _D810_INSTR_STATE:
+            _stop_d810_instructions()
+            ok_mba = _start_d810_instructions()
+    except Exception:
+        pass
+    ea = ida_kernwin.get_screen_ea()
+    func = ida_funcs.get_func(ea)
+    if func:
+        _analysis_for_entry(func.start_ea)
+        try:
+            ida_hexrays.mark_cfunc_dirty(func.start_ea, True)
+        except Exception:
+            pass
+        _open_deobfuscated_pseudocode(func.start_ea)
+    print("[%s] ARMED - structure=%s classic-unflat=%s d810-instructions=%s (toggle off via the same menu)" %
+          (PLUGIN_NAME, ok_hook, ok_unflat, ok_mba))
+    return True
+
+
+def disarm_seagull():
+    """Stop every optimizer this plugin started; F5 returns to vanilla."""
+    global _ARMED, _MODE, _HEX_HOOK, _UNFLAT_ACTIVE, _MICROCODE_UNFLAT
+    if not _ARMED:
+        _MODE = None
+        return True
+    _ARMED = False
+    _MODE = None
+    if _HEX_HOOK is not None:
+        try:
+            _HEX_HOOK.unhook()
+        except Exception:
+            pass
+        _HEX_HOOK = None
+    try:
+        if _MICROCODE_UNFLAT is not None:
+            hook = getattr(_MICROCODE_UNFLAT, "hook_instance", None)
+            if hook:
+                hook.unhook()
+    except Exception:
+        pass
+    _UNFLAT_ACTIVE = False
+    _MICROCODE_UNFLAT = None
+    _stop_d810_instructions()
+    _REWIRED_ENTRIES.clear()
+    print("[%s] DISARMED - decompilation is vanilla again" % PLUGIN_NAME)
+    _refresh_decompiler()
+    return True
+
+
+def arm_min():
+    arm_seagull("min")
+    ida_kernwin.info("Oo0l1IVvMm MIN armed (classic OLLVM) - F5 now deobfuscates")
+
+
+def arm_max():
+    arm_seagull("max")
+    ida_kernwin.info("Oo0l1IVvMm MAX armed (jmp-reg dispatch) - F5 now deobfuscates")
+
+
+def choose_mode():
+    """Plugin entry dialog: pick MIN / MAX, or turn off."""
+    btn = ida_kernwin.ask_buttons("MIN", "MAX", "OFF", 1,
+                   "Choose deobfuscation mode\n"
+                   "MIN: classic OLLVM flattening (central dispatcher)\n"
+                   "MAX: encoded inline dispatch (the jmp reg family)\n"
+                   "OFF: disarm - vanilla F5")
+    if btn == "MIN":
+        arm_min()
+    elif btn == "MAX":
+        arm_max()
+    elif btn == "OFF":
+        disarm_seagull()
+        ida_kernwin.info("Oo0l1IVvMm disarmed - F5 is vanilla again")
+
+
+def allround_mode():
+    """One-click full deobfuscation stack.
+
+    Division of labour between the cooperating plugins:
+      - Seagull (this plugin): structural recovery - instruction
+        materialization, finite jtbl lifting, dispatch-chain resolution and
+        direct-edge rewriting, dead dispatcher removal.
+      - unflat/new_unflattener: classic OLLVM central-dispatcher valrange
+        unflattening plus BCF dead-code removal.
+      - D-810 (instruction-only profile): 177 instruction rules - MBA
+        simplification, constant folding, opaque predicates, Z3 SMT.
+      - hrtng.dll keeps running autonomously (toggle: "[hrt] Enable
+        Unflattener" in its own menu).
+    """
+    import ida_hexrays
+    ok_flow = _install_hexrays_hook()
+    ok_unflat = _start_preferred_unflattener()
+    ok_mba = _start_d810_instructions()
+    ea = ida_kernwin.get_screen_ea()
+    func = ida_funcs.get_func(ea)
+    if func:
+        _analysis_for_entry(func.start_ea)
+        try:
+            ida_hexrays.mark_cfunc_dirty(func.start_ea, True)
+        except Exception:
+            pass
+    _open_deobfuscated_pseudocode(func.start_ea if func else ea)
+    ida_kernwin.info("Seagull all-around mode: structure=%s, classic-unflat=%s, D-810 instructions=%s" %
+                     (ok_flow, ok_unflat, ok_mba))
+
+
+def toggle_d810_instructions():
+    if _D810_INSTR_STATE is not None:
+        _stop_d810_instructions()
+    else:
+        _start_d810_instructions()
+    _refresh_decompiler()
+
+
+def toggle_d810_switch_case():
+    """D-810's switch-case unflattener for flattening styles our engines
+    do not cover; restores the user's profile selection afterwards."""
+    if _D810_INSTR_STATE is not None:
+        try:
+            _D810_INSTR_STATE.load_project(D810_SWITCH_CASE_PROFILE)
+            _D810_INSTR_STATE.start_d810()
+            _D810_INSTR_STATE.d810_config.set("last_project_index", _D810_SAVED_INDEX)
+            _D810_INSTR_STATE.d810_config.save()
+            print("[%s] D-810 switch-case unflattening profile active" % PLUGIN_NAME)
+            _refresh_decompiler()
+            return
+        except Exception as exc:
+            print("[%s] D-810 switch-case profile failed: %s" % (PLUGIN_NAME, exc))
+    _start_d810_instructions(D810_SWITCH_CASE_PROFILE)
+    _refresh_decompiler()
+
+
+def deflatten_current():
+    """Scan first, then install microcode rewriting and refresh F5 output."""
+    analyze_current()
+    _recover_static_cfg()
+    return enable_microcode_deflatten(refresh=True)
+
+
+class SeagullHandler(ida_kernwin.action_handler_t):
+    def __init__(self, callback):
+        ida_kernwin.action_handler_t.__init__(self)
+        self.callback = callback
+
+    def activate(self, ctx):
+        self.callback()
+        return 1
+
+    def update(self, ctx):
+        return ida_kernwin.AST_ENABLE_ALWAYS
+
+
+class SeagullPlugin(idaapi.plugin_t):
+    flags = idaapi.PLUGIN_FIX
+    comment = "Conservative native obfuscation triage"
+    help = "Find CFF dispatchers, indirect jump tables, opaque predicates, and anti-disassembly idioms"
+    wanted_name = PLUGIN_NAME  # "Oo0l1IVvMm"
+    # D-810 already uses Ctrl+Shift+D in the user's IDA installation.
+    wanted_hotkey = "Ctrl+Shift+Alt+D"
+
+    ACTION_SCAN = "seagull:scan-current"
+    ACTION_ALL = "seagull:scan-all"
+    ACTION_DEFLAT = "seagull:deflatten-current"
+    ACTION_RECOVER = "seagull:recover-static-cfg"
+    ACTION_ALLROUND = "seagull:allround-mode"
+    ACTION_MINMODE = "seagull:min-mode"
+    ACTION_SNAPSHOT = "seagull:load-snapshot"
+    ACTION_MBA = "seagull:toggle-d810-instructions"
+    ACTION_SWITCHCASE = "seagull:d810-switch-case"
+
+    def init(self):
+        try:
+            _install_ui_hook()
+            _schedule_late_hooks()
+            ida_kernwin.register_action(ida_kernwin.action_desc_t(
+                self.ACTION_SCAN, "Oo0l1IVvMm: scan current function", SeagullHandler(analyze_current),
+                self.wanted_hotkey, self.help, 0))
+            ida_kernwin.register_action(ida_kernwin.action_desc_t(
+                self.ACTION_ALL, "Oo0l1IVvMm: scan all functions", SeagullHandler(analyze_all),
+                None, self.help, 0))
+            ida_kernwin.register_action(ida_kernwin.action_desc_t(
+                self.ACTION_DEFLAT, "Oo0l1IVvMm: enable Hex-Rays optimizers",
+                SeagullHandler(deflatten_current), None,
+                "Enable installed Hex-Rays optimizers", 0))
+            ida_kernwin.register_action(ida_kernwin.action_desc_t(
+                self.ACTION_RECOVER, "Oo0l1IVvMm: recover encoded CFG targets",
+                SeagullHandler(lambda: _recover_static_cfg()), None,
+                "Recover finite encoded indirect jump targets", 0))
+            ida_kernwin.register_action(ida_kernwin.action_desc_t(
+                self.ACTION_ALLROUND, "Oo0l1IVvMm: MAX mode (jmp-reg dispatch)",
+                SeagullHandler(arm_max), None,
+                "Full stack: structure recovery, chain resolver, unflat, D-810 instructions", 0))
+            ida_kernwin.register_action(ida_kernwin.action_desc_t(
+                self.ACTION_MINMODE, "Oo0l1IVvMm: MIN mode (classic OLLVM)",
+                SeagullHandler(arm_min), None,
+                "Classic OLLVM dispatcher: unflat + D-810 instructions, chain resolver off", 0))
+            ida_kernwin.register_action(ida_kernwin.action_desc_t(
+                self.ACTION_MBA, "Oo0l1IVvMm: toggle D-810 instruction simplifier (MBA)",
+                SeagullHandler(toggle_d810_instructions), None,
+                "Toggle D-810's 177 instruction rules (MBA, constants, opaque predicates, Z3)", 0))
+            ida_kernwin.register_action(ida_kernwin.action_desc_t(
+                self.ACTION_SNAPSHOT, "Oo0l1IVvMm: load runtime snapshot",
+                SeagullHandler(load_runtime_snapshot), None,
+                "Load a runtime-captured snapshot (seeds + dispatch tables) for lazily-initialized obfuscation", 0))
+            ida_kernwin.register_action(ida_kernwin.action_desc_t(
+                self.ACTION_SWITCHCASE, "Oo0l1IVvMm: D-810 switch-case unflattener",
+                SeagullHandler(toggle_d810_switch_case), None,
+                "Switch D-810 to its switch-case unflattening profile", 0))
+            ida_kernwin.attach_action_to_menu("Edit/Plugins/", self.ACTION_SCAN, ida_kernwin.SETMENU_APP)
+            ida_kernwin.attach_action_to_menu("Edit/Plugins/", self.ACTION_ALL, ida_kernwin.SETMENU_APP)
+            ida_kernwin.attach_action_to_menu("Edit/Plugins/", self.ACTION_DEFLAT, ida_kernwin.SETMENU_APP)
+            ida_kernwin.attach_action_to_menu("Edit/Plugins/", self.ACTION_RECOVER, ida_kernwin.SETMENU_APP)
+            ida_kernwin.attach_action_to_menu("Edit/Plugins/", self.ACTION_ALLROUND, ida_kernwin.SETMENU_APP)
+            ida_kernwin.attach_action_to_menu("Edit/Plugins/", self.ACTION_MINMODE, ida_kernwin.SETMENU_APP)
+            ida_kernwin.attach_action_to_menu("Edit/Plugins/", self.ACTION_SNAPSHOT, ida_kernwin.SETMENU_APP)
+            ida_kernwin.attach_action_to_menu("Edit/Plugins/", self.ACTION_MBA, ida_kernwin.SETMENU_APP)
+            ida_kernwin.attach_action_to_menu("Edit/Plugins/", self.ACTION_SWITCHCASE, ida_kernwin.SETMENU_APP)
+            try:
+                import seagull_core
+                print("[%s] decoder=%s" % (PLUGIN_NAME, seagull_core.CAPSTONE_PATH or "unavailable"))
+            except Exception as exc:
+                print("[%s] decoder status unavailable: %s" % (PLUGIN_NAME, exc))
+            print("[%s] %s loaded" % (PLUGIN_NAME, PLUGIN_VERSION))
+            return idaapi.PLUGIN_KEEP
+        except Exception:
+            print("[%s] initialization failed\n%s" % (PLUGIN_NAME, traceback.format_exc()))
+            return idaapi.PLUGIN_SKIP
+
+    def run(self, arg):
+        # Clicking the plugin entry (Edit -> Plugins -> Oo0l1IVvMm) opens the
+        # mode chooser; nothing runs until a mode is picked.
+        choose_mode()
+
+    def term(self):
+        global _D810_STATE, _HEX_HOOK, _HEX_ANALYSIS, _UI_HOOK, _UI_TIMER, _UNFLAT_ACTIVE
+        if _D810_INSTR_STATE is not None:
+            _stop_d810_instructions()
+        if _UI_TIMER is not None:
+            try:
+                ida_kernwin.unregister_timer(_UI_TIMER)
+            except Exception:
+                pass
+            _UI_TIMER = None
+        if _UI_HOOK is not None:
+            try:
+                _UI_HOOK.unhook()
+            except Exception:
+                pass
+            _UI_HOOK = None
+        if _HEX_HOOK is not None:
+            try:
+                _HEX_HOOK.unhook()
+            except Exception:
+                pass
+            _HEX_HOOK = None
+        _HEX_ANALYSIS.clear()
+        if _D810_STATE is not None:
+            try:
+                _D810_STATE.stop_d810()
+            except Exception:
+                pass
+            _D810_STATE = None
+        if _MICROCODE_UNFLAT is not None:
+            try:
+                hook = getattr(_MICROCODE_UNFLAT, "hook_instance", None)
+                if hook:
+                    hook.unhook()
+            except Exception:
+                pass
+        _UNFLAT_ACTIVE = False
+        for action in (self.ACTION_SCAN, self.ACTION_ALL, self.ACTION_DEFLAT, self.ACTION_RECOVER,
+                       self.ACTION_ALLROUND, self.ACTION_MINMODE, self.ACTION_SNAPSHOT,
+                       self.ACTION_MBA, self.ACTION_SWITCHCASE):
+            try:
+                ida_kernwin.unregister_action(action)
+            except Exception:
+                pass
+
+
+def PLUGIN_ENTRY():
+    return SeagullPlugin()
+
+
+```
+
+`README.md`:
+
+```md
+# Oo0l1IVvMm
+
+IDA Pro 9.x (Hex-Rays x64) 反混淆插件 / An IDA Pro deobfuscation plugin for
+control-flow-flattened code. **双模式、手动启用、零常驻开销**：不选模式时 F5
+就是原生 Hex-Rays 的速度；在 `Edit → Plugins → Oo0l1IVvMm` 选择模式后，
+F5 自动反混淆。
+
+Two modes, **opt-in**, zero resident cost: pick a mode from
+`Edit → Plugins → Oo0l1IVvMm` (or its menu actions), then plain F5
+deobfuscates. Disarmed by default.
+
+## 模式 / Modes
+
+| 模式 | 针对的混淆 | 引擎组合 |
+|---|---|---|
+| **MIN** | 经典 OLLVM 平坦化（中央分发器 + 寄存器状态） | 物化/截断修复 + unflat valrange + D-810 指令级简化（链解析器关闭，轻量） |
+| **MAX** | 内联编码表分发（`jmp reg` 家族：栈槽状态/查表加密/cmov 汇合） | MIN 全部 + 具体走链解析 + 微码直达边/jz 拆分 + 死分发链删除 |
+
+选择方式：点击插件条目弹出 MIN/MAX/OFF 选择框，或直接用菜单
+`Oo0l1IVvMm: MAX mode (jmp-reg dispatch)` / `MIN mode (classic OLLVM)`。
+快捷键 `Ctrl+Shift+Alt+D` 同样弹选择框。OFF 解除武装恢复原生速度。
+
+## 它解决什么 / What it solves
+
+针对如下几类控制流平坦化（自动识别，无需配置）：
+
+1. **比较链 + 编码跳转表式分发**（本插件独创能力）：每个状态块尾部内联
+   `cmp 状态reg, K; jl 选偏移; 查全局表; add 解码钥reg; jmp reg`，
+   未命中落入下一 stub。状态值常藏在**栈槽**（单写常量），原始 if/else 被折进
+   `cmov`，还有 `je/js` 直接跳进链头——这些让 valrange 类 unflattener 失败的
+   形态，本插件用"具体走链解析"静态恢复。
+2. **经典 OLLVM 中央分发器**：通过编排 unflat/new_unflattener（valrange）处理。
+3. **截断函数修复**：IDA 在第一个间接跳转处截断函数时，递归解码物化真实指令
+   边界并重建函数范围。
+4. **算术混淆（MBA）/ 常量折叠 / 不透明谓词**：编排 D-810 的 177 条指令级规则
+   （含 Z3 SMT）处理——仅指令级 profile，不与其余控制流引擎冲突。
+
+## 实测效果 / Results
+
+对一处 OLLVM 变种样本（约 48 KB 的平坦化 `main`）：
+
+| 指标 | 原始 F5 | Seagull 武装后 F5 |
+|---|---|---|
+| 伪代码长度 | 98,390 字符 | **2,965 字符** |
+| switch（分发器） | 175 | **0** |
+| goto | 131 | **0** |
+| 编码查表 | 遍布全文 | **0** |
+
+恢复出原始 `if/else`、循环、调用参数与真实常量。
+
+## 安装 / Install
+
+```
+# 方式一：脚本（默认装入 IDA 程序 plugins 目录）
+powershell -ExecutionPolicy Bypass -File install.ps1 [-IdaRoot <IDA dir>]
+
+# 方式二：手工复制 ida_seagull_deob.py 与 seagull_core.py 到 IDA 的 plugins 目录
+```
+
+依赖：Hex-Rays x64 反编译器；Capstone 5（三种途径任选）：
+
+1. 放入 `plugins/vendor/capstone/`（本仓库不含，请自行复制）；
+2. `set SEAGULL_CAPSTONE_PATH=<含 capstone 包的目录>`；
+3. 已能被 IDA 的 Python `import capstone` 即可。
+
+可选协同插件（存在则自动编排，缺失则跳过，不强依赖）：
+[unflat/new_unflattener]、[D-810]。详见 `docs/plugin-ecosystem.md`。
+
+## 使用 / Usage（手动模式）
+
+1. 打开样本，**Edit → Plugins → Seagull Deobfuscator**（或菜单
+   `Oo0l1IVvMm: MAX/MIN mode` 菜单，快捷键
+   `Ctrl+Shift+Alt+D`）→ 武装。
+2. 在目标函数上按 **F5** → 反混淆后的伪代码。
+3. 再点一次 → 解除武装，F5 恢复原生速度。分析结果按函数缓存。
+
+其它菜单动作：`scan current/all functions`（注释+JSON 报告）、
+`recover encoded CFG targets`、`toggle D-810 instruction simplifier`、
+`D-810 switch-case unflattener`。
+
+## 运行时快照 / Runtime snapshots（对付"表运行时才构建"的样本）
+
+有些样本的分发表/表指针/密钥**在文件里不存在**——运行时（如首次调用、登录后）
+才解密构建。静态任何工具都无解；Oo0l1IVvMm v1.1 起支持**调试器快照**：
+
+1. 用 IDA 调试器跑到表已构建的时刻（如题目自带的 md5 比较断点）；
+2. 执行 `docs/snapshot_collect.py` 的 `snapshot_collect()`（导出各段内存 +
+   寄存器 + 栈，生成 `manifest.json`）;
+3. 菜单 `Oo0l1IVvMm: load runtime snapshot` 选择该 manifest；
+4. MAX 模式 F5 —— `resolve_chain` 用快照内存替代文件镜像、用捕获的种子寄存器
+   钉死分发密钥，静态恢复完整 CFG。
+
+`resolve_chain(..., seeds={reg: val}, mem_overlay={ea: bytes})` 也可编程调用。
+
+## 原理 / How it works
+
+1. **递归解码物化**：x86-64 有界抽象解释器（自研 `seagull_core`）从函数入口
+   解码，把所有真实指令边界写回 IDB，修复截断。
+2. **有限 jtbl 提升**：把抽象解释器解析出的间接跳转提升为微码 `m_jtbl`，
+   消灭 `JUMPOUT`。
+3. **分发链具体解析**（`resolve_chain`）：两遍分析 + 单写者常量栈槽 sticky
+   内存模型；对每个状态更新点，用该点的具体 `(状态值, 解码钥)` 单值重新执行
+   分发链直到真实状态块。汇合点（cmov 数据依赖）得到"值→目标"对。
+4. **微码重写**：单值站点改直达边；汇合点插 `m_jz` 链重建原始分支；jcc 站点
+   保留条件只改 taken 边；fallthrough 站点插显式 goto 块。两阶段 serial 处理
+   防块重编号腐蚀。
+5. **死链删除**：glbopt 阶段删除已无入边的整条分发链。
+6. **编排层**：unflat（经典分发器）与 D-810（指令级 MBA）按分工同时武装，
+   互不冲突；D-810 的 profile 选择在使用后自动恢复。
+
+## 兼容性 / Compatibility
+
+- IDA Pro 9.x + Hex-Rays（在 9.1.0.250226 上开发验证）；7.4+ 理论可用未验证。
+- 不修改原始二进制字节；仅物化指令边界与函数范围（数据库层修复）。
+- 遇到无法静态解析的形态（运行时解密表、自修改、VM）保守保留 `ijmp`，
+  不伪造边。
+
+## License
+
+MIT。Inspired by and interoperates with the D-810 and unflat projects
+(their code is not included; they remain the property of their authors).
+
+```
+
+`docs/blog-ollvm-deobf.md`:
+
+```md
+# 从 OLLVM 三板斧到 `jmp reg` 地狱：一款"全能"反混淆插件的诞生
+
+> 本文先讲清楚 OLLVM 三种经典混淆 pass 的原理与对抗，再带你见识一类教科书之外的"魔改变种"——内联编码表分发（`jmp reg` 家族），最后介绍我们为此写的开源插件 **Oo0l1IVvMm**：一键选模式，F5 直接反混淆。
+>
+> 仓库：https://github.com/woye969/Oo0l1IVvMm （MIT，IDA Pro 9.x）
+
+## 0. 为什么反编译出来是天书
+
+CPU 层面没有 if/else 和循环，只有指令和跳转。反编译器（Hex-Rays）的工作是把指令切成**基本块**、组成**控制流图（CFG）**，再做结构化识别——嵌套关系还原成 if/else，回边还原成循环。
+
+**它的命门：跳转目标必须静态可知。** `je 0x401748` 没问题；`jmp rdx`——rdx 是运行时才算出来的——它就瞎了：函数在第一个间接跳转处被截断，后面几 KB 代码不属于任何函数。
+
+混淆的本质，就是围绕这个命门做文章。
+
+## 1. OLLVM 三板斧
+
+OLLVM 不是单一工具，而是所有"在官方 LLVM 上叠加混淆 pass"的统称。三个最经典的 pass：
+
+### 1.1 指令替换（sub）—— 藏"语义"
+
+把简单运算替换成数值等价、形式冗长的表达式，产物通常是 **MBA（混合布尔-算术）表达式**。基于恒等式 `(x + y) - 2·(x & y) == x ^ y`：
+
+```c
+r = x ^ y;
+// 混淆后
+r = (x + y) - 2 * (x & y);
+// 或
+r = (x | y) - (x & y);
+```
+
+两个恶果：**代码膨胀**（一条指令变几十上百条）和**对抗分析**（伪代码被位运算淹没）。
+
+**对抗**：模式匹配是王道。IDA 插件 **D-810** 挂在 Hex-Rays 流程里，用预定义规则把 `(x|y)-(x&y)` 这类形状折叠回 `x^y`；更复杂的非标准 MBA 可以上 **GAMBA** 做深度求解。"D-810 初步清洗 + GAMBA 深度还原"是公认的组合拳。
+
+### 1.2 虚假控制流（bcf）—— 藏"结构"
+
+往 CFG 里注入**永不执行**的死代码块和难以预测的条件跳转。核心武器是**不透明谓词（Opaque Predicate）**：
+
+```c
+if (x * (x + 1) % 2 != 0) { ... }
+```
+
+数学上 `x(x+1)` 必为偶数，条件永假——但 IDA 不做深度代数分析，会当成合法分支老老实实画出流程。
+
+**对抗**有两条路：
+
+- 仍用 D-810，选 `bogus_loops.json` 配置，它能精确识别谓词对并剪除虚假结构（KSA/PRGA 那种被拆散的 `for` 循环能完整复原）；
+- **利用编译器优化**：bcf 的谓词常放在 `.bss` 全局变量里。手动给变量赋初值、把段属性改成只读，反编译器触发**常量传播**，死分支自动消失。改汇编直打补丁同理。
+
+### 1.3 控制流平坦化（fla）—— 藏"一切"
+
+最重量级的一招：引入**中央分发器**，把原本层级分明的基本块全部拍扁到同一层，靠状态变量调度：
+
+```c
+state = S0;
+while (1) {
+    switch (state) {
+    case S0: x = 0;   state = S1; continue;
+    case S1: i = 0;   state = S2; continue;
+    case S2: if (i < 8) state = S3; else state = S5; continue;
+    ...
+    }
+}
+```
+
+识别它要认识六大组件：**序言**（初始化状态变量）、**主分发器**（`while(1)+switch` 心脏）、**子分发器**（复杂变种会嵌套 switch 或用公式算目标）、**真实块**（业务逻辑，被隔离成 case）、**状态更新**（块尾 `state = NEXT` 后跳回分发器）、**返回块**。
+
+**对抗思路**：重建真实块之间的直接边——块 A 结尾 `state=2` 而 `state=2` 对应块 B，就把 A 的结尾改成 `JMP Block_B`，绕过分发器。工具上：D-810、基于符号执行的 **deflat**（识别组件 → 符号执行求解 state → 直接 patch 二进制）、或 **Unicorn 模拟执行**记录真实轨迹后修复。
+
+## 2. 教科书之外：`jmp reg` 家族
+
+以上三板斧有个共同前提：**分发器是规矩的**——状态在寄存器/栈上，目标查静态表。valrange 类工具（D-810 的 Unflattener、hrtng、deflat）都基于"值域传播"：算出每个块出口的状态值，和目标块入口的要求配对连边。
+
+但定制混淆器会把**分发器本身也混淆掉**。我们在一个 CTF 样本（某个"云岭电力"主题挑战的验证器）里遇到的真实形态：
+
+```asm
+; ---- 状态块结尾 ----
+40121f: mov  0xc(%rsp), %ecx          ; 状态基值藏在栈槽！
+401223: mov  $0x61b0268b, %eax
+401228: add  %eax, %ecx               ; 下一状态 = 基值 + 偏移
+; ---- 内联分发 stub（约 175 个，遍布全函数）----
+401230: mov  $0x308, %edx             ; 表内偏移候选 A
+401235: cmp  $0xad1ed58, %ecx         ; 拿状态值比大小
+40123b: jl   401242
+40123d: mov  $0xa90, %edx             ; 偏移候选 B
+401242: mov  0x11e47(%rip), %rax      ; 表基址（全局指针再间接一层）
+401249: mov  -0x1c433d74(%rax,%rdx), %rdx   ; 查表 → 加密的目标地址
+401251: add  %r14, %rdx               ; 用密钥 r14 解码
+40125a: jmp  *%rdx                    ; ★ 未命中时解出的是"下一个 stub"
+```
+
+与经典 OLLVM 的四点不同，每一处都让值域传播断链：
+
+1. **状态在栈槽**：任何一次"经未知地址的存储"都会让抽象解释器丢掉整个内存模型，之后读到全是"未知"；
+2. **目标经算术解码**：查表 + 常量密钥，符号求值链太长；
+3. **cmov 汇合**：原始 if/else 被**折进状态计算**（`cmove %edx,%ecx`），一个汇合点的状态有两个可能值——值域合并恰好丢失"哪个值对应哪个目标"的路径关联；
+4. **`je` 直接跳进链头**：条件分支与分发链纠缠。
+
+实测某 valrange 引擎的日志：`152 dispatch predecessors: 64 resolved + 88 failed`——失败的 88 个前驱正是死在这四点上。
+
+## 3. 我们的做法：别传播值域，直接"走链"
+
+换一种思路：**对每个状态更新点，用该点具体的 (状态值， 密钥) 像 CPU 一样逐条执行分发序列**——cmp 能定值就定值、查表能读就读、加密钥就加——直到落在第一个"非 stub"地址上，那就是真实目标。
+
+三个关键设计：
+
+1. **两遍分析 + sticky 栈槽**：第一遍找出"全函数只写一次的常量栈槽"（本例的状态基值 `0x19a4231a` @ `[rsp+0xc]`），第二遍让这些槽在内存模型被清空时自动复活；
+2. **按值拆分走链**：cmov 汇合点有 N 个候选状态值？按值拆成 N 次单值走链，各自落到自己的目标——顺便就把原始 if/else 重建出来了（微码层插 `m_jz` 链）；
+3. **每条边都有证明**：只重写"具体执行过分发序列、落在确定地址"的站点。算不出来？保守保留原状，绝不猜边。抽象解释是过近似，拆分走链即使多算出运行时不存在的值，对应的 jz 分支也永远不触发——**不改变语义**。
+
+工程上还踩了两个值得记录的坑：微码**插块会重排 serial**，边插块边写跳转目标会被重编号腐蚀到错误块（必须两阶段：先插完所有块、再用最终编号写指令）；flowchart 阶段标记的可达集**不会重算**，被绕开的死分发链要显式删除，否则 Hex-Rays 照样渲染。
+
+## 4. Oo0l1IVvMm：把上面的一切装进一个插件
+
+仓库：**https://github.com/woye969/Oo0l1IVvMm**
+
+设计哲学是"**按形态分工，宁可丑不可错**"。装进 IDA 后**默认完全静默**——F5 就是原生速度；在 `Edit → Plugins → Oo0l1IVvMm` 选模式后，F5 自动反混淆：
+
+| 模式 | 针对的混淆 | 引擎组合 |
+|---|---|---|
+| **MIN** | 经典 OLLVM 平坦化（中央分发器） | 截断修复 + unflat valrange + D-810 指令级（177 条规则：MBA/常量折叠/不透明谓词/Z3） |
+| **MAX** | `jmp reg` 内联编码表分发 | MIN 全部 + 具体走链解析 + 微码直达边/jz 拆分 + 死链删除 |
+
+两个模式的划分就是本文第 1、2 节的映射：三板斧交给生态里成熟的引擎（unflat、D-810，本插件负责编排和冲突防护），魔改变种用自己的走链引擎。再点一次选择 OFF 即解除武装。
+
+**实测**（一个 48KB 平坦化的 `main`，MAX 模式）：
+
+| 指标 | 原始 F5 | 插件 F5 |
+|---|---|---|
+| 伪代码长度 | 98,390 字符 | **2,965 字符** |
+| switch（分发器） | 175 | **0** |
+| goto | 131 | **0** |
+| JUMPOUT | 多处 | **0** |
+
+恢复出的代码有真实的解密循环、带参数的调用、原始阈值比较——不是"看起来干净"，是业务逻辑可见。这个区别至关重要：我们最初也拿到过一次"98KB→2.2KB"的漂亮数字，后来发现是假阳性——钩子没装上，第一个 `jmp rdx` 之后的代码因不可达被 Hex-Rays 丢弃。**看着干净 ≠ 反混淆成功，真实逻辑可见才是。**
+
+### 4.1 还解不了怎么办：v1.1 运行时快照
+
+更极端的样本（一个 client/server CTF 题）里，分发表、表指针、连分发密钥都**在文件里不存在**——全部运行时构建。我们验证过：基址指针 77 处引用全是读、零写入，表槽文件里是密文，静态层面神仙难救。
+
+v1.1 给出了通用钥匙：**调试器快照**。跑到表已构建的断点处（题目自带的调试脚本就是提示），一键导出内存+寄存器，插件加载后用快照内存覆盖文件镜像、用捕获的密钥钉死分发变量，MAX 模式照常走链。`resolve_chain(seeds=..., mem_overlay=...)` 也可编程调用。
+
+（顺带一提排查那只 sample 时的趣事：双端怎么都连不上，最后发现是端口 5566 落进了 Hyper-V 的保留端口范围——和混淆毫无关系，补丁个端口就好了。逆向路上一半的时间都花在这种地方。）
+
+## 5. 结语
+
+- **sub/bcf** 交给你喜欢的指令级工具（D-810 甚至手动改数据段）；
+- **经典 fla** 用 valrange 系引擎足够；
+- **`jmp reg` 变种**，试试我们的走链器；
+- 永远记住：能静态证明的边才重写；证明不了的保留原状；看到"干净得可疑"的输出，先怀疑是丢弃假象。
+
+插件完全开源（MIT）：**https://github.com/woye969/Oo0l1IVvMm** —— MIN/MAX 一键切换，欢迎 issue 和 PR。
+
+```
+
+`docs/obfuscation-tutorial.md`:
+
+```md
+# 控制流平坦化混淆详解（教学篇）
+
+以真实样本（比较链 + 编码跳转表分发）为例，从原理到对抗。
+
+## 0. 预备知识：反编译器眼里的程序
+
+CPU 层面没有 if/else、循环，只有指令与跳转。反编译器把指令切成**基本块**
+（basic block：只从第一条进、最后一条出的直线序列），组成 **CFG**，再做
+"结构化识别"——嵌套关系还原成 if/else，回边还原成循环。
+
+**命门：跳转目标必须静态可知。** `je 0x401748` 没问题；`jmp rdx` 的 rdx 是
+运行时算出来的，反编译器就瞎了。
+
+## 1. 什么是控制流平坦化（CFF）
+
+原始逻辑（结构清晰）：
+
+```c
+x = 0;
+for (i = 0; i < 8; i++) x ^= s[i];
+if (x == 0x41) puts("ok"); else puts("no");
+```
+
+平坦化后（结构被抹平成一张状态转换表）：
+
+```c
+state = S0;
+while (1) {
+    switch (state) {
+    case S0: x = 0;      state = S1; continue;
+    case S1: i = 0;      state = S2; continue;
+    case S2: if (i < 8) state = S3; else state = S5; continue;
+    case S3: x ^= s[i];  state = S4; continue;
+    case S4: i++;        state = S2; continue;      // 原循环回边
+    case S5: if (x == 0x41) state = S6; else state = S7; continue;
+    ...
+    }
+}
+```
+
+逻辑没变，层级没了。**恢复 = 两件事**：算出每个状态更新点的下一状态对应
+哪个真实块；把"更新+跳回 dispatcher"改写成直达边。结构化识别随后自动复原。
+
+## 2. 汇编层两大家族
+
+### 家族 A：中央分发器（经典 OLLVM 编译产物）
+
+集中的 dispatcher 块，两种形态：
+
+比较链（状态值不连续）：
+
+```asm
+dispatcher:
+    cmp  ecx, 0x2A2F7B5
+    je   block_S0
+    cmp  ecx, 0x84DB614C
+    je   block_S1
+    ...
+```
+
+跳转表（状态可映射）：`jmp [table + ecx*8]`。
+
+状态块结尾：`mov ecx, 下一状态常量` + `jmp dispatcher`。
+
+这类形态目标在表里、状态在寄存器——valrange 类工具（unflat / D-810 /
+hrtng）通过微码值域传播配对"出口值 ↔ 入口要求"，直接连边。
+
+### 家族 B：内联编码表分发（"jmp rdx" 那种）
+
+dispatcher 本身也被混淆：查表逻辑内联进每个块尾部，表项加密。真实样本：
+
+```asm
+; 状态块结尾：更新状态（基值藏在栈槽）
+40121f: mov  0xc(%rsp), %ecx       ; ecx = 状态基值
+401223: mov  $0x61b0268b, %eax
+401228: add  %eax, %ecx            ; 下一状态 = 基值 + 偏移
+
+; 内联分发 stub
+401230: mov  $0x308, %edx          ; 表内偏移候选 A
+401235: cmp  $0xad1ed58, %ecx      ; 按状态值比大小
+40123b: jl   401242
+40123d: mov  $0xa90, %edx          ; 偏移候选 B
+401242: mov  0x11e47(%rip), %rax   ; rax = 表基址（全局指针间接）
+401249: mov  -0x1c433d74(%rax,%rdx), %rdx   ; rdx = 加密的表项
+401251: add  %r14, %rdx            ; 用密钥 r14 解码
+40125a: jmp  *%rdx                 ; ★ jmp rdx
+40125c: (下一个 stub 紧贴其后；未命中时解码结果恰好等于下一 stub 地址)
+```
+
+协议要素（实测值）：状态基值 0x19a4231a 单写于 [rsp+0xc]；密钥 r14=
+0x5825c6f0；表基址经 qword_413090 间接；约 175 个 stub；33 处 cmove 汇合
+（原始 if/else 被折进状态计算）；10 处 je 直接跳入链头。
+
+## 3. `jmp rdx` 的三重打击
+
+1. **截断**：IDA 无法确定后继，函数边界切在第一个间接跳转处，其后代码
+   不属于任何函数。
+2. **微码层灭口**：即使物化了指令、修了边界，`jmp rdx` 在微码里是没有
+   后继的 m_ijmp，其后所有块不可达 → 被优化当死代码删除。（"输出变干净"
+   可能是丢弃假象，不是反混淆成功——务必核对真实逻辑是否可见。）
+3. **假边风险**：猜错目标会污染微码图，输出貌似合理实则语义错误。
+
+## 4. valrange 类工具失败的三个根因
+
+1. 状态在**栈槽**：任何经未知地址的存储都会清空内存模型，读到 TOP。
+2. 目标**经算术解码**：查表 + 密钥，符号求值链太长。
+3. **cmov 汇合**：状态有两个可能值，值域合并丢失"值↔目标"的路径关联。
+
+Seagull 的解法是换成**具体重新执行**：对每个状态更新点取具体的
+(状态值, 密钥)，逐条执行分发指令直到落在非 stub 地址。栈槽用"单写者常量
+槽 sticky 内存"解决；cmov 用"按值拆分再分别走"解决。
+
+## 5. 快速识别清单
+
+- 大量 `jmp reg` 结尾的小块，尾部模式高度重复；
+- 每块附近有 `mov reg, 高熵32位常量`（四字节皆非零）；
+- 全局指针被 `mov rax,[rip+X]` 间接引用后当数组用；
+- 函数列表里函数特别短，函数体区域大片未定义字节；
+- 修复后的 F5 是巨型 while(1)+switch，case 为高熵常量。
+
+## 6. 手工对抗
+
+- **动态收集**：gdb 断在 jmp rdx 记录实际目标，手工 add_cref（覆盖率 =
+  执行过的路径）。
+- **静态解表**：脚本读全局表 + 常量密钥解出整表（对密钥固定的样本有效）。
+- **模拟执行**：Unicorn 跑函数、hook 间接跳转（要处理 libc 调用）。
+
+## 7. 同家族其他成员
+
+- **MBA**：位运算等价式膨胀简单算术（藏语义）。D-810 指令规则的主战场。
+- **BCF**：不透明谓词制造假分支。unflat RemoveDeadCode 处理。
+- **VM 保护**：自定义字节码 + 解释器，需专门 lift，本插件保守放弃。
+- 商业混淆通常是叠加态——按层分工的编排（见 plugin-ecosystem.md）因此有效。
+
+```
+
+`docs/plugin-ecosystem.md`:
+
+```md
+# 插件生态与全能模式分工 / Plugin Ecosystem
+
+Seagull 是一个编排型插件：它自带结构层恢复引擎，并把本机已有的优秀反混淆
+引擎按"分工不冲突"的原则组织起来。
+
+| 引擎 | 擅长 | 机制 | 全能模式角色 |
+|---|---|---|---|
+| **Seagull** | 比较链+查表式平坦化、截断函数修复 | 递归解码物化 + 具体走链解析 + 微码直达边/jz 拆分 + glbopt 死链删除 | 结构层（武装后自动） |
+| **unflat/new_unflattener**（+ flatPlugin 前端） | 经典 OLLVM 中央分发器 | 微码 VALRANGE + 状态赋值匹配（deflat 1-4 级）+ RemoveDeadCode | 控制流第二引擎 |
+| **D-810** | MBA 算术混淆、常量折叠、不透明谓词、Z3 SMT | instruction_only profile：177 条指令规则 + JumpFixer | 指令层 |
+| **hrtng.dll**（bes tools） | 通用分发器（valrange 前驱解析） | 闭源微码 unflattener，自带 `[hrt] Enable/Disable` 开关 | 旁路第三引擎（用户手动控制，Seagull 不触碰） |
+
+## 冲突防护
+
+- 三个控制流重写器同时跑会互相破坏微码，因此全能模式只自动启用 D-810 的
+  **指令级** profile（不含 Unflattener 块规则）；需要 D-810 的
+  switch-case 反平坦化时经菜单单独切换，用完自动恢复用户原 profile。
+- 检测到用户自行启动 D-810 GUI 时，Seagull 自动让位（单实例原则）。
+- D-810 的 `start_d810()` 会持久化 profile 索引，Seagull 使用后立即恢复。
+
+## 手动模式（v0.9.0 起）
+
+一切自动行为默认关闭：不武装时 F5 为原生速度，导航不触发分析。点击
+`Edit → Plugins → Seagull Deobfuscator`（或菜单/快捷键）武装整条链；
+再点一次解除。
+
+```
+
+`docs/snapshot_collect.py`:
+
+```py
+"""Oo0l1IVvMm runtime-snapshot collector.
+
+Run this INSIDE IDA while DEBUGGING the target (native Windows debugger):
+  1. Set your breakpoint where the obfuscation tables are known to be built
+     (e.g. the md5-compare site hinted by the challenge's own
+     print_target_md5.py - break on the function that reads the input buffer,
+     or on any dispatch site inside the flattened function).
+  2. When the debugger stops there, run:  Oo0l1IVvMm.snapshot_collect()
+     from the IDA Python console (or via the plugin's
+     "load runtime snapshot" action after importing this module).
+
+It dumps every segment of the debugged process plus the concrete registers,
+and writes a manifest that Oo0l1IVvMm's "load runtime snapshot" action
+consumes: resolve_chain then overlays the runtime tables, pins the captured
+seeds, and recovers the CFG of lazily-initialized flattening.
+"""
+import json
+import os
+
+import idaapi
+import ida_dbg
+import ida_segment
+import ida_bytes
+
+OUT_DIR = os.path.join(os.environ.get("TEMP", "."), "oo_snapshot_out")
+
+
+def snapshot_collect(out_dir=OUT_DIR, max_bytes_per_seg=0x40000):
+    if not ida_dbg.dbg_can_query():
+        print("[snapshot] debugger is not paused on a process - run to your "
+              "breakpoint first")
+        return None
+    os.makedirs(out_dir, exist_ok=True)
+    regions = []
+    nseg = ida_segment.get_segm_qty()
+    for i in range(nseg):
+        seg = ida_segment.getnseg(i)
+        if seg is None:
+            continue
+        size = min(seg.end_ea - seg.start_ea, max_bytes_per_seg)
+        data = ida_dbg.read_dbg_memory(seg.start_ea, size)
+        if not data:
+            continue
+        fname = "%s_%x.bin" % (ida_segment.get_segm_name(seg).strip(".@") or "seg", seg.start_ea)
+        with open(os.path.join(out_dir, fname), "wb") as fp:
+            fp.write(data)
+        regions.append({"name": ida_segment.get_segm_name(seg),
+                        "ea": "%x" % seg.start_ea,
+                        "size": len(data),
+                        "bytes": fname})
+
+    regs = {}
+    for name in ("rcx", "rdx", "r8", "r9", "rbx", "rsi", "rdi",
+                 "r10", "r11", "r12", "r13", "r14", "r15", "rax", "rbp"):
+        try:
+            regs[name] = ida_dbg.get_reg_val(name)
+        except Exception:
+            pass
+    rsp = regs.get("rsp")
+    rip = regs.get("rip") or ida_dbg.get_ip_val()
+    stack = b""
+    if rsp:
+        stack = ida_dbg.read_dbg_memory(rsp, 0x2000) or b""
+    with open(os.path.join(out_dir, "stack.bin"), "wb") as fp:
+        fp.write(stack)
+
+    manifest = {
+        "rip": "%x" % (rip or 0),
+        "rsp": "%x" % (rsp or 0),
+        "registers": {k: v for k, v in regs.items()},
+        "regions": regions,
+    }
+    mpath = os.path.join(out_dir, "manifest.json")
+    with open(mpath, "w", encoding="utf-8") as fp:
+        json.dump(manifest, fp, indent=1)
+    print("[snapshot] %d regions, rip=%#x rsp=%#x -> %s" %
+          (len(regions), rip or 0, rsp or 0, mpath))
+    print("[snapshot] now: Edit -> Plugins -> Oo0l1IVvMm: load runtime snapshot, "
+          "pick %s, then MAX-mode F5 the flattened function" % mpath)
+    return mpath
+
+```
+
+`install.ps1`:
+
+```ps1
+param(
+    [string]$IdaRoot = "$env:PROGRAMFILES\IDA Professional 9.1",
+    [string]$UserPluginRoot = "$env:APPDATA\Hex-Rays\IDA Pro\plugins",
+    [switch]$InstallUserCopy
+)
+
+$ErrorActionPreference = 'Stop'
+$sourceRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
+$targets = @((Join-Path $IdaRoot 'plugins'))
+if ($InstallUserCopy) { $targets += $UserPluginRoot }
+$required = @('Oo0l1IVvMm.py', 'seagull_core.py')
+
+foreach ($target in $targets) {
+    New-Item -ItemType Directory -Force -Path $target | Out-Null
+    foreach ($name in $required) {
+        Copy-Item -LiteralPath (Join-Path $sourceRoot $name) -Destination (Join-Path $target $name) -Force
+    }
+    $vendor = Join-Path $target 'vendor'
+    New-Item -ItemType Directory -Force -Path $vendor | Out-Null
+    $capstoneSource = Join-Path $sourceRoot 'vendor\capstone'
+    if (Test-Path (Join-Path $capstoneSource 'lib\capstone.dll')) {
+        Copy-Item -LiteralPath $capstoneSource -Destination $vendor -Recurse -Force
+    } elseif (-not (Get-Command python -ErrorAction SilentlyContinue) -or -not (python -c "import capstone" 2>$null)) {
+        Write-Host 'NOTE: capstone not bundled and not importable. Set SEAGULL_CAPSTONE_PATH,
+        or place a capstone package under plugins\vendor\capstone, or pip-install capstone
+        into the Python that IDA uses.'
+    }
+    Write-Host "Installed Oo0l1IVvMm -> $target"
+}
+
+Write-Host 'Done. Restart IDA before testing.'
+
+```
+
+`seagull_core.py`:
+
+```py
+"""Bounded x86-64 abstract interpretation, independent of IDA operand text.
+
+Unknown values are TOP, never zero. Both outcomes of unknown conditions are
+visited. Results describe an overapproximation, not a sampled execution trace.
+"""
+from collections import deque
+from itertools import product
+import os
+import sys
+
+
+def _load_capstone():
+    """Load Capstone without requiring a separate IDA Python install.
+
+    IDA 9.1 ships its own Python runtime, so a package installed in the
+    user's normal Python environment is invisible to plugins.  Lookup order:
+    the SEAGULL_CAPSTONE_PATH environment variable, the plugin-local vendor
+    directory, then anything already importable from sys.path (e.g. a
+    capstone installed into IDA's Python).  The analyzer stays importable
+    when none is present; the caller reports the missing optional decoder
+    instead of failing during plugin discovery.
+    """
+    here = os.path.dirname(os.path.abspath(__file__))
+    candidates = [
+        os.environ.get("SEAGULL_CAPSTONE_PATH", ""),
+        os.path.join(here, "vendor"),
+        os.path.join(here, "..", "vendor"),
+    ]
+    for root in candidates:
+        root = os.path.abspath(root)
+        if os.path.isdir(os.path.join(root, "capstone")) and root not in sys.path:
+            sys.path.insert(0, root)
+    try:
+        from capstone import Cs, CS_ARCH_X86, CS_MODE_64, CS_GRP_JUMP, CS_GRP_RET
+        from capstone.x86 import X86_OP_REG, X86_OP_IMM, X86_OP_MEM
+        return (Cs, CS_ARCH_X86, CS_MODE_64, CS_GRP_JUMP, CS_GRP_RET,
+                X86_OP_REG, X86_OP_IMM, X86_OP_MEM, None)
+    except Exception as exc:
+        return (None, None, None, None, None, None, None, None, exc)
+
+
+(Cs, CS_ARCH_X86, CS_MODE_64, CS_GRP_JUMP, CS_GRP_RET,
+ X86_OP_REG, X86_OP_IMM, X86_OP_MEM, _CAPSTONE_ERROR) = _load_capstone()
+CAPSTONE_AVAILABLE = Cs is not None
+CAPSTONE_PATH = getattr(sys.modules.get("capstone"), "__file__", None)
+
+MASK = (1 << 64) - 1
+LIMIT = 8
+
+
+def values(*xs):
+    return frozenset(x & MASK for x in xs)
+
+
+def join(a, b):
+    if a is None or b is None:
+        return None
+    c = a | b
+    return c if len(c) <= LIMIT else None
+
+
+def calc(a, b, fn, bits=64):
+    if a is None or b is None:
+        return None
+    mask = (1 << bits) - 1
+    try:
+        c = frozenset(fn(x, y) & mask for x, y in product(a, b))
+        return c if len(c) <= LIMIT else None
+    except (ValueError, ZeroDivisionError):
+        return None
+
+
+def alias(name):
+    roots = ['rax', 'rbx', 'rcx', 'rdx', 'rsi', 'rdi', 'rbp', 'rsp']
+    for root in roots:
+        stem = root[1:]
+        names = {root: (64, 0), 'e' + stem: (32, 0), stem: (16, 0)}
+        low = stem[0] + 'l' if root in roots[:4] else stem + 'l'
+        names[low] = (8, 0)
+        if root in roots[:4]:
+            names[stem[0] + 'h'] = (8, 8)
+        if name in names:
+            return (root,) + names[name]
+    if name.startswith('r') and name[1:].rstrip('dwb').isdigit():
+        suffix = name[-1]
+        return (name[:-1], {'d': 32, 'w': 16, 'b': 8}[suffix], 0) if suffix in 'dwb' else (name, 64, 0)
+    return name, 64, 0
+
+
+class State:
+    def __init__(self, regs=None, mem=None):
+        self.regs = dict(regs or {})
+        self.mem = dict(mem or {})
+
+    def copy(self):
+        return State(self.regs, self.mem)
+
+    def read(self, name):
+        root, bits, shift = alias(name)
+        v = self.regs.get(root)
+        return None if v is None else frozenset((x >> shift) & ((1 << bits) - 1) for x in v)
+
+    def write(self, name, v):
+        root, bits, shift = alias(name)
+        if bits >= 32:
+            self.regs[root] = None if v is None else frozenset(x & ((1 << bits) - 1) for x in v)
+        else:
+            mask = ((1 << bits) - 1) << shift
+            self.regs[root] = calc(self.regs.get(root), v, lambda a, b: (a & ~mask) | ((b << shift) & mask))
+
+    def merge(self, other):
+        changed = False
+        for mine, theirs in [(self.regs, other.regs), (self.mem, other.mem)]:
+            for k in set(mine) | set(theirs):
+                v = join(mine.get(k), theirs.get(k))
+                if k not in mine or mine[k] != v:
+                    mine[k] = v
+                    changed = True
+        return changed
+
+
+class Analyzer:
+    def __init__(self, read, start, end):
+        self.read = read
+        self.start, self.end = start, end
+        self.cs = Cs(CS_ARCH_X86, CS_MODE_64)
+        self.cs.detail = True
+        self.insns = {}
+        self.states = {}
+        self.edges = {}
+        self.calls = {}
+        self.unresolved = set()
+        self.steps = 0
+
+    def decode(self, ea):
+        if ea not in self.insns:
+            data = self.read(ea, min(15, self.end - ea))
+            self.insns[ea] = next(self.cs.disasm(data or b'', ea, 1), None)
+        return self.insns[ea]
+
+    def address(self, ins, op, state):
+        m = op.mem
+        if m.segment:
+            return None
+        base = values(ins.address + ins.size) if ins.reg_name(m.base) == 'rip' else state.read(ins.reg_name(m.base)) if m.base else values(0)
+        index = calc(state.read(ins.reg_name(m.index)), values(m.scale), lambda a, b: a * b) if m.index else values(0)
+        return calc(calc(base, index, lambda a, b: a + b), values(m.disp), lambda a, b: a + b)
+
+    def operand(self, ins, op, state):
+        if op.type == X86_OP_IMM:
+            return values(op.imm & ((1 << (op.size * 8)) - 1))
+        if op.type == X86_OP_REG:
+            return state.read(ins.reg_name(op.reg))
+        if op.type == X86_OP_MEM:
+            addresses = self.address(ins, op, state)
+            if addresses is None:
+                return None
+            out = frozenset()
+            for a in addresses:
+                key = a, op.size
+                if key in state.mem:
+                    v = state.mem[key]
+                elif 0x700000000000 <= a < 0x700000100000:
+                    return None
+                else:
+                    raw = self.read(a, op.size)
+                    v = values(int.from_bytes(raw, 'little')) if raw and len(raw) == op.size else None
+                out = join(out, v)
+                if out is None:
+                    return None
+            return out
+        return None
+
+    def put(self, ins, op, state, v):
+        if op.type == X86_OP_REG:
+            state.write(ins.reg_name(op.reg), v)
+        elif op.type == X86_OP_MEM:
+            addrs = self.address(ins, op, state)
+            if addrs is None:
+                # An unmodelled alias may overwrite known local memory.
+                state.mem.clear()
+                return
+            for a in addrs:
+                for key in list(state.mem):
+                    if key[0] < a + op.size and a < key[0] + key[1]:
+                        state.mem[key] = None
+                state.mem[(a, op.size)] = v if len(addrs) == 1 else None
+
+    def execute(self, ins, s):
+        m, ops = ins.mnemonic, ins.operands
+        get = lambda n: self.operand(ins, ops[n], s)
+        put = lambda v: self.put(ins, ops[0], s, v)
+        bits = ops[0].size * 8 if ops else 64
+        if m in ('mov', 'movabs', 'movzx'):
+            put(get(1))
+        elif m in ('movsx', 'movsxd'):
+            b = ops[1].size * 8
+            v = get(1)
+            put(None if v is None else frozenset((x - (1 << b) if x & (1 << (b - 1)) else x) & ((1 << bits) - 1) for x in v))
+        elif m == 'lea':
+            put(self.address(ins, ops[1], s))
+        elif m in ('xor', 'sub') and ops[0].type == X86_OP_REG and ops[1].type == X86_OP_REG and ops[0].reg == ops[1].reg:
+            put(values(0))
+        elif m in ('add', 'sub', 'xor', 'and', 'or', 'shl', 'sal', 'shr', 'sar', 'imul'):
+            funcs = {'add': lambda a,b:a+b, 'sub': lambda a,b:a-b, 'xor':lambda a,b:a^b,
+                     'and':lambda a,b:a&b, 'or':lambda a,b:a|b, 'shl':lambda a,b:a << (b & (63 if bits == 64 else 31)),
+                     'sal':lambda a,b:a << (b & (63 if bits == 64 else 31)), 'shr':lambda a,b:a >> (b & (63 if bits == 64 else 31)),
+                     'sar':lambda a,b: (a-(1<<bits) if a & (1<<(bits-1)) else a) >> (b & (63 if bits == 64 else 31)),
+                     'imul':lambda a,b:a*b}
+            put(calc(get(1) if len(ops) == 3 else get(0), get(2) if len(ops) == 3 else get(1), funcs[m], bits))
+        elif m in ('inc', 'dec', 'neg', 'not'):
+            put(calc(get(0), values(0), {'inc':lambda a,b:a+1, 'dec':lambda a,b:a-1, 'neg':lambda a,b:-a, 'not':lambda a,b:~a}[m], bits))
+        elif m.startswith('set'):
+            put(values(0, 1))
+        elif m.startswith('cmov'):
+            put(join(get(0), get(1)))
+        elif m == 'push':
+            v = get(0)
+            s.write('rsp', calc(s.read('rsp'), values(8), lambda a,b:a-b))
+            a = s.read('rsp')
+            if a and len(a) == 1:
+                s.mem[(next(iter(a)), 8)] = v
+        elif m == 'pop':
+            a = s.read('rsp')
+            put(s.mem.get((next(iter(a)), 8)) if a and len(a) == 1 else None)
+            s.write('rsp', calc(s.read('rsp'), values(8), lambda a,b:a+b))
+        elif m == 'call':
+            v = get(0)
+            self.calls[ins.address] = join(self.calls.get(ins.address, frozenset()), v)
+            for r in ('rax','rcx','rdx','rsi','rdi','r8','r9','r10','r11'):
+                s.write(r, None)
+        elif m not in ('cmp','test','nop','endbr64') and not ins.group(CS_GRP_JUMP) and not ins.group(CS_GRP_RET):
+            _, written = ins.regs_access()
+            for reg in written:
+                s.write(ins.reg_name(reg), None)
+            if ops and ops[0].type == X86_OP_MEM and ops[0].access & 2:
+                self.put(ins, ops[0], s, None)
+
+    def run(self, max_steps=250000):
+        initial = State({'rsp': values(0x700000080000)})
+        self.states[self.start] = initial
+        todo = deque([self.start])
+        queued = {self.start}
+        def enqueue(ea, s):
+            if not self.start <= ea < self.end:
+                return
+            if ea not in self.states:
+                self.states[ea] = s.copy()
+                changed = True
+            else:
+                changed = self.states[ea].merge(s)
+            if changed and ea not in queued:
+                todo.append(ea)
+                queued.add(ea)
+        while todo:
+            ea = todo.popleft()
+            queued.discard(ea)
+            self.steps += 1
+            if self.steps > max_steps:
+                raise RuntimeError('abstract interpretation exceeded step budget')
+            ins = self.decode(ea)
+            if not ins:
+                continue
+            s = self.states[ea].copy()
+            if ins.mnemonic == 'jmp':
+                targets = self.operand(ins, ins.operands[0], s)
+                if ins.operands[0].type != X86_OP_IMM:
+                    old = self.edges.get(ea, frozenset())
+                    self.edges[ea] = join(old, targets)
+                    if self.edges[ea] is None:
+                        self.unresolved.add(ea)
+                if targets:
+                    for dst in targets:
+                        enqueue(dst, s)
+            elif ins.group(CS_GRP_JUMP):
+                if ins.operands[0].type == X86_OP_IMM:
+                    enqueue(ins.operands[0].imm, s)
+                enqueue(ea + ins.size, s)
+            elif not ins.group(CS_GRP_RET) and ins.mnemonic not in ('ud2','hlt','int3'):
+                self.execute(ins, s)
+                enqueue(ea + ins.size, s)
+        return self
+
+
+class ElfImage:
+    def __init__(self, path):
+        from elftools.elf.elffile import ELFFile
+        with open(path, 'rb') as f:
+            elf = ELFFile(f)
+            self.segments = [(int(s['p_vaddr']), s.data()) for s in elf.iter_segments() if s['p_type'] == 'PT_LOAD']
+            self.functions = sorted((int(e['initial_location']), int(e['initial_location'] + e['address_range']))
+                                    for e in elf.get_dwarf_info().EH_CFI_entries() if e.__class__.__name__ == 'FDE')
+
+    def read(self, address, size):
+        for base, data in self.segments:
+            if base <= address and address + size <= base + len(data):
+                return data[address-base:address-base+size]
+        return None
+
+
+# ---------------------------------------------------------------------------
+# Dispatch-chain resolution.
+#
+# Some flatteners do not use a compare-chain dispatcher on a register. Each
+# state block updates a state value (kept in a stack slot or a register),
+# then dispatches through a chain of tiny compare-and-table stubs:
+#
+#     mov  edx, OFF_A
+#     cmp  ecx, K
+#     jl   next_insn          ; pick OFF_A or OFF_B
+#     mov  edx, OFF_B
+#     mov  rax, [rip+global]  ; table base, adjusted along the chain
+#     mov  rdx, [rax + rdx + DISP]
+#     add  rdx, r14           ; per-path decode key
+#     jmp  rdx                ; miss -> next stub, hit -> state block
+#
+# Merged abstract states cannot resolve these sites (the state base lives in
+# a stack slot that stores through unknown addresses keep invalidating). The
+# resolver below re-executes the chain once per state-update site with that
+# site's own concrete values, which recovers the exact next block.
+# ---------------------------------------------------------------------------
+
+SIGNED_JCC = {'jl': lambda a, b: a < b, 'jge': lambda a, b: a >= b,
+              'jg': lambda a, b: a > b, 'jle': lambda a, b: a <= b}
+UNSIGNED_JCC = {'jb': lambda a, b: a < b, 'jbe': lambda a, b: a <= b,
+                'ja': lambda a, b: a > b, 'jae': lambda a, b: a >= b}
+EQUAL_JCC = {'je': lambda a, b: a == b, 'jne': lambda a, b: a != b}
+
+
+def _signed(v, bits):
+    return v - (1 << bits) if v & (1 << (bits - 1)) else v
+
+
+def slot_inits(analyzer, start, end):
+    """Constant single-writer stack slots keyed by true address.
+
+    Writers' own concrete rsp computes the slot address; functions with big
+    prologues keep their slots far below the entry rsp.
+    """
+    writes = {}
+    for ea, ins in analyzer.insns.items():
+        if not (start <= ea < end):
+            continue
+        ops = ins.operands
+        if ins.mnemonic in ('mov', 'movl') and len(ops) >= 2 and \
+                ops[0].type == X86_OP_MEM and ops[1].type == X86_OP_IMM:
+            m = ops[0].mem
+            if ins.reg_name(m.base) == 'rsp' and not m.index:
+                s = analyzer.states.get(ea)
+                rsp = s.read('rsp') if s is not None else None
+                if rsp is None or len(rsp) != 1:
+                    continue
+                addr = (next(iter(rsp)) + m.disp) & MASK
+                writes.setdefault((addr, ops[0].size), []).append(
+                    ops[1].imm & ((1 << (ops[0].size * 8)) - 1))
+    return {key: vals[0] for key, vals in writes.items() if len(vals) == 1}
+
+
+class StickyAnalyzer(Analyzer):
+    """Analyzer whose memory model preserves constant single-writer slots.
+
+    A store through an unknown address clears the whole memory model, which
+    loses the state base kept in a single-writer slot. Those slots survive
+    clears and are never invalidated by overlap writes.
+    """
+    sticky_slots = {}
+
+    def put(self, ins, op, state, v):
+        import capstone
+        if op.type == capstone.x86.X86_OP_MEM:
+            addrs = self.address(ins, op, state)
+            if addrs is None:
+                state.mem.clear()
+                state.mem.update(self.sticky_slots)
+                return
+        Analyzer.put(self, ins, op, state, v)
+
+
+class ChainWalker:
+    """Concrete re-execution of the dispatch chain from a state-update site."""
+
+    def __init__(self, analyzer):
+        self.an = analyzer
+        self._stub_cache = {}
+
+    def is_stub(self, ea):
+        """A dispatch stub: a short side-effect-free run ending in `jmp reg`."""
+        if ea in self._stub_cache:
+            return self._stub_cache[ea]
+        result = False
+        cur, n = ea, 0
+        while cur is not None and n < 15:
+            ins = self.an.decode(cur)
+            if ins is None:
+                break
+            if ins.mnemonic == 'jmp':
+                result = ins.operands[0].type != X86_OP_IMM
+                break
+            if ins.mnemonic == 'call' or ins.mnemonic.startswith('ret'):
+                break
+            if ins.operands and ins.operands[0].type == X86_OP_MEM and ins.operands[0].access & 2:
+                break
+            cur = cur + ins.size
+            n += 1
+        self._stub_cache[ea] = result
+        return result
+
+    def _decide(self, mnem, a, b, bits):
+        fn = SIGNED_JCC.get(mnem) or UNSIGNED_JCC.get(mnem) or EQUAL_JCC.get(mnem)
+        if fn is None:
+            return None
+        if mnem in SIGNED_JCC:
+            return fn(_signed(a, bits), _signed(b, bits))
+        return fn(a, b)
+
+    def walk(self, start_ea, state, max_steps=4000):
+        """Execute the chain; return the set of final non-stub targets."""
+        import capstone
+        CS_GRP_JUMP = capstone.CS_GRP_JUMP
+        CS_GRP_RET = capstone.CS_GRP_RET
+        finals = set()
+        stack = [(start_ea, state.copy())]
+        steps = 0
+        while stack:
+            ea, s = stack.pop()
+            cur = ea
+            pending = None
+            while True:
+                steps += 1
+                if steps > max_steps:
+                    return None
+                ins = self.an.decode(cur)
+                if ins is None:
+                    return None
+                m = ins.mnemonic
+                if m in ('cmp', 'test'):
+                    ops = ins.operands
+                    pending = (m, self.an.operand(ins, ops[0], s), self.an.operand(ins, ops[1], s),
+                               ops[0].size * 8 if ops[0].size else 32)
+                    cur += ins.size
+                    continue
+                if m.startswith('set') and pending is not None and pending[0] == 'cmp':
+                    ops = ins.operands
+                    cond = None
+                    if pending[1] is not None and len(pending[1]) == 1 and pending[2] is not None and len(pending[2]) == 1:
+                        cond = self._decide('j' + m[3:], next(iter(pending[1])), next(iter(pending[2])), pending[3])
+                    if cond is not None:
+                        self.an.put(ins, ops[0], s, values(1 if cond else 0))
+                    else:
+                        self.an.put(ins, ops[0], s, values(0, 1))
+                    cur += ins.size
+                    continue
+                if m == 'jmp':
+                    ops = ins.operands
+                    if ops[0].type == X86_OP_IMM:
+                        cur = ops[0].imm
+                        continue
+                    tset = self.an.operand(ins, ops[0], s)
+                    if not tset:
+                        return None
+                    for t in tset:
+                        if self.is_stub(t):
+                            stack.append((t, s.copy()))
+                        else:
+                            finals.add(t)
+                    break
+                if ins.group(CS_GRP_JUMP):
+                    ops = ins.operands
+                    taken = None
+                    if pending is not None and pending[0] in ('cmp', 'test') and \
+                            pending[1] is not None and len(pending[1]) == 1 and \
+                            pending[2] is not None and len(pending[2]) == 1:
+                        a, b = next(iter(pending[1])), next(iter(pending[2]))
+                        if pending[0] == 'test':
+                            if m in ('je', 'jne'):
+                                taken = EQUAL_JCC[m](a & b, 0)
+                        else:
+                            taken = self._decide(m, a, b, pending[3])
+                    if taken is None:
+                        if ops[0].type == X86_OP_IMM:
+                            stack.append((ops[0].imm, s.copy()))
+                        cur += ins.size
+                    elif taken:
+                        if ops[0].type != X86_OP_IMM:
+                            return None
+                        cur = ops[0].imm
+                    else:
+                        cur += ins.size
+                    pending = None
+                    continue
+                if ins.group(CS_GRP_RET) or m in ('ud2', 'hlt', 'int3'):
+                    return None
+                self.an.execute(ins, s)
+                cur += ins.size
+        return finals or None
+
+
+def _discover_chain_regs(an, chain_head):
+    """State and decode-key register names used by the dispatch chain.
+
+    The state register is what the chain head's first `cmp` tests; the decode
+    key is the register added to the table entry right before `jmp reg`.
+    Falls back to the common ecx/r14 pair when the shapes are not found.
+    """
+    state_reg, key_reg = "ecx", "r14"
+    insns = []
+    cur = chain_head
+    for _ in range(16):
+        ins = an.decode(cur)
+        if ins is None:
+            break
+        insns.append(ins)
+        if ins.mnemonic == "jmp":
+            break
+        cur += ins.size
+    for ins in insns:
+        if ins.mnemonic in ("cmp", "test"):
+            for op in ins.operands[:2]:
+                if op.type == X86_OP_REG:
+                    state_reg = ins.reg_name(op.reg)
+                    break
+            break
+    for ins in reversed(insns):
+        if ins.mnemonic in ("add", "sub", "xor", "or", "and") and ins.operands[0].type == X86_OP_REG \
+                and ins.operands[1].type == X86_OP_REG:
+            key_reg = ins.reg_name(ins.operands[1].reg)
+            break
+    return state_reg, key_reg
+
+
+def _pin_seeds(an, seeds):
+    """Overwrite seeded registers in every abstract state and re-propagate."""
+    for ea, st in an.states.items():
+        for reg, val in seeds.items():
+            st.write(reg, values(val & MASK))
+
+
+class ChainResolution(object):
+    """Outcome of dispatch-chain resolution.
+
+    ``rewires`` maps each state-update site to ((state_value, target), ...)
+    pairs: at runtime the site's state register holds one of the values and
+    control continues at the matching target. Single-pair sites become direct
+    edges; multi-pair sites are genuine data-dependent joins (the obfuscator
+    folded the original if/else into the state computation, often via cmov)
+    and need a conditional split.
+    """
+
+    def __init__(self, rewires, chain_head, state_reg, key_reg, site_kinds=None):
+        self.rewires = rewires
+        self.chain_head = chain_head
+        self.state_reg = state_reg
+        self.key_reg = key_reg
+        self.site_kinds = site_kinds or {}
+
+
+def resolve_chain(read, start, end, max_steps_per_site=4000, seeds=None,
+                  mem_overlay=None):
+    """Resolve every state-update site's real next block.
+
+    seeds: optional {regname: int} concrete values injected at the function
+    entry state (e.g. a runtime-captured dispatch key that lives in a
+    caller-provided buffer). Every seeded register is pinned for the whole
+    run, which lets the walker resolve sites whose key normally comes from
+    an input buffer.
+
+    mem_overlay: optional {ea: bytes} patches applied on top of `read`
+    (e.g. runtime-captured table contents for lazily-built dispatch
+    tables). Applied through a wrapping reader so lookups see the live
+    memory instead of the file image.
+
+    Returns a ChainResolution (or None when no dispatcher chain exists).
+    """
+    import capstone
+    CS_GRP_JUMP = capstone.CS_GRP_JUMP
+    CS_GRP_RET = capstone.CS_GRP_RET
+
+    if mem_overlay:
+        class _Overlay:
+            def __init__(self, inner):
+                self.inner = inner
+            def __call__(self, ea, size):
+                for oea, obytes in mem_overlay.items():
+                    if oea <= ea and ea + size <= oea + len(obytes):
+                        return obytes[ea - oea: ea - oea + size]
+                return self.inner(ea, size)
+        read = _Overlay(read)
+
+    base = Analyzer(read, start, end).run()
+    if not base.edges:
+        return None
+    sticky = {key: values(v) for key, v in slot_inits(base, start, end).items()}
+    if seeds:
+        import capstone
+        for reg, val in seeds.items():
+            lo = reg.lower()
+            if lo in ("ecx", "rcx"):
+                # seed both the 64-bit root and pin via sticky reg mechanism
+                sticky[("reg:" + lo, 4)] = values(val & 0xFFFFFFFF)
+            else:
+                sticky[("reg:" + lo, 8)] = values(val & MASK)
+        # teach StickyAnalyzer to apply register seeds on every state copy
+    StickyAnalyzer.sticky_slots = sticky
+    an = StickyAnalyzer(read, start, end).run()
+    if seeds:
+        _pin_seeds(an, seeds)
+
+    walker = ChainWalker(an)
+
+    # chain head: most-targeted direct-jump destination inside the region
+    tgt_count = {}
+    for ea, ins in an.insns.items():
+        if ins.mnemonic == 'jmp' and ins.operands[0].type == X86_OP_IMM:
+            t = ins.operands[0].imm
+            if start < t < end:
+                tgt_count[t] = tgt_count.get(t, 0) + 1
+    if not tgt_count:
+        return None
+    chain_head = max(tgt_count.items(), key=lambda kv: kv[1])[0]
+    state_reg, key_reg = _discover_chain_regs(an, chain_head)
+    stub_starts = {chain_head}
+    for targets in an.edges.values():
+        for t in (targets or ()):
+            if t != chain_head and walker.is_stub(t):
+                stub_starts.add(t)
+
+    entries = {}
+    for ea, ins in an.insns.items():
+        if not (start <= ea < end):
+            continue
+        dst = None
+        kind = None
+        if ins.mnemonic == 'jmp':
+            if ins.operands[0].type == X86_OP_IMM and ins.operands[0].imm in stub_starts:
+                dst = ins.operands[0].imm
+                kind = 'jmp'
+        elif ins.group(CS_GRP_JUMP):
+            # a conditional whose taken edge enters the chain keeps its
+            # condition; only the taken target gets rewritten
+            if ins.operands[0].type == X86_OP_IMM and ins.operands[0].imm in stub_starts:
+                dst = ins.operands[0].imm
+                kind = 'jcc'
+        elif not ins.group(CS_GRP_RET):
+            if ea + ins.size in stub_starts:
+                dst = ea + ins.size
+                kind = 'fall'
+        if dst is not None:
+            entries[ea] = (dst, kind)
+
+    rewires = {}
+    site_kinds = {}
+    for ea in sorted(entries):
+        entry_dst, kind = entries[ea]
+        site_kinds[ea] = kind
+        s = an.states.get(ea)
+        if s is None:
+            continue
+        s = s.copy()
+        ins = an.decode(ea)
+        if ins is not None and ins.mnemonic != 'jmp' and not ins.group(CS_GRP_JUMP):
+            try:
+                an.execute(ins, s)
+            except Exception:
+                continue
+        # Split join points into singleton-state walks: a site reached with
+        # several state values is a real data-dependent join (each value has
+        # its own next block), and walking them together explodes the paths.
+        sv = s.read(state_reg)
+        kv = s.read(key_reg)
+        splits = []
+        if sv is not None and kv is not None:
+            for v in sorted(sv):
+                for k in sorted(kv):
+                    s2 = s.copy()
+                    s2.write(state_reg, values(v))
+                    s2.write(key_reg, values(k))
+                    splits.append((v, s2))
+        else:
+            splits.append((None, s))
+        pairs = {}
+        ok = True
+        for v, s2 in splits:
+            got = walker.walk(entry_dst, s2, max_steps_per_site)
+            if got is None:
+                ok = False
+                break
+            pairs.setdefault(v, set()).update(got)
+        if not ok or not pairs:
+            continue
+        # every state value must lead to exactly one block for a clean split
+        if all(len(t) == 1 for t in pairs.values()):
+            rewires[ea] = tuple((v, next(iter(t))) for v, t in pairs.items())
+    return ChainResolution(rewires, chain_head, state_reg, key_reg, site_kinds)
+
+
+if __name__ == '__main__':
+    import sys, json
+    image = ElfImage(sys.argv[1])
+    reports = []
+    for start, end in image.functions:
+        if start < 0x401150:
+            continue
+        a = Analyzer(image.read, start, end).run()
+        report = {'start':start,'end':end,'instructions':len(a.insns),'steps':a.steps,
+                  'edges':{str(k):sorted(v) for k,v in a.edges.items() if v},
+                  'unresolved':sorted(k for k,v in a.edges.items() if v is None),
+                  'calls':{str(k):sorted(v) for k,v in a.calls.items() if v}}
+        reports.append(report)
+        print(hex(start),len(a.insns),'edges',len(report['edges']),'unknown',len(report['unresolved']),'steps',a.steps, flush=True)
+    with open(sys.argv[2], 'w') as f:
+        json.dump(reports, f, indent=2)
+
+
+# IDA scans every .py file in plugins/ and expects a plugin entry point. Keep
+# the analyzer importable while making this support module a harmless skipped
+# plugin when it is discovered by the loader.
+try:
+    import idaapi as _idaapi
+    class _SeagullCoreLibraryPlugin(_idaapi.plugin_t):
+        flags = _idaapi.PLUGIN_HIDE
+        wanted_name = "Seagull Core Library"
+        comment = "Seagull analyzer support module"
+        help = ""
+        wanted_hotkey = ""
+        def init(self):
+            return _idaapi.PLUGIN_SKIP
+        def run(self, arg):
+            return 0
+        def term(self):
+            pass
+    def PLUGIN_ENTRY():
+        return _SeagullCoreLibraryPlugin()
+except Exception:
+    pass
+
+
+```
