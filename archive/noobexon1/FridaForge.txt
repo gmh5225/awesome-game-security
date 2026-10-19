@@ -1,0 +1,1814 @@
+Project Path: arc_noobexon1_FridaForge_vnskxd7u
+
+Source Tree:
+
+```txt
+arc_noobexon1_FridaForge_vnskxd7u
+├── LICENSE
+├── README.md
+├── build
+│   └── build.py
+├── fridaforge
+│   ├── __init__.py
+│   ├── _version.py
+│   ├── backend.py
+│   ├── commands
+│   │   ├── __init__.py
+│   │   ├── base.py
+│   │   ├── hook_dlopen_functions.py
+│   │   ├── hook_function.py
+│   │   ├── modify_section_protection.py
+│   │   ├── negate_cond_branch_arm64.py
+│   │   └── negate_cond_branch_x86.py
+│   ├── core
+│   │   ├── __init__.py
+│   │   ├── hook_dlopen_functions.py
+│   │   ├── hook_function.py
+│   │   ├── modify_section_protection.py
+│   │   ├── negate_cond_branch_arm64.py
+│   │   ├── negate_cond_branch_x86.py
+│   │   └── utils.py
+│   └── templates
+│       ├── hook_dlopen_functions.js
+│       ├── hook_function.js
+│       ├── modify_section_protection.js
+│       ├── negate_cond_branch_arm64.js
+│       └── negate_cond_branch_x86.js
+├── hosts
+│   ├── binja
+│   │   ├── __init__.py
+│   │   ├── backend_binja.py
+│   │   └── plugin.json
+│   └── ida
+│       ├── backend_ida.py
+│       ├── ida-plugin.json
+│       └── ida_entry.py
+├── pyproject.toml
+└── tests
+    ├── fakes.py
+    ├── test_backend.py
+    ├── test_build.py
+    ├── test_commands.py
+    └── test_generators.py
+
+```
+
+`LICENSE`:
+
+```
+MIT License
+
+Copyright (c) 2026 noobexon1
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
+`README.md`:
+
+```md
+<div align="center">
+
+# FridaForge
+
+**Generate Frida scripts directly from IDA Pro and Binary Ninja.** ⚡
+
+[![GitHub release](https://img.shields.io/github/v/release/noobexon1/FridaForge)](https://github.com/noobexon1/FridaForge/releases)
+[![GitHub stars](https://img.shields.io/github/stars/noobexon1/FridaForge)](https://github.com/noobexon1/FridaForge/stargazers)
+[![GitHub last commit](https://img.shields.io/github/last-commit/noobexon1/FridaForge)](https://github.com/noobexon1/FridaForge/commits)
+[![GitHub issues](https://img.shields.io/github/issues/noobexon1/FridaForge)](https://github.com/noobexon1/FridaForge/issues)
+[![GitHub downloads](https://img.shields.io/github/downloads/noobexon1/FridaForge/total)](https://github.com/noobexon1/FridaForge/releases)
+[![Release](https://img.shields.io/github/actions/workflow/status/noobexon1/FridaForge/release.yml?label=release)](https://github.com/noobexon1/FridaForge/actions/workflows/release.yml)
+![IDA Pro](https://img.shields.io/badge/IDA%20Pro-Plugin-blue)
+![Binary Ninja](https://img.shields.io/badge/Binary%20Ninja-Plugin-orange)
+![Frida](https://img.shields.io/badge/Frida-Instrumentation-red)
+[![GitHub License](https://img.shields.io/github/license/noobexon1/FridaForge)](LICENSE)
+
+</div>
+
+## ✨ Features
+
+Right-click (or hit a hotkey) in your disassembler to generate ready-to-use Frida snippets — the result is instantly copied to your clipboard.
+
+- 🧩 **Composable scripts** — snippets are independent but can be nested to build complex instrumentation with a few clicks
+- 🎯 **Context-aware** — scripts auto-fill module name, function address, section, and any other detail available from your current context
+- 🧰 **Two hosts, one experience** — identical features, hotkeys, and menus in both IDA Pro and Binary Ninja
+- 📋 **Clipboard integration** — generated scripts are copied the moment you run an action
+
+### Supported Actions
+
+#### 🪝 Hooks
+
+| Action | Description | Hotkey |
+|---|---|---|
+| Generate function hook | Intercept calls to the selected function, log entry/exit | `Shift+F` |
+| Generate dlopen hooks | Monitor `dlopen` (including Android variants) to detect module loading | `Shift+D` |
+
+#### 🧠 Memory
+
+| Action | Description | Hotkey |
+|---|---|---|
+| Modify section protection | Change memory protection of the section at the current address | `Shift+M` |
+
+#### 🩹 Patching
+
+| Action | Description | Hotkey |
+|---|---|---|
+| Negate cond branch (ARM64) | Flip the condition of an ARM64 conditional branch | `Shift+A` |
+| Negate cond branch (x86/x64) | Flip the condition of an x86/x64 conditional branch | `Shift+X` |
+
+## 🔧 How it Works
+
+Each feature follows a simple pipeline: a **Frida template** (`fridaforge/templates/`) provides the JavaScript skeleton with placeholders, a **command** (`fridaforge/commands/`) gathers context through a host-agnostic **Backend**, and a **generator** (`fridaforge/core/`) fills the template to produce the final script.
+
+The shared core knows nothing about IDA or Binary Ninja. Each host lives in `hosts/` and provides a thin **adapter** that implements the `Backend` interface (data extraction, clipboard, menu + hotkey registration). Add a feature once and it works in both tools.
+
+## 📦 Installation
+
+Grab the archive for your tool from the [latest release](https://github.com/noobexon1/FridaForge/releases). There's one per host — `fridaforge-binja-<version>.zip` and `fridaforge-ida-<version>.zip`.
+
+### 🟠 Binary Ninja
+
+1. Find your user plugins directory by running this in Binary Ninja's Python console:
+   ```python
+   binaryninja.user_plugin_path()
+   ```
+2. Extract `fridaforge-binja-<version>.zip` into that directory so that `<binja user plugins>/fridaforge/` exists.
+3. Restart Binary Ninja.
+
+### 🔵 IDA Pro
+
+1. **Prerequisites:**
+   - IDA Pro (tested with 9.0, but any version with Python 3 and `idaapi` should work).
+   - [Frida](https://frida.re) installed on your target system/device.
+   - PyQt5 for clipboard functionality (usually bundled with IDA's Python).
+2. Locate your IDA Pro plugins directory — in IDA, go to `Help` → `About IDA...` → `IDA directories` tab → `Plugins`. Common paths:
+   - **Windows:** `%APPDATA%\Hex-Rays\IDA Pro\plugins` or `C:\Program Files\IDA Pro X.X\plugins`
+   - **Linux:** `~/.idapro/plugins`
+   - **macOS:** `~/.idapro/plugins`
+3. Extract `fridaforge-ida-<version>.zip` into that directory so that `<plugins>/fridaforge/ida-plugin.json` exists.
+4. Restart IDA Pro. The plugin loads automatically — you'll see `[FridaForge]` messages in the Output window if it loaded correctly.
+
+## 🚀 Usage
+
+1. Open your target binary in IDA Pro or Binary Ninja.
+2. Right-click in the disassembly or pseudocode view (or use the hotkeys above).
+3. Navigate to **FridaForge** → choose a category and action.
+4. The generated Frida script is copied to your clipboard.
+5. Paste into your Frida CLI, agent, or `.js` file.
+
+### 🧱 Script Composition
+
+Snippets are designed to be independent building blocks. You can nest scripts inside each other — for example, hook a function, negate a conditional branch on entry, and restore it on exit. Complex instrumentation from a few clicks.
+
+## 🛠️ Building from Source
+
+```bash
+pip install pytest
+pytest -v                 # run the host-agnostic test suite
+python build/build.py     # writes dist/fridaforge-binja-*.zip and dist/fridaforge-ida-*.zip
+```
+
+Builds are deterministic — the same source produces byte-identical archives.
+
+## 🤝 Contributing
+
+Contributions welcome! Got a useful Frida snippet? Turn it into a template so everyone can use it.
+
+1. Fork the repository.
+2. Create a new branch for your feature or fix.
+3. Make your changes (and add a test — the core is fully unit-tested without needing a host).
+4. Submit a pull request.
+
+| Adding... | Where |
+|---|---|
+| New Frida snippet | `fridaforge/templates/` (JS template) + `fridaforge/core/` (generator) + `fridaforge/commands/` (command) |
+| Host-specific behavior | `hosts/binja/` or `hosts/ida/` |
+
+Each command and generator lives in its own file — easy to contribute without merge conflicts.
+
+## 🗺️ Roadmap
+
+See [open issues](https://github.com/noobexon1/FridaForge/issues) for planned features and known bugs.
+
+## 📄 License
+
+[MIT](LICENSE)
+
+```
+
+`build/build.py`:
+
+```py
+"""Assemble the two FridaForge host archives."""
+
+import argparse
+import json
+import shutil
+import zipfile
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent.parent
+PKG = ROOT / "fridaforge"
+HOSTS = ROOT / "hosts"
+DIST = ROOT / "dist"
+STAGING = ROOT / "build" / "_staging"
+
+_IGNORE = shutil.ignore_patterns("__pycache__", "*.pyc")
+
+
+def read_version() -> str:
+    namespace: dict = {}
+    exec((PKG / "_version.py").read_text(encoding="utf-8"), namespace)
+    return namespace["__version__"]
+
+
+def stamp_version(pkg_dir: Path, host: str, version: str) -> None:
+    if host == "binja":
+        path = pkg_dir / "plugin.json"
+        data = json.loads(path.read_text(encoding="utf-8"))
+        data["version"] = version
+        path.write_text(json.dumps(data, indent=2), encoding="utf-8")
+    else:
+        path = pkg_dir / "ida-plugin.json"
+        data = json.loads(path.read_text(encoding="utf-8"))
+        data["plugin"]["version"] = version
+        path.write_text(json.dumps(data, indent=2), encoding="utf-8")
+
+
+def zip_folder(folder: Path, out: Path) -> None:
+    with zipfile.ZipFile(out, "w", zipfile.ZIP_DEFLATED) as archive:
+        for file in sorted(folder.rglob("*")):
+            if file.is_file():
+                arcname = file.relative_to(folder).as_posix()
+                info = zipfile.ZipInfo(arcname, date_time=(1980, 1, 1, 0, 0, 0))
+                info.compress_type = zipfile.ZIP_DEFLATED
+                info.external_attr = 0o644 << 16
+                archive.writestr(info, file.read_bytes())
+
+
+def build_host(host: str, version: str) -> Path:
+    stage = STAGING / host
+    if stage.exists():
+        shutil.rmtree(stage)
+    stage.mkdir(parents=True)
+
+    pkg_dir = stage / "fridaforge"
+    shutil.copytree(PKG, pkg_dir, ignore=_IGNORE)
+
+    for item in (HOSTS / host).iterdir():
+        if item.is_file():
+            shutil.copy2(item, pkg_dir / item.name)
+
+    stamp_version(pkg_dir, host, version)
+
+    DIST.mkdir(exist_ok=True)
+    out = DIST / f"fridaforge-{host}-{version}.zip"
+    if out.exists():
+        out.unlink()
+    zip_folder(stage, out)
+    return out
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description="Build FridaForge archives.")
+    parser.add_argument("--version", default=None, help="Override version.")
+    args = parser.parse_args()
+    version = args.version or read_version()
+
+    for host in ("binja", "ida"):
+        out = build_host(host, version)
+        print(f"Built {out}")
+
+
+if __name__ == "__main__":
+    main()
+
+```
+
+`fridaforge/__init__.py`:
+
+```py
+"""FridaForge: generate Frida scripts from IDA Pro and Binary Ninja."""
+
+from fridaforge._version import __version__
+
+__all__ = ["__version__"]
+
+```
+
+`fridaforge/_version.py`:
+
+```py
+__version__ = "0.1.0"
+
+```
+
+`fridaforge/backend.py`:
+
+```py
+"""Host-agnostic backend interface for FridaForge commands."""
+
+from abc import ABC, abstractmethod
+from dataclasses import dataclass
+from enum import Enum, auto
+
+
+class ContextKind(Enum):
+    """The host context a command needs to run."""
+
+    GLOBAL = auto()    # only the module is needed
+    ADDRESS = auto()   # the current address is needed
+    FUNCTION = auto()  # the current function is needed
+
+
+@dataclass(frozen=True)
+class FunctionRef:
+    """A resolved reference to a function in the loaded binary."""
+
+    start: int
+    name: str
+
+
+class Backend(ABC):
+    """The port each host (Binary Ninja, IDA) must implement."""
+
+    @abstractmethod
+    def get_module_name(self) -> str:
+        """Return the loaded module's base file name."""
+
+    @abstractmethod
+    def get_image_base(self) -> int:
+        """Return the image base address of the loaded binary."""
+
+    @abstractmethod
+    def get_current_address(self) -> int | None:
+        """Return the currently selected address, or ``None``."""
+
+    @abstractmethod
+    def get_current_function(self) -> FunctionRef | None:
+        """Return the currently selected function, or ``None``."""
+
+    @abstractmethod
+    def get_section_name_at(self, addr: int) -> str | None:
+        """Return the name of the section/segment containing *addr*."""
+
+    @abstractmethod
+    def get_instruction_mnemonic(self, addr: int) -> str | None:
+        """Return the mnemonic of the instruction at *addr*, or ``None``."""
+
+    @abstractmethod
+    def copy_to_clipboard(self, text: str) -> bool:
+        """Copy *text* to the system clipboard. Return success."""
+
+    @abstractmethod
+    def log_info(self, msg: str) -> None:
+        """Emit an informational message in the host's idiom."""
+
+    @abstractmethod
+    def log_warn(self, msg: str) -> None:
+        """Emit a warning message in the host's idiom."""
+
+    # --- concrete helpers shared by all hosts ---
+
+    def get_relative_address(self, addr: int) -> str:
+        """Return *addr*'s offset from the image base as a hex string."""
+        return hex(addr - self.get_image_base())
+
+    def _resolve_function_name(self, start: int, raw_name: str) -> str:
+        """Return *raw_name*, or a ``sub_<offset>`` fallback when empty."""
+        if raw_name:
+            return raw_name
+        relative_address = self.get_relative_address(start)
+        return f"sub_{relative_address.removeprefix('0x')}"
+
+```
+
+`fridaforge/commands/__init__.py`:
+
+```py
+"""FridaForge command registry."""
+
+from fridaforge.commands.base import Command
+from fridaforge.commands.hook_dlopen_functions import DlopenHooksCommand
+from fridaforge.commands.hook_function import FunctionHookCommand
+from fridaforge.commands.modify_section_protection import (
+    ModifySectionProtectionCommand,
+)
+from fridaforge.commands.negate_cond_branch_arm64 import (
+    NegateArm64CondBranchCommand,
+)
+from fridaforge.commands.negate_cond_branch_x86 import (
+    NegateX86CondBranchCommand,
+)
+
+ALL_COMMANDS: list[Command] = [
+    FunctionHookCommand(),
+    DlopenHooksCommand(),
+    ModifySectionProtectionCommand(),
+    NegateArm64CondBranchCommand(),
+    NegateX86CondBranchCommand(),
+]
+
+__all__ = ["Command", "ALL_COMMANDS"]
+
+```
+
+`fridaforge/commands/base.py`:
+
+```py
+"""Base class for host-agnostic FridaForge commands."""
+
+from abc import ABC, abstractmethod
+
+from fridaforge.backend import Backend, ContextKind
+
+
+class Command(ABC):
+    """A single user-facing feature, independent of the host.
+
+    Subclasses set the metadata class attributes and implement
+    :meth:`run`, which pulls data from the *backend* and copies the
+    generated snippet to the clipboard.
+    """
+
+    id: str
+    description: str
+    category: str
+    hotkey: str | None = None
+    context: ContextKind
+
+    @abstractmethod
+    def run(self, backend: Backend) -> None:
+        """Execute the command against the given backend."""
+
+    def _deliver(self, backend: Backend, snippet: str) -> None:
+        """Copy the snippet to the clipboard and report the outcome."""
+        if backend.copy_to_clipboard(snippet):
+            backend.log_info("Frida snippet copied to clipboard.")
+        else:
+            backend.log_warn("Failed to copy snippet to clipboard.")
+
+```
+
+`fridaforge/commands/hook_dlopen_functions.py`:
+
+```py
+"""Command: generate Frida dlopen-family hooks."""
+
+from fridaforge.backend import Backend, ContextKind
+from fridaforge.commands.base import Command
+from fridaforge.core import DlopenHookGenerator
+
+
+class DlopenHooksCommand(Command):
+    id = "hook_dlopen_functions"
+    description = "Generate dlopen hooks (Basic for Android native libs)"
+    category = "Hooks"
+    hotkey = "Shift+D"
+    context = ContextKind.GLOBAL
+
+    def run(self, backend: Backend) -> None:
+        module_name = backend.get_module_name()
+        if not module_name:
+            backend.log_warn("Could not determine the module name.")
+            return
+
+        snippet = DlopenHookGenerator().generate(module_name)
+        self._deliver(backend, snippet)
+
+```
+
+`fridaforge/commands/hook_function.py`:
+
+```py
+"""Command: generate a Frida function hook."""
+
+from fridaforge.backend import Backend, ContextKind
+from fridaforge.commands.base import Command
+from fridaforge.core import FunctionHookGenerator
+
+
+class FunctionHookCommand(Command):
+    id = "hook_function"
+    description = "Generate function hook"
+    category = "Hooks"
+    hotkey = "Shift+F"
+    context = ContextKind.FUNCTION
+
+    def run(self, backend: Backend) -> None:
+        func = backend.get_current_function()
+        if func is None:
+            backend.log_warn("No function at the current location.")
+            return
+
+        module_name = backend.get_module_name()
+        relative_address = backend.get_relative_address(func.start)
+        snippet = FunctionHookGenerator().generate(
+            module_name, relative_address, func.name
+        )
+        self._deliver(backend, snippet)
+
+```
+
+`fridaforge/commands/modify_section_protection.py`:
+
+```py
+"""Command: generate a Frida section protection modification."""
+
+from fridaforge.backend import Backend, ContextKind
+from fridaforge.commands.base import Command
+from fridaforge.core import ModifySectionProtectionGenerator
+
+
+class ModifySectionProtectionCommand(Command):
+    id = "modify_section_protection"
+    description = "Modify current section permissions"
+    category = "Memory"
+    hotkey = "Shift+M"
+    context = ContextKind.ADDRESS
+
+    def run(self, backend: Backend) -> None:
+        addr = backend.get_current_address()
+        if addr is None:
+            backend.log_warn("Could not determine the current address.")
+            return
+
+        section_name = backend.get_section_name_at(addr)
+        if not section_name:
+            backend.log_warn(
+                f"Could not determine the containing section for {hex(addr)}."
+            )
+            return
+
+        if not section_name.startswith("."):
+            backend.log_warn(
+                f"Address is not in a standard section. "
+                f"(Section name: {section_name})"
+            )
+            return
+
+        module_name = backend.get_module_name()
+        snippet = ModifySectionProtectionGenerator().generate(
+            module_name, section_name
+        )
+        self._deliver(backend, snippet)
+
+```
+
+`fridaforge/commands/negate_cond_branch_arm64.py`:
+
+```py
+"""Command: negate an ARM64 conditional branch."""
+
+from fridaforge.backend import Backend, ContextKind
+from fridaforge.commands.base import Command
+from fridaforge.core import NegateArm64CondBranchGenerator
+
+ARM64_COND_BRANCHES = {
+    "b.eq", "b.ne", "b.hs", "b.lo", "b.cs",
+    "b.mi", "b.pl", "b.vs", "b.vc",
+    "b.hi", "b.ls", "b.ge", "b.lt",
+    "b.gt", "b.le", "tbz", "tbnz",
+    "cbz", "cbnz",
+}
+
+
+class NegateArm64CondBranchCommand(Command):
+    id = "negate_cond_branch_arm64"
+    description = "Negate cond branch instruction (ARM64)"
+    category = "Patching"
+    hotkey = "Shift+A"
+    context = ContextKind.ADDRESS
+
+    def run(self, backend: Backend) -> None:
+        addr = backend.get_current_address()
+        if addr is None:
+            backend.log_warn("Could not determine the current address.")
+            return
+
+        mnemonic = (backend.get_instruction_mnemonic(addr) or "").lower()
+        if mnemonic not in ARM64_COND_BRANCHES:
+            backend.log_warn(
+                f"Instruction at {hex(addr)} ('{mnemonic}') "
+                f"is not a recognized ARM64 conditional branch."
+            )
+            return
+
+        module_name = backend.get_module_name()
+        relative_address = backend.get_relative_address(addr)
+        snippet = NegateArm64CondBranchGenerator().generate(
+            module_name, relative_address
+        )
+        self._deliver(backend, snippet)
+
+```
+
+`fridaforge/commands/negate_cond_branch_x86.py`:
+
+```py
+"""Command: negate an x86 conditional branch."""
+
+from fridaforge.backend import Backend, ContextKind
+from fridaforge.commands.base import Command
+from fridaforge.core import NegateX86CondBranchGenerator
+
+X86_COND_BRANCHES = {
+    "je", "jne", "jz", "jnz",
+    "ja", "jnbe", "jae", "jnb", "jnc",
+    "jb", "jnae", "jc", "jbe", "jna",
+    "jg", "jnle", "jge", "jnl",
+    "jl", "jnge", "jle", "jng",
+    "jo", "jno", "js", "jns",
+    "jp", "jpe", "jnp", "jpo",
+}
+
+
+class NegateX86CondBranchCommand(Command):
+    id = "negate_cond_branch_x86"
+    description = "Negate cond branch instruction (x86)"
+    category = "Patching"
+    hotkey = "Shift+X"
+    context = ContextKind.ADDRESS
+
+    def run(self, backend: Backend) -> None:
+        addr = backend.get_current_address()
+        if addr is None:
+            backend.log_warn("Could not determine the current address.")
+            return
+
+        mnemonic = (backend.get_instruction_mnemonic(addr) or "").lower()
+        if mnemonic not in X86_COND_BRANCHES:
+            backend.log_warn(
+                f"Instruction at {hex(addr)} ('{mnemonic}') "
+                f"is not a recognized x86 conditional branch."
+            )
+            return
+
+        module_name = backend.get_module_name()
+        relative_address = backend.get_relative_address(addr)
+        snippet = NegateX86CondBranchGenerator().generate(
+            module_name, relative_address
+        )
+        self._deliver(backend, snippet)
+
+```
+
+`fridaforge/core/__init__.py`:
+
+```py
+"""Base class for Frida snippet generators.
+
+Every generator **must** subclass :class:`SnippetGenerator` and:
+
+1. Set the ``template_filename`` class attribute to the name of a
+   JavaScript template file located in the ``templates/`` directory.
+2. Implement a ``generate()`` method with explicit, typed parameters
+   that builds a placeholder mapping and delegates to :meth:`_render`.
+
+Both constraints are validated at class-creation time; forgetting
+either one raises :class:`TypeError` immediately.
+"""
+
+from collections.abc import Mapping
+
+from fridaforge.core.utils import fill_template, read_template
+
+
+class SnippetGenerator:
+    """Abstract base for all Frida snippet generators."""
+
+    template_filename: str
+
+    def __init_subclass__(cls, **kwargs: object) -> None:
+        super().__init_subclass__(**kwargs)
+
+        if not getattr(cls, "template_filename", None):
+            raise TypeError(
+                f"{cls.__name__} must define 'template_filename' "
+                f"as a non-empty class attribute."
+            )
+
+        if "generate" not in cls.__dict__:
+            raise TypeError(
+                f"{cls.__name__} must implement a 'generate()' method."
+            )
+
+    def _render(self, placeholders: Mapping[str, str | int]) -> str:
+        """Read the template, substitute placeholders, and return the result."""
+        template = read_template(self.template_filename)
+        return fill_template(template, placeholders)
+
+
+from fridaforge.core.hook_dlopen_functions import DlopenHookGenerator
+from fridaforge.core.hook_function import FunctionHookGenerator
+from fridaforge.core.modify_section_protection import (
+    ModifySectionProtectionGenerator,
+)
+from fridaforge.core.negate_cond_branch_arm64 import (
+    NegateArm64CondBranchGenerator,
+)
+from fridaforge.core.negate_cond_branch_x86 import (
+    NegateX86CondBranchGenerator,
+)
+
+__all__ = [
+    "SnippetGenerator",
+    "DlopenHookGenerator",
+    "FunctionHookGenerator",
+    "ModifySectionProtectionGenerator",
+    "NegateArm64CondBranchGenerator",
+    "NegateX86CondBranchGenerator",
+]
+
+```
+
+`fridaforge/core/hook_dlopen_functions.py`:
+
+```py
+"""Generator for Frida dlopen hook snippets."""
+
+from fridaforge.core import SnippetGenerator
+
+
+class DlopenHookGenerator(SnippetGenerator):
+    """Generate a Frida script that hooks dlopen-family functions."""
+
+    template_filename = "hook_dlopen_functions.js"
+
+    def generate(self, module_name: str) -> str:
+        return self._render({
+            "MODULE_NAME_PLACEHOLDER": module_name,
+        })
+
+```
+
+`fridaforge/core/hook_function.py`:
+
+```py
+"""Generator for Frida function hook snippets."""
+
+from fridaforge.core import SnippetGenerator
+
+
+class FunctionHookGenerator(SnippetGenerator):
+    """Generate a Frida ``Interceptor.attach`` script for a function."""
+
+    template_filename = "hook_function.js"
+
+    def generate(
+        self,
+        module_name: str,
+        function_relative_address: str,
+        function_name: str,
+    ) -> str:
+        return self._render({
+            "MODULE_NAME_PLACEHOLDER": module_name,
+            "FUNCTION_RELATIVE_ADDRESS_PLACEHOLDER": function_relative_address,
+            "FUNCTION_NAME_PLACEHOLDER": function_name,
+        })
+
+```
+
+`fridaforge/core/modify_section_protection.py`:
+
+```py
+"""Generator for Frida section protection modification snippets."""
+
+from fridaforge.core import SnippetGenerator
+
+
+class ModifySectionProtectionGenerator(SnippetGenerator):
+    """Generate a Frida script that sets a section's protection to rwx."""
+
+    template_filename = "modify_section_protection.js"
+
+    def generate(self, module_name: str, section_name: str) -> str:
+        return self._render({
+            "MODULE_NAME_PLACEHOLDER": module_name,
+            "SECTION_NAME_PLACEHOLDER": section_name,
+        })
+
+```
+
+`fridaforge/core/negate_cond_branch_arm64.py`:
+
+```py
+"""Generator for Frida ARM64 conditional branch negation snippets."""
+
+from fridaforge.core import SnippetGenerator
+
+
+class NegateArm64CondBranchGenerator(SnippetGenerator):
+    """Generate a Frida script that negates an ARM64 conditional branch."""
+
+    template_filename = "negate_cond_branch_arm64.js"
+
+    def generate(self, module_name: str, relative_address: str) -> str:
+        return self._render({
+            "MODULE_NAME_PLACEHOLDER": module_name,
+            "RELATIVE_ADDRESS_PLACEHOLDER": relative_address,
+        })
+
+```
+
+`fridaforge/core/negate_cond_branch_x86.py`:
+
+```py
+"""Generator for Frida x86 conditional branch negation snippets."""
+
+from fridaforge.core import SnippetGenerator
+
+
+class NegateX86CondBranchGenerator(SnippetGenerator):
+    """Generate a Frida script that negates an x86 conditional branch."""
+
+    template_filename = "negate_cond_branch_x86.js"
+
+    def generate(self, module_name: str, relative_address: str) -> str:
+        return self._render({
+            "MODULE_NAME_PLACEHOLDER": module_name,
+            "RELATIVE_ADDRESS_PLACEHOLDER": relative_address,
+        })
+
+```
+
+`fridaforge/core/utils.py`:
+
+```py
+"""Template loading and placeholder substitution utilities."""
+
+import os
+from collections.abc import Mapping
+
+TEMPLATES_DIR = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)), "..", "templates"
+)
+
+
+def read_template(template_filename: str) -> str:
+    """Read a JavaScript template file from the templates directory.
+
+    :param template_filename: The file name of the template
+        (e.g. ``hook_function.js``).
+    :return: The raw template content as a string.
+    """
+    filepath = os.path.join(TEMPLATES_DIR, template_filename)
+    with open(filepath, "r", encoding="utf-8") as f:
+        return f.read()
+
+
+def fill_template(template: str, data_to_replace: Mapping[str, str | int]) -> str:
+    """Replace ``[PLACEHOLDER]`` tokens in a template with actual values.
+
+    :param template: The template string containing placeholders.
+    :param data_to_replace: A mapping of placeholder names (without
+        brackets) to their replacement values.
+    :return: The filled template string.
+    """
+    for placeholder, value in data_to_replace.items():
+        template = template.replace(f"[{placeholder}]", str(value))
+    return template
+
+```
+
+`fridaforge/templates/hook_dlopen_functions.js`:
+
+```js
+(function () {
+    const moduleName = "[MODULE_NAME_PLACEHOLDER]"; 
+
+    function hookOnLibraryLoad(dlopenFunctionAddr) {
+        Interceptor.attach(dlopenFunctionAddr, {
+            onEnter: function (args) {
+                const loadPath = args[0].readCString();
+                if (loadPath != null && loadPath.includes(moduleName)) {
+                    this.isTarget = true;
+                }
+            },
+            onLeave: function () {
+                if (this.isTarget) {
+                    console.log(`[+] ${moduleName} loaded!`);
+
+                    // ** Your code goes in here... **
+
+                    this.isTarget = false;
+                }
+            }
+        });
+    } 
+
+    const dlopenFunctions = ["dlopen", "android_dlopen_ext"];
+    for (let i = 0; i < dlopenFunctions.length; i++) {
+        const address = Module.getGlobalExportByName(dlopenFunctions[i]);
+        if (address != null) {
+            hookOnLibraryLoad(address);
+        }
+    }
+    
+})();
+
+```
+
+`fridaforge/templates/hook_function.js`:
+
+```js
+(function () {
+    const moduleName = "[MODULE_NAME_PLACEHOLDER]"; 
+    const functionRelativeAddress = "[FUNCTION_RELATIVE_ADDRESS_PLACEHOLDER]";
+    const functionName = "[FUNCTION_NAME_PLACEHOLDER]";
+
+    const module = Process.findModuleByName(moduleName);
+    if (module != null) {
+        const targetAddr = module.base.add(functionRelativeAddress);
+        console.log(`[+] Hook installed for [${functionName}]`);
+        Interceptor.attach(targetAddr, {
+            onEnter: function (args) { 
+                console.log(`-> enetered [${functionName}] at [${targetAddr}]`);
+
+                // Your code goes here...
+
+            }, 
+            onLeave: function (retval) {
+                console.log(`<- leaving [${functionName}] at [${this.context.pc}]`);
+                
+                // Your code goes here...
+
+            }
+        });   
+    } else {
+        console.log("[!] Failed to find module");
+    }
+})();
+
+```
+
+`fridaforge/templates/modify_section_protection.js`:
+
+```js
+(function () {
+    const moduleName = "[MODULE_NAME_PLACEHOLDER]"; 
+    const sectionName = "[SECTION_NAME_PLACEHOLDER]";
+
+    const module = Process.findModuleByName(moduleName);
+    if (module != null) {
+        let target;
+
+        const sections = module.enumerateSections()
+        for (let i = 0; i < sections.length; i++) {
+            const section = sections[i];
+            if (section.name == sectionName) {
+                target = section;
+                break;
+            }
+        }
+
+        if (target) {
+            const newPrermissions = 'rwx' // <-------- ** CHANGE THIS ACCORDING TO YOUR NEEDS **
+
+            console.log(`[+] Found section [${target.name}] at ${target.address}. size: ${target.size} (bytes)`);
+            console.log(`\tAttempting to change permissions from [${Memory.queryProtection(target.address)}] to [${newPrermissions}]`);
+            const protectionResult = Memory.protect(target.address, target.size, newPrermissions);
+            if (protectionResult) {
+                console.log(`\tSuccess! [${Memory.queryProtection(target.address)}]`);
+            } else {
+                console.log(`[!] Failed to change memory protection`);
+            }
+        } else {
+            console.log(`[!] Failed to find section ${sectionName}`);
+        }
+
+    } else {
+        console.log("[!] Failed to find module");
+    }
+})();
+
+```
+
+`fridaforge/templates/negate_cond_branch_arm64.js`:
+
+```js
+(function () {
+    const moduleName = "[MODULE_NAME_PLACEHOLDER]"; 
+    const condBranchRelAddr = "[RELATIVE_ADDRESS_PLACEHOLDER]";
+
+    const module = Process.findModuleByName(moduleName);
+    if (module != null) {
+        const targetAddr = module.base.add(condBranchRelAddr);
+
+        console.log(`[+] Negating conditional branch at ${targetAddr}`);
+        console.log(`\tbefore: ${Instruction.parse(targetAddr)}`);
+        Memory.patchCode(targetAddr, 4, code => {
+            const raw = targetAddr.readU32();
+            let xorMask;
+            if ((raw & 0xFF000010) === 0x54000000) {
+                xorMask = 1;            // b.cond: condition in bit 0
+            } else if ((raw & 0x7E000000) === 0x36000000) {
+                xorMask = 1 << 24;     // tbz/tbnz: op in bit 24
+            } else if ((raw & 0x7E000000) === 0x34000000) {
+                xorMask = 1 << 24;     // cbz/cbnz: op in bit 24
+            } else {
+                console.log("[!] Unrecognized conditional branch encoding");
+                return;
+            }
+            code.writeU32(raw ^ xorMask);
+        });
+        console.log(`\tafter: ${Instruction.parse(targetAddr)}`);
+    } else {
+        console.log("[!] Failed to find module");
+    }
+})();
+
+```
+
+`fridaforge/templates/negate_cond_branch_x86.js`:
+
+```js
+(function () {
+    const moduleName = "[MODULE_NAME_PLACEHOLDER]"; 
+    const condBranchRelAddr = "[RELATIVE_ADDRESS_PLACEHOLDER]";
+
+    const module = Process.findModuleByName(moduleName);
+    if (module != null) {
+        const targetAddr = module.base.add(condBranchRelAddr);
+
+        console.log(`[+] Negating conditional branch at ${targetAddr}`);
+        console.log(`\tbefore: ${Instruction.parse(targetAddr)}`);
+
+        let patchPtr;
+
+        const firstByte = targetAddr.readU8();
+        if (firstByte === 0x0F) {
+            const secondByte = targetAddr.add(1).readU8();
+            if ((secondByte & 0xF0) === 0x80) {
+                patchPtr = targetAddr.add(1);
+            }
+        } else if ((firstByte & 0xF0) === 0x70) {
+            patchPtr = targetAddr;
+        }
+
+        if (patchPtr) {
+            Memory.patchCode(patchPtr, 1, code => {
+                const raw = patchPtr.readU8();
+                code.writeU8(raw ^ 1);
+            })
+        }
+
+        console.log(`\tafter: ${Instruction.parse(targetAddr)}`);
+    } else {
+        console.log("[!] Failed to find module");
+    }
+})();
+
+```
+
+`hosts/binja/__init__.py`:
+
+```py
+"""Binary Ninja plugin entry point for FridaForge."""
+
+from binaryninja import PluginCommand, log_info
+
+from fridaforge._version import __version__
+from fridaforge.backend import ContextKind
+from fridaforge.backend_binja import BinjaBackend
+from fridaforge.commands import ALL_COMMANDS
+
+PLUGIN_MENU = "FridaForge"
+
+try:
+    from binaryninjaui import UIAction, UIActionHandler
+    _UI_AVAILABLE = True
+except Exception:
+    _UI_AVAILABLE = False
+
+
+def _menu_path(command) -> str:
+    if command.category:
+        return f"{PLUGIN_MENU}\\{command.category}\\{command.description}"
+    return f"{PLUGIN_MENU}\\{command.description}"
+
+
+def _register_menu(command) -> None:
+    path = _menu_path(command)
+    if command.context == ContextKind.FUNCTION:
+        PluginCommand.register_for_function(
+            path, command.description,
+            lambda bv, func, c=command: c.run(
+                BinjaBackend(bv, addr=func.start, func=func)
+            ),
+        )
+    elif command.context == ContextKind.ADDRESS:
+        PluginCommand.register_for_address(
+            path, command.description,
+            lambda bv, addr, c=command: c.run(BinjaBackend(bv, addr=addr)),
+        )
+    else:
+        PluginCommand.register(
+            path, command.description,
+            lambda bv, c=command: c.run(BinjaBackend(bv)),
+        )
+
+
+def _register_hotkey(command) -> None:
+    # NOTE: confirm UIActionContext attribute names against the installed
+    # Binary Ninja version during manual verification (Step 5).
+    if not command.hotkey or not _UI_AVAILABLE:
+        return
+    action_name = f"{PLUGIN_MENU}\\{command.description}"
+
+    def _run(ctx, c=command):
+        bv = getattr(ctx, "binaryView", None)
+        if bv is None:
+            return
+        addr = getattr(ctx, "address", None)
+        func = getattr(ctx, "function", None)
+        c.run(BinjaBackend(bv, addr=addr, func=func))
+
+    UIAction.registerAction(action_name, command.hotkey)
+    UIActionHandler.globalActions().bindAction(action_name, UIAction(_run))
+
+
+for _command in ALL_COMMANDS:
+    _register_menu(_command)
+    _register_hotkey(_command)
+
+log_info(f"[FridaForge] v{__version__} loaded.")
+
+```
+
+`hosts/binja/backend_binja.py`:
+
+```py
+"""Binary Ninja implementation of the FridaForge Backend."""
+
+import os
+
+from binaryninja import BinaryView, Function, log_info, log_warn
+from PySide6.QtWidgets import QApplication
+
+from fridaforge.backend import Backend, FunctionRef
+
+
+class BinjaBackend(Backend):
+    def __init__(self, bv: BinaryView, addr: int | None = None,
+                 func: Function | None = None):
+        self._bv = bv
+        self._addr = addr
+        self._func = func
+
+    def get_module_name(self) -> str:
+        return os.path.basename(self._bv.file.original_filename)
+
+    def get_image_base(self) -> int:
+        return self._bv.start
+
+    def get_current_address(self) -> int | None:
+        return self._addr
+
+    def get_current_function(self) -> FunctionRef | None:
+        if self._func is None:
+            return None
+        name = self._resolve_function_name(self._func.start, self._func.name)
+        return FunctionRef(self._func.start, name)
+
+    def get_section_name_at(self, addr: int) -> str | None:
+        for name, section in self._bv.sections.items():
+            if section.start <= addr < section.start + section.length:
+                return name
+        return None
+
+    def get_instruction_mnemonic(self, addr: int) -> str | None:
+        try:
+            disasm = self._bv.get_disassembly(addr)
+            if not disasm:
+                return None
+            return disasm.split()[0]
+        except Exception:
+            return None
+
+    def copy_to_clipboard(self, text: str) -> bool:
+        if not text:
+            return False
+        app = QApplication.instance()
+        if app is None:
+            return False
+        clipboard = app.clipboard()
+        if clipboard is None:
+            return False
+        clipboard.setText(text)
+        return True
+
+    def log_info(self, msg: str) -> None:
+        log_info(f"[FridaForge] {msg}")
+
+    def log_warn(self, msg: str) -> None:
+        log_warn(f"[FridaForge] {msg}")
+
+```
+
+`hosts/binja/plugin.json`:
+
+```json
+{
+  "pluginmetadataversion": 2,
+  "name": "FridaForge",
+  "type": ["helper"],
+  "api": ["python3"],
+  "description": "Generate Frida scripts directly from Binary Ninja",
+  "longdescription": "A Binary Ninja plugin that generates ready-to-use Frida instrumentation snippets. Right-click on functions, addresses, or branches to generate hook scripts, negate conditional branches, modify section protections, and more. Generated scripts are automatically copied to your clipboard.",
+  "license": {
+    "name": "MIT",
+    "text": "MIT License\n\nCopyright (c) 2025 noobexon1\n\nPermission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the \"Software\"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE."
+  },
+  "platforms": ["Darwin", "Linux", "Windows"],
+  "dependencies": {"pip": []},
+  "version": "0.1.0",
+  "author": "noobexon1",
+  "minimumbinaryninjaversion": 3164
+}
+
+```
+
+`hosts/ida/backend_ida.py`:
+
+```py
+"""IDA Pro implementation of the FridaForge Backend."""
+
+import os
+
+import idaapi
+import idc
+from PyQt5.QtWidgets import QApplication
+
+from fridaforge.backend import Backend, FunctionRef
+
+
+class IdaBackend(Backend):
+    def get_module_name(self) -> str:
+        try:
+            return os.path.basename(idaapi.get_input_file_path())
+        except Exception:
+            return ""
+
+    def get_image_base(self) -> int:
+        try:
+            return idaapi.get_imagebase()
+        except Exception:
+            return 0
+
+    def get_current_address(self) -> int | None:
+        ea = idaapi.get_screen_ea()
+        if ea == idaapi.BADADDR:
+            return None
+        return ea
+
+    def get_current_function(self) -> FunctionRef | None:
+        ea = idaapi.get_screen_ea()
+        if ea == idaapi.BADADDR:
+            return None
+        func = idaapi.get_func(ea)
+        if not func:
+            return None
+        raw_name = idaapi.get_func_name(func.start_ea) or ""
+        name = self._resolve_function_name(func.start_ea, raw_name)
+        return FunctionRef(func.start_ea, name)
+
+    def get_section_name_at(self, addr: int) -> str | None:
+        seg = idaapi.getseg(addr)
+        if not seg:
+            return None
+        return idaapi.get_segm_name(seg)
+
+    def get_instruction_mnemonic(self, addr: int) -> str | None:
+        mnemonic = idc.print_insn_mnem(addr)
+        return mnemonic or None
+
+    def copy_to_clipboard(self, text: str) -> bool:
+        if not text:
+            return False
+        app = QApplication.instance()
+        if app is None:
+            return False
+        clipboard = app.clipboard()
+        if clipboard is None:
+            return False
+        clipboard.setText(text)
+        return True
+
+    def log_info(self, msg: str) -> None:
+        print(f"[FridaForge] {msg}")
+
+    def log_warn(self, msg: str) -> None:
+        print(f"[FridaForge] {msg}")
+
+```
+
+`hosts/ida/ida-plugin.json`:
+
+```json
+{
+  "IDAMetadataDescriptorVersion": 1,
+  "plugin": {
+    "name": "FridaForge",
+    "author": "noobexon1",
+    "description": "Generate Frida scripts directly from IDA Pro",
+    "version": "0.1.0",
+    "url": "https://github.com/noobexon1/FridaForge",
+    "entryPoint": "ida_entry.py"
+  }
+}
+
+```
+
+`hosts/ida/ida_entry.py`:
+
+```py
+"""IDA Pro plugin entry point for FridaForge."""
+
+import os
+import sys
+
+import idaapi
+
+# Ensure the parent of this plugin folder is on sys.path so that
+# ``import fridaforge`` resolves (this file lives inside fridaforge/).
+_plugin_dir = os.path.dirname(os.path.abspath(__file__))
+_parent = os.path.dirname(_plugin_dir)
+if _parent not in sys.path:
+    sys.path.insert(0, _parent)
+
+from fridaforge.backend_ida import IdaBackend
+from fridaforge.commands import ALL_COMMANDS
+
+TOP_MENU = "FridaForge"
+
+
+class _CommandHandler(idaapi.action_handler_t):
+    def __init__(self, command):
+        super().__init__()
+        self.command = command
+
+    @property
+    def action_name(self) -> str:
+        return f"fridaforge:{type(self.command).__name__}"
+
+    def activate(self, ctx):
+        self.command.run(IdaBackend())
+        return 1
+
+    def update(self, ctx):
+        if idaapi.get_widget_type(ctx.widget) not in (
+            idaapi.BWN_DISASM,
+            idaapi.BWN_PSEUDOCODE,
+        ):
+            return idaapi.AST_DISABLE_FOR_WIDGET
+        path = TOP_MENU + "/"
+        if self.command.category:
+            path += self.command.category + "/"
+        idaapi.attach_action_to_popup(ctx.widget, None, self.action_name, path)
+        return idaapi.AST_ENABLE_FOR_WIDGET
+
+
+class FridaForgePlugin(idaapi.plugin_t):
+    flags = idaapi.PLUGIN_KEEP
+    comment = "Generate Frida scripts from IDA Pro"
+    help = "Right-click in Disassembly/Pseudocode to generate Frida snippets."
+    wanted_name = "FridaForge"
+    wanted_hotkey = ""
+
+    def init(self):
+        self._handlers = []
+        for command in ALL_COMMANDS:
+            handler = _CommandHandler(command)
+            self._handlers.append(handler)
+            idaapi.register_action(
+                idaapi.action_desc_t(
+                    handler.action_name,
+                    command.description,
+                    handler,
+                    command.hotkey,
+                )
+            )
+        return idaapi.PLUGIN_KEEP
+
+    def run(self, arg):
+        idaapi.msg("[FridaForge] Use right-click menus or hotkeys.\n")
+
+    def term(self):
+        for handler in self._handlers:
+            idaapi.unregister_action(handler.action_name)
+        self._handlers = []
+
+
+def PLUGIN_ENTRY():
+    return FridaForgePlugin()
+
+```
+
+`pyproject.toml`:
+
+```toml
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "fridaforge"
+dynamic = ["version"]
+description = "Generate Frida scripts from IDA Pro and Binary Ninja"
+requires-python = ">=3.10"
+
+[tool.setuptools.dynamic]
+version = {attr = "fridaforge._version.__version__"}
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+
+```
+
+`tests/fakes.py`:
+
+```py
+"""Test doubles for FridaForge backends."""
+
+from fridaforge.backend import Backend, FunctionRef
+
+
+class FakeBackend(Backend):
+    """An in-memory Backend for unit tests."""
+
+    def __init__(
+        self,
+        module_name: str = "libtest.so",
+        image_base: int = 0x1000,
+        current_address: int | None = None,
+        current_function: FunctionRef | None = None,
+        section_at: dict[int, str] | None = None,
+        mnemonic_at: dict[int, str] | None = None,
+    ):
+        self._module_name = module_name
+        self._image_base = image_base
+        self._current_address = current_address
+        self._current_function = current_function
+        self._section_at = section_at or {}
+        self._mnemonic_at = mnemonic_at or {}
+        self.clipboard: str | None = None
+        self.infos: list[str] = []
+        self.warnings: list[str] = []
+
+    def get_module_name(self) -> str:
+        return self._module_name
+
+    def get_image_base(self) -> int:
+        return self._image_base
+
+    def get_current_address(self) -> int | None:
+        return self._current_address
+
+    def get_current_function(self) -> FunctionRef | None:
+        return self._current_function
+
+    def get_section_name_at(self, addr: int) -> str | None:
+        return self._section_at.get(addr)
+
+    def get_instruction_mnemonic(self, addr: int) -> str | None:
+        return self._mnemonic_at.get(addr)
+
+    def copy_to_clipboard(self, text: str) -> bool:
+        self.clipboard = text
+        return True
+
+    def log_info(self, msg: str) -> None:
+        self.infos.append(msg)
+
+    def log_warn(self, msg: str) -> None:
+        self.warnings.append(msg)
+
+```
+
+`tests/test_backend.py`:
+
+```py
+from fridaforge.backend import ContextKind, FunctionRef
+from tests.fakes import FakeBackend
+
+
+def test_get_relative_address_subtracts_image_base():
+    be = FakeBackend(image_base=0x1000)
+    assert be.get_relative_address(0x1234) == hex(0x1234 - 0x1000)
+
+
+def test_resolve_function_name_uses_raw_when_present():
+    be = FakeBackend(image_base=0x1000)
+    assert be._resolve_function_name(0x1234, "my_func") == "my_func"
+
+
+def test_resolve_function_name_falls_back_to_sub():
+    be = FakeBackend(image_base=0x1000)
+    # relative address is 0x234 -> fallback "sub_234"
+    assert be._resolve_function_name(0x1234, "") == "sub_234"
+
+
+def test_context_kind_members():
+    assert {k.name for k in ContextKind} == {"GLOBAL", "ADDRESS", "FUNCTION"}
+
+
+def test_function_ref_fields():
+    ref = FunctionRef(start=0x10, name="f")
+    assert ref.start == 0x10 and ref.name == "f"
+
+```
+
+`tests/test_build.py`:
+
+```py
+import json
+import subprocess
+import sys
+import zipfile
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent.parent
+
+
+def test_build_creates_both_archives():
+    subprocess.run(
+        [sys.executable, str(ROOT / "build" / "build.py"), "--version", "9.9.9"],
+        check=True,
+        cwd=ROOT,
+    )
+
+    binja = ROOT / "dist" / "fridaforge-binja-9.9.9.zip"
+    ida = ROOT / "dist" / "fridaforge-ida-9.9.9.zip"
+    assert binja.exists()
+    assert ida.exists()
+
+    with zipfile.ZipFile(binja) as z:
+        names = z.namelist()
+        assert "fridaforge/__init__.py" in names
+        assert "fridaforge/backend.py" in names
+        assert "fridaforge/backend_binja.py" in names
+        assert "fridaforge/plugin.json" in names
+        assert "fridaforge/templates/hook_function.js" in names
+        assert "fridaforge/commands/__init__.py" in names
+        manifest = json.loads(z.read("fridaforge/plugin.json"))
+        assert manifest["version"] == "9.9.9"
+
+    with zipfile.ZipFile(ida) as z:
+        names = z.namelist()
+        assert "fridaforge/ida_entry.py" in names
+        assert "fridaforge/backend_ida.py" in names
+        assert "fridaforge/ida-plugin.json" in names
+        assert "fridaforge/templates/hook_function.js" in names
+        manifest = json.loads(z.read("fridaforge/ida-plugin.json"))
+        assert manifest["plugin"]["version"] == "9.9.9"
+
+```
+
+`tests/test_commands.py`:
+
+```py
+from fridaforge.backend import ContextKind, FunctionRef
+from fridaforge.commands import ALL_COMMANDS
+from fridaforge.commands.hook_dlopen_functions import DlopenHooksCommand
+from fridaforge.commands.hook_function import FunctionHookCommand
+from fridaforge.commands.modify_section_protection import (
+    ModifySectionProtectionCommand,
+)
+from fridaforge.commands.negate_cond_branch_arm64 import (
+    NegateArm64CondBranchCommand,
+)
+from fridaforge.commands.negate_cond_branch_x86 import (
+    NegateX86CondBranchCommand,
+)
+from tests.fakes import FakeBackend
+
+
+def test_function_hook_copies_filled_snippet():
+    be = FakeBackend(
+        module_name="libfoo.so",
+        image_base=0x1000,
+        current_function=FunctionRef(start=0x1234, name="my_func"),
+    )
+    FunctionHookCommand().run(be)
+    assert be.clipboard is not None
+    assert "libfoo.so" in be.clipboard
+    assert "my_func" in be.clipboard
+    assert hex(0x1234 - 0x1000) in be.clipboard
+
+
+def test_function_hook_without_function_warns_and_skips():
+    be = FakeBackend(current_function=None)
+    FunctionHookCommand().run(be)
+    assert be.clipboard is None
+    assert be.warnings
+
+
+def test_function_hook_metadata():
+    cmd = FunctionHookCommand()
+    assert cmd.context == ContextKind.FUNCTION
+    assert cmd.description == "Generate function hook"
+    assert cmd.category == "Hooks"
+    assert cmd.hotkey == "Shift+F"
+
+
+def test_dlopen_copies_filled_snippet():
+    be = FakeBackend(module_name="libfoo.so")
+    DlopenHooksCommand().run(be)
+    assert be.clipboard is not None
+    assert "libfoo.so" in be.clipboard
+
+
+def test_dlopen_without_module_warns_and_skips():
+    be = FakeBackend(module_name="")
+    DlopenHooksCommand().run(be)
+    assert be.clipboard is None
+    assert be.warnings
+
+
+def test_section_protection_copies_for_valid_section():
+    be = FakeBackend(
+        module_name="libfoo.so",
+        current_address=0x2000,
+        section_at={0x2000: ".text"},
+    )
+    ModifySectionProtectionCommand().run(be)
+    assert be.clipboard is not None
+    assert ".text" in be.clipboard
+    assert "libfoo.so" in be.clipboard
+
+
+def test_section_protection_no_address_skips():
+    be = FakeBackend(current_address=None)
+    ModifySectionProtectionCommand().run(be)
+    assert be.clipboard is None
+
+
+def test_section_protection_no_section_warns():
+    be = FakeBackend(current_address=0x2000, section_at={})
+    ModifySectionProtectionCommand().run(be)
+    assert be.clipboard is None
+    assert be.warnings
+
+
+def test_section_protection_non_dot_section_warns():
+    be = FakeBackend(current_address=0x2000, section_at={0x2000: "extern"})
+    ModifySectionProtectionCommand().run(be)
+    assert be.clipboard is None
+    assert be.warnings
+
+
+def test_negate_arm64_valid_branch_copies():
+    be = FakeBackend(
+        module_name="libfoo.so",
+        image_base=0x1000,
+        current_address=0x1500,
+        mnemonic_at={0x1500: "b.eq"},
+    )
+    NegateArm64CondBranchCommand().run(be)
+    assert be.clipboard is not None
+    assert "libfoo.so" in be.clipboard
+    assert hex(0x1500 - 0x1000) in be.clipboard
+
+
+def test_negate_arm64_non_branch_warns():
+    be = FakeBackend(current_address=0x1500, mnemonic_at={0x1500: "mov"})
+    NegateArm64CondBranchCommand().run(be)
+    assert be.clipboard is None
+    assert be.warnings
+
+
+def test_negate_arm64_no_address_skips():
+    be = FakeBackend(current_address=None)
+    NegateArm64CondBranchCommand().run(be)
+    assert be.clipboard is None
+
+
+def test_negate_x86_valid_branch_copies():
+    be = FakeBackend(
+        module_name="libfoo.so",
+        image_base=0x1000,
+        current_address=0x1600,
+        mnemonic_at={0x1600: "JNE"},
+    )
+    NegateX86CondBranchCommand().run(be)
+    assert be.clipboard is not None
+    assert "libfoo.so" in be.clipboard
+    assert hex(0x1600 - 0x1000) in be.clipboard
+
+
+def test_negate_x86_non_branch_warns():
+    be = FakeBackend(current_address=0x1600, mnemonic_at={0x1600: "mov"})
+    NegateX86CondBranchCommand().run(be)
+    assert be.clipboard is None
+    assert be.warnings
+
+
+def test_registry_has_five_unique_commands():
+    assert len(ALL_COMMANDS) == 5
+    ids = [c.id for c in ALL_COMMANDS]
+    assert len(set(ids)) == 5
+
+
+def test_registry_hotkeys_are_unique():
+    hotkeys = [c.hotkey for c in ALL_COMMANDS]
+    assert all(hotkeys)
+    assert len(set(hotkeys)) == 5
+
+
+def test_registry_every_command_has_context_and_description():
+    for c in ALL_COMMANDS:
+        assert c.description
+        assert c.category
+        assert c.context is not None
+
+```
+
+`tests/test_generators.py`:
+
+```py
+from fridaforge.core.utils import fill_template, read_template
+
+
+def test_fill_template_replaces_bracketed_tokens():
+    out = fill_template("a=[X], b=[Y]", {"X": "1", "Y": 2})
+    assert out == "a=1, b=2"
+
+
+def test_fill_template_leaves_unknown_tokens():
+    out = fill_template("keep [Z]", {"X": "1"})
+    assert out == "keep [Z]"
+
+
+def test_read_template_loads_hook_function():
+    content = read_template("hook_function.js")
+    assert "[MODULE_NAME_PLACEHOLDER]" in content
+
+
+from fridaforge.core import (
+    DlopenHookGenerator,
+    FunctionHookGenerator,
+    ModifySectionProtectionGenerator,
+    NegateArm64CondBranchGenerator,
+    NegateX86CondBranchGenerator,
+)
+
+
+def _assert_no_leftover_placeholders(text: str):
+    import re
+    assert not re.search(r"\[[A-Z_]+_PLACEHOLDER\]", text)
+
+
+def test_function_hook_generator_fills_all():
+    out = FunctionHookGenerator().generate("libfoo.so", "0x1234", "my_func")
+    assert "libfoo.so" in out
+    assert "0x1234" in out
+    assert "my_func" in out
+    _assert_no_leftover_placeholders(out)
+
+
+def test_dlopen_generator_fills_module():
+    out = DlopenHookGenerator().generate("libfoo.so")
+    assert "libfoo.so" in out
+    _assert_no_leftover_placeholders(out)
+
+
+def test_section_protection_generator_fills_all():
+    out = ModifySectionProtectionGenerator().generate("libfoo.so", ".text")
+    assert "libfoo.so" in out
+    assert ".text" in out
+    _assert_no_leftover_placeholders(out)
+
+
+def test_negate_arm64_generator_fills_all():
+    out = NegateArm64CondBranchGenerator().generate("libfoo.so", "0xdead")
+    assert "libfoo.so" in out
+    assert "0xdead" in out
+    _assert_no_leftover_placeholders(out)
+
+
+def test_negate_x86_generator_fills_all():
+    out = NegateX86CondBranchGenerator().generate("libfoo.so", "0xbeef")
+    assert "libfoo.so" in out
+    assert "0xbeef" in out
+    _assert_no_leftover_placeholders(out)
+
+```
