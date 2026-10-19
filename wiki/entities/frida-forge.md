@@ -19,9 +19,13 @@ confidence: medium
 - **Memory and control flow** — change section protections and flip conditional branches on **ARM64** and **x86/x64**.
 - **Composable output** — JavaScript Frida snippets nest for multi-hook setups; finished scripts copy to the clipboard.
 
+## Audience
+
+Reverse engineers and security researchers who want faster **dynamic analysis** of native binaries—including **games** and **mobile** targets—without hand-writing repetitive Frida boilerplate. (source: wiki/sources/descriptions/noobexon1__FridaForge.md)
+
 ## Positioning
 
-**Cheat / Frida** lane beside static-to-dynamic bridges such as [[hook-updater]] and modular libraries such as [[frida-module-example]] — reduces hand-written Frida boilerplate when moving from IDA/BN decompilation to runtime observation on native game and mobile binaries.
+**Cheat / Frida** lane beside disassembler hook-script generators such as [[ghidra-frida-hook-gen]] (Ghidra) on other hosts, static-to-dynamic bridges such as [[frinet]]/[[frinja]], refresh helpers such as [[hook-updater]], and modular libraries such as [[frida-module-example]] — reduces boilerplate when moving from IDA/BN decompilation to runtime observation.
 
 ## Links
 
@@ -29,4 +33,4 @@ confidence: medium
 
 ## Related
 
-[[frida]] · [[frida-module-example]] · [[hook-updater]] · [[frida-mobile-kit]] · [[frida-ide]] · [[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[overviews/mobile-security]]
+[[frida]] · [[ghidra-frida-hook-gen]] · [[frinet]] · [[frinja]] · [[frida-module-example]] · [[hook-updater]] · [[frida-mobile-kit]] · [[frida-ide]] · [[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[overviews/mobile-security]]
