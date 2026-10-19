@@ -1,7 +1,7 @@
 ---
 title: bootleg16
 kind: entity
-topics: [anti-cheat, game-hacking]
+topics: [anti-cheat, game-engine, game-hacking]
 sources:
   - wiki/sources/descriptions/anas1412__bootleg16.md
 updated: 2026-10-19
@@ -10,7 +10,7 @@ confidence: medium
 
 # bootleg16
 
-**Bootleg16** (anas1412/bootleg16) is a from-scratch **Counter-Strike 1.6**–style competitive FPS rebuilt in **Rust** on **Bevy**, with GoldSrc-style movement, weapons, and economy in a modern 5v5 flow. GoldSrc asset readers, split client/authoritative server/lobby crates, Steam auth, voice, match recordings, matchmaking, and Docker-based lobby/game hosting sit beside **built-in server-side anti-cheat** on encrypted match traffic—useful for studying live FPS netcode and practical AC integration. (source: wiki/sources/descriptions/anas1412__bootleg16.md)
+**Bootleg16** (anas1412/bootleg16) is a from-scratch **Counter-Strike 1.6** reimplementation in **Rust** on **Bevy**: classic GoldSrc movement, weapons, and economy in a modern **5v5 competitive** flow. Dedicated GoldSrc asset readers load original-style data; work splits across **client**, **authoritative game server**, and **lobby** crates with shared networking, simulation, and **encrypted match traffic**. Online features include Steam authentication, voice chat, match recordings, parties and matchmaking, custom games (knife rounds, map vetoes), and deathmatch warmup. **Server-side anti-cheat** is built into the online stack; **Docker**-based hosting scales lobby and game servers. The project targets developers and operators studying multiplayer FPS architecture, legacy asset pipelines, and practical anti-cheat in a live competitive shooter. (source: wiki/sources/descriptions/anas1412__bootleg16.md)
 
 ## Links
 
@@ -18,4 +18,4 @@ confidence: medium
 
 ## Related
 
-[[overviews/anti-cheat]] · [[overviews/game-hacking]] · [[cs16-client]] · [[detector-operations]] · [[bevy-personal-test]]
+[[overviews/anti-cheat]] · [[overviews/game-engine]] · [[overviews/game-hacking]] · [[bevy]] · [[bevy-personal-test]] · [[lightyear]] · [[halflife]] · [[regamedll-cs]] · [[cs16-client]] · [[detector-operations]]
