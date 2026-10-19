@@ -11,7 +11,8 @@ sources:
   - wiki/sources/descriptions/mattgodbolt__pipeline-disasm.md
   - wiki/sources/descriptions/mattgodbolt__frogman.md
   - wiki/sources/descriptions/xshxdex98__OpenMCM2.md
-updated: 2026-10-12
+  - wiki/sources/descriptions/nevergiveupcpp__oh-my-dump.md
+updated: 2026-10-19
 confidence: high
 ---
 
@@ -42,6 +43,8 @@ Integrated RE workbenches such as [[ceasta]] bundle binary diffing beside disass
 
 Game-security uses include tracking anti-cheat driver updates between versions, reviewing changed behavior and trust-boundary assumptions in supplied builds, and comparing obfuscated builds to isolate logic changes.
 
+After a differ highlights where code moved, nevergiveupcpp/[[oh-my-dump]] can re-apply exported IDA 9.x annotations (names, types, comments, colors, breakpoints) on a newer x86/x64 Windows IDB via wildcard byte signatures and RIP-relative/offset-aware matching when FLIRT/Lumina omit analyst context. (source: wiki/sources/descriptions/nevergiveupcpp__oh-my-dump.md)
+
 ## Evidence limits
 
 A comparative quality ranking requires a specified benchmark and independently checked matches. Preserve:
@@ -57,4 +60,4 @@ Similarity scores and decompiled differences suggest where to look—they do not
 
 ## Related
 
-[[static-runtime-evidence]] · [[binary-evidence]] · [[research-rigor]] · [[diaphora]] · [[ghidriff]] · [[turbodiff]] · [[rom-weaver]] · [[ik-plus-reforged]] · [[pipeline-disasm]] · [[frogman]] · [[openmcm2]] · [[ceasta]] · [[mixed-boolean-arithmetic]] · [[control-flow-flattening]] · [[overviews/reverse-engineering]]
+[[static-runtime-evidence]] · [[binary-evidence]] · [[research-rigor]] · [[diaphora]] · [[ghidriff]] · [[turbodiff]] · [[rom-weaver]] · [[ik-plus-reforged]] · [[pipeline-disasm]] · [[frogman]] · [[openmcm2]] · [[ceasta]] · [[oh-my-dump]] · [[mixed-boolean-arithmetic]] · [[control-flow-flattening]] · [[overviews/reverse-engineering]]
