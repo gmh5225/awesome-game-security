@@ -4570,6 +4570,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/yuonsovann5656-netizen/Nexora-AntiCheat [Paper/Folia Minecraft anti-cheat plugin with movement, combat, and world checks, lag compensation, and async SQLite/MySQL persistence]
 - https://github.com/llsgllsg/Minecraft_AntiCheatAI [DeepGuard: Paper Minecraft anti-cheat with ONNX scaffold AI detection, behavior recorder, and training pipeline]
 - https://github.com/gravemaulr/mlanticheat [Paper Minecraft anti-cheat that trains per-server ML models on combat/aim behavior with shadow mode and PacketEvents integration]
+- https://github.com/voilecx/eigen [Paper/Folia ML combat anti-cheat: PacketEvents aim/movement feature streams, labelled combat windows, and backend dataset collection/inference]
 - https://github.com/OneLiteFeatherNET/Corvus [Velocity plugin plus Python ingest/score pipeline: PacketEvents capture, pseudonymised Parquet data lake, CPU ML cheating-likelihood scores for staff review (no auto-ban)]
 - https://github.com/Alexramirezzz/TFG-AntiCheat-ServerSide [Paper/Spigot 1.18.2 thesis server-side anti-cheat with hardened plugin logic, labelled session ML timing pipeline, ONNX export, and fail-safe fallback to rule-based detection]
 - https://github.com/Kotsasmin/key-value-checker [Paper/Spigot Minecraft server plugin that detects installed cheat clients by scanning client translation keys (Meteor, Freecam, AutoTotem, etc.) via PacketEvents]
