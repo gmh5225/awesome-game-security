@@ -8,6 +8,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 - **2026-10-19** — lint (agent): read `wiki/AGENTS.md`; **Overviews** (9) / **Concepts** (51) / **Entities** (4124); `index.md` matches disk (4184 paths, 0 missing, 0 dead, 0 duplicates); overview + index concept-blurb wikilink spot-check — 0 broken (13533 links), 0 malformed `]]]`; bootstrap not required; no structural repairs (`log.md` only).
 
+- **2026-10-19** — lint (agent): read `wiki/AGENTS.md`; **Overviews** (9) / **Concepts** (51) / **Entities** (4124); `index.md` matches disk (4184 paths, 0 missing, 0 dead, 0 duplicates); overview + index concept-blurb wikilink spot-check — 0 broken (13533 links), 0 malformed `]]]`; bootstrap not required; no structural repairs (`log.md` only).
+
 - **2026-10-19** — lint (agent): read `wiki/AGENTS.md`; **Overviews** (9) / **Concepts** (51) / **Entities** (4124); `index.md` matches disk (4184 paths, 0 missing, 0 dead, 0 duplicates); overview + index blurb wikilink spot-check — 0 broken (13533 links), 0 malformed `]]]`; bootstrap not required; no structural repairs (`log.md` only).
 
 - **2026-10-19** — ingest `description:voilecx/eigen`: refreshed entity [[eigen-anticheat]] (Paper/Folia Scala 3; PacketEvents client-view reconstruction; per-tick combat feature rows; combat/baseline windows; authenticated WebSocket ML backend; core vs Paper adapter; GrimAC/Shard transaction lag compensation); cited on [[concepts/ai-aimbot-detection]] Minecraft combat-ML lane and [[overviews/anti-cheat]] README map; `index.md` entity blurb updated.
