@@ -761,6 +761,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/blanec/cyberpunk-better-shaders [Vulkan implicit layer (VkLayer_callisto_spvswap) that hot-swaps Cyberpunk 2077 path-tracer ray-gen SPIR-V at load time via Proton on Linux]
 - https://github.com/bruhmoment21/UniversalHookX [X86/64 Windows]
 - https://github.com/gmh5225/Vulkan-Hook [X86/64 Windows]
+- https://github.com/DrNseven/VulkanWallhack [Vulkan hook DLL (MinHook) for model stride bruteforce and in-game wallhack toggles; inject early into Vulkan titles]
 - https://github.com/Sh0ckFR/Universal-Dear-ImGui-Hook
 - https://github.com/Halen84/ImGuiRDR2Hook
 
@@ -4630,6 +4631,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/GiannBart/BanMod [Among Us BepInEx mod with host-side AntiCheat module for RPC/task abuse, crashers, and lobby integrity]
 - https://github.com/hckerelauk-git/amongusanticheat [Among Us client-side BepInEx 6 / IL2CPP anti-cheat (ACE) with rule-based detections, in-game settings UI, AI review, and RPC flood protection]
 - https://github.com/xav0dev/AU-Anticheat [Among Us BepInEx IL2CPP host-side anti-cheat and lobby moderation with evidence-based RPC checks and configurable host tools]
+- https://github.com/DoomSalat/PEAK-mode-AntiCheat-Sentinel [BepInEx host-side anti-cheat for PEAK that attributes suspicious item spawns to Photon senders and blocks illegal grants on the host]
 - https://github.com/Longno242/Encryptic-Roblox-Anti-Cheat [Server-authoritative Luau anti-cheat for Roblox with movement, remote, fly/noclip, fire-rate, and combat guards plus Studio demo]
 - https://github.com/mastershadow547/Advanced-Anticheat [Open-source Roblox server anti-cheat detecting movement exploits, unauthorized remotes, and environment tampering]
 - https://github.com/sorrelhub/shprotect-ac [Server-first Roblox Luau anti-cheat with movement, remote spam, fly/noclip, and client watchdog detectors]
