@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-19** — ingest `description:CTRLKirk/7DTD-Anti-Cheat`: refreshed entity [[7dtd-anti-cheat]] (C# .NET 4.8 Harmony server mod; host-side network/inventory + movement monitor; god mode/teleport/speed/fly/noclip/items/damage/reach/progression; XML log/kick/ban + Discord + console reload/review; modded multipliers/exemptions; EAC-compatible); cited on [[overviews/anti-cheat]] Open Source AC list and [[overviews/game-hacking]] dedicated-server defensive lane; `index.md` entity blurb updated.
+
 - **2026-10-19** — ingest `description:apoj-inc/Cyclone-V-PCIe-AVMM-DMA`: refreshed entity [[cyclone-v-pcie-avmm-dma]] (Intel Cyclone V PCIe 2.0 x4 AVMM multi-channel SystemVerilog DMA; Quartus Platform Designer; MSI-X + per-channel IRQ; Linux kernel module + userspace echo/parallel R/W; Questa/Cocotb sim; DMA attack-surface / AC containment research baseline); cited on [[concepts/dma]] FPGA reference lane and [[overviews/dma-attack]] README map; `index.md` entity blurb updated.
 
 - **2026-10-19** — ingest `description:nevergiveupcpp/oh-my-dump`: refreshed entity [[oh-my-dump]] (IDA Pro 9.x JSON signature export/import for names, types, comments, colors, breakpoints; RIP-relative/offset re-apply on rebased x86/x64 Windows builds); cited on [[concepts/binary-diffing]] post-diff annotation lane and [[overviews/reverse-engineering]] Cheat / RE Tools map (description source); cross-linked [[ida-migrator]]; `index.md` entity + binary-diffing blurbs updated.
