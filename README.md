@@ -1786,6 +1786,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/gmh5225/IDASkins [Skins]
 - https://github.com/gmh5225/ida-nord-theme [Skins]
 - https://github.com/giladreich/ida_migrator [Migrate Database]
+- https://github.com/nevergiveupcpp/oh-my-dump [IDA Pro 9.x plugin to export and import names, types, comments, colors, and breakpoints across IDBs for different builds of the same x86/x64 binary]
 - https://github.com/gmh5225/NtRays [Windows Kernel Enhance]
 - https://github.com/gmh5225/ida_bitfields [Windows Kernel Enhance]
 - https://github.com/gmh5225/DriverBuddyReloaded [Windows Kernel Analysis]
@@ -2375,6 +2376,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/acageduser/DMA-Attack-Firmware-Customization [Guide to disguising LambdaConcept PCIe Screamer Squirrel DMA firmware as a Realtek RTL8111 NIC to evade anti-cheat PCIe enumeration]
 - https://github.com/PacktPublishing/Learn-FPGA-Programming [Guide]
 - https://github.com/enjoy-digital/litepcie [Small footprint and configurable PCIe core]
+- https://github.com/apoj-inc/Cyclone-V-PCIe-AVMM-DMA [Configurable Intel Cyclone V PCIe 2.0 x4 FPGA DMA engine (AVMM, multi-channel FIFOs, MSIX) with Linux driver and userspace examples]
 - https://github.com/cakehonolulu/pciem [A Linux framework for synthetic PCIe device emulation entirely in userspace]
 - https://github.com/ufrisk/pcileech
 - https://github.com/ufrisk/pcileech-fpga [FPGA HDL/firmware modules for PCILeech DMA attack hardware]
@@ -4619,6 +4621,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/StarBloomMinecraft/BlarionAntiCheat [Minecraft Bedrock behavior-pack anti-cheat on ScriptAPI with 40+ combat/movement/inventory detection modules]
 - https://github.com/Eangly99/AstroX-AntiCheat [GeyserMC extension anti-cheat for Minecraft Bedrock intercepting raw RakNet packets before Java translation]
 - https://github.com/majimaakane/7dtd-AntiCheatMod [Server-side 7 Days to Die mod blocking cheat commands and detecting fly, teleport, speedhack, and godmode]
+- https://github.com/CTRLKirk/7DTD-Anti-Cheat [Server-side 7 Days to Die mod detecting god mode, teleport, speed/fly/noclip, illegal items, damage, reach, and progression anomalies (EAC-compatible)]
 - https://github.com/irembo337/Fusion-AntiCheat [Server-side LabFusion/BONELAB anti-cheat with avatar allowlist enforcement and in-game settings panel]
 - https://github.com/Pryaxis/TShock [Mature open-source Terraria server framework with built-in server-side anti-cheat, permissions, and community moderation tools]
 - https://github.com/Ghou133/TShock-AntiCheat [Terraria 1.4.5.8 TShock server anti-cheat plugin source with observe-only detections for butcher damage, map brushes, item abuse, and health locks]
