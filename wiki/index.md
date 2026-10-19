@@ -3992,7 +3992,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [vPhone Workstation](entities/vphone-ws.md) — Native macOS SwiftUI front-end for vphone-cli: browse, create, boot, clone, export, and delete iOS research VMs (zqxwce; Virtualization.framework; creation wizard + host readiness checks; IOS Emulator)
 - [vulchatgpt](entities/vulchatgpt.md) — BinAIVulHunter IDA plugin: multi-provider AI vuln analysis on decompiled functions (OpenAI/Gemini/Ollama; cheat / IDA Plugins)
 - [WPeChatGPT](entities/wpechatgpt.md) — OpenAI-compatible IDA plugin: explain/rename, Python routine reconstruction, vuln checks, automated function-tree summarization (IDAPython; cheat / IDA Plugins / `[ChatGPT]`)
-- [Vulkan Wallhack](entities/vulkan-wallhack.md) — DrNseven MinHook Vulkan wallhack DLL; stride bruteforce; early inject (Vulkan / Hook)
+- [Vulkan Wallhack](entities/vulkan-wallhack.md) — DrNseven VS C++ Vulkan MinHook DLL; vertex stride bruteforce (Valheim default); hotkey wallhack/alternate coloring; early inject; depth/visibility cheat + AC monitoring research (Vulkan / Hook)
 - [vulkan](entities/vulkan.md) — PE dumper for Hyperion/Theia dynamic code encryption (NOACCESS page resolve; import fixup; Roblox/The Finals; atrexus; Dump lane)
 - [Vulkan-Hook](entities/vulkan-hook.md) — Vulkan API hook framework: `vkQueuePresentKHR` intercept + ImGui overlay menus / ESP (C++; Windows x86/x64; gmh5225)
 - [Vocem Overlay](entities/vocem-overlay.md) — Linux Discord in-game overlay (Vulkan implicit layer + OpenGL LD_PRELOAD interposer; daemon RPC/shared memory; HDR/Flatpak; overlay-injection research; ales-drnz)
