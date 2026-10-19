@@ -2881,7 +2881,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Ow-Outlines](entities/ow-outlines.md) — Overwatch internal glow/outline ESP (injected DLL; GlowESP offset + VEH; outline rendering memory writes; cheat / game:overwatch)
 - [ow_unpack](entities/ow-unpack.md) — Overwatch protected-binary unpack/decrypt (Midi12; reuploaded C++; decryption/helper modules + asm-assisted low-level unpacking; binary analysis / unpack study; cheat / game:overwatch)
 - [orx](entities/orx.md) — portable data-driven 2D C/C++ engine (Game Engine / source)
-- [orress](entities/orress.md) — pure-Rust RE IDE (disasm, Rust-syntax decompiler, debugger, x86-64 emulator, YARA-X triage, ORRESS Academy; okiedocus; Cheat / RE Tools)
+- [orress](entities/orress.md) — pure-Rust RE IDE (multi-format static+dynamic RE; x86/x64/ARM64 disasm, Rust-syntax decompiler, debugger, time-travel x86-64 emulator, symbolic solve, YARA-X/sandbox triage, Rhai; ORRESS Academy; okiedocus; Cheat / RE Tools)
 - [osslsigncode](entities/osslsigncode.md) — cross-platform Authenticode signing (OpenSSL/cURL; PE/CAB/CAT/MSI/APPX/scripts; Anti Cheat → Sign Tools)
 - [OSAntiCheat](entities/osanticheat.md) — experimental server-side CS2 CounterStrikeSharp heuristic AC (spinbot/aimbot/triggerbot/wallhack detectors; fusion suspicion tiers; log-only)
 - [osiris](entities/osiris.md) — open-source CS:GO internal cheat (modern C++; ESP/glow/aimbot/triggerbot/backtrack/skin changer; interface pointers/pattern scan/VMT hooks; danielkrupinski; cheat / game:csgo)
