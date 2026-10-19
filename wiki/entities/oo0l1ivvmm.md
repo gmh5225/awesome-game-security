@@ -11,7 +11,11 @@ confidence: medium
 
 # Oo0l1IVvMm
 
-Opt-in **IDA Pro 9.x Hex-Rays** plugin (woye969; Python) for **OLLVM-style control-flow flattening** and encoded dispatch recovery. **MIN** mode targets classic central-dispatcher flattening via unflat valrange unflattening, instruction materialization, and **D-810** simplification. **MAX** mode resolves encoded inline jmp-reg dispatch with concrete chain walking, microcode edge rewriting, and dead-dispatcher removal. Disarmed by default so F5 stays at vanilla speed until a mode is chosen from the menu or hotkey; optional Capstone decoding and runtime snapshots support table-based dispatch. Bundled **seagull_core** supports standalone chain analysis outside IDA. (source: wiki/sources/descriptions/woye969__Oo0l1IVvMm.md)
+Opt-in **IDA Pro 9.x Hex-Rays** plugin (woye969; Python) for **OLLVM-style control-flow flattening** and encoded dispatch recovery. **MIN** mode targets classic central-dispatcher flattening via unflat valrange unflattening, instruction materialization, and **D-810** simplification. **MAX** mode resolves encoded inline jmp-reg dispatch with concrete chain walking, microcode edge rewriting, and dead-dispatcher removal. Disarmed by default so F5 stays at vanilla speed until a mode is chosen from the menu or hotkey; optional Capstone decoding and runtime snapshots support table-based dispatch. Bundled **seagull_core** supports standalone chain analysis outside IDA. Aimed at reverse engineers and game-security analysts who need readable pseudocode from heavily flattened commercial or protected executables without constant background overhead. (source: wiki/sources/descriptions/woye969__Oo0l1IVvMm.md)
+
+## Workflow
+
+Choose **MIN** for classic central-dispatcher CFF; choose **MAX** when dispatch uses encoded inline jmp-reg chains or table-driven routing. Invoke from the plugin menu or hotkey only when decompilation quality matters—the plugin does not hook F5 until armed.
 
 ## Positioning
 
