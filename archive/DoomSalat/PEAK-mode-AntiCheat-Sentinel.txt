@@ -1,0 +1,939 @@
+Project Path: arc_DoomSalat_PEAK-mode-AntiCheat-Sentinel_zj1x44ll
+
+Source Tree:
+
+```txt
+arc_DoomSalat_PEAK-mode-AntiCheat-Sentinel_zj1x44ll
+├── README.md
+├── index.md
+└── src
+    └── PeakSentinel
+        ├── Detection
+        │   ├── InstantiateAudit.cs
+        │   ├── ProtectionSettings.cs
+        │   └── RpcAudit.cs
+        ├── Patches
+        │   ├── NetworkPatches.cs
+        │   └── SentinelHooks.cs
+        ├── PeakSentinel.csproj
+        ├── Reporting
+        │   ├── DebugTrace.cs
+        │   ├── SentinelWindow.cs
+        │   ├── SuspicionReport.cs
+        │   └── VersionBadge.cs
+        └── SentinelPlugin.cs
+
+```
+
+`README.md`:
+
+```md
+# Peak Sentinel
+
+Прототип античита для PEAK (BepInEx 5). Определяет, **кто** сделал подозрительное действие с предметами, по отправителю сетевого сообщения — его ставит сервер Photon, подделать нельзя. Хост может блокировать незаконную выдачу предметов.
+
+## Что умеет
+
+- **Ловит выдачу предметов**: себе и другим игрокам через встроенную команду «спавн в руки» (так работают спавнеры и читы), подбор от чужого имени, подмену чужого инвентаря, создание предмета, которого нет в инвентаре создателя.
+- **Блокирует у хоста** незаконную выдачу: предмет просто не создаётся. Ванильные выдачи (паспорт в аэропорту, стартовый предмет режима Grapple) проходят. Свои спавны хоста можно разрешить.
+- **Окно менеджера (F6)**: история находок с прокруткой и переключатели защиты.
+- **Лента подключений**: подозрительное и заблокированное видно прямо в игре.
+- **Отладочный лог** `BepInEx/PeakSentinel.log`.
+
+Подробнее — [index.md](index.md).
+
+## Сборка
+
+Нужны .NET SDK и PEAK с BepInEx 5. Путь к игре по умолчанию — `G:\SteamLibrary\steamapps\common\PEAK`, другой передаётся параметром:
+
+```bash
+dotnet build src/PeakSentinel -c Release -p:GameDirectory="D:\Steam\steamapps\common\PEAK"
+```
+
+Сборка кладёт `PeakSentinel.dll` в профиль Thunderstore Mod Manager `Default`: `BepInEx/plugins/PeakSentinel`. Другой путь — параметр `-p:ProfilePlugins=...`.
+
+## Ограничения
+
+- Блокировка и большая часть проверок работают только у хоста: запросы выдачи предметов идут хосту.
+- Хост-читер не ловится.
+- Каким именно модом сделан спавн, не определить: спавнеры не сообщают о себе по сети.
+
+```
+
+`index.md`:
+
+```md
+# PeakSentinel — Feature Index
+
+> Прототип античита для PEAK (BepInEx 5): пишет в лог и в ленту подключений, кто сделал подозрительное действие с предметами. Определение «кто» — по отправителю сетевого сообщения, его ставит сервер Photon.
+
+## Layer Map
+SentinelPlugin (BepInPlugin) — создаёт отчёт и аудиты, Harmony PatchAll
+├── Patches/NetworkPatches — PhotonNetwork.ExecuteRpc (префикс: каждое входящее и локальное RPC с отправителем), PhotonNetwork.NetworkInstantiate(InstantiateParameters, bool, bool) (постфикс: любое сетевое создание объекта с создателем; аудит только для пришедших по сети — instantiateEvent), PlayerConnectionLog.Awake (лента)
+├── Patches/SentinelHooks — статические ссылки для патчей
+├── Detection/RpcAudit — правила по RPC предметов; Inspect возвращает «выполнять ли»: префикс ExecuteRpc отменяет RPC, если нарушение и BlockCheatSpawns включён и ты хост (свои запросы хоста не блокируются при AllowMySpawns); отклонение пишется как BLOCKED
+├── Detection/ProtectionSettings — конфиг [Protection]: BlockCheatSpawns (вкл.), AllowMySpawns (вкл.)
+├── Detection/InstantiateAudit — создание предметов не-хостом
+├── Reporting/DebugTrace — текстовый лог отладки BepInEx/PeakSentinel.log (перезаписывается при запуске, AutoFlush): каждое RPC предметов (метод, отправитель#actor и host, view и его владелец, аргументы), каждое созданное по сети и локально предметное тело (префаб, создатель, позиция), каждая находка SUSPICIOUS/notice; конфиг [Debug] TraceFile (вкл.), TraceAllRpcs (выкл. — писать вообще все RPC)
+├── Reporting/VersionBadge — IMGUI-надпись «Peak Sentinel 0.1.0» вверху по центру, пока ты в комнате Photon (лобби и забег); отдельный GameObject DontDestroyOnLoad
+├── Reporting/SentinelWindow — окно менеджера (IMGUI GUI.Window, перетаскивается), открыть/закрыть [Manager] ToggleKey = F6 (свободна: F2 BadScout/античит, F3–F4 Spectator, F5 спавнеры, F7 Rope Carabiner, F9 PEAKER/OBS, F12 Steam); переключатели [Protection] BlockCheatSpawns и AllowMySpawns, «показывать notice», «очистить», пометка «блок работает только у хоста»; история последних 500 находок копится всё время, даже при закрытом окне (красный SUSPICIOUS, оранжевый BLOCKED, серый notice), вертикальная прокрутка всегда видна, «Follow newest» держит внизу (выключить — листать вручную); перетаскивание только за заголовок, чтобы не мешать полосе прокрутки; SUSPICIOUS и BLOCKED параллельно идут в ванильную ленту подключений; пока открыто — курсор свободен (патч GUIManager.UpdateWindowStatus)
+└── Reporting/SuspicionReport — лог BepInEx (SUSPICIOUS / notice) + лента подключений (повтор того же текста не чаще раза в 2 с) + консоль
+
+## Правила RpcAudit
+| RPC | Кто вправе | Что пишет |
+|---|---|---|
+| `RPC_SpawnItemInHandMaster` (CharacterItems, идёт хосту) | никто в обычной игре; владелец — только паспорт в аэропорту (игра выдаёт его этой же командой) и стартовый предмет режима Grapple | «заспавнил X в руки Y» / «себе в руки» |
+| `RequestPickup` (Item, идёт хосту) | владелец персонажа из аргумента или хост (после спавна в руки хост сам шлёт «подобрать» за игрока — виноват отправитель спавна, он уже пойман) | «заставил Y подобрать X» |
+| `OnPickupAccepted` | хост | «принудительный подбор» |
+| `SyncInventoryRPC`, `RPC_SetInventory`, `RPCRemoveItemFromSlot` (Player) | владелец или хост | «переписал инвентарь Y» |
+| `RPC_InitHoldingItem`, `EquipSlotRpc` | владелец или хост | «вложил предмет в руки Y» |
+| `RPC_Clone` | — | любой клон предмета |
+
+## InstantiateAudit
+Создатель не хост, объект — предмет: ниже y = −400 (визуал рюкзака) — пропуск; такой предмет есть в слотах создателя — notice (достал из инвентаря); иначе SUSPICIOUS (спавн или законный разбиваемый объект — проверить).
+
+## Ограничения прототипа
+- Видит только сообщения, дошедшие до этого клиента: RPC хосту видит только хост.
+- Хост-читер не ловится (хост создаёт предметы сам).
+- Сборка кладёт DLL в профиль Thunderstore Default: `BepInEx/plugins/PeakSentinel`.
+- Каким модом сделан спавн, не пишется: ItemSpawnerPremium и ItemSpawnerEnhanced оба идут через ту же ванильную команду и ничего о себе по сети не сообщают — по имени их не отличить.
+- Проверено в игре (хост + 1 игрок): выдача себе и другому через спавнер блокируется, предмет не появляется ни у кого.
+
+```
+
+`src/PeakSentinel/Detection/InstantiateAudit.cs`:
+
+```cs
+using PeakSentinel.Reporting;
+using UnityEngine;
+using PhotonPlayer = Photon.Realtime.Player;
+
+namespace PeakSentinel.Detection
+{
+    public sealed class InstantiateAudit
+    {
+        private const float BackpackVisualHeight = -400f;
+
+        private readonly SuspicionReport _report;
+        private readonly DebugTrace _trace;
+
+        public InstantiateAudit(SuspicionReport report, DebugTrace trace)
+        {
+            _report = report;
+            _trace = trace;
+        }
+
+        public void Inspect(PhotonPlayer creator, GameObject created, bool fromNetwork)
+        {
+            if (created == null || !created.TryGetComponent(out Item item))
+                return;
+
+            _trace.Instantiate(creator, created.name, created.transform.position);
+
+            if (!fromNetwork || creator == null || creator.IsMasterClient)
+                return;
+
+            if (created.transform.position.y < BackpackVisualHeight)
+                return;
+
+            if (Carries(creator, item.itemID))
+            {
+                _report.Notice(creator, $"took '{item.GetItemName()}' out of the inventory");
+                return;
+            }
+
+            _report.Flag(creator, $"created '{item.GetItemName()}' that is not in their inventory (spawn or legit breakable — check)");
+        }
+
+        private bool Carries(PhotonPlayer creator, ushort itemId)
+        {
+            if (!PlayerHandler.TryGetPlayer(creator.ActorNumber, out Player player))
+                return false;
+
+            foreach (ItemSlot slot in player.itemSlots)
+            {
+                if (Holds(slot, itemId))
+                    return true;
+            }
+
+            return Holds(player.tempFullSlot, itemId);
+        }
+
+        private bool Holds(ItemSlot slot, ushort itemId)
+        {
+            return slot != null && !slot.IsEmpty() && slot.prefab.itemID == itemId;
+        }
+    }
+}
+
+```
+
+`src/PeakSentinel/Detection/ProtectionSettings.cs`:
+
+```cs
+using BepInEx.Configuration;
+
+namespace PeakSentinel.Detection
+{
+    public sealed class ProtectionSettings
+    {
+        private const string Section = "Protection";
+
+        public ProtectionSettings(ConfigFile config)
+        {
+            BlockCheatSpawns = config.Bind(Section, "BlockCheatSpawns", true, "As host, refuse item spawns and forged pickups/inventory changes that the vanilla game never sends (cheats and spawner mods). Only works while you are the host.");
+            AllowMySpawns = config.Bind(Section, "AllowMySpawns", true, "Do not block item spawns that you (the host) request yourself, e.g. with your own spawner mod.");
+        }
+
+        public ConfigEntry<bool> BlockCheatSpawns { get; }
+        public ConfigEntry<bool> AllowMySpawns { get; }
+    }
+}
+
+```
+
+`src/PeakSentinel/Detection/RpcAudit.cs`:
+
+```cs
+using System.Collections.Generic;
+using ExitGames.Client.Photon;
+using Photon.Pun;
+using PeakSentinel.Reporting;
+using PhotonPlayer = Photon.Realtime.Player;
+
+namespace PeakSentinel.Detection
+{
+    public sealed class RpcAudit
+    {
+        private const byte ViewIdKey = 0;
+        private const byte MethodNameKey = 3;
+        private const byte ArgumentsKey = 4;
+        private const byte MethodIndexKey = 5;
+        private const string SpawnInHand = "RPC_SpawnItemInHandMaster";
+        private const string RequestPickup = "RequestPickup";
+        private const string PickupAccepted = "OnPickupAccepted";
+        private const string SyncInventory = "SyncInventoryRPC";
+        private const string SetInventory = "RPC_SetInventory";
+        private const string RemoveFromSlot = "RPCRemoveItemFromSlot";
+        private const string InitHoldingItem = "RPC_InitHoldingItem";
+        private const string EquipSlot = "EquipSlotRpc";
+        private const string Clone = "RPC_Clone";
+        private const string PassportItem = "Passport";
+
+        private static readonly HashSet<string> Watched = new HashSet<string> // Static: fixed set of item RPC names
+        {
+            SpawnInHand, RequestPickup, PickupAccepted, SyncInventory, SetInventory, RemoveFromSlot, InitHoldingItem, EquipSlot, Clone,
+        };
+
+        private readonly SuspicionReport _report;
+        private readonly DebugTrace _trace;
+        private readonly ProtectionSettings _protection;
+
+        public RpcAudit(SuspicionReport report, DebugTrace trace, ProtectionSettings protection)
+        {
+            _report = report;
+            _trace = trace;
+            _protection = protection;
+        }
+
+        public bool Inspect(Hashtable rpc, PhotonPlayer sender)
+        {
+            if (rpc == null || !(rpc[ViewIdKey] is int viewId))
+                return true;
+
+            string method = MethodOf(rpc);
+
+            if (method == null)
+                return true;
+
+            PhotonView view = PhotonView.Find(viewId);
+            PhotonPlayer owner = view == null ? null : view.Owner;
+            object[] arguments = rpc[ArgumentsKey] as object[];
+
+            if (_trace.TracesAllRpcs || Watched.Contains(method))
+                _trace.Rpc(method, sender, viewId, owner, arguments);
+
+            switch (method)
+            {
+                case SpawnInHand:
+                    return CheckSpawnInHand(sender, owner, view, FirstString(arguments));
+
+                case RequestPickup:
+                    return CheckPickupRequest(sender, view, arguments);
+
+                case PickupAccepted:
+                    return CheckFromHost(sender, owner, "forced an item pickup on");
+
+                case SyncInventory:
+                case SetInventory:
+                case RemoveFromSlot:
+                    return CheckFromOwner(sender, owner, $"rewrote the inventory ({method}) of");
+
+                case InitHoldingItem:
+                case EquipSlot:
+                    return CheckFromOwner(sender, owner, $"forced an item into the hands ({method}) of");
+
+                case Clone:
+                    _report.Flag(sender, $"cloned an item ({ItemNameOf(view)})");
+                    return true;
+
+                default:
+                    return true;
+            }
+        }
+
+        private bool CheckSpawnInHand(PhotonPlayer sender, PhotonPlayer owner, PhotonView view, string item)
+        {
+            if (!IsSame(sender, owner))
+                return Refuse(sender, $"spawned '{item}' into the hands of {SuspicionReport.NameOf(owner)}", IsMine(sender));
+
+            if (IsGrappleStartItem(item))
+            {
+                _report.Notice(sender, $"got the grapple mode start item '{item}'");
+                return true;
+            }
+
+            if (IsAirportPassport(view, item))
+            {
+                _report.Notice(sender, $"got the airport '{item}'");
+                return true;
+            }
+
+            return Refuse(sender, $"spawned '{item}' into own hands", IsMine(sender));
+        }
+
+        private bool CheckPickupRequest(PhotonPlayer sender, PhotonView itemView, object[] arguments)
+        {
+            PhotonView picker = arguments != null && arguments.Length > 0 ? ViewOf(arguments[0]) : null;
+            PhotonPlayer pickerOwner = picker == null ? null : picker.Owner;
+
+            if (IsSame(sender, pickerOwner) || IsHost(sender))
+                return true;
+
+            return Refuse(sender, $"made {SuspicionReport.NameOf(pickerOwner)} pick up '{ItemNameOf(itemView)}'", false);
+        }
+
+        private bool CheckFromHost(PhotonPlayer sender, PhotonPlayer owner, string action)
+        {
+            return IsHost(sender) || Refuse(sender, $"{action} {SuspicionReport.NameOf(owner)}", false);
+        }
+
+        private bool CheckFromOwner(PhotonPlayer sender, PhotonPlayer owner, string action)
+        {
+            return IsSame(sender, owner) || IsHost(sender) || Refuse(sender, $"{action} {SuspicionReport.NameOf(owner)}", false);
+        }
+
+        private bool Refuse(PhotonPlayer sender, string action, bool mine)
+        {
+            bool block = _protection.BlockCheatSpawns.Value && PhotonNetwork.IsMasterClient && !(mine && _protection.AllowMySpawns.Value);
+            _report.Flag(sender, action, block);
+            return !block;
+        }
+
+        private bool IsMine(PhotonPlayer sender)
+        {
+            return sender != null && sender.IsLocal;
+        }
+
+        private bool IsHost(PhotonPlayer sender)
+        {
+            return sender != null && sender.IsMasterClient;
+        }
+
+        private string MethodOf(Hashtable rpc)
+        {
+            if (rpc[MethodIndexKey] is byte index)
+                return index < PhotonNetwork.PhotonServerSettings.RpcList.Count ? PhotonNetwork.PhotonServerSettings.RpcList[index] : null;
+
+            return rpc[MethodNameKey] as string;
+        }
+
+        private PhotonView ViewOf(object argument)
+        {
+            if (argument is PhotonView view)
+                return view;
+
+            return argument is int id ? PhotonView.Find(id) : null;
+        }
+
+        private string ItemNameOf(PhotonView view)
+        {
+            Item item = view == null ? null : view.GetComponent<Item>();
+            return item == null ? "unknown item" : item.GetItemName();
+        }
+
+        private string FirstString(object[] arguments)
+        {
+            return arguments != null && arguments.Length > 0 ? arguments[0] as string : null;
+        }
+
+        private bool IsSame(PhotonPlayer first, PhotonPlayer second)
+        {
+            return first != null && second != null && first.ActorNumber == second.ActorNumber;
+        }
+
+        private bool IsAirportPassport(PhotonView view, string item)
+        {
+            Character character = view == null ? null : view.GetComponent<Character>();
+            return item == PassportItem && character != null && character.inAirport;
+        }
+
+        private bool IsGrappleStartItem(string item)
+        {
+            return item == RunSettings.GRAPPLE_MODE_ITEM && RunSettings.GetValue(RunSettings.SETTINGTYPE.GrappleMode) == 1;
+        }
+    }
+}
+
+```
+
+`src/PeakSentinel/Patches/NetworkPatches.cs`:
+
+```cs
+using ExitGames.Client.Photon;
+using HarmonyLib;
+using Photon.Pun;
+using UnityEngine;
+using PhotonPlayer = Photon.Realtime.Player;
+using PunInstantiateParameters = Photon.Pun.InstantiateParameters;
+
+namespace PeakSentinel.Patches
+{
+    [HarmonyPatch]
+    public static class NetworkPatches // Static: Harmony patch class
+    {
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(PhotonNetwork), nameof(PhotonNetwork.ExecuteRpc))]
+        public static bool InspectRpc(Hashtable rpcData, PhotonPlayer sender)
+        {
+            return SentinelHooks.Rpc == null || SentinelHooks.Rpc.Inspect(rpcData, sender);
+        }
+
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(PhotonNetwork), nameof(PhotonNetwork.NetworkInstantiate), new[] { typeof(PunInstantiateParameters), typeof(bool), typeof(bool) })]
+        public static void InspectInstantiate(PunInstantiateParameters parameters, bool instantiateEvent, GameObject __result)
+        {
+            SentinelHooks.Instantiate?.Inspect(parameters.creator, __result, instantiateEvent);
+        }
+
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(PlayerConnectionLog), "Awake")]
+        public static void RememberFeed(PlayerConnectionLog __instance)
+        {
+            if (SentinelHooks.Report != null)
+                SentinelHooks.Report.Feed = __instance;
+        }
+
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(GUIManager), "UpdateWindowStatus")]
+        public static void FreeCursorForWindow(GUIManager __instance)
+        {
+            if (SentinelHooks.Window == null || !SentinelHooks.Window.IsOpen)
+                return;
+
+            __instance.windowShowingCursor = true;
+            __instance.windowBlockingInput = true;
+        }
+    }
+}
+
+```
+
+`src/PeakSentinel/Patches/SentinelHooks.cs`:
+
+```cs
+using PeakSentinel.Detection;
+using PeakSentinel.Reporting;
+
+namespace PeakSentinel.Patches
+{
+    public static class SentinelHooks // Static: Harmony patches are static and reach the mod only through statics
+    {
+        public static SuspicionReport Report { get; set; } // Set: assigned once by SentinelPlugin
+        public static RpcAudit Rpc { get; set; } // Set: assigned once by SentinelPlugin
+        public static InstantiateAudit Instantiate { get; set; } // Set: assigned once by SentinelPlugin
+        public static SentinelWindow Window { get; set; } // Set: assigned once by SentinelPlugin, frees the cursor while open
+    }
+}
+
+```
+
+`src/PeakSentinel/PeakSentinel.csproj`:
+
+```csproj
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <AssemblyName>PeakSentinel</AssemblyName>
+    <RootNamespace>PeakSentinel</RootNamespace>
+    <LangVersion>latest</LangVersion>
+    <Nullable>disable</Nullable>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <RestoreAdditionalProjectSources>
+      https://api.nuget.org/v3/index.json;
+      https://nuget.bepinex.dev/v3/index.json
+    </RestoreAdditionalProjectSources>
+    <GameDirectory Condition="'$(GameDirectory)' == ''">G:\SteamLibrary\steamapps\common\PEAK</GameDirectory>
+    <ManagedDirectory>$(GameDirectory)\PEAK_Data\Managed</ManagedDirectory>
+    <ProfilePlugins Condition="'$(ProfilePlugins)' == ''">$(AppData)\Thunderstore Mod Manager\DataFolder\PEAK\profiles\Default\BepInEx\plugins</ProfilePlugins>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="BepInEx.Core" Version="5.4.21" PrivateAssets="all" />
+    <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.3" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="Assembly-CSharp" Publicize="true">
+      <HintPath>$(ManagedDirectory)\Assembly-CSharp.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="PhotonUnityNetworking" Publicize="true">
+      <HintPath>$(ManagedDirectory)\PhotonUnityNetworking.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="PhotonRealtime">
+      <HintPath>$(ManagedDirectory)\PhotonRealtime.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Photon3Unity3D">
+      <HintPath>$(ManagedDirectory)\Photon3Unity3D.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Zorro.Core.Runtime">
+      <HintPath>$(ManagedDirectory)\Zorro.Core.Runtime.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Unity.TextMeshPro">
+      <HintPath>$(ManagedDirectory)\Unity.TextMeshPro.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine">
+      <HintPath>$(ManagedDirectory)\UnityEngine.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.CoreModule">
+      <HintPath>$(ManagedDirectory)\UnityEngine.CoreModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Unity.InputSystem">
+      <HintPath>$(ManagedDirectory)\Unity.InputSystem.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.IMGUIModule">
+      <HintPath>$(ManagedDirectory)\UnityEngine.IMGUIModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.TextRenderingModule">
+      <HintPath>$(ManagedDirectory)\UnityEngine.TextRenderingModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+
+  <Target Name="CopyToProfile" AfterTargets="Build" Condition="Exists('$(ProfilePlugins)')">
+    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(ProfilePlugins)\PeakSentinel" />
+  </Target>
+
+</Project>
+
+```
+
+`src/PeakSentinel/Reporting/DebugTrace.cs`:
+
+```cs
+using System;
+using System.IO;
+using System.Text;
+using BepInEx.Configuration;
+using UnityEngine;
+using PhotonPlayer = Photon.Realtime.Player;
+
+namespace PeakSentinel.Reporting
+{
+    public sealed class DebugTrace : IDisposable
+    {
+        private const string TimeFormat = "HH:mm:ss.fff";
+        private const string Separator = ", ";
+        private const string Null = "null";
+
+        private readonly ConfigEntry<bool> _enabled;
+        private readonly ConfigEntry<bool> _allRpcs;
+        private readonly StreamWriter _writer;
+
+        public DebugTrace(string path, ConfigEntry<bool> enabled, ConfigEntry<bool> allRpcs)
+        {
+            _enabled = enabled;
+            _allRpcs = allRpcs;
+            _writer = new StreamWriter(path, false, Encoding.UTF8) { AutoFlush = true };
+            Path = path;
+            Write($"trace started, game time {Time.unscaledTime:F1}");
+        }
+
+        public string Path { get; }
+        public bool TracesAllRpcs => _enabled.Value && _allRpcs.Value;
+
+        public void Rpc(string method, PhotonPlayer sender, int viewId, PhotonPlayer viewOwner, object[] arguments)
+        {
+            Write($"RPC {method} from {Describe(sender)} on view {viewId} owned by {Describe(viewOwner)} args [{Join(arguments)}]");
+        }
+
+        public void Instantiate(PhotonPlayer creator, string prefab, Vector3 position)
+        {
+            Write($"INSTANTIATE {prefab} by {Describe(creator)} at {position}");
+        }
+
+        public void Finding(string level, PhotonPlayer culprit, string action)
+        {
+            Write($"{level} {Describe(culprit)}: {action}");
+        }
+
+        public void Dispose()
+        {
+            _writer.Dispose();
+        }
+
+        private void Write(string line)
+        {
+            if (_enabled.Value)
+                _writer.WriteLine($"[{DateTime.Now.ToString(TimeFormat)}] {line}");
+        }
+
+        private string Describe(PhotonPlayer player)
+        {
+            if (player == null)
+                return Null;
+
+            string host = player.IsMasterClient ? " host" : string.Empty;
+            return $"{SuspicionReport.NameOf(player)}#{player.ActorNumber}{host}";
+        }
+
+        private string Join(object[] arguments)
+        {
+            if (arguments == null)
+                return string.Empty;
+
+            StringBuilder text = new StringBuilder();
+
+            for (int i = 0; i < arguments.Length; i++)
+            {
+                if (i > 0)
+                    text.Append(Separator);
+
+                text.Append(arguments[i] == null ? Null : arguments[i].ToString());
+            }
+
+            return text.ToString();
+        }
+    }
+}
+
+```
+
+`src/PeakSentinel/Reporting/SentinelWindow.cs`:
+
+```cs
+using System;
+using System.Collections.Generic;
+using BepInEx.Configuration;
+using PeakSentinel.Detection;
+using Photon.Pun;
+using UnityEngine;
+using UnityEngine.InputSystem;
+
+namespace PeakSentinel.Reporting
+{
+    public sealed class SentinelWindow : MonoBehaviour
+    {
+        private const int WindowId = 0x5E471;
+        private const int MaxLines = 500;
+        private const float TitleHeight = 20f;
+        private const string FollowLabel = "Follow newest";
+        private const float Width = 760f;
+        private const float Height = 460f;
+        private const float TopMargin = 40f;
+        private const int FontSize = 14;
+        private const string TimeFormat = "HH:mm:ss";
+        private const string Empty = "no findings yet";
+        private const string HostOnly = "Blocking works only while you are the host";
+        private const string BlockLabel = "Block cheat item spawns (spawners, forged pickups and inventories)";
+        private const string AllowMineLabel = "Allow my own spawns (host)";
+        private const string NoticesLabel = "Show notices";
+        private const string ClearLabel = "Clear";
+
+        private static readonly Color FlagColor = new Color(1f, 0.45f, 0.4f); // Static: fixed window colors
+        private static readonly Color BlockedColor = new Color(1f, 0.75f, 0.2f); // Static: fixed window colors
+        private static readonly Color NoticeColor = new Color(0.75f, 0.75f, 0.75f); // Static: fixed window colors
+
+        private readonly List<(string Text, Color Color, bool IsNotice)> _lines = new List<(string Text, Color Color, bool IsNotice)>();
+        private ConfigEntry<Key> _toggleKey;
+        private ProtectionSettings _protection;
+        private string _title;
+        private Rect _window;
+        private Vector2 _scroll;
+        private bool _showNotices = true;
+        private bool _followNewest = true;
+        private GUIStyle _lineStyle;
+
+        public bool IsOpen { get; private set; }
+
+        public void Initialize(string title, ConfigEntry<Key> toggleKey, ProtectionSettings protection)
+        {
+            _title = title;
+            _toggleKey = toggleKey;
+            _protection = protection;
+            _window = new Rect((Screen.width - Width) / 2f, TopMargin, Width, Height);
+        }
+
+        private void Update()
+        {
+            Keyboard keyboard = Keyboard.current;
+
+            if (keyboard != null && _toggleKey.Value != Key.None && keyboard[_toggleKey.Value].wasPressedThisFrame)
+                IsOpen = !IsOpen;
+        }
+
+        private void OnGUI()
+        {
+            if (!IsOpen)
+                return;
+
+            if (_lineStyle == null)
+                _lineStyle = new GUIStyle(GUI.skin.label) { fontSize = FontSize, wordWrap = true };
+
+            _window = GUI.Window(WindowId, _window, DrawWindow, $"{_title} — {_toggleKey.Value}");
+        }
+
+        public void Add(string text, bool isFlag, bool isBlocked)
+        {
+            Color color = isBlocked ? BlockedColor : isFlag ? FlagColor : NoticeColor;
+            _lines.Add(($"[{DateTime.Now.ToString(TimeFormat)}] {text}", color, !isFlag));
+
+            if (_lines.Count > MaxLines)
+                _lines.RemoveAt(0);
+        }
+
+        private void DrawWindow(int id)
+        {
+            _protection.BlockCheatSpawns.Value = GUILayout.Toggle(_protection.BlockCheatSpawns.Value, BlockLabel);
+            _protection.AllowMySpawns.Value = GUILayout.Toggle(_protection.AllowMySpawns.Value, AllowMineLabel);
+            GUILayout.BeginHorizontal();
+            _showNotices = GUILayout.Toggle(_showNotices, NoticesLabel);
+            _followNewest = GUILayout.Toggle(_followNewest, FollowLabel);
+            GUILayout.FlexibleSpace();
+
+            if (!PhotonNetwork.IsMasterClient)
+                GUILayout.Label(HostOnly);
+
+            if (GUILayout.Button(ClearLabel))
+                _lines.Clear();
+
+            GUILayout.EndHorizontal();
+
+            if (_followNewest)
+                _scroll.y = float.MaxValue;
+
+            _scroll = GUILayout.BeginScrollView(_scroll, false, true);
+
+            if (_lines.Count == 0)
+                GUILayout.Label(Empty);
+
+            foreach ((string text, Color color, bool isNotice) in _lines)
+            {
+                if (isNotice && !_showNotices)
+                    continue;
+
+                _lineStyle.normal.textColor = color;
+                GUILayout.Label(text, _lineStyle);
+            }
+
+            GUILayout.EndScrollView();
+            GUI.DragWindow(new Rect(0f, 0f, Width, TitleHeight));
+        }
+    }
+}
+
+```
+
+`src/PeakSentinel/Reporting/SuspicionReport.cs`:
+
+```cs
+using System.Collections.Generic;
+using BepInEx.Logging;
+using UnityEngine;
+using PhotonPlayer = Photon.Realtime.Player;
+
+namespace PeakSentinel.Reporting
+{
+    public sealed class SuspicionReport
+    {
+        private const float RepeatSeconds = 2f;
+        private const string FeedFormat = "<color=#FF6060>[Sentinel]</color> <color=#FFD060>{0}</color> {1}";
+        private const string FlagLevel = "SUSPICIOUS";
+        private const string BlockedLevel = "BLOCKED";
+        private const string NoticeLevel = "notice";
+        private const string BlockedPrefix = "blocked: ";
+
+        private readonly ManualLogSource _log;
+        private readonly DebugTrace _trace;
+        private readonly Dictionary<string, float> _lastShown = new Dictionary<string, float>();
+
+        public SuspicionReport(ManualLogSource log, DebugTrace trace)
+        {
+            _log = log;
+            _trace = trace;
+        }
+
+        public PlayerConnectionLog Feed { get; set; } // Set: remembered by the connection log patch once the HUD wakes up
+        public SentinelWindow Window { get; set; } // Set: assigned once by SentinelPlugin after the window object exists
+
+        public void Flag(PhotonPlayer culprit, string action, bool blocked = false)
+        {
+            string name = NameOf(culprit);
+            string level = blocked ? BlockedLevel : FlagLevel;
+            string text = blocked ? BlockedPrefix + action : action;
+            _log.LogWarning($"{level} {name} (actor {ActorOf(culprit)}): {action}");
+            _trace.Finding(level, culprit, action);
+            Window?.Add($"{name}: {text}", true, blocked);
+            Show(name, text);
+        }
+
+        public void Notice(PhotonPlayer culprit, string action)
+        {
+            _log.LogInfo($"{NoticeLevel} {NameOf(culprit)} (actor {ActorOf(culprit)}): {action}");
+            _trace.Finding(NoticeLevel, culprit, action);
+            Window?.Add($"{NameOf(culprit)}: {action}", false, false);
+        }
+
+        public static string NameOf(PhotonPlayer player) // Static: pure formatting shared by the audits
+        {
+            if (player == null)
+                return "unknown";
+
+            return string.IsNullOrEmpty(player.NickName) ? $"actor {player.ActorNumber}" : player.NickName;
+        }
+
+        private static int ActorOf(PhotonPlayer player) // Static: pure formatting
+        {
+            return player == null ? 0 : player.ActorNumber;
+        }
+
+        private void Show(string name, string action)
+        {
+            string key = name + action;
+            float now = Time.unscaledTime;
+
+            if (_lastShown.TryGetValue(key, out float last) && now - last < RepeatSeconds)
+                return;
+
+            _lastShown[key] = now;
+
+            if (Feed != null)
+                Feed.AddMessage(string.Format(FeedFormat, name, action));
+        }
+    }
+}
+
+```
+
+`src/PeakSentinel/Reporting/VersionBadge.cs`:
+
+```cs
+using Photon.Pun;
+using UnityEngine;
+
+namespace PeakSentinel.Reporting
+{
+    public sealed class VersionBadge : MonoBehaviour
+    {
+        private const float Width = 400f;
+        private const float Height = 24f;
+        private const float TopMargin = 6f;
+        private const int FontSize = 16;
+
+        private static readonly Color TextColor = new Color(1f, 0.85f, 0.4f, 0.9f); // Static: fixed badge color
+
+        private string _text;
+        private GUIStyle _style;
+
+        public void Initialize(string text)
+        {
+            _text = text;
+        }
+
+        private void OnGUI()
+        {
+            if (!PhotonNetwork.InRoom)
+                return;
+
+            if (_style == null)
+                _style = new GUIStyle(GUI.skin.label) { alignment = TextAnchor.UpperCenter, fontSize = FontSize, fontStyle = FontStyle.Bold, normal = { textColor = TextColor } };
+
+            GUI.Label(new Rect((Screen.width - Width) / 2f, TopMargin, Width, Height), _text, _style);
+        }
+    }
+}
+
+```
+
+`src/PeakSentinel/SentinelPlugin.cs`:
+
+```cs
+using System.IO;
+using BepInEx;
+using BepInEx.Configuration;
+using HarmonyLib;
+using PeakSentinel.Detection;
+using PeakSentinel.Patches;
+using PeakSentinel.Reporting;
+using UnityEngine;
+using UnityEngine.InputSystem;
+
+namespace PeakSentinel
+{
+    [BepInPlugin(Guid, Name, Version)]
+    public sealed class SentinelPlugin : BaseUnityPlugin
+    {
+        public const string Guid = "peaksentinel";
+        public const string Name = "Peak Sentinel";
+        public const string Version = "0.1.0";
+
+        private const string DebugSection = "Debug";
+        private const string ManagerSection = "Manager";
+        private const string TraceFile = "PeakSentinel.log";
+
+        private Harmony _harmony;
+        private DebugTrace _trace;
+
+        private void Awake()
+        {
+            ConfigEntry<bool> traceEnabled = Config.Bind(DebugSection, "TraceFile", true, $"Write a debug trace to BepInEx/{TraceFile}: every item RPC (sender, view owner, arguments), every item created over the network and every finding.");
+            ConfigEntry<bool> traceAllRpcs = Config.Bind(DebugSection, "TraceAllRpcs", false, "Also write every other RPC to the trace (very noisy, for finding new cheat paths).");
+            _trace = new DebugTrace(Path.Combine(Paths.BepInExRootPath, TraceFile), traceEnabled, traceAllRpcs);
+            ProtectionSettings protection = new ProtectionSettings(Config);
+            SuspicionReport report = new SuspicionReport(Logger, _trace);
+            SentinelHooks.Report = report;
+            SentinelHooks.Rpc = new RpcAudit(report, _trace, protection);
+            SentinelHooks.Instantiate = new InstantiateAudit(report, _trace);
+            GameObject host = new GameObject(Name);
+            DontDestroyOnLoad(host);
+            host.hideFlags = HideFlags.HideAndDontSave;
+            host.AddComponent<VersionBadge>().Initialize($"{Name} {Version}");
+            SentinelWindow window = host.AddComponent<SentinelWindow>();
+            window.Initialize($"{Name} {Version}", Config.Bind(ManagerSection, "ToggleKey", Key.F6, "Key that opens or closes the Sentinel manager window: findings and protection switches (None = no key)."), protection);
+            report.Window = window;
+            SentinelHooks.Window = window;
+            _harmony = new Harmony(Guid);
+            _harmony.PatchAll(typeof(SentinelPlugin).Assembly);
+            Logger.LogInfo($"{Name} {Version} loaded: block cheat spawns {protection.BlockCheatSpawns.Value}, trace in {_trace.Path}");
+        }
+
+        private void OnDestroy()
+        {
+            _harmony?.UnpatchSelf();
+            _trace?.Dispose();
+        }
+    }
+}
+
+```
