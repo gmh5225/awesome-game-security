@@ -18,7 +18,7 @@ Compiled knowledge catalog for awesome-game-security.
 
 ## Concepts
 
-- [AI Aimbot Detection](concepts/ai-aimbot-detection.md) — server-side replay + ML + hardware-input signals for zero-memory visual cheats; batch telemetry pipelines such as [[pubg-bigdata-analytics]]; Minecraft timing ML such as [[tfg-anticheat-serverside]] labelled-session autoclicker ONNX thesis bench
+- [AI Aimbot Detection](concepts/ai-aimbot-detection.md) — server-side replay + ML + hardware-input signals for zero-memory visual cheats; batch telemetry pipelines such as [[pubg-bigdata-analytics]]; Minecraft timing ML such as [[tfg-anticheat-serverside]] labelled-session autoclicker ONNX thesis bench + [[eigen-anticheat]] PacketEvents combat feature streaming to WebSocket ML backend
 - [Anti-Screenshot Capture](concepts/anti-screenshot-capture.md) — capture-layer contracts (PrintWindow/DDA/Present/readback/NVIDIA scanout/DWM redirect); WDA/FindClosestMatchingMode exclusion limits; AC BitBlt vs overlay evasion (DWM, frame suppress)
 - [Assurance Boundaries](concepts/assurance-boundaries.md) — mechanism vs deployed policy vs evidence coverage vs attribution; device-label limits; EPT vs IOMMU separation; HVCI/DMA-policy independence; TPM quote scope; PCI containment ownership; cross-link [[iommu-state-verification]] four-property checklist
 - [BattlEye](concepts/battleye.md)
@@ -1354,7 +1354,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [egui-d3d11](entities/egui-d3d11.md) — Rust egui renderer for D3D11 Present-hook overlay menus (HLSL + Win32 input; gmh5225; README [Menu])
 - [eHook](entities/ehook.md) — Android ARM64 uprobe eBPF hook framework (Go orchestration + C eBPF; on-enter/on-leave handlers; memory R/W wrappers; rooted mobile game RE / runtime tracing; ShinoLeah; cheat / eBPF hook)
 - [Egret Engine](entities/egret-core.md) — HTML5 game engine (modular 2D/3D rendering, GUI, audio, resource management; Game Engine / HTML5)
-- [Eigen (ML combat anti-cheat)](entities/eigen-anticheat.md) — Paper/Folia Scala 3 PacketEvents combat feature streaming; labelled combat windows; WebSocket ML backend dataset/inference (voilecx; Anti Cheat / game:minecraft)
+- [Eigen (ML combat anti-cheat)](entities/eigen-anticheat.md) — Paper/Folia Scala 3 PacketEvents lag-compensated client-view aim features; per-tick rows + combat/baseline windows; WebSocket ML backend dataset/inference (GrimAC/Shard-style compensation; voilecx; Anti Cheat / game:minecraft)
 - [EC (ekknod)](entities/ec.md) — CS:GO kernel/driver/OpenGL cheat research (C/C++; cheat / game:csgo; README → EC_PRO-LAN)
 - [EC_PRO-LAN (ekknod)](entities/ec-pro-lan.md) — FACEIT AC exploration (C++/C; driver development / OpenGL; Win10 1607 LTSB + Ryzen B350–B450 + Logitech G HUB)
 - [Echinoidea](entities/echinoidea.md) — M3351AN lightweight external CS:GO cheat (C#; bunnyhop, overlay ESP, trigger bot; offset-driven workflow; write-signal reduction + VAC-era detection tradeoff notes; educational external cheat design; cheat / game:csgo [External C#])

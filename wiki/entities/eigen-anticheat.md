@@ -1,7 +1,7 @@
 ---
 title: Eigen (ML combat anti-cheat)
 kind: entity
-topics: [anti-cheat]
+topics: [anti-cheat, game-hacking]
 sources:
   - wiki/sources/descriptions/voilecx__eigen.md
   - wiki/sources/README-categories.md
@@ -11,7 +11,11 @@ confidence: medium
 
 # Eigen (ML combat anti-cheat)
 
-Open-source **machine-learning combat anti-cheat** for **Minecraft Paper and Folia** (voilecx/eigen). Scala 3 + sbt server plugin uses **PacketEvents** to observe per-player traffic, reconstruct lag-compensated aim geometry, and emit sensitivity-independent mouse-input features. Each client tick becomes a feature row; rows group into combat and baseline windows and stream over an authenticated **WebSocket** to a separate backend for labelled dataset collection and inference. (source: wiki/sources/descriptions/voilecx__eigen.md)
+Open-source **machine-learning combat anti-cheat** for **Minecraft Paper and Folia** (voilecx/eigen). Scala 3 + sbt server plugin uses **PacketEvents** to observe per-player network traffic and reconstruct what each client sees—lag-compensated aim geometry plus sensitivity-independent mouse input—without trusting client-side reports. (source: wiki/sources/descriptions/voilecx__eigen.md)
+
+## Detection pipeline
+
+Every client tick becomes a **feature row** in a combat telemetry schema. Rows aggregate into **combat** and **baseline** windows, then stream over an authenticated **WebSocket** to a separate backend for labelled dataset collection and online inference—ML-driven combat cheat detection instead of purely heuristic rule stacks. (source: wiki/sources/descriptions/voilecx__eigen.md)
 
 ## Architecture
 
@@ -27,4 +31,4 @@ Server operators and anti-cheat developers who want **ML-driven combat cheat det
 
 ## Related
 
-[[overviews/anti-cheat]] · [[tfg-anticheat-serverside]] · [[thorium-minecraft-plugin]] · [[concepts/detector-operations]] · [[concepts/ai-aimbot-detection]]
+[[overviews/anti-cheat]] · [[tfg-anticheat-serverside]] · [[thorium-minecraft-plugin]] · [[grim]] · [[shard]] · [[concepts/detector-operations]] · [[concepts/ai-aimbot-detection]]

@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-19** — ingest `description:voilecx/eigen`: refreshed entity [[eigen-anticheat]] (Paper/Folia Scala 3; PacketEvents client-view reconstruction; per-tick combat feature rows; combat/baseline windows; authenticated WebSocket ML backend; core vs Paper adapter; GrimAC/Shard transaction lag compensation); cited on [[concepts/ai-aimbot-detection]] Minecraft combat-ML lane and [[overviews/anti-cheat]] README map; `index.md` entity blurb updated.
+
 - **2026-10-19** — ingest `readme:categories`: **Cheat** link_count **2925** (unchanged) / **Anti Cheat** **813** (+1; voilecx/[[eigen-anticheat]] Paper/Folia ML combat PacketEvents feature streaming) / **Game Engine** ~159 / **Game Develop** ~194 / **DirectX** ~42 / **Game Network** ~34 and other major README sections unchanged; 41 top-level sections (`NeverC & NeverD` placeholder); synced [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/reverse-engineering]], and [[overviews/dma-attack]]; entity [[eigen-anticheat]]; light `index.md` section notes (no per-category pages).
 
 - **2026-10-19** — lint (agent): read `wiki/AGENTS.md`; **Overviews** (9) / **Concepts** (51) / **Entities** (4123); reconciled `index.md` vs disk (4183 paths, 0 missing, 0 dead); overview + index concept-blurb [[wikilink]] spot-check — 0 broken (13527 links), 0 malformed `]]]`; bootstrap not required; no structural repairs (`log.md` only).

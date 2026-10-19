@@ -42,11 +42,12 @@ sources:
   - wiki/sources/descriptions/AbdulAmi09__SentinelAntiCheat.md
   - wiki/sources/descriptions/MaksymSakundiak__chess-anti-cheat.md
   - wiki/sources/descriptions/Alexramirezzz__TFG-AntiCheat-ServerSide.md
+  - wiki/sources/descriptions/voilecx__eigen.md
   - wiki/sources/descriptions/AODOJUST__gomoku-anti-cheat-detector.md
   - wiki/sources/descriptions/NetVar1337__apex-anticheat-lab.md
   - wiki/sources/README-categories.md
   - wiki/sources/descriptions/ahuhu789__pubg-bigdata-analytics.md
-updated: 2026-10-16
+updated: 2026-10-19
 confidence: medium
 ---
 
@@ -120,6 +121,7 @@ Tabular engagement features (reaction time, curvature stats, dx/dy correlation, 
 - [[auto-simulated-universe]] — Honkai: Star Rail Simulated Universe automation bot (screen recognition + input; pathfinding, combat rotation, blessing selection; gmh5225)
 - [[minecraft-anticheatai]] — Minecraft Paper DeepGuard; ONNX 1D-CNN over server-side behavior sequences (scaffold-bridging focus; BehaviorRecorder + PyTorch training pipeline)
 - [[tfg-anticheat-serverside]] — Alexramirezzz Paper/Spigot **1.18.2** thesis autoclicker defense; labelled sessions from cleaned swing/interact streams; threshold rules vs isolation forest/one-class SVM/ensemble/sequence-CNN baselines with adversarial and lag robustness studies; ONNX off-thread inference and CPS rule fail-safe; auditable low-overhead server timing under man-at-the-end client distrust (source: wiki/sources/descriptions/Alexramirezzz__TFG-AntiCheat-ServerSide.md)
+- [[eigen-anticheat]] — voilecx Paper/Folia Scala 3 plugin; PacketEvents per-tick aim/movement feature rows with lag-compensated client-view reconstruction; combat vs baseline windows streamed to authenticated WebSocket ML backend for labelled datasets and inference (GrimAC/Shard-inspired transaction lag compensation) (source: wiki/sources/descriptions/voilecx__eigen.md)
 - [[mlanticheat]] — Minecraft Paper 1.21.4+ combat AC; per-server ensemble neural + logistic models + anomaly detection over combat rotations; operator labeling, Shadow Mode review, optional PacketEvents rotation tracking, automatic retraining (gravemaulr)
 - [[model-anti-cheat]] — DayZ server-side ML pipeline; mission-script per-second telemetry (position, view, weapon, raycast line-of-sight) + Python feature extraction + RandomForest aimbot/movement anomaly classifier (sample cheater sessions)
 - [[deep-learning-anti-cheat-csgo]] — CS:GO deep-learning anti-cheat implementation (memory scan, code integrity, process/debugger checks, network packet validation; detection-to-response pipeline; gmh5225)
