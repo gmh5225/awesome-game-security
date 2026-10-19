@@ -8,6 +8,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 - **2026-10-19** — lint (agent): read `wiki/AGENTS.md`; **Overviews** (9) / **Concepts** (51) / **Entities** (4123); `index.md` matches disk (4183 paths, 0 missing, 0 dead, 0 duplicates); overview + index blurb wikilink spot-check — 0 broken (13527 links), 0 malformed `]]]`; bootstrap not required; no file edits beyond this log entry.
 
+- **2026-10-19** — lint (agent): read `wiki/AGENTS.md`; **Overviews** (9) / **Concepts** (51) / **Entities** (4123); `index.md` matches disk (4183 paths, 0 missing, 0 dead, 0 duplicates); overview + index blurb wikilink spot-check — 0 broken (13527 links), 0 malformed `]]]`; bootstrap not required; no file edits beyond this log entry.
+
 - **2026-10-19** — lint (agent): read `wiki/AGENTS.md`; **Overviews** (9) / **Concepts** (51) / **Entities** (4123); `index.md` matches disk (4183 paths, 0 missing, 0 dead, 0 duplicates); overview + index blurb wikilink spot-check — 0 broken (13527 links), 0 malformed `]]]`; bootstrap not required; no structural repairs (`log.md` only).
 
 - **2026-10-19** — ingest `description:AmenHermano144/Anti-cheat-Kernel-Driver`: refreshed entity [[core-ac]] (Core_ac; modular WDM x64 kernel AC reference; BYOVD/driver blacklist + PiDDBCache/MmUnloadedDrivers tamper watch, PML4 process watch, NMI/environment probes, mouse/keyboard class input integrity; CNG AES-GCM IOCTL + SYSTEM companion event ring; deferred DriverEntry + strict device DACLs; VS 2022/WDK; authorized kernel AC research baseline); cited on [[overviews/windows-kernel]] modular AC reference lane and [[concepts/byovd]] defensive tamper-detection mitigations; `index.md` entity blurb updated.
