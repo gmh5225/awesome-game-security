@@ -1,0 +1,2657 @@
+Project Path: arc_nevergiveupcpp_oh-my-dump__omisqlk
+
+Source Tree:
+
+```txt
+arc_nevergiveupcpp_oh-my-dump__omisqlk
+├── CMakeLists.txt
+├── CMakePresets.json
+├── LICENSE
+├── README.md
+├── docs
+│   └── images
+├── ida-plugin.json
+├── idaplugin
+│   ├── dialog
+│   │   ├── dialog.cpp
+│   │   └── dialog.h
+│   ├── dllmain.cpp
+│   ├── dllmain.h
+│   ├── internals
+│   │   ├── export
+│   │   │   ├── export.cpp
+│   │   │   ├── export.h
+│   │   │   └── export_filters.h
+│   │   ├── import
+│   │   │   ├── import.cpp
+│   │   │   └── import.h
+│   │   └── patterns
+│   │       ├── byte_pattern.cpp
+│   │       ├── byte_pattern.h
+│   │       ├── pattern_search.cpp
+│   │       └── pattern_search.h
+│   ├── utils
+│   │   ├── logger
+│   │   │   ├── logger.cpp
+│   │   │   └── logger.h
+│   │   ├── types.h
+│   │   ├── utils.cpp
+│   │   └── utils.h
+│   └── version.h
+└── vcpkg.json
+
+```
+
+`CMakeLists.txt`:
+
+```txt
+cmake_minimum_required(VERSION 3.31)
+project(oh-my-dump)
+
+set(CMAKE_CXX_STANDARD 20)
+
+if (NOT EXISTS "${IDA_SDK_DIR}")
+    message(FATAL_ERROR "IDA SDK path not found. Set IDA_SDK_DIR to the IDA SDK directory.")
+endif ()
+
+set(IDA_INCLUDE_DIR "${IDA_SDK_DIR}/src/include")
+
+if (NOT EXISTS "${IDA_INCLUDE_DIR}/ida.hpp")
+    message(FATAL_ERROR "Invalid IDA_SDK_DIR: ${IDA_SDK_DIR}")
+endif ()
+
+find_library(IDA_LIBRARY
+        NAMES ida ida.lib "${IDA_LIBRARY_NAME}"
+        PATHS "${IDA_SDK_DIR}/src/lib"
+        PATH_SUFFIXES x64_win_64 x64_win_vc_64
+        NO_DEFAULT_PATH
+)
+
+if (NOT IDA_LIBRARY)
+    message(FATAL_ERROR "IDA library not found under ${IDA_SDK_DIR}/src/lib (expected x64_win_64 or x64_win_vc_64).")
+endif ()
+
+get_filename_component(IDA_LIB_DIR "${IDA_LIBRARY}" DIRECTORY)
+
+file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS
+        "idaplugin/*.cpp"
+        "idaplugin/*.h"
+)
+
+find_package(nlohmann_json CONFIG REQUIRED)
+
+add_library(oh-my-dump SHARED ${SOURCES})
+
+set_target_properties(oh-my-dump
+        PROPERTIES
+        PREFIX ""
+)
+
+target_include_directories(oh-my-dump
+        PRIVATE
+        "${CMAKE_SOURCE_DIR}/idaplugin"
+        "${IDA_INCLUDE_DIR}"
+)
+
+target_link_directories(oh-my-dump
+        PRIVATE
+        "${IDA_LIB_DIR}"
+)
+
+target_link_libraries(oh-my-dump
+        PRIVATE
+        nlohmann_json::nlohmann_json
+        "${IDA_LIBRARY}"
+)
+
+target_compile_definitions(oh-my-dump PRIVATE
+        __NT__
+        __IDP__
+        __EA64__
+        _SILENCE_CXX20_IS_POD_DEPRECATION_WARNING
+        dont_use_snprintf=snprintf
+        dont_use_fgetc=fgetc
+        _strtoui64=strtoull
+)
+
+```
+
+`CMakePresets.json`:
+
+```json
+{
+  "version": 6,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 15,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "preset-base",
+      "hidden": true,
+      "binaryDir": "${sourceDir}/build/${presetName}",
+      "cacheVariables": {
+        "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
+        "IDA_SDK_DIR": "$env{IDA_ROOT}/ida-sdk"
+      }
+    },
+    {
+      "name": "msvc-x64",
+      "inherits": "preset-base",
+      "displayName": "MSVC x64 Release",
+      "toolset": "v143",
+      "cacheVariables": {
+        "CMAKE_C_COMPILER": "cl",
+        "CMAKE_CXX_COMPILER": "cl",
+        "CMAKE_GENERATOR_PLATFORM": "x64",
+        "VCPKG_TARGET_TRIPLET": "x64-windows"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "msvc-x64",
+      "configurePreset": "msvc-x64",
+      "configuration": "Release"
+    }
+  ]
+}
+
+```
+
+`LICENSE`:
+
+```
+MIT License
+
+Copyright (c) 2025 nevergiveupcpp
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
+`README.md`:
+
+```md
+# Oh My Dump
+
+![Banner](docs/images/banner.png)
+
+## Description
+**Oh My Dump** is built for IDA Pro 9.x and helps carry analysis results over between different versions of the target binary.
+The plugin exports analysis data and imports it into a dump from the same binary family (newer or older version), reducing the amount
+of repeated manual work needed to rename items and analyze the program's control flow.
+
+## FLIRT & Lumina Server Diff
+The project was written before **FLIRT** gained the ability to create signatures directly from an **IDB** (**IDA Pro 8.x**).
+That said, **Oh My Dump** is still useful because it handles cases that neither **FLIRT** nor **Lumina Server** fully covers.
+
+**FLIRT** works well for recognizing functions by signature, but it is not designed to carry over the full analysis context.
+**Oh My Dump** covers a broader set of data: global variables, function and global-variable declarations, comments, colors, and breakpoints.
+
+**Lumina Server** is a more capable alternative for transferring metadata, but it has limitations too.
+**Lumina** is primarily focused on function metadata, so it does not cover global variables or breakpoints.
+It also ties data to the function's **MD5** hash, which can be inconvenient when moving analysis between modified versions of a binary.
+
+## Limitations
+Unfortunately, **Oh My Dump** has a number of limitations that may be fixed in the future.
+For now, the project supports only **x86** and **x86-64** and does not work with other architectures.
+
+Data export can also be slow: the process is single-threaded, and the current algorithm is too bad to be fast at the moment :(.
+This can take a noticeable amount of time on large dumps.
+
+The final limitation is related to filtering auto-generated IDA data.
+The rules are currently hardcoded and cannot be edited without recompiling, so in rare cases the filter may accidentally discard user data during export.
+
+## Requirements
+- IDA Pro 9.x **(tested only on 9.x)**.
+
+## Capabilities
+**Oh My Dump** can transfer the following analysis data between IDBs:
+- Function and variable names;
+- Function and global variable type declarations;
+- Comments on functions, instructions, and data items;
+- Background colors;
+- Breakpoints;
+
+## Installation
+- Put it into plugins folder of **your** IDA installation.
+
+## Usage
+> To avoid repeating the same information, the import workflow is shown below. The same steps also apply to export.
+
+Launch the plugin by pressing hotkey (by default “**Ctrl+Shift+F10**”) or via **Edit -> Plugin -> Oh My Dump**. 
+Select the action, search area, fields and debug flag in the settings window.
+
+![Main dialog](docs/images/main-dialog.png)
+
+For large dumps, limit the search range: analyzing large address ranges can take longer than usual.
+When selecting **“Global”**, we skip entering segment name and address range and proceed to json file selection.
+If you select **“Segment only”** you will need to enter the segment name (default is .text).
+
+![Segment scope](docs/images/segment-scope.png)
+
+If you select **“Custom”** you will need to enter the range: start and end address. **(default value: ea_min | ea_max)**
+
+![Custom range](docs/images/custom-range.png)
+
+Select ***.omd.json** with signatures and wait for the search and signing to complete.
+
+![OMD Json select](docs/images/omd-json-select.png)
+
+## Result
+![Import result](docs/images/import-result.png)
+
+![Import log](docs/images/import-log.png)
+
+## JSON configuration format
+The plugin uses **JSON files** to define signature patterns and their associated metadata. Each pattern is an object in a JSON array.
+
+## Field reference
+| Field                      | Required | Type | Description                                                                                                                                                                                                                                                                          |
+|----------------------------|----------|------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `signature`                | + | string | Byte pattern with wildcards (`?` or `??` for unknown bytes)                                                                                                                                                                                                                          |
+| `name`                     | - | string | Sets name for function/variable at the found address                                                                                                                                                                                                                                 |
+| `declaration`              | - | string | Sets function/variable type and name                                                                                                                                                                                                                                                 |
+| `comment`                  | - | string | Adds comment to address or function                                                                                                                                                                                                                                                  |
+| `color`                    | - | number | Sets background color (RGB value in decimal format)                                                                                                                                                                                                                                  |
+| `operations`               | - | array | Array with data (`offset`, `insn_format`) for calculating final effective address. Possible fields: offset, insn_format. Fields can be arranged in any order and repeated.Operations executed sequentially from lower to higher index                                                |
+| `operations[].offset`      | - | number | Is used for calculating final effective address by using basic operation (to current address += offset)                                                                                                                                                                              |
+| `operations[].insn_format` | - | array | Is used for obtaining relative offset. Calculation is performed as follows: for instruction at 0x1000 `"E8 12 34 56 78"` with format `[1,4]`: `rip = 0x1000 + 1 + 4`, `rel_offset = read_dword(0x1000 + 1)`, `final_address = rip + rel_offset`                                      |
+| `breakpoint`               | - | array | Breakpoint configuration `[exist, type, size]`. Type: 0=software+execute (default), 1=write, 2=read, 3=read/write, 4=software, 8=execute, 12=default. Size is irrelevant for software breakpoints. For hardware breakpoints size matters but can't always be set to arbitrary values |
+
+## Example configuration
+```json
+[
+  {
+    "name": "function_with_comment",
+    "signature": "  E8 ? ? ? ? 0F B7 45 ? 41 B9",
+    "declaration": "void* function_with_comment(int value);",
+    "operations": [
+      {
+        "insn_format": [
+          1,
+          4
+        ]
+      },
+      {
+        "offset": 26
+      },
+      {
+        "insn_format": [
+          1,
+          4
+        ]
+      }
+    ],
+    "comment": "Some important function for important matters",
+    "color": 15658724,
+    "breakpoint": [
+      true,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "global_variable",
+    "signature": "48 8B 05 ?? ?? ?? ?? 4C 8B 14 D0",
+    "operations": [
+      {
+        "insn_format": [
+          3,
+          4
+        ]
+      }
+    ],
+    "comment": "Something very important"
+  },
+  {
+    "name": "some_math_handler",
+    "signature": "48 89 5C 24 ? 48 89 74 24 ? 48 89 7C 24 ? 55 41 56 41 57 48 8B EC"
+  },
+  {
+    "comment": "just_comment",
+    "signature": "7E ? 83 F9 ? 7E ? 83 F9 ? 74 ? 7E"
+  }
+]
+```
+
+## Build requirements
+- C++20 or later;
+- CMake 3.31 or later;
+- IDA SDK 9.x or later;
+- vcpkg;
+
+## Build
+1. Install `vcpkg` and set the `VCPKG_ROOT` environment variable.
+2. Fetch baseline: `cd $VCPKG_ROOT && git fetch origin e1dfb369fc1c6e58d5850cf67c224caa955309e5`.
+3. Set `IDA_ROOT` to your IDA installation directory.
+4. Configure: `cmake --preset msvc-x64`.
+5. Build: `cmake --build --preset msvc-x64 --config Release`.
+
+## License
+**oh-my-dump** is distributed under the [MIT License](LICENSE).
+
+```
+
+`ida-plugin.json`:
+
+```json
+{
+  "$schema": "https://hcli.docs.hex-rays.com/schemas/ida-plugin.json",
+  "IDAMetadataDescriptorVersion": 1,
+  "plugin": {
+    "name": "oh-my-dump",
+    "entryPoint": "oh-my-dump",
+    "version": "1.0.16",
+    "idaVersions": [
+      ">=9.0"
+    ],
+    "platforms": [
+      "windows-x86_64"
+    ],
+    "description": "IDA Pro plugin for transferring analysis data between different versions of the same binary.",
+    "license": "MIT",
+    "logoPath": "./docs/images/omd-logo.png",
+    "categories": [
+      "api-scripting-and-automation"
+    ],
+    "keywords": [
+      "automatic",
+      "binary-analysis",
+      "reverse-engineering",
+      "ida-pro",
+      "ida"
+    ],
+    "urls": {
+      "repository": "https://github.com/nevergiveupcpp/oh-my-dump"
+    },
+    "authors": [{
+        "name": "nevergiveupcpp",
+        "email": "nevergiveupcxx@gmail.com"
+      }],
+    "maintainers": [{
+        "name": "nevergiveupcpp",
+        "email": "nevergiveupcxx@gmail.com"
+      }]
+  }
+}
+
+```
+
+`idaplugin/dialog/dialog.cpp`:
+
+```cpp
+#include "dialog/dialog.h"
+
+#include "version.h"
+#include "../utils/logger/logger.h"
+#include "../utils/utils.h"
+
+#include <filesystem>
+#include <sstream>
+#include <string>
+
+#include <fpro.h>
+#include <kernwin.hpp>
+#include <nalt.hpp>
+#include <segment.hpp>
+
+namespace {
+    enum transfer_field : ushort {
+        transfer_names = 0,
+        transfer_declarations,
+        transfer_comments,
+        transfer_colors,
+        transfer_breakpoints
+    };
+
+    enum additional_options : ushort { debug_output = 0, export_filter };
+
+    std::string default_transfer_filename() {
+        char root_filename[QMAXPATH]{};
+        get_root_filename(root_filename, sizeof(root_filename));
+
+        const std::filesystem::path filename{root_filename};
+        return filename.stem().string() + ".omd.json";
+    }
+
+    [[nodiscard]] bool ask_named_segment_range(omd::address_region& target_range) {
+        qstring segment_name{".text"};
+
+        if (!ask_str(&segment_name, HIST_SEG, "Enter segment name")) {
+            omd::logging::error("Failed to get segment name from dialog widget\n");
+            return false;
+        }
+
+        auto const segment = get_segm_by_name(segment_name.c_str());
+        if (segment == nullptr) {
+            omd::logging::error("Failed to get segment: {}\n", segment_name.c_str());
+            return false;
+        }
+
+        target_range = omd::address_region{segment->start_ea, segment->end_ea};
+        if (!target_range.valid()) {
+            omd::logging::error(
+                "Invalid segment range for {}: 0x{:X} - 0x{:X}\n",
+                segment_name.c_str(),
+                target_range.start,
+                target_range.end
+            );
+            return false;
+        }
+
+        return true;
+    }
+
+    [[nodiscard]] bool ask_custom_address_range(omd::address_region& target_range) {
+        const auto [ea_min, ea_max] = omd::utils::get_address_range();
+        ea_t start_address{ea_min};
+        ea_t end_address{ea_max};
+
+        constexpr char custom_address_range_form_body[] = "<~S~tart address:$::16::>\n"
+                                                          "<~E~nd address  :$::16::>\n";
+
+        std::stringstream custom_address_range_form;
+        custom_address_range_form << PLUGIN_NAME ": Custom address range\n";
+        custom_address_range_form << custom_address_range_form_body;
+
+        if (ask_form(custom_address_range_form.str().c_str(), &start_address, &end_address) <= 0) {
+            omd::logging::error("Failed to get custom range from dialog widget\n");
+            return false;
+        }
+
+        target_range = omd::address_region{start_address, end_address};
+        if (!target_range.valid()) {
+            omd::logging::error("Invalid custom range: 0x{:X} - 0x{:X}\n", start_address, end_address);
+            return false;
+        }
+
+        return true;
+    }
+
+    [[nodiscard]] bool ask_target_range(omd::address_region& target_range, const ushort selected_scope) {
+        if (selected_scope == omd::dialog::target_scope::whole_database) {
+            const auto [ea_min, ea_max] = omd::utils::get_address_range();
+            target_range = omd::address_region{ea_min, ea_max};
+        } else if (selected_scope == omd::dialog::target_scope::named_segment) {
+            return ask_named_segment_range(target_range);
+        } else if (selected_scope == omd::dialog::target_scope::custom_address_range) {
+            return ask_custom_address_range(target_range);
+        }
+
+        if (!target_range.valid()) {
+            omd::logging::error("Failed to get working range\n");
+            return false;
+        }
+
+        return true;
+    }
+
+} // namespace
+
+namespace omd::dialog {
+    nlohmann::json load_transfer() {
+        auto const path = ask_file(false, default_transfer_filename().c_str(), "Choose transfer file");
+
+        if (path == nullptr) {
+            logging::error("Failed to get a file name from dialog widget\n");
+            return nlohmann::json{};
+        }
+
+        return utils::read_json(path);
+    }
+
+    bool save_transfer(const nlohmann::ordered_json& transfer) {
+        auto const path = ask_file(true, default_transfer_filename().c_str(), "Save transfer");
+
+        if (path == nullptr) {
+            logging::error("Failed to get output file name from dialog widget\n");
+            return false;
+        }
+
+        return utils::write_json(path, transfer);
+    }
+
+    bool ask_settings(settings& settings) {
+        ushort selected_mode{operation_mode::export_signatures};
+        ushort selected_scope{target_scope::named_segment};
+
+        omd::bitmask field_mask{
+            (1 << transfer_names) | (1 << transfer_declarations) | (1 << transfer_comments) | (1 << transfer_colors) |
+            (1 << transfer_breakpoints)
+        };
+        omd::bitmask other_mask{(1 << export_filter)};
+
+        constexpr char settings_form_body[] =
+            "Operation:\n"
+            "<#Exports all signatures to a file#~E~xport signatures:R>\n"
+            "<#Import all signatures from your file#~I~mport signatures:R>>\n"
+
+            "Target scope:\n"
+            "<#Search the entire database and all loaded segments#~G~lobal (search in entire binary):R>\n"
+            "<#Search only within the currently selected segment (recommended)#~S~egment only (search in selected "
+            "segment, recommended):R>\n"
+            "<#Search within a user-specified address range#~C~ustom (search within range):R>>\n"
+
+            "Included fields:\n"
+            "<#Include function and symbol names in the signature data#~N~ames:C>\n"
+            "<#Include type information and declarations#~D~eclarations:C>\n"
+            "<#Include repeatable and non-repeatable comments#Co~m~ments:C>\n"
+            "<#Include item and background colors#C~o~lors:C>\n"
+            "<#Include breakpoint locations and settings#~B~reakpoints:C>>\n"
+
+            "Additional options:\n"
+            "<#Print detailed diagnostic information to the output window#D~e~bug output:C>\n"
+            "<#Skip autogenerated names, comments, and other automatically created data#~F~ilter autogenerated "
+            "data:C>>\n";
+
+        std::stringstream settings_form;
+        settings_form << PLUGIN_NAME " v" PLUGIN_VERSION;
+        settings_form << "\n";
+        settings_form << settings_form_body;
+
+        if (ask_form(settings_form.str().c_str(), &selected_mode, &selected_scope, &field_mask, &other_mask) <= 0) {
+            return false;
+        }
+
+        settings.mode = static_cast<operation_mode>(selected_mode);
+        settings.options.names = field_mask.is_bit_set(transfer_names);
+        settings.options.declarations = field_mask.is_bit_set(transfer_declarations);
+        settings.options.comments = field_mask.is_bit_set(transfer_comments);
+        settings.options.colors = field_mask.is_bit_set(transfer_colors);
+        settings.options.breakpoints = field_mask.is_bit_set(transfer_breakpoints);
+        settings.options.filter_noise = other_mask.is_bit_set(export_filter);
+
+        logging::logger::instance().set_debug_enabled(other_mask.is_bit_set(debug_output));
+
+        if (!settings.options.any()) {
+            logging::error("No fields selected\n");
+            return false;
+        }
+
+        if (!ask_target_range(settings.target_range, selected_scope)) {
+            return false;
+        }
+
+        return true;
+    }
+} // namespace omd::dialog
+
+```
+
+`idaplugin/dialog/dialog.h`:
+
+```h
+#ifndef NGU_OMD_DIALOG_DIALOG_H
+#define NGU_OMD_DIALOG_DIALOG_H
+
+#include "utils/types.h"
+
+#include <nlohmann/json.hpp>
+
+namespace omd::dialog {
+    enum operation_mode : ushort {
+        export_signatures,
+        import_signatures,
+    };
+
+    enum target_scope : ushort {
+        whole_database,
+        named_segment,
+        custom_address_range,
+    };
+
+    struct settings {
+        operation_mode mode{operation_mode::export_signatures};
+        transfer_options options{};
+        address_region target_range{};
+    };
+
+    nlohmann::json load_transfer();
+    bool save_transfer(const nlohmann::ordered_json& transfer);
+    bool ask_settings(settings& settings);
+} // namespace omd::dialog
+
+#endif // NGU_OMD_DIALOG_DIALOG_H
+
+```
+
+`idaplugin/dllmain.cpp`:
+
+```cpp
+#include "dllmain.h"
+
+#include "version.h"
+#include "dialog/dialog.h"
+#include "internals/export/export.h"
+#include "internals/import/import.h"
+#include "utils/logger/logger.h"
+
+#include <kernwin.hpp>
+#include <loader.hpp>
+
+namespace {
+    bool perform_export(const omd::dialog::settings& settings) {
+        const auto& options = settings.options;
+        const auto& target_range = settings.target_range;
+
+        omd::logging::info("Starting export in range 0x{:X} - 0x{:X}\n", target_range.start, target_range.end);
+
+        show_wait_box("Exporting...");
+        auto const result = omd::exporter::create_transfer(options, target_range);
+        hide_wait_box();
+
+        if (result.status == omd::operation_status::cancelled) {
+            omd::logging::info("Export cancelled by user\n");
+            return false;
+        }
+
+        if (!result.transfer.is_array()) {
+            omd::logging::error("Failed to create export transfer\n");
+            return false;
+        }
+
+        if (result.transfer.empty()) {
+            omd::logging::error("Export transfer is empty\n");
+            return false;
+        }
+
+        if (!omd::dialog::save_transfer(result.transfer)) {
+            return false;
+        }
+
+        omd::logging::info("Export completed: {} items\n", result.transfer.size());
+        return true;
+    }
+
+    bool perform_import(const omd::dialog::settings& settings) {
+        const auto& options = settings.options;
+        const auto& target_range = settings.target_range;
+
+        auto const transfer = omd::dialog::load_transfer();
+
+        if (!transfer.is_array()) {
+            omd::logging::error("Transfer type isn't array\n");
+            return false;
+        }
+
+        show_wait_box("Importing...");
+        auto const result = omd::importer::apply_transfer(transfer, options, target_range);
+        hide_wait_box();
+
+        if (result.status == omd::operation_status::cancelled) {
+            omd::logging::info("Import cancelled by user\n");
+            return false;
+        }
+
+        if (result.total == 0) {
+            omd::logging::error("Transfer contains no signatures\n");
+            return false;
+        }
+
+        if (const auto failed = result.failed(); failed != 0) {
+            omd::logging::error(
+                "Search completed {}/{} patterns processed, {} failed\n", result.found, result.total, failed
+            );
+        } else {
+            omd::logging::info("Search completed {}/{} patterns processed\n", result.found, result.total);
+        }
+
+        return true;
+    }
+} // namespace
+
+namespace omd {
+    bool plugin::run(std::size_t arg) {
+        (void)arg;
+
+        dialog::settings settings{};
+        if (!dialog::ask_settings(settings)) {
+            return false;
+        }
+
+        return settings.mode == dialog::operation_mode::export_signatures ? perform_export(settings)
+                                                                          : perform_import(settings);
+    }
+
+    plugmod_t* idaapi init() {
+        return new plugin();
+    }
+
+} // namespace omd
+
+plugin_t PLUGIN{
+    IDP_INTERFACE_VERSION,
+    PLUGIN_MULTI,
+    omd::init,
+    nullptr,
+    nullptr,
+    PLUGIN_NAME " v" PLUGIN_VERSION " for IDA Pro 9.x by nevergiveupcpp",
+    "1. Run the plugin.\n"
+    "2. Choose operation, target scope, fields and debug output in the settings dialog.\n"
+    "3. For import choose input *.json; for export choose output *.json.\n"
+    "4. Wait for the operation to complete.",
+    PLUGIN_NAME,
+    PLUGIN_HOTKEY
+};
+
+```
+
+`idaplugin/dllmain.h`:
+
+```h
+#ifndef NGU_OMD_DLLMAIN_H
+#define NGU_OMD_DLLMAIN_H
+
+#include <cstddef>
+
+#include <idp.hpp>
+
+namespace omd {
+    class plugin final : public plugmod_t {
+    public:
+        bool idaapi run(std::size_t arg) override;
+    };
+    plugmod_t* idaapi init();
+} // namespace omd
+
+#endif // NGU_OMD_DLLMAIN_H
+
+```
+
+`idaplugin/internals/export/export.cpp`:
+
+```cpp
+#include "export.h"
+#include "export_filters.h"
+
+#include "../patterns/byte_pattern.h"
+#include "../../utils/logger/logger.h"
+#include "utils/utils.h"
+
+#include <algorithm>
+#include <cstdint>
+#include <vector>
+
+#include <bytes.hpp>
+#include <dbg.hpp>
+#include <funcs.hpp>
+#include <kernwin.hpp>
+#include <name.hpp>
+#include <typeinf.hpp>
+#include <xref.hpp>
+
+namespace {
+    [[nodiscard]] bool is_function_start(const ea_t address) {
+        auto const func = get_func(address);
+        return func != nullptr && func->start_ea == address;
+    }
+
+    [[nodiscard]] bool matches_rule(const qstring& value, const omd::export_filters::rule& rule) {
+        switch (rule.match) {
+        case omd::export_filters::match::exact:
+            return value == rule.pattern.data();
+        case omd::export_filters::match::prefix:
+            return value.starts_with(rule.pattern.data());
+        default:
+            return false;
+        }
+    }
+
+    template<std::size_t Count> [[nodiscard]] bool is_auto_generated(
+        const qstring& value, const std::array<omd::export_filters::rule, Count>& rules
+    ) {
+        for (const auto& rule : rules) {
+            if (matches_rule(value, rule)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    [[nodiscard]] std::uint32_t ida_color_to_json(const bgcolor_t color) {
+        return ((color & 0xFF) << 16) | (color & 0xFF00) | ((color >> 16) & 0xFF);
+    }
+
+    [[nodiscard]] bool contains_address(const omd::address_region& range, const ea_t address) {
+        return range.valid() && address >= range.start && address < range.end;
+    }
+
+    [[nodiscard]] bool is_code_item(const ea_t address) {
+        auto const head = get_item_head(address);
+        return head != BADADDR && is_code(get_flags(head));
+    }
+
+    [[nodiscard]] bool create_rip_operation(
+        omd::transfer_data::ea_op_data* operation, const insn_t& insn, const ea_t target
+    ) {
+        for (std::uint32_t i{}; i < UA_MAXOP; ++i) {
+            op_t const* op = &insn.ops[i];
+            if (op->type == o_void) {
+                break;
+            }
+
+            if (op->offb <= 0) {
+                continue;
+            }
+
+            auto const offset = static_cast<std::uint32_t>(op->offb);
+            if (offset + sizeof(std::uint32_t) > insn.size) {
+                continue;
+            }
+
+            auto const encoded_target = static_cast<std::int32_t>(get_dword(insn.ea + offset));
+
+            if (inf_is_64bit()) {
+                auto const rel = encoded_target;
+                auto const resolved = static_cast<std::int64_t>(insn.ea) + static_cast<std::int64_t>(insn.size) +
+                                      static_cast<std::int64_t>(rel);
+                if (resolved < 0 || static_cast<ea_t>(resolved) != target) {
+                    continue;
+                }
+            } else {
+                auto const abs = encoded_target;
+                if ((abs < inf_get_min_ea() || abs >= inf_get_max_ea()) || abs != target) {
+                    continue;
+                }
+            }
+
+            operation->type = omd::addr_calc;
+            operation->opcode_length = offset;
+            operation->displ_length = static_cast<std::uint32_t>(insn.size) - offset;
+            return true;
+        }
+
+        return false;
+    }
+
+    void add_address(std::vector<ea_t>& addresses, const omd::address_region& range, const ea_t address) {
+        if (address == BADADDR || !contains_address(range, address)) {
+            return;
+        }
+
+        addresses.push_back(address);
+    }
+
+    [[nodiscard]] bool get_signed_name(qstring* name, const ea_t address, const omd::export_filter& filter) {
+        qstring visible_name{};
+        if (get_name(&visible_name, address, GN_VISIBLE | GN_NOT_DUMMY) <= 0 ||
+            !filter.accept_name(address, visible_name)) {
+            return false;
+        }
+
+        *name = visible_name;
+        return true;
+    }
+
+    [[nodiscard]] bool get_function_comment(qstring* comment, func_t const* func, const omd::export_filter& filter) {
+        if (func == nullptr) {
+            return false;
+        }
+
+        qstring candidate{};
+        if (get_func_cmt(&candidate, func, true) > 0 && filter.accept_comment(candidate)) {
+            *comment = candidate;
+            return true;
+        }
+
+        candidate.clear();
+        if (get_func_cmt(&candidate, func, false) > 0 && filter.accept_comment(candidate)) {
+            *comment = candidate;
+            return true;
+        }
+
+        return false;
+    }
+
+    [[nodiscard]] bool get_item_comment(qstring* comment, const ea_t address, const omd::export_filter& filter) {
+        qstring candidate{};
+        if (get_cmt(&candidate, address, true) > 0 && filter.accept_comment(candidate)) {
+            *comment = candidate;
+            return true;
+        }
+
+        candidate.clear();
+        if (get_cmt(&candidate, address, false) > 0 && filter.accept_comment(candidate)) {
+            *comment = candidate;
+            return true;
+        }
+
+        return false;
+    }
+
+    [[nodiscard]] omd::operation_status collect_signed_addresses(
+        std::vector<ea_t>& addresses, const omd::address_region& range, const omd::export_filter& filter
+    ) {
+        auto const count = get_nlist_size();
+        for (std::size_t index{}; index < count; ++index) {
+            if (user_cancelled()) {
+                return omd::operation_status::cancelled;
+            }
+
+            auto const address = get_nlist_ea(index);
+
+            qstring name{};
+            if (get_signed_name(&name, address, filter)) {
+                add_address(addresses, range, address);
+            }
+        }
+
+        return omd::operation_status::completed;
+    }
+
+    [[nodiscard]] omd::operation_status collect_comment_addresses(
+        std::vector<ea_t>& addresses, const omd::transfer_options& options, const omd::address_region& range
+    ) {
+        if (!options.comments) {
+            return omd::operation_status::completed;
+        }
+
+        omd::export_filter const filter{{options.filter_noise}};
+
+        auto const function_count = get_func_qty();
+        for (std::size_t index{}; index < function_count; ++index) {
+            if (user_cancelled()) {
+                return omd::operation_status::cancelled;
+            }
+
+            auto const func = getn_func(index);
+            qstring comment{};
+            if (get_function_comment(&comment, func, filter)) {
+                add_address(addresses, range, func->start_ea);
+            }
+        }
+
+        for (ea_t address = range.start; address != BADADDR && address < range.end;
+             address = next_head(address, range.end)) {
+            if (user_cancelled()) {
+                return omd::operation_status::cancelled;
+            }
+
+            qstring comment{};
+            if (get_item_comment(&comment, address, filter)) {
+                add_address(addresses, range, address);
+            }
+        }
+
+        return omd::operation_status::completed;
+    }
+
+    struct collected_addresses {
+        omd::operation_status status{omd::operation_status::completed};
+        std::vector<ea_t> addresses{};
+    };
+
+    collected_addresses collect_export_addresses(
+        const omd::transfer_options& options, const omd::address_region& range
+    ) {
+        collected_addresses result{};
+        omd::export_filter const filter{{options.filter_noise}};
+
+        if (options.names || options.declarations || options.colors || options.breakpoints) {
+            result.status = collect_signed_addresses(result.addresses, range, filter);
+            if (result.status == omd::operation_status::cancelled) {
+                return result;
+            }
+        }
+
+        result.status = collect_comment_addresses(result.addresses, options, range);
+        if (result.status == omd::operation_status::cancelled) {
+            return result;
+        }
+
+        std::ranges::sort(result.addresses);
+        auto const [first, last] = std::ranges::unique(result.addresses);
+        result.addresses.erase(first, last);
+        return result;
+    }
+} // namespace
+
+namespace omd {
+    bool export_filter::accept_name(const ea_t address, const qstring& name) const {
+        if (!options_.enabled) {
+            return true;
+        }
+
+        if (name.empty()) {
+            return false;
+        }
+
+        if (auto const flags = get_flags(address); !has_user_name(flags) || has_auto_name(flags)) {
+            return false;
+        }
+
+        if (is_auto_generated(name, export_filters::name_rules)) {
+            return false;
+        }
+
+        return !is_function_start(address) || !is_auto_generated(name, export_filters::function_name_rules);
+    }
+
+    bool export_filter::accept_declaration(const qstring& declaration) const {
+        if (!options_.enabled) {
+            return true;
+        }
+
+        if (declaration.empty()) {
+            return false;
+        }
+
+        return !is_auto_generated(declaration, export_filters::declaration_rules);
+    }
+
+    bool export_filter::accept_comment(const qstring& comment) const {
+        if (!options_.enabled) {
+            return true;
+        }
+
+        if (comment.empty()) {
+            return false;
+        }
+
+        return !is_auto_generated(comment, export_filters::comment_rules);
+    }
+
+    export_entry::export_entry(const ea_t address, const transfer_options& options, const address_region& range) :
+        address_(address),
+        range_(range),
+        options_(options),
+        filter_(filter_options{options.filter_noise}) {
+    }
+
+    bool export_entry::collect() {
+        collect_name();
+
+        if (options_.declarations || (options_.names && !data_.name.empty() && is_function_start(address_))) {
+            collect_declaration();
+        }
+
+        if (options_.comments) {
+            collect_comment();
+        }
+
+        if (options_.colors) {
+            collect_color();
+        }
+
+        if (options_.breakpoints) {
+            collect_breakpoint();
+        }
+
+        if (!has_export_data()) {
+            logging::debug("Skipped empty export item: 0x{:X}\n", address_);
+            return false;
+        }
+
+        if (!collect_signature()) {
+
+            if (!data_.name.empty()) {
+                logging::info(
+                    "Skipped export item, failed to create signature: 0x{:X}: Name: {}\n", address_, data_.name.c_str()
+                );
+            }
+
+            logging::debug("Skipped export item, failed to create signature: 0x{:X}\n", address_);
+            return false;
+        }
+
+        logging::debug("Export item: 0x{:X}, {}\n", address_, get_display_name());
+        return true;
+    }
+
+    nlohmann::ordered_json export_entry::to_json() const {
+        auto object = nlohmann::ordered_json::object();
+        if (options_.names && !data_.name.empty()) {
+            object["name"] = data_.name.c_str();
+        }
+
+        if (!data_.declaration.empty()) {
+            object["declaration"] = data_.declaration.c_str();
+        }
+
+        if (!data_.comment.empty()) {
+            object["comment"] = data_.comment.c_str();
+        }
+
+        if (data_.color != 0) {
+            object["color"] = data_.color;
+        }
+
+        if (data_.breakpoint.exists) {
+            object["breakpoint"] = {
+                data_.breakpoint.exists,
+                data_.breakpoint.type,
+                data_.breakpoint.size,
+            };
+        }
+
+        if (!data_.ea_ops_chain.empty()) {
+            auto operations = nlohmann::ordered_json::array();
+            for (const auto& operation : data_.ea_ops_chain) {
+                if (operation.type == ea_calc) {
+                    operations.push_back({{"offset", operation.offset}});
+                } else if (operation.type == addr_calc) {
+                    operations.push_back({
+                        {"insn_format",
+                         {
+                             operation.opcode_length,
+                             operation.displ_length,
+                         }},
+                    });
+                }
+            }
+
+            if (!operations.empty()) {
+                object["operations"] = operations;
+            }
+        }
+
+        object["signature"] = signature_;
+
+        return object;
+    }
+
+    const transfer_data& export_entry::get_data() const {
+        return data_;
+    }
+
+    const char* export_entry::get_display_name() const {
+        for (const auto* str : {&data_.name, &data_.declaration, &data_.comment}) {
+            if (!str->empty()) {
+                return str->c_str();
+            }
+        }
+        return "None";
+    }
+
+    bool export_entry::collect_signature() {
+        if (is_code_item(address_)) {
+            auto const result = collect_direct_signature();
+            if (!result) {
+                return collect_xref_signature();
+            }
+            return result;
+        }
+
+        return collect_xref_signature();
+    }
+
+    bool export_entry::collect_direct_signature() {
+        byte_pattern pattern{range_};
+        signature_ = pattern.create(address_);
+        return !signature_.empty();
+    }
+
+    bool export_entry::collect_xref_signature() {
+        xrefblk_t xref{};
+        for (bool ok = xref.first_to(address_, XREF_NOFLOW | XREF_EA); ok; ok = xref.next_to()) {
+            auto const source = get_item_head(xref.from);
+            if (source == BADADDR || !contains_address(range_, source) || !is_code(get_flags(source))) {
+                continue;
+            }
+
+            insn_t insn{};
+            if (decode_insn(&insn, source) == 0) {
+                continue;
+            }
+
+            transfer_data::ea_op_data operation{};
+            if (!create_rip_operation(&operation, insn, address_)) {
+                logging::debug("Skipped xref, unsupported address calculation: 0x{:X} -> 0x{:X}\n", source, address_);
+                continue;
+            }
+
+            byte_pattern pattern{range_};
+            auto signature = pattern.create(source);
+            if (signature.empty()) {
+                logging::debug("Skipped xref, failed to create signature: 0x{:X} -> 0x{:X}\n", source, address_);
+                continue;
+            }
+
+            data_.ea_ops_chain.clear();
+            data_.ea_ops_chain.push_back(operation);
+            signature_ = signature;
+            logging::debug(
+                "Export item uses xref signature: 0x{:X} -> 0x{:X}, [{}, {}]\n",
+                source,
+                address_,
+                operation.opcode_length,
+                operation.displ_length
+            );
+            return true;
+        }
+
+        logging::debug("Skipped export item, no supported xref signature: 0x{:X}\n", address_);
+        return false;
+    }
+
+    bool export_entry::collect_name() {
+        return get_signed_name(&data_.name, address_, filter_);
+    }
+
+    bool export_entry::collect_declaration() {
+        tinfo_t type{};
+        if (!get_tinfo(&type, address_) || !type.is_correct()) {
+            return false;
+        }
+
+        auto const* name = data_.name.empty() ? nullptr : data_.name.c_str();
+        qstring declaration{};
+        if (!type.print(&declaration, name, PRTYPE_1LINE | PRTYPE_SEMI) || !filter_.accept_declaration(declaration)) {
+            return false;
+        }
+
+        data_.declaration = declaration;
+        return true;
+    }
+
+    bool export_entry::collect_comment() {
+        if (auto const func = get_func(address_); func != nullptr && func->start_ea == address_) {
+            if (get_function_comment(&data_.comment, func, filter_)) {
+                return true;
+            }
+        }
+
+        return get_item_comment(&data_.comment, address_, filter_);
+    }
+
+    void export_entry::collect_color() {
+        auto color = get_item_color(address_);
+
+        if (color == DEFCOLOR) {
+            if (auto const func = get_func(address_); func != nullptr && func->start_ea == address_) {
+                color = func->color;
+            }
+        }
+
+        if (color != DEFCOLOR) {
+            data_.color = ida_color_to_json(color);
+        }
+    }
+
+    void export_entry::collect_breakpoint() {
+        bpt_t breakpoint{};
+        if (!get_bpt(address_, &breakpoint)) {
+            return;
+        }
+
+        data_.breakpoint.exists = true;
+        data_.breakpoint.type = breakpoint.type;
+        data_.breakpoint.size = breakpoint.size;
+    }
+
+    bool export_entry::has_export_data() const {
+        return (options_.names && !data_.name.empty()) || !data_.declaration.empty() || !data_.comment.empty() ||
+               data_.color != 0 || data_.breakpoint.exists;
+    }
+
+} // namespace omd
+
+namespace omd::exporter {
+    export_result create_transfer(const transfer_options& options, const address_region& range) {
+        export_result result{};
+        if (!range.valid()) {
+            logging::error("Invalid export range: 0x{:X} - 0x{:X}\n", range.start, range.end);
+            return result;
+        }
+
+        const auto [status, addresses] = collect_export_addresses(options, range);
+        if (status == operation_status::cancelled) {
+            result.status = operation_status::cancelled;
+            return result;
+        }
+
+        logging::info("Export candidates: {} in range 0x{:X} - 0x{:X}\n", addresses.size(), range.start, range.end);
+
+        for (const auto address : addresses) {
+            if (user_cancelled()) {
+                result.status = operation_status::cancelled;
+                return result;
+            }
+            if (export_entry entry{address, options, range}; entry.collect()) {
+                result.transfer.push_back(entry.to_json());
+                logging::debug("Exported: 0x{:X}, {}\n", address, entry.get_display_name());
+            }
+        }
+
+        logging::debug("Export transfer completed: {}/{} items\n", result.transfer.size(), addresses.size());
+        return result;
+    }
+
+    void dump_signed_items() {
+        constexpr transfer_options options{};
+        const auto [start, end] = utils::get_address_range();
+        auto const result = create_transfer(options, {start, end});
+        if (logging::logger::instance().debug_enabled()) {
+            logging::debug("{}\n", result.transfer.dump(4));
+        }
+    }
+} // namespace omd::exporter
+
+```
+
+`idaplugin/internals/export/export.h`:
+
+```h
+#ifndef NGU_OMD_INTERNALS_EXPORT_EXPORT_H
+#define NGU_OMD_INTERNALS_EXPORT_EXPORT_H
+
+#include "utils/types.h"
+
+#include <string>
+
+#include <nlohmann/json.hpp>
+
+namespace omd {
+    struct filter_options {
+        bool enabled{true};
+    };
+
+    class export_filter final {
+    public:
+        explicit export_filter(const filter_options options = {}) : options_(options) {
+        }
+
+        [[nodiscard]] bool accept_name(ea_t address, const qstring& name) const;
+        [[nodiscard]] bool accept_declaration(const qstring& declaration) const;
+        [[nodiscard]] bool accept_comment(const qstring& comment) const;
+
+    private:
+        filter_options options_{};
+    };
+
+    class export_entry final {
+    public:
+        export_entry(ea_t address, const transfer_options& options, const address_region& range);
+
+        bool collect();
+        [[nodiscard]] nlohmann::ordered_json to_json() const;
+        [[nodiscard]] const transfer_data& get_data() const;
+        [[nodiscard]] const char* get_display_name() const;
+
+    private:
+        bool collect_signature();
+        bool collect_direct_signature();
+        bool collect_xref_signature();
+        bool collect_name();
+        bool collect_declaration();
+        bool collect_comment();
+        void collect_color();
+        void collect_breakpoint();
+
+        [[nodiscard]] bool has_export_data() const;
+
+        ea_t address_{BADADDR};
+        address_region range_{};
+        transfer_options options_{};
+        export_filter filter_{};
+        std::string signature_{};
+        transfer_data data_{};
+    };
+
+} // namespace omd
+
+namespace omd::exporter {
+    struct export_result {
+        operation_status status{operation_status::completed};
+        nlohmann::ordered_json transfer{nlohmann::ordered_json::array()};
+    };
+
+    export_result create_transfer(const transfer_options& options, const address_region& range);
+    void dump_signed_items();
+} // namespace omd::exporter
+
+#endif // NGU_OMD_INTERNALS_EXPORT_EXPORT_H
+
+```
+
+`idaplugin/internals/export/export_filters.h`:
+
+```h
+#ifndef NGU_OMD_INTERNALS_EXPORT_EXPORT_FILTERS_H
+#define NGU_OMD_INTERNALS_EXPORT_EXPORT_FILTERS_H
+
+#include <array>
+#include <cstddef>
+#include <string_view>
+
+namespace omd::export_filters {
+    enum class match {
+        exact,
+        prefix,
+    };
+
+    struct rule {
+        match match{};
+        std::string_view pattern{};
+    };
+
+    inline constexpr std::array name_rules{
+        rule{match::prefix, "def_"},   /// IDA-generated switch default case label
+        rule{match::prefix, "jpt_"},   /// IDA-generated jump table symbol
+        rule{match::prefix, "funcs_"}, /// IDA-generated function pointer table
+        rule{match::prefix, "loc_"},   /// IDA-generated jump position
+        rule{match::prefix, "?"},      /// Mangled C++ symbol
+        rule{match::prefix, "j_"},     /// Nullsub
+    };
+
+    inline constexpr std::array function_name_rules{
+        rule{match::prefix, "??"},  /// Mangled C++ symbol
+        rule{match::prefix, "??_"}, /// RTTI / vftable helper
+        rule{match::prefix, "?__"}, /// compiler-generated helper function
+        rule{match::prefix, "__"},  /// CRT / compiler runtime function
+    };
+
+    inline constexpr std::array<rule, 0> declaration_rules{};
+
+    inline constexpr std::array comment_rules{
+        // Generic IDA-generated parameter names
+        rule{match::exact, "Size"},   /// Generic size parameter
+        rule{match::exact, "Src"},    /// Generic source pointer
+        rule{match::exact, "Void *"}, /// Unknown pointer type
+        rule{match::exact, "int"},    /// Generic integer parameter
+        rule{match::exact, "Str"},    /// Generic string parameter
+        rule{match::exact, "Str1"},   /// Generic string parameter
+        rule{match::exact, "String"}, /// Generic string parameter
+        rule{match::exact, "Buf1"},   /// Generic buffer parameter
+        rule{match::exact, "Buf2"},   /// Generic buffer parameter
+        rule{match::exact, "Block"},  /// Generic memory block parameter
+
+        // Generic container / algorithm names
+        rule{match::exact, "Table"},    /// Generic table reference
+        rule{match::exact, "Function"}, /// Generic function reference
+        rule{match::exact, "Last"},     /// STL-style iterator parameter
+        rule{match::exact, "First"},    /// STL-style iterator parameter
+        rule{match::exact, "Buffer"},   /// Generic buffer parameter
+        rule{match::exact, "MaxCount"}, /// Generic count parameter
+        rule{match::exact, "Val"},      /// Generic value parameter
+        rule{match::exact, "X"},        /// Generic variable name
+
+        // Generic type names produced by IDA
+        rule{match::exact, "bool"},               /// Auto-generated type name
+        rule{match::exact, "char"},               /// Auto-generated type name
+        rule{match::exact, "void *"},             /// Auto-generated type name
+        rule{match::exact, "char *"},             /// Auto-generated type name
+        rule{match::exact, "char **"},            /// Auto-generated type name
+        rule{match::exact, "wchar_t *"},          /// Auto-generated type name
+        rule{match::exact, "unsigned int"},       /// Auto-generated type name
+        rule{match::exact, "unsigned __int8 *"},  /// Auto-generated type name
+        rule{match::exact, "__int64"},            /// Auto-generated type name
+        rule{match::exact, "unsigned __int64"},   /// Auto-generated type name
+        rule{match::exact, "unsigned __int64 *"}, /// Auto-generated type name
+        rule{match::exact, "this"},               /// C++ this pointer
+
+        // Switch analysis
+        rule{match::exact, "switch jump"},                     /// IDA switch analysis comment
+        rule{match::exact, "jump table for switch statement"}, /// IDA jump table comment
+
+        // RTTI metadata
+        rule{match::exact, "signature"},                   /// RTTI structure field
+        rule{match::exact, "Trap to Debugger"},            /// Debug runtime metadata
+        rule{match::exact, "attributes"},                  /// RTTI attribute field
+        rule{match::exact, "base class attributes"},       /// RTTI base class descriptor
+        rule{match::exact, "vftable displacement"},        /// RTTI vftable offset
+        rule{match::exact, "member displacement"},         /// RTTI member offset
+        rule{match::exact, "displacement within vftable"}, /// RTTI vftable displacement
+        rule{match::exact, "type descriptor name"},        /// RTTI type descriptor
+        rule{match::exact, "internal runtime reference"},  /// CRT/runtime reference
+
+        // Windows x64 unwind information
+        rule{match::prefix, "UWOP_"}, /// x64 unwind opcode
+
+        // EH metadata statistics
+        rule{match::prefix, "num_ip2state entries:"}, /// EH IP-to-state entry count
+        rule{match::prefix, "num unwind entries:"},   /// EH unwind entry count
+
+        // Switch/jumptable comments
+        rule{match::prefix, "switch "},    /// IDA switch analysis comment
+        rule{match::prefix, "jumptable "}, /// IDA jump table comment
+
+        // Auto-generated references
+        rule{match::prefix, "ea 0x"},         /// Effective address reference
+        rule{match::prefix, "reference to "}, /// Auto-generated cross-reference
+
+        // Auto-generated structure field descriptions
+        rule{match::prefix, "frame offset of "}, /// Stack frame offset description
+        rule{match::prefix, "# of "},            /// Entry count field
+        rule{match::prefix, "offset of "},       /// Structure offset description
+        rule{match::prefix, "count of "},        /// Count field description
+    };
+} // namespace omd::export_filters
+
+#endif // NGU_OMD_INTERNALS_EXPORT_EXPORT_FILTERS_H
+
+```
+
+`idaplugin/internals/import/import.cpp`:
+
+```cpp
+#include "import.h"
+
+#include "../../utils/logger/logger.h"
+#include "../../utils/utils.h"
+
+#include <cstdint>
+#include <string>
+
+#include <bytes.hpp>
+#include <dbg.hpp>
+#include <funcs.hpp>
+#include <kernwin.hpp>
+#include <name.hpp>
+#include <typeinf.hpp>
+
+namespace omd {
+    import_entry::import_entry(const nlohmann::json& j) {
+        if (j.contains("name")) {
+            data_.name = j["name"].get<std::string>().c_str();
+        }
+
+        if (j.contains("declaration")) {
+            data_.declaration = j["declaration"].get<std::string>().c_str();
+        }
+
+        if (j.contains("comment")) {
+            data_.comment = j["comment"].get<std::string>().c_str();
+        }
+
+        if (j.contains("color")) {
+            data_.color = j["color"].get<std::uint32_t>();
+        }
+
+        if (j.contains("operations")) {
+            if (const auto& ops = j["operations"]; ops.is_array() && !ops.empty()) {
+                for (const auto& op : ops) {
+                    transfer_data::ea_op_data operation{};
+
+                    if (op.contains("offset")) {
+                        operation.type = ea_calc;
+                        operation.offset = op["offset"].get<std::int64_t>();
+                    } else if (op.contains("insn_format")) {
+                        if (const auto& layout = op["insn_format"];
+                            layout.is_array() && layout.size() == max_insn_layout_array_size) {
+                            operation.type = addr_calc;
+                            operation.opcode_length = layout[opcode_length].get<std::uint32_t>();
+                            operation.displ_length = layout[displ_length].get<std::uint32_t>();
+                        }
+                    }
+
+                    data_.ea_ops_chain.push_back(operation);
+                }
+            }
+        }
+
+        if (j.contains("breakpoint")) {
+            if (const auto& bpt = j["breakpoint"]; bpt.is_array() && bpt.size() == max_bpt_array_size) {
+                data_.breakpoint.exists = bpt[breakpoint_exists].get<bool>();
+                data_.breakpoint.type = bpt[breakpoint_type].get<bpttype_t>();
+                data_.breakpoint.size = bpt[breakpoint_size].get<asize_t>();
+            }
+        }
+    }
+
+    void import_entry::apply(ea_t address, const transfer_options& options) const {
+        bool success = true;
+
+        if (!adjust_address(address)) {
+            logging::error("Failed to adjust address: 0x{:X}, {}\n", address, get_display_name());
+            return;
+        }
+
+        if (options.names && !set_name(address)) {
+            logging::error("Failed to set name: {} (0x{:X})\n", data_.name.c_str(), address);
+            success = false;
+        }
+
+        if (options.declarations) {
+            if (auto const result = set_declaration(address); result != decl_result::success) {
+                switch (result) {
+                case decl_result::no_type_info:
+                    logging::error(
+                        "Failed to set declaration, address doesn't support type info: {} (0x{:X})\n",
+                        data_.declaration.c_str(),
+                        address
+                    );
+                    break;
+                case decl_result::parse_failed:
+                    logging::error("Failed to parse declaration: {} (0x{:X})\n", data_.declaration.c_str(), address);
+                    break;
+                case decl_result::set_tinfo_failed:
+                    logging::error("Failed to set declaration: {} (0x{:X})\n", data_.declaration.c_str(), address);
+                    break;
+                default:
+                    break;
+                }
+                success = false;
+            }
+        }
+
+        if (options.comments) {
+            if (auto const result = set_comment(address); result != cmt_result::success) {
+                logging::error(
+                    "Failed to set {}: {} (0x{:X})\n",
+                    (result == cmt_result::func_cmt_failed) ? "function comment" : "comment",
+                    data_.comment.c_str(),
+                    address
+                );
+                success = false;
+            }
+        }
+
+        if (options.breakpoints && !set_breakpoint(address)) {
+            logging::error("Failed to add breakpoint at 0x{:X}\n", address);
+            success = false;
+        }
+
+        if (options.colors) {
+            set_color(address);
+        }
+
+        if (success) {
+            logging::debug("Success: 0x{:X}, {}\n", address, get_display_name());
+        } else {
+            logging::debug("Completed with errors: 0x{:X}, {}\n", address, get_display_name());
+        }
+    }
+
+    const transfer_data& import_entry::get_data() const {
+        return data_;
+    }
+
+    const char* import_entry::get_display_name() const {
+        for (const auto* str : {&data_.name, &data_.declaration, &data_.comment}) {
+            if (!str->empty()) {
+                return str->c_str();
+            }
+        }
+        return "None";
+    }
+
+    bool import_entry::adjust_address(ea_t& address) const {
+        for (const auto& op : data_.ea_ops_chain) {
+            if (op.type == ea_calc) {
+                address += op.offset;
+                if (!is_loaded(address)) {
+                    return false;
+                }
+            } else if (op.type == addr_calc) {
+                if (auto const data = address + op.opcode_length; is_loaded(data)) {
+                    if (inf_is_64bit()) {
+                        auto const rel_offset = static_cast<std::int32_t>(get_dword(address + op.opcode_length));
+                        auto const next_insn = address + op.opcode_length + op.displ_length;
+                        address = next_insn + rel_offset;
+                    } else {
+                        address = get_dword(address + op.opcode_length);
+                    }
+                } else {
+                    return false;
+                }
+            }
+        }
+        return is_loaded(address);
+    }
+
+    bool import_entry::set_name(ea_t const address) const {
+        if (data_.name.empty()) {
+            return true;
+        }
+
+        if (!::set_name(address, data_.name.c_str(), SN_NOCHECK)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    import_entry::decl_result import_entry::set_declaration(ea_t const address) const {
+        if (data_.declaration.empty()) {
+            return decl_result::success;
+        }
+
+        if (!utils::has_type_info(address)) {
+            return decl_result::no_type_info;
+        }
+
+        tinfo_t tif{};
+        qstring name{};
+        if (parse_decl(&tif, &name, nullptr, data_.declaration.c_str(), PT_TYP | PT_VAR | PT_SIL) && tif.is_correct()) {
+            if (!set_tinfo(address, &tif)) {
+                return decl_result::set_tinfo_failed;
+            }
+        } else {
+            return decl_result::parse_failed;
+        }
+
+        return decl_result::success;
+    }
+
+    import_entry::cmt_result import_entry::set_comment(ea_t const address) const {
+        if (data_.comment.empty()) {
+            return cmt_result::success;
+        }
+
+        if (auto const func = get_func(address); func != nullptr && func->start_ea == address) {
+            if (!set_func_cmt(func, data_.comment.c_str(), true)) {
+                return cmt_result::func_cmt_failed;
+            }
+        }
+
+        else {
+            if (!set_cmt(address, data_.comment.c_str(), true)) {
+                return cmt_result::cmt_failed;
+            }
+        }
+
+        return cmt_result::success;
+    }
+
+    bool import_entry::set_breakpoint(ea_t const address) const {
+        if (!data_.breakpoint.exists || exist_bpt(address)) {
+            return true;
+        }
+
+        return add_bpt(
+            address, data_.breakpoint.size, data_.breakpoint.type == 0 ? BPT_DEFAULT : data_.breakpoint.type
+        );
+    }
+
+    void import_entry::set_color(ea_t const address) const {
+        if (data_.color != 0) {
+            auto const bgr = ((data_.color & 0xFF) << 16) | (data_.color & 0xFF00) | ((data_.color >> 16) & 0xFF);
+            set_item_color(address, bgr);
+        }
+    }
+} // namespace omd
+
+namespace omd::importer {
+    import_result apply_transfer(
+        const nlohmann::json& transfer, const transfer_options& options, const address_region& range
+    ) {
+        import_result result{};
+        pattern_search const scanner{range.start, range.end};
+
+        for (const auto& object : transfer) {
+            if (user_cancelled()) {
+                result.status = operation_status::cancelled;
+                return result;
+            }
+
+            if (!object.contains("signature")) {
+                continue;
+            }
+
+            import_entry const entry{object};
+
+            ++result.total;
+            auto const signature = object["signature"].get<std::string>();
+            auto const address = scanner.search(signature.c_str(), [entry, options](const ea_t address) {
+                entry.apply(address, options);
+            });
+
+            if (address == BADADDR) {
+                logging::debug("Pattern not found: {}\n", signature.c_str());
+            } else {
+                ++result.found;
+            }
+        }
+
+        return result;
+    }
+} // namespace omd::importer
+
+```
+
+`idaplugin/internals/import/import.h`:
+
+```h
+#ifndef NGU_OMD_INTERNALS_IMPORT_IMPORT_H
+#define NGU_OMD_INTERNALS_IMPORT_IMPORT_H
+
+#include "internals/patterns/pattern_search.h"
+#include "utils/types.h"
+
+#include <cstddef>
+
+#include <nlohmann/json.hpp>
+
+namespace omd {
+    class import_entry final {
+    public:
+        explicit import_entry(const nlohmann::json& j);
+
+        void apply(ea_t address, const transfer_options& options) const;
+        [[nodiscard]] const transfer_data& get_data() const;
+        [[nodiscard]] const char* get_display_name() const;
+
+    private:
+        enum class decl_result {
+            success,
+            no_type_info,
+            parse_failed,
+            set_tinfo_failed,
+        };
+
+        enum class cmt_result {
+            success,
+            func_cmt_failed,
+            cmt_failed,
+        };
+
+        bool adjust_address(ea_t& address) const;
+
+        [[nodiscard]] bool set_name(ea_t address) const;
+        [[nodiscard]] decl_result set_declaration(ea_t address) const;
+        [[nodiscard]] cmt_result set_comment(ea_t address) const;
+        [[nodiscard]] bool set_breakpoint(ea_t address) const;
+        void set_color(ea_t address) const;
+
+        transfer_data data_{};
+    };
+} // namespace omd
+
+namespace omd::importer {
+    struct import_result {
+        operation_status status{operation_status::completed};
+        std::size_t total{};
+        uint32 found{};
+
+        [[nodiscard]] std::size_t failed() const {
+            return total - found;
+        }
+    };
+
+    import_result apply_transfer(
+        const nlohmann::json& transfer, const transfer_options& options, const address_region& range
+    );
+} // namespace omd::importer
+
+#endif // NGU_OMD_INTERNALS_IMPORT_IMPORT_H
+
+```
+
+`idaplugin/internals/patterns/byte_pattern.cpp`:
+
+```cpp
+#include "byte_pattern.h"
+#include "pattern_search.h"
+
+#include "../../utils/utils.h"
+
+#include <format>
+
+#include <bytes.hpp>
+#include <funcs.hpp>
+
+namespace omd {
+    static constexpr std::size_t max_signature_size{100};
+
+    byte_pattern::byte_pattern(const address_region range) : range_(range) {
+    }
+
+    byte_pattern& byte_pattern::add(const std::uint8_t byte, const bool is_imm) {
+        bytes_.push_back(byte);
+        imm_.push_back(is_imm);
+        return *this;
+    }
+
+    byte_pattern& byte_pattern::trim() {
+        while (!imm_.empty() && imm_.back()) {
+            bytes_.pop_back();
+            imm_.pop_back();
+        }
+
+        while (!imm_.empty() && imm_.front()) {
+            bytes_.erase(bytes_.begin());
+            imm_.erase(imm_.begin());
+        }
+
+        return *this;
+    }
+
+    byte_pattern& byte_pattern::reset() {
+        bytes_.clear();
+        imm_.clear();
+        return *this;
+    }
+
+    std::string byte_pattern::b2s() const {
+        std::string result{};
+        for (std::size_t pos{}; pos < bytes_.size(); ++pos) {
+            if (imm_[pos]) {
+                result += "? ";
+            } else {
+                result += std::format("{:02X} ", static_cast<unsigned>(bytes_[pos]));
+            }
+        }
+
+        if (!result.empty()) {
+            result.pop_back();
+        }
+        return result;
+    }
+
+    std::string byte_pattern::create_linear(const ea_t start) {
+        if (!range_.valid() || start < range_.start || start >= range_.end || !is_loaded(start)) {
+            return {};
+        }
+
+        reset();
+
+        const omd::pattern_search search{range_.start, range_.end};
+
+        for (ea_t address = start; address < range_.end && is_loaded(address);) {
+            insn_t insn{};
+            if (decode_insn(&insn, address) == 0) {
+                break;
+            }
+
+            auto const insn_end = address + insn.size;
+            if (insn_end < address || insn_end > range_.end) {
+                break;
+            }
+
+            if (size() + insn.size > max_signature_size) {
+                break;
+            }
+
+            auto const imm_offset = utils::get_insn_imm_offset(&insn);
+
+            for (ea_t op_addr = address; op_addr < insn_end; ++op_addr) {
+                add(get_byte(op_addr), imm_offset > 0 && (op_addr - address) >= imm_offset);
+            }
+
+            byte_pattern candidate = *this;
+            auto const sig = candidate.trim().b2s();
+
+            address = insn_end;
+
+            if (sig.empty()) {
+                continue;
+            }
+
+            ea_t search_result{};
+            if (auto const unique = search.search_unique(sig.c_str(), search_result);
+                unique && search_result == start) {
+                return sig;
+            }
+        }
+
+        return {};
+    }
+
+    std::size_t byte_pattern::size() const {
+        return bytes_.size();
+    }
+
+    std::string byte_pattern::create(const ea_t target) {
+        if (!range_.valid() || target < range_.start || target >= range_.end) {
+            return {};
+        }
+
+        auto const start = get_item_head(target);
+        if (start == BADADDR || start < range_.start || start >= range_.end) {
+            return {};
+        }
+
+        auto const func = get_func(start);
+
+        if (func == nullptr) {
+            return create_linear(start);
+        }
+
+        func_item_iterator_t iterator;
+        if (!iterator.set(func, start)) {
+            return {};
+        }
+
+        const omd::pattern_search search{range_.start, range_.end};
+
+        reset();
+
+        for (bool ok{true}; ok; ok = iterator.next_code()) {
+            ea_t const addr = iterator.current();
+            if (addr >= range_.end) {
+                break;
+            }
+
+            insn_t insn{};
+
+            if (decode_insn(&insn, addr) == 0) {
+                break;
+            }
+
+            auto const insn_end = addr + insn.size;
+            if (insn_end < addr || insn_end > range_.end) {
+                break;
+            }
+
+            auto const imm_offset = utils::get_insn_imm_offset(&insn);
+
+            if (size() + insn.size > max_signature_size) {
+                break;
+            }
+
+            for (ea_t op_addr = addr; op_addr < insn_end; ++op_addr) {
+                add(get_byte(op_addr), imm_offset > 0 && (op_addr - addr) >= imm_offset);
+            }
+
+            byte_pattern candidate = *this;
+            auto const sig = candidate.trim().b2s();
+
+            if (sig.empty()) {
+                continue;
+            }
+
+            ea_t search_result{};
+            if (auto const unique = search.search_unique(sig.c_str(), search_result);
+                unique && search_result == start) {
+                return sig;
+            }
+        }
+
+        return {};
+    }
+} // namespace omd
+
+```
+
+`idaplugin/internals/patterns/byte_pattern.h`:
+
+```h
+#ifndef NGU_OMD_INTERNALS_PATTERNS_BYTE_PATTERN_H
+#define NGU_OMD_INTERNALS_PATTERNS_BYTE_PATTERN_H
+
+#include "utils/types.h"
+
+#include <cstddef>
+#include <cstdint>
+#include <string>
+#include <vector>
+
+#include <ida.hpp>
+
+namespace omd {
+    class byte_pattern final {
+    public:
+        explicit byte_pattern(address_region range);
+
+        [[nodiscard]] std::string create(ea_t target);
+
+    private:
+        byte_pattern& add(std::uint8_t byte, bool is_imm = false);
+        byte_pattern& trim();
+        byte_pattern& reset();
+
+        [[nodiscard]] std::string b2s() const;
+        [[nodiscard]] std::string create_linear(ea_t start);
+        [[nodiscard]] std::size_t size() const;
+
+        address_region range_{};
+        std::vector<std::uint8_t> bytes_;
+        std::vector<bool> imm_;
+    };
+} // namespace omd
+
+#endif // NGU_OMD_INTERNALS_PATTERNS_BYTE_PATTERN_H
+
+```
+
+`idaplugin/internals/patterns/pattern_search.cpp`:
+
+```cpp
+#include "pattern_search.h"
+
+#include "../../utils/logger/logger.h"
+
+#include <bytes.hpp>
+#include <search.hpp>
+
+namespace omd {
+    pattern_search::pattern_search(const ea_t start, const ea_t end) {
+        region_.start = start;
+        region_.end = end;
+    }
+
+    operation_status pattern_search::run(uint32* found) {
+        for (const auto& [sig, callback] : patterns_) {
+            if (search(sig, callback) == BADADDR) {
+                logging::debug("Pattern not found: {}\n", sig.c_str());
+            } else if (found != nullptr) {
+                ++*found;
+            }
+        }
+
+        clear();
+        return operation_status::completed;
+    }
+
+    void pattern_search::add(const qstring& sig, const on_found_callback& callback) {
+        patterns_.emplace_back(pattern_entry{sig, callback});
+    }
+
+    void pattern_search::clear() {
+        patterns_.clear();
+    }
+
+    ea_t pattern_search::search(const qstring& sig, const on_found_callback& callback) const {
+        auto const address = impl_search(sig, region_);
+
+        if (callback != nullptr) {
+            callback(address);
+        }
+
+        return address;
+    }
+
+    bool pattern_search::search_unique(
+        const qstring& sig, ea_t& address_found, const on_found_callback& callback
+    ) const {
+        address_found = impl_search(sig, region_);
+
+        if (address_found == BADADDR) {
+            return false;
+        }
+
+        if (auto const next = impl_search(sig, {address_found + 1, region_.end}); next == BADADDR) {
+            if (callback != nullptr) {
+                callback(address_found);
+            }
+            return true;
+        }
+
+        return false;
+    }
+
+    ea_t pattern_search::impl_search(const qstring& sig, const address_region& reg) const {
+#if IDA_SDK_VERSION >= 900
+        compiled_binpat_vec_t binary_pattern{};
+        if (!parse_binpat_str(&binary_pattern, reg.start, sig.c_str(), 16)) {
+            return BADADDR;
+        }
+        return bin_search(reg.start, reg.end, binary_pattern, BIN_SEARCH_NOCASE | BIN_SEARCH_FORWARD);
+#else
+        return find_binary(reg.start, reg.end, sig.c_str(), 16, SEARCH_DOWN);
+#endif
+    }
+} // namespace omd
+
+```
+
+`idaplugin/internals/patterns/pattern_search.h`:
+
+```h
+#ifndef NGU_OMD_INTERNALS_PATTERNS_PATTERN_SEARCH_H
+#define NGU_OMD_INTERNALS_PATTERNS_PATTERN_SEARCH_H
+
+#include "utils/types.h"
+
+#include <functional>
+#include <vector>
+
+#include <ida.hpp>
+
+namespace omd {
+    class pattern_search final {
+        using on_found_callback = std::function<void(ea_t)>;
+
+        struct pattern_entry {
+            qstring sig{};
+            on_found_callback callback{};
+        };
+
+    public:
+        pattern_search(ea_t start, ea_t end);
+
+        operation_status run(uint32* found = nullptr);
+        void add(const qstring& sig, const on_found_callback& callback = nullptr);
+        void clear();
+
+        [[nodiscard]] ea_t search(const qstring& sig, const on_found_callback& callback = nullptr) const;
+        [[nodiscard]] bool search_unique(
+            const qstring& sig, ea_t& address_found, const on_found_callback& callback = nullptr
+        ) const;
+
+    private:
+        [[nodiscard]] ea_t impl_search(const qstring& sig, const address_region& reg) const;
+
+        address_region region_{};
+        std::vector<pattern_entry> patterns_{};
+    };
+} // namespace omd
+
+#endif // NGU_OMD_INTERNALS_PATTERNS_PATTERN_SEARCH_H
+
+```
+
+`idaplugin/utils/logger/logger.cpp`:
+
+```cpp
+#include "logger.h"
+
+#include <ida.hpp>
+#include <kernwin.hpp>
+
+namespace {
+    [[nodiscard]] const char* level_label(const omd::logging::level severity) {
+        switch (severity) {
+        case omd::logging::level::error:
+            return "ERROR";
+        case omd::logging::level::info:
+            return "INFO";
+        case omd::logging::level::debug:
+            return "DEBUG";
+        default:
+            return "UNKNOWN";
+        }
+    }
+} // namespace
+
+namespace omd::logging {
+    message::message(const char* format, const std::source_location& location) : format_(format), location_(location) {
+    }
+
+    const char* message::format() const {
+        return format_;
+    }
+
+    const std::source_location& message::location() const {
+        return location_;
+    }
+
+    logger& logger::instance() {
+        static logger instance{};
+        return instance;
+    }
+
+    void logger::set_debug_enabled(const bool enabled) {
+        debug_enabled_ = enabled;
+    }
+
+    bool logger::debug_enabled() const {
+        return debug_enabled_;
+    }
+
+    bool logger::should_write(const level severity) const {
+        return severity != level::debug || debug_enabled_;
+    }
+
+    void logger::write(const level severity, const std::source_location& location, const std::string& text) const {
+        if (severity != level::debug) {
+            msg("[OMD] [%s] >> %s", level_label(severity), text.c_str());
+            return;
+        }
+
+        msg("[OMD] [%s] [%u:%s] >> %s",
+            level_label(severity),
+            static_cast<unsigned>(location.line()),
+            location.function_name(),
+            text.c_str());
+    }
+} // namespace omd::logging
+
+```
+
+`idaplugin/utils/logger/logger.h`:
+
+```h
+#ifndef NGU_OMD_UTILS_LOGGER_LOGGER_H
+#define NGU_OMD_UTILS_LOGGER_LOGGER_H
+
+#include <format>
+#include <source_location>
+#include <string>
+#include <utility>
+
+namespace omd::logging {
+    enum class level {
+        error,
+        info,
+        debug,
+    };
+
+    class message final {
+    public:
+        message(const char* format, const std::source_location& location = std::source_location::current());
+
+        [[nodiscard]] const char* format() const;
+        [[nodiscard]] const std::source_location& location() const;
+
+    private:
+        const char* format_{nullptr};
+        std::source_location location_{};
+    };
+
+    class logger final {
+    public:
+        static logger& instance();
+
+        void set_debug_enabled(bool enabled);
+        [[nodiscard]] bool debug_enabled() const;
+        [[nodiscard]] bool should_write(level severity) const;
+
+        void write(level severity, const std::source_location& location, const std::string& text) const;
+
+    private:
+        logger() = default;
+
+        bool debug_enabled_{false};
+    };
+
+    template<typename... Args> void write(const level severity, const message& message, Args&&... args) {
+        auto& sink = logger::instance();
+        if (!sink.should_write(severity)) {
+            return;
+        }
+
+        auto text = std::vformat(message.format(), std::make_format_args(args...));
+        sink.write(severity, message.location(), text);
+    }
+
+    template<typename... Args> void error(const message& message, Args&&... args) {
+        write(level::error, message, std::forward<Args>(args)...);
+    }
+
+    template<typename... Args> void info(const message& message, Args&&... args) {
+        write(level::info, message, std::forward<Args>(args)...);
+    }
+
+    template<typename... Args> void debug(const message& message, Args&&... args) {
+        write(level::debug, message, std::forward<Args>(args)...);
+    }
+} // namespace omd::logging
+
+#endif // NGU_OMD_UTILS_LOGGER_LOGGER_H
+
+```
+
+`idaplugin/utils/types.h`:
+
+```h
+#ifndef NGU_OMD_UTILS_TYPES_H
+#define NGU_OMD_UTILS_TYPES_H
+
+#include <cstddef>
+#include <cstdint>
+#include <string>
+
+#include <ida.hpp>
+#include <idd.hpp>
+
+namespace omd {
+    constexpr std::size_t max_bpt_array_size{3};
+    constexpr std::size_t max_insn_layout_array_size{2};
+
+    enum class operation_status {
+        completed,
+        cancelled,
+    };
+
+    enum op_type { ea_calc, addr_calc };
+
+    enum insn_array_idx {
+        opcode_length,
+        displ_length,
+    };
+
+    enum bpt_array_idx {
+        breakpoint_exists,
+        breakpoint_type,
+        breakpoint_size,
+    };
+
+    class bitmask {
+    public:
+        explicit bitmask(const ushort value) : bits_(value) {
+        }
+
+        bool set(const ushort bit) {
+            return (bits_ |= (1U << bit)) != 0u;
+        }
+
+        bool reset(const ushort bit) {
+            return (bits_ &= ~(1U << bit)) != 0u;
+        }
+
+        bool is_bit_set(const ushort bit) const {
+            return (bits_ & (1U << bit)) != 0;
+        }
+
+        bool any_bit() const {
+            return bits_ != 0;
+        }
+
+        explicit operator ushort() const {
+            return bits_;
+        }
+
+    private:
+        ushort bits_{};
+    };
+
+    struct transfer_data {
+        struct ea_op_data {
+            op_type type{};
+            std::int64_t offset{0};
+            std::uint32_t opcode_length{0};
+            std::uint32_t displ_length{0};
+        };
+        struct bpt_data {
+            bool exists{};
+            bpttype_t type{};
+            asize_t size{};
+        };
+
+        qstring name{};
+        qstring declaration{};
+        qstring comment{};
+        std::uint32_t color{0};
+        qvector<ea_op_data> ea_ops_chain{};
+        bpt_data breakpoint{};
+    };
+
+    struct transfer_options {
+        bool names{true};
+        bool declarations{true};
+        bool comments{true};
+        bool colors{true};
+        bool breakpoints{true};
+
+        bool filter_noise{true};
+
+        [[nodiscard]] bool any() const {
+            return names || declarations || comments || colors || breakpoints;
+        }
+    };
+
+    struct address_region {
+        address_region() = default;
+        explicit address_region(const std::pair<ea_t, ea_t>& range) : start(range.first), end(range.second) {};
+        address_region(const ea_t start, const ea_t end) : start(start), end(end) {};
+
+        address_region& operator=(const std::pair<ea_t, ea_t>& range) {
+            start = range.first;
+            end = range.second;
+            return *this;
+        }
+
+        ea_t start{BADADDR};
+        ea_t end{BADADDR};
+
+        [[nodiscard]] bool valid() const {
+            return start != BADADDR && end != BADADDR && start < end;
+        }
+    };
+} // namespace omd
+
+#endif // NGU_OMD_UTILS_TYPES_H
+
+```
+
+`idaplugin/utils/utils.cpp`:
+
+```cpp
+#include "utils/utils.h"
+
+#include "logger/logger.h"
+
+#include <bytes.hpp>
+#include <fpro.h>
+
+namespace omd::utils {
+    nlohmann::json read_json(const char* path) {
+        auto const file = qfopen(path, "rb");
+
+        if (file == nullptr) {
+            logging::error("Failed to get a file\n");
+            return nlohmann::json{};
+        }
+
+        auto const size = qfsize(file);
+
+        if (size == 0) {
+            logging::error("Empty file received\n");
+            qfclose(file);
+            return nlohmann::json{};
+        };
+
+        std::vector<char> buffer(size + 1);
+        if (auto const bytes_read = qfread(file, buffer.data(), size); bytes_read != size) {
+            logging::error("Failed to read complete file: read {} bytes, expected {}\n", bytes_read, size);
+            qfclose(file);
+            return nlohmann::json{};
+        }
+        buffer[size] = '\0';
+        qfclose(file);
+
+        try {
+            return nlohmann::json::parse(buffer.data());
+        } catch (const nlohmann::json::parse_error& e) {
+            logging::error("Failed to parse json: {}\n", e.what());
+            return nlohmann::json{};
+        }
+    }
+
+    bool write_json(const char* path, const nlohmann::ordered_json& json) {
+        auto const file = qfopen(path, "wb");
+
+        if (file == nullptr) {
+            logging::error("Failed to create output file\n");
+            return false;
+        }
+
+        auto const contents = json.dump(4);
+        auto const bytes_written = qfwrite(file, contents.data(), contents.size());
+        qfclose(file);
+
+        if (bytes_written != contents.size()) {
+            logging::error(
+                "Failed to write complete file: wrote {} bytes, expected {}\n", bytes_written, contents.size()
+            );
+            return false;
+        }
+
+        return true;
+    }
+
+    std::pair<ea_t, ea_t> get_address_range() {
+        return {inf_get_min_ea(), inf_get_max_ea()};
+    }
+
+    bool has_type_info(const ea_t address) {
+        auto const flags = get_flags(address);
+        return is_func(flags) || is_data(flags) || is_unknown(flags);
+    }
+
+    std::int32_t get_insn_imm_offset(insn_t const* insn) {
+        for (std::uint32_t i{}; i < UA_MAXOP; i++) {
+            op_t const* op = &insn->ops[i];
+
+            if (op->type == o_void) {
+                return 0;
+            }
+
+            if (op->offb > 0) {
+                return op->offb;
+            }
+        }
+        return 0;
+    }
+} // namespace omd::utils
+
+```
+
+`idaplugin/utils/utils.h`:
+
+```h
+#ifndef NGU_OMD_UTILS_UTILS_H
+#define NGU_OMD_UTILS_UTILS_H
+
+#include <cstdint>
+#include <utility>
+
+#include <nlohmann/json.hpp>
+
+#include <ida.hpp>
+#include <ua.hpp>
+
+namespace omd::utils {
+    nlohmann::json read_json(const char* path);
+
+    bool write_json(const char* path, const nlohmann::ordered_json& json);
+
+    std::pair<ea_t, ea_t> get_address_range();
+
+    bool has_type_info(ea_t address);
+
+    std::int32_t get_insn_imm_offset(insn_t const* insn);
+} // namespace omd::utils
+
+#endif // NGU_OMD_UTILS_UTILS_H
+
+```
+
+`idaplugin/version.h`:
+
+```h
+#ifndef NGU_OMD_VERSION_H
+#define NGU_OMD_VERSION_H
+
+#define PLUGIN_NAME "Oh My Dump"
+#define PLUGIN_VERSION "1.0.16"
+#define PLUGIN_HOTKEY "Ctrl+Shift+F10"
+
+#endif // NGU_OMD_VERSION_H
+
+```
+
+`vcpkg.json`:
+
+```json
+{
+  "name": "oh-my-dump",
+  "version": "1.0.6",
+  "builtin-baseline": "e1dfb369fc1c6e58d5850cf67c224caa955309e5",
+  "dependencies": [
+    "nlohmann-json"
+  ]
+}
+
+```

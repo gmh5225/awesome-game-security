@@ -1,0 +1,1960 @@
+Project Path: arc_CTRLKirk_7DTD-Anti-Cheat_rwqmfpa2
+
+Source Tree:
+
+```txt
+arc_CTRLKirk_7DTD-Anti-Cheat_rwqmfpa2
+├── AntiCheat.csproj
+├── Config
+│   └── settings.xml
+├── LICENSE
+├── ModInfo.xml
+├── README.md
+└── src
+    ├── Commands
+    │   └── ConsoleCmdAntiCheat.cs
+    ├── Core
+    │   ├── DetectionNames.cs
+    │   ├── DetectionService.cs
+    │   ├── DetectionSettings.cs
+    │   ├── ModLog.cs
+    │   ├── Notifier.cs
+    │   ├── PlayerTracker.cs
+    │   ├── Punishment.cs
+    │   ├── ServerContext.cs
+    │   └── Settings.cs
+    ├── Detections
+    │   ├── DamagePatch.cs
+    │   ├── GodModePatch.cs
+    │   ├── InventoryPatches.cs
+    │   ├── InventoryReader.cs
+    │   ├── ItemChecks.cs
+    │   ├── MovementMonitor.cs
+    │   ├── ProgressionPatch.cs
+    │   └── TeleportGracePatches.cs
+    └── ModEntry.cs
+
+```
+
+`AntiCheat.csproj`:
+
+```csproj
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net48</TargetFramework>
+    <AssemblyName>AntiCheat</AssemblyName>
+    <RootNamespace>AntiCheat</RootNamespace>
+    <LangVersion>9.0</LangVersion>
+    <Version>1.0.0</Version>
+    <Authors>CTRLKirk</Authors>
+    <Product>AntiCheat</Product>
+    <Copyright>Copyright (c) 2026 CTRLKirk</Copyright>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <DebugType>portable</DebugType>
+  </PropertyGroup>
+
+  <!--
+    GamePath must point at a 7 Days to Die (dedicated server or client) install.
+    Override on the command line: dotnet build -c Release -p:GamePath="D:\Games\7 Days To Die"
+  -->
+  <PropertyGroup>
+    <GamePath Condition="'$(GamePath)' == ''">C:\Program Files (x86)\Steam\steamapps\common\7 Days to Die Dedicated Server</GamePath>
+    <ManagedPath Condition="Exists('$(GamePath)\7DaysToDieServer_Data\Managed')">$(GamePath)\7DaysToDieServer_Data\Managed</ManagedPath>
+    <ManagedPath Condition="'$(ManagedPath)' == ''">$(GamePath)\7DaysToDie_Data\Managed</ManagedPath>
+    <ModFolderName>AntiCheat</ModFolderName>
+    <DistDir>$(MSBuildThisFileDirectory)dist\$(ModFolderName)</DistDir>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="Assembly-CSharp" HintPath="$(ManagedPath)\Assembly-CSharp.dll" Private="false" />
+    <Reference Include="Assembly-CSharp-firstpass" HintPath="$(ManagedPath)\Assembly-CSharp-firstpass.dll" Private="false" />
+    <Reference Include="LogLibrary" HintPath="$(ManagedPath)\LogLibrary.dll" Private="false" />
+    <Reference Include="UnityEngine" HintPath="$(ManagedPath)\UnityEngine.dll" Private="false" />
+    <Reference Include="UnityEngine.CoreModule" HintPath="$(ManagedPath)\UnityEngine.CoreModule.dll" Private="false" />
+    <Reference Include="0Harmony" HintPath="$(GamePath)\Mods\0_TFP_Harmony\0Harmony.dll" Private="false" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Xml.Linq" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="ModInfo.xml" />
+    <None Include="Config\**\*" />
+  </ItemGroup>
+
+  <!-- Lays out a ready-to-install mod folder in dist\AntiCheat. -->
+  <Target Name="PackageMod" AfterTargets="Build">
+    <ItemGroup>
+      <ModConfigFiles Include="Config\**\*" />
+    </ItemGroup>
+    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(DistDir)" />
+    <Copy SourceFiles="ModInfo.xml" DestinationFolder="$(DistDir)" />
+    <Copy SourceFiles="@(ModConfigFiles)" DestinationFolder="$(DistDir)\Config\%(RecursiveDir)" />
+  </Target>
+
+  <!-- Optional: dotnet build -c Release -p:DeployToGame=true copies the mod into GamePath\Mods. -->
+  <Target Name="DeployMod" AfterTargets="PackageMod" Condition="'$(DeployToGame)' == 'true'">
+    <ItemGroup>
+      <DistFiles Include="$(DistDir)\**\*" Exclude="$(DistDir)\Config\**\*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(DistFiles)" DestinationFolder="$(GamePath)\Mods\$(ModFolderName)\%(RecursiveDir)" />
+    <Copy SourceFiles="@(ModConfigFiles)" DestinationFolder="$(GamePath)\Mods\$(ModFolderName)\Config\%(RecursiveDir)" Condition="!Exists('$(GamePath)\Mods\$(ModFolderName)\Config\settings.xml')" />
+  </Target>
+
+</Project>
+
+```
+
+`Config/settings.xml`:
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  AntiCheat settings.
+
+  Action values for each detection:
+    Off  - detection disabled
+    Log  - write to the detection log and server console, notify online admins (and Discord if configured)
+    Kick - same as Log, then kick the player
+    Ban  - same as Log, then ban the player for BanDurationHours
+
+  Run "ac reload" in the server console after editing this file.
+-->
+<AntiCheat>
+  <!-- Players at or below this permission level are never checked. 0 = owner. -->
+  <Setting name="ExemptPermissionLevel" value="1" />
+
+  <!-- Online players at or below this permission level receive in-game alerts. -->
+  <Setting name="NotifyPermissionLevel" value="1" />
+
+  <!-- Ban length used by the Ban action. 0 = permanent. -->
+  <Setting name="BanDurationHours" value="0" />
+
+  <!-- Seconds before the same detection can fire again for the same player. -->
+  <Setting name="AlertCooldownSeconds" value="15" />
+
+  <!-- Optional Discord webhook URL for alerts. Leave empty to disable. -->
+  <Setting name="DiscordWebhookUrl" value="" />
+
+  <!--
+    Modded servers. Overhaul mods often let players run faster, hit harder or reach
+    further than vanilla allows. Raise these instead of editing every check below.
+    1.0 means vanilla. Any check can also be turned off completely with action="Off".
+  -->
+
+  <!-- Scales the Speed maxSpeed and Teleport maxDistance limits. -->
+  <Setting name="SpeedMultiplier" value="1.0" />
+
+  <!-- Scales the Reach maxDistance limit. -->
+  <Setting name="ReachMultiplier" value="1.0" />
+
+  <!-- Scales the Damage maxDamage limit. -->
+  <Setting name="DamageMultiplier" value="1.0" />
+
+  <!-- Players with any of these buffs skip the speed, teleport, fly and noclip checks.
+       Comma separated buff names from buffs.xml, for example a mod's sprint or jetpack buff. -->
+  <Setting name="ExemptBuffs" value="" />
+
+  <!-- Players who are never checked, comma separated. Platform ID (Steam_7656..., EOS_...) or player name. -->
+  <Setting name="ExemptPlayers" value="" />
+
+  <!-- Client reports god mode while not exempt. -->
+  <Detection name="GodMode" action="Kick" />
+
+  <!-- Player moved further than maxDistance meters in one check without a server teleport, respawn or vehicle. -->
+  <Detection name="Teleport" action="Kick" maxDistance="150" />
+
+  <!-- Sustained horizontal speed on foot above maxSpeed m/s, averaged over windowSeconds. -->
+  <Detection name="Speed" action="Log" maxSpeed="20" windowSeconds="3" />
+
+  <!-- Airborne with nothing nearby for longer than maxAirSeconds without losing height. -->
+  <Detection name="Fly" action="Log" maxAirSeconds="6" />
+
+  <!-- Feet and head inside solid blocks for minChecks checks in a row (one check every 0.5s). -->
+  <Detection name="NoClip" action="Log" minChecks="4" />
+
+  <!-- Admin/developer items (CreativeMode Dev or Test in items.xml) or any item listed in extraItems (comma separated).
+       Items listed in allowItems are never flagged, for mods that hand out dev-tagged items to normal players. -->
+  <Detection name="IllegalItem" action="Kick" creativeModes="Dev,Test" extraItems="" allowItems="" />
+
+  <!-- Item stack larger than the item's max stack size. -->
+  <Detection name="StackSize" action="Log" />
+
+  <!-- Single hit above maxDamage. The hit is also dropped. -->
+  <Detection name="Damage" action="Kick" maxDamage="10000" />
+
+  <!-- Melee hit from further than maxDistance meters. -->
+  <Detection name="Reach" action="Log" maxDistance="8" />
+
+  <!-- Player level jumped by more than maxLevelGain in a single update. -->
+  <Detection name="Progression" action="Log" maxLevelGain="3" />
+</AntiCheat>
+
+```
+
+`LICENSE`:
+
+```
+MIT License
+
+Copyright (c) CTRLKirk
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
+`ModInfo.xml`:
+
+```xml
+<?xml version="1.0" encoding="UTF-8" ?>
+<xml>
+	<Name value="AntiCheat" />
+	<DisplayName value="AntiCheat" />
+	<Description value="Server-side cheat detection: god mode, teleport, speed, fly, noclip, admin items, damage and more." />
+	<Author value="CTRLKirk" />
+	<Version value="1.0.0" />
+	<Website value="https://github.com/CTRLKirk/7DTD-Anti-Cheat" />
+</xml>
+
+```
+
+`README.md`:
+
+```md
+# AntiCheat for 7 Days to Die
+
+A server-side anti-cheat mod for 7 Days to Die dedicated servers. It watches what players send to the server and flags things that should not be possible: god mode, teleporting, speed and fly hacks, noclip, spawned admin items, oversized stacks, impossible damage and reach, and level jumps.
+
+Everything runs on the server. Players do not need to install anything, and a cheater cannot switch the checks off from their own machine.
+
+- Game version: V3.3 (b18)
+- Mod version: 1.0.0
+
+## Installation
+
+1. Download `AntiCheat-<version>.zip` from the [Releases](https://github.com/CTRLKirk/7DTD-Anti-Cheat/releases) page.
+2. Extract it into the server's `Mods` folder so that you end up with `Mods/AntiCheat/ModInfo.xml`.
+3. Restart the server. The console log should show:
+
+   ```
+   [AntiCheat] Loaded v1.0.0 for game V 3.3.0 (b18).
+   ```
+
+The mod only needs to be on the server. It works with EasyAntiCheat enabled.
+
+## What it checks
+
+| Detection     | What triggers it                                                        | Default action |
+|---------------|-------------------------------------------------------------------------|----------------|
+| `GodMode`     | A player's client reports god mode while player damage is on            | Kick           |
+| `Teleport`    | A player moves further than `maxDistance` between two samples (0.5s)    | Kick           |
+| `IllegalItem` | Dev or test items (creative menu only) in inventory or dropped          | Kick           |
+| `Damage`      | A single hit above `maxDamage`. The hit is also cancelled                | Kick           |
+| `Speed`       | Average horizontal speed above `maxSpeed` over `windowSeconds`          | Log            |
+| `Fly`         | In the air with no blocks nearby for longer than `maxAirSeconds`        | Log            |
+| `NoClip`      | Standing inside solid blocks for `minChecks` samples in a row           | Log            |
+| `StackSize`   | A stack bigger than the item's maximum stack size                       | Log            |
+| `Reach`       | A melee hit from further away than `maxDistance`                        | Log            |
+| `Progression` | Player level goes up by more than `maxLevelGain` in one update          | Log            |
+
+The kick defaults are on checks that are very unlikely to fire for a legitimate player. Movement checks default to logging because lag, vehicles and some game mechanics can produce odd movement. Watch the logs for a while before turning them up to `Kick`.
+
+Admins are skipped. Anyone with a permission level at or below `ExemptPermissionLevel` (default 1) is never checked. Players coming out of a spawn, respawn or server teleport get a short grace period. The illegal item check is off when the server has the creative menu enabled.
+
+## What happens on a detection
+
+1. A line is written to the server console and to `Mods/AntiCheat/Logs/detections-<date>.log`.
+2. Online admins (permission level at or below `NotifyPermissionLevel`) get a private chat message.
+3. If `DiscordWebhookUrl` is set, the detection is posted to that Discord channel.
+4. The configured action runs: `Log` stops here, `Kick` kicks the player, `Ban` bans them.
+
+The same detection for the same player is only reported once per `AlertCooldownSeconds`.
+
+## Configuration
+
+Settings live in `Mods/AntiCheat/Config/settings.xml`. Each check has an `action` (`Off`, `Log`, `Kick` or `Ban`) and its own thresholds:
+
+```xml
+<Detection name="Speed" action="Log" maxSpeed="20" windowSeconds="3" />
+```
+
+General settings:
+
+| Setting                 | Default | Meaning                                                     |
+|-------------------------|---------|-------------------------------------------------------------|
+| `ExemptPermissionLevel` | 1       | Players at or below this permission level are not checked   |
+| `NotifyPermissionLevel` | 1       | Players at or below this level get in-game alerts           |
+| `BanDurationHours`      | 0       | Length of bans from the `Ban` action. 0 means permanent      |
+| `AlertCooldownSeconds`  | 15      | Minimum time between repeat alerts for one player and check |
+| `DiscordWebhookUrl`     | empty   | Discord webhook for alerts. Leave empty to turn off         |
+
+After editing the file, run `ac reload` in the server console. No restart needed.
+
+## Modded servers
+
+The default limits are set for vanilla. Overhaul mods that make players faster, jump higher, reach further or hit harder will set off the movement, reach and damage checks during normal play. These settings in the same file adjust for that:
+
+| Setting            | Default | Meaning                                                                                              |
+|--------------------|---------|------------------------------------------------------------------------------------------------------|
+| `SpeedMultiplier`  | 1.0     | Multiplies the Speed and Teleport limits. 2.0 allows twice the vanilla limit                          |
+| `ReachMultiplier`  | 1.0     | Multiplies the Reach limit                                                                           |
+| `DamageMultiplier` | 1.0     | Multiplies the Damage limit                                                                          |
+| `ExemptBuffs`      | empty   | Buff names from `buffs.xml`. Players with any of them skip the speed, teleport, fly and noclip checks |
+| `ExemptPlayers`    | empty   | Platform IDs (`Steam_...`, `EOS_...`) or player names that are never checked                         |
+
+Other things that help on a modded server:
+
+- Turn any check off with `action="Off"`, or keep it on `Log` while you work out the right limit.
+- If a mod gives regular players items that are tagged as dev or test items, list them in `allowItems` on the `IllegalItem` check.
+- `StackSize` reads each item's maximum stack size from the loaded item config, so mods that raise stack sizes work without changes.
+- Vehicles and anything else a player is riding are already skipped by the movement checks.
+
+A good way to start: leave Speed, Fly, NoClip and Reach on `Log`, let people play for a few days, then look at `ac recent` and the log files to see what normal looks like on your server before tightening anything.
+
+## Console commands
+
+Run these from the server console, telnet or the in-game console as an admin.
+
+| Command             | What it does                                     |
+|---------------------|--------------------------------------------------|
+| `ac status`         | Shows every check, its action and total flags     |
+| `ac recent [count]` | Shows the latest detections (default 10)         |
+| `ac reload`         | Reloads `settings.xml`                           |
+
+`anticheat` works as a longer alias for `ac`.
+
+## Building from source
+
+You need the .NET SDK (6 or newer) and a copy of the game or the dedicated server for the game DLLs.
+
+```
+dotnet build -c Release -p:GamePath="C:\Program Files (x86)\Steam\steamapps\common\7 Days to Die Dedicated Server"
+```
+
+The ready-to-install mod folder is written to `dist/AntiCheat`. Add `-p:DeployToGame=true` to copy it straight into `GamePath/Mods` as well. An existing `settings.xml` there is left alone.
+
+## License
+
+MIT. See [LICENSE](LICENSE).
+
+```
+
+`src/Commands/ConsoleCmdAntiCheat.cs`:
+
+```cs
+using System.Collections.Generic;
+using System.Globalization;
+using AntiCheat.Core;
+
+namespace AntiCheat.Commands
+{
+    public class ConsoleCmdAntiCheat : ConsoleCmdAbstract
+    {
+        public override int DefaultPermissionLevel => 0;
+
+        public override string[] getCommands() => new[] { "anticheat", "ac" };
+
+        public override string getDescription() => "AntiCheat: status, recent detections, reload settings.";
+
+        public override string getHelp()
+        {
+            return "Usage:\n" +
+                   "  ac status         - show each detection and its action\n" +
+                   "  ac recent [count] - show the most recent detections (default 10)\n" +
+                   "  ac reload         - reload Config/settings.xml";
+        }
+
+        public override void Execute(List<string> _params, CommandSenderInfo _senderInfo)
+        {
+            var sub = _params.Count > 0 ? _params[0].ToLowerInvariant() : "status";
+            switch (sub)
+            {
+                case "status":
+                    PrintStatus();
+                    break;
+                case "recent":
+                    var count = 10;
+                    if (_params.Count > 1 && !int.TryParse(_params[1], NumberStyles.Integer, CultureInfo.InvariantCulture, out count))
+                    {
+                        Output("Count must be a number.");
+                        return;
+                    }
+                    PrintRecent(count);
+                    break;
+                case "reload":
+                    Settings.Load(ModEntry.SettingsPath);
+                    Output("Settings reloaded.");
+                    PrintStatus();
+                    break;
+                default:
+                    Output(getHelp());
+                    break;
+            }
+        }
+
+        private static void PrintStatus()
+        {
+            var settings = Settings.Current;
+            Output($"AntiCheat - {DetectionService.TotalDetections} detection(s) since start");
+            Output($"  Exempt permission level: <= {settings.ExemptPermissionLevel}, alerts to: <= {settings.NotifyPermissionLevel}");
+            Output($"  Discord webhook: {(string.IsNullOrEmpty(settings.DiscordWebhookUrl) ? "off" : "on")}");
+            Output($"  Modded: speed x{settings.SpeedMultiplier:0.##}, reach x{settings.ReachMultiplier:0.##}, damage x{settings.DamageMultiplier:0.##}, " +
+                   $"exempt buffs: {settings.ExemptBuffs.Count}, exempt players: {settings.ExemptPlayers.Count}");
+            foreach (var detection in settings.Detections)
+            {
+                Output($"  {detection.Name,-12} {detection.Action}");
+            }
+        }
+
+        private static void PrintRecent(int count)
+        {
+            var recent = DetectionService.Recent;
+            if (recent.Count == 0)
+            {
+                Output("No detections yet.");
+                return;
+            }
+
+            for (var i = 0; i < recent.Count && i < count; i++)
+            {
+                Output(recent[i].ToString());
+            }
+        }
+
+        private static void Output(string line) => SingletonMonoBehaviour<SdtdConsole>.Instance.Output(line);
+    }
+}
+
+```
+
+`src/Core/DetectionNames.cs`:
+
+```cs
+namespace AntiCheat.Core
+{
+    public static class DetectionNames
+    {
+        public const string GodMode = "GodMode";
+        public const string Teleport = "Teleport";
+        public const string Speed = "Speed";
+        public const string Fly = "Fly";
+        public const string NoClip = "NoClip";
+        public const string IllegalItem = "IllegalItem";
+        public const string StackSize = "StackSize";
+        public const string Damage = "Damage";
+        public const string Reach = "Reach";
+        public const string Progression = "Progression";
+    }
+}
+
+```
+
+`src/Core/DetectionService.cs`:
+
+```cs
+using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+
+namespace AntiCheat.Core
+{
+    public sealed class DetectionRecord
+    {
+        public DateTime Time { get; set; }
+        public string Detection { get; set; }
+        public string PlayerName { get; set; }
+        public string PlayerId { get; set; }
+        public int EntityId { get; set; }
+        public string Details { get; set; }
+        public DetectionAction Action { get; set; }
+
+        public override string ToString()
+        {
+            return $"{Time:yyyy-MM-dd HH:mm:ss} {Detection} {Action} player=\"{PlayerName}\" id={PlayerId} entity={EntityId} {Details}";
+        }
+    }
+
+    public static class DetectionService
+    {
+        private const int RecentCapacity = 100;
+
+        private static readonly ConcurrentQueue<KeyValuePair<int, KeyValuePair<string, string>>> Pending =
+            new ConcurrentQueue<KeyValuePair<int, KeyValuePair<string, string>>>();
+
+        private static readonly LinkedList<DetectionRecord> RecentRecords = new LinkedList<DetectionRecord>();
+        private static readonly Dictionary<string, DateTime> LastAlert = new Dictionary<string, DateTime>();
+        private static readonly object FileLock = new object();
+
+        public static IReadOnlyList<DetectionRecord> Recent
+        {
+            get
+            {
+                lock (RecentRecords)
+                {
+                    return RecentRecords.ToList();
+                }
+            }
+        }
+
+        public static int TotalDetections { get; private set; }
+
+        /// <summary>
+        /// Queues a detection. Safe to call from any thread; handled on the next game update.
+        /// </summary>
+        public static void Report(int entityId, string detection, string details)
+        {
+            if (!Settings.Current.Get(detection).Enabled)
+            {
+                return;
+            }
+
+            Pending.Enqueue(new KeyValuePair<int, KeyValuePair<string, string>>(
+                entityId, new KeyValuePair<string, string>(detection, details)));
+        }
+
+        public static void ProcessQueue()
+        {
+            while (Pending.TryDequeue(out var item))
+            {
+                try
+                {
+                    Handle(item.Key, item.Value.Key, item.Value.Value);
+                }
+                catch (Exception e)
+                {
+                    ModLog.Error($"Failed to handle {item.Value.Key} detection: {e}");
+                }
+            }
+        }
+
+        private static void Handle(int entityId, string detection, string details)
+        {
+            var settings = Settings.Current;
+            var action = settings.Get(detection).Action;
+            if (action == DetectionAction.Off)
+            {
+                return;
+            }
+
+            var client = ServerContext.ClientFor(entityId);
+            if (client == null || client.disconnecting || ServerContext.IsExempt(client))
+            {
+                return;
+            }
+
+            var cooldownKey = entityId + ":" + detection;
+            var now = DateTime.UtcNow;
+            if (LastAlert.TryGetValue(cooldownKey, out var last) &&
+                (now - last).TotalSeconds < settings.AlertCooldownSeconds)
+            {
+                return;
+            }
+            LastAlert[cooldownKey] = now;
+
+            var record = new DetectionRecord
+            {
+                Time = DateTime.Now,
+                Detection = detection,
+                PlayerName = client.playerName,
+                PlayerId = client.InternalId?.CombinedString ?? "unknown",
+                EntityId = entityId,
+                Details = details,
+                Action = action
+            };
+
+            Remember(record);
+            ModLog.Warning(record.ToString());
+            WriteToFile(record);
+            Notifier.NotifyAdmins(record);
+            Notifier.SendWebhook(record);
+
+            switch (action)
+            {
+                case DetectionAction.Kick:
+                    Punishment.Kick(client, detection);
+                    break;
+                case DetectionAction.Ban:
+                    Punishment.Ban(client, detection, settings.BanDurationHours);
+                    break;
+            }
+        }
+
+        private static void Remember(DetectionRecord record)
+        {
+            lock (RecentRecords)
+            {
+                TotalDetections++;
+                RecentRecords.AddFirst(record);
+                while (RecentRecords.Count > RecentCapacity)
+                {
+                    RecentRecords.RemoveLast();
+                }
+            }
+        }
+
+        private static void WriteToFile(DetectionRecord record)
+        {
+            try
+            {
+                var directory = Path.Combine(ModEntry.ModPath, "Logs");
+                Directory.CreateDirectory(directory);
+                var file = Path.Combine(directory, $"detections-{record.Time:yyyy-MM-dd}.log");
+                lock (FileLock)
+                {
+                    File.AppendAllText(file, record + Environment.NewLine);
+                }
+            }
+            catch (Exception e)
+            {
+                ModLog.Error($"Could not write detection log: {e.Message}");
+            }
+        }
+    }
+}
+
+```
+
+`src/Core/DetectionSettings.cs`:
+
+```cs
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+
+namespace AntiCheat.Core
+{
+    public enum DetectionAction
+    {
+        Off,
+        Log,
+        Kick,
+        Ban
+    }
+
+    public sealed class DetectionSettings
+    {
+        private readonly Dictionary<string, string> values;
+
+        public DetectionSettings(string name, DetectionAction action, Dictionary<string, string> values)
+        {
+            Name = name;
+            Action = action;
+            this.values = values;
+        }
+
+        public string Name { get; }
+        public DetectionAction Action { get; }
+        public bool Enabled => Action != DetectionAction.Off;
+
+        public float GetFloat(string key, float fallback)
+        {
+            return values.TryGetValue(key, out var raw) &&
+                   float.TryParse(raw, NumberStyles.Float, CultureInfo.InvariantCulture, out var parsed)
+                ? parsed
+                : fallback;
+        }
+
+        public int GetInt(string key, int fallback)
+        {
+            return values.TryGetValue(key, out var raw) &&
+                   int.TryParse(raw, NumberStyles.Integer, CultureInfo.InvariantCulture, out var parsed)
+                ? parsed
+                : fallback;
+        }
+
+        public string GetString(string key, string fallback)
+        {
+            return values.TryGetValue(key, out var raw) ? raw : fallback;
+        }
+
+        public HashSet<string> GetList(string key)
+        {
+            var set = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            foreach (var part in GetString(key, string.Empty).Split(','))
+            {
+                var trimmed = part.Trim();
+                if (trimmed.Length > 0)
+                {
+                    set.Add(trimmed);
+                }
+            }
+            return set;
+        }
+    }
+}
+
+```
+
+`src/Core/ModLog.cs`:
+
+```cs
+namespace AntiCheat.Core
+{
+    internal static class ModLog
+    {
+        private const string Prefix = "[AntiCheat] ";
+
+        public static void Info(string message) => Log.Out(Prefix + message);
+        public static void Warning(string message) => Log.Warning(Prefix + message);
+        public static void Error(string message) => Log.Error(Prefix + message);
+    }
+}
+
+```
+
+`src/Core/Notifier.cs`:
+
+```cs
+using System;
+using System.Collections.Generic;
+using System.Net;
+using System.Net.Http;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace AntiCheat.Core
+{
+    internal static class Notifier
+    {
+        private static readonly HttpClient Http = new HttpClient { Timeout = TimeSpan.FromSeconds(10) };
+
+        static Notifier()
+        {
+            ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12;
+        }
+
+        public static void NotifyAdmins(DetectionRecord record)
+        {
+            var connectionManager = SingletonMonoBehaviour<ConnectionManager>.Instance;
+            if (connectionManager == null)
+            {
+                return;
+            }
+
+            var recipients = new List<int>();
+            foreach (var client in connectionManager.Clients.List)
+            {
+                if (client != null && client.entityId != -1 && !client.disconnecting &&
+                    ServerContext.PermissionLevel(client) <= Settings.Current.NotifyPermissionLevel)
+                {
+                    recipients.Add(client.entityId);
+                }
+            }
+
+            if (recipients.Count == 0)
+            {
+                return;
+            }
+
+            var message = $"[FF5555]AntiCheat[-] {record.PlayerName}: {record.Detection} ({record.Details}) -> {record.Action}";
+            GameManager.Instance.ChatMessageServer(null, EChatType.Whisper, -1, message, recipients, EMessageSender.Server);
+        }
+
+        public static void SendWebhook(DetectionRecord record)
+        {
+            var url = Settings.Current.DiscordWebhookUrl;
+            if (string.IsNullOrEmpty(url))
+            {
+                return;
+            }
+
+            var content = $"**{record.Detection}** ({record.Action}) - {record.PlayerName} `{record.PlayerId}`\n{record.Details}";
+            var json = "{\"username\":\"AntiCheat\",\"content\":\"" + EscapeJson(content) + "\"}";
+
+            Task.Run(async () =>
+            {
+                try
+                {
+                    using (var body = new StringContent(json, Encoding.UTF8, "application/json"))
+                    using (var response = await Http.PostAsync(url, body).ConfigureAwait(false))
+                    {
+                        if (!response.IsSuccessStatusCode)
+                        {
+                            ModLog.Warning($"Discord webhook returned {(int)response.StatusCode}.");
+                        }
+                    }
+                }
+                catch (Exception e)
+                {
+                    ModLog.Warning($"Discord webhook failed: {e.GetBaseException().Message}");
+                }
+            });
+        }
+
+        private static string EscapeJson(string value)
+        {
+            const char Backslash = (char)92;
+            var builder = new StringBuilder(value.Length + 16);
+            foreach (var c in value)
+            {
+                if (c == '"' || c == Backslash)
+                {
+                    builder.Append(Backslash).Append(c);
+                }
+                else if (c == (char)10)
+                {
+                    builder.Append(Backslash).Append('n');
+                }
+                else if (c < 0x20)
+                {
+                    builder.Append(Backslash).Append('u').Append(((int)c).ToString("x4"));
+                }
+                else
+                {
+                    builder.Append(c);
+                }
+            }
+            return builder.ToString();
+        }
+    }
+}
+
+```
+
+`src/Core/PlayerTracker.cs`:
+
+```cs
+using System.Collections.Generic;
+using UnityEngine;
+
+namespace AntiCheat.Core
+{
+    public sealed class PlayerTracker
+    {
+        private const float GraceSeconds = 10f;
+
+        private static readonly Dictionary<int, PlayerTracker> Trackers = new Dictionary<int, PlayerTracker>();
+        private static readonly object Sync = new object();
+
+        private readonly Queue<KeyValuePair<float, float>> horizontalSamples = new Queue<KeyValuePair<float, float>>();
+
+        private PlayerTracker(int entityId)
+        {
+            EntityId = entityId;
+        }
+
+        public int EntityId { get; }
+
+        public bool HasPosition { get; private set; }
+        public Vector3 LastPosition { get; private set; }
+        public float LastSampleTime { get; private set; }
+        public float GraceUntil { get; private set; }
+
+        public float AirborneSince { get; set; } = -1f;
+        public float AirborneStartY { get; set; }
+        public int SolidChecks { get; set; }
+        public int LastLevel { get; set; } = -1;
+
+        public bool InGrace => Time.time < GraceUntil;
+
+        public static PlayerTracker Get(int entityId)
+        {
+            lock (Sync)
+            {
+                if (!Trackers.TryGetValue(entityId, out var tracker))
+                {
+                    tracker = new PlayerTracker(entityId);
+                    Trackers[entityId] = tracker;
+                }
+                return tracker;
+            }
+        }
+
+        public static void Remove(int entityId)
+        {
+            lock (Sync)
+            {
+                Trackers.Remove(entityId);
+            }
+        }
+
+        public void StartGrace()
+        {
+            GraceUntil = Time.time + GraceSeconds;
+            ResetMovement();
+        }
+
+        public void ResetMovement()
+        {
+            HasPosition = false;
+            AirborneSince = -1f;
+            SolidChecks = 0;
+            horizontalSamples.Clear();
+        }
+
+        public void SetPosition(Vector3 position, float time)
+        {
+            LastPosition = position;
+            LastSampleTime = time;
+            HasPosition = true;
+        }
+
+        public float AddHorizontalSample(float time, float distance, float windowSeconds, out float coveredSeconds)
+        {
+            horizontalSamples.Enqueue(new KeyValuePair<float, float>(time, distance));
+            while (horizontalSamples.Count > 0 && time - horizontalSamples.Peek().Key > windowSeconds)
+            {
+                horizontalSamples.Dequeue();
+            }
+
+            var total = 0f;
+            var oldest = time;
+            foreach (var sample in horizontalSamples)
+            {
+                total += sample.Value;
+                oldest = Mathf.Min(oldest, sample.Key);
+            }
+
+            coveredSeconds = time - oldest + (time - LastSampleTime);
+            return total;
+        }
+    }
+}
+
+```
+
+`src/Core/Punishment.cs`:
+
+```cs
+using System;
+
+namespace AntiCheat.Core
+{
+    internal static class Punishment
+    {
+        public static void Kick(ClientInfo client, string detection)
+        {
+            var reason = $"AntiCheat: {detection}";
+            GameUtils.KickPlayerForClientInfo(client,
+                new GameUtils.KickPlayerData(GameUtils.EKickReason.ManualKick, 0, default, reason));
+        }
+
+        public static void Ban(ClientInfo client, string detection, int durationHours)
+        {
+            var reason = $"AntiCheat: {detection}";
+            var until = durationHours > 0 ? DateTime.Now.AddHours(durationHours) : DateTime.Now.AddYears(100);
+
+            var blacklist = GameManager.Instance.adminTools?.Blacklist;
+            if (blacklist != null)
+            {
+                blacklist.AddBan(client.playerName, client.PlatformId, until, reason);
+                if (client.CrossplatformId != null)
+                {
+                    blacklist.AddBan(client.playerName, client.CrossplatformId, until, reason);
+                }
+            }
+
+            GameUtils.KickPlayerForClientInfo(client,
+                new GameUtils.KickPlayerData(GameUtils.EKickReason.Banned, 0, until, reason));
+        }
+    }
+}
+
+```
+
+`src/Core/ServerContext.cs`:
+
+```cs
+namespace AntiCheat.Core
+{
+    internal static class ServerContext
+    {
+        public static bool IsServer
+        {
+            get
+            {
+                var connectionManager = SingletonMonoBehaviour<ConnectionManager>.Instance;
+                return connectionManager != null && connectionManager.IsServer;
+            }
+        }
+
+        public static World World => GameManager.Instance?.World;
+
+        public static ClientInfo ClientFor(int entityId)
+        {
+            return SingletonMonoBehaviour<ConnectionManager>.Instance?.Clients?.ForEntityId(entityId);
+        }
+
+        public static int PermissionLevel(ClientInfo client)
+        {
+            var admin = GameManager.Instance?.adminTools;
+            return admin == null || client == null ? 1000 : admin.Users.GetUserPermissionLevel(client);
+        }
+
+        public static bool IsExempt(ClientInfo client)
+        {
+            return client == null || PermissionLevel(client) <= Settings.Current.ExemptPermissionLevel || IsListedExempt(client);
+        }
+
+        public static bool HasExemptBuff(EntityAlive entity)
+        {
+            var buffs = Settings.Current.ExemptBuffs;
+            if (buffs.Count == 0 || entity?.Buffs == null)
+            {
+                return false;
+            }
+
+            foreach (var buff in buffs)
+            {
+                if (entity.Buffs.HasBuff(buff))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private static bool IsListedExempt(ClientInfo client)
+        {
+            var players = Settings.Current.ExemptPlayers;
+            return players.Count > 0 &&
+                   (players.Contains(client.PlatformId?.CombinedString ?? string.Empty) ||
+                    players.Contains(client.CrossplatformId?.CombinedString ?? string.Empty) ||
+                    players.Contains(client.playerName ?? string.Empty));
+        }
+
+        public static bool IsExempt(int entityId)
+        {
+            return IsExempt(ClientFor(entityId));
+        }
+    }
+}
+
+```
+
+`src/Core/Settings.cs`:
+
+```cs
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
+using System.Xml.Linq;
+
+namespace AntiCheat.Core
+{
+    public sealed class Settings
+    {
+        private static readonly Dictionary<string, DetectionAction> DefaultActions =
+            new Dictionary<string, DetectionAction>(StringComparer.OrdinalIgnoreCase)
+            {
+                { DetectionNames.GodMode, DetectionAction.Kick },
+                { DetectionNames.Teleport, DetectionAction.Kick },
+                { DetectionNames.Speed, DetectionAction.Log },
+                { DetectionNames.Fly, DetectionAction.Log },
+                { DetectionNames.NoClip, DetectionAction.Log },
+                { DetectionNames.IllegalItem, DetectionAction.Kick },
+                { DetectionNames.StackSize, DetectionAction.Log },
+                { DetectionNames.Damage, DetectionAction.Kick },
+                { DetectionNames.Reach, DetectionAction.Log },
+                { DetectionNames.Progression, DetectionAction.Log }
+            };
+
+        private readonly Dictionary<string, DetectionSettings> detections =
+            new Dictionary<string, DetectionSettings>(StringComparer.OrdinalIgnoreCase);
+
+        public static Settings Current { get; private set; } = new Settings();
+
+        public int ExemptPermissionLevel { get; private set; } = 1;
+        public int NotifyPermissionLevel { get; private set; } = 1;
+        public int BanDurationHours { get; private set; }
+        public float AlertCooldownSeconds { get; private set; } = 15f;
+        public string DiscordWebhookUrl { get; private set; } = string.Empty;
+        public float SpeedMultiplier { get; private set; } = 1f;
+        public float ReachMultiplier { get; private set; } = 1f;
+        public float DamageMultiplier { get; private set; } = 1f;
+        public HashSet<string> ExemptBuffs { get; private set; } = NewSet();
+        public HashSet<string> ExemptPlayers { get; private set; } = NewSet();
+
+        public IEnumerable<DetectionSettings> Detections => detections.Values;
+
+        public DetectionSettings Get(string name)
+        {
+            if (detections.TryGetValue(name, out var settings))
+            {
+                return settings;
+            }
+
+            DefaultActions.TryGetValue(name, out var action);
+            return new DetectionSettings(name, action, new Dictionary<string, string>());
+        }
+
+        public static void Load(string path)
+        {
+            var settings = new Settings();
+
+            if (!File.Exists(path))
+            {
+                ModLog.Warning($"Settings file not found at {path}, using defaults.");
+            }
+            else
+            {
+                try
+                {
+                    settings.Parse(XDocument.Load(path));
+                }
+                catch (Exception e)
+                {
+                    ModLog.Error($"Failed to read {path}, using defaults: {e.Message}");
+                    settings = new Settings();
+                }
+            }
+
+            foreach (var name in DefaultActions.Keys)
+            {
+                if (!settings.detections.ContainsKey(name))
+                {
+                    settings.detections[name] = settings.Get(name);
+                }
+            }
+
+            Current = settings;
+        }
+
+        private void Parse(XDocument document)
+        {
+            var root = document.Root;
+            if (root == null)
+            {
+                return;
+            }
+
+            foreach (var element in root.Elements("Setting"))
+            {
+                ApplySetting((string)element.Attribute("name"), (string)element.Attribute("value") ?? string.Empty);
+            }
+
+            foreach (var element in root.Elements("Detection"))
+            {
+                var name = (string)element.Attribute("name");
+                if (string.IsNullOrEmpty(name))
+                {
+                    continue;
+                }
+
+                DefaultActions.TryGetValue(name, out var action);
+                var rawAction = (string)element.Attribute("action");
+                if (rawAction != null && !Enum.TryParse(rawAction, true, out action))
+                {
+                    ModLog.Warning($"Unknown action '{rawAction}' for detection {name}, using Log.");
+                    action = DetectionAction.Log;
+                }
+
+                var values = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                foreach (var attribute in element.Attributes())
+                {
+                    values[attribute.Name.LocalName] = attribute.Value;
+                }
+
+                detections[name] = new DetectionSettings(name, action, values);
+            }
+        }
+
+        private void ApplySetting(string name, string value)
+        {
+            switch (name)
+            {
+                case "ExemptPermissionLevel":
+                    ExemptPermissionLevel = ParseInt(value, ExemptPermissionLevel);
+                    break;
+                case "NotifyPermissionLevel":
+                    NotifyPermissionLevel = ParseInt(value, NotifyPermissionLevel);
+                    break;
+                case "BanDurationHours":
+                    BanDurationHours = ParseInt(value, BanDurationHours);
+                    break;
+                case "AlertCooldownSeconds":
+                    if (float.TryParse(value, NumberStyles.Float, CultureInfo.InvariantCulture, out var cooldown))
+                    {
+                        AlertCooldownSeconds = cooldown;
+                    }
+                    break;
+                case "DiscordWebhookUrl":
+                    DiscordWebhookUrl = value.Trim();
+                    break;
+                case "SpeedMultiplier":
+                    SpeedMultiplier = ParseMultiplier(name, value, SpeedMultiplier);
+                    break;
+                case "ReachMultiplier":
+                    ReachMultiplier = ParseMultiplier(name, value, ReachMultiplier);
+                    break;
+                case "DamageMultiplier":
+                    DamageMultiplier = ParseMultiplier(name, value, DamageMultiplier);
+                    break;
+                case "ExemptBuffs":
+                    ExemptBuffs = ParseSet(value);
+                    break;
+                case "ExemptPlayers":
+                    ExemptPlayers = ParseSet(value);
+                    break;
+                default:
+                    ModLog.Warning($"Unknown setting '{name}' ignored.");
+                    break;
+            }
+        }
+
+        private static float ParseMultiplier(string name, string value, float fallback)
+        {
+            if (float.TryParse(value, NumberStyles.Float, CultureInfo.InvariantCulture, out var parsed) && parsed > 0f)
+            {
+                return parsed;
+            }
+
+            ModLog.Warning($"{name} must be a number above 0, keeping {fallback}.");
+            return fallback;
+        }
+
+        private static HashSet<string> NewSet() => new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        private static HashSet<string> ParseSet(string value)
+        {
+            var set = NewSet();
+            foreach (var part in value.Split(new[] { (char)44, (char)59 }, StringSplitOptions.RemoveEmptyEntries))
+            {
+                var trimmed = part.Trim();
+                if (trimmed.Length > 0)
+                {
+                    set.Add(trimmed);
+                }
+            }
+            return set;
+        }
+
+        private static int ParseInt(string value, int fallback)
+        {
+            return int.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out var parsed) ? parsed : fallback;
+        }
+    }
+}
+
+```
+
+`src/Detections/DamagePatch.cs`:
+
+```cs
+using AntiCheat.Core;
+using HarmonyLib;
+using UnityEngine;
+
+namespace AntiCheat.Detections
+{
+    [HarmonyPatch(typeof(NetPackageDamageEntity), nameof(NetPackageDamageEntity.ProcessPackage))]
+    internal static class DamagePatch
+    {
+        private static bool Prefix(NetPackageDamageEntity __instance, World _world)
+        {
+            var sender = __instance.Sender;
+            if (sender == null || _world == null || !ServerContext.IsServer ||
+                __instance.attackerEntityId != sender.entityId || ServerContext.IsExempt(sender))
+            {
+                return true;
+            }
+
+            var settings = Settings.Current;
+            var damage = settings.Get(DetectionNames.Damage);
+            if (damage.Enabled)
+            {
+                var limit = damage.GetFloat("maxDamage", 10000f) * settings.DamageMultiplier;
+                if (__instance.strength > limit)
+                {
+                    DetectionService.Report(sender.entityId, DetectionNames.Damage,
+                        $"hit for {__instance.strength} damage (limit {limit:F0}) with {ItemName(__instance.attackingItem)}");
+                    return false;
+                }
+            }
+
+            var reach = settings.Get(DetectionNames.Reach);
+            if (reach.Enabled && IsMelee(__instance.attackingItem))
+            {
+                var attacker = _world.GetEntity(__instance.attackerEntityId);
+                var target = _world.GetEntity(__instance.entityId);
+                if (attacker != null && target != null)
+                {
+                    var distance = Vector3.Distance(attacker.position, target.position);
+                    var limit = reach.GetFloat("maxDistance", 8f) * settings.ReachMultiplier;
+                    if (distance > limit)
+                    {
+                        DetectionService.Report(sender.entityId, DetectionNames.Reach,
+                            $"melee hit from {distance:F1}m (limit {limit:F1}) with {ItemName(__instance.attackingItem)}");
+                    }
+                }
+            }
+
+            return true;
+        }
+
+        private static bool IsMelee(ItemValue item)
+        {
+            var actions = item?.ItemClass?.Actions;
+            if (actions == null || actions.Length == 0)
+            {
+                return false;
+            }
+            return actions[0] is ItemActionDynamicMelee || actions[0] is ItemActionMelee;
+        }
+
+        private static string ItemName(ItemValue item) => item?.ItemClass?.GetItemName() ?? "unknown item";
+    }
+}
+
+```
+
+`src/Detections/GodModePatch.cs`:
+
+```cs
+using AntiCheat.Core;
+using HarmonyLib;
+
+namespace AntiCheat.Detections
+{
+    [HarmonyPatch(typeof(NetPackageEntityAliveFlags), nameof(NetPackageEntityAliveFlags.ProcessPackage))]
+    internal static class GodModePatch
+    {
+        private const ushort GodModeFlag = 0x80;
+
+        private static void Prefix(NetPackageEntityAliveFlags __instance)
+        {
+            var sender = __instance.Sender;
+            if (sender == null || !ServerContext.IsServer || (__instance.flags & GodModeFlag) == 0 ||
+                __instance.entityId != sender.entityId)
+            {
+                return;
+            }
+
+            if (!GameStats.GetBool(EnumGameStats.IsPlayerDamageEnabled) || ServerContext.IsExempt(sender))
+            {
+                return;
+            }
+
+            DetectionService.Report(sender.entityId, DetectionNames.GodMode, "client reported god mode enabled");
+        }
+    }
+}
+
+```
+
+`src/Detections/InventoryPatches.cs`:
+
+```cs
+using AntiCheat.Core;
+using HarmonyLib;
+
+namespace AntiCheat.Detections
+{
+    [HarmonyPatch(typeof(NetPackagePlayerInventory), nameof(NetPackagePlayerInventory.ProcessPackage))]
+    internal static class InventoryPatch
+    {
+        private static void Prefix(NetPackagePlayerInventory __instance)
+        {
+            var sender = __instance.Sender;
+            if (sender == null || !ServerContext.IsServer || ServerContext.IsExempt(sender))
+            {
+                return;
+            }
+
+            ItemChecks.CheckStacks(sender.entityId, "toolbelt", InventoryReader.ReadToolbelt(__instance.inventoryData));
+            ItemChecks.CheckStacks(sender.entityId, "backpack", InventoryReader.ReadBag(__instance.bagData));
+            if (__instance.dragAndDropItem != null)
+            {
+                ItemChecks.CheckStack(sender.entityId, "cursor", __instance.dragAndDropItem);
+            }
+        }
+    }
+
+    [HarmonyPatch(typeof(NetPackageItemDrop), nameof(NetPackageItemDrop.ProcessPackage))]
+    internal static class ItemDropPatch
+    {
+        private static void Prefix(NetPackageItemDrop __instance)
+        {
+            var sender = __instance.Sender;
+            if (sender == null || !ServerContext.IsServer || ServerContext.IsExempt(sender))
+            {
+                return;
+            }
+
+            ItemChecks.CheckStack(sender.entityId, "dropped item", __instance.itemStack);
+        }
+    }
+}
+
+```
+
+`src/Detections/InventoryReader.cs`:
+
+```cs
+using System;
+using System.Collections.Generic;
+using System.IO;
+using AntiCheat.Core;
+
+namespace AntiCheat.Detections
+{
+    /// <summary>
+    /// Reads item stacks out of the inventory blobs a client sends, without touching the live player.
+    /// Mirrors Inventory.ReadInto, Bag.readInto and ItemStackGrid.ReadInto.
+    /// </summary>
+    internal static class InventoryReader
+    {
+        private static bool loggedFailure;
+
+        public static List<ItemStack> ReadToolbelt(MemoryStream blob)
+        {
+            return Read(blob, reader =>
+            {
+                reader.ReadByte();
+                return ReadGridItems(reader);
+            });
+        }
+
+        public static List<ItemStack> ReadBag(MemoryStream blob)
+        {
+            return Read(blob, reader =>
+            {
+                var version = reader.ReadByte();
+                if (version >= 2)
+                {
+                    return ReadGridItems(reader);
+                }
+
+                int count = reader.ReadUInt16();
+                return ReadStacks(reader, count);
+            });
+        }
+
+        private static List<ItemStack> ReadGridItems(PooledBinaryReader reader)
+        {
+            reader.ReadUInt16();
+            StreamUtils.ReadVector2i(reader);
+            int count = reader.ReadInt16();
+            return ReadStacks(reader, count);
+        }
+
+        private static List<ItemStack> ReadStacks(PooledBinaryReader reader, int count)
+        {
+            var stacks = new List<ItemStack>(Math.Max(0, count));
+            for (var i = 0; i < count; i++)
+            {
+                var stack = ItemStack.Empty.Clone();
+                stack.Read(reader);
+                stacks.Add(stack);
+            }
+            return stacks;
+        }
+
+        private static List<ItemStack> Read(MemoryStream blob, Func<PooledBinaryReader, List<ItemStack>> read)
+        {
+            List<ItemStack> result = null;
+            if (blob == null || blob.Length == 0)
+            {
+                return result;
+            }
+
+            try
+            {
+                StreamUtils.FromBlob(blob, reader => result = read(reader));
+            }
+            catch (Exception e)
+            {
+                if (!loggedFailure)
+                {
+                    loggedFailure = true;
+                    ModLog.Warning($"Could not read a player inventory update, item checks may be incomplete: {e.Message}");
+                }
+            }
+            return result;
+        }
+    }
+}
+
+```
+
+`src/Detections/ItemChecks.cs`:
+
+```cs
+using System;
+using System.Collections.Generic;
+using AntiCheat.Core;
+
+namespace AntiCheat.Detections
+{
+    internal static class ItemChecks
+    {
+        public static void CheckStacks(int entityId, string location, List<ItemStack> stacks)
+        {
+            if (stacks == null)
+            {
+                return;
+            }
+
+            foreach (var stack in stacks)
+            {
+                CheckStack(entityId, location, stack);
+            }
+        }
+
+        public static void CheckStack(int entityId, string location, ItemStack stack)
+        {
+            if (stack == null || stack.IsEmpty())
+            {
+                return;
+            }
+
+            var itemClass = stack.itemValue?.ItemClass;
+            if (itemClass == null)
+            {
+                return;
+            }
+
+            var settings = Settings.Current;
+            var name = itemClass.GetItemName();
+
+            var illegal = settings.Get(DetectionNames.IllegalItem);
+            if (illegal.Enabled && !GameStats.GetBool(EnumGameStats.IsCreativeMenuEnabled) && IsIllegal(illegal, itemClass, name))
+            {
+                DetectionService.Report(entityId, DetectionNames.IllegalItem,
+                    $"{stack.count}x {name} in {location} (CreativeMode {itemClass.CreativeMode})");
+            }
+
+            var stackSize = settings.Get(DetectionNames.StackSize);
+            var max = itemClass.Stacknumber.Value;
+            if (stackSize.Enabled && max > 0 && stack.count > max)
+            {
+                DetectionService.Report(entityId, DetectionNames.StackSize,
+                    $"{stack.count}x {name} in {location} (max stack {max})");
+            }
+        }
+
+        private static bool IsIllegal(DetectionSettings settings, ItemClass itemClass, string name)
+        {
+            if (settings.GetList("allowItems").Contains(name))
+            {
+                return false;
+            }
+
+            if (settings.GetList("extraItems").Contains(name))
+            {
+                return true;
+            }
+
+            foreach (var mode in settings.GetList("creativeModes"))
+            {
+                if (Enum.TryParse(mode, true, out EnumCreativeMode parsed) && itemClass.CreativeMode == parsed)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+    }
+}
+
+```
+
+`src/Detections/MovementMonitor.cs`:
+
+```cs
+using AntiCheat.Core;
+using UnityEngine;
+
+namespace AntiCheat.Detections
+{
+    /// <summary>
+    /// Samples remote player positions on the server and checks teleport, speed, fly and noclip.
+    /// </summary>
+    internal static class MovementMonitor
+    {
+        private const float SampleInterval = 0.5f;
+
+        private static float nextSample;
+
+        public static void Tick()
+        {
+            var now = Time.time;
+            if (now < nextSample)
+            {
+                return;
+            }
+            nextSample = now + SampleInterval;
+
+            var world = ServerContext.World;
+            if (world == null)
+            {
+                return;
+            }
+
+            var players = world.Players.list;
+            for (var i = 0; i < players.Count; i++)
+            {
+                var player = players[i];
+                if (player != null && player.isEntityRemote)
+                {
+                    Check(world, player, now);
+                }
+            }
+        }
+
+        private static void Check(World world, EntityPlayer player, float now)
+        {
+            var tracker = PlayerTracker.Get(player.entityId);
+
+            if (!player.Spawned || player.IsDead() || player.AttachedToEntity != null || tracker.InGrace ||
+                ServerContext.IsExempt(player.entityId) || ServerContext.HasExemptBuff(player))
+            {
+                tracker.ResetMovement();
+                return;
+            }
+
+            var position = player.position;
+            if (!tracker.HasPosition)
+            {
+                tracker.SetPosition(position, now);
+                return;
+            }
+
+            var settings = Settings.Current;
+            var delta = position - tracker.LastPosition;
+            var distance = delta.magnitude;
+
+            var teleport = settings.Get(DetectionNames.Teleport);
+            if (teleport.Enabled && distance > teleport.GetFloat("maxDistance", 150f) * settings.SpeedMultiplier)
+            {
+                DetectionService.Report(player.entityId, DetectionNames.Teleport,
+                    $"moved {distance:F0}m in {now - tracker.LastSampleTime:F1}s from {Format(tracker.LastPosition)} to {Format(position)}");
+                tracker.ResetMovement();
+                tracker.SetPosition(position, now);
+                return;
+            }
+
+            CheckSpeed(player, tracker, settings, delta, now);
+            CheckFly(world, player, tracker, settings, position, now);
+            CheckNoClip(world, player, tracker, settings, position);
+
+            tracker.SetPosition(position, now);
+        }
+
+        private static void CheckSpeed(EntityPlayer player, PlayerTracker tracker, Settings settings, Vector3 delta, float now)
+        {
+            var speed = settings.Get(DetectionNames.Speed);
+            if (!speed.Enabled)
+            {
+                return;
+            }
+
+            var window = Mathf.Max(1f, speed.GetFloat("windowSeconds", 3f));
+            var horizontal = new Vector2(delta.x, delta.z).magnitude;
+            var total = tracker.AddHorizontalSample(now, horizontal, window, out var covered);
+            if (covered < window * 0.8f)
+            {
+                return;
+            }
+
+            var average = total / covered;
+            var limit = speed.GetFloat("maxSpeed", 20f) * settings.SpeedMultiplier;
+            if (average > limit)
+            {
+                DetectionService.Report(player.entityId, DetectionNames.Speed,
+                    $"average {average:F1} m/s over {covered:F1}s (limit {limit:F1})");
+            }
+        }
+
+        private static void CheckFly(World world, EntityPlayer player, PlayerTracker tracker, Settings settings, Vector3 position, float now)
+        {
+            var fly = settings.Get(DetectionNames.Fly);
+            if (!fly.Enabled)
+            {
+                return;
+            }
+
+            if (player.onGround || player.IsInWater() || player.IsInElevator() || HasBlocksNearby(world, position))
+            {
+                tracker.AirborneSince = -1f;
+                return;
+            }
+
+            if (tracker.AirborneSince < 0f)
+            {
+                tracker.AirborneSince = now;
+                tracker.AirborneStartY = position.y;
+                return;
+            }
+
+            var airTime = now - tracker.AirborneSince;
+            var maxAir = fly.GetFloat("maxAirSeconds", 6f);
+            if (airTime > maxAir && position.y > tracker.AirborneStartY - 2f)
+            {
+                DetectionService.Report(player.entityId, DetectionNames.Fly,
+                    $"airborne {airTime:F1}s with no support at {Format(position)}");
+                tracker.AirborneSince = now;
+                tracker.AirborneStartY = position.y;
+            }
+        }
+
+        private static void CheckNoClip(World world, EntityPlayer player, PlayerTracker tracker, Settings settings, Vector3 position)
+        {
+            var noClip = settings.Get(DetectionNames.NoClip);
+            if (!noClip.Enabled)
+            {
+                return;
+            }
+
+            var feet = new Vector3i(position + new Vector3(0f, 0.1f, 0f));
+            var head = feet + Vector3i.up;
+            if (IsSolid(world, feet) && IsSolid(world, head))
+            {
+                tracker.SolidChecks++;
+                var required = Mathf.Max(1, noClip.GetInt("minChecks", 4));
+                if (tracker.SolidChecks >= required)
+                {
+                    DetectionService.Report(player.entityId, DetectionNames.NoClip,
+                        $"inside solid blocks for {tracker.SolidChecks} checks at {Format(position)}");
+                    tracker.SolidChecks = 0;
+                }
+            }
+            else
+            {
+                tracker.SolidChecks = 0;
+            }
+        }
+
+        private static bool IsSolid(World world, Vector3i position)
+        {
+            var block = world.GetBlock(position);
+            if (block.isair)
+            {
+                return false;
+            }
+
+            var type = block.Block;
+            return type != null && type.IsCollideMovement && type.shape != null && type.shape.IsSolidCube;
+        }
+
+        private static bool HasBlocksNearby(World world, Vector3 position)
+        {
+            var feet = new Vector3i(position);
+            for (var dy = -3; dy <= 1; dy++)
+            {
+                for (var dx = -1; dx <= 1; dx++)
+                {
+                    for (var dz = -1; dz <= 1; dz++)
+                    {
+                        if (!world.GetBlock(new Vector3i(feet.x + dx, feet.y + dy, feet.z + dz)).isair)
+                        {
+                            return true;
+                        }
+                    }
+                }
+            }
+            return false;
+        }
+
+        private static string Format(Vector3 v) => $"({v.x:F0}, {v.y:F0}, {v.z:F0})";
+    }
+}
+
+```
+
+`src/Detections/ProgressionPatch.cs`:
+
+```cs
+using AntiCheat.Core;
+using HarmonyLib;
+
+namespace AntiCheat.Detections
+{
+    [HarmonyPatch(typeof(NetPackagePlayerStats), nameof(NetPackagePlayerStats.ProcessPackage))]
+    internal static class ProgressionPatch
+    {
+        private static void Prefix(NetPackagePlayerStats __instance)
+        {
+            var sender = __instance.Sender;
+            var stats = __instance.entityNetworkStats;
+            if (sender == null || stats == null || !ServerContext.IsServer || __instance.entityId != sender.entityId)
+            {
+                return;
+            }
+
+            var tracker = PlayerTracker.Get(sender.entityId);
+            var level = stats.level;
+            var previous = tracker.LastLevel;
+            tracker.LastLevel = level;
+
+            var progression = Settings.Current.Get(DetectionNames.Progression);
+            if (previous < 0 || !progression.Enabled || ServerContext.IsExempt(sender))
+            {
+                return;
+            }
+
+            var limit = progression.GetInt("maxLevelGain", 3);
+            if (level - previous > limit)
+            {
+                DetectionService.Report(sender.entityId, DetectionNames.Progression,
+                    $"level jumped from {previous} to {level}");
+            }
+        }
+    }
+}
+
+```
+
+`src/Detections/TeleportGracePatches.cs`:
+
+```cs
+using AntiCheat.Core;
+using HarmonyLib;
+using UnityEngine;
+
+namespace AntiCheat.Detections
+{
+    /// <summary>
+    /// Server-initiated teleports (admin commands, trader eviction, game events) start a grace period
+    /// so they are not reported as teleport cheats.
+    /// </summary>
+    [HarmonyPatch(typeof(ClientInfo), nameof(ClientInfo.SendPackage))]
+    internal static class ClientTeleportPatch
+    {
+        private static void Prefix(ClientInfo __instance, NetPackage _package)
+        {
+            if (_package is NetPackageTeleportPlayer && __instance != null && __instance.entityId != -1)
+            {
+                PlayerTracker.Get(__instance.entityId).StartGrace();
+            }
+        }
+    }
+
+    [HarmonyPatch(typeof(ConnectionManager), nameof(ConnectionManager.SendPackage),
+        typeof(NetPackage), typeof(bool), typeof(int), typeof(int), typeof(int), typeof(Vector3?), typeof(int), typeof(bool))]
+    internal static class BroadcastTeleportPatch
+    {
+        private static void Prefix(NetPackage _package, int _attachedToEntityId)
+        {
+            if (_package is NetPackageTeleportPlayer && _attachedToEntityId != -1)
+            {
+                PlayerTracker.Get(_attachedToEntityId).StartGrace();
+            }
+        }
+    }
+}
+
+```
+
+`src/ModEntry.cs`:
+
+```cs
+using System;
+using System.IO;
+using System.Reflection;
+using AntiCheat.Core;
+using AntiCheat.Detections;
+using HarmonyLib;
+
+namespace AntiCheat
+{
+    public class ModEntry : IModApi
+    {
+        private const string HarmonyId = "com.ctrlkirk.anticheat";
+
+        public static string ModPath { get; private set; }
+        public static string SettingsPath => Path.Combine(ModPath, "Config", "settings.xml");
+
+        public void InitMod(Mod modInstance)
+        {
+            ModPath = modInstance.Path;
+            Settings.Load(SettingsPath);
+
+            ApplyPatches();
+
+            ModEvents.GameUpdate.RegisterHandler(OnGameUpdate);
+            ModEvents.PlayerSpawnedInWorld.RegisterHandler(OnPlayerSpawnedInWorld);
+            ModEvents.PlayerDisconnected.RegisterHandler(OnPlayerDisconnected);
+
+            var version = Assembly.GetExecutingAssembly().GetName().Version;
+            ModLog.Info($"Loaded v{version.ToString(3)} for game {Constants.cVersionInformation.LongString}.");
+        }
+
+        private static void ApplyPatches()
+        {
+            var harmony = new Harmony(HarmonyId);
+            var applied = 0;
+            var failed = 0;
+
+            foreach (var type in AccessTools.GetTypesFromAssembly(Assembly.GetExecutingAssembly()))
+            {
+                if (type.GetCustomAttributes(typeof(HarmonyPatch), false).Length == 0)
+                {
+                    continue;
+                }
+
+                try
+                {
+                    harmony.CreateClassProcessor(type).Patch();
+                    applied++;
+                }
+                catch (Exception e)
+                {
+                    failed++;
+                    ModLog.Error($"Patch {type.Name} failed, that check is disabled: {e.GetBaseException().Message}");
+                }
+            }
+
+            ModLog.Info($"Applied {applied} patch(es).");
+            if (failed > 0)
+            {
+                ModLog.Warning($"{failed} patch(es) failed to apply. The game version may not be supported.");
+            }
+        }
+
+        private static void OnGameUpdate(ref ModEvents.SGameUpdateData data)
+        {
+            if (!ServerContext.IsServer)
+            {
+                return;
+            }
+
+            MovementMonitor.Tick();
+            DetectionService.ProcessQueue();
+        }
+
+        private static void OnPlayerSpawnedInWorld(ref ModEvents.SPlayerSpawnedInWorldData data)
+        {
+            if (ServerContext.IsServer)
+            {
+                PlayerTracker.Get(data.EntityId).StartGrace();
+            }
+        }
+
+        private static void OnPlayerDisconnected(ref ModEvents.SPlayerDisconnectedData data)
+        {
+            if (data.ClientInfo != null)
+            {
+                PlayerTracker.Remove(data.ClientInfo.entityId);
+            }
+        }
+    }
+}
+
+```
