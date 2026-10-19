@@ -22,6 +22,7 @@ sources:
   - wiki/sources/descriptions/PluginsKers__Shield.md
   - wiki/sources/descriptions/Driw0x__CS2Guard.md
   - wiki/sources/descriptions/donnie1337__AntiCheatPlus.md
+  - wiki/sources/descriptions/DoomSalat__PEAK-mode-AntiCheat-Sentinel.md
   - wiki/sources/descriptions/oykuoner__YAACS-AntiCheat.md
   - wiki/sources/descriptions/gjones01__NullCS.md
   - wiki/sources/descriptions/ImNotVirgola__VirgolaAntiCheat.md

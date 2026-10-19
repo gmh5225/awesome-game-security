@@ -45,7 +45,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [HWID Spoofing](concepts/hwid-spoofing.md) — disk/NIC/SMBIOS/GPU/monitor/volume/TPM identifier masking; filter-driver IOCTL, registry, UEFI pre-boot; ban-evasion limits
 - [Hardware Input Injection](concepts/hardware-input-injection.md) — KMBox/Arduino/HID + driver-filter paths for AI visual aim pipelines; USB HID report analysis + [[network-environment-evidence]]; defensive [[qortroller]] controller attestation
 - [IL2CPP](concepts/il2cpp.md) — Unity AOT backend; metadata vs native trust boundary (stripping/AOT limits); Il2CppDomain hierarchy; metadata + dumpers (incl. metadata locator + Qiling emulation); [[terraria-android-modding]] Android name-based Frida/JsHook hooks
-- [Input Provenance](concepts/input-provenance.md) — observation-coverage table, telemetry trust labels, missing-event discipline, coordinate-space/time-base prerequisites for behavioral and replay detectors
+- [Input Provenance](concepts/input-provenance.md) — observation-coverage table, telemetry trust labels, missing-event discipline, coordinate-space/time-base prerequisites for behavioral and replay detectors; PEAK Photon sender attribution via [[peak-mode-anticheat-sentinel]]
 - [IOMMU](concepts/iommu.md) — VT-d/AMD-Vi translation; six out-of-domain paths; ACS/ATS-untrusted/RMRR; 16-entry bypass catalog + containment; enforcement vs observation limits via [[assurance-boundaries]]; [[iommu-state-verification]] ACPI/policy/live-unit/requester separation
 - [IOMMU State Verification](concepts/iommu-state-verification.md) — four-property IOMMU evidence model (ACPI advertisement, Windows KDP policy, live unit state, per-requester coverage); read-only checklist; KDP≠full endpoint coverage; scopes≠runtime mappings
 - [Memory Acquisition Path](concepts/memory-acquisition-path.md) — classify initiator, transport, privilege, isolation boundary, and observable artifacts (PCIe FPGA, host driver, hypervisor, offline image); scope detection to the actual boundary; route certainty claims to [[assurance-boundaries]]
@@ -2942,7 +2942,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Palworld-SDK-Dump](entities/palworld-sdk-dump.md) — Palworld UE5 SDK dump (SDK generation; cheat / game:palworld [UE5])
 - [PalworldSaved](entities/palworldsaved.md) — Palworld UE5 save/editor tooling (cheat / game:palworld [Save])
 - [PaintFE](entities/paintfe.md) — Rust raster image editor (wgpu GPU filters, Rhai scripting, CLI batch, GIF/APNG; Image Codec)
-- [PEAK-mode AntiCheat Sentinel](entities/peak-mode-anticheat-sentinel.md) — BepInEx 5 PEAK host-side AC; Harmony Photon RPC/instantiate hooks; item-spawn sender attribution; host block of illegal grants; F6 findings UI (DoomSalat; Anti Cheat)
+- [PEAK-mode AntiCheat Sentinel](entities/peak-mode-anticheat-sentinel.md) — prototype BepInEx 5 PEAK host-side AC; Harmony Photon RPC/instantiate hooks; RpcAudit/InstantiateAudit item-spawn rules; server-assigned sender attribution; host block + F6 findings UI (DoomSalat; Anti Cheat)
 - [palera1n](entities/palera1n.md) — iOS 15+ checkm8 jailbreak (A8–A11; rootful/rootless; Sileo bootstrap)
 - [PANDA](entities/panda.md) — Platform for Architecture-Neutral Dynamic Analysis (QEMU-based; Cheat QEMU/KVM / DBI)
 - [Panda3D](entities/panda3d.md) — Python/C++ 3D engine framework (liberal license; Game Engine / source)

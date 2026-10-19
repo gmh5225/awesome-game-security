@@ -6,7 +6,8 @@ sources:
   - wiki/sources/skills/anti-cheat.md
   - wiki/sources/descriptions/AtakanKeser__BlastScale.md
   - wiki/sources/descriptions/GloriousBrendon__rearguard.md
-updated: 2026-10-01
+  - wiki/sources/descriptions/DoomSalat__PEAK-mode-AntiCheat-Sentinel.md
+updated: 2026-10-19
 confidence: high
 ---
 
@@ -70,6 +71,8 @@ Behavioral features remain hypotheses until provenance, units, and collector cov
 
 Open-source SDKs such as [[rearguard]] (GloriousBrendon; Rust server + Godot 4 GDExtension; per-match server-seeded probes in mouse sensitivity and recoil parameters—clients reacting to hidden cues expose automation; treat probe parameters as **server-derived** gameplay state and client input reactions as **client-reported** evidence requiring corroboration) illustrate probe-based input-trust labeling without kernel drivers. (source: wiki/sources/descriptions/GloriousBrendon__rearguard.md)
 
+BepInEx host plugins such as [[peak-mode-anticheat-sentinel]] attribute PEAK item-spawn RPCs and network instantiations to the **Photon message sender** assigned by the server—label that sender as **server-observed** network identity before blocking forged pickups or inventory rewrites on the host. (source: wiki/sources/descriptions/DoomSalat__PEAK-mode-AntiCheat-Sentinel.md)
+
 ## Related
 
-[[ai-aimbot-detection]] · [[blastscale]] · [[rearguard]] · [[hardware-input-injection]] · [[research-rigor]] · [[overviews/anti-cheat]] · [[overviews/game-hacking]]
+[[ai-aimbot-detection]] · [[blastscale]] · [[rearguard]] · [[peak-mode-anticheat-sentinel]] · [[hardware-input-injection]] · [[research-rigor]] · [[overviews/anti-cheat]] · [[overviews/game-hacking]]
