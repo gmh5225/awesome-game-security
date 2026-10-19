@@ -15,6 +15,17 @@ Android application and exploit chain that achieves **ephemeral root** on arm64 
 
 Page-cache primitive lineage beside Dirty Pipe [[dirtypiperoot]] / [[dirtypipe-android]]; contemporary locked-bootloader root toolkit lane with [[ghostlock-oneplus]] / [[ghostlock-app]] (CVE-2026-43499).
 
+## Chain components
+
+| Layer | Role |
+|-------|------|
+| Java manager UI | Orchestrates exploit stages, module toggles, autorun, and soft reboot |
+| Native C/JNI | AES-CBC transforms, `crash_dump64` splice privilege escalation, in-place libc++ hooking |
+| Loadable kernel module | Delivers root primitive without unlocked bootloader or patched boot image |
+| Staged `libksud` | Hands off to a user-chosen KernelSU-style root manager after elevation |
+
+Samsung OneUI targets add DEFEX, RKP, and KDP bypass paths in the native/kernel stages. (source: wiki/sources/descriptions/mitschud__DirtyFrag.md)
+
 ## Links
 
 - Repo: https://github.com/mitschud/DirtyFrag
