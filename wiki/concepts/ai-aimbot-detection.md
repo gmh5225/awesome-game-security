@@ -13,6 +13,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__BattleriteBot.md
   - wiki/sources/descriptions/gmh5225__Auto_Simulated_Universe.md
   - wiki/sources/descriptions/karola3vax__CS2AC.md
+  - wiki/sources/descriptions/ViTaminza__plugify-cs2ac.md
   - wiki/sources/descriptions/jakobfriedl__usb-monitor-bof.md
   - wiki/sources/descriptions/gmh5225__anti-cheat.md
   - wiki/sources/descriptions/rafalimma__ModelAnti-Cheat.md
@@ -84,6 +85,7 @@ Tabular engagement features (reaction time, curvature stats, dx/dy correlation, 
 ## Corpus examples
 
 - [[cs2ac]] — CS2 Metamod:Source server plugin; ~17 behavioral modules for aimbot/aimlock/silent aim/movement/input abuse on dedicated servers (no client install)
+- [[plugify-cs2ac]] — ViTaminza Plugify/s2sdk port of [[cs2ac]]; server-side usercmd/movement/aim/shot/input-history and client-cvar analysis via Polyhook `libserver.so` detours and s2sdk hooks; rule-based aimbot/triggerbot/movement classes for dedicated-server operators (source: wiki/sources/descriptions/ViTaminza__plugify-cs2ac.md)
 - [[waldo]] — CS2 deep-learning triggerbot/aimbot detection (user-trained model)
 - [[cs2-hybrid-anticheat-proposal]] — CS2 hybrid AC proposal (ML + Glicko-2 Overwatch judges, honeypot entities, shadow monitoring; Python PoC)
 - [[aimbot-detection-prototype]] — clip + live-window prototype

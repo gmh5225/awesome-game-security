@@ -617,6 +617,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__Genshin-EasyPeasy-Bypass.md
   - wiki/sources/descriptions/kanekikun420__NoCheatZ-3.md
   - wiki/sources/descriptions/karola3vax__CS2AC.md
+  - wiki/sources/descriptions/ViTaminza__plugify-cs2ac.md
   - wiki/sources/descriptions/Pintuzoft__OSAntiCheat.md
   - wiki/sources/descriptions/IntelSDM__7DTD.md
   - wiki/sources/descriptions/majimaakane__7dtd-AntiCheatMod.md

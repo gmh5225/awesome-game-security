@@ -11,7 +11,11 @@ confidence: medium
 
 # plugify-cs2ac
 
-**Plugify / s2sdk port** of [[cs2ac]] for Counter-Strike 2 dedicated servers. Rewritten from the original Metamod:Source plugin while preserving server-side behavioral coverage over user commands, movement, aim, shots, input history, and client settings. (source: wiki/sources/descriptions/ViTaminza__plugify-cs2ac.md)
+**Plugify / s2sdk port** of [[cs2ac]] for Counter-Strike 2 dedicated servers. Rewritten from the original Metamod:Source plugin while preserving behavioral parity. On the game server it inspects user commands, movement, aim, shots, input history, and client settings, then reports or punishes aimbots, triggerbots, movement exploits, invalid cvars, and related anomalies (plus fork-specific telemetry modes). (source: wiki/sources/descriptions/ViTaminza__plugify-cs2ac.md)
+
+## Scope
+
+For **dedicated server operators and admins** who want server-authoritative anti-cheat and moderation on hosts they control—not client-side kernel protection, VAC-style client scans, or reverse-engineering cheat development workflows. (source: wiki/sources/descriptions/ViTaminza__plugify-cs2ac.md)
 
 ## Detection stack
 

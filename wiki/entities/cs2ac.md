@@ -23,7 +23,7 @@ Ships about seventeen detection modules covering cheats such as aimbot, aimlock,
 - Player whitelists
 - Optional Discord webhook evidence reporting
 
-Targets community and dedicated CS2 server operators who want behavioral anti-cheat on servers they control—the same server-authoritative lane as [[plugify-cs2ac]] (Plugify/s2sdk port), [[sac-the-server-anticheat]], [[anticheatsystem]], [[open.mp-anticheat]], and [[gamesoftacs]], rather than kernel products such as [[easy-anti-cheat]] or [[vanguard]].
+Targets community and dedicated CS2 server operators who want behavioral anti-cheat on servers they control—the same server-authoritative lane as [[plugify-cs2ac]] (ViTaminza; Plugify/s2sdk rewrite with Polyhook `libserver.so` usercmd/movement detours and s2sdk event/net/cvar/schema hooks while preserving [[cs2ac]] behavior), [[sac-the-server-anticheat]], [[anticheatsystem]], [[open.mp-anticheat]], and [[gamesoftacs]], rather than kernel products such as [[easy-anti-cheat]] or [[vanguard]]. (source: wiki/sources/descriptions/ViTaminza__plugify-cs2ac.md)
 
 ## Links
 
