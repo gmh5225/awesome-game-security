@@ -5298,6 +5298,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/andeecollard/jsrf-recomp [WIP static recompilation of Jet Set Radio Future (Xbox XBE) to native macOS, built on sp00nznet/xboxrecomp]
 - https://github.com/wivi514/Dead_Rising_2_Case_Zero_Xenon_Recomp [Native Windows/Linux port of Dead Rising 2: Case Zero (XBLA) via Xbox 360 PPC static recompilation (XenonRecomp), Vulkan renderer, and XMA audio]
 - https://github.com/megarohas/nhl-legacy-remaster [NHL Legacy Edition (Xbox 360) native PC port via ReXGlue static recompilation, plus roster/uniform mod tooling and docs (no game assets)]
+- https://github.com/nefariousjosiah/WWE-SVR2009-RECOMP [Native Windows/Linux/Steam Deck port of WWE SmackDown vs. Raw 2009 (Xbox 360) via static recompilation with D3D12/Vulkan renderers; BYO disc image, no game assets in repo]
 - https://github.com/IcyModz420/X360GameHack2025 [Xbox 360/OG Xbox all-in-one XEX/XBE/XISO/PKG/GOD patching tool for RGH/JTAG and Bad Update]
 - https://github.com/exploits-forsale/collateral-damage [Kernel exploit for Xbox SystemOS using CVE-2024-30088]
 - https://github.com/Byrom90/XenonDumper [Dumps files & data required to use the Xenon Xbox 360 Low Level Emulator]
