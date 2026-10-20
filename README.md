@@ -5256,6 +5256,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/Genymobile/genymotion-kernel
 - https://github.com/anbox/anbox
 - https://github.com/jwmcglynn/android-emulator
+- https://github.com/NKS1608/kiln-android-emulator [Apple Silicon macOS Android 16 emulator (HVF, GLES/Vulkan) with per-instance IMEI/serial/SIM, adb, and per-game key mapping]
 - https://github.com/google/android-emulator-hypervisor-driver
 - https://github.com/ant4g0nist/rudroid [Rust]
 - https://github.com/qemu-gvm/qemu-gvm [QEMU]
