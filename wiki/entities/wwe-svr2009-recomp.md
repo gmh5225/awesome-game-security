@@ -28,3 +28,7 @@ Sits in the README **Xbox** static-recomp cluster beside ReXGlue ports such as [
 ## Links
 
 - Repo: https://github.com/nefariousjosiah/WWE-SVR2009-RECOMP
+
+## Related
+
+[[nhl-legacy-remaster]] · [[mcla-pc]] · [[dead-rising-2-case-zero-xenon-recomp]] · [[xenia]] · [[idaxex]] · [[ida-vmx128-helper]] · [[static-runtime-evidence]] · [[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[overviews/graphics-api]]

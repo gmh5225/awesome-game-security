@@ -16,7 +16,8 @@ sources:
   - wiki/sources/descriptions/elkir0__sc2-android-recomp.md
   - wiki/sources/descriptions/gamboozino__ngbrecomp.md
   - wiki/sources/descriptions/Coz-0__smo-recomp.md
-updated: 2026-10-18
+  - wiki/sources/descriptions/nefariousjosiah__WWE-SVR2009-RECOMP.md
+updated: 2026-10-20
 confidence: high
 ---
 
@@ -70,6 +71,8 @@ Win32 PE32 x86-32 static recompilation to Android ARM64 such as [[sc2-android-re
 
 Switch AArch64 static recompilation to native Windows x64 such as [[smo-recomp]] (Coz-0; *Super Mario Odyssey* 1.4.1; Python AOT lifter→C with Clang build; Unicorn per-function difftest as lift oracle; custom host runtime for Switch system libraries, file I/O, audio, SDL3 input, and NVN-style graphics on Vulkan with Maxwell→SPIR-V shader translation; users supply decrypted dumps—no bundled assets) illustrates the same boundary between lifted guest code and reimplemented platform services when studying commercial porting without a CPU interpreter or JIT. (source: wiki/sources/descriptions/Coz-0__smo-recomp.md)
 
+ReXGlue-based Xbox 360 static ports such as [[wwe-svr2009-recomp]] (nefariousjosiah; *WWE SmackDown vs. Raw 2009*; ReXGlue PPC→x86-64 + XenosRecomp ahead-of-time shader conversion + native re:Blue/plume renderer on D3D12 or Vulkan; optional D3D call census and shader dumping for GPU translation RE; BYO disc image) pair lifted guest binaries with explicitly reimplemented graphics/runtime services—label which shader and API paths are translated vs instrumented before treating the native build as a renderer reference beside [[nhl-legacy-remaster]]. (source: wiki/sources/descriptions/nefariousjosiah__WWE-SVR2009-RECOMP.md)
+
 ## Behavioral capability from TTD traces
 
 Full-process **Time Travel Debugging (TTD)** recordings capture executed API calls and unpacked/runtime-generated code paths that static PE analysis may miss. [[ttd-capa-cpp]] replays `.run` traces through the TTD SDK, decodes Win32/native call arguments, and matches observed behavior against capa rules—including optional code-region scanning and capability timelines—so analysts can label **observed calls** vs static import/reachability claims. (source: wiki/sources/descriptions/HullaBrian__ttd-capa-cpp.md)
@@ -80,4 +83,4 @@ Game-server PC checks often combine **offline host artifacts** (Prefetch, Amcach
 
 ## Related
 
-[[binary-evidence]] · [[binary-diffing]] · [[dynamic-binary-instrumentation]] · [[jsrf-recomp]] · [[ngbrecomp]] · [[nfsu2recomp]] · [[sc2-android-recomp]] · [[smo-recomp]] · [[saturnkit]] · [[motorstorm-mv-recomp]] · [[dead-rising-2-case-zero-xenon-recomp]] · [[mcla-pc]] · [[pipeline-disasm]] · [[frogman]] · [[openmcm2]] · [[ttd-capa-cpp]] · [[custos]] · [[mixed-boolean-arithmetic]] · [[control-flow-flattening]] · [[research-rigor]] · [[overviews/reverse-engineering]] · [[overviews/windows-kernel]] · [[overviews/game-engine]]
+[[binary-evidence]] · [[binary-diffing]] · [[dynamic-binary-instrumentation]] · [[jsrf-recomp]] · [[ngbrecomp]] · [[nfsu2recomp]] · [[sc2-android-recomp]] · [[smo-recomp]] · [[wwe-svr2009-recomp]] · [[nhl-legacy-remaster]] · [[saturnkit]] · [[motorstorm-mv-recomp]] · [[dead-rising-2-case-zero-xenon-recomp]] · [[mcla-pc]] · [[pipeline-disasm]] · [[frogman]] · [[openmcm2]] · [[ttd-capa-cpp]] · [[custos]] · [[mixed-boolean-arithmetic]] · [[control-flow-flattening]] · [[research-rigor]] · [[overviews/reverse-engineering]] · [[overviews/windows-kernel]] · [[overviews/game-engine]]
