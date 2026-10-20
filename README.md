@@ -955,6 +955,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/2akouwu/reverify [AI-assisted reverse engineering with deterministic byte-level verification via MCP server and CLI]
 - https://github.com/mytechnotalent/rea [Offline-first RE assistant with one-shot binary scan, native PE/ELF/Mach-O and JavaScript/Electron static inventory, local RAG, multi-agent harness, and MCP server]
 - https://github.com/zheedevVn/Rea-Unlock [MCP server unifying static and dynamic reverse engineering (Frida, Ghidra, decompilers) for binary and application analysis]
+- https://github.com/joasasantos/rea-prompts [Curated REA (Reverse Engineer Anything) prompt templates for agent-assisted RE — games, anti-cheat, DMA, kernels, APKs, and protection research with evidence-first instructions]
 - https://github.com/LargoScript/n0xis [Cross-platform Rust RE pipeline with static PE/ELF analysis, SSA decompilation, live memory scanning, hardware watchpoints, and MCP/JSON automation for game reversing]
 - https://github.com/okiedocus/orress [Pure-Rust RE IDE: disassembler, Rust-syntax decompiler, debugger, emulator, malware triage, and built-in RE academy]
 - https://github.com/heaven-hm/cheat-agent [Cross-platform C++/Rust autonomous RE agent with native memory scanning, closed-loop trainer verification, and optional MCP hosting for Codex/Claude Code]
