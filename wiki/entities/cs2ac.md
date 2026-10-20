@@ -4,7 +4,7 @@ kind: entity
 topics: [anti-cheat, game-hacking]
 sources:
   - wiki/sources/descriptions/karola3vax__CS2AC.md
-updated: 2026-08-02
+updated: 2026-10-20
 confidence: medium
 ---
 
@@ -23,7 +23,7 @@ Ships about seventeen detection modules covering cheats such as aimbot, aimlock,
 - Player whitelists
 - Optional Discord webhook evidence reporting
 
-Targets community and dedicated CS2 server operators who want behavioral anti-cheat on servers they control—the same server-authoritative lane as [[sac-the-server-anticheat]], [[anticheatsystem]], [[open.mp-anticheat]], and [[gamesoftacs]], rather than kernel products such as [[easy-anti-cheat]] or [[vanguard]].
+Targets community and dedicated CS2 server operators who want behavioral anti-cheat on servers they control—the same server-authoritative lane as [[plugify-cs2ac]] (Plugify/s2sdk port), [[sac-the-server-anticheat]], [[anticheatsystem]], [[open.mp-anticheat]], and [[gamesoftacs]], rather than kernel products such as [[easy-anti-cheat]] or [[vanguard]].
 
 ## Links
 
@@ -31,4 +31,4 @@ Targets community and dedicated CS2 server operators who want behavioral anti-ch
 
 ## Related
 
-[[overviews/anti-cheat]] · [[ai-aimbot-detection]] · [[cs2-calladmin]] · [[cs2kac]] · [[cs2-hybrid-anticheat-proposal]] · [[sac-the-server-anticheat]] · [[anticheatsystem]] · [[gamesoftacs]] · [[open.mp-anticheat]]
+[[overviews/anti-cheat]] · [[ai-aimbot-detection]] · [[plugify-cs2ac]] · [[cs2-calladmin]] · [[cs2kac]] · [[cs2-hybrid-anticheat-proposal]] · [[sac-the-server-anticheat]] · [[anticheatsystem]] · [[gamesoftacs]] · [[open.mp-anticheat]]
