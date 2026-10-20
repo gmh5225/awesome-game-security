@@ -6,7 +6,8 @@ sources:
   - wiki/sources/skills/game-engine.md
   - wiki/sources/descriptions/Timehue__ShinobiX.md
   - wiki/sources/descriptions/apistol78__traktor.md
-updated: 2026-09-13
+  - wiki/sources/descriptions/abczsl520__game-quality-gates.md
+updated: 2026-10-20
 confidence: high
 ---
 
@@ -35,7 +36,7 @@ Apply [[research-rigor]] when porting artifacts across builds. Separate **reflec
 | Reflected metadata | Schema accepted as full memory layout | [[unreal-object-model]], [[il2cpp]] |
 | Serialized assets | Untrusted content accepted by importer | asset-format RE; supply-chain review |
 | In-process plugins | Third-party code with engine privileges | mod/plugin inventory |
-| Client replication | Client assertions treated as authoritative state | game-server-security (authority, sessions); browser SPA clients such as [[shinobix]] require server-side settlement receipts and ledgered economy mutations (source: wiki/sources/descriptions/Timehue__ShinobiX.md) |
+| Client replication | Client assertions treated as authoritative state | game-server-security (authority, sessions); browser SPA clients such as [[shinobix]] require server-side settlement receipts and ledgered economy mutations (source: wiki/sources/descriptions/Timehue__ShinobiX.md); Canvas/WebGL H5 checklists such as [[game-quality-gates]] pair untrusted-client lifecycle rules with raid tokens, duration/score sanity, and atomic purchase flows (source: wiki/sources/descriptions/abczsl520__game-quality-gates.md) |
 | Build / update / mod distribution | Tampered binaries or mod channels | game-supply-chain-security |
 | Tick / prediction / replay | Ordering or replay limits misunderstood | game-server-security (time-ordering evidence) |
 | Graphics measurements | Present timing or draw counts misread | [[overviews/graphics-api]] |
@@ -79,4 +80,4 @@ Primary collection lanes for engine work—route to [[engine-artifact-selection]
 
 ## Related
 
-[[engine-artifact-selection]] · [[unreal-object-model]] · [[il2cpp]] · [[source-netvars]] · [[resource-selection]] · [[repository-navigation]] · [[research-rigor]] · [[shinobix]] · [[overviews/game-engine]] · [[overviews/anti-cheat]]
+[[engine-artifact-selection]] · [[unreal-object-model]] · [[il2cpp]] · [[source-netvars]] · [[resource-selection]] · [[repository-navigation]] · [[research-rigor]] · [[shinobix]] · [[game-quality-gates]] · [[overviews/game-engine]] · [[overviews/anti-cheat]]
