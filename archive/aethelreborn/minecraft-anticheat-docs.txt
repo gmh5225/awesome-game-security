@@ -1,0 +1,911 @@
+Project Path: arc_aethelreborn_minecraft-anticheat-docs_7zfjl8ff
+
+Source Tree:
+
+```txt
+arc_aethelreborn_minecraft-anticheat-docs_7zfjl8ff
+├── LICENSE
+├── README.md
+└── docs
+    ├── 01-introduction.md
+    ├── 02-architecture.md
+    ├── 03-packets.md
+    ├── 04-cheats.md
+    ├── 05-approaches.md
+    ├── 06-philosophy.md
+    ├── 07-movement.md
+    ├── 08-combat.md
+    ├── 09-packet-analysis.md
+    ├── 10-blocks-inventory.md
+    ├── 11-heuristics-ml.md
+    ├── 12-enforcement.md
+    ├── 13-latency-fp.md
+    ├── 14-implementations.md
+    ├── 15-visual-hacks.md
+    ├── 16-hybrid.md
+    ├── 17-arms-race.md
+    ├── 18-operators.md
+    ├── 19-ethics.md
+    ├── 20-glossary.md
+    ├── FULL.md
+    ├── appendix-a-check-cycle.md
+    ├── appendix-b-physics.md
+    ├── appendix-c-latency.md
+    ├── appendix-d-history.md
+    └── appendix-e-tuning.md
+
+```
+
+`LICENSE`:
+
+```
+MIT License
+
+Copyright (c) 2026 Educational Documentation
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+This documentation is provided for educational and defensive purposes only.
+
+```
+
+`README.md`:
+
+```md
+# Minecraft Anticheat Systems Documentation
+
+**Educational reference on how Minecraft anticheats work, how cheats function at a high level, and how detection & blocking occur.**
+
+> **Disclaimer**: This repository is for educational and defensive purposes only. It explains detection mechanisms used by server-side and hybrid anticheat systems. It does **not** provide instructions for creating, obtaining, or using cheats.
+
+## Overview
+
+Minecraft multiplayer relies on a partially client-authoritative model. Modified clients can send altered movement, combat, and interaction data. Modern anticheat systems counteract this through physics simulation, geometric validation, packet analysis, statistical heuristics, and layered enforcement.
+
+This documentation covers:
+
+- Client-server architecture and the Minecraft protocol
+- Categories of cheats and high-level operation
+- Server-side vs client-side vs hybrid approaches
+- Movement prediction engines
+- Combat analysis (reach, aura, aim, clicks, velocity)
+- Packet-order and protocol checks
+- Block, inventory, and world interaction checks
+- Heuristics, statistics, and machine-learning approaches
+- Violation levels, setbacks, and enforcement
+- Latency, TPS, and false-positive handling
+- Popular anticheat implementations
+- Visual hacks and the limits of pure server-side detection
+- The ongoing arms race and practical operator guidance
+
+## Documentation Structure
+
+| Section | Description |
+|---------|-------------|
+| [01 - Introduction & Scope](docs/01-introduction.md) | Purpose, scope, and design goals |
+| [02 - Architecture Fundamentals](docs/02-architecture.md) | Client-server model, ticks, latency, prediction |
+| [03 - Network Packets](docs/03-packets.md) | Protocol basics and what anticheats observe |
+| [04 - Cheat Categories](docs/04-cheats.md) | Movement, combat, visual, inventory cheats |
+| [05 - Server vs Client Side](docs/05-approaches.md) | Strengths, weaknesses, hybrid models |
+| [06 - Detection Philosophy](docs/06-philosophy.md) | Core principles of modern anticheat design |
+| [07 - Movement Analysis](docs/07-movement.md) | Prediction engines and physics simulation |
+| [08 - Combat Analysis](docs/08-combat.md) | Reach, KillAura, aim, autoclicker, velocity |
+| [09 - Packet Analysis](docs/09-packet-analysis.md) | Protocol validation and sequence checks |
+| [10 - Block & Inventory](docs/10-blocks-inventory.md) | Breaking, placing, inventory automation |
+| [11 - Heuristics & ML](docs/11-heuristics-ml.md) | Statistical and machine-learning detection |
+| [12 - Enforcement](docs/12-enforcement.md) | VL, setbacks, kicks, bans |
+| [13 - Latency & False Positives](docs/13-latency-fp.md) | Compensation and usability |
+| [14 - Popular Implementations](docs/14-implementations.md) | GrimAC, Vulcan, Matrix, and others |
+| [15 - Visual Hacks](docs/15-visual-hacks.md) | Why server-side alone is insufficient |
+| [16 - Hybrid Systems](docs/16-hybrid.md) | Client-side verification approaches |
+| [17 - Arms Race](docs/17-arms-race.md) | Evolution of cheats and detection |
+| [18 - Operator Guidance](docs/18-operators.md) | Practical advice for server owners |
+| [19 - Ethics & Legal](docs/19-ethics.md) | Responsible use notes |
+| [20 - Glossary](docs/20-glossary.md) | Terms and concepts |
+| [Appendix A - Check Cycle](docs/appendix-a-check-cycle.md) | Typical detection flow |
+| [Appendix B - Movement Physics](docs/appendix-b-physics.md) | Physics considerations |
+| [Appendix C - Latency Compensation](docs/appendix-c-latency.md) | Reach and timing examples |
+| [Appendix D - History](docs/appendix-d-history.md) | Evolution of Minecraft anticheats |
+| [Appendix E - Tuning](docs/appendix-e-tuning.md) | Configuration philosophy |
+| [Full Single-File Version](docs/FULL.md) | Complete documentation in one file |
+
+## Intended Audience
+
+- Server operators and administrators
+- Plugin / anticheat developers
+- Researchers interested in networked game security
+- Players who want to understand the systems that govern competitive play
+
+## License & Usage
+
+This material is provided for educational purposes. Do not use it to develop or improve cheats. Server operators should publish clear rules and apply technical measures proportionately.
+
+---
+
+*Generated as educational documentation. Specific product internals and exact thresholds evolve continuously and are intentionally omitted.*
+
+```
+
+`docs/01-introduction.md`:
+
+```md
+# 1. Introduction and Scope
+
+Minecraft multiplayer operates on a fundamentally client-authoritative model for many actions, especially movement and combat reporting. The client tells the server where the player is, what they are looking at, and which entities or blocks they claim to interact with. The vanilla server performs only limited validation. This design prioritizes responsiveness and low latency over strict authority, which creates opportunities for modified clients (commonly called "hacked clients," "cheat clients," or "utility mods") to send data that grants unfair advantages.
+
+Anticheat systems exist to restore fairness by analyzing the data the client sends, comparing it against the known physics, rules, and human-capability limits of the game, and taking action when deviations exceed acceptable thresholds.
+
+This documentation explains in exhaustive detail:
+
+- How the underlying architecture enables both legitimate play and cheating.
+- The high-level ways modified clients alter behavior or packets.
+- The multi-layered techniques modern anticheats use to detect and mitigate those alterations.
+- The practical trade-offs involving latency compensation, false positives, performance, and version differences.
+- Historical context and the evolution of detection methods.
+- Operational guidance for those responsible for maintaining fair multiplayer environments.
+
+The focus is primarily on Java Edition server plugins (the most mature ecosystem) such as predictive systems exemplified by approaches like GrimAC, commercial solutions like Vulcan and Matrix, and historical systems like NoCheatPlus. Bedrock Edition and Geyser cross-play considerations are noted where relevant. Official Mojang servers use their own internal systems that follow similar behavioral principles but are not publicly detailed to the same degree.
+
+All descriptions remain at the conceptual and systems level. Implementation details that would constitute actionable bypass or exploit guidance are omitted by design. The goal is understanding of defensive systems, not offensive capability.
+
+Minecraft's popularity as both a creative sandbox and a competitive multiplayer platform has made fair play a persistent challenge. From early anarchy servers to modern ranked PvP networks and large-scale survival multiplayer (SMP) communities, the presence of modified clients has shaped server rules, plugin ecosystems, and even game design decisions by Mojang. Understanding anticheat technology is essential for anyone operating a public server, developing plugins, researching networked game security, or simply wishing to understand why certain behaviors result in punishments.
+
+---
+
+[← Back to Index](../README.md)
+
+```
+
+`docs/02-architecture.md`:
+
+```md
+# 2. Minecraft Client-Server Architecture Fundamentals
+
+Minecraft multiplayer is a classic client-server model with important asymmetries that directly influence both cheating possibilities and detection strategies.
+
+### 2.1 Responsibilities of the Client
+
+The client (the player's game instance) is responsible for:
+
+- Rendering the world, entities, particles, and user interface.
+- Handling local input from keyboard, mouse, controller, or touch devices.
+- Performing client-side prediction of movement so that the local player feels responsive even under latency.
+- Sending packets that report the player's position, rotation (yaw and pitch), on-ground status, actions (digging, placing, attacking, using items), inventory interactions, and other state.
+- Receiving and applying packets that update the world state, other players' positions, entity data, block changes, inventory synchronization, and occasional hard corrections (teleports).
+
+Because the client predicts its own movement and then reports the resulting position, there exists an inherent window of trust. The server often accepts the reported position unless it fails relatively basic sanity checks, such as traveling an impossible distance in a single tick or reporting an illegal stance.
+
+### 2.2 Responsibilities of the Server
+
+The server is responsible for:
+
+- Maintaining the authoritative world state, including block data, entity positions and health, player inventories (in most configurations), and game rules.
+- Performing validation of client reports to the degree implemented by vanilla code or installed plugins.
+- Broadcasting relevant state changes to other connected clients so that everyone sees a coherent shared world.
+- Applying damage calculations, block breaking and placement rules, item usage effects, and other authoritative game logic.
+- Managing connections, authentication (in online mode), and plugin-driven extensions.
+
+### 2.3 Key Technical Concepts
+
+**Ticks**: The game simulation advances in discrete steps called ticks. The target rate is 20 ticks per second (each tick lasting 50 milliseconds). Movement physics, combat cooldowns, redstone, entity AI, and many other systems are evaluated on a per-tick basis. When a server cannot maintain 20 TPS, timing assumptions used by both vanilla code and anticheats begin to degrade.
+
+**Latency (Ping)**: The time required for a packet to travel from client to server and for a response to return. High ping means the server is always working with slightly outdated information about the player's actions, and the client has more wall-clock time to move between the moment it sends a packet and the moment the server processes it. Anticheats must explicitly compensate for this or they will flag legitimate high-ping players.
+
+**Client-Side Prediction versus Server Authority**: To hide latency, the client applies movement locally immediately upon input. It then sends the resulting state to the server. If the server later decides the movement was invalid, it can send a correction packet that forces the client back to a server-approved position. This correction is experienced by the player as a "rubber-band" or lag-back. Modern anticheats make extensive use of such corrections (setbacks) as a primary mitigation tool.
+
+**Version Differences**: Minecraft has undergone major changes to combat (the 1.9 combat update), movement (elytra, tridents, soul sand, honey, powder snow, etc.), and protocol structure across versions. An anticheat that works well on 1.8.9 may require substantial adaptation for 1.21+, and vice versa. Cross-version support (via ViaVersion and similar) further complicates physics assumptions because a 1.8 client on a 1.21 server behaves differently from a native 1.21 client.
+
+This architecture explains why purely trusting the client is insufficient and why the dominant modern approach is sophisticated server-side simulation of what a legitimate client could have achieved.
+
+---
+
+[← Back to Index](../README.md)
+
+```
+
+`docs/03-packets.md`:
+
+```md
+# 3. Network Packets: The Foundation of Everything
+
+All multiplayer interaction is mediated by the Minecraft network protocol. Packets are structured binary messages with a defined ID and fields. The protocol has evolved significantly; modern versions contain well over one hundred distinct packet types in the Play state alone.
+
+### 3.1 Directionality
+
+- **Serverbound packets** travel from client to server. These include player position and look updates, use-entity (attacks and interactions), player digging (mining start/finish/cancel), block placement, animation (arm swing), inventory click and close, keep-alive responses, and many others.
+- **Clientbound packets** travel from server to client. These include entity position and velocity updates, block changes, chunk data, player teleports, inventory synchronization, chat, titles, and scoreboard updates.
+
+### 3.2 Movement Packets in Particular
+
+Typical serverbound movement reporting includes absolute or relative position (x, y, z), rotation (yaw, pitch), and a boolean on-ground flag. In some protocol versions and movement modes the client also reports velocity or input vectors. The frequency of these packets is normally tied to the client's tick rate; a vanilla client sends movement updates regularly even when standing still (to keep the on-ground state and other flags fresh).
+
+### 3.3 Combat Packets
+
+Attacking an entity is reported via a use-entity packet that carries the target entity ID and an interaction type (attack). In vanilla behavior this is almost always accompanied by an arm-animation packet representing the swing. The absence of the expected companion packet, or the presence of attacks without plausible preceding rotations, is a classic logic-check signal.
+
+### 3.4 How Anticheats Observe Packets
+
+On Bukkit, Spigot, Paper, and related platforms, anticheats typically use:
+
+- High-level Bukkit events (PlayerMoveEvent, EntityDamageByEntityEvent, etc.) for convenience, though these can be noisy or post-facto.
+- Packet listening libraries such as PacketEvents or ProtocolLib for direct access to the raw protocol messages before or as they are processed.
+- Direct NMS (net.minecraft.server) access in more invasive plugins for deeper state inspection.
+
+By examining both the values inside packets and the sequences, timings, and correlations across packets, anticheats build a picture of whether the client's behavior is consistent with an unmodified game under the observed conditions.
+
+A modified client can change field values, alter send rates, suppress expected packets, inject extra packets, or spoof client brand and other metadata. Detection therefore cannot rely on any single packet in isolation; it requires state tracking across time.
+
+---
+
+[← Back to Index](../README.md)
+
+```
+
+`docs/04-cheats.md`:
+
+```md
+# 4. Categories of Cheats and High-Level Operation
+
+Cheats are grouped by the advantage conferred and by the technical layer they primarily modify. Understanding the categories helps map detection strategies to the right signals.
+
+### 4.1 Movement Cheats
+
+These alter locomotion:
+
+- **Speed and Timer**: Increasing movement speed beyond sprint + potion + attribute limits, or accelerating the client's effective tick rate so that more movement packets are generated per real second.
+- **Flight, Hover, Jetpack**: Sustained upward or zero-gravity motion without elytra, creative flight, or other legitimate sources of lift.
+- **Step and Spider**: Ascending heights or climbing surfaces that normal collision and step-up rules prohibit.
+- **NoFall**: Suppressing or reducing fall damage by manipulating on-ground flags, velocity, or damage application.
+- **Jesus / WaterWalk, NoSlow, Phase / Noclip, Blink**: Walking on liquids as solid, ignoring slowdown from cobwebs or soul sand, moving through solid blocks, or temporarily desynchronizing position (blink) to gain bursts of mobility.
+
+High-level operation: The modified client may rewrite local physics before packaging position updates, directly construct position packets with illegal deltas, or change the rate at which the client advances its simulation and emits packets. Because the server ultimately receives a stream of positions, any of these techniques can be challenged by asking whether the sequence of positions is physically reachable under vanilla rules.
+
+### 4.2 Combat Cheats
+
+These improve the outcome of player-versus-player or player-versus-entity fights:
+
+- **KillAura / Forcefield / MultiAura**: Automatically selecting and attacking one or more nearby entities, often without requiring the player to look at them or with the ability to switch targets faster than human reaction allows.
+- **Reach**: Extending the effective attack distance beyond the normal approximately 3-block entity reach (or the corresponding block-interaction reach).
+- **Aimbot and AimAssist**: Fully automatic or partially assisted rotation toward targets, ranging from silent snaps that exist only for the attack packet to smooth tracking that still exceeds human precision and consistency.
+- **AutoClicker**: Generating attack or place inputs at rates or with regularity that exceed normal human capability, even when "randomized."
+- **Velocity / Anti-Knockback**: Reducing, delaying, or canceling the knockback that should result from being hit.
+- **Criticals, AutoBlock, AutoTotem, W-Tap assistance, and similar**: Automating or perfecting timing-dependent combat techniques.
+
+High-level operation: The client calculates target positions, generates the necessary attack packets (sometimes with fabricated or adjusted rotations), and may suppress or alter knockback application on the local simulation. Silent-aim techniques are particularly interesting because the player's visible rotation may remain natural while the attack packet carries a different look direction.
+
+### 4.3 Visual and Information Cheats
+
+These grant knowledge the player should not possess:
+
+- **X-Ray**: Rendering specific block types (ores, spawners, etc.) as visible through solid stone and dirt.
+- **ESP (Extra Sensory Perception)**: Drawing outlines, boxes, or information overlays for players, items, or containers through walls.
+- **Tracers, Radar, Extended Minimap**: Lines or map markers showing entity locations beyond normal visibility or radar range.
+- **Freecam**: Detaching the camera from the player body to scout safely.
+
+High-level operation: These features almost exclusively modify the client's rendering and memory. They frequently produce no abnormal serverbound packets at all. Consequently, pure server-side analysis sees only the downstream effects (lucky mining patterns, perfect awareness of hidden players) rather than a direct protocol violation. This category is the primary motivation for client-side or hybrid anticheat components.
+
+### 4.4 Inventory, World Interaction, and Protocol Exploits
+
+- FastBreak and Nuker: Breaking blocks faster than tool, enchantment, and hardness calculations permit, or breaking many blocks in a short window.
+- Scaffold and Tower: Automated or semi-automated placement of blocks under or in front of the player for bridging or vertical ascent, often with unnatural timing or rotation patterns.
+- Inventory automation: Chest stealers, auto-armor, auto-totem, rapid slot switching.
+- Illegal items, duplication glitches, and various protocol-level exploits that send malformed or unexpected packet sequences.
+
+High-level operation: These usually leave clearer packet-sequence and timing signatures because inventory windows, dig packets, and place packets have relatively strict expected orders and rate limits in vanilla behavior.
+
+### 4.5 Client Classification: Ghost, Blatant, and Hybrid
+
+- **Blatant clients** maximize advantage and are obvious to both spectators and basic checks (full flight, spinning multi-aura, extreme speed).
+- **Ghost clients** deliberately stay close to legitimate statistics: fractional reach increases, humanized click distributions, mild velocity reduction, subtle aim assistance. Their design goal is to raise the detection bar and to look plausible under casual observation.
+- **Hybrid clients** expose both styles, often with profiles or "legit mode" toggles.
+
+Effective anticheat design must therefore address both the extreme outliers and the carefully tuned near-legitimate behaviors.
+
+---
+
+[← Back to Index](../README.md)
+
+```
+
+`docs/05-approaches.md`:
+
+```md
+# 5. Server-Side vs Client-Side Anticheat Approaches
+
+### 5.1 Server-Side Anticheats
+
+These run entirely on the Minecraft server as plugins or server-side mods. They see only the packets and game events that reach the server. 
+
+**Strengths**:
+- Cannot be turned off by the connecting player.
+- Apply uniformly to every client that joins.
+- Excel at validating movement physics and combat geometry.
+- Can integrate deeply with server state (world, inventories, effects).
+
+**Weaknesses**:
+- Completely blind to pure visual modifications that never alter outbound packets.
+- Must invest significant engineering in latency and version compensation to avoid false positives.
+- Performance cost scales with player count and check complexity.
+
+### 5.2 Client-Side Anticheats
+
+These run on the player's computer, either as a required modification, a separate process, or part of a custom launcher.
+
+**Strengths**:
+- Can inspect memory, loaded modules, rendering hooks, and file integrity.
+- Capable of detecting many visual and injection-based cheats that leave no server-side trace.
+
+**Weaknesses**:
+- Require the player to install and run the software (friction and compatibility issues).
+- Sophisticated cheats invest heavily in anti-detection (obfuscation, memory cloaking, timing of injection).
+- Raise privacy and trust concerns among players.
+- Can themselves become targets for bypass or for malicious impersonation.
+
+### 5.3 Hybrid Models
+
+The most robust public deployments often combine both layers. Server-side systems handle the physics and combat that must cross the network; client-side verification is required for access to ranked queues, tournaments, or other high-stakes modes where visual advantages matter most. Some systems use encrypted handshakes or challenge-response protocols so that the server can confirm a trusted client component is present and active.
+
+---
+
+[← Back to Index](../README.md)
+
+```
+
+`docs/06-philosophy.md`:
+
+```md
+# 6. Core Anticheat Detection Philosophy
+
+Contemporary anticheat design converges on a shared set of principles:
+
+1. **Continuous State Collection**  
+   Maintain rolling histories of position, velocity, rotation, attack events, block interactions, inventory snapshots, estimated latency, and server performance metrics.
+
+2. **Physics-Aware Simulation**  
+   Especially for movement, reconstruct the set of states a vanilla client could reach given the same inputs, potion effects, attributes, vehicle state, and surrounding collision geometry.
+
+3. **Geometric and Temporal Validation**  
+   For combat, compute distances, ray intersections, and timing relationships while compensating for the known latency of each player.
+
+4. **Statistical and Heuristic Layers**  
+   Over longer windows, examine distributions of clicks, rotations, and success rates for patterns that are rare in human play.
+
+5. **Buffered Violation Accounting**  
+   Single anomalies are often tolerated or given low weight; repeated or severe deviations accumulate a violation level that triggers graduated responses.
+
+6. **Contextual Exemptions and Uncertainty**  
+   Explicitly model sources of legitimate uncertainty (ping, recent teleports, explosions, complex block collisions, known version quirks) so that tolerances expand when appropriate and contract when the situation is unambiguous.
+
+7. **Actionable Response**  
+   Prefer mitigations that remove advantage (setbacks, action cancellation) before or alongside punitive actions (kick, ban), and always provide staff visibility.
+
+The philosophy is defensive and probabilistic rather than absolute. Perfect detection of every possible modification is not claimed; the objective is to make successful, sustained cheating expensive in terms of development effort, risk of detection, and impact on the cheater's own experience.
+
+---
+
+[← Back to Index](../README.md)
+
+```
+
+`docs/07-movement.md`:
+
+```md
+# 7. Movement Analysis and Prediction Engines
+
+Movement detection has seen the largest advances in the last several years because the underlying physics are largely deterministic.
+
+### 7.1 Limitations of Simple Threshold Checks
+
+Early anticheats measured distance traveled over one or more ticks and compared the result to a static or lightly adjusted maximum speed. Flight checks looked for prolonged airborne time without supporting blocks. These methods caught the most obvious cheats but suffered from:
+
+- High false-positive rates on ice, slime, blue ice, and steep terrain.
+- Difficulty handling legitimate high-speed techniques (boat travel, elytra, riptide).
+- Relative ease of bypass by cheats that accelerated gradually or stayed just under the numeric limit.
+- Poor behavior under server lag or high player ping.
+
+### 7.2 The Predictive / Simulation Approach
+
+Modern engines maintain, for each player, a parallel model of possible movement:
+
+- Starting from the last accepted state (position, velocity, pose, effects).
+- Generating candidate input combinations (forward, backward, left, right, jump, sprint, sneak) consistent with the client's reported actions where available.
+- Applying the correct friction, gravity, collision response, fluid push, and special-block interactions for the player's Minecraft version and current environment.
+- Producing a set of positions and velocities that a legitimate client could have reached.
+- Measuring the offset between the client's reported arrival point and the nearest (or best-matching) simulated possibility.
+- Accepting the movement if the offset lies inside an uncertainty budget that accounts for latency, floating-point differences, 0.03-block edge cases, and recent disruptive events; otherwise recording a violation.
+
+Specialized sub-engines or movement tickers handle distinct regimes:
+
+- Ground and air movement under normal walking/sprinting/jumping rules.
+- Swimming in water and lava, including bubble-column vertical forces.
+- Elytra gliding, with pitch-dependent acceleration and firework rocket impulses.
+- Vehicle physics for boats, horses, camels, pigs, striders, and others.
+- Temporary states such as riptide, levitation, slow falling, and powder-snow burial.
+
+### 7.3 Compensated World and Latency Awareness
+
+Because the client and server can disagree about the exact set of solid blocks (due to chunk loading latency, recent placements, or plugin-generated fake blocks), advanced systems keep a per-player "compensated" world view. This view is updated from the chunk and block packets the server has sent to that specific client, plus predictions of recent client-side placements. Collision checks then use the compensated view, reducing false flags caused by ghost blocks or delayed updates.
+
+Uncertainty handlers further widen or narrow tolerances dynamically. Near a complex staircase, after an explosion, or immediately following a teleport, the allowed offset grows; on flat open ground with low ping it shrinks.
+
+### 7.4 Supporting Movement Checks
+
+Even with a strong prediction core, additional specialized checks remain useful:
+
+- Timer detection via analysis of packet inter-arrival times relative to real wall-clock time and server TPS.
+- Ground-spoof detection when the on-ground flag is inconsistent with collision results.
+- Phase and noclip detection when the movement path intersects solid volumes that the simulation cannot traverse.
+- Vehicle control and speed validation.
+- Elytra-specific rules around firework use and pitch extremes.
+
+The combination yields both high detection rates against movement cheats and acceptable false-positive rates when properly tuned.
+
+---
+
+[← Back to Index](../README.md)
+
+```
+
+`docs/08-combat.md`:
+
+```md
+# 8. Combat Analysis and Reach/Aim Detection
+
+Combat is inherently noisier than movement because human aim and reaction times vary widely, and because latency affects the apparent geometry of every engagement.
+
+### 8.1 Reach Calculation
+
+The vanilla maximum distance from the attacker's eye position to the target's hitbox is approximately 3.0 blocks for entity attacks in survival. Block interaction reach is larger (commonly cited around 4.5–5 blocks depending on version and context).
+
+Because of latency, a simple static 3.0 limit produces false positives: by the time the attack packet arrives, the target may have moved closer, or the attacker's reported position may be slightly stale. A common compensation formula expands the allowed reach by a term proportional to estimated one-way latency multiplied by a conservative movement speed (for example, sprint speed). The exact constants are tuned per anticheat and often made configurable.
+
+More accurate implementations perform proper intersection tests between the attack ray (or the attacker's eye point) and the target's axis-aligned or oriented bounding box at the relevant simulation time, rather than relying solely on Euclidean center-to-center distance.
+
+### 8.2 KillAura and Related Automation
+
+Detection signals include:
+
+- Attacks directed at entities outside the player's current look vector (or only inside it for a single tick).
+- Rapid target switching that exceeds plausible human reaction and motor limits.
+- Multiple entities damaged in the same tick or in an impossibly short window without corresponding rotation changes.
+- Attacks that ignore solid obstruction (wall hits) when line-of-sight checks are enabled.
+- Missing arm-swing animations that vanilla clients normally emit with each attack.
+
+Some systems have experimented with spawning transient verification entities or using other active challenges; most production systems rely on passive packet and rotation analysis for performance and simplicity.
+
+### 8.3 Aim and Rotation Heuristics
+
+Sequences of yaw and pitch are examined for:
+
+- Instantaneous snaps toward a target that occur only in the attack packet and are immediately reversed ("silent aim").
+- Unnaturally low entropy or overly consistent angular speeds.
+- Mathematical artifacts related to mouse sensitivity and the greatest common divisor of rotation deltas.
+- Statistical correlation between rotation changes and hit success over sliding windows of several seconds.
+- Patterns that persist across many different targets and engagement distances.
+
+These checks are among the most actively developed because ghost clients invest heavily in making aim assistance look human.
+
+### 8.4 Click Patterns and AutoClickers
+
+Clicks are observed primarily through arm-animation packets and interaction packets. Beyond raw clicks-per-second ceilings, modern checks analyze:
+
+- Variance and higher moments of the inter-click interval distribution.
+- Presence of perfectly periodic or low-entropy timing even when superficial randomization is applied.
+- Relationship between click timing and hit registration success.
+- Behavior while the player is also moving, placing blocks, or under different latency conditions.
+
+Human motor control produces characteristic variability; many software click generators, even sophisticated ones, leave residual regularity or statistical signatures.
+
+### 8.5 Knockback and Velocity
+
+After a player is damaged, the server applies (and usually sends) a velocity vector. Subsequent movement packets can be compared against the trajectory expected from that velocity plus normal physics. Consistent under-application of knockback is a strong signal. Prediction engines commonly inject recent velocity events into their simulation so that post-hit movement is validated coherently with the rest of the movement model.
+
+### 8.6 Additional Combat Signals
+
+Critical-hit timing, shield or blocking automation, totem re-equip speed, bow draw-and-release consistency, newer mace smash validation, and end-crystal or anchor placement/detonation patterns all receive dedicated attention in full-featured combat modules.
+
+---
+
+[← Back to Index](../README.md)
+
+```
+
+`docs/09-packet-analysis.md`:
+
+```md
+# 9. Packet Analysis and Protocol Validation
+
+A separate layer examines the protocol itself rather than the game-semantic meaning of the data:
+
+- Illegal or impossible orderings of packets.
+- Absence of packets that vanilla clients always emit together.
+- Abnormal frequencies or sudden bursts.
+- Field values outside legal ranges.
+- Inventory transaction sequences that violate window state machines.
+- Timing of keep-alive and transaction responses, which some systems use both for latency estimation and for detecting interference attempts.
+- Malformed packets that may be intended to crash or desynchronize the server or other players.
+
+These checks are valuable because they catch both intentional exploits and unintended side-effects of aggressive or poorly engineered cheat modules. They also operate at a lower level that is harder for some cheats to perfectly mimic while still achieving their gameplay goals.
+
+---
+
+[← Back to Index](../README.md)
+
+```
+
+`docs/10-blocks-inventory.md`:
+
+```md
+# 10. Block Interaction, Inventory, and World Checks
+
+### 10.1 Breaking Speed
+
+Expected break duration is a function of block hardness, the tool in hand, relevant enchantments (Efficiency, and in some cases Aqua Affinity or others), potion effects (Haste, Mining Fatigue), and whether the player is on the ground or airborne. Breaking significantly faster than this calculation, especially across many blocks in succession, indicates FastBreak or Nuker-style modules.
+
+### 10.2 Placement Patterns
+
+Scaffold and tower modules frequently produce placement rates, under-foot timing, or rotation behavior while placing that deviate from normal human bridging. Fast-place limits and rotation-consistency checks help here. Placement while the inventory is open or while sprinting in certain ways can also be constrained.
+
+### 10.3 Inventory Automation
+
+Rapid multi-slot clicks inside a chest, equipping armor or totems at superhuman speed, moving while certain inventory operations are in progress, or performing actions that vanilla clients serialize more slowly are all detectable through transaction timing and state tracking.
+
+### 10.4 Mining Pattern Heuristics
+
+Although pure x-ray is invisible at the packet level, the resulting mining behavior can be statistically unusual (disproportionate diamond or ancient debris yields relative to stone mined, or digging patterns that ignore normal exploration logic). These heuristics are noisy and are usually treated as soft signals that increase scrutiny rather than as standalone ban reasons.
+
+---
+
+[← Back to Index](../README.md)
+
+```
+
+`docs/11-heuristics-ml.md`:
+
+```md
+# 11. Heuristic, Statistical, and Machine-Learning Approaches
+
+Hard simulation works extremely well when the rules are deterministic (most movement). Combat and subtle assistance require looking at aggregate behavior:
+
+- Distributions of inter-click intervals and rotation deltas.
+- Entropy measures and tests for excessive regularity.
+- Aim-offset statistics relative to target hitboxes over time.
+- Cross-correlation among multiple individually weak indicators so that a player who is mildly suspicious on several axes simultaneously accumulates VL faster.
+
+A growing number of systems incorporate machine-learning models trained on large corpora of labeled legitimate and illegitimate combat traces. These models typically output a continuous anomaly or cheat-probability score rather than a binary decision on any single packet. Cloud offloading appears in a few commercial offerings for the heaviest models.
+
+Challenges include obtaining clean training data, handling version and play-style drift, controlling computational cost on the server, and ensuring that the models do not introduce new classes of false positives against skilled legitimate players.
+
+---
+
+[← Back to Index](../README.md)
+
+```
+
+`docs/12-enforcement.md`:
+
+```md
+# 12. Violation Levels, Setbacks, and Enforcement
+
+Almost every production anticheat uses some form of buffered scoring:
+
+- Each failed check contributes a quantity of violation level (VL), scaled by severity and sometimes by confidence.
+- VL decays toward zero when the player exhibits normal behavior for a period of time.
+- Crossing successive thresholds triggers escalating responses: verbose logging, staff alerts (chat, Discord webhooks, etc.), setbacks, cancellation of the offending action, kicks, temporary bans, or permanent bans.
+- Many systems expose fine-grained configuration so that server operators can choose different curves for different checks or different worlds.
+
+**Setbacks** deserve special emphasis. By forcibly returning the player to the last position that passed simulation, the anticheat neutralizes the practical benefit of a movement cheat even if the player is not immediately removed. This is often preferable to an instant kick for borderline or first-time detections, and it reduces the incentive to use movement cheats that are only intermittently detectable.
+
+Staff-facing tools commonly include per-player violation history, real-time alerts with context (ping, TPS, check name, VL), freeze commands, and integration points for external punishment or replay systems.
+
+---
+
+[← Back to Index](../README.md)
+
+```
+
+`docs/13-latency-fp.md`:
+
+```md
+# 13. Handling Latency, TPS, and False Positives
+
+False positives are more damaging to a community than occasional missed detections, because they punish legitimate players and erode trust in the moderation system.
+
+Primary mitigation techniques:
+
+- Explicit ping-based expansion of reach and movement envelopes.
+- Dynamic uncertainty that grows near complex geometry, after teleports, explosions, or vehicle dismounts, and in the presence of known problematic blocks.
+- TPS monitoring: when the server itself is lagging, timing-sensitive checks are relaxed or temporarily disabled.
+- Version-aware physics tables so that a 1.8 client is not judged by 1.21 movement rules and vice versa.
+- Per-player compensated worlds that reflect the blocks the client has actually been sent.
+- Extensive internal testing against high-ping connections, various legitimate clients (vanilla, popular optimized clients, modded environments), and edge-case movement styles (parkour, ice highways, boat travel, elytra courses).
+- Permission-based or world-based exemptions for staff, for minigames that intentionally break vanilla movement, and for debugging.
+
+Configuration is iterative. Operators typically begin with conservative thresholds, collect data on alerts, and gradually tighten while watching false-positive rates.
+
+---
+
+[← Back to Index](../README.md)
+
+```
+
+`docs/14-implementations.md`:
+
+```md
+# 14. Popular Anticheat Implementations Overview
+
+The ecosystem is large and constantly shifting; the following characterizations reflect publicly discussed strengths around the mid-2020s:
+
+- **GrimAC**: Open-source and prediction-centric. Its detailed movement simulation is widely regarded as among the strongest free options. Often paired with separate combat-focused plugins.
+- **Vulcan**: Commercial, strong packet-level analysis, balanced movement and combat coverage, generally low false-positive reputation when configured appropriately.
+- **Matrix**: Commercial, broad check set, historically popular in multiple regions, includes a variety of combat and movement heuristics.
+- **NoCheatPlus and maintained forks**: One of the longest-lived open-source projects; still used, though newer predictive engines have surpassed it in movement accuracy.
+- **Spartan, Polar, Intave, Verus**, and many others: Each emphasizes different combinations of combat heuristics, performance characteristics, Bedrock support, or update frequency.
+- Specialized combat layers (various commercial and free projects) that deliberately avoid duplicating movement simulation and instead focus on aim, click, and aura patterns, often designed to run alongside GrimAC or similar.
+
+Selection criteria for a given server include game mode (casual SMP versus competitive PvP), budget, supported Minecraft versions, expected player count, tolerance for configuration work, and whether Bedrock/Geyser players must be supported.
+
+---
+
+[← Back to Index](../README.md)
+
+```
+
+`docs/15-visual-hacks.md`:
+
+```md
+# 15. Visual Hacks and Why Server-Side Alone Is Insufficient
+
+Because x-ray, ESP, and similar features operate entirely inside the client's rendering and memory spaces, they need not generate any abnormal serverbound traffic. The server observes a player who finds ores at an unusually high rate or who always seems to know where opponents are hiding, but the packets themselves can be indistinguishable from legitimate play.
+
+Server-side responses are therefore limited to:
+
+- Statistical heuristics on mining or movement patterns (noisy).
+- Increased logging and staff attention for suspicious players.
+- World-generation and resource-distribution choices that reduce the payoff of pure information advantages.
+- Requirements that players in sensitive modes run additional client-side verification.
+
+This is the fundamental reason hybrid architectures exist.
+
+---
+
+[← Back to Index](../README.md)
+
+```
+
+`docs/16-hybrid.md`:
+
+```md
+# 16. Hybrid and Client-Side Verification Systems
+
+In environments where visual cheats would critically undermine fairness (ranked ladders, tournaments, high-stakes economy servers), operators may require a verified client component. That component can:
+
+- Perform memory and module scanning.
+- Monitor for known cheat signatures or injection patterns.
+- Maintain an encrypted or authenticated channel with the server.
+- Report integrity status at login and periodically thereafter.
+
+Only after successful verification are full privileges or access to competitive queues granted. These systems raise the bar substantially against casual and many intermediate cheats, at the cost of installation friction, potential incompatibility with other modifications, and the need for ongoing anti-tamper development.
+
+---
+
+[← Back to Index](../README.md)
+
+```
+
+`docs/17-arms-race.md`:
+
+```md
+# 17. The Ongoing Arms Race
+
+Cheat authors respond to each generation of detection with:
+
+- Improved humanization of click and rotation distributions.
+- More faithful reproduction of vanilla packet timing and ordering.
+- Latency-aware logic that stays inside common compensation envelopes.
+- Attempts to interfere with specific measurement techniques used by popular anticheats.
+- Heavier obfuscation and runtime protection against client-side scanners.
+
+Anticheat authors respond with:
+
+- More complete and version-accurate physics simulations.
+- Richer uncertainty models.
+- Longer temporal windows and cross-signal correlation.
+- Machine-learning components trained on fresh data.
+- Faster release cycles that close newly observed bypasses.
+
+The equilibrium is not perfect detection but a continuously elevated cost of cheating. Most players on well-protected servers experience a largely fair environment; determined adversaries with significant resources can still find temporary advantages, which is true of nearly every online multiplayer game.
+
+---
+
+[← Back to Index](../README.md)
+
+```
+
+`docs/18-operators.md`:
+
+```md
+# 18. Practical Considerations for Server Operators
+
+- Prefer a strong predictive movement foundation and add combat modules as needed rather than relying on a single monolithic product.
+- Begin with conservative VL thresholds and staff-only alerts; tighten after observing real traffic.
+- Keep the server itself performant; low TPS undermines both detection quality and player experience.
+- Provide clear rules, consistent enforcement, and accessible appeal paths.
+- Maintain exemptions for staff, for custom gamemodes that intentionally violate vanilla physics, and for testing.
+- Test configuration changes on a staging environment that includes high-ping clients and a variety of legitimate movement styles.
+- Monitor community feedback for false-positive reports and act on them promptly.
+- Recognize that different server genres have different optimal points on the strictness-versus-usability spectrum.
+
+---
+
+[← Back to Index](../README.md)
+
+```
+
+`docs/19-ethics.md`:
+
+```md
+# 19. Ethical and Legal Notes
+
+This document exists to explain defensive technology so that server operators, plugin developers, and researchers can build and maintain fairer multiplayer environments. It deliberately avoids any guidance that would help a reader construct, obtain, or operate cheats.
+
+Using modified clients to gain unfair advantages on servers that prohibit them generally violates the server's terms of service. Consequences can include account suspension, hardware identifiers being blocked, and, depending on jurisdiction and circumstances, legal exposure under computer-access or terms-of-service statutes. Server operators should publish clear rules, apply them consistently, and ensure that technical measures are proportionate to the harms they address.
+
+---
+
+[← Back to Index](../README.md)
+
+```
+
+`docs/20-glossary.md`:
+
+```md
+# 20. Glossary and Further Reading Concepts
+
+- **VL (Violation Level)**: Numeric accumulation of suspicion for a given check or for a player overall.
+- **Setback**: Forced teleport of a player to a previously validated position.
+- **Prediction / Simulation Engine**: Server-side reconstruction of possible legitimate movement.
+- **Compensated World**: Latency-adjusted per-player view of solid blocks.
+- **Ghost Client**: Cheat client engineered for low detectability.
+- **Blatant Client**: Cheat client engineered for maximum advantage with little regard for subtlety.
+- **Reach**: Maximum accepted distance for an attack or block interaction.
+- **Timer**: Acceleration of client tick or packet rate relative to real time.
+- **PacketEvents / ProtocolLib**: Widely used packet interception libraries on the Bukkit family of servers.
+- **Geyser / Floodgate**: Bridging technology allowing Bedrock Edition clients to join Java Edition servers.
+
+Readers interested in deeper technical study may examine public protocol documentation, the source repositories of open-source anticheats (for architectural patterns only), literature on networked game security and anomaly detection, and the design of client-side prediction in other multiplayer engines.
+
+---
+
+[← Back to Index](../README.md)
+
+```
+
+`docs/FULL.md`:
+
+```md
+# Minecraft Anticheat Systems: Full Documentation (Single File)
+
+This file is a consolidated reference. For the best reading experience, use the individual pages linked from the [main README](../README.md).
+
+The complete multi-section documentation covering architecture, packets, cheat categories, detection philosophy, movement prediction, combat analysis, packet validation, heuristics, enforcement, latency handling, popular implementations, visual hacks, hybrid systems, the arms race, operator guidance, ethics, glossary, and appendices is distributed across the `docs/` directory.
+
+**Start here:** [README Index](../README.md)
+
+---
+
+*Educational documentation only. No cheat development guidance is included.*
+
+```
+
+`docs/appendix-a-check-cycle.md`:
+
+```md
+# Appendix A: Conceptual Flow of a Typical Check Cycle
+
+1. A serverbound packet arrives from a client.
+2. The anticheat's packet listener or event handler captures it together with the current player state snapshot.
+3. Relevant check modules are invoked according to packet type and player state (moving, fighting, digging, etc.).
+4. Movement modules run prediction, compute offsets, and consult uncertainty.
+5. Combat modules evaluate geometry, rotation history, timing, and companion packets.
+6. Packet-order, inventory, and statistical modules update their respective buffers.
+7. Any failed checks increment VL according to configured weights.
+8. If thresholds are crossed, the configured response pipeline executes (alert, setback, cancel, kick, ban).
+9. Internal histories and decay timers are advanced.
+10. The original packet continues through normal server processing unless it was cancelled by a mitigation.
+
+This loop executes for every relevant packet under tight performance budgets so that the anticheat does not itself become a source of lag.
+
+---
+
+[← Back to Index](../README.md)
+
+```
+
+`docs/appendix-b-physics.md`:
+
+```md
+# Appendix B: Detailed Movement Physics Considerations
+
+Minecraft movement is governed by a combination of:
+
+- Base speeds for walking, sprinting, sneaking, and crawling.
+- Friction coefficients that differ on ice, slime, soul sand, honey, and normal blocks.
+- Gravity and drag that differ in air, water, and lava.
+- Collision resolution against the voxel world, including step-up height and the ability to walk over non-full blocks.
+- Status effects (Speed, Slowness, Jump Boost, Levitation, Slow Falling, etc.) and attribute modifiers.
+- Special movement sources: elytra, fireworks, riptide, vehicles, bubble columns, pistons, and explosions.
+
+A prediction engine must replicate enough of this logic, for each supported client version, that the set of reachable states is accurate. Small discrepancies in friction application order, in the handling of edge cases around 0.03 blocks, or in vehicle passenger physics quickly become either bypasses or false-positive sources. This is why mature prediction engines are large, carefully tested codebases rather than simple speed multipliers.
+
+---
+
+[← Back to Index](../README.md)
+
+```
+
+`docs/appendix-c-latency.md`:
+
+```md
+# Appendix C: Combat Geometry and Latency Compensation Examples
+
+Consider a player with 100 ms one-way latency. In the time the attack packet travels, a sprinting target can cover a non-negligible distance. If the anticheat measures reach against the positions known at packet-arrival time without compensation, legitimate hits near the edge of range will be flagged. Expanding the allowed reach by approximately latency × maximum plausible closing speed restores fairness for the lagging player while still rejecting truly impossible distances.
+
+Similar compensation appears in hitbox expansion, in the timing windows for critical hits, and in the interpretation of rotation samples that may themselves be delayed. The art of combat anticheat lies in applying enough compensation to protect legitimate high-ping players without opening large enough windows for cheats to hide inside.
+
+---
+
+[← Back to Index](../README.md)
+
+```
+
+`docs/appendix-d-history.md`:
+
+```md
+# Appendix D: Historical Evolution of Minecraft Anticheats
+
+Early public servers relied on simple plugins that checked maximum speed and basic flight. As cheat clients proliferated, the community produced NoCheat and later NoCheatPlus, which introduced more structured checks and configuration. The 1.8 era saw heavy focus on combat because of the prevalence of that version in PvP. The 1.9 combat changes and subsequent movement additions forced major redesigns. The rise of predictive engines in the late 2010s and early 2020s marked a qualitative improvement in movement detection accuracy. Parallel commercial development produced polished, frequently updated products with extensive combat heuristic suites. The current landscape is a mixture of strong open-source prediction cores, commercial all-in-one solutions, and specialized combat overlays, with increasing interest in statistical and machine-learning methods for the hardest ghost-client cases.
+
+---
+
+[← Back to Index](../README.md)
+
+```
+
+`docs/appendix-e-tuning.md`:
+
+```md
+# Appendix E: Configuration and Tuning Philosophy
+
+No default configuration is optimal for every server. Key tuning dimensions include:
+
+- Per-check enable/disable and sensitivity.
+- VL thresholds and decay rates.
+- Setback versus kick preferences.
+- Alert verbosity and destination (in-game, Discord, etc.).
+- Exemptions by permission, world, or gamemode.
+- Performance limits (how many expensive checks run under high load).
+
+A prudent approach is to enable core movement prediction and basic reach first, observe false-positive and true-positive rates for several days, then incrementally enable and tighten additional combat and heuristic modules while continuing to monitor. Staff should be trained to distinguish clear violations from borderline alerts that may need configuration adjustment rather than immediate punishment.
+
+---
+
+[← Back to Index](../README.md)
+
+```
