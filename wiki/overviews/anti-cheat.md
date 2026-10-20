@@ -88,6 +88,7 @@ sources:
   - wiki/sources/descriptions/LordNoteworthy__al-khaser.md
   - wiki/sources/descriptions/LordAbbot__Rust-External-Cheat.md
   - wiki/sources/descriptions/Longno242__Encryptic-Roblox-Anti-Cheat.md
+  - wiki/sources/descriptions/EnderDevelopment__roblox-speed-tester.md
   - wiki/sources/descriptions/theo926__VolcanoAC.md
   - wiki/sources/descriptions/Buck3ttcode__bloxdesk.md
   - wiki/sources/descriptions/severrir__AntiCheat-Dashboard.md
@@ -1314,7 +1315,7 @@ Long-form kernel AC architecture primer [How Kernel Anti-Cheats Work](https://s4
 
 **Fabric client-side AC QA:** [[anticheat-qa]] (u8012146108-bit; Java Fabric **1.21.11** client mod; ClickGUI/HUD monitors for reach/movement/rotation/CPS/velocity/ping; ESP/tracers/FreeCam visualization; test simulator + Y-Level Probe for server-side data-stripping validation; observes and simulates detections without enabling cheats; Anti Cheat / Stress Testing / game:minecraft) for engineers validating server AC behavior from a dedicated QA client. (source: wiki/sources/descriptions/u8012146108-bit__anticheat-qa.md)
 
-**Roblox movement AC dev harness:** [[roblox-speed-tester]] (EnderDevelopment; Luau LocalScript + GUI; ramps walk speed and surfaces server rollback while exercising movement anti-cheat during authorized Roblox development; Anti Cheat / Stress Testing) beside Luau server-side AC such as [[volcano-ac]] and [[anticheat-dashboard]]. (source: wiki/sources/README-categories.md)
+**Roblox movement AC dev harness:** [[roblox-speed-tester]] (EnderDevelopment; Luau LocalScript **SpeedTester** + GUI; configurable Humanoid walk speed and RunService heartbeat/client translation tests; status readouts and rollback indicators; simulates movement spikes to observe server rollback/correction; StarterPlayerScripts in Studio or live servers; Anti Cheat / Stress Testing) beside Luau server-side AC such as [[volcano-ac]] and [[anticheat-dashboard]]. (source: wiki/sources/descriptions/EnderDevelopment__roblox-speed-tester.md)
 
 **Injectable 1.8.9 client-side passive observer:** [[rain-injectable]] (maximumemails-cmd; Windows C++/CMake native injector + JNI bootstrap + Java 8 detection runtime; loads Rain Anti-Cheat passive observer into Minecraft **1.8.9** Forge and Badlion Client processes; temporal analysis + observation engine watches other players for killaura, auto-block, scaffold, and aim-related behavior without server telemetry or gameplay mutation; evidence export + configurable GUI overlays present review candidates locally rather than automatic bans; defensive research for authorized legacy **1.8.9** multiplayer; Anti Cheat / game:minecraft) distinct from Forge mod monitors such as [[local-anticheat-1-8-9]]. (source: wiki/sources/descriptions/maximumemails-cmd__RainInjectable.md)
 

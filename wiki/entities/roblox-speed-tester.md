@@ -3,14 +3,23 @@ title: Roblox Speed Tester
 kind: entity
 topics: [anti-cheat, game-engine]
 sources:
+  - wiki/sources/descriptions/EnderDevelopment__roblox-speed-tester.md
   - wiki/sources/README-categories.md
 updated: 2026-10-20
-confidence: low
+confidence: medium
 ---
 
 # Roblox Speed Tester
 
-Roblox **Luau LocalScript** with a GUI that ramps local movement speed so developers can watch **server rollback** and movement anti-cheat reactions during authorized game development. (source: wiki/sources/README-categories.md)
+**SpeedTester** is a Roblox **Luau LocalScript** that helps evaluate **movement anti-cheat** in published games by driving the player at configurable speeds and watching how the server responds. It builds an in-game GUI with speed controls, status readouts, and rollback indicators. Intended for authorized development and security research into movement-validation weaknesses. (source: wiki/sources/descriptions/EnderDevelopment__roblox-speed-tester.md)
+
+## Mechanics
+
+Uses Roblox services including **Humanoid** walk speed, **RunService** heartbeat loops, and client-side translation for movement tests. Can simulate unauthorized movement spikes and observe whether the server **rolls back** or corrects the character.
+
+## Deployment
+
+Runs from **StarterPlayerScripts** in Roblox Studio or on live servers when testing movement enforcement behavior.
 
 ## Role
 
