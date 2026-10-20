@@ -4358,6 +4358,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/worstpoetGIT/Crystal-Hunt [Unity mobile multiplayer crystal game with host-authoritative UDP networking and host-side movement speed clamping]
 - https://github.com/Timehue/ShinobiX [Live browser MMORPG with server-authoritative combat and documented auth/reward-integrity anti-cheat patterns]
 - https://github.com/aryribeiro/cobra [Production web snake game with server-side HMAC game sessions, score plausibility checks, and rate-limited leaderboard submission anti-cheat]
+- https://github.com/abczsl520/game-quality-gates [OpenClaw agent skill with wiki-documented server-side anti-cheat patterns for browser/H5 games (raid tokens, duration/score sanity, atomic purchases)]
 - https://github.com/kodeni-am/leaderboard [Open-source multi-tenant leaderboard API (Go/Redis) with durable ingest, scalable ranking, and optional per-app HMAC-signed score submits with replay protection]
 - https://github.com/AtakanKeser/BlastScale [Server-authoritative mobile puzzle backend with move-replay anti-cheat, exactly-once rewards, and LiveOps tooling]
 - https://github.com/StanislawGolec/Ultimo [Java 21 authoritative multiplayer card-game server with fog-of-war hand hiding, virtual threads, and WebSockets]
