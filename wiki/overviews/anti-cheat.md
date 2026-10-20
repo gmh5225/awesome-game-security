@@ -98,6 +98,7 @@ sources:
   - wiki/sources/descriptions/adem-hosni__AtomicShieldClient.md
   - wiki/sources/descriptions/adde88__SkyEngine.md
   - wiki/sources/descriptions/afulsamet__integrity.md
+  - wiki/sources/descriptions/aethelreborn__minecraft-anticheat-docs.md
   - wiki/sources/descriptions/alal4465__KernelMon.md
   - wiki/sources/descriptions/alekzandren__in-memory-mutation-demo.md
   - wiki/sources/descriptions/alfarom256__rs-ldr.md

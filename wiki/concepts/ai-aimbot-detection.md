@@ -44,6 +44,7 @@ sources:
   - wiki/sources/descriptions/Alexramirezzz__TFG-AntiCheat-ServerSide.md
   - wiki/sources/descriptions/voilecx__eigen.md
   - wiki/sources/descriptions/katze225__PowerAC.md
+  - wiki/sources/descriptions/aethelreborn__minecraft-anticheat-docs.md
   - wiki/sources/descriptions/AODOJUST__gomoku-anti-cheat-detector.md
   - wiki/sources/descriptions/NetVar1337__apex-anticheat-lab.md
   - wiki/sources/README-categories.md
@@ -124,6 +125,7 @@ Tabular engagement features (reaction time, curvature stats, dx/dy correlation, 
 - [[tfg-anticheat-serverside]] — Alexramirezzz Paper/Spigot **1.18.2** thesis autoclicker defense; labelled sessions from cleaned swing/interact streams; threshold rules vs isolation forest/one-class SVM/ensemble/sequence-CNN baselines with adversarial and lag robustness studies; ONNX off-thread inference and CPS rule fail-safe; auditable low-overhead server timing under man-at-the-end client distrust (source: wiki/sources/descriptions/Alexramirezzz__TFG-AntiCheat-ServerSide.md)
 - [[eigen-anticheat]] — voilecx Paper/Folia Scala 3 plugin; PacketEvents per-tick aim/movement feature rows with lag-compensated client-view reconstruction; combat vs baseline windows streamed to authenticated WebSocket ML backend for labelled datasets and inference (GrimAC/Shard-inspired transaction lag compensation) (source: wiki/sources/descriptions/voilecx__eigen.md)
 - [[powerac]] — katze225 Paper/Folia Java plugin; embedded CNN over fixed-window rotation telemetry from packet listeners; in-game labeled-sample collection with asynchronous on-server retraining; staff logs, Discord webhooks, and plugin API/events—no remote inference or license server (source: wiki/sources/descriptions/katze225__PowerAC.md)
+- [[minecraft-anticheat-docs]] — aethelreborn structured Markdown primer on Minecraft server-side combat/reach analysis, heuristic and ML detection models, and latency compensation for Java Edition plugins (GrimAC/Vulcan/Matrix context; documentation-only Guide lane) (source: wiki/sources/descriptions/aethelreborn__minecraft-anticheat-docs.md)
 - [[mlanticheat]] — Minecraft Paper 1.21.4+ combat AC; per-server ensemble neural + logistic models + anomaly detection over combat rotations; operator labeling, Shadow Mode review, optional PacketEvents rotation tracking, automatic retraining (gravemaulr)
 - [[model-anti-cheat]] — DayZ server-side ML pipeline; mission-script per-second telemetry (position, view, weapon, raycast line-of-sight) + Python feature extraction + RandomForest aimbot/movement anomaly classifier (sample cheater sessions)
 - [[deep-learning-anti-cheat-csgo]] — CS:GO deep-learning anti-cheat implementation (memory scan, code integrity, process/debugger checks, network packet validation; detection-to-response pipeline; gmh5225)
