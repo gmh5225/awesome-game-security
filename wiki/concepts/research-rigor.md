@@ -15,7 +15,8 @@ sources:
   - wiki/sources/descriptions/2akouwu__reverify.md
   - wiki/sources/descriptions/IZxMD__ac-compat-research.md
   - wiki/sources/descriptions/0111-0222__uc-mcp.md
-updated: 2026-10-02
+  - wiki/sources/descriptions/JoasASantos__REA-Prompts.md
+updated: 2026-10-20
 confidence: high
 ---
 
@@ -57,7 +58,7 @@ DBI coverage, trap-and-emulate latency, deobfuscation completeness, and anti-deb
 
 Undocumented kernel structures, offsets, globals, and allocator internals vary by Windows build, architecture, and configuration — verify against symbols and runtime observations for the exact target before generalizing PoCs, pool parsers, or forensic heuristics; distinguish documented contracts, observed host state, and inferred internals. (source: wiki/sources/skills/windows-kernel.md)
 
-LLM-assisted static RE should ground conclusions in disassembler/decompiler evidence (pseudocode, xrefs, FLIRT IDs) from tool APIs rather than model speculation—read-only agent harnesses such as [[re-harness]] enforce IDA/IDASQL-backed workflows for auditable outputs (source: wiki/sources/descriptions/thatskriptkid__re-harness.md); file-export bridges such as [[ida-no-mcp]] materialize decompilation, xref metadata, and call graphs as plain files for AI IDEs without live MCP, keeping analysis anchored to IDA output rather than model invention (source: wiki/sources/descriptions/P4nda0s__IDA-NO-MCP.md); byte-level claim checkers such as [[reverify]] run deterministic VERIFIED/REFUTED/INCONCLUSIVE gates against PE/ELF/Mach-O bytes in a reconstruction-agent loop with an established-facts ledger, refuting model hallucinations before they propagate. (source: wiki/sources/descriptions/2akouwu__reverify.md)
+LLM-assisted static RE should ground conclusions in disassembler/decompiler evidence (pseudocode, xrefs, FLIRT IDs) from tool APIs rather than model speculation—read-only agent harnesses such as [[re-harness]] enforce IDA/IDASQL-backed workflows for auditable outputs (source: wiki/sources/descriptions/thatskriptkid__re-harness.md); file-export bridges such as [[ida-no-mcp]] materialize decompilation, xref metadata, and call graphs as plain files for AI IDEs without live MCP, keeping analysis anchored to IDA output rather than model invention (source: wiki/sources/descriptions/P4nda0s__IDA-NO-MCP.md); byte-level claim checkers such as [[reverify]] run deterministic VERIFIED/REFUTED/INCONCLUSIVE gates against PE/ELF/Mach-O bytes in a reconstruction-agent loop with an established-facts ledger, refuting model hallucinations before they propagate. (source: wiki/sources/descriptions/2akouwu__reverify.md) Curated agent instruction templates such as [[rea-prompts]] encode the same evidence discipline—static analysis first, explicit fact vs hypothesis separation—for REA workflows spanning games, AC/DMA, kernels, and mobile targets. (source: wiki/sources/descriptions/JoasASantos__REA-Prompts.md)
 
 Community forum knowledge retrieved via MCP bridges such as [[uc-mcp]] (0111-0222; read-only UnknownCheats search via session cookies; UTC timestamps + staleness labels flag outdated offsets and bypass write-ups) remains **discovery/provenance**—verify against live binaries, patches, and primary documentation before acting on offset or bypass claims. (source: wiki/sources/descriptions/0111-0222__uc-mcp.md)
 

@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-20** — ingest `description:JoasASantos/REA-Prompts`: created entity [[rea-prompts]] (Markdown REA investigation prompt library for coding agents—games, AC/DMA, kernels, mobile, web; evidence-first static analysis, confirmed facts vs hypotheses; documentation-only); cited on [[overviews/reverse-engineering]] MCP/agent RE lane + Cheat / RE Tools map and [[concepts/research-rigor]] agent instruction discipline; `index.md` entity + reverse-engineering blurb updated.
+
 - **2026-10-20** — ingest `description:nefariousjosiah/WWE-SVR2009-RECOMP`: refreshed entity [[wwe-svr2009-recomp]] (ReXGlue PPC→x86-64; XenosRecomp + re:Blue/plume D3D12/Vulkan; hooks, pipeline cache, D3D census/shader dump for GPU translation RE; BYO disc; Windows/Linux/Steam Deck); cited on [[concepts/static-runtime-evidence]] ReXGlue lift cluster and [[overviews/reverse-engineering]] Console/QEMU XenonRecomp/ReXGlue lane; `index.md` concept blurb updated.
 
 - **2026-10-20** — ingest `readme:categories`: **Cheat** link_count **2930** (+1) / **Xbox** **13** (+1; nefariousjosiah/[[wwe-svr2009-recomp]] WWE SVR 2009 ReXGlue static recomp) / **Anti Cheat** **815** / **Vulkan** **13** / **Game Engine** ~159 / **Game Develop** ~194 / **DirectX** ~42 / **Game Network** ~34 and other major README sections unchanged; 41 top-level sections (`NeverC & NeverD` placeholder); synced [[overviews/overview]], [[overviews/game-hacking]], [[overviews/reverse-engineering]], and [[overviews/dma-attack]]; entity [[wwe-svr2009-recomp]]; light `index.md` section notes (no per-category pages).
