@@ -1,0 +1,752 @@
+Project Path: arc_JoasASantos_REA-Prompts_n2rq350t
+
+Source Tree:
+
+```txt
+arc_JoasASantos_REA-Prompts_n2rq350t
+└── README.md
+
+```
+
+`README.md`:
+
+```md
+# REA Investigation Prompts — Reverse Engineering with your Coding Agent
+
+A curated collection of prompts for [REA (Reverse Engineer Anything)](https://rea.tools/) — the toolset that lets your AI coding agent inspect how software works, from native binaries, firmware and kernels to games, Electron apps, APKs and websites.
+
+Prompts are ready to paste into your agent. Replace everything in `<angle brackets>` and keep each request focused on **one feature** — narrow questions get evidence-backed answers.
+
+## Sources & credits
+
+- **REA tools & guides:** https://rea.tools/
+- **Official prompt gallery:** https://madewithrea.com/prompts
+- **Intro thread ("REA is the most dangerous thing on the internet right now")** by codila — https://x.com/0xCodila/status/2109623431763292649
+  (quoting Matthew Berman — https://x.com/MatthewBerman/status/2108245653843509415)
+
+## Table of contents
+
+| # | Section |
+|---|---------|
+| 0 | [Install & verify](#0-install--verify) |
+| 1 | [Getting started](#1-getting-started) |
+| 2 | [Feature tracing (any program)](#2-feature-tracing-any-program) |
+| 3 | [Native binary exploration](#3-native-binary-exploration) |
+| 4 | [Software & feature cloning](#4-software--feature-cloning) |
+| 5 | [Games](#5-games) |
+| 6 | [Game portability to WASM](#6-game-portability-to-wasm) |
+| 7 | [Firmware & embedded](#7-firmware--embedded) |
+| 8 | [Android](#8-android) |
+| 9 | [Kernel analysis](#9-kernel-analysis) |
+| 10 | [Vulnerability research](#10-vulnerability-research) |
+| 11 | [Electron & JavaScript](#11-electron--javascript) |
+| 12 | [Anti-cheat & protection research](#12-anti-cheat--protection-research) |
+| 13 | [DMA & hardware-assisted cheat research (defensive)](#13-dma--hardware-assisted-cheat-research-defensive) |
+| 14 | [Software cracking research](#14-software-cracking-research) |
+| 15 | [Version comparison & crash work](#15-version-comparison--crash-work) |
+| 16 | [Long-running investigations](#16-long-running-investigations) |
+| — | [Wildcard prompt](#wildcard-prompt-start-here) · [Prompt-writing tips](#prompt-writing-tips-why-these-work) |
+
+> ⚠️ **Use responsibly.** Only analyze software you own or are explicitly authorized to test. Anti-cheat, DMA, DRM, kernel and vulnerability prompts below are for **security research, interoperability, CTFs, bug bounties and testing the protection of your own software**. Bypassing protection of software you don't own, cheating in online games, or weaponizing a found vulnerability may violate law and terms of service. Every prompt asks the agent to separate *confirmed facts* from *hypotheses* and to cite evidence — treat that as non-negotiable.
+
+---
+
+## 0. Install & verify
+
+```text
+Install REA and connect it to this agent using: npx rea-agents@latest setup
+
+First, show me the installation plan and the configuration changes for my
+approval. After the install, verify the connection and list the available
+tools and workflows.
+```
+
+---
+
+## 1. Getting started
+
+### First exercise — trace a CSV export
+
+```text
+Download https://rea.tools/examples/notes-example.zip into a new folder and
+extract the contents.
+
+Use REA to investigate what happens when I click "Export notes". Trace the
+flow from the button to the file write.
+
+Show where notes.csv is created, which fields it contains, and the files and
+functions that prove each step.
+```
+
+### First look at an unfamiliar app
+
+```text
+Use REA to give me a map of <program>: its main parts, entry points and the
+three features worth investigating first. Keep it short and point to evidence
+for each claim.
+```
+
+---
+
+## 2. Feature tracing (any program)
+
+### Explain one feature
+
+```text
+Use REA to investigate how <FEATURE> works in <PATH TO APPLICATION>.
+
+Identify the entry point, the functions involved, the data flow, the
+dependencies and the observable effects.
+
+For every conclusion, present evidence: file, function, address or relevant
+snippet. Separate confirmed facts, inferences and points that remain unknown.
+
+Do not execute the application in this step.
+```
+
+### Trace a button to its effect
+
+```text
+Use REA on <app>. Start at the <button name> button and trace what happens
+until the result is written, sent or shown. Name every module or function on
+the path and what each one does.
+```
+
+### Recover a rule and rebuild it
+
+```text
+Use REA to find the rule that controls <behaviour> in <program>. Write the
+rule in plain words, then build a minimal standalone version I can run, and
+give me one input that proves it matches the original.
+```
+
+---
+
+## 3. Native binary exploration
+
+### Understand an executable
+
+```text
+Analyze <PATH TO EXECUTABLE> with REA.
+
+Identify format, architecture, runtime, libraries, relevant strings and
+possible entry points.
+
+Map the main components and explain their responsibilities with evidence.
+State which analysis engine is available and its limitations.
+
+Start with static analysis.
+```
+
+### Function deep-dive
+
+```text
+Use REA on <binary>. Pick the function that handles <operation> and produce:
+decompiled pseudocode, its callers and callees, the data structures it reads
+or writes, and every string/global it touches. Annotate each finding with the
+address range that proves it.
+```
+
+### Imports, strings and triage map
+
+```text
+Use REA on <binary>. Produce a triage map: file format and architecture,
+section layout, linked libraries and imports grouped by capability (network,
+filesystem, crypto, process/thread, registry/IPC), interesting strings with
+their addresses, and the top candidate entry points for <FEATURE>. Flag any
+signs of packing, obfuscation or control-flow flattening.
+```
+
+### File-format reverse engineering
+
+```text
+Use REA on <program> to work out how it reads and writes <file type>.
+Describe the structure field by field, show where each field is parsed, and
+write a small reader that prints a sample file.
+```
+
+### Protocol / serialization extraction
+
+```text
+Use REA on <binary> to recover the wire format used for <feature>'s network or
+IPC traffic. Show the marshal/unmarshal functions with addresses, list every
+field (size, endianness, encoding), and produce a Python struct/proto
+definition plus one example message built from the code's constants.
+```
+
+---
+
+## 4. Software & feature cloning
+
+> Clean-room methodology: extract *behavior*, not code. Never copy
+> proprietary source, assets, branding or licensing mechanisms.
+
+### Full application clone (behavioral)
+
+```text
+Use REA to study <application> as a black box for a clean-room clone.
+
+Produce CLONE_SPEC.md covering: every user-visible feature, screen and state
+machine; inputs, outputs and edge cases; file formats and network protocols it
+uses; settings and persistence layout; error behaviors.
+
+For each requirement, cite the evidence (function, address, string, captured
+request). Mark anything unconfirmed as UNKNOWN. Do not copy code or assets —
+I will implement from the spec only.
+```
+
+### Clone one feature into my own app
+
+```text
+Use REA to recover the exact behavior of <FEATURE> in <application>: trigger,
+inputs, processing steps, outputs, side effects and failure modes.
+
+Then implement <FEATURE> from scratch in <MY LANGUAGE/PROJECT> matching that
+behavior, with tests derived from the recovered rules. List every observable
+difference that remains between my version and the original.
+```
+
+### Validate a clone against the original
+
+```text
+Compare <MY IMPLEMENTATION> with the observed behavior of <ORIGINAL
+APPLICATION>.
+
+Use verify_reconstruction, if available. Check results, errors, limits and
+state transitions.
+
+Present passing cases, divergences and behaviors not yet tested. Do not
+consider equivalence demonstrated just because a few examples passed.
+```
+
+### UI/UX behavior cloning without assets
+
+```text
+Use REA on <application> to document its interaction model: layout logic,
+keyboard shortcuts, command dispatch, undo/redo semantics and clipboard
+formats. Recreate the behavior in <my framework> using only my own visual
+assets, matching the documented semantics. Show which original function
+proves each documented rule.
+```
+
+---
+
+## 5. Games
+
+### Gameplay logic recovery
+
+```text
+Use REA to reconstruct <GAME> from its executable. Recover the gameplay logic
+in C and test it against the original.
+
+For each mechanic (movement, physics, scoring, spawning), show the function,
+the constants and the update loop that prove the rule.
+```
+
+### Speed / difficulty rule (dino-style)
+
+```text
+Use REA to inspect <game>. Why does <difficulty/speed> change over time? Show
+the exact rule and the constants behind it, then build a small standalone
+version with an adjustable parameter.
+```
+
+### Engine & asset pipeline map
+
+```text
+Use REA on <game executable/data folder>. Identify the engine or framework,
+the render loop, the update/tick order, how levels and assets are loaded and
+serialized, and where gameplay data lives (tables, scripts, archives). Map
+each component to functions/addresses and describe the load pipeline step by
+step.
+```
+
+### Single-player mod support (offline only)
+
+```text
+Use REA on <offline single-player game> to locate the code that controls
+<weapon stats / spawn rates / economy>. Show the data tables or functions with
+addresses. I only want to understand where the values live so I can build my
+own offline trainer for personal experimentation — no multiplayer, no
+persistence tricks.
+```
+
+---
+
+## 6. Game portability to WASM
+
+### Port a native game to the browser
+
+```text
+Use REA to analyze <game executable/source> as a portability target for WASM.
+
+Map: the main loop and frame pacing, the rendering backend (OpenGL/DirectX/
+SDL/Vulkan calls), filesystem and save paths, threading model, audio output,
+input handling, and any platform-specific APIs or inline assembly.
+
+For each, classify as: portable as-is / needs shim / must be rewritten. Cite
+the functions and call sites that prove each classification.
+```
+
+### Build the port plan
+
+```text
+Based on the REA findings for <game>, produce a WASM port plan:
+- toolchain choice (Emscripten or manual recompile) and required shims
+  (GL→WebGL, SDL→SDL2-compat, pthreads→SharedArrayBuffer/threads);
+- the minimal set of source modules to compile;
+- how saves move to IndexedDB and assets to fetch/streaming;
+- performance risks found in the native code (allocation per frame, busy
+  loops, 64-bit assumptions) with function evidence;
+- a milestone list ending in a playable index.html.
+```
+
+### Port the logic core first (headless)
+
+```text
+Use REA to isolate <game>'s pure simulation logic (physics, AI, rules) from
+rendering and OS calls. Extract the exact rules with evidence, then implement
+that logic core in C/Rust compiled to WASM with a test harness that replays
+recorded inputs and compares state hashes against the original behavior.
+```
+
+---
+
+## 7. Firmware & embedded
+
+### Firmware image triage
+
+```text
+Use REA to analyze <firmware image / bin / img>.
+
+Identify the container format, extract partitions/filesystems (JFFS2, SquashFS,
+UBI, cramfs...), map each region to architecture and load address, locate the
+kernel and rootfs, and list boot entries, init scripts and services.
+
+Show offsets, entropy observations and the evidence for every claim. Start
+with static analysis; do not flash or run anything.
+```
+
+### MCU / IoT binary analysis
+
+```text
+Use REA on <firmware blob> for a <ARM Cortex-M / MIPS / AVR / ESP32> target.
+
+Find the vector table and reset handler, reconstruct the memory map from
+literal pools and peripheral base addresses, identify the RTOS (FreeRTOS,
+Zephyr...) from symbol/string fingerprints, and map the main task loop and
+peripheral drivers (UART, SPI, I2C, radio stack) with function addresses.
+```
+
+### Embedded protocol & update mechanism
+
+```text
+Use REA on <firmware> to recover: the network stack usage (hardcoded IPs,
+DNS, MQTT/HTTP endpoints, ports), the OTA update path (download URL, signature
+check, flash write), and credential material (keys, default passwords, debug
+tokens). For each finding give the function/address and say whether the
+behavior is confirmed statically or still a hypothesis.
+```
+
+---
+
+## 8. Android
+
+### Audit an APK
+
+```text
+Use REA to analyze <PATH TO APK>.
+
+List declared permissions, exported components, analytics/tracking SDKs,
+domains found and local storage mechanisms.
+
+For each finding, show the corresponding class, method or file.
+
+Distinguish references present in the code from behaviors actually observed.
+Do not conclude that a domain is accessed just because it appears in a string.
+```
+
+### Trace a feature through Java/Kotlin and native code
+
+```text
+Use REA on <APK> to trace <FEATURE> end to end: UI entry point (Activity/
+Fragment/Composable), the Java/Kotlin call chain, any JNI boundaries
+(RegisterNatives / native library loads), the .so functions involved, and the
+final effect (network call, file write, database row). Show class, method and
+offset evidence at every hop.
+```
+
+### Storage, crypto and secrets review
+
+```text
+Use REA on <APK>. Determine how the app stores <data>: SharedPreferences,
+SQLite, files, keystore. Recover any embedded crypto (hardcoded keys/IVs,
+obfuscation routines) with the class/method that uses them. State whether
+data is encrypted at rest and in transit, with evidence, and list concrete
+risks.
+```
+
+### Obfuscated / packed app triage
+
+```text
+Use REA on <APK> that appears obfuscated or packed. Identify the packer or
+protector (string/class fingerprints, loader stub in the native libs), map
+what is statically visible vs. deferred to runtime, and propose the minimal
+safe steps to reach the real dex/native code for analysis.
+```
+
+---
+
+## 9. Kernel analysis
+
+### Driver inspection (Windows / Linux)
+
+```text
+Use REA on <driver binary: .sys / .ko>.
+
+Identify the format and target OS version, the entry/init routine, the device
+object and driver dispatch table, every IOCTL code with its input/output
+buffer validation, the callbacks/notifications it registers, and the memory it
+reads or writes outside its own allocations.
+
+Map each finding to function/address evidence. Static analysis only — do not
+load the driver.
+```
+
+### IOCTL attack-surface enumeration
+
+```text
+Use REA on <driver>. Enumerate all control codes handled, and for each:
+the handler function, how it validates input/output buffers (probe methods,
+size checks, IRQL assumptions), and any copy_to_user/copy_from_user or
+memcpy with attacker-controlled length. Rank the handlers by risk with
+evidence for the ranking.
+```
+
+### Kernel subsystem / syscall behavior
+
+```text
+Use REA on <kernel binary or module> to explain how <subsystem/syscall>
+processes <input>. Trace from the syscall/dispatch entry to the parsing
+functions, show bounds checks (or their absence), the data structures
+populated, and error paths. Cite addresses for each step.
+```
+
+---
+
+## 10. Vulnerability research
+
+### Trust-boundary audit
+
+```text
+Use REA to review the security of <authorized application or binary>.
+
+Prioritize trust boundaries, untrusted input, privileged operations,
+credential storage, IPC, file handling and command execution.
+
+For each possible vulnerability, present:
+- the input origin and the sensitive operation;
+- the code path and existing checks;
+- preconditions and impact;
+- evidence and uncertainties;
+- a proposal for controlled validation.
+
+Do not classify a hypothesis as a confirmed vulnerability without sufficient
+evidence.
+```
+
+### Sink hunt from untrusted input
+
+```text
+Use REA on <binary>. List every place untrusted data enters (network sockets,
+files, IPC, command-line, clipboard, URL handlers) and follow each source to
+dangerous sinks: memcpy/strcpy with unchecked length, system/exec, dynamic
+loading, deserialization, path concatenation. For each source→sink path give
+the function chain with addresses and state which validation exists in
+between.
+```
+
+### Patch diffing (1-day to incomplete-fix hunting)
+
+```text
+Use REA to compare <vulnerable version> and <patched version> of <component>.
+
+Diff the security-relevant functions: what check was added, where else in the
+binary the same pattern exists without the fix, and whether the fix covers
+every caller of the vulnerable routine. Report candidate incomplete-fix
+locations with function/address evidence, clearly labeled as hypotheses until
+validated in a controlled environment.
+```
+
+### Crash triage to root cause
+
+```text
+Use REA to investigate this crash in <application>.
+
+Available evidence:
+<STACK TRACE, LOGS, DUMP OR REPRO STEPS>
+
+Relate the error to the functions involved, formulate hypotheses and indicate
+which evidence supports each one.
+
+Propose the smallest experiment needed to distinguish the hypotheses and
+validate the cause.
+```
+
+### How is my data handled?
+
+```text
+I am allowed to analyse <program>. Use REA to find where it stores or sends
+<kind of data>. Show the code paths, say whether the data is encrypted at rest
+and in transit, and list concrete risks with evidence.
+```
+
+---
+
+## 11. Electron & JavaScript
+
+### Electron app anatomy
+
+```text
+Use REA to analyze <PATH TO ELECTRON APP>.
+
+Locate the JavaScript files and any app.asar archives. Map the main and
+renderer processes, the preload scripts and the IPC channels.
+
+Then trace <FEATURE> from the UI to its implementation, including network
+calls and filesystem operations. Show the evidence.
+```
+
+### IPC & contextIsolation security review
+
+```text
+Use REA on <Electron app>. Enumerate every ipcMain handler and the channels
+exposed via contextBridge/preload. For each channel: what arguments it
+accepts, whether it reaches shell.openExternal, child_process, fs, or webview
+navigation, and what validation exists. Flag any handler where renderer-
+controlled input reaches a privileged sink without checks — with file and
+function evidence.
+```
+
+### Minified / bundled JS feature tracing
+
+```text
+Use REA on <app.asar / bundle.js> to trace <FEATURE> through minified code.
+Identify the module boundaries, recover the relevant functions with readable
+names, follow the data flow from the UI event to the network/filesystem
+effect, and produce a call graph. Cite offsets in the bundle for each hop.
+```
+
+### Web feature mapping
+
+```text
+Use REA to observe <site> while I use <feature>. List the requests, scripts
+and state changes involved, then summarise how the feature works and which
+parts run on the client versus the server.
+```
+
+### Website clone (structure + behavior)
+
+```text
+Use REA to inspect https://<site>/. Recover the page structure, the client
+routes, the API calls each view makes and the state management pattern.
+Rebuild a functional equivalent with my own assets and styling, matching the
+observed behavior. List requests and scripts as evidence per view.
+```
+
+---
+
+## 12. Anti-cheat & protection research
+
+> Scope these at **your own machine, your own software, a vendor bug bounty,
+> a CTF, or academic study**. Never at other players' live game sessions.
+
+### Map an anti-cheat's detection surface
+
+```text
+Use REA to analyze <anti-cheat driver/service binary> on a lab machine I own.
+
+Identify: what it enumerates (processes, modules, handles, callbacks), which
+integrity checks it performs, what it hooks or registers with the kernel, and
+what data it sends out (endpoints, intervals, payload fields).
+
+For each finding cite the function/address. Separate "code present" from
+"behavior observed". Do not run the target game; static analysis first.
+```
+
+### Test my own product's protections
+
+```text
+I own <my application> and its protection scheme. Use REA to assess it as an
+attacker would: locate the license check, the integrity checks, the
+anti-debug/anti-VM tricks, and trace what a failed check does. Report which
+checks are trivially bypassable, which are load-bearing, and concrete fixes —
+each claim backed by file/function/address evidence.
+```
+
+### DRM / license flow analysis (interoperability)
+
+```text
+Use REA on <application> to document its licensing flow: where entitlement is
+validated, what local and remote checks exist, what state is stored on disk,
+and how offline mode behaves. Goal is interoperability and security review of
+software I legitimately own. Report facts with evidence; flag anything you
+could not confirm.
+```
+
+---
+
+## 13. DMA & hardware-assisted cheat research (defensive)
+
+> DMA attacks are a real anti-cheat and platform-security problem. Use these
+> to **study how detection works** and to **harden your own product/lab** —
+> on machines you own, offline targets, or with vendor authorization. Reading
+> another machine's memory over PCIe without authorization is illegal in most
+> jurisdictions.
+
+### How DMA memory access works on a target platform
+
+```text
+Use REA on <anti-cheat driver / DMA-protection firmware (e.g. Thunderbolt
+security, IOMMU/VT-d config)> in my lab.
+
+Explain, with function/address evidence: how the platform restricts external
+PCIe memory reads (IOMMU mappings, Thunderbolt ACLs, kernel DMA protection),
+what the anti-cheat enumerates to spot a DMA device (PCIe topology, BAR
+regions, unknown root ports, timing anomalies), and which checks are
+load-bearing versus cosmetic.
+```
+
+### Analyze a DMA-cheat toolchain sample (malware-style)
+
+```text
+I have a sample <DMA firmware / PCILeech-style driver / user-mode reader> for
+defensive research. Use REA to document: how it opens physical memory
+(XNVIPHYSTREE-style access, PCIe BAR mapping), how it locates the game process
+(PEB walking, page-table traversal), what it reads/writes, and any
+anti-detection tricks (pattern scanning avoidance, timing padding). Give the
+function chain with addresses for each stage. Do not run it against any live
+game — analysis only.
+```
+
+### Detection-gap analysis for my own product
+
+```text
+Use REA to evaluate how <my application/my anti-cheat component> would react
+to external physical memory access: which integrity checks exist, whether
+sensitive values sit in predictable memory, what side-channel validation the
+server performs. Propose concrete hardening (value obfuscation, server-side
+validation, memory layout randomization) mapped to the code locations that
+need each change.
+```
+
+### FPGA/microcontroller device firmware study
+
+```text
+Use REA on <device firmware dump> from a PCIe/USB device I own. Identify the
+MCU/FPGA soft-core, the protocol it speaks to the host, the memory-read
+primitives it implements, and how it hides from host enumeration. Show
+evidence per claim and label anything that needs runtime confirmation.
+```
+
+---
+
+## 14. Software cracking research
+
+> For studying protection schemes, crackmes/CTFs, malware-adjacent RE, and
+> hardening your own software. Not a guide to pirate other people's products.
+
+### Keygen-repair style analysis (document, don't bypass)
+
+```text
+Use REA on <binary> to find the validation routine for <license key / serial>.
+Recover the algorithm (decompile it), identify the input encoding, the
+checksum/transform steps and the success/failure branches with addresses.
+Then write a test harness that exercises the recovered algorithm against
+sample inputs. Do not patch or bypass anything — I want the algorithm
+documented, not the check removed.
+```
+
+### Crackme / CTF challenge solving
+
+```text
+Use REA on this crackme: <path>. Enumerate entry points, strings, imports and
+any packer/protection indicators. Identify the flag-checking logic, decompile
+it, and derive the correct input from the recovered algorithm. Show the full
+evidence chain: address → instruction → conclusion.
+```
+
+### Protection-diffing between versions
+
+```text
+Use REA to compare <protected app v1> and <v2>. Identify what changed in the
+protection layer: new integrity checks, new anti-debug tricks, changed
+validation paths. Map each change to functions/addresses and explain the
+hardening intent.
+```
+
+---
+
+## 15. Version comparison & crash work
+
+### Compare two versions
+
+```text
+Use the compare_application_versions workflow, if available, to compare
+<OLD VERSION> and <NEW VERSION> of <application>.
+
+Identify functional changes, API changes, dependency and permission changes,
+and possible security fixes.
+
+Map each change to the corresponding functions or files and explain the
+impact. Differentiate build changes from behavior changes.
+```
+
+---
+
+## 16. Long-running investigations
+
+### Continue where you left off
+
+```text
+Review the evidence and notes of this investigation.
+
+Use audit_residual_unknowns, if available, to list what has not been
+demonstrated yet.
+
+Prioritize the next analyses by how much they can reduce uncertainty. Update
+an INVESTIGATION.md file with findings, evidence, discarded hypotheses and
+next steps.
+```
+
+---
+
+## Wildcard prompt (start here)
+
+```text
+Use REA to understand how <FEATURE> works in <PATH TO APPLICATION>.
+
+Check first which tools are actually available. Start with static analysis
+and trace the feature down to the responsible functions.
+
+Present evidence for each conclusion, separate facts from hypotheses, and
+record the limitations. At the end, generate a behavioral specification and
+propose tests to verify it.
+```
+
+---
+
+## Prompt-writing tips (why these work)
+
+1. **One feature per prompt.** Broad "explain the whole app" questions return shallow maps; narrow ones return call chains and addresses.
+2. **Demand evidence.** Every prompt here requires file/function/address citations — it stops the agent from confabulating.
+3. **Separate fact / inference / unknown.** The three-bucket format keeps hypotheses honest.
+4. **Static first.** Say "do not execute the application" until you actually need runtime observation.
+5. **End with a deliverable.** SPEC.md, a reader script, a port plan, a minimal rebuild — a concrete artifact forces the agent to verify its own claims.
+6. **State the scope out loud.** "Lab machine I own", "offline single-player", "document, don't bypass" — the framing keeps results usable for research and reporting.
+
+## License
+
+Prompts in this repo: MIT. REA itself and its docs: see https://rea.tools/.
+
+```
