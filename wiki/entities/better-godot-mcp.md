@@ -20,4 +20,4 @@ Complements Unity editor MCP [[unity-mcp]] and the shared engine-agnostic host [
 
 ## Related
 
-[[gamedev-mcp-server]] · [[unity-mcp]] · [[gddumper]] · [[interactive-feedback-mcp]] · [[deepwiki-mcp]] · [[overviews/game-engine]] · [[overviews/overview]]
+[[godot-mcp]] · [[gamedev-mcp-server]] · [[unity-mcp]] · [[gddumper]] · [[interactive-feedback-mcp]] · [[deepwiki-mcp]] · [[overviews/game-engine]] · [[overviews/overview]]
