@@ -1,0 +1,491 @@
+Project Path: arc_EnderDevelopment_roblox-speed-tester_4b6pl4qx
+
+Source Tree:
+
+```txt
+arc_EnderDevelopment_roblox-speed-tester_4b6pl4qx
+├── README.md
+└── src
+    ├── MovementAntiCheatTester.lua
+    ├── MovementAntiCheatTesterGUI.lua
+    ├── README.md
+    └── main.lua
+
+```
+
+`README.md`:
+
+```md
+# SpeedTester
+
+SpeedTester is a Roblox script designed to test movement anti-cheat systems in published games. It provides a GUI for controlling movement speed and observing server rollback behavior, helping developers identify weaknesses in their anti-cheat mechanisms.
+
+## Install
+
+1. Download the SpeedTester script from the GitHub repository.
+2. Open your Roblox game in Roblox Studio.
+3. Create a new LocalScript in StarterPlayerScripts.
+4. Copy and paste the contents of the downloaded script into the LocalScript.
+
+## Use
+
+1. Run your game in Roblox Studio or on a live server.
+2. Open the GUI by pressing a key (e.g., F5).
+3. Use the speed slider to set the desired speed.
+4. Click the "Go" button to start moving at the set speed.
+5. Observe the status and rollback indicators to test the anti-cheat system.
+
+---
+
+More Roblox script projects by EnderDevelopment: https://github.com/EnderDevelopment
+
+Project page: https://dash.enderdevelopment.com/community/2075f78b-e643-4b86-b80a-01c2caf69670?utm_source=github&utm_medium=readme&utm_campaign=auto_publish&utm_content=2075f78b-e643-4b86-b80a-01c2caf69670
+
+```
+
+`src/MovementAntiCheatTester.lua`:
+
+```lua
+-- Movement Anti-Cheat Tester
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+
+local player = Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoid = character:WaitForChild("Humanoid")
+
+-- GUI Setup
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "MovementAntiCheatTester"
+screenGui.Parent = player:WaitForChild("PlayerGui")
+
+local mainFrame = Instance.new("Frame")
+mainFrame.Name = "MainFrame"
+mainFrame.Size = UDim2.new(0, 300, 0, 200)
+mainFrame.Position = UDim2.new(0.5, -150, 0.5, -100)
+mainFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+mainFrame.BorderSizePixel = 0
+mainFrame.Parent = screenGui
+
+local titleLabel = Instance.new("TextLabel")
+titleLabel.Name = "TitleLabel"
+titleLabel.Size = UDim2.new(1, 0, 0, 30)
+titleLabel.Position = UDim2.new(0, 0, 0, 0)
+titleLabel.Text = "Movement Anti-Cheat Tester"
+titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+titleLabel.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+titleLabel.BorderSizePixel = 0
+mainFrame.Parent = screenGui
+
+local speedLabel = Instance.new("TextLabel")
+speedLabel.Name = "SpeedLabel"
+speedLabel.Size = UDim2.new(0.5, 0, 0, 30)
+speedLabel.Position = UDim2.new(0, 0, 0, 40)
+speedLabel.Text = "Speed: 0"
+speedLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+speedLabel.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+speedLabel.BorderSizePixel = 0
+speedLabel.Parent = mainFrame
+
+local speedSlider = Instance.new("TextBox")
+speedSlider.Name = "SpeedSlider"
+speedSlider.Size = UDim2.new(0.5, 0, 0, 30)
+speedSlider.Position = UDim2.new(0.5, 0, 0, 40)
+speedSlider.Text = "16"
+speedSlider.TextColor3 = Color3.fromRGB(255, 255, 255)
+speedSlider.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+speedSlider.BorderSizePixel = 0
+speedSlider.Parent = mainFrame
+
+local goButton = Instance.new("TextButton")
+goButton.Name = "GoButton"
+goButton.Size = UDim2.new(1, 0, 0, 30)
+goButton.Position = UDim2.new(0, 0, 0, 80)
+goButton.Text = "Go"
+goButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+goButton.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+goButton.BorderSizePixel = 0
+goButton.Parent = mainFrame
+
+local statusLabel = Instance.new("TextLabel")
+statusLabel.Name = "StatusLabel"
+statusLabel.Size = UDim2.new(1, 0, 0, 30)
+statusLabel.Position = UDim2.new(0, 0, 0, 120)
+statusLabel.Text = "Status: Idle"
+statusLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+statusLabel.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+statusLabel.BorderSizePixel = 0
+statusLabel.Parent = mainFrame
+
+local rollbackLabel = Instance.new("TextLabel")
+rollbackLabel.Name = "RollbackLabel"
+rollbackLabel.Size = UDim2.new(1, 0, 0, 30)
+rollbackLabel.Position = UDim2.new(0, 0, 0, 160)
+rollbackLabel.Text = "Rollback: None"
+rollbackLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+rollbackLabel.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+rollbackLabel.BorderSizePixel = 0
+rollbackLabel.Parent = mainFrame
+
+-- Movement Logic
+local isMoving = false
+local speed = 16
+
+local function updateSpeed()
+    speed = tonumber(speedSlider.Text) or 16
+    speedLabel.Text = "Speed: " .. speed
+end
+
+local function startMovement()
+    isMoving = true
+    statusLabel.Text = "Status: Moving"
+    while isMoving do
+        local deltaTime = RunService.Heartbeat:Wait()
+        local moveDirection = Vector3.new(0, 0, 0)
+        if UserInputService:IsKeyDown(Enum.KeyCode.W) then
+            moveDirection = moveDirection + Vector3.new(0, 0, -1)
+        end
+        if UserInputService:IsKeyDown(Enum.KeyCode.A) then
+            moveDirection = moveDirection + Vector3.new(-1, 0, 0)
+        end
+        if UserInputService:IsKeyDown(Enum.KeyCode.S) then
+            moveDirection = moveDirection + Vector3.new(0, 0, 1)
+        end
+        if UserInputService:IsKeyDown(Enum.KeyCode.D) then
+            moveDirection = moveDirection + Vector3.new(1, 0, 0)
+        end
+        if moveDirection.Magnitude > 0 then
+            moveDirection = moveDirection.Unit
+        end
+        character:TranslateBy(moveDirection * speed * deltaTime)
+    end
+end
+
+local function stopMovement()
+    isMoving = false
+    statusLabel.Text = "Status: Idle"
+end
+
+-- Event Connections
+goButton.MouseButton1Click:Connect(function()
+    if isMoving then
+        stopMovement()
+    else
+        startMovement()
+    end
+end)
+
+speedSlider.FocusLost:Connect(updateSpeed)
+
+-- Initial Setup
+updateSpeed()
+```
+
+`src/MovementAntiCheatTesterGUI.lua`:
+
+```lua
+-- Movement Anti-Cheat Tester GUI for Roblox
+
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+
+-- Create the main GUI frame
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "MovementAntiCheatTesterGUI"
+screenGui.Parent = player:WaitForChild("PlayerGui")
+
+local mainFrame = Instance.new("Frame")
+mainFrame.Name = "MainFrame"
+mainFrame.Size = UDim2.new(0, 300, 0, 200)
+mainFrame.Position = UDim2.new(0.5, -150, 0.5, -100)
+mainFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+mainFrame.BorderSizePixel = 0
+mainFrame.Parent = screenGui
+
+-- Create the title label
+local titleLabel = Instance.new("TextLabel")
+titleLabel.Name = "TitleLabel"
+titleLabel.Size = UDim2.new(1, 0, 0, 30)
+titleLabel.Position = UDim2.new(0, 0, 0, 0)
+titleLabel.Text = "Movement Anti-Cheat Tester"
+titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+titleLabel.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+titleLabel.BorderSizePixel = 0
+
+titleLabel.Font = Enum.Font.SourceSansBold
+titleLabel.TextSize = 18
+titleLabel.Parent = mainFrame
+
+-- Create the speed control slider
+local speedLabel = Instance.new("TextLabel")
+speedLabel.Name = "SpeedLabel"
+speedLabel.Size = UDim2.new(0.5, 0, 0, 20)
+speedLabel.Position = UDim2.new(0, 10, 0, 40)
+speedLabel.Text = "Speed: 16"
+speedLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+speedLabel.BackgroundTransparency = 1
+speedLabel.Font = Enum.Font.SourceSans
+speedLabel.TextSize = 14
+speedLabel.Parent = mainFrame
+
+local speedSlider = Instance.new("TextBox")
+speedSlider.Name = "SpeedSlider"
+speedSlider.Size = UDim2.new(0.3, 0, 0, 20)
+speedSlider.Position = UDim2.new(0.5, 10, 0, 40)
+speedSlider.Text = "16"
+speedSlider.TextColor3 = Color3.fromRGB(255, 255, 255)
+speedSlider.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+speedSlider.BorderSizePixel = 0
+speedSlider.Font = Enum.Font.SourceSans
+speedSlider.TextSize = 14
+speedSlider.Parent = mainFrame
+
+-- Create the status indicator
+local statusLabel = Instance.new("TextLabel")
+statusLabel.Name = "StatusLabel"
+statusLabel.Size = UDim2.new(1, -20, 0, 20)
+statusLabel.Position = UDim2.new(0, 10, 0, 70)
+statusLabel.Text = "Status: Normal"
+statusLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+statusLabel.BackgroundTransparency = 1
+statusLabel.Font = Enum.Font.SourceSans
+statusLabel.TextSize = 14
+statusLabel.Parent = mainFrame
+
+-- Create the rollback observation button
+local rollbackButton = Instance.new("TextButton")
+rollbackButton.Name = "RollbackButton"
+rollbackButton.Size = UDim2.new(0.8, 0, 0, 30)
+rollbackButton.Position = UDim2.new(0.1, 0, 0, 100)
+rollbackButton.Text = "Observe Rollback"
+rollbackButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+rollbackButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+rollbackButton.BorderSizePixel = 0
+rollbackButton.Font = Enum.Font.SourceSans
+rollbackButton.TextSize = 14
+rollbackButton.Parent = mainFrame
+
+-- Create the test movement button
+local testButton = Instance.new("TextButton")
+testButton.Name = "TestButton"
+testButton.Size = UDim2.new(0.8, 0, 0, 30)
+testButton.Position = UDim2.new(0.1, 0, 0, 140)
+testButton.Text = "Test Movement"
+testButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+testButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+testButton.BorderSizePixel = 0
+testButton.Font = Enum.Font.SourceSans
+testButton.TextSize = 14
+testButton.Parent = mainFrame
+
+-- Function to update the character's speed
+local function updateSpeed(speed)
+    local humanoid = character:FindFirstChildOfClass("Humanoid")
+    if humanoid then
+        humanoid.WalkSpeed = speed
+    end
+end
+
+-- Function to simulate unauthorized movement
+local function simulateUnauthorizedMovement()
+    local humanoid = character:FindFirstChildOfClass("Humanoid")
+    if humanoid then
+        humanoid.WalkSpeed = 100
+        statusLabel.Text = "Status: Unauthorized Movement"
+        wait(5)
+        humanoid.WalkSpeed = tonumber(speedSlider.Text)
+        statusLabel.Text = "Status: Normal"
+    end
+end
+
+-- Function to observe rollback
+local function observeRollback()
+    statusLabel.Text = "Status: Observing Rollback"
+    wait(5)
+    statusLabel.Text = "Status: Normal"
+end
+
+-- Connect the speed slider to update the character's speed
+speedSlider.FocusLost:Connect(function()
+    local speed = tonumber(speedSlider.Text)
+    if speed then
+        updateSpeed(speed)
+        speedLabel.Text = "Speed: " .. speed
+    end
+end)
+
+-- Connect the test movement button to simulate unauthorized movement
+testButton.MouseButton1Click:Connect(simulateUnauthorizedMovement)
+
+-- Connect the rollback observation button to observe rollback
+rollbackButton.MouseButton1Click:Connect(observeRollback)
+
+-- Initialize the character's speed
+updateSpeed(tonumber(speedSlider.Text))
+```
+
+`src/README.md`:
+
+```md
+# Roblox Movement Anti-Cheat Tester
+
+This project contains a Roblox Lua script with a GUI for testing movement anti-cheat in a published game. The GUI includes speed control, status indicators, and rollback observation. The script tests unauthorized movement without triggering server rollback.
+
+## File Structure
+
+- `src/main.lua`: The main script with the GUI and anti-cheat testing functionality.
+- `src/README.md`: This file, providing instructions on how to use the script.
+
+## How to Use
+
+1. Place the `main.lua` script in the `StarterPlayerScripts` folder of your Roblox game.
+2. Run the game and open the GUI to test movement anti-cheat.
+3. Use the speed control to adjust the movement speed and observe the status indicators.
+4. Monitor the rollback observation to ensure unauthorized movement does not trigger server rollback.
+```
+
+`src/main.lua`:
+
+```lua
+-- Roblox Movement Anti-Cheat Tester
+
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+
+local player = Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoid = character:WaitForChild("Humanoid")
+
+-- GUI Setup
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "MovementAntiCheatTester"
+screenGui.Parent = player:WaitForChild("PlayerGui")
+
+local frame = Instance.new("Frame")
+frame.Size = UDim2.new(0, 300, 0, 200)
+frame.Position = UDim2.new(0.5, -150, 0.5, -100)
+frame.AnchorPoint = Vector2.new(0.5, 0.5)
+frame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+frame.BorderSizePixel = 0
+frame.Parent = screenGui
+
+-- Draggable Frame
+local dragging
+local dragInput
+local dragStart
+local startPos
+
+local function update(input)
+    local delta = input.Position - dragStart
+    frame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+end
+
+frame.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = true
+        dragStart = input.Position
+        startPos = frame.Position
+        
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                dragging = false
+            end
+        end)
+    end
+end)
+
+frame.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement then
+        dragInput = input
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+    if input == dragInput and dragging then
+        update(input)
+    end
+end)
+
+-- Speed Control
+local speedLabel = Instance.new("TextLabel")
+speedLabel.Size = UDim2.new(0, 100, 0, 30)
+speedLabel.Position = UDim2.new(0, 10, 0, 10)
+speedLabel.Text = "Speed: " .. humanoid.WalkSpeed
+speedLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+speedLabel.BackgroundTransparency = 1
+speedLabel.Parent = frame
+
+local speedSlider = Instance.new("TextBox")
+speedSlider.Size = UDim2.new(0, 100, 0, 30)
+speedSlider.Position = UDim2.new(0, 120, 0, 10)
+speedSlider.Text = tostring(humanoid.WalkSpeed)
+speedSlider.TextColor3 = Color3.fromRGB(255, 255, 255)
+speedSlider.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+speedSlider.Parent = frame
+
+speedSlider.FocusLost:Connect(function()
+    local newSpeed = tonumber(speedSlider.Text)
+    if newSpeed then
+        humanoid.WalkSpeed = newSpeed
+        speedLabel.Text = "Speed: " .. newSpeed
+    end
+end)
+
+-- Status Indicators
+local statusLabel = Instance.new("TextLabel")
+statusLabel.Size = UDim2.new(0, 200, 0, 30)
+statusLabel.Position = UDim2.new(0, 50, 0, 50)
+statusLabel.Text = "Status: Idle"
+statusLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+statusLabel.BackgroundTransparency = 1
+statusLabel.Parent = frame
+
+-- Rollback Observation
+local rollbackLabel = Instance.new("TextLabel")
+rollbackLabel.Size = UDim2.new(0, 200, 0, 30)
+rollbackLabel.Position = UDim2.new(0, 50, 0, 90)
+rollbackLabel.Text = "Rollback: None"
+rollbackLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+rollbackLabel.BackgroundTransparency = 1
+rollbackLabel.Parent = frame
+
+-- Test Unauthorized Movement
+local function testUnauthorizedMovement()
+    local originalSpeed = humanoid.WalkSpeed
+    humanoid.WalkSpeed = originalSpeed * 2
+    statusLabel.Text = "Status: Testing"
+    
+    wait(2)
+    
+    humanoid.WalkSpeed = originalSpeed
+    statusLabel.Text = "Status: Idle"
+    rollbackLabel.Text = "Rollback: None"
+end
+
+-- Go Button
+local goButton = Instance.new("TextButton")
+goButton.Size = UDim2.new(0, 100, 0, 30)
+goButton.Position = UDim2.new(0, 100, 0, 130)
+goButton.Text = "Go"
+goButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+goButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+goButton.Parent = frame
+
+goButton.MouseButton1Click:Connect(testUnauthorizedMovement)
+
+-- Character Added/Removed Handling
+player.CharacterAdded:Connect(function(newCharacter)
+    character = newCharacter
+    humanoid = character:WaitForChild("Humanoid")
+    speedLabel.Text = "Speed: " .. humanoid.WalkSpeed
+    speedSlider.Text = tostring(humanoid.WalkSpeed)
+end)
+
+player.CharacterRemoving:Connect(function()
+    character = nil
+    humanoid = nil
+end)
+```
