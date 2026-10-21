@@ -2825,7 +2825,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [obfuscxx](entities/obfuscxx.md) — C++20 header-only compile-time variable obfuscation (SIMD decrypt; AC Encrypt Variable)
 - [Obfusk8](entities/obfusk8.md) — C++17 compile-time/runtime obfuscation library (AC Compile Time)
 - [obengine](entities/obengine.md) — open-source 2D Lua+C++ game engine (SFML; scene/game-object/map/animation/input/networking/plugins; scriptable APIs; Game Engine / [2D+Lua])
-- [Obelisk](entities/obelisk.md) — Zagrios Apple silicon macOS unified Steam/Epic/GOG launcher (SwiftUI + Rust core; Voile Wine + voile-lkd for Linux AC–supported titles; legitimate compatibility research; Cheat / Proton)
+- [Obelisk](entities/obelisk.md) — Zagrios Apple silicon macOS unified Steam/Epic/GOG launcher (SwiftUI + Rust storefront core; SteamKit/Legendary patterns; Voile Wine + voile-lkd + D3DMetal/DXMT; no AC bypass; compatibility research; Cheat / Proton)
 - [obj2shellcode](entities/obj2shellcode.md) — C++ object-to-shellcode generation framework (AC shellcode engine & tricks)
 - [obpo-plugin](entities/obpo-plugin.md) — IDA client + Go OBPO backend (closed core; open plugin; Fix OLLVM)
 - [Oboro](entities/oboro.md) — Android NDK LLVM 21 / OLLVM prebuilt toolchain (FLA, BCF, indirection, string/constant encryption; Clang+BOLT monorepo; native `.so` hardening; luluovo1; Obfuscation Engine)
