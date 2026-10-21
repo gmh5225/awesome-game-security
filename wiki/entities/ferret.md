@@ -1,12 +1,12 @@
 ---
 title: Ferret
 kind: entity
-topics: [game-hacking, reverse-engineering]
+topics: [game-hacking, reverse-engineering, anti-cheat]
 sources:
   - wiki/sources/descriptions/Petru101__ferret.md
   - wiki/sources/README-categories.md
 updated: 2026-10-21
-confidence: medium
+confidence: high
 ---
 
 # Ferret
@@ -16,8 +16,12 @@ confidence: medium
 ## Architecture
 
 - Flatpak UI stays sandboxed; a separate host helper performs **ptrace**-based read and write
-- OCR-click narrowing, freeze/set, and auto re-resolve after restarts (Cheat Engine–style ergonomics)
-- Blocks or warns on online titles using local anti-cheat process checks and an embedded **AreWeAntiCheatYet** game list
+- OCR-click narrowing, interactive narrow scans, freeze/set, and auto re-resolve after restarts (Cheat Engine–style ergonomics without a scan-first workflow)
+- Blocks or warns on online titles using local anti-cheat process checks and an embedded [[are-we-anti-cheat-yet]] game list (source: wiki/sources/descriptions/Petru101__ferret.md)
+
+## Engine-aware browsing
+
+Runtime-specific memory browsing helpers cover **Unreal**, **Unity**, **Godot**, **GameMaker**, **Java**, **Python**, and other common game runtimes—alongside generic pointer-path persistence across restarts. (source: wiki/sources/descriptions/Petru101__ferret.md)
 
 ## Use cases
 

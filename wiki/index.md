@@ -1452,7 +1452,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [fARM64](entities/farm64.md) — pure-Rust no_std AArch64 disassembler/encoder (iced-x86-shaped API; zero-heap decode; SVE/SME/SIMD/FP; semantic round-trip encode; wasm/bare-metal friendly; binsnake; cheat / RE tools)
 - [fastDbg](entities/fastdbg.md) — Go x64 ELF Linux debugger (ptrace breakpoints/memory/registers/disasm; CLI; eBPF tracing + QEMU kernel-debug modules; Yayoi-cs; x86_64 native/qemu kernel debugger)
 - [fastlogs](entities/fastlogs.md) — Unity/GameMaker remote debug engine (AitiX; log/device/screenshot/scene snapshot ingest → short shareable links; WebGL/mobile/console; self-hosted Node.js/SQLite; agent/QA remote command channel; Game Develop / debug)
-- [ferret](entities/ferret.md) — Linux GTK4/Rust OCR-guided single-player memory editor (Flatpak UI + ptrace helper; Proton/offline; AWACY gate; Cheat / Debugging; Petru101)
+- [ferret](entities/ferret.md) — Linux GTK4/Rust OCR-click memory editor (interactive narrow/freeze; UE/Unity/Godot/GM/Java/Python browsing; Flatpak UI + ptrace helper; AWACY + local AC process gate; Proton/offline; Cheat / Debugging; Petru101)
 - [Flying-Guys-fully-modified](entities/flying-guys-fully-modified.md) — Fall Guys fully modified cheat suite (kernel driver + KdMapper + ImGui; fly/movement hacks; gmh5225)
 - [FlyingGuys](entities/flying-guys.md) — Fall Guys kernel cheat (KdMapper custom driver + ImGui overlay; zlib network manipulation; gmh5225)
 - [FPGA DMA Multi Tool](entities/fpga-dma-multi-tool.md) — Artix-7 FPGA DMA board detect/flash/speedtest (Go/Fyne; openFPGALoader)
