@@ -11,15 +11,19 @@ confidence: high
 
 # Devo's Map Doctor
 
-**devos-map-doctor** ([devoltzz/devos-map-doctor](https://github.com/devoltzz/devos-map-doctor)) is a **Warcraft III** map toolkit for diagnosing, repairing, unprotecting, and porting custom maps (**1.24–Reforged**) without modifying originals in place. (source: wiki/sources/descriptions/devoltzz__devos-map-doctor.md)
+**devos-map-doctor** ([devoltzz/devos-map-doctor](https://github.com/devoltzz/devos-map-doctor)) is a toolkit for opening, diagnosing, repairing, and porting **Warcraft III** custom maps—especially protected or platform-specific releases—so they run on **Reforged** and classic clients and in **World Editor**, without modifying the original file in place. (source: wiki/sources/descriptions/devoltzz__devos-map-doctor.md)
 
 ## Implementation
 
-Python core with Rust script checkers, native C helpers for **MPQ** cryptography, and browser or desktop UI on Windows, Linux, and the web. It rebuilds and validates MPQ archives, reverses protectors such as **SProtect** and **KK** encryption, restores scripts and object data, and can port Chinese KK and Korean M16 maps by emulating platform natives and save behavior.
+Python core with Rust script checkers, native C helpers for **MPQ** cryptography, and browser or desktop UI on Windows, Linux, and the web. (source: wiki/sources/descriptions/devoltzz__devos-map-doctor.md)
+
+## Capabilities
+
+Rebuilds and validates MPQ archives; reverses common protectors such as **SProtect** and **KK** encryption; restores scripts and object data; ports Chinese **KK** and Korean **M16** maps by emulating platform natives and save behavior; supports translation workflows, crash/replay diagnostics, and Reforged compatibility checks. (source: wiki/sources/descriptions/devoltzz__devos-map-doctor.md)
 
 ## Security research
 
-Supports translation workflows, crash/replay diagnostics, Reforged compatibility checks, and optional cheat-pack injection or analysis for studying in-map cheat menus and platform anti-cheat bait logic—used by map authors and analysts inspecting integrity and script tampering.
+Optional cheat-pack injection or analysis for studying in-map cheat menus and platform **anti-cheat bait** logic. Map authors, reverse engineers, and game-security researchers use it to inspect map integrity, understand protection and script tampering, and recover editable maps. (source: wiki/sources/descriptions/devoltzz__devos-map-doctor.md)
 
 ## Related
 

@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-21** — ingest `description:devoltzz/devos-map-doctor`: enriched entity [[devos-map-doctor]] from description projection (MPQ rebuild/validation; SProtect/KK reversal; KK/M16 platform-native porting; translation/crash/replay/Reforged checks; optional cheat-pack / anti-cheat bait study; non-destructive recovery for World Editor); cited on [[overviews/game-hacking]] WC3 map toolchain lane and [[overviews/reverse-engineering]] Cheat RE Tools blurb; `index.md` entity blurb updated.
+
 - **2026-10-21** — ingest `description:liuyyx/nocturne-client`: enriched entity [[nocturne-client]] from description projection (single JAR external injector + in-process Java agent; 1.8.9–26.3 mapping tables for vanilla/Fabric/Forge/NeoForge; Java 8 injectable modules; ASM LWJGL/GL frame hooks, input block, storage-search overlays; JVM attach + obfuscation-bridging study); cited on [[overviews/game-hacking]] Minecraft JVM-injection lane and [[overviews/reverse-engineering]] Cheat RE Tools blurb; `index.md` entity blurb updated.
 
 - **2026-10-21** — ingest `description:nat649/fs15-reconstruction`: enriched entity [[fs15-reconstruction]] from description projection (independent FS15 / GIANTS Engine 6 native + asset reconstruction; LuaJIT re-host for hundreds of Lua modules; OpenGL/Bullet subsystem recovery; large fixture difftest; parallel Linux GE6 x64 VM boot/render/script study; script–native boundary focus; BYO retail files); cited on [[overviews/game-engine]] proprietary-engine recovery lane and [[overviews/reverse-engineering]] Cheat RE Tools blurb; `index.md` entity and overview blurbs updated.
