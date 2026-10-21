@@ -879,6 +879,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/imugee/xdv
 - https://github.com/eteran/edb-debugger [For Linux]
 - https://github.com/korcankaraokcu/PINCE [For Linux]
+- https://github.com/Petru101/ferret [Linux GTK4/Rust single-player memory editor: OCR-click on-screen values, interactive narrow scans, freeze/set, and auto re-resolve after restarts (Cheat Engine–style)]
 - https://github.com/djolertrk/kLLDB [LLDB based debugger for Linux Kernel]
 - https://github.com/mrexodia/TitanHide
 - https://github.com/Air14/HyperHide [VT debuger]
