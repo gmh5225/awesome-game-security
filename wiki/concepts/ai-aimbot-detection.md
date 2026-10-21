@@ -14,6 +14,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__Auto_Simulated_Universe.md
   - wiki/sources/descriptions/karola3vax__CS2AC.md
   - wiki/sources/descriptions/ViTaminza__plugify-cs2ac.md
+  - wiki/sources/descriptions/pandathebeasty__cs2-AntiCheat.md
   - wiki/sources/descriptions/jakobfriedl__usb-monitor-bof.md
   - wiki/sources/descriptions/gmh5225__anti-cheat.md
   - wiki/sources/descriptions/rafalimma__ModelAnti-Cheat.md
@@ -50,7 +51,7 @@ sources:
   - wiki/sources/descriptions/NetVar1337__apex-anticheat-lab.md
   - wiki/sources/README-categories.md
   - wiki/sources/descriptions/ahuhu789__pubg-bigdata-analytics.md
-updated: 2026-10-20
+updated: 2026-10-21
 confidence: medium
 ---
 
@@ -86,6 +87,7 @@ Tabular engagement features (reaction time, curvature stats, dx/dy correlation, 
 
 - [[cs2ac]] — CS2 Metamod:Source server plugin; ~17 behavioral modules for aimbot/aimlock/silent aim/movement/input abuse on dedicated servers (no client install)
 - [[plugify-cs2ac]] — ViTaminza Plugify/s2sdk port of [[cs2ac]]; server-side usercmd/movement/aim/shot/input-history and client-cvar analysis via Polyhook `libserver.so` detours and s2sdk hooks; rule-based aimbot/triggerbot/movement classes for dedicated-server operators (source: wiki/sources/descriptions/ViTaminza__plugify-cs2ac.md)
+- [[cs2-anticheat-pandathebeasty]] — pandathebeasty CounterStrikeSharp modular server-side rule checks (aimbot snaps, backtrack, bhop, rapid fire, impossible yaw, no-recoil, UserCmdRate, AntiDLL gamedata hooks) with per-module JSON log/kick/ban for community/competitive dedicated servers (source: wiki/sources/descriptions/pandathebeasty__cs2-AntiCheat.md)
 - [[waldo]] — CS2 deep-learning triggerbot/aimbot detection (user-trained model)
 - [[cs2-hybrid-anticheat-proposal]] — CS2 hybrid AC proposal (ML + Glicko-2 Overwatch judges, honeypot entities, shadow monitoring; Python PoC)
 - [[aimbot-detection-prototype]] — clip + live-window prototype

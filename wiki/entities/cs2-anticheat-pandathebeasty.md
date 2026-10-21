@@ -11,7 +11,20 @@ confidence: medium
 
 # CS2 AntiCheat (pandathebeasty)
 
-Modular server-side anti-cheat plugin for Counter-Strike 2 on CounterStrikeSharp (pandathebeasty). Written in C# for .NET, each detection module ships with its own JSON configuration and configurable response (log, kick, or ban). Modules cover aimbot snaps, backtrack abuse, bunnyhop automation, rapid fire, impossible view angles and yaw, duck spam, abnormal user command rates, no-recoil patterns, and an AntiDLL check that flags cheat libraries subscribed to blacklisted engine game events using updatable gamedata signatures. Discord webhook alerts and admin reload commands support live tuning without rebuilding the plugin. (source: wiki/sources/descriptions/pandathebeasty__cs2-AntiCheat.md)
+Modular server-side anti-cheat plugin for Counter-Strike 2 on CounterStrikeSharp (pandathebeasty). Written in C# for .NET, each detection module ships with its own JSON configuration and configurable response (log, kick, or ban). Discord webhook alerts and admin reload commands support live tuning without rebuilding the plugin. (source: wiki/sources/descriptions/pandathebeasty__cs2-AntiCheat.md)
+
+## Scope
+
+For **community and competitive CS2 dedicated-server operators** who want lightweight game security beyond Valve’s built-in protections—server-authoritative heuristics on hosts they control, not client kernel AC or cheat development workflows. (source: wiki/sources/descriptions/pandathebeasty__cs2-AntiCheat.md)
+
+## Detection modules
+
+Independent checks (each with its own JSON config and punishment ladder):
+
+- Aimbot snaps, backtrack abuse, bunnyhop automation, rapid fire
+- Impossible view angles and yaw, duck spam, abnormal user command rates (`UserCmdRate`)
+- No-recoil pattern heuristics
+- **AntiDLL** — flags cheat libraries subscribed to blacklisted engine game events via updatable gamedata signatures
 
 ## Capabilities
 
