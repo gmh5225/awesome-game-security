@@ -77,7 +77,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [1.6 C2](entities/1-6-c2.md) — CS1.6 cheat (C++; HL1 client DLL; ESP/aimbot/movement; GoldSrc hook patterns; cheat / game:cs1.6; eversinc33)
 - [2048.cpp](entities/2048-cpp.md) — terminal C++ 2048 (console board / merge scoring; Game Develop / source)
 - [2Pack](entities/2pack.md) — Rust PE & shellcode packer (EXE/DLL + raw; Anti Cheat → Binary Packer)
-- [2026 All Brands Bootloader Unlock Status](entities/2026-all-brands-bootloader-unlock-status.md) — AdaUnlocked living OEM bootloader unlock/root/jailbreak reference (fuse/anti-rollback, EDL, temporary root, OEM AC/ADB gates; Cheat / Android Bootloader Bypass)
+- [2026 All Brands Bootloader Unlock Status](entities/2026-all-brands-bootloader-unlock-status.md) — AdaUnlocked living OEM bootloader unlock/root/jailbreak reference (Chinese-market Android + iOS; fuse/anti-rollback, unauth 9008 EDL, temporary root, efisp/fake re-lock, OEM AC/ADB gates; Cheat / Android Bootloader Bypass)
 - [2k17-club](entities/2k17-club.md) — CS:GO internal C++ cheat framework (Akatsyk; aimbot, anti-aim, autowall, chams, grenade helpers; DirectX9 ImGui + Lua/LuaJIT LuaBridge; cheat development + Source engine RE; cheat / game:csgo)
 - [3Beans](entities/3beans.md) — LLE Nintendo 3DS emulator (ARM9/ARM11 + Teak DSP; full OS boot; boot9/boot11/NAND dumps; software/hardware GPU; cross-platform; Nintendo 3DS)
 - [360WFP Exploit](entities/360wfp-exploit.md) — BYOVD via Qihoo 360 `360netmon_x64.sys_wfp` (WFP; block EDR/XDR network)
