@@ -4571,6 +4571,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/3iden-del/fasds-anti-cheat [Fabric 1.21.11 client mod with heuristic cheat spotting, in-game flag report (K) and clear (J), CI-built jar]
 - https://github.com/maximumemails-cmd/RainInjectable [Injectable Windows C++/Java runtime that rebuilds the Rain 1.8.9 client-side cheat observer for Forge and Badlion, with JNI bootstrap, detection research docs, and local-only evidence review]
 - https://github.com/YcbrYL1/YCBR-AntiCheat [Paper 1.8.9 Minecraft anti-cheat plugin with 19 combat/movement/protocol checks, auth, DDoS protection, and admin GUI]
+- https://github.com/flameteamdev/LavaGuardAC [Open-source Bukkit/Spigot Minecraft server anti-cheat plugin with movement, combat, and block-break checks, violation tracking, admin GUI, and Discord webhook alerts]
 - https://github.com/NoCheatPlus/NoCheatPlus [Open-source anti-cheat plugin for Minecraft (Bukkit/Spigot)]
 - https://github.com/hahasc26-lang/ArgusAC [Modular Paper/Spigot Minecraft anti-cheat (1.12.2–1.21.x) with movement/combat/world checks, last-known-valid setbacks, SHA-256 audit logs, and optional ProtocolLib]
 - https://github.com/ThoriumAC/Thorium-Minecraft-Plugin [Open-source Paper/Spigot/Folia plugin that streams movement, combat, and world-interaction telemetry to the Thorium engine for server-side anti-cheat enforcement]
