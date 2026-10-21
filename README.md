@@ -1550,6 +1550,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 > Android Bootloader Bypass
 - https://github.com/MlgmXyysd/Xiaomi-HyperOS-BootLoader-Bypass [Xiaomi HyperOS BootLoader Bypass]
 - https://github.com/atlas4381/qualcomm_avb_exploit_poc [Unlocking qualcomm bootloader]
+- https://github.com/AdaUnlocked/2026-All-Brands-Bootloader-Unlock-Status [Continuously updated reference guide to bootloader unlock, root, and iOS jailbreak status across major OEM brands for mobile modding research]
 
 > Android Key Attestation
 - https://github.com/quarkslab/android-hardware-attestation-demo [End-to-end PoC bypassing backend hardware Key Attestation by Frida-hooking KeystoreAttestation.generateAttestedKey and relaying the backend nonce to a clean, bootloader-locked device that returns a genuine TEE/StrongBox chain — no TEE tampering or forged certs]
@@ -2807,6 +2808,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/pgarba/ptrace_read_teb [use ptrace to read the TEB of a process on Linux]
 - https://github.com/redecorate/Holodori-Kernel-Bypass [Userspace emulation of Hololive Dreams usrdrv017964 kernel anti-cheat for Wine/Proton]
 - https://github.com/dazi2011/crossover-patcher [Experimental CrossOver patcher to improve compatibility with Windows games protected by anti-cheat]
+- https://github.com/Zagrios/Obelisk [Open-source Apple silicon macOS launcher for Steam/Epic/GOG with Voile Wine runtime and voile-lkd for Windows and Linux anti-cheat–supported titles]
 - https://github.com/CDJuaum/RunEXE [Python PE analyzer and Wine launcher that flags kernel anti-cheat/DRM blockers and auto-provisions prefixes and dependencies before running Windows games on Linux]
 - https://github.com/ertunc-ozbay/pointblank-linux [Rust standalone launcher to run Point Blank (Zepetto/TAM) on Linux with unmodified CheatBlocker anti-cheat via Wine-GE/Proton, TLS-aligned runner, and prefix setup]
 - https://github.com/BlaMacfly/ArchMod [Native Rust/Tauri cheat panel for Steam games on Proton: launch Windows trainers in the correct prefix, scan memory natively, and share community address profiles]
