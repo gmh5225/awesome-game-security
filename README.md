@@ -991,6 +991,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/mattgodbolt/frogman [Annotated BeebASM disassembly of unreleased BBC Micro platformer with jsbeeb runtime-dump RE, multi-stage VIA-timer XOR loader analysis, and byte-exact rebuild tooling]
 - https://github.com/0x5abe/vifterpreter [Rust library for parsing PlayStation 2 VIF1 DMA packets and VIF commands]
 - https://github.com/danielgomesvieira2000/ps2-port-engine [Verified PS2 decompilation toolchain and native PC port runtime (EE/IOP/GS/VU, Vulkan host) with no bundled game assets]
+- https://github.com/nat649/fs15-reconstruction [Early-stage Farming Simulator 15 / GIANTS Engine 6 decompilation, native reconstruction, and validated component recovery (local game files required)]
 - https://github.com/byroweb/AC1_RE [RE reference and tooling for Armored Core (PS1, SLUS-01323): docs, Ghidra pipeline, disc/PA/mission parsers, and behavioral C models (BYO disc)]
 - https://github.com/piffd0s/defcon-dreamcast-planetweb-research [DEF CON Dreamcast PlanetWeb exploit chain — Eden loading, memory-write flaw, and MIME stack overflow to run native SH-4 DOOM without a debugger]
 - https://github.com/Anonym0ose/JitDumper [A CIL method body dumper]
@@ -3307,6 +3308,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - [A minecraft server backend written in c++](https://github.com/gmh5225/minecpp)
 - https://github.com/AnarchDevelopment/aegledll [Internal Minecraft DX11 DLL client with ImGui overlay and MinHook hooks]
 - https://github.com/inpeacedTeams/phantom-client [Lunar Client 1.8.9 internal DLL with JNI/JVMTI, wglSwapBuffers OpenGL hook, and ImGui overlay modules]
+- https://github.com/liuyyx/nocturne-client [Cross-version Minecraft Java JVM attach injector and in-process agent (1.8.9–26.3) with mapping tables, LWJGL frame hooks, and OpenGL overlay modules]
 - https://github.com/unleg1t/Yuri [Open-source 1.8.9 MCP hacked client with Watchdog/Polar/Grim bypass modules and bundled Java 8 runtime]
 - https://github.com/adanainv3-creator/OxClient [Minecraft Bedrock/PE MITM cheat client with protocol relay, combat/movement modules, and ESP]
 - https://github.com/eksses/EAFE [Mineflayer elytra autopilot with vanilla physics, FSM navigation, and anti-cheat-aware Bézier flight paths]
@@ -3409,6 +3411,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 
 > Game:Warcraft III
 - https://github.com/stijnherfst/HiveWE [editor]
+- https://github.com/devoltzz/devos-map-doctor [Toolkit to diagnose, unprotect, fix, and port Warcraft III maps (1.24–Reforged) for World Editor and Reforged without modifying originals]
 
 > Game:Half-Life 2
 - https://github.com/codereversing/hl2aimbot
