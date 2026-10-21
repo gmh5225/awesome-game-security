@@ -1,0 +1,4482 @@
+Project Path: arc_pandathebeasty_cs2-AntiCheat_8x700_wa
+
+Source Tree:
+
+```txt
+arc_pandathebeasty_cs2-AntiCheat_8x700_wa
+├── CS2-AntiCheat.csproj
+├── CS2-AntiCheat.sln
+├── Config
+│   ├── Aimbot.json
+│   ├── AntiDLL.json
+│   ├── Backtrack.json
+│   ├── BunnyHop.json
+│   ├── DuckSpam.json
+│   ├── General.json
+│   ├── ImpossibleYaw.json
+│   ├── NoRecoil.json
+│   ├── RapidFire.json
+│   ├── UntrustedAngles.json
+│   └── UserCmdRate.json
+├── Core
+│   ├── ACCore.cs
+│   ├── BaseConfig.cs
+│   ├── DetectionHandler.cs
+│   ├── GeneralConfig.cs
+│   └── Globals.cs
+├── Detections
+│   ├── BaseCaller.cs
+│   ├── BaseModule.cs
+│   └── Modules
+│       ├── Aimbot.cs
+│       ├── AntiDLL.cs
+│       ├── AntiDLLSdk
+│       │   ├── CLCMsg_ListenEvents.cs
+│       │   ├── CPlayerSlot.cs
+│       │   ├── CSource1LegacyGameEventGameSystem.cs
+│       │   ├── CUtlString.cs
+│       │   └── IGameEventManager2.cs
+│       ├── Backtrack.cs
+│       ├── BunnyHop.cs
+│       ├── DuckSpam.cs
+│       ├── ImpossibleYaw.cs
+│       ├── NoRecoil.cs
+│       ├── RapidFire.cs
+│       ├── UntrustedAngles.cs
+│       └── UserCmdRate.cs
+├── Handlers
+│   ├── Commands.cs
+│   ├── EventHandlers.cs
+│   ├── EventListeners.cs
+│   └── UserMessagesHandler.cs
+├── Integration
+│   └── DiscordIntegration.cs
+├── LICENSE
+├── README.md
+└── gamedata
+    └── CS2-AntiCheat.AntiDLL.json
+
+```
+
+`CS2-AntiCheat.csproj`:
+
+```csproj
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CounterStrikeSharp.API" Version="1.0.375" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- AntiDLL native signatures/offsets. Ships into the plugin's gamedata folder and is loaded by
+         GameData.GetSignature/GetOffset. Edit this JSON to update signatures (no recompile). -->
+    <None Update="gamedata\CS2-AntiCheat.AntiDLL.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Config\" />
+  </ItemGroup>
+
+</Project>
+
+```
+
+`CS2-AntiCheat.sln`:
+
+```sln
+
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.8.34601.278
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CS2-AntiCheat", "CS2-AntiCheat.csproj", "{6119D24C-C6A2-4376-8FA1-4D5F8DAE0B91}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6119D24C-C6A2-4376-8FA1-4D5F8DAE0B91}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6119D24C-C6A2-4376-8FA1-4D5F8DAE0B91}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6119D24C-C6A2-4376-8FA1-4D5F8DAE0B91}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6119D24C-C6A2-4376-8FA1-4D5F8DAE0B91}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {57331A5E-87F1-42E3-8A5F-4E650168817B}
+	EndGlobalSection
+EndGlobal
+
+```
+
+`Config/Aimbot.json`:
+
+```json
+{
+  "DetectionEnabled": true,
+  "DetectionAction": 2,
+  "MaxAimbotAngle": 30,
+  "MaxDetectionsBeforeAction": 2
+}
+
+```
+
+`Config/AntiDLL.json`:
+
+```json
+{
+  "DetectionEnabled": true,
+  "DetectionAction": 3
+}
+
+```
+
+`Config/Backtrack.json`:
+
+```json
+{
+  "DetectionEnabled": true,
+  "DetectionAction": 1,
+  "PingThresholdMs": 150,
+  "SuspiciousKillsBeforeLog": 4
+}
+
+```
+
+`Config/BunnyHop.json`:
+
+```json
+{
+  "DetectionEnabled": true,
+  "DetectionAction": 1
+}
+
+```
+
+`Config/DuckSpam.json`:
+
+```json
+{
+  "DetectionEnabled": true,
+  "DetectionAction": 2,
+  "MaxToggles": 10,
+  "WindowTicks": 64
+}
+
+```
+
+`Config/General.json`:
+
+```json
+{
+  "Enabled": true,
+  "Debug": false,
+  "CommandPermission": "@css/root",
+  "BanCommand": "css_ban #{id} 0 \"ANTICHEAT: {reason}\"",
+  "KickCommand": "css_kick #{id}",
+  "DiscordAlerts": true,
+  "DiscordWebhookUrl": "",
+  "DiscordMentionRoleId": ""
+}
+
+```
+
+`Config/ImpossibleYaw.json`:
+
+```json
+{
+  "DetectionEnabled": true,
+  "DetectionAction": 2,
+  "MaxYawDeltaPerTick": 120,
+  "MaxDetectionsBeforeAction": 6
+}
+
+```
+
+`Config/NoRecoil.json`:
+
+```json
+{
+  "DetectionEnabled": true,
+  "DetectionAction": 3,
+  "MinBurstShots": 12,
+  "MinAccumulatedPunch": 4.0,
+  "MaxPitchCompensation": 1.0,
+  "MaxDetectionsBeforeAction": 2
+}
+
+```
+
+`Config/RapidFire.json`:
+
+```json
+{
+  "DetectionEnabled": true,
+  "DetectionAction": 2,
+  "MaxDetectionsBeforeAction": 5
+}
+
+```
+
+`Config/UntrustedAngles.json`:
+
+```json
+{
+  "DetectionEnabled": true,
+  "DetectionAction": 2
+}
+
+```
+
+`Config/UserCmdRate.json`:
+
+```json
+{
+  "DetectionEnabled": true,
+  "DetectionAction": 2,
+  "MaxCommandsPerTick": 2.0,
+  "WindowTicks": 64,
+  "MaxDetectionsBeforeAction": 3
+}
+
+```
+
+`Core/ACCore.cs`:
+
+```cs
+using CounterStrikeSharp.API.Core.Attributes;
+using CounterStrikeSharp.API.Core;
+using CS2AntiCheat.Handlers;
+using CS2AntiCheat.Integration;
+using Microsoft.Extensions.Logging;
+
+namespace CS2AntiCheat.Core
+{
+    [MinimumApiVersion(374)]
+    public class ACCore : BasePlugin
+    {
+        public override string ModuleName => "CS2-AntiCheat";
+        public override string ModuleVersion => "1.0.0";
+        public override string ModuleAuthor => "panda";
+        public override string ModuleDescription => "Anti-Cheat for CS2";
+
+        public override void Unload(bool hotReload)
+        {
+            foreach (var module in Globals.Modules)
+            {
+                try { module.OnUnload(); }
+                catch (Exception e) { Globals.Log($"Exception in {module.Name}.OnUnload -> {e.Message}"); }
+            }
+        }
+
+        public override void Load(bool hotReload)
+        {
+            // Always-on load logging (goes to the CounterStrikeSharp log file in addons/.../logs/,
+            // independent of the General.json "Debug" switch which only gates verbose runtime logs).
+            Logger.LogInformation("Loading {Name} v{Version} (hotReload: {HotReload})", ModuleName, ModuleVersion, hotReload);
+
+            Globals.PreInit(this, Logger);
+            Globals.Log($"Loading (hotReload: {hotReload})");
+
+            if (hotReload == true)
+            {
+                Globals.Initialize(hotReload);
+            }
+
+            CommandHandler.Initialize(this);
+
+            EventListeners.Initialize(this);
+            EventHandlers.Initialize(this, hotReload);
+
+            UserMessagesHandler.Initialize(this);
+
+            GeneralConfig.Initialize();
+            Globals.RefreshServerInfo();
+            DiscordIntegration.InitializeWebhook();
+
+            // Always-on: written to the CSSharp log file regardless of the Debug switch. The per-module
+            // summary is logged from Globals.Initialize (which runs on map start / hot reload, once the
+            // modules actually exist).
+            Logger.LogInformation("Loaded {Name} v{Version}", ModuleName, ModuleVersion);
+        }
+    }
+}
+
+```
+
+`Core/BaseConfig.cs`:
+
+```cs
+using System.Text.Json;
+
+namespace CS2AntiCheat.Core
+{
+    internal class BaseConfig
+    {
+        internal static readonly JsonSerializerOptions JsonSerializerOptions = new JsonSerializerOptions()
+        {
+            WriteIndented = true
+        };
+    }
+
+    internal class BaseConfig<T> where T : new()
+    {
+        internal T Config { get; private set; }
+        protected readonly string configPath = string.Empty;
+
+        internal BaseConfig(string path)
+        {
+            string folderPath = $"{Globals.GetModuleDirectory()}/Configs/";
+            if (Directory.Exists(folderPath) == false)
+            {
+                Directory.CreateDirectory(folderPath);
+            }
+
+            configPath = $"{folderPath}{path}.json";
+            Config = new T();
+
+            Load();
+        }
+
+        internal bool Save()
+        {
+            string json = JsonSerializer.Serialize(Config, BaseConfig.JsonSerializerOptions);
+            File.WriteAllText(configPath, json);
+
+            return true;
+        }
+
+        internal bool Load()
+        {
+            if (File.Exists(configPath) == false)
+            {
+                Save();
+                return false;
+            }
+
+            string json = File.ReadAllText(configPath);
+            T? possibleConfig = JsonSerializer.Deserialize<T>(json, BaseConfig.JsonSerializerOptions);
+
+            if (possibleConfig == null)
+            {
+                return false;
+            }
+
+            Config = possibleConfig;
+            return true;
+        }
+    }
+}
+
+```
+
+`Core/DetectionHandler.cs`:
+
+```cs
+using CounterStrikeSharp.API;
+using CounterStrikeSharp.API.ValveConstants.Protobuf;
+using CS2AntiCheat.Detections;
+using CS2AntiCheat.Integration;
+
+namespace CS2AntiCheat.Core
+{
+    internal struct DetectionMetadata
+    {
+        internal BaseModule module;
+        internal PlayerData player;
+        internal DateTime time;
+        internal string reason;
+    }
+
+    internal static class DetectionHandler
+    {
+        internal static void OnPlayerDetected(DetectionMetadata metadata)
+        {
+            string punishment;
+
+            switch (metadata.module.ActionType)
+            {
+                case ActionType.None:
+                {
+                    return;
+                }
+
+                case ActionType.Log:
+                {
+                    Globals.Log($"{metadata.player.Controller.PlayerName} is suspected of using {metadata.module.Name} ({metadata.reason})");
+                    punishment = "No punishment (log only).";
+                    break;
+                }
+
+                case ActionType.Kick:
+                {
+                    Globals.Log($"{metadata.player.Controller.PlayerName} was kicked for using {metadata.module.Name} ({metadata.reason})");
+                    metadata.player.Disconnect(NetworkDisconnectionReason.NETWORK_DISCONNECT_DISCONNECT_BY_SERVER);
+                    punishment = "Player was kicked.";
+                    break;
+                }
+
+                case ActionType.Ban:
+                {
+                    Globals.Log($"{metadata.player.Controller.PlayerName} was banned for using {metadata.module.Name} ({metadata.reason})");
+                    BanPlayerWithCommands(metadata);
+                    punishment = "Player was banned.";
+                    break;
+                }
+
+                default:
+                {
+                    return;
+                }
+            }
+
+            // Discord notification, gated by the global DiscordAlerts switch (General.json).
+            if (GeneralConfig.GetGeneralConfig().Config.DiscordAlerts == true)
+            {
+                NotifyDiscord(metadata, punishment);
+            }
+        }
+
+        /// <summary>
+        /// Runs the configurable ban + kick commands (in that order) on the server console. Both
+        /// come from General.json and support placeholders; an empty template skips that step.
+        /// </summary>
+        private static void BanPlayerWithCommands(DetectionMetadata metadata)
+        {
+            var cfg = GeneralConfig.GetGeneralConfig().Config;
+            var banCommand = BuildCommand(cfg.BanCommand, metadata);
+            var kickCommand = BuildCommand(cfg.KickCommand, metadata);
+
+            // Execute on the main thread/next frame (detections can fire off the main thread).
+            Server.NextFrame(() =>
+            {
+                if (string.IsNullOrWhiteSpace(banCommand) == false)
+                {
+                    Globals.Log($"Executing ban command: {banCommand}");
+                    Server.ExecuteCommand(banCommand);
+                }
+
+                if (string.IsNullOrWhiteSpace(kickCommand) == false)
+                {
+                    Globals.Log($"Executing kick command: {kickCommand}");
+                    Server.ExecuteCommand(kickCommand);
+                }
+            });
+        }
+
+        /// <summary>Fills the configurable command template with this detection's player data.</summary>
+        private static string BuildCommand(string template, DetectionMetadata metadata)
+        {
+            if (string.IsNullOrWhiteSpace(template))
+            {
+                return string.Empty;
+            }
+
+            var controller = metadata.player.Controller;
+            var userId = controller.UserId?.ToString() ?? "0";
+            var steamId64 = controller.AuthorizedSteamID?.SteamId64.ToString() ?? "0";
+            var steamId2 = controller.AuthorizedSteamID?.SteamId2 ?? metadata.player.SteamID;
+
+            return template
+                .Replace("{id}", userId)
+                .Replace("{steamid}", steamId64)
+                .Replace("{steamid2}", steamId2)
+                .Replace("{name}", controller.PlayerName)
+                .Replace("{reason}", metadata.reason)
+                .Replace("{module}", metadata.module.Name);
+        }
+
+        private static void NotifyDiscord(DetectionMetadata metadata, string punishment)
+        {
+            var controller = metadata.player.Controller;
+            var steamId64 = controller.AuthorizedSteamID?.SteamId64.ToString() ?? "0";
+
+            var report = new DetectionReport
+            {
+                PlayerName = controller.PlayerName,
+                SteamId64 = steamId64,
+                ProfileUrl = $"https://steamcommunity.com/profiles/{steamId64}",
+                Detection = metadata.module.Name,
+                Evidence = metadata.reason,
+                Punishment = punishment,
+                Map = Server.MapName,
+                Address = Globals.ServerAddress,
+                ServerName = Globals.ServerName
+            };
+
+            DiscordIntegration.SendDetection(report);
+        }
+    }
+}
+
+```
+
+`Core/GeneralConfig.cs`:
+
+```cs
+using CounterStrikeSharp.API.Core;
+using CounterStrikeSharp.API.Modules.Admin;
+using CounterStrikeSharp.API.Modules.Commands;
+using CS2AntiCheat.Handlers;
+
+namespace CS2AntiCheat.Core
+{
+    public class GeneralConfigData
+    {
+        // Master on/off switch for the whole anti-cheat. When false, no detection runs (player
+        // tracking still works, so toggling with tbac_reload takes effect immediately).
+        public bool Enabled { get; set; } = true;
+
+        // When true, the plugin prints all console log lines (init messages, detection logs, debug
+        // info). When false, the console stays silent - Discord alerts still work independently.
+        public bool Debug { get; set; } = false;
+
+        // Prefix prepended to every console log line (e.g. "[CS2AC] Loaded ..."). Change it to
+        // whatever tag you want to grep for in the server console. A trailing space is added
+        // automatically, so leave it as just the tag. Leave empty for no prefix.
+        public string LogPrefix { get; set; } = "[CS2AC]";
+
+        // Permission flag required to run the plugin's admin commands (tbac_reload, tbac_*_action,
+        // tbac_aimbot_angle, ...). The server console always bypasses this.
+        public string CommandPermission { get; set; } = "@css/root";
+
+        // Commands run (on the server console) when a module's action is Ban. They run in order:
+        // BanCommand first, then KickCommand. Both are optional - leave empty to skip that step.
+        // Placeholders: {id} = userid (use #{id} to target by userid), {steamid} = SteamID64,
+        //               {steamid2} = STEAM_0:..., {name} = player name, {reason} = detection reason,
+        //               {module} = detection module name.
+        public string BanCommand { get; set; } = "css_ban #{id} 0 \"ANTICHEAT: {reason}\"";
+        public string KickCommand { get; set; } = "css_kick #{id}";
+
+        // Global switch for Discord detection alerts. When false, no detection sends to Discord
+        // regardless of module. (A webhook URL is still required for alerts to work when true.)
+        public bool DiscordAlerts { get; set; } = true;
+
+        // Full Discord webhook URL, e.g. https://discord.com/api/webhooks/<id>/<token>
+        // Leave empty to disable Discord notifications.
+        public string DiscordWebhookUrl { get; set; } = string.Empty;
+
+        // Who to ping on a detection message. Options:
+        //   ""           = no ping
+        //   "everyone"   = pings @everyone
+        //   "here"       = pings @here
+        //   "<role id>"  = pings that role (numeric Discord role id, e.g. "123456789012345678")
+        public string DiscordMentionRoleId { get; set; } = string.Empty;
+    }
+
+    internal static class GeneralConfig
+    {
+        private static BaseConfig<GeneralConfigData> config = null!;
+
+        public static void Initialize()
+        {
+            LoadConfig();
+
+            CommandHandler.RegisterCommand("tbac_reload", "Reloads the config", OnReloadCommand);
+        }
+
+        public static BaseConfig<GeneralConfigData> GetGeneralConfig()
+        {
+            return config;
+        }
+
+        private static void LoadConfig()
+        {
+            config = new BaseConfig<GeneralConfigData>("General");
+
+            // Mirror the switches into Globals so the hot paths can read them cheaply.
+            Globals.Enabled = config.Config.Enabled;
+            Globals.DebugLogging = config.Config.Debug;
+            Globals.LogPrefix = config.Config.LogPrefix;
+
+            Globals.Log($"Loaded general config (anti-cheat {(Globals.Enabled ? "ENABLED" : "DISABLED")})");
+        }
+
+        // ----- Commands ----- \\
+
+        private static void OnReloadCommand(CCSPlayerController? player, CommandInfo command)
+        {
+            if (CommandHandler.HasPermission(player) == false)
+            {
+                return;
+            }
+
+            LoadConfig();
+        }
+    }
+}
+
+```
+
+`Core/Globals.cs`:
+
+```cs
+using CounterStrikeSharp.API;
+using CounterStrikeSharp.API.Core;
+using CounterStrikeSharp.API.Modules.Cvars;
+using CounterStrikeSharp.API.ValveConstants.Protobuf;
+using Microsoft.Extensions.Logging;
+using CS2AntiCheat.Detections;
+using CS2AntiCheat.Detections.Modules;
+
+namespace CS2AntiCheat.Core
+{
+    internal class PlayerData
+    {
+        internal required CCSPlayerController Controller;
+        internal required CCSPlayerPawn Pawn;
+
+        internal required int Index;
+        internal required bool IsBot;
+
+        internal string PlayerName => Controller.PlayerName;
+        internal string SteamID => Controller.AuthorizedSteamID?.SteamId2 ?? "Invalid SteamID";
+
+        internal CCSWeaponBaseGun GetWeapon()
+        {
+            CPlayer_WeaponServices? weaponServices = Pawn.WeaponServices;
+            if (weaponServices == null)
+            {
+                return null!;
+            }
+
+            CBasePlayerWeapon? weaponBase = weaponServices.ActiveWeapon.Value;
+            if (weaponBase == null)
+            {
+                return null!;
+            }
+
+            return new CCSWeaponBaseGun(weaponBase.Handle);
+        }
+
+        internal void Disconnect(NetworkDisconnectionReason reason)
+        {
+            Controller.Disconnect(reason);
+        }
+    }
+
+    internal static class Globals
+    {
+        private static bool initializedOnce = false;
+
+        private static ACCore? pluginCore = null;
+        private static ILogger? logger = null;
+
+        // Master on/off switch, driven by General.json "Enabled". Checked by the detection dispatch
+        // so the whole anti-cheat can be turned off from config (reload with tbac_reload).
+        internal static bool Enabled = true;
+
+        // Gates all console logging. Driven by General.json "Debug". Off until the config loads, so
+        // nothing prints before we know the setting.
+        internal static bool DebugLogging = false;
+
+        // Prefix prepended to every console log line. Driven by General.json "LogPrefix". Defaults to
+        // "[CS2AC]" so early init lines (before the config loads) are still tagged consistently.
+        internal static string LogPrefix = "[CS2AC]";
+
+        // Server info for Discord embeds, cached on the main thread (ConVar reads are main-thread only).
+        internal static string ServerName = "CS2 Server";
+        internal static string ServerAddress = "unknown";
+
+        /// <summary>Refreshes the cached hostname + ip:port. Call on the main thread (map start/load).</summary>
+        internal static void RefreshServerInfo()
+        {
+            try
+            {
+                var hostname = ConVar.Find("hostname")?.StringValue;
+                if (string.IsNullOrWhiteSpace(hostname) == false)
+                {
+                    ServerName = hostname;
+                }
+
+                var ip = ConVar.Find("ip")?.StringValue;
+                var port = ConVar.Find("hostport")?.GetPrimitiveValue<int>();
+                if (string.IsNullOrWhiteSpace(ip) == false && ip != "0.0.0.0" && port is > 0)
+                {
+                    ServerAddress = $"{ip}:{port}";
+                }
+            }
+            catch
+            {
+                // keep previous values on failure
+            }
+        }
+
+        internal static PlayerData[] Players = [];
+        internal static BaseModule[] Modules = [];
+
+        internal static void PreInit(ACCore core, ILogger log)
+        {
+            pluginCore = core;
+            logger = log;
+        }
+
+        internal static void Initialize(bool forceReinitialize)
+        {
+            Players = new PlayerData[Server.MaxPlayers];
+            if (initializedOnce == true && forceReinitialize == false)
+            {
+                return;
+            }
+
+            Log($"Globals Initializing (forced: {forceReinitialize})");
+
+            Modules =
+            [
+                new Aimbot(),
+                new Backtrack(),
+                new BunnyHop(),
+                new RapidFire(),
+                new UntrustedAngles(),
+                new ImpossibleYaw(),
+                new DuckSpam(),
+                new UserCmdRate(),
+                new NoRecoil(),
+                new AntiDLLModule()
+            ];
+
+            initializedOnce = true;
+
+            // Always-on: record which detection modules were loaded (written to the CSSharp log file).
+            LogInfo($"Initialized {Modules.Length} detection module(s): {string.Join(", ", Modules.Select(m => m.Name))}");
+        }
+
+        internal static string GetModuleDirectory()
+        {
+            if (pluginCore == null)
+            {
+                return string.Empty;
+            }
+
+            return pluginCore.ModuleDirectory;
+        }
+
+        internal static void Log(string message)
+        {
+            if (DebugLogging == false)
+            {
+                return;
+            }
+
+            var line = string.IsNullOrEmpty(LogPrefix) ? message : $"{LogPrefix} {message}";
+            logger?.Log(LogLevel.Information, line);
+        }
+
+        /// <summary>
+        /// Always-on logging: writes to the CounterStrikeSharp log file (addons/.../logs/) regardless
+        /// of the "Debug" switch. Use for load/init milestones that should always be recorded.
+        /// </summary>
+        internal static void LogInfo(string message)
+        {
+            var line = string.IsNullOrEmpty(LogPrefix) ? message : $"{LogPrefix} {message}";
+            logger?.Log(LogLevel.Information, line);
+        }
+    }
+}
+
+```
+
+`Detections/BaseCaller.cs`:
+
+```cs
+using CounterStrikeSharp.API.Core;
+using CS2AntiCheat.Core;
+
+namespace CS2AntiCheat.Detections
+{
+    internal static class BaseCaller
+    {
+        internal static void OnPlayerJoin(PlayerData player)
+        {
+            foreach (BaseModule module in Globals.Modules)
+            {
+                try
+                {
+                    module.OnPlayerJoin(player);
+                }
+                catch (Exception e)
+                {
+                    Globals.Log($"Exception in {module.Name} -> {e.Message} | {e.StackTrace}");
+                }
+            }
+        }
+
+        internal static void OnPlayerLeave(PlayerData player)
+        {
+            foreach (BaseModule module in Globals.Modules)
+            {
+                try
+                {
+                    module.OnPlayerLeave(player);
+                }
+                catch (Exception e)
+                {
+                    Globals.Log($"Exception in {module.Name} -> {e.Message} | {e.StackTrace}");
+                }
+            }
+        }
+
+        internal static void OnPlayerJump(PlayerData player)
+        {
+            if (!Globals.Enabled) return;
+            foreach (BaseModule module in Globals.Modules)
+            {
+                try
+                {
+                    module.OnPlayerJump(player);
+                }
+                catch (Exception e)
+                {
+                    Globals.Log($"Exception in {module.Name} -> {e.Message} | {e.StackTrace}");
+                }
+            }
+        }
+
+        internal static void OnPlayerHurt(PlayerData victim, PlayerData shooter, HitGroup_t hitgroup)
+        {
+            if (!Globals.Enabled) return;
+            foreach (BaseModule module in Globals.Modules)
+            {
+                try
+                {
+                    module.OnPlayerHurt(victim, shooter, hitgroup);
+                }
+                catch (Exception e)
+                {
+                    Globals.Log($"Exception in {module.Name} -> {e.Message} | {e.StackTrace}");
+                }
+            }
+        }
+
+        internal static void OnPlayerDead(PlayerData victim, PlayerData shooter)
+        {
+            if (!Globals.Enabled) return;
+            foreach (BaseModule module in Globals.Modules)
+            {
+                try
+                {
+                    module.OnPlayerDead(victim, shooter);
+                }
+                catch (Exception e)
+                {
+                    Globals.Log($"Exception in {module.Name} -> {e.Message} | {e.StackTrace}");
+                }
+            }
+        }
+
+        internal static void OnPlayerShoot(PlayerData player)
+        {
+            if (!Globals.Enabled) return;
+            foreach (BaseModule module in Globals.Modules)
+            {
+                try
+                {
+                    module.OnPlayerShoot(player);
+                }
+                catch (Exception e)
+                {
+                    Globals.Log($"Exception in {module.Name} -> {e.Message} | {e.StackTrace}");
+                }
+            }
+        }
+
+        internal static void OnPlayerTick(PlayerData player)
+        {
+            if (!Globals.Enabled) return;
+            foreach (BaseModule module in Globals.Modules)
+            {
+                try
+                {
+                    module.OnPlayerTick(player);
+                }
+                catch (Exception e)
+                {
+                    Globals.Log($"Exception in {module.Name} -> {e.Message} | {e.StackTrace}");
+                }
+            }
+        }
+
+        internal static void OnRoundStart()
+        {
+            if (!Globals.Enabled) return;
+            foreach (BaseModule module in Globals.Modules)
+            {
+                try
+                {
+                    module.OnRoundStart();
+                }
+                catch (Exception e)
+                {
+                    Globals.Log($"Exception in {module.Name} -> {e.Message} | {e.StackTrace}");
+                }
+            }
+        }
+
+        internal static void OnRoundEnd()
+        {
+            if (!Globals.Enabled) return;
+            foreach (BaseModule module in Globals.Modules)
+            {
+                try
+                {
+                    module.OnRoundEnd();
+                }
+                catch (Exception e)
+                {
+                    Globals.Log($"Exception in {module.Name} -> {e.Message} | {e.StackTrace}");
+                }
+            }
+        }
+
+        internal static void OnGameTick()
+        {
+            if (!Globals.Enabled) return;
+            foreach (BaseModule module in Globals.Modules)
+            {
+                try
+                {
+                    module.OnGameTick();
+                }
+                catch(Exception e)
+                {
+                    Globals.Log($"Exception in {module.Name} -> {e.Message} | {e.StackTrace}");
+                }
+            }
+        }
+    }
+}
+
+```
+
+`Detections/BaseModule.cs`:
+
+```cs
+using CounterStrikeSharp.API.Core;
+using CS2AntiCheat.Core;
+
+namespace CS2AntiCheat.Detections
+{
+    public enum ActionType : byte
+    {
+        None = 0,
+        Log = 1,
+        Kick = 2,
+        Ban = 3
+    }
+
+    internal abstract class BaseModule
+    {
+        internal BaseModule() { }
+
+        internal abstract string Name { get; }
+        internal abstract ActionType ActionType { get; }
+
+        protected void OnPlayerDetected(PlayerData player, string reason)
+        {
+            DetectionMetadata metadata = new DetectionMetadata()
+            {
+                module = this,
+                player = player,
+                time = DateTime.Now,
+                reason = reason
+            };
+
+            DetectionHandler.OnPlayerDetected(metadata);
+        }
+
+        internal virtual void OnPlayerJoin(PlayerData player) { }
+        internal virtual void OnPlayerLeave(PlayerData player) { }
+
+        internal virtual void OnPlayerJump(PlayerData player) { }
+        internal virtual void OnPlayerHurt(PlayerData victim, PlayerData shooter, HitGroup_t hitgroup) { }
+        internal virtual void OnPlayerDead(PlayerData victim, PlayerData shooter) { }
+        internal virtual void OnPlayerShoot(PlayerData player) { }
+        internal virtual void OnPlayerTick(PlayerData player) { }
+
+        internal virtual void OnRoundStart() { }
+        internal virtual void OnRoundEnd() { }
+
+        internal virtual void OnGameTick() { }
+
+        internal virtual void OnUnload() { }
+    }
+}
+
+```
+
+`Detections/Modules/Aimbot.cs`:
+
+```cs
+using CounterStrikeSharp.API;
+using CounterStrikeSharp.API.Core;
+using CounterStrikeSharp.API.Modules.Admin;
+using CounterStrikeSharp.API.Modules.Commands;
+using CounterStrikeSharp.API.Modules.Entities;
+using CounterStrikeSharp.API.Modules.Utils;
+using System.Numerics;
+using CS2AntiCheat.Core;
+using CS2AntiCheat.Handlers;
+
+namespace CS2AntiCheat.Detections.Modules
+{
+    public class AimbotSaveData
+    {
+        public bool DetectionEnabled { get; set; } = true;
+        public ActionType DetectionAction { get; set; } = ActionType.Kick;
+
+        public float MaxAimbotAngle { get; set; } = 30f;
+        public int MaxDetectionsBeforeAction { get; set; } = 2;
+    }
+
+    internal class PlayerAimbotData
+    {
+        internal required Vector3[] eyeAngleHistory;
+        internal required int historyIndex;
+
+        internal required int detections;
+
+        internal void Reset()
+        {
+            historyIndex = 0;
+        }
+    }
+
+    /*
+     * Module: Aimbot
+     * Purpose: Detect players which flick with their eye angles at high velocity. Nobody can reliably flick 20+ degrees in a single tick and still hit players
+     * NOTE: For some reason EyeAngles is not properly synched from client to server I think? Either way this module will always be unreliable against rage hackers
+     */
+    internal class Aimbot : BaseModule
+    {
+        internal override string Name => "Aimbot";
+        internal override ActionType ActionType => config.Config.DetectionAction;
+
+        private const int aimbotMaxHistory = 64; //1 entire second worth of history (considering the tickrate is 64)
+
+        private readonly BaseConfig<AimbotSaveData> config;
+        private readonly PlayerAimbotData[] playerData;
+
+        internal Aimbot() : base()
+        {
+            config = new BaseConfig<AimbotSaveData>("Aimbot");
+            playerData = new PlayerAimbotData[Server.MaxPlayers];
+
+            CommandHandler.RegisterCommand("tbac_aimbot_action", "Which action to take on the player. 0 = none | 1 = log | 2 = kick | 3 = ban", OnActionCommand);
+            CommandHandler.RegisterCommand("tbac_aimbot_angle", "Max angle in a single tick before detection", OnAngleCommand);
+            CommandHandler.RegisterCommand("tbac_aimbot_detections", "Maximum detections before an action should be taken", OnDetectionsCommand);
+
+            Globals.Log($"Aimbot Initialized");
+        }
+
+        internal override void OnPlayerJoin(PlayerData player)
+        {
+            if (player.IsBot == true)
+            {
+                return;
+            }
+
+            playerData[player.Index] = new PlayerAimbotData()
+            {
+                eyeAngleHistory = new Vector3[aimbotMaxHistory],
+                historyIndex = 0,
+
+                detections = 0
+            };
+        }
+
+        internal override void OnPlayerDead(PlayerData victim, PlayerData shooter)
+        {
+            if (config.Config.DetectionEnabled == false)
+            {
+                return;
+            }
+
+            if (shooter.IsBot == true)
+            {
+                return;
+            }
+
+            PlayerAimbotData aimbotData = playerData[shooter.Index];
+
+            int historyIndex = aimbotData.historyIndex;
+            Vector3 lastAngle = aimbotData.eyeAngleHistory[historyIndex];
+
+            float maxAngle = config.Config.MaxAimbotAngle;
+
+            historyIndex++;
+            for (int i = historyIndex; i < aimbotMaxHistory; i++)
+            {
+                if (historyIndex >= aimbotMaxHistory)
+                {
+                    historyIndex = 0;
+                }
+
+                Vector3 currentAngle = aimbotData.eyeAngleHistory[historyIndex];
+                float angleDiff = Distance(lastAngle, currentAngle);
+
+                //Normalize the angle so we can use it for our aimbot detection logic
+                if (angleDiff > 180f)
+                {
+                    angleDiff = MathF.Abs(angleDiff - 360);
+                }
+
+                //Server.PrintToChatAll($"{i}: {shooter.Controller.PlayerName} -> {angleDiff}");
+
+                if (angleDiff > maxAngle)
+                {
+                    OnAimbotDetected(shooter, aimbotData, angleDiff);
+                    break;
+                }
+
+                lastAngle = currentAngle;
+                historyIndex++;
+            }
+        }
+
+        internal override void OnPlayerTick(PlayerData player)
+        {
+            if (config.Config.DetectionEnabled == false)
+            {
+                return;
+            }
+
+            if (player.IsBot == true)
+            {
+                return;
+            }
+
+            PlayerAimbotData aimbotData  = playerData[player.Index];
+
+            QAngle eyeAngles = player.Pawn.EyeAngles;
+            aimbotData.eyeAngleHistory[aimbotData.historyIndex] = new Vector3(eyeAngles.X, eyeAngles.Y, eyeAngles.Z);
+
+            aimbotData.historyIndex++;
+            if (aimbotData.historyIndex == aimbotMaxHistory)
+            {
+                aimbotData.historyIndex = 0;
+            }
+        }
+
+        internal override void OnRoundStart()
+        {
+            foreach (PlayerData player in Globals.Players)
+            {
+                if (player == null)
+                {
+                    continue;
+                }
+
+                if (player.IsBot == true)
+                {
+                    continue;
+                }
+
+                PlayerAimbotData aimbotData = playerData[player.Index];
+                aimbotData.Reset();
+            }
+        }
+
+        private void OnAimbotDetected(PlayerData player, PlayerAimbotData data, float angleDiff)
+        {
+            int maxDetections = config.Config.MaxDetectionsBeforeAction;
+
+            data.detections++;
+            Globals.Log($"{player.Controller.PlayerName}: Suspicious aimbot -> {angleDiff} degrees ({data.detections}/{maxDetections} detections) | weapon: {player.GetWeapon()?.DesignerName ?? "Invalid Weapon"}");
+
+            if (data.detections < maxDetections)
+            {
+                return;
+            }
+
+            string reason = $"Aimbot -> {angleDiff}";
+            OnPlayerDetected(player, reason);
+        }
+
+        // ----- Commands ----- \\
+
+        private void OnActionCommand(CCSPlayerController? player, CommandInfo command)
+        {
+            if (CommandHandler.HasPermission(player) == false)
+            {
+                return;
+            }
+
+            if (command.ArgCount != 2)
+            {
+                return;
+            }
+
+            string arg = command.ArgByIndex(1);
+            if (int.TryParse(arg, out int action) == false)
+            {
+                return;
+            }
+
+            ActionType actionType = (ActionType)action;
+            if (config.Config.DetectionAction.HasFlag(actionType) == false)
+            {
+                return;
+            }
+
+            config.Config.DetectionAction = actionType;
+            config.Save();
+        }
+
+        private void OnAngleCommand(CCSPlayerController? player, CommandInfo command)
+        {
+            if (CommandHandler.HasPermission(player) == false)
+            {
+                return;
+            }
+
+            if (command.ArgCount != 2)
+            {
+                return;
+            }
+
+            string arg = command.ArgByIndex(1);
+            if (float.TryParse(arg, out float angle) == false)
+            {
+                return;
+            }
+
+            config.Config.MaxAimbotAngle = angle;
+            config.Save();
+        }
+
+        private void OnDetectionsCommand(CCSPlayerController? player, CommandInfo command)
+        {
+            if (CommandHandler.HasPermission(player) == false)
+            {
+                return;
+            }
+
+            if (command.ArgCount != 2)
+            {
+                return;
+            }
+
+            string arg = command.ArgByIndex(1);
+            if (int.TryParse(arg, out int detections) == false)
+            {
+                return;
+            }
+
+            config.Config.MaxDetectionsBeforeAction = detections;
+            config.Save();
+        }
+
+        // ----- Helper Functions ----- \\
+
+        public static float Distance(Vector3 a, Vector3 b)
+        {
+            float newX = a.X - b.X;
+            float newY = a.Y - b.Y;
+            float newZ = a.Z - b.Z;
+
+            float distance = MathF.Sqrt(newX * newX + newY * newY + newZ * newZ);
+            return distance;
+        }
+    }
+}
+
+```
+
+`Detections/Modules/AntiDLL.cs`:
+
+```cs
+using CounterStrikeSharp.API;
+using CounterStrikeSharp.API.Core;
+using CounterStrikeSharp.API.Modules.Commands;
+using CounterStrikeSharp.API.Modules.Memory.DynamicFunctions;
+using CS2AntiCheat.AntiDLLSdk;
+using CS2AntiCheat.Core;
+using CS2AntiCheat.Handlers;
+
+namespace CS2AntiCheat.Detections.Modules
+{
+    public class AntiDLLSaveData
+    {
+        public bool DetectionEnabled { get; set; } = true;
+
+        // Listening to a blacklisted game event is an unambiguous cheat signal, so this defaults to Ban.
+        public ActionType DetectionAction { get; set; } = ActionType.Ban;
+
+        // The blacklist of game-event names a cheat DLL registers as a listener (legit clients never
+        // do). Edit this list (Configs/AntiDLL.json) to add/remove events - no recompile needed.
+        // Shipped with the full default list from the standalone AntiDLL plugin (KillStr3aK).
+        public HashSet<string> Blacklist { get; set; } = DefaultBlacklist();
+
+        private static HashSet<string> DefaultBlacklist() =>
+        [
+            "gameui_hidden", "player_chat", "player_score", "player_shoot", "game_init", "game_start",
+            "game_end", "warmup_end", "ugc_map_info_received", "ugc_map_unsubscribed",
+            "ugc_map_download_error", "ugc_file_download_finished", "ugc_file_download_start",
+            "dm_bonus_weapon_start", "survival_announce_phase", "break_prop", "player_decal",
+            "entity_visible", "instructor_server_hint_create", "instructor_server_hint_stop",
+            "reset_game_titledata", "vote_ended", "vote_started", "vote_options",
+            "endmatch_mapvote_selecting_map", "endmatch_cmm_start_reveal_items", "inventory_updated",
+            "client_loadout_changed", "add_player_sonar_icon", "door_open", "door_closed", "door_break",
+            "other_death", "bullet_damage", "item_purchase", "bomb_beginplant", "bomb_abortplant",
+            "bomb_begindefuse", "bomb_abortdefuse", "hostage_stops_following", "hostage_rescued_all",
+            "hostage_call_for_help", "vip_escaped", "vip_killed", "player_radio", "bomb_beep",
+            "weapon_fire_on_empty", "weapon_zoom", "silencer_detach", "inspect_weapon",
+            "weapon_zoom_rifle", "player_spawned", "item_pickup_slerp", "item_pickup_failed",
+            "item_remove", "item_equip", "enter_buyzone", "exit_buyzone", "buytime_ended",
+            "enter_bombzone", "exit_bombzone", "enter_rescue_zone", "exit_rescue_zone", "silencer_off",
+            "silencer_on", "buymenu_open", "buymenu_close", "round_prestart", "round_poststart",
+            "grenade_bounce", "molotov_detonate", "tagrenade_detonate", "inferno_extinguish",
+            "decoy_firing", "bullet_impact", "player_footstep", "player_jump", "player_blind",
+            "player_falldamage", "door_moving", "mb_input_lock_success", "mb_input_lock_cancel",
+            "nav_blocked", "nav_generate", "achievement_info_loaded", "hltv_changed_mode",
+            "show_deathpanel", "hide_deathpanel", "player_avenged_teammate", "achievement_earned_local",
+            "repost_xbox_achievements", "match_end_conditions", "write_profile_data",
+            "trial_time_expired", "update_matchmaking_stats", "enable_restart_voting", "sfuievent",
+            "start_vote", "teamchange_pending", "material_default_complete", "cs_prev_next_spectator",
+            "tournament_reward", "start_halftime", "ammo_refill", "parachute_pickup",
+            "parachute_deploy", "dronegun_attack", "drone_dispatched", "loot_crate_visible",
+            "loot_crate_opened", "open_crate_instr", "smoke_beacon_paradrop", "drone_cargo_detached",
+            "drone_above_roof", "dz_item_interaction", "survival_teammate_respawn",
+            "guardian_wave_restart", "bullet_flight_resolution", "server_shutdown", "server_message",
+            "player_full_update", "local_player_team", "local_player_controller_team",
+            "local_player_pawn_changed", "ragdoll_dissolved", "team_info", "team_score",
+            "hltv_rank_camera", "hltv_rank_entity", "demo_stop", "map_shutdown", "map_transition",
+            "hostname_changed", "game_message", "round_start_pre_entity", "round_start_post_nav",
+            "teamplay_round_start", "player_hintmessage", "break_breakable", "broken_breakable",
+            "door_close", "vote_failed", "vote_passed", "vote_cast_yes", "vote_cast_no",
+            "achievement_event", "achievement_write_failed", "bonus_updated", "gameinstructor_draw",
+            "gameinstructor_nodraw", "flare_ignite_npc", "helicopter_grenade_punt_miss",
+            "physgun_pickup", "cart_updated", "store_pricesheet_updated", "item_schema_initialized",
+            "drop_rate_modified", "event_ticket_modified", "gc_connected", "instructor_start_lesson",
+            "instructor_close_lesson", "set_instructor_group_enabled", "clientside_lesson_closed",
+            "dynamic_shadow_light_changed"
+        ];
+    }
+
+    /*
+     * Module: AntiDLL (self-contained port of KillStr3aK/CS2-AntiDLL)
+     * Purpose: Detect cheat DLLs by the game-event listeners they register. Cheats subscribe to
+     *          engine events that legitimate clients never listen to; when a client registers a
+     *          listener for any event in the Blacklist, that's the detection.
+     *
+     * HOW: hooks two native functions via CounterStrikeSharp dynamic functions -
+     *        CGameEventManager_Init                                 (grab the event manager)
+     *        CSource1LegacyGameEventGameSystem::ListenBitsReceived  (a client sent its listen bits)
+     *      When the manager is captured, each blacklisted event NAME is resolved to its listen-bit
+     *      index (CGameEventManager::GetEventDescriptor) and OR-ed into a 512-bit blacklist mask.
+     *      At runtime we read the client's listen-bits straight from the CLCMsg_ListenEvents message
+     *      (CUtlVector<uint32> at CLCMsg_ListenEvents::EventArray) and AND them with the mask - any
+     *      set bit is a blacklisted event the client subscribed to. No proxy-listener walk, no
+     *      per-event FindListener call.
+     *
+     * The native signatures/offsets live in gamedata/CS2-AntiCheat.AntiDLL.json (editable, no recompile).
+     * The event blacklist lives in Configs/AntiDLL.json (editable, no recompile).
+     */
+    internal class AntiDLLModule : BaseModule
+    {
+        internal override string Name => "AntiDLL";
+        internal override ActionType ActionType => config.Config.DetectionAction;
+
+        private readonly BaseConfig<AntiDLLSaveData> config;
+        private IGameEventManager2? gameEventManager;
+        private bool hooked;
+
+        // Precomputed blacklist as listen-bit words (16 x uint32 = 512 bits). Built once from the
+        // event names when the event manager is captured: for each blacklisted name we resolve its
+        // bit index and set that bit. At runtime we just AND the client's listen-bits with this mask.
+        private readonly uint[] blacklistMask = new uint[16];
+        private bool maskBuilt;
+
+        // Maps a bit index back to the event name(s) it was built from, for readable detection logs.
+        private readonly Dictionary<int, string> bitToName = new();
+
+        internal AntiDLLModule() : base()
+        {
+            config = new BaseConfig<AntiDLLSaveData>("AntiDLL");
+
+            CommandHandler.RegisterCommand("tbac_antidll_action", "Which action to take on the player. 0 = none | 1 = log | 2 = kick | 3 = ban", OnActionCommand);
+
+            TryHook();
+
+            Globals.Log($"AntiDLL Initialized (blacklist: {config.Config.Blacklist.Count} events)");
+        }
+
+        /// <summary>
+        /// Installs the native hooks. Wrapped in try/catch: if the gamedata signatures are missing or
+        /// stale for the current CS2 build, the module stays idle instead of crashing the plugin.
+        /// </summary>
+        private void TryHook()
+        {
+            if (hooked == true || config.Config.DetectionEnabled == false)
+            {
+                return;
+            }
+
+            // Bit-parsing path is verified for both Windows (server.dll) and Linux (libserver.so):
+            // the message layout (CLCMsg_ListenEvents::EventCount/EventData) and the name->bit resolver
+            // (CGameEventManager::GetEventDescriptor) have per-platform signatures/offsets in gamedata.
+            try
+            {
+                IGameEventManager2.Init.Hook(OnGameEventManagerInit, HookMode.Pre);
+                CSource1LegacyGameEventGameSystem.ListenBitsReceived.Hook(OnListenBitsReceived, HookMode.Pre);
+                hooked = true;
+            }
+            catch (Exception e)
+            {
+                Globals.Log($"AntiDLL could not install hooks (bad/missing gamedata signatures?): {e.Message}");
+            }
+        }
+
+        private HookResult OnGameEventManagerInit(DynamicHook hook)
+        {
+            gameEventManager = hook.GetParam<IGameEventManager2>(0);
+            BuildBlacklistMask();
+            return HookResult.Continue;
+        }
+
+        /// <summary>
+        /// Translates every blacklisted event name into its listen-bit index (via the event manager)
+        /// and sets that bit in blacklistMask. Runs once, right after the manager is available. If an
+        /// event name is unknown to this build, it is skipped (logged), not fatal.
+        /// </summary>
+        private void BuildBlacklistMask()
+        {
+            if (maskBuilt == true || gameEventManager == null)
+            {
+                return;
+            }
+
+            Array.Clear(blacklistMask);
+            bitToName.Clear();
+
+            int resolved = 0;
+            foreach (var name in config.Config.Blacklist)
+            {
+                int bit = gameEventManager.GetEventBitIndex(name);
+                if (bit < 0 || bit >= 512)
+                {
+                    continue; // unknown event on this build - skip
+                }
+
+                blacklistMask[bit >> 5] |= 1u << (bit & 31);
+                bitToName[bit] = name;
+                resolved++;
+            }
+
+            maskBuilt = true;
+            Globals.LogInfo($"AntiDLL blacklist mask built ({resolved}/{config.Config.Blacklist.Count} events resolved to bits)");
+        }
+
+        private HookResult OnListenBitsReceived(DynamicHook hook)
+        {
+            if (config.Config.DetectionEnabled == false)
+            {
+                return HookResult.Continue;
+            }
+
+            // Make sure the mask is ready (manager may have been captured but mask not yet built).
+            if (maskBuilt == false)
+            {
+                BuildBlacklistMask();
+                if (maskBuilt == false)
+                {
+                    return HookResult.Continue;
+                }
+            }
+
+            CLCMsg_ListenEvents msg = hook.GetParam<CLCMsg_ListenEvents>(1);
+            CPlayerSlot slot = msg.GetPlayerSlot();
+
+            CCSPlayerController? controller = Utilities.GetPlayerFromSlot(slot);
+            if (controller == null || controller.IsValid == false || controller.IsBot == true)
+            {
+                return HookResult.Continue;
+            }
+
+            // Read the client's listen-bits straight from the message and AND against the blacklist.
+            uint[] bits = msg.GetEventBits();
+            if (bits.Length == 0)
+            {
+                return HookResult.Continue;
+            }
+
+            var hits = new List<string>();
+            int words = Math.Min(bits.Length, blacklistMask.Length);
+            for (int w = 0; w < words; w++)
+            {
+                uint matched = bits[w] & blacklistMask[w];
+                while (matched != 0)
+                {
+                    int bitInWord = System.Numerics.BitOperations.TrailingZeroCount(matched);
+                    matched &= matched - 1; // clear lowest set bit
+                    int globalBit = (w << 5) + bitInWord;
+                    hits.Add(bitToName.TryGetValue(globalBit, out var n) ? n : $"bit#{globalBit}");
+                }
+            }
+
+            if (hits.Count == 0)
+            {
+                return HookResult.Continue;
+            }
+
+            int index = controller.Slot;
+            if (index < 0 || index >= Globals.Players.Length)
+            {
+                return HookResult.Continue;
+            }
+
+            PlayerData? player = Globals.Players[index];
+            if (player == null)
+            {
+                return HookResult.Continue;
+            }
+
+            OnPlayerDetected(player, $"AntiDLL -> blacklisted event listener(s): {string.Join(", ", hits)}");
+            return HookResult.Continue;
+        }
+
+        internal override void OnUnload()
+        {
+            Shutdown();
+        }
+
+        internal void Shutdown()
+        {
+            if (hooked == false)
+            {
+                return;
+            }
+
+            try
+            {
+                CSource1LegacyGameEventGameSystem.ListenBitsReceived.Unhook(OnListenBitsReceived, HookMode.Pre);
+                IGameEventManager2.Init.Unhook(OnGameEventManagerInit, HookMode.Pre);
+            }
+            catch { /* ignore */ }
+
+            hooked = false;
+        }
+
+        // ----- Commands ----- \\
+
+        private void OnActionCommand(CCSPlayerController? player, CommandInfo command)
+        {
+            if (CommandHandler.HasPermission(player) == false) return;
+            if (command.ArgCount != 2) return;
+            if (int.TryParse(command.ArgByIndex(1), out int action) == false) return;
+            config.Config.DetectionAction = (ActionType)action;
+            config.Save();
+        }
+    }
+}
+
+```
+
+`Detections/Modules/AntiDLLSdk/CLCMsg_ListenEvents.cs`:
+
+```cs
+namespace CS2AntiCheat.AntiDLLSdk
+{
+    using CounterStrikeSharp.API;
+    using CounterStrikeSharp.API.Core;
+
+    using System.Runtime.InteropServices;
+
+    /// <summary>
+    /// Wrapper over the parsed CNetMessagePB&lt;CMsgSource1LegacyListenEvents&gt; a client sends to say
+    /// which game events it wants to listen to.
+    ///
+    /// Layout (verified from CSource1LegacyGameEventGameSystem::ListenBitsReceived on both platforms):
+    ///   [msg + 0x58]  player slot (int)
+    ///   [msg + 0x48]  event-bit element count (int)
+    ///   [msg + 0x50]  pointer to the uint32 word array holding the listen bits (up to 16 words = 512 bits)
+    ///                 Bit N set == the client listens to the event with descriptor index N.
+    /// On Windows these two offsets are the count+data members of a CUtlVector&lt;uint32&gt; that starts at
+    /// 0x48 (count at 0x48, data ptr at 0x50). On Linux they are separate fields at the same offsets.
+    /// Both offsets come from gamedata so they can be updated without recompiling.
+    /// </summary>
+    public class CLCMsg_ListenEvents : NativeObject
+    {
+        private static readonly int EventCountOffset = GameData.GetOffset("CLCMsg_ListenEvents::EventCount");
+        private static readonly int EventDataOffset = GameData.GetOffset("CLCMsg_ListenEvents::EventData");
+
+        private unsafe CPlayerSlot m_Slot => Marshal.PtrToStructure<CPlayerSlot>(base.Handle + 80);
+
+        public CLCMsg_ListenEvents(nint ptr) : base(ptr)
+            { }
+
+        public CPlayerSlot GetPlayerSlot() => this.m_Slot;
+
+        /// <summary>
+        /// Reads the listen-bits vector from the message and returns it as up to 16 uint32 words
+        /// (512 bits). A missing/empty vector returns an empty array. Never throws on bad data.
+        /// </summary>
+        public uint[] GetEventBits()
+        {
+            try
+            {
+                int count = Marshal.ReadInt32(base.Handle + EventCountOffset);
+                if (count <= 0 || count > 16)
+                {
+                    return [];
+                }
+
+                nint data = (nint)Marshal.ReadInt64(base.Handle + EventDataOffset);
+                if (data == nint.Zero)
+                {
+                    return [];
+                }
+
+                var words = new uint[count];
+                for (int i = 0; i < count; i++)
+                {
+                    words[i] = unchecked((uint)Marshal.ReadInt32(data + (i * 4)));
+                }
+                return words;
+            }
+            catch
+            {
+                return [];
+            }
+        }
+    }
+}
+
+```
+
+`Detections/Modules/AntiDLLSdk/CPlayerSlot.cs`:
+
+```cs
+namespace CS2AntiCheat.AntiDLLSdk
+{
+    using System.Runtime.InteropServices;
+
+    [StructLayout(LayoutKind.Explicit)]
+    public struct CPlayerSlot
+    {
+        [FieldOffset(0x0)]
+        private int m_Data;
+
+        public int Get() => this.m_Data;
+
+        public static implicit operator int(CPlayerSlot slot) => slot.m_Data;
+    }
+}
+
+```
+
+`Detections/Modules/AntiDLLSdk/CSource1LegacyGameEventGameSystem.cs`:
+
+```cs
+namespace CS2AntiCheat.AntiDLLSdk
+{
+    using CounterStrikeSharp.API;
+    using CounterStrikeSharp.API.Core;
+    using CounterStrikeSharp.API.Modules.Memory.DynamicFunctions;
+
+    /// <summary>
+    /// The game system that receives a client's "listen bits" message. We only hook
+    /// ListenBitsReceived to intercept the CLCMsg_ListenEvents; detection reads the event-bit vector
+    /// straight from that message and matches it against a precomputed blacklist mask, so the old
+    /// Listeners offset / proxy-listener walk is no longer needed.
+    /// </summary>
+    public class CSource1LegacyGameEventGameSystem : NativeObject
+    {
+        public static readonly MemoryFunctionWithReturn<CSource1LegacyGameEventGameSystem, CLCMsg_ListenEvents, bool> ListenBitsReceived = new MemoryFunctionWithReturn<CSource1LegacyGameEventGameSystem, CLCMsg_ListenEvents, bool>(GameData.GetSignature("CSource1LegacyGameEventGameSystem::ListenBitsReceived"));
+
+        public CSource1LegacyGameEventGameSystem(nint ptr) : base(ptr)
+            { }
+    }
+}
+
+```
+
+`Detections/Modules/AntiDLLSdk/CUtlString.cs`:
+
+```cs
+namespace CS2AntiCheat.AntiDLLSdk
+{
+    using System.Runtime.InteropServices;
+
+    [StructLayout(LayoutKind.Explicit)]
+    public struct CUtlString
+    {
+        [FieldOffset(0x0)]
+        public string m_pString;
+
+        public string Get() => this.m_pString;
+
+        public override bool Equals(object? obj)
+        {
+            if (obj is CUtlString utlString)
+            {
+                return this == utlString;
+            }
+            else if (obj is string str)
+            {
+                return this == str;
+            }
+
+            return false;
+        }
+
+        public override int GetHashCode() => this.m_pString?.GetHashCode() ?? 0;
+
+        public override string ToString() => this.m_pString;
+
+        public static bool operator ==(CUtlString a, CUtlString b) => a.m_pString == b.m_pString;
+
+        public static bool operator !=(CUtlString a, CUtlString b) => a.m_pString != b.m_pString;
+
+        public static bool operator ==(CUtlString a, string b) => a.m_pString == b;
+
+        public static bool operator !=(CUtlString a, string b) => a.m_pString != b;
+
+        public static implicit operator string(CUtlString str) => str.m_pString;
+    }
+}
+
+```
+
+`Detections/Modules/AntiDLLSdk/IGameEventManager2.cs`:
+
+```cs
+namespace CS2AntiCheat.AntiDLLSdk
+{
+    using CounterStrikeSharp.API;
+    using CounterStrikeSharp.API.Core;
+    using CounterStrikeSharp.API.Modules.Memory;
+    using CounterStrikeSharp.API.Modules.Memory.DynamicFunctions;
+
+    using System.Runtime.InteropServices;
+
+    public class IGameEventManager2 : NativeObject
+    {
+        public static readonly MemoryFunctionVoid<IGameEventManager2> Init = new MemoryFunctionVoid<IGameEventManager2>(GameData.GetSignature("CGameEventManager_Init"));
+
+        // bool GetEventDescriptor(CGameEventManager* this, const char* name, int* outBitIndex)
+        // Returns a descriptor pointer (non-null = found) and writes the event's bit index into
+        // *outBitIndex (the engine ORs in bit 31 as a flag, so mask with 0x7FFFFFFF).
+        private static readonly MemoryFunctionWithReturn<nint, string, nint, nint> GetEventDescriptorFn =
+            new MemoryFunctionWithReturn<nint, string, nint, nint>(GameData.GetSignature("CGameEventManager::GetEventDescriptor"));
+
+        public IGameEventManager2(nint ptr) : base(ptr)
+            { }
+
+        /// <summary>
+        /// Resolves an event name to its listen-bit index. Returns -1 if the event does not exist
+        /// (or on any failure). The returned index is the bit position in the client's listen-bits
+        /// vector (see CLCMsg_ListenEvents.GetEventBits).
+        /// </summary>
+        public int GetEventBitIndex(string eventName)
+        {
+            try
+            {
+                nint outIndex = Marshal.AllocHGlobal(sizeof(int));
+                try
+                {
+                    Marshal.WriteInt32(outIndex, -1);
+                    nint descriptor = GetEventDescriptorFn.Invoke(base.Handle, eventName, outIndex);
+                    if (descriptor == nint.Zero)
+                    {
+                        return -1;
+                    }
+
+                    int raw = Marshal.ReadInt32(outIndex);
+                    if (raw == -1)
+                    {
+                        return -1;
+                    }
+
+                    return raw & 0x7FFFFFFF; // strip the bit-31 flag the engine sets
+                }
+                finally
+                {
+                    Marshal.FreeHGlobal(outIndex);
+                }
+            }
+            catch
+            {
+                return -1;
+            }
+        }
+    }
+}
+
+```
+
+`Detections/Modules/Backtrack.cs`:
+
+```cs
+using CounterStrikeSharp.API;
+using CounterStrikeSharp.API.Core;
+using CounterStrikeSharp.API.Modules.Admin;
+using CounterStrikeSharp.API.Modules.Commands;
+using CS2AntiCheat.Core;
+using CS2AntiCheat.Handlers;
+
+namespace CS2AntiCheat.Detections.Modules
+{
+    public class BacktrackSaveData
+    {
+        public bool DetectionEnabled { get; set; } = true;
+
+        // IMPORTANT: this is a LOG-ONLY investigation aid, not proof. Backtracking inside the
+        // server's lag-compensation window is, by the server's own rules, a valid hit - there is no
+        // clean "impossible" signal available server-side in CounterStrikeSharp. This module only
+        // flags kills made with abnormally high latency (the window backtrack abuse relies on) so an
+        // admin can review the demo. Keep it on Log; do NOT auto-ban from it.
+        public ActionType DetectionAction { get; set; } = ActionType.Log;
+
+        // Shooter ping (ms) at the moment of the kill above which the kill is flagged for review.
+        // CS2 lag compensation caps around 200 ms, so kills near/above that are the suspicious band.
+        public int PingThresholdMs { get; set; } = 150;
+
+        // How many such high-latency kills in a row before it is logged (avoids logging one laggy
+        // kill from a player on a genuinely bad connection).
+        public int SuspiciousKillsBeforeLog { get; set; } = 4;
+    }
+
+    internal class BacktrackData
+    {
+        internal int suspiciousKills;
+    }
+
+    /*
+     * Module: Backtrack (LOG-ONLY investigation aid)
+     * Purpose: Flag kills made with abnormally high latency, which is the condition backtrack abuse
+     *          depends on. This is NOT a reliable backtrack detector - server-side CS2 has no access
+     *          to the lag-compensation hitbox history needed to prove backtracking. Treat hits as
+     *          leads for manual demo review only.
+     */
+    internal class Backtrack : BaseModule
+    {
+        internal override string Name => "Backtrack";
+        internal override ActionType ActionType => config.Config.DetectionAction;
+
+        private readonly BaseConfig<BacktrackSaveData> config;
+        private readonly BacktrackData[] playerData;
+
+        internal Backtrack() : base()
+        {
+            config = new BaseConfig<BacktrackSaveData>("Backtrack");
+            playerData = new BacktrackData[Server.MaxPlayers];
+
+            CommandHandler.RegisterCommand("tbac_backtrack_action", "Which action to take on the player. 0 = none | 1 = log | 2 = kick | 3 = ban", OnActionCommand);
+
+            Globals.Log($"Backtrack Initialized (log-only investigation aid)");
+        }
+
+        internal override void OnPlayerJoin(PlayerData player)
+        {
+            if (player.IsBot == true)
+            {
+                return;
+            }
+
+            playerData[player.Index] = new BacktrackData { suspiciousKills = 0 };
+        }
+
+        internal override void OnPlayerDead(PlayerData victim, PlayerData shooter)
+        {
+            if (config.Config.DetectionEnabled == false || shooter.IsBot == true)
+            {
+                return;
+            }
+
+            // Self-kills / world deaths are not relevant.
+            if (shooter.Index == victim.Index)
+            {
+                return;
+            }
+
+            BacktrackData data = playerData[shooter.Index];
+            if (data == null)
+            {
+                return;
+            }
+
+            uint ping = shooter.Controller.Ping;
+
+            if (ping < (uint)config.Config.PingThresholdMs)
+            {
+                // A clean (low-latency) kill resets the streak.
+                data.suspiciousKills = 0;
+                return;
+            }
+
+            data.suspiciousKills++;
+            if (data.suspiciousKills >= config.Config.SuspiciousKillsBeforeLog)
+            {
+                OnPlayerDetected(shooter,
+                    $"Backtrack (review) -> {data.suspiciousKills} high-latency kills, ping {ping}ms (>= {config.Config.PingThresholdMs}ms). Manual demo review recommended.");
+                data.suspiciousKills = 0;
+            }
+        }
+
+        private void OnActionCommand(CCSPlayerController? player, CommandInfo command)
+        {
+            if (CommandHandler.HasPermission(player) == false) return;
+            if (command.ArgCount != 2) return;
+            if (int.TryParse(command.ArgByIndex(1), out int action) == false) return;
+            config.Config.DetectionAction = (ActionType)action;
+            config.Save();
+        }
+    }
+}
+
+```
+
+`Detections/Modules/BunnyHop.cs`:
+
+```cs
+using CounterStrikeSharp.API;
+using CounterStrikeSharp.API.Core;
+using CounterStrikeSharp.API.Modules.Admin;
+using CounterStrikeSharp.API.Modules.Commands;
+using CS2AntiCheat.Core;
+using CS2AntiCheat.Handlers;
+
+namespace CS2AntiCheat.Detections.Modules
+{
+    public class BunnyHopSaveData
+    {
+        public bool DetectionEnabled { get; set; } = true;
+        public ActionType DetectionAction { get; set; } = ActionType.Log;
+    }
+
+    internal class BunnyHopData
+    {
+        internal int perfectBhops;
+    }
+
+    /*
+     * Module: Bunny Hop
+     * Purpose: Detect players that does tick perfect bunny hops over and over again
+     * NOTE: Not production ready. Needs testing
+     */
+    internal class BunnyHop : BaseModule
+    {
+        internal override string Name => "BunnyHop";
+        internal override ActionType ActionType => config.Config.DetectionAction;
+
+        private readonly BaseConfig<BunnyHopSaveData> config;
+        private readonly BunnyHopData[] playerData;
+
+        internal BunnyHop() : base()
+        {
+            config = new BaseConfig<BunnyHopSaveData>("BunnyHop");
+            playerData = new BunnyHopData[Server.MaxPlayers];
+
+            CommandHandler.RegisterCommand("tbac_bhop_action", "Which action to take on the player. 0 = none | 1 = log | 2 = kick | 3 = ban", OnActionCommand);
+
+            Globals.Log($"BunnyHop Initialized");
+        }
+
+        internal override void OnPlayerJoin(PlayerData player)
+        {
+            if (player.IsBot == true)
+            {
+                return;
+            }
+
+            playerData[player.Index] = new BunnyHopData()
+            {
+                perfectBhops = 0
+            };
+        }
+
+        /*internal override void OnPlayerJump(PlayerData player)
+        {
+            //Server.PrintToChatAll($"{player.Controller.PlayerName} -> Jumped");
+        }
+
+        internal override void OnPlayerTick(PlayerData player)
+        {
+            BunnyHopData data = playerData[player.Index];
+
+            PlayerButtons buttons = player.Controller.Buttons;
+            if (buttons.HasFlag(PlayerButtons.Jump) == true)
+            {
+                //Server.PrintToChatAll($"{player.Controller.PlayerName} -> Jumped");
+            }
+        }*/
+
+        // ----- Commands ----- \\
+
+        private void OnActionCommand(CCSPlayerController? player, CommandInfo command)
+        {
+            if (CommandHandler.HasPermission(player) == false)
+            {
+                return;
+            }
+
+            if (command.ArgCount != 2)
+            {
+                return;
+            }
+
+            string arg = command.ArgByIndex(1);
+            if (int.TryParse(arg, out int action) == false)
+            {
+                return;
+            }
+
+            ActionType actionType = (ActionType)action;
+            if (config.Config.DetectionAction.HasFlag(actionType) == false)
+            {
+                return;
+            }
+
+            config.Config.DetectionAction = actionType;
+            config.Save();
+        }
+    }
+}
+
+```
+
+`Detections/Modules/DuckSpam.cs`:
+
+```cs
+using CounterStrikeSharp.API;
+using CounterStrikeSharp.API.Core;
+using CounterStrikeSharp.API.Modules.Admin;
+using CounterStrikeSharp.API.Modules.Commands;
+using CS2AntiCheat.Core;
+using CS2AntiCheat.Handlers;
+
+namespace CS2AntiCheat.Detections.Modules
+{
+    public class DuckSpamSaveData
+    {
+        public bool DetectionEnabled { get; set; } = true;
+        public ActionType DetectionAction { get; set; } = ActionType.Kick;
+
+        // Maximum duck<->unduck toggles allowed within the sampling window. A human cannot toggle
+        // crouch dozens of times per second; fake-duck anti-aim scripts do. Conservative default.
+        public int MaxToggles { get; set; } = 10;
+
+        // Sampling window in server ticks (64 tick => 64 ticks ~= 1 second).
+        public int WindowTicks { get; set; } = 64;
+    }
+
+    internal class DuckSpamData
+    {
+        internal bool lastDuck;
+        internal bool hasLast;
+        internal int toggles;
+        internal int windowStartTick;
+    }
+
+    /*
+     * Module: Duck Spam (fake-duck)
+     * Purpose: Flag crouch toggling faster than any human input can produce.
+     * Safe: counts physical toggle rate over a window; legitimate crouch use stays far below.
+     */
+    internal class DuckSpam : BaseModule
+    {
+        internal override string Name => "DuckSpam";
+        internal override ActionType ActionType => config.Config.DetectionAction;
+
+        private const uint DuckButton = 4; // PlayerButtons.Duck
+
+        private readonly BaseConfig<DuckSpamSaveData> config;
+        private readonly DuckSpamData[] playerData;
+
+        internal DuckSpam() : base()
+        {
+            config = new BaseConfig<DuckSpamSaveData>("DuckSpam");
+            playerData = new DuckSpamData[Server.MaxPlayers];
+
+            CommandHandler.RegisterCommand("tbac_duckspam_action", "Which action to take on the player. 0 = none | 1 = log | 2 = kick | 3 = ban", OnActionCommand);
+
+            Globals.Log($"DuckSpam Initialized");
+        }
+
+        internal override void OnPlayerJoin(PlayerData player)
+        {
+            if (player.IsBot == true)
+            {
+                return;
+            }
+
+            playerData[player.Index] = new DuckSpamData { hasLast = false, toggles = 0, windowStartTick = Server.TickCount };
+        }
+
+        internal override void OnPlayerTick(PlayerData player)
+        {
+            if (config.Config.DetectionEnabled == false || player.IsBot == true)
+            {
+                return;
+            }
+
+            DuckSpamData data = playerData[player.Index];
+            if (data == null)
+            {
+                return;
+            }
+
+            var movement = player.Pawn.MovementServices;
+            if (movement == null)
+            {
+                return;
+            }
+
+            bool ducking = (movement.Buttons.ButtonStates[0] & DuckButton) != 0;
+
+            if (data.hasLast == false)
+            {
+                data.lastDuck = ducking;
+                data.hasLast = true;
+                return;
+            }
+
+            if (ducking != data.lastDuck)
+            {
+                data.toggles++;
+                data.lastDuck = ducking;
+            }
+
+            int now = Server.TickCount;
+            if (now - data.windowStartTick >= config.Config.WindowTicks)
+            {
+                if (data.toggles > config.Config.MaxToggles)
+                {
+                    OnPlayerDetected(player, $"DuckSpam -> {data.toggles} toggles in {config.Config.WindowTicks} ticks (limit {config.Config.MaxToggles})");
+                }
+
+                data.toggles = 0;
+                data.windowStartTick = now;
+            }
+        }
+
+        private void OnActionCommand(CCSPlayerController? player, CommandInfo command)
+        {
+            if (CommandHandler.HasPermission(player) == false) return;
+            if (command.ArgCount != 2) return;
+            if (int.TryParse(command.ArgByIndex(1), out int action) == false) return;
+            config.Config.DetectionAction = (ActionType)action;
+            config.Save();
+        }
+    }
+}
+
+```
+
+`Detections/Modules/ImpossibleYaw.cs`:
+
+```cs
+using CounterStrikeSharp.API;
+using CounterStrikeSharp.API.Core;
+using CounterStrikeSharp.API.Modules.Admin;
+using CounterStrikeSharp.API.Modules.Commands;
+using CounterStrikeSharp.API.Modules.Utils;
+using CS2AntiCheat.Core;
+using CS2AntiCheat.Handlers;
+
+namespace CS2AntiCheat.Detections.Modules
+{
+    public class ImpossibleYawSaveData
+    {
+        public bool DetectionEnabled { get; set; } = true;
+        public ActionType DetectionAction { get; set; } = ActionType.Kick;
+
+        // Maximum yaw change (degrees) allowed between two consecutive ticks. A human mouse flick
+        // tops out well below a full continuous spin; spinbots rotate far faster. 120 deg/tick at
+        // 64 tick = ~7680 deg/s, which no legitimate input produces continuously.
+        public float MaxYawDeltaPerTick { get; set; } = 120f;
+
+        // Consecutive over-limit ticks before acting (a spinbot trips this every tick; a one-off
+        // teleport/respawn angle snap will not sustain it).
+        public int MaxDetectionsBeforeAction { get; set; } = 6;
+    }
+
+    internal class ImpossibleYawData
+    {
+        internal float lastYaw;
+        internal bool hasLast;
+        internal int detections;
+    }
+
+    /*
+     * Module: Impossible Yaw (spinbot)
+     * Purpose: Flag horizontal view rotation faster than any legitimate input can sustain.
+     * Safe: measures a physical impossibility (sustained per-tick yaw delta), not a statistic.
+     */
+    internal class ImpossibleYaw : BaseModule
+    {
+        internal override string Name => "ImpossibleYaw";
+        internal override ActionType ActionType => config.Config.DetectionAction;
+
+        private readonly BaseConfig<ImpossibleYawSaveData> config;
+        private readonly ImpossibleYawData[] playerData;
+
+        internal ImpossibleYaw() : base()
+        {
+            config = new BaseConfig<ImpossibleYawSaveData>("ImpossibleYaw");
+            playerData = new ImpossibleYawData[Server.MaxPlayers];
+
+            CommandHandler.RegisterCommand("tbac_impossibleyaw_action", "Which action to take on the player. 0 = none | 1 = log | 2 = kick | 3 = ban", OnActionCommand);
+
+            Globals.Log($"ImpossibleYaw Initialized");
+        }
+
+        internal override void OnPlayerJoin(PlayerData player)
+        {
+            if (player.IsBot == true)
+            {
+                return;
+            }
+
+            playerData[player.Index] = new ImpossibleYawData { hasLast = false, detections = 0 };
+        }
+
+        internal override void OnPlayerTick(PlayerData player)
+        {
+            if (config.Config.DetectionEnabled == false || player.IsBot == true)
+            {
+                return;
+            }
+
+            ImpossibleYawData data = playerData[player.Index];
+            if (data == null)
+            {
+                return;
+            }
+
+            float yaw = player.Pawn.EyeAngles.Y;
+
+            if (data.hasLast == false)
+            {
+                data.lastYaw = yaw;
+                data.hasLast = true;
+                return;
+            }
+
+            // Shortest angular distance between the two yaws (handles the -180/180 wrap).
+            float delta = MathF.Abs(yaw - data.lastYaw) % 360f;
+            if (delta > 180f)
+            {
+                delta = 360f - delta;
+            }
+
+            data.lastYaw = yaw;
+
+            if (delta > config.Config.MaxYawDeltaPerTick)
+            {
+                data.detections++;
+                if (data.detections >= config.Config.MaxDetectionsBeforeAction)
+                {
+                    OnPlayerDetected(player, $"ImpossibleYaw -> {delta:F1} deg/tick (limit {config.Config.MaxYawDeltaPerTick})");
+                    data.detections = 0;
+                }
+            }
+            else
+            {
+                // Decay so isolated spikes (teleport, respawn) do not accumulate into a ban.
+                if (data.detections > 0)
+                {
+                    data.detections--;
+                }
+            }
+        }
+
+        private void OnActionCommand(CCSPlayerController? player, CommandInfo command)
+        {
+            if (CommandHandler.HasPermission(player) == false) return;
+            if (command.ArgCount != 2) return;
+            if (int.TryParse(command.ArgByIndex(1), out int action) == false) return;
+            config.Config.DetectionAction = (ActionType)action;
+            config.Save();
+        }
+    }
+}
+
+```
+
+`Detections/Modules/NoRecoil.cs`:
+
+```cs
+using CounterStrikeSharp.API;
+using CounterStrikeSharp.API.Core;
+using CounterStrikeSharp.API.Modules.Admin;
+using CounterStrikeSharp.API.Modules.Commands;
+using CS2AntiCheat.Core;
+using CS2AntiCheat.Handlers;
+
+namespace CS2AntiCheat.Detections.Modules
+{
+    public class NoRecoilSaveData
+    {
+        public bool DetectionEnabled { get; set; } = true;
+
+        // Per your request this defaults to Ban. NOTE: server-side no-recoil detection is inherently
+        // less certain than the physical-impossibility modules; consider running it on Log (1) first
+        // and watching for false positives before leaving it on Ban (3).
+        public ActionType DetectionAction { get; set; } = ActionType.Ban;
+
+        // Minimum consecutive full-auto shots in one burst before the burst is evaluated. Long
+        // bursts are where recoil compensation is unmistakable, so a high value avoids tap/burst FPs.
+        public int MinBurstShots { get; set; } = 12;
+
+        // Aim-punch magnitude (degrees) that must have accumulated over the burst for it to count as
+        // "recoil was clearly applied". Below this the engine barely kicked, so we skip (no verdict).
+        public float MinAccumulatedPunch { get; set; } = 4.0f;
+
+        // Maximum total vertical view movement (degrees) across the burst for it to be considered
+        // "not compensating". A legit player pulls down noticeably against spray; a no-recoil cheat
+        // leaves the view almost still. Conservative so only near-zero compensation trips it.
+        public float MaxPitchCompensation { get; set; } = 1.0f;
+
+        public int MaxDetectionsBeforeAction { get; set; } = 2;
+    }
+
+    internal class NoRecoilData
+    {
+        internal int burstShots;
+        internal float burstStartPitch;
+        internal float lastPunch;
+        internal float accumulatedPunch;
+        internal int lastShotTick;
+        internal int detections;
+    }
+
+    /*
+     * Module: No Recoil (conservative)
+     * Purpose: Flag sustained full-auto bursts where clear recoil (aim punch) was applied but the
+     *          player's view barely moved to compensate - the signature of recoil removal.
+     * CAUTION: This is the least certain module (unlike the pure-physics ones). Thresholds are
+     *          deliberately conservative; prefer Log first on a live server.
+     */
+    internal class NoRecoil : BaseModule
+    {
+        internal override string Name => "NoRecoil";
+        internal override ActionType ActionType => config.Config.DetectionAction;
+
+        private const int BurstGapTicks = 16; // >~0.25s between shots ends the burst
+
+        private readonly BaseConfig<NoRecoilSaveData> config;
+        private readonly NoRecoilData[] playerData;
+
+        internal NoRecoil() : base()
+        {
+            config = new BaseConfig<NoRecoilSaveData>("NoRecoil");
+            playerData = new NoRecoilData[Server.MaxPlayers];
+
+            CommandHandler.RegisterCommand("tbac_norecoil_action", "Which action to take on the player. 0 = none | 1 = log | 2 = kick | 3 = ban", OnActionCommand);
+
+            Globals.Log($"NoRecoil Initialized");
+        }
+
+        internal override void OnPlayerJoin(PlayerData player)
+        {
+            if (player.IsBot == true)
+            {
+                return;
+            }
+
+            playerData[player.Index] = new NoRecoilData();
+        }
+
+        internal override void OnPlayerShoot(PlayerData player)
+        {
+            if (config.Config.DetectionEnabled == false || player.IsBot == true)
+            {
+                return;
+            }
+
+            NoRecoilData data = playerData[player.Index];
+            if (data == null)
+            {
+                return;
+            }
+
+            int now = Server.TickCount;
+            float pitch = player.Pawn.EyeAngles.X;
+            float punch = GetPunchMagnitude(player);
+
+            // A gap between shots ends the previous burst; start a fresh one.
+            if (data.burstShots == 0 || now - data.lastShotTick > BurstGapTicks)
+            {
+                StartBurst(data, now, pitch, punch);
+                return;
+            }
+
+            data.burstShots++;
+            data.lastShotTick = now;
+
+            // Accumulate how much recoil (aim punch) the engine applied during the burst.
+            float punchDelta = MathF.Abs(punch - data.lastPunch);
+            data.accumulatedPunch += punchDelta;
+            data.lastPunch = punch;
+
+            // Only evaluate once the burst is long enough to be unambiguous.
+            if (data.burstShots < config.Config.MinBurstShots)
+            {
+                return;
+            }
+
+            // How much the player actually moved their view vertically across the burst.
+            float pitchCompensation = MathF.Abs(pitch - data.burstStartPitch);
+
+            bool recoilClearlyApplied = data.accumulatedPunch >= config.Config.MinAccumulatedPunch;
+            bool noCompensation = pitchCompensation <= config.Config.MaxPitchCompensation;
+
+            if (recoilClearlyApplied && noCompensation)
+            {
+                data.detections++;
+                if (data.detections >= config.Config.MaxDetectionsBeforeAction)
+                {
+                    OnPlayerDetected(player,
+                        $"NoRecoil -> burst {data.burstShots} shots, punch {data.accumulatedPunch:F2} deg, view moved {pitchCompensation:F2} deg");
+                    data.detections = 0;
+                }
+
+                // Reset the burst so one long spray is counted once.
+                StartBurst(data, now, pitch, punch);
+            }
+        }
+
+        private static void StartBurst(NoRecoilData data, int tick, float pitch, float punch)
+        {
+            data.burstShots = 1;
+            data.burstStartPitch = pitch;
+            data.lastPunch = punch;
+            data.accumulatedPunch = 0f;
+            data.lastShotTick = tick;
+        }
+
+        /// <summary>Magnitude of the applied aim punch (recoil kick) in degrees, 0 if unavailable.</summary>
+        private static float GetPunchMagnitude(PlayerData player)
+        {
+            var punchServices = player.Pawn.AimPunchServices;
+            if (punchServices == null)
+            {
+                return 0f;
+            }
+
+            var angle = punchServices.PredictableBaseAngle;
+            return MathF.Sqrt((angle.X * angle.X) + (angle.Y * angle.Y));
+        }
+
+        private void OnActionCommand(CCSPlayerController? player, CommandInfo command)
+        {
+            if (CommandHandler.HasPermission(player) == false) return;
+            if (command.ArgCount != 2) return;
+            if (int.TryParse(command.ArgByIndex(1), out int action) == false) return;
+            config.Config.DetectionAction = (ActionType)action;
+            config.Save();
+        }
+    }
+}
+
+```
+
+`Detections/Modules/RapidFire.cs`:
+
+```cs
+using CounterStrikeSharp.API;
+using CounterStrikeSharp.API.Core;
+using CounterStrikeSharp.API.Modules.Admin;
+using CounterStrikeSharp.API.Modules.Commands;
+using CS2AntiCheat.Core;
+using CS2AntiCheat.Handlers;
+
+namespace CS2AntiCheat.Detections.Modules
+{
+    public class RapidFireSaveData
+    {
+        public bool DetectionEnabled { get; set; } = true;
+        public ActionType DetectionAction { get; set; } = ActionType.Kick;
+
+        public int MaxDetectionsBeforeAction { get; set; } = 5;
+    }
+
+    internal class RapidFireData
+    {
+        internal int lastBulletShotTick;
+        internal int lastNextAttackTick;
+        internal int rapidDetections;
+    }
+
+    /*
+     * Module: Rapid Fire
+     * Purpose: Detect rapid fire where weapons can fire at speeds that are not normal, either within the same tick or the ticks after
+     * NOTE: This is not production ready. It needs a lot of testing so keep that in mind when using this
+     */
+    internal class RapidFire : BaseModule
+    {
+        internal override string Name => "RapidFire";
+        internal override ActionType ActionType => config.Config.DetectionAction;
+
+        private readonly BaseConfig<RapidFireSaveData> config;
+        private readonly RapidFireData[] playerData;
+
+        internal RapidFire() : base()
+        {
+            config = new BaseConfig<RapidFireSaveData>("RapidFire");
+            playerData = new RapidFireData[Server.MaxPlayers];
+
+            CommandHandler.RegisterCommand("tbac_rapidfire_action", "Which action to take on the player. 0 = none | 1 = log | 2 = kick | 3 = ban", OnActionCommand);
+
+            Globals.Log($"RapidFire Initialized");
+        }
+
+        internal override void OnPlayerJoin(PlayerData player)
+        {
+            if (player.IsBot == true)
+            {
+                return;
+            }
+
+            playerData[player.Index] = new RapidFireData()
+            {
+                lastBulletShotTick = 0,
+                lastNextAttackTick = 0,
+                rapidDetections = 0
+            };
+        }
+
+        internal override void OnPlayerShoot(PlayerData player)
+        {
+            if (config.Config.DetectionEnabled == false)
+            {
+                return;
+            }
+
+            if (player.IsBot == true)
+            {
+                return;
+            }
+
+            CCSWeaponBaseGun weapon = player.GetWeapon();
+            string weaponName = weapon.DesignerName;
+
+            if (weaponName == "weapon_healthshot")
+            {
+                return;
+            }
+
+            int nextAttack;
+            switch (weapon.WeaponMode)
+            {
+                case CSWeaponMode.Primary_Mode: nextAttack = weapon.NextPrimaryAttackTick; break;
+                case CSWeaponMode.Secondary_Mode: nextAttack = weapon.NextSecondaryAttackTick; break;
+                default: Globals.Log($"Unsupported WeaponMode: {(int)weapon.WeaponMode} on {weaponName}"); return;
+            }
+
+            int serverTickCount = Server.TickCount;
+            RapidFireData data = playerData[player.Index];
+
+            // Authoritative check: the engine sets NextPrimary/SecondaryAttackTick to the earliest
+            // tick the weapon is ALLOWED to fire again. A shot landing strictly before that tick is
+            // physically impossible without manipulating the fire rate. This is far more reliable
+            // than the previous "two shots one tick apart" heuristic (which flagged legit fast guns).
+            //
+            // nextAttack was captured AFTER this shot, so it already points at the next allowed tick.
+            // We compare the gap since the previous shot to how long the previous shot's cooldown
+            // should have been. A conservative 1-tick tolerance absorbs rounding / subtick timing.
+            int tickDiff = serverTickCount - data.lastBulletShotTick;
+
+            // Reset the burst tracking after a long pause between shots.
+            if (tickDiff > 64)
+            {
+                data.lastBulletShotTick = serverTickCount;
+                data.lastNextAttackTick = nextAttack;
+                data.rapidDetections = 0;
+                return;
+            }
+
+            // If this shot occurred before the previously-promised next-allowed tick (with a 1-tick
+            // tolerance), the weapon fired faster than the engine permits.
+            bool firedTooEarly = data.lastNextAttackTick > 0 && serverTickCount < data.lastNextAttackTick - 1;
+
+            if (firedTooEarly)
+            {
+                data.rapidDetections++;
+                Globals.Log($"RapidFire suspect -> {player.Controller.PlayerName} | {weaponName} | shotTick {serverTickCount} < allowed {data.lastNextAttackTick} | gap {tickDiff}");
+            }
+            else if (data.rapidDetections > 0)
+            {
+                // Decay so an occasional timing blip never accumulates into a ban.
+                data.rapidDetections--;
+            }
+
+            if (data.rapidDetections >= config.Config.MaxDetectionsBeforeAction)
+            {
+                OnPlayerDetected(player, $"RapidFire -> {weaponName} fired faster than engine cooldown ({data.rapidDetections} times)");
+                data.rapidDetections = 0;
+            }
+
+            data.lastBulletShotTick = serverTickCount;
+            data.lastNextAttackTick = nextAttack;
+        }
+
+        // ----- Commands ----- \\
+
+        private void OnActionCommand(CCSPlayerController? player, CommandInfo command)
+        {
+            if (CommandHandler.HasPermission(player) == false)
+            {
+                return;
+            }
+
+            if (command.ArgCount != 2)
+            {
+                return;
+            }
+
+            string arg = command.ArgByIndex(1);
+            if (int.TryParse(arg, out int action) == false)
+            {
+                return;
+            }
+
+            ActionType actionType = (ActionType)action;
+            if (config.Config.DetectionAction.HasFlag(actionType) == false)
+            {
+                return;
+            }
+
+            config.Config.DetectionAction = actionType;
+            config.Save();
+        }
+    }
+}
+
+```
+
+`Detections/Modules/UntrustedAngles.cs`:
+
+```cs
+using CounterStrikeSharp.API.Core;
+using CounterStrikeSharp.API.Modules.Admin;
+using CounterStrikeSharp.API.Modules.Commands;
+using CounterStrikeSharp.API.Modules.Utils;
+using CS2AntiCheat.Core;
+using CS2AntiCheat.Handlers;
+
+namespace CS2AntiCheat.Detections.Modules
+{
+    public class UntrustedAnglesSaveData
+    {
+        public bool DetectionEnabled { get; set; } = true;
+        public ActionType DetectionAction { get; set; } = ActionType.Kick;
+    }
+
+    /*
+     * Module: Untrusted Angles
+     * Purpose: Detect players which use eye angles that are outside the normal limit
+     */
+    internal class UntrustedAngles : BaseModule
+    {
+        internal override string Name => "UntrustedAngles";
+        internal override ActionType ActionType => config.Config.DetectionAction;
+
+        //NOTE: We're adding 0.1 extra here due how floating point numbers work in computers. 180f could theoretically still be 180.0002, etc.
+        private const float pitchMin = -89.1f;
+        private const float pitchMax = 89.1f;
+
+        private const float yawMin = -180.1f;
+        private const float yawMax = 180.1f;
+
+        private const float rollMin = -50.1f;
+        private const float rollMax = 50.1f;
+
+        private readonly BaseConfig<UntrustedAnglesSaveData> config;
+
+        internal UntrustedAngles() : base()
+        {
+            config = new BaseConfig<UntrustedAnglesSaveData>("UntrustedAngles");
+
+            CommandHandler.RegisterCommand("tbac_untrustedangles_action", "Which action to take on the player. 0 = none | 1 = log | 2 = kick | 3 = ban", OnActionCommand);
+
+            Globals.Log($"UntrustedAngles Initialized");
+        }
+
+        internal override void OnPlayerTick(PlayerData player)
+        {
+            if (config.Config.DetectionEnabled == false)
+            {
+                return;
+            }
+
+            if (player.IsBot == true)
+            {
+                return;
+            }
+
+            QAngle eyeAngles = player.Pawn.EyeAngles;
+            float pitch = eyeAngles.X;
+            float yaw = eyeAngles.Y;
+            float roll = eyeAngles.Z;
+
+            if (pitch < pitchMin || pitch > pitchMax)
+            {
+                string reason = $"Untrusted EyeAngles Pitch -> {pitch}";
+                OnPlayerDetected(player, reason);
+
+                return;
+            }
+            else if (yaw < yawMin || yaw > yawMax)
+            {
+                string reason = $"Untrusted EyeAngles Yaw -> {yaw}";
+                OnPlayerDetected(player, reason);
+
+                return;
+            }
+            else if (roll < rollMin || roll > rollMax)
+            {
+                string reason = $"Untrusted EyeAngles Roll -> {roll}";
+                OnPlayerDetected(player, reason);
+
+                return;
+            }
+        }
+
+        // ----- Commands ----- \\
+
+        private void OnActionCommand(CCSPlayerController? player, CommandInfo command)
+        {
+            if (CommandHandler.HasPermission(player) == false)
+            {
+                return;
+            }
+
+            if (command.ArgCount != 2)
+            {
+                return;
+            }
+
+            string arg = command.ArgByIndex(1);
+            if (int.TryParse(arg, out int action) == false)
+            {
+                return;
+            }
+
+            ActionType actionType = (ActionType)action;
+            if (config.Config.DetectionAction.HasFlag(actionType) == false)
+            {
+                return;
+            }
+
+            config.Config.DetectionAction = actionType;
+            config.Save();
+        }
+    }
+}
+
+```
+
+`Detections/Modules/UserCmdRate.cs`:
+
+```cs
+using CounterStrikeSharp.API;
+using CounterStrikeSharp.API.Core;
+using CounterStrikeSharp.API.Modules.Admin;
+using CounterStrikeSharp.API.Modules.Commands;
+using CS2AntiCheat.Core;
+using CS2AntiCheat.Handlers;
+
+namespace CS2AntiCheat.Detections.Modules
+{
+    public class UserCmdRateSaveData
+    {
+        public bool DetectionEnabled { get; set; } = true;
+        public ActionType DetectionAction { get; set; } = ActionType.Kick;
+
+        // Max user commands a client may process per server tick on average over the window. The
+        // engine normally processes ~1 usercmd per tick; sustained values well above that indicate
+        // command flooding / choke exploits. 2.0 leaves generous headroom for legit jitter.
+        public float MaxCommandsPerTick { get; set; } = 2.0f;
+
+        // Sampling window in server ticks before evaluating the average.
+        public int WindowTicks { get; set; } = 64;
+
+        public int MaxDetectionsBeforeAction { get; set; } = 3;
+    }
+
+    internal class UserCmdRateData
+    {
+        internal uint lastCommandNumber;
+        internal bool hasLast;
+        internal int windowStartTick;
+        internal uint windowStartCommand;
+        internal int detections;
+    }
+
+    /*
+     * Module: UserCmd Rate
+     * Purpose: Flag clients processing far more user commands than ticks (command flooding).
+     * Safe-ish: uses LastCommandNumberProcessed vs ticks elapsed; conservative threshold.
+     */
+    internal class UserCmdRate : BaseModule
+    {
+        internal override string Name => "UserCmdRate";
+        internal override ActionType ActionType => config.Config.DetectionAction;
+
+        private readonly BaseConfig<UserCmdRateSaveData> config;
+        private readonly UserCmdRateData[] playerData;
+
+        internal UserCmdRate() : base()
+        {
+            config = new BaseConfig<UserCmdRateSaveData>("UserCmdRate");
+            playerData = new UserCmdRateData[Server.MaxPlayers];
+
+            CommandHandler.RegisterCommand("tbac_usercmdrate_action", "Which action to take on the player. 0 = none | 1 = log | 2 = kick | 3 = ban", OnActionCommand);
+
+            Globals.Log($"UserCmdRate Initialized");
+        }
+
+        internal override void OnPlayerJoin(PlayerData player)
+        {
+            if (player.IsBot == true)
+            {
+                return;
+            }
+
+            playerData[player.Index] = new UserCmdRateData { hasLast = false, detections = 0 };
+        }
+
+        internal override void OnPlayerTick(PlayerData player)
+        {
+            if (config.Config.DetectionEnabled == false || player.IsBot == true)
+            {
+                return;
+            }
+
+            UserCmdRateData data = playerData[player.Index];
+            if (data == null)
+            {
+                return;
+            }
+
+            var movement = player.Pawn.MovementServices;
+            if (movement == null)
+            {
+                return;
+            }
+
+            uint cmd = movement.LastCommandNumberProcessed;
+            int now = Server.TickCount;
+
+            if (data.hasLast == false)
+            {
+                data.hasLast = true;
+                data.lastCommandNumber = cmd;
+                data.windowStartTick = now;
+                data.windowStartCommand = cmd;
+                return;
+            }
+
+            data.lastCommandNumber = cmd;
+
+            int ticksElapsed = now - data.windowStartTick;
+            if (ticksElapsed < config.Config.WindowTicks)
+            {
+                return;
+            }
+
+            // Commands processed across the window vs ticks that passed.
+            long commandsProcessed = (long)cmd - data.windowStartCommand;
+            data.windowStartTick = now;
+            data.windowStartCommand = cmd;
+
+            // Ignore nonsensical windows (counter reset on respawn/reconnect).
+            if (commandsProcessed <= 0 || ticksElapsed <= 0)
+            {
+                return;
+            }
+
+            float perTick = (float)commandsProcessed / ticksElapsed;
+            if (perTick > config.Config.MaxCommandsPerTick)
+            {
+                data.detections++;
+                if (data.detections >= config.Config.MaxDetectionsBeforeAction)
+                {
+                    OnPlayerDetected(player, $"UserCmdRate -> {perTick:F2} cmds/tick over {ticksElapsed} ticks (limit {config.Config.MaxCommandsPerTick})");
+                    data.detections = 0;
+                }
+            }
+            else if (data.detections > 0)
+            {
+                data.detections--;
+            }
+        }
+
+        private void OnActionCommand(CCSPlayerController? player, CommandInfo command)
+        {
+            if (CommandHandler.HasPermission(player) == false) return;
+            if (command.ArgCount != 2) return;
+            if (int.TryParse(command.ArgByIndex(1), out int action) == false) return;
+            config.Config.DetectionAction = (ActionType)action;
+            config.Save();
+        }
+    }
+}
+
+```
+
+`Handlers/Commands.cs`:
+
+```cs
+using CounterStrikeSharp.API.Core;
+using CounterStrikeSharp.API.Modules.Admin;
+using CounterStrikeSharp.API.Modules.Commands;
+using CS2AntiCheat.Core;
+
+namespace CS2AntiCheat.Handlers
+{
+    internal static class CommandHandler
+    {
+        private static BasePlugin? plugin;
+
+        /// <summary>
+        /// True when the caller may run an admin command. The server console (null) always passes;
+        /// an in-game player must hold the configurable permission (General.json CommandPermission,
+        /// default @css/root). Replies are left to the caller.
+        /// </summary>
+        internal static bool HasPermission(CCSPlayerController? player)
+        {
+            if (player == null)
+            {
+                return true; // server console
+            }
+
+            if (player.IsValid == false)
+            {
+                return false;
+            }
+
+            string flag = GeneralConfig.GetGeneralConfig().Config.CommandPermission;
+            if (string.IsNullOrWhiteSpace(flag))
+            {
+                return true; // no restriction configured
+            }
+
+            return AdminManager.PlayerHasPermissions(player, flag);
+        }
+
+        internal static void Initialize(BasePlugin basePlugin)
+        {
+            plugin = basePlugin;
+
+            Globals.Log($"CommandHandler Initialized");
+        }
+
+        internal static bool RegisterCommand(string command, string description, CommandInfo.CommandCallback handler)
+        {
+            if (plugin == null)
+            {
+                return false;
+            }
+
+            if (string.IsNullOrEmpty(command) == true)
+            {
+                return false;
+            }
+
+            if (handler == null)
+            {
+                return false;
+            }
+
+            plugin.AddCommand(command, description, handler);
+            return true;
+        }
+    }
+}
+
+```
+
+`Handlers/EventHandlers.cs`:
+
+```cs
+using CounterStrikeSharp.API;
+using CounterStrikeSharp.API.Core;
+using CS2AntiCheat.Core;
+using CS2AntiCheat.Detections;
+
+namespace CS2AntiCheat.Handlers
+{
+    internal static class EventHandlers
+    {
+        internal static void Initialize(BasePlugin plugin, bool hotReload)
+        {
+            plugin.RegisterEventHandler<EventPlayerConnectFull>(OnPlayerConnectFull);
+            plugin.RegisterEventHandler<EventPlayerDisconnect>(OnPlayerDisconnect, HookMode.Pre);
+            plugin.RegisterEventHandler<EventPlayerActivate>(OnPlayerActivate);
+
+            plugin.RegisterEventHandler<EventPlayerJump>(OnPlayerJump);
+            plugin.RegisterEventHandler<EventPlayerHurt>(OnPlayerHurt);
+            plugin.RegisterEventHandler<EventPlayerDeath>(OnPlayerDeath);
+
+            plugin.RegisterEventHandler<EventWeaponFire>(OnWeaponFire);
+
+            plugin.RegisterEventHandler<EventRoundStart>(OnRoundStart);
+            plugin.RegisterEventHandler<EventRoundEnd>(OnRoundEnd);
+
+            Globals.Log($"EventHandlers Initialized");
+
+            if (hotReload == true)
+            {
+                for (int i = 0; i < Server.MaxPlayers; i++)
+                {
+                    CCSPlayerController? controller = Utilities.GetPlayerFromSlot(i);
+                    if (controller == null || controller.IsValid == false)
+                    {
+                        continue;
+                    }
+
+                    if (controller.Connected != PlayerConnectedState.Connected)
+                    {
+                        continue;
+                    }
+
+                    OnPlayerJoined(controller);
+                }
+            }
+        }
+
+        private static HookResult OnPlayerActivate(EventPlayerActivate activateEvent, GameEventInfo _)
+        {
+            CCSPlayerController? controller = activateEvent.Userid;
+            if (controller == null || controller.IsValid == false)
+            {
+                return HookResult.Continue;
+            }
+
+            // Normal players are already getting handled correctly. No need to do that here
+            if (controller.IsBot == false)
+            {
+                return HookResult.Continue;
+            }
+
+            // Skip out on SourceTV since we don't want to track a "player" like that
+            if (controller.IsHLTV == true)
+            {
+                return HookResult.Continue;
+            }
+
+            //Globals.Log($"Bot activated -> {controller.Slot} | {controller.PlayerName}");
+            OnPlayerJoined(controller);
+
+            return HookResult.Continue;
+        }
+
+        private static HookResult OnPlayerConnectFull(EventPlayerConnectFull connectEvent, GameEventInfo _)
+        {
+            OnPlayerJoined(connectEvent.Userid);
+
+            return HookResult.Continue;
+        }
+
+        private static HookResult OnPlayerDisconnect(EventPlayerDisconnect disconnectEvent, GameEventInfo _)
+        {
+            OnPlayerLeft(disconnectEvent.Userid);
+
+            return HookResult.Continue;
+        }
+
+        private static HookResult OnPlayerJump(EventPlayerJump jumpEvent, GameEventInfo _)
+        {
+            CCSPlayerController? controller = jumpEvent.Userid;
+            if (controller == null || controller.IsValid == false)
+            {
+                return HookResult.Continue;
+            }
+
+            PlayerData player = Globals.Players[controller.Slot];
+            BaseCaller.OnPlayerJump(player);
+
+            return HookResult.Continue;
+        }
+
+        private static HookResult OnPlayerHurt(EventPlayerHurt hurtEvent, GameEventInfo _)
+        {
+            CCSPlayerController? victimController = hurtEvent.Userid;
+            CCSPlayerController? shooterController = hurtEvent.Attacker;
+
+            if (victimController == null || victimController.IsValid == false ||
+                shooterController == null || shooterController.IsValid == false)
+            {
+                return HookResult.Continue;
+            }
+
+            PlayerData victim = Globals.Players[victimController.Slot];
+            PlayerData shooter = Globals.Players[shooterController.Slot];
+
+            BaseCaller.OnPlayerHurt(victim, shooter, (HitGroup_t)hurtEvent.Hitgroup);
+
+            return HookResult.Continue;
+        }
+
+        private static HookResult OnPlayerDeath(EventPlayerDeath deathEvent, GameEventInfo _)
+        {
+            CCSPlayerController? victimController = deathEvent.Userid;
+            CCSPlayerController? shooterController = deathEvent.Attacker;
+
+            if (victimController == null || victimController.IsValid == false ||
+                shooterController == null || shooterController.IsValid == false)
+            {
+                return HookResult.Continue;
+            }
+
+            PlayerData victim = Globals.Players[victimController.Slot];
+            PlayerData shooter = Globals.Players[shooterController.Slot];
+
+            if (victim == null || shooter == null)
+            {
+                return HookResult.Continue;
+            }
+
+            BaseCaller.OnPlayerDead(victim, shooter);
+
+            return HookResult.Continue;
+        }
+
+        private static HookResult OnWeaponFire(EventWeaponFire shootEvent, GameEventInfo _)
+        {
+            CCSPlayerController? controller = shootEvent.Userid;
+            if (controller == null || controller.IsValid == false)
+            {
+                return HookResult.Continue;
+            }
+
+            PlayerData shooter = Globals.Players[controller.Slot];
+            BaseCaller.OnPlayerShoot(shooter);
+
+            return HookResult.Continue;
+        }
+
+        private static HookResult OnRoundStart(EventRoundStart roundStartEvent, GameEventInfo _)
+        {
+            BaseCaller.OnRoundStart();
+
+            return HookResult.Continue;
+        }
+
+        private static HookResult OnRoundEnd(EventRoundEnd roundEndEvent, GameEventInfo _)
+        {
+            BaseCaller.OnRoundEnd();
+
+            return HookResult.Continue;
+        }
+
+        // ----- Helper Functions ----- \\
+
+        private static void OnPlayerJoined(CCSPlayerController? controller)
+        {
+            if (controller == null || controller.IsValid == false)
+            {
+                Globals.Log($"WARNING: Controller is invalid when player joined");
+                return;
+            }
+
+            CCSPlayerPawn? pawn = controller.PlayerPawn.Value;
+            if (pawn == null)
+            {
+                Globals.Log($"WARNING: Pawn is invalid when player ({controller.PlayerName}) joined");
+                return;
+            }
+
+            int playerIndex = controller.Slot;
+            PlayerData player = new PlayerData()
+            {
+                Controller = controller,
+                Pawn = pawn,
+
+                Index = playerIndex,
+                IsBot = controller.IsBot
+            };
+
+            Globals.Players[playerIndex] = player;
+            BaseCaller.OnPlayerJoin(player);
+
+            //Globals.Log($"Player joined -> {playerIndex} | {controller.PlayerName}");
+        }
+
+        private static void OnPlayerLeft(CCSPlayerController? controller)
+        {
+            if (controller == null || controller.IsValid == false)
+            {
+                Globals.Log($"WARNING: Controller is invalid when player left");
+                return;
+            }
+
+            int playerIndex = controller.Slot;
+            if (Globals.Players[playerIndex] == null)
+            {
+                return;
+            }
+
+            CCSPlayerPawn? pawn = controller.PlayerPawn.Value;
+            if (pawn == null)
+            {
+                Globals.Log($"WARNING: Pawn is invalid when player ({controller.PlayerName}) left");
+            }
+
+            PlayerData player = Globals.Players[playerIndex];
+
+            BaseCaller.OnPlayerLeave(player);
+            Globals.Players[playerIndex] = null!;
+
+            //Globals.Log($"Player left -> {playerIndex} | {controller.PlayerName}");
+        }
+    }
+}
+
+```
+
+`Handlers/EventListeners.cs`:
+
+```cs
+using CounterStrikeSharp.API.Core;
+using CS2AntiCheat.Core;
+using CS2AntiCheat.Detections;
+
+namespace CS2AntiCheat.Handlers
+{
+    public static class EventListeners
+    {
+        internal static void Initialize(BasePlugin plugin)
+        {
+            plugin.RegisterListener<Listeners.OnTick>(OnGameTick);
+            plugin.RegisterListener<Listeners.OnMapStart>(OnMapStart);
+            plugin.RegisterListener<Listeners.OnMapEnd>(OnMapEnd);
+
+            Globals.Log($"EventListeners Initialized");
+        }
+
+        private static void OnMapStart(string mapName)
+        {
+            Globals.Initialize(false);
+            Globals.RefreshServerInfo();
+        }
+
+        private static void OnMapEnd() { }
+
+        private static void OnGameTick()
+        {
+            BaseCaller.OnGameTick();
+
+            foreach (PlayerData player in Globals.Players)
+            {
+                if (player == null)
+                {
+                    continue;
+                }
+
+                BaseCaller.OnPlayerTick(player);
+            }
+        }
+    }
+}
+
+```
+
+`Handlers/UserMessagesHandler.cs`:
+
+```cs
+using CounterStrikeSharp.API;
+using CounterStrikeSharp.API.Core;
+using CounterStrikeSharp.API.Modules.UserMessages;
+using CS2AntiCheat.Core;
+
+namespace CS2AntiCheat.Handlers
+{
+    internal static class UserMessagesHandler
+    {
+        internal static void Initialize(BasePlugin plugin)
+        {
+            Globals.Log($"UserMessagesHandler Initialized");
+
+            //plugin.HookUserMessage(452, CMsgTEFireBullets, HookMode.Pre);
+        }
+
+        private static HookResult CMsgTEFireBullets(UserMessage msg)
+        {
+            string angles = msg.ReadString("angles");
+            int player = msg.ReadInt("player");
+
+            Server.PrintToChatAll($"Player -> {player} | Angles -> {angles}");
+
+            return HookResult.Continue;
+        }
+    }
+}
+
+```
+
+`Integration/DiscordIntegration.cs`:
+
+```cs
+using CS2AntiCheat.Core;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+
+namespace CS2AntiCheat.Integration
+{
+    /// <summary>All data needed to render one detection embed. Filled on the main thread.</summary>
+    internal struct DetectionReport
+    {
+        internal string PlayerName;
+        internal string SteamId64;
+        internal string ProfileUrl;
+        internal string Detection;   // module name
+        internal string Evidence;    // reason
+        internal string Punishment;  // human text for the action taken
+        internal string Map;
+        internal string Address;     // ip:port
+        internal string ServerName;  // hostname
+    }
+
+    internal class DiscordIntegration
+    {
+        // ----- Webhook payload shapes (snake_case to match the Discord API) -----
+#pragma warning disable IDE1006 // Naming Styles
+        private class WebhookData
+        {
+            public string username { get; set; } = "CS2AC";
+            public string? content { get; set; }
+            public AllowedMentions allowed_mentions { get; set; } = new();
+            public List<Embed>? embeds { get; set; }
+        }
+
+        private class AllowedMentions
+        {
+            public List<string> parse { get; set; } = new();
+            public List<string> roles { get; set; } = new();
+        }
+
+        private class Embed
+        {
+            public EmbedAuthor? author { get; set; }
+            public int color { get; set; }
+            public List<EmbedField> fields { get; set; } = new();
+            public EmbedThumbnail? thumbnail { get; set; }
+            public EmbedFooter? footer { get; set; }
+            public string? timestamp { get; set; }
+        }
+
+        private class EmbedAuthor
+        {
+            public string name { get; set; } = string.Empty;
+        }
+
+        private class EmbedField
+        {
+            public string name { get; set; } = string.Empty;
+            public string value { get; set; } = string.Empty;
+            [JsonPropertyName("inline")] public bool inlineField { get; set; }
+        }
+
+        private class EmbedThumbnail
+        {
+            public string url { get; set; } = string.Empty;
+        }
+
+        private class EmbedFooter
+        {
+            public string text { get; set; } = string.Empty;
+        }
+#pragma warning restore IDE1006 // Naming Styles
+
+        private const int EmbedColorRed = 0xE02424; // red bar on the left of the embed
+
+        private static HttpClient webClient = null!;
+        private static string webClientAddress = string.Empty;
+
+        private static string mentionPrefix = string.Empty;
+        private static AllowedMentions allowedMentions = new();
+
+        internal static bool InitializeWebhook()
+        {
+            string url = GeneralConfig.GetGeneralConfig().Config.DiscordWebhookUrl;
+
+            if (string.IsNullOrWhiteSpace(url) == true)
+            {
+                Globals.Log("Unable to initialize Webhook ('DiscordWebhookUrl' not set)");
+                return false;
+            }
+
+            webClient ??= new HttpClient();
+            webClientAddress = url.Trim();
+
+            BuildMention();
+            return true;
+        }
+
+        /// <summary>
+        /// Builds the ping prefix + allowed_mentions from DiscordMentionRoleId:
+        ///   "" -> no ping; "everyone" -> @everyone; "here" -> @here; "&lt;role id&gt;" -> that role.
+        /// </summary>
+        private static void BuildMention()
+        {
+            mentionPrefix = string.Empty;
+            allowedMentions = new AllowedMentions();
+
+            var value = GeneralConfig.GetGeneralConfig().Config.DiscordMentionRoleId?.Trim() ?? string.Empty;
+            if (string.IsNullOrEmpty(value))
+            {
+                return;
+            }
+
+            if (value.Equals("everyone", StringComparison.OrdinalIgnoreCase))
+            {
+                mentionPrefix = "@everyone ";
+                allowedMentions.parse.Add("everyone");
+            }
+            else if (value.Equals("here", StringComparison.OrdinalIgnoreCase))
+            {
+                mentionPrefix = "@here ";
+                allowedMentions.parse.Add("everyone");
+            }
+            else
+            {
+                var roleId = value.Trim('<', '>', '@', '&', ' ');
+                mentionPrefix = $"<@&{roleId}> ";
+                allowedMentions.roles.Add(roleId);
+            }
+        }
+
+        /// <summary>
+        /// Sends a detection as a rich embed (resolves the Steam avatar first for the thumbnail).
+        /// </summary>
+        internal static async void SendDetection(DetectionReport report)
+        {
+            if (webClient == null)
+            {
+                return; // webhook not configured
+            }
+
+            string avatarUrl = await GetSteamAvatarAsync(report.SteamId64);
+
+            var embed = new Embed
+            {
+                author = new EmbedAuthor { name = report.ServerName },
+                color = EmbedColorRed,
+                timestamp = DateTime.UtcNow.ToString("o"),
+                footer = new EmbedFooter { text = string.Empty }, // Discord shows date/time next to it
+                fields =
+                [
+                    new EmbedField { name = "Player", value = $"[{report.PlayerName}]({report.ProfileUrl})", inlineField = true },
+                    new EmbedField { name = "SteamID64", value = $"`{report.SteamId64}`", inlineField = true },
+                    new EmbedField { name = "Detection", value = $"`{report.Detection}`", inlineField = false },
+                    new EmbedField { name = "Evidence", value = $"```{Truncate(report.Evidence, 1000)}```", inlineField = false },
+                    new EmbedField { name = "Punishment", value = report.Punishment, inlineField = false },
+                    new EmbedField { name = "Map", value = $"`{report.Map}`", inlineField = true },
+                    new EmbedField { name = "Address", value = $"`{report.Address}`", inlineField = true }
+                ]
+            };
+
+            if (string.IsNullOrEmpty(avatarUrl) == false)
+            {
+                embed.thumbnail = new EmbedThumbnail { url = avatarUrl };
+            }
+
+            var payload = new WebhookData
+            {
+                username = "CS2AC",
+                content = string.IsNullOrEmpty(mentionPrefix) ? null : mentionPrefix.TrimEnd(),
+                allowed_mentions = allowedMentions,
+                embeds = [embed]
+            };
+
+            await PostAsync(payload);
+        }
+
+        private static async Task PostAsync(WebhookData payload)
+        {
+            string json;
+            try
+            {
+                json = JsonSerializer.Serialize(payload, new JsonSerializerOptions
+                {
+                    DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+                });
+            }
+            catch (Exception e)
+            {
+                Globals.Log($"Unable to send Webhook (Serialize Exception | {e.Message})");
+                return;
+            }
+
+            try
+            {
+                var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
+                var response = await webClient.PostAsync(webClientAddress, content);
+                if (response.StatusCode != System.Net.HttpStatusCode.OK &&
+                    response.StatusCode != System.Net.HttpStatusCode.NoContent)
+                {
+                    Globals.Log($"Discord webhook returned {response.StatusCode}");
+                }
+            }
+            catch (Exception e)
+            {
+                Globals.Log($"Unable to send Webhook (Request Exception | {e.Message})");
+            }
+        }
+
+        /// <summary>
+        /// Resolves a player's full Steam avatar from their public profile XML. No API key needed.
+        /// Returns "" on any failure (the embed then shows no thumbnail).
+        /// </summary>
+        private static async Task<string> GetSteamAvatarAsync(string steamId64)
+        {
+            if (string.IsNullOrEmpty(steamId64) || steamId64 == "0")
+            {
+                return string.Empty;
+            }
+
+            try
+            {
+                var xml = await webClient.GetStringAsync($"https://steamcommunity.com/profiles/{steamId64}/?xml=1");
+                const string open = "<avatarFull><![CDATA[";
+                const string close = "]]></avatarFull>";
+                var start = xml.IndexOf(open, StringComparison.Ordinal);
+                if (start < 0) return string.Empty;
+                start += open.Length;
+                var end = xml.IndexOf(close, start, StringComparison.Ordinal);
+                return end < 0 ? string.Empty : xml.Substring(start, end - start);
+            }
+            catch
+            {
+                return string.Empty;
+            }
+        }
+
+        private static string Truncate(string value, int max)
+        {
+            if (string.IsNullOrEmpty(value)) return string.Empty;
+            return value.Length <= max ? value : value[..max];
+        }
+    }
+}
+
+```
+
+`LICENSE`:
+
+```
+                    GNU GENERAL PUBLIC LICENSE
+                       Version 3, 29 June 2007
+
+ Copyright (C) 2007 Free Software Foundation, Inc. <https://fsf.org/>
+ Everyone is permitted to copy and distribute verbatim copies
+ of this license document, but changing it is not allowed.
+
+                            Preamble
+
+  The GNU General Public License is a free, copyleft license for
+software and other kinds of works.
+
+  The licenses for most software and other practical works are designed
+to take away your freedom to share and change the works.  By contrast,
+the GNU General Public License is intended to guarantee your freedom to
+share and change all versions of a program--to make sure it remains free
+software for all its users.  We, the Free Software Foundation, use the
+GNU General Public License for most of our software; it applies also to
+any other work released this way by its authors.  You can apply it to
+your programs, too.
+
+  When we speak of free software, we are referring to freedom, not
+price.  Our General Public Licenses are designed to make sure that you
+have the freedom to distribute copies of free software (and charge for
+them if you wish), that you receive source code or can get it if you
+want it, that you can change the software or use pieces of it in new
+free programs, and that you know you can do these things.
+
+  To protect your rights, we need to prevent others from denying you
+these rights or asking you to surrender the rights.  Therefore, you have
+certain responsibilities if you distribute copies of the software, or if
+you modify it: responsibilities to respect the freedom of others.
+
+  For example, if you distribute copies of such a program, whether
+gratis or for a fee, you must pass on to the recipients the same
+freedoms that you received.  You must make sure that they, too, receive
+or can get the source code.  And you must show them these terms so they
+know their rights.
+
+  Developers that use the GNU GPL protect your rights with two steps:
+(1) assert copyright on the software, and (2) offer you this License
+giving you legal permission to copy, distribute and/or modify it.
+
+  For the developers' and authors' protection, the GPL clearly explains
+that there is no warranty for this free software.  For both users' and
+authors' sake, the GPL requires that modified versions be marked as
+changed, so that their problems will not be attributed erroneously to
+authors of previous versions.
+
+  Some devices are designed to deny users access to install or run
+modified versions of the software inside them, although the manufacturer
+can do so.  This is fundamentally incompatible with the aim of
+protecting users' freedom to change the software.  The systematic
+pattern of such abuse occurs in the area of products for individuals to
+use, which is precisely where it is most unacceptable.  Therefore, we
+have designed this version of the GPL to prohibit the practice for those
+products.  If such problems arise substantially in other domains, we
+stand ready to extend this provision to those domains in future versions
+of the GPL, as needed to protect the freedom of users.
+
+  Finally, every program is threatened constantly by software patents.
+States should not allow patents to restrict development and use of
+software on general-purpose computers, but in those that do, we wish to
+avoid the special danger that patents applied to a free program could
+make it effectively proprietary.  To prevent this, the GPL assures that
+patents cannot be used to render the program non-free.
+
+  The precise terms and conditions for copying, distribution and
+modification follow.
+
+                       TERMS AND CONDITIONS
+
+  0. Definitions.
+
+  "This License" refers to version 3 of the GNU General Public License.
+
+  "Copyright" also means copyright-like laws that apply to other kinds of
+works, such as semiconductor masks.
+
+  "The Program" refers to any copyrightable work licensed under this
+License.  Each licensee is addressed as "you".  "Licensees" and
+"recipients" may be individuals or organizations.
+
+  To "modify" a work means to copy from or adapt all or part of the work
+in a fashion requiring copyright permission, other than the making of an
+exact copy.  The resulting work is called a "modified version" of the
+earlier work or a work "based on" the earlier work.
+
+  A "covered work" means either the unmodified Program or a work based
+on the Program.
+
+  To "propagate" a work means to do anything with it that, without
+permission, would make you directly or secondarily liable for
+infringement under applicable copyright law, except executing it on a
+computer or modifying a private copy.  Propagation includes copying,
+distribution (with or without modification), making available to the
+public, and in some countries other activities as well.
+
+  To "convey" a work means any kind of propagation that enables other
+parties to make or receive copies.  Mere interaction with a user through
+a computer network, with no transfer of a copy, is not conveying.
+
+  An interactive user interface displays "Appropriate Legal Notices"
+to the extent that it includes a convenient and prominently visible
+feature that (1) displays an appropriate copyright notice, and (2)
+tells the user that there is no warranty for the work (except to the
+extent that warranties are provided), that licensees may convey the
+work under this License, and how to view a copy of this License.  If
+the interface presents a list of user commands or options, such as a
+menu, a prominent item in the list meets this criterion.
+
+  1. Source Code.
+
+  The "source code" for a work means the preferred form of the work
+for making modifications to it.  "Object code" means any non-source
+form of a work.
+
+  A "Standard Interface" means an interface that either is an official
+standard defined by a recognized standards body, or, in the case of
+interfaces specified for a particular programming language, one that
+is widely used among developers working in that language.
+
+  The "System Libraries" of an executable work include anything, other
+than the work as a whole, that (a) is included in the normal form of
+packaging a Major Component, but which is not part of that Major
+Component, and (b) serves only to enable use of the work with that
+Major Component, or to implement a Standard Interface for which an
+implementation is available to the public in source code form.  A
+"Major Component", in this context, means a major essential component
+(kernel, window system, and so on) of the specific operating system
+(if any) on which the executable work runs, or a compiler used to
+produce the work, or an object code interpreter used to run it.
+
+  The "Corresponding Source" for a work in object code form means all
+the source code needed to generate, install, and (for an executable
+work) run the object code and to modify the work, including scripts to
+control those activities.  However, it does not include the work's
+System Libraries, or general-purpose tools or generally available free
+programs which are used unmodified in performing those activities but
+which are not part of the work.  For example, Corresponding Source
+includes interface definition files associated with source files for
+the work, and the source code for shared libraries and dynamically
+linked subprograms that the work is specifically designed to require,
+such as by intimate data communication or control flow between those
+subprograms and other parts of the work.
+
+  The Corresponding Source need not include anything that users
+can regenerate automatically from other parts of the Corresponding
+Source.
+
+  The Corresponding Source for a work in source code form is that
+same work.
+
+  2. Basic Permissions.
+
+  All rights granted under this License are granted for the term of
+copyright on the Program, and are irrevocable provided the stated
+conditions are met.  This License explicitly affirms your unlimited
+permission to run the unmodified Program.  The output from running a
+covered work is covered by this License only if the output, given its
+content, constitutes a covered work.  This License acknowledges your
+rights of fair use or other equivalent, as provided by copyright law.
+
+  You may make, run and propagate covered works that you do not
+convey, without conditions so long as your license otherwise remains
+in force.  You may convey covered works to others for the sole purpose
+of having them make modifications exclusively for you, or provide you
+with facilities for running those works, provided that you comply with
+the terms of this License in conveying all material for which you do
+not control copyright.  Those thus making or running the covered works
+for you must do so exclusively on your behalf, under your direction
+and control, on terms that prohibit them from making any copies of
+your copyrighted material outside their relationship with you.
+
+  Conveying under any other circumstances is permitted solely under
+the conditions stated below.  Sublicensing is not allowed; section 10
+makes it unnecessary.
+
+  3. Protecting Users' Legal Rights From Anti-Circumvention Law.
+
+  No covered work shall be deemed part of an effective technological
+measure under any applicable law fulfilling obligations under article
+11 of the WIPO copyright treaty adopted on 20 December 1996, or
+similar laws prohibiting or restricting circumvention of such
+measures.
+
+  When you convey a covered work, you waive any legal power to forbid
+circumvention of technological measures to the extent such circumvention
+is effected by exercising rights under this License with respect to
+the covered work, and you disclaim any intention to limit operation or
+modification of the work as a means of enforcing, against the work's
+users, your or third parties' legal rights to forbid circumvention of
+technological measures.
+
+  4. Conveying Verbatim Copies.
+
+  You may convey verbatim copies of the Program's source code as you
+receive it, in any medium, provided that you conspicuously and
+appropriately publish on each copy an appropriate copyright notice;
+keep intact all notices stating that this License and any
+non-permissive terms added in accord with section 7 apply to the code;
+keep intact all notices of the absence of any warranty; and give all
+recipients a copy of this License along with the Program.
+
+  You may charge any price or no price for each copy that you convey,
+and you may offer support or warranty protection for a fee.
+
+  5. Conveying Modified Source Versions.
+
+  You may convey a work based on the Program, or the modifications to
+produce it from the Program, in the form of source code under the
+terms of section 4, provided that you also meet all of these conditions:
+
+    a) The work must carry prominent notices stating that you modified
+    it, and giving a relevant date.
+
+    b) The work must carry prominent notices stating that it is
+    released under this License and any conditions added under section
+    7.  This requirement modifies the requirement in section 4 to
+    "keep intact all notices".
+
+    c) You must license the entire work, as a whole, under this
+    License to anyone who comes into possession of a copy.  This
+    License will therefore apply, along with any applicable section 7
+    additional terms, to the whole of the work, and all its parts,
+    regardless of how they are packaged.  This License gives no
+    permission to license the work in any other way, but it does not
+    invalidate such permission if you have separately received it.
+
+    d) If the work has interactive user interfaces, each must display
+    Appropriate Legal Notices; however, if the Program has interactive
+    interfaces that do not display Appropriate Legal Notices, your
+    work need not make them do so.
+
+  A compilation of a covered work with other separate and independent
+works, which are not by their nature extensions of the covered work,
+and which are not combined with it such as to form a larger program,
+in or on a volume of a storage or distribution medium, is called an
+"aggregate" if the compilation and its resulting copyright are not
+used to limit the access or legal rights of the compilation's users
+beyond what the individual works permit.  Inclusion of a covered work
+in an aggregate does not cause this License to apply to the other
+parts of the aggregate.
+
+  6. Conveying Non-Source Forms.
+
+  You may convey a covered work in object code form under the terms
+of sections 4 and 5, provided that you also convey the
+machine-readable Corresponding Source under the terms of this License,
+in one of these ways:
+
+    a) Convey the object code in, or embodied in, a physical product
+    (including a physical distribution medium), accompanied by the
+    Corresponding Source fixed on a durable physical medium
+    customarily used for software interchange.
+
+    b) Convey the object code in, or embodied in, a physical product
+    (including a physical distribution medium), accompanied by a
+    written offer, valid for at least three years and valid for as
+    long as you offer spare parts or customer support for that product
+    model, to give anyone who possesses the object code either (1) a
+    copy of the Corresponding Source for all the software in the
+    product that is covered by this License, on a durable physical
+    medium customarily used for software interchange, for a price no
+    more than your reasonable cost of physically performing this
+    conveying of source, or (2) access to copy the
+    Corresponding Source from a network server at no charge.
+
+    c) Convey individual copies of the object code with a copy of the
+    written offer to provide the Corresponding Source.  This
+    alternative is allowed only occasionally and noncommercially, and
+    only if you received the object code with such an offer, in accord
+    with subsection 6b.
+
+    d) Convey the object code by offering access from a designated
+    place (gratis or for a charge), and offer equivalent access to the
+    Corresponding Source in the same way through the same place at no
+    further charge.  You need not require recipients to copy the
+    Corresponding Source along with the object code.  If the place to
+    copy the object code is a network server, the Corresponding Source
+    may be on a different server (operated by you or a third party)
+    that supports equivalent copying facilities, provided you maintain
+    clear directions next to the object code saying where to find the
+    Corresponding Source.  Regardless of what server hosts the
+    Corresponding Source, you remain obligated to ensure that it is
+    available for as long as needed to satisfy these requirements.
+
+    e) Convey the object code using peer-to-peer transmission, provided
+    you inform other peers where the object code and Corresponding
+    Source of the work are being offered to the general public at no
+    charge under subsection 6d.
+
+  A separable portion of the object code, whose source code is excluded
+from the Corresponding Source as a System Library, need not be
+included in conveying the object code work.
+
+  A "User Product" is either (1) a "consumer product", which means any
+tangible personal property which is normally used for personal, family,
+or household purposes, or (2) anything designed or sold for incorporation
+into a dwelling.  In determining whether a product is a consumer product,
+doubtful cases shall be resolved in favor of coverage.  For a particular
+product received by a particular user, "normally used" refers to a
+typical or common use of that class of product, regardless of the status
+of the particular user or of the way in which the particular user
+actually uses, or expects or is expected to use, the product.  A product
+is a consumer product regardless of whether the product has substantial
+commercial, industrial or non-consumer uses, unless such uses represent
+the only significant mode of use of the product.
+
+  "Installation Information" for a User Product means any methods,
+procedures, authorization keys, or other information required to install
+and execute modified versions of a covered work in that User Product from
+a modified version of its Corresponding Source.  The information must
+suffice to ensure that the continued functioning of the modified object
+code is in no case prevented or interfered with solely because
+modification has been made.
+
+  If you convey an object code work under this section in, or with, or
+specifically for use in, a User Product, and the conveying occurs as
+part of a transaction in which the right of possession and use of the
+User Product is transferred to the recipient in perpetuity or for a
+fixed term (regardless of how the transaction is characterized), the
+Corresponding Source conveyed under this section must be accompanied
+by the Installation Information.  But this requirement does not apply
+if neither you nor any third party retains the ability to install
+modified object code on the User Product (for example, the work has
+been installed in ROM).
+
+  The requirement to provide Installation Information does not include a
+requirement to continue to provide support service, warranty, or updates
+for a work that has been modified or installed by the recipient, or for
+the User Product in which it has been modified or installed.  Access to a
+network may be denied when the modification itself materially and
+adversely affects the operation of the network or violates the rules and
+protocols for communication across the network.
+
+  Corresponding Source conveyed, and Installation Information provided,
+in accord with this section must be in a format that is publicly
+documented (and with an implementation available to the public in
+source code form), and must require no special password or key for
+unpacking, reading or copying.
+
+  7. Additional Terms.
+
+  "Additional permissions" are terms that supplement the terms of this
+License by making exceptions from one or more of its conditions.
+Additional permissions that are applicable to the entire Program shall
+be treated as though they were included in this License, to the extent
+that they are valid under applicable law.  If additional permissions
+apply only to part of the Program, that part may be used separately
+under those permissions, but the entire Program remains governed by
+this License without regard to the additional permissions.
+
+  When you convey a copy of a covered work, you may at your option
+remove any additional permissions from that copy, or from any part of
+it.  (Additional permissions may be written to require their own
+removal in certain cases when you modify the work.)  You may place
+additional permissions on material, added by you to a covered work,
+for which you have or can give appropriate copyright permission.
+
+  Notwithstanding any other provision of this License, for material you
+add to a covered work, you may (if authorized by the copyright holders of
+that material) supplement the terms of this License with terms:
+
+    a) Disclaiming warranty or limiting liability differently from the
+    terms of sections 15 and 16 of this License; or
+
+    b) Requiring preservation of specified reasonable legal notices or
+    author attributions in that material or in the Appropriate Legal
+    Notices displayed by works containing it; or
+
+    c) Prohibiting misrepresentation of the origin of that material, or
+    requiring that modified versions of such material be marked in
+    reasonable ways as different from the original version; or
+
+    d) Limiting the use for publicity purposes of names of licensors or
+    authors of the material; or
+
+    e) Declining to grant rights under trademark law for use of some
+    trade names, trademarks, or service marks; or
+
+    f) Requiring indemnification of licensors and authors of that
+    material by anyone who conveys the material (or modified versions of
+    it) with contractual assumptions of liability to the recipient, for
+    any liability that these contractual assumptions directly impose on
+    those licensors and authors.
+
+  All other non-permissive additional terms are considered "further
+restrictions" within the meaning of section 10.  If the Program as you
+received it, or any part of it, contains a notice stating that it is
+governed by this License along with a term that is a further
+restriction, you may remove that term.  If a license document contains
+a further restriction but permits relicensing or conveying under this
+License, you may add to a covered work material governed by the terms
+of that license document, provided that the further restriction does
+not survive such relicensing or conveying.
+
+  If you add terms to a covered work in accord with this section, you
+must place, in the relevant source files, a statement of the
+additional terms that apply to those files, or a notice indicating
+where to find the applicable terms.
+
+  Additional terms, permissive or non-permissive, may be stated in the
+form of a separately written license, or stated as exceptions;
+the above requirements apply either way.
+
+  8. Termination.
+
+  You may not propagate or modify a covered work except as expressly
+provided under this License.  Any attempt otherwise to propagate or
+modify it is void, and will automatically terminate your rights under
+this License (including any patent licenses granted under the third
+paragraph of section 11).
+
+  However, if you cease all violation of this License, then your
+license from a particular copyright holder is reinstated (a)
+provisionally, unless and until the copyright holder explicitly and
+finally terminates your license, and (b) permanently, if the copyright
+holder fails to notify you of the violation by some reasonable means
+prior to 60 days after the cessation.
+
+  Moreover, your license from a particular copyright holder is
+reinstated permanently if the copyright holder notifies you of the
+violation by some reasonable means, this is the first time you have
+received notice of violation of this License (for any work) from that
+copyright holder, and you cure the violation prior to 30 days after
+your receipt of the notice.
+
+  Termination of your rights under this section does not terminate the
+licenses of parties who have received copies or rights from you under
+this License.  If your rights have been terminated and not permanently
+reinstated, you do not qualify to receive new licenses for the same
+material under section 10.
+
+  9. Acceptance Not Required for Having Copies.
+
+  You are not required to accept this License in order to receive or
+run a copy of the Program.  Ancillary propagation of a covered work
+occurring solely as a consequence of using peer-to-peer transmission
+to receive a copy likewise does not require acceptance.  However,
+nothing other than this License grants you permission to propagate or
+modify any covered work.  These actions infringe copyright if you do
+not accept this License.  Therefore, by modifying or propagating a
+covered work, you indicate your acceptance of this License to do so.
+
+  10. Automatic Licensing of Downstream Recipients.
+
+  Each time you convey a covered work, the recipient automatically
+receives a license from the original licensors, to run, modify and
+propagate that work, subject to this License.  You are not responsible
+for enforcing compliance by third parties with this License.
+
+  An "entity transaction" is a transaction transferring control of an
+organization, or substantially all assets of one, or subdividing an
+organization, or merging organizations.  If propagation of a covered
+work results from an entity transaction, each party to that
+transaction who receives a copy of the work also receives whatever
+licenses to the work the party's predecessor in interest had or could
+give under the previous paragraph, plus a right to possession of the
+Corresponding Source of the work from the predecessor in interest, if
+the predecessor has it or can get it with reasonable efforts.
+
+  You may not impose any further restrictions on the exercise of the
+rights granted or affirmed under this License.  For example, you may
+not impose a license fee, royalty, or other charge for exercise of
+rights granted under this License, and you may not initiate litigation
+(including a cross-claim or counterclaim in a lawsuit) alleging that
+any patent claim is infringed by making, using, selling, offering for
+sale, or importing the Program or any portion of it.
+
+  11. Patents.
+
+  A "contributor" is a copyright holder who authorizes use under this
+License of the Program or a work on which the Program is based.  The
+work thus licensed is called the contributor's "contributor version".
+
+  A contributor's "essential patent claims" are all patent claims
+owned or controlled by the contributor, whether already acquired or
+hereafter acquired, that would be infringed by some manner, permitted
+by this License, of making, using, or selling its contributor version,
+but do not include claims that would be infringed only as a
+consequence of further modification of the contributor version.  For
+purposes of this definition, "control" includes the right to grant
+patent sublicenses in a manner consistent with the requirements of
+this License.
+
+  Each contributor grants you a non-exclusive, worldwide, royalty-free
+patent license under the contributor's essential patent claims, to
+make, use, sell, offer for sale, import and otherwise run, modify and
+propagate the contents of its contributor version.
+
+  In the following three paragraphs, a "patent license" is any express
+agreement or commitment, however denominated, not to enforce a patent
+(such as an express permission to practice a patent or covenant not to
+sue for patent infringement).  To "grant" such a patent license to a
+party means to make such an agreement or commitment not to enforce a
+patent against the party.
+
+  If you convey a covered work, knowingly relying on a patent license,
+and the Corresponding Source of the work is not available for anyone
+to copy, free of charge and under the terms of this License, through a
+publicly available network server or other readily accessible means,
+then you must either (1) cause the Corresponding Source to be so
+available, or (2) arrange to deprive yourself of the benefit of the
+patent license for this particular work, or (3) arrange, in a manner
+consistent with the requirements of this License, to extend the patent
+license to downstream recipients.  "Knowingly relying" means you have
+actual knowledge that, but for the patent license, your conveying the
+covered work in a country, or your recipient's use of the covered work
+in a country, would infringe one or more identifiable patents in that
+country that you have reason to believe are valid.
+
+  If, pursuant to or in connection with a single transaction or
+arrangement, you convey, or propagate by procuring conveyance of, a
+covered work, and grant a patent license to some of the parties
+receiving the covered work authorizing them to use, propagate, modify
+or convey a specific copy of the covered work, then the patent license
+you grant is automatically extended to all recipients of the covered
+work and works based on it.
+
+  A patent license is "discriminatory" if it does not include within
+the scope of its coverage, prohibits the exercise of, or is
+conditioned on the non-exercise of one or more of the rights that are
+specifically granted under this License.  You may not convey a covered
+work if you are a party to an arrangement with a third party that is
+in the business of distributing software, under which you make payment
+to the third party based on the extent of your activity of conveying
+the work, and under which the third party grants, to any of the
+parties who would receive the covered work from you, a discriminatory
+patent license (a) in connection with copies of the covered work
+conveyed by you (or copies made from those copies), or (b) primarily
+for and in connection with specific products or compilations that
+contain the covered work, unless you entered into that arrangement,
+or that patent license was granted, prior to 28 March 2007.
+
+  Nothing in this License shall be construed as excluding or limiting
+any implied license or other defenses to infringement that may
+otherwise be available to you under applicable patent law.
+
+  12. No Surrender of Others' Freedom.
+
+  If conditions are imposed on you (whether by court order, agreement or
+otherwise) that contradict the conditions of this License, they do not
+excuse you from the conditions of this License.  If you cannot convey a
+covered work so as to satisfy simultaneously your obligations under this
+License and any other pertinent obligations, then as a consequence you may
+not convey it at all.  For example, if you agree to terms that obligate you
+to collect a royalty for further conveying from those to whom you convey
+the Program, the only way you could satisfy both those terms and this
+License would be to refrain entirely from conveying the Program.
+
+  13. Use with the GNU Affero General Public License.
+
+  Notwithstanding any other provision of this License, you have
+permission to link or combine any covered work with a work licensed
+under version 3 of the GNU Affero General Public License into a single
+combined work, and to convey the resulting work.  The terms of this
+License will continue to apply to the part which is the covered work,
+but the special requirements of the GNU Affero General Public License,
+section 13, concerning interaction through a network will apply to the
+combination as such.
+
+  14. Revised Versions of this License.
+
+  The Free Software Foundation may publish revised and/or new versions of
+the GNU General Public License from time to time.  Such new versions will
+be similar in spirit to the present version, but may differ in detail to
+address new problems or concerns.
+
+  Each version is given a distinguishing version number.  If the
+Program specifies that a certain numbered version of the GNU General
+Public License "or any later version" applies to it, you have the
+option of following the terms and conditions either of that numbered
+version or of any later version published by the Free Software
+Foundation.  If the Program does not specify a version number of the
+GNU General Public License, you may choose any version ever published
+by the Free Software Foundation.
+
+  If the Program specifies that a proxy can decide which future
+versions of the GNU General Public License can be used, that proxy's
+public statement of acceptance of a version permanently authorizes you
+to choose that version for the Program.
+
+  Later license versions may give you additional or different
+permissions.  However, no additional obligations are imposed on any
+author or copyright holder as a result of your choosing to follow a
+later version.
+
+  15. Disclaimer of Warranty.
+
+  THERE IS NO WARRANTY FOR THE PROGRAM, TO THE EXTENT PERMITTED BY
+APPLICABLE LAW.  EXCEPT WHEN OTHERWISE STATED IN WRITING THE COPYRIGHT
+HOLDERS AND/OR OTHER PARTIES PROVIDE THE PROGRAM "AS IS" WITHOUT WARRANTY
+OF ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING, BUT NOT LIMITED TO,
+THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+PURPOSE.  THE ENTIRE RISK AS TO THE QUALITY AND PERFORMANCE OF THE PROGRAM
+IS WITH YOU.  SHOULD THE PROGRAM PROVE DEFECTIVE, YOU ASSUME THE COST OF
+ALL NECESSARY SERVICING, REPAIR OR CORRECTION.
+
+  16. Limitation of Liability.
+
+  IN NO EVENT UNLESS REQUIRED BY APPLICABLE LAW OR AGREED TO IN WRITING
+WILL ANY COPYRIGHT HOLDER, OR ANY OTHER PARTY WHO MODIFIES AND/OR CONVEYS
+THE PROGRAM AS PERMITTED ABOVE, BE LIABLE TO YOU FOR DAMAGES, INCLUDING ANY
+GENERAL, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES ARISING OUT OF THE
+USE OR INABILITY TO USE THE PROGRAM (INCLUDING BUT NOT LIMITED TO LOSS OF
+DATA OR DATA BEING RENDERED INACCURATE OR LOSSES SUSTAINED BY YOU OR THIRD
+PARTIES OR A FAILURE OF THE PROGRAM TO OPERATE WITH ANY OTHER PROGRAMS),
+EVEN IF SUCH HOLDER OR OTHER PARTY HAS BEEN ADVISED OF THE POSSIBILITY OF
+SUCH DAMAGES.
+
+  17. Interpretation of Sections 15 and 16.
+
+  If the disclaimer of warranty and limitation of liability provided
+above cannot be given local legal effect according to their terms,
+reviewing courts shall apply local law that most closely approximates
+an absolute waiver of all civil liability in connection with the
+Program, unless a warranty or assumption of liability accompanies a
+copy of the Program in return for a fee.
+
+                     END OF TERMS AND CONDITIONS
+
+            How to Apply These Terms to Your New Programs
+
+  If you develop a new program, and you want it to be of the greatest
+possible use to the public, the best way to achieve this is to make it
+free software which everyone can redistribute and change under these terms.
+
+  To do so, attach the following notices to the program.  It is safest
+to attach them to the start of each source file to most effectively
+state the exclusion of warranty; and each file should have at least
+the "copyright" line and a pointer to where the full notice is found.
+
+    <one line to give the program's name and a brief idea of what it does.>
+    Copyright (C) <year>  <name of author>
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+Also add information on how to contact you by electronic and paper mail.
+
+  If the program does terminal interaction, make it output a short
+notice like this when it starts in an interactive mode:
+
+    <program>  Copyright (C) <year>  <name of author>
+    This program comes with ABSOLUTELY NO WARRANTY; for details type `show w'.
+    This is free software, and you are welcome to redistribute it
+    under certain conditions; type `show c' for details.
+
+The hypothetical commands `show w' and `show c' should show the appropriate
+parts of the General Public License.  Of course, your program's commands
+might be different; for a GUI interface, you would use an "about box".
+
+  You should also get your employer (if you work as a programmer) or school,
+if any, to sign a "copyright disclaimer" for the program, if necessary.
+For more information on this, and how to apply and follow the GNU GPL, see
+<https://www.gnu.org/licenses/>.
+
+  The GNU General Public License does not permit incorporating your program
+into proprietary programs.  If your program is a subroutine library, you
+may consider it more useful to permit linking proprietary applications with
+the library.  If this is what you want to do, use the GNU Lesser General
+Public License instead of this License.  But first, please read
+<https://www.gnu.org/licenses/why-not-lgpl.html>.
+
+```
+
+`README.md`:
+
+```md
+# CS2-AntiCheat
+
+A modular, server-side anti-cheat for Counter-Strike 2 built on
+[CounterStrikeSharp](https://github.com/roflmuffin/CounterStrikeSharp). Inspired by
+[SourceMod Anti-Cheat (SMAC)](https://github.com/Silenci0/SMAC).
+
+Each detection is a self-contained **module** with its own config file and its own punishment action
+(none / log / kick / ban), so you can tune, disable, or escalate each check independently. Violations
+can be mirrored to Discord and to the CounterStrikeSharp log file.
+
+> Author: **panda** · Version: **1.0.0** · Target: **.NET 10 / CounterStrikeSharp API ≥ 374**
+
+---
+
+## Detection modules
+
+| Module            | What it looks for                                                        | Config file                  |
+|-------------------|--------------------------------------------------------------------------|------------------------------|
+| **Aimbot**        | Suspicious aim snaps / angle changes toward targets                      | `Aimbot.json`                |
+| **Backtrack**     | Hitting players at positions they no longer occupy                       | `Backtrack.json`             |
+| **BunnyHop**      | Automated / scripted bunnyhopping patterns                               | `BunnyHop.json`              |
+| **RapidFire**     | Firing a semi-auto weapon faster than humanly possible                   | `RapidFire.json`             |
+| **UntrustedAngles** | View angles outside the range the engine should ever produce           | `UntrustedAngles.json`       |
+| **ImpossibleYaw** | Yaw deltas that are physically impossible between ticks                  | `ImpossibleYaw.json`         |
+| **DuckSpam**      | Crouch-spam (duck toggling) beyond human rates                           | `DuckSpam.json`              |
+| **UserCmdRate**   | Abnormal user-command rates (command injection / timing cheats)          | `UserCmdRate.json`           |
+| **NoRecoil**      | Recoil compensation that no human input could achieve                    | `NoRecoil.json`              |
+| **AntiDLL**       | Cheat DLLs that subscribe to blacklisted engine game events              | `AntiDLL.json` (+ gamedata)  |
+
+All modules are enabled by default. Each writes its own `Configs/plugins/CS2-AntiCheat/<Module>.json`
+on first run.
+
+---
+
+## Installation
+
+1. Install [CounterStrikeSharp](https://github.com/roflmuffin/CounterStrikeSharp) (Metamod + CSSharp)
+   and make sure it loads.
+2. Copy the **CS2-AntiCheat** folder into:
+   ```
+   game/csgo/addons/counterstrikesharp/plugins/
+   ```
+   so you end up with `.../plugins/CS2-AntiCheat/CS2-AntiCheat.dll`.
+3. Start the server (or `css_plugins load CS2-AntiCheat`). Config files are generated on first load.
+4. Check `addons/counterstrikesharp/logs/` — you should see the load lines (see **Logging** below).
+
+**Platforms:** Windows and Linux are both supported. The AntiDLL module uses per-platform
+signatures/offsets shipped in `gamedata/CS2-AntiCheat.AntiDLL.json`.
+
+---
+
+## Configuration
+
+### General (`Configs/plugins/CS2-AntiCheat/General.json`)
+
+| Key                   | Default                                             | Description                                                                 |
+|-----------------------|-----------------------------------------------------|-----------------------------------------------------------------------------|
+| `Enabled`             | `true`                                              | Master on/off switch for all detections.                                    |
+| `Debug`               | `false`                                             | Verbose runtime logging to the console/log. Load milestones log regardless. |
+| `LogPrefix`           | `[CS2AC]`                                            | Prefix prepended to every console log line. Empty = no prefix.              |
+| `CommandPermission`   | `@css/root`                                          | Permission flag required to run admin commands. Server console always passes. |
+| `BanCommand`          | `css_ban #{id} 0 "ANTICHEAT: {reason}"`             | Command run (server console) when a module's action is **Ban**.             |
+| `KickCommand`         | `css_kick #{id}`                                    | Command run after the ban command (also used for **Kick**).                 |
+| `DiscordAlerts`       | `true`                                              | Master switch for Discord detection alerts.                                 |
+| `DiscordWebhookUrl`   | `""`                                                | Discord webhook URL. Empty = Discord disabled.                              |
+| `DiscordMentionRoleId`| `""`                                                | `""` = no ping · `everyone` · `here` · a numeric role id.                   |
+
+Command placeholders: `{id}` (userid — use `#{id}` to target by userid), `{steamid}` (SteamID64),
+`{steamid2}` (STEAM_0:…), `{name}`, `{reason}`, `{module}`.
+
+### Per-module (`Configs/plugins/CS2-AntiCheat/<Module>.json`)
+
+Every module config has at least:
+
+| Key                | Values                                  | Description                                            |
+|--------------------|-----------------------------------------|--------------------------------------------------------|
+| `DetectionEnabled` | `true` / `false`                        | Turn this single module on or off.                     |
+| `DetectionAction`  | `0` none · `1` log · `2` kick · `3` ban | What to do when this module detects a player.          |
+
+Individual modules add their own thresholds/tunables on top of those two keys.
+
+### AntiDLL (`Configs/plugins/CS2-AntiCheat/AntiDLL.json`)
+
+AntiDLL detects cheat DLLs by the engine game-event listeners they register — cheats subscribe to
+events a normal client never listens to.
+
+| Key                | Default        | Description                                                              |
+|--------------------|----------------|--------------------------------------------------------------------------|
+| `DetectionEnabled` | `true`         | Enable AntiDLL.                                                          |
+| `DetectionAction`  | `3` (Ban)      | Action on detection. Listening to a blacklisted event is unambiguous.    |
+| `Blacklist`        | ~160 events    | Game-event names that flag a client. Edit freely — no recompile needed.  |
+
+The native **signatures/offsets** live in `gamedata/CS2-AntiCheat.AntiDLL.json` (editable, no
+recompile). If a game update breaks them, update that file. See **How AntiDLL works** below.
+
+---
+
+## Commands
+
+All admin commands require `CommandPermission` (default `@css/root`); the **server console always
+passes**.
+
+| Command                      | Args              | Description                                                   |
+|------------------------------|-------------------|---------------------------------------------------------------|
+| `tbac_reload`                | —                 | Reload `General.json` (re-applies `Enabled`, `Debug`, prefix).|
+| `tbac_aimbot_action`         | `0‑3`             | Set the Aimbot module's action.                               |
+| `tbac_backtrack_action`      | `0‑3`             | Set the Backtrack module's action.                            |
+| `tbac_bunnyhop_action`       | `0‑3`             | Set the BunnyHop module's action.                             |
+| `tbac_rapidfire_action`      | `0‑3`             | Set the RapidFire module's action.                            |
+| `tbac_untrustedangles_action`| `0‑3`             | Set the UntrustedAngles module's action.                      |
+| `tbac_impossibleyaw_action`  | `0‑3`             | Set the ImpossibleYaw module's action.                        |
+| `tbac_duckspam_action`       | `0‑3`             | Set the DuckSpam module's action.                             |
+| `tbac_usercmdrate_action`    | `0‑3`             | Set the UserCmdRate module's action.                          |
+| `tbac_norecoil_action`       | `0‑3`             | Set the NoRecoil module's action.                             |
+| `tbac_antidll_action`        | `0‑3`             | Set the AntiDLL module's action.                              |
+
+Action values: `0` = none · `1` = log · `2` = kick · `3` = ban. `*_action` commands write the new
+value to that module's config.
+
+---
+
+## Logging
+
+Load milestones are **always** written to `addons/counterstrikesharp/logs/` (independent of `Debug`):
+
+```
+[CS2AC] Loaded CS2-AntiCheat v1.0.0
+[CS2AC] Initialized 10 detection module(s): Aimbot, Backtrack, BunnyHop, RapidFire, UntrustedAngles, ImpossibleYaw, DuckSpam, UserCmdRate, NoRecoil, AntiDLL
+[CS2AC] AntiDLL blacklist mask built (152/160 events resolved to bits)
+```
+
+The AntiDLL "mask built" line is the key health check: `X/Y resolved` with `X > 0` means AntiDLL
+successfully translated blacklisted event names into listen-bit indices for your game build. `0`
+means the gamedata signatures are stale for your current CS2 version.
+
+Verbose runtime logs (per-player events, ticks, detections) are gated by `"Debug": true` in
+`General.json` so the log file stays clean in production. Change it and run `tbac_reload`.
+
+---
+
+## How AntiDLL works
+
+When a client connects it tells the server which game events it wants to listen to (a
+`CLCMsg_ListenEvents` message carrying a bitmask of event indices). Legitimate clients only ever
+subscribe to a small, fixed set; many cheat DLLs subscribe to extra engine events to drive their
+features. AntiDLL flags any client that listens to an event in the `Blacklist`.
+
+Implementation (fully self-contained, ported from
+[KillStr3aK/CS2-AntiDLL](https://github.com/KillStr3aK/CS2-AntiDLL)):
+
+1. On the event manager's init, each blacklisted event **name** is resolved to its **listen-bit
+   index** via `CGameEventManager::GetEventDescriptor`, building a 512-bit blacklist mask once.
+2. `CSource1LegacyGameEventGameSystem::ListenBitsReceived` is hooked. On each message, the client's
+   listen-bits are read straight from the message and `AND`-ed with the mask — any set bit is a
+   blacklisted event the client subscribed to.
+
+No per-event lookups and no proxy-listener walk at runtime. Signatures/offsets are in
+`gamedata/CS2-AntiCheat.AntiDLL.json` with separate Windows and Linux entries:
+
+| Key                                               | Purpose                                                         |
+|---------------------------------------------------|-----------------------------------------------------------------|
+| `CSource1LegacyGameEventGameSystem::ListenBitsReceived` | Function hooked to intercept a client's listen-bits.      |
+| `CLCMsg_ListenEvents::EventCount` / `EventData`   | Offsets of the event-bit count + data pointer in the message.   |
+| `CGameEventManager::GetEventDescriptor`           | Resolves an event name to its listen-bit index (at init).       |
+
+All native reads are wrapped in `try/catch`; if a signature is stale the module stays idle and logs
+it instead of crashing the server.
+
+---
+
+## Building from source
+
+Requirements: [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0). All dependencies come
+from NuGet (`CounterStrikeSharp.API`).
+
+```bash
+dotnet build CS2-AntiCheat.csproj -c Release
+```
+
+The compiled plugin is produced at `bin/Release/net10.0/CS2-AntiCheat.dll` along with the `gamedata/`
+and `lang/` assets it needs.
+
+---
+
+## Credits
+
+- [AlliedModders — original SMAC](https://forums.alliedmods.net/forumdisplay.php?f=133)
+- [Silenci0 — SMAC fork](https://github.com/Silenci0/SMAC)
+- [roflmuffin — CounterStrikeSharp](https://github.com/roflmuffin/CounterStrikeSharp)
+- [KillStr3aK — CS2-AntiDLL](https://github.com/KillStr3aK/CS2-AntiDLL) (AntiDLL module basis)
+
+```
+
+`gamedata/CS2-AntiCheat.AntiDLL.json`:
+
+```json
+{
+    "CSource1LegacyGameEventGameSystem::ListenBitsReceived": {
+        "_search": "OnSource1LegacyGameEventListenBitsReceived: game event %i not found.",
+        "signatures": {
+            "library": "server",
+            "windows": "40 56 48 83 EC ? 48 63 42",
+            "linux": "48 63 46 58 83 F8 3F 0F 87 ? ? ? ? 55 48 C1 E0 04 48 89 E5 41 56 41 55"
+        }
+    },
+    "CLCMsg_ListenEvents::EventCount": {
+        "_comment": "Offset of the int element-count of the listen-bits event array inside CLCMsg_ListenEvents. Windows: start of the CUtlVector<uint32> (count at +0x0 of the vector at 0x48 -> 0x48). Linux: separate count field at 0x48. Both verified from ListenBitsReceived.",
+        "offsets": {
+            "windows": 72,
+            "linux": 72
+        }
+    },
+    "CLCMsg_ListenEvents::EventData": {
+        "_comment": "Offset of the pointer to the uint32 word array holding the listen bits. Windows: the CUtlVector's data pointer sits at vector+0x8 (0x48+0x8 = 0x50). Linux: a direct pointer field at 0x50. Both verified from ListenBitsReceived (Windows reads CUtlVector@0x48; Linux reads count@0x48 + ptr@0x50).",
+        "offsets": {
+            "windows": 80,
+            "linux": 80
+        }
+    },
+    "CGameEventManager::GetEventDescriptor": {
+        "_comment": "bool/ptr GetEventDescriptor(CGameEventManager* this, const char* name, int* outBitIndex). Resolves an event name to its descriptor and writes the event's listen-bit index into *outBitIndex (Windows ORs bit 31 as a flag; mask with 0x7FFFFFFF). Used at init to translate blacklisted event names into bit indices. Windows verified from server.dll, Linux from libserver.so (sub_17705A0).",
+        "signatures": {
+            "library": "server",
+            "windows": "48 89 5C 24 08 48 89 6C 24 18 56 57 41 56 48 83 EC 20 49 8B F8 48 8B F2 48 8B D9",
+            "linux": "55 48 8D 87 E0 00 00 00 48 89 E5 41 57 41 56 49 89 FE 41 55 41 54 53 48 81 EC D8 03 00 00"
+        }
+    }
+}
+
+```
