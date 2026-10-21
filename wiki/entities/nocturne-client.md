@@ -11,7 +11,7 @@ confidence: high
 
 # Nocturne Client
 
-**nocturne-client** ([liuyyx/nocturne-client](https://github.com/liuyyx/nocturne-client)) is a **JVM attach injector** and in-process **Java agent** packaged as one Gradle-built JAR for **Minecraft Java 1.8.9–26.3**. (source: wiki/sources/descriptions/liuyyx__nocturne-client.md)
+**nocturne-client** ([liuyyx/nocturne-client](https://github.com/liuyyx/nocturne-client)) is a **JVM injection** cheat client: one Gradle-built JAR acts as both an **external attach injector** and an in-process **Java agent** on a live Minecraft process, spanning **Java 1.8.9–26.3**. Injectable modules ship as **Java 8 bytecode**. (source: wiki/sources/descriptions/liuyyx__nocturne-client.md)
 
 ## Version bridging
 
@@ -19,7 +19,7 @@ Per-release mapping tables cover vanilla, Fabric, Forge, and NeoForge runtime na
 
 ## Hooks and modules
 
-**ASM** bytecode transformers drive LWJGL frame hooks, draw callbacks, and input blocking. The client layer exposes cheat-style ESP, tracers, storage-search overlays, and a ClickGUI rendered through LWJGL2 fixed pipeline, modern GL core, or the game GUI extractor on newer stacks.
+**ASM** bytecode transformers drive LWJGL frame hooks, draw callbacks, and **input blocking**. The modular client layer exposes ESP, tracers, **storage-search overlays**, and a custom **ClickGUI** rendered through LWJGL2 fixed pipeline, modern GL core, or the game’s GUI extractor on newer stacks.
 
 ## Research use
 

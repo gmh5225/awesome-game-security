@@ -1248,6 +1248,7 @@ sources:
   - wiki/sources/descriptions/mentebinaria__retoolkit.md
   - wiki/sources/descriptions/lilyco-42__rev-tools-setup.md
   - wiki/sources/descriptions/linflame__SusfsLkmLoader.md
+  - wiki/sources/descriptions/liuyyx__nocturne-client.md
   - wiki/sources/descriptions/mandiant__flare-vm.md
   - wiki/sources/descriptions/mandiant__GoReSym.md
   - wiki/sources/descriptions/mahaloz__DAILA.md
@@ -2590,7 +2591,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Sea of Thieves modding / SDK generation / hooking scaffolds such as [[sea-of-choros]] (gmh5225; C/C++; cheat / game:sea of thieves) sit in the title-specific Unreal offensive lane. (source: wiki/sources/descriptions/gmh5225__SeaOfChoros.md)
 - Title-specific POLYGON UE5 offensive samples such as [[polygon-ue5]] (gmh5225; C/C++; graphics / Unreal Engine / hooking; cheat / game:polygon [UE5]) sit in the same title-specific Unreal UE5 offensive lane beside other low-poly multiplayer shooter RE. (source: wiki/sources/descriptions/gmh5225__POLYGON_UE5.md) Multi-title Unreal signature-scan cheats such as [[cheat-it]] (gmh5225; Witch It + POLYGON; pattern-match UObject arrays / engine structures; configurable per-game targets; cheat / game:witch it + game:polygon) extend that lane with shared [[unreal-object-model]] address discovery across casual multiplayer titles. (source: wiki/sources/descriptions/gmh5225__CheatIt.md)
 - Farming Simulator 15 / GIANTS Engine 6 decompilation and native reconstruction via [[fs15-reconstruction]] (nat649; C++17/CMake + Python validation + LuaJIT script host; differential fixtures; parallel GE6 x64 VM study track; BYO game files; cheat / RE Tools) (source: wiki/sources/README-categories.md)
-- Cross-version Minecraft Java JVM attach + in-process agent clients such as [[nocturne-client]] (liuyyx; **1.8.9–26.3** mapping tables for vanilla/Fabric/Forge/NeoForge; ASM LWJGL frame hooks; ESP/tracers/ClickGUI; JVM attach + dynamic instrumentation study; cheat / game:minecraft) (source: wiki/sources/README-categories.md)
+- Cross-version Minecraft Java JVM attach + in-process agent clients such as [[nocturne-client]] (liuyyx; single JAR external injector + Java agent; **1.8.9–26.3** mapping tables for vanilla/Fabric/Forge/NeoForge with Mojmap-style module code; ASM LWJGL/GL frame hooks + input block; ESP/tracers/storage-search/ClickGUI; JVM attach + dynamic instrumentation study; cheat / game:minecraft) (source: wiki/sources/descriptions/liuyyx__nocturne-client.md) (source: wiki/sources/README-categories.md)
 - Warcraft III map diagnose/unprotect/port tooling such as [[devos-map-doctor]] (devoltzz; Python + Rust checkers + MPQ crypto helpers; SProtect/KK reversal; KK/M16 porting; optional cheat-pack analysis; cheat / game:warcraft iii) (source: wiki/sources/README-categories.md)
 - Warcraft III map-editor alternatives such as [[hivewe]] (faster large-map World Editor replacement) sit in the cheat / game:warcraft iii [editor] lane. (source: wiki/sources/descriptions/stijnherfst__HiveWE.md)
 - Structured CS:GO offensive-technique guides such as [[master-guide]] (csgohacks; five-part CS:GO guide; cheat / guide) sit in the cheat / game:csgo learning lane for researchers studying Source 1 cheat workflows beside runnable samples. (source: wiki/sources/descriptions/csgohacks__master-guide.md)

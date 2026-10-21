@@ -2735,7 +2735,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [NoahGameFrame](entities/noahgameframe.md) — C++ server engine (OGRE/BigWorld-inspired; Game Network / Server Engine)
 - [Nomad](entities/nomad.md) — kernel AC-style mapped-driver detector (thread stack walk, entry-point validation, big-pool abnormal refs, IOCTL hook signals; C++ WDK; Rwkeith; README Mapped Driver)
 - [Nocturne](entities/nocturne.md) — bin2bin x86-64 PE code virtualizer (SDK markers / VM handlers / junk; AC Obfuscation Engine)
-- [Nocturne Client](entities/nocturne-client.md) — liuyyx; Minecraft Java JVM attach injector + in-process agent (1.8.9–26.3; ASM LWJGL hooks; ESP/tracers/ClickGUI; cheat / game:minecraft)
+- [Nocturne Client](entities/nocturne-client.md) — liuyyx; single-JAR JVM attach injector + Java agent (1.8.9–26.3; vanilla/Fabric/Forge/NeoForge mapping tables; ASM LWJGL/GL hooks; ESP/tracers/storage search/ClickGUI; cheat / game:minecraft)
 - [NocturneLdr](entities/nocturneldr.md) — CET-compatible Win x64 shellcode loader (fully backed stacks; Spoof Stack)
 - [Norsefire](entities/norsefire.md) — kernel-mode W/RPM + mouse_event (C++; cheat / RPM)
 - [note](entities/note.md) — Chinese Android File Explorer guide (Guide-zh; Cheat Android File Explorer)
