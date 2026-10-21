@@ -3601,7 +3601,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [SuperDllHijack](entities/super-dll-hijack.md) — generic Windows proxy-DLL hijack helper (C/C++; renamed original + replacement DLL; DllMain export passthrough; loader/sideload research; anhkgg; Cheat / DLL Hijack)
 - [SuperMega](entities/super-mega.md) — PE infection shellcode loader (Cordyceps parasitic injection; web UI; anti-emulation; static-analysis evasion; dobin)
 - [SuperSplat](entities/supersplat.md) — PlayCanvas web 3D Gaussian Splat editor (PLY/splat export; 3D Graphics / AI splat)
-- [SUSFS LKM Loader](entities/susfs-lkm-loader.md) — linflame Magisk/KernelSU/APatch module auto-loading SUSFS guard LKM at boot for filesystem/module hiding on rooted Android hosts (Cheat / Magisk)
+- [SUSFS LKM Loader](entities/susfs-lkm-loader.md) — linflame Magisk/KernelSU/APatch boot module; auto-loads SUSFS guard LKM (prebuilt kernel-object matrix, insmod helper, WebUI/sync tracks) for filesystem/module hiding vs mobile integrity checks (Cheat / Magisk)
 - [SwishDbgExt](entities/swishdbgext.md) — WinDbg extension; expand/fix built-in commands (Matt Suiche / Comae; WinDbg Plugins)
 - [swsim](entities/swsim.md) — pure-software USIM/UICC SIM simulator (APDU/MILENAGE; SIMtrace2; Cellular/SIM)
 - [Sushi](entities/sushi.md) — PatchGuard (PG) monitoring (tandasat; cheat / PatchGuard-related)
