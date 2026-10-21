@@ -1350,6 +1350,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/Yass5002/magisk-hub [Active-source directory and static site for Magisk/KernelSU/APatch modules with schema validation and automated release sync]
 - https://github.com/Elcapitanoe/pif-config-generator [Automated pipeline to track upstream Android build.prop tags and publish validated Play Integrity Fix (PIF) JSON profiles]
 - https://github.com/wajahatnaeem056/jerrymanager [KernelSU/APatch/Magisk module with Web UI for Play Integrity attestation, keybox injection, root hiding, and banking-app detection cleanup]
+- https://github.com/linflame/SusfsLkmLoader [Magisk/KernelSU/APatch module that auto-loads the susfs kernel module at boot for Android root hiding used in mobile game security research]
 - https://github.com/bufanchen121101/AxManagerD [Root-free Magisk-style Android module framework with property injection, runtime modules, and built-in LSPatch Xposed hooking]
 - https://github.com/Dr-TSNG/ZygiskOnKernelSU [Run Zygisk on KernelSU]
 - https://github.com/svoboda18/magiskboot [Boot Image Modification Tool]
@@ -4131,6 +4132,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/ablanchard-dev/dexcheck [Read-only PC forensics check for Call of Duty / Warzone screen-share vetting. Reads execution and existence traces that survive deletion of the binary and reboots (Prefetch, BAM/DAM, UserAssist, Shimcache, PCA, raw USN journal), plus DMA/PCIe hardware, HWID spoof indicators, kernel driver signatures and Code Integrity refusals. Never writes to the machine. PowerShell 5.1, 40 probes, double-click launcher.]
 - https://github.com/dybeky/custos [Read-only Windows forensic desktop scanner for game-server vetting: prefetch, BAM, registry, DNS cache, and other execution traces matched against known cheat fingerprints, with exportable reports.]
 - https://github.com/Krimziee/SecureBootCheck [Read-only PowerShell diagnostic that explains why Secure Boot or TPM 2.0 blocks kernel anti-cheat titles and gives step-by-step fixes without modifying the system]
+- https://github.com/arioofarmani/iG-Windows-Tuner [Auditable PowerShell/WPF Windows 11 competitive-gaming tuner with reversible snapshots, security hardening, and per-anti-cheat readiness checks without disabling VBS, TPM, or Defender]
 
 > Stress Testing
 - https://github.com/niemand-sec/AntiCheat-Testing-Framework [Testing Framework]
