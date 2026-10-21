@@ -1,0 +1,1352 @@
+Project Path: arc_linflame_SusfsLkmLoader_3_mv5dzj
+
+Source Tree:
+
+```txt
+arc_linflame_SusfsLkmLoader_3_mv5dzj
+├── README.md
+├── legacy
+│   ├── build
+│   │   └── module.prop
+│   ├── pack.bat
+│   └── pack.ps1
+├── modules
+│   ├── changelog.md
+│   └── update.json
+├── next
+│   ├── build
+│   │   ├── action.sh
+│   │   ├── module.prop
+│   │   ├── updater.sh
+│   │   ├── webroot
+│   │   │   └── index.html
+│   │   └── webui.sh
+│   ├── pack.bat
+│   └── pack.ps1
+└── shared
+    ├── customize.sh
+    ├── kmi.sh
+    ├── kos
+    │   ├── susfs_guard_lkm-android12-5.10.ko
+    │   ├── susfs_guard_lkm-android13-5.10.ko
+    │   ├── susfs_guard_lkm-android13-5.15.ko
+    │   ├── susfs_guard_lkm-android14-5.15.ko
+    │   ├── susfs_guard_lkm-android14-6.1.ko
+    │   ├── susfs_guard_lkm-android15-6.6.ko
+    │   ├── susfs_guard_lkm-android16-6.12.ko
+    │   └── susfs_guard_lkm-android17-6.18.ko
+    ├── load.sh
+    ├── post-fs-data.sh
+    ├── service.sh
+    ├── susfs_insmod
+    ├── uninstall.sh
+    └── upstream_version
+
+```
+
+`README.md`:
+
+```md
+# SUSFS LKM Loader
+
+开机自动加载 susfs 内核模块的 Root 模块，兼容 Magisk / KernelSU / APatch。  
+ko / 加载器来源：[susfs4ksu-lkm](https://github.com/inforcqb/susfs4ksu-lkm)  
+检测更新频率：每天检查
+
+## 双线
+
+| | next | legacy |
+|---|---|---|
+| 定位 | 自主更新 | 极简安装 |
+| 更新方式 | Action 按钮 / WebUI | root管理器更新或重刷 zip |
+
+互刷无需卸载。
+
+## 目录
+
+- `shared/`：两线公共文件（kos/、susfs_insmod、upstream_version、安装与加载脚本）
+- `legacy/build/`、`next/build/`：各线专有文件（module.prop；next 另有 action/updater/webui/webroot）
+- `modules/`：打包产物与 update.json / changelog.md
+
+## 特性
+
+- 安装时自动识别内核版本
+- 便于用户更新
+- 日志：`/data/adb/susfs_lkm.log`
+
+鸣谢：酷安@只是不够强 · [susfs4ksu-lkm](https://github.com/inforcqb/susfs4ksu-lkm)
+
+
+```
+
+`legacy/build/module.prop`:
+
+```prop
+id=SUSFS_LKM
+name=SUSFS LKM Loader
+version=v2.3.0-r18.4
+versionCode=230184
+author=linflame & 酷安@只是不够强
+description=Auto load susfs kernel module on boot. 项目地址: https://github.com/linflame/SusfsLkmLoader
+updateJson=https://raw.githubusercontent.com/linflame/SusfsLkmLoader/main/modules/update.json
+
+```
+
+`legacy/pack.bat`:
+
+```bat
+@echo off
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0pack.ps1"
+pause
+
+```
+
+`legacy/pack.ps1`:
+
+```ps1
+# SUSFS LKM Loader (legacy) repack script
+# 更新源: 首选 Gitee (解析 releases 页面, 不用 API 避免限流), 失败回退 GitHub (API 限流时解析 release 页面, 可设 GH_TOKEN 提额)
+# 公共文件 (kos / susfs_insmod / upstream_version / 脚本) 在 ../shared, 本地版本 = shared/upstream_version
+# 产物: modules/SUSFS_LKM_legacy.zip + modules/update.json + modules/changelog.md (nightly 模式, 地址恒定, 管理器凭 versionCode 判断升级)
+$ErrorActionPreference = 'Stop'
+$ProgressPreference = 'SilentlyContinue'
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+
+$repo = 'inforcqb/susfs4ksu-lkm'
+$sources = @('gitee', 'github')
+$root = Split-Path -Parent $MyInvocation.MyCommand.Path
+Set-Location $root
+$shared = Join-Path (Split-Path -Parent $root) 'shared'
+
+$headers = @{ 'User-Agent' = 'susfs-lkm-pack' }
+if ($env:GH_TOKEN) { $headers['Authorization'] = "Bearer $env:GH_TOKEN" }
+
+# update.json / changelog.md 经仓库 raw 地址读取, zip 在 nightly release; 默认值可用环境变量覆盖 (CI 按实际分支注入)
+$UpdateJsonUrl = if ($env:SUSFS_UPDATE_JSON_URL) { $env:SUSFS_UPDATE_JSON_URL } else { 'https://raw.githubusercontent.com/linflame/SusfsLkmLoader/main/modules/update.json' }
+$ChangelogUrl  = if ($env:SUSFS_CHANGELOG_URL)  { $env:SUSFS_CHANGELOG_URL }  elseif ($UpdateJsonUrl) { $UpdateJsonUrl -replace '[^/]+$', 'changelog.md' } else { '' }
+$ZipUrlBase    = if ($env:SUSFS_ZIP_URL_BASE)    { $env:SUSFS_ZIP_URL_BASE }    else { 'https://github.com/linflame/SusfsLkmLoader/releases/download/nightly/' }
+$ZipOut        = 'SUSFS_LKM_legacy.zip'
+$modDir        = Join-Path (Split-Path -Parent $root) 'modules'
+New-Item -ItemType Directory -Path $modDir -Force | Out-Null
+
+function Write-ModuleProp([string]$tag, [int]$code) {
+    $lines = @(
+        'id=SUSFS_LKM',
+        'name=SUSFS LKM Loader',
+        "version=$tag",
+        "versionCode=$code",
+        'author=linflame & 酷安@只是不够强',
+        "description=Auto load susfs kernel module on boot. 项目地址: https://github.com/linflame/SusfsLkmLoader"
+    )
+    if ($UpdateJsonUrl) { $lines += "updateJson=$UpdateJsonUrl" }
+    # [IO.File] 相对路径按进程 cwd 解析, 必须用绝对路径
+    [IO.File]::WriteAllText((Join-Path $root 'build\module.prop'), ($lines -join "`n") + "`n")
+}
+
+# 管理器更新: changelog 字段指向 markdown 地址, 更新内容写入 modules/changelog.md
+function Write-UpdateJson([string]$tag, [int]$code, [string]$zipName) {
+    if (-not $UpdateJsonUrl) { return }
+    $md = "# 更新日志`n`n## $tag`n`n- 同步上游更新，susfs 版本号：$tag`n"
+    [IO.File]::WriteAllText((Join-Path $modDir 'changelog.md'), $md)
+    $j = [ordered]@{
+        version     = $tag
+        versionCode = $code
+        zipUrl      = "$ZipUrlBase$zipName"
+    }
+    if ($ChangelogUrl) { $j.changelog = $ChangelogUrl }
+    [IO.File]::WriteAllText((Join-Path $modDir 'update.json'), ($j | ConvertTo-Json) + "`n")
+    Write-Host "      已生成 update.json + changelog.md (versionCode $code)"
+}
+
+$upfile = Join-Path $shared 'upstream_version'
+if (-not (Test-Path $upfile)) { throw "本地 upstream_version 不存在: $upfile" }
+$localTag = (Get-Content $upfile -Raw).Trim()
+if (-not $localTag) { throw "upstream_version 文件为空" }
+$vc = 1
+$m2 = Select-String -Path 'build\module.prop' -Pattern '^versionCode=(\d+)' -ErrorAction SilentlyContinue
+if ($m2) { $vc = [int]$m2.Matches[0].Groups[1].Value }
+Write-Host "本地版本: $localTag (versionCode $vc)"
+
+# versionCode 由上游 tag 推导: v2.3.0-r18.1 -> 230181 (每段固定占位, 位数恒定、严格单调; 上限: 主/次/修订 <10, r<100, 子修订 <10)
+function Get-VersionCode([string]$tag) {
+    if ($tag -match '^v?(\d+)\.(\d+)\.(\d+)(?:-r(\d+)(?:\.(\d+))?)?$') {
+        $R = 0; $s = 0
+        if ($Matches[4]) { $R = [int]$Matches[4] }
+        if ($Matches[5]) { $s = [int]$Matches[5] }
+        return [int]$Matches[1] * 100000 + [int]$Matches[2] * 10000 + [int]$Matches[3] * 1000 + $R * 10 + $s
+    }
+    throw "无法从上游 tag 推导 versionCode: $tag"
+}
+
+function Get-LatestRelease([string]$src) {
+    if ($src -eq 'gitee') {
+        try {
+            $html = (Invoke-WebRequest -Uri "https://gitee.com/$repo/releases" -Headers $headers -UseBasicParsing).Content
+            $tm = [regex]::Match($html, [regex]::Escape($repo) + '/releases/tag/([^"?#<"]+)')
+            if (-not $tm.Success) { throw "页面中未找到 release tag" }
+            $tag = $tm.Groups[1].Value
+            $assets = @()
+            foreach ($am in [regex]::Matches($html, [regex]::Escape("$repo/releases/download/$tag/") + '([^"?#<"]+)')) {
+                $assets += [PSCustomObject]@{
+                    name = [Uri]::UnescapeDataString($am.Groups[1].Value)
+                    size = 0
+                    url  = "https://gitee.com/$repo/releases/download/$tag/" + $am.Groups[1].Value
+                }
+            }
+            $assets = @($assets | Group-Object name | ForEach-Object { $_.Group[0] })
+            if ($assets.Count -eq 0) { throw "页面解析未找到 $tag 的附件" }
+            return [PSCustomObject]@{ source = 'gitee'; tag = $tag; assets = $assets }
+        } catch {
+            Write-Host "      gitee 查询失败: $($_.Exception.Message)"
+            return $null
+        }
+    }
+    try {
+        $rel = Invoke-RestMethod -Uri "https://api.github.com/repos/$repo/releases/latest" -Headers $headers
+        $assets = @($rel.assets | ForEach-Object {
+            [PSCustomObject]@{ name = $_.name; size = [long]$_.size; url = $_.browser_download_url }
+        })
+        return [PSCustomObject]@{ source = 'github'; tag = [string]$rel.tag_name; assets = $assets }
+    } catch {
+        Write-Host "      github API 不可用 ($($_.Exception.Message)), 改用 release 页面解析 ..."
+        try {
+            $resp = Invoke-WebRequest -Uri "https://github.com/$repo/releases/latest" -Headers $headers -UseBasicParsing
+            $tag = ($resp.BaseResponse.ResponseUri.AbsolutePath -split '/')[-1]
+            $html = (Invoke-WebRequest -Uri "https://github.com/$repo/releases/expanded_assets/$tag" -Headers $headers -UseBasicParsing).Content
+            $assets = @()
+            foreach ($mm in [regex]::Matches($html, 'href="(/' + [regex]::Escape($repo) + '/releases/download/[^"]+)"')) {
+                $u = $mm.Groups[1].Value
+                $assets += [PSCustomObject]@{
+                    name = [Uri]::UnescapeDataString(($u -split '/')[-1])
+                    size = 0
+                    url  = 'https://github.com' + $u
+                }
+            }
+            if ($assets.Count -eq 0) { throw "页面解析未找到 $tag 的附件" }
+            return [PSCustomObject]@{ source = 'github'; tag = $tag; assets = $assets }
+        } catch {
+            Write-Host "      github 页面解析失败: $($_.Exception.Message)"
+            return $null
+        }
+    }
+}
+
+# 拼接 shared/ (公共) + build/ (线专有) 到临时目录后打包; $files 中 shared 没有的从 build 取
+function Pack-Module([string]$out, [string[]]$files) {
+    $koCount = (Get-ChildItem (Join-Path $shared 'kos') -Filter 'susfs_guard_lkm-*.ko' -ErrorAction SilentlyContinue).Count
+    if ($koCount -eq 0) { throw "shared\kos 下没有 ko 文件, 无法打包" }
+    if (-not (Test-Path (Join-Path $shared 'susfs_insmod'))) { throw "shared\susfs_insmod 缺失, 无法打包" }
+    $stage = Join-Path $root '.pack_tmp'
+    if (Test-Path $stage) { Remove-Item $stage -Recurse -Force }
+    New-Item -ItemType Directory -Path $stage | Out-Null
+    foreach ($f in $files) {
+        $src = Join-Path $shared $f
+        if (-not (Test-Path $src)) { $src = Join-Path 'build' $f }
+        if (-not (Test-Path $src)) { Remove-Item $stage -Recurse -Force; throw "缺少打包文件: $f" }
+        Copy-Item $src (Join-Path $stage $f) -Recurse
+    }
+    if (Test-Path $out) { Remove-Item $out -Force }
+    # 不能用 Compress-Archive: zip 条目名会写成反斜杠, Android 端解压后 ko 提取失败. 用 Windows 自带 bsdtar.
+    $tar = "$env:SystemRoot\System32\tar.exe"
+    if (-not (Test-Path $tar)) { throw "bsdtar not found at $tar (Windows 10 1803+ is required)" }
+    & $tar -acf $out -C $stage $files
+    Remove-Item $stage -Recurse -Force
+    if ($LASTEXITCODE -ne 0) { throw "tar pack failed (exit $LASTEXITCODE)" }
+    return $koCount
+}
+
+$packFiles = @('customize.sh', 'module.prop', 'post-fs-data.sh', 'service.sh', 'uninstall.sh', 'kmi.sh', 'load.sh', 'susfs_insmod', 'kos')
+
+Write-Host "[1/3] Querying latest release of $repo (首选 gitee) ..."
+$rel = $null
+foreach ($s in $sources) {
+    $rel = Get-LatestRelease $s
+    if ($rel -and $rel.tag) { break }
+}
+if ($rel) {
+    Write-Host "      上游最新: $($rel.tag) [来源: $($rel.source)]"
+} else {
+    Write-Host "      !! 所有更新源均不可用, 按本地版本处理"
+}
+
+# 无更新: 本地已有 zip 则停止, 否则打包本地版本 (versionCode 不递增)
+if (-not $rel -or $rel.tag -eq $localTag) {
+    $out = Join-Path $modDir $ZipOut
+    if (Test-Path $out) {
+        Write-Host ""
+        Write-Host "无更新 ($localTag), 且本地构建 $out 已存在, 停止打包."
+        exit 0
+    }
+    Write-Host "[2/3] 无更新, 本地无构建 -> 打包本地版本 $localTag (versionCode 保持 $vc) ..."
+    Write-ModuleProp $localTag $vc
+    $kc = Pack-Module $out $packFiles
+    Write-UpdateJson $localTag $vc $ZipOut
+    Write-Host ""
+    Write-Host "Done: $out  (本地版本 $localTag, versionCode $vc 未变, $kc kernels + susfs_insmod)"
+    exit 0
+}
+
+# 有更新: 拉取 ko + loader 到 shared, version = 上游 tag, versionCode 由 tag 推导
+$tag = $rel.tag
+$assets = @($rel.assets | Where-Object { $_.name -like 'susfs_guard_lkm-*.ko' -or $_.name -eq 'susfs_insmod' })
+$koCount = ($assets | Where-Object { $_.name -like '*.ko' }).Count
+if ($koCount -eq 0) { throw "No susfs_guard_lkm-*.ko assets found in release $tag" }
+if (-not ($assets | Where-Object { $_.name -eq 'susfs_insmod' })) { throw "No susfs_insmod loader found in release $tag" }
+Write-Host "[2/3] 发现更新 $localTag -> $tag, 下载 $koCount kernels + susfs_insmod [$($rel.source)] ..."
+$kosDir = Join-Path $shared 'kos'
+if (Test-Path $kosDir) {
+    Remove-Item "$kosDir\*.ko" -Force
+} else {
+    New-Item -ItemType Directory -Path $kosDir | Out-Null
+}
+foreach ($a in $assets) {
+    if ($a.name -eq 'susfs_insmod') {
+        $dst = Join-Path $shared $a.name
+    } else {
+        $dst = Join-Path $kosDir $a.name
+    }
+    Write-Host "      $($a.name)"
+    $ok = $false
+    for ($try = 1; $try -le 3 -and -not $ok; $try++) {
+        try {
+            Invoke-WebRequest -Uri $a.url -OutFile $dst -Headers $headers
+            $ok = $true
+        } catch {
+            Write-Host "      download attempt $try failed: $($_.Exception.Message)"
+            if ($try -lt 3) { Start-Sleep -Seconds (3 * $try) }
+        }
+    }
+    if (-not $ok) { throw "Download failed after 3 attempts: $($a.name)" }
+    $len = (Get-Item $dst).Length
+    if ($a.size -gt 0 -and $len -ne $a.size) { throw "Size mismatch after download: $($a.name)" }
+    if ($len -lt 10000) { throw "Downloaded file suspiciously small: $($a.name)" }
+}
+
+$vc = Get-VersionCode $tag
+Write-Host "[3/3] 更新 module.prop 并打包 (versionCode=$vc) ..."
+Write-ModuleProp $tag $vc
+[IO.File]::WriteAllText($upfile, "$tag`n")
+
+$out = Join-Path $modDir $ZipOut
+$kc = Pack-Module $out $packFiles
+Write-UpdateJson $tag $vc $ZipOut
+
+Write-Host ""
+Write-Host "Done: $out  (upstream $tag [$($rel.source)], versionCode $vc, $kc kernels + susfs_insmod)"
+
+```
+
+`modules/changelog.md`:
+
+```md
+# 更新日志
+
+## v2.3.0-r18.4
+
+- 同步上游更新，susfs 版本号：v2.3.0-r18.4
+
+```
+
+`modules/update.json`:
+
+```json
+{
+  "version": "v2.3.0-r18.4",
+  "versionCode": 230184,
+  "zipUrl": "https://github.com/linflame/SusfsLkmLoader/releases/download/nightly/SUSFS_LKM_legacy.zip",
+  "changelog": "https://raw.githubusercontent.com/linflame/SusfsLkmLoader/main/modules/changelog.md"
+}
+
+```
+
+`next/build/action.sh`:
+
+```sh
+#!/system/bin/sh
+# 管理器 Action 入口: 检查更新 -> 下载替换 ko + susfs_insmod -> 热重载
+# updater.sh 的 INFO=/OK=/ERROR= 前缀供 WebUI 解析, 这里剥掉做纯净输出
+MODDIR=${0%/*}
+. "$MODDIR/updater.sh"
+
+SRC="gitee"
+[ -f "$MODDIR/update_source" ] && SRC=$(cat "$MODDIR/update_source" | tr -d '\r')
+case "$SRC" in gitee|github) ;; *) SRC="gitee" ;; esac
+
+echo "== SUSFS LKM Loader 更新 (首选源: $SRC) =="
+do_update "$SRC" | sed 's/^INFO=//; s/^OK=//; s/^ERROR=//'
+echo "== 结束: $(date '+%Y-%m-%d %H:%M:%S') =="
+
+```
+
+`next/build/module.prop`:
+
+```prop
+id=SUSFS_LKM
+name=SUSFS LKM Loader
+version=1.0
+versionCode=1
+author=linflame & 酷安@只是不够强
+description=Auto load susfs kernel module on boot. Current version = v2.3.0-r18.4
+
+```
+
+`next/build/updater.sh`:
+
+```sh
+#!/system/bin/sh
+# SUSFS LKM Loader - 更新核心库, action.sh / webui.sh 共用
+# 首选更新源 gitee, 失败自动回退 github (webui 可改 update_source)
+# 输出约定: "INFO=xxx" 日志, "OK=xxx"/"ERROR=xxx"/"uptodate" 结果; WebUI 依赖前缀解析
+REPO="inforcqb/susfs4ksu-lkm"
+UA="susfs-lkm-updater"
+[ -z "$MODDIR" ] && MODDIR=${0%/*}
+LOG=/data/adb/susfs_lkm.log
+
+# ---------- 下载工具探测: curl -> wget -> busybox wget ----------
+CURL=""
+WGET=""
+detect_tools() {
+    [ -n "$CURL" ] || [ -n "$WGET" ] && return 0
+    for d in "" /data/adb/ksu/bin /data/adb/ap/bin /data/adb/magisk /system/bin /system/xbin /vendor/bin; do
+        p="${d:+$d/}curl"; { command -v "$p" >/dev/null 2>&1 || [ -x "$p" ]; } && { CURL="$p"; return 0; }
+    done
+    for d in "" /data/adb/ksu/bin /data/adb/ap/bin /data/adb/magisk /system/bin /system/xbin; do
+        p="${d:+$d/}wget"; { command -v "$p" >/dev/null 2>&1 || [ -x "$p" ]; } && { WGET="$p"; return 0; }
+        p="${d:+$d/}busybox"; { command -v "$p" >/dev/null 2>&1 || [ -x "$p" ]; } && { WGET="$p wget"; return 0; }
+    done
+    return 1
+}
+
+http_get() { # $1=url -> stdout
+    if [ -n "$CURL" ]; then
+        $CURL -fsSL --connect-timeout 10 -m 40 -A "$UA" "$1" 2>/dev/null
+    else
+        $WGET -q -T 15 -U "$UA" -O - "$1" 2>/dev/null
+    fi
+}
+
+http_download() { # $1=url $2=dest
+    rm -f "$2"
+    if [ -n "$CURL" ]; then
+        $CURL -fL --connect-timeout 15 -m 300 -A "$UA" -o "$2" "$1" 2>/dev/null
+    else
+        $WGET -q -T 30 -U "$UA" -O "$2" "$1" 2>/dev/null
+    fi
+}
+
+# ---------- 查最新 tag (不用 API 避免限流) ----------
+# 优先 releases/latest 302 跳转; 兜底解析 releases 列表页 (第一个 tag 即最新)
+get_latest_tag() { # $1=gitee|github
+    case "$1" in
+        gitee) HOST="https://gitee.com" ;;
+        github) HOST="https://github.com" ;;
+        *) return 1 ;;
+    esac
+    t=""
+    if [ -n "$CURL" ]; then
+        t=$($CURL -fsSIL --connect-timeout 10 -m 30 -A "$UA" -o /dev/null -w '%{url_effective}' "$HOST/$REPO/releases/latest" 2>/dev/null)
+        case "$t" in */releases/tag/*) t=${t##*/} ;; *) t="" ;; esac
+    fi
+    if [ -z "$t" ]; then
+        t=$(http_get "$HOST/$REPO/releases" | grep -o "releases/tag/[^\"?#<]*" | head -n 1)
+        t=${t#releases/tag/}
+    fi
+    echo "$t"
+}
+
+release_url() { # $1=source $2=tag $3=filename
+    case "$1" in
+        gitee) echo "https://gitee.com/$REPO/releases/download/$2/$3" ;;
+        github) echo "https://github.com/$REPO/releases/download/$2/$3" ;;
+    esac
+}
+
+# ---------- 加载状态 ----------
+is_loaded() {
+    grep -q '^susfs_guard_lkm ' /proc/modules 2>/dev/null && return 0
+    [ -d /sys/module/susfs_guard_lkm ] && return 0
+    for n in /proc/susfs_path /proc/susfs_kstat /proc/susfs_hide_modules /proc/susfs_enable_log; do
+        [ -e "$n" ] && return 0
+    done
+    return 1
+}
+
+unload_ko() {
+    rmmod susfs_guard_lkm 2>/dev/null
+    sleep 1
+}
+
+load_ko() { # $1=ko 路径; 统一用 susfs_insmod (显式暴露 /proc/susfs_* 控制节点)
+    "$MODDIR/susfs_insmod" "$1" expose_proc=1 2>&1
+}
+
+# 把状态动态写进 module.prop 描述 (与 load.sh 同一约定: 状态前缀 + 描述基座)
+write_status() { # $1=状态文本 (😋加载成功~ / 😭加载失败！)
+    B=$(cat "$MODDIR/description_base" 2>/dev/null)
+    [ -n "$B" ] || return 0
+    B=$(printf '%s' "$B" | sed 's/[&|]/\\&/g')
+    sed -i "s|^description=.*|description=$1 $B|" "$MODDIR/module.prop"
+}
+
+set_module_version() { # $1=上游tag: 更新 upstream_version 与描述基座, 模块 version/versionCode 不动
+    echo "$1" > "$MODDIR/upstream_version"
+    echo "Auto load susfs kernel module on boot. Current version = $1" > "$MODDIR/description_base"
+}
+
+# 下载 release 附件 (带跨源重试), 成功返回 0
+fetch_asset() { # $1=源顺序 $2=tag $3=文件名 $4=保存路径
+    for s in $1; do
+        http_download "$(release_url $s "$2" "$3")" "$4"
+        [ -s "$4" ] && return 0
+        echo "INFO=$s 下载失败, 换源重试"
+    done
+    return 1
+}
+
+# ---------- 只检查 ----------
+do_check() { # $1=gitee|github
+    detect_tools || { echo "ERROR=设备上没有可用的 curl/wget"; return 1; }
+    echo "INFO=正在从 $1 查询最新版本 ..."
+    t=$(get_latest_tag "$1")
+    [ -n "$t" ] && { echo "LATEST=$t"; return 0; }
+    echo "ERROR=无法从 $1 查询最新版本"
+    return 1
+}
+
+# ---------- 更新 + 热重载 ----------
+do_update() { # $1=首选源 gitee|github
+    echo "INFO=正在检测下载工具 ..."
+    detect_tools || { echo "ERROR=设备上没有可用的 curl/wget"; return 1; }
+    echo "INFO=下载工具: ${CURL:-$WGET}"
+
+    CUR=$(cat "$MODDIR/upstream_version" 2>/dev/null | tr -d '\r')
+
+    # 内核变体: kernel_version 为固定模式 (只更新该变体), 否则自动匹配当前内核 (全量更新所有变体)
+    KVAR=$(cat "$MODDIR/kernel_version" 2>/dev/null | tr -d '\r')
+    if [ -n "$KVAR" ]; then
+        echo "INFO=固定内核变体: $KVAR"
+        UPKMIS="$KVAR"
+    else
+        REL=$(cat /proc/sys/kernel/osrelease)
+        . "$MODDIR/kmi.sh"
+        KVAR=$(select_kmi "$REL" "$MODDIR")
+        [ -z "$KVAR" ] && { echo "ERROR=当前内核 $REL 无匹配 ko"; return 1; }
+        echo "INFO=自动匹配内核变体: $KVAR (更新全部变体)"
+        UPKMIS=$(cat "$MODDIR/kmis")
+    fi
+
+    [ "$1" = "github" ] && ORDER="github gitee" || ORDER="gitee github"
+
+    TAG=""; SRC=""
+    for s in $ORDER; do
+        echo "INFO=正在从 $s 查询最新版本 ..."
+        t=$(get_latest_tag "$s")
+        [ -n "$t" ] && { TAG="$t"; SRC="$s"; break; }
+        echo "INFO=$s 查询失败, 尝试下一个源"
+    done
+    [ -z "$TAG" ] && { echo "ERROR=所有更新源均不可用"; return 1; }
+    echo "INFO=当前版本 $CUR, 上游最新 $TAG [$SRC]"
+
+    [ "$TAG" = "$CUR" ] && { echo "uptodate"; return 0; }
+
+    TMP="$MODDIR/.update_tmp"
+    rm -rf "$TMP"; mkdir -p "$TMP/old"
+
+    for k in $UPKMIS; do
+        KONAME="susfs_guard_lkm-$k.ko"
+        echo "INFO=下载 $KONAME"
+        if ! fetch_asset "$ORDER" "$TAG" "$KONAME" "$TMP/$KONAME" \
+           || [ $(wc -c < "$TMP/$KONAME" | tr -d ' ') -lt 10000 ]; then
+            echo "ERROR=$KONAME 下载失败 (上游可能未提供该内核的 ko)"
+            rm -rf "$TMP"; return 1
+        fi
+    done
+    echo "INFO=下载 susfs_insmod"
+    if ! fetch_asset "$ORDER" "$TAG" susfs_insmod "$TMP/susfs_insmod" \
+       || [ $(wc -c < "$TMP/susfs_insmod" | tr -d ' ') -lt 10000 ]; then
+        echo "ERROR=susfs_insmod 下载失败"
+        rm -rf "$TMP"; return 1
+    fi
+
+    # 热重载: 备份 -> 卸载 -> 换文件 -> 加载
+    for k in $UPKMIS; do
+        cp -f "$MODDIR/kos/susfs_guard_lkm-$k.ko" "$TMP/old/" 2>/dev/null
+    done
+    cp -f "$MODDIR/susfs_insmod" "$TMP/old/susfs_insmod" 2>/dev/null
+    echo "INFO=热重载 susfs_guard_lkm ($KVAR)"
+    unload_ko
+    is_loaded && echo "INFO=旧模块未能卸载, 文件已替换, 重启后生效"
+    for k in $UPKMIS; do
+        mv -f "$TMP/susfs_guard_lkm-$k.ko" "$MODDIR/kos/susfs_guard_lkm-$k.ko"
+        chmod 644 "$MODDIR/kos/susfs_guard_lkm-$k.ko"
+    done
+    mv -f "$TMP/susfs_insmod" "$MODDIR/susfs_insmod"; chmod 755 "$MODDIR/susfs_insmod"
+    is_loaded || OUT=$(load_ko "$MODDIR/kos/susfs_guard_lkm-$KVAR.ko" 2>&1)
+
+    if is_loaded; then
+        set_module_version "$TAG"
+        write_status "😋加载成功~"
+        echo "$(date '+%m-%d %H:%M:%S') OK hot-updated to $TAG ($KVAR, $SRC)" >> "$LOG"
+        echo "OK=已更新到 $TAG 并完成热重载 ($KVAR)"
+        rm -rf "$TMP"
+        return 0
+    fi
+
+    # 加载失败: 回滚旧文件并尝试恢复
+    echo "INFO=新 ko 加载失败: $OUT"
+    echo "INFO=回滚到旧版本 $CUR"
+    for f in "$TMP/old"/*; do
+        [ -f "$f" ] || continue
+        b=${f##*/}
+        case "$b" in
+            susfs_insmod) mv -f "$f" "$MODDIR/susfs_insmod"; chmod 755 "$MODDIR/susfs_insmod" ;;
+            *.ko) mv -f "$f" "$MODDIR/kos/$b"; chmod 644 "$MODDIR/kos/$b" ;;
+        esac
+    done
+    load_ko "$MODDIR/kos/susfs_guard_lkm-$KVAR.ko" >/dev/null 2>&1
+    if is_loaded; then
+        write_status "😋加载成功~"
+        echo "ERROR=更新失败, 已回滚到 $CUR 并恢复加载"
+    else
+        write_status "😭加载失败！"
+        echo "ERROR=更新失败且回滚失败, 请重启手机"
+    fi
+    echo "$(date '+%m-%d %H:%M:%S') ERROR hot-update to $TAG failed, rolled back" >> "$LOG"
+    rm -rf "$TMP"
+    return 1
+}
+
+```
+
+`next/build/webroot/index.html`:
+
+```html
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>SUSFS LKM Loader</title>
+<style>
+  :root {
+    --bg: #0f1115;
+    --card: #1a1d24;
+    --border: #2a2e39;
+    --text: #e6e8ee;
+    --dim: #9aa0ae;
+    --accent: #4f8cff;
+    --ok: #34c77b;
+    --warn: #e5b545;
+    --err: #e5614f;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    padding: 16px; max-width: 640px; margin: 0 auto;
+  }
+  h1 { font-size: 20px; font-weight: 600; margin-bottom: 4px; }
+  .sub { color: var(--dim); font-size: 13px; margin-bottom: 16px; }
+  .card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 14px; padding: 16px; margin-bottom: 14px;
+  }
+  .grid { display: grid; grid-template-columns: auto 1fr; gap: 8px 14px; font-size: 14px; }
+  .grid dt { color: var(--dim); }
+  .grid dd { word-break: break-all; }
+  .badge { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; }
+  .badge.ok { background: rgba(52,199,123,.15); color: var(--ok); }
+  .badge.err { background: rgba(229,97,79,.15); color: var(--err); }
+  .badge.dim { background: rgba(154,160,174,.15); color: var(--dim); }
+  .badge.new { background: rgba(229,181,69,.18); color: var(--warn); }
+  .sources { display: flex; gap: 10px; margin-top: 6px; }
+  .src {
+    flex: 1; padding: 10px; border-radius: 10px; border: 1px solid var(--border);
+    background: transparent; color: var(--dim); font-size: 14px; text-align: center;
+    cursor: pointer; transition: all .15s;
+  }
+  .src.active { border-color: var(--accent); color: var(--accent); background: rgba(79,140,255,.10); font-weight: 600; }
+  .btns { display: flex; gap: 10px; }
+  button.act {
+    flex: 1; padding: 12px; border-radius: 10px; border: none; font-size: 15px; font-weight: 600;
+    cursor: pointer; transition: opacity .15s;
+  }
+  button.act:disabled { opacity: .45; cursor: not-allowed; }
+  #btnCheck { background: var(--card); color: var(--text); border: 1px solid var(--border); }
+  #btnUpdate { background: var(--accent); color: #fff; }
+  #btnRepo { background: var(--card); color: var(--accent); border: 1px solid var(--border); }
+  pre#log {
+    background: #0a0c10; border: 1px solid var(--border); border-radius: 10px;
+    padding: 12px; font-family: ui-monospace, Consolas, monospace; font-size: 12px;
+    line-height: 1.6; white-space: pre-wrap; word-break: break-all;
+    min-height: 60px; max-height: 320px; overflow-y: auto; color: var(--dim);
+  }
+  pre#log .ok { color: var(--ok); }
+  pre#log .err { color: var(--err); }
+  pre#log .info { color: var(--dim); }
+  .hint { color: var(--dim); font-size: 12px; margin-top: 8px; }
+  #status-line { font-size: 14px; margin-bottom: 10px; }
+  .hidden { display: none; }
+</style>
+</head>
+<body>
+  <h1>SUSFS LKM Loader</h1>
+  <div class="sub">内核模块在线更新 · 首选 Gitee 源</div>
+
+  <div class="card">
+    <dl class="grid">
+      <dt>模块版本</dt><dd id="d-version">…</dd>
+      <dt>susfs 版本</dt><dd id="d-susfs">…</dd>
+      <dt>内核变体</dt><dd id="d-kernel">…</dd>
+      <dt>模块状态</dt><dd id="d-loaded">…</dd>
+      <dt>上游最新</dt><dd id="d-latest"><span class="badge dim">未检查</span></dd>
+    </dl>
+  </div>
+
+  <div class="card">
+    <div style="color:var(--dim);font-size:13px;margin-bottom:6px;">更新源</div>
+    <div class="sources">
+      <div class="src" id="src-gitee" data-v="gitee">Gitee（国内推荐）</div>
+      <div class="src" id="src-github" data-v="github">GitHub</div>
+    </div>
+    <div class="hint">首选源查询/下载失败时会自动回退到另一个源。</div>
+  </div>
+
+  <div class="card">
+    <div class="btns">
+      <button class="act" id="btnCheck">检查更新</button>
+      <button class="act" id="btnUpdate" disabled>更新并热重载</button>
+    </div>
+    <div class="hint">更新会直接替换当前内核对应的 ko 与 susfs_insmod，并立即热重载；失败自动回滚。</div>
+  </div>
+
+  <div class="card">
+    <dl class="grid">
+      <dt>项目地址</dt><dd>github.com/linflame/SusfsLkmLoader</dd>
+    </dl>
+    <div class="btns" style="margin-top:10px">
+      <button class="act" id="btnRepo">前往</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div id="status-line">就绪</div>
+    <pre id="log"></pre>
+  </div>
+
+<script>
+(function () {
+  var MODULE_DIRS = ['/data/adb/modules/SUSFS_LKM', '/data/adb/modules_update/SUSFS_LKM'];
+  var REPO_URL = 'https://github.com/linflame/SusfsLkmLoader';
+  var state = { version: '', susfs: '', kernel: '', loaded: 0, source: 'gitee', latest: '', checked: false };
+
+  function $(id) { return document.getElementById(id); }
+
+  function logLine(text, cls) {
+    var el = $('log');
+    var span = document.createElement('span');
+    span.textContent = text + '\n';
+    if (cls) span.className = cls;
+    el.appendChild(span);
+    el.scrollTop = el.scrollHeight;
+  }
+  function clearLog() { $('log').textContent = ''; }
+  function setStatus(t) { $('status-line').textContent = t; }
+
+  // KernelSU / SukiSU WebUI 注入的 ksu.exec；兼容 callback 与 Promise 两种形式
+  function exec(cmd) {
+    return new Promise(function (resolve, reject) {
+      if (!window.ksu || typeof window.ksu.exec !== 'function') {
+        reject(new Error('no-ksu'));
+        return;
+      }
+      var done = false;
+      var cbName = '__susfs_cb_' + Math.random().toString(36).slice(2);
+      window[cbName] = function (errno, stdout, stderr) {
+        if (done) return; done = true;
+        try { delete window[cbName]; } catch (e) { window[cbName] = undefined; }
+        resolve({ errno: errno, stdout: stdout || '', stderr: stderr || '' });
+      };
+      try {
+        var r = window.ksu.exec(cmd, '{}', cbName);
+        if (r && typeof r.then === 'function') {
+          r.then(function (v) {
+            if (done) return; done = true;
+            resolve(v);
+          }, reject);
+        }
+      } catch (e) { reject(e); }
+    });
+  }
+
+  function runWebui(sub, arg) {
+    var cmd0 = 'sh ' + MODULE_DIRS[0] + '/webui.sh ' + sub + (arg ? ' ' + arg : '');
+    return exec(cmd0).then(function (r) {
+      if (r.errno === 0 || r.stdout) return r;
+      // 模块待更新状态时目录在 modules_update
+      var cmd1 = 'sh ' + MODULE_DIRS[1] + '/webui.sh ' + sub + (arg ? ' ' + arg : '');
+      return exec(cmd1);
+    });
+  }
+
+  function parseKV(stdout) {
+    var out = {};
+    stdout.split('\n').forEach(function (line) {
+      var i = line.indexOf('=');
+      if (i > 0) out[line.slice(0, i)] = line.slice(i + 1).trim();
+    });
+    return out;
+  }
+
+  function render() {
+    $('d-version').textContent = state.version || '未知';
+    $('d-susfs').textContent = state.susfs || '未知';
+    $('d-kernel').textContent = state.kernel || '未知';
+    $('d-loaded').innerHTML = state.loaded
+      ? '<span class="badge ok">已加载</span>'
+      : '<span class="badge err">未加载</span>';
+    $('src-gitee').classList.toggle('active', state.source === 'gitee');
+    $('src-github').classList.toggle('active', state.source === 'github');
+
+    var latest = $('d-latest');
+    if (!state.checked) {
+      latest.innerHTML = '<span class="badge dim">未检查</span>';
+    } else if (!state.latest) {
+      latest.innerHTML = '<span class="badge err">查询失败</span>';
+    } else if (state.latest === state.susfs) {
+      latest.innerHTML = '<span class="badge ok">' + state.latest + '（已是最新）</span>';
+    } else {
+      latest.innerHTML = '<span class="badge new">' + state.latest + '（有更新）</span>';
+    }
+    $('btnUpdate').disabled = !(state.checked && state.latest && state.latest !== state.susfs);
+  }
+
+  function refreshInfo() {
+    setStatus('读取模块信息…');
+    return runWebui('info').then(function (r) {
+      var kv = parseKV(r.stdout);
+      state.version = kv.VERSION || '';
+      state.susfs = kv.SUSFS || kv.VERSION || '';
+      state.kernel = kv.KERNEL || '';
+      state.loaded = kv.LOADED === '1' ? 1 : 0;
+      if (kv.SOURCE === 'gitee' || kv.SOURCE === 'github') state.source = kv.SOURCE;
+      setStatus('就绪');
+      render();
+    }).catch(function (e) {
+      setStatus('无法读取模块信息');
+      logLine('ERROR: ' + (e && e.message === 'no-ksu'
+        ? '未检测到 WebUI 执行环境，请在 KernelSU / SukiSU 等支持 WebUI 的管理器中打开'
+        : String(e)), 'err');
+      render();
+    });
+  }
+
+  function selectSource(v) {
+    state.source = v;
+    state.checked = false; state.latest = '';
+    render();
+    runWebui('set_source', v).then(function (r) {
+      if (r.errno === 0) logLine('更新源已切换为 ' + v, 'info');
+    });
+  }
+
+  function checkUpdate() {
+    clearLog();
+    state.checked = false; state.latest = '';
+    render();
+    setStatus('正在从 ' + state.source + ' 查询…');
+    logLine('查询 ' + state.source + ' 最新 release…', 'info');
+    $('btnCheck').disabled = true;
+    return runWebui('check', state.source).then(function (r) {
+      var kv = parseKV(r.stdout);
+      state.checked = true;
+      if (kv.LATEST) {
+        state.latest = kv.LATEST;
+        if (state.latest === state.susfs) {
+          setStatus('uptodate');
+          logLine('uptodate：当前已是最新版本 ' + state.latest, 'ok');
+        } else {
+          setStatus('发现新版本 ' + state.latest);
+          logLine('发现新版本：' + state.susfs + ' -> ' + state.latest, 'ok');
+        }
+      } else {
+        setStatus('查询失败');
+        logLine(kv.ERROR || r.stderr || '查询失败', 'err');
+      }
+      render();
+      $('btnCheck').disabled = false;
+    }).catch(function (e) {
+      state.checked = true;
+      setStatus('查询失败');
+      logLine('ERROR: ' + String(e), 'err');
+      render();
+      $('btnCheck').disabled = false;
+    });
+  }
+
+  function doUpdate() {
+    clearLog();
+    setStatus('正在更新…');
+    $('btnCheck').disabled = true;
+    $('btnUpdate').disabled = true;
+    return runWebui('update', state.source).then(function (r) {
+      var lines = (r.stdout || '').split('\n');
+      var finalCls = r.errno === 0 ? 'ok' : 'err';
+      lines.forEach(function (line) {
+        if (!line) return;
+        var cls = 'info';
+        if (line.indexOf('OK=') === 0) { cls = 'ok'; line = line.slice(3); }
+        else if (line.indexOf('ERROR=') === 0) { cls = 'err'; line = line.slice(6); }
+        else if (line.indexOf('INFO=') === 0) { line = line.slice(5); }
+        else if (line === 'uptodate') { cls = 'ok'; line = 'uptodate：已是最新，无需更新'; }
+        logLine(line, cls);
+      });
+      if (r.stderr) logLine(r.stderr, 'err');
+      var kv = parseKV(r.stdout);
+      if (kv.OK) {
+        setStatus('更新完成');
+        // 重新读取版本号
+        return runWebui('info').then(function (ri) {
+          var k2 = parseKV(ri.stdout);
+          state.version = k2.VERSION || state.version;
+          state.susfs = k2.SUSFS || state.latest;
+          state.loaded = k2.LOADED === '1' ? 1 : 0;
+          state.latest = state.susfs;
+          state.checked = true;
+          render();
+        });
+      } else {
+        setStatus(r.errno === 0 ? '完成' : '更新失败');
+        render();
+      }
+    }).catch(function (e) {
+      setStatus('更新失败');
+      logLine('ERROR: ' + String(e), 'err');
+    }).then(function () {
+      $('btnCheck').disabled = false;
+      render();
+    });
+  }
+
+  // 经 am 调起系统浏览器; 无执行环境时退回 window.open
+  function openRepo() {
+    exec("am start -a android.intent.action.VIEW -d '" + REPO_URL + "'").then(function (r) {
+      if (r.errno !== 0) {
+        logLine('调起浏览器失败，尝试页面内打开', 'err');
+        window.open(REPO_URL, '_blank');
+      }
+    }).catch(function () { window.open(REPO_URL, '_blank'); });
+  }
+
+  $('src-gitee').addEventListener('click', function () { selectSource('gitee'); });
+  $('src-github').addEventListener('click', function () { selectSource('github'); });
+  $('btnCheck').addEventListener('click', checkUpdate);
+  $('btnUpdate').addEventListener('click', doUpdate);
+  $('btnRepo').addEventListener('click', openRepo);
+
+  if (!window.ksu || typeof window.ksu.exec !== 'function') {
+    setStatus('环境不支持');
+    logLine('未检测到 ksu.exec，请在 KernelSU / SukiSU 等支持 WebUI 的管理器中打开本页面。', 'err');
+  }
+  refreshInfo();
+})();
+</script>
+</body>
+</html>
+
+```
+
+`next/build/webui.sh`:
+
+```sh
+#!/system/bin/sh
+# WebUI 后端: webui.sh info | check <源> | update <源> | set_source <源>
+MODDIR=${0%/*}
+. "$MODDIR/updater.sh"
+
+case "$1" in
+    info)
+        V=$(sed -n 's/^version=//p' "$MODDIR/module.prop" | head -n 1 | tr -d '\r')
+        U=$(cat "$MODDIR/upstream_version" 2>/dev/null | tr -d '\r')
+        K=$(cat "$MODDIR/kernel_version" 2>/dev/null | tr -d '\r')
+        if [ -z "$K" ]; then
+            . "$MODDIR/kmi.sh"
+            K="auto ($(select_kmi "$(cat /proc/sys/kernel/osrelease)" "$MODDIR"))"
+        fi
+        L=0; is_loaded && L=1
+        S=$(cat "$MODDIR/update_source" 2>/dev/null | tr -d '\r')
+        case "$S" in gitee|github) ;; *) S="gitee" ;; esac
+        echo "VERSION=$V"
+        echo "SUSFS=$U"
+        echo "KERNEL=$K"
+        echo "LOADED=$L"
+        echo "SOURCE=$S"
+        ;;
+    check)      do_check "$2" ;;
+    update)     do_update "$2" ;;
+    set_source)
+        case "$2" in
+            gitee|github) echo "$2" > "$MODDIR/update_source"; echo "OK=$2" ;;
+            *) echo "ERROR=非法源: $2"; exit 1 ;;
+        esac ;;
+    *) echo "ERROR=未知命令: $1"; exit 1 ;;
+esac
+
+```
+
+`next/pack.bat`:
+
+```bat
+@echo off
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0pack.ps1"
+pause
+
+```
+
+`next/pack.ps1`:
+
+```ps1
+# SUSFS LKM Loader (next) pack script
+# next 线已冻结: 模块 version 固定 1.0 / versionCode 1, 不查上游、不带更新配置
+# 公共文件 (kos / susfs_insmod / upstream_version / 脚本) 在 ../shared
+# 产物: ../modules/SUSFS_LKM_next.zip
+$ErrorActionPreference = 'Stop'
+$root = Split-Path -Parent $MyInvocation.MyCommand.Path
+Set-Location $root
+$shared = Join-Path (Split-Path -Parent $root) 'shared'
+
+$modDir = Join-Path (Split-Path -Parent $root) 'modules'
+New-Item -ItemType Directory -Path $modDir -Force | Out-Null
+$out = Join-Path $modDir 'SUSFS_LKM_next.zip'
+
+$tag = ((Get-Content (Join-Path $shared 'upstream_version') -Raw).Trim())
+if (-not $tag) { throw "shared\upstream_version 为空" }
+
+$lines = @(
+    'id=SUSFS_LKM',
+    'name=SUSFS LKM Loader',
+    'version=1.0',
+    'versionCode=1',
+    'author=linflame & 酷安@只是不够强',
+    "description=Auto load susfs kernel module on boot. Current version = $tag"
+)
+[IO.File]::WriteAllText((Join-Path $root 'build\module.prop'), ($lines -join "`n") + "`n")
+
+# 拼接 shared/ (公共) + build/ (线专有) 到临时目录后打包
+$files = @('customize.sh', 'module.prop', 'post-fs-data.sh', 'service.sh', 'uninstall.sh',
+           'action.sh', 'updater.sh', 'webui.sh', 'kmi.sh', 'load.sh', 'susfs_insmod', 'upstream_version', 'kos', 'webroot')
+$stage = Join-Path $root '.pack_tmp'
+if (Test-Path $stage) { Remove-Item $stage -Recurse -Force }
+New-Item -ItemType Directory -Path $stage | Out-Null
+foreach ($f in $files) {
+    $src = Join-Path $shared $f
+    if (-not (Test-Path $src)) { $src = Join-Path 'build' $f }
+    if (-not (Test-Path $src)) { Remove-Item $stage -Recurse -Force; throw "缺少打包文件: $f" }
+    Copy-Item $src (Join-Path $stage $f) -Recurse
+}
+if (Test-Path $out) { Remove-Item $out -Force }
+# 不能用 Compress-Archive: zip 条目名会写成反斜杠, Android 端解压后 ko 提取失败. 用 Windows 自带 bsdtar.
+$tar = "$env:SystemRoot\System32\tar.exe"
+& $tar -acf $out -C $stage $files
+Remove-Item $stage -Recurse -Force
+if ($LASTEXITCODE -ne 0) { throw "tar pack failed (exit $LASTEXITCODE)" }
+
+$koCount = (Get-ChildItem (Join-Path $shared 'kos') -Filter 'susfs_guard_lkm-*.ko').Count
+Write-Host "Done: $out  (模块 1.0 / susfs $tag, $koCount kernels + susfs_insmod)"
+
+```
+
+`shared/customize.sh`:
+
+```sh
+#!/system/bin/sh
+# SUSFS LKM Loader - 安装: 选语言 -> 自动识别/固定版本 -> 保留全部 ko, 开机按内核匹配
+# 兼容 Magisk / KernelSU / SukiSU / APatch
+SKIPUNZIP=0
+TIMEOUT=20
+
+# ---------- 音量键: 0=音量+ 1=音量- 2=超时 ----------
+# getevent -lc 1 输出如 "EV_KEY KEY_VOLUMEDOWN DOWN"; 只认按下 (DOWN) 忽略释放 (UP),
+# 否则残留的释放事件会被下次 keycheck 读到, 一次按键跳两项
+keycheck() {
+  TMPF=$TMPDIR/.key_evt
+  rm -f $TMPF
+  ( while true; do
+      E=$(getevent -lc 1 2>/dev/null)
+      case "$E" in
+        *KEY_VOLUMEUP*DOWN*)   echo up > $TMPF;   break ;;
+        *KEY_VOLUMEDOWN*DOWN*) echo down > $TMPF; break ;;
+      esac
+    done ) &
+  GPID=$!
+  SECS=0
+  while [ $SECS -lt $TIMEOUT ]; do
+    [ -s $TMPF ] && break
+    sleep 1
+    SECS=$((SECS + 1))
+  done
+  kill $GPID 2>/dev/null
+  grep -q up $TMPF 2>/dev/null && return 0
+  grep -q down $TMPF 2>/dev/null && return 1
+  return 2
+}
+
+# 双语输出: say "中文" "English" (ZH=1 中文, ZH=0 English)
+ZH=1
+say() { [ $ZH = 1 ] && ui_print "$1" || ui_print "$2"; }
+
+ui_print "- SUSFS LKM Loader installer started"
+
+# ---------- Q1: 语言 ----------
+ui_print "--------------------------------"
+ui_print " 选择语言 / Select language"
+ui_print " 音量+ = 中文    音量- = English"
+ui_print " Vol+ = Chinese  Vol- = English"
+ui_print "--------------------------------"
+keycheck
+[ $? = 1 ] && ZH=0
+
+# ---------- 内核清单 = kos/ 目录内容 ----------
+KOLIST=""
+for f in $MODPATH/kos/susfs_guard_lkm-*.ko; do
+  [ -f "$f" ] && { b=${f##*susfs_guard_lkm-}; KOLIST="$KOLIST ${b%.ko}"; }
+done
+[ -z "$KOLIST" ] && abort "! 模块包内未找到 ko 文件 / no ko files in package"
+
+# 生成 kmis 清单并按 osrelease 自动识别 (与开机加载共用 kmi.sh 同一套逻辑)
+printf '%s\n' $KOLIST > $MODPATH/kmis
+REL=$(cat /proc/sys/kernel/osrelease)
+. $MODPATH/kmi.sh
+DETECTED=$(select_kmi "$REL" "$MODPATH")
+
+ui_print "--------------------------------"
+say " 内核: $REL" " Kernel: $REL"
+[ -n "$DETECTED" ] && say " 自动识别: $DETECTED" " Detected: $DETECTED"
+ui_print "--------------------------------"
+
+# ---------- Q2: 自动识别 or 固定版本 ----------
+say "每次开机自动识别内核版本?" "Auto-detect kernel version on every boot?"
+say "音量+ = 是, 自动识别 (推荐, 换内核无需重装)" "Vol+ = Yes, auto (recommended, no reinstall after OTA)"
+say "音量- = 否, 固定版本安装" "Vol- = No, use a fixed version"
+say "${TIMEOUT}s 无操作默认自动识别" "Timeout ${TIMEOUT}s defaults to auto"
+keycheck; R=$?
+
+if [ $R -eq 1 ]; then
+  # ---------- Q3: 固定版本列表 (识别结果排第一) ----------
+  ORDER=""
+  REST=""
+  for k in $KOLIST; do
+    if [ "$k" = "$DETECTED" ]; then ORDER="$k"; else REST="$REST $k"; fi
+  done
+  ORDER="$ORDER$REST"
+  SEL=""
+  for k in $ORDER; do
+    say ">>> 固定使用 $k ?" ">>> Use fixed $k ?"
+    say "    音量+ = 确认    音量- = 下一个" "    Vol+ = confirm  Vol- = next"
+    keycheck; R=$?
+    if [ $R -eq 0 ]; then
+      SEL=$k; break
+    elif [ $R -eq 2 ]; then
+      [ -n "$DETECTED" ] && { SEL=$DETECTED; say " 超时, 使用识别结果: $SEL" " Timeout, use detected: $SEL"; }
+      break
+    fi
+  done
+  [ -z "$SEL" ] && { say "! 未选择版本, 安装中止" "! No version selected, aborting"; abort "! install aborted"; }
+  echo "$SEL" > $MODPATH/kernel_version
+  say "- 模式: 固定版本 $SEL" "- Mode: fixed $SEL"
+else
+  [ $R -eq 2 ] && say " 超时, 默认自动识别" " Timeout, default: auto"
+  rm -f $MODPATH/kernel_version
+  say "- 模式: 自动识别 (每次开机按内核匹配)" "- Mode: auto-detect (match kernel on every boot)"
+fi
+
+# ---------- 校验与权限 (next 专有文件按存在性处理, 两线共用此脚本) ----------
+MISSING=""
+for f in kos kmis kmi.sh load.sh susfs_insmod post-fs-data.sh service.sh uninstall.sh module.prop; do
+  [ -e $MODPATH/$f ] || MISSING="$MISSING $f"
+done
+[ -n "$MISSING" ] && { ui_print "! 模块文件不完整, 缺少:$MISSING"; abort "! 安装中止 (请反馈此日志)"; }
+
+set_perm_recursive $MODPATH/kos 0 0 0755 0644
+set_perm $MODPATH/kmis 0 0 0644
+set_perm $MODPATH/susfs_insmod 0 0 0755
+for f in kmi.sh load.sh post-fs-data.sh service.sh uninstall.sh action.sh updater.sh webui.sh; do
+  [ -f $MODPATH/$f ] && set_perm $MODPATH/$f 0 0 0755
+done
+[ -f $MODPATH/upstream_version ] && set_perm $MODPATH/upstream_version 0 0 0644
+[ -d $MODPATH/webroot ] && set_perm_recursive $MODPATH/webroot 0 0 0755 0644
+
+# 保存描述基座, 加载状态由 load.sh 每次开机动态写入 module.prop
+sed -n 's/^description=//p' $MODPATH/module.prop > $MODPATH/description_base
+set_perm $MODPATH/description_base 0 0 0644
+
+# 纯加载器, 不做文件挂载
+touch $MODPATH/skip_mount
+
+# ---------- 注册公用 post-fs-data.d 提前加载 ----------
+# 公用脚本早于所有模块脚本; 钩子只转发到模块内 load.sh, uninstall.sh 负责清除
+PFD=/data/adb/post-fs-data.d
+HOOK=$PFD/susfs_guard_lkm.sh
+mkdir -p $PFD
+if [ -f "$HOOK" ] && ! grep -q 'SUSFS_LKM' "$HOOK"; then
+  say "! $HOOK 已被其他模块占用, 跳过提前加载注册 (模块阶段仍会加载)" \
+      "! $HOOK is used by another module, skip early-load hook (module stage still loads)"
+else
+  cat > $HOOK <<'EOF'
+#!/system/bin/sh
+# SUSFS_LKM 提前加载 (公用阶段, 早于所有模块脚本)
+MODDIR=/data/adb/modules/SUSFS_LKM
+[ -f "$MODDIR/load.sh" ] && exec /system/bin/sh "$MODDIR/load.sh" early
+exit 0
+EOF
+  chmod 755 $HOOK
+  say "- 已注册公用提前加载 (post-fs-data.d)" "- Early-load hook registered (post-fs-data.d)"
+fi
+
+say "- 完成! 重启后自动加载" "- Done! Will load on reboot"
+
+```
+
+`shared/kmi.sh`:
+
+```sh
+# SPDX-License-Identifier: GPL-2.0-only
+# 来自上游 susfs4ksu-lkm: 按内核 osrelease 从 kmis 清单选择匹配 KMI
+# 清单在 "$2/kmis" (每行一个 <android版本>-<内核版本>), 新增 KMI 只需加一行
+select_kmi() {
+  rel="$1"
+  while IFS= read -r kmi; do
+    [ -n "$kmi" ] || continue
+    os="${kmi%-*}"
+    kver="${kmi#*-}"
+    case "$rel" in
+      "$kver".*-"$os"-*) echo "$kmi"; return 0 ;;
+    esac
+  done < "$2/kmis"
+  # 内核串里有 android 标签但不匹配 = 真的不匹配, 不能当无标签处理
+  case "$rel" in *android[0-9]*) return 1 ;; esac
+  # 无标签内核: 仅当版本号唯一对应一个 KMI 才匹配 (5.10 / 5.15 有共享则拒绝)
+  match=""
+  n=0
+  while IFS= read -r kmi; do
+    [ -n "$kmi" ] || continue
+    kver="${kmi#*-}"
+    case "$rel" in "$kver".*) ;; *) continue ;; esac
+    patch="${rel#"$kver".}"; patch="${patch%%-*}"
+    case "$patch" in ''|*[!0-9]*) continue ;; esac
+    match="$kmi"; n=$((n + 1))
+  done < "$2/kmis"
+  [ "$n" = 1 ] && { echo "$match"; return 0; }
+  return 1
+}
+
+```
+
+`shared/load.sh`:
+
+```sh
+#!/system/bin/sh
+# SUSFS LKM Loader - 核心加载逻辑, 公用钩子 / post-fs-data / service 三入口共用
+# $1 = 调用阶段 (early / post-fs-data / service), early 阶段清空日志
+# 加载结果动态写入 module.prop 描述 (安装时无状态, 每次开机更新)
+MODDIR=${0%/*}
+[ -f "$MODDIR/disable" ] && exit 0
+[ -f "$MODDIR/remove" ] && exit 0
+[ "$(getprop persist.sys.safemode)" != 1 ] || exit 0
+[ "$(getprop ro.sys.safemode)" != 1 ] || exit 0
+
+LOG=/data/adb/susfs_lkm.log
+STAGE=$1
+[ "$STAGE" = early ] && : > $LOG
+
+write_status() { # $1=状态文本 (😋加载成功~ / 😭加载失败！)
+    B=$(cat "$MODDIR/description_base" 2>/dev/null)
+    [ -n "$B" ] || return 0
+    B=$(printf '%s' "$B" | sed 's/[&|]/\\&/g')
+    sed -i "s|^description=.*|description=$1 $B|" "$MODDIR/module.prop"
+}
+
+# 模块加载后自我隐藏, 以 /proc/susfs_* 控制节点为主要判据
+is_loaded() {
+    grep -q '^susfs_guard_lkm ' /proc/modules 2>/dev/null && return 0
+    [ -d /sys/module/susfs_guard_lkm ] && return 0
+    for n in /proc/susfs_path /proc/susfs_kstat /proc/susfs_hide_modules /proc/susfs_enable_log; do
+        [ -e "$n" ] && return 0
+    done
+    return 1
+}
+
+if is_loaded; then
+    write_status "😋加载成功~"
+    exit 0
+fi
+
+# 固定版本 (安装时音量键手动选择) 优先, 否则按内核 osrelease 从 kmis 清单自动匹配
+KVER=""
+[ -f "$MODDIR/kernel_version" ] && KVER=$(cat "$MODDIR/kernel_version" | tr -d '\r')
+if [ -z "$KVER" ]; then
+    REL=$(cat /proc/sys/kernel/osrelease)
+    . "$MODDIR/kmi.sh"
+    KVER=$(select_kmi "$REL" "$MODDIR")
+fi
+[ -n "$KVER" ] || { echo "ERROR no ko matches kernel: $REL ($STAGE)" >> $LOG; write_status "😭加载失败！"; exit 0; }
+KO=$MODDIR/kos/susfs_guard_lkm-$KVER.ko
+[ -f "$KO" ] || { echo "ERROR ko missing: $KO ($STAGE)" >> $LOG; write_status "😭加载失败！"; exit 0; }
+
+# 统一用上游自带的 susfs_insmod (所有管理器一套逻辑), 显式暴露 /proc/susfs_* 控制节点
+[ -x "$MODDIR/susfs_insmod" ] || { echo "ERROR susfs_insmod missing ($STAGE)" >> $LOG; write_status "😭加载失败！"; exit 0; }
+OUT=$("$MODDIR/susfs_insmod" "$KO" expose_proc=1 2>&1)
+
+if is_loaded || echo "$OUT" | grep -qi 'file exists'; then
+    echo "OK loaded ($KVER, $STAGE)" >> $LOG
+    write_status "😋加载成功~"
+else
+    echo "ERROR load failed ($KVER, $STAGE): $OUT" >> $LOG
+    write_status "😭加载失败！"
+fi
+
+```
+
+`shared/post-fs-data.sh`:
+
+```sh
+#!/system/bin/sh
+# 模块 post-fs-data 阶段: 调用核心加载 (公用钩子已加载时 load.sh 自动跳过)
+MODDIR=${0%/*}
+exec /system/bin/sh "$MODDIR/load.sh" post-fs-data
+
+```
+
+`shared/service.sh`:
+
+```sh
+#!/system/bin/sh
+# service 阶段兜底: 等模块文件就绪后调用核心加载
+MODDIR=${0%/*}
+for i in $(seq 1 20); do
+    [ -f "$MODDIR/load.sh" ] && break
+    sleep 1
+done
+exec /system/bin/sh "$MODDIR/load.sh" service
+
+```
+
+`shared/uninstall.sh`:
+
+```sh
+#!/system/bin/sh
+# 卸载 ko, 清理日志/残留 ko/公用提前加载脚本 (仅删除本模块创建的钩子)
+rmmod susfs_guard_lkm 2>/dev/null
+rm -f /data/adb/susfs_lkm.log
+rm -f /data/adb/susfs_guard_lkm-android*.ko
+H=/data/adb/post-fs-data.d/susfs_guard_lkm.sh
+[ -f "$H" ] && grep -q 'SUSFS_LKM' "$H" && rm -f "$H"
+
+```
+
+`shared/upstream_version`:
+
+```
+v2.3.0-r18.4
+
+```
