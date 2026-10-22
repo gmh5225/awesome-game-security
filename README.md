@@ -948,6 +948,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/lilyco-42/rev-tools-setup [One-click Windows RE toolchain installer (Scoop) with Cheat Engine MCP setup and AI agent pitfalls guide]
 - https://github.com/rollingrock/bethesda-modding-starter [Bootstrap for Bethesda script-extender plugin dev plus Ghidra/x64dbg MCP reverse-engineering toolchain]
 - https://github.com/jlagedo/dreams-to-reality-re [Reverse-engineering research toolkit for Dreams to Reality (1997): Python asset decoders, Ghidra scripts, format documentation, and a Babylon.js viewer—tools only, no copyrighted game data]
+- https://github.com/formix/sre-re [Solar Realms Elite 0.994b (DOS BBS) RE: Ghidra toolchain, decoded .II save formats, and recovered game rules toward a Linux remake]
 - https://github.com/reikop/axis-web [Reverse-engineered AXIS (2005) client rebuilt as WebAssembly/WebGL with byte-exact asset decoders and multiplayer protocol research]
 - https://github.com/iniGlowee/headless-asset-re [Documented methodology for headless game-asset reverse engineering without the original SDK—reference-first decode, render validation, and IP-safe workflows (no bundled game data).]
 - https://github.com/xshxdex98/OpenMCM2 [Native Motocross Madness 2 rebuild: Ghidra export/relink harness, retail section verification, and integrated OpenGL renderer]
