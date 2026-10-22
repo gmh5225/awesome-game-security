@@ -2366,7 +2366,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [OpenLeaderboard](entities/leaderboard.md) — Go/Redis multi-tenant leaderboard API; durable ingest log; HMAC-signed score submits + replay window; split API/player credentials; dashboard, SDKs, Unity client; Docker/Terraform/AWS; Prometheus/Grafana (kodeni-am; Anti Cheat / backend)
 - [levo](entities/levo.md) — experimental x86/x64 PE AOT binary translator (Ghidra CFG → XED/Remill lift → LLVM recompile; kernel32 API-intercept runtime)
 - [LetMeGG](entities/letme-gg.md) — C++ PoC; prevent WinDbg break/attach (Some Tricks / Windows Ring0 anti-debug; gmh5225)
-- [Let's Go Recomp](entities/letsgo-recomp.md) — *Pokémon Let's Go* Switch 1.0.0 LAS Recomp static recomp to Windows x64 (Horizon HLE, NVN→Vulkan, FSR; Python/Zig toolchain; BYO exefs/romfs; raulzrrs; Cheat / Source)
+- [Let's Go Recomp](entities/letsgo-recomp.md) — *Pokémon Let's Go* Switch 1.0.0 LAS Recomp static recomp to Windows x64 (Horizon HLE, NVN→Vulkan, FSR; Python/Zig per-dump lift; memory watch/RenderDoc dev hooks; BYO exefs/romfs; raulzrrs; Cheat / Source)
 - [LeviAntiCheat](entities/levi-anticheat.md) — LeviLamina C++ Bedrock BDS plugin (X-ray Anti-Xray engine, fly/speed, reach, auto-click, invalid inventory, malformed packets, dupe/crafter-crash fixes, violation-level ban/mute, JSON + hot reload; Anti Cheat / Open Source Anti Cheat System; LiteLDev)
 - [lightsaber](entities/lightsaber.md) — iOS 18.4–18.6.2 userland exploit; JS inject SpringBoard (DarkSword-derived)
 - [light-hook](entities/light-hook.md) — single-header x86-64 hook library (SamuelTulach; pure C; Windows/Linux/EFI; user/kernel/firmware examples; no heavy disassembler; cross-platform hook library)
