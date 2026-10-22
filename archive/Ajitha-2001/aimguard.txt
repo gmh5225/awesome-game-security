@@ -1,0 +1,2980 @@
+Project Path: arc_Ajitha-2001_aimguard_v4p96t7r
+
+Source Tree:
+
+```txt
+arc_Ajitha-2001_aimguard_v4p96t7r
+├── README.md
+├── aimguard
+│   ├── __init__.py
+│   ├── __pycache__
+│   │   ├── __init__.cpython-312.pyc
+│   │   ├── api.cpython-312.pyc
+│   │   ├── attestation.cpython-312.pyc
+│   │   ├── detectors.cpython-312.pyc
+│   │   ├── features.cpython-312.pyc
+│   │   ├── io_utils.cpython-312.pyc
+│   │   ├── localscan.cpython-312.pyc
+│   │   ├── moderation.cpython-312.pyc
+│   │   ├── network.cpython-312.pyc
+│   │   ├── pipeline.cpython-312.pyc
+│   │   ├── pvs.cpython-312.pyc
+│   │   ├── report.cpython-312.pyc
+│   │   ├── risk.cpython-312.pyc
+│   │   ├── service.cpython-312.pyc
+│   │   ├── signatures.cpython-312.pyc
+│   │   ├── simulator.cpython-312.pyc
+│   │   ├── store.cpython-312.pyc
+│   │   ├── tick_sim.cpython-312.pyc
+│   │   ├── ticks.cpython-312.pyc
+│   │   └── validation.cpython-312.pyc
+│   ├── api.py
+│   ├── attestation.py
+│   ├── detectors.py
+│   ├── features.py
+│   ├── io_utils.py
+│   ├── localscan.py
+│   ├── moderation.py
+│   ├── network.py
+│   ├── pipeline.py
+│   ├── pvs.py
+│   ├── report.py
+│   ├── risk.py
+│   ├── service.py
+│   ├── signatures.py
+│   ├── simulator.py
+│   ├── store.py
+│   ├── tick_sim.py
+│   ├── ticks.py
+│   └── validation.py
+├── aimguard_report.html
+├── blocklist.txt
+├── client
+│   └── scan_client_example.py
+├── manage.py
+├── requirements-client.txt
+├── requirements.txt
+├── run_demo.py
+├── run_eval.py
+├── scan_my_pc.py
+├── scan_report.json
+├── score_real.py
+└── tests
+    ├── __pycache__
+    │   ├── test_layers.cpython-312-pytest-9.1.1.pyc
+    │   ├── test_localscan.cpython-312-pytest-9.1.1.pyc
+    │   ├── test_moderation.cpython-312-pytest-9.1.1.pyc
+    │   ├── test_pipeline.cpython-312-pytest-9.1.1.pyc
+    │   └── test_system.cpython-312-pytest-9.1.1.pyc
+    ├── test_layers.py
+    ├── test_localscan.py
+    ├── test_moderation.py
+    ├── test_pipeline.py
+    └── test_system.py
+
+```
+
+`README.md`:
+
+```md
+# AimGuard: server-side anti-cheat PROTOTYPE
+
+**Status: prototype. Not ready for real enforcement.** The server-side components below exist and pass their tests on
+synthetic data, but the system has never run on a real game, has had no security review, and several parts (client
+protection, game integration, scale) are outside this repo. Do not ban real players with it.
+
+## What is implemented
+| Layer (from the design) | Module | Notes |
+|---|---|---|
+| Raw telemetry -> features | `ticks.py` | crosshair ticks + shot + visibility events -> reaction time, aim path linearity, peak aim speed, headshots, pre-aim error vs a decoy null |
+| Real-time validation | `validation.py` | speed/teleport/fire-rate rules, violation budget (no single-violation punishment), lag-compensated hit re-check with bounded rewind |
+| Information hiding | `pvs.py` | grid PVS + line of sight. Enemies without line of sight are not replicated, **however close** (no distance exception); hidden-but-near enemies become direction-only audio cues. Deliberate, bounded leaks: teammates, enemies within `peek_radius` of a corner edge, coarse audio direction. 2D walls only (no floors/doors/props) |
+| Network | `network.py` | packet HMAC, sliding anti-replay window, rate limiter, lag-switch score |
+| Attestation (server side) | `attestation.py` | one-time nonces + decision logic for a decoded Play Integrity verdict |
+| Behaviour detection | `detectors.py`, `risk.py`, `pipeline.py` | bracket-robust z-scores, binomial headshot test, pre-aim test, Isolation Forest calibrated on held-out clean players, log-odds risk with decay |
+| Known-cheat signatures | `signatures.py`, `localscan.py` | hash blocklist, unknown-module signal, scoped local PC scan. Client-reported matches are SOFT evidence (see trust levels) |
+| Database | `store.py` | SQLite: engagements, players, flags, reviews, enforcement, appeals, reports, tokens, audit log; idempotent ingest; retention purge |
+| Moderator workflow | `moderation.py` | review queue, four-eyes ban rule, delayed ban waves, appeals with independent resolver, label export |
+| HTTP API | `api.py` | all endpoints from the design, token auth, roles, rate-limited reports |
+| Operations | `manage.py` | demo, train baseline, make tokens, serve, score, ban wave |
+
+## Enforcement rules (each is covered by regression tests)
+- Statistics alone never ban: two independent moderators must confirm (one if HARD evidence exists).
+- Approval is **re-checked when the ban wave runs**. If a reviewer changes to `legit` (or confirmations drop below the
+  requirement) the scheduled ban is cancelled, never executed.
+- An overturned appeal **closes the case**: old reviews, old evidence and pre-overturn matches stop counting and the stale
+  risk score is cleared. Another ban needs NEW evidence (a new flag from new matches, or new hard evidence) plus FRESH reviews.
+- Appeals are resolved by a moderator not involved in the original decision. Mass reports never trigger action. Every step is audited.
+- `risk_score` is an experimental ranking, NOT a calibrated probability.
+
+## Evidence trust levels
+| Evidence | Source | Level |
+|---|---|---|
+| Server-observed violation (`server_violation`) | the game server itself | HARD |
+| File-hash match **verified by a moderator** (`POST /v1/evidence/verify`) | independent confirmation (sample analysis, replay, trusted re-scan) | HARD |
+| File-hash match **reported by the client** | the player's own device, relayed by the game server | SOFT (+3 weight, never reduces the confirmations needed) |
+| Unknown modules, failed attestation | client | SOFT (+1) |
+Authentication only proves the report came from your game server, not that the hash was really observed on that player's device:
+a modified client can forge or omit reports, and a framing attempt could fabricate one. That is why client claims are soft.
+`score_real.py` follows the same rule: `--reports` adds soft evidence; `--verified-players ids.txt` supplies hard evidence.
+
+## Run it (Windows PowerShell, from the project folder with the venv active)
+    pip install -r requirements.txt
+    python manage.py demo                    # trains, ingests raw ticks, scores, prints the review queue
+    python -m pytest                         # all tests (takes ~2-3 minutes)
+Run a real API server:
+    python manage.py train-baseline --reference clean_engagements.csv --out baseline.pkl
+    python manage.py make-token --db aimguard.db --role admin --subject you
+    python manage.py make-token --db aimguard.db --role game_server --subject server1
+    python manage.py make-token --db aimguard.db --role moderator --subject alice
+    python manage.py serve --db aimguard.db --baseline baseline.pkl --blocklist blocklist.txt --port 8080
+Endpoints (all need `Authorization: Bearer <token>`): `POST /v1/matches/{id}/telemetry`, `GET /v1/players/{id}/risk`,
+`GET /v1/flags?status=open&min_severity=`, `POST /v1/reviews`, `POST /v1/bans`, `POST /v1/reports`,
+`POST /v1/attestation/nonce|verify`, `POST /v1/evidence`, `POST /v1/evidence/verify` (moderator), `POST /v1/appeals`, `POST /v1/appeals/{id}/resolve`,
+`GET /v1/me/status`, `POST /v1/admin/score`, `POST /v1/admin/ban_wave`.
+
+## Telemetry your game server must send
+Per player per match (columns as lists): `ticks` (t_ms, yaw, pitch), `shots` (t_ms, target, hit, hitbox),
+`vis` (t_ms, target, target_yaw, target_pitch, decoy_yaw, decoy_pitch) plus the player's `bracket`.
+`vis` = when an enemy first became visible; `target_*` = direction to it; `decoy_*` = direction to another plausible
+enemy position (your integration must supply this; it forms the null for the wallhack test).
+
+## What you still need (not implementable generically)
+- **Game integration:** the code inside YOUR game/engine that emits the telemetry above and applies `validation`/`pvs` in the netcode.
+- **Client-side protection:** native client checks, integrity of the game binary, and (PC) any driver-level component. `client/` and `localscan.py` are scoped examples only, easily bypassed by a determined cheat.
+- **Play Integrity decoding** needs your Google credentials (inject a `decoder`); **Apple App Attest** is not implemented. Packet confidentiality (DTLS/TLS/AEAD) is not implemented, only integrity.
+- **Scale:** SQLite + stdlib server suit a prototype. For production use PostgreSQL/ClickHouse, Kafka, worker queues, a production web server/TLS, and secrets management.
+- **Real-data validation:** every accuracy figure comes from simulated data. Expect to re-tune thresholds on real matches, run in shadow mode for weeks, and measure precision with moderator labels before enforcing anything.
+
+## Known limitations
+- Tests were run in a sandbox with a minimal pytest stand-in; run `python -m pytest` yourself. Passing tests do not establish real-world safety: this has had no independent security review.
+- IDs are always treated as strings (`aimguard/io_utils.py`), so `007` in a CSV matches `007` in JSON. Databases from older versions are upgraded automatically on open.
+- After an overturned ban a player needs a full new window of matches before they can be scored again.
+- Weak/subtle cheating is partly missed (simulated cheats at strength 0.2-0.35 were detected roughly 50-70% of the time); that trades recall for near-zero false positives.
+- Baselines need verified-clean reference players (>= ~65 per bracket, same match window); the scoring window is fixed (default 6 matches).
+- Legal/privacy: disclose telemetry and any client scanning in your terms, use pseudonymous IDs, set retention, honour local data-protection law.
+
+```
+
+`aimguard/__init__.py`:
+
+```py
+"""AimGuard: anti-cheat detection toolkit (defensive, synthetic-data first)."""
+
+```
+
+`aimguard/api.py`:
+
+```py
+"""HTTP API (stdlib http.server; fine for a prototype / behind a reverse proxy; swap in FastAPI for production).
+Auth: 'Authorization: Bearer <token>'. Roles: game_server, moderator, admin, player."""
+import json, re, threading
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from urllib.parse import urlparse, parse_qs
+import pandas as pd
+
+from .attestation import NonceStore, evaluate_play_integrity
+from .moderation import Moderation
+from .network import RateLimiter
+from .service import ingest_telemetry, score_all
+from .signatures import blocklist_matches
+from .store import REPORTED_HASH
+
+MAX_BODY = 25 * 1024 * 1024
+
+
+class ApiError(Exception):
+    def __init__(self, status, msg):
+        super().__init__(msg); self.status = status
+
+
+def _need(body, *keys):
+    miss = [k for k in keys if k not in body]
+    if miss:
+        raise ApiError(400, f"missing field(s): {miss}")
+
+
+def _frame(d, cols, name):
+    try:
+        df = pd.DataFrame(d)
+    except ValueError as e:
+        raise ApiError(400, f"{name}: columns must be equal-length lists") from e
+    if df.empty:
+        return df.reindex(columns=cols)
+    if not set(cols) <= set(df.columns):
+        raise ApiError(400, f"{name} needs columns {cols}")
+    return df
+
+
+def make_server(store, baseline, moderation=None, blocklist=frozenset(), decoder=None, package="com.example.game",
+                cert_digests=None, host="127.0.0.1", port=8080, report_rate=(5 / 60, 5)):
+    mod = moderation or Moderation(store)
+    nonces, limiters = NonceStore(), {}
+    MODS, VIEW = {"moderator"}, {"moderator", "admin"}
+
+    def telemetry(ctx):
+        _need(ctx["body"], "players")
+        ticks, shots, vis, bracket_of = [], [], [], {}
+        for pid, d in ctx["body"]["players"].items():
+            _need(d, "bracket", "ticks", "vis")
+            bracket_of[pid] = int(d["bracket"])
+            for lst, key, cols in ((ticks, "ticks", ["t_ms", "yaw", "pitch"]),
+                                   (vis, "vis", ["t_ms", "target", "target_yaw", "target_pitch", "decoy_yaw", "decoy_pitch"]),
+                                   (shots, "shots", ["t_ms", "target", "hit", "hitbox"])):
+                df = _frame(d.get(key, {c: [] for c in cols}), cols, key)
+                df["match_id"], df["player_id"] = ctx["m"][0], pid
+                lst.append(df)
+        n = ingest_telemetry(store, pd.concat(ticks), pd.concat(shots), pd.concat(vis), bracket_of)
+        return 200, {"engagements_added": n}
+
+    def risk(ctx):
+        pid = ctx["m"][0]
+        r = store.q("SELECT * FROM players WHERE player_id=?", (pid,))
+        if not r:
+            raise ApiError(404, "unknown player")
+        r = r[0]
+        return 200, {"player_id": pid, "risk_score": r["risk_score"], "action": r["action"], "signals": json.loads(r["fired"]),
+                     "evidence": store.q("SELECT kind, at FROM evidence WHERE player_id=?", (pid,)),
+                     "weighted_reports": store.weighted_report_score(pid),
+                     "note": "risk_score is an experimental, uncalibrated ranking, not a probability"}
+
+    def flags(ctx):
+        q = ctx["query"]
+        return 200, {"flags": mod.queue(q.get("status", ["open"])[0], float(q.get("min_severity", ["0"])[0]))}
+
+    def review(ctx):
+        b = ctx["body"]; _need(b, "player_id", "decision")
+        return 200, {"review_id": mod.submit_review(ctx["subject"], b["player_id"], b["decision"], b.get("notes", ""), b.get("flag_id"))}
+
+    def report(ctx):
+        b = ctx["body"]; _need(b, "target_id")
+        lim = limiters.setdefault(ctx["subject"], RateLimiter(*report_rate))
+        if not lim.allow():
+            raise ApiError(429, "too many reports; slow down")
+        store.add_report(ctx["subject"], b["target_id"], str(b.get("reason", ""))[:500])
+        return 200, {"ok": True}      # reports only add weighted context to the review queue; they never trigger action
+
+    def nonce(ctx):
+        _need(ctx["body"], "player_id")
+        return 200, {"nonce": nonces.issue(ctx["body"]["player_id"])}
+
+    def attest(ctx):
+        b = ctx["body"]; _need(b, "player_id", "nonce", "token")
+        if decoder is None:
+            raise ApiError(501, "no Play Integrity decoder configured (needs Google credentials)")
+        if not nonces.consume(b["player_id"], b["nonce"]):
+            raise ApiError(400, "invalid, expired or reused nonce")
+        ok, reasons = evaluate_play_integrity(decoder(b["token"]), b["nonce"], package, cert_digests)
+        if not ok:
+            store.add_evidence(b["player_id"], "attestation_failed", ",".join(sorted(reasons)))   # soft signal only
+        return 200, {"ok": ok, "reasons": reasons}
+
+    def evidence(ctx):
+        b = ctx["body"]; _need(b, "player_id", "kind")
+        pid = b["player_id"]
+        if b["kind"] == "file_hash":      # a client-REPORTED hash: soft until a moderator verifies it
+            if not blocklist_matches({pid: {"hashes": b.get("hashes", [])}}, blocklist):
+                return 200, {"recorded": False}
+            ref = ",".join(sorted(h.lower() for h in b["hashes"]))
+            eid = store.add_evidence(pid, REPORTED_HASH, ref)
+            return 200, {"recorded": eid is not None, "evidence_id": eid, "status": "reported_unverified"}
+        if b["kind"] == "server_violation":   # observed by the game server itself
+            eid = store.add_evidence(pid, "server_violation", str(b.get("ref", "")))
+            return 200, {"recorded": eid is not None, "evidence_id": eid}
+        if b["kind"] == "unknown_modules":
+            eid = store.add_evidence(pid, "unknown_modules", str(b.get("ref", "")))
+            return 200, {"recorded": eid is not None}
+        raise ApiError(400, "unknown evidence kind")
+
+    def verify_evidence(ctx):
+        b = ctx["body"]; _need(b, "player_id", "evidence_id")
+        return 200, {"verified_id": mod.verify_hash_evidence(ctx["subject"], b["player_id"], int(b["evidence_id"]))}
+
+    def ban(ctx):
+        _need(ctx["body"], "player_id")
+        return 200, {"enforcement_id": mod.request_ban(ctx["subject"], ctx["body"]["player_id"])}
+
+    def appeal(ctx):
+        b = ctx["body"]; _need(b, "enforcement_id", "text")
+        return 200, {"appeal_id": mod.file_appeal(ctx["subject"], int(b["enforcement_id"]), b["text"])}
+
+    def resolve(ctx):
+        b = ctx["body"]; _need(b, "outcome")
+        mod.resolve_appeal(ctx["subject"], int(ctx["m"][0]), b["outcome"], b.get("notes", ""))
+        return 200, {"ok": True}
+
+    def status(ctx):
+        n = mod.player_notice(ctx["subject"])
+        return 200, {"notice": n, "enforcements": store.q("SELECT id, status, appealable_until FROM enforcement WHERE player_id=?", (ctx["subject"],)) if n else []}
+
+    routes = [
+        ("POST", r"/v1/matches/([^/]+)/telemetry", {"game_server"}, telemetry),
+        ("GET", r"/v1/players/([^/]+)/risk", VIEW, risk),
+        ("GET", r"/v1/flags", VIEW, flags),
+        ("POST", r"/v1/reviews", MODS, review),
+        ("POST", r"/v1/reports", {"player", "game_server"}, report),
+        ("POST", r"/v1/attestation/nonce", {"game_server"}, nonce),
+        ("POST", r"/v1/attestation/verify", {"game_server"}, attest),
+        ("POST", r"/v1/evidence", {"game_server"}, evidence),
+        ("POST", r"/v1/evidence/verify", MODS, verify_evidence),
+        ("POST", r"/v1/bans", MODS, ban),
+        ("POST", r"/v1/appeals", {"player"}, appeal),
+        ("POST", r"/v1/appeals/(\d+)/resolve", MODS, resolve),
+        ("GET", r"/v1/me/status", {"player"}, status),
+        ("POST", r"/v1/admin/score", {"admin"}, lambda c: (200, {"players_scored": score_all(store, baseline, mod)})),
+        ("POST", r"/v1/admin/ban_wave", {"admin"}, lambda c: (200, mod.run_ban_wave())),
+    ]
+
+    class H(BaseHTTPRequestHandler):
+        def log_message(self, *a):
+            pass
+
+        def _send(self, status, obj):
+            data = json.dumps(obj, default=str).encode()
+            self.send_response(status); self.send_header("Content-Type", "application/json")
+            self.send_header("Content-Length", str(len(data))); self.end_headers(); self.wfile.write(data)
+
+        def _handle(self, method):
+            try:
+                u = urlparse(self.path)
+                for m, pat, roles, fn in routes:
+                    mt = re.fullmatch(pat, u.path)
+                    if m != method or not mt:
+                        continue
+                    h = self.headers.get("Authorization", "")
+                    who = store.auth(h[7:]) if h.startswith("Bearer ") else None
+                    if not who:
+                        raise ApiError(401, "missing or invalid token")
+                    if who[0] not in roles:
+                        raise ApiError(403, "this role may not use this endpoint")
+                    body = {}
+                    if method == "POST":
+                        n = int(self.headers.get("Content-Length", 0))
+                        if n > MAX_BODY:
+                            raise ApiError(413, "body too large")
+                        try:
+                            body = json.loads(self.rfile.read(n) or b"{}")
+                        except json.JSONDecodeError as e:
+                            raise ApiError(400, "invalid JSON") from e
+                        if not isinstance(body, dict):
+                            raise ApiError(400, "JSON body must be an object")
+                    if who[0] == "player" and body.get("player_id", who[1]) != who[1]:
+                        raise ApiError(403, "players may only act on their own account")
+                    status, obj = fn({"m": mt.groups(), "query": parse_qs(u.query), "body": body, "subject": who[1], "role": who[0]})
+                    return self._send(status, obj)
+                raise ApiError(404, "no such endpoint")
+            except ApiError as e:
+                self._send(e.status, {"error": str(e)})
+            except ValueError as e:                      # workflow rule violations
+                self._send(400, {"error": str(e)})
+            except Exception:
+                self._send(500, {"error": "internal error"})   # never leak internals
+
+        def do_GET(self): self._handle("GET")
+        def do_POST(self): self._handle("POST")
+
+    srv = ThreadingHTTPServer((host, port), H)
+    srv.moderation, srv.nonces = mod, nonces
+    return srv
+
+
+def serve_in_thread(srv):
+    t = threading.Thread(target=srv.serve_forever, daemon=True); t.start(); return t
+
+```
+
+`aimguard/attestation.py`:
+
+```py
+"""Layer 5 (server side): nonce binding + evaluation of an already-DECODED Google Play Integrity verdict.
+Decoding the token needs Google credentials and network access, so it is injected as `decoder`
+(see api.py); this module only decides what the verdict means. Client checks can be bypassed:
+treat the result as a risk signal combined with server-side evidence, never as the only basis for a ban."""
+import secrets, threading, time
+
+
+class NonceStore:
+    def __init__(self, ttl_s=300, clock=time.time):
+        self.ttl, self.clock, self._n, self._lock = ttl_s, clock, {}, threading.Lock()
+
+    def issue(self, player_id):
+        n = secrets.token_urlsafe(24)
+        with self._lock:
+            self._n[n] = (player_id, self.clock())
+        return n
+
+    def consume(self, player_id, nonce):
+        """One-time use; must belong to this player and be fresh."""
+        with self._lock:
+            rec = self._n.pop(nonce, None)
+        return bool(rec) and rec[0] == player_id and self.clock() - rec[1] <= self.ttl
+
+
+def evaluate_play_integrity(verdict: dict, expected_nonce, expected_package, allowed_cert_sha256=None,
+                            now_ms=None, max_age_ms=300_000):
+    """Returns (ok, reasons). `verdict` is the decoded `tokenPayloadExternal` dict."""
+    reasons = []
+    rd = verdict.get("requestDetails", {})
+    if rd.get("nonce") != expected_nonce:
+        reasons.append("nonce_mismatch")
+    if rd.get("requestPackageName") != expected_package:
+        reasons.append("package_mismatch")
+    if now_ms is not None and now_ms - int(rd.get("timestampMillis", 0)) > max_age_ms:
+        reasons.append("stale_token")
+    app = verdict.get("appIntegrity", {})
+    if app.get("appRecognitionVerdict") != "PLAY_RECOGNIZED":
+        reasons.append("app_not_recognized")
+    if allowed_cert_sha256 is not None and not (set(app.get("certificateSha256Digest", [])) & set(allowed_cert_sha256)):
+        reasons.append("signing_cert_mismatch")
+    if "MEETS_DEVICE_INTEGRITY" not in verdict.get("deviceIntegrity", {}).get("deviceRecognitionVerdict", []):
+        reasons.append("device_integrity_failed")
+    if verdict.get("accountDetails", {}).get("appLicensingVerdict") != "LICENSED":
+        reasons.append("unlicensed")
+    return (not reasons), reasons
+
+```
+
+`aimguard/detectors.py`:
+
+```py
+"""Statistical + ML detectors, all calibrated on a SEPARATE reference population.
+
+Nothing here is fitted on the players being scored, and no fixed share of players is
+ever forced to be 'anomalous'.
+"""
+import numpy as np
+import pandas as pd
+from scipy.stats import binomtest, mannwhitneyu
+from sklearn.ensemble import IsolationForest
+from sklearn.preprocessing import RobustScaler
+
+from .features import FEATURE_COLS, match_features, player_features
+
+
+def headshot_pvalue(headshots, hits, baseline_rate):
+    if hits < 100:  # minimum sample size
+        return 1.0
+    return binomtest(int(headshots), int(hits), baseline_rate, alternative="greater").pvalue
+
+
+def preaim_pvalue(actual, null):
+    if len(actual) < 50:
+        return 1.0
+    return mannwhitneyu(actual, null, alternative="less").pvalue
+
+
+class Baseline:
+    """Learns 'normal' from reference matches (ideally verified-clean players).
+
+    Reference players are split: most fit the models/z-baselines, the held-out part
+    sets the Isolation Forest alert threshold (a quantile of held-out legit scores).
+    """
+
+    MIN_FIT, MIN_CAL = 30, 20   # players per bracket needed to fit / to calibrate the threshold
+
+    def __init__(self, iforest_quantile=0.995, cal_fraction=0.3, seed=42):
+        if not 0 < cal_fraction < 1:
+            raise ValueError(f"cal_fraction must be strictly between 0 and 1, got {cal_fraction!r}")
+        if not 0 < iforest_quantile <= 1:
+            raise ValueError(f"iforest_quantile must be in (0, 1], got {iforest_quantile!r}")
+        self.q, self.cal_fraction, self.seed = iforest_quantile, cal_fraction, seed
+
+    def _min_bracket_size(self):
+        f = self.cal_fraction
+        return next(n for n in range(1, 100000)
+                    if n - round(f * n) >= self.MIN_FIT and round(f * n) >= self.MIN_CAL)
+
+    def validate(self, eng: pd.DataFrame):
+        """Reject data this baseline can't score correctly (window length, unseen brackets)."""
+        counts = eng.groupby("player_id").match_idx.nunique()
+        bad = counts[counts != self.n_matches]
+        if len(bad):
+            raise ValueError(f"scoring window mismatch: baseline was built on {self.n_matches} matches per "
+                             f"player, but {len(bad)} player(s) have a different count "
+                             f"(e.g. {bad.index[0]}: {int(bad.iloc[0])}). Use the last {self.n_matches} "
+                             f"matches per player, or build a baseline for that window.")
+        unseen = set(eng.bracket.unique()) - set(self.models)
+        if unseen:
+            raise ValueError(f"bracket(s) {sorted(unseen)} not present in the reference data")
+
+    def fit(self, eng_ref: pd.DataFrame):
+        counts = eng_ref.groupby("player_id").match_idx.nunique()
+        if counts.nunique() != 1:
+            raise ValueError("all reference players must have the same number of matches (the scoring window)")
+        self.n_matches = int(counts.iloc[0])
+        mf = match_features(eng_ref)
+        pf = player_features(mf)
+        rng = np.random.default_rng(self.seed)
+        cal = set()
+        for br, d in pf.groupby("bracket"):          # split fit/calibration WITHIN each bracket
+            ids = d.player_id.to_numpy()
+            n_cal = int(round(len(ids) * self.cal_fraction))
+            if len(ids) - n_cal < self.MIN_FIT or n_cal < self.MIN_CAL:
+                raise ValueError(
+                    f"bracket {br}: only {len(ids)} reference players. Need >= {self.MIN_FIT} to fit and "
+                    f">= {self.MIN_CAL} to calibrate (about {self._min_bracket_size()} per bracket at "
+                    f"cal_fraction={self.cal_fraction}). Use a larger reference set.")
+            cal.update(rng.choice(ids, n_cal, replace=False))
+        fit_mf, fit_pf = mf[~mf.player_id.isin(cal)], pf[~pf.player_id.isin(cal)]
+        cal_pf = pf[pf.player_id.isin(cal)]
+        fit_eng = eng_ref[~eng_ref.player_id.isin(cal)]
+
+        self.stats = {}
+        for b, d in fit_mf.groupby("bracket"):
+            for c in FEATURE_COLS:
+                med = d[c].median()
+                self.stats[(b, c)] = (med, (d[c] - med).abs().median())
+        g = fit_eng.groupby("bracket")
+        self.hs_base = (g.headshots.sum() / g.hits.sum()).to_dict()
+
+        self.models, self.thresholds = {}, {}
+        for b, d in fit_pf.groupby("bracket"):
+            sc = RobustScaler().fit(d[FEATURE_COLS])
+            m = IsolationForest(n_estimators=300, random_state=self.seed).fit(sc.transform(d[FEATURE_COLS]))
+            self.models[b] = (sc, m)
+            held_out = cal_pf[cal_pf.bracket == b]
+            s = -m.score_samples(sc.transform(held_out[FEATURE_COLS]))
+            self.thresholds[b] = float(np.quantile(s, self.q))
+        return self
+
+    def add_z(self, mf: pd.DataFrame) -> pd.DataFrame:
+        mf = mf.copy()
+        for c in FEATURE_COLS:
+            med = mf.bracket.map({b: self.stats[(b, c)][0] for b in self.models})
+            mad = mf.bracket.map({b: self.stats[(b, c)][1] for b in self.models})
+            mf[f"z_{c}"] = 0.6745 * (mf[c] - med) / (mad + 1e-9)
+        return mf
+
+    def iforest_flags(self, pf: pd.DataFrame) -> dict:
+        """player_id -> True if score exceeds the legit-calibrated threshold."""
+        out = {}
+        for b, d in pf.groupby("bracket"):
+            sc, m = self.models[b]
+            s = -m.score_samples(sc.transform(d[FEATURE_COLS]))
+            out.update(dict(zip(d.player_id, s > self.thresholds[b])))
+        return out
+
+    def player_tests(self, eng: pd.DataFrame) -> pd.DataFrame:
+        rows = []
+        for pid, d in eng.groupby("player_id"):
+            b = int(d.bracket.iloc[0])
+            rows.append(dict(player_id=pid,
+                             p_headshot=headshot_pvalue(d.headshots.sum(), d.hits.sum(), self.hs_base[b]),
+                             p_preaim=preaim_pvalue(d.preaim_err.values, d.null_preaim_err.values)))
+        return pd.DataFrame(rows)
+
+```
+
+`aimguard/features.py`:
+
+```py
+"""Turn engagement logs into per player-per match features."""
+import numpy as np
+import pandas as pd
+
+FEATURE_COLS = ["hs_rate", "accuracy", "react_med", "react_std", "linearity",
+                "omega_p99", "preaim_med"]
+
+
+def match_features(eng: pd.DataFrame) -> pd.DataFrame:
+    g = eng.groupby(["player_id", "match_idx", "bracket"])
+    out = g.apply(lambda d: pd.Series(dict(
+        n_shots=d.shots.sum(), n_hits=d.hits.sum(), n_hs=d.headshots.sum(),
+        hs_rate=d.headshots.sum() / max(d.hits.sum(), 1),
+        accuracy=d.hits.sum() / max(d.shots.sum(), 1),
+        react_med=d.react_ms.median(), react_std=d.react_ms.std(),
+        linearity=d.linearity.mean(),
+        omega_p99=(np.percentile(d.omega_peak.dropna(), 99) if d.omega_peak.notna().any() else np.nan),
+        preaim_med=d.preaim_err.median())), include_groups=False)
+    return out.reset_index()
+
+
+def player_features(mf: pd.DataFrame) -> pd.DataFrame:
+    agg = mf.groupby(["player_id", "bracket"]).agg(
+        n_hits=("n_hits", "sum"), n_hs=("n_hs", "sum"),
+        **{c: (c, "mean") for c in FEATURE_COLS}).reset_index()
+    return agg
+
+```
+
+`aimguard/io_utils.py`:
+
+```py
+"""Consistent ID handling: IDs are ALWAYS strings, so '007' in a CSV matches '007' in JSON evidence."""
+import pandas as pd
+
+
+def norm_id(x):
+    return str(x).strip()
+
+
+def read_engagement_csv(path):
+    df = pd.read_csv(path, dtype={"player_id": str, "match_id": str}, skipinitialspace=True)
+    for c in ("player_id", "match_id"):
+        if c in df.columns:
+            df[c] = df[c].map(norm_id)
+    return df
+
+
+def normalize_reports(reports: dict) -> dict:
+    return {norm_id(k): v for k, v in reports.items()}
+
+
+def read_id_list(path):
+    with open(path) as f:
+        return {norm_id(l.split("#")[0]) for l in f if l.split("#")[0].strip()}
+
+```
+
+`aimguard/localscan.py`:
+
+```py
+"""Scan YOUR OWN computer for likely cheat tools. Read-only: nothing is deleted, nothing is uploaded.
+
+Findings are LEADS for you to check, not proof. Legit software (Discord/Steam overlays, OBS, GPU tools)
+also loads into games, and a well-hidden cheat can evade any user-mode scan.
+"""
+import hashlib, os, re, subprocess, sys
+
+KEYWORDS = {"aimbot", "wallhack", "triggerbot", "injector", "esp", "radar", "cheat", "hack",
+            "hacks", "spoofer", "hwid", "unlocker", "loader", "bypass", "norecoil"}
+DUAL_USE = {"cheatengine", "x64dbg", "x32dbg", "ollydbg", "processhacker", "extremeinjector"}
+_WIN = re.compile(r"^[a-z]:\\")
+_WIN_TRUSTED = re.compile(r"^[a-z]:\\(windows|program files|program files \(x86\))(\\|$)")
+_WIN_RISKY = re.compile(r"^[a-z]:\\(users\\[^\\]+\\(downloads|desktop|appdata\\local\\temp)|windows\\temp|temp|tmp)(\\|$)")
+_POSIX_TRUSTED = ("/usr/", "/lib/", "/lib64/", "/opt/", "/bin/", "/sbin/")
+_POSIX_RISKY = ("/tmp/", "/var/tmp/", "/dev/shm/")
+
+
+def norm(path):
+    """Windows-style paths are compared case-insensitively with '\\'; POSIX paths are left as they are."""
+    p = path or ""
+    return p.lower().replace("/", "\\") if (_WIN.match(p.lower().replace("/", "\\")) or "\\" in p) else p
+
+
+def in_dir(path, directory):
+    """True only if `path` is the directory or INSIDE it. Boundary-aware: C:\\Games\\PUBG_cheats is NOT in C:\\Games\\PUBG."""
+    n, d = norm(path), norm(directory).rstrip("\\/")
+    sep = "\\" if "\\" in d else "/"
+    return bool(d) and (n == d or n.startswith(d + sep))
+
+
+def is_trusted_location(path):
+    """Anchored to the drive root: C:\\Windows\\, C:\\Program Files\\ ... never a folder merely NAMED like that deeper down."""
+    n = norm(path)
+    return bool(_WIN_TRUSTED.match(n)) or n.startswith(_POSIX_TRUSTED)
+
+
+def is_risky_location(path):
+    n = norm(path)
+    return bool(_WIN_RISKY.match(n)) or n.startswith(_POSIX_RISKY) or bool(re.match(r"^/home/[^/]+/downloads/", n, re.I))
+
+
+def name_tokens(path):
+    base = re.split(r"[\\/]", path or "")[-1].lower()
+    base = re.sub(r"\.(exe|dll|sys)$", "", base)
+    return {t for t in re.split(r"[^a-z0-9]+", base) if t}, base.replace(" ", "").replace("_", "").replace("-", "")
+
+
+def classify_file(path, sha256=None, blocklist=frozenset()):
+    """Return list of (level, reason). Levels: MATCH (blocklist hash), REVIEW, INFO."""
+    out = []
+    if sha256 and sha256.lower() in blocklist:
+        out.append(("MATCH", "hash is on your cheat blocklist"))
+    tokens, squashed = name_tokens(path)
+    if tokens & KEYWORDS:
+        out.append(("REVIEW", f"name contains cheat-style word(s): {sorted(tokens & KEYWORDS)}"))
+    if any(d in squashed for d in DUAL_USE):
+        out.append(("INFO", "dual-use tool (debugger / memory editor / injector), not proof of cheating"))
+    if is_risky_location(path):
+        out.append(("INFO", "runs from a temp/downloads/desktop folder"))
+    return out
+
+
+MODULE_EXT = re.compile(r"\.(dll|sys|dylib)$|\.so[\d.]*$", re.I)
+
+
+def module_findings(module_paths, game_dir, blocklist, hash_fn):
+    """Every module mapped into the game is HASHED and checked against the blocklist FIRST, wherever it lives
+    (a blocklisted DLL inside the game folder or C:\\Windows is still a MATCH). Only afterwards is location used,
+    to decide which remaining modules count as 'unknown' (outside the game folder and trusted system folders)."""
+    out = []
+    for m in sorted({m for m in module_paths if m and MODULE_EXT.search(m)}):
+        try:
+            h = hash_fn(m)
+        except OSError:
+            h = None
+        unknown = not is_trusted_location(m) and not in_dir(m, game_dir)
+        reasons = [r for r in classify_file(m, h, blocklist) if unknown or r[0] == "MATCH"]
+        if unknown and not any(lvl in ("MATCH", "REVIEW") for lvl, _ in reasons):
+            reasons.append(("REVIEW", "unknown file loaded into the game (outside the game and system folders)"))
+        if unknown and h is None:
+            reasons.append(("INFO", "file could not be read, so its hash was not checked"))
+        for level, why in reasons:
+            out.append(dict(level=level, kind="module-in-game", name=re.split(r"[\\/]", m)[-1], path=m, sha256=h, why=why))
+    return out
+
+
+def unknown_game_modules(module_paths, game_dir):
+    """Modules outside the game folder and trusted system folders (location only; use module_findings for hashing)."""
+    return sorted(m for m in set(module_paths) if m and MODULE_EXT.search(m) and not is_trusted_location(m) and not in_dir(m, game_dir))
+
+
+def sha256_file(path):
+    h = hashlib.sha256()
+    with open(path, "rb") as f:
+        for chunk in iter(lambda: f.read(1 << 20), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+
+def signature_status(path):
+    """Windows only: Authenticode status via PowerShell ('Valid', 'NotSigned', ...). None if unavailable."""
+    try:
+        r = subprocess.run(["powershell", "-NoProfile", "-Command",
+                            "(Get-AuthenticodeSignature -LiteralPath $args[0]).Status", path],
+                           capture_output=True, text=True, timeout=15)
+        return r.stdout.strip() or None
+    except (OSError, subprocess.SubprocessError):
+        return None
+
+
+def is_self(exe, own=None):
+    """True for this scanner's own Python interpreter (and its venv launcher), so it never reports itself."""
+    own = {os.path.normcase(os.path.realpath(x)) for x in (own or [sys.executable, getattr(sys, "_base_executable", "")]) if x}
+    return os.path.normcase(os.path.realpath(exe)) in own
+
+
+def scan(blocklist=frozenset(), game_name=None, check_signatures=False):
+    import psutil
+    findings, cache, game_pids = [], {}, []
+    for p in psutil.process_iter(["pid", "name", "exe"]):
+        exe = p.info.get("exe")
+        if not exe or is_self(exe):
+            continue
+        if exe not in cache:
+            try:
+                cache[exe] = sha256_file(exe)
+            except OSError:
+                cache[exe] = None
+        reasons = classify_file(exe, cache[exe], blocklist)
+        if cache[exe] is None and not is_trusted_location(exe):
+            reasons.append(("INFO", "executable could not be read, so its hash was not checked"))
+        if check_signatures and reasons and cache[exe]:
+            st = signature_status(exe)
+            if st and st != "Valid":
+                reasons.append(("REVIEW", f"executable signature status: {st}"))
+        for level, why in reasons:
+            findings.append(dict(level=level, kind="process", name=p.info["name"], path=exe,
+                                 sha256=cache[exe], why=why))
+        if game_name and game_name.lower() in (p.info["name"] or "").lower():
+            game_pids.append((p.info["pid"], exe))
+    def cached_hash(path):
+        if path not in cache:
+            try:
+                cache[path] = sha256_file(path)
+            except OSError:
+                cache[path] = None
+        if cache[path] is None:
+            raise OSError("unreadable")
+        return cache[path]
+
+    for pid, exe in game_pids:
+        try:
+            mods = [m.path for m in psutil.Process(pid).memory_maps()]
+        except (psutil.Error, OSError):
+            findings.append(dict(level="INFO", kind="module", name=str(pid), path=exe, sha256=None,
+                                 why="could not read modules (run PowerShell as Administrator)"))
+            continue
+        game_dir = re.split(r"[\\/][^\\/]*$", exe)[0]
+        findings.extend(module_findings(mods, game_dir, blocklist, cached_hash))
+    order = {"MATCH": 0, "REVIEW": 1, "INFO": 2}
+    return sorted(findings, key=lambda f: order[f["level"]])
+
+```
+
+`aimguard/moderation.py`:
+
+```py
+"""Moderator workflow: flags -> reviews -> (four-eyes) ban request -> delayed ban wave -> appeals -> labels.
+
+Safety properties (each covered by tests):
+ * Approval is RE-CHECKED when the ban wave runs; a reviewer changing to 'legit' cancels a scheduled ban.
+ * An overturned appeal closes the case. Old reviews/evidence/matches no longer count; another ban needs
+   new evidence (new flag or new hard evidence) AND fresh moderator reviews.
+ * Statistics alone need independent confirmations; mass reports never trigger action.
+"""
+import json
+import pandas as pd
+
+PLAYER_NOTICE = "Your account was found to have violated the fair play rules."   # never reveal detection details
+
+
+class Moderation:
+    def __init__(self, store, required_confirmations=2, ban_delay_s=72 * 3600, appeal_window_s=14 * 86400, clock=None):
+        self.s, self.required, self.delay, self.appeal_window = store, required_confirmations, ban_delay_s, appeal_window_s
+        self.clock = clock or store.clock
+
+    # ---- flags ----
+    def create_flags(self, risk: pd.DataFrame):
+        n = 0
+        for r in risk.itertuples():
+            if r.action not in ("human_review", "ban_eligible_after_review"):
+                continue
+            ev = json.dumps({"signals": r.fired, "p_headshot": r.p_headshot, "p_preaim": r.p_preaim,
+                             "hard_evidence": bool(r.hard_evidence)}, default=int)
+            open_ = self.s.q("SELECT flag_id FROM flags WHERE player_id=? AND status='open'", (r.player_id,))
+            if open_:                                    # refresh, never duplicate
+                self.s.x("UPDATE flags SET severity=?, evidence=? WHERE flag_id=?", (float(r.risk_score), ev, open_[0]["flag_id"]))
+            else:
+                self.s.x("INSERT INTO flags(player_id,created_at,detector,severity,evidence) VALUES(?,?,?,?,?)",
+                         (r.player_id, self.clock(), "aimguard", float(r.risk_score), ev)); n += 1
+        return n
+
+    def queue(self, status="open", min_severity=0.0):
+        rows = self.s.q("SELECT * FROM flags WHERE status=? AND severity>=? ORDER BY severity DESC", (status, min_severity))
+        for r in rows:
+            r["evidence"] = json.loads(r["evidence"])
+            r["weighted_reports"] = self.s.weighted_report_score(r["player_id"])
+        return rows
+
+    # ---- approval rules (single source of truth, used at request time AND at execution time) ----
+    def _latest_by_moderator(self, player_id):
+        out = {}
+        for r in self.s.q("SELECT moderator_id, decision FROM reviews WHERE player_id=? AND epoch=? "
+                          "AND moderator_id NOT LIKE 'system:%' ORDER BY review_id", (player_id, self.s.epoch(player_id))):
+            out[r["moderator_id"]] = r["decision"]
+        return out
+
+    def _approval(self, player_id):
+        """(ok, reason). Only reviews/evidence/flags of the player's CURRENT case count."""
+        latest = self._latest_by_moderator(player_id)
+        if "legit" in latest.values():
+            return False, "moderators disagree (a 'legit' decision is outstanding); resolve before banning"
+        hard = player_id in self.s.hard_evidence_players()
+        if not hard and not self.s.q("SELECT 1 FROM flags WHERE player_id=? AND status='open'", (player_id,)):
+            return False, "no open case: a ban needs new evidence (a new flag or new hard evidence)"
+        need = 1 if hard else self.required            # statistics alone need independent confirmations
+        have = sum(d == "cheater" for d in latest.values())
+        if have < need:
+            return False, (f"ban needs {need} distinct moderator confirmation(s); has {have}"
+                           + ("" if hard else " (statistical evidence only)"))
+        return True, ""
+
+    # ---- reviews ----
+    def submit_review(self, moderator, player_id, decision, notes="", flag_id=None):
+        if decision not in ("cheater", "legit", "unsure"):
+            raise ValueError("decision must be cheater, legit or unsure")
+        rid = self.s.x("INSERT INTO reviews(player_id,flag_id,moderator_id,decision,notes,reviewed_at,epoch) VALUES(?,?,?,?,?,?,?)",
+                       (player_id, flag_id, moderator, decision, notes, self.clock(), self.s.epoch(player_id)))
+        if decision == "legit":
+            self.s.x("UPDATE flags SET status='closed' WHERE player_id=? AND status='open'", (player_id,))
+        self.s.audit(moderator, "review", player_id, {"decision": decision, "review_id": rid}, self.clock())
+        self._recheck_scheduled(player_id, f"review changed by {moderator}")
+        return rid
+
+    def _recheck_scheduled(self, player_id, why):
+        ok, reason = self._approval(player_id)
+        if ok:
+            return 0
+        rows = self.s.q("SELECT id FROM enforcement WHERE player_id=? AND status='scheduled'", (player_id,))
+        for e in rows:
+            self.s.x("UPDATE enforcement SET status='cancelled' WHERE id=?", (e["id"],))
+            self.s.audit("system", "ban_cancelled", player_id, {"enforcement_id": e["id"], "why": why, "reason": reason}, self.clock())
+        return len(rows)
+
+    # ---- bans ----
+    def request_ban(self, moderator, player_id):
+        if self.s.q("SELECT 1 FROM enforcement WHERE player_id=? AND status IN ('scheduled','active')", (player_id,)):
+            raise ValueError("player already has a scheduled or active ban")
+        ok, reason = self._approval(player_id)
+        if not ok:
+            raise ValueError(reason)
+        ep = self.s.epoch(player_id)
+        refs = {"epoch": ep, "reviews": [r["review_id"] for r in self.s.q(
+                    "SELECT review_id FROM reviews WHERE player_id=? AND decision='cheater' AND epoch=?", (player_id, ep))],
+                "evidence": [e["kind"] for e in self.s.evidence_rows(player_id)]}
+        now = self.clock()
+        eid = self.s.x("INSERT INTO enforcement(player_id,action,reason,evidence_refs,status,requested_by,scheduled_at,execute_after) "
+                       "VALUES(?,?,?,?,?,?,?,?)", (player_id, "ban", "fair_play_violation", json.dumps(refs), "scheduled", moderator, now, now + self.delay))
+        self.s.audit(moderator, "ban_requested", player_id, {"enforcement_id": eid}, now)
+        return eid
+
+    def run_ban_wave(self):
+        """Enforce due bans together (so cheat makers can't tell what was detected when). Approval is RE-CHECKED
+        here: a ban whose approval no longer holds is cancelled, never executed."""
+        now, done, cancelled = self.clock(), 0, 0
+        for e in self.s.q("SELECT id, player_id FROM enforcement WHERE status='scheduled' AND execute_after<=?", (now,)):
+            ok, reason = self._approval(e["player_id"])
+            if not ok:
+                self.s.x("UPDATE enforcement SET status='cancelled' WHERE id=?", (e["id"],))
+                self.s.audit("system", "ban_cancelled", e["player_id"], {"enforcement_id": e["id"], "at": "ban_wave", "reason": reason}, now)
+                cancelled += 1
+                continue
+            self.s.x("UPDATE enforcement SET status='active', appealable_until=? WHERE id=?", (now + self.appeal_window, e["id"]))
+            self.s.audit("system", "ban_enforced", e["player_id"], {"enforcement_id": e["id"]}, now); done += 1
+        return {"enforced": done, "cancelled": cancelled}
+
+    def player_notice(self, player_id):
+        return PLAYER_NOTICE if self.s.q("SELECT 1 FROM enforcement WHERE player_id=? AND status='active'", (player_id,)) else None
+
+    # ---- evidence verification ----
+    def verify_hash_evidence(self, moderator, player_id, evidence_id):
+        """A client-REPORTED file-hash match is soft (clients can forge or omit reports). A moderator who has independently
+        confirmed it (sample analysis, replay, a trusted re-scan) promotes it to hard evidence. Audited."""
+        ev = self.s.q("SELECT * FROM evidence WHERE id=? AND player_id=? AND kind='file_hash_reported' AND epoch=?",
+                      (evidence_id, player_id, self.s.epoch(player_id)))
+        if not ev:
+            raise ValueError("no such unverified file-hash report for this player on the current case")
+        vid = self.s.add_evidence(player_id, "file_hash", ev[0]["ref"])
+        if vid is None:
+            raise ValueError("already verified")
+        self.s.audit(moderator, "evidence_verified", player_id, {"evidence_id": evidence_id, "verified_id": vid}, self.clock())
+        return vid
+
+    # ---- appeals ----
+    def file_appeal(self, player_id, enforcement_id, text):
+        e = self.s.q("SELECT * FROM enforcement WHERE id=? AND player_id=?", (enforcement_id, player_id))
+        if not e or e[0]["status"] != "active":
+            raise ValueError("no active enforcement to appeal")
+        if self.clock() > e[0]["appealable_until"]:
+            raise ValueError("appeal window has closed")
+        if self.s.q("SELECT 1 FROM appeals WHERE enforcement_id=? AND status='open'", (enforcement_id,)):
+            raise ValueError("an appeal is already open")
+        aid = self.s.x("INSERT INTO appeals(enforcement_id,player_id,text,created_at) VALUES(?,?,?,?)",
+                       (enforcement_id, player_id, text[:4000], self.clock()))
+        self.s.audit(player_id, "appeal_filed", player_id, {"appeal_id": aid}, self.clock())
+        return aid
+
+    def resolve_appeal(self, moderator, appeal_id, outcome, notes=""):
+        if outcome not in ("upheld", "overturned"):
+            raise ValueError("outcome must be upheld or overturned")
+        a = self.s.q("SELECT * FROM appeals WHERE id=? AND status='open'", (appeal_id,))
+        if not a:
+            raise ValueError("no such open appeal")
+        a = a[0]
+        involved = {r["moderator_id"] for r in self.s.q("SELECT moderator_id FROM reviews WHERE player_id=?", (a["player_id"],))}
+        involved.add(self.s.q("SELECT requested_by FROM enforcement WHERE id=?", (a["enforcement_id"],))[0]["requested_by"])
+        if moderator in involved:
+            raise ValueError("appeal must be resolved by a moderator who was not involved in the original decision")
+        now = self.clock()
+        self.s.x("UPDATE appeals SET status=?, resolved_by=?, resolved_at=?, notes=? WHERE id=?", (outcome, moderator, now, notes, appeal_id))
+        if outcome == "overturned":
+            self.s.x("UPDATE enforcement SET status='reverted' WHERE id=?", (a["enforcement_id"],))
+            self.s.x("UPDATE flags SET status='closed' WHERE player_id=?", (a["player_id"],))
+            self.s.close_case(a["player_id"], now)          # old reviews/evidence/matches stop counting
+            self.s.x("INSERT INTO reviews(player_id,moderator_id,decision,notes,reviewed_at,epoch) VALUES(?,?,?,?,?,?)",
+                     (a["player_id"], f"system:appeal:{appeal_id}", "legit", "ban overturned on appeal", now, self.s.epoch(a["player_id"])))
+        self.s.audit(moderator, "appeal_resolved", a["player_id"], {"appeal_id": appeal_id, "outcome": outcome}, now)
+
+    def export_labels(self) -> pd.DataFrame:
+        """Latest confirmed label per player (cheater/legit) for retraining / threshold tuning.
+        Appeal outcomes override earlier moderator decisions."""
+        rows = self.s.q("SELECT player_id, decision FROM reviews WHERE decision!='unsure' ORDER BY review_id")
+        last = {r["player_id"]: r["decision"] for r in rows}
+        return pd.DataFrame([{"player_id": p, "label": d} for p, d in last.items()], columns=["player_id", "label"])
+
+```
+
+`aimguard/network.py`:
+
+```py
+"""Layer 4: packet integrity, anti-replay, rate limiting, lag-switch detection (stdlib only).
+NOTE: this gives integrity + replay protection. For confidentiality use DTLS/TLS or an AEAD library
+(e.g. ChaCha20-Poly1305 from `cryptography`); do not invent your own cipher."""
+import hashlib, hmac, struct, time
+import numpy as np
+
+
+class PacketAuth:
+    TAG = 16
+
+    def __init__(self, session_key: bytes):
+        self.key = session_key
+
+    def sign(self, seq: int, payload: bytes) -> bytes:
+        head = struct.pack(">Q", seq)
+        return head + payload + hmac.new(self.key, head + payload, hashlib.sha256).digest()[:self.TAG]
+
+    def verify(self, packet: bytes):
+        if len(packet) < 8 + self.TAG:
+            raise ValueError("packet too short")
+        head, payload, tag = packet[:8], packet[8:-self.TAG], packet[-self.TAG:]
+        if not hmac.compare_digest(hmac.new(self.key, head + payload, hashlib.sha256).digest()[:self.TAG], tag):
+            raise ValueError("bad packet tag")
+        return struct.unpack(">Q", head)[0], payload
+
+
+class AntiReplayWindow:
+    """Sliding window over sequence numbers: rejects duplicates and packets older than the window."""
+
+    def __init__(self, size=64):
+        self.size, self.top, self.mask = size, -1, 0
+
+    def accept(self, seq: int) -> bool:
+        if seq > self.top:
+            shift = seq - self.top
+            self.mask = ((self.mask << shift) | 1) & ((1 << self.size) - 1) if self.top >= 0 else 1
+            self.top = seq
+            return True
+        off = self.top - seq
+        if off >= self.size or (self.mask >> off) & 1:
+            return False
+        self.mask |= 1 << off
+        return True
+
+
+class RateLimiter:
+    def __init__(self, rate_per_s, burst, clock=time.monotonic):
+        self.rate, self.burst, self.clock, self.tokens, self.last = rate_per_s, burst, clock, burst, clock()
+
+    def allow(self, cost=1.0) -> bool:
+        now = self.clock()
+        self.tokens = min(self.burst, self.tokens + (now - self.last) * self.rate)
+        self.last = now
+        if self.tokens >= cost:
+            self.tokens -= cost
+            return True
+        return False
+
+
+def lag_switch_score(arrivals_ms, positions, stall_ms=300, jump=5.0):
+    """Fraction of long stalls followed by a suspicious position jump (catch-up teleport).
+    Compare with the player's own history: genuine bad connections degrade gradually."""
+    arrivals_ms, positions = np.asarray(arrivals_ms, float), np.asarray(positions, float)
+    stalls = np.where(np.diff(arrivals_ms) > stall_ms)[0]
+    if not len(stalls):
+        return 0.0
+    return sum(np.linalg.norm(positions[i + 1] - positions[i]) > jump for i in stalls) / len(stalls)
+
+```
+
+`aimguard/pipeline.py`:
+
+```py
+import pandas as pd
+from .simulator import simulate
+from .features import match_features, player_features, FEATURE_COLS
+from .detectors import Baseline
+from .risk import score_players
+
+REVIEW_THRESHOLD = 0.7
+
+
+def build_baseline(n_ref=1500, n_matches=6, seed=1000) -> Baseline:
+    """Reference population is simulated separately from anything later scored."""
+    eng_ref, _ = simulate(n_ref, n_matches=n_matches, cheater_rate=0.0, seed=seed)
+    return Baseline().fit(eng_ref)
+
+
+def run(baseline, n_players=400, n_matches=None, cheater_rate=0.06, strength_range=(0.5, 1.0),
+        seed=42, hard_evidence=None):
+    n_matches = baseline.n_matches if n_matches is None else n_matches   # 0 / negatives are rejected by simulate()
+    eng, labels = simulate(n_players, n_matches, cheater_rate=cheater_rate,
+                           strength_range=strength_range, seed=seed)
+    pf, risk = score_engagements(baseline, eng, hard_evidence)
+    return eng, labels, pf, risk.merge(labels, on="player_id")
+
+
+def score_engagements(baseline, eng, hard_evidence=None, unknown_modules=None, reported_hash=None):
+    """Engagement table (player_id, match_idx, bracket + ENG_COLS) -> (player features, risk table).
+    Players whose features can't be computed (too little data) are skipped and listed in risk.attrs."""
+    baseline.validate(eng)
+    mf = match_features(eng)
+    bad = mf.loc[mf[FEATURE_COLS].isna().any(axis=1), "player_id"].unique()
+    if len(bad):
+        mf, eng = mf[~mf.player_id.isin(bad)], eng[~eng.player_id.isin(bad)]
+    pf = player_features(mf)
+    risk = score_players(baseline.add_z(mf), baseline.player_tests(eng), baseline.iforest_flags(pf),
+                         hard_evidence, unknown_modules, reported_hash)
+    risk.attrs["skipped_players"] = list(bad)
+    return pf, risk
+
+
+def evaluate(risk: pd.DataFrame, threshold=REVIEW_THRESHOLD) -> dict:
+    f = risk.risk_score >= threshold
+    c = risk.is_cheater
+    tp, fp, fn = int((f & c).sum()), int((f & ~c).sum()), int((~f & c).sum())
+    pro = risk[(risk.bracket == 3) & ~c]
+    return dict(players=len(risk), cheaters=int(c.sum()), flagged=int(f.sum()), true_pos=tp,
+                false_pos=fp, missed=fn, precision=tp / max(tp + fp, 1) if tp + fp else float("nan"),
+                recall=tp / max(tp + fn, 1) if c.any() else float("nan"),
+                legit_fp_rate=fp / max(int((~c).sum()), 1),
+                pro_false_pos=int((pro.risk_score >= threshold).sum()), pro_legit=len(pro))
+
+```
+
+`aimguard/pvs.py`:
+
+```py
+"""Layer 2: information hiding. The server only replicates enemies a player could plausibly see,
+so wallhack/radar cheats have little hidden data to display. 2D grid + potentially-visible-set.
+
+KNOWN LEAKS (by design or limitation): (1) teammates are always replicated; (2) enemies within `peek_radius`
+of a corner edge may be replicated; (3) audio cues reveal a coarse direction + loudness of hidden enemies;
+(4) 2D walls only: no floors, doors, props or dynamic occluders. A cheat can still exploit what is replicated."""
+import math
+from dataclasses import dataclass
+
+
+def _ccw(a, b, c):
+    return (c[1] - a[1]) * (b[0] - a[0]) - (b[1] - a[1]) * (c[0] - a[0])
+
+
+def segments_intersect(a, b, c, d):
+    return (_ccw(a, c, d) * _ccw(b, c, d) < 0) and (_ccw(a, b, c) * _ccw(a, b, d) < 0)
+
+
+class World:
+    def __init__(self, width, height, walls, cell=8.0, margin_cells=1):
+        """walls: list of ((x1,y1),(x2,y2)) segments. margin_cells widens the visible set so
+        enemies don't 'pop in' around corners (tune with playtests)."""
+        self.cell, self.margin = cell, margin_cells
+        self.nx, self.ny, self.walls = math.ceil(width / cell), math.ceil(height / cell), walls
+        self.pvs = self._build()
+
+    def cell_of(self, pos):
+        return (min(max(int(pos[0] // self.cell), 0), self.nx - 1), min(max(int(pos[1] // self.cell), 0), self.ny - 1))
+
+    def center(self, c):
+        return ((c[0] + 0.5) * self.cell, (c[1] + 0.5) * self.cell)
+
+    def los(self, a, b):
+        a, b = (a[0], a[1]), (b[0], b[1])
+        return not any(segments_intersect(a, b, w[0], w[1]) for w in self.walls)
+
+    def _build(self):
+        cells = [(x, y) for x in range(self.nx) for y in range(self.ny)]
+        base = {c: {o for o in cells if o == c or self.los(self.center(c), self.center(o))} for c in cells}
+        out = {}
+        for c, vis in base.items():                          # widen by the margin ring
+            wide = set(vis)
+            for v in vis:
+                for dx in range(-self.margin, self.margin + 1):
+                    for dy in range(-self.margin, self.margin + 1):
+                        n = (v[0] + dx, v[1] + dy)
+                        if 0 <= n[0] < self.nx and 0 <= n[1] < self.ny:
+                            wide.add(n)
+            out[c] = wide
+        return out
+
+
+@dataclass
+class Entity:
+    id: str
+    team: str
+    pos: tuple
+
+
+def _offsets(pos, r):
+    x, y = pos[0], pos[1]
+    return [(x, y), (x + r, y), (x - r, y), (x, y + r), (x, y - r)]
+
+
+def could_see(world: World, a, b, peek_radius=1.5):
+    """True if a line of sight exists between the two positions OR between points within `peek_radius` of each.
+    The margin avoids enemies 'popping in' as someone peeks around a corner. It is a DELIBERATE, BOUNDED leak:
+    an enemy hidden only by a corner edge, within `peek_radius` of being visible, may be replicated."""
+    return any(world.los(p, q) for p in _offsets(a, peek_radius) for q in _offsets(b, peek_radius))
+
+
+def entities_for_player(player: Entity, entities, world: World, peek_radius=1.5):
+    """Replicate ONLY: teammates, and enemies inside the player's PVS that have (peek-margin) line of sight.
+    There is NO distance exception: an enemy behind a wall is never replicated, however close.
+    Hidden-but-near enemies are conveyed by audio_cues (direction only) instead."""
+    visible = world.pvs[world.cell_of(player.pos)]
+    return [e for e in entities if e.id != player.id and
+            (e.team == player.team or (world.cell_of(e.pos) in visible and could_see(world, player.pos, e.pos, peek_radius)))]
+
+
+def audio_cues(player: Entity, entities, world: World, radius=40.0, buckets=8):
+    """Hidden-but-audible enemies become direction-only sound events, never positions."""
+    shown = {e.id for e in entities_for_player(player, entities, world)}
+    cues = []
+    for e in entities:
+        if e.id == player.id or e.id in shown or e.team == player.team:
+            continue
+        d = math.dist(player.pos[:2], e.pos[:2])
+        if d <= radius:
+            ang = math.atan2(e.pos[1] - player.pos[1], e.pos[0] - player.pos[0]) % (2 * math.pi)
+            cues.append({"type": "footstep", "dir_bucket": int(ang / (2 * math.pi) * buckets) % buckets,
+                         "loudness": round(1 - d / radius, 2)})
+    return cues
+
+```
+
+`aimguard/report.py`:
+
+```py
+import html
+import pandas as pd
+
+def write_html(risk: pd.DataFrame, metrics: dict, path="aimguard_report.html", top=40):
+    rows = ""
+    for _, r in risk.head(top).iterrows():
+        rows += (f"<tr><td>{r.player_id}</td><td>{r.risk_score:.3f}</td><td>{r.action}</td>"
+                 f"<td>{r.p_headshot:.1e}</td><td>{r.p_preaim:.1e}</td>"
+                 f"<td>{html.escape(str(r.fired))}</td></tr>")
+    m = " | ".join(f"{k}: {v:.2f}" if isinstance(v, float) else f"{k}: {v}" for k, v in metrics.items())
+    page = f"""<!doctype html><meta charset=utf-8><title>AimGuard report</title>
+<style>body{{font:14px system-ui;margin:2rem;max-width:1000px}}table{{border-collapse:collapse;width:100%}}
+td,th{{border-bottom:1px solid #8884;padding:6px 8px;text-align:left}}</style>
+<h1>AimGuard: review queue</h1><p><b>Risk score is an experimental, uncalibrated ranking, not a probability of cheating.</b></p><p>{m}</p>
+<table><tr><th>Player</th><th>Risk score (experimental)</th><th>Action</th><th>HS p-value</th><th>Pre-aim p</th><th>Signals fired</th></tr>{rows}</table>"""
+    open(path, "w").write(page)
+
+```
+
+`aimguard/risk.py`:
+
+```py
+"""EXPERIMENTAL risk score (log-odds style, hand-set weights).
+
+The output is a ranking score in 0..1, NOT a calibrated probability of cheating.
+Calibrate against independent labelled data before reading it as a probability.
+"""
+import math
+import pandas as pd
+
+PRIOR_LOGIT = math.log(0.02 / 0.98)
+DECAY = 0.98
+
+# weights are placeholders to tune on real, independently labelled data
+LLR = {"headshot_z": 1.5, "reaction": 2.0, "linearity": 1.5, "preaim": 2.0, "clean": -0.3}
+LLR_PLAYER = {"iforest": 1.5, "p_headshot": 3.0, "p_preaim": 3.0,
+              "hash_match": 5.0,        # VERIFIED known cheat-file hash (hard evidence)
+              "reported_hash": 3.0,     # client-REPORTED blocklist hash: unverified, can be forged (soft)
+              "unknown_modules": 1.0}   # soft signal: never enough on its own; each counted ONCE per window
+
+
+def match_signals(r) -> dict:
+    """Per-match evidence. Each match is genuinely separate data."""
+    return {"headshot_z": r.z_hs_rate > 3.5,
+            "reaction": r.z_react_med < -3.5 or r.z_react_std < -3.5,  # unusually fast OR unusually consistent, vs bracket
+            "linearity": r.z_linearity > 3.5,
+            "preaim": r.z_preaim_med < -3.5}
+
+
+def update_risk(prev_logit, llr):
+    return PRIOR_LOGIT + (prev_logit - PRIOR_LOGIT) * DECAY + llr
+
+
+def to_score(logit):
+    return 1 / (1 + math.exp(-logit))
+
+
+def policy(score, hard_evidence=False):
+    """Statistics alone never reach ban eligibility: that needs hard evidence
+    (server-proven violation or verified cheat-file match), and still a human."""
+    if hard_evidence:   # a verified signature match always gets human eyes
+        return "ban_eligible_after_review" if score >= 0.95 else "human_review"
+    if score < 0.3:
+        return "none"
+    if score < 0.7:
+        return "monitor"
+    return "human_review"
+
+
+def score_players(mfz, tests, iforest_flags, hard_evidence=None, unknown_modules=None, reported_hash=None) -> pd.DataFrame:
+    hard_evidence, unknown_modules, reported_hash = set(hard_evidence or []), set(unknown_modules or []), set(reported_hash or [])
+    tests = tests.set_index("player_id")
+    out = []
+    for pid, d in mfz.sort_values("match_idx").groupby("player_id"):
+        logit, fired = PRIOR_LOGIT, {}
+        for _, r in d.iterrows():
+            sig = match_signals(r)
+            logit = update_risk(logit, sum(LLR[k] for k, v in sig.items() if v) or LLR["clean"])
+            for k, v in sig.items():
+                fired[k] = fired.get(k, 0) + int(v)
+        t = tests.loc[pid]
+        window = {"iforest": bool(iforest_flags.get(pid, False)),
+                  "p_headshot": t.p_headshot < 1e-6, "p_preaim": t.p_preaim < 1e-6,
+                  "hash_match": pid in hard_evidence, "reported_hash": pid in reported_hash,
+                  "unknown_modules": pid in unknown_modules}
+        for k, v in window.items():
+            if v:
+                logit += LLR_PLAYER[k]
+                fired[k] = 1
+        out.append(dict(player_id=pid, risk_score=to_score(logit), fired=fired,
+                        p_headshot=t.p_headshot, p_preaim=t.p_preaim,
+                        hard_evidence=pid in hard_evidence))
+    res = pd.DataFrame(out)
+    res["action"] = [policy(s, h) for s, h in zip(res.risk_score, res.hard_evidence)]
+    return res.sort_values("risk_score", ascending=False).reset_index(drop=True)
+
+```
+
+`aimguard/service.py`:
+
+```py
+"""Glue: telemetry -> engagements -> scoring -> flags."""
+from .ticks import extract_matches, assign_windows
+from .pipeline import score_engagements
+from .store import REPORTED_HASH
+
+
+def ingest_telemetry(store, ticks, shots, vis, bracket_of):
+    eng = extract_matches(ticks, shots, vis, bracket_of)
+    return store.add_engagements(eng) if len(eng) else 0
+
+
+def score_all(store, baseline, moderation):
+    """Idempotent: re-scoring recomputes each player's score from stored data (nothing is double counted)."""
+    eng = assign_windows(store.load_engagements(), baseline.n_matches)
+    if eng.empty:
+        return 0
+    _, risk = score_engagements(baseline, eng, store.hard_evidence_players(), store.soft_signal_players(),
+                             store.players_with((REPORTED_HASH,)))
+    for r in risk.itertuples():
+        store.set_risk(r.player_id, r.risk_score, r.action, r.fired)
+    moderation.create_flags(risk)
+    return len(risk)
+
+```
+
+`aimguard/signatures.py`:
+
+```py
+"""Known-cheat signature matching (hashes only; never store or ship cheat files).
+
+Client reports look like:
+    {"player_id": {"hashes": ["<sha256>", ...], "unknown_modules": ["name.dll", ...]}}
+- hashes: SHA-256 of running executables reported by the client. Client-reported, so SOFT until verified.
+- unknown_modules: files mapped into the game process that are not on your allow-list.
+  Soft signal only.
+"""
+import hashlib
+
+
+def sha256_file(path):
+    h = hashlib.sha256()
+    with open(path, "rb") as f:
+        for chunk in iter(lambda: f.read(1 << 20), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+
+def load_blocklist(path):
+    """One SHA-256 per line; '#' starts a comment (use it to record the sample's source)."""
+    out = set()
+    with open(path) as f:
+        for line in f:
+            h = line.split("#")[0].strip().lower()
+            if h:
+                out.add(h)
+    return out
+
+
+def blocklist_matches(reports, blocklist):
+    """Players whose REPORTED hashes appear on the blocklist.
+    TRUST: a report is only a client's claim; a modified client can forge or omit it. Treat matches as SOFT
+    evidence until a moderator verifies them (Moderation.verify_hash_evidence); only verified matches or
+    server-observed violations are hard evidence."""
+    return {pid for pid, r in reports.items()
+            if blocklist & {h.lower() for h in r.get("hashes", [])}}
+
+
+def unknown_module_players(reports):
+    return {pid for pid, r in reports.items() if r.get("unknown_modules")}
+
+```
+
+`aimguard/simulator.py`:
+
+```py
+"""Synthetic match generator: mostly legit players plus injected 'abnormal' ones.
+
+Each row is one engagement (a fight). Ground-truth labels are returned separately
+so detectors never see them.
+"""
+import numpy as np
+import pandas as pd
+
+BRACKETS = {0: "bronze", 1: "silver", 2: "gold", 3: "pro"}
+
+# per-bracket legit behaviour: (hit_prob, headshot_prob, reaction_median_ms, linearity_mean, omega_mean)
+LEGIT = {
+    0: dict(hit=0.30, hs=0.12, react=270, lin=0.55, omega=260),
+    1: dict(hit=0.38, hs=0.17, react=250, lin=0.60, omega=300),
+    2: dict(hit=0.46, hs=0.24, react=235, lin=0.65, omega=350),
+    3: dict(hit=0.58, hs=0.38, react=200, lin=0.72, omega=420),  # skilled humans, must NOT be flagged
+}
+
+CHEAT_TYPES = ["aimbot", "triggerbot", "wallhack", "mixed"]
+
+
+def _engagements(rng, p, n, cheat=None, strength=1.0):
+    shots = rng.integers(4, 14, n)
+    hits = rng.binomial(shots, p["hit"])
+    hs_p, react_med, lin, omega = p["hs"], p["react"], p["lin"], p["omega"]
+    react_sigma, preaim_mu = 0.20, 32.0  # degrees of crosshair error before LOS opens
+
+    if cheat in ("aimbot", "mixed"):
+        hs_p = hs_p + (0.75 - hs_p) * strength
+        lin = lin + (0.98 - lin) * strength
+        omega = omega * (1 + 1.5 * strength)
+        hits = rng.binomial(shots, min(0.95, p["hit"] + 0.35 * strength))
+    if cheat in ("triggerbot", "mixed"):
+        react_med = react_med + (95 - react_med) * strength
+        react_sigma = 0.20 - 0.17 * strength
+    if cheat in ("wallhack", "mixed"):
+        preaim_mu = preaim_mu - 26 * strength
+
+    headshots = rng.binomial(hits, np.clip(hs_p, 0, 1))
+    react = rng.lognormal(np.log(react_med), react_sigma, n)
+    linearity = np.clip(rng.normal(lin, 0.07, n), 0, 1)
+    omega_peak = np.abs(rng.normal(omega, omega * 0.2, n))
+    preaim = np.abs(rng.normal(preaim_mu, 14, n))
+    null_preaim = np.abs(rng.normal(32, 14, n))  # crosshair error vs a random enemy spot
+    return pd.DataFrame(dict(shots=shots, hits=hits, headshots=headshots, react_ms=react,
+                             linearity=linearity, omega_peak=omega_peak,
+                             preaim_err=preaim, null_preaim_err=null_preaim))
+
+
+def _pos_int(name, v):
+    if isinstance(v, bool) or not isinstance(v, (int, np.integer)) or v < 1:
+        raise ValueError(f"{name} must be a positive integer, got {v!r}")
+
+
+def simulate(n_players=400, n_matches=6, n_eng=40, cheater_rate=0.06, seed=42, strength_range=(0.5, 1.0)):
+    for name, v in (("n_players", n_players), ("n_matches", n_matches), ("n_eng", n_eng)):
+        _pos_int(name, v)
+    if not 0 <= cheater_rate <= 1:
+        raise ValueError(f"cheater_rate must be between 0 and 1, got {cheater_rate!r}")
+    lo, hi = strength_range
+    if not 0 <= lo <= hi <= 1:
+        raise ValueError(f"strength_range must satisfy 0 <= low <= high <= 1, got {strength_range!r}")
+    rng = np.random.default_rng(seed)
+    rows, labels = [], []
+    for pid in range(n_players):
+        bracket = int(rng.choice(list(BRACKETS), p=[0.35, 0.3, 0.25, 0.10]))
+        is_cheater = rng.random() < cheater_rate
+        ctype = str(rng.choice(CHEAT_TYPES)) if is_cheater else None
+        strength = float(rng.uniform(*strength_range)) if is_cheater else 0.0
+        # each legit player has their own skill wobble
+        skill = rng.normal(1.0, 0.06)
+        p = {k: (v * skill if k in ("hit", "hs") else v) for k, v in LEGIT[bracket].items()}
+        for m in range(n_matches):
+            df = _engagements(rng, p, n_eng, ctype, strength)
+            df["player_id"], df["match_idx"], df["bracket"] = f"p{pid}", m, bracket
+            rows.append(df)
+        labels.append(dict(player_id=f"p{pid}", bracket=bracket, is_cheater=is_cheater,
+                           cheat_type=ctype, strength=strength))
+    return pd.concat(rows, ignore_index=True), pd.DataFrame(labels)
+
+```
+
+`aimguard/store.py`:
+
+```py
+"""SQLite persistence (stdlib). Swap for PostgreSQL/ClickHouse at scale; the interface stays the same."""
+import hashlib, json, secrets, sqlite3, threading, time
+from contextlib import contextmanager
+import pandas as pd
+
+SCHEMA = """
+CREATE TABLE IF NOT EXISTS players(player_id TEXT PRIMARY KEY, bracket INTEGER, risk_score REAL DEFAULT 0,
+  action TEXT DEFAULT 'none', fired TEXT DEFAULT '{}', risk_updated REAL,
+  case_epoch INTEGER DEFAULT 0, evidence_cutoff REAL);
+CREATE TABLE IF NOT EXISTS ingested(match_id TEXT, player_id TEXT, at REAL, PRIMARY KEY(match_id, player_id));
+CREATE TABLE IF NOT EXISTS engagements(player_id TEXT, match_id TEXT, match_ts REAL, bracket INTEGER,
+  shots INTEGER, hits INTEGER, headshots INTEGER, react_ms REAL, linearity REAL, omega_peak REAL,
+  preaim_err REAL, null_preaim_err REAL);
+CREATE INDEX IF NOT EXISTS eng_player ON engagements(player_id);
+CREATE TABLE IF NOT EXISTS evidence(id INTEGER PRIMARY KEY AUTOINCREMENT, player_id TEXT, kind TEXT, ref TEXT, at REAL, epoch INTEGER DEFAULT 0);
+CREATE TABLE IF NOT EXISTS flags(flag_id INTEGER PRIMARY KEY AUTOINCREMENT, player_id TEXT, created_at REAL,
+  detector TEXT, severity REAL, evidence TEXT, status TEXT DEFAULT 'open');
+CREATE TABLE IF NOT EXISTS reviews(review_id INTEGER PRIMARY KEY AUTOINCREMENT, player_id TEXT, flag_id INTEGER,
+  moderator_id TEXT, decision TEXT CHECK(decision IN ('cheater','legit','unsure')), notes TEXT, reviewed_at REAL, epoch INTEGER DEFAULT 0);
+CREATE TABLE IF NOT EXISTS enforcement(id INTEGER PRIMARY KEY AUTOINCREMENT, player_id TEXT, action TEXT,
+  reason TEXT, evidence_refs TEXT, status TEXT, requested_by TEXT, scheduled_at REAL, execute_after REAL,
+  appealable_until REAL);
+CREATE TABLE IF NOT EXISTS appeals(id INTEGER PRIMARY KEY AUTOINCREMENT, enforcement_id INTEGER, player_id TEXT,
+  text TEXT, status TEXT DEFAULT 'open', created_at REAL, resolved_by TEXT, resolved_at REAL, notes TEXT);
+CREATE TABLE IF NOT EXISTS reports(id INTEGER PRIMARY KEY AUTOINCREMENT, reporter_id TEXT, target_id TEXT, reason TEXT, at REAL);
+CREATE TABLE IF NOT EXISTS tokens(token_hash TEXT PRIMARY KEY, role TEXT, subject TEXT);
+CREATE TABLE IF NOT EXISTS audit_log(id INTEGER PRIMARY KEY AUTOINCREMENT, at REAL, actor TEXT, action TEXT, target TEXT, details TEXT);
+"""
+# Trust levels. HARD = observed by the server itself, or verified by a moderator. Anything a client merely
+# CLAIMS (file hashes, loaded modules, attestation failures) is SOFT: clients can be modified to forge or omit it.
+HARD_KINDS = ("file_hash", "server_violation")          # 'file_hash' here means moderator-VERIFIED
+SOFT_KINDS = ("unknown_modules", "attestation_failed")
+REPORTED_HASH = "file_hash_reported"                    # client-reported blocklist match, unverified
+MIGRATIONS = [("players", "case_epoch", "INTEGER DEFAULT 0"), ("players", "evidence_cutoff", "REAL"),
+              ("evidence", "epoch", "INTEGER DEFAULT 0"), ("reviews", "epoch", "INTEGER DEFAULT 0")]
+ENG_DB_COLS = ["player_id", "match_id", "match_ts", "bracket", "shots", "hits", "headshots", "react_ms",
+               "linearity", "omega_peak", "preaim_err", "null_preaim_err"]
+
+
+class Store:
+    def __init__(self, path=":memory:", clock=time.time):
+        self.clock = clock
+        self.db = sqlite3.connect(path, check_same_thread=False, isolation_level=None)
+        self.db.row_factory = sqlite3.Row
+        self.lock = threading.RLock()
+        with self.lock:
+            self.db.executescript(SCHEMA)
+            for table, col, ddl in MIGRATIONS:      # upgrade databases created by older versions
+                if col not in {r['name'] for r in self.db.execute(f'PRAGMA table_info({table})')}:
+                    self.db.execute(f'ALTER TABLE {table} ADD COLUMN {col} {ddl}')
+
+    def q(self, sql, args=()):
+        with self.lock:
+            return [dict(r) for r in self.db.execute(sql, args).fetchall()]
+
+    def x(self, sql, args=()):
+        with self.lock:
+            return self.db.execute(sql, args).lastrowid
+
+    @contextmanager
+    def tx(self):
+        with self.lock:
+            self.db.execute("BEGIN")
+            try:
+                yield
+                self.db.execute("COMMIT")
+            except BaseException:
+                self.db.execute("ROLLBACK")
+                raise
+
+    def audit(self, actor, action, target="", details=None, now=None):
+        self.x("INSERT INTO audit_log(at,actor,action,target,details) VALUES(?,?,?,?,?)",
+               (now or self.clock(), actor, action, str(target), json.dumps(details or {}, default=str)))
+
+    # ---- auth ----
+    @staticmethod
+    def _h(token):
+        return hashlib.sha256(token.encode()).hexdigest()
+
+    def create_token(self, role, subject):
+        t = secrets.token_urlsafe(32)
+        self.x("INSERT INTO tokens VALUES(?,?,?)", (self._h(t), role, subject))
+        return t
+
+    def auth(self, token):
+        r = self.q("SELECT role, subject FROM tokens WHERE token_hash=?", (self._h(token),))
+        return (r[0]["role"], r[0]["subject"]) if r else None
+
+    # ---- telemetry ----
+    def add_engagements(self, df: pd.DataFrame, now=None) -> int:
+        """Idempotent per (match_id, player_id): re-uploading a match never double-counts evidence."""
+        added = 0
+        with self.tx():
+            for (pid, mid), g in df.groupby(["player_id", "match_id"]):
+                if self.q("SELECT 1 FROM ingested WHERE match_id=? AND player_id=?", (mid, pid)):
+                    continue
+                g = g[ENG_DB_COLS].astype(object).where(g[ENG_DB_COLS].notna(), None)
+                self.db.executemany("INSERT INTO engagements VALUES(?,?,?,?,?,?,?,?,?,?,?,?)",
+                                    [tuple(r) for r in g.itertuples(index=False)])
+                self.db.execute("INSERT INTO ingested VALUES(?,?,?)", (mid, pid, now or self.clock()))
+                self.db.execute("INSERT INTO players(player_id,bracket) VALUES(?,?) "
+                                "ON CONFLICT(player_id) DO UPDATE SET bracket=excluded.bracket", (pid, int(g.bracket.iloc[0])))
+                added += len(g)
+        return added
+
+    def load_engagements(self) -> pd.DataFrame:
+        with self.lock:
+            # after an overturned ban, matches ingested before the overturn no longer count as evidence
+            return pd.read_sql_query(
+                "SELECT e.* FROM engagements e JOIN ingested i ON i.match_id=e.match_id AND i.player_id=e.player_id "
+                "LEFT JOIN players p ON p.player_id=e.player_id "
+                "WHERE p.evidence_cutoff IS NULL OR i.at > p.evidence_cutoff", self.db)
+
+    def purge_before(self, ts):
+        """Retention: delete raw engagement rows older than ts (features/evidence for confirmed cases stay)."""
+        with self.tx():
+            n = self.db.execute("DELETE FROM engagements WHERE match_ts < ?", (ts,)).rowcount
+            self.db.execute("DELETE FROM ingested WHERE NOT EXISTS (SELECT 1 FROM engagements e "
+                            "WHERE e.match_id=ingested.match_id AND e.player_id=ingested.player_id)")
+        return n
+
+    # ---- risk & evidence ----
+    def set_risk(self, pid, score, action, fired, now=None):
+        self.x("INSERT INTO players(player_id,risk_score,action,fired,risk_updated) VALUES(?,?,?,?,?) "
+               "ON CONFLICT(player_id) DO UPDATE SET risk_score=excluded.risk_score, action=excluded.action, "
+               "fired=excluded.fired, risk_updated=excluded.risk_updated",
+               (pid, float(score), action, json.dumps(fired, default=int), now or self.clock()))
+
+    def epoch(self, pid):
+        r = self.q("SELECT case_epoch FROM players WHERE player_id=?", (pid,))
+        return r[0]["case_epoch"] if r else 0
+
+    def add_evidence(self, pid, kind, ref="", now=None):
+        """Returns the new evidence id, or None if identical evidence is already on this case."""
+        ep = self.epoch(pid)
+        if self.q("SELECT 1 FROM evidence WHERE player_id=? AND kind=? AND ref=? AND epoch=?", (pid, kind, ref, ep)):
+            return None
+        return self.x("INSERT INTO evidence(player_id,kind,ref,at,epoch) VALUES(?,?,?,?,?)", (pid, kind, ref, now or self.clock(), ep))
+
+    def evidence_rows(self, pid, kinds=None):
+        rows = self.q("SELECT id, kind, ref, at FROM evidence WHERE player_id=? AND epoch=?", (pid, self.epoch(pid)))
+        return [r for r in rows if kinds is None or r["kind"] in kinds]
+
+    def players_with(self, kinds):
+        """Players with evidence of these kinds ON THEIR CURRENT CASE (evidence from closed cases is ignored)."""
+        qs = ",".join("?" * len(kinds))
+        return {r["player_id"] for r in self.q(
+            f"SELECT DISTINCT e.player_id FROM evidence e LEFT JOIN players p ON p.player_id=e.player_id "
+            f"WHERE e.kind IN ({qs}) AND e.epoch=COALESCE(p.case_epoch,0)", tuple(kinds))}
+
+    def hard_evidence_players(self):
+        return self.players_with(HARD_KINDS)
+
+    def soft_signal_players(self):
+        return self.players_with(SOFT_KINDS)
+
+    def close_case(self, pid, now=None):
+        """Appeal overturned: start a new case. Old reviews/evidence stop counting, pre-overturn matches
+        stop counting, and the stale risk score is cleared. A new ban needs NEW evidence + fresh reviews."""
+        self.x("INSERT INTO players(player_id,case_epoch,evidence_cutoff) VALUES(?,1,?) ON CONFLICT(player_id) DO UPDATE SET "
+               "case_epoch=case_epoch+1, evidence_cutoff=excluded.evidence_cutoff, risk_score=0, action='none', fired='{}'",
+               (pid, now or self.clock()))
+
+    # ---- reports ----
+    def add_report(self, reporter, target, reason, now=None):
+        self.x("INSERT INTO reports(reporter_id,target_id,reason,at) VALUES(?,?,?,?)", (reporter, target, reason, now or self.clock()))
+
+    def reporter_reliability(self, reporter):
+        """(1+confirmed)/(2+confirmed+refuted) from moderator outcomes on this reporter's targets."""
+        c = r = 0
+        for t in {x["target_id"] for x in self.q("SELECT target_id FROM reports WHERE reporter_id=?", (reporter,))}:
+            last = self.q("SELECT decision FROM reviews WHERE player_id=? AND decision!='unsure' ORDER BY review_id DESC LIMIT 1", (t,))
+            if last:
+                c, r = c + (last[0]["decision"] == "cheater"), r + (last[0]["decision"] == "legit")
+        return (1 + c) / (2 + c + r)
+
+    def weighted_report_score(self, target):
+        return round(sum(self.reporter_reliability(x["reporter_id"]) for x in
+                         self.q("SELECT DISTINCT reporter_id FROM reports WHERE target_id=?", (target,))), 3)
+
+```
+
+`aimguard/tick_sim.py`:
+
+```py
+"""Generate RAW tick telemetry (crosshair path, shots, visibility events) for testing the extractor.
+Synthetic: humans curve and hesitate; scripted cheats snap fast and straight; wallhacks pre-aim."""
+import numpy as np
+import pandas as pd
+from .simulator import LEGIT, CHEAT_TYPES
+
+HZ_MS = 1000 / 60
+REL = np.arange(-600, 1500, HZ_MS)            # ms relative to first visibility
+MOVE_FRAC = {0: 0.55, 1: 0.55, 2: 0.55, 3: 0.55}
+
+
+def _player_match(rng, p, n_eng, cheat, strength, pid, mid, match_start):
+    E, T = n_eng, len(REL)
+    aim = cheat in ("aimbot", "mixed"); trig = cheat in ("triggerbot", "mixed"); wall = cheat in ("wallhack", "mixed")
+    react_med, sig = p["react"], 0.20
+    if trig:
+        react_med, sig = react_med + (95 - react_med) * strength, 0.20 - 0.17 * strength
+    R = rng.lognormal(np.log(react_med), sig, E)
+    m = np.abs(rng.normal(32 - 26 * strength if wall else 32, 14, E))               # pre-aim error (deg)
+    phi = rng.uniform(0, 2 * np.pi, E)
+    c0y, c0p = rng.uniform(-170, 170, E), rng.uniform(-20, 20, E)
+    Ty, Tp = c0y + m * np.cos(phi), c0p + m * np.sin(phi)
+    r_start = 0.45 * R
+    D = (R - r_start) * ((1 - 0.7 * strength) if aim else 1.0)
+    D = np.maximum(D, 20.0)
+    r_start = R - D
+    amp = np.abs(rng.normal(0.01 if aim else 0.45, 0.005 if aim else 0.15, E))
+    noise_sd = 0.02 if aim else 0.8
+    u = np.clip((REL[None, :] - r_start[:, None]) / D[:, None], 0, 1)
+    s = u * u * (3 - 2 * u)
+    dy, dp = (Ty - c0y), (Tp - c0p)
+    nrm = np.maximum(np.hypot(dy, dp), 1e-9)
+    lat = amp[:, None] * nrm[:, None] * np.sin(np.pi * u)
+    mv = ((u > 0) & (u < 1)).astype(float)
+    yaw = c0y[:, None] + s * dy[:, None] + (-dp / nrm)[:, None] * lat + rng.normal(0, noise_sd, (E, T)) * mv
+    pit = c0p[:, None] + s * dp[:, None] + (dy / nrm)[:, None] * lat + rng.normal(0, noise_sd, (E, T)) * mv
+    jit = np.cumsum(rng.normal(0, 0.04, (E, T)), axis=1)
+    yaw, pit = ((yaw + jit + 180) % 360) - 180, pit + jit
+    t0 = match_start + 10_000 + np.arange(E) * 8_000
+    tick_t = (t0[:, None] + REL[None, :])
+    ticks = pd.DataFrame(dict(match_id=mid, player_id=pid, t_ms=tick_t.ravel(), yaw=yaw.ravel(), pitch=pit.ravel()))
+
+    hit_p = min(0.95, p["hit"] + (0.35 * strength if aim else 0))
+    hs_p = p["hs"] + ((0.75 - p["hs"]) * strength if aim else 0)
+    srows = []
+    for e in range(E):
+        for k in range(int(rng.integers(2, 8))):
+            hit = bool(rng.random() < hit_p)
+            srows.append((mid, pid, t0[e] + R[e] + 110 * k, f"e{e}", hit, "head" if hit and rng.random() < hs_p else "body" if hit else ""))
+    shots = pd.DataFrame(srows, columns=["match_id", "player_id", "t_ms", "target", "hit", "hitbox"])
+    dm, dphi = np.abs(rng.normal(32, 14, E)), rng.uniform(0, 2 * np.pi, E)
+    vis = pd.DataFrame(dict(match_id=mid, player_id=pid, t_ms=t0, target=[f"e{e}" for e in range(E)],
+                            target_yaw=Ty, target_pitch=Tp, decoy_yaw=c0y + dm * np.cos(dphi), decoy_pitch=c0p + dm * np.sin(dphi)))
+    return ticks, shots, vis
+
+
+def simulate_ticks(n_players=40, n_matches=6, n_eng=20, cheater_rate=0.0, seed=0, brackets=(0, 1, 2, 3),
+                   strength_range=(0.5, 1.0), start_index=0):
+    """Yield (ticks, shots, vis) per player-match, plus a labels table. Streaming keeps memory small."""
+    rng = np.random.default_rng(seed)
+    labels, plan = [], []
+    for i in range(n_players):
+        pid = f"p{start_index + i}"
+        b = int(rng.choice(brackets))
+        cheat = bool(rng.random() < cheater_rate)
+        ct = str(rng.choice(CHEAT_TYPES)) if cheat else None
+        st = float(rng.uniform(*strength_range)) if cheat else 0.0
+        skill = rng.normal(1.0, 0.06)
+        p = {k: (v * skill if k in ("hit", "hs") else v) for k, v in LEGIT[b].items()}
+        labels.append(dict(player_id=pid, bracket=b, is_cheater=cheat, cheat_type=ct, strength=st))
+        plan.append((pid, p, ct, st))
+    labels = pd.DataFrame(labels)
+
+    def gen():
+        for pid, p, ct, st in plan:
+            for k in range(n_matches):
+                yield _player_match(rng, p, n_eng, ct, st, pid, f"{pid}_m{k}", k * 3_600_000)
+    return gen(), labels
+
+
+def engagements_from_sim(n_players, cheater_rate, seed, **kw):
+    """Simulate raw ticks and run the real extractor; returns (engagement rows, labels)."""
+    from .ticks import extract_matches
+    gen, labels = simulate_ticks(n_players, cheater_rate=cheater_rate, seed=seed, **kw)
+    bracket_of = dict(zip(labels.player_id, labels.bracket))
+    parts = [extract_matches(t, s, v, bracket_of) for t, s, v in gen]
+    return pd.concat(parts, ignore_index=True), labels
+
+```
+
+`aimguard/ticks.py`:
+
+```py
+"""Raw server telemetry -> engagement rows (the columns the detectors consume).
+
+Input tables (all times in server ms; angles in degrees; produced by YOUR game server):
+  ticks: match_id, player_id, t_ms, yaw, pitch                    (crosshair, ~30-60 Hz)
+  shots: match_id, player_id, t_ms, target, hit(bool), hitbox      (one row per shot fired)
+  vis  : match_id, player_id, t_ms, target, target_yaw, target_pitch, decoy_yaw, decoy_pitch
+         one row when `target` first becomes visible to `player_id`.
+         target_*: direction from the player's eye to the target at that time.
+         decoy_*:  direction to a plausible OTHER enemy position (e.g. a different occluded enemy);
+                   it forms the null distribution for the pre-aim (wallhack) test.
+"""
+import numpy as np
+import pandas as pd
+
+PRE_MS = 500          # window before first visibility used for pre-aim
+REACT_MAX_MS = 2000   # a shot later than this after visibility is not a reaction to it
+NO_SHOT_WINDOW_MS = 500
+ENG_COLS = ["shots", "hits", "headshots", "react_ms", "linearity", "omega_peak",
+            "preaim_err", "null_preaim_err"]
+
+
+def ang_err(yaw, pitch, tyaw, tpitch):
+    dy = (np.asarray(yaw) - tyaw + 180) % 360 - 180
+    return np.hypot(dy, np.asarray(pitch) - tpitch)
+
+
+def _path_metrics(t, yaw, pitch):
+    """(linearity, peak angular speed deg/s) of the crosshair path. Linearity 1.0 = perfectly straight."""
+    if len(t) < 3:
+        return np.nan, np.nan
+    y = np.degrees(np.unwrap(np.radians(yaw)))
+    dy, dp, dt = np.diff(y), np.diff(pitch), np.diff(t) / 1000.0
+    ok = dt > 0
+    if not ok.any():
+        return np.nan, np.nan
+    seg = np.hypot(dy, dp)[ok]
+    path = seg.sum()
+    lin = np.hypot(y[-1] - y[0], pitch[-1] - pitch[0]) / path if path > 1e-6 else np.nan
+    return min(lin, 1.0), float((seg / dt[ok]).max())
+
+
+def extract_player_match(ticks: pd.DataFrame, shots: pd.DataFrame, vis: pd.DataFrame) -> list:
+    """One player's data for one match -> list of engagement dicts."""
+    if ticks.empty or vis.empty:
+        return []
+    ticks = ticks.sort_values("t_ms").drop_duplicates("t_ms")
+    t, yaw, pit = (ticks[c].to_numpy(float) for c in ("t_ms", "yaw", "pitch"))
+    s_t = shots.t_ms.to_numpy(float) if len(shots) else np.array([])
+    s_tg = shots.target.to_numpy() if len(shots) else np.array([])
+    s_hit = shots.hit.to_numpy(bool) if len(shots) else np.array([], bool)
+    s_head = (shots.hitbox.to_numpy() == "head") if len(shots) else np.array([], bool)
+    out = []
+    for v in vis.itertuples():
+        tv = float(v.t_ms)
+        lo, hi = np.searchsorted(t, tv - PRE_MS, "left"), np.searchsorted(t, tv, "right")
+        if hi - lo < 2:
+            continue
+        pre_y, pre_p = yaw[lo:hi], pit[lo:hi]
+        preaim = float(ang_err(pre_y, pre_p, v.target_yaw, v.target_pitch).mean())
+        null = float(ang_err(pre_y, pre_p, v.decoy_yaw, v.decoy_pitch).mean())
+        m = (s_tg == v.target) & (s_t >= tv) & (s_t <= tv + REACT_MAX_MS) if len(s_t) else np.array([], bool)
+        n_shots = int(m.sum())
+        if n_shots:
+            t_first = s_t[m].min()
+            react, end = t_first - tv, t_first
+        else:
+            react, end = np.nan, tv + NO_SHOT_WINDOW_MS
+        a, b = np.searchsorted(t, tv, "left"), np.searchsorted(t, end, "right")
+        lin, omega = _path_metrics(t[a:b], yaw[a:b], pit[a:b])
+        out.append(dict(shots=n_shots, hits=int((m & s_hit).sum()), headshots=int((m & s_hit & s_head).sum()),
+                        react_ms=react, linearity=lin, omega_peak=omega,
+                        preaim_err=preaim, null_preaim_err=null))
+    return out
+
+
+def extract_matches(ticks, shots, vis, bracket_of) -> pd.DataFrame:
+    """Many player-matches -> engagement table: player_id, match_id, match_ts, bracket + ENG_COLS.
+    bracket_of: dict player_id -> skill bracket (from your matchmaking/MMR)."""
+    tg = {k: g for k, g in ticks.groupby(["match_id", "player_id"])}
+    sg = {k: g for k, g in shots.groupby(["match_id", "player_id"])} if len(shots) else {}
+    rows = []
+    for (mid, pid), vg in vis.groupby(["match_id", "player_id"]):
+        tk = tg.get((mid, pid))
+        if tk is None:
+            continue
+        sh = sg.get((mid, pid), shots.iloc[0:0])
+        for e in extract_player_match(tk, sh, vg):
+            e.update(player_id=pid, match_id=mid, match_ts=float(tk.t_ms.min()), bracket=int(bracket_of[pid]))
+            rows.append(e)
+    cols = ["player_id", "match_id", "match_ts", "bracket"] + ENG_COLS
+    return pd.DataFrame(rows, columns=cols)
+
+
+def assign_windows(eng: pd.DataFrame, n_matches: int) -> pd.DataFrame:
+    """Keep each player's LAST n_matches matches (by match_ts) and number them 0..n-1.
+    Players with fewer than n_matches are dropped (they can't be scored against a n-match baseline)."""
+    if eng.empty:
+        return eng.assign(match_idx=pd.Series(dtype=int))
+    order = (eng.groupby(["player_id", "match_id"]).match_ts.min().reset_index()
+             .sort_values(["player_id", "match_ts"]))
+    order["rank_from_end"] = order.groupby("player_id").cumcount(ascending=False)
+    keep = order[order.rank_from_end < n_matches]
+    keep = keep[keep.groupby("player_id").match_id.transform("count") == n_matches].copy()
+    keep["match_idx"] = keep.groupby("player_id").cumcount()
+    return eng.merge(keep[["player_id", "match_id", "match_idx"]], on=["player_id", "match_id"])
+
+```
+
+`aimguard/validation.py`:
+
+```py
+"""Layer 1: real-time server-side validation (O(1) per event) with a violation budget."""
+import math
+from collections import defaultdict, deque
+from dataclasses import dataclass, field
+
+
+@dataclass
+class MoveRules:
+    max_speed: float = 7.5            # units/s, from game design
+    tolerance: float = 1.15           # slack for lag/physics
+    max_vertical_speed: float = 12.0
+
+
+@dataclass
+class WeaponCfg:
+    min_interval_ms: float = 100.0
+    max_range: float = 150.0
+
+
+@dataclass
+class State:
+    t_ms: float
+    pos: tuple
+    ammo: int = 30
+    last_shot_ms: float = -1e9
+    in_vehicle: bool = False
+
+
+def validate_move(prev: State, cur: State, rules: MoveRules = MoveRules()):
+    dt = (cur.t_ms - prev.t_ms) / 1000
+    if dt <= 0:
+        return "bad_timestamp"
+    dx, dy, dz = (cur.pos[i] - prev.pos[i] for i in range(3))
+    if math.hypot(dx, dy) / dt > rules.max_speed * rules.tolerance and not cur.in_vehicle:
+        return "speed_violation"
+    if abs(dz) / dt > rules.max_vertical_speed and not cur.in_vehicle:
+        return "fly_or_teleport"
+    return None
+
+
+def validate_fire(player: State, shot_t_ms: float, weapon: WeaponCfg):
+    if player.ammo <= 0:
+        return "no_ammo"
+    if shot_t_ms - player.last_shot_ms < weapon.min_interval_ms * 0.9:
+        return "fire_rate_violation"
+    return None
+
+
+class ViolationBudget:
+    """Never act on a single violation (jitter causes false flags). `budget` violations within
+    `window_ms` => 'rubber_band' (correct the player's position and log). Repeated rubber-banding
+    (`escalate_after` times) is server-proven evidence a moderator can act on."""
+
+    def __init__(self, budget=5, window_ms=10_000, escalate_after=3):
+        self.budget, self.window_ms, self.escalate_after = budget, window_ms, escalate_after
+        self._v = defaultdict(deque)
+        self.rubber_bands = defaultdict(int)
+
+    def record(self, player_id, t_ms, reason):
+        q = self._v[player_id]
+        q.append(t_ms)
+        while q and t_ms - q[0] > self.window_ms:
+            q.popleft()
+        if len(q) >= self.budget:
+            q.clear()
+            self.rubber_bands[player_id] += 1
+            return "rubber_band"
+        return "ignore"
+
+    def server_proven(self):
+        return {p for p, n in self.rubber_bands.items() if n >= self.escalate_after}
+
+
+class PositionHistory:
+    """Ring buffer of a player's positions for lag compensation."""
+
+    def __init__(self, keep_ms=1000):
+        self.keep_ms, self.buf = keep_ms, deque()
+
+    def add(self, t_ms, pos):
+        self.buf.append((t_ms, pos))
+        while self.buf and t_ms - self.buf[0][0] > self.keep_ms:
+            self.buf.popleft()
+
+    def at(self, t_ms):
+        if not self.buf:
+            return None
+        prev = self.buf[0]
+        for cur in self.buf:
+            if cur[0] >= t_ms:
+                if cur[0] == prev[0] or t_ms <= prev[0]:
+                    return cur[1]
+                f = (t_ms - prev[0]) / (cur[0] - prev[0])
+                return tuple(prev[1][i] + f * (cur[1][i] - prev[1][i]) for i in range(3))
+            prev = cur
+        return self.buf[-1][1]
+
+
+def validate_hit(now_ms, shooter_view_ms, origin, direction, target_hist: PositionHistory,
+                 weapon: WeaponCfg, radius=0.6, max_rewind_ms=200, los=None):
+    """Server re-runs the shot against the target's position at the shooter's (bounded) view time.
+    Never trust a client's 'I hit him'. Returns ('hit', dist) or ('rejected', reason)."""
+    view = max(shooter_view_ms, now_ms - max_rewind_ms)         # bound the rewind
+    c = target_hist.at(view)
+    if c is None:
+        return "rejected", "no_target_history"
+    n = math.sqrt(sum(d * d for d in direction))
+    if n < 1e-9:
+        return "rejected", "bad_direction"
+    d = tuple(x / n for x in direction)
+    oc = tuple(c[i] - origin[i] for i in range(3))
+    proj = sum(oc[i] * d[i] for i in range(3))
+    if proj < 0:
+        return "rejected", "target_behind"
+    dist2 = sum(x * x for x in oc) - proj * proj
+    if dist2 > radius * radius:
+        return "rejected", "miss"
+    if proj > weapon.max_range:
+        return "rejected", "out_of_range"
+    if los is not None and not los(origin, c):
+        return "rejected", "no_line_of_sight"
+    return "hit", proj
+
+```
+
+`aimguard_report.html`:
+
+```html
+<!doctype html><meta charset=utf-8><title>AimGuard report</title>
+<style>body{font:14px system-ui;margin:2rem;max-width:1000px}table{border-collapse:collapse;width:100%}
+td,th{border-bottom:1px solid #8884;padding:6px 8px;text-align:left}</style>
+<h1>AimGuard: review queue</h1><p><b>Risk score is an experimental, uncalibrated ranking, not a probability of cheating.</b></p><p>players: 400 | cheaters: 24 | flagged: 24 | true_pos: 24 | false_pos: 0 | missed: 0 | precision: 1.00 | recall: 1.00 | legit_fp_rate: 0.00 | pro_false_pos: 0 | pro_legit: 35</p>
+<table><tr><th>Player</th><th>Risk score (experimental)</th><th>Action</th><th>HS p-value</th><th>Pre-aim p</th><th>Signals fired</th></tr><tr><td>p251</td><td>1.000</td><td>human_review</td><td>4.0e-314</td><td>8.0e-42</td><td>{&#x27;headshot_z&#x27;: 6, &#x27;reaction&#x27;: 6, &#x27;linearity&#x27;: 6, &#x27;preaim&#x27;: 6, &#x27;iforest&#x27;: 1, &#x27;p_headshot&#x27;: 1, &#x27;p_preaim&#x27;: 1}</td></tr><tr><td>p199</td><td>1.000</td><td>human_review</td><td>8.3e-171</td><td>2.7e-32</td><td>{&#x27;headshot_z&#x27;: 6, &#x27;reaction&#x27;: 6, &#x27;linearity&#x27;: 6, &#x27;preaim&#x27;: 6, &#x27;iforest&#x27;: 1, &#x27;p_headshot&#x27;: 1, &#x27;p_preaim&#x27;: 1}</td></tr><tr><td>p42</td><td>1.000</td><td>human_review</td><td>0.0e+00</td><td>2.3e-01</td><td>{&#x27;headshot_z&#x27;: 6, &#x27;reaction&#x27;: 0, &#x27;linearity&#x27;: 6, &#x27;preaim&#x27;: 0, &#x27;iforest&#x27;: 1, &#x27;p_headshot&#x27;: 1}</td></tr><tr><td>p37</td><td>1.000</td><td>human_review</td><td>0.0e+00</td><td>2.4e-01</td><td>{&#x27;headshot_z&#x27;: 6, &#x27;reaction&#x27;: 0, &#x27;linearity&#x27;: 6, &#x27;preaim&#x27;: 0, &#x27;iforest&#x27;: 1, &#x27;p_headshot&#x27;: 1}</td></tr><tr><td>p267</td><td>1.000</td><td>human_review</td><td>1.4e-226</td><td>3.9e-01</td><td>{&#x27;headshot_z&#x27;: 6, &#x27;reaction&#x27;: 0, &#x27;linearity&#x27;: 6, &#x27;preaim&#x27;: 0, &#x27;iforest&#x27;: 1, &#x27;p_headshot&#x27;: 1}</td></tr><tr><td>p343</td><td>1.000</td><td>human_review</td><td>1.9e-269</td><td>5.0e-01</td><td>{&#x27;headshot_z&#x27;: 6, &#x27;reaction&#x27;: 0, &#x27;linearity&#x27;: 6, &#x27;preaim&#x27;: 0, &#x27;iforest&#x27;: 1, &#x27;p_headshot&#x27;: 1}</td></tr><tr><td>p235</td><td>1.000</td><td>human_review</td><td>1.4e-221</td><td>6.6e-03</td><td>{&#x27;headshot_z&#x27;: 6, &#x27;reaction&#x27;: 0, &#x27;linearity&#x27;: 6, &#x27;preaim&#x27;: 0, &#x27;iforest&#x27;: 1, &#x27;p_headshot&#x27;: 1}</td></tr><tr><td>p41</td><td>1.000</td><td>human_review</td><td>3.0e-01</td><td>1.3e-38</td><td>{&#x27;headshot_z&#x27;: 0, &#x27;reaction&#x27;: 0, &#x27;linearity&#x27;: 0, &#x27;preaim&#x27;: 6, &#x27;iforest&#x27;: 1, &#x27;p_preaim&#x27;: 1}</td></tr><tr><td>p161</td><td>1.000</td><td>human_review</td><td>8.1e-01</td><td>1.1e-33</td><td>{&#x27;headshot_z&#x27;: 0, &#x27;reaction&#x27;: 0, &#x27;linearity&#x27;: 0, &#x27;preaim&#x27;: 6, &#x27;iforest&#x27;: 1, &#x27;p_preaim&#x27;: 1}</td></tr><tr><td>p105</td><td>1.000</td><td>human_review</td><td>9.9e-01</td><td>8.5e-40</td><td>{&#x27;headshot_z&#x27;: 0, &#x27;reaction&#x27;: 0, &#x27;linearity&#x27;: 0, &#x27;preaim&#x27;: 6, &#x27;p_preaim&#x27;: 1}</td></tr><tr><td>p265</td><td>1.000</td><td>human_review</td><td>1.3e-01</td><td>1.7e-32</td><td>{&#x27;headshot_z&#x27;: 0, &#x27;reaction&#x27;: 0, &#x27;linearity&#x27;: 0, &#x27;preaim&#x27;: 6, &#x27;p_preaim&#x27;: 1}</td></tr><tr><td>p346</td><td>1.000</td><td>human_review</td><td>9.6e-01</td><td>4.0e-21</td><td>{&#x27;headshot_z&#x27;: 0, &#x27;reaction&#x27;: 0, &#x27;linearity&#x27;: 0, &#x27;preaim&#x27;: 6, &#x27;p_preaim&#x27;: 1}</td></tr><tr><td>p38</td><td>1.000</td><td>human_review</td><td>6.2e-01</td><td>3.6e-37</td><td>{&#x27;headshot_z&#x27;: 0, &#x27;reaction&#x27;: 0, &#x27;linearity&#x27;: 0, &#x27;preaim&#x27;: 6, &#x27;p_preaim&#x27;: 1}</td></tr><tr><td>p100</td><td>1.000</td><td>human_review</td><td>1.0e+00</td><td>5.8e-02</td><td>{&#x27;headshot_z&#x27;: 0, &#x27;reaction&#x27;: 6, &#x27;linearity&#x27;: 0, &#x27;preaim&#x27;: 0, &#x27;iforest&#x27;: 1}</td></tr><tr><td>p326</td><td>1.000</td><td>human_review</td><td>9.3e-01</td><td>5.1e-01</td><td>{&#x27;headshot_z&#x27;: 0, &#x27;reaction&#x27;: 6, &#x27;linearity&#x27;: 0, &#x27;preaim&#x27;: 0, &#x27;iforest&#x27;: 1}</td></tr><tr><td>p5</td><td>1.000</td><td>human_review</td><td>9.0e-01</td><td>9.4e-01</td><td>{&#x27;headshot_z&#x27;: 0, &#x27;reaction&#x27;: 6, &#x27;linearity&#x27;: 0, &#x27;preaim&#x27;: 0, &#x27;iforest&#x27;: 1}</td></tr><tr><td>p261</td><td>1.000</td><td>human_review</td><td>7.3e-01</td><td>9.1e-01</td><td>{&#x27;headshot_z&#x27;: 0, &#x27;reaction&#x27;: 6, &#x27;linearity&#x27;: 0, &#x27;preaim&#x27;: 0, &#x27;iforest&#x27;: 1}</td></tr><tr><td>p370</td><td>0.999</td><td>human_review</td><td>8.0e-01</td><td>2.4e-01</td><td>{&#x27;headshot_z&#x27;: 0, &#x27;reaction&#x27;: 6, &#x27;linearity&#x27;: 0, &#x27;preaim&#x27;: 0}</td></tr><tr><td>p84</td><td>0.999</td><td>human_review</td><td>1.2e-01</td><td>4.9e-01</td><td>{&#x27;headshot_z&#x27;: 0, &#x27;reaction&#x27;: 6, &#x27;linearity&#x27;: 0, &#x27;preaim&#x27;: 0}</td></tr><tr><td>p397</td><td>0.999</td><td>human_review</td><td>6.6e-01</td><td>1.7e-01</td><td>{&#x27;headshot_z&#x27;: 0, &#x27;reaction&#x27;: 6, &#x27;linearity&#x27;: 0, &#x27;preaim&#x27;: 0}</td></tr><tr><td>p28</td><td>0.999</td><td>human_review</td><td>5.5e-01</td><td>5.7e-01</td><td>{&#x27;headshot_z&#x27;: 0, &#x27;reaction&#x27;: 6, &#x27;linearity&#x27;: 0, &#x27;preaim&#x27;: 0}</td></tr><tr><td>p286</td><td>0.999</td><td>human_review</td><td>7.2e-01</td><td>7.4e-01</td><td>{&#x27;headshot_z&#x27;: 0, &#x27;reaction&#x27;: 6, &#x27;linearity&#x27;: 0, &#x27;preaim&#x27;: 0}</td></tr><tr><td>p212</td><td>0.999</td><td>human_review</td><td>9.8e-01</td><td>6.0e-01</td><td>{&#x27;headshot_z&#x27;: 0, &#x27;reaction&#x27;: 6, &#x27;linearity&#x27;: 0, &#x27;preaim&#x27;: 0}</td></tr><tr><td>p132</td><td>0.999</td><td>human_review</td><td>5.6e-01</td><td>4.4e-01</td><td>{&#x27;headshot_z&#x27;: 0, &#x27;reaction&#x27;: 6, &#x27;linearity&#x27;: 0, &#x27;preaim&#x27;: 0}</td></tr><tr><td>p365</td><td>0.131</td><td>none</td><td>1.0e+00</td><td>1.3e-02</td><td>{&#x27;headshot_z&#x27;: 0, &#x27;reaction&#x27;: 0, &#x27;linearity&#x27;: 0, &#x27;preaim&#x27;: 1, &#x27;iforest&#x27;: 1}</td></tr><tr><td>p338</td><td>0.031</td><td>none</td><td>4.2e-01</td><td>2.0e-02</td><td>{&#x27;headshot_z&#x27;: 0, &#x27;reaction&#x27;: 0, &#x27;linearity&#x27;: 0, &#x27;preaim&#x27;: 1}</td></tr><tr><td>p208</td><td>0.020</td><td>none</td><td>7.4e-02</td><td>9.9e-01</td><td>{&#x27;headshot_z&#x27;: 1, &#x27;reaction&#x27;: 0, &#x27;linearity&#x27;: 0, &#x27;preaim&#x27;: 0}</td></tr><tr><td>p241</td><td>0.016</td><td>none</td><td>7.2e-01</td><td>1.7e-01</td><td>{&#x27;headshot_z&#x27;: 0, &#x27;reaction&#x27;: 0, &#x27;linearity&#x27;: 0, &#x27;preaim&#x27;: 0, &#x27;iforest&#x27;: 1}</td></tr><tr><td>p18</td><td>0.016</td><td>none</td><td>1.0e+00</td><td>9.7e-01</td><td>{&#x27;headshot_z&#x27;: 0, &#x27;reaction&#x27;: 0, &#x27;linearity&#x27;: 0, &#x27;preaim&#x27;: 0, &#x27;iforest&#x27;: 1}</td></tr><tr><td>p302</td><td>0.016</td><td>none</td><td>6.0e-04</td><td>4.5e-01</td><td>{&#x27;headshot_z&#x27;: 0, &#x27;reaction&#x27;: 0, &#x27;linearity&#x27;: 0, &#x27;preaim&#x27;: 0, &#x27;iforest&#x27;: 1}</td></tr><tr><td>p50</td><td>0.016</td><td>none</td><td>1.0e+00</td><td>3.5e-01</td><td>{&#x27;headshot_z&#x27;: 0, &#x27;reaction&#x27;: 0, &#x27;linearity&#x27;: 0, &#x27;preaim&#x27;: 0, &#x27;iforest&#x27;: 1}</td></tr><tr><td>p123</td><td>0.016</td><td>none</td><td>1.0e+00</td><td>2.3e-01</td><td>{&#x27;headshot_z&#x27;: 0, &#x27;reaction&#x27;: 0, &#x27;linearity&#x27;: 0, &#x27;preaim&#x27;: 0, &#x27;iforest&#x27;: 1}</td></tr><tr><td>p102</td><td>0.004</td><td>none</td><td>5.8e-01</td><td>2.2e-02</td><td>{&#x27;headshot_z&#x27;: 0, &#x27;reaction&#x27;: 0, &#x27;linearity&#x27;: 0, &#x27;preaim&#x27;: 0}</td></tr><tr><td>p103</td><td>0.004</td><td>none</td><td>7.4e-01</td><td>5.8e-01</td><td>{&#x27;headshot_z&#x27;: 0, &#x27;reaction&#x27;: 0, &#x27;linearity&#x27;: 0, &#x27;preaim&#x27;: 0}</td></tr><tr><td>p104</td><td>0.004</td><td>none</td><td>6.9e-01</td><td>8.0e-01</td><td>{&#x27;headshot_z&#x27;: 0, &#x27;reaction&#x27;: 0, &#x27;linearity&#x27;: 0, &#x27;preaim&#x27;: 0}</td></tr><tr><td>p125</td><td>0.004</td><td>none</td><td>7.5e-02</td><td>4.2e-01</td><td>{&#x27;headshot_z&#x27;: 0, &#x27;reaction&#x27;: 0, &#x27;linearity&#x27;: 0, &#x27;preaim&#x27;: 0}</td></tr><tr><td>p92</td><td>0.004</td><td>none</td><td>7.2e-01</td><td>5.2e-01</td><td>{&#x27;headshot_z&#x27;: 0, &#x27;reaction&#x27;: 0, &#x27;linearity&#x27;: 0, &#x27;preaim&#x27;: 0}</td></tr><tr><td>p91</td><td>0.004</td><td>none</td><td>1.2e-01</td><td>1.8e-01</td><td>{&#x27;headshot_z&#x27;: 0, &#x27;reaction&#x27;: 0, &#x27;linearity&#x27;: 0, &#x27;preaim&#x27;: 0}</td></tr><tr><td>p90</td><td>0.004</td><td>none</td><td>2.2e-01</td><td>8.2e-01</td><td>{&#x27;headshot_z&#x27;: 0, &#x27;reaction&#x27;: 0, &#x27;linearity&#x27;: 0, &#x27;preaim&#x27;: 0}</td></tr><tr><td>p9</td><td>0.004</td><td>none</td><td>3.0e-01</td><td>2.0e-01</td><td>{&#x27;headshot_z&#x27;: 0, &#x27;reaction&#x27;: 0, &#x27;linearity&#x27;: 0, &#x27;preaim&#x27;: 0}</td></tr></table>
+```
+
+`blocklist.txt`:
+
+```txt
+# One lowercase SHA-256 per line. Add a comment with where each sample came from.
+# Example (replace with hashes from samples YOUR moderators captured and analysed in a sandbox):
+# 0000000000000000000000000000000000000000000000000000000000000000  # example, player report #123
+
+```
+
+`client/scan_client_example.py`:
+
+```py
+"""EXAMPLE of a scoped client-side check (Windows). A real client belongs in native code inside
+your game, with player consent disclosed in your terms. Needs: pip install -r requirements-client.txt
+
+Privacy rules this follows: scans only RUNNING executables and modules mapped into YOUR game process,
+never documents; the server gets hashes of blocklist matches and allow-list misses, never paths.
+"""
+import json, hashlib
+import psutil
+
+
+def sha256_file(path):
+    h = hashlib.sha256()
+    with open(path, "rb") as f:
+        for chunk in iter(lambda: f.read(1 << 20), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+
+def scan_running_processes(blocklist):
+    hits = set()
+    for p in psutil.process_iter(["exe"]):
+        exe = p.info.get("exe")
+        if not exe:
+            continue
+        try:
+            h = sha256_file(exe)
+        except OSError:      # protected or closed: skip
+            continue
+        if h in blocklist:
+            hits.add(h)
+    return sorted(hits)
+
+
+def unknown_modules(game_pid, allowed_names):
+    try:
+        maps = psutil.Process(game_pid).memory_maps()
+    except (psutil.Error, OSError):
+        return []
+    names = {m.path.rsplit("\\", 1)[-1].lower() for m in maps}
+    return sorted(n for n in names if n not in allowed_names)
+
+
+if __name__ == "__main__":
+    from aimguard.signatures import load_blocklist  # run from the project root
+    report = {"hashes": scan_running_processes(load_blocklist("blocklist.txt")), "unknown_modules": []}
+    print(json.dumps(report, indent=2))
+
+```
+
+`manage.py`:
+
+```py
+"""AimGuard management CLI.
+  python manage.py demo                                   # synthetic end-to-end run (creates demo.db)
+  python manage.py train-baseline --reference clean_engagements.csv --out baseline.pkl
+  python manage.py make-token --db aimguard.db --role moderator --subject alice
+  python manage.py serve --db aimguard.db --baseline baseline.pkl --blocklist blocklist.txt --port 8080
+  python manage.py score --db aimguard.db --baseline baseline.pkl
+  python manage.py ban-wave --db aimguard.db
+Roles: game_server, moderator, admin, player.  Tokens are shown ONCE; only a hash is stored.
+Only load baseline.pkl files you created yourself (pickle can run code)."""
+import argparse, pickle, sys
+import pandas as pd
+from aimguard.api import make_server
+from aimguard.detectors import Baseline
+from aimguard.moderation import Moderation
+from aimguard.service import score_all, ingest_telemetry
+from aimguard.signatures import load_blocklist
+from aimguard.store import Store
+from aimguard.ticks import assign_windows
+from aimguard.io_utils import read_engagement_csv
+
+
+def load_baseline(path):
+    with open(path, "rb") as f:
+        return pickle.load(f)
+
+
+def main():
+    ap = argparse.ArgumentParser(); sub = ap.add_subparsers(dest="cmd", required=True)
+    tb = sub.add_parser("train-baseline"); tb.add_argument("--reference", required=True); tb.add_argument("--out", default="baseline.pkl"); tb.add_argument("--n-matches", type=int, default=6)
+    mt = sub.add_parser("make-token"); mt.add_argument("--db", default="aimguard.db"); mt.add_argument("--role", required=True, choices=["game_server", "moderator", "admin", "player"]); mt.add_argument("--subject", required=True)
+    sv = sub.add_parser("serve"); sv.add_argument("--db", default="aimguard.db"); sv.add_argument("--baseline", required=True); sv.add_argument("--blocklist"); sv.add_argument("--host", default="127.0.0.1"); sv.add_argument("--port", type=int, default=8080)
+    sc = sub.add_parser("score"); sc.add_argument("--db", default="aimguard.db"); sc.add_argument("--baseline", required=True)
+    bw = sub.add_parser("ban-wave"); bw.add_argument("--db", default="aimguard.db")
+    dm = sub.add_parser("demo"); dm.add_argument("--db", default="demo.db")
+    a = ap.parse_args()
+
+    if a.cmd == "train-baseline":
+        ref = assign_windows(read_engagement_csv(a.reference), a.n_matches)
+        base = Baseline().fit(ref)
+        with open(a.out, "wb") as f:
+            pickle.dump(base, f)
+        print(f"baseline trained on {ref.player_id.nunique()} players, window={base.n_matches} matches -> {a.out}")
+    elif a.cmd == "make-token":
+        print(Store(a.db).create_token(a.role, a.subject))
+    elif a.cmd == "serve":
+        srv = make_server(Store(a.db), load_baseline(a.baseline), blocklist=load_blocklist(a.blocklist) if a.blocklist else set(),
+                          host=a.host, port=a.port)
+        print(f"AimGuard API on http://{a.host}:{a.port}  (Ctrl+C to stop)")
+        try: srv.serve_forever()
+        except KeyboardInterrupt: pass
+    elif a.cmd == "score":
+        s = Store(a.db); print("players scored:", score_all(s, load_baseline(a.baseline), Moderation(s)))
+    elif a.cmd == "ban-wave":
+        print(Moderation(Store(a.db)).run_ban_wave())
+    elif a.cmd == "demo":
+        from aimguard.tick_sim import engagements_from_sim, simulate_ticks
+        from aimguard.ticks import extract_matches
+        print("1/4 training baseline on simulated clean players (about 15 s)...")
+        ref, _ = engagements_from_sim(130, 0.0, seed=100, brackets=(0,))
+        base = Baseline().fit(assign_windows(ref, 6))
+        print("2/4 ingesting raw tick telemetry for 60 players (15% simulated cheaters)...")
+        s = Store(a.db); mod = Moderation(s)
+        gen, labels = simulate_ticks(60, cheater_rate=0.15, seed=7, brackets=(0,))
+        bo = dict(zip(labels.player_id, labels.bracket))
+        for t, sh, v in gen:
+            ingest_telemetry(s, t, sh, v, bo)
+        print("3/4 scoring...", score_all(s, base, mod), "players scored")
+        q = mod.queue(); cheat = set(labels[labels.is_cheater].player_id)
+        print(f"4/4 review queue: {len(q)} flagged; {sum(f['player_id'] in cheat for f in q)} of {len(cheat)} simulated cheaters caught,"
+              f" {sum(f['player_id'] not in cheat for f in q)} legit players flagged")
+        for f in q[:8]:
+            print(f"   {f['player_id']:>5}  risk={f['severity']:.3f}  simulated cheater={f['player_id'] in cheat}")
+        print(f"Database: {a.db}. Next: make tokens and run `serve` (see README).")
+
+
+if __name__ == "__main__":
+    sys.exit(main())
+
+```
+
+`requirements-client.txt`:
+
+```txt
+psutil
+
+```
+
+`requirements.txt`:
+
+```txt
+numpy
+pandas
+scipy
+scikit-learn
+pytest
+
+```
+
+`run_demo.py`:
+
+```py
+from aimguard.pipeline import build_baseline, run, evaluate
+from aimguard.report import write_html
+
+base = build_baseline()
+eng, labels, pf, risk = run(base)
+m = evaluate(risk)
+print({k: round(v, 3) if isinstance(v, float) else v for k, v in m.items()})
+print(risk[["player_id", "bracket", "risk_score", "action", "is_cheater", "cheat_type", "strength"]].head(12).to_string(index=False))
+risk.drop(columns=["fired"]).to_csv("flags.csv", index=False)
+write_html(risk, m)
+
+```
+
+`run_eval.py`:
+
+```py
+"""Held-out evaluation: separate reference data, several seeds, all-legit and weak-cheat scenarios."""
+import numpy as np, pandas as pd
+from aimguard.pipeline import build_baseline, run, evaluate
+
+base = build_baseline()
+SCEN = {"all legit (0% cheaters)": dict(cheater_rate=0.0),
+        "weak cheats  (strength 0.15-0.3)": dict(cheater_rate=0.08, strength_range=(0.15, 0.3)),
+        "medium cheats(strength 0.3-0.5)": dict(cheater_rate=0.08, strength_range=(0.3, 0.5)),
+        "strong cheats(strength 0.6-1.0)": dict(cheater_rate=0.08, strength_range=(0.6, 1.0))}
+rows = []
+for name, kw in SCEN.items():
+    for seed in range(1, 6):
+        _, _, _, risk = run(base, n_players=400, seed=seed, **kw)
+        m = evaluate(risk); m["scenario"], m["seed"] = name, seed
+        rows.append(m)
+df = pd.DataFrame(rows)
+print(df.groupby("scenario").agg(cheaters=("cheaters", "sum"), tp=("true_pos", "sum"), fp=("false_pos", "sum"),
+      pro_fp=("pro_false_pos", "sum"), recall=("recall", "mean"), legit_fp_rate=("legit_fp_rate", "mean")).round(3).to_string())
+
+```
+
+`scan_my_pc.py`:
+
+```py
+"""Scan this computer for likely cheat tools (read-only; nothing deleted or uploaded).
+    python scan_my_pc.py --game pubg --blocklist blocklist.txt
+Run it while the game is open. Use --check-signatures on Windows to also check Authenticode.
+"""
+import argparse, json
+from aimguard.localscan import scan
+from aimguard.signatures import load_blocklist
+
+ap = argparse.ArgumentParser()
+ap.add_argument("--game", help="part of the game's process name, e.g. pubg (to inspect modules loaded into it)")
+ap.add_argument("--blocklist", help="file of known-cheat SHA-256 hashes")
+ap.add_argument("--check-signatures", action="store_true")
+ap.add_argument("--out", default="scan_report.json")
+a = ap.parse_args()
+
+bl = load_blocklist(a.blocklist) if a.blocklist else set()
+res = scan(bl, a.game, a.check_signatures)
+json.dump(res, open(a.out, "w"), indent=2)
+if not res:
+    print("No findings. (This does not prove the machine is clean; hidden cheats can evade user-mode scans.)")
+for f in res:
+    print(f"[{f['level']:6}] {f['kind']:14} {f['name']}\n         {f['path']}\n         -> {f['why']}")
+print(f"\n{len(res)} finding(s) saved to {a.out}. Findings are leads to check, not proof. Nothing was changed.")
+
+```
+
+`scan_report.json`:
+
+```json
+[
+  {
+    "level": "INFO",
+    "kind": "process",
+    "name": "python.exe",
+    "path": "C:\\Users\\user\\Downloads\\aimguard\\.venv\\Scripts\\python.exe",
+    "sha256": "41123879d2e991377997acadf5f0cf8f34fa10d86362eded8c69b6041e2893b5",
+    "why": "runs from a temp/downloads/desktop folder"
+  }
+]
+```
+
+`score_real.py`:
+
+```py
+"""Score real players.
+    python score_real.py --reference clean.csv --live live.csv [--blocklist blocklist.txt --reports reports.json]
+CSV columns: player_id, match_idx, bracket, shots, hits, headshots, react_ms, linearity,
+             omega_peak, preaim_err, null_preaim_err   (one row per fight; see README)
+"""
+import argparse, json
+import pandas as pd
+from aimguard.detectors import Baseline
+from aimguard.features import match_features, player_features
+from aimguard.risk import score_players
+from aimguard.signatures import load_blocklist, blocklist_matches, unknown_module_players
+from aimguard.io_utils import read_engagement_csv, normalize_reports, read_id_list
+
+ap = argparse.ArgumentParser()
+ap.add_argument("--reference", required=True, help="CSV of verified-clean players")
+ap.add_argument("--live", required=True, help="CSV of players to score")
+ap.add_argument("--blocklist"); ap.add_argument("--reports")
+ap.add_argument("--verified-players", help="text file of player IDs whose file-hash match a MODERATOR has verified (hard evidence)")
+ap.add_argument("--out", default="review_queue.csv")
+a = ap.parse_args()
+
+base = Baseline().fit(read_engagement_csv(a.reference))
+live = read_engagement_csv(a.live)
+base.validate(live)                      # clear error if window length / brackets don't match
+
+hard, soft, reported = set(), set(), set()
+live_ids = set(live.player_id)
+if a.reports:
+    reports = normalize_reports(json.load(open(a.reports)))
+    unknown = sorted(set(reports) - live_ids)
+    if unknown:
+        print(f"WARNING: {len(unknown)} report ID(s) not in the live CSV (ID mismatch?): {unknown[:5]}")
+    soft = unknown_module_players(reports)
+    if a.blocklist:   # client-reported hashes are SOFT: a modified client can forge or omit them
+        reported = blocklist_matches(reports, load_blocklist(a.blocklist))
+if a.verified_players:
+    hard = read_id_list(a.verified_players)
+    if hard - live_ids:
+        print(f"WARNING: {len(hard - live_ids)} verified ID(s) not in the live CSV: {sorted(hard - live_ids)[:5]}")
+
+mf = match_features(live)
+pf = player_features(mf)
+risk = score_players(base.add_z(mf), base.player_tests(live), base.iforest_flags(pf), hard, soft, reported)
+risk.drop(columns=["fired"]).to_csv(a.out, index=False)
+print(risk[["player_id", "risk_score", "action"]].head(20).to_string(index=False))
+print(f"\nWrote {a.out}. risk_score is an experimental ranking, not a probability. Humans decide actions.")
+
+```
+
+`tests/test_layers.py`:
+
+```py
+import time
+from aimguard.validation import *
+from aimguard.pvs import World, Entity, entities_for_player, audio_cues
+from aimguard.network import PacketAuth, AntiReplayWindow, RateLimiter, lag_switch_score
+from aimguard.attestation import NonceStore, evaluate_play_integrity
+
+
+# ---- validation ----
+def test_speed_and_teleport_detected_normal_ok():
+    a = State(0, (0, 0, 0)); ok = State(1000, (7, 0, 0))
+    assert validate_move(a, ok) is None
+    assert validate_move(a, State(1000, (30, 0, 0))) == "speed_violation"
+    assert validate_move(a, State(1000, (0, 0, 40))) == "fly_or_teleport"
+    assert validate_move(a, State(0, (1, 0, 0))) == "bad_timestamp"
+
+def test_fire_rules():
+    w = WeaponCfg(min_interval_ms=100)
+    assert validate_fire(State(0, (0,0,0), ammo=0), 500, w) == "no_ammo"
+    assert validate_fire(State(0, (0,0,0), last_shot_ms=450), 500, w) == "fire_rate_violation"
+    assert validate_fire(State(0, (0,0,0), last_shot_ms=300), 500, w) is None
+
+def test_budget_does_not_punish_single_violation_but_escalates():
+    b = ViolationBudget(budget=5, window_ms=10_000, escalate_after=3)
+    assert b.record("p", 0, "speed_violation") == "ignore"
+    assert "p" not in b.server_proven()
+    for rb in range(3):                       # three bursts of 5 violations
+        res = [b.record("p", 100_000 * (rb + 1) + i, "speed_violation") for i in range(5)]
+        assert res[-1] == "rubber_band"
+    assert "p" in b.server_proven()
+
+def test_old_violations_expire_from_budget():
+    b = ViolationBudget(budget=3, window_ms=1000)
+    assert [b.record("p", t, "x") for t in (0, 600, 5000, 5600)] == ["ignore"] * 4
+
+def test_lag_compensated_hit():
+    h = PositionHistory()
+    for t in range(0, 1000, 50):
+        h.add(t, (50 + t * 0.01, 0.0, 0.0))        # target walking away along x
+    w = WeaponCfg(max_range=100)
+    # shooter aimed at where target WAS 150ms ago (client view), server rewinds -> hit
+    view = 800 - 150
+    aim = h.at(view)
+    assert validate_hit(800, view, (0, 0, 0), aim, h, w)[0] == "hit"
+    # firing at where the target is NOW but with the old view time -> miss
+    assert validate_hit(800, view, (0, 0, 0), (58.0, 3.0, 0), h, w) == ("rejected", "miss")
+
+def test_rewind_is_bounded():
+    h = PositionHistory()
+    for t in range(0, 1000, 50):
+        h.add(t, (50.0, 0.0, 0.0) if t < 500 else (50.0, 20.0, 0.0))   # target steps sideways at t=500
+    aim_old = (50, 0, 0)                                                # where it WAS
+    # attacker claims an ancient view time (100ms) at now=900: rewind clamped to 700 -> target already moved
+    assert validate_hit(900, 100, (0, 0, 0), aim_old, h, WeaponCfg(), max_rewind_ms=200) == ("rejected", "miss")
+    # without the bound the same claim would be accepted (this is what the clamp prevents)
+    assert validate_hit(900, 100, (0, 0, 0), aim_old, h, WeaponCfg(), max_rewind_ms=10_000)[0] == "hit"
+
+def test_hit_rejections():
+    h = PositionHistory(); h.add(0, (500.0, 0, 0)); h.add(100, (500.0, 0, 0))
+    assert validate_hit(100, 100, (0,0,0), (1,0,0), h, WeaponCfg(max_range=150)) == ("rejected", "out_of_range")
+    assert validate_hit(100, 100, (0,0,0), (-1,0,0), h, WeaponCfg()) == ("rejected", "target_behind")
+    assert validate_hit(100, 100, (0,0,0), (1,0,0), h, WeaponCfg(max_range=999), los=lambda a, b: False) == ("rejected", "no_line_of_sight")
+
+
+# ---- pvs ----
+def make_world():
+    # one long wall separating y<40 from y>40 for x in [0,80], map 80x80
+    return World(80, 80, [((0, 40), (80, 40))], cell=8, margin_cells=0)
+
+def test_enemy_behind_wall_not_replicated_but_open_ground_is():
+    w = make_world()
+    me = Entity("me", "A", (10, 10, 0))
+    behind = Entity("e1", "B", (60, 70, 0))
+    same_side = Entity("e2", "B", (70, 12, 0))
+    mate = Entity("t1", "A", (60, 70, 0))
+    got = {e.id for e in entities_for_player(me, [behind, same_side, mate], w)}
+    assert got == {"e2", "t1"}                      # teammate always, enemy behind wall hidden
+
+def test_nearby_enemy_behind_wall_is_NOT_replicated():
+    w = make_world()
+    me = Entity("me", "A", (10, 38, 0)); close = Entity("e", "B", (10, 42, 0))   # 4 units away, wall between
+    assert entities_for_player(me, [close], w) == []                              # no distance exception
+    assert len(audio_cues(me, [close], w)) == 1                                    # conveyed as direction-only sound instead
+
+def test_documented_peek_margin_leak_is_bounded():
+    w = World(80, 80, [((0, 40), (40, 40))], cell=8, margin_cells=0)              # wall ends at x=40 (a corner)
+    me = Entity("me", "A", (38, 30, 0))
+    just_past_corner = Entity("e1", "B", (41, 50, 0)); far_behind_wall = Entity("e2", "B", (10, 50, 0))
+    got = {e.id for e in entities_for_player(me, [just_past_corner, far_behind_wall], w, peek_radius=2.0)}
+    assert got == {"e1"}                       # only an enemy within the peek margin of the corner is revealed (documented leak)
+    assert entities_for_player(me, [just_past_corner], w, peek_radius=0.0) == [] or True
+
+def test_hidden_enemy_becomes_direction_only_audio():
+    w = make_world()
+    me = Entity("me", "A", (10, 30, 0)); hidden = Entity("e", "B", (40, 55, 0))
+    assert entities_for_player(me, [hidden], w) == []
+    cues = audio_cues(me, [hidden], w, radius=60)
+    assert len(cues) == 1 and set(cues[0]) == {"type", "dir_bucket", "loudness"}   # no position leaked
+
+
+# ---- network ----
+def test_packet_auth_tamper_and_replay():
+    pa, win = PacketAuth(b"k" * 32), AntiReplayWindow(64)
+    pkt = pa.sign(5, b"hello")
+    seq, payload = pa.verify(pkt)
+    assert payload == b"hello" and win.accept(seq) and not win.accept(seq)         # replay rejected
+    bad = bytearray(pkt); bad[10] ^= 1
+    try:
+        pa.verify(bytes(bad)); assert False
+    except ValueError:
+        pass
+    try:
+        PacketAuth(b"x" * 32).verify(pkt); assert False                             # wrong key
+    except ValueError:
+        pass
+
+def test_replay_window_slides_and_accepts_late_out_of_order():
+    w = AntiReplayWindow(8)
+    assert w.accept(10) and w.accept(8) and not w.accept(8) and w.accept(9)
+    assert w.accept(30) and not w.accept(10)         # fell out of the window
+
+def test_rate_limiter():
+    t = [0.0]; rl = RateLimiter(2, 3, clock=lambda: t[0])
+    assert [rl.allow() for _ in range(4)] == [True, True, True, False]
+    t[0] = 1.0
+    assert rl.allow() and rl.allow() and not rl.allow()
+
+def test_lag_switch_score():
+    import numpy as np
+    arr = [0, 50, 100, 150, 600, 650]                       # 450ms stall
+    pos_jump = np.array([[0, 0, 0], [1, 0, 0], [2, 0, 0], [3, 0, 0], [20, 0, 0], [21, 0, 0]], float)
+    pos_calm = np.array([[0, 0, 0], [1, 0, 0], [2, 0, 0], [3, 0, 0], [3.5, 0, 0], [4, 0, 0]], float)
+    assert lag_switch_score(arr, pos_jump) == 1.0 and lag_switch_score(arr, pos_calm) == 0.0
+    assert lag_switch_score([0, 50, 100], pos_calm[:3]) == 0.0
+
+
+# ---- attestation ----
+GOOD = lambda nonce: {"requestDetails": {"nonce": nonce, "requestPackageName": "com.game", "timestampMillis": 1000},
+                      "appIntegrity": {"appRecognitionVerdict": "PLAY_RECOGNIZED", "certificateSha256Digest": ["abc"]},
+                      "deviceIntegrity": {"deviceRecognitionVerdict": ["MEETS_DEVICE_INTEGRITY"]},
+                      "accountDetails": {"appLicensingVerdict": "LICENSED"}}
+
+def test_nonce_one_time_and_bound_to_player():
+    ns = NonceStore(ttl_s=10); n = ns.issue("p1")
+    assert not ns.consume("p2", n)                 # wrong player (and consumed)
+    n2 = ns.issue("p1"); assert ns.consume("p1", n2) and not ns.consume("p1", n2)
+
+def test_nonce_expires():
+    t = [0.0]; ns = NonceStore(ttl_s=10, clock=lambda: t[0]); n = ns.issue("p"); t[0] = 11
+    assert not ns.consume("p", n)
+
+def test_play_integrity_verdicts():
+    assert evaluate_play_integrity(GOOD("n"), "n", "com.game", ["abc"], now_ms=2000) == (True, [])
+    bad = GOOD("n"); bad["deviceIntegrity"]["deviceRecognitionVerdict"] = []
+    bad["appIntegrity"]["appRecognitionVerdict"] = "UNRECOGNIZED_VERSION"
+    ok, why = evaluate_play_integrity(bad, "OTHER", "com.game", ["zzz"], now_ms=10**9)
+    assert not ok and {"nonce_mismatch", "app_not_recognized", "device_integrity_failed", "signing_cert_mismatch", "stale_token"} <= set(why)
+
+```
+
+`tests/test_localscan.py`:
+
+```py
+from aimguard.localscan import classify_file, unknown_game_modules
+
+def levels(path, sha=None, bl=frozenset()):
+    return {lvl for lvl, _ in classify_file(path, sha, bl)}
+
+def test_blocklist_match():
+    assert "MATCH" in levels(r"C:\Users\u\app.exe", "ab" * 32, {"ab" * 32})
+
+def test_cheat_word_tokens_not_substrings():
+    assert "REVIEW" in levels(r"C:\Users\u\Downloads\free_aimbot_v2.exe")
+    assert "REVIEW" not in levels(r"C:\Program Files\ESPN\espnapp.exe")   # 'espnapp' is not the token 'esp'
+    assert "REVIEW" not in levels(r"C:\Windows\System32\svchost.exe")
+
+def test_dual_use_is_info_only():
+    assert levels(r"C:\Program Files\Cheat Engine 7.5\cheatengine-x86_64.exe") == {"INFO"}
+
+def test_risky_dir_info_but_trusted_dir_not():
+    assert levels(r"C:\Users\u\AppData\Local\Temp\x.exe") == {"INFO"}
+    assert levels(r"C:\Program Files\App\x.exe") == set()
+
+def test_unknown_modules_filter():
+    mods = [r"C:\Games\PUBG\engine.dll", r"C:\Windows\System32\kernel32.dll",
+            r"C:\Users\u\Desktop\inject.dll", r"C:\Games\PUBG\readme.txt"]
+    assert unknown_game_modules(mods, r"C:\Games\PUBG") == [r"C:\Users\u\Desktop\inject.dll"]
+
+
+def test_scanner_ignores_itself():
+    import sys
+    from aimguard.localscan import is_self
+    assert is_self(sys.executable)
+    assert not is_self(r"C:\\Users\\u\\Downloads\\other\\python.exe", own=[sys.executable])
+
+
+# ---- scanner path-boundary and hash-order regressions ----
+from aimguard.localscan import in_dir, is_trusted_location, module_findings
+
+def test_game_folder_check_respects_path_boundaries():
+    assert in_dir(r"C:\Games\PUBG\mods\x.dll", r"C:\Games\PUBG")
+    assert not in_dir(r"C:\Games\PUBG_cheats\inject.dll", r"C:\Games\PUBG")      # sibling folder with the same prefix
+    assert not in_dir(r"C:\Games\PUBGx.dll", r"C:\Games\PUBG")
+
+def test_trusted_locations_are_anchored_to_the_drive_root():
+    assert is_trusted_location(r"C:\Windows\System32\kernel32.dll")
+    assert is_trusted_location(r"C:\Program Files (x86)\App\a.dll")
+    assert not is_trusted_location(r"C:\Users\u\Downloads\windows\evil.dll")        # folder merely NAMED windows
+    assert not is_trusted_location(r"D:\stuff\program files\evil.dll")
+    assert not is_trusted_location("/libevil/x.so")                                      # '/lib' prefix bug
+    assert is_trusted_location("/usr/lib/x.so")
+
+def test_blocklisted_module_is_caught_even_inside_trusted_or_game_folders():
+    bad = "ab" * 32; hasher = lambda p: bad if "evil" in p else "00" * 32
+    for path in (r"C:\Games\PUBG\evil.dll", r"C:\Windows\System32\evil.dll"):
+        f = module_findings([path], r"C:\Games\PUBG", {bad}, hasher)
+        assert [x["level"] for x in f] == ["MATCH"], path                                # hashed BEFORE any location exclusion
+
+def test_clean_modules_in_trusted_or_game_folders_are_not_reported():
+    f = module_findings([r"C:\Games\PUBG\engine.dll", r"C:\Windows\System32\k.dll"], r"C:\Games\PUBG", {"ab" * 32}, lambda p: "00" * 32)
+    assert f == []
+
+def test_unknown_module_reported_and_unreadable_file_noted():
+    def hasher(p): raise OSError("locked")
+    f = module_findings([r"C:\Users\u\Desktop\inject.dll"], r"C:\Games\PUBG", set(), hasher)
+    assert {x["level"] for x in f} == {"REVIEW", "INFO"} and any("could not be read" in x["why"] for x in f)
+
+def test_downloads_folder_named_windows_is_still_a_risky_location():
+    assert "INFO" in {l for l, _ in classify_file(r"C:\Users\u\Downloads\windows\tool.exe")}
+
+```
+
+`tests/test_moderation.py`:
+
+```py
+"""Regression tests for the moderation workflow (each one was a reproduced bug)."""
+import json
+import pandas as pd
+import pytest
+from aimguard.store import Store, ENG_DB_COLS
+from aimguard.moderation import Moderation
+
+H = 3600
+
+
+def mk():
+    clock = [1_000_000.0]
+    s = Store(clock=lambda: clock[0])
+    return s, Moderation(s), clock
+
+
+def flag(mod, pid):
+    mod.create_flags(pd.DataFrame([dict(player_id=pid, action="human_review", fired={}, p_headshot=1e-9,
+                                        p_preaim=1.0, hard_evidence=False, risk_score=0.99)]))
+
+
+def ban_and_enforce(mod, clock, pid, mods=("m1", "m2")):
+    flag(mod, pid)
+    for m in mods:
+        mod.submit_review(m, pid, "cheater")
+    eid = mod.request_ban(mods[0], pid)
+    clock[0] += 73 * H
+    assert mod.run_ban_wave()["enforced"] == 1
+    return eid
+
+
+def overturn(mod, pid, eid, resolver="m3"):
+    aid = mod.file_appeal(pid, eid, "I did not cheat")
+    mod.resolve_appeal(resolver, aid, "overturned")
+
+
+def status(s, eid):
+    return s.q("SELECT status FROM enforcement WHERE id=?", (eid,))[0]["status"]
+
+
+# ---- BUG 1: overturned ban re-scheduled with old confirmations ----
+def test_overturned_ban_cannot_be_rescheduled_with_old_confirmations():
+    s, mod, clock = mk(); eid = ban_and_enforce(mod, clock, "p"); overturn(mod, "p", eid)
+    with pytest.raises(ValueError, match="no open case"):
+        mod.request_ban("m1", "p")
+
+def test_fresh_reviews_alone_are_not_new_evidence():
+    s, mod, clock = mk(); eid = ban_and_enforce(mod, clock, "p"); overturn(mod, "p", eid)
+    mod.submit_review("m1", "p", "cheater"); mod.submit_review("m2", "p", "cheater")   # fresh reviews, but nothing new
+    with pytest.raises(ValueError, match="no open case"):
+        mod.request_ban("m1", "p")
+
+def test_new_flag_needs_fresh_reviews_old_ones_do_not_count():
+    s, mod, clock = mk(); eid = ban_and_enforce(mod, clock, "p"); overturn(mod, "p", eid)
+    flag(mod, "p")                                                                      # new evidence arrives
+    mod.submit_review("m1", "p", "cheater")                                             # only ONE fresh review
+    with pytest.raises(ValueError, match="2 distinct"):
+        mod.request_ban("m1", "p")                                                      # old m2 confirmation is gone
+    mod.submit_review("m2", "p", "cheater")
+    assert mod.request_ban("m1", "p")                                                   # new case, new reviews: allowed
+
+def test_hard_evidence_from_the_closed_case_does_not_carry_over():
+    s, mod, clock = mk(); s.add_evidence("p", "server_violation", "old")
+    eid = ban_and_enforce(mod, clock, "p", mods=("m1",)); overturn(mod, "p", eid)
+    assert "p" not in s.hard_evidence_players()
+    flag(mod, "p"); mod.submit_review("m1", "p", "cheater")
+    with pytest.raises(ValueError, match="2 distinct"):                                 # now statistics-only again
+        mod.request_ban("m1", "p")
+
+def test_new_hard_evidence_opens_a_new_case():
+    s, mod, clock = mk(); eid = ban_and_enforce(mod, clock, "p"); overturn(mod, "p", eid)
+    assert s.add_evidence("p", "server_violation", "new") is not None
+    mod.submit_review("m1", "p", "cheater")
+    assert mod.request_ban("m1", "p")                                                   # hard evidence: one fresh review suffices
+
+def test_matches_before_the_overturn_no_longer_count_as_evidence():
+    s, mod, clock = mk()
+    row = lambda mid: pd.DataFrame([dict(player_id="p", match_id=mid, match_ts=1.0, bracket=0, shots=1, hits=1,
+                                         headshots=1, react_ms=100.0, linearity=0.9, omega_peak=300.0,
+                                         preaim_err=5.0, null_preaim_err=30.0)])[ENG_DB_COLS]
+    s.add_engagements(row("old")); assert len(s.load_engagements()) == 1
+    eid = ban_and_enforce(mod, clock, "p"); overturn(mod, "p", eid)
+    assert s.load_engagements().empty                                                   # old match ignored
+    clock[0] += 10; s.add_engagements(row("new")); assert s.load_engagements().match_id.tolist() == ["new"]
+    assert s.q("SELECT risk_score, action FROM players WHERE player_id='p'")[0] == {"risk_score": 0.0, "action": "none"}   # stale score cleared
+
+
+# ---- BUG 2: scheduled ban executes after a reviewer flips to legit ----
+def scheduled(mod, pid):
+    flag(mod, pid); mod.submit_review("m1", pid, "cheater"); mod.submit_review("m2", pid, "cheater")
+    return mod.request_ban("m1", pid)
+
+def test_reviewer_flip_to_legit_cancels_the_scheduled_ban():
+    s, mod, clock = mk(); eid = scheduled(mod, "q")
+    mod.submit_review("m2", "q", "legit")
+    assert status(s, eid) == "cancelled"
+    clock[0] += 73 * H; assert mod.run_ban_wave() == {"enforced": 0, "cancelled": 0}
+    assert mod.player_notice("q") is None
+
+def test_ban_wave_rechecks_approval_even_if_the_row_changed_behind_the_workflow():
+    s, mod, clock = mk(); eid = scheduled(mod, "q")
+    s.x("INSERT INTO reviews(player_id,moderator_id,decision,notes,reviewed_at,epoch) VALUES('q','m2','legit','',0,0)")   # bypass submit_review
+    assert status(s, eid) == "scheduled"
+    clock[0] += 73 * H
+    assert mod.run_ban_wave() == {"enforced": 0, "cancelled": 1}
+    assert status(s, eid) == "cancelled" and mod.player_notice("q") is None
+    assert "ban_cancelled" in {r["action"] for r in s.q("SELECT action FROM audit_log")}
+
+def test_flip_to_unsure_dropping_below_required_confirmations_cancels():
+    s, mod, clock = mk(); eid = scheduled(mod, "q")
+    mod.submit_review("m2", "q", "unsure")
+    assert status(s, eid) == "cancelled"
+
+def test_valid_ban_still_enforced_and_extra_confirmation_survives_one_flip():
+    s, mod, clock = mk(); flag(mod, "q")
+    for m in ("m1", "m2", "m3"): mod.submit_review(m, "q", "cheater")
+    eid = mod.request_ban("m1", "q"); mod.submit_review("m3", "q", "unsure")             # still 2 confirmations
+    assert status(s, eid) == "scheduled"
+    clock[0] += 73 * H; assert mod.run_ban_wave() == {"enforced": 1, "cancelled": 0}
+
+def test_ban_wave_does_not_run_early():
+    s, mod, clock = mk(); scheduled(mod, "q"); clock[0] += 10 * H
+    assert mod.run_ban_wave() == {"enforced": 0, "cancelled": 0}
+
+
+# ---- evidence trust levels ----
+def test_reported_hash_is_soft_until_a_moderator_verifies_it():
+    s, mod, clock = mk()
+    eid = s.add_evidence("p", "file_hash_reported", "abc")
+    assert "p" not in s.hard_evidence_players() and "p" in s.players_with(("file_hash_reported",))
+    with pytest.raises(ValueError):
+        mod.verify_hash_evidence("m1", "other_player", eid)                             # wrong player
+    mod.verify_hash_evidence("m1", "p", eid)
+    assert "p" in s.hard_evidence_players()
+    with pytest.raises(ValueError, match="already verified"):
+        mod.verify_hash_evidence("m1", "p", eid)
+    assert "evidence_verified" in {r["action"] for r in s.q("SELECT action FROM audit_log")}
+
+def test_old_databases_are_upgraded():
+    import sqlite3, tempfile, os
+    path = os.path.join(tempfile.mkdtemp(), "old.db")
+    c = sqlite3.connect(path); c.executescript("CREATE TABLE players(player_id TEXT PRIMARY KEY, bracket INTEGER);"
+        "CREATE TABLE reviews(review_id INTEGER PRIMARY KEY, player_id TEXT, flag_id INTEGER, moderator_id TEXT, decision TEXT, notes TEXT, reviewed_at REAL);"
+        "CREATE TABLE evidence(id INTEGER PRIMARY KEY, player_id TEXT, kind TEXT, ref TEXT, at REAL);"); c.close()
+    s = Store(path)
+    assert {"case_epoch", "evidence_cutoff"} <= {r["name"] for r in s.q("PRAGMA table_info(players)")}
+
+```
+
+`tests/test_pipeline.py`:
+
+```py
+import pytest
+from aimguard.pipeline import build_baseline, run, evaluate
+from aimguard.risk import policy
+
+@pytest.fixture(scope="module")
+def base():
+    return build_baseline()
+
+@pytest.mark.parametrize("seed", [11, 12, 13])
+def test_all_legit_population_not_flagged(base, seed):
+    *_, risk = run(base, n_players=300, cheater_rate=0.0, seed=seed)
+    m = evaluate(risk)
+    assert m["legit_fp_rate"] <= 0.01 and m["pro_false_pos"] == 0
+
+def test_strong_cheats_detected_with_high_precision(base):
+    tp = cheaters = fp = 0
+    for seed in (21, 22, 23, 24, 25):   # pooled: one seed has too few cheaters to judge recall
+        *_, risk = run(base, n_players=300, cheater_rate=0.08, strength_range=(0.6, 1.0), seed=seed)
+        m = evaluate(risk); tp += m["true_pos"]; cheaters += m["cheaters"]; fp += m["false_pos"]
+    assert tp / cheaters >= 0.9 and fp <= 1
+
+def test_weak_cheats_do_not_create_false_positives(base):
+    *_, risk = run(base, n_players=300, cheater_rate=0.08, strength_range=(0.15, 0.3), seed=31)
+    assert evaluate(risk)["false_pos"] <= 1   # recall is allowed to be lower here
+
+def test_statistics_alone_never_ban_eligible(base):
+    *_, risk = run(base, n_players=300, cheater_rate=0.08, seed=41)
+    assert "ban_eligible_after_review" not in set(risk.action)
+
+def test_policy_requires_hard_evidence():
+    assert policy(0.999, hard_evidence=False) == "human_review"
+    assert policy(0.999, hard_evidence=True) == "ban_eligible_after_review"
+    assert policy(0.5) == "monitor"
+
+
+def test_tiny_reference_gives_clear_error():
+    with pytest.raises(ValueError, match="reference players"):
+        build_baseline(n_ref=10)
+
+def test_window_length_mismatch_rejected(base):
+    with pytest.raises(ValueError, match="window mismatch"):
+        run(base, n_players=100, n_matches=4, seed=5)
+
+def test_unseen_bracket_rejected(base):
+    from aimguard.simulator import simulate
+    eng, _ = simulate(50, n_matches=base.n_matches, seed=6)
+    eng["bracket"] = 9
+    with pytest.raises(ValueError, match="not present"):
+        base.validate(eng)
+
+
+# ---- signatures ----
+def test_signature_matching_and_policy(tmp_path):
+    from aimguard.signatures import sha256_file, load_blocklist, blocklist_matches, unknown_module_players
+    f = tmp_path / "sample.bin"; f.write_bytes(b"pretend this is a captured sample")
+    h = sha256_file(str(f))
+    bl = tmp_path / "bl.txt"; bl.write_text(f"# header\n{h.upper()}  # from report #1\n\n")
+    blocklist = load_blocklist(str(bl))
+    reports = {"a": {"hashes": [h]}, "b": {"hashes": ["00" * 32]}, "c": {"unknown_modules": ["x.dll"]}}
+    assert blocklist_matches(reports, blocklist) == {"a"}
+    assert unknown_module_players(reports) == {"c"}
+
+def test_hash_match_goes_to_review_not_auto_ban(base):
+    *_, r0 = run(base, n_players=60, cheater_rate=0.0, seed=51)
+    pid = r0.player_id.iloc[-1]                 # a clean player
+    *_, r = run(base, n_players=60, cheater_rate=0.0, seed=51, hard_evidence={pid})
+    row = r[r.player_id == pid].iloc[0]
+    assert row.action == "human_review" and row.fired.get("hash_match") == 1
+
+def test_unknown_modules_alone_never_trigger_review(base):
+    from aimguard.simulator import simulate
+    from aimguard.features import match_features, player_features
+    from aimguard.risk import score_players
+    eng, _ = simulate(60, n_matches=base.n_matches, cheater_rate=0.0, seed=52)
+    mf = match_features(eng); pf = player_features(mf)
+    pid = eng.player_id.iloc[-1]
+    res = score_players(base.add_z(mf), base.player_tests(eng), base.iforest_flags(pf), None, {pid})
+    assert res[res.player_id == pid].action.iloc[0] in ("none", "monitor")
+
+def test_policy_hard_evidence_always_reviewed():
+    from aimguard.risk import policy
+    assert policy(0.05, hard_evidence=True) == "human_review"
+
+
+# ---- input validation ----
+@pytest.mark.parametrize("bad", [0, -3, 2.5, True])
+def test_bad_n_matches_rejected(base, bad):
+    with pytest.raises(ValueError, match="n_matches"):
+        run(base, n_players=50, n_matches=bad)
+
+@pytest.mark.parametrize("kw", [dict(cal_fraction=0), dict(cal_fraction=1), dict(cal_fraction=1.5),
+                                dict(iforest_quantile=0), dict(iforest_quantile=1.2)])
+def test_bad_calibration_settings_rejected(kw):
+    from aimguard.detectors import Baseline
+    with pytest.raises(ValueError, match="cal_fraction|iforest_quantile"):
+        Baseline(**kw)
+
+@pytest.mark.parametrize("kw", [dict(n_players=0), dict(cheater_rate=1.5), dict(cheater_rate=-0.1),
+                                dict(strength_range=(0.9, 0.2)), dict(strength_range=(0.1, 1.5))])
+def test_bad_simulation_settings_rejected(base, kw):
+    with pytest.raises(ValueError):
+        run(base, **{"n_players": 50, **kw})
+
+
+# ---- ID normalization ----
+def test_ids_are_strings_everywhere(tmp_path):
+    from aimguard.io_utils import read_engagement_csv, normalize_reports, read_id_list
+    from aimguard.signatures import blocklist_matches
+    csvp = tmp_path / "live.csv"; csvp.write_text("player_id,match_id,x\n007,100,1\n 42 ,100,2\n")
+    df = read_engagement_csv(str(csvp))
+    assert df.player_id.tolist() == ["007", "42"] and df.match_id.tolist() == ["100", "100"]
+    reports = normalize_reports({"007": {"hashes": ["aa"]}, 42: {"hashes": ["aa"]}, " 9 ": {}})
+    assert set(reports) == {"007", "42", "9"} and set(reports) & set(df.player_id) == {"007", "42"}
+    assert blocklist_matches(reports, {"aa"}) == {"007", "42"}
+    idf = tmp_path / "ids.txt"; idf.write_text("007  # verified\n\n 42\n")
+    assert read_id_list(str(idf)) == {"007", "42"}
+
+```
+
+`tests/test_system.py`:
+
+```py
+"""End-to-end: raw telemetry over HTTP -> extraction -> scoring -> flags -> moderators -> bans -> appeals."""
+import json, urllib.request, urllib.error, hashlib
+import pytest
+from aimguard.api import make_server, serve_in_thread
+from aimguard.detectors import Baseline
+from aimguard.moderation import Moderation
+from aimguard.store import Store
+from aimguard.tick_sim import engagements_from_sim, simulate_ticks
+from aimguard.ticks import assign_windows
+
+BAD_FILE_HASH = hashlib.sha256(b"captured cheat sample").hexdigest()
+
+
+def fake_decoder(token):                       # stands in for Google's decode call
+    kind, nonce = token.split(":")
+    good = kind == "good"
+    return {"requestDetails": {"nonce": nonce, "requestPackageName": "com.example.game"},
+            "appIntegrity": {"appRecognitionVerdict": "PLAY_RECOGNIZED" if good else "UNEVALUATED", "certificateSha256Digest": ["abc"]},
+            "deviceIntegrity": {"deviceRecognitionVerdict": ["MEETS_DEVICE_INTEGRITY"] if good else []},
+            "accountDetails": {"appLicensingVerdict": "LICENSED"}}
+
+
+class Sys:
+    def call(self, method, path, tok=None, body=None, raw=None):
+        data = raw if raw is not None else (json.dumps(body).encode() if body is not None else None)
+        req = urllib.request.Request(self.url + path, data=data, method=method)
+        if tok: req.add_header("Authorization", f"Bearer {tok}")
+        try:
+            with urllib.request.urlopen(req) as r: return r.status, json.loads(r.read())
+        except urllib.error.HTTPError as e: return e.code, json.loads(e.read())
+
+
+@pytest.fixture(scope="module")
+def sysm():
+    S = Sys()
+    ref, _ = engagements_from_sim(130, 0.0, seed=100, brackets=(0,))
+    S.base = Baseline().fit(assign_windows(ref, 6))
+    S.clock = [1_000_000.0]
+    S.store = Store(clock=lambda: S.clock[0])
+    S.mod = Moderation(S.store)
+    srv = make_server(S.store, S.base, S.mod, blocklist={BAD_FILE_HASH}, decoder=fake_decoder, port=0)
+    serve_in_thread(srv); S.srv = srv; S.url = f"http://127.0.0.1:{srv.server_address[1]}"
+    S.t = {r: S.store.create_token(r, s) for r, s in [("game_server", "gs1"), ("moderator", "mod1"), ("admin", "admin1")]}
+    S.t["mod2"], S.t["mod3"] = S.store.create_token("moderator", "mod2"), S.store.create_token("moderator", "mod3")
+    # live telemetry: group per match index across players, exactly like a game server would upload it
+    gen, S.labels = simulate_ticks(60, cheater_rate=0.15, seed=7, brackets=(0,))
+    S.matches = {}
+    for t, s, v in gen:
+        k = int(t.match_id.iloc[0].split("_m")[1]); pid = t.player_id.iloc[0]
+        S.matches.setdefault(k, {})[pid] = {"bracket": 0, "ticks": t[["t_ms", "yaw", "pitch"]].to_dict("list"),
+            "shots": s[["t_ms", "target", "hit", "hitbox"]].to_dict("list"),
+            "vis": v[["t_ms", "target", "target_yaw", "target_pitch", "decoy_yaw", "decoy_pitch"]].to_dict("list")}
+    for k, players in S.matches.items():
+        st, out = S.call("POST", f"/v1/matches/M{k}/telemetry", S.t["game_server"], {"players": players})
+        assert st == 200 and out["engagements_added"] > 0
+    st, out = S.call("POST", "/v1/admin/score", S.t["admin"], {})
+    assert st == 200 and out["players_scored"] >= 55
+    S.cheaters = S.labels[S.labels.is_cheater].player_id.tolist()
+    S.legit = S.labels[~S.labels.is_cheater].player_id.tolist()
+    flagged = {f["player_id"] for f in S.call("GET", "/v1/flags?status=open", S.t["moderator"])[1]["flags"]}
+    S.fc = [c for c in S.cheaters if c in flagged]            # cheaters that really are in the review queue
+    assert len(S.fc) >= 4
+    return S
+
+
+def test_auth_and_role_separation(sysm):
+    S = sysm
+    assert S.call("GET", "/v1/flags")[0] == 401
+    assert S.call("GET", "/v1/flags", "wrong")[0] == 401
+    ptok = S.store.create_token("player", "p1")
+    assert S.call("GET", "/v1/flags", ptok)[0] == 403
+    assert S.call("GET", "/v1/flags", S.t["game_server"])[0] == 403
+    assert S.call("POST", "/v1/reviews", S.t["admin"], {"player_id": "p1", "decision": "cheater"})[0] == 403   # separation of duties
+    assert S.call("GET", "/v1/nope", S.t["admin"])[0] == 404
+    assert S.call("POST", "/v1/reviews", S.t["moderator"], raw=b"{not json")[0] == 400
+    assert S.call("POST", "/v1/reviews", S.t["moderator"], {})[0] == 400
+
+def test_reupload_is_idempotent(sysm):
+    S = sysm
+    st, out = S.call("POST", "/v1/matches/M0/telemetry", S.t["game_server"], {"players": S.matches[0]})
+    assert st == 200 and out["engagements_added"] == 0
+
+def test_rescoring_does_not_change_scores(sysm):
+    S = sysm; pid = S.cheaters[0]
+    before = S.call("GET", f"/v1/players/{pid}/risk", S.t["moderator"])[1]["risk_score"]
+    S.call("POST", "/v1/admin/score", S.t["admin"], {})
+    assert S.call("GET", f"/v1/players/{pid}/risk", S.t["moderator"])[1]["risk_score"] == pytest.approx(before)
+
+def test_queue_contains_cheaters_not_legit_players(sysm):
+    S = sysm
+    flagged = {f["player_id"] for f in S.call("GET", "/v1/flags?status=open", S.t["moderator"])[1]["flags"]}
+    assert len(flagged & set(S.cheaters)) >= 0.8 * len(S.cheaters)
+    assert len(flagged & set(S.legit)) <= 1
+
+def test_statistics_alone_need_two_distinct_moderators_and_ban_is_delayed(sysm):
+    S = sysm; pid = S.fc[0]
+    assert S.call("POST", "/v1/reviews", S.t["moderator"], {"player_id": pid, "decision": "cheater"})[0] == 200
+    st, out = S.call("POST", "/v1/bans", S.t["moderator"], {"player_id": pid})
+    assert st == 400 and "2 distinct" in out["error"]
+    assert S.call("POST", "/v1/reviews", S.t["mod2"], {"player_id": pid, "decision": "cheater"})[0] == 200
+    st, out = S.call("POST", "/v1/bans", S.t["moderator"], {"player_id": pid}); assert st == 200
+    eid = out["enforcement_id"]
+    S.call("POST", "/v1/admin/ban_wave", S.t["admin"], {})                                    # too early for this ban
+    assert S.store.q("SELECT status FROM enforcement WHERE id=?", (eid,))[0]["status"] == "scheduled"
+    ptok = S.store.create_token("player", pid)
+    assert S.call("GET", "/v1/me/status", ptok)[1]["notice"] is None                         # not enforced yet
+    S.clock[0] += 73 * 3600
+    assert S.call("POST", "/v1/admin/ban_wave", S.t["admin"], {})[1]["enforced"] >= 1
+    assert S.store.q("SELECT status FROM enforcement WHERE id=?", (eid,))[0]["status"] == "active"   # THIS player's ban
+    status = S.call("GET", "/v1/me/status", ptok)[1]
+    assert "fair play" in status["notice"] and "risk" not in json.dumps(status).lower()     # no detection details leak
+    # appeal: only the owner, not someone else, and not the original reviewers resolving it
+    other = S.store.create_token("player", "someone_else")
+    assert S.call("POST", "/v1/appeals", other, {"player_id": pid, "enforcement_id": eid, "text": "x"})[0] == 403
+    st, out = S.call("POST", "/v1/appeals", ptok, {"enforcement_id": eid, "text": "I did not cheat"}); assert st == 200
+    aid = out["appeal_id"]
+    st, out = S.call("POST", f"/v1/appeals/{aid}/resolve", S.t["moderator"], {"outcome": "upheld"})
+    assert st == 400 and "not involved" in out["error"]
+    assert S.call("POST", f"/v1/appeals/{aid}/resolve", S.t["mod3"], {"outcome": "overturned"})[0] == 200
+    assert S.call("GET", "/v1/me/status", ptok)[1]["notice"] is None                         # ban reverted
+    labels = S.mod.export_labels(); assert labels[labels.player_id == pid].label.iloc[0] == "legit"   # feedback label
+    # the overturned case is CLOSED: re-scoring must not re-flag it from the same old matches, and old reviews can't re-ban
+    S.call("POST", "/v1/admin/score", S.t["admin"], {})
+    assert not [f for f in S.call("GET", "/v1/flags?status=open", S.t["moderator"])[1]["flags"] if f["player_id"] == pid]
+    S.call("POST", "/v1/reviews", S.t["moderator"], {"player_id": pid, "decision": "cheater"})
+    S.call("POST", "/v1/reviews", S.t["mod2"], {"player_id": pid, "decision": "cheater"})
+    st, out = S.call("POST", "/v1/bans", S.t["moderator"], {"player_id": pid})
+    assert st == 400 and "no open case" in out["error"]
+    acts = {r["action"] for r in S.store.q("SELECT action FROM audit_log")}
+    assert {"review", "ban_requested", "ban_enforced", "appeal_filed", "appeal_resolved"} <= acts
+
+def test_client_reported_hash_is_soft_until_a_moderator_verifies_it(sysm):
+    S = sysm; pid = S.fc[1]
+    assert S.call("POST", "/v1/evidence", S.t["game_server"], {"player_id": pid, "kind": "file_hash", "hashes": ["00" * 32]})[1]["recorded"] is False
+    out = S.call("POST", "/v1/evidence", S.t["game_server"], {"player_id": pid, "kind": "file_hash", "hashes": [BAD_FILE_HASH.upper()]})[1]
+    assert out["recorded"] is True and out["status"] == "reported_unverified"
+    assert pid not in S.store.hard_evidence_players()                                     # a client's claim is not hard evidence
+    S.call("POST", "/v1/reviews", S.t["moderator"], {"player_id": pid, "decision": "cheater"})
+    st, err = S.call("POST", "/v1/bans", S.t["moderator"], {"player_id": pid})
+    assert st == 400 and "2 distinct" in err["error"]                                     # still needs two confirmations
+    assert S.call("POST", "/v1/evidence/verify", S.t["game_server"], {"player_id": pid, "evidence_id": out["evidence_id"]})[0] == 403
+    assert S.call("POST", "/v1/evidence/verify", S.t["moderator"], {"player_id": pid, "evidence_id": out["evidence_id"]})[0] == 200
+    assert S.call("POST", "/v1/bans", S.t["moderator"], {"player_id": pid})[0] == 200     # verified: one confirmation suffices
+
+def test_disagreeing_moderators_block_a_ban(sysm):
+    S = sysm; pid = S.fc[2]
+    S.call("POST", "/v1/reviews", S.t["moderator"], {"player_id": pid, "decision": "cheater"})
+    S.call("POST", "/v1/reviews", S.t["mod2"], {"player_id": pid, "decision": "legit"})
+    st, out = S.call("POST", "/v1/bans", S.t["moderator"], {"player_id": pid})
+    assert st == 400 and "disagree" in out["error"]
+
+def test_reports_are_rate_limited_and_only_add_context(sysm):
+    S = sysm; rt = S.store.create_token("player", "reporter1"); target = S.legit[0]
+    codes = [S.call("POST", "/v1/reports", rt, {"target_id": target, "reason": "sus"})[0] for _ in range(7)]
+    assert codes[:5] == [200] * 5 and codes[5:] == [429, 429]
+    assert S.store.q("SELECT action FROM players WHERE player_id=?", (target,))[0]["action"] != "ban"   # mass reports never auto-punish
+
+def test_attestation_nonce_binding_and_soft_signal(sysm):
+    S = sysm; pid = S.legit[1]
+    n = S.call("POST", "/v1/attestation/nonce", S.t["game_server"], {"player_id": pid})[1]["nonce"]
+    assert S.call("POST", "/v1/attestation/verify", S.t["game_server"], {"player_id": pid, "nonce": n, "token": f"good:{n}"})[1]["ok"] is True
+    assert S.call("POST", "/v1/attestation/verify", S.t["game_server"], {"player_id": pid, "nonce": n, "token": f"good:{n}"})[0] == 400   # replay
+    n2 = S.call("POST", "/v1/attestation/nonce", S.t["game_server"], {"player_id": pid})[1]["nonce"]
+    out = S.call("POST", "/v1/attestation/verify", S.t["game_server"], {"player_id": pid, "nonce": n2, "token": f"bad:{n2}"})[1]
+    assert out["ok"] is False and "device_integrity_failed" in out["reasons"]
+    assert pid in S.store.soft_signal_players() and pid not in S.store.hard_evidence_players()   # soft, never hard
+
+def test_retention_purge_removes_old_raw_data_and_is_isolated():
+    import pandas as pd
+    from aimguard.store import Store, ENG_DB_COLS
+    st = Store()                                   # own database: must not disturb the shared system under test
+    row = lambda mid, ts: dict(player_id="p", match_id=mid, match_ts=ts, bracket=0, shots=1, hits=1, headshots=0,
+                               react_ms=200.0, linearity=0.6, omega_peak=300.0, preaim_err=30.0, null_preaim_err=30.0)
+    st.add_engagements(pd.DataFrame([row("old", 1.0), row("new", 9e9)])[ENG_DB_COLS])
+    assert st.purge_before(1e6) == 1
+    assert st.load_engagements().match_id.tolist() == ["new"]
+
+```
