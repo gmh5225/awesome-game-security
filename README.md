@@ -1677,6 +1677,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 
 > Android Network Explorer
 - https://github.com/emanuele-f/PCAPdroid
+- https://github.com/DoranekoSystems/ebpf-analyzer [PacketProxy plugin with rooted Android x86_64 eBPF TCP/syscall capture, process attribution, and optional Frida native/Java stacks—no device proxy]
 - https://github.com/damanoreshkan-beep/rtl8852au-userspace [No-root userspace RTL8852AU Wi-Fi driver for Android with libusb monitor mode, channel hopping, and 802.11 frame injection]
 - https://github.com/zhizhuodemao/android_proxy_mcp [Android Proxy MCP — MCP-based HTTP/HTTPS capture & analysis for AI]
 
@@ -5273,6 +5274,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/Genymobile
 - https://github.com/Genymobile/genymotion-kernel
 - https://github.com/anbox/anbox
+- https://github.com/reveny/Android-Compatibility-Layer [Linux translation layer to run ARM64/x86_64 APKs without a VM—host ART for Dex, LLVM AOT/JIT for native, Wayland/Vulkan/GLES]
 - https://github.com/jwmcglynn/android-emulator
 - https://github.com/NKS1608/kiln-android-emulator [Apple Silicon macOS Android 16 emulator (HVF, GLES/Vulkan) with per-instance IMEI/serial/SIM, adb, and per-game key mapping]
 - https://github.com/google/android-emulator-hypervisor-driver
