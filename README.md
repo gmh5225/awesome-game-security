@@ -1059,6 +1059,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/TalhaMudo/NFSU2Recomp [Static recompilation pipeline and runtime lifting Need for Speed: Underground 2 (Win32/x86, D3D9) to native ARM64 macOS with documented RE tooling]
 - https://github.com/elkir0/sc2-android-recomp [StarCraft II static recompilation toolkit (x86-32 to ARM64): per-function difftest oracle, D3D9 shader translation, MPQ tools, pcrecomp closure extensions, and Android porting helpers—method and tooling only, no game assets]
 - https://github.com/gamboozino/ngbrecomp [Static recompilation of Ninja Gaiden Black (Xbox OG) to native Linux/Windows with a custom Vulkan renderer; BYO game assets]
+- https://github.com/Manya3084/SF33RDSXBRecompo [Native x86-64 port of Street Fighter III: 3rd Strike from the original Xbox (3s-decomp-ogxb), with SDL3, Vulkan/OpenGL, and OpenAL—BYO disc, no assets in repo]
 - https://github.com/Coz-0/smo-recomp [Static recompilation of Super Mario Odyssey (Switch 1.4.1) to native Windows x64 with custom runtime and Vulkan renderer; BYO dump, no assets in repo]
 - https://github.com/sosso33/omikron-tns-omk-engine [From-scratch C++20 reimplementation of Omikron: The Nomad Soul (1999) with documented format reverse engineering and evidence-backed asset readers]
 - https://github.com/sergen213/kabus22-linux [Reverse-engineered native Linux Kabus 22 engine with GTK installer/launcher, OpenGL/Vulkan rendering, and RE notes; requires user-supplied original game assets]
