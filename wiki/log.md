@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-22** — ingest `description:Battelle/cantordust`: enriched entity [[cantordust]] (Java Ghidra extension/script + standalone desktop; byte/trigram/metric-map/bitmap visual modes; viz click→CodeBrowser offset; Gradle + Python dev utility; firmware/executable/malware triage); cited on [[concepts/binary-evidence]] visualization-as-hypothesis lane and [[overviews/reverse-engineering]] Ghidra byte-triage Tools cluster; `index.md` entity blurb updated.
+
 - **2026-10-22** — ingest `description:raulzrrs/letsgo-recomp`: enriched entity [[letsgo-recomp]] (LAS Recomp *Pokémon Let's Go* Switch 1.0.0→Windows x64; Python/Zig per-dump lift; Horizon HLE; NVN→Vulkan; FSR; memory watch/profiling/RenderDoc; BYO exefs/romfs); cited on [[concepts/static-runtime-evidence]] Switch static-recomp cluster and [[overviews/reverse-engineering]] Console/QEMU lane; `index.md` entity blurb updated.
 
 - **2026-10-22** — ingest `readme:categories`: **Cheat** link_count **2943** (+2; raulzrrs/[[letsgo-recomp]] Switch *Pokémon Let's Go* LAS Recomp static recomp to Windows + Battelle/[[cantordust]] Ghidra trigram/metric-map binary visualization) / **Anti Cheat** **824** / **Game Develop** **195** / **Game Engine** ~159 / **DirectX** ~42 / **Vulkan** ~13 / **Game Network** ~34 and other major README sections unchanged; 41 top-level sections (`NeverC & NeverD` placeholder); synced [[overviews/overview]], [[overviews/game-hacking]], [[overviews/reverse-engineering]], [[overviews/dma-attack]], and [[concepts/static-runtime-evidence]]; entities [[letsgo-recomp]], [[cantordust]]; light `index.md` section notes (no per-category pages).
