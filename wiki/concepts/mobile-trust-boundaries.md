@@ -5,7 +5,8 @@ topics: [mobile-security, anti-cheat]
 sources:
   - wiki/sources/skills/mobile-security.md
   - wiki/sources/descriptions/regulad__aaoracled.md
-updated: 2026-09-17
+  - wiki/sources/descriptions/reveny__Android-Compatibility-Layer.md
+updated: 2026-10-22
 confidence: high
 ---
 
@@ -46,7 +47,7 @@ Keep **local indicators**, **verified attestation**, **backend decisions**, and 
 - **App Attest (iOS)** — requires server verification of attestations/assertions, including challenge and counter handling; keep development and production context separate. Jailbroken-device oracle tooling such as [[aaoracled]] (OracledDCPatch hooks `devicecheckd` to forge bundle IDs; REST daemon mints attestations for arbitrary App IDs) demonstrates userspace App-ID binding on compromised hardware—not Secure Enclave proof. (source: wiki/sources/descriptions/regulad__aaoracled.md)
 - **Network trust configuration** — for owned-app transport tests, distinguish debug-only trust anchors from release configuration. Android Network Security Configuration defaults change with target SDK; a successful debug capture does not establish release-build trust or pinning behavior. Custom/native TLS stacks need their own contracts and evidence. See [[mobile-network-trust-evidence]].
 
-Include supported emulators, stock devices, developer builds, OS updates, and service/attestation errors as **controls**. Record unavailable evidence separately from a verified negative result.
+Include supported emulators, stock devices, developer builds, OS updates, and service/attestation errors as **controls**. Record unavailable evidence separately from a verified negative result. Linux host APK translation such as [[android-compatibility-layer]] (non-VM Dex on AOSP ART + translated native code; optional seccomp/Landlock namespaces) is a distinct **collection environment** from QEMU emulators or full containerized Android stacks—record whether findings depend on that host-native graphics and translation path. (source: wiki/sources/descriptions/reveny__Android-Compatibility-Layer.md)
 
 ## Privilege and instrumentation limits
 

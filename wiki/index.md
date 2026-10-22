@@ -316,7 +316,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [kernel-xiaomi-sm8250](entities/kernel-xiaomi-sm8250.md) — POCO F3/F4 SM8250 custom Xiaomi Android kernel (AnyKernel3, defconfigs, GitLab CI, GKI ABI; Snapdragon 870/888; cheat / xiaomi kernel for POCO F3/F4)
 
 - [Android-Emulator-Detection](entities/android-emulator-detection.md) — Android Anti-Emulator (gmh5225 Java/Kotlin scoring library; reveny Java/C++ fork; Detection:Virtual Environments)
-- [Android Compatibility Layer](entities/android-compatibility-layer.md) — reveny Linux translation layer for ARM64/x86_64 APKs without a VM; host ART, LLVM AOT/JIT native, Wayland/Vulkan/GLES; seccomp/Landlock namespaces (Android Emulator ~12)
+- [Android Compatibility Layer](entities/android-compatibility-layer.md) — reveny Linux APK translation layer (ARM64/x86_64) without VM/container; AOSP host ART + LLVM AOT/JIT native; Wayland/Vulkan/GLES framework reimplementation; seccomp/Landlock namespaces; app/game analysis on Wayland Linux (Android Emulator ~12)
 - [android-classyshark](entities/android-classyshark.md) — Google ClassyShark APK/DEX/AAR/class bytecode viewer (hierarchies, dependencies, multidex triage)
 - [android-emulator](entities/android-emulator.md) — Android emulator (emulation focus; mobile-platform / emulator research)
 - [android-emulator-hypervisor-driver](entities/android-emulator-hypervisor-driver.md) — Google KVM-on-Windows hypervisor (Android Studio Emulator acceleration; Win8.1+ x64)
