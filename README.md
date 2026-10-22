@@ -2276,6 +2276,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/erfur/linjector-rs [Code injection on Android without ptrace]
 - https://github.com/NepMods/InjectARM64 [Non-root injection]
 - https://github.com/reveny/Android-Virtual-Inject [Inject through Virtual Space without root permissions]
+- https://github.com/Kysnez4/MS_KIT [MelonLoader/Frida mod kit and Zombix loader for Magic Survival (Unity IL2CPP on Android): C# mod API, packaging tools, and no-root sideload injection workflow]
 
 > Injection:IOS
 - https://github.com/opa334/opainject [iOS runtime dylib injection tool]
@@ -4533,6 +4534,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/modcommunity/dot-server-security [Godot 4 dedicated-server security addon with movement/shot validation, configurable rule-engine escalation, ban feeds, and dry-run auditing]
 - https://github.com/B6sse/modManager [Star Wars Battlefront (2015) mod manager: SHA-256-verified approved mods only, in-memory apply via Auric, no unauthorized imports]
 - https://github.com/Parko-Developer/guard-game [Node.js server-side cheat detection: clients report movement/actions, server validates against world limits; TCP/HTTP protocol, admin API, and engine SDKs (C#, GDScript, JS, Luau)]
+- https://github.com/Ajitha-2001/aimguard [Python server-side anti-cheat prototype: telemetry ingestion, lag-compensated validation, PVS replication, behavioral detectors, moderator review workflow, and HTTP API on synthetic gameplay data]
 - https://github.com/vul-os/magnetite [Rust self-hostable game platform with magnetite-anticheat: server-authoritative deterministic replay verification and composable cheat validators]
 - https://github.com/web-coder-lab/chessking [Rust server-side anti-cheat for multiplayer chess: risk scoring, device fingerprinting, match integrity, captcha, and ban escalation]
 - https://github.com/AbdulAmi09/SentinelAntiCheat [Chess integrity platform with seven-layer statistical engine-assistance detection, explainable risk tiers, arbiter case management, and hash-chained audit logging]
