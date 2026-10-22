@@ -4,7 +4,8 @@ kind: concept
 topics: [mobile-security, anti-cheat]
 sources:
   - wiki/sources/skills/mobile-security.md
-updated: 2026-09-13
+  - wiki/sources/descriptions/DoranekoSystems__ebpf-analyzer.md
+updated: 2026-10-22
 confidence: high
 ---
 
@@ -19,7 +20,7 @@ Discipline for interpreting mobile game traffic, TLS, and certificate-pinning ev
 | Networking stack | OkHttp, Conscrypt, Cronet, Flutter, React Native, or custom/native TLS change hook targets |
 | Target SDK and build variant | Android Network Security Configuration defaults and debuggable flags differ by variant |
 | Manifest-linked NSC | Domain policies, debug overrides, and cleartext rules are packaged artifacts |
-| Observation point | mitmproxy, Charles, Frida Java hook, or native intercept each cover different paths |
+| Observation point | mitmproxy, Charles, Frida Java hook, native intercept, or rooted **eBPF** capture (e.g. [[ebpf-analyzer]] PacketProxy: TCP/syscall I/O without device proxy—wire TLS still opaque) each cover different paths (source: wiki/sources/descriptions/DoranekoSystems__ebpf-analyzer.md) |
 | iOS trust contract | ATS, pinning in native code, and NSPinnedDomains need separate evidence from Android |
 
 A proxy record or decrypted capture only covers traffic **visible at that observation point**—it does not establish that all libraries or the release build share the same trust configuration. (source: wiki/sources/skills/mobile-security.md)
