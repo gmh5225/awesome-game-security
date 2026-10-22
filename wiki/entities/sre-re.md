@@ -1,5 +1,5 @@
 ---
-title: sre-re
+title: Solar Realms Elite RE
 kind: entity
 topics: [game-hacking, reverse-engineering]
 sources:
@@ -9,9 +9,9 @@ updated: 2026-10-22
 confidence: high
 ---
 
-# sre-re
+# Solar Realms Elite RE (sre-re)
 
-**sre-re** (formix/sre-re) reverse engineers **Solar Realms Elite 0.994b**, a classic DOS BBS door game whose original Borland C++ 3.0 source is lost, with the stated goal of documenting behavior and eventually shipping a Linux C++ remake. (source: wiki/sources/descriptions/formix__sre-re.md)
+**sre-re** ([formix/sre-re](https://github.com/formix/sre-re)) reverse engineers **Solar Realms Elite 0.994b**, a classic DOS BBS door game whose original **Borland C++ 3.0** source is lost, with the stated goal of documenting behavior and eventually shipping a **Linux C++** remake. (source: wiki/sources/descriptions/formix__sre-re.md)
 
 ## Architecture
 
@@ -27,10 +27,18 @@ confidence: high
 - Documents legacy x86 reverse engineering when no source tree exists: overlay handling, save-format cryptography, and rule recovery validated against live runs.
 - Not live-game memory cheating or anti-cheat tooling—preservation and binary-recovery research aligned with [[static-runtime-evidence]] and [[binary-evidence]] discipline.
 
+## Audience
+
+Practitioners learning **legacy x86** reverse engineering, binary recovery without source, and **rigorous validation** of inferred program logic—not live anti-cheat bypass or memory-cheat delivery. (source: wiki/sources/descriptions/formix__sre-re.md)
+
 ## Positioning
 
-Listed under **Cheat → RE Tools** beside [[dreams-to-reality-re]] (1997 asset/toolkit RE) and DOS format docs such as [[pc-wackywheels-doc]]; pairs [[overviews/reverse-engineering]] classic-executable lanes.
+Listed under **Cheat → RE Tools** beside [[dreams-to-reality-re]] (1997 asset/toolkit RE) and DOS format docs such as [[pc-wackywheels-doc]]; pairs [[overviews/reverse-engineering]] classic-executable lanes and [[static-runtime-evidence]] DOSBox corroboration discipline.
+
+## Related
+
+[[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[static-runtime-evidence]] · [[binary-evidence]] · [[dreams-to-reality-re]]
 
 ## Links
 
-- Upstream: https://github.com/formix/sre-re
+- Repo: https://github.com/formix/sre-re

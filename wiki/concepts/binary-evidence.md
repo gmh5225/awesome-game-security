@@ -5,7 +5,8 @@ topics: [reverse-engineering, anti-cheat]
 sources:
   - wiki/sources/skills/reverse-engineering.md
   - wiki/sources/descriptions/mytechnotalent__rea.md
-updated: 2026-10-11
+  - wiki/sources/descriptions/formix__sre-re.md
+updated: 2026-10-22
 confidence: high
 ---
 
@@ -17,7 +18,7 @@ Discipline for framing **what a binary artifact can prove** before converting st
 
 Record sample hash, provenance, architecture, image layout, tool version, analysis configuration, and symbol identity. Keep **file offsets**, **RVAs**, and **runtime addresses** distinct, including relocation assumptions in disk/memory comparisons. Match symbols to the actual binary—public and private symbol sets expose different information.
 
-Decompiler output is a **reconstruction**. Validate inferred types, names, prototypes, and function boundaries against instructions, ABI constraints, and available observations. Ghidra instruction semantics and p-code explain why displayed C is not recovered source.
+Decompiler output is a **reconstruction**. Validate inferred types, names, prototypes, and function boundaries against instructions, ABI constraints, and available observations. Ghidra instruction semantics and p-code explain why displayed C is not recovered source. Legacy game-rule recovery such as [[sre-re]] (DOS BBS door binary; turn-by-turn mechanics transcribed from decompilation) pairs static Ghidra work with **DOSBox re-execution** to verify formulas before treating recovered specs as findings rather than hypotheses. (source: wiki/sources/descriptions/formix__sre-re.md)
 
 ## Question classification
 

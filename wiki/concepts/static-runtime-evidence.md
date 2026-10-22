@@ -17,7 +17,8 @@ sources:
   - wiki/sources/descriptions/gamboozino__ngbrecomp.md
   - wiki/sources/descriptions/Coz-0__smo-recomp.md
   - wiki/sources/descriptions/nefariousjosiah__WWE-SVR2009-RECOMP.md
-updated: 2026-10-20
+  - wiki/sources/descriptions/formix__sre-re.md
+updated: 2026-10-22
 confidence: high
 ---
 
@@ -63,6 +64,8 @@ Static recompilation projects such as [[jsrf-recomp]] (OG Xbox XBE→native macO
 
 BBC Micro preservation rebuilds such as [[pipeline-disasm]] (mattgodbolt; annotated 6502 + BBC BASIC reassembly; baron toolchain; Python/Node disc compare; jsbeeb headless runs) treat **byte-identical disc and flux images** plus symbol dumps and execution traces as the baseline that every reassembly step must match—static disassembly claims are not accepted without that retail-aligned output check. (source: wiki/sources/descriptions/mattgodbolt__pipeline-disasm.md) [[frogman]] (same author; unreleased flip-screen platformer) adds **multi-stage VIA-timer XOR loaders** where static images stay opaque until decrypted stages are captured from jsbeeb memory dumps—another static-vs-runtime split for classic copy protection. (source: wiki/sources/descriptions/mattgodbolt__frogman.md)
 
+16-bit DOS preservation RE such as [[sre-re]] (formix; *Solar Realms Elite* 0.994b Borland C++ 3.0 BBS door binary; Ghidra including headless export; **VROOMM overlay flattening** for static study; Python disassembly/string/call annotation; encrypted `.II` save decoders) transcribes turn-by-turn rules from decompiled logic but treats a **DOSBox workflow** that re-runs formulas against the retail executable as the gate before accepting recovered specs—static Ghidra output alone is not sufficient for game-rule claims. (source: wiki/sources/descriptions/formix__sre-re.md)
+
 Windows PE32 relink harnesses such as xshxdex98/[[openmcm2]] (*Motocross Madness 2*; fixed-base MSVC 6.0 image; Ghidra export + assembly/link verification) keep **retail sections byte-for-byte** while selectively replacing routines with ported C that must match retail behavior; optional DirectDraw tracing compares renderer calls against the original path. (source: wiki/sources/descriptions/xshxdex98__OpenMCM2.md)
 
 Win32 PE32 static recompilation such as [[nfsu2recomp]] (TalhaMudo; *Need for Speed: Underground 2* x86→ARM64 macOS; ahead-of-time lift to C plus Win32/D3D9 runtime translation) separates **static discovery** (PE relocation recovery, recursive function discovery, indirect-call dispatch tables) from **runtime fidelity** claims about HLE shortcuts (e.g. D3DX effect framework)—label which API paths are fully lifted vs emulated before treating the native build as a reference port. (source: wiki/sources/descriptions/TalhaMudo__NFSU2Recomp.md)
@@ -83,4 +86,4 @@ Game-server PC checks often combine **offline host artifacts** (Prefetch, Amcach
 
 ## Related
 
-[[binary-evidence]] · [[binary-diffing]] · [[dynamic-binary-instrumentation]] · [[jsrf-recomp]] · [[ngbrecomp]] · [[nfsu2recomp]] · [[sc2-android-recomp]] · [[smo-recomp]] · [[wwe-svr2009-recomp]] · [[nhl-legacy-remaster]] · [[saturnkit]] · [[motorstorm-mv-recomp]] · [[dead-rising-2-case-zero-xenon-recomp]] · [[mcla-pc]] · [[pipeline-disasm]] · [[frogman]] · [[openmcm2]] · [[ttd-capa-cpp]] · [[custos]] · [[mixed-boolean-arithmetic]] · [[control-flow-flattening]] · [[research-rigor]] · [[overviews/reverse-engineering]] · [[overviews/windows-kernel]] · [[overviews/game-engine]]
+[[binary-evidence]] · [[binary-diffing]] · [[dynamic-binary-instrumentation]] · [[jsrf-recomp]] · [[ngbrecomp]] · [[nfsu2recomp]] · [[sc2-android-recomp]] · [[smo-recomp]] · [[wwe-svr2009-recomp]] · [[nhl-legacy-remaster]] · [[saturnkit]] · [[motorstorm-mv-recomp]] · [[dead-rising-2-case-zero-xenon-recomp]] · [[mcla-pc]] · [[pipeline-disasm]] · [[frogman]] · [[sre-re]] · [[openmcm2]] · [[ttd-capa-cpp]] · [[custos]] · [[mixed-boolean-arithmetic]] · [[control-flow-flattening]] · [[research-rigor]] · [[overviews/reverse-engineering]] · [[overviews/windows-kernel]] · [[overviews/game-engine]]
