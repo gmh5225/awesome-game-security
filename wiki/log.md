@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-22** — ingest `description:Ajitha-2001/aimguard`: enriched entity [[aimguard]] (Python server-side synthetic-telemetry AC prototype; aim/movement features, lag-compensated validation, grid PVS replication, HMAC/anti-replay, Play Integrity, statistical/ML detectors, hash blocklists; shadow-mode trust levels; SQLite token HTTP API with review queues, appeals, ban waves); cited on [[concepts/detector-operations]] shadow-mode moderator workflow lane and [[concepts/input-provenance]] PVS replication-trust note; `index.md` entity + concept blurbs updated.
+
 - **2026-10-22** — ingest `description:Kysnez4/MS_KIT`: enriched entity [[ms-kit]] (Magic Survival Zombix no-root sideload loader; MelonLoader/Harmony/Il2CppInterop C# ModKit vs legacy Frida TS/JS; zip mods, hooks, game-data libraries); cited on [[concepts/il2cpp]] and [[overviews/mobile-security]]; `index.md` entity + Mobile Security overview blurb updated.
 
 - **2026-10-22** — ingest `readme:categories`: **Cheat** link_count **2941** (+1; Kysnez4/[[ms-kit]] Magic Survival Android MelonLoader/Frida Zombix no-root sideload mod kit) / **Anti Cheat** **824** (+1; Ajitha-2001/[[aimguard]] Python server-side telemetry/PVS/behavioral AC prototype with moderator HTTP API) / **Game Develop** **195** / **Game Engine** ~159 / **DirectX** ~42 / **Vulkan** ~13 / **Game Network** ~34 and other major README sections unchanged; 41 top-level sections (`NeverC & NeverD` placeholder); synced [[overviews/overview]], [[overviews/game-hacking]], [[overviews/anti-cheat]], and [[overviews/dma-attack]]; entities [[ms-kit]], [[aimguard]]; light `index.md` section notes (no per-category pages).
