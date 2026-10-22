@@ -26,9 +26,17 @@ confidence: high
 | **Assets** | User-supplied Xbox disc image or extracted XBE + AFS tree |
 | **Tooling** | XBE header, XDVDFS, and disc-archive readers; Python helpers tied to ogxb; CMake build with optional Android packaging and shader/stub generators |
 
+## Audience
+
+Developers and researchers studying reverse engineering, console binary preservation, and how **decompiled** retail game logic can be rehosted on modern desktops when users supply legally owned disc data—without shipping Xbox assets in the repository. (source: wiki/sources/descriptions/Manya3084__SF33RDSXBRecompo.md)
+
 ## Positioning
 
-Listed under **Cheat → Source** beside other OG Xbox static-rehost ports such as [[ngbrecomp]] and [[jsrf-recomp]]. Preservation and console-binary RE research—not live multiplayer cheat delivery. Pair [[static-runtime-evidence]] when comparing lifted logic against retail traces.
+Listed under **Cheat → Source** beside other OG Xbox static-rehost ports such as [[ngbrecomp]] (xboxrecomp XBE lift) and [[jsrf-recomp]]. Unlike xboxrecomp forks, this project runs logic from the **3s-decomp-ogxb** decompilation pipeline rather than lifting the retail XBE directly. Shader and stub generation utilities help maintain parity with retail behavior; optional Android packaging extends the same stack. Preservation and console-binary RE research—not live multiplayer cheat delivery. Pair [[static-runtime-evidence]] when separating decompiled structure from runtime fidelity claims (graphics draw paths, audio cues, saves).
+
+## Links
+
+- Repo: https://github.com/Manya3084/SF33RDSXBRecompo
 
 ## Related
 
