@@ -1792,7 +1792,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [H5GG](entities/h5gg.md) — iOS modding engine (JavaScript + HTML5 UI; memory edit, scripts/plugins, pointer chains, h5frida hook/patch; jailbroken and non-jailbroken modes; cheat / IOS cheat engine)
 - [Hawkeye](entities/hawkeye.md) — Windows kernel security research console for anti-cheat analysis and live forensics (hawkeye-Leo; host-native driver Win10/11 x64; `!probe`/`!etw`/`!kernel_region`; Hawkeye Lab `!analyze` scored reports; GPL Community + paid Lab; Anti Cheat)
 - [hdd_serial_spoofer](entities/hdd-serial-spoofer.md) — HDD serial spoof (C/C++; cheat / HWID; namazso)
-- [HackiOS XNU Kernel](entities/hackios-xnu-kernel.md) — oosexgang; XNU iOS 16.5 on POCO X5 Pro 5G or QEMU virt; stock userspace through SpringBoard/Safari; RAM fastboot research sessions; IOS Emulator ~6
+- [HackiOS XNU Kernel](entities/hackios-xnu-kernel.md) — oosexgang; XNU xnu-8796.121.2 iOS 16.5 on POCO X5 Pro 5G or QEMU virt; Mu-Silicium UEFI + ath11k Wi-Fi compat; stock userspace through SpringBoard/Safari/Wi-Fi; RAM fastboot; prebuilt artifacts + xl USB tool; IOS Emulator ~6
 - [hacking-online-games](entities/hacking-online-games.md) — curated online/multiplayer game hacking resources (network protocol RE, server-side emulation, packet encryption, AC bypass; GameGuard/MMORPG papers; dsasmblr; cheat / guide)
 - [hacksysextremevulnerabledriver](entities/hacksysextremevulnerabledriver.md) — HackSys Team vulnerable-driver exploitation guide (Cheat / Guide)
 - [Handle-Ripper](entities/handle-ripper.md) — user-mode handle hijack via SystemHandleInformation + DuplicateHandle (gmh5225; DuplicateHandle)
