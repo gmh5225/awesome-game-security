@@ -423,6 +423,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/OTFCG/Awesome-Game-Analysis [Video game tech analysis resources]
 - https://github.com/killop/anything_about_game [Game Development resources]
 - https://github.com/TastSong/GameProgrammerStudyNotes [Game Development notes]
+- https://github.com/alexgaoth/awesome-reverse-engineered [Index of 16,800+ open-source projects built by reverse engineering, including 6,000+ game decompilations, static recompilations, engine reimplementations and private servers]
 - https://github.com/gmh5225/gtav-sourcecode-build-guide [GTA V Source Code Build Tutorial]
 
 > Source
