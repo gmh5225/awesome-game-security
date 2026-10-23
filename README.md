@@ -5290,6 +5290,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/zqxwce/vphone-ws [Native macOS SwiftUI front-end for vphone-cli: browse, create, and boot iOS research VMs from a single window]
 - https://github.com/34306/vphone-aio [1 script run the vphone]
 - https://github.com/jprx/darwin-vm [QEMU Darwin VM: boot iOS/macOS to root shell; virtual iPhone 17–12 (A19–A14) and M5–M1 Apple Silicon Macs; kernel/SPTM/TXM debug; no GUI/SpringBoard]
+- https://github.com/oosexgang/hackios-xnu-kernel [XNU xnu-8796.121.2 (iOS 16.5) on Xiaomi POCO X5 Pro 5G (redwood, Snapdragon 778G) and QEMU virt; stock iOS 16.5 userspace through lock screen, SpringBoard, Safari, and Wi-Fi; fastboot boot into RAM, no firmware flash; IPSW fetched from Apple CDN; no cellular, Bluetooth, charging, SEP, or App Store; timed research session]
 
 ## Game Boy
 - https://github.com/xkevio/kevboy [Emulator]
