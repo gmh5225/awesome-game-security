@@ -322,7 +322,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [android-emulator-hypervisor-driver](entities/android-emulator-hypervisor-driver.md) — Google KVM-on-Windows hypervisor (Android Studio Emulator acceleration; Win8.1+ x64)
 - [android-ebpf](entities/android-ebpf.md) — Android eBPF tracing examples (syscalls, network, process, perf; cheat / EBPF)
 - [android-faker](entities/android-faker.md) — Xposed/LSPosed device-identifier spoofing (IMEI, Android ID, MAC, SIM; randomization + manual edit; privacy / fingerprint testing; Android1500; cheat / Android)
-- [android-frida-bypass-suite](entities/android-frida-bypass-suite.md) — Frida script + Python forward proxy for Android pentesting; Java/native root bypass, OkHttp/TrustKit/Conscrypt/WebView SSL pinning defeat, AES hooks; Burp/adb reverse (mrmtwoj; Cheat / Frida)
+- [android-frida-bypass-suite](entities/android-frida-bypass-suite.md) — runtime Frida hooks (no APK rewrite); Java/native root bypass, OkHttp/TrustKit/Conscrypt/WebView SSL pinning defeat, AES key/cipher hooks; Python forward proxy + Burp/adb reverse; Android 5–14 (mrmtwoj; Cheat / Frida)
 - [android-anti-cheat](entities/android-anti-cheat.md) — Open-source Android anti-cheat research (C/C++; anti-cheat, modding, hooking; codetronik; Anti Cheat / Open Source Anti Cheat System)
 - [android-boot-image-editor](entities/android-boot-image-editor.md) — Gradle boot/recovery/vendor_boot unpack-repack (AVB, LZ4/XZ/GZIP, EROFS/sparse; boot v0–4; JDK 11+; cfig)
 - [android-bootable-recovery-OFRP](entities/android-bootable-recovery-ofrp.md) — full OrangeFox Recovery (OFRP) custom recovery codebase (recovery UI, partition management, flashing; C/C++, build scripts, XML, Java; firmware dev / power users; cheat / OrangeFox Recovery)

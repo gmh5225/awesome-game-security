@@ -5,7 +5,8 @@ topics: [mobile-security, anti-cheat]
 sources:
   - wiki/sources/skills/mobile-security.md
   - wiki/sources/descriptions/DoranekoSystems__ebpf-analyzer.md
-updated: 2026-10-22
+  - wiki/sources/descriptions/mrmtwoj__android-frida-bypass-suite.md
+updated: 2026-10-23
 confidence: high
 ---
 
@@ -20,7 +21,7 @@ Discipline for interpreting mobile game traffic, TLS, and certificate-pinning ev
 | Networking stack | OkHttp, Conscrypt, Cronet, Flutter, React Native, or custom/native TLS change hook targets |
 | Target SDK and build variant | Android Network Security Configuration defaults and debuggable flags differ by variant |
 | Manifest-linked NSC | Domain policies, debug overrides, and cleartext rules are packaged artifacts |
-| Observation point | mitmproxy, Charles, Frida Java hook, native intercept, or rooted **eBPF** capture (e.g. [[ebpf-analyzer]] PacketProxy: TCP/syscall I/O without device proxy—wire TLS still opaque) each cover different paths (source: wiki/sources/descriptions/DoranekoSystems__ebpf-analyzer.md) |
+| Observation point | mitmproxy, Charles, Frida Java hook, native intercept, or rooted **eBPF** capture (e.g. [[ebpf-analyzer]] PacketProxy: TCP/syscall I/O without device proxy—wire TLS still opaque) each cover different paths (source: wiki/sources/descriptions/DoranekoSystems__ebpf-analyzer.md); bundled Frida + proxy suites such as [[android-frida-bypass-suite]] combine stack-specific pinning hooks (OkHttp/TrustKit/Conscrypt/WebView), AES cipher logging, and a Python forward proxy with Burp/adb reverse—record which hooks fired, not just that traffic decrypted (source: wiki/sources/descriptions/mrmtwoj__android-frida-bypass-suite.md) |
 | iOS trust contract | ATS, pinning in native code, and NSPinnedDomains need separate evidence from Android |
 
 A proxy record or decrypted capture only covers traffic **visible at that observation point**—it does not establish that all libraries or the release build share the same trust configuration. (source: wiki/sources/skills/mobile-security.md)
@@ -41,4 +42,4 @@ Preserve the test configuration, validation result, and unobserved paths. Review
 
 ## Related
 
-[[mobile-trust-boundaries]] · [[mobile-anti-cheat]] · [[frida]] · [[ssl-bypass]] · [[frida-mobile-kit]] · [[android-proxy-mcp]] · [[research-rigor]] · [[overviews/mobile-security]]
+[[mobile-trust-boundaries]] · [[mobile-anti-cheat]] · [[frida]] · [[ssl-bypass]] · [[frida-mobile-kit]] · [[android-frida-bypass-suite]] · [[android-proxy-mcp]] · [[research-rigor]] · [[overviews/mobile-security]]
