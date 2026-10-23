@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-23** — ingest `description:goooroooX/CE-Decky`: enriched entity [[ce-decky]] (Decky Loader; Python backend + TS/JS Game Mode UI + Lua CE bridge; Proton-prefix CE, community tables, QAM toggles, table repair, Authenticode installs, session lifecycle; confidence high); cited on [[overviews/game-hacking]] CE Plugins lane; cross-linked [[cheat-engine]], [[controller-mode]], [[archmod]]; `index.md` entity blurb updated.
+
 - **2026-10-23** — ingest `description:jammyfu/rea-atlas`: enriched entity [[rea-atlas]] (REA workflow **Yes** tagging rules, audience, Cheat / Guide lane; confidence high); cross-linked morluto/[[rea]] to [[rea-atlas]]; cited on [[overviews/game-hacking]] agent-RE / guide cluster; `index.md` blurbs for [[rea]] and [[rea-atlas]].
 
 - **2026-10-23** — ingest `readme:categories`: **Cheat** link_count **2946** (+2; jammyfu/[[rea-atlas]] morluto/[[rea]]-tagged decomp/recomp index + goooroooX/[[ce-decky]] Decky Loader Proton Cheat Engine plugin) / **Anti Cheat** **824** / **Game Develop** **196** / **Game Engine** ~159 / **DirectX** ~42 / **Vulkan** ~13 / **Game Network** ~34 and other major README sections unchanged; 41 top-level sections (`NeverC & NeverD` placeholder); synced [[overviews/overview]], [[overviews/game-hacking]], [[overviews/reverse-engineering]], and [[overviews/dma-attack]]; entities [[rea-atlas]], [[ce-decky]]; light `index.md` section notes (no per-category pages).

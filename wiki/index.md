@@ -642,7 +642,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [CE Lua Extensions](entities/ce-lua-extensions.md) — Skyrimfus CE Lua autorun pack: extension loader + breakpoint cleanup, caller lookup, template insertion, UI workflow scripts (cheat / Lua Extensions)
 - [CE MCP Plugin](entities/ce-mcp-plugin.md) — Eruditi CE plugin: C + Lua; async TCP AI command channel; memory R/W, freeze, disasm/asm, process control, DLL injection (cheat / MCP for Cheat Engine)
 - [CE Tracer-IDA](entities/ce-tracer-ida.md) — Python IDA plugin: CheatEngine value tracer (memory analysis; cheat / IDA Plugins)
-- [ce-decky](entities/ce-decky.md) — goooroooX Decky Loader plugin; Proton-prefix Windows Cheat Engine, community table search, Quick Access toggles, Lua bridge; Authenticode-checked installs; Cheat / CE Plugins
+- [ce-decky](entities/ce-decky.md) — goooroooX Decky Loader plugin; Python/TS/JS Game Mode UI + Lua bridge; Proton-prefix Windows CE, community table search, library/compatibility review, table repair, Quick Access toggles; Authenticode-checked installs; Cheat / CE Plugins
 - [ce-easyanticheat-bypass](entities/ce-easyanticheat-bypass.md) — Cheat Engine bypass for EAC (CE process/window class/driver/memory-access evasion; UD CE; gmh5225)
 - [Ceasta](entities/ceasta.md) — all-in-one disassembler/decompiler/debugger for Windows/Linux PE/ELF (ngwg; C++17; IDA-style listing + CFG + x64dbg-style debugger; Lua plugins; binary diffing + library signature matching; CLI + built-in MCP; self-contained vendored workbench; Cheat / RE Tools)
 - [ce-tutorial](entities/ce-tutorial.md) — Cheat Engine register tutorial (register roles vs common illustrations; cheat / guide)
