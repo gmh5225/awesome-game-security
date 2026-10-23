@@ -11,7 +11,9 @@ sources:
   - wiki/sources/descriptions/Sentient111__ClearDriverTraces.md
   - wiki/sources/descriptions/gmh5225__Allocating-individual-pages.md
   - wiki/sources/descriptions/starfallreverie__pfnwatch.md
-updated: 2026-10-08
+  - wiki/sources/descriptions/zodiacon__PoolMonXv3.md
+  - wiki/sources/README-categories.md
+updated: 2026-10-23
 confidence: high
 ---
 
@@ -75,7 +77,7 @@ Before/after **Big Pool snapshots** compared via driver-backed tooling such as [
 
 ## Interactive enumeration / dump
 
-Tools such as [[pooldump]] scan kernel pool pages to list allocation blocks (tags, sizes, owning drivers) and dump specific pool contents — useful when recovering manually mapped images (e.g. EAC manual-map DLL extraction) or inspecting driver/rootkit pool artifacts without a full live debugger session. (source: wiki/sources/descriptions/ioncodes__pooldump.md)
+GUI monitors such as [[poolmonxv3]] poll live pool tags via `NtQuerySystemInformation`, enrich tags from WinDbg’s `pooltag.txt`, and highlight allocation deltas between refreshes — a lightweight alternative to WinDbg `!pool` walks when spotting new driver or cheat pool consumers. (source: wiki/sources/descriptions/zodiacon__PoolMonXv3.md) Tools such as [[pooldump]] scan kernel pool pages to list allocation blocks (tags, sizes, owning drivers) and dump specific pool contents — useful when recovering manually mapped images (e.g. EAC manual-map DLL extraction) or inspecting driver/rootkit pool artifacts without a full live debugger session. (source: wiki/sources/descriptions/ioncodes__pooldump.md)
 
 ## Non-pool allocation evasion
 
@@ -87,4 +89,4 @@ Remote kernel reads that map a protected process's physical pages must install P
 
 ## Related
 
-[[kernel-evidence-baseline]] · [[driver-trust-boundaries]] · [[kernel-callbacks]] · [[byovd]] · [[hvci]] · [[etw-threat-intelligence]] · [[kernel-codecave-poc]] · [[revert-mapper]] · [[allocating-individual-pages]] · [[pfnwatch]] · [[kn-diff-pool]] · [[pooldump]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]]
+[[kernel-evidence-baseline]] · [[driver-trust-boundaries]] · [[kernel-callbacks]] · [[byovd]] · [[hvci]] · [[etw-threat-intelligence]] · [[kernel-codecave-poc]] · [[revert-mapper]] · [[allocating-individual-pages]] · [[pfnwatch]] · [[kn-diff-pool]] · [[poolmonxv3]] · [[pooldump]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]]
