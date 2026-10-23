@@ -3094,7 +3094,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [plugin-ghidra](entities/plugin-ghidra.md) — RevEng.AI Ghidra extension: binary upload, code similarity, batch function matching/renaming, AI decompilation views (Java/Gradle; Ghidra 11.4+/Java 21; ML-assisted stripped-binary RE; cheat / Ghidra Plugins / `[RevEng.AI]`)
 - [PMI-hpc](entities/pmi-hpc.md) — PMI + hardware performance counters for Windows security monitoring (branch misprediction / cache miss interrupts; code injection / ROP anomaly detection)
 - [pmctrace](entities/pmctrace.md) — Intel PMC counter collection via ETW (C; cache/branch/instruction micro-arch events; profiling / side-channel RE)
-- [PoolMonX v3](entities/poolmonxv3.md) — zodiacon GUI kernel pool-tag monitor (`NtQuerySystemInformation`; WinDbg pooltag.txt; filter/pause/delta refresh; Cheat / Windows Kernel Explorer)
+- [PoolMonX v3](entities/poolmonxv3.md) — zodiacon C++/WTL GUI kernel pool-tag monitor (`NtQuerySystemInformation`; WinDbg pooltag.txt; filter/pause/delta refresh/dark mode; driver/AC pool forensics; Cheat / Windows Kernel Explorer)
 - [pooldump](entities/pooldump.md) — Windows kernel pool enumerator/dumper (tags, sizes, owning drivers; EAC manual-map DLL extraction)
 - [PoolParty](entities/poolparty.md) — Windows thread-pool injection techniques (worker-factory overwrite + TP_* queue variants; red-team / EDR visibility; SafeBreach-Labs; ThreadPool)
 - [powerhook](entities/powerhook.md) — KPRCB IdlePreselect power-management callback hook PoC (Archie-osu; C++ KMDF driver; PRCB hook + thread/process logging; Windows internals / low-level game security research)

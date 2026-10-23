@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-23** — ingest `description:zodiacon/PoolMonXv3`: enriched entity [[poolmonxv3]] (Capabilities/Use cases; C++/Visual Studio WTL/WIL; confidence high); cited on [[overviews/windows-kernel]] pool-forensics lane; `index.md` entity blurb updated.
+
 - **2026-10-23** — ingest `readme:categories`: **Cheat** link_count **2949** (+1; zodiacon/[[poolmonxv3]] GUI kernel pool-tag monitor with WinDbg pooltag.txt integration; Cheat / Windows Kernel Explorer) / **Anti Cheat** **824** / **Game Develop** **196** / **Game Engine** ~159 / **DirectX** ~42 / **Vulkan** ~13 / **Game Network** ~34 and other major README sections unchanged; 41 top-level sections (`NeverC & NeverD` placeholder); synced [[overviews/overview]], [[overviews/game-hacking]], [[overviews/windows-kernel]], [[overviews/dma-attack]], [[overviews/reverse-engineering]], and [[concepts/kernel-pool-scanning]]; entity [[poolmonxv3]]; light `index.md` section notes (no per-category pages).
 
 - **2026-10-23** — ingest `description:mrmtwoj/android-frida-bypass-suite`: enriched entity [[android-frida-bypass-suite]] (capabilities table, Burp/adb workflow, non-invasive runtime hooks; confidence high); cited on [[concepts/mobile-network-trust-evidence]] observation-point row and [[overviews/game-hacking]] Cheat lane; `index.md` entity blurb updated.
