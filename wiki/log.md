@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-23** — ingest `description:alexgaoth/awesome-reverse-engineered`: enriched entity [[awesome-reverse-engineered]] (machine-maintained RE-derived OSS catalog; themed categories incl. game decomp/recomp, RE tooling, unofficial API clients, IoT; JSON + nightly Python refresh + GitHub Pages + MCP/agent skills; activity/license ranking); cited on [[overviews/reverse-engineering]] Guides/indexes cluster and [[overviews/game-engine]] Game Develop guide lane; `index.md` entity blurb updated.
+
 - **2026-10-23** — ingest `readme:categories`: **Game Develop** link_count **196** (+1; alexgaoth/[[awesome-reverse-engineered]] index of 16,800+ RE-derived OSS projects incl. 6,000+ game decomp/static recomp/engine reimplementations/private servers) / **Cheat** **2944** / **Anti Cheat** **824** / **Game Engine** ~159 / **DirectX** ~42 / **Vulkan** ~13 / **Game Network** ~34 and other major README sections unchanged; 41 top-level sections (`NeverC & NeverD` placeholder); synced [[overviews/overview]], [[overviews/game-engine]], and [[overviews/reverse-engineering]]; entity [[awesome-reverse-engineered]]; light `index.md` section notes (no per-category pages).
 
 - **2026-10-23** — lint (agent, Cursor lint pass): read `wiki/AGENTS.md`; **Overviews** (9) / **Concepts** (51) / **Entities** (4160); `index.md` reconciled with disk — 4220 paths, 0 missing, 0 dead, 0 duplicate entries; nine `overviews/*.md` + `index.md` Overviews/Concepts blurb [[wikilink]] spot-check — 13758 links, 0 broken, 0 malformed `]]]`; 6 expected cross-kind slug collisions; bootstrap not required; structural repairs none (`log.md` only).
