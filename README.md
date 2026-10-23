@@ -1064,6 +1064,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/Manya3084/SF33RDSXBRecompo [Native x86-64 port of Street Fighter III: 3rd Strike from the original Xbox (3s-decomp-ogxb), with SDL3, Vulkan/OpenGL, and OpenAL—BYO disc, no assets in repo]
 - https://github.com/Coz-0/smo-recomp [Static recompilation of Super Mario Odyssey (Switch 1.4.1) to native Windows x64 with custom runtime and Vulkan renderer; BYO dump, no assets in repo]
 - https://github.com/raulzrrs/letsgo-recomp [Native Windows port of Pokémon: Let's Go, Eevee!/Pikachu! (Switch 1.0.0) via static recompilation on LAS Recomp; BYO game dump, no assets in repo]
+- https://github.com/MaryNCRT/Ultimate-Mortal-Kombat-3-iOS-Decompiled [Clean-room Ghidra decompilation of Ultimate Mortal Kombat 3 (iOS v1.2.59) with differential verification and a native cross-platform PC port (OpenGL/Vulkan/D3D12)]
 - https://github.com/sosso33/omikron-tns-omk-engine [From-scratch C++20 reimplementation of Omikron: The Nomad Soul (1999) with documented format reverse engineering and evidence-backed asset readers]
 - https://github.com/sergen213/kabus22-linux [Reverse-engineered native Linux Kabus 22 engine with GTK installer/launcher, OpenGL/Vulkan rendering, and RE notes; requires user-supplied original game assets]
 - https://github.com/LyeDevGit/WonTree-RBLX-Dumper [Universal Roblox game analysis dumper: Luau decompile stack, remote call graph, live remote logger, framework and anti-cheat pattern detection, markdown/CSV reports]
