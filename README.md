@@ -2069,6 +2069,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/Invoke-RE/binja-lattice-mcp [MCP for Binary_Ninja]
 - https://github.com/mrphrazer/obfuscation_analysis [Binary Ninja plugin to analyze and simplify obfuscated code]
 - https://github.com/ScriptWare-Software/native-predicate-solver [Binary Ninja plugin for removing opaque predicates]
+- https://github.com/MZHeader/binja-d810 [Binary Ninja plugin inspired by D-810/d810-ng that simplifies MBA obfuscation, opaque predicates, and OLLVM-style control-flow flattening in MLIL/HLIL]
 - https://github.com/buzzer-re/Rikugan [A reverse-engineering agent for IDA Pro and Binary Ninja that integrates a multi-provider LLM directly into your analysis UI]
 - https://github.com/banteg/bn [binary ninja cli for agents]
 - https://github.com/seekbytes/ptxNinja [Binary Ninja plugin for reverse engineering PTX — CUDA GPU virtual ISA]
