@@ -1,0 +1,880 @@
+Project Path: arc_mrmtwoj_android-frida-bypass-suite_jq13o48a
+
+Source Tree:
+
+```txt
+arc_mrmtwoj_android-frida-bypass-suite_jq13o48a
+├── README.md
+├── acyber_frida.js
+└── acyber_server_proxy.py
+
+```
+
+`README.md`:
+
+```md
+# 🛡️ android-frida-bypass-suite
+
+> **Frida toolkit for Android penetration testing — Root bypass + SSL pinning bypass + AES key hook, plus a filterable companion forward proxy.**
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Frida-✔-red?style=flat-square&logo=frida" />
+  <img src="https://img.shields.io/badge/Platform-Android-3DDC84?style=flat-square&logo=android" />
+  <img src="https://img.shields.io/badge/Python-3.x-3776AB?style=flat-square&logo=python" />
+  <img src="https://img.shields.io/badge/Burp_Suite-Ready-orange?style=flat-square" />
+  <img src="https://img.shields.io/badge/License-MIT-blue?style=flat-square" />
+  <img src="https://img.shields.io/badge/Author-mrmtwoj-blueviolet?style=flat-square" />
+  <img src="https://img.shields.io/badge/Website-acyber.ir-purple?style=flat-square" />
+</p>
+
+<p align="center">
+  <a href="https://acyber.ir">
+    <img src="https://img.shields.io/badge/🌐_acyber.ir-Visit-9b59b6?style=for-the-badge" />
+  </a>
+  <a href="https://github.com/mrmtwoj">
+    <img src="https://img.shields.io/badge/👤_mrmtwoj-GitHub-181717?style=for-the-badge&logo=github" />
+  </a>
+</p>
+
+---
+
+
+## 📌 About
+
+This repository provides a comprehensive **Frida script** for Android application security testing, along with a lightweight **Python forward proxy**. Together they deliver three bypass modules plus a traffic control layer:
+
+| File | Purpose |
+|------|---------|
+| 🥷 **`acyber_frida.js`** → Root Detection Bypass | Bypass root checks at Java and Native (libc) level |
+| 🔐 **`acyber_frida.js`** → AES Token Hook | Capture AES keys, IVs, and `Cipher` input/output |
+| 🌐 **`acyber_frida.js`** → SSL Pinning Bypass | Bypass OkHttp, TrustKit, Conscrypt, and WebView pinning |
+| 🛰️ **`acyber_server_proxy.py`** → Companion Proxy | Forward proxy with protocol/domain filters + live logging |
+
+Output is designed to work smoothly alongside **Burp Suite**, **adb reverse**, and the **Companion Proxy**, exposing cryptographic material while traffic is being intercepted.
+
+---
+
+## ✨ Features
+
+- ✅ Root bypass at **14 distinct points** (Java + Native)
+- ✅ Full AES lifecycle hooks (`SecretKeySpec`, `IvParameterSpec`, `Cipher`)
+- ✅ Covers **10+ SSL pinning libraries** (OkHttp, TrustKit, Conscrypt, WebView, Appcelerator)
+- ✅ Deduplicated logs via `seenAES` / `seenSSL`
+- ✅ HEX and Base64 output for keys
+- ✅ Python forward proxy with **protocol filter**, **domain allow/block list**, and **live logging**
+- ✅ Compatible with **Android 5 → 14**
+- ✅ No app modification required — Frida injection only
+
+---
+
+## ⚙️ Requirements
+
+| Tool | Recommended | Install |
+|------|-------------|---------|
+| `frida` + `frida-tools` | ≥ 16.x | `pip install frida-tools` |
+| `frida-server` (arm64) | Same version as frida | [Releases](https://github.com/frida/frida/releases) |
+| `adb` | ≥ 1.0.41 | Android SDK Platform Tools |
+| **Python** | ≥ 3.8 | To run `acyber_server_proxy.py` |
+| **Burp Suite** | Community or Pro | [portswigger.net](https://portswigger.net/burp) |
+| Rooted device | — | Or emulator with `frida-server` |
+
+---
+
+## 🚀 Step-by-Step Setup
+
+### 1️⃣ Start frida-server on the device
+
+```bash
+adb push frida-server /data/local/tmp/
+adb shell "chmod 755 /data/local/tmp/frida-server"
+adb shell "/data/local/tmp/frida-server &"
+```
+
+### 2️⃣ Set a global HTTP proxy
+
+```bash
+adb shell settings put global http_proxy 192.168.1.10:8080
+```
+
+> 🔁 To remove: `adb shell settings put global http_proxy :0`
+
+### 3️⃣ Reverse tunnel for Frida
+
+```bash
+adb reverse tcp:3333 tcp:9090
+```
+
+### 4️⃣ Prepare Burp Suite
+
+1. **Proxy → Options → Proxy Listeners** → listener on `0.0.0.0:8080`
+2. On device: browser → `http://burp` → download CA
+3. **Settings → Security → Install from storage → CA Certificate**
+4. For Android 7+ apps with `targetSdk ≥ 24`, either use **this script's SSL module** or push the CA into `/system/etc/security/cacerts`
+
+### 5️⃣ Inject the script into the target app
+
+Three common ways to inject `acyber_frida.js`:
+
+**a) Spawn by package name (most common):**
+```bash
+frida -U -f com.target.app -l acyber_frida.js --no-pause
+```
+
+**b) Attach to a running process (`-p`):**
+```bash
+# Find the PID first
+frida-ps -U | grep com.target.app
+
+# Attach by PID or process name
+frida -U -l acyber_frida.js -p 12345
+# or
+frida -U -l acyber_frida.js -p com.target.app
+```
+
+**c) Spawn without pause (inject at boot):**
+```bash
+frida -U -f com.target.app -l acyber_frida.js
+```
+
+> 💡 `-f` vs `-p`:
+> - `-f <package>` → spawns a new process and injects at boot (recommended for SSL bypass, must be active before the first handshake).
+> - `-p <pid|name>` → attaches to a running process (fast debugging, late hooks).
+
+---
+
+## 🧠 Key Parts of `acyber_frida.js`
+
+### 🥷 Module 1 — Root Detection Bypass
+
+Helpers:
+- **`logRoot(api, detail)`** — central log for every root check
+- **`RootPackages[]`** — 24 root manager packages (SuperSU, Magisk, Xposed, …)
+- **`RootBinaries[]`** — suspicious binaries: `su`, `busybox`, `supersu`, …
+- **`RootProperties{}`** — spoofed property values
+
+Java-level hooks:
+
+| Class | Method | Behavior |
+|-------|--------|----------|
+| `ApplicationPackageManager` | `getPackageInfo` | Replace package name with a fake one |
+| `java.io.File` | `exists` | Return `false` for root binaries |
+| `Runtime` | `exec` × 6 overloads | Block `su`, `id`, `mount`, `getprop` |
+| `SystemProperties` | `get` | Return safe values |
+| `String` | `contains` | `test-keys` → `false` |
+| `BufferedReader` | `readLine` | `test-keys` → `release-keys` |
+| `ProcessBuilder` | `start` | Replace command with `grep` |
+
+Native (libc) hooks:
+- **`fopen`** → overwrite path with `Memory.writeUtf8String` to `/notexists`
+- **`system`** → replace dangerous command with `grep`
+
+### 🔐 Module 2 — AES Token Hook
+
+Helpers:
+- **`bytesToHex(arr)`** — byte array → HEX
+- **`bytesToBase64(arr)`** — byte array → Base64
+- **`logAES(label, value)`** — deduplicated logging (via `seenAES`)
+
+Hooks:
+
+| Class | Hook point | Captured data |
+|-------|------------|---------------|
+| `SecretKeySpec` | `$init` | **AES key** (HEX + Base64) |
+| `IvParameterSpec` | `$init` | **IV** (HEX + Base64) |
+| `Cipher` | `getInstance` | Transformation (e.g., `AES/CBC/PKCS5Padding`) |
+| `Cipher` | `init` | mode (ENCRYPT / DECRYPT) |
+| `Cipher` | `doFinal` | Input and output as Base64 |
+
+### 🌐 Module 3 — SSL Pinning Bypass
+
+Core: **`Java.registerClass`** creates an open `X509TrustManager`, then injects it into `SSLContext.init`.
+
+Additional hooks:
+- `HttpsURLConnection.setDefaultHostnameVerifier` / `setSSLSocketFactory` / `setHostnameVerifier`
+- `com.android.org.conscrypt.TrustManagerImpl.verifyChain` and `checkTrustedRecursive`
+- `com.android.org.conscrypt.OpenSSLSocketImpl.verifyCertificateChain`
+- **OkHttp**: all three `CertificatePinner.check(...)` overloads + `check$okhttp`
+- **TrustKit**: `OkHostnameVerifier.verify(SSLSession/X509)` + `PinningTrustManager.checkServerTrusted`
+- **Appcelerator**: `PinningTrustManager.checkServerTrusted`
+- **WebView**: `WebViewClient.onReceivedSslError` → `handler.proceed()`
+
+---
+
+## 🛰️ Module 4 — Companion Proxy (`acyber_server_proxy.py`)
+
+A **lightweight forward proxy** with protocol and domain filtering that can run alongside Burp or replace it. Live timestamped logs are printed to the terminal.
+
+### Usage
+
+```bash
+# Default: 127.0.0.1:5090, everything allowed
+python acyber_server_proxy.py
+
+# Custom host / port
+python acyber_server_proxy.py --host 127.0.0.1 --port 8080
+
+# Only allow HTTPS (HTTP returns 403)
+python acyber_server_proxy.py --protocol https
+
+# Only HTTPS + these domains
+python acyber_server_proxy.py --protocol https --allow-domain "*.github.com,example.com"
+
+# Block ads / trackers (wildcards supported)
+python acyber_server_proxy.py --block-domain "*.doubleclick.net,*.ads.example,facebook.com"
+
+# Bind on a LAN interface with a whitelist
+python acyber_server_proxy.py --host 0.0.0.0 --port 5090 --allow-domain "*.wikipedia.org"
+```
+
+### Sample log output
+
+```text
+[14:22:01] Proxy listening on 127.0.0.1:5090
+[14:22:01] Protocol filter : all
+[14:22:03] [HTTP]         GET http://example.com:80/  <- 127.0.0.1
+[14:22:05] [HTTPS]        github.com:443  <- 127.0.0.1
+[14:22:07] [DENY-DOMAIN]  HTTP   ads.foo.com/x  <- 127.0.0.1
+[14:22:09] [DENY-PROTO]   HTTPS  bank.com:443  <- 127.0.0.1
+```
+
+### CLI options
+
+| Option | Default | Description |
+|--------|---------|-------------|
+| `--host` | `127.0.0.1` | Bind address |
+| `--port` | `5090` | Bind port |
+| `--protocol` | `all` | `all` / `http` / `https` |
+| `--allow-domain` | empty | Comma-separated whitelist, wildcards allowed (`*.example.com`) |
+| `--block-domain` | empty | Comma-separated blacklist, wildcards allowed |
+
+### Combined with Frida + Burp
+
+```bash
+# Terminal 1 — proxy
+python acyber_server_proxy.py --host 0.0.0.0 --port 5090
+
+# Terminal 2 — Frida
+frida -U -f com.target.app -l acyber_frida.js --no-pause
+
+# Terminal 3 — point the device at the proxy
+adb shell settings put global http_proxy 192.168.1.10:5090
+
+# To chain with Burp:
+#   Burp Listener on 8080 → acyber_server_proxy.py on 5090 → device to 5090
+#   (or reverse the chain depending on your scenario)
+```
+
+---
+
+## 🧪 Sample Frida Output
+
+```text
+===== [1] ROOT DETECTION =====
+[ROOT] ApplicationPackageManager.getPackageInfo(String, int) -> eu.chainfire.supersu
+[ROOT] java.io.File.exists() -> su
+[ROOT] Runtime.exec(String) -> getprop
+[ROOT] libc.so!system -> su
+
+===== [2] AES TOKEN HOOK =====
+[AES] SecretKeySpec: hex=8f2a...c1 b64=jyqu...wQ==
+[AES] IvParameterSpec: hex=0001...ff b64=AAH.../w==
+[AES] Cipher.getInstance: AES/CBC/PKCS5Padding
+[AES] Cipher.init mode -> 1
+[AES] doFinal input: b64=U2FsdGVk...
+[AES] doFinal output: b64=c2VjcmV0...
+
+===== [3] SSL SPOOFING =====
+[SSL] bypassed: javax.net.ssl.SSLContext.init
+[SSL] bypassed: okhttp3.CertificatePinner.check(String, List)
+[SSL] bypassed: android.webkit.WebViewClient.onReceivedSslError
+
+===== [READY] =====
+```
+
+---
+
+## 🧹 Cleanup
+
+```bash
+adb shell settings put global http_proxy :0
+adb shell "pkill frida-server"
+```
+
+And if you installed a CA, remove it from **Settings → Security → Trusted credentials → User**.
+
+---
+
+### 📰 ACyber Sentinel — Cybersecurity News
+
+Stay updated with the latest threat reports, vulnerability disclosures, and industry news from the ACyber Sentinel portal:
+
+| Language | Link |
+|----------|------|
+| 🇬🇧 English | [news.acyber.ir/?lang=en](https://news.acyber.ir/?lang=en) |
+| 🇮🇷 فارسی | [news.acyber.ir/?lang=fa](https://news.acyber.ir/?lang=fa) |
+| 🇸🇦 العربية | [news.acyber.ir/?lang=ar](https://news.acyber.ir/?lang=ar) |
+| 🇷🇺 Русский | [news.acyber.ir/?lang=ru](https://news.acyber.ir/?lang=ru) |
+| 🇨🇳 中文 | [news.acyber.ir/?lang=zh](https://news.acyber.ir/?lang=zh) |
+| 🇻🇦 Latina | [news.acyber.ir/?lang=la](https://news.acyber.ir/?lang=la) |
+---
+
+## ⚠️ Disclaimer
+
+This project is intended for **education**, **security research**, and **legal penetration testing** on applications you own or are authorized in writing to test.  
+Using these tools against third-party applications without permission violates their terms of service and applicable law.  
+The author assumes no liability for any misuse.
+
+---
+
+```
+
+`acyber_frida.js`:
+
+```js
+'use strict';
+
+var seenAES = {};
+var seenSSL = {};
+
+function bytesToHex(arr) {
+    var str = '';
+    for (var i = 0; i < arr.length; i++) {
+        var j = arr[i] < 0 ? arr[i] + 256 : arr[i];
+        if (j < 16) str += '0';
+        str += j.toString(16);
+    }
+    return str;
+}
+
+var b64 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+function bytesToBase64(e) {
+    var r = '', a = 0, c = e.length, h, o, t;
+    while (a < c) {
+        h = 255 & e[a++];
+        if (a == c) { r += b64.charAt(h >> 2) + b64.charAt((3 & h) << 4) + '=='; break; }
+        o = e[a++];
+        if (a == c) { r += b64.charAt(h >> 2) + b64.charAt(((3 & h) << 4) | ((240 & o) >> 4)) + b64.charAt((15 & o) << 2) + '='; break; }
+        t = e[a++];
+        r += b64.charAt(h >> 2) + b64.charAt(((3 & h) << 4) | ((240 & o) >> 4)) + b64.charAt(((15 & o) << 2) | ((192 & t) >> 6)) + b64.charAt(63 & t);
+    }
+    return r;
+}
+
+function logRoot(api, detail) {
+    console.log('[ROOT] ' + api + (detail ? ' -> ' + detail : ''));
+}
+
+function logSSL(fn) {
+    if (seenSSL[fn]) return;
+    seenSSL[fn] = true;
+    console.log('[SSL] bypassed: ' + fn);
+}
+
+function logAES(label, value) {
+    var key = label + '|' + value;
+    if (seenAES[key]) return;
+    seenAES[key] = true;
+    console.log('[AES] ' + label + ': ' + value);
+}
+
+setTimeout(function () {
+    Java.perform(function () {
+
+        console.log('===== [1] ROOT DETECTION =====');
+        console.log('[ROOT] API structure:');
+        console.log('  ApplicationPackageManager.getPackageInfo(String, int)');
+        console.log('  java.io.File.exists()');
+        console.log('  java.lang.Runtime.exec(String)');
+        console.log('  java.lang.Runtime.exec(String[])');
+        console.log('  java.lang.Runtime.exec(String, String[])');
+        console.log('  java.lang.Runtime.exec(String[], String[])');
+        console.log('  java.lang.Runtime.exec(String[], String[], File)');
+        console.log('  java.lang.Runtime.exec(String, String[], File)');
+        console.log('  java.lang.String.contains(String)');
+        console.log('  android.os.SystemProperties.get(String)');
+        console.log('  libc.so!fopen');
+        console.log('  libc.so!system');
+        console.log('  java.io.BufferedReader.readLine()');
+        console.log('  java.lang.ProcessBuilder.start()');
+        console.log('[ROOT] ----------------------------------------');
+
+        var RootPackages = [
+            'com.noshufou.android.su', 'com.noshufou.android.su.elite', 'eu.chainfire.supersu',
+            'com.koushikdutta.superuser', 'com.thirdparty.superuser', 'com.yellowes.su',
+            'com.koushikdutta.rommanager', 'com.koushikdutta.rommanager.license',
+            'com.dimonvideo.luckypatcher', 'com.chelpus.lackypatch',
+            'com.ramdroid.appquarantine', 'com.ramdroid.appquarantinepro',
+            'com.devadvance.rootcloak', 'com.devadvance.rootcloakplus',
+            'de.robv.android.xposed.installer', 'com.saurik.substrate',
+            'com.zachspong.temprootremovejb', 'com.amphoras.hidemyroot',
+            'com.amphoras.hidemyrootadfree', 'com.formyhm.hiderootPremium',
+            'com.formyhm.hideroot', 'me.phh.superuser', 'eu.chainfire.supersu.pro',
+            'com.kingouser.com'
+        ];
+        var RootBinaries = ['su', 'busybox', 'supersu', 'Superuser.apk', 'KingoUser.apk', 'SuperSu.apk'];
+        var RootProperties = {
+            'ro.build.selinux': '1', 'ro.debuggable': '0',
+            'service.adb.root': '0', 'ro.secure': '1'
+        };
+        var RootPropertiesKeys = Object.keys(RootProperties);
+
+        try {
+            var PM = Java.use('android.app.ApplicationPackageManager');
+            PM.getPackageInfo.overload('java.lang.String', 'int').implementation = function (pname, flags) {
+                if (RootPackages.indexOf(pname) > -1) {
+                    logRoot('ApplicationPackageManager.getPackageInfo(String, int)', pname);
+                    pname = 'set.package.name.to.a.fake.one.so.we.can.bypass.it';
+                }
+                return this.getPackageInfo.call(this, pname, flags);
+            };
+        } catch (e) { console.log('[ROOT] getPackageInfo fail: ' + e.message); }
+
+        try {
+            var NF = Java.use('java.io.File');
+            NF.exists.implementation = function () {
+                var name = NF.getName.call(this);
+                if (RootBinaries.indexOf(name) > -1) { logRoot('java.io.File.exists()', name); return false; }
+                return this.exists.call(this);
+            };
+        } catch (e) { console.log('[ROOT] File.exists fail: ' + e.message); }
+
+        try {
+            var RT = Java.use('java.lang.Runtime');
+            var e0 = RT.exec.overload('[Ljava.lang.String;');
+            var e1 = RT.exec.overload('java.lang.String');
+            var e2 = RT.exec.overload('java.lang.String', '[Ljava.lang.String;');
+            var e3 = RT.exec.overload('[Ljava.lang.String;', '[Ljava.lang.String;');
+            var e4 = RT.exec.overload('[Ljava.lang.String;', '[Ljava.lang.String;', 'java.io.File');
+            var e5 = RT.exec.overload('java.lang.String', '[Ljava.lang.String;', 'java.io.File');
+            var block = function (c) {
+                return c.indexOf('getprop') != -1 || c == 'mount' || c.indexOf('build.prop') != -1 || c == 'id' || c == 'sh' || c == 'su';
+            };
+            e5.implementation = function (cmd, env, dir) {
+                if (block(cmd)) { logRoot('Runtime.exec(String, String[], File)', cmd); return e1.call(this, 'grep'); }
+                return e5.call(this, cmd, env, dir);
+            };
+            e4.implementation = function (arr, env, file) {
+                for (var i = 0; i < arr.length; i++) if (block(arr[i])) { logRoot('Runtime.exec(String[], String[], File)', arr[i]); return e1.call(this, 'grep'); }
+                return e4.call(this, arr, env, file);
+            };
+            e3.implementation = function (arr, envp) {
+                for (var i = 0; i < arr.length; i++) if (block(arr[i])) { logRoot('Runtime.exec(String[], String[])', arr[i]); return e1.call(this, 'grep'); }
+                return e3.call(this, arr, envp);
+            };
+            e2.implementation = function (cmd, env) {
+                if (block(cmd)) { logRoot('Runtime.exec(String, String[])', cmd); return e1.call(this, 'grep'); }
+                return e2.call(this, cmd, env);
+            };
+            e0.implementation = function (arr) {
+                for (var i = 0; i < arr.length; i++) if (block(arr[i])) { logRoot('Runtime.exec(String[])', arr[i]); return e1.call(this, 'grep'); }
+                return e0.call(this, arr);
+            };
+            e1.implementation = function (cmd) {
+                if (block(cmd)) { logRoot('Runtime.exec(String)', cmd); return e1.call(this, 'grep'); }
+                return e1.call(this, cmd);
+            };
+        } catch (e) { console.log('[ROOT] Runtime.exec fail: ' + e.message); }
+
+        try {
+            var S = Java.use('java.lang.String');
+            S.contains.implementation = function (n) {
+                if (n == 'test-keys') { logRoot('String.contains(String)', 'test-keys'); return false; }
+                return this.contains.call(this, n);
+            };
+        } catch (e) { console.log('[ROOT] String.contains fail: ' + e.message); }
+
+        try {
+            var SP = Java.use('android.os.SystemProperties');
+            var g = SP.get.overload('java.lang.String');
+            g.implementation = function (n) {
+                if (RootPropertiesKeys.indexOf(n) != -1) { logRoot('SystemProperties.get(String)', n); return RootProperties[n]; }
+                return this.get.call(this, n);
+            };
+        } catch (e) { console.log('[ROOT] SystemProperties.get fail: ' + e.message); }
+
+        try {
+            var fopen = Module.findExportByName('libc.so', 'fopen');
+            if (fopen) Interceptor.attach(fopen, {
+                onEnter: function (a) {
+                    var p = Memory.readCString(a[0]).split('/');
+                    var n = p[p.length - 1];
+                    if (RootBinaries.indexOf(n) > -1) { logRoot('libc.so!fopen', n); Memory.writeUtf8String(a[0], '/notexists'); }
+                }
+            });
+        } catch (e) { console.log('[ROOT] fopen fail: ' + e.message); }
+
+        try {
+            var sysfn = Module.findExportByName('libc.so', 'system');
+            if (sysfn) Interceptor.attach(sysfn, {
+                onEnter: function (a) {
+                    var c = Memory.readCString(a[0]);
+                    if (c.indexOf('getprop') != -1 || c == 'mount' || c.indexOf('build.prop') != -1 || c == 'id' || c == 'su') {
+                        logRoot('libc.so!system', c);
+                        Memory.writeUtf8String(a[0], 'grep');
+                    }
+                }
+            });
+        } catch (e) { console.log('[ROOT] system fail: ' + e.message); }
+
+        try {
+            var BR = Java.use('java.io.BufferedReader');
+            BR.readLine.overload().implementation = function () {
+                var t = this.readLine.call(this);
+                if (t !== null && t.indexOf('ro.build.tags=test-keys') > -1) {
+                    logRoot('BufferedReader.readLine()', 'test-keys');
+                    t = t.replace('ro.build.tags=test-keys', 'ro.build.tags=release-keys');
+                }
+                return t;
+            };
+        } catch (e) { console.log('[ROOT] BufferedReader fail: ' + e.message); }
+
+        try {
+            var PB = Java.use('java.lang.ProcessBuilder');
+            PB.start.implementation = function () {
+                var c = this.command.call(this);
+                for (var i = 0; i < c.size(); i++) {
+                    var t = c.get(i).toString();
+                    if (t.indexOf('getprop') != -1 || t.indexOf('mount') != -1 || t.indexOf('build.prop') != -1 || t.indexOf('id') != -1 || t == 'su') {
+                        logRoot('ProcessBuilder.start()', t);
+                        this.command.call(this, ['grep']);
+                        break;
+                    }
+                }
+                return this.start.call(this);
+            };
+        } catch (e) { console.log('[ROOT] ProcessBuilder fail: ' + e.message); }
+
+        console.log('===== [2] AES TOKEN HOOK =====');
+
+        try {
+            var SKS = Java.use('javax.crypto.spec.SecretKeySpec');
+            SKS.$init.overload('[B', 'java.lang.String').implementation = function (k, alg) {
+                var r = this.$init(k, alg);
+                logAES('SecretKeySpec', 'hex=' + bytesToHex(k) + ' b64=' + bytesToBase64(k));
+                return r;
+            };
+        } catch (e) { console.log('[AES] SecretKeySpec fail: ' + e.message); }
+
+        try {
+            var IVS = Java.use('javax.crypto.spec.IvParameterSpec');
+            IVS.$init.overload('[B').implementation = function (iv) {
+                var r = this.$init(iv);
+                logAES('IvParameterSpec', 'hex=' + bytesToHex(iv) + ' b64=' + bytesToBase64(iv));
+                return r;
+            };
+        } catch (e) { console.log('[AES] IvParameterSpec fail: ' + e.message); }
+
+        try {
+            var C = Java.use('javax.crypto.Cipher');
+            C.getInstance.overload('java.lang.String').implementation = function (t) {
+                logAES('Cipher.getInstance', t);
+                return this.getInstance(t);
+            };
+            C.init.overload('int', 'java.security.Key', 'java.security.spec.AlgorithmParameterSpec').implementation = function (mode, key, iv) {
+                var r = this.init(mode, key, iv);
+                logAES('Cipher.init mode', String(mode));
+                return r;
+            };
+            C.doFinal.overload('[B').implementation = function (x) {
+                var r = this.doFinal.overload('[B').call(this, x);
+                try { logAES('doFinal output', 'b64=' + bytesToBase64(r)); } catch (e) {}
+                logAES('doFinal input', 'b64=' + bytesToBase64(x));
+                return r;
+            };
+        } catch (e) { console.log('[AES] Cipher fail: ' + e.message); }
+
+        console.log('===== [3] SSL SPOOFING =====');
+
+        try {
+            var X509 = Java.use('javax.net.ssl.X509TrustManager');
+            var CTX = Java.use('javax.net.ssl.SSLContext');
+            var TM = Java.registerClass({
+                name: 'dev.bypass.TM',
+                implements: [X509],
+                methods: {
+                    checkClientTrusted: function () {},
+                    checkServerTrusted: function () {},
+                    getAcceptedIssuers: function () { return []; }
+                }
+            });
+            var TMs = [TM.$new()];
+            var ctxInit = CTX.init.overload('[Ljavax.net.ssl.KeyManager;', '[Ljavax.net.ssl.TrustManager;', 'java.security.SecureRandom');
+            ctxInit.implementation = function (km, tm, sr) {
+                logSSL('javax.net.ssl.SSLContext.init');
+                return ctxInit.call(this, km, TMs, sr);
+            };
+        } catch (e) {}
+
+        try {
+            var H = Java.use('javax.net.ssl.HttpsURLConnection');
+            H.setDefaultHostnameVerifier.implementation = function () { logSSL('HttpsURLConnection.setDefaultHostnameVerifier'); };
+            H.setSSLSocketFactory.implementation = function () { logSSL('HttpsURLConnection.setSSLSocketFactory'); };
+            H.setHostnameVerifier.implementation = function () { logSSL('HttpsURLConnection.setHostnameVerifier'); };
+        } catch (e) {}
+
+        try {
+            var TMI = Java.use('com.android.org.conscrypt.TrustManagerImpl');
+            TMI.verifyChain.implementation = function (uc) {
+                logSSL('com.android.org.conscrypt.TrustManagerImpl.verifyChain');
+                return uc;
+            };
+        } catch (e) {}
+
+        try {
+            var TMI2 = Java.use('com.android.org.conscrypt.TrustManagerImpl');
+            TMI2.checkTrustedRecursive.implementation = function () {
+                logSSL('com.android.org.conscrypt.TrustManagerImpl.checkTrustedRecursive');
+                return Java.use('java.util.ArrayList').$new();
+            };
+        } catch (e) {}
+
+        try {
+            var OSS = Java.use('com.android.org.conscrypt.OpenSSLSocketImpl');
+            OSS.verifyCertificateChain.implementation = function () {
+                logSSL('com.android.org.conscrypt.OpenSSLSocketImpl.verifyCertificateChain');
+            };
+        } catch (e) {}
+
+        try {
+            var CP = Java.use('okhttp3.CertificatePinner');
+            CP.check.overload('java.lang.String', 'java.util.List').implementation = function () {
+                logSSL('okhttp3.CertificatePinner.check(String, List)');
+            };
+        } catch (e) {}
+
+        try {
+            var CP2 = Java.use('okhttp3.CertificatePinner');
+            CP2.check.overload('java.lang.String', '[Ljava.security.cert.Certificate;').implementation = function () {
+                logSSL('okhttp3.CertificatePinner.check(String, Certificate[])');
+            };
+        } catch (e) {}
+
+        try {
+            var CP3 = Java.use('okhttp3.CertificatePinner');
+            CP3['check$okhttp'].implementation = function () {
+                logSSL('okhttp3.CertificatePinner.check$okhttp');
+            };
+        } catch (e) {}
+
+        try {
+            var TK = Java.use('com.datatheorem.android.trustkit.pinning.OkHostnameVerifier');
+            TK.verify.overload('java.lang.String', 'javax.net.ssl.SSLSession').implementation = function () { logSSL('Trustkit.OkHostnameVerifier.verify(SSLSession)'); return true; };
+        } catch (e) {}
+
+        try {
+            var TK2 = Java.use('com.datatheorem.android.trustkit.pinning.OkHostnameVerifier');
+            TK2.verify.overload('java.lang.String', 'java.security.cert.X509Certificate').implementation = function () { logSSL('Trustkit.OkHostnameVerifier.verify(X509Certificate)'); return true; };
+        } catch (e) {}
+
+        try {
+            var TKP = Java.use('com.datatheorem.android.trustkit.pinning.PinningTrustManager');
+            TKP.checkServerTrusted.implementation = function () { logSSL('Trustkit.PinningTrustManager.checkServerTrusted'); };
+        } catch (e) {}
+
+        try {
+            var APP = Java.use('appcelerator.https.PinningTrustManager');
+            APP.checkServerTrusted.implementation = function () { logSSL('appcelerator.https.PinningTrustManager.checkServerTrusted'); };
+        } catch (e) {}
+
+        try {
+            var WVC = Java.use('android.webkit.WebViewClient');
+            WVC.onReceivedSslError.implementation = function (wv, h, err) {
+                logSSL('android.webkit.WebViewClient.onReceivedSslError');
+                h.proceed();
+            };
+        } catch (e) {}
+
+        console.log('===== [READY] =====');
+    });
+}, 0);
+
+```
+
+`acyber_server_proxy.py`:
+
+```py
+#!/usr/bin/env python3
+"""
+Forward proxy — configurable host/port, protocol filter, domain filter, live log.
+
+Usage:
+  python proxy.py
+  python proxy.py --host 127.0.0.1 --port 8080
+  python proxy.py --protocol https
+  python proxy.py --allow-domain "example.com,*.github.com"
+  python proxy.py --block-domain "*.ads.com,doubleclick.net"
+  acyber.ir | mrmtwoj.ir
+"""
+import socket, threading, select, argparse, fnmatch
+from urllib.parse import urlparse
+from datetime import datetime
+
+BUFFER_SIZE = 8192
+TIMEOUT     = 30
+
+# ---- runtime config (filled by CLI) ----
+CFG = {
+    "protocol":       "all",   # all | http | https
+    "allow_domains":  [],      # whitelist (empty = allow all)
+    "block_domains":  [],      # blacklist
+}
+
+# ---------------- helpers ----------------
+def log(msg):
+    print(f"[{datetime.now():%H:%M:%S}] {msg}", flush=True)
+
+def domain_match(host, pattern):
+    return fnmatch.fnmatch(host.lower(), pattern.lower())
+
+def domain_ok(host):
+    host = host.lower()
+    if CFG["allow_domains"] and not any(domain_match(host, p) for p in CFG["allow_domains"]):
+        return False
+    if any(domain_match(host, p) for p in CFG["block_domains"]):
+        return False
+    return True
+
+def proto_ok(proto):
+    return CFG["protocol"] == "all" or CFG["protocol"] == proto
+
+def deny(client, reason):
+    try:
+        client.sendall(f"HTTP/1.1 403 Forbidden\r\nX-Deny-Reason: {reason}\r\n\r\n".encode())
+    except Exception:
+        pass
+
+# ---------------- per-connection handler ----------------
+def handle_client(client, addr):
+    remote = None
+    try:
+        # --- read request header ---
+        request = b""
+        while b"\r\n\r\n" not in request:
+            chunk = client.recv(BUFFER_SIZE)
+            if not chunk:
+                return
+            request += chunk
+
+        head = request.split(b"\r\n\r\n", 1)[0].decode(errors="ignore")
+        lines = head.split("\r\n")
+        method, target, version = lines[0].split(" ", 2)
+        headers = lines[1:]
+
+        # ---------- HTTPS (CONNECT tunnel) ----------
+        if method.upper() == "CONNECT":
+            if not proto_ok("https"):
+                log(f"[DENY-PROTO]   HTTPS  {target}  <- {addr[0]}")
+                return deny(client, "protocol")
+            host, _, port = target.partition(":")
+            port = int(port or 443)
+            if not domain_ok(host):
+                log(f"[DENY-DOMAIN]  HTTPS  {host}  <- {addr[0]}")
+                return deny(client, "domain")
+
+            log(f"[HTTPS]        {host}:{port}  <- {addr[0]}")
+            remote = socket.create_connection((host, port), timeout=TIMEOUT)
+            client.sendall(b"HTTP/1.1 200 Connection Established\r\n\r\n")
+
+            pair = [client, remote]
+            while True:
+                r, _, _ = select.select(pair, [], [], TIMEOUT)
+                if not r:
+                    break
+                for s in r:
+                    data = s.recv(BUFFER_SIZE)
+                    if not data:
+                        return
+                    (remote if s is client else client).sendall(data)
+            return
+
+        # ---------- HTTP ----------
+        parsed = urlparse(target)
+        if parsed.hostname:                                  # absolute form
+            host = parsed.hostname
+            port = parsed.port or 80
+            path = (parsed.path or "/") + (("?" + parsed.query) if parsed.query else "")
+        else:                                                # origin form
+            host_hdr = next((h.split(":", 1)[1].strip()
+                             for h in headers if h.lower().startswith("host:")), None)
+            if not host_hdr:
+                return deny(client, "no-host")
+            host, _, port = host_hdr.partition(":")
+            port = int(port or 80)
+            path = target
+
+        if not proto_ok("http"):
+            log(f"[DENY-PROTO]   HTTP   {host}{path}  <- {addr[0]}")
+            return deny(client, "protocol")
+        if not domain_ok(host):
+            log(f"[DENY-DOMAIN]  HTTP   {host}{path}  <- {addr[0]}")
+            return deny(client, "domain")
+
+        log(f"[HTTP]         {method} http://{host}:{port}{path}  <- {addr[0]}")
+
+        remote = socket.create_connection((host, port), timeout=TIMEOUT)
+        rebuilt = f"{method} {path} {version}\r\n" + "\r\n".join(headers) + "\r\n\r\n"
+        remote.sendall(rebuilt.encode() + request.split(b"\r\n\r\n", 1)[1])
+
+        while True:
+            data = remote.recv(BUFFER_SIZE)
+            if not data:
+                break
+            client.sendall(data)
+
+    except Exception as e:
+        log(f"[ERR] {addr[0]}: {e}")
+        try:
+            client.sendall(b"HTTP/1.1 502 Bad Gateway\r\n\r\n")
+        except Exception:
+            pass
+    finally:
+        for s in (client, remote):
+            if s:
+                try: s.close()
+                except Exception: pass
+
+# ---------------- entry point ----------------
+def main():
+    p = argparse.ArgumentParser(description="Forward proxy with filters")
+    p.add_argument("--host", default="127.0.0.1",
+                   help="Bind IP (default 127.0.0.1)")
+    p.add_argument("--port", type=int, default=5090,
+                   help="Bind port (default 5090)")
+    p.add_argument("--protocol", choices=["all", "http", "https"], default="all",
+                   help="Only allow this protocol (default all)")
+    p.add_argument("--allow-domain", default="",
+                   help="Whitelist, comma-separated, wildcards ok (*.example.com)")
+    p.add_argument("--block-domain", default="",
+                   help="Blacklist, comma-separated, wildcards ok (*.ads.com)")
+    a = p.parse_args()
+
+    CFG["protocol"] = a.protocol
+    if a.allow_domain:
+        CFG["allow_domains"] = [d.strip() for d in a.allow_domain.split(",") if d.strip()]
+    if a.block_domain:
+        CFG["block_domains"] = [d.strip() for d in a.block_domain.split(",") if d.strip()]
+
+    srv = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    srv.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    srv.bind((a.host, a.port))
+    srv.listen(200)
+
+    log(f"Proxy listening on {a.host}:{a.port}")
+    log(f"Protocol filter : {CFG['protocol']}")
+    if CFG["allow_domains"]:
+        log(f"Whitelist       : {CFG['allow_domains']}")
+    if CFG["block_domains"]:
+        log(f"Blacklist       : {CFG['block_domains']}")
+
+    try:
+        while True:
+            c, addr = srv.accept()
+            threading.Thread(target=handle_client, args=(c, addr), daemon=True).start()
+    except KeyboardInterrupt:
+        log("Shutting down…")
+        srv.close()
+
+if __name__ == "__main__":
+    main()
+
+```
