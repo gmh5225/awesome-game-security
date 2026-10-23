@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-23** — lint (agent, Cursor lint pass): read `wiki/AGENTS.md`; listed **Overviews** (9): `anti-cheat`, `dma-attack`, `game-engine`, `game-hacking`, `graphics-api`, `mobile-security`, `overview`, `reverse-engineering`, `windows-kernel`; **Concepts** (51) under `wiki/concepts/`; **Entities** (4163) under `wiki/entities/`; reconciled `index.md` vs disk — 4223 catalog paths (9+51+4163), 4223 unique, 0 missing, 0 dead, 0 duplicate index entries; nine `overviews/*.md` + `index.md` Overviews/Concepts blurb [[wikilink]] spot-check — 13773 links, 0 broken, 0 malformed `]]]`; 6 expected cross-kind slug collisions ([[anti-cheat]], [[game-hacking]], [[reverse-engineering]], [[byovd]], [[dma]], [[il2cpp]]); wiki populated — bootstrap not required; structural repairs none (`log.md` only).
+
 - **2026-10-23** — ingest `description:goooroooX/CE-Decky`: enriched entity [[ce-decky]] (Decky Loader; Python backend + TS/JS Game Mode UI + Lua CE bridge; Proton-prefix CE, community tables, QAM toggles, table repair, Authenticode installs, session lifecycle; confidence high); cited on [[overviews/game-hacking]] CE Plugins lane; cross-linked [[cheat-engine]], [[controller-mode]], [[archmod]]; `index.md` entity blurb updated.
 
 - **2026-10-23** — ingest `description:jammyfu/rea-atlas`: enriched entity [[rea-atlas]] (REA workflow **Yes** tagging rules, audience, Cheat / Guide lane; confidence high); cross-linked morluto/[[rea]] to [[rea-atlas]]; cited on [[overviews/game-hacking]] agent-RE / guide cluster; `index.md` blurbs for [[rea]] and [[rea-atlas]].
