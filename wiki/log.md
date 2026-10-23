@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-23** — lint (agent, Cursor lint pass): read `wiki/AGENTS.md`; **Overviews** (9): `anti-cheat`, `dma-attack`, `game-engine`, `game-hacking`, `graphics-api`, `mobile-security`, `overview`, `reverse-engineering`, `windows-kernel`; **Concepts** (51); **Entities** (4166); `index.md` reconciled with disk — 4226 catalog paths, 0 missing, 0 dead, 0 duplicates; `overviews/*.md` [[wikilink]] spot-check — 12879 links, 0 broken; index Overviews/Concepts blurb — 13792 links, 0 broken, 0 malformed `]]]`; 6 expected cross-kind slug collisions; bootstrap not required; no structural repairs (`log.md` only).
+
 - **2026-10-23** — lint (agent, Cursor lint pass): read `wiki/AGENTS.md`; listed **Overviews** (9): `anti-cheat`, `dma-attack`, `game-engine`, `game-hacking`, `graphics-api`, `mobile-security`, `overview`, `reverse-engineering`, `windows-kernel`; **Concepts** (51) under `wiki/concepts/`; **Entities** (4166) under `wiki/entities/`; reconciled `index.md` vs disk — 4226 catalog paths (9+51+4166), 4226 unique, 0 missing, 0 dead, 0 duplicate index entries; nine `overviews/*.md` + `index.md` Overviews/Concepts blurb [[wikilink]] spot-check — 13792 links, 0 broken, 0 malformed `]]]`; 6 expected cross-kind slug collisions ([[anti-cheat]], [[game-hacking]], [[reverse-engineering]], [[byovd]], [[dma]], [[il2cpp]]); wiki populated — bootstrap not required; structural repairs none (`log.md` only).
 
 - **2026-10-23** — ingest `description:zodiacon/PoolMonXv3`: enriched entity [[poolmonxv3]] (Capabilities/Use cases; C++/Visual Studio WTL/WIL; confidence high); cited on [[overviews/windows-kernel]] pool-forensics lane; `index.md` entity blurb updated.
