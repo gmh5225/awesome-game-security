@@ -6,12 +6,16 @@ sources:
   - wiki/sources/descriptions/MaryNCRT__Ultimate-Mortal-Kombat-3-iOS-Decompiled.md
   - wiki/sources/README-categories.md
 updated: 2026-10-23
-confidence: medium
+confidence: high
 ---
 
-# ultimate-mortal-kombat-3-ios-decompiled
+# Ultimate Mortal Kombat 3 iOS Decompiled
 
-Clean-room Ghidra decompilation of *Ultimate Mortal Kombat 3* (**iOS v1.2.59**, armv7) into verified C, plus a native cross-platform desktop port—documenting the LIME 3D engine, arcade fight logic, and proprietary binary formats while requiring a user-supplied IPA (no copyrighted assets in the repository). (source: wiki/sources/descriptions/MaryNCRT__Ultimate-Mortal-Kombat-3-iOS-Decompiled.md)
+**MaryNCRT/Ultimate-Mortal-Kombat-3-iOS-Decompiled** is a clean-room **Ghidra** decompilation of the 2011 iOS release of *Ultimate Mortal Kombat 3* (**v1.2.59**, armv7): all **2,572** game functions transcribed into verified C and wrapped in a playable native desktop port. The tree documents the **LIME 3D** engine, arcade fight logic, and proprietary binary formats; builds require a user-supplied **IPA** (no copyrighted assets shipped). (source: wiki/sources/descriptions/MaryNCRT__Ultimate-Mortal-Kombat-3-iOS-Decompiled.md)
+
+## Positioning
+
+Listed under **Cheat / Source** beside Switch static-recomp ports such as [[smo-recomp]] and [[letsgo-recomp]]—a preservation-oriented reference for recovering classic fighting-game logic from shipped **Mach-O** mobile binaries with differential verification rather than runtime hooks.
 
 ## Stack
 
