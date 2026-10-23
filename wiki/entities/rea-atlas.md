@@ -6,7 +6,7 @@ sources:
   - wiki/sources/descriptions/jammyfu__rea-atlas.md
   - wiki/sources/README-categories.md
 updated: 2026-10-23
-confidence: medium
+confidence: high
 ---
 
 # REA Atlas
@@ -15,7 +15,19 @@ confidence: medium
 
 ## Scope
 
-Entries are grouped by console or platform from retro hardware through modern PC and mobile. Maintenance uses structured JSON plus a Python renderer that regenerates localized README tables—aimed at preservationists and researchers who want a single map of legitimate decomp and RE efforts rather than crack or piracy tooling.
+Entries are grouped by console or platform from retro systems through modern PC and mobile. Maintenance uses structured JSON plus a Python renderer that regenerates localized README tables. (source: wiki/sources/descriptions/jammyfu__rea-atlas.md)
+
+## Audience
+
+Reverse engineers, preservationists, and researchers who want one index of legitimate decomp and RE efforts—not crack or piracy tooling. (source: wiki/sources/descriptions/jammyfu__rea-atlas.md)
+
+## REA workflow tags
+
+Each row records whether the project follows the [[rea]] workflow; **Yes** is used only when public documentation supports the claim. (source: wiki/sources/descriptions/jammyfu__rea-atlas.md)
+
+## README lane
+
+Cheat / Guide — curated map beside agent RE stacks such as morluto/[[rea]] and prompt libraries such as [[rea-prompts]]. (source: wiki/sources/descriptions/jammyfu__rea-atlas.md)
 
 ## Positioning
 

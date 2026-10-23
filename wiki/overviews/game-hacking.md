@@ -1930,6 +1930,7 @@ sources:
   - wiki/sources/descriptions/B6sse__modManager.md
   - wiki/sources/descriptions/MinibloxCheaters2__VapeRewrite.md
   - wiki/sources/descriptions/goooroooX__CE-Decky.md
+  - wiki/sources/descriptions/jammyfu__rea-atlas.md
 updated: 2026-10-23
 confidence: high
 ---
@@ -2262,6 +2263,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - UnknownCheats forum knowledge retrieval via [[uc-mcp]] (0111-0222; Python read-only MCP; session-cookie keyword search, thread read, subforum browse, page fetch, and health check; UTC staleness labels; curl_cffi Cloudflare bypass + vBulletin parse; rate limits + URL guards + SQLite cache; Claude Code/Cursor; Cheat agent-RE / community-knowledge lane) (source: wiki/sources/descriptions/0111-0222__uc-mcp.md)
 - AI-assisted RE with deterministic byte-level verification via [[reverify]] (2akouwu; MCP server + CLI; pairs LLM analysis with auditable byte-level checks; Cheat RE Tools) (source: wiki/sources/README-categories.md)
 - Offline-first RE triage via [[rea-mytechnotalent]] (mytechnotalent; Python; one-shot PE/ELF/Mach-O + JS/Electron inventory, local RAG, multi-agent propose-review-gate, CLI + MCP; default no API key; Cheat / RE Tools) (source: wiki/sources/descriptions/mytechnotalent__rea.md)
+- Multilingual decomp/recomp and RE project map via [[rea-atlas]] (jammyfu; platform-grouped JSON + Python README renderer; morluto/[[rea]] workflow tags when publicly documented; preservation-oriented index—not crack tooling; Cheat / Guide) (source: wiki/sources/descriptions/jammyfu__rea-atlas.md)
 - DSH Ghidra headless RPC skill family via [[ghidra-skill-for-dsh]] (Cristallin2006; seven scenario workflows—triage, unpack, static, vuln audit, Frida/Qiling dynamic, PCAP traffic, pure-DEX APK; oracle-based verification; Cheat RE Tools) (source: wiki/sources/descriptions/Cristallin2006__ghidra-skill-for-dsh.md)
 - DSH Ghidra bridge with 219+ agent tools via [[dsh-ghidra]] (spix18; JavaScript/Python DSH plugin; PyGhidra cross-platform import/decompile, xrefs, call graphs, persistent renames/comments/prototypes, composite analysis, malware triage—crypto constants, API heuristics, IOC extraction, anti-analysis patterns; optional GhidraMCP REST; environment diagnostics + agent skill; Cheat RE Tools) (source: wiki/sources/descriptions/spix18__dsh-ghidra.md)
 - Node.js MCP orchestrator via [[skid-factory]] (wrong-commit; TypeScript + Lua/Python bridges; Cheat Engine/x64dbg/Ghidra memory scan, hardware write breakpoints, pointer-chain trace, and patch workflows; Cursor CLI advise loop; Cheat RE Tools) (source: wiki/sources/descriptions/wrong-commit__skid_factory.md)

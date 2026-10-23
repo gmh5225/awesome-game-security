@@ -4,8 +4,9 @@ kind: entity
 topics: [reverse-engineering, game-engine]
 sources:
   - wiki/sources/descriptions/morluto__rea.md
+  - wiki/sources/descriptions/jammyfu__rea-atlas.md
   - wiki/sources/README-categories.md
-updated: 2026-10-11
+updated: 2026-10-23
 confidence: medium
 ---
 
@@ -33,10 +34,12 @@ Sits in the README **Game Develop → MCP server** lane beside single-backend br
 
 **Not** mytechnotalent/rea — that separate Python offline-first triage + local RAG assistant lives under **Cheat → RE Tools** as [[rea-mytechnotalent]].
 
+For a platform-grouped catalog of open decomp/recomp and RE projects tagged for documented REA usage, see jammyfu/[[rea-atlas]] (multilingual README indexes from JSON; Cheat / Guide). (source: wiki/sources/descriptions/jammyfu__rea-atlas.md)
+
 ## Links
 
 - Repo: https://github.com/morluto/rea
 
 ## Related
 
-[[binary-ninja-headless-mcp]] · [[ghidra-headless-mcp]] · [[ida-pro-mcp]] · [[delamain]] · [[dnspymcp]] · [[rea-unlock]] · [[reverify]] · [[research-rigor]] · [[overviews/reverse-engineering]] · [[overviews/game-engine]]
+[[binary-ninja-headless-mcp]] · [[ghidra-headless-mcp]] · [[ida-pro-mcp]] · [[delamain]] · [[dnspymcp]] · [[rea-atlas]] · [[rea-prompts]] · [[rea-unlock]] · [[reverify]] · [[research-rigor]] · [[overviews/reverse-engineering]] · [[overviews/game-engine]]
