@@ -15,6 +15,10 @@ confidence: medium
 
 README category: Cheat / RE Tools.
 
+## Stack
+
+JavaScript/Node.js DSH plugin; bridges **220+ MCP tools** from upstream **rea-agents** into a localized web workbench. Bundled offline documentation and agent skills reduce extra REA profile setup. Dashboard surfaces health checks, per-tool usage, and localized error explanations; panel helpers can install or manage Ghidra, JDK, and Frida engines. (source: wiki/sources/descriptions/jiuyou-7411__dsh-rea-plugin.md)
+
 ## Capabilities
 
 Android APK workflows via JADX, apktool, unpacking, and Frida instrumentation; native binaries through optional Ghidra integration; mobile-focused helpers for anti-injection checks, SO analysis, and related scripts. Analysis can run without extra REA profile setup when bundled docs and skills are used. (source: wiki/sources/descriptions/jiuyou-7411__dsh-rea-plugin.md)
@@ -33,4 +37,4 @@ Complements [[dsh-plugins]] and [[dsh-ghidra]] as a REA-oriented DSH workbench (
 
 ## Related
 
-[[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[overviews/mobile-security]] · [[dsh-plugins]] · [[dsh-ghidra]] · [[ghidra-skill-for-dsh]] · [[rea-atlas]] · [[research-rigor]]
+[[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[overviews/mobile-security]] · [[dsh-plugins]] · [[dsh-ghidra]] · [[ghidra-skill-for-dsh]] · [[rea]] · [[rea-atlas]] · [[rea-prompts]] · [[jadx]] · [[frida]] · [[research-rigor]]

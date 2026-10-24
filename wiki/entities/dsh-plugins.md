@@ -5,7 +5,7 @@ topics: [reverse-engineering, game-hacking]
 sources:
   - wiki/sources/descriptions/GalaxyBatMan111__dsh-plugins.md
   - wiki/sources/README-categories.md
-updated: 2026-09-08
+updated: 2026-10-24
 confidence: medium
 ---
 
@@ -23,7 +23,7 @@ Plugin bundle for the **DeepSeek Harness (DSH)** desktop AI assistant. Extends D
 
 README category: Cheat / RE Tools.
 
-Complements [[ghidra-bridge]] and [[ghidra-headless-mcp]] agent paths; pairs with [[dsh-ghidra]] for a fuller DSH-native Ghidra tool catalog and [[dsh-cheatengine]] for DSH-side dynamic memory analysis. Pair automated decompile summaries with [[research-rigor]].
+Complements [[ghidra-bridge]] and [[ghidra-headless-mcp]] agent paths; pairs with [[dsh-ghidra]] for a fuller DSH-native Ghidra tool catalog, [[dsh-rea-plugin]] for the REA agent workbench (~220 rea-agents MCP tools; Chinese UI; JADX/apktool/Frida/Ghidra; bundled offline docs) (source: wiki/sources/descriptions/jiuyou-7411__dsh-rea-plugin.md), and [[dsh-cheatengine]] for DSH-side dynamic memory analysis. Pair automated decompile summaries with [[research-rigor]].
 
 ## Links
 
@@ -31,4 +31,4 @@ Complements [[ghidra-bridge]] and [[ghidra-headless-mcp]] agent paths; pairs wit
 
 ## Related
 
-[[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[dsh-ghidra]] · [[ghidra-bridge]] · [[ghidra-headless-mcp]] · [[reverify]] · [[dsh-cheatengine]] · [[research-rigor]]
+[[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[dsh-ghidra]] · [[dsh-rea-plugin]] · [[ghidra-bridge]] · [[ghidra-headless-mcp]] · [[reverify]] · [[dsh-cheatengine]] · [[research-rigor]]
