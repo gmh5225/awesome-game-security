@@ -17,9 +17,20 @@ confidence: high
 
 Cheat / IOS App Packaging — evidence-linked iOS/macOS app study and partial independent rebuilds beside jailbroken IPA dump tools. (source: wiki/sources/README-categories.md)
 
+## Collection routes
+
+| Mode | Prerequisites | Typical artifacts |
+|------|-----------------|-------------------|
+| Standard | USB-attached device | UI/accessibility trees, lighter capture without SSH or Frida |
+| Jailbroken / extended | Compatible jailbroken path | Packages, sandbox data, optional runtime traces, FairPlay-related decryption where supported |
+
 ## Mechanism
 
-Static analysis can integrate optional **Ghidra** and **Hopper** decompilation, **ARM64** disassembly, and **Frida** method tracing, orchestrated through verifiable evidence cases, playbooks, and coding-agent handoff tasks. **Swift** components support macOS collection and sample rebuild targets; the toolchain emphasizes cited reports, feature specifications, and same-device comparison of original versus rebuilt flows. (source: wiki/sources/descriptions/everettjf__copyapp.md)
+Static analysis can integrate optional **Ghidra** and **Hopper** decompilation, **ARM64** disassembly, and **Frida** method tracing, orchestrated through verifiable **evidence cases**, **playbooks**, and coding-agent handoff tasks. **Swift** components support macOS collection and sample rebuild targets; the toolchain emphasizes cited reports, feature specifications, and same-device comparison of original versus rebuilt flows. (source: wiki/sources/descriptions/everettjf__copyapp.md)
+
+## Audience
+
+Mobile reverse engineers, security researchers, and developers who need **reproducible, evidence-linked** study of proprietary app behavior rather than black-box guessing. (source: wiki/sources/descriptions/everettjf__copyapp.md)
 
 ## Positioning
 

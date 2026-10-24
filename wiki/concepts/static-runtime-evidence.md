@@ -21,7 +21,8 @@ sources:
   - wiki/sources/descriptions/nefariousjosiah__WWE-SVR2009-RECOMP.md
   - wiki/sources/descriptions/formix__sre-re.md
   - wiki/sources/descriptions/Manya3084__SF33RDSXBRecompo.md
-updated: 2026-10-23
+  - wiki/sources/descriptions/everettjf__copyapp.md
+updated: 2026-10-24
 confidence: high
 ---
 
@@ -81,6 +82,8 @@ Switch AArch64 static recompilation to native Windows x64 such as [[smo-recomp]]
 
 [[ultimate-mortal-kombat-3-ios-decompiled]] (MaryNCRT; iOS armv7 Mach-O clean-room Ghidra lift to verified C with armrecomp/differential oracle tests and Win32/SDL2 desktop hosts on OpenGL/Vulkan/D3D12) illustrates mobile fighting-game preservation where lift fidelity is argued via per-function differential checks rather than Switch-style NVN HLE—separate LIME engine/format recovery from GPU backend choice before citing gameplay logic. (source: wiki/sources/descriptions/MaryNCRT__Ultimate-Mortal-Kombat-3-iOS-Decompiled.md)
 
+[[copyapp]] (everettjf; Python CLI + agent workflow on USB-attached **iOS/macOS** targets) chains device collection (UI/accessibility trees, sandbox, optional Frida traces; FairPlay-related decrypt on jailbroken paths) with optional Ghidra/Hopper/ARM64 static follow-on through **verifiable evidence cases** and playbooks—label which observations came from standard capture vs jailbroken/runtime lanes before treating rebuilt flows as behaviorally equivalent to the original app. (source: wiki/sources/descriptions/everettjf__copyapp.md)
+
 ReXGlue-based Xbox 360 static ports such as [[wwe-svr2009-recomp]] (nefariousjosiah; *WWE SmackDown vs. Raw 2009*; ReXGlue PPC→x86-64 + XenosRecomp ahead-of-time shader conversion + native re:Blue/plume renderer on D3D12 or Vulkan; optional D3D call census and shader dumping for GPU translation RE; BYO disc image) pair lifted guest binaries with explicitly reimplemented graphics/runtime services—label which shader and API paths are translated vs instrumented before treating the native build as a renderer reference beside [[nhl-legacy-remaster]]. (source: wiki/sources/descriptions/nefariousjosiah__WWE-SVR2009-RECOMP.md)
 
 ## Behavioral capability from TTD traces
@@ -93,4 +96,4 @@ Game-server PC checks often combine **offline host artifacts** (Prefetch, Amcach
 
 ## Related
 
-[[binary-evidence]] · [[binary-diffing]] · [[dynamic-binary-instrumentation]] · [[jsrf-recomp]] · [[ngbrecomp]] · [[sf33rdsxbrecompo]] · [[nfsu2recomp]] · [[sc2-android-recomp]] · [[smo-recomp]] · [[letsgo-recomp]] · [[ultimate-mortal-kombat-3-ios-decompiled]] · [[wwe-svr2009-recomp]] · [[nhl-legacy-remaster]] · [[saturnkit]] · [[motorstorm-mv-recomp]] · [[dead-rising-2-case-zero-xenon-recomp]] · [[mcla-pc]] · [[pipeline-disasm]] · [[frogman]] · [[sre-re]] · [[openmcm2]] · [[ttd-capa-cpp]] · [[custos]] · [[mixed-boolean-arithmetic]] · [[control-flow-flattening]] · [[research-rigor]] · [[overviews/reverse-engineering]] · [[overviews/windows-kernel]] · [[overviews/game-engine]]
+[[binary-evidence]] · [[binary-diffing]] · [[dynamic-binary-instrumentation]] · [[jsrf-recomp]] · [[ngbrecomp]] · [[sf33rdsxbrecompo]] · [[nfsu2recomp]] · [[sc2-android-recomp]] · [[smo-recomp]] · [[letsgo-recomp]] · [[ultimate-mortal-kombat-3-ios-decompiled]] · [[copyapp]] · [[wwe-svr2009-recomp]] · [[nhl-legacy-remaster]] · [[saturnkit]] · [[motorstorm-mv-recomp]] · [[dead-rising-2-case-zero-xenon-recomp]] · [[mcla-pc]] · [[pipeline-disasm]] · [[frogman]] · [[sre-re]] · [[openmcm2]] · [[ttd-capa-cpp]] · [[custos]] · [[mixed-boolean-arithmetic]] · [[control-flow-flattening]] · [[research-rigor]] · [[overviews/reverse-engineering]] · [[overviews/windows-kernel]] · [[overviews/game-engine]]
