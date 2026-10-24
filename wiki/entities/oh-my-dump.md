@@ -21,4 +21,4 @@ Suited to game-security analysts who need to preserve manual IDA work across fre
 
 ## Related
 
-[[ida_migrator]] · [[binary-diffing]] · [[static-runtime-evidence]] · [[overviews/reverse-engineering]] · [[overviews/game-hacking]]
+[[ida-migrator]] · [[binary-diffing]] · [[static-runtime-evidence]] · [[overviews/reverse-engineering]] · [[overviews/game-hacking]]
