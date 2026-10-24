@@ -3931,6 +3931,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/zhitkur/DayZzz
 - https://github.com/gmh5225/External-Dayz-Cheat
 - https://github.com/gmh5225/DayZ-Cheat
+- https://github.com/cmachale14-eng/DayZESP [External DayZ ESP with DX11 ImGui overlay and iqvw64e.sys BYOVD kernel memory reads for BattlEye-protected process access]
 - https://github.com/JonathanEke/DayZ-Server-Battleye-Remover [Disable battleye]
 
 > Game:Rust
