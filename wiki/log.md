@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-24** — ingest `description:prob1st/chess-sentinel`: enriched entity [[chess-sentinel]] (confidence high; Forensic signals + Operations: `[%clk]` metronome/mid-game engine-toggle cues without Game Review, fair-play closure watchlists, historical public-stats-only scope); cited on [[concepts/ai-aimbot-detection]] chess engine-assistance Bayesian browser lane + [[overviews/anti-cheat]] bullet/frontmatter source sync; `index.md` entity blurb updated.
+
 - **2026-10-24** — ingest `description:yingyangdao/honor-v10-lab`: enriched entity [[honor-v10-lab]] (SWTP unlock, lab stack, HwOUC/harness automation, game-client RE positioning); short cite on [[concepts/frida]] Huawei SELinux → Frida Gadget fallback; `mobile-security` frontmatter source; `index.md` entity blurb.
 
 - **2026-10-24** — ingest `readme:categories`: **Cheat** link_count **2955** (+1; yingyangdao/[[honor-v10-lab]] Honor V10 EMUI 9 documented root lab—SWTP unlock, Magisk, EdXposed, Frida Gadget on Huawei SELinux, tcpdump; Cheat / Android Root) / **Anti Cheat** **826** (+1; prob1st/[[chess-sentinel]] Chrome MV3 Chess.com local Bayesian cheat-probability HUD; Open Source Anti Cheat System) / **Game Develop** **196** / **Game Engine** ~159 / **DirectX** ~42 / **Vulkan** ~13 / **Game Network** ~34 and other major README sections unchanged; 41 top-level sections (`NeverC & NeverD` placeholder); synced [[overviews/overview]], [[overviews/game-hacking]], [[overviews/mobile-security]], [[overviews/anti-cheat]], [[overviews/dma-attack]], and [[overviews/reverse-engineering]]; entities [[honor-v10-lab]] + [[chess-sentinel]]; light `index.md` section notes (no per-category pages).
