@@ -1,0 +1,5026 @@
+Project Path: arc_yingyangdao_honor-v10-lab_81nb7nlb
+
+Source Tree:
+
+```txt
+arc_yingyangdao_honor-v10-lab_81nb7nlb
+├── LICENSE
+├── README.md
+├── docs
+│   ├── 00-快速开始.md
+│   ├── 01-设备档案与Root方案.md
+│   ├── 02-解锁与Root全过程.md
+│   ├── 03-实施方案.md
+│   ├── 04-Magisk完全指南.md
+│   ├── 05-模块安装报告.md
+│   ├── 06-功能入口与控制手册.md
+│   ├── 07-抓包能力配置与验证.md
+│   ├── 08-Frida与抓包完全教程.md
+│   ├── 09-固件下载渠道全网排查.md
+│   ├── 10-固件9.1.0.337获取渠道.md
+│   ├── 11-固件最终排查结果.md
+│   ├── 12-eRecovery抓包教程.md
+│   ├── 13-HwOUC逆向报告.md
+│   ├── 14-踩坑记录.md
+│   └── assets
+├── scripts
+│   ├── README.md
+│   ├── capture.ps1
+│   ├── env.ps1
+│   ├── frida-patch.ps1
+│   ├── install-module.sh
+│   ├── phone.ps1
+│   └── proxy.ps1
+├── skills
+│   └── honor-v10-lab
+│       └── SKILL.md
+└── 连接手机SSH.bat
+
+```
+
+`LICENSE`:
+
+```
+MIT License
+
+Copyright (c) 2026 yingyangdao
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
+`README.md`:
+
+```md
+# 荣耀V10 (BKL-AL20) Root 与长期调试环境
+
+> 一台 2017 年的荣耀V10，从**无法解锁的"废手机"**，变成**长期插在电脑上做开发/调试/抓包的实验机**。
+> 本仓库记录了完整过程、全部踩坑、可复用脚本，以及一套 DeepSeek Harness 技能插件。
+
+[![Device](https://img.shields.io/badge/Device-HONOR%20BKL--AL20-blue)]()
+[![Android](https://img.shields.io/badge/Android-9%20%2F%20EMUI%209.1.0.337-green)]()
+[![Magisk](https://img.shields.io/badge/Magisk-20.1-orange)]()
+[![Root](https://img.shields.io/badge/Root-OK-success)]()
+[![License](https://img.shields.io/badge/License-MIT-yellow)]()
+
+---
+
+## 一、这台机器现在能干什么
+
+| 能力 | 状态 | 实现方式 |
+|---|---|---|
+| **Root** | ✅ | Magisk 20.1（装在 `recovery_ramdisk`，本机没有独立 boot 分区） |
+| **Bootloader 解锁** | ✅ | 软件测试点（SWTP）方式，**不需要解锁码** |
+| **隐藏 Root** | ✅ | MagiskHide（Magisk 20.1 时代的方案） |
+| **Xposed 框架** | ✅ | EdXposed v0.5.2.2 + Riru v23.9 |
+| **系统级 CA 证书** | ✅ | 自建 `cacerts` Magisk 模块（mitmproxy CA） |
+| **全机去广告** | ✅ | AdAway + `hosts` 模块（7.1 万条规则） |
+| **被动抓包** | ✅ | Termux tcpdump 4.99.7 |
+| **Frida 注入** | ✅ | **Frida Gadget**（frida-server 在华为上不可用，见下） |
+| **SSH 服务** | ✅ | Termux sshd，端口 8022 |
+| **文件管理** | ✅ | MT管理器 |
+| **分区备份** | ✅ | oeminfo / modem / nvm 等 12 个分区 |
+
+### 成果截图
+
+| Magisk 模块（全部中文名） | EdXposed 框架已激活 |
+|---|---|
+| ![magisk](docs/assets/magisk-modules.png) | ![edxposed](docs/assets/edxposed-active.png) |
+
+| AdAway 去广告（7.1 万条） | Termux 终端 |
+|---|---|
+| ![adaway](docs/assets/adaway.png) | ![termux](docs/assets/termux.png) |
+
+---
+
+## 二、这台机器最大的三个坑（精华）
+
+### 坑 1：华为锁死了 SELinux 策略写接口 → frida-server 用不了
+
+```
+frida-server -v
+→ Unable to save SELinux policy to the kernel: Out of memory
+
+# 换成 Magisk 自己的工具，同样失败（证明不是 frida 的问题）
+magiskpolicy --live "allow magisk magisk_file file read"
+→ write failed with 12: Out of memory
+
+setenforce 0
+→ setenforce: Couldn't set enforcing status to '0': Invalid argument
+```
+
+**结论**：任何需要在运行期改 SELinux 策略的工具在华为上全部失效。
+**解法**：改用 **Frida Gadget**（把 `libfrida-gadget.so` 打进 APK，不需要改 SELinux）。
+参考 [frida#1039](https://github.com/frida/frida/issues/1039)。
+
+### 坑 2：华为上 `pm` / `am` 不能用 root 跑
+
+```bash
+adb shell su -c 'pm list packages'
+→ cmd: Failure calling service package: Failed transaction (2147483646)
+```
+
+**解法**：`pm` / `am` 一律用 **shell 身份**（直接 `adb shell pm ...`，不要 `su -c`）。
+这个坑会让"黑域"这类靠 `pm disable` 的工具失效。
+
+### 坑 3：`magisk --sqlite` 带子查询会把 magiskd 搞崩
+
+```bash
+adb shell su -c 'magisk --sqlite "REPLACE INTO policies (...) VALUES (...,(select ...))"'
+→ read (4 != 0) failed with 0: Success
+# 之后 magiskd 死亡，root 全部失效（重启后恢复）
+```
+
+**解法**：加 su 授权走 Magisk Manager 界面，别手搓 SQL。
+
+---
+
+## 三、目录结构
+
+```
+.
+├── README.md                 ← 你在这里
+├── LICENSE
+├── .gitignore
+├── docs/                     ← 全部文档（见下方索引）
+│   └── assets/               ← 文档插图
+├── scripts/                  ← 可复用脚本（见 scripts/README.md）
+│   ├── env.ps1               ← 一键设置工具链环境变量
+│   ├── phone.ps1             ← 设备控制台（状态/root/模块/应用/SSH）
+│   ├── capture.ps1           ← tcpdump 被动抓包
+│   ├── proxy.ps1             ← adb reverse 代理抓包
+│   ├── frida-patch.ps1       ← Frida Gadget 打补丁
+│   └── install-module.sh     ← 手机端 Magisk 模块安装器
+├── skills/                   ← DeepSeek Harness 技能插件
+│   └── honor-v10-lab/SKILL.md
+├── tools/        (gitignore) ← 工具链：frida / apktool / plink / kirintool / hut ...
+├── firmware/     (gitignore) ← 官方固件 UPDATE.APP
+├── phone_backup/ (gitignore) ← 分区备份（26 个分区 + 12 个 NV 分区）
+└── archive/      (gitignore) ← 探索期的一次性脚本（留档）
+```
+
+---
+
+## 四、快速开始
+
+### 4.1 电脑端环境
+
+```powershell
+cd 'G:\DeepSeek Harness\Root'
+. .\scripts\env.ps1            # 把 adb / JDK / apktool / frida 加进 PATH
+.\scripts\phone.ps1 status      # 看手机现在什么状态
+```
+
+需要预装（脚本会自动探测路径，也可用环境变量覆盖）：
+- **adb**（Android SDK platform-tools）
+- **JDK 17**（apktool / objection 需要）
+- **Python 3.11** + `pip install frida frida-tools objection`
+- **apktool**（`objection patchapk` 需要）
+
+### 4.2 抓一个 App 的 HTTPS 明文
+
+```powershell
+# ① 让手机信任你的抓包证书（把 CA 放进 cacerts 模块，重启）
+#    详见 docs/07-抓包能力配置与验证.md
+
+# ② 开代理（手机和电脑不同网段也能用）
+.\scripts\proxy.ps1 on 8080
+#    另开一个窗口：mitmweb --listen-port 8080
+
+# ③ 如果 App 有 SSL Pinning，用 Frida Gadget 解掉
+.\scripts\frida-patch.ps1 -Package com.target.app -Install
+#    手机上启动 App 后：objection -g com.target.app explore
+#    进去敲：android sslpinning disable
+
+# ④ 手机上操作 App，mitmweb 里就能看到明文
+```
+
+### 4.3 抓不走代理的流量
+
+```powershell
+.\scripts\capture.ps1 start
+# ...操作 App...
+.\scripts\capture.ps1 stop        # 自动拉回 capture\cap.pcap，用 Wireshark 打开
+```
+
+---
+
+## 五、文档索引
+
+| # | 文档 | 内容 |
+|---|---|---|
+| 00 | [快速开始](docs/00-快速开始.md) | 5 分钟上手 |
+| 01 | [设备档案与 Root 方案](docs/01-设备档案与Root方案.md) | 硬件规格、分区表、解锁原理 |
+| 02 | [解锁与 Root 全过程](docs/02-解锁与Root全过程.md) | SWTP 软件测试点完整流程 |
+| 03 | [实施方案](docs/03-实施方案.md) | 详细实施计划 |
+| 04 | [Magisk 完全指南](docs/04-Magisk完全指南.md) | 模块原理、安装、排障 |
+| 05 | [模块安装报告](docs/05-模块安装报告.md) | 4 个模块的安装与验证 |
+| 06 | [功能入口与控制手册](docs/06-功能入口与控制手册.md) | 每个功能在哪、怎么开关 |
+| 07 | [抓包能力配置与验证](docs/07-抓包能力配置与验证.md) | 系统 CA / Pinning / tcpdump |
+| 08 | [Frida 与抓包完全教程](docs/08-Frida与抓包完全教程.md) | Frida Gadget / objection 实战 |
+| 09 | [固件下载渠道全网排查](docs/09-固件下载渠道全网排查.md) | 9.1.0.337 固件来源 |
+| 10 | [固件 9.1.0.337 获取渠道](docs/10-固件9.1.0.337获取渠道.md) | 下载链接汇总 |
+| 11 | [固件最终排查结果](docs/11-固件最终排查结果.md) | 结论 |
+| 12 | [eRecovery 抓包教程](docs/12-eRecovery抓包教程.md) | 抓 eRecovery 的请求 |
+| 13 | [HwOUC 逆向报告](docs/13-HwOUC逆向报告.md) | 华为 OTA 客户端分析 |
+| 14 | [踩坑记录](docs/14-踩坑记录.md) | **所有坑的完整清单** |
+
+---
+
+## 六、关键技术备忘
+
+### 分区布局（本机没有 `boot`，ramdisk 在 `recovery_ramdisk`）
+
+```
+kernel           -> /dev/block/sdd38
+recovery_ramdisk -> /dev/block/sdd40    ← Magisk 装在这里
+fastboot         -> /dev/block/sdd28
+oeminfo          -> /dev/block/sdd6     ← 解锁状态存这里
+nvme             -> /dev/block/sdd4
+vbmeta           -> /dev/block/sdd49
+userdata         -> /dev/block/sdd64
+```
+
+### Magisk 20.1 的安装模块姿势
+
+20.1 **没有** `magisk --install-module`，必须手动跑模块 zip 里的 `update-binary`：
+
+```sh
+export BOOTMODE=true MAGISK_VER=20.1 MAGISK_VER_CODE=20100
+export ARCH=arm64 IS64BIT=true API=28
+export TMPDIR=/dev/tmp MAGISKTMP=/sbin/.magisk NVBASE=/data/adb
+sh META-INF/com/google/android/update-binary 3 1 "$ZIP"
+```
+
+已封装成 [scripts/install-module.sh](scripts/install-module.sh)。
+
+### 常用 adb 命令
+
+```bash
+# 查询（不要用 su！）
+adb shell pm list packages -3          # 第三方应用
+adb shell pm list packages -d          # 已冻结
+adb shell settings get global http_proxy
+
+# root 操作
+adb shell su -c 'ls /data/adb/modules'
+adb shell su -c 'magisk -v'
+
+# 端口转发
+adb forward tcp:8022 tcp:8022          # 电脑 → 手机（SSH）
+adb reverse tcp:8080 tcp:8080          # 手机 → 电脑（代理抓包）
+```
+
+---
+
+## 七、免责声明
+
+本项目仅供**设备所有者对自己的设备**进行学习研究使用。
+解锁 Bootloader、刷入 Magisk、修改系统分区会导致**保修失效**，并有一定**变砖风险**。
+请务必先做完整分区备份。因使用本项目造成的任何损失，作者不承担责任。
+
+---
+
+## 八、License
+
+[MIT](LICENSE)
+
+```
+
+`docs/00-快速开始.md`:
+
+```md
+# 00 · 快速开始
+
+> 5 分钟让这台手机为你干活。
+
+## 0. 前提
+
+手机已经 Root 好（Magisk 20.1），插在电脑上，`adb devices` 能看到。
+
+## 1. 电脑端：设置环境（每次新开终端都要做）
+
+```powershell
+cd 'G:\DeepSeek Harness\Root'
+. .\scripts\env.ps1
+```
+
+它会自动把 `adb` / `build-tools` / `JDK 17` / `apktool` / `frida` 加进 PATH。
+
+## 2. 看一眼手机状态
+
+```powershell
+.\scripts\phone.ps1 status
+```
+
+输出包含：设备信息、Root 状态、Magisk 版本、模块列表、第三方应用、已冻结应用、系统负载。
+
+## 3. 我要干什么？
+
+### A. 抓某个 App 的 HTTPS 明文
+
+```powershell
+# 开代理（手机与电脑不同网段也能用，靠 adb reverse）
+.\scripts\proxy.ps1 on 8080
+
+# 另开一个终端跑代理（任选其一）
+mitmweb --listen-port 8080            # mitmproxy，推荐
+# 或者打开 Charles / Fiddler，监听 8080，勾选 Allow remote clients
+
+# 手机上操作目标 App，代理界面里就能看到明文
+```
+
+> 如果 App 报证书错误，说明它有 SSL Pinning，看下一步。
+
+### B. 破 SSL Pinning
+
+```powershell
+.\scripts\frida-patch.ps1 -Package com.target.app -Install
+```
+
+然后手机上启动 App，电脑上：
+
+```powershell
+objection -g com.target.app explore
+# 进去后敲：
+android sslpinning disable
+```
+
+### C. 抓不走代理的流量（非 HTTP / 绕过代理的 App）
+
+```powershell
+.\scripts\capture.ps1 start
+# ...操作 App...
+.\scripts\capture.ps1 stop       # 自动拉回 capture\cap.pcap
+```
+
+用 Wireshark 打开 `capture\cap.pcap`。
+
+### D. 装一个 Magisk 模块
+
+```powershell
+.\scripts\phone.ps1 install .\mod.zip
+adb reboot
+```
+
+### E. 连手机的 SSH（当服务器用）
+
+```powershell
+.\scripts\phone.ps1 ssh          # 自动建转发 + 登录
+# 或者直接双击根目录的「连接手机SSH.bat」
+```
+
+用户名 `u0_a123`，密码 `termux2026`（**建议进 Termux 敲 `passwd` 改掉**）。
+
+### F. 以 root 执行命令
+
+```powershell
+.\scripts\phone.ps1 su "id"
+.\scripts\phone.ps1 su "ls /data/adb/modules"
+```
+
+## 4. 下一步
+
+- 每个功能的入口和开关 → [06-功能入口与控制手册](06-功能入口与控制手册.md)
+- 抓包深入 → [08-Frida与抓包完全教程](08-Frida与抓包完全教程.md)
+- 遇到问题 → [14-踩坑记录](14-踩坑记录.md)
+
+```
+
+`docs/01-设备档案与Root方案.md`:
+
+```md
+# 荣耀 V10 (BKL-AL20) 规格检测 + Root 方案调研报告
+
+> 生成时间：2026-10-22（Asia/Shanghai）
+> 设备序列号：P7CDU18425013192 ｜ 检测方式：adb（Android SDK Platform-Tools 37.0.1）
+
+---
+
+## 第一部分：设备详细规格
+
+### 1.1 身份信息
+
+| 项目 | 值 |
+|---|---|
+| 品牌 / 厂商 | HONOR / HUAWEI |
+| 市场名 | 荣耀 V10 (Honor V10) |
+| 型号 | BKL-AL20（全网通） |
+| 设备代号 | HWBKL / BKL |
+| 序列号 | P7CDU18425013192 |
+| 产品区域码 | C00（中国大陆公开版） |
+| 定制信息 | C00E333R1P1 |
+
+### 1.2 核心硬件
+
+| 项目 | 值 | 说明 |
+|---|---|---|
+| SoC | HiSilicon Kirin 970 (kirin970) | 10nm，含 NPU |
+| CPU | 8 核 ARM64 (aarch64) | 4×Cortex-A73 2.36GHz + 4×Cortex-A53 1.8GHz |
+| ABI | arm64-v8a, armeabi-v7a, armeabi | |
+| GPU | ARM Mali-G72 MP12 | OpenGL ES 3.2 (196610) |
+| 内存 | 5,835,420 kB ≈ 5.56 GiB | → **6GB LPDDR4X 版本** |
+| ZRAM | 2,293,756 kB 总 / 已用 852,416 kB | 内存压缩交换 |
+| 存储 | /data 53 GB | → **64GB UFS 2.1 版本** |
+| 屏幕 | 1080 × 2160，480dpi（403.411 ppi） | 5.99 英寸 IPS LCD，60Hz，18:9 |
+| 电池 | Li-poly，3750mAh（典型值） | health=2(良好)，当前 30%，3.84V，32°C |
+| 充电 | USB 供电，Max 500mA / 4.75V | 支持 5V/4.5A 超级快充（需原装充电头） |
+| 摄像头 | 2 个逻辑相机（后置/前置） | 后置 2000万黑白 + 1600万彩色，前置 1300万 |
+| 传感器 | accelerometer-lsm6ds3-c (ST)、指纹、霍尔等 | 指纹在正面 Home 键 |
+| 耳机 | hi3660_HI6403_CARD Headset Jack | 有 3.5mm 耳机孔 |
+| 基带 | 21C20B369S009C000 | 双卡双待 (dsds)，LTE |
+
+### 1.3 系统与构建
+
+| 项目 | 值 |
+|---|---|
+| Android 版本 | 9 (API 28) |
+| EMUI 版本 | EmotionUI_9.1.0 |
+| 构建号 | BKL-AL20 9.1.0.337(C00E333R1P1) |
+| 指纹 | HONOR/BKL-AL20/HWBKL:9/HUAWEIBKL-AL20/9.1.0.337C00:user/release-keys |
+| 内核 | Linux 4.9.148 aarch64（2019-12-13 构建） |
+| 构建日期 | 2019-12-13 12:10:24 CST |
+| 安全补丁 | **2019-12-01** |
+| 构建类型 | user / release-keys（正式版，非 eng） |
+| 语言/区域 | zh-Hans-CN |
+| 加密 | File-Based Encryption (FBE) 已启用 |
+| 用户 | 1 个（汪洋） |
+| 应用数 | 255 个包（其中第三方 42 个） |
+
+### 1.4 安全 / 引导状态（关键）
+
+| 项目 | 值 | 含义 |
+|---|---|---|
+| ro.boot.verifiedbootstate | **green** | 验证启动通过，系统未被篡改 |
+| ro.boot.flash.locked | **1** | **Bootloader 已锁定** |
+| ro.boot.vbmeta.device_state | **locked** | vbmeta 锁定 |
+| ro.boot.veritymode | enforcing | dm-verity 强制校验开启 |
+| SELinux | Enforcing | |
+| ro.oem_unlock_supported | 1 | 硬件支持解锁 |
+| ro.secure / ro.debuggable | 1 / 0 | 正式版，无 root adb |
+| fastboot oem get-bootinfo | **locked** | 引导器确认锁定 |
+| fastboot oem check-rootinfo | **SAFE** | 未检测到 root 或篡改 |
+| fastboot getvar / flashing 等 | **Command not allowed** | 锁定状态下大部分 fastboot 命令被拒 |
+
+### 1.5 分区表（/dev/block/by-name）
+
+磁盘 sdd（UFS），关键分区：
+
+```
+sdd38 kernel              引导内核
+sdd39 eng_system          工程模式系统
+sdd40 recovery_ramdisk    ★ Recovery 的 ramdisk（华为无独立 boot 分区）
+sdd41 recovery_vendor
+sdd42/43 dts / dto        设备树
+sdd47 recovery_vbmeta
+sdd48 erecovery_vbmeta
+sdd49 vbmeta              ★ 验证启动元数据
+sdd53 version             版本信息
+sdd54 vendor
+sdd55 preload             预装
+sdd56 cust                定制
+sdd57 odm
+sdd58 cache
+sdd61 product
+sdd62 system
+sdd63 patch               ★ 华为补丁分区
+sdd64 userdata            ★ 用户数据（53GB）
+sdc1  frp                 恢复出厂保护
+sdc2  persist
+sdd6  oeminfo             ★ 机型/区域信息
+sdd14 veritykey
+sdd25 hisee_img / sdd26 hhee / sdd33 teeos   安全子系统
+sdd1/2 vrl / vrl_backup
+```
+
+**重要：华为 EMUI 9 机型没有独立的 boot 和 ramdisk 分区**（内核在 kernel，ramdisk 只在 recovery_ramdisk），这直接决定了 Root 的实现方式（见第三部分）。
+
+---
+
+## 第二部分：卡死原因初步诊断
+
+采集到的异常信号：
+
+| 指标 | 数值 | 判断 |
+|---|---|---|
+| /data 占用 | **47 GB / 53 GB = 89%**，仅剩 5.9 GB | ⚠️ 存储严重吃紧 |
+| 应用本体 | 20.4 GB | |
+| 应用数据 | 14.6 GB | |
+| 照片 | 8.3 GB | |
+| 视频 | 2.5 GB | |
+| 音频 | 1.6 GB | |
+| Load Average | **41.40 / 31.69 / 15.14**（8 核） | ⚠️ 严重超载（正常应 < 8） |
+| kswapd0 / f2fs_gc | 持续占用 CPU | ⚠️ 内存回收 + 闪存垃圾回收互相抢 I/O |
+| ZRAM 交换 | 852 MB 已换出 | ⚠️ 内存压力大 |
+| 主要 I/O | system_server 404 major faults，com.huawei.hidisk 6.8% CPU | ⚠️ I/O 阻塞 |
+| DropBox 异常 | system_server_wtf: No service published for: connectivity (HwWifiStateMachine) | ⚠️ 系统服务启动异常 |
+| 第三方应用 | 42 个 | 常驻后台多 |
+
+**结论（初步）**：卡死不是单一原因，而是 **存储接近写满 + 老化的 UFS + 内存压缩交换 + 大量后台应用** 共同造成的 I/O 雪崩。EMUI 9.1 在 /data 剩余空间低于 10% 时，f2fs 的 GC 会与正常读写严重争抢，典型表现就是“随机卡死几十秒”。
+
+**这意味着：修复卡死其实不需要 Root** —— 清理存储 / 恢复出厂 / 重刷固件就能解决绝大部分问题。Root 是“废物利用”的额外目标。
+
+---
+
+## 第三部分：Root / 解锁方案调研
+
+### 3.0 前提事实
+
+1. **华为官方解锁码通道已于 2018-07-25 永久关闭**，官方渠道无解。
+2. 本机 Bootloader = **locked**，fastboot 绝大部分命令返回 Command not allowed，**必须先解锁 BL 才能 Root**。
+3. 麒麟 970 无法用老牌工具 PotatoNV 解锁（PotatoNV 仅支持 Kirin 620/65x/925/935/950/955/960）。
+4. 所有非官方解锁都需要让手机进入 **COM 1.0（VCOM）底层模式**，路径有两条：
+   - **SWTP（软件测试点）**：无需拆机，要求安全补丁 ≤ 2021-01 → **本机 2019-12，满足！**
+   - **硬件测试点**：拆机后用镊子把主板测试点短接到地。
+
+---
+
+### 方案 A：Kirin-Tool（免费，★首选）
+
+- **来源**：GitHub kethily-daniel/Kirin-Tool（source-available 许可）｜官网 kirintool.cfd ｜Telegram t.me/kirintoolsupport
+- **教程**：XDA 帖 4768171《PERMANENT bootloader unlock for Kirin 710/710F/970/980》（2025-11 发布，2026-10-09 更新）
+- **支持范围**：Kirin 620 ~ 990 5G；**明确支持 Kirin 970**，要求 **EMUI 9.1.0.XXX 及以下** → **本机 9.1.0.337 完全命中**
+- **仓库内已内置 hisi970 引导器**：loaders/hisi970/{xloader.ktl, fastboot.ktl, uce.ktl, null.ktl}
+- **两种进入 COM 1.0 的方式**：
+  - **A1｜SWTP 软件测试点（推荐，不拆机）**
+    1. 安装 HiSuite（只为拿 USB 更新模式驱动）
+    2. 下载 **BKL-AL20 C00 且版本 ≥ 9.1.0.337** 的官方固件，解压出 dload/update_sd_base/update.app
+    3. Kirin-Tool 选 CPU = 970 → VCOM operations → 勾 software testpoint → 选中 update.app
+    4. 手机关机 → 同时按住 **音量+ 和 音量-** 插 USB → 进 recovery → 选 Update mode → USB update mode
+    5. Kirin-Tool 点 Enter → 手机显示 update success 后黑屏 → 成功进入 COM 1.0
+  - **A2｜硬件测试点（SWTP 失败时兜底）**：拆后盖，用镊子把测试点短接到地（金属屏蔽罩）同时插 USB，设备管理器出现 USB SER 或 HUAWEI USB COM 1.0；若显示 USB SER 需手动装 COM1 驱动（hw_quser.inf）
+- **解锁动作**：Kirin-Tool → CPU=970 → VCOM operations → Unlock → 切到 Security tools → Unlock → 提示时按一下电源键 → 完成
+- **需要下载**：XDA 附件 Kirin-Tool-v2.3.2.zip(58.4MB)、COM 1 DRIVER.7z(8.9MB)、Test points.7z(9.1MB)
+- **风险**：变砖；解锁后可能出现“托盘下拉打不开”等 bug，需补刷 kernel；NM/SD 卡数据可能丢失
+
+---
+
+### 方案 B：Huawei-Unlock-Tool / HUT（免费开源）
+
+- **来源**：GitHub werasik2aa/Huawei-Unlock-Tool，Telegram t.me/+TztmQ7N2xz9lN2Uy
+- **支持**：620 / 620(CAM) / 65x_a / 65x_b / 710 / 810 / 925 / 935 / 950 / 955 / 960 / **970**（980 理论支持）
+- **硬性要求**：**必须 EMUI 8 或 9** → 本机 EMUI 9.1 满足
+- **功能**：Bootloader 解锁 / FRP 解锁、分区管理、整机 ROM 刷写与备份、oeminfo 编译/反编译、update.app 提取与 EDL 9008 刷写、Rawprogram0.xml 生成、HISI Flash/FRP 工具
+- **原理**：内置 PotatoNV 源码 + 4PDA 的 Moongamer QCOM 解锁逻辑
+- **定位**：可作为**方案 A 的备用/交叉验证工具**；也可在解锁后用于刷机与救砖
+
+---
+
+### 方案 C：付费商业工具（省事但花钱）
+
+| 工具 | 费用 | 对本机支持 | 说明 |
+|---|---|---|---|
+| **HCU Client + DC Phoenix** | **$19 / 3 天** | Kirin 970 ✓ | DC Phoenix 把手机打进“软件测试点”模式 → HCU 读取/切换 Bootloader lock 与 FRP → DC Phoenix 退出测试点模式。**目前公认最稳** |
+| **ChimeraTool** | 订阅制 | **明确列出 HUAWEI Honor V10 BKL-AL20** | Unlock/Relock Bootloader、FRP 移除、Repair IMEI、Read/Write Cert (Fastboot)、Load Factory Fastboot、USB 固件更新 |
+| **SigmaKey / Octoplus** | 按次/订阅 | Kirin 970 ✓ | 多为维修店工具链 |
+
+优点：图形化、成功率高、有售后。缺点：收费、需联网激活、工具来源无法审计（存在被投毒风险）。
+
+---
+
+### 方案 D：PotatoNV —— ❌ 不适用
+
+仅支持 Kirin 620 / 650 / 655 / 658 / 659 / 925 / 935 / 950 / 960。**Kirin 970 明确不在支持列表**，直接排除。
+
+### 方案 E：官方解锁码 —— ❌ 已关闭
+
+华为 2018-07-25 关闭解锁码申请页面，无官方路径。
+
+---
+
+### 3.6 解锁之后的 Root 路线（华为特有，重点）
+
+因为 **华为 EMUI 9 没有 boot / ramdisk 分区**，所以不能照搬“修补 boot.img”的通用做法。
+
+**路线 R1：Magisk 修补 recovery_ramdisk（推荐，无需第三方 Recovery）**
+1. 从官方固件 update.app 中提取原厂 recovery_ramdisk.img（用 HuaweiUpdateExtractor）
+2. 装 Magisk App → 设置里**打开 Recovery Mode**（因为检测到 Ramdisk = No）→ 修补 recovery_ramdisk.img → 得到 magisk_patched-xxxxx.img
+3. fastboot flash recovery_ramdisk magisk_patched-xxxxx.img
+4. **每次开机按住 音量+ + 电源** 进 recovery → Magisk 引导系统 → 获得 Root
+5. 代价：正常开机无 Root，必须走 recovery 组合键；可装 Magisk 模块（Zygisk + Shamiko 隐藏 Root）
+
+**路线 R2：刷第三方 TWRP + Magisk**
+- 荣耀 V10 有适配 EMUI 8/9 的 TWRP 3.2.x，刷入 recovery_ramdisk 后卡刷 Magisk.zip
+- 优点：可备份/刷机更方便；缺点：TWRP 与 EMUI 9.1 兼容性参差
+
+**Magisk 版本建议**：EMUI 9 上 **v23.0** 兼容性最好（v24+ 对 legacy recovery 模式支持有变化，v26+ 基本移除），也有教程用 v20.4。
+
+**必要收尾**：解锁后需处理 dm-verity / AVB（Kirin-Tool 解锁流程通常已处理，或 fastboot flashing unlock / 刷入已去除 verity 的 vbmeta）。
+
+---
+
+### 3.7 固件来源（SWTP 与提取镜像都需要）
+
+- **免费**：Firmware Finder / HiSuite Proxy（按型号 BKL-AL20 + 版本号直接拉官方固件）
+- **第三方站**：givemerom、HalabTech、onfix.cn、donghairom（部分收费/需注册）
+- **本机需要的版本**：**BKL-AL20，C00 定制，≥ 9.1.0.337**（当前是 9.1.0.337 C00E333R1P1）
+
+---
+
+## 第四部分：建议执行路线（等你确认）
+
+| 阶段 | 内容 | 风险 | 是否需要 Root | 预计耗时 |
+|---|---|---|---|---|
+| **0** | 全量备份（照片 8.3G / 视频 2.5G / 应用数据）+ 记录 IMEI、oeminfo、分区表 | 无 | 否 | 30-90 分钟 |
+| **1** | **修复卡死**：清理 /data 至剩余 > 20%，或直接恢复出厂设置 | 低（会清数据，已备份） | 否 | 30 分钟 |
+| **2** | **解锁 Bootloader**：Kirin-Tool + SWTP（失败则转硬件测试点） | **中高**（变砖/状态不可逆/清数据） | 否 | 1-3 小时 |
+| **3** | **Root**：Magisk 修补 recovery_ramdisk 并刷入 | 中 | 是 | 1 小时 |
+| **4** | 废物利用：去广告、装模块、当备用机/软路由/监控/服务器 | 低 | 是 | 按需 |
+
+### ⚠️ 必须先确认的风险点
+
+1. **数据大概率全清**：解锁命令本身是否强制擦除没有 100% 保证，但三条证据都指向“会清”：(a) XDA 指南明确要求解锁后 `format userdata`；(b) 本机是 FBE 加密，密钥由 Keymaster 封装且与引导状态绑定，green → orange 后大概率拒绝解密，系统会强制恢复出厂；(c) dm-verity 处于 enforcing。**按“一定会清空”准备，先备份。**
+2. **解锁状态不可逆 —— 更正上次的说法**：“硬件熔断 eFuse”这个说法我上次讲过头了。公开资料（bootloader-unlock-wall-of-shame 等）显示华为的锁状态存放在 OEMINFO/NVME 安全区 + 安全引擎（hisee/hhee/teeos）里，走的是分区 + RSA 签名（RDLOCK）路线，**没有证据**表明麒麟 970 解锁会烧断硅片熔丝（那是三星 KNOX 的机制）。但“不可逆”是真的：回锁也恢复不成“从未解锁”，`fastboot oem check-rootinfo` 会留下带时间戳的永久 RISK 记录。另外本机是 2017 年机型，**保修早已过期**，这条风险对你无实际影响。
+3. **变砖风险**：Kirin 970 解锁存在“能解锁但系统异常”的报告（如托盘无法下拉），需要补刷 kernel 甚至重刷全量固件。**本机是唯一一台机器的话，请谨慎**。
+4. **需要拆机**：如果 SWTP 失败，就必须拆后盖短接测试点（后盖为玻璃，有碎裂风险）。
+5. **固件获取**：SWTP 需要与机型/版本匹配的官方 update.app，如果找不到 ≥ 9.1.0.337 的 C00 固件，SWTP 走不通，只能拆机。
+
+### 建议
+
+- **如果首要目标是“让手机不卡”**：先做阶段 0 + 1，大概率就好了，不需要冒险解锁。
+- **如果确定要“废物利用”**（刷模块、当服务器、跑脚本）：再走阶段 2 + 3，推荐 **方案 A（Kirin-Tool，免费）**，付费方案 C（HCU + DC Phoenix $19）作为保底。
+
+---
+
+## 附：信息来源
+
+- XDA：[PERMANENT bootloader unlock for Kirin 710/710F/970/980 (updated guide)](https://xdaforums.com/t/bootloader-unlock-permanent-bootloader-unlock-for-kirin-710-710f-970-and-980-socs-updated-guide.4768171/)
+- GitHub：[kethily-daniel/Kirin-Tool](https://github.com/kethily-daniel/Kirin-Tool)
+- GitHub：[werasik2aa/Huawei-Unlock-Tool](https://github.com/werasik2aa/Huawei-Unlock-Tool)
+- GitHub：[kitsuned/PotatoNV Discussion #155](https://github.com/kitsuned/PotatoNV/discussions/155)
+- 博客：[How to unlock the bootloader on Huawei P20-PRO without code](https://blog.pasqualefiorillo.it/how-to-unlock-bootloader-on-huawei-p20-pro-clt-l09-without-code/)
+- ChimeraTool：[Huawei Honor V10 BKL-AL20 支持列表](https://chimeratool.com/en/models/huawei-honor-v10-bkl-al20)
+- XDA 资讯：[Bootloader unlock method for Huawei and Honor devices with Kirin SoCs](https://www.xda-developers.com/huawei-honor-bootloader-unlock-potatonv/)
+- 博客园：[Honor V10 BKL-AL20 ROOT（Magisk方式）](https://www.cnblogs.com/zhaojjiang/p/9600763.html)
+- Xhy's Blog：[emui9 安装 Magisk 框架](https://xhyeax.github.io/2019/04/02/emui9-magisk-install/)
+- CSDN：[无需 TWRP 实现 Magisk 刷入（以华为荣耀 V9 为例）](https://blog.csdn.net/beizishaizi/article/details/125445900)
+```
+
+`docs/02-解锁与Root全过程.md`:
+
+```md
+# 荣耀V10 (BKL-AL20) 解锁 + Root 完整报告
+
+**完成时间**: 2026-10-24 02:52
+**设备**: HONOR BKL-AL20 (荣耀V10) / Kirin 970
+**系统**: EMUI 9.1.0.337(C00E333R1P1) / Android 9 / 安全补丁 2019-12-01
+
+---
+
+## 一、最终状态
+
+| 项目 | 状态 | 验证命令 | 结果 |
+|---|---|---|---|
+| Bootloader | **已解锁** | `getprop ro.boot.flash.locked` | `0` |
+| 引导验证状态 | **orange（已解锁）** | `getprop ro.boot.verifiedbootstate` | `orange` |
+| Root | **完全可用** | `su -c id` | `uid=0(root) context=u:r:magisk:s0` |
+| Magisk 版本 | **v20.1 (20100)** | `magisk -v` | `20.1:MAGISK` |
+| Magisk Manager | **v7.5.1** | — | 已安装 |
+| MagiskHide | **可用** | `magisk --list` | `magiskhide` 在列 |
+| magiskboot | **可用** | `magiskboot` | `MagiskBoot v20.1` |
+| busybox | **可用** | `busybox` | `BusyBox v1.31.1-topjohnwu` |
+| 系统版本 | **未变** | `getprop ro.build.display.id` | `BKL-AL20 9.1.0.337(C00E333R1P1)` |
+| 存储 | **已修复** | `df -h /data` | 53G 总 / 用 9.1G / **剩 44G (18%)** |
+
+---
+
+## 二、卡死问题根因与修复
+
+### 根因
+**数据分区占用 89%（47 GB / 53 GB）** —— f2fs 文件系统在高占用率下垃圾回收会疯狂搬运数据，导致系统随时卡死。
+
+### 修复
+通过解锁时的强制数据擦除 + 低级格式化，**存储占用从 89% 降到 18%**，根因消除。
+
+---
+
+## 三、技术攻关过程
+
+### 3.1 核心难点
+华为 EMUI 9 的 USB 更新模式（DLOAD）有**版本检查**，拒绝低于设备版本的固件包。
+
+### 3.2 关键突破
+
+**① 逆向出完整 CRC 机制**
+- 算法：**CRC-16/X-25**，按原始数据逐 **32K 块**计算（最后一块不补齐）
+- `CRC.img` 结构：uint16 LE 数组，每 32K 块一项
+  ```
+  idx0 = CURVER
+  idx1 = VERLIST
+  idx2 = PACKAGE_TYPE
+  idx3.. = HISIUFS_GPT 及其后所有镜像
+  ```
+- **`CRC.img` 自身不在表内，但有 SHA256RSA 签名保护 → 不可修改**
+
+**② 挖出设备端版本检查逻辑**（反编译 update-binary）
+```
+check_emui_version
+the current emui version does not exist in the list, not allow to update.
+line length of list greater than emui version length, not allow to update.
+This is not a downgrade package, don't need to check emui version.
+version list not be checked, maybe there is no versionlist or checked fail!
+```
+
+**③ 实现真实 CRC 碰撞**
+用 GF(2) 线性代数求解，构造出**内容全改但 CRC 值不变**的 VERLIST：
+- 目标 CRC：`0xad14`（原值）
+- 方法：在末尾留 16 字节"牺牲区"，用高斯消元求解使 CRC 命中目标
+- **结果：CRC.img 无需修改，签名保护绕过**
+
+**④ 发现版本标识真相**
+对比 9.1.0.337 与 8.0.0.199 的 VERLIST：
+```
+9.1.0.337 包:  BKL-EMUI90          ← 设备实际比对的「EMUI 版本标识」
+              BKL-EMUI9.0.0.150_Xloader
+              BKLL00B000
+              BKLC00B000
+              BKL-AL00 8.0.0.106(C00)
+              ...
+8.0.0.199 包:  （无 BKL-EMUI90 这两行）→ 版本检查失败
+```
+
+### 3.3 最终执行路径
+
+```
+1. 取得 9.1.0.337 完整固件包（含 XLOADER）
+      ↓
+2. Kirin-Tool SWTP（软件测试点）
+   ├─ 用 9.1.0.337 的 UPDATE.APP（版本完全匹配）
+   └─ 手机显示 "update success" → 黑屏 → 进入 COM 1.0 模式
+      ↓
+3. 安装 COM 1.0 驱动（VID_12D1&PID_3609）
+   ├─ 系统无匹配 INF → 手工给 hw_quser.inf 加入 PID_3609
+   ├─ 自签名证书 + 目录签名 + 测试签名模式
+   └─ pnputil 正式安装 → COM14 出现
+      ↓
+4. Kirin-Tool VCOM Operations → Unlock
+   └─ 加载临时 fastboot（null → XLOADER → UCE → FASTBOOT）
+      ↓
+5. 解锁 Bootloader
+   ├─ fblock:   locked → unlocked
+   └─ userlock: locked → unlocked
+      ↓
+6. 刷入 Magisk（recovery_ramdisk）
+      ↓
+7. 擦除 userdata（清 crypt info）
+      ↓
+8. 恢复引导器（SWTP 会把 XLOADER 打坏）
+   ├─ fastboot flash xloader  ← 原厂 9.1.0.337 XLOADER
+   └─ fastboot flash fastboot ← 原厂 FASTBOOT
+      ↓
+9. 低级格式化数据分区（修复损坏的 /data）
+      ↓
+10. 手工重建 Magisk 环境（/data/adb/magisk/）
+      ↓
+✅ 完成
+```
+
+---
+
+## 四、关键文件位置
+
+### 固件与镜像
+```
+tools/firmware/BASE337/UPDATE.APP          9.1.0.337 完整固件 (3.72 GB)
+tools/firmware/REC_337/9.1.0.337/
+    RECOVERY_RAMDIS.img                     原厂 recovery (MD5 f9f94fa3...)
+    magisk_patched.img                      Magisk 版 (MD5 49a2e1ae...)
+tools/unlock_ws/dload337/dload/             48 个分区镜像（含 XLOADER）
+tools/firmware/BD/.../                       BD 工程固件（救砖用）
+```
+
+### 备份
+```
+phone_backup/apk/                           34 个 APK (2.34 GB)
+phone_backup/app_list.md                    带中文名的清单
+phone_backup/partitions_after_root/         解锁后关键分区备份
+    recovery_ramdisk.img  (32 MB)           已验证可用的 Magisk 版
+    kernel.img / vbmeta.img / fastboot.img ...
+phone_backup/baseline_before_unlock.txt     解锁前 rootinfo 基线
+```
+
+### 工具
+```
+tools/kirintool/.../Kirin-Tool.exe          Kirin-Tool v2.4.2
+tools/magisk/MagiskManager-v7.5.1.apk       配套 Manager
+tools/magisk/Magisk-v20.1.zip               官方包（含 busybox 等）
+tools/drivers/hw_quser_3609/                改版驱动（含 PID_3609）
+tools/drivers/install_driver_admin.ps1      驱动安装脚本
+```
+
+### 关键脚本
+```
+tools/unlock_ws/run_swtp2.py                SWTP 漏洞发送器
+tools/unlock_ws/collide2.py                 CRC 碰撞生成器
+tools/unlock_ws/restore_stock.ps1           恢复原厂脚本
+fix_magisk_env.ps1                          重建 Magisk 环境
+```
+
+---
+
+## 五、解锁码
+
+```
+485737783237ffff
+```
+（从 update.APP 的镜像头 offset 12 提取，8 字节，所有版本一致）
+
+---
+
+## 六、使用须知
+
+### Root 使用
+**正常开机（电源键）即带 Root** —— 无需按音量+进 recovery。
+
+### 每次开机的解锁警告
+```
+⚠️ Your device has been unlocked and can't be trusted.
+(1) Press Power key to continue.
+(3) Your device will continue to boot 5 seconds later if there is no operation.
+```
+**这是正常的，等 5 秒自动继续。**
+
+### 必须避免
+- ❌ **不要点系统 OTA 更新**（会覆盖 Magisk）
+- ❌ 不要刷非本机型固件
+- ⚠️ 部分银行/支付 App 会检测解锁 → 用 MagiskHide 隐藏
+
+### 救砖资源（全部就位）
+1. **原厂镜像** —— 48 个分区镜像
+2. **Kirin-Tool** —— 重新进 COM 1.0
+3. **BD 工程固件** —— 终极救砖
+4. **完整备份** —— 解锁后可用的 recovery_ramdisk
+
+---
+
+## 七、Magisk 环境修复详解（本次独有）
+
+### 问题
+格式化数据分区后 `/data/adb/magisk/` 被清空，导致：
+```
+E Magisk : * Magisk environment setup incomplete, abort
+```
+Magisk Manager 反复提示"需要修复运行环境"，但它的修复流程（下载+打补丁+刷机）在这台华为上无效，形成死循环。
+
+### 根因
+Magisk Manager 7.5.1 的 APK **不打包 Magisk 二进制**（只有 2 MB 界面资源），需要联网下载 `Magisk-vXX.zip`。而修复流程走的是"打补丁刷 boot 分区"，这台设备**没有 boot 分区**，所以永远失败。
+
+### 解决
+从官方 `Magisk-v20.1.zip` 手工组装 `/data/adb/magisk/`：
+
+| 文件 | 来源 | 大小 |
+|---|---|---|
+| `magisk` | `magiskinit64 -x magisk magisk` 提取 | 149848 |
+| `magiskboot` | `arm/magiskboot` | 303088 |
+| `magiskinit` | `arm/magiskinit` | 365892 |
+| `magiskinit64` | `arm/magiskinit64` | 345412 |
+| `busybox` | 从 `update-binary` 偏移 1604608 处 dd 出（ARM 版） | 1070668 |
+| `util_functions.sh` / `boot_patch.sh` / `addon.d.sh` / `magisk.apk` | `common/` | — |
+| `chromeos/` | `chromeos/` | — |
+
+**关键发现**：`update-binary` 是自解压脚本，脚本占前 1024 字节，后面追加多个 busybox：
+- 偏移 1024，长度 1603584 → **x86 版**
+- 偏移 1604608，长度 1070668 → **ARM 版** ← 我们要的
+
+### 修复后日志
+```
+* Initializing Magisk environment
+* Mounting mirrors
+* Setting up internal busybox          ← 之前在这里 abort
+* Running post-fs-data.d scripts
+* Running module post-fs-data scripts
+* Loading modules
+* Starting MagiskHide
+  hide_policy: Hiding sensitive props
+  hide_list init: [com.google.android.gms/com.google.android.gms.unstable]
+```
+
+---
+
+## 八、遗留小问题
+
+```
+I Magisk : apk_install: /data/magisk.apk
+I Magisk : apk_install: Failure [INSTALL_FAILED_ABORTED: User rejected permissions]
+```
+Magisk 尝试安装自己的 stub APK（用于隐藏）时被拒绝。**不影响 Root 功能**。如需修复：给 Magisk Manager 开「安装未知应用」权限。
+
+---
+
+## 九、验证命令速查
+
+```bash
+# 解锁状态
+adb shell getprop ro.boot.flash.locked          # 0
+adb shell getprop ro.boot.verifiedbootstate     # orange
+
+# Root
+adb shell su -c id                              # uid=0(root)
+
+# Magisk 状态
+adb shell su -c 'magisk -v'                     # 20.1:MAGISK
+adb shell su -c 'magisk --list'                 # su resetprop magiskhide
+
+# 存储
+adb shell df -h /data
+
+# Magisk 日志
+adb shell su -c 'cat /cache/magisk.log'
+```
+
+```
+
+`docs/03-实施方案.md`:
+
+```md
+# 荣耀 V10 (BKL-AL20) 修复 + Root 实施方案 · v2 已验证版
+
+> 生成时间：2026-10-22 ｜ 设备：HONOR BKL-AL20 ｜ 序列号 P7CDU18425013192
+> 系统：Android 9 / EMUI 9.1.0.337(C00E333R1P1) ｜ 安全补丁 2019-12-01 ｜ BL 状态 locked
+
+---
+
+## 0. 本轮结论速览
+
+| 你的问题 | 结论 |
+|---|---|
+| root 后 rootinfo 账本能否 100% 变更？ | **不能 100% 断言物理不可能，但可以确定：目前不存在任何公开可行的方法把它恢复成 SAFE**，且 integrity 类项目是开机实时重测的。详见第 1 章 |
+| App 列表 + APK 备份 | **已完成**：34 个应用 / 2.34 GB，含中文名、版本、安装时间、大小清单。详见第 2 章 |
+| 详细实施方案 | 见第 3 章，共 5 个阶段 + 3 个 Go/No-Go 决策门 + 救砖预案 + 交叉验证矩阵 |
+
+**本轮最重要的新发现（会改变方案）：**
+
+1. leadroyal.cn 有一份 **同机型（BKL-AL20）+ 同版本（EMUI 9.1.0.337）** 的实测 Root 报告，确认了完整可行路径与一堆坑。
+2. 那份报告里的官方固件直链 **现在已经 404**，固件必须另找来源 —— 这是当前最大的卡点。
+3. 报告明确：**绝对不能升级到 EMUI 10**（EMUI 10 移除了 bootloader 的 oem unlock 命令）。本机在 9.1，正好卡在门槛内。
+4. 报告明确：**用 HiSuite 做升降级会把解锁状态刷新掉**。所以解锁后不能再碰 HiSuite 升级功能。
+
+---
+
+## 1. 问题一：rootinfo 安全账本到底能不能变更？
+
+### 1.1 先看实测结构（你手机的真实输出）
+
+```
+fastboot oem check-rootinfo
+  status        : SAFE
+  version       : v2.0
+  current status: SAFE
+  old status    : SAFE
+  change_time   : 0
+
+  item:usb-debug,     category:potential, credible:Y, status:RISK, old status:RISK, time:1792604984
+  item:pha,           category:potential, credible:Y, status:RISK, old status:RISK, time:1760812336
+  item:verifyboot,    category:integrity, credible:N, status:SAFE, old status:SAFE, time:0
+  item:verity-enable, category:integrity, credible:Y, status:SAFE, old status:SAFE, time:0
+  item:key-files,     category:integrity, credible:Y, status:SAFE, old status:SAFE, time:0
+```
+
+### 1.2 三个关键解读
+
+**① 项目分两类，性质完全不同**
+
+| 类别 | 项目 | 含义 | 当前值 |
+|---|---|---|---|
+| `potential`（潜在风险） | usb-debug、pha | 行为类风险，**不影响总状态** | 已 RISK |
+| `integrity`（完整性） | verifyboot、verity-enable、key-files | 设备完整性，**决定总状态** | 全 SAFE |
+
+注意：你现在 USB 调试开着，`usb-debug` 已经是 RISK 了（时间戳 1792604984 ≈ 2026-10-21，就是你开调试那天），但总状态仍是 SAFE。**说明 potential 类不参与总判定。**
+
+**② integrity 类不是日志，是「开机实时测量」**
+
+这三项的名字已经说明了它们的来源：
+- `verifyboot` = 验证启动状态（对应 ro.boot.verifiedbootstate）
+- `verity-enable` = dm-verity 是否开启（对应 ro.boot.veritymode）
+- `key-files` = 关键文件签名校验
+
+这些值由 **bootloader 在每次启动时从设备实际状态重新测量**，而不是从一份历史记录里读。
+
+**推论：解锁后 verifiedbootstate 从 green 变 orange，这三项必然翻成 RISK。即使你有办法把记录擦掉，下次开机立刻重新测出来、重新记上。**
+
+**③ 数据由引导器持有，不在 Android 层**
+
+`check-rootinfo` 是 fastboot 命令 —— 回答你的是引导器，不是 Android。数据住在引导器能访问的安全存储里（结合社区资料，位置是 OEMINFO/NVME 分区 + 安全引擎 hisee/hhee/teeos）。
+
+### 1.3 全网检索到的证据
+
+| 来源 | 内容 | 可信度 |
+|---|---|---|
+| bootloader-unlock-wall-of-shame（GitHub 社区权威汇总） | 华为锁状态存于 **OEMINFO/NVME 分区**；麒麟 970 的解锁码是 **RSA 签名（RDLOCK）**，非明文；HCU-client 因持有 RSA 私钥而收费 | 高 |
+| PotatoNV 官方手册 | FBLOCK 存于 **NVME 分区**，可用 nve 命令改写（仅限麒麟 960 及以下） | 高 |
+| HalabTech 华为 fastboot 命令集 | `fastboot oem check-rootinfo` 在旧机型返回 `old_stat / now_stat / change_time`；`fastboot oem relock` 返回 `remote: stat not match`（**回锁经常直接失败**） | 高 |
+| CSDN 问答（社区回答） | 「华为已明确停止支持重新锁 BL……一旦解锁，BootROM 会永久标记设备为已解锁状态，无法通过任何公开工具、命令或华为官方服务恢复」 | 中（社区回答，可能含 AI 生成内容） |
+| 华为官方社区公告 | 2018-07-25 停止发放解锁码；官方措辞为解锁后不可恢复 | 高（但页面为 JS 渲染，未能抓到全文） |
+| leadroyal.cn 同机型实测 | 「解锁状态不会轻易丢失，**当且仅当使用 HiSuite 升级降级时，码会被刷新掉**」 | 高（同机型同版本实测） |
+
+**检索结论：全网没有任何一个工具、教程或成功案例声称能把 rootinfo 重置回 SAFE。**
+
+### 1.4 分层结论（这是我能给你的最诚实的答案）
+
+| 命题 | 判定 |
+|---|---|
+| integrity 三项会被开机实时重测，擦记录也没用 | ✅ **确定**（由机制推导） |
+| 解锁后 integrity 三项会翻成 RISK、总状态变 RISK | ✅ **几乎确定** |
+| `fastboot oem relock` 在华为上大概率失败或无法恢复原状 | ✅ **确定**（多个来源一致） |
+| 回锁 + 刷回全官方固件后，历史记录会被清零 | ⚠️ **高度可能不会**，但无公开案例可证 |
+| 「物理上 100% 绝对不可能变更」 | ❌ **我不能替华为保证**。理论上 HCU/ChimeraTool 能写 oeminfo，也许能改记录；但（a）没有任何公开工具提供此功能，（b）改完开机又被重测覆盖，（c）改它本身就得先解锁 |
+
+**给你的实操建议：把 rootinfo 当作「一次性、不可逆」来对待。** 不是因为它 100% 物理不可逆，而是因为**没有任何已知的可行路径让它恢复**，赌它可逆没有任何收益。
+
+---
+
+## 2. 问题二：App 列表 + APK 备份 —— 已完成
+
+### 2.1 产出物
+
+| 文件 | 说明 |
+|---|---|
+| `phone_backup/apk/` | **34 个 APK，合计 2.34 GB**，全部拉取成功（pulled=34, failed=0） |
+| `phone_backup/app_list.md` | 带中文应用名的清单表格 |
+| `phone_backup/app_manifest.csv` | 机器可读清单（包名/名称/版本/安装时间/大小） |
+| `phone_backup/app_manifest_raw.txt` | 原始数据（含 APK 在设备上的路径） |
+| `phone_backup/system_packages.txt` | 213 个系统应用 |
+| `phone_backup/enabled_packages.txt` | 247 个已启用应用 |
+| `phone_backup/disabled_packages.txt` | 0 个被禁用应用 |
+
+### 2.2 应用清单（按大小排序的重点项）
+
+| 应用 | 包名 | 版本 | 大小 |
+|---|---|---|---|
+| 联通智家 | com.woapp.hebei | 8.0.7 | 475.8 MB |
+| WeChat | com.tencent.mm | 8.0.74 | 249.1 MB |
+| 录音机高清 | cn.mashanghudong.recoder.audio | 7.2.0 | 198.9 MB |
+| 支付宝 | com.eg.android.AlipayGphone | 10.8.76.8100 | 171.1 MB |
+| QQ | com.tencent.mobileqq | 8.8.35 | 140.9 MB |
+| 中国联通 | com.sinovatech.unicom.ui | 12.12 | 126.7 MB |
+| 高德地图 | com.autonavi.minimap | 11.13.0.2925 | 94.7 MB |
+| Chrome | com.android.chrome | 87.0.4280.141 | 92.9 MB |
+| 铁路12306 | com.MobileTicket | 5.5.1.4 | 81.6 MB |
+| WPS Office | cn.wps.moffice_eng | 13.21.0 | 81.8 MB |
+| 智行火车票 | com.yipiao | 9.9.8 | 74.1 MB |
+| 兜兜学车 | com.xinty.doudouxc | 2.8.6 | 68.0 MB |
+| 疆电课堂 | com.sgitg.tsyxy | 1.6.8 | 62.3 MB |
+| 网易邮箱大师 | com.netease.mail | 7.9.4 | 61.0 MB |
+| 剪映 | com.lemon.lv | 7.4.0 | 60.9 MB |
+
+其余 19 个（百度文库、简书、ES 文件浏览器、PandaVPN、Legado、和留言、国网高培云课堂、安规题库、HiSuite、Lapse It Pro、NetCapture、截图侠、随身测量尺子、LED Scroller、全能录音机、GO谷歌安装器、翻译、Buddy Help、Huawei Themes Live Engine）见 `app_list.md`。
+
+> ⚠️ **注意**：APK 只是安装包，**不含应用数据**（微信聊天记录、支付宝登录态等都在 /data 里）。微信/QQ 的聊天记录必须在 App 内自带功能备份，我无法代劳。
+
+---
+
+## 3. 问题三：详细实施方案
+
+### 3.1 关键前置发现（直接改变方案）
+
+| 编号 | 发现 | 影响 |
+|---|---|---|
+| F1 | 同机型同版本实测报告存在：leadroyal.cn/p/1172（荣耀V10 6+128G，BKL-AL20，EMUI 9.1.0.337） | 路径已被验证可行 |
+| F2 | 该报告中的官方固件直链 `update.dbankcdn.com/.../update_full_base.zip` **实测返回 404** | **固件必须另找来源 —— 当前最大卡点** |
+| F3 | 报告：华为**没有 boot 分区、没有 recovery 分区**，fastboot **有且仅有一个功能** = 刷 recovery_ramdisk | Root 只能走修补 recovery_ramdisk |
+| F4 | 报告：**禁止升级 EMUI 10**，EMUI 10 移除 oem unlock 命令 | 本机 9.1 安全；解锁后禁止 OTA |
+| F5 | 报告：**用 HiSuite 升降级会把解锁状态刷新掉** | 解锁后绝对不能用 HiSuite 升级功能 |
+| F6 | 报告：TWRP 3.4.0 无法解密本机 data 分区，只能删文件 | **放弃 TWRP 路线，走 Magisk 修补 recovery_ramdisk** |
+| F7 | 报告：EdXposed 会导致启动卡死；frida 不可用；部分 Magisk 模块装不上 | 期望值管理：能 Root，但不要指望 Xposed |
+| F8 | 报告：救砖靠 eRecovery 在线自救 / 三键强刷 / 9008 短接刷 update.app | 救砖预案明确 |
+| F9 | 本机安全补丁 2019-12-01 ≤ 2021-01 | **SWTP 软件测试点路径可行**（不必先拆机） |
+| F10 | 本机 EMUI 9.1.0.337 ≤ 9.1.0.XXX | **Kirin-Tool 支持范围内** |
+
+### 3.2 阶段总览
+
+```
+阶段 0  备份                    风险：无        [进行中]
+   ↓
+阶段 1  修复卡死                风险：低        [可独立完成，不需要解锁]
+   ↓
+  ★ 决策门 A：是否继续解锁？
+   ↓
+阶段 2  解锁 Bootloader         风险：中高      [核心风险区]
+   ↓
+  ★ 决策门 B：解锁后系统是否正常？
+   ↓
+阶段 3  Root（Magisk）          风险：中
+   ↓
+  ★ 决策门 C：Root 后是否稳定？
+   ↓
+阶段 4  废物利用                风险：低
+```
+
+### 3.3 阶段 0：备份（当前状态）
+
+| 步骤 | 内容 | 状态 | 方法 |
+|---|---|---|---|
+| 0.1 | App 列表 + APK | ✅ 完成 | adb pull（34 个 / 2.34 GB） |
+| 0.2 | /sdcard 全量（照片 8.3G / 视频 2.5G / 音频 1.6G / 文档） | ⬜ 待做 | `adb pull /sdcard/` |
+| 0.3 | 通讯录 / 短信 / 通话记录 | ⬜ 待做 | HiSuite 或 content query |
+| 0.4 | 微信 / QQ 聊天记录 | ⬜ 需你手动 | App 内「聊天记录迁移与备份」 |
+| 0.5 | 设备指纹存档 | ⬜ 待做 | IMEI、序列号、分区表、build 信息、rootinfo 现状快照 |
+| 0.6 | oeminfo 分区备份 | ⬜ 待做 | 需解锁后（或 EDL 模式下）才能读 |
+
+**预计 0.2 + 0.3 + 0.5 需要 30-60 分钟（13 GB 走 USB）。**
+
+### 3.4 阶段 1：修复卡死（不需要解锁）
+
+**病因回顾**：/data 89% 满（剩 5.9 GB）、Load 41、ZRAM 换出 852 MB、f2fs GC 与正常 I/O 抢资源。
+
+**方案 1A：清理存储（推荐先试，风险最低）**
+
+| 步骤 | 操作 | 预期释放 |
+|---|---|---|
+| 1 | 把照片 8.3G / 视频 2.5G / 音频 1.6G 备份后从手机删除 | ~12 GB |
+| 2 | 清理各 App 缓存（设置 → 存储 → 缓存数据） | 1-3 GB |
+| 3 | 卸载长期不用的 App（安规题库、兜兜学车、Lapse It Pro、LED Scroller 等） | 1-2 GB |
+| 4 | 微信「存储空间」清理 | 1-5 GB |
+| 5 | 目标：/data 剩余 > 20%（约 10 GB 以上） | — |
+
+**方案 1B：恢复出厂设置（如果 1A 无效）**
+- 设置 → 系统 → 重置 → 恢复出厂设置
+- 会清空全部数据（必须先完成阶段 0）
+- 对 f2fs 碎片化和系统服务异常最有效
+
+**方案 1C：eRecovery 在线恢复系统**
+- 关机 → 电源键 + 音量加（3 秒）→ 进入 eRecovery → 下载最新版本并恢复
+- 需要 WiFi；会清数据
+
+**阶段 1 完成判据**：连续使用 24 小时不出现卡死；Load Average 在空闲时 < 8；/data 剩余 > 15%。
+
+### 3.5 阶段 2：解锁 Bootloader（核心风险区）
+
+#### 2.1 准备工具
+
+| 工具 | 来源 | 用途 |
+|---|---|---|
+| Kirin-Tool v2.3.2+ | XDA 帖 4768171 附件（58.4 MB）或 GitHub kethily-daniel/Kirin-Tool | 主解锁工具 |
+| COM 1 DRIVER.7z | 同上（8.9 MB） | USB SER → HUAWEI USB COM 1.0 驱动 |
+| Test points.7z | 同上（9.1 MB） | 各机型测试点图（备用） |
+| HiSuite | 华为官网 | 只为安装 USB 更新模式驱动 |
+| HuaweiUpdateExtractor | 通用工具 | 从 update.app 提取分区镜像 |
+| adb / fastboot | 已有（SDK 37.0.1） | — |
+
+> ⚠️ Kirin-Tool 是 **source-available 非开源**（许可禁止再分发）。从 XDA 附件或作者仓库取，不要用来路不明的第三方镜像。
+
+#### 2.2 获取固件（★ 当前最大卡点）
+
+**需要**：BKL-AL20，C00 定制，版本 **≥ 9.1.0.337**，且包含 `update_sd_base/update.app`。
+
+**候选渠道（按优先级）**：
+
+| 渠道 | 说明 | 状态 |
+|---|---|---|
+| Firmware Finder (pro-teammt.ru) | 按型号查华为 OTA 固件，给直链 | 待验证 |
+| HiSuite Proxy (GitHub ProfessorJTJ/HISuite-Proxy) | 配合 Firmware Finder 让 HiSuite 下载指定固件 | 待验证 |
+| cnroms.com/firmwares/huawei/BKL-AL20 | 官方固件列表站 | 待验证 |
+| givemerom / HalabTech | 第三方 ROM 站，有 BKL-AL20 9.1.0.337 (C00E333R2P1T8) | 需注册/可能收费 |
+| onfix.cn / donghairom | 国内维修站 | 需注册/可能收费 |
+| 百度网盘分享 | 各种论坛 | 无法校验，风险高 |
+
+**这一步必须成功，否则 SWTP 走不通，只能拆机。**
+
+#### 2.3 SWTP 进入 COM 1.0（不拆机）
+
+1. 装 HiSuite（拿 USB 更新模式驱动）
+2. 解压固件包，找到并解压 `update_sd_base`，取出里面的 `update.app`
+3. 打开 Kirin-Tool → CPU model 选 **970** → VCOM operations 标签 → 勾选 `software testpoint`
+4. 在 `Base UPDATE.APP` 输入框右侧点浏览，选中上一步的 `update.app`
+5. **手机关机** → 同时按住 **音量加 + 音量减** → 插 USB → 等它进 recovery
+6. 手机上选 `Update mode` → `USB update mode`
+7. Kirin-Tool 点 `Enter`
+8. **成功标志**：手机显示 `update success` 后黑屏 → 已进入 COM 1.0
+9. **失败标志**：显示 `update failed` → 说明安全补丁太新或固件不对 → 转 2.4
+
+#### 2.4 硬件测试点（SWTP 失败时的兜底）
+
+参考资源：
+- onfix.cn/course/7444 —— 荣耀V10 拆机短接图示
+- donghairom.com/thread-5243-1-1.html —— BKL-AL00/AL20/TL10 进 USB1.0 精准点位图
+- YouTube: Honor V10 (BKL-AL20) Test Point | Dead Boot Repair | EDL 9008
+
+操作要点：
+1. 关机；热风枪/吹风机均匀加热后盖 2-3 分钟
+2. 塑料卡片沿边划开玻璃后盖（**碎裂风险真实存在**）
+3. **断开电池排线**（测试点手册强制要求）
+4. 按点位图找到测试点，用**导电镊子**短接到地（金属屏蔽罩）
+5. **保持短接**的同时插 USB，保持约 3 秒
+6. 设备管理器出现 `USB SER` 或 `HUAWEI USB COM 1.0` 即成功
+7. 若显示 `USB SER`，用 COM 1 DRIVER 里的 `hw_quser.inf` 手动装驱动
+
+#### 2.5 执行解锁
+
+1. Kirin-Tool → CPU = 970 → `VCOM operations` → 点 **Unlock**（K980 才会弹窗，970 直接过）
+2. 切到 `Security tools` 标签 → 点 **Unlock** → 提示时**按一下手机电源键**
+3. 完成后验证：
+
+```
+fastboot oem get-bootinfo        → 应显示 unlocked
+fastboot oem check-rootinfo      → 观察 integrity 三项是否翻 RISK
+fastboot oem get-product-model   → 确认 BKL-AL20
+```
+
+4. **解锁后立刻格式化 userdata**（`fastboot erase userdata` 或让系统自行恢复出厂）
+
+#### 2.6 阶段 2 风险与对策
+
+| 风险 | 概率 | 对策 |
+|---|---|---|
+| 数据全清 | 高 | 阶段 0 已备份 |
+| SWTP 失败 | 中 | 转 2.4 硬件测试点 |
+| 拆机碎屏 | 中 | 找有经验的人；备好替换后盖 |
+| 解锁后系统异常（如托盘下拉打不开） | 中 | 按 PotatoNV 讨论 #155：补刷 kernel；或重刷全量固件 |
+| 变砖 | 低-中 | 见 3.8 救砖预案 |
+| rootinfo 永久变 RISK | 几乎必然 | 已接受（见第 1 章） |
+
+### 3.6 阶段 3：Root（Magisk 修补 recovery_ramdisk）
+
+**依据**：leadroyal 同机型同版本实测路径 + CSDN 荣耀 V9 免 TWRP 教程交叉验证。
+
+1. 用 HuaweiUpdateExtractor 从 `update.app` 提取 **`recovery_ramdisk.img`**（原厂镜像）
+2. 手机装 Magisk App（建议 **v23.0**，EMUI 9 兼容性最好；v24+ 对 legacy recovery 模式支持有变化）
+3. Magisk 设置里**打开 Recovery Mode**（因为本机检测为 Ramdisk = No）
+4. 选择「安装 → 修补一个文件」→ 选 `recovery_ramdisk.img` → 得到 `magisk_patched-xxxxx.img`
+5. 把修补后的镜像拷到电脑：
+
+```
+fastboot flash recovery_ramdisk magisk_patched-xxxxx.img
+```
+
+6. **开机方式（关键）**：
+
+| 按键组合 | 进入 | 有无 Root |
+|---|---|---|
+| 电源键 | 正常系统 | ❌ 无 Root |
+| **音量加 + 电源键** | **recovery（Magisk 系统）** | ✅ **有 Root** |
+| 音量减 + 电源键 | fastboot | — |
+| 电源键 + 音量加（3 秒） | eRecovery（救砖） | — |
+| 音量加 + 音量减 + 电源键 | 三键强刷 | — |
+
+7. 验证：进 Magisk App 看是否显示已安装版本；`adb shell su -c id` 应返回 uid=0
+
+**期望值管理（来自同机型实测）**：
+- ❌ EdXposed 会导致启动卡死，**不要装**
+- ❌ frida 不可用（疑似 SELinux 问题）
+- ⚠️ 部分 Magisk 模块会报「需要 Magisk 20+」而装不上
+- ⚠️ TWRP 无法解密 data，只能用来删模块文件
+- ✅ 太极（Magisk 版）实测正常
+
+### 3.7 阶段 4：废物利用
+
+解锁 + Root 后可做：
+- 深度去广告（hosts / 模块）
+- 卸载/冻结系统预装应用（213 个系统包）
+- 当备用机 / 离线下载机 / 监控端 / 轻量服务器（Termux）
+- 抓包分析（本机已装 NetCapture）
+- 改分辨率/DPI 提性能（本机已是 1080x2160 @480dpi）
+
+### 3.8 救砖预案（按顺序尝试）
+
+| 层级 | 手段 | 前提 |
+|---|---|---|
+| 1 | 进 recovery（音量加+电源）刷回原厂 recovery_ramdisk.img | 能进 recovery |
+| 2 | eRecovery 在线恢复（电源+音量加 3 秒，需 WiFi） | 能进 eRecovery |
+| 3 | 三键强刷（音量加+音量减+电源），用 dload 目录的 update.app | 有 SD 卡/OTG U 盘 |
+| 4 | EDL 9008 短接 + 工具刷 update.app（如猎人华为降级工具） | 需拆机 + 工具 |
+| 5 | 送修 | — |
+
+> 关键：**阶段 2 之前必须先把原厂 `recovery_ramdisk.img` 和完整 `update.app` 存好**，这是救砖的弹药。
+
+### 3.9 决策门（Go / No-Go）
+
+**决策门 A（阶段 1 之后）**：手机还卡吗？
+- 不卡了 → **强烈建议停在阶段 1**，不解锁。收益/风险比最优。
+- 还卡 → 继续阶段 2（反正要重刷固件）。
+
+**决策门 B（阶段 2 解锁成功后，刷 Root 之前）**：
+- 系统能正常启动、能打电话上网 → 继续阶段 3
+- 系统异常（托盘打不开/基带丢失） → **先重刷全量官方固件修复**，再考虑是否继续
+
+**决策门 C（阶段 3 之后）**：
+- 进 recovery 有 Root、进系统正常 → 完成
+- 卡启动动画 → 进 fastboot 刷回原厂 recovery_ramdisk.img 回滚
+
+**另外：固件获取是阶段 2 的硬性前置。如果拿不到 ≥9.1.0.337 的 C00 固件，SWTP 直接不可行，只能拆机 —— 这是要不要继续的分水岭。**
+
+### 3.10 交叉验证矩阵
+
+| 关键结论 | 来源 1 | 来源 2 | 来源 3 | 一致性 |
+|---|---|---|---|---|
+| 华为无 boot/recovery 分区，只刷 recovery_ramdisk | leadroyal 同机型实测 | 本机分区表实测（无 boot/ramdisk 分区） | Xhy's Blog EMUI9 Magisk | ✅ 一致 |
+| Root 方法 = Magisk 修补 recovery_ramdisk | leadroyal 实测 | CSDN 荣耀 V9 免 TWRP 教程 | CSDN 华为 EMUI Magisk 指南 | ✅ 一致 |
+| 麒麟 970 不在 PotatoNV 支持范围 | PotatoNV 官方 README（明确列出 970 不兼容） | bootloader-unlock-wall-of-shame | 多篇社区文章 | ✅ 一致 |
+| Kirin-Tool 支持 970 + EMUI ≤9.1 | XDA 帖 4768171 | Kirin-Tool 仓库 loaders/hisi970 存在 | 仓库 README（Kirin 620-990 5G） | ✅ 一致 |
+| SWTP 要求安全补丁 ≤2021-01 | XDA 帖 4768171 | 本机补丁 2019-12 实测 | — | ✅ 满足 |
+| 解锁后数据必丢 | XDA 指南要求 format userdata | FBE + Keymaster 绑定引导状态的机制 | dm-verity enforcing | ✅ 一致 |
+| 禁止升级 EMUI 10 | leadroyal 实测警告 | bootloader-unlock-wall-of-shame（Android 10+ 移除 userlock） | — | ✅ 一致 |
+| HiSuite 升降级会刷新解锁状态 | leadroyal 实测 | — | — | ⚠️ 单一来源，但同机型可信 |
+| rootinfo 不可恢复 | 机制推导（实时测量） | CSDN 社区回答 | 无任何成功案例 | ⚠️ 无公开成功案例 ≠ 证明不可能 |
+
+---
+
+## 3.11 【2026-10-22 04:22 更新】rootinfo 完整结构实测（重要更正）
+
+之前只抓了前 20 行，实际完整输出有 **3 个类别、19 个项目**：
+
+| 类别 | 项目 | 当前状态 |
+|---|---|---|
+| `potential` | usb-debug ⚠️RISK (2026-10-21)、pha ⚠️RISK (2025-10-18) | 不影响总状态 |
+| `integrity` | verifyboot、verity-enable、key-files、verified-state、eima | 全 SAFE |
+| `root` | root-prop、**fblock**、**userlock**、check-su、sysrw、setids、kcode、kcode-syscall、se-enforcing、se-hook、**root-procs ⚠️RISK (2024-12-06)** | 其余全 SAFE |
+
+**三个关键结论：**
+
+1. **`userlock` 就是 bootloader 用户锁状态项。** 现在 SAFE（=锁定）。**解锁后它必然变 RISK，并写入时间戳，`old status: SAFE` 作为历史永久保留。** 这是"不可逆"最直接的证据。
+2. **`root-procs` 已经是 RISK，时间戳 1733499038 ≈ 2024-12-06** —— 这台手机在 2024 年 12 月就已经被引导器记录过"检测到 root 进程"。**它本来就不是"完全干净"的状态了。**
+3. **总状态只由 `integrity` 类决定**：即使 potential 和 root 类里已有 3 项 RISK，`current status` 仍是 SAFE。
+
+基线快照已存：`phone_backup/baseline_before_unlock.txt`（解锁后可对比，看哪些项翻转）。
+
+---
+
+## 4. 待你确认
+
+| # | 事项 | 选项 |
+|---|---|---|
+| 1 | 现在做阶段 0 剩余备份（/sdcard 全量 + 通讯录短信）吗？ | 做 / 先不做 |
+| 2 | 阶段 1 用哪个方案？ | 1A 清理 / 1B 恢复出厂 / 1C eRecovery |
+| 3 | 是否接受「rootinfo 永久 RISK + 数据全清」继续阶段 2？ | 接受 / 停在阶段 1 |
+| 4 | SWTP 失败时是否同意拆机短接？ | 同意 / 不同意（那就要一次成功） |
+| 5 | 是否要我先去验证固件渠道（Firmware Finder / cnroms）能不能拿到 ≥9.1.0.337 的 C00 包？ | 要 / 不要 |
+
+**我的建议顺序**：先做完备份（0.2-0.5）→ 执行阶段 1A 清理 → 观察 24 小时 → 如果还卡再决定要不要解锁。同时我可以并行去验证固件渠道。
+
+```
+
+`docs/04-Magisk完全指南.md`:
+
+```md
+# 荣耀V10 Magisk 完全指南
+
+> **适用设备**：HONOR BKL-AL20（荣耀V10）/ Kirin 970 / arm64-v8a
+> **系统**：EMUI 9.1.0.337 / Android 9 (SDK 28) / 内核 4.9.148
+> **Magisk**：v20.1 (20100) / Magisk Manager v7.5.1
+> **SELinux**：Enforcing
+> **编写时间**：2026-10-24
+
+---
+
+# 第一部分 · 原理篇
+
+## 1.1 Magisk 到底是什么
+
+Magisk 不是"一个 App"，而是**一套系统级改造框架**，由 4 个部分组成：
+
+| 组件 | 位置 | 作用 |
+|---|---|---|
+| **magiskinit** | 打包进 recovery_ramdisk，启动时替换 \`/init\` | 最早期接管启动，挂载 magisk 分区 |
+| **magiskd** | 常驻守护进程（root 身份） | 管理 root 授权、模块、Hide |
+| **magisk** | 命令行工具 | 你敲的 \`magisk\` 命令 |
+| **Magisk Manager** | 普通 App | 图形界面，操作上面三个 |
+
+## 1.2 核心思想：Systemless（无系统修改）
+
+**传统 Root（SuperSU 时代）的问题**：
+\`\`\`
+直接往 /system 里塞 su 二进制 → 系统分区被改 → OTA 更新失败 → 变砖
+\`\`\`
+
+**Magisk 的解法**：
+\`\`\`
+/system 分区一个字节都不动
+    ↓
+启动时用 overlayfs / bind mount 把模块文件"叠"到 /system 上
+    ↓
+系统以为自己看到了修改后的文件，实际磁盘上什么都没变
+\`\`\`
+
+**好处**：
+- ✅ 随时可以完全卸载，系统恢复原样
+- ✅ OTA 更新不会因为系统被改而失败
+- ✅ 出问题拔掉模块就好，不用重刷系统
+
+## 1.3 Magisk 启动流程（你这台机器的真实日志）
+
+\`\`\`
+① BootROM
+     ↓  加载 XLOADER（我们恢复过的那个）
+② XLOADER
+     ↓  加载 FASTBOOT / UCE
+③ fastboot → 引导内核
+     ↓  读 recovery_ramdisk 里的 magiskinit（替换了原厂 /init）
+④ magiskinit
+     ↓  解析内核 cmdline，判断是正常启动还是 recovery
+     ↓  挂载 /data，读取 /data/adb/magisk/
+⑤ magiskd 启动
+     ↓
+   ┌─ post-fs-data 阶段（阻塞式，其他进程会等）
+   │   * Initializing Magisk environment
+   │   * Mounting mirrors          ← 挂载 /system /vendor /product 镜像
+   │   * Setting up internal busybox
+   │   * Running post-fs-data.d scripts
+   │   * Running module post-fs-data scripts
+   │   * Loading modules            ← 把模块文件 overlay 到系统
+   │   * Starting MagiskHide        ← 启动隐藏守护
+   └─
+     ↓
+   ┌─ late_start 阶段（非阻塞）
+   │   * Running service.d scripts
+   │   * Running module service scripts
+   └─
+     ↓
+⑥ boot_complete → 系统可用
+\`\`\`
+
+**你这台机器的实际日志**（\`/cache/magisk.log\`）：
+\`\`\`
+Magisk v20.1(20100) daemon started
+* Device API level: 28
+** post-fs-data mode running
+* Initializing Magisk environment
+* Mounting mirrors
+* Setting up internal busybox
+* Running post-fs-data.d scripts
+* Running module post-fs-data scripts
+* Loading modules
+* Starting MagiskHide
+  hide_policy: Hiding sensitive props
+  hide_list init: [com.google.android.gms/com.google.android.gms.unstable]
+** late_start service mode running
+** boot_complete triggered
+\`\`\`
+
+## 1.4 华为 EMUI 的特殊之处（非常重要）
+
+### 普通安卓 vs 华为
+
+| | 普通安卓 | 华为 EMUI 9 |
+|---|---|---|
+| boot 分区 | 有（kernel + ramdisk） | **没有** |
+| recovery 分区 | 有 | **没有独立 recovery 分区** |
+| ramdisk 在哪 | boot 分区里 | **recovery_ramdisk 分区** |
+| Magisk 刷哪 | boot | **recovery_ramdisk** |
+
+### 这意味着什么
+
+\`\`\`
+普通安卓:  电源键 → boot 分区 → 系统（带 Magisk）
+           音量+ + 电源 → recovery 分区 → recovery
+
+华为EMUI9: 电源键 → kernel + recovery_ramdisk → 系统（带 Magisk）
+           音量+ + 电源 → kernel + recovery_ramdisk → recovery 模式
+\`\`\`
+
+**你的实测结果：正常开机（电源键）就带 Root** ✅ —— 所以不用担心"要不要按音量+"的问题。
+
+### 华为的「双锁」机制
+
+华为 Bootloader 有**两层锁**（这是它比其他厂商难解的原因）：
+
+| 锁 | 存储位置 | 作用 | 解锁后 |
+|---|---|---|---|
+| **FBlock** | rdmode NV 项 | 控制能否刷写分区 | \`unlocked\` |
+| **USER Lock** | oeminfo bootinfo NV 项 | 控制能否启动非签名镜像 | \`unlocked\` |
+
+**你现在的状态**（\`fastboot oem check-rootinfo\`）：
+\`\`\`
+item: fblock,   status: unlocked, credible: Y
+item: userlock, status: unlocked, credible: Y
+status: RISK
+\`\`\`
+
+## 1.5 你这台机器的 Magisk 文件布局
+
+\`\`\`
+/sbin/                           ← tmpfs（内存盘，重启消失）
+  magisk            149848       主二进制
+  magiskinit        345412       启动 init
+  magiskhide -> ./magisk         MagiskHide 入口
+  magiskpolicy -> ./magiskinit   SELinux 策略工具
+  su -> ./magisk                 Root 入口
+  .magisk/                       运行时挂载点
+
+/data/adb/                       ← 持久化（重启保留）
+  magisk/                        ★ Magisk 工具集（我们手工重建的）
+    magisk            149848
+    magiskboot        303088     镜像解包/打包
+    magiskinit        365892
+    magiskinit64      345412
+    busybox          1070668
+    util_functions.sh  12988
+    boot_patch.sh       6403
+    addon.d.sh          2048
+    magisk.apk       2095876
+    chromeos/                    伪装 ChromeOS 签名工具
+  magisk.db                      root 授权数据库
+  modules/                       ★ 模块安装目录（当前为空）
+  post-fs-data.d/                早期启动脚本
+  service.d/                     后期启动脚本
+\`\`\`
+
+---
+
+# 第二部分 · Magisk Manager 界面详解
+
+## 2.1 首页
+
+打开 Magisk Manager，从上到下：
+
+| 区块 | 显示内容 | 说明 |
+|---|---|---|
+| **Magisk** | \`已安装 20.1 (20100)\` | 当前 Magisk 版本 |
+| | \`最新版 22.1 (22100)\` + \`更新\`按钮 | ⚠️ **不要点！** 见 6.1 |
+| **Magisk Manager** | \`已安装 7.5.1\` | Manager 自己的版本 |
+| **MagiskHide** | 开关状态 | 隐藏 root 的总开关 |
+| **系统级 hosts** | 开关状态 | AdAway 等去广告必需 |
+| **保持 AVB 2.0/dm-verity** | 开关 | 见 3.7 |
+| **保持强制加密** | 开关 | 见 3.7 |
+
+## 2.2 侧边栏菜单（左上角三条杠）
+
+\`\`\`
+├─ 主页
+├─ 超级用户        ← 管理 root 授权（哪些 App 能用 root）
+├─ 模块            ← 安装/卸载模块
+├─ 下载            ← 在线模块商店（⚠️ 已失效，见 3.2）
+├─ 日志            ← 查看 magisk.log
+├─ 设置
+└─ 卸载 Magisk     ← 完全卸载
+\`\`\`
+
+## 2.3 设置项逐条解释
+
+### Root 相关
+| 设置 | 建议 | 说明 |
+|---|---|---|
+| **超级用户访问** | \`仅限应用和 ADB\` | 控制谁能用 root |
+| **超级用户通知** | 开 | 有 App 请求 root 时弹提示 |
+| **超级用户超时** | \`10 分钟\` | 授权有效期 |
+
+### MagiskHide 相关
+| 设置 | 建议 | 说明 |
+|---|---|---|
+| **MagiskHide** | 开 | 总开关 |
+| **隐藏 Magisk Manager** | 按需 | 把 Manager 自己改名换图标，躲避检测 |
+| **MagiskHide 应用列表** | 按需勾选 | 对哪些 App 隐藏 root |
+
+### 系统相关
+| 设置 | 建议 | 说明 |
+|---|---|---|
+| **系统级 hosts** | 用 AdAway 时开 | 把 /system/etc/hosts 变成可写 |
+| **保持 AVB 2.0/dm-verity** | **开** | 保留 dm-verity 校验 |
+| **保持强制加密** | **开** | 保留 /data 加密 |
+| **核心功能模式** | 关 | 开启后禁用所有模块（救急用） |
+
+### 其他
+| 设置 | 说明 |
+|---|---|
+| **语言** | 可切换中文 |
+| **主题** | 深色/浅色 |
+| **清除 Repo 缓存** | 在线模块列表出问题时用 |
+
+---
+
+# 第三部分 · 核心功能实操
+
+## 3.1 Root 权限管理
+
+### 授予 App Root
+1. App 第一次请求 root → 手机弹出提示
+2. 选择：
+   - **允许**（本次）— 一次性
+   - **永久允许** — 记住选择
+   - **拒绝**
+3. 建议：**只有确定可信的 App 才给永久允许**
+
+### 手动管理
+\`\`\`
+Magisk Manager → 超级用户
+  ├─ 已授权列表（可以撤销）
+  ├─ 被拒绝列表
+  └─ 点击条目可以改变授权状态
+\`\`\`
+
+### 命令行测试 Root
+\`\`\`bash
+adb shell su -c id
+# 期望输出: uid=0(root) gid=0(root) context=u:r:magisk:s0
+\`\`\`
+
+## 3.2 模块安装
+
+### ⚠️ 重要：在线商店已失效
+
+**官方模块仓库（Magisk-Modules-Repo）在 2023 年归档**，\`repo.json\` 已删除（我实测返回 404）。所以 Manager 里的「**下载**」页面会显示空白或报错。
+
+### 正确的安装方式：手动下载 → 本地安装
+
+\`\`\`
+① 在电脑/手机浏览器打开模块的 GitHub 页面
+② 下载 Release 里的 .zip 文件
+③ 传到手机
+④ Magisk Manager → 模块 → 「从本地安装」→ 选 zip
+⑤ 重启手机
+\`\`\`
+
+### 命令行安装
+\`\`\`bash
+adb push module.zip /sdcard/
+adb shell su -c 'magisk --install-module /sdcard/module.zip'
+adb reboot
+\`\`\`
+
+### 模块目录结构
+\`\`\`
+/data/adb/modules/<模块ID>/
+  module.prop         模块信息（名称、版本、作者）
+  post-fs-data.sh     早期启动脚本
+  service.sh          后期启动脚本
+  system/             要 overlay 到 /system 的文件
+  system.prop         要设置的属性
+  uninstall.sh        卸载时执行
+  disable             存在此文件 = 模块被禁用
+  remove              存在此文件 = 下次重启时删除
+\`\`\`
+
+### 模块出问题怎么办（不进系统就能救）
+\`\`\`bash
+# 方法1：创建 disable 文件禁用模块
+adb shell su -c 'touch /data/adb/modules/<模块ID>/disable'
+
+# 方法2：创建 remove 文件删除模块
+adb shell su -c 'touch /data/adb/modules/<模块ID>/remove'
+
+# 方法3：开启核心功能模式（禁用全部模块）
+adb shell su -c 'touch /cache/.disable_magisk'
+adb reboot
+# 关掉：adb shell su -c 'rm /cache/.disable_magisk'
+\`\`\`
+
+## 3.3 MagiskHide（隐藏 Root）
+
+### 为什么需要
+银行 App、支付宝、微信支付、游戏反作弊会检测 root，检测到就拒绝运行。
+
+### 原理
+\`\`\`
+MagiskHide 会对勾选的 App 做三件事：
+① 卸载 /sbin 下的 magisk 相关挂载点（该 App 看不到）
+② 修改该进程的 SELinux 上下文（伪装成普通 App）
+③ 隐藏敏感系统属性（ro.debuggable、ro.secure 等）
+\`\`\`
+
+### 配置步骤
+\`\`\`
+① Magisk Manager → 设置 → 打开 MagiskHide 开关
+② 侧边栏 → MagiskHide
+③ 勾选需要隐藏的 App
+④ 重启手机
+\`\`\`
+
+### 验证是否生效
+\`\`\`bash
+# 查看当前 hide 列表
+adb shell su -c 'magiskhide ls'
+
+# 测试某个 App
+adb shell su -c 'magiskhide test com.example.app'
+\`\`\`
+
+### 推荐的隐藏对象
+\`\`\`
+支付宝          com.eg.android.AlipayGphone
+微信            com.tencent.mm
+云闪付          com.unionpay
+各大银行 App
+三国志战略版    com.aligames.sgzzlb.huawei    ← 你装的那个游戏
+Google Play 服务 com.google.android.gms
+\`\`\`
+
+## 3.4 系统级 hosts（去广告基础）
+
+### 原理
+\`\`\`
+Android 的 DNS 解析会先查 /etc/hosts
+把广告域名的 IP 改成 0.0.0.0 → 广告加载失败
+但 /system 是只读的 → Magisk 用 bind mount 把可写的 hosts 叠上去
+\`\`\`
+
+### 开启步骤
+\`\`\`
+Magisk Manager → 设置 → 打开「系统级 hosts」
+\`\`\`
+
+### 验证
+\`\`\`bash
+adb shell su -c 'mount | grep hosts'
+# 应该看到 /data/adb/modules/hosts/system/etc/hosts 挂载到 /system/etc/hosts
+\`\`\`
+
+### 之后配合 AdAway 使用
+见第五部分第 21 项。
+
+## 3.5 日志查看
+
+\`\`\`bash
+# Magisk 主日志
+adb shell su -c 'cat /cache/magisk.log'
+
+# 实时跟踪
+adb shell su -c 'tail -f /cache/magisk.log'
+
+# 模块安装日志
+adb shell su -c 'cat /data/adb/magisk/install.log'
+\`\`\`
+
+## 3.6 完全卸载 Magisk
+
+### 方法一：Manager 界面
+\`\`\`
+Magisk Manager → 侧边栏 → 卸载 Magisk → 完全卸载
+\`\`\`
+
+### 方法二：命令行
+\`\`\`bash
+adb shell su -c 'magisk --remove-modules'   # 先删模块
+# 然后需要重新刷原厂 recovery_ramdisk
+\`\`\`
+
+### ⚠️ 你这台机器的特别注意
+卸载后需要**重新刷原厂 recovery_ramdisk**，否则开机会卡：
+\`\`\`bash
+# 进 COM 1.0 → Kirin-Tool VCOM Unlock → 然后：
+fastboot flash recovery_ramdisk "G:\DeepSeek Harness\Root\tools\firmware\REC_337\9.1.0.337\RECOVERY_RAMDIS.img"
+fastboot reboot
+\`\`\`
+
+## 3.7 「保持 AVB 2.0 / 保持强制加密」到底要不要开
+
+| 设置 | 开 | 关 |
+|---|---|---|
+| **保持 AVB 2.0/dm-verity** | 系统分区保持完整性校验 | 关闭校验（某些模块需要） |
+| **保持强制加密** | /data 保持加密 | 关闭加密（性能略好，但安全性下降） |
+
+**你的建议**：**两个都保持开启**。
+- 你是日常使用，安全性更重要
+- 关闭加密后如果忘记密码，数据完全暴露
+- 而且你的卡死问题已经通过清理存储解决了，不需要靠关加密提升性能
+
+
+---
+
+# 第四部分 · 命令行大全
+
+> 所有命令通过 \`adb shell su -c '命令'\` 执行，或在手机的 Termux/终端里直接执行
+
+## 4.1 magisk 命令全集
+
+### 信息查询
+\`\`\`bash
+magisk -v                      # 版本号（20.1:MAGISK）
+magisk -V                      # 版本码（20100）
+magisk --path                  # magisk 运行时路径
+magisk --list                  # 列出内置 applet（su/resetprop/magiskhide）
+magisk --sqlite "SELECT * FROM settings"    # 查询配置数据库
+\`\`\`
+
+### 模块管理
+\`\`\`bash
+magisk --install-module <zip路径>    # 安装模块
+magisk --remove-modules              # 删除所有标记为 remove 的模块
+magisk --modules                     # 列出已装模块
+\`\`\`
+
+### MagiskHide
+\`\`\`bash
+magiskhide enable                    # 开启 Hide
+magiskhide disable                   # 关闭 Hide
+magiskhide ls                        # 列出隐藏的进程
+magiskhide add <包名> <进程名>        # 添加
+magiskhide rm <包名> <进程名>         # 移除
+magiskhide test <包名>                # 测试某 App 是否被隐藏
+\`\`\`
+
+### 属性操作（resetprop）
+\`\`\`bash
+resetprop                            # 列出所有属性
+resetprop <属性名>                    # 读取属性
+resetprop <属性名> <值>               # 设置属性（会触发 init 的 property_service）
+resetprop -n <属性名> <值>            # 设置属性（不触发，直接改内存）
+resetprop --delete <属性名>           # 删除属性
+resetprop -p                          # 持久化（写入 /data/property）
+\`\`\`
+
+### 其他
+\`\`\`bash
+magisk --unlock-blocks               # 解锁被锁的块设备
+magisk --remove-modules               # 清理待删模块
+magisk --daemon                       # 手动启动守护进程
+magisk --post-fs-data                 # 手动跑 post-fs-data 阶段
+magisk --service                      # 手动跑 service 阶段
+magisk --boot-complete                # 手动触发 boot_complete
+\`\`\`
+
+## 4.2 magiskboot（镜像工具）
+
+\`\`\`bash
+magiskboot unpack boot.img           # 解包镜像
+    # 产出: kernel / ramdisk.cpio / dtb / second / extra
+magiskboot repack boot.img           # 重新打包
+magiskboot cpio ramdisk.cpio <操作>  # 操作 cpio 归档
+    # ls / cat / add / rm / mkdir / extract / test / restore
+    # 例: magiskboot cpio ramdisk.cpio "add 750 init magiskinit"
+magiskboot compress <格式> <文件>     # 压缩（gzip/lz4/xz）
+magiskboot decompress <文件>          # 解压
+magiskboot hexpatch <文件> <查找> <替换>   # 十六进制补丁
+magiskboot sha1 <文件>                # 计算 SHA1
+magiskboot dtb <文件> patch           # 修补 dtb 里的 fstab
+magiskboot cleanup                    # 清理临时文件
+\`\`\`
+
+**实用例子：备份当前 recovery_ramdisk 的 ramdisk**
+\`\`\`bash
+adb shell su -c 'cd /data/local/tmp && magiskboot unpack /dev/block/by-name/recovery_ramdisk'
+adb shell su -c 'cp /data/local/tmp/ramdisk.cpio /sdcard/'
+adb pull /sdcard/ramdisk.cpio
+\`\`\`
+
+## 4.3 实用脚本（放进 /data/adb/service.d/ 开机自动执行）
+
+### 脚本 1：开机自动关闭华为安全扫描（省电省 CPU）
+\`\`\`bash
+#!/system/bin/sh
+# 文件名: /data/adb/service.d/10-disable-security-scan.sh
+sleep 60
+pm disable com.huawei.systemmanager/.optimize.process.ProtectActivity 2>/dev/null
+pm disable com.huawei.systemmanager/.mainscreen.MainScreenActivity 2>/dev/null
+# 关闭病毒扫描
+settings put global hw_security_scan_enabled 0 2>/dev/null
+\`\`\`
+
+### 脚本 2：开机自动清理缓存
+\`\`\`bash
+#!/system/bin/sh
+# 文件名: /data/adb/service.d/20-clean-cache.sh
+sleep 120
+rm -rf /data/local/tmp/* 2>/dev/null
+rm -rf /cache/* 2>/dev/null
+log -t MagiskClean "cache cleaned at $(date)"
+\`\`\`
+
+### 脚本 3：性能模式（锁定大核频率）
+\`\`\`bash
+#!/system/bin/sh
+# 文件名: /data/adb/service.d/30-perf.sh
+sleep 90
+# 查看可用频率
+# cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_available_frequencies
+echo "schedutil" > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor 2>/dev/null
+echo "schedutil" > /sys/devices/system/cpu/cpu4/cpufreq/scaling_governor 2>/dev/null
+\`\`\`
+
+**设置权限（必须）**：
+\`\`\`bash
+adb shell su -c 'chmod 755 /data/adb/service.d/*.sh'
+adb shell su -c 'chown root:root /data/adb/service.d/*.sh'
+\`\`\`
+
+## 4.4 华为专项命令
+
+### 查看 rootinfo（安全账本）
+\`\`\`bash
+# 需要重启到 fastboot
+adb reboot bootloader
+fastboot oem check-rootinfo
+fastboot oem get-bootinfo
+\`\`\`
+
+### 查看/修改 oeminfo
+\`\`\`bash
+adb shell su -c 'dd if=/dev/block/by-name/oeminfo of=/sdcard/oeminfo.img'
+adb pull /sdcard/oeminfo.img
+# ⚠️ 修改 oeminfo 有变砖风险，改前务必备份
+\`\`\`
+
+### 查看分区布局
+\`\`\`bash
+adb shell su -c 'ls -la /dev/block/by-name/'
+adb shell su -c 'cat /proc/partitions'
+\`\`\`
+
+### 备份任意分区
+\`\`\`bash
+adb shell su -c 'dd if=/dev/block/by-name/<分区名> of=/sdcard/<分区名>.img'
+adb pull /sdcard/<分区名>.img
+\`\`\`
+
+
+---
+
+# 第五部分 · 100 项精选功能与设置
+
+> **兼容性图例**
+> ✅ = 你这台机器（Magisk 20.1 / Android 9 / EMUI 9.1）可直接用
+> ⚠️ = 需要额外条件（会说明）
+> ❌ = 不支持（需要 Zygisk / Magisk 24+ / Android 10+）
+
+---
+
+## 一、Root 权限与授权管理（1-10）
+
+| # | 功能 | 作用 | 怎么做 | 兼容 |
+|---|---|---|---|---|
+| 1 | **超级用户授权** | 给 App root 权限 | Manager → 超级用户，App 请求时点"永久允许" | ✅ |
+| 2 | **Root 授权审计** | 查看哪些 App 有 root、什么时候用的 | Manager → 超级用户 → 已授权列表 | ✅ |
+| 3 | **临时授权** | 只给一次，用完失效 | 请求时选"允许"（不勾永久） | ✅ |
+| 4 | **撤销 Root** | 发现可疑 App 立刻收回权限 | Manager → 超级用户 → 点条目 → 删除 | ✅ |
+| 5 | **ADB Root 开关** | 控制 \`adb shell su\` 能否用 | 设置 → 超级用户访问 → "仅限应用和 ADB" | ✅ |
+| 6 | **Root 请求通知** | 有 App 偷偷要 root 时弹提示 | 设置 → 超级用户通知 → 开 | ✅ |
+| 7 | **授权超时** | 授权 N 分钟后自动失效 | 设置 → 超级用户超时 → 10 分钟 | ✅ |
+| 8 | **多用户隔离** | 访客/分身用户不给 root | 默认行为，无需配置 | ✅ |
+| 9 | **su 命令直用** | 脚本里直接调 \`su -c\` | \`su -c '命令'\` | ✅ |
+| 10 | **magisk.db 备份** | 备份授权数据库 | \`su -c 'cp /data/adb/magisk.db /sdcard/'\` | ✅ |
+
+---
+
+## 二、MagiskHide 隐藏与对抗检测（11-20）
+
+| # | 功能 | 作用 | 怎么做 | 兼容 |
+|---|---|---|---|---|
+| 11 | **MagiskHide 总开关** | 隐藏 root 的核心功能 | 设置 → MagiskHide → 开 | ✅ |
+| 12 | **按 App 隐藏** | 只对特定 App 隐藏 | Manager → MagiskHide → 勾选 | ✅ |
+| 13 | **隐藏 Magisk Manager 自身** | 把 Manager 改名换图标 | 设置 → 隐藏 Magisk Manager | ✅ |
+| 14 | **隐藏敏感属性** | 伪装 ro.debuggable/ro.secure | MagiskHide 自动处理 | ✅ |
+| 15 | **SELinux 上下文伪装** | 让被隐藏 App 看不到 magisk 域 | MagiskHide 自动处理 | ✅ |
+| 16 | **卸载 /sbin 挂载点** | 对目标 App 隐藏 magisk 挂载 | MagiskHide 自动处理 | ✅ |
+| 17 | **银行 App 绕过** | 让银行 App 正常运行 | 把银行 App 加入 MagiskHide 列表 | ✅ |
+| 18 | **支付宝/微信支付绕过** | 让支付功能正常 | 加入 Hide 列表 | ✅ |
+| 19 | **游戏反作弊绕过** | 让游戏不检测 root | 加入 Hide 列表（如三国志战略版） | ✅ |
+| 20 | **MagiskHide Props Config 模块** | 改设备指纹，过 SafetyNet/Play 认证 | 装模块 → 终端跑 \`props\` 选指纹 | ✅ |
+
+---
+
+## 三、去广告与隐私防护（21-30）
+
+| # | 功能 | 作用 | 怎么做 | 兼容 |
+|---|---|---|---|---|
+| 21 | **系统级 hosts** | 全 App 去广告的基础 | 设置 → 系统级 hosts → 开 | ✅ |
+| 22 | **AdAway 去广告** | 屏蔽全网广告域名 | 装 AdAway → 启用 → 下载 hosts 源 | ✅ |
+| 23 | **自定义 hosts 源** | 用国内更快的源 | AdAway → 主机源 → 加 \`https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts\` | ✅ |
+| 24 | **App 内广告拦截** | 拦掉开屏/横幅广告 | AdAway + 系统级 hosts 组合 | ✅ |
+| 25 | **YouTube 去广告** | 看 YT 无广告 | ⚠️ 需 YouTube Vanced（独立 App，不用 Magisk） | ⚠️ |
+| 26 | **应用权限审计** | 看哪些 App 偷要权限 | 设置 → 应用 → 权限管理，或装 AppOpsX | ✅ |
+| 27 | **禁用后台自启** | 阻止 App 后台偷偷跑 | 设置 → 应用启动管理 → 全部手动 | ✅ |
+| 28 | **冻结预装应用** | 让预装 App 彻底不跑 | \`su -c 'pm disable-user --user 0 <包名>'\` | ✅ |
+| 29 | **隐私沙盒** | 给 App 喂假数据 | 装 XPrivacyLua（需 EdXposed） | ⚠️ |
+| 30 | **WiFi 密码查看** | 看已保存的 WiFi 密码 | \`su -c 'cat /data/misc/wifi/WifiConfigStore.xml'\` | ✅ |
+
+---
+
+## 四、系统性能与省电（31-40）
+
+| # | 功能 | 作用 | 怎么做 | 兼容 |
+|---|---|---|---|---|
+| 31 | **查看 CPU 频率** | 实时看各核心频率 | \`su -c 'cat /sys/devices/system/cpu/cpu*/cpufreq/scaling_cur_freq'\` | ✅ |
+| 32 | **切换 CPU 调度器** | 平衡性能/省电 | \`su -c 'echo schedutil > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor'\` | ✅ |
+| 33 | **锁大核频率** | 游戏时保性能 | 写入 scaling_min_freq / scaling_max_freq | ✅ |
+| 34 | **关闭华为安全扫描** | 干掉吃 194% CPU 的进程 | \`su -c 'pm disable-user --user 0 com.huawei.systemmanager'\` | ✅ |
+| 35 | **关闭应用市场后台** | 阻止它偷偷下载 | \`su -c 'pm disable-user --user 0 com.huawei.appmarket'\` | ✅ |
+| 36 | **查看唤醒锁** | 找出耗电元凶 | \`su -c 'dumpsys power | grep -i wake'\` | ✅ |
+| 37 | **查看电池统计** | 哪个 App 最耗电 | \`su -c 'dumpsys batterystats --charged'\` | ✅ |
+| 38 | **Fstrim 手动执行** | 给 UFS 做垃圾回收，提速 | \`su -c 'fstrim -v /data'\` | ✅ |
+| 39 | **调整 swappiness** | 减少 swap 换入换出 | \`su -c 'echo 60 > /proc/sys/vm/swappiness'\` | ✅ |
+| 40 | **清理内存缓存** | 释放缓存 | \`su -c 'sync; echo 3 > /proc/sys/vm/drop_caches'\` | ✅ |
+
+---
+
+## 五、存储空间管理（41-50）
+
+| # | 功能 | 作用 | 怎么做 | 兼容 |
+|---|---|---|---|---|
+| 41 | **查看真实占用** | 找出谁在吃空间 | \`su -c 'du -sh /data/* 然后 sort -h'\` | ✅ |
+| 42 | **清理 Dalvik 缓存** | 释放几个 GB | \`su -c 'rm -rf /data/dalvik-cache/*'\`（重启后重建） | ✅ |
+| 43 | **清理应用缓存** | 批量清所有 App 缓存 | \`su -c 'pm trim-caches 999G'\` | ✅ |
+| 44 | **清理日志** | 删掉系统日志 | \`su -c 'rm -rf /data/log/* /data/anr/*'\` | ✅ |
+| 45 | **清理 tombstone** | 删崩溃转储 | \`su -c 'rm -rf /data/tombstones/*'\` | ✅ |
+| 46 | **查找大文件** | 定位超大文件 | \`su -c 'find /data -type f -size +100M -exec ls -lh {} \\;'\` | ✅ |
+| 47 | **移动 App 到 SD 卡** | 释放内置存储 | ⚠️ 需要 App2SD 类工具 + 外置卡 | ⚠️ |
+| 48 | **删除预装 APK** | 彻底移除占空间预装 | \`su -c 'rm /system/app/<名字>.apk'\`（有风险，建议用 pm disable） | ⚠️ |
+| 49 | **存储分析** | 图形化看空间分布 | 装 DiskUsage | ✅ |
+| 50 | **定期自动清理** | 写 service.d 脚本定时清 | 见 4.3 脚本 2 | ✅ |
+
+
+---
+
+## 六、界面美化与个性化（51-60）
+
+| # | 功能 | 作用 | 怎么做 | 兼容 |
+|---|---|---|---|---|
+| 51 | **换字体** | 全系统字体替换 | 装「字体模块」或 Magisk 字体模块 zip | ✅ |
+| 52 | **换开机动画** | 自定义 bootanimation | 替换 \`/system/media/bootanimation.zip\` | ✅ |
+| 53 | **状态栏图标定制** | 改信号/WiFi/电池图标 | 装 EMUI 主题或 Xposed 模块 | ⚠️ |
+| 54 | **沉浸式状态栏** | 全屏体验 | 设置里开，或装模块 | ✅ |
+| 55 | **DPI 调整** | 改界面元素大小 | \`su -c 'wm density 420'\`（默认约 480） | ✅ |
+| 56 | **分辨率调整** | 省电（降分辨率） | \`su -c 'wm size 1080x2160'\` | ✅ |
+| 57 | **动画速度** | 让系统感觉更快 | 开发者选项 → 动画缩放 → 0.5x | ✅ |
+| 58 | **深色模式** | Android 9 原生支持 | 设置 → 显示 → 深色模式 | ✅ |
+| 59 | **自定义开机音** | 换开机音乐 | 替换 \`/system/media/audio/ui/*.ogg\` | ✅ |
+| 60 | **导航栏定制** | 改按键布局 | 装模块或改 \`build.prop\` | ⚠️ |
+
+---
+
+## 七、华为 EMUI 专项优化（61-70）
+
+| # | 功能 | 作用 | 怎么做 | 兼容 |
+|---|---|---|---|---|
+| 61 | **彻底关闭省电精灵** | EMUI 最大的性能杀手 | \`su -c 'pm disable-user --user 0 com.huawei.powergenie'\` | ✅ |
+| 62 | **关闭华为推送** | 省电省内存 | \`su -c 'pm disable-user --user 0 com.huawei.android.pushagent'\` | ⚠️ 会影响推送 |
+| 63 | **关闭 HiCloud 同步** | 停止后台同步 | 设置 → 账号 → 关闭云同步 | ✅ |
+| 64 | **关闭应用市场自动更新** | 阻止偷跑流量 | \`su -c 'pm disable-user --user 0 com.huawei.appmarket'\` | ✅ |
+| 65 | **关闭系统更新提示** | 避免误点 OTA | \`su -c 'pm disable-user --user 0 com.huawei.android.hwouc'\` | ✅ **强烈推荐** |
+| 66 | **关闭用户体验计划** | 停止上报数据 | 设置 → 系统 → 用户体验改进计划 → 关 | ✅ |
+| 67 | **关闭杂志锁屏** | 省流量省电 | 设置 → 桌面和壁纸 → 杂志锁屏 → 关 | ✅ |
+| 68 | **关闭智能助手** | 减少后台 | 设置 → 智能助手 → 关 | ✅ |
+| 69 | **查看 EMUI 白名单** | 看哪些 App 被允许后台 | \`su -c 'dumpsys activity 然后 grep -i hw'\` | ✅ |
+| 70 | **修改 EMUI 后台策略** | 让 App 不被杀 | 设置 → 电池 → 启动管理 → 手动管理 | ✅ |
+
+---
+
+## 八、自动化与脚本（71-80）
+
+| # | 功能 | 作用 | 怎么做 | 兼容 |
+|---|---|---|---|---|
+| 71 | **开机自动脚本** | 开机跑任意命令 | 放 \`.sh\` 到 \`/data/adb/service.d/\` | ✅ |
+| 72 | **早期启动脚本** | 比 service.d 更早执行 | 放 \`/data/adb/post-fs-data.d/\` | ✅ |
+| 73 | **定时任务** | 定时执行脚本 | Termux + cron，或写死循环脚本 | ✅ |
+| 74 | **自动备份** | 定期备份指定目录 | 脚本 + \`tar\` + \`rsync\` | ✅ |
+| 75 | **自动清理** | 每天清理缓存 | 见 4.3 脚本 2 | ✅ |
+| 76 | **开机自动改属性** | 每次开机设置特定 prop | \`resetprop -n\` 写进脚本 | ✅ |
+| 77 | **日志自动上传** | 出问题自动存日志 | 脚本 + curl 上传 | ✅ |
+| 78 | **Tasker + Root** | 图形化自动化 | 装 Tasker，用 Run Shell 调 su | ✅ |
+| 79 | **Termux 定时任务** | 手机当服务器 | Termux + \`pkg install cronie\` | ✅ |
+| 80 | **MacroDroid 自动化** | 更简单的自动化 | 装 MacroDroid，用 root 动作 | ✅ |
+
+---
+
+## 九、开发调试与抓包（81-90）
+
+| # | 功能 | 作用 | 怎么做 | 兼容 |
+|---|---|---|---|---|
+| 81 | **系统级抓包** | 抓所有 App 的 HTTPS 流量 | 装 NetCapture/HttpCanary + 装系统证书 | ✅ |
+| 82 | **安装系统级 CA 证书** | 让抓包工具能解 HTTPS | \`su -c 'cp ca.pem /system/etc/security/cacerts/'\` + chmod 644 | ✅ |
+| 83 | **绕过 SSL Pinning** | 抓有证书锁定的 App | 装 JustTrustMe（需 EdXposed） | ⚠️ |
+| 84 | **查看 App 数据目录** | 看任意 App 私有文件 | \`su -c 'ls /data/data/<包名>/'\` | ✅ |
+| 85 | **提取 App APK** | 从手机导出已装 App | \`su -c 'cp /data/app/<路径>/base.apk /sdcard/'\` | ✅ |
+| 86 | **查看 App 内存详情** | 分析内存占用 | \`su -c 'dumpsys meminfo <包名>'\` | ✅ |
+| 87 | **查看 Activity 栈** | 调试界面跳转 | \`su -c 'dumpsys activity activities'\` | ✅ |
+| 88 | **查看网络连接** | 看 App 连了哪些 IP | \`su -c 'netstat -anp'\` | ✅ |
+| 89 | **logcat 过滤** | 只看关心的日志 | \`su -c 'logcat -s TAG'\` | ✅ |
+| 90 | **EdXposed 框架** | Xposed 模块支持 | 装 Riru + EdXposed（**不是** LSPosed） | ⚠️ 需 Riru |
+
+---
+
+## 十、备份、安全与救砖（91-100）
+
+| # | 功能 | 作用 | 怎么做 | 兼容 |
+|---|---|---|---|---|
+| 91 | **分区备份** | 备份任意分区 | \`su -c 'dd if=/dev/block/by-name/X of=/sdcard/X.img'\` | ✅ |
+| 92 | **App 数据备份** | 备份 App 的私有数据 | \`su -c 'tar czf /sdcard/app.tgz /data/data/<包名>'\` | ✅ |
+| 93 | **完整 nandroid 式备份** | 备份 system/data/boot | 脚本 dd 所有关键分区 | ✅ |
+| 94 | **备份 oeminfo** | 保存设备身份信息 | \`dd if=/dev/block/by-name/oeminfo\` | ✅ **改前必做** |
+| 95 | **备份 modem** | 保存基带 | \`dd if=/dev/block/by-name/modem_fw\` | ✅ |
+| 96 | **救砖：进 COM 1.0** | 系统起不来时 | Kirin-Tool → VCOM Operations → Unlock | ✅ |
+| 97 | **救砖：刷回原厂** | 恢复所有分区 | \`fastboot flash <分区> <镜像>\` | ✅ |
+| 98 | **救砖：BD 工程固件** | 终极手段 | IDT + BD 包（我们已备份） | ✅ |
+| 99 | **关闭 OTA 防变砖** | 阻止系统自动更新覆盖 Magisk | \`pm disable-user --user 0 com.huawei.android.hwouc\` | ✅ **必做** |
+| 100 | **应急 Magisk 开关** | 模块搞崩系统时救急 | 进 recovery 建 \`/cache/.disable_magisk\` | ✅ |
+
+---
+
+# 第六部分 · 兼容性红线（哪些绝对不能用）
+
+## 6.1 ❌ 不要升级 Magisk
+
+| 项目 | 说明 |
+|---|---|
+| **现状** | Magisk 20.1 + Manager 7.5.1，**已验证完全可用** |
+| **Manager 提示可升级到 22.1** | **不要点！** |
+| **风险** | 升级会重写 recovery_ramdisk，华为机型上没有 boot 分区，极易变砖 |
+| **例外** | 除非你准备好完整救砖流程，否则永远不要升 |
+
+## 6.2 ❌ 不能用 Zygisk 系的一切
+
+**Zygisk 是 Magisk 24.0+ 的功能，你的 20.1 没有。** 以下全部不可用：
+
+| 模块 | 需要 | 替代方案 |
+|---|---|---|
+| **Shamiko** | Zygisk | 用 MagiskHide（20.1 自带） |
+| **LSPosed (Zygisk 版)** | Zygisk | 用 **EdXposed**（Riru 版） |
+| **PlayIntegrityFix** | Zygisk + Magisk 24+ | 用 MagiskHide Props Config |
+| **Tricky Store** | Zygisk | 无 |
+| **ReZygisk** | Magisk 26+ | 无 |
+| **Universal SafetyNet Fix (新版)** | Zygisk | 用旧版或 Props Config |
+
+## 6.3 ⚠️ 需要 Riru 的模块（可用但要先装 Riru）
+
+\`\`\`
+Riru v22 ~ v25 支持 Magisk 20.1
+  ↓
+EdXposed（不是 LSPosed）
+  ↓
+JustTrustMe / XPrivacyLua / 各种 Xposed 模块
+\`\`\`
+
+**Riru 下载**：https://github.com/RikkaApps/Riru/releases （选 v25.x 或更早）
+**EdXposed 下载**：https://github.com/ElderDrivers/EdXposed/releases
+
+## 6.4 ⚠️ Android 版本限制
+
+| 功能 | 需要 |
+|---|---|
+| 原生深色模式 | Android 10+（你是 9，只能用主题实现） |
+| 存储沙盒 (Scoped Storage) | Android 10+ |
+| 动态分区 | Android 10+ |
+| 部分新版 App | 可能要求 Android 10+ |
+
+## 6.5 ❌ 在线模块商店已失效
+
+**官方仓库 2023 年归档**，\`repo.json\` 返回 404（我实测过）。
+
+**解决方案**：
+1. 手动从 GitHub 下载模块 zip → Manager「从本地安装」
+2. 或用 Alt Repo 手动浏览：https://github.com/Magisk-Modules-Alt-Repo
+3. 见第七部分的精选直链清单
+
+---
+
+# 第七部分 · 精选模块直链清单
+
+> 全部已验证链接可访问（2026-10-24）
+
+## 7.1 强烈推荐（你这台机器优先装）
+
+| 模块 | 作用 | 链接 |
+|---|---|---|
+| **MagiskHide Props Config** | 改设备指纹，过 SafetyNet/Play 认证 | https://github.com/Magisk-Modules-Repo/MagiskHidePropsConf |
+| **Busybox for Android NDK** | 完整 Linux 命令行工具 | https://github.com/Magisk-Modules-Repo/busybox-ndk |
+| **AdAway**（APK，不是模块） | 去广告 | https://github.com/AdAway/AdAway/releases |
+| **Systemless Hosts** | 去广告基础（Manager 内置开关） | Magisk Manager → 设置 → 系统级 hosts |
+| **Termux**（APK） | 手机上的 Linux 终端 | https://f-droid.org/packages/com.termux/ |
+
+## 7.2 进阶（需要 Riru）
+
+| 模块 | 作用 | 链接 |
+|---|---|---|
+| **Riru** | Xposed 框架基础 | https://github.com/RikkaApps/Riru/releases |
+| **EdXposed** | Xposed 框架（Android 9 版） | https://github.com/ElderDrivers/EdXposed/releases |
+| **JustTrustMe** | 绕过 SSL Pinning（配合抓包） | https://github.com/Fuzion24/JustTrustMe |
+| **XPrivacyLua** | 隐私沙盒，喂假数据 | https://github.com/M66B/XPrivacyLua |
+
+## 7.3 音效
+
+| 模块 | 作用 | 链接 |
+|---|---|---|
+| **ViPER4Android FX** | 顶级音效处理 | https://github.com/Magisk-Modules-Repo/ViPER4Android-FX |
+
+## 7.4 浏览更多模块
+
+| 来源 | 链接 | 说明 |
+|---|---|---|
+| **Alt Repo**（活跃） | https://github.com/Magisk-Modules-Alt-Repo | 社区替代仓库，比原仓库更大 |
+| **Alt Repo JSON** | https://raw.githubusercontent.com/Magisk-Modules-Alt-Repo/json/main/modules.json | 模块清单（62 KB） |
+| **MMRL**（模块管理器 App） | https://mmrl.dev | 第三方模块商店 App |
+
+## 7.5 安装通用步骤
+
+\`\`\`bash
+# 1. 电脑上下载模块 zip
+# 2. 推到手机
+adb push module.zip /sdcard/Download/
+
+# 3. 用命令行安装（比界面快）
+adb shell su -c 'magisk --install-module /sdcard/Download/module.zip'
+
+# 4. 重启
+adb reboot
+
+# 5. 验证
+adb shell su -c 'ls /data/adb/modules/'
+adb shell su -c 'cat /cache/magisk.log | tail -30'
+\`\`\`
+
+**出问题**：
+\`\`\`bash
+# 禁用某个模块
+adb shell su -c 'touch /data/adb/modules/<模块ID>/disable'
+
+# 禁用全部模块（核心功能模式）
+adb shell su -c 'touch /cache/.disable_magisk'
+\`\`\`
+
+
+---
+
+# 附录 A · 针对你的个性化推荐 TOP 10
+
+> 基于你的实际情况：荣耀V10 当备用机 / 装了三国志战略版 / 有 NetCapture 抓包工具 / 曾经卡死
+
+| 排名 | 做什么 | 为什么对你最重要 | 命令/操作 |
+|---|---|---|---|
+| **1** | **关闭系统 OTA 更新** | 防止手滑点更新导致 Magisk 被覆盖变砖 | \`su -c 'pm disable-user --user 0 com.huawei.android.hwouc'\` |
+| **2** | **装 AdAway 去广告** | 全 App 去广告，最直观的体验提升 | 装 APK → 开系统级 hosts → 启用 |
+| **3** | **把游戏加进 MagiskHide** | 防止三国志战略版的反作弊检测 root | Manager → MagiskHide → 勾选游戏 |
+| **4** | **关闭华为安全扫描** | 实测它吃 194% CPU，是卡顿元凶之一 | \`su -c 'pm disable-user --user 0 com.huawei.systemmanager'\` |
+| **5** | **装 Busybox 模块** | 抓包/脚本/调试都要用它 | 装 busybox-ndk 模块 |
+| **6** | **装系统级 CA 证书** | 让 NetCapture 能解 HTTPS（Android 7+ 默认不信用户证书） | 见下方附录 C |
+| **7** | **写自动清理脚本** | 防止存储再次爆满导致卡死复发 | 见 4.3 脚本 2 |
+| **8** | **装 MagiskHide Props Config** | 改设备指纹，过 SafetyNet，部分 App 才能用 | 装模块 → 终端跑 \`props\` |
+| **9** | **备份 oeminfo 和 modem** | 这两个分区丢了就彻底变砖 | \`dd if=/dev/block/by-name/oeminfo of=/sdcard/\` |
+| **10** | **装 Termux** | 把这台备用机变成小服务器（下载机/监控/脚本） | F-Droid 装 Termux |
+
+---
+
+# 附录 B · 应急速查表
+
+## B.1 系统起不来怎么办
+
+| 症状 | 原因 | 解决 |
+|---|---|---|
+| 卡在开机 Logo | 模块冲突 | 进 recovery 建 \`/cache/.disable_magisk\` |
+| 反复重启 | 模块搞崩 | 同上，或用 \`/data/adb/modules/<ID>/disable\` |
+| 黑屏 + 电脑出现 COM 口 | 引导器损坏 | Kirin-Tool VCOM Unlock → 刷回原厂 XLOADER |
+| 卡在 Orange State 画面 | /data 损坏 | 进系统恢复 → 低级格式化数据分区 |
+| 完全没反应 | 需要测试点 | BD 工程固件 + IDT |
+
+## B.2 关键文件位置速查
+
+\`\`\`
+Magisk 日志          /cache/magisk.log
+Magisk 工具          /data/adb/magisk/
+模块目录             /data/adb/modules/
+开机脚本             /data/adb/service.d/
+早期脚本             /data/adb/post-fs-data.d/
+禁用全部模块         /cache/.disable_magisk   （创建这个文件）
+root 授权数据库      /data/adb/magisk.db
+\`\`\`
+
+## B.3 电脑上的救砖资源
+
+\`\`\`
+原厂 48 个分区镜像      G:\DeepSeek Harness\Root\tools\unlock_ws\dload337\dload\
+9.1.0.337 完整固件      G:\DeepSeek Harness\Root\tools\firmware\BASE337\UPDATE.APP
+BD 工程固件（终极）      G:\DeepSeek Harness\Root\tools\firmware\BD\
+Kirin-Tool v2.4.2       G:\DeepSeek Harness\Root\tools\kirintool\...\Kirin-Tool.exe
+解锁后可用的恢复镜像     G:\DeepSeek Harness\Root\phone_backup\partitions_after_root\
+\`\`\`
+
+---
+
+# 附录 C · 三个高价值实操（带完整命令）
+
+## C.1 安装系统级 CA 证书（抓包必备）
+
+Android 7 以后，App 默认**不信任用户安装的证书**，所以抓 HTTPS 必须把证书装到系统区。
+
+\`\`\`bash
+# 1. 准备证书（从 NetCapture/Charles/Fiddler 导出 .pem 格式）
+#    文件名必须是 <证书哈希>.0 的格式
+
+# 2. 计算哈希（在电脑上，需要 openssl）
+#    openssl x509 -inform PEM -subject_hash_old -in ca.pem | head -1
+#    假设得到 9a5ba575
+
+# 3. 改名并推送
+#    mv ca.pem 9a5ba575.0
+adb push 9a5ba575.0 /sdcard/
+
+# 4. 挂载 /system 为可写并复制
+adb shell su -c 'mount -o rw,remount /system'
+adb shell su -c 'cp /sdcard/9a5ba575.0 /system/etc/security/cacerts/'
+adb shell su -c 'chmod 644 /system/etc/security/cacerts/9a5ba575.0'
+adb shell su -c 'chown root:root /system/etc/security/cacerts/9a5ba575.0'
+
+# 5. 重启
+adb reboot
+
+# 6. 验证
+adb shell su -c 'ls -la /system/etc/security/cacerts/ | grep 9a5ba575'
+\`\`\`
+
+**注意**：这是唯一需要**真的写 /system** 的操作（不能 systemless，因为证书要在系统启动早期可用）。改完记得备份。
+
+## C.2 批量冻结预装应用（省电省内存）
+
+\`\`\`bash
+# 先列出所有第三方/预装包
+adb shell pm list packages -s > packages.txt
+
+# 冻结单个（可随时解冻，安全）
+adb shell su -c 'pm disable-user --user 0 com.huawei.appmarket'
+
+# 解冻
+adb shell su -c 'pm enable com.huawei.appmarket'
+
+# 批量冻结（示例：华为全家桶）
+adb shell su -c 'for p in com.huawei.appmarket com.huawei.hwread.al com.huawei.android.thememanager com.huawei.gamebox com.huawei.videoeditor com.huawei.himovie; do pm disable-user --user 0 $p; done'
+
+# 查看已冻结的
+adb shell pm list packages -d
+\`\`\`
+
+**推荐冻结清单（保守版，不影响正常使用）**：
+\`\`\`
+com.huawei.appmarket          应用市场
+com.huawei.android.hwouc      系统更新   ★ 必冻
+com.huawei.gamebox            游戏中心
+com.huawei.himovie            华为视频
+com.huawei.hwread.al          华为阅读
+com.huawei.android.thememanager  主题
+com.huawei.videoeditor        视频编辑
+com.huawei.browser            华为浏览器
+com.huawei.music              华为音乐
+\`\`\`
+
+## C.3 把备用机变成 Linux 服务器
+
+\`\`\`bash
+# 1. 装 Termux（F-Droid 版本，别用 Play 版）
+#    https://f-droid.org/packages/com.termux/
+
+# 2. 在 Termux 里：
+pkg update && pkg upgrade
+pkg install openssh python nodejs git curl wget nano
+
+# 3. 启动 SSH 服务（默认端口 8022）
+sshd
+# 查看用户名
+whoami
+# 查看 IP
+ifconfig | grep inet
+
+# 4. 电脑上连接
+#    ssh -p 8022 u0_aXXX@<手机IP>
+
+# 5. 设置开机自动启动 SSH（用 Magisk 脚本）
+#    创建 /data/adb/service.d/40-termux-ssh.sh：
+\`\`\`
+
+\`\`\`bash
+#!/system/bin/sh
+sleep 120
+su -l u0_a122 -c '/data/data/com.termux/files/usr/bin/sshd' 2>/dev/null
+\`\`\`
+
+\`\`\`bash
+# 6. 给它 root 权限（可选，用于系统级操作）
+#    在 Termux 里：su -c '命令'
+\`\`\`
+
+---
+
+# 附录 D · 你这台机器的专属信息卡
+
+\`\`\`
+设备型号      HONOR BKL-AL20（荣耀V10）
+芯片          HiSilicon Kirin 970 (arm64-v8a, 8核)
+系统          EMUI 9.1.0.337(C00E333R1P1) / Android 9 (SDK 28)
+内核          Linux 4.9.148 aarch64
+安全补丁      2019-12-01
+SELinux       Enforcing
+内存          6 GB (5.7 GB 可用)
+存储          53 GB /data（当前用 9.1 GB，剩 44 GB）
+
+Bootloader    unlocked（fblock + userlock 双解锁）
+Root          Magisk v20.1 (20100) + Manager v7.5.1
+解锁码        485737783237ffff
+ramdisk 分区  recovery_ramdisk（华为无 boot 分区）
+启动方式      电源键 = 带 Root 的正常系统
+
+Magisk 路径   /data/adb/magisk/
+日志          /cache/magisk.log
+\`\`\`
+
+---
+
+**文档结束 · 祝使用愉快**
+
+> 有任何问题，把 \`/cache/magisk.log\` 和你的操作步骤发我，我帮你分析。
+
+```
+
+`docs/05-模块安装报告.md`:
+
+```md
+# 荣耀V10 模块安装完成报告
+
+时间：2026-10-25 00:22（Asia/Shanghai）
+设备：HONOR BKL-AL20（荣耀V10） / P7CDU18425013192
+状态：**已重启验证通过，Root 正常，4 个模块全部生效**
+
+---
+
+## 一、模块清单（全部中文显示名，Magisk Manager 已确认）
+
+| 模块 ID（不可改） | 显示名 | 版本 | 状态 |
+|---|---|---|---|
+| `busybox-ndk` | **BusyBox 命令行工具箱** | 1.36.1 | ✅ 生效，`/system/bin/busybox` 已挂载 |
+| `MagiskHidePropsConf` | **设备指纹伪装** | v5.3.6-v106 | ✅ 生效 |
+| `cacerts` | **系统级 CA 证书（抓包）** | 1.0 | ✅ 生效，`/system/etc/security/cacerts/037aaf60.0` |
+| `hosts` | **系统级 Hosts 去广告** | 1.0 | ✅ 生效，`/system/etc/hosts` 已被 AdAway 接管 |
+
+模块名中文**可以改**：显示名来自 `module.prop` 的 `name=` 字段，UTF-8 完全支持。
+只有 **模块 ID（文件夹名）必须保持 ASCII**，因为 Magisk 用它做挂载和依赖判断。
+
+---
+
+## 二、第二批执行结果
+
+| # | 项目 | 结果 |
+|---|---|---|
+| 4 | 关闭系统 OTA | ⏭️ 按你的要求**跳过**，`com.huawei.android.hwouc` 保持启用 |
+| 5 | 关闭华为安全扫描 | ⚠️ **部分成功**：`hw_security_scan_enabled=0` 已生效；两个扫描 Activity 被华为系统拒绝（`Error: not allowed to disable this package`） |
+| 6 | 批量冻结预装 | ✅ 冻结 4 个：`com.huawei.appmarket`(应用市场) / `himovie`(华为视频) / `android.thememanager`(主题) / `videoeditor`(视频编辑)。游戏中心/阅读/浏览器/音乐本机没装。**hwouc 未动** |
+| 7 | 系统级 CA 证书 | ✅ 用你 `Downloads\mitmproxy-ca-cert.cer` 做的，hash = `037aaf60` |
+| 8 | 自动清理脚本 | ✅ `/data/adb/service.d/10-disable-security-scan.sh` + `20-clean-cache.sh` |
+| 9 | 备份 oeminfo / modem | ✅ 12 个分区共 292 MB，手机 `/sdcard/hw_backup/`，电脑 `phone_backup\hw_nv_backup\` |
+
+### 备份清单（含 MD5）
+```
+oeminfo            64 MB  b7e48a5527ad3eedb4a1e2cc62657c22
+nvme                5 MB  925394b135bafc63e4951c1609d81a6b
+persist             2 MB  b2d1236c286a3c0704224fe4105eca49
+modemnvm_factory   16 MB  e9f615b367ed74a7c16b88f8648eab53
+modemnvm_backup    16 MB  2897ef49d1a9da84015fc34acb00cc7a
+modemnvm_img       20 MB  c6087e04d7f0b51cc99ab6ed0eefe504
+modemnvm_system    16 MB  060194b6e8fcc03c7cd5df0af2780ba0
+modemnvm_cust      40 MB  e5d63665c27d61b3b3f6990630ef05af
+modemnvm_update    16 MB  9cce34321b755cb07076778c63cc3a63
+modem_om           32 MB  6e90aef2081eb1f0fdcea8ce9668b42b
+modem_secure      8.9 MB  e031b50d3d330697f1bf15f84b081c95
+modem_fw           56 MB  8137f77a578a2f5717d1711d5a4647ab
+```
+
+---
+
+## 三、第四批（APK）
+
+| 应用 | 状态 |
+|---|---|
+| **Termux** | ✅ 已装（`com.termux`），未配置 SSH |
+| **AdAway 6.1.4** | ✅ 已装 + **已配置完成**：选了「基于 Root 的广告屏蔽」，已授予 root，已下载 3 个来源，`/system/etc/hosts` = 71,505 行 / 2.1 MB，当前拦截 71496 条 |
+| ~~蝰蛇音效~~ | ⏭️ 按你要求跳过 |
+
+AdAway 的三个来源：AdAway 官方 hosts、Pete Lowe blocklist、StevenBlack Unified hosts。
+
+---
+
+## 四、第三批（Riru / EdXposed）—— 需要你决定
+
+你说「第三批去掉 Riru 注入框架」，但 **EdXposed 必须依赖 Riru 才能工作**（它的 module.prop 里明确写着 "Requires Riru v23 or above"）。
+所以：
+
+- **只去掉 Riru** → EdXposed 装了也起不来
+- **两个都不要** → 第三批整体跳过（当前就是这样，没装）
+- **两个都要** → 我用 riru-v23.9.zip（**需要先修一个拼写 bug**：脚本里 `BOOTMODE` 被写成了 `BOOTMOE`，不改必装失败），再装 EdXposed v0.5.2.2
+
+请告诉我选哪个。
+
+---
+
+## 五、关于卡顿：已定位到真正元凶
+
+重启后 load average 仍是 42，CPU 占用大头：
+
+| 进程 | CPU | 说明 |
+|---|---|---|
+| media.codec (omx service) | 109% | 在**解码**媒体文件 |
+| android.process.media | 78% | 媒体扫描器 |
+| mediaserver | 50% | |
+| media.extractor | | |
+
+**SD 卡（`/storage/3637-6663`）里的 DCIM / Huawei / Sounds / MISC 媒体文件正在被反复扫描和解码**，这才是卡顿根源，不是华为安全扫描。
+
+**解决方法（二选一）**：
+```bash
+# 方案A：在 SD 卡根目录放 .nomedia，让媒体扫描器整卡跳过
+adb shell su -c 'touch /storage/3637-6663/.nomedia'
+```
+```bash
+# 方案B：把 SD 卡里的媒体文件夹移走/删掉，只留 dload
+```
+方案 A 副作用：图库/音乐 App 里就看不到 SD 卡上的照片和音乐了。
+
+---
+
+## 六、常用撤销命令
+
+```bash
+# 解冻应用
+adb shell pm enable com.huawei.appmarket
+adb shell pm enable com.huawei.himovie
+adb shell pm enable com.huawei.android.thememanager
+adb shell pm enable com.huawei.videoeditor
+
+# 恢复安全扫描开关
+adb shell settings put global hw_security_scan_enabled 1
+
+# 禁用某个模块（重启后生效）
+adb shell su -c 'touch /data/adb/modules/<模块ID>/disable'
+# 启用
+adb shell su -c 'rm /data/adb/modules/<模块ID>/disable'
+# 全部模块禁用（核心功能模式）
+adb shell su -c 'touch /cache/.disable_magisk'
+
+# 卸掉 CA 证书模块
+adb shell su -c 'rm -rf /data/adb/modules/cacerts'
+```
+
+---
+
+## 七、踩到的坑（记录备用）
+
+1. **华为 EMUI 上 `pm` 不能用 root 跑**：`su -c 'pm list packages'` 会报
+   `cmd: Failure calling service package: Failed transaction (2147483646)`。
+   必须以 **shell（uid 2000）** 身份执行 `pm`。这是本机最容易踩的坑。
+2. **toybox 的 `dd` 不认 `bs=1M`**，必须写 `bs=1048576`。
+3. **Magisk 20.1 没有 `magisk --install-module`**，装模块只能手动跑 zip 里的
+   `META-INF/com/google/android/update-binary`，并设好
+   `BOOTMODE=true / MAGISK_VER=20.1 / MAGISK_VER_CODE=20100 / ARCH=arm64 / IS64BIT=true / API=28`。
+4. **USB 会间歇性掉线**，`adb install` 用流式写入容易失败；改用
+   `adb push` + `pm install` 更稳。
+5. **不要用 Magisk Manager 的「安装/修复运行环境」**——本机没有独立 boot 分区，
+   会把 recovery_ramdisk 搞坏。
+
+```
+
+`docs/06-功能入口与控制手册.md`:
+
+```md
+# 荣耀V10 已安装功能 · 入口与控制手册
+
+生成时间：2026-10-25 01:03
+设备：HONOR BKL-AL20（荣耀V10）· P7CDU18425013192
+ADB 路径：`C:\Users\wangyang\AppData\Local\Android\Sdk\platform-tools\adb.exe`
+
+> 下文所有命令里的 `adb` 都指上面这个完整路径（或你把它加进 PATH 后直接用 adb）。
+
+---
+
+## 0. 总入口一览
+
+| 功能 | 手机上的入口 | 电脑上的入口 |
+|---|---|---|
+| Magisk 本体 / 模块 / su / Hide | 桌面 **Magisk** 图标 | `adb shell su -c ...` |
+| 去广告 | 桌面 **AdAway** 图标 | `su -c 'wc -l /system/etc/hosts'` |
+| Linux 终端 / SSH 服务 | 桌面 **Termux** 图标 | `G:\DeepSeek Harness\Root\连接手机SSH.bat` 或 `ssh termux` |
+| 冻结的预装 App | 设置 → 应用 → 应用管理 | `adb shell pm list packages -d` |
+| 开机脚本 | （无界面） | `/data/adb/service.d/` |
+| 分区备份 | 文件管理 → 内部存储 → hw_backup | `phone_backup\hw_nv_backup\` |
+
+---
+
+## 1. Magisk（总控制台）
+
+**入口：手机桌面 → Magisk 图标**
+
+左侧 ☰ 菜单里有 6 项：
+
+| 菜单项 | 干什么 |
+|---|---|
+| **Magisk**（首页） | 看版本、检查更新、SafetyNet 检查 |
+| **超级用户** | 查看/撤销哪些 App 拿到了 root |
+| **Magisk Hide** | 勾选要"隐藏 root"的 App（反检测） |
+| **模块** | 装/卸/启用/禁用模块 ← **最常用** |
+| **下载** | 在线模块商店（已失效，别用） |
+| **日志** | 看 Magisk 运行日志 |
+| **设置** | 系统级 hosts 开关、核心功能模式、MagiskHide 总开关 |
+
+### 1.1 模块的启用 / 暂停 / 删除
+
+**图形界面**：Magisk → ☰ → 模块
+- 每个模块右侧 **✓ / ○ 圆圈** = 点一下切换 **启用 / 禁用**
+- **垃圾桶图标** = 删除模块
+- 右下 **黄色 + 按钮** = 从存储安装模块 zip
+
+**命令行**（改完要重启生效）：
+```bash
+# 禁用某个模块
+adb shell su -c 'touch /data/adb/modules/busybox-ndk/disable'
+# 重新启用
+adb shell su -c 'rm /data/adb/modules/busybox-ndk/disable'
+
+# 禁用全部模块（核心功能模式，救砖用）
+adb shell su -c 'touch /cache/.disable_magisk'
+# 恢复
+adb shell su -c 'rm /cache/.disable_magisk'
+
+# 删除模块
+adb shell su -c 'rm -rf /data/adb/modules/<模块ID>'
+```
+
+**当前 4 个模块的 ID**（文件夹名，不可改）：
+`busybox-ndk` · `MagiskHidePropsConf` · `cacerts` · `hosts`
+
+### 1.2 超级用户授权管理
+Magisk → ☰ → 超级用户 → 可以：
+- 看到所有申请过 root 的 App 和它们的状态
+- 点某个 App → **撤销 / 改为"允许"或"拒绝"**
+
+当前：`com.android.shell`（adb）是**永久允许**；AdAway 已授予；Termux 需要用时才申请。
+
+### 1.3 MagiskHide（反检测）
+Magisk → ☰ → Magisk Hide
+- 顶部总开关 = 启用/停用整个 MagiskHide
+- 列表里勾选 App = 对这些 App 隐藏 root
+
+当前状态：**已启用**。
+
+### 1.4 系统级 hosts 开关
+Magisk → ☰ → 设置 → **系统级 hosts**
+- 这个开关对应 `/data/adb/modules/hosts` 模块（我手动建好了，这里会显示为已开启）
+- 关掉它 AdAway 的 hosts 就会失效
+
+---
+
+## 2. AdAway（全机去广告）
+
+**入口：手机桌面 → AdAway 图标**
+
+主界面：
+
+| 元素 | 作用 |
+|---|---|
+| 顶部三个数字 | 阻止 / 允许 / 重定向 的条数 |
+| 中间卡片「3 个已更新来源」+ **🔄 图标** | 点它 = 检查并更新广告源 |
+| 中间卡片 + **⬇ 图标** | 下载/应用 hosts |
+| 底部**大红圆按钮** | **暂停图标(⏸)= 正在拦截，点一下暂停**；**播放图标(▶)= 已暂停，点一下恢复** |
+| 左下 ☰ 菜单 | 设置、来源管理、DNS 请求记录 |
+
+**查看当前生效的拦截条数**：
+```bash
+adb shell su -c 'wc -l /system/etc/hosts'
+adb shell su -c 'head -8 /system/etc/hosts'    # 能看到生成时间和来源
+```
+
+**暂停 AdAway 的三种办法**：
+1. AdAway 界面点底部大红按钮
+2. `adb shell su -c 'rm -rf /data/adb/modules/hosts' && adb reboot`（连模块一起删）
+3. 把 `/data/adb/modules/hosts` 改名加 `disable`（重启后失效但保留文件）
+
+当前：**已启用，71,505 条规则**，3 个来源（AdAway 官方 / Pete Lowe / StevenBlack Unified）。
+
+---
+
+## 3. Termux + SSH 服务 ⭐
+
+**入口：手机桌面 → Termux 图标**
+
+### 3.1 连接信息
+
+| 项 | 值 |
+|---|---|
+| 用户名 | `u0_a123` |
+| 密码 | `termux2026` ← **建议改掉** |
+| 端口 | `8022` |
+| 手机局域网 IP | `192.168.5.16`（WiFi：风生水起-5G） |
+| USB 转发地址 | `127.0.0.1:8022`（走 adb） |
+
+> ⚠️ 你电脑的网段是 `192.168.9.x`（以太网），手机是 `192.168.5.x`，**不在同一个局域网**，所以电脑现在直连不到手机 IP。
+> 两种解法：① 让手机连到电脑同一个网（192.168.9.x）；② 直接用 USB 转发（下面这个 .bat 就是干这个的）。
+
+### 3.2 电脑上怎么连（推荐）
+
+双击 **[连接手机SSH.bat](G:\DeepSeek%20Harness\Root\连接手机SSH.bat)**
+它会自动：建立 adb 端口转发 → 调起 ssh → 提示你输入密码 `termux2026`
+
+或者手动：
+```powershell
+# 1. 建立 USB 转发（插着数据线才有效）
+& "C:\Users\wangyang\AppData\Local\Android\Sdk\platform-tools\adb.exe" forward tcp:8022 tcp:8022
+
+# 2. 连接（已经写进 ~/.ssh/config，直接 ssh termux 即可）
+ssh termux
+# 密码：termux2026
+```
+
+> ⚠️ **Windows 自带的 ssh.exe（9.5 版）有个 bug**：遇到新版 OpenSSH 服务端会走
+> `publickey-hostbound` 路径然后静默失败（报 `Permission denied`）。
+> 我已经在 `~/.ssh/config` 里给 `termux` 这个主机加了 `PubkeyAuthentication no` 绕开它，**用密码登录就正常**。
+> 如果想用密钥登录，用 **plink**：`G:\DeepSeek Harness\Root\tools\plink.exe`（已下好，实测可用）。
+
+### 3.3 在手机上控制 SSH 服务
+
+在 Termux 里敲：
+
+| 命令 | 作用 |
+|---|---|
+| `sshd` | **启动** SSH 服务 |
+| `pkill sshd` | **停止** SSH 服务 |
+| `pgrep -x sshd` | 看有没有在跑（有输出=在跑） |
+| `netstat -tln \| grep 8022` | 看端口是否在监听 |
+| `passwd` | **改密码**（输两遍新密码） |
+| `whoami` | 看用户名 |
+| `ifconfig wlan0` | 看手机 IP |
+| `exit` | 退出当前会话 |
+
+在电脑上用 adb 控制：
+```bash
+# 查看状态
+adb shell netstat -tln | findstr 8022
+# 强制停掉
+adb shell su -c 'pkill -f sshd'
+```
+
+### 3.4 开机自动启动（已配置，但需要你点 3 下）
+
+我装了 **Termux:Boot**，它会开机跑 `~/.termux/boot/10-sshd.sh`。
+
+**但华为 EMUI 默认禁止第三方 App 自启动**，所以你需要手动放行一次：
+
+> **设置 → 应用 → 应用启动管理 → 找到 Termux 和 Termux:Boot → 关掉"自动管理" → 三个开关（自启动 / 关联启动 / 后台活动）全部打开**
+
+**兜底方案（已生效）**：就算 EMUI 不放行，你只要**打开一次 Termux**，`~/.bashrc` 里的钩子就会自动把 sshd 拉起来，不用手敲命令。
+
+相关文件：
+- 开机脚本：`~/.termux/boot/10-sshd.sh`
+- 兜底钩子：`~/.bashrc` 末尾
+- 开机日志：`~/boot.log`（能看到 `sshd started at ...` 就说明 Termux:Boot 生效了）
+- 临时开关：`~/.termux/termux.properties` 里的 `allow-external-apps=true`
+
+### 3.5 Termux 常用包管理
+```bash
+pkg update            # 更新软件源
+pkg install <包名>     # 装软件，例：pkg install python nodejs git
+pkg list-installed    # 已装列表
+pkg uninstall <包名>   # 卸载
+```
+已装：openssh、curl、git 依赖链、python 未装。
+
+---
+
+## 4. 被冻结的预装应用
+
+**入口：设置 → 应用 → 应用管理**（会显示"已停用"）
+
+当前冻结 4 个：
+
+| 包名 | 中文名 |
+|---|---|
+| `com.huawei.appmarket` | 应用市场 |
+| `com.huawei.himovie` | 华为视频 |
+| `com.huawei.android.thememanager` | 主题 |
+| `com.huawei.videoeditor` | 视频编辑 |
+
+> `com.huawei.android.hwouc`（系统更新）**按你要求保持启用**。
+
+**查看 / 解冻 / 再冻结**：
+```bash
+# 查看已冻结的
+adb shell pm list packages -d
+
+# 解冻（恢复）
+adb shell pm enable com.huawei.appmarket
+adb shell pm enable com.huawei.himovie
+adb shell pm enable com.huawei.android.thememanager
+adb shell pm enable com.huawei.videoeditor
+
+# 再冻结
+adb shell pm disable-user --user 0 com.huawei.appmarket
+```
+> ⚠️ **华为 EMUI 上 `pm` 命令不能用 root 跑**！必须像上面这样直接用 `adb shell`（shell 身份）。
+> 用 `su -c 'pm ...'` 会报 `Failed transaction (2147483646)`。
+
+---
+
+## 5. 华为安全扫描开关
+
+已关闭：`hw_security_scan_enabled = 0`
+
+```bash
+# 查看当前值
+adb shell settings get global hw_security_scan_enabled
+
+# 关闭
+adb shell settings put global hw_security_scan_enabled 0
+
+# 打开
+adb shell settings put global hw_security_scan_enabled 1
+```
+
+> 注：指南里那两条 `pm disable com.huawei.systemmanager/.xxxActivity` 被华为系统拒绝了
+> （`Error: not allowed to disable this package`），所以只关掉了扫描开关，没动整个手机管家。
+
+---
+
+## 6. 开机自动脚本（service.d）
+
+**位置：`/data/adb/service.d/`**（Magisk 在开机后期以 root 执行这里的所有 `.sh`）
+
+当前 2 个：
+
+| 文件 | 作用 |
+|---|---|
+| `10-disable-security-scan.sh` | 开机 60 秒后把安全扫描开关关掉 |
+| `20-clean-cache.sh` | 开机 120 秒后清 `/data/local/tmp` 和 `/cache` |
+
+**启用 / 暂停**：
+```bash
+# 暂停（改名加 .off 后缀即可）
+adb shell su -c 'mv /data/adb/service.d/20-clean-cache.sh /data/adb/service.d/20-clean-cache.sh.off'
+# 恢复
+adb shell su -c 'mv /data/adb/service.d/20-clean-cache.sh.off /data/adb/service.d/20-clean-cache.sh'
+# 加新脚本
+adb push my.sh /data/adb/service.d/30-my.sh
+adb shell su -c 'chmod 755 /data/adb/service.d/30-my.sh'
+```
+
+> 更早的 `/data/adb/post-fs-data.d/` 也能放脚本，执行时机更早（开机挂载 /data 之后立刻）。
+
+---
+
+## 7. 系统级 CA 证书（抓包）
+
+**入口：没有界面**，靠 Magisk 模块挂载。
+
+- 模块 ID：`cacerts`
+- 证书文件：`/data/adb/modules/cacerts/system/etc/security/cacerts/037aaf60.0`
+- 实际生效路径：`/system/etc/security/cacerts/037aaf60.0`（Magisk 挂载）
+- 证书来源：`C:\Users\wangyang\Downloads\mitmproxy-ca-cert.cer`（mitmproxy 的 CA）
+
+**换证书 / 删除**：
+```bash
+# 删掉整个证书模块
+adb shell su -c 'rm -rf /data/adb/modules/cacerts' && adb reboot
+
+# 换成别的证书：文件名必须是 <subject_hash_old>.0
+# 计算哈希（电脑上，需要 openssl）：
+#   openssl x509 -inform PEM -subject_hash_old -in ca.pem | head -1
+```
+> 注：`Downloads\klmy.pem` 是一把**私钥**（RSA PRIVATE KEY），不是证书，装不了。
+
+---
+
+## 8. 分区备份
+
+| 位置 | 内容 |
+|---|---|
+| 手机 `/sdcard/hw_backup/` | 12 个分区 img，292 MB |
+| 电脑 `G:\DeepSeek Harness\Root\phone_backup\hw_nv_backup\` | 同上，305,659,904 字节 |
+
+包含：`oeminfo`(解锁状态) `nvme` `persist` `modemnvm_factory/backup/img/system/cust/update` `modem_om` `modem_secure` `modem_fw`
+
+**恢复某个分区**（危险操作，务必先确认）：
+```bash
+adb push oeminfo.img /sdcard/
+adb shell su -c 'dd if=/sdcard/oeminfo.img of=/dev/block/by-name/oeminfo bs=1048576'
+```
+
+---
+
+## 9. 常见故障速查
+
+| 症状 | 处理 |
+|---|---|
+| sshd 连不上 | 手机打开 Termux 敲 `sshd`；电脑重跑一次 adb forward |
+| `ssh termux` 报 Permission denied | 确认 `~/.ssh/config` 里有 `PubkeyAuthentication no`；或改用 `连接手机SSH.bat` |
+| Magisk 里模块全没了 | 检查 `/data/adb/modules` 是否还在；用 `su -c 'magisk --restorecon'` |
+| 开机卡住 | 进 recovery 建 `/cache/.disable_magisk`，或用 adb `touch /data/adb/modules/<ID>/disable` |
+| `pm` 报 Failed transaction | 别用 `su -c` 跑 pm，直接用 `adb shell pm ...` |
+| `dd` 报 illegal number | toybox 的 dd 不认 `bs=1M`，写 `bs=1048576` |
+| 系统很卡 | 见下一节 |
+
+---
+
+## 10. 卡顿问题的当前状态
+
+实测：重启后 load average 仍然 40+，CPU 占用大头是
+
+```
+media.codec (omx service)  109%   ← 在解码媒体文件
+android.process.media       78%   ← 媒体扫描器
+mediaserver                 50%
+```
+
+**根因：SD 卡（`/storage/3637-6663`）里的 DCIM / Huawei / Sounds 媒体文件被反复扫描解码。**
+
+**一键解决**（副作用：图库/音乐看不到 SD 卡上的媒体）：
+```bash
+adb shell su -c 'touch /storage/3637-6663/.nomedia'
+```
+**撤销**：
+```bash
+adb shell su -c 'rm /storage/3637-6663/.nomedia'
+```
+
+```
+
+`docs/07-抓包能力配置与验证.md`:
+
+```md
+# 荣耀V10 抓包能力 · 配置与验证报告
+
+时间：2026-10-25 01:47
+设备：HONOR BKL-AL20（荣耀V10）· Android 9 / EMUI 9.1.0.337 · Magisk 20.1 · 已 Root
+
+---
+
+## 一、本轮新增安装
+
+| 项目 | 包名 / 路径 | 版本 | 状态 |
+|---|---|---|---|
+| **MT管理器**（RE管理器替代） | `bin.mt.plus` | 2.26.10 | ✅ 已装 |
+| **Riru** | `riru-core` 模块 | v23.9 (API 10) | ✅ 已激活 |
+| **EdXposed 框架** | `riru_edxposed` 模块 | v0.5.2.2_4683 (YAHFA) | ✅ **框架已激活** |
+| **EdXposed Manager** | `org.meowcat.edxposed.manager` | 4.6.2 (46200) | ✅ 已装 |
+| **tcpdump** | `/data/data/com.termux/files/usr/bin/tcpdump` | 4.99.7 + libpcap 1.11.0 | ✅ 实测可抓 |
+
+**EdXposed 激活证据**（Manager 界面）：Xposed API **v93.0** / EdXposed v0.5.2.2_4683-master (YAHFA) / Android 9 (Pie, API 28) / HUAWEI HONOR BKL-AL20 (EMUI)，大绿勾「EdXposed 框架已激活」。
+zygote64 / zygote 进程里都能看到 `libriru.so` 和 `libriru_b0a6.so` 各 6 处映射。
+
+### 安装 EdXposed 时踩的两个坑（已解决）
+
+1. **Riru v23.9 官方 zip 有拼写 bug**：`customize.sh` 和 `util_functions.sh` 里把 `$BOOTMODE` 写成了 `$BOOTMOE`，导致 `if ; then` 语法错误，**必装失败**。
+   → 已改成 `BOOTMODE`，并**重算这两个文件的 sha256** 写回对应的 `.sha256sum`（否则 Riru 自带的 verify.sh 会拒绝）。
+2. **EdXposed 的安装器要求 Magisk v20.4+**，而本机是 20.1，会直接 abort。
+   → 临时把 `/data/adb/magisk/util_functions.sh` 换成「v20.1 内容 + 补上 20.4 的 `install_module()` / `print_modname()`」的兼容版，装完立刻还原。
+
+---
+
+## 二、抓包三项能力逐条核实
+
+### ① 系统级证书信任 —— ✅ **早就做好了**
+
+- 已存在 Magisk 模块 `cacerts`，把 mitmproxy 的 CA 挂载进系统信任区：
+  `/system/etc/security/cacerts/037aaf60.0`（1257 字节）
+- 证书源：`C:\Users\wangyang\Downloads\mitmproxy-ca-cert.cer`
+
+**换成 Fiddler / Charles / Burp 的证书**（三步）：
+```bash
+# 1. 电脑上把证书导出成 PEM，算哈希（Git Bash 里执行）
+openssl x509 -inform PEM -subject_hash_old -in ca.pem | head -1
+#    假设输出 9a5ba575
+
+# 2. 改名并推到手机
+#    mv ca.pem 9a5ba575.0
+adb push 9a5ba575.0 /data/local/tmp/
+adb shell su -c 'cp /data/local/tmp/9a5ba575.0 /data/adb/modules/cacerts/system/etc/security/cacerts/'
+adb shell su -c 'chmod 644 /data/adb/modules/cacerts/system/etc/security/cacerts/9a5ba575.0'
+adb shell su -c 'chcon u:object_r:magisk_file:s0 /data/adb/modules/cacerts/system/etc/security/cacerts/9a5ba575.0'
+
+# 3. 重启
+adb reboot
+```
+> ⚠️ 文件名**必须是 `<subject_hash_old>.0`** 格式，否则系统不认。
+> ⚠️ **不要**再去装 MoveCertificate / Conscrypt Trust User Certs —— 原理和我这个 `cacerts` 模块完全一样，重复了。
+
+---
+
+### ② 突破 SSL Pinning —— ⚠️ **框架已就绪，选对模块就行**
+
+EdXposed 框架现在**已激活**，所以 Xposed 类模块可以直接用了。但要注意选哪个：
+
+| 方案 | 可行性 | 评价 |
+|---|---|---|
+| EdXposed + **JustTrustMe** | ⚠️ | **2016 年的老古董，Android 9 上大部分 App 已失效，不推荐** |
+| EdXposed + **TrustMeAlready** | ✅ **推荐** | JustTrustMe 的维护版，支持 Android 8~11，通用性最好 |
+| EdXposed + **SSLUnpinning** | ✅ | 另一个维护版，可作备选 |
+| **Frida** | ✅✅ **最强** | 手机跑 `frida-server`，电脑用 `frida`/objection 注入脚本。**不需要 Zygisk**，只要有 root |
+| **objection** | ✅ | Frida 的封装，一条命令：`objection -g <包名> explore` → `android sslpinning disable` |
+| LSPosed 模块 | ❌ | 需要 Magisk 24+ |
+
+**推荐路线**：
+- 图省事 → 装 **TrustMeAlready**（EdXposed 模块），勾选目标 App 重启即可
+- 要治顽固 App → 上 **Frida**，脚本按 App 定制，成功率最高
+
+---
+
+### ③ 底层被动抓包 —— ✅ **已装好并实测通过**
+
+Termux 里已经装好 **tcpdump 4.99.7**（注意：tcpdump 在 Termux 的 **root-repo** 里，不在主仓库）。
+
+**实测结果**（用 root 抓了 20 个包并回读成功）：
+```
+tcpdump: listening on any, link-type LINUX_SLL2, snapshot length 262144 bytes
+20 packets captured
+0 packets dropped by kernel
+→ /sdcard/test.pcap 2228 字节，回读正常
+```
+
+**用法**：
+```bash
+# 手机 Termux 里（需要 root）
+su -c 'LD_LIBRARY_PATH=$PREFIX/lib $PREFIX/bin/tcpdump -i any -w /sdcard/cap.pcap'
+
+# 或者从电脑直接抓（不用碰手机界面）
+adb shell su -c 'LD_LIBRARY_PATH=/data/data/com.termux/files/usr/lib /data/data/com.termux/files/usr/bin/tcpdump -i any -w /sdcard/cap.pcap'
+
+# 抓完拉回电脑用 Wireshark 打开
+adb pull /sdcard/cap.pcap
+```
+常用参数：`-i any` 所有网卡 / `-c N` 抓 N 个包就停 / `-s 0` 抓完整包 / `-w` 存文件 / `-r` 读文件 / `port 443` 只抓 HTTPS
+
+**更省事的替代：PCAPdroid**（App，免 root）
+- 用 VPN 方式接管，**能抓到不走代理的 App**
+- 可以直接导出 pcap 给 Wireshark，也能内置 mitm 解密
+- 对这台机器非常合适，和 tcpdump 互补
+
+---
+
+## 三、原文里的三处错误（重要）
+
+| 原文说法 | 实际 |
+|---|---|
+| 「荣耀V10 运行 EMUI 8.0 / Android 8.0」 | **实际是 EMUI 9.1 / Android 9（API 28）** |
+| 「Frida 在 Magisk + Zygisk 环境下使用」 | ❌ **错。Frida 完全不需要 Zygisk**，只要有 root 就行 |
+| 推荐 Xposed + **JustTrustMe** | ⚠️ 过时了。JustTrustMe 是 2016 年的，Android 9 上大面积失效，应改用 **TrustMeAlready** 或 **Frida** |
+
+---
+
+## 四、一条重要教训
+
+**不要用 `magisk --sqlite` 跑带子查询的 SQL**。
+我用它给 Termux 加 su 授权时，命令返回 `read (4 != 0) failed`，**直接把 magiskd 搞崩了**，root 全部失效。
+好在重启后 magiskd 自己恢复了。
+以后加 su 授权，直接用 **Magisk Manager → 超级用户** 界面操作，或者让 App 自己弹窗申请。
+
+---
+
+## 五、当前完整能力清单
+
+| 能力 | 状态 |
+|---|---|
+| Root | ✅ Magisk 20.1 |
+| 隐藏 Root | ✅ MagiskHide（20.1 时代的方案，DenyList 要 Magisk 24+） |
+| 系统级 CA 证书 | ✅ cacerts 模块（mitmproxy CA） |
+| Xposed 框架 | ✅ EdXposed 0.5.2.2 + Riru v23.9 |
+| SSL Pinning 绕过 | ⚠️ 框架就绪，待装 TrustMeAlready 或上 Frida |
+| 被动抓包 | ✅ tcpdump 4.99.7 |
+| 去广告 | ✅ AdAway（71505 条） |
+| 文件管理 | ✅ MT管理器 2.26.10 |
+| 终端 / SSH | ✅ Termux + sshd(8022) |
+| 分区备份 | ✅ 12 个分区（oeminfo/modem 等） |
+
+```
+
+`docs/08-Frida与抓包完全教程.md`:
+
+```md
+# 荣耀V10 · Frida / objection / 电脑抓包 完全教程
+
+设备：HONOR BKL-AL20（荣耀V10）· Android 9 / EMUI 9.1.0.337 · Magisk 20.1 · 已 Root
+编写时间：2026-10-25
+
+---
+
+## 0. 结论先行：这台机器能用什么、不能用什么
+
+| 方案 | 状态 | 说明 |
+|---|---|---|
+| **frida-server** | ❌ **用不了** | 华为锁死了 SELinux 策略写接口 |
+| **Frida Gadget**（objection patchapk） | ✅ **强烈推荐** | 绕过 frida-server 限制，实测可用 |
+| **EdXposed 模块** | ✅ 可用 | 框架已激活（Riru v23.9 + EdXposed 0.5.2.2） |
+| **系统 CA 证书 + 代理** | ✅ 已配好 | 能解密遵循系统信任链的 App |
+| **tcpdump 被动抓包** | ✅ 已装好 | 抓不走代理的流量 |
+| **PCAPdroid** | ✅ 备选 | 免 root，VPN 方式 |
+
+### 为什么 frida-server 在这台机器上用不了（有实测证据）
+
+```
+# 1) frida-server 自己报的错
+/data/adb/frida/frida-server -v
+→ Unable to save SELinux policy to the kernel: Out of memory
+
+# 2) 换 Magisk 自带的工具，一样失败（说明不是 frida 的问题）
+magiskpolicy --live "allow magisk magisk_file file read"
+→ write failed with 12: Out of memory
+
+# 3) 想关 SELinux 也不行
+setenforce 0
+→ setenforce: Couldn't set enforcing status to '0': Invalid argument
+```
+
+**根因**：华为内核把 `/sys/fs/selinux/load` 这个策略写接口锁死了，任何写入都返回 `ENOMEM(12)`。
+所以凡是**需要在运行时修改 SELinux 策略**的工具（frida-server、setenforce、magiskpolicy --live）全部失效。
+
+这是 frida 官方的老问题，不是你这台机器独有：
+- [frida#1039 — huawei p20 Unable to save SELinux policy](https://github.com/frida/frida/issues/1039)
+- [frida#1023 — PTRACE_POKEDATA head failed: 5 | HUAWEI](https://github.com/frida/frida/issues/1023)
+
+> 注意：**Magisk 模块的 `sepolicy.rule` 在开机阶段是能生效的**（Riru/EdXposed 就靠它），
+> 但那是开机早期由 magiskd 写入，运行期再写就一律失败。
+
+**所以本教程走 "Frida Gadget" 路线。**
+
+---
+
+## 1. 环境清单（都已装好）
+
+### 手机端
+
+| 东西 | 位置 / 说明 |
+|---|---|
+| Root | Magisk 20.1，`su -c id` → uid=0 |
+| frida-server | `/data/adb/frida/frida-server`（**装了，但用不了，留着做纪念**） |
+| tcpdump 4.99.7 | `/data/data/com.termux/files/usr/bin/tcpdump` |
+| 系统 CA 证书 | `/system/etc/security/cacerts/037aaf60.0`（mitmproxy CA） |
+| EdXposed Manager | 桌面「EdXposed Ma..」，框架已激活 |
+| MT管理器 | 桌面「MT管理器」 |
+| Termux | SSH 端口 8022，用户名 `u0_a123`，密码 `termux2026` |
+
+### 电脑端
+
+| 工具 | 路径 / 版本 |
+|---|---|
+| Python | `C:\Windows\py.exe`（3.11.9） |
+| frida | 17.24.3 |
+| frida-tools | 14.11.0 |
+| objection | 1.12.5 |
+| adb | `C:\Users\wangyang\AppData\Local\Android\Sdk\platform-tools\adb.exe` |
+| zipalign / apksigner / aapt | `...\Android\Sdk\build-tools\36.0.0\` |
+| Java | JDK 17（`C:\Program Files\Eclipse Adoptium\jdk-17.0.20.101-hotspot`） |
+| apktool | 3.0.3（`G:\DeepSeek Harness\Root\tools\apktool\apktool.bat`） |
+| plink | `G:\DeepSeek Harness\Root\tools\plink.exe`（备用 SSH 客户端） |
+
+**新开 PowerShell 时先把工具加进 PATH：**
+```powershell
+$env:PATH += ";C:\Users\wangyang\AppData\Local\Android\Sdk\platform-tools"
+$env:PATH += ";C:\Users\wangyang\AppData\Local\Android\Sdk\build-tools\36.0.0"
+$env:PATH += ";C:\Program Files\Eclipse Adoptium\jdk-17.0.20.101-hotspot\bin"
+$env:PATH += ";G:\DeepSeek Harness\Root\tools\apktool"
+$env:PATH += ";C:\Users\wangyang\AppData\Local\Programs\Python\Python311\Scripts"
+```
+加完之后 `adb` / `frida-ps` / `objection` / `apktool` / `java` 都能直接敲。
+
+---
+
+## 2. 拼图一：让 App 信任你的抓包证书（系统级 CA）
+
+Android 7 以后，App 默认**不信任用户手动装的证书**，只信 `/system/etc/security/cacerts` 里的。
+本机已经用 Magisk 模块 `cacerts` 把 mitmproxy 的 CA 挂进去了：
+
+```bash
+ls -l /system/etc/security/cacerts/037aaf60.0     # 应该能看到
+```
+
+### 换成 Charles / Fiddler / Burp 的证书
+
+```bash
+# ① 电脑上把证书导出成 PEM（比如 ca.pem），算哈希
+#    Git Bash / WSL 里执行：
+openssl x509 -inform PEM -subject_hash_old -in ca.pem | head -1
+#    假设输出 9a5ba575
+
+# ② 改名成 <hash>.0，推到手机
+#    mv ca.pem 9a5ba575.0
+adb push 9a5ba575.0 /data/local/tmp/
+
+# ③ 放进 cacerts 模块（不是直接写 /system！）
+adb shell su -c 'cp /data/local/tmp/9a5ba575.0 /data/adb/modules/cacerts/system/etc/security/cacerts/'
+adb shell su -c 'chmod 644 /data/adb/modules/cacerts/system/etc/security/cacerts/9a5ba575.0'
+adb shell su -c 'chcon u:object_r:magisk_file:s0 /data/adb/modules/cacerts/system/etc/security/cacerts/9a5ba575.0'
+
+# ④ 重启
+adb reboot
+```
+
+> ⚠️ 文件名**必须**是 `<subject_hash_old>.0`（8 位小写十六进制 + `.0`），否则系统不认。
+> ⚠️ **不要**去 `mount -o rw,remount /system` —— 本机 /system 是只读 erofs，改不动，而且 Magisk 模块挂载是更好的做法。
+> ⚠️ **不用**再装 MoveCertificate / Conscrypt Trust User Certs，原理和 `cacerts` 模块一样，重复。
+
+**删除某张证书**：把对应文件从模块目录删掉，重启即可。
+
+---
+
+## 3. 拼图二：代理抓包（跨网段也能用）
+
+### 3.1 关键技巧：`adb reverse`
+
+你这台电脑在 `192.168.9.x`，手机在 `192.168.5.x`，**不在同一个局域网**，手机直连不到电脑的代理端口。
+
+**解决办法：用 `adb reverse` 把电脑的端口"反向"映射到手机的 127.0.0.1。**
+
+```powershell
+# 电脑上执行：把电脑的 8080 映射成手机上的 127.0.0.1:8080
+adb reverse tcp:8080 tcp:8080
+adb reverse --list        # 确认：(reverse) tcp:8080 tcp:8080
+
+# 让手机全局走这个代理
+adb shell settings put global http_proxy 127.0.0.1:8080
+```
+
+取消代理：
+```powershell
+adb shell settings put global http_proxy :0
+adb reverse --remove-all
+```
+
+### 3.2 用 mitmproxy（命令行，最方便）
+
+```powershell
+# 电脑上
+pip install mitmproxy          # 或者用 py -m pip install mitmproxy
+mitmweb --listen-port 8080     # 会打开浏览器界面 http://127.0.0.1:8081
+```
+
+### 3.3 用 Charles / Fiddler
+
+1. 电脑上设置监听端口 **8080**，勾选 "Allow remote clients"
+2. 按 3.1 建立 `adb reverse` 并设置手机代理
+3. 证书用第 2 节的方法装进系统区
+4. 手机上打开目标 App，电脑上就能看到明文 HTTPS
+
+### 3.4 只给单个 App 设代理（不动全局）
+
+部分 App 不认全局代理，可以改用 **PCAPdroid**（见第 7 节），或者在目标 App 里用 Frida 改它的代理设置。
+
+---
+
+## 4. 拼图三：Frida Gadget（本机唯一可用的 Frida 路线）⭐
+
+### 4.1 原理对比
+
+| | frida-server | Frida Gadget |
+|---|---|---|
+| 工作方式 | 外部进程注入目标 App | 把 `libfrida-gadget.so` 打进 APK，App 自己加载 |
+| 需要改 SELinux | ✅ 需要 → **本机不行** | ❌ 不需要 → **本机可行** |
+| 需要重装 App | ❌ | ✅（签名变了要重装） |
+| 适用 | 通用 | 需要 patch 的目标 App |
+
+### 4.2 完整流程
+
+```powershell
+# ① 找到目标 App 的 APK 路径并拉下来
+adb shell pm path com.example.app
+#    → package:/data/app/~~xxxx/com.example.app-yyyy/base.apk
+adb pull /data/app/~~xxxx/com.example.app-yyyy/base.apk target.apk
+
+# ② 打补丁
+#    -a arm64-v8a  指定架构（本机是 arm64-v8a）
+#    -N            注入 network_security_config.xml，让 App 信任用户 CA（抓包必加！）
+#    -d            顺便把 android:debuggable 设成 true（可选）
+objection patchapk -s target.apk -a arm64-v8a -N
+
+#    产物：target.objection.apk
+
+# ③ 卸载原版，装补丁版（签名变了，必须先卸）
+adb uninstall com.example.app
+adb install target.objection.apk
+
+# ④ 启动 App（gadget 会自动加载并挂起/监听）
+adb shell am start -n com.example.app/.MainActivity
+
+# ⑤ 连接
+frida-ps -U                     # 列表里应该出现 Gadget
+objection -g com.example.app explore
+# 或
+frida -U -n Gadget
+```
+
+**实测记录**（拿 Termux:Boot 做的小样）：
+```
+Unpacking tb.apk
+App does not have android.permission.INTERNET, attempting to patch...
+Injecting permission: android.permission.INTERNET
+Creating XML res path: ...\res\xml
+Copying network_security_config.xml...
+Reading smali from: .../BootActivity.smali
+Injecting loadLibrary call at line: 6
+Creating library path: ...\lib\arm64-v8a
+Copying Frida gadget to libs path...
+Rebuilding the APK with the frida-gadget loaded...
+Zipalign completed / Signed the APK
+→ tb.objection.apk
+```
+
+### 4.3 让 Gadget 监听网络端口（可选，方便远程调试）
+
+默认 Gadget 走 USB。如果想让电脑通过网络连（例如手机不在同一网段但能互通），
+写一个配置文件 `gadget.json`：
+
+```json
+{
+  "interaction": {
+    "type": "listen",
+    "address": "0.0.0.0",
+    "port": 27042,
+    "on_load": "resume"
+  }
+}
+```
+
+打补丁时指定：
+```powershell
+objection patchapk -s target.apk -a arm64-v8a -N -c gadget.json
+```
+
+连接：
+```powershell
+frida -H 192.168.5.16:27042 -n Gadget
+```
+
+---
+
+## 5. 拼图四：objection 实战
+
+### 5.1 常用命令速查（在 `objection -g <包名> explore` 的交互里敲）
+
+| 命令 | 作用 |
+|---|---|
+| `android sslpinning disable` | **解除 SSL Pinning**（最常用） |
+| `android root disable` | 隐藏 root 检测 |
+| `android root simulate` | 假装有 root |
+| `android hooking list classes` | 列出所有类 |
+| `android hooking search classes <关键字>` | 搜索类 |
+| `android hooking list class_methods <类名>` | 列出某类的方法 |
+| `android hooking watch class_method <类>.<方法> --dump-args --dump-return --dump-backtrace` | **实时监控方法调用和参数** |
+| `android hooking set return_value <类>.<方法> false` | 强制某方法返回指定值 |
+| `memory list modules` | 列出加载的 so |
+| `memory list exports <so名>` | 列出 so 的导出符号 |
+| `android intent launch_activity <Activity>` | 启动指定 Activity |
+| `env` | 查看 App 运行环境 |
+| `jobs list` / `jobs kill <id>` | 管理 hook 任务 |
+| `exit` | 退出 |
+
+### 5.2 典型用法：一条命令解除 SSL Pinning
+
+```powershell
+objection -g com.example.app explore
+# 进去后敲：
+android sslpinning disable
+```
+
+它会自动 hook 掉 OkHttp / TrustManager / Conscrypt / Appmattus 等常见 pinning 实现。
+
+### 5.3 直接跑 Frida 脚本（不用交互）
+
+```javascript
+// unpin.js —— 通用 SSL Pinning 绕过
+Java.perform(function () {
+    // 1. 干掉 OkHttp 的 CertificatePinner
+    try {
+        var CertificatePinner = Java.use('okhttp3.CertificatePinner');
+        CertificatePinner.check.overload('java.lang.String', 'java.util.List').implementation = function (a, b) {
+            console.log('[+] OkHttp pinning bypassed: ' + a);
+            return;
+        };
+    } catch (e) { console.log('[-] no OkHttp'); }
+
+    // 2. 干掉 X509TrustManager 的所有校验
+    try {
+        var X509TrustManager = Java.use('javax.net.ssl.X509TrustManager');
+        var SSLContext = Java.use('javax.net.ssl.SSLContext');
+        var TrustManager = Java.registerClass({
+            name: 'com.dsh.TrustAll',
+            implements: [X509TrustManager],
+            methods: {
+                checkClientTrusted: function (chain, authType) {},
+                checkServerTrusted: function (chain, authType) {},
+                getAcceptedIssuers: function () { return []; }
+            }
+        });
+        var TrustManagers = [TrustManager.$new()];
+        var SSLContext_init = SSLContext.init.overload(
+            '[Ljavax.net.ssl.KeyManager;', '[Ljavax.net.ssl.TrustManager;', 'java.security.SecureRandom');
+        SSLContext_init.implementation = function (km, tm, sr) {
+            console.log('[+] SSLContext.init hooked');
+            SSLContext_init.call(this, km, TrustManagers, sr);
+        };
+    } catch (e) { console.log('[-] TrustManager hook failed: ' + e); }
+
+    // 3. 打印所有网络请求（可选）
+    try {
+        var URL = Java.use('java.net.URL');
+        URL.openConnection.overload().implementation = function () {
+            console.log('[URL] ' + this.toString());
+            return this.openConnection();
+        };
+    } catch (e) {}
+});
+```
+
+运行：
+```powershell
+frida -U -n Gadget -l unpin.js
+# 或者 gadget 已经在跑：
+frida -U -f com.example.app -l unpin.js
+```
+
+---
+
+## 6. 拼图五：EdXposed（不重打包就能 Hook）
+
+**优点**：不用改 APK、不用重装，装上模块勾选目标 App 重启即可。
+**缺点**：只能用在已 Root 且有 Xposed 框架的机器上（本机已就绪）。
+
+### 6.1 装模块
+
+1. 下载 Xposed 模块 APK（例如 **TrustMeAlready**）
+2. 安装到手机
+3. 打开 **EdXposed Manager** → 左侧「模块」→ 勾选该模块
+4. **重启手机**
+5. 打开模块 App 配置要作用的范围
+
+### 6.2 抓包相关的推荐模块
+
+| 模块 | 作用 |
+|---|---|
+| **TrustMeAlready** | SSL Pinning 绕过（JustTrustMe 的维护版，Android 8~11 通用） |
+| **SSLUnpinning** | 同类，备选 |
+| **JustTrustMe** | ⚠️ 2016 年老版本，Android 9 上大面积失效，**不推荐** |
+| **XPrivacyLua** | 隐私沙盒（喂假数据） |
+
+### 6.3 与 Frida 的分工
+
+- **EdXposed**：一次配置，长期生效，适合"装一次一直用"
+- **Frida Gadget**：按需注入，脚本可随时改，适合"临时深挖某个 App"
+
+---
+
+## 7. 拼图六：tcpdump 被动抓包（抓不走代理的流量）
+
+代理抓包有个盲区：**不遵守系统代理的 App**（很多 App 会绕过）。这时候用 tcpdump 在网卡层抓。
+
+### 7.1 抓包
+
+```powershell
+# 电脑上执行，抓包存到手机 /sdcard
+adb shell su -c 'LD_LIBRARY_PATH=/data/data/com.termux/files/usr/lib /data/data/com.termux/files/usr/bin/tcpdump -i any -s 0 -w /sdcard/cap.pcap'
+
+# 抓到够了按 Ctrl+C，然后拉回电脑
+adb pull /sdcard/cap.pcap
+# 用 Wireshark 打开
+```
+
+### 7.2 常用参数
+
+| 参数 | 含义 |
+|---|---|
+| `-i any` | 所有网卡（WiFi + 移动网络 + 回环） |
+| `-s 0` | 抓完整包（不截断） |
+| `-c 100` | 抓 100 个包就停 |
+| `-w file.pcap` | 写入文件 |
+| `-r file.pcap` | 读取文件 |
+| `-nn` | 不解析主机名和端口名（更快） |
+| `port 443` | 只抓 HTTPS |
+| `host 1.2.3.4` | 只抓某个 IP |
+
+### 7.3 在手机 Termux 里直接抓
+
+```bash
+# Termux 里（需要 su，Magisk 会弹窗，点允许）
+su -c 'LD_LIBRARY_PATH=$PREFIX/lib $PREFIX/bin/tcpdump -i any -w /sdcard/cap.pcap'
+```
+
+### 7.4 更省事的替代：PCAPdroid
+
+**PCAPdroid** 是一个 App，用 VPN 方式接管流量，**免 root**：
+- 能抓到所有 App 的流量（包括不走代理的）
+- 可以直接导出 pcap 给 Wireshark
+- 也内置了 mitm 解密功能
+- 缺点：VPN 模式和某些 App 的 VPN 检测冲突
+
+---
+
+## 8. 组合拳：三个典型场景
+
+### 场景 A：普通 App 抓 HTTPS（最简单）
+
+```powershell
+adb reverse tcp:8080 tcp:8080
+adb shell settings put global http_proxy 127.0.0.1:8080
+mitmweb --listen-port 8080        # 电脑上另开一个窗口
+# 手机上打开目标 App 操作
+# 电脑 mitmweb 界面里就能看到明文
+```
+
+### 场景 B：有 SSL Pinning 的 App
+
+```powershell
+# 路线 1（推荐，快）：Frida Gadget
+adb shell pm path com.target.app
+adb pull <上面输出的路径> target.apk
+objection patchapk -s target.apk -a arm64-v8a -N
+adb uninstall com.target.app
+adb install target.objection.apk
+adb shell am start -n com.target.app/.MainActivity
+objection -g com.target.app explore
+#   进去后敲：android sslpinning disable
+
+# 路线 2（不重装）：EdXposed
+#   装 TrustMeAlready → EdXposed Manager 勾选 → 重启 → 模块里勾目标 App
+```
+然后再按场景 A 设置代理。
+
+### 场景 C：抓不走代理的流量 / 非 HTTP 协议
+
+```powershell
+adb shell su -c 'LD_LIBRARY_PATH=/data/data/com.termux/files/usr/lib /data/data/com.termux/files/usr/bin/tcpdump -i any -s 0 -w /sdcard/cap.pcap'
+# 操作 App
+# Ctrl+C 后：
+adb pull /sdcard/cap.pcap
+# Wireshark 打开；如果是 TLS，再配合场景 A/B 的证书+Frida 才有明文
+```
+
+---
+
+## 9. 常见问题
+
+| 问题 | 解决 |
+|---|---|
+| `frida-ps -U` 没反应/卡住 | 本机没有可用的 frida-server。用 Gadget 路线，或先确认 Gadget 已随 App 启动 |
+| `objection patchapk` 报找不到 adb / apktool | 按第 1 节把路径加进 PATH |
+| 补丁版 App 装不上（签名冲突） | 先 `adb uninstall <包名>`；数据会丢，先备份 |
+| 装了证书 App 还是报证书错误 | 该 App 有 SSL Pinning → 走场景 B |
+| App 完全不发请求 | 它可能绕过了系统代理 → 走场景 C |
+| 手机和电脑不同网段 | 用 `adb reverse`（第 3.1 节） |
+| `setenforce 0` 报 Invalid argument | 华为锁死，正常现象，别折腾 |
+| `pm` 命令报 `Failed transaction` | 华为限制：**不要用 `su -c` 跑 `pm`**，直接用 `adb shell pm ...` |
+| Termux 里 `su` 弹窗 | 在 Magisk Manager → 超级用户里给 Termux 授权 |
+
+---
+
+## 10. 一句话总结
+
+**这台机器的抓包链路是：**
+```
+系统 CA 证书（cacerts 模块）
+        +
+代理（adb reverse + mitmproxy/Charles）
+        +
+绕过 SSL Pinning（Frida Gadget + objection，或 EdXposed + TrustMeAlready）
+        +
+兜底抓包（tcpdump / PCAPdroid）
+```
+**Frida-server 走不通（华为锁 SELinux），但 Frida Gadget 完全可用，功能一点不少。**
+
+```
+
+`docs/09-固件下载渠道全网排查.md`:
+
+```md
+# 荣耀V10 BKL-AL20 解锁方案与固件下载渠道 · 全网排查报告
+
+> 生成时间：2026-10-23 ｜ 本轮核心成果：**找到了不拆机的技术路径 + 免费的工程固件源**
+
+---
+
+## 一、重大突破：找到了完整的技术原理（不拆机路径存在！）
+
+### 1.1 关键仓库：kasnria001/huawei-usbdload-tool
+
+https://github.com/kasnria001/huawei-usbdload-tool
+
+**注意：kasnria001 正是 Kirin-Tool 作者在 README 里致谢的人（提供解密 xloader）。** 这个仓库公开了完整原理：
+
+**核心原理（原文要点）：**
+
+1. 老华为设备有一个 **USB DLOAD MODE（也叫 5% MODE）**
+2. 进入方式：**Vol+ + Vol- + Power 三键**（或在 recovery 里选）—— **不需要拆机！**
+3. 这个模式可以接收 `UPDATE.APP` 包，把镜像写进指定分区
+4. UPDATE.APP 的第一个镜像是 `SHA256RSA.img`（签名），第二个是 `CRC.img`（每块 CRC）
+5. **关键漏洞：EMUI9 及以下，update-binary 只校验镜像块的 CRC，不校验签名 → 可以做 CRC 碰撞**
+6. 以 0x8000 为一块，把 `PACKAGE_TYPE` 改成 `OFFLINE_UPDATE` 即可绕过在线校验
+7. 版本检查（BASE_VER/BASE_VERLIST）绕过法：**连发两个包不重启，第一个用更高版本**
+8. **EMUI 9.1 起华为给关键分区加了 hash 校验，但是——PRELOADER 和 XLOADER 是同一个物理分区，PRELOADER 不属于关键分区。只要把 XLOADER 的镜像头里的分区名改成 PRELOADER，就能继续用 CRC 碰撞。**
+9. **这样就能把手机踢进 COM 1.0 模式**，之后用 BootROM/xloader 漏洞解锁
+
+**另有 nvme_editor.py**：老华为把 FBLOCK 和解锁码（USRKEY）的 SHA256 存在 nvme 分区，**可以直接改这两个值**（需同步更新每项的 CRC）。
+
+### 1.2 我们的机器为什么适用
+
+| 条件 | 本机 | 是否满足 |
+|---|---|---|
+| EMUI 版本 | **EMUI 9.1.0.337** | ✅ 在「EMUI9 及以下」范围内 |
+| XLOADER→PRELOADER 改名绕过 | 适用 EMUI 9.1 | ✅ |
+| 进入 USB DLOAD MODE | 三键组合 | ✅ **不需要拆机** |
+
+**结论：存在一条不拆机的路径。** 但必须有一份 BKL-AL20 的 `UPDATE.APP`。
+
+### 1.3 配套工具（已全部拿到）
+
+| 工具 | 位置 | 说明 |
+|---|---|---|
+| `appupk.py` | 已下载 `tools/kirintool-cli/x/kirintool-main/tools/` | 解包 UPDATE.APP，提取镜像/头/list/unlockcode；mode 3 可 dump 分区 |
+| `gobrom.py` | 同上 | 从 USB DLOAD MODE 把设备踢进 BOOTROM/COM1.0 |
+| `usbdload.py` | 同上 | HDLC 串口协议（0x7e/0x7d + CRC-X25），含 unlock/head/tail/data/reboot 命令 |
+| `nvme_editor.py` | 同上 | 改 FBLOCK / USRKEY |
+| Kirin-Tool v2.4.2 | 已编译 `tools/kirintool/.../Kirin-Tool.exe` | 图形界面，COM1.0 解锁 + Dump 分区 |
+| Magisk v23.0 | `tools/magisk/Magisk-v23.0.apk` | Root |
+
+### 1.4 完整 BootROM 漏洞链参考实现
+
+https://github.com/xiaochen200000/mate30-bl-unlock （MIT 许可，2026-09）
+
+- 6 篇逆向文档 + 3 个 Python 脚本（`readback_xloader.py` / `readback_fastboot.py` / `unlock_chain.py`）
+- **重要特性：破解/回读阶段的补丁全部只写 SRAM/DDR 运行内存，不碰持久存储 → 这一阶段没有变砖风险，断电重启即恢复**
+- ⚠️ 作者明确声明：**只在 Mate30 4G（Kirin 990）上测过**，其他机型的 payload 地址表、补丁偏移都不同，不能照跑
+- 理论源头：TASZK 白皮书 https://i.blackhat.com/USA21/Wednesday-Handouts/US-21-Komaromy-How-To-Tame-Your-Unicorn-wp.pdf
+
+---
+
+## 二、固件下载渠道 —— 全部实测结果
+
+### ✅ 免费、可用（优先试这些）
+
+#### 1. AndroidFileHost —— 工程固件（Board Software / BD）★最推荐
+
+**这正是一个月前 mate30 项目用的同类文件（BD 包内含 `sec_usb_xloader.img` / `sec_usb_xloader2.img` / `sec_fastboot.img`）**
+
+| 项目 | 值 |
+|---|---|
+| 文件名 | `Huawei Honor V10 View10 BKL-L09 BKL-AL00 BKL-AL10 BKL-AL20 BKL-TL10 BKL-TL20 Berkeley-AL20-BD 1.0.0.40 Board Software general 8.0.0 r1 EMUI8.0 05022HCX.rar` |
+| 大小 | **1.3 GB** |
+| MD5 | `d7a71a113fa277afce90cdc805e5fc1b` |
+| 下载页 | **https://androidfilehost.com/?fid=2188818919693747486** |
+| 实测 | 页面正常，显示「Click Here to Start Download / No wait time」，**免费无等待**（下载按钮需浏览器执行 JS） |
+
+#### 2. Google Drive —— 官方 Dload 固件包（含 UPDATE.APP）
+
+| 文件 | 链接 |
+|---|---|
+| `Honor_View_10_BKL-AL20_8.0.0.199_C00GT_Firmware_8.0.0_R1_EMUI8.0_05014UWC_Dload.zip` | https://drive.google.com/file/d/14hrVQt_Z1kccOoj8BcIKbIII8hps3q2U/view |
+| `Honor_V10_Berkeley-AL20_8.0.0.199_C00GT_Firmware_8.0.0_R1_EMUI8.0_05014UWC_Dload.zip` | https://drive.google.com/file/d/1rt7Z4Eqx8cVKHUY6MWmpxIHDU7DFtH8D/view |
+
+> ⚠️ **我实测这两个链接匿名下载都返回 `Google Drive - Quota exceeded`（配额超限）。**
+> **你可以这样试**：用自己的 Google 账号打开 → 右上角「添加到我的云端硬盘」→ 在「我的云端硬盘」里右键「制作副本」→ 下载副本。副本不受原文件配额限制，这个方法通常有效。
+
+#### 3. firmwarefile.com —— 聚合页（指向上面两个源，附刷机教程）
+
+- https://firmwarefile.com/honor-view-10-bkl-al20
+- https://firmwarefile.com/honor-v10-berkeley-al20/
+
+#### 4. IDT Tool —— 刷 BD 工程固件的工具（免费，XDA 帖提供）
+
+- https://www.mediafire.com/file/akhhupm06aco71h/Huawei-Download-tool-IDT_V2.0.0.zip/file
+
+#### 5. XDA 通用降级/救砖教程（BD 方法原文，含完整步骤）
+
+- https://xdaforums.com/t/guide-huawei-honor-downgrade-unbrick-method-no-rollback-package-required.4793545/
+
+> 教程要点：刷入 Board Software 后手机会进入**工厂测试模式**，此时**所有固件签名校验和版本回滚限制全部失效**，可以用三键 dload 强刷任意版本。
+> 教程也提醒：BD 刷完后系统界面会很怪、只有中英文，属正常；用自带「主题」应用恢复默认主题即可。
+
+### 💰 需要注册 / 付费
+
+#### 6. firmwaredrive.com（同一批文件，站内有购物车）
+
+| 文件 | 链接 |
+|---|---|
+| BKL-AL20 8.0.0.199 C00GT | https://firmwaredrive.com/index.php?a=downloads&b=file&id=20012 |
+| BKL-AL20 8.0.0.199 C01GT | https://firmwaredrive.com/index.php?a=downloads&b=file&id=20013 |
+| Berkeley-AL20 8.0.0.199 C00GT | https://firmwaredrive.com/index.php?a=downloads&b=file&id=20004 |
+| Berkeley-AL20 8.0.0.132D C00 | https://firmwaredrive.com/index.php?a=downloads&b=file&id=21046 |
+| **BKL-AL10 BD 1.0.0.40 工程固件** | https://firmwaredrive.com/index.php?a=downloads&b=file&id=21051 |
+
+> 实测：文件页可看（5.84 GB），但下载端点返回 403（需购买/登录）
+
+#### 7. HalabTech（维修站，需注册）
+
+| 文件 | 链接 |
+|---|---|
+| Berkeley-AL20-BD 1.0.0.40 Board Software | https://support.halabtech.com/index.php?a=downloads&b=file&id=104535 |
+| BKL-AL20 9.1.0.337 (C00E333R2P1T8) Firmware | https://support.halabtech.com/index.php?a=downloads&b=file&id=239316 |
+| BKL-AL20 9.1.0.337 (C01E333R1P1T8) Firmware | https://support.halabtech.com/index.php?a=downloads&b=file&id=247361 |
+
+#### 8. cnroms.com（走百度网盘，需 license 确认）
+
+- 工程固件页：https://www.cnroms.com/firmwares/huawei/BKL-AL20/download/9106
+- 该页列出完整包内容，含 `sec_usb_xloader.img` / `sec_usb_xloader2.img` / `sec_fastboot.img` / `boot_ramdisk.img` / `efuse.img`
+
+#### 9. 其他
+
+| 站点 | 链接 | 备注 |
+|---|---|---|
+| onfix.cn | https://onfix.cn/rom?bid=6&mid=3503 | 5 鱼鳞（付费），提供百度网盘+123网盘 |
+| donghairom | https://www.donghairom.com/thread-25744-1-1.html | 需注册 |
+| romzj.com.cn | http://www.romzj.com.cn/rom/honor-rom/honor-v-series/bkl-al00-rom/25263/ | 有 BD 包 |
+| romdevelopers | https://romdevelopers.com/index.php?a=downloads&b=file&id=29851 | Cloudflare 验证 |
+| arabunlock | https://support.arabunlock.com/index.php?a=downloads&b=folder&id=11297 | 需注册 |
+
+### ❌ 已失效
+
+| 渠道 | 状态 |
+|---|---|
+| 官方直链 `update.dbankcdn.com/.../v351781/...` | 404 |
+| 华为 OTA CDN（`update.hicloud.com:8180`） | 路径已轮换，全 404 |
+| Firmware Finder（pro-teammt.ru） | 数据库已改版，旧接口 404 |
+| HiSuite Proxy | 仓库 2023-08 归档；本地启动失败 |
+| XDA 附件（Kirin-Tool / COM1 驱动 / 测试点） | 403 需登录 |
+
+---
+
+## 三、版本问题（必须知道）
+
+免费找到的固件全是 **EMUI 8.0（Android 8）**，而手机是 **EMUI 9.1.0.337**。
+
+| 问题 | 说明 | 绕过办法 |
+|---|---|---|
+| 版本检查 | update-binary 可能检查 BASE_VER 要求新版本 | ① 连发两个包不重启，第一个用更高版本 ② BD 工程固件本身绕过所有检查 |
+| 签名检查 | EMUI9 及以下只校验 CRC | CRC 碰撞 |
+| EMUI9.1 关键分区 hash | 华为给关键分区加 hash | **XLOADER 镜像头改成 PRELOADER** |
+
+---
+
+## 四、建议的执行顺序
+
+### 路线 A（不拆机，推荐先试）
+
+1. 从 AndroidFileHost 下载 **BD 工程固件**（1.3 GB，免费）—— 或用 Google Drive 副本法拿 Dload 包
+2. 用 `appupk.py` 解包，取出 XLOADER
+3. 手机三键（Vol+ + Vol- + Power）进 **USB DLOAD MODE**（不拆机！）
+4. 用 `usbdload.py` 发 CRC 碰撞后的包（XLOADER 头改 PRELOADER）→ 踢进 COM 1.0
+5. COM 1.0 里用 Kirin-Tool 解锁 + Dump `recovery_ramdisk`
+6. Magisk 修补 → `fastboot flash recovery_ramdisk`
+
+### 路线 B（拆机，保底）
+
+测试点短接 → COM 1.0 → 同上第 5-6 步
+
+---
+
+## 五、你现在可以做的事
+
+**第一步：点这个链接下载 BD 工程固件**（免费、无等待）
+
+👉 https://androidfilehost.com/?fid=2188818919693747486
+
+下完告诉我，我接着处理。**1.3 GB，注意核对 MD5：`d7a71a113fa277afce90cdc805e5fc1b`**
+
+```
+
+`docs/10-固件9.1.0.337获取渠道.md`:
+
+```md
+# BKL-AL20 9.1.0.337 固件获取 · 全网穷尽排查结果
+
+> 生成时间：2026-10-23
+
+## 一、本轮新突破
+
+### 1. 华为 OTA 接口还活着（重要）
+
+从你手机的 logcat 里抓到了官方 OTA 接口：
+
+```
+POST https://query.hicloud.com/sp_ard_common/v2/onestopCheck.action?verType=true&autoInstall=y&latest=true
+```
+
+- 实测 GET → 405（说明接口在，只是要 POST）
+- 实测 POST 空 JSON → `{"status":"-1"}`（服务器正常响应）
+- 手机自己查询返回：`{"status":"1","versionPackageCheckResults":[{"status":"1","versionPackageType":2},...]}`
+- 手机日志明确写：**New version not available** → 说明 9.1.0.337 就是最终版，服务器上有这个包
+
+**如果拿到正确的请求体格式，就能用「旧版本号」去查询，服务器会返回 9.1.0.337 的下载地址。** 目前缺的就是 JSON body 格式。
+
+### 2. OTA CDN 已彻底废弃
+
+```
+http://update.hicloud.com:8180/TDS/...   → 全部 404
+https://update.dbankcdn.com/TDS/...      → 全部 404
+```
+连 ValdikSS 那份「历史可用链接清单」里的链接现在也 404 了。**URL 爆破路线死亡。**
+
+---
+
+## 二、有 9.1.0.337 的站点（按推荐度排序）
+
+### ⭐ 强烈推荐：4PDA（免费注册，而且有现成 Magisk 镜像）
+
+**https://4pda.to/forum/index.php?showtopic=890903**
+
+俄语论坛 Honor V10 官方固件专帖。帖子首楼明确列出：
+
+> Magisk / TWRP / fastboot / **9.1.0.325, 9.1.0.329, 9.1.0.337, 9.1.0.357** / **RECOVERY_RAMDISK** 各版本（部分标注 **+ magisk**）
+
+**这个帖子如果真有 9.1.0.337 的 recovery_ramdisk + Magisk 现成镜像，那连修补步骤都省了。**
+
+### 需要注册（免费）
+
+| 站点 | 内容 | 链接 |
+|---|---|---|
+| **HalabTech** | BKL-AL20 9.1.0.337 (C00E333R2P1T8) 05014UWC，4.00 GB | https://support.halabtech.com/index.php?a=downloads&b=file&id=239316 |
+| **HalabTech** | BKL-AL20 9.1.0.337 (C01E333R1P1T8) 05014UYE，6.00 GB | https://support.halabtech.com/index.php?a=downloads&b=file&id=247361 |
+| HalabTech 目录 | BKL-AL20 全部资源 | https://support.halabtech.com/index.php?a=downloads&b=folder&id=15288 |
+| **giveMeRom** | BKL-AL20 9.1.0.337 (C00E333R2P1T8) | https://givemerom.com/index.php?a=downloads&b=file&id=38208 |
+| giveMeRom 目录 | BKL-AL20 全部 | https://givemerom.com/index.php?a=downloads&b=folder&id=15905 |
+| **FirmwareFix** | BKL-AL20 9.1.0.337 (C00E333R2P1T8) | https://firmwarefix.net/index.php?a=downloads&b=file&id=1416 |
+| VietNam GSM | BKL-AL00 系列 | https://vngsmservices.com/index.php?a=downloads&b=folder&id=157233 |
+| arabunlock | Berkeley-AL20 系列 | https://support.arabunlock.com/index.php?a=downloads&b=folder&id=11297 |
+| GSMForum | Honor View 10 BKL-L09 资源 | https://gsmforum.ru/resources/honor-10-view-bkl-l09.10182/ |
+
+### 需要注册（国内）
+
+| 站点 | 内容 | 链接 |
+|---|---|---|
+| 东海论坛 | BKL-AL20 9.1.0.333 | https://www.donghairom.com/thread-25744-1-1.html |
+| 东海论坛 | BKL-AL20 9.1.0.336 | https://www.donghairom.com/thread-25745-1-1.html |
+| 万维手机维修 ROM100 | BKL-AL00 9.1.0.337 高维禁用版 | https://www.rom100.com/ |
+| ROM之家 | 荣耀V10 全系列固件 | https://www.romzj.com.cn/rom/honor-rom/bkl-al00-rom/ |
+| 百度贴吧 | 有人分享 EMUI8/9/10 刷机包（含 dload 三件套） | https://tieba.baidu.com/p/8640726669 |
+
+### 需要付费
+
+| 站点 | 内容 | 链接 |
+|---|---|---|
+| ONFIX | Berkeley-AL00_9.1.0.337(C00E333R2P1T8)_EMUI9.1.0 卡刷包，5.39 GB，百度网盘+123网盘双链接 | https://onfix.cn/rom/497961 |
+| ONFIX | BKL-AL20 列表 | https://onfix.cn/rom?bid=6&mid=3503 |
+| firmwaredrive | 同批文件（有购物车） | https://firmwaredrive.com/ |
+
+---
+
+## 三、已经拿到的（不用再找）
+
+| 文件 | 版本 | 来源 |
+|---|---|---|
+| BD 工程固件（1.25 GB，MD5 已验证） | 1.0.0.40 EMUI8.0 | AndroidFileHost |
+| Dload 完整包（5.84 GB） | 8.0.0.199 EMUI8.0 | Google Drive 副本 |
+| base UPDATE.APP（3.9 GB，已解包） | 8.0.0.199 | 同上 |
+| **解锁码** | `485737783237ffff` | 从 update.app 提取 |
+
+---
+
+## 四、拿到 9.1.0.337 之后的路线
+
+1. 用 `appupk.py` 解包 → 取 `dload/XLOADER.img` + `unlockcode`
+2. 三键进 **USB DLOAD MODE**（不用拆机）
+3. Kirin-Tool SWTP 或 `gobrom.py` 发补丁后的 XLOADER → 踢进 COM 1.0
+4. COM 1.0 里解锁 + Dump `recovery_ramdisk`
+5. Magisk 修补 → `fastboot flash recovery_ramdisk`
+
+---
+
+## 五、并行方案：破解 OTA 接口
+
+如果你愿意，我可以继续做这件事：**逆向 HwOUC 的请求体格式**，然后直接向华为服务器查询 9.1.0.337 的下载地址。
+
+接口已确认存活，只差 body 格式。可行路径：
+- 反编译 `HwOUC.apk`（已从手机拉取，7.1 MB）找 JSON 模板
+- 或者给手机挂代理抓包
+
+```
+
+`docs/11-固件最终排查结果.md`:
+
+```md
+# BKL-AL20 9.1.0.337 完整固件 —— 全网穷尽排查最终结果
+
+> 生成时间：2026-10-23 01:4x
+
+## 结论：全网只有 4 个站点有，全部需要付费或充值
+
+| 站点 | 文件 | 大小 | 价格/门槛 | 链接 |
+|---|---|---|---|---|
+| **givemerom.com** | BKL-AL20 9.1.0.337 (C00E333R2P1T8) 05014UWC | 5.32 GB | **需充值**（Buy From UPI / 购买套餐） | https://givemerom.com/index.php?a=downloads&b=file&id=38208 |
+| **HalabTech** | BKL-AL20 9.1.0.337 (C00E333R2P1T8) 05014UWC | 5.00 GB | **需注册+付费**（套餐及价格） | https://support.halabtech.com/index.php?a=downloads&b=file&id=239316 |
+| **HalabTech** | BKL-AL20 9.1.0.337 (C01E333R1P1T8) 05014UYE | 6.00 GB | 同上 | https://support.halabtech.com/index.php?a=downloads&b=file&id=247361 |
+| **firmwarefix.net** | FIRMWAREFIX_BKL-AL20 9.1.0.337(C00E333R2P1T8) | 5.30 GB | **付费商品**（你已登录） | https://firmwarefix.net/index.php?a=downloads&b=file&id=1416 |
+| **onfix.cn** | Berkeley-AL00_9.1.0.337(C00E333R2P1T8)_EMUI9.1.0 卡刷包 | 5.39 GB | **5 鱼鳞**（付费） | https://onfix.cn/rom/497961 |
+| 东海手机维修论坛 | BKL-AL20 9.1.0.333 / 9.1.0.336 | — | **需积分**（你打开的页面就是充值页） | https://www.donghairom.com/thread-25744-1-1.html |
+
+### 已验证死亡 / 不可用
+
+| 渠道 | 结果 |
+|---|---|
+| 华为 OTA CDN（`update.hicloud.com:8180` / `update.dbankcdn.com`） | 所有路径 **404**，连历史可用链接也失效 |
+| 华为 OTA API（`query.hicloud.com/.../onestopCheck.action`） | **接口存活**，我构造出了正确请求体并得到 200 响应，但服务器对本机型一律返回 `status:1`（无更新）——**该机型的 OTA 已下线** |
+| 华为 configserver（COTA 参数） | 404 |
+| Firmware Finder（pro-teammt.ru） | 数据库已改版，旧接口 404 |
+| HiSuite Proxy | 仓库 2023-08 归档 |
+| 4PDA 论坛 | 只有 recovery_ramdisk（已拿到），完整固件他们只给 Firmware Finder 链接 |
+| Google Drive / AndroidFileHost / firmwarefile / firmwaredrive / huaweistockrom / romdevelopers / arabunlock / vngsmservices | 只有 8.0.0.199，无 9.1.0.337 |
+| Baidu 贴吧 / rom100 / romzj / iotrom | 需百度账号 / 注册 / 付费 |
+
+---
+
+## 但是 —— 我们已经拿到的东西比完整固件更关键
+
+| 资源 | 状态 |
+|---|---|
+| **9.1.0.337 原厂 RECOVERY_RAMDIS.img** | ✅ MD5 `f9f94fa38d71a963eb9cdf39e34a6418` |
+| **9.1.0.337 Magisk 已修补 magisk_patched.img** | ✅ MD5 `49a2e1ae680a9e4cff798158f2988107` |
+| 8.0.0.199 完整固件 update.app（含 XLOADER + 解锁码） | ✅ 已解包，86 个文件 |
+| BD 工程固件（sec_usb_xloader.img 等） | ✅ 已解包 |
+| 解锁码 `485737783237ffff` | ✅ |
+| Kirin-Tool v2.4.2 / kasnria001 工具链 / Magisk | ✅ |
+
+---
+
+## 关键判断：完整固件只用于「进 COM 1.0」，而这一步也许用 8.0.0.199 就能过
+
+Kirin-Tool 的 SWTP 只从 update.app 里**提取 XLOADER**（`ExtractUpToXloader`），不需要整包匹配版本。
+kasnria001 的文档也明确说：**EMUI9 及以下 update-binary 只校验镜像块的 CRC，不校验签名**，并给出了绕过版本检查的方法（改 PACKAGE_TYPE 为 OFFLINE_UPDATE——我们的包本来就是 OFFLINE_UPDATE）。
+
+**所以：用 8.0.0.199 的包试 SWTP，成功概率不低，而且失败模式大概率是安全的「update failed」（什么都不写入）。**
+
+---
+
+## 建议
+
+**方案 1（推荐，免费，今天就能做）**：用已有的 8.0.0.199 包跑 SWTP
+- 需要你：关机 → 按住音量+和音量− → 插 USB → recovery 选 Update mode → USB update mode
+- 我：跑 gobrom.py / Kirin-Tool
+- 成功 → 直接进 COM 1.0 → 解锁 → 刷 magisk_patched.img → 完事
+- 失败 → 显示 update failed，手机原样，我们再考虑买固件
+
+**方案 2**：花钱买固件（givemerom 充值 / HalabTech 注册+套餐 / onfix 鱼鳞）
+
+**方案 3**：拆机短接测试点（4PDA 有测试点图：https://4pda.to/forum/index.php?showtopic=890903&view=findpost&p=83292529）
+
+```
+
+`docs/12-eRecovery抓包教程.md`:
+
+```md
+# eRecovery 抓包教程 —— 目标：抓出 9.1.0.337 固件下载地址
+
+## 📋 现状
+
+| 项目 | 状态 |
+|---|---|
+| PC 有线网（以太网 2） | ✅ 192.168.9.105，能上网 |
+| PC 无线网卡 WLAN | 空闲（Realtek 8821AE） |
+| 手机 WiFi | `风生水起-5G`，IP 192.168.5.16 |
+| **问题** | PC 和手机**不在同一网段**（9.x vs 5.x），没法直接抓 |
+| **方案** | 让 PC 开热点，手机连过来 → 流量必经 PC |
+| 抓包工具 | ✅ pktmon（系统自带，已提权跑通过一次） |
+
+---
+
+## 第一步：开启移动热点（你来，30 秒）
+
+1. 按 **Win + I** 打开设置
+2. **网络和 Internet → 移动热点**
+3. 「共享我的以下 Internet 连接」选 **以太网 2**
+4. 点 **编辑**，改成：
+   - 网络名称：**HuaweiCapture**
+   - 网络密码：**capture2026**
+5. 把「移动热点」开关**打开**
+6. 确认页面上显示的网段是 **192.168.137.1**
+
+> 我已经用 API 试过启动，但状态不稳（一会儿 On 一会儿 Off）。**用设置界面开最稳。**
+
+## 第二步：手机连热点
+
+1. 手机 **设置 → WLAN**，连接 **HuaweiCapture**，密码 **capture2026**
+2. 如果提示「无法访问互联网」，选 **仍然连接**
+3. **务必打开手机浏览器试一下能不能上网** —— 不通的话 eRecovery 也下不了
+
+## 第三步：告诉我热点已开好
+
+我会：
+- 确认热点网段和手机在线
+- **重启 pktmon 抓包**（会弹 UAC，你点「是」）
+
+## 第四步：进 eRecovery 下载（你来）
+
+1. **手机关机**（拔不拔 USB 都行）
+2. 按住 **「音量加」+「电源键」** 约 3 秒 → 进入 **eRecovery** 界面
+3. 选 **「下载最新版本并恢复」**（英文：Download latest version and recovery）
+4. eRecovery 里选 WiFi：**HuaweiCapture** / **capture2026**
+5. 点开始下载
+6. **看到进度条开始走就够了** —— 我会在抓包里抓下载地址
+
+## 第五步：告诉我，我停抓包分析
+
+---
+
+## ⚠️ 重要提醒
+
+### 1. eRecovery 会清空手机数据
+「下载最新版本并恢复」下载完成后会**直接格式化并重装系统**。
+
+**但这对你反而有好处**：
+- 你数据已经备份过了
+- 重装的就是 **9.1.0.337**（和当前版本一样）
+- **顺手解决了 /data 89% 满导致的卡死问题**
+- 而且解锁本来也会清数据，等于是提前做了
+
+### 2. 如果你想避免重装
+看到进度条走起来、我确认抓到 URL 之后，你可以**长按电源键强制关机**。
+但我不建议 —— 下载中途断电有风险，而且重装对你没坏处。
+
+### 3. 抓包原理
+```
+手机 ──WiFi──> PC 热点(192.168.137.1) ──ICS NAT──> 以太网 2 ──> 路由器 ──> 华为服务器
+                        ↑
+                  pktmon 在这里抓
+```
+华为 OTA 下载历史上走的是 **HTTP**（`http://update.hicloud.com:8180/TDS/...`），
+如果是 HTTP，**完整 URL 会明文出现在抓包里**，直接就能用。
+
+---
+
+## 备用方案（如果热点搞不定）
+
+**让 PC 连上手机同一个 WiFi**（`风生水起-5G`）：
+- PC 的 WLAN 现在是空闲的，连上后 PC 和手机都在 192.168.5.x
+- 然后我做 ARP 欺骗抓包
+- **需要你告诉我 `风生水起-5G` 的 WiFi 密码**（PC 没保存过这个网络）
+
+```
+
+`docs/13-HwOUC逆向报告.md`:
+
+```md
+# HwOUC OTA 接口逆向报告
+
+> 2026-10-23 ｜ 目标：拿到 BKL-AL20 9.1.0.337 官方下载地址
+
+## 一、成果：接口已完全逆向，实测被服务器接受
+
+### 端点
+```
+POST https://query.hicloud.com/sp_ard_common/v2/onestopCheck.action?verType=true&autoInstall=y&latest=true
+Content-Type: application/json
+```
+（另有 `?logOnly=true` 变体；`v1` 端点返回 -1 不可用；`CheckEx.action` 返回 `{"status":"1"}`；`GetCondition.action` 返回 `{"code":"-1"}`）
+
+### 完整请求体（已实测跑通）
+```json
+{
+  "commonRules": {
+    "FingerPrint": "HONOR/BKL-AL20/HWBKL:9/HUAWEIBKL-AL20/9.1.0.337C00:user/release-keys",
+    "DeviceName": "BKL-AL20",
+    "VendorCountry": "hw-cn",
+    "BoardID": "",
+    "Reserved1": "", "Reserved2": "",
+    "vendor": "BKL-AL20-hw-cn:",
+    "deviceId": "P7CDU18425013192",
+    "udid": "",
+    "Language": "zh-CN",
+    "OS": "Android 9",
+    "HotaVersion": "9.1.30.391",
+    "saleinfo": "black|cn|hw|N|EmotionUI 9.1.0|6.4 GB|64 GB|8 2.2GHz|Y|blue|9.1.30.391|Y",
+    "C version": "C00",
+    "D version": "C00",
+    "Subgroup": "", "Vergroup": "", "devicetoken": "",
+    "PackageType": "psi",
+    "ControlFlag": "0",
+    "extra info": "",
+    "DeviceDisplayVersion": "BKL-AL20 8.0.0.199(C00)",
+    "ProductBaseVersion": "BKL-LGRP1-CHN 8.0.0.199",
+    "Emui": "EmotionUI 9.1.0"
+  },
+  "versionPackageRules": [
+    {"versionPackageType": 2, "rules": {"FirmWare": "BKL-LGRP1-CHN 8.0.0.199"}},
+    {"versionPackageType": 3, "rules": {"FirmWare": "BKL-AL20-CUST 8.0.0.199(C00)"}},
+    {"versionPackageType": 4, "rules": {"FirmWare": "BKL-AL20-PRELOAD 8.0.0.1(C00R1)"}}
+  ],
+  "keyAttestation": ""
+}
+```
+
+### 服务器响应（与手机自己查询的响应**一字不差**）
+```json
+{"status":"1","versionPackageCheckResults":[{"status":"1","versionPackageType":2},{"status":"1","versionPackageType":3},{"status":"1","versionPackageType":4}]}
+```
+
+### 已验证的字段约束
+| 试验 | 结果 |
+|---|---|
+| 空 body `{}` | `{"status":"-1"}` |
+| 有 commonRules，无 versionPackageRules | `{"status":"-1"}` → **versionPackageRules 是必需字段** |
+| 完整 body | `{"status":"1",...}` ✅ |
+| PackageType 改成 full/ota/normal/空 | 响应不变 |
+| ControlFlag=1 | 响应不变 |
+| 加 udid / 随机序列号 / 空序列号 | 响应不变 |
+| 去掉 keyAttestation 字段 | 响应不变 |
+| 版本号改成 8.0.0.199 / 9.0.0.187 / 9.1.0.300 / 9.1.0.325 | **响应仍不变，永远是「无新版本」** |
+
+## 二、卡点：为什么拿不到下载地址
+
+服务器**不采信**我发送的版本号，恒定返回「无新版本」。推测原因：
+
+1. **`authorize.action` 鉴权缺失** —— 手机端 HwOUC 会先调 `https://query.hicloud.com/sp_ard_common/v1/authorize.action` 拿签名令牌，再用 `cert=` / `sign=` 证明身份。实测空请求返回 `data=&sign=&cert=`（空模板）。
+2. 私钥在 `.bks` 密钥库里（APK 内含 `cer.pem` + 2 个 `.bks`），**无法提取**，这条鉴权路基本堵死。
+3. 或者服务器直接用 deviceId 在库里查真实版本。
+
+## 三、附带挖到的关键数据（很有用）
+
+从手机 props 里拿到完整的**四元组版本信息**：
+```
+ro.build.display.id                  = BKL-AL20 9.1.0.337(C00E333R1P1)
+ro.build.fingerprint                 = HONOR/BKL-AL20/HWBKL:9/HUAWEIBKL-AL20/9.1.0.337C00:user/release-keys
+ro.build.description                 = BKL-AL20-user 9.1.0 HUAWEIBKL-AL20 337-CHN-LGRP1 release-keys
+ro.comp.hl.product_base_version      = BKL-LGRP1-CHN 9.1.0.337
+ro.comp.hl.product_cust_version      = BKL-AL20-CUST 9.1.0.333(C00)
+ro.comp.hl.product_preload_version   = BKL-AL20-PRELOAD 9.1.0.1(C00R1)
+ro.comp.cust_version                 = Cust-CHN 9.0.0.1(0001)
+ro.comp.product_version              = Product-BKL-LGRP1-CHN 9.1.0(0000)
+```
+
+**`BKL-LGRP1-CHN` 这个 LGRP 名很关键** —— 找固件时可以直接搜这个串。
+
+## 四、结论与建议
+
+### HwOUC 逆向：**技术上成功**（格式完全对，服务器接受），但**拿不到下载地址**（鉴权层挡住）。
+
+### 新思路（推荐）
+
+**eRecovery 路线** —— 手机自己就能下载 9.1.0.337 完整包：
+1. 关机 → **电源键 + 音量加**（按住约 3 秒）→ 进入 eRecovery
+2. 选「下载最新版本并恢复」（需连 WiFi）
+3. eRecovery 下载的就是**当前版本 9.1.0.337 的完整固件包**
+
+**关键**：eRecovery 是系统级恢复流程，可能不走设备证书鉴权。只要在下载时把 URL 抓出来（PC 开热点让手机连、或用代理），就能自己下整包。
+
+**风险提示**：eRecovery 恢复会**清空手机数据**（你已备份）。而且它会直接刷机。
+
+### 其他可行路线
+- **HiSuite PC 端「系统修复」**：同样会下载当前版本完整包
+- 继续等另一个对话找到的 9.1.0.337 完整固件
+
+```
+
+`docs/14-踩坑记录.md`:
+
+```md
+# 14 · 踩坑记录（完整清单）
+
+> 这份清单是本项目最有价值的部分。**每一条都是实际踩过、验证过的。**
+> 同类机型（华为/荣耀 EMUI 9 及以下）刷机、Root、抓包的人可以直接抄。
+
+---
+
+## 一、华为/荣耀 EMUI 专属坑（最要命）
+
+### 1. 华为锁死了 SELinux 策略写接口 → frida-server 彻底用不了
+
+```
+frida-server -v
+→ Unable to save SELinux policy to the kernel: Out of memory
+
+# 换 Magisk 自己的工具，同样失败（证明不是 frida 的问题）
+magiskpolicy --live "allow magisk magisk_file file read"
+→ write failed with 12: Out of memory
+
+setenforce 0
+→ setenforce: Couldn't set enforcing status to '0': Invalid argument
+```
+
+**根因**：`/sys/fs/selinux/load` 被锁，任何写入返回 `ENOMEM(12)`。
+**影响**：frida-server、setenforce、magiskpolicy --live、以及所有"运行期改 SELinux"的工具全部失效。
+**解法**：用 **Frida Gadget**（把 gadget 打进 APK，不碰 SELinux）。见 [08-Frida与抓包完全教程](08-Frida与抓包完全教程.md)。
+**参考**：[frida#1039](https://github.com/frida/frida/issues/1039) · [frida#1023](https://github.com/frida/frida/issues/1023)
+
+> 注意：**Magisk 模块的 `sepolicy.rule` 在开机早期是能生效的**（Riru/EdXposed 就靠它），
+> 但运行期再写就一律失败。
+
+### 2. `pm` / `am` 不能用 root 跑
+
+```bash
+adb shell su -c 'pm list packages'
+→ cmd: Failure calling service package: Failed transaction (2147483646)
+
+adb shell su -c 'am startservice ...'
+→ cmd: Failure calling service activity: Failed transaction (2147483646)
+```
+
+**解法**：`pm` / `am` / `settings` 一律用 **shell 身份**（直接 `adb shell pm ...`）。
+**连带影响**：
+- 黑域（Blackhole）这类靠 `pm disable` 的工具，root 模式会失效
+- Magisk 的 `service.d` 脚本以 root 运行，**不能在里面调 `am`**，所以"开机自动启动某 App"这条路走不通
+- 加 su 授权别用 `magisk --sqlite`，走 Magisk Manager 界面
+
+### 3. `magisk --sqlite` 带子查询会把 magiskd 搞崩
+
+```bash
+adb shell su -c 'magisk --sqlite "REPLACE INTO policies (uid,policy,until,logging,notification,package_name) VALUES (10123,2,0,1,1,(select package_name from policies where uid=10123))"'
+→ read (4 != 0) failed with 0: Success
+# 之后 magiskd 死亡，su 全部失效 → "No daemon is currently running!"
+```
+
+**恢复**：重启手机，magiskd 会自动重启（实测有效）。
+**教训**：别手搓 SQL，用 Magisk Manager 界面。
+
+### 4. 本机没有独立 `boot` 分区
+
+分区表里只有 `kernel` + `recovery_ramdisk`，**没有 `boot`**。
+所以：
+- Magisk 只能装在 `recovery_ramdisk`
+- **绝对不要用 Magisk Manager 的「安装 / 修复运行环境」** —— 它会去找 boot 分区，把 recovery_ramdisk 搞坏
+- 升级 Magisk 到 24+ 的风险极高（刷坏就失去 root，而且本机**没有可用的 fastboot 兜底**）
+
+### 5. eRecovery 的「下载最新版本并恢复」已失效
+
+华为服务器不再为 EOL 机型提供服务，点了直接「获取失败」。
+「恢复出厂设置」也不格式化，只是重启。
+
+### 6. 工程菜单「存储卡升级」不工作
+
+SD 卡里 `dload/UPDATE.APP` 放好了、手机也认得到，但点了转 1 秒就没反应。
+
+### 7. EMUI 默认禁止第三方 App 自启动
+
+Termux:Boot 装了也没用，必须手动放行：
+**设置 → 应用 → 应用启动管理 → 找到目标 App → 关掉"自动管理" → 三个开关全开**
+
+### 8. 系统分区是只读 erofs，`mount -o rw,remount` 没用
+
+```
+/sbin/.magisk/block/system_root on /system type erofs (ro,seclabel,...)
+```
+**正确做法**：用 Magisk 模块挂载（module 里放 `system/...`），不要试图 remount。
+改 CA 证书、改 hosts、替换系统文件都走这条路。
+
+---
+
+## 二、Magisk 20.1 专属坑
+
+### 9. 20.1 没有 `magisk --install-module`
+
+`magisk --list` 只有 `su` / `resetprop` / `magiskhide` 三个 applet。
+**解法**：手动跑模块 zip 里的 `update-binary`：
+
+```sh
+export BOOTMODE=true MAGISK_VER=20.1 MAGISK_VER_CODE=20100
+export ARCH=arm64 IS64BIT=true API=28
+export TMPDIR=/dev/tmp MAGISKTMP=/sbin/.magisk NVBASE=/data/adb
+sh META-INF/com/google/android/update-binary 3 1 "$ZIP"
+```
+
+已封装：[scripts/install-module.sh](../scripts/install-module.sh)
+
+### 10. 20.1 的 `util_functions.sh` 没有 `install_module()`
+
+Magisk **20.4+** 的模块安装器（例如 EdXposed 的）会这样写：
+```sh
+. /data/adb/magisk/util_functions.sh
+[ $MAGISK_VER_CODE -lt 20400 ] && require_new_magisk
+install_module
+```
+在 20.1 上直接 abort：`Please install Magisk v20.4+!`
+
+**解法**（本项目用的）：临时把 `/data/adb/magisk/util_functions.sh` 换成
+「v20.1 内容 + 补上 20.4 的 `install_module()` / `print_modname()`」的兼容版，
+装完立刻还原。
+
+### 11. Riru v23.9 官方 zip 有拼写 bug
+
+`customize.sh` 和 `util_functions.sh` 里把 `$BOOTMODE` 写成了 **`$BOOTMOE`**：
+```sh
+if $BOOTMOE; then      # → if ; then  语法错误，必装失败
+```
+
+**解法**：
+1. 改成 `BOOTMODE`
+2. **必须重算 sha256 写回 `.sha256sum` 文件** —— Riru 自带的 `verify.sh` 会校验，不改校验就 abort
+   （格式：`.sha256sum` 文件里只放 64 位十六进制，没有文件名）
+
+### 12. EdXposed 装完要重启两次
+
+Magisk < 21006 时，EdXposed 的安装器会 `touch reboot_twice_flag`，需要两次重启才完全生效。
+
+---
+
+## 三、Windows / PC 端坑
+
+### 13. Windows 自带 OpenSSH 9.5 对 OpenSSH 10.x 服务端密钥认证静默失败
+
+```
+debug1: Server accepts key: ...
+debug3: sign_and_send_pubkey: using publickey-hostbound-v00@openssh.com
+debug2: we did not send a packet, disable method
+→ Permission denied (publickey,password,keyboard-interactive)
+```
+
+**解法**：
+- 在 `~/.ssh/config` 里给该主机加 `PubkeyAuthentication no` 强制走密码
+- 或者用 **plink**（`tools\plink.exe`，实测可用）
+- 服务端密钥认证本身是好的（用 Termux 自己的 ssh 回环测过 `PUBKEY_AUTH_OK`）
+
+### 14. `adb install` 流式写入容易失败
+
+USB 间歇性掉线时，`adb install xxx.apk` 会报空错误。
+**解法**：改用 `adb push` + `pm install`：
+```bash
+adb push app.apk /data/local/tmp/a.apk
+adb shell pm install -r /data/local/tmp/a.apk
+```
+
+### 15. toybox 的 `dd` 不认 `bs=1M`
+
+```
+dd: block size '1M': illegal number
+```
+**解法**：写 `bs=1048576`。
+
+### 16. `.xz` 解压：PowerShell 没有内置支持
+
+**解法**：用 Python 的 lzma：
+```python
+import lzma, shutil
+with lzma.open(src,'rb') as f, open(dst,'wb') as o: shutil.copyfileobj(f,o)
+```
+
+### 17. PowerShell 调原生 exe 报 StandardOutputEncoding 错
+
+`& python.exe script.py` → `StandardOutputEncoding is only supported when standard output is redirected`
+
+**解法**：用 **`C:\Windows\py.exe`**（Python 启动器，路径无空格）：
+```powershell
+& "C:\Windows\py.exe" script.py
+```
+
+### 18. `objection patchapk` 需要 adb 和 apktool 在 PATH 里
+
+否则报：
+```
+Unable to find adb. Install it with: apt install adb ...
+Unable to find apktool. Install it from https://apktool.org/docs/install
+```
+**解法**：见 [scripts/env.ps1](../scripts/env.ps1)。apktool 需要自己造一个 `apktool.bat` 包装 `java -jar apktool.jar %*`。
+
+### 19. Windows 上 `pip install` 用清华源会 403
+
+**解法**：`--index-url https://pypi.org/simple/`
+
+---
+
+## 四、Termux / 手机端坑
+
+### 20. `tcpdump` 不在 Termux 主仓库
+
+```
+E: Unable to locate package tcpdump
+```
+**解法**：先 `pkg install root-repo`，再 `pkg install tcpdump`。
+
+### 21. Termux 的 sshd 必须在 App 上下文里跑
+
+从 magisk 域（`su 10123 -c sshd`）跑会失败：
+```
+bad addr or host: <NULL> (No address associated with hostname)
+```
+因为 magisk 域拿不到 netd 的 DNS。同理，从 magisk 域跑 `curl` 也解析不了域名。
+**解法**：在 Termux App 里敲 `sshd`（或走 Termux:Boot）。
+
+### 22. `~/.ssh/authorized_keys` 不能有 CRLF
+
+Windows 下 `ssh-keygen` 生成的 `.pub` 推过去可能带 `\r`，sshd 会静默拒绝。
+**解法**：推送前去掉 `\r`。
+
+### 23. 从 magisk 域跑 Termux 的二进制，能执行但没网
+
+`su -c "su 10123 -c 'id'"` 能跑（uid 正确），但网络不通。
+**原因**：SELinux 域还是 `u:r:magisk:s0`，不是 `u:r:untrusted_app:s0`。
+Magisk 20.1 的 `su` 没有 `-Z` 选项，改不了域。
+
+### 24. Termux:Boot 需要 EMUI 放行自启动
+
+见第 7 条。兜底方案：在 `~/.bashrc` 里加钩子，打开一次 Termux 就自动起 sshd。
+
+---
+
+## 五、抓包 / 分析坑
+
+### 25. Android 7+ 默认不信任用户证书
+
+必须把 CA 放进**系统**信任区。做法：Magisk 模块挂载到
+`/system/etc/security/cacerts/<subject_hash_old>.0`
+（文件名必须是 8 位小写十六进制 + `.0`，用 `openssl x509 -subject_hash_old` 算）
+
+### 26. 手机和电脑不同网段时，代理连不上
+
+用 **`adb reverse`**：
+```bash
+adb reverse tcp:8080 tcp:8080
+adb shell settings put global http_proxy 127.0.0.1:8080
+```
+
+### 27. `magiskpolicy --live` 的规则语法
+
+是 `allow <源域> <目标域> <类别> <权限>`，**没有冒号**：
+```
+magiskpolicy --live "allow magisk magisk_file file read"     ✅
+magiskpolicy --live "allow magisk self:process setcurrent"   ❌ 语法错误
+```
+
+---
+
+## 六、性能 / 稳定性坑
+
+### 28. SD 卡里的媒体文件被反复扫描 → 系统卡死
+
+```
+media.codec (omx service)  109%
+android.process.media       78%
+mediaserver                 50%
+[mmcqd/1]                   9.3%   ← SD 卡 IO 队列一直忙
+load average 40+
+```
+**解法**：在 SD 卡根目录放 `.nomedia`：
+```bash
+adb shell su -c 'touch /storage/XXXX-XXXX/.nomedia'
+```
+副作用：图库/音乐看不到 SD 卡上的媒体。
+
+### 29. USB 会间歇性掉线
+
+表现为 `adb devices` 显示 `offline`（USB 设备还在，adbd 不响应）。
+**解法**：拔插数据线，或重启手机。
+
+### 30. `ro.boot.flash.locked` / `verifiedbootstate` 的值被 Magisk 伪装过，不可信
+
+```bash
+adb shell getprop ro.boot.flash.locked        # → 1      （假的！）
+adb shell getprop ro.boot.verifiedbootstate   # → green  （假的！）
+```
+
+**真实状态要看 `/proc/cmdline`：**
+```bash
+adb shell su -c 'cat /proc/cmdline' | tr ' ' '\n' | grep -E 'bootlock|userlock|verifiedbootstate'
+# bootlock=unlocked
+# userlock=unlocked
+# androidboot.verifiedbootstate=orange      ← 真实值：橙灯 = 已解锁
+```
+
+**注意**：这两个 prop 是 **magiskinit 在开机时**写进去的，**关掉 MagiskHide 也不会还原**
+（实测 `magiskhide --disable` 后依然是 1 / green）。
+
+**影响**：任何靠 `getprop ro.boot.flash.locked` 判断"设备是否解锁"的脚本都会误判。
+判断解锁状态请一律读 `/proc/cmdline` 里的 `bootlock` / `userlock`。
+
+---
+
+## 七、快速对照表
+
+| 症状 | 原因 | 解法 |
+|---|---|---|
+| `Failed transaction (2147483646)` | 用 root 跑了 `pm`/`am` | 改用 `adb shell pm ...` |
+| `No daemon is currently running!` | magiskd 崩了 | 重启手机 |
+| `Unable to save SELinux policy` | 华为锁 SELinux | 别用 frida-server，用 Gadget |
+| `setenforce: Invalid argument` | 同上 | 别折腾 |
+| `dd: block size '1M': illegal number` | toybox dd | 用 `bs=1048576` |
+| `E: Unable to locate package tcpdump` | 不在主仓库 | 先装 `root-repo` |
+| `bad addr or host: <NULL>` | 在 magisk 域跑 Termux 程序 | 在 Termux App 里跑 |
+| ssh 密钥认证 Permission denied | Windows OpenSSH 9.5 bug | 用密码或 plink |
+| `adb install` 空错误 | USB 抖动 | `push` + `pm install` |
+| 手机点不动 / 很卡 | SD 卡媒体扫描 | 放 `.nomedia` |
+| 模块装不上 `Please install Magisk v20.4+` | 20.1 缺 `install_module` | 用兼容 util_functions.sh |
+| Riru 装不上 | `BOOTMOE` 拼写 bug | 改字 + 重算 sha256 |
+
+```
+
+`scripts/README.md`:
+
+```md
+# scripts/ 脚本索引
+
+> 先点源 `env.ps1` 设置环境变量（每条 pwsh 命令都是新进程，变量不跨命令保留）。
+
+```powershell
+cd 'G:\DeepSeek Harness\Root'
+. .\scripts\env.ps1
+```
+
+| 脚本 | 作用 | 例子 |
+|---|---|---|
+| `env.ps1` | 一键把 adb / build-tools / JDK / apktool / frida 加进 PATH | `. .\scripts\env.ps1` |
+| `phone.ps1` | 设备控制台：状态、root、模块、应用、推拉、SSH | `.\scripts\phone.ps1 status` |
+| `capture.ps1` | tcpdump 被动抓包（启停 + 拉回电脑） | `.\scripts\capture.ps1 start` |
+| `proxy.ps1` | 用 `adb reverse` 开代理抓包（跨网段可用） | `.\scripts\proxy.ps1 on 8080` |
+| `frida-patch.ps1` | Frida Gadget 打补丁（本机唯一可用的 Frida 路线） | `.\scripts\frida-patch.ps1 -Package com.x.y` |
+| `install-module.sh` | 手机端 Magisk 模块安装器（兼容 Magisk 20.1） | `.\scripts\phone.ps1 install mod.zip` |
+
+## 常见组合
+
+```powershell
+# 看设备状态
+.\scripts\phone.ps1 status
+
+# 抓一个 App 的 HTTPS 明文
+.\scripts\proxy.ps1 on 8080              # 另开窗口: mitmweb --listen-port 8080
+.\scripts\frida-patch.ps1 -Package com.target.app -Install
+
+# 抓不走代理的流量
+.\scripts\capture.ps1 start
+.\scripts\capture.ps1 stop               # 自动拉回 capture\cap.pcap
+```
+```
+
+`scripts/capture.ps1`:
+
+```ps1
+<#
+.SYNOPSIS
+  被动抓包（tcpdump）—— 抓手机所有网卡流量，导出 pcap 给 Wireshark
+.EXAMPLE
+  .\scripts\capture.ps1 start
+  .\scripts\capture.ps1 stop
+#>
+param(
+  [Parameter(Position=0)][string]$Action = 'help',
+  [string]$Out = 'G:\DeepSeek Harness\Root\capture\cap.pcap',
+  [string]$Filter = ''
+)
+$ErrorActionPreference = 'Stop'
+$ADB = $env:ADB; if (-not $ADB) { $ADB = (Get-Command adb).Source }
+$devArg = if ($env:PHONE_SERIAL) { @('-s', $env:PHONE_SERIAL) } else { @() }
+$TCPDUMP = '/data/data/com.termux/files/usr/bin/tcpdump'
+$LDPATH  = '/data/data/com.termux/files/usr/lib'
+$REMOTE  = '/sdcard/_cap.pcap'
+
+switch ($Action.ToLower()) {
+  'start' {
+    & $ADB @devArg shell "su -c 'pkill -f tcpdump; rm -f $REMOTE; LD_LIBRARY_PATH=$LDPATH nohup $TCPDUMP -i any -s 0 -w $REMOTE $Filter >/dev/null 2>&1 &'"
+    Start-Sleep -Seconds 2
+    & $ADB @devArg shell "su -c 'ps -A | grep tcpdump'"
+    Write-Host '抓包已开始。停止: .\scripts\capture.ps1 stop' -ForegroundColor Green
+  }
+  'stop' {
+    & $ADB @devArg shell "su -c 'pkill -f tcpdump'"
+    Start-Sleep -Seconds 2
+    New-Item -ItemType Directory -Force -Path (Split-Path $Out) | Out-Null
+    & $ADB @devArg pull $REMOTE $Out
+    Write-Host "已保存到 $Out —— 用 Wireshark 打开" -ForegroundColor Green
+  }
+  'live' { & $ADB @devArg shell "su -c 'LD_LIBRARY_PATH=$LDPATH $TCPDUMP -i any -nn $Filter'" }
+  default {
+    Write-Host '用法: capture.ps1 <start|stop|live> [-Out 路径] [-Filter 表达式]' -ForegroundColor Yellow
+    Write-Host '过滤例子: "port 443" / "host 1.2.3.4" / "tcp and not port 22"'
+  }
+}
+```
+
+`scripts/env.ps1`:
+
+```ps1
+<#
+.SYNOPSIS
+  一键设置本机 Android 工具链环境变量（点源执行，仅当前进程有效）
+.EXAMPLE
+  . .\scripts\env.ps1
+#>
+$ErrorActionPreference = 'Stop'
+
+# ---- adb / platform-tools ----
+$adb = $env:ADB
+if (-not $adb) {
+  $sdkRoots = @($env:ANDROID_SDK, $env:ANDROID_HOME,
+                 (Join-Path $env:LOCALAPPDATA 'Android\Sdk'),
+                 (Join-Path $env:USERPROFILE 'AppData\Local\Android\Sdk'),
+                 'C:\Android\Sdk') | Where-Object { $_ }
+  foreach ($s in $sdkRoots) {
+    $c = Join-Path $s 'platform-tools\adb.exe'
+    if (Test-Path $c) { $adb = $c; break }
+  }
+}
+if (-not $adb) { $adb = (Get-Command adb -ErrorAction SilentlyContinue).Source }
+if (-not $adb) {
+  Write-Host '[env] ⚠ 找不到 adb。请设置 $env:ANDROID_SDK 或把 platform-tools 加进 PATH' -ForegroundColor Red
+} else {
+  $env:ADB = $adb
+  $env:PATH = "$(Split-Path $adb);$env:PATH"
+}
+
+# ---- build-tools (zipalign / apksigner / aapt) ----
+if ($adb) {
+  $sdk = Split-Path (Split-Path $adb)
+  $bt = Join-Path $sdk 'build-tools'
+  if (Test-Path $bt) {
+    $latest = Get-ChildItem $bt -Directory | Sort-Object Name -Descending | Select-Object -First 1
+    if ($latest) { $env:PATH = "$($latest.FullName);$env:PATH" }
+  }
+}
+
+# ---- JDK ----
+$java = $env:JAVA_HOME
+if (-not ($java -and (Test-Path (Join-Path $java 'bin\java.exe')))) { $java = $null }
+if (-not $java) {
+  $cands = @('G:\DeepSeek Harness\Tool\jdk-17',
+             'C:\Program Files\Eclipse Adoptium\jdk-17.0.20.101-hotspot') | Where-Object { $_ }
+  $adopt = Get-ChildItem 'C:\Program Files\Eclipse Adoptium' -Directory -ErrorAction SilentlyContinue |
+           Where-Object { $_.Name -like 'jdk-17*' } | Select-Object -First 1
+  if ($adopt) { $cands += $adopt.FullName }
+  foreach ($c in $cands) { if (Test-Path (Join-Path $c 'bin\java.exe')) { $java = $c; break } }
+}
+if ($java) { $java = $java.TrimEnd('\\'); $env:JAVA_HOME = $java; $env:PATH = "$java\bin;$env:PATH" }
+
+# ---- apktool ----
+$apktool = $env:APKTOOL_HOME
+if (-not ($apktool -and (Test-Path (Join-Path $apktool 'apktool.bat')))) { $apktool = $null }
+if (-not $apktool) {
+  foreach ($c in @('G:\DeepSeek Harness\Root\tools\apktool','G:\DeepSeek Harness\Tool\apktool')) {
+    if (Test-Path (Join-Path $c 'apktool.bat')) { $apktool = $c; break }
+  }
+}
+if ($apktool) { $env:APKTOOL_HOME = $apktool; $env:PATH = "$apktool;$env:PATH" }
+
+# ---- Python Scripts (frida / objection) ----
+$pyScripts = $env:PY_SCRIPTS
+if (-not ($pyScripts -and (Test-Path (Join-Path $pyScripts 'frida-ps.exe')))) { $pyScripts = $null }
+if (-not $pyScripts) {
+  $base = Join-Path $env:LOCALAPPDATA 'Programs\Python'
+  if (Test-Path $base) {
+    $cands = Get-ChildItem $base -Directory | ForEach-Object { Join-Path $_.FullName 'Scripts' } |
+             Where-Object { Test-Path (Join-Path $_ 'frida-ps.exe') }
+    if ($cands) { $pyScripts = @($cands)[-1] }
+  }
+}
+if ($pyScripts) { $env:PY_SCRIPTS = $pyScripts; $env:PATH = "$pyScripts;$env:PATH" }
+
+# ---- 本项目自带工具 ----
+$extra = 'G:\DeepSeek Harness\Root\tools'
+if (Test-Path $extra) { $env:PATH = "$extra;$env:PATH" }
+
+Write-Host "[env] adb        : $adb"
+Write-Host "[env] JAVA_HOME  : $java"
+Write-Host "[env] apktool    : $apktool"
+Write-Host "[env] py-scripts : $pyScripts"
+Write-Host '[env] PATH 已更新（仅当前进程）'
+```
+
+`scripts/frida-patch.ps1`:
+
+```ps1
+<#
+.SYNOPSIS
+  Frida Gadget 打补丁 —— 本机 frida-server 不可用（华为锁 SELinux），
+  这是唯一可用的 Frida 路线：把 gadget 直接打进 APK。
+.EXAMPLE
+  .\scripts\frida-patch.ps1 -Package com.example.app -Install
+#>
+param(
+  [string]$Package,
+  [string]$Apk,
+  [string]$OutDir = 'G:\DeepSeek Harness\Root\capture\frida',
+  [switch]$Install,
+  [switch]$NoNetSec
+)
+$ErrorActionPreference = 'Stop'
+$ADB = $env:ADB; if (-not $ADB) { $ADB = (Get-Command adb).Source }
+$devArg = if ($env:PHONE_SERIAL) { @('-s', $env:PHONE_SERIAL) } else { @() }
+if (-not $env:PY_SCRIPTS) { throw '请先执行 . .\scripts\env.ps1' }
+$OBJ = Join-Path $env:PY_SCRIPTS 'objection.exe'
+New-Item -ItemType Directory -Force -Path $OutDir | Out-Null
+
+if (-not $Apk) {
+  if (-not $Package) { throw '必须指定 -Package 或 -Apk' }
+  $remote = ((& $ADB @devArg shell "pm path $Package") -join '') -replace '^package:', ''
+  $remote = $remote.Trim()
+  if (-not $remote) { throw "设备上找不到 $Package" }
+  $Apk = Join-Path $OutDir "$Package.apk"
+  & $ADB @devArg pull $remote $Apk
+}
+
+$extra = if ($NoNetSec) { @() } else { @('-N') }
+& $OBJ patchapk -s $Apk -a arm64-v8a @extra
+
+$patched = Join-Path (Split-Path $Apk) ((Split-Path $Apk -Leaf) -replace '\.apk$', '.objection.apk')
+if (Test-Path $patched) { Write-Host "补丁完成: $patched" -ForegroundColor Green }
+
+if ($Install -and $Package) {
+  & $ADB @devArg uninstall $Package
+  & $ADB @devArg install $patched
+  Write-Host "已安装。启动后执行: objection -g $Package explore" -ForegroundColor Green
+} elseif ($Package) {
+  Write-Host '手动安装：' -ForegroundColor Yellow
+  Write-Host "  adb uninstall $Package"
+  Write-Host "  adb install '$patched'"
+  Write-Host "  objection -g $Package explore    # 进去后敲: android sslpinning disable"
+}
+```
+
+`scripts/install-module.sh`:
+
+```sh
+#!/system/bin/sh
+# Magisk 模块安装器（兼容 Magisk 20.1 —— 20.1 没有 magisk --install-module）
+# 用法: su -c 'sh install-module.sh /data/local/tmp/xxx.zip'
+ZIP="$1"
+[ -f "$ZIP" ] || { echo "用法: sh $0 <module.zip>"; exit 1; }
+
+BB=/system/bin/busybox
+[ -x "$BB" ] || BB=/data/adb/magisk/busybox
+[ -x "$BB" ] || { echo '找不到 busybox'; exit 1; }
+
+BBDIR=/dev/.bb
+mkdir -p $BBDIR
+cp -f $BB $BBDIR/busybox
+chmod 755 $BBDIR/busybox
+$BBDIR/busybox --install -s $BBDIR 2>/dev/null
+export PATH="$BBDIR:$PATH"
+
+export BOOTMODE=true
+export MAGISK_VER=20.1
+export MAGISK_VER_CODE=20100
+export ARCH=arm64
+export IS64BIT=true
+export API=28
+export TMPDIR=/dev/tmp
+export MAGISKTMP=/sbin/.magisk
+export NVBASE=/data/adb
+
+T=/dev/.mi
+rm -rf $T; mkdir -p $T
+unzip -o "$ZIP" 'META-INF/com/google/android/update-binary' -d $T >/dev/null 2>&1
+[ -f "$T/META-INF/com/google/android/update-binary" ] || { echo '不是有效的 Magisk 模块 zip'; exit 1; }
+
+sh $T/META-INF/com/google/android/update-binary 3 1 "$ZIP"
+rc=$?
+echo "=== exit=$rc ==="
+ls /data/adb/modules
+exit $rc
+```
+
+`scripts/phone.ps1`:
+
+```ps1
+<#
+.SYNOPSIS
+  荣耀V10（BKL-AL20）设备控制台 —— 日常调试/查询一站式封装
+.EXAMPLE
+  . .\scripts\env.ps1
+  .\scripts\phone.ps1 status
+  .\scripts\phone.ps1 su "id"
+#>
+param(
+  [Parameter(Position=0)][string]$Action = 'status',
+  [Parameter(Position=1, ValueFromRemainingArguments=$true)][string[]]$Rest
+)
+$ErrorActionPreference = 'Stop'
+if (-not $env:ADB) { $env:ADB = (Get-Command adb -ErrorAction SilentlyContinue).Source }
+if (-not $env:ADB) { throw '找不到 adb，请先执行 . .\scripts\env.ps1' }
+$ADB = $env:ADB
+$devArg = if ($env:PHONE_SERIAL) { @('-s', $env:PHONE_SERIAL) } else { @() }
+function Sh([string]$c)     { & $ADB @devArg shell $c }
+function ShRoot([string]$c) { & $ADB @devArg shell "su -c '$c'" }
+
+switch ($Action.ToLower()) {
+  'status' {
+    Write-Host '== devices ==' -ForegroundColor Cyan; & $ADB devices -l
+    Write-Host '== 基本信息 ==' -ForegroundColor Cyan
+    Sh "getprop ro.product.model; getprop ro.build.display.id; getprop ro.build.version.release"
+    Write-Host '== Bootloader 真实状态（读 /proc/cmdline；getprop 的值被 Magisk 伪装过）==' -ForegroundColor Cyan
+    $cmdline = ((Sh "su -c 'cat /proc/cmdline'") -join ' ')
+    foreach ($k in @('bootlock','userlock','androidboot.verifiedbootstate','androidboot.veritymode')) {
+      $m = [regex]::Match($cmdline, ($k + '=(\S+)'))
+      if ($m.Success) { Write-Host ('  ' + $k.PadRight(32) + ' = ' + $m.Groups[1].Value) }
+    }
+    Write-Host '== getprop（已被伪装，不可信）==' -ForegroundColor DarkGray
+    Sh "getprop ro.boot.flash.locked; getprop ro.boot.verifiedbootstate"
+    Write-Host '== Root ==' -ForegroundColor Cyan; ShRoot 'id'
+    Write-Host '== Magisk ==' -ForegroundColor Cyan; ShRoot 'magisk -v; magiskhide --status'
+    Write-Host '== 模块 ==' -ForegroundColor Cyan; ShRoot 'ls /data/adb/modules'
+    Write-Host '== 第三方应用 ==' -ForegroundColor Cyan; Sh 'pm list packages -3'
+    Write-Host '== 已冻结 ==' -ForegroundColor Cyan; Sh 'pm list packages -d'
+    Write-Host '== 负载 ==' -ForegroundColor Cyan; Sh 'uptime'
+  }
+  'su'      { ShRoot ($Rest -join ' ') }
+  'sh'      { Sh ($Rest -join ' ') }
+  'shell'   { & $ADB @devArg shell }
+  'modules' { ShRoot "for m in /data/adb/modules/*/module.prop; do echo == \$m; grep -E '^(id|name|version)=' \$m; done" }
+  'apps'    { Sh 'pm list packages -3' }
+  'reboot'  { & $ADB @devArg reboot; Write-Host '已发送重启' }
+  'push'    { & $ADB @devArg push $Rest[0] $Rest[1] }
+  'pull'    { & $ADB @devArg pull $Rest[0] $Rest[1] }
+  'install' {
+    $zip = $Rest[0]
+    if (-not (Test-Path $zip)) { throw "找不到 $zip" }
+    & $ADB @devArg push $zip /data/local/tmp/_mod.zip
+    & $ADB @devArg push (Join-Path $PSScriptRoot 'install-module.sh') /data/local/tmp/inst.sh
+    ShRoot 'sh /data/local/tmp/inst.sh /data/local/tmp/_mod.zip'
+  }
+  'ssh' {
+    & $ADB @devArg forward tcp:8022 tcp:8022
+    Write-Host '端口转发已建立，连接 127.0.0.1:8022（用户名 u0_a123）' -ForegroundColor Green
+    & ssh -p 8022 -o StrictHostKeyChecking=no -o UserKnownHostsFile=NUL u0_a123@127.0.0.1
+  }
+  default {
+    Write-Host '用法: phone.ps1 <动作> [参数]' -ForegroundColor Yellow
+    Write-Host '  status / su <命令> / sh <命令> / shell / modules / apps'
+    Write-Host '  install <zip> / push <本地> <远端> / pull <远端> <本地> / ssh / reboot'
+  }
+}
+```
+
+`scripts/proxy.ps1`:
+
+```ps1
+<#
+.SYNOPSIS
+  手机代理抓包环境 —— 用 adb reverse 把电脑代理端口映射到手机 127.0.0.1
+  （手机与电脑不在同一网段时，这是唯一可行的办法）
+.EXAMPLE
+  .\scripts\proxy.ps1 on 8080
+  .\scripts\proxy.ps1 off
+#>
+param(
+  [Parameter(Position=0)][string]$Action = 'status',
+  [int]$Port = 8080
+)
+$ErrorActionPreference = 'Stop'
+$ADB = $env:ADB; if (-not $ADB) { $ADB = (Get-Command adb).Source }
+$devArg = if ($env:PHONE_SERIAL) { @('-s', $env:PHONE_SERIAL) } else { @() }
+
+switch ($Action.ToLower()) {
+  'on' {
+    & $ADB @devArg reverse "tcp:$Port" "tcp:$Port"
+    & $ADB @devArg shell "settings put global http_proxy 127.0.0.1:$Port"
+    Write-Host "代理已开启: 手机 -> 127.0.0.1:$Port -> 电脑:$Port" -ForegroundColor Green
+    Write-Host "别忘了让电脑上的 mitmproxy/Charles/Fiddler 监听 $Port" -ForegroundColor Yellow
+  }
+  'off' {
+    & $ADB @devArg shell 'settings put global http_proxy :0'
+    Write-Host '代理已关闭' -ForegroundColor Green
+  }
+  default {
+    Write-Host '== 手机代理 ==' -ForegroundColor Cyan; & $ADB @devArg shell 'settings get global http_proxy'
+    Write-Host '== reverse ==' -ForegroundColor Cyan; & $ADB @devArg reverse --list
+    Write-Host '== forward ==' -ForegroundColor Cyan; & $ADB @devArg forward --list
+  }
+}
+```
+
+`skills/honor-v10-lab/SKILL.md`:
+
+```md
+---
+name: honor-v10-lab
+description: 荣耀V10(BKL-AL20)安卓实验机（G:\DeepSeek Harness\Root）：已 Root 的 EMUI 9.1 备用机，长期插在电脑上做开发/调试/抓包/破解。提供设备控制台脚本、抓包链路、Frida Gadget 注入、Magisk 模块安装器，以及华为 EMUI 专属坑的解决方案
+whenToUse: 需要用这台荣耀V10做任何事时——查设备状态、执行 root 命令、抓 HTTPS 包、绕 SSL Pinning、装 Magisk 模块、SSH 登录手机、分析 App、刷机救砖、查华为机型踩坑
+---
+
+# 荣耀V10 安卓实验机（G:\DeepSeek Harness\Root）
+
+一台**已经 Root 好、长期插在电脑上**的荣耀V10，当开发/调试/抓包/破解的实验机用。
+
+## 设备档案
+
+| 项 | 值 |
+|---|---|
+| 型号 | HONOR BKL-AL20（荣耀V10） |
+| 芯片 | 海思麒麟 970（arm64-v8a） |
+| 系统 | Android 9 / EMUI 9.1.0.337(C00E333R1P1) |
+| 安全补丁 | 2019-12-01 |
+| 序列号 | P7CDU18425013192 |
+| Bootloader | **已解锁**（`ro.boot.flash.locked=0`） |
+| Root | **Magisk 20.1**（装在 `recovery_ramdisk`，本机没有独立 boot 分区） |
+| SELinux | Enforcing（**华为锁死了策略写接口**） |
+
+## ⚠️ 五条铁律（违反必翻车）
+
+1. **`pm` / `am` / `settings` 不能用 root 跑** —— 会报 `Failed transaction (2147483646)`。
+   必须用 shell 身份：`adb shell pm ...`（不要 `su -c 'pm ...'`）
+2. **frida-server 用不了** —— 华为锁 SELinux，改用 **Frida Gadget**（`objection patchapk`）
+3. **别用 Magisk Manager 的「安装/修复运行环境」** —— 本机没 boot 分区，会把 recovery_ramdisk 搞坏
+4. **别用 `magisk --sqlite` 跑带子查询的 SQL** —— 会把 magiskd 搞崩，root 全失效
+5. **toybox 的 `dd` 不认 `bs=1M`** —— 写 `bs=1048576`
+6. **判断是否解锁看 `/proc/cmdline`** —— `getprop ro.boot.flash.locked` 被 Magisk 伪装成 `1`，不可信
+
+## 快速上手（每个新会话第一步）
+
+```powershell
+cd 'G:\DeepSeek Harness\Root'
+. .\scripts\env.ps1              # 把 adb / JDK17 / apktool / frida 加进 PATH
+.\scripts\phone.ps1 status        # 看设备状态
+```
+
+## 现成脚本（G:\DeepSeek Harness\Root\scripts\）
+
+| 脚本 | 作用 |
+|---|---|
+| `env.ps1` | 一键设置工具链环境变量（必须点源执行） |
+| `phone.ps1` | 设备控制台：`status` / `su <cmd>` / `sh <cmd>` / `modules` / `apps` / `install <zip>` / `push` / `pull` / `ssh` / `reboot` |
+| `capture.ps1` | tcpdump 被动抓包：`start` / `stop` / `live` |
+| `proxy.ps1` | `adb reverse` 代理抓包（跨网段可用）：`on <port>` / `off` / `status` |
+| `frida-patch.ps1` | Frida Gadget 打补丁：`-Package <包名> -Install` |
+| `install-module.sh` | 手机端 Magisk 模块安装器（兼容 Magisk 20.1） |
+
+## 常见任务怎么做
+
+### 查设备 / 执行 root 命令
+```powershell
+.\scripts\phone.ps1 status
+.\scripts\phone.ps1 su "ls /data/adb/modules"
+.\scripts\phone.ps1 su "magisk -v"
+```
+
+### 抓某个 App 的 HTTPS 明文
+```powershell
+.\scripts\proxy.ps1 on 8080
+# 另开窗口：mitmweb --listen-port 8080
+# 手机上操作 App
+```
+
+### 绕 SSL Pinning
+```powershell
+.\scripts\frida-patch.ps1 -Package com.target.app -Install
+# 手机启动 App 后：
+objection -g com.target.app explore
+# 进去敲：android sslpinning disable
+```
+
+### 抓不走代理的流量
+```powershell
+.\scripts\capture.ps1 start
+.\scripts\capture.ps1 stop     # 拉回 capture\cap.pcap
+```
+
+### 装 Magisk 模块
+```powershell
+.\scripts\phone.ps1 install .\mod.zip
+adb reboot
+```
+
+### SSH 登录手机（当服务器用）
+```powershell
+.\scripts\phone.ps1 ssh        # 自动建 tcp:8022 转发并登录
+# 用户名 u0_a123 / 密码 termux2026 / 端口 8022
+```
+
+## 手机里已装的东西
+
+| 应用 | 包名 | 用途 |
+|---|---|---|
+| Magisk Manager | `com.topjohnwu.magisk` | Root 管理、模块、MagiskHide |
+| EdXposed Manager | `org.meowcat.edxposed.manager` | Xposed 模块（框架已激活） |
+| AdAway | `org.adaway` | 全机去广告（7.1 万条规则） |
+| Termux | `com.termux` | 终端 + SSH + tcpdump |
+| Termux:Boot | `com.termux.boot` | 开机自动跑脚本 |
+| MT管理器 | `bin.mt.plus` | Root 文件管理 |
+
+**Magisk 模块**：`busybox-ndk` / `MagiskHidePropsConf` / `cacerts` / `hosts` / `riru-core` / `riru_edxposed`
+
+## 关键路径
+
+| 东西 | 路径 |
+|---|---|
+| 系统 CA 证书 | `/system/etc/security/cacerts/037aaf60.0`（mitmproxy CA） |
+| 证书模块 | `/data/adb/modules/cacerts/` |
+| tcpdump | `/data/data/com.termux/files/usr/bin/tcpdump` |
+| frida-server | `/data/adb/frida/frida-server`（**装了但用不了**） |
+| Magisk 工具集 | `/data/adb/magisk/` |
+| 开机脚本 | `/data/adb/service.d/` |
+| 分区备份 | 手机 `/sdcard/hw_backup/`，电脑 `phone_backup\` |
+
+## 分区表（本机没有 boot）
+
+```
+kernel           -> /dev/block/sdd38
+recovery_ramdisk -> /dev/block/sdd40    ← Magisk 在这里
+fastboot         -> /dev/block/sdd28
+oeminfo          -> /dev/block/sdd6     ← 解锁状态
+nvme             -> /dev/block/sdd4
+vbmeta           -> /dev/block/sdd49
+userdata         -> /dev/block/sdd64
+```
+
+## 详细文档（G:\DeepSeek Harness\Root\docs\）
+
+| 文档 | 什么时候看 |
+|---|---|
+| `00-快速开始.md` | 第一次用 |
+| `04-Magisk完全指南.md` | 模块原理、排障 |
+| `06-功能入口与控制手册.md` | 某个功能在哪、怎么开关 |
+| `07-抓包能力配置与验证.md` | 证书、Pinning、tcpdump |
+| `08-Frida与抓包完全教程.md` | Frida Gadget / objection 实战 |
+| `14-踩坑记录.md` | **遇到任何奇怪问题先查这个** |
+
+## 华为 EMUI 专属坑速查
+
+| 症状 | 原因 | 解法 |
+|---|---|---|
+| `Failed transaction (2147483646)` | 用 root 跑了 `pm`/`am` | 改用 `adb shell pm ...` |
+| `Unable to save SELinux policy` | 华为锁 SELinux | 用 Frida Gadget，别用 frida-server |
+| `setenforce: Invalid argument` | 同上 | 别折腾 |
+| `No daemon is currently running!` | magiskd 崩了 | 重启手机 |
+| `dd: block size '1M'` | toybox dd | `bs=1048576` |
+| `E: Unable to locate package tcpdump` | 不在 Termux 主仓库 | 先 `pkg install root-repo` |
+| `bad addr or host: <NULL>` | 在 magisk 域跑 Termux 程序 | 在 Termux App 里跑 |
+| ssh 密钥认证 Permission denied | Windows OpenSSH 9.5 的 hostbound bug | 用密码或 `tools\plink.exe` |
+| 手机很卡 / 点不动 | SD 卡媒体文件被反复扫描 | SD 卡根目录放 `.nomedia` |
+| 模块装不上 `Please install Magisk v20.4+` | 20.1 缺 `install_module` | 用 `scripts/install-module.sh` |
+
+## 注意事项
+
+- **不要**升级 Magisk 到 24+：本机没 boot 分区、没 fastboot 兜底，刷坏就失去 root
+- **不要**用 Magisk Manager 的「修复运行环境」
+- 抓包前先确认：证书装了没 → 代理开了没 → 有没有 Pinning → 是不是绕过代理
+- 改任何系统文件都用 **Magisk 模块挂载**，不要 remount /system
+
+```
+
+`连接手机SSH.bat`:
+
+```bat
+@echo off
+REM 连接手机 Termux 的 SSH（自动建立 adb 端口转发）
+"C:\Users\wangyang\AppData\Local\Android\Sdk\platform-tools\adb.exe" -s P7CDU18425013192 forward tcp:8022 tcp:8022 >nul 2>&1
+echo 正在连接 Termux (端口 8022)...
+ssh termux
+
+```
