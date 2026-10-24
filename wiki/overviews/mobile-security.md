@@ -559,6 +559,7 @@ sources:
   - wiki/sources/descriptions/stuffed-cat__hide-ace-kernel.md
   - wiki/sources/descriptions/xjoker__frida-magisk.md
   - wiki/sources/descriptions/Ayoubvvch__sshserver-magisk.md
+  - wiki/sources/descriptions/areyougarou__BlackHex.md
 updated: 2026-10-24
 confidence: high
 ---

@@ -531,7 +531,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [BlackObfuscator](entities/black-obfuscator.md) — DEX control-flow obfuscator (CodingGay; Java; modified dex2jar pipeline; configurable depth, package targeting, rule-based processing; GUI + Android Studio plugin; mobile app protection / anti-RE; `[Dex]`)
 - [Blackbone](entities/blackbone.md) — Windows memory hacking library (DarthTon; x86/x64; alloc/R/W/protect, module enum, manual PE map, WOW64 thread control; user+kernel APIs; RE / game-security / AC tooling)
 - [BlackBox](entities/blackbox.md)
-- [BlackHex](entities/blackhex.md) — free-tier Android RASP library (Kotlin + NDK; on-device root/Frida/emulator/custom-ROM checks; per-signal clean/detected/inconclusive verdicts; local pass-or-block policy; areyougarou; Anti Cheat / Detection:Android root)
+- [BlackHex](entities/blackhex.md) — free-tier Android RASP library (Kotlin + NDK API 26+; configurable emulator/instrumentation/root/bootloader groups + always-on app integrity; per-signal clean/detected/inconclusive; local pass-or-block; GOT/PLT/memory-map native scans; areyougarou; Anti Cheat / Detection:Android root)
  — deprecated FBlackBox Android virtualization project (README-only removal notice; historical context; cheat / Android)
 - [blacksun-framework](entities/blacksun-framework.md) — modular C++ game cheat framework (user-mode/kernel/DMA access backends; pattern scan, hooking, overlays, comm layers; cs1ime)
 - [blazedumper](entities/blazedumper.md) — maintained CS:GO offset database (Akandesh; JSON + C++/C# defs; signature patterns + updater pipeline; cheat / game:csgo [Offset])

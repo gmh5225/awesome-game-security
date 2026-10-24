@@ -13,6 +13,18 @@ confidence: medium
 
 Free-tier Android runtime application self-protection (RASP) library: Kotlin SDK plus arm64 native checks for app tampering/repackaging, Frida and hooking, emulators, root and root-manager artifacts, and custom ROM or unlocked-bootloader signals. Policy toggles can allow or block emulator, instrumentation, root, and bootloader groups while app-integrity enforcement stays always on; each probe reports clean, detected, or inconclusive and rolls up to a local pass-or-block verdict without vendor-server telemetry. (source: wiki/sources/descriptions/areyougarou__BlackHex.md)
 
+## Check groups
+
+| Group | Policy | Per-check status |
+|-------|--------|----------------|
+| App integrity (tamper/repack) | Always enforced | clean / detected / inconclusive |
+| Emulator | Configurable allow or block | clean / detected / inconclusive |
+| Instrumentation (Frida, hooks) | Configurable allow or block | clean / detected / inconclusive |
+| Root / root-manager artifacts | Configurable allow or block | clean / detected / inconclusive |
+| Custom ROM / unlocked bootloader | Configurable allow or block | clean / detected / inconclusive |
+
+Verdicts aggregate locally to pass-or-block; no vendor-server upload. (source: wiki/sources/descriptions/areyougarou__BlackHex.md)
+
 ## Architecture
 
 Gradle Android library module (API 26+); CMake/NDK scans include memory maps, GOT/PLT, opcode patterns, and JNI bridges for low-level integrity evidence.

@@ -72,6 +72,7 @@ sources:
   - wiki/sources/descriptions/ohmk1811__MobSentry.md
   - wiki/sources/descriptions/oldboysonnt__mobile-harness.md
   - wiki/sources/descriptions/stuffed-cat__hide-ace-kernel.md
+  - wiki/sources/descriptions/areyougarou__BlackHex.md
 updated: 2026-10-24
 confidence: medium
 ---
