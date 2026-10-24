@@ -2474,7 +2474,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Magnetite](entities/magnetite.md) — Rust self-hostable Wasm game platform (deterministic replay AC / magnetite-anticheat)
 - [Mandragora](entities/mandragora.md) — educational ring-3 usermode anti-cheat for Assault Cube (weak difficulty; unobfuscated source for RE practice; gmh5225)
 - [Magisk](entities/magisk.md) — Android systemless root (su daemon / modules / DenyList·Shamiko / Zygisk)
-- [Android Mods](entities/android-mods.md) — PallabKumarS KernelSU/Magisk modules + LSPosed hooks for HyperOS/AOSP (Play Integrity Tricky Store AIO, Strong Keybox; attestation/root-hide; cheat / Magisk)
+- [Android Mods](entities/android-mods.md) — PallabKumarS systemless Magisk/KernelSU + LSPosed suite (Play Integrity/Tricky Store AIO, build/keystore attestation spoof, Intune MAM bypass; HyperOS/MIUI/AOSP; Zygisk + Gradle; cheat / Magisk)
 - [Magisk Hub](entities/magisk-hub.md) — Astro static directory for Magisk/KernelSU/APatch modules (schema-validated six-hour upstream sync; Frida, root-hide, Play Integrity bypass; Yass5002; cheat / Magisk)
 - [MagiskHide](entities/magiskhide.md) — portable ptrace MagiskHide module for Magisk v24.0+ (DenyList hidelist; no Zygisk; Android 11+; gmh5225)
 - [MagiskKiller](entities/magisk-killer.md) — Android Magisk/MagiskHide detector (fork subprocess + pipe IPC; tracer/bootloader/property/PTS; canyie; Detection:Magisk)
