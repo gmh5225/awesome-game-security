@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-24** — ingest `description:ravindu644/USB-Arsenal`: enriched entity [[usb-arsenal]] (Architecture: C core + Magisk/KernelSU module + Jetpack Compose; Capabilities/Positioning; confidence high); short cite on [[concepts/hardware-input-injection]] Android configfs composite HID lane; [[overviews/mobile-security]] README-map + frontmatter source sync; `index.md` entity blurb updated.
+
 - **2026-10-24** — ingest `readme:categories`: **Cheat** link_count **2956** (+1; ravindu644/[[usb-arsenal]] rooted Android USB configfs composite gadget—mass storage/CD-ROM, RNDIS/NCM, HID keyboard/mouse; Magisk/KernelSU; Cheat / Android Root) / **Anti Cheat** **826** / **Game Develop** **196** / **Game Engine** ~159 / **DirectX** ~42 / **Vulkan** ~13 / **Game Network** ~34 and other major README sections unchanged; 41 top-level sections (`NeverC & NeverD` placeholder); synced [[overviews/overview]], [[overviews/game-hacking]], [[overviews/mobile-security]], [[overviews/dma-attack]], and [[overviews/reverse-engineering]]; entity [[usb-arsenal]]; light `index.md` section notes (no per-category pages).
 
 - **2026-10-24** — lint (agent, Cursor lint pass): read `wiki/AGENTS.md`; **Overviews** (9) / **Concepts** (51) / **Entities** (4174); `index.md` matches disk (4234 paths, 0 missing, 0 dead, 0 duplicates); overview + index Overviews/Concepts blurb [[wikilink]] spot-check (13842 links), 0 broken; bootstrap not required; no structural repairs (`log.md` only).
