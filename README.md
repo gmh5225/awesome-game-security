@@ -1630,6 +1630,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/gmh5225/KernelSU-4.4 [Adapted for Linux Kernel 4.4 + Google GCC 4.9]
 - https://github.com/BuSung-dev/Root-My-Galaxy [One-click KernelSU installer for supported Samsung Galaxy firmware via CVE-2026-43499]
 - https://github.com/tbc0309/KPA-Root [Bootloader unlock, Magisk root, and restore toolkit for the KONKR Pocket Advance gaming handheld with integrity-module support]
+- https://github.com/yingyangdao/honor-v10-lab [Documented Honor V10 (EMUI 9) root lab: SWTP bootloader unlock, Magisk 20.1, EdXposed, Frida Gadget workaround for Huawei SELinux limits, tcpdump, and reusable scripts]
 - https://github.com/bmax121/APatch
 - https://github.com/lzghzr/APatch_kpm [APatch modules]
 - https://github.com/abcz316/SKRoot-linuxKernelRoot
@@ -4553,6 +4554,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/web-coder-lab/chessking [Rust server-side anti-cheat for multiplayer chess: risk scoring, device fingerprinting, match integrity, captcha, and ban escalation]
 - https://github.com/AbdulAmi09/SentinelAntiCheat [Chess integrity platform with seven-layer statistical engine-assistance detection, explainable risk tiers, arbiter case management, and hash-chained audit logging]
 - https://github.com/MaksymSakundiak/chess-anti-cheat [TensorFlow/Keras engine-assistance detector with bidirectional LSTM and Conv1D over moves, timing, and color for interactive risk scoring]
+- https://github.com/prob1st/chess-sentinel [Chrome MV3 extension: local Bayesian cheat-probability HUD on Chess.com using PGN clock metronome, CAPS2 Elo calibration, and six-signal forensic telemetry]
 - https://github.com/XX-Batsu/bevy-personal-test [Rust Bevy multiplayer framework with sandboxed Rhai script VM, rollback netcode, and shadow-VM anti-cheat verification]
 - https://github.com/anas1412/bootleg16 [Counter-Strike 1.6-style FPS rebuilt in Rust/Bevy with matchmaking, official servers, and server-side anti-cheat]
 - https://github.com/joeltco/ff3mmo [Browser-based NES FF3 MMO with server-authoritative PvE/PvP/economy arbiters, inventory mirror anti-dup, wire validation, and moderation tooling]
