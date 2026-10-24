@@ -1893,7 +1893,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [rep-mov-ept-detecc](entities/rep-mov-ept-detecc.md) — REP MOVS fault-pattern EPT hook/access monitor detector (Windows C++; JustasMasiulis; overwrite-pattern signal + exception handling; REP MOV based EPT detection)
 - [rhabdomancer](entities/rhabdomancer.md) — Rust idalib headless IDA plugin; locates insecure API calls (strcpy/sprintf/system/ioctl); tiered badness, bookmarks, backtrace audit paths; binary vulnerability triage (0xdea; cheat / IDA Plugins)
 - [vmdtstr](entities/vmdtstr.md) — STR-exit VMM fault detector (cryotb; nested HVPP test harness; Detection: Hacked Hypervisor)
-- [Honor V10 Lab](entities/honor-v10-lab.md) — documented Honor V10 (EMUI 9) root lab: SWTP unlock, Magisk, EdXposed, Frida Gadget on Huawei SELinux, tcpdump, scripts (yingyangdao; Cheat / Android Root)
+- [Honor V10 Lab](entities/honor-v10-lab.md) — Honor V10 (BKL-AL20) EMUI 9 root lab: SWTP unlock, Magisk/EdXposed, Frida Gadget vs broken frida-server on Huawei SELinux, system CA MITM, Termux tcpdump, HwOUC notes, harness skill (yingyangdao; Cheat / Android Root)
 - [honor-of-kings-RE-research](entities/honor-of-kings-re-research.md) — Honor of Kings Android RE (ACE / libtersafe / IL2CPP / KernelPatch KPMs)
 - [Hotkeybased Keylogger Detector](entities/hotkeybased-keylogger-detector.md) — win32kfull global hotkey-table scanner; detects keyloggers abusing RegisterHotKey (AsuNa-jp; KMDF; defensive endpoint research; Detect RegisterHotKey API)
 - [Horizon Engine](entities/horizon-engine.md) — Windows 3D rendering engine (D3D12 / Vulkan / Metal; Game Engine source)

@@ -68,7 +68,8 @@ sources:
   - wiki/sources/descriptions/abcd123rft__terraria-android-modding.md
   - wiki/sources/descriptions/wzxwhxcz__LSPFRIDA.md
   - wiki/sources/descriptions/xjoker__frida-magisk.md
-updated: 2026-10-19
+  - wiki/sources/descriptions/yingyangdao__honor-v10-lab.md
+updated: 2026-10-24
 confidence: high
 ---
 
@@ -78,7 +79,7 @@ Cross-platform dynamic instrumentation toolkit widely used on Android/iOS (and d
 
 ## Observation limits
 
-Frida distinguishes **injected**, **embedded**, and **preloaded** operation—these are integration modes, not universal stealth levels or guarantees of early-execution coverage. Bind a report to the exact tool revision, target build, entry point, required privilege, and actual evidence source. (source: wiki/sources/skills/mobile-security.md) **Embedded Frida Gum** inside LSPosed modules such as [[lspfrida]] (wzxwhxcz; QuickJS GumJS + LSPlant hooks; frida-java-bridge-compatible `Java.perform`/`Java.use`; on-device script editor; no frida-server/ADB/PC) and [[com-fuck-iab]] (FKIAB; native C++ layer runs compiled TypeScript scripts per target package for multi-store IAP billing hooks) illustrates in-process embedded instrumentation without external `frida-server` attach. (source: wiki/sources/descriptions/wzxwhxcz__LSPFRIDA.md) (source: wiki/sources/descriptions/Xposed-Modules-Repo__com.fuck.iab.md)
+Frida distinguishes **injected**, **embedded**, and **preloaded** operation—these are integration modes, not universal stealth levels or guarantees of early-execution coverage. Bind a report to the exact tool revision, target build, entry point, required privilege, and actual evidence source. (source: wiki/sources/skills/mobile-security.md) On **Huawei/Honor EMUI** devices with strict SELinux, attach-mode **`frida-server`** may be unusable; documented lab setups such as [[honor-v10-lab]] fall back to **Frida Gadget** injection after Magisk root—same GumJS lane, different deployment boundary. (source: wiki/sources/descriptions/yingyangdao__honor-v10-lab.md) **Embedded Frida Gum** inside LSPosed modules such as [[lspfrida]] (wzxwhxcz; QuickJS GumJS + LSPlant hooks; frida-java-bridge-compatible `Java.perform`/`Java.use`; on-device script editor; no frida-server/ADB/PC) and [[com-fuck-iab]] (FKIAB; native C++ layer runs compiled TypeScript scripts per target package for multi-store IAP billing hooks) illustrates in-process embedded instrumentation without external `frida-server` attach. (source: wiki/sources/descriptions/wzxwhxcz__LSPFRIDA.md) (source: wiki/sources/descriptions/Xposed-Modules-Repo__com.fuck.iab.md)
 
 | Question | Evidence to preserve |
 |----------|---------------------|

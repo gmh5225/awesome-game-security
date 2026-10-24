@@ -562,6 +562,7 @@ sources:
   - wiki/sources/descriptions/xjoker__frida-magisk.md
   - wiki/sources/descriptions/Ayoubvvch__sshserver-magisk.md
   - wiki/sources/descriptions/areyougarou__BlackHex.md
+  - wiki/sources/descriptions/yingyangdao__honor-v10-lab.md
 updated: 2026-10-24
 confidence: high
 ---
