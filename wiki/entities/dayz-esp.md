@@ -11,7 +11,7 @@ confidence: medium
 
 # DayZ ESP
 
-**DayZ ESP** (cmachale14-eng/DayZESP) is a Windows **external** cheat for the Enfusion-based **DayZ** client: a standalone C++20 (MinGW) executable draws a **DirectX 11** Dear ImGui overlay while reading live game state through **kernel-mode** cross-process memory access backed by the Intel **`iqvw64e.sys`** vulnerable driver ([[byovd]] / kdmapper-family lane). Supporting modules cover process memory I/O, offset tables, entity and item discovery, name resolution, and optional dumping. (source: wiki/sources/descriptions/cmachale14-eng__DayZESP.md) (source: wiki/sources/README-categories.md)
+**DayZ ESP** (cmachale14-eng/DayZESP) is a Windows **external** cheat for the Enfusion-based **DayZ** client: a standalone C++20 (MinGW g++) executable draws a **DirectX 11** Dear ImGui overlay (Win32 backend) while reading live game state through **kernel-mode** cross-process memory access backed by the Intel **`iqvw64e.sys`** vulnerable driver ([[byovd]] / kdmapper-family lane). Supporting modules cover process memory I/O, offset definitions, entity and item discovery, name resolution, and optional dumping. (source: wiki/sources/descriptions/cmachale14-eng__DayZESP.md) (source: wiki/sources/README-categories.md)
 
 ## Research framing
 

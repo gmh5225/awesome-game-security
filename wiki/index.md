@@ -24,7 +24,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [BattlEye](concepts/battleye.md)
 - [Binary Diffing](concepts/binary-diffing.md) — BinDiff/[[diaphora]]/[[ghidriff]]/DarunGrim/[[turbodiff]]/[[rom-weaver]]/[[ik-plus-reforged]]/[[pipeline-disasm]]/[[openmcm2]] patch analysis; AC driver update tracking; [[oh-my-dump]] IDA 9.x annotation re-apply after build shifts; retro ROM delta + in-place classic patches vs full-tree disassembly rebuilds + Ghidra PE relink documented rebuilds; similarity scores as candidate evidence; [[static-runtime-evidence]] hash/tool-version baseline; [[overviews/reverse-engineering]] routing cross-link
 - [Binary Evidence](concepts/binary-evidence.md) — question classification (interface abuse, integrity, obfuscation, anti-analysis, binary change); offset/RVA/runtime address provenance; imported API vs reachable path vs observed call; decompiler reconstruction limits + [[sre-re]] DOSBox corroboration for decompiled game rules; [[cantordust]]-class byte visualization as hypothesis generation (not standalone proof); [[static-runtime-evidence]] baseline cross-link
-- [BYOVD](concepts/byovd.md)
+- [BYOVD](concepts/byovd.md) — signed vulnerable-driver load → kernel R/W; blocklist/HVCI/LOLDriver mitigations; game externals such as [[dayz-esp]] on Intel `iqvw64e.sys`
 - [Cheat Attack Surface](concepts/cheat-attack-surface.md) — threat-family taxonomy (observation, injection, DMA, graphics, input, protocol abuse); objective/boundary/evidence framing; counterexamples and legitimate-use limits
 - [Compiled Wiki](concepts/compiled-wiki.md) — four-layer discovery model (wiki → README → descriptions → archives); discovery aid, not proof; pairs with [[repository-navigation]] indexer
 - [Repository Navigation](concepts/repository-navigation.md) — layer selection, path/case lookup, read-only `repository_index.py` helper, archive limits, identity preservation; maintenance vs retrieval separation
@@ -947,7 +947,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [dayu](entities/dayu.md) — Open/HarmonyOS `.abc` parser and decompiler (mobile RE; maintenance not guaranteed)
 
 - [DayZ-Cheat](entities/dayz-cheat.md) — DayZ external cheat (ESP, aimbot, item ESP; external memory reads + overlay; gmh5225)
-- [DayZ ESP](entities/dayz-esp.md) — external DayZ DX11 ImGui ESP; iqvw64e.sys BYOVD kernel memory reads for BattlEye-protected Enfusion client (cmachale14-eng; Cheat / game:dayz [External])
+- [DayZ ESP](entities/dayz-esp.md) — external DayZ MinGW C++20 DX11/Win32 ImGui ESP; iqvw64e.sys BYOVD kernel memory reads for BattlEye-protected Enfusion client (cmachale14-eng; Cheat / game:dayz [External])
 - [rea](entities/rea.md) — morluto REA CLI + MCP agent-assisted RE (native/JS/.NET/web/mobile/firmware, process runtime, ELF/crash diagnostics; evidence provenance + limitations; bridges Hopper/Ghidra/IDA/JADX/pwntools/mitmproxy; companion project index [[rea-atlas]]; Game Develop / MCP)
 - [rea-atlas](entities/rea-atlas.md) — jammyfu curated multilingual RE project map (game decomp/recomp, ports, asset tools, firmware/security RE) with documented morluto/[[rea]] workflow tags; platform-grouped JSON + Python README renderer; preservation-oriented Cheat / Guide index
 - [rea-mytechnotalent](entities/rea-mytechnotalent.md) — mytechnotalent offline-first Python RE assistant (one-shot PE/ELF/Mach-O + JS/Electron inventory via readelf/objdump/nm/strings, local RAG, propose-review-gate multi-agent evidence; CLI + MCP; malware/game/AC triage; Cheat / RE Tools)

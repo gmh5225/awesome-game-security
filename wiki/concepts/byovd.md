@@ -113,12 +113,13 @@ sources:
   - wiki/sources/descriptions/CyberSecurityUP__ViGEmBus-Driver-Exploitation.md
   - wiki/sources/descriptions/CyberSecurityUP__UrekMazino-Malware.md
   - wiki/sources/descriptions/CaledoniaProject__drivers-binaries.md
+  - wiki/sources/descriptions/cmachale14-eng__DayZESP.md
   - wiki/sources/descriptions/ANYLNK__NSecSoftBYOVD.md
   - wiki/sources/descriptions/4l3x777__dse_pg_bypass.md
   - wiki/sources/descriptions/0xJs__BYOVD_read_write_primitive.md
   - wiki/sources/descriptions/0xJs__BYOVD_EDRKiller.md
   - wiki/sources/descriptions/mein-0__forti-research.md
-updated: 2026-09-12
+updated: 2026-10-24
 confidence: high
 ---
 
@@ -256,7 +257,7 @@ Physical-memory mapping abuse via **`msIo64.sys`** such as [[ms-io-exploit]] sit
 
 Gigabyte **`gdrv64.sys`/`gdrv.sys`** loader research such as [[gdrv-loader]] (gmh5225; arbitrary R/W IOCTL → manual map unsigned PE; DSE bypass via BYOVD), [[gdrv-loader-v2]] (C/C++; alternate `gdrv.sys` loader in the cheat / vulnerable-driver lane), and updated loader [[gdrv-loader-updated]] (1337kenzo; C/C++; Win10/11 compatibility; streamlined vulnerable-driver byte loading; CLI load/unload; kernel security lab research; README `[gdrv.sys Win11]`), PoC exploit toolkit [[gdrv-sys-exploit]] (AmitMoshel1; C++ Visual Studio solution; arbitrary-write and shellcode-oriented `gdrv.sys` examples for modern Windows/Win11; educational BYOVD kernel exploitation research), plus reusable access-primitive library [[gdriver-lib]] (gmh5225; C++ wrapper for physmem R/W, physical mapping, and kernel ops via gdrv IOCTLs); Win10 KDP-aware unsigned loader [[kdp-compatible-driver-loader]] (gmh5225; `gdrv.sys` write primitives → `SeCiCallbacks` patch for DSE bypass on KDP-enabled builds); CVE-2018-19320 DSE-bypass PoC such as [[cve-2018-19320]] (gmh5225; ring-0 memcpy-like IOCTL → arbitrary kernel R/W → leak/toggle **`CI!g_CiOptions`** to disable DSE); LPE variant [[cve-2018-19320-lpe]] (gmh5225; arbitrary alloc/write IOCTLs → SYSTEM escalation; Win10 x64 21H1). (source: wiki/sources/descriptions/gmh5225__gdrv-loader.md) (source: wiki/sources/descriptions/holi4m__gdrv-loader-v2.md) (source: wiki/sources/descriptions/gmh5225__gdriver-lib.md) (source: wiki/sources/descriptions/gmh5225__KDP-compatible-driver-loader.md) (source: wiki/sources/descriptions/gmh5225__CVE-2018-19320.md) (source: wiki/sources/descriptions/gmh5225__CVE-2018-19320-LPE.md) (source: wiki/sources/descriptions/AmitMoshel1__gdrv_sys_exploit.md) (source: wiki/sources/descriptions/1337kenzo__gdrv-loader-updated.md)
 
-Intel **`iqvw64e.sys`** (Nal diagnostics) CVE-2015-2291 PoC such as [[cve-2015-2291]] (gmh5225; IOCTL-based arbitrary kernel memory R/W via the vulnerable Nal driver; `NtQuerySystemInformation` kernel-base leak for privilege escalation; foundational Intel BYOVD backend reused by kdmapper-family mappers such as [[saturn-mapper]] and [[kdu]]) sits in the canonical cheat / vulnerable-driver research lane. (source: wiki/sources/descriptions/gmh5225__CVE-2015-2291.md)
+Intel **`iqvw64e.sys`** (Nal diagnostics) CVE-2015-2291 PoC such as [[cve-2015-2291]] (gmh5225; IOCTL-based arbitrary kernel memory R/W via the vulnerable Nal driver; `NtQuerySystemInformation` kernel-base leak for privilege escalation; foundational Intel BYOVD backend reused by kdmapper-family mappers such as [[saturn-mapper]] and [[kdu]]) sits in the canonical cheat / vulnerable-driver research lane. (source: wiki/sources/descriptions/gmh5225__CVE-2015-2291.md) External game cheats such as [[dayz-esp]] (cmachale14-eng; MinGW C++20; DX11/Win32 ImGui overlay; `iqvw64e.sys` kernel cross-process reads for [[battleye]]-protected DayZ entity/item ESP) illustrate the same Intel Nal backend backing live protected-process memory access beside custom mapped drivers. (source: wiki/sources/descriptions/cmachale14-eng__DayZESP.md)
 
 Multi-provider unsigned-driver mappers such as [[kdu]] (Kernel Driver Utility; hfiref0x; extensible vulnerable-driver providers across Intel/ASUS/MSI/Gigabyte families; automated DSE bypass, PE map, cleanup) sit in the canonical cheat / driver-mapper research lane. (source: wiki/sources/descriptions/hfiref0x__KDU.md)
 
