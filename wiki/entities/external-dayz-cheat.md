@@ -12,7 +12,7 @@ confidence: medium
 
 **DayZ external ESP cheat** (gmh5225) that runs outside the [[battleye]]-protected Enfusion client. A transparent **DirectX 9 overlay** (`Direct3DCreate9Ex`, `FindWindow`/`GetWindowRect` window tracking) draws player positions, names, health bars, and distance via **D3DXFont** and **D3DXLine** while a **kernel driver** (`Driver.h`/`Imports.h`) supplies cross-process entity memory reads. The cheat walks the game's entity list through SDK-defined offsets and projects world coordinates with [[world-to-screen]] math. (source: wiki/sources/descriptions/gmh5225__External-Dayz-Cheat.md)
 
-Complements [[dayz-cheat]] (standard external ESP/aimbot/item ESP), [[dayzzz]] (SDK generation + overlays), and defensive server-side ML such as [[model-anti-cheat]] for comparing external overlay + driver-backed RPM patterns on DayZ/Enfusion titles.
+Complements [[dayz-cheat]] (standard external ESP/aimbot/item ESP), [[dayz-esp]] (DX11 ImGui external with `iqvw64e.sys` BYOVD kernel reads), [[dayzzz]] (SDK generation + overlays), and defensive server-side ML such as [[model-anti-cheat]] for comparing external overlay + driver-backed RPM patterns on DayZ/Enfusion titles.
 
 ## Links
 
@@ -20,4 +20,4 @@ Complements [[dayz-cheat]] (standard external ESP/aimbot/item ESP), [[dayzzz]] (
 
 ## Related
 
-[[battleye]] · [[world-to-screen]] · [[present-hook]] · [[dayz-cheat]] · [[dayzzz]] · [[model-anti-cheat]] · [[overviews/game-hacking]] · [[overviews/windows-kernel]] · [[overviews/graphics-api]]
+[[battleye]] · [[world-to-screen]] · [[present-hook]] · [[dayz-cheat]] · [[dayz-esp]] · [[dayzzz]] · [[model-anti-cheat]] · [[overviews/game-hacking]] · [[overviews/windows-kernel]] · [[overviews/graphics-api]]
