@@ -959,6 +959,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/zhuyansen/awesome-ai-reverse-engineering [Curated AI-agent RE stack: Ghidra/IDA MCP servers, mobile tooling (jadx, Frida), agent skills, and security-graded open-source RE projects]
 - https://github.com/2akouwu/reverify [AI-assisted reverse engineering with deterministic byte-level verification via MCP server and CLI]
 - https://github.com/mytechnotalent/rea [Offline-first RE assistant with one-shot binary scan, native PE/ELF/Mach-O and JavaScript/Electron static inventory, local RAG, multi-agent harness, and MCP server]
+- https://github.com/jiuyou-7411/dsh-rea-plugin [DeepSeek Harness REA workbench plugin with Chinese UI for 220 RE tools (Frida, Ghidra, jadx), bundled offline docs, and engine install helpers]
 - https://github.com/zheedevVn/Rea-Unlock [MCP server unifying static and dynamic reverse engineering (Frida, Ghidra, decompilers) for binary and application analysis]
 - https://github.com/joasasantos/rea-prompts [Curated REA (Reverse Engineer Anything) prompt templates for agent-assisted RE — games, anti-cheat, DMA, kernels, APKs, and protection research with evidence-first instructions]
 - https://github.com/jammyfu/rea-atlas [Curated map of reverse-engineering projects (game decomp/recomp, asset tools, firmware) tagged for morluto/rea usage, with multilingual README indexes]
