@@ -1,0 +1,189 @@
+Project Path: arc_MitologicoDev_mf_antiesp_10aqoh8l
+
+Source Tree:
+
+```txt
+arc_MitologicoDev_mf_antiesp_10aqoh8l
+├── LICENSE
+├── README.md
+├── client.lua
+├── config.lua
+└── fxmanifest.lua
+
+```
+
+`LICENSE`:
+
+```
+MIT License
+
+Copyright (c) 2026 SentryV
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
+`README.md`:
+
+```md
+# FiveM AntiESP
+
+Free, standalone Anti-ESP for FiveM.
+
+ESP cheats draw boxes, names and skeletons on players through walls. This resource hides (conceals) every player that is behind a wall on your screen, so there is nothing for the cheat to draw. As soon as the player would be visible again, they are revealed.
+
+- Standalone: no framework, no dependencies
+- Client-side only, nothing to configure on the server
+- Drag and drop
+
+> [!WARNING]
+> This resource can easily cause problems with other scripts, especially anything that hides/shows players, uses instances or routing buckets, or relies on player visibility. Test it on your server before going live.
+
+## Installation
+
+1. Download the latest release (or clone this repo) into your `resources` folder.
+2. Make sure the folder is named `mf_antiesp`.
+3. Add this line to your `server.cfg`:
+
+```cfg
+ensure mf_antiesp
+```
+
+## Configuration
+
+Everything is in `config.lua`:
+
+| Option | Default | Description |
+|---|---|---|
+| `Config.ConcealInterval` | `100` | ms between scans for players hidden behind walls |
+| `Config.RevealInterval` | `5` | ms between checks to reveal concealed players |
+| `Config.CleanupInterval` | `1000` | ms between checks for players stuck concealed by other scripts |
+
+## How it works
+
+1. Every `ConcealInterval` ms, for each other player that is on screen and occluded (`IsEntityOccluded`), the player is concealed with `NetworkConcealPlayer`.
+2. Every `RevealInterval` ms, each concealed player is checked with `WouldEntityBeOccluded` at their network position. If they would no longer be hidden, they are revealed.
+3. Every `CleanupInterval` ms, any player concealed that this resource did not conceal is revealed.
+
+## Limitations
+
+- It is client-side: a cheat able to stop or tamper with resources can bypass it. It works best alongside a full anticheat.
+- Step 3 reveals players concealed by other scripts. If your server uses `NetworkConcealPlayer` for instances/routing, it will conflict with this resource.
+
+## License
+
+[MIT](LICENSE)
+
+```
+
+`client.lua`:
+
+```lua
+local concealed = {}
+
+local function concealPlayer(ped)
+    local playerId = NetworkGetPlayerIndexFromPed(ped)
+    NetworkConcealPlayer(playerId, true, true)
+
+    concealed[playerId] = {
+        model = GetEntityModel(ped)
+    }
+end
+
+-- Unconceal players hidden by someone else (stuck concealment)
+CreateThread(function()
+    while true do
+        Wait(Config.CleanupInterval)
+        for _, v in ipairs(GetActivePlayers()) do
+            if NetworkIsPlayerConcealed(v) and not concealed[v] then
+                NetworkConcealPlayer(v, false, false)
+            end
+        end
+    end
+end)
+
+-- Reveal concealed players as soon as they would be visible
+CreateThread(function()
+    while true do
+        Wait(Config.RevealInterval)
+        for playerId, data in pairs(concealed) do
+            if not NetworkIsPlayerActive(playerId) then
+                concealed[playerId] = nil
+            else
+                local coords = NetworkGetPlayerCoords(playerId)
+                if not WouldEntityBeOccluded(data.model, coords.x + 0.0, coords.y + 0.0, coords.z + 0.0, false) then
+                    NetworkConcealPlayer(playerId, false, false)
+                    concealed[playerId] = nil
+                end
+            end
+        end
+    end
+end)
+
+-- Conceal on-screen players hidden behind walls
+CreateThread(function()
+    while true do
+        Wait(Config.ConcealInterval)
+        local myPed = PlayerPedId()
+        local allPeds = GetGamePool('CPed')
+        for i = 1, #allPeds do
+            local ped = allPeds[i]
+            if DoesEntityExist(ped) and IsPedAPlayer(ped) and ped ~= myPed then
+                local pedCoords = GetEntityCoords(ped)
+                local onScreen = GetScreenCoordFromWorldCoord(pedCoords.x, pedCoords.y, pedCoords.z)
+                if onScreen and IsEntityOccluded(ped) then
+                    concealPlayer(ped)
+                end
+            end
+        end
+    end
+end)
+
+```
+
+`config.lua`:
+
+```lua
+Config = {}
+
+-- Intervals in ms. Lower = more reactive, higher = cheaper on resmon.
+Config.ConcealInterval = 100 -- scan for occluded players to hide
+Config.RevealInterval = 5    -- check if hidden players became visible
+Config.CleanupInterval = 1000 -- unconceal players stuck hidden by other scripts
+
+```
+
+`fxmanifest.lua`:
+
+```lua
+fx_version 'cerulean'
+game 'gta5'
+lua54 'yes'
+
+name 'mf_antiesp'
+author 'SentryV'
+description 'Standalone Anti-ESP: hides players behind walls so ESP cheats cannot see them'
+version '1.0.0'
+
+client_scripts {
+    'config.lua',
+    'client.lua'
+}
+
+```
