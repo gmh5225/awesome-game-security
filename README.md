@@ -4145,6 +4145,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/gmh5225/DVRT [DVRT]
 - https://areweanticheatyet.com [A list of games using anti-cheats]
 - https://github.com/AreWeAntiCheatYet/AreWeAntiCheatYet [Crowd-sourced source repo for tracking game anti-cheat support on GNU/Linux, Wine, and Proton]
+- https://github.com/jrv97/steam-ai-reporter [Browser extension and userscript that tags Steam store listings with Valve-reported anti-cheat (including kernel-level), AI disclosure, DRM, and related store metadata]
 - https://github.com/IZxMD/ac-compat-research [Vendor-agnostic feasibility study on hosting kernel anti-cheat components on Linux without virtualization, covering LSM, signing, isolation, and ABI constraints]
 - https://github.com/ManInMyVan/Minecraft-Anticheat-List [Curated catalog of public Minecraft Java/Bedrock anticheats across platforms and versions]
 - https://github.com/aethelreborn/minecraft-anticheat-docs [Structured educational docs on Minecraft server anticheat architecture, cheat categories, detection methods, and enforcement]
@@ -4695,6 +4696,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/ricardoofnl/open.mp-anticheat [Native open.mp C++ component that detects client mods via self-memory reads vs known cheat signatures]
 - https://github.com/adem-hosni/AtomicShieldClient [Multi-layered FiveM anti-cheat client with tray agent, manual-map loader, and runtime guards]
 - https://github.com/Dead-Scripts/Dead_antiCheat [FiveM server-side Lua anti-cheat detecting noclip, spectate abuse, fake chat, and blacklisted prop spawns with Discord webhook logging]
+- https://github.com/MitologicoDev/mf_antiesp [Standalone FiveM client resource that conceals occluded players with NetworkConcealPlayer so ESP cheats cannot draw through walls]
 - [Cheat developer platform](https://github.com/c4kef/UAC)
 - https://github.com/ekknod/Anti-Cheat-TestBench [TestBench]
 - https://github.com/gmh5225/Malicious-code-detection-bugu [Malicious code detection and obfuscation]
