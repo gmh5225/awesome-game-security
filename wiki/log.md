@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-25** — lint (agent): read `wiki/AGENTS.md`; listed **Overviews** (9): `anti-cheat`, `dma-attack`, `game-engine`, `game-hacking`, `graphics-api`, `mobile-security`, `overview`, `reverse-engineering`, `windows-kernel`; **Concepts** (51) under `wiki/concepts/`; **Entities** (4184) under `wiki/entities/`; reconciled `index.md` vs disk — 4244 catalog paths (9+51+4184), 4244 unique, 0 missing, 0 dead, 0 duplicate catalog paths; nine `overviews/*.md` + `index.md` Overviews/Concepts blurb [[wikilink]] spot-check (13902 links), 0 broken; bootstrap not required; structural repairs none (`log.md` only).
+
 - **2026-10-25** — ingest `description:s4dbrd/s4dbrd.github.io`: enriched entity [[s4dbrd-github-io]] (Stack; Ruby/Jekyll/Chirpy; kernel vuln + exploit-dev scope; diagram-heavy articles); short cites on [[overviews/anti-cheat]] Guide primer + [[overviews/windows-kernel]] kernel AC articles bullet + frontmatter source sync; `index.md` entity blurb updated.
 
 - **2026-10-25** — ingest `readme:categories`: **Anti Cheat** link_count **831** (+1; s4dbrd/[[s4dbrd-github-io]] Jekyll kernel AC/BattlEye/Win32k blog source in Guide) / **Cheat** **2959** / **Game Develop** **196** / **Game Engine** ~159 / **DirectX** ~42 / **Vulkan** ~13 / **Game Network** ~34 and other major README sections unchanged; 41 top-level sections (`NeverC & NeverD` placeholder); synced [[overviews/overview]], [[overviews/anti-cheat]], and [[overviews/dma-attack]]; entity [[s4dbrd-github-io]]; light `index.md` section notes (no per-category pages).
