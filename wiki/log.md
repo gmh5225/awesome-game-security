@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-25** — ingest `description:chaossource/menace-reverse-engineering`: enriched entity [[menace-reverse-engineering]] (Architecture, Capabilities, Audience; confidence high); short cite on [[overviews/reverse-engineering]] classic preservation bullet + README-map source sync; [[overviews/game-hacking]] preservation rebuild bullet + frontmatter source sync; `index.md` entity blurb updated.
+
 - **2026-10-25** — ingest `description:lino9999/LinoAC`: enriched entity [[lino-ac]] (Detection stack, Staff/enforcement, Positioning; confidence high); short cite on [[overviews/anti-cheat]] README-map bullet + frontmatter source sync; [[concepts/detector-operations]] punishment-wave/buffer pipeline cite; `index.md` entity blurb updated.
 
 - **2026-10-25** — ingest `readme:categories`: **Cheat** link_count **2957** (+1; chaossource/[[menace-reverse-engineering]] 1988 Amiga Menace 68000/ADF RE + SDL2 C++ port) / **Anti Cheat** **829** (+1; lino9999/[[lino-ac]] Spigot/Paper **1.21.11–26.3** PacketEvents MC AC with punishment waves) / **Game Develop** **196** / **Game Engine** ~159 / **DirectX** ~42 / **Vulkan** ~13 / **Game Network** ~34 and other major README sections unchanged; 41 top-level sections (`NeverC & NeverD` placeholder); synced [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/game-hacking]], [[overviews/reverse-engineering]], and [[overviews/dma-attack]]; entities [[menace-reverse-engineering]] + [[lino-ac]]; light `index.md` section notes (no per-category pages).

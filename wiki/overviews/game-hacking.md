@@ -12,6 +12,7 @@ sources:
   - wiki/sources/descriptions/Manya3084__SF33RDSXBRecompo.md
   - wiki/sources/descriptions/Kysnez4__MS_KIT.md
   - wiki/sources/descriptions/formix__sre-re.md
+  - wiki/sources/descriptions/chaossource__menace-reverse-engineering.md
   - wiki/sources/descriptions/AdaUnlocked__2026-All-Brands-Bootloader-Unlock-Status.md
   - wiki/sources/descriptions/zhuyansen__awesome-ai-reverse-engineering.md
   - wiki/sources/descriptions/bmjubairdadu__kernel-loader.md
@@ -2269,6 +2270,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - AI-assisted RE with deterministic byte-level verification via [[reverify]] (2akouwu; MCP server + CLI; pairs LLM analysis with auditable byte-level checks; Cheat RE Tools) (source: wiki/sources/README-categories.md)
 - Offline-first RE triage via [[rea-mytechnotalent]] (mytechnotalent; Python; one-shot PE/ELF/Mach-O + JS/Electron inventory, local RAG, multi-agent propose-review-gate, CLI + MCP; default no API key; Cheat / RE Tools) (source: wiki/sources/descriptions/mytechnotalent__rea.md)
 - Multilingual decomp/recomp and RE project map via [[rea-atlas]] (jammyfu; platform-grouped JSON + Python README renderer; morluto/[[rea]] workflow tags when publicly documented; preservation-oriented index—not crack tooling; Cheat / Guide) (source: wiki/sources/descriptions/jammyfu__rea-atlas.md)
+- Retro **Cheat / RE Tools** preservation rebuilds: chaossource/[[menace-reverse-engineering]] (1988 Amiga Menace 68000/ADF asset pipelines + SDL2 port) alongside formix/[[sre-re]] DOS BBS recovery and BBC Micro [[pipeline-disasm]]/[[frogman]] disc rebuilds—not live memory cheat or AC bypass tooling. (source: wiki/sources/descriptions/chaossource__menace-reverse-engineering.md)
 - DSH Ghidra headless RPC skill family via [[ghidra-skill-for-dsh]] (Cristallin2006; seven scenario workflows—triage, unpack, static, vuln audit, Frida/Qiling dynamic, PCAP traffic, pure-DEX APK; oracle-based verification; Cheat RE Tools) (source: wiki/sources/descriptions/Cristallin2006__ghidra-skill-for-dsh.md)
 - DSH Ghidra bridge with 219+ agent tools via [[dsh-ghidra]] (spix18; JavaScript/Python DSH plugin; PyGhidra cross-platform import/decompile, xrefs, call graphs, persistent renames/comments/prototypes, composite analysis, malware triage—crypto constants, API heuristics, IOC extraction, anti-analysis patterns; optional GhidraMCP REST; environment diagnostics + agent skill; Cheat RE Tools) (source: wiki/sources/descriptions/spix18__dsh-ghidra.md)
 - Node.js MCP orchestrator via [[skid-factory]] (wrong-commit; TypeScript + Lua/Python bridges; Cheat Engine/x64dbg/Ghidra memory scan, hardware write breakpoints, pointer-chain trace, and patch workflows; Cursor CLI advise loop; Cheat RE Tools) (source: wiki/sources/descriptions/wrong-commit__skid_factory.md)

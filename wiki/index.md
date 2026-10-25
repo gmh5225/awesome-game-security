@@ -2617,7 +2617,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [MhsX](entities/mhsx.md) — 64-bit MHS successor (C++ Windows; expression/regex/string scans, hex editor, disasm, PE inspect, speedhack, floating-point studio; live process memory analysis; cheat / memory searcher-debugger)
 - [melonJS](entities/melonjs.md) — modern lightweight HTML5 game engine (ES6 classes; esbuild bundling; Game Engine / HTML5)
 - [meowsense](entities/meowsense.md) — free multi-game cheat research sample (Overwatch 2 focus; offensive techniques; gmh5225)
-- [Menace Reverse Engineering](entities/menace-reverse-engineering.md) — chaossource; 1988 Amiga Menace 68000/ADF RE, Python asset extractors, SDL2 C++ desktop port (Cheat / RE Tools)
+- [Menace Reverse Engineering](entities/menace-reverse-engineering.md) — chaossource; 1988 Amiga Menace annotated 68000/ADF RE, bootblock/register docs, Python planar asset extractors, SDL2 C++ preservation port (Cheat / RE Tools)
 - [Milfuscator](entities/milfuscator.md) — x32 PE mutator (full rebuild; Zydis + AsmJit; AC Obfuscation Engine)
 - [microavx](entities/microavx.md) — IDA Pro Hex-Rays AVX lifter (`m_ext`→microcode; AVX coverage scraper; cheat / IDA Plugins / AVX Lifter)
 - [minecpp](entities/minecpp.md) — C++ Minecraft Java server backend (1.19; protocol/offensive-technique RE; gmh5225)
