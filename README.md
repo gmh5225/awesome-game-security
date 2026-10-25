@@ -4136,6 +4136,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 ## Anti Cheat
 > Guide
 - [How Kernel Anti-Cheats Work: A Deep Dive into Modern Game Protection](https://s4dbrd.github.io/posts/how-kernel-anti-cheats-work)
+- https://github.com/s4dbrd/s4dbrd.github.io [Jekyll blog source for anti-cheat, BattlEye, Win32k, and Windows kernel/game protection research posts]
 - [An in-depth exploration of how C programs transform from source code to executable binaries. This repository contains a comprehensive guide to understanding linking, loading, and executable formats](https://github.com/gmh5225/underTheHoodOfExecutables)
 - https://technology.riotgames.com/news/riots-approach-anti-cheat
 - https://github.com/gmh5225/WeirdAntiCheatIdeas
