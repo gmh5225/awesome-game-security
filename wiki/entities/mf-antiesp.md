@@ -3,14 +3,29 @@ title: mf_antiesp
 kind: entity
 topics: [anti-cheat, game-hacking]
 sources:
+  - wiki/sources/descriptions/MitologicoDev__mf_antiesp.md
   - wiki/sources/README-categories.md
 updated: 2026-10-25
-confidence: medium
+confidence: high
 ---
 
 # mf_antiesp
 
-Standalone **FiveM client resource** (MitologicoDev) that mitigates wallhack-style ESP by concealing occluded players with `NetworkConcealPlayer`, so cheats cannot draw enemy models through walls on GTA V multiplayer servers. Ships as a CitizenFX resource for server operators who want a lightweight network-layer countermeasure beside server-side Lua AC such as [[dead-anticheat]] and movement heuristics such as [[esp-killer]] on other titles. (source: wiki/sources/README-categories.md)
+**FiveM AntiESP** (MitologicoDev/mf_antiesp) is a free, standalone **client-side** CitizenFX resource for GTA V FiveM that mitigates wallhack-style ESP by hiding other players from the local client when they are occluded behind geometry, so cheat overlays cannot draw enemy models through walls until those players would legitimately be visible again. (source: wiki/sources/descriptions/MitologicoDev__mf_antiesp.md)
+
+README category: Anti Cheat / Detection:ESP.
+
+## Mechanism
+
+The resource periodically scans on-screen player peds and uses native occlusion checks such as **`IsEntityOccluded`** and **`WouldEntityBeOccluded`**, then applies **`NetworkConcealPlayer`** so concealed players are not available to ESP overlays while occluded. (source: wiki/sources/descriptions/MitologicoDev__mf_antiesp.md)
+
+## Stack and deployment
+
+Implemented in **Lua** with a standard **fxmanifest**; requires **no framework** and no server-side configuration—operators drop the resource into the server bundle as a client resource. Scan and reveal intervals are tunable via **`config.lua`** for performance versus responsiveness trade-offs. (source: wiki/sources/descriptions/MitologicoDev__mf_antiesp.md)
+
+## Positioning
+
+Targets **server operators** and anti-cheat workflows on roleplay or multiplayer hosts. It is **client-only** and meant to **complement** full anticheat (e.g. server-side Lua such as [[dead-anticheat]]) rather than replace kernel or server enforcement; test carefully because concealment can conflict with other scripts that manage player visibility, instances, or routing buckets. (source: wiki/sources/descriptions/MitologicoDev__mf_antiesp.md)
 
 ## Links
 

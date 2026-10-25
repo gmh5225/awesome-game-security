@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-25** — ingest `description:MitologicoDev/mf_antiesp`: enriched entity [[mf-antiesp]] (Mechanism, Stack/deployment, Positioning; confidence high); short cite on [[overviews/anti-cheat]] FiveM bullet + README-map bullet/frontmatter source sync; `index.md` entity blurb updated.
+
 - **2026-10-25** — ingest `description:jrv97/steam-ai-reporter`: enriched entity [[steam-ai-reporter]] (Stack, Detected tags, UI/coverage, Privacy/positioning; confidence high); short cite on [[overviews/anti-cheat]] Guide lane + README-map bullet/frontmatter source sync; `index.md` entity blurb updated.
 
 - **2026-10-25** — ingest `readme:categories`: **Anti Cheat** link_count **828** (+2; jrv97/[[steam-ai-reporter]] Steam store anti-cheat/DRM/AI disclosure tagging extension + MitologicoDev/[[mf-antiesp]] FiveM NetworkConcealPlayer anti-ESP client resource) / **Cheat** **2956** / **Game Develop** **196** / **Game Engine** ~159 / **DirectX** ~42 / **Vulkan** ~13 / **Game Network** ~34 and other major README sections unchanged; 41 top-level sections (`NeverC & NeverD` placeholder); synced [[overviews/overview]], [[overviews/anti-cheat]], and [[overviews/dma-attack]]; entities [[steam-ai-reporter]] + [[mf-antiesp]]; light `index.md` section notes (no per-category pages).

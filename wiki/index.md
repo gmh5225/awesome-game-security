@@ -1352,7 +1352,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [error-pc-check](entities/error-pc-check.md) — Error SMP Screenshare consensual MC Java workflow (NotSkrib; signed C#/.NET 8 client agent + React/TypeScript staff panel + Supabase; one-time keys; Windows forensic collectors + correlation engine; severity-ranked human-review reports; Anti Cheat / game:minecraft)
 - [esp-killer](entities/esp-killer.md) — The Isle: Evrima server-side ESP/wallhack detection (kroshtan; Python read-only RCON agent + FastAPI/SQLite backend; movement heuristics flag hidden-player vectors/implausible speeds; admin alerting without auto-ban; EAC/no modding API; fake RCON + movement simulator dev tools; Detection:ESP / game:the isle)
 - [EscapeFromTarkov-Trainer](entities/escapefromtarkov-trainer.md) — discontinued EFT internal trainer (Mono era; IL2CPP 1.0 pivot; cheat / game:eft)
-- [mf_antiesp](entities/mf-antiesp.md) — FiveM client resource; NetworkConcealPlayer occluded-player concealment against wallhack ESP (MitologicoDev; Anti Cheat / Detection:ESP)
+- [mf_antiesp](entities/mf-antiesp.md) — FiveM AntiESP client Lua resource; IsEntityOccluded/WouldEntityBeOccluded + NetworkConcealPlayer for occluded players; config.lua scan/reveal tuning; complements server AC (MitologicoDev; Anti Cheat / Detection:ESP)
 - [meatyeftrelease](entities/meatyeftrelease.md) — open-source DMA EFT radar and companion toolkit (C++/ImGui; LeechCore/MemProcFS; fuser overlay; cheat / game:eft [DMA])
 - [EfiTool](entities/efitool.md) — UEFI ExitBootServices in-RAM SYSTEM hive patch (SYSTEM shell; no disk/driver)
 - [efi-monitor (ekknod)](entities/efi-monitor.md) — PatchGuard-safe MmCopyMemory hook (C/C++; driver development / graphics / networking; cheat / EFI driver area)
