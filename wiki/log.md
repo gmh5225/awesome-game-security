@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-25** — ingest `description:wepposs/WepAC`: entity [[wepac]] (Paper/Spigot **1.21+** hybrid heuristic + online-learning Java MLP; Netty packet handler; movement physics simulation; combat/movement/block/inventory checks; staff labels/punishments/legit PvP feedback; persisted weights; client-brand flags); cited on [[concepts/ai-aimbot-detection]] Minecraft embedded-ML corpus and [[overviews/anti-cheat]] README map; `index.md` entity + concept blurbs updated.
+
 - **2026-10-25** — ingest `description:x86rc/unthemidator`: entity [[unthemidator]]; short cite on [[overviews/game-hacking]] and [[overviews/reverse-engineering]] Fix Themida lanes + frontmatter source sync; `index.md` entity blurb updated.
 
 - **2026-10-25** — ingest `readme:categories`: **Cheat** link_count **2958** (+1; xhscfq/[[unreal-vtdbg]] VT-x/EPT Windows kernel debugging in Cheat / Debugging) / **Anti Cheat** **830** (+1; thexin7/[[kernel-cve-analysis]] defensive kernel CVE write-ups in Guide) / **Game Develop** **196** / **Game Engine** ~159 / **DirectX** ~42 / **Vulkan** ~13 / **Game Network** ~34 and other major README sections unchanged; 41 top-level sections (`NeverC & NeverD` placeholder); synced [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/game-hacking]], [[overviews/reverse-engineering]], and [[overviews/dma-attack]]; fixed stale Cheat (~2938) cross-link on [[overviews/anti-cheat]]; light `index.md` section notes (no per-category pages).
