@@ -796,6 +796,7 @@ sources:
   - wiki/sources/descriptions/ergrelet__themida-spotter-bn.md
   - wiki/sources/descriptions/ergrelet__themida-unmutate.md
   - wiki/sources/descriptions/ergrelet__unlicense.md
+  - wiki/sources/descriptions/x86rc__unthemidator.md
   - wiki/sources/descriptions/erfur__linjector-rs.md
   - wiki/sources/descriptions/eteran__edb-debugger.md
   - wiki/sources/descriptions/execnone__simple-cs-16-multihack.md
@@ -2245,6 +2246,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Themida 3.1.3 Tiger red64 unpack/unwrap via [[bobalkkagi]] (Python; Unicorn emulation + win10_v1903 API hooks; fast/hook_block/hook_code modes; optional OEP; planned devirt; Capstone/distorm3) also sits in the Cheat Fix Themida lane. (source: wiki/sources/descriptions/bobalkkagi__bobalkkagi.md)
 - Oreans VM unvirtualization in Ghidra via [[ghidr-orean]] (Marisa-Chan; Python Ghidra scripts; Deathway Unvirtualizer reimplementation; CISC complete, TIGER largely finished, RISC/FISH assembler configs; main Orean script + configurable working directory; Themida/WinLicense/Code Virtualizer; Cheat Fix Themida / Ghidra Scripts) also sits in the Cheat Fix Themida lane. (source: wiki/sources/descriptions/Marisa-Chan__GhidrOrean.md)
 - Dynamic Themida/WinLicense 2.x/3.x unpack via [[unlicense]] (Python 3; Frida instrumentation; OEP recovery + obfuscated IAT rebuild; x86/x64 native PE/DLL + .NET EXE; LIEF/Capstone) also sits in the Cheat Fix Themida lane. (source: wiki/sources/descriptions/ergrelet__unlicense.md)
+- Static Themida/Code Virtualizer/WinLicense v3–v4 unpack via [[unthemidator]] (x86rc; C++20; Unicorn + Zydis CPU emulation without executing the protected binary; IAT/resources restore + VM code decompression; full PE rebuild; x86/x64 EXE/DLL/drivers; VM version ID; Fix Themida) also sits in that lane. (source: wiki/sources/descriptions/x86rc__unthemidator.md)
 - Safe Exam Browser Themida `seb_x64.dll` static/runtime RE via [[seb-re-toolkit]] (Arcticbyp; Python PE analysis, BSTR export calls, Frida tracing, GUI; Fix Themida) also sits in the commercial-packer RE lane. (source: wiki/sources/descriptions/Arcticbyp__seb-re-toolkit.md)
 - Two-stage Themida + Nuitka onefile unpack via [[nuitka-themida-unpacker]] (DimaReverse; Python; chains unlicense dynamic strip with nuthem KAX/KAY static extraction; zstd/uncompressed archives; SHA-256 manifests; optional Python artifact recovery; Fix Themida) also sits in that lane. (source: wiki/sources/descriptions/DimaReverse__nuitka-themida-unpacker.md)
 - Static mutation deobfuscation via [[themida-unmutate]] (Python 3; Themida/WinLicense/Code Virtualizer 3.x insn mutation on selected functions; tested to Themida 3.1.9) also sits in the Cheat Fix Themida lane. (source: wiki/sources/descriptions/ergrelet__themida-unmutate.md)
