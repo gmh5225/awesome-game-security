@@ -1,0 +1,3452 @@
+Project Path: arc_lino9999_LinoAC_sx4xkt6m
+
+Source Tree:
+
+```txt
+arc_lino9999_LinoAC_sx4xkt6m
+├── AGENTS.md
+├── LICENSE
+├── README.md
+├── assets
+│   └── ICON.md
+├── docs
+│   ├── AGENTS.md
+│   ├── RELEASE_NOTES.md
+│   ├── REVERSE_ENGINEERING.md
+│   ├── VALIDATION.md
+│   └── spigot
+│       ├── description.bbcode
+│       └── documentation.bbcode
+├── mvnw
+├── mvnw.cmd
+├── pom.xml
+└── src
+    └── main
+        ├── java
+        │   └── io
+        │       └── github
+        │           └── lino9999
+        │               └── linoac
+        │                   ├── LinoAC.java
+        │                   ├── api
+        │                   │   ├── LinoPunishmentEvent.java
+        │                   │   └── LinoViolationEvent.java
+        │                   ├── check
+        │                   │   ├── CheckPolicy.java
+        │                   │   ├── CheckType.java
+        │                   │   ├── CombatChecks.java
+        │                   │   └── MovementChecks.java
+        │                   ├── command
+        │                   │   └── LinoCommand.java
+        │                   ├── config
+        │                   │   └── Settings.java
+        │                   ├── integration
+        │                   │   ├── BedrockSupport.java
+        │                   │   ├── LinoPlaceholders.java
+        │                   │   └── WebhookService.java
+        │                   ├── listener
+        │                   │   └── GameListener.java
+        │                   ├── packet
+        │                   │   ├── PacketBridge.java
+        │                   │   └── PacketSample.java
+        │                   ├── player
+        │                   │   └── PlayerData.java
+        │                   ├── service
+        │                   │   ├── Messages.java
+        │                   │   ├── PunishmentService.java
+        │                   │   └── ViolationService.java
+        │                   ├── storage
+        │                   │   ├── AuditLog.java
+        │                   │   └── StateStore.java
+        │                   └── util
+        │                       ├── Environment.java
+        │                       ├── Geometry.java
+        │                       └── WindowCounter.java
+        └── resources
+            ├── config.yml
+            └── plugin.yml
+
+```
+
+`AGENTS.md`:
+
+```md
+# LinoAC
+
+Read `docs/AGENTS.md` before editing. Read only the files relevant to the change. Never read or execute `Plugin Originale/`, `.work/`, `target/`, or `dist/` unless the human explicitly requests investigation or build verification. All plugin messages and documentation are English. Java source contains no comments.
+
+```
+
+`LICENSE`:
+
+```
+MIT License
+
+Copyright (c) 2026 Lino
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
+`README.md`:
+
+```md
+<p align="center"><img src="assets/linoac-icon-128.png" width="128" height="128" alt="LinoAC Minecraft anti-cheat shield"></p>
+
+# LinoAC — Minecraft Anti-Cheat & Staff Tools
+
+[![Build](https://github.com/lino9999/LinoAC/actions/workflows/build.yml/badge.svg)](https://github.com/lino9999/LinoAC/actions/workflows/build.yml)
+[![Download](https://img.shields.io/github/v/release/lino9999/LinoAC?include_prereleases&label=download)](https://github.com/lino9999/LinoAC/releases)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+
+**LinoAC by Lino** is an open-source Minecraft anti-cheat plugin for Spigot and Paper, targeting **1.21.11 through 26.3**. It combines packet monitoring, movement and combat checks, clickable staff alerts, violation logs, a persistent punishment wave, and moderation commands in a small, modular Java plugin.
+
+**Version 0.1.0 is an experimental preview.** Its 22 independent checks do not reproduce the original plugin's 195 check variants. Detection quality and false-positive rates have not been established by a multiplayer field trial. Automatic punishments and setbacks are disabled by default. See [implementation coverage](docs/REVERSE_ENGINEERING.md) and [verification results](docs/VALIDATION.md) before deployment.
+
+## Features
+
+- Movement checks for speed, unsupported flight, jump height, step height, climbing and sprint state.
+- Melee reach checks with interaction attributes, latency allowance and recent player bounding boxes; optional hitbox heuristics and multiple-target detection.
+- Packet timing, excessive packet rate, invalid movement values, invalid hotbar slots and sustained high arm-swing rates through PacketEvents.
+- Block placement and inventory click monitoring, with optional fast-break, ghost-hand, air-place, liquid-walking, no-slow and fast-bow heuristics.
+- Per-check enable switches, buffers, decay, violation thresholds, optional setbacks and configurable punishment commands.
+- Clickable alerts with hover details, staff-only verbose samples, player profiles and top violation counts.
+- Staff freeze, teleport, knockback, rotation and hotbar-shuffle tools.
+- Persistent punishment waves, spaced one entry per second, with optional periodic execution.
+- Daily asynchronous violation and punishment logs, bounded queues, retention and paginated in-game access.
+- Client-brand alerts and optional brand blocklist/allowlist. Client brands are supplied by the client and can be spoofed.
+- Optional Discord-compatible HTTPS webhooks, PlaceholderAPI placeholders and Floodgate detection exemptions.
+- A cancellable Java event API, English messages, no telemetry or remote licensing, and no bundled original code.
+
+## Requirements and installation
+
+1. Use Spigot or Paper **1.21.11–26.3**. Folia is not supported by this preview.
+2. Use **Java 21** for 1.21.11 and **Java 25** for 26.x servers, following the [Paper runtime requirements](https://docs.papermc.io/paper/getting-started/).
+3. Install [PacketEvents 2.14.0](https://github.com/retrooper/packetevents/releases/tag/v2.14.0) in `plugins/`. It includes 26.3 support.
+4. Download the JAR from [GitHub Releases](https://github.com/lino9999/LinoAC/releases), place it in `plugins/`, and restart the server.
+5. Review `plugins/LinoAC/config.yml`, then use `/linoac status` and `/linoac alerts`.
+
+The same Java 21 plugin JAR is used across the target range. Paper startup and command checks are recorded separately from gameplay tests in [VALIDATION.md](docs/VALIDATION.md). Spigot compatibility uses the public Spigot API; a successful Paper test does not establish Spigot runtime validation. Other server forks and client translators require their own validation.
+
+## Commands and aliases
+
+Main command: `/linoac`. Aliases: `/lac`, `/linoanticheat`. Permission names below use the `linoac.` prefix.
+
+| Command after `/linoac` | Purpose | Permission |
+| --- | --- | --- |
+| `help` | Show permitted commands and syntax | `status` |
+| `status` | Version, TPS estimate, check count and enforcement mode | `status` |
+| `alerts` | Toggle persistent clickable alerts | `alerts` |
+| `verbose` | Toggle unbuffered diagnostic samples for this session | `verbose` |
+| `profile <player>` | Client, ping, arm-swing average, frozen state and violations | `profile` |
+| `violations <player>` | List current per-check violation levels | `profile` |
+| `cps <player>` | Show the latest five-second arm-swing average | `profile` |
+| `connection <player>` | Show ping, reported brand and protocol version | `profile` |
+| `top` | Show the ten online players with the most violations | `profile` |
+| `checks` | List all check IDs and enabled states | `status` |
+| `describe <check>` | Explain a check | `status` |
+| `menu` | Open the check inventory; toggling requires `manage` | `status` |
+| `enable <check>` / `disable <check>` | Save a check's enabled state and reload | `manage` |
+| `reload` | Validate and replace the active configuration | `manage` |
+| `reset <player\|all>` | Clear online violations and buffers | `manage` |
+| `freeze <player>` | Toggle movement, block-action and inventory-click freeze | `freeze` |
+| `teleport <player>` | Teleport yourself to an online player | `teleport` |
+| `ban <player>` | Run the configured manual punishment commands | `punish` |
+| `wave add <player>` | Add an online player to the persistent queue | `wave` |
+| `wave remove <player>` | Remove a queued player, including offline players | `wave` |
+| `wave list` | List queued names | `wave` |
+| `wave execute` | Start processing the queue | `wave` |
+| `logs <player> [page]` | Read retained violation records | `logs` |
+| `punishlogs <player> [page]` | Read retained punishment records | `logs` |
+| `knockback <player>` | Apply a small staff test velocity | `test` |
+| `rotate <player>` | Rotate an online player's view by 90 degrees | `test` |
+| `shuffle <player>` | Randomize the nine hotbar slots | `test` |
+| `testalert [player]` | Send a staff test alert without adding violations | `test` |
+
+| Shortcut | Aliases | Equivalent |
+| --- | --- | --- |
+| `/lacalerts` | `/lalerts` | `/linoac alerts` |
+| `/lacwave` | `/lwave` | `/linoac wave` |
+| `/laclogs` | `/llogs` | `/linoac logs` |
+| `/lacpunishments` | `/lpunishlogs` | `/linoac punishlogs` |
+
+Player parameters require an online player except for log lookup and wave removal. Commands requiring a sender location, alert preferences or a GUI require a player sender. Console can use `testalert <player>`. There are no old command or permission aliases.
+
+## Permissions
+
+`linoac.admin` grants all administrative permissions listed above and defaults to operators. Individual staff permissions also default to operators. `linoac.bypass` exempts detections and **defaults to false**, including for operators. Never grant administrative permissions to ordinary players. Invalid protocol values are still discarded before detection exemptions are applied.
+
+## Configuration
+
+The default [config.yml](src/main/resources/config.yml) is the authoritative configuration reference. `/linoac reload` validates numeric ranges before replacing active settings. Reloading resets online violations and provides a short grace period. Invalid YAML or invalid numeric settings leave the previously loaded settings active.
+
+| Option | Behavior |
+| --- | --- |
+| `settings.minimum-tps` / `maximum-ping` | Suspend flags outside the configured performance conditions |
+| `settings.join-grace-ticks` | Suppress join-time detections; teleports add global grace, while velocity, damage and actual riptide grant movement-only grace |
+| `settings.violation-reset-seconds` | Reset online violations and buffers on a global interval |
+| `settings.automatic-punishments` | Global automatic command gate; false by default |
+| `settings.ignore-bedrock` | Exempt recognized Floodgate/Bedrock UUIDs; true by default |
+| `settings.excluded-worlds` | World names exempt from detections |
+| `limits.*` | Shared rate and distance thresholds |
+| `checks.<id>.buffer` / `decay` | Repeated samples needed before a violation and clean-sample decay |
+| `checks.<id>.setback` | Optional correction to the last accepted grounded location |
+| `checks.<id>.punishable` / `max-violations` / `commands` | Per-check automatic punishment gate, threshold and commands |
+| `punishments.manual-commands` | Explicit staff punishment commands; defaults to `ban` |
+| `wave.commands` | Commands used by a wave; defaults to `ban` |
+| `wave.automatic` / `interval-seconds` | Optional recurring wave execution |
+| `wave.queue-automatic-punishments` | Route automatic punishments into the wave |
+| `brands.*` | Brand alerts, ignored brands, substring blocklist and allowlist |
+| `webhook.*` | Optional HTTPS endpoint and alert/punishment notification switches |
+| `messages.*` | Prefix, alert template and core configurable messages; `&` colors supported |
+
+Punishment templates support `%player%`, `%uuid%`, and `%check%`. The alert template supports `%player%`, `%check%`, and `%vl%`. Commands execute as console. Manual staff punishment and manually started waves work independently of the automatic-punishment switch.
+
+Enabled by default: `speed`, `flight`, `jump`, `step`, `fast-climb`, `sprint`, `reach`, `auto-clicker`, `multi-aura`, `fast-place`, `scaffold`, `inventory`, `timer`, `bad-packets`, `packet-flood`.
+
+Optional heuristics disabled by default: `jesus`, `no-slow`, `hitbox`, `fast-bow`, `fast-break`, `ghost-hand`, `air-place`. These need server-specific evaluation. Generic check IDs describe the signal evaluated; they are not claims of complete detection of every cheat in that category.
+
+Logs are stored under `plugins/LinoAC/logs/` with ISO timestamps, UUIDs and player names. Each daily log is capped at 32 MiB; additional records are dropped with a warning. The queue holds 4,096 jobs. Retention is applied at startup, reload and daily rollover. In-game pages contain eight entries, within `settings.recent-log-limit`. Alert preferences and queued wave entries are stored in `state.yml`. Violations, freeze state and verbose mode are session-only.
+
+Wave entries are removed and saved before command dispatch to prevent repeat execution after a crash. A crash between saving and dispatch can skip an entry; failed or API-cancelled commands require staff review and requeueing. Wave execution is a staff moderation tool, not a transactional ban service.
+
+## Integrations and developer API
+
+Install PlaceholderAPI to use `%linoac_violations%`, `%linoac_cps%`, `%linoac_ping%`, `%linoac_brand%`, `%linoac_client%`, `%linoac_frozen%`, `%linoac_alerts%`, `%linoac_tps%`, and `%linoac_version%`. Player values represent online, main-thread snapshots. `%linoac_cps%` measures arm swings, not proven physical clicks.
+
+Configure a Discord-compatible HTTPS webhook to forward rate-limited alerts or punishments. URLs remain in the local config. Delivery uses a bounded worker queue, three-second timeouts and a maximum rate of one notification every two seconds. Notifications are best effort and may be dropped; logs remain the local record.
+
+Java integrations can listen for synchronous, cancellable `LinoViolationEvent` and `LinoPunishmentEvent` in `io.github.lino9999.linoac.api`. Cancelling a violation prevents its VL, alert, log, setback and punishment. Cancelling a punishment prevents command dispatch. Neither API is binary-compatible with the original plugin.
+
+## Build and contribute
+
+Run `./mvnw clean verify` on Linux/macOS or `mvnw.cmd clean verify` on Windows with JDK 21 or newer. Output: `target/LinoAC-0.1.0.jar`. Dependencies are provided by the server or separately installed plugins. Nothing from the original JAR is bundled.
+
+Read [docs/AGENTS.md](docs/AGENTS.md) for the source map, [reverse-engineering notes](docs/REVERSE_ENGINEERING.md) for evidence and limitations, and [SpigotMC BBCode files](docs/spigot/) for resource-page copy. Source code and project assets are published under the MIT license. PacketEvents and PlaceholderAPI retain their own licenses and are separate dependencies.
+
+```
+
+`assets/ICON.md`:
+
+```md
+# LinoAC resource icon
+
+Use `linoac-icon-128.png` for the SpigotMC resource icon. The 64 px and 256 px variants are also provided. The original generated raster is retained as `linoac-icon-source.png`.
+
+Generated with the built-in image generation tool, then resized with nearest-neighbor sampling.
+
+Prompt: “Create one square SpigotMC resource icon for LinoAC, a Minecraft anti-cheat plugin. Minimal pixel art, crisp block grid, front-facing shield enclosing a clearly recognizable capital L, strong silhouette readable at 64x64. Dark navy background, emerald shield with a pale mint L, restrained two-tone pixel highlights. Centered with generous margin. No words, no watermark, no gradients, no blur, no 3D mockup, no additional objects.”
+
+```
+
+`docs/AGENTS.md`:
+
+```md
+# LinoAC maintenance guide
+
+## Constraints
+
+- Independent implementation, owned by Lino. Do not copy code, strings, encrypted constants or assets from the original JAR.
+- All Java source is comment-free. All plugin messages, commands and documentation are English.
+- Minimum bytecode is Java 21. Use public Spigot API and PacketEvents 2.14.0. Do not introduce NMS or version-specific reflection. The isolated optional Floodgate hook uses reflection against its public API.
+- Target Spigot/Paper 1.21.11 through 26.3. Folia is explicitly unsupported. Never claim field-validated cheat detection, complete original parity or untested runtime support.
+- Automatic punishments and setbacks remain off by default. Preserve permission checks for every command and inventory action.
+- Main-thread ownership: Bukkit, PlayerData, violations, settings, state and commands. Packet callbacks touch only synchronized PacketSample counters. Placeholders read immutable snapshots. Disk and HTTP work use bounded workers.
+- Honor the human's instruction to delete temporary testing files after verification. Keep a concise factual validation report instead. Do not silently add persistent test fixtures.
+
+## Read the smallest relevant set
+
+| Task | Start here |
+| --- | --- |
+| Lifecycle, tick scheduling, joining, brands | `src/main/java/io/github/lino9999/linoac/LinoAC.java` |
+| Check identity and policies | `check/CheckType.java`, `check/CheckPolicy.java`, `config/Settings.java` |
+| Movement exemptions and budgets | `check/MovementChecks.java`, `util/Environment.java` |
+| Combat geometry and history | `check/CombatChecks.java`, `util/Geometry.java` |
+| World, inventory and item actions | `listener/GameListener.java` |
+| Packet counters and rate windows | `packet/PacketBridge.java`, `packet/PacketSample.java` |
+| Buffers, VL, alerts, enforcement | `service/ViolationService.java` |
+| Staff punishment and wave queue | `service/PunishmentService.java`, `storage/StateStore.java` |
+| Commands, permissions, check GUI | `command/LinoCommand.java`, `src/main/resources/plugin.yml` |
+| Audit files and queue limits | `storage/AuditLog.java` |
+| Optional integrations | `integration/` |
+| Public events | `api/` |
+| Defaults and supported settings | `src/main/resources/config.yml` |
+
+Paths without the full Java prefix in this table are relative to `src/main/java/io/github/lino9999/linoac/`.
+
+## Efficient workflow
+
+Use `rg` for targeted searches. Avoid recursive reads of the repository. Ignore `Plugin Originale/`, `.analysis/`, `.work/`, `target/` and `dist/`; `.ignore` and `.gitignore` exclude them. Read README tables only when changing public behavior.
+
+When adding a check, update CheckType, its signal evaluator, config defaults, README check lists, Spigot BBCode and validation evidence together. Expose only signals actually implemented. Do not create decorative check names with no execution path.
+
+Build with the Maven wrapper. Verify a changed rule with meaningful clean and suspicious cases, permissions and exemptions. A build-only CI result does not establish runtime compatibility or detection accuracy. Keep temporary servers loopback-only and isolated; never run the original JAR or reuse production player data. Remove temporary test files after recording actual results in `docs/VALIDATION.md`.
+
+Before release, confirm Java class version 65, config coverage for every check, plugin metadata, no old namespace or creator in distributable files, no original classes/assets, no secrets, valid optional-dependency behavior, and the SHA-256 of the published JAR. Preserve third-party Maven wrapper license headers.
+
+```
+
+`docs/RELEASE_NOTES.md`:
+
+```md
+# LinoAC 0.1.0 — Experimental Preview
+
+LinoAC introduces an independent, modular Minecraft anti-cheat and staff toolkit by Lino, targeting Spigot/Paper 1.21.11 through 26.3.
+
+## Included
+
+- 22 configurable detection signals covering movement, combat, packet timing, placement and inventory activity.
+- Clickable alerts, diagnostic samples, profiles, violation rankings and a check-control inventory.
+- Freeze, teleport, knockback, rotation and hotbar-shuffle commands with granular permissions.
+- Daily asynchronous audit logs and a persistent punishment wave.
+- Client-brand controls, optional HTTPS webhooks, PlaceholderAPI snapshots and Floodgate exemptions.
+- English documentation, SpigotMC BBCode, pixel-art resource icons and a Maven wrapper.
+
+## Install
+
+Install PacketEvents 2.14.0 separately. Use Java 21 for Minecraft 1.21.11 and Java 25 for 26.x. Place `LinoAC-0.1.0.jar` in `plugins/` and restart. Review the generated configuration and run `/linoac status`.
+
+Automatic punishments and setbacks are disabled by default. Manual `/linoac ban` and wave execution run the configured console commands; their defaults ban the selected players.
+
+## Verification
+
+The final JAR was built with Java 21 bytecode. Paper startup and command validation cover 1.21.11, 26.1.1, 26.1.2, 26.2 and 26.3. Temporary domain and protocol-client tests are described in [the validation report](https://github.com/lino9999/LinoAC/blob/main/docs/VALIDATION.md). SHA-256 checksums accompany the JAR.
+
+## Preview limits
+
+This is an experimental preview with 22 independent checks. **It is not a complete recreation of the original plugin's 195 check variants.** Several original detector families, transaction-synchronized prediction and Folia support remain unimplemented. There is no measured multiplayer false-positive rate or detection-equivalence claim. Seven optional heuristics are disabled by default.
+
+Paper startup validation does not establish Spigot runtime validation. Gameplay tests used a simulated 1.21.11 client and do not certify every detector or every target version. Review [coverage and remaining gaps](https://github.com/lino9999/LinoAC/blob/main/docs/REVERSE_ENGINEERING.md) before deployment.
+
+The release includes only newly written plugin classes and new project assets. The original JAR, decompiled code, temporary test servers and test files are excluded.
+
+```
+
+`docs/REVERSE_ENGINEERING.md`:
+
+```md
+# Static analysis and implementation coverage
+
+Analysis date: 25 October 2026. The supplied artifact was inspected as data and was never loaded into a Minecraft server or executed.
+
+## Evidence
+
+| Item | Observation |
+| --- | --- |
+| Supplied artifact | `Plugin Originale/Vulcan-2.9.7.29.jar` |
+| SHA-256 | `0560adb0045b123c081caf606accbece66c4c8898a47af1d970ad9a2530177ed` |
+| REA connection | `rea-agents` 6.7.0, connected MCP; setup reported ready with no changes |
+| REA package inventory | 924 occurrences: 836 files and 88 directories; zero declared integrity contradictions |
+| Java inventory | 822 class entries; all constant pools parsed without errors |
+| Configuration catalogue | 195 lettered check variants in 41 families |
+| Supplementary analysis | CFR 0.152 static decompilation and direct resource inspection |
+
+REA evidence references: inventory `ev_de951f2dbb8f9998d71dcd76c5021f9587171d5980bb636c4f4a170abb34aff9`, inspection `ev_6336ae951f0abea8deeb6ebabe93fa51b24d923f8c46f0e387baa5d4205606b8`, summary `ev_1b78f9ddf6ff3be5d1e9b41b1c44f29cff13ba83dd4b387bdc8c57aef4fedbb3`. The complete exported record is preserved locally in ignored `.analysis/rea-evidence.json`. Archive identity and entries are observed artifact facts; summary counts are derived from that inventory. Supplementary constant-pool and configuration counts come from direct offline parsers, not REA runtime observation.
+
+REA inventory establishes archive contents, not runtime safety. The original uses extensive name, control-flow and string obfuscation. Some class names collide under case-insensitive comparison, so extraction on Windows cannot establish a one-to-one decompilation of every class. CFR also reports incomplete control-flow reconstruction and failed methods. A complete behavioral specification was not recovered.
+
+The startup class makes an outbound premium-license request to Spigot's API. Bundled metrics code contains a bStats submission URL and reads the processor count through Java Runtime. A command-dispatch helper is also present. These observations alone do not establish malware. No prompt-injection instruction or confirmed backdoor was identified in the inspected plaintext and reconstructed entry point; encrypted strings and unstructured methods remain unverified. No licensing, telemetry, downloaded code, original class files or original strings were carried into LinoAC.
+
+The original contains protected implementation and third-party components. Its JAR and decompilation are excluded from Git and from releases. LinoAC uses freshly written source and new project assets. The MIT license applies to this implementation, not to the supplied artifact.
+
+## Coverage
+
+LinoAC 0.1.0 implements 22 independently designed signal checks. Similar names describe common anti-cheat concepts; they do not establish equivalence with any original lettered variant.
+
+| Area | Implemented |
+| --- | --- |
+| Movement | Speed budget, prolonged unsupported flight, jump/step attributes, climb rate, sprint food state; optional liquid/no-slow heuristics |
+| Combat | Attribute-aware melee reach, recent player boxes, optional ray/box hitbox heuristic, distinct target count, excessive arm swings |
+| World/player | Placement rate, out-of-range placement, inventory rate; optional mining-time, occlusion, support and bow-charge heuristics |
+| Packets | Movement timing over five seconds, total packet rate, finite movement/rotation validation, hotbar-slot validation |
+| Staff | Alerts, verbose samples, profiles, violations, reset/top, freeze, teleport, knockback, rotation, shuffle, check descriptions and inventory |
+| Operations | Daily logs, retention, saved alert preferences, persistent punishment queue, configurable commands, webhooks, brands, placeholders, cancellable events |
+
+Original families observed in configuration: aim, autoblock, autoclicker, reach, fastbow, criticals, killaura, hitbox, velocity, noslow, motion, jump, step, boatfly, entityflight, antilevitation, nosaddle, entityspeed, elytra, speed, fastclimb, wallclimb, jesus, flight, vclip, sprint, strafe, fastuse, fastplace, fastbreak, tower, scaffold, timer, baritone, ghosthand, airplace, badpackets, inventory, invalid, groundspoof and improbable.
+
+## Material differences and missing functionality
+
+- LinoAC does not recreate the 195 original variants, their tuning or their prediction engine.
+- No full movement simulation, transaction acknowledgement engine, client-world replication, velocity prediction, aim statistics, ground-spoof classifier or cheat-specific signature system is implemented.
+- No dedicated boat, mounted-entity, elytra, anti-levitation, wall-climb, no-saddle, strafe, fast-use, tower, Baritone, criticals, autoblock or improbable-combination detectors are provided. Some of these states are deliberately exempt to reduce false positives.
+- Multiple-target and support/range heuristics do not recreate full KillAura or scaffold detection. Bukkit attack events may omit attempted attacks, cancelled attacks and hits rejected by vanilla.
+- Reach uses current and recent server boxes, with conservative allowances; it is not transaction-synchronized lag compensation. Other entities have current boxes only. Spear and trident melee are exempt.
+- There is no active runtime comparison against the original, no measured detection-equivalence claim, no guarantee of zero bugs and no performance improvement benchmark against the original.
+- Folia, original API binary compatibility, legacy Minecraft versions, Bungee messaging, rich per-check integration hooks for custom mechanics and automatic ghost-block repair are outside this preview.
+
+This release is a reviewable foundation for further independent development. Complete replacement parity remains unfinished and is not advertised in the README, Spigot copy or release notes.
+
+## Investigation status
+
+| Question | Status | Evidence boundary |
+| --- | --- | --- |
+| Which artifact was supplied? | Answered | SHA-256 and REA ZIP inventory |
+| Which commands and settings are exposed? | Answered for packaged declarations | Direct plugin/config resource inspection |
+| What does startup do? | Partially answered | Decompiled entry point; obfuscated delegate methods remain incomplete |
+| Is the original free of backdoors or injection? | Unresolved | Plaintext and selected static reconstructions only; no original execution |
+| Does LinoAC reproduce every original detection? | No; incomplete | 22 independent signals versus 195 configured original variants |
+| Does the new JAR load on the requested Paper versions? | Answered for listed builds | Controlled tests recorded in VALIDATION.md |
+| Does it match the original's accuracy and performance? | Unresolved | No original replay or comparative field/load benchmark |
+
+```
+
+`docs/VALIDATION.md`:
+
+```md
+# Validation report
+
+Date: 25 October 2026. Release: LinoAC 0.1.0 experimental preview.
+
+## Artifact
+
+- JAR: `LinoAC-0.1.0.jar` (83,927 bytes).
+- SHA-256: `decfe8094f93962128b796af6af6b428ff8a049e716c775c349d4561a69d3cf1`.
+- 27 project class files; every class uses Java class version 65 (Java 21).
+- All class entries belong to the LinoAC namespace. PacketEvents and PlaceholderAPI are provided dependencies and are not bundled.
+- Metadata identifies Lino as author. Plugin version substitution was verified. Java source contains no comments.
+
+## Build and targeted checks
+
+`mvnw.cmd -B -ntp clean verify` succeeded using JDK 25 with compiler release 21 and Maven 3.9.11. A temporary Java harness passed 148 assertions covering synchronized packet counters under concurrent writers, counter saturation/draining, point-to-box distances, rate-window boundaries, unique and resolvable check IDs, complete configuration coverage and disabled automatic punishment defaults.
+
+The permanent CI workflow builds and packages the project. Temporary test harnesses were removed as requested; CI does not rerun these deleted tests.
+
+## Paper runtime matrix
+
+The final release artifact was copied to isolated, loopback-only Paper servers with PacketEvents 2.14.0 and no PlaceholderAPI or Floodgate installed. Each server loaded the plugin, reached ready state and shut down cleanly.
+
+| Minecraft | Paper build | Channel | Java | Startup and commands |
+| --- | --- | --- | --- | --- |
+| 1.21.11 | 132 | stable | 21 | Pass |
+| 26.1.1 | 29 | alpha | 25 | Pass |
+| 26.1.2 | 74 | stable | 25 | Pass |
+| 26.2 | 134 | stable | 25 | Pass |
+| 26.3 | 222 | stable | 25 | Pass |
+
+Each run exercised plugin listing, status, check listing/description, main aliases, standalone shortcuts, missing-player handling, console-only restrictions, empty wave listing/execution, log lookup, disabling/enabling a check, reload, reset and invalid check/page input. No LinoAC startup errors, event exceptions or task exceptions were observed in these runs. Version 26.1.1 uses an archived alpha Paper build, not a stable distribution.
+
+## Protocol-client scenarios
+
+A temporary offline-mode protocol client connected only to the isolated Paper 1.21.11 server. It used PacketEvents 2.14.0 and the final project code. All 22 scenario assertions passed:
+
+- Ground fixture exists.
+- Player login with PacketEvents.
+- Unprivileged command denied.
+- Idle player no violations.
+- Ordinary ground movement no violations.
+- Resting on a fence no flight violation.
+- Operator profile command.
+- Check inventory opens.
+- Freeze command acknowledged.
+- Freeze movement corrected.
+- Synthetic speed detected.
+- Monitor mode leaves player connected.
+- Invalid slot packets detected.
+- Invalid slot packets do not disconnect client.
+- Damage regression fixture applied.
+- Sustained timer detected during damage and movement-item use.
+- Wave persisted before execution.
+- Wave removal persisted.
+- Invalid reload rejected.
+- Plugin stays enabled after rejected reload.
+- Violation audit file contains detections.
+- No player event or tick exceptions.
+
+The suspicious inputs were controlled synthetic cases: approximately 0.7 blocks of horizontal movement per 50 ms, repeated invalid hotbar slot 30 and three movement packets per client interval. The timer regression also applied repeated actual damage and sent trident-use packets to confirm that movement exemptions no longer disable packet checks. These results establish the exercised code paths only. Early harness failures caused by a missing ground fixture and a teleport-response feedback loop were corrected before the passing run. Collision-shape support for fences and timer behavior under mild tick jitter were improved and rechecked. Independent source review identified the global movement-grace bypass; it was corrected before the passing regression run.
+
+## Limits
+
+- No complete gameplay replay on 26.x, Spigot runtime test, public multiplayer field trial, translator matrix, exhaustive cheat-client suite or large-player-count load benchmark was performed.
+- The other detection signals compile and register but were not individually certified through adversarial gameplay scenarios.
+- Optional PlaceholderAPI registration with the dependency present, live Floodgate detection, live webhook delivery, API cancellation handlers and crash-between-save-and-dispatch wave recovery were not integration-tested. Startup without those optional dependencies was tested.
+- Testing does not establish detection parity with the original, absence of all bugs, zero false positives or improved performance over the original.
+- Automatic enforcement stays off. Seven optional heuristics stay disabled pending server-specific evaluation.
+
+Temporary clients, server worlds, dependency downloads, harness sources/classes and console captures were removed after this report was written. Only the original user-supplied artifact and ignored local REA evidence were preserved outside the published source and release assets.
+
+```
+
+`docs/spigot/description.bbcode`:
+
+```bbcode
+[CENTER][SIZE=7][B][COLOR=#26c98e]LinoAC[/COLOR][/B][/SIZE]
+[SIZE=4]Minecraft Anti-Cheat & Staff Tools[/SIZE]
+[COLOR=#808080]By Lino | Spigot & Paper | Minecraft 1.21.11–26.3[/COLOR]
+
+[URL=https://github.com/lino9999/LinoAC/releases][B]DOWNLOAD[/B][/URL]  •  [URL=https://github.com/lino9999/LinoAC][B]SOURCE CODE[/B][/URL]  •  [URL=https://github.com/lino9999/LinoAC/issues][B]REPORT AN ISSUE[/B][/URL][/CENTER]
+
+[SIZE=5][B]Monitor suspicious activity. Give staff useful evidence.[/B][/SIZE]
+LinoAC is an open-source Minecraft anti-cheat plugin combining packet monitoring, movement and combat checks, clickable alerts, searchable violation logs, a persistent punishment wave and practical moderation commands. Each detection has its own buffer, decay, violation threshold and optional response.
+
+[B]Experimental preview:[/B] Version 0.1.0 contains 22 independently implemented checks. It does not reproduce all 195 variants in the analyzed original plugin. Detection accuracy and false-positive rates have not been established through a multiplayer field trial. Automatic punishments and setbacks are disabled by default. Review the [URL=https://github.com/lino9999/LinoAC/blob/main/docs/REVERSE_ENGINEERING.md]coverage notes[/URL] and [URL=https://github.com/lino9999/LinoAC/blob/main/docs/VALIDATION.md]validation report[/URL].
+
+[SIZE=5][B]Features[/B][/SIZE]
+[LIST]
+[*][B]Movement monitoring:[/B] speed, unsupported flight, jump height, step height, climb speed and sprint state.
+[*][B]Combat signals:[/B] melee reach with interaction attributes, latency allowance and recent player bounding boxes; excessive arm swings and multiple-target detection.
+[*][B]Packet analysis:[/B] sustained movement timing, packet rate, invalid movement values and invalid hotbar slots through PacketEvents.
+[*][B]World and inventory checks:[/B] placement and inventory-click rates, out-of-range placement, plus optional support, occlusion, mining and item-use heuristics.
+[*][B]Clickable staff alerts:[/B] hover details, teleport shortcuts, diagnostic samples, player profiles and violation rankings.
+[*][B]Moderation tools:[/B] freeze, teleport, knockback tests, view rotation and hotbar shuffling.
+[*][B]Persistent punishment waves:[/B] staff-managed queues, optional scheduled execution and configurable console commands.
+[*][B]Asynchronous audit logs:[/B] daily files, bounded queues, retention and in-game pagination.
+[*][B]Optional integrations:[/B] Discord-compatible HTTPS webhooks, PlaceholderAPI and Floodgate exemptions.
+[*][B]Developer-friendly:[/B] modular Java source, cancellable events, English messages and an MIT license.
+[/LIST]
+
+[SIZE=5][B]Get started[/B][/SIZE]
+[LIST=1]
+[*]Use Spigot or Paper 1.21.11–26.3. Use Java 21 for 1.21.11 and Java 25 for 26.x. Folia is not supported.
+[*]Install [URL=https://github.com/retrooper/packetevents/releases/tag/v2.14.0]PacketEvents 2.14.0[/URL].
+[*]Place LinoAC in your plugins folder and restart the server.
+[*]Review plugins/LinoAC/config.yml and run [B]/linoac status[/B].
+[*]Use [B]/linoac alerts[/B] to toggle staff notifications. Keep enforcement disabled while evaluating your server mechanics.
+[/LIST]
+
+[SIZE=5][B]Commands at a glance[/B][/SIZE]
+Main command: [B]/linoac[/B]. Aliases: [B]/lac[/B] and [B]/linoanticheat[/B].
+[CODE]
+/lac help
+/lac status
+/lac alerts
+/lac verbose
+/lac profile <player>
+/lac violations <player>
+/lac cps <player>
+/lac connection <player>
+/lac top
+/lac checks
+/lac describe <check>
+/lac menu
+/lac enable <check>
+/lac disable <check>
+/lac reload
+/lac reset <player|all>
+/lac freeze <player>
+/lac teleport <player>
+/lac ban <player>
+/lac wave add <player>
+/lac wave remove <player>
+/lac wave list
+/lac wave execute
+/lac logs <player> [page]
+/lac punishlogs <player> [page]
+/lac knockback <player>
+/lac rotate <player>
+/lac shuffle <player>
+/lac testalert [player]
+[/CODE]
+Shortcuts: [B]/lacalerts[/B] (/lalerts), [B]/lacwave[/B] (/lwave), [B]/laclogs[/B] (/llogs), [B]/lacpunishments[/B] (/lpunishlogs).
+
+[SIZE=5][B]Permissions[/B][/SIZE]
+[B]linoac.admin[/B] grants the staff permissions and defaults to operators. Individual permissions are listed in the documentation. [B]linoac.bypass[/B] exempts detections and defaults to false, including for operators. Invalid protocol values are still discarded.
+
+[SIZE=5][B]Clear scope[/B][/SIZE]
+LinoAC provides monitoring signals and staff tools. It does not promise detection of every cheat. Vehicle, elytra, aim-statistics, velocity-prediction and several original detector families are not implemented in this preview. Public Spigot API compatibility and Paper runtime checks are documented separately from gameplay validation. Client brands can be spoofed. Custom mechanics and translated clients require server-specific testing.
+
+[CENTER][B]Open source. Configurable. Built for maintainable development.[/B]
+[URL=https://github.com/lino9999/LinoAC/releases]Download LinoAC on GitHub[/URL][/CENTER]
+
+```
+
+`docs/spigot/documentation.bbcode`:
+
+```bbcode
+[CENTER][SIZE=6][B]LinoAC Documentation[/B][/SIZE]
+[COLOR=#808080]Version 0.1.0 • By Lino • Experimental preview[/COLOR][/CENTER]
+
+[SIZE=5][B]1. Installation and compatibility[/B][/SIZE]
+Supported target: Spigot/Paper 1.21.11 through 26.3. Install PacketEvents 2.14.0 separately. Use Java 21 for Minecraft 1.21.11 and Java 25 for 26.x. The same LinoAC JAR uses Java 21 bytecode across this range. Folia is unsupported.
+
+Copy LinoAC and PacketEvents into plugins, restart, then inspect plugins/LinoAC/config.yml. Use /lac status to confirm startup. Do not use server-wide reload commands to replace plugin JARs. See the [URL=https://github.com/lino9999/LinoAC/blob/main/docs/VALIDATION.md]validation report[/URL] for exact tested builds and the distinction between startup and gameplay coverage.
+
+[SIZE=5][B]2. Permissions and commands[/B][/SIZE]
+All permissions start with [B]linoac.[/B]. The admin permission grants all staff permissions below; bypass is separate and defaults to false. Individual staff permissions default to operators.
+
+[SPOILER=Commands, descriptions and required permissions]
+[B]linoac.status[/B]
+[LIST]
+[*]/lac help — show commands available to the sender.
+[*]/lac status — version, TPS estimate, online players, check count and automatic-punishment status.
+[*]/lac checks — list check IDs and enabled states.
+[*]/lac describe <check> — display a check description.
+[*]/lac menu — open the check inventory. Changing settings additionally requires linoac.manage.
+[/LIST]
+[B]linoac.alerts[/B]
+[LIST][*]/lac alerts — toggle saved clickable alert preferences. Click an alert to run /linoac teleport; teleport permission is checked separately.[/LIST]
+[B]linoac.verbose[/B]
+[LIST][*]/lac verbose — toggle pre-violation diagnostic samples for the current session.[/LIST]
+[B]linoac.profile[/B]
+[LIST]
+[*]/lac profile <player> — client version, reported brand, ping, arm-swing average, frozen state and current violations.
+[*]/lac violations <player> — current per-check violation levels.
+[*]/lac cps <player> — latest five-second arm-swing average, not a measurement of physical mouse clicks.
+[*]/lac connection <player> — ping and client information. Client brands are unverified.
+[*]/lac top — the ten online players with the highest total violation counts.
+[/LIST]
+[B]linoac.manage[/B]
+[LIST]
+[*]/lac reload — validate and replace the active configuration; reset online violations and grant short grace.
+[*]/lac enable <check> — persistently enable a check and reload settings.
+[*]/lac disable <check> — persistently disable a check and reload settings.
+[*]/lac reset <player|all> — clear online buffers and violations.
+[/LIST]
+[B]linoac.freeze[/B]
+[LIST][*]/lac freeze <player> — toggle movement, block-action, attack and inventory-click restrictions. Disconnecting while frozen alerts staff and writes an audit record. Freeze state does not survive reconnects.[/LIST]
+[B]linoac.teleport[/B]
+[LIST][*]/lac teleport <player> — teleport yourself to an online player.[/LIST]
+[B]linoac.punish[/B]
+[LIST][*]/lac ban <player> — execute configured manual punishment commands. The default command bans the target. This explicit staff action does not depend on automatic-punishments.[/LIST]
+[B]linoac.wave[/B]
+[LIST]
+[*]/lac wave add <player> — queue an online player and immediately save the queue.
+[*]/lac wave remove <player> — remove a queued name, including offline players.
+[*]/lac wave list — list queued players.
+[*]/lac wave execute — begin processing the saved queue, one player per second.
+[/LIST]
+[B]linoac.logs[/B]
+[LIST]
+[*]/lac logs <player> [page] — read recent retained violation records, including offline players.
+[*]/lac punishlogs <player> [page] — read retained punishment-command records.
+[/LIST]
+[B]linoac.test[/B]
+[LIST]
+[*]/lac knockback <player> — apply a small test velocity.
+[*]/lac rotate <player> — rotate the target's view by 90 degrees.
+[*]/lac shuffle <player> — randomize the nine hotbar slots.
+[*]/lac testalert [player] — send a test staff alert without creating a violation. Console must specify a player.
+[/LIST]
+[/SPOILER]
+
+Main aliases: /lac and /linoanticheat.
+[CODE]
+/lacalerts      alias /lalerts       = /lac alerts
+/lacwave        alias /lwave         = /lac wave
+/laclogs        alias /llogs         = /lac logs
+/lacpunishments alias /lpunishlogs   = /lac punishlogs
+[/CODE]
+Most player arguments require an online player. Wave removal and log lookup accept offline names. Alert toggles, verbose mode, the menu and self-teleport require a player sender.
+
+[SIZE=5][B]3. Available checks[/B][/SIZE]
+[B]Enabled by default:[/B]
+[CODE]
+speed        flight        jump          step
+fast-climb   sprint        reach         auto-clicker
+multi-aura   fast-place    scaffold      inventory
+timer        bad-packets   packet-flood
+[/CODE]
+[B]Optional heuristics, disabled by default:[/B]
+[CODE]
+jesus        no-slow       hitbox        fast-bow
+fast-break   ghost-hand    air-place
+[/CODE]
+Use /lac describe <check> for its actual signal. A category name does not imply complete coverage of all cheats using that technique. Multiple-target and placement-range heuristics are limited signals, not full KillAura or scaffold simulation.
+
+[SIZE=5][B]4. Buffers, violations and enforcement[/B][/SIZE]
+Each suspicious sample increases a check's buffer. Clean evaluated samples reduce it by decay. Once the configured buffer is reached, a violation can be recorded, staff can be alerted and optional actions can run. Flags are limited to one per check per server tick. Alerts have an additional per-player, per-check cooldown.
+
+[CODE]
+checks:
+  speed:
+    enabled: true
+    buffer: 3
+    decay: 0.25
+    max-violations: 20
+    setback: false
+    punishable: false
+    commands:
+      - 'kick %player% LinoAC: Unfair advantage (%check%)'
+[/CODE]
+Automatic commands require both settings.automatic-punishments and checks.<id>.punishable. A check's threshold is max-violations. Repeated automatic punishments have a sixty-second per-check cooldown. Setbacks are separately controlled and disabled by default.
+
+Command placeholders: %player%, %uuid%, %check%. Commands run as console. The alert message supports %player%, %check%, %vl% and legacy ampersand colors.
+
+[SIZE=5][B]5. Exemptions and thresholds[/B][/SIZE]
+[LIST]
+[*]settings.minimum-tps and settings.maximum-ping gate detection flags.
+[*]settings.join-grace-ticks suppresses join-time flags. Teleports add global grace. Velocity, damage and actual riptide grant movement-only grace, leaving packet-rate and combat checks active. Merely right-clicking a movement item does not grant grace.
+[*]Creative/spectator movement, allowed flight, gliding, swimming, vehicles and several special physics states skip movement checks. This preview has no dedicated mounted-entity or elytra detector.
+[*]Nearby special blocks suspend ordinary movement heuristics briefly to reduce environmental false positives.
+[*]settings.excluded-worlds accepts exact world names.
+[*]linoac.bypass skips detection flags. Packet sanitation remains active.
+[*]settings.ignore-bedrock exempts Floodgate-recognized players and zero-prefix Bedrock UUIDs by default.
+[*]limits.* sets movement, range, arm-swing, placement, inventory and packet rate limits. Timer and packet averages use five-second windows.
+[*]settings.violation-reset-seconds resets online violations and buffers globally; defaults to 480 seconds.
+[/LIST]
+Spear/trident melee is exempt from reach heuristics. Client translation plugins and custom combat or movement mechanics require independent validation. Recognition of every Bedrock setup is not guaranteed.
+
+[SIZE=5][B]6. Persistent punishment wave[/B][/SIZE]
+[CODE]
+wave:
+  automatic: false
+  interval-seconds: 3600
+  queue-automatic-punishments: false
+  commands:
+    - 'ban %player% Unfair advantage'
+[/CODE]
+Queue entries are saved to state.yml. Manual execution is available regardless of the automatic-punishment switch. Set wave.automatic for periodic processing, or wave.queue-automatic-punishments to route qualifying automatic punishments into the queue.
+
+Each entry is removed and saved before its console commands run. This prevents repeat execution after a crash, but a crash between saving and dispatch can skip the entry. Failed or API-cancelled commands require staff review and requeueing. Commands execute one player's batch per second; this is not a transactional ban system.
+
+[SIZE=5][B]7. Logs and stored data[/B][/SIZE]
+Violation and punishment logs use daily files under plugins/LinoAC/logs. Entries contain timestamps, UUIDs and names. Reads and writes use one bounded worker with a 4,096-job queue. Each daily log is capped at 32 MiB; extra entries are dropped with a warning. Retention defaults to fourteen days and is applied at startup, reload and daily rollover. The recent-log limit defaults to 200 entries; each in-game page contains eight entries.
+
+state.yml stores alert preferences and queued wave entries. Online violations, freeze and verbose state are temporary. Preferences are saved on toggle and shutdown; wave changes are saved immediately. Back up the plugin directory while the server is stopped.
+
+[SIZE=5][B]8. Client brands[/B][/SIZE]
+brands.alerts enables client-brand notices. brands.ignored suppresses notices for exact listed brands. brands.blocked performs case-insensitive substring matching. brands.whitelist-enabled requires a matching substring in brands.whitelist. Blocked brands take precedence. Client-brand values are supplied by clients and can be spoofed, so they are not proof of cheating.
+
+[SIZE=5][B]9. Webhooks and PlaceholderAPI[/B][/SIZE]
+Set webhook.enabled and a Discord-compatible HTTPS webhook.url. webhook.alerts and webhook.punishments select notification types. Delivery is best effort, capped at one message per two seconds with a 32-job queue and three-second timeouts. Mentions are disabled. No request is sent when the integration is disabled.
+
+Install PlaceholderAPI to expose:
+[CODE]
+%linoac_violations%   %linoac_cps%       %linoac_ping%
+%linoac_brand%        %linoac_client%    %linoac_frozen%
+%linoac_alerts%       %linoac_tps%       %linoac_version%
+[/CODE]
+Player values are immutable snapshots of online data. CPS is an average arm-swing rate, not a physical-click measurement.
+
+[SIZE=5][B]10. Developer API[/B][/SIZE]
+The package io.github.lino9999.linoac.api provides synchronous cancellable LinoViolationEvent and LinoPunishmentEvent. Cancelling a violation prevents its VL, alert, audit entry, setback and automatic punishment. Cancelling a punishment prevents command dispatch. Integrations must not block the server thread. The API is independent of the original plugin.
+
+[SIZE=5][B]11. Troubleshooting and scope[/B][/SIZE]
+[LIST]
+[*]Plugin missing: check Java version and PacketEvents installation, then inspect startup errors.
+[*]No alerts: check linoac.alerts, the preference toggle, exclusions, grace and per-check enabled settings.
+[*]No automatic bans: enforcement is disabled by default and requires both global and per-check opt-in.
+[*]Reload rejected: fix the reported YAML or numeric-range error. Previously loaded settings remain active.
+[*]False positive: preserve the check ID, server version, ping, movement conditions and audit details; disable that check while investigating.
+[*]Brand missing: clients may omit, forge or alter the brand channel.
+[*]Feature gaps: see the coverage report. There is no full movement prediction, transaction engine, velocity prediction, aim-statistics detector, vehicle/elytra detector or Folia support in this preview.
+[/LIST]
+
+Source and issue tracker: [URL=https://github.com/lino9999/LinoAC]github.com/lino9999/LinoAC[/URL]
+
+```
+
+`mvnw`:
+
+```
+#!/bin/sh
+# ----------------------------------------------------------------------------
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
+# ----------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------
+# Apache Maven Wrapper startup batch script, version 3.3.4
+#
+# Optional ENV vars
+# -----------------
+#   JAVA_HOME - location of a JDK home dir, required when download maven via java source
+#   MVNW_REPOURL - repo url base for downloading maven distribution
+#   MVNW_USERNAME/MVNW_PASSWORD - user and password for downloading maven
+#   MVNW_VERBOSE - true: enable verbose log; debug: trace the mvnw script; others: silence the output
+# ----------------------------------------------------------------------------
+
+set -euf
+[ "${MVNW_VERBOSE-}" != debug ] || set -x
+
+# OS specific support.
+native_path() { printf %s\\n "$1"; }
+case "$(uname)" in
+CYGWIN* | MINGW*)
+  [ -z "${JAVA_HOME-}" ] || JAVA_HOME="$(cygpath --unix "$JAVA_HOME")"
+  native_path() { cygpath --path --windows "$1"; }
+  ;;
+esac
+
+# set JAVACMD and JAVACCMD
+set_java_home() {
+  # For Cygwin and MinGW, ensure paths are in Unix format before anything is touched
+  if [ -n "${JAVA_HOME-}" ]; then
+    if [ -x "$JAVA_HOME/jre/sh/java" ]; then
+      # IBM's JDK on AIX uses strange locations for the executables
+      JAVACMD="$JAVA_HOME/jre/sh/java"
+      JAVACCMD="$JAVA_HOME/jre/sh/javac"
+    else
+      JAVACMD="$JAVA_HOME/bin/java"
+      JAVACCMD="$JAVA_HOME/bin/javac"
+
+      if [ ! -x "$JAVACMD" ] || [ ! -x "$JAVACCMD" ]; then
+        echo "The JAVA_HOME environment variable is not defined correctly, so mvnw cannot run." >&2
+        echo "JAVA_HOME is set to \"$JAVA_HOME\", but \"\$JAVA_HOME/bin/java\" or \"\$JAVA_HOME/bin/javac\" does not exist." >&2
+        return 1
+      fi
+    fi
+  else
+    JAVACMD="$(
+      'set' +e
+      'unset' -f command 2>/dev/null
+      'command' -v java
+    )" || :
+    JAVACCMD="$(
+      'set' +e
+      'unset' -f command 2>/dev/null
+      'command' -v javac
+    )" || :
+
+    if [ ! -x "${JAVACMD-}" ] || [ ! -x "${JAVACCMD-}" ]; then
+      echo "The java/javac command does not exist in PATH nor is JAVA_HOME set, so mvnw cannot run." >&2
+      return 1
+    fi
+  fi
+}
+
+# hash string like Java String::hashCode
+hash_string() {
+  str="${1:-}" h=0
+  while [ -n "$str" ]; do
+    char="${str%"${str#?}"}"
+    h=$(((h * 31 + $(LC_CTYPE=C printf %d "'$char")) % 4294967296))
+    str="${str#?}"
+  done
+  printf %x\\n $h
+}
+
+verbose() { :; }
+[ "${MVNW_VERBOSE-}" != true ] || verbose() { printf %s\\n "${1-}"; }
+
+die() {
+  printf %s\\n "$1" >&2
+  exit 1
+}
+
+trim() {
+  # MWRAPPER-139:
+  #   Trims trailing and leading whitespace, carriage returns, tabs, and linefeeds.
+  #   Needed for removing poorly interpreted newline sequences when running in more
+  #   exotic environments such as mingw bash on Windows.
+  printf "%s" "${1}" | tr -d '[:space:]'
+}
+
+scriptDir="$(dirname "$0")"
+scriptName="$(basename "$0")"
+
+# parse distributionUrl and optional distributionSha256Sum, requires .mvn/wrapper/maven-wrapper.properties
+while IFS="=" read -r key value; do
+  case "${key-}" in
+  distributionUrl) distributionUrl=$(trim "${value-}") ;;
+  distributionSha256Sum) distributionSha256Sum=$(trim "${value-}") ;;
+  esac
+done <"$scriptDir/.mvn/wrapper/maven-wrapper.properties"
+[ -n "${distributionUrl-}" ] || die "cannot read distributionUrl property in $scriptDir/.mvn/wrapper/maven-wrapper.properties"
+
+case "${distributionUrl##*/}" in
+maven-mvnd-*bin.*)
+  MVN_CMD=mvnd.sh _MVNW_REPO_PATTERN=/maven/mvnd/
+  case "${PROCESSOR_ARCHITECTURE-}${PROCESSOR_ARCHITEW6432-}:$(uname -a)" in
+  *AMD64:CYGWIN* | *AMD64:MINGW*) distributionPlatform=windows-amd64 ;;
+  :Darwin*x86_64) distributionPlatform=darwin-amd64 ;;
+  :Darwin*arm64) distributionPlatform=darwin-aarch64 ;;
+  :Linux*x86_64*) distributionPlatform=linux-amd64 ;;
+  *)
+    echo "Cannot detect native platform for mvnd on $(uname)-$(uname -m), use pure java version" >&2
+    distributionPlatform=linux-amd64
+    ;;
+  esac
+  distributionUrl="${distributionUrl%-bin.*}-$distributionPlatform.zip"
+  ;;
+maven-mvnd-*) MVN_CMD=mvnd.sh _MVNW_REPO_PATTERN=/maven/mvnd/ ;;
+*) MVN_CMD="mvn${scriptName#mvnw}" _MVNW_REPO_PATTERN=/org/apache/maven/ ;;
+esac
+
+# apply MVNW_REPOURL and calculate MAVEN_HOME
+# maven home pattern: ~/.m2/wrapper/dists/{apache-maven-<version>,maven-mvnd-<version>-<platform>}/<hash>
+[ -z "${MVNW_REPOURL-}" ] || distributionUrl="$MVNW_REPOURL$_MVNW_REPO_PATTERN${distributionUrl#*"$_MVNW_REPO_PATTERN"}"
+distributionUrlName="${distributionUrl##*/}"
+distributionUrlNameMain="${distributionUrlName%.*}"
+distributionUrlNameMain="${distributionUrlNameMain%-bin}"
+MAVEN_USER_HOME="${MAVEN_USER_HOME:-${HOME}/.m2}"
+MAVEN_HOME="${MAVEN_USER_HOME}/wrapper/dists/${distributionUrlNameMain-}/$(hash_string "$distributionUrl")"
+
+exec_maven() {
+  unset MVNW_VERBOSE MVNW_USERNAME MVNW_PASSWORD MVNW_REPOURL || :
+  exec "$MAVEN_HOME/bin/$MVN_CMD" "$@" || die "cannot exec $MAVEN_HOME/bin/$MVN_CMD"
+}
+
+if [ -d "$MAVEN_HOME" ]; then
+  verbose "found existing MAVEN_HOME at $MAVEN_HOME"
+  exec_maven "$@"
+fi
+
+case "${distributionUrl-}" in
+*?-bin.zip | *?maven-mvnd-?*-?*.zip) ;;
+*) die "distributionUrl is not valid, must match *-bin.zip or maven-mvnd-*.zip, but found '${distributionUrl-}'" ;;
+esac
+
+# prepare tmp dir
+if TMP_DOWNLOAD_DIR="$(mktemp -d)" && [ -d "$TMP_DOWNLOAD_DIR" ]; then
+  clean() { rm -rf -- "$TMP_DOWNLOAD_DIR"; }
+  trap clean HUP INT TERM EXIT
+else
+  die "cannot create temp dir"
+fi
+
+mkdir -p -- "${MAVEN_HOME%/*}"
+
+# Download and Install Apache Maven
+verbose "Couldn't find MAVEN_HOME, downloading and installing it ..."
+verbose "Downloading from: $distributionUrl"
+verbose "Downloading to: $TMP_DOWNLOAD_DIR/$distributionUrlName"
+
+# select .zip or .tar.gz
+if ! command -v unzip >/dev/null; then
+  distributionUrl="${distributionUrl%.zip}.tar.gz"
+  distributionUrlName="${distributionUrl##*/}"
+fi
+
+# verbose opt
+__MVNW_QUIET_WGET=--quiet __MVNW_QUIET_CURL=--silent __MVNW_QUIET_UNZIP=-q __MVNW_QUIET_TAR=''
+[ "${MVNW_VERBOSE-}" != true ] || __MVNW_QUIET_WGET='' __MVNW_QUIET_CURL='' __MVNW_QUIET_UNZIP='' __MVNW_QUIET_TAR=v
+
+# normalize http auth
+case "${MVNW_PASSWORD:+has-password}" in
+'') MVNW_USERNAME='' MVNW_PASSWORD='' ;;
+has-password) [ -n "${MVNW_USERNAME-}" ] || MVNW_USERNAME='' MVNW_PASSWORD='' ;;
+esac
+
+if [ -z "${MVNW_USERNAME-}" ] && command -v wget >/dev/null; then
+  verbose "Found wget ... using wget"
+  wget ${__MVNW_QUIET_WGET:+"$__MVNW_QUIET_WGET"} "$distributionUrl" -O "$TMP_DOWNLOAD_DIR/$distributionUrlName" || die "wget: Failed to fetch $distributionUrl"
+elif [ -z "${MVNW_USERNAME-}" ] && command -v curl >/dev/null; then
+  verbose "Found curl ... using curl"
+  curl ${__MVNW_QUIET_CURL:+"$__MVNW_QUIET_CURL"} -f -L -o "$TMP_DOWNLOAD_DIR/$distributionUrlName" "$distributionUrl" || die "curl: Failed to fetch $distributionUrl"
+elif set_java_home; then
+  verbose "Falling back to use Java to download"
+  javaSource="$TMP_DOWNLOAD_DIR/Downloader.java"
+  targetZip="$TMP_DOWNLOAD_DIR/$distributionUrlName"
+  cat >"$javaSource" <<-END
+	public class Downloader extends java.net.Authenticator
+	{
+	  protected java.net.PasswordAuthentication getPasswordAuthentication()
+	  {
+	    return new java.net.PasswordAuthentication( System.getenv( "MVNW_USERNAME" ), System.getenv( "MVNW_PASSWORD" ).toCharArray() );
+	  }
+	  public static void main( String[] args ) throws Exception
+	  {
+	    setDefault( new Downloader() );
+	    java.nio.file.Files.copy( java.net.URI.create( args[0] ).toURL().openStream(), java.nio.file.Paths.get( args[1] ).toAbsolutePath().normalize() );
+	  }
+	}
+	END
+  # For Cygwin/MinGW, switch paths to Windows format before running javac and java
+  verbose " - Compiling Downloader.java ..."
+  "$(native_path "$JAVACCMD")" "$(native_path "$javaSource")" || die "Failed to compile Downloader.java"
+  verbose " - Running Downloader.java ..."
+  "$(native_path "$JAVACMD")" -cp "$(native_path "$TMP_DOWNLOAD_DIR")" Downloader "$distributionUrl" "$(native_path "$targetZip")"
+fi
+
+# If specified, validate the SHA-256 sum of the Maven distribution zip file
+if [ -n "${distributionSha256Sum-}" ]; then
+  distributionSha256Result=false
+  if [ "$MVN_CMD" = mvnd.sh ]; then
+    echo "Checksum validation is not supported for maven-mvnd." >&2
+    echo "Please disable validation by removing 'distributionSha256Sum' from your maven-wrapper.properties." >&2
+    exit 1
+  elif command -v sha256sum >/dev/null; then
+    if echo "$distributionSha256Sum  $TMP_DOWNLOAD_DIR/$distributionUrlName" | sha256sum -c - >/dev/null 2>&1; then
+      distributionSha256Result=true
+    fi
+  elif command -v shasum >/dev/null; then
+    if echo "$distributionSha256Sum  $TMP_DOWNLOAD_DIR/$distributionUrlName" | shasum -a 256 -c >/dev/null 2>&1; then
+      distributionSha256Result=true
+    fi
+  else
+    echo "Checksum validation was requested but neither 'sha256sum' or 'shasum' are available." >&2
+    echo "Please install either command, or disable validation by removing 'distributionSha256Sum' from your maven-wrapper.properties." >&2
+    exit 1
+  fi
+  if [ $distributionSha256Result = false ]; then
+    echo "Error: Failed to validate Maven distribution SHA-256, your Maven distribution might be compromised." >&2
+    echo "If you updated your Maven version, you need to update the specified distributionSha256Sum property." >&2
+    exit 1
+  fi
+fi
+
+# unzip and move
+if command -v unzip >/dev/null; then
+  unzip ${__MVNW_QUIET_UNZIP:+"$__MVNW_QUIET_UNZIP"} "$TMP_DOWNLOAD_DIR/$distributionUrlName" -d "$TMP_DOWNLOAD_DIR" || die "failed to unzip"
+else
+  tar xzf${__MVNW_QUIET_TAR:+"$__MVNW_QUIET_TAR"} "$TMP_DOWNLOAD_DIR/$distributionUrlName" -C "$TMP_DOWNLOAD_DIR" || die "failed to untar"
+fi
+
+# Find the actual extracted directory name (handles snapshots where filename != directory name)
+actualDistributionDir=""
+
+# First try the expected directory name (for regular distributions)
+if [ -d "$TMP_DOWNLOAD_DIR/$distributionUrlNameMain" ]; then
+  if [ -f "$TMP_DOWNLOAD_DIR/$distributionUrlNameMain/bin/$MVN_CMD" ]; then
+    actualDistributionDir="$distributionUrlNameMain"
+  fi
+fi
+
+# If not found, search for any directory with the Maven executable (for snapshots)
+if [ -z "$actualDistributionDir" ]; then
+  # enable globbing to iterate over items
+  set +f
+  for dir in "$TMP_DOWNLOAD_DIR"/*; do
+    if [ -d "$dir" ]; then
+      if [ -f "$dir/bin/$MVN_CMD" ]; then
+        actualDistributionDir="$(basename "$dir")"
+        break
+      fi
+    fi
+  done
+  set -f
+fi
+
+if [ -z "$actualDistributionDir" ]; then
+  verbose "Contents of $TMP_DOWNLOAD_DIR:"
+  verbose "$(ls -la "$TMP_DOWNLOAD_DIR")"
+  die "Could not find Maven distribution directory in extracted archive"
+fi
+
+verbose "Found extracted Maven distribution directory: $actualDistributionDir"
+printf %s\\n "$distributionUrl" >"$TMP_DOWNLOAD_DIR/$actualDistributionDir/mvnw.url"
+mv -- "$TMP_DOWNLOAD_DIR/$actualDistributionDir" "$MAVEN_HOME" || [ -d "$MAVEN_HOME" ] || die "fail to move MAVEN_HOME"
+
+clean || :
+exec_maven "$@"
+
+```
+
+`mvnw.cmd`:
+
+```cmd
+<# : batch portion
+@REM ----------------------------------------------------------------------------
+@REM Licensed to the Apache Software Foundation (ASF) under one
+@REM or more contributor license agreements.  See the NOTICE file
+@REM distributed with this work for additional information
+@REM regarding copyright ownership.  The ASF licenses this file
+@REM to you under the Apache License, Version 2.0 (the
+@REM "License"); you may not use this file except in compliance
+@REM with the License.  You may obtain a copy of the License at
+@REM
+@REM    http://www.apache.org/licenses/LICENSE-2.0
+@REM
+@REM Unless required by applicable law or agreed to in writing,
+@REM software distributed under the License is distributed on an
+@REM "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+@REM KIND, either express or implied.  See the License for the
+@REM specific language governing permissions and limitations
+@REM under the License.
+@REM ----------------------------------------------------------------------------
+
+@REM ----------------------------------------------------------------------------
+@REM Apache Maven Wrapper startup batch script, version 3.3.4
+@REM
+@REM Optional ENV vars
+@REM   MVNW_REPOURL - repo url base for downloading maven distribution
+@REM   MVNW_USERNAME/MVNW_PASSWORD - user and password for downloading maven
+@REM   MVNW_VERBOSE - true: enable verbose log; others: silence the output
+@REM ----------------------------------------------------------------------------
+
+@IF "%__MVNW_ARG0_NAME__%"=="" (SET __MVNW_ARG0_NAME__=%~nx0)
+@SET __MVNW_CMD__=
+@SET __MVNW_ERROR__=
+@SET __MVNW_PSMODULEP_SAVE=%PSModulePath%
+@SET PSModulePath=
+@FOR /F "usebackq tokens=1* delims==" %%A IN (`powershell -noprofile "& {$scriptDir='%~dp0'; $script='%__MVNW_ARG0_NAME__%'; icm -ScriptBlock ([Scriptblock]::Create((Get-Content -Raw '%~f0'))) -NoNewScope}"`) DO @(
+  IF "%%A"=="MVN_CMD" (set __MVNW_CMD__=%%B) ELSE IF "%%B"=="" (echo %%A) ELSE (echo %%A=%%B)
+)
+@SET PSModulePath=%__MVNW_PSMODULEP_SAVE%
+@SET __MVNW_PSMODULEP_SAVE=
+@SET __MVNW_ARG0_NAME__=
+@SET MVNW_USERNAME=
+@SET MVNW_PASSWORD=
+@IF NOT "%__MVNW_CMD__%"=="" ("%__MVNW_CMD__%" %*)
+@echo Cannot start maven from wrapper >&2 && exit /b 1
+@GOTO :EOF
+: end batch / begin powershell #>
+
+$ErrorActionPreference = "Stop"
+if ($env:MVNW_VERBOSE -eq "true") {
+  $VerbosePreference = "Continue"
+}
+
+# calculate distributionUrl, requires .mvn/wrapper/maven-wrapper.properties
+$distributionUrl = (Get-Content -Raw "$scriptDir/.mvn/wrapper/maven-wrapper.properties" | ConvertFrom-StringData).distributionUrl
+if (!$distributionUrl) {
+  Write-Error "cannot read distributionUrl property in $scriptDir/.mvn/wrapper/maven-wrapper.properties"
+}
+
+switch -wildcard -casesensitive ( $($distributionUrl -replace '^.*/','') ) {
+  "maven-mvnd-*" {
+    $USE_MVND = $true
+    $distributionUrl = $distributionUrl -replace '-bin\.[^.]*$',"-windows-amd64.zip"
+    $MVN_CMD = "mvnd.cmd"
+    break
+  }
+  default {
+    $USE_MVND = $false
+    $MVN_CMD = $script -replace '^mvnw','mvn'
+    break
+  }
+}
+
+# apply MVNW_REPOURL and calculate MAVEN_HOME
+# maven home pattern: ~/.m2/wrapper/dists/{apache-maven-<version>,maven-mvnd-<version>-<platform>}/<hash>
+if ($env:MVNW_REPOURL) {
+  $MVNW_REPO_PATTERN = if ($USE_MVND -eq $False) { "/org/apache/maven/" } else { "/maven/mvnd/" }
+  $distributionUrl = "$env:MVNW_REPOURL$MVNW_REPO_PATTERN$($distributionUrl -replace "^.*$MVNW_REPO_PATTERN",'')"
+}
+$distributionUrlName = $distributionUrl -replace '^.*/',''
+$distributionUrlNameMain = $distributionUrlName -replace '\.[^.]*$','' -replace '-bin$',''
+
+$MAVEN_M2_PATH = "$HOME/.m2"
+if ($env:MAVEN_USER_HOME) {
+  $MAVEN_M2_PATH = "$env:MAVEN_USER_HOME"
+}
+
+if (-not (Test-Path -Path $MAVEN_M2_PATH)) {
+    New-Item -Path $MAVEN_M2_PATH -ItemType Directory | Out-Null
+}
+
+$MAVEN_WRAPPER_DISTS = $null
+if ((Get-Item $MAVEN_M2_PATH).Target[0] -eq $null) {
+  $MAVEN_WRAPPER_DISTS = "$MAVEN_M2_PATH/wrapper/dists"
+} else {
+  $MAVEN_WRAPPER_DISTS = (Get-Item $MAVEN_M2_PATH).Target[0] + "/wrapper/dists"
+}
+
+$MAVEN_HOME_PARENT = "$MAVEN_WRAPPER_DISTS/$distributionUrlNameMain"
+$MAVEN_HOME_NAME = ([System.Security.Cryptography.SHA256]::Create().ComputeHash([byte[]][char[]]$distributionUrl) | ForEach-Object {$_.ToString("x2")}) -join ''
+$MAVEN_HOME = "$MAVEN_HOME_PARENT/$MAVEN_HOME_NAME"
+
+if (Test-Path -Path "$MAVEN_HOME" -PathType Container) {
+  Write-Verbose "found existing MAVEN_HOME at $MAVEN_HOME"
+  Write-Output "MVN_CMD=$MAVEN_HOME/bin/$MVN_CMD"
+  exit $?
+}
+
+if (! $distributionUrlNameMain -or ($distributionUrlName -eq $distributionUrlNameMain)) {
+  Write-Error "distributionUrl is not valid, must end with *-bin.zip, but found $distributionUrl"
+}
+
+# prepare tmp dir
+$TMP_DOWNLOAD_DIR_HOLDER = New-TemporaryFile
+$TMP_DOWNLOAD_DIR = New-Item -Itemtype Directory -Path "$TMP_DOWNLOAD_DIR_HOLDER.dir"
+$TMP_DOWNLOAD_DIR_HOLDER.Delete() | Out-Null
+trap {
+  if ($TMP_DOWNLOAD_DIR.Exists) {
+    try { Remove-Item $TMP_DOWNLOAD_DIR -Recurse -Force | Out-Null }
+    catch { Write-Warning "Cannot remove $TMP_DOWNLOAD_DIR" }
+  }
+}
+
+New-Item -Itemtype Directory -Path "$MAVEN_HOME_PARENT" -Force | Out-Null
+
+# Download and Install Apache Maven
+Write-Verbose "Couldn't find MAVEN_HOME, downloading and installing it ..."
+Write-Verbose "Downloading from: $distributionUrl"
+Write-Verbose "Downloading to: $TMP_DOWNLOAD_DIR/$distributionUrlName"
+
+$webclient = New-Object System.Net.WebClient
+if ($env:MVNW_USERNAME -and $env:MVNW_PASSWORD) {
+  $webclient.Credentials = New-Object System.Net.NetworkCredential($env:MVNW_USERNAME, $env:MVNW_PASSWORD)
+}
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+$webclient.DownloadFile($distributionUrl, "$TMP_DOWNLOAD_DIR/$distributionUrlName") | Out-Null
+
+# If specified, validate the SHA-256 sum of the Maven distribution zip file
+$distributionSha256Sum = (Get-Content -Raw "$scriptDir/.mvn/wrapper/maven-wrapper.properties" | ConvertFrom-StringData).distributionSha256Sum
+if ($distributionSha256Sum) {
+  if ($USE_MVND) {
+    Write-Error "Checksum validation is not supported for maven-mvnd. `nPlease disable validation by removing 'distributionSha256Sum' from your maven-wrapper.properties."
+  }
+  Import-Module $PSHOME\Modules\Microsoft.PowerShell.Utility -Function Get-FileHash
+  if ((Get-FileHash "$TMP_DOWNLOAD_DIR/$distributionUrlName" -Algorithm SHA256).Hash.ToLower() -ne $distributionSha256Sum) {
+    Write-Error "Error: Failed to validate Maven distribution SHA-256, your Maven distribution might be compromised. If you updated your Maven version, you need to update the specified distributionSha256Sum property."
+  }
+}
+
+# unzip and move
+Expand-Archive "$TMP_DOWNLOAD_DIR/$distributionUrlName" -DestinationPath "$TMP_DOWNLOAD_DIR" | Out-Null
+
+# Find the actual extracted directory name (handles snapshots where filename != directory name)
+$actualDistributionDir = ""
+
+# First try the expected directory name (for regular distributions)
+$expectedPath = Join-Path "$TMP_DOWNLOAD_DIR" "$distributionUrlNameMain"
+$expectedMvnPath = Join-Path "$expectedPath" "bin/$MVN_CMD"
+if ((Test-Path -Path $expectedPath -PathType Container) -and (Test-Path -Path $expectedMvnPath -PathType Leaf)) {
+  $actualDistributionDir = $distributionUrlNameMain
+}
+
+# If not found, search for any directory with the Maven executable (for snapshots)
+if (!$actualDistributionDir) {
+  Get-ChildItem -Path "$TMP_DOWNLOAD_DIR" -Directory | ForEach-Object {
+    $testPath = Join-Path $_.FullName "bin/$MVN_CMD"
+    if (Test-Path -Path $testPath -PathType Leaf) {
+      $actualDistributionDir = $_.Name
+    }
+  }
+}
+
+if (!$actualDistributionDir) {
+  Write-Error "Could not find Maven distribution directory in extracted archive"
+}
+
+Write-Verbose "Found extracted Maven distribution directory: $actualDistributionDir"
+Rename-Item -Path "$TMP_DOWNLOAD_DIR/$actualDistributionDir" -NewName $MAVEN_HOME_NAME | Out-Null
+try {
+  Move-Item -Path "$TMP_DOWNLOAD_DIR/$MAVEN_HOME_NAME" -Destination $MAVEN_HOME_PARENT | Out-Null
+} catch {
+  if (! (Test-Path -Path "$MAVEN_HOME" -PathType Container)) {
+    Write-Error "fail to move MAVEN_HOME"
+  }
+} finally {
+  try { Remove-Item $TMP_DOWNLOAD_DIR -Recurse -Force | Out-Null }
+  catch { Write-Warning "Cannot remove $TMP_DOWNLOAD_DIR" }
+}
+
+Write-Output "MVN_CMD=$MAVEN_HOME/bin/$MVN_CMD"
+
+```
+
+`pom.xml`:
+
+```xml
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>io.github.lino9999</groupId>
+  <artifactId>linoac</artifactId>
+  <version>0.1.0</version>
+  <name>LinoAC</name>
+  <description>Modular Minecraft anti-cheat and staff moderation tools.</description>
+  <url>https://github.com/lino9999/LinoAC</url>
+  <properties>
+    <maven.compiler.release>21</maven.compiler.release>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.build.outputTimestamp>2026-10-25T00:00:00Z</project.build.outputTimestamp>
+    <spigot.version>1.21.11-R0.1-SNAPSHOT</spigot.version>
+  </properties>
+  <repositories>
+    <repository><id>spigot</id><url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url></repository>
+    <repository><id>codemc</id><url>https://repo.codemc.io/repository/maven-releases/</url></repository>
+    <repository><id>placeholderapi</id><url>https://repo.extendedclip.com/content/repositories/placeholderapi/</url></repository>
+  </repositories>
+  <dependencies>
+    <dependency><groupId>org.spigotmc</groupId><artifactId>spigot-api</artifactId><version>${spigot.version}</version><scope>provided</scope></dependency>
+    <dependency><groupId>com.github.retrooper</groupId><artifactId>packetevents-spigot</artifactId><version>2.14.0</version><scope>provided</scope></dependency>
+    <dependency><groupId>me.clip</groupId><artifactId>placeholderapi</artifactId><version>2.11.7</version><scope>provided</scope></dependency>
+  </dependencies>
+  <build>
+    <finalName>LinoAC-${project.version}</finalName>
+    <resources><resource><directory>src/main/resources</directory><filtering>true</filtering></resource></resources>
+    <plugins>
+      <plugin><groupId>org.apache.maven.plugins</groupId><artifactId>maven-compiler-plugin</artifactId><version>3.14.1</version></plugin>
+      <plugin><groupId>org.apache.maven.plugins</groupId><artifactId>maven-resources-plugin</artifactId><version>3.3.1</version></plugin>
+      <plugin><groupId>org.apache.maven.plugins</groupId><artifactId>maven-jar-plugin</artifactId><version>3.4.2</version><configuration><archive><manifestEntries><Implementation-Title>LinoAC</Implementation-Title><Implementation-Version>${project.version}</Implementation-Version><Implementation-Vendor>Lino</Implementation-Vendor></manifestEntries></archive></configuration></plugin>
+    </plugins>
+  </build>
+</project>
+
+```
+
+`src/main/java/io/github/lino9999/linoac/LinoAC.java`:
+
+```java
+package io.github.lino9999.linoac;
+
+import com.github.retrooper.packetevents.PacketEvents;
+import io.github.lino9999.linoac.check.CombatChecks;
+import io.github.lino9999.linoac.check.MovementChecks;
+import io.github.lino9999.linoac.command.LinoCommand;
+import io.github.lino9999.linoac.config.Settings;
+import io.github.lino9999.linoac.listener.GameListener;
+import io.github.lino9999.linoac.integration.BedrockSupport;
+import io.github.lino9999.linoac.integration.LinoPlaceholders;
+import io.github.lino9999.linoac.integration.WebhookService;
+import io.github.lino9999.linoac.packet.PacketBridge;
+import io.github.lino9999.linoac.player.PlayerData;
+import io.github.lino9999.linoac.service.Messages;
+import io.github.lino9999.linoac.service.PunishmentService;
+import io.github.lino9999.linoac.service.ViolationService;
+import io.github.lino9999.linoac.storage.AuditLog;
+import io.github.lino9999.linoac.storage.StateStore;
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
+import org.bukkit.plugin.java.JavaPlugin;
+
+import java.io.ByteArrayInputStream;
+import java.io.DataInputStream;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+
+public final class LinoAC extends JavaPlugin {
+    private final Map<UUID, PlayerData> players = new HashMap<>();
+    private Settings settings;
+    private StateStore store;
+    private AuditLog audit;
+    private Messages messages;
+    private ViolationService violations;
+    private PunishmentService punishments;
+    private CombatChecks combat;
+    private MovementChecks movement;
+    private PacketBridge packets;
+    private BedrockSupport bedrock;
+    private WebhookService webhooks;
+    private LinoPlaceholders expansion;
+    private final Map<UUID, Map<String, String>> placeholderSnapshots = new java.util.concurrent.ConcurrentHashMap<>();
+    private volatile String tpsText = "20.00";
+    private long tick;
+    private long previousTick;
+    private double smoothedTick = 50;
+    private double tickScale = 1;
+
+    public void onEnable() {
+        try {
+            if (isFolia()) throw new IllegalStateException("This build requires the Spigot/Paper main-thread scheduler. Folia is not supported.");
+            saveDefaultConfig();
+            settings = new Settings(this);
+            store = new StateStore(this);
+            audit = new AuditLog(this, settings.integer("settings.log-retention-days"));
+            messages = new Messages(this);
+            violations = new ViolationService(this);
+            punishments = new PunishmentService(this);
+            combat = new CombatChecks(this);
+            movement = new MovementChecks(this);
+            packets = new PacketBridge(this);
+            bedrock = new BedrockSupport();
+            webhooks = new WebhookService(this);
+            PacketEvents.getAPI().getEventManager().registerListener(packets);
+            Bukkit.getPluginManager().registerEvents(new GameListener(this), this);
+            LinoCommand command = new LinoCommand(this);
+            Bukkit.getPluginManager().registerEvents(command, this);
+            for (String name : new String[]{"linoac", "lacalerts", "lacwave", "laclogs", "lacpunishments"}) {
+                var registered = java.util.Objects.requireNonNull(getCommand(name));
+                registered.setExecutor(command);
+                registered.setTabCompleter(command);
+            }
+            getServer().getMessenger().registerIncomingPluginChannel(this, "minecraft:brand", this::brand);
+            Bukkit.getOnlinePlayers().forEach(this::join);
+            if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
+                expansion = new LinoPlaceholders(this);
+                expansion.register();
+            }
+            previousTick = System.nanoTime();
+            Bukkit.getScheduler().runTaskTimer(this, this::tickPlayers, 1, 1);
+            getLogger().info("LinoAC " + getDescription().getVersion() + " by Lino enabled with " + io.github.lino9999.linoac.check.CheckType.values().length + " checks. Automatic punishments: " + settings.enabled("settings.automatic-punishments"));
+        } catch (Exception e) {
+            getLogger().severe("Unable to enable LinoAC: " + e.getMessage());
+            Bukkit.getPluginManager().disablePlugin(this);
+        }
+    }
+
+    public void onDisable() {
+        Bukkit.getScheduler().cancelTasks(this);
+        if (packets != null) {
+            PacketEvents.getAPI().getEventManager().unregisterListener(packets);
+            packets.clear();
+        }
+        if (store != null) {
+            players.forEach((id, data) -> store.setAlerts(id, data.alerts));
+            try { store.save(); } catch (Exception e) { getLogger().severe("Unable to save state: " + e.getMessage()); }
+        }
+        players.clear();
+        placeholderSnapshots.clear();
+        if (expansion != null) expansion.unregister();
+        if (webhooks != null) webhooks.close();
+        if (audit != null) audit.close();
+    }
+
+    private void tickPlayers() {
+        tick++;
+        long now = System.nanoTime();
+        double elapsed = (now - previousTick) / 1_000_000d;
+        previousTick = now;
+        smoothedTick = smoothedTick * .95 + Math.max(50, elapsed) * .05;
+        tickScale = Math.max(1, Math.min(5, elapsed / 50));
+        tpsText = String.format(java.util.Locale.ROOT, "%.2f", tps());
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            PlayerData data = data(player);
+            if (elapsed > 110) exempt(data, 40);
+            packets.tick(player, data);
+            movement.tick(player, data);
+            data.attacked.clear();
+            placeholderSnapshots.put(data.id, Map.of("violations", Integer.toString(data.totalViolations()), "cps", Integer.toString(data.swings),
+                    "ping", Integer.toString(player.getPing()), "brand", data.brand, "client", data.clientVersion,
+                    "frozen", Boolean.toString(data.frozen), "alerts", Boolean.toString(data.alerts)));
+            if (tick % (settings.integer("settings.violation-reset-seconds") * 20L) == 0) data.reset();
+        }
+        punishments.tick(tick);
+        if (tick % 1200 == 0) {
+            try { store.save(); } catch (java.io.IOException e) { getLogger().warning("Unable to save state: " + e.getMessage()); }
+        }
+    }
+
+    public void join(Player player) {
+        PlayerData data = new PlayerData(player.getUniqueId(), tick + settings.integer("settings.join-grace-ticks"));
+        data.alerts = store.alerts(data.id, settings.enabled("settings.alerts-on-join"));
+        data.clientVersion = packets.clientVersion(player);
+        data.bedrock = bedrock.isBedrock(data.id);
+        players.put(data.id, data);
+        packets.add(player);
+    }
+
+    public void quit(Player player) {
+        PlayerData data = players.remove(player.getUniqueId());
+        placeholderSnapshots.remove(player.getUniqueId());
+        packets.remove(player.getUniqueId());
+        if (data == null) return;
+        store.setAlerts(data.id, data.alerts);
+        if (data.frozen) {
+            getLogger().warning(player.getName() + " disconnected while frozen.");
+            audit.write("violations", data.id, player.getName(), "Disconnected while frozen");
+            for (Player staff : Bukkit.getOnlinePlayers()) if (staff.hasPermission("linoac.freeze")) messages.send(staff, "&c" + player.getName() + " disconnected while frozen.");
+        }
+    }
+
+    private void brand(String channel, Player player, byte[] bytes) {
+        if (bytes.length > 1024) return;
+        try {
+            DataInputStream input = new DataInputStream(new ByteArrayInputStream(bytes));
+            int length = 0;
+            int shift = 0;
+            int value;
+            do {
+                if (shift >= 35) return;
+                value = input.readUnsignedByte();
+                length |= (value & 127) << shift;
+                shift += 7;
+            } while ((value & 128) != 0);
+            if (length < 0 || length > 256 || length > input.available()) return;
+            String brand = new String(input.readNBytes(length), java.nio.charset.StandardCharsets.UTF_8).replaceAll("[^A-Za-z0-9_. /+-]", "");
+            PlayerData data = data(player);
+            if (brand.equals(data.brand)) return;
+            data.brand = brand;
+            String normalized = brand.toLowerCase(java.util.Locale.ROOT);
+            boolean blocked = settings.list("brands.blocked").stream().filter(s -> !s.isBlank()).anyMatch(s -> normalized.contains(s.toLowerCase(java.util.Locale.ROOT)));
+            boolean whitelisted = settings.list("brands.whitelist").stream().filter(s -> !s.isBlank()).anyMatch(s -> normalized.contains(s.toLowerCase(java.util.Locale.ROOT)));
+            if (blocked || settings.enabled("brands.whitelist-enabled") && !whitelisted) {
+                player.kickPlayer(messages.color(settings.text("messages.blocked-brand")));
+                return;
+            }
+            if (settings.enabled("brands.alerts") && !settings.list("brands.ignored").contains(normalized)) {
+                for (Player staff : Bukkit.getOnlinePlayers()) if (data(staff).alerts && staff.hasPermission("linoac.alerts")) messages.send(staff, "&f" + player.getName() + " &7joined using &f" + brand + "&7.");
+            }
+        } catch (java.io.IOException ignored) {
+            getLogger().fine("Ignored malformed client brand from " + player.getName());
+        }
+    }
+
+    public void reloadSettings() throws Exception {
+        Settings replacement = new Settings(this);
+        settings = replacement;
+        audit.retention(replacement.integer("settings.log-retention-days"));
+        players.values().forEach(data -> { data.reset(); exempt(data, 40); });
+    }
+
+    public PlayerData data(Player player) {
+        return players.computeIfAbsent(player.getUniqueId(), id -> new PlayerData(id, tick + settings.integer("settings.join-grace-ticks")));
+    }
+
+    public void exempt(PlayerData data, int ticks) {
+        data.graceUntil = Math.max(data.graceUntil, tick + ticks);
+        data.airTicks = 0;
+        data.previousDy = 0;
+    }
+
+    public void exemptMovement(PlayerData data, int ticks) {
+        data.movementGraceUntil = Math.max(data.movementGraceUntil, tick + ticks);
+        data.airTicks = 0;
+        data.previousDy = 0;
+    }
+
+    private boolean isFolia() {
+        try { Class.forName("io.papermc.paper.threadedregions.RegionizedServer"); return true; }
+        catch (ClassNotFoundException e) { return false; }
+    }
+
+    public Settings settings() { return settings; }
+    public StateStore store() { return store; }
+    public AuditLog audit() { return audit; }
+    public Messages messages() { return messages; }
+    public ViolationService violations() { return violations; }
+    public PunishmentService punishments() { return punishments; }
+    public CombatChecks combat() { return combat; }
+    public long tick() { return tick; }
+    public double tps() { return Math.min(20, 1000 / smoothedTick); }
+    public double tickScale() { return tickScale; }
+    public WebhookService webhooks() { return webhooks; }
+    public String placeholder(UUID id, String identifier) {
+        if (identifier.equals("tps")) return tpsText;
+        if (identifier.equals("version")) return getDescription().getVersion();
+        Map<String, String> snapshot = id == null ? null : placeholderSnapshots.get(id);
+        return snapshot == null ? "" : snapshot.get(identifier);
+    }
+}
+
+```
+
+`src/main/java/io/github/lino9999/linoac/api/LinoPunishmentEvent.java`:
+
+```java
+package io.github.lino9999.linoac.api;
+
+import org.bukkit.event.Cancellable;
+import org.bukkit.event.Event;
+import org.bukkit.event.HandlerList;
+
+import java.util.List;
+import java.util.UUID;
+
+public final class LinoPunishmentEvent extends Event implements Cancellable {
+    private static final HandlerList HANDLERS = new HandlerList();
+    private final UUID playerId;
+    private final String playerName;
+    private final String reason;
+    private final List<String> commands;
+    private boolean cancelled;
+
+    public LinoPunishmentEvent(UUID playerId, String playerName, String reason, List<String> commands) {
+        this.playerId = playerId;
+        this.playerName = playerName;
+        this.reason = reason;
+        this.commands = List.copyOf(commands);
+    }
+
+    public UUID getPlayerId() { return playerId; }
+    public String getPlayerName() { return playerName; }
+    public String getReason() { return reason; }
+    public List<String> getCommands() { return commands; }
+    public boolean isCancelled() { return cancelled; }
+    public void setCancelled(boolean value) { cancelled = value; }
+    public HandlerList getHandlers() { return HANDLERS; }
+    public static HandlerList getHandlerList() { return HANDLERS; }
+}
+
+```
+
+`src/main/java/io/github/lino9999/linoac/api/LinoViolationEvent.java`:
+
+```java
+package io.github.lino9999.linoac.api;
+
+import io.github.lino9999.linoac.check.CheckType;
+import org.bukkit.entity.Player;
+import org.bukkit.event.Cancellable;
+import org.bukkit.event.Event;
+import org.bukkit.event.HandlerList;
+
+public final class LinoViolationEvent extends Event implements Cancellable {
+    private static final HandlerList HANDLERS = new HandlerList();
+    private final Player player;
+    private final CheckType check;
+    private final String detail;
+    private final int violations;
+    private boolean cancelled;
+
+    public LinoViolationEvent(Player player, CheckType check, String detail, int violations) {
+        this.player = player;
+        this.check = check;
+        this.detail = detail;
+        this.violations = violations;
+    }
+
+    public Player getPlayer() { return player; }
+    public CheckType getCheck() { return check; }
+    public String getDetail() { return detail; }
+    public int getViolations() { return violations; }
+    public boolean isCancelled() { return cancelled; }
+    public void setCancelled(boolean value) { cancelled = value; }
+    public HandlerList getHandlers() { return HANDLERS; }
+    public static HandlerList getHandlerList() { return HANDLERS; }
+}
+
+```
+
+`src/main/java/io/github/lino9999/linoac/check/CheckPolicy.java`:
+
+```java
+package io.github.lino9999.linoac.check;
+
+import java.util.List;
+
+public record CheckPolicy(boolean enabled, double buffer, double decay, int maxViolations,
+                          boolean setback, boolean punishable, List<String> commands) {}
+
+```
+
+`src/main/java/io/github/lino9999/linoac/check/CheckType.java`:
+
+```java
+package io.github.lino9999.linoac.check;
+
+import java.util.Arrays;
+import java.util.Locale;
+import java.util.Optional;
+
+public enum CheckType {
+    SPEED("Horizontal movement above a conservative movement budget", "movement"),
+    FLIGHT("Sustained unsupported hovering or rising", "movement"),
+    JUMP("Vertical jump exceeding the current jump attribute", "movement"),
+    STEP("Grounded ascent exceeding the step-height attribute", "movement"),
+    FAST_CLIMB("Excessive climbing speed", "movement"),
+    JESUS("Repeated unsupported movement on liquid", "movement"),
+    NO_SLOW("Excessive movement while actively using an item", "movement"),
+    SPRINT("Sprinting with insufficient food", "movement"),
+    REACH("Melee attack beyond range and latency allowance", "combat"),
+    HITBOX("Melee aim missing recent target bounding boxes", "combat"),
+    AUTO_CLICKER("Sustained excessive arm-swing rate", "combat"),
+    MULTI_AURA("Attacking too many distinct entities in one server tick", "combat"),
+    FAST_BOW("Bow shot stronger than its observed charge time", "player"),
+    FAST_PLACE("Sustained excessive block placement rate", "world"),
+    FAST_BREAK("Breaking blocks faster than the server-estimated break time", "world"),
+    GHOST_HAND("Interacting through solid blocks", "world"),
+    AIR_PLACE("Block placement without an adjacent support block", "world"),
+    SCAFFOLD("Repeated placement outside the player's interaction range", "world"),
+    INVENTORY("Excessive inventory click rate", "player"),
+    TIMER("Sustained movement packet rate above real elapsed time", "packet"),
+    BAD_PACKETS("Invalid movement values or invalid hotbar slots", "packet"),
+    PACKET_FLOOD("Excessive incoming play packet rate", "packet");
+
+    private final String description;
+    private final String category;
+
+    CheckType(String description, String category) {
+        this.description = description;
+        this.category = category;
+    }
+
+    public String id() { return name().toLowerCase(Locale.ROOT).replace('_', '-'); }
+    public String description() { return description; }
+    public String category() { return category; }
+
+    public static Optional<CheckType> find(String value) {
+        return Arrays.stream(values()).filter(type -> type.id().equalsIgnoreCase(value.replace('_', '-'))).findFirst();
+    }
+}
+
+```
+
+`src/main/java/io/github/lino9999/linoac/check/CombatChecks.java`:
+
+```java
+package io.github.lino9999.linoac.check;
+
+import io.github.lino9999.linoac.LinoAC;
+import io.github.lino9999.linoac.player.PlayerData;
+import io.github.lino9999.linoac.util.Environment;
+import io.github.lino9999.linoac.util.Geometry;
+import org.bukkit.Location;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Player;
+import org.bukkit.util.BoundingBox;
+import org.bukkit.util.Vector;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public final class CombatChecks {
+    private final LinoAC plugin;
+
+    public CombatChecks(LinoAC plugin) { this.plugin = plugin; }
+
+    public void attack(Player player, LivingEntity target) {
+        PlayerData data = plugin.data(player);
+        data.lastCombat = plugin.tick();
+        if (!plugin.violations().eligible(player, data) || player.isInsideVehicle() || target.isInsideVehicle()
+                || player.getGameMode() == org.bukkit.GameMode.CREATIVE || player.getGameMode() == org.bukkit.GameMode.SPECTATOR) return;
+        String weapon = player.getInventory().getItemInMainHand().getType().name();
+        if (weapon.contains("SPEAR") || weapon.contains("TRIDENT")) return;
+        Location eye = player.getEyeLocation();
+        Vector origin = eye.toVector();
+        double range = Environment.attribute(player, "entity_interaction_range", 3);
+        double allowance = plugin.settings().number("limits.reach-margin") + Math.min(.6, player.getPing() * .002);
+        List<BoundingBox> boxes = new ArrayList<>();
+        boxes.add(target.getBoundingBox().clone());
+        if (target instanceof Player victim) {
+            PlayerData other = plugin.data(victim);
+            boxes.addAll(other.history);
+        }
+        double distance = boxes.stream().mapToDouble(box -> Geometry.distance(origin, box)).min().orElse(0);
+        boolean intersects = boxes.stream().anyMatch(box -> box.clone().expand(.25 + allowance)
+                .rayTrace(origin, eye.getDirection(), range + allowance + 1) != null);
+        plugin.violations().sample(player, data, CheckType.REACH, distance > range + allowance,
+                "distance=" + String.format(java.util.Locale.ROOT, "%.3f", distance));
+        plugin.violations().sample(player, data, CheckType.HITBOX, !intersects && distance > 1, "target=" + target.getType().name());
+        data.attacked.add(target.getEntityId());
+        plugin.violations().sample(player, data, CheckType.MULTI_AURA, data.attacked.size() > 3, "targets=" + data.attacked.size());
+    }
+
+    public boolean obstructed(Player player, Location target) {
+        Vector direction = target.toVector().subtract(player.getEyeLocation().toVector());
+        double distance = direction.length();
+        if (distance < .1 || distance > 12 || !player.getWorld().equals(target.getWorld())) return false;
+        var hit = player.getWorld().rayTraceBlocks(player.getEyeLocation(), direction.normalize(), distance,
+                org.bukkit.FluidCollisionMode.NEVER, true);
+        return hit != null && hit.getHitBlock() != null && !hit.getHitBlock().equals(target.getBlock())
+                && hit.getHitPosition().distance(player.getEyeLocation().toVector()) < distance - .8;
+    }
+}
+
+```
+
+`src/main/java/io/github/lino9999/linoac/check/MovementChecks.java`:
+
+```java
+package io.github.lino9999.linoac.check;
+
+import io.github.lino9999.linoac.LinoAC;
+import io.github.lino9999.linoac.player.PlayerData;
+import io.github.lino9999.linoac.util.Environment;
+import org.bukkit.GameMode;
+import org.bukkit.Location;
+import org.bukkit.entity.Player;
+import org.bukkit.potion.PotionEffectType;
+
+public final class MovementChecks {
+    private final LinoAC plugin;
+
+    public MovementChecks(LinoAC plugin) { this.plugin = plugin; }
+
+    public void tick(Player player, PlayerData data) {
+        Location current = player.getLocation();
+        Location previous = data.previous;
+        data.previous = current.clone();
+        data.history.addLast(player.getBoundingBox().clone());
+        if (data.history.size() > 12) data.history.removeFirst();
+        if (previous == null || !previous.getWorld().equals(current.getWorld())) return;
+        boolean ground = Environment.supported(player);
+        boolean wasGround = data.previousGround;
+        data.previousGround = ground;
+        data.airTicks = ground ? 0 : data.airTicks + 1;
+        double dy = current.getY() - previous.getY();
+        double lastDy = data.previousDy;
+        data.previousDy = dy;
+        if (!plugin.violations().eligible(player, data) || plugin.tick() < data.movementGraceUntil || player.getGameMode() != GameMode.SURVIVAL
+                && player.getGameMode() != GameMode.ADVENTURE || player.getAllowFlight() || player.isFlying()
+                || player.isGliding() || player.isRiptiding() || player.isInsideVehicle() || player.isSwimming()
+                || player.isSleeping() || player.hasPotionEffect(PotionEffectType.LEVITATION)
+                || player.hasPotionEffect(PotionEffectType.SLOW_FALLING) || player.hasPotionEffect(PotionEffectType.JUMP_BOOST)) {
+            data.airTicks = 0;
+            return;
+        }
+        if (!current.getWorld().isChunkLoaded(current.getBlockX() >> 4, current.getBlockZ() >> 4)) return;
+        double dx = current.getX() - previous.getX();
+        double dz = current.getZ() - previous.getZ();
+        double horizontal = Math.hypot(dx, dz);
+        boolean special = Environment.special(player);
+        if (special) data.environmentUntil = plugin.tick() + 12;
+        double speedAttribute = Environment.attribute(player, "movement_speed", .1);
+        double speedLimit = (.38 + Math.max(0, speedAttribute - .1) * 3.8)
+                * plugin.settings().number("limits.speed-multiplier") * plugin.tickScale();
+        if (plugin.tick() >= data.environmentUntil && !player.isClimbing()) {
+            plugin.violations().sample(player, data, CheckType.SPEED, horizontal > speedLimit,
+                    "distance=" + format(horizontal) + " limit=" + format(speedLimit));
+            boolean hovering = Math.abs(dy) < .005 && Math.abs(lastDy) < .005;
+            boolean rising = dy > .1 && dy >= lastDy - .005;
+            plugin.violations().sample(player, data, CheckType.FLIGHT, data.airTicks > 14 && (hovering || rising), "air-ticks=" + data.airTicks);
+            double jump = Environment.attribute(player, "jump_strength", .42) + .18;
+            plugin.violations().sample(player, data, CheckType.JUMP, wasGround && !ground && dy > jump * plugin.tickScale(), "rise=" + format(dy));
+            double step = Environment.attribute(player, "step_height", .6) + .15;
+            plugin.violations().sample(player, data, CheckType.STEP, ground && wasGround && dy > step * plugin.tickScale(), "rise=" + format(dy));
+            plugin.violations().sample(player, data, CheckType.NO_SLOW,
+                    player.isHandRaised() && ground && wasGround && horizontal > Math.max(.32, speedLimit * .8), "distance=" + format(horizontal));
+        }
+        plugin.violations().sample(player, data, CheckType.FAST_CLIMB, player.isClimbing() && dy > .35 * plugin.tickScale(), "rise=" + format(dy));
+        boolean liquidBelow = current.clone().subtract(0, .2, 0).getBlock().isLiquid();
+        data.liquidTicks = liquidBelow && !player.isInWater() && !ground && Math.abs(dy) < .005 ? data.liquidTicks + 1 : 0;
+        plugin.violations().sample(player, data, CheckType.JESUS, data.liquidTicks > 20, "liquid-ticks=" + data.liquidTicks);
+        plugin.violations().sample(player, data, CheckType.SPRINT, player.isSprinting() && player.getFoodLevel() <= 6, "food=" + player.getFoodLevel());
+        if (ground && !special && data.buffers.getOrDefault(CheckType.SPEED, 0d) == 0 && data.buffers.getOrDefault(CheckType.STEP, 0d) == 0) data.safe = current.clone();
+    }
+
+    private String format(double value) { return String.format(java.util.Locale.ROOT, "%.3f", value); }
+}
+
+```
+
+`src/main/java/io/github/lino9999/linoac/command/LinoCommand.java`:
+
+```java
+package io.github.lino9999.linoac.command;
+
+import io.github.lino9999.linoac.LinoAC;
+import io.github.lino9999.linoac.check.CheckType;
+import io.github.lino9999.linoac.player.PlayerData;
+import org.bukkit.Bukkit;
+import org.bukkit.Material;
+import org.bukkit.command.*;
+import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryHolder;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.util.Vector;
+
+import java.io.File;
+import java.util.*;
+
+public final class LinoCommand implements CommandExecutor, TabCompleter, Listener {
+    private final LinoAC plugin;
+    private final Map<String, String> permissions = Map.ofEntries(
+            Map.entry("help", "status"), Map.entry("status", "status"), Map.entry("alerts", "alerts"),
+            Map.entry("verbose", "verbose"), Map.entry("profile", "profile"), Map.entry("violations", "profile"),
+            Map.entry("cps", "profile"), Map.entry("connection", "profile"), Map.entry("top", "profile"),
+            Map.entry("checks", "status"), Map.entry("describe", "status"), Map.entry("menu", "status"),
+            Map.entry("reload", "manage"), Map.entry("enable", "manage"), Map.entry("disable", "manage"),
+            Map.entry("reset", "manage"), Map.entry("freeze", "freeze"), Map.entry("ban", "punish"),
+            Map.entry("wave", "wave"), Map.entry("logs", "logs"), Map.entry("punishlogs", "logs"),
+            Map.entry("teleport", "teleport"), Map.entry("knockback", "test"), Map.entry("rotate", "test"),
+            Map.entry("shuffle", "test"), Map.entry("testalert", "test"));
+
+    public LinoCommand(LinoAC plugin) { this.plugin = plugin; }
+
+    public boolean onCommand(CommandSender sender, Command command, String label, String[] original) {
+        String[] args = shortcut(command.getName(), original);
+        String sub = args.length == 0 ? "help" : args[0].toLowerCase(Locale.ROOT);
+        String permission = permissions.get(sub);
+        if (permission == null) { plugin.messages().key(sender, "unknown-command"); return true; }
+        if (!sender.hasPermission("linoac." + permission)) { plugin.messages().key(sender, "no-permission"); return true; }
+        try {
+            switch (sub) {
+                case "help" -> help(sender);
+                case "status" -> plugin.messages().send(sender, "&fLinoAC " + plugin.getDescription().getVersion() + " &7| TPS: " + String.format(Locale.ROOT, "%.2f", plugin.tps())
+                        + " | Players: " + Bukkit.getOnlinePlayers().size() + " | Checks: " + CheckType.values().length + " | Auto punishment: " + plugin.settings().enabled("settings.automatic-punishments"));
+                case "alerts", "verbose" -> toggle(sender, sub);
+                case "profile", "violations", "cps", "connection" -> profile(sender, target(args, 1), sub);
+                case "top" -> Bukkit.getOnlinePlayers().stream().sorted(Comparator.comparingInt((Player p) -> plugin.data(p).totalViolations()).reversed()).limit(10)
+                        .forEach(p -> plugin.messages().send(sender, "&f" + p.getName() + " &7VL: " + plugin.data(p).totalViolations()));
+                case "checks" -> { for (CheckType type : CheckType.values()) plugin.messages().send(sender, (plugin.settings().policy(type).enabled() ? "&a" : "&c") + type.id() + " &7[" + type.category() + "]"); }
+                case "describe" -> { CheckType type = check(args, 1); plugin.messages().send(sender, "&f" + type.id() + " &7" + type.description()); }
+                case "menu" -> menu(requirePlayer(sender));
+                case "reload" -> { plugin.reloadSettings(); plugin.messages().send(sender, "&aConfiguration reloaded."); }
+                case "enable", "disable" -> configure(sender, check(args, 1), sub.equals("enable"));
+                case "reset" -> {
+                    if (args.length > 1 && args[1].equalsIgnoreCase("all")) Bukkit.getOnlinePlayers().forEach(p -> plugin.data(p).reset());
+                    else plugin.data(target(args, 1)).reset();
+                    plugin.messages().send(sender, "&aViolations reset.");
+                }
+                case "freeze" -> {
+                    Player player = target(args, 1);
+                    PlayerData data = plugin.data(player);
+                    data.frozen = !data.frozen;
+                    plugin.exempt(data, 60);
+                    plugin.messages().send(player, data.frozen ? "&cYou are frozen. Please await instructions from staff." : "&aYou are no longer frozen.");
+                    plugin.messages().send(sender, "&f" + player.getName() + " &7frozen: " + data.frozen);
+                }
+                case "ban" -> {
+                    Player player = target(args, 1);
+                    boolean result = plugin.punishments().execute(player.getUniqueId(), player.getName(), "staff", plugin.settings().list("punishments.manual-commands"));
+                    plugin.messages().send(sender, result ? "&aPunishment commands dispatched." : "&ePunishment cancelled by an API listener.");
+                }
+                case "wave" -> wave(sender, args);
+                case "logs", "punishlogs" -> logs(sender, args, sub);
+                case "teleport" -> {
+                    Player staff = requirePlayer(sender);
+                    Player target = target(args, 1);
+                    staff.teleport(target.getLocation());
+                    plugin.messages().send(sender, "&aTeleported to " + target.getName() + ".");
+                }
+                case "knockback" -> {
+                    Player player = target(args, 1);
+                    player.setVelocity(new Vector(.35, .4, .35));
+                    plugin.exemptMovement(plugin.data(player), 100);
+                    plugin.messages().send(sender, "&aKnockback test sent to " + player.getName() + ".");
+                }
+                case "rotate" -> {
+                    Player player = target(args, 1);
+                    var location = player.getLocation();
+                    location.setYaw(location.getYaw() + 90);
+                    player.teleport(location);
+                    plugin.messages().send(sender, "&aRotated " + player.getName() + ".");
+                }
+                case "shuffle" -> {
+                    Player player = target(args, 1);
+                    List<ItemStack> items = new ArrayList<>();
+                    for (int i = 0; i < 9; i++) items.add(player.getInventory().getItem(i));
+                    Collections.shuffle(items);
+                    for (int i = 0; i < 9; i++) player.getInventory().setItem(i, items.get(i));
+                    plugin.messages().send(sender, "&aShuffled hotbar for " + player.getName() + ".");
+                }
+                case "testalert" -> {
+                    Player player = args.length > 1 ? target(args, 1) : requirePlayer(sender);
+                    plugin.violations().alert(player, CheckType.BAD_PACKETS, 0, "Staff test alert; no violation recorded.");
+                    plugin.messages().send(sender, "&aTest alert sent.");
+                }
+                default -> plugin.messages().key(sender, "unknown-command");
+            }
+        } catch (IllegalArgumentException e) { plugin.messages().send(sender, "&c" + e.getMessage()); }
+        catch (Exception e) {
+            plugin.messages().send(sender, "&cOperation failed: " + e.getMessage());
+            plugin.getLogger().warning("Command " + sub + " failed: " + e.getMessage());
+        }
+        return true;
+    }
+
+    private void help(CommandSender sender) {
+        plugin.messages().send(sender, "&fLinoAC commands &7(/linoac, /lac, /linoanticheat)");
+        for (String sub : List.of("status", "alerts", "verbose", "profile", "violations", "cps", "connection", "top", "checks", "describe", "menu", "reload", "enable", "disable", "reset", "freeze", "ban", "wave", "logs", "punishlogs", "teleport", "knockback", "rotate", "shuffle", "testalert")) {
+            if (sender.hasPermission("linoac." + permissions.get(sub))) plugin.messages().send(sender, "&a/lac " + sub + " &7" + syntax(sub));
+        }
+    }
+
+    private String syntax(String sub) {
+        return switch (sub) {
+            case "profile", "violations", "cps", "connection", "freeze", "ban", "teleport", "knockback", "rotate", "shuffle" -> "<player>";
+            case "enable", "disable", "describe" -> "<check>";
+            case "reset" -> "<player|all>";
+            case "wave" -> "<add|remove|list|execute> [player]";
+            case "logs", "punishlogs" -> "<player> [page]";
+            case "testalert" -> "[player]";
+            default -> "";
+        };
+    }
+
+    private void toggle(CommandSender sender, String kind) throws java.io.IOException {
+        PlayerData data = plugin.data(requirePlayer(sender));
+        if (kind.equals("alerts")) {
+            data.alerts = !data.alerts;
+            plugin.store().setAlerts(data.id, data.alerts);
+            plugin.store().save();
+        } else data.verbose = !data.verbose;
+        plugin.messages().send(sender, "&7" + kind + ": &f" + (kind.equals("alerts") ? data.alerts : data.verbose));
+    }
+
+    private void profile(CommandSender sender, Player player, String kind) {
+        PlayerData data = plugin.data(player);
+        if (kind.equals("profile") || kind.equals("connection")) plugin.messages().send(sender,
+                "&f" + player.getName() + " &7| Ping: " + player.getPing() + "ms | Client: " + data.clientVersion + " | Brand (unverified): " + data.brand + " | Frozen: " + data.frozen);
+        if (kind.equals("profile") || kind.equals("cps")) plugin.messages().send(sender, "&7Recent average arm swings/second: &f" + data.swings);
+        if (kind.equals("profile") || kind.equals("violations")) {
+            plugin.messages().send(sender, "&7Total VL: &f" + data.totalViolations());
+            data.violations.forEach((type, vl) -> plugin.messages().send(sender, "&7" + type.id() + ": &f" + vl));
+        }
+    }
+
+    private void wave(CommandSender sender, String[] args) throws java.io.IOException {
+        if (args.length < 2) throw new IllegalArgumentException("Usage: /lac wave " + syntax("wave"));
+        switch (args[1].toLowerCase(Locale.ROOT)) {
+            case "add" -> {
+                Player player = target(args, 2);
+                plugin.punishments().add(player.getUniqueId(), player.getName());
+                plugin.messages().send(sender, "&aAdded " + player.getName() + " to the wave.");
+            }
+            case "remove" -> {
+                if (args.length < 3) throw new IllegalArgumentException("Usage: /lac wave remove <player>");
+                UUID id = plugin.store().wave().entrySet().stream().filter(e -> e.getValue().equalsIgnoreCase(args[2])).map(Map.Entry::getKey).findFirst()
+                        .orElseThrow(() -> new IllegalArgumentException("Player is not queued."));
+                plugin.punishments().remove(id);
+                plugin.messages().send(sender, "&aRemoved player from the wave.");
+            }
+            case "list" -> plugin.messages().send(sender, "&7Queued: &f" + String.join(", ", plugin.store().wave().values()));
+            case "execute" -> plugin.messages().send(sender, "&7Wave entries scheduled: &f" + plugin.punishments().startWave());
+            default -> throw new IllegalArgumentException("Usage: /lac wave " + syntax("wave"));
+        }
+    }
+
+    private void logs(CommandSender sender, String[] args, String kind) {
+        if (args.length < 2 || !args[1].matches("[A-Za-z0-9_]{1,16}")) throw new IllegalArgumentException("Usage: /lac " + kind + " <player> [page]");
+        int page = args.length > 2 ? Integer.parseInt(args[2]) : 1;
+        int limit = plugin.settings().integer("settings.recent-log-limit");
+        if (page < 1 || page > (limit + 7) / 8) throw new IllegalArgumentException("Page is outside the configured recent-log limit.");
+        plugin.audit().read(kind.equals("logs") ? "violations" : "punishments", args[1], page, limit, lines -> {
+            if (!plugin.isEnabled()) return;
+            Bukkit.getScheduler().runTask(plugin, () -> {
+                if (sender instanceof Player player && !player.isOnline()) return;
+                if (!sender.hasPermission("linoac.logs")) return;
+                plugin.messages().send(sender, "&7" + kind + " for &f" + args[1] + " &7| Page " + page);
+                if (lines.isEmpty()) plugin.messages().send(sender, "&7No records found.");
+                for (String line : lines) plugin.messages().send(sender, "&7" + line.replace('\t', ' '));
+            });
+        });
+    }
+
+    private void configure(CommandSender sender, CheckType type, boolean enabled) throws Exception {
+        File file = new File(plugin.getDataFolder(), "config.yml");
+        YamlConfiguration yaml = new YamlConfiguration();
+        yaml.load(file);
+        yaml.set("checks." + type.id() + ".enabled", enabled);
+        yaml.save(file);
+        plugin.reloadSettings();
+        plugin.messages().send(sender, "&7" + type.id() + " &fenabled: " + enabled);
+    }
+
+    private Player target(String[] args, int index) {
+        if (args.length <= index) throw new IllegalArgumentException("Specify an online player. See /lac help.");
+        Player player = Bukkit.getPlayerExact(args[index]);
+        if (player == null) throw new IllegalArgumentException("Player is not online.");
+        return player;
+    }
+
+    private Player requirePlayer(CommandSender sender) {
+        if (!(sender instanceof Player player)) throw new IllegalArgumentException("This command requires a player.");
+        return player;
+    }
+
+    private CheckType check(String[] args, int index) {
+        if (args.length <= index) throw new IllegalArgumentException("Specify a check ID. See /lac checks.");
+        return CheckType.find(args[index]).orElseThrow(() -> new IllegalArgumentException("Unknown check ID. See /lac checks."));
+    }
+
+    private String[] shortcut(String command, String[] original) {
+        String first = switch (command) {
+            case "lacalerts" -> "alerts";
+            case "lacwave" -> "wave";
+            case "laclogs" -> "logs";
+            case "lacpunishments" -> "punishlogs";
+            default -> "";
+        };
+        if (first.isEmpty()) return original;
+        String[] result = new String[original.length + 1];
+        result[0] = first;
+        System.arraycopy(original, 0, result, 1, original.length);
+        return result;
+    }
+
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] original) {
+        String[] args = shortcut(command.getName(), original);
+        List<String> candidates;
+        if (args.length <= 1) candidates = permissions.entrySet().stream().filter(e -> sender.hasPermission("linoac." + e.getValue())).map(Map.Entry::getKey).sorted().toList();
+        else {
+            String sub = args[0].toLowerCase(Locale.ROOT);
+            if (!sender.hasPermission("linoac." + permissions.getOrDefault(sub, "admin"))) return List.of();
+            if (List.of("enable", "disable", "describe").contains(sub) && args.length == 2) candidates = Arrays.stream(CheckType.values()).map(CheckType::id).toList();
+            else if (sub.equals("wave") && args.length == 2) candidates = List.of("add", "remove", "list", "execute");
+            else if (sub.equals("wave") && args.length == 3 && args[1].equalsIgnoreCase("remove")) candidates = new ArrayList<>(plugin.store().wave().values());
+            else if (args.length == 2 && !syntax(sub).isEmpty() || sub.equals("wave") && args.length == 3) candidates = Bukkit.getOnlinePlayers().stream().filter(p -> !(sender instanceof Player viewer) || viewer.canSee(p)).map(Player::getName).toList();
+            else candidates = List.of();
+        }
+        String prefix = args.length == 0 ? "" : args[args.length - 1].toLowerCase(Locale.ROOT);
+        return candidates.stream().filter(s -> s.toLowerCase(Locale.ROOT).startsWith(prefix)).toList();
+    }
+
+    private void menu(Player player) {
+        CheckMenu holder = new CheckMenu();
+        holder.inventory = Bukkit.createInventory(holder, 27, "LinoAC Checks");
+        for (CheckType type : CheckType.values()) {
+            boolean enabled = plugin.settings().policy(type).enabled();
+            ItemStack item = new ItemStack(enabled ? Material.LIME_DYE : Material.GRAY_DYE);
+            var meta = item.getItemMeta();
+            meta.setDisplayName(plugin.messages().color((enabled ? "&a" : "&c") + type.id()));
+            meta.setLore(List.of(type.description(), "Category: " + type.category(), "Enabled: " + enabled, "Click to toggle (linoac.manage)."));
+            item.setItemMeta(meta);
+            holder.inventory.setItem(type.ordinal(), item);
+        }
+        player.openInventory(holder.inventory);
+    }
+
+    @EventHandler public void clickMenu(InventoryClickEvent event) {
+        if (!(event.getView().getTopInventory().getHolder() instanceof CheckMenu)) return;
+        event.setCancelled(true);
+        if (!(event.getWhoClicked() instanceof Player player) || event.getRawSlot() < 0 || event.getRawSlot() >= CheckType.values().length
+                || !player.hasPermission("linoac.manage") || plugin.data(player).frozen) return;
+        CheckType type = CheckType.values()[event.getRawSlot()];
+        try { configure(player, type, !plugin.settings().policy(type).enabled()); menu(player); }
+        catch (Exception e) { plugin.messages().send(player, "&cUnable to update configuration: " + e.getMessage()); }
+    }
+
+    @EventHandler public void dragMenu(InventoryDragEvent event) {
+        if (event.getView().getTopInventory().getHolder() instanceof CheckMenu) event.setCancelled(true);
+    }
+
+    private static final class CheckMenu implements InventoryHolder {
+        private Inventory inventory;
+        public Inventory getInventory() { return inventory; }
+    }
+}
+
+```
+
+`src/main/java/io/github/lino9999/linoac/config/Settings.java`:
+
+```java
+package io.github.lino9999.linoac.config;
+
+import io.github.lino9999.linoac.check.CheckPolicy;
+import io.github.lino9999.linoac.check.CheckType;
+import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.plugin.java.JavaPlugin;
+
+import java.io.File;
+import java.util.EnumMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+public final class Settings {
+    private final YamlConfiguration yaml;
+    private final Map<CheckType, CheckPolicy> policies = new EnumMap<>(CheckType.class);
+    private final Set<String> excludedWorlds;
+
+    public Settings(JavaPlugin plugin) throws Exception {
+        yaml = new YamlConfiguration();
+        yaml.load(new File(plugin.getDataFolder(), "config.yml"));
+        excludedWorlds = Set.copyOf(yaml.getStringList("settings.excluded-worlds"));
+        require("settings.minimum-tps", 1, 20);
+        require("settings.maximum-ping", 0, 10000);
+        require("settings.join-grace-ticks", 0, 12000);
+        require("settings.violation-reset-seconds", 1, 86400);
+        require("settings.alert-cooldown-ms", 100, 60000);
+        require("settings.log-retention-days", 1, 365);
+        require("settings.recent-log-limit", 10, 1000);
+        require("wave.interval-seconds", 1, 86400);
+        for (CheckType type : CheckType.values()) {
+            String path = "checks." + type.id();
+            require(path + ".buffer", 1, 1000);
+            require(path + ".decay", 0, 100);
+            require(path + ".max-violations", 1, 100000);
+            policies.put(type, new CheckPolicy(yaml.getBoolean(path + ".enabled"), yaml.getDouble(path + ".buffer"),
+                    yaml.getDouble(path + ".decay"), yaml.getInt(path + ".max-violations"),
+                    yaml.getBoolean(path + ".setback"), yaml.getBoolean(path + ".punishable"),
+                    List.copyOf(yaml.getStringList(path + ".commands"))));
+        }
+        require("limits.speed-multiplier", 1, 10);
+        require("limits.reach-margin", 0, 6);
+        require("limits.maximum-cps", 5, 200);
+        require("limits.maximum-placements", 5, 200);
+        require("limits.maximum-inventory-clicks", 5, 500);
+        require("limits.maximum-packets", 50, 10000);
+        require("limits.timer-multiplier", 1.01, 3);
+    }
+
+    private void require(String path, double min, double max) {
+        double value = yaml.getDouble(path, Double.NaN);
+        if (!Double.isFinite(value) || value < min || value > max) {
+            throw new IllegalArgumentException("Invalid " + path + ": expected " + min + " to " + max);
+        }
+    }
+
+    public CheckPolicy policy(CheckType type) { return policies.get(type); }
+    public double number(String path) { return yaml.getDouble(path); }
+    public int integer(String path) { return yaml.getInt(path); }
+    public boolean enabled(String path) { return yaml.getBoolean(path); }
+    public String text(String path) { return yaml.getString(path, ""); }
+    public List<String> list(String path) { return yaml.getStringList(path); }
+    public Set<String> excludedWorlds() { return excludedWorlds; }
+}
+
+```
+
+`src/main/java/io/github/lino9999/linoac/integration/BedrockSupport.java`:
+
+```java
+package io.github.lino9999.linoac.integration;
+
+import java.lang.reflect.Method;
+import java.util.UUID;
+
+public final class BedrockSupport {
+    private Object api;
+    private Method isFloodgatePlayer;
+
+    public BedrockSupport() {
+        try {
+            Class<?> type = Class.forName("org.geysermc.floodgate.api.FloodgateApi");
+            api = type.getMethod("getInstance").invoke(null);
+            isFloodgatePlayer = type.getMethod("isFloodgatePlayer", UUID.class);
+        } catch (ReflectiveOperationException ignored) { api = null; }
+    }
+
+    public boolean isBedrock(UUID id) {
+        if (id.getMostSignificantBits() == 0) return true;
+        if (api == null) return false;
+        try { return (boolean) isFloodgatePlayer.invoke(api, id); }
+        catch (ReflectiveOperationException e) { return false; }
+    }
+}
+
+```
+
+`src/main/java/io/github/lino9999/linoac/integration/LinoPlaceholders.java`:
+
+```java
+package io.github.lino9999.linoac.integration;
+
+import io.github.lino9999.linoac.LinoAC;
+import me.clip.placeholderapi.expansion.PlaceholderExpansion;
+import org.bukkit.OfflinePlayer;
+
+import java.util.Locale;
+
+public final class LinoPlaceholders extends PlaceholderExpansion {
+    private final LinoAC plugin;
+
+    public LinoPlaceholders(LinoAC plugin) { this.plugin = plugin; }
+    public String getIdentifier() { return "linoac"; }
+    public String getAuthor() { return "Lino"; }
+    public String getVersion() { return plugin.getDescription().getVersion(); }
+    public boolean persist() { return true; }
+
+    public String onRequest(OfflinePlayer player, String identifier) {
+        return plugin.placeholder(player == null ? null : player.getUniqueId(), identifier.toLowerCase(Locale.ROOT));
+    }
+}
+
+```
+
+`src/main/java/io/github/lino9999/linoac/integration/WebhookService.java`:
+
+```java
+package io.github.lino9999.linoac.integration;
+
+import io.github.lino9999.linoac.LinoAC;
+
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.time.Duration;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+
+public final class WebhookService implements AutoCloseable {
+    private final LinoAC plugin;
+    private final HttpClient client = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(3)).followRedirects(HttpClient.Redirect.NEVER).build();
+    private final ThreadPoolExecutor executor = new ThreadPoolExecutor(1, 1, 0, TimeUnit.MILLISECONDS,
+            new ArrayBlockingQueue<>(32), action -> {
+                Thread thread = new Thread(action, "LinoAC-webhook");
+                thread.setDaemon(true);
+                return thread;
+            });
+    private long nextSend;
+
+    public WebhookService(LinoAC plugin) { this.plugin = plugin; }
+
+    public void send(String kind, String message) {
+        if (!plugin.settings().enabled("webhook.enabled") || !plugin.settings().enabled("webhook." + kind)) return;
+        long now = System.nanoTime();
+        if (now < nextSend) return;
+        nextSend = now + TimeUnit.SECONDS.toNanos(2);
+        URI uri;
+        try {
+            uri = URI.create(plugin.settings().text("webhook.url"));
+            if (!"https".equals(uri.getScheme()) || uri.getHost() == null || uri.getUserInfo() != null) return;
+        } catch (IllegalArgumentException e) { return; }
+        String content = message.replace("\\", "\\\\").replace("\"", "\\\"").replaceAll("[\\p{Cntrl}]", " ");
+        HttpRequest request = HttpRequest.newBuilder(uri).timeout(Duration.ofSeconds(3))
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString("{\"content\":\"" + content + "\",\"allowed_mentions\":{\"parse\":[]}}"))
+                .build();
+        try {
+            executor.execute(() -> {
+                try {
+                    int status = client.send(request, HttpResponse.BodyHandlers.discarding()).statusCode();
+                    if (status < 200 || status > 299) plugin.getLogger().fine("Webhook returned HTTP " + status);
+                } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
+                catch (Exception e) { plugin.getLogger().fine("Webhook delivery failed."); }
+            });
+        } catch (java.util.concurrent.RejectedExecutionException ignored) { plugin.getLogger().fine("Webhook queue is full."); }
+    }
+
+    public void close() {
+        executor.shutdownNow();
+        client.close();
+    }
+}
+
+```
+
+`src/main/java/io/github/lino9999/linoac/listener/GameListener.java`:
+
+```java
+package io.github.lino9999.linoac.listener;
+
+import io.github.lino9999.linoac.LinoAC;
+import io.github.lino9999.linoac.check.CheckType;
+import io.github.lino9999.linoac.player.PlayerData;
+import io.github.lino9999.linoac.util.Environment;
+import org.bukkit.GameMode;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockDamageEvent;
+import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityShootBowEvent;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.player.*;
+import org.bukkit.event.entity.EntityResurrectEvent;
+
+public final class GameListener implements Listener {
+    private final LinoAC plugin;
+
+    public GameListener(LinoAC plugin) { this.plugin = plugin; }
+
+    @EventHandler public void join(PlayerJoinEvent event) { plugin.join(event.getPlayer()); }
+    @EventHandler public void quit(PlayerQuitEvent event) { plugin.quit(event.getPlayer()); }
+    @EventHandler public void respawn(PlayerRespawnEvent event) { plugin.exempt(plugin.data(event.getPlayer()), 100); }
+    @EventHandler(ignoreCancelled = true) public void teleport(PlayerTeleportEvent event) {
+        PlayerData data = plugin.data(event.getPlayer());
+        plugin.exempt(data, 60);
+        data.previous = null;
+        data.safe = null;
+        data.history.clear();
+    }
+    @EventHandler(ignoreCancelled = true) public void velocity(PlayerVelocityEvent event) {
+        plugin.exemptMovement(plugin.data(event.getPlayer()), 80);
+    }
+    @EventHandler(ignoreCancelled = true) public void damage(EntityDamageEvent event) {
+        if (event.getEntity() instanceof Player player) plugin.exemptMovement(plugin.data(player), 40);
+    }
+    @EventHandler(ignoreCancelled = true) public void resurrect(EntityResurrectEvent event) {
+        if (event.getEntity() instanceof Player player) plugin.exempt(plugin.data(player), 60);
+    }
+    @EventHandler(ignoreCancelled = true) public void mode(PlayerGameModeChangeEvent event) { plugin.exemptMovement(plugin.data(event.getPlayer()), 60); }
+    @EventHandler(ignoreCancelled = true) public void flight(PlayerToggleFlightEvent event) { plugin.exemptMovement(plugin.data(event.getPlayer()), 60); }
+    @EventHandler public void riptide(PlayerRiptideEvent event) { plugin.exemptMovement(plugin.data(event.getPlayer()), 100); }
+    @EventHandler(ignoreCancelled = true) public void move(PlayerMoveEvent event) {
+        PlayerData data = plugin.data(event.getPlayer());
+        if (data.frozen && event.getTo() != null && (event.getFrom().getX() != event.getTo().getX()
+                || event.getFrom().getY() != event.getTo().getY() || event.getFrom().getZ() != event.getTo().getZ())) {
+            var location = event.getFrom().clone();
+            location.setYaw(event.getTo().getYaw());
+            location.setPitch(event.getTo().getPitch());
+            event.setTo(location);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void attack(EntityDamageByEntityEvent event) {
+        if (event.getDamager() instanceof Player player && event.getEntity() instanceof LivingEntity target
+                && event.getCause() == EntityDamageEvent.DamageCause.ENTITY_ATTACK) {
+            plugin.combat().attack(player, target);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
+    public void frozenAttack(EntityDamageByEntityEvent event) {
+        if (event.getDamager() instanceof Player player && plugin.data(player).frozen) event.setCancelled(true);
+    }
+
+    @EventHandler(ignoreCancelled = true) public void place(BlockPlaceEvent event) {
+        Player player = event.getPlayer();
+        PlayerData data = plugin.data(player);
+        if (data.frozen) { event.setCancelled(true); return; }
+        if (!survival(player)) return;
+        int rate = data.placements.add(System.nanoTime());
+        plugin.violations().sample(player, data, CheckType.FAST_PLACE, rate > plugin.settings().number("limits.maximum-placements"), "placements=" + rate);
+        double range = Environment.attribute(player, "block_interaction_range", 4.5);
+        double distance = player.getEyeLocation().distance(event.getBlockPlaced().getLocation().add(.5, .5, .5));
+        plugin.violations().sample(player, data, CheckType.SCAFFOLD, distance > range + 1.5, "distance=" + distance);
+        boolean supported = false;
+        for (BlockFace face : new BlockFace[]{BlockFace.UP, BlockFace.DOWN, BlockFace.NORTH, BlockFace.SOUTH, BlockFace.EAST, BlockFace.WEST}) {
+            Block neighbor = event.getBlockPlaced().getRelative(face);
+            if (!neighbor.getType().isAir() && !neighbor.isLiquid()) supported = true;
+        }
+        String material = event.getBlockPlaced().getType().name();
+        plugin.violations().sample(player, data, CheckType.AIR_PLACE, !supported && !material.contains("LILY") && !material.contains("SCAFFOLD"), "material=" + material);
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true) public void mining(BlockDamageEvent event) {
+        PlayerData data = plugin.data(event.getPlayer());
+        data.miningBlock = event.getBlock().getLocation();
+        data.miningStarted = System.nanoTime();
+    }
+
+    @EventHandler(ignoreCancelled = true) public void breakBlock(BlockBreakEvent event) {
+        Player player = event.getPlayer();
+        PlayerData data = plugin.data(player);
+        if (data.frozen) { event.setCancelled(true); return; }
+        if (!survival(player)) return;
+        if (data.miningBlock != null && data.miningBlock.equals(event.getBlock().getLocation())) {
+            double speed = event.getBlock().getBreakSpeed(player);
+            double expected = speed > 0 ? Math.ceil(1d / speed) * 50 : 0;
+            double elapsed = (System.nanoTime() - data.miningStarted) / 1_000_000d;
+            plugin.violations().sample(player, data, CheckType.FAST_BREAK, speed < 1 && expected > 200 && elapsed + 150 < expected * .65,
+                    "elapsed-ms=" + Math.round(elapsed) + " expected-ms=" + Math.round(expected));
+        }
+        data.miningBlock = null;
+        plugin.violations().sample(player, data, CheckType.GHOST_HAND,
+                plugin.combat().obstructed(player, event.getBlock().getLocation().add(.5, .5, .5)), "block=" + event.getBlock().getType().name());
+    }
+
+    @EventHandler(ignoreCancelled = true) public void inventory(InventoryClickEvent event) {
+        if (!(event.getWhoClicked() instanceof Player player)) return;
+        PlayerData data = plugin.data(player);
+        if (data.frozen) { event.setCancelled(true); return; }
+        int rate = data.clicks.add(System.nanoTime());
+        plugin.violations().sample(player, data, CheckType.INVENTORY, rate > plugin.settings().number("limits.maximum-inventory-clicks"), "clicks=" + rate);
+    }
+
+    @EventHandler public void interact(PlayerInteractEvent event) {
+        PlayerData data = plugin.data(event.getPlayer());
+        if (data.frozen) { event.setCancelled(true); return; }
+        if (event.getItem() == null || event.getAction() != org.bukkit.event.block.Action.RIGHT_CLICK_AIR
+                && event.getAction() != org.bukkit.event.block.Action.RIGHT_CLICK_BLOCK) return;
+        String type = event.getItem().getType().name();
+        if (type.equals("BOW")) data.bowStarted = System.nanoTime();
+    }
+
+    @EventHandler(ignoreCancelled = true) public void bow(EntityShootBowEvent event) {
+        if (!(event.getEntity() instanceof Player player) || event.getBow() == null || !event.getBow().getType().name().equals("BOW")) return;
+        PlayerData data = plugin.data(player);
+        if (data.bowStarted == 0) return;
+        double ticks = (System.nanoTime() - data.bowStarted) / 50_000_000d + 3;
+        double charge = ticks / 20;
+        double expected = Math.min(1, (charge * charge + charge * 2) / 3);
+        plugin.violations().sample(player, data, CheckType.FAST_BOW, event.getForce() > expected + .15, "force=" + event.getForce());
+        data.bowStarted = 0;
+    }
+
+    private boolean survival(Player player) { return player.getGameMode() == GameMode.SURVIVAL || player.getGameMode() == GameMode.ADVENTURE; }
+}
+
+```
+
+`src/main/java/io/github/lino9999/linoac/packet/PacketBridge.java`:
+
+```java
+package io.github.lino9999.linoac.packet;
+
+import com.github.retrooper.packetevents.PacketEvents;
+import com.github.retrooper.packetevents.event.PacketListenerAbstract;
+import com.github.retrooper.packetevents.event.PacketListenerPriority;
+import com.github.retrooper.packetevents.event.PacketReceiveEvent;
+import com.github.retrooper.packetevents.protocol.packettype.PacketType;
+import com.github.retrooper.packetevents.wrapper.play.client.WrapperPlayClientHeldItemChange;
+import com.github.retrooper.packetevents.wrapper.play.client.WrapperPlayClientPlayerFlying;
+import io.github.lino9999.linoac.LinoAC;
+import io.github.lino9999.linoac.check.CheckType;
+import io.github.lino9999.linoac.player.PlayerData;
+import org.bukkit.entity.Player;
+
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+
+public final class PacketBridge extends PacketListenerAbstract {
+    private final LinoAC plugin;
+    private final Map<UUID, PacketSample> samples = new ConcurrentHashMap<>();
+    private final Map<UUID, RateWindow> windows = new java.util.HashMap<>();
+
+    public PacketBridge(LinoAC plugin) {
+        super(PacketListenerPriority.NORMAL);
+        this.plugin = plugin;
+    }
+
+    public void add(Player player) { samples.put(player.getUniqueId(), new PacketSample()); windows.remove(player.getUniqueId()); }
+    public void remove(UUID id) { samples.remove(id); windows.remove(id); }
+    public void clear() { samples.clear(); windows.clear(); }
+
+    public void onPacketReceive(PacketReceiveEvent event) {
+        UUID id = event.getUser().getUUID();
+        if (id == null || event.isCancelled()) return;
+        PacketSample sample = samples.get(id);
+        if (sample == null) return;
+        boolean movement = WrapperPlayClientPlayerFlying.isFlying(event.getPacketType());
+        boolean invalid = false;
+        if (movement) {
+            var flying = new WrapperPlayClientPlayerFlying(event);
+            var location = flying.getLocation();
+            if (flying.hasPositionChanged()) {
+                invalid = !Double.isFinite(location.getX()) || !Double.isFinite(location.getY()) || !Double.isFinite(location.getZ())
+                        || Math.abs(location.getX()) > 30_000_001 || Math.abs(location.getZ()) > 30_000_001 || Math.abs(location.getY()) > 20_000_000;
+            }
+            if (flying.hasRotationChanged()) invalid |= !Float.isFinite(location.getYaw()) || !Float.isFinite(location.getPitch()) || Math.abs(location.getPitch()) > 90;
+        } else if (event.getPacketType() == PacketType.Play.Client.HELD_ITEM_CHANGE) {
+            int slot = new WrapperPlayClientHeldItemChange(event).getSlot();
+            invalid = slot < 0 || slot > 8;
+        }
+        if (invalid) event.setCancelled(true);
+        sample.record(movement, event.getPacketType() == PacketType.Play.Client.ANIMATION, invalid);
+    }
+
+    public void tick(Player player, PlayerData data) {
+        PacketSample sample = samples.get(data.id);
+        if (sample == null) return;
+        PacketSample.Snapshot snapshot = sample.drain();
+        if (snapshot.invalid() > 0) plugin.violations().flag(player, data, CheckType.BAD_PACKETS, "invalid=" + snapshot.invalid());
+        long now = System.nanoTime();
+        RateWindow window = windows.computeIfAbsent(data.id, ignored -> new RateWindow(now));
+        if (!plugin.violations().eligible(player, data)) {
+            windows.put(data.id, new RateWindow(now));
+            return;
+        }
+        window.packets += snapshot.packets();
+        window.moves += snapshot.moves();
+        window.swings += snapshot.swings();
+        double seconds = (now - window.started) / 1_000_000_000d;
+        if (seconds >= 5) {
+            double cps = window.swings / seconds;
+            data.swings = (int) Math.round(cps);
+            plugin.violations().sample(player, data, CheckType.TIMER,
+                    window.moves > seconds * 20 * plugin.settings().number("limits.timer-multiplier") + 20,
+                    "movement-rate=" + Math.round(window.moves / seconds));
+            plugin.violations().sample(player, data, CheckType.PACKET_FLOOD,
+                    window.packets / seconds > plugin.settings().number("limits.maximum-packets"), "packet-rate=" + Math.round(window.packets / seconds));
+            plugin.violations().sample(player, data, CheckType.AUTO_CLICKER,
+                    plugin.tick() - data.lastCombat < 120 && cps > plugin.settings().number("limits.maximum-cps"), "cps=" + data.swings);
+            windows.put(data.id, new RateWindow(now));
+        }
+    }
+
+    public String clientVersion(Player player) {
+        var user = PacketEvents.getAPI().getPlayerManager().getUser(player);
+        return user == null ? "unknown" : user.getClientVersion().getReleaseName();
+    }
+
+    private static final class RateWindow {
+        private final long started;
+        private int packets;
+        private int moves;
+        private int swings;
+        private RateWindow(long started) { this.started = started; }
+    }
+}
+
+```
+
+`src/main/java/io/github/lino9999/linoac/packet/PacketSample.java`:
+
+```java
+package io.github.lino9999.linoac.packet;
+
+public final class PacketSample {
+    private int packets;
+    private int moves;
+    private int swings;
+    private int invalid;
+
+    public synchronized void record(boolean movement, boolean swing, boolean bad) {
+        packets = Math.min(100000, packets + 1);
+        if (movement) moves = Math.min(100000, moves + 1);
+        if (swing) swings = Math.min(100000, swings + 1);
+        if (bad) invalid = Math.min(100000, invalid + 1);
+    }
+
+    public synchronized Snapshot drain() {
+        Snapshot snapshot = new Snapshot(packets, moves, swings, invalid);
+        packets = moves = swings = invalid = 0;
+        return snapshot;
+    }
+
+    public record Snapshot(int packets, int moves, int swings, int invalid) {}
+}
+
+```
+
+`src/main/java/io/github/lino9999/linoac/player/PlayerData.java`:
+
+```java
+package io.github.lino9999.linoac.player;
+
+import io.github.lino9999.linoac.check.CheckType;
+import io.github.lino9999.linoac.util.WindowCounter;
+import org.bukkit.Location;
+import org.bukkit.util.BoundingBox;
+
+import java.util.ArrayDeque;
+import java.util.EnumMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+
+public final class PlayerData {
+    public final UUID id;
+    public final Map<CheckType, Double> buffers = new EnumMap<>(CheckType.class);
+    public final Map<CheckType, Integer> violations = new EnumMap<>(CheckType.class);
+    public final Map<CheckType, Long> lastFlags = new EnumMap<>(CheckType.class);
+    public final Map<CheckType, Long> lastAlerts = new EnumMap<>(CheckType.class);
+    public final Map<CheckType, Long> lastPunishments = new EnumMap<>(CheckType.class);
+    public final WindowCounter placements = new WindowCounter();
+    public final WindowCounter clicks = new WindowCounter();
+    public final ArrayDeque<BoundingBox> history = new ArrayDeque<>();
+    public final Set<Integer> attacked = new HashSet<>();
+    public Location previous;
+    public Location safe;
+    public Location miningBlock;
+    public long miningStarted;
+    public long graceUntil;
+    public long movementGraceUntil;
+    public long bowStarted;
+    public long lastCombat;
+    public long lastMoveTick;
+    public long environmentUntil;
+    public double previousDy;
+    public boolean previousGround;
+    public int airTicks;
+    public int liquidTicks;
+    public int swings;
+    public boolean frozen;
+    public boolean alerts;
+    public boolean verbose;
+    public boolean bedrock;
+    public String brand = "unknown";
+    public String clientVersion = "unknown";
+
+    public PlayerData(UUID id, long graceUntil) {
+        this.id = id;
+        this.graceUntil = graceUntil;
+    }
+
+    public int totalViolations() { return violations.values().stream().mapToInt(Integer::intValue).sum(); }
+
+    public void reset() {
+        buffers.clear();
+        violations.clear();
+        lastFlags.clear();
+        lastAlerts.clear();
+        lastPunishments.clear();
+    }
+}
+
+```
+
+`src/main/java/io/github/lino9999/linoac/service/Messages.java`:
+
+```java
+package io.github.lino9999.linoac.service;
+
+import io.github.lino9999.linoac.LinoAC;
+import org.bukkit.ChatColor;
+import org.bukkit.command.CommandSender;
+
+public final class Messages {
+    private final LinoAC plugin;
+
+    public Messages(LinoAC plugin) { this.plugin = plugin; }
+    public String color(String value) { return ChatColor.translateAlternateColorCodes('&', value); }
+    public void send(CommandSender sender, String value) { sender.sendMessage(color(plugin.settings().text("messages.prefix") + " " + value)); }
+    public void key(CommandSender sender, String key) { send(sender, plugin.settings().text("messages." + key)); }
+}
+
+```
+
+`src/main/java/io/github/lino9999/linoac/service/PunishmentService.java`:
+
+```java
+package io.github.lino9999.linoac.service;
+
+import io.github.lino9999.linoac.LinoAC;
+import io.github.lino9999.linoac.api.LinoPunishmentEvent;
+import org.bukkit.Bukkit;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+public final class PunishmentService {
+    private final LinoAC plugin;
+    private final java.util.ArrayDeque<Map.Entry<UUID, String>> running = new java.util.ArrayDeque<>();
+    private long nextEntryTick;
+
+    public PunishmentService(LinoAC plugin) { this.plugin = plugin; }
+
+    public boolean execute(UUID id, String name, String reason, List<String> templates) {
+        if (!name.matches("[A-Za-z0-9_]{1,16}")) return false;
+        List<String> commands = templates.stream().map(s -> s.replace("%player%", name)
+                .replace("%uuid%", id.toString()).replace("%check%", reason)).toList();
+        LinoPunishmentEvent event = new LinoPunishmentEvent(id, name, reason, commands);
+        Bukkit.getPluginManager().callEvent(event);
+        if (event.isCancelled()) return false;
+        for (String command : commands) {
+            boolean result = Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command);
+            plugin.audit().write("punishments", id, name, "reason=" + reason + " command=" + command + " dispatched=" + result);
+        }
+        plugin.webhooks().send("punishments", "[LinoAC] " + name + " punished: " + reason);
+        return true;
+    }
+
+    public void add(UUID id, String name) throws IOException {
+        String previous = plugin.store().wave().put(id, name);
+        try { plugin.store().save(); }
+        catch (IOException e) {
+            if (previous == null) plugin.store().wave().remove(id); else plugin.store().wave().put(id, previous);
+            throw e;
+        }
+    }
+
+    public boolean remove(UUID id) throws IOException {
+        String name = plugin.store().wave().remove(id);
+        if (name == null) return false;
+        try { plugin.store().save(); }
+        catch (IOException e) { plugin.store().wave().put(id, name); throw e; }
+        running.removeIf(entry -> entry.getKey().equals(id));
+        return true;
+    }
+
+    public int startWave() {
+        if (!running.isEmpty()) return 0;
+        running.addAll(new ArrayList<>(plugin.store().wave().entrySet()));
+        return running.size();
+    }
+
+    public void tick(long tick) {
+        if (plugin.settings().enabled("wave.automatic") && tick % (plugin.settings().integer("wave.interval-seconds") * 20L) == 0) startWave();
+        if (running.isEmpty() || tick < nextEntryTick) return;
+        var entry = running.peek();
+        try {
+            if (remove(entry.getKey())) execute(entry.getKey(), entry.getValue(), "wave", plugin.settings().list("wave.commands"));
+        } catch (IOException e) {
+            running.clear();
+            plugin.getLogger().severe("Wave paused: " + e.getMessage());
+        }
+        nextEntryTick = tick + 20;
+    }
+}
+
+```
+
+`src/main/java/io/github/lino9999/linoac/service/ViolationService.java`:
+
+```java
+package io.github.lino9999.linoac.service;
+
+import io.github.lino9999.linoac.LinoAC;
+import io.github.lino9999.linoac.api.LinoViolationEvent;
+import io.github.lino9999.linoac.check.CheckPolicy;
+import io.github.lino9999.linoac.check.CheckType;
+import io.github.lino9999.linoac.player.PlayerData;
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.HoverEvent;
+import net.md_5.bungee.api.chat.TextComponent;
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
+
+public final class ViolationService {
+    private final LinoAC plugin;
+
+    public ViolationService(LinoAC plugin) { this.plugin = plugin; }
+
+    public boolean eligible(Player player, PlayerData data) {
+        return player.isOnline() && !player.isDead() && !data.frozen && !player.hasPermission("linoac.bypass")
+                && !(data.bedrock && plugin.settings().enabled("settings.ignore-bedrock"))
+                && plugin.tick() >= data.graceUntil && player.getPing() <= plugin.settings().integer("settings.maximum-ping")
+                && plugin.tps() >= plugin.settings().number("settings.minimum-tps")
+                && !plugin.settings().excludedWorlds().contains(player.getWorld().getName());
+    }
+
+    public void reward(PlayerData data, CheckType type) {
+        data.buffers.computeIfPresent(type, (key, value) -> Math.max(0, value - plugin.settings().policy(type).decay()));
+    }
+
+    public void sample(Player player, PlayerData data, CheckType type, boolean suspicious, String detail) {
+        if (suspicious) flag(player, data, type, detail); else reward(data, type);
+    }
+
+    public void flag(Player player, PlayerData data, CheckType type, String detail) {
+        CheckPolicy policy = plugin.settings().policy(type);
+        if (!policy.enabled() || !eligible(player, data)) return;
+        long tick = plugin.tick();
+        if (data.lastFlags.getOrDefault(type, -1L) == tick) return;
+        data.lastFlags.put(type, tick);
+        double buffer = Math.min(policy.buffer(), data.buffers.getOrDefault(type, 0d) + 1);
+        data.buffers.put(type, buffer);
+        if (buffer < policy.buffer()) {
+            verbose(player, type, detail);
+            return;
+        }
+        int vl = Math.min(1000000, data.violations.getOrDefault(type, 0) + 1);
+        LinoViolationEvent event = new LinoViolationEvent(player, type, detail, vl);
+        Bukkit.getPluginManager().callEvent(event);
+        if (event.isCancelled()) return;
+        data.violations.put(type, vl);
+        data.buffers.put(type, Math.max(0, policy.buffer() - 1));
+        String plain = player.getName() + " failed " + type.id() + " VL=" + vl + " ping=" + player.getPing() + " " + detail;
+        plugin.audit().write("violations", data.id, player.getName(), plain);
+        long now = System.currentTimeMillis();
+        if (now - data.lastAlerts.getOrDefault(type, 0L) >= plugin.settings().integer("settings.alert-cooldown-ms")) {
+            data.lastAlerts.put(type, now);
+            alert(player, type, vl, detail);
+            if (plugin.settings().enabled("settings.console-alerts")) plugin.getLogger().info(plain);
+            plugin.webhooks().send("alerts", "[LinoAC] " + plain);
+        }
+        if (policy.setback() && data.safe != null && data.safe.getWorld().equals(player.getWorld())
+                && player.getWorld().isChunkLoaded(data.safe.getBlockX() >> 4, data.safe.getBlockZ() >> 4)) {
+            player.teleport(data.safe);
+            plugin.exempt(data, 20);
+        }
+        if (policy.punishable() && plugin.settings().enabled("settings.automatic-punishments") && vl >= policy.maxViolations()
+                && tick - data.lastPunishments.getOrDefault(type, -1200L) >= 1200) {
+            data.lastPunishments.put(type, tick);
+            if (plugin.settings().enabled("wave.queue-automatic-punishments")) {
+                try { plugin.punishments().add(data.id, player.getName()); }
+                catch (java.io.IOException e) { plugin.getLogger().severe("Unable to queue punishment: " + e.getMessage()); }
+            } else plugin.punishments().execute(data.id, player.getName(), type.id(), policy.commands());
+        }
+    }
+
+    public void alert(Player suspect, CheckType type, int vl, String detail) {
+        String text = plugin.settings().text("messages.alert").replace("%player%", suspect.getName())
+                .replace("%check%", type.id()).replace("%vl%", Integer.toString(vl));
+        TextComponent component = new TextComponent(TextComponent.fromLegacyText(plugin.messages().color(plugin.settings().text("messages.prefix") + " " + text)));
+        component.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/linoac teleport " + suspect.getName()));
+        component.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextComponent.fromLegacyText(
+                "Ping: " + suspect.getPing() + "ms\n" + type.description() + "\n" + detail + "\nClick to teleport.")));
+        for (Player viewer : Bukkit.getOnlinePlayers()) {
+            PlayerData staff = plugin.data(viewer);
+            if (staff.alerts && viewer.hasPermission("linoac.alerts")) viewer.spigot().sendMessage(component);
+        }
+    }
+
+    private void verbose(Player suspect, CheckType type, String detail) {
+        for (Player viewer : Bukkit.getOnlinePlayers()) {
+            if (plugin.data(viewer).verbose && viewer.hasPermission("linoac.verbose")) {
+                plugin.messages().send(viewer, "&8[Sample] &7" + suspect.getName() + " " + type.id() + " " + detail);
+            }
+        }
+    }
+}
+
+```
+
+`src/main/java/io/github/lino9999/linoac/storage/AuditLog.java`:
+
+```java
+package io.github.lino9999.linoac.storage;
+
+import org.bukkit.plugin.java.JavaPlugin;
+
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
+import java.time.LocalDate;
+import java.time.Instant;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
+import java.util.stream.Stream;
+
+public final class AuditLog implements AutoCloseable {
+    private final JavaPlugin plugin;
+    private final Path directory;
+    private final ThreadPoolExecutor worker;
+    private int retention;
+    private long lastWarning;
+    private LocalDate lastDate;
+
+    public AuditLog(JavaPlugin plugin, int retention) throws IOException {
+        this.plugin = plugin;
+        this.retention = retention;
+        directory = plugin.getDataFolder().toPath().resolve("logs");
+        Files.createDirectories(directory);
+        worker = new ThreadPoolExecutor(1, 1, 0, TimeUnit.MILLISECONDS, new ArrayBlockingQueue<>(4096), r -> {
+            Thread thread = new Thread(r, "LinoAC-audit");
+            thread.setDaemon(true);
+            return thread;
+        });
+        submit(this::prune);
+    }
+
+    public void retention(int days) { retention = days; submit(this::prune); }
+
+    public void write(String kind, UUID id, String name, String text) {
+        String line = Instant.now() + "\t" + id + "\t" + clean(name) + "\t" + clean(text) + System.lineSeparator();
+        LocalDate date = LocalDate.now();
+        submit(() -> {
+            if (!date.equals(lastDate)) {
+                lastDate = date;
+                prune();
+            }
+            Path path = directory.resolve(date + "-" + kind + ".log");
+            try {
+                if (Files.exists(path) && Files.size(path) >= 32L * 1024 * 1024) {
+                    warning("Daily " + kind + " log reached 32 MiB; further entries will be dropped today.");
+                    return;
+                }
+                Files.writeString(path, line, StandardCharsets.UTF_8, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+            } catch (IOException e) {
+                warning("Unable to write audit log: " + e.getMessage());
+            }
+        });
+    }
+
+    public void read(String kind, String name, int page, int limit, Consumer<List<String>> callback) {
+        submit(() -> {
+            ArrayDeque<String> lines = new ArrayDeque<>(limit);
+            try (Stream<Path> paths = Files.list(directory)) {
+                List<Path> files = paths.filter(p -> p.getFileName().toString().endsWith("-" + kind + ".log"))
+                        .sorted(Comparator.comparing(Path::toString).reversed()).toList();
+                int maximum = Math.min(limit, page * 8);
+                for (Path file : files) {
+                    ArrayDeque<String> perFile = new ArrayDeque<>();
+                    try (Stream<String> source = Files.lines(file, StandardCharsets.UTF_8)) {
+                        source.filter(line -> {
+                            String[] parts = line.split("\t", 4);
+                            return parts.length == 4 && parts[2].equalsIgnoreCase(name);
+                        }).forEach(line -> {
+                            perFile.addLast(line);
+                            if (perFile.size() > maximum) perFile.removeFirst();
+                        });
+                    }
+                    while (!perFile.isEmpty() && lines.size() < maximum) lines.addLast(perFile.removeLast());
+                    if (lines.size() >= maximum) break;
+                }
+                List<String> all = new ArrayList<>(lines);
+                int start = Math.min(all.size(), (page - 1) * 8);
+                List<String> result = List.copyOf(all.subList(start, Math.min(all.size(), start + 8)));
+                callback.accept(result);
+            } catch (IOException e) {
+                warning("Unable to read audit log: " + e.getMessage());
+                callback.accept(List.of());
+            }
+        });
+    }
+
+    private void prune() {
+        LocalDate cutoff = LocalDate.now().minusDays(retention);
+        try (Stream<Path> paths = Files.list(directory)) {
+            paths.filter(p -> p.getFileName().toString().matches("\\d{4}-\\d{2}-\\d{2}-(violations|punishments)\\.log"))
+                    .forEach(path -> {
+                        if (LocalDate.parse(path.getFileName().toString().substring(0, 10)).isBefore(cutoff)) {
+                            try { Files.deleteIfExists(path); } catch (IOException e) { warning("Unable to remove expired log: " + path); }
+                        }
+                    });
+        } catch (IOException e) { warning("Unable to prune audit logs: " + e.getMessage()); }
+    }
+
+    private void submit(Runnable action) {
+        try { worker.execute(action); }
+        catch (java.util.concurrent.RejectedExecutionException e) { warning("Audit queue is full or shutting down."); }
+    }
+
+    private synchronized void warning(String text) {
+        long now = System.nanoTime();
+        if (now - lastWarning > TimeUnit.SECONDS.toNanos(30)) {
+            lastWarning = now;
+            plugin.getLogger().warning(text);
+        }
+    }
+
+    private String clean(String value) { return value.replaceAll("[\\r\\n\\t\\p{Cntrl}]", " "); }
+
+    public void close() {
+        worker.shutdown();
+        try {
+            if (!worker.awaitTermination(5, TimeUnit.SECONDS)) {
+                plugin.getLogger().warning("Audit shutdown timeout; pending records may be lost.");
+                worker.shutdownNow();
+            }
+        } catch (InterruptedException e) { Thread.currentThread().interrupt(); worker.shutdownNow(); }
+    }
+}
+
+```
+
+`src/main/java/io/github/lino9999/linoac/storage/StateStore.java`:
+
+```java
+package io.github.lino9999.linoac.storage;
+
+import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.plugin.java.JavaPlugin;
+
+import java.io.IOException;
+import java.nio.file.AtomicMoveNotSupportedException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.UUID;
+
+public final class StateStore {
+    private final Path path;
+    private final YamlConfiguration data = new YamlConfiguration();
+    private final Map<UUID, String> wave = new LinkedHashMap<>();
+
+    public StateStore(JavaPlugin plugin) throws Exception {
+        path = plugin.getDataFolder().toPath().resolve("state.yml");
+        if (Files.exists(path)) data.load(path.toFile());
+        var section = data.getConfigurationSection("wave");
+        if (section != null) for (String key : section.getKeys(false)) {
+            UUID id = UUID.fromString(key);
+            String name = section.getString(key, "");
+            if (name.matches("[A-Za-z0-9_]{1,16}")) wave.put(id, name);
+        }
+    }
+
+    public boolean alerts(UUID id, boolean fallback) { return data.getBoolean("alerts." + id, fallback); }
+    public void setAlerts(UUID id, boolean enabled) { data.set("alerts." + id, enabled); }
+    public Map<UUID, String> wave() { return wave; }
+
+    public void save() throws IOException {
+        data.set("wave", null);
+        wave.forEach((id, name) -> data.set("wave." + id, name));
+        Path temporary = path.resolveSibling("state.yml.tmp");
+        Files.writeString(temporary, data.saveToString());
+        try { Files.move(temporary, path, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE); }
+        catch (AtomicMoveNotSupportedException e) { Files.move(temporary, path, StandardCopyOption.REPLACE_EXISTING); }
+    }
+}
+
+```
+
+`src/main/java/io/github/lino9999/linoac/util/Environment.java`:
+
+```java
+package io.github.lino9999.linoac.util;
+
+import org.bukkit.Location;
+import org.bukkit.NamespacedKey;
+import org.bukkit.Registry;
+import org.bukkit.attribute.Attribute;
+import org.bukkit.attribute.AttributeInstance;
+import org.bukkit.block.Block;
+import org.bukkit.entity.Player;
+import org.bukkit.util.BoundingBox;
+
+public final class Environment {
+    private Environment() {}
+
+    public static double attribute(Player player, String key, double fallback) {
+        Attribute attribute = Registry.ATTRIBUTE.get(NamespacedKey.minecraft(key));
+        AttributeInstance instance = attribute == null ? null : player.getAttribute(attribute);
+        return instance == null ? fallback : instance.getValue();
+    }
+
+    public static boolean special(Player player) {
+        Location location = player.getLocation();
+        for (int x = -1; x <= 1; x++) {
+            for (int z = -1; z <= 1; z++) {
+                if (!location.getWorld().isChunkLoaded((location.getBlockX() + x) >> 4, (location.getBlockZ() + z) >> 4)) return true;
+                for (int y = -1; y <= 2; y++) {
+                    Block block = location.getWorld().getBlockAt(location.getBlockX() + x, location.getBlockY() + y, location.getBlockZ() + z);
+                    String name = block.getType().name();
+                    if (block.isLiquid() || name.contains("ICE") || name.contains("SLIME") || name.contains("HONEY")
+                            || name.contains("WEB") || name.contains("BERRY") || name.contains("POWDER_SNOW")
+                            || name.contains("SOUL_SAND") || name.contains("BUBBLE") || name.contains("BED")
+                            || name.contains("PISTON")) return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public static boolean supported(Player player) {
+        Location l = player.getLocation();
+        BoundingBox body = player.getBoundingBox();
+        BoundingBox feet = new BoundingBox(body.getMinX() + .01, l.getY() - .12, body.getMinZ() + .01,
+                body.getMaxX() - .01, l.getY() + .01, body.getMaxZ() - .01);
+        for (int x = (int) Math.floor(feet.getMinX()); x <= (int) Math.floor(feet.getMaxX()); x++) {
+            for (int z = (int) Math.floor(feet.getMinZ()); z <= (int) Math.floor(feet.getMaxZ()); z++) {
+                if (!l.getWorld().isChunkLoaded(x >> 4, z >> 4)) return true;
+                for (int y = l.getBlockY() - 2; y <= l.getBlockY(); y++) {
+                    Block block = l.getWorld().getBlockAt(x, y, z);
+                    if (!block.isPassable() && !block.isLiquid()
+                            && block.getCollisionShape().overlaps(feet.clone().shift(-x, -y, -z))) return true;
+                }
+            }
+        }
+        return false;
+    }
+}
+
+```
+
+`src/main/java/io/github/lino9999/linoac/util/Geometry.java`:
+
+```java
+package io.github.lino9999.linoac.util;
+
+import org.bukkit.util.BoundingBox;
+import org.bukkit.util.Vector;
+
+public final class Geometry {
+    private Geometry() {}
+
+    public static double distance(Vector point, BoundingBox box) {
+        double x = Math.max(box.getMinX() - point.getX(), Math.max(0, point.getX() - box.getMaxX()));
+        double y = Math.max(box.getMinY() - point.getY(), Math.max(0, point.getY() - box.getMaxY()));
+        double z = Math.max(box.getMinZ() - point.getZ(), Math.max(0, point.getZ() - box.getMaxZ()));
+        return Math.sqrt(x * x + y * y + z * z);
+    }
+}
+
+```
+
+`src/main/java/io/github/lino9999/linoac/util/WindowCounter.java`:
+
+```java
+package io.github.lino9999.linoac.util;
+
+public final class WindowCounter {
+    private long start;
+    private int count;
+
+    public int add(long now) {
+        if (now - start >= 1_000_000_000L) {
+            start = now;
+            count = 0;
+        }
+        return ++count;
+    }
+
+    public int count(long now) { return now - start >= 1_000_000_000L ? 0 : count; }
+}
+
+```
+
+`src/main/resources/config.yml`:
+
+```yml
+settings:
+  minimum-tps: 18.0
+  maximum-ping: 250
+  join-grace-ticks: 100
+  violation-reset-seconds: 480
+  alert-cooldown-ms: 1000
+  log-retention-days: 14
+  recent-log-limit: 200
+  console-alerts: true
+  alerts-on-join: true
+  automatic-punishments: false
+  excluded-worlds: []
+  ignore-bedrock: true
+limits:
+  speed-multiplier: 1.35
+  reach-margin: 0.45
+  maximum-cps: 25
+  maximum-placements: 22
+  maximum-inventory-clicks: 50
+  maximum-packets: 500
+  timer-multiplier: 1.12
+brands:
+  alerts: true
+  ignored: [vanilla]
+  blocked: []
+  whitelist-enabled: false
+  whitelist: []
+punishments:
+  manual-commands:
+    - 'ban %player% Unfair advantage'
+wave:
+  automatic: false
+  interval-seconds: 3600
+  queue-automatic-punishments: false
+  commands:
+    - 'ban %player% Unfair advantage'
+webhook:
+  enabled: false
+  url: ''
+  alerts: true
+  punishments: true
+messages:
+  prefix: '&2&lLinoAC &8»'
+  alert: '&f%player% &7failed &a%check% &8[&fVL %vl%&8]'
+  no-permission: '&cYou do not have permission to use this command.'
+  unknown-command: '&cUnknown command. Use /linoac help.'
+  blocked-brand: '&cThis client brand is not allowed on this server.'
+checks:
+  speed:
+    enabled: true
+    buffer: 3
+    decay: 0.25
+    max-violations: 20
+    setback: false
+    punishable: false
+    commands:
+      - 'kick %player% LinoAC: Unfair advantage (%check%)'
+  flight:
+    enabled: true
+    buffer: 3
+    decay: 0.25
+    max-violations: 20
+    setback: false
+    punishable: false
+    commands:
+      - 'kick %player% LinoAC: Unfair advantage (%check%)'
+  jump:
+    enabled: true
+    buffer: 3
+    decay: 0.25
+    max-violations: 20
+    setback: false
+    punishable: false
+    commands:
+      - 'kick %player% LinoAC: Unfair advantage (%check%)'
+  step:
+    enabled: true
+    buffer: 3
+    decay: 0.25
+    max-violations: 20
+    setback: false
+    punishable: false
+    commands:
+      - 'kick %player% LinoAC: Unfair advantage (%check%)'
+  fast-climb:
+    enabled: true
+    buffer: 3
+    decay: 0.25
+    max-violations: 20
+    setback: false
+    punishable: false
+    commands:
+      - 'kick %player% LinoAC: Unfair advantage (%check%)'
+  jesus:
+    enabled: false
+    buffer: 3
+    decay: 0.25
+    max-violations: 20
+    setback: false
+    punishable: false
+    commands:
+      - 'kick %player% LinoAC: Unfair advantage (%check%)'
+  no-slow:
+    enabled: false
+    buffer: 3
+    decay: 0.25
+    max-violations: 20
+    setback: false
+    punishable: false
+    commands:
+      - 'kick %player% LinoAC: Unfair advantage (%check%)'
+  sprint:
+    enabled: true
+    buffer: 3
+    decay: 0.25
+    max-violations: 20
+    setback: false
+    punishable: false
+    commands:
+      - 'kick %player% LinoAC: Unfair advantage (%check%)'
+  reach:
+    enabled: true
+    buffer: 3
+    decay: 0.25
+    max-violations: 20
+    setback: false
+    punishable: false
+    commands:
+      - 'kick %player% LinoAC: Unfair advantage (%check%)'
+  hitbox:
+    enabled: false
+    buffer: 3
+    decay: 0.25
+    max-violations: 20
+    setback: false
+    punishable: false
+    commands:
+      - 'kick %player% LinoAC: Unfair advantage (%check%)'
+  auto-clicker:
+    enabled: true
+    buffer: 3
+    decay: 0.25
+    max-violations: 20
+    setback: false
+    punishable: false
+    commands:
+      - 'kick %player% LinoAC: Unfair advantage (%check%)'
+  multi-aura:
+    enabled: true
+    buffer: 3
+    decay: 0.25
+    max-violations: 20
+    setback: false
+    punishable: false
+    commands:
+      - 'kick %player% LinoAC: Unfair advantage (%check%)'
+  fast-bow:
+    enabled: false
+    buffer: 3
+    decay: 0.25
+    max-violations: 20
+    setback: false
+    punishable: false
+    commands:
+      - 'kick %player% LinoAC: Unfair advantage (%check%)'
+  fast-place:
+    enabled: true
+    buffer: 3
+    decay: 0.25
+    max-violations: 20
+    setback: false
+    punishable: false
+    commands:
+      - 'kick %player% LinoAC: Unfair advantage (%check%)'
+  fast-break:
+    enabled: false
+    buffer: 3
+    decay: 0.25
+    max-violations: 20
+    setback: false
+    punishable: false
+    commands:
+      - 'kick %player% LinoAC: Unfair advantage (%check%)'
+  ghost-hand:
+    enabled: false
+    buffer: 3
+    decay: 0.25
+    max-violations: 20
+    setback: false
+    punishable: false
+    commands:
+      - 'kick %player% LinoAC: Unfair advantage (%check%)'
+  air-place:
+    enabled: false
+    buffer: 3
+    decay: 0.25
+    max-violations: 20
+    setback: false
+    punishable: false
+    commands:
+      - 'kick %player% LinoAC: Unfair advantage (%check%)'
+  scaffold:
+    enabled: true
+    buffer: 3
+    decay: 0.25
+    max-violations: 20
+    setback: false
+    punishable: false
+    commands:
+      - 'kick %player% LinoAC: Unfair advantage (%check%)'
+  inventory:
+    enabled: true
+    buffer: 3
+    decay: 0.25
+    max-violations: 20
+    setback: false
+    punishable: false
+    commands:
+      - 'kick %player% LinoAC: Unfair advantage (%check%)'
+  timer:
+    enabled: true
+    buffer: 2
+    decay: 0.25
+    max-violations: 20
+    setback: false
+    punishable: false
+    commands:
+      - 'kick %player% LinoAC: Unfair advantage (%check%)'
+  bad-packets:
+    enabled: true
+    buffer: 2
+    decay: 0.25
+    max-violations: 20
+    setback: false
+    punishable: false
+    commands:
+      - 'kick %player% LinoAC: Unfair advantage (%check%)'
+  packet-flood:
+    enabled: true
+    buffer: 2
+    decay: 0.25
+    max-violations: 20
+    setback: false
+    punishable: false
+    commands:
+      - 'kick %player% LinoAC: Unfair advantage (%check%)'
+
+```
+
+`src/main/resources/plugin.yml`:
+
+```yml
+name: LinoAC
+version: '${project.version}'
+main: io.github.lino9999.linoac.LinoAC
+api-version: '1.21.11'
+author: Lino
+description: Modular Minecraft anti-cheat, violation monitoring and staff tools.
+website: https://github.com/lino9999/LinoAC
+depend: [packetevents]
+softdepend: [PlaceholderAPI, floodgate]
+commands:
+  linoac:
+    description: LinoAC administration and detection tools.
+    aliases: [lac, linoanticheat]
+    usage: /<command> help
+  lacalerts:
+    description: Toggle LinoAC alerts.
+    aliases: [lalerts]
+  lacwave:
+    description: Manage the LinoAC punishment wave.
+    aliases: [lwave]
+  laclogs:
+    description: Read LinoAC violation logs.
+    aliases: [llogs]
+  lacpunishments:
+    description: Read LinoAC punishment logs.
+    aliases: [lpunishlogs]
+permissions:
+  linoac.admin:
+    default: op
+    children:
+      linoac.alerts: true
+      linoac.verbose: true
+      linoac.status: true
+      linoac.profile: true
+      linoac.logs: true
+      linoac.manage: true
+      linoac.freeze: true
+      linoac.punish: true
+      linoac.wave: true
+      linoac.teleport: true
+      linoac.test: true
+  linoac.alerts:
+    default: op
+  linoac.verbose:
+    default: op
+  linoac.status:
+    default: op
+  linoac.profile:
+    default: op
+  linoac.logs:
+    default: op
+  linoac.manage:
+    default: op
+  linoac.freeze:
+    default: op
+  linoac.punish:
+    default: op
+  linoac.wave:
+    default: op
+  linoac.teleport:
+    default: op
+  linoac.test:
+    default: op
+  linoac.bypass:
+    default: false
+
+```
