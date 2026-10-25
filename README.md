@@ -5356,6 +5356,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/ntfargo/CSSFontFace-Exploit [WebKit CSSFontFace UAF for PS4/PS5; PS4 6.00-11.02 (kernel chain 7.00-11.02); PS5 needs separate ASLR/vtable defeat; writeup: linearfox.com]
 - https://github.com/ArabPixel/PSFree-Enhanced [Feature-rich PS4 WebKit jailbreak exploit host — chains PSFree/Bad Hoist/CSSFontFace userland with Lapse/NetCtrl/sleirsgoevy kernel exploits (FW 6.00-11.02), auto fw/console detection, GoldHEN/HEN selector, payload loader on port 9020]
 - https://github.com/notmaj0r/CheatRunner_Patches [Community PS4/PS5 Title-ID patch XML collection for CheatRunner (FPS, resolution, and in-game byte patches)]
+- https://github.com/niakw/NiakPS5 [Native full-screen PS5 homebrew dashboard with DualSense UI, game library, LaunchBox artwork, and local title launching]
 - https://github.com/mohasi/game-cheats [Community PS3 cheat database (Artemis-sourced) for simple-cheat-menu: editable source per TITLEID, compiled console files, and vote-driven reliability scores]
 
 
