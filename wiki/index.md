@@ -3428,7 +3428,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [s2x](entities/s2x.md) — COD MW2 (2009) client mod framework: Arxan bypass, code healing, integrity neutralization, custom console, server emulation, modding infra (Brentdevent; cheat / game:cod mw2 modding)
 - [s4killer](entities/s4killer.md) — BYOVD via Samsung S4 `probmon.sys` (IOCTL phys/virt kernel R/W; unsigned load / AC bypass research; gmh5225)
 - [s4mapper](entities/s4mapper.md) — BYOVD driver mapper via Samsung S4 `SignalRgbDriver.sys` (memory-access IOCTLs; manual unsigned map; gmh5225)
-- [s4dbrd.github.io](entities/s4dbrd-github-io.md) — Jekyll GitHub Pages kernel AC/BattlEye/Win32k research blog source; Chirpy theme; long-form Windows internals articles (s4dbrd; Anti Cheat / Guide)
+- [s4dbrd.github.io](entities/s4dbrd-github-io.md) — Ruby/Jekyll/Chirpy GitHub Pages blog source; kernel vuln + exploit dev; BEDaisy/Win32k/secure-kernel attestation + kernel AC architecture articles (s4dbrd; Anti Cheat / Guide)
 - [s6-pcie-microblaze](entities/s6-pcie-microblaze.md) — PCIe DIY DMA toolkit for Xilinx SP605 (Verilog + MicroBlaze; raw TLP over Ethernet; Python host R/W + IOMMU audit; UEFI DXE / Hyper-V / Boot Backdoor PoCs; Cr4sh; DMA / FPGA research)
 - [sac-the-server-anticheat](entities/sac-the-server-anticheat.md) — CS2 server-side algorithmic AC for Metamod:Source and CounterStrikeSharp (IDELd; C#/.NET 8; 17 detection modules; progressive enforcement; Open Source Anti Cheat System)
 - [sakura](entities/sakura.md) — CS1.6 public cheat (C++; DirectX + OpenGL + anti-cheat research; cheat / game:cs1.6; bit-paper)
