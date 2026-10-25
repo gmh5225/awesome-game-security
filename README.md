@@ -1165,6 +1165,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/sodareverse/TDE
 - https://github.com/ergrelet/themida-unmutate
 - https://github.com/ergrelet/unlicense [Dynamic unpacker and import fixer for Themida/WinLicense 2.x and 3.x]
+- https://github.com/x86rc/unthemidator [Static Themida/Code Virtualizer/WinLicense (v3–v4) unpacker with IAT restoration, VM identification, and full PE rebuild without executing the protected binary]
 - https://github.com/DimaReverse/nuitka-themida-unpacker [Two-stage unpacking pipeline that chains Themida/WinLicense dynamic unpacking (unlicense) with Nuitka onefile KAX/KAY static extraction]
 - https://github.com/Hendi48/Magicmida [Themida auto-unpacker for 32/64-bit apps with dump and section restore helpers]
 - https://github.com/guoxing2024/magicmida-rs [Rust reimplementation of Magicmida Themida unpacker with IAT rebuild and OEP discovery]
@@ -4606,6 +4607,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/TheMille-Dev/AntiGuard [Self-contained Paper/Purpur Minecraft anti-cheat plugin with Fly/Speed/Reach/KillAura checks, embedded SQLite storage, and built-in web dashboard plus REST API]
 - https://github.com/donnie1337/AntiCheatPlus [Paper Minecraft anti-cheat and punishment plugin with movement, combat, block, x-ray, and killaura decoy checks plus ban/warn GUI]
 - https://github.com/ImNotVirgola/VirgolaAntiCheat [Paper 1.21.11 Minecraft anti-cheat plugin with modular movement/combat/packet checks (fly, speed, killaura, scaffold, bad packets), PacketEvents, staff GUI, and Discord alerts]
+- https://github.com/wepposs/WepAC [Paper/Spigot 1.21+ server anti-cheat combining heuristic movement/combat/packet checks with an online-learning MLP, inline Netty sniffing, and movement physics simulation]
 - https://github.com/lino9999/LinoAC [Experimental open-source Spigot/Paper Minecraft anti-cheat (1.21.11–26.3) with PacketEvents monitoring, movement/combat checks, staff alerts, and punishment waves]
 - https://github.com/m3rMAX/HeroAntiCheat [Open-source Paper/Purpur 1.21.11 server anti-cheat plugin (Java 21+) with CI build artifacts and configurable heuristics]
 - https://github.com/tahad4492-svg/Astral-AntiCheat [Paper 1.21.11 anti-cheat plugin that replays vanilla movement physics from ClientTickEndEvent, detects packet-order cheats, and supports watch-only alerts or configurable punishments]
