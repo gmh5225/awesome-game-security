@@ -2708,7 +2708,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [nai64-patches](entities/nai64-patches.md) — curated Morphe Android APK patch catalog (~100 Kotlin/Gradle universal patches; ad removal, license/Play Integrity bypass, root/emulator hide, SSL pinning bypass, telemetry block, device/manifest spoof; mobile game RE / modding; Nai64)
 - [native-predicate-solver](entities/native-predicate-solver.md) — Binary Ninja native opaque-predicate remover (C++; MLIL branch analysis; single-function/whole-binary; multithreaded; ScriptWare-Software; Cheat Binary Ninja Plugins)
 - [nigusFN](entities/nigusfn.md) — Fortnite external cheat source (C++; nigusFN-style interface; DirectX 9 ImGui menu + driver/utility components; item defs + config headers; EAC-oriented tooling workflows; YMY1666527646; cheat / game:fortnite [External])
-- [NiakPS5](entities/niak-ps5.md) — native PS5 homebrew full-screen library dashboard (DualSense UI, loopback launch broker, LaunchBox case art; niakw; PlayStation / homebrew shell)
+- [NiakPS5](entities/niak-ps5.md) — native PS5 homebrew full-screen library dashboard (DualSense UI, local title scan, loopback `127.0.0.1` launch broker, 3D case art + lazy LaunchBox CDN; GPL C/C++/OpenGL + Python packaging; niakw; PlayStation / homebrew shell)
 - [NineS](entities/nines.md) — PS5 ELF injector (TCP :9033; remote manual map + thread; section load/relocs; PlayStation process injection)
 - [nb_obfuscator](entities/nb-obfuscator.md) — Win32/x64 PE obfuscation framework (Capstone/udis86; polymorphic stub/dead-code; PSC-Engine; AC Obfuscation Engine)
 - [ndisapi](entities/ndisapi.md) — user-mode Windows Packet Filter / NDIS packet inspect-modify API
