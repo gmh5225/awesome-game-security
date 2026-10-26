@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-26** — ingest `description:alephc0rporation/Aleph0-Virtualization-Hypervisor`: entity [[aleph0-virtualization-hypervisor]] (Rust Intel VT-x UEFI hypervisor; VMX root, nested Hyper-V, EPT; below-OS game memory protection / AC research); short cites on [[overviews/anti-cheat]] and [[overviews/windows-kernel]]; `index.md` entity entry.
+
 - **2026-10-26** — ingest `readme:categories`: **Anti Cheat** link_count **835** (+1; alephc0rporation/Aleph0-Virtualization-Hypervisor Rust Intel VT-x UEFI EPT hypervisor for below-OS memory-protection AC research in Open Source Anti Cheat System) / **Cheat** **2961** / **Game Develop** **197** / **Game Engine** ~159 / **DirectX** ~42 / **Vulkan** ~13 / **Game Network** ~34 and other major README sections unchanged; 41 top-level sections (`NeverC & NeverD` placeholder); synced [[overviews/overview]], [[overviews/anti-cheat]], and [[overviews/dma-attack]]; light `index.md` section notes (no per-category pages).
 
 - **2026-10-26** — ingest `description:snackbar92hypernova/quen-mcp`: entity [[quen-mcp]] (Rust MCP/CLI + C++/WitcherScript Witcher 3 bridge; reproducible mod sessions, PresentMon A/B, SQLite ledger, folder restore); enriched [[overviews/game-engine]] Quen MCP bullet + [[overviews/game-hacking]] mod-dev automation cite beside [[dayz-mcp]]; `index.md` entity entry.
