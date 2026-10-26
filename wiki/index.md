@@ -1021,7 +1021,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [DetoursNT](entities/detoursnt.md) — NTDLL-only Microsoft Detours (no Win32; cheat / hook research)
 - [Dobby](entities/dobby.md) — lightweight multi-platform hook framework (C/C++; DirectX / Windows game tooling; cheat / hook research)
 - [DIE-engine-web](entities/die-engine-web.md) — Detect It Easy in-browser (WASM PE/ELF/Mach-O packer/compiler ID)
-- [DFSC4317 Deadlock DMA Research](entities/dfsc4317-deadlock-dma-research.md) — course FPGA DMA external reads for Deadlock minimap plotting; paper/slides (Lagrossa; Cheat / Guide)
+- [DFSC4317 Deadlock DMA Research](entities/dfsc4317-deadlock-dma-research.md) — course FPGA DMA external-host reads for Valve Deadlock entity minimap overlay; hardware-obfuscation paper/slides (Lagrossa; Cheat / Guide)
 - [DFIRTriage](entities/dfirtriage.md) — Python Windows DFIR triage (process/network/registry/event logs/prefetch)
 - [DFoundryFX](entities/dfoundryfx.md) — UE5 plugin: in-viewport performance tooling (customizable metric charts, shader compile monitoring, STAT command controls; no extra level actors; C++ modules; runtime diagnostics; DarknessFX; Plugins:Unreal)
 - [DioProcess](entities/dioprocess-private.md) — Windows internals research (Rust/Dioxus + KM + UEFI; DSE/KPP)

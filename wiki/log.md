@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-26** — ingest `description:Lagrossa/DFSC4317-Obfuscating-Game-Hacking-Through-Hardware`: enriched entity [[dfsc4317-deadlock-dma-research]] (external-host FPGA DMA Deadlock entity reads + minimap; paper/slides vs full stack; Approach/Artifacts/Audience); short cites on [[overviews/dma-attack]] threat-model + README map and [[overviews/game-hacking]] hardware-assisted external lane + Cheat blurb; `index.md` entity blurb updated.
+
 - **2026-10-26** — ingest `description:ValenMyHeartDev/BloonAntiCheat`: enriched entity [[bloon-anti-cheat]] (Java 17 Paper/Spigot; Bukkit player-event heuristics; staff alerts + YAML sanction GUI); short cites on [[overviews/anti-cheat]] Bukkit lightweight lane + [[concepts/detector-operations]]; `index.md` entity blurb updated.
 
 - **2026-10-26** — ingest `readme:categories`: **Cheat** link_count **2960** (+1; Lagrossa/[[dfsc4317-deadlock-dma-research]] FPGA DMA Deadlock minimap course research in Guide) / **Anti Cheat** **832** (+1; ValenMyHeartDev/[[bloon-anti-cheat]] Paper/Spigot MC fly/reach/autoclicker/triggerbot plugin) / **Game Develop** **196** / **Game Engine** ~159 / **DirectX** ~42 / **Vulkan** ~13 / **Game Network** ~34 and other major README sections unchanged; 41 top-level sections (`NeverC & NeverD` placeholder); synced [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], [[overviews/game-hacking]], and [[overviews/reverse-engineering]]; entities [[dfsc4317-deadlock-dma-research]] + [[bloon-anti-cheat]]; light `index.md` section notes (no per-category pages).
