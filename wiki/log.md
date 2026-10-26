@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-26** — lint (agent, Cursor lint pass): read `wiki/AGENTS.md`; **Overviews** (9): `anti-cheat`, `dma-attack`, `game-engine`, `game-hacking`, `graphics-api`, `mobile-security`, `overview`, `reverse-engineering`, `windows-kernel`; **Concepts** (51) under `wiki/concepts/`; **Entities** (4187) under `wiki/entities/`; reconciled `index.md` vs disk — 4247 catalog paths (9+51+4187), 4247 unique, 0 missing, 0 dead, 0 duplicate catalog paths; nine `overviews/*.md` + `index.md` Overviews/Concepts blurb [[wikilink]] spot-check (13917 links), 0 broken, 0 malformed `]]]`; wiki populated — bootstrap not required; structural repairs none (`log.md` only).
+
 - **2026-10-26** — ingest `description:LongpanZhou/BYOVD-AI-Guide`: enriched entity [[byovd-ai-guide]] (methodology loop, corpus/tooling, lab validation, audience); short cites on [[concepts/byovd]] and [[overviews/reverse-engineering]]; `index.md` entity blurb updated.
 
 - **2026-10-26** — ingest `readme:categories`: **Cheat** link_count **2961** (+1; LongpanZhou/[[byovd-ai-guide]] BYOVD research playbook in Driver Signature enforcement) / **Anti Cheat** **832** / **Game Develop** **196** / **Game Engine** ~159 / **DirectX** ~42 / **Vulkan** ~13 / **Game Network** ~34 and other major README sections unchanged; 41 top-level sections (`NeverC & NeverD` placeholder); synced [[overviews/overview]], [[overviews/game-hacking]], [[overviews/windows-kernel]], [[overviews/dma-attack]], and [[overviews/reverse-engineering]]; entity [[byovd-ai-guide]]; light `index.md` section notes (no per-category pages).
