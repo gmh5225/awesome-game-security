@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-26** — ingest `description:Catusse2k/ScreenShare-Signatures`: enriched entity [[screenshare-signatures]] (ScreenShare Forensic Scanner; threat-grouped JSON rules for DMA/PCILeech, kernel mappers, BYOVD, firmware, cheat artifacts, input emulation, evasion; severity/confidence/allowlist; integrator multi-hit correlation; planned YARA); cited on [[overviews/anti-cheat]] FiveM/Minecraft screenshare cluster + [[concepts/detector-operations]] joint-threshold note; `index.md` entity blurb.
+
 - **2026-10-26** — ingest `description:imattas/HexLab`: entity [[hexlab]] (C++20 wxWidgets GUI + CLI + debug server; PE/ELF/Mach-O/minidumps/firmware/metadata; multi-arch disasm/decompile; GDB RSP; Python stack/locals; plugin SDK); description cites on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; `index.md` entity blurb.
 
 - **2026-10-26** — ingest `readme:categories`: **Cheat** link_count **2962** (+1; imattas/[[hexlab]] C++20 wxWidgets/CLI RE workbench in RE Tools) / **Anti Cheat** **836** (+1; Catusse2k/[[screenshare-signatures]] FiveM/Minecraft screenshare signature database) / **Game Develop** **197** / **Game Engine** ~159 / **DirectX** ~42 / **Vulkan** ~13 / **Game Network** ~34 and other major README sections unchanged; 41 top-level sections (`NeverC & NeverD` placeholder); synced [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/game-hacking]], [[overviews/reverse-engineering]], and [[overviews/dma-attack]]; entities [[hexlab]] + [[screenshare-signatures]]; light `index.md` section notes (no per-category pages).
