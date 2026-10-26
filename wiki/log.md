@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-26** — ingest `description:snackbar92hypernova/quen-mcp`: entity [[quen-mcp]] (Rust MCP/CLI + C++/WitcherScript Witcher 3 bridge; reproducible mod sessions, PresentMon A/B, SQLite ledger, folder restore); enriched [[overviews/game-engine]] Quen MCP bullet + [[overviews/game-hacking]] mod-dev automation cite beside [[dayz-mcp]]; `index.md` entity entry.
+
 - **2026-10-26** — ingest `readme:categories`: **Game Develop** link_count **197** (+1; snackbar92hypernova/[[quen-mcp]] Witcher 3 agent MCP mod/test ledger in MCP server) / **Cheat** **2961** / **Anti Cheat** **834** / **Game Engine** ~159 / **DirectX** ~42 / **Vulkan** ~13 / **Game Network** ~34 and other major README sections unchanged; 41 top-level sections (`NeverC & NeverD` placeholder); synced [[overviews/overview]] and [[overviews/game-engine]]; light `index.md` section notes (no per-category pages).
 
 - **2026-10-26** — lint (agent, Cursor lint pass): read `wiki/AGENTS.md`; listed **Overviews** (9): `anti-cheat`, `dma-attack`, `game-engine`, `game-hacking`, `graphics-api`, `mobile-security`, `overview`, `reverse-engineering`, `windows-kernel`; **Concepts** (51) under `wiki/concepts/`; **Entities** (4188) under `wiki/entities/`; reconciled `index.md` vs disk — 4248 catalog paths (9+51+4188), 4248 unique, 0 missing, 0 dead, 0 duplicate catalog paths; nine `overviews/*.md` + `index.md` Overviews/Concepts blurb [[wikilink]] spot-check (13923 links), 0 broken, 0 malformed `]]]`; 6 expected cross-kind slug collisions ([[anti-cheat]], [[game-hacking]], [[reverse-engineering]], [[byovd]], [[dma]], [[il2cpp]]); wiki populated — bootstrap not required; structural repairs none (`log.md` only).
