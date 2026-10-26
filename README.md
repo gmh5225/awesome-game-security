@@ -4581,6 +4581,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/g8tsz/deadlock-anti-cheat [User-mode Deadlock anti-cheat client: process logging, game-window screenshots, key input, cheat-process matching, and Discord webhook upload]
 - https://github.com/urcool626/Level-Hash [Geode Geometry Dash mod that SHA-256 fingerprints levels to help detect level-edit cheating]
 - https://github.com/AliShe3a/VortexAC [Open-source CrossFire private-server anti-cheat with C++ client detections, SQL-backed session validation, server integration, and admin web dashboard]
+- https://github.com/yanndecaii/WIGPanel [Self-hosted SCP: Secret Laboratory (LabAPI) moderation panel with heuristic server-side anti-cheat (spinbot, silent aim, rapid-fire), ghost-bullet mitigation, and Discord RoleSync]
 - https://github.com/AvivShabtay/Stresser [Anti Virus in fact but also Anti Cheat]
 - https://github.com/D4stiny/PeaceMaker [Anti Virus in fact but also Anti Cheat]
 - https://github.com/danielkrupinski/VAC [Reversed VAC]
