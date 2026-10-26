@@ -4739,6 +4739,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/J-Tanzanite/Little-Anti-Cheat [For Source Games]
 - https://github.com/noahware/darken-anticheat [Kernel anti-cheat for protecting software]
 - https://github.com/mikio815/linux-anticheat [WIP kernel-level Linux console anti-cheat using LSM BPF, a thin kernel module, and BitVisor hypervisor EPT write-protection]
+- https://github.com/alephc0rporation/Aleph0-Virtualization-Hypervisor [Rust Intel VT-x UEFI hypervisor with EPT isolation, built for below-OS game memory protection and anti-cheat research]
 - https://github.com/TOSTcRa/vigil [Open-source Linux-native anti-cheat powered by eBPF]
 - https://github.com/TuncorReUnion/TLAC-MODERN-LOCAL-ANTI-CHEAT-REUNIONED [Linux user-space anti-cheat with eBPF, signature scanning, HWID bans, and AI anomaly detection]
 
