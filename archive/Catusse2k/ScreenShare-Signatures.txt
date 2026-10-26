@@ -1,0 +1,1401 @@
+Project Path: arc_Catusse2k_ScreenShare-Signatures_xi7e7f5m
+
+Source Tree:
+
+```txt
+arc_Catusse2k_ScreenShare-Signatures_xi7e7f5m
+├── README.md
+└── signatures.json
+
+```
+
+`README.md`:
+
+```md
+# ScreenShare Forensic Scanner
+
+A forensic scanner for **screenshare** sessions on **FiveM** and **Minecraft**, built to help moderators and staff detect advanced cheats (kernel, DMA, firmware/UEFI) and attempts to hide them.
+
+This repository contains the signature database (`signatures.json`) and the documentation for using it in your scanner.
+
+> **Note:** this is a defensive tool. Use it only on machines where you have explicit consent to perform the analysis (e.g. a screenshare the player has agreed to).
+
+---
+
+## What it detects
+
+| Category | Description |
+|---|---|
+| `dma_hardware_pnp` | PCI/USB IDs, device names and typical anomalies of DMA cards (FPGA, FTDI, spoofed IDs) |
+| `dma_software_artifacts` | Files, processes, DLLs and in-memory strings related to PCILeech, MemProcFS, LeechCore and DMA libraries |
+| `input_emulation_hardware` | External hardware mice/keyboards (kmbox, Arduino, Pico, Teensy) and related software |
+| `kernel_cheat_and_loaders` | Kernel mappers and loaders, vulnerable drivers (BYOVD), kernel artifacts, relevant Event IDs and registry keys |
+| `firmware_uefi_smm_indicators` | **Indirect** indicators of firmware/UEFI/SMM tampering: flashing tools, Secure Boot, ESP, SMBIOS, TPM |
+| `fivem_cheats` | Known menus/executors, suspicious natives and events, FiveM folders and files |
+| `minecraft_cheats` | Cheat clients, modules, Java agents and injection, obfuscators, autoclickers and macros |
+| `anti_bypass_and_evasion_detection` | Log and trace wiping, anti-screenshare, renamed or packed binaries, HWID spoofers |
+| `system_state_checks` | Windows security posture and timeline/uptime checks |
+
+---
+
+## Structure
+
+```
+.
+├── README.md
+└── signatures.json
+```
+
+`signatures.json` is organized by category; each section contains lists of strings, paths, IDs or textual heuristics.
+
+---
+
+## Usage
+
+1. Load `signatures.json` into your scanner.
+2. Apply each category to the right data source:
+   - **Processes and modules** → file names, DLLs, executables
+   - **Memory of `javaw.exe` / `FiveM_*_GTAProcess.exe`** → in-memory strings
+   - **Registry** → service keys, BAM, UserAssist, MuiCache, ShimCache
+   - **Event Log** → the listed Event IDs
+   - **PnP / PCI / USB** → device IDs
+   - **Filesystem** → paths, Prefetch, Amcache, USN Journal
+3. Assign a **weight** to each match and only flag results above a threshold to reduce false positives.
+4. Correlate findings: a single match is rarely enough, several indicators together are.
+
+### Example (Python)
+
+```python
+import json
+
+with open("signatures.json", encoding="utf-8") as f:
+    sigs = json.load(f)
+
+def scan_text(text: str, strings: list[str]) -> list[str]:
+    t = text.lower()
+    return [s for s in strings if s.lower() in t]
+
+hits = scan_text(process_list_dump, sigs["kernel_cheat_and_loaders"]["mappers_and_loaders"])
+print(hits)
+```
+
+---
+
+## Known limitations
+
+- **SMM (ring -2) and UEFI implants are not visible from userland.** No string can prove their absence. The firmware category only contains indirect indicators; a proper check requires an SPI dump compared against the vendor's official firmware.
+- **DMA leaves few traces on the gaming PC**, because the cheat runs on a second machine. The useful traces are hardware-related (PCI/USB devices, IOMMU, Kernel DMA Protection).
+- **Strings are easy to evade** through renaming, recompiling and obfuscation. They should be combined with hashes, PE metadata, digital signatures, YARA rules and timeline analysis.
+- **Cheat names change frequently:** the database needs regular updates.
+- Some generic strings (`Speed`, `Fly`, `TriggerServerEvent`) can cause false positives if used on their own.
+- The `VID_0403&PID_601E/601F/6010` (FTDI) and `DEV_0666` (PCILeech) IDs should be verified on real hardware before building a detection on them.
+
+---
+
+## Roadmap
+
+- [ ] Convert signatures into YARA rules with scoring
+- [ ] Automatic reading of registry, Prefetch, Amcache, BAM, USN Journal
+- [ ] PnP/PCI/USB enumeration and IOMMU / Kernel DMA Protection checks
+- [ ] Memory scanning of `javaw.exe` and `FiveM_*_GTAProcess.exe`
+- [ ] Digital signature and `OriginalFilename` verification of binaries
+- [ ] Final report (HTML/JSON) with risk score and timeline
+
+---
+
+## Contributing
+
+Pull requests and issues are welcome: new signatures, false positives, corrections to IDs and names. Always include the source or explain how you verified the signature.
+
+## Disclaimer
+
+This tool is intended for moderation and security purposes. Using it on systems without authorization is prohibited. The scanner's output is an **indicator**, not definitive proof: every ban decision should be confirmed by a manual review.
+
+## License
+
+Choose the license you prefer (e.g. MIT) and add a `LICENSE` file.
+
+```
+
+`signatures.json`:
+
+```json
+{
+  "meta": {
+    "name": "ScreenShare Forensic Scanner - Signature Database",
+    "schema_version": "2.0.0",
+    "database_version": "2.0.0",
+    "last_updated": "2026-10-26",
+    "language": "en",
+    "scope": ["FiveM", "Minecraft", "Windows 10/11"],
+    "purpose": "Defensive detection signatures for moderated screenshare sessions (kernel cheats, DMA, firmware/UEFI indicators, evasion).",
+    "warnings": [
+      "A single match is an INDICATOR, not proof. Always correlate and confirm manually before any sanction.",
+      "String matching alone is easy to evade (rename, recompile, obfuscate). Combine with hashes, PE metadata, signatures, YARA and timeline analysis.",
+      "SMM (ring -2) and UEFI implants cannot be proven absent from userland. Firmware rules are indirect indicators only.",
+      "Names of commercial cheats change often. Treat brand lists as community-sourced and review them regularly."
+    ],
+    "severity_weights": {
+      "critical": 100,
+      "high": 50,
+      "medium": 25,
+      "low": 10,
+      "info": 3
+    },
+    "confidence_levels": {
+      "high": "Specific, rarely seen outside cheating context.",
+      "medium": "Associated with cheating but also used by legitimate software.",
+      "low": "Generic term; only meaningful together with other matches."
+    },
+    "verdict_thresholds": {
+      "clean": [0, 39],
+      "needs_manual_review": [40, 99],
+      "suspicious": [100, 199],
+      "highly_suspicious": [200, null]
+    },
+    "match_types": {
+      "filename": "Case-insensitive match on file name (with or without extension).",
+      "path": "Case-insensitive match on a full or partial path; environment variables must be expanded.",
+      "process": "Case-insensitive match on process image name.",
+      "module": "Case-insensitive match on a loaded module (DLL/SYS) name.",
+      "memory_string": "ASCII and UTF-16LE string search in process memory.",
+      "registry": "Registry key or value path; supports prefix match.",
+      "event_id": "Windows Event Log ID (format: Channel:ID).",
+      "pnp_id": "PCI/USB hardware ID fragment (VEN_/DEV_/VID_/PID_).",
+      "device_name": "Friendly name or description of a PnP device.",
+      "command_line": "Substring in a command line, shell history or script.",
+      "pe_metadata": "PE header, version resource or section check.",
+      "check": "Procedural check described in text; not a literal pattern."
+    },
+    "rule_fields": {
+      "id": "Unique rule identifier.",
+      "severity": "critical | high | medium | low | info",
+      "confidence": "high | medium | low",
+      "targets": "Where the rule should be applied.",
+      "match": "One of match_types.",
+      "patterns": "List of strings to match (case-insensitive unless stated).",
+      "min_distinct_matches": "Minimum number of DIFFERENT patterns required before the rule fires.",
+      "false_positive_risk": "low | medium | high",
+      "notes": "Analyst guidance."
+    }
+  },
+
+  "allowlist": {
+    "_description": "Legitimate software that can legitimately contain or load items flagged below. Use to lower the score, never to skip a rule silently.",
+    "moderator_and_forensic_tools": [
+      "System Informer", "KSystemInformer.sys", "Process Hacker", "KProcessHacker.sys",
+      "Process Explorer", "PROCEXP152.SYS", "Autoruns", "Sysinternals", "Sysmon", "SysmonDrv",
+      "Everything", "Wireshark", "NPcap", "Hex Editor", "Registry Explorer", "Eric Zimmerman tools"
+    ],
+    "legitimate_software_using_flagged_drivers": [
+      { "driver": "RTCore64.sys", "software": ["MSI Afterburner", "RivaTuner Statistics Server"] },
+      { "driver": "cpuz141.sys", "software": ["CPU-Z"] },
+      { "driver": "WinRing0x64.sys", "software": ["OpenHardwareMonitor", "LibreHardwareMonitor", "FanControl", "SignalRGB", "OpenRGB"] },
+      { "driver": "ThrottleStop.sys", "software": ["ThrottleStop"] },
+      { "driver": "AsIO3.sys", "software": ["ASUS Armoury Crate", "AI Suite"] },
+      { "driver": "gdrv.sys", "software": ["Gigabyte App Center", "RGB Fusion"] },
+      { "driver": "dbutil_2_3.sys", "software": ["Dell Update / SupportAssist (old versions)"] },
+      { "driver": "VBoxDrv.sys", "software": ["VirtualBox"] },
+      { "driver": "ene.sys", "software": ["RGB controllers from ENE-based boards"] },
+      { "driver": "BS_RCIO64.sys", "software": ["Biostar utilities"] },
+      { "driver": "AMDRyzenMasterDriver.sys", "software": ["AMD Ryzen Master"] }
+    ],
+    "guidance": "A vulnerable driver is MUCH more suspicious when the matching legitimate software is NOT installed, when the service was created recently, or when the driver was loaded and removed shortly before the screenshare."
+  },
+
+  "categories": {
+
+    "dma_hardware": {
+      "description": "Hardware indicators of Direct Memory Access (DMA) cards and their USB/PCIe bridges.",
+      "rules": [
+        {
+          "id": "dma_pci_xilinx_vendor",
+          "severity": "medium",
+          "confidence": "medium",
+          "targets": ["HKLM\\SYSTEM\\CurrentControlSet\\Enum\\PCI", "Get-PnpDevice", "SetupAPI device list"],
+          "match": "pnp_id",
+          "patterns": ["VEN_10EE"],
+          "false_positive_risk": "medium",
+          "notes": "Xilinx vendor ID. Used by FPGA cards, including DMA hardware, but also by legitimate FPGA/capture hardware. Weight rises if combined with the rules below."
+        },
+        {
+          "id": "dma_pci_pcileech_default_ids",
+          "severity": "high",
+          "confidence": "medium",
+          "targets": ["HKLM\\SYSTEM\\CurrentControlSet\\Enum\\PCI", "Get-PnpDevice"],
+          "match": "pnp_id",
+          "patterns": ["VEN_10EE&DEV_0666", "VEN_10EE&DEV_7011", "VEN_10EE&DEV_7021", "VEN_10EE&DEV_7024"],
+          "false_positive_risk": "low",
+          "notes": "0666 is the default PCILeech FPGA device ID; the others are common Xilinx 7-series PCIe defaults. Verify on real hardware before relying on them."
+        },
+        {
+          "id": "dma_usb_ftdi_bridge",
+          "severity": "medium",
+          "confidence": "medium",
+          "targets": ["HKLM\\SYSTEM\\CurrentControlSet\\Enum\\USB", "Get-PnpDevice"],
+          "match": "pnp_id",
+          "patterns": ["VID_0403&PID_601E", "VID_0403&PID_601F", "VID_0403&PID_6010"],
+          "false_positive_risk": "medium",
+          "notes": "FTDI FT600/FT601/FT2232H bridges used by many DMA cards (screamer-style). Also used by legitimate dev boards. Check for a second PC or a USB link to another machine."
+        },
+        {
+          "id": "dma_card_brands_and_names",
+          "severity": "high",
+          "confidence": "medium",
+          "targets": ["PnP device names", "Installed programs", "Downloads folder", "Browser history"],
+          "match": "device_name",
+          "patterns": [
+            "PCIe Screamer", "ScreamerM2", "Screamer", "Squirrel", "Enigma X1", "LambdaConcept",
+            "Captain DMA", "NeoDMA", "Raptor DMA", "FPGA", "Artix", "Kintex", "Zynq"
+          ],
+          "false_positive_risk": "medium",
+          "notes": "Brand names change. Many cards present generic names such as 'PCI Memory Controller' or 'Data Acquisition and Signal Processing Controller'."
+        },
+        {
+          "id": "dma_generic_device_names",
+          "severity": "low",
+          "confidence": "low",
+          "targets": ["PnP device names"],
+          "match": "device_name",
+          "patterns": ["PCI Memory Controller", "RAM Memory Controller", "Data Acquisition and Signal Processing Controller", "Signal Processing Controller"],
+          "false_positive_risk": "high",
+          "notes": "Windows labels unknown PCI devices this way. Weak on its own."
+        },
+        {
+          "id": "dma_spoofed_id_checks",
+          "severity": "high",
+          "confidence": "medium",
+          "targets": ["PCI device inventory"],
+          "match": "check",
+          "checks": [
+            { "id": "spoofed_vendor_class_mismatch", "description": "PCI device shows a Realtek/Intel/Broadcom vendor ID but its class/subclass or capabilities do not match a NIC or controller from that vendor (firmware ID spoofing)." },
+            { "id": "no_driver_busmaster", "description": "PCI device with no driver (Code 28 or generic) while Bus Master is enabled." },
+            { "id": "bad_subsystem_id", "description": "Subsystem ID equal to 0000 or duplicated across unrelated devices." },
+            { "id": "pci_count_anomaly", "description": "Number of PCI endpoints higher than expected for the declared motherboard/chipset." },
+            { "id": "unexpected_pcie_link", "description": "A device negotiated as PCIe x1 Gen1/Gen2 on a slot or chipset lane where no known add-in card is expected." }
+          ],
+          "false_positive_risk": "medium"
+        },
+        {
+          "id": "dma_protection_disabled",
+          "severity": "medium",
+          "confidence": "high",
+          "targets": ["msinfo32", "Win32_DeviceGuard", "BIOS settings (manual)"],
+          "match": "check",
+          "checks": [
+            { "id": "iommu_off", "description": "IOMMU / VT-d / AMD-Vi disabled in firmware." },
+            { "id": "kernel_dma_protection_off", "description": "msinfo32 reports 'Kernel DMA Protection: Off'." },
+            { "id": "memory_integrity_off", "description": "HVCI / Memory Integrity disabled on hardware that supports it." }
+          ],
+          "false_positive_risk": "high",
+          "notes": "Many legitimate users have these off. Meaningful only together with DMA hardware indicators."
+        }
+      ]
+    },
+
+    "dma_software": {
+      "description": "Software, libraries and strings associated with DMA tooling (PCILeech, MemProcFS, LeechCore) and DMA-based cheats.",
+      "rules": [
+        {
+          "id": "dma_tool_files",
+          "severity": "high",
+          "confidence": "high",
+          "targets": ["Filesystem", "Prefetch", "Amcache", "BAM", "Downloads", "Recent files"],
+          "match": "filename",
+          "patterns": [
+            "pcileech.exe", "pcileech", "leechcore.dll", "leechagent.exe", "memprocfs.exe", "vmm.dll",
+            "FTD3XX.dll", "FTD3XX.lib", "pcileech-fpga", "pcileech-wifi", "LeechCore-plugins",
+            "DMALibrary", "dmalib"
+          ],
+          "false_positive_risk": "low"
+        },
+        {
+          "id": "dma_firmware_toolchain",
+          "severity": "medium",
+          "confidence": "medium",
+          "targets": ["Installed programs", "Prefetch", "Filesystem"],
+          "match": "filename",
+          "patterns": ["vivado.exe", "openFPGALoader", "xsdb", "hw_server.exe", "firmware.bin"],
+          "false_positive_risk": "medium",
+          "notes": "Used to flash or modify FPGA firmware (including ID spoofing). Rare on a normal gaming PC."
+        },
+        {
+          "id": "dma_api_memory_strings",
+          "severity": "critical",
+          "confidence": "high",
+          "targets": ["Process memory of any non-system process", "Overlay/radar processes", "Second-PC remote tools"],
+          "match": "memory_string",
+          "min_distinct_matches": 2,
+          "patterns": [
+            "VMMDLL_Initialize", "VMMDLL_MemRead", "VMMDLL_MemReadEx", "VMMDLL_MemWrite",
+            "VMMDLL_Scatter_Initialize", "VMMDLL_Scatter_PrepareEx", "VMMDLL_Scatter_ExecuteRead",
+            "VMMDLL_PidGetFromName", "VMMDLL_ProcessGetModuleBase", "VMMDLL_Close",
+            "LcCreate", "LcRead", "LcWrite", "LcClose", "LcCommand"
+          ],
+          "false_positive_risk": "low",
+          "notes": "These are exported API names of the MemProcFS/LeechCore libraries."
+        },
+        {
+          "id": "dma_command_line_strings",
+          "severity": "high",
+          "confidence": "high",
+          "targets": ["Shell history", "PowerShell history", "Run MRU", "Command lines in memory"],
+          "match": "command_line",
+          "patterns": ["-device fpga", "-device FPGA://", "FPGA://", "-memmap auto", "-waitinitialize", "pcileech.exe"],
+          "false_positive_risk": "low"
+        },
+        {
+          "id": "dma_support_drivers_and_registry",
+          "severity": "low",
+          "confidence": "low",
+          "targets": ["HKLM\\SYSTEM\\CurrentControlSet\\Services"],
+          "match": "registry",
+          "patterns": [
+            "HKLM\\SYSTEM\\CurrentControlSet\\Services\\dokan1",
+            "HKLM\\SYSTEM\\CurrentControlSet\\Services\\dokan2",
+            "HKLM\\SYSTEM\\CurrentControlSet\\Services\\ftdibus",
+            "HKLM\\SYSTEM\\CurrentControlSet\\Services\\ftd3xx"
+          ],
+          "false_positive_risk": "high",
+          "notes": "Dokan (userland filesystem, used by MemProcFS) and FTDI drivers have many legitimate uses."
+        },
+        {
+          "id": "dma_second_pc_remote_stack",
+          "severity": "medium",
+          "confidence": "low",
+          "targets": ["Processes", "Installed programs", "Capture devices", "Network connections"],
+          "match": "process",
+          "patterns": [
+            "looking-glass-client.exe", "looking-glass-host.exe", "parsecd.exe", "sunshine.exe",
+            "moonlight.exe", "rustdesk.exe", "anydesk.exe", "teamviewer.exe", "obs64.exe"
+          ],
+          "false_positive_risk": "high",
+          "notes": "Context only. Streaming/remote tools are common; they matter when an unexplained second machine or capture card is also present."
+        }
+      ]
+    },
+
+    "input_emulation_hardware": {
+      "description": "External hardware that emulates mouse/keyboard input (kmbox, Arduino, Pico, Teensy), often paired with DMA for undetectable aim assistance.",
+      "rules": [
+        {
+          "id": "kmbox_software_and_api",
+          "severity": "critical",
+          "confidence": "high",
+          "targets": ["Filesystem", "Process memory", "Loaded modules"],
+          "match": "memory_string",
+          "patterns": ["kmNet_init", "kmNet_mouse_move", "kmNet_mouse_left", "kmNet_monitor", "kmNet_keydown", "kmboxNet.dll", "kmbox.dll"],
+          "false_positive_risk": "low"
+        },
+        {
+          "id": "kmbox_names",
+          "severity": "high",
+          "confidence": "medium",
+          "targets": ["Device names", "Downloads", "Installed programs"],
+          "match": "device_name",
+          "patterns": ["kmbox", "KMBox Net", "kmboxNet", "MAKCU"],
+          "false_positive_risk": "low"
+        },
+        {
+          "id": "usb_serial_bridges_for_hid_emulators",
+          "severity": "low",
+          "confidence": "low",
+          "targets": ["HKLM\\SYSTEM\\CurrentControlSet\\Enum\\USB"],
+          "match": "pnp_id",
+          "patterns": ["VID_1A86&PID_7523", "USB-SERIAL CH340", "CH343", "CH9102"],
+          "false_positive_risk": "high",
+          "notes": "Common on hobby boards and cheap adapters. Only relevant with a COM port history and no known reason."
+        },
+        {
+          "id": "hid_microcontroller_boards",
+          "severity": "medium",
+          "confidence": "medium",
+          "targets": ["USB device history (LastArrivalDate)", "Device Manager"],
+          "match": "pnp_id",
+          "patterns": [
+            "VID_2341&PID_8036", "VID_2341", "VID_2A03", "VID_2E8A", "VID_16C0", "VID_239A", "VID_303A",
+            "Arduino Leonardo", "Arduino Micro", "Pro Micro", "Raspberry Pi Pico", "RP2040", "Teensy", "Digispark", "ESP32"
+          ],
+          "false_positive_risk": "medium",
+          "notes": "A microcontroller enumerated as a HID mouse or keyboard is a strong indicator. Check whether it appears as an extra mouse/keyboard device."
+        },
+        {
+          "id": "input_injection_software",
+          "severity": "medium",
+          "confidence": "medium",
+          "targets": ["Filesystem", "Services", "Drivers"],
+          "match": "filename",
+          "patterns": ["interception.dll", "interception.sys", "ghub_device.dll", "LogitechGHubDriver"],
+          "false_positive_risk": "medium",
+          "notes": "Interception is a legitimate driver framework but heavily used for input-based cheats."
+        },
+        {
+          "id": "input_api_strings_weak",
+          "severity": "low",
+          "confidence": "low",
+          "targets": ["Process memory of unknown processes"],
+          "match": "memory_string",
+          "min_distinct_matches": 3,
+          "patterns": ["SendInput", "mouse_event", "keybd_event", "SetCursorPos", "GetAsyncKeyState", "GetCursorPos"],
+          "false_positive_risk": "high",
+          "notes": "Extremely common in legitimate software. Only meaningful in a process that also matches other rules."
+        }
+      ]
+    },
+
+    "kernel_loaders_and_hypervisors": {
+      "description": "Tools used to load unsigned kernel code, bypass Driver Signature Enforcement, or run cheats below the OS (hypervisor/UEFI).",
+      "rules": [
+        {
+          "id": "kernel_mappers",
+          "severity": "critical",
+          "confidence": "high",
+          "targets": ["Filesystem", "Prefetch", "Amcache", "BAM", "Recent files", "Downloads"],
+          "match": "filename",
+          "patterns": [
+            "kdmapper", "kdmapper.exe", "kdu.exe", "Kernel Driver Utility", "drvmap", "drvmap.exe",
+            "dsefix.exe", "DSEFix", "ByePg", "ByePg.exe", "Turla Driver Loader", "TDL.exe", "mapper.exe"
+          ],
+          "false_positive_risk": "low",
+          "notes": "'mapper.exe' is generic: lower confidence when alone."
+        },
+        {
+          "id": "uefi_and_hypervisor_frameworks",
+          "severity": "high",
+          "confidence": "high",
+          "targets": ["Filesystem", "ESP partition", "Downloads"],
+          "match": "filename",
+          "patterns": [
+            "EfiGuard", "EfiGuardDxe", "EfiGuardDxe.efi", "Loader.efi", "Voyager", "HyperHide", "hvpp", "HyperDbg"
+          ],
+          "false_positive_risk": "medium",
+          "notes": "HyperDbg and hvpp are also legitimate research projects."
+        },
+        {
+          "id": "driver_loading_commands",
+          "severity": "medium",
+          "confidence": "medium",
+          "targets": ["PowerShell history", "CMD history", "Scripts (.bat/.ps1/.cmd)", "Event 4688 command lines"],
+          "match": "command_line",
+          "patterns": [
+            "sc create", "type= kernel", "sc start", "NtLoadDriver", "ZwLoadDriver", "NtUnloadDriver", "sc delete"
+          ],
+          "false_positive_risk": "medium",
+          "notes": "Look for sc create with type= kernel pointing to a non-standard path, followed by sc start and sc delete."
+        },
+        {
+          "id": "boot_configuration_tampering",
+          "severity": "high",
+          "confidence": "high",
+          "targets": ["Command history", "bcdedit /enum all", "Event 4688"],
+          "match": "command_line",
+          "patterns": [
+            "bcdedit /set testsigning on",
+            "bcdedit /set nointegritychecks on",
+            "bcdedit /set loadoptions DISABLE_INTEGRITY_CHECKS",
+            "bcdedit /set nx AlwaysOff",
+            "bcdedit /debug on",
+            "bcdedit /set hypervisorlaunchtype off"
+          ],
+          "false_positive_risk": "medium",
+          "notes": "Developers and some modders use these; verify the CURRENT bcdedit state, not only history."
+        },
+        {
+          "id": "desktop_test_mode_watermark",
+          "severity": "medium",
+          "confidence": "medium",
+          "targets": ["Screen capture", "Desktop"],
+          "match": "check",
+          "checks": [
+            { "id": "test_mode_watermark", "description": "'Test Mode' watermark in the bottom-right corner of the desktop (testsigning enabled). May be hidden by tools; confirm with bcdedit." }
+          ],
+          "false_positive_risk": "medium"
+        }
+      ]
+    },
+
+    "vulnerable_drivers_byovd": {
+      "description": "Known vulnerable signed drivers abused to read/write kernel or physical memory (BYOVD). Check the allowlist before scoring.",
+      "rules": [
+        {
+          "id": "byovd_drivers_loaded_or_present",
+          "severity": "high",
+          "confidence": "medium",
+          "targets": ["Loaded drivers", "HKLM\\SYSTEM\\CurrentControlSet\\Services", "C:\\Windows\\System32\\drivers", "%TEMP%", "Event 7045", "Sysmon 6"],
+          "match": "filename",
+          "patterns": [
+            "iqvw64e.sys", "iqvw64.sys", "capcom.sys", "gdrv.sys", "GIO.sys", "RTCore64.sys", "RTCore32.sys",
+            "dbutil_2_3.sys", "AsIO.sys", "AsIO2.sys", "AsIO3.sys", "AsrDrv101.sys", "AsrDrv102.sys",
+            "AsrDrv103.sys", "AsrDrv104.sys", "AsrDrv105.sys", "AsrDrv106.sys", "ene.sys", "WinRing0.sys",
+            "WinRing0x64.sys", "cpuz141.sys", "cpuz_x64.sys", "ATSZIO64.sys", "winio.sys", "winio32.sys",
+            "winio64.sys", "speedfan.sys", "mhyprot2.sys", "mhyprot3.sys", "ThrottleStop.sys", "NalDrv.sys",
+            "PhyMem.sys", "phymemx64.sys", "physmem.sys", "AMDRyzenMasterDriver.sys", "BS_RCIO64.sys",
+            "BS_Flash64.sys", "BS_I2cIo.sys", "msio64.sys", "msio32.sys", "inpoutx64.sys", "inpout32.sys",
+            "HwOs2Ec10x64.sys", "LnvMSRIO.sys", "rzpnk.sys", "nvoclock.sys", "viragt64.sys", "directio64.sys",
+            "ntiolib_x64.sys", "ntiolib.sys", "EneIo64.sys", "EneTechIo64.sys", "gmer64.sys", "AODDriver.sys",
+            "stdcdrv64.sys", "BdApiUtil64.sys", "AsUpIO.sys", "AsUpIO64.sys", "ArPot.sys", "wsftprm.sys",
+            "TrueSight.sys", "echo_driver.sys", "kEvP64.sys", "zamguard64.sys", "lha.sys", "RwDrv.sys",
+            "amifldrv64.sys"
+          ],
+          "false_positive_risk": "high",
+          "notes": "Many of these ship with legitimate utilities (see allowlist). Raise severity to critical if: the matching software is NOT installed, the service was created/removed recently, or the driver sits in a user-writable path."
+        },
+        {
+          "id": "cheat_engine_kernel_driver",
+          "severity": "high",
+          "confidence": "high",
+          "targets": ["Loaded drivers", "Services", "Filesystem"],
+          "match": "filename",
+          "patterns": ["dbk64.sys", "dbk32.sys", "cheatengine-x86_64.exe", "cheatengine-i386.exe"],
+          "false_positive_risk": "low",
+          "notes": "Cheat Engine's DBK driver can read/write arbitrary process memory from kernel mode."
+        },
+        {
+          "id": "driver_in_user_writable_path",
+          "severity": "critical",
+          "confidence": "high",
+          "targets": ["HKLM\\SYSTEM\\CurrentControlSet\\Services\\*\\ImagePath"],
+          "match": "check",
+          "checks": [
+            { "id": "service_imagepath_temp", "description": "Kernel service whose ImagePath is in %TEMP%, %APPDATA%, C:\\Users\\Public, C:\\ProgramData, a Downloads folder, or uses a \\??\\ prefix to a user path." },
+            { "id": "service_random_name", "description": "Kernel service with a random 6-16 character alphanumeric name." }
+          ],
+          "false_positive_risk": "low"
+        },
+        {
+          "id": "vulnerable_driver_blocklist_disabled",
+          "severity": "high",
+          "confidence": "high",
+          "targets": ["HKLM\\SYSTEM\\CurrentControlSet\\Control\\CI\\Config"],
+          "match": "registry",
+          "patterns": ["VulnerableDriverBlocklistEnable=0"],
+          "false_positive_risk": "low",
+          "notes": "Disabling the Microsoft Vulnerable Driver Blocklist is required for several BYOVD loaders to work."
+        }
+      ]
+    },
+
+    "kernel_artifacts": {
+      "description": "Strings, device names and structures typically found in kernel cheat drivers, loaders and their traces.",
+      "rules": [
+        {
+          "id": "kernel_driver_api_strings",
+          "severity": "high",
+          "confidence": "medium",
+          "targets": ["Unsigned or unknown .sys files", "Memory of loader processes"],
+          "match": "memory_string",
+          "min_distinct_matches": 4,
+          "patterns": [
+            "MmCopyVirtualMemory", "MmCopyMemory", "KeStackAttachProcess", "KeAttachProcess",
+            "PsLookupProcessByProcessId", "MmMapIoSpace", "MmMapIoSpaceEx", "MmGetPhysicalAddress",
+            "MmAllocateContiguousMemory", "ObRegisterCallbacks", "PsSetCreateProcessNotifyRoutine",
+            "IoCreateDevice", "IoCreateSymbolicLink", "ZwProtectVirtualMemory"
+          ],
+          "false_positive_risk": "high",
+          "notes": "Legitimate drivers import these APIs too. Strong only when the driver is unsigned, mapped, from a user path, or combined with IOCTL strings below."
+        },
+        {
+          "id": "kernel_device_paths",
+          "severity": "high",
+          "confidence": "medium",
+          "targets": ["Open handles", "Process memory", "Loader binaries"],
+          "match": "memory_string",
+          "patterns": [
+            "\\\\.\\PhysicalMemory", "\\Device\\PhysicalMemory", "\\\\.\\Nal", "\\\\.\\RTCore64", "\\\\.\\GIO",
+            "\\\\.\\WinRing0_1_2_0", "\\\\.\\DBUtil_2_3", "\\\\.\\ThrottleStop"
+          ],
+          "false_positive_risk": "medium"
+        },
+        {
+          "id": "kernel_ioctl_naming",
+          "severity": "medium",
+          "confidence": "low",
+          "targets": ["Unknown user-mode binaries"],
+          "match": "memory_string",
+          "min_distinct_matches": 2,
+          "patterns": ["IOCTL_READ_MEMORY", "IOCTL_WRITE_MEMORY", "IOCTL_GET_MODULE_BASE", "IOCTL_MAP_PHYSICAL", "kernel_read", "kernel_write"],
+          "false_positive_risk": "medium"
+        },
+        {
+          "id": "kernel_trace_structures",
+          "severity": "info",
+          "confidence": "medium",
+          "targets": ["Kernel memory analysis (advanced)", "Reference list for custom kernel scanners"],
+          "match": "check",
+          "checks": [
+            { "id": "piddb_cache", "description": "PiDDBCacheTable / PiDDBLock: records of loaded drivers; cheat loaders often wipe their entry. A missing entry for a known-loaded driver is a signal." },
+            { "id": "mmunloaded_drivers", "description": "MmUnloadedDrivers / MmLastUnloadedDriver: ring of recently unloaded drivers; loaders clear it." },
+            { "id": "hash_bucket_list", "description": "g_KernelHashBucketList / g_HashCacheLock: CI hash cache entries targeted by cleaners." },
+            { "id": "ci_options", "description": "g_CiOptions tampering (DSE disabled in memory)." }
+          ],
+          "false_positive_risk": "low",
+          "notes": "Requires kernel-level inspection (own driver or offline memory dump). Not reachable by plain userland string search."
+        },
+        {
+          "id": "capture_evasion_apis",
+          "severity": "medium",
+          "confidence": "medium",
+          "targets": ["Overlay processes", "Process memory"],
+          "match": "memory_string",
+          "patterns": ["SetWindowDisplayAffinity", "NtUserSetWindowDisplayAffinity", "WDA_EXCLUDEFROMCAPTURE", "WDA_MONITOR"],
+          "false_positive_risk": "medium",
+          "notes": "Used to make overlays invisible to screen capture. Legitimate for DRM or privacy apps (browsers, banking, password managers)."
+        }
+      ]
+    },
+
+    "firmware_uefi_smm_indicators": {
+      "description": "INDIRECT indicators of firmware, UEFI or SMM tampering. Nothing here can prove the absence of an SMM implant.",
+      "rules": [
+        {
+          "id": "firmware_tools_present",
+          "severity": "medium",
+          "confidence": "medium",
+          "targets": ["Filesystem", "Prefetch", "Amcache", "BAM", "Downloads"],
+          "match": "filename",
+          "patterns": [
+            "UEFITool", "UEFIExtract", "UEFIFind", "chipsec_main", "chipsec_util", "RWEverything", "Rw.exe", "RwDrv.sys",
+            "AFUWIN", "AFUWINx64", "AFUDOS", "AFUEFI", "fpt.exe", "fptw64.exe", "flashrom", "flashprog",
+            "ch341a", "CH341A", "ch341a_programmer", "RT809H", "RT809F", "Dediprog", "AMIDEWINx64", "AMIDEEFIx64"
+          ],
+          "false_positive_risk": "medium",
+          "notes": "Used by enthusiasts and service technicians too. High weight only if combined with spoofing indicators or a recent BIOS change."
+        },
+        {
+          "id": "uefi_malware_and_smm_projects",
+          "severity": "high",
+          "confidence": "medium",
+          "targets": ["Filesystem", "Downloads", "Source folders"],
+          "match": "filename",
+          "patterns": [
+            "SmmBackdoor", "SmmInfect", "SmmExploit", "DXE-Inject", "UEFI-Bootkit", "efi_rootkit", "EfiDXE",
+            "BlackLotus", "CosmicStrand", "MoonBounce", "LoJax", "ESPecter", "MosaicRegressor", "BmpBackdoor"
+          ],
+          "false_positive_risk": "low",
+          "notes": "Public PoCs and known UEFI malware families; also appear in security research folders."
+        },
+        {
+          "id": "esp_integrity_checks",
+          "severity": "high",
+          "confidence": "medium",
+          "targets": ["EFI System Partition (mountvol S: /S)"],
+          "match": "check",
+          "checks": [
+            { "id": "esp_boot_files_hash", "description": "Compare hashes and signatures of \\EFI\\Microsoft\\Boot\\bootmgfw.efi, bootmgr.efi and winload.efi with known Microsoft values." },
+            { "id": "esp_unknown_efi", "description": "Unsigned or non-Microsoft .efi files in \\EFI\\ other than expected OEM/boot manager entries." },
+            { "id": "esp_suspicious_dirs", "description": "Directories such as \\EFI\\Custom, \\EFI\\Loader, \\EFI\\Tools, or fallback \\EFI\\Boot\\bootx64.efi replaced." },
+            { "id": "esp_recent_modification", "description": "ESP file modification times that do not match Windows install or update dates." }
+          ],
+          "false_positive_risk": "medium",
+          "notes": "Dual-boot setups and OEM tools legitimately add .efi files."
+        },
+        {
+          "id": "secure_boot_state",
+          "severity": "medium",
+          "confidence": "high",
+          "targets": ["Confirm-SecureBootUEFI", "Get-SecureBootUEFI", "msinfo32"],
+          "match": "check",
+          "checks": [
+            { "id": "secure_boot_off", "description": "Secure Boot disabled or unsupported on hardware that supports it." },
+            { "id": "custom_secure_boot_keys", "description": "Custom PK/KEK/db entries not belonging to the OEM or Microsoft." },
+            { "id": "secure_boot_policy_nonstandard", "description": "Non-standard Secure Boot policy installed (Get-SecureBootPolicy)." }
+          ],
+          "false_positive_risk": "high",
+          "notes": "Many Linux dual-boot and older systems have Secure Boot off. Weak alone."
+        },
+        {
+          "id": "firmware_identity_anomalies",
+          "severity": "medium",
+          "confidence": "low",
+          "targets": ["SMBIOS (Win32_BIOS, Win32_BaseBoard)", "Event logs", "OEM site"],
+          "match": "check",
+          "checks": [
+            { "id": "smbios_default_strings", "description": "SMBIOS values such as 'To Be Filled By O.E.M.' or 'Default string' on a branded OEM machine (re-flashed or edited BIOS)." },
+            { "id": "bios_version_mismatch", "description": "BIOS version/date, AGESA or Intel ME version inconsistent with any public release for that board." },
+            { "id": "acpi_table_anomalies", "description": "Unexpected custom SSDT/DSDT tables or modified ACPI tables." },
+            { "id": "tpm_pcr_mismatch", "description": "Measured Boot log (C:\\Windows\\Logs\\MeasuredBoot) with PCR 0/2/4/7 values inconsistent with a known baseline." },
+            { "id": "spi_dump_mismatch", "description": "SPI flash dump hash differs from the vendor's official image (requires hardware programmer or CHIPSEC)." }
+          ],
+          "false_positive_risk": "high"
+        }
+      ]
+    },
+
+    "fivem": {
+      "description": "FiveM-specific cheat menus, executors, injected plugins, suspicious natives and event names, and relevant folders.",
+      "rules": [
+        {
+          "id": "fivem_cheat_brands",
+          "severity": "high",
+          "confidence": "medium",
+          "targets": ["Filesystem", "Process names", "Window titles", "Browser history", "Discord downloads", "Prefetch"],
+          "match": "filename",
+          "patterns": [
+            "Eulen", "EulenCheats", "RedEngine", "RedEngineCheats", "Lynx", "LynxMenu", "Hammafia", "HamMafia",
+            "Desudo", "Susano", "Brutan", "Dopamine", "Cipher", "Redstar", "Lumia", "Absolute", "Nexus"
+          ],
+          "false_positive_risk": "medium",
+          "notes": "Community-sourced and volatile. Some names are common words (Absolute, Nexus, Cipher): require an executable, DLL or menu-related context."
+        },
+        {
+          "id": "gta_menus_and_trainers",
+          "severity": "medium",
+          "confidence": "medium",
+          "targets": ["Filesystem", "FiveM plugins folder", "Prefetch"],
+          "match": "filename",
+          "patterns": [
+            "Menyoo", "NativeTrainer", "ScriptHookV.dll", "ScriptHookVDotNet", "OpenIV.asi", "asiloader",
+            "Stand", "2Take1", "2T1", "Cherax", "Kiddions", "Modest Menu", "Impulse"
+          ],
+          "false_positive_risk": "medium",
+          "notes": "Mostly GTA Online/single-player tools. Presence next to FiveM is suspicious; legitimate on a separate GTA V install."
+        },
+        {
+          "id": "executor_and_dumper_names",
+          "severity": "high",
+          "confidence": "medium",
+          "targets": ["Filesystem", "Downloads", "Prefetch"],
+          "match": "filename",
+          "patterns": [
+            "LuaExecutor", "FiveM Executor", "ResourceStopper", "ResourceBlocker", "ResourceDumper",
+            "ServerDumper", "ScriptDumper", "LuaDumper", "Dumper.dll", "ac_bypass", "anticheat_bypass"
+          ],
+          "false_positive_risk": "low"
+        },
+        {
+          "id": "fivem_lua_native_misuse",
+          "severity": "medium",
+          "confidence": "low",
+          "targets": ["Memory of FiveM_*_GTAProcess.exe", "Unknown .lua files outside server resources"],
+          "match": "memory_string",
+          "min_distinct_matches": 6,
+          "patterns": [
+            "SetEntityInvincible", "SetPlayerInvincible", "SetEntityCoordsNoOffset", "SetPedCanRagdoll",
+            "SetEntityVisible", "NetworkSetEntityInvisibleToNetwork", "SetEntityAlpha",
+            "SetPlayerWeaponDamageModifier", "SetPlayerMeleeWeaponDamageModifier", "SetSuperJumpThisFrame",
+            "SetPedMoveRateOverride", "SetRunSprintMultiplierForPlayer", "SetPedInfiniteAmmo",
+            "SetPedInfiniteAmmoClip", "GiveWeaponToPed", "FreezeEntityPosition", "SetEntityCollision",
+            "ShootSingleBulletBetweenCoords", "AddExplosion", "SetPedShootsAtCoord", "SetPlayerLockon",
+            "GetPedBoneCoords", "StopResource", "LoadResourceFile", "SaveResourceFile", "loadstring(", "assert(load"
+          ],
+          "false_positive_risk": "high",
+          "notes": "Every one of these appears in legitimate server resources. Only meaningful when found in user-side injected code or in unusual quantity together with executor strings."
+        },
+        {
+          "id": "fivem_event_abuse_strings",
+          "severity": "medium",
+          "confidence": "low",
+          "targets": ["Memory of FiveM_*_GTAProcess.exe", "Unknown Lua scripts"],
+          "match": "memory_string",
+          "min_distinct_matches": 3,
+          "patterns": [
+            "esx_ambulancejob:revive", "esx_policejob:handcuff", "esx_billing:sendBill", "esx_society:withdrawMoney",
+            "esx_dmvschool:addLicense", "esx_jobs:caution", "esx:giveInventoryItem", "esx_vehicleshop:setVehicleOwned",
+            "esx_garage:setParking", "vrp:payment", "ox_inventory:openInventory", "qb-vehicleshop:server:",
+            "qb-policejob:server:", "qb-ambulancejob:server:", "hospital:server:", "police:server:", "banking:server:"
+          ],
+          "false_positive_risk": "high",
+          "notes": "Cheat menus fire server events directly. Correlate with TriggerServerEvent strings in the client process."
+        },
+        {
+          "id": "fivem_screenshot_tampering",
+          "severity": "low",
+          "confidence": "low",
+          "targets": ["Memory of FiveM_*_GTAProcess.exe", "Resources"],
+          "match": "memory_string",
+          "patterns": ["screenshot-basic:requestScreenshot", "requestScreenshot", "uploadScreenshot"],
+          "false_positive_risk": "high",
+          "notes": "Legitimate anticheat uses these. Look for hooks or modified handlers instead of the strings alone."
+        },
+        {
+          "id": "fivem_user_paths",
+          "severity": "info",
+          "confidence": "high",
+          "targets": ["Filesystem"],
+          "match": "path",
+          "patterns": [
+            "%LOCALAPPDATA%\\FiveM\\FiveM.app\\plugins",
+            "%LOCALAPPDATA%\\FiveM\\FiveM.app\\CitizenFX.ini",
+            "%LOCALAPPDATA%\\FiveM\\FiveM.app\\logs",
+            "%LOCALAPPDATA%\\FiveM\\FiveM.app\\crashes",
+            "%LOCALAPPDATA%\\FiveM\\FiveM.app\\data\\cache",
+            "%LOCALAPPDATA%\\FiveM\\FiveM.app\\citizen\\scripting\\lua",
+            "%APPDATA%\\CitizenFX\\kvs",
+            "%LOCALAPPDATA%\\DigitalEntitlements"
+          ],
+          "false_positive_risk": "low",
+          "notes": "Locations to inspect: unexpected DLL/ASI files in plugins, modified CitizenFX.ini (IVPath/ExecutableName), recently deleted logs/kvs/DigitalEntitlements (ban evasion)."
+        },
+        {
+          "id": "fivem_process_module_checks",
+          "severity": "high",
+          "confidence": "medium",
+          "targets": ["FiveM.exe", "FiveM_*_GTAProcess.exe", "FiveM_GTAProcess.exe", "FiveM_ChromeBrowser.exe"],
+          "match": "check",
+          "checks": [
+            { "id": "unsigned_modules", "description": "Unsigned or unknown modules loaded in the FiveM game process." },
+            { "id": "foreign_threads", "description": "Threads whose start address is outside any loaded module (manual map / shellcode)." },
+            { "id": "executable_private_memory", "description": "Large private RX/RWX regions without a backing file." },
+            { "id": "physical_memory_handle", "description": "Handles to \\Device\\PhysicalMemory held by an unrelated process." },
+            { "id": "topmost_transparent_overlay", "description": "Topmost window with WS_EX_LAYERED | WS_EX_TRANSPARENT | WS_EX_TOOLWINDOW over the game, belonging to a non-standard process." },
+            { "id": "dll_hijack_names", "description": "Unexpected dinput8.dll, d3d11.dll, version.dll, winmm.dll next to the game executables." }
+          ],
+          "false_positive_risk": "medium",
+          "notes": "NVIDIA, Discord, Steam and OBS overlays are legitimate; verify signer."
+        }
+      ]
+    },
+
+    "minecraft": {
+      "description": "Minecraft cheat clients, Java agent injection, module names in javaw.exe memory, mixins, obfuscators, autoclickers and macros.",
+      "rules": [
+        {
+          "id": "mc_cheat_clients_high_confidence",
+          "severity": "high",
+          "confidence": "high",
+          "targets": ["Filesystem", "Version folders", "Mods folder", "Process memory of javaw.exe", "Prefetch"],
+          "match": "filename",
+          "patterns": [
+            "Wurst", "Meteor Client", "meteor-client", "Impact Client", "Aristois", "LiquidBounce", "Vape V4", "Vape Lite",
+            "Novoline", "Astolfo", "Tenacity", "Exhibition", "RusherHack", "rusherhack", "Konas", "Phobos", "SalHack",
+            "BleachHack", "ThunderHack", "Future Client", "KamiBlue", "Huzuni", "Seppuku", "Wolfram", "Inertia",
+            "Doomsday", "DoomsDay", "Rise Client", "Raven B4", "Raven B+", "Drip Client", "Sigma Client", "Opai",
+            "Whiteout", "Entropy Client", "Slinky"
+          ],
+          "false_positive_risk": "low",
+          "notes": "Several names are common words (Future, Rise, Sigma, Drip, Entropy); match them as 'Name Client', jar names, or folder names under .minecraft."
+        },
+        {
+          "id": "mc_cheat_client_folders",
+          "severity": "high",
+          "confidence": "medium",
+          "targets": ["%APPDATA%\\.minecraft\\*"],
+          "match": "path",
+          "patterns": [
+            "%APPDATA%\\.minecraft\\wurst", "%APPDATA%\\.minecraft\\meteor-client", "%APPDATA%\\.minecraft\\liquidbounce",
+            "%APPDATA%\\.minecraft\\Impact", "%APPDATA%\\.minecraft\\Future", "%APPDATA%\\.minecraft\\vape",
+            "%APPDATA%\\.minecraft\\rise", "%APPDATA%\\.minecraft\\Sigma", "%APPDATA%\\.minecraft\\Novoline",
+            "%APPDATA%\\.minecraft\\rusherhack", "%APPDATA%\\.minecraft\\Konas", "%APPDATA%\\.minecraft\\Aristois",
+            "%APPDATA%\\.minecraft\\ThunderHack"
+          ],
+          "false_positive_risk": "medium"
+        },
+        {
+          "id": "mc_modules_in_javaw_memory",
+          "severity": "high",
+          "confidence": "medium",
+          "targets": ["Memory of javaw.exe / Minecraft process"],
+          "match": "memory_string",
+          "min_distinct_matches": 8,
+          "patterns": [
+            "KillAura", "Killaura", "TriggerBot", "AimAssist", "AimBot", "Reach", "Hitbox", "HitBox", "Velocity",
+            "AntiKnockback", "AutoClicker", "LeftClicker", "RightClicker", "JitterClick", "ButterflyClick",
+            "Scaffold", "Tower", "NoFall", "Criticals", "Backtrack", "Blink", "FastPlace", "FastBreak", "Nuker",
+            "AutoArmor", "AutoTotem", "AutoPot", "AutoGapple", "CrystalAura", "AutoCrystal", "Surround", "HoleFiller",
+            "AutoTrap", "Xray", "X-Ray", "Tracers", "Nametags", "Chams", "Fullbright", "NoSlow", "NoSlowdown",
+            "Jesus", "Spider", "Phase", "LongJump", "InventoryMove", "ChestStealer", "InvManager", "AntiBot",
+            "Disabler", "SafeWalk", "KeepSprint", "WTap", "BlockHit", "AutoBlock", "FastBow", "BowAimbot",
+            "Freecam", "ClickGui", "ClickGUI", "ModuleManager"
+          ],
+          "false_positive_risk": "medium",
+          "notes": "Individual words are generic. A high count of DISTINCT module names in one process is the signal."
+        },
+        {
+          "id": "mc_client_framework_strings",
+          "severity": "medium",
+          "confidence": "medium",
+          "targets": ["Memory of javaw.exe", "Jar files (class names, package names)"],
+          "match": "memory_string",
+          "min_distinct_matches": 3,
+          "patterns": ["@EventTarget", "@Subscribe", "EventBus", "event/impl/", "client/module/", "module/impl/", "ClickGui", "ModuleToggle"],
+          "false_positive_risk": "high",
+          "notes": "Legitimate mods use event buses too. Combine with module names."
+        },
+        {
+          "id": "mc_java_agent_and_injection",
+          "severity": "critical",
+          "confidence": "medium",
+          "targets": ["Process memory of javaw.exe", "Command line of javaw.exe", "launcher_profiles.json (javaArgs)"],
+          "match": "memory_string",
+          "min_distinct_matches": 2,
+          "patterns": [
+            "-javaagent:", "agentmain", "premain", "Premain-Class", "Agent-Class", "Can-Retransform-Classes",
+            "Can-Redefine-Classes", "retransformClasses", "redefineClasses", "ClassFileTransformer",
+            "VirtualMachine.attach", "VirtualMachine.loadAgent", "attach_hotspot_windows",
+            "JNI_GetCreatedJavaVMs", "GetCreatedJavaVMs", "AttachCurrentThread", "DefineClass", "jvmti"
+          ],
+          "false_positive_risk": "medium",
+          "notes": "Profilers, debuggers and some legitimate mods (e.g. Java agents for instrumentation) use these. Inspect the agent jar and its origin."
+        },
+        {
+          "id": "mc_native_injection_primitives",
+          "severity": "high",
+          "confidence": "medium",
+          "targets": ["Injectors (unknown exe)", "Memory of unknown processes"],
+          "match": "memory_string",
+          "min_distinct_matches": 3,
+          "patterns": [
+            "ReflectiveDllInjection", "ManualMap", "LoadLibraryA", "LoadLibraryW", "CreateRemoteThread",
+            "NtCreateThreadEx", "QueueUserAPC", "RtlCreateUserThread", "VirtualAllocEx", "WriteProcessMemory",
+            "NtWriteVirtualMemory", "NtMapViewOfSection", "SetWindowsHookEx"
+          ],
+          "false_positive_risk": "high",
+          "notes": "Standard injection toolbox. Strong only in an unknown/unsigned process that targets javaw.exe."
+        },
+        {
+          "id": "mc_obfuscators_and_protectors",
+          "severity": "low",
+          "confidence": "low",
+          "targets": ["Jar manifests and class names", "Memory of javaw.exe"],
+          "match": "memory_string",
+          "patterns": [
+            "ZelixKlassMaster", "ZKM", "Allatori", "Skidfuscator", "JNIC", "Paramorphism", "Caesium", "Stringer",
+            "DashO", "qProtect", "Binscure", "Bozar", "Superblaubeere", "Branchlock", "Radon"
+          ],
+          "false_positive_risk": "high",
+          "notes": "Obfuscators are used by legitimate paid mods too. Heavy obfuscation of a jar in the mods folder plus class names of 1-2 characters is the actual signal."
+        },
+        {
+          "id": "mc_mods_folder_checks",
+          "severity": "high",
+          "confidence": "medium",
+          "targets": ["%APPDATA%\\.minecraft\\mods", "%APPDATA%\\.minecraft\\libraries", "%APPDATA%\\.minecraft\\versions"],
+          "match": "check",
+          "checks": [
+            { "id": "jar_with_mixins_unknown_origin", "description": "Jar containing mixin configs and classes under a package that does not match any known mod." },
+            { "id": "short_class_names", "description": "Jar where most classes are named a/b/c, aa/ab, or use unprintable characters." },
+            { "id": "jar_in_libraries_outside_standard", "description": "Unexpected jar placed in libraries/ or versions/ that is not referenced by the official version JSON." },
+            { "id": "launcher_profile_custom_jvm_args", "description": "launcher_profiles.json entries with -javaagent, -Xbootclasspath/a or custom injection args." },
+            { "id": "recent_modification_before_check", "description": "Mods or logs modified/deleted shortly before the screenshare (compare latest.log timestamps and USN Journal)." }
+          ],
+          "false_positive_risk": "medium"
+        },
+        {
+          "id": "mc_autoclickers_and_macros",
+          "severity": "medium",
+          "confidence": "medium",
+          "targets": ["Processes", "Filesystem", "Prefetch", "Startup entries"],
+          "match": "process",
+          "patterns": [
+            "OP Auto Clicker", "GS Auto Clicker", "Free Auto Clicker", "Speed AutoClicker", "FastClicker",
+            "Murgee", "XMouseButtonControl", "TinyTask", "tinytask.exe", "Pulover", "AutoHotkey", "AutoHotkeyU64.exe",
+            ".ahk", "Macro Recorder", "JitBit"
+          ],
+          "false_positive_risk": "medium",
+          "notes": "Check peripheral software too: Logitech G HUB, Razer Synapse, Corsair iCUE, SteelSeries Engine, Bloody, A4Tech macros and Lua scripts (OnEvent) that can emulate clicks."
+        },
+        {
+          "id": "mc_hid_cheating_devices",
+          "severity": "high",
+          "confidence": "medium",
+          "targets": ["USB device history", "Device Manager"],
+          "match": "device_name",
+          "patterns": ["Cronus", "CronusZen", "XIM", "Titan Two", "Strike Pack"],
+          "false_positive_risk": "low",
+          "notes": "Input-modifying devices mostly seen with console/controller play, but also appear on PC cheating setups."
+        }
+      ]
+    },
+
+    "evasion_and_anti_forensics": {
+      "description": "Indicators that the user tried to hide traces, wiped logs, masked binaries or evaded the screenshare.",
+      "rules": [
+        {
+          "id": "event_log_cleared",
+          "severity": "high",
+          "confidence": "high",
+          "targets": ["Security log", "System log", "Sysmon log"],
+          "match": "event_id",
+          "patterns": ["Security:1102", "System:104", "Microsoft-Windows-Sysmon/Operational:104"],
+          "false_positive_risk": "low",
+          "notes": "Check the timestamp: a log cleared shortly before the screenshare is highly suspicious."
+        },
+        {
+          "id": "time_tampering",
+          "severity": "high",
+          "confidence": "high",
+          "targets": ["Security log"],
+          "match": "event_id",
+          "patterns": ["Security:4616", "System:Kernel-General:1"],
+          "false_positive_risk": "medium",
+          "notes": "System time change; automatic NTP syncs are usually small. Look for large jumps."
+        },
+        {
+          "id": "defender_tampering_events",
+          "severity": "medium",
+          "confidence": "medium",
+          "targets": ["Microsoft-Windows-Windows Defender/Operational"],
+          "match": "event_id",
+          "patterns": ["Defender:5001", "Defender:5007", "Defender:5010", "Defender:5012"],
+          "false_positive_risk": "medium"
+        },
+        {
+          "id": "defender_exclusions_and_disable",
+          "severity": "medium",
+          "confidence": "medium",
+          "targets": ["Registry", "PowerShell history"],
+          "match": "registry",
+          "patterns": [
+            "HKLM\\SOFTWARE\\Microsoft\\Windows Defender\\Exclusions\\Paths",
+            "HKLM\\SOFTWARE\\Microsoft\\Windows Defender\\Exclusions\\Processes",
+            "HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows Defender\\DisableAntiSpyware=1",
+            "Set-MpPreference -ExclusionPath", "Add-MpPreference -ExclusionPath",
+            "Set-MpPreference -DisableRealtimeMonitoring $true"
+          ],
+          "false_positive_risk": "medium",
+          "notes": "Exclusions pointing at game folders or Temp/AppData paths are more suspicious than a generic exclusion."
+        },
+        {
+          "id": "artifact_wiping_commands",
+          "severity": "high",
+          "confidence": "medium",
+          "targets": ["PowerShell/CMD history", "Event 4688", "Scripts", "Prefetch"],
+          "match": "command_line",
+          "patterns": [
+            "wevtutil cl", "wevtutil clear-log", "Clear-EventLog", "Remove-EventLog", "fsutil usn deletejournal",
+            "vssadmin delete shadows", "wmic shadowcopy delete", "cipher /w:", "sdelete", "sdelete64.exe",
+            "del /f /q %SystemRoot%\\Prefetch\\*", "Remove-Item *.pf"
+          ],
+          "false_positive_risk": "low"
+        },
+        {
+          "id": "cleaner_tools",
+          "severity": "low",
+          "confidence": "low",
+          "targets": ["Filesystem", "Prefetch", "Installed programs"],
+          "match": "process",
+          "patterns": ["BleachBit", "CCleaner", "ccleaner64.exe", "Eraser", "PrivaZer", "Wise Disk Cleaner"],
+          "false_positive_risk": "high",
+          "notes": "Very common legitimate tools. Check last run time relative to the screenshare."
+        },
+        {
+          "id": "forensic_source_disabled_or_empty",
+          "severity": "medium",
+          "confidence": "medium",
+          "targets": ["Registry", "Filesystem"],
+          "match": "check",
+          "checks": [
+            { "id": "prefetch_disabled", "description": "EnablePrefetcher=0 or SysMain disabled (HKLM\\SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Memory Management\\PrefetchParameters)." },
+            { "id": "prefetch_nearly_empty", "description": "C:\\Windows\\Prefetch with very few files on a machine with long uptime history." },
+            { "id": "amcache_recently_rewritten", "description": "Amcache.hve missing, empty or modified shortly before the check." },
+            { "id": "usn_journal_reset", "description": "USN Journal recreated or with a start date after the suspected activity." },
+            { "id": "bam_userassist_wiped", "description": "BAM, UserAssist, MuiCache or AppCompatCache keys empty or recently deleted." },
+            { "id": "recent_files_wiped", "description": "Recent, Jump Lists and Thumbcache empty on an actively used account." },
+            { "id": "recycle_bin_emptied", "description": "Recycle Bin emptied shortly before the check." }
+          ],
+          "false_positive_risk": "medium",
+          "notes": "Gaps and missing data are often stronger evidence than any single string."
+        },
+        {
+          "id": "anti_screenshare_hiding",
+          "severity": "medium",
+          "confidence": "medium",
+          "targets": ["Processes", "Windows", "Desktops"],
+          "match": "check",
+          "checks": [
+            { "id": "virtual_desktop_hiding", "description": "Additional virtual desktops or a hidden desktop (CreateDesktop/SwitchDesktop) holding cheat processes." },
+            { "id": "sandbox_or_vm", "description": "Sandboxie, Windows Sandbox or a VM (vmwp.exe, VBoxHeadless.exe, qemu-system-x86_64.exe, vmware-vmx.exe) running alongside the game." },
+            { "id": "hidden_windows", "description": "Windows hidden via ShowWindow(SW_HIDE) or WS_EX_TOOLWINDOW belonging to unknown processes." },
+            { "id": "capture_exclusion", "description": "Windows excluded from capture via SetWindowDisplayAffinity." },
+            { "id": "recent_shutdown_or_process_kill", "description": "Processes terminated or services stopped immediately after the screenshare was requested (Event 4689, 7036, Sysmon 5)." }
+          ],
+          "false_positive_risk": "medium"
+        },
+        {
+          "id": "masked_or_renamed_binaries",
+          "severity": "high",
+          "confidence": "medium",
+          "targets": ["Executables and drivers in user-writable paths", "%TEMP%", "%APPDATA%", "C:\\Users\\Public", "C:\\ProgramData", "C:\\Windows\\Tasks", "$Recycle.Bin"],
+          "match": "pe_metadata",
+          "checks": [
+            { "id": "originalfilename_mismatch", "description": "PE OriginalFilename differs from the file name on disk." },
+            { "id": "generic_or_empty_version_info", "description": "Empty or generic ProductName/CompanyName/FileDescription on an executable outside System32." },
+            { "id": "invalid_or_missing_signature", "description": "Executable with an invalid, revoked or missing signature (WinVerifyTrust)." },
+            { "id": "random_filename", "description": "File name matching ^[a-zA-Z0-9]{8,16}\\.(exe|sys|dll)$ in a user-writable folder." },
+            { "id": "disguised_extension", "description": "File with .jpg/.png/.txt/.dat/.tmp/.log/.bin extension but an MZ (4D 5A) header." },
+            { "id": "alternate_data_streams", "description": "Executable payloads stored inside NTFS alternate data streams (dir /r, Get-Item -Stream *)." },
+            { "id": "missing_mark_of_the_web", "description": "Executable downloaded by a browser but missing Zone.Identifier." },
+            { "id": "high_entropy_sections", "description": "Sections or overlay with entropy above 7.2 (packed/encrypted)." },
+            { "id": "minimal_imports", "description": "Import table reduced to LoadLibrary/GetProcAddress only." },
+            { "id": "timestamp_anomalies", "description": "PE TimeDateStamp equal to zero, in the future, or file timestamps modified (timestomping)." },
+            { "id": "suspicious_pdb_path", "description": "Debug (PDB) path containing words such as cheat, hack, inject, loader, driver, bypass, aimbot, esp, kdmapper, dma, radar, spoofer." }
+          ],
+          "false_positive_risk": "medium"
+        },
+        {
+          "id": "packer_section_names",
+          "severity": "medium",
+          "confidence": "medium",
+          "targets": ["PE section table"],
+          "match": "pe_metadata",
+          "patterns": [
+            "UPX0", "UPX1", ".vmp0", ".vmp1", ".themida", ".enigma1", ".aspack", ".adata", ".MPRESS1",
+            ".nsp0", ".nsp1", ".petite"
+          ],
+          "false_positive_risk": "medium",
+          "notes": "VMProtect, Themida, Enigma, UPX, ASPack, MPRESS. Commercial software also uses these; weight by context."
+        },
+        {
+          "id": "obfuscated_powershell",
+          "severity": "medium",
+          "confidence": "medium",
+          "targets": ["PowerShell history", "Event 4688", "Scheduled tasks", "Startup scripts"],
+          "match": "command_line",
+          "patterns": [
+            "powershell -enc", "powershell -w hidden", "-ExecutionPolicy Bypass", "FromBase64String",
+            "IEX (New-Object Net.WebClient)", "DownloadString("
+          ],
+          "false_positive_risk": "medium"
+        }
+      ]
+    },
+
+    "hwid_spoofing_and_ban_evasion": {
+      "description": "Tools and artifacts used to change hardware identifiers and evade bans (FiveM and anticheat bans).",
+      "rules": [
+        {
+          "id": "spoofer_tools",
+          "severity": "high",
+          "confidence": "medium",
+          "targets": ["Filesystem", "Prefetch", "Amcache", "BAM", "Downloads"],
+          "match": "filename",
+          "patterns": [
+            "HWID Spoofer", "hwid_spoofer", "HWIDSpoofer", "spoofer.exe", "FiveM Spoofer", "GTA Spoofer",
+            "Perm Spoofer", "Temp Spoofer", "hwid changer", "UnbanTool", "FiveM Unban", "FiveM ban fix", "FiveM cleaner",
+            "FiveM Trace Cleaner", "Fix Ban"
+          ],
+          "false_positive_risk": "low"
+        },
+        {
+          "id": "identifier_changer_utilities",
+          "severity": "medium",
+          "confidence": "medium",
+          "targets": ["Filesystem", "Prefetch", "Command history"],
+          "match": "filename",
+          "patterns": [
+            "AMIDEWINx64", "amidewin", "AMIDEEFIx64", "DMIEdit", "dmidecode", "VolumeID.exe", "volumeid64.exe",
+            "Technitium MAC Address Changer", "TMAC", "MACChanger"
+          ],
+          "false_positive_risk": "medium",
+          "notes": "Used legitimately by repair technicians; suspicious near a ban or on a gaming PC."
+        },
+        {
+          "id": "identifier_registry_changes",
+          "severity": "medium",
+          "confidence": "medium",
+          "targets": ["Registry (check last write time)"],
+          "match": "registry",
+          "patterns": [
+            "HKLM\\SOFTWARE\\Microsoft\\Cryptography\\MachineGuid",
+            "HKLM\\SYSTEM\\CurrentControlSet\\Control\\IDConfigDB\\Hardware Profiles\\0001\\HwProfileGuid",
+            "HKLM\\SYSTEM\\CurrentControlSet\\Control\\SystemInformation",
+            "HKLM\\HARDWARE\\DESCRIPTION\\System\\BIOS",
+            "HKLM\\HARDWARE\\DEVICEMAP\\Scsi"
+          ],
+          "false_positive_risk": "medium",
+          "notes": "Compare MachineGuid and install date with FiveM logs and Windows installation date. A MachineGuid changed after Windows was installed is a strong indicator."
+        },
+        {
+          "id": "fivem_ban_evasion_artifacts",
+          "severity": "medium",
+          "confidence": "medium",
+          "targets": ["Filesystem", "Registry"],
+          "match": "path",
+          "patterns": [
+            "%LOCALAPPDATA%\\DigitalEntitlements",
+            "%APPDATA%\\CitizenFX\\kvs",
+            "%APPDATA%\\CitizenFX\\ros_id.dat",
+            "%LOCALAPPDATA%\\FiveM\\FiveM.app\\cache"
+          ],
+          "false_positive_risk": "medium",
+          "notes": "Look for these folders being recently deleted/recreated, or FiveM reinstalled just before the check, especially right after a ban."
+        },
+        {
+          "id": "spoofer_driver_and_install_signals",
+          "severity": "high",
+          "confidence": "medium",
+          "targets": ["Event 7045", "Sysmon 6", "Services"],
+          "match": "check",
+          "checks": [
+            { "id": "driver_loaded_then_removed", "description": "Kernel service installed (7045) and removed shortly after; typical of temporary spoofers." },
+            { "id": "windows_install_date_recent", "description": "Windows install date very recent while the account/profile history is old or other devices show long usage." },
+            { "id": "disk_serial_inconsistency", "description": "Disk or volume serials differing between registry, WMI and raw queries." },
+            { "id": "mac_changed_recently", "description": "NIC MAC address registry override (NetworkAddress) present." }
+          ],
+          "false_positive_risk": "medium"
+        }
+      ]
+    },
+
+    "forensic_artifact_sources": {
+      "description": "Where to look. Not detections themselves: a map of Windows artifacts useful for building a timeline.",
+      "rules": [
+        {
+          "id": "execution_artifacts",
+          "severity": "info",
+          "confidence": "high",
+          "targets": ["Registry", "Filesystem"],
+          "match": "path",
+          "patterns": [
+            "C:\\Windows\\Prefetch",
+            "C:\\Windows\\AppCompat\\Programs\\Amcache.hve",
+            "HKLM\\SYSTEM\\CurrentControlSet\\Control\\Session Manager\\AppCompatCache",
+            "HKLM\\SYSTEM\\CurrentControlSet\\Services\\bam\\State\\UserSettings",
+            "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\UserAssist",
+            "HKCU\\Software\\Classes\\Local Settings\\Software\\Microsoft\\Windows\\Shell\\MuiCache",
+            "HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\AppCompatFlags\\Compatibility Assistant\\Store",
+            "C:\\Windows\\System32\\sru\\SRUDB.dat",
+            "%LOCALAPPDATA%\\ConnectedDevicesPlatform"
+          ]
+        },
+        {
+          "id": "file_system_artifacts",
+          "severity": "info",
+          "confidence": "high",
+          "targets": ["NTFS volume"],
+          "match": "path",
+          "patterns": [
+            "$MFT", "$UsnJrnl:$J", "$LogFile", "$Recycle.Bin",
+            "%APPDATA%\\Microsoft\\Windows\\Recent",
+            "%APPDATA%\\Microsoft\\Windows\\Recent\\AutomaticDestinations",
+            "%LOCALAPPDATA%\\Microsoft\\Windows\\Explorer (thumbcache, iconcache)"
+          ]
+        },
+        {
+          "id": "device_and_driver_artifacts",
+          "severity": "info",
+          "confidence": "high",
+          "targets": ["Registry", "Filesystem"],
+          "match": "path",
+          "patterns": [
+            "HKLM\\SYSTEM\\CurrentControlSet\\Enum\\USB",
+            "HKLM\\SYSTEM\\CurrentControlSet\\Enum\\PCI",
+            "HKLM\\SYSTEM\\CurrentControlSet\\Enum\\USBSTOR",
+            "HKLM\\SYSTEM\\CurrentControlSet\\Services",
+            "C:\\Windows\\INF\\setupapi.dev.log",
+            "C:\\Windows\\System32\\drivers"
+          ],
+          "notes": "Use LastArrivalDate / LastRemovalDate on device keys to place USB and PCI events on the timeline."
+        },
+        {
+          "id": "event_log_sources",
+          "severity": "info",
+          "confidence": "high",
+          "targets": ["Event Viewer / .evtx files"],
+          "match": "event_id",
+          "patterns": [
+            "System:7045 (new service installed)",
+            "System:7036 (service state change)",
+            "System:7040 (service start type changed)",
+            "Security:4688 (process creation)",
+            "Security:4689 (process exit)",
+            "Microsoft-Windows-CodeIntegrity/Operational:3033",
+            "Microsoft-Windows-CodeIntegrity/Operational:3034",
+            "Microsoft-Windows-CodeIntegrity/Operational:3076",
+            "Microsoft-Windows-CodeIntegrity/Operational:3077",
+            "Microsoft-Windows-Kernel-PnP/Configuration (device events)",
+            "Microsoft-Windows-Sysmon/Operational:1 (process), 5 (terminate), 6 (driver load), 12/13/14 (registry), 11 (file create)"
+          ]
+        }
+      ]
+    }
+  },
+
+  "correlation_rules": {
+    "_description": "Combinations of rules that raise the verdict regardless of individual weights. Scanner should evaluate these after all categories.",
+    "rules": [
+      {
+        "id": "corr_dma_full_stack",
+        "severity": "critical",
+        "when_all": ["dma_hardware (any high/critical rule)", "dma_software OR input_emulation_hardware (any rule)"],
+        "bonus_score": 150,
+        "explanation": "DMA hardware indicators together with DMA software or external input emulation."
+      },
+      {
+        "id": "corr_dma_with_protection_off",
+        "severity": "high",
+        "when_all": ["dma_hardware (PCI/USB indicators)", "dma_protection_disabled"],
+        "bonus_score": 60,
+        "explanation": "DMA-capable hardware together with IOMMU/Kernel DMA Protection disabled."
+      },
+      {
+        "id": "corr_byovd_loader_chain",
+        "severity": "critical",
+        "when_all": ["vulnerable_drivers_byovd (driver present or loaded)", "kernel_loaders_and_hypervisors (mapper/loader or sc create/start)", "driver_loaded_then_removed OR event 7045 in last 24h"],
+        "bonus_score": 150,
+        "explanation": "Classic kernel cheat chain: vulnerable driver, loader/mapper and a short-lived service."
+      },
+      {
+        "id": "corr_byovd_without_legit_software",
+        "severity": "high",
+        "when_all": ["vulnerable_drivers_byovd (match)", "matching legitimate software from allowlist NOT installed"],
+        "bonus_score": 60,
+        "explanation": "A vulnerable driver is present but the software that normally ships it is not installed."
+      },
+      {
+        "id": "corr_evasion_before_screenshare",
+        "severity": "high",
+        "when_all": ["evasion_and_anti_forensics (log cleared OR artifact wiping OR forensic source disabled)", "event within 24h before the screenshare"],
+        "bonus_score": 80,
+        "explanation": "Traces were wiped shortly before the check."
+      },
+      {
+        "id": "corr_spoofer_plus_ban_context",
+        "severity": "high",
+        "when_all": ["hwid_spoofing_and_ban_evasion (any rule)", "FiveM reinstall or DigitalEntitlements/kvs recently recreated"],
+        "bonus_score": 70,
+        "explanation": "Likely hardware ID spoofing to evade a ban."
+      },
+      {
+        "id": "corr_fivem_injection",
+        "severity": "critical",
+        "when_all": ["fivem (process_module_checks: unsigned module OR foreign thread OR RWX region)", "fivem (executor/menu names OR event abuse strings)"],
+        "bonus_score": 120,
+        "explanation": "Injected code in the game process together with cheat-related names or strings."
+      },
+      {
+        "id": "corr_minecraft_injection",
+        "severity": "critical",
+        "when_all": ["minecraft (java agent/injection OR native injection)", "minecraft (modules_in_javaw_memory OR cheat client names)"],
+        "bonus_score": 120,
+        "explanation": "Injection into javaw.exe together with cheat modules or known clients."
+      },
+      {
+        "id": "corr_firmware_tampering_suspected",
+        "severity": "high",
+        "when_all": ["firmware_uefi_smm_indicators (firmware tools OR ESP anomalies OR custom Secure Boot keys)", "any DMA or kernel cheat indicator"],
+        "bonus_score": 80,
+        "explanation": "Firmware-level tooling or boot anomalies alongside other cheat indicators. Still indirect: recommend an SPI dump and official-image comparison."
+      },
+      {
+        "id": "corr_capture_evasion_overlay",
+        "severity": "high",
+        "when_all": ["capture_evasion_apis (SetWindowDisplayAffinity)", "topmost_transparent_overlay in a non-whitelisted process"],
+        "bonus_score": 70,
+        "explanation": "An overlay that is hidden from screen capture and drawn over the game."
+      }
+    ]
+  },
+
+  "manual_review_checklist": {
+    "before_scan": [
+      "Obtain explicit consent and record the session (screen + audio) according to your server/community rules.",
+      "Ask the user NOT to restart, close programs or delete anything; note uptime and Windows install date.",
+      "Run the scanner as Administrator so drivers, services, event logs and process memory are accessible."
+    ],
+    "during_scan": [
+      "List running processes, loaded drivers and services; flag unsigned or user-path binaries.",
+      "Inspect USB and PCI device history and Device Manager (show hidden devices).",
+      "Check Secure Boot, HVCI, Kernel DMA Protection and bcdedit state.",
+      "Review the FiveM and .minecraft folders and the game process modules.",
+      "Review the execution artifacts timeline (Prefetch, Amcache, BAM, USN) around the last game sessions."
+    ],
+    "after_scan": [
+      "Never sanction on a single string match; confirm with at least two independent indicators or a direct observation.",
+      "Keep the report (JSON/HTML), hashes of suspicious files and screenshots for appeals.",
+      "If the machine passes but hardware-level cheating is suspected (DMA/SMM), schedule an in-person or hardware-based inspection."
+    ]
+  }
+}
+
+```
