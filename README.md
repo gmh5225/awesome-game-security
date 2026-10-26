@@ -966,6 +966,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/joasasantos/rea-prompts [Curated REA (Reverse Engineer Anything) prompt templates for agent-assisted RE — games, anti-cheat, DMA, kernels, APKs, and protection research with evidence-first instructions]
 - https://github.com/jammyfu/rea-atlas [Curated map of reverse-engineering projects (game decomp/recomp, asset tools, firmware) tagged for morluto/rea usage, with multilingual README indexes]
 - https://github.com/LargoScript/n0xis [Cross-platform Rust RE pipeline with static PE/ELF analysis, SSA decompilation, live memory scanning, hardware watchpoints, and MCP/JSON automation for game reversing]
+- https://github.com/imattas/HexLab [Open-source C++20 RE workbench (wxWidgets GUI + CLI) for PE/ELF/Mach-O analysis, decompilation, debugging, and plugin extensions]
 - https://github.com/okiedocus/orress [Pure-Rust RE IDE: disassembler, Rust-syntax decompiler, debugger, emulator, malware triage, and built-in RE academy]
 - https://github.com/heaven-hm/cheat-agent [Cross-platform C++/Rust autonomous RE agent with native memory scanning, closed-loop trainer verification, and optional MCP hosting for Codex/Claude Code]
 - https://github.com/wrong-commit/skid_factory [Node.js orchestrator that automates game reverse engineering and cheat development via MCP bridges to Cheat Engine, x64dbg, and Ghidra, with pointer-trace and memory-patch workflows]
@@ -5024,6 +5025,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/winzysss/JarAnalyzer [Windows Minecraft screenshare cheat forensics scanner — MFT-walks disks, scans JAR constant pools against blacklists, flags obfuscated archives, exports evidence reports]
 - https://github.com/klasscripts/ffs-explorer [Cross-platform PySide6 viewer for iOS/Android GrayKey and Cellebrite UFED Full File System ZIP extractions — stream-browse without unpacking, vendor metadata reconstruction, SQLite/WAL preview, and artefact shortcuts]
 - https://github.com/NotSkrib/error-pc-check [Open-source consensual Minecraft Java screenshare workflow: signed C# client agent, staff web panel, and Supabase backend for live forensic scans and severity-ranked cheat evidence reports]
+- https://github.com/Catusse2k/ScreenShare-Signatures [Signature database and docs for FiveM/Minecraft screenshare forensics covering DMA, kernel loaders, firmware hints, and cheat evasion artifacts]
 
 > Dynamic Script
 - https://github.com/can1357/NtLua
