@@ -6,7 +6,7 @@ sources:
   - wiki/sources/descriptions/imattas__HexLab.md
   - wiki/sources/README-categories.md
 updated: 2026-10-26
-confidence: medium
+confidence: high
 ---
 
 # HexLab
@@ -18,7 +18,7 @@ confidence: medium
 - **Formats:** raw images, PE, ELF, Mach-O, Windows minidumps, firmware, and managed metadata.
 - **Architectures:** x86, ARM, AArch64, PowerPC, MIPS, and RISC-V disassembly and decompilation.
 - **Views:** synchronized disassembly, bytes, CFGs, and pseudocode; cross-references, strings, types, CFG-aware binary diff, SQLite project persistence, plugin SDK.
-- **Debug:** native Win32 and Linux x86-64, GDB Remote Serial Protocol, Python automation.
+- **Debug:** native Win32 and Linux x86-64, GDB Remote Serial Protocol (GDB RSP), Python scripting for automation plus stack and local-variable introspection.
 
 ## Audience
 
