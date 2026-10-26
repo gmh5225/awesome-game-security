@@ -4755,6 +4755,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/saadahmedscse/kac-inspector [Windows CLI that enumerates known kernel anti-cheat drivers via SCM, driver store, and EnumDeviceDrivers with running/stale/orphaned states]
 - https://github.com/Nimdy/detect-FPS-hackers [Server-side FPS anti-cheat evidence pipeline (fpsdet): ingests dedicated-server shot/movement logs, scores players with heuristics and baselines, and outputs human-review case files without client installs or auto-bans]
 - https://github.com/nft-syou/jevcraft-bench [Behavioral anti-cheat research bench for Minecraft Paper: mining telemetry, typed LLM evaluation, and offline X-Ray heuristic benchmarking in shadow mode]
+- https://github.com/gemakfy/leaf-mod-analyzer [Rust standalone static Java bytecode analyzer for Minecraft mod JARs with obfuscation heuristics, entropy scoring, and extensible JSON rules—no JVM required]
 - https://github.com/baldspots440/R6Intel [Rainbow Six Siege player stat analyzer with explainable heuristic suspicion scoring via R6Data API]
 - https://github.com/ahuhu789/pubg-bigdata-analytics [Big-data pipeline (PySpark, Cassandra, Streamlit) for PUBG match analytics and esports cheater anomaly detection via clustering and rule-based flags]
 - https://github.com/Remus3/Lanternlight [Anti-cheat-safe Mistfall Hunter companion that derives game state only from logs, saves, and passive screen capture—no process memory, injection, or hooks]
