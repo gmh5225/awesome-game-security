@@ -409,6 +409,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__StarRail-ACE-B.md
   - wiki/sources/descriptions/gmh5225__HI3-ACE-B.md
   - wiki/sources/descriptions/Gitex68__Katapult-AntiCheat.md
+  - wiki/sources/descriptions/gemakfy__leaf-mod-analyzer.md
   - wiki/sources/descriptions/GuidoBartoli__sherloq.md
   - wiki/sources/descriptions/GunshipPenguin__kiteshield.md
   - wiki/sources/descriptions/H1d3r__GPU_ShellCode.md
@@ -1329,6 +1330,8 @@ Title-specific R6 ranked-stat suspicion tooling such as [[r6-intel]] (baldspots4
 **Fabric client+server AC:** [[the-dreamers-guards]] (IamFriendly0242u; Java Fabric mod; encrypted join-time network payloads; mod blacklist scanning; progressive four-phase suspension; anti-evasion logout-bypass checks; operator kick/ban/pardon/trust commands; Discord webhook alerts; Anti Cheat / game:minecraft) for Fabric administrators needing combined client-integrity verification and automated server-side enforcement. (source: wiki/sources/descriptions/IamFriendly0242u__The-Dreamers-Guards.md)
 
 **NeoForge client+server mod integrity AC:** [[katapult-anticheat]] (Gitex68; Java NeoForge **1.21.1** mod; SHA-256 checksums on client mod JARs and resource packs against server whitelists; real-time join/reload pack monitoring incl. renamed X-ray textures; hot-reloadable config, whitelist regeneration, live re-validation commands; Gson whitelist management; Anti Cheat / game:minecraft) for NeoForge modded-server operators needing file-integrity enforcement beyond gameplay packet checks. (source: wiki/sources/descriptions/Gitex68__Katapult-AntiCheat.md)
+
+**Offline mod JAR static triage:** [[leaf-mod-analyzer]] (gemakfy; Rust CLI + optional Python bindings; native classfile parser; JAR single/batch scans; entropy/obfuscation heuristics and JSON rule engine; Fabric/Forge/NeoForge-oriented reporting; no JVM—flags cheat-client bytecode patterns for moderation and research; Anti Cheat / game:minecraft) for pre-admission or appeal review beside live hash enforcement such as [[faircount]] and screenshare JAR tooling such as [[jaranalyzer]]. (source: wiki/sources/descriptions/gemakfy__leaf-mod-analyzer.md)
 
 **Headless protocol stress testing:** [[ghostjoin]] (KuryCat; pure Python stdlib Minecraft Java client; connects and stays online without rendering; full modern login/configuration/play flow with compression and Keep Alive; protocol ~773–776; authorized anti-bot/anti-cheat probe tool for offline-mode servers you own or have permission to test; Anti Cheat / game:minecraft) complements server-side plugins indexed by [[minecraft-anticheat-list]] for evaluating bot-connection defenses. (source: wiki/sources/descriptions/KuryCat__GhostJoin.md)
 
