@@ -1,0 +1,786 @@
+Project Path: arc_ValenMyHeartDev_BloonAntiCheat_k0ib8s9k
+
+Source Tree:
+
+```txt
+arc_ValenMyHeartDev_BloonAntiCheat_k0ib8s9k
+├── pom.xml
+└── src
+    └── main
+        ├── java
+        │   └── com
+        │       └── bloon
+        │           └── anticheat
+        │               ├── AlertsUtil.java
+        │               ├── AutoClickerCheck.java
+        │               ├── BloonCommand.java
+        │               ├── FlyCheck.java
+        │               ├── Main.java
+        │               ├── MenuListener.java
+        │               ├── PlayerData.java
+        │               ├── PunishmentMenu.java
+        │               ├── ReachCheck.java
+        │               └── TriggerCheck.java
+        └── resources
+            ├── config.yml
+            └── plugin.yml
+
+```
+
+`pom.xml`:
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.bloon</groupId>
+    <artifactId>BloonAntiCheat</artifactId>
+    <version>1.0.0</version>
+    <packaging>jar</packaging>
+    <name>Bloon AntiCheat V1</name>
+    <properties>
+        <maven.compiler.release>17</maven.compiler.release>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+    <repositories>
+        <repository>
+            <id>papermc</id>
+            <url>https://repo.papermc.io/repository/maven-public/</url>
+        </repository>
+    </repositories>
+    <dependencies>
+        <dependency>
+            <groupId>io.papermc.paper</groupId>
+            <artifactId>paper-api</artifactId>
+            <version>1.20.2-R0.1-SNAPSHOT</version>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+    <build>
+        <finalName>BloonAntiCheat-V1</finalName>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.13.0</version>
+                <configuration>
+                    <release>17</release>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>
+
+```
+
+`src/main/java/com/bloon/anticheat/AlertsUtil.java`:
+
+```java
+package com.bloon.anticheat;
+
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.entity.Player;
+
+public class AlertsUtil {
+
+    private static final String ALERT_PERMISSION = "bloon.alerts";
+
+    /**
+     * Envía una alerta formateada a la consola y a todos los jugadores con permiso de staff.
+     */
+    public static void sendAlert(Player player, String checkName, String details) {
+        // Formato visual de la alerta con colores profesionales
+        String message = ChatColor.translateAlternateColorCodes('&', 
+            "&8[&cBloonAC&8] &e" + player.getName() + " &7falló en &c" + checkName + " &7(&f" + details + "&7)");
+
+        // 1. Enviar a la consola del servidor para registros (logs)
+        Bukkit.getConsoleSender().sendMessage(message);
+
+        // 2. Enviar a todos los jugadores en línea que tengan el permiso de staff
+        for (Player staff : Bukkit.getOnlinePlayers()) {
+            if (staff.hasPermission(ALERT_PERMISSION)) {
+                staff.sendMessage(message);
+            }
+        }
+    }
+}
+
+```
+
+`src/main/java/com/bloon/anticheat/AutoClickerCheck.java`:
+
+```java
+package com.bloon.anticheat;
+
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
+import org.bukkit.event.player.PlayerInteractEvent;
+
+import java.util.HashMap;
+import java.util.UUID;
+import java.util.Map;
+
+public class AutoClickerCheck implements Listener {
+
+    private final Main plugin;
+    private final Map<UUID, Integer> clickCounts = new HashMap<>();
+    private final Map<UUID, Long> lastReset = new HashMap<>();
+
+    public AutoClickerCheck(Main plugin) {
+        this.plugin = plugin;
+    }
+
+    @EventHandler
+    public void onInteract(PlayerInteractEvent event) {
+        if (event.getAction() != Action.LEFT_CLICK_AIR && event.getAction() != Action.LEFT_CLICK_BLOCK) {
+            return;
+        }
+
+        Player player = event.getPlayer();
+        if (player.hasPermission("bloon.bypass")) return;
+
+        FileConfiguration config = plugin.getConfig();
+        if (!config.getBoolean("checks.autoclicker.enabled", true)) return;
+
+        UUID uuid = player.getUniqueId();
+        long currentSecond = System.currentTimeMillis() / 1000;
+
+        lastReset.putIfAbsent(uuid, currentSecond);
+        clickCounts.putIfAbsent(uuid, 0);
+
+        if (lastReset.get(uuid) != currentSecond) {
+            int clicks = clickCounts.get(uuid);
+            int maxCps = config.getInt("checks.autoclicker.max-cps", 18);
+
+            if (clicks > maxCps) {
+                // Notificar mediante el sistema de alertas centralizado
+                AlertsUtil.sendAlert(player, "AutoClicker", "CPS: " + clicks + " (Máx: " + maxCps + ")");
+            }
+
+            clickCounts.put(uuid, 1);
+            lastReset.put(uuid, currentSecond);
+        } else {
+            clickCounts.put(uuid, clickCounts.get(uuid) + 1);
+        }
+    }
+}
+
+```
+
+`src/main/java/com/bloon/anticheat/BloonCommand.java`:
+
+```java
+package com.bloon.anticheat;
+
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandExecutor;
+import org.bukkit.command.CommandSender;
+import org.bukkit.command.TabCompleter;
+import org.bukkit.entity.Player;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public final class BloonCommand implements CommandExecutor, TabCompleter {
+    private final Main plugin;
+
+    public BloonCommand(Main plugin) {
+        this.plugin = plugin;
+    }
+
+    @Override
+    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+        if (!sender.hasPermission("bloon.admin")) {
+            sender.sendMessage(ChatColor.RED + "No tienes permiso para usar los comandos de Bloon AntiCheat.");
+            return true;
+        }
+
+        if (args.length == 0 || args[0].equalsIgnoreCase("help")) {
+            sendHelpMenu(sender);
+            return true;
+        }
+
+        String subCommand = args[0].toLowerCase();
+
+        switch (subCommand) {
+            case "sanciones":
+            case "menu":
+            case "gui":
+                if (!(sender instanceof Player player)) {
+                    sender.sendMessage(ChatColor.RED + "Este subcomando solo puede usarse dentro del juego.");
+                    return true;
+                }
+                new PunishmentMenu(plugin).open(player);
+                return true;
+
+            case "reload":
+                plugin.reloadConfig();
+                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', 
+                    "&8[&cBloonAC&8] &a¡Configuración de Bloon AntiCheat recargada correctamente!"));
+                return true;
+
+            case "alerts":
+            case "alertas":
+                if (sender instanceof Player player) {
+                    boolean hasAlerts = player.hasPermission("bloon.alerts");
+                    if (hasAlerts) {
+                        player.sendMessage(ChatColor.translateAlternateColorCodes('&', 
+                            "&8[&cBloonAC&8] &eNotificaciones de Staff: &aACTIVADAS &7(Permiso: bloon.alerts)"));
+                    } else {
+                        player.sendMessage(ChatColor.translateAlternateColorCodes('&', 
+                            "&8[&cBloonAC&8] &cNecesitas el permiso &ebloon.alerts &cpara recibir avisos."));
+                    }
+                } else {
+                    sender.sendMessage("Solo los jugadores en el juego pueden verificar las alertas de chat.");
+                }
+                return true;
+
+            case "stats":
+            case "info":
+                if (args.length < 2) {
+                    sender.sendMessage(ChatColor.RED + "Uso correcto: /bloon stats <jugador>");
+                    return true;
+                }
+                Player target = Bukkit.getPlayer(args[1]);
+                if (target == null) {
+                    sender.sendMessage(ChatColor.RED + "El jugador no se encuentra en línea.");
+                    return true;
+                }
+                PlayerData data = plugin.getPlayerData(target.getUniqueId());
+                sender.sendMessage(ChatColor.DARK_GRAY + "----------------------------------------");
+                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&c&lEstadísticas de " + target.getName()));
+                sender.sendMessage(ChatColor.GRAY + "■ TriggerBot Buffer: " + ChatColor.YELLOW + String.format("%.2f", data.getTriggerBuffer()));
+                sender.sendMessage(ChatColor.GRAY + "■ Latencia (Ping): " + ChatColor.GREEN + target.getPing() + "ms");
+                sender.sendMessage(ChatColor.DARK_GRAY + "----------------------------------------");
+                return true;
+
+            default:
+                sendHelpMenu(sender);
+                return true;
+        }
+    }
+
+    private void sendHelpMenu(CommandSender sender) {
+        sender.sendMessage(ChatColor.DARK_GRAY + "----------------------------------------");
+        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&c&lBloon AntiCheat V1 &7- Comandos Staff"));
+        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&e/bloon help &7- Muestra esta guía e introducción a los comandos."));
+        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&e/bloon menu &7- Abre el menú visual (GUI) con el historial de sanciones."));
+        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&e/bloon reload &7- Recarga los parámetros del config.yml en tiempo real."));
+        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&e/bloon alerts &7- Comprueba el estado de las alertas de trampa en chat."));
+        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&e/bloon stats <jugador> &7- Muestra el buffer de trampa y ping en vivo."));
+        sender.sendMessage(ChatColor.DARK_GRAY + "----------------------------------------");
+    }
+
+    @Override
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+        List<String> options = new ArrayList<>();
+        
+        if (args.length == 1) {
+            for (String option : List.of("help", "menu", "sanciones", "reload", "alerts", "stats")) {
+                if (option.startsWith(args[0].toLowerCase())) {
+                    options.add(option);
+                }
+            }
+        } else if (args.length == 2 && (args[0].equalsIgnoreCase("stats") || args[0].equalsIgnoreCase("info"))) {
+            for (Player player : Bukkit.getOnlinePlayers()) {
+                if (player.getName().toLowerCase().startsWith(args[1].toLowerCase())) {
+                    options.add(player.getName());
+                }
+            }
+        }
+        
+        return options;
+    }
+}
+
+```
+
+`src/main/java/com/bloon/anticheat/FlyCheck.java`:
+
+```java
+package com.bloon.anticheat;
+
+import org.bukkit.GameMode;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.block.Block;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerMoveEvent;
+
+public class FlyCheck implements Listener {
+
+    private final Main plugin;
+
+    public FlyCheck(Main plugin) {
+        this.plugin = plugin;
+    }
+
+    @EventHandler
+    public void onMove(PlayerMoveEvent event) {
+        Player player = event.getPlayer();
+
+        // Si está en creativo, espectador o tiene permiso de bypass, se ignora
+        if (player.getGameMode() == GameMode.CREATIVE || player.getGameMode() == GameMode.SPECTATOR) return;
+        if (player.isFlying() || player.isInsideVehicle() || player.hasPermission("bloon.bypass")) return;
+
+        FileConfiguration config = plugin.getConfig();
+        if (!config.getBoolean("checks.fly.enabled", true)) return;
+
+        Location from = event.getFrom();
+        Location to = event.getTo();
+        if (to == null) return;
+
+        double deltaY = to.getY() - from.getY();
+
+        // Ignoramos si el jugador está cayendo o quieto en el mismo nivel
+        if (deltaY <= 0) return;
+
+        // Si está cerca de bloques seguros (agua, escaleras, losas, andamios, etc.)
+        if (isNearSafeBlock(player.getLocation())) return;
+
+        // Detección estricta: si no está en el suelo y sube más de lo que permite un salto normal en supervivencia (> 0.42)
+        if (!player.isOnGround() && deltaY > 0.419999999999998) {
+            
+            // 1. ROLLBACK: Devuelve al jugador a la ubicación anterior legítima de forma instantánea
+            event.setTo(from);
+
+            // 2. Envía la alerta al staff en el juego y a la consola del hosting
+            AlertsUtil.sendAlert(player, "Fly / Vuelo Ilegal", "Vuelo bloqueado (DeltaY: " + String.format("%.3f", deltaY) + ")");
+        }
+    }
+
+    private boolean isNearSafeBlock(Location loc) {
+        int x = loc.getBlockX();
+        int y = loc.getBlockY();
+        int z = loc.getBlockZ();
+
+        for (int dx = -1; dx <= 1; dx++) {
+            for (int dy = -1; dy <= 1; dy++) {
+                for (int dz = -1; dz <= 1; dz++) {
+                    Block block = loc.getWorld().getBlockAt(x + dx, y + dy, z + dz);
+                    Material type = block.getType();
+                    String typeName = type.name();
+                    if (typeName.contains("WATER") || 
+                        typeName.contains("LAVA") || 
+                        typeName.contains("CLIMBABLE") || 
+                        typeName.contains("LADDER") || 
+                        typeName.contains("VINE") || 
+                        typeName.contains("COBWEB") || 
+                        typeName.contains("SLIME") ||
+                        typeName.contains("SCAFFOLDING") ||
+                        typeName.contains("SLAB") ||
+                        typeName.contains("STAIRS")) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+}
+
+```
+
+`src/main/java/com/bloon/anticheat/Main.java`:
+
+```java
+package com.bloon.anticheat;
+
+import org.bukkit.plugin.java.JavaPlugin;
+import java.util.HashMap;
+import java.util.UUID;
+
+public class Main extends JavaPlugin {
+
+    private static Main instance;
+    private final HashMap<UUID, PlayerData> playerDataMap = new HashMap<>();
+
+    @Override
+    public void onEnable() {
+        instance = this;
+        saveDefaultConfig();
+
+        // 1. Registrar Comando Principal y TabCompleter
+        if (getCommand("bloon") != null) {
+            BloonCommand bloonCommand = new BloonCommand(this);
+            getCommand("bloon").setExecutor(bloonCommand);
+            getCommand("bloon").setTabCompleter(bloonCommand);
+        }
+
+        // 2. Registrar TODOS los Listeners de Detección y Menús
+        getServer().getPluginManager().registerEvents(new MenuListener(this), this);
+        getServer().getPluginManager().registerEvents(new TriggerCheck(this), this);
+        getServer().getPluginManager().registerEvents(new FlyCheck(this), this);
+        getServer().getPluginManager().registerEvents(new ReachCheck(this), this);
+        getServer().getPluginManager().registerEvents(new AutoClickerCheck(this), this);
+
+        getLogger().info("¡Bloon AntiCheat V1 cargado y activado correctamente con todas sus detecciones!");
+    }
+
+    @Override
+    public void onDisable() {
+        playerDataMap.clear();
+        getLogger().info("Bloon AntiCheat V1 desactivado.");
+    }
+
+    public static Main getInstance() {
+        return instance;
+    }
+
+    public PlayerData getPlayerData(UUID uuid) {
+        return playerDataMap.computeIfAbsent(uuid, PlayerData::new);
+    }
+}
+
+```
+
+`src/main/java/com/bloon/anticheat/MenuListener.java`:
+
+```java
+package com.bloon.anticheat;
+
+import org.bukkit.ChatColor;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
+
+public final class MenuListener implements Listener {
+    private final Main plugin;
+
+    public MenuListener(Main plugin) {
+        this.plugin = plugin;
+    }
+
+    @EventHandler
+    public void onInventoryClick(InventoryClickEvent event) {
+        if (!isPunishmentMenu(event.getView().getTitle())) return;
+
+        event.setCancelled(true);
+
+        // Items are intentionally display-only. No punishment is executed by clicking.
+        if (event.getWhoClicked() instanceof Player player
+                && event.getClickedInventory() != null
+                && event.getClickedInventory().equals(event.getView().getTopInventory())) {
+            player.sendMessage(ChatColor.GRAY + "Menú de sanciones: solo lectura.");
+        }
+    }
+
+    @EventHandler
+    public void onInventoryDrag(InventoryDragEvent event) {
+        if (isPunishmentMenu(event.getView().getTitle())) {
+            event.setCancelled(true);
+        }
+    }
+
+    private boolean isPunishmentMenu(String title) {
+        return PunishmentMenu.TITLE.equals(title);
+    }
+}
+
+```
+
+`src/main/java/com/bloon/anticheat/PlayerData.java`:
+
+```java
+package com.bloon.anticheat;
+
+import java.util.UUID;
+
+public class PlayerData {
+
+    private final UUID uuid;
+    private double triggerBuffer = 0.0;
+
+    public PlayerData(UUID uuid) {
+        this.uuid = uuid;
+    }
+
+    public UUID getUuid() {
+        return uuid;
+    }
+
+    public double getTriggerBuffer() {
+        return triggerBuffer;
+    }
+
+    public void setTriggerBuffer(double triggerBuffer) {
+        this.triggerBuffer = triggerBuffer;
+    }
+
+    public void addTriggerBuffer(double amount) {
+        this.triggerBuffer += amount;
+    }
+}
+
+```
+
+`src/main/java/com/bloon/anticheat/PunishmentMenu.java`:
+
+```java
+package com.bloon.anticheat;
+
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.Material;
+import org.bukkit.OfflinePlayer;
+import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.SkullMeta;
+import org.bukkit.plugin.java.JavaPlugin;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class PunishmentMenu {
+
+    public static final String TITLE = ChatColor.DARK_GRAY + "Bloon AntiCheat " + ChatColor.DARK_RED + "» Sanciones";
+
+    private final JavaPlugin plugin;
+
+    public PunishmentMenu(JavaPlugin plugin) {
+        this.plugin = plugin;
+    }
+
+    public void open(Player admin) {
+        openMenu(admin);
+    }
+
+    public void openMenu(Player admin) {
+        Inventory gui = Bukkit.createInventory(null, 54, TITLE);
+
+        FileConfiguration config = plugin.getConfig();
+        ConfigurationSection sanctionsSection = config.getConfigurationSection("sanctions");
+
+        if (sanctionsSection != null) {
+            int slot = 0;
+            for (String key : sanctionsSection.getKeys(false)) {
+                if (slot >= 54) break;
+
+                // Lee los campos configurados en tu config.yml
+                String name = config.getString("sanctions." + key + ".name", "&cSanción");
+                String materialName = config.getString("sanctions." + key + ".material", "PLAYER_HEAD");
+                String ownerName = config.getString("sanctions." + key + ".owner", "Notch");
+                List<String> rawLore = config.getStringList("sanctions." + key + ".lore");
+
+                ItemStack item = createCustomItem(materialName, ownerName, name, rawLore);
+                gui.setItem(slot, item);
+                slot++;
+            }
+        }
+
+        admin.openInventory(gui);
+    }
+
+    private ItemStack createCustomItem(String materialName, String ownerName, String displayName, List<String> rawLore) {
+        Material material = Material.matchMaterial(materialName);
+        if (material == null) {
+            material = Material.PLAYER_HEAD;
+        }
+
+        ItemStack item = new ItemStack(material);
+        
+        // Si es una cabeza de jugador, aplicamos su skin con el owner
+        if (item.getItemMeta() instanceof SkullMeta skullMeta) {
+            try {
+                OfflinePlayer target = Bukkit.getOfflinePlayer(ownerName);
+                skullMeta.setOwningPlayer(target);
+            } catch (Exception ignored) {}
+            item.setItemMeta(skullMeta);
+        }
+
+        if (item.hasItemMeta() || item.getType() == Material.PLAYER_HEAD) {
+            var meta = item.getItemMeta();
+            if (meta != null) {
+                meta.setDisplayName(ChatColor.translateAlternateColorCodes('&', displayName));
+
+                List<String> formattedLore = new ArrayList<>();
+                for (String line : rawLore) {
+                    formattedLore.add(ChatColor.translateAlternateColorCodes('&', line));
+                }
+                meta.setLore(formattedLore);
+                item.setItemMeta(meta);
+            }
+        }
+
+        return item;
+    }
+}
+
+```
+
+`src/main/java/com/bloon/anticheat/ReachCheck.java`:
+
+```java
+package com.bloon.anticheat;
+
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
+
+public class ReachCheck implements Listener {
+
+    private final Main plugin;
+
+    public ReachCheck(Main plugin) {
+        this.plugin = plugin;
+    }
+
+    @EventHandler
+    public void onAttack(EntityDamageByEntityEvent event) {
+        if (!(event.getDamager() instanceof Player)) return;
+        Player player = (Player) event.getDamager();
+
+        if (player.hasPermission("bloon.bypass")) return;
+
+        FileConfiguration config = plugin.getConfig();
+        if (!config.getBoolean("checks.reach.enabled", true)) return;
+
+        double maxReach = config.getDouble("checks.reach.max-distance", 4.2);
+        double distance = player.getLocation().distance(event.getEntity().getLocation());
+
+        if (distance > maxReach) {
+            // 1. ACCIÓN PRINCIPAL: Cancela el golpe para que la trampa no haga efecto ni daño
+            event.setCancelled(true);
+
+            // 2. Notificar al staff
+            AlertsUtil.sendAlert(player, "Reach / Killaura", "Golpe bloqueado a " + String.format("%.2f", distance) + "m");
+        }
+    }
+}
+
+```
+
+`src/main/java/com/bloon/anticheat/TriggerCheck.java`:
+
+```java
+package com.bloon.anticheat;
+
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
+
+public class TriggerCheck implements Listener {
+
+    private final Main plugin;
+
+    public TriggerCheck(Main plugin) {
+        this.plugin = plugin;
+    }
+
+    @EventHandler
+    public void onAttack(EntityDamageByEntityEvent event) {
+        if (!(event.getDamager() instanceof Player)) return;
+        Player player = (Player) event.getDamager();
+
+        if (player.hasPermission("bloon.bypass")) return;
+
+        FileConfiguration config = plugin.getConfig();
+        if (!config.getBoolean("punishments.triggerbot.enabled", true) && 
+            !config.getBoolean("checks.TriggerBot.enabled", true)) {
+            return;
+        }
+
+        // Obtenemos los datos del jugador desde el almacenamiento principal
+        PlayerData data = plugin.getPlayerData(player.getUniqueId());
+        if (data == null) return;
+
+        // Incrementamos el buffer de combate
+        data.addTriggerBuffer(1.0);
+        double currentBuffer = data.getTriggerBuffer();
+
+        double threshold = config.getDouble("punishments.triggerbot.buffer-threshold", 10.0);
+
+        // Si el jugador supera el límite de ataques sospechosos
+        if (currentBuffer >= threshold) {
+            AlertsUtil.sendAlert(player, "TriggerBot", "Buffer acumulado: " + currentBuffer);
+            
+            // Reiniciamos el buffer tras emitir la alerta
+            data.setTriggerBuffer(0.0);
+        }
+    }
+}
+
+```
+
+`src/main/resources/config.yml`:
+
+```yml
+# ===================================================
+#           BLOON ANTICHEAT V1 - CONFIG
+# ===================================================
+
+settings:
+  prefix: "&8[&cBloonAC&8]"
+
+punishments:
+  triggerbot:
+    enabled: true
+    buffer-threshold: 10
+    command: "kick %player% TriggerBot detectado"
+
+checks:
+  TriggerBot:
+    enabled: false
+    buffer-decay-per-second: 0.25
+  autoclicker:
+    enabled: true
+    max-cps: 18
+  fly:
+    enabled: true
+  reach:
+    enabled: true
+    max-distance: 4.2
+
+# Entradas visuales que aparecen en /bloon menu o /bloon sanciones.
+sanctions:
+  ejemplo:
+    name: "&cEjemplo de sanción"
+    material: PLAYER_HEAD
+    owner: Notch
+    lore:
+      - "&7Ejemplo de entrada"
+      - "&eConfigúrala en config.yml"
+    command: "say Sanción de ejemplo para %player%"
+
+```
+
+`src/main/resources/plugin.yml`:
+
+```yml
+name: BloonAntiCheat
+version: 1.0.0
+main: com.bloon.anticheat.Main
+api-version: '1.20'
+author: Bloon
+description: Bloon AntiCheat V1 - basic anti-cheat management tools
+commands:
+  bloon:
+    description: Bloon AntiCheat administration command
+    usage: /bloon <sanciones|reload>
+    permission: bloon.admin
+permissions:
+  bloon.admin:
+    description: Allows administration of Bloon AntiCheat
+    default: op
+
+```
