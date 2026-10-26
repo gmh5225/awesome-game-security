@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-26** — lint (agent, Cursor lint pass): read `wiki/AGENTS.md`; **Overviews** (9): `anti-cheat`, `dma-attack`, `game-engine`, `game-hacking`, `graphics-api`, `mobile-security`, `overview`, `reverse-engineering`, `windows-kernel`; **Concepts** (51) under `wiki/concepts/`; **Entities** (4186) under `wiki/entities/`; reconciled `index.md` vs disk — 4246 catalog paths (9+51+4186), 4246 unique, 0 missing, 0 dead, 0 duplicate catalog paths; nine `overviews/*.md` + `index.md` Overviews/Concepts blurb [[wikilink]] spot-check (13909 links), 0 broken, 0 malformed `]]]`; wiki populated — bootstrap not required; structural repairs none (`log.md` only).
+
 - **2026-10-26** — ingest `description:Lagrossa/DFSC4317-Obfuscating-Game-Hacking-Through-Hardware`: enriched entity [[dfsc4317-deadlock-dma-research]] (external-host FPGA DMA Deadlock entity reads + minimap; paper/slides vs full stack; Approach/Artifacts/Audience); short cites on [[overviews/dma-attack]] threat-model + README map and [[overviews/game-hacking]] hardware-assisted external lane + Cheat blurb; `index.md` entity blurb updated.
 
 - **2026-10-26** — ingest `description:ValenMyHeartDev/BloonAntiCheat`: enriched entity [[bloon-anti-cheat]] (Java 17 Paper/Spigot; Bukkit player-event heuristics; staff alerts + YAML sanction GUI); short cites on [[overviews/anti-cheat]] Bukkit lightweight lane + [[concepts/detector-operations]]; `index.md` entity blurb updated.
