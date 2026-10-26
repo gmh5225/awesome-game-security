@@ -1,0 +1,4190 @@
+Project Path: arc_gemakfy_leaf-mod-analyzer_gj3vfkie
+
+Source Tree:
+
+```txt
+arc_gemakfy_leaf-mod-analyzer_gj3vfkie
+├── Cargo.toml
+├── LICENSE
+├── README.md
+├── assets
+├── pyproject.toml
+└── src
+    ├── classfile
+    │   ├── attributes.rs
+    │   ├── constant_pool.rs
+    │   ├── mod.rs
+    │   ├── opcodes.rs
+    │   └── reader.rs
+    ├── cli
+    │   ├── banner.rs
+    │   ├── loader.rs
+    │   ├── mod.rs
+    │   ├── report.rs
+    │   ├── rules.rs
+    │   └── style.rs
+    ├── default_rules.json
+    ├── hashing.rs
+    ├── jar
+    │   ├── entropy.rs
+    │   ├── entrypoints.rs
+    │   ├── mod.rs
+    │   ├── models.rs
+    │   └── scanner.rs
+    ├── lib.rs
+    ├── main.rs
+    ├── py_bridge.rs
+    └── rules
+        ├── engine.rs
+        ├── matcher.rs
+        ├── mod.rs
+        ├── models.rs
+        └── triggers.rs
+
+```
+
+`Cargo.toml`:
+
+```toml
+[package]
+name = "mod_analyzer_core"
+version = "0.1.0"
+authors = ["gemakfy"]
+license = "GPL-3.0-only"
+edition = "2021"
+description = "Native Rust acceleration core for Mod Analyzer"
+
+[lib]
+name = "mod_analyzer_core"
+crate-type = ["cdylib", "rlib"]
+
+[[bin]]
+name = "leaf-mod-analyzer"
+path = "src/main.rs"
+
+[features]
+default = []
+python = ["dep:pyo3"]
+
+[dependencies]
+pyo3 = { version = "0.30", features = ["abi3-py310", "extension-module"], optional = true }
+zip = { version = "9.1", default-features = false, features = ["deflate"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+thiserror = "2.0"
+fancy-regex = "0.20"
+sha2 = { version = "0.11" }
+clap = { version = "4", features = ["derive"] }
+
+[profile.release]
+opt-level = 3
+lto = "fat"
+codegen-units = 1
+strip = true
+
+```
+
+`LICENSE`:
+
+```
+                    GNU GENERAL PUBLIC LICENSE
+                       Version 3, 29 June 2007
+
+ Copyright (C) 2007 Free Software Foundation, Inc. <https://fsf.org/>
+ Everyone is permitted to copy and distribute verbatim copies
+ of this license document, but changing it is not allowed.
+
+                            Preamble
+
+  The GNU General Public License is a free, copyleft license for
+software and other kinds of works.
+
+  The licenses for most software and other practical works are designed
+to take away your freedom to share and change the works.  By contrast,
+the GNU General Public License is intended to guarantee your freedom to
+share and change all versions of a program--to make sure it remains free
+software for all its users.  We, the Free Software Foundation, use the
+GNU General Public License for most of our software; it applies also to
+any other work released this way by its authors.  You can apply it to
+your programs, too.
+
+  When we speak of free software, we are referring to freedom, not
+price.  Our General Public Licenses are designed to make sure that you
+have the freedom to distribute copies of free software (and charge for
+them if you wish), that you receive source code or can get it if you
+want it, that you can change the software or use pieces of it in new
+free programs, and that you know you can do these things.
+
+  To protect your rights, we need to prevent others from denying you
+these rights or asking you to surrender the rights.  Therefore, you have
+certain responsibilities if you distribute copies of the software, or if
+you modify it: responsibilities to respect the freedom of others.
+
+  For example, if you distribute copies of such a program, whether
+gratis or for a fee, you must pass on to the recipients the same
+freedoms that you received.  You must make sure that they, too, receive
+or can get the source code.  And you must show them these terms so they
+know their rights.
+
+  Developers that use the GNU GPL protect your rights with two steps:
+(1) assert copyright on the software, and (2) offer you this License
+giving you legal permission to copy, distribute and/or modify it.
+
+  For the developers' and authors' protection, the GPL clearly explains
+that there is no warranty for this free software.  For both users' and
+authors' sake, the GPL requires that modified versions be marked as
+changed, so that their problems will not be attributed erroneously to
+authors of previous versions.
+
+  Some devices are designed to deny users access to install or run
+modified versions of the software inside them, although the manufacturer
+can do so.  This is fundamentally incompatible with the aim of
+protecting users' freedom to change the software.  The systematic
+pattern of such abuse occurs in the area of products for individuals to
+use, which is precisely where it is most unacceptable.  Therefore, we
+have designed this version of the GPL to prohibit the practice for those
+products.  If such problems arise substantially in other domains, we
+stand ready to extend this provision to those domains in future versions
+of the GPL, as needed to protect the freedom of users.
+
+  Finally, every program is threatened constantly by software patents.
+States should not allow patents to restrict development and use of
+software on general-purpose computers, but in those that do, we wish to
+avoid the special danger that patents applied to a free program could
+make it effectively proprietary.  To prevent this, the GPL assures that
+patents cannot be used to render the program non-free.
+
+  The precise terms and conditions for copying, distribution and
+modification follow.
+
+                       TERMS AND CONDITIONS
+
+  0. Definitions.
+
+  "This License" refers to version 3 of the GNU General Public License.
+
+  "Copyright" also means copyright-like laws that apply to other kinds of
+works, such as semiconductor masks.
+
+  "The Program" refers to any copyrightable work licensed under this
+License.  Each licensee is addressed as "you".  "Licensees" and
+"recipients" may be individuals or organizations.
+
+  To "modify" a work means to copy from or adapt all or part of the work
+in a fashion requiring copyright permission, other than the making of an
+exact copy.  The resulting work is called a "modified version" of the
+earlier work or a work "based on" the earlier work.
+
+  A "covered work" means either the unmodified Program or a work based
+on the Program.
+
+  To "propagate" a work means to do anything with it that, without
+permission, would make you directly or secondarily liable for
+infringement under applicable copyright law, except executing it on a
+computer or modifying a private copy.  Propagation includes copying,
+distribution (with or without modification), making available to the
+public, and in some countries other activities as well.
+
+  To "convey" a work means any kind of propagation that enables other
+parties to make or receive copies.  Mere interaction with a user through
+a computer network, with no transfer of a copy, is not conveying.
+
+  An interactive user interface displays "Appropriate Legal Notices"
+to the extent that it includes a convenient and prominently visible
+feature that (1) displays an appropriate copyright notice, and (2)
+tells the user that there is no warranty for the work (except to the
+extent that warranties are provided), that licensees may convey the
+work under this License, and how to view a copy of this License.  If
+the interface presents a list of user commands or options, such as a
+menu, a prominent item in the list meets this criterion.
+
+  1. Source Code.
+
+  The "source code" for a work means the preferred form of the work
+for making modifications to it.  "Object code" means any non-source
+form of a work.
+
+  A "Standard Interface" means an interface that either is an official
+standard defined by a recognized standards body, or, in the case of
+interfaces specified for a particular programming language, one that
+is widely used among developers working in that language.
+
+  The "System Libraries" of an executable work include anything, other
+than the work as a whole, that (a) is included in the normal form of
+packaging a Major Component, but which is not part of that Major
+Component, and (b) serves only to enable use of the work with that
+Major Component, or to implement a Standard Interface for which an
+implementation is available to the public in source code form.  A
+"Major Component", in this context, means a major essential component
+(kernel, window system, and so on) of the specific operating system
+(if any) on which the executable work runs, or a compiler used to
+produce the work, or an object code interpreter used to run it.
+
+  The "Corresponding Source" for a work in object code form means all
+the source code needed to generate, install, and (for an executable
+work) run the object code and to modify the work, including scripts to
+control those activities.  However, it does not include the work's
+System Libraries, or general-purpose tools or generally available free
+programs which are used unmodified in performing those activities but
+which are not part of the work.  For example, Corresponding Source
+includes interface definition files associated with source files for
+the work, and the source code for shared libraries and dynamically
+linked subprograms that the work is specifically designed to require,
+such as by intimate data communication or control flow between those
+subprograms and other parts of the work.
+
+  The Corresponding Source need not include anything that users
+can regenerate automatically from other parts of the Corresponding
+Source.
+
+  The Corresponding Source for a work in source code form is that
+same work.
+
+  2. Basic Permissions.
+
+  All rights granted under this License are granted for the term of
+copyright on the Program, and are irrevocable provided the stated
+conditions are met.  This License explicitly affirms your unlimited
+permission to run the unmodified Program.  The output from running a
+covered work is covered by this License only if the output, given its
+content, constitutes a covered work.  This License acknowledges your
+rights of fair use or other equivalent, as provided by copyright law.
+
+  You may make, run and propagate covered works that you do not
+convey, without conditions so long as your license otherwise remains
+in force.  You may convey covered works to others for the sole purpose
+of having them make modifications exclusively for you, or provide you
+with facilities for running those works, provided that you comply with
+the terms of this License in conveying all material for which you do
+not control copyright.  Those thus making or running the covered works
+for you must do so exclusively on your behalf, under your direction
+and control, on terms that prohibit them from making any copies of
+your copyrighted material outside their relationship with you.
+
+  Conveying under any other circumstances is permitted solely under
+the conditions stated below.  Sublicensing is not allowed; section 10
+makes it unnecessary.
+
+  3. Protecting Users' Legal Rights From Anti-Circumvention Law.
+
+  No covered work shall be deemed part of an effective technological
+measure under any applicable law fulfilling obligations under article
+11 of the WIPO copyright treaty adopted on 20 December 1996, or
+similar laws prohibiting or restricting circumvention of such
+measures.
+
+  When you convey a covered work, you waive any legal power to forbid
+circumvention of technological measures to the extent such circumvention
+is effected by exercising rights under this License with respect to
+the covered work, and you disclaim any intention to limit operation or
+modification of the work as a means of enforcing, against the work's
+users, your or third parties' legal rights to forbid circumvention of
+technological measures.
+
+  4. Conveying Verbatim Copies.
+
+  You may convey verbatim copies of the Program's source code as you
+receive it, in any medium, provided that you conspicuously and
+appropriately publish on each copy an appropriate copyright notice;
+keep intact all notices stating that this License and any
+non-permissive terms added in accord with section 7 apply to the code;
+keep intact all notices of the absence of any warranty; and give all
+recipients a copy of this License along with the Program.
+
+  You may charge any price or no price for each copy that you convey,
+and you may offer support or warranty protection for a fee.
+
+  5. Conveying Modified Source Versions.
+
+  You may convey a work based on the Program, or the modifications to
+produce it from the Program, in the form of source code under the
+terms of section 4, provided that you also meet all of these conditions:
+
+    a) The work must carry prominent notices stating that you modified
+    it, and giving a relevant date.
+
+    b) The work must carry prominent notices stating that it is
+    released under this License and any conditions added under section
+    7.  This requirement modifies the requirement in section 4 to
+    "keep intact all notices".
+
+    c) You must license the entire work, as a whole, under this
+    License to anyone who comes into possession of a copy.  This
+    License will therefore apply, along with any applicable section 7
+    additional terms, to the whole of the work, and all its parts,
+    regardless of how they are packaged.  This License gives no
+    permission to license the work in any other way, but it does not
+    invalidate such permission if you have separately received it.
+
+    d) If the work has interactive user interfaces, each must display
+    Appropriate Legal Notices; however, if the Program has interactive
+    interfaces that do not display Appropriate Legal Notices, your
+    work need not make them do so.
+
+  A compilation of a covered work with other separate and independent
+works, which are not by their nature extensions of the covered work,
+and which are not combined with it such as to form a larger program,
+in or on a volume of a storage or distribution medium, is called an
+"aggregate" if the compilation and its resulting copyright are not
+used to limit the access or legal rights of the compilation's users
+beyond what the individual works permit.  Inclusion of a covered work
+in an aggregate does not cause this License to apply to the other
+parts of the aggregate.
+
+  6. Conveying Non-Source Forms.
+
+  You may convey a covered work in object code form under the terms
+of sections 4 and 5, provided that you also convey the
+machine-readable Corresponding Source under the terms of this License,
+in one of these ways:
+
+    a) Convey the object code in, or embodied in, a physical product
+    (including a physical distribution medium), accompanied by the
+    Corresponding Source fixed on a durable physical medium
+    customarily used for software interchange.
+
+    b) Convey the object code in, or embodied in, a physical product
+    (including a physical distribution medium), accompanied by a
+    written offer, valid for at least three years and valid for as
+    long as you offer spare parts or customer support for that product
+    model, to give anyone who possesses the object code either (1) a
+    copy of the Corresponding Source for all the software in the
+    product that is covered by this License, on a durable physical
+    medium customarily used for software interchange, for a price no
+    more than your reasonable cost of physically performing this
+    conveying of source, or (2) access to copy the
+    Corresponding Source from a network server at no charge.
+
+    c) Convey individual copies of the object code with a copy of the
+    written offer to provide the Corresponding Source.  This
+    alternative is allowed only occasionally and noncommercially, and
+    only if you received the object code with such an offer, in accord
+    with subsection 6b.
+
+    d) Convey the object code by offering access from a designated
+    place (gratis or for a charge), and offer equivalent access to the
+    Corresponding Source in the same way through the same place at no
+    further charge.  You need not require recipients to copy the
+    Corresponding Source along with the object code.  If the place to
+    copy the object code is a network server, the Corresponding Source
+    may be on a different server (operated by you or a third party)
+    that supports equivalent copying facilities, provided you maintain
+    clear directions next to the object code saying where to find the
+    Corresponding Source.  Regardless of what server hosts the
+    Corresponding Source, you remain obligated to ensure that it is
+    available for as long as needed to satisfy these requirements.
+
+    e) Convey the object code using peer-to-peer transmission, provided
+    you inform other peers where the object code and Corresponding
+    Source of the work are being offered to the general public at no
+    charge under subsection 6d.
+
+  A separable portion of the object code, whose source code is excluded
+from the Corresponding Source as a System Library, need not be
+included in conveying the object code work.
+
+  A "User Product" is either (1) a "consumer product", which means any
+tangible personal property which is normally used for personal, family,
+or household purposes, or (2) anything designed or sold for incorporation
+into a dwelling.  In determining whether a product is a consumer product,
+doubtful cases shall be resolved in favor of coverage.  For a particular
+product received by a particular user, "normally used" refers to a
+typical or common use of that class of product, regardless of the status
+of the particular user or of the way in which the particular user
+actually uses, or expects or is expected to use, the product.  A product
+is a consumer product regardless of whether the product has substantial
+commercial, industrial or non-consumer uses, unless such uses represent
+the only significant mode of use of the product.
+
+  "Installation Information" for a User Product means any methods,
+procedures, authorization keys, or other information required to install
+and execute modified versions of a covered work in that User Product from
+a modified version of its Corresponding Source.  The information must
+suffice to ensure that the continued functioning of the modified object
+code is in no case prevented or interfered with solely because
+modification has been made.
+
+  If you convey an object code work under this section in, or with, or
+specifically for use in, a User Product, and the conveying occurs as
+part of a transaction in which the right of possession and use of the
+User Product is transferred to the recipient in perpetuity or for a
+fixed term (regardless of how the transaction is characterized), the
+Corresponding Source conveyed under this section must be accompanied
+by the Installation Information.  But this requirement does not apply
+if neither you nor any third party retains the ability to install
+modified object code on the User Product (for example, the work has
+been installed in ROM).
+
+  The requirement to provide Installation Information does not include a
+requirement to continue to provide support service, warranty, or updates
+for a work that has been modified or installed by the recipient, or for
+the User Product in which it has been modified or installed.  Access to a
+network may be denied when the modification itself materially and
+adversely affects the operation of the network or violates the rules and
+protocols for communication across the network.
+
+  Corresponding Source conveyed, and Installation Information provided,
+in accord with this section must be in a format that is publicly
+documented (and with an implementation available to the public in
+source code form), and must require no special password or key for
+unpacking, reading or copying.
+
+  7. Additional Terms.
+
+  "Additional permissions" are terms that supplement the terms of this
+License by making exceptions from one or more of its conditions.
+Additional permissions that are applicable to the entire Program shall
+be treated as though they were included in this License, to the extent
+that they are valid under applicable law.  If additional permissions
+apply only to part of the Program, that part may be used separately
+under those permissions, but the entire Program remains governed by
+this License without regard to the additional permissions.
+
+  When you convey a copy of a covered work, you may at your option
+remove any additional permissions from that copy, or from any part of
+it.  (Additional permissions may be written to require their own
+removal in certain cases when you modify the work.)  You may place
+additional permissions on material, added by you to a covered work,
+for which you have or can give appropriate copyright permission.
+
+  Notwithstanding any other provision of this License, for material you
+add to a covered work, you may (if authorized by the copyright holders of
+that material) supplement the terms of this License with terms:
+
+    a) Disclaiming warranty or limiting liability differently from the
+    terms of sections 15 and 16 of this License; or
+
+    b) Requiring preservation of specified reasonable legal notices or
+    author attributions in that material or in the Appropriate Legal
+    Notices displayed by works containing it; or
+
+    c) Prohibiting misrepresentation of the origin of that material, or
+    requiring that modified versions of such material be marked in
+    reasonable ways as different from the original version; or
+
+    d) Limiting the use for publicity purposes of names of licensors or
+    authors of the material; or
+
+    e) Declining to grant rights under trademark law for use of some
+    trade names, trademarks, or service marks; or
+
+    f) Requiring indemnification of licensors and authors of that
+    material by anyone who conveys the material (or modified versions of
+    it) with contractual assumptions of liability to the recipient, for
+    any liability that these contractual assumptions directly impose on
+    those licensors and authors.
+
+  All other non-permissive additional terms are considered "further
+restrictions" within the meaning of section 10.  If the Program as you
+received it, or any part of it, contains a notice stating that it is
+governed by this License along with a term that is a further
+restriction, you may remove that term.  If a license document contains
+a further restriction but permits relicensing or conveying under this
+License, you may add to a covered work material governed by the terms
+of that license document, provided that the further restriction does
+not survive such relicensing or conveying.
+
+  If you add terms to a covered work in accord with this section, you
+must place, in the relevant source files, a statement of the
+additional terms that apply to those files, or a notice indicating
+where to find the applicable terms.
+
+  Additional terms, permissive or non-permissive, may be stated in the
+form of a separately written license, or stated as exceptions;
+the above requirements apply either way.
+
+  8. Termination.
+
+  You may not propagate or modify a covered work except as expressly
+provided under this License.  Any attempt otherwise to propagate or
+modify it is void, and will automatically terminate your rights under
+this License (including any patent licenses granted under the third
+paragraph of section 11).
+
+  However, if you cease all violation of this License, then your
+license from a particular copyright holder is reinstated (a)
+provisionally, unless and until the copyright holder explicitly and
+finally terminates your license, and (b) permanently, if the copyright
+holder fails to notify you of the violation by some reasonable means
+prior to 60 days after the cessation.
+
+  Moreover, your license from a particular copyright holder is
+reinstated permanently if the copyright holder notifies you of the
+violation by some reasonable means, this is the first time you have
+received notice of violation of this License (for any work) from that
+copyright holder, and you cure the violation prior to 30 days after
+your receipt of the notice.
+
+  Termination of your rights under this section does not terminate the
+licenses of parties who have received copies or rights from you under
+this License.  If your rights have been terminated and not permanently
+reinstated, you do not qualify to receive new licenses for the same
+material under section 10.
+
+  9. Acceptance Not Required for Having Copies.
+
+  You are not required to accept this License in order to receive or
+run a copy of the Program.  Ancillary propagation of a covered work
+occurring solely as a consequence of using peer-to-peer transmission
+to receive a copy likewise does not require acceptance.  However,
+nothing other than this License grants you permission to propagate or
+modify any covered work.  These actions infringe copyright if you do
+not accept this License.  Therefore, by modifying or propagating a
+covered work, you indicate your acceptance of this License to do so.
+
+  10. Automatic Licensing of Downstream Recipients.
+
+  Each time you convey a covered work, the recipient automatically
+receives a license from the original licensors, to run, modify and
+propagate that work, subject to this License.  You are not responsible
+for enforcing compliance by third parties with this License.
+
+  An "entity transaction" is a transaction transferring control of an
+organization, or substantially all assets of one, or subdividing an
+organization, or merging organizations.  If propagation of a covered
+work results from an entity transaction, each party to that
+transaction who receives a copy of the work also receives whatever
+licenses to the work the party's predecessor in interest had or could
+give under the previous paragraph, plus a right to possession of the
+Corresponding Source of the work from the predecessor in interest, if
+the predecessor has it or can get it with reasonable efforts.
+
+  You may not impose any further restrictions on the exercise of the
+rights granted or affirmed under this License.  For example, you may
+not impose a license fee, royalty, or other charge for exercise of
+rights granted under this License, and you may not initiate litigation
+(including a cross-claim or counterclaim in a lawsuit) alleging that
+any patent claim is infringed by making, using, selling, offering for
+sale, or importing the Program or any portion of it.
+
+  11. Patents.
+
+  A "contributor" is a copyright holder who authorizes use under this
+License of the Program or a work on which the Program is based.  The
+work thus licensed is called the contributor's "contributor version".
+
+  A contributor's "essential patent claims" are all patent claims
+owned or controlled by the contributor, whether already acquired or
+hereafter acquired, that would be infringed by some manner, permitted
+by this License, of making, using, or selling its contributor version,
+but do not include claims that would be infringed only as a
+consequence of further modification of the contributor version.  For
+purposes of this definition, "control" includes the right to grant
+patent sublicenses in a manner consistent with the requirements of
+this License.
+
+  Each contributor grants you a non-exclusive, worldwide, royalty-free
+patent license under the contributor's essential patent claims, to
+make, use, sell, offer for sale, import and otherwise run, modify and
+propagate the contents of its contributor version.
+
+  In the following three paragraphs, a "patent license" is any express
+agreement or commitment, however denominated, not to enforce a patent
+(such as an express permission to practice a patent or covenant not to
+sue for patent infringement).  To "grant" such a patent license to a
+party means to make such an agreement or commitment not to enforce a
+patent against the party.
+
+  If you convey a covered work, knowingly relying on a patent license,
+and the Corresponding Source of the work is not available for anyone
+to copy, free of charge and under the terms of this License, through a
+publicly available network server or other readily accessible means,
+then you must either (1) cause the Corresponding Source to be so
+available, or (2) arrange to deprive yourself of the benefit of the
+patent license for this particular work, or (3) arrange, in a manner
+consistent with the requirements of this License, to extend the patent
+license to downstream recipients.  "Knowingly relying" means you have
+actual knowledge that, but for the patent license, your conveying the
+covered work in a country, or your recipient's use of the covered work
+in a country, would infringe one or more identifiable patents in that
+country that you have reason to believe are valid.
+
+  If, pursuant to or in connection with a single transaction or
+arrangement, you convey, or propagate by procuring conveyance of, a
+covered work, and grant a patent license to some of the parties
+receiving the covered work authorizing them to use, propagate, modify
+or convey a specific copy of the covered work, then the patent license
+you grant is automatically extended to all recipients of the covered
+work and works based on it.
+
+  A patent license is "discriminatory" if it does not include within
+the scope of its coverage, prohibits the exercise of, or is
+conditioned on the non-exercise of one or more of the rights that are
+specifically granted under this License.  You may not convey a covered
+work if you are a party to an arrangement with a third party that is
+in the business of distributing software, under which you make payment
+to the third party based on the extent of your activity of conveying
+the work, and under which the third party grants, to any of the
+parties who would receive the covered work from you, a discriminatory
+patent license (a) in connection with copies of the covered work
+conveyed by you (or copies made from those copies), or (b) primarily
+for and in connection with specific products or compilations that
+contain the covered work, unless you entered into that arrangement,
+or that patent license was granted, prior to 28 March 2007.
+
+  Nothing in this License shall be construed as excluding or limiting
+any implied license or other defenses to infringement that may
+otherwise be available to you under applicable patent law.
+
+  12. No Surrender of Others' Freedom.
+
+  If conditions are imposed on you (whether by court order, agreement or
+otherwise) that contradict the conditions of this License, they do not
+excuse you from the conditions of this License.  If you cannot convey a
+covered work so as to satisfy simultaneously your obligations under this
+License and any other pertinent obligations, then as a consequence you may
+not convey it at all.  For example, if you agree to terms that obligate you
+to collect a royalty for further conveying from those to whom you convey
+the Program, the only way you could satisfy both those terms and this
+License would be to refrain entirely from conveying the Program.
+
+  13. Use with the GNU Affero General Public License.
+
+  Notwithstanding any other provision of this License, you have
+permission to link or combine any covered work with a work licensed
+under version 3 of the GNU Affero General Public License into a single
+combined work, and to convey the resulting work.  The terms of this
+License will continue to apply to the part which is the covered work,
+but the special requirements of the GNU Affero General Public License,
+section 13, concerning interaction through a network will apply to the
+combination as such.
+
+  14. Revised Versions of this License.
+
+  The Free Software Foundation may publish revised and/or new versions of
+the GNU General Public License from time to time.  Such new versions will
+be similar in spirit to the present version, but may differ in detail to
+address new problems or concerns.
+
+  Each version is given a distinguishing version number.  If the
+Program specifies that a certain numbered version of the GNU General
+Public License "or any later version" applies to it, you have the
+option of following the terms and conditions either of that numbered
+version or of any later version published by the Free Software
+Foundation.  If the Program does not specify a version number of the
+GNU General Public License, you may choose any version ever published
+by the Free Software Foundation.
+
+  If the Program specifies that a proxy can decide which future
+versions of the GNU General Public License can be used, that proxy's
+public statement of acceptance of a version permanently authorizes you
+to choose that version for the Program.
+
+  Later license versions may give you additional or different
+permissions.  However, no additional obligations are imposed on any
+author or copyright holder as a result of your choosing to follow a
+later version.
+
+  15. Disclaimer of Warranty.
+
+  THERE IS NO WARRANTY FOR THE PROGRAM, TO THE EXTENT PERMITTED BY
+APPLICABLE LAW.  EXCEPT WHEN OTHERWISE STATED IN WRITING THE COPYRIGHT
+HOLDERS AND/OR OTHER PARTIES PROVIDE THE PROGRAM "AS IS" WITHOUT WARRANTY
+OF ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING, BUT NOT LIMITED TO,
+THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+PURPOSE.  THE ENTIRE RISK AS TO THE QUALITY AND PERFORMANCE OF THE PROGRAM
+IS WITH YOU.  SHOULD THE PROGRAM PROVE DEFECTIVE, YOU ASSUME THE COST OF
+ALL NECESSARY SERVICING, REPAIR OR CORRECTION.
+
+  16. Limitation of Liability.
+
+  IN NO EVENT UNLESS REQUIRED BY APPLICABLE LAW OR AGREED TO IN WRITING
+WILL ANY COPYRIGHT HOLDER, OR ANY OTHER PARTY WHO MODIFIES AND/OR CONVEYS
+THE PROGRAM AS PERMITTED ABOVE, BE LIABLE TO YOU FOR DAMAGES, INCLUDING ANY
+GENERAL, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES ARISING OUT OF THE
+USE OR INABILITY TO USE THE PROGRAM (INCLUDING BUT NOT LIMITED TO LOSS OF
+DATA OR DATA BEING RENDERED INACCURATE OR LOSSES SUSTAINED BY YOU OR THIRD
+PARTIES OR A FAILURE OF THE PROGRAM TO OPERATE WITH ANY OTHER PROGRAMS),
+EVEN IF SUCH HOLDER OR OTHER PARTY HAS BEEN ADVISED OF THE POSSIBILITY OF
+SUCH DAMAGES.
+
+  17. Interpretation of Sections 15 and 16.
+
+  If the disclaimer of warranty and limitation of liability provided
+above cannot be given local legal effect according to their terms,
+reviewing courts shall apply local law that most closely approximates
+an absolute waiver of all civil liability in connection with the
+Program, unless a warranty or assumption of liability accompanies a
+copy of the Program in return for a fee.
+
+                     END OF TERMS AND CONDITIONS
+
+            How to Apply These Terms to Your New Programs
+
+  If you develop a new program, and you want it to be of the greatest
+possible use to the public, the best way to achieve this is to make it
+free software which everyone can redistribute and change under these terms.
+
+  To do so, attach the following notices to the program.  It is safest
+to attach them to the start of each source file to most effectively
+state the exclusion of warranty; and each file should have at least
+the "copyright" line and a pointer to where the full notice is found.
+
+    <one line to give the program's name and a brief idea of what it does.>
+    Copyright (C) <year>  <name of author>
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+Also add information on how to contact you by electronic and paper mail.
+
+  If the program does terminal interaction, make it output a short
+notice like this when it starts in an interactive mode:
+
+    <program>  Copyright (C) <year>  <name of author>
+    This program comes with ABSOLUTELY NO WARRANTY; for details type `show w'.
+    This is free software, and you are welcome to redistribute it
+    under certain conditions; type `show c' for details.
+
+The hypothetical commands `show w' and `show c' should show the appropriate
+parts of the General Public License.  Of course, your program's commands
+might be different; for a GUI interface, you would use an "about box".
+
+  You should also get your employer (if you work as a programmer) or school,
+if any, to sign a "copyright disclaimer" for the program, if necessary.
+For more information on this, and how to apply and follow the GNU GPL, see
+<https://www.gnu.org/licenses/>.
+
+  The GNU General Public License does not permit incorporating your program
+into proprietary programs.  If your program is a subroutine library, you
+may consider it more useful to permit linking proprietary applications with
+the library.  If this is what you want to do, use the GNU Lesser General
+Public License instead of this License.  But first, please read
+<https://www.gnu.org/licenses/why-not-lgpl.html>.
+
+```
+
+`README.md`:
+
+```md
+# 🍃 Leaf Mod Analyzer
+
+> Fast, standalone static bytecode analyzer for Minecraft mods and cheats. No JVM or decompilation required.
+
+> [!NOTE]
+> This repository contains the **bare analysis core** (bytecode parser, heuristics, entropy calculator, and execution engine) without detection rules.
+> Full analysis with complete, regularly updated detection rule sets is available online at **[mods.merud.online](https://mods.merud.online/)**.
+> You can also supply your own custom rules using the `--rules <dir>` option.
+
+---
+
+## ⚡ Demo
+
+### Single Mod Analysis
+![Single Mod Scan](assets/demo-single.gif)
+
+### Batch Scan (Directory)
+![Batch Mod Scan](assets/demo-batch.gif)
+
+---
+
+## ✨ Features
+
+- **No JVM Required**: Pure Rust bytecode parser and rule engine. Runs instantly without Java installed.
+- **Deep Heuristics**: Detects obfuscation, aggressive renaming, homoglyph identifiers, string pool encryption, and bytecode entropy.
+- **Extensible Rule Engine**: Supply your own detection rules via `--rules <dir>` in JSON format.
+- **Blazing Fast**: Analyzes dozens of complex JARs in hundreds of milliseconds using parallel multithreading.
+- **Zero Dependencies**: Single standalone binary for Linux and Windows.
+
+---
+
+## 🚀 Quick Start
+
+### Basic Usage
+
+```bash
+# Scan a single mod JAR
+leaf-mod-analyzer path/to/mod.jar
+
+# Scan an entire directory of mods (batch mode)
+leaf-mod-analyzer path/to/mods/
+
+# Scan using custom detection rules
+leaf-mod-analyzer --rules path/to/rules/ path/to/mods/
+```
+
+### Exit Codes
+
+| Code | Meaning |
+|:---:|:---|
+| `0` | Scan completed successfully (clean / verified / suspicious / detected) |
+| `1` | Scanner error or invalid arguments |
+
+---
+
+## 🛠️ Building from Source
+
+### Using Cargo
+
+```bash
+cargo build --release
+```
+
+Binary will be available at `target/release/leaf-mod-analyzer`.
+
+### Cross-Compilation (Linux & Windows)
+
+```bash
+# Linux x86_64
+cargo build --release --target x86_64-unknown-linux-gnu
+
+# Windows x86_64
+cargo build --release --target x86_64-pc-windows-gnu
+```
+
+```
+
+`pyproject.toml`:
+
+```toml
+[build-system]
+requires = ["maturin>=1.0,<2.0"]
+build-backend = "maturin"
+
+[project]
+name = "mod_analyzer_core"
+version = "0.1.0"
+requires-python = ">=3.10"
+
+[tool.maturin]
+features = ["python"]
+
+```
+
+`src/classfile/attributes.rs`:
+
+```rs
+use std::collections::{HashMap, HashSet};
+
+use super::constant_pool::ConstantPool;
+use super::opcodes::{
+    next_pc, OP_INVOKEINTERFACE, OP_INVOKEVIRTUAL, OP_LOOKUPSWITCH, OP_TABLESWITCH,
+};
+use super::reader::ByteReader;
+use super::RawClassData;
+
+const MAX_ANNOTATION_DEPTH: usize = 32;
+
+pub fn parse_attributes(
+    reader: &mut ByteReader,
+    cp: &ConstantPool,
+    data: &mut RawClassData,
+    method_sig: Option<&str>,
+) -> Option<()> {
+    let attr_count = reader.read_u16()? as usize;
+    for _ in 0..attr_count {
+        let name_idx = reader.read_u16()?;
+        let length = reader.read_u32()? as usize;
+        let attr_data = reader.read_bytes(length)?;
+
+        let attr_name = cp.get_utf8(name_idx).unwrap_or("");
+        // Code attribute is only valid on methods (§4.7.3)
+        if attr_name == "Code" && method_sig.is_some() {
+            scan_code_attribute(attr_data, cp, data, method_sig);
+        } else if attr_name == "RuntimeVisibleAnnotations"
+            || attr_name == "RuntimeInvisibleAnnotations"
+        {
+            parse_annotation_attribute(attr_data, cp, &mut data.annotations);
+        }
+    }
+    Some(())
+}
+
+fn scan_code_attribute(
+    code_attr: &[u8],
+    cp: &ConstantPool,
+    data: &mut RawClassData,
+    method_sig: Option<&str>,
+) -> Option<()> {
+    let mut reader = ByteReader::new(code_attr);
+    let _max_stack = reader.read_u16()?;
+    let _max_locals = reader.read_u16()?;
+    let code_len = reader.read_u32()? as usize;
+    let bytecode = reader.read_bytes(code_len)?;
+
+    let mut offset = 0;
+    let mut has_switch = false;
+    let mut m_refs: HashSet<String> = HashSet::new();
+
+    while offset < bytecode.len() {
+        let op = bytecode[offset];
+        if (OP_INVOKEVIRTUAL..=OP_INVOKEINTERFACE).contains(&op) && offset + 2 < bytecode.len() {
+            let cp_idx = u16::from_be_bytes([bytecode[offset + 1], bytecode[offset + 2]]);
+            if let Some((owner, name, desc)) = cp.resolve_member_ref(cp_idx, true) {
+                m_refs.insert(format!("{owner}.{name}"));
+                if owner == "java/lang/StringBuilder"
+                    && name == "append"
+                    && desc == "(C)Ljava/lang/StringBuilder;"
+                {
+                    data.char_append_count += 1;
+                }
+            }
+        } else if op == OP_TABLESWITCH || op == OP_LOOKUPSWITCH {
+            has_switch = true;
+        }
+
+        let next = next_pc(op, bytecode, offset);
+        if next <= offset || next > bytecode.len() {
+            break;
+        }
+        offset = next;
+    }
+
+    if has_switch {
+        data.switch_methods += 1;
+    }
+    if let Some(sig) = method_sig {
+        if !m_refs.is_empty() {
+            data.method_refs_by_method.insert(sig.to_string(), m_refs);
+        }
+    }
+    Some(())
+}
+
+fn parse_annotation_attribute(
+    attr_data: &[u8],
+    cp: &ConstantPool,
+    out: &mut Vec<(String, HashMap<String, Vec<String>>)>,
+) -> Option<()> {
+    let mut reader = ByteReader::new(attr_data);
+    let count = reader.read_u16()? as usize;
+    for _ in 0..count {
+        let ann = parse_one_annotation(&mut reader, cp)?;
+        out.push(ann);
+    }
+    Some(())
+}
+
+fn parse_one_annotation(
+    reader: &mut ByteReader,
+    cp: &ConstantPool,
+) -> Option<(String, HashMap<String, Vec<String>>)> {
+    let type_idx = reader.read_u16()?;
+    let type_name = cp.get_utf8(type_idx)?.to_string();
+    let num_pairs = reader.read_u16()? as usize;
+    let mut elements: HashMap<String, Vec<String>> = HashMap::new();
+
+    for _ in 0..num_pairs {
+        let name_idx = reader.read_u16()?;
+        let name = cp.get_utf8(name_idx).unwrap_or("").to_string();
+        let mut vals = Vec::new();
+        read_element_value(reader, cp, &mut vals, 0)?;
+        if !name.is_empty() && !vals.is_empty() {
+            elements.insert(name, vals);
+        }
+    }
+    Some((type_name, elements))
+}
+
+fn read_element_value(
+    reader: &mut ByteReader,
+    cp: &ConstantPool,
+    out: &mut Vec<String>,
+    depth: usize,
+) -> Option<()> {
+    if depth >= MAX_ANNOTATION_DEPTH {
+        return None;
+    }
+    let tag = reader.read_u8()?;
+    match tag {
+        b's' | b'c' => {
+            let idx = reader.read_u16()?;
+            if let Some(s) = cp.get_utf8(idx) {
+                out.push(s.to_string());
+            }
+        }
+        b'e' => {
+            let _enum_type_idx = reader.read_u16()?;
+            let const_name_idx = reader.read_u16()?;
+            if let Some(s) = cp.get_utf8(const_name_idx) {
+                out.push(s.to_string());
+            }
+        }
+        b'[' => {
+            let num = reader.read_u16()? as usize;
+            for _ in 0..num {
+                read_element_value(reader, cp, out, depth + 1)?;
+            }
+        }
+        b'@' => {
+            let _type_idx = reader.read_u16()?;
+            let pairs = reader.read_u16()? as usize;
+            for _ in 0..pairs {
+                let _name_idx = reader.read_u16()?;
+                read_element_value(reader, cp, out, depth + 1)?;
+            }
+        }
+        b'B' | b'C' | b'D' | b'F' | b'I' | b'J' | b'S' | b'Z' => {
+            // Primitive tags have a 2-byte const_value_index
+            let _ = reader.read_u16()?;
+        }
+        _ => return None,
+    }
+    Some(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn deep_nested_array_aborts_at_max_depth() {
+        // Build nested array brackets b'[' > 32 levels deep
+        let mut nested = Vec::new();
+        for _ in 0..40 {
+            nested.push(b'[');
+            nested.extend_from_slice(&1u16.to_be_bytes()); // array of 1 element
+        }
+        nested.push(b's');
+        nested.extend_from_slice(&1u16.to_be_bytes());
+
+        let mut reader = ByteReader::new(&nested);
+        let cp = ConstantPool::default();
+        let mut out = Vec::new();
+        let res = read_element_value(&mut reader, &cp, &mut out, 0);
+        assert!(res.is_none());
+    }
+}
+
+```
+
+`src/classfile/constant_pool.rs`:
+
+```rs
+use std::collections::HashMap;
+
+use super::reader::{decode_modified_utf8, ByteReader};
+
+// Constant pool tags (JVM Spec §4.4)
+pub const CONSTANT_UTF8: u8 = 1;
+pub const CONSTANT_INTEGER: u8 = 3;
+pub const CONSTANT_FLOAT: u8 = 4;
+pub const CONSTANT_LONG: u8 = 5;
+pub const CONSTANT_DOUBLE: u8 = 6;
+pub const CONSTANT_CLASS: u8 = 7;
+pub const CONSTANT_STRING: u8 = 8;
+pub const CONSTANT_FIELDREF: u8 = 9;
+pub const CONSTANT_METHODREF: u8 = 10;
+pub const CONSTANT_INTERFACE_METHODREF: u8 = 11;
+pub const CONSTANT_NAME_AND_TYPE: u8 = 12;
+pub const CONSTANT_METHOD_HANDLE: u8 = 15;
+pub const CONSTANT_METHOD_TYPE: u8 = 16;
+pub const CONSTANT_DYNAMIC: u8 = 17;
+pub const CONSTANT_INVOKE_DYNAMIC: u8 = 18;
+pub const CONSTANT_MODULE: u8 = 19;
+pub const CONSTANT_PACKAGE: u8 = 20;
+
+#[derive(Default)]
+pub struct ConstantPool {
+    pub utf8: HashMap<u16, String>,
+    pub classes: HashMap<u16, u16>,
+    pub strings: HashMap<u16, u16>,
+    pub field_refs: HashMap<u16, (u16, u16)>,
+    pub method_refs: HashMap<u16, (u16, u16)>,
+    pub name_and_types: HashMap<u16, (u16, u16)>,
+    pub float_constants: Vec<f64>,
+}
+
+impl ConstantPool {
+    #[inline]
+    pub fn get_utf8(&self, idx: u16) -> Option<&str> {
+        self.utf8.get(&idx).map(|s| s.as_str())
+    }
+
+    #[inline]
+    pub fn get_class_name(&self, idx: u16) -> Option<&str> {
+        let name_idx = self.classes.get(&idx)?;
+        self.get_utf8(*name_idx)
+    }
+
+    pub fn resolve_member_ref(&self, idx: u16, is_method: bool) -> Option<(&str, &str, &str)> {
+        let map = if is_method {
+            &self.method_refs
+        } else {
+            &self.field_refs
+        };
+        let (class_idx, nt_idx) = map.get(&idx)?;
+        let owner = self.get_class_name(*class_idx)?;
+        let (name_idx, desc_idx) = self.name_and_types.get(nt_idx)?;
+        let name = self.get_utf8(*name_idx)?;
+        let desc = self.get_utf8(*desc_idx)?;
+        Some((owner, name, desc))
+    }
+}
+
+pub fn parse_constant_pool(reader: &mut ByteReader) -> Option<ConstantPool> {
+    let count = reader.read_u16()? as usize;
+    if count == 0 {
+        return None;
+    }
+
+    let mut cp = ConstantPool::default();
+    let mut idx = 1;
+    while idx < count {
+        let tag = reader.read_u8()?;
+        match tag {
+            CONSTANT_UTF8 => {
+                let len = reader.read_u16()? as usize;
+                let bytes = reader.read_bytes(len)?;
+                cp.utf8.insert(idx as u16, decode_modified_utf8(bytes));
+            }
+            CONSTANT_INTEGER => {
+                reader.skip(4)?;
+            }
+            CONSTANT_FLOAT => {
+                let bits = reader.read_u32()?;
+                cp.float_constants.push(f32::from_bits(bits) as f64);
+            }
+            CONSTANT_DOUBLE => {
+                let bytes = reader.read_bytes(8)?;
+                let bits = u64::from_be_bytes(bytes.try_into().ok()?);
+                cp.float_constants.push(f64::from_bits(bits));
+                idx += 1; // 8-byte constants take two pool entries
+            }
+            CONSTANT_LONG => {
+                reader.skip(8)?;
+                idx += 1;
+            }
+            CONSTANT_CLASS => {
+                cp.classes.insert(idx as u16, reader.read_u16()?);
+            }
+            CONSTANT_STRING => {
+                cp.strings.insert(idx as u16, reader.read_u16()?);
+            }
+            CONSTANT_FIELDREF => {
+                let class_idx = reader.read_u16()?;
+                let nt_idx = reader.read_u16()?;
+                cp.field_refs.insert(idx as u16, (class_idx, nt_idx));
+            }
+            CONSTANT_METHODREF | CONSTANT_INTERFACE_METHODREF => {
+                let class_idx = reader.read_u16()?;
+                let nt_idx = reader.read_u16()?;
+                cp.method_refs.insert(idx as u16, (class_idx, nt_idx));
+            }
+            CONSTANT_NAME_AND_TYPE => {
+                let name_idx = reader.read_u16()?;
+                let desc_idx = reader.read_u16()?;
+                cp.name_and_types.insert(idx as u16, (name_idx, desc_idx));
+            }
+            CONSTANT_METHOD_HANDLE => {
+                reader.skip(3)?;
+            }
+            CONSTANT_METHOD_TYPE => {
+                reader.skip(2)?;
+            }
+            CONSTANT_DYNAMIC | CONSTANT_INVOKE_DYNAMIC => {
+                reader.skip(4)?;
+            }
+            CONSTANT_MODULE | CONSTANT_PACKAGE => {
+                reader.skip(2)?;
+            }
+            _ => return None,
+        }
+        idx += 1;
+    }
+    Some(cp)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn constant_pool_should_return_none_when_empty() {
+        let empty = [0x00, 0x00];
+        let mut reader = ByteReader::new(&empty);
+        assert!(parse_constant_pool(&mut reader).is_none());
+    }
+
+    #[test]
+    fn constant_pool_should_parse_utf8_entry() {
+        let mut data = vec![0x00, 0x02, CONSTANT_UTF8, 0x00, 0x04];
+        data.extend_from_slice(b"test");
+
+        let mut reader = ByteReader::new(&data);
+        let cp = parse_constant_pool(&mut reader).expect("should parse CP");
+        assert_eq!(cp.get_utf8(1), Some("test"));
+    }
+}
+
+```
+
+`src/classfile/mod.rs`:
+
+```rs
+use std::collections::{HashMap, HashSet};
+
+pub mod attributes;
+pub mod constant_pool;
+pub mod opcodes;
+pub mod reader;
+
+pub use attributes::parse_attributes;
+pub use constant_pool::{parse_constant_pool, ConstantPool};
+pub use opcodes::*;
+pub use reader::{decode_modified_utf8, ByteReader};
+
+/// JVM class file magic number (0xCAFEBABE).
+pub const JVM_MAGIC: &[u8; 4] = b"\xCA\xFE\xBA\xBE";
+
+#[derive(Default)]
+pub struct RawClassData {
+    pub this_class: String,
+    pub simple_name: String,
+    pub class_refs: HashSet<String>,
+    pub field_refs: HashSet<String>,
+    pub method_refs: HashSet<String>,
+    pub strings: HashSet<String>,
+    pub float_constants: Vec<f64>,
+    pub member_names: HashSet<String>,
+    pub annotations: Vec<(String, HashMap<String, Vec<String>>)>,
+    pub char_append_count: usize,
+    pub method_refs_by_method: HashMap<String, HashSet<String>>,
+    pub total_methods: usize,
+    pub switch_methods: usize,
+    pub encrypted_string_count: usize,
+}
+
+/// Check if an identifier consists of visually confusable homoglyphs ([Il][Il1]+ | [O][O0]+)
+/// or stealthy mixed-script characters (Latin + Cyrillic lookalikes).
+pub fn is_homoglyph(name: &str) -> bool {
+    let bytes = name.as_bytes();
+    if bytes.len() < 2 {
+        return false;
+    }
+
+    match bytes[0] {
+        b'I' | b'l' if bytes[1..].iter().all(|&b| matches!(b, b'I' | b'l' | b'1')) => {
+            return true;
+        }
+        b'O' if bytes[1..].iter().all(|&b| matches!(b, b'O' | b'0')) => {
+            return true;
+        }
+        _ => {}
+    }
+
+    if name.is_ascii() {
+        return false;
+    }
+
+    // Mixed script homoglyphs (e.g. disguising Latin 'player' with Cyrillic 'р')
+    let mut has_latin = false;
+    let mut has_cyrillic = false;
+    for c in name.chars() {
+        if c.is_ascii_alphabetic() {
+            has_latin = true;
+        } else if ('\u{0400}'..='\u{04FF}').contains(&c) {
+            has_cyrillic = true;
+        }
+        if has_latin && has_cyrillic {
+            return true;
+        }
+    }
+    false
+}
+
+pub fn parse_class(raw: &[u8]) -> Option<RawClassData> {
+    if raw.len() < 10 || &raw[0..4] != JVM_MAGIC {
+        return None;
+    }
+
+    let mut reader = ByteReader::new(&raw[8..]); // skip magic and version
+    let cp = parse_constant_pool(&mut reader)?;
+
+    let _access_flags = reader.read_u16()?;
+    let this_class_idx = reader.read_u16()?;
+    let _super_class_idx = reader.read_u16()?;
+
+    let this_class = cp.get_class_name(this_class_idx)?.to_string();
+    let simple_name = this_class
+        .rsplit('/')
+        .next()
+        .unwrap_or(&this_class)
+        .to_string();
+
+    let mut data = RawClassData {
+        this_class,
+        simple_name,
+        ..Default::default()
+    };
+
+    populate_constant_pool_facts(&cp, &mut data);
+
+    // Skip interfaces
+    let interfaces_count = reader.read_u16()? as usize;
+    reader.skip(interfaces_count * 2)?;
+
+    parse_fields(&mut reader, &cp, &mut data)?;
+    parse_methods(&mut reader, &cp, &mut data)?;
+    parse_attributes(&mut reader, &cp, &mut data, None)?;
+
+    Some(data)
+}
+
+fn populate_constant_pool_facts(cp: &ConstantPool, data: &mut RawClassData) {
+    for &name_idx in cp.classes.values() {
+        if let Some(s) = cp.get_utf8(name_idx) {
+            data.class_refs.insert(s.to_string());
+        }
+    }
+    for &str_idx in cp.strings.values() {
+        if let Some(s) = cp.get_utf8(str_idx) {
+            if crate::is_encrypted_string(s) {
+                data.encrypted_string_count += 1;
+            }
+            data.strings.insert(s.to_string());
+        }
+    }
+    for &idx in cp.field_refs.keys() {
+        if let Some((owner, name, _)) = cp.resolve_member_ref(idx, false) {
+            data.field_refs.insert(format!("{owner}.{name}"));
+        }
+    }
+    for &idx in cp.method_refs.keys() {
+        if let Some((owner, name, _)) = cp.resolve_member_ref(idx, true) {
+            data.method_refs.insert(format!("{owner}.{name}"));
+        }
+    }
+    data.float_constants = cp.float_constants.clone();
+}
+
+fn parse_fields(reader: &mut ByteReader, cp: &ConstantPool, data: &mut RawClassData) -> Option<()> {
+    let fields_count = reader.read_u16()? as usize;
+    for _ in 0..fields_count {
+        let _f_access = reader.read_u16()?;
+        let name_idx = reader.read_u16()?;
+        let _desc_idx = reader.read_u16()?;
+        if let Some(name) = cp.get_utf8(name_idx) {
+            data.member_names.insert(name.to_string());
+        }
+        parse_attributes(reader, cp, data, None)?;
+    }
+    Some(())
+}
+
+fn parse_methods(
+    reader: &mut ByteReader,
+    cp: &ConstantPool,
+    data: &mut RawClassData,
+) -> Option<()> {
+    let methods_count = reader.read_u16()? as usize;
+    data.total_methods = methods_count;
+    for _ in 0..methods_count {
+        let _m_access = reader.read_u16()?;
+        let name_idx = reader.read_u16()?;
+        let desc_idx = reader.read_u16()?;
+        let m_name = cp.get_utf8(name_idx).unwrap_or("");
+        let m_desc = cp.get_utf8(desc_idx).unwrap_or("");
+        if !m_name.is_empty() {
+            data.member_names.insert(m_name.to_string());
+        }
+        let m_sig = format!("{m_name}{m_desc}");
+        parse_attributes(reader, cp, data, Some(&m_sig))?;
+    }
+    Some(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn is_homoglyph_detects_visual_confusables() {
+        assert!(is_homoglyph("IlIl"));
+        assert!(is_homoglyph("l1l1"));
+        assert!(is_homoglyph("O0O0"));
+        assert!(is_homoglyph("Il"));
+        assert!(is_homoglyph("ll"));
+        assert!(!is_homoglyph("NormalName"));
+    }
+
+    #[test]
+    fn is_homoglyph_detects_mixed_cyrillic() {
+        // "plаyer" with Cyrillic 'а' (\u0430)
+        assert!(is_homoglyph("pl\u{0430}yer"));
+    }
+
+    #[test]
+    fn parse_class_rejects_invalid_magic() {
+        let invalid = b"NOT_A_CLASS_FILE";
+        assert!(parse_class(invalid).is_none());
+    }
+}
+
+```
+
+`src/classfile/opcodes.rs`:
+
+```rs
+// Selected JVM opcodes (JVM Spec §6.5)
+pub const OP_TABLESWITCH: u8 = 0xAA;
+pub const OP_LOOKUPSWITCH: u8 = 0xAB;
+pub const OP_INVOKEVIRTUAL: u8 = 0xB6;
+pub const OP_INVOKEINTERFACE: u8 = 0xB9;
+pub const OP_WIDE: u8 = 0xC4;
+
+#[inline]
+pub fn align_to_4_bytes(offset: usize) -> usize {
+    (offset + 3) & !3
+}
+
+pub fn next_pc(op: u8, code: &[u8], offset: usize) -> usize {
+    if op == OP_TABLESWITCH {
+        let i = align_to_4_bytes(offset + 1);
+        if i + 12 > code.len() {
+            return code.len();
+        }
+        let low = i32::from_be_bytes([code[i + 4], code[i + 5], code[i + 6], code[i + 7]]) as i64;
+        let high =
+            i32::from_be_bytes([code[i + 8], code[i + 9], code[i + 10], code[i + 11]]) as i64;
+        let count = (high - low + 1).max(0) as usize;
+        let Some(table_size) = count.checked_mul(4) else {
+            return code.len();
+        };
+        return i.saturating_add(12).saturating_add(table_size);
+    }
+    if op == OP_LOOKUPSWITCH {
+        let i = align_to_4_bytes(offset + 1);
+        if i + 8 > code.len() {
+            return code.len();
+        }
+        let npairs = i32::from_be_bytes([code[i + 4], code[i + 5], code[i + 6], code[i + 7]]).max(0)
+            as usize;
+        let Some(pairs_size) = npairs.checked_mul(8) else {
+            return code.len();
+        };
+        return i.saturating_add(8).saturating_add(pairs_size);
+    }
+    if op == OP_WIDE {
+        if offset + 1 >= code.len() {
+            return code.len();
+        }
+        return if code[offset + 1] == 0x84 {
+            offset + 6
+        } else {
+            offset + 4
+        };
+    }
+
+    let len = match op {
+        // 2-byte opcodes (bipush, ldc, xload, xstore, ret, newarray)
+        0x10 | 0x12 | 0x15..=0x19 | 0x36..=0x3A | 0xA9 | 0xBC => 2,
+        // 3-byte opcodes (sipush, ldc_w, ldc2_w, iinc, branches, get/put, invokes, new, checkcast, etc.)
+        0x11
+        | 0x13
+        | 0x14
+        | 0x84
+        | 0x99..=0xA8
+        | 0xB2..=0xB8
+        | 0xBB
+        | 0xBD
+        | 0xC0
+        | 0xC1
+        | 0xC6
+        | 0xC7 => 3,
+        // 4-byte opcodes (multianewarray)
+        0xC5 => 4,
+        // 5-byte opcodes (invokeinterface, invokedynamic, goto_w, jsr_w)
+        0xB9 | 0xBA | 0xC8 | 0xC9 => 5,
+        _ => 1,
+    };
+    offset + len
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn align_to_4_bytes_should_compute_correct_offsets() {
+        assert_eq!(align_to_4_bytes(0), 0);
+        assert_eq!(align_to_4_bytes(1), 4);
+        assert_eq!(align_to_4_bytes(2), 4);
+        assert_eq!(align_to_4_bytes(3), 4);
+        assert_eq!(align_to_4_bytes(4), 4);
+        assert_eq!(align_to_4_bytes(5), 8);
+    }
+
+    #[test]
+    fn next_pc_should_advance_fixed_opcodes() {
+        let dummy = [0u8; 16];
+        // nop (0x00) -> 1 byte
+        assert_eq!(next_pc(0x00, &dummy, 0), 1);
+        // bipush (0x10) -> 2 bytes
+        assert_eq!(next_pc(0x10, &dummy, 0), 2);
+        // ret (0xA9) -> 2 bytes
+        assert_eq!(next_pc(0xA9, &dummy, 0), 2);
+        // iinc (0x84) -> 3 bytes
+        assert_eq!(next_pc(0x84, &dummy, 0), 3);
+        // invokevirtual (0xB6) -> 3 bytes
+        assert_eq!(next_pc(0xB6, &dummy, 0), 3);
+        // invokeinterface (0xB9) -> 5 bytes
+        assert_eq!(next_pc(0xB9, &dummy, 0), 5);
+        // invokedynamic (0xBA) -> 5 bytes
+        assert_eq!(next_pc(0xBA, &dummy, 0), 5);
+    }
+
+    #[test]
+    fn tableswitch_handles_i32_overflow_safely() {
+        // Construct tableswitch with low = i32::MIN, high = i32::MAX
+        let mut code = vec![0xAA, 0x00, 0x00, 0x00]; // padding aligned
+        code.extend_from_slice(&0i32.to_be_bytes()); // default
+        code.extend_from_slice(&i32::MIN.to_be_bytes()); // low
+        code.extend_from_slice(&i32::MAX.to_be_bytes()); // high
+        let next = next_pc(OP_TABLESWITCH, &code, 0);
+        // Should not panic on i32 subtraction overflow
+        assert!(next >= code.len());
+    }
+
+    #[test]
+    fn walk_does_not_desync_on_iinc_with_switch_lookalike() {
+        // iinc 0, -86 (84 00 AA); return (B1)
+        let code = [0x84, 0x00, 0xAA, 0xB1];
+        let mut off = 0;
+        let mut offsets = vec![];
+        while off < code.len() {
+            offsets.push(off);
+            off = next_pc(code[off], &code, off);
+        }
+        assert_eq!(offsets, vec![0, 3]);
+        assert_eq!(off, code.len());
+    }
+}
+
+```
+
+`src/classfile/reader.rs`:
+
+```rs
+/// Safe, zero-allocation byte reader over borrowed binary data.
+#[derive(Clone, Copy, Debug)]
+pub struct ByteReader<'a> {
+    data: &'a [u8],
+}
+
+impl<'a> ByteReader<'a> {
+    #[inline]
+    pub fn new(data: &'a [u8]) -> Self {
+        Self { data }
+    }
+
+    #[inline]
+    pub fn len(&self) -> usize {
+        self.data.len()
+    }
+
+    #[inline]
+    pub fn is_empty(&self) -> bool {
+        self.data.is_empty()
+    }
+
+    #[inline]
+    pub fn read_u8(&mut self) -> Option<u8> {
+        let (&first, rest) = self.data.split_first()?;
+        self.data = rest;
+        Some(first)
+    }
+
+    #[inline]
+    pub fn read_u16(&mut self) -> Option<u16> {
+        let (&chunk, rest) = self.data.split_first_chunk::<2>()?;
+        self.data = rest;
+        Some(u16::from_be_bytes(chunk))
+    }
+
+    #[inline]
+    pub fn read_u32(&mut self) -> Option<u32> {
+        let (&chunk, rest) = self.data.split_first_chunk::<4>()?;
+        self.data = rest;
+        Some(u32::from_be_bytes(chunk))
+    }
+
+    #[inline]
+    pub fn read_bytes(&mut self, len: usize) -> Option<&'a [u8]> {
+        let (bytes, rest) = self.data.split_at_checked(len)?;
+        self.data = rest;
+        Some(bytes)
+    }
+
+    #[inline]
+    pub fn skip(&mut self, len: usize) -> Option<()> {
+        let (_, rest) = self.data.split_at_checked(len)?;
+        self.data = rest;
+        Some(())
+    }
+
+    #[inline]
+    pub fn remaining(&self) -> &'a [u8] {
+        self.data
+    }
+}
+
+/// Decode standard and JVM Modified UTF-8 strings, preserving surrogate pairs (e.g. emojis).
+pub fn decode_modified_utf8(bytes: &[u8]) -> String {
+    // Fast path: standard UTF-8 without embedded NUL
+    if let Ok(s) = std::str::from_utf8(bytes) {
+        if !s.contains('\0') {
+            return s.to_string();
+        }
+    }
+
+    let mut u16_buf: Vec<u16> = Vec::with_capacity(bytes.len());
+    let mut i = 0;
+    while i < bytes.len() {
+        let b = bytes[i];
+        if b & 0x80 == 0 {
+            u16_buf.push(b as u16);
+            i += 1;
+        } else if b & 0xE0 == 0xC0 && i + 1 < bytes.len() {
+            let b2 = bytes[i + 1];
+            if b == 0xC0 && b2 == 0x80 {
+                u16_buf.push(0x0000);
+            } else {
+                let code_unit = (((b & 0x1F) as u16) << 6) | ((b2 & 0x3F) as u16);
+                u16_buf.push(code_unit);
+            }
+            i += 2;
+        } else if b & 0xF0 == 0xE0 && i + 2 < bytes.len() {
+            let b2 = bytes[i + 1];
+            let b3 = bytes[i + 2];
+            let code_unit =
+                (((b & 0x0F) as u16) << 12) | (((b2 & 0x3F) as u16) << 6) | ((b3 & 0x3F) as u16);
+            u16_buf.push(code_unit);
+            i += 3;
+        } else {
+            // Invalid byte, represent as replacement character
+            u16_buf.push(0xFFFD);
+            i += 1;
+        }
+    }
+    String::from_utf16_lossy(&u16_buf)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn reader_should_read_integers_correctly() {
+        let data = [0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE];
+        let mut reader = ByteReader::new(&data);
+
+        assert_eq!(reader.len(), 7);
+        assert!(!reader.is_empty());
+        assert_eq!(reader.read_u8(), Some(0x12));
+        assert_eq!(reader.read_u16(), Some(0x3456));
+        assert_eq!(reader.read_u32(), Some(0x789ABCDE));
+        assert_eq!(reader.read_u8(), None);
+        assert!(reader.is_empty());
+    }
+
+    #[test]
+    fn reader_should_return_none_on_insufficient_bytes() {
+        let data = [0x01, 0x02];
+        let mut reader = ByteReader::new(&data);
+        assert_eq!(reader.read_u32(), None);
+        assert_eq!(reader.len(), 2);
+    }
+
+    #[test]
+    fn decode_modified_utf8_handles_ascii_and_null() {
+        let ascii = b"Hello, World!";
+        assert_eq!(decode_modified_utf8(ascii), "Hello, World!");
+
+        let jvm_null = [0xC0, 0x80];
+        assert_eq!(decode_modified_utf8(&jvm_null), "\0");
+    }
+
+    #[test]
+    fn decode_modified_utf8_handles_surrogate_pairs_emojis() {
+        // U+1F600 (Grinning Face): high surrogate 0xD83D, low surrogate 0xDE00
+        // in Modified UTF-8: ED A0 BD (D83D) and ED B8 80 (DE00)
+        let emoji_m_utf8 = [0xED, 0xA0, 0xBD, 0xED, 0xB8, 0x80];
+        assert_eq!(decode_modified_utf8(&emoji_m_utf8), "😀");
+    }
+}
+
+```
+
+`src/cli/banner.rs`:
+
+```rs
+use super::style::Style;
+
+pub fn print_banner(style: &Style) {
+    println!("{}", style.green(" ██╗     ███████╗ █████╗ ███████╗"));
+    println!("{}", style.green(" ██║     ██╔════╝██╔══██╗██╔════╝"));
+    println!("{}", style.green(" ██║     █████╗  ███████║█████╗  "));
+    println!("{}", style.green(" ██║     ██╔══╝  ██╔══██║██╔══╝  "));
+    println!("{}", style.green(" ███████╗███████╗██║  ██║██║     "));
+    println!("{}", style.green(" ╚══════╝╚══════╝╚═╝  ╚═╝╚═╝     "));
+    println!(
+        "{}",
+        style.bold("  █▀▄▀█ █▀█ █▀▄   ▄▀█ █▄░█ ▄▀█ █░░ █▄█ ▀█ █▀▀ █▀█")
+    );
+    println!(
+        "{}",
+        style.bold("  █░▀░█ █▄█ █▄▀   █▀█ █░▀█ █▀█ █▄▄ ░█░ █▄ ██▄ █▀▄")
+    );
+    println!();
+    println!(
+        "   {} {}  {} {}",
+        style.dim("Website:"),
+        style.cyan("https://mods.merud.online/"),
+        style.dim("•"),
+        style.dim("Minecraft Mod & Cheat Scanner")
+    );
+    println!();
+}
+
+```
+
+`src/cli/loader.rs`:
+
+```rs
+use std::fs::File;
+use std::path::Path;
+
+pub fn detect_loader(jar_path: &Path) -> String {
+    let Ok(file) = File::open(jar_path) else {
+        return "any".to_string();
+    };
+    let Ok(mut archive) = zip::ZipArchive::new(file) else {
+        return "any".to_string();
+    };
+
+    let mut has_fabric = false;
+    let mut has_forge = false;
+    let mut has_neoforge = false;
+    let mut has_quilt = false;
+
+    for i in 0..archive.len() {
+        if let Ok(entry) = archive.by_index(i) {
+            if let Ok(name) = entry.name() {
+                match name.as_ref() {
+                    "fabric.mod.json" => has_fabric = true,
+                    "quilt.mod.json" => has_quilt = true,
+                    "META-INF/neoforge.mods.toml" => has_neoforge = true,
+                    "META-INF/mods.toml" => has_forge = true,
+                    _ => {}
+                }
+            }
+        }
+    }
+
+    if has_quilt {
+        "quilt".to_string()
+    } else if has_fabric {
+        "fabric".to_string()
+    } else if has_neoforge {
+        "neoforge".to_string()
+    } else if has_forge {
+        "forge".to_string()
+    } else {
+        "any".to_string()
+    }
+}
+
+```
+
+`src/cli/mod.rs`:
+
+```rs
+pub mod banner;
+pub mod loader;
+pub mod report;
+pub mod rules;
+pub mod style;
+
+```
+
+`src/cli/report.rs`:
+
+```rs
+use serde::Serialize;
+use std::collections::HashMap;
+use std::path::{Path, PathBuf};
+
+use super::loader::detect_loader;
+use super::style::Style;
+use crate::jar::models::{EntropyMetricsData, JarScanError};
+use crate::jar::scan_jar;
+use crate::rules::engine::RuleEngine;
+use crate::rules::models::RawMatch;
+
+#[derive(Serialize)]
+pub struct SingleScanReport {
+    pub file: String,
+    pub file_size_bytes: u64,
+    pub loader: String,
+    pub classes_count: usize,
+    pub status: String,
+    pub score: i64,
+    pub entropy: EntropyMetricsData,
+    pub missing_entrypoints: Vec<String>,
+    pub matches: Vec<RawMatch>,
+}
+
+pub fn collect_jars(target: &Path) -> Vec<PathBuf> {
+    if target.is_file() {
+        return if is_jar_file(target) {
+            vec![target.to_path_buf()]
+        } else {
+            Vec::new()
+        };
+    }
+
+    let mut jars = Vec::new();
+    if let Ok(entries) = std::fs::read_dir(target) {
+        for entry in entries.flatten() {
+            let p = entry.path();
+            if is_jar_file(&p) {
+                jars.push(p);
+            }
+        }
+    }
+    jars.sort();
+    jars
+}
+
+#[inline]
+fn is_jar_file(path: &Path) -> bool {
+    path.is_file() && path.extension().and_then(|s| s.to_str()) == Some("jar")
+}
+
+pub fn scan_single_jar(
+    jar_path: &Path,
+    engine: &RuleEngine,
+    forced_loader: Option<&str>,
+) -> Result<SingleScanReport, JarScanError> {
+    let path_str = jar_path.to_string_lossy();
+    let facts = scan_jar(&path_str)?;
+    let loader = forced_loader
+        .map(|s| s.to_string())
+        .unwrap_or_else(|| detect_loader(jar_path));
+
+    let matches = engine.evaluate(&facts, &loader, true);
+    let score = calculate_score(&matches);
+
+    let status = if score >= 7 {
+        "detected"
+    } else if score >= 2 {
+        "suspicious"
+    } else {
+        "clean"
+    }
+    .to_string();
+
+    let file_size = std::fs::metadata(jar_path).map(|m| m.len()).unwrap_or(0);
+
+    Ok(SingleScanReport {
+        file: jar_path
+            .file_name()
+            .map(|s| s.to_string_lossy().to_string())
+            .unwrap_or_else(|| path_str.to_string()),
+        file_size_bytes: file_size,
+        loader,
+        classes_count: facts.classes.len(),
+        status,
+        score,
+        entropy: facts.entropy,
+        missing_entrypoints: facts.missing_entrypoints,
+        matches,
+    })
+}
+
+fn calculate_score(matches: &[RawMatch]) -> i64 {
+    let mut event_scores: HashMap<(&str, &str), i64> = HashMap::new();
+    for m in matches {
+        let key = (m.category.as_str(), m.file.as_str());
+        event_scores
+            .entry(key)
+            .and_modify(|current| *current = (*current).max(m.score))
+            .or_insert(m.score);
+    }
+    event_scores.values().sum()
+}
+
+pub fn format_bytes(bytes: u64) -> String {
+    if bytes < 1024 {
+        format!("{bytes} B")
+    } else if bytes < 1024 * 1024 {
+        format!("{:.1} KB", bytes as f64 / 1024.0)
+    } else {
+        format!("{:.2} MB", bytes as f64 / (1024.0 * 1024.0))
+    }
+}
+
+pub fn print_single_report(report: &SingleScanReport, style: &Style) {
+    println!();
+    println!(
+        "{}",
+        style.bold("══════════════════════════════════════════════════════════════")
+    );
+    println!(" {} {}", style.cyan("ANALYZING:"), style.bold(&report.file));
+    println!(
+        " Size: {}  |  Classes: {}  |  Loader: {}",
+        format_bytes(report.file_size_bytes),
+        report.classes_count,
+        report.loader
+    );
+    print_telemetry(report, style);
+    print_detections(&report.matches, style);
+    print_verdict(&report.status, report.score, style);
+    println!();
+}
+
+fn print_telemetry(report: &SingleScanReport, style: &Style) {
+    println!(
+        "{}",
+        style.dim("──────────────────────────────────────────────────────────────")
+    );
+    println!("{}", style.bold(" TELEMETRY & HEURISTICS"));
+    println!(
+        " • Entropy:          max {:.2} bits/byte, avg {:.2} bits/byte",
+        report.entropy.byte_entropy_max, report.entropy.byte_entropy_avg
+    );
+    println!(
+        " • Obfuscation:      {} (short names: {:.1}%, CFF density: {:.1}%)",
+        report.entropy.obfuscation_type,
+        report.entropy.short_name_ratio * 100.0,
+        report.entropy.switch_density * 100.0
+    );
+    if report.entropy.high_entropy_strings > 0 {
+        println!(
+            " • Encrypted Pool:   {} high-entropy string literals",
+            report.entropy.high_entropy_strings
+        );
+    }
+    if !report.missing_entrypoints.is_empty() {
+        println!(
+            " • {} Missing entrypoints: {}",
+            style.yellow("WARN:"),
+            report.missing_entrypoints.join(", ")
+        );
+    }
+}
+
+fn print_detections(matches: &[RawMatch], style: &Style) {
+    println!(
+        "{}",
+        style.dim("──────────────────────────────────────────────────────────────")
+    );
+    println!("{}", style.bold(" DETECTIONS"));
+
+    if matches.is_empty() {
+        println!(
+            "   {} No suspicious bytecode patterns matched",
+            style.green("✔")
+        );
+        return;
+    }
+
+    for m in matches {
+        let tag = match m.severity.to_lowercase().as_str() {
+            "critical" => style.red("[CRITICAL]"),
+            "high" => style.red("[HIGH]    "),
+            "medium" => style.yellow("[MEDIUM]  "),
+            _ => style.cyan("[LOW]     "),
+        };
+        println!(
+            "   {} {} (score: {}) -> {}",
+            tag,
+            style.bold(&m.category),
+            m.score,
+            style.dim(&m.file)
+        );
+        println!("            {}", style.dim(&m.trigger));
+    }
+}
+
+fn print_verdict(status: &str, score: i64, style: &Style) {
+    println!(
+        "{}",
+        style.bold("══════════════════════════════════════════════════════════════")
+    );
+    let (label, score_str) = match status {
+        "detected" => (style.red("DETECTED / MALICIOUS"), format!("{score}")),
+        "suspicious" => (style.yellow("SUSPICIOUS"), format!("{score}")),
+        _ => (style.green("CLEAN"), format!("{score}")),
+    };
+    println!(" VERDICT: {label} (Total Score: {score_str})");
+    println!(
+        "{}",
+        style.bold("══════════════════════════════════════════════════════════════")
+    );
+}
+
+```
+
+`src/cli/rules.rs`:
+
+```rs
+use std::collections::BTreeMap;
+use std::path::Path;
+
+use crate::rules::engine::RuleEngine;
+use crate::rules::models::RawRule;
+
+pub const DEFAULT_RULES_JSON: &str = include_str!("../default_rules.json");
+
+pub fn load_rules(custom_path: Option<&Path>) -> Result<(RuleEngine, usize), String> {
+    match custom_path {
+        None => {
+            let engine = RuleEngine::from_json(DEFAULT_RULES_JSON)
+                .map_err(|e| format!("Failed to parse default rules: {e}"))?;
+            let count = engine.rules().len();
+            Ok((engine, count))
+        }
+        Some(path) => {
+            if path.is_file() {
+                let content = std::fs::read_to_string(path)
+                    .map_err(|e| format!("Failed to read {}: {e}", path.display()))?;
+                let engine = RuleEngine::from_json(&content)
+                    .map_err(|e| format!("Failed to compile rules from {}: {e}", path.display()))?;
+                let count = engine.rules().len();
+                Ok((engine, count))
+            } else if path.is_dir() {
+                let mut merged: BTreeMap<String, RawRule> = BTreeMap::new();
+                collect_json_rules(path, &mut merged)?;
+                let engine = RuleEngine::from_raw_rules(merged).map_err(|e| {
+                    format!(
+                        "Failed to compile merged rules from {}: {e}",
+                        path.display()
+                    )
+                })?;
+                let count = engine.rules().len();
+                Ok((engine, count))
+            } else {
+                Err(format!("Rules path not found: {}", path.display()))
+            }
+        }
+    }
+}
+
+fn collect_json_rules(dir: &Path, merged: &mut BTreeMap<String, RawRule>) -> Result<(), String> {
+    let entries =
+        std::fs::read_dir(dir).map_err(|e| format!("Failed to read dir {}: {e}", dir.display()))?;
+    for entry in entries.flatten() {
+        let p = entry.path();
+        if p.is_dir() {
+            collect_json_rules(&p, merged)?;
+        } else if p.is_file() && p.extension().and_then(|s| s.to_str()) == Some("json") {
+            let content = std::fs::read_to_string(&p)
+                .map_err(|e| format!("Failed to read {}: {e}", p.display()))?;
+            let rules: BTreeMap<String, RawRule> = serde_json::from_str(&content)
+                .map_err(|e| format!("Error in rule file {}: {e}", p.display()))?;
+            for (k, v) in rules {
+                merged.insert(k, v);
+            }
+        }
+    }
+    Ok(())
+}
+
+```
+
+`src/cli/style.rs`:
+
+```rs
+use std::io::IsTerminal;
+
+pub struct Style {
+    enabled: bool,
+}
+
+impl Default for Style {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl Style {
+    pub fn new() -> Self {
+        let enabled = std::io::stdout().is_terminal() && std::env::var_os("NO_COLOR").is_none();
+        Self { enabled }
+    }
+
+    pub fn red(&self, s: &str) -> String {
+        if self.enabled {
+            format!("\x1b[1;31m{s}\x1b[0m")
+        } else {
+            s.to_string()
+        }
+    }
+
+    pub fn green(&self, s: &str) -> String {
+        if self.enabled {
+            format!("\x1b[1;32m{s}\x1b[0m")
+        } else {
+            s.to_string()
+        }
+    }
+
+    pub fn yellow(&self, s: &str) -> String {
+        if self.enabled {
+            format!("\x1b[1;33m{s}\x1b[0m")
+        } else {
+            s.to_string()
+        }
+    }
+
+    pub fn cyan(&self, s: &str) -> String {
+        if self.enabled {
+            format!("\x1b[1;36m{s}\x1b[0m")
+        } else {
+            s.to_string()
+        }
+    }
+
+    pub fn bold(&self, s: &str) -> String {
+        if self.enabled {
+            format!("\x1b[1m{s}\x1b[0m")
+        } else {
+            s.to_string()
+        }
+    }
+
+    pub fn dim(&self, s: &str) -> String {
+        if self.enabled {
+            format!("\x1b[2m{s}\x1b[0m")
+        } else {
+            s.to_string()
+        }
+    }
+}
+
+```
+
+`src/default_rules.json`:
+
+```json
+{
+  "Packed_Class_Crypter": {
+    "scope": "jar",
+    "loaders": ["any"],
+    "severity": "critical",
+    "score": 8,
+    "all_of": [
+      { "fact": "classes_min", "value": 1 },
+      { "fact": "byte_entropy_max_min", "value": 7.0 }
+    ]
+  },
+  "Encrypted_String_Pool": {
+    "scope": "jar",
+    "loaders": ["any"],
+    "severity": "medium",
+    "score": 4,
+    "all_of": [
+      { "fact": "high_entropy_strings_min", "value": 25 }
+    ]
+  },
+  "Aggressive_Renaming": {
+    "scope": "jar",
+    "loaders": ["any"],
+    "severity": "medium",
+    "score": 4,
+    "all_of": [
+      { "fact": "classes_min", "value": 20 },
+      { "fact": "short_name_ratio_min", "value": 0.35 }
+    ]
+  },
+  "Control_Flow_Flattening": {
+    "scope": "jar",
+    "loaders": ["any"],
+    "severity": "medium",
+    "score": 4,
+    "all_of": [
+      { "fact": "classes_min", "value": 20 },
+      { "fact": "switch_density_min", "value": 0.1 }
+    ]
+  },
+  "Obfuscated_Class_Names": {
+    "scope": "jar",
+    "loaders": ["any"],
+    "severity": "high",
+    "score": 5,
+    "all_of": [
+      { "fact": "classes_min", "value": 40 },
+      { "fact": "gibberish_ratio_min", "value": 0.4 }
+    ]
+  },
+  "Homoglyph_Identifiers": {
+    "scope": "class",
+    "loaders": ["any"],
+    "severity": "medium",
+    "score": 4,
+    "all_of": [
+      { "fact": "member_homoglyphs_min", "value": 3 }
+    ]
+  },
+  "Hitbox_SetBoundingBox": {
+    "scope": "class",
+    "loaders": ["any"],
+    "severity": "high",
+    "score": 9,
+    "all_of": [
+      {
+        "fact": "method_ref",
+        "any": ["func_174826_a", "setBoundingBox", "method_5857", "m_20011_"]
+      },
+      {
+        "fact": "method_ref",
+        "any": ["method_1009", "inflate", "grow", "expand", "stretch"]
+      }
+    ]
+  },
+  "Hitbox_Iterate_Entities": {
+    "scope": "class",
+    "loaders": ["any"],
+    "severity": "high",
+    "score": 9,
+    "all_of": [
+      {
+        "fact": "method_ref",
+        "any": ["func_174826_a", "setBoundingBox", "method_5857", "m_20011_"]
+      },
+      {
+        "fact": "method_ref",
+        "any": ["method_18456", "getPlayers", "getEntities", "method_8333", "method_18112"]
+      },
+      {
+        "fact": "method_ref",
+        "any": ["AxisAlignedBB.<init>", "class_238.<init>", "AABB.<init>", "Box.<init>"]
+      }
+    ]
+  },
+  "Hitbox_Mixin_Override": {
+    "scope": "class",
+    "loaders": ["any"],
+    "severity": "high",
+    "score": 9,
+    "all_of": [
+      {
+        "fact": "annotation",
+        "any": [
+          "mixin/injection/Inject;",
+          "mixin/injection/ModifyReturnValue;",
+          "mixin/injection/ModifyExpressionValue;",
+          "ModifyExpressionValue;",
+          "ModifyReturnValue;",
+          "Inject;"
+        ],
+        "pattern": "^(?:getBoundingBox|method_5829|getTargetingMargin|method_5871|getBaseDimensions|method_55694|m_142220_|func_174813_aQ)(?:\\(|$|\")|^getDimensions\\("
+      }
+    ]
+  }
+}
+
+```
+
+`src/hashing.rs`:
+
+```rs
+use sha2::{Digest, Sha512};
+use std::fs::File;
+use std::io::{BufReader, Read};
+
+const BUFFER_CAPACITY: usize = 512 * 1024;
+const READ_CHUNK_SIZE: usize = 256 * 1024;
+
+#[inline]
+fn to_hex(bytes: &[u8]) -> String {
+    const HEX_CHARS: &[u8; 16] = b"0123456789abcdef";
+    let mut hex = String::with_capacity(bytes.len() * 2);
+    for &b in bytes {
+        hex.push(HEX_CHARS[(b >> 4) as usize] as char);
+        hex.push(HEX_CHARS[(b & 0x0f) as usize] as char);
+    }
+    hex
+}
+
+/// Computes SHA-512 hex digest of a file at the given path.
+pub fn sha512_file(file_path: &str) -> std::io::Result<String> {
+    let file = File::open(file_path)?;
+    let mut reader = BufReader::with_capacity(BUFFER_CAPACITY, file);
+    let mut hasher = Sha512::new();
+    let mut buffer = [0u8; READ_CHUNK_SIZE];
+
+    loop {
+        let bytes_read = reader.read(&mut buffer)?;
+        if bytes_read == 0 {
+            break;
+        }
+        hasher.update(&buffer[..bytes_read]);
+    }
+
+    Ok(to_hex(&hasher.finalize()))
+}
+
+/// Computes SHA-512 hex digest of an in-memory byte slice.
+pub fn sha512_bytes(data: &[u8]) -> String {
+    let mut hasher = Sha512::new();
+    hasher.update(data);
+    to_hex(&hasher.finalize())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::io::Write;
+
+    #[test]
+    fn sha512_bytes_empty_string_matches_known_digest() {
+        let digest = sha512_bytes(b"");
+        assert_eq!(
+            digest,
+            "cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f2b0ff8318d2877eec2f63b931bd47417a81a538327af927da3e"
+        );
+    }
+
+    #[test]
+    fn sha512_file_computes_correct_digest() {
+        let dir = std::env::temp_dir();
+        let file_path = dir.join("mod_analyzer_sha512_test.bin");
+        {
+            let mut f = File::create(&file_path).unwrap();
+            f.write_all(b"Hello, Minecraft Mod Analyzer!").unwrap();
+        }
+
+        let file_digest = sha512_file(file_path.to_str().unwrap()).unwrap();
+        let mem_digest = sha512_bytes(b"Hello, Minecraft Mod Analyzer!");
+        assert_eq!(file_digest, mem_digest);
+
+        let _ = std::fs::remove_file(file_path);
+    }
+}
+
+```
+
+`src/jar/entropy.rs`:
+
+```rs
+use super::models::EntropyMetricsData;
+
+pub fn round_to(val: f64, decimals: u32) -> f64 {
+    let factor = 10_f64.powi(decimals as i32);
+    (val * factor).round() / factor
+}
+
+pub fn classify_obfuscation(
+    high_entropy_classes: usize,
+    high_entropy_strings: usize,
+    short_ratio: f64,
+) -> &'static str {
+    if high_entropy_classes > 0 {
+        "packed"
+    } else if high_entropy_strings >= 5 {
+        "encrypted"
+    } else if short_ratio >= 0.35 {
+        "renamed"
+    } else {
+        "none"
+    }
+}
+
+pub fn build_entropy_metrics(
+    entropies: &[f64],
+    total_classes: usize,
+    short_names: usize,
+    high_entropy_strings: usize,
+    total_methods: usize,
+    switch_methods: usize,
+) -> EntropyMetricsData {
+    let (sum_entropy, max_val, high_entropy_classes) = entropies
+        .iter()
+        .fold((0.0_f64, 0.0_f64, 0_usize), |(sum, max_e, count), &e| {
+            (sum + e, max_e.max(e), count + usize::from(e >= 7.0))
+        });
+
+    let total_len = entropies.len();
+    let avg_entropy = if total_len > 0 {
+        round_to(sum_entropy / total_len as f64, 2)
+    } else {
+        0.0
+    };
+    let max_entropy = round_to(max_val, 2);
+
+    let short_ratio = if total_classes > 0 {
+        round_to(short_names as f64 / total_classes as f64, 3)
+    } else {
+        0.0
+    };
+    let switch_density = if total_methods > 0 {
+        round_to(switch_methods as f64 / total_methods as f64, 3)
+    } else {
+        0.0
+    };
+
+    let obfuscation_type =
+        classify_obfuscation(high_entropy_classes, high_entropy_strings, short_ratio);
+
+    EntropyMetricsData {
+        byte_entropy_avg: avg_entropy,
+        byte_entropy_max: max_entropy,
+        high_entropy_classes,
+        high_entropy_strings,
+        short_name_ratio: short_ratio,
+        switch_density,
+        obfuscation_type: obfuscation_type.to_string(),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn classify_obfuscation_logic() {
+        assert_eq!(classify_obfuscation(1, 0, 0.1), "packed");
+        assert_eq!(classify_obfuscation(0, 5, 0.1), "encrypted");
+        assert_eq!(classify_obfuscation(0, 2, 0.4), "renamed");
+        assert_eq!(classify_obfuscation(0, 2, 0.1), "none");
+    }
+}
+
+```
+
+`src/jar/entrypoints.rs`:
+
+```rs
+use std::collections::HashSet;
+
+pub fn parse_fabric_entrypoint_value(s: &str) -> Option<String> {
+    let class_part = s.split("::").next()?.trim();
+    if class_part.is_empty() {
+        return None;
+    }
+    let internal = class_part.replace('.', "/");
+    (!internal.ends_with('/')).then_some(internal)
+}
+
+pub fn parse_fabric_entrypoints(fabric_json: &str, declared: &mut Vec<String>) {
+    let clean_json = fabric_json.strip_prefix('\u{FEFF}').unwrap_or(fabric_json);
+    let Ok(val) = serde_json::from_str::<serde_json::Value>(clean_json) else {
+        return;
+    };
+    let Some(ep_obj) = val.get("entrypoints").and_then(|v| v.as_object()) else {
+        return;
+    };
+
+    for (_key, val) in ep_obj {
+        if let Some(arr) = val.as_array() {
+            for item in arr {
+                let candidate = item
+                    .as_str()
+                    .or_else(|| item.get("value").and_then(|v| v.as_str()));
+                if let Some(s) = candidate.and_then(parse_fabric_entrypoint_value) {
+                    declared.push(s);
+                }
+            }
+        } else if let Some(s) = val.as_str() {
+            if let Some(ep) = parse_fabric_entrypoint_value(s) {
+                declared.push(ep);
+            }
+        }
+    }
+}
+
+pub fn unfold_manifest_lines(manifest: &str) -> Vec<String> {
+    let mut unfolded: Vec<String> = Vec::new();
+    for line in manifest.lines() {
+        if line.starts_with(' ') || line.starts_with('\t') {
+            if let Some(last) = unfolded.last_mut() {
+                last.push_str(&line[1..]);
+                continue;
+            }
+        }
+        unfolded.push(line.to_string());
+    }
+    unfolded
+}
+
+pub fn parse_manifest_entrypoints(manifest: &str, declared: &mut Vec<String>) {
+    for line in unfold_manifest_lines(manifest) {
+        let trimmed = line.trim();
+        let lower = trimmed.to_ascii_lowercase();
+
+        if let Some(rest) = line.strip_prefix("Fabric-Loom-Client-Only-Entries:") {
+            for token in rest.split(|c: char| c == ';' || c == ',' || c.is_whitespace()) {
+                let t = token.trim();
+                if let Some(stripped) = t.strip_suffix(".class") {
+                    declared.push(stripped.to_string());
+                }
+            }
+        } else if lower.starts_with("main-class:")
+            || lower.starts_with("premain-class:")
+            || lower.starts_with("agent-class:")
+            || lower.starts_with("launcher-agent-class:")
+        {
+            if let Some((_, val)) = trimmed.split_once(':') {
+                let val = val.trim();
+                if !val.is_empty() {
+                    let internal = val.replace('.', "/");
+                    declared.push(internal);
+                }
+            }
+        }
+    }
+}
+
+pub fn parse_entrypoints(fabric_json: Option<&str>, manifest: Option<&str>) -> Vec<String> {
+    let mut declared = Vec::new();
+    if let Some(json_str) = fabric_json {
+        parse_fabric_entrypoints(json_str, &mut declared);
+    }
+    if let Some(mf) = manifest {
+        parse_manifest_entrypoints(mf, &mut declared);
+    }
+    declared
+}
+
+pub fn find_missing_entrypoints(
+    declared: Vec<String>,
+    entry_names: &HashSet<String>,
+) -> Vec<String> {
+    let mut missing: Vec<String> = declared
+        .into_iter()
+        .filter(|name| {
+            let class_name = format!("{name}.class");
+            !entry_names.contains(&class_name) && !entry_names.contains(name)
+        })
+        .collect();
+    missing.sort();
+    missing.dedup();
+    missing
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn parse_fabric_entrypoint_value_normalizes_dot_to_slash_and_strips_method() {
+        assert_eq!(
+            parse_fabric_entrypoint_value("net.example.ModClient"),
+            Some("net/example/ModClient".to_string())
+        );
+        assert_eq!(
+            parse_fabric_entrypoint_value("net.example.ModClient::init"),
+            Some("net/example/ModClient".to_string())
+        );
+        assert_eq!(parse_fabric_entrypoint_value(""), None);
+    }
+
+    #[test]
+    fn parse_fabric_entrypoints_with_bom() {
+        let json_with_bom = "\u{FEFF}{\"entrypoints\": {\"main\": [\"net.example.Mod\"]}}";
+        let mut declared = Vec::new();
+        parse_fabric_entrypoints(json_with_bom, &mut declared);
+        assert_eq!(declared, vec!["net/example/Mod".to_string()]);
+    }
+
+    #[test]
+    fn unfold_manifest_lines_joins_continuation_lines() {
+        let mf = "Header: Value\r\n ContinuationLine\r\nOther: Normal";
+        let unfolded = unfold_manifest_lines(mf);
+        assert_eq!(unfolded.len(), 2);
+        assert_eq!(unfolded[0], "Header: ValueContinuationLine");
+        assert_eq!(unfolded[1], "Other: Normal");
+    }
+
+    #[test]
+    fn parse_manifest_entrypoints_supports_main_class() {
+        let mf = "Main-Class: com.example.MyMain\r\nPremain-Class: com.example.Agent";
+        let mut declared = Vec::new();
+        parse_manifest_entrypoints(mf, &mut declared);
+        assert!(declared.contains(&"com/example/MyMain".to_string()));
+        assert!(declared.contains(&"com/example/Agent".to_string()));
+    }
+}
+
+```
+
+`src/jar/mod.rs`:
+
+```rs
+pub mod entropy;
+pub mod entrypoints;
+pub mod models;
+pub mod scanner;
+
+pub use models::{ClassFactsData, EntropyMetricsData, JarFactsResult, JarScanError};
+pub use scanner::{build_class_facts_data, scan_jar};
+
+```
+
+`src/jar/models.rs`:
+
+```rs
+use serde::Serialize;
+use std::collections::{HashMap, HashSet};
+
+#[derive(Debug, thiserror::Error)]
+pub enum JarScanError {
+    #[error("I/O error: {0}")]
+    Io(#[from] std::io::Error),
+    #[error("ZIP error: {0}")]
+    Zip(#[from] zip::result::ZipError),
+}
+
+#[derive(Debug, Clone)]
+pub struct ClassFactsData {
+    pub class_name: String,
+    pub simple_name: String,
+    pub method_refs: HashSet<String>,
+    pub field_refs: HashSet<String>,
+    pub class_refs: HashSet<String>,
+    pub strings: HashSet<String>,
+    pub float_constants: Vec<f64>,
+    pub annotations: Vec<(String, HashMap<String, Vec<String>>)>,
+    pub member_names: HashSet<String>,
+    pub char_append_count: usize,
+    pub member_homoglyphs: Vec<String>,
+    pub method_refs_by_method: HashMap<String, HashSet<String>>,
+}
+
+#[derive(Debug, Clone, Serialize)]
+pub struct EntropyMetricsData {
+    pub byte_entropy_avg: f64,
+    pub byte_entropy_max: f64,
+    pub high_entropy_classes: usize,
+    pub high_entropy_strings: usize,
+    pub short_name_ratio: f64,
+    pub switch_density: f64,
+    pub obfuscation_type: String,
+}
+
+#[derive(Debug, Clone)]
+pub struct JarFactsResult {
+    pub classes: Vec<ClassFactsData>,
+    pub unparsed: Vec<String>,
+    pub hidden_class_entries: usize,
+    pub missing_entrypoints: Vec<String>,
+    pub entropy: EntropyMetricsData,
+}
+
+```
+
+`src/jar/scanner.rs`:
+
+```rs
+use std::collections::HashSet;
+use std::fs::File;
+use std::io::{BufReader, Read};
+use std::path::Path;
+use zip::ZipArchive;
+
+use super::entropy::build_entropy_metrics;
+use super::entrypoints::{find_missing_entrypoints, parse_entrypoints};
+use super::models::{ClassFactsData, JarFactsResult, JarScanError};
+use crate::classfile::{self, is_homoglyph, RawClassData, JVM_MAGIC};
+
+pub fn scan_jar(jar_path: &str) -> Result<JarFactsResult, JarScanError> {
+    let file = File::open(Path::new(jar_path))?;
+    let reader = BufReader::with_capacity(64 * 1024, file);
+    let mut zip = ZipArchive::new(reader)?;
+
+    let mut entry_names = HashSet::with_capacity(zip.len());
+    let mut manifest_content = None;
+    let mut fabric_mod_content = None;
+    let mut acc = ClassScanAccumulator::default();
+
+    for i in 0..zip.len() {
+        let Ok(mut file) = zip.by_index(i) else {
+            continue;
+        };
+        let Ok(name_cow) = file.name() else {
+            continue;
+        };
+        let is_dir = name_cow.ends_with('/');
+        let name = name_cow.to_string();
+
+        if !is_dir {
+            entry_names.insert(name.clone());
+        }
+
+        if name == "META-INF/MANIFEST.MF" {
+            let mut buf = Vec::new();
+            if file.read_to_end(&mut buf).is_ok() {
+                manifest_content = Some(String::from_utf8_lossy(&buf).to_string());
+            }
+        } else if name == "fabric.mod.json" {
+            let mut buf = Vec::new();
+            if file.read_to_end(&mut buf).is_ok() {
+                fabric_mod_content = Some(String::from_utf8_lossy(&buf).to_string());
+            }
+        } else if let Some(raw_bytes) = read_candidate_class_entry(&mut file) {
+            acc.record_class(&name, &raw_bytes);
+        }
+    }
+
+    let declared_entrypoints =
+        parse_entrypoints(fabric_mod_content.as_deref(), manifest_content.as_deref());
+    let missing_entrypoints = find_missing_entrypoints(declared_entrypoints, &entry_names);
+
+    let entropy = build_entropy_metrics(
+        &acc.byte_entropies,
+        acc.classes.len(),
+        acc.short_names,
+        acc.high_entropy_strings,
+        acc.total_methods,
+        acc.switch_methods,
+    );
+
+    Ok(JarFactsResult {
+        classes: acc.classes,
+        unparsed: acc.unparsed,
+        hidden_class_entries: acc.hidden_class_entries,
+        missing_entrypoints,
+        entropy,
+    })
+}
+
+fn read_candidate_class_entry<R: Read>(file: &mut zip::read::ZipFile<'_, R>) -> Option<Vec<u8>> {
+    if file.is_dir() {
+        return None;
+    }
+    let mut magic = [0u8; 4];
+    if file.read_exact(&mut magic).is_err() || &magic != JVM_MAGIC {
+        return None;
+    }
+
+    let mut raw_bytes = Vec::with_capacity(4096);
+    raw_bytes.extend_from_slice(&magic);
+    file.read_to_end(&mut raw_bytes).ok()?;
+    Some(raw_bytes)
+}
+
+#[derive(Default)]
+struct ClassScanAccumulator {
+    classes: Vec<ClassFactsData>,
+    unparsed: Vec<String>,
+    hidden_class_entries: usize,
+    byte_entropies: Vec<f64>,
+    short_names: usize,
+    high_entropy_strings: usize,
+    total_methods: usize,
+    switch_methods: usize,
+}
+
+impl ClassScanAccumulator {
+    fn record_class(&mut self, entry_name: &str, raw_bytes: &[u8]) {
+        if !entry_name.ends_with(".class") {
+            self.hidden_class_entries += 1;
+        }
+
+        self.byte_entropies.push(crate::entropy(raw_bytes));
+
+        match classfile::parse_class(raw_bytes) {
+            Some(data) => {
+                let simple_stripped = data
+                    .simple_name
+                    .rsplit('$')
+                    .next()
+                    .unwrap_or(&data.simple_name);
+
+                let is_numeric = !simple_stripped.is_empty()
+                    && simple_stripped.chars().all(|c| c.is_ascii_digit());
+                if simple_stripped.len() <= 2 && !is_numeric {
+                    self.short_names += 1;
+                }
+
+                self.high_entropy_strings += data.encrypted_string_count;
+                self.total_methods += data.total_methods;
+                self.switch_methods += data.switch_methods;
+
+                self.classes.push(build_class_facts_data(data));
+            }
+            None => {
+                self.unparsed.push(entry_name.to_string());
+            }
+        }
+    }
+}
+
+fn extract_homoglyphs(simple_name: &str, member_names: &HashSet<String>) -> Vec<String> {
+    let simple_is_homoglyph = is_homoglyph(simple_name);
+    let any_member_homoglyph = member_names.iter().any(|m| is_homoglyph(m));
+
+    if !simple_is_homoglyph && !any_member_homoglyph {
+        return Vec::new();
+    }
+
+    let mut homoglyphs = std::collections::BTreeSet::new();
+    if simple_is_homoglyph {
+        homoglyphs.insert(simple_name.to_string());
+    }
+    for m in member_names {
+        if is_homoglyph(m) {
+            homoglyphs.insert(m.clone());
+        }
+    }
+    homoglyphs.into_iter().collect()
+}
+
+pub fn build_class_facts_data(data: RawClassData) -> ClassFactsData {
+    let member_homoglyphs = extract_homoglyphs(&data.simple_name, &data.member_names);
+
+    ClassFactsData {
+        class_name: data.this_class,
+        simple_name: data.simple_name,
+        method_refs: data.method_refs,
+        field_refs: data.field_refs,
+        class_refs: data.class_refs,
+        strings: data.strings,
+        float_constants: data.float_constants,
+        annotations: data.annotations,
+        member_names: data.member_names,
+        char_append_count: data.char_append_count,
+        member_homoglyphs,
+        method_refs_by_method: data.method_refs_by_method,
+    }
+}
+
+```
+
+`src/lib.rs`:
+
+```rs
+#[cfg(feature = "python")]
+use pyo3::prelude::*;
+
+pub mod classfile;
+pub mod cli;
+pub mod hashing;
+pub mod jar;
+#[cfg(feature = "python")]
+pub mod py_bridge;
+pub mod rules;
+
+#[cfg(feature = "python")]
+pub use py_bridge::RuleEngine;
+#[cfg(not(feature = "python"))]
+pub use rules::engine::RuleEngine;
+
+/// Calculate entropy in bits per byte (0.0 to 8.0) rounded to 4 decimals.
+#[cfg_attr(feature = "python", pyfunction)]
+pub fn entropy(data: &[u8]) -> f64 {
+    if data.is_empty() {
+        return 0.0;
+    }
+    let mut counts = [0usize; 256];
+    for &b in data {
+        counts[b as usize] += 1;
+    }
+    let total = data.len() as f64;
+    let val = counts
+        .iter()
+        .filter(|&&c| c > 0)
+        .map(|&c| {
+            let p = c as f64 / total;
+            -p * p.log2()
+        })
+        .sum::<f64>();
+    (val * 10000.0).round() / 10000.0
+}
+
+/// Backwards compatibility alias for `entropy`.
+#[cfg_attr(feature = "python", pyfunction)]
+pub fn shannon_entropy(data: &[u8]) -> f64 {
+    entropy(data)
+}
+
+/// Calculate entropy of a UTF-8 string.
+#[cfg_attr(feature = "python", pyfunction)]
+pub fn string_entropy(text: &str) -> f64 {
+    entropy(text.as_bytes())
+}
+
+/// Determine if a string looks like an encrypted or packed pool literal.
+#[cfg_attr(feature = "python", pyfunction)]
+pub fn is_encrypted_string(s: &str) -> bool {
+    let char_count = s.chars().count();
+    if char_count < 20 {
+        return false;
+    }
+
+    let non_ascii_count = s.chars().filter(|&ch| !ch.is_ascii()).count();
+    if non_ascii_count >= 8 {
+        let ratio = (non_ascii_count as f64) / (char_count as f64);
+        if ratio >= 0.4 && entropy(s.as_bytes()) >= 4.2 {
+            return true;
+        }
+    }
+    if char_count >= 64
+        && !s.contains(' ')
+        && !s.contains('.')
+        && !s.contains('/')
+        && entropy(s.as_bytes()) >= 5.0
+    {
+        return true;
+    }
+    false
+}
+
+/// Count encrypted strings from a list of strings.
+#[cfg_attr(feature = "python", pyfunction)]
+pub fn count_high_entropy_strings(strings: Vec<String>) -> usize {
+    strings.iter().filter(|s| is_encrypted_string(s)).count()
+}
+
+/// Fast single-class parser extracting ClassFacts from raw bytecode.
+#[cfg(feature = "python")]
+#[pyfunction]
+pub fn extract_class_facts<'py>(py: Python<'py>, raw: &[u8]) -> PyResult<Bound<'py, PyAny>> {
+    let raw_data = classfile::parse_class(raw).ok_or_else(|| {
+        pyo3::exceptions::PyValueError::new_err("Invalid or unparseable Java class bytes")
+    })?;
+    let facts_data = jar::build_class_facts_data(raw_data);
+    let facts_mod = py.import("app.bytecode.facts")?;
+    let class_facts_cls = facts_mod.getattr("ClassFacts")?;
+    py_bridge::build_py_class_facts(py, &class_facts_cls, &facts_data)
+}
+
+/// Fast single-pass JAR scanner extracting ClassFacts and EntropyMetrics in native Rust without blocking GIL.
+#[cfg(feature = "python")]
+#[pyfunction]
+pub fn extract_jar_facts<'py>(py: Python<'py>, jar_path: &str) -> PyResult<Bound<'py, PyAny>> {
+    let result = py
+        .detach(|| jar::scan_jar(jar_path))
+        .map_err(|e| pyo3::exceptions::PyValueError::new_err(e.to_string()))?;
+
+    py_bridge::build_py_jar_facts(py, &result)
+}
+
+/// Compute SHA-512 hex digest of a file on disk without blocking GIL.
+#[cfg(feature = "python")]
+#[pyfunction]
+pub fn sha512_file(py: Python<'_>, file_path: &str) -> PyResult<String> {
+    py.detach(|| hashing::sha512_file(file_path))
+        .map_err(|e| pyo3::exceptions::PyIOError::new_err(e.to_string()))
+}
+
+/// Compute SHA-512 hex digest of an in-memory byte slice.
+#[cfg_attr(feature = "python", pyfunction)]
+pub fn sha512_bytes(data: &[u8]) -> String {
+    hashing::sha512_bytes(data)
+}
+
+#[cfg(feature = "python")]
+#[pymodule]
+fn mod_analyzer_core(m: &Bound<'_, PyModule>) -> PyResult<()> {
+    m.add_function(wrap_pyfunction!(entropy, m)?)?;
+    m.add_function(wrap_pyfunction!(shannon_entropy, m)?)?;
+    m.add_function(wrap_pyfunction!(string_entropy, m)?)?;
+    m.add_function(wrap_pyfunction!(is_encrypted_string, m)?)?;
+    m.add_function(wrap_pyfunction!(count_high_entropy_strings, m)?)?;
+    m.add_function(wrap_pyfunction!(extract_class_facts, m)?)?;
+    m.add_function(wrap_pyfunction!(extract_jar_facts, m)?)?;
+    m.add_function(wrap_pyfunction!(sha512_file, m)?)?;
+    m.add_function(wrap_pyfunction!(sha512_bytes, m)?)?;
+    m.add_class::<RuleEngine>()?;
+    Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn entropy_of_empty_slice_is_zero() {
+        assert_eq!(entropy(&[]), 0.0);
+        assert_eq!(shannon_entropy(&[]), 0.0);
+    }
+
+    #[test]
+    fn entropy_of_uniform_bytes() {
+        let single_byte = [0x42; 100];
+        assert_eq!(entropy(&single_byte), 0.0);
+        assert_eq!(shannon_entropy(&single_byte), 0.0);
+
+        let two_equal_bytes = [0x00, 0xFF, 0x00, 0xFF];
+        assert_eq!(entropy(&two_equal_bytes), 1.0);
+        assert_eq!(shannon_entropy(&two_equal_bytes), 1.0);
+    }
+
+    #[test]
+    fn string_entropy_computes_utf8() {
+        assert_eq!(string_entropy(""), 0.0);
+        assert!(string_entropy("hello world") > 0.0);
+    }
+
+    #[test]
+    fn is_encrypted_string_short_string_is_false() {
+        assert!(!is_encrypted_string("short"));
+    }
+
+    #[test]
+    fn is_encrypted_string_flags_high_entropy_non_ascii() {
+        assert!(is_encrypted_string(
+            "абвгдежзийклмнопрстуфхцчшщъыьэюя123456789"
+        ));
+    }
+}
+
+```
+
+`src/main.rs`:
+
+```rs
+use clap::Parser;
+use std::path::{Path, PathBuf};
+use std::time::Instant;
+
+use mod_analyzer_core::cli::banner::print_banner;
+use mod_analyzer_core::cli::report::{
+    collect_jars, print_single_report, scan_single_jar, SingleScanReport,
+};
+use mod_analyzer_core::cli::rules::load_rules;
+use mod_analyzer_core::cli::style::Style;
+use mod_analyzer_core::rules::RuleEngine;
+
+#[derive(Parser, Debug)]
+#[command(
+    name = "leaf-mod-analyzer",
+    author = "Leaf Mod Analyzer Team",
+    version = "0.1.0",
+    about = "Leaf Mod Analyzer — Blazing fast static bytecode & security analyzer for Minecraft mods"
+)]
+struct Cli {
+    /// Path to a .jar file or a directory with .jar files
+    #[arg(default_value = ".")]
+    path: PathBuf,
+
+    /// Optional path to custom rules (.json file or directory containing .json files)
+    #[arg(short, long)]
+    rules: Option<PathBuf>,
+
+    /// Target mod loader (fabric, forge, neoforge, quilt, or any). Auto-detected if omitted.
+    #[arg(short, long)]
+    loader: Option<String>,
+
+    /// Output full scan results in JSON format
+    #[arg(long)]
+    json: bool,
+}
+
+fn main() {
+    let cli = Cli::parse();
+    let style = Style::new();
+
+    if let Err(err) = run(&cli, &style) {
+        eprintln!("{} {err}", style.red("Error:"));
+        std::process::exit(1);
+    }
+}
+
+fn run(cli: &Cli, style: &Style) -> Result<(), Box<dyn std::error::Error>> {
+    let start_time = Instant::now();
+
+    if !cli.json {
+        print_banner(style);
+    }
+
+    let (engine, rules_count) =
+        load_rules(cli.rules.as_deref()).map_err(|e| -> Box<dyn std::error::Error> { e.into() })?;
+
+    let jars = collect_jars(&cli.path);
+    if jars.is_empty() {
+        eprintln!(
+            "{} No .jar files found at '{}'",
+            style.yellow("Warning:"),
+            cli.path.display()
+        );
+        return Ok(());
+    }
+
+    let is_batch = jars.len() > 1;
+    if !cli.json && is_batch {
+        print_batch_header(jars.len(), &cli.path, rules_count, style);
+    }
+
+    let (reports, stats) = execute_scan(&jars, &engine, cli, is_batch, style);
+
+    if cli.json {
+        print_json_reports(&reports, is_batch);
+    } else if is_batch {
+        print_batch_summary(start_time, &stats, style);
+    }
+
+    Ok(())
+}
+
+#[derive(Default)]
+struct ScanStats {
+    clean: usize,
+    suspicious: usize,
+    detected: usize,
+}
+
+impl ScanStats {
+    fn record(&mut self, status: &str) {
+        match status {
+            "detected" => self.detected += 1,
+            "suspicious" => self.suspicious += 1,
+            _ => self.clean += 1,
+        }
+    }
+}
+
+fn print_batch_header(jar_count: usize, path: &Path, rules_count: usize, style: &Style) {
+    println!(
+        "{} Scanning {} JAR files in {} (using {} rules)...",
+        style.cyan("Leaf Mod Analyzer:"),
+        style.bold(&jar_count.to_string()),
+        style.dim(&path.display().to_string()),
+        rules_count
+    );
+    println!(
+        "{}",
+        style.dim("─────────────────────────────────────────────────────────────────────────────")
+    );
+}
+
+fn execute_scan(
+    jars: &[PathBuf],
+    engine: &RuleEngine,
+    cli: &Cli,
+    is_batch: bool,
+    style: &Style,
+) -> (Vec<SingleScanReport>, ScanStats) {
+    let mut reports = Vec::with_capacity(jars.len());
+    let mut stats = ScanStats::default();
+
+    for jar in jars {
+        match scan_single_jar(jar, engine, cli.loader.as_deref()) {
+            Ok(report) => {
+                stats.record(&report.status);
+                if !cli.json {
+                    if is_batch {
+                        print_batch_row(&report, style);
+                    } else {
+                        print_single_report(&report, style);
+                    }
+                }
+                reports.push(report);
+            }
+            Err(e) => eprintln!(
+                " [{}] Failed to scan {}: {e}",
+                style.red("ERROR"),
+                jar.display()
+            ),
+        }
+    }
+
+    (reports, stats)
+}
+
+fn print_batch_summary(start_time: Instant, stats: &ScanStats, style: &Style) {
+    let elapsed = start_time.elapsed();
+    println!(
+        "{}",
+        style.dim("─────────────────────────────────────────────────────────────────────────────")
+    );
+    println!(
+        " {} Completed in {:.1}ms: {} clean, {} suspicious, {} detected",
+        style.cyan("Summary:"),
+        elapsed.as_secs_f64() * 1000.0,
+        style.green(&stats.clean.to_string()),
+        style.yellow(&stats.suspicious.to_string()),
+        style.red(&stats.detected.to_string())
+    );
+    println!();
+}
+
+fn print_batch_row(report: &SingleScanReport, style: &Style) {
+    let status_tag = match report.status.as_str() {
+        "detected" => style.red("DETECTED  "),
+        "suspicious" => style.yellow("SUSPICIOUS"),
+        _ => style.green("CLEAN     "),
+    };
+    let display_name = format_file_column(&report.file);
+    let rules_info = if report.matches.is_empty() {
+        format!("entropy: {:.2}", report.entropy.byte_entropy_max)
+    } else {
+        let mut categories: Vec<&str> =
+            report.matches.iter().map(|m| m.category.as_str()).collect();
+        categories.sort_unstable();
+        categories.dedup();
+        categories.join(", ")
+    };
+    println!(
+        " [{}] {} (score: {:>2}, classes: {:>4}) | {}",
+        status_tag,
+        style.bold(&display_name),
+        report.score,
+        report.classes_count,
+        style.dim(&rules_info)
+    );
+}
+
+fn format_file_column(filename: &str) -> String {
+    if filename.len() > 36 {
+        format!("{}...", &filename[..33])
+    } else {
+        format!("{filename:<36}")
+    }
+}
+
+fn print_json_reports(reports: &[SingleScanReport], is_batch: bool) {
+    let json_output = if is_batch {
+        serde_json::to_string_pretty(reports)
+    } else {
+        serde_json::to_string_pretty(&reports.first())
+    };
+    println!("{}", json_output.unwrap_or_default());
+}
+
+```
+
+`src/py_bridge.rs`:
+
+```rs
+use pyo3::prelude::*;
+use pyo3::types::{PyDict, PyFrozenSet, PyList, PyTuple};
+
+use crate::jar::{self, ClassFactsData, JarFactsResult};
+use crate::rules::{self, RawMatch};
+
+pub fn build_py_class_facts<'py>(
+    py: Python<'py>,
+    class_facts_cls: &Bound<'py, PyAny>,
+    c: &ClassFactsData,
+) -> PyResult<Bound<'py, PyAny>> {
+    let method_refs = PyFrozenSet::new(py, &c.method_refs)?;
+    let field_refs = PyFrozenSet::new(py, &c.field_refs)?;
+    let class_refs = PyFrozenSet::new(py, &c.class_refs)?;
+    let strings = PyFrozenSet::new(py, &c.strings)?;
+    let float_constants = PyFrozenSet::new(py, &c.float_constants)?;
+    let member_names = PyFrozenSet::new(py, &c.member_names)?;
+    let member_homoglyphs = PyTuple::new(py, &c.member_homoglyphs)?;
+
+    let mut ann_pairs = Vec::new();
+    for (ann_type, elements) in &c.annotations {
+        let py_elements = PyDict::new(py);
+        for (k, v) in elements {
+            py_elements.set_item(k, v)?;
+        }
+        ann_pairs.push((ann_type, py_elements));
+    }
+    let annotations = PyTuple::new(py, ann_pairs)?;
+
+    let py_m_by_m = PyDict::new(py);
+    for (sig, refs) in &c.method_refs_by_method {
+        let f_set = PyFrozenSet::new(py, refs)?;
+        py_m_by_m.set_item(sig, f_set)?;
+    }
+
+    class_facts_cls.call1((
+        &c.class_name,
+        &c.simple_name,
+        method_refs,
+        field_refs,
+        class_refs,
+        strings,
+        float_constants,
+        annotations,
+        member_names,
+        c.char_append_count,
+        member_homoglyphs,
+        py_m_by_m,
+    ))
+}
+
+pub fn build_py_entropy<'py>(
+    py: Python<'py>,
+    ent: &crate::jar::EntropyMetricsData,
+) -> PyResult<Bound<'py, PyAny>> {
+    let entropy_mod = py.import("app.bytecode.entropy")?;
+    let entropy_cls = entropy_mod.getattr("EntropyMetrics")?;
+    entropy_cls.call1((
+        ent.byte_entropy_avg,
+        ent.byte_entropy_max,
+        ent.high_entropy_classes,
+        ent.high_entropy_strings,
+        ent.short_name_ratio,
+        ent.switch_density,
+        &ent.obfuscation_type,
+    ))
+}
+
+pub fn build_py_jar_facts<'py>(
+    py: Python<'py>,
+    result: &JarFactsResult,
+) -> PyResult<Bound<'py, PyAny>> {
+    let facts_mod = py.import("app.bytecode.facts")?;
+    let class_facts_cls = facts_mod.getattr("ClassFacts")?;
+    let jar_facts_cls = facts_mod.getattr("JarFacts")?;
+
+    let py_classes = PyList::empty(py);
+    for c in &result.classes {
+        let class_facts = build_py_class_facts(py, &class_facts_cls, c)?;
+        py_classes.append(class_facts)?;
+    }
+
+    let entropy_obj = build_py_entropy(py, &result.entropy)?;
+
+    jar_facts_cls.call1((
+        py_classes,
+        &result.unparsed,
+        result.hidden_class_entries,
+        &result.missing_entrypoints,
+        entropy_obj,
+    ))
+}
+
+pub fn build_py_matches<'py>(
+    py: Python<'py>,
+    raw_matches: &[RawMatch],
+) -> PyResult<Bound<'py, PyList>> {
+    let result_mod = py.import("app.models.result")?;
+    let match_cls = result_mod.getattr("Match")?;
+    let list = PyList::empty(py);
+
+    for m in raw_matches {
+        let kwargs = PyDict::new(py);
+        kwargs.set_item("category", &m.category)?;
+        kwargs.set_item("trigger", &m.trigger)?;
+        kwargs.set_item("file", &m.file)?;
+        kwargs.set_item("line_num", m.line_num)?;
+        kwargs.set_item("code_snippet", &m.code_snippet)?;
+        kwargs.set_item("severity", &m.severity)?;
+        kwargs.set_item("score", m.score)?;
+        let py_match = match_cls.call((), Some(&kwargs))?;
+        list.append(py_match)?;
+    }
+    Ok(list)
+}
+
+#[pyclass]
+pub struct RuleEngine {
+    inner: rules::RuleEngine,
+}
+
+#[pymethods]
+impl RuleEngine {
+    #[new]
+    pub fn new(rules_json: &str) -> PyResult<Self> {
+        let inner = rules::RuleEngine::from_json(rules_json)
+            .map_err(|e| pyo3::exceptions::PyValueError::new_err(e.to_string()))?;
+        Ok(Self { inner })
+    }
+
+    /// Evaluates rules on a JAR file directly in Rust without holding GIL.
+    pub fn scan_jar<'py>(
+        &self,
+        py: Python<'py>,
+        jar_path: &str,
+        loader: &str,
+    ) -> PyResult<Bound<'py, PyList>> {
+        let raw_matches = py
+            .detach(|| {
+                let facts = jar::scan_jar(jar_path)?;
+                Ok::<_, jar::JarScanError>(self.inner.evaluate(&facts, loader, true))
+            })
+            .map_err(|e| pyo3::exceptions::PyValueError::new_err(e.to_string()))?;
+
+        build_py_matches(py, &raw_matches)
+    }
+
+    /// Evaluates rules on a JAR file directly in Rust and returns Matches and EntropyMetrics
+    /// WITHOUT the expensive overhead of marshalling hundreds of ClassFacts into Python.
+    pub fn scan_jar_with_entropy<'py>(
+        &self,
+        py: Python<'py>,
+        jar_path: &str,
+        loader: &str,
+    ) -> PyResult<(Bound<'py, PyList>, Bound<'py, PyAny>)> {
+        let (raw_matches, entropy) = py
+            .detach(|| {
+                let facts = jar::scan_jar(jar_path)?;
+                let raw_matches = self.inner.evaluate(&facts, loader, true);
+                Ok::<_, jar::JarScanError>((raw_matches, facts.entropy))
+            })
+            .map_err(|e| pyo3::exceptions::PyValueError::new_err(e.to_string()))?;
+
+        let py_matches = build_py_matches(py, &raw_matches)?;
+        let py_entropy = build_py_entropy(py, &entropy)?;
+        Ok((py_matches, py_entropy))
+    }
+
+    /// Evaluates rules on a JAR file directly in Rust and returns both Matches and JarFacts.
+    pub fn scan_jar_with_facts<'py>(
+        &self,
+        py: Python<'py>,
+        jar_path: &str,
+        loader: &str,
+    ) -> PyResult<(Bound<'py, PyList>, Bound<'py, PyAny>)> {
+        let (raw_matches, facts) = py
+            .detach(|| {
+                let facts = jar::scan_jar(jar_path)?;
+                let raw_matches = self.inner.evaluate(&facts, loader, true);
+                Ok::<_, jar::JarScanError>((raw_matches, facts))
+            })
+            .map_err(|e| pyo3::exceptions::PyValueError::new_err(e.to_string()))?;
+
+        let py_matches = build_py_matches(py, &raw_matches)?;
+        let py_jar_facts = build_py_jar_facts(py, &facts)?;
+        Ok((py_matches, py_jar_facts))
+    }
+}
+
+```
+
+`src/rules/engine.rs`:
+
+```rs
+use std::collections::{BTreeMap, HashMap};
+
+use super::matcher::class_matchers_hold;
+use super::models::{CompiledMatcher, CompiledRule, MatcherFact, RawMatch, RawRule, RuleScope};
+use super::triggers::{class_trigger, jar_trigger, sanitize_path};
+use crate::jar::JarFactsResult;
+
+pub const MAX_MATCHES_PER_CATEGORY: usize = 5;
+
+#[derive(Debug, thiserror::Error)]
+pub enum RuleCompileError {
+    #[error("Rule '{0}' must declare at least one matcher in all_of")]
+    EmptyAllOf(String),
+    #[error("Invalid regex in pattern '{0}': {1}")]
+    RegexError(String, Box<fancy_regex::Error>),
+    #[error("JSON deserialization error: {0}")]
+    Json(#[from] serde_json::Error),
+}
+
+#[derive(Debug, Clone)]
+pub struct RuleEngine {
+    rules: Vec<CompiledRule>,
+}
+
+impl RuleEngine {
+    pub fn new(rules: Vec<CompiledRule>) -> Self {
+        Self { rules }
+    }
+
+    /// Compile engine from a JSON string containing rule definitions.
+    pub fn from_json(json_str: &str) -> Result<Self, RuleCompileError> {
+        let raw_rules: BTreeMap<String, RawRule> = serde_json::from_str(json_str)?;
+        Self::from_raw_rules(raw_rules)
+    }
+
+    /// Compile engine directly from a map of parsed raw rules without JSON serialization roundtrip.
+    pub fn from_raw_rules(raw_rules: BTreeMap<String, RawRule>) -> Result<Self, RuleCompileError> {
+        let mut compiled = Vec::with_capacity(raw_rules.len());
+
+        for (name, raw) in raw_rules {
+            if raw.all_of.is_empty() {
+                return Err(RuleCompileError::EmptyAllOf(name));
+            }
+            let scope = match raw.scope.as_str() {
+                "jar" => RuleScope::Jar,
+                _ => RuleScope::Class,
+            };
+
+            let mut matchers = Vec::with_capacity(raw.all_of.len());
+            for m in raw.all_of {
+                let fact = MatcherFact::from(m.fact.as_str());
+                let regex = if let Some(ref pat) = m.pattern {
+                    Some(
+                        fancy_regex::Regex::new(pat)
+                            .map_err(|e| RuleCompileError::RegexError(pat.clone(), Box::new(e)))?,
+                    )
+                } else {
+                    None
+                };
+                matchers.push(CompiledMatcher {
+                    fact,
+                    any: m.any,
+                    value: m.value,
+                    pattern: m.pattern,
+                    regex,
+                    same_method: m.same_method,
+                });
+            }
+
+            compiled.push(CompiledRule {
+                name,
+                scope,
+                loaders: raw.loaders,
+                severity: raw.severity,
+                score: raw.score,
+                all_of: matchers,
+            });
+        }
+
+        Ok(Self { rules: compiled })
+    }
+
+    pub fn rules(&self) -> &[CompiledRule] {
+        &self.rules
+    }
+
+    pub fn evaluate(
+        &self,
+        facts: &JarFactsResult,
+        loader: &str,
+        target_ext_java: bool,
+    ) -> Vec<RawMatch> {
+        let mut matches = Vec::new();
+        let mut per_category = HashMap::new();
+
+        for rule in &self.rules {
+            if !rule.is_applicable(loader) {
+                continue;
+            }
+
+            match rule.scope {
+                RuleScope::Jar => {
+                    if rule.all_of.iter().all(|m| m.holds_for_jar(facts)) {
+                        let trigger = jar_trigger(rule, facts);
+                        emit_match(
+                            &mut matches,
+                            &mut per_category,
+                            rule,
+                            "archive",
+                            1,
+                            trigger,
+                            target_ext_java,
+                        );
+                    }
+                }
+                RuleScope::Class => {
+                    for class_facts in &facts.classes {
+                        if !class_matchers_hold(rule, class_facts) {
+                            continue;
+                        }
+                        let trigger = class_trigger(rule, class_facts);
+                        emit_match(
+                            &mut matches,
+                            &mut per_category,
+                            rule,
+                            &class_facts.class_name,
+                            1,
+                            trigger,
+                            target_ext_java,
+                        );
+                        if per_category.get(rule.name.as_str()).copied().unwrap_or(0)
+                            >= MAX_MATCHES_PER_CATEGORY
+                        {
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        matches
+    }
+}
+
+fn emit_match<'a>(
+    matches: &mut Vec<RawMatch>,
+    per_category: &mut HashMap<&'a str, usize>,
+    rule: &'a CompiledRule,
+    file_name: &str,
+    line: usize,
+    trigger: String,
+    target_ext_java: bool,
+) {
+    let count = per_category.entry(rule.name.as_str()).or_insert(0);
+    if *count >= MAX_MATCHES_PER_CATEGORY {
+        return;
+    }
+    *count += 1;
+
+    let sanitized = sanitize_path(file_name);
+    let target_file = if sanitized == "archive" {
+        "archive".to_string()
+    } else if target_ext_java {
+        let base = sanitized.strip_suffix(".class").unwrap_or(&sanitized);
+        format!("{}.java", base)
+    } else if sanitized.ends_with(".class") {
+        sanitized
+    } else {
+        format!("{}.class", sanitized)
+    };
+
+    matches.push(RawMatch {
+        category: rule.name.clone(),
+        trigger,
+        file: target_file,
+        line_num: line.max(1),
+        code_snippet: String::new(),
+        severity: rule.severity.clone(),
+        score: rule.score.max(0),
+    });
+}
+
+```
+
+`src/rules/matcher.rs`:
+
+```rs
+use std::collections::HashSet;
+
+use super::models::{CompiledMatcher, CompiledRule, MatcherFact};
+use crate::jar::{ClassFactsData, JarFactsResult};
+
+pub fn is_gibberish_name(name: &str) -> bool {
+    let char_count = name.chars().count();
+    if !(2..=6).contains(&char_count) {
+        return false;
+    }
+    if name.chars().any(|ch| ch.is_ascii_digit()) {
+        return true;
+    }
+    !name.chars().any(|ch| {
+        matches!(
+            ch,
+            'a' | 'e' | 'i' | 'o' | 'u' | 'y' | 'A' | 'E' | 'I' | 'O' | 'U' | 'Y'
+        )
+    })
+}
+
+pub fn suffix_match(haystack: &HashSet<String>, needles: &[String]) -> bool {
+    if needles.is_empty() || haystack.is_empty() {
+        return false;
+    }
+    haystack
+        .iter()
+        .any(|ref_str| needles.iter().any(|needle| ref_str.ends_with(needle)))
+}
+
+pub fn annotation_match(
+    annotations: &[(String, std::collections::HashMap<String, Vec<String>>)],
+    type_suffixes: &[String],
+    rx: Option<&fancy_regex::Regex>,
+) -> bool {
+    for (type_name, elements) in annotations {
+        if !type_suffixes
+            .iter()
+            .any(|suffix| type_name.ends_with(suffix))
+        {
+            continue;
+        }
+        let Some(rx) = rx else {
+            return true;
+        };
+        for values in elements.values() {
+            if values.iter().any(|v| rx.is_match(v).unwrap_or(false)) {
+                return true;
+            }
+        }
+    }
+    false
+}
+
+impl CompiledMatcher {
+    pub fn holds_for_class(&self, facts: &ClassFactsData) -> bool {
+        match self.fact {
+            MatcherFact::MethodRef if !self.same_method => {
+                suffix_match(&facts.method_refs, &self.any)
+            }
+            MatcherFact::FieldRef => suffix_match(&facts.field_refs, &self.any),
+            MatcherFact::ClassRef => suffix_match(&facts.class_refs, &self.any),
+            MatcherFact::String => {
+                let Some(rx) = &self.regex else {
+                    return false;
+                };
+                facts
+                    .strings
+                    .iter()
+                    .any(|s| rx.is_match(s).unwrap_or(false))
+            }
+            MatcherFact::Annotation => {
+                annotation_match(&facts.annotations, &self.any, self.regex.as_ref())
+            }
+            MatcherFact::CharConcat => {
+                let threshold = self.value.unwrap_or(60.0) as usize;
+                facts.char_append_count >= threshold
+            }
+            MatcherFact::MemberHomoglyphsMin => {
+                let threshold = self.value.unwrap_or(0.0) as usize;
+                facts.member_homoglyphs.len() >= threshold
+            }
+            MatcherFact::FloatConstantMin => {
+                let threshold = self.value.unwrap_or(0.0);
+                facts.float_constants.iter().any(|c| c.abs() >= threshold)
+            }
+            _ => false,
+        }
+    }
+
+    fn holds_for_jar_entropy(&self, facts: &JarFactsResult) -> bool {
+        match self.fact {
+            MatcherFact::ShortNameRatioMin => {
+                facts.entropy.short_name_ratio >= self.value.unwrap_or(0.0)
+            }
+            MatcherFact::ByteEntropyMaxMin => {
+                facts.entropy.byte_entropy_max >= self.value.unwrap_or(0.0)
+            }
+            MatcherFact::HighEntropyStringsMin => {
+                let threshold = self.value.unwrap_or(0.0) as usize;
+                facts.entropy.high_entropy_strings >= threshold
+            }
+            MatcherFact::HighEntropyClassesMin => {
+                let threshold = self.value.unwrap_or(0.0) as usize;
+                facts.entropy.high_entropy_classes >= threshold
+            }
+            MatcherFact::SwitchDensityMin => {
+                facts.entropy.switch_density >= self.value.unwrap_or(0.0)
+            }
+            _ => false,
+        }
+    }
+
+    pub fn holds_for_jar(&self, facts: &JarFactsResult) -> bool {
+        match self.fact {
+            MatcherFact::ClassesMin => {
+                let threshold = self.value.unwrap_or(0.0) as usize;
+                facts.classes.len() >= threshold
+            }
+            MatcherFact::GibberishRatioMin => {
+                if facts.classes.is_empty() {
+                    return false;
+                }
+                let gibberish = facts
+                    .classes
+                    .iter()
+                    .filter(|c| is_gibberish_name(&c.simple_name))
+                    .count();
+                let ratio = (gibberish as f64) / (facts.classes.len() as f64);
+                ratio >= self.value.unwrap_or(0.0)
+            }
+            MatcherFact::SingleLetterRatioMin => {
+                if facts.classes.is_empty() {
+                    return false;
+                }
+                let singles = facts
+                    .classes
+                    .iter()
+                    .filter(|c| c.simple_name.len() == 1)
+                    .count();
+                let ratio = (singles as f64) / (facts.classes.len() as f64);
+                ratio >= self.value.unwrap_or(0.0)
+            }
+            MatcherFact::HiddenClassEntriesMin => {
+                let threshold = self.value.unwrap_or(0.0) as usize;
+                facts.hidden_class_entries >= threshold
+            }
+            MatcherFact::UnparsedClassesMin => {
+                let threshold = self.value.unwrap_or(0.0) as usize;
+                facts.unparsed.len() >= threshold
+            }
+            MatcherFact::MissingEntrypointsMin => {
+                let threshold = self.value.unwrap_or(1.0) as usize;
+                facts.missing_entrypoints.len() >= threshold
+            }
+            _ => self.holds_for_jar_entropy(facts),
+        }
+    }
+}
+
+pub fn class_matchers_hold(rule: &CompiledRule, facts: &ClassFactsData) -> bool {
+    let same_method: Vec<&CompiledMatcher> = rule
+        .all_of
+        .iter()
+        .filter(|m| m.same_method && m.fact == MatcherFact::MethodRef)
+        .collect();
+
+    let other_hold = rule
+        .all_of
+        .iter()
+        .filter(|m| !(m.same_method && m.fact == MatcherFact::MethodRef))
+        .all(|m| m.holds_for_class(facts));
+
+    if !other_hold {
+        return false;
+    }
+    if same_method.is_empty() {
+        return true;
+    }
+    facts
+        .method_refs_by_method
+        .values()
+        .any(|refs| same_method.iter().all(|m| suffix_match(refs, &m.any)))
+}
+
+```
+
+`src/rules/mod.rs`:
+
+```rs
+pub mod engine;
+pub mod matcher;
+pub mod models;
+pub mod triggers;
+
+pub use engine::{RuleCompileError, RuleEngine, MAX_MATCHES_PER_CATEGORY};
+pub use matcher::{annotation_match, is_gibberish_name, suffix_match};
+pub use models::{CompiledMatcher, CompiledRule, MatcherFact, RawMatch, RuleScope};
+pub use triggers::sanitize_path;
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::jar::{ClassFactsData, EntropyMetricsData, JarFactsResult};
+    use std::collections::{HashMap, HashSet};
+
+    #[test]
+    fn test_is_gibberish_name_heuristics() {
+        assert!(is_gibberish_name("12"));
+        assert!(is_gibberish_name("x7"));
+        assert!(is_gibberish_name("bcdf"));
+        assert!(!is_gibberish_name("a")); // length 1
+        assert!(!is_gibberish_name("something_long")); // length > 6
+        assert!(!is_gibberish_name("Player")); // has vowels
+    }
+
+    #[test]
+    fn test_sanitize_path_replaces_control_characters() {
+        assert_eq!(sanitize_path("foo/\n\t\x01bar"), "foo/___bar");
+        assert_eq!(sanitize_path("   "), "unknown");
+        assert_eq!(sanitize_path("com/example/MyClass"), "com/example/MyClass");
+    }
+
+    #[test]
+    fn test_suffix_match_logic() {
+        let mut set = HashSet::new();
+        set.insert("net/minecraft/entity/Entity.setBoundingBox".to_string());
+        set.insert("net/minecraft/entity/Entity.inflate".to_string());
+
+        let needles = vec!["setBoundingBox".to_string(), "func_1234".to_string()];
+        assert!(suffix_match(&set, &needles));
+
+        let non_matching = vec!["nonExistentMethod".to_string()];
+        assert!(!suffix_match(&set, &non_matching));
+        assert!(!suffix_match(&set, &[]));
+    }
+
+    #[test]
+    fn test_rule_engine_from_json_and_eval_same_method() {
+        let json = r#"{
+            "Dropper_Download_Exec": {
+                "scope": "class",
+                "loaders": ["any"],
+                "severity": "critical",
+                "score": 10,
+                "all_of": [
+                    {
+                        "fact": "method_ref",
+                        "any": ["openStream", "openConnection"],
+                        "same_method": true
+                    },
+                    {
+                        "fact": "method_ref",
+                        "any": ["exec", "start"],
+                        "same_method": true
+                    }
+                ]
+            }
+        }"#;
+
+        let engine = RuleEngine::from_json(json).unwrap();
+        assert_eq!(engine.rules().len(), 1);
+
+        let mut method_refs_by_method = HashMap::new();
+        let mut m1 = HashSet::new();
+        m1.insert("java/net/URL.openStream".to_string());
+        m1.insert("java/lang/ProcessBuilder.start".to_string());
+        method_refs_by_method.insert("downloadAndRun()V".to_string(), m1);
+
+        let cf = ClassFactsData {
+            class_name: "pkg/Malicious".to_string(),
+            simple_name: "Malicious".to_string(),
+            method_refs: HashSet::new(),
+            field_refs: HashSet::new(),
+            class_refs: HashSet::new(),
+            strings: HashSet::new(),
+            float_constants: Vec::new(),
+            annotations: Vec::new(),
+            member_names: HashSet::new(),
+            char_append_count: 0,
+            member_homoglyphs: Vec::new(),
+            method_refs_by_method,
+        };
+
+        let jar_facts = JarFactsResult {
+            classes: vec![cf],
+            unparsed: Vec::new(),
+            hidden_class_entries: 0,
+            missing_entrypoints: Vec::new(),
+            entropy: EntropyMetricsData {
+                byte_entropy_avg: 0.0,
+                byte_entropy_max: 0.0,
+                high_entropy_classes: 0,
+                high_entropy_strings: 0,
+                short_name_ratio: 0.0,
+                switch_density: 0.0,
+                obfuscation_type: "none".to_string(),
+            },
+        };
+
+        let matches = engine.evaluate(&jar_facts, "fabric", true);
+        assert_eq!(matches.len(), 1);
+        assert_eq!(matches[0].category, "Dropper_Download_Exec");
+        assert_eq!(matches[0].file, "pkg/Malicious.java");
+        assert_eq!(matches[0].score, 10);
+    }
+}
+
+```
+
+`src/rules/models.rs`:
+
+```rs
+use serde::{Deserialize, Serialize};
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum RuleScope {
+    Class,
+    Jar,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum MatcherFact {
+    MethodRef,
+    FieldRef,
+    ClassRef,
+    String,
+    Annotation,
+    CharConcat,
+    MemberHomoglyphsMin,
+    FloatConstantMin,
+    ClassesMin,
+    GibberishRatioMin,
+    SingleLetterRatioMin,
+    HiddenClassEntriesMin,
+    UnparsedClassesMin,
+    MissingEntrypointsMin,
+    ShortNameRatioMin,
+    ByteEntropyMaxMin,
+    HighEntropyStringsMin,
+    HighEntropyClassesMin,
+    SwitchDensityMin,
+    Unknown,
+}
+
+impl From<&str> for MatcherFact {
+    fn from(s: &str) -> Self {
+        match s {
+            "method_ref" => Self::MethodRef,
+            "field_ref" => Self::FieldRef,
+            "class_ref" => Self::ClassRef,
+            "string" => Self::String,
+            "annotation" => Self::Annotation,
+            "char_concat" => Self::CharConcat,
+            "member_homoglyphs_min" => Self::MemberHomoglyphsMin,
+            "float_constant_min" => Self::FloatConstantMin,
+            "classes_min" => Self::ClassesMin,
+            "gibberish_ratio_min" => Self::GibberishRatioMin,
+            "single_letter_ratio_min" => Self::SingleLetterRatioMin,
+            "hidden_class_entries_min" => Self::HiddenClassEntriesMin,
+            "unparsed_classes_min" => Self::UnparsedClassesMin,
+            "missing_entrypoints_min" => Self::MissingEntrypointsMin,
+            "short_name_ratio_min" => Self::ShortNameRatioMin,
+            "byte_entropy_max_min" => Self::ByteEntropyMaxMin,
+            "high_entropy_strings_min" => Self::HighEntropyStringsMin,
+            "high_entropy_classes_min" => Self::HighEntropyClassesMin,
+            "switch_density_min" => Self::SwitchDensityMin,
+            _ => Self::Unknown,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize)]
+pub struct RawRule {
+    #[serde(default = "default_class_scope")]
+    pub scope: String,
+    #[serde(default)]
+    pub loaders: Vec<String>,
+    #[serde(default = "default_severity")]
+    pub severity: String,
+    #[serde(default = "default_score")]
+    pub score: i64,
+    pub all_of: Vec<RawMatcher>,
+}
+
+fn default_class_scope() -> String {
+    "class".to_string()
+}
+
+fn default_severity() -> String {
+    "medium".to_string()
+}
+
+fn default_score() -> i64 {
+    1
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize)]
+pub struct RawMatcher {
+    pub fact: String,
+    #[serde(default)]
+    pub any: Vec<String>,
+    #[serde(default)]
+    pub value: Option<f64>,
+    #[serde(default)]
+    pub pattern: Option<String>,
+    #[serde(default)]
+    pub same_method: bool,
+}
+
+#[derive(Debug, Clone)]
+pub struct CompiledMatcher {
+    pub fact: MatcherFact,
+    pub any: Vec<String>,
+    pub value: Option<f64>,
+    pub pattern: Option<String>,
+    pub regex: Option<fancy_regex::Regex>,
+    pub same_method: bool,
+}
+
+#[derive(Debug, Clone)]
+pub struct CompiledRule {
+    pub name: String,
+    pub scope: RuleScope,
+    pub loaders: Vec<String>,
+    pub severity: String,
+    pub score: i64,
+    pub all_of: Vec<CompiledMatcher>,
+}
+
+impl CompiledRule {
+    #[inline]
+    pub fn is_applicable(&self, loader: &str) -> bool {
+        self.loaders.iter().any(|l| l == "any" || l == loader)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+pub struct RawMatch {
+    pub category: String,
+    pub trigger: String,
+    pub file: String,
+    pub line_num: usize,
+    pub code_snippet: String,
+    pub severity: String,
+    pub score: i64,
+}
+
+```
+
+`src/rules/triggers.rs`:
+
+```rs
+use super::matcher::is_gibberish_name;
+use super::models::{CompiledRule, MatcherFact};
+use crate::jar::{ClassFactsData, JarFactsResult};
+
+pub fn sanitize_path(name: &str) -> String {
+    let mut cleaned = String::with_capacity(name.len());
+    for ch in name.chars() {
+        let code = ch as u32;
+        if (32..127).contains(&code) || code > 159 {
+            cleaned.push(ch);
+        } else {
+            cleaned.push('_');
+        }
+    }
+    let trimmed = cleaned.trim();
+    if trimmed.is_empty() {
+        "unknown".to_string()
+    } else {
+        trimmed.to_string()
+    }
+}
+
+pub fn class_trigger(rule: &CompiledRule, facts: &ClassFactsData) -> String {
+    let mut parts = Vec::new();
+    for matcher in &rule.all_of {
+        if !matcher.any.is_empty() {
+            let slice: Vec<&str> = matcher.any.iter().take(3).map(|s| s.as_str()).collect();
+            parts.push(slice.join(" or "));
+        } else if matcher.fact == MatcherFact::String {
+            if let Some(rx) = &matcher.regex {
+                for s in &facts.strings {
+                    if let Ok(Some(m)) = rx.find(s) {
+                        parts.push(format!("literal URL: {}", m.as_str()));
+                        break;
+                    }
+                }
+            }
+        }
+    }
+    let sanitized_cls = sanitize_path(&facts.class_name);
+    if parts.is_empty() {
+        return format!("{}: matched", sanitized_cls);
+    }
+    if parts.len() == 1 && parts[0].starts_with("literal URL:") {
+        return parts[0].clone();
+    }
+    format!("{}: {}", sanitized_cls, parts.join(" + "))
+}
+
+pub fn jar_trigger(rule: &CompiledRule, facts: &JarFactsResult) -> String {
+    for matcher in &rule.all_of {
+        match matcher.fact {
+            MatcherFact::ByteEntropyMaxMin | MatcherFact::HighEntropyClassesMin => {
+                return format!(
+                    "High entropy: max {} bits/byte ({} packed classes)",
+                    facts.entropy.byte_entropy_max, facts.entropy.high_entropy_classes
+                );
+            }
+            MatcherFact::HighEntropyStringsMin => {
+                return format!(
+                    "Encrypted string pool: {} high-entropy strings",
+                    facts.entropy.high_entropy_strings
+                );
+            }
+            MatcherFact::ShortNameRatioMin => {
+                let pct = (facts.entropy.short_name_ratio * 100.0) as i64;
+                return format!("Aggressive renaming: {}% short class names", pct);
+            }
+            MatcherFact::SwitchDensityMin => {
+                let pct = (facts.entropy.switch_density * 100.0) as i64;
+                return format!("Control flow flattening: {}% switch dispatch methods", pct);
+            }
+            _ => {}
+        }
+    }
+
+    let gibberish = facts
+        .classes
+        .iter()
+        .filter(|c| is_gibberish_name(&c.simple_name))
+        .count();
+    let mut parts = vec![
+        format!(
+            "{}/{} machine-generated class names",
+            gibberish,
+            facts.classes.len()
+        ),
+        format!("{} unparsable", facts.unparsed.len()),
+    ];
+    if !facts.missing_entrypoints.is_empty() {
+        let shown = facts
+            .missing_entrypoints
+            .iter()
+            .take(3)
+            .map(|s| s.as_str())
+            .collect::<Vec<_>>()
+            .join(", ");
+        parts.push(format!("declared but absent: {}", shown));
+    }
+    parts.join(", ")
+}
+
+```
