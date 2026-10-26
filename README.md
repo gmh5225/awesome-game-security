@@ -546,6 +546,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/zeegzoog/godot-mcp [Rust MCP server with a Godot 4 editor WebSocket bridge for live scene inspection and undoable edits, plus headless Godot CLI fallback]
 - https://github.com/gmh5225/vibe-blocks-mcp [MCP for Roblox Studio]
 - https://github.com/willy92wins/dayz-mcp [DayZ MCP server with 53 tools for mod build/run, server-authoritative world control, telemetry, and automated in-game testing]
+- https://github.com/snackbar92hypernova/quen-mcp [MCP server for agent-driven Witcher 3 mod dev and testing: reproducible sessions, in-game control, frame-time A/Bs, memory reads/patches, staged mods, and a SQLite result ledger]
 - https://github.com/rehan-remade/universal-modder [Agent skills, fal MCP, and um CLI for game recon, RE, mod building, and in-game verification]
 - https://github.com/LaurieWired/GhidraMCP [MCP for Ghidra]
 - https://github.com/jtang613/GhidrAssistMCP [MCP for Ghidra]
