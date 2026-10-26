@@ -2538,6 +2538,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/magicsword-io/LOLDrivers [Living Off The Land Drivers]
 - https://github.com/KeServiceDescriptorTable/vulnerable-drivers [Vulnerable drivers for windows machines]
 - https://github.com/ghostbyt3/BYOVDFinder [Identifies LOLDrivers that are not blocked by the active HVCI policy]
+- https://github.com/LongpanZhou/BYOVD-AI-Guide [BYOVD research playbook: driver corpus, LOLDrivers/blocklist gates, Ghidra static audits, VM write-primitive verification]
 - https://github.com/rtfmkiesel/loldrivers-client [Scan loldrivers]
 - https://github.com/FourCoreLabs/LolDriverScan [Scan loldrivers]
 - https://github.com/trailofbits/HVCI-loldrivers-check [HVCI loldrivers check]
