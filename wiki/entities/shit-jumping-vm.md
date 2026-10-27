@@ -6,14 +6,26 @@ sources:
   - wiki/sources/README-categories.md
   - wiki/sources/descriptions/woand__ShitJumpingVM.md
 updated: 2026-10-27
-confidence: medium
+confidence: high
 ---
 
 # ShitJumpingVM (NEXTVM)
 
-**NEXTVM** is a lightweight Android **application virtualization** engine: third-party APKs run in **isolated sandbox processes** on a physical device **without root** and without a hardware emulator. A Kotlin virtual context and system-service proxies sit above a **C++ native hook layer** (GOT/PLT patches) that redirects filesystem and property queries; **Binder IPC** and **ActivityThread** launch paths are intercepted. Supports **multiple parallel instances** with per-clone storage and **device identity spoofing**, plus an anti-detection stack for common root, emulator, Xposed, and virtual-environment probes; optional **Google Play Services** bridging for auth and push. (source: wiki/sources/descriptions/woand__ShitJumpingVM.md)
+**NEXTVM** (woand/ShitJumpingVM) is a lightweight Android **application virtualization** engine: third-party APKs run in **isolated sandbox processes** on a physical device **without root** and without a hardware emulator. (source: wiki/sources/descriptions/woand__ShitJumpingVM.md)
 
-Multi-module Gradle project (Jetpack Compose, Hilt, Clean Architecture). README lists under **Cheat → VirtualMachine** beside full guest VMs such as [[virtualmachine]] and desktop workbenches such as [[rooted-android-game-vm]]. (source: wiki/sources/README-categories.md)
+README category: **Cheat → VirtualMachine** (no-root app sandbox lane beside full guest VMs such as [[virtualmachine]]).
+
+## Architecture
+
+- **Java/Kotlin layer** — virtual `Context`, system-service proxies, Jetpack Compose UI; multi-module Gradle project with Hilt and Clean Architecture.
+- **Launch intercept** — **Binder IPC** and **ActivityThread** paths are hooked so guest apps start inside the sandbox.
+- **Native layer** — C++ **GOT/PLT** patches redirect filesystem and system-property queries seen by the guest.
+- **Multi-instance** — parallel clones with per-instance storage and **device identity spoofing**.
+- **Anti-detection** — mitigations aimed at common root, emulator, Xposed, and virtual-environment probes; optional **Google Play Services** bridging for auth and push. (source: wiki/sources/descriptions/woand__ShitJumpingVM.md)
+
+## Use cases
+
+Privacy isolation, mobile security research, app compatibility testing, and observing how **protected apps** behave inside a controlled guest environment. (source: wiki/sources/descriptions/woand__ShitJumpingVM.md)
 
 ## Links
 
