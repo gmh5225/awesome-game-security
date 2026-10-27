@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-27** — lint (agent): read `wiki/AGENTS.md`; **Overviews** (9): `anti-cheat`, `dma-attack`, `game-engine`, `game-hacking`, `graphics-api`, `mobile-security`, `overview`, `reverse-engineering`, `windows-kernel`; **Concepts** (51) in `wiki/concepts/`; **Entities** (4203) in `wiki/entities/`; `index.md` vs disk — 4263 catalog paths (9+51+4203), 0 missing, 0 dead, 0 duplicate paths; nine `overviews/*.md` + `index.md` ## Overviews / ## Concepts blurb [[wikilink]] spot-check (13999 links), 0 broken; bootstrap not required; structural repairs none (`log.md` only).
+
 - **2026-10-27** — ingest `description:5hux1n/bytedance-jb-research`: enriched entity [[bytedance-jb-research]] (static/dynamic analysis stack, rule-engine VMs, HMD telemetry, risk-control paths, defensive scope; confidence medium); description cites on [[overviews/mobile-security]] iOS integrity-RE lane + [[overviews/reverse-engineering]] Mobile/iOS cluster; `index.md` entity blurb.
 
 - **2026-10-27** — ingest `description:AndrewDisco/RektAntiCheat`: enriched entity [[rekt-anti-cheat]] (detection stack, PacketEvents/Netty path, community-consolidated checks; confidence medium); description cite on [[overviews/game-hacking]] Java Bukkit packet-inspection cluster; `index.md` entity blurb.
