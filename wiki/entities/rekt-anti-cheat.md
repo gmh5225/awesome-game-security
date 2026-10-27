@@ -1,7 +1,7 @@
 ---
 title: RektAntiCheat
 kind: entity
-topics: [anti-cheat, game-engine]
+topics: [anti-cheat, game-hacking]
 sources:
   - wiki/sources/descriptions/AndrewDisco__RektAntiCheat.md
   - wiki/sources/README-categories.md
@@ -11,9 +11,13 @@ confidence: medium
 
 # RektAntiCheat
 
-Java **Minecraft** server plugin (**RAC**) that detects and blocks common client cheats on **Spigot/Bukkit** hosts. Built with Maven; integrates **PacketEvents** and Netty-style packet interception to correlate network traffic with movement and combat state. (source: wiki/sources/descriptions/AndrewDisco__RektAntiCheat.md)
+Java **Minecraft** server plugin (**RAC**) that detects and blocks common client cheats and unauthorized player behavior on **Spigot/Bukkit** hosts. Ships as a Maven-built JAR; integrates **PacketEvents** with Netty-style packet interception to inspect network traffic alongside in-game movement and combat state. (source: wiki/sources/descriptions/AndrewDisco__RektAntiCheat.md)
 
-Detection modules cover combat abuses (kill aura, reach, autoclicker), movement hacks (fly, speed, phase, scaffold), and packet, inventory, timer, and crash-related checks. Optional join-time tooling can flag proxies and related connection metadata. Consolidates community-sourced checks for survival and PvP operators studying Paper/Folia server-side AC patterns.
+Targets server operators and developers hardening multiplayer survival and PvP against widespread hack clients; check modules consolidate community-sourced patterns rather than a single narrow exploit class.
+
+## Detection stack
+
+Combat (kill aura, reach, autoclicker); movement (fly, speed, phase, scaffold); packet, inventory, timer, and crash-related checks. Optional join-time tooling flags proxies and related connection metadata.
 
 ## Links
 
@@ -21,4 +25,4 @@ Detection modules cover combat abuses (kill aura, reach, autoclicker), movement 
 
 ## Related
 
-[[overviews/anti-cheat]] · [[tfg-anticheat-serverside]] · [[virgola-anticheat]] · [[lino-ac]] · [[hero-anti-cheat]] · [[minecraft-anticheat-list]]
+[[grim]] · [[minecraft-anti-cheat]] · [[nocheatplus]] · [[ycbr-anticheat]] · [[minecraft-anticheat-list]] · [[overviews/anti-cheat]] · [[overviews/game-hacking]]
