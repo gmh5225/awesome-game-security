@@ -2841,6 +2841,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/CDJuaum/RunEXE [Python PE analyzer and Wine launcher that flags kernel anti-cheat/DRM blockers and auto-provisions prefixes and dependencies before running Windows games on Linux]
 - https://github.com/ertunc-ozbay/pointblank-linux [Rust standalone launcher to run Point Blank (Zepetto/TAM) on Linux with unmodified CheatBlocker anti-cheat via Wine-GE/Proton, TLS-aligned runner, and prefix setup]
 - https://github.com/BlaMacfly/ArchMod [Native Rust/Tauri cheat panel for Steam games on Proton: launch Windows trainers in the correct prefix, scan memory natively, and share community address profiles]
+- https://github.com/DeckCheatz/DeckCheatz [AGPL Rust trainer launcher for Steam Deck and Linux with Flatpak/Nix packaging and Proton/Wine-friendly trainer UI]
 
 > Anti Screenshot
 - https://github.com/KANKOSHEV/NoScreen [Hide Window]
@@ -4566,6 +4567,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/Parko-Developer/guard-game [Node.js server-side cheat detection: clients report movement/actions, server validates against world limits; TCP/HTTP protocol, admin API, and engine SDKs (C#, GDScript, JS, Luau)]
 - https://github.com/Ajitha-2001/aimguard [Python server-side anti-cheat prototype: telemetry ingestion, lag-compensated validation, PVS replication, behavioral detectors, moderator review workflow, and HTTP API on synthetic gameplay data]
 - https://github.com/vul-os/magnetite [Rust self-hostable game platform with magnetite-anticheat: server-authoritative deterministic replay verification and composable cheat validators]
+- https://github.com/marclourens19/ghostline [Godot 4 arena shooter reference with headless deterministic input replay verification, ASP.NET Core validation API, and PostgreSQL cheat-proof leaderboards]
 - https://github.com/web-coder-lab/chessking [Rust server-side anti-cheat for multiplayer chess: risk scoring, device fingerprinting, match integrity, captcha, and ban escalation]
 - https://github.com/AbdulAmi09/SentinelAntiCheat [Chess integrity platform with seven-layer statistical engine-assistance detection, explainable risk tiers, arbiter case management, and hash-chained audit logging]
 - https://github.com/MaksymSakundiak/chess-anti-cheat [TensorFlow/Keras engine-assistance detector with bidirectional LSTM and Conv1D over moves, timing, and color for interactive risk scoring]
