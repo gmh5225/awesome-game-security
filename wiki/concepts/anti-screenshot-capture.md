@@ -19,7 +19,8 @@ sources:
   - wiki/sources/descriptions/TheCruZ__nvidiaCapture.md
   - wiki/sources/descriptions/vmguard__dwm-window-capture.md
   - wiki/sources/descriptions/saadnahid7__smalipatcher_reborn.md
-updated: 2026-09-30
+  - wiki/sources/descriptions/allnighter51__Iris.md
+updated: 2026-10-27
 confidence: medium
 ---
 
@@ -65,7 +66,7 @@ Comparative Windows capture samples such as [[screenshot]] (gmh5225; BitBlt, DXG
 
 - **Frame suppression** — detect AC `BitBlt`/`PrintWindow` hooks and skip ImGui draw for the captured frame.
 - **GDI capture hook** — hook `BitBlt` in gdi32 so AC screenshot pipelines receive a pre-stored clean frame instead of the live overlay-modified client area; educational PoC [[screenshot-detection-bypass]] (Mes2d; C++; class-based hook + settings; README `[BitBlt]`). (source: wiki/sources/descriptions/Mes2d__Screenshot-Detection-Bypass.md)
-- **Display affinity** — `SetWindowDisplayAffinity(WDA_EXCLUDEFROMCAPTURE)` on external overlay HWND so some capture APIs omit it. Kernel-assisted window protection such as [[noscreen]] (KANKOSHEV; custom driver + device interface; display-affinity-like anti-capture without direct target process memory modification; reduced user-mode detection surface; README Hide Window) extends that lane below user-mode WDA calls. (source: wiki/sources/descriptions/KANKOSHEV__NoScreen.md)
+- **Display affinity** — `SetWindowDisplayAffinity(WDA_EXCLUDEFROMCAPTURE)` on external overlay HWND so some capture APIs omit it. Rust/Tauri HUD compositors such as [[iris-overlay]] (allnighter51; optional streamer mode on layered PNG/WebP stacks; no game inject) document productized WDA on the external-overlay lane beside cheat ESP samples. (source: wiki/sources/descriptions/allnighter51__Iris.md) Kernel-assisted window protection such as [[noscreen]] (KANKOSHEV; custom driver + device interface; display-affinity-like anti-capture without direct target process memory modification; reduced user-mode detection surface; README Hide Window) extends that lane below user-mode WDA calls. (source: wiki/sources/descriptions/KANKOSHEV__NoScreen.md)
 - **DWM composition** — separate surfaces that survive `PrintWindow` but not all BitBlt paths; kernel DC blocking in extreme cases.
 - **Hardware overlay planes** — content on dedicated scan-out planes may be absent from software duplication.
 - **Off-screen render** — secondary display, capture card, or virtual camera feed outside the game window.
@@ -79,4 +80,4 @@ Screenshot evidence is rarely sufficient alone—correlate with [[present-hook]]
 
 ## Related
 
-[[nvidia-capture]] · [[dwm-window-capture]] · [[obs-game-capture]] · [[present-hook]] · [[flagsecurepatcher]] · [[simple-flag-secure]] · [[smalipatcher-reborn]] · [[sherloq]] · [[overviews/graphics-api]] · [[overviews/anti-cheat]] · [[overviews/game-hacking]] · [[overviews/mobile-security]]
+[[iris-overlay]] · [[nvidia-capture]] · [[dwm-window-capture]] · [[obs-game-capture]] · [[present-hook]] · [[flagsecurepatcher]] · [[simple-flag-secure]] · [[smalipatcher-reborn]] · [[sherloq]] · [[overviews/graphics-api]] · [[overviews/anti-cheat]] · [[overviews/game-hacking]] · [[overviews/mobile-security]]

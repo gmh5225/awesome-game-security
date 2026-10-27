@@ -2153,7 +2153,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Ironwall](entities/ironwall.md) — open-source AC protocol stack (TEE attestation, ZK human-input proofs, Hedera HCS match receipts; Unity/Unreal)
 - [IW4MAdmin SebzAntiCheat](entities/iw4madmin-sebzanticheat.md) — IW4X server-side suspicion telemetry + IW4MAdmin review dashboard; GSC aim/visibility checks; Discord case workflow; no auto-ban (crazythecoder)
 - [Iris](entities/iris.md) — cross-platform C++ game engine (component-based; multi-backend render; CMake; Game Engine source)
-- [Iris (HUD Overlay)](entities/iris-overlay.md) — Rust/Tauri 2 external Win32 layered HUD compositor; no inject/RPM; WDA_EXCLUDEFROMCAPTURE option (allnighter51; Cheat / overlay)
+- [Iris (HUD Overlay)](entities/iris-overlay.md) — Rust/Tauri 2 modular HUD compositor (Vault/Layering Studio/Display Controller); Win32 layered PNG/WebP; click-through; optional WDA_EXCLUDEFROMCAPTURE; no inject/RPM (allnighter51; Cheat / overlay)
 - [injdrv](entities/injdrv.md) — kernel APC DLL injector (process notify → LdrLoadDll; C)
 - [intel-pcm](entities/intel-pcm.md) — Intel Performance Counter Monitor (CPU/memory/PCIe/power PMU telemetry; Docker/CXL)
 - [int_fastdiv](entities/int-fastdiv.md) — header-only C++ magic-number integer division (CPU/CUDA; ~2× vs hardware div; Mathematics)
