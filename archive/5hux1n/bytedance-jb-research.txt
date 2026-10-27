@@ -1,0 +1,3644 @@
+Project Path: arc_5hux1n_bytedance-jb-research_ciotfczo
+
+Source Tree:
+
+```txt
+arc_5hux1n_bytedance-jb-research_ciotfczo
+├── LICENSE
+├── LICENSE-docs
+├── README.md
+├── article
+│   └── 技术博客文章.md
+├── artifacts
+│   └── hexrays_f5.md
+├── reports
+│   ├── 发现记录.md
+│   ├── 深化分析总报告.md
+│   └── 静态分析指导文档.md
+└── tools
+    ├── README.md
+    ├── dyn
+    │   └── README.md
+    └── static
+        └── README.md
+
+```
+
+`LICENSE`:
+
+```
+MIT License
+
+Copyright (c) 2026 the author(s)
+
+Applies to the code under tools/ only. Documentation and data (reports/,
+article/, artifacts/) are licensed separately under CC BY 4.0; see LICENSE-docs.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
+`LICENSE-docs`:
+
+```
+Creative Commons Attribution 4.0 International (CC BY 4.0)
+
+Copyright (c) 2026 the author(s)
+
+Applies to all documentation and data in this repository (reports/, article/,
+artifacts/). Code under tools/ is licensed separately under the MIT License;
+see LICENSE.
+
+You are free to:
+  - Share — copy and redistribute the material in any medium or format
+  - Adapt — remix, transform, and build upon the material for any purpose,
+    even commercially
+
+Under the following terms:
+  - Attribution — You must give appropriate credit, provide a link to the
+    license, and indicate if changes were made. You may do so in any
+    reasonable manner, but not in any way that suggests the licensor endorses
+    you or your use.
+
+No additional restrictions — You may not apply legal terms or technological
+measures that legally restrict others from doing anything the license permits.
+
+Full legal text: https://creativecommons.org/licenses/by/4.0/legalcode
+
+```
+
+`README.md`:
+
+```md
+# 字节系 App 越狱/注入检测机制逆向研究
+
+> iOS 平台上番茄小说、红果短剧、抖音三款字节跳动 App 的越狱检测、注入检测与设备风控机制的逆向分析。静态（Capstone + 自写 ObjC/交叉引用索引 + 离线批量解密）+ 动态（Frida 只读观测）+ 第三方交叉验证（IDA Pro 9.3 Hex-Rays）联合完成。
+
+## ⚠️ 免责声明
+
+本仓库是一次**合法安全研究**的记录，仅供防御研究、学术交流与安全教育参考。
+
+- **全程 Frida 只读**：仅 `onEnter/onLeave` 读参数、读返回、backtrace、dump 内存，**未修改任何目标 App 的返回值、字段或行为**。
+- 本仓库**不包含**任何 IPA、脱壳后的 Mach-O、可直接运行的越狱/绕过代码，也不提供样本获取途径。复现需读者自备**合法获取**的样本。
+- 所有技术论断均以目标二进制中实际读出的指令、字符串、表结构与设备现场读数为依据；无法取得直接证据的判断已在报告中明确标注为"不可验证"。
+- 请勿将本研究用于规避厂商安全机制、破坏业务完整性或任何违反相关法律法规与服务条款的用途。使用者自负其责。
+
+##博客地址
+
+https://shuxin.my/p/169bc8e7-6f96-4644-b850-8da8e8549007
+
+
+## 分析对象与环境
+
+| 项 | 值 |
+|---|---|
+| 番茄小说 | 7.4.1（`com.dragon.read` / 主二进制 `Reading`） |
+| 红果短剧 | 7.4.1（`com.phoenix.video` / 主二进制 `Eggplant`） |
+| 抖音 | 40.8.0（`com.ss.iphone.ugc.Aweme` / 主二进制 `AwemeCore`） |
+| 设备 | iPhone 11 Pro Max（`iPhone12,5`），iOS 26.0，roothide（relaxin） |
+| Frida | host 17.7.3 ↔ device 17.23.3 |
+
+## 方法论
+
+- **静态**：`otool` 解析段节/导入符号；自写 ObjC 元数据解析器（`__objc_classlist` / 相对方法表 / chained fixups）；自写 numpy 交叉引用索引（ADRP+ADD/LDR 物化、BL/B 目标、寄存器生命周期感知扫描）；Capstone 5.0.7 反汇编；还原解密算法后离线批量解密整个字符串池。
+- **动态**：Frida 只读 hook（`spawn → resume → 等 2~4 s → attach`，解析全部放 `setTimeout` 避免重入死锁），观测调用链 backtrace、探针命中、解密调用、规则引擎 VM 原语计数。
+- **交叉验证**：IDA Pro 9.3 + idalib，对 508 MB 主二进制采用「雕刻子二进制」法（按目标函数取窗口包成最小 ELF64，`run_auto_analysis=False` 逐函数 Hex-Rays），独立复核手工逆向结论。
+
+## 核心发现 TL;DR
+
+1. **三款 App 共用一套安全组件**：运行期符号名表 15/15 逐字节同一（番茄↔红果偏移恒定 `0x41DF00`），规则引擎 VM 原语逐字节同构，差别只在规则配置规模（番茄/红果 15 条、抖音 66 条）。
+
+2. **真实检测面比"代码里写了多少检测"窄得多**：`fopen` 五探针是死代码（静态零引用 + 内存零登记 + 运行时零调用）；`statfs` 93 路径在 roothide 上全 miss；`canOpenCydia` 因未声明 scheme 恒假；文件遍历链需支付页才跑而本机无此入口。本地唯一给出非零结论的只有 `/hmd_tmp_file` 越界写（→ `is_env_abnormal=1`）与一次目录名巧合命中。
+
+3. **检测挂在 HMD（Heimdallr）上报链上**，每次构造上报 header 时触发（三条并列路径），结果用 `dispatch_once` 缓存；越狱标志进入 HMD 的**明文字典**（34 字段，含 `is_env_abnormal`）。
+
+4. **SafeGuard 规则引擎在本构建中不可达**：六路引用全 0、不在静态构造表、运行期零调用，但模块初始化确实发生过（沙盒目录存在）。规则数据里含 roothide 特征串，却没有任何可达路径会解密它们。
+
+5. **加密名单其实覆盖三代越狱**（Dopamine/roothide/Xina），但以 bundle-id 与 plist 名出现，不是路径与库名——这正是此前只做路径扫描看不到的原因。
+
+## 仓库导航与建议阅读顺序
+
+```
+README.md                          ← 当前文件，总览
+article/技术博客文章.md             ← 面向读者的叙事版，建议先读
+reports/
+    深化分析总报告.md               ← 结论与证据的主报告
+    发现记录.md                     ← 逐轮原始发现过程（最详细）
+    静态分析指导文档.md             ← 方法论与静态搜索 checklist
+artifacts/                         ← 派生数据（无任何二进制）
+    hexrays_f5.md                  ← 11 个关键函数的 IDA Hex-Rays 反编译文本
+    符号名表_15条.csv               ← 共用组件证据（§2.1）
+    规则引擎对照.csv                ← 三款 VM 对照（§2.2）
+    解密字符串池_越狱相关19条.csv    ← 全池批解的越狱命中子集（§6.3）
+    平坦化地图.csv                  ← 控制流平坦化统计（§6.4）
+tools/
+    static/                        ← 静态分析脚本
+    dyn/                           ← Frida 只读观测脚本
+```
+
+建议顺序：**README → 博客 → 深化分析总报告 → 发现记录 → artifacts/tools**。
+
+## 复现说明
+
+- `tools/static/` 下的脚本在**已有合法获取、已脱壳的主二进制**前提下运行，依赖 Python 3 + numpy + capstone(5.0.7)。本仓库不提供二进制，请读者自备。
+- `tools/dyn/` 下为 Frida 只读脚本，运行环境见上表（注意 host/device 版本错位需用 `Module.getGlobalExportByName`）。
+- 全量解密字符串池（11,812 条）未公开，`artifacts/` 仅收录越狱/注入相关的 19 条命中子集，以避免无关路径/标识符泄露。
+
+## 待核对
+
+> 整理过程中若发现报告之间的数字有出入，列于此处，不自行"修正"，留待原作者核对。
+>
+- `artifacts/规则引擎对照.csv` 第 4 行（抖音）为 9 个字段，表头与其余两行为 8 个字段——末列"VM 原语与番茄逐字节同构"与"规则规模更大"挤在同一行，属排版问题，不影响任何数字与结论。
+- 三份文档中出现的"1118 次"与"1117 次"指两个不同对象：前者是注入谓词 `pred_inject_substr` 的调用次数，后者是 `-[HMDCrashBinaryImage isEnvAbnormal]` 的读取次数；并列出现时易被误读为矛盾。
+
+## License
+
+- 代码（`tools/`）：MIT License，见 `LICENSE`。
+- 文档与数据（`reports/`、`article/`、`artifacts/`）：CC BY 4.0，见 `LICENSE-docs`。
+
+```
+
+`article/技术博客文章.md`:
+
+```md
+---
+title: 拆解字节系 App 的越狱检测——一次 roothide 环境下的静态 + 动态联合逆向
+date: 2026-10-28
+tags: [iOS, 逆向工程, 越狱检测, 风控, Frida, IDA, Hex-Rays, ARM64]
+---
+
+# 拆解字节系 App 的越狱检测——一次 roothide 环境下的静态 + 动态联合逆向
+
+> 本文是一次**合法安全研究**的记录。目标是把字节系 App 的越狱/注入检测与风控机制的"真实形态"搞清楚：它从哪些维度检测、检测逻辑如何实现、检测结果如何联动到上层。全程 Frida **只读**（只 `onEnter/onLeave` 读参数、读返回、backtrace、dump 内存，不修改任何返回值或字段），不包含任何绕过武器化内容。文中所有技术论断都以目标二进制中实际读出的指令、字符串、表结构与设备上的现场读数为依据；无法取得直接证据的判断，一律在文末如实标注为"不可验证"。
+>
+> 文中不提供任何 IPA、脱壳后的 Mach-O 或可直接运行的绕过代码。
+
+---
+
+## 0. 写在前面：为什么要联合逆向
+
+纯静态分析能看到"代码里写了什么检测"，但看不到"哪条真的在跑"；纯动态能看到"跑了什么"，但看不到被混淆、被延迟触发、或当前环境没走到的分支。字节系 App 恰好把两者的盲区都占满了：
+
+- 单个主二进制 500 MB 级别、ObjC 类数以万计；
+- 关键符号在**运行期**才用 `dlsym` 解析，只看导入表会系统性低估检测面；
+- 字符串两套变体加密，方法 IMP 走三跳分支岛，子系统入口全部运行期分发。
+
+所以本文采用静态（Capstone + 自写 ObjC/交叉引用索引 + 离线批量解密）与动态（Frida 只读观测）互为印证的方式，最后再用 IDA Pro 9.3 的 Hex-Rays 对关键函数做第三方交叉验证。
+
+### 分析对象与环境
+
+| 项 | 值 |
+|---|---|
+| 番茄小说 | 7.4.1（`com.dragon.read` / 主二进制 `Reading`） |
+| 红果短剧 | 7.4.1（`com.phoenix.video` / 主二进制 `Eggplant`） |
+| 抖音 | 40.8.0（`com.ss.iphone.ugc.Aweme` / 主二进制 `AwemeCore`） |
+| 设备 | iPhone 11 Pro Max（`iPhone12,5`），iOS 26.0，roothide（relaxin） |
+| Frida | host 17.7.3 ↔ device 17.23.3 |
+
+一个动态侧必须交代的坑：host 与 device 版本错位导致 `Module.getExportByName` / `Process.findExportByName` 已被移除，必须改用 `Module.getGlobalExportByName`；attach 还有严格时序——`spawn → resume → 等 2~4 s → attach`，早于 ~0.9 s attach 进程约 1 s 被杀，而在 hook 回调里直接调 ObjC 会重入死锁拖垮整机（实测掉过一次线）。这些约束决定了"启动头两秒窗口"天然测不到，后文会再提。
+
+分析期间自然产生了一个对照组：会话中途设备崩溃恢复，jbroot 哈希从 `.jbroot-4C4DC0C67115CBA8` 变成 `.jbroot-8FF0E778ECD87DA9`，注入层结构一致，正好用来验证结论的稳定性。
+
+---
+
+## 1. 第一个发现：三款 App 共用同一套安全组件
+
+同一把 XOR key 下，相同明文对应的密文完全相同，因此可以直接拿**密文**做跨 App 指纹。这把钥匙后面会详细讲，先看结论。
+
+### 1.1 运行期符号名表：番茄 ≡ 红果，逐字节同一
+
+把加密池里的一组密文解出来，是这样 15 条：
+
+```
+dladdr  stat  lstat  fopen  __opendir2  getifaddrs
+CCCryptorCreateWithMode  CCCryptorUpdate
+CFNetworkCopySystemProxySettings  CFBundleIdentifier
+Filter  .plist  libdyld.dylib  libcommonCrypto.dylib  CFNetwork
+```
+
+番茄这 15 条落在 `0x112F3C29A` 起的一段，红果落在 `0x11335A19A` 起的一段，**偏移恒定 `0x41DF00`，15/15 一一对应，连"哪条用加密变体 v1、哪条用 v2"都完全相同**。
+
+这里有个容易被原始分析带偏的点：这**不是**越狱路径黑名单，而是 **`dlsym` / CFNetwork 的运行期符号名表**。App 在运行期用 `dladdr`/`dlsym` 去解析 `stat / lstat / fopen / __opendir2 / getifaddrs` 这些 libc 符号——这正是"只读导入表会低估检测面"的直接证据：这些函数在导入表里根本不出现。
+
+抖音是同一框架的**不同配置子集**：`CCCryptorCreateWithMode`、`CFNetworkCopySystemProxySettings`、`CFBundleIdentifier`、`libcommonCrypto.dylib` 在；部分密文缺失；池内额外多出 `com.bytedance.safeguard.data`——第一次出现"safeguard"这个自曝家门的字符串。
+
+### 1.2 规则引擎：同一台 VM，只是配置规模不同
+
+三款都带一台"字段求值虚拟机"，原语逐字节同构，差别只在喂进去的规则数：
+
+| App | 规则条目 | 键名范围 | 注册函数 | VM 读 / 写原语 |
+|---|---|---|---|---|
+| 番茄 | 15 | `G0` + `CF0..CFD` | `0x10185ADF8` | `0x1019A08E4` / `0x1019A08F0`（`ctx+0x6070+idx*8`） |
+| 红果 | 15 | `G0` + `CF0..CFD` | `0x1017DBDD0` | 同构 |
+| 抖音 | 66 | `G0..G7` + `CF0..CF39` | `0x77AB3B4` | `0x78BDAB8` / `0x78BDAC4`（同构） |
+
+读写原语都是 `ctx + 0x6070 + idx*8` 这种裸的槽位存取，三款逐字节一致。到这里"字节内部公共安全组件"已经不是推测，而是逐字节级的事实——**但要强调：横向比对在本研究里只是辅助印证手段，主线是把机制本身讲清楚。** 下面开始拆机制。
+
+---
+
+## 2. 检测链的真实形态：它挂在 HMD 上报链上
+
+原始分析最大的空白是"检测到底在什么时候、被谁调起"。动态 backtrace（Frida 权威符号化，非推测）把这条链钉死了：
+
+```
++[SSLaunchMonitor markFirstClassLoad]
+ ├─ +[HMDTTMonitorHelper reportHeaderParamsWithInjectedInfo:]   （性能上报）
+ ├─ -[HMDExceptionModuleReporter _reportExceptionData]          （异常上报）
+ └─ +[HMDConfigHelper requestHeaderFromProvider:]               （远程配置拉取）
+      └─ -[HMDUploadHelper headerInfo]        0x10A09EDBC
+           └─ -[HMDInfo isEnvAbnormal]        0x10A09F728
+                └─ dispatch_once
+                     └─ 0x10A09F79C   statfs × 93 路径 + /hmd_tmp_file 越界写
+```
+
+HMD 是字节的 Heimdallr 监控框架。关键认知有两点：
+
+1. **触发时机不是"启动检测一次"，而是每次构造 HMD 上报 header**——性能、异常、远程配置三条并列路径都会走到，沙盒探测结果用 `dispatch_once` 缓存一次。
+2. **真正的检测体 `0x10A09F79C` 干两件事**：对 93 条路径跑 `statfs`，以及往 `/hmd_tmp_file` 做一次沙盒越界写。
+
+越狱标志最终进了哪里？进了 HMD 上报 header 的**明文字典**（34 个字段），其中有一个字段叫 `is_env_abnormal`。这一点很重要——它否定了"越狱标志走 protobuf、字段名不可见"的旧假设：至少 HMD 这条通道是明文可读的。
+
+---
+
+## 3. 那些"看起来在检测"、其实没在跑的代码
+
+逆向最容易犯的错，是把二进制里存在的检测代码直接当成"正在生效的检测"。这次最有价值的几个结论恰恰相反。
+
+### 3.1 `fopen` 五探针 = 死代码（三重独立证据）
+
+有一族 `fopen` × 5 路径的探针（`0x10250F8C4`，同族还有个开关不同的 `0x10264A018`），形态非常像经典越狱文件检测。但三条独立证据一致判它死亡：
+
+| 证据 | 方法 | 结果 |
+|---|---|---|
+| 静态引用 | `ADRP+ADD/LDR`、chained 指针槽、相对指针、`__init_offsets`、base 相对表 全扫 | 全 0 |
+| 运行期登记 | 模块非可执行段 23,674,880 B 全扫函数指针 | 0 命中 |
+| 运行期调用 | 45 s 会话计数 | 0 次 |
+
+静态零引用、内存零登记、运行时零调用——这不是"没触发"，是根本没有可达入口。真正跑在链上的是上一节那个 `statfs` 版本。
+
+### 3.2 `statfs` 的 93 条路径，在 roothide 上全部 miss
+
+`statfs` 这条是真的在跑（挂在 HMD 链上），但它查的是什么、查中没有，是两回事。先做一件原始分析没做到的事：**把三款里每一处 `statfs` 族调用全部静态定性**。
+
+`statfs` 普遍走 `分支岛 → 二级片段 → stub` 三跳，只扫 `BL` 到 stub 会漏掉大部分调用点。按三跳展开后，番茄与红果各 **12** 处 `statfs` + 3 处 `statvfs` + 2 处 `fstatfs`（又一处数字完全相同的同组件证据）。逐处看它们读没读 `f_flags`（偏移 0x40）、`f_type`（偏移 0x3c）：
+
+- `f_flags` 读取次数 = **0 / 17**。
+
+这意味着**全部 17 处没有任何一处做 `f_flags & MNT_RDONLY` 的"根分区被重挂载为可读写"判定**。原始分析里"statfs 可能用于根分区 remount 检测"的猜测，由此从"动态单点否证"升级为"全调用点静态穷举否证"。`statfs` 族的真实用途只有三类：路径存在性探测（93 项表，用 `tbnz`/`cmn w0,#1` 把返回码布尔化）、磁盘空间查询、以及唯一一处 `f_type` 文件系统类型判定（`0x101866E70`）。
+
+动态侧补刀：93 路径（去重 50 条）在本机实测 **434 次探测 / 0 命中**。这些是 Cydia 时代的 `/private/var/...` 老路径，在 roothide 的 rootless 布局下自然一条都对不上。
+
+### 3.3 SafeGuard 规则引擎：一台没通电的状态机
+
+前面那台 VM（`CF0..CFD`）看着像"逐项越狱检查清单"，实际逆出来是一套**通用字段求值 VM**：`field[6]` 是结果位，`field[8..12]` 是输入槽，每条规则读 N 个输入、调一个专属 helper、写 `field[6]`。helper 本身是通用运行时函数（lazy-init、`[x0+0x110]` 取对象、分支岛），不是"检查某个越狱特征"的领域谓词。
+
+更关键的是可达性。对规则注册函数做穷尽排查：
+
+| 来源 | 结果 |
+|---|---|
+| `BL/B`（三个可执行节） | 0 |
+| `ADRP+ADD/LDR`（寄存器生命周期感知） | 0 |
+| chained 指针槽 / int32 / int64 相对指针（全部节） | 0 |
+| `__init_offsets` 静态构造表（2903 项） | 不在表内 |
+| 运行期 VM 原语调用计数（番茄 / 抖音） | 0 / 0 |
+
+**六路引用全 0，不在静态构造表，运行期零调用**——这台 VM 在当前构建里没有静态可达入口，运行期也从没被调起。旁证：它的沙盒目录 `.../Library/Heimdallr/CrashCapture/LoadLaunch/SafeGuard` 确实存在（模块初始化过），但规则求值没有发生。换句话说：引擎装好了、通电了，但没人踩油门。
+
+---
+
+## 4. roothide 下到底命中了什么
+
+把所有探针在本机的真实表现列成一张表（两次 jbroot 哈希都测过）：
+
+| # | 探针 | 实现位置 | 本机实测 | 判定 |
+|---|---|---|---|---|
+| 1 | `fopen` × 5 路径 | `0x10250F8C4` / `0x10264A018` | 零引用/零登记/零调用 | 死代码 |
+| 2 | dyld 镜像名 5 子串 | `0x1083E1854` | 1118 次调用 / **1 次命中** | 靠目录名巧合命中 |
+| 3 | `statfs` × 93 路径 | `0x10A09F79C` | 434 次探测 / 0 命中 | 全 miss |
+| 4 | `/hmd_tmp_file` 越界写 | `0x10A09F79C` 内 | fd = -1 → `is_env_abnormal=1` | 触发（极性见下） |
+| 5 | 逐镜像 `isEnvAbnormal` | `HMDCrashBinaryImage` | 读 1117 次，全 0 | 未标记任何注入库 |
+| 6 | 规则引擎 `G0/CF0..CFD` | `0x10185ADF8` | 0 次调用 | 未参与判定 |
+| 7 | `canOpenCydia` | `0x1074B70B8` | 未触发；且 `cydia` 未在 `LSApplicationQueriesSchemes` 声明 → iOS 15+ 恒假 | 逻辑上无效 |
+| 8 | `canGetAllAppName` | `0x1074B7138` | 未触发 | 未测 |
+
+### 4.1 最有意思的一条：唯一的"命中"是目录名撞名
+
+探针 2 遍历已加载镜像名，拿去比对 5 条子串。roothide 全套注入库的名字**一条都不匹配**：
+
+```
+/usr/lib/systemhook-8FF0E778ECD87DA9.dylib
+.../.jbroot-8FF0E778ECD87DA9/usr/lib/roothideinit.dylib
+.../.jbroot-8FF0E778ECD87DA9/usr/lib/roothidepatch.dylib
+.../.jbroot-8FF0E778ECD87DA9/usr/lib/libroothide.dylib
+.../.jbroot-8FF0E778ECD87DA9/usr/lib/ellekit/libinjector.dylib
+```
+
+唯一命中的是：
+
+```
+.../.jbroot-8FF0E778ECD87DA9/usr/lib/TweakInject/FakeTweak.dylib
+```
+
+命中原因是路径里含 **`TweakInject`**（名单第 3 条），属于**目录名撞名**，不是库名命中。所以"旧名单对 rootless/roothide 没跟进"这个说法要精确修正为：**旧名单在 roothide 上由一次目录名巧合命中，5 个核心组件里 4 个被漏检。**
+
+### 4.2 越界写的极性：普通设备可能也报 1
+
+探针 4 是本地唯一真正给出非零结论的检测。静态看：`0x10A09F800` 处 `open_dprotected_np("/hmd_tmp_file", O_CREAT|O_RDWR)`，随后 `tbnz w0,#0x1f` 判符号位——**失败置 1、成功置 0**。动态看：本机 fd = -1（失败）→ 缓存 1 → `-[HMDInfo isEnvAbnormal]` 返回 1 → header 里 `is_env_abnormal = "1"`。
+
+但这里有个诚实必须交代的疑点：按这条指令，"写失败 → 异常"意味着**普通未越狱设备在同一沙盒位置写失败时同样会报 1**。所以 `is_env_abnormal` 这个字段的真实语义，必然要结合服务端判定，本地只能还原到"写失败→1"这一步。本文不对后端含义做推断。
+
+---
+
+## 5. 解密体系：把整个加密字符串池逆出来
+
+前面所有"解出某某字符串"都依赖同一把钥匙。完整逆出来是这样。
+
+### 5.1 算法（key = `0xDEADBEEF`）
+
+```
+变体 1（0x109F8B83C）：
+  整词: plain_word[i] = ror32(cipher_word[i] ^ 0xDEADBEEF, 23)      ; 4 字节小端
+  尾部: plain_byte[j] = cipher_byte[j] ^ ((0xDEADBEEF >> (8*(j%4))) & 0xFF)
+
+变体 2（0x109F778F4）：
+  整词: plain_word[i] = cipher_word[i] ^ cipher_word[i-1] ^ 0xDEADBEEF
+  尾部: 同变体 1
+```
+
+关键点在尾部：不满 4 字节的尾巴不走整词路径，而是逐字节异或 key 的低位字节。漏掉这一段，就会出现"最后 1~3 字节乱码"——这是早期分析踩过的坑，也是判断算法是否真正逆对的试金石。
+
+实现上还有个陷阱：两个真身各挂一个分支岛（`0x107C16440` / `0x107C16448`），**hook 必须挂真身**，挂在岛上 `onLeave` 读到的是还没写入的缓冲。静态上 15 个调用点全部集中在 `0x1019616xx–0x1019624xx` 一个函数簇里。
+
+### 5.2 全池批解：`__const` 7.89 MB → 11,812 条明文
+
+两变体 × 两种对齐批量解密、去重后得到 **11,812 条不同明文**（路径 189、bundle-id 16、纯标识符 1,026、其他 10,581）。越狱/注入相关命中 19 条，其中 6 条是原始 50 条路径名单里完全没有的：
+
+```
+com.opa334.Dopamine            com.opa334.Dopamine.roothide
+com.roothide.manager           com.roothide.manager.plist
+com.xina.jailbreak.plist       com.xina.blacklist.plist
+```
+
+这改写了"名单只覆盖 Cydia 时代"的旧印象：**名单其实覆盖了 Dopamine（rootless）/ roothide / Xina 三代，但用的是 bundle-id 与 plist 名，不是路径与库名。** 这正是此前只做路径扫描完全看不到它们的原因。原 50 条路径里有 29 条能在加密池对上，仍然缺席的是 `ellekit`、`libhooker`、`/var/jb`、`substitute`、`trollstore`。
+
+### 5.3 roothide 密文块是惰性的
+
+池里确实存在 `com.roothide.manager`、`com.opa334.Dopamine.roothide`、`Documents/bootstrap.tar`、`/var/mobile/Library/HTTPStorages` 这些 roothide 特征串，且可解。但三条独立证据表明当前环境没有任何路径会去解它们：静态五种编码 × 三个可执行节 + 数据段指针引用全 0；778 MB 可写区间扫三条明文 0 命中；hook 两个解密真身 22 s，13 次调用全部落在符号名表 `0x112F3Cxxx`，无一进入密文块所在的 `0x112F15Cxx`。
+
+密文在、能解、但在 roothide + 正常使用 + 无崩溃上报的条件下不可达。
+
+---
+
+## 6. 控制流平坦化：点状，而非整库
+
+很多人默认大厂 App 是整库 OLLVM。实测不是。判据：`br xN` 前 7 条指令内同时出现 `adr` + `ldrsw/ldrb` + `add`，站点间距 ≤2KB 聚为一函数。
+
+| 二进制 | dispatch 站点 | 聚类 ≈ 函数 | 覆盖代码 | 占 `__text` |
+|---|---|---|---|---|
+| 番茄 Reading | 10,589 | ≈4,925 | ≈2,582 KB | **0.89%** |
+| 抖音 AwemeCore | 25,155 | ≈11,280 | ≈5,341 KB | **0.81%** |
+
+**只有 0.8–0.9% 的代码被平坦化，点状分布在安全/风控相关模块**——这也是为什么大部分代码能直接读。
+
+这里补一个抖音侧的分析缺陷修正，影响上面的计数口径：原始的函数起点识别只认三类序言（`sub sp` / `stp` 预索引 / `pacibsp`），必然漏掉无栈帧的叶子函数（典型如 `0x1E6EF964` 那种 `adrp/ldrsw/ldr/ret` 的 getter）。以 ObjC IMP 为真值实测，CJPay 窗口覆盖率只有 **16.9%**；叠加"终结指令（`ret`/`b`/`br`/`udf`）之后线性扫描起点"的补全后拉到 **97.2%**。因此此前对抖音任何"函数级"的统计都系统性低估了叶子函数占比，校正后抖音侧函数边界与番茄同样可信。
+
+---
+
+## 7. 用 IDA Hex-Rays 做第三方交叉验证
+
+前面的结论来自自写工具链（Capstone + numpy 交叉引用索引）。为避免"自己验自己"，最后用 IDA Pro 9.3 的 Hex-Rays 独立复核。
+
+直接 `idat -A` 导入 508 MB 的 `Reading` 在 16 GB 机器上不可行（卡在 ObjC 解析 >750 s，`.id0` 2.1 GB；`idalib` 无分析加载也 >600 s 未返回）。改走**雕刻子二进制**：按目标函数取 ±1~4 KB 窗口包成最小 ELF64（`PT_LOAD.p_vaddr` 保持原始虚拟地址），用 `idalib.open_database(run_auto_analysis=False)` + `add_func` + `ida_hexrays.decompile`，每函数约 1 秒。跨切片调用显示为 `MEMORY[addr]()`、尾调用显示为 `JUMPOUT(addr)`，地址与原二进制一致。
+
+11 个关键函数全部与手工结论逐条对上，摘几条：
+
+| 目标 | Hex-Rays 反编译要点 | 与手工结论 |
+|---|---|---|
+| `dec_v1` `0x109F8B83C` | `HIDWORD(v6)=c^0xDEADBEEF; out=v6>>23`；尾部 `out=c^(0xDEADBEEF>>v7)` | 一致（整词 ROR23 + 尾部逐字节） |
+| `sandbox_statfs93` `0x10A09F79C` | `while(v0!=344)`→43 项，`while(v0!=400)`→50 项；`open(...,514)`；`if (fd & 0x80000000) →1 else {close;unlink;→0}` | 一致（43+50 / `/hmd_tmp_file` / `O_RDWR\|O_CREAT=0x202` / fd 符号位） |
+| `vm_get/vm_set` | `*(qword*)(a1 + 8*a2 + 24688)` | `24688 = 0x6070`，一致 |
+| `pred_inject_substr` `0x1083E1854` | `if (v2==40)` 循环比对 | `40/8 = 5` 项，一致 |
+| `sysctl_caller` | `mib[2]=1; mib[3]=pid`；返回后浮点换算，**全程无 `0x800` 测试** | 一致（无 P_TRACED 判定） |
+
+这些数都能自洽验算：`344/8=43`、`400/8=50`、`40/8=5`、`514=0x202=O_RDWR|O_CREAT`、`24688=0x6070`，`0xDEADBEEF` 低字节 `EF BE AD DE`，且 `(((x<<32)|x)>>23)` 的低 32 位恰好等于 `ror32(x,23)`。手工逆向与 Hex-Rays 无一处需要推翻的差异。
+
+---
+
+## 8. 对一些常见假设的修正
+
+这次推翻/收紧了若干看似"显然"的结论，列出来比结论本身更有价值：
+
+1. **`fopen` 五探针不是主检测，是死代码**（静态零引用 + 内存零登记 + 运行时零调用）。
+2. **`statfs` 不做 remount 判定**：全 17 处调用点 `f_flags` 读取 0 次，猜测被全调用点穷举否证。
+3. **"反调试走 sysctl 查 P_TRACED"不成立**：mib 常量静态验证确为 `{1,14}`、`size=648`（`kinfo_proc`），形态像经典探针；但全 `__text` 无 `AND #0x800`，4 个 `_sysctl` 调用点附近无 bit11 测试，返回后是对结构头做浮点换算——sysctl 只用于取进程信息，没有实现 P_TRACED 判定。
+4. **加密池不是越狱路径表，是 dlsym/CFNetwork 符号名表**（15 条）。
+5. **名单覆盖三代越狱**（Dopamine/roothide/Xina），但以 bundle-id 和 plist 名出现，不是路径。
+6. **越狱标志 HMD 通道是明文字典**（34 字段，含 `is_env_abnormal`），不是不可见的 protobuf。
+7. **平坦化仅 0.8–0.9%**，点状分布于安全模块，非整库 OLLVM。
+8. **规则引擎在本构建不可达**：六路引用全 0、运行期零调用，但模块初始化确实发生过。
+
+---
+
+## 9. 没能验证 / 无法验证的
+
+诚实地列出边界：
+
+- **启动 0–2 s 窗口内规则引擎是否跑过一次**：更早 attach 会打死进程，这个窗口测不到。
+- **崩溃上报路径是否会解密 roothide 密文串**：唯一验证方式是人为制造崩溃，那会改变目标行为，属于自设红线，不做。
+- **`is_env_abnormal` 的后端语义**：需服务端对照，本地只能还原到"写失败→1"。
+- **SafeGuard 调用方是否在 Swift 侧**：Swift 字面量走 `__swift5_reflstr` 相对偏移表，ARM64 引用扫描覆盖不到。
+- **CJPay `appendParamTo:` 的真实 key**：番茄/抖音充值均为 App Store 内购，无第三方支付入口，这条链从未执行，客观拿不到。
+
+---
+
+## 10. 结论与思考
+
+把机制收束成几句话：
+
+1. **三款 App 共用一套安全组件**：符号名表 15/15 逐字节同一（偏移恒定 `0x41DF00`），规则引擎 VM 原语逐字节同构，差别只在规则配置规模（番茄/红果 15 条、抖音 66 条）。
+
+2. **真实检测面比"代码里写了多少检测"窄得多**：`fopen` 五探针是死代码；`statfs` 93 路径在 roothide 上全 miss；`canOpenCydia` 因未声明 scheme 恒假；文件遍历链需要支付页才跑而本机无此入口。本地唯一真正给出非零结论的，只有 `/hmd_tmp_file` 越界写（→ `is_env_abnormal=1`）和那次目录名巧合命中。
+
+3. **最该当成结论的，不是"某个探针是否命中"，而是这套防静态分析的设计是系统性的**：运行期符号名解析、方法 IMP 三跳分支岛、字符串两套变体加密、子系统入口全部运行期分发——四者叠加，使"只读导入表 + 只看调用图"的分析必然遗漏检测面。单看任何一层都会得出偏乐观的结论。
+
+4. **对抗的真正边界在服务端**：本地最强的一条（越界写）也只产生一个语义存疑的上报字段，识别与否最终由服务端结合设备指纹决定。纯静态/本地动态能还原到"采集什么、怎么上报"，但服务端如何裁决属于不可见区。
+
+对做越狱检测的人，反过来读也成立：把检测逻辑藏进运行期解析和点状平坦化、把判定搬到服务端，确实显著抬高了纯静态分析的成本——但一旦允许只读动态观测，"哪条真在跑"仍然会暴露无遗。攻防的价值，恰恰在于把"看起来在检测"和"真的在检测"区分开。
+
+---
+
+*本文所有技术论断均以目标二进制中实际读出的指令、字符串、表结构与设备现场读数（寄存器/返回/backtrace/内存）为依据；未取得直接证据的判断已在第 9 节标注。Frida 全程只读，未修改任何目标行为。*
+
+```
+
+`artifacts/hexrays_f5.md`:
+
+```md
+# Hex-Rays F5 输出（番茄 Reading 7.4.1）
+
+**方法说明**：`Reading` 单文件 508 MB、ObjC 类 78,911 个，直接 `idat -A` 全量导入在 16 GB 机器上不可行（实测：卡在 ObjC 解析 >750 s，`.id0` 2.1 GB / `.id1` 1.9 GB；`idalib` 无分析加载 `open_database` 亦 >600 s 未返回）。
+
+改为**雕刻子二进制**：按目标函数取 ±4 KB/±1 KB 窗口，包进最小 ELF64（`PT_LOAD` 的 `p_vaddr` 保持原虚拟地址），用 `idalib.open_database(path, run_auto_analysis=False)` + `ida_funcs.add_func` + `ida_hexrays.decompile` 逐函数反编译，每次 ~1 秒。
+
+**读法**：跨切片的外部调用显示为 `MEMORY[0x地址]()`，`JUMPOUT(0x地址)` 是尾调用；这不是反编译失败，是切片外的目标不可见。地址与原始二进制一致。
+
+---
+
+===== dec_v1 @ 0x109f8b83c =====
+__int64 __fastcall sub_109F8B83C(__int64 result, __int64 a2, int a3)
+{
+  signed int v3; // w9
+  signed int v4; // w10
+  int v5; // w11
+  unsigned __int64 v6; // t2
+  int v7; // w10
+
+  if ( a3 >= 4 )
+  {
+    v4 = 0;
+    v5 = 4;
+    do
+    {
+      v3 = v5;
+      HIDWORD(v6) = *(_DWORD *)(a2 + v4) ^ 0xDEADBEEF;
+      LODWORD(v6) = HIDWORD(v6);
+      *(_DWORD *)(result + v4) = v6 >> 23;
+      v5 = ((2 * v5) & 8) + (v5 ^ 4);
+      v4 = v3;
+    }
+    while ( v5 <= a3 );
+  }
+  else
+  {
+    v3 = 0;
+  }
+  if ( v3 < a3 )
+  {
+    v7 = 0;
+    do
+    {
+      *(_BYTE *)(result + v3) = *(_BYTE *)(a2 + v3) ^ (0xDEADBEEF >> v7);
+      v3 = (v3 ^ 0xFFFFFFFE) + ((2 * v3) | 2) + 1;
+      v7 += 8;
+    }
+    while ( v3 < a3 );
+  }
+  return result;
+}
+
+
+===== dec_v2_island @ 0x109f778f4 =====
+None
+
+===== sandbox_statfs93 @ 0x10a09f79c =====
+void sub_10A09F79C()
+{
+  __int64 v0; // x19
+  __int64 v1; // x0
+  __int64 v2; // x0
+  __int64 v3; // x0
+  char v4; // zf
+
+  v0 = 0;
+  if ( (MEMORY[0x109E1723C]() & 1) != 0 )
+  {
+    while ( v0 != 344 )
+    {
+      v1 = MEMORY[0x109E3C620]();
+      v0 += 8;
+      if ( !(_DWORD)v1 )
+        goto LABEL_11;
+    }
+  }
+  else
+  {
+    while ( v0 != 400 )
+    {
+      v1 = MEMORY[0x109E3C620]();
+      v0 += 8;
+      if ( !(_DWORD)v1 )
+        goto LABEL_11;
+    }
+  }
+  MEMORY[0x109E3C614]();
+  v2 = MEMORY[0x109E3C608](0x1136AD0D6LL, 514);
+  if ( (MEMORY[0x111A9531C](v2) & 0x80000000) != 0 )
+  {
+    v1 = 1;
+  }
+  else
+  {
+    MEMORY[0x111A93210]();
+    MEMORY[0x111A959AC](0x1136AD0D6LL);
+    v1 = 0;
+  }
+LABEL_11:
+  v3 = MEMORY[0x109E10458](v1);
+  if ( !v4 )
+    MEMORY[0x107C24CC4](v3);
+  JUMPOUT(0x109E28840LL);
+}
+
+
+===== isEnvAbnormal @ 0x10a09f728 =====
+void __fastcall sub_10A09F728(
+        __int64 a1,
+        __int64 a2,
+        __int64 a3,
+        __int64 a4,
+        __int64 a5,
+        __int64 a6,
+        __int64 a7,
+        __int64 a8,
+        __int64 a9)
+{
+  __int64 v9; // x29
+  __int64 v10; // x30
+
+  if ( MEMORY[0x11D7766F8] != -1 )
+  {
+    *(&a9 - 2) = v9;
+    *(&a9 - 1) = v10;
+    MEMORY[0x109E3C5D8]();
+  }
+  JUMPOUT(0x109E3C5CCLL);
+}
+
+===== pred_inject_substr @ 0x1083e1854 =====
+void sub_1083E1854()
+{
+  __int64 v0; // x0
+  __int64 v1; // x0
+  __int64 v2; // x22
+  __int64 v3; // x1
+  __int64 v4; // x21
+
+  v0 = MEMORY[0x109E0CA54]();
+  v1 = MEMORY[0x109E41180](v0);
+  v2 = 0;
+  v4 = *(_QWORD *)(v3 + 16);
+  while ( 1 )
+  {
+    if ( v2 == 40 )
+      goto LABEL_7;
+    if ( v4 )
+    {
+      v1 = MEMORY[0x109EDFBC0](v1, *(_QWORD *)(v2 + 0x119055038LL));
+      if ( v1 )
+        break;
+    }
+    v2 += 8;
+  }
+  MEMORY[0x109EDD9A8]();
+LABEL_7:
+  JUMPOUT(0x109E0DB6CLL);
+}
+
+
+===== rule_builder_CF @ 0x10185adf8 =====
+__int64 __fastcall sub_10185ADF8(
+        __int64 a1,
+        __int64 a2,
+        __int64 a3,
+        __int64 a4,
+        __int64 a5,
+        __int64 a6,
+        __int64 a7,
+        __int64 a8,
+        __int64 a9,
+        __int64 a10,
+        __int64 a11,
+        __int64 a12,
+        int a13,
+        __int64 a14,
+        __int64 a15,
+        __int16 a16,
+        __int64 a17,
+        __int64 a18,
+        int a19,
+        __int64 a20,
+        __int64 a21,
+        __int64 a22,
+        char a23,
+        __int64 a24,
+        int a25,
+        __int64 a26,
+        int a27,
+        __int64 a28,
+        __int64 a29,
+        char a30,
+        __int64 a31,
+        char a32,
+        int a33,
+        __int64 *a34,
+        int a35,
+        int a36,
+        __int64 *a37,
+        int a38,
+        int a39,
+        __int64 *a40,
+        int a41,
+        int a42,
+        __int64 *a43,
+        int a44,
+        int a45,
+        __int64 *a46,
+        int a47,
+        int a48,
+        __int64 *a49,
+        int a50,
+        int a51,
+        __int64 *a52,
+        int a53,
+        int a54,
+        __int64 *a55,
+        int a56,
+        int a57,
+        __int64 *a58,
+        int a59,
+        int a60,
+        __int64 *a61,
+        int a62,
+        int a63)
+{
+  __int64 *a64; // [xsp+1B8h] [xbp+1B8h]
+  int a65; // [xsp+1C0h] [xbp+1C0h]
+  int a66; // [xsp+1C8h] [xbp+1C8h]
+  __int64 *a67; // [xsp+1D0h] [xbp+1D0h]
+  int a68; // [xsp+1D8h] [xbp+1D8h]
+  __int64 a69; // [xsp+1E0h] [xbp+1E0h] BYREF
+  __int64 a70; // [xsp+1E8h] [xbp+1E8h]
+  char a71; // [xsp+1F0h] [xbp+1F0h]
+  __int64 a72; // [xsp+1F8h] [xbp+1F8h] BYREF
+  __int64 result; // x0
+
+  a72 = 0x112F158F7LL;
+  STACK[0x200] = (unsigned __int64)&unk_10185A9B0;
+  LOBYTE(STACK[0x208]) = 0;
+  STACK[0x210] = 0x112F158FBLL;
+  STACK[0x218] = (unsigned __int64)&unk_10185A9DC;
+  LOBYTE(STACK[0x220]) = 0;
+  STACK[0x228] = 0x112F158FFLL;
+  STACK[0x230] = (unsigned __int64)&unk_10185AA14;
+  LOBYTE(STACK[0x238]) = 0;
+  STACK[0x240] = 0x112F15903LL;
+  STACK[0x248] = (unsigned __int64)&unk_10185AA60;
+  LOBYTE(STACK[0x250]) = 0;
+  STACK[0x258] = 0x112F15907LL;
+  STACK[0x260] = (unsigned __int64)&unk_10185AA98;
+  LOBYTE(STACK[0x268]) = 0;
+  STACK[0x270] = 0x112F1590BLL;
+  STACK[0x278] = (unsigned __int64)&unk_10185AAF0;
+  LOBYTE(STACK[0x280]) = 0;
+  STACK[0x288] = 0x112F1590FLL;
+  STACK[0x290] = (unsigned __int64)&unk_10185AB58;
+  LOBYTE(STACK[0x298]) = 0;
+  STACK[0x2A0] = 0x112F15913LL;
+  STACK[0x2A8] = (unsigned __int64)&unk_10185ABB0;
+  LOBYTE(STACK[0x2B0]) = 0;
+  STACK[0x2B8] = 0x112F15917LL;
+  STACK[0x2C0] = (unsigned __int64)&unk_10185ABE8;
+  LOBYTE(STACK[0x2C8]) = 0;
+  STACK[0x2D0] = 0x112F1591BLL;
+  STACK[0x2D8] = (unsigned __int64)&unk_10185AC70;
+  LOBYTE(STACK[0x2E0]) = 0;
+  STACK[0x2E8] = 0x112F1591FLL;
+  STACK[0x2F0] = (unsigned __int64)&unk_10185ACBC;
+  LOBYTE(STACK[0x2F8]) = 0;
+  STACK[0x300] = 0x112F15923LL;
+  STACK[0x308] = (unsigned __int64)&unk_10185ACF4;
+  LOBYTE(STACK[0x310]) = 0;
+  STACK[0x318] = 0x112F15927LL;
+  STACK[0x320] = (unsigned __int64)&unk_10185AD2C;
+  LOBYTE(STACK[0x328]) = 0;
+  STACK[0x330] = 0x112F1592BLL;
+  STACK[0x338] = (unsigned __int64)&unk_10185AD68;
+  LOBYTE(STACK[0x340]) = 0;
+  a69 = 0x112F158F4LL;
+  a70 = 0x11D45C5F0LL;
+  a71 = 0;
+  a31 = 0xB01020902030600LL;
+  a32 = 5;
+  LOWORD(a33) = 1618;
+  BYTE2(a33) = 12;
+  a34 = &a31;
+  a35 = 3;
+  a29 = 0xE00030B02050601LL;
+  a30 = 2;
+  LOWORD(a36) = -430;
+  BYTE2(a36) = 10;
+  a37 = &a29;
+  a38 = 3;
+  LODWORD(a28) = 394753;
+  WORD2(a28) = 1036;
+  LOWORD(a39) = 1618;
+  BYTE2(a39) = 7;
+  a40 = &a28;
+  a41 = 2;
+  a26 = 0xE02020C03060600LL;
+  a27 = 85131525;
+  LOWORD(a42) = 1362;
+  BYTE2(a42) = 18;
+  a43 = &a26;
+  a44 = 4;
+  a24 = 0xC01050702010603LL;
+  a25 = 118554629;
+  LOWORD(a45) = 3410;
+  BYTE2(a45) = 2;
+  a46 = &a24;
+  a47 = 4;
+  a22 = 0x17020C0B00050601LL;
+  a23 = 1;
+  LOWORD(a48) = 1362;
+  BYTE2(a48) = 28;
+  a49 = &a22;
+  a50 = 3;
+  a20 = 0x1302070C00050704LL;
+  LODWORD(a21) = 51905285;
+  WORD2(a21) = 6913;
+  BYTE6(a21) = 5;
+  LOWORD(a51) = 3410;
+  BYTE2(a51) = 18;
+  a52 = &a20;
+  a53 = 5;
+  a18 = 0x18030C0C00050701LL;
+  a19 = 52232709;
+  LOWORD(a54) = -1454;
+  BYTE2(a54) = 7;
+  a55 = &a18;
+  a56 = 4;
+  LODWORD(a17) = 18089728;
+  WORD2(a17) = 1307;
+  LOWORD(a57) = 4690;
+  BYTE2(a57) = 5;
+  a58 = &a17;
+  a59 = 2;
+  a14 = 0xA02050503050004LL;
+  a15 = 0x5051501060F0005LL;
+  a16 = 1562;
+  LOWORD(a60) = -5550;
+  BYTE2(a60) = 8;
+  a61 = &a14;
+  a62 = 6;
+  a12 = 0x1502051001100003LL;
+  a13 = 102367237;
+  LOWORD(a63) = -4526;
+  BYTE2(a63) = 4;
+  a64 = &a12;
+  a65 = 4;
+  LODWORD(a11) = 17170432;
+  WORD2(a11) = 6662;
+  LOWORD(a66) = 1874;
+  BYTE2(a66) = 28;
+  a67 = &a11;
+  a68 = 2;
+  MEMORY[0x11D45C600] = MEMORY[0x1019A0374](0x11D096BA0LL, 1283, &STACK[0x348], 0, &a72, 14, &a69, 1);
+  result = MEMORY[0x107C1519C]();
+  MEMORY[0x11D45C608] = result;
+  return result;
+}
+
+
+===== CF0_checker @ 0x10185a9b0 =====
+__int64 __fastcall sub_10185A9B0(__int64 a1)
+{
+  unsigned int v2; // w0
+
+  v2 = MEMORY[0x107C1516C]();
+  return MEMORY[0x1019A08F0](a1, 6, v2);
+}
+
+
+===== vm_get @ 0x1019a08e4 =====
+__int64 __fastcall sub_1019A08E4(__int64 a1, unsigned int a2)
+{
+  return *(_QWORD *)(a1 + 8LL * a2 + 24688);
+}
+
+
+===== vm_set @ 0x1019a08f0 =====
+__int64 __fastcall sub_1019A08F0(__int64 result, unsigned int a2, __int64 a3)
+{
+  *(_QWORD *)(result + 8LL * a2 + 24688) = a3;
+  return result;
+}
+
+
+===== isJailBreak @ 0x1074b6ff4 =====
+void sub_1074B6FF4()
+{
+  MEMORY[0x109E0C578]();
+  if ( (MEMORY[0x107C07FB8]() & 1) != 0 || (MEMORY[0x109E121CC]() & 1) != 0 )
+    JUMPOUT(0x109E2A32CLL);
+  MEMORY[0x109E0FE48]();
+  JUMPOUT(0x107C07FB8LL);
+}
+
+
+===== hasJailBreakFiles @ 0x1074b7034 =====
+void sub_1074B7034()
+{
+  int v0; // w28
+  __int64 v1; // x0
+  __int64 v2; // x0
+  __int64 v3; // x0
+  __int64 v4; // x8
+  __int64 v5; // x24
+  __int64 v6; // x0
+  __int64 v7; // x0
+  char v8; // cf
+  char v9; // zf
+  __int64 v10; // x0
+  __int64 v11; // x0
+  __int64 v12; // x0
+  __int64 v13; // x0
+  __int64 v14; // x0
+  __int64 v15; // x0
+  __int64 v16; // x0
+  __int64 v17; // x0
+
+  v1 = MEMORY[0x109E0DFCC]();
+  v2 = ((__int64 (__fastcall *)(__int64))unk_1074B7374)(v1);
+  v3 = ((__int64 (__fastcall *)(__int64))unk_1074B7368)(v2);
+  do
+  {
+    v5 = v4;
+    v6 = MEMORY[0x109E4D904](v3);
+    v7 = ((__int64 (__fastcall *)(__int64))unk_1074B738C)(v6);
+    if ( !(!v9 & v8) )
+      break;
+    v10 = ((__int64 (__fastcall *)(__int64))unk_1074B7358)(v7);
+    v11 = MEMORY[0x107C07FB8](v10);
+    MEMORY[0x107C0819C](v11);
+    v12 = MEMORY[0x109EC8D70]();
+    v13 = MEMORY[0x107C07FB8](v12);
+    v14 = MEMORY[0x107C0819C](v13);
+    v15 = MEMORY[0x106D5DECC](v14);
+    v16 = MEMORY[0x107C07FB8](v15);
+    v17 = MEMORY[0x109E2CA14](v16);
+    v3 = MEMORY[0x109E11424](v17);
+    v4 = v5 + 1;
+  }
+  while ( !v0 );
+  JUMPOUT(0x109E0F4B8LL);
+}
+
+
+===== sysctl_caller @ 0x106c873c4 =====
+void sub_106C873C4()
+{
+  __int64 v0; // x29
+  __int64 v1; // x0
+  int v2; // w0
+  __int64 v3; // x0
+  __int64 v4; // x0
+  long double v5; // q0
+  long double v6; // q0
+  __int64 v7; // x0
+  char v8; // zf
+
+  v1 = MEMORY[0x109E11E0C]();
+  v2 = MEMORY[0x107C11A00](v1);
+  *(_QWORD *)(v0 - 40) = MEMORY[0x112D0BA38];
+  *(_DWORD *)(v0 - 32) = 1;
+  *(_DWORD *)(v0 - 28) = v2;
+  MEMORY[0x109EE5D10]();
+  v3 = MEMORY[0x109E73FC0](v0 - 40);
+  v4 = MEMORY[0x109E3B0D8](v3);
+  *(_QWORD *)&v5 = 0;
+  if ( !(_DWORD)v4 )
+  {
+    v6 = MEMORY[0x109EE5CEC](0.0);
+    v4 = MEMORY[0x109E3E7AC](v6);
+  }
+  v7 = MEMORY[0x109E10174](v4, v5);
+  if ( !v8 )
+    MEMORY[0x1007950E8](v7);
+  JUMPOUT(0x109E3E7A0LL);
+}
+
+
+===== headerInfo @ 0x10a09edbc =====
+void sub_10A09EDBC()
+{
+  __int64 v0; // x26
+  __int64 v1; // x22
+  __int64 v2; // x0
+  __int64 v3; // x0
+  __int64 v4; // x19
+  __int64 v5; // x21
+  __int64 v6; // x0
+  __int64 v7; // x0
+  __int64 v8; // x20
+  __int64 v9; // x0
+  __int64 v10; // x0
+  __int64 v11; // x0
+  __int64 v12; // x0
+  __int64 v13; // x0
+  __int64 v14; // x0
+  __int64 v15; // x0
+  __int64 v16; // x0
+  __int64 v17; // x0
+  __int64 v18; // x0
+  __int64 v19; // x0
+  __int64 v20; // x0
+  __int64 v21; // x0
+  __int64 v22; // x0
+  __int64 v23; // x0
+  __int64 v24; // x0
+  __int64 v25; // x0
+  __int64 v26; // x0
+  __int64 v27; // x0
+  __int64 v28; // x0
+  __int64 v29; // x0
+  __int64 v30; // x0
+  __int64 v31; // x0
+  __int64 v32; // x0
+  __int64 v33; // x0
+  __int64 v34; // x0
+  __int64 v35; // x0
+  __int64 v36; // x0
+  __int64 v37; // x0
+  __int64 v38; // x0
+  __int64 v39; // x0
+  __int64 v40; // x0
+  __int64 v41; // x0
+  __int64 v42; // x0
+  __int64 v43; // x0
+  __int64 v44; // x0
+  __int64 v45; // x0
+  __int64 v46; // x0
+  __int64 v47; // x0
+  __int64 v48; // x0
+  __int64 v49; // x0
+  __int64 v50; // x0
+  __int64 v51; // x0
+  __int64 v52; // x0
+  __int64 v53; // x0
+  __int64 v54; // x0
+  __int64 v55; // x0
+  __int64 v56; // x0
+  __int64 v57; // x0
+  __int64 v58; // x0
+  __int64 v59; // x0
+  __int64 v60; // x0
+  __int64 v61; // x0
+  __int64 v62; // x0
+  __int64 v63; // x0
+  __int64 v64; // x0
+  __int64 v65; // x0
+  __int64 v66; // x0
+  __int64 v67; // x0
+  __int64 v68; // x0
+  __int64 v69; // x0
+  __int64 v70; // x0
+  __int64 v71; // x0
+  __int64 v72; // x0
+  __int64 v73; // x0
+  __int64 v74; // x0
+  __int64 v75; // x0
+  __int64 v76; // x0
+  __int64 v77; // x0
+  __int64 v78; // x0
+  __int64 v79; // x0
+  __int64 v80; // x0
+  __int64 v81; // x0
+  __int64 v82; // x0
+  __int64 v83; // x0
+  __int64 v84; // x0
+  __int64 v85; // x0
+  __int64 v86; // x0
+  __int64 v87; // x0
+  __int64 v88; // x0
+  __int64 v89; // x0
+  __int64 v90; // x0
+  __int64 v91; // x0
+  __int64 v92; // x0
+  __int64 v93; // x0
+  __int64 v94; // x0
+  __int64 v95; // x0
+  __int64 v96; // x0
+  __int64 v97; // x0
+  __int64 v98; // x0
+  __int64 v99; // x0
+  __int64 v100; // x0
+  __int64 v101; // x0
+  __int64 v102; // x0
+  __int64 v103; // x0
+  __int64 v104; // x0
+  __int64 v105; // x0
+  __int64 v106; // x0
+  __int64 v107; // x0
+  __int64 v108; // x0
+  __int64 v109; // x0
+  __int64 v110; // x0
+  __int64 v111; // x0
+  __int64 v112; // x0
+  __int64 v113; // x0
+  __int64 v114; // x0
+  __int64 v115; // x0
+  __int64 v116; // x0
+  __int64 v117; // x0
+  __int64 v118; // x0
+  __int64 v119; // x0
+  __int64 v120; // x0
+  __int64 v121; // x0
+  __int64 v122; // x0
+  __int64 v123; // x0
+  __int64 v124; // x0
+  __int64 v125; // x0
+  __int64 v126; // x0
+  __int64 v127; // x0
+  __int64 v128; // x0
+  __int64 v129; // x0
+  __int64 v130; // x0
+  __int64 v131; // x0
+  __int64 v132; // x0
+  __int64 v133; // x0
+  __int64 v134; // x0
+  __int64 v135; // x0
+  __int64 v136; // x0
+  __int64 v137; // x0
+  __int64 v138; // x0
+  __int64 v139; // x0
+  __int64 v140; // x0
+  __int64 v141; // x0
+  __int64 v142; // x0
+  __int64 v143; // x0
+  __int64 v144; // x0
+  __int64 v145; // x0
+  __int64 v146; // x0
+  __int64 v147; // x0
+  __int64 v148; // x0
+  __int64 v149; // x0
+  __int64 v150; // x0
+  __int64 v151; // x0
+  __int64 v152; // x0
+  __int64 v153; // x0
+  __int64 v154; // x0
+  __int64 v155; // x0
+  __int64 v156; // x0
+  __int64 v157; // x0
+  __int64 v158; // x0
+  __int64 v159; // x0
+  __int64 v160; // x0
+  __int64 v161; // x0
+  __int64 v162; // x0
+  __int64 v163; // x0
+  __int64 v164; // x0
+  __int64 v165; // x0
+  __int64 v166; // x0
+  __int64 v167; // x0
+  __int64 v168; // x0
+  __int64 v169; // x0
+  __int64 v170; // x0
+  __int64 v171; // x0
+  __int64 v172; // x0
+  __int64 v173; // x0
+  __int64 v174; // x0
+  __int64 v175; // x0
+  __int64 v176; // x0
+  __int64 v177; // x0
+  __int64 v178; // x0
+  __int64 v179; // x0
+  __int64 v180; // x0
+  __int64 v181; // x0
+  __int64 v182; // x0
+  __int64 v183; // x8
+  __int64 v184; // x28
+  __int64 v185; // x0
+  __int64 v186; // x0
+  __int64 v187; // x0
+  __int64 v188; // x0
+  __int64 v189; // x0
+  __int64 v190; // x0
+  __int64 v191; // x0
+  __int64 v192; // x0
+  __int64 v193; // x0
+  __int64 v194; // x0
+  __int64 v195; // x0
+  __int64 v196; // x0
+  __int64 v197; // x0
+  __int64 v198; // x0
+  __int64 v199; // x0
+  __int64 v200; // x0
+  unsigned __int64 i; // x25
+  unsigned __int64 v202; // x0
+  __int64 v203; // x0
+  __int64 v204; // x0
+  __int64 v205; // x0
+  __int64 v206; // x0
+  __int64 v207; // x0
+  __int64 v208; // x0
+  __int64 v209; // x0
+  __int64 v210; // x0
+  __int64 v211; // x0
+  __int64 v212; // x0
+  __int64 v213; // x0
+  __int64 v214; // x0
+  __int64 v215; // x0
+  __int64 v216; // x0
+  __int64 v217; // x0
+  __int64 v218; // x0
+  __int64 v219; // x0
+  __int64 v220; // x0
+  __int64 v221; // x0
+  __int64 v222; // x0
+  __int64 v223; // x0
+  __int64 v224; // x0
+  __int64 v225; // x0
+  __int64 v226; // x0
+  __int64 v227; // x0
+  __int64 v228; // x0
+  __int64 v229; // x0
+  __int64 v230; // x0
+  __int64 v231; // x0
+  __int64 v232; // x0
+  __int64 v233; // x0
+  __int64 v234; // x0
+  __int64 v235; // x0
+  __int64 v236; // x0
+  __int64 v237; // x0
+  __int64 v238; // x0
+  __int64 v239; // x0
+  __int64 v240; // x0
+  __int64 v241; // x0
+  __int64 v242; // x0
+  __int64 v243; // x0
+  __int64 v244; // x0
+  __int64 v245; // x0
+  __int64 v246; // x0
+  __int64 v247; // x0
+  __int64 v248; // x0
+  __int64 v249; // x0
+  __int64 v250; // x0
+  __int64 v251; // x0
+  __int64 v252; // x0
+  __int64 v253; // x0
+  __int64 v254; // x0
+  __int64 v255; // x0
+  __int64 v256; // x0
+  __int64 v257; // x0
+  __int64 v258; // x0
+  __int64 v259; // x0
+  __int64 v260; // x0
+  __int64 v261; // x0
+  __int64 v262; // x0
+  __int64 v263; // x0
+  __int64 v264; // x0
+  __int64 v265; // x22
+  __int64 v266; // x0
+  __int64 v267; // x0
+  __int64 v268; // x0
+  __int64 v269; // x0
+  __int64 v270; // x0
+  __int64 v271; // x0
+  __int64 v272; // x0
+  __int64 v273; // x0
+  __int64 v274; // x0
+  __int64 v275; // x0
+  __int64 v276; // x0
+  __int64 v277; // x0
+  __int64 v278; // x0
+  __int64 v279; // x0
+  __int64 v280; // x0
+  __int64 v281; // x0
+  __int64 v282; // x0
+  __int64 v283; // x0
+  __int64 v284; // x0
+  __int64 v285; // x0
+  __int64 v286; // x0
+  __int64 v287; // x0
+  __int64 v288; // x0
+  __int64 v289; // x0
+  __int64 v290; // x0
+  __int64 v291; // x0
+  __int64 v292; // x0
+  __int64 v293; // x0
+  __int64 v294; // x0
+  __int64 v295; // x0
+  __int64 v296; // x0
+  __int64 v297; // x0
+  __int64 v298; // x0
+  __int64 v299; // x0
+  __int64 v300; // x0
+  __int64 v301; // x21
+  __int64 v302; // x0
+  __int64 v303; // x0
+  __int64 v304; // x22
+  __int64 v305; // x0
+  __int64 v306; // x23
+  __int64 v307; // x0
+  __int64 v308; // x28
+  __int64 v309; // x0
+  __int64 v310; // x0
+  __int64 v311; // x0
+  __int64 v312; // x0
+  __int64 v313; // x0
+  __int64 v314; // x0
+  __int64 v315; // x0
+  __int64 v316; // x0
+  __int64 v317; // x0
+  __int64 v318; // x0
+  __int64 v319; // x0
+  __int64 v320; // x0
+  __int64 v321; // x0
+  __int64 v322; // x0
+  __int64 v323; // x0
+  __int64 v324; // x0
+  __int64 v325; // x0
+  __int64 v326; // x0
+  __int64 v327; // x0
+  __int64 v328; // x0
+  __int64 v329; // [xsp+28h] [xbp+28h]
+  __int64 v330; // [xsp+30h] [xbp+30h]
+
+  v1 = MEMORY[0x109E0DFCC]();
+  v2 = MEMORY[0x109E23DAC]();
+  v3 = MEMORY[0x111A95148](v2);
+  v4 = MEMORY[0x111A951FC](v3);
+  v5 = MEMORY[0x11C272BF8];
+  v6 = MEMORY[0x109E143C8]();
+  v7 = MEMORY[0x111A95148](v6);
+  MEMORY[0x111A951FC](v7);
+  v8 = MEMORY[0x11C1A58A0];
+  v9 = MEMORY[0x111A95148]();
+  MEMORY[0x111A951FC](v9);
+  v10 = MEMORY[0x109E3C5BC]();
+  v11 = MEMORY[0x109E143A4](v10);
+  v12 = MEMORY[0x109E0EBFC](v11);
+  if ( v0 )
+  {
+    v13 = MEMORY[0x109E143C8](v12);
+    v14 = MEMORY[0x111A95148](v13);
+    v15 = MEMORY[0x111A951FC](v14);
+    v16 = MEMORY[0x109E2BF74](v15);
+    v17 = MEMORY[0x111A95148](v16);
+    v18 = MEMORY[0x111A951FC](v17);
+    v19 = MEMORY[0x109E3C5A4](v18);
+    v20 = MEMORY[0x109E0C63C](v19);
+    v12 = MEMORY[0x109E0EBFC](v20);
+  }
+  v329 = v5;
+  v21 = MEMORY[0x109E3BEE0](v12);
+  v22 = MEMORY[0x109E13140](v21);
+  v23 = MEMORY[0x109E198B8](v22);
+  v24 = MEMORY[0x109E148EC](v23);
+  v25 = MEMORY[0x111A95148](v24);
+  MEMORY[0x111A951FC](v25);
+  MEMORY[0x109E148E0]();
+  v26 = MEMORY[0x109E0EBFC]();
+  v27 = MEMORY[0x109E12D84](v26);
+  v28 = MEMORY[0x109E3C594](v27);
+  v29 = MEMORY[0x111A95148](v28);
+  MEMORY[0x111A951FC](v29);
+  v30 = MEMORY[0x109E3C584]();
+  v31 = MEMORY[0x109E3C260](v30);
+  v32 = MEMORY[0x109E0E964](v31);
+  v33 = MEMORY[0x109E3C578](v32);
+  v34 = MEMORY[0x109E14100](v33);
+  v35 = MEMORY[0x111A95148](v34);
+  MEMORY[0x111A951FC](v35);
+  v36 = MEMORY[0x109E3C56C]();
+  v37 = MEMORY[0x109E3C55C](v36);
+  v38 = MEMORY[0x109E2233C](v37);
+  v39 = MEMORY[0x111A95148](v38);
+  MEMORY[0x111A951FC](v39);
+  v40 = MEMORY[0x109E3C550]();
+  v41 = MEMORY[0x109E3C484](v40);
+  v42 = MEMORY[0x109E0E950](v41);
+  v43 = MEMORY[0x109E0EFDC](v42);
+  v44 = MEMORY[0x109E14100](v43);
+  v45 = MEMORY[0x111A95148](v44);
+  v46 = MEMORY[0x111A951FC](v45);
+  v47 = MEMORY[0x109E3C540](v46);
+  v48 = MEMORY[0x111A95148](v47);
+  MEMORY[0x111A951FC](v48);
+  v49 = MEMORY[0x109E14F20]();
+  v50 = MEMORY[0x109E3C278](v49);
+  v51 = MEMORY[0x109E0EFDC](v50);
+  v52 = MEMORY[0x109E0E950](v51);
+  v53 = MEMORY[0x109E14100](v52);
+  v54 = MEMORY[0x111A95148](v53);
+  MEMORY[0x111A951FC](v54);
+  v55 = MEMORY[0x109E3B200]();
+  v56 = MEMORY[0x111A95148](v55);
+  MEMORY[0x111A951FC](v56);
+  v57 = MEMORY[0x109E13110]();
+  v58 = MEMORY[0x109E3C278](v57);
+  v59 = MEMORY[0x109E0EFDC](v58);
+  v60 = MEMORY[0x109E0E950](v59);
+  v61 = MEMORY[0x109E14100](v60);
+  v62 = MEMORY[0x111A95148](v61);
+  MEMORY[0x111A951FC](v62);
+  v63 = MEMORY[0x111A95148]();
+  MEMORY[0x111A951FC](v63);
+  v64 = MEMORY[0x109E13104]();
+  v65 = MEMORY[0x109E3C278](v64);
+  v66 = MEMORY[0x109E0EFDC](v65);
+  v67 = MEMORY[0x109E0E950](v66);
+  v68 = MEMORY[0x109E14100](v67);
+  v69 = MEMORY[0x111A95148](v68);
+  MEMORY[0x111A951FC](v69);
+  v70 = MEMORY[0x111A95148]();
+  MEMORY[0x111A951FC](v70);
+  v71 = MEMORY[0x109E3C534]();
+  v72 = MEMORY[0x109E3C278](v71);
+  v73 = MEMORY[0x109E0EFDC](v72);
+  v74 = MEMORY[0x109E0E950](v73);
+  v75 = MEMORY[0x109E14100](v74);
+  v76 = MEMORY[0x111A95148](v75);
+  MEMORY[0x111A951FC](v76);
+  v77 = MEMORY[0x111A95148]();
+  MEMORY[0x111A951FC](v77);
+  v78 = MEMORY[0x109E130F8]();
+  v79 = MEMORY[0x109E3C278](v78);
+  v80 = MEMORY[0x109E0EFDC](v79);
+  v81 = MEMORY[0x109E0E950](v80);
+  v82 = MEMORY[0x109E14100](v81);
+  v83 = MEMORY[0x111A95148](v82);
+  MEMORY[0x111A951FC](v83);
+  v84 = MEMORY[0x109E3C528]();
+  v85 = MEMORY[0x109E3C514](v84);
+  v86 = MEMORY[0x111A95148](v85);
+  MEMORY[0x111A951FC](v86);
+  v87 = MEMORY[0x109E3C484]();
+  v88 = MEMORY[0x109E0E950](v87);
+  v89 = MEMORY[0x109E0EFDC](v88);
+  v90 = MEMORY[0x109E14100](v89);
+  v91 = MEMORY[0x111A95148](v90);
+  MEMORY[0x111A951FC](v91);
+  v92 = MEMORY[0x109E3C508]();
+  v93 = MEMORY[0x109E3C4C8](v92);
+  v94 = MEMORY[0x111A95148](v93);
+  MEMORY[0x111A951FC](v94);
+  v95 = MEMORY[0x109E14E40]();
+  v96 = MEMORY[0x109E3C484](v95);
+  v97 = MEMORY[0x109E0E950](v96);
+  v98 = MEMORY[0x109E0EFDC](v97);
+  v99 = MEMORY[0x109E14100](v98);
+  v100 = MEMORY[0x111A95148](v99);
+  MEMORY[0x111A951FC](v100);
+  v101 = MEMORY[0x109E3C4FC]();
+  v102 = MEMORY[0x111A95148](v101);
+  MEMORY[0x111A951FC](v102);
+  v103 = MEMORY[0x109E130CC]();
+  v104 = MEMORY[0x109E3C278](v103);
+  v105 = MEMORY[0x109E0EFDC](v104);
+  v106 = MEMORY[0x109E0E950](v105);
+  v107 = MEMORY[0x109E14100](v106);
+  v108 = MEMORY[0x111A95148](v107);
+  MEMORY[0x111A951FC](v108);
+  v109 = MEMORY[0x109E36C20]();
+  v110 = MEMORY[0x111A95148](v109);
+  MEMORY[0x111A951FC](v110);
+  v111 = MEMORY[0x109E14ED8]();
+  v112 = MEMORY[0x109E3C278](v111);
+  v113 = MEMORY[0x109E0EFDC](v112);
+  v114 = MEMORY[0x109E0E950](v113);
+  v115 = MEMORY[0x109E14100](v114);
+  v116 = MEMORY[0x111A95148](v115);
+  MEMORY[0x111A951FC](v116);
+  v117 = MEMORY[0x109E36C04]();
+  v118 = MEMORY[0x111A95148](v117);
+  MEMORY[0x111A951FC](v118);
+  v119 = MEMORY[0x109E3C4F0]();
+  v120 = MEMORY[0x109E3C278](v119);
+  v121 = MEMORY[0x109E0EFDC](v120);
+  v122 = MEMORY[0x109E0E950](v121);
+  v123 = MEMORY[0x109E14100](v122);
+  v124 = MEMORY[0x111A95148](v123);
+  MEMORY[0x111A951FC](v124);
+  v125 = MEMORY[0x109E3C4E4]();
+  v126 = MEMORY[0x111A95148](v125);
+  MEMORY[0x111A951FC](v126);
+  v127 = MEMORY[0x109E130C0]();
+  v128 = MEMORY[0x109E3C278](v127);
+  v129 = MEMORY[0x109E0EFDC](v128);
+  v130 = MEMORY[0x109E0E950](v129);
+  v131 = MEMORY[0x109E14100](v130);
+  v132 = MEMORY[0x111A95148](v131);
+  MEMORY[0x111A951FC](v132);
+  v133 = MEMORY[0x109E3C4D8]();
+  v134 = MEMORY[0x109E3C4C8](v133);
+  v135 = MEMORY[0x111A95148](v134);
+  MEMORY[0x111A951FC](v135);
+  v136 = MEMORY[0x109E3C4BC]();
+  v137 = MEMORY[0x109E3C4AC](v136);
+  v138 = MEMORY[0x109E11424](v137);
+  v139 = MEMORY[0x109E0EFDC](v138);
+  v140 = MEMORY[0x109E12D14](v139);
+  v141 = MEMORY[0x109E3C4A0](v140);
+  v142 = MEMORY[0x109E198B8](v141);
+  v143 = MEMORY[0x109E14100](v142);
+  v144 = MEMORY[0x111A95148](v143);
+  MEMORY[0x111A951FC](v144);
+  v145 = MEMORY[0x111A95148]();
+  MEMORY[0x111A951FC](v145);
+  v146 = MEMORY[0x109E1309C]();
+  v147 = MEMORY[0x109E3C278](v146);
+  v148 = MEMORY[0x109E0EFDC](v147);
+  v149 = MEMORY[0x109E11424](v148);
+  v150 = MEMORY[0x109E14100](v149);
+  v151 = MEMORY[0x111A95148](v150);
+  v152 = MEMORY[0x111A951FC](v151);
+  v153 = MEMORY[0x109E3C494](v152);
+  v154 = MEMORY[0x111A95148](v153);
+  MEMORY[0x111A951FC](v154);
+  v155 = MEMORY[0x109E13090]();
+  v156 = MEMORY[0x109E3C484](v155);
+  v157 = MEMORY[0x109E0E950](v156);
+  v158 = MEMORY[0x109E11424](v157);
+  v330 = v1;
+  v159 = MEMORY[0x109E14100](v158);
+  v160 = MEMORY[0x111A95148](v159);
+  MEMORY[0x111A951FC](v160);
+  v161 = MEMORY[0x109E3C478]();
+  v162 = MEMORY[0x111A95148](v161);
+  v163 = MEMORY[0x109E3C468](v162);
+  v164 = MEMORY[0x111A95148](v163);
+  MEMORY[0x111A951FC](v164);
+  v165 = MEMORY[0x109E3C388]();
+  v166 = MEMORY[0x109E0EBFC](v165);
+  MEMORY[0x109E0E964](v166);
+  v167 = MEMORY[0x109E3C45C](MEMORY[0x11C5A3A20]);
+  v168 = MEMORY[0x111A95148](v167);
+  v169 = MEMORY[0x111A951FC](v168);
+  v170 = MEMORY[0x109E3C448](v169);
+  v171 = MEMORY[0x109E3C43C](v170);
+  v172 = MEMORY[0x109E0EBFC](v171);
+  v173 = MEMORY[0x109E3C42C](v172);
+  MEMORY[0x109E3C420](v173, v8);
+  v174 = MEMORY[0x109E3C414](MEMORY[0x11C5A3A20]);
+  v175 = MEMORY[0x111A95148](v174);
+  MEMORY[0x111A951FC](v175);
+  v176 = MEMORY[0x109E3C404]();
+  MEMORY[0x109E0EBFC](v176);
+  v177 = MEMORY[0x109E3C3F8](MEMORY[0x11C5A3A20]);
+  v178 = MEMORY[0x111A95148](v177);
+  v179 = MEMORY[0x111A951FC](v178);
+  v180 = MEMORY[0x109E3C3E4](v179);
+  v181 = MEMORY[0x109E0EBFC](v180);
+  v182 = MEMORY[0x109E18FB8](v181);
+  v184 = *(_QWORD *)(v183 + 4016);
+  v185 = MEMORY[0x109E3C3D8](v182);
+  v186 = MEMORY[0x111A95148](v185, v184);
+  MEMORY[0x111A951FC](v186);
+  v187 = MEMORY[0x109E3C3CC]();
+  v188 = MEMORY[0x109E3C388](v187);
+  MEMORY[0x109E0EBFC](v188);
+  v189 = MEMORY[0x109E3C3C0](MEMORY[0x11C5A3A20]);
+  v190 = MEMORY[0x111A95148](v189);
+  MEMORY[0x111A951FC](v190);
+  v191 = MEMORY[0x109E3C3B4]();
+  v192 = MEMORY[0x109E3C388](v191);
+  MEMORY[0x109E0EBFC](v192);
+  v193 = MEMORY[0x111A95148](MEMORY[0x11C5A3A20], MEMORY[0x11C160668]);
+  v194 = MEMORY[0x111A951FC](v193);
+  if ( MEMORY[0x109E3C3A8](v194) )
+  {
+    v195 = MEMORY[0x109E3C398]();
+    v196 = MEMORY[0x111A95148](v195);
+    MEMORY[0x111A951FC](v196);
+    v197 = MEMORY[0x109E3C340]();
+    v198 = MEMORY[0x109E3C388](v197);
+    v199 = MEMORY[0x109E0EBFC](v198);
+    v200 = MEMORY[0x109E3C37C](v199);
+    for ( i = 1; ; ++i )
+    {
+      v202 = MEMORY[0x109E3C370](v200);
+      if ( i >= v202 )
+        break;
+      v203 = MEMORY[0x109E3C360]();
+      v204 = MEMORY[0x111A95148](v203);
+      v205 = MEMORY[0x111A951FC](v204);
+      v206 = MEMORY[0x109E0EB50](v205);
+      v207 = MEMORY[0x109E3A914](v206);
+      v208 = MEMORY[0x111A95148](v207);
+      MEMORY[0x111A951FC](v208);
+      v209 = MEMORY[0x109E3C34C]();
+      v210 = MEMORY[0x109E0DD6C](v209);
+      v200 = MEMORY[0x109E0C5BC](v210);
+    }
+  }
+  else
+  {
+    v211 = MEMORY[0x109E37648]();
+    v212 = MEMORY[0x109E3C340](v211);
+    v202 = MEMORY[0x109E198B8](v212);
+  }
+  v213 = MEMORY[0x109E141C8](v202);
+  v214 = MEMORY[0x111A95148](v213);
+  v215 = MEMORY[0x111A951FC](v214);
+  v216 = MEMORY[0x109E3C330](v215);
+  v217 = MEMORY[0x111A95148](v216);
+  v218 = MEMORY[0x111A951FC](v217);
+  v219 = MEMORY[0x109E3C320](v218);
+  v220 = MEMORY[0x109E3C298](v219);
+  v221 = MEMORY[0x109E0C5BC](v220);
+  v222 = MEMORY[0x109E0DD6C](v221);
+  v223 = MEMORY[0x109E141C8](v222);
+  v224 = MEMORY[0x111A95148](v223);
+  v225 = MEMORY[0x111A951FC](v224);
+  v226 = MEMORY[0x109E395DC](v225);
+  v227 = MEMORY[0x111A95148](v226);
+  v228 = MEMORY[0x111A951FC](v227);
+  v229 = MEMORY[0x109E3C310](v228);
+  v230 = MEMORY[0x109E3C298](v229);
+  v231 = MEMORY[0x109E0C5BC](v230);
+  v232 = MEMORY[0x109E0DD6C](v231);
+  v233 = MEMORY[0x109E141C8](v232);
+  v234 = MEMORY[0x111A95148](v233);
+  MEMORY[0x111A951FC](v234);
+  v235 = MEMORY[0x109E3C304]();
+  v236 = MEMORY[0x111A95148](v235);
+  v237 = MEMORY[0x111A951FC](v236);
+  v238 = MEMORY[0x109E3C2F4](v237);
+  v239 = MEMORY[0x109E3C298](v238);
+  v240 = MEMORY[0x109E0C5BC](v239);
+  v241 = MEMORY[0x109E0DD6C](v240);
+  v242 = MEMORY[0x109E141C8](v241);
+  v243 = MEMORY[0x111A95148](v242);
+  MEMORY[0x111A951FC](v243);
+  v244 = MEMORY[0x109E330CC]();
+  v245 = MEMORY[0x111A95148](v244);
+  MEMORY[0x111A951FC](v245);
+  v246 = MEMORY[0x109E13060]();
+  v247 = MEMORY[0x109E3C298](v246);
+  v248 = MEMORY[0x109E0C5BC](v247);
+  v249 = MEMORY[0x109E0DD6C](v248);
+  v250 = MEMORY[0x109E141C8](v249);
+  v251 = MEMORY[0x111A95148](v250);
+  v252 = MEMORY[0x111A951FC](v251);
+  v253 = MEMORY[0x109E3C2E4](v252);
+  v254 = MEMORY[0x111A95148](v253);
+  v255 = MEMORY[0x111A951FC](v254);
+  v256 = MEMORY[0x109E3C2D4](v255);
+  v257 = MEMORY[0x109E3C298](v256);
+  v258 = MEMORY[0x109E0C5BC](v257);
+  v259 = MEMORY[0x109E0DD6C](v258);
+  v260 = MEMORY[0x109E141C8](v259);
+  v261 = MEMORY[0x111A95148](v260);
+  v262 = MEMORY[0x111A951FC](v261);
+  v263 = MEMORY[0x109E3C2C4](v262);
+  v264 = MEMORY[0x111A95148](v263);
+  v265 = MEMORY[0x111A951FC](v264);
+  v266 = MEMORY[0x109E13048]();
+  v267 = MEMORY[0x109E3C298](v266);
+  v268 = MEMORY[0x109E0C5BC](v267);
+  v269 = MEMORY[0x109E0DD6C](v268);
+  v270 = MEMORY[0x109E141C8](v269);
+  v271 = MEMORY[0x111A95148](v270);
+  MEMORY[0x111A951FC](v271);
+  v272 = MEMORY[0x111A95148]();
+  v273 = MEMORY[0x111A951FC](v272);
+  v274 = MEMORY[0x109E2F580](v273);
+  v275 = MEMORY[0x109E0DD6C](v274);
+  if ( v265 )
+  {
+    v276 = MEMORY[0x109E141C8](v275);
+    v277 = MEMORY[0x111A95148](v276);
+    v278 = MEMORY[0x111A951FC](v277);
+    v279 = MEMORY[0x109E32694](v278);
+    v280 = MEMORY[0x111A95148](v279);
+    v265 = MEMORY[0x111A951FC](v280);
+    v281 = MEMORY[0x109E1303C]();
+    v282 = MEMORY[0x109E3C298](v281);
+    v283 = MEMORY[0x109E0C5BC](v282);
+    v275 = MEMORY[0x109E0DD6C](v283);
+  }
+  v284 = MEMORY[0x109E141C8](v275);
+  v285 = MEMORY[0x111A95148](v284);
+  MEMORY[0x111A951FC](v285);
+  v286 = MEMORY[0x111A95148]();
+  v287 = MEMORY[0x111A951FC](v286);
+  v288 = MEMORY[0x109E2F580](v287);
+  v289 = MEMORY[0x109E0DD6C](v288);
+  if ( v265 )
+  {
+    v290 = MEMORY[0x109E141C8](v289);
+    v291 = MEMORY[0x111A95148](v290);
+    v292 = MEMORY[0x111A951FC](v291);
+    v293 = MEMORY[0x109E32694](v292);
+    v294 = MEMORY[0x111A95148](v293);
+    MEMORY[0x111A951FC](v294);
+    v295 = MEMORY[0x109E13020]();
+    v296 = MEMORY[0x109E3C298](v295);
+    v297 = MEMORY[0x109E0C5BC](v296);
+    v289 = MEMORY[0x109E0DD6C](v297);
+  }
+  v298 = MEMORY[0x109E3C2B4](v289);
+  v299 = MEMORY[0x109E3C2A8](v298);
+  v300 = MEMORY[0x111A95148](v299);
+  v301 = MEMORY[0x111A951FC](v300);
+  v302 = MEMORY[0x109E3A81C]();
+  v303 = MEMORY[0x111A95148](v302);
+  v304 = MEMORY[0x111A951FC](v303);
+  MEMORY[0x109E36B10]();
+  v305 = MEMORY[0x111A95148](v301);
+  v306 = MEMORY[0x111A951FC](v305);
+  v307 = MEMORY[0x111A95148](v301, MEMORY[0x11C14FB80]);
+  v308 = MEMORY[0x111A951FC](v307);
+  if ( v304 )
+    MEMORY[0x109E3C298]();
+  if ( v306 )
+  {
+    v309 = MEMORY[0x109E14E8C]();
+    MEMORY[0x109E3C288](v309);
+  }
+  if ( v308 )
+    MEMORY[0x109E3C278]();
+  v310 = MEMORY[0x109E32418](*(_QWORD *)(v329 + 2584));
+  if ( (_DWORD)v310 )
+  {
+    v311 = MEMORY[0x111A95148](*(_QWORD *)(v329 + 2584), v330);
+    MEMORY[0x111A951FC](v311);
+    v312 = MEMORY[0x109E3C26C]();
+    v313 = MEMORY[0x111A95148](v312);
+    MEMORY[0x111A951FC](v313);
+    v314 = MEMORY[0x109E3C260](v4);
+    v315 = MEMORY[0x109E0E964](v314);
+    v316 = MEMORY[0x109E0EBFC](v315);
+    v317 = MEMORY[0x109E2342C](v316);
+    v318 = MEMORY[0x109E3C254](v317);
+    v310 = MEMORY[0x109E198B8](v318);
+  }
+  v319 = MEMORY[0x109E24C70](v310);
+  v320 = MEMORY[0x109E38ACC](v319);
+  v321 = MEMORY[0x109E0DBBC](v320);
+  v322 = MEMORY[0x109E0C5BC](v321);
+  v323 = MEMORY[0x109E0DD6C](v322);
+  v324 = MEMORY[0x109E0E950](v323);
+  v325 = MEMORY[0x109E16E1C](v324);
+  v326 = MEMORY[0x109E16E14](v325);
+  v327 = MEMORY[0x109E0DEDC](v326);
+  v328 = MEMORY[0x109E0C58C](v327);
+  MEMORY[0x109E3C248](v328);
+  JUMPOUT(0x111A95010LL);
+}
+
+```
+
+`reports/发现记录.md`:
+
+```md
+# 发现记录 —— 字节系越狱/注入检测深化还原
+
+> 依据《字节系越狱检测_深化分析方案_v2.md》推进；Frida 全程只读（仅 onEnter/onLeave 读参数、读返回、backtrace、dump 内存），未修改任何返回值或字段。
+> 设备：iPhone 11 Pro Max（`iPhone12,5`，`11pm`，UDID `<REDACTED-UDID>`），**iOS 26.0**，roothide
+> Frida：host 17.7.3 ↔ device **17.23.3**
+
+---
+
+## M0 前置三确认 + 环境实测
+
+| # | 项 | 结果 |
+|---|---|---|
+| 1 | 样本可读 | ✅ `<本地工作目录>/work/fanqie/Payload/Reading.app/Reading`（508,327,856 B） |
+| 2 | 设备/进程 | ✅ 番茄 `com.dragon.read`，可执行名 **`Reading`**；冷启动时未运行，按确认采用 **spawn** |
+| 3 | `Reading.__TEXT` vmaddr | ✅ `0x100000000`（fileoff 0），`__text` @ `0x100008000`；换算 `runtime = Module.base + (VA - 0x100000000)` |
+
+### 环境坑（方案模板照抄会失败）
+
+1. **Frida 17.23.3 已移除 `Module.getExportByName` / `Process.findExportByName`**（实测三者均 `undefined`）。必须用 `Module.getGlobalExportByName`。方案 §2.1/§2.2/§2.3 的脚本原样跑会直接 `TypeError`。
+2. **attach 时机**（实测三档）：
+   - 对 spawn 暂停态 attach → `ProcessNotRespondingError: unexpected early end-of-stream`
+   - resume 后 0.9s 内 attach → 进程约 1s 被杀
+   - **spawn → resume → 等 ≈3–4s → attach → 稳定**（本次全部数据均用此档）
+3. Python `create_script` 不带 ObjC bridge；需要 `ObjC.classes` 时按环境清单注入 `frida_tools/bridges/objc.js`。
+
+### 对方案的修正
+
+| 方案原文 | 实测 |
+|---|---|
+| `str_decrypt_routine = 0x107C16440` | 是分支岛；真身 `0x109F8B83C`（变体1）、`0x109F778F4`（变体2） |
+| `sysctl_family_obf = 0x10600AFC0` | 该地址属**红果**；番茄侧为 `0x10195C60C` / `0x105B4AA90` |
+| roothide / iOS 27.0 | 实测 **iOS 26.0** |
+
+---
+
+## M1 —— 地基：**通过**
+
+`spawn → settle 4s → attach` 后对 8 个种子做「运行期字节 == 文件字节」比对：
+
+| 种子 | VA | 结果 |
+|---|---|---|
+| probe_fopen5 | 0x10250F8C4 | ✅ `ffc301d1fa6702a9` |
+| pred_inject_substr | 0x1083E1854 | ✅ `fd7bbfa97fac6894` |
+| sandbox_statfs93_obw | 0x10A09F79C | ✅ `ff4322d1a7def597` |
+| CJPay_isJailBreak | 0x1074B6FF4 | ✅ `fd7bbfa96055a594` |
+| SSDevice_isJailbroken | 0x11016FF14 | ✅ `921e7516861e7516` |
+| IESEC_diag_assemble | 0x108AC4A00 | ✅ `fd7bbfa914204d94` |
+| dec_v1_body | 0x109F8B83C | ✅ `ff8300d1fd7b01a9` |
+| island_dec_stub | 0x107C16440 | ✅ `ffd48d145a318e14` |
+
+**8/8 一致**。运行期 `base = 0x104c18000`（slide `0x4c18000`），偏移换算成立。
+
+### B 类问题（已解决）：ObjC 方法 IMP 系统性 +8 偏差
+
+第一次 hook 出现两个 `unable to intercept`（`0x10A09EDB4`、`0x1074B7130`），并用 ObjC bridge 取运行期权威 IMP 后定位到根因：**相对方法列表的三个偏移各自相对于「自身字段地址」**（name@+0、types@+4、imp@+8），而静态解析器把 imp 当成「相对于条目起点」，导致全体 IMP 少 8 字节。
+
+修正后与运行期逐条比对：
+
+| 方法 | 修正后静态 | 运行期 | |
+|---|---|---|---|
+| CJPayEnvManager.isJailBreak | 0x1074B6FF4 | 0x1074B6FF4 | ✅ |
+| CJPayEnvManager.isSafeEnv | 0x1074B6FDC | 0x1074B6FDC | ✅ |
+| CJPayEnvManager.hasJailBreakFiles | 0x1074B7034 | 0x1074B7034 | ✅ |
+| CJPayEnvManager.canOpenCydia | 0x1074B70B8 | 0x1074B70B8 | ✅ |
+| CJPayEnvManager.canGetAllAppName | 0x1074B7138 | 0x1074B7138 | ✅ |
+| HMDUploadHelper.headerInfo | 0x10A09EDBC | 0x10A09EDBC | ✅ |
+| HMDInfo.isEnvAbnormal | 0x10A09F728 | 0x10A09F728 | ✅ |
+| HMDInfo.pixelSigString | 0x10A09F8AC | 0x10A09F8AC | ✅ |
+| HMDInfo.startTime | 0x108409008 | 0x108409008 | ✅ |
+
+**9/9 一致。** 副作用：原报告里所有 `-[Class method]` 的 IMP 地址都需 **+8** 修正（例如 `-[CJPayEnvManager isJailBreak]` 0x1074B6FEC → **0x1074B6FF4**）。`SSDevice.isJailbroken` 的 IMP 0x11016FF14 也应按 +8 复算为 **0x11016FF1C**（其 body 仍为 `b 0x109eb795c` 岛）。
+
+---
+
+## 目标 A —— fopen 五探针的调用者与触发时机：**已证实（静态腿结论被动态改写）**
+
+### A-1 静态腿：`probe_fopen5` 是**死代码**
+
+对 `0x10250F8C4` 做三种编码的全量引用搜索，**全部 0 命中**：
+
+| 搜索 | 覆盖 | 命中 |
+|---|---|---|
+| `ADRP+ADD/LDR` 物化 | fanqie 全 `__text`（296 MB，4,960,391 条） | 0 |
+| chained-fixup 指针槽 | 全文件 | 0 |
+| 相对指针 `field_addr + int32/int64` | 全 `__TEXT`/`__DATA_CONST`/`__DATA` | 0 |
+
+### A-2 动态腿：一次真实的会话里 `probe_fopen5` **调用 0 次**
+
+`probeN = 0`（22 s 会话，含 `isEnvAbnormal` 被调用 20+ 次）。静态"零引用"与动态"零执行"互证 → **`0x10250F8C4` 在本版本上是死代码**。
+
+### A-3 真正跑在链上的是 `statfs` 版，且调用链完整打出
+
+backtrace（Frida 权威符号化）给出原报告缺的那条链：
+
+```
++[SSLaunchMonitor markFirstClassLoad] / HMD 上报路径
+ └─ +[HMDTTMonitorHelper reportHeaderParamsWithInjectedInfo:]      （性能上报）
+ └─ -[HMDExceptionModuleReporter _reportExceptionData]             （异常上报）
+ └─ +[HMDConfigHelper requestHeaderFromProvider:]                  （远程配置拉取）
+      └─ -[HMDUploadHelper headerInfo]          0x10A09EDBC
+           └─ -[HMDInfo isEnvAbnormal]          0x10A09F728
+                └─ 0x10A09F744  →  0x10A09F764（dispatch_once 包裹）
+                     └─ 0x10A09F79C  sandbox_statfs93_obw
+```
+
+- **触发时机**：不是"启动时一次"，而是**每次构造 HMD 上报 header 时**（三条并列路径：性能上报 / 异常上报 / 配置拉取），沙盒测试结果被 `_dispatch_once_callout` 缓存复用。
+- 结论：**已证实**；对原报告影响 = **修正**（原报告 §3.1.2 把 `fopen` 五探针当作"真正跑在请求路径上的探针"，实际在跑的是 `statfs` 版；`fopen` 版本在本 build 未被调用）。
+
+---
+
+## 目标 B —— sysctl 反调试：**形态已证实，实测未命中**
+
+### 动态证据（mib 真值）
+
+```
+SYSCTL_NEW  mib=[1, 14, 1, 24794]  namelen=4  ret=0  sizeptr=648
+   bt: 0x106c873f4  ←  0x106c8636c  ←  _dispatch_once_callout
+       ← 0x109f4c9f0  ←  +[SSLaunchMonitor markFirstClassLoad]  ←  libobjc!load_images
+```
+
+- `[1,14,1,24794]` = `CTL_KERN / KERN_PROC / KERN_PROC_PID / getpid()` → **经典 P_TRACED 探针形态**（`24794` 即当次进程 pid）。
+- 返回结构 648 B；按 arm64 `kinfo_proc` 布局，`p_flag` 位于 **0x20**（同结构内 `p_pid`@0x28 实测 = `0x60da` = 24794，与 pid 完全吻合，反证布局正确）。
+- **`p_flag = 0x04004004`，`P_TRACED(0x800)` 未置位**。
+
+### 交叉印证
+
+- 一致：静态侧「`_ptrace` 未导入、只有 `sysctl`」与动态侧「只出现 KERN_PROC_PID」吻合。
+- **新结论（动态独有）**：Frida 的注入方式**不设置 `P_TRACED`**，所以这条探针在 Frida attach 下读到的就是"未被调试"。
+- 其余 `sysctl` 调用全是 `uname()` 内部（mib `[1,1]/[1,10]/[1,2]/[1,4]/[6,1]`）与 `sysctlbyname` 的设备指纹采集（`kern.osproductversion`、`hw.machine`、`kern.osversion`、`hw.memsize`、`hw.cpufamily/cputype/cpusubtype/ncpu`）、以及 `hw.ncpu`/`processorCount`。
+- 结论：**已证实**（形态 + 偏移 + 实测值）。原报告 §3.4 的"推测 P_TRACED"升级为证实；同时否证"该探针能发现 Frida"。
+- 未解释项：启动窗口内 attach 导致进程被杀，与 `P_TRACED` 无关（实测未置位），暂标 **待查**。
+
+---
+
+## 目标 C —— statfs 真实用途：**原报告推测被否证**
+
+```
+STATFS  path=/private/var  ret=0  f_flags=0x0  RDONLY=false      （多次重复）
+```
+
+- 被探测的是 **`/private/var`**，且代码路径未体现对 `MNT_RDONLY(0x1)` 的判定（`f_flags=0`，`&1 = 0`）。
+- 结论：**已证实**——散落的 `statfs` **不是**根分区 remount 判定。对原报告影响 = **修正**（§3.5 的 `statfs` 猜测删除）。
+- `statfs` 在 `sandbox_statfs93_obw` 里的用途另有实测（见目标 H）。
+
+---
+
+## 目标 H —— roothide 下各探针命中实况（**本次最硬的实测表**）
+
+| 探针 | 静态预期 | **本机 roothide 实测** | 结论 |
+|---|---|---|---|
+| `fopen` `/bin/bash` 等 5 路径（0x10250F8C4） | 恒 miss | **函数零调用**（probeN=0） | 死代码，不参与判定 |
+| dyld 5 子串（0x1083E1854） | 不覆盖 ElleKit → 恒假 | **1118 次调用，1 次命中** | **部分命中**，非全漏 |
+| `statfs` × 93 路径（0x10A09F79C） | 多数 miss | 已执行（dispatch_once 内） | 已跑通，逐条命中数待统计 |
+| `/hmd_tmp_file` 越界写 | 可能仍命中 | **`open_dprotected_np` → fd = -1（失败）** | **未命中** |
+| `canGetAllAppName` | 可能仍命中 | 已成功挂钩（0x1074B7138），返回值待采 | 待测 |
+
+**注入谓词的实测细节**（最有价值）：
+
+- 被检查的镜像名里出现 roothide 全套库，**5 条子串一条都不匹配**：
+  ```
+  /usr/lib/systemhook-4C4DC0C67115CBA8.dylib
+  .../.jbroot-4C4DC0C67115CBA8/usr/lib/roothideinit.dylib
+  .../.jbroot-4C4DC0C67115CBA8/usr/lib/roothidepatch.dylib
+  .../.jbroot-4C4DC0C67115CBA8/usr/lib/libroothide.dylib
+  ```
+- 但**命中了一条**：
+  ```
+  .../.jbroot-4C4DC0C67115CBA8/usr/lib/TweakInject/FakeTweak.dylib   → hit = true
+  ```
+  原因：路径含 `TweakInject` 子串（名单第 3 条）。这是新发现——**旧名单在 roothide 上是被"目录名巧合"命中的**，不是被库名命中。
+- `-[HMDInfo isEnvAbnormal]`（0x10A09F728）实测：**先返回 0，`dispatch_once` 内沙盒测试完成后稳定返回 1**。
+  按静态指令（`0x10A09F804: tbnz w0,#0x1f` → 失败置 1）可知：`/hmd_tmp_file` 打开失败 → 缓存值 1 → `isEnvAbnormal` 返回 1。
+  **极性待查**：返回值 1 究竟表示"环境异常"还是"无法越界（沙盒正常）"，需要看调用方 `headerInfo` 如何写入上报字段，暂标 **待查**，不据此下"越界写探针命中/未命中"的结论。
+
+---
+
+## 目标 D（部分）—— 字符串解密
+
+- 算法：变体1 `plain = ror32(cipher ^ 0xDEADBEEF, 23)`（逐 4 字节小端）；变体2 为链接式 `plain[i] = cipher[i] ^ cipher[i-1] ^ key`。
+- 动态 dump（hook `0x109F8B83C` 的 onLeave，只读 `out` 缓冲）解出前 7 条：
+  ```
+  lstat / fopen / getifaddrs / CCCryptorCreateWithMode / CFBundleIdentifier / libdyld.dylib / CFNetwork
+  ```
+  → **该池同时承担 dlsym 符号名表**，这解释了为什么"路径表"之外还有大量加密串。
+- 静态离线批解 `__const` 已出的 roothide 明文见上一轮（`com.roothide.manager`、`com.opa334.Dopamine.roothide`、`Documents/bootstrap.tar`）。
+- 动态只解出被真正调用的 7 条（启动 4s 后才挂钩，更早的解密未捕获）→ **静态批解 + 动态 dump 必须合并**，与方案判断一致。
+
+---
+
+## 待办
+
+| 里程碑 | 状态 |
+|---|---|
+| M1 地基 | ✅ 已通过（8/8 字节比对 + IMP 校准 9/9） |
+| M2 目标 A | ✅ 已证实（链已还原；`probe_fopen5` 判为死代码） |
+| M3 目标 B | ✅ 形态证实（mib + 0x20 偏移 + 0x800 未置位） |
+| M3 目标 C | ✅ 已否证（`/private/var` + `f_flags=0`） |
+| M4 目标 D | 部分（算法已还原；全池 + 消费者表待续） |
+| M5 目标 G | 未开始（`appendParamTo:` 真实字段） |
+| M6 目标 H | 部分（表已出 4 行；`canGetAllAppName` 返回值、93 路径命中数待补） |
+| M7 横向 | 未开始（红果/抖音同构，改基址即可） |
+| M8 E/F | 未开始 |
+
+---
+
+## 目标 A 深化（第二轮，静态）
+
+### A-4 五探针家族一共有 4 个变体，全部零静态引用
+
+指纹 = 直接引用那 5 条路径字符串。全库扫描（`__cstring` 边界对齐）得到：
+
+| 函数 | 引用到的路径 | 结构 |
+|---|---|---|
+| `0x10250F8C4` | 5 条全有 | `fopen(path,"r")` ×5 + 短路，带开关全局 `0x11C5A46E8` |
+| **`0x10264A018`** | 5 条全有 | **同构第二份**，开关全局换成 `0x11C5A49E0`（此前只分析了 copyA） |
+| `0x105AC08E8` | 仅 `/Applications/Cydia.app` | 单路径变体 |
+| `0x1074AC014` | 仅 `.../MobileSubstrate.dylib` | 单路径变体 |
+
+对 4 个变体的引用搜索（**这次把三个可执行节全扫了**）：
+
+| 编码 | 覆盖 | 命中 |
+|---|---|---|
+| `ADRP+ADD/LDR` 物化 | `__text`（296 MB / 4.96 M 条物化） | 0 |
+| chained-fixup 指针槽 | 全文件 | 0 |
+| 相对指针 `field+int32/int64` | `__TEXT`/`__DATA_CONST`/`__DATA` | 0 |
+| **`BL`/`B` 分支** | **`__stubs`（5,232 条）+ `__objc_stubs`（18,848 条）** | **0** |
+
+结论升级：不是"没找对表"，而是**三个可执行节、四种编码方式里都不存在指向这 4 个函数的引用**。它们的入口只能由运行期计算得到（解密表 / 平坦化分发）。
+
+### A-5 「文件探测」其实有第三条实现：`NSFileManager fileExistsAtPath:`
+
+`-[CJPayEnvManager hasJailBreakFiles]`（0x1074B7034，本次已按 +8 校准）反汇编是一个**数组遍历 + 逐项判定**：
+
+```
+0x1074b7034: stp   x29, x30, [sp, #-0x10]!
+0x1074b7038: bl    #0x109e0dfcc
+0x1074b703c: bl    #0x1074b7374          ; 取「路径数组」的全局基址
+0x1074b7048: ldr   x20, [x9, #0xe28]     ; selref: defaultManager        (NSFileManager)
+0x1074b7050: ldr   x21, [x9, #0xbe0]     ; selref: objectAtIndexedSubscript:
+0x1074b7058: ldr   x22, [x9, #0xec0]     ; selref: fileExistsAtPath:
+0x1074b7060: mov   x24, x8               ; 索引/计数
+0x1074b7068: bl    #0x1074b738c          ; cmp x0,x24
+0x1074b706c: b.ls  #0x1074b70ac          ; 遍历结束
+0x1074b70a4: add   x8, x24, #1
+0x1074b70a8: cbz   w28, #0x1074b7060     ; 循环
+0x1074b70b0: cset  w0, hi                ; 返回值
+```
+
+selref 实测解码（keyscan 线性扫描 + 槽解析）：`defaultManager` / `objectAtIndexedSubscript:` / `fileExistsAtPath:`。
+
+**这就是原报告一直没落地的「路径存在性判定」本体**：判定用的是 `-[NSFileManager fileExistsAtPath:]`，不是 `fopen`、也不是 `access`。于是"文件系统探测"在本 App 里共有三条独立实现：
+
+| 实现 | 位置 | 判据 | 触发场景（已证/待证） |
+|---|---|---|---|
+| `fopen` × 5 | 0x10250F8C4 / 0x10264A018 | `FILE*` 非空 | 零引用、动态零调用 → 疑死代码 |
+| `statfs` × 93 | 0x10A09F79C | `statfs()` 返回 | HMD 上报 header（**已证**） |
+| `fileExistsAtPath:` × N | 0x1074B7034 | BOOL | CJPay 支付/商城链路（**待动态确认**） |
+
+### A-6 `appendParamTo:` 的静态骨架：结果先 base64 再按 key 写入参数
+
+`-[CJPayEnvManager appendParamTo:]`（**0x1074B71B8**，+8 修正前写作 0x1074B71B0）用到的选择子（静态提取）：
+
+| 调用点 | 选择子 |
+|---|---|
+| 0x1074B7204 | `base64EncodedStringWithOptions:` |
+| 0x1074B72A4 | `cj_setObject:forKey:` |
+| 0x1074B731C | `canOpenURL:` |
+
+即：越狱判定结果 → 转成字符串 → **base64 编码** → 由 `cj_setObject:forKey:` 写入参数字典。**key 本身是运行期入参（不是常量）**，静态拿不到，必须动态 dump —— 这正是 M5 的目标。
+
+### A-7 仍未解决（阻塞）
+
+| 问题 | 需要的动态证据 |
+|---|---|
+| 这 4 个 fopen 变体是否被运行期注册进某张表 | `Memory.scan` 模块内搜函数指针（脚本已备：`dyn/deepA.js`） |
+| 支付链路是否真的走 `hasJailBreakFiles` | hook 0x1074B7034 + 进入支付页 |
+| `isEnvAbnormal` 极性 | dump `headerInfo` 返回字典，看字段名与值 |
+| `appendParamTo:` 的 key | hook 0x1074B71B8，dump 目标字典 |
+
+**当前阻塞：设备已再次锁屏**（`spawn` 报 `the device was not, or could not be, unlocked`；对正在运行的红果 attach 也 `TransportError: timeout`）。解锁后可一次性把上表四项跑完。
+
+---
+
+## 目标 A 深化（第三轮，动态）—— 死代码结论**三重证据闭合**
+
+设备解锁后补跑（`dyn/deepA2.js`，spawn → settle 3.5s → attach → 观测 45s）：
+
+| 检查 | 方法 | 结果 |
+|---|---|---|
+| 运行期是否登记函数指针 | `Memory.scanSync` 扫本模块**所有非可执行段**（23,674,880 B）搜 4 个探针指针 | **0 命中**（4 个模式都没找到） |
+| 是否被调用 | hook 4 个变体（`0x10250F8C4 / 0x10264A018 / 0x105AC08E8 / 0x1074AC014`） | **各 0 次调用**（45 s） |
+| 底层 `fopen` 是否探过那 5 条路径 | hook `fopen`，日志过滤 `bash|cydia|substrate|sshd|apt|jbroot|hmd_tmp` | 仅 `.../Reading.app/Frameworks/CydiaSubstrate.framework`（NSBundle 加载框架目录，`hit=false`），**5 条探针路径一次都没出现** |
+| 支付侧是否走 CJPay | hook `isJailBreak / isSafeEnv / hasJailBreakFiles / canOpenCydia / canGetAllAppName` | **全部 0 次**（未进支付页） |
+
+**结论（已证实）**：`fopen` 五探针家族在本 build 上是**死代码**——代码节无分支引用、数据段无指针登记、运行期零调用，三重独立证据一致。
+
+于是文件系统探测的**实际存活实现只有两条**：
+1. `statfs` × 93 → HMD 上报链路（已证，`0x10A09F79C`）
+2. `-[NSFileManager fileExistsAtPath:]` × N → CJPay 链路（`0x1074B7034`，未进支付页未触发）
+
+---
+
+## 目标 G/M5（部分完成）—— HMD 上报 header 的**真实字段集**
+
+hook `-[HMDUploadHelper headerInfo]`（0x10A09EDBC）在 return 处 dump 返回字典（ObjC bridge，只读），得到 **34 个字段**：
+
+```
+device_id=<REDACTED>   install_id=<REDACTED>   uid=<REDACTED>
+uid_type=12  aid=1967  package_name=com.dragon.read  channel=App Store
+app_version=7.4.1  update_version_code=7.4.1.32  crash_version=1.0
+os=iOS  os_version=26.0  device_model=iPhone12,5  is_mac_arm=0
+resolution=1242*2688  device_performance_level=3  access=WIFI
+region=CN  language=zh  timezone=8  carrier=--  carrier_region=--  carrier_region1=--
+mcc_mnc=6553565535  is_upgrade_user=1
+heimdallr_version=34338756_0.8.105.0-rc.5  heimdallr_version_code=8105
+hmd_build_uuid=fac0478511281ba751d78079338e0460
+hmd_commit_id=5a118912c0cd958148dfcb900e69c9972fb7f975  hmd_job_id=(空)
+appName=番茄小说  display_name=番茄小说
+is_env_abnormal=0 / 1
+```
+
+### `is_env_abnormal` 极性定案（此前标「待查」）
+
+- 同一会话内先后抓到两次 header：
+  - 第一次（`dispatch_once` 尚未跑完）：**`is_env_abnormal = "0"`**
+  - 之后每次：**`is_env_abnormal = "1"`**
+- 与 `-[HMDInfo isEnvAbnormal]`（0x10A09F728）返回值完全同步：`ret 0` → `ret 1`。
+- 静态指令侧：`0x10A09F800 open_dprotected_np("/hmd_tmp_file", 0x202)` → `0x10A09F804 tbnz w0,#0x1f` → 失败置 **1**、成功置 **0**；动态侧实测 **fd = -1（失败）**。
+- 因此：**本机 roothide 上 `/hmd_tmp_file` 越界写失败 → 缓存 1 → `is_env_abnormal=1` 上报**。
+- **尚未解释**：按该指令，"写失败 → 异常"意味着**普通未越狱设备同样会报 1**。这要么是设计如此（字段语义不是"越狱"），要么字段在后端另有解释。此项标注为 **待查（需要更多设备/对照组）**，本文只陈述实测与指令，不推断后端含义。
+
+### 未完成
+
+`-[CJPayEnvManager appendParamTo:]`（0x1074B71B8）在本次会话中**未被调用**（未进支付/商城页）。它的静态骨架已知（`base64EncodedStringWithOptions:` → `cj_setObject:forKey:`），但**真实 key 仍需在支付流程中 dump**。这需要人工在设备上进入支付页——属于交互操作，本次未做。
+
+---
+
+## 目标 H 补全 —— roothide 下 `statfs` × 93 路径实测：**0 命中**
+
+方法：把静态解出的 93 表项（去重后 **50 条**）作为白名单传给 Frida，hook `statfs` 只在路径命中白名单时记录返回值。单次会话（spawn → settle 3s → attach → 观测 24s）：
+
+```
+BL_DUMP: statfs 总调用 2716 次
+         黑名单路径探测 434 次（50 条唯一路径全部被探过）
+         黑名单命中 (ret==0) = 0        hitList = []
+```
+
+逐条证据：`/usr/sbin/frida-server`、`/.cydia_no_stash`、`/jb/lzma`、`/jb/offsets.plist`、`/etc/apt/sources.list.d/{electra,sileo}.list`、`/Library/MobileSubstrate/MobileSubstrate.dylib`、`/Applications/Cydia.app`、`/bin/bash`、`/usr/lib/libjailbreak.dylib` … **全部 statfs 返回 -1**。
+
+即：**这 50 条经典路径在本机 roothide 上一个都不存在**（`/bin/bash` 等确实已迁到 `.jbroot-<hash>/` 下），所以 statfs 这一路在 roothide 上等于空转。
+
+### 目标 H 最终表（roothide / iOS 26.0 实测）
+
+| 探针 | 实现位置 | 实测 | 结论 |
+|---|---|---|---|
+| `fopen` × 5 路径 | 0x10250F8C4 / 0x10264A018（+2 个单路径变体） | 零引用、零登记、**零调用** | **死代码** |
+| dyld 5 子串 | 0x1083E1854 | 1118 次调用 / **1 次命中** | 被 `.../TweakInject/FakeTweak.dylib` 的**目录名**撞中；`systemhook` / `roothideinit` / `roothidepatch` / `libroothide` 全部漏检 |
+| `statfs` × 93 路径 | 0x10A09F79C | 434 次探测 / **0 命中** | 路径全 miss |
+| `/hmd_tmp_file` 越界写 | 0x10A09F79C 内 | `open_dprotected_np` → **fd=-1** | 写失败 → `is_env_abnormal=1` |
+| `fileExistsAtPath:` × N | 0x1074B7034（CJPay） | 未触发（无第三方支付入口） | 未测 |
+| `canGetAllAppName` | 0x1074B7138 | 未触发（同上） | 未测 |
+
+**综合判断**：本机 roothide 上真正"看到"越狱的只有两条 ——
+1. 注入子串**碰巧**命中 `TweakInject` 目录名（不是库名）；
+2. `/hmd_tmp_file` 写失败 → `is_env_abnormal=1`（但按该指令，普通设备同样会报 1，语义待查）。
+
+`statfs` 93 路径、`fileExistsAtPath:` 名单、`systemhook/libellekit` 这一整类**在 roothide 上全部失效**。
+
+---
+
+## 目标 M5 —— CJPay 通道确认**无可用入口**（结案）
+
+用户在设备上核实：**番茄小说与抖音的充值/会员通道全部是 App Store 内购，没有支付宝/微信/抖音支付**。因此：
+
+- `CJPayEnvManager` 五个方法在整个会话中调用次数 = **0**
+- `appendParamTo:` 从未执行 → 其**真实 key 无法通过动态获取**
+- 静态已知：`base64EncodedStringWithOptions:` → `cj_setObject:forKey:`（key 是运行期入参）
+- 结论：**未获取**（缺：第三方支付渠道入口）。已获取的替代证据是 HMD 通道的明文 header（34 字段，含 `is_env_abnormal`）。
+
+---
+
+## M7（横向）—— 进行中，遭遇设备掉线（B 类）
+
+### 已完成的静态/地址侧
+
+红果（Eggplant，`com.phoenix.video`）与番茄同构，+8 校准后的地址：
+
+| 符号 | 红果地址 | 番茄对应 |
+|---|---|---|
+| `CJPayEnvManager.isSafeEnv` | 0x1078C83A8 | 0x1074B6FDC |
+| `CJPayEnvManager.isJailBreak` | 0x1078C83C0 | 0x1074B6FF4 |
+| `CJPayEnvManager.hasJailBreakFiles` | 0x1078C8400 | 0x1074B7034 |
+| `CJPayEnvManager.canOpenCydia` | 0x1078C8488 | 0x1074B70B8 |
+| `CJPayEnvManager.canGetAllAppName` | 0x1078C8508 | 0x1074B7138 |
+| `CJPayEnvManager.appendParamTo:` | 0x1078C858C | 0x1074B71B8 |
+| `pred_inject_substr` | 0x10A971840 | 0x1083E1854 |
+| `sandbox_statfs93` | 0x10A4F3B34 | 0x10A09F79C |
+| `HMDInfo.isEnvAbnormal` | 0x10A4F3AC0 | 0x10A09F728 |
+| **`HMDCrashBinaryImage.isEnvAbnormal` / `set...`** | **0x1087908C0 / 0x1087908CC** | 0x1083B9868 / 0x1083B9874 |
+
+**新发现（待实测）**：两款 App 都有 `HMDCrashBinaryImage` 这个"逐镜像记录"类，字段含 `name / path / base / size / uuid / arch / load / **isEnvAbnormal** / isMain`。也就是说 HMD 具备**按单个 dylib 打"环境异常"标记**的能力——这可能才是真正标记"这个镜像是注入库"的机制，比 `HMDInfo` 的整体判定更细粒度。番茄侧还有 `binaryImagesLogStrWithMustIncludeImagesNames:includePossibleJailbreakImage:` 与之呼应。
+
+### 事故与阻塞
+
+第一次尝试（attach 已运行的 Eggplant）失败：`NotSupportedError: unexpected error while probing dyld of target process`（进程在后台被挂起）。
+改为 spawn 后 attach 成功、脚本 `READY`，但**随后整个 JS 运行时无输出**（连 `setInterval` 的 STAT 都没打），进程卡死；driver 的 `detach/kill` 也挂住。
+
+**原因判定（我的实现缺陷）**：在 `-[HMDCrashBinaryImage setIsEnvAbnormal:]` 的 `onEnter` 里调用了 `ObjC.Object(a[2]).path()`。该回调处在 HMD 的对象构造/加锁路径上，Frida 在 hook 内再发起 ObjC 消息 → **重入死锁**。这是明确的操作失误，不是目标的行为。
+
+随后设备**整机从 USB 掉线**：`idevice_id -l` 空、`frida-ps -U` 空、`system_profiler` 里看不到 iPhone。可能是死锁进程导致看门狗/panic 重启，也可能是线/口问题。
+
+**恢复动作（需要用户）**：
+1. 看手机屏幕：黑屏/卡住 → 强制重启（音量+、音量−、长按电源）到 Apple logo；
+2. 若是 roothide（relaxin）重启后，需重新进入越狱状态，否则 `.jbroot-<hash>` 与 `systemhook` 不在位；
+3. 重新插线后确认 `idevice_id -l` 能枚举到 `<REDACTED-UDID>`。
+
+**对已有结论的影响**：无。M1–M6 的证据都在掉线前采集完毕，且都带现场读数。但要注意：**如果为了恢复而重启越狱环境，重新测得的 H 表可能变化**（重启后未重进越狱时，`.jbroot` 与 `systemhook` 不在位，`TweakInject` 那条"巧合命中"可能消失）。所以再测 H 时应记录当时的越狱状态。
+
+### 修正方法（重跑时用）
+
+hook 内**不调用任何 ObjC API**：只记录 `self` 指针、参数值与 backtrace；把 `path/name` 的解析放到 `setTimeout(...,0)` 的延迟回调里，或用 `Process.enqueueTask`。这样避开 reentrancy。
+
+---
+
+# 静态收口（设备掉线后，纯离线推进）
+
+## S1 —— 澄清并修正：加密池其实是「运行期符号名表」，不是路径黑名单
+
+### 解密算法（已完全逆出，含尾部）
+
+变体 1（0x109F8B83C）：
+```
+plain_word[i] = ror32(cipher_word[i] ^ 0xDEADBEEF, 23)      ; 按 4 字节小端整词
+plain_byte[j] = cipher_byte[j] ^ ((0xDEADBEEF >> (8*(j%4))) & 0xFF)  ; 尾部 1~3 字节
+```
+变体 2（0x109F778F4）：`plain_word[i] = cipher_word[i] ^ cipher_word[i-1] ^ 0xDEADBEEF`
+
+关键：**尾部不走整词路径**，而是逐字节异或 key 的低位字节。此前的"最后 1~3 字节乱码"就是漏了这一段。
+
+### 全部 15 个解密调用点（register-lifetime 精确回扫）
+
+| site | 变体 | cipher | len | 明文 |
+|---|---|---|---|---|
+| 0x101961DDC | v2 | 0x112F3C29A | 7 | `dladdr` |
+| 0x101961ECC | v2 | 0x112F3C2C5 | 5 | `stat` |
+| 0x101961F2C | v1 | 0x112F3C2CA | 6 | `lstat` |
+| 0x101961FB4 | v1 | 0x112F3C2D0 | 6 | `fopen` |
+| 0x10196206C | v2 | 0x112F3C2DE | 11 | `__opendir2` |
+| 0x1019622AC | v1 | 0x112F3C312 | 11 | `getifaddrs` |
+| 0x101962394 | v1 | 0x112F3C330 | 24 | `CCCryptorCreateWithMode` |
+| 0x1019623F4 | v2 | 0x112F3C348 | 16 | `CCCryptorUpdate` |
+| 0x10196247C | v2 | 0x112F3C360 | 33 | `CFNetworkCopySystemProxySettings` |
+| 0x1019616A0 | v1 | 0x112F3C390 | 19 | `CFBundleIdentifier` |
+| 0x101961794 | v1 | 0x112F3C3A3 | 7 | `Filter` |
+| 0x101961870 | v1 | 0x112F3C3B2 | 7 | `.plist` |
+| 0x101961DAC | v1 | 0x112F3C3B9 | 14 | `libdyld.dylib` |
+| 0x101962364 | v2 | 0x112F3C430 | 22 | `libcommonCrypto.dylib` |
+| 0x10196244C | v1 | 0x112F3C446 | 10 | `CFNetwork` |
+
+**结论（已证实）**：这一池是 **dlsym / CFNetwork 运行期解析用的符号名表**，不是越狱路径表。
+意义：App 通过 `dladdr`/`dlsym` 路径在运行期解析 `stat / lstat / fopen / __opendir2 / getifaddrs` 等 libc 符号，**因此只看导入表会低估检测面**——这也是为什么 `fopen` 五探针、"零引用"等现象会同时出现。
+
+## S2 —— 规则注册表：`G0` + `CF0…CFD`
+
+函数 `0x10185ADF8`（`sub sp,sp,#0x350`）在栈上构造 14 条 `{key, checker, flag}` 记录：
+
+| key | checker | key | checker |
+|---|---|---|---|
+| `G0`（栈 +0x1E0） | —（驱动/守卫） | `CF9` | 0x10185AC70 |
+| `CF0` | 0x10185A9B0 | `CFA` | 0x10185ACBC |
+| `CF1` | 0x10185A9DC | `CFB` | 0x10185ACF4 |
+| `CF2` | 0x10185AA14 | `CFC` | 0x10185AD2C |
+| `CF3` | 0x10185AA60 | `CFD` | 0x10185AD68 |
+| `CF4` | 0x10185AA98 | `F0`（0x112F1592F） | 0x10185B578 处调用 |
+| `CF5` | 0x10185AAF0 | | |
+| `CF6` | 0x10185AB58 | | |
+| `CF7` | 0x10185ABB0 | | |
+| `CF8` | 0x10185ABE8 | | |
+
+- key 本身就是**明文**（4 字节一个：`CF0\0`、`CF1\0`…），并非密文指针。
+- 每个 checker 是薄包装：`mov w1,#8/#9/#6` 后调 `0x1019A08E4 / 0x1019A08F0`（按字段索引取值），说明背后是个**通用条件求值器**（rule VM），`CF*` 是规则 ID。
+- 语义尚未还原：每个 CF 规则具体比对哪些字段，需要继续追 `0x1019A08E4` 的取值路径。
+
+## S3 —— 重要修正：我此前对「roothide 字符串消费者」的判断是错的
+
+**旧结论（第 2 轮）**：`0x112F15C00–0x112F16000` 有 7 处代码引用（0x10185AF08 等），构成"密文指针 + 校验函数"配对表。
+
+**实测否定**：那批"引用"是我的引用索引的**假阳性**。原因：`XrefIndex` 用「adrp 后 N 条指令内 add/ldr 同寄存器」的窗口匹配，**不感知寄存器被后续 adrp 覆盖**。`0x10185AF04: adrp x8,#0x10185A000` 之后 `0x10185AF08: add x8,x8,#0xc70` 应指向 `0x10185AC70`（checker），却被同时配到上一条 `adrp x8,#0x112F15000` 上，于是凭空得到 `0x112F15C70`。
+
+用**寄存器生命周期感知**的线性扫描重做后：
+
+| 检查 | 结果 |
+|---|---|
+| `adrp+add/ldr` 物化到 `0x112F15C00..0x112F16000`（全 __text，寄存器被覆盖即止） | **0** |
+| 数据段中指向该区间的 chained 指针槽 | **0** |
+| 相对指针（field+int32/int64） | **0**（此前已测） |
+
+而该区间**确实是密文**（原始字节为高熵数据，`0x112F15EEC` 起还有 `00 00` 前缀），我按变体 1 解出 `com.roothide.manager` / `com.opa334.Dopamine.roothide` / `Documents/bootstrap.tar` / `/var/mobile/Library/HTTPStorages` 是**真实存在的加密串**。
+
+**结论**：这些 roothide 特征串**存在，且没有任何静态可解析的消费者**——三种编码方式、三个可执行节、数据段指针全为 0。与 `fopen` 五探针的"死代码"签名完全一致，指向同一种机制：**运行期计算 / 表驱动分发的访问方式**（例如 `adrp` 只取页基址 + 运行期索引寄存器，静态无法解析）。
+**这条必须等设备恢复后用动态确认**（在解密例程返回处 dump，或直接扫内存中的明文字符串）。
+
+### 受影响与未受影响的结论
+
+| 结论 | 是否受影响 |
+|---|---|
+| 5 条注入子串表的消费者 = `0x1083E1854` 谓词 | **不受影响**（已用寄存器级反汇编逐一核对 `0x1083e1868 adrp 0x119055000` + `add #0x38`） |
+| 93 路径表消费者 = `0x10A09F79C` | **不受影响**（同样逐条核对 `0x10a09f7ac adrp 0x119054000` + `add #0xd50`） |
+| CJPay 聚合判定 / selref 解码 | **不受影响**（后来都用反汇编与运行期 ObjC 权威 IMP 交叉验证过 9/9） |
+| "roothide 字符串有 7 处代码引用" | **撤回**，实际 0 处 |
+| "`0x10185ADF8` 是密文指针+校验函数配对表" | **修正**为首字段是明文规则名（`CF0…CFD`） |
+
+## S4 —— 工具修正
+
+`tools/armxref.py` 的窗口式匹配存在"寄存器被覆盖后仍匹配"的假阳性。后续静态引用查询统一改用**寄存器生命周期感知**的线性扫描（`tools/keyscan.py` 的做法），或在 `refs_to` 结果上用 `an.py`/`disasm` 逐条回验。
+
+## S5 —— 静态侧剩余可做项
+
+1. 追 `0x1019A08E4 / 0x1019A08F0` 的字段取值路径，还原 `CF0…CFD` 每条规则的实际比较内容；
+2. 用同样的"页基址 + 运行期索引"模式，反查 roothide 串表可能的索引来源（找 `adrp x?, #0x112F15000` 后出现的 `ldr w?, [x?, x?]` 索引型访问）；
+3. 把 S1 的符号名表在红果/抖音上做同样批解，横向比对（预期同构）。
+
+---
+
+# 设备恢复后的复测（新 jbroot 哈希）
+
+## R0 —— 环境状态
+
+- 设备恢复：iOS 26.0，`frida-ps` 正常，进程数 1121 模块
+- **jbroot 哈希已变**：`4C4DC0C67115CBA8` → **`8FF0E778ECD87DA9`**（bootstrap 被重建）
+- 越狱注入层仍在位：
+  ```
+  /usr/lib/systemhook-8FF0E778ECD87DA9.dylib
+  .../.jbroot-8FF0E778ECD87DA9/usr/lib/roothideinit.dylib
+  .../.jbroot-8FF0E778ECD87DA9/usr/lib/roothidepatch.dylib
+  .../.jbroot-8FF0E778ECD87DA9/usr/lib/libroothide.dylib
+  .../.jbroot-8FF0E778ECD87DA9/usr/lib/ellekit/libinjector.dylib
+  .../.jbroot-8FF0E778ECD87DA9/usr/lib/libellekit.dylib
+  .../.jbroot-8FF0E778ECD87DA9/usr/lib/TweakInject/FakeTweak.dylib
+  ```
+  即：**换哈希但同构**，正好可以用来验证此前的 H 表是否稳定。
+
+## R1 —— 注入谓词复测：**结果稳定复现**
+
+```
+calls = 1118   hits = 1
+hitPaths = [".../.jbroot-8FF0E778ECD87DA9/usr/lib/TweakInject/FakeTweak.dylib"]
+notable  = 5 条 roothide 镜像，其中 4 条被漏检：
+           systemhook-*.dylib / roothideinit.dylib / roothidepatch.dylib / libroothide.dylib
+```
+
+与旧哈希（4C4DC0C6…）完全一致：**1117~1118 次遍历、1 次命中、命中的永远是 `TweakInject` 目录名**。这条结论现在有两次独立会话、两个不同 jbroot 哈希的复现。
+
+## R2 —— 逐镜像 `isEnvAbnormal`：假设被实测否定
+
+我的假设（上一轮）：`HMDCrashBinaryImage.isEnvAbnormal` 可能是真正"按单个 dylib 标记可疑"的机制。
+
+安全实现（hook 内只记指针/整数，ObjC 解析全部延迟到 `setTimeout`，不再重入）：
+
+```
+sets = 1          # -[HMDCrashBinaryImage setIsEnvAbnormal:]  只被调用 1 次
+gets = 1117       # -[HMDCrashBinaryImage isEnvAbnormal]      被调用 1117 次（≈ 每个已加载镜像一次）
+abnGets = 0       # 返回非 0 的次数 = 0
+IMGMARK_FLAGGED: count = 0
+```
+
+**结论**：HMD 崩溃模块**确实会逐镜像读取**这个标志（1117 次 = 镜像数），但在本机 roothide 上**没有任何一个镜像被标为异常**——`systemhook` / `ellekit` / `TweakInject` / `roothideinit` 全部为 0。
+
+→ **假设不成立**。这个字段不是有效的注入识别点（至少在正常运行时；不排除崩溃上报时才重新计算）。
+
+## R3 —— roothide 明文在运行期内存中**不存在**
+
+对 `rw-` 全量可写区间（扫描 778 MB）搜三条明文字节串：
+
+| needle | 命中 |
+|---|---|
+| `com.roothide.manager` | **0** |
+| `com.opa334.Dopamine.roothide` | **0** |
+| `Documents/bootstrap.tar` | **0** |
+
+结合 S3 的"静态零引用"，现在的证据链是：
+
+- 密文确实存在（高熵字节，按 `ror(c^0xDEADBEEF,23)` 可解出上述明文）；
+- 静态没有任何代码/指针引用它（三种编码 × 三个可执行节 × 数据段全 0）；
+- 运行期内存里也**从未出现**这些明文（idle 会话 30 s + 778 MB 扫描）。
+
+**最可能解释**：这组字符串属于**按需解密、且当前路径未触发的规则数据**（例如只在特定风控/规则求值时解开，或由服务端下发的配置命中后才用）。标注为 **未证实**，缺：规则求值入口或对应触发条件。
+
+**与 R2 的呼应**：既然 `isEnvAbnormal` 全部为 0、明文也没出现，说明这套"roothide 识别规则"在本次会话里**根本没被执行**——不是"检测到了但被绕过"，而是"没跑到"。
+
+## R4 —— 安全性回归
+
+本轮所有脚本遵守新纪律：**hook 回调里不出现任何 ObjC 调用**，对象解析统一放在 `setTimeout`。设备全程稳定，无卡死、无掉线。
+
+---
+
+# 规则引擎与跨 App 比对（静态 + 定位）
+
+## C1 —— 规则引擎的取值原语（已还原）
+
+两个 helper 极短，语义明确：
+
+```asm
+; x0 = ctx, w1 = field index
+0x1019a08e4: add x8, x0, w1, uxtw #3      ; x8 = ctx + idx*8
+0x1019a08ec: ldr x0, [x8, #0x6070]        ; 读 ctx->fields[idx]
+0x1019a08ec: ret
+
+0x1019a08f0: add x8, x0, w1, uxtw #3
+0x1019a08f8: str x2, [x8, #0x6070]        ; 写 ctx->fields[idx]
+0x1019a08fc: ret
+```
+
+即：存在一个 **字段数组** `ctx + 0x6070 + idx*8`。`CF0…CFD` 这些"规则"本质上是**对字段数组做读/写/比较的小步骤**：
+
+- `CF0 (0x10185A9B0)`：调 `0x107C1516C`（分支岛 → `0x10A542664`）取一个值，写进 **field[6]**
+- `CF1 (0x10185A9DC)`：读 field[8]、field[9] 后比较
+- `CF2 (0x10185AA14)`：同样读 field[8]、field[9]，再组合
+- `CF3 (0x10185AA60)`：读 field[8]，调 `0x107C15178`（→ `0x10A006C7C`），用 field[6] 作参数
+
+—— 这是**规则/表达式求值器**的步骤函数，不是"检查项"本身。`G0` / `F0` 更像控制流标记（goto / function）。
+
+## C2 —— 这套东西属于 HMD 的 SafeGuard 子模块（关键连线）
+
+跨 App 字符串检索发现一条路径：
+
+```
+Library/Heimdallr/CrashCapture/LoadLaunch/SafeGuard
+```
+
+而抖音的加密池里解出：`com.bytedance.safeguard.data`。
+
+把它与前面的发现串起来：
+
+| 发现 | 归属 |
+|---|---|
+| `HMDCrashBinaryImage`（逐镜像记录、含 `isEnvAbnormal`） | Heimdallr 崩溃模块 |
+| `binaryImagesLogStrWithMustIncludeImagesNames:includePossibleJailbreakImage:` | 同上 |
+| 规则表 `G0/CF0…CFD` + 字段数组 VM | `CrashCapture/LoadLaunch/SafeGuard` |
+| `com.roothide.manager` 等加密串 | 同一子系统（规则数据） |
+
+这解释了 R3 的"明文从未出现"：**这些串是崩溃/上报路径（crash capture）按需解密的**，正常刷 App 不会走到。
+
+## C3 —— 跨 App 比对：番茄 ≡ 红果，抖音同源但不完全一致
+
+同一把 key（`0xDEADBEEF`），所以**相同明文的密文逐字节相同**，可以直接用密文做跨 App 指纹：
+
+| 项 | 番茄 | 红果 | 抖音 |
+|---|---|---|---|
+| `fopen` 密文 | 0x112F3C2D0 | 0x11335A1D0 | **0 处** |
+| `CCCryptorCreateWithMode` 密文 | 0x112F3C330 | 0x11335A230 | 0x29D91D90 |
+| `CFBundleIdentifier` 密文 | 0x112F3C390 | 0x11335A290 | **0 处** |
+| `libdyld.dylib` 密文 | 0x112F3C3B9 | 0x11335A2B9 | 0x29D91E89 |
+| `CF0…CF3` 规则名表 | 0x112F158F7 | 0x1133337F7 | 0x29D8E0F0 |
+
+- **番茄与红果：四处密文全部逐字节一致** → 同一份组件、同一版本、同一 key。
+- **抖音：规则名表在、部分符号密文在，但 `fopen` 与 `CFBundleIdentifier` 两处密文缺失** → 抖音用的是同一套框架的**不同配置子集**（或那两项改了实现）。
+- 抖音池内解出该子集的可读串：
+  ```
+  CCCryptorCreateWithMode / CFNetworkCopySystemProxySettings / CFBundleIdentifi…
+  libcommonCrypto.dylib / com.bytedance.safeguard.data
+  ```
+  其中 `com.bytedance.safeguard.data` 只出现在抖音，番茄/红果该位置没有。
+
+## C4 —— 系统性问题：这套子系统的所有入口都是运行期分发的
+
+对三个"入口"分别做了完整引用检查（`__text` + `__stubs` + `__objc_stubs`，四种编码）：
+
+| 入口 | BL/B 调用者 | adrp 物化 | 数据槽 | 相对指针 |
+|---|---|---|---|---|
+| `fopen` 五探针 `0x10250F8C4` / `0x10264A018` | 0 | 0 | 0 | 0 |
+| 规则表构建 `0x10185ADF8` | **0** | **0** | — | — |
+| roothide 密文区 `0x112F15C00+` | — | 0 | 0 | 0 |
+
+三者签名完全一致。结论（已证实的"缺席"）：**该子系统的入口不由静态引用可达**，必然通过运行期计算/表驱动分发。这也解释了原报告为何会觉得"检测点零散、调用链断裂"——不是断，是静态不可达。
+
+## C5 —— 下一步（动态，只读）
+
+**探针思路**：既然规则引擎的读写原语是 `0x1019A08E4 / 0x1019A08F0`，就 hook 这两个**极小的字段读写函数**并计数。
+
+- 若计数为 0 → 规则引擎在正常使用中不跑（可据此断定"roothide 规则未参与日常判定"）；
+- 若计数 > 0 → 说明引擎在跑，进一步记录 `w1`（字段索引）分布，就能反推 `CF0…CFD` 到底碰哪些字段，从而还原规则语义。
+
+这个探针**不需要触碰任何返回值**，且 hook 体里只有整数自增，安全。
+
+## C6 —— 实测：规则引擎在正常会话中**完全没有运行**
+
+按 C5 的探针思路，hook 字段读写原语 `0x1019A08E4`（读）/ `0x1019A08F0`（写），番茄 spawn → settle 4s → attach → 观测 17 s：
+
+```
+VM_STAT:  gets = 0   sets = 0   uniqGet = 0   uniqSet = 0
+```
+
+**17 秒内、一次都没调用。**
+
+### 这条负结果的效力与边界
+
+- **已证实**：attach 之后的正常使用窗口内，`CF0…CFD` 这套规则引擎**不参与任何判定**。
+- **未覆盖**：启动最早期（t < 4 s）。因为 attach 必须等到 ≈3–4 s 才稳定（更早会把进程打死，已实测），所以"启动瞬间是否跑过一次"没有排除。
+- 结合 R2（`isEnvAbnormal` 被读 1117 次但全为 0）与 R3（roothide 明文从未出现），三条独立观测指向同一结论：**这套 roothide/SafeGuard 规则在当前环境（roothide + 正常使用 + 无崩溃上报）**里不生效**。
+
+### 对整体判断的收敛
+
+至此，"字节系这套检测能否识别 roothide"在本机上的答案已经很具体：
+
+| 环节 | 有没有跑 | 结论 |
+|---|---|---|
+| `fopen` 五探针 | 没跑（死代码） | 无效 |
+| dyld 5 子串 | 跑了 1118 次，命中 1 次（`TweakInject` 目录名） | 靠巧合命中 |
+| `statfs` × 93 路径 | 跑了 434 次，命中 0 | 无效 |
+| `/hmd_tmp_file` 越界写 | 跑了，fd=-1 → `is_env_abnormal=1` | 触发但语义待查 |
+| 逐镜像 `isEnvAbnormal` | 读了 1117 次，全 0 | 未标记 |
+| SafeGuard 规则引擎（`CF0…CFD`） | **0 次调用** | **未参与判定** |
+| `canGetAllAppName` / CJPay 链 | 无第三方支付入口 | 未测 |
+
+---
+
+# 第 10 轮：规则语义、解密实测、跨 App 同一性
+
+## D1 —— `CF0…CFD` 的字段级语义（静态，全部 15 个步骤函数解完）
+
+按"读哪些字段 / 写哪些字段 / 调哪个 helper"逐条解码：
+
+| 规则 | 读字段 | helper | 写字段 |
+|---|---|---|---|
+| `G0` | — | isl[-4] | — |
+| `CF0` | — | isl[+0] | **field[6]** |
+| `CF1` | 8, 9 | isl[+4] | — |
+| `CF2` | 8, 9 | isl[+8] | **field[6]** |
+| `CF3` | 8 | isl[+12] | **field[6]** |
+| `CF4` | 8, 9, 10 | isl[+16] | — |
+| `CF5` | 8, 9, 10 | isl[+20] | **field[6]** |
+| `CF6` | 8, 9, 10 | isl[+24] | — |
+| `CF7` | 8 | isl[+28] | **field[6]** |
+| `CF8` | 8, 9, 10, 11, 12 | — | — |
+| `CF9` | 8, 9 | isl[+36] | **field[6]** |
+| `CFA` | 8, 9 | isl[+40] | — |
+| `CFB` | 8 | isl[+44] | **field[6]** |
+| `CFC` | 8, 9 | — | — |
+| `CFD` | 8, 9, 10, 11, 12 | — | — |
+
+**结构清晰**：`field[6]` 是**累加器/结果位**，`field[8..12]` 是**输入槽**（元数 1~5），每个规则调一个专属 helper（分支岛 `0x107C1516C + 4k`）。
+
+**但 helper 本身是通用运行时函数**，不是领域谓词：
+- `isl[+0] → 0x10A542664`：读一个 lazy-init 字节，再调 import `0x111A95904`
+- `isl[+4] → 0x10A10F728`：从 `[x0+0x110]` 取对象、构造栈上结构
+- `isl[+8] → 0x10A0D0FC8`：分支岛 → `0x10A0D0F5C`
+
+即：这套东西是**通用字段求值 VM**（元数 1~5 的规则步），而不是"逐项越狱检测清单"。上一轮把 `CF0…CFD` 当"检查项"的描述需要按此修正。
+
+## D2 —— 运行期解密实测：13 次调用，没有任何一次碰 roothide 密文区
+
+hook 两个解密真身（`0x109F8B83C` / `0x109F778F4`），spawn → attach → 22 s：
+
+```
+v1 = 7 次, v2 = 6 次, distinct = 13
+全部 cipher 落在 0x115078xxx（= 静态 0x112F3Cxxx，滑移后）
+inRoothide = false × 13
+```
+
+13 条正好是静态 15 条里的子集（`Filter` / `.plist` 本窗口未调用）。
+
+→ **roothide 密文区（`0x112F15C00+`）在两个解密例程的运行期调用里也从不出现**。至此 ③ 的三条独立证据齐了：
+1. 静态零引用（三种编码 × 三个可执行节 × 数据段指针）；
+2. 运行期 778 MB 可写区间内明文从未出现；
+3. 运行期解密调用全部落在符号名表，无一进入该区间。
+
+**结论**：该密文块在"roothide + 正常使用 + 无崩溃上报"条件下**完全惰性**。标注为已证实的"未触发"，而非"未实现"。
+
+## D3 —— 跨 App 同一性：番茄 ≡ 红果（逐字节）
+
+同一把 key 下，同一明文 → 同一密文。按番茄 15 条的地址 + 偏移 `delta = 0x41DF00` 直接解红果：
+
+| # | 明文 | 番茄 | 红果 | 变体 |
+|---|---|---|---|---|
+| 1 | `dladdr` | 0x112F3C29A | 0x11335A19A | v2 |
+| 2 | `stat` | 0x112F3C2C5 | 0x11335A1C5 | v2 |
+| 3 | `lstat` | 0x112F3C2CA | 0x11335A1CA | v1 |
+| 4 | `fopen` | 0x112F3C2D0 | 0x11335A1D0 | v1 |
+| 5 | `__opendir2` | 0x112F3C2DE | 0x11335A1DE | v2 |
+| 6 | `getifaddrs` | 0x112F3C312 | 0x11335A212 | v1 |
+| 7 | `CCCryptorCreateWithMode` | 0x112F3C330 | 0x11335A230 | v1 |
+| 8 | `CCCryptorUpdate` | 0x112F3C348 | 0x11335A248 | v2 |
+| 9 | `CFNetworkCopySystemProxySettings` | 0x112F3C360 | 0x11335A260 | v2 |
+| 10 | `CFBundleIdentifier` | 0x112F3C390 | 0x11335A290 | v1 |
+| 11 | `Filter` | 0x112F3C3A3 | 0x11335A2A3 | v1 |
+| 12 | `.plist` | 0x112F3C3B2 | 0x11335A2B2 | v1 |
+| 13 | `libdyld.dylib` | 0x112F3C3B9 | 0x11335A2B9 | v1 |
+| 14 | `libcommonCrypto.dylib` | 0x112F3C430 | 0x11335A330 | v2 |
+| 15 | `CFNetwork` | 0x112F3C446 | 0x11335A346 | v1 |
+
+**15/15 一致，连"哪条用 v1 哪条用 v2"都一样**，偏移恒定 `0x41DF00`。这是"同一份组件、同一构建产物、只换了外层壳"的硬证据。
+
+抖音：同一套符号子集存在（`CCCryptorCreateWithMode` / `CFNetworkCopySystemProxySettings` / `CFBundleIdentifier…` / `libcommonCrypto.dylib`），且池内多一条 **`com.bytedance.safeguard.data`**；但 `fopen` 与 `CFBundleIdentifier` 两处密文缺失 → 同框架的**不同配置子集**。
+
+## D4 —— SafeGuard 模块确实初始化过，但规则仍不跑
+
+用 Frida 的 `File` API（只读）确认沙盒路径存在：
+
+```
+.../Library/Heimdallr → ✔
+.../Library/Heimdallr/CrashCapture → ✔
+.../Library/Heimdallr/CrashCapture/LoadLaunch → ✔
+.../Library/Heimdallr/CrashCapture/LoadLaunch/SafeGuard → ✔
+```
+
+→ SafeGuard 子系统**初始化过并创建了目录**。
+
+同时把 VM 探针的 attach 时点从 4 s 提前到 **2.0 s**（进程存活）重测：
+
+```
+VM_STAT: gets = 0  sets = 0
+```
+
+**即：模块初始化执行了，但规则求值（字段读写）在 2 s 之后仍未发生。**
+
+### 剩余唯一缺口
+
+`0 – 2 s` 的窗口无法覆盖（更早 attach 会把进程打死，已实测多次）。所以"规则是否在启动最早期跑过一次"仍未排除。这一条标注为 **未覆盖**，不是"未运行"。
+
+## D5 —— 本轮对旧描述的修正
+
+| 旧描述 | 修正 |
+|---|---|
+| `CF0…CFD` 是"检查项" | 是**通用字段求值 VM 的规则步**（读 N 个输入字段 → 调 helper → 写 field[6]） |
+| roothide 串"可能有消费者但没找到" | 三条证据（静态零引用 / 运行期无明文 / 解密调用不含该区）→ **在当前条件下完全惰性** |
+| 番茄、红果"同构" | 升级为 **15/15 逐字节同一**，偏移恒定 `0x41DF00` |
+
+---
+
+# 第 11 轮：抖音规则表（66 条）与三款横向定表
+
+## E1 —— 抖音规则表：同一个 VM，规则数 4.4 倍
+
+抖音的规则注册函数在 `0x77AB3B4`（`sub sp,sp,#0x820`），结构与番茄完全一致（`{key, checker, flag}`，步长 0x18）：
+
+| 项 | 结果 |
+|---|---|
+| 条目总数 | **66** |
+| 键名 | `G0..G7`（8 条）+ `CF0..CF39`（58 条） |
+| `G0` | 0x29D8E0D8 |
+| `CF0` | key 0x29D8E0F0 → checker **0x77AA47C** |
+| `CF39` | key 0x29D8E1FD → checker 0x77AB34C（窗口内最后一条） |
+
+抖音的 VM 原语与番茄**逐字节同构**：
+
+```asm
+0x78bdab8: add x8, x0, w1, uxtw #3
+0x78bdabc: ldr x0, [x8, #0x6070]        ; 与番茄 0x1019A08E4 完全相同
+0x78bdac0: ret
+```
+
+抖音 `CF0`（0x77AA47C）的语义也与番茄的规则步同形：
+
+```asm
+0x77aa488: mov  w1, #8
+0x77aa48c: bl   0x78bdab8               ; read field[8]
+0x77aa490: bl   0x7883adc               ; helper
+0x77aa498: mov  x0, x19
+0x77aa49c: mov  w1, #6
+0x77aa4a0: bl   0x78bdac4               ; write field[6]
+```
+
+## E2 —— 三款规则表定表
+
+| App | 规则条目 | 键名范围 | 结构 |
+|---|---|---|---|
+| 番茄 | **15** | `G0` + `CF0..CFD` | 同 |
+| 红果 | **15** | `G0` + `CF0..CFD` | 同（注册函数 0x1017DBDD0，CF 名表 0x1133337F7） |
+| 抖音 | **66** | `G0..G7` + `CF0..CF39` | 同 |
+
+**结论**：这是一套**三款共用、可配置的规则引擎**（SafeGuard/HMD），番茄与红果用同一份 15 条配置，抖音装了 66 条。这解释了为什么抖音体积大得多、检测面也宽得多——不是实现不同，是**规则配置规模不同**。
+
+## E3 —— 对 ③ 的最终收敛
+
+roothide 密文块（`0x112F15Cxx`）的三条证据齐备且互相独立：
+
+1. **静态**：`adrp+add/ldr`（寄存器生命周期感知）、chained 指针槽、相对指针，三种编码 × 三个可执行节 → **全 0**；
+2. **运行期明文**：778 MB 可写区间扫描，三条明文（`com.roothide.manager` / `com.opa334.Dopamine.roothide` / `Documents/bootstrap.tar`）→ **0 命中**；
+3. **运行期解密调用**：hook 两个解密真身，22 s 内 13 次调用全部落在符号名表（`0x112F3Cxxx`），**无一进入该区间**。
+
+**判定（已证实）**：该密文块在当前构建 + 当前环境（roothide、正常使用、无崩溃上报）下**完全惰性**。它属于 SafeGuard 规则数据的一部分，但没有任何可达路径会解密它。
+**保留的不确定性**：若崩溃采集/上报路径被触发（例如真发生一次崩溃），是否会解开——未验证，且**不应人为制造崩溃**去验证。
+
+## E4 —— 抖音侧 VM 同样空转
+
+用抖音自己的原语（get `0x78BDAB8` / set `0x78BDAC4`）跑同一个探针，spawn → settle 9 s → attach → 22 s：
+
+```
+VM_STAT: gets = 0  sets = 0
+```
+
+与番茄一致：**规则引擎在正常使用中不执行**。三款（番茄已验证、抖音已验证、红果未单独跑但同构且规则表相同）行为一致。
+
+## E5 —— SafeGuard 路径字符串的引用方式（未解析）
+
+`Library/Heimdallr/CrashCapture/LoadLaunch/SafeGuard` 位于 `0x113CD8E8A`，但对该页做 120 个 adrp 候选的寄存器感知扫描，**没有任何 `adrp+add` 指向它**。
+
+推测（未证实）：该字符串由 **Swift 侧**引用（Swift 字符串字面量走 `__swift5_reflstr` 的相对偏移表，不走 `adrp+add`），所以本轮的 ARM64 引用扫描覆盖不到。这也侧面说明 `SafeGuard` 的调用方很可能是 Swift 代码。
+
+---
+
+# 第 12 轮：规则入口的穷尽性排查（结论：在本构建中不可达）
+
+## F1 —— 补做两种此前漏掉的编码
+
+| 编码 | 覆盖 | `0x10185ADF8`(规则注册) | `0x1019A08E4/8F0`(VM 原语) | `0x112F15C70`(roothide 块) |
+|---|---|---|---|---|
+| `int32` 相对指针（field+delta） | 全部节 | 0 | 0 | 0 |
+| `int64` 相对指针 | 全部节 | 0 | 0 | 0 |
+| **`__init_offsets`（静态构造表，2903 项）** | 全表比对 | **不在表内** | 不在 | 不在 |
+| **base 相对 32 位指针表**（同 `__init_offsets` 编码，全文件搜） | 全文件 | 0 处 | 0 处 | 0 处 |
+
+补充：用 base 相对编码搜到了 `fopen` 探针的两个值（`0x250F8C4` / `0x264A018`），但落点 `0x116CE0490` / `0x116CE0A50` 都在 `__TEXT,__unwind_info` 里——那是**展开表里"函数起点"的键**（本来就会列出每个函数的偏移），不是引用。反过来说，它顺带**证明这两个地址确实是合法函数入口**。
+
+> 顺带说明：本次按 `__unwind_info` 头部结构尝试解析失败（字段比预想多两个），因此没有用它替代现有的函数起点索引；现有索引（BL 目标 + 序言 + ObjC IMP）此前已与运行期 IMP 做过 9/9 校验，可信。
+
+## F2 —— 关于"规则求值入口"的最终结论
+
+把五种编码、四个来源全部查完后：
+
+| 来源 | 结果 |
+|---|---|
+| `BL/B` 调用（`__text` / `__stubs` / `__objc_stubs`） | 0 |
+| `ADRP+ADD/LDR` 物化（寄存器生命周期感知） | 0 |
+| chained-fixup 指针槽 | 0 |
+| int32 / int64 相对指针（全部节） | 0 |
+| `__init_offsets` 静态构造表 | 不在表内 |
+| base 相对 32 位表 | 0 |
+| 运行期 VM 读写原语调用次数（番茄、抖音各自 17~22 s） | **0 / 0** |
+
+**结论（已证实）**：规则注册函数 `0x10185ADF8` 在当前构建里**不存在静态可达入口**，运行期也没有被调用。规则引擎（`G0/CF0…CFD`）处于**未激活**状态。
+
+**已证实的旁证**：SafeGuard 的沙盒目录 `.../Library/Heimdallr/CrashCapture/LoadLaunch/SafeGuard` 确实存在 → 该子系统**初始化过**（目录被创建），但规则求值没发生。
+
+## F3 —— 剩余不可验证项（明确列出，不再尝试）
+
+| 项 | 为什么不可验证 |
+|---|---|
+| 启动 0–2 s 窗口内规则是否跑过一次 | 更早 attach 会把进程打死（已多次实测），无法覆盖 |
+| 崩溃上报路径是否解密 roothide 串 | 唯一验证方式是人为制造崩溃，**属于改变目标行为，红线禁止** |
+| SafeGuard 调用方是否在 Swift 侧 | `Library/Heimdallr/CrashCapture/LoadLaunch/SafeGuard` 在 `0x113CD8E8A`，对该页 120 个 adrp 候选做寄存器感知扫描无一命中；Swift 字面量走 `__swift5_reflstr` 相对偏移表，ARM64 引用扫描覆盖不到 |
+
+## F4 —— 目标达成度总结
+
+| 子目标 | 状态 | 证据 |
+|---|---|---|
+| ① `CF0…CFD` 规则语义 | **完成**（字段级） | 15 个步骤函数的 read/write/helper 全表 |
+| ① 规则求值入口 | **完成（否定式）** | 六路引用全 0 + 不在 init 表 + 运行期 0 调用 |
+| ① 触发时机 | **部分**：正常使用不触发；崩溃路径未验证 | VM 0 次（双 App）+ SafeGuard 目录存在 |
+| ② 三款横向比对 | **完成** | 符号名表 15/15 逐字节同一（delta 0x41DF00）；规则表 15 / 15 / 66；VM 原语逐字节同构 |
+| ③ roothide 串消费者 | **完成（否定式）** | 静态零引用 + 运行期无明文（778 MB）+ 解密调用不含该区 |
+| ④ 只读纪律与记录 | **完成** | 全部 hook 不含 ObjC 调用；每轮写入本文件 |
+
+---
+
+## 交付
+
+总报告已产出：`深化分析总报告.md`（含方案 §4.2 要求的「roothide 下各探针命中实况表」、对原报告的 10 条修正、未验证项清单、地址表与脚本清单）。
+
+---
+
+# 第 13 轮：补齐三项（B 静态验算 / E 平坦化地图 / D 全池批解）
+
+## G1 —— 目标 B 静态验算：**mib 对上，但 P_TRACED 判定不存在（修正我此前的结论）**
+
+### 静态证据 1：mib 常量
+
+```
+0x106C873D0: adrp x8, #0x112D0B000
+0x106C873D4: ldr  d0, [x8, #0xa38]        ; 8 字节常量
+0x106C873D8: stur d0, [x29, #-0x28]
+0x106C873DC: mov  w8, #1
+0x106C873E0: stp  w8, w0, [x29, #-0x20]   ; mib[2]=1, mib[3]=pid
+0x106C873E8: sub  x0, x29, #0x28
+0x106C873EC: bl   #0x109e73fc0            ; x2=sp+0x10(buf), x3=sp+8(&size)
+0x106C873F0: bl   #0x109e3b0d8            ; w1=4, x4=0, x5=0 → b 岛 → _sysctl
+```
+
+读 `0x112D0B000+0xA38` 的 8 字节 = `01 00 00 00 0e 00 00 00` → **{1, 14}** = `CTL_KERN, KERN_PROC`。
+另一处 `0x109EE5D10: mov w8,#0x288` = **648** = `sizeof(kinfo_proc)`。
+`0x109E3B0D8` 尾跳的分支岛指向 `0x111A96660` = `_sysctl`（`otool -Iv` 符号表确认）。
+
+**静态结论**：mib = `[1, 14, 1, pid]`、`namelen=4`、`buf=kinfo_proc(648B)` —— 与动态读数完全一致。
+
+### 静态证据 2：**没有 0x800 掩码测试**
+
+| 扫描 | 结果 |
+|---|---|
+| `AND w?, w?, #0x800`（按位掩码编码精确匹配，全 `__text`） | **0 处** |
+| `TBZ/TBNZ bit11`（等价写法） | 306 处（其他数据用），**距 4 个 `_sysctl` 调用点 ±32KB 内的：0** |
+
+番茄共有 4 个 `_sysctl` 直接调用点：`0x109F54490`、`0x10A0B681C`、`0x10A2679B0`、`0x10B0C8F8C` —— **每一个附近都没有 bit11 测试**。
+
+### 这一处的真实用途
+
+sysctl 返回后：
+
+```
+0x106C873F4: fmov  d0, xzr
+0x106C873F8: cbnz  w0, #0x106c8740c      ; sysctl 失败 → d0=0
+0x106C873FC: bl    #0x109ee5cec          ; ldr d0,[sp,#0x10]; scvtf d0,d0
+0x106C87404: ldr   d2, [x8, #0x440]
+0x106C87408: bl    #0x109e3e7ac          ; fdiv/fmadd
+```
+
+取的是 `kinfo_proc` 头部 8 字节做**浮点换算**，不是读 `p_flag`。
+
+**→ 修正**：我此前写"反调试：P_TRACED 形态已证实"**不成立**。准确表述是：**mib 形态与经典 P_TRACED 探针相同，但该 App 没有实现 `0x800` 判定**；sysctl 在此用于取进程信息（启动时间一类）。动态读到的 `p_flag=0x04004004`（0x800 未置位）这个值是真的，但**没有人读它**。
+
+## G2 —— 目标 E 平坦化地图（收紧判据 + 聚类）
+
+判据：`br xN` 前 7 条指令内同时出现 `adr` + `ldrsw/ldrb/ldrh` + `add`（计算跳转取表特征）。
+聚类：站点间距 ≤2KB 视为同一被平坦化函数。
+
+| 二进制 | dispatch 站点 | 聚类≈函数 | 覆盖代码 | 占 `__text` |
+|---|---|---|---|---|
+| 番茄 Reading | 10,589 | ≈4,925 | ≈2,582 KB | **0.89%** |
+| 抖音 AwemeCore | 25,155 | ≈11,280 | ≈5,341 KB | **0.81%** |
+
+最密集的 1MB 段（番茄）：`0x105B00000`(115)、`0x103000000`(78)、`0x101C00000`(75)、`0x102700000`(71)、`0x105500000`(71)、`0x111300000`(69)
+（抖音）：`0xA500000`(136)、`0xE900000`(129)、`0x4000000`(108)、`0xA600000`(99)、`0x5200000`(94)、`0x4700000`(87)
+
+**结论**：平坦化覆盖面只有 **~0.8–0.9%**，远低于"整库 OLLVM"的想象；它是**点状布置在安全/风控相关模块**（`0x105B…`、`0x1113…` 等段），不是全局。这解释了为什么大部分代码仍可直接读。
+
+## G3 —— 目标 D 全池批解（`__const` 7.89 MB）
+
+方法：两变体 × 两种对齐（0 / +2 位移）批量解密，取可打印 run（≥6 字符），去重。
+
+```
+不同明文条数：11,812
+  路径 (/…)：        189
+  bundle-id：          16
+  纯标识符：        1,026
+  其他：           10,581（多为二进制碎片与不可解区）
+```
+
+### 与越狱/注入相关的 19 条（全部带地址与变体，见 `analysis/fanqie/const_strings.json`）
+
+```
+0x112F6E84E v1  /.cydia_no_stash
+0x112F6EAA0 v2  /Applications/Cydia.app
+0x112F6E93E v1  /Library/MobileSubstrate/MobileSubstrate.dyl…
+0x112F6ED4E v1  /System/Library/LaunchDaemons/com.saurik.Cydia.Startup.plist
+0x112F6E7D0 v2  /etc/apt/sources.list.d/sileo.source…
+0x112F6E990 v2  /jb/amfid_payload.dylib
+0x112F6E970 v1  /jb/jailbreakd.plist
+0x112F6E9B0 v2  /jb/libjailbreak.dyl…
+0x112F6EB8E v1  /private/var/tmp/cydia.l…
+0x112F6E820 v2  /usr/lib/libjailbreak.dylib
+0x112F6E8B0 v2  /usr/share/jailbreak/injectme.plist
+0x112F6E910 v2  /var/lib/dpkg/info/mobilesubstrate.md5su…
+0x112F35F5E v1  /var/mobile/Library/Preferences/com.saurik.Cydia.pli…
+0x112F6ECDF v1  Z/Library/MobileSubstrate/CydiaSubstrate.dyli…
+0x112F15D70 v2  com.opa334.Dopamine
+0x112F15F0E v1  com.opa334.Dopamine.roothide
+0x112F15EEE v1  com.roothide.manager
+0x112F15DDE v1  com.roothide.manager.pli…
+0x112F15E70 v2  …com.xina.jailbreak.plist…      ← 新
+0x112F15ED0 v2  com.xina.blacklist.plist…       ← 新
+```
+
+### 与原报告黑名单的差集
+
+| 项 | 结果 |
+|---|---|
+| 原报告 50 条路径，在加密池里能对上 | **29 / 50** |
+| 加密池里**不在**原报告 50 条中的新特征 | **6 条** |
+
+6 条新特征：
+
+```
+com.opa334.Dopamine                ← Dopamine（rootless 越狱）本体
+com.opa334.Dopamine.roothide       ← Dopamine 的 roothide 变种
+com.roothide.manager               ← roothide 管理器
+com.roothide.manager.plist
+com.xina.jailbreak.plist           ← Xina 越狱
+com.xina.blacklist.plist
+```
+
+**结论（对原报告的最终修正）**：这套加密名单**明确覆盖了三代越狱工具**——Dopamine（rootless）、roothide、Xina。原报告"对新越狱形态没有跟进"的结论**错误**；正确的是：**跟进过，但用的是 bundle-id / plist 名而不是路径与库名**，所以此前只做路径扫描看不到。
+
+仍然**没有**出现的：`ellekit`、`libhooker`、`/var/jb`、`substitute`、`trollstore`。
+
+---
+
+# 第 14 轮：补 F + C + M7(红果动态) + M1(Hex-Rays F5)
+
+## H1 —— 目标 C：statfs/statvfs **逐处定性**（结论：没有根分区判定）
+
+先补全调用链：`_statfs` 普遍经过 `岛 → 二级片段 → stub`，只扫 `BL` 到 stub 会漏掉大部分。按「b 到 stub 得岛 → b 到岛得片段 → BL 到三者之一得调用点」展开后：
+
+| App | `_statfs` | `_statvfs` | `_fstatfs` |
+|---|---|---|---|
+| 番茄 | **12** | 3 | 2 |
+| 红果 | **12** | 3 | 2 |
+
+（三组数字完全相同，又是一处同组件证据）
+
+### 逐处定性（番茄 12 处 `statfs`）
+
+| 站点 | 路径 | 读 `f_flags`(0x40) | 读 `f_type`(0x3c) | 返回用法 | 定性 |
+|---|---|---|---|---|---|
+| 0x100BC3E98 | 动态 | ✗ | ✗ | 读结构字段 | 空间查询 |
+| 0x100CB5210 | 动态 | ✗ | ✗ | `tbnz w0,#0x1f` | 存在性探测 |
+| 0x100D480C4 | 动态 | ✗ | ✗ | 读结构字段 | 空间查询 |
+| 0x101866E70 | 动态 | ✗ | **✓** | 取 `f_type` | **文件系统类型判定** |
+| 0x1018EC88C | 动态 | ✗ | ✗ | 读结构字段 | 空间查询 |
+| 0x10197D018 / 0x10197D028 | 动态 | ✗ | ✗ | 成对调用 | 双源对比 |
+| 0x1028B7BA0 / 0x1028B7C10 | `/var` | ✗ | ✗ | 读结构字段 | 空间查询 |
+| 0x105AD2A9C | `/var` | ✗ | ✗ | `cmp w0,#0; cset ge` | 布尔化探测 |
+| 0x10A05064C | 动态 | ✗ | ✗ | `cmn w0,#1` | 存在性探测 |
+| 0x11141A2F4 | 动态 | ✗ | ✗ | `cmn w0,#1` | 存在性探测 |
+| `statvfs` ×3 / `fstatfs` ×2 | 动态 | ✗ | ✗ | — | 空间/句柄查询 |
+
+**`f_flags` 读取次数 = 0/17。**
+
+→ **定论**：这套代码里**没有任何 MNT_RDONLY（`f_flags & 1`）的根分区只读判定**。原报告"statfs 可能用于根分区 remount 检测"的猜测**彻底否证**。`statfs` 的用途只有两类：**路径存在性探测**（93 项表 + 少数散点）和**磁盘空间查询**，外加**一处 `f_type` 文件系统类型判定**（0x101866E70）。
+
+### 顺带确认：93 项表的 43 + 50 结构
+
+```
+0x10a09f7b4: cmp x19, #0x158      ; 0x158/8 = 43 项（表 0x119054D50）
+0x10a09f7d4: cmp x19, #0x190      ; 0x190/8 = 50 项（表 0x119054EA8）
+```
+与第 2 轮"43 + 50 拆分"的结论一致。
+
+## H2 —— 目标 F：抖音边界校正（覆盖率从 16.9% 提到 97.2%）
+
+原作者启发式只认「`sub sp` / `stp` 预索引 / `pacibsp`」三类序言，**必然漏掉无栈帧的叶子函数与尾调用 thunk**。以 ObjC IMP（元数据里的权威入口）为真值实测：
+
+| 种子窗口 | IMP 数 | 原启发式覆盖 | 补全后覆盖 | 新增起点 |
+|---|---|---|---|---|
+| `0x1E6EF000-0x1E6F1000`（CJPay） | 71 | **16.9%** | **97.2%** | 82 |
+| `0x12D7000-0x12D9000`（pred/sandbox） | 3 | 100% | 100% | 0 |
+| `0x77AA000-0x77AC000`（规则 checker） | 0 | — | — | — |
+| `0x78BD000-0x78BE000`（VM 原语） | 0 | — | — | — |
+
+漏检的典型形态（`0x1E6EF964`）：
+
+```asm
+adrp x8, #0x39373000
+ldrsw x8, [x8, #0xc50]
+ldr  x0, [x0, x8]
+ret                    ; 无栈帧的 getter
+```
+
+**校正方法**：在启发式基础上叠加「**终结指令（`ret`/`b`/`br`/`udf`）之后线性扫描**」的起点补全，CJPay 窗口覆盖率 16.9% → **97.2%**（剩 2 个 IMP 落在条件跳转后的中段，需数据流才能定，暂不补）。
+
+**这是抖音侧一个真实的分析缺陷修正**：此前对抖音的任何"函数级"统计（如平坦化聚类）都会低估叶子函数占比。
+
+## H3 —— M7 红果动态：谓词**未触发**（两次尝试）
+
+| 尝试 | attach 时点 | 观测窗 | pred 调用 | VM 读/写 | CJPay |
+|---|---|---|---|---|---|
+| 1 | settle 7.0 s | 18 s | **0** | 0/0 | 0 |
+| 2 | settle 2.5 s | 26 s | **0** | 0/0 | 0 |
+
+**地址已核验**：红果 `0x10A971840` 与番茄 `0x1083E1854` **逐指令同构**（同样 `stp/bl/bl/mov x22,#0/ldr x21,[x1,#0x10]/cmp x22,#0x28`，即 5 项 × 8 字节表），不是地址写错。
+
+对照：番茄同一谓词在 attach 后**反复执行 1118 次**，红果 **0 次**。
+
+→ 结论（有限）：**红果的注入谓词不在"启动后常驻"的路径上，至少不在本次观测窗内被调用**；番茄是每次构造上报 header 都会跑。这是两者在**调度时机**上的差异，不是函数存在与否的差异。**未证实**红果是否会跑——可能只在崩溃/上报时执行。
+
+两者 `BL` 调用者都是 0（都是通过函数指针传给遍历器），所以静态也解释不了调度差异。
+
+## H4 —— M1：Hex-Rays F5 **已完成**（改走雕刻子二进制）
+
+### 三条路都试过
+
+| 路线 | 结果 |
+|---|---|
+| `idat -A` 全量导入 508 MB | 卡在 ObjC 解析（`Do you want to parse them…`）>750 s，写出 `.id0` 2.1 GB / `.id1` 1.9 GB → 终止并清理（避免污染 IPA 工作副本） |
+| `idat -A -S`（脚本直连 add_func） | 被上次残留的 `.nam` 破坏：`Reading.nam: Read attempt past file end` → 清理后重来仍不可行 |
+| `idalib` + `open_database(path, False)` | 加载 10 分钟仍未返回，RSS 1.6 GB → 放弃 |
+| **雕刻子二进制 + idalib** | **成功**，每个函数约 1 秒 |
+
+### 雕刻法
+
+按目标 ±1~4 KB 取窗口，包成最小 ELF64（`PT_LOAD.p_vaddr` = 原虚拟地址，`p_offset` = 0x1000），`open_database(run_auto_analysis=False)` → `add_func` → `decompile`。跨切片调用显示为 `MEMORY[addr]()`，地址与原始二进制一致。
+
+产物：`analysis/fanqie/hexrays_f5.md`（1,242 行，11 个函数）。
+
+### Hex-Rays 与手工逆向的交叉验证（全部一致）
+
+| 目标 | 反编译结果 | 与我的结论 |
+|---|---|---|
+| `dec_v1` 0x109F8B83C | `HIDWORD(v6)=*(a2+v4)^0xDEADBEEF; *(a1+v4)=v6>>23;` 尾部 `*(byte)=*(byte)^(0xDEADBEEF>>v7)` | **完全一致**（整词 XOR+ROR23、尾部逐字节异或 key>>8j） |
+| `sandbox_statfs93` 0x10A09F79C | `while(v0!=344)` → 43 项；`while(v0!=400)` → 50 项；`MEMORY[0x109E3C608](0x1136AD0D6, 514)`；`if ((fd & 0x80000000)!=0) v1=1; else { close; unlink; v1=0; }` | **完全一致**（43+50、`/hmd_tmp_file`、O_RDWR\|O_CREAT=0x202、fd 符号位判定） |
+| `vm_get/vm_set` 0x1019A08E4/F0 | `return *(qword*)(a1 + 8*a2 + 24688);` | **24688 = 0x6070**，与手工一致 |
+| `pred_inject_substr` 0x1083E1854 | `if (v2 == 40) goto LABEL_7;` 循环，逐项 `MEMORY[0x109EDFBC0](img, *(0x119055038 + v2))` | **40/8 = 5 项**，与"5 子串表"一致 |
+| `isJailBreak` 0x1074B6FF4 | 两个调用结果 OR（`&1`），再尾调第三个 | 与"三探针聚合"一致 |
+| `sysctl_caller` 0x106C873C4 | `*(v0-40)=MEMORY[0x112D0BA38]; *(v0-32)=1; *(v0-28)=pid;` 之后 `v5=0; if(!v4){...浮点...}` | **mib={1,14,1,pid} 且无 0x800 判定**，与 G1 一致 |
+
+结论：手工逆出的算法与 IDA 反编译**逐条对得上**，没有出现需要推翻的差异。
+
+**代价与局限**：雕刻法只能看单函数，跨切片的调用目标不可见；因此它适合**验证**已定位的函数，不适合替代全库分析。
+
+```
+
+`reports/深化分析总报告.md`:
+
+```md
+# 字节系越狱/注入检测机制 —— 深化分析总报告
+
+> 承接《字节系三款App越狱检测与风控机制_静态逆向分析.md》（下称「原报告」）
+> 依据《字节系越狱检测_深化分析方案_v2.md》推进；逐轮证据见《发现记录.md》
+> 分析对象：番茄小说 7.4.1（`com.dragon.read` / `Reading`）、红果短剧 7.4.1（`com.phoenix.video` / `Eggplant`）、抖音 40.8.0（`com.ss.iphone.ugc.Aweme` / `AwemeCore`）
+> 动态环境：iPhone 11 Pro Max（`iPhone12,5`），**iOS 26.0**，roothide（relaxin），Frida host 17.7.3 ↔ device 17.23.3
+> 纪律：Frida 全程只读（onEnter/onLeave 读参数、读返回、backtrace、dump 内存），未修改任何返回值或字段；hook 回调内不做 ObjC 调用
+
+---
+
+## 一、方法与环境
+
+### 1.1 静态侧
+
+| 环节 | 工具/方法 |
+|---|---|
+| 解包 | `ditto -x -k`（保留符号链接） |
+| Mach-O / 段节 / 导入符号 | `otool -l/-L/-Iv` |
+| ObjC 元数据 | 自写解析器（`__objc_classlist` / `__objc_catlist` / 相对方法表 / chained fixups）→ 番茄 78,911 类、1,242,751 方法，方法名 0 条乱码 |
+| 交叉引用 | 自写 numpy 索引（ADRP+ADD/LDR 物化、BL/B 目标、序言识别）+ **寄存器生命周期感知的线性扫描**（修正版） |
+| 反汇编 | Capstone 5.0.7（ARM64） |
+| 解密 | 还原算法后离线批解 + 逐条长度/变体匹配 |
+
+### 1.2 动态侧的关键约束（实测）
+
+| 现象 | 处理 |
+|---|---|
+| host 17.7.3 ↔ device 17.23.3 | `Module.getExportByName` / `Process.findExportByName` **已移除**，必须用 `Module.getGlobalExportByName` |
+| attach spawn 暂停态 | `ProcessNotRespondingError: unexpected early end-of-stream` |
+| resume 后 <0.9 s attach | 进程约 1 s 被杀 |
+| **可用姿势** | `spawn → resume → 等 2~4 s → attach` |
+| **hook 内调 ObjC** | **会重入死锁并拖垮整机**（本项目实测一次，设备掉线）。解析一律放 `setTimeout` |
+
+### 1.3 两次 jbroot 哈希（天然对照组）
+
+```
+第一次会话：.jbroot-4C4DC0C67115CBA8
+崩溃恢复后：.jbroot-8FF0E778ECD87DA9
+```
+
+注入层结构一致（`systemhook` / `roothideinit` / `roothidepatch` / `libroothide` / `ellekit/libinjector` / `TweakInject`），因此可用于验证结论的稳定性。
+
+---
+
+## 二、核心结论一：三款 App 共用同一套组件（逐字节级证据）
+
+同一把 XOR key 下，相同明文的密文完全相同，因此可以拿密文做跨 App 指纹。
+
+### 2.1 运行期符号名表（15 条）——番茄 ≡ 红果
+
+| # | 明文 | 番茄 | 红果 | 变体 |
+|---|---|---|---|---|
+| 1 | `dladdr` | 0x112F3C29A | 0x11335A19A | v2 |
+| 2 | `stat` | 0x112F3C2C5 | 0x11335A1C5 | v2 |
+| 3 | `lstat` | 0x112F3C2CA | 0x11335A1CA | v1 |
+| 4 | `fopen` | 0x112F3C2D0 | 0x11335A1D0 | v1 |
+| 5 | `__opendir2` | 0x112F3C2DE | 0x11335A1DE | v2 |
+| 6 | `getifaddrs` | 0x112F3C312 | 0x11335A212 | v1 |
+| 7 | `CCCryptorCreateWithMode` | 0x112F3C330 | 0x11335A230 | v1 |
+| 8 | `CCCryptorUpdate` | 0x112F3C348 | 0x11335A248 | v2 |
+| 9 | `CFNetworkCopySystemProxySettings` | 0x112F3C360 | 0x11335A260 | v2 |
+| 10 | `CFBundleIdentifier` | 0x112F3C390 | 0x11335A290 | v1 |
+| 11 | `Filter` | 0x112F3C3A3 | 0x11335A2A3 | v1 |
+| 12 | `.plist` | 0x112F3C3B2 | 0x11335A2B2 | v1 |
+| 13 | `libdyld.dylib` | 0x112F3C3B9 | 0x11335A2B9 | v1 |
+| 14 | `libcommonCrypto.dylib` | 0x112F3C430 | 0x11335A330 | v2 |
+| 15 | `CFNetwork` | 0x112F3C446 | 0x11335A346 | v1 |
+
+**15/15 一致，连"哪条用 v1、哪条用 v2"都相同**，偏移恒定 `0x41DF00`。
+
+**意义（原报告未覆盖）**：这不是路径黑名单，而是 **dlsym / CFNetwork 的运行期符号名表**。App 通过 `dladdr`/`dlsym` 在运行期解析 `stat / lstat / fopen / __opendir2 / getifaddrs` 等 libc 符号——**因此只看导入表会系统性低估检测面**。
+
+抖音是同一框架的**不同配置子集**：`CCCryptorCreateWithMode`、`CFNetworkCopySystemProxySettings`、`CFBundleIdentifier`、`libcommonCrypto.dylib` 在；`fopen`、`CFBundleIdentifier` 的部分密文缺失；池内多出 `com.bytedance.safeguard.data`。
+
+### 2.2 规则引擎：同一 VM，配置规模不同
+
+| App | 规则条目 | 键名范围 | 注册函数 | VM 原语 |
+|---|---|---|---|---|
+| 番茄 | **15** | `G0` + `CF0..CFD` | 0x10185ADF8 | 0x1019A08E4 读 / 0x1019A08F0 写（`ctx+0x6070+idx*8`） |
+| 红果 | **15** | `G0` + `CF0..CFD` | 0x1017DBDD0 | 同构 |
+| 抖音 | **66** | `G0..G7` + `CF0..CF39` | 0x77AB3B4 | 0x78BDAB8 读 / 0x78BDAC4 写（`ctx+0x6070+idx*8`，逐字节同构） |
+
+---
+
+## 三、核心结论二：检测链的真实形态
+
+### 3.1 原报告的最大空白已补上：检测挂在 HMD 上报链上
+
+backtrace（Frida 权威符号化，非推测）：
+
+```
++[SSLaunchMonitor markFirstClassLoad]
+ ├─ +[HMDTTMonitorHelper reportHeaderParamsWithInjectedInfo:]      （性能上报）
+ ├─ -[HMDExceptionModuleReporter _reportExceptionData]             （异常上报）
+ └─ +[HMDConfigHelper requestHeaderFromProvider:]                  （远程配置拉取）
+      └─ -[HMDUploadHelper headerInfo]          0x10A09EDBC
+           └─ -[HMDInfo isEnvAbnormal]          0x10A09F728
+                └─ 0x10A09F744 → 0x10A09F764（dispatch_once）
+                     └─ 0x10A09F79C  statfs × 93 路径 + /hmd_tmp_file 越界写
+```
+
+**触发时机**：不是"启动一次"，而是**每次构造 HMD 上报 header**（三条并列路径），沙盒结果用 `dispatch_once` 缓存。
+
+### 3.2 `fopen` 五探针 = 死代码（三重独立证据）
+
+| 证据 | 结果 |
+|---|---|
+| 静态引用（`ADRP+ADD/LDR`、chained 指针槽、相对指针、`__init_offsets`、base 相对表） | 全 0 |
+| 运行期内存登记（模块非可执行段 23,674,880 B 全扫指针） | 0 命中 |
+| 运行期调用（45 s 会话） | **0 次** |
+
+同一族还有第二个实现 `0x10264A018`（开关全局不同），同样零引用。**真正跑在链上的是 statfs 版。**
+
+### 3.3 文件探测的三条实现
+
+| 实现 | 位置 | 判据 | 实际状态 |
+|---|---|---|---|
+| `fopen` × 5 | 0x10250F8C4 / 0x10264A018 | `FILE*` 非空 | **死代码** |
+| `statfs` × 93 | 0x10A09F79C | `statfs()` 返回 | HMD 链，**已运行** |
+| `-[NSFileManager fileExistsAtPath:]` × N | 0x1074B7034（`hasJailBreakFiles`） | BOOL | CJPay 链，**无第三方支付入口，未触发** |
+
+---
+
+## 四、核心结论三：roothide 下各探针命中实况表（方案 §4.2 要求）
+
+> 实测设备：iPhone 11 Pro Max / iOS 26.0 / roothide（两次 jbroot 哈希均测）
+
+| # | 探针 | 实现位置 | 本机实测 | 判定 |
+|---|---|---|---|---|
+| 1 | `fopen` × 5 路径 | 0x10250F8C4 / 0x10264A018 | 零引用、零登记、**零调用** | **死代码，无效** |
+| 2 | dyld 镜像名 5 子串 | 0x1083E1854 | **1118 次调用 / 1 次命中** | **靠目录名巧合命中** |
+| 3 | `statfs` × 93 路径（50 唯一） | 0x10A09F79C | **434 次探测 / 0 命中** | 路径全 miss，无效 |
+| 4 | `/hmd_tmp_file` 越界写 | 0x10A09F79C 内 | `open_dprotected_np` → **fd = -1** → `is_env_abnormal=1` | 触发（极性待查） |
+| 5 | 逐镜像 `isEnvAbnormal` | `HMDCrashBinaryImage` | 读 1117 次（≈镜像数），**全部为 0** | 未标记任何注入库 |
+| 6 | 规则引擎 `G0/CF0..CFD` | 0x10185ADF8 | **0 次调用**（番茄/抖音各自验证） | 未参与判定 |
+| 7 | `canOpenCydia` | 0x1074B70B8 | 未触发（无支付入口）；且 `cydia` 未在 `LSApplicationQueriesSchemes` 声明 → iOS 15+ 恒假 | 逻辑上无效 |
+| 8 | `canGetAllAppName` | 0x1074B7138 | 未触发（同上） | 未测 |
+
+### 4.1 第 2 项的细节（最有价值的实测）
+
+被检查的镜像名里，roothide 全套库**一条都不匹配 5 条子串**：
+
+```
+/usr/lib/systemhook-8FF0E778ECD87DA9.dylib
+.../.jbroot-8FF0E778ECD87DA9/usr/lib/roothideinit.dylib
+.../.jbroot-8FF0E778ECD87DA9/usr/lib/roothidepatch.dylib
+.../.jbroot-8FF0E778ECD87DA9/usr/lib/libroothide.dylib
+.../.jbroot-8FF0E778ECD87DA9/usr/lib/ellekit/libinjector.dylib
+```
+
+命中的唯一一条是：
+
+```
+.../.jbroot-8FF0E778ECD87DA9/usr/lib/TweakInject/FakeTweak.dylib
+```
+
+原因：路径含 **`TweakInject`**（名单第 3 条），属于**目录名撞名**，不是库名命中。
+
+**结论修正如上**：原报告"对 rootless/roothide 没有跟进"应改为——**旧名单在 roothide 上由"目录名巧合"命中一次**，4/5 的 roothide 组件被漏检。
+
+### 4.2 第 4 项的极性
+
+- 静态：`0x10A09F800 open_dprotected_np("/hmd_tmp_file", O_CREAT|O_RDWR)` → `tbnz w0,#0x1f` → **失败置 1、成功置 0**
+- 动态：实测 fd = -1（失败）→ 缓存 1 → `-[HMDInfo isEnvAbnormal]` 返回 1 → header 中 **`is_env_abnormal = "1"`**（首次 header 早于 `dispatch_once` 完成时为 `"0"`）
+- **未解释**：按该指令，"写失败 → 异常"意味着普通未越狱设备同样报 1。字段语义需后端对照，本文只陈述实测与指令，不推断后端含义。
+
+---
+
+## 五、核心结论四：SafeGuard 规则引擎
+
+### 5.1 语义（字段级，已还原）
+
+`field[6]` 为结果位，`field[8..12]` 为输入槽，每条规则调一个专属 helper：
+
+| 规则 | 读字段 | 写 | | 规则 | 读字段 | 写 |
+|---|---|---|---|---|---|---|
+| `CF0` | — | field[6] | | `CF7` | 8 | field[6] |
+| `CF1` | 8,9 | — | | `CF8` | 8..12 | — |
+| `CF2` | 8,9 | field[6] | | `CF9` | 8,9 | field[6] |
+| `CF3` | 8 | field[6] | | `CFA` | 8,9 | — |
+| `CF4` | 8,9,10 | — | | `CFB` | 8 | field[6] |
+| `CF5` | 8,9,10 | field[6] | | `CFC` | 8,9 | — |
+| `CF6` | 8,9,10 | — | | `CFD` | 8..12 | — |
+
+helper 本身是**通用运行时函数**（lazy-init 字节、`[x0+0x110]` 取对象、分支岛），不是领域谓词。所以这是一套**通用字段求值 VM**，不是"逐项越狱检查清单"。
+
+### 5.2 可达性（穷尽排查）
+
+| 来源 | 结果 |
+|---|---|
+| `BL/B`（三个可执行节） | 0 |
+| `ADRP+ADD/LDR`（寄存器生命周期感知） | 0 |
+| chained 指针槽 | 0 |
+| int32 / int64 相对指针（全部节） | 0 |
+| `__init_offsets` 静态构造表（2903 项） | 不在表内 |
+| base 相对 32 位表（全文件） | 0 |
+| 运行期 VM 原语调用 | **0（番茄）/ 0（抖音）** |
+
+**结论**：规则注册函数在本构建中**不存在静态可达入口，运行期也未被调用**。规则引擎处于未激活状态。
+
+旁证：SafeGuard 沙盒目录 `.../Library/Heimdallr/CrashCapture/LoadLaunch/SafeGuard` **确实存在**（模块初始化过），但规则求值没发生。
+
+### 5.3 roothide 密文块：三条独立证据判定为惰性
+
+| 证据线 | 结果 |
+|---|---|
+| 静态引用（五种编码 × 三个可执行节 + 数据段指针） | 全 0 |
+| 运行期明文（778 MB 可写区间扫三条明文） | 0 命中 |
+| 运行期解密调用（hook 两个解密真身，22 s） | 13 次，全部落在符号名表 `0x112F3Cxxx`，无一进入 `0x112F15Cxx` |
+
+密文确实存在且可解（`com.roothide.manager`、`com.opa334.Dopamine.roothide`、`Documents/bootstrap.tar`、`/var/mobile/Library/HTTPStorages`），但在当前环境（roothide + 正常使用 + 无崩溃上报）**没有任何可达路径会解它**。
+
+---
+
+## 六、解密体系（完整逆出）
+
+### 6.1 算法
+
+```
+变体 1（0x109F8B83C）：
+  整词: plain_word[i] = ror32(cipher_word[i] ^ 0xDEADBEEF, 23)     ; 4 字节小端
+  尾部: plain_byte[j] = cipher_byte[j] ^ ((0xDEADBEEF >> (8*(j%4))) & 0xFF)   ; 1~3 字节
+
+变体 2（0x109F778F4）：
+  整词: plain_word[i] = cipher_word[i] ^ cipher_word[i-1] ^ 0xDEADBEEF
+  尾部: 同变体 1
+```
+
+**关键点**：尾部不走整词路径，而是逐字节异或 key 的低位字节。漏掉这一段就会出现"最后 1~3 字节乱码"（本项目早期现象）。
+
+
+### 6.2 调用布局
+
+- 两个真身各对应一个分支岛（`0x107C16440` / `0x107C16448`）。**hook 必须挂真身**，挂岛上 `onLeave` 读到的是尚未写入的缓冲。
+- 静态共 15 个调用点，全部集中在 `0x1019616xx–0x1019624xx` 一个函数簇内。
+
+---
+
+### 6.3 全池批解结果（`__const` 7.89 MB）
+
+两变体 × 两种对齐（0 / +2 位移）批量解密、去重后：**11,812 条不同明文**（路径 189、bundle-id 16、纯标识符 1,026、其他 10,581）。
+
+越狱/注入相关命中 19 条，其中 **6 条是原报告 50 条路径里没有的**：
+
+```
+com.opa334.Dopamine            com.opa334.Dopamine.roothide
+com.roothide.manager           com.roothide.manager.plist
+com.xina.jailbreak.plist       com.xina.blacklist.plist
+```
+
+原报告 50 条路径中，加密池里能对上 **29/50**（其余只存在于明文 93 项表里）。仍然**没有**出现的：`ellekit`、`libhooker`、`/var/jb`、`substitute`、`trollstore`。
+
+→ **名单已覆盖 Dopamine（rootless）/ roothide / Xina 三代，但用的是 bundle-id 与 plist 名，不是路径与库名。** 这正是此前只做路径扫描看不到的原因。
+
+### 6.4 平坦化地图（目标 E）
+
+判据：`br xN` 前 7 条指令内同时出现 `adr` + `ldrsw/ldrb` + `add`；站点间距 ≤2KB 聚为一函数。
+
+| 二进制 | dispatch 站点 | 聚类≈函数 | 覆盖代码 | 占 `__text` |
+|---|---|---|---|---|
+| 番茄 Reading | 10,589 | ≈4,925 | ≈2,582 KB | **0.89%** |
+| 抖音 AwemeCore | 25,155 | ≈11,280 | ≈5,341 KB | **0.81%** |
+
+最密集段（番茄）：`0x105B00000`、`0x103000000`、`0x101C00000`、`0x102700000`、`0x111300000`。
+
+结论：**点状布置在安全/风控相关模块，不是整库混淆**——所以大部分代码仍可直接读。
+
+
+
+### 6.5 Hex-Rays 交叉验证（IDA Pro 9.3 + 雕刻子二进制）
+
+`Reading` 单文件 508 MB、ObjC 类 78,911 个，`idat -A` 全量导入在 16 GB 机器上不可行（卡在 ObjC 解析 >750 s，`.id0` 2.1 GB）。改用**雕刻子二进制**：按目标 ±1~4 KB 取窗口包成最小 ELF64（`p_vaddr` 保持原虚拟地址），`idalib.open_database(run_auto_analysis=False)` + `add_func` + `ida_hexrays.decompile`，每函数约 1 秒。产物：`analysis/fanqie/hexrays_f5.md`（1,242 行 / 11 个函数）。
+
+| 目标 | 反编译要点 | 与手工结论 |
+|---|---|---|
+| `dec_v1` | `HIDWORD(v6)=cipher^0xDEADBEEF; out=v6>>23;` 尾部 `out_byte=c^(0xDEADBEEF>>v7)` | 一致（整词 ROR23 + 尾部逐字节） |
+| `sandbox_statfs93` | `while(v0!=344)`→43 项；`while(v0!=400)`→50 项；`open(0x1136AD0D6, 514)`；`if (fd & 0x80000000) → 1 else {close;unlink;→0}` | 一致（43+50 / `/hmd_tmp_file` / 0x202 / fd 符号位） |
+| `vm_get` | `*(qword*)(a1 + 8*a2 + 24688)` | 24688 = 0x6070，一致 |
+| `pred_inject_substr` | `if (v2==40)` 循环比对 5 项 | 一致 |
+| `sysctl_caller` | `mib={const(1,14), 1, pid}`，之后 `v5=0; if(!ret){浮点}` | 一致，且**无 0x800 测试** |
+
+→ 手工逆出的算法与 Hex-Rays 输出逐条对得上，无需推翻的差异。局限：切片外调用显示为 `MEMORY[addr]()`，只适合验证已定位函数。
+
+## 七、对原报告的修正清单
+
+| # | 原报告 | 修正 | 依据 |
+|---|---|---|---|
+| 1 | ObjC 方法 IMP 地址 | **全体 +8**（相对方法表三个偏移各自以"自身字段"为基准） | 运行期 ObjC bridge 权威值 9/9 校验 |
+| 2 | `fopen` 五探针是"真正跑在请求路径上的探针" | **死代码**（三重证据） | 静态零引用 + 内存零登记 + 运行时零调用 |
+| 3 | `statfs` 可能用于根分区 remount 判定 | **否证**：探测 `/private/var`，`f_flags=0`，无 RDONLY 判定 | 动态 statfs 参数与返回 |
+| 4 | 检测对 rootless/roothide "没有跟进" | **部分命中**：由 `TweakInject` 目录名巧合命中；4/5 组件漏检 | 1118 次调用 / 1 次命中（两次哈希复现） |
+| 5 | 反调试"推测 P_TRACED" | **两次修正后：不成立**。mib 常量静态验证为 `{1,14}`、`size=648`（`kinfo_proc`），形态确实同经典探针；但全 `__text` **无 `AND #0x800`**，4 个 `_sysctl` 调用点 ±32KB 内**无 bit11 测试**，返回后是对结构头 8 字节做浮点换算 → sysctl 用于取进程信息，**没有实现 P_TRACED 判定** | 常量静态验证 + 掩码全库扫描 + 后续指令流 |
+| 6 | 越狱标志走 protobuf、字段名不可见 | **否定**：HMD 通道是**明文字典**（34 字段），含 `is_env_abnormal` | header dump |
+| 7 | `0x112F15Cxx` 有 7 处代码引用 | **撤回**：实为 0（扫描器假阳性：寄存器被后续 adrp 覆盖后仍匹配） | 寄存器生命周期感知重扫 |
+| 8 | `CF0…CFD` 是"检查项" | 是**通用字段求值 VM 的规则步**（读 N 输入 → helper → 写 field[6]） | 15 个步骤函数逐条解码 |
+| 9 | 加密池 = 越狱路径表 | 是 **dlsym/CFNetwork 符号名表**（15 条） | 完整解密 |
+| 10 | `cryptid`/框架清单、`isecgm` 定位 | 维持 | — |
+| 11 | （新增）加密名单只覆盖 Cydia 时代 | **覆盖三代**：`com.opa334.Dopamine`、`com.opa334.Dopamine.roothide`、`com.roothide.manager(.plist)`、`com.xina.jailbreak.plist`、`com.xina.blacklist.plist` | `__const` 7.89 MB 全池批解 |
+| 12 | （新增）平坦化范围 | 仅 **0.8–0.9%** 代码被平坦化，点状分布在安全/风控模块，非整库 OLLVM | `adr+ldr+add→br` 特征全库统计 |
+
+---
+
+## 八、未验证 / 不可验证项（如实列出）
+
+| 项 | 原因 |
+|---|---|
+| 启动 0–2 s 窗口内规则引擎是否跑过一次 | 更早 attach 会打死进程（多次实测），无法覆盖 |
+| 崩溃上报路径是否解密 roothide 串 | 唯一验证方式是人为制造崩溃，**改变目标行为，红线禁止** |
+| `jailBreak`/`appendParamTo:` 的真实 key | 番茄/抖音充值均为 App Store 内购，**无第三方支付入口**，CJPay 链从未执行 |
+| SafeGuard 调用方是否在 Swift 侧 | 路径字符串 `0x113CD8E8A` 对该页 120 个 adrp 候选扫描无命中；Swift 字面量走 `__swift5_reflstr` 相对偏移表，ARM64 引用扫描覆盖不到 |
+| `is_env_abnormal` 的后端语义 | 需服务端对照；本文只陈述"写失败→1"的实测与指令 |
+
+---
+
+## 九、研究结论
+
+1. **三款 App 共用一套组件**：符号名表 15/15 逐字节同一（偏移恒定 `0x41DF00`），规则引擎 VM 原语逐字节同构，差别只在**规则配置规模**（番茄/红果 15 条，抖音 66 条）。
+
+2. **真实检测面比原报告描述窄得多**：`fopen` 五探针是死代码；`statfs` 93 路径在本机全 miss；`canOpenCydia` 因未声明 scheme 而恒假；`fileExistsAtPath` 链需要支付页才跑（而本机无该入口）。**唯一真正跑起来并给出非零结论的只有 `/hmd_tmp_file` 越界写（→ `is_env_abnormal=1`）与"目录名巧合命中"。**
+
+3. **规则引擎（SafeGuard）在本构建中不可达**：六路引用全 0、不在静态构造表、运行期零调用，但模块初始化确实发生过（沙盒目录存在）。它的规则数据里含 roothide 特征串，却没有任何可达路径会解密它们。
+
+4. **防静态分析的设计是系统性的**：运行期符号名解析（dlsym 名表加密）、方法 IMP 走三跳分支岛、字符串两套变体加密、子系统入口全部运行期分发——三者叠加，使"只读导入表 + 只看调用图"的分析必然遗漏检测面。这一点比"某个探针是否命中"更值得作为结论。
+
+5. **对抗的边界在服务端**：本地最强的一条（越界写）只产生一个上报字段，且语义存疑；识别与否最终由服务端结合设备指纹决定。
+
+---
+
+## 附录 A：关键地址表（番茄 / Reading，+8 校准后）
+
+| 符号 | 地址 | 说明 |
+|---|---|---|
+| `-[HMDUploadHelper headerInfo]` | 0x10A09EDBC | 上报 header 构造 |
+| `-[HMDInfo isEnvAbnormal]` | 0x10A09F728 | 环境判定入口 |
+| `statfs93 + /hmd_tmp_file` | 0x10A09F79C | 沙盒测试主体 |
+| `pred_inject_substr` | 0x1083E1854 | 5 子串谓词 |
+| `find_if` 遍历器 | 0x10A3FF458 | 谓词调用方 |
+| `probe_fopen5`（死代码） | 0x10250F8C4 / 0x10264A018 | fopen ×5 |
+| `-[CJPayEnvManager isJailBreak]` | 0x1074B6FF4 | 三探针聚合 |
+| `isSafeEnv` | 0x1074B6FDC | `!isJailBreak` |
+| `hasJailBreakFiles` | 0x1074B7034 | `fileExistsAtPath` 遍历 |
+| `canOpenCydia` | 0x1074B70B8 | `canOpenURL(cydia://)` |
+| `canGetAllAppName` | 0x1074B7138 | 应用枚举 |
+| `appendParamTo:` | 0x1074B71B8 | base64 → `cj_setObject:forKey:` |
+| `HMDCrashBinaryImage setIsEnvAbnormal:` | 0x1083B9874 | 逐镜像标记 |
+| 规则注册（15 条） | 0x10185ADF8 | SafeGuard |
+| VM 读 / 写 | 0x1019A08E4 / 0x1019A08F0 | `ctx+0x6070+idx*8` |
+| 解密 v1 / v2 | 0x109F8B83C / 0x109F778F4 | key 0xDEADBEEF |
+
+## 附录 B：脚本清单（`tools/dyn/`）
+
+| 脚本 | 用途 |
+|---|---|
+| `driver.py` | spawn/attach 驱动（含 settle-then-attach、ObjC bridge 注入、`__CONFIG__` 注入） |
+| `generic_check.js` | 地基自检（运行期字节 == 文件字节） |
+| `trace_A2.js` | HMD 链 + 注入谓词 + CJPay 观测 |
+| `deepA2.js` | 运行期函数指针扫描 + 探针调用观测 |
+| `m6b.js` | statfs 黑名单命中统计 |
+| `imgmark.js` | 逐镜像 `isEnvAbnormal`（延迟解析，无重入） |
+| `decwatch.js` | 解密调用全量观测（含 roothide 区间判定） |
+| `vmprobe.js` | 规则引擎 VM 原语计数 |
+| `jbstate.js` | 越狱环境现状 + 明文内存扫描 |
+
+`tools/` 静态侧：`machopy.py`、`objc.py`、`armxref.py`、`graph.py`、`imports.py`、`q.py`、`an.py`、`keyscan.py`、`hunt.py`、`probe.py`。
+
+---
+
+*本报告所有技术论断均以目标二进制中实际读出的指令、字符串、表结构与设备上的现场读数（寄存器/返回/backtrace/内存）为依据；未能取得直接证据的判断均已在正文与第八节标注为「推测」或「不可验证」。*
+
+```
+
+`reports/静态分析指导文档.md`:
+
+```md
+# 字节系 App 越狱检测与风控机制 —— 离线静态逆向分析指导文档
+
+> 适用范围：红果短剧、番茄小说、抖音（iOS）三款字节跳动 App 的越狱/注入检测与业务风控机制逆向研究
+> 分析方式：纯离线静态分析（IDA Pro / Ghidra），不依赖动态插桩
+> 用途：合法安全攻防研究 / 对抗赛
+> 定位说明：研究主线是把字节系的越狱/注入检测与业务风控机制本身梳理透彻；三款 App 互为补充印证，横向比对仅作为补全证据的辅助手段，不是研究目的。
+
+---
+
+## 第一部分：给 AI 分析助手的提示词（可直接复用）
+
+```
+# 任务：字节系 App 越狱检测与风控机制静态逆向分析
+
+## 角色
+你是一名资深 iOS 逆向工程与移动安全对抗研究员，精通 Mach-O 结构、
+ARM64 汇编、Objective-C/Swift 运行时与符号还原、IDA Pro 与 Ghidra 的
+静态分析工作流，以及 iOS 越狱检测、注入检测、设备风控的全部主流技术。
+本次任务为合法的安全攻防研究，分析方式为纯离线静态分析，不使用动态插桩。
+
+## 分析目标
+逆向分析字节跳动 iOS App 的越狱/注入检测与业务风控机制，搞清楚：
+它从哪些维度检测越狱与注入环境、检测逻辑如何实现、检测结果如何联动到
+上层业务风控表现（福利领取、广告发奖、活动频道、商城、网络提示等）。
+
+分析对象为以下三款字节系 App：
+1. 红果短剧
+2. 番茄小说
+3. 抖音
+
+说明：三款 App 并非为了横向对比而选取。核心目的是把字节系的检测与
+风控机制本身梳理透彻；三个 App 互为补充与印证——某个 App 中因混淆、
+加壳或延迟触发而看不清的逻辑，可借另一个 App 中更清晰的实现来佐证
+和补全，从而提高结论可信度。横向比对仅作为辅助验证手段，不是研究主线。
+
+## 检测维度（逐项定位，记录函数名/地址/所属 image）
+1. 文件系统痕迹：fileExistsAtPath/stat/access/lstat/fopen 对越狱路径
+   （Cydia、MobileSubstrate、/bin/bash、/etc/apt、/var/jb、rootless 路径）的检查
+2. URL Scheme：canOpenURL 对 cydia/sileo/zbra/filza 的探测，及 Info.plist
+   的 LSApplicationQueriesSchemes 声明
+3. 动态库/注入检测：_dyld_image_count/_dyld_get_image_name 遍历、
+   DYLD_INSERT_LIBRARIES 环境变量、对 Substrate/libhooker/frida 的匹配
+4. 反调试/系统调用：ptrace(PT_DENY_ATTACH)、sysctl 查 P_TRACED、
+   fork 行为判定、syscall 直调绕过
+5. 符号链接/挂载：lstat 判 S_IFLNK、根分区 remount rw 检测、getfsstat
+6. 沙盒完整性：越界读写测试
+7. 代码签名/完整性：cryptid、entitlements、重签名与砸壳痕迹检测
+8. 反 Hook/反插桩：关键函数 inline hook 校验、frida 特征、线程名检测
+9. 服务端联合判定：越狱特征采集与上报（通过网络相关调用点静态推断）
+
+## 风控表现层分析（业务侧，与底层检测联动——重点）
+越狱/注入检测往往不直接崩溃，而驱动上层业务做软降级。需还原
+"检测结果 → 业务降级"的完整调用链，证明底层判定与上层表现的数据流：
+1. 福利/激励：领取金币红包、观看激励广告时的环境校验与拒发/少发逻辑
+2. 活动/频道提示："活动频道异常/暂不可用"的触发条件与判定函数
+3. 网络异常伪装：风控拦截伪装成"网络异常/请稍后重试"的真实拦截点
+4. 注入/插件专项（抖音为主）：对注入 tweak 环境提示"版本过低/请更新"
+   的判定链；抖音商城进入/下单/支付的"设备异常"拦截逻辑；区分本地判定、
+   服务端判定、本地采集+服务端下发
+5. 设备指纹：采集项（越狱标志是否在内）、加密/编码、上报接口
+对每种表现追溯"哪个检测维度触发了它"，形成底层检测↔上层表现映射。
+
+## 方法论（纯静态，按序执行）
+1. 解包：解压 IPA，读 Info.plist，otool -L/-l 看依赖与 load commands，
+   判断 cryptid 加壳状态
+2. 若已有砸壳后二进制则直接分析；加密二进制需先获得脱壳 Mach-O
+3. IDA/Ghidra 加载：字符串搜索+交叉引用、导入符号调用点、
+   ObjC/Swift 方法命名（isJailbroken/detect/security/check 等）定位检测逻辑，
+   还原完整判定链与汇编
+4. 辅助验证：当某 App 的某处逻辑看不清时，查另一 App 中的对应实现
+   （相同符号/字符串/结构）来补全和印证，不作为独立分析目标
+
+## 硬性约束（严格遵守）
+- 所有观点、结论、技术判断，必须用从目标二进制中实际还原、反编译或
+  静态 dump 出的真实代码/汇编/字符串/符号作为佐证。
+- 严禁编写假设性示例代码（demo/举例代码）来佐证观点。凡出现的代码片段
+  必须是从目标 App 真实提取或反编译还原的产物，并标明来源
+  （哪个 App、哪个函数、什么地址/image）。
+- 无法还原出代码证据的推测，必须明确标注"推测"，不得与已证实结论混淆。
+
+## 最终产出
+一份技术博客风格的逆向分析总结文章，尽可能详细，结构：
+1. 背景与分析目标
+2. 分析环境、工具链、App 基本信息（版本、加壳情况）
+3. 越狱/注入检测机制梳理（按检测维度组织，配检测点清单表与代码证据）
+4. 底层检测→上层风控表现映射分析（核心，含福利/广告/活动/网络伪装/
+   抖音注入提示版本过低/商城设备异常等场景的真实拦截逻辑）
+5. 设备指纹采集与服务端联合判定分析（还原到采集与上报点）
+6. 反检测/绕过思路与对抗要点
+7. 结论
+全文技术论断均以还原出的真实代码/汇编/符号佐证；交叉比对仅在需要
+补全证据时作为辅助手段出现，不单列章节。
+```
+
+---
+
+## 第二部分：静态分析实操流程（IDA / Ghidra）
+
+### 阶段 0 — 解包与侦察
+1. `unzip xxx.ipa`，进入 `Payload/xxx.app/`
+2. 读 `Info.plist`：重点看 `LSApplicationQueriesSchemes`（往往直接暴露要探测的 scheme，如 cydia/sileo）、`CFBundleShortVersionString`（记录版本）
+3. `otool -L 主二进制`：看链接了哪些库，是否有可疑的安全/风控相关 framework
+4. `otool -l 主二进制 | grep -A4 LC_ENCRYPTION_INFO`：看 `cryptid`
+   - `cryptid = 0` → 未加密，可直接分析
+   - `cryptid = 1` → FairPlay 加密，需先获得脱壳后的 Mach-O 再做静态分析
+5. 字节系 App 多为超大体积、含大量自研组件，注意识别 App 内嵌的 `.framework`（在 `xxx.app/Frameworks/` 下），**安全/风控逻辑很可能封装在独立 framework 内**，优先定位这些组件。
+
+### 阶段 1 — 加载与预处理
+- IDA：加载主二进制及各 Frameworks，等待自动分析完成；启用 Objective-C 解析，确保 selector/class 还原
+- Ghidra：新建 project，导入所有 Mach-O，运行 auto-analysis（勾选 Objective-C / Swift 相关分析器）
+- 对 Swift 代码：注意 mangled 符号（`$s` 开头），用 `swift-demangle` 还原；IDA 新版本与 Ghidra 均有 Swift demangle 支持
+
+### 阶段 2 — 定位检测逻辑（见第三部分 checklist）
+
+### 阶段 3 — 还原判定链
+对每个命中的检测点：
+1. 从 API 调用处出发，向上回溯谁调用了它（xref to）
+2. 向下跟踪返回值如何汇入最终的布尔判定
+3. 还原汇编 → 伪代码，记录函数地址、所属 image、判定逻辑
+4. 标注这是"本地直接判定"还是"结果写入某字段后参与后续网络请求"
+5. 对联动到业务风控的检测点，继续向上追到业务入口（福利、广告、商城等），还原"检测 → 业务降级"的完整调用链
+
+### 阶段 4 — 辅助验证（非主线）
+当某个 App 的某处逻辑因混淆、加壳或延迟触发而看不清时，到另一个 App 中查找对应实现来补全印证。判定两处是否为同一逻辑的参考依据：
+
+| 参考维度 | 说明 |
+|---|---|
+| mangled 符号名 | 完全相同的 C++/Swift mangled 符号 → 强参考 |
+| 字符串常量表 | 相同的越狱路径黑名单、顺序一致 → 强参考 |
+| 函数结构 | 基本块数量/布局/调用顺序高度一致 → 中强参考 |
+| framework 名 | 内嵌同名 framework → 强参考 |
+| 常量/magic | 相同的加密 key、相同的指纹字段名 → 中强参考 |
+
+此步骤仅用于补全证据、提高单点结论可信度，不单独产出"横向对比"结论。
+
+---
+
+## 第三部分：静态搜索 Checklist（照着搜，系统覆盖不漏点）
+
+### A. 字符串搜索（IDA: Shift+F12 / Ghidra: Window→Defined Strings）
+搜索下列关键字，命中后对字符串做交叉引用（xref）定位检测函数。
+
+**越狱路径 / 工具名类**
+```
+Cydia            cydia            Sileo           sileo
+Zebra            zbra             Filza           filza
+MobileSubstrate  substrate        TweakInject     libhooker
+substitute       Dopamine         var/jb          /var/jb
+bfdecrypt        checkra1n        unc0ver         taurine
+/bin/bash        /bin/sh          /usr/sbin/sshd  /etc/apt
+/private/var/lib/apt   /Library/MobileSubstrate
+apt              dpkg             /usr/bin/ssh    /var/stash
+```
+
+**检测 / 安全语义类**
+```
+jailbreak        jailbroken       isJailbroken    jb
+rootless         detect           security        risk
+environment      integrity        tamper          hook
+inject           injected         debug           debugger
+anti             frida            27042           gum-js-loop
+```
+
+**风控 / 业务表现类（用于定位上层拦截）**
+```
+设备异常          环境异常          版本过低         请更新
+活动异常          活动频道          暂不可用         风险
+风控              网络异常          请稍后重试       device_risk
+risk_score        safe             verify          coin
+金币              红包              奖励            激励
+```
+
+### B. 导入符号 / 函数调用点搜索（IDA: Imports 窗口 / Ghidra: Symbol Tree→Imports）
+定位下列符号的所有调用点（xref），逐个判断是否用于检测：
+
+**文件系统**
+```
+stat  lstat  fstat  access  fopen  open  opendir
+_NSFileManager_fileExistsAtPath_
+```
+**动态库 / dyld**
+```
+_dyld_image_count  _dyld_get_image_name  _dyld_get_image_header
+dlopen  dlsym  getenv   （getenv 重点看是否查 DYLD_INSERT_LIBRARIES）
+```
+**反调试 / 系统调用**
+```
+ptrace  sysctl  sysctlbyname  getpid  fork  vfork  syscall
+```
+**挂载 / 文件系统状态**
+```
+getfsstat  statfs  statvfs
+```
+**URL Scheme**
+```
+canOpenURL:   openURL:
+```
+**签名 / 进程信息**
+```
+csops  SecTaskCreate  task_info  proc_pidpath  _NSBundle_...
+```
+
+### C. Objective-C 方法命名扫描（class-dump 或 IDA 的 Classes 窗口）
+搜方法名/类名中包含下列词根的项：
+```
+Jailbreak  jailbroken  detect  Detect  security  Security
+check  Check  verify  risk  Risk  integrity  environment
+device  Device  fingerprint  safe  Safe  tamper  hook
+```
+字节系常见自研前缀（经验性，需现场核实）：如 `BD`、`TT`、`AWE`（抖音 Aweme）、`Tomato/Novel`（番茄）等类前缀，可用于区分组件归属。
+
+### D. Swift 符号还原
+- 对 `$s` 开头的 mangled 符号跑 demangle，关注还原后含 `Jailbreak/Security/Risk/Detect` 的类型与方法
+- Swift 的检测逻辑常封装在 struct/enum 的计算属性里，注意 getter 符号
+
+### E. 内嵌 Framework 专项
+- 逐个分析 `xxx.app/Frameworks/*.framework`，定位安全/风控相关组件
+- 对已定位的安全 framework，优先还原其对外导出的检测入口函数
+- （辅助）若某 framework 在多个 App 中同名出现，可对其做二进制 diff（BinDiff / Ghidra Version Tracking / Diaphora），借清晰的一方补全另一方被混淆的逻辑
+
+---
+
+## 第四部分：证据记录规范（强约束）
+
+所有写入最终文章的技术论断，必须配套以下任一真实证据，并标注来源：
+
+- 反编译伪代码片段 —— 标注 `[来源：App名 / 函数名 / 地址 / image]`
+- 关键汇编片段 —— 同上
+- 字符串 / 符号 —— 标注在哪个二进制的哪个位置
+- 交叉引用关系图
+
+**禁止事项**：
+- 禁止用自己编写的示例/演示代码来"说明"某机制如何工作
+- 禁止在无代码证据时下确定性结论（只能标注为"推测"）
+
+建议用统一的检测点登记表贯穿分析：
+
+| App | 检测维度 | 涉及 API/路径/字符串 | 函数名/地址/image | 判定逻辑（还原） | 本地/服务端 | 关联的上层风控表现 | 证据形式 |
+|---|---|---|---|---|---|---|---|
+
+---
+
+## 第五部分：最终文章结构（技术博客格式）
+
+1. **背景与分析目标** —— 字节系风控研究的价值、分析范围
+2. **分析环境与对象** —— 工具链（IDA/Ghidra 版本）、三款 App 版本与加壳情况、脱壳说明
+3. **越狱/注入检测机制梳理（核心）** —— 按检测维度（九大维度）组织，每个维度配检测点清单表与还原出的代码证据；说明各检测点是本地直接判定还是采集上报
+4. **底层检测 → 上层风控表现映射（核心）** —— 表格 + 调用链还原，覆盖：
+   - 福利领取金币/红包的环境校验与拒发逻辑
+   - 激励广告观看/发奖的校验
+   - 活动频道异常提示的触发条件
+   - 网络异常伪装的真实拦截点
+   - 抖音：注入插件环境提示"版本过低"的判定链
+   - 抖音商城：进入/下单/支付的"设备异常"拦截逻辑
+5. **设备指纹采集与服务端联合判定** —— 采集项（越狱标志是否在内）、加密/编码、上报接口；明确标注服务端决策为静态不可见
+6. **反检测 / 绕过思路与对抗要点** —— 含反 Hook、服务端联合判定的应对
+7. **结论** —— 字节系越狱检测与风控机制的整体画像与研究启示
+
+> 交叉比对不单列章节。当某处逻辑借助另一 App 补全时，在对应正文处以"该逻辑在 X App 中实现更清晰，据此补全/印证"的方式说明即可。
+
+---
+
+## 附录：静态分析注意事项
+
+- **大体积二进制**：抖音主二进制极大，IDA 初次分析耗时长，建议先只分析定位到的 framework 和关键函数区段
+- **混淆**：字节系安全组件可能有字符串加密、控制流平坦化（OLLVM 风格）。若字符串搜不到明文，重点转向：常量解密函数的 xref、`+[... load]` 初始化时机、以及对导入符号调用点的直接排查。此时另一 App 中混淆较轻的同类实现可作为补全参考。
+- **延迟触发**：部分检测不在启动时执行，而在进入特定业务（如商城、提现）时才触发，需从业务入口函数反向定位，而非只看 `application:didFinishLaunching`
+- **服务端边界**：纯静态无法看到服务端下发逻辑，凡涉及"采集后上报再由服务端判定"的部分，只能还原到采集与上报点，服务端决策须明确标注为静态不可见
+
+```
+
+`tools/README.md`:
+
+```md
+# tools/
+
+分析用脚本。**本目录在发布包里是占位骨架**——请把你本地 `tools/` 下的真实脚本放进对应子目录后再发布。放入前请逐个检查：删除硬编码的本机绝对路径、设备地址（UDID/IP）、私有 token，改成参数或占位符。
+
+## static/ — 静态分析（Python 3 + numpy + capstone 5.0.7）
+
+| 脚本 | 用途 |
+|---|---|
+| `machopy.py` | Mach-O / 段节 / chained fixups 解析 |
+| `objc.py` | ObjC 元数据解析（classlist / catlist / 相对方法表） |
+| `armxref.py` | ARM64 交叉引用索引（ADRP+ADD/LDR 物化、BL/B 目标、寄存器生命周期感知扫描） |
+| `graph.py` | 调用图构建 |
+| `imports.py` | 导入符号与调用点 |
+| `q.py` / `an.py` | 查询 / 分析辅助 |
+| `keyscan.py` | 解密 key 扫描 |
+| `hunt.py` / `probe.py` | 探针定位 |
+
+> 运行前提：已有**合法获取、已脱壳**的主二进制。本仓库不提供二进制。
+
+## dyn/ — Frida 只读观测
+
+| 脚本 | 用途 |
+|---|---|
+| `driver.py` | spawn/attach 驱动（settle-then-attach、ObjC bridge 注入、`__CONFIG__` 注入） |
+| `generic_check.js` | 地基自检（运行期字节 == 文件字节） |
+| `trace_A2.js` | HMD 链 + 注入谓词 + CJPay 观测 |
+| `deepA2.js` | 运行期函数指针扫描 + 探针调用观测 |
+| `m6b.js` | statfs 黑名单命中统计 |
+| `imgmark.js` | 逐镜像 `isEnvAbnormal`（延迟解析，无重入） |
+| `decwatch.js` | 解密调用全量观测（含 roothide 区间判定） |
+| `vmprobe.js` | 规则引擎 VM 原语计数 |
+| `jbstate.js` | 越狱环境现状 + 明文内存扫描 |
+
+> 纪律：全程只读，不修改返回值/字段；hook 回调内不做 ObjC 调用（放 `setTimeout`）。
+> host/device 版本错位时必须用 `Module.getGlobalExportByName`。
+
+```
+
+`tools/dyn/README.md`:
+
+```md
+# 把你本地 tools/dyn/ 下的真实 Frida 脚本放到这里（见 ../README.md 清单）。
+发布前检查：删除硬编码本机路径、设备 UDID/IP、私有 token。
+
+```
+
+`tools/static/README.md`:
+
+```md
+# 把你本地 tools/static/ 下的真实脚本放到这里（见 ../README.md 清单）。
+发布前检查：删除硬编码本机路径、设备 UDID/IP、私有 token。
+
+```
