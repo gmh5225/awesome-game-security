@@ -4149,6 +4149,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://technology.riotgames.com/news/riots-approach-anti-cheat
 - https://github.com/gmh5225/WeirdAntiCheatIdeas
 - https://github.com/xhscfq/anti-cheat-research-index [Structured research index covering anti-cheat architecture, Windows kernel security, VT-x/EPT virtualization, graphics integrity, and reverse engineering references]
+- https://github.com/ANTI-CHEAT-OBSERVATORY/ANTI-CHEAT-OBSERVATORY.github.io [Version-scoped, source-backed anti-cheat catalog (Astro/TypeScript) with scoped claims, evidence origins, dispute handling, and static GitHub Pages export]
 - https://github.com/thexin7/kernel-cve-analysis [Defensive write-ups on publicly disclosed Windows kernel CVEs from an anti-cheat/EDR telemetry and mitigation perspective]
 - https://github.com/gmh5225/AntiCheat-chrysalis
 - https://www.unknowncheats.me/forum/anti-cheat-bypass/481731-tutorial-ring3-anticheat-project.html
