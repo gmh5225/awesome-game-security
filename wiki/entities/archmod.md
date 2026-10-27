@@ -20,4 +20,4 @@ Its in-progress native engine reads and writes game memory directly on Linux thr
 
 ## Related
 
-[[proton]] · [[cheat-engine]] · [[freeplay]] · [[cttrainer]] · [[elden-ring-ct-tga]] · [[counterstrikesource-linux-trainer]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]]
+[[proton]] · [[deckcheatz]] · [[ce-decky]] · [[cheat-engine]] · [[freeplay]] · [[cttrainer]] · [[elden-ring-ct-tga]] · [[counterstrikesource-linux-trainer]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]]

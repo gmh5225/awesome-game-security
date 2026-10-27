@@ -1007,6 +1007,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [DEF CON Dreamcast PlanetWeb Research](entities/defcon-dreamcast-planetweb-research.md) — DEF CON demo; PlanetWeb v3.0 Eden RCE + `setRawDeviceID` memory write + MIME stack overflow → native SH-4 DOOM without debugger; Python DNS/HTTP/POP3 + Java staging + Flycast patch; vintage console browser attack-surface RE (piffd0s; Cheat)
 - [defender-control](entities/defender-control.md) — C# GUI: Defender real-time / Tamper Protection / sample-submission toggles (registry/service)
 - [Dead By Daylight Copy](entities/dead-by-daylight.md) — UE4 asymmetric-horror clone (physics / animation / asset pipelines; Game Develop / source)
+- [DeckCheatz](entities/deckcheatz.md) — AGPL Rust Proton compatibility-tool trainer launcher (Steam Deck/Linux; Flatpak/Nix; Tokio/Clap; optional SQLite; Steam library/Steamworks/proton-call/Decky flags; WeMod/PLITCH-style trainer UI under Wine/Proton)
 - [Delamain](entities/delamain.md) — headless JADX MCP server (APK/DEX/AAB; Frida hooks; AI agents)
 - [DelphiHelper](entities/delphi-helper.md) — x86/x86_64 Delphi binary analysis tooling (eset; cheat / IDA Plugins; py7zr setup)
 - [DelphiReSym](entities/delphiresym.md) — Ghidra/pyghidra Delphi symbol recovery (function signatures, params, vtables from compiler metadata; modern Delphi; malware/legacy RE; WenzWenzWenz)

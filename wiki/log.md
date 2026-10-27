@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-27** — ingest `description:DeckCheatz/DeckCheatz`: created entity [[deckcheatz]] (Proton compatibility-tool Rust trainer launcher; Flatpak/Nix; WeMod/PLITCH-style workflows; confidence medium); description cite on [[overviews/game-hacking]] Linux Proton trainer cluster; cross-links on [[archmod]]; `index.md` entity blurb.
+
 - **2026-10-27** — ingest `description:marclourens19/ghostline`: created entity [[ghostline]] (Godot 4 C# GHST input replay + ASP.NET Core headless fixed-point verification + PostgreSQL leaderboards; confidence medium); description cites on [[overviews/anti-cheat]] server-side replay cluster + [[overviews/game-engine]] Godot deterministic-netcode lane; `index.md` entity blurb.
 
 - **2026-10-27** — ingest `readme:categories`: **Cheat** link_count **2967** / **Anti Cheat** **839** (41 sections; `NeverC & NeverD` placeholder); synced [[overviews/overview]] cross-category map + category counts, [[overviews/anti-cheat]] README map (observatory Guide cite; fixed stale Cheat ~2963 cross-link), [[overviews/dma-attack]], [[overviews/game-hacking]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
