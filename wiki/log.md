@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-27** — ingest `description:marclourens19/ghostline`: created entity [[ghostline]] (Godot 4 C# GHST input replay + ASP.NET Core headless fixed-point verification + PostgreSQL leaderboards; confidence medium); description cites on [[overviews/anti-cheat]] server-side replay cluster + [[overviews/game-engine]] Godot deterministic-netcode lane; `index.md` entity blurb.
+
 - **2026-10-27** — ingest `readme:categories`: **Cheat** link_count **2967** / **Anti Cheat** **839** (41 sections; `NeverC & NeverD` placeholder); synced [[overviews/overview]] cross-category map + category counts, [[overviews/anti-cheat]] README map (observatory Guide cite; fixed stale Cheat ~2963 cross-link), [[overviews/dma-attack]], [[overviews/game-hacking]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
 
 - **2026-10-27** — lint (agent): read `wiki/AGENTS.md`; **Overviews** (9): `anti-cheat`, `dma-attack`, `game-engine`, `game-hacking`, `graphics-api`, `mobile-security`, `overview`, `reverse-engineering`, `windows-kernel`; **Concepts** (51) in `wiki/concepts/`; **Entities** (4199) in `wiki/entities/`; `index.md` vs disk — 4259 catalog paths, 0 missing, 0 dead; overview + index ## Overviews/## Concepts blurb [[wikilink]] spot-check (13981 links), 0 broken; bootstrap not required; no repairs (`log.md` only).

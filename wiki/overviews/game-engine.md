@@ -629,6 +629,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__Cunthook.md
   - wiki/sources/descriptions/erkkah__tigr.md
   - wiki/sources/descriptions/euuuuuuan__gatewarden-public.md
+  - wiki/sources/descriptions/marclourens19__ghostline.md
   - wiki/sources/descriptions/eversinc33__1.6_C2.md
   - wiki/sources/descriptions/dreamstalker__rehlds.md
   - wiki/sources/descriptions/alliedmodders__hl2sdk.md
@@ -717,7 +718,7 @@ sources:
   - wiki/sources/descriptions/AnonymoDGH__cheat-mcp.md
   - wiki/sources/descriptions/0111-0222__uc-mcp.md
   - wiki/sources/descriptions/abczsl520__game-quality-gates.md
-updated: 2026-10-26
+updated: 2026-10-27
 confidence: high
 ---
 
@@ -791,6 +792,7 @@ Editor-facing MCP bridges in the README's **MCP server** subcategory let AI agen
 - **Void Engine** — [[void-engine]] Godot 4.x plugin with WhiteVoid AntiCheat autoload (debugger/process/window detection, honeypot integrity checks, HWID ban enforcement), VoidNet multiplayer stack, and VoidForge editor tooling (lannden1245; Anti Cheat / Open Source Anti Cheat System) (source: wiki/sources/descriptions/lannden1245__Void-Engine.md)
 - **Rearguard** — [[rearguard]] Godot 4 GDExtension + Rust server zero-access AC SDK (per-match server-seeded mouse/recoil input probes; aimbot/recoil-macro detection; telemetry pipeline + simulation/evaluation harness; Linux/Windows without kernel driver; GloriousBrendon; Anti Cheat / Open Source Anti Cheat System) (source: wiki/sources/descriptions/GloriousBrendon__rearguard.md)
 - **dot-server-security** — [[dot-server-security]] Godot 4 dedicated-server security addon (GDScript rule engine; movement re-simulation + shot validation; sliding-window rate limits; warn/gag/mute/kick/ban escalation; external ban feeds; dry-run default; modcommunity; Anti Cheat / Open Source Anti Cheat System) (source: wiki/sources/descriptions/modcommunity__dot-server-security.md)
+- **Ghostline** — [[ghostline]] Godot 4 C# client + shared fixed-point C# sim; GHST input replay stream; ASP.NET Core headless re-simulation for PostgreSQL leaderboards; HTML5 GHST tick inspector (marclourens19; deterministic netcode + server-side score verification reference; Anti Cheat / Game Engine) (source: wiki/sources/descriptions/marclourens19__ghostline.md)
 - **guard-game** — [[guard-game]] Node.js engine-agnostic server-side AC (Parko-Developer; world-profile movement/action validation; TCP JSON lines + HTTP ingest; Unity/Godot/Roblox/JS SDKs; strike ladder + admin API; optional HMAC signing; Anti Cheat / Open Source Anti Cheat System) (source: wiki/sources/descriptions/Parko-Developer__guard-game.md)
 - **LeviAntiCheat** — [[levi-anticheat]] C++ LeviLamina plugin for Minecraft Bedrock BDS (X-ray/fly/speed/reach/auto-click/invalid-inventory/malformed-packet checks; obfuscation Anti-Xray engine modes; violation-level ban/mute; item-dupe and crafter-crash fixes; JSON config + hot reload; LiteLDev; Anti Cheat / Open Source Anti Cheat System / game:minecraft) (source: wiki/sources/descriptions/LiteLDev__LeviAntiCheat.md)
 - **DayZ MCP** — [[dayz-mcp]] Enfusion mod-dev automation (Python MCP + Enforce Script bridge; 53 server-authoritative tools for addon pack/build, test instances, entity/vehicle control, telemetry, screenshots, structured state assertions; localhost session leases; willy92wins) (source: wiki/sources/descriptions/willy92wins__dayz-mcp.md)
