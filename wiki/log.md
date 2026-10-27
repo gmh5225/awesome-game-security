@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-27** — ingest `description:5hux1n/bytedance-jb-research`: enriched entity [[bytedance-jb-research]] (static/dynamic analysis stack, rule-engine VMs, HMD telemetry, risk-control paths, defensive scope; confidence medium); description cites on [[overviews/mobile-security]] iOS integrity-RE lane + [[overviews/reverse-engineering]] Mobile/iOS cluster; `index.md` entity blurb.
+
 - **2026-10-27** — ingest `description:AndrewDisco/RektAntiCheat`: enriched entity [[rekt-anti-cheat]] (detection stack, PacketEvents/Netty path, community-consolidated checks; confidence medium); description cite on [[overviews/game-hacking]] Java Bukkit packet-inspection cluster; `index.md` entity blurb.
 
 - **2026-10-27** — ingest `readme:categories`: **Anti Cheat** link_count **841** (+2; marclourens19/[[ghostline]] GHST replay verification + AndrewDisco/[[rekt-anti-cheat]] Java Minecraft RAC) / **Cheat** **2967** (+1; 5hux1n/[[bytedance-jb-research]] ByteDance iOS jailbreak/integrity RE corpus) / other major README sections unchanged; 41 top-level sections (`NeverC & NeverD` placeholder); synced [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/game-hacking]], [[overviews/mobile-security]]; entities [[rekt-anti-cheat]] + [[bytedance-jb-research]]; light `index.md` section notes (no per-category pages).

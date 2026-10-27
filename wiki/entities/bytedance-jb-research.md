@@ -11,9 +11,23 @@ confidence: medium
 
 # ByteDance JB Research
 
-Documented **iOS reverse-engineering** corpus for jailbreak, injection, and device-integrity detection shared across several **ByteDance** apps. Combines static analysis (Capstone, NumPy, custom Mach-O and Objective-C metadata/xref indexing, offline encrypted string-pool decryption) with read-only **Frida** observation and **IDA Hex-Rays** validation—not a bypass toolkit. (source: wiki/sources/descriptions/5hux1n__bytedance-jb-research.md)
+Documented **iOS reverse-engineering** corpus for jailbreak, injection, and device-integrity detection shared across several **ByteDance** apps—not a bypass toolkit or binary drop. (source: wiki/sources/descriptions/5hux1n__bytedance-jb-research.md)
 
-Reports and reproducible scripts explain shared security components, rule-engine VMs, HMD telemetry linkage, and which probes run versus dead or environment-specific code. Aimed at defensive mobile researchers studying iOS anti-tamper and device-trust mechanisms.
+Published reports, artifacts, and reproducible scripts map how client checks run, what they observe, and how results feed **reporting and risk-control** paths on the server side.
+
+## Analysis stack
+
+**Static:** Python tooling on Capstone and NumPy with custom **Mach-O** and **Objective-C** metadata and cross-reference indexing; offline bulk decryption of encrypted string pools.
+
+**Dynamic validation:** read-only **Frida** hooks for observation; independent confirmation with **IDA Pro Hex-Rays** decompilation.
+
+## Documented components
+
+Shared security modules, **rule-engine VMs**, **HMD telemetry** linkage, and explicit distinction between probes that execute in production versus dead or environment-specific code paths.
+
+## Audience
+
+Defensive mobile security researchers, reverse engineers, and teams studying iOS anti-tamper and device-trust mechanisms—not shipping bypass tools.
 
 ## Links
 
