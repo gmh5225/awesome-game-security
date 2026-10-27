@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-27** — ingest `description:Jstar269/nakagawa-recomp`: enriched entity [[nakagawa-recomp]] (sal063 fork; MIPS+VFPU guest runtime; Vulkan/SDL3 launcher; Python codegen, cosimulation, decomp.me export, optional real-PSP verify; hst-decomp workflow; confidence medium); cited on [[concepts/static-runtime-evidence]] PSP static-recomp cluster + [[overviews/reverse-engineering]] Console/QEMU lane; `index.md` entity blurb.
+
 - **2026-10-27** — ingest `description:ressiws/AegisAC`: enriched entity [[aegis-ac-cs2]] (SwiftlyS2 trajectory/angle + sub-tick user-command + weapon-fire/damage pairing, sliding-window sanctions, Discord webhooks; confidence high); description cites on [[overviews/anti-cheat]] CS2 server-plugin cluster + [[concepts/ai-aimbot-detection]] corpus; `index.md` entity + concept blurbs.
 
 - **2026-10-27** — ingest `readme:categories`: **Cheat** link_count **2966** (+1; Jstar269/[[nakagawa-recomp]] PSP MIPS static recomp to Windows in Source) / **Anti Cheat** **837** (+1; ressiws/[[aegis-ac-cs2]] SwiftlyS2 CS2 server-side heuristic AC) / **Game Develop** **197** / **Game Engine** ~159 / **DirectX** ~42 / **Vulkan** ~13 / **Game Network** ~34 and other major README sections unchanged; 41 top-level sections (`NeverC & NeverD` placeholder); synced [[overviews/overview]], [[overviews/game-hacking]], [[overviews/anti-cheat]], [[overviews/reverse-engineering]], and [[overviews/dma-attack]]; entities [[nakagawa-recomp]] + [[aegis-ac-cs2]]; light `index.md` section notes (no per-category pages).

@@ -22,7 +22,8 @@ sources:
   - wiki/sources/descriptions/formix__sre-re.md
   - wiki/sources/descriptions/Manya3084__SF33RDSXBRecompo.md
   - wiki/sources/descriptions/everettjf__copyapp.md
-updated: 2026-10-24
+  - wiki/sources/descriptions/Jstar269__nakagawa-recomp.md
+updated: 2026-10-27
 confidence: high
 ---
 
@@ -80,6 +81,8 @@ Switch AArch64 static recompilation to native Windows x64 such as [[smo-recomp]]
 
 [[letsgo-recomp]] (raulzrrs; *Pokémon Let's Go* Switch 1.0.0 on LAS Recomp; AArch64→x86-64 lift with Horizon system HLE, NVN→Vulkan, Python/Zig one-time per-dump codegen; FSR upscaling, mod hooks, memory watch, profiling, and RenderDoc integration) extends that Switch static-recomp cluster—label which NVN/audio paths are fully reimplemented vs developer-instrumented before treating the Windows build as a renderer reference. (source: wiki/sources/descriptions/raulzrrs__letsgo-recomp.md)
 
+PSP MIPS static recompilation to native Windows such as [[nakagawa-recomp]] (Jstar269; sal063 fork lineage; EBOOT→C lift with MIPS guest runtime and VFPU support tables; Vulkan + SDL3 launcher/player; Python codegen, pipeline tests, cosimulation against a reference interpreter, decomp.me export, optional real-PSP verification; BYO disc) applies the same static/runtime split on a handheld MIPS+VFPU target—separate lifted guest code from reimplemented PSP services and GPU paths before citing gameplay or preservation claims. (source: wiki/sources/descriptions/Jstar269__nakagawa-recomp.md)
+
 [[ultimate-mortal-kombat-3-ios-decompiled]] (MaryNCRT; iOS armv7 Mach-O clean-room Ghidra lift to verified C with armrecomp/differential oracle tests and Win32/SDL2 desktop hosts on OpenGL/Vulkan/D3D12) illustrates mobile fighting-game preservation where lift fidelity is argued via per-function differential checks rather than Switch-style NVN HLE—separate LIME engine/format recovery from GPU backend choice before citing gameplay logic. (source: wiki/sources/descriptions/MaryNCRT__Ultimate-Mortal-Kombat-3-iOS-Decompiled.md)
 
 [[copyapp]] (everettjf; Python CLI + agent workflow on USB-attached **iOS/macOS** targets) chains device collection (UI/accessibility trees, sandbox, optional Frida traces; FairPlay-related decrypt on jailbroken paths) with optional Ghidra/Hopper/ARM64 static follow-on through **verifiable evidence cases** and playbooks—label which observations came from standard capture vs jailbroken/runtime lanes before treating rebuilt flows as behaviorally equivalent to the original app. (source: wiki/sources/descriptions/everettjf__copyapp.md)
@@ -96,4 +99,4 @@ Game-server PC checks often combine **offline host artifacts** (Prefetch, Amcach
 
 ## Related
 
-[[binary-evidence]] · [[binary-diffing]] · [[dynamic-binary-instrumentation]] · [[jsrf-recomp]] · [[ngbrecomp]] · [[sf33rdsxbrecompo]] · [[nfsu2recomp]] · [[sc2-android-recomp]] · [[smo-recomp]] · [[letsgo-recomp]] · [[ultimate-mortal-kombat-3-ios-decompiled]] · [[copyapp]] · [[wwe-svr2009-recomp]] · [[nhl-legacy-remaster]] · [[saturnkit]] · [[motorstorm-mv-recomp]] · [[dead-rising-2-case-zero-xenon-recomp]] · [[mcla-pc]] · [[pipeline-disasm]] · [[frogman]] · [[sre-re]] · [[openmcm2]] · [[ttd-capa-cpp]] · [[custos]] · [[mixed-boolean-arithmetic]] · [[control-flow-flattening]] · [[research-rigor]] · [[overviews/reverse-engineering]] · [[overviews/windows-kernel]] · [[overviews/game-engine]]
+[[binary-evidence]] · [[binary-diffing]] · [[dynamic-binary-instrumentation]] · [[jsrf-recomp]] · [[ngbrecomp]] · [[sf33rdsxbrecompo]] · [[nfsu2recomp]] · [[sc2-android-recomp]] · [[smo-recomp]] · [[letsgo-recomp]] · [[nakagawa-recomp]] · [[ultimate-mortal-kombat-3-ios-decompiled]] · [[copyapp]] · [[wwe-svr2009-recomp]] · [[nhl-legacy-remaster]] · [[saturnkit]] · [[motorstorm-mv-recomp]] · [[dead-rising-2-case-zero-xenon-recomp]] · [[mcla-pc]] · [[pipeline-disasm]] · [[frogman]] · [[sre-re]] · [[openmcm2]] · [[ttd-capa-cpp]] · [[custos]] · [[mixed-boolean-arithmetic]] · [[control-flow-flattening]] · [[research-rigor]] · [[overviews/reverse-engineering]] · [[overviews/windows-kernel]] · [[overviews/game-engine]]
