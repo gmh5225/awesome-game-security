@@ -16,7 +16,7 @@ Android application (**VM Studio**) that runs a **full guest Android virtual mac
 
 **Audience:** developers and researchers who need a sandboxed, hook-friendly Android environment for reverse engineering, modding, and testing how games and anti-cheat systems behave under virtualization, root, and instrumentation.
 
-Sits in the app-virtualization lane beside container clones ([[virtual-app]]), host-no-root Twoyi sandboxes ([[zn-toolbox]]), and hypervisor-backed on-phone VMs ([[droidvm]])—stronger isolation than app cloning, with explicit root/Xposed tooling inside the guest.
+Sits in the app-virtualization lane beside container clones ([[virtual-app]]), host-no-root Twoyi sandboxes ([[zn-toolbox]]), Binder-proxy sandboxes such as [[shit-jumping-vm]] (no-root multi-instance), and hypervisor-backed on-phone VMs ([[droidvm]])—stronger isolation than app cloning, with explicit root/Xposed tooling inside the guest.
 
 ## Links
 
