@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-27** — ingest `description:Zhishulo/dsh-rea-powerpack`: enriched entity [[dsh-rea-powerpack]] (architecture, engine lifecycle, version governance, analysis scope; confidence high); description cite on [[overviews/reverse-engineering]] DSH REA MCP cluster; `index.md` entity blurb.
+
 - **2026-10-27** — ingest `description:allnighter51/Iris`: enriched entity [[iris-overlay]] (module table, low-overhead framing, AC design-intent vs Vanguard/EAC/BattlEye/Ricochet, confidence high); description cite on [[concepts/anti-screenshot-capture]] WDA lane + [[overviews/game-hacking]] overlay bullet; `index.md` entity blurb.
 
 - **2026-10-27** — ingest `readme:categories`: **Cheat** link_count **2965** (+2; Zhishulo/[[dsh-rea-powerpack]] DSH REA engine install/pin/rollback in RE Tools + allnighter51/[[iris-overlay]] Rust/Tauri external Win32 HUD overlay) / **Anti Cheat** **836** / **Game Develop** **197** / **Game Engine** ~159 / **DirectX** ~42 / **Vulkan** ~13 / **Game Network** ~34 and other major README sections unchanged; 41 top-level sections (`NeverC & NeverD` placeholder); synced [[overviews/overview]], [[overviews/game-hacking]], [[overviews/reverse-engineering]], [[overviews/graphics-api]], and [[overviews/dma-attack]]; entities [[dsh-rea-powerpack]] + [[iris-overlay]]; light `index.md` section notes (no per-category pages).
