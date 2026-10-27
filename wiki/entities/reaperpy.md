@@ -15,6 +15,10 @@ confidence: high
 
 README category: **PlayStation** (live console memory RE / trainer workflow).
 
+## Prerequisites
+
+Requires a **jailbroken PS5** with the **ps5debug-NG** payload active and a desktop client on the **same network** as the console. (source: wiki/sources/descriptions/Ston3dd__ReaperPy.md)
+
 ## Capabilities
 
 - Byte patches and **x86-64 code caves** assembled with Keystone; pointer scanning; hardware watchpoints; live hex and Capstone disassembly views.
@@ -29,4 +33,4 @@ Targets researchers and mod authors who need deep in-process inspection, trainer
 ## Links
 
 - Repo: https://github.com/Ston3dd/ReaperPy
-- Related: [[niak-ps5]] (homebrew library shell), [[nines]] (remote ELF inject), [[ps5-linux-loader]], [[ida-ps5-elf-plugin]]
+- Related: [[niak-ps5]] (homebrew library shell), [[nines]] (remote ELF inject), [[cheatrunner-patches]] (Title-ID XML patches), [[ps5-linux-loader]], [[ida-ps5-elf-plugin]]
