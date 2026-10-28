@@ -5396,6 +5396,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/notmaj0r/CheatRunner_Patches [Community PS4/PS5 Title-ID patch XML collection for CheatRunner (FPS, resolution, and in-game byte patches)]
 - https://github.com/niakw/NiakPS5 [Native full-screen PS5 homebrew dashboard with DualSense UI, game library, LaunchBox artwork, and local title launching]
 - https://github.com/mohasi/game-cheats [Community PS3 cheat database (Artemis-sourced) for simple-cheat-menu: editable source per TITLEID, compiled console files, and vote-driven reliability scores]
+- https://github.com/mlafeldt/codebreaker-rs [Rust library to encrypt and decrypt CodeBreaker PS2 cheat codes]
 
 
 ## Donate
