@@ -3342,6 +3342,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/AnarchDevelopment/aegledll [Internal Minecraft DX11 DLL client with ImGui overlay and MinHook hooks]
 - https://github.com/inpeacedTeams/phantom-client [Lunar Client 1.8.9 internal DLL with JNI/JVMTI, wglSwapBuffers OpenGL hook, and ImGui overlay modules]
 - https://github.com/liuyyx/nocturne-client [Cross-version Minecraft Java JVM attach injector and in-process agent (1.8.9–26.3) with mapping tables, LWJGL frame hooks, and OpenGL overlay modules]
+- https://github.com/hhhhhffd/_k0t1k-overlay [Cross-loader Minecraft Java in-game overlay via -javaagent: Byte Buddy LWJGL 2/3 hooks (OpenGL and Vulkan), no Minecraft class patches, 1.8 through 26.3+]
 - https://github.com/unleg1t/Yuri [Open-source 1.8.9 MCP hacked client with Watchdog/Polar/Grim bypass modules and bundled Java 8 runtime]
 - https://github.com/adanainv3-creator/OxClient [Minecraft Bedrock/PE MITM cheat client with protocol relay, combat/movement modules, and ESP]
 - https://github.com/eksses/EAFE [Mineflayer elytra autopilot with vanilla physics, FSM navigation, and anti-cheat-aware Bézier flight paths]
