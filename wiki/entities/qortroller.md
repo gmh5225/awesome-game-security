@@ -30,4 +30,4 @@ Primary use cases: **game security**, **anti-cheat research**, and on-chain atte
 
 ## Related
 
-[[hardware-input-injection]] · [[ai-aimbot-detection]] · [[usbmon]] · [[overviews/anti-cheat]] · [[overviews/game-hacking]]
+[[hardware-input-injection]] · [[ai-aimbot-detection]] · [[usbmon]] · [[qortime-ai]] · [[overviews/anti-cheat]] · [[overviews/game-hacking]]

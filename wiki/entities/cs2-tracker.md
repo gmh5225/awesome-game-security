@@ -4,7 +4,8 @@ kind: entity
 topics: [anti-cheat, game-hacking]
 sources:
   - wiki/sources/descriptions/LooperSalty__cs2-tracker.md
-updated: 2026-08-23
+  - wiki/sources/README-categories.md
+updated: 2026-10-28
 confidence: medium
 ---
 
@@ -38,4 +39,4 @@ Complements server-side heuristic plugins such as [[osanticheat]] and community 
 
 ## Related
 
-[[overviews/anti-cheat]] · [[overviews/game-hacking]] · [[osanticheat]] · [[cs2ac]] · [[cs2-calladmin]] · [[aimbot-detection-prototype]] · [[cs2-hybrid-anticheat-proposal]] · [[alibi]] · [[cs2-anticheat]]
+[[overviews/anti-cheat]] · [[overviews/game-hacking]] · [[osanticheat]] · [[cs2ac]] · [[cs2-calladmin]] · [[aimbot-detection-prototype]] · [[cs2-hybrid-anticheat-proposal]] · [[alibi]] · [[cs2-anticheat]] · [[qortime-ai]] · [[cs2-overwatch]] · [[yaacs-anticheat]]
