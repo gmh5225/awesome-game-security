@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-28** — ingest `description:mlafeldt/codebreaker-rs`: enriched entity [[codebreaker-rs]] (v1–v6 + v7+ RC4; mixed lists; v7-disable control lines; `no_std` little-endian crate; MIPS firmware RE + C port lineage; confidence medium); description cite on [[overviews/game-hacking]] PlayStation PS2 cheat-format lane; `index.md` entity blurb updated.
+
 - **2026-10-28** — ingest `readme:categories`: **PlayStation** link_count **12** (+1; mlafeldt/[[codebreaker-rs]] Rust CodeBreaker PS2 cheat codec) / **Cheat** **2969** / **Anti Cheat** **847** and other major README sections unchanged; 41 top-level sections (`NeverC & NeverD` placeholder); synced [[overviews/overview]], [[overviews/game-hacking]], [[overviews/reverse-engineering]]; entity [[codebreaker-rs]]; light `index.md` section notes (no per-category pages).
 
 - **2026-10-28** — lint (agent, Cursor lint pass): read `wiki/AGENTS.md`; listed **Overviews** (9): `anti-cheat`, `dma-attack`, `game-engine`, `game-hacking`, `graphics-api`, `mobile-security`, `overview`, `reverse-engineering`, `windows-kernel`; **Concepts** (51) under `wiki/concepts/`; **Entities** (4213) under `wiki/entities/`; reconciled `index.md` vs disk — 4273 catalog paths (9+51+4213), 0 missing, 0 dead, 0 duplicate index paths; nine `overviews/*.md` + `index.md` ## Overviews / ## Concepts blurb [[wikilink]] spot-check, 0 broken; wiki populated — bootstrap not required; structural repairs none (`log.md` only).

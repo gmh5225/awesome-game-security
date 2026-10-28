@@ -11,13 +11,20 @@ confidence: medium
 
 # codebreaker-rs
 
-**codebreaker-rs** (mlafeldt/codebreaker-rs) is a Rust **`no_std`** library that encrypts and decrypts cheat codes for the **CodeBreaker PlayStation 2** accessory. It implements legacy schemes from **CodeBreaker v1 through v6** and the **v7+ RC4-based** cipher, including automatic detection of mixed code lists and special control lines (for example lines that disable v7 mode). The crate targets little-endian platforms and is intended for tools and homebrew that analyze or author PS2 cheat databases. (source: wiki/sources/descriptions/mlafeldt__codebreaker-rs.md)
+**codebreaker-rs** (mlafeldt/codebreaker-rs) is a published Rust **`no_std`** library that encrypts and decrypts cheat codes for the **CodeBreaker PlayStation 2** accessory. It targets **little-endian** hosts and is meant for tools and homebrew that analyze or author PS2 cheat databases—not live online anti-cheat bypass. (source: wiki/sources/descriptions/mlafeldt__codebreaker-rs.md)
 
 README category: **PlayStation** (PS2 cheat-code format / crypto RE).
 
-## Technical notes
+## Cipher coverage
 
-Derived from reverse-engineering the device’s **MIPS firmware** crypto and porting earlier C implementations—useful for classic console cheat protection study and database tooling, not online anti-cheat bypass.
+- **CodeBreaker v1–v6:** legacy encryption schemes used by older device firmware and saved code lists.
+- **CodeBreaker v7+:** RC4-based cipher path for newer lists.
+- **Mixed lists:** automatic detection when a single database mixes v1–v6 and v7+ entries.
+- **Control lines:** special plaintext directives (for example lines that **disable v7 mode**) are recognized alongside game cheat entries. (source: wiki/sources/descriptions/mlafeldt__codebreaker-rs.md)
+
+## Provenance
+
+Implementation lineage comes from reverse-engineering the accessory’s **MIPS firmware** crypto and porting earlier **C** reference code—useful for studying classic console cheat protection, validating format parsers, and building database editors. (source: wiki/sources/descriptions/mlafeldt__codebreaker-rs.md)
 
 ## Links
 
@@ -25,4 +32,4 @@ Derived from reverse-engineering the device’s **MIPS firmware** crypto and por
 
 ## Related
 
-[[game-cheats]] · [[reaperpy]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]]
+[[game-cheats]] · [[ps2-ida-vu-micro]] · [[vifterpreter]] · [[bizhawk]] · [[reaperpy]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]]
