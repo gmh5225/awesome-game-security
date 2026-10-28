@@ -4794,6 +4794,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/afulsamet/integrity
 - https://github.com/Midi12/QueryWorkingSetExample
 - https://github.com/gmh5225/integrity_experiments [header only]
+- https://github.com/hypersenseindia/hypersense-memory-analyzer [Windows GUI for live usermode memory analysis (Moneta) flagging injection-like regions and suspicious pages, with TXT/HTML export]
 - https://github.com/DejavuSecure/DetectNtoskrnlIntegrity [Windows Kernel Security: Memory Integrity Verification with Disk Verification of ntoskrnl.exe]
 - https://github.com/starfallreverie/pfnwatch [Windows kernel PoC that scans page tables to detect kernel PTEs pointing at a protected process's physical pages (e.g. MmCopyMemory / MmMapIoSpace abuse)]
 - https://github.com/MatheuZSecurity/ksentinel [Linux kernel integrity monitor for detecting syscall hooking]
