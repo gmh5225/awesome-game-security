@@ -11,19 +11,23 @@ confidence: medium
 
 # k0t1k Overlay
 
-**k0t1k-overlay** ([hhhhhffd/_k0t1k-overlay](https://github.com/hhhhhffd/_k0t1k-overlay)) is a **Steam-style in-game overlay** for Minecraft Java Edition: one fat JAR attaches as a **`-javaagent`** instead of registering as a mod. (source: wiki/sources/descriptions/hhhhhffd___k0t1k-overlay.md)
+**k0t1k-overlay** ([hhhhhffd/_k0t1k-overlay](https://github.com/hhhhhffd/_k0t1k-overlay)) is a **Steam-style in-game overlay** for Minecraft Java Edition: a single **fat JAR** attaches as a **`-javaagent`** instead of registering as a Fabric/Forge mod. README category: Cheat / game:minecraft. (source: wiki/sources/descriptions/hhhhhffd___k0t1k-overlay.md)
+
+## Delivery
+
+Launchers pass `-javaagent:…k0t1k-overlay….jar` so instrumentation loads before the game main class; no Minecraft bytecode patches are required for the overlay core. (source: wiki/sources/descriptions/hhhhhffd___k0t1k-overlay.md)
 
 ## Hooking model
 
-**Byte Buddy** instruments LWJGL **swap, present, and input** paths so the overlay draws on the finished frame and captures input **without patching Minecraft classes**. Works across vanilla, Fabric, Forge, and NeoForge from roughly **1.8 through current releases** on **OpenGL or Vulkan**, reusing the game’s LWJGL stack for GLSL or SPIR-V rendering.
+**Byte Buddy** instruments **LWJGL 2/3** **swap, present, and input** entry points so the overlay draws on the finished frame and captures input **without patching Minecraft classes**. Supports vanilla, Fabric, Forge, and NeoForge from roughly **1.8 through 26.3+** on **OpenGL or Vulkan**, rendering with **GLSL or SPIR-V** through the game’s own LWJGL stack. (source: wiki/sources/descriptions/hhhhhffd___k0t1k-overlay.md)
 
 ## Feature surface
 
-Bundled utilities include chat history search, persistent notes, mod listings, performance HUD, optional **JCEF** in-game browsing, GPU-backed replay clips, and related QoL—aimed at players and launcher integrators as much as researchers.
+Bundled utilities include chat history search, persistent notes, mod listings, performance HUD, optional **JCEF** (Chromium) in-game browsing, GPU-backed replay clips, and related QoL—aimed at players and **launcher integrators** who want cross-version overlay features. (source: wiki/sources/descriptions/hhhhhffd___k0t1k-overlay.md)
 
 ## Research use
 
-Reference for **JVM instrumentation**, **graphics API hooking at the LWJGL boundary**, and **client-side overlay injection** beside attach-based agents such as [[nocturne-client]]—not a sanctioned multiplayer tool.
+Practical reference for **JVM instrumentation**, **graphics API hooking at the LWJGL JNI boundary**, and **client-side overlay injection** beside attach-based cheat clients such as [[nocturne-client]]—not a sanctioned multiplayer tool. Apply [[frame-observation-boundary]] when comparing LWJGL hook artifacts to native Present-path overlays. (source: wiki/sources/descriptions/hhhhhffd___k0t1k-overlay.md)
 
 ## Related
 
