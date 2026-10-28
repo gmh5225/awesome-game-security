@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-28** — lint (agent, Cursor lint pass): read `wiki/AGENTS.md`; listed **Overviews** (9): `anti-cheat`, `dma-attack`, `game-engine`, `game-hacking`, `graphics-api`, `mobile-security`, `overview`, `reverse-engineering`, `windows-kernel`; **Concepts** (51) under `wiki/concepts/`; **Entities** (4210) under `wiki/entities/`; reconciled `index.md` vs disk — 4270 catalog paths (9+51+4210), 0 missing, 0 dead, 0 duplicate index paths; nine `overviews/*.md` + `index.md` ## Overviews / ## Concepts blurb [[wikilink]] spot-check (14037 links), 0 broken, 0 malformed `]]]`; 6 expected cross-kind slug collisions ([[anti-cheat]], [[game-hacking]], [[reverse-engineering]], [[byovd]], [[dma]], [[il2cpp]]); wiki populated — bootstrap not required; structural repairs none (`log.md` only).
+
 - **2026-10-28** — ingest `description:hhhhhffd/_k0t1k-overlay`: enriched entity [[k0t1k-overlay]] (fat JAR `-javaagent`, LWJGL 2/3 Byte Buddy swap/present/input, OpenGL/Vulkan GLSL/SPIR-V, JCEF/replay QoL, launcher-integrator audience; confidence medium); description cite on [[concepts/present-hook]] JVM/LWJGL finished-frame lane; `index.md` entity blurb updated.
 
 - **2026-10-28** — ingest `readme:categories`: **Cheat** link_count **2969** (+1; hhhhhffd/[[k0t1k-overlay]] `-javaagent` Minecraft Java LWJGL 2/3 overlay via Byte Buddy) / **Anti Cheat** **846** and other major README sections unchanged; 41 top-level sections (`NeverC & NeverD` placeholder); synced [[overviews/overview]], [[overviews/game-hacking]], [[overviews/reverse-engineering]], [[overviews/dma-attack]]; entity [[k0t1k-overlay]]; light `index.md` section notes (no per-category pages).
