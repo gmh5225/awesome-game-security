@@ -1617,7 +1617,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [game-engine-detector](entities/game-engine-detector.md) — Python APK/IPA game-engine detector (Mobile Game)
 - [gamedev](entities/gamedev.md) — Chinese-language curated gamedev resource index (tools, mixed reality, engine frameworks, learning; README [Unity]; Game Develop / guide)
 - [GameDev MCP Server](entities/gamedev-mcp-server.md) — engine-agnostic C# ASP.NET Core MCP proxy host for Unity-MCP, Godot-MCP, and Unreal-MCP plugins; SignalR bridge; stdio/streamableHttp; OAuth/session handling; Docker/.NET tool (IvanMurzak; Game Develop / MCP)
-- [IvanMurzak Godot MCP](entities/ivanmurzak-godot-mcp.md) — C# Godot 4 editor addon; SignalR to GameDev MCP Server; RQL scene/resource tools; OAuth/token; runtime export boundaries (IvanMurzak; Game Develop / MCP server)
+- [IvanMurzak Godot MCP](entities/ivanmurzak-godot-mcp.md) — C# Godot 4 editor MCP addon; SignalR to ai-game.dev or GameDev MCP Server; RQL scene/resource tools, script run/diagnostics, reflection calls; OAuth/token + godot-cli npm; documented export runtime boundaries (IvanMurzak; Game Develop / MCP server)
 - [IvanMurzak Unreal MCP](entities/ivanmurzak-unreal-mcp.md) — UE C++ editor plugin + .NET MCP bridge; RQL; Blueprint/C++ automation; npm CLI; cloud or self-hosted GameDev MCP Server (IvanMurzak; Game Develop / MCP server)
 - [GameDev Resources](entities/gamedev-resources.md) — curated index across art/code/engines/tooling/design/monetization; paid/free/OSS availability labels (Kavex; Game Development resources / Game Develop / guide)
 - [bgfx](entities/bgfx.md) — cross-platform rendering library (D3D9/11/12, Metal, OpenGL/ES, Vulkan, WebGPU; shaderc GLSL cross-compiler; Rendering library)

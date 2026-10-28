@@ -7,7 +7,8 @@ sources:
   - wiki/sources/descriptions/Timehue__ShinobiX.md
   - wiki/sources/descriptions/apistol78__traktor.md
   - wiki/sources/descriptions/abczsl520__game-quality-gates.md
-updated: 2026-10-20
+  - wiki/sources/descriptions/IvanMurzak__Godot-MCP.md
+updated: 2026-10-28
 confidence: high
 ---
 
@@ -47,7 +48,7 @@ Engine identification or object discovery **alone does not establish compromise*
 
 - **Unreal** — reflection covers annotated members; native-only members and object lifetime need separate evidence. A reflected schema is not a complete C++ layout. See [[unreal-object-model]].
 - **Unity IL2CPP** — managed assemblies, stripping, C++ generation, and native compilation interact; reconstructed names or metadata do not guarantee complete type coverage or original-source recovery. See [[il2cpp]].
-- **Godot** — GDExtension compatibility is versioned (manifest documents engine release, platform, build, architecture); verify the target release rather than projecting one example onto all versions.
+- **Godot** — GDExtension compatibility is versioned (manifest documents engine release, platform, build, architecture); verify the target release rather than projecting one example onto all versions. Editor MCP bridges such as [[ivanmurzak-godot-mcp]] expose scene mutation, script execution, and reflection calls to remote agents via [[gamedev-mcp-server]]—treat live editor sessions and documented exported-build tool allowlists as separate surfaces. (source: wiki/sources/descriptions/IvanMurzak__Godot-MCP.md)
 - **Source / SDK trees** — distinguish open-source engines, licensed engine source, SDK game code, and reference-source subsets. Source SDK 2013 carries its own non-commercial license; repository visibility does not imply unrestricted reuse. See [[source-netvars]].
 - **Traktor (modular OSS engine)** — runtime, integrated editor, build toolchain, Avalanche asset server, Lua scripting, and P2P state replication are independent surfaces; editor MCP tooling adds an agent-driven workflow boundary separate from shipped player builds. See [[traktor]]. (source: wiki/sources/descriptions/apistol78__traktor.md)
 
