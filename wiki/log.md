@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-28** — lint (agent, Cursor lint pass): read `wiki/AGENTS.md`; listed **Overviews** (9): `anti-cheat`, `dma-attack`, `game-engine`, `game-hacking`, `graphics-api`, `mobile-security`, `overview`, `reverse-engineering`, `windows-kernel`; **Concepts** (51) under `wiki/concepts/`; **Entities** (4206) under `wiki/entities/`; reconciled `index.md` vs disk — 4266 catalog paths (9+51+4206), 0 missing, 0 dead, 0 duplicate index paths; nine `overviews/*.md` + `index.md` ## Overviews / ## Concepts blurb [[wikilink]] spot-check (14020 links), 0 broken, 0 malformed `]]]`; 6 expected cross-kind slug collisions ([[anti-cheat]], [[game-hacking]], [[reverse-engineering]], [[byovd]], [[dma]], [[il2cpp]]); wiki populated — bootstrap not required; structural repairs none (`log.md` only).
+
 - **2026-10-28** — ingest `description:ConWan30/qortime-ai`: enriched entity [[qortime-ai]] (Meta Muse Spark/Wonder + SAM 3.1 advisory layer; Python/JS panels; Show Your Hands; Ed25519 sidecars; lower-only VERIFIED→PARTIAL rules; confidence medium); description cites on [[overviews/anti-cheat]] console match-integrity AI lane + [[concepts/detector-operations]] lower-only AI policy; `index.md` entity blurb updated.
 
 - **2026-10-28** — ingest `description:aftermathlabs/llvm-msvc`: entity [[llvm-msvc]] (aftermathlabs; llvm-project fork; MSVC-compatible Clang driver, Windows/Android kernel-driver toolchains, custom obfuscation passes, BOLT post-link rewrite; game-security native toolchain); cited on [[overviews/reverse-engineering]] (Obfuscation lane) and [[overviews/windows-kernel]] (LLVM kernel driver toolchains); cross-linked [[oboro]], [[dll-ollvm]], [[amice]], [[limba]]; `index.md` entity blurb updated.
