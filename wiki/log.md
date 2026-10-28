@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-28** — ingest `description:IvanMurzak/Unreal-MCP`: enriched entity [[ivanmurzak-unreal-mcp]] (C++ plugin + .NET localhost IPC + embedded Python; RQL; Blueprint/C++/level/asset automation; npm CLI; per-tool enablement + optional packaged runtime hooks; ai-game.dev or [[gamedev-mcp-server]]; editor vs runtime security angles; confidence medium); description cites on [[overviews/game-engine]] IvanMurzak Unreal MCP lane + [[concepts/engine-trust-boundaries]] Unreal MCP editor/runtime split; `index.md` entity blurb updated.
+
 - **2026-10-28** — ingest `description:IvanMurzak/Godot-MCP`: enriched entity [[ivanmurzak-godot-mcp]] (MCP + SignalR to [[gamedev-mcp-server]]/ai-game.dev; RQL, script execution, reflection, screenshots, extension modules, godot-cli npm; editor vs export security angles; confidence medium); description cites on [[overviews/game-engine]] IvanMurzak Godot MCP lane + [[concepts/engine-trust-boundaries]] Godot MCP editor/export split; `index.md` entity blurb updated.
 
 - **2026-10-28** — ingest `readme:categories`: **Game Develop** link_count **199** (+2; IvanMurzak/[[ivanmurzak-unreal-mcp]] UE editor MCP plugin + [[ivanmurzak-godot-mcp]] Godot 4 SignalR addon for [[gamedev-mcp-server]]) / **Cheat** **2969** / **Anti Cheat** **846** and other major README sections unchanged; 41 top-level sections (`NeverC & NeverD` placeholder); synced [[overviews/overview]], [[overviews/game-engine]]; entities [[ivanmurzak-unreal-mcp]], [[ivanmurzak-godot-mcp]]; light `index.md` section notes (no per-category pages).
