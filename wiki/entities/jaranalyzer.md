@@ -26,4 +26,4 @@ Windows desktop tool for detecting Minecraft cheats during **screenshares**. Enu
 
 ## Related
 
-[[local-anticheat-1-8-9]] · [[phantom-client]] · [[lenrete-mod]] · [[dakotaac]] · [[minecraft-anticheatai]] · [[bytecode-viewer]] · [[echoac-poc]] · [[overviews/anti-cheat]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]]
+[[jvm-inspector]] · [[local-anticheat-1-8-9]] · [[phantom-client]] · [[lenrete-mod]] · [[dakotaac]] · [[minecraft-anticheatai]] · [[bytecode-viewer]] · [[echoac-poc]] · [[overviews/anti-cheat]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]]
