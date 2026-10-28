@@ -542,6 +542,8 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/wondeks/unity-mcp [MCP for unity]
 - https://github.com/gmh5225/mcpup [MCP for unity]
 - https://github.com/IvanMurzak/GameDev-MCP-Server [Engine-agnostic MCP server shared by Unity-MCP, Godot-MCP, and Unreal-MCP]
+- https://github.com/IvanMurzak/Unreal-MCP [Unreal Editor MCP plugin (C++ editor plugin + .NET bridge) for AI agents via GameDev-MCP-Server or ai-game.dev]
+- https://github.com/IvanMurzak/Godot-MCP [Godot 4 editor MCP addon (C#) for AI-driven scene, script, and asset tooling via GameDev-MCP-Server or ai-game.dev]
 - https://github.com/n24q02m/better-godot-mcp [Composite MCP server for Godot Engine AI-assisted game development]
 - https://github.com/zeegzoog/godot-mcp [Rust MCP server with a Godot 4 editor WebSocket bridge for live scene inspection and undoable edits, plus headless Godot CLI fallback]
 - https://github.com/gmh5225/vibe-blocks-mcp [MCP for Roblox Studio]
