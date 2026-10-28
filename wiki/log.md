@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-28** — ingest `description:KamiKitsune420/bgt-decomp-tools`: enriched entity [[bgt-decomp-tools]] (Python BGT/NVGT PE overlay→AES-256-CBC/LZ77→AngelScript lift; trial-decrypt/self-verify readers; NVGT/UPX/Ghidra headless; CLI + screen-reader GUI; preservation/accessible-game RE; confidence medium); description cites on [[concepts/static-runtime-evidence]] BGT pack-recovery lane + [[overviews/reverse-engineering]] README map; `index.md` entity blurb updated.
+
 - **2026-10-28** — ingest `description:Shrawan-13/ff-dts-analysis`: enriched entity [[ff-dts-analysis]] (Python XAPK→IL2CPP pipeline, XOR metadata decrypt, Il2CppDumper + combat-keyword scan; defensive Free Fire MAX aim-mechanics research; confidence medium); description cite on [[concepts/il2cpp]] research workflow + [[overviews/anti-cheat]] Analysis Framework lane; `index.md` entity blurb updated.
 
 - **2026-10-28** — ingest `readme:categories`: **Cheat** link_count **2968** (+1; KamiKitsune420/[[bgt-decomp-tools]] BGT/NVGT AngelScript recovery) / **Anti Cheat** **845** (+1; Shrawan-13/[[ff-dts-analysis]] Free Fire MAX defensive Il2CPP pipeline) / other major README sections unchanged; 41 top-level sections (`NeverC & NeverD` placeholder); synced [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/game-hacking]], [[overviews/reverse-engineering]], [[overviews/dma-attack]]; entities [[bgt-decomp-tools]], [[ff-dts-analysis]]; light `index.md` section notes (no per-category pages).

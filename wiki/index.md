@@ -2480,7 +2480,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [lsass-extend-mapper](entities/lsass-extend-mapper.md) — unsigned driver map via lsass address-space extend
 - [LUDA](entities/luda.md) — Lua IDA Pro scripting plugin (direct SDK access; cheat / IDA Plugins)
 - [luadecompiler](entities/luadecompiler.md) — Coldzer0 Pascal Lua 5.1–5.5 bytecode disassembler/decompiler (SSA CFG reconstruction, boolean recovery, custom opcode tables for game-modified Lua VMs; script RE / Decompiler)
-- [bgt-decomp-tools](entities/bgt-decomp-tools.md) — Python BGT/NVGT blind-audio-game AngelScript identify/recover toolkit (structure, strings, assets; KamiKitsune420; Cheat / RE Tools)
+- [bgt-decomp-tools](entities/bgt-decomp-tools.md) — Python BGT/NVGT PE overlay→AES/LZ77→AngelScript lift; trial-decrypt readers; UPX + optional Ghidra headless; CLI/screen-reader GUI (KamiKitsune420; Cheat / RE Tools)
 - [luagenny](entities/luagenny.md) — C++ Lua SDK codegen (cheat / sdk codegen; RE)
 - [luaboot](entities/luaboot.md) — fully scriptable UEFI bootloader (Lua; MIT; cheat / EFI driver research)
 - [LuaMachine](entities/luamachine.md) — UE4 Lua gameplay scripting plugin (Blueprint assets / metatables; Plugins:Unreal)

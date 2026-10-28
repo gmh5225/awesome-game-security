@@ -23,7 +23,8 @@ sources:
   - wiki/sources/descriptions/Manya3084__SF33RDSXBRecompo.md
   - wiki/sources/descriptions/everettjf__copyapp.md
   - wiki/sources/descriptions/Jstar269__nakagawa-recomp.md
-updated: 2026-10-27
+  - wiki/sources/descriptions/KamiKitsune420__bgt-decomp-tools.md
+updated: 2026-10-28
 confidence: high
 ---
 
@@ -72,6 +73,8 @@ BBC Micro preservation rebuilds such as [[pipeline-disasm]] (mattgodbolt; annota
 16-bit DOS preservation RE such as [[sre-re]] (formix; *Solar Realms Elite* 0.994b Borland C++ 3.0 BBS door binary; Ghidra including headless export; **VROOMM overlay flattening** for static study; Python disassembly/string/call annotation; encrypted `.II` save decoders) transcribes turn-by-turn rules from decompiled logic but treats a **DOSBox workflow** that re-runs formulas against the retail executable as the gate before accepting recovered specs—static Ghidra output alone is not sufficient for game-rule claims. (source: wiki/sources/descriptions/formix__sre-re.md)
 
 Windows PE32 relink harnesses such as xshxdex98/[[openmcm2]] (*Motocross Madness 2*; fixed-base MSVC 6.0 image; Ghidra export + assembly/link verification) keep **retail sections byte-for-byte** while selectively replacing routines with ported C that must match retail behavior; optional DirectDraw tracing compares renderer calls against the original path. (source: wiki/sources/descriptions/xshxdex98__OpenMCM2.md)
+
+BGT/NVGT blind-audio-game toolkits such as [[bgt-decomp-tools]] (KamiKitsune420; Python) chain **PE overlay** extraction through **AES-256-CBC** and **LZ77** before AngelScript disassembly/lift—engine readers use **trial decryption** and **self-verifying format checks** so static pack recovery is not accepted until decrypted layouts parse cleanly; optional **UPX** runtime unpack and Ghidra headless extend opcode tables when shipped binaries add packers. (source: wiki/sources/descriptions/KamiKitsune420__bgt-decomp-tools.md)
 
 Win32 PE32 static recompilation such as [[nfsu2recomp]] (TalhaMudo; *Need for Speed: Underground 2* x86→ARM64 macOS; ahead-of-time lift to C plus Win32/D3D9 runtime translation) separates **static discovery** (PE relocation recovery, recursive function discovery, indirect-call dispatch tables) from **runtime fidelity** claims about HLE shortcuts (e.g. D3DX effect framework)—label which API paths are fully lifted vs emulated before treating the native build as a reference port. (source: wiki/sources/descriptions/TalhaMudo__NFSU2Recomp.md)
 
