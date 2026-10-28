@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-28** — ingest `description:ConWan30/qortime-ai`: enriched entity [[qortime-ai]] (Meta Muse Spark/Wonder + SAM 3.1 advisory layer; Python/JS panels; Show Your Hands; Ed25519 sidecars; lower-only VERIFIED→PARTIAL rules; confidence medium); description cites on [[overviews/anti-cheat]] console match-integrity AI lane + [[concepts/detector-operations]] lower-only AI policy; `index.md` entity blurb updated.
+
 - **2026-10-28** — ingest `description:aftermathlabs/llvm-msvc`: entity [[llvm-msvc]] (aftermathlabs; llvm-project fork; MSVC-compatible Clang driver, Windows/Android kernel-driver toolchains, custom obfuscation passes, BOLT post-link rewrite; game-security native toolchain); cited on [[overviews/reverse-engineering]] (Obfuscation lane) and [[overviews/windows-kernel]] (LLVM kernel driver toolchains); cross-linked [[oboro]], [[dll-ollvm]], [[amice]], [[limba]]; `index.md` entity blurb updated.
 
 - **2026-10-28** — ingest `readme:categories`: **Anti Cheat** link_count **844** (+2; LooperSalty/[[cs2-tracker]] GSI + explainable heuristic CS2 suspicion scoring + ConWan30/[[qortime-ai]] Muse explain/red-team on deterministic console match-integrity receipts) / **Cheat** **2967** and other major README sections unchanged; 41 top-level sections (`NeverC & NeverD` placeholder); synced [[overviews/overview]], [[overviews/anti-cheat]]; entity [[qortime-ai]]; light `index.md` section notes (no per-category pages).

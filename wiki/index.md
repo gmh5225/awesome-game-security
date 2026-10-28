@@ -3247,7 +3247,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [qiling-il2cpp-dump](entities/qiling-il2cpp-dump.md) — Qiling emulation IL2CPP metadata dump (no game launch; obfuscated/anti-tamper; cheat / game engine explorer:Unity)
 - [qiomem](entities/qiomem.md) — BYOVD via Qualcomm `QIOMem.sys` (QCI0701 ACPI; virtual device → IOCTL physmem R/W; gmh5225)
 - [QorTroller](entities/qortroller.md) — ConWan30 hardware-rooted controller attestation (VAPI; DualShock bridge; PoEP; Circom/Groth16 ZK verified-human proofs; session receipts; game security / anti-cheat research; Cryptographic console anti-cheat)
-- [qortime-ai](entities/qortime-ai.md) — ConWan30 Muse explain/red-team and SAM visualization on deterministic console match-integrity receipts; AI advisories cannot upgrade referee verdicts (Anti Cheat)
+- [qortime-ai](entities/qortime-ai.md) — ConWan30 QorTime AI (Python/JS); Muse Spark/Wonder + SAM 3.1 over signed console match receipts; Ed25519 advisory sidecars; lower-only AI (VERIFIED→PARTIAL, never upgrades referee) (Anti Cheat)
 - [qualcomm_avb_exploit_poc](entities/qualcomm-avb-exploit-poc.md) — Qualcomm AVB bypass PoC (crafted partition data skips boot-image verification; persistent code execution; atlas4381)
 - [QtScrcpy](entities/qtscrcpy.md) — Qt GUI scrcpy client (USB/TCP Android mirror; keyboard/mouse, drag-and-drop, recording, multi-device; no root; barry-ran)
 - [QQTang](entities/qqtang.md) — QQ Tang (QQ堂) client/protocol/memory/AC research (Tencent casual game; gmh5225)
