@@ -11,9 +11,10 @@ sources:
   - wiki/sources/descriptions/Sentient111__ClearDriverTraces.md
   - wiki/sources/descriptions/gmh5225__Allocating-individual-pages.md
   - wiki/sources/descriptions/starfallreverie__pfnwatch.md
+  - wiki/sources/descriptions/hypersenseindia__hypersense-memory-analyzer.md
   - wiki/sources/descriptions/zodiacon__PoolMonXv3.md
   - wiki/sources/README-categories.md
-updated: 2026-10-23
+updated: 2026-10-28
 confidence: high
 ---
 
@@ -85,8 +86,8 @@ Offensive research such as [[allocating-individual-pages]] allocates isolated ke
 
 ## Page-table / PFN monitoring
 
-Remote kernel reads that map a protected process's physical pages must install PTEs somewhere in kernel address space. PoCs such as [[pfnwatch]] build a PFN bitmap from the target's page tables and periodically scan kernel PTEs for matches — catching `MmCopyMemory`, `MmMapIoSpace`, and direct PTE manipulation without pool-tag or reference-count heuristics alone. Complementary to BigPool walks and Segment Heap scans, not a drop-in replacement. (source: wiki/sources/descriptions/starfallreverie__pfnwatch.md)
+Remote kernel reads that map a protected process's physical pages must install PTEs somewhere in kernel address space. PoCs such as [[pfnwatch]] build a PFN bitmap from the target's page tables and periodically scan kernel PTEs for matches — catching `MmCopyMemory`, `MmMapIoSpace`, and direct PTE manipulation without pool-tag or reference-count heuristics alone. Complementary to BigPool walks and Segment Heap scans, not a drop-in replacement. (source: wiki/sources/descriptions/starfallreverie__pfnwatch.md) Usermode **live-process** Moneta workflows such as [[hypersense-memory-analyzer]] walk virtual regions/subregions on a selected process with PE/.NET parsing and IOC filters—no kernel driver—beside PTE watch PoCs for game-integrity triage on authorized hosts. (source: wiki/sources/descriptions/hypersenseindia__hypersense-memory-analyzer.md)
 
 ## Related
 
-[[kernel-evidence-baseline]] · [[driver-trust-boundaries]] · [[kernel-callbacks]] · [[byovd]] · [[hvci]] · [[etw-threat-intelligence]] · [[kernel-codecave-poc]] · [[revert-mapper]] · [[allocating-individual-pages]] · [[pfnwatch]] · [[kn-diff-pool]] · [[poolmonxv3]] · [[pooldump]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]]
+[[kernel-evidence-baseline]] · [[driver-trust-boundaries]] · [[kernel-callbacks]] · [[byovd]] · [[hvci]] · [[etw-threat-intelligence]] · [[kernel-codecave-poc]] · [[revert-mapper]] · [[allocating-individual-pages]] · [[pfnwatch]] · [[hypersense-memory-analyzer]] · [[kn-diff-pool]] · [[poolmonxv3]] · [[pooldump]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]]

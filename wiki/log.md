@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-28** — ingest `description:hypersenseindia/hypersense-memory-analyzer`: enriched entity [[hypersense-memory-analyzer]] (Moneta region/subregion walk, PE/.NET parsing, IOC modes, VirusTotal export; AC/game-integrity analyst audience; confidence medium); description cites on [[overviews/anti-cheat]] Detection:Memory Integrity Moneta lane + [[concepts/kernel-pool-scanning]] usermode live-process complement beside [[pfnwatch]]; `index.md` entity + concept blurbs updated.
+
 - **2026-10-28** — ingest `readme:categories`: **Anti Cheat** link_count **846** (+1; hypersenseindia/[[hypersense-memory-analyzer]] Moneta GUI live usermode memory IOC scanner) / **Cheat** **2968** and other major README sections unchanged; 41 top-level sections (`NeverC & NeverD` placeholder); synced [[overviews/overview]], [[overviews/anti-cheat]]; entity [[hypersense-memory-analyzer]]; light `index.md` section notes (no per-category pages).
 
 - **2026-10-28** — lint (agent, Cursor lint pass): read `wiki/AGENTS.md`; listed **Overviews** (9): `anti-cheat`, `dma-attack`, `game-engine`, `game-hacking`, `graphics-api`, `mobile-security`, `overview`, `reverse-engineering`, `windows-kernel`; **Concepts** (51) under `wiki/concepts/`; **Entities** (4208) under `wiki/entities/`; reconciled `index.md` vs disk — 4268 catalog paths (9+51+4208), 0 missing, 0 dead, 0 duplicate index paths; nine `overviews/*.md` + `index.md` ## Overviews / ## Concepts blurb [[wikilink]] spot-check, 0 broken, 0 malformed `]]]`; wiki populated — bootstrap not required; structural repairs none (`log.md` only).

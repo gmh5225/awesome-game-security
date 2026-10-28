@@ -11,7 +11,15 @@ confidence: medium
 
 # HyperSense Memory Analyzer
 
-Windows x64 **live usermode memory analysis** GUI (hypersenseindia/hypersense-memory-analyzer) wrapping the open-source **Moneta** engine. C++17 Win32 front-end plus optional classic Moneta-style CLI layout scans a selected process for injection-like regions, suspicious mappings, unsigned modules, metadata anomalies, and CLR-related heaps across IOC, ALL, REGION, and REFERENCED modes. Emits TXT/HTML reports and optional VirusTotal lookups on file paths. README category: Anti Cheat → Detection:Memory Integrity. (source: wiki/sources/descriptions/hypersenseindia__hypersense-memory-analyzer.md)
+Windows x64 **live usermode memory analysis** GUI (hypersenseindia/hypersense-memory-analyzer) wrapping the open-source **Moneta** engine. C++17 Win32 front-end plus optional classic Moneta-style CLI layout scans a user-selected process for injection-like regions, suspicious mappings, unsigned modules, metadata anomalies, and CLR-related heaps across IOC, ALL, REGION, and REFERENCED modes. Emits TXT/HTML reports and optional VirusTotal lookups on file paths. README category: Anti Cheat → Detection:Memory Integrity. (source: wiki/sources/descriptions/hypersenseindia__hypersense-memory-analyzer.md)
+
+## Scan engine
+
+Moneta walks **virtual memory regions and subregions**, parses **PE images** and **.NET-related layouts**, and applies mode-specific IOC filters (unsigned modules, metadata anomalies, CLR heaps, and related memory attributes) before TXT/HTML export. (source: wiki/sources/descriptions/hypersenseindia__hypersense-memory-analyzer.md)
+
+## Audience
+
+Built for security researchers, **anti-cheat and game-integrity analysts**, and reverse engineers who need to spot injected code, suspicious mappings, and other **live-process memory anomalies** on authorized systems. (source: wiki/sources/descriptions/hypersenseindia__hypersense-memory-analyzer.md)
 
 ## Positioning
 
