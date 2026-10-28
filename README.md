@@ -4476,6 +4476,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/es3n1n/obfuscator
 - https://github.com/ykus4/kagura [LLVM pass plugin for CFG/string obfuscation, anti-tamper, and anti-debug across mobile/desktop/Wasm]
 - https://github.com/fuqiuluo/amice [Rust LLVM pass plugin for compile-time obfuscation and instruction-level VM virtualization on C/C++/Rust (LLVM 11–22; Android NDK supported)]
+- https://github.com/aftermathlabs/llvm-msvc [LLVM-MSVC compiler with MSVC-compatible syntax, Windows/Android kernel driver toolchains, and support for custom obfuscation passes]
 - https://github.com/luluovo1/Oboro [Prebuilt Android NDK LLVM 21 / OLLVM toolchain with FLA, BCF, indirection, and string/constant encryption for native .so hardening]
 - https://github.com/nkhmelni/Obscura [Hassle-free LLVM pass-plugin obfuscator for C/C++/ObjC/Swift]
 - https://github.com/jnastarot/furikuri
@@ -4760,6 +4761,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/ohmk1811/MobSentry [Evidence-first static analyzer for Android APK and iOS IPA with SSL pinning, root/jailbreak, and anti-instrumentation findings plus stack-aware bypass guidance and PDF reports]
 - https://github.com/5hux1n/bytedance-jb-research [Documented iOS RE of ByteDance apps’ shared jailbreak, injection, and device-integrity detection (static Capstone/ObjC indexing plus read-only Frida validation)]
 - https://github.com/LooperSalty/cs2-tracker [CS2 stats tracker with local FastAPI, Game State Integration live match feed, and explainable heuristic anti-cheat suspicion scoring]
+- https://github.com/ConWan30/qortime-ai [Muse explain/red-team and SAM visualization layer on deterministic console match-integrity receipts; AI advisories cannot upgrade referee verdicts]
 - https://github.com/oykuoner/YAACS-AntiCheat [CS2 anti-cheat research pipeline that parses HLTV demos with demoparser2, extracts spatiotemporal aim telemetry, and benchmarks heuristic plus ML aimbot classifiers]
 - https://github.com/magicnothief/cs2-overwatch [Offline CS2 demo review pipeline with aim/behavior models, ray-cast visibility checks, calibrated suspicion scoring, and optional local LLM evidence summaries]
 - https://github.com/gjones01/NullCS [Offline CS2 demo (.dem) pipeline that extracts tick-level aim/visibility features and ranks players with evidence tables for human review—not automated bans]
