@@ -798,7 +798,8 @@ sources:
   - wiki/sources/descriptions/saadahmedscse__kac-inspector.md
   - wiki/sources/descriptions/seyifalode-cmd__process-injection-detection-lab.md
   - wiki/sources/descriptions/Optccopa__SaturnAntiCheat.md
-updated: 2026-10-23
+  - wiki/sources/descriptions/aftermathlabs__llvm-msvc.md
+updated: 2026-10-28
 confidence: high
 ---
 
@@ -851,6 +852,7 @@ Trusted hypervisors can enforce separate guest-memory protection boundaries, but
 - **Kernel AC long-form articles (English):** [[s4dbrd-github-io]] (s4dbrd; Jekyll/Chirpy GitHub Pages blog source; kernel vulnerability research and exploit-development write-ups incl. BattlEye **BEDaisy** static RE, **Win32k** type confusion, secure-kernel runtime attestation, and modern kernel anti-cheat architecture; Anti Cheat / Guide) (source: wiki/sources/descriptions/s4dbrd__s4dbrd.github.io.md)
 - **Kernel AC driver census (read-only):** [[kac-inspector]] (saadahmedscse; Rust CLI; `EnumDeviceDrivers` + SCM + driver-store correlation against dozens of known kernel AC signatures + heuristics for self-identified AC drivers; running/loaded/stopped/idle/orphaned/stale labels and related usermode services; no install/patch/network—launch troubleshooting and privacy triage beside [[securebootcheck]] and host surveys such as [[apex-anticheat-lab]]) (source: wiki/sources/descriptions/saadahmedscse__kac-inspector.md)
 - **Modular kernel AC reference (WDM):** [[core-ac]] (AmenHermano144; C VS 2022 + WDK; educational modular detection stack—BYOVD/driver blacklist scans, PiDDBCache/MmUnloadedDrivers tamper watch, PML4 process watch, NMI/environment probes, mouse/keyboard class input integrity; AES-GCM–sealed usermode IOCTL + event ring buffer to SYSTEM companion; deferred `DriverEntry` init + strict device DACLs; Open Source Anti Cheat System / defensive kernel detection study) (source: wiki/sources/descriptions/AmenHermano144__Anti-cheat-Kernel-Driver.md)
+- **LLVM kernel driver toolchains:** [[llvm-msvc]] (aftermathlabs; llvm-project fork with MSVC-oriented Clang driver, Windows/Android kernel-driver toolchain targets, custom LLVM obfuscation passes, and BOLT post-link rewrite for x86/AArch64/RISC-V; Clang/llvm ecosystem alternative to proprietary MSVC for native driver and protected-module research builds) (source: wiki/sources/descriptions/aftermathlabs__llvm-msvc.md)
 - **User-mode ntdll unhooking:** Rust tool/library [[nt-unhooker]] (Teach2Breach; inline/IAT hook state analysis; in-memory vs clean reference PE compare; symbol-based clean DLL retrieval; restore modified regions with safety checks; CLI + programmatic API; malware analysis / red team / defender hook-tampering study) (source: wiki/sources/descriptions/Teach2Breach__nt_unhooker.md)
 - **User-mode hook detection:** GUI tool [[hook-detector]] (0x6461726B; C++20; scans loaded modules/processes for inline/IAT hooks; remote PE parsing + manual PEB traversal vs expected executable layouts; DX11/ImGui; x86/x64; anti-cheat / RE hook-tampering inspection) (source: wiki/sources/descriptions/0x6461726B__Hook-Detector.md)
 - **KnownDlls `.text` unhooking:** [[known-dll-unhook]] (ORCx41; iterates loaded DLLs; maps trusted copies from `\KnownDlls`; replaces hooked `.text` sections and restores protections; native syscalls for memory/map ops; EDR/anti-cheat hook evasion research) (source: wiki/sources/descriptions/ORCx41__KnownDllUnhook.md)
