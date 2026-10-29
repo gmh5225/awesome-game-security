@@ -2207,6 +2207,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/CynicRus/DWARFHelper [Load DWARF debug symbols from PE (.exe/.dll) as labels, functions, and file:line comments; libdwarf; x86/x64]
 - https://github.com/mibho/x64dbgTraceReader [Trace Reader]
 - https://github.com/Steesha/CodeCleaner [Cleaning Themida Mutation Assembly codes]
+- https://github.com/ivanpotatoes/KozDbg [Open-source x64dbg plugin that bypasses VMProtect 3.3.x–3.10.x user-mode and kernel-debugger anti-debug checks via version-specific profiles (no kernel driver)]
 - https://github.com/notpidgey/ManyTypes [x64dbg typeparsing plugin with Windows types]
 - https://github.com/cycraft-corp/BinaryAnalysisMCPs [Binary analysis MCPs collections]
 - https://github.com/dariushoule/x64dbg-rippy [AI reverse engineering assistant for x64dbg]
