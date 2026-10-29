@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-29** — ingest `description:keshav0045/stripped-binary`: enriched entity [[stripped-binary]] (dataset pipeline + models/delivery tables; game-client triage context); description cites on [[overviews/reverse-engineering]] AI-assisted stripped naming lane and [[overviews/game-hacking]] Cheat README map; refreshed `index.md` entity blurb.
+
 - **2026-10-29** — ingest `description:kjjkjjzyayufqza/DDGACreg`: enriched entity [[ddgacreg]] (feature-module + stack tables; MASM `version.dll` forwarder; HLSL cabinet compositor; localhost SQLite content server); description cites on [[overviews/game-hacking]] Cheat / DLL hijack lane and [[overviews/graphics-api]] DirectX map; refreshed `index.md` entity blurb.
 
 - **2026-10-29** — ingest `description:vw2x/Mira`: enriched entity [[mira]] (architecture table—host apps, Frida RPC, relay/Next.js console, MCP; documented side-channel case library); description cites on [[overviews/mobile-security]] (Mobile anti-cheat lane) and [[overviews/anti-cheat]] README map; refreshed `index.md` entity blurb.
