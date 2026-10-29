@@ -703,6 +703,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/niemand-sec/DirectX11Hook [DX11 Imgui]
 - https://github.com/guided-hacking/GH_D3D11_Hook [DX11]
 - https://github.com/justinstenning/Direct3DHook [Direct3D 9/10/11 API hooks for screen capture and in-game overlays]
+- https://github.com/effcol/wiz3D [Open-source stereoscopic 3D proxy-DLL wrapper for DirectX 7–11 and OpenGL (iZ3D lineage) with per-game hook profiles and stereo injection]
 - https://github.com/techiew/DirectXHook [DirectX 11/12 Present hook with a simple in-game overlay framework]
 - https://github.com/nefarius/HydraHook [DirectX 9–12 API-hooking and overlay rendering framework for games]
 - https://github.com/aufkrawall/capture-engine [Windows game capture with injected D3D9–D12, Vulkan, OpenGL, and DXVK hooks, custom overlays, and frame pacing]
