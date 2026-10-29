@@ -1,0 +1,1880 @@
+Project Path: arc_keshav0045_stripped-binary_87zpkcss
+
+Source Tree:
+
+```txt
+arc_keshav0045_stripped-binary_87zpkcss
+├── Dockerfile
+├── Makefile
+├── README.md
+├── configs
+│   └── projects.yaml
+├── docker
+│   └── Dockerfile.pipeline
+├── fnname
+│   ├── __init__.py
+│   ├── baselines
+│   │   ├── __init__.py
+│   │   └── knn.py
+│   ├── build.py
+│   ├── decompile.py
+│   ├── elf_symbols.py
+│   ├── evaluate.py
+│   ├── llm
+│   │   ├── __init__.py
+│   │   ├── predict_lora.py
+│   │   ├── prompt.py
+│   │   ├── train_lora.py
+│   │   └── zero_shot.py
+│   ├── metrics.py
+│   ├── names.py
+│   ├── normalize.py
+│   ├── pair.py
+│   └── split.py
+├── ghidra_scripts
+│   ├── ExportDecompiled.java
+│   └── SuggestName.java
+├── requirements-dev.txt
+├── requirements-llm.txt
+├── requirements.txt
+├── serve
+│   ├── __init__.py
+│   ├── app.py
+│   └── static
+│       └── index.html
+└── tests
+    ├── conftest.py
+    ├── test_core.py
+    └── test_pipeline.py
+
+```
+
+`Dockerfile`:
+
+```
+# Serving image (kNN model by default; mount a LoRA adapter and install
+# requirements-llm.txt to serve the fine-tuned model instead).
+#   docker build -t fnname . && docker run -p 8000:8000 fnname
+FROM python:3.12-slim
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+COPY fnname fnname
+COPY serve serve
+COPY models/knn.pkl models/knn.pkl
+ENV FNNAME_MODEL=models/knn.pkl
+EXPOSE 8000
+CMD ["uvicorn", "serve.app:app", "--host", "0.0.0.0", "--port", "8000"]
+
+```
+
+`Makefile`:
+
+```
+# End-to-end pipeline. Stages 1a-1b run inside the pipeline container
+# (`make shell`); everything after runs anywhere with requirements installed.
+PY ?= python
+IMAGE = fnname-pipeline
+JOBS ?= 8
+
+image:
+	docker build --platform linux/amd64 -f docker/Dockerfile.pipeline -t $(IMAGE) .
+
+shell:
+	docker run --rm -it --platform linux/amd64 -v $(PWD):/app $(IMAGE) bash
+
+build:        ## 1a: compile every project x config, keep unstripped + stripped
+	$(PY) -m fnname.build --projects configs/projects.yaml --work work
+
+decompile:    ## 1b: Ghidra headless over all stripped binaries
+	$(PY) -m fnname.decompile --work work --jobs $(JOBS)
+
+dataset:      ## 1c+1d: pair with ground truth, split by project, dedupe
+	$(PY) -m fnname.pair --work work --out data/functions.jsonl
+	$(PY) -m fnname.split --data data/functions.jsonl --out data
+
+baseline:     ## 2: frequency + TF-IDF kNN
+	$(PY) -m fnname.baselines.knn --train data/train.jsonl --test data/test.jsonl --out preds/knn.jsonl --save models/knn.pkl
+
+lora:         ## 3: fine-tune (GPU) and predict
+	$(PY) -m fnname.llm.train_lora --train data/train.jsonl --val data/val.jsonl --out models/lora
+	$(PY) -m fnname.llm.predict_lora --adapter models/lora --test data/test.jsonl --out preds/lora.jsonl
+
+zeroshot:     ## 3: zero-shot API baseline on a 2K sample
+	$(PY) -m fnname.llm.zero_shot --test data/test.jsonl --out preds/zeroshot.jsonl --sample 2000
+
+eval:         ## 4: results tables
+	$(PY) -m fnname.evaluate --test data/test.jsonl --failures 15 preds/*.jsonl
+
+serve:        ## 5
+	FNNAME_MODEL=models/knn.pkl uvicorn serve.app:app --port 8000
+
+test:
+	$(PY) -m pytest -q tests
+
+.PHONY: image shell build decompile dataset baseline lora zeroshot eval serve test
+
+```
+
+`README.md`:
+
+```md
+# fnname: predicting function names in stripped binaries
+
+When a binary is stripped, Ghidra shows `FUN_00101a30` where the source said
+`parse_http_header`. This project builds a dataset from open-source C code
+compiled with and without symbols, then trains models that read Ghidra's
+decompiler output and suggest the original name, with a confidence score.
+
+```
+open-source C ──► gcc/clang × -O0/-O2 ──► unstripped ─┐   (labels: .symtab)
+                                       └► stripped ──► Ghidra headless ──► decompiled C
+                                                                         │
+            pair by address ◄────────────────────────────────────────────┘
+                   │
+       split by project + cross-project dedupe ──► train / val / test
+                   │
+    frequency · TF-IDF kNN · LoRA code LLM · zero-shot API model ──► evaluate ──► FastAPI + Ghidra plugin
+```
+
+## Results
+
+> Placeholder until the full dataset is built. Every number here must come from `make eval` on held-out projects.
+
+| model | exact@1 | exact@5 | subtoken F1 |
+|---|---|---|---|
+| frequency prior | – | – | – |
+| TF-IDF kNN | – | – | – |
+| zero-shot (Claude Opus 5.5) | – | – | – |
+| Qwen2.5-Coder-1.5B + LoRA | – | – | – |
+
+`make eval` also prints breakdowns by optimization level, by function size and
+by compiler config, followed by sample failures.
+
+## Design decisions (each one is material for the write-up)
+
+**Labels for free, cleaned carefully.** Names come from `.symtab` of the
+unstripped twin (`fnname/elf_symbols.py`). GCC clone suffixes (`.isra.0`,
+`.constprop.1`, `.part.2`) are stripped, `.cold` fragments are dropped, and so
+are CRT/runtime helpers (`_start`, `frame_dummy`, `main`, `__*`).
+
+**Matching stripped to unstripped.** `strip` leaves PT_LOAD segments where they
+were, so Ghidra reports each function's *file offset* in the stripped binary,
+and `pair.py` converts it to a vaddr using the program headers. Ghidra's image
+base for PIE binaries doesn't matter.
+
+**Forcing optimization levels.** Build systems override `CFLAGS` all the time.
+`build.py` puts a wrapper `cc` first on `PATH` that runs `gcc "$@" -O2`, and
+the last `-O` flag wins, so each binary really has the level its config says.
+
+**Normalization.** Ghidra embeds addresses everywhere. `FUN_00102000` and
+`DAT_00104010` become positional `FUN_1` and `DAT_1`, the target function becomes
+`FUNC`, and long hex constants become `ADDR`. Without this, a model can memorize
+memory layout.
+
+**Leakage, three ways.**
+1. *Split by project, not by function.* Otherwise zlib's `inflate` at -O0 sits in
+   train and the same `inflate` at -O2 sits in test.
+2. *Cross-project dedupe.* Projects vendor shared code (gnulib, getopt, md5).
+   `split.py` drops any val/test function whose normalized body also appears in
+   train, and reports how many it dropped.
+3. *Names that survive stripping.* Exported `.dynsym` symbols remain in stripped
+   shared libraries, so Ghidra already knows those names. `pair.py` drops these
+   functions. It also flags functions whose name appears in a string literal
+   (from `assert` or `__func__`). That's a real signal, but report it separately.
+
+**Prediction files are model-agnostic.** Every model writes
+`{"id", "preds": [{"name", "score"}]}`, and `evaluate.py` scores them all the
+same way. Use `--intersect` to compare everything on the zero-shot sample.
+
+## Running it
+
+```bash
+python3 -m venv .venv && .venv/bin/pip install -r requirements-dev.txt
+make test                      # unit + synthetic end-to-end tests
+
+# Stage 1: data (in the x86-64 pipeline container: gcc, clang, Ghidra)
+make image
+make shell                     # then, inside the container:
+make build                     # configs/projects.yaml × 4 configs
+make decompile JOBS=8          # Ghidra headless, ExportDecompiled.java
+make dataset                   # pair + split + dedupe, prints drop statistics
+
+# Stage 2: baselines
+make baseline                  # preds/knn.jsonl, preds/frequency.jsonl, models/knn.pkl
+
+# Stage 3: models  (pip install -r requirements-llm.txt)
+make lora                      # needs a CUDA GPU with about 16 GB
+make zeroshot                  # needs Anthropic API credentials; 2K-sample by default
+
+# Stage 4 and 5
+make eval
+make serve                     # http://localhost:8000
+docker build -t fnname . && docker run -p 8000:8000 fnname
+```
+
+**Ghidra plugin:** add `ghidra_scripts/` in Script Manager, then press
+Ctrl-Shift-N inside a function (`SuggestName.java`). It sends the decompiled
+code to the service, lets you pick a suggestion, renames the function and
+records every suggestion in a comment.
+
+**On Apple Silicon:** the pipeline image is amd64, so it runs emulated and is
+slow. Building and decompiling about 300 projects is best done on an x86-64
+Linux cloud VM.
+
+## Scaling the dataset
+
+`configs/projects.yaml` starts with 20 projects. Grow it toward about 300. For
+each project, check `work/logs/<project>.<config>.log`. A project that builds
+partially still contributes the binaries it produced. The data-engineering
+story to tell is how many projects built cleanly, how many functions each stage
+dropped and why, and how much vendored code the dedupe removed.
+
+## Layout
+
+```
+configs/projects.yaml      projects + toolchain configs
+docker/Dockerfile.pipeline gcc + clang + Ghidra image
+ghidra_scripts/            ExportDecompiled.java (headless), SuggestName.java (plugin)
+fnname/
+  build.py decompile.py pair.py split.py   stage 1
+  names.py normalize.py elf_symbols.py     labels, normalization, ground truth
+  baselines/knn.py                         stage 2
+  llm/                                     stage 3: prompt, LoRA train/predict, zero-shot
+  metrics.py evaluate.py                   stage 4
+serve/                     FastAPI app + web UI (stage 5)
+tests/
+```
+
+```
+
+`configs/projects.yaml`:
+
+```yaml
+# Open-source C projects to compile. Each is built once per toolchain config.
+#
+#   build: autotools | cmake | make | a shell snippet run in the source dir
+#          ($CC and $CFLAGS are exported; install nothing, just build in-tree)
+#
+# Start small, verify the pipeline end to end, then grow the list toward ~300.
+# Keep notes on projects that vendor shared code (gnulib, zlib, md5, getopt):
+# that is where cross-project leakage comes from, and split.py dedupes it.
+
+configs:
+  - {name: gcc-O0,   cc: gcc,   cflags: "-O0"}
+  - {name: gcc-O2,   cc: gcc,   cflags: "-O2"}
+  - {name: clang-O0, cc: clang, cflags: "-O0"}
+  - {name: clang-O2, cc: clang, cflags: "-O2"}
+
+projects:
+  - {name: zlib,      git: https://github.com/madler/zlib,           ref: v1.3.1,   build: cmake}
+  - {name: lua,       git: https://github.com/lua/lua,               ref: v5.4.7,   build: "make CC=$CC MYCFLAGS=\"$CFLAGS\" MYLDFLAGS= -j$(nproc)"}
+  - {name: jq,        git: https://github.com/jqlang/jq,             ref: jq-1.7.1, build: "git submodule update --init && autoreconf -fi && ./configure --with-oniguruma=builtin --disable-docs && make -j$(nproc)"}
+  - {name: cjson,     git: https://github.com/DaveGamble/cJSON,      ref: v1.7.18,  build: cmake}
+  - {name: sqlite,    git: https://github.com/sqlite/sqlite,         ref: version-3.46.1, build: autotools}
+  - {name: curl,      git: https://github.com/curl/curl,             ref: curl-8_10_1, build: "autoreconf -fi && ./configure --without-ssl --without-libpsl --disable-ldap && make -j$(nproc)"}
+  - {name: libpng,    git: https://github.com/pnggroup/libpng,       ref: v1.6.44,  build: cmake}
+  - {name: redis,     git: https://github.com/redis/redis,           ref: 7.2.5,    build: "make CC=$CC OPTIMIZATION=\"$CFLAGS\" MALLOC=libc -j$(nproc)"}
+  - {name: nginx,     git: https://github.com/nginx/nginx,           ref: release-1.27.2, build: "./auto/configure --without-http_rewrite_module --without-http_gzip_module --with-cc-opt=\"$CFLAGS\" && make -j$(nproc)"}
+  - {name: tmux,      git: https://github.com/tmux/tmux,             ref: "3.5",    build: autotools}
+  - {name: libuv,     git: https://github.com/libuv/libuv,           ref: v1.49.2,  build: cmake}
+  - {name: mbedtls,   git: https://github.com/Mbed-TLS/mbedtls,      ref: v3.6.2,   build: "git submodule update --init && cmake -B build -DENABLE_TESTING=OFF -DCMAKE_C_FLAGS=\"$CFLAGS\" && cmake --build build -j$(nproc)"}
+  - {name: libyaml,   git: https://github.com/yaml/libyaml,          ref: "0.2.5",  build: autotools}
+  - {name: http-parser, git: https://github.com/nodejs/http-parser,  ref: v2.9.4,   build: "make CC=$CC CFLAGS_FAST_EXTRA=\"$CFLAGS\" package"}
+  - {name: htop,      git: https://github.com/htop-dev/htop,         ref: "3.3.0",  build: autotools}
+  - {name: binutils-readelf, git: https://github.com/bminor/binutils-gdb, ref: binutils-2_43, build: "./configure --disable-gdb --disable-gdbserver --disable-sim --disable-werror && make -j$(nproc) all-binutils"}
+  - {name: coreutils, git: https://github.com/coreutils/coreutils,   ref: v9.5,     build: "./bootstrap --skip-po && ./configure --disable-nls && make -j$(nproc)"}
+  - {name: grep,      git: https://git.savannah.gnu.org/git/grep.git, ref: v3.11,   build: "./bootstrap --skip-po && ./configure --disable-nls && make -j$(nproc)"}
+  - {name: openssh,   git: https://github.com/openssh/openssh-portable, ref: V_9_9_P1, build: "autoreconf -fi && ./configure --without-openssl --without-zlib && make -j$(nproc)"}
+  - {name: busybox,   git: https://github.com/mirror/busybox,        ref: "1_36_1", build: "make defconfig && make CC=$CC HOSTCC=$CC EXTRA_CFLAGS=\"$CFLAGS\" -j$(nproc)"}
+
+```
+
+`docker/Dockerfile.pipeline`:
+
+```pipeline
+# Data pipeline image: GCC + Clang + common build deps + Ghidra (headless).
+# Build for x86-64 so every binary in the dataset shares one architecture:
+#   docker build --platform linux/amd64 -f docker/Dockerfile.pipeline -t fnname-pipeline .
+FROM ubuntu:24.04
+
+ARG GHIDRA_VERSION=11.2.1
+ARG GHIDRA_DATE=20241105
+ENV DEBIAN_FRONTEND=noninteractive \
+    GHIDRA_HOME=/opt/ghidra
+
+# libharfbuzz/freetype/fontconfig: Ghidra measures fonts even headless, and the
+# -headless JDK doesn't pull them in (UnsatisfiedLinkError in libfontmanager.so).
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        build-essential gcc clang lld binutils make cmake ninja-build pkg-config \
+        autoconf automake libtool autopoint gettext bison flex texinfo gperf m4 \
+        git ca-certificates curl unzip rsync wget xz-utils \
+        libncurses-dev libevent-dev zlib1g-dev libreadline-dev \
+        openjdk-21-jdk-headless python3 python3-venv python3-pip \
+        libharfbuzz0b libfreetype6 fontconfig fonts-dejavu-core \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN curl -fsSL -o /tmp/ghidra.zip \
+        "https://github.com/NationalSecurityAgency/ghidra/releases/download/Ghidra_${GHIDRA_VERSION}_build/ghidra_${GHIDRA_VERSION}_PUBLIC_${GHIDRA_DATE}.zip" \
+    && unzip -q /tmp/ghidra.zip -d /opt && mv /opt/ghidra_${GHIDRA_VERSION}_PUBLIC ${GHIDRA_HOME} && rm /tmp/ghidra.zip
+
+WORKDIR /app
+COPY requirements.txt .
+RUN python3 -m venv /venv && /venv/bin/pip install --no-cache-dir -r requirements.txt
+ENV PATH=/venv/bin:$PATH
+COPY . .
+
+```
+
+`fnname/baselines/knn.py`:
+
+```py
+"""Baselines: frequency prior and TF-IDF nearest-neighbour name lookup.
+
+kNN retrieves the k most similar training functions by cosine similarity over
+TF-IDF of code tokens (identifiers, callees, string-literal words, constants)
+and ranks candidate names by summed similarity. Confidence is a candidate's
+share of the total neighbour similarity.
+
+    python -m fnname.baselines.knn --train data/train.jsonl --test data/test.jsonl \
+        --out preds/knn.jsonl --save models/knn.pkl
+"""
+
+import argparse
+import json
+import pickle
+import re
+from collections import Counter, defaultdict
+from pathlib import Path
+
+from sklearn.feature_extraction.text import TfidfVectorizer
+
+from ..normalize import tokens
+
+# Placeholders and Ghidra's generated locals carry no meaning across functions.
+_NOISE = re.compile(r"^(FUN|DAT|LAB|PTR|UNK|switchD|caseD)_\d+$|^[a-z]*Var\d+$|^(local|param|in|stack)_\w+$")
+
+
+def features(code):
+    out = []
+    for t in tokens(code):
+        if t.startswith('"'):
+            out += ["S:" + w.lower() for w in re.findall(r"[A-Za-z]{3,}", t)]
+        elif not _NOISE.match(t):
+            out.append(t)
+    return out
+
+
+class KNNNamer:
+    def __init__(self, k=20, max_df=0.5):
+        self.k = k
+        self.vec = TfidfVectorizer(analyzer=features, sublinear_tf=True, min_df=2, max_df=max_df)
+
+    def fit(self, codes, names):
+        self.X = self.vec.fit_transform(codes)
+        self.names = list(names)
+        return self
+
+    def predict(self, codes, top=5):
+        sims = self.vec.transform(codes) @ self.X.T
+        results = []
+        for row in sims:
+            row = row.tocoo()
+            order = row.data.argsort()[::-1][: self.k]
+            votes = defaultdict(float)
+            for j in order:
+                votes[self.names[row.col[j]]] += row.data[j]
+            total = sum(votes.values()) or 1.0
+            ranked = sorted(votes.items(), key=lambda kv: -kv[1])[:top]
+            results.append([{"name": n, "score": s / total} for n, s in ranked])
+        return results
+
+
+def load(path):
+    return [json.loads(l) for l in open(path)]
+
+
+def write_preds(path, rows, preds):
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with open(path, "w") as f:
+        for r, p in zip(rows, preds):
+            f.write(json.dumps({"id": r["id"], "preds": p}) + "\n")
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--train", default="data/train.jsonl", type=Path)
+    ap.add_argument("--test", default="data/test.jsonl", type=Path)
+    ap.add_argument("--out", default="preds/knn.jsonl", type=Path)
+    ap.add_argument("--save", type=Path)
+    ap.add_argument("--k", type=int, default=20)
+    args = ap.parse_args()
+
+    # Import by package path so the pickle references fnname.baselines.knn, not __main__.
+    from fnname.baselines.knn import KNNNamer as Namer
+
+    train, test = load(args.train), load(args.test)
+    model = Namer(k=args.k).fit([r["code"] for r in train], [r["name"] for r in train])
+    write_preds(args.out, test, model.predict([r["code"] for r in test]))
+
+    prior = Counter(r["name"] for r in train).most_common(5)
+    total = len(train)
+    freq = [{"name": n, "score": c / total} for n, c in prior]
+    write_preds(args.out.with_name("frequency.jsonl"), test, [freq] * len(test))
+
+    if args.save:
+        args.save.parent.mkdir(parents=True, exist_ok=True)
+        pickle.dump(model, open(args.save, "wb"))
+    print(f"wrote {args.out} and {args.out.with_name('frequency.jsonl')}")
+
+
+if __name__ == "__main__":
+    main()
+
+```
+
+`fnname/build.py`:
+
+```py
+"""Stage 1a: clone each project and build it under every toolchain config.
+
+Build systems love to override CFLAGS, so instead of trusting them we put a
+compiler wrapper first on PATH that appends the config's flags *last*
+(`gcc "$@" -O2`): the final -O wins. Every ELF with a symbol table found in
+the build tree is copied out next to a stripped twin.
+
+    python -m fnname.build --projects configs/projects.yaml --work work [--only zlib lua]
+"""
+
+import argparse
+import os
+import shutil
+import stat
+import subprocess
+from pathlib import Path
+
+import yaml
+from elftools.elf.elffile import ELFFile
+
+BUILD_PRESETS = {
+    "autotools": "([ -x configure ] || autoreconf -fi) && ./configure && make -j$(nproc)",
+    "cmake": "cmake -B _build -DCMAKE_BUILD_TYPE=None && cmake --build _build -j$(nproc)",
+    "make": "make -j$(nproc)",
+}
+
+
+def make_wrappers(work, cfg):
+    bindir = work / "cc" / cfg["name"]
+    bindir.mkdir(parents=True, exist_ok=True)
+    real = shutil.which(cfg["cc"])
+    for alias in ("cc", "gcc", "clang", cfg["cc"]):
+        w = bindir / alias
+        w.write_text(f'#!/bin/sh\nexec {real} "$@" {cfg["cflags"]}\n')
+        w.chmod(w.stat().st_mode | stat.S_IEXEC)
+    return bindir
+
+
+def checkout(proj, src_root):
+    dest = src_root / proj["name"]
+    if not dest.exists():
+        subprocess.run(
+            ["git", "-c", "advice.detachedHead=false", "clone", "--depth", "1", "--branch", str(proj["ref"]), proj["git"], str(dest)],
+            check=True,
+        )
+    return dest
+
+
+def has_symtab(path):
+    try:
+        with open(path, "rb") as f:
+            if f.read(4) != b"\x7fELF":
+                return False
+            f.seek(0)
+            elf = ELFFile(f)
+            return elf["e_type"] in ("ET_EXEC", "ET_DYN") and elf.get_section_by_name(".symtab") is not None
+    except Exception:
+        return False
+
+
+def collect_binaries(tree, out_dir):
+    out_dir.mkdir(parents=True, exist_ok=True)
+    found = 0
+    for p in tree.rglob("*"):
+        # CMakeFiles/ holds CMake's compiler-probe programs, not project code
+        if "CMakeFiles" in p.parts or not p.is_file() or p.is_symlink() or not has_symtab(p):
+            continue
+        rel = str(p.relative_to(tree)).replace("/", "__")
+        shutil.copy2(p, out_dir / rel)
+        subprocess.run(["strip", "-o", str(out_dir / f"{rel}.stripped"), str(p)], check=True)
+        found += 1
+    return found
+
+
+def build_one(proj, cfg, work):
+    out_dir = work / "bins" / proj["name"] / cfg["name"]
+    if (out_dir / ".done").exists():
+        return "cached"
+    src = checkout(proj, work / "src")
+    tree = work / "build" / proj["name"] / cfg["name"]
+    shutil.rmtree(tree, ignore_errors=True)
+    shutil.copytree(src, tree, symlinks=True)
+
+    wrappers = make_wrappers(work, cfg)
+    env = dict(os.environ, CC="cc", CFLAGS=cfg["cflags"], PATH=f"{wrappers}:{os.environ['PATH']}")
+    cmd = BUILD_PRESETS.get(proj["build"], proj["build"])
+    log = work / "logs" / f"{proj['name']}.{cfg['name']}.log"
+    log.parent.mkdir(parents=True, exist_ok=True)
+    with open(log, "w") as fh:
+        rc = subprocess.run(["bash", "-c", cmd], cwd=tree, env=env, stdout=fh, stderr=subprocess.STDOUT).returncode
+
+    # Partial builds still yield useful binaries, so collect regardless of rc.
+    n = collect_binaries(tree, out_dir)
+    shutil.rmtree(tree, ignore_errors=True)
+    if n:
+        (out_dir / ".done").write_text(f"rc={rc}\n")
+    return f"rc={rc} binaries={n}"
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--projects", default="configs/projects.yaml")
+    ap.add_argument("--work", default="work", type=Path)
+    ap.add_argument("--only", nargs="*")
+    args = ap.parse_args()
+
+    spec = yaml.safe_load(open(args.projects))
+    for proj in spec["projects"]:
+        if args.only and proj["name"] not in args.only:
+            continue
+        for cfg in spec["configs"]:
+            try:
+                status = build_one(proj, cfg, args.work.resolve())
+            except subprocess.CalledProcessError as e:
+                status = f"error: {e}"
+            print(f"{proj['name']:<20} {cfg['name']:<10} {status}", flush=True)
+
+
+if __name__ == "__main__":
+    main()
+
+```
+
+`fnname/decompile.py`:
+
+```py
+"""Stage 1b: run Ghidra headless over every stripped binary.
+
+    python -m fnname.decompile --work work --jobs 8
+
+Requires $GHIDRA_HOME (the Docker image sets it). Output goes to
+work/decomp/<project>/<config>/<binary>.jsonl, one function per line.
+"""
+
+import argparse
+import os
+import subprocess
+import tempfile
+from concurrent.futures import ProcessPoolExecutor, as_completed
+from pathlib import Path
+
+SCRIPTS = Path(__file__).resolve().parent.parent / "ghidra_scripts"
+
+
+def decompile(stripped, out, timeout):
+    out.parent.mkdir(parents=True, exist_ok=True)
+    headless = Path(os.environ["GHIDRA_HOME"]) / "support" / "analyzeHeadless"
+    with tempfile.TemporaryDirectory() as proj_dir:
+        cmd = [
+            str(headless), proj_dir, "tmp",
+            "-import", str(stripped),
+            "-scriptPath", str(SCRIPTS),
+            "-postScript", "ExportDecompiled.java", str(out) + ".part",
+            "-deleteProject", "-analysisTimeoutPerFile", str(timeout),
+        ]
+        r = subprocess.run(cmd, capture_output=True, text=True)
+    part = Path(str(out) + ".part")
+    if r.returncode == 0 and part.exists():
+        part.rename(out)
+        return f"ok {stripped}"
+    log = (r.stdout + r.stderr).splitlines()
+    errors = [l.strip() for l in log if "ERROR" in l or "Exception" in l]
+    return f"FAIL {stripped}: {errors[0][:400] if errors else (log[-1] if log else 'no output')}"
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--work", default="work", type=Path)
+    ap.add_argument("--jobs", type=int, default=os.cpu_count())
+    ap.add_argument("--timeout", type=int, default=600, help="analysis seconds per binary")
+    args = ap.parse_args()
+
+    bins, decomp = args.work / "bins", args.work / "decomp"
+    todo = []
+    for stripped in sorted(bins.rglob("*.stripped")):
+        rel = stripped.relative_to(bins)
+        out = decomp / rel.parent / (rel.name.removesuffix(".stripped") + ".jsonl")
+        if not out.exists():
+            todo.append((stripped, out))
+    print(f"{len(todo)} binaries to decompile")
+
+    with ProcessPoolExecutor(args.jobs) as pool:
+        futs = [pool.submit(decompile, s, o, args.timeout) for s, o in todo]
+        for i, f in enumerate(as_completed(futs), 1):
+            print(f"[{i}/{len(todo)}] {f.result()}", flush=True)
+
+
+if __name__ == "__main__":
+    main()
+
+```
+
+`fnname/elf_symbols.py`:
+
+```py
+"""Ground-truth labels from ELF symbol tables.
+
+`strip` removes .symtab but leaves PT_LOAD segments where they were, so a
+function's virtual address is the same in the stripped and unstripped copy.
+Ghidra reports a file offset for each function in the stripped binary; we turn
+that back into a vaddr with the program headers and look the name up here.
+"""
+
+from elftools.elf.elffile import ELFFile
+
+
+def function_symbols(path):
+    """{vaddr: (name, size)} for every defined STT_FUNC symbol."""
+    out = {}
+    with open(path, "rb") as f:
+        elf = ELFFile(f)
+        for section_name in (".symtab", ".dynsym"):
+            sec = elf.get_section_by_name(section_name)
+            if sec is None:
+                continue
+            for sym in sec.iter_symbols():
+                if sym["st_info"]["type"] != "STT_FUNC" or sym["st_shndx"] == "SHN_UNDEF":
+                    continue
+                # .symtab wins over .dynsym: it has local (static) functions too
+                out.setdefault(sym["st_value"], (sym.name, sym["st_size"]))
+    return out
+
+
+def offset_to_vaddr(path):
+    """Return a function mapping a file offset to a vaddr via PT_LOAD headers."""
+    with open(path, "rb") as f:
+        segs = [
+            (s["p_offset"], s["p_filesz"], s["p_vaddr"])
+            for s in ELFFile(f).iter_segments()
+            if s["p_type"] == "PT_LOAD"
+        ]
+
+    def convert(off):
+        for start, size, vaddr in segs:
+            if start <= off < start + size:
+                return vaddr + off - start
+        return None
+
+    return convert
+
+```
+
+`fnname/evaluate.py`:
+
+```py
+"""Score prediction files and build the results table with breakdowns.
+
+    python -m fnname.evaluate --test data/test.jsonl preds/*.jsonl [--failures 20]
+
+Prediction files are JSONL: {"id": ..., "preds": [{"name": ..., "score": ...}, ...]}
+"""
+
+import argparse
+import json
+from pathlib import Path
+
+from .metrics import canonical, score
+
+SIZE_BUCKETS = [(0, 10, "tiny <10"), (10, 50, "small 10-49"), (50, 200, "medium 50-199"), (200, 10**9, "large 200+")]
+
+
+def size_bucket(n):
+    return next(label for lo, hi, label in SIZE_BUCKETS if lo <= n < hi)
+
+
+def opt_level(config):
+    return config.split("-")[-1]
+
+
+def table(rows, header):
+    widths = [max(len(str(r[i])) for r in [header] + rows) for i in range(len(header))]
+    line = lambda r: "| " + " | ".join(str(c).ljust(w) for c, w in zip(r, widths)) + " |"
+    return "\n".join([line(header), "|" + "|".join("-" * (w + 2) for w in widths) + "|"] + [line(r) for r in rows])
+
+
+def fmt(m):
+    return [m["n"], f"{100 * m['exact@1']:.1f}", f"{100 * m['exact@5']:.1f}", f"{100 * m['f1']:.1f}"]
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--test", default="data/test.jsonl", type=Path)
+    ap.add_argument("--failures", type=int, default=0, help="print the first N misses per model")
+    ap.add_argument("--intersect", action="store_true",
+                    help="score every model on the ids all prediction files cover (e.g. a zero-shot sample)")
+    ap.add_argument("preds", nargs="+", type=Path)
+    args = ap.parse_args()
+
+    test = {r["id"]: r for r in map(json.loads, open(args.test))}
+    if args.intersect:
+        for path in args.preds:
+            covered = {p["id"] for p in map(json.loads, open(path))}
+            test = {i: r for i, r in test.items() if i in covered}
+    header = ["model", "n", "exact@1", "exact@5", "subtoken F1"]
+    overall, by_opt, by_size, by_cc = [], [], [], []
+
+    for path in args.preds:
+        model = path.stem
+        preds = {p["id"]: [c["name"] for c in p["preds"]] for p in map(json.loads, open(path))}
+        pairs = [(test[i], preds.get(i, [])) for i in test]
+        overall.append([model] + fmt(score((r["name"], p) for r, p in pairs)))
+
+        for group, key, sink in [
+            ("opt", lambda r: opt_level(r["config"]), by_opt),
+            ("size", lambda r: size_bucket(r["n_instructions"]), by_size),
+            ("config", lambda r: r["config"], by_cc),
+        ]:
+            for g in sorted({key(r) for r, _ in pairs}):
+                sub = [(r["name"], p) for r, p in pairs if key(r) == g]
+                sink.append([model, g] + fmt(score(sub)))
+
+        if args.failures:
+            print(f"\n### Failures: {model}\n")
+            misses = [(r, p) for r, p in pairs if not p or canonical(p[0]) != canonical(r["name"])]
+            for r, p in misses[: args.failures]:
+                print(f"- `{r['name']}` ({r['project']}, {r['config']}) -> {p[:3]}")
+
+    print("\n## Overall (unseen projects)\n")
+    print(table(overall, header))
+    for title, rows, col in [("optimization level", by_opt, "opt"), ("function size (instructions)", by_size, "size"), ("compiler config", by_cc, "config")]:
+        print(f"\n## By {title}\n")
+        print(table(rows, ["model", col] + header[1:]))
+
+
+if __name__ == "__main__":
+    main()
+
+```
+
+`fnname/llm/predict_lora.py`:
+
+```py
+"""Top-k name suggestions from the fine-tuned model via beam search.
+
+Confidence is the softmax over the k beams' length-normalized log-probs, so the
+five scores sum to 1 — comparable in spirit to the kNN vote share.
+
+    python -m fnname.llm.predict_lora --adapter models/lora --test data/test.jsonl --out preds/lora.jsonl
+"""
+
+import argparse
+import json
+from pathlib import Path
+
+import torch
+from peft import AutoPeftModelForCausalLM
+from transformers import AutoTokenizer
+
+from .prompt import build_prompt
+
+
+class LoraNamer:
+    def __init__(self, adapter, device=None):
+        self.device = device or ("cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu")
+        self.tok = AutoTokenizer.from_pretrained(adapter)
+        self.tok.padding_side = "left"
+        self.model = AutoPeftModelForCausalLM.from_pretrained(adapter, torch_dtype=torch.bfloat16).to(self.device).eval()
+
+    @torch.no_grad()
+    def predict(self, codes, top=5):
+        enc = self.tok([build_prompt(c) for c in codes], return_tensors="pt", padding=True).to(self.device)
+        out = self.model.generate(
+            **enc, max_new_tokens=16, num_beams=top, num_return_sequences=top,
+            output_scores=True, return_dict_in_generate=True, early_stopping=True,
+            pad_token_id=self.tok.pad_token_id,
+        )
+        texts = self.tok.batch_decode(out.sequences[:, enc["input_ids"].shape[1]:], skip_special_tokens=True)
+        probs = out.sequences_scores.view(len(codes), top).softmax(-1).tolist()
+        results = []
+        for i in range(len(codes)):
+            seen, cands = set(), []
+            for t, p in zip(texts[i * top:(i + 1) * top], probs[i]):
+                name = t.strip().split()[0] if t.strip() else ""
+                if name and name not in seen:
+                    seen.add(name)
+                    cands.append({"name": name, "score": p})
+            results.append(cands)
+        return results
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--adapter", default="models/lora")
+    ap.add_argument("--test", default="data/test.jsonl")
+    ap.add_argument("--out", default="preds/lora.jsonl", type=Path)
+    ap.add_argument("--batch", type=int, default=8)
+    args = ap.parse_args()
+
+    namer = LoraNamer(args.adapter)
+    rows = [json.loads(l) for l in open(args.test)]
+    args.out.parent.mkdir(parents=True, exist_ok=True)
+    with open(args.out, "w") as f:
+        for i in range(0, len(rows), args.batch):
+            chunk = rows[i:i + args.batch]
+            for r, p in zip(chunk, namer.predict([r["code"] for r in chunk])):
+                f.write(json.dumps({"id": r["id"], "preds": p}) + "\n")
+            print(f"{i + len(chunk)}/{len(rows)}", flush=True)
+
+
+if __name__ == "__main__":
+    main()
+
+```
+
+`fnname/llm/prompt.py`:
+
+```py
+"""Prompt format shared by fine-tuning, local inference, and the zero-shot baseline."""
+
+MAX_CODE_CHARS = 6000  # ~1.5-2K tokens; long functions keep their head (signature + setup)
+
+TEMPLATE = "// Decompiled function (stripped binary)\n{code}\n// Original function name:"
+
+
+def build_prompt(code):
+    if len(code) > MAX_CODE_CHARS:
+        code = code[:MAX_CODE_CHARS] + "\n// ... truncated"
+    return TEMPLATE.format(code=code)
+
+```
+
+`fnname/llm/train_lora.py`:
+
+```py
+"""Stage 3: LoRA fine-tune a small code model to emit the function name.
+
+Loss is computed on the name tokens only; the prompt is masked out.
+
+    python -m fnname.llm.train_lora --base Qwen/Qwen2.5-Coder-1.5B \
+        --train data/train.jsonl --val data/val.jsonl --out models/lora-qwen1.5b
+
+Needs a CUDA GPU with ~16 GB (bf16, batch 8 x grad-accum 4 at 2K tokens).
+"""
+
+import argparse
+import json
+
+import torch
+from datasets import Dataset
+from peft import LoraConfig, get_peft_model
+from transformers import (AutoModelForCausalLM, AutoTokenizer, DataCollatorForSeq2Seq,
+                          Trainer, TrainingArguments)
+
+from .prompt import build_prompt
+
+
+def encode(tok, max_len):
+    def fn(row):
+        prompt = tok(build_prompt(row["code"]), add_special_tokens=False)["input_ids"]
+        target = tok(" " + row["name"], add_special_tokens=False)["input_ids"] + [tok.eos_token_id]
+        prompt = prompt[: max_len - len(target)]
+        return {
+            "input_ids": prompt + target,
+            "attention_mask": [1] * (len(prompt) + len(target)),
+            "labels": [-100] * len(prompt) + target,
+        }
+    return fn
+
+
+def load(path, tok, max_len, limit=None):
+    rows = [json.loads(l) for l in open(path)][:limit]
+    ds = Dataset.from_list([{"code": r["code"], "name": r["name"]} for r in rows])
+    return ds.map(encode(tok, max_len), remove_columns=["code", "name"])
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--base", default="Qwen/Qwen2.5-Coder-1.5B")
+    ap.add_argument("--train", default="data/train.jsonl")
+    ap.add_argument("--val", default="data/val.jsonl")
+    ap.add_argument("--out", default="models/lora")
+    ap.add_argument("--max-len", type=int, default=2048)
+    ap.add_argument("--epochs", type=float, default=2)
+    ap.add_argument("--lr", type=float, default=2e-4)
+    ap.add_argument("--rank", type=int, default=16)
+    args = ap.parse_args()
+
+    tok = AutoTokenizer.from_pretrained(args.base)
+    tok.pad_token = tok.pad_token or tok.eos_token
+    model = AutoModelForCausalLM.from_pretrained(args.base, torch_dtype=torch.bfloat16)
+    model = get_peft_model(model, LoraConfig(
+        r=args.rank, lora_alpha=2 * args.rank, lora_dropout=0.05, task_type="CAUSAL_LM",
+        target_modules=["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"],
+    ))
+    model.print_trainable_parameters()
+
+    trainer = Trainer(
+        model=model,
+        args=TrainingArguments(
+            output_dir=args.out, num_train_epochs=args.epochs, learning_rate=args.lr,
+            per_device_train_batch_size=8, per_device_eval_batch_size=8, gradient_accumulation_steps=4,
+            lr_scheduler_type="cosine", warmup_ratio=0.03, bf16=True, logging_steps=20,
+            eval_strategy="steps", eval_steps=500, save_steps=500, save_total_limit=2,
+            load_best_model_at_end=True, group_by_length=True, report_to="none",
+        ),
+        train_dataset=load(args.train, tok, args.max_len),
+        eval_dataset=load(args.val, tok, args.max_len, limit=2000),
+        data_collator=DataCollatorForSeq2Seq(tok, padding=True, label_pad_token_id=-100),
+    )
+    trainer.train()
+    model.save_pretrained(args.out)
+    tok.save_pretrained(args.out)
+
+
+if __name__ == "__main__":
+    main()
+
+```
+
+`fnname/llm/zero_shot.py`:
+
+```py
+"""Zero-shot baseline: ask a large API model (Claude) for five ranked names.
+
+No examples in the prompt; same normalized input the fine-tuned model sees.
+Run it on a fixed random sample of the test set to bound cost.
+
+    python -m fnname.llm.zero_shot --test data/test.jsonl --out preds/zeroshot.jsonl --sample 2000
+
+Uses server-side refusal fallbacks: decompiled code can trip safety classifiers
+now and then, and a fallback model answering beats a silently empty row.
+"""
+
+import argparse
+import json
+import random
+from concurrent.futures import ThreadPoolExecutor
+from pathlib import Path
+
+import anthropic
+
+from .prompt import build_prompt
+
+SYSTEM = (
+    "You are a reverse engineer. You are shown Ghidra decompiler output for one function "
+    "from a stripped C binary; address-derived names were replaced with placeholders such "
+    "as FUN_1 and DAT_1, and the function itself is called FUNC. Suggest the function's "
+    "original C name as the developer would have written it (snake_case or camelCase, no "
+    "prefixes like sub_). Give exactly five distinct candidates, best first, with "
+    "probabilities that sum to 1."
+)
+
+SCHEMA = {
+    "type": "object",
+    "properties": {
+        "candidates": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {"name": {"type": "string"}, "score": {"type": "number"}},
+                "required": ["name", "score"],
+                "additionalProperties": False,
+            },
+        }
+    },
+    "required": ["candidates"],
+    "additionalProperties": False,
+}
+
+
+def suggest(client, model, code):
+    resp = client.beta.messages.create(
+        model=model,
+        max_tokens=4000,
+        system=SYSTEM,
+        messages=[{"role": "user", "content": build_prompt(code)}],
+        output_config={"effort": "low", "format": {"type": "json_schema", "schema": SCHEMA}},
+        betas=["server-side-fallback-2026-07-01"],
+        fallbacks="default",
+    )
+    if resp.stop_reason == "refusal":
+        return [], "refusal"
+    text = next((b.text for b in resp.content if b.type == "text"), "")
+    cands = json.loads(text)["candidates"][:5]
+    return cands, None
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--test", default="data/test.jsonl")
+    ap.add_argument("--out", default="preds/zeroshot.jsonl", type=Path)
+    ap.add_argument("--model", default="claude-opus-5-5")
+    ap.add_argument("--sample", type=int, default=2000, help="0 = whole test set")
+    ap.add_argument("--workers", type=int, default=8)
+    args = ap.parse_args()
+
+    rows = [json.loads(l) for l in open(args.test)]
+    if args.sample and args.sample < len(rows):
+        rows = random.Random(0).sample(rows, args.sample)
+    client = anthropic.Anthropic()
+
+    def run(row):
+        try:
+            cands, err = suggest(client, args.model, row["code"])
+        except anthropic.BadRequestError as e:
+            cands, err = [], f"bad_request: {e.message}"
+        except anthropic.APIStatusError as e:  # retries already exhausted by the SDK
+            cands, err = [], f"api_{e.status_code}"
+        except anthropic.APIConnectionError:
+            cands, err = [], "connection"
+        except (json.JSONDecodeError, KeyError):
+            cands, err = [], "unparseable"
+        return {"id": row["id"], "preds": cands, **({"error": err} if err else {})}
+
+    args.out.parent.mkdir(parents=True, exist_ok=True)
+    errors = 0
+    with open(args.out, "w") as f, ThreadPoolExecutor(args.workers) as pool:
+        for i, rec in enumerate(pool.map(run, rows), 1):
+            errors += "error" in rec
+            f.write(json.dumps(rec) + "\n")
+            if i % 50 == 0:
+                print(f"{i}/{len(rows)} ({errors} errors)", flush=True)
+    print(f"wrote {args.out}: {len(rows)} rows, {errors} errors")
+
+
+if __name__ == "__main__":
+    main()
+
+```
+
+`fnname/metrics.py`:
+
+```py
+"""Evaluation metrics, following the code2seq / DIRE convention.
+
+- exact@1 / exact@5: canonical name of a top-k prediction equals the truth
+- subtoken precision / recall / F1: multiset overlap of name subtokens on the
+  top-1 prediction, micro-averaged over the test set
+"""
+
+from collections import Counter
+
+from .names import canonical, subtokens
+
+
+def subtoken_counts(pred, true):
+    p, t = Counter(subtokens(pred)), Counter(subtokens(true))
+    tp = sum((p & t).values())
+    return tp, sum(p.values()), sum(t.values())
+
+
+def score(examples, k=5):
+    """examples: iterable of (true_name, [ranked predicted names])."""
+    n = ex1 = exk = tp = np_ = nt = 0
+    for true, preds in examples:
+        n += 1
+        truth = canonical(true)
+        canon = [canonical(p) for p in preds[:k]]
+        ex1 += bool(canon) and canon[0] == truth
+        exk += truth in canon
+        a, b, c = subtoken_counts(preds[0] if preds else "", true)
+        tp, np_, nt = tp + a, np_ + b, nt + c
+    prec = tp / np_ if np_ else 0.0
+    rec = tp / nt if nt else 0.0
+    f1 = 2 * prec * rec / (prec + rec) if prec + rec else 0.0
+    return {
+        "n": n,
+        "exact@1": ex1 / n if n else 0.0,
+        f"exact@{k}": exk / n if n else 0.0,
+        "precision": prec,
+        "recall": rec,
+        "f1": f1,
+    }
+
+```
+
+`fnname/names.py`:
+
+```py
+"""Function-name normalization and subtoken splitting.
+
+Labels come straight from ELF symbol tables, so they need cleaning before they
+are usable targets: compiler clone suffixes are stripped, runtime/CRT helpers
+are dropped, and every name is canonicalized to lowercase snake_case subtokens.
+"""
+
+import re
+
+# GCC/Clang clone suffixes: foo.isra.0, foo.constprop.3, foo.part.1, foo.lto_priv.0
+_CLONE_SUFFIX = re.compile(r"\.(isra|constprop|part|lto_priv|llvm)\.\d+.*$")
+_CAMEL = re.compile(r"[A-Z]+(?=[A-Z][a-z])|[A-Z]?[a-z]+|[A-Z]+|\d+")
+
+# Functions every binary has, which say nothing about the program.
+_RUNTIME = {
+    "_start", "_init", "_fini", "main", "frame_dummy", "register_tm_clones",
+    "deregister_tm_clones", "__do_global_dtors_aux", "__libc_csu_init",
+    "__libc_csu_fini", "_dl_relocate_static_pie", "__x86.get_pc_thunk.bx",
+}
+
+
+def clean_symbol(raw):
+    """Return the label for a raw symbol name, or None if it should be dropped."""
+    if raw in _RUNTIME or raw.startswith("__"):
+        return None
+    if ".cold" in raw:  # split-off cold paths aren't whole functions
+        return None
+    name = _CLONE_SUFFIX.sub("", raw)
+    if "." in name or "@" in name or not subtokens(name):
+        return None
+    return name
+
+
+def subtokens(name):
+    """parse_HTTPHeader2 -> ['parse', 'http', 'header', '2']"""
+    out = []
+    for part in re.split(r"[_\W]+", name):
+        out.extend(t.lower() for t in _CAMEL.findall(part))
+    return out
+
+
+def canonical(name):
+    """Comparison form used by exact-match: lowercase snake_case of subtokens."""
+    return "_".join(subtokens(name))
+
+```
+
+`fnname/normalize.py`:
+
+```py
+"""Normalization of Ghidra decompiler output.
+
+Ghidra embeds addresses everywhere (FUN_00101a30, DAT_00104010, LAB_...). They
+are meaningless across binaries and let a model memorize layout, so they're
+renamed to positional placeholders. The function's own name becomes FUNC.
+"""
+
+import hashlib
+import re
+
+_ADDR_SYM = re.compile(r"\b(FUN|DAT|LAB|PTR|UNK|switchD|caseD|thunk_FUN)_([0-9a-fA-F]{4,16})\b")
+# Other address-suffixed labels, e.g. s_usage:_%s_00102004 -> s_usage:_%s
+_ADDR_SUFFIX = re.compile(r"\b(\w+?)_[0-9a-fA-F]{8,16}\b")
+_HEX = re.compile(r"0x[0-9a-fA-F]{5,}")
+_COMMENT = re.compile(r"/\*.*?\*/", re.S)
+_STRING = re.compile(r'"(?:\\.|[^"\\])*"')
+_TOKEN = re.compile(r'"(?:\\.|[^"\\])*"|[A-Za-z_]\w*|0x[0-9a-fA-F]+|\d+|==|!=|<=|>=|->|&&|\|\||<<|>>|\S')
+
+
+def normalize(code, self_name=None):
+    """Replace address-derived identifiers with stable placeholders."""
+    code = _COMMENT.sub("", code)
+    if self_name:
+        code = re.sub(rf"\b{re.escape(self_name)}\b", "FUNC", code)
+    seen, per_kind = {}, {}
+
+    def rename(m):
+        key, kind = m.group(0), m.group(1)
+        if key not in seen:
+            per_kind[kind] = per_kind.get(kind, 0) + 1
+            seen[key] = f"{kind}_{per_kind[kind]}"
+        return seen[key]
+
+    code = _ADDR_SYM.sub(rename, code)
+    code = _ADDR_SUFFIX.sub(r"\1", code)
+    code = _HEX.sub("ADDR", code)
+    code = re.sub(r"[ \t]+", " ", code)
+    return re.sub(r"\n\s*\n+", "\n", code).strip()
+
+
+def code_hash(normalized):
+    """Body hash used for de-duplication across binaries and projects."""
+    body = re.sub(r"\s+", "", normalized)
+    return hashlib.sha1(body.encode()).hexdigest()[:16]
+
+
+def tokens(code):
+    return _TOKEN.findall(code)
+
+
+def string_literals(code):
+    return [s[1:-1] for s in _STRING.findall(code)]
+
+```
+
+`fnname/pair.py`:
+
+```py
+"""Stage 1c: join Ghidra output with ground-truth symbols into one dataset.
+
+    python -m fnname.pair --work work --out data/functions.jsonl
+
+Dropped (and counted, because the counts belong in the write-up):
+  - no symbol at that address, or a runtime/CRT helper
+  - Ghidra already knew the name (exported .dynsym symbols survive strip)
+  - duplicate (name, body) within the same project+config, e.g. a static
+    helper linked into several of the project's executables
+"""
+
+import argparse
+import json
+from collections import Counter
+from pathlib import Path
+
+from .elf_symbols import function_symbols, offset_to_vaddr
+from .names import clean_symbol
+from .normalize import code_hash, normalize, string_literals
+
+
+def pair_binary(unstripped, stripped, decomp_jsonl, stats):
+    syms = function_symbols(unstripped)
+    to_vaddr = offset_to_vaddr(stripped)
+    for line in open(decomp_jsonl):
+        rec = json.loads(line)
+        stats["ghidra_functions"] += 1
+        sym = syms.get(to_vaddr(rec["file_offset"]))
+        if sym is None:
+            stats["drop_no_symbol"] += 1
+            continue
+        name = clean_symbol(sym[0])
+        if name is None:
+            stats["drop_runtime_or_unusable"] += 1
+            continue
+        if not rec["ghidra_name"].startswith("FUN_"):
+            stats["drop_name_visible_in_stripped"] += 1
+            continue
+        code = normalize(rec["code"], rec["ghidra_name"])
+        yield {
+            "name": name,
+            "raw_symbol": sym[0],
+            "code": code,
+            "code_hash": code_hash(code),
+            "n_instructions": rec["n_instructions"],
+            # assert()/__func__ put the real name in .rodata; legit signal, but report it
+            "name_in_strings": any(name in s for s in string_literals(code)),
+        }
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--work", default="work", type=Path)
+    ap.add_argument("--out", default="data/functions.jsonl", type=Path)
+    args = ap.parse_args()
+
+    stats, seen = Counter(), set()
+    args.out.parent.mkdir(parents=True, exist_ok=True)
+    with open(args.out, "w") as out:
+        for decomp_jsonl in sorted((args.work / "decomp").rglob("*.jsonl")):
+            project, config = decomp_jsonl.parts[-3], decomp_jsonl.parts[-2]
+            binary = decomp_jsonl.name.removesuffix(".jsonl")
+            bin_dir = args.work / "bins" / project / config
+            for ex in pair_binary(bin_dir / binary, bin_dir / f"{binary}.stripped", decomp_jsonl, stats):
+                key = (project, config, ex["name"], ex["code_hash"])
+                if key in seen:
+                    stats["drop_dup_within_project"] += 1
+                    continue
+                seen.add(key)
+                ex.update(project=project, config=config, binary=binary)
+                out.write(json.dumps(ex) + "\n")
+                stats["kept"] += 1
+
+    for k, v in sorted(stats.items()):
+        print(f"{k:<32} {v}")
+
+
+if __name__ == "__main__":
+    main()
+
+```
+
+`fnname/split.py`:
+
+```py
+"""Stage 1d: split by project, then remove cross-project leakage.
+
+Splitting by function would put zlib's inflate() at -O0 in train and the same
+inflate() at -O2 in test. Splitting by project fixes that, but projects still
+vendor each other's code (gnulib, getopt, md5...). So after the project split,
+any val/test function whose normalized body also appears in train is dropped.
+
+    python -m fnname.split --data data/functions.jsonl --out data/
+"""
+
+import argparse
+import hashlib
+import json
+from collections import Counter
+from pathlib import Path
+
+
+def assign(project, val_frac, test_frac, seed):
+    h = int(hashlib.sha1(f"{seed}:{project}".encode()).hexdigest(), 16) / 16**40
+    return "test" if h < test_frac else "val" if h < test_frac + val_frac else "train"
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--data", default="data/functions.jsonl", type=Path)
+    ap.add_argument("--out", default="data", type=Path)
+    ap.add_argument("--val", type=float, default=0.1)
+    ap.add_argument("--test", type=float, default=0.1)
+    ap.add_argument("--seed", default="0")
+    ap.add_argument("--test-projects", nargs="*", default=[], help="force these into test")
+    args = ap.parse_args()
+
+    rows = [json.loads(l) for l in open(args.data)]
+    split_of = {}
+    for p in sorted({r["project"] for r in rows}):
+        split_of[p] = "test" if p in args.test_projects else assign(p, args.val, args.test, args.seed)
+
+    train_hashes = {r["code_hash"] for r in rows if split_of[r["project"]] == "train"}
+    train_names = {r["name"] for r in rows if split_of[r["project"]] == "train"}
+    stats = Counter()
+    files = {s: open(args.out / f"{s}.jsonl", "w") for s in ("train", "val", "test")}
+    for i, r in enumerate(rows):
+        s = split_of[r["project"]]
+        if s != "train" and r["code_hash"] in train_hashes:
+            stats[f"{s}_dropped_body_seen_in_train"] += 1
+            continue
+        stats[s] += 1
+        if s != "train" and r["name"] in train_names:
+            stats[f"{s}_name_seen_in_train"] += 1
+        r["id"] = i
+        files[s].write(json.dumps(r) + "\n")
+    for f in files.values():
+        f.close()
+
+    json.dump(split_of, open(args.out / "split_projects.json", "w"), indent=2)
+    for k, v in sorted(stats.items()):
+        print(f"{k:<36} {v}")
+
+
+if __name__ == "__main__":
+    main()
+
+```
+
+`ghidra_scripts/ExportDecompiled.java`:
+
+```java
+// Headless post-script: decompile every non-thunk, non-external function and
+// write one JSON object per line to the path given as the first script arg.
+//
+//   analyzeHeadless <proj_dir> tmp -import bin.stripped -deleteProject \
+//       -postScript ExportDecompiled.java out.jsonl
+//
+// @category FnName
+
+import java.io.FileWriter;
+import java.io.PrintWriter;
+
+import ghidra.app.decompiler.DecompInterface;
+import ghidra.app.decompiler.DecompileResults;
+import ghidra.app.script.GhidraScript;
+import ghidra.program.database.mem.AddressSourceInfo;
+import ghidra.program.model.listing.Function;
+import ghidra.program.model.mem.MemoryBlock;
+
+public class ExportDecompiled extends GhidraScript {
+
+    private static final int TIMEOUT_SECONDS = 30;
+
+    @Override
+    public void run() throws Exception {
+        String outPath = getScriptArgs()[0];
+        DecompInterface decomp = new DecompInterface();
+        decomp.openProgram(currentProgram);
+
+        int ok = 0, failed = 0;
+        try (PrintWriter out = new PrintWriter(new FileWriter(outPath))) {
+            for (Function fn : currentProgram.getFunctionManager().getFunctions(true)) {
+                if (monitor.isCancelled()) break;
+                if (fn.isThunk() || fn.isExternal()) continue;
+                MemoryBlock block = getMemoryBlock(fn.getEntryPoint());
+                if (block == null || !block.isExecute() || block.getName().startsWith(".plt")) continue;
+
+                AddressSourceInfo src = currentProgram.getMemory().getAddressSourceInfo(fn.getEntryPoint());
+                if (src == null || src.getFileOffset() < 0) continue;
+
+                DecompileResults res = decomp.decompileFunction(fn, TIMEOUT_SECONDS, monitor);
+                if (res == null || !res.decompileCompleted()) {
+                    failed++;
+                    continue;
+                }
+                out.println("{\"ghidra_name\":" + q(fn.getName())
+                        + ",\"file_offset\":" + src.getFileOffset()
+                        + ",\"n_instructions\":" + countInstructions(fn)
+                        + ",\"code\":" + q(res.getDecompiledFunction().getC()) + "}");
+                ok++;
+            }
+        } finally {
+            decomp.dispose();
+        }
+        println("ExportDecompiled: " + ok + " functions, " + failed + " failed");
+    }
+
+    private int countInstructions(Function fn) {
+        int n = 0;
+        var it = currentProgram.getListing().getInstructions(fn.getBody(), true);
+        while (it.hasNext()) { it.next(); n++; }
+        return n;
+    }
+
+    private static String q(String s) {
+        StringBuilder b = new StringBuilder("\"");
+        for (char c : s.toCharArray()) {
+            switch (c) {
+                case '"': b.append("\\\""); break;
+                case '\\': b.append("\\\\"); break;
+                case '\n': b.append("\\n"); break;
+                case '\r': b.append("\\r"); break;
+                case '\t': b.append("\\t"); break;
+                default:
+                    if (c < 0x20) b.append(String.format("\\u%04x", (int) c));
+                    else b.append(c);
+            }
+        }
+        return b.append('"').toString();
+    }
+}
+
+```
+
+`ghidra_scripts/SuggestName.java`:
+
+```java
+// Ghidra plugin script: send the function under the cursor to the fnname
+// service, pick one of the suggestions, and rename the function.
+//
+// Install: Script Manager -> Script Directories -> add this folder. Bind it to
+// a key (e.g. Ctrl-Shift-N). Set FNNAME_URL if the service isn't on localhost.
+//
+// @category FnName
+// @keybinding ctrl shift N
+// @menupath Tools.FnName.Suggest Name
+
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import ghidra.app.decompiler.DecompInterface;
+import ghidra.app.decompiler.DecompileResults;
+import ghidra.app.script.GhidraScript;
+import ghidra.program.model.listing.Function;
+import ghidra.program.model.symbol.SourceType;
+
+public class SuggestName extends GhidraScript {
+
+    private static final Pattern CANDIDATE =
+            Pattern.compile("\\{\"name\":\"((?:\\\\.|[^\"\\\\])*)\",\"score\":([0-9.eE+-]+)\\}");
+
+    @Override
+    public void run() throws Exception {
+        Function fn = getFunctionContaining(currentAddress);
+        if (fn == null) {
+            popup("Put the cursor inside a function first.");
+            return;
+        }
+
+        DecompInterface decomp = new DecompInterface();
+        decomp.openProgram(currentProgram);
+        DecompileResults res = decomp.decompileFunction(fn, 60, monitor);
+        decomp.dispose();
+        if (res == null || !res.decompileCompleted()) {
+            popup("Decompilation failed: " + (res == null ? "" : res.getErrorMessage()));
+            return;
+        }
+
+        String base = System.getenv().getOrDefault("FNNAME_URL", "http://127.0.0.1:8000");
+        String body = "{\"code\":" + quote(res.getDecompiledFunction().getC()) + ",\"top\":5}";
+        HttpResponse<String> resp = HttpClient.newHttpClient().send(
+                HttpRequest.newBuilder(URI.create(base + "/predict"))
+                        .header("Content-Type", "application/json")
+                        .POST(HttpRequest.BodyPublishers.ofString(body)).build(),
+                HttpResponse.BodyHandlers.ofString());
+        if (resp.statusCode() != 200) {
+            popup("fnname service returned " + resp.statusCode() + ": " + resp.body());
+            return;
+        }
+
+        List<String> choices = new ArrayList<>();
+        Matcher m = CANDIDATE.matcher(resp.body().replace(" ", ""));
+        while (m.find()) {
+            choices.add(String.format("%s  (%.0f%%)", m.group(1), 100 * Double.parseDouble(m.group(2))));
+        }
+        if (choices.isEmpty()) {
+            popup("No suggestions for " + fn.getName());
+            return;
+        }
+
+        String pick = askChoice("FnName", "Rename " + fn.getName() + " to:", choices, choices.get(0));
+        String name = pick.substring(0, pick.indexOf("  ("));
+        fn.setName(name, SourceType.USER_DEFINED);
+        fn.setComment("fnname suggestion: " + pick + "\nall: " + String.join(", ", choices));
+        println("Renamed to " + name);
+    }
+
+    private static String quote(String s) {
+        StringBuilder b = new StringBuilder("\"");
+        for (char c : s.toCharArray()) {
+            switch (c) {
+                case '"': b.append("\\\""); break;
+                case '\\': b.append("\\\\"); break;
+                case '\n': b.append("\\n"); break;
+                case '\r': b.append("\\r"); break;
+                case '\t': b.append("\\t"); break;
+                default:
+                    if (c < 0x20) b.append(String.format("\\u%04x", (int) c));
+                    else b.append(c);
+            }
+        }
+        return b.append('"').toString();
+    }
+}
+
+```
+
+`requirements-dev.txt`:
+
+```txt
+-r requirements.txt
+pytest
+httpx
+
+```
+
+`requirements-llm.txt`:
+
+```txt
+torch
+transformers
+peft
+datasets
+accelerate
+anthropic
+
+```
+
+`requirements.txt`:
+
+```txt
+numpy
+scipy
+scikit-learn
+pyelftools
+pyyaml
+fastapi
+uvicorn
+pydantic
+
+```
+
+`serve/app.py`:
+
+```py
+"""Stage 5: HTTP service for name suggestions.
+
+    FNNAME_MODEL=models/knn.pkl uvicorn serve.app:app --port 8000
+    FNNAME_MODEL=models/lora    uvicorn serve.app:app --port 8000   # needs torch+peft
+
+POST /predict {"code": "<Ghidra decompiler output>"} -> top-5 names with confidence.
+Raw Ghidra output is fine: it is normalized here exactly as in training.
+"""
+
+import os
+import pickle
+import re
+from pathlib import Path
+
+from fastapi import FastAPI
+from fastapi.responses import FileResponse
+from pydantic import BaseModel, Field
+
+from fnname.normalize import normalize
+
+MODEL_PATH = Path(os.environ.get("FNNAME_MODEL", "models/knn.pkl"))
+STATIC = Path(__file__).parent / "static"
+_SIGNATURE_NAME = re.compile(r"^[\w\s\*]*?\b(FUN_[0-9a-fA-F]+|sub_[0-9a-fA-F]+)\s*\(", re.M)
+
+
+def load_model(path):
+    if path.suffix == ".pkl":
+        return pickle.load(open(path, "rb")), "knn"
+    from fnname.llm.predict_lora import LoraNamer
+    return LoraNamer(str(path)), "lora"
+
+
+model, model_kind = load_model(MODEL_PATH)
+app = FastAPI(title="fnname", description="Suggest names for stripped-binary functions")
+
+
+class PredictRequest(BaseModel):
+    code: str = Field(..., min_length=1, max_length=200_000)
+    top: int = Field(5, ge=1, le=10)
+
+
+class Candidate(BaseModel):
+    name: str
+    score: float
+
+
+class PredictResponse(BaseModel):
+    model: str
+    candidates: list[Candidate]
+
+
+@app.post("/predict", response_model=PredictResponse)
+def predict(req: PredictRequest):
+    m = _SIGNATURE_NAME.search(req.code)
+    code = normalize(req.code, m.group(1) if m else None)
+    return {"model": model_kind, "candidates": model.predict([code], top=req.top)[0]}
+
+
+@app.get("/health")
+def health():
+    return {"ok": True, "model": model_kind, "path": str(MODEL_PATH)}
+
+
+@app.get("/")
+def index():
+    return FileResponse(STATIC / "index.html")
+
+```
+
+`serve/static/index.html`:
+
+```html
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>fnname</title>
+<style>
+  :root { --bg:#fafaf9; --fg:#1c1917; --muted:#78716c; --card:#fff; --line:#e7e5e4; --accent:#2563eb; --bar:#dbeafe; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#0c0a09; --fg:#f5f5f4; --muted:#a8a29e; --card:#1c1917; --line:#292524; --accent:#60a5fa; --bar:#1e3a5f; }
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--fg); font:15px/1.5 system-ui, sans-serif; }
+  main { max-width:860px; margin:0 auto; padding:32px 16px; }
+  h1 { font-size:22px; margin:0 0 4px; }
+  p { color:var(--muted); margin:0 0 20px; }
+  textarea { width:100%; height:320px; padding:12px; border:1px solid var(--line); border-radius:8px;
+             background:var(--card); color:var(--fg); font:13px/1.45 ui-monospace, Menlo, monospace; resize:vertical; }
+  button { margin-top:12px; padding:9px 18px; border:0; border-radius:6px; background:var(--accent); color:#fff;
+           font-weight:600; cursor:pointer; }
+  button:disabled { opacity:.5; cursor:default; }
+  ol { list-style:none; padding:0; margin:24px 0 0; }
+  li { position:relative; display:flex; justify-content:space-between; padding:10px 14px; margin-bottom:6px;
+       border:1px solid var(--line); border-radius:6px; background:var(--card); overflow:hidden; }
+  li .bar { position:absolute; inset:0 auto 0 0; background:var(--bar); z-index:0; }
+  li span { position:relative; z-index:1; }
+  li .name { font-family:ui-monospace, Menlo, monospace; font-weight:600; }
+  li .score { color:var(--muted); font-variant-numeric:tabular-nums; }
+  .err { color:#dc2626; margin-top:16px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>fnname</h1>
+  <p>Paste a function from Ghidra's decompiler window. You get five ranked name suggestions with confidence scores.</p>
+  <textarea id="code" spellcheck="false">undefined8 FUN_00101a30(char *param_1,long param_2)
+{
+  char *pcVar1;
+  pcVar1 = strchr(param_1,0x3a);
+  if (pcVar1 == (char *)0x0) {
+    return 0xffffffff;
+  }
+  *pcVar1 = '\0';
+  *(char **)(param_2 + 8) = param_1;
+  *(char **)(param_2 + 0x10) = pcVar1 + 1 + strspn(pcVar1 + 1," \t");
+  return 0;
+}</textarea>
+  <button id="go">Suggest names</button>
+  <div id="err" class="err"></div>
+  <ol id="out"></ol>
+</main>
+<script>
+const go = document.getElementById("go"), out = document.getElementById("out"), err = document.getElementById("err");
+go.onclick = async () => {
+  go.disabled = true; err.textContent = ""; out.innerHTML = "";
+  try {
+    const r = await fetch("/predict", {method: "POST", headers: {"Content-Type": "application/json"},
+                                      body: JSON.stringify({code: document.getElementById("code").value})});
+    if (!r.ok) throw new Error(`${r.status} ${await r.text()}`);
+    const {candidates} = await r.json();
+    if (!candidates.length) err.textContent = "No similar functions found.";
+    for (const c of candidates) {
+      const li = document.createElement("li");
+      const pct = (100 * c.score).toFixed(1);
+      li.innerHTML = `<div class="bar" style="width:${pct}%"></div><span class="name"></span><span class="score">${pct}%</span>`;
+      li.querySelector(".name").textContent = c.name;
+      out.appendChild(li);
+    }
+  } catch (e) { err.textContent = e.message; }
+  go.disabled = false;
+};
+</script>
+</body>
+</html>
+
+```
+
+`tests/conftest.py`:
+
+```py
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
+```
+
+`tests/test_core.py`:
+
+```py
+from fnname.metrics import score
+from fnname.names import canonical, clean_symbol, subtokens
+from fnname.normalize import code_hash, normalize
+
+
+def test_subtokens():
+    assert subtokens("parse_HTTPHeader2") == ["parse", "http", "header", "2"]
+    assert subtokens("readFileContents") == ["read", "file", "contents"]
+    assert canonical("ParseHttpHeader") == canonical("parse_http_header")
+
+
+def test_clean_symbol():
+    assert clean_symbol("inflate_fast.isra.0") == "inflate_fast"
+    assert clean_symbol("deflate.part.3") == "deflate"
+    assert clean_symbol("main") is None
+    assert clean_symbol("__libc_csu_init") is None
+    assert clean_symbol("foo.cold") is None
+    assert clean_symbol("frame_dummy") is None
+
+
+def test_normalize_placeholders_are_positional():
+    a = "int FUN_00101a30(void) { FUN_00102000(DAT_00104010); return FUN_00102000(0x401234); }"
+    b = "int FUN_00203b40(void) { FUN_00205000(DAT_00207010); return FUN_00205000(0x509abc); }"
+    na = normalize(a, "FUN_00101a30")
+    assert na == normalize(b, "FUN_00203b40")
+    assert na.startswith("int FUNC(void)") and "FUN_1(DAT_1)" in na and "ADDR" in na
+    assert code_hash(na) == code_hash(normalize(b, "FUN_00203b40"))
+
+
+def test_normalize_strips_comments_and_string_label_addresses():
+    code = "/* WARNING: x */\nvoid f(void) { puts(s_usage_00102004); }"
+    assert normalize(code) == "void f(void) { puts(s_usage); }"
+
+
+def test_metrics():
+    m = score([
+        ("parse_http_header", ["parseHttpHeader", "x"]),      # exact
+        ("read_config_file", ["load_config", "read_config_file"]),  # top-5 only
+        ("free_buffer", []),                                   # no prediction
+    ])
+    assert m["n"] == 3
+    assert abs(m["exact@1"] - 1 / 3) < 1e-9
+    assert abs(m["exact@5"] - 2 / 3) < 1e-9
+    # tp: 3 + 1 (config); predicted: 3 + 2; true: 3 + 3 + 2
+    assert abs(m["precision"] - 4 / 5) < 1e-9
+    assert abs(m["recall"] - 4 / 8) < 1e-9
+
+```
+
+`tests/test_pipeline.py`:
+
+```py
+"""Split -> kNN -> evaluate -> serve on a small synthetic dataset."""
+
+import json
+import pickle
+import subprocess
+import sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent.parent
+
+TEMPLATES = {
+    "parse_header": 'int FUNC(char *param_1) { char *p = strchr(param_1, 0x3a); if (p == 0) return -1; *p = 0; return strspn(p + 1, " \\t"); }',
+    "read_file": 'long FUNC(char *param_1) { FILE *f = fopen(param_1, "rb"); fseek(f, 0, 2); long n = ftell(f); fread(DAT_1, 1, n, f); fclose(f); return n; }',
+    "hash_string": "uint FUNC(byte *param_1) { uint h = 0x1505; while (*param_1) { h = h * 0x21 + *param_1; param_1++; } return h; }",
+    "free_list": "void FUNC(long *param_1) { long *n; while (param_1) { n = (long *)*param_1; free(param_1); param_1 = n; } }",
+    "print_usage": 'void FUNC(void) { fprintf(stderr, "usage: %s [options] file\\n", DAT_1); exit(1); }',
+}
+
+
+def make_dataset(path):
+    rows = []
+    for p in range(12):
+        for cfg in ("gcc-O0", "gcc-O2", "clang-O0", "clang-O2"):
+            for name, code in TEMPLATES.items():
+                variant = code.replace("param_1", f"param_1 /*{p}*/") if p % 2 else code
+                body = f"{variant}\n// {cfg} {p}"  # unique body per project/config
+                rows.append({"name": name, "raw_symbol": name, "code": body, "code_hash": f"{p}{cfg}{name}",
+                             "n_instructions": 20 + len(code) // 10, "name_in_strings": False,
+                             "project": f"proj{p}", "config": cfg, "binary": "a"})
+    path.write_text("".join(json.dumps(r) + "\n" for r in rows))
+
+
+def run(*args):
+    return subprocess.run([sys.executable, "-m", *args], cwd=ROOT, check=True, capture_output=True, text=True).stdout
+
+
+def test_end_to_end(tmp_path):
+    data = tmp_path / "functions.jsonl"
+    make_dataset(data)
+    run("fnname.split", "--data", str(data), "--out", str(tmp_path), "--test-projects", "proj0", "proj1")
+    split = json.loads((tmp_path / "split_projects.json").read_text())
+    assert split["proj0"] == "test"
+    test_projects = {json.loads(l)["project"] for l in open(tmp_path / "test.jsonl")}
+    train_projects = {json.loads(l)["project"] for l in open(tmp_path / "train.jsonl")}
+    assert test_projects and not test_projects & train_projects
+
+    model = tmp_path / "knn.pkl"
+    run("fnname.baselines.knn", "--train", str(tmp_path / "train.jsonl"), "--test", str(tmp_path / "test.jsonl"),
+        "--out", str(tmp_path / "knn.jsonl"), "--save", str(model))
+    report = run("fnname.evaluate", "--test", str(tmp_path / "test.jsonl"), "--failures", "3",
+                 str(tmp_path / "knn.jsonl"), str(tmp_path / "frequency.jsonl"))
+    assert "## Overall" in report and "| knn" in report and "O2" in report
+    knn_row = next(l for l in report.splitlines() if l.startswith("| knn "))
+    assert float(knn_row.split("|")[4]) > 90  # exact@5 on near-duplicate templates
+
+    namer = pickle.load(open(model, "rb"))
+    preds = namer.predict([TEMPLATES["hash_string"]])[0]
+    assert preds[0]["name"] == "hash_string" and abs(sum(p["score"] for p in preds) - 1) < 1e-6
+
+
+def test_serve(tmp_path, monkeypatch):
+    from fnname.baselines.knn import KNNNamer
+    names = list(TEMPLATES) * 3
+    model = KNNNamer().fit([TEMPLATES[n] for n in names], names)
+    pickle.dump(model, open(tmp_path / "knn.pkl", "wb"))
+    monkeypatch.setenv("FNNAME_MODEL", str(tmp_path / "knn.pkl"))
+    sys.modules.pop("serve.app", None)
+    from fastapi.testclient import TestClient
+    from serve.app import app
+
+    client = TestClient(app)
+    raw = TEMPLATES["read_file"].replace("FUNC", "FUN_00101a30").replace("DAT_1", "DAT_00104010")
+    r = client.post("/predict", json={"code": raw})
+    assert r.status_code == 200
+    body = r.json()
+    assert body["model"] == "knn" and body["candidates"][0]["name"] == "read_file"
+    assert client.get("/").status_code == 200
+
+```
