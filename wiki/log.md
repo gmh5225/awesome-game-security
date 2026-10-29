@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-29** — ingest `description:kjjkjjzyayufqza/DDGACreg`: enriched entity [[ddgacreg]] (feature-module + stack tables; MASM `version.dll` forwarder; HLSL cabinet compositor; localhost SQLite content server); description cites on [[overviews/game-hacking]] Cheat / DLL hijack lane and [[overviews/graphics-api]] DirectX map; refreshed `index.md` entity blurb.
+
 - **2026-10-29** — ingest `description:vw2x/Mira`: enriched entity [[mira]] (architecture table—host apps, Frida RPC, relay/Next.js console, MCP; documented side-channel case library); description cites on [[overviews/mobile-security]] (Mobile anti-cheat lane) and [[overviews/anti-cheat]] README map; refreshed `index.md` entity blurb.
 
 - **2026-10-29** — ingest `readme:categories`: **Cheat** link_count **2972** (+2; keshav0045/[[stripped-binary]] Ghidra stripped-name inference + kjjkjjzyayufqza/[[ddgacreg]] TG4AC version.dll proxy hook) / **Anti Cheat** **849** (+1; vw2x/[[mira]] mobile runtime detection workbench) / other major README sections unchanged; 41 top-level sections (`NeverC & NeverD` placeholder); synced [[overviews/overview]], [[overviews/game-hacking]], [[overviews/reverse-engineering]], [[overviews/anti-cheat]], [[overviews/dma-attack]]; entities [[stripped-binary]], [[ddgacreg]], [[mira]]; light `index.md` section notes (no per-category pages).

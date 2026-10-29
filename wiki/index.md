@@ -1087,7 +1087,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [cheat-attack-thread-slemu](entities/cheat-attack-thread-slemu.md) — thread sleep emulation / context manipulation to evade AC thread scanning (gmh5225; Heartbeat Testing)
 - [ddma](entities/ddma.md) — disk HBA ATA DMA PoC (SLAT/EPT bypass via unvirtualized storage; Hyper-V runtime modification; kernel/hypervisor research; btbd)
 - [DDMA-1](entities/ddma-1.md) — disk-based DMA cheat framework (ATA/SCSI PCIe camouflage; zero target-OS footprint; gmh5225; cheat / DMA)
-- [DDGACreg](entities/ddgacreg.md) — TG4AC 5.80.02 Windows `version.dll` proxy hook (MinHook; free camera; NESYS pipe; localhost SQLite card/mission server; kjjkjjzyayufqza; Cheat / DLL hijack)
+- [DDGACreg](entities/ddgacreg.md) — TG4AC 5.80.02 Windows `version.dll` proxy (MinHook; MASM forwarder; HLSL multi-panel compositor; free camera; NESYS pipe; localhost SQLite card/mission server; kjjkjjzyayufqza; Cheat / DLL hijack)
 - [Diskjacker](entities/diskjacker.md) — runtime Hyper-V VM-exit hijacking via DDMA-style DMA (LabGuy94; C++ kernel + usermode + asm stubs; low-level mapping/execution transfer; hardware/virtualization preconditions; hypervisor security PoC)
 - [DMACheatEngineLoader](entities/dma-cheat-engine-loader.md) — Cheat Engine DMA loader (copy CE → DMACE; closed-source)
 - [DMA Attack Firmware Customization](entities/dma-attack-firmware-customization.md) — Screamer Squirrel 35T [[pcileech-fpga]] RTL8111 NIC disguise guide (MindShare Arbor donor harvest; Vivado patch; BattlEye/EAC evasion testing; acageduser)
