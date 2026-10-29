@@ -2303,7 +2303,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [KnoxPatch](entities/knoxpatch.md) — LSPosed module restoring Samsung Knox-gated apps on rooted Galaxy (Knox SDK / attestation hooks + Magisk/KernelSU enhancer; One UI 9–16)
 - [Kong](entities/kong.md) — agentic reverse engineer; LLM-orchestrated binary RE via in-process Ghidra, call-graph analysis, agentic MBA deobfuscation (amruth-sn)
 - [koidbg](entities/koidbg.md) — Windows ARM64 debugger (EN/PT docs; cheat / debugging; game-security RE)
-- [KozDbg](entities/kozdbg.md) — ivanpotatoes; open-source x64dbg plugin bypassing VMProtect 3.3.x–3.10.x user-mode/kernel-debugger anti-debug via version-specific INI profiles (no kernel driver; Cheat / Debugging / RE Tools)
+- [KozDbg](entities/kozdbg.md) — ivanpotatoes; open-source x64dbg plugin bypassing VMProtect 3.3.1–3.10.1 anti-debug (PEB/debug APIs, debug objects, trap flag, HW breakpoints, instrumentation callbacks; API hooks vs direct syscalls; customizable INI profiles; no kernel driver; Cheat / Debugging / RE Tools)
 - [kernforge](entities/kernforge.md) — Go AI workbench for Windows/AC project analysis, fuzz reasoning, driver POC scaffolding, verification (MCP skills)
 - [Known-Driver-Mappers](entities/known-driver-mappers.md) — catalog of known Driver Mappers (AC / stress-testing)
 - [KnownDllUnhook](entities/known-dll-unhook.md) — KnownDlls `.text` section restore for loaded modules (native syscalls; EDR/AC hook evasion research; ORCx41)
