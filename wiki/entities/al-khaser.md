@@ -12,7 +12,7 @@ confidence: medium
 
 Windows **proof-of-concept anti-analysis test suite** that simulates many malware evasion behaviors. C++ codebase with a command-line interface exercising anti-debugging, anti-VM, anti-dumping, anti-disassembly, and timing-based checks. Broad environment-detection coverage for VirtualBox, VMware, QEMU, Wine, and common analysis workflows. Primary use case: validating sandbox, EDR, and anti-malware visibility against real-world evasion techniques. (source: wiki/sources/descriptions/LordNoteworthy__al-khaser.md)
 
-Complements modular anti-analysis testers such as [[pafish]], embeddable VM fingerprinting such as [[compact-vm-detector]], sandbox demos such as [[anticuckoo]] and [[anti-sandbox]], and anti-debug bypass/hide tooling studied in RE workflows ([[scyllahide]], [[titanhide]], [[makin]]).
+Complements modular anti-analysis testers such as [[pafish]], embeddable VM fingerprinting such as [[compact-vm-detector]], sandbox demos such as [[anticuckoo]] and [[anti-sandbox]], and anti-debug bypass/hide tooling studied in RE workflows ([[scyllahide-for-ida9.0rc]], [[titanhide]], [[makin]]).
 
 ## Links
 

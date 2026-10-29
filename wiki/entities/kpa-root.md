@@ -33,4 +33,4 @@ Targets handheld modders and Android/game-security researchers who need root on 
 
 ## Related
 
-[[overviews/mobile-security]] · [[overviews/game-hacking]] · [[magisk]] · [[zygisk]] · [[kernelsu]] · [[mobile-anti-cheat]] · [[jerrymanager]] · [[shamiko]]
+[[overviews/mobile-security]] · [[overviews/game-hacking]] · [[magisk]] · [[zygisk]] · [[kernelsu]] · [[mobile-anti-cheat]] · [[jerrymanager]]
