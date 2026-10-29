@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-29** — lint (agent, Cursor lint pass): read `wiki/AGENTS.md`; **Overviews** (9): `anti-cheat`, `dma-attack`, `game-engine`, `game-hacking`, `graphics-api`, `mobile-security`, `overview`, `reverse-engineering`, `windows-kernel`; **Concepts** (51) under `wiki/concepts/`; **Entities** (4218) under `wiki/entities/`; reconciled `index.md` vs disk — 4278 catalog paths (9+51+4218), 0 missing, 0 dead, 0 duplicate index paths; nine `overviews/*.md` + `index.md` ## Overviews / ## Concepts blurb [[wikilink]] spot-check, 0 broken, 0 malformed `]]]`; 6 expected cross-kind slug collisions ([[anti-cheat]], [[game-hacking]], [[reverse-engineering]], [[byovd]], [[dma]], [[il2cpp]]); wiki populated — bootstrap not required; structural repairs none (`log.md` only).
+
 - **2026-10-29** — ingest `description:1llu50ry/mcp-reverse`: enriched entity [[mcp-reverse]] (180+ tools; sidecar bridges; native decomp/YARA/ROP/PDB modules; VMProtect cookbooks, agent mesh, anti-cheat skill corpus); description cite on [[overviews/reverse-engineering]] AI-assisted MCP lane; refreshed `index.md` entity blurb.
 
 - **2026-10-29** — ingest `readme:categories`: **Game Develop** link_count **200** (+1; 1llu50ry/[[mcp-reverse]] aggregated game RE MCP hub) / **Cheat** **2970** / **Anti Cheat** **848** and other major README sections unchanged; 41 top-level sections (`NeverC & NeverD` placeholder); synced [[overviews/overview]], [[overviews/game-engine]], [[overviews/reverse-engineering]]; entity [[mcp-reverse]]; light `index.md` section notes (no per-category pages).
