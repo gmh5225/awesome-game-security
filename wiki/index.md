@@ -2664,7 +2664,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [minidump](entities/minidump.md) — Python minidump (.dmp) parser (full/mini; LSASS; cross-platform)
 - [Mini Anti-Cheat V2](entities/mini-anti-cheat-v2.md) — educational Windows kernel anti-cheat PoC (Abdelnour2; user-mode game + driver; process-creation notify blacklist + ObRegisterCallbacks memory shield; IOCTL game-PID/shield control; Anti Cheat)
 - [MiniDumpWriteDumpPoC](entities/minidumpwritedumppoc.md) — C++ MiniDumpWriteDump hook PoC; intercept dump buffers in-memory; optional encrypt + socket exfil; Python decrypt receiver; credential-dump tradecraft / detection research (Adepts-Of-0xCC; Dump Memory)
-- [Mira](entities/mira.md) — mobile runtime detection workbench (iOS/Android; Frida Java/native RPC; LAN/relay web console; MCP; root/emulator/Magisk/LSPosed/jailbreak side-channel cases; vw2x; Anti Cheat / Detection:Frida)
+- [Mira](entities/mira.md) — mobile runtime detection workbench (iOS/Android host apps + iSH layer; sandboxed shell/PTY/screen capture; Frida tasks; Python relay + Next.js console; MCP; reusable workflows for root/emulator/projection/Magisk/LSPosed/jailbreak side channels; vw2x; Anti Cheat / Detection:Frida)
 - [miniDumpReader](entities/minidumpreader.md) — Python minidump / memory analysis (AC / Windows kernel dump)
 - [minivers](entities/minivers.md) — pre-modification backup copies for monitored files (change/delete/rename; AC / backup-file)
 - [minivm](entities/minivm.md) — small optimizing VM + JIT runtime (C11 + Cuik TB codegen; Lua tests/benchmarks; GNU Make; desktop + WASM; VM/compiler/runtime performance experimentation; FastVM)
