@@ -1,0 +1,3811 @@
+Project Path: arc_multiplayeragent_chompchomp-io_qyqwyvi0
+
+Source Tree:
+
+```txt
+arc_multiplayeragent_chompchomp-io_qyqwyvi0
+├── LICENSE
+├── README.md
+├── build.js
+├── docs
+├── game.js
+├── index.html
+├── powerups.js
+├── server
+│   └── logic.js
+├── sim.js
+└── style.css
+
+```
+
+`LICENSE`:
+
+```
+MIT License
+
+Copyright (c) 2026 Midnight Monsters Corp
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
+`README.md`:
+
+```md
+# ChompChomp.io: a multiplayer snake .io game with server-authoritative anti-cheat
+
+**[▶ Play ChompChomp.io now](https://chompchompio.play.multiplayeragent.com/)**: free, in the browser, no download. Send the link to a friend and you're in the same arena.
+
+ChompChomp.io is a slither-style browser game where snakes have guns. Eat glowing orbs to grow, grab power-ups and weapons, shoot rivals' bodies to slice them in half, and chomp anyone who crosses your path. It runs online with friends, with player accounts, saved stats, global leaderboards, and bots that fill the world and step aside as real players join.
+
+It was built with [Claude Code](https://claude.com/claude-code) and the [Multiplayer Agent](https://multiplayeragent.com/) plugin, starting from a single-player canvas game and turning it into a hosted multiplayer game. There's no game server to write, run or deploy. This repo is the full source, and it's part of the content package for the video made while building it.
+
+![ChompChomp.io gameplay: a snake moving through glowing orbs, with the live leaderboard and minimap](docs/gameplay.png)
+
+## Features
+
+- **Real-time multiplayer:** everyone who opens the link plays in the same arena, synced 20 times a second.
+- **Server-authoritative anti-cheat:** the server decides movement, dots, power-ups, bullets, damage and scores. The browser only sends steering, boost and fire. You can't teleport, spawn power-ups, or fake a score.
+- **Player login:** you start as a guest instantly. Sign up to keep your progress and put your name on the leaderboards, and log in on any device.
+- **Saved player data:** games played, best score, longest snake, total kills, dots eaten and time played, all written by the server.
+- **Global leaderboards:** best score, total kills and longest snake, plus a live in-match leaderboard.
+- **Bots that make room:** 24 bots keep an empty world lively. Three retire for every player who joins, out of sight.
+- **7 weapons and 17 power-ups:** blaster, shotgun, twin guns, SMG, railgun, rocket launcher, homing seeker; shields, ghost mode, frenzy, vampire, nanobots and more.
+- **Smooth netcode:** client-side prediction for your own snake and interpolation for everyone else, so steering feels instant.
+- **Desktop and mobile:** mouse, keyboard or touch, with on-screen fire and boost buttons.
+
+![ChompChomp.io menu with skins, sign up / log in, global leaderboards and player stats](docs/menu.png)
+
+## How to play
+
+| Action | Desktop | Mobile |
+| --- | --- | --- |
+| Steer | Mouse | Drag |
+| Shoot | Left click or `F` | FIRE button |
+| Boost (costs length) | Right click, `Space` or `W` | BOOST button or two fingers |
+
+Body shots slice snakes; headshots drain health. Shooting is free under length 100, and smaller snakes fire faster. Running your head into another snake's body ends your run, and the world's red edge is deadly.
+
+## How the anti-cheat works
+
+Most browser .io clones trust the client: the browser says where its snake is and what it ate. ChompChomp.io doesn't. The whole world is simulated on the server by [authoritative room logic](https://multiplayeragent.com/docs) running on Multiplayer Agent:
+
+```
+ browser                                   Multiplayer Agent room "arena" (server)
+ ───────                                   ───────────────────────────────────────
+ mouse / keys ──► input {angle, boost, fire} ──► onInput: queue it, one per tick
+                                                 onTick: move snakes, eat orbs, fire bullets,
+                                                         collide, kill, spawn/retire bots
+ draws snakes ◄── room state (snake heads, mass, power-ups) ◄─┘
+ draws orbs   ◄── events (orb added/eaten, bullet fired/hit, effects)
+ stats screen ◄── saveData / submitScore (only the server writes these)
+```
+
+- Clients can't write room state. If a modified client sends fake "I ate this" or "I picked that up" messages, or sets its own position or mass, the server ignores it.
+- Inputs are validated: a steering angle, two booleans, nothing else. Speed and turning come from the server's rules, so a snake can't teleport.
+- Saves and leaderboard scores are written by the server from results it computed itself, so they can't be forged from the browser.
+- Your own snake is predicted locally from your inputs and corrected against the server every tick, so it still feels instant.
+
+## Run your own copy
+
+You need [Claude Code](https://claude.com/claude-code) with the [Multiplayer Agent plugin](https://github.com/multiplayeragent/multiplayer-agent):
+
+```
+/plugin marketplace add multiplayeragent/multiplayer-agent
+/plugin install multiplayer-agent@multiplayer-agent
+```
+
+Then ask Claude Code to "host this game on my own Multiplayer Agent game" in a clone of this repo. Claude will:
+
+1. Create a game with `create_game` and put its publishable key (`pk_…`) in `NET.key` at the top of [game.js](game.js). The key in this repo points at the live ChompChomp.io game, so without this step your copy joins that arena.
+2. Build the server bundle with `node build.js` (Node 18+, no dependencies). This writes `dist/server.js`.
+3. Deploy it with `deploy_room_logic` to the room `arena`, at tick rate 20. Server logic needs a Multiplayer Agent account; Claude opens the sign-in page for you.
+4. Publish `index.html`, `style.css`, `powerups.js`, `sim.js` and `game.js` with `publish_game`, which gives you a share link at `https://<your-game>.play.multiplayeragent.com/`.
+
+The [free tier](https://multiplayeragent.com/pricing) is enough to play with friends.
+
+## Project structure
+
+| File | What it does |
+| --- | --- |
+| [game.js](game.js) | Browser client: rendering, input, prediction and interpolation, accounts, leaderboards, menus |
+| [sim.js](sim.js) | Game rules shared by server and client: movement, food, power-ups, bullets, collisions, bot AI |
+| [powerups.js](powerups.js) | Weapon and power-up definitions and their icons |
+| [server/logic.js](server/logic.js) | Authoritative room logic: inputs, ticks, state sync, events, saves and leaderboard scores |
+| [build.js](build.js) | Bundles `powerups.js` + `sim.js` + `server/logic.js` into `dist/server.js` for deployment |
+| [index.html](index.html), [style.css](style.css) | Page, HUD and menus |
+
+## Built with Multiplayer Agent
+
+[Multiplayer Agent](https://multiplayeragent.com/) is a hosted backend that makes any browser game multiplayer, driven from Claude Code through its [MCP server](https://multiplayeragent.com/mcp). ChompChomp.io uses:
+
+- **Realtime rooms** for the shared arena state and events
+- **Authoritative server logic** for anti-cheat
+- **Player identity** for guest play, sign up and log in
+- **Player datastore** for saved stats
+- **Leaderboards** for best score, total kills and longest
+- **Hosting** for the share link
+
+Links:
+
+- Multiplayer Agent: https://multiplayeragent.com/
+- Claude Code plugin and MCP server: https://github.com/multiplayeragent/multiplayer-agent
+- How the MCP connection works: https://multiplayeragent.com/mcp
+- SDK reference: https://multiplayeragent.com/docs
+- Pricing (free tier, no card): https://multiplayeragent.com/pricing
+- Play ChompChomp.io: https://chompchompio.play.multiplayeragent.com/
+
+## License
+
+[MIT](LICENSE)
+
+```
+
+`build.js`:
+
+```js
+// Bundles the authoritative room logic: powerups.js + sim.js + server/logic.js -> dist/server.js.
+// The room runtime has no imports, so the shared game rules are concatenated in.
+// Usage: node build.js
+const fs = require('fs');
+const path = require('path');
+
+const read = (f) => fs.readFileSync(path.join(__dirname, f), 'utf8');
+const src = [
+  'var window = globalThis;',
+  read('powerups.js'),
+  read('sim.js'),
+  read('server/logic.js'),
+].join('\n;\n');
+
+fs.mkdirSync(path.join(__dirname, 'dist'), { recursive: true });
+fs.writeFileSync(path.join(__dirname, 'dist/server.js'), src);
+console.log(`dist/server.js: ${(src.length / 1024).toFixed(1)} KB`);
+
+```
+
+`game.js`:
+
+```js
+'use strict';
+
+// Browser client. The world is simulated by the authoritative room logic (server/logic.js); this
+// file draws what the server says, predicts our own head so steering feels instant, and sends only
+// inputs: steering angle, boost and fire.
+(() => {
+  const { RARITY, WEAPONS, POWERUPS, iconSprite, iconURL } = window.ChompPowerups;
+  const S = window.ChompSim;
+  const { WORLD_R, SKINS, PALETTE, WEAPON_IDS, MAX_SHIELD, BULLET_R, PICKUP_R, PICKUP_DROP_LIFE, TAU, clamp, angleDiff } = S;
+
+  // ---------- Config ----------
+  const NET = {
+    key: 'pk_live_1761bd68750bfb48e2444a6030f9895bb8d54369f839fc42',
+    endpoint: 'wss://live.multiplayeragent.com',
+    apiUrl: 'https://api.multiplayeragent.com',
+    room: 'arena',
+  };
+  const INPUT_DT = 1 / 20; // one input per server tick
+  const INTERP_DELAY = 0.12; // seconds other snakes are drawn in the past, between two server updates
+  const MAX_PARTICLES = 1500;
+  const LB_ROTATE = 5; // seconds per in-game leaderboard category
+  const BOARDS = [
+    { id: 'score', title: 'Best score' },
+    { id: 'kills', title: 'Total kills' },
+    { id: 'length', title: 'Longest' },
+  ];
+
+  // ---------- Utils ----------
+  const rand = (a, b) => a + Math.random() * (b - a);
+  function hexToRgb(hex) {
+    const n = parseInt(hex.slice(1), 16);
+    return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+  }
+  function shade(hex, amt) {
+    const f = amt < 0 ? (c) => Math.round(c * (1 + amt)) : (c) => Math.round(c + (255 - c) * amt);
+    const [r, g, b] = hexToRgb(hex);
+    return `rgb(${f(r)},${f(g)},${f(b)})`;
+  }
+  function rgba(hex, a) {
+    const [r, g, b] = hexToRgb(hex);
+    return `rgba(${r},${g},${b},${a})`;
+  }
+  const esc = (s) => String(s).replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
+  const store = {
+    get(k) { try { return localStorage.getItem(k); } catch { return null; } },
+    set(k, v) { try { localStorage.setItem(k, v); } catch { /* storage unavailable */ } },
+  };
+  const fmtTime = (secs) => (secs >= 3600 ? `${Math.floor(secs / 3600)}h ${Math.floor((secs % 3600) / 60)}m`
+    : secs >= 60 ? `${Math.floor(secs / 60)}m ${secs % 60}s` : `${secs}s`);
+
+  // ---------- Canvas ----------
+  const canvas = document.getElementById('game');
+  const ctx = canvas.getContext('2d');
+  let W = 0, H = 0, DPR = 1, vignette = null;
+
+  function resize() {
+    DPR = Math.min(window.devicePixelRatio || 1, 2);
+    W = window.innerWidth;
+    H = window.innerHeight;
+    canvas.width = Math.round(W * DPR);
+    canvas.height = Math.round(H * DPR);
+    canvas.style.width = W + 'px';
+    canvas.style.height = H + 'px';
+    vignette = ctx.createRadialGradient(W / 2, H / 2, Math.min(W, H) * 0.35, W / 2, H / 2, Math.max(W, H) * 0.75);
+    vignette.addColorStop(0, 'rgba(0,0,0,0)');
+    vignette.addColorStop(1, 'rgba(0,0,0,0.55)');
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  // ---------- Sprites ----------
+  const sprites = new Map();
+  function makeSprite(key, size, draw) {
+    let c = sprites.get(key);
+    if (!c) {
+      c = document.createElement('canvas');
+      c.width = c.height = size;
+      draw(c.getContext('2d'), size / 2);
+      sprites.set(key, c);
+    }
+    return c;
+  }
+  const bodySprite = (color) => makeSprite('b' + color, 128, (g, m) => {
+    const grad = g.createRadialGradient(m * 0.72, m * 0.68, m * 0.08, m, m, m);
+    grad.addColorStop(0, shade(color, 0.5));
+    grad.addColorStop(0.45, color);
+    grad.addColorStop(0.85, shade(color, -0.3));
+    grad.addColorStop(1, shade(color, -0.65));
+    g.fillStyle = grad;
+    g.beginPath();
+    g.arc(m, m, m - 1, 0, TAU);
+    g.fill();
+  });
+  const glowSprite = (color) => makeSprite('g' + color, 64, (g, m) => {
+    const grad = g.createRadialGradient(m, m, 0, m, m, m);
+    grad.addColorStop(0, rgba(color, 0.8));
+    grad.addColorStop(0.4, rgba(color, 0.35));
+    grad.addColorStop(1, rgba(color, 0));
+    g.fillStyle = grad;
+    g.fillRect(0, 0, m * 2, m * 2);
+  });
+  const foodSprite = (color) => makeSprite('f' + color, 64, (g, m) => {
+    const grad = g.createRadialGradient(m, m, 0, m, m, m);
+    grad.addColorStop(0, 'rgba(255,255,255,0.95)');
+    grad.addColorStop(0.12, rgba(color, 1));
+    grad.addColorStop(0.28, rgba(color, 0.55));
+    grad.addColorStop(0.55, rgba(color, 0.15));
+    grad.addColorStop(1, rgba(color, 0));
+    g.fillStyle = grad;
+    g.fillRect(0, 0, m * 2, m * 2);
+  });
+
+  function makeHexPattern() {
+    const S2 = 2, w = 56, h = 96, s = h / 3;
+    const xs = w / (Math.sqrt(3) * s);
+    const c = document.createElement('canvas');
+    c.width = w * S2;
+    c.height = h * S2;
+    const g = c.getContext('2d');
+    g.scale(S2, S2);
+    g.fillStyle = '#080b0f';
+    g.fillRect(0, 0, w, h);
+    for (const [cx, cy] of [[0, 0], [w, 0], [w / 2, h / 2], [0, h], [w, h]]) {
+      const grad = g.createRadialGradient(cx, cy - s * 0.3, 0, cx, cy, s);
+      grad.addColorStop(0, '#1a212b');
+      grad.addColorStop(1, '#10151b');
+      g.fillStyle = grad;
+      g.beginPath();
+      for (let k = 0; k < 6; k++) {
+        const a = -Math.PI / 2 + k * Math.PI / 3;
+        g.lineTo(cx + Math.cos(a) * (s - 2) * xs, cy + Math.sin(a) * (s - 2));
+      }
+      g.closePath();
+      g.fill();
+    }
+    const p = ctx.createPattern(c, 'repeat');
+    if (p.setTransform) p.setTransform(new DOMMatrix().scale(1 / S2));
+    return p;
+  }
+  const hexPattern = makeHexPattern();
+  const sparkSprite = glowSprite('#ffffff');
+  const fireSprite = glowSprite('#ff922b');
+  const frenzyGlow = glowSprite('#ff4d4d');
+  const rarityGlow = Object.fromEntries(Object.entries(RARITY).map(([k, r]) => [k, glowSprite(r.color)]));
+
+  // Crack overlays for damaged body circles: dark fissures with a light edge so they read on any skin.
+  const crackSprites = [0, 1, 2].map((v) => makeSprite('crack' + v, 64, (g, m) => {
+    g.beginPath();
+    g.arc(m, m, m - 1, 0, TAU);
+    g.clip();
+    g.lineCap = g.lineJoin = 'round';
+    const paths = [];
+    for (let k = 0; k < 4; k++) {
+      let a = (k / 4) * TAU + v * 0.9 + rand(-0.4, 0.4), x = m + rand(-4, 4), y = m + rand(-4, 4);
+      const pts = [[x, y]];
+      for (let s = 0; s < 4; s++) {
+        a += rand(-0.7, 0.7);
+        x += Math.cos(a) * m * 0.3;
+        y += Math.sin(a) * m * 0.3;
+        pts.push([x, y]);
+      }
+      paths.push(pts);
+    }
+    for (const [color, width, off] of [['rgba(255,255,255,0.8)', 8, 2], ['rgba(0,0,0,0.95)', 6, 0]]) {
+      g.strokeStyle = color;
+      g.lineWidth = width;
+      for (const pts of paths) {
+        g.beginPath();
+        for (const [x, y] of pts) g.lineTo(x + off, y + off);
+        g.stroke();
+      }
+    }
+  }));
+
+  // ---------- World mirror ----------
+  const snakes = new Map(); // server snake id -> Snake
+  const foods = new Map(); // orb id -> orb
+  let eating = []; // orbs flying into the mouth that ate them
+  let pickups = [];
+  const pickupCache = new Map();
+  let bullets = [];
+  let particles = [];
+  let me = null; // our own snake while alive
+  let state = 'menu'; // 'menu' | 'spawning' | 'playing' | 'dead'
+  let time = performance.now() / 1000;
+  let serverT = 0, serverTAt = 0; // last server clock, and the local time it arrived
+  const serverNow = () => serverT + (time - serverTAt);
+  let online = 0;
+  let hudT = 0;
+  let lbIdx = 0;
+  let lbT = LB_ROTATE;
+  const cam = { x: 0, y: 0, zoom: 1, tx: 0, ty: 0, tr: 12 };
+
+  // Our own head runs ahead of the server: each input is applied locally at once, then replayed on
+  // top of every server update that hasn't processed it yet.
+  let seq = 0, inputAcc = 0, targetAngle = 0;
+  const pendingInputs = [];
+  let pred = { x: 0, y: 0, angle: 0 }, prevPred = { x: 0, y: 0, angle: 0 }, predAt = 0;
+  const corr = { x: 0, y: 0 }; // visual offset left over from a correction, decays to 0
+
+  function predictStep(p, inp) {
+    const boosting = inp.b && me.mass > S.MIN_BOOST_MASS;
+    S.steer(p, inp.a, me.r, me.tu, S.moveSpeed(boosting, me.sp), INPUT_DT);
+  }
+
+  class Snake {
+    constructor(id, e, t) {
+      this.id = id;
+      this.name = e.n || '?';
+      this.skin = SKINS[clamp(e.s | 0, 0, SKINS.length - 1)];
+      this.sprites = this.skin.map(bodySprite);
+      this.glow = glowSprite(this.skin[0]);
+      this.miniColor = rgba(this.skin[0], 0.7);
+      this.pid = e.p || '';
+      this.isPlayer = false;
+      this.seen = t;
+      this.samples = []; // server head positions {t, x, y, a}, oldest first
+      this.trail = [];
+      this.segs = [];
+      this.hurt = new Map(); // damaged circle index -> severity 0-9
+      this.hurtKey = '';
+      this.upKey = null;
+      this.stacks = {};
+      this.bodyKey = '';
+      this.hp = e.hp;
+      this.shield = e.sh;
+      this.hitFlash = 0;
+      this.shieldFlash = 0;
+      this.ghostLeft = 0;
+      this.frenzyLeft = 0;
+      this.x = e.x;
+      this.y = e.y;
+      this.angle = this.targetAngle = e.a;
+      this.apply(e, t);
+      if (!this.trail.length) {
+        const L = S.bodyLength(this.mass) + 20, ca = Math.cos(this.angle), sa = Math.sin(this.angle);
+        for (let d = L; d > 0; d -= 6) this.trail.push({ x: this.x - ca * d, y: this.y - sa * d });
+        this.trail.push({ x: this.x, y: this.y });
+      }
+    }
+
+    apply(e, t) {
+      if (e.hp < this.hp) this.hitFlash = 0.15;
+      if (e.sh < this.shield) this.shieldFlash = 0.2;
+      this.mass = e.m;
+      this.r = S.radius(e.m);
+      this.boosting = !!e.bo;
+      this.hp = e.hp;
+      this.maxHp = e.mh;
+      this.shield = e.sh;
+      this.ge = e.ge;
+      this.fe = e.fe;
+      this.weapon = WEAPON_IDS[e.w] || 'blaster';
+      this.score = e.sc;
+      this.kills = e.k;
+      this.dots = e.d;
+      this.hits = e.hi;
+      this.sp = e.sp || 1;
+      this.tu = e.tu || 1;
+      this.ack = e.ack | 0;
+      if (e.up !== this.upKey) {
+        this.upKey = e.up;
+        this.stacks = {};
+        for (const part of (e.up || '').split(',')) {
+          const [id, n] = part.split(':');
+          if (POWERUPS[id]) this.stacks[id] = n | 0;
+        }
+      }
+      if (e.hu !== this.hurtKey) {
+        this.hurtKey = e.hu;
+        this.hurt.clear();
+        for (const part of (e.hu || '').split(',')) {
+          const k = part.indexOf(':');
+          if (k > 0) this.hurt.set(part.slice(0, k) | 0, part.slice(k + 1) | 0);
+        }
+      }
+      const last = this.samples[this.samples.length - 1];
+      if (!last || last.x !== e.x || last.y !== e.y) {
+        this.samples.push({ t, x: e.x, y: e.y, a: e.a });
+        if (this.samples.length > 40) this.samples.shift();
+      }
+      // A fresh body outline only matters to snakes we just started seeing; after that the body
+      // grows from the head path we've drawn.
+      if (e.bd && e.bd !== this.bodyKey) {
+        this.bodyKey = e.bd;
+        if (!this.isPlayer && t - this.seen < 2) this.loadBody(e.bd, true);
+      }
+    }
+
+    // Rebuild the trail from the server's outline (head first). Other snakes are drawn slightly in
+    // the past, so `behind` drops the stretch nearest the head they haven't reached yet.
+    loadBody(bd, behind) {
+      const pts = bd.split(';').map((p) => {
+        const k = p.indexOf(',');
+        return { x: +p.slice(0, k), y: +p.slice(k + 1) };
+      });
+      let skip = behind ? S.moveSpeed(this.boosting, this.sp) * INTERP_DELAY : 0, i = 0;
+      while (skip > 0 && i < pts.length - 2) {
+        skip -= Math.hypot(pts[i + 1].x - pts[i].x, pts[i + 1].y - pts[i].y);
+        i++;
+      }
+      this.trail = pts.slice(i).reverse();
+    }
+
+    // Head position `INTERP_DELAY` ago, between the two server updates around it.
+    interpolate(rt) {
+      const sm = this.samples;
+      while (sm.length > 2 && sm[1].t < rt - 1) sm.shift();
+      let i = sm.length - 1;
+      while (i > 0 && sm[i].t > rt) i--;
+      const a = sm[i], b = sm[i + 1];
+      if (!b) {
+        const dt = clamp(rt - a.t, 0, 0.2), sp = S.moveSpeed(this.boosting, this.sp);
+        this.x = a.x + Math.cos(a.a) * sp * dt;
+        this.y = a.y + Math.sin(a.a) * sp * dt;
+        this.angle = a.a;
+      } else if (rt <= a.t) {
+        this.x = a.x;
+        this.y = a.y;
+        this.angle = a.a;
+      } else {
+        const f = (rt - a.t) / (b.t - a.t);
+        this.x = a.x + (b.x - a.x) * f;
+        this.y = a.y + (b.y - a.y) * f;
+        this.angle = a.a + angleDiff(a.a, b.a) * f;
+      }
+      this.targetAngle = this.angle;
+    }
+
+    tick(dt) {
+      if (this.isPlayer) {
+        const f = clamp((time - predAt) / INPUT_DT, 0, 1);
+        this.x = prevPred.x + (pred.x - prevPred.x) * f + corr.x;
+        this.y = prevPred.y + (pred.y - prevPred.y) * f + corr.y;
+        this.angle = prevPred.angle + angleDiff(prevPred.angle, pred.angle) * f;
+        this.targetAngle = targetAngle;
+      } else {
+        this.interpolate(time - INTERP_DELAY);
+      }
+      const tr = this.trail, last = tr[tr.length - 1];
+      if (last && (last.x - this.x) ** 2 + (last.y - this.y) ** 2 < 4) {
+        last.x = this.x;
+        last.y = this.y;
+      } else {
+        tr.push({ x: this.x, y: this.y });
+      }
+      S.layoutBody(tr, this.segs, this.r, this.mass);
+      const sn = serverNow();
+      this.ghostLeft = Math.max(0, this.ge - sn);
+      this.frenzyLeft = Math.max(0, this.fe - sn);
+      if (this.hitFlash > 0) this.hitFlash -= dt;
+      if (this.shieldFlash > 0) this.shieldFlash -= dt;
+    }
+  }
+
+  function becomeMe(s) {
+    if (me) me.isPlayer = false;
+    me = s;
+    s.isPlayer = true;
+    const last = s.samples[s.samples.length - 1];
+    pred = { x: last.x, y: last.y, angle: last.a };
+    prevPred = { ...pred };
+    predAt = time;
+    corr.x = corr.y = 0;
+    pendingInputs.length = 0;
+    targetAngle = last.a;
+    if (s.bodyKey) s.loadBody(s.bodyKey, false);
+    cam.x = cam.tx = last.x;
+    cam.y = cam.ty = last.y;
+    state = 'playing';
+    lbIdx = 0;
+    lbT = LB_ROTATE;
+    menu.hidden = true;
+    guide.hidden = true;
+    deathScreen.hidden = true;
+    hud.hidden = false;
+    input.reset();
+    updateHud();
+  }
+
+  function reconcile(e) {
+    while (pendingInputs.length && pendingInputs[0].q <= e.ack) pendingInputs.shift();
+    const p = { x: e.x, y: e.y, angle: e.a };
+    for (const inp of pendingInputs) predictStep(p, inp);
+    const dx = p.x - pred.x, dy = p.y - pred.y, da = angleDiff(pred.angle, p.angle);
+    // Keep the drawn head where it is and let the offset fade, unless it is a real jump.
+    if (dx * dx + dy * dy < 250 * 250) {
+      corr.x -= dx;
+      corr.y -= dy;
+    } else {
+      corr.x = corr.y = 0;
+    }
+    prevPred.x += dx;
+    prevPred.y += dy;
+    prevPred.angle += da;
+    pred = p;
+  }
+
+  function sendInput() {
+    const inp = { q: ++seq, a: Math.round(targetAngle * 1000) / 1000, b: input.boost() ? 1 : 0, f: input.firing() ? 1 : 0 };
+    mp.sendInput(inp);
+    pendingInputs.push(inp);
+    if (pendingInputs.length > 60) pendingInputs.shift();
+    prevPred = { ...pred };
+    predictStep(pred, inp);
+    predAt = time;
+  }
+
+  // ---------- Server messages ----------
+  function addFood(id, x, y, v10, c) {
+    if (foods.has(id)) return;
+    const value = v10 / 10;
+    foods.set(id, {
+      x, y,
+      r: 3 + Math.sqrt(value) * 2.3,
+      phase: rand(0, TAU),
+      born: time,
+      sprite: foodSprite(PALETTE[c] || PALETTE[0]),
+    });
+  }
+
+  function eatFood(id, sid) {
+    const f = foods.get(id);
+    if (!f) return;
+    foods.delete(id);
+    const s = snakes.get(String(sid));
+    if (s && inView(f.x, f.y, 60)) {
+      f.eater = s;
+      f.eatT = 0.12;
+      eating.push(f);
+    }
+  }
+
+  function addBullet(id, x, y, vx, vy, life, wi, ownerId) {
+    const w = WEAPONS[WEAPON_IDS[wi]] || WEAPONS.blaster;
+    const owner = snakes.get(String(ownerId));
+    bullets.push({
+      id, x, y, vx, vy, life,
+      size: w.size,
+      tail: w.tail || 0.02,
+      homing: w.homing || 0,
+      glow: w.explode ? fireSprite : owner ? owner.glow : sparkSprite,
+      owner,
+      target: null,
+      retarget: 0,
+      dead: false,
+    });
+  }
+
+  function onTickEvents(batch) {
+    if (!Array.isArray(batch)) return;
+    for (const t of batch) {
+      switch (t[0]) {
+        case 'f': addFood(t[1], t[2], t[3], t[4], t[5]); break;
+        case 'e': eatFood(t[1], t[2]); break;
+        case 'b': addBullet(t[1], t[2], t[3], t[4], t[5], t[6], t[7], t[8]); break;
+        case 'd': for (const b of bullets) if (b.id === t[1]) b.dead = true; break;
+        case 'h': hitFx(snakes.get(String(t[1])), t[2], t[3], t[4], t[5], t[6], t[7]); break;
+        case 'x': explosionFx(t[1], t[2], t[3]); break;
+        case 'p': {
+          const def = POWERUPS[t[3]];
+          if (def && inView(t[1], t[2], 100)) spawnParticles(t[1], t[2], 0, Math.PI, 14, 380, 10, rarityGlow[def.rarity], true);
+          break;
+        }
+      }
+    }
+  }
+
+  function onFoodSnapshot(d) {
+    if (!d || !Array.isArray(d.f)) return;
+    if (d.i === 0) foods.clear();
+    const f = d.f;
+    for (let k = 0; k + 4 < f.length; k += 5) addFood(f[k], f[k + 1], f[k + 2], f[k + 3], f[k + 4]);
+  }
+
+  let lostMeAt = 0;
+  function onState(st) {
+    const t = performance.now() / 1000;
+    const shared = st.shared || {};
+    if (typeof shared.t === 'number' && shared.t !== serverT) {
+      serverT = shared.t;
+      serverTAt = t;
+    }
+    const ents = (st.entities && st.entities.snakes) || {};
+    for (const id in ents) {
+      const e = ents[id];
+      if (typeof e.x !== 'number') continue;
+      const s = snakes.get(id);
+      if (s) s.apply(e, t);
+      else snakes.set(id, new Snake(id, e, t));
+    }
+    for (const id of snakes.keys()) {
+      if (ents[id]) continue;
+      snakes.delete(id);
+      if (me && me.id === id) {
+        me = null;
+        lostMeAt = t;
+      }
+    }
+
+    const players = (st.entities && st.entities.players) || {};
+    online = Object.keys(players).length;
+    const mine = mp && players[mp.sessionId];
+    const myId = mine && mine.sn ? String(mine.sn) : '';
+    if (myId && (!me || me.id !== myId) && snakes.has(myId)) becomeMe(snakes.get(myId));
+    if (me) reconcile(ents[me.id]);
+
+    const pk = (st.entities && st.entities.pk) || {};
+    const list = [];
+    for (const id in pk) {
+      const e = pk[id];
+      if (!POWERUPS[e.t]) continue;
+      let p = pickupCache.get(id);
+      if (!p) pickupCache.set(id, (p = { phase: rand(0, TAU), born: t }));
+      p.x = e.x;
+      p.y = e.y;
+      p.type = e.t;
+      p.natural = !!e.n;
+      p.serverBorn = e.b;
+      list.push(p);
+    }
+    if (pickupCache.size > list.length + 50) {
+      for (const id of pickupCache.keys()) if (!pk[id]) pickupCache.delete(id);
+    }
+    pickups = list;
+  }
+
+  function onDead(d) {
+    if (!d || typeof d !== 'object') return;
+    state = 'dead';
+    me = null;
+    hud.hidden = true;
+    input.reset();
+    $('deathCause').textContent = d.cause === 'edge' ? 'You hit the edge of the world'
+      : d.cause === 'shot' ? `Shot down by ${d.by}` : d.by ? `Chomped by ${d.by}` : 'You got chomped';
+    $('dScore').textContent = d.score | 0;
+    $('dLen').textContent = d.len | 0;
+    $('dKills').textContent = d.kills | 0;
+    $('dDots').textContent = d.dots | 0;
+    $('dHits').textContent = d.hits | 0;
+    $('dTime').textContent = fmtTime(d.secs | 0);
+    $('dBest').textContent = d.newBest ? 'New best score!' : `Your best score: ${d.best | 0}`;
+    setTimeout(() => { if (state === 'dead') deathScreen.hidden = false; }, 1100);
+    setTimeout(refreshMenuData, 1500); // saves and scores flush within about a second
+  }
+
+  // ---------- Effects ----------
+  const inView = (x, y, margin) =>
+    Math.abs(x - cam.x) < W / 2 / cam.zoom + margin && Math.abs(y - cam.y) < H / 2 / cam.zoom + margin;
+
+  function spawnParticles(x, y, ang, spread, n, speed, size, sprite, glow) {
+    for (let k = 0; k < n && particles.length < MAX_PARTICLES; k++) {
+      const a = ang + rand(-spread, spread), sp = speed * rand(0.35, 1), life = rand(0.3, 0.65);
+      particles.push({ x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, life, max: life, size: size * rand(0.6, 1.2), sprite, glow });
+    }
+  }
+
+  // Chunks of the snake's skin plus white sparks, sprayed around `ang`.
+  function hitFx(s, i, x, y, ang, spread, scale) {
+    if (!inView(x, y, 150)) return;
+    if (s) {
+      const sprite = s.sprites[((i / 3) | 0) % s.sprites.length];
+      spawnParticles(x, y, ang, spread, Math.round(8 * scale), 420, Math.max(5, s.r * 0.5), sprite, false);
+    }
+    spawnParticles(x, y, ang, spread * 1.3, Math.round(6 * scale), 650, 11, sparkSprite, true);
+  }
+
+  function explosionFx(x, y, R) {
+    if (!inView(x, y, R + 100)) return;
+    spawnParticles(x, y, 0, Math.PI, 30, R * 5, 22, fireSprite, true);
+    spawnParticles(x, y, 0, Math.PI, 12, R * 6, 10, sparkSprite, true);
+    particles.push({ x, y, vx: 0, vy: 0, life: 0.35, max: 0.35, size: R, ring: true });
+  }
+
+  function updateParticles(dt) {
+    const drag = Math.max(0, 1 - 4 * dt);
+    for (const p of particles) {
+      p.x += p.vx * dt;
+      p.y += p.vy * dt;
+      p.vx *= drag;
+      p.vy *= drag;
+      p.life -= dt;
+    }
+    particles = particles.filter((p) => p.life > 0);
+  }
+
+  // Bullets fly on their own between server messages; the server says when one hits something.
+  function updateBullets(dt) {
+    for (const b of bullets) {
+      b.life -= dt;
+      if (b.homing) {
+        const sp = Math.hypot(b.vx, b.vy);
+        b.retarget -= dt;
+        if (b.retarget <= 0) {
+          b.retarget = 0.15;
+          b.target = null;
+          let best = 650 * 650;
+          const cx = b.vx / sp, cy = b.vy / sp;
+          for (const o of snakes.values()) {
+            if (o === b.owner || o.ghostLeft > 0) continue;
+            const dx = o.x - b.x, dy = o.y - b.y, d2 = dx * dx + dy * dy;
+            if (d2 < best && dx * cx + dy * cy > 0) { best = d2; b.target = o; }
+          }
+        }
+        const t = b.target;
+        if (t && snakes.get(t.id) === t) {
+          const cur = Math.atan2(b.vy, b.vx);
+          const a = cur + clamp(angleDiff(cur, Math.atan2(t.y - b.y, t.x - b.x)), -b.homing * dt, b.homing * dt);
+          b.vx = Math.cos(a) * sp;
+          b.vy = Math.sin(a) * sp;
+        }
+      }
+      b.x += b.vx * dt;
+      b.y += b.vy * dt;
+      if (b.life <= 0 || b.x * b.x + b.y * b.y > WORLD_R * WORLD_R) b.dead = true;
+    }
+    bullets = bullets.filter((b) => !b.dead);
+  }
+
+  function updateEating(dt) {
+    for (const f of eating) {
+      f.eatT -= dt;
+      const h = f.eater.segs[0];
+      if (!h) continue;
+      const k = Math.min(1, dt * 22);
+      f.x += (h.x - f.x) * k;
+      f.y += (h.y - f.y) * k;
+    }
+    eating = eating.filter((f) => f.eatT > 0);
+  }
+
+  // ---------- Update ----------
+  function update(dt) {
+    if (state === 'playing' && me && mp) {
+      const dx = input.x - ((me.x - cam.x) * cam.zoom + W / 2);
+      const dy = input.y - ((me.y - cam.y) * cam.zoom + H / 2);
+      if (dx * dx + dy * dy > 25) targetAngle = Math.atan2(dy, dx);
+      inputAcc += dt;
+      for (let n = 0; inputAcc >= INPUT_DT && n < 3; n++) {
+        inputAcc -= INPUT_DT;
+        sendInput();
+      }
+      if (inputAcc > INPUT_DT) inputAcc = 0;
+    }
+    const k = Math.exp(-dt * 8);
+    corr.x *= k;
+    corr.y *= k;
+    for (const s of snakes.values()) s.tick(dt);
+    updateEating(dt);
+    updateBullets(dt);
+    updateParticles(dt);
+    updateCamera(dt);
+
+    // Our snake vanished without a death notice (e.g. a reconnect): back to the menu.
+    if (state === 'playing' && !me && time - lostMeAt > 2.5) showMenu();
+    if (state === 'spawning' && time - spawnAt > 4) {
+      showMenu();
+      setMenuMsg('Could not spawn. Try again.');
+    }
+
+    if (state === 'playing' && me) {
+      updateHealthBar();
+      lbT -= dt;
+      if (lbT <= 0) {
+        lbIdx = (lbIdx + 1) % LB_CATS.length;
+        lbT = LB_ROTATE;
+        hudT = 0;
+      }
+      lbTimerFill.style.width = `${(lbT / LB_ROTATE) * 100}%`;
+      hudT -= dt;
+      if (hudT <= 0) {
+        updateHud();
+        hudT = 0.25;
+      }
+    }
+  }
+
+  function updateCamera(dt) {
+    let target = me;
+    if (!target && state === 'menu') {
+      for (const s of snakes.values()) if (!target || s.mass > target.mass) target = s;
+    }
+    if (target) {
+      cam.tx = target.x;
+      cam.ty = target.y;
+      cam.tr = target.r;
+    }
+    const k = Math.min(1, dt * (state === 'playing' ? 12 : 2.5));
+    cam.x += (cam.tx - cam.x) * k;
+    cam.y += (cam.ty - cam.y) * k;
+    const base = clamp(Math.min(W, H) / 850, 0.6, 1.5);
+    const zt = base * Math.pow(14 / (cam.tr + 3), 0.55);
+    cam.zoom += (zt - cam.zoom) * Math.min(1, dt * 2);
+  }
+
+  // ---------- Rendering ----------
+  function drawSnake(s, vx0, vy0, vx1, vy1) {
+    const segs = s.segs, n = segs.length, r = s.r;
+    if (!n) return;
+    const m = r * 2.6;
+    const alpha = s.ghostLeft > 0 ? 0.35 + 0.1 * Math.sin(time * 10) : 1;
+
+    if (s.boosting) {
+      ctx.globalCompositeOperation = 'lighter';
+      ctx.globalAlpha = (0.55 + 0.25 * Math.sin(time * 18)) * alpha;
+      for (let i = n - 1; i >= 0; i -= 2) {
+        const p = segs[i];
+        if (p.x < vx0 - m || p.x > vx1 + m || p.y < vy0 - m || p.y > vy1 + m) continue;
+        ctx.drawImage(s.glow, p.x - m, p.y - m, m * 2, m * 2);
+      }
+      ctx.globalCompositeOperation = 'source-over';
+    }
+
+    ctx.globalAlpha = alpha;
+    const tailN = clamp(Math.floor(n * 0.35), 3, 12);
+    for (let i = n - 1; i >= 0; i--) {
+      const p = segs[i];
+      if (p.x < vx0 - r || p.x > vx1 + r || p.y < vy0 - r || p.y > vy1 + r) continue;
+      const fromTail = n - 1 - i;
+      const sr = fromTail < tailN ? r * (0.45 + (0.55 * fromTail) / tailN) : r;
+      ctx.drawImage(s.sprites[((i / 3) | 0) % s.sprites.length], p.x - sr, p.y - sr, sr * 2, sr * 2);
+    }
+
+    // Damaged circles: charred, cracked, and a blinking ring once close to breaking.
+    // Drawn on top since each circle is mostly covered by the next one.
+    if (s.hurt.size) {
+      const blink = 0.5 + 0.5 * Math.sin(time * 16);
+      const cr = r * 0.85;
+      ctx.fillStyle = '#000';
+      ctx.strokeStyle = '#fff';
+      ctx.lineWidth = Math.max(1.5, r * 0.14);
+      for (const [i, sev] of s.hurt) {
+        const p = segs[i];
+        if (!p || p.x < vx0 - r || p.x > vx1 + r || p.y < vy0 - r || p.y > vy1 + r) continue;
+        const frac = (sev + 0.5) / 10;
+        ctx.globalAlpha = (0.3 + 0.5 * frac) * alpha;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, cr, 0, TAU);
+        ctx.fill();
+        ctx.globalAlpha = Math.min(1, 0.5 + frac) * alpha;
+        ctx.drawImage(crackSprites[i % 3], p.x - cr, p.y - cr, cr * 2, cr * 2);
+        if (frac > 0.4) {
+          ctx.globalAlpha = blink * frac * alpha;
+          ctx.stroke();
+        }
+      }
+    }
+
+    const h = segs[0];
+    if (s.frenzyLeft > 0) {
+      const g = r * (2.4 + 0.4 * Math.sin(time * 20));
+      ctx.globalCompositeOperation = 'lighter';
+      ctx.globalAlpha = 0.8 * alpha;
+      ctx.drawImage(frenzyGlow, h.x - g, h.y - g, g * 2, g * 2);
+      ctx.globalCompositeOperation = 'source-over';
+    }
+    if (s.hitFlash > 0) {
+      ctx.globalAlpha = (s.hitFlash / 0.15) * 0.7 * alpha;
+      ctx.fillStyle = '#fff';
+      ctx.beginPath();
+      ctx.arc(h.x, h.y, r, 0, TAU);
+      ctx.fill();
+    }
+
+    // Eyes
+    ctx.globalAlpha = alpha;
+    const ca = Math.cos(s.angle), sa = Math.sin(s.angle);
+    const lc = Math.cos(s.targetAngle), ls = Math.sin(s.targetAngle);
+    const er = r * 0.36, pr = r * 0.2;
+    for (const side of [-1, 1]) {
+      const ex = h.x + ca * r * 0.35 - sa * r * 0.48 * side;
+      const ey = h.y + sa * r * 0.35 + ca * r * 0.48 * side;
+      ctx.fillStyle = '#fff';
+      ctx.beginPath();
+      ctx.arc(ex, ey, er, 0, TAU);
+      ctx.fill();
+      ctx.fillStyle = '#111';
+      ctx.beginPath();
+      ctx.arc(ex + lc * er * 0.45, ey + ls * er * 0.45, pr, 0, TAU);
+      ctx.fill();
+    }
+
+    // Shield bubble around the head
+    if (s.shield > 0) {
+      const f = s.shield / MAX_SHIELD;
+      ctx.beginPath();
+      ctx.arc(h.x, h.y, r * 1.55, 0, TAU);
+      ctx.globalAlpha = (0.12 + 0.15 * f + (s.shieldFlash > 0 ? 0.25 : 0)) * alpha;
+      ctx.fillStyle = '#74c0fc';
+      ctx.fill();
+      ctx.globalAlpha = (0.45 + 0.4 * f + (s.shieldFlash > 0 ? 0.3 : 0)) * alpha;
+      ctx.strokeStyle = '#a5d8ff';
+      ctx.lineWidth = Math.max(2, r * 0.14);
+      ctx.stroke();
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  function drawPickups(vx0, vy0, vx1, vy1) {
+    const size = PICKUP_R * 2.3, gs = PICKUP_R * 4, sn = serverNow();
+    for (const pk of pickups) {
+      if (pk.x < vx0 - gs || pk.x > vx1 + gs || pk.y < vy0 - gs || pk.y > vy1 + gs) continue;
+      const def = POWERUPS[pk.type];
+      let a = Math.min(1, (time - pk.born) / 0.4);
+      if (!pk.natural && PICKUP_DROP_LIFE - (sn - pk.serverBorn) < 10) a *= 0.55 + 0.45 * Math.sin(time * 12); // about to expire
+      const y = pk.y + Math.sin(time * 3 + pk.phase) * 3;
+      ctx.globalCompositeOperation = 'lighter';
+      ctx.globalAlpha = a * (0.55 + 0.25 * Math.sin(time * 4 + pk.phase));
+      ctx.drawImage(rarityGlow[def.rarity], pk.x - gs / 2, y - gs / 2, gs, gs);
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.globalAlpha = a;
+      ctx.drawImage(iconSprite(pk.type), pk.x - size / 2, y - size / 2, size, size);
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  function drawMinimap() {
+    const R = Math.min(75, Math.min(W, H) * 0.14);
+    const cx = W - R - 16, cy = H - R - 16;
+    const k = R / WORLD_R;
+    ctx.fillStyle = 'rgba(10,14,20,0.7)';
+    ctx.strokeStyle = 'rgba(255,255,255,0.18)';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.arc(cx, cy, R, 0, TAU);
+    ctx.fill();
+    ctx.stroke();
+    // Rare and epic loot shows up on the map.
+    for (const pk of pickups) {
+      const rarity = POWERUPS[pk.type].rarity;
+      if (rarity !== 'rare' && rarity !== 'epic') continue;
+      ctx.fillStyle = RARITY[rarity].color;
+      ctx.fillRect(cx + pk.x * k - 1.5, cy + pk.y * k - 1.5, 3, 3);
+    }
+    ctx.lineCap = 'round';
+    for (const s of snakes.values()) {
+      ctx.strokeStyle = s.isPlayer ? '#fff' : s.miniColor;
+      ctx.lineWidth = s.isPlayer ? 2.5 : clamp(s.r * 0.08, 1, 3);
+      ctx.beginPath();
+      for (let i = 0; i < s.segs.length; i += 3) ctx.lineTo(cx + s.segs[i].x * k, cy + s.segs[i].y * k);
+      ctx.stroke();
+    }
+    if (me) {
+      ctx.fillStyle = '#fff';
+      ctx.beginPath();
+      ctx.arc(cx + me.x * k, cy + me.y * k, 3, 0, TAU);
+      ctx.fill();
+    }
+  }
+
+  // Player's loadout along the bottom: weapon, stacked upgrades, timed effects.
+  function drawTray() {
+    const items = [{ id: 'w_' + me.weapon, label: WEAPONS[me.weapon].name }];
+    for (const id of Object.keys(me.stacks)) items.push({ id, count: me.stacks[id] });
+    if (me.ghostLeft > 0) items.push({ id: 'ghost', timer: me.ghostLeft });
+    if (me.frenzyLeft > 0) items.push({ id: 'frenzy', timer: me.frenzyLeft });
+    const gap = 6;
+    const size = clamp((W - 140) / items.length - gap, 22, 40);
+    const total = items.length * (size + gap) - gap;
+    let x = Math.max(116, (W - total) / 2);
+    const y = H - size - 16;
+    ctx.textAlign = 'center';
+    for (const it of items) {
+      ctx.drawImage(iconSprite(it.id), x, y, size, size);
+      if (it.label) {
+        ctx.font = '600 11px Poppins, system-ui, sans-serif';
+        ctx.fillStyle = 'rgba(255,255,255,0.8)';
+        ctx.fillText(it.label, x + size / 2, y - 6);
+      }
+      if (it.count > 1 || it.timer) {
+        const text = it.timer ? `${Math.ceil(it.timer)}s` : `x${it.count}`;
+        ctx.font = '700 11px Poppins, system-ui, sans-serif';
+        const tw = ctx.measureText(text).width + 8;
+        ctx.fillStyle = 'rgba(0,0,0,0.75)';
+        ctx.fillRect(x + size - tw + 2, y + size - 12, tw, 14);
+        ctx.fillStyle = it.timer ? '#ffd43b' : '#fff';
+        ctx.fillText(text, x + size - tw / 2 + 2, y + size - 1);
+      }
+      x += size + gap;
+    }
+  }
+
+  function render() {
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    ctx.fillStyle = '#05070a';
+    ctx.fillRect(0, 0, W, H);
+
+    const z = cam.zoom;
+    const vx0 = cam.x - W / 2 / z, vx1 = cam.x + W / 2 / z;
+    const vy0 = cam.y - H / 2 / z, vy1 = cam.y + H / 2 / z;
+    ctx.setTransform(DPR * z, 0, 0, DPR * z, DPR * (W / 2 - cam.x * z), DPR * (H / 2 - cam.y * z));
+
+    // Hex floor inside the world
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(0, 0, WORLD_R, 0, TAU);
+    ctx.clip();
+    ctx.fillStyle = hexPattern;
+    ctx.fillRect(vx0, vy0, vx1 - vx0, vy1 - vy0);
+    ctx.restore();
+
+    // Danger zone outside + border
+    ctx.beginPath();
+    ctx.rect(vx0 - 10, vy0 - 10, vx1 - vx0 + 20, vy1 - vy0 + 20);
+    ctx.arc(0, 0, WORLD_R, 0, TAU);
+    ctx.fillStyle = 'rgba(110,10,25,0.35)';
+    ctx.fill('evenodd');
+    ctx.beginPath();
+    ctx.arc(0, 0, WORLD_R, 0, TAU);
+    ctx.strokeStyle = 'rgba(255,60,85,0.25)';
+    ctx.lineWidth = 18;
+    ctx.stroke();
+    ctx.strokeStyle = '#ff3b55';
+    ctx.lineWidth = 4;
+    ctx.stroke();
+
+    // Food
+    ctx.globalCompositeOperation = 'lighter';
+    const drawFood = (f, shrink) => {
+      if (f.x < vx0 - 30 || f.x > vx1 + 30 || f.y < vy0 - 30 || f.y > vy1 + 30) return;
+      const age = time - f.born;
+      ctx.globalAlpha = age < 0.4 ? age / 0.4 : 1;
+      const sz = f.r * 6 * (1 + 0.15 * Math.sin(time * 4 + f.phase)) * shrink;
+      const fx = f.x + Math.cos(time * 1.7 + f.phase) * 2;
+      const fy = f.y + Math.sin(time * 1.3 + f.phase) * 2;
+      ctx.drawImage(f.sprite, fx - sz / 2, fy - sz / 2, sz, sz);
+    };
+    for (const f of foods.values()) drawFood(f, 1);
+    for (const f of eating) drawFood(f, f.eatT / 0.12);
+    ctx.globalAlpha = 1;
+    ctx.globalCompositeOperation = 'source-over';
+
+    drawPickups(vx0, vy0, vx1, vy1);
+
+    // Snakes (player on top)
+    for (const s of snakes.values()) if (!s.isPlayer) drawSnake(s, vx0, vy0, vx1, vy1);
+    if (me) drawSnake(me, vx0, vy0, vx1, vy1);
+
+    // Bullets: glow, then a white streak
+    ctx.globalCompositeOperation = 'lighter';
+    for (const b of bullets) {
+      if (b.x < vx0 - 30 || b.x > vx1 + 30 || b.y < vy0 - 30 || b.y > vy1 + 30) continue;
+      const g = 14 * b.size;
+      ctx.drawImage(b.glow, b.x - g, b.y - g, g * 2, g * 2);
+    }
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.strokeStyle = '#fff';
+    ctx.lineCap = 'round';
+    for (const b of bullets) {
+      if (b.x < vx0 - 30 || b.x > vx1 + 30 || b.y < vy0 - 30 || b.y > vy1 + 30) continue;
+      ctx.lineWidth = BULLET_R * 1.2 * b.size;
+      ctx.beginPath();
+      ctx.moveTo(b.x - b.vx * b.tail, b.y - b.vy * b.tail);
+      ctx.lineTo(b.x, b.y);
+      ctx.stroke();
+    }
+
+    // Particles: skin chunks normally, sparks additively, blast rings as strokes
+    for (const p of particles) {
+      const t = p.life / p.max;
+      if (p.ring) {
+        ctx.globalCompositeOperation = 'source-over';
+        ctx.globalAlpha = t;
+        ctx.strokeStyle = '#ffd8a8';
+        ctx.lineWidth = 6 * t + 1;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size * (0.3 + 0.7 * (1 - t)), 0, TAU);
+        ctx.stroke();
+        continue;
+      }
+      if (p.x < vx0 - 20 || p.x > vx1 + 20 || p.y < vy0 - 20 || p.y > vy1 + 20) continue;
+      const sz = p.size * (0.4 + 0.6 * t);
+      ctx.globalAlpha = Math.min(1, t * 1.5);
+      ctx.globalCompositeOperation = p.glow ? 'lighter' : 'source-over';
+      ctx.drawImage(p.sprite, p.x - sz, p.y - sz, sz * 2, sz * 2);
+    }
+    ctx.globalAlpha = 1;
+    ctx.globalCompositeOperation = 'source-over';
+
+    // Names + health bars (other players' names in white, bots dimmer)
+    ctx.font = `600 ${Math.round(13 / z)}px Poppins, system-ui, sans-serif`;
+    ctx.textAlign = 'center';
+    for (const s of snakes.values()) {
+      const h = s.segs[0];
+      if (!h || h.x < vx0 || h.x > vx1 || h.y < vy0 || h.y > vy1) continue;
+      ctx.fillStyle = s.pid && !s.isPlayer ? 'rgba(255,255,255,0.95)' : 'rgba(255,255,255,0.7)';
+      ctx.fillText(s.name, h.x, h.y - s.r - 10 / z);
+      if (s.hp < s.maxHp) {
+        const bw = 40 / z, bh = 5 / z, bx = h.x - bw / 2, by = h.y - s.r - 34 / z;
+        const frac = Math.max(0, s.hp / s.maxHp);
+        ctx.fillStyle = 'rgba(0,0,0,0.6)';
+        ctx.fillRect(bx, by, bw, bh);
+        ctx.fillStyle = frac > 0.5 ? '#7cff6b' : frac > 0.25 ? '#ffd43b' : '#ff4d6d';
+        ctx.fillRect(bx, by, bw * frac, bh);
+      }
+    }
+
+    // Screen space
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    ctx.fillStyle = vignette;
+    ctx.fillRect(0, 0, W, H);
+    if (state === 'playing' && me) {
+      drawMinimap();
+      drawTray();
+    }
+  }
+
+  // ---------- HUD / UI ----------
+  const $ = (id) => document.getElementById(id);
+  const hud = $('hud'), menu = $('menu'), deathScreen = $('deathScreen'), guide = $('guide');
+  const nameInput = $('nameInput'), skinsEl = $('skins'), playBtn = $('playBtn');
+  const boostBtn = $('boostBtn'), fireBtn = $('fireBtn');
+  const hpFill = $('hpFill'), shBar = $('shBar'), shFill = $('shFill');
+  const lbTimerFill = $('lbTimerFill');
+  let skinIdx = clamp(parseInt(store.get('chomp.skin'), 10) || 0, 0, SKINS.length - 1);
+  nameInput.value = store.get('chomp.name') || '';
+
+  const LB_CATS = [
+    { title: 'Top Score', val: (s) => s.score },
+    { title: 'Most Kills', val: (s) => s.kills },
+    { title: 'Longest', val: (s) => Math.floor(s.mass) },
+    { title: 'Most Dots', val: (s) => s.dots },
+  ];
+  $('lbTabs').innerHTML = LB_CATS.map(() => '<i></i>').join('');
+
+  function selectSkin(i) {
+    skinIdx = i;
+    skinsEl.querySelectorAll('.skin').forEach((el, j) => el.classList.toggle('sel', j === i));
+  }
+  SKINS.forEach((skin, i) => {
+    const b = document.createElement('button');
+    b.className = 'skin' + (i === skinIdx ? ' sel' : '');
+    b.style.background = `repeating-linear-gradient(135deg, ${skin[0]} 0 10px, ${skin[1]} 10px 20px)`;
+    b.setAttribute('aria-label', `Skin ${i + 1}`);
+    b.addEventListener('click', () => selectSkin(i));
+    skinsEl.appendChild(b);
+  });
+
+  // Power-up guide, grouped into upgrades and weapons.
+  function buildGuide() {
+    const row = (id) => {
+      const d = POWERUPS[id], r = RARITY[d.rarity];
+      return `<li><img src="${iconURL(id)}" alt=""><div><b>${esc(d.name)}</b>` +
+        `<em style="color:${r.color}">${r.label}</em><span>${esc(d.desc)}</span></div></li>`;
+    };
+    const ids = Object.keys(POWERUPS).filter((id) => !POWERUPS[id].noSpawn);
+    $('guideUpgrades').innerHTML = ids.filter((id) => !POWERUPS[id].weapon).map(row).join('');
+    $('guideWeapons').innerHTML = ids.filter((id) => POWERUPS[id].weapon).map(row).join('');
+  }
+  buildGuide();
+
+  function toast(msg) {
+    const el = document.createElement('div');
+    el.className = 'toast';
+    el.textContent = msg;
+    $('toasts').appendChild(el);
+    setTimeout(() => el.remove(), 2200);
+  }
+
+  function pickupToast(type, msg) {
+    const def = POWERUPS[type];
+    if (!def) return;
+    const box = $('pickupToasts');
+    const el = document.createElement('div');
+    el.className = 'ptoast';
+    el.style.setProperty('--rc', RARITY[def.rarity].color);
+    el.innerHTML = `<img src="${iconURL(type)}" alt=""><div><b>${esc(def.name)}</b><span>${esc(msg)}</span></div>`;
+    box.prepend(el);
+    while (box.children.length > 3) box.lastChild.remove();
+    setTimeout(() => el.remove(), 2600);
+  }
+
+  function updateHud() {
+    if (!me) return;
+    const cat = LB_CATS[lbIdx];
+    const sorted = [...snakes.values()].sort((a, b) => cat.val(b) - cat.val(a));
+    $('lbTitle').textContent = cat.title;
+    $('lbTabs').querySelectorAll('i').forEach((el, i) => el.classList.toggle('on', i === lbIdx));
+    $('lbList').innerHTML = sorted.slice(0, 10).map((s, i) =>
+      `<li class="${s.isPlayer ? 'me' : s.pid ? 'human' : ''}"><span>${i + 1}. ${esc(s.name)}</span><b>${cat.val(s)}</b></li>`
+    ).join('');
+    $('rank').textContent = `Your rank: ${sorted.indexOf(me) + 1} of ${sorted.length} · ${online} online`;
+    $('score').textContent = me.score;
+    $('len').textContent = Math.floor(me.mass);
+    $('kills').textContent = me.kills;
+    $('dots').textContent = me.dots;
+    $('hits').textContent = me.hits;
+  }
+
+  function updateHealthBar() {
+    const frac = Math.max(0, me.hp / me.maxHp);
+    hpFill.style.width = `${frac * 100}%`;
+    hpFill.style.background = frac > 0.5 ? '#7cff6b' : frac > 0.25 ? '#ffd43b' : '#ff4d6d';
+    shBar.hidden = me.shield <= 0;
+    shFill.style.width = `${(me.shield / MAX_SHIELD) * 100}%`;
+  }
+
+  const setMenuMsg = (msg) => { $('menuMsg').textContent = msg; };
+
+  let spawnAt = 0;
+  function startGame() {
+    if (!mp || state === 'spawning' || state === 'playing') return;
+    const name = nameInput.value.trim().slice(0, 16) || (account && account.username) || 'Guest';
+    store.set('chomp.name', nameInput.value.trim());
+    store.set('chomp.skin', String(skinIdx));
+    savePrefs(nameInput.value.trim(), skinIdx);
+    mp.send('spawn', { n: name, s: skinIdx });
+    state = 'spawning';
+    spawnAt = time;
+    setMenuMsg('');
+    menu.hidden = true;
+    guide.hidden = true;
+    deathScreen.hidden = true;
+  }
+
+  function showMenu() {
+    state = 'menu';
+    me = null;
+    hud.hidden = true;
+    deathScreen.hidden = true;
+    menu.hidden = false;
+    refreshMenuData();
+  }
+
+  playBtn.addEventListener('click', startGame);
+  $('againBtn').addEventListener('click', startGame);
+  $('menuBtn').addEventListener('click', showMenu);
+  $('guideBtn').addEventListener('click', () => { guide.hidden = false; });
+  $('guideClose').addEventListener('click', () => { guide.hidden = true; });
+
+  // ---------- Accounts, saves & leaderboards ----------
+  const auth = MP.auth({ key: NET.key, apiUrl: NET.apiUrl });
+  let mp = null;
+  let account = null; // { id, username, claimed }
+  let boardIdx = 0;
+
+  function track(where, err) {
+    try { if (mp) mp.track('error', { message: String((err && err.message) || err).slice(0, 200), where }); } catch { /* analytics is best-effort */ }
+  }
+
+  function setNet(msg, bad) {
+    const el = $('netStatus');
+    el.textContent = msg;
+    el.classList.toggle('bad', !!bad);
+    $('netBanner').hidden = !(bad && state === 'playing');
+    $('netBanner').textContent = msg;
+  }
+
+  function updateAccountUI() {
+    const claimed = account && account.claimed;
+    $('acctGuest').hidden = !!claimed;
+    $('acctUserLine').hidden = !claimed;
+    if (claimed) $('acctName').textContent = account.username;
+    if (claimed) $('acctForm').hidden = true;
+  }
+
+  async function savePrefs(name, skin) {
+    try { await auth.data.set({ name, skin }); } catch (err) { track('savePrefs', err); }
+  }
+
+  async function loadPrefs() {
+    try {
+      const { data } = await auth.data.get();
+      if (data && typeof data.name === 'string' && data.name) nameInput.value = data.name.slice(0, 16);
+      if (data && Number.isInteger(data.skin)) selectSkin(clamp(data.skin, 0, SKINS.length - 1));
+    } catch (err) { track('loadPrefs', err); }
+  }
+
+  async function refreshStats() {
+    try {
+      const { data } = await auth.data.get('@save');
+      const v = data || {};
+      const cell = (label, val) => `<div><span>${label}</span><b>${val}</b></div>`;
+      $('myStats').innerHTML = cell('Games', v.games || 0) + cell('Best score', v.best || 0) + cell('Longest', v.bestLen || 0)
+        + cell('Kills', v.kills || 0) + cell('Dots', v.dots || 0) + cell('Time', fmtTime(v.time || 0));
+    } catch (err) {
+      track('refreshStats', err);
+    }
+  }
+
+  async function refreshBoards() {
+    const b = BOARDS[boardIdx];
+    $('boardTabs').querySelectorAll('button').forEach((el, i) => el.classList.toggle('on', i === boardIdx));
+    try {
+      const board = auth.leaderboard(b.id);
+      const [{ entries }, mine] = await Promise.all([board.top(10), board.myRank()]);
+      if (BOARDS[boardIdx] !== b) return;
+      $('boardList').innerHTML = entries.length ? entries.map((e) =>
+        `<li class="${account && e.playerId === account.id ? 'me' : ''}"><span>${e.rank}. ${esc(e.username || 'Guest')}</span><b>${e.score}</b></li>`
+      ).join('') : '<li class="empty">No scores yet. Be the first!</li>';
+      $('boardMine').textContent = mine && mine.rank ? `You: #${mine.rank} of ${mine.total}`
+        : 'Play a round to get on the board';
+    } catch (err) {
+      $('boardList').innerHTML = '<li class="empty">Leaderboard unavailable</li>';
+      $('boardMine').textContent = '';
+      track('refreshBoards', err);
+    }
+  }
+
+  function refreshMenuData() {
+    refreshBoards();
+    refreshStats();
+  }
+
+  $('boardTabs').innerHTML = BOARDS.map((b) => `<button type="button">${b.title}</button>`).join('');
+  $('boardTabs').querySelectorAll('button').forEach((el, i) => el.addEventListener('click', () => {
+    boardIdx = i;
+    refreshBoards();
+  }));
+
+  $('acctToggle').addEventListener('click', () => {
+    $('acctForm').hidden = !$('acctForm').hidden;
+    if (!$('acctForm').hidden) $('acctUser').focus();
+  });
+
+  async function accountAction(kind) {
+    const user = $('acctUser').value.trim(), pass = $('acctPass').value;
+    const msg = $('acctMsg');
+    if (!user || !pass) {
+      msg.textContent = 'Enter a username and password.';
+      return;
+    }
+    msg.textContent = kind === 'claim' ? 'Creating account…' : 'Logging in…';
+    try {
+      if (kind === 'claim') {
+        await auth.claim(user, pass); // same player id, so progress so far is kept
+        account = await auth.getPlayer();
+      } else {
+        await auth.login(user, pass);
+        account = await auth.getPlayer();
+        await reconnect(); // a different player: rejoin so the server saves to the right account
+        await loadPrefs();
+      }
+      $('acctPass').value = '';
+      msg.textContent = '';
+      if (!nameInput.value.trim()) nameInput.value = account.username || '';
+      updateAccountUI();
+      refreshMenuData();
+    } catch (err) {
+      msg.textContent = String((err && err.message) || err || 'Something went wrong');
+    }
+  }
+  $('signupBtn').addEventListener('click', () => accountAction('claim'));
+  $('loginBtn').addEventListener('click', () => accountAction('login'));
+  $('logoutBtn').addEventListener('click', async () => {
+    auth.logout();
+    account = null;
+    await reconnect();
+    updateAccountUI();
+    refreshMenuData();
+  });
+
+  // ---------- Connection ----------
+  function resetWorld() {
+    snakes.clear();
+    foods.clear();
+    pickupCache.clear();
+    pickups = [];
+    bullets = [];
+    eating = [];
+    me = null;
+  }
+
+  async function connect() {
+    setNet('Connecting…');
+    playBtn.disabled = true;
+    try {
+      account = await auth.getPlayer();
+      mp = await MP.join({ key: NET.key, room: NET.room, endpoint: NET.endpoint, apiUrl: NET.apiUrl, player: auth });
+    } catch (err) {
+      setNet('Could not connect. Retrying…', true);
+      setTimeout(connect, 3000);
+      return;
+    }
+    mp.onState(onState);
+    mp.on('t', onTickEvents);
+    mp.on('fs', onFoodSnapshot);
+    mp.on('dead', onDead);
+    mp.on('toast', (msg) => toast(String(msg).slice(0, 80)));
+    mp.on('pu', (d) => Array.isArray(d) && pickupToast(d[0], String(d[1])));
+    mp.onDisconnect(() => setNet('Reconnecting…', true));
+    mp.onReconnect(() => {
+      setNet('');
+      mp.send('hello'); // re-sync orbs we may have missed
+    });
+    mp.send('hello');
+    setNet('');
+    playBtn.disabled = false;
+    updateAccountUI();
+    refreshMenuData();
+  }
+
+  async function reconnect() {
+    const old = mp;
+    mp = null;
+    resetWorld();
+    if (old) {
+      try { await old.leave(); } catch (err) { track('leave', err); }
+    }
+    await connect();
+  }
+
+  window.addEventListener('pagehide', () => { if (mp) mp.leave(); });
+
+  // ---------- Input ----------
+  const input = {
+    x: W / 2, y: H / 2,
+    key: false, mouse: false, touch: false, btn: false,
+    fireKey: false, fireMouse: false, fireBtn: false,
+    boost() { return this.key || this.mouse || this.touch || this.btn; },
+    firing() { return this.fireKey || this.fireMouse || this.fireBtn; },
+    reset() {
+      this.key = this.mouse = this.touch = this.btn = false;
+      this.fireKey = this.fireMouse = this.fireBtn = false;
+      boostBtn.classList.remove('on');
+      fireBtn.classList.remove('on');
+    },
+  };
+
+  const BOOST_KEYS = ['Space', 'ArrowUp', 'KeyW'];
+  window.addEventListener('mousemove', (e) => { input.x = e.clientX; input.y = e.clientY; });
+  canvas.addEventListener('mousedown', (e) => {
+    if (e.button === 0) input.fireMouse = true;
+    else if (e.button === 2) input.mouse = true;
+  });
+  window.addEventListener('mouseup', (e) => {
+    if (e.button === 0) input.fireMouse = false;
+    else if (e.button === 2) input.mouse = false;
+  });
+  canvas.addEventListener('contextmenu', (e) => e.preventDefault());
+  window.addEventListener('blur', () => input.reset());
+
+  window.addEventListener('keydown', (e) => {
+    if (state === 'playing' && BOOST_KEYS.includes(e.code)) {
+      e.preventDefault();
+      input.key = true;
+    } else if (state === 'playing' && e.code === 'KeyF') {
+      input.fireKey = true;
+    } else if (e.code === 'Escape') {
+      guide.hidden = true;
+    } else if (e.code === 'Enter' && guide.hidden && !e.target.closest('#acctForm')) {
+      if (state === 'menu' || (state === 'dead' && !deathScreen.hidden)) startGame();
+    }
+  });
+  window.addEventListener('keyup', (e) => {
+    if (BOOST_KEYS.includes(e.code)) input.key = false;
+    else if (e.code === 'KeyF') input.fireKey = false;
+  });
+
+  function onTouch(e) {
+    e.preventDefault();
+    const t = e.targetTouches[0];
+    if (t) { input.x = t.clientX; input.y = t.clientY; }
+    input.touch = e.targetTouches.length >= 2;
+  }
+  canvas.addEventListener('touchstart', onTouch, { passive: false });
+  canvas.addEventListener('touchmove', onTouch, { passive: false });
+  canvas.addEventListener('touchend', onTouch, { passive: false });
+  canvas.addEventListener('touchcancel', onTouch, { passive: false });
+
+  function bindHoldButton(el, prop) {
+    const set = (on) => (e) => {
+      e.preventDefault();
+      input[prop] = on;
+      el.classList.toggle('on', on);
+    };
+    el.addEventListener('touchstart', set(true), { passive: false });
+    el.addEventListener('touchend', set(false), { passive: false });
+    el.addEventListener('touchcancel', set(false), { passive: false });
+  }
+  bindHoldButton(boostBtn, 'btn');
+  bindHoldButton(fireBtn, 'fireBtn');
+  if ('ontouchstart' in window || window.matchMedia('(pointer: coarse)').matches) {
+    boostBtn.hidden = false;
+    fireBtn.hidden = false;
+  }
+
+  // ---------- Boot ----------
+  connect().then(loadPrefs);
+
+  let last = performance.now();
+  function frame(now) {
+    const dt = Math.min(0.05, (now - last) / 1000);
+    last = now;
+    time = now / 1000;
+    try {
+      update(dt);
+      render();
+    } catch (err) {
+      track('frame', err);
+      console.error(err);
+    }
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
+
+```
+
+`index.html`:
+
+```html
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <title>ChompChomp.io</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <canvas id="game"></canvas>
+
+  <div id="hud" hidden>
+    <div id="stats">
+      <div class="row"><span>Score</span><b id="score">0</b></div>
+      <div class="row"><span>Length</span><b id="len">10</b></div>
+      <div class="row"><span>Kills</span><b id="kills">0</b></div>
+      <div class="row"><span>Dots</span><b id="dots">0</b></div>
+      <div class="row"><span>Hits</span><b id="hits">0</b></div>
+      <div class="hp" title="Health"><i id="hpFill"></i></div>
+      <div class="hp shield" id="shBar" title="Shield" hidden><i id="shFill"></i></div>
+    </div>
+    <div id="leaderboard">
+      <h3 id="lbTitle">Top Score</h3>
+      <div id="lbTabs"></div>
+      <ol id="lbList"></ol>
+      <div id="rank"></div>
+      <div id="lbTimer"><i id="lbTimerFill"></i></div>
+    </div>
+    <button id="fireBtn" hidden>FIRE</button>
+    <button id="boostBtn" hidden>BOOST</button>
+  </div>
+
+  <div id="netBanner" hidden></div>
+  <div id="toasts"></div>
+  <div id="pickupToasts"></div>
+
+  <div id="menu" class="overlay">
+    <div class="menu-wrap">
+      <div class="panel">
+        <h1>Chomp<span>Chomp</span><em>.io</em></h1>
+        <p class="tagline">Eat orbs. Grab power-ups. Slice your rivals.</p>
+        <input id="nameInput" maxlength="16" placeholder="Nickname" autocomplete="off" spellcheck="false">
+        <div id="skins"></div>
+        <button id="playBtn" class="primary">Play</button>
+        <p id="netStatus"></p>
+        <p id="menuMsg"></p>
+        <button id="guideBtn" class="secondary">Power-up guide</button>
+        <div id="account">
+          <p id="acctGuest">Playing as a guest · <button type="button" id="acctToggle" class="link">Sign up / Log in</button></p>
+          <p id="acctUserLine" hidden>Signed in as <b id="acctName"></b> · <button type="button" id="logoutBtn" class="link">Log out</button></p>
+          <div id="acctForm" hidden>
+            <input id="acctUser" maxlength="24" placeholder="Username" autocomplete="username" spellcheck="false">
+            <input id="acctPass" type="password" placeholder="Password" autocomplete="current-password">
+            <div class="acct-btns">
+              <button type="button" id="signupBtn" class="secondary">Sign up</button>
+              <button type="button" id="loginBtn" class="secondary">Log in</button>
+            </div>
+            <p class="hint">Sign up keeps your guest progress. Log in to play your account on another device.</p>
+            <p id="acctMsg"></p>
+          </div>
+        </div>
+        <p class="hint">
+          <b>Left click / F</b> shoot &middot; <b>Right click / Space</b> boost<br>
+          Body shots slice &middot; Headshots drain health<br>
+          Free shots under length 100 &middot; Small snakes fire faster
+        </p>
+      </div>
+      <div class="panel side">
+        <h3>Leaderboards</h3>
+        <div id="boardTabs" class="tabs"></div>
+        <ol id="boardList" class="board"></ol>
+        <p id="boardMine"></p>
+        <h3>Your stats</h3>
+        <div id="myStats" class="mini-stats"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="guide" class="overlay" hidden>
+    <div class="panel wide">
+      <h2>Power-ups</h2>
+      <p class="tagline">Upgrades stack and last until you die, then drop for others to grab.</p>
+      <ul id="guideUpgrades" class="guide-list"></ul>
+      <h3>Weapons</h3>
+      <ul id="guideWeapons" class="guide-list"></ul>
+      <button id="guideClose" class="primary">Got it</button>
+    </div>
+  </div>
+
+  <div id="deathScreen" class="overlay" hidden>
+    <div class="panel">
+      <h2>You got chomped!</h2>
+      <p id="deathCause"></p>
+      <div class="statgrid">
+        <div class="big"><span>Score</span><b id="dScore">0</b></div>
+        <div><span>Final length</span><b id="dLen">0</b></div>
+        <div><span>Kills</span><b id="dKills">0</b></div>
+        <div><span>Dots</span><b id="dDots">0</b></div>
+        <div><span>Hits</span><b id="dHits">0</b></div>
+        <div><span>Time alive</span><b id="dTime">0s</b></div>
+      </div>
+      <p id="dBest"></p>
+      <button id="againBtn" class="primary">Play again</button>
+      <button id="menuBtn" class="secondary">Menu &amp; leaderboards</button>
+    </div>
+  </div>
+
+  <script src="https://cdn.multiplayeragent.com/sdk/mp.global.js"></script>
+  <script src="powerups.js"></script>
+  <script src="sim.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>
+
+```
+
+`powerups.js`:
+
+```js
+'use strict';
+
+// Power-up, weapon and icon definitions. Loaded before game.js, which reads window.ChompPowerups.
+window.ChompPowerups = (() => {
+  const TAU = Math.PI * 2;
+  const MAX_SHIELD = 200;
+
+  // `weight` is the relative chance a natural spawn rolls a power-up of this rarity.
+  const RARITY = {
+    common: { weight: 10, color: '#ced4da', label: 'Common' },
+    uncommon: { weight: 5, color: '#51cf66', label: 'Uncommon' },
+    rare: { weight: 2.2, color: '#4dabf7', label: 'Rare' },
+    epic: { weight: 0.8, color: '#cc5de8', label: 'Epic' },
+  };
+
+  // Multipliers on the base gun: shot interval, damage, bullet speed, bullet lifetime (range), visual size.
+  const WEAPONS = {
+    blaster: { name: 'Blaster', interval: 1, damage: 1, speed: 1, life: 1, pellets: 1, size: 1 },
+    shotgun: { name: 'Shotgun', interval: 2.2, damage: 0.6, speed: 0.9, life: 0.45, pellets: 5, spread: 0.3, size: 0.8 },
+    twin: { name: 'Twin Guns', interval: 1.1, damage: 0.75, speed: 1, life: 1, pellets: 2, parallel: true, size: 0.9 },
+    smg: { name: 'SMG', interval: 0.4, damage: 0.4, speed: 1.1, life: 0.8, pellets: 1, jitter: 0.09, size: 0.7 },
+    rail: { name: 'Railgun', interval: 3.2, damage: 3, speed: 2.2, life: 0.7, pellets: 1, pierce: 3, size: 1.2, tail: 0.035 },
+    rocket: { name: 'Rocket Launcher', interval: 3.5, damage: 1.5, speed: 0.55, life: 1.6, pellets: 1, explode: 110, size: 1.8 },
+    seeker: { name: 'Seeker', interval: 1.4, damage: 0.9, speed: 0.7, life: 1.8, pellets: 1, homing: 5, size: 1.1 },
+  };
+
+  // `max`: stack cap for permanent upgrades. `consumable`: used up on pickup, not kept or dropped on death.
+  const POWERUPS = {
+    medkit: { name: 'Medkit', desc: 'Full heal & body repair', rarity: 'common', accent: '#ff6b6b', consumable: true,
+      apply: (s) => { s.health = s.mods.maxHealth; s.segLife.fill(-1); s.bodyHurt = false; } },
+    feast: { name: 'Feast', desc: '+25 length', rarity: 'common', accent: '#ffd43b', consumable: true,
+      apply: (s) => { s.mass += 25; } },
+    magnet: { name: 'Magnet', desc: '+50% pickup reach', rarity: 'common', accent: '#ff4d4d', max: 4,
+      apply: (s) => { s.mods.magnet += 0.5; } },
+    turbo: { name: 'Turbo', desc: '+10% speed', rarity: 'common', accent: '#3bc9db', max: 5,
+      apply: (s) => { s.mods.speed += 0.1; } },
+    shield: { name: 'Shield', desc: '+50 shield, absorbs damage', rarity: 'uncommon', accent: '#4dabf7', consumable: true,
+      apply: (s) => { s.mods.shield = Math.min(MAX_SHIELD, s.mods.shield + 50); } },
+    trigger: { name: 'Hair Trigger', desc: '+15% fire rate', rarity: 'uncommon', accent: '#ffd43b', max: 5,
+      apply: (s) => { s.mods.fireRate *= 0.87; } },
+    vitality: { name: 'Vitality', desc: '+25 max head health', rarity: 'uncommon', accent: '#ff4d6d', max: 4,
+      apply: (s) => { s.mods.maxHealth += 25; s.health += 25; } },
+    plating: { name: 'Plating', desc: 'Body 30% tougher', rarity: 'uncommon', accent: '#adb5bd', max: 5,
+      apply: (s) => { s.mods.armor += 0.3; } },
+    agility: { name: 'Agility', desc: 'Turn 20% sharper', rarity: 'uncommon', accent: '#69db7c', max: 3,
+      apply: (s) => { s.mods.turn += 0.2; } },
+    nitro: { name: 'Nitro', desc: 'Boost costs 30% less', rarity: 'uncommon', accent: '#ff922b', max: 3,
+      apply: (s) => { s.mods.boostCost *= 0.7; } },
+    hollow: { name: 'Hollow Points', desc: '+25% damage', rarity: 'rare', accent: '#fcc419', max: 5,
+      apply: (s) => { s.mods.damage += 0.25; } },
+    barrel: { name: 'Long Barrel', desc: '+30% bullet speed & range', rarity: 'rare', accent: '#ff6b6b', max: 3,
+      apply: (s) => { s.mods.bulletSpeed += 0.3; } },
+    nanobots: { name: 'Nanobots', desc: 'Body slowly repairs itself', rarity: 'rare', accent: '#38d9a9', max: 3,
+      apply: (s) => { s.mods.repair += 0.05; } },
+    vampire: { name: 'Vampire', desc: 'Your hits heal your head', rarity: 'rare', accent: '#e03131', max: 3,
+      apply: (s) => { s.mods.lifesteal += 3; } },
+    golden: { name: 'Golden Scales', desc: '+25% score', rarity: 'rare', accent: '#fcc419', max: 4,
+      apply: (s) => { s.mods.score += 0.25; } },
+    ghost: { name: 'Ghost', desc: '7s: pass through snakes & bullets', rarity: 'epic', accent: '#f8f9fa', consumable: true,
+      apply: (s) => { s.effects.ghost = 7; } },
+    frenzy: { name: 'Frenzy', desc: '8s: triple fire rate, free shots', rarity: 'epic', accent: '#ff6b6b', consumable: true,
+      apply: (s) => { s.effects.frenzy = 8; } },
+    w_blaster: { weapon: 'blaster', desc: 'Standard gun', rarity: 'common', accent: '#dee2e6', noSpawn: true },
+    w_shotgun: { weapon: 'shotgun', desc: '5-pellet spread, short range', rarity: 'uncommon', accent: '#ffa94d' },
+    w_twin: { weapon: 'twin', desc: 'Two parallel guns', rarity: 'uncommon', accent: '#74c0fc' },
+    w_smg: { weapon: 'smg', desc: 'Rapid fire, low damage', rarity: 'uncommon', accent: '#b197fc' },
+    w_rail: { weapon: 'rail', desc: 'Huge damage, pierces 3 snakes', rarity: 'rare', accent: '#66d9e8' },
+    w_rocket: { weapon: 'rocket', desc: 'Explodes, hurting everything nearby', rarity: 'rare', accent: '#ff8787' },
+    w_seeker: { weapon: 'seeker', desc: 'Homing shots', rarity: 'epic', accent: '#da77f2' },
+  };
+  for (const def of Object.values(POWERUPS)) if (def.weapon) def.name = WEAPONS[def.weapon].name;
+
+  const SPAWNABLE = Object.keys(POWERUPS).filter((id) => !POWERUPS[id].noSpawn);
+  const TOTAL_WEIGHT = SPAWNABLE.reduce((a, id) => a + RARITY[POWERUPS[id].rarity].weight, 0);
+  function rollPowerup() {
+    let r = Math.random() * TOTAL_WEIGHT;
+    for (const id of SPAWNABLE) {
+      r -= RARITY[POWERUPS[id].rarity].weight;
+      if (r <= 0) return id;
+    }
+    return SPAWNABLE[0];
+  }
+
+  // ---------- Icons ----------
+  function rgba(hex, a) {
+    const n = parseInt(hex.slice(1), 16);
+    return `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${a})`;
+  }
+  const circle = (g, x, y, r) => { g.beginPath(); g.arc(x, y, r, 0, TAU); };
+  const fill = (g, color) => { g.fillStyle = color; g.fill(); };
+  const stroke = (g, color, w) => { g.strokeStyle = color; g.lineWidth = w; g.stroke(); };
+  function poly(g, pts, close = true) {
+    g.beginPath();
+    for (const [x, y] of pts) g.lineTo(x, y);
+    if (close) g.closePath();
+  }
+  function rrect(g, x, y, w, h, r) {
+    g.beginPath();
+    g.moveTo(x + r, y);
+    g.arcTo(x + w, y, x + w, y + h, r);
+    g.arcTo(x + w, y + h, x, y + h, r);
+    g.arcTo(x, y + h, x, y, r);
+    g.arcTo(x, y, x + w, y, r);
+    g.closePath();
+  }
+  function star(g, n, r1, r2) {
+    const pts = [];
+    for (let k = 0; k < n * 2; k++) {
+      const a = -Math.PI / 2 + (k * Math.PI) / n, r = k % 2 ? r2 : r1;
+      pts.push([Math.cos(a) * r, Math.sin(a) * r]);
+    }
+    poly(g, pts);
+  }
+  function hexagon(g, x, y, r) {
+    const pts = [];
+    for (let k = 0; k < 6; k++) pts.push([x + Math.cos(k * Math.PI / 3 + Math.PI / 6) * r, y + Math.sin(k * Math.PI / 3 + Math.PI / 6) * r]);
+    poly(g, pts);
+  }
+  function arrowHead(g, x, y, ang, size, color) {
+    poly(g, [
+      [x + Math.cos(ang) * size, y + Math.sin(ang) * size],
+      [x + Math.cos(ang + 2.4) * size, y + Math.sin(ang + 2.4) * size],
+      [x + Math.cos(ang - 2.4) * size, y + Math.sin(ang - 2.4) * size],
+    ]);
+    fill(g, color);
+  }
+  // A bullet pointing along `ang`: body colour with a contrasting tip.
+  function bullet(g, x, y, ang, len, w, tip, body) {
+    g.save();
+    g.translate(x, y);
+    g.rotate(ang);
+    const front = len / 2 - w / 2;
+    g.beginPath();
+    g.moveTo(-len / 2, -w / 2);
+    g.lineTo(front, -w / 2);
+    g.arc(front, 0, w / 2, -Math.PI / 2, Math.PI / 2);
+    g.lineTo(-len / 2, w / 2);
+    g.closePath();
+    fill(g, body);
+    g.beginPath();
+    g.moveTo(front - w * 0.7, -w / 2);
+    g.lineTo(front, -w / 2);
+    g.arc(front, 0, w / 2, -Math.PI / 2, Math.PI / 2);
+    g.lineTo(front - w * 0.7, w / 2);
+    g.closePath();
+    fill(g, tip);
+    g.restore();
+  }
+  function flame(g, s, dy, color) {
+    g.beginPath();
+    g.moveTo(0, -18 * s + dy);
+    g.bezierCurveTo(8 * s, -8 * s + dy, 14 * s, dy, 10 * s, 10 * s + dy);
+    g.bezierCurveTo(7 * s, 17 * s + dy, -7 * s, 17 * s + dy, -10 * s, 10 * s + dy);
+    g.bezierCurveTo(-14 * s, dy, -6 * s, -6 * s + dy, 0, -18 * s + dy);
+    fill(g, color);
+  }
+  function shieldPath(g, s) {
+    g.beginPath();
+    g.moveTo(0, -17 * s);
+    g.bezierCurveTo(6 * s, -13 * s, 12 * s, -13 * s, 14 * s, -12 * s);
+    g.lineTo(14 * s, 0);
+    g.quadraticCurveTo(13 * s, 12 * s, 0, 18 * s);
+    g.quadraticCurveTo(-13 * s, 12 * s, -14 * s, 0);
+    g.lineTo(-14 * s, -12 * s);
+    g.bezierCurveTo(-12 * s, -13 * s, -6 * s, -13 * s, 0, -17 * s);
+  }
+
+  // Each glyph draws centred on (0, 0) within a radius of about 20.
+  const GLYPHS = {
+    medkit(g) {
+      rrect(g, -14, -14, 28, 28, 6); fill(g, '#f8f9fa');
+      rrect(g, -3.5, -10, 7, 20, 1.5); fill(g, '#e03131');
+      rrect(g, -10, -3.5, 20, 7, 1.5); fill(g, '#e03131');
+    },
+    feast(g) {
+      for (const [x, y, c] of [[-7, 5, '#ffd43b'], [7, 5, '#ff6b6b'], [0, -7, '#69db7c']]) {
+        circle(g, x, y, 7.5); fill(g, c);
+        circle(g, x - 2.5, y - 2.5, 2); fill(g, 'rgba(255,255,255,0.85)');
+      }
+    },
+    magnet(g) {
+      g.lineCap = 'butt';
+      g.beginPath();
+      g.moveTo(-11, -12);
+      g.lineTo(-11, 2);
+      g.arc(0, 2, 11, Math.PI, 0, true);
+      g.lineTo(11, -12);
+      stroke(g, '#ff4d4d', 8);
+      rrect(g, -15, -18, 8, 6, 1); fill(g, '#f1f3f5');
+      rrect(g, 7, -18, 8, 6, 1); fill(g, '#f1f3f5');
+    },
+    turbo(g, c) {
+      poly(g, [[-13, -11], [-3, 0], [-13, 11]], false); stroke(g, c, 5.5);
+      poly(g, [[0, -11], [10, 0], [0, 11]], false); stroke(g, c, 5.5);
+    },
+    shield(g, c) {
+      shieldPath(g, 1); fill(g, c);
+      shieldPath(g, 0.6); stroke(g, 'rgba(255,255,255,0.75)', 2);
+    },
+    trigger(g, c) {
+      poly(g, [[4, -18], [-9, 3], [-1, 3], [-5, 18], [10, -4], [2, -4], [7, -18]]); fill(g, c);
+    },
+    vitality(g, c) {
+      g.beginPath();
+      g.moveTo(0, 15);
+      g.bezierCurveTo(-20, 2, -12, -17, 0, -7);
+      g.bezierCurveTo(12, -17, 20, 2, 0, 15);
+      fill(g, c);
+      rrect(g, -1.6, -5, 3.2, 10, 1); fill(g, '#fff');
+      rrect(g, -5, -1.6, 10, 3.2, 1); fill(g, '#fff');
+    },
+    plating(g) {
+      for (const [x, y] of [[-7, -5], [7, -5], [0, 7]]) {
+        hexagon(g, x, y, 8.5); fill(g, '#ced4da'); stroke(g, '#495057', 2);
+      }
+    },
+    agility(g, c) {
+      const a0 = 0.75 * Math.PI, a1 = 2.15 * Math.PI;
+      g.beginPath(); g.arc(0, 1, 11, a0, a1); stroke(g, c, 5);
+      arrowHead(g, Math.cos(a1) * 11, 1 + Math.sin(a1) * 11, a1 + Math.PI / 2, 8, c);
+    },
+    nitro(g, c) {
+      flame(g, 1, 0, c);
+      flame(g, 0.55, 5, '#ffd43b');
+    },
+    hollow(g) {
+      bullet(g, 0, 0, -Math.PI / 2, 36, 13, '#e8590c', '#fcc419');
+    },
+    barrel(g, c) {
+      circle(g, 0, 0, 12); stroke(g, c, 3.5);
+      for (let k = 0; k < 4; k++) {
+        const a = (k * Math.PI) / 2;
+        poly(g, [[Math.cos(a) * 6, Math.sin(a) * 6], [Math.cos(a) * 19, Math.sin(a) * 19]], false);
+        stroke(g, c, 3.5);
+      }
+      circle(g, 0, 0, 2.5); fill(g, c);
+    },
+    nanobots(g, c) {
+      for (let k = 0; k < 8; k++) {
+        g.save();
+        g.rotate((k * TAU) / 8);
+        rrect(g, -3.5, -18, 7, 8, 1.5); fill(g, c);
+        g.restore();
+      }
+      circle(g, 0, 0, 12.5); fill(g, c);
+      circle(g, 0, 0, 5); fill(g, '#0d1218');
+    },
+    vampire(g, c) {
+      g.beginPath();
+      g.moveTo(0, -18);
+      g.bezierCurveTo(5, -9, 13, -2, 13, 5);
+      g.arc(0, 5, 13, 0, Math.PI);
+      g.bezierCurveTo(-13, -2, -5, -9, 0, -18);
+      fill(g, c);
+      g.beginPath(); g.ellipse(-5, 5, 2.5, 4, 0.3, 0, TAU); fill(g, 'rgba(255,255,255,0.6)');
+    },
+    golden(g, c) {
+      poly(g, [[-16, 10], [-17, -9], [-8, -1], [0, -15], [8, -1], [17, -9], [16, 10]]); fill(g, c);
+      rrect(g, -16, 9, 32, 5, 1.5); fill(g, '#f59f00');
+      circle(g, 0, 3, 2.5); fill(g, '#e03131');
+      circle(g, -8, 4, 2); fill(g, '#4dabf7');
+      circle(g, 8, 4, 2); fill(g, '#69db7c');
+    },
+    ghost(g, c) {
+      g.beginPath();
+      g.moveTo(-12, 15);
+      g.lineTo(-12, -3);
+      g.arc(0, -3, 12, Math.PI, TAU);
+      g.lineTo(12, 15);
+      for (const [x, y] of [[8, 11], [4, 15], [0, 11], [-4, 15], [-8, 11]]) g.lineTo(x, y);
+      g.closePath();
+      fill(g, c);
+      circle(g, -4.5, -3, 2.6); fill(g, '#1c1f24');
+      circle(g, 4.5, -3, 2.6); fill(g, '#1c1f24');
+    },
+    frenzy(g, c) {
+      star(g, 12, 19, 10); fill(g, c);
+      star(g, 12, 10, 5); fill(g, '#ffd43b');
+    },
+    w_blaster(g, c) {
+      bullet(g, 0, 0, -Math.PI / 4, 34, 11, '#868e96', c);
+    },
+    w_shotgun(g, c) {
+      const ox = -13, oy = 10;
+      for (const a of [-1.0, -0.6, -0.2]) {
+        const ex = ox + Math.cos(a) * 26, ey = oy + Math.sin(a) * 26;
+        poly(g, [[ox, oy], [ex, ey]], false); stroke(g, rgba(c, 0.55), 2.5);
+        circle(g, ex, ey, 3.8); fill(g, c);
+      }
+    },
+    w_twin(g, c) {
+      bullet(g, 0, -6, 0, 30, 8, '#e8590c', c);
+      bullet(g, 0, 7, 0, 30, 8, '#e8590c', c);
+    },
+    w_smg(g, c) {
+      for (const [x, y] of [[-10, 9], [0, 0], [10, -9]]) bullet(g, x, y, -0.73, 15, 6.5, '#e8590c', c);
+    },
+    w_rail(g, c) {
+      poly(g, [[-18, 0], [18, 0]], false); stroke(g, rgba(c, 0.35), 9);
+      stroke(g, c, 4);
+      for (const x of [-8, 0, 8]) {
+        g.beginPath(); g.ellipse(x, 0, 3, 9, 0, 0, TAU); stroke(g, '#e3fafc', 2);
+      }
+    },
+    w_rocket(g, c) {
+      g.save();
+      g.rotate(Math.PI / 4);
+      poly(g, [[-3, 10], [0, 19], [3, 10]]); fill(g, '#ffd43b');
+      poly(g, [[-5, 3], [-10, 12], [-5, 10]]); fill(g, '#c92a2a');
+      poly(g, [[5, 3], [10, 12], [5, 10]]); fill(g, '#c92a2a');
+      rrect(g, -5, -10, 10, 21, 3); fill(g, c);
+      poly(g, [[-5, -9], [0, -19], [5, -9]]); fill(g, '#f1f3f5');
+      circle(g, 0, -2, 2.5); fill(g, '#74c0fc');
+      g.restore();
+    },
+    w_seeker(g, c) {
+      circle(g, 9, -9, 6.5); stroke(g, c, 2.5);
+      circle(g, 9, -9, 2); fill(g, c);
+      g.setLineDash([3, 3.5]);
+      g.beginPath(); g.moveTo(-15, 13); g.quadraticCurveTo(-14, -6, 0, -5); stroke(g, c, 2.5);
+      g.setLineDash([]);
+      arrowHead(g, 1, -5, -0.15, 6, c);
+    },
+  };
+
+  const iconCache = new Map();
+  const urlCache = new Map();
+
+  // 128px badge: dark disc tinted by the power-up's accent, ringed in its rarity colour.
+  function iconSprite(id) {
+    let c = iconCache.get(id);
+    if (c) return c;
+    const def = POWERUPS[id];
+    c = document.createElement('canvas');
+    c.width = c.height = 128;
+    const g = c.getContext('2d');
+    g.scale(2, 2);
+    g.translate(32, 32);
+    circle(g, 0, 0, 29);
+    fill(g, '#0d1218');
+    const grad = g.createRadialGradient(0, -6, 2, 0, 0, 29);
+    grad.addColorStop(0, rgba(def.accent, 0.5));
+    grad.addColorStop(1, rgba(def.accent, 0.06));
+    fill(g, grad);
+    stroke(g, RARITY[def.rarity].color, 3.5);
+    g.lineCap = g.lineJoin = 'round';
+    g.shadowColor = 'rgba(0,0,0,0.7)';
+    g.shadowBlur = 3;
+    g.shadowOffsetY = 1;
+    g.save();
+    GLYPHS[id](g, def.accent);
+    g.restore();
+    iconCache.set(id, c);
+    return c;
+  }
+
+  function iconURL(id) {
+    let u = urlCache.get(id);
+    if (!u) urlCache.set(id, (u = iconSprite(id).toDataURL()));
+    return u;
+  }
+
+  return { MAX_SHIELD, RARITY, WEAPONS, POWERUPS, rollPowerup, iconSprite, iconURL };
+})();
+
+```
+
+`server/logic.js`:
+
+```js
+// Authoritative room logic for ChompChomp.io. build.js concatenates powerups.js + sim.js + this file
+// into dist/server.js, which is deployed to the "arena" room. Clients only send inputs (steering,
+// boost, fire) and two events (hello, spawn); movement, dots, power-ups, bullets, damage, scores and
+// saves are all decided here, so a modified client can't teleport or award itself anything.
+
+const SIM = window.ChompSim;
+const { WEAPON_IDS, SKINS, clamp } = SIM;
+const MSG_CHARS = 1800; // stay under the 2048-char event payload cap
+const BODY_POINTS = 150; // max points in a synced body outline (keeps the field under 2048 chars)
+const HURT_MAX = 250; // max damaged circles listed per snake
+const INPUT_QUEUE = 4;
+const SNAPSHOT_COOLDOWN = 2; // seconds between full food snapshots for one client
+
+const sessions = {}; // sessionId -> { id, q, input, snake, deadAt, save, snapAt }
+let world = null;
+let out = []; // event tuples produced this tick, flushed to every client
+const bodyDirty = new Set();
+let bodyCursor = 0;
+
+const r1 = (v) => Math.round(v * 10) / 10;
+const r2 = (v) => Math.round(v * 100) / 100;
+const r3 = (v) => Math.round(v * 1000) / 1000;
+const wrapAngle = (a) => Math.atan2(Math.sin(a), Math.cos(a));
+
+const humansOnline = () => Object.keys(sessions).length;
+const botTarget = () => Math.max(0, SIM.BOT_COUNT - SIM.BOTS_PER_HUMAN * humansOnline());
+
+function safe(fn) {
+  try { return fn(); } catch (err) { state.shared.persistError = String(err && err.message || err).slice(0, 200); }
+  return undefined;
+}
+
+// ---------- World hooks: what clients need to hear about ----------
+const hooks = {
+  foodAdd: (f) => out.push(['f', f.id, Math.round(f.x), Math.round(f.y), Math.round(f.value * 10), f.c]),
+  foodEat: (f, s) => out.push(['e', f.id, s.id]),
+  bullet: (b) => out.push(['b', b.id, Math.round(b.x), Math.round(b.y), Math.round(b.vx), Math.round(b.vy),
+    r2(b.life), WEAPON_IDS.indexOf(b.weapon), b.owner.id]),
+  bulletHit: (b) => out.push(['d', b.id]),
+  fx: (t) => out.push(t),
+  pickupAdd: (pk) => {
+    state.entities.pk[pk.id] = { x: Math.round(pk.x), y: Math.round(pk.y), t: pk.type, n: pk.natural ? 1 : 0, b: r2(pk.born) };
+  },
+  pickupGone: (pk) => { delete state.entities.pk[pk.id]; },
+  spawn: (s) => bodyDirty.add(s),
+  chop: (s) => bodyDirty.add(s),
+  death: onDeath,
+  toast: (s, msg) => emitTo(s.pid, 'toast', msg),
+  pickup: (s, type, msg) => emitTo(s.pid, 'pu', [type, msg]),
+};
+
+function ensureWorld() {
+  if (world) return;
+  state.entities.players = state.entities.players || {};
+  state.entities.snakes = state.entities.snakes || {};
+  state.entities.pk = state.entities.pk || {};
+  world = SIM.createWorld(hooks);
+  world.init(botTarget());
+  out = []; // nobody is connected yet; joiners get a snapshot
+}
+
+// ---------- Persistence ----------
+// Saves and leaderboard scores are written only here, from server-computed results.
+function recordGame(sess, s) {
+  const score = Math.floor(s.stats.score);
+  const len = Math.floor(s.peakMass);
+  const secs = Math.max(0, Math.floor(world.time - s.born));
+  // The cached copy carries this session's earlier writes (which flush asynchronously); the stored
+  // copy covers anything written elsewhere. Take the larger of each.
+  const stored = safe(() => loadData(sess.id)) || {};
+  const v = sess.save;
+  for (const k of ['games', 'best', 'bestLen', 'kills', 'dots', 'time']) v[k] = Math.max(v[k] || 0, stored[k] || 0);
+  const newBest = score > v.best;
+  v.games += 1;
+  v.best = Math.max(v.best, score);
+  v.bestLen = Math.max(v.bestLen, len);
+  v.kills += s.kills;
+  v.dots += s.stats.dots;
+  v.time += secs;
+  safe(() => saveData(sess.id, v));
+  safe(() => submitScore(sess.id, 'score', score, 'max'));
+  safe(() => submitScore(sess.id, 'length', len, 'max'));
+  if (s.kills > 0) safe(() => submitScore(sess.id, 'kills', s.kills, 'inc'));
+  return { score, len, secs, newBest, best: v.best };
+}
+
+function onDeath(s, killer, cause) {
+  delete state.entities.snakes[s.id];
+  bodyDirty.delete(s);
+  if (!s.human) return;
+  const p = state.entities.players[s.pid];
+  if (p) p.sn = 0;
+  const sess = sessions[s.pid];
+  if (!sess) return;
+  sess.snake = null;
+  sess.deadAt = world.time;
+  const res = recordGame(sess, s);
+  if (cause === 'left') return;
+  emitTo(s.pid, 'dead', {
+    by: killer ? killer.name : '',
+    cause,
+    score: res.score,
+    len: Math.floor(s.mass),
+    kills: s.kills,
+    dots: s.stats.dots,
+    hits: s.stats.hits,
+    secs: res.secs,
+    best: res.best,
+    newBest: res.newBest,
+  });
+}
+
+// ---------- Sync ----------
+function bodyStr(s) {
+  const segs = s.segs, n = segs.length, k = Math.max(1, Math.ceil(n / BODY_POINTS));
+  const parts = [];
+  for (let i = 0; i < n; i += k) parts.push(Math.round(segs[i].x) + ',' + Math.round(segs[i].y));
+  if ((n - 1) % k) parts.push(Math.round(segs[n - 1].x) + ',' + Math.round(segs[n - 1].y));
+  return parts.join(';');
+}
+
+// Damaged circles as "index:severity" with severity 0-9.
+function hurtStr(s) {
+  if (!s.bodyHurt) return '';
+  const max = world.segHp(s), life = s.segLife, parts = [];
+  for (let i = 0; i < life.length && parts.length < HURT_MAX; i++) {
+    if (life[i] >= 0) parts.push(i + ':' + clamp(Math.floor((1 - life[i] / max) * 10), 0, 9));
+  }
+  return parts.join(',');
+}
+
+const upgradesStr = (s) => Object.keys(s.stacks).map((id) => id + ':' + s.stacks[id]).join(',');
+
+function syncSnakes() {
+  const ents = state.entities.snakes, list = world.snakes, t = world.time;
+  // Refresh one body outline per tick so late joiners see whole snakes, not just heads.
+  if (list.length) {
+    bodyCursor = (bodyCursor + 1) % list.length;
+    bodyDirty.add(list[bodyCursor]);
+  }
+  for (const s of list) {
+    s.angle = wrapAngle(s.angle);
+    let e = ents[s.id];
+    if (!e) e = ents[s.id] = { n: s.name, s: s.skin, p: s.pid || '' };
+    e.x = r1(s.x);
+    e.y = r1(s.y);
+    e.a = r3(s.angle);
+    e.m = r1(s.mass);
+    e.bo = s.boosting ? 1 : 0;
+    e.hp = Math.ceil(s.health);
+    e.mh = s.mods.maxHealth;
+    e.sh = Math.ceil(s.mods.shield);
+    e.ge = s.effects.ghost > 0 ? r1(t + s.effects.ghost) : 0; // server time the effect ends
+    e.fe = s.effects.frenzy > 0 ? r1(t + s.effects.frenzy) : 0;
+    e.w = WEAPON_IDS.indexOf(s.weapon);
+    e.sc = Math.floor(s.stats.score);
+    e.k = s.kills;
+    e.d = s.stats.dots;
+    e.hi = s.stats.hits;
+    e.sp = r2(s.mods.speed);
+    e.tu = r2(s.mods.turn);
+    e.up = upgradesStr(s);
+    e.hu = hurtStr(s);
+    if (s.human) e.ack = s.ack | 0;
+    if (bodyDirty.has(s)) e.bd = bodyStr(s);
+  }
+  bodyDirty.clear();
+}
+
+// Send this tick's tuples to everyone, split into messages under the payload cap.
+function flush() {
+  if (!out.length) return;
+  let batch = [], len = 2;
+  for (const t of out) {
+    const n = JSON.stringify(t).length + 1;
+    if (len + n > MSG_CHARS && batch.length) {
+      emit('t', batch);
+      batch = [];
+      len = 2;
+    }
+    batch.push(t);
+    len += n;
+  }
+  emit('t', batch);
+  out = [];
+}
+
+// Every live orb, flattened as [id, x, y, value*10, color, ...] in chunks.
+function sendSnapshot(id) {
+  const chunks = [];
+  let cur = [], len = 0;
+  for (const f of world.foods) {
+    if (f.eaten) continue;
+    const item = [f.id, Math.round(f.x), Math.round(f.y), Math.round(f.value * 10), f.c];
+    const n = item.join(',').length + 1;
+    if (len + n > MSG_CHARS - 40 && cur.length) {
+      chunks.push(cur);
+      cur = [];
+      len = 0;
+    }
+    for (const v of item) cur.push(v);
+    len += n;
+  }
+  chunks.push(cur);
+  chunks.forEach((f, i) => emitTo(id, 'fs', { i, n: chunks.length, f }));
+  for (const s of world.snakes) bodyDirty.add(s);
+}
+
+function cleanName(n) {
+  const name = String(n == null ? '' : n).replace(/[\u0000-\u001f\u007f<>]/g, '').trim().slice(0, 16);
+  return name || 'Guest';
+}
+
+// ---------- Room handlers ----------
+function onJoin(id) {
+  ensureWorld();
+  const save = safe(() => loadData(id)) || {};
+  sessions[id] = { id, q: [], input: null, snake: null, deadAt: -Infinity, save, snapAt: -Infinity };
+  state.entities.players[id] = { sn: 0 };
+}
+
+function onLeave(id) {
+  const sess = sessions[id];
+  if (sess && sess.snake && sess.snake.alive) world.killSnake(sess.snake, null, 'left');
+  delete sessions[id];
+  delete state.entities.players[id];
+}
+
+function onInput(id, input) {
+  const sess = sessions[id];
+  if (!sess || !input || typeof input !== 'object') return;
+  const a = Number(input.a);
+  if (!Number.isFinite(a)) return;
+  sess.q.push({ q: input.q | 0, a, b: !!input.b, f: !!input.f });
+  if (sess.q.length > INPUT_QUEUE) sess.q.shift();
+}
+
+function onEvent(id, type, data) {
+  ensureWorld();
+  const sess = sessions[id];
+  if (!sess) return;
+  if (type === 'hello') {
+    if (world.time - sess.snapAt < SNAPSHOT_COOLDOWN) return;
+    sess.snapAt = world.time;
+    sendSnapshot(id);
+  } else if (type === 'spawn') {
+    if (sess.snake || world.time - sess.deadAt < 0.8) return;
+    const d = data && typeof data === 'object' ? data : {};
+    sess.q.length = 0;
+    sess.input = null;
+    const s = world.spawnHuman(id, cleanName(d.n), clamp(d.s | 0, 0, SKINS.length - 1));
+    s.ack = 0;
+    sess.snake = s;
+    state.entities.players[id].sn = s.id;
+  }
+}
+
+function onTick(dt) {
+  ensureWorld();
+  if (dt > 1) dt /= 1000; // tolerate a millisecond tick
+  dt = clamp(dt || 0.05, 0.001, 0.1);
+  for (const id in sessions) {
+    const sess = sessions[id], s = sess.snake;
+    if (!s || !s.alive) continue;
+    // One input per tick; if a client got ahead, skip to its newer inputs.
+    if (sess.q.length > 2) sess.q.splice(0, sess.q.length - 2);
+    const inp = sess.q.shift() || sess.input;
+    if (!inp) continue;
+    sess.input = inp;
+    s.targetAngle = inp.a;
+    s.wantBoost = inp.b;
+    s.wantFire = inp.f;
+    s.ack = inp.q;
+  }
+  world.step(dt, botTarget());
+  syncSnakes();
+  flush();
+  state.shared.t = r2(world.time);
+}
+
+```
+
+`sim.js`:
+
+```js
+'use strict';
+
+// Game rules shared by the authoritative room logic (which runs the whole world) and the browser
+// client (constants, movement prediction, body layout). Loaded after powerups.js.
+window.ChompSim = (() => {
+  const { MAX_SHIELD, WEAPONS, POWERUPS, rollPowerup } = window.ChompPowerups;
+
+  // ---------- Config ----------
+  const WORLD_R = 3500;
+  const BOT_COUNT = 24; // bots in a world with nobody online
+  const BOTS_PER_HUMAN = 3; // bots retired for each connected player
+  const BOT_RETIRE_DIST = 1600; // bots are retired out of every player's sight when possible
+  const FOOD_TARGET = 2400;
+  const FOOD_MAX = 6000;
+  const CELL = 100;
+  const MAX_SEG_R = 38;
+  const BASE_SPEED = 190;
+  const BOOST_SPEED = 400;
+  const BOOST_COST = 5; // mass per second
+  const MIN_BOOST_MASS = 12;
+  const START_MASS = 10;
+  const MIN_MASS = 6;
+  const HUNT_GRACE = 8; // seconds a new snake is ignored by hunting/shooting bots
+  const SPAWN_CLEAR_PLAYER = 700; // px of open space required around a player spawn
+  const SPAWN_CLEAR_BOT = 400;
+  const SPAWN_AWAY_FROM_PLAYERS = 900; // bots never spawn this close to a player's head
+  const BASE_HEALTH = 100;
+  const HEADSHOT_DAMAGE = 12;
+  const REGEN_DELAY = 2.5; // seconds after a hit before head health regenerates
+  const REGEN_RATE = 20; // head health per second
+  const BULLET_SPEED = 900;
+  const BULLET_LIFE = 0.8;
+  const BULLET_R = 4;
+  const HEAD_SEGS = 1; // hits on segments 0..HEAD_SEGS count as headshots
+  const BODY_DAMAGE = 10;
+  const BODY_SPLASH = [0.5, 0.25]; // damage fraction dealt to circles 1 and 2 away from the one hit
+  const segMaxHp = (mass) => 10 + Math.sqrt(mass) * 4; // per body circle; bigger snakes are tougher
+  const FREE_FIRE_MASS = 100; // shooting is free below this length
+  const SHOT_COST = 0.01; // fraction of mass per shot at or above FREE_FIRE_MASS
+  const fireInterval = (mass) => clamp(0.1 + mass * 0.0018, 0.1, 1.2);
+  const PICKUP_TARGET = 60; // natural power-ups kept in the world
+  const PICKUP_R = 18;
+  const PICKUP_DROP_LIFE = 90; // seconds a power-up dropped by a dead snake lasts
+  const MAX_DROPS = 12; // power-ups a dying snake can drop
+  const SCORE_DOT = 2;
+  const SCORE_KILL = 250;
+  const SCORE_HIT = 10;
+  const SCORE_PER_LENGTH_SEC = 0.05; // score per unit of length per second
+  const TAU = Math.PI * 2;
+
+  const SKINS = [
+    ['#ff4d6d', '#ff8fa3'],
+    ['#4dabf7', '#a5d8ff'],
+    ['#51cf66', '#b2f2bb'],
+    ['#fcc419', '#ffe066'],
+    ['#cc5de8', '#e599f7'],
+    ['#ff922b', '#ffc078'],
+    ['#22b8cf', '#99e9f2'],
+    ['#f06595', '#5c7cfa'],
+    ['#94d82d', '#2f9e44'],
+    ['#f8f9fa', '#868e96'],
+  ];
+  const FOOD_COLORS = ['#ff6b6b', '#ffd43b', '#69db7c', '#4dabf7', '#da77f2', '#ff922b', '#3bc9db', '#f783ac', '#a9e34b'];
+  // Every colour an orb can have, so the network sends an index instead of a hex string.
+  const PALETTE = [...new Set([...FOOD_COLORS, ...SKINS.flat()])];
+  const colorIdx = (hex) => PALETTE.indexOf(hex);
+  const WEAPON_IDS = Object.keys(WEAPONS);
+  const BOT_NAMES = [
+    'Noodle', 'Slinky', 'Mr. Wiggles', 'Danger Noodle', 'Sir Hiss', 'Spaghetti', 'Zigzag', 'Nope Rope',
+    'Hissy Fit', 'Kaa', 'Viper', 'Mamba', 'Cobra Kai', 'Python', 'Anaconda', 'Wormy', 'Sneky', 'Snek',
+    'Longboi', 'Chompy', 'Gobbler', 'Munch', 'Pretzel', 'Licorice', 'Garden Hose', 'Shoelace', 'Ramen',
+    'Udon', 'Linguine', 'Gummy Worm', 'Slippy', 'Squiggles', 'Twisty', 'Coily', 'Neon', 'Glowstick',
+  ];
+
+  // ---------- Utils ----------
+  const rand = (a, b) => a + Math.random() * (b - a);
+  const pick = (arr) => arr[(Math.random() * arr.length) | 0];
+  const clamp = (v, a, b) => (v < a ? a : v > b ? b : v);
+  function angleDiff(a, b) {
+    let d = (b - a) % TAU;
+    if (d > Math.PI) d -= TAU;
+    else if (d < -Math.PI) d += TAU;
+    return d;
+  }
+  function randomPoint(frac) {
+    const a = rand(0, TAU);
+    const r = Math.sqrt(Math.random()) * WORLD_R * frac;
+    return { x: Math.cos(a) * r, y: Math.sin(a) * r };
+  }
+  function shuffle(arr) {
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = (Math.random() * (i + 1)) | 0;
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
+
+  // ---------- Movement & body (shared with client prediction) ----------
+  const radius = (mass) => 8 + Math.min(30, Math.sqrt(mass) * 0.95);
+  const bodyLength = (mass) => 35 * Math.pow(mass, 0.6);
+  const turnRate = (r, turnMod) => (5.2 * turnMod) / (1 + (r - 11) / 28);
+  const moveSpeed = (boosting, speedMod) => (boosting ? BOOST_SPEED : BASE_SPEED) * speedMod;
+
+  // Turn a head {x, y, angle} toward targetAngle, then move it forward one step.
+  function steer(h, targetAngle, r, turnMod, speed, dt) {
+    const maxTurn = turnRate(r, turnMod) * dt;
+    h.angle += clamp(angleDiff(h.angle, targetAngle), -maxTurn, maxTurn);
+    h.x += Math.cos(h.angle) * speed * dt;
+    h.y += Math.sin(h.angle) * speed * dt;
+  }
+
+  // Sample evenly spaced segments along the head's trail (oldest point first, head last) so the
+  // body follows the exact path. Trims trail points the body no longer needs.
+  function layoutBody(t, segs, r, mass) {
+    const sp = r * 0.5;
+    const n = Math.max(6, Math.round(bodyLength(mass) / sp));
+    const last = t.length - 1;
+    if (!segs[0]) segs[0] = { x: 0, y: 0 };
+    segs[0].x = t[last].x;
+    segs[0].y = t[last].y;
+
+    let k = 1, dist = 0, next = sp, i = last;
+    for (; i > 0 && k < n; i--) {
+      const a = t[i], b = t[i - 1];
+      const dx = b.x - a.x, dy = b.y - a.y;
+      const d = Math.sqrt(dx * dx + dy * dy);
+      while (k < n && next <= dist + d) {
+        const f = (next - dist) / d;
+        const s = segs[k] || (segs[k] = { x: 0, y: 0 });
+        s.x = a.x + dx * f;
+        s.y = a.y + dy * f;
+        k++;
+        next += sp;
+      }
+      dist += d;
+    }
+    // Trail ran out (snake just grew): bunch remaining segments at the tail end.
+    while (k < n) {
+      const s = segs[k] || (segs[k] = { x: 0, y: 0 });
+      s.x = t[0].x;
+      s.y = t[0].y;
+      k++;
+    }
+    segs.length = n;
+    if (i > 2) t.splice(0, i - 2);
+    return n;
+  }
+
+  // ---------- Spatial grid ----------
+  class Grid {
+    constructor(cell, radius) {
+      this.cell = cell;
+      this.off = radius;
+      this.n = Math.ceil((radius * 2) / cell);
+      this.cells = Array.from({ length: this.n * this.n }, () => []);
+      this.used = []; // cells holding entries, so clear() skips the empty ones
+    }
+    clear() {
+      for (const c of this.used) c.length = 0;
+      this.used.length = 0;
+    }
+    add(x, y, a) {
+      const c = this.cellAt(x, y);
+      if (!c.length) this.used.push(c);
+      c.push(a);
+    }
+    add2(x, y, a, b) {
+      const c = this.cellAt(x, y);
+      if (!c.length) this.used.push(c);
+      c.push(a, b);
+    }
+    ci(v) {
+      return clamp(Math.floor((v + this.off) / this.cell), 0, this.n - 1);
+    }
+    cellAt(x, y) {
+      return this.cells[this.ci(y) * this.n + this.ci(x)];
+    }
+    // Calls fn(cellArray) for each cell overlapping the square around (x, y); fn returning false stops.
+    forEach(x, y, r, fn) {
+      const x0 = this.ci(x - r), x1 = this.ci(x + r), y0 = this.ci(y - r), y1 = this.ci(y + r);
+      for (let gy = y0; gy <= y1; gy++) {
+        for (let gx = x0; gx <= x1; gx++) {
+          if (fn(this.cells[gy * this.n + gx]) === false) return;
+        }
+      }
+    }
+  }
+
+  const defaultMods = () => ({
+    maxHealth: BASE_HEALTH,
+    speed: 1,
+    turn: 1,
+    boostCost: 1,
+    fireRate: 1, // multiplier on the shot interval (lower = faster)
+    damage: 1,
+    bulletSpeed: 1,
+    magnet: 1,
+    armor: 1, // multiplier on body circle health
+    shield: 0,
+    repair: 0, // fraction of circle health repaired per second
+    lifesteal: 0, // head health restored per hit landed
+    score: 1,
+  });
+
+  // ---------- World (authoritative simulation) ----------
+  // `hooks` receive everything other machines need to hear about; see the noop defaults below.
+  function createWorld(hooks) {
+    const H = Object.assign({
+      foodAdd() {}, foodEat() {}, bullet() {}, bulletHit() {}, fx() {}, pickupAdd() {}, pickupGone() {},
+      spawn() {}, chop() {}, death() {}, toast() {}, pickup() {},
+    }, hooks);
+
+    let snakes = [];
+    let foods = [];
+    let bullets = [];
+    let pickups = [];
+    let naturalFood = 0;
+    let time = 0;
+    let botRespawnT = 0;
+    let botRetireT = 0;
+    let pickupSpawnT = 0;
+    let foodGridT = 0;
+    let nextSnakeId = 1, nextFoodId = 1, nextBulletId = 1, nextPickupId = 1;
+    const segGrid = new Grid(CELL, WORLD_R + 400); // entries stored as pairs: snake, segIndex
+    const foodGrid = new Grid(CELL, WORLD_R + 400);
+
+    // ---------- Food ----------
+    function addFood(x, y, value, color, natural, force) {
+      if (!natural && !force && foods.length > FOOD_MAX) return;
+      const f = {
+        id: nextFoodId++, x, y, value, natural,
+        c: color >= 0 ? color : (Math.random() * FOOD_COLORS.length) | 0,
+        r: 3 + Math.sqrt(value) * 2.3,
+        eaten: false,
+      };
+      foods.push(f);
+      foodGrid.add(x, y, f);
+      if (natural) naturalFood++;
+      H.foodAdd(f);
+    }
+    function spawnNaturalFood() {
+      const p = randomPoint(0.98);
+      const roll = Math.random();
+      addFood(p.x, p.y, roll < 0.05 ? 4 : roll < 0.3 ? 2 : 1, -1, true);
+    }
+
+    // ---------- Power-up pickups ----------
+    function addPickup(x, y, type, natural) {
+      const pk = { id: nextPickupId++, x, y, type, natural, born: time, taken: false };
+      pickups.push(pk);
+      H.pickupAdd(pk);
+    }
+    function spawnNaturalPickup() {
+      const p = randomPoint(0.95);
+      addPickup(p.x, p.y, rollPowerup(), true);
+    }
+
+    function applyPowerup(s, type) {
+      const def = POWERUPS[type];
+      let msg = def.desc;
+      if (def.weapon) {
+        if (s.weapon === def.weapon) {
+          s.mass += 10;
+          msg = 'Already equipped: +10 length';
+        } else {
+          s.weapon = def.weapon;
+        }
+      } else if (def.max && (s.stacks[type] || 0) >= def.max) {
+        s.mass += 10;
+        msg = 'Maxed out: +10 length';
+      } else {
+        def.apply(s);
+        if (!def.consumable) {
+          s.stacks[type] = (s.stacks[type] || 0) + 1;
+          s.upgrades.push(type);
+        }
+      }
+      const h = s.segs[0];
+      H.fx(['p', Math.round(h.x), Math.round(h.y), type]);
+      if (s.human) H.pickup(s, type, msg);
+    }
+
+    // Drop the snake's held upgrades and non-default weapon among its remains.
+    function dropPowerups(s) {
+      const items = s.upgrades.slice();
+      if (s.weapon !== 'blaster') items.push('w_' + s.weapon);
+      shuffle(items);
+      for (let k = 0; k < Math.min(items.length, MAX_DROPS); k++) {
+        const p = s.segs[(Math.random() * s.segs.length) | 0];
+        addPickup(p.x + rand(-20, 20), p.y + rand(-20, 20), items[k], false);
+      }
+    }
+
+    // Anything inside magnet reach is grabbed (clients animate the pull).
+    function collectPickups(s) {
+      const h = s.segs[0], r = s.r;
+      const reach = (r * 1.5 + 22) * s.mods.magnet + PICKUP_R;
+      for (const pk of pickups) {
+        if (pk.taken) continue;
+        const dx = h.x - pk.x, dy = h.y - pk.y;
+        if (Math.abs(dx) > reach || Math.abs(dy) > reach) continue;
+        if (dx * dx + dy * dy < reach * reach) {
+          pk.taken = true;
+          applyPowerup(s, pk.type);
+        }
+      }
+    }
+
+    // ---------- Snake ----------
+    const segHp = (s) => segMaxHp(s.mass) * s.mods.armor;
+    const addScore = (s, pts) => { s.stats.score += pts * s.mods.score; };
+
+    function bulletRange(s) {
+      const w = WEAPONS[s.weapon];
+      return (BULLET_SPEED * w.speed * s.mods.bulletSpeed + BASE_SPEED) * BULLET_LIFE * w.life;
+    }
+
+    class Snake {
+      constructor({ name, skin, mass, x, y, angle = rand(0, TAU), pid = null }) {
+        this.id = nextSnakeId++;
+        this.name = name;
+        this.skin = skin; // index into SKINS
+        this.pid = pid; // session id of the human driving it; null for bots
+        this.human = !!pid;
+        this.mass = mass;
+        this.peakMass = mass;
+        this.x = x;
+        this.y = y;
+        this.angle = angle;
+        this.targetAngle = angle;
+        this.wantBoost = false;
+        this.boosting = false;
+        this.alive = true;
+        this.dropAcc = 0;
+        this.kills = 0;
+        this.born = time;
+        this.mods = defaultMods();
+        this.effects = { ghost: 0, frenzy: 0 }; // seconds remaining
+        this.weapon = 'blaster';
+        this.stacks = {}; // power-up id -> times collected
+        this.upgrades = []; // permanent power-ups held, dropped on death
+        this.stats = { score: 0, dots: 0, hits: 0 };
+        this.health = this.mods.maxHealth;
+        this.lastHit = -Infinity;
+        this.wantFire = false;
+        this.fireCd = 0;
+        this.r = radius(mass);
+        this.segs = [];
+        // Remaining health of each body circle, parallel to segs; -1 = undamaged (always at the current max).
+        // Damaged circles never regain health on their own, even as the max grows; only Medkit/Nanobots restore it.
+        this.segLife = [];
+        this.bodyHurt = false;
+        this.trail = [];
+        // AI
+        this.thinkT = 0;
+        this.aggro = Math.random();
+        this.escapeDir = Math.random() < 0.5 ? -1 : 1;
+
+        // Lay the initial body out in a straight line behind the head.
+        const L = bodyLength(mass) + 20;
+        for (let d = L; d > 0; d -= 6) {
+          this.trail.push({ x: x - Math.cos(angle) * d, y: y - Math.sin(angle) * d });
+        }
+        this.trail.push({ x, y });
+        this.updateBody();
+      }
+
+      update(dt) {
+        const m = this.mods;
+        this.r = radius(this.mass);
+        this.boosting = this.wantBoost && this.mass > MIN_BOOST_MASS;
+        steer(this, this.targetAngle, this.r, m.turn, moveSpeed(this.boosting, m.speed), dt);
+        this.trail.push({ x: this.x, y: this.y });
+
+        if (this.boosting) {
+          const cost = BOOST_COST * m.boostCost * dt * (1 + this.mass / 800);
+          this.mass -= cost;
+          this.dropAcc += cost;
+          if (this.dropAcc > 1.5) {
+            const tail = this.segs[this.segs.length - 1];
+            addFood(tail.x + rand(-4, 4), tail.y + rand(-4, 4), this.dropAcc * 0.8, colorIdx(SKINS[this.skin][0]), false);
+            this.dropAcc = 0;
+          }
+        }
+        if (this.mass > this.peakMass) this.peakMass = this.mass;
+        this.updateBody();
+
+        this.effects.ghost = Math.max(0, this.effects.ghost - dt);
+        this.effects.frenzy = Math.max(0, this.effects.frenzy - dt);
+        this.fireCd -= dt;
+        if (this.wantFire && this.fireCd <= 0) this.shoot();
+        if (time - this.lastHit > REGEN_DELAY) this.health = Math.min(m.maxHealth, this.health + REGEN_RATE * dt);
+        if (m.repair > 0 && this.bodyHurt) this.repairBody(m.repair * dt);
+        addScore(this, this.mass * SCORE_PER_LENGTH_SEC * dt);
+      }
+
+      // Nanobots: heal every damaged circle by `frac` of its max health.
+      repairBody(frac) {
+        const max = segHp(this), heal = max * frac, life = this.segLife;
+        let hurt = false;
+        for (let i = 0; i < life.length; i++) {
+          if (life[i] < 0) continue;
+          life[i] += heal;
+          if (life[i] >= max) life[i] = -1;
+          else hurt = true;
+        }
+        this.bodyHurt = hurt;
+      }
+
+      // Fire the current weapon from the center of the head along the current heading.
+      shoot() {
+        const w = WEAPONS[this.weapon], m = this.mods;
+        const frenzy = this.effects.frenzy > 0;
+        this.fireCd = fireInterval(this.mass) * w.interval * m.fireRate * (frenzy ? 0.33 : 1);
+        if (this.mass >= FREE_FIRE_MASS && !frenzy) this.mass -= this.mass * SHOT_COST;
+        const speed = BULLET_SPEED * w.speed * m.bulletSpeed + moveSpeed(this.boosting, m.speed);
+        const ca = Math.cos(this.angle), sa = Math.sin(this.angle);
+        for (let k = 0; k < w.pellets; k++) {
+          let ang = this.angle, ox = 0, oy = 0;
+          if (w.spread) ang += -w.spread + (2 * w.spread * k) / (w.pellets - 1) + rand(-0.04, 0.04);
+          if (w.jitter) ang += rand(-w.jitter, w.jitter);
+          if (w.parallel) {
+            const off = (k === 0 ? -1 : 1) * this.r * 0.55;
+            ox = -sa * off;
+            oy = ca * off;
+          }
+          const b = {
+            id: nextBulletId++,
+            x: this.x + ox,
+            y: this.y + oy,
+            vx: Math.cos(ang) * speed,
+            vy: Math.sin(ang) * speed,
+            life: BULLET_LIFE * w.life,
+            owner: this,
+            weapon: this.weapon,
+            damage: w.damage * m.damage,
+            pierce: w.pierce || 0,
+            explode: w.explode || 0,
+            homing: w.homing || 0,
+            size: w.size,
+            hitSet: null,
+            target: null,
+            retarget: 0,
+            dead: false,
+          };
+          bullets.push(b);
+          H.bullet(b);
+        }
+      }
+
+      updateBody() {
+        const n = layoutBody(this.trail, this.segs, this.r, this.mass);
+        const life = this.segLife;
+        while (life.length < n) life.push(-1);
+        life.length = n;
+      }
+    }
+
+    // Scatter `total` mass as orbs along segments [from, to).
+    function dropOrbs(s, from, to, total) {
+      const len = to - from;
+      const count = clamp(Math.round(total / 2), 1, Math.max(1, Math.min(len, 160)));
+      const step = len / count;
+      const value = total / count;
+      const skin = SKINS[s.skin];
+      for (let k = 0; k < count; k++) {
+        const idx = from + Math.floor(k * step);
+        const p = s.segs[idx];
+        const color = colorIdx(skin[Math.floor(idx / 3) % skin.length]);
+        addFood(p.x + rand(-s.r, s.r) * 0.6, p.y + rand(-s.r, s.r) * 0.6, value, color, false, true);
+      }
+    }
+
+    // cause: 'shot' | 'chomp' | 'edge' | 'left' | 'retired'
+    function killSnake(s, killer, cause) {
+      if (!s.alive) return;
+      s.alive = false;
+      dropOrbs(s, 0, s.segs.length, s.mass * 0.75);
+      dropPowerups(s);
+      if (killer) {
+        killer.kills++;
+        addScore(killer, SCORE_KILL);
+        if (killer.human && killer.alive) H.toast(killer, cause === 'shot' ? `You shot down ${s.name}!` : `You chomped ${s.name}!`);
+      }
+      H.death(s, killer, cause);
+    }
+
+    function hitFx(s, i, x, y, ang, spread, scale) {
+      H.fx(['h', s.id, i, Math.round(x), Math.round(y), Math.round(ang * 100) / 100, spread, scale]);
+    }
+
+    // Sever everything from segment i back; the severed part becomes orbs.
+    function chopSnake(s, i, shooter) {
+      const segs = s.segs;
+      const newMass = clamp(Math.pow((i * s.r * 0.5) / 35, 1 / 0.6), MIN_MASS, s.mass);
+      const lost = s.mass - newMass;
+      if (lost < 0.5) return;
+      hitFx(s, i, segs[i].x, segs[i].y, 0, Math.PI, 3);
+      dropOrbs(s, i, segs.length, lost * 0.75);
+      s.mass = newMass;
+      segs.length = i;
+      s.segLife.length = i;
+      s.trail = segs.map((p) => ({ x: p.x, y: p.y })).reverse();
+      H.chop(s);
+      if (shooter.human && shooter.alive && lost >= 15) H.toast(shooter, `You sliced ${s.name}!`);
+    }
+
+    // Shield soaks damage first; returns the damage that gets through.
+    function absorb(s, amount) {
+      if (s.mods.shield <= 0) return amount;
+      const soaked = Math.min(s.mods.shield, amount);
+      s.mods.shield -= soaked;
+      return amount - soaked;
+    }
+
+    function registerHit(shooter) {
+      shooter.stats.hits++;
+      addScore(shooter, SCORE_HIT);
+      if (shooter.mods.lifesteal > 0 && shooter.alive) {
+        shooter.health = Math.min(shooter.mods.maxHealth, shooter.health + shooter.mods.lifesteal);
+      }
+    }
+
+    function damageSnake(s, shooter, amount) {
+      amount = absorb(s, amount);
+      if (amount <= 0) return;
+      s.health -= amount;
+      s.lastHit = time;
+      if (s.health <= 0) {
+        const h = s.segs[0];
+        hitFx(s, 0, h.x, h.y, 0, Math.PI, 4);
+        killSnake(s, shooter, 'shot');
+      }
+    }
+
+    // Apply damage to body circles, given as a flat list of [index, amount, ...]; slice at the first circle that breaks.
+    function woundSegments(s, wounds, shooter) {
+      const max = segHp(s), life = s.segLife;
+      s.bodyHurt = true;
+      let cut = -1;
+      for (let k = 0; k < wounds.length; k += 2) {
+        const j = wounds[k];
+        if (j <= HEAD_SEGS || j >= life.length) continue;
+        life[j] = (life[j] < 0 ? max : Math.min(life[j], max)) - wounds[k + 1];
+        if (life[j] <= 0 && (cut < 0 || j < cut)) cut = j;
+      }
+      if (cut >= 0) chopSnake(s, cut, shooter);
+    }
+
+    // Damage the circle hit plus splash to its neighbours.
+    function damageBody(s, i, shooter, amount) {
+      const through = absorb(s, amount);
+      if (through <= 0) return;
+      const wounds = [], reach = BODY_SPLASH.length;
+      for (let k = -reach; k <= reach; k++) wounds.push(i + k, through * (k === 0 ? 1 : BODY_SPLASH[Math.abs(k) - 1]));
+      woundSegments(s, wounds, shooter);
+    }
+
+    // Rocket blast: damages every circle of every other snake within the radius.
+    function explode(b) {
+      const R = b.explode;
+      H.fx(['x', Math.round(b.x), Math.round(b.y), R]);
+      const hit = new Map();
+      segGrid.forEach(b.x, b.y, R + MAX_SEG_R, (cell) => {
+        for (let j = 0; j < cell.length; j += 2) {
+          const o = cell[j];
+          if (o === b.owner || !o.alive || o.effects.ghost > 0) continue;
+          const i = cell[j + 1], p = o.segs[i];
+          if (!p) continue;
+          const dx = p.x - b.x, dy = p.y - b.y, rr = R + o.r;
+          if (dx * dx + dy * dy < rr * rr) {
+            let list = hit.get(o);
+            if (!list) hit.set(o, (list = []));
+            list.push(i);
+          }
+        }
+      });
+      for (const [o, idxs] of hit) {
+        if (!o.alive) continue;
+        registerHit(b.owner);
+        if (idxs.some((i) => i <= HEAD_SEGS)) damageSnake(o, b.owner, HEADSHOT_DAMAGE * b.damage);
+        if (!o.alive) continue;
+        const through = absorb(o, BODY_DAMAGE * b.damage);
+        if (through <= 0) continue;
+        const wounds = [];
+        for (const i of idxs) wounds.push(i, through);
+        woundSegments(o, wounds, b.owner);
+      }
+    }
+
+    // Returns true when the bullet is used up.
+    function bulletHit(b) {
+      let hitS = null, hitI = Infinity;
+      const br = BULLET_R * b.size;
+      segGrid.forEach(b.x, b.y, MAX_SEG_R + br, (cell) => {
+        for (let j = 0; j < cell.length; j += 2) {
+          const o = cell[j];
+          if (o === b.owner || !o.alive || o.effects.ghost > 0 || (b.hitSet && b.hitSet.includes(o))) continue;
+          const i = cell[j + 1];
+          const p = o.segs[i];
+          if (!p) continue;
+          const dx = p.x - b.x, dy = p.y - b.y, rr = o.r + br;
+          if (dx * dx + dy * dy < rr * rr && (!hitS || (o === hitS && i < hitI))) {
+            hitS = o;
+            hitI = i;
+          }
+        }
+      });
+      if (!hitS) return false;
+      if (b.explode) {
+        explode(b);
+        return true;
+      }
+      const head = hitI <= HEAD_SEGS;
+      hitFx(hitS, hitI, b.x, b.y, Math.atan2(-b.vy, -b.vx), 1.2, head ? 1.4 : 1);
+      registerHit(b.owner);
+      if (head) damageSnake(hitS, b.owner, HEADSHOT_DAMAGE * b.damage);
+      else damageBody(hitS, hitI, b.owner, BODY_DAMAGE * b.damage);
+      if (b.pierce > 0) {
+        b.pierce--;
+        (b.hitSet || (b.hitSet = [])).push(hitS);
+        return false;
+      }
+      return true;
+    }
+
+    // Seeker bullets turn toward the nearest enemy head in front of them.
+    function steerBullet(b, dt) {
+      const sp = Math.hypot(b.vx, b.vy);
+      b.retarget -= dt;
+      if (b.retarget <= 0) {
+        b.retarget = 0.15;
+        b.target = null;
+        let best = 650 * 650;
+        const cx = b.vx / sp, cy = b.vy / sp;
+        for (const o of snakes) {
+          if (o === b.owner || !o.alive || o.effects.ghost > 0) continue;
+          const h = o.segs[0], dx = h.x - b.x, dy = h.y - b.y, d2 = dx * dx + dy * dy;
+          if (d2 < best && dx * cx + dy * cy > 0) { best = d2; b.target = o; }
+        }
+      }
+      const t = b.target;
+      if (!t || !t.alive) return;
+      const h = t.segs[0];
+      const cur = Math.atan2(b.vy, b.vx);
+      const a = cur + clamp(angleDiff(cur, Math.atan2(h.y - b.y, h.x - b.x)), -b.homing * dt, b.homing * dt);
+      b.vx = Math.cos(a) * sp;
+      b.vy = Math.sin(a) * sp;
+    }
+
+    function updateBullets(dt) {
+      for (const b of bullets) {
+        b.life -= dt;
+        if (b.homing) steerBullet(b, dt);
+        const steps = Math.max(2, Math.ceil((Math.hypot(b.vx, b.vy) * dt) / 12));
+        const h = dt / steps;
+        for (let k = 0; k < steps && !b.dead; k++) {
+          b.x += b.vx * h;
+          b.y += b.vy * h;
+          if (b.x * b.x + b.y * b.y > WORLD_R * WORLD_R) b.dead = true;
+          else if (bulletHit(b)) {
+            b.dead = true;
+            H.bulletHit(b);
+          }
+        }
+        if (b.life <= 0 && !b.dead) {
+          b.dead = true;
+          if (b.explode) explode(b);
+        }
+      }
+      bullets = bullets.filter((b) => !b.dead);
+    }
+
+    function rebuildSegGrid() {
+      segGrid.clear();
+      for (const s of snakes) {
+        if (!s.alive) continue;
+        const segs = s.segs;
+        for (let i = 0; i < segs.length; i++) segGrid.add2(segs[i].x, segs[i].y, s, i);
+      }
+    }
+
+    // Find a point with no snake body within clearR (or the most open point tried), at least
+    // awayDist from every player's head, facing roughly toward the center.
+    function findSpawn(awayDist, clearR) {
+      const heads = snakes.filter((s) => s.human && s.alive).map((s) => s.segs[0]);
+      let best = null, bestClear = -1;
+      for (let tries = 0; tries < 40; tries++) {
+        const p = randomPoint(0.8);
+        if (heads.some((h) => Math.hypot(p.x - h.x, p.y - h.y) < awayDist)) continue;
+        let nearest2 = Infinity;
+        segGrid.forEach(p.x, p.y, clearR, (cell) => {
+          for (let j = 0; j < cell.length; j += 2) {
+            const o = cell[j], q = o.segs[cell[j + 1]];
+            if (!o.alive || !q) continue;
+            const dx = q.x - p.x, dy = q.y - p.y;
+            nearest2 = Math.min(nearest2, dx * dx + dy * dy);
+          }
+        });
+        if (nearest2 >= clearR * clearR) { best = p; break; }
+        if (nearest2 > bestClear) { best = p; bestClear = nearest2; }
+      }
+      best = best || randomPoint(0.8);
+      best.angle = Math.atan2(-best.y, -best.x) + rand(-1, 1);
+      return best;
+    }
+
+    function addSnake(opts) {
+      const s = new Snake(opts);
+      snakes.push(s);
+      H.spawn(s);
+      return s;
+    }
+
+    function spawnBot() {
+      const used = new Set(snakes.map((s) => s.name));
+      const free = BOT_NAMES.filter((n) => !used.has(n));
+      const p = findSpawn(SPAWN_AWAY_FROM_PLAYERS, SPAWN_CLEAR_BOT);
+      return addSnake({
+        name: pick(free.length ? free : BOT_NAMES),
+        skin: (Math.random() * SKINS.length) | 0,
+        mass: START_MASS,
+        x: p.x,
+        y: p.y,
+        angle: p.angle,
+      });
+    }
+
+    function spawnHuman(pid, name, skin) {
+      const p = findSpawn(0, SPAWN_CLEAR_PLAYER);
+      const s = addSnake({ name, skin, mass: START_MASS, x: p.x, y: p.y, angle: p.angle, pid });
+      rebuildSegGrid();
+      return s;
+    }
+
+    // Retire the smallest bot no player can see, else the smallest bot.
+    function retireBot() {
+      const heads = snakes.filter((s) => s.human && s.alive).map((s) => s.segs[0]);
+      let best = null, bestHidden = false;
+      for (const s of snakes) {
+        if (s.human || !s.alive) continue;
+        const h = s.segs[0];
+        const hidden = !heads.some((p) => Math.hypot(p.x - h.x, p.y - h.y) < BOT_RETIRE_DIST);
+        if (!best || (hidden && !bestHidden) || (hidden === bestHidden && s.mass < best.mass)) {
+          best = s;
+          bestHidden = hidden;
+        }
+      }
+      if (best) killSnake(best, null, 'retired');
+    }
+
+    // ---------- Bot AI ----------
+    const PROBE_OFFSETS = [-0.5, 0.5, -1.0, 1.0, -1.6, 1.6, -2.3, 2.3];
+    const isTarget = (b, o) => o !== b && o.alive && o.effects.ghost <= 0 && time - o.born >= HUNT_GRACE;
+
+    function probeDanger(b, ang, look) {
+      const h = b.segs[0], r = b.r;
+      const ca = Math.cos(ang), sa = Math.sin(ang);
+      const edge = (WORLD_R - r - 20) ** 2;
+      const rad = r + 24;
+      let danger = 0;
+      for (let k = 1; k <= 3; k++) {
+        const t = k / 3;
+        const px = h.x + ca * look * t, py = h.y + sa * look * t;
+        if (px * px + py * py > edge) danger += 3 / t;
+        if (b.effects.ghost > 0) continue;
+        segGrid.forEach(px, py, rad + MAX_SEG_R, (cell) => {
+          for (let j = 0; j < cell.length; j += 2) {
+            const o = cell[j];
+            if (o === b || !o.alive || o.effects.ghost > 0) continue;
+            const p = o.segs[cell[j + 1]];
+            if (!p) continue;
+            const dx = p.x - px, dy = p.y - py, rr = rad + o.r;
+            if (dx * dx + dy * dy < rr * rr) {
+              danger += 1 / t;
+              return false;
+            }
+          }
+        });
+      }
+      return danger;
+    }
+
+    // Fire when another snake is in the line of fire; trigger-happiness scales with aggro, less when shots cost mass.
+    function botWantsFire(b) {
+      const paid = b.mass >= FREE_FIRE_MASS && b.effects.frenzy <= 0;
+      const chance = (paid ? 0.12 : 0.35) * (0.4 + b.aggro);
+      if (Math.random() > chance) return false;
+      const h = b.segs[0];
+      const ca = Math.cos(b.angle), sa = Math.sin(b.angle);
+      const range = bulletRange(b) * 0.8;
+      for (const o of snakes) {
+        if (!isTarget(b, o)) continue;
+        const segs = o.segs;
+        for (let i = 0; i < segs.length; i += 3) {
+          const dx = segs[i].x - h.x, dy = segs[i].y - h.y;
+          const t = dx * ca + dy * sa;
+          if (t > 0 && t < range && Math.abs(dx * sa - dy * ca) < o.r) return true;
+        }
+      }
+      return false;
+    }
+
+    function thinkBot(b, dt) {
+      b.thinkT -= dt;
+      if (b.thinkT > 0) return;
+      b.thinkT = rand(0.07, 0.15);
+      const h = b.segs[0], r = b.r;
+      const look = 70 + r * 3.5;
+      b.wantBoost = false;
+      b.wantFire = botWantsFire(b);
+
+      // 1. Avoid bodies and the border.
+      const ahead = probeDanger(b, b.angle, look);
+      if (ahead > 0) {
+        let best = ahead, bestA = null;
+        for (const off of PROBE_OFFSETS) {
+          const a = b.angle + off;
+          const d = probeDanger(b, a, look);
+          if (d < best) { best = d; bestA = a; }
+        }
+        if (bestA === null) bestA = b.angle + 2.6 * b.escapeDir;
+        else b.escapeDir = Math.sign(angleDiff(b.angle, bestA)) || 1;
+        b.targetAngle = bestA;
+        if (ahead >= 3 && b.mass > 30 && Math.random() < b.aggro * 0.5) b.wantBoost = true;
+        b.thinkT = 0.04;
+        return;
+      }
+
+      // 2. Drift back toward the middle when near the edge.
+      if (Math.hypot(h.x, h.y) > WORLD_R - 400) {
+        b.targetAngle = Math.atan2(-h.y, -h.x) + rand(-0.6, 0.6);
+        return;
+      }
+
+      // 3. Grab nearby power-ups.
+      let loot = null, lootD = 450;
+      for (const pk of pickups) {
+        if (pk.taken) continue;
+        const d = Math.hypot(pk.x - h.x, pk.y - h.y);
+        if (d < lootD) { lootD = d; loot = pk; }
+      }
+      if (loot && Math.random() < 0.85) {
+        b.targetAngle = Math.atan2(loot.y - h.y, loot.x - h.x);
+        b.wantBoost = lootD < 250 && b.mass > 40 && Math.random() < 0.3;
+        return;
+      }
+
+      // 4. Fight any nearby snake (bots included): big aggressive bots cut them off, others shoot at their heads.
+      if (Math.random() < b.aggro) {
+        let prey = null, pd = Math.min(550, bulletRange(b) * 0.9);
+        for (const o of snakes) {
+          if (!isTarget(b, o)) continue;
+          const oh = o.segs[0];
+          const d = Math.hypot(oh.x - h.x, oh.y - h.y);
+          if (d < pd) { pd = d; prey = o; }
+        }
+        if (prey) {
+          const oh = prey.segs[0];
+          const pc = Math.cos(prey.angle), ps = Math.sin(prey.angle);
+          if (b.aggro > 0.6 && b.mass > 30 && prey.mass < b.mass * 1.3 && Math.random() < 0.5) {
+            const lead = prey.r * 2 + 90 + pd * 0.3;
+            b.targetAngle = Math.atan2(oh.y + ps * lead - h.y, oh.x + pc * lead - h.x);
+            b.wantBoost = pd < 320 && b.mass > 45 && Math.random() < 0.7;
+          } else {
+            // Lead the target's head by bullet travel time.
+            const w = WEAPONS[b.weapon];
+            const bulletSpeed = BULLET_SPEED * w.speed * b.mods.bulletSpeed + BASE_SPEED;
+            const lead = (pd / bulletSpeed) * moveSpeed(prey.boosting, prey.mods.speed);
+            const aim = Math.atan2(oh.y + ps * lead - h.y, oh.x + pc * lead - h.x);
+            b.targetAngle = aim;
+            const paid = b.mass >= FREE_FIRE_MASS && b.effects.frenzy <= 0;
+            if (Math.abs(angleDiff(b.angle, aim)) < 0.15 && (!paid || Math.random() < 0.4)) b.wantFire = true;
+          }
+          return;
+        }
+      }
+
+      // 5. Go for the best food, preferring what's in front.
+      const ca = Math.cos(b.angle), sa = Math.sin(b.angle);
+      let bestF = null, bestScore = 0;
+      foodGrid.forEach(h.x, h.y, 360, (cell) => {
+        for (let j = 0; j < cell.length; j++) {
+          const f = cell[j];
+          if (f.eaten) continue;
+          const dx = f.x - h.x, dy = f.y - h.y;
+          const d = Math.sqrt(dx * dx + dy * dy) + 1;
+          if (d > 360) continue;
+          const facing = (dx * ca + dy * sa) / d;
+          const score = (f.value * (1.4 + facing)) / (d + 30);
+          if (score > bestScore) { bestScore = score; bestF = f; }
+        }
+      });
+      if (bestF) {
+        b.targetAngle = Math.atan2(bestF.y - h.y, bestF.x - h.x);
+        return;
+      }
+
+      // 6. Wander.
+      b.targetAngle = b.angle + rand(-0.8, 0.8);
+    }
+
+    // ---------- Simulation ----------
+    // Anything inside magnet reach is eaten (clients animate the pull).
+    function eatFood(s) {
+      const h = s.segs[0], r = s.r;
+      const reach = (r * 1.5 + 22) * s.mods.magnet;
+      foodGrid.forEach(h.x, h.y, reach + 10, (cell) => {
+        for (let j = 0; j < cell.length; j++) {
+          const f = cell[j];
+          if (f.eaten) continue;
+          const dx = h.x - f.x, dy = h.y - f.y, rr = reach + f.r;
+          if (dx * dx + dy * dy < rr * rr) {
+            f.eaten = true;
+            s.mass += f.value;
+            s.stats.dots++;
+            addScore(s, SCORE_DOT);
+            if (f.natural) naturalFood--;
+            H.foodEat(f, s);
+          }
+        }
+      });
+    }
+
+    function checkCollisions() {
+      const deaths = [];
+      for (const s of snakes) {
+        if (!s.alive) continue;
+        const h = s.segs[0], r = s.r;
+        if (h.x * h.x + h.y * h.y > (WORLD_R - r * 0.3) ** 2) {
+          deaths.push([s, null]);
+          continue;
+        }
+        if (s.effects.ghost > 0) continue;
+        let killer = null;
+        segGrid.forEach(h.x, h.y, r + MAX_SEG_R, (cell) => {
+          for (let j = 0; j < cell.length; j += 2) {
+            const o = cell[j];
+            if (o === s || o.effects.ghost > 0) continue;
+            const p = o.segs[cell[j + 1]];
+            if (!p) continue;
+            const dx = p.x - h.x, dy = p.y - h.y, rr = (r + o.r) * 0.72;
+            if (dx * dx + dy * dy < rr * rr) {
+              killer = o;
+              return false;
+            }
+          }
+        });
+        if (killer) deaths.push([s, killer]);
+      }
+      for (const [s, killer] of deaths) if (s.alive) killSnake(s, killer, killer ? 'chomp' : 'edge');
+    }
+
+    // botTarget: how many bots the world should hold right now.
+    function step(dt, botTarget) {
+      time += dt;
+
+      for (const s of snakes) if (!s.human && s.alive) thinkBot(s, dt);
+      for (const s of snakes) if (s.alive) s.update(dt);
+
+      rebuildSegGrid();
+      // Orbs never move here, so the food grid is kept up to date by addFood and only rebuilt
+      // now and then to drop eaten entries.
+      foodGridT -= dt;
+      if (foodGridT <= 0) {
+        foodGridT = 2;
+        foodGrid.clear();
+        for (const f of foods) if (!f.eaten) foodGrid.add(f.x, f.y, f);
+      }
+
+      for (const s of snakes) {
+        if (!s.alive) continue;
+        eatFood(s);
+        collectPickups(s);
+      }
+      checkCollisions();
+      updateBullets(dt);
+
+      let w = 0;
+      for (let i = 0; i < foods.length; i++) if (!foods[i].eaten) foods[w++] = foods[i];
+      foods.length = w;
+      pickups = pickups.filter((pk) => {
+        const keep = !pk.taken && (pk.natural || time - pk.born < PICKUP_DROP_LIFE);
+        if (!keep) H.pickupGone(pk);
+        return keep;
+      });
+      snakes = snakes.filter((s) => s.alive);
+
+      for (let i = 0; i < 40 && naturalFood < FOOD_TARGET; i++) spawnNaturalFood();
+
+      pickupSpawnT -= dt;
+      if (pickupSpawnT <= 0) {
+        pickupSpawnT = 0.5;
+        if (pickups.filter((pk) => pk.natural).length < PICKUP_TARGET) spawnNaturalPickup();
+      }
+
+      const bots = snakes.filter((s) => !s.human).length;
+      botRespawnT -= dt;
+      if (botRespawnT <= 0 && bots < botTarget) {
+        spawnBot();
+        botRespawnT = 0.4;
+      }
+      botRetireT -= dt;
+      if (botRetireT <= 0 && bots > botTarget) {
+        retireBot();
+        botRetireT = 1;
+      }
+    }
+
+    function init(botTarget) {
+      for (let i = 0; i < FOOD_TARGET; i++) spawnNaturalFood();
+      for (let i = 0; i < PICKUP_TARGET; i++) spawnNaturalPickup();
+      for (let i = 0; i < botTarget; i++) {
+        spawnBot();
+        rebuildSegGrid();
+      }
+    }
+
+    return {
+      get time() { return time; },
+      get snakes() { return snakes; },
+      get foods() { return foods; },
+      get pickups() { return pickups; },
+      segHp,
+      init,
+      step,
+      spawnHuman,
+      killSnake,
+    };
+  }
+
+  return {
+    WORLD_R, BOT_COUNT, BOTS_PER_HUMAN, MAX_SEG_R, BASE_SPEED, BOOST_SPEED, MIN_BOOST_MASS, START_MASS,
+    BULLET_SPEED, BULLET_LIFE, BULLET_R, PICKUP_R, PICKUP_DROP_LIFE, MAX_SHIELD, HEAD_SEGS, TAU,
+    SKINS, FOOD_COLORS, PALETTE, WEAPON_IDS,
+    clamp, angleDiff, radius, bodyLength, turnRate, moveSpeed, steer, layoutBody, segMaxHp,
+    createWorld,
+  };
+})();
+
+```
+
+`style.css`:
+
+```css
+:root {
+  --bg: #05070a;
+  --panel: rgba(14, 18, 26, 0.86);
+  --accent: #7cff6b;
+  --text: #e9eef5;
+  --muted: #8a94a6;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Poppins', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: none;
+}
+
+[hidden] { display: none !important; }
+
+#game { position: fixed; inset: 0; display: block; cursor: crosshair; }
+
+/* ---------- Overlays ---------- */
+.overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: radial-gradient(ellipse at center, rgba(5, 7, 10, 0.25), rgba(5, 7, 10, 0.85));
+  animation: fadeIn 0.35s ease;
+}
+
+.panel {
+  width: min(400px, 100%);
+  background: var(--panel);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  padding: 28px 24px;
+  text-align: center;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+h1 {
+  font-size: clamp(2.1rem, 9vw, 3rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+}
+h1 span { color: var(--accent); text-shadow: 0 0 24px rgba(124, 255, 107, 0.5); }
+h1 em { font-style: normal; color: var(--muted); font-weight: 600; }
+
+h2 { font-size: 1.8rem; font-weight: 800; color: #ff5d73; }
+
+.tagline { color: var(--muted); font-size: 0.9rem; margin: 6px 0 20px; }
+
+#nameInput {
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: 12px;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.35);
+  color: var(--text);
+  font: inherit;
+  font-size: 1.05rem;
+  text-align: center;
+  outline: none;
+  user-select: text;
+  -webkit-user-select: text;
+  transition: border-color 0.15s;
+}
+#nameInput:focus { border-color: var(--accent); }
+
+#skins {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 10px;
+  margin: 18px 4px;
+}
+.skin {
+  aspect-ratio: 1;
+  border-radius: 50%;
+  border: 3px solid transparent;
+  cursor: pointer;
+  transition: transform 0.12s, border-color 0.12s;
+  box-shadow: inset -4px -6px 10px rgba(0, 0, 0, 0.35);
+}
+.skin:hover { transform: scale(1.06); }
+.skin.sel { border-color: #fff; transform: scale(1.12); }
+
+button { font: inherit; cursor: pointer; }
+
+button.primary {
+  width: 100%;
+  padding: 14px;
+  font-size: 1.2rem;
+  font-weight: 800;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(180deg, #9bff8c, #3fcf4f);
+  color: #0a1d0a;
+  box-shadow: 0 5px 0 #2a8f36;
+  transition: transform 0.08s, box-shadow 0.08s;
+}
+button.primary:active { transform: translateY(4px); box-shadow: 0 1px 0 #2a8f36; }
+
+button.secondary {
+  width: 100%;
+  margin-top: 12px;
+  padding: 10px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: transparent;
+  color: var(--muted);
+}
+button.secondary:hover { color: var(--text); border-color: rgba(255, 255, 255, 0.3); }
+
+.hint, #best, #dBest { color: var(--muted); font-size: 0.8rem; margin-top: 14px; line-height: 1.5; }
+#best, #dBest { color: var(--accent); font-weight: 600; }
+.hint b { color: var(--text); font-weight: 600; }
+#dBest { margin: 0 0 16px; }
+
+#deathCause { color: var(--muted); margin: 6px 0 18px; }
+
+.statgrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.statgrid .big b { color: var(--accent); }
+.statgrid div {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 12px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+}
+.statgrid span { font-size: 0.75rem; color: var(--muted); }
+.statgrid b { font-size: 1.4rem; }
+
+/* ---------- HUD ---------- */
+#stats {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  background: rgba(10, 14, 20, 0.55);
+  border-radius: 12px;
+  padding: 8px 14px;
+  font-size: 0.85rem;
+  color: var(--muted);
+  pointer-events: none;
+}
+#stats .row { display: flex; justify-content: space-between; gap: 14px; line-height: 1.5; }
+#stats b { color: #fff; font-size: 1rem; }
+#stats .row:first-child b { color: var(--accent); font-size: 1.15rem; }
+#stats .hp {
+  width: 110px;
+  height: 7px;
+  margin-top: 6px;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+}
+#stats .hp i { display: block; height: 100%; width: 100%; background: var(--accent); transition: width 0.1s; }
+#stats .hp.shield { margin-top: 4px; height: 5px; }
+#stats .hp.shield i { background: #74c0fc; box-shadow: 0 0 6px #74c0fc; }
+
+#leaderboard {
+  position: fixed;
+  top: 12px;
+  right: 12px;
+  width: 210px;
+  background: rgba(10, 14, 20, 0.55);
+  border-radius: 12px;
+  padding: 10px 12px;
+  font-size: 0.8rem;
+  pointer-events: none;
+}
+#leaderboard h3 { font-size: 0.9rem; text-align: center; }
+#lbTabs { display: flex; justify-content: center; gap: 5px; margin: 4px 0 6px; }
+#lbTabs i { width: 6px; height: 6px; border-radius: 50%; background: rgba(255, 255, 255, 0.2); }
+#lbTabs i.on { background: var(--accent); }
+#lbTimer { margin-top: 6px; height: 2px; border-radius: 1px; background: rgba(255, 255, 255, 0.1); overflow: hidden; }
+#lbTimer i { display: block; height: 100%; background: rgba(124, 255, 107, 0.6); }
+#lbList { list-style: none; }
+#lbList li { display: flex; justify-content: space-between; gap: 8px; color: rgba(255, 255, 255, 0.8); line-height: 1.6; }
+#lbList li span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#lbList li.me { color: var(--accent); font-weight: 600; }
+#rank { margin-top: 6px; text-align: center; color: var(--muted); font-size: 0.75rem; }
+
+#boostBtn, #fireBtn {
+  position: fixed;
+  left: 20px;
+  bottom: 24px;
+  width: 84px;
+  height: 84px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.25);
+  background: rgba(124, 255, 107, 0.18);
+  color: #fff;
+  font-weight: 800;
+  font-size: 0.8rem;
+  letter-spacing: 0.05em;
+}
+#boostBtn.on { background: rgba(124, 255, 107, 0.5); }
+#fireBtn { bottom: 122px; background: rgba(255, 77, 109, 0.2); }
+#fireBtn.on { background: rgba(255, 77, 109, 0.55); }
+
+#toasts {
+  position: fixed;
+  top: 22%;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  pointer-events: none;
+}
+.toast {
+  font-weight: 800;
+  font-size: 1.25rem;
+  color: #fff;
+  text-shadow: 0 0 12px rgba(124, 255, 107, 0.8), 0 2px 4px #000;
+  animation: toast 2.2s ease forwards;
+  white-space: nowrap;
+}
+
+/* Power-up pickup notices, above the loadout tray */
+#pickupToasts {
+  position: fixed;
+  bottom: 90px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  pointer-events: none;
+}
+.ptoast {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 14px 6px 6px;
+  border-radius: 30px;
+  background: rgba(10, 14, 20, 0.8);
+  border: 1px solid var(--rc);
+  box-shadow: 0 0 16px color-mix(in srgb, var(--rc) 40%, transparent);
+  animation: ptoast 2.6s ease forwards;
+  white-space: nowrap;
+}
+.ptoast img { width: 36px; height: 36px; }
+.ptoast b { display: block; color: var(--rc); font-size: 0.9rem; }
+.ptoast span { font-size: 0.78rem; color: var(--text); }
+
+/* Power-up guide */
+.panel.wide { width: min(720px, 100%); max-height: calc(100vh - 32px); overflow-y: auto; text-align: left; }
+.panel.wide h2 { color: var(--text); text-align: center; }
+.panel.wide .tagline { text-align: center; }
+.panel.wide h3 { margin: 18px 0 8px; font-size: 1rem; }
+.guide-list {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 8px;
+}
+.guide-list li {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 12px;
+  padding: 8px;
+}
+.guide-list img { width: 44px; height: 44px; flex: none; }
+.guide-list b { display: block; font-size: 0.85rem; }
+.guide-list em { font-style: normal; font-size: 0.68rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
+.guide-list span { display: block; font-size: 0.75rem; color: var(--muted); line-height: 1.35; }
+.panel.wide .primary { margin-top: 18px; }
+
+/* ---------- Menu: account + leaderboards ---------- */
+.overlay#menu { overflow-y: auto; align-items: safe center; }
+.menu-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  justify-content: center;
+  align-items: flex-start;
+  width: 100%;
+  max-width: 840px;
+}
+.menu-wrap .panel { flex: 1 1 320px; }
+.panel.side { text-align: left; padding: 22px 20px; }
+.panel.side h3 { font-size: 1rem; margin-bottom: 10px; }
+.panel.side h3 + .mini-stats { margin-top: 0; }
+.panel.side h3:not(:first-child) { margin-top: 20px; }
+
+#playBtn:disabled { filter: grayscale(0.7); opacity: 0.7; cursor: wait; }
+#netStatus, #menuMsg { color: var(--muted); font-size: 0.8rem; margin-top: 8px; min-height: 0; }
+#netStatus:empty, #menuMsg:empty { display: none; }
+#netStatus.bad, #menuMsg { color: #ff8fa3; }
+
+#account { margin-top: 14px; font-size: 0.85rem; color: var(--muted); }
+#account b { color: var(--accent); }
+button.link {
+  background: none;
+  border: none;
+  color: var(--text);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  padding: 0;
+}
+button.link:hover { color: var(--accent); }
+#acctForm { margin-top: 10px; display: grid; gap: 8px; }
+#acctForm[hidden] { display: none; }
+#acctForm input {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.35);
+  color: var(--text);
+  font: inherit;
+  outline: none;
+  user-select: text;
+  -webkit-user-select: text;
+}
+#acctForm input:focus { border-color: var(--accent); }
+.acct-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.acct-btns button.secondary { margin-top: 0; color: var(--text); }
+#acctForm .hint { margin-top: 0; }
+#acctMsg { color: #ff8fa3; font-size: 0.8rem; }
+#acctMsg:empty { display: none; }
+
+.tabs { display: flex; gap: 6px; margin-bottom: 10px; }
+.tabs button {
+  flex: 1;
+  padding: 6px 4px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: transparent;
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+.tabs button.on { background: rgba(124, 255, 107, 0.15); border-color: var(--accent); color: var(--text); }
+.board { list-style: none; font-size: 0.85rem; min-height: 120px; }
+.board li { display: flex; justify-content: space-between; gap: 10px; padding: 4px 8px; border-radius: 6px; }
+.board li:nth-child(odd) { background: rgba(0, 0, 0, 0.25); }
+.board li span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.board li.me { color: var(--accent); font-weight: 600; }
+.board li.empty { color: var(--muted); justify-content: center; background: none; }
+#boardMine { color: var(--muted); font-size: 0.78rem; margin-top: 8px; }
+.mini-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.mini-stats div { background: rgba(0, 0, 0, 0.3); border-radius: 10px; padding: 6px 8px; display: flex; flex-direction: column; }
+.mini-stats span { font-size: 0.68rem; color: var(--muted); }
+.mini-stats b { font-size: 1rem; }
+#lbList li.human { color: #fff; }
+
+#netBanner {
+  position: fixed;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 6px 14px;
+  border-radius: 20px;
+  background: rgba(255, 77, 109, 0.85);
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.85rem;
+  pointer-events: none;
+}
+
+@keyframes ptoast {
+  0% { opacity: 0; transform: translateY(10px) scale(0.9); }
+  10% { opacity: 1; transform: translateY(0) scale(1); }
+  80% { opacity: 1; }
+  100% { opacity: 0; transform: translateY(-8px); }
+}
+
+@keyframes toast {
+  0% { opacity: 0; transform: translateY(10px) scale(0.9); }
+  12% { opacity: 1; transform: translateY(0) scale(1.05); }
+  20% { transform: scale(1); }
+  75% { opacity: 1; }
+  100% { opacity: 0; transform: translateY(-16px); }
+}
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+@media (max-width: 600px) {
+  #leaderboard { width: 150px; font-size: 0.68rem; padding: 8px 10px; }
+  #stats { font-size: 0.75rem; }
+}
+
+```
