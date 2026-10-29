@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-29** — ingest `description:effcol/wiz3D`: entity [[wiz3d]] (stereoscopic proxy-DLL/DXGI wrapper stack; shader patching; AC-relevant hook surface); cited on [[concepts/present-hook]] and [[overviews/graphics-api]]; refreshed `index.md` entity blurb.
+
 - **2026-10-29** — ingest `readme:categories`: **DirectX** link_count **43** (+1; effcol/[[wiz3d]] open-source stereoscopic 3D proxy-DLL wrapper for D3D7–12/OpenGL) / **Cheat** **2969** / **Anti Cheat** **847** and other major README sections unchanged; 41 top-level sections (`NeverC & NeverD` placeholder); synced [[overviews/overview]], [[overviews/graphics-api]]; entity [[wiz3d]]; light `index.md` section notes (no per-category pages).
 
 - **2026-10-29** — lint (agent, Cursor lint pass): read `wiki/AGENTS.md`; **Overviews** (9): `anti-cheat`, `dma-attack`, `game-engine`, `game-hacking`, `graphics-api`, `mobile-security`, `overview`, `reverse-engineering`, `windows-kernel`; **Concepts** (51) under `wiki/concepts/`; **Entities** (4214) under `wiki/entities/`; reconciled `index.md` vs disk — 4274 catalog paths (9+51+4214), 0 missing, 0 dead, 0 duplicate index paths; nine `overviews/*.md` + `index.md` ## Overviews / ## Concepts blurb [[wikilink]] spot-check (14060 links), 0 broken, 0 malformed `]]]`; 6 expected cross-kind slug collisions ([[anti-cheat]], [[game-hacking]], [[reverse-engineering]], [[byovd]], [[dma]], [[il2cpp]]); wiki populated — bootstrap not required; structural repairs none (`log.md` only).

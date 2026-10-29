@@ -15,8 +15,13 @@ Windows stereoscopic 3D driver stack that wraps and intercepts game graphics API
 
 ## Mechanism
 
-- **Proxy DLL / wrapper layers:** intercept D3D7–12, DXGI, and OpenGL exports with per-title profiles.
-- **Stereo injection:** dual-view rendering path for shutter glasses and 3D displays (iZ3D lineage).
+- **Proxy DLL / wrapper layers:** intercept D3D7–12, DXGI, OpenGL, and Vulkan exports via vendor proxy DLLs and vtable hooks with per-title profiles.
+- **Shader path:** analysis, patching, and stereo-specific shader work alongside swap-chain/device proxying.
+- **Stereo injection:** dual-view rendering for shutter glasses and 3D displays (iZ3D lineage; NVIDIA 3D Vision–style direct mode; AMD HD3D-related proxies).
+
+## Security relevance
+
+Real-world reference for graphics hooking, device/swap-chain proxying, and shader-level interception—the same surfaces anti-cheat and graphics-integrity modules often fingerprint or harden. (source: wiki/sources/descriptions/effcol__wiz3D.md)
 
 ## Links
 

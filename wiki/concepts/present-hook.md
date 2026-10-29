@@ -47,7 +47,8 @@ sources:
   - wiki/sources/descriptions/ASDAlexander77__opengl32_enhancer.md
   - wiki/sources/descriptions/AliShe3a__VortexAC.md
   - wiki/sources/descriptions/hhhhhffd___k0t1k-overlay.md
-updated: 2026-10-28
+  - wiki/sources/descriptions/effcol__wiz3D.md
+updated: 2026-10-29
 confidence: high
 ---
 
@@ -78,7 +79,7 @@ User-mode **GDI32 `.data` pointer-swap** PoCs such as [[edgegdi-hook]] (0mdi; C+
 
 User-mode DWM hook samples such as [[dwm-hook]] (C++; rendering / hooking / overlays) draw via Desktop Window Manager composition rather than a single game swap-chain Present. (source: wiki/sources/descriptions/rlybasic__DWM_Hook.md) DWM/DirectX ImGui overlay frameworks such as [[dwm-overlay]] include Yukin02 assembly stubs for dispatch interception and present-path handling without `.text` patches (README `[DWM Overlay without modify .text]`) (source: wiki/sources/descriptions/Yukin02__Dwm-Overlay.md) and LoxTus MinHook + D3D11 + ImGui PoCs that pattern-scan dwmcore present routines and draw custom UI through the swap chain (README `[DWM]`) (source: wiki/sources/descriptions/LoxTus__dwm-overlay.md)—both provide hook-integration bases beside composition-function hooks. DWM overlay projects named [[dwmhook]] span a PoC that hooks DWM composition functions to inject draw calls without a separate overlay window (gmh5225; README `[DWM]`) (source: wiki/sources/descriptions/gmh5225__dwmhook.md) and a fuller DX11 vtable ImGui framework (reflective inject; MinHook/PolyHook2; PDB/DIA compositor symbols; README `[DWM VFTable]`) (source: wiki/sources/descriptions/mfxiaosheng__dwmhook.md). DWM anti-screenshot samples such as [[disablenvidiascreenshot]] (C++; NVIDIA / capture-facing screenshot lane) use the same composition surface to study cheat-side anti-screenshot vs Present-path capture. (source: wiki/sources/descriptions/oakboat__DisableNvidiaScreenshot.md) DWM screenshot / AC research samples such as [[dwm-screen-shot]] (C++; defensive engineers studying DWM capture in the Anti Cheat / Screenshot lane) complement overlay and evasion work on the same composition surface. (source: wiki/sources/descriptions/lainswork__dwm-screen-shot.md)
 
-DX11 stereoscopic-fix tooling such as [[3d9]] works in the same Present/swap-chain ecosystem (developer-oriented; not an end-user product). (source: wiki/sources/descriptions/visotw__3d9.md)
+DX11 stereoscopic-fix tooling such as [[3d9]] works in the same Present/swap-chain ecosystem (developer-oriented; not an end-user product). (source: wiki/sources/descriptions/visotw__3d9.md) Full stereoscopic driver stacks such as [[wiz3d]] (effcol; cross-API proxy-DLL/DXGI wrapper layers, vtable hooks, shader patching, per-game profiles; dual-view stereo rather than cheat overlays) sit on the same intercept surface AC and RE practitioners study beside Present-only ImGui hooks. (source: wiki/sources/descriptions/effcol__wiz3D.md)
 
 ## Anti-detection and evasion
 
@@ -90,5 +91,5 @@ Windows provides no first-class API for third-party overlays to compose beside a
 
 ## Related
 
-[[frame-observation-boundary]] · [[k0t1k-overlay]] · [[nocturne-client]] · [[overviews/graphics-api]] · [[present-injector]] · [[reshade]] · [[swapchain-bottleneck]] · [[obs-game-capture]] · [[obs-graphics-hook32-hook]] · [[obs-hook]] · [[draw-call-hook]] · [[anti-screenshot-capture]] · [[kiero]] · [[kiero2]] · [[directxhook]] · [[dx11-basehook]] · [[directx11hook]] · [[gh-d3d11-hook]] · [[hydrahook]] · [[d3dhook-imgui]] · [[d3d12-hook-imgui]] · [[universalhookx]] · [[universal-dear-imgui-hook]] · [[direct3d9-overlay]] · [[vulkan-hook]] · [[pubg-dx]] · [[lazysight]] · [[modernwarfare2-cpp-external]] · [[present-hook-detection]] · [[winbo]] · [[wda-monitor-trick]] · [[eac-overlay]] · [[dwm-hook]] · [[dwm-overlay]] · [[dwmhook]] · [[dwm-screen-shot]] · [[disablenvidiascreenshot]] · [[dxgkrnl-hook]] · [[krnl-gdi-render]] · [[edgegdi-hook]] · [[3d9]] · [[direct3d-hook]] · [[goverlay]] · [[battleye]] · [[overviews/game-hacking]] · [[overviews/anti-cheat]]
+[[frame-observation-boundary]] · [[k0t1k-overlay]] · [[nocturne-client]] · [[overviews/graphics-api]] · [[present-injector]] · [[reshade]] · [[swapchain-bottleneck]] · [[obs-game-capture]] · [[obs-graphics-hook32-hook]] · [[obs-hook]] · [[draw-call-hook]] · [[anti-screenshot-capture]] · [[kiero]] · [[kiero2]] · [[directxhook]] · [[dx11-basehook]] · [[directx11hook]] · [[gh-d3d11-hook]] · [[hydrahook]] · [[d3dhook-imgui]] · [[d3d12-hook-imgui]] · [[universalhookx]] · [[universal-dear-imgui-hook]] · [[direct3d9-overlay]] · [[vulkan-hook]] · [[wiz3d]] · [[pubg-dx]] · [[lazysight]] · [[modernwarfare2-cpp-external]] · [[present-hook-detection]] · [[winbo]] · [[wda-monitor-trick]] · [[eac-overlay]] · [[dwm-hook]] · [[dwm-overlay]] · [[dwmhook]] · [[dwm-screen-shot]] · [[disablenvidiascreenshot]] · [[dxgkrnl-hook]] · [[krnl-gdi-render]] · [[edgegdi-hook]] · [[3d9]] · [[direct3d-hook]] · [[goverlay]] · [[battleye]] · [[overviews/game-hacking]] · [[overviews/anti-cheat]]
 

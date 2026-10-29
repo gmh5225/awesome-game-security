@@ -4188,7 +4188,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [WinRing0](entities/winring0.md) — WinRing0 driver/API CPU temperature sample (CPUID + MSR per-core temps; admin; hardware monitoring; ashleyhung)
 - [Wizard-Loader](entities/wizard-loader.md) — Windows PE manual-map loader/injector (PE header erasure, thread hiding; Xwizard.exe side-load; gmh5225)
 - [wizard101-spoofer](entities/wizard101-spoofer.md) — Wizard101 HWID spoofer (disk/MAC/motherboard UUID; Cheat HWID)
-- [wiz3d](entities/wiz3d.md) — stereoscopic 3D proxy-DLL wrapper for D3D7–12/OpenGL (iZ3D lineage; per-game hook profiles; stereo injection; DirectX Hook/Compatibility; effcol)
+- [wiz3d](entities/wiz3d.md) — stereoscopic 3D proxy-DLL stack for D3D7–12/DXGI/OpenGL/Vulkan (iZ3D lineage; vtable hooks; shader patching; per-game profiles; DirectX Hook/Compatibility; effcol)
 - [wkpe](entities/wkpe.md) — Windows kernel programming experiments; PoC drivers + user tools; process VAD enumeration; WDK/VS; build/symbol coupling (am0nsec; Enumerate VAD)
 - [ward](entities/ward.md) — simple ELF runtime packer for stealthy droppers (Go/C; Anti Cheat → Binary Packer `[ELF]`)
 - [wardogs-data-docs](entities/wardogs-data-docs.md) — Wardogs (UE 5.7) defensive-research Jekyll reference (Kiyogitpy; cooked UE config/balance JSON + UEDumper SDK/mappings; combat/damage/aim-assist/teamkill/watermarking docs; responsible disclosure; cheat / Defensive-research)
