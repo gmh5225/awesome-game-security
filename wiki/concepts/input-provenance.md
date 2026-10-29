@@ -8,7 +8,8 @@ sources:
   - wiki/sources/descriptions/GloriousBrendon__rearguard.md
   - wiki/sources/descriptions/DoomSalat__PEAK-mode-AntiCheat-Sentinel.md
   - wiki/sources/descriptions/Ajitha-2001__aimguard.md
-updated: 2026-10-22
+  - wiki/sources/descriptions/multiplayeragent__chompchomp-io.md
+updated: 2026-10-29
 confidence: high
 ---
 
@@ -76,6 +77,8 @@ BepInEx host plugins such as [[peak-mode-anticheat-sentinel]] attribute PEAK ite
 
 Server-side AC prototypes such as [[aimguard]] apply grid-based **potential visibility sets (PVS)** to cap client replication—treat aim/movement features validated through lag-compensated server rules as **server-derived** while keeping replication-bound visibility intervals separate from raw **client-reported** aim samples. (source: wiki/sources/descriptions/Ajitha-2001__aimguard.md)
 
+Browser `.io` reference [[chompchomp-io]] narrows the client protocol to validated **steer, boost, and fire** commands at 20 Hz while authoritative simulation covers movement, pickups, bullets, collisions, and scoring—label those commands **client-reported** and treat world/combat outcomes as **server-derived** unless independently measured. (source: wiki/sources/descriptions/multiplayeragent__chompchomp-io.md)
+
 ## Related
 
-[[ai-aimbot-detection]] · [[blastscale]] · [[rearguard]] · [[peak-mode-anticheat-sentinel]] · [[hardware-input-injection]] · [[research-rigor]] · [[overviews/anti-cheat]] · [[overviews/game-hacking]]
+[[ai-aimbot-detection]] · [[blastscale]] · [[rearguard]] · [[peak-mode-anticheat-sentinel]] · [[chompchomp-io]] · [[hardware-input-injection]] · [[research-rigor]] · [[overviews/anti-cheat]] · [[overviews/game-hacking]]
