@@ -4786,6 +4786,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/baldspots440/R6Intel [Rainbow Six Siege player stat analyzer with explainable heuristic suspicion scoring via R6Data API]
 - https://github.com/ahuhu789/pubg-bigdata-analytics [Big-data pipeline (PySpark, Cassandra, Streamlit) for PUBG match analytics and esports cheater anomaly detection via clustering and rule-based flags]
 - https://github.com/Remus3/Lanternlight [Anti-cheat-safe Mistfall Hunter companion that derives game state only from logs, saves, and passive screen capture—no process memory, injection, or hooks]
+- https://github.com/Mlovo/HuntOpenHighlights [AC-safe Hunt: Showdown highlight recorder using NVIDIA MessageBus IPC and GPU encoders—no injection, hooks, or input emulation]
 
 > Detection:Hook
 - https://github.com/hasherezade/pe-sieve
