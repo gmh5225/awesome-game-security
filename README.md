@@ -550,6 +550,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/willy92wins/dayz-mcp [DayZ MCP server with 53 tools for mod build/run, server-authoritative world control, telemetry, and automated in-game testing]
 - https://github.com/snackbar92hypernova/quen-mcp [MCP server for agent-driven Witcher 3 mod dev and testing: reproducible sessions, in-game control, frame-time A/Bs, memory reads/patches, staged mods, and a SQLite result ledger]
 - https://github.com/rehan-remade/universal-modder [Agent skills, fal MCP, and um CLI for game recon, RE, mod building, and in-game verification]
+- https://github.com/1llu50ry/mcp-reverse [Aggregated MCP server for game RE and debugging: 180+ tools, multi-backend decompilation, Frida bridge, anti-cheat skill corpus, and agent mesh for Claude/Cursor/Codex]
 - https://github.com/LaurieWired/GhidraMCP [MCP for Ghidra]
 - https://github.com/jtang613/GhidrAssistMCP [MCP for Ghidra]
 - https://github.com/mrphrazer/ghidra-headless-mcp [ghidra-headless-mcp — headless Ghidra over MCP]
