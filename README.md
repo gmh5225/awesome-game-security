@@ -2142,6 +2142,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/danielplohmann/gui-plugin-template [A template for cross-compatible GUI plugins]
 - https://github.com/astrelsky/GhidraGradlePlugin [Gradle]
 - https://github.com/jtang613/GhidrAssist [An LLM extension for Ghidra to enable AI assistance in RE]
+- https://github.com/keshav0045/stripped-binary [Predict stripped-binary function names from Ghidra decompiler output (dataset, kNN/LoRA models, FastAPI service, Ghidra plugin)]
 - https://github.com/RevEngAI/plugin-ghidra [RevEng.AI Ghidra plugin for binary similarity, function renaming, and AI-assisted reverse engineering]
 - https://github.com/DSecurity/efiSeek [Ghidra analyzer for UEFI firmware]
 - https://github.com/LaurieWired/GhidraMCP [MCP for Ghidra]
@@ -2325,6 +2326,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - [Project for identifying executables and DLLs vulnerable to relative path DLL hijacking](https://github.com/wietze/windows-dll-hijacking)
 - https://github.com/anhkgg/SuperDllHijack [A general DLL hijack technology]
 - https://github.com/ctxis/DLLHSC [DLL Hijack SCanner]
+- https://github.com/kjjkjjzyayufqza/DDGACreg [TG4AC version.dll proxy hook (MinHook) with free camera, NESYS/card server, and companion localhost content program]
 
 > Hook
 - https://github.com/stars/gmh5225/lists/hook [Lists]
@@ -4996,6 +4998,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/qtfreet00/AntiFrida
 - https://github.com/muellerberndt/frida-detection
 - https://github.com/apkunpacker/Anti-Frida [Some Of Anti-Frida Stuff]
+- https://github.com/vw2x/Mira [Mobile runtime detection workbench for iOS/Android with Frida tasks, relay, MCP, and documented root/emulator/hook side-channel cases]
 
 > Detection:Overlay
 - https://github.com/Oliver-1-1/TOPMOST-Detection [Detect simple top most windows]
