@@ -4582,6 +4582,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/anas1412/bootleg16 [Counter-Strike 1.6-style FPS rebuilt in Rust/Bevy with matchmaking, official servers, and server-side anti-cheat]
 - https://github.com/joeltco/ff3mmo [Browser-based NES FF3 MMO with server-authoritative PvE/PvP/economy arbiters, inventory mirror anti-dup, wire validation, and moderation tooling]
 - https://github.com/nocoo/pew-game [Browser twin-stick shooter with server-side HMAC session tokens, replay protection, and score/wave plausibility checks for leaderboard anti-cheat]
+- https://github.com/multiplayeragent/chompchomp-io [Browser snake .io source with server-authoritative room logic, documented anti-cheat design, and Multiplayer Agent deployment]
 - https://github.com/xihedun-2026/Ponytail-Risk- [Open-source behavior risk-control and evidence-review platform for private game servers (Rust agent, C ABI SDK, read-only DB analysis, rule scoring, plugin events)]
 - https://github.com/ConWan30/QorTroller [Cryptographic console anti-cheat proving human controller presence via attested inputs and verifiable match receipts]
 - https://github.com/wflores9/Ironwall [Open-source anti-cheat protocol stack with thin client, TEE attestation, ZK-SNARK human-input proofs, and Hedera HCS + XRPL dual-anchored match receipts]
