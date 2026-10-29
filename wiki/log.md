@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-29** — lint (agent, Cursor lint pass): read `wiki/AGENTS.md`; **Overviews** (9) `wiki/overviews/*.md`: `anti-cheat`, `dma-attack`, `game-engine`, `game-hacking`, `graphics-api`, `mobile-security`, `overview`, `reverse-engineering`, `windows-kernel`; **Concepts** (51) `wiki/concepts/*.md`; **Entities** (4222) `wiki/entities/*.md`; reconciled `index.md` catalog paths vs disk — 4282 paths (9+51+4222), 0 missing, 0 dead, 0 duplicate index paths; nine `overviews/*.md` overview-body + `index.md` ## Overviews / ## Concepts blurb [[wikilink]] spot-check (14103 links), 0 broken, 0 malformed `]]]`; 6 expected cross-kind slug collisions ([[anti-cheat]], [[game-hacking]], [[reverse-engineering]], [[byovd]], [[dma]], [[il2cpp]]); wiki populated — bootstrap not required; structural repairs none (`log.md` only).
+
 - **2026-10-29** — ingest `description:Mlovo/HuntOpenHighlights`: entity [[hunt-open-highlights]] (HuntReplay Studio; Highlights SDK + NVIDIA MessageBus IPC; WGC/NVENC ring-buffer clips; no inject; EAC-safe); description cites on [[overviews/anti-cheat]] platform-trust lane and [[overviews/graphics-api]] non-injected capture; refreshed `index.md` entity blurb.
 
 - **2026-10-29** — ingest `readme:categories`: **Anti Cheat** link_count **850** (+1; gmh5225/[[underthehoodofexecutables]] Guide primer in Anti Cheat) / **Cheat** **2972** and other major README sections unchanged; 41 top-level sections (`NeverC & NeverD` placeholder); synced [[overviews/overview]], [[overviews/anti-cheat]]; light `index.md` section notes (no per-category pages).
