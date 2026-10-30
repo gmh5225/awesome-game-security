@@ -9,7 +9,8 @@ sources:
   - wiki/sources/descriptions/DoomSalat__PEAK-mode-AntiCheat-Sentinel.md
   - wiki/sources/descriptions/Ajitha-2001__aimguard.md
   - wiki/sources/descriptions/multiplayeragent__chompchomp-io.md
-updated: 2026-10-29
+  - wiki/sources/descriptions/ToldByNun__earlybuffering-gd.md
+updated: 2026-10-30
 confidence: high
 ---
 
@@ -79,6 +80,8 @@ Server-side AC prototypes such as [[aimguard]] apply grid-based **potential visi
 
 Browser `.io` reference [[chompchomp-io]] narrows the client protocol to validated **steer, boost, and fire** commands at 20 Hz while authoritative simulation covers movement, pickups, bullets, collisions, and scoring—label those commands **client-reported** and treat world/combat outcomes as **server-derived** unless independently measured. (source: wiki/sources/descriptions/multiplayeragent__chompchomp-io.md)
 
+Geode timing-assist mod [[earlybuffering-gd]] holds slightly early jump presses until an internal **shadow physics** tick still classifies release as safe—label emitted jump events **client-reported**; the planner, buffer state machine, and optional per-level learning run entirely on the client with no server corroboration of raw HID timing or shadow-tick decisions. (source: wiki/sources/descriptions/ToldByNun__earlybuffering-gd.md)
+
 ## Related
 
-[[ai-aimbot-detection]] · [[blastscale]] · [[rearguard]] · [[peak-mode-anticheat-sentinel]] · [[chompchomp-io]] · [[hardware-input-injection]] · [[research-rigor]] · [[overviews/anti-cheat]] · [[overviews/game-hacking]]
+[[ai-aimbot-detection]] · [[blastscale]] · [[rearguard]] · [[peak-mode-anticheat-sentinel]] · [[chompchomp-io]] · [[earlybuffering-gd]] · [[hardware-input-injection]] · [[research-rigor]] · [[overviews/anti-cheat]] · [[overviews/game-hacking]]

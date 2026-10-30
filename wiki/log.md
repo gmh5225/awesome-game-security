@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-30** — ingest `description:ToldByNun/earlybuffering-gd`: enriched entity [[earlybuffering-gd]] (Geode GD 2.2081 shadow-physics jump buffer; planner/state machine, GDR replay, cross-platform Geode packaging); cited [[concepts/input-provenance]] client-reported timing assist lane; added description source on [[overviews/game-hacking]] frontmatter; refreshed `index.md` entity blurb.
+
 - **2026-10-30** — ingest `description:jerryshell/ac-esp`: enriched entity [[ac-esp]] (Rust i686 injectable Direct2D ESP; fixed offsets, W2S head/foot boxes, release builds + overlay unit tests); cited [[concepts/world-to-screen]] AssaultCube learning scaffold; added description source on [[overviews/game-hacking]] frontmatter; refreshed `index.md` entity blurb.
 
 - **2026-10-30** — ingest `readme:categories`: **Cheat** link_count **2975** (+2; jerryshell/[[ac-esp]] AssaultCube Rust ESP DLL + ToldByNun/[[earlybuffering-gd]] Geode GD early-jump buffer) / **Anti Cheat** **852** (+1; ShaniTheDeveloper/[[adaptive-anti-cheat-stream-processor]] Qt simulated-telemetry stream AC prototype); 41 top-level sections (`NeverC & NeverD` placeholder); synced [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]]; entities [[ac-esp]], [[earlybuffering-gd]], [[adaptive-anti-cheat-stream-processor]]; light `index.md` section notes (no per-category pages).

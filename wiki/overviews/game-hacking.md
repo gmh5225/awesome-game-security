@@ -47,6 +47,7 @@ sources:
   - wiki/sources/descriptions/kotae4__intro-to-gamehacking.md
   - wiki/sources/descriptions/jbro129__android-modding.md
   - wiki/sources/descriptions/jerryshell__ac-esp.md
+  - wiki/sources/descriptions/ToldByNun__earlybuffering-gd.md
   - wiki/sources/descriptions/1401199262__RemoteCall.md
   - wiki/sources/descriptions/0111-0222__uc-mcp.md
   - wiki/sources/descriptions/0xenia__remem.md
