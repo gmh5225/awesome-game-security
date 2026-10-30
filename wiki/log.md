@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-30** — lint (agent, Cursor lint pass): read `wiki/AGENTS.md`; **Overviews** (9) `wiki/overviews/`: `anti-cheat`, `dma-attack`, `game-engine`, `game-hacking`, `graphics-api`, `mobile-security`, `overview`, `reverse-engineering`, `windows-kernel`; **Concepts** (51) `wiki/concepts/`; **Entities** (4230) `wiki/entities/`; reconciled `index.md` catalog `](overviews|concepts|entities/*.md)` paths vs disk — 4290 paths (9+51+4230), 0 missing, 0 dead, 0 duplicate; nine `overviews/*.md` overview-body (13156 [[wikilink]]s) + `index.md` ## Overviews / ## Concepts blurb (999 links) spot-check, 0 broken, 0 malformed `]]]`; 6 expected cross-kind slug collisions ([[anti-cheat]], [[game-hacking]], [[reverse-engineering]], [[byovd]], [[dma]], [[il2cpp]]); wiki populated — bootstrap not required; `index.md` unchanged; structural repairs none (`log.md` only).
+
 - **2026-10-30** — ingest `description:Ogonx/anticheat-lab`: enriched entity [[anticheat-lab]] (six-month VM-scoped attack/defense curriculum on own vulnerable builds; curriculum arc + Compiler Explorer/VS early tooling sections); cited [[overviews/reverse-engineering]] Guides lane; refreshed `index.md` entity blurb.
 
 - **2026-10-30** — ingest `description:staromodny/miata`: enriched entity [[miata]] (D3D9/Daisy external minimap; cs2-dumper offset file; modular RPM/entity/pawn/D3D layers; RE/AC audience); cited [[overviews/game-hacking]] native CS2 external radar lane and [[overviews/reverse-engineering]] CS2 client architecture blurb; refreshed `index.md` entity blurb.
