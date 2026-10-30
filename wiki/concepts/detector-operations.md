@@ -43,7 +43,8 @@ sources:
   - wiki/sources/descriptions/ValenMyHeartDev__BloonAntiCheat.md
   - wiki/sources/descriptions/Ajitha-2001__aimguard.md
   - wiki/sources/descriptions/JoshRob297__halo-ce-server.md
-updated: 2026-10-27
+  - wiki/sources/descriptions/ShaniTheDeveloper__Adaptive_Anti-Cheat_Stream_Processor.md
+updated: 2026-10-30
 confidence: high
 ---
 
@@ -95,6 +96,8 @@ Community-maintained screenshare indicator corpora such as [[screenshare-signatu
 Educational Markdown such as [[minecraft-anticheat-docs]] (aethelreborn) walks through Minecraft server-side **latency compensation**, movement prediction, packet validation, and enforcement ladders for Java Edition plugins—useful when tuning lag shields, setbacks, and violation decay before treating network delay as misconduct evidence. (source: wiki/sources/descriptions/aethelreborn__minecraft-anticheat-docs.md)
 
 Console receipt verifiers such as [[qortime-ai]] (ConWan30; Meta Muse/SAM advisory layer over signed match-integrity receipts) encode **lower-only** AI policy—generative advisories may reduce `VERIFIED` to `PARTIAL` but cannot upgrade or replace deterministic referee outcomes; pair red-team receipt tampering (Muse Wonder) with Ed25519-bound advisory sidecars when rehearsing adversarial testing of verifiers. (source: wiki/sources/descriptions/ConWan30__qortime-ai.md)
+
+Desktop stream-processing prototypes such as [[adaptive-anti-cheat-stream-processor]] (ShaniTheDeveloper; C++/Qt; simulated telemetry ingest with Bloom filters, count-min sketches, and sliding-window heuristics for input cadence, movement velocity, and aim vectors; dashboard throughput/latency metrics) rehearse real-time anomaly scoring with explicit **hint-not-verdict** alerts—calibrate thresholds and treat pipeline health metrics separately from misconduct attribution before mapping patterns to enforcement ladders. (source: wiki/sources/descriptions/ShaniTheDeveloper__Adaptive_Anti-Cheat_Stream_Processor.md)
 
 ## Related
 

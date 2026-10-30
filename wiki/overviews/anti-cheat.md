@@ -381,6 +381,7 @@ sources:
   - wiki/sources/descriptions/redteamsocietegenerale__DLLirant.md
   - wiki/sources/descriptions/Sh0ckFR__DLLirant.md
   - wiki/sources/descriptions/Shrawan-13__ff-dts-analysis.md
+  - wiki/sources/descriptions/ShaniTheDeveloper__Adaptive_Anti-Cheat_Stream_Processor.md
   - wiki/sources/descriptions/knight0x07__ImpulsiveDLLHijack.md
   - wiki/sources/descriptions/anhkgg__SuperDllHijack.md
   - wiki/sources/descriptions/andrew9382__exe_packer.md

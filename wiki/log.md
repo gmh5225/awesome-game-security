@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-30** — ingest `description:ShaniTheDeveloper/Adaptive_Anti-Cheat_Stream_Processor`: enriched entity [[adaptive-anti-cheat-stream-processor]] (C++/Qt simulated telemetry stream engine; Bloom/count-min/sliding-window detectors; hint-not-verdict alerts; Open Source Anti Cheat System catalog); cited [[concepts/detector-operations]] stream-prototype review lane; added description source on [[overviews/anti-cheat]] frontmatter; refreshed `index.md` entity blurb.
+
 - **2026-10-30** — ingest `description:ToldByNun/earlybuffering-gd`: enriched entity [[earlybuffering-gd]] (Geode GD 2.2081 shadow-physics jump buffer; planner/state machine, GDR replay, cross-platform Geode packaging); cited [[concepts/input-provenance]] client-reported timing assist lane; added description source on [[overviews/game-hacking]] frontmatter; refreshed `index.md` entity blurb.
 
 - **2026-10-30** — ingest `description:jerryshell/ac-esp`: enriched entity [[ac-esp]] (Rust i686 injectable Direct2D ESP; fixed offsets, W2S head/foot boxes, release builds + overlay unit tests); cited [[concepts/world-to-screen]] AssaultCube learning scaffold; added description source on [[overviews/game-hacking]] frontmatter; refreshed `index.md` entity blurb.
