@@ -4740,6 +4740,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - [Proof of concept Anti-Cheat plugin for CS:GO](https://github.com/ekknod/CSGO-AC)
 - https://github.com/Pintuzoft/OSAntiCheat [Server-side CS2 CounterStrikeSharp heuristic anti-cheat (spinbot/aimbot/triggerbot/wallhack detectors, log-only)]
 - https://github.com/karola3vax/CS2AC [Open-source server-side CS2 anti-cheat Metamod:Source plugin with aimbot/aimlock/silentaim and related detections]
+- https://github.com/mihaigsm2003/CS2-AntiCheat [Open-source Metamod:Source CS2 dedicated-server anti-cheat with configurable detectors, punishments, Discord/JSON webhooks, and no client install]
 - https://github.com/ViTaminza/plugify-cs2ac [Plugify/s2sdk port of karola3vax CS2AC with polyhook usercmd detours, server-side detections, and optional Discord webhook]
 - https://github.com/pavelinbs-afk/anticheatsystem [CS2 MetaMod server-side anti-cheat with C++ aim/movement/statistics analyzers, suspicion scoring, and AdminPlugin ban integration]
 - https://github.com/IDELd/SAC-The-server-AntiCheat [Server-side CS2 anti-cheat plugin for Metamod:Source and CounterStrikeSharp with 17 algorithmic detection modules, in-game reporting, and progressive enforcement]
