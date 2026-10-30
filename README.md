@@ -4552,6 +4552,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/Ether2023/Ether-Uprotector
 - https://github.com/badApple001/Il2cppEncrtypt
 - https://github.com/focus-creative-games/obfuz
+- https://github.com/kingsjoys/kingsSafe [Open Unity game-hardening research: asset protection, memory protection, and logic obfuscation with documented threat model and unity-build-probe experiments]
 - https://github.com/talsec/Free-RASP-Unity-POC [Unity freeRASP plugin for mobile root/jailbreak, Frida, tamper, and integrity detection]
 - https://github.com/phajmvawnsix/com.sipvlib.anticheat [Unity UPM anti-cheat: server-verified GameTime plus root/jailbreak/emulator/debugger checks]
 
