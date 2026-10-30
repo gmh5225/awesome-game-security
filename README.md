@@ -3586,6 +3586,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/nezu-cc/BakaWare4
 - https://github.com/gmh5225/cs2-fov-changer [FOV changer]
 - https://github.com/clauadv/cs2_webradar [undetected counter strike 2 browser based radar cheat]
+- https://github.com/staromodny/miata [FOSS external CS2 radar in C++ (VS2022) with configurable overlay layout and cs2-dumper offset updates]
 - https://github.com/MoZiHao/CS2_DMA_Radar [DMA Radar]
 - https://github.com/gmh5225/cs2_webradar [Browser based radar cheat]
 - https://github.com/MoZiHao/CS2_DMA_Extrnal [DMA External]
@@ -4418,6 +4419,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/kodeni-am/leaderboard [Open-source multi-tenant leaderboard API (Go/Redis) with durable ingest, scalable ranking, and optional per-app HMAC-signed score submits with replay protection]
 - https://github.com/AtakanKeser/BlastScale [Server-authoritative mobile puzzle backend with move-replay anti-cheat, exactly-once rewards, and LiveOps tooling]
 - https://github.com/StanislawGolec/Ultimo [Java 21 authoritative multiplayer card-game server with fog-of-war hand hiding, virtual threads, and WebSockets]
+- https://github.com/Ogonx/anticheat-lab [Six-month self-study lab attacking and defending deliberately vulnerable own-game builds, with ASM/C++ memory exercises, devlog, and VM-only scope]
 
 > Compile Time
 - https://github.com/ManulMap/malstring [Using c++23 compile-time magic to produce obfuscated PIC strings and arrays]
