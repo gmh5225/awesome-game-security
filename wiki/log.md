@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-30** — lint (agent, Cursor lint pass): read `wiki/AGENTS.md`; **Overviews** (9) `wiki/overviews/`: `anti-cheat`, `dma-attack`, `game-engine`, `game-hacking`, `graphics-api`, `mobile-security`, `overview`, `reverse-engineering`, `windows-kernel`; **Concepts** (51) `wiki/concepts/`; **Entities** (4224) `wiki/entities/`; reconciled `index.md` catalog `](overviews|concepts|entities/*.md)` paths vs disk — 4284 paths (9+51+4224), 0 missing, 0 dead, 0 duplicate; nine `overviews/*.md` overview-body [[wikilink]] spot-check + `index.md` ## Overviews / ## Concepts blurb, 0 broken, 0 malformed `]]]`; wiki populated — bootstrap not required; `index.md` unchanged; structural repairs none (`log.md` only).
+
 - **2026-10-30** — ingest `description:NetVar1337/echo-reverse`: enriched entity [[echo-reverse]] (Echo backend, WebSocket AngelScript agents, function emulation, kernel/network tooling); cited [[overviews/reverse-engineering]] MCP/live-workbench lane; refreshed `index.md` blurb.
 
 - **2026-10-30** — ingest `readme:categories`: **Cheat** link_count **2973** (+1; NetVar1337/[[echo-reverse]] Windows Tauri/React Echo live RE workbench in Cheat / RE Tools) / **Anti Cheat** **851** and other major README sections unchanged; 41 top-level sections (`NeverC & NeverD` placeholder); synced [[overviews/overview]], [[overviews/game-hacking]], [[overviews/reverse-engineering]], [[overviews/dma-attack]]; entity [[echo-reverse]]; light `index.md` section notes (no per-category pages).
