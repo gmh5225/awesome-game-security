@@ -1,0 +1,2754 @@
+Project Path: arc_staromodny_miata_pujxvki9
+
+Source Tree:
+
+```txt
+arc_staromodny_miata_pujxvki9
+├── CMakeLists.txt
+├── CMakePresets.json
+├── LICENSE
+├── README.md
+├── src
+│   ├── d3d
+│   │   ├── device.cpp
+│   │   └── device.hpp
+│   ├── main.cpp
+│   ├── main.hpp
+│   ├── memory
+│   │   ├── memory.cpp
+│   │   └── memory.hpp
+│   ├── utils
+│   │   ├── errors.hpp
+│   │   └── message_box.hpp
+│   └── valve
+│       ├── offsets.hpp
+│       └── player_pawn.hpp
+└── thirdparty
+    └── daisy.hpp
+
+```
+
+`CMakeLists.txt`:
+
+```txt
+cmake_minimum_required(VERSION 3.25)
+
+project(Miata
+    VERSION 1.9
+    DESCRIPTION "CS2 foss RadarHack"
+    LANGUAGES CXX)
+
+if(NOT WIN32)
+    message(FATAL_ERROR "Miata only supports Windows.")
+endif()
+
+set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
+
+set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_EXTENSIONS OFF)
+set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
+
+file(GLOB_RECURSE MIATA_SOURCES CONFIGURE_DEPENDS
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp"
+)
+
+file(GLOB_RECURSE MIATA_HEADERS CONFIGURE_DEPENDS
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/*.hpp"
+)
+
+add_executable(Miata WIN32
+    ${MIATA_SOURCES}
+    ${MIATA_HEADERS}
+)
+
+target_compile_definitions(Miata PRIVATE
+        UNICODE
+        _UNICODE
+        WIN32_LEAN_AND_MEAN
+        NOMINMAX
+)
+
+target_include_directories(Miata PRIVATE
+        "${PROJECT_SOURCE_DIR}/thirdparty"
+)
+
+target_link_libraries(Miata PRIVATE
+        d3d9
+)
+```
+
+`CMakePresets.json`:
+
+```json
+{
+  "version": 3,
+  "configurePresets": [
+    {
+      "name": "windows",
+      "hidden": true,
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/out/build/${presetName}",
+      "installDir": "${sourceDir}/out/install/${presetName}",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "x86",
+      "hidden": true,
+      "architecture": {
+        "value": "x86",
+        "strategy": "external"
+      },
+      "vendor": {
+        "jetbrains.com/clion": {
+          "toolchain": "Visual Studio x86"
+        }
+      }
+    },
+    {
+      "name": "x64",
+      "hidden": true,
+      "architecture": {
+        "value": "x64",
+        "strategy": "external"
+      },
+      "vendor": {
+        "jetbrains.com/clion": {
+          "toolchain": "Visual Studio x64"
+        }
+      }
+    },
+    {
+      "name": "msvc-cl",
+      "hidden": true,
+      "cacheVariables": {
+        "CMAKE_C_COMPILER": "cl.exe",
+        "CMAKE_CXX_COMPILER": "cl.exe"
+      }
+    },
+    {
+      "name": "msvc-clang-cl",
+      "hidden": true,
+      "cacheVariables": {
+        "CMAKE_C_COMPILER": "clang-cl.exe",
+        "CMAKE_CXX_COMPILER": "clang-cl.exe"
+      }
+    },
+    {
+      "name": "gcc",
+      "hidden": true,
+      "cacheVariables": {
+        "CMAKE_CXX_FLAGS": "-static-libgcc -static-libstdc++"
+      }
+    },
+    {
+      "name": "debug",
+      "hidden": true,
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
+    },
+    {
+      "name": "relwithdebinfo",
+      "hidden": true,
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "RelWithDebInfo"
+      }
+    },
+    {
+      "name": "release",
+      "hidden": true,
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
+      }
+    },
+    {
+      "name": "msvc-x86-debug",
+      "inherits": [
+        "windows",
+        "msvc-cl",
+        "x86",
+        "debug"
+      ]
+    },
+    {
+      "name": "msvc-x86-release",
+      "inherits": [
+        "windows",
+        "msvc-cl",
+        "x86",
+        "release"
+      ]
+    },
+    {
+      "name": "msvc-x64-debug",
+      "inherits": [
+        "windows",
+        "msvc-cl",
+        "x64",
+        "debug"
+      ]
+    },
+    {
+      "name": "msvc-x64-release",
+      "inherits": [
+        "windows",
+        "msvc-cl",
+        "x64",
+        "release"
+      ]
+    },
+    {
+      "name": "msvc-clang-x86-debug",
+      "inherits": [
+        "windows",
+        "msvc-clang-cl",
+        "x86",
+        "debug"
+      ]
+    },
+    {
+      "name": "msvc-clang-x86-release",
+      "inherits": [
+        "windows",
+        "msvc-clang-cl",
+        "x86",
+        "release"
+      ]
+    },
+    {
+      "name": "msvc-clang-x64-debug",
+      "inherits": [
+        "windows",
+        "msvc-clang-cl",
+        "x64",
+        "debug"
+      ]
+    },
+    {
+      "name": "msvc-clang-x64-release",
+      "inherits": [
+        "windows",
+        "msvc-clang-cl",
+        "x64",
+        "release"
+      ]
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "msvc-x86-debug",
+      "configurePreset": "msvc-x86-debug"
+    },
+    {
+      "name": "msvc-x86-release",
+      "configurePreset": "msvc-x86-release"
+    },
+    {
+      "name": "msvc-x64-debug",
+      "configurePreset": "msvc-x64-debug"
+    },
+    {
+      "name": "msvc-x64-release",
+      "configurePreset": "msvc-x64-release"
+    },
+    {
+      "name": "msvc-clang-x86-debug",
+      "configurePreset": "msvc-clang-x86-debug"
+    },
+    {
+      "name": "msvc-clang-x86-release",
+      "configurePreset": "msvc-clang-x86-release"
+    },
+    {
+      "name": "msvc-clang-x64-debug",
+      "configurePreset": "msvc-clang-x64-debug"
+    },
+    {
+      "name": "msvc-clang-x64-release",
+      "configurePreset": "msvc-clang-x64-release"
+    }
+  ],
+  "testPresets": [
+    {
+      "name": "msvc-x86-debug",
+      "configurePreset": "msvc-x86-debug"
+    },
+    {
+      "name": "msvc-x86-release",
+      "configurePreset": "msvc-x86-release"
+    },
+    {
+      "name": "msvc-x64-debug",
+      "configurePreset": "msvc-x64-debug"
+    },
+    {
+      "name": "msvc-x64-release",
+      "configurePreset": "msvc-x64-release"
+    },
+    {
+      "name": "msvc-clang-x86-debug",
+      "configurePreset": "msvc-clang-x86-debug"
+    },
+    {
+      "name": "msvc-clang-x86-release",
+      "configurePreset": "msvc-clang-x86-release"
+    },
+    {
+      "name": "msvc-clang-x64-debug",
+      "configurePreset": "msvc-clang-x64-debug"
+    },
+    {
+      "name": "msvc-clang-x64-release",
+      "configurePreset": "msvc-clang-x64-release"
+    }
+  ]
+}
+```
+
+`LICENSE`:
+
+```
+MIT License
+
+Copyright (c) 2026 v3ctra
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
+`README.md`:
+
+```md
+# Miata
+[![C++](https://img.shields.io/badge/language-C%2B%2B-%23f34b7d.svg?style=plastic)](https://en.wikipedia.org/wiki/C%2B%2B) 
+[![GitHub issues](https://img.shields.io/github/issues/v3ctra/miata?color=green)](https://github.com/v3ctra/miata/issues)
+
+Free and open-source radar-hack software for Counter-Strike 2.
+
+## Compiling
+
+### Prerequisites
+
+* **Microsoft Visual Studio 2022** with **Desktop development with C++** workload
+
+### Compiling from source
+
+Open **miata.sln** in Visual Studio 2022, set build configuration to **Release | x64**. Press *Build solution* and you should receive **miata.exe** file.
+
+## Example Config
+If config.txt doesn't exist - cheat will use default values, defined in entrypoint.
+```
+radar.pos.x=5        # x position of radar on the screen
+radar.pos.y=5        # y position of radar on the screen
+radar.size.w=128     # width of the radar's window
+radar.size.h=128     # height of the radar's window
+cheat.window.hide=0  # Determines if window should be hidden on the screenshots and recordings
+cheat.window.vsync=0 # Determines if window should have vertical sync enabled
+```
+
+## Updating
+Cheat will perform an attempt to read file called "offsets.txt". The contents of the file should look like:
+```
+offsets.client.dwLocalPlayerPawn=29302688
+offsets.client.dwEntityList=30500696
+offsets.client.dwViewAngles=31712480
+offsets.client.m_hPlayerPawn=2300
+offsets.client.m_iHealth=844
+offsets.client.m_iTeamNum=1003
+offsets.client.m_vOldOrigin=5560
+```
+Updated offsets can be found [HERE](https://github.com/a2x/cs2-dumper/blob/main/output/offsets.json). and [HERE](https://github.com/a2x/cs2-dumper/blob/main/output/client_dll.json).
+
+## Contribution
+Contributions via Pull Requests are welcome :)
+
+## Community
+Join the community... https://t.me/precache
+
+```
+
+`src/d3d/device.cpp`:
+
+```cpp
+#include "device.hpp"
+
+#include "../utils/message_box.hpp"
+
+#include <daisy.hpp>
+
+bool c_d3d_device::initialize(const int& width, const int& height) {
+	// create d3d9 interface
+	m_d3d = Microsoft::WRL::ComPtr<IDirect3D9>(Direct3DCreate9(D3D_SDK_VERSION));
+	if (!m_d3d) {
+		show_message_box<wchar_t>(L"Failed to create D3D9 Interface.", L"", buttons::OK | icons::Error, m_hwnd);
+		return false;
+	}
+
+	ZeroMemory(&m_params, sizeof(m_params));
+	m_params.Windowed = TRUE;
+	m_params.SwapEffect = D3DSWAPEFFECT_DISCARD;
+	m_params.BackBufferFormat = D3DFMT_A8R8G8B8;
+	m_params.BackBufferWidth = width;
+	m_params.BackBufferHeight = height;
+	m_params.EnableAutoDepthStencil = TRUE;
+	m_params.AutoDepthStencilFormat = D3DFMT_D16;
+	m_params.PresentationInterval = m_vsync ? D3DPRESENT_INTERVAL_ONE : D3DPRESENT_INTERVAL_IMMEDIATE;
+
+	HRESULT res = m_d3d->CreateDevice(
+		D3DADAPTER_DEFAULT,
+		D3DDEVTYPE_HAL,
+		m_hwnd,
+		D3DCREATE_HARDWARE_VERTEXPROCESSING,
+		&m_params,
+		m_device.GetAddressOf());
+
+	if (FAILED(res)) {
+		res = m_d3d->CreateDevice(
+			D3DADAPTER_DEFAULT,
+			D3DDEVTYPE_HAL,
+			m_hwnd,
+			D3DCREATE_SOFTWARE_VERTEXPROCESSING,
+			&m_params,
+			m_device.GetAddressOf());
+	}
+
+	if (FAILED(res)) {
+		show_message_box<wchar_t>(L"Failed to create D3D9 device.", L"", buttons::OK | icons::Error, m_hwnd);
+		return false;
+	}
+
+	// initialize the library with the d3d9 device pointer
+	daisy::daisy_initialize(m_device.Get());
+
+	return true;
+}
+
+bool c_d3d_device::begin_rendering() const noexcept {
+	m_device->Clear(0, nullptr, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DCOLOR_RGBA(0, 0, 0, 255), 1.0f, 0);
+	return m_device->BeginScene() == D3D_OK;
+}
+
+void c_d3d_device::end_rendering() const noexcept {
+	m_device->EndScene();
+	m_device->Present(nullptr, nullptr, nullptr, nullptr);
+}
+```
+
+`src/d3d/device.hpp`:
+
+```hpp
+#pragma once
+#include <Windows.h>
+
+#include <wrl/client.h>
+
+#include <d3d9.h>
+
+class c_d3d_device {
+public:
+    c_d3d_device(const HWND& target_window, const bool& vsync) : m_hwnd(target_window) {};
+    ~c_d3d_device() = default;
+
+    [[nodiscard]]
+    bool initialize(const int& width, const int& height);
+
+    [[nodiscard]]
+    bool begin_rendering() const noexcept;
+    
+    void end_rendering() const noexcept;
+
+    const auto& get() noexcept {
+        return this->m_device;
+    }
+private:
+    D3DPRESENT_PARAMETERS m_params{};
+    Microsoft::WRL::ComPtr<IDirect3D9> m_d3d{};
+    Microsoft::WRL::ComPtr<IDirect3DDevice9> m_device{};
+
+	bool m_vsync{ false };
+	HWND m_hwnd{ nullptr };
+};
+```
+
+`src/main.cpp`:
+
+```cpp
+#include <Windows.h>
+#include <windowsx.h>
+
+#include <thread>
+#include <mutex>
+
+#include <algorithm>
+#include <fstream>
+#include <sstream>
+#include <string>
+#include <map>
+
+#include "utils/message_box.hpp"
+#include "utils/errors.hpp"
+
+#include "valve/player_pawn.hpp"
+#include "memory/memory.hpp"
+#include "d3d/device.hpp"
+
+#include "main.hpp"
+
+#include <daisy.hpp>
+
+struct player_data_t {
+    std::vector<c_cs_player_pawn*> player_list{};
+    std::mutex player_mutex{};
+};
+
+struct radar_data_t {
+    std::vector<vec2_t> radar_points{};
+    std::mutex radar_points_mutex{};
+};
+
+static void entity_cache_thread(const std::stop_source& st, const c_game* game, player_data_t& players) {
+    std::vector<c_cs_player_pawn*> temp_players{};
+
+    const auto client_base = game->get_client_base();
+    if (!client_base) {
+        return;
+    }
+
+    while (!st.stop_requested()) {
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+        const auto entity_list = game->read<uintptr_t>(client_base + offsets::dwEntityList).value_or(0);
+        if (!entity_list)
+            continue;
+
+        temp_players.clear();
+        for (int i = 1; i < 64; i++) {
+            const auto list_entity_controller = game->read<uintptr_t>(entity_list + ((8 * (i & 0x7FFF) >> 9) + 16)).value_or(0);
+            if (!list_entity_controller)
+                continue;
+
+            const auto entity_controller = game->read<uintptr_t>(list_entity_controller + (112) * (i & 0x1FF)).value_or(0);
+            if (!entity_controller)
+                continue;
+
+            const auto entity_controller_pawn = game->read<uintptr_t>(entity_controller + offsets::m_hPlayerPawn).value_or(0);
+            if (!entity_controller_pawn)
+                continue;
+
+            const auto list_entity = game->read<uintptr_t>(entity_list + (0x8 * ((entity_controller_pawn & 0x7FFF) >> 9) + 16)).value_or(0);
+            if (!list_entity)
+                continue;
+
+            const auto entity = game->read<c_cs_player_pawn*>(list_entity + (112) * (entity_controller_pawn & 0x1FF)).value_or(nullptr);
+            if (!entity)
+                continue;
+
+            temp_players.emplace_back(entity);
+        }
+        {
+            std::unique_lock<std::mutex> lock(players.player_mutex);
+            players.player_list = std::move(temp_players);
+        }
+    }
+}
+
+static void entity_data_thread(const std::stop_source& st, c_game* game, player_data_t& players, radar_data_t& radar_data) {
+    std::vector<vec2_t> temp_radar_points{};
+
+    const auto client_base = game->get_client_base();
+    if (!client_base)
+        return;
+
+    while (!st.stop_requested()) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+        vec3_t viewangles = game->read<vec3_t>(client_base + offsets::dwViewAngles).value();
+		if (viewangles.is_zero()) // probably not even in the game
+			continue;
+
+        const auto local_pawn = game->read<c_cs_player_pawn*>(client_base + offsets::dwLocalPlayerPawn).value_or(nullptr);
+        if (!local_pawn)
+            continue;
+
+        const auto local_pos = local_pawn->m_vOldOrigin(game);
+        const auto local_team = local_pawn->m_iTeamNum(game);
+
+        vec2_t radar_center{};
+        radar_center.x = (static_cast<float>(g_config.size_w) / 2);
+        radar_center.y = (static_cast<float>(g_config.size_h) / 2);
+
+        temp_radar_points.clear();
+        std::unique_lock<std::mutex> players_lock(players.player_mutex);
+        for (const auto& player : players.player_list) {
+            if (!player || local_pawn == player || local_team == player->m_iTeamNum(game))
+                continue;
+
+            if (player->m_iHealth(game) <= 0)
+                continue;
+
+            // Get player radar position.
+            const auto origin = player->m_vOldOrigin(game);
+            if (origin.is_zero())
+                continue;
+
+            vec2_t screen_pos{};
+            screen_pos.x = (local_pos.x - origin.x) / 15; //scale. 
+            screen_pos.y = (local_pos.y - origin.y) / 15;
+
+            // Prevent inverted x axis position.
+            screen_pos.x *= -1;
+
+            // Ensure position starts at center.
+            screen_pos.x += radar_center.x;
+            screen_pos.y += radar_center.y;
+
+            // Rotate the point based on our yaw.
+            auto rotated_point = screen_pos.rotate_point(&radar_center, viewangles.y - 90.f);
+
+            // Prevent player from going out of bounds.
+            rotated_point.x = std::clamp(rotated_point.x, 5.f, static_cast<float>(g_config.size_w) - 10.f);
+            rotated_point.y = std::clamp(rotated_point.y, 5.f, static_cast<float>(g_config.size_h) - 10.f);
+
+            // Store the point in the list
+            temp_radar_points.emplace_back(rotated_point);
+        }
+        {
+            std::unique_lock<std::mutex> radar_points_lock(radar_data.radar_points_mutex);
+            radar_data.radar_points = std::move(temp_radar_points);
+        }
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    }
+}
+
+static LRESULT CALLBACK wnd_proc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
+    static POINT click_pos{};
+    static bool dragging{ false };
+
+    switch (msg) {
+    case WM_LBUTTONDOWN: {
+        dragging = true;
+        SetCapture(hwnd); // capture mouse even when leaving window
+
+        click_pos.x = GET_X_LPARAM(lParam);
+        click_pos.y = GET_Y_LPARAM(lParam);
+        return 0;
+    }
+    case WM_MOUSEMOVE: {
+        if (dragging) {
+            POINT p{};
+            GetCursorPos(&p);
+
+            const auto newX = p.x - click_pos.x;
+            const auto newY = p.y - click_pos.y;
+
+            SetWindowPos(hwnd, nullptr, newX, newY, 0, 0, SWP_NOZORDER | SWP_NOSIZE);
+            return 0;
+        }
+        break;
+    }
+    case WM_LBUTTONUP: {
+        dragging = false;
+        ReleaseCapture();
+        return 0;
+    }
+    case WM_DESTROY:
+        PostQuitMessage(0);
+        return 0;
+    default:
+        break;
+    }
+
+    return DefWindowProc(hwnd, msg, wParam, lParam);
+}
+
+using config_map = std::map<std::string, std::map<std::string, std::map<std::string, int>>>;
+static bool parse_config(const std::string& filename, config_map& config) {
+    config.clear();
+
+    std::ifstream file(filename);
+    if (!file) {
+        return false;
+    }
+
+    std::string line{};
+    while (std::getline(file, line)) {
+        if (line.empty() || line.find('=') == std::string::npos) continue;
+
+        auto pos = line.find('=');
+        std::string key = line.substr(0, pos);
+        std::string value_str = line.substr(pos + 1);
+
+        std::istringstream key_stream(key);
+        std::string part{};
+        std::string parts[3];
+        int idx = 0;
+        while (std::getline(key_stream, part, '.') && idx < 3) {
+            parts[idx++] = part;
+        }
+        if (idx != 3) {
+            return false;
+        }
+
+        int value = std::stoi(value_str);
+        config[parts[0]][parts[1]][parts[2]] = value;
+    }
+
+    return true;
+}
+
+int WINAPI WinMain(HINSTANCE hInstance, [[maybe_unused]] HINSTANCE hPrevInstance, [[maybe_unused]] LPSTR lpCmdLine, int nShowCmd) {
+    config_map config{};
+    const auto success = parse_config("settings.txt", config);
+    if (success) {
+        g_config.pos_x = config["radar"]["pos"]["x"];
+        g_config.pos_y = config["radar"]["pos"]["y"];
+        g_config.size_w = config["radar"]["size"]["w"];
+        g_config.size_h = config["radar"]["size"]["h"];
+        g_config.hide_from_recording = config["cheat"]["window"]["hide"];
+        g_config.vertical_sync = config["cheat"]["window"]["vsync"];
+    }
+    else {
+        show_message_box<wchar_t>(L"Failed to parse settings.txt, using default values", L"", buttons::OK | icons::Warning);
+        g_config.pos_x = 10;
+        g_config.pos_y = 200;
+        g_config.size_w = 150;
+        g_config.size_h = 150;
+        g_config.hide_from_recording = 0;
+        g_config.vertical_sync = 0;
+    }
+
+    bool offsets_parser = parse_config("offsets.txt", config);
+    if (offsets_parser) {
+        offsets::dwLocalPlayerPawn = config["offsets"]["client"]["dwLocalPlayerPawn"];
+        offsets::dwEntityList = config["offsets"]["client"]["dwEntityList"];
+        offsets::dwViewAngles = config["offsets"]["client"]["dwViewAngles"];
+
+        offsets::m_hPlayerPawn = config["offsets"]["client"]["m_hPlayerPawn"];
+        offsets::m_iHealth = config["offsets"]["client"]["m_iHealth"];
+        offsets::m_iTeamNum = config["offsets"]["client"]["m_iTeamNum"];
+        offsets::m_vOldOrigin = config["offsets"]["client"]["m_vOldOrigin"];
+    }
+    else {
+        return *show_message_box<wchar_t>(L"Failed to parse offsets.", L"", buttons::OK | icons::Error);
+    }
+
+    const auto game = std::make_unique<c_game>();
+    if (!game->initialize()) {
+        return *show_message_box<wchar_t>(L"Failed to query game info.", L"", buttons::OK | icons::Error);
+    }
+
+    static constexpr auto WINDOW_NAME = L"Miata(c) staromodny";
+    static constexpr auto CLASS_NAME = L"SimpleWinClass";
+
+    WNDCLASS wc = {};
+    wc.lpfnWndProc = wnd_proc;
+    wc.hInstance = hInstance;
+    wc.lpszClassName = CLASS_NAME;
+    wc.hbrBackground = reinterpret_cast<HBRUSH>((COLOR_WINDOW + 1));
+    wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
+
+    if (!RegisterClass(&wc)) {
+        return show_last_error(L"RegisterClass");
+    }
+
+    // Step 2: Create the window
+    const auto hwnd = CreateWindowEx(
+        WS_EX_TOPMOST,
+        CLASS_NAME,
+        WINDOW_NAME,
+        WS_POPUP | WS_VISIBLE,
+        g_config.pos_x, g_config.pos_y, g_config.size_w, g_config.size_h,
+        nullptr, nullptr, hInstance, nullptr
+    );
+
+    if (!hwnd) {
+        return show_last_error(L"CreateWindowEx");
+    }
+
+    const auto device = std::make_unique<c_d3d_device>(hwnd, static_cast<bool>(g_config.vertical_sync));
+    if (!device->initialize(g_config.size_w, g_config.size_h)) {
+        return EXIT_FAILURE;
+    }
+
+    if (g_config.hide_from_recording == 1) {
+        if (const auto result = SetWindowDisplayAffinity(hwnd, WDA_EXCLUDEFROMCAPTURE); !result) { // introduced in windows 10 2004
+            std::ignore = show_last_error(L"SetWindowDisplayAffinity"); // not a critical failure.
+        }
+    }
+
+    ShowWindow(hwnd, nShowCmd);
+    UpdateWindow(hwnd);
+
+    // prepare d3d9 state for rendering
+    // if daisy is the only thing you plan on rendering with, you can only do this once *safely*
+    // if you're implementing daisy alongside in a codebase that changes device state
+    // you probably want to call this each frame before flushing render queues
+    daisy::daisy_prepare();
+
+    const auto queue = std::make_unique<daisy::c_renderqueue>();
+    if (!queue->create(64, 128)) {
+        return *show_message_box<wchar_t>(L"Failed to create buffer queue", L"", buttons::OK | icons::Error);
+    }
+
+    std::stop_source stop_source{};
+
+    player_data_t player_data{};
+    radar_data_t radar_data{};
+
+    std::jthread cache_thread(entity_cache_thread, stop_source, game.get(), std::ref(player_data));
+    std::jthread data_thread(entity_data_thread, stop_source, game.get(), std::ref(player_data), std::ref(radar_data));
+
+    const auto width = static_cast<float>(g_config.size_w);
+    const auto height = static_cast<float>(g_config.size_h);
+
+    while (!stop_source.stop_requested()) {
+        MSG msg{};
+        while (::PeekMessage(&msg, nullptr, 0U, 0U, PM_REMOVE)) {
+            ::TranslateMessage(&msg);
+            ::DispatchMessage(&msg);
+            if (msg.message == WM_QUIT)
+                stop_source.request_stop();
+        }
+        if (!FindWindow(L"SDL_app", L"Counter-Strike 2") || GetAsyncKeyState(VK_DELETE) & 1)
+            stop_source.request_stop();
+
+        if (device->begin_rendering()) {
+            queue->clear();
+            {
+                std::unique_lock<std::mutex> lock(radar_data.radar_points_mutex);
+                for (const auto& pt : radar_data.radar_points) {
+                    queue->push_filled_rectangle({ pt.x, pt.y }, { 5, 5 }, daisy::color_t(0, 255, 0, 255));
+                }
+
+                // Vertical center line
+                queue->push_line({width / 2.f,0.f },{width / 2.f,height},daisy::color_t(0, 255, 0, 128));
+
+                // Horizontal center line
+                queue->push_line({ 0.f, height / 2.f }, { width, height / 2.f }, daisy::color_t(0, 255, 0, 128));
+            }
+            queue->flush();
+            device->end_rendering();
+        }
+    }
+
+    daisy::daisy_shutdown();
+
+    ::DestroyWindow(hwnd);
+    ::UnregisterClass(wc.lpszClassName, wc.hInstance);
+    return EXIT_SUCCESS;
+}
+```
+
+`src/main.hpp`:
+
+```hpp
+#pragma once
+
+struct config_t {
+	int pos_x{20};
+	int pos_y{20};
+	int size_w{128};
+	int size_h{ 128 };
+	int hide_from_recording{ 0 };
+	int vertical_sync{ 0 };
+}inline g_config;
+```
+
+`src/memory/memory.cpp`:
+
+```cpp
+#include "memory.hpp"
+
+#include <TlHelp32.h>
+#include <thread>
+
+bool c_game::initialize() {
+    const std::wstring_view& target_name = L"cs2.exe";
+    const unique_handle snapshot(CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0));
+    if (!snapshot)
+        return false;
+
+    PROCESSENTRY32W entry{};
+    entry.dwSize = sizeof(entry);
+
+    //Enumerate running processes
+    for (Process32First(snapshot.get(), &entry); Process32Next(snapshot.get(), &entry); ) {
+        if (target_name.compare(entry.szExeFile) == 0) {
+            m_process_id = entry.th32ProcessID;
+            m_process_handle = *open_process(*m_process_id, PROCESS_VM_READ);
+            break;
+        }
+    }
+
+    if (!m_process_id)
+        return false;
+
+    while (m_client_base == 0) {
+        m_client_base = get_module_by_name(*m_process_id, L"client.dll");
+        std::this_thread::sleep_for(std::chrono::milliseconds(50));
+    }
+    return m_client_base != 0 && m_process_id != 0 && m_process_handle != nullptr;
+}
+
+std::optional<DWORD64> c_memory::get_module_by_name(DWORD pid, const std::wstring_view& target_module) {
+    const unique_handle snapshot{ CreateToolhelp32Snapshot(TH32CS_SNAPMODULE | TH32CS_SNAPMODULE32, pid) };
+    if (!snapshot) {
+        return std::nullopt;
+    }
+
+    MODULEENTRY32W entry{};
+    entry.dwSize = sizeof(entry);
+
+    // First module
+    if (!Module32FirstW(snapshot.get(), &entry)) {
+        return std::nullopt;
+    }
+
+    do {
+        if (target_module.compare(entry.szModule) == 0) {
+            return reinterpret_cast<uintptr_t>(entry.modBaseAddr);
+        }
+    } while (Module32NextW(snapshot.get(), &entry));
+
+    return std::nullopt;
+}
+
+std::optional<unique_handle> c_memory::open_process(DWORD pid, DWORD access_flags) {
+    HANDLE handle = OpenProcess(access_flags, FALSE, pid); //If the function fails, the return value is NULL.
+    if (handle == NULL) {
+        return std::nullopt;
+    }
+
+    return unique_handle{ handle };
+}
+```
+
+`src/memory/memory.hpp`:
+
+```hpp
+#pragma once
+#include <Windows.h>
+
+#include <string_view>
+#include <optional>
+#include <memory>
+
+struct handle_disposer_t {
+    using pointer = HANDLE;
+    void operator()(HANDLE handle) const {
+        if (handle != NULL || handle != INVALID_HANDLE_VALUE) {
+            CloseHandle(handle);
+        }
+    }
+};
+using unique_handle = std::unique_ptr<HANDLE, handle_disposer_t>;
+
+class c_memory {
+public:
+    [[nodiscard]]
+    std::optional<uintptr_t> get_module_by_name(DWORD pid, const std::wstring_view& target_module);
+    
+    [[nodiscard]]
+    std::optional<unique_handle> open_process(DWORD pid, DWORD access_flags);
+};
+
+class c_game : public c_memory {
+public:
+    c_game() : m_process_handle(nullptr), m_client_base(0), m_process_id(0) {}
+    ~c_game() = default;
+
+    [[nodiscard]]
+    bool initialize();
+
+    [[nodiscard]]
+    const auto& get_client_base() const noexcept { return *this->m_client_base; }
+
+    template <typename T>
+    [[nodiscard]]
+    constexpr std::optional<T> read(const uintptr_t& address) const noexcept {
+        T value{};
+        if (::ReadProcessMemory(this->m_process_handle.get(), reinterpret_cast<const void*>(address), &value, sizeof(T), nullptr))
+            return value;
+        return std::nullopt;
+    }
+private:
+    unique_handle m_process_handle{};
+    std::optional<uintptr_t> m_client_base{};
+    std::optional<DWORD> m_process_id{};
+};
+```
+
+`src/utils/errors.hpp`:
+
+```hpp
+#pragma once
+#include <windows.h>
+
+#include <format>
+#include <string>
+
+#include "message_box.hpp"
+
+[[nodiscard]]
+inline auto format_code(const DWORD& error_code, const std::wstring& custom_message = L"") -> std::wstring
+{
+    LPWSTR message_buffer = nullptr;
+
+    const auto size = FormatMessageW(
+        FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+        nullptr, error_code,
+        MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+        reinterpret_cast<LPWSTR>(&message_buffer), 0, nullptr
+    );
+
+    const auto windows_message = size ? std::wstring(message_buffer, size) : L"Unknown";
+    LocalFree(message_buffer);
+
+    return std::format(L"{}\n\n0x{:X} - {}", custom_message, error_code, windows_message);
+}
+
+[[nodiscard]]
+inline int show_last_error(const std::wstring& context)
+{
+    const auto full_message = format_code(GetLastError(), context.c_str());
+    return *show_message_box<wchar_t>(full_message,L"",buttons::OK | icons::Error);
+}
+```
+
+`src/utils/message_box.hpp`:
+
+```hpp
+#pragma once
+
+#include <Windows.h>
+#include <string>
+#include <string_view>
+#include <optional>
+#include <concepts>
+#include <type_traits>
+
+template<typename T>
+concept IsCharacter = std::same_as<std::remove_cv_t<T>, char> ||
+std::same_as<std::remove_cv_t<T>, wchar_t>;
+
+enum DialogResult : int {
+	OK = IDOK,
+	Cancel = IDCANCEL,
+	Abort = IDABORT,
+	Retry = IDRETRY,
+	Ignore = IDIGNORE,
+	Yes = IDYES,
+	No = IDNO,
+	TryAgain = IDTRYAGAIN,
+	Continue = IDCONTINUE,
+	Close = IDCANCEL
+};
+
+struct MsgBoxOptions {
+	UINT flags = 0;
+
+	// Combine options using the | operator
+	friend constexpr MsgBoxOptions operator|(MsgBoxOptions lhs, MsgBoxOptions rhs) {
+		return { lhs.flags | rhs.flags };
+	}
+};
+
+namespace buttons {
+	constexpr MsgBoxOptions OK{ MB_OK };
+	constexpr MsgBoxOptions OKCancel{ MB_OKCANCEL };
+	constexpr MsgBoxOptions AbortRetryIgnore{ MB_ABORTRETRYIGNORE };
+	constexpr MsgBoxOptions YesNoCancel{ MB_YESNOCANCEL };
+	constexpr MsgBoxOptions YesNo{ MB_YESNO };
+	constexpr MsgBoxOptions RetryCancel{ MB_RETRYCANCEL };
+	constexpr MsgBoxOptions CancelTryContinue{ MB_CANCELTRYCONTINUE };
+	constexpr MsgBoxOptions Help{ MB_HELP };
+}
+
+namespace icons {
+	constexpr MsgBoxOptions None{ 0 };
+	constexpr MsgBoxOptions Error{ MB_ICONERROR };
+	constexpr MsgBoxOptions Question{ MB_ICONQUESTION };
+	constexpr MsgBoxOptions Warning{ MB_ICONWARNING };
+	constexpr MsgBoxOptions Information{ MB_ICONINFORMATION };
+	// Aliases
+	constexpr MsgBoxOptions Stop{ MB_ICONSTOP };
+	constexpr MsgBoxOptions Hand{ MB_ICONHAND };
+	constexpr MsgBoxOptions Asterisk{ MB_ICONASTERISK };
+	constexpr MsgBoxOptions Exclamation{ MB_ICONEXCLAMATION };
+}
+
+template <IsCharacter CharT>
+auto show_message_box(
+	std::basic_string_view<CharT> text,
+	std::basic_string_view<CharT> caption,
+	MsgBoxOptions options,
+	HWND owner = nullptr) -> std::optional<DialogResult>
+{
+	const std::basic_string<CharT> safe_text{ text };
+	const std::basic_string<CharT> safe_caption{ caption };
+
+	int result = 0;
+
+	if constexpr (std::same_as<CharT, char>) {
+		result = ::MessageBoxA(owner, safe_text.c_str(), safe_caption.c_str(), options.flags);
+	}
+	else {
+		result = ::MessageBoxW(owner, safe_text.c_str(), safe_caption.c_str(), options.flags);
+	}
+
+	if (result == 0) {
+		return std::nullopt;
+	}
+
+	return static_cast<DialogResult>(result);
+}
+```
+
+`src/valve/offsets.hpp`:
+
+```hpp
+#pragma once
+#include <cstddef>
+
+namespace offsets {
+    inline uintptr_t dwLocalPlayerPawn{};
+    inline uintptr_t dwEntityList{};
+    inline uintptr_t dwViewAngles{};
+
+    inline uintptr_t m_hPlayerPawn{};
+    inline uintptr_t m_iHealth{};
+    inline uintptr_t m_iTeamNum{};
+    inline uintptr_t m_vOldOrigin{};
+}
+```
+
+`src/valve/player_pawn.hpp`:
+
+```hpp
+#pragma once
+#include <numbers>
+
+#include "../memory/memory.hpp"
+
+#include "offsets.hpp"
+
+struct vec3_t {
+    explicit constexpr vec3_t(const float x = 0.f, const float y = 0.f, const float z = 0.f) : x(x), y(y), z(z) { }
+
+    [[nodiscard]] bool is_zero() const noexcept {
+        return (this->x == 0.f && this->y == 0.f && this->z == 0.f);
+    }
+
+    float x{}, y{}, z{};
+};
+
+struct vec2_t {
+    explicit constexpr vec2_t(const float x = 0.f, const float y = 0.f) : x(x), y(y) { }
+
+    [[nodiscard]] bool is_zero() const noexcept {
+        return (this->x == 0.f && this->y == 0.f);
+    }
+
+    [[nodiscard]]
+    vec2_t rotate_point(const vec2_t* mid_point, float angle) const noexcept {
+        // Convert our angle from degrees to radians.
+        angle = static_cast<float>(angle * (std::numbers::pi / 180.f));
+
+        // Get our current angle as a cosine and sine.
+        const auto cos_angle = std::cos(angle);
+        const auto sin_angle = std::sin(angle);
+		
+        vec2_t out{};
+
+        // Calculate the rotation.
+        out.x = cos_angle * (this->x - mid_point->x) - sin_angle * (this->y - mid_point->y);
+        out.y = sin_angle * (this->x - mid_point->x) + cos_angle * (this->y - mid_point->y);
+
+        // Add the mid-point to the calculated point.
+        out.x += mid_point->x;
+        out.y += mid_point->y;
+
+        return out;
+    }
+
+    float x{}, y{};
+};
+
+class c_cs_player_pawn {
+public:
+    [[nodiscard]]
+    int m_iHealth(c_game* game) const noexcept {
+        return *game->read<int>(reinterpret_cast<uintptr_t>(this) + offsets::m_iHealth);
+    }
+    [[nodiscard]]
+    int m_iTeamNum(c_game* game) const noexcept {
+        return *game->read<int>(reinterpret_cast<uintptr_t>(this) + offsets::m_iTeamNum);
+    }
+    [[nodiscard]]
+    vec3_t m_vOldOrigin(c_game* game) const noexcept {
+        return *game->read<vec3_t>(reinterpret_cast<uintptr_t>(this) + offsets::m_vOldOrigin);
+    }
+};
+```
+
+`thirdparty/daisy.hpp`:
+
+```hpp
+// daisy - a simple, tiny, very fast, well-documented, Windows only, header-only library for 2D primitive and text rendering using D3D9 & GDI, written in C++17
+// - written by munteanu octavian-adrian (https://github.com/sse2/daisy)
+// - MIT license (see end of file or github repo LICENSE.txt if you're unfamiliar with it)
+#ifndef _SSE2_DAISY_INCLUDE_GUARD
+#define _SSE2_DAISY_INCLUDE_GUARD
+
+// you can replace this with your own includes if you don't want to use the standard library,
+// however you'll need to provide your own implementations for the stl containers and they need to be at least mostly compatible with the ones provided by the standard library
+#ifndef DAISY_NO_STL
+// stl includes
+#include <unordered_map> // std::unordered_map
+#include <string_view>   // std::string_view
+#include <vector>        // std::vector
+#include <array>         // std::array
+#include <atomic>        // std::atomic
+#include <memory>        // std::unique_ptr, std::make_unique
+#include <cstdint>       // uint/int types, fabsf, fmodf, sinf, cosf, floorf
+#include <cmath>
+namespace stl = std;
+#endif // DAISY_NO_STL
+
+// d3d9
+#include <d3d9.h>
+
+namespace daisy
+{
+    namespace detail
+    {
+        constexpr static inline auto PI = 3.14159265358979323846f;
+        constexpr static inline auto PI_SQUARED = PI * PI;
+    } // namespace detail
+
+    // our color struct
+    struct color_t
+    {
+        union {
+            struct
+            {
+                uint8_t b, g, r, a;
+            } chan;
+
+            uint32_t bgra;
+        };
+
+        constexpr color_t(uint8_t _r = 255, uint8_t _g = 255, uint8_t _b = 255, uint8_t _a = 255) noexcept
+            : chan({ _b, _g, _r, _a })
+        {
+        }
+
+        /// <summary>
+        /// returns a new color based on hue, saturation and variance values
+        /// </summary>
+        /// <param name="hue">float between [0, 360] which represents hue of color</param>
+        /// <param name="saturation">float between [0, 1] which represents percentage of saturation, where 0 means desaturated (black and white) and 1 means saturated</param>
+        /// <param name="variance">float between [0, 1] which represents percentage of variance, where 0 means black and 1 means "colored"</param>
+        /// <returns></returns>
+        static color_t from_hsv(float hue, float saturation, float variance)
+        {
+            // @ref: stackoverflow - can't find the original link, sorry!
+            color_t ret;
+
+            float C = saturation * variance;
+            float X = C * (1 - stl::fabsf(stl::fmodf(hue / 60.f, 2) - 1));
+            float m = variance - C;
+
+            float r, g, b;
+
+            if (hue >= 0.f && hue < 60.f)
+            {
+                r = C, g = X, b = 0.f;
+            }
+            else if (hue >= 60.f && hue < 120.f)
+            {
+                r = X, g = C, b = 0.f;
+            }
+            else if (hue >= 120.f && hue < 180)
+            {
+                r = 0.f, g = C, b = X;
+            }
+            else if (hue >= 180.f && hue < 240.f)
+            {
+                r = 0.f, g = X, b = C;
+            }
+            else if (hue >= 240.f && hue < 300.f)
+            {
+                r = X, g = 0.f, b = C;
+            }
+            else
+            {
+                r = C, g = 0.f, b = X;
+            }
+
+            ret.chan.r = static_cast<unsigned char> ((r + m) * 255);
+            ret.chan.g = static_cast<unsigned char> ((g + m) * 255);
+            ret.chan.b = static_cast<unsigned char> ((b + m) * 255);
+            ret.chan.a = 255;
+
+            return ret;
+        }
+    };
+
+    // our vertex struct
+    struct daisy_vtx_t
+    {
+        float m_pos[4]; // x,y,z,rhw
+        D3DCOLOR m_col;
+        float m_uv[2];
+    };
+
+    // buffer
+    struct renderbuffer_t
+    {
+        stl::unique_ptr< uint8_t[] > m_data{ nullptr };
+        uint32_t m_capacity{ 0 }, m_size{ 0 };
+    };
+
+    // kind of calls submitted
+    enum class daisy_call_kind : uint8_t
+    {
+        CALL_TRI = 0,
+        CALL_VTXSHADER,
+        CALL_PIXSHADER,
+        CALL_SCISSOR
+    };
+
+    // used for text calls
+    enum daisy_text_align : uint16_t
+    {
+        TEXT_ALIGN_DEFAULT = 0,
+        TEXT_ALIGNX_LEFT = 1 << 0,
+        TEXT_ALIGNX_CENTER = 1 << 1,
+        TEXT_ALIGNX_RIGHT = 1 << 2,
+        TEXT_ALIGNY_TOP = 1 << 3,
+        TEXT_ALIGNY_CENTER = 1 << 4,
+        TEXT_ALIGNY_BOTTOM = 1 << 5,
+    };
+
+    // flags for font ctor
+    enum daisy_font_flags : uint8_t
+    {
+        FONT_DEFAULT = 0,
+        FONT_BOLD = 1 << 0,
+        FONT_ITALIC = 1 << 1
+    };
+
+    using uv_t = stl::array< float, 4 >;
+
+    struct point_t
+    {
+        float x, y;
+    };
+
+    struct daisy_drawcall_t
+    {
+        daisy_call_kind m_kind;
+
+        union {
+            // for CALL_TRI
+            struct
+            {
+                IDirect3DTexture9* m_texture_handle;
+                uint32_t m_primitives, m_vertices, m_indices;
+            } m_tri;
+
+            // for shader pop/push calls
+            struct
+            {
+                void* m_shader_handle;
+            } m_shader;
+
+            // for scissor pop/push calls
+            struct
+            {
+                point_t m_position, m_size;
+            } m_scissor;
+        };
+    };
+
+    // this is the only global object. we need this because the alternative would be passing around the pointer to each texture atlas and font wrapper instance
+    // we don't really *need* it but it makes the code more readable
+    struct daisy_t
+    {
+        static inline IDirect3DDevice9* s_device = nullptr;
+    };
+
+    class c_daisy_resettable_object
+    {
+    public:
+        /// <summary>
+        /// called on device reset (pre/post)
+        /// </summary>
+        /// <param name="pre_reset">if this is called before device is reset</param>
+        /// <returns>true on success, false otherwise</returns>
+        virtual bool reset(bool pre_reset = false) noexcept = 0;
+    };
+
+    // our font wrapper class
+    class c_fontwrapper : public c_daisy_resettable_object
+    {
+    private:
+        // members
+        stl::unordered_map< wchar_t, uv_t > m_coords;
+        stl::string_view m_family;
+        IDirect3DTexture9* m_texture_handle;
+        float m_scale;
+        uint32_t m_width, m_height, m_spacing, m_size, m_quality;
+        uint8_t m_flags;
+
+    private:
+        // methods
+        /// <summary>
+        /// actually creates font instance and atlas
+        /// </summary>
+        /// <returns>true on succesful font creation, false otherwise</returns>
+        bool create_ex() noexcept
+        {
+            if (!daisy_t::s_device)
+                return false;
+
+            HDC gdi_ctx = nullptr;
+            HGDIOBJ gdi_font = nullptr, prev_gdi_font = nullptr, prev_bitmap = nullptr;
+            HBITMAP bitmap = nullptr;
+
+            // function could be possibly called by reset handler
+            if (this->m_texture_handle)
+                this->m_texture_handle->Release();
+
+            // create GDI context
+            gdi_ctx = CreateCompatibleDC(nullptr);
+            SetMapMode(gdi_ctx, MM_TEXT);
+
+            // create GDI font
+            this->create_gdi_font(gdi_ctx, &gdi_font);
+
+            prev_gdi_font = SelectObject(gdi_ctx, gdi_font);
+
+            // set default atlas size
+            this->m_width = this->m_height = 128;
+
+            // ensure our atlas is big enough
+            while (this->paint_or_measure_alphabet(gdi_ctx, true) == 2)
+            {
+                this->m_width *= 2;
+                this->m_height *= 2;
+            }
+
+            D3DCAPS9 caps{ };
+            HRESULT res = daisy_t::s_device->GetDeviceCaps(&caps);
+            if (res != D3D_OK)
+                return false;
+
+            // ensure our atlas isn't above max texture cap
+            // @todo; use texatlas
+            if (this->m_width > static_cast<uint32_t> (caps.MaxTextureWidth))
+            {
+                this->m_scale = static_cast<float> (caps.MaxTextureWidth) / this->m_width;
+                this->m_width = this->m_height = caps.MaxTextureWidth;
+
+                bool first_iteration = true;
+
+                do
+                {
+                    if (!first_iteration)
+                        this->m_scale *= 0.9f;
+
+                    DeleteObject(SelectObject(gdi_ctx, prev_gdi_font));
+
+                    this->create_gdi_font(gdi_ctx, &gdi_font);
+
+                    prev_gdi_font = SelectObject(gdi_ctx, gdi_font);
+
+                    first_iteration = false;
+                } while (this->paint_or_measure_alphabet(gdi_ctx, true) == 2);
+            }
+
+            // create dx9 tex
+            res = daisy_t::s_device->CreateTexture(this->m_width, this->m_height, 1, D3DUSAGE_DYNAMIC, D3DFMT_A4R4G4B4, D3DPOOL_DEFAULT, &this->m_texture_handle, nullptr);
+            if (res != D3D_OK || !this->m_texture_handle)
+                return false;
+
+            DWORD* bitmap_bits = nullptr;
+
+            BITMAPINFO bitmap_ctx{ };
+            bitmap_ctx.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
+            bitmap_ctx.bmiHeader.biWidth = this->m_width;
+            bitmap_ctx.bmiHeader.biHeight = -static_cast<int32_t> (this->m_height);
+            bitmap_ctx.bmiHeader.biPlanes = 1;
+            bitmap_ctx.bmiHeader.biCompression = BI_RGB;
+            bitmap_ctx.bmiHeader.biBitCount = 32;
+
+            bitmap = CreateDIBSection(gdi_ctx, &bitmap_ctx, DIB_RGB_COLORS, reinterpret_cast<void**> (&bitmap_bits), nullptr, 0);
+            if (!bitmap)
+                return false;
+
+            prev_bitmap = SelectObject(gdi_ctx, bitmap);
+
+            SetTextColor(gdi_ctx, RGB(255, 255, 255));
+            SetBkColor(gdi_ctx, 0x00000000);
+            SetTextAlign(gdi_ctx, TA_TOP);
+
+            // to note: paint_alphabet returns 0 on success
+            if (this->paint_or_measure_alphabet(gdi_ctx, false))
+                return false;
+
+            D3DLOCKED_RECT locked_rect;
+            if (this->m_texture_handle->LockRect(0, &locked_rect, nullptr, 0) != D3D_OK)
+                return false;
+
+            uint8_t* dst_row = static_cast<uint8_t*> (locked_rect.pBits);
+            BYTE alpha;
+
+            // write to texture
+            for (uint32_t y = 0; y < this->m_height; y++)
+            {
+                uint16_t* dst = reinterpret_cast<uint16_t*> (dst_row);
+                for (uint32_t x = 0; x < this->m_width; x++)
+                {
+                    alpha = ((bitmap_bits[this->m_width * y + x] & 0xff) >> 4);
+                    if (alpha > 0)
+                    {
+                        *dst++ = ((alpha << 12) | 0x0fff);
+                    }
+                    else
+                    {
+                        *dst++ = 0x0000;
+                    }
+                }
+                dst_row += locked_rect.Pitch;
+            }
+
+            if (this->m_texture_handle->UnlockRect(0) != D3D_OK)
+                return false;
+
+            // clean up
+            SelectObject(gdi_ctx, prev_bitmap);
+            SelectObject(gdi_ctx, prev_gdi_font);
+            DeleteObject(bitmap);
+            DeleteObject(gdi_font);
+            DeleteDC(gdi_ctx);
+
+            return true;
+        }
+
+        /// <summary>
+        /// creates GDI font
+        /// </summary>
+        /// <param name="context">GDI context</param>
+        /// <param name="gdi_font">font GDI object</param>
+        void create_gdi_font(HDC context, HGDIOBJ* gdi_font) noexcept
+        {
+            *gdi_font = CreateFontA(-MulDiv(this->m_size, static_cast<int> (GetDeviceCaps(context, LOGPIXELSY) * this->m_scale), 72),
+                0, 0, 0, (this->m_flags & daisy_font_flags::FONT_BOLD) ? FW_BOLD : FW_NORMAL, (this->m_flags & daisy_font_flags::FONT_ITALIC) ? TRUE : FALSE,
+                FALSE, FALSE, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, this->m_quality, VARIABLE_PITCH, this->m_family.data());
+        }
+
+        /// <summary>
+        /// measures or paints alphabet
+        /// </summary>
+        /// <param name="context">GDI context</param>
+        /// <param name="measure">if we should only measure, not paint alphabet</param>
+        /// <returns>0 on success, 1 on GDI error, 2 if texture atlas can't contain our glyphs</returns>
+        int paint_or_measure_alphabet(HDC context, bool measure = false) noexcept
+        {
+            SIZE size;
+            wchar_t chr[] = L"x\0\0";
+
+            if (!GetTextExtentPoint32W(context, chr, 1, &size))
+                return 1;
+
+            // thanks dex for help with this
+            const auto unicode_ranges_size = GetFontUnicodeRanges(context, nullptr);
+            if (!unicode_ranges_size)
+                return 1;
+
+            auto glyph_sets_memory = stl::make_unique< uint8_t[] >(unicode_ranges_size);
+            if (!glyph_sets_memory)
+                return 1;
+
+            auto glyph_sets = reinterpret_cast<GLYPHSET*> (glyph_sets_memory.get());
+
+            if (!GetFontUnicodeRanges(context, glyph_sets))
+                return 1;
+
+            this->m_spacing = static_cast<uint32_t> (ceil(size.cy * 0.3f));
+
+            uint32_t x = this->m_spacing;
+            uint32_t y = 0;
+
+            // iterate glyph ranges
+            for (uint32_t r = 0; r < glyph_sets->cRanges; ++r)
+            {
+                // iterate glyphs
+                for (auto ch = glyph_sets->ranges[r].wcLow; ch < (glyph_sets->ranges[r].wcLow + glyph_sets->ranges[r].cGlyphs); ++ch)
+                {
+                    // get metrics of the current character
+                    if (!GetTextExtentPoint32W(context, &ch, 1, &size))
+                        continue;
+
+                    if (x + size.cx + this->m_spacing > this->m_width)
+                    {
+                        x = this->m_spacing;
+                        y += size.cy + 1;
+                    }
+
+                    // ran out of space in texture
+                    if (y + size.cy > this->m_height)
+                        return 2;
+
+                    if (!measure)
+                    {
+                        if (!ExtTextOutW(context, x + 0, y + 0, ETO_OPAQUE, nullptr, &ch, 1, nullptr))
+                            return 1;
+
+                        this->m_coords[static_cast<uint16_t> (ch)][0] = (static_cast<float> (x + 0 - this->m_spacing)) / this->m_width;
+                        this->m_coords[static_cast<uint16_t> (ch)][1] = (static_cast<float> (y + 0 + 0)) / this->m_height;
+                        this->m_coords[static_cast<uint16_t> (ch)][2] = (static_cast<float> (x + size.cx + this->m_spacing)) / this->m_width;
+                        this->m_coords[static_cast<uint16_t> (ch)][3] = (static_cast<float> (y + size.cy + 0)) / this->m_height;
+                    }
+
+                    x += size.cx + (2 * this->m_spacing);
+                }
+            }
+
+            return 0;
+        }
+
+    public:
+        // inits everything with 0
+        c_fontwrapper() noexcept
+            : m_family(), m_texture_handle(nullptr), m_scale(0.f), m_width(0), m_height(0), m_spacing(0), m_size(0), m_quality(NONANTIALIASED_QUALITY), m_flags(0)
+        {
+        }
+
+        // disallow copying
+        c_fontwrapper(const c_fontwrapper&) = delete;
+        c_fontwrapper& operator= (const c_fontwrapper&) = delete;
+
+        /// <summary>
+        /// creates font instance and atlas
+        /// </summary>
+        /// <param name="family">font family name, for example "Arial" (to note; fonts added by AddFontMemResourceEx also work)</param>
+        /// <param name="height">font height</param>
+        /// <param name="quality">font quality (NONANTIALIASED_QUALITY, CLEARTYPE_NATURAL_QUALITY etc.)</param>
+        /// <param name="flags">font flags (see enum daisy_font_flags; FONT_DEFAULT, FONT_BOLD, FONT_ITALIC)</param>
+        /// <returns>true on succesful font creation, false otherwise</returns>
+        [[nodiscard]] bool create(const stl::string_view family, uint32_t height, uint32_t quality, uint8_t flags) noexcept
+        {
+            this->m_family = family;
+            this->m_size = height;
+            this->m_flags = flags;
+            this->m_quality = quality;
+            this->m_scale = 1.f;
+            this->m_spacing = 0;
+
+            return this->create_ex();
+        }
+
+        /// <summary>
+        /// returns measured text extent in pixels
+        /// </summary>
+        /// <typeparam name="t">iteratable text container (only char and wchar_t accepted currently)</typeparam>
+        /// <param name="text">text to measure</param>
+        /// <returns>point_t containing width and height of measured text</returns>
+        template < typename t = stl::string_view >
+        point_t text_extent(t text) noexcept
+        {
+            float row_width = 0.f;
+            float row_height = (this->m_coords[static_cast<wchar_t> (32)][3] - this->m_coords[static_cast<wchar_t> (32)][1]) * this->m_height;
+            float width = 0.f;
+            float height = row_height;
+
+            for (const auto c : text)
+            {
+                if (c == '\n')
+                {
+                    row_width = 0.f;
+                    height += row_height;
+                }
+
+                if (c < ' ')
+                    continue;
+
+                float tx1 = this->m_coords[static_cast<wchar_t> (c)][0];
+                float tx2 = this->m_coords[static_cast<wchar_t> (c)][2];
+
+                row_width += (tx2 - tx1) * this->m_width - 2.f * this->m_spacing;
+
+                if (row_width > width)
+                    width = row_width;
+            }
+
+            return { width, height };
+        }
+
+        /// <summary>
+        /// called on device reset (pre/post)
+        /// </summary>
+        /// <param name="pre_reset">if this is called before device is reset</param>
+        /// <returns>true on success, false otherwise</returns>
+        [[nodiscard]] virtual bool reset(bool pre_reset = false) noexcept override
+        {
+            if (!pre_reset)
+                return this->create_ex();
+            else if (this->m_texture_handle)
+                this->m_texture_handle->Release();
+
+            return true;
+        }
+
+        /// <summary>
+        /// erases the font
+        /// </summary>
+        void erase() noexcept
+        {
+            if (this->m_texture_handle)
+                this->m_texture_handle->Release();
+
+            this->m_coords.clear();
+
+            this->m_size = this->m_spacing = this->m_flags = 0;
+            this->m_scale = 1.f;
+            this->m_family = "";
+        }
+
+        // getters
+
+        /// <summary>
+        /// get UV coordinates of glyph
+        /// </summary>
+        /// <typeparam name="t">char, wchar_t</typeparam>
+        /// <param name="glyph">character to get glyph UV coordinates for</param>
+        /// <returns>UV coordinates of glyph</returns>
+        template < typename t = char >
+        const uv_t& coords(t glyph) const noexcept
+        {
+            if (this->m_coords.find(glyph) != this->m_coords.end())
+                return this->m_coords.at(glyph);
+
+            static uv_t null_uv{ 0.f, 0.f, 0.f, 0.f };
+            return null_uv;
+        }
+
+        /// <summary>
+        /// get font spacing
+        /// </summary>
+        /// <returns>font spacing</returns>
+        uint32_t spacing() const noexcept
+        {
+            return this->m_spacing;
+        }
+
+        /// <summary>
+        /// get font width
+        /// </summary>
+        /// <returns>font width</returns>
+        uint32_t width() const noexcept
+        {
+            return this->m_width;
+        }
+
+        /// <summary>
+        /// get font height
+        /// </summary>
+        /// <returns>font height</returns>
+        uint32_t height() const noexcept
+        {
+            return this->m_height;
+        }
+
+        /// <summary>
+        /// get font scale
+        /// </summary>
+        /// <returns>font scale</returns>
+        float scale() const noexcept
+        {
+            return this->m_scale;
+        }
+
+        /// <summary>
+        /// get texture handle
+        /// </summary>
+        /// <returns>texture handle</returns>
+        IDirect3DTexture9* texture_handle() const noexcept
+        {
+            return this->m_texture_handle;
+        }
+    };
+
+    class c_texatlas : public c_daisy_resettable_object
+    {
+    private:
+        stl::unordered_map< uint32_t, uv_t > m_coords;
+        point_t m_cursor, m_dimensions;
+        IDirect3DTexture9* m_texture_handle;
+        float m_max_height;
+
+    public:
+        c_texatlas() noexcept
+            : m_cursor({ 0.f, 0.f }), m_dimensions({ 0.f, 0.f }), m_texture_handle(nullptr), m_max_height(0.f)
+        {
+        }
+
+        // disable copying
+        c_texatlas(const c_texatlas&) = delete;
+        c_texatlas& operator= (const c_texatlas&) = delete;
+
+        /// <summary>
+        /// creates a texture atlas
+        /// </summary>
+        /// <param name="dimensions">texture atlas dimensions</param>
+        /// <returns>true on success, false otherwise</returns>
+        [[nodiscard]] bool create(const point_t& dimensions) noexcept
+        {
+            if (!daisy_t::s_device)
+                return false;
+
+            this->m_dimensions = dimensions;
+            this->m_cursor = point_t{ 0.f, 0.f };
+            this->m_max_height = 0.f;
+
+            if (daisy_t::s_device->CreateTexture(static_cast<UINT> (dimensions.x), static_cast<UINT> (dimensions.y), 1, D3DUSAGE_DYNAMIC, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &this->m_texture_handle, nullptr) != D3D_OK)
+                return false;
+
+            return true;
+        }
+
+        /// <summary>
+        /// called on device reset (pre/post)
+        /// </summary>
+        /// <param name="pre_reset">if this is called before device is reset</param>
+        /// <returns>true on success, false otherwise</returns>
+        [[nodiscard]] virtual bool reset(bool pre_reset = false) noexcept override
+        {
+            if (!pre_reset)
+                return this->create(this->m_dimensions);
+            else if (this->m_texture_handle)
+                this->m_texture_handle->Release();
+
+            return true;
+        }
+
+        /// <summary>
+        /// appends a texture to the texture atlas
+        /// </summary>
+        /// <param name="uuid">uuid of texture (can be whatever you want as long as it's unique per texture)</param>
+        /// <param name="dimensions">dimensions of texture in pixels</param>
+        /// <param name="tex_data">A8R8G8B8 texture data</param>
+        /// <param name="tex_size">size of texture data in bytes</param>
+        /// <returns>true on success, false otherwise</returns>
+        bool append(const uint32_t uuid, const point_t& dimensions, uint8_t* tex_data, uint32_t tex_size) noexcept
+        {
+            if (!tex_data || !tex_size)
+                return false;
+
+            // go down if not enough space left
+            if (this->m_cursor.x + dimensions.x > this->m_dimensions.x)
+            {
+                this->m_cursor.y += this->m_max_height;
+                this->m_cursor.x = this->m_max_height = 0.f;
+            }
+
+            // not enough space left
+            if (this->m_cursor.y + dimensions.y > this->m_dimensions.y)
+                return false;
+
+            // ensure we set max height
+            if (this->m_max_height < dimensions.y)
+                this->m_max_height = dimensions.y;
+
+            // lock tex
+            D3DLOCKED_RECT tex_locked_rect;
+
+            if (this->m_texture_handle->LockRect(0, &tex_locked_rect, NULL, 0) != D3D_OK)
+                return false;
+
+            // copy tex data over
+            for (int y = 0; y < dimensions.y; ++y)
+            {
+                for (int x = 0; x < dimensions.x; ++x)
+                {
+                    const uint8_t* source_pixel = tex_data + static_cast<uint32_t> (dimensions.x) * 4 * y + x * 4;
+
+                    // ensure the texture size matches what we expect
+                    if (static_cast<uint32_t> (dimensions.x) * 4 * y + x * 4 > tex_size)
+                        return false;
+
+                    uint8_t* destination_pixel = static_cast<uint8_t*> (tex_locked_rect.pBits) + tex_locked_rect.Pitch * (static_cast<uint32_t> (this->m_cursor.y) + y) + (static_cast<uint32_t> (this->m_cursor.x) + x) * 4;
+
+                    destination_pixel[0] = source_pixel[2];
+                    destination_pixel[1] = source_pixel[1];
+                    destination_pixel[2] = source_pixel[0];
+                    destination_pixel[3] = source_pixel[3];
+                }
+            }
+
+            this->m_texture_handle->UnlockRect(0);
+
+            // set uv mins/maxs
+            auto start_uv = point_t{ this->m_cursor.x / this->m_dimensions.x, this->m_cursor.y / this->m_dimensions.y };
+            auto end_uv = point_t{ start_uv.x + dimensions.x / this->m_dimensions.x, start_uv.y + dimensions.y / this->m_dimensions.y };
+            this->m_coords[uuid] = uv_t{ start_uv.x, start_uv.y, end_uv.x, end_uv.y };
+
+            // move cursor over
+            this->m_cursor.x += dimensions.x;
+
+            return true;
+        }
+
+        /// <summary>
+        /// get UV coordinates of texture
+        /// </summary>
+        /// <param name="glyph">character to get texture UV coordinates for</param>
+        /// <returns>UV coordinates of texture</returns>
+        const uv_t& coords(uint32_t uuid) const noexcept
+        {
+            if (this->m_coords.find(uuid) != this->m_coords.end())
+                return this->m_coords.at(uuid);
+
+            static uv_t null_uv{ 0.f, 0.f, 0.f, 0.f };
+            return null_uv;
+        }
+
+        /// <summary>
+        /// get texture handle
+        /// </summary>
+        /// <returns>texture handle</returns>
+        IDirect3DTexture9* texture_handle() const noexcept
+        {
+            return this->m_texture_handle;
+        }
+    };
+
+    class c_renderqueue : public c_daisy_resettable_object
+    {
+    private:
+        IDirect3DVertexBuffer9* m_vertex_buffer;
+        IDirect3DIndexBuffer9* m_index_buffer;
+
+        renderbuffer_t m_vtxs, m_idxs;
+
+        stl::vector< daisy_drawcall_t > m_drawcalls;
+
+        // update d3d9 sided vtx/idx buffers
+        bool m_update;
+
+        // reallocate d3d9 buffers
+        bool m_realloc_vtx, m_realloc_idx;
+
+    private:
+        /// <summary>
+        /// ensures buffers have enough capacity for the draw call
+        /// </summary>
+        /// <param name="vertices_to_add">vertices to be added to buffer</param>
+        /// <param name="indices_to_add">indices to be added to buffer</param>
+        void ensure_buffers_capacity(const uint32_t vertices_to_add, const uint32_t indices_to_add) noexcept
+        {
+            // check vtxbuf
+            if (this->m_vtxs.m_size + vertices_to_add >= this->m_vtxs.m_capacity)
+            {
+                // set new capacity
+                while (this->m_vtxs.m_size + vertices_to_add >= this->m_vtxs.m_capacity)
+                    this->m_vtxs.m_capacity = this->m_vtxs.m_capacity * 2;
+
+                // create new vertex buf
+                auto new_vtx = stl::make_unique< uint8_t[] >(this->m_vtxs.m_capacity * sizeof(daisy_vtx_t));
+
+                if (new_vtx)
+                {
+                    // copy old data over
+                    memcpy(new_vtx.get(), this->m_vtxs.m_data.get(), this->m_vtxs.m_size * sizeof(daisy_vtx_t));
+
+                    // d3d9 buf needs to be reallocated on new flush (we could do this here, however this ensures we're in the d3d9 rendering thread)
+                    this->m_realloc_vtx = true;
+
+                    // replace old data
+                    this->m_vtxs.m_data.swap(new_vtx);
+                }
+            }
+
+            // check idxbuf
+            if (this->m_idxs.m_size + indices_to_add >= this->m_idxs.m_capacity)
+            {
+                // set capacity
+                while (this->m_idxs.m_size + indices_to_add >= this->m_idxs.m_capacity)
+                    this->m_idxs.m_capacity = this->m_idxs.m_capacity * 2;
+
+                // create new index buf
+                auto new_idx = stl::make_unique< uint8_t[] >(this->m_idxs.m_capacity * sizeof(uint16_t));
+
+                if (new_idx)
+                {
+                    // copy old data over
+                    memcpy(new_idx.get(), this->m_idxs.m_data.get(), this->m_idxs.m_size * sizeof(uint16_t));
+
+                    // d3d9 buf needs to be reallocated on new flush (we could do this here, however this ensures we're in the d3d9 rendering thread)
+                    this->m_realloc_idx = true;
+
+                    // replace old data
+                    this->m_idxs.m_data.swap(new_idx);
+                }
+            }
+        }
+
+        /// <summary>
+        /// checks if call can be batched
+        /// </summary>
+        /// <param name="texture_handle">texture handle</param>
+        /// <returns>0 if we can't batch this call, index offset on success</returns>
+        uint32_t begin_batch(IDirect3DTexture9* texture_handle = nullptr) const noexcept
+        {
+            uint32_t additional = 0;
+
+            // attempt to batch drawcall
+            if (!this->m_drawcalls.empty())
+            {
+                auto& last_call = this->m_drawcalls.back();
+                if (last_call.m_kind == daisy_call_kind::CALL_TRI && last_call.m_tri.m_texture_handle == texture_handle)
+                {
+                    // we can batch this call
+                    additional = last_call.m_tri.m_vertices;
+                }
+            }
+
+            return additional;
+        }
+
+        /// <summary>
+        /// appends call to batch if possible
+        /// </summary>
+        /// <param name="additional_indices">return value of begin_batch() call</param>
+        /// <param name="vertices">vertices in call</param>
+        /// <param name="indices">indices in call</param>
+        /// <param name="primitives">primitives in call</param>
+        /// <param name="texture_handle">texutre handle</param>
+        void end_batch(uint32_t additional_indices, uint32_t vertices, uint32_t indices, uint32_t primitives, IDirect3DTexture9* texture_handle = nullptr)
+        {
+            // call can't be batched
+            if (!additional_indices)
+            {
+                daisy_drawcall_t d{ };
+                d.m_kind = daisy_call_kind::CALL_TRI;
+                d.m_tri.m_indices = indices;
+                d.m_tri.m_vertices = vertices;
+                d.m_tri.m_texture_handle = texture_handle;
+                d.m_tri.m_primitives = primitives;
+
+                this->m_drawcalls.push_back(stl::move(d));
+            }
+            // call is batched
+            else
+            {
+                auto& last_call = this->m_drawcalls.back();
+
+                last_call.m_tri.m_vertices += vertices;
+                last_call.m_tri.m_indices += indices;
+                last_call.m_tri.m_primitives += primitives;
+            }
+
+            // need to update gpu-side buffers
+            this->m_update = true;
+        }
+
+    public:
+        c_renderqueue() noexcept
+            : m_vertex_buffer(nullptr), m_index_buffer(nullptr), m_update(true), m_realloc_vtx(false), m_realloc_idx(false)
+        {
+        }
+
+        // disallow copying
+        c_renderqueue(const c_renderqueue&) = delete;
+        c_renderqueue& operator= (const c_renderqueue&) = delete;
+
+        /// <summary>
+        /// initializes current queue by initializing vertex and index buffers
+        /// </summary>
+        /// <param name="max_verts">max capacity of vertex buffer</param>
+        /// <param name="max_indices">max capacity of index buffer</param>
+        /// <returns>true on success, false otherwise</returns>
+        [[nodiscard]] bool create(const uint32_t max_verts = 32767, const uint32_t max_indices = 65535) noexcept
+        {
+            if (!daisy_t::s_device)
+                return false;
+
+            // create d3d9 buffers
+            if (!this->m_vertex_buffer)
+                if (daisy_t::s_device->CreateVertexBuffer(sizeof(daisy_vtx_t) * max_verts, D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY, (D3DFVF_XYZRHW | D3DFVF_DIFFUSE | D3DFVF_TEX1), D3DPOOL_DEFAULT, &this->m_vertex_buffer, nullptr) < 0)
+                    return false;
+
+            if (!this->m_index_buffer)
+                if (daisy_t::s_device->CreateIndexBuffer(sizeof(uint16_t) * max_indices, D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY, D3DFMT_INDEX16, D3DPOOL_DEFAULT, &this->m_index_buffer, nullptr) < 0)
+                    return false;
+
+            // create local buffers
+            if (!this->m_vtxs.m_data.get())
+            {
+                this->m_vtxs.m_data = stl::make_unique< uint8_t[] >(sizeof(daisy_vtx_t) * max_verts);
+                this->m_vtxs.m_capacity = max_verts;
+                this->m_vtxs.m_size = 0;
+            }
+
+            if (!this->m_idxs.m_data)
+            {
+                this->m_idxs.m_data = stl::make_unique< uint8_t[] >(sizeof(uint16_t) * max_indices);
+                this->m_idxs.m_capacity = max_indices;
+                this->m_idxs.m_size = 0;
+            }
+
+            if (!this->m_vtxs.m_data || !this->m_idxs.m_data)
+                return false;
+
+            return true;
+        }
+
+        /// <summary>
+        /// wipes data from local buffers
+        /// </summary>
+        void clear() noexcept
+        {
+            this->m_vtxs.m_size = 0;
+            this->m_idxs.m_size = 0;
+
+            if (!this->m_drawcalls.empty())
+                this->m_drawcalls.clear();
+        }
+
+        /// <summary>
+        /// called on device reset (pre/post)
+        /// </summary>
+        /// <param name="pre_reset">if this is called before device is reset</param>
+        /// <returns>true on success, false otherwise</returns>
+        [[nodiscard]] virtual bool reset(bool pre_reset = false) noexcept override
+        {
+            if (!pre_reset)
+                return this->create(this->m_vtxs.m_capacity, this->m_idxs.m_capacity);
+            else
+            {
+                if (this->m_vertex_buffer)
+                {
+                    this->m_vertex_buffer->Release();
+                    this->m_vertex_buffer = nullptr;
+                }
+
+                if (this->m_index_buffer)
+                {
+                    this->m_index_buffer->Release();
+                    this->m_index_buffer = nullptr;
+                }
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// copies data from local buffer to d3d9 buffers
+        /// </summary>
+        void update() noexcept
+        {
+            if (!daisy_t::s_device)
+                return;
+
+            // checking realloc
+            if (this->m_realloc_vtx)
+            {
+                this->m_vertex_buffer->Release();
+
+                if (daisy_t::s_device->CreateVertexBuffer(static_cast<UINT> (this->m_vtxs.m_capacity * sizeof(daisy_vtx_t)), D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY, (D3DFVF_XYZRHW | D3DFVF_DIFFUSE | D3DFVF_TEX1), D3DPOOL_DEFAULT, &this->m_vertex_buffer, nullptr) < 0)
+                    return;
+
+                this->m_realloc_vtx = false;
+            }
+
+            if (this->m_realloc_idx)
+            {
+                this->m_index_buffer->Release();
+
+                if (daisy_t::s_device->CreateIndexBuffer(static_cast<UINT> (this->m_idxs.m_capacity * sizeof(uint16_t)), D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY, D3DFMT_INDEX16, D3DPOOL_DEFAULT, &this->m_index_buffer, nullptr) < 0)
+                    return;
+
+                this->m_realloc_idx = false;
+            }
+
+            daisy_vtx_t* vert;
+            uint16_t* indx;
+
+            // lock buffers
+            if (this->m_vertex_buffer->Lock(0, static_cast<UINT> (this->m_vtxs.m_size * sizeof(daisy_vtx_t)), (void**)&vert, D3DLOCK_DISCARD) < 0)
+                return;
+
+            if (this->m_index_buffer->Lock(0, static_cast<UINT> (this->m_idxs.m_size * sizeof(uint16_t)), (void**)&indx, D3DLOCK_DISCARD) < 0)
+            {
+                this->m_vertex_buffer->Unlock();
+                return;
+            }
+
+            // we can just memcpy these
+            memcpy(vert, this->m_vtxs.m_data.get(), sizeof(daisy_vtx_t) * this->m_vtxs.m_size);
+            memcpy(indx, this->m_idxs.m_data.get(), sizeof(uint16_t) * this->m_idxs.m_size);
+
+            // unlock and ret
+            this->m_vertex_buffer->Unlock();
+            this->m_index_buffer->Unlock();
+
+            // we no longer need to update
+            this->m_update = false;
+        }
+
+        /// <summary>
+        /// flushes vertices and indices to d3d9 buffer if an update is required and actually draws primitives
+        /// </summary>
+        void flush() noexcept
+        {
+            if (this->m_drawcalls.empty())
+                return;
+
+            // modify buffers only if required
+            if (this->m_update)
+                this->update();
+
+            daisy_t::s_device->SetStreamSource(0, this->m_vertex_buffer, 0, sizeof(daisy_vtx_t));
+            daisy_t::s_device->SetIndices(this->m_index_buffer);
+            daisy_t::s_device->SetFVF((D3DFVF_XYZRHW | D3DFVF_DIFFUSE | D3DFVF_TEX1));
+
+            uint32_t vertex_idx{ 0 }, index_idx{ 0 };
+
+            // render commands
+            for (const auto& cmd : this->m_drawcalls)
+            {
+                // @todo: more proper support for shaders
+                switch (cmd.m_kind)
+                {
+                case daisy_call_kind::CALL_TRI:
+                    daisy_t::s_device->SetTexture(0, cmd.m_tri.m_texture_handle);
+                    daisy_t::s_device->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, vertex_idx, 0, cmd.m_tri.m_vertices, index_idx, cmd.m_tri.m_primitives);
+
+                    vertex_idx += cmd.m_tri.m_vertices;
+                    index_idx += cmd.m_tri.m_indices;
+                    break;
+                case daisy_call_kind::CALL_VTXSHADER:
+                    daisy_t::s_device->SetVertexShader(reinterpret_cast<IDirect3DVertexShader9*> (cmd.m_shader.m_shader_handle));
+                    break;
+                case daisy_call_kind::CALL_PIXSHADER:
+                    daisy_t::s_device->SetPixelShader(reinterpret_cast<IDirect3DPixelShader9*> (cmd.m_shader.m_shader_handle));
+                    break;
+                case daisy_call_kind::CALL_SCISSOR: {
+                    RECT r{ static_cast<LONG> (cmd.m_scissor.m_position.x), static_cast<LONG> (cmd.m_scissor.m_position.y),
+                             static_cast<LONG> (cmd.m_scissor.m_position.x + cmd.m_scissor.m_size.x),
+                             static_cast<LONG> (cmd.m_scissor.m_position.y + cmd.m_scissor.m_size.y) };
+
+                    daisy_t::s_device->SetScissorRect(&r);
+                }
+                                                  break;
+                }
+            }
+        }
+
+        /// <summary>
+        /// clips viewport to a certain rectangle
+        /// </summary>
+        /// <param name="position">rectangle position</param>
+        /// <param name="size">rectangle size</param>
+        void push_scissor(point_t& position, point_t& size) noexcept
+        {
+            daisy_drawcall_t d{ };
+            d.m_kind = daisy_call_kind::CALL_SCISSOR;
+            d.m_scissor.m_position = position;
+            d.m_scissor.m_size = size;
+
+            this->m_drawcalls.push_back(stl::move(d));
+        }
+
+        /// <summary>
+        /// push gradient rectangle to drawlist
+        /// </summary>
+        /// <param name="position">rectangle position</param>
+        /// <param name="size">rectangle size</param>
+        /// <param name="c1">top left rectangle color</param>
+        /// <param name="c2">top right rectangle color</param>
+        /// <param name="c3">bottom left rectangle color</param>
+        /// <param name="c4">bottom right rectangle color</param>
+        /// <param name="texture_handle">texture handle (by default nullptr, means no texture is applied)</param>
+        /// <param name="uv_mins">uv mins of rectangle in texture (by default {0, 0})</param>
+        /// <param name="uv_maxs">uv maxs of rectangle in texture (by default {1, 1})</param>
+        void push_gradient_rectangle(const point_t& position, const point_t& size, const color_t c1, const color_t c2, const color_t c3, const color_t c4, IDirect3DTexture9* texture_handle = nullptr, const point_t& uv_mins = { 0.f, 0.f }, const point_t& uv_maxs = { 1.f, 1.f }) noexcept
+        {
+            this->ensure_buffers_capacity(4, 6);
+
+            uint32_t additional_indices = this->begin_batch(texture_handle);
+
+            auto vtx_counter = 0, idx_counter = 0;
+
+            daisy_vtx_t* vtx = reinterpret_cast<daisy_vtx_t*> (reinterpret_cast<uintptr_t> (this->m_vtxs.m_data.get()) + (sizeof(daisy_vtx_t) * this->m_vtxs.m_size));
+            uint16_t* idx = reinterpret_cast<uint16_t*> (reinterpret_cast<uintptr_t> (this->m_idxs.m_data.get()) + (sizeof(uint16_t) * this->m_idxs.m_size));
+
+            vtx[vtx_counter++] = daisy_vtx_t{ { stl::floorf(position.x), stl::floorf(position.y), 0.0f, 1.f }, c1.bgra, { uv_mins.x, uv_mins.y } };
+            vtx[vtx_counter++] = daisy_vtx_t{ { stl::floorf(position.x + size.x), stl::floorf(position.y), 0.0f, 1.f }, c2.bgra, { uv_maxs.x, uv_mins.y } };
+            vtx[vtx_counter++] = daisy_vtx_t{ { stl::floorf(position.x + size.x), stl::floorf(position.y + size.y), 0.0f, 1.f }, c4.bgra, { uv_maxs.x, uv_maxs.y } };
+            vtx[vtx_counter++] = daisy_vtx_t{ { stl::floorf(position.x), stl::floorf(position.y + size.y), 0.0f, 1.f }, c3.bgra, { uv_mins.x, uv_maxs.y } };
+
+            idx[idx_counter++] = static_cast<uint16_t> (additional_indices);
+            idx[idx_counter++] = static_cast<uint16_t> (additional_indices + 1);
+            idx[idx_counter++] = static_cast<uint16_t> (additional_indices + 3);
+            idx[idx_counter++] = static_cast<uint16_t> (additional_indices + 3);
+            idx[idx_counter++] = static_cast<uint16_t> (additional_indices + 2);
+            idx[idx_counter++] = static_cast<uint16_t> (additional_indices + 1);
+
+            this->m_vtxs.m_size += 4;
+            this->m_idxs.m_size += 6;
+
+            this->end_batch(additional_indices, 4, 6, 2, texture_handle);
+        }
+
+        /// <summary>
+        /// push filled rectangle to drawlist
+        /// </summary>
+        /// <param name="position">rectangle position</param>
+        /// <param name="size">rectangle size</param>
+        /// <param name="col">rectangle color</param>
+        /// <param name="texture_handle">texture handle (by default nullptr, means no texture is applied)</param>
+        /// <param name="uv_mins">uv mins of rectangle in texture (by default {0, 0})</param>
+        /// <param name="uv_maxs">uv maxs of rectangle in texture (by default {1, 1})</param>
+        void push_filled_rectangle(const point_t& position, const point_t& size, const color_t col, IDirect3DTexture9* texture_handle = nullptr, const point_t& uv_mins = { 0.f, 0.f }, const point_t& uv_maxs = { 1.f, 1.f }) noexcept
+        {
+            this->push_gradient_rectangle(position, size, col, col, col, col, texture_handle, uv_mins, uv_maxs);
+        }
+
+        /// <summary>
+        /// push filled triangle to drawlist
+        /// </summary>
+        /// <param name="p1">point 1 of triangle</param>
+        /// <param name="p2">point 2 of triangle</param>
+        /// <param name="p3">point 3 of triangle</param>
+        /// <param name="c1">color 1 of triangle</param>
+        /// <param name="c2">color 2 of triangle</param>
+        /// <param name="c3">color 3 of triangle</param>
+        /// <param name="texture_handle">texture handle (by default nullptr, means no texture is applied)</param>
+        /// <param name="uv1">uv bounds for the 1st point</param>
+        /// <param name="uv2">uv bounds for the 2nd point</param>
+        /// <param name="uv3">uv bounds for the 3rd point</param>
+        void push_filled_triangle(const point_t& p1, const point_t& p2, const point_t& p3, const color_t c1, const color_t c2, const color_t c3, IDirect3DTexture9* texture_handle = nullptr, const point_t& uv1 = { 0.f, 0.f }, const point_t& uv2 = { 0.f, 0.f }, const point_t& uv3 = { 0.f, 0.f }) noexcept
+        {
+            this->ensure_buffers_capacity(3, 3);
+
+            uint32_t additional_indices = this->begin_batch(texture_handle);
+
+            auto vtx_counter = 0, idx_counter = 0;
+
+            daisy_vtx_t* vtx = reinterpret_cast<daisy_vtx_t*> (reinterpret_cast<uintptr_t> (this->m_vtxs.m_data.get()) + (sizeof(daisy_vtx_t) * this->m_vtxs.m_size));
+            uint16_t* idx = reinterpret_cast<uint16_t*> (reinterpret_cast<uintptr_t> (this->m_idxs.m_data.get()) + (sizeof(uint16_t) * this->m_idxs.m_size));
+
+            vtx[vtx_counter++] = daisy_vtx_t{ { stl::floorf(p1.x), stl::floorf(p1.y), 0.0f, 1.f }, c1.bgra, { uv1.x, uv1.y } };
+            vtx[vtx_counter++] = daisy_vtx_t{ { stl::floorf(p2.x), stl::floorf(p2.y), 0.0f, 1.f }, c2.bgra, { uv2.x, uv2.y } };
+            vtx[vtx_counter++] = daisy_vtx_t{ { stl::floorf(p3.x), stl::floorf(p3.y), 0.0f, 1.f }, c3.bgra, { uv3.x, uv3.y } };
+
+            idx[idx_counter++] = static_cast<uint16_t> (additional_indices);
+            idx[idx_counter++] = static_cast<uint16_t> (additional_indices + 1);
+            idx[idx_counter++] = static_cast<uint16_t> (additional_indices + 2);
+
+            this->m_vtxs.m_size += 3;
+            this->m_idxs.m_size += 3;
+
+            this->end_batch(additional_indices, 3, 3, 1, texture_handle);
+        }
+
+        /// <summary>
+        /// push line to drawlist
+        /// </summary>
+        /// <param name="p1">point 1 of line</param>
+        /// <param name="p2">point 2 of line</param>
+        /// <param name="col">color of line</param>
+        /// <param name="width">width of line</param>
+        void push_line(const point_t& p1, const point_t& p2, const color_t& col, const float width = 1.f) noexcept
+        {
+            this->ensure_buffers_capacity(4, 6);
+
+            uint32_t additional_indices = this->begin_batch(nullptr);
+
+            // shoutout 8th grade math
+            point_t delta = { p2.x - p1.x, p2.y - p1.y };
+            float length = stl::sqrtf(delta.x * delta.x + delta.y * delta.y) + FLT_EPSILON;
+
+            float scale = width / (2.f * length);
+            point_t radius = { -scale * delta.y, scale * delta.x };
+
+            auto vtx_counter = 0, idx_counter = 0;
+
+            daisy_vtx_t* vtx = reinterpret_cast<daisy_vtx_t*> (reinterpret_cast<uintptr_t> (this->m_vtxs.m_data.get()) + (sizeof(daisy_vtx_t) * this->m_vtxs.m_size));
+            uint16_t* idx = reinterpret_cast<uint16_t*> (reinterpret_cast<uintptr_t> (this->m_idxs.m_data.get()) + (sizeof(uint16_t) * this->m_idxs.m_size));
+
+            vtx[vtx_counter++] = daisy_vtx_t{ { p1.x - radius.x, p1.y - radius.y, 0.0f, 1.f }, col.bgra, { 0.f, 0.f } };
+            vtx[vtx_counter++] = daisy_vtx_t{ { p1.x + radius.x, p1.y + radius.y, 0.0f, 1.f }, col.bgra, { 1.f, 0.f } };
+            vtx[vtx_counter++] = daisy_vtx_t{ { p2.x - radius.x, p2.y - radius.y, 0.0f, 1.f }, col.bgra, { 1.f, 1.f } };
+            vtx[vtx_counter++] = daisy_vtx_t{ { p2.x + radius.x, p2.y + radius.y, 0.0f, 1.f }, col.bgra, { 0.f, 1.f } };
+
+            idx[idx_counter++] = static_cast<uint16_t> (additional_indices);
+            idx[idx_counter++] = static_cast<uint16_t> (additional_indices + 1);
+            idx[idx_counter++] = static_cast<uint16_t> (additional_indices + 2);
+            idx[idx_counter++] = static_cast<uint16_t> (additional_indices + 2);
+            idx[idx_counter++] = static_cast<uint16_t> (additional_indices + 3);
+            idx[idx_counter++] = static_cast<uint16_t> (additional_indices + 1);
+
+            this->m_vtxs.m_size += 4;
+            this->m_idxs.m_size += 6;
+
+            this->end_batch(additional_indices, 4, 6, 2, nullptr);
+        }
+
+        /// <summary>
+        /// push filled arc of circle to drawlist
+        /// to note: it would be more efficient to use a pixel shader and draw a quad to draw the circle
+        /// </summary>
+        /// <param name="center">center of circle</param>
+        /// <param name="radius">radius of circle</param>
+        /// <param name="segments">how many points are used to draw the circle (less = circle is less accurate, more = more vertices and indicies used, increased memory usage, slower to compute)</param>
+        /// <param name="factor">how much of the circle arc to draw [0.0, 1.0]</param>
+        /// <param name="center_color">the color of the center of the circle</param>
+        /// <param name="outer_color">the color of the outside of the circle</param>
+        void push_filled_arc(const point_t& center, const float radius, const int segments, const float factor, const color_t& center_color, const color_t& outer_color)
+        {
+            // sanity checks
+            if (segments < 3 || factor <= 0.f || factor > 1.f)
+                return;
+
+            int segments_to_draw = static_cast<int> (static_cast<float> (segments) * factor);
+
+            this->ensure_buffers_capacity(static_cast<uint32_t> (segments_to_draw + 2), static_cast<uint32_t> ((segments_to_draw + 1) * 3));
+
+            uint32_t additional_indices = this->begin_batch(nullptr);
+
+            auto vtx_counter = 0, idx_counter = 0, primitive_counter = 0;
+
+            // write directly to the end of the buffer as we know we have more than enough space - need to start doing this everywhere
+            daisy_vtx_t* vtx = reinterpret_cast<daisy_vtx_t*> (reinterpret_cast<uintptr_t> (this->m_vtxs.m_data.get()) + (sizeof(daisy_vtx_t) * this->m_vtxs.m_size));
+            uint16_t* idx = reinterpret_cast<uint16_t*> (reinterpret_cast<uintptr_t> (this->m_idxs.m_data.get()) + (sizeof(uint16_t) * this->m_idxs.m_size));
+
+            // center point
+            vtx[vtx_counter++] = daisy_vtx_t{ { center.x, center.y, 0.0f, 1.f }, center_color.bgra, { 0.f, 0.f } };
+
+            auto seg = segments_to_draw;
+
+            // outer points
+            for (int i = 0; i <= seg + 1; ++i)
+            {
+                float tetha = 2.f * detail::PI * static_cast<float> (i) / static_cast<float> (segments);
+                float x = center.x + (radius * stl::cosf(tetha));
+                float y = center.y - (radius * stl::sinf(tetha));
+
+                // circle outer point
+                vtx[vtx_counter++] = daisy_vtx_t{ { x, y, 0.0f, 1.f }, outer_color.bgra, { 0.f, 0.f } };
+
+                // indices
+                if (i > 0)
+                {
+                    idx[idx_counter++] = static_cast<uint16_t> (additional_indices);         // center
+                    idx[idx_counter++] = static_cast<uint16_t> (additional_indices + i);     // current outer
+                    idx[idx_counter++] = static_cast<uint16_t> (additional_indices + i - 1); // last outer
+
+                    primitive_counter++;
+                }
+            }
+
+            this->m_vtxs.m_size += vtx_counter;
+            this->m_idxs.m_size += idx_counter;
+
+            this->end_batch(additional_indices, vtx_counter, idx_counter, primitive_counter, nullptr);
+        }
+
+        /// <summary>
+        /// push filled circle to drawlist
+        /// to note: it would be more efficient to use a pixel shader and draw a quad to draw the circle
+        /// </summary>
+        /// <param name="center">center of circle</param>
+        /// <param name="radius">radius of circle</param>
+        /// <param name="segments">how many points are used to draw the circle (less = circle is less accurate, more = more vertices and indicies used, increased memory usage, slower to compute)</param>
+        /// <param name="center_color">the color of the center of the circle</param>
+        /// <param name="outer_color">the color of the outside of the circle</param>
+        void push_filled_circle(const point_t& center, const float radius, const int segments, const color_t& center_color, const color_t& outer_color)
+        {
+            this->push_filled_arc(center, radius, segments, 1.f, center_color, outer_color);
+        }
+
+        /// <summary>
+        /// push a string with a given font to drawlist
+        /// </summary>
+        /// <typeparam name="t">iteratable text container (only char and wchar_t accepted currently)</typeparam>
+        /// <param name="font">initialized c_fontwrapper instance</param>
+        /// <param name="position">position of text</param>
+        /// <param name="text">text to draw</param>
+        /// <param name="color">color of text to draw</param>
+        /// <param name="alignment">alignment of text to draw</param>
+        template < typename t = stl::string_view >
+        void push_text(c_fontwrapper& font, const point_t& position, const t text, const color_t& color, uint16_t alignment = TEXT_ALIGN_DEFAULT) noexcept
+        {
+            // this is a rough approximate, best we can do without passing through the entire string twice.
+            this->ensure_buffers_capacity(static_cast<uint32_t> (text.size() * 4), static_cast<uint32_t> (text.size() * 6));
+
+            uint32_t additional_indices = this->begin_batch(font.texture_handle());
+            uint32_t cont_vertices = 0, cont_indices = 0, cont_primitives = 0;
+
+            point_t corrected_position{ position };
+
+            if (alignment != TEXT_ALIGN_DEFAULT)
+            {
+                const auto size = font.text_extent(text);
+
+                if (alignment & TEXT_ALIGNX_CENTER)
+                    corrected_position.x -= stl::floorf(0.5f * size.x);
+                else if (alignment & TEXT_ALIGNX_RIGHT)
+                    corrected_position.x -= stl::floorf(size.x);
+
+                if (alignment & TEXT_ALIGNY_CENTER)
+                    corrected_position.y -= stl::floorf(0.5f * size.y);
+                else if (alignment & TEXT_ALIGNY_BOTTOM)
+                    corrected_position.y -= stl::floorf(size.y);
+            }
+
+            corrected_position.x -= font.spacing();
+
+            float start_x = corrected_position.x;
+            auto space_coords = font.coords('A');
+
+            auto vtx_counter = 0, idx_counter = 0;
+
+            daisy_vtx_t* vtx = reinterpret_cast<daisy_vtx_t*> (reinterpret_cast<uintptr_t> (this->m_vtxs.m_data.get()) + (sizeof(daisy_vtx_t) * this->m_vtxs.m_size));
+            uint16_t* idx = reinterpret_cast<uint16_t*> (reinterpret_cast<uintptr_t> (this->m_idxs.m_data.get()) + (sizeof(uint16_t) * this->m_idxs.m_size));
+
+            for (const auto c : text)
+            {
+                if (c == '\n')
+                {
+                    corrected_position.x = start_x;
+                    corrected_position.y += (space_coords[3] - space_coords[1]) * font.height();
+
+                    continue;
+                }
+
+                if (c < ' ')
+                    continue;
+
+                auto is_space = (c == ' ');
+                auto coords = font.coords(c);
+
+                float tx1 = coords[0];
+                float ty1 = coords[1];
+                float tx2 = coords[2];
+                float ty2 = coords[3];
+
+                float w = (tx2 - tx1) * font.width() / font.scale();
+                float h = (ty2 - ty1) * font.height() / font.scale();
+
+                if (!is_space)
+                {
+                    daisy_vtx_t v[] = {
+                        { { corrected_position.x - 0.5f, corrected_position.y - 0.5f + h, 0.f, 1.f }, color.bgra, { tx1, ty2 } },
+                        { { corrected_position.x - 0.5f, corrected_position.y - 0.5f, 0.f, 1.f }, color.bgra, { tx1, ty1 } },
+                        { { corrected_position.x - 0.5f + w, corrected_position.y - 0.5f + h, 0.f, 1.f }, color.bgra, { tx2, ty2 } },
+                        { { corrected_position.x - 0.5f + w, corrected_position.y - 0.5f, 0.f, 1.f }, color.bgra, { tx2, ty1 } } };
+
+                    vtx[vtx_counter++] = daisy_vtx_t{ { corrected_position.x - 0.5f, corrected_position.y - 0.5f + h, 0.f, 1.f }, color.bgra, { tx1, ty2 } };
+                    vtx[vtx_counter++] = daisy_vtx_t{ { corrected_position.x - 0.5f, corrected_position.y - 0.5f, 0.f, 1.f }, color.bgra, { tx1, ty1 } };
+                    vtx[vtx_counter++] = daisy_vtx_t{ { corrected_position.x - 0.5f + w, corrected_position.y - 0.5f + h, 0.f, 1.f }, color.bgra, { tx2, ty2 } };
+                    vtx[vtx_counter++] = daisy_vtx_t{ { corrected_position.x - 0.5f + w, corrected_position.y - 0.5f, 0.f, 1.f }, color.bgra, { tx2, ty1 } };
+
+                    idx[idx_counter++] = static_cast<uint16_t> (additional_indices + cont_vertices);
+                    idx[idx_counter++] = static_cast<uint16_t> (additional_indices + cont_vertices + 1);
+                    idx[idx_counter++] = static_cast<uint16_t> (additional_indices + cont_vertices + 2);
+                    idx[idx_counter++] = static_cast<uint16_t> (additional_indices + cont_vertices + 3);
+                    idx[idx_counter++] = static_cast<uint16_t> (additional_indices + cont_vertices + 2);
+                    idx[idx_counter++] = static_cast<uint16_t> (additional_indices + cont_vertices + 1);
+
+                    this->m_vtxs.m_size += 4;
+                    this->m_idxs.m_size += 6;
+
+                    cont_vertices += 4;
+                    cont_indices += 6;
+                    cont_primitives += 2;
+                }
+
+                corrected_position.x += w - (2.f * font.spacing());
+            }
+
+            this->end_batch(additional_indices, cont_vertices, cont_indices, cont_primitives, font.texture_handle());
+        }
+    };
+
+    class c_doublebuffer_queue : public c_daisy_resettable_object
+    {
+    private:
+        c_renderqueue m_front_queue, m_back_queue;
+        stl::atomic< bool > m_swap_drawlists;
+
+    public:
+        /// <summary>
+        /// initializes current queue by initializing vertex and index buffers
+        /// </summary>
+        /// <param name="max_verts">max capacity of vertex buffer</param>
+        /// <param name="max_indices">max capacity of index buffer</param>
+        /// <returns>true on success, false otherwise</returns>
+        [[nodiscard]] bool create(const uint32_t max_verts = 32767, const uint32_t max_indices = 65535) noexcept
+        {
+            if (!this->m_front_queue.create(max_verts, max_indices))
+                return false;
+
+            if (!this->m_back_queue.create(max_verts, max_indices))
+                return false;
+
+            return true;
+        }
+
+        /// <summary>
+        /// called on device reset (pre/post)
+        /// </summary>
+        /// <param name="pre_reset">if this is called before device is reset</param>
+        /// <returns>true on success, false otherwise</returns>
+        [[nodiscard]] virtual bool reset(bool pre_reset = false) noexcept override
+        {
+            return this->m_front_queue.reset(pre_reset) && this->m_back_queue.reset(pre_reset);
+        }
+
+        /// <summary>
+        /// swap back and front drawlists
+        /// </summary>
+        void swap() noexcept
+        {
+            this->m_swap_drawlists = !this->m_swap_drawlists;
+        }
+
+        /// <summary>
+        /// access currently safe render queue
+        /// </summary>
+        /// <returns>queue</returns>
+        c_renderqueue* queue() noexcept
+        {
+            return (!this->m_swap_drawlists ? &this->m_front_queue : &this->m_back_queue);
+        }
+
+        /// <summary>
+        /// flushes currently filled queue
+        /// </summary>
+        void flush()
+        {
+            this->m_swap_drawlists ? this->m_front_queue.flush() : this->m_back_queue.flush();
+        }
+    };
+
+    /// <summary>
+    /// initializes daisy
+    /// </summary>
+    /// <param name="device">d3d9 device handle</param>
+    inline static void daisy_initialize(IDirect3DDevice9* device) noexcept
+    {
+        daisy_t::s_device = device;
+        daisy_t::s_device->AddRef();
+    }
+
+    /// <summary>
+    /// prepares render state for daisy
+    /// </summary>
+    inline static void daisy_prepare() noexcept
+    {
+        daisy_t::s_device->SetRenderState(D3DRS_ZENABLE, FALSE);
+        daisy_t::s_device->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
+        daisy_t::s_device->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
+        daisy_t::s_device->SetRenderState(D3DRS_SRCBLENDALPHA, D3DBLEND_INVDESTALPHA);
+        daisy_t::s_device->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
+        daisy_t::s_device->SetRenderState(D3DRS_DESTBLENDALPHA, D3DBLEND_ONE);
+        daisy_t::s_device->SetRenderState(D3DRS_ALPHATESTENABLE, FALSE);
+        daisy_t::s_device->SetRenderState(D3DRS_SEPARATEALPHABLENDENABLE, TRUE);
+        daisy_t::s_device->SetRenderState(D3DRS_ALPHAREF, 0x08);
+        daisy_t::s_device->SetRenderState(D3DRS_ALPHAFUNC, D3DCMP_GREATEREQUAL);
+        daisy_t::s_device->SetRenderState(D3DRS_LIGHTING, FALSE);
+        daisy_t::s_device->SetRenderState(D3DRS_FILLMODE, D3DFILL_SOLID);
+        daisy_t::s_device->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
+        daisy_t::s_device->SetRenderState(D3DRS_SCISSORTESTENABLE, TRUE);
+        daisy_t::s_device->SetRenderState(D3DRS_ZWRITEENABLE, FALSE);
+        daisy_t::s_device->SetRenderState(D3DRS_STENCILENABLE, FALSE);
+        daisy_t::s_device->SetRenderState(D3DRS_CLIPPING, TRUE);
+        daisy_t::s_device->SetRenderState(D3DRS_CLIPPLANEENABLE, FALSE);
+        daisy_t::s_device->SetRenderState(D3DRS_VERTEXBLEND, D3DVBF_DISABLE);
+        daisy_t::s_device->SetRenderState(D3DRS_INDEXEDVERTEXBLENDENABLE, FALSE);
+        daisy_t::s_device->SetRenderState(D3DRS_FOGENABLE, FALSE);
+        daisy_t::s_device->SetRenderState(D3DRS_SRGBWRITEENABLE, FALSE);
+        daisy_t::s_device->SetRenderState(D3DRS_COLORWRITEENABLE, D3DCOLORWRITEENABLE_RED | D3DCOLORWRITEENABLE_GREEN | D3DCOLORWRITEENABLE_BLUE | D3DCOLORWRITEENABLE_ALPHA);
+        daisy_t::s_device->SetRenderState(D3DRS_ANTIALIASEDLINEENABLE, FALSE);
+
+        daisy_t::s_device->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_MODULATE);
+        daisy_t::s_device->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
+        daisy_t::s_device->SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_DIFFUSE);
+        daisy_t::s_device->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_MODULATE);
+        daisy_t::s_device->SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE);
+        daisy_t::s_device->SetTextureStageState(0, D3DTSS_ALPHAARG2, D3DTA_DIFFUSE);
+        daisy_t::s_device->SetTextureStageState(0, D3DTSS_TEXCOORDINDEX, 0);
+        daisy_t::s_device->SetTextureStageState(0, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_DISABLE);
+        daisy_t::s_device->SetTextureStageState(1, D3DTSS_COLOROP, D3DTOP_DISABLE);
+        daisy_t::s_device->SetTextureStageState(1, D3DTSS_ALPHAOP, D3DTOP_DISABLE);
+
+        daisy_t::s_device->SetSamplerState(0ul, D3DSAMP_ADDRESSU, D3DTADDRESS_WRAP);
+        daisy_t::s_device->SetSamplerState(0ul, D3DSAMP_ADDRESSV, D3DTADDRESS_WRAP);
+        daisy_t::s_device->SetSamplerState(0ul, D3DSAMP_ADDRESSW, D3DTADDRESS_WRAP);
+        daisy_t::s_device->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_PYRAMIDALQUAD);
+        daisy_t::s_device->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_PYRAMIDALQUAD);
+        daisy_t::s_device->SetSamplerState(0, D3DSAMP_MIPFILTER, D3DTEXF_PYRAMIDALQUAD);
+
+        daisy_t::s_device->SetVertexShader(nullptr);
+        daisy_t::s_device->SetPixelShader(nullptr);
+    }
+
+    /// <summary>
+    /// shut down daisy
+    /// </summary>
+    inline static void daisy_shutdown() noexcept
+    {
+        if (daisy_t::s_device)
+            daisy_t::s_device->Release();
+    }
+} // namespace daisy
+
+#endif // _SSE2_DAISY_INCLUDE_GUARD
+
+/*
+Copyright (c) 2024 Munteanu Octavian-Adrian
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+```

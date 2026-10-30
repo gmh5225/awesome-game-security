@@ -1,0 +1,561 @@
+Project Path: arc_Ogonx_anticheat-lab_r2vehnnp
+
+Source Tree:
+
+```txt
+arc_Ogonx_anticheat-lab_r2vehnnp
+├── LICENSE
+├── README.md
+├── devlog.md
+└── month1-asm
+    ├── 01-add
+    │   ├── main.cpp
+    │   └── notes.md
+    ├── 02-stack
+    │   ├── ConsoleApplication1
+    │   │   ├── ConsoleApplication1.cpp
+    │   │   ├── ConsoleApplication1.sln
+    │   │   ├── ConsoleApplication1.vcxproj
+    │   │   └── ConsoleApplication1.vcxproj.filters
+    │   └── notes.md
+    └── 03-locals
+        └── notes.md
+
+```
+
+`LICENSE`:
+
+```
+MIT License
+
+Copyright (c) 2026 ogon-x
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
+`README.md`:
+
+```md
+# anticheat-lab
+
+Learning game anti-cheat by attacking and defending my own builds.
+
+## Rules
+
+- I only attack my own games and practice binaries (crackmes, CTF challenges).
+- Nothing here targets live multiplayer games or their anti-cheat.
+- Risky experiments run inside a VM.
+
+## Plan
+
+Six months, about 2 hours a day, one folder per month.
+
+1. Assembly and C++ memory layout
+2. Reverse engineering tools
+3. A deliberately cheatable multiplayer game
+4. Attacking it, then moving authority to the server
+5. Statistical detection
+6. Client-side checks, then breaking them
+
+## Progress
+
+Daily notes are in [devlog.md](devlog.md).
+```
+
+`devlog.md`:
+
+```md
+## 2026-10-19 (day 1)
+Learned: registers live inside the CPU and memory is RAM. 16 general purpose registers. eax is the low half of rax. On Windows x64, the first two int arguments arrive in ecx and edx and an int result goes back in eax.
+Built or broke: read add(int, int) in Compiler Explorer at /Od (9 lines, saves arguments to stack memory and reloads them) and /O2 (1 lea plus ret, all in registers). Typed /02 with a zero first, which made both outputs look identical.
+Stuck on: DWORD PTR is a size label, not a pointer. lea does arithmetic without reading memory. ret 0 is a normal return, not a return value of 0. Why the compiler saves arguments to the stack at all.
+Tomorrow: stack, call and ret
+
+## Day 2 (20 to 27 Oct)
+
+Done:
+- Finished the OST2 hex arithmetic exercise (add and subtract up to 64 bit).
+- Wrote stack-demo (square and sum_of_squares) and stepped through it with F11 in the Disassembly window, watching rsp and the Memory window.
+
+What I learned:
+- call pushes an 8 byte return address and jumps. ret pops it into rip. rsp goes down 8, then up 8.
+- Each function reserves stack with sub rsp,N and undoes it before ret, so rsp points at the return address right before ret.
+- The return address on the stack was the address of the next instruction after the call in the caller.
+- At /Od, a and b are saved into the 16 bytes above the return address. I think this is shadow space, to confirm in the Function Parameter Passing video.
+- Return values come back in rax: square(3) gave 9, square(4) gave 16.
+
+Where I got stuck:
+- Memory window was pointed at a random address and showed ??. Fix: type rsp in the address box.
+- Was stepping in the .cpp tab, which steps by line. Disassembly steps by instruction.
+- Restarting the program changes all the addresses, so only compare differences.
+- Forgot carries and borrows in the hex exercise a lot.
+
+## Day 3 (30 Oct)
+
+Done:
+- Watched Calling Functions and Local Variables.
+- Stepped through SingleLocalVariable and SingleLocalVariable2 in the debugger on my own PC (retargeted the course projects to the newer toolset).
+- Filled in a step table and a stack diagram for the nested calls, and worked out why func2 reserves 38h and not 40h.
+
+What I learned:
+- Locals live in space reserved with sub rsp,N. mov [rsp],value stores a local, mov eax,[rsp] reads it back, add rsp,N gives the space back. After ret the old value is still in memory but below rsp.
+- call sets rip to the target and pushes the return address. ret pops it into rip and adds 8 to rsp.
+- Reserved sizes: func3 18h, func 28h, func2 38h, main 28h. Each one plus the 8 byte return address is a multiple of 16, because Windows x64 needs rsp 16-byte aligned at every call.
+- 40h would give 48h, which is not a multiple of 16.
+- A frame is padding (8) plus locals (16) plus shadow space (32), but only the parts a function needs. func2 needs all three, so 8+16+32 = 56 = 38h.
+- Shadow space is 32 bytes the caller reserves for the callee's 4 register arguments. To confirm in the Function Parameter Passing video.
+
+Where I got stuck:
+- Got the direction of call wrong twice (it lowers rsp).
+- Mixed up hex and decimal (48h is 72, not 48).
+- Thought ret read the local variable. It reads the return address.
+- The first build failed because the course projects used the VS 2019 toolset. Fix: retarget to the latest toolset.
+
+Next: DoubleLocalVariable.
+```
+
+`month1-asm/01-add/main.cpp`:
+
+```cpp
+#include <cstdio>
+
+__declspec(noinline) int add(int a, int b) {
+
+	return a + b;
+}
+
+int main() {
+	std::printf("%d\n", add(2, 3));
+	return 0;
+}
+```
+
+`month1-asm/01-add/notes.md`:
+
+```md
+\# 01-add
+
+
+
+Source:
+
+
+
+main.cpp
+
+int add(int a, int b)
+
+{
+
+&#x20;   return a + b;
+
+}
+
+
+
+On Windows x64, `a` arrives in `ecx` and `b` in `edx`. An `int` result goes back in `eax`.
+
+
+
+\## /Od (no optimisation)
+
+
+
+```asm
+
+int add(int,int) PROC          ; function start (a label for the assembler, not an instruction)
+
+mov DWORD PTR \[rsp+16], edx    ; store b (2nd argument, in edx) into stack memory at rsp+16
+
+mov DWORD PTR \[rsp+8], ecx     ; store a (1st argument, in ecx) into stack memory at rsp+8
+
+mov eax, DWORD PTR b$\[rsp]     ; load b back from rsp+16 into eax (b$ is the compiler's name for offset 16)
+
+mov ecx, DWORD PTR a$\[rsp]     ; load a back from rsp+8 into ecx (a$ is the name for offset 8)
+
+add ecx, eax                   ; ecx = ecx + eax, so ecx = a + b
+
+mov eax, ecx                   ; copy the sum into eax, where the caller expects an int result
+
+ret 0                          ; return to the caller (main), result is in eax
+
+int add(int,int) ENDP          ; function end (also not an instruction)
+
+```
+
+
+
+At /Od every variable lives in memory. The compiler saves each argument to the stack and loads it straight back before using it.
+
+
+
+\## /O2 (optimised)
+
+
+
+```asm
+
+int add(int,int) PROC                 ; function start
+
+lea eax, DWORD PTR \[rcx+rdx]          ; eax = rcx + rdx (a + b). lea does the arithmetic without reading memory, and writes the sum to a third register
+
+ret 0                                 ; return to the caller, result already in eax
+
+int add(int,int) ENDP                 ; function end
+
+```
+
+
+
+At /O2 the arguments are used straight from the registers they arrive in, so memory is never touched.
+
+
+
+\## Differences
+
+
+
+1./0d uses 6 instructions plus ret; four mov's, an add, and a final mov but /O2	uses 1 instruction plus ret: a single lea.
+
+2.the unoptimized version does a lot of busywork. it saves both arguments to memory, loads them back, adds them, and copies the sum into the result register. the optimised version just adds the two registers directly and writes the result in eax.
+
+3\. /0d uses rsp but /O2 doesn't.
+
+4\. /Od saves a and b from ecx and edx to the stack and loads them back before adding. /O2 reads them directly from rcx and rdx.
+
+5\. /0d needs move eax, ecx to get the sum but /O2 doesn't as it just gets it from lea eax, DWORD PTR \[rcx+rdx]
+
+
+
+\## What confused me
+
+
+
+\- Why does the compiler save arguments to \[rsp+8] and \[rsp+16] at all?
+
+
+```
+
+`month1-asm/02-stack/ConsoleApplication1/ConsoleApplication1.cpp`:
+
+```cpp
+#include <cstdio>
+
+__declspec(noinline) int square(int x)
+{
+    return x * x;
+}
+
+__declspec(noinline) int sum_of_squares(int a, int b)
+{
+    int sa = square(a);
+    int sb = square(b);
+    return sa + sb;
+}
+
+int main()
+{
+    int result = sum_of_squares(3, 4);
+    std::printf("%d\n", result);
+    return 0;
+}
+```
+
+`month1-asm/02-stack/ConsoleApplication1/ConsoleApplication1.sln`:
+
+```sln
+
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.37710.0 d17.14
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ConsoleApplication1", "ConsoleApplication1.vcxproj", "{353BF7E0-6A81-4E82-8526-EC88C69AA93F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{353BF7E0-6A81-4E82-8526-EC88C69AA93F}.Debug|x64.ActiveCfg = Debug|x64
+		{353BF7E0-6A81-4E82-8526-EC88C69AA93F}.Debug|x64.Build.0 = Debug|x64
+		{353BF7E0-6A81-4E82-8526-EC88C69AA93F}.Debug|x86.ActiveCfg = Debug|Win32
+		{353BF7E0-6A81-4E82-8526-EC88C69AA93F}.Debug|x86.Build.0 = Debug|Win32
+		{353BF7E0-6A81-4E82-8526-EC88C69AA93F}.Release|x64.ActiveCfg = Release|x64
+		{353BF7E0-6A81-4E82-8526-EC88C69AA93F}.Release|x64.Build.0 = Release|x64
+		{353BF7E0-6A81-4E82-8526-EC88C69AA93F}.Release|x86.ActiveCfg = Release|Win32
+		{353BF7E0-6A81-4E82-8526-EC88C69AA93F}.Release|x86.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {DE7EFEAB-13E6-4475-B78A-924DDD1B3783}
+	EndGlobalSection
+EndGlobal
+
+```
+
+`month1-asm/02-stack/ConsoleApplication1/ConsoleApplication1.vcxproj`:
+
+```vcxproj
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>17.0</VCProjectVersion>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectGuid>{353bf7e0-6a81-4e82-8526-ec88c69aa93f}</ProjectGuid>
+    <RootNamespace>ConsoleApplication1</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="ConsoleApplication1.cpp" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
+```
+
+`month1-asm/02-stack/ConsoleApplication1/ConsoleApplication1.vcxproj.filters`:
+
+```filters
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="ConsoleApplication1.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
+```
+
+`month1-asm/02-stack/notes.md`:
+
+```md
+\# Day 2: the stack
+
+
+
+call pushes the 8 byte return address, then jumps. ret pops 8 bytes into rip.
+
+
+
+rsp (last 3 hex digits, one run):
+
+\- start of main: 9C8
+
+\- on call sum\_of\_squares: 8B0 (main setup: push rbp, push rdi, sub rsp,108h = -280)
+
+\- inside sum\_of\_squares: 8A8 (-8, return address)
+
+\- on call square: 770 (setup = -312)
+
+\- inside square: 768 (-8)
+
+\- square body: 670 (setup = -248)
+
+\- on ret in square: 768 (lea + 2 pops undo the setup)
+
+\- after ret: 770 (+8)
+
+
+
+Return address at rsp after call = address of the instruction after the call in main.
+
+square(3) = 9, square(4) = 16 (0x10), both returned in rax.
+
+
+
+a and b are saved by mov \[rsp+8],ecx and mov \[rsp+10h],edx into the 16 bytes above the return address (shadow space, to confirm in the video).
+
+
+
+Not yet seen: the final ret from sum\_of\_squares back into main.
+
+
+```
+
+`month1-asm/03-locals/notes.md`:
+
+```md
+\# Day 3: local variables and stack frames
+
+
+
+SingleLocalVariable:
+
+\- sub rsp,18h reserves 24 bytes. mov dword ptr \[rsp],5CA1AB1Eh stores i at rsp+0. mov eax,\[rsp] copies it into eax for the return. add rsp,18h gives the space back.
+
+\- After ret the value is still in memory but below rsp, so it can be overwritten at any time.
+
+
+
+SingleLocalVariable2 (main -> func -> func2 -> func3):
+
+\- call pushes the return address and sets rip to the call target. ret pops it into rip and adds 8 to rsp.
+
+\- Reserved sizes: func3 18h (24), func 28h (40), func2 38h (56), main 28h (40).
+
+\- Each size plus the 8 byte return address is a multiple of 16 (Windows x64 needs rsp 16-byte aligned at every call).
+
+\- func2 is 38h and not 40h because 40h + 8 = 48h (72), which is not a multiple of 16.
+
+\- Frame breakdown: 8 padding + 16 locals + 32 shadow space. func3 = 8+16, func = 8+32, func2 = 8+16+32.
+
+\- Shadow space is 32 bytes the caller reserves for the callee's 4 register arguments (rcx, rdx, r8, r9). To confirm in the Function Parameter Passing video.
+
+
+
+Mistakes: wrong direction for call (it lowers rsp), mixed up hex and decimal (48h is 72, not 48), thought ret reads i (it reads the return address).
+
+
+```
