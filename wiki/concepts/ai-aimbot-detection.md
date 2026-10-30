@@ -54,7 +54,8 @@ sources:
   - wiki/sources/README-categories.md
   - wiki/sources/descriptions/ahuhu789__pubg-bigdata-analytics.md
   - wiki/sources/descriptions/ressiws__AegisAC.md
-updated: 2026-10-27
+  - wiki/sources/descriptions/mihaigsm2003__CS2-AntiCheat.md
+updated: 2026-10-30
 confidence: medium
 ---
 
@@ -89,6 +90,7 @@ Tabular engagement features (reaction time, curvature stats, dx/dy correlation, 
 ## Corpus examples
 
 - [[cs2ac]] — CS2 Metamod:Source server plugin; ~17 behavioral modules for aimbot/aimlock/silent aim/movement/input abuse on dedicated servers (no client install)
+- [[mihaigsm2003-cs2-anticheat]] — mihaigsm2003 Metamod:Source CS2 plugin; eighteen configurable server-side modules for aim assistance, trigger/silent aim, movement/subtick abuse, invalid cvars/inputs, and DLL-related client events via Source 2 hooks, detours, movement analysis, and client cvar queries—dedicated-server rule classes without client install (source: wiki/sources/descriptions/mihaigsm2003__CS2-AntiCheat.md)
 - [[plugify-cs2ac]] — ViTaminza Plugify/s2sdk port of [[cs2ac]]; server-side usercmd/movement/aim/shot/input-history and client-cvar analysis via Polyhook `libserver.so` detours and s2sdk hooks; rule-based aimbot/triggerbot/movement classes for dedicated-server operators (source: wiki/sources/descriptions/ViTaminza__plugify-cs2ac.md)
 - [[cs2-anticheat-pandathebeasty]] — pandathebeasty CounterStrikeSharp modular server-side rule checks (aimbot snaps, backtrack, bhop, rapid fire, impossible yaw, no-recoil, UserCmdRate, AntiDLL gamedata hooks) with per-module JSON log/kick/ban for community/competitive dedicated servers (source: wiki/sources/descriptions/pandathebeasty__cs2-AntiCheat.md)
 - [[aegis-ac-cs2]] — ressiws SwiftlyS2 CS2 server plugin; trajectory/angle heuristics with sub-tick user-command correlation and weapon-fire→damage pairing; sliding-window evidence before sanctions—client-free dedicated-server aim telemetry (source: wiki/sources/descriptions/ressiws__AegisAC.md)
