@@ -13,11 +13,16 @@ confidence: medium
 
 **echo-reverse** (NetVar1337/echo-reverse) is a Windows desktop reverse-engineering workbench that connects to live game and application targets through the Echo backend. The UI is Tauri + React; AngelScript agents run over a local WebSocket relay. (source: wiki/sources/descriptions/NetVar1337__echo-reverse.md)
 
+## Architecture
+
+Front end: **Tauri + React**. Analysis agents: **AngelScript** over a local **WebSocket** relay to the **Echo** backend, which attaches to live game and application processes for memory and code views. (source: wiki/sources/descriptions/NetVar1337__echo-reverse.md)
+
 ## Capabilities
 
 - **Live analysis:** disassembly, PE and string analysis, memory scanning and watches, function emulation via Echo-backed memory access.
 - **Engine tooling:** Unreal, Unity IL2CPP, and Source 2 inspection helpers in one workspace.
-- **Automation:** AngelScript templates, overlay design, Frida integration, deobfuscation helpers, and an **MCP endpoint** for external agent-driven workflows.
+- **Automation:** AngelScript templates (stock templates), overlay design, Frida integration, deobfuscation helpers, and an **MCP endpoint** for external agent-driven workflows.
+- **Extended lanes:** kernel and network tooling alongside user-mode RE in the same workbench. (source: wiki/sources/descriptions/NetVar1337__echo-reverse.md)
 
 ## Audience
 
