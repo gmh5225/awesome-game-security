@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-30** — ingest `description:kingsjoys/kingsSafe`: entity [[kings-safe]] (stack table C#/Python/JS; mechanism probes); cited on [[overviews/anti-cheat]] (obfuscation + Anti Cheat catalog blurb) and [[overviews/game-engine]] (Unity protection lane); `index.md` entity blurb; frontmatter source `kingsjoys__kingsSafe.md`.
+
 - **2026-10-30** — ingest `readme:categories`: **Anti Cheat** link_count **851** (+1; kingsjoys/[[kings-safe]] Unity client-hardening research in Game Engine Protection:Unity) / **Cheat** **2972** and other major README sections unchanged; 41 top-level sections (`NeverC & NeverD` placeholder); synced [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/game-engine]]; entity [[kings-safe]]; light `index.md` section notes (no per-category pages).
 
 - **2026-10-30** — lint (agent, Cursor lint pass): read `wiki/AGENTS.md`; listed **Overviews** (9) `wiki/overviews/*.md`: `anti-cheat`, `dma-attack`, `game-engine`, `game-hacking`, `graphics-api`, `mobile-security`, `overview`, `reverse-engineering`, `windows-kernel`; **Concepts** (51) `wiki/concepts/*.md`; **Entities** (4222) `wiki/entities/*.md`; reconciled `index.md` catalog `](overviews|concepts|entities/*.md)` paths vs disk — 4282 paths (9+51+4222), 0 missing, 0 dead, 0 duplicate; nine `overviews/*.md` overview-body + `index.md` ## Overviews / ## Concepts blurb [[wikilink]] spot-check, 0 broken, 0 malformed `]]]`; 6 expected cross-kind slug collisions ([[anti-cheat]], [[game-hacking]], [[reverse-engineering]], [[byovd]], [[dma]], [[il2cpp]]); wiki populated — bootstrap not required; structural repairs none (`log.md` only).
