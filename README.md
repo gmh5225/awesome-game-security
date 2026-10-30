@@ -3644,6 +3644,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/201580ag/AssaultCube_Cheat
 - https://github.com/kotae4/lab-esp-and-aimbot [Walkthrough of an ESP and aimbot cheat from scratch]
 - https://github.com/s7shvets7s/simple_ac_internal_cheat [Educational C++20 AssaultCube internal: hooks, ESP, aimbot, ImGui overlay]
+- https://github.com/jerryshell/ac-esp [Rust-built 32-bit ESP overlay DLL for AssaultCube 1.3.0.2 with injection notes, tests, and release builds]
 
 > Game:Valorant
 - https://github.com/apekros/valorant_offsets [Offset]
@@ -4102,6 +4103,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 
 > Game:Geometry Dash
 - https://github.com/gmh5225/gd-internal
+- https://github.com/ToldByNun/earlybuffering-gd [Geode mod (MIT) that buffers early jump input using shadow physics simulation for Geometry Dash 2.2081 timing assist]
 
 > Game:8ball pool
 - https://github.com/gmh5225/Alaa-8ball-pool-source-exposed
@@ -4774,6 +4776,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/5hux1n/bytedance-jb-research [Documented iOS RE of ByteDance apps’ shared jailbreak, injection, and device-integrity detection (static Capstone/ObjC indexing plus read-only Frida validation)]
 - https://github.com/Shrawan-13/ff-dts-analysis [Defensive Il2CPP static-analysis pipeline for Free Fire MAX (XOR metadata decrypt, Il2CppDumper workflow) to research client-side aim/cheat mechanics]
 - https://github.com/LooperSalty/cs2-tracker [CS2 stats tracker with local FastAPI, Game State Integration live match feed, and explainable heuristic anti-cheat suspicion scoring]
+- https://github.com/ShaniTheDeveloper/Adaptive_Anti-Cheat_Stream_Processor [C++/Qt desktop pipeline that ingests simulated gameplay telemetry and flags suspicious patterns with Bloom filters, count-min sketches, and sliding windows]
 - https://github.com/ConWan30/qortime-ai [Muse explain/red-team and SAM visualization layer on deterministic console match-integrity receipts; AI advisories cannot upgrade referee verdicts]
 - https://github.com/oykuoner/YAACS-AntiCheat [CS2 anti-cheat research pipeline that parses HLTV demos with demoparser2, extracts spatiotemporal aim telemetry, and benchmarks heuristic plus ML aimbot classifiers]
 - https://github.com/magicnothief/cs2-overwatch [Offline CS2 demo review pipeline with aim/behavior models, ray-cast visibility checks, calibrated suspicion scoring, and optional local LLM evidence summaries]
