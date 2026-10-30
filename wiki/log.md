@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-30** — ingest `description:Ogonx/anticheat-lab`: enriched entity [[anticheat-lab]] (six-month VM-scoped attack/defense curriculum on own vulnerable builds; curriculum arc + Compiler Explorer/VS early tooling sections); cited [[overviews/reverse-engineering]] Guides lane; refreshed `index.md` entity blurb.
+
 - **2026-10-30** — ingest `description:staromodny/miata`: enriched entity [[miata]] (D3D9/Daisy external minimap; cs2-dumper offset file; modular RPM/entity/pawn/D3D layers; RE/AC audience); cited [[overviews/game-hacking]] native CS2 external radar lane and [[overviews/reverse-engineering]] CS2 client architecture blurb; refreshed `index.md` entity blurb.
 
 - **2026-10-30** — ingest `readme:categories`: **Cheat** link_count **2976** (+1; staromodny/[[miata]] FOSS external CS2 D3D9 radar) / **Anti Cheat** **854** (+1; Ogonx/[[anticheat-lab]] VM-scoped educational self-study lab); 41 top-level sections (`NeverC & NeverD` placeholder); synced [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]]; entities [[miata]], [[anticheat-lab]]; light `index.md` section notes (no per-category pages).
