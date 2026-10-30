@@ -839,7 +839,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [cs2-tracker](entities/cs2-tracker.md) — CS2 stats tracker with local FastAPI, Game State Integration live match feed, and explainable heuristic anti-cheat suspicion scoring (LooperSalty)
 - [NullCS](entities/nullcs.md) — offline CS2 `.dem` pipeline (demoparser2/awpy; CNN + XGBoost ~450-feature lobby ranks; Next.js/FastAPI upload workflows; evidence tables for human review—gjones01; not automated bans; Anti Cheat / Analysis Framework)
 - [cs2-overwatch](entities/cs2-overwatch.md) — CPU-friendly offline CS2 demo review pipeline (magicnothief; Python; hard rules + ray-cast visibility + CS2CD ML behavior scoring + calibrated suspicion tiers; optional local LLM verdicts via llama.cpp; web UI/CLI; ONNX + optional YOLO cross-checks; Anti Cheat / Analysis Framework)
-- [Miata](entities/miata.md) — FOSS external CS2 D3D9 radar overlay (C++/VS2022; cs2-dumper-aligned offsets; configurable layout; Cheat / game:cs2)
+- [Miata](entities/miata.md) — FOSS external CS2 D3D9 radar (C++/CMake VS2022; Daisy minimap overlay; cs2-dumper-aligned offset file; modular RPM/entity/D3D layers; text config; Cheat / game:cs2)
 - [cs2-webradar](entities/cs2-webradar.md) — CS2 browser-based radar cheat (C++/JavaScript; memory analysis / asset pipelines; gmh5225 and clauadv forks)
 - [csf (ekknod)](entities/csf.md) — CS:GO Linux SDK generation (C/C++; Linux SDK scaffold; cheat / game:csgo [Linux SDK])
 - [csf-w (ekknod)](entities/csf-w.md) — CS:GO Win SDK generation (C/C++; Windows SDK scaffold; cheat / game:csgo [Win SDK])

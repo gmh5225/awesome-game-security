@@ -6,12 +6,18 @@ sources:
   - wiki/sources/descriptions/staromodny__miata.md
   - wiki/sources/README-categories.md
 updated: 2026-10-30
-confidence: medium
+confidence: high
 ---
 
 # Miata
 
-**Miata** (staromodny/miata) is a free, open-source **external Counter-Strike 2 radar** for Windows: a standalone C++ executable (VS2022/CMake) that reads live client memory through configurable offsets (aligned with common dump tooling such as cs2-dumper) and draws teammate/enemy positions on a separate **Direct3D 9** overlay window via the header-only Daisy library. Layout, size, position, vertical sync, and capture visibility are driven by a simple text config. Process memory access, Valve-style entity/pawn structures, and a dedicated D3D device layer are split into small modules—useful as a readable reference for external radar architecture and offset-driven entity state on Source 2. (source: wiki/sources/descriptions/staromodny__miata.md)
+**Miata** (staromodny/miata) is a free, open-source **external Counter-Strike 2 radar** for Windows: a standalone C++ executable (VS2022/CMake) that reads live client memory through configurable offsets (aligned with common dump tooling such as [[cs2-dumper]]) and draws teammate/enemy positions on a separate **Direct3D 9** overlay window via the header-only Daisy library. Layout, size, position, vertical sync, and capture visibility are driven by a simple text config. Aimed at game-security researchers, reverse engineers, and anti-cheat developers studying external memory radar on CS2. (source: wiki/sources/descriptions/staromodny__miata.md)
+
+## Architecture
+
+- **Memory:** out-of-process reads of the CS2 client; offsets loaded from a text file (cs2-dumper–compatible refresh workflow).
+- **Game state:** Valve-style entity and pawn structures parsed into radar positions.
+- **Rendering:** dedicated D3D9 device layer + Daisy minimap-style overlay (separate window from the game).
 
 ## Catalog
 
@@ -23,4 +29,4 @@ Listed under README **Cheat** → CS2 external/radar lanes beside browser stacks
 
 ## Related
 
-[[cs2-webradar]] · [[cs2-offsets]] · [[cs2-dma-radar]] · [[world-to-screen]] · [[present-hook]] · [[overviews/game-hacking]] · [[overviews/graphics-api]]
+[[cs2-dumper]] · [[cs2-webradar]] · [[cs2-offsets]] · [[cs2-dma-radar]] · [[world-to-screen]] · [[present-hook]] · [[overviews/game-hacking]] · [[overviews/graphics-api]] · [[overviews/reverse-engineering]]
