@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-31** — lint: read `wiki/AGENTS.md`; catalog vs disk — **Overviews** 9, **Concepts** 51, **Entities** 4236; `index.md` paths 4296, 0 missing, 0 dead; overview [[wikilink]] spot-check (13184 body + 1013 index blurb), 0 broken; 6 cross-kind slug collisions (expected); bootstrap not required; `index.md` unchanged; edits: `log.md` only.
+
 - **2026-10-31** — lint (agent, Cursor lint pass): read `wiki/AGENTS.md`; **Overviews** (9) `wiki/overviews/`: `anti-cheat`, `dma-attack`, `game-engine`, `game-hacking`, `graphics-api`, `mobile-security`, `overview`, `reverse-engineering`, `windows-kernel`; **Concepts** (51) `wiki/concepts/`; **Entities** (4236) `wiki/entities/`; reconciled `index.md` catalog `](overviews|concepts|entities/*.md)` paths vs disk — 4296 paths (9+51+4236), 0 missing, 0 dead, 0 orphan; nine `overviews/*.md` overview-body (13184 [[wikilink]]s) + `index.md` ## Overviews / ## Concepts blurb (1013 links) spot-check, 0 broken, 0 malformed `]]]`; 6 expected cross-kind slug collisions ([[anti-cheat]], [[game-hacking]], [[reverse-engineering]], [[byovd]], [[dma]], [[il2cpp]]); wiki populated — bootstrap not required; `index.md` unchanged; structural repairs none (`log.md` only).
 
 - **2026-10-31** — ingest `description:weltling/virtio-villain-mshv`: enriched entity [[virtio-villain-mshv]] (confidence high; stack/orchestration + structured MSHV UAPI test coverage; nested Hyper-V appliance via Virtio Villain); cited [[overviews/game-hacking]] QEMU/KVM guest-introspection lane + [[overviews/windows-kernel]] Linux MSHV UAPI validation blurb; refreshed `index.md` entity blurb.
