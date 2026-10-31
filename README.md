@@ -2853,6 +2853,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/ertunc-ozbay/pointblank-linux [Rust standalone launcher to run Point Blank (Zepetto/TAM) on Linux with unmodified CheatBlocker anti-cheat via Wine-GE/Proton, TLS-aligned runner, and prefix setup]
 - https://github.com/BlaMacfly/ArchMod [Native Rust/Tauri cheat panel for Steam games on Proton: launch Windows trainers in the correct prefix, scan memory natively, and share community address profiles]
 - https://github.com/DeckCheatz/DeckCheatz [AGPL Rust trainer launcher for Steam Deck and Linux with Flatpak/Nix packaging and Proton/Wine-friendly trainer UI]
+- https://github.com/Qiming-Liu/Decky-Game-Cheats-Manager [Decky Loader plugin to search, download, and launch Game Cheats Manager trainers on Steam Deck with Proton sidecars and per-game associations]
 
 > Anti Screenshot
 - https://github.com/KANKOSHEV/NoScreen [Hide Window]
