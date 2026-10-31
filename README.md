@@ -723,6 +723,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 
 > Emulation 
 - https://github.com/code-tom-code/Software_D3D9 [DX9]
+- https://github.com/jenissimo/bottleship [Browser HLE that boots x86 Win32 PEs and reimplements Win32/COM plus DirectDraw/Direct3D 3–9 on WebGPU/WebAudio/OPFS for classic Windows games]
 
 > Compatibility
 - https://github.com/CnCNet/cnc-ddraw [Old Game]
@@ -1151,6 +1152,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/wallds/NoVmpy
 - https://github.com/can1357/NoVmp [Static VMProtect x64 3.x devirtualizer powered by VTIL]
 - https://github.com/sexyiam/VMPLift [Emulation-first VMProtect 3.8–3.10+ x64 handler walker and lifter for VIP tracing, devirtualization, and closed-form recovery in IDA/Ghidra workflows]
+- https://github.com/Aetherx86/VMP_DEVIRT [Integrated research suite for 64-bit VMProtect 3.x, Themida 3.x, and Tigress: hybrid unpacking, Triton/concolic analysis, handler recovery, and LLVM IR lifting for devirtualization]
 - https://github.com/JonathanSalwan/VMProtect-devirtualization [Experimental VMProtect 3.x pure-function deobfuscation via symbolic execution and LLVM]
 - https://github.com/fare9/dragons-vs-vms [VMProtect x64 devirtualization lab: dragon-tales symbolic handler analysis, all 256 handler slots classified, LLVM IR recovery, and protected sample binaries with Binary Ninja databases]
 - https://github.com/gmh5225/VMP-Vmp3_64bit_disasm-prerelease-
@@ -4624,6 +4626,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/gmh5225/be_shellcode_dump [Reversed BE Shellcode]
 - https://github.com/codetronik/AndroidAntiCheat [Android Platform]
 - https://github.com/Lazenca/Lazenca-S [Android Platform]
+- https://github.com/sonekkdev/sonekk-guard1 [PolyForm-licensed client-side anti-cheat for standalone VR (Quest/Pico): Frida/root/debugger/hook and integrity checks with signed reports and server-side scoring; Unity package and Node server]
 - https://github.com/MrDiamond64/Scythe-AntiCheat [Minecraft]
 - https://github.com/GrimAnticheat/Grim [Minecraft]
 - https://github.com/InertiaOrg/Inertia [Open-source Minecraft anti-cheat foundation with version-neutral movement/packet modeling, evidence accumulation, and testable detection core]
