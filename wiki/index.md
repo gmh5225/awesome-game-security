@@ -369,7 +369,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Android-VirtualCam-Manager](entities/android-virtualcam-manager.md) — Magisk/Zygisk virtual camera (ArtHook Camera1 NV21/surface injection; no LSPosed; camera spoofing / liveness AC research)
 - [VirtualApp](entities/virtual-app.md) — Android app virtualization framework (cloned apps in isolated container; Xposed + SandHook; virtual package/process/component management; mobile RE / multi-instance sandbox; ServenScorpion)
 - [VirtualMachine](entities/virtualmachine.md)
-- [Virtio Villain MSHV](entities/virtio-villain-mshv.md) — Linux MSHV UAPI partition/VP test suite via Virtio Villain nested Hyper-V (Cloud Hypervisor/OpenVMM; C/Python; Cheat / Guest introspection; weltling)
+- [Virtio Villain MSHV](entities/virtio-villain-mshv.md) — Linux MSHV UAPI test suite (partition lifecycle, VP/CPUID, guest memory, IRQ eventfds); Virtio Villain nested Hyper-V via Cloud Hypervisor or OpenVMM+KVM; C/Python/Make; Cheat / Guest introspection; weltling
  — VM Studio full guest Android VM on ARM64 host (native C isolation + Kotlin UI; chrooted rootfs, syscall translation, Vulkan/OpenGL ES; Magisk root toggle, Xposed, Google Play, camera/sensor/VPN passthrough; wumingzhinu; Cheat Android Emulator)
 - [android-touch](entities/android-touch.md) — C/C++ Android touch-input driver (triggerbot & aimbot; driver development; gmh5225)
 - [android_virtualTouch](entities/android-virtual-touch.md) — ARM64 NDK uinput virtual touch (tap/swipe/multi-touch; rooted; game automation)
