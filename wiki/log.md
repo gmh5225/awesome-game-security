@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-31** — ingest `description:danielalves96/gow-pc-port`: enriched entity [[gow-pc-port]] (Rust MIPS/R5900 static recompiler + ELF tooling + parity checks; C++ IOP/runtime; VU1/texture hooks; OpenGL host; Tauri/React launcher, widescreen, in-game cheat menu; BYO disc); cited on [[concepts/static-runtime-evidence]] PS2 static-recomp cluster + [[overviews/reverse-engineering]] Console/QEMU lane; `index.md` entity blurb updated.
+
 - **2026-10-31** — ingest `description:pIat0n/IDA-Plugin-Strings-decryptor-Anogs`: expanded entity [[ida-plugin-strings-decryptor-anogs]] (IDAPython Anogs/ACE string decrypt; ARM32/ARM64 routing, xref decryptors, ADR/ADRL inference, Hex-Rays/disasm comments + JSON export); cited on [[overviews/reverse-engineering]] and [[concepts/mobile-anti-cheat]]; cross-linked [[ida-gameguard-str-dec]], [[ida-jm-xorstr-decrypt-plugin]], [[ff-ace-anticheat-analysis]]; light `index.md` entity blurb.
 
 - **2026-10-31** — ingest `readme:categories`: **Cheat** link_count **2978** (+2; danielalves96/[[gow-pc-port]] God of War PS2 static recomp + piat0n/[[ida-plugin-strings-decryptor-anogs]] Anogs/ACE IDA string decryptor) / **Anti Cheat** **854** and other major README section counts stable; 41 top-level sections (`NeverC & NeverD` placeholder); synced [[overviews/overview]], [[overviews/game-hacking]], [[overviews/reverse-engineering]], [[overviews/dma-attack]]; entities [[gow-pc-port]], [[ida-plugin-strings-decryptor-anogs]]; light `index.md` section notes (no per-category pages).
