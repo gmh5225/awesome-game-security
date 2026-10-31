@@ -809,6 +809,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/guided-hacking
 - https://gamehacking.academy
 - https://github.com/GameHackingAcademy
+- https://github.com/deavers/re-dojo [Interactive offline game-hacking and reverse-engineering academy: tiered curriculum, C++20 dojo labs, crackmes, auto-grader, and a companion web RPG]
 - https://github.com/GameHackingBook/GameHackingCode [Example code for the No Starch Press Game Hacking book]
 - https://areweanticheatyet.com [A list of games using anti-cheats]
 - https://github.com/aclist/aclist.github.io [Anti-cheat compatibility list]
@@ -3303,6 +3304,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 
 > Explore AntiCheat System:FACEIT
 - https://github.com/ekknod/EC_PRO-LAN
+- https://github.com/redlanterndev/faceoff [Portable Windows utility to disable FACEIT's FACEIT_AC.sys kernel driver and service when not playing CS2, then re-enable before matches (with documented reboot flow)]
 
 > Explore AntiCheat System:CS2
 - https://github.com/danielkrupinski/cs2-anticheat
@@ -4126,6 +4128,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 > Game:Chess
 - https://github.com/gmh5225/lc0 [Chess Engine]
 - https://github.com/gmh5225/Stockfish [Chess Engine]
+- https://github.com/thatkidglitchy/chess-hacks [Client-side Chess Assist userscripts (Tampermonkey/mobile) using Stockfish for auto-play, move hints, eval bar, and opponent engine-use heuristics on chess.com]
 
 > Game:BLOCKPOST
 - https://github.com/gmh5225/BLOCKPOST-Cheat
@@ -4428,6 +4431,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/AtakanKeser/BlastScale [Server-authoritative mobile puzzle backend with move-replay anti-cheat, exactly-once rewards, and LiveOps tooling]
 - https://github.com/StanislawGolec/Ultimo [Java 21 authoritative multiplayer card-game server with fog-of-war hand hiding, virtual threads, and WebSockets]
 - https://github.com/Ogonx/anticheat-lab [Six-month self-study lab attacking and defending deliberately vulnerable own-game builds, with ASM/C++ memory exercises, devlog, and VM-only scope]
+- https://github.com/senolbasyigit/anticheat-lab [Claude Code skill plus Python scripts to memory-scan your own dev builds (devbuild.json guard), report exposed client values, and suggest server-side validation fixes; optional pywinauto RPA mode]
 
 > Compile Time
 - https://github.com/ManulMap/malstring [Using c++23 compile-time magic to produce obfuscated PIC strings and arrays]
@@ -4636,6 +4640,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/maximumemails-cmd/RainInjectable [Injectable Windows C++/Java runtime that rebuilds the Rain 1.8.9 client-side cheat observer for Forge and Badlion, with JNI bootstrap, detection research docs, and local-only evidence review]
 - https://github.com/YcbrYL1/YCBR-AntiCheat [Paper 1.8.9 Minecraft anti-cheat plugin with 19 combat/movement/protocol checks, auth, DDoS protection, and admin GUI]
 - https://github.com/flameteamdev/LavaGuardAC [Open-source Bukkit/Spigot Minecraft server anti-cheat plugin with movement, combat, and block-break checks, violation tracking, admin GUI, and Discord webhook alerts]
+- https://github.com/mayankpatil3/vulcan-anticheat-built [From-scratch Paper/Spigot Minecraft anti-cheat plugin with movement/combat detections, violation tracking, alerts, and punishment commands]
 - https://github.com/ValenMyHeartDev/BloonAntiCheat [Paper/Spigot Minecraft server plugin with fly, reach, autoclicker, and triggerbot checks plus admin punishment flow]
 - https://github.com/NoCheatPlus/NoCheatPlus [Open-source anti-cheat plugin for Minecraft (Bukkit/Spigot)]
 - https://github.com/AndrewDisco/RektAntiCheat [Java Minecraft server anti-cheat (RAC) with combat, movement, and world checks consolidated from community sources]
