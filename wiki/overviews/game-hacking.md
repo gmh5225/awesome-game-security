@@ -665,6 +665,7 @@ sources:
   - wiki/sources/descriptions/Jesewe__VioletWing.md
   - wiki/sources/descriptions/Jiang-Night__Kernel_driver_hack.md
   - wiki/sources/descriptions/JoinChang__ghostlock-oneplus.md
+  - wiki/sources/descriptions/Romk-a__CVE-2026-43499-ghostlock-vivo-x100-ultra-root.md
   - wiki/sources/descriptions/zsw125__o3root.md
   - wiki/sources/descriptions/mitschud__DirtyFrag.md
   - wiki/sources/descriptions/PierreCiholas__GetPixel-vs-BitBlt_GetDIBits.md
