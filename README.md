@@ -1573,6 +1573,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/BuSung-dev/Root-My-Galaxy [Samsung Galaxy KernelSU installer — CVE-2026-43499]
 - https://github.com/alex193a/Root-My-Pixel [Jailbreak supported Google Pixel phones with CVE-2026-43499]
 - https://github.com/JoinChang/ghostlock-oneplus [GhostLock (CVE-2026-43499) futex PI UAF exploit with multi-device offset tables for locked-bootloader OnePlus/OPPO/realme/Xiaomi root + KernelSU]
+- https://github.com/Romk-a/CVE-2026-43499-ghostlock-vivo-x100-ultra-root [GhostLock PI-futex exploit port for Vivo X100 Ultra with KernelSU and vr.ko anti-root bypass research]
 - https://github.com/zsw125/o3root [Shizuku-driven CVE-2026-98260 LPE chain with matching KernelSU-family LKM loader for Xiaomi yingtian/lhasa (HyperOS 4, kernel 6.18.21)]
 - https://github.com/YuKongA/ghostlock-app [GhostLock One-Tap Execution App - CVE-2026-43499]
 - https://github.com/mitschud/DirtyFrag [Ephemeral root via the CVE-2026-43284 page-cache exploit]
@@ -2336,6 +2337,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/anhkgg/SuperDllHijack [A general DLL hijack technology]
 - https://github.com/ctxis/DLLHSC [DLL Hijack SCanner]
 - https://github.com/kjjkjjzyayufqza/DDGACreg [TG4AC version.dll proxy hook (MinHook) with free camera, NESYS/card server, and companion localhost content program]
+- https://github.com/00xJS/SR5-Tweak-Menu [dinput8.dll host and in-game tweak/cheat menu for Saints Row (2022) DX12 (Epic)]
 
 > Hook
 - https://github.com/stars/gmh5225/lists/hook [Lists]
@@ -3634,6 +3636,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/gmh5225/csgo2-cheat [Internal]
 - https://github.com/gmh5225/Aurora [Internal]
 - https://github.com/clouddss/cs2-internal-sdk [Internal]
+- https://github.com/gniesporek/internal-sdk [Minimal CS2 internal cheat SDK (C++/VS) with screenshots and version-tagged game support]
 - https://github.com/W1lliam1337/cstrike2-hack [Rust-based internal]
 - https://github.com/eden13378/CS2-DMA-Cheat [DMA]
 - https://github.com/gmh5225/CS2-Dma-Radar [DMA]
