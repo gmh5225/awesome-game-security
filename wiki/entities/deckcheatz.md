@@ -18,4 +18,4 @@ confidence: medium
 
 ## Related
 
-[[proton]] · [[archmod]] · [[ce-decky]] · [[ferret]] · [[freeplay]] · [[are-we-anti-cheat-yet]] · [[overviews/game-hacking]]
+[[proton]] · [[archmod]] · [[ce-decky]] · [[decky-game-cheats-manager]] · [[ferret]] · [[freeplay]] · [[are-we-anti-cheat-yet]] · [[overviews/game-hacking]]
