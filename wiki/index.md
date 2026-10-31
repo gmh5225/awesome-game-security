@@ -953,7 +953,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [DCMB](entities/dcmb.md) — dynamic kernel callback-list discovery without hardcoded offsets/signatures (GetRektBoy724; C driver; process/thread/image/registry/object/minifilter notify; debug-output learning PoC; AC/EDR callback inspection)
 - [Dainsleif](entities/dainsleif.md) — simple internal CS:GO cheat (RE training; cheat / game:csgo)
 - [Dani's Nightmare](entities/danis-nightmare.md) — BepInEx Harmony mod for Muck (C# runtime debug/cheat chat commands; player/enemy/item/powerup/time manipulation; Tab autocomplete from live memory; mod dev / RE / engine stress-test; PlinKuuu)
-- [Dashfile Manager](entities/dashfile-manager.md) — Windows .NET/Avalonia ADB + rooted Android device manager (Magisk/KernelSU/APatch module browse, AVB tooling, plugins; Cheat Android File Explorer; Eternal-Dash)
+- [Dashfile Manager](entities/dashfile-manager.md) — portable Windows .NET 8/Avalonia USB ADB host (optional root; file explorer, bulk apps, Magisk/KernelSU/APatch modules; AXML/DEX/APK/AVB viewers; `.dfp` plugins; Cheat Android File Explorer; Eternal-Dash)
 - [DakotaAC](entities/dakotaac.md) — Spigot/Paper Minecraft AC (ProtocolLib + Citizens2; combat/movement/inventory modules; YAML kick/ban)
 - [Darken Anti-Cheat](entities/darken-anticheat.md) — kernel AC PoC (driver comm / integrity / sigscan / debugger / overlay; C/C++)
 - [Dark Souls III Cheat Engine Guide](entities/dark-souls-iii-cheat-engine-guide.md) — The Grand Archives DS3 Cheat Engine table guide (cheat / game:dark souls [Cheat Engine])

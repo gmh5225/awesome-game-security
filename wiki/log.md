@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-31** — ingest `description:Eternal-Dash/Dashfile_Manager`: enriched entity [[dashfile-manager]] (portable Windows .NET 8/Avalonia USB ADB host; optional root; file explorer, bulk app management, Magisk/KernelSU/APatch modules, AXML/resources.arsc/DEX/APK-signature/AVB viewers, `.dfp` plugin API; mobile RE/game-security artifact inspection); cited [[overviews/game-hacking]] Android File Explorer lane + [[overviews/mobile-security]] PC-side device-manager blurb; refreshed `index.md` entity blurb.
+
 - **2026-10-31** — ingest `description:valentderah/totk-pc-recomp`: enriched entity [[totk-pc-recomp]] (Switch ARM64 NSO→C Python lifter, Unicorn differential validation, multi-build patch lists, Horizon/NVN/audio/input/fs HLE on Windows, Vulkan enhancements, llvm-mingw local compile; BYO assets); cited [[concepts/static-runtime-evidence]] Switch cluster + [[overviews/reverse-engineering]] Cheat/RE Tools blurb; refreshed `index.md` entity blurb.
 
 - **2026-10-31** — ingest `readme:categories`: **Cheat** link_count **2981** (+2; valentderah/[[totk-pc-recomp]] *TOTK* Switch static recomp + Eternal-Dash/[[dashfile-manager]] Windows ADB/root device manager) / **Anti Cheat** **854** and other major README section counts stable; 41 top-level sections (`NeverC & NeverD` placeholder); synced [[overviews/overview]], [[overviews/game-hacking]], [[overviews/reverse-engineering]], [[overviews/dma-attack]], [[overviews/mobile-security]], [[concepts/static-runtime-evidence]]; entities [[totk-pc-recomp]], [[dashfile-manager]]; light `index.md` section notes (no per-category pages).
