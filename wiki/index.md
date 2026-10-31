@@ -1454,7 +1454,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [FakePDB](entities/fakepdb.md) — synthetic PDB generation from IDA analysis (stripped PE symbol recovery; PDB Generation From IDA; gmh5225)
 - [FakeSign](entities/fakesign.md) — fake Authenticode signatures on PE binaries (superficial cert validation bypass; Fake Cert; gmh5225)
 - [FakeEnclave](entities/fake-enclave.md) — VBS enclave abuse PoC (Some Tricks / Windows Ring0; gmh5225)
-- [FaceOff](entities/faceoff.md) — redlanterndev C# WPF/CLI; disable FACEIT kernel driver/service between CS2 sessions; reboot-guided re-enable; Explore AntiCheat System:FACEIT
+- [FaceOff](entities/faceoff.md) — redlanterndev C# WPF/CLI + batch scripts; toggle `FACEIT_AC.sys`/FACEITService between CS2 sessions; boot-time driver → admin + restart; limit always-on kernel AC exposure; Explore AntiCheat System:FACEIT / Cheat
 - [FairCount](entities/faircount.md) — Fabric server/client mod/resource-pack whitelist AC (join-time mod inventory incl. nested jar-in-jar; SHA-256 hash verification; auto-permits Fabric API modules; admin commands + localized kicks; XuJun05; Anti Cheat / game:minecraft)
 - [fasd's Anti Cheat](entities/fasds-anti-cheat.md) — Fabric **1.21.11** client mod; heuristic nearby-player cheat spotting from server-sent data only; K/J ranked report and clear keys; violation decay; heuristic lag false-positive caveats; 3iden-del; Anti Cheat / Open Source Anti Cheat System)
 - [Farming Simulator 12 Mp Build](entities/farming-simulator-12-mp-build.md) — native Android FS12 multiplayer mod; runtime `libmultiplayermod.so` injection; Substrate hooks; UDP/TCP sync; Dear ImGui OpenGL ES 2 overlay; NDK armeabi; Cheat / Injection:Android

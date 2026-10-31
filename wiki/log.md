@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-31** — ingest `description:REDLANTERNDEV/FaceOff`: enriched entity [[faceoff]] (confidence high; `FACEIT_AC.sys`/FACEITService/client-process toggle with local settings persistence; boot-time driver → admin elevation + restart; C# WPF/CLI + batch scripts; CS2/competitive FPS operational exposure management); cited [[overviews/anti-cheat]] FACEIT AC lane + [[overviews/game-hacking]] Explore AntiCheat System:FACEIT blurb; refreshed `index.md` entity blurb.
+
 - **2026-10-31** — ingest `description:ThatKidGlitchy/chess-hacks`: enriched entity [[chess-hacks]] (confidence high; Automation & assist: userscripts/bookmarklets/extension + mobile Safari, Stockfish auto-play/hints/eval; Heuristic detection panel: centipawn loss, accuracy, best-move rate, suspicion gauge, full-game reanalysis); cited [[overviews/game-hacking]] Game:Chess browser-augmentation lane + [[concepts/ai-aimbot-detection]] offensive chess engine-correlation blurb; refreshed `index.md` entity blurb.
 
 - **2026-10-31** — ingest `description:deavers/re-dojo`: enriched entity [[re-dojo]] (confidence high; 18× C++20 memory/hook labs + crackmes, CE/trainer/DLL templates, PE/AOB/Z3 Python utils, web RPG + artifact grader dimensions); cited [[overviews/game-hacking]] Cheat guide lane + [[overviews/reverse-engineering]] Guides/indexes blurb; refreshed `index.md` entity blurb.
