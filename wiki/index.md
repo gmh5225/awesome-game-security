@@ -3628,7 +3628,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [source2sdk](entities/source2sdk.md) — generated Source 2 SDKs for multiple games (C++; game engine explorer:source)
 - [source2dumps](entities/source2dumps.md) — aggregated Source 2 netvars/interfaces/class IDs (Dota 2, Artifact, HL:Alyx, Sandbox; C++ headers; [Dump])
 - [Splendid Implanter](entities/splendid-implanter.md) — BattlEye-compatible user-mode injector (secret.club; exploits UM BE flaw; Injector)
-- [SR5 Tweak Menu](entities/sr5-tweak-menu.md) — Saints Row (2022) Epic DX12 dinput8.dll host with Lua 5.4 in-game tweak/cheat menu (memory R/W helpers, save-clean mode; offset/archive RE notes; 00xJS; DirectX / Hook)
+- [SR5 Tweak Menu](entities/sr5-tweak-menu.md) — Saints Row (2022) Epic DX12 dinput8.dll main-loop detour + Lua 5.4 in-engine script menu (memory R/W, save-clean cheat flags; Python offset/vtable/archive RE; 00xJS; DirectX / Hook)
 - [Spoof-RetAddr](entities/spoof-ret-addr.md) — x64 WinAPI return-address spoofing PoC (HulkOperator; C + NASM; stack manipulation; call-stack obfuscation education; Cheat Spoof Stack)
 - [Spoofer (AlfredIU)](entities/spoofer.md) — Windows C++ mixed overlay cheat + HWID-evasion package (user-mode aimbot/ESP/entity cache/projectile prediction via DirectX9 ImGui; kernel driver artifacts; cheat / HWID)
 - [SpoofingCollection](entities/spoofing-collection.md) — Magisk + LSPosed Android device-fingerprint profiles (build props + Build API hooks; Play Integrity / attestation research)

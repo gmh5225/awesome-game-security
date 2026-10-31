@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-31** — ingest `description:00xJS/SR5-Tweak-Menu`: enriched entity [[sr5-tweak-menu]] (confidence high; Epic DX12 Saints Row 2022; C dinput8.dll main-loop detour; Lua 5.4 menu + native Lua injection + memory R/W; save-clean cheat-flag mode; Python offset/vtable/archive RE); cited [[overviews/game-hacking]] proxy-DLL / Cheat lane + [[overviews/reverse-engineering]] Saints Row 2022 client blurb; refreshed `index.md` entity blurb.
+
 - **2026-10-31** — ingest `description:Romk-a/CVE-2026-43499-ghostlock-vivo-x100-ultra-root`: enriched entity [[ghostlock-vivo-x100-ultra-root]] (confidence high; Vivo X100 Ultra PD2366 PI-futex CVE-2026-43499; Kotlin/Compose + C++23 native + Rust GLK1 profiles; multicast/zerocopy/select-stack + KernelSnitch; vr.ko anti-root bypass research; KernelSU bootstrap); cited [[overviews/mobile-security]] Kernel drivers & CVE lanes + [[entities/cve-2026-43499-popsicle]] CVE family blurb; [[overviews/game-hacking]] source frontmatter; refreshed `index.md` entity blurb.
 
 - **2026-10-31** — ingest `description:gniesporek/internal-sdk`: enriched entity [[gniesporek-internal-sdk]] (confidence high; C++/VS internal CS2 DLL; pattern-scanned interfaces, schema offset map, threaded entity cache, MinHook engine/input/present detours, DX11 ImGui overlay, trace/hitbox/prediction stages; version-tagged support); cited [[overviews/game-hacking]] CS2 internal SDK lane + [[overviews/reverse-engineering]] Game clients (CS2) blurb; refreshed `index.md` entity blurb.
