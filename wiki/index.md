@@ -3813,7 +3813,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [tocode](entities/tocode.md) — binary-to-source export for coding agents (IDA Pro/radare2; decompile, similarity clustering, naming, Semgrep; buzzer-re)
 - [toon](entities/toon.md) — modular C++ graphics-demo engine (driver dev + OpenGL/Vulkan; benjinx; Game Engine / source)
 - [tool-diy-system-memory-dump](entities/tool-diy-system-memory-dump.md) — DIY live Windows system memory dump (crash-dump format; WinDbg / Volatility; gmh5225)
-- [Tears of the Kingdom PC Recomp](entities/totk-pc-recomp.md) — *TOTK* Switch static recomp to native Windows x64 with Vulkan renderer (BYO assets; valentderah; Cheat / Source)
+- [Tears of the Kingdom PC Recomp](entities/totk-pc-recomp.md) — *TOTK* Switch ARM64 NSO→C static lift, Unicorn differential tests, NVN/Vulkan runtime HLE, llvm-mingw build (BYO assets; valentderah; Cheat / Source)
 - [Tool-Tree](entities/tool-tree.md) — Android ROM/APK unpack-repack toolkit for ARM64 (boot/super/APK/APKS/APEX; apktool-style decode/build; root or non-root; Zenlua)
 - [tp-2dside-scroller-bp](entities/tp-2dside-scroller-bp.md) — UE5 2D side-scroller blueprint template (Paper2D starter project, sample assets, optional PaperZD; CobraCodeDev; Game Develop / [UE5 2D template])
 - [ToastyLink](entities/toastylink.md) — C++17 XBDM Xbox 360 trainer/debug (RGH/JTAG; pointer chains, scan/freeze, PPC patches, JSON cheat tables; Cheat Debugging)
