@@ -4069,7 +4069,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [vmdevirt-vtil](entities/vmdevirt-vtil.md) — broken VTIL VMP devirt demo (Fix VMP / IDA jmp-around-vmenter)
 - [VMProtect-devirtualization](entities/vmprotect-devirtualization.md) — experimental dynamic VMProtect 3.x pure-function deobfuscation (Intel Pin trace + Triton symbolic exec; LLVM IR lift for MBA simplification; JonathanSalwan; Fix VMP)
 - [vmp-devirtualization-lab](entities/vmp-devirtualization-lab.md) — Android native VMP devirt educational lab (mini-VM, dispatcher/handler recovery, symbolic lifting; QBDI/Unicorn/Triton/Frida; tomhamidi97-arch)
-- [VMP_DEVIRT](entities/vmp-devirt.md) — integrated VMProtect 3.x/Themida 3.x/Tigress unpack + Triton concolic handler recovery + LLVM IR devirt (Aetherx86; Cheat / Fix VMP)
+- [VMP_DEVIRT](entities/vmp-devirt.md) — CIA + VPC symbolic trace + Triton concolic handler recovery + MBA simplification; AETHER LLVM IR lift to x64 (VMProtect 3.x/Themida 3.x/Tigress; Aetherx86; Cheat / Fix VMP)
 - [vmp-unpacker](entities/vmp-unpacker.md) — C++ dynamic VMProtect unpacker (Win32 debug attach; PEB/ntdll anti-debug bypass; OEP discovery; mutated IAT rebuild; Fix VMP / Unpacker; Lucyferek-nunu)
 - [vmprotect-unpacker](entities/vmprotect-unpacker.md) — WIP dynamic VMProtect 3.8.x unpacker (C++ VS; DLL inject; OEP discovery, memory dump, IAT rebuild; bytecode devirt disasm; anti-debug hooks; EXE/DLL launch or PID attach; datcathuh; Fix VMP / Unpacker)
 - [VMPacker](entities/vmpacker.md) — ARM64 ELF VM code protection (Go; native→custom bytecode; indirect dispatch, chained encryption, CRC integrity, function-split obfuscation; demo programs; binary protection / VM obfuscation RE; LeoChen-CoreMind; AC Obfuscation Engine `[VM]`)
