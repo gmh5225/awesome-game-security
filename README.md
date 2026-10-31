@@ -2816,6 +2816,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/Qemu-Gang
 - https://github.com/memflow/memflow-kvm
 - https://github.com/IntroVirt/IntroVirt [Guest introspection library]
+- https://github.com/weltling/virtio-villain-mshv [Linux MSHV UAPI test suite for partition lifecycle and VP state via nested Hyper-V (Virtio Villain, Cloud Hypervisor or OpenVMM)]
 - https://github.com/MisterY52/apex_dma_kvm_pub
 - https://github.com/SamuelTulach/BetterTiming [Bypass CPU Timing]
 - https://github.com/WCharacter/RDTSC-KVM-Handler [Bypass RDTSC]
