@@ -1,0 +1,676 @@
+Project Path: arc_senolbasyigit_anticheat-lab_xg29tvu5
+
+Source Tree:
+
+```txt
+arc_senolbasyigit_anticheat-lab_xg29tvu5
+├── LICENSE
+├── README.md
+├── SKILL.md
+├── references
+│   ├── defense.md
+│   └── rpa.md
+└── scripts
+    ├── backend_windows.py
+    ├── common.py
+    ├── guard.py
+    ├── next_scan.py
+    ├── rpa_inspect.py
+    ├── rw.py
+    └── scan.py
+
+```
+
+`LICENSE`:
+
+```
+MIT License
+
+Copyright (c) 2026 Şenol
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
+`README.md`:
+
+```md
+# anticheat-lab
+
+A Claude skill for tamper-testing **your own** game builds before release. It finds values that are exposed in process memory, then produces server-side validation fixes and regression tests. It also has an RPA mode for automating third-party Windows apps without touching their memory.
+
+> Status: testing. The Windows backend has only been compile-checked so far. Android and iOS backends are not implemented yet.
+
+## Modes
+
+**Mode A: memory tamper testing (your own build only)**
+Scan for values such as health, ammo or currency, narrow the results, read them, and report which ones the client exposes. Every finding comes with a defense recommendation and a regression test.
+
+**Mode B: RPA for third-party apps**
+No memory access. Preference order: the app's own export or API, then UI Automation (`pywinauto`), then OCR.
+
+## Safety model
+
+- Mode A only works on a process whose executable has a `devbuild.json` manifest next to it with a matching SHA-256.
+- You create the manifest yourself and confirm you own the build:
+  ```
+  python scripts/guard.py create path\to\game.exe
+  ```
+- If the guard refuses, the scripts stop. Do not use this on live or online sessions, on processes protected by an anti-cheat service, or on software you do not own.
+- The guard is a safety rail for the AI workflow, not a security boundary. You are responsible for how you use this.
+
+## Install
+
+1. Copy the repo folder to `~/.claude/skills/anticheat-lab/` (on Windows: `C:\Users\<you>\.claude\skills\anticheat-lab\`). `SKILL.md` must sit directly inside it.
+2. Install Python 3. For RPA mode: `pip install pywinauto`.
+3. Restart Claude Code and check that `anticheat-lab` appears in `/skills`.
+
+## Usage
+
+Memory testing on your own build:
+
+```
+python scripts/guard.py create C:\dev\mygame.exe
+python scripts/scan.py <pid> int32 100
+python scripts/next_scan.py scan_state.json exact --value 93
+python scripts/rw.py read <pid> 0x1A2B3C4D int32
+```
+
+Or just ask Claude Code:
+
+> Use the anticheat-lab skill. This is my own build (PID: 1234), the manifest is ready. Find the health value, then write the findings with defenses and regression tests.
+
+RPA mode:
+
+> Use the anticheat-lab skill. Write an RPA script for Windows Calculator that multiplies 12 by 30 and reads the result. No memory scanning.
+
+## Layout
+
+```
+SKILL.md
+scripts/      scan, next_scan, rw, guard, backend_windows, rpa_inspect
+references/   defense.md, rpa.md
+```
+
+## Defense priorities
+
+1. Server authority over all game state
+2. Server-side validation of impossible deltas
+3. Telemetry anomaly detection
+4. Integrity signals
+5. Client-side obfuscation (a speed bump only)
+
+## License
+
+MIT
+
+```
+
+`SKILL.md`:
+
+```md
+---
+name: anticheat-lab
+description: Tamper-test the user's OWN game or app build for memory-editing cheats, then produce defenses (server-side validation, anomaly detection) and regression tests. Also provides an RPA mode for automating third-party Windows apps through exports, APIs and UI Automation. Use whenever the user mentions cheat testing, anti-cheat, memory scanning, Cheat Engine style testing of their own build, reverse engineering their own game, hardening a game before release, or automating a desktop app (accounting software, ERP, legacy tools) with macros or RPA, even if they do not use those exact words.
+---
+
+# anticheat-lab
+
+Two modes. Pick one before doing anything else.
+
+- Mode A: memory tamper testing of a build the user owns, followed by defenses.
+- Mode B: RPA for third-party apps. No memory access in this mode.
+
+## Hard rules
+
+1. Mode A runs only against a process whose executable has a `devbuild.json` manifest next to it with a matching SHA-256. `scripts/guard.py` enforces this and every script calls it.
+2. The user creates the manifest themselves with `python scripts/guard.py create <exe>`, which asserts they own the build. Never run `create` on the user's behalf and never write a manifest yourself.
+3. If the guard refuses, stop and tell the user why. Do not edit the guard, bypass it, or reach for another scanner or debugger.
+4. Never touch live or online game sessions, processes protected by an anti-cheat service, or any process that is not the verified dev build.
+5. Never use memory access on third-party applications. Use Mode B.
+6. Writes to memory are only for demonstrating that a tampered value is rejected. Use `rw.py write --confirm-dev-build` and record the result.
+
+## Mode A workflow
+
+1. Ask for engine, platform, and which values matter (health, ammo, currency, score, position, cooldowns). Confirm the build is theirs and the guard manifest exists.
+2. Scan: `python scripts/scan.py <pid> int32 <value>` then change the value in game and run `python scripts/next_scan.py <state.json> exact --value <new>` (modes: exact, changed, unchanged, increased, decreased) until a handful of addresses remain.
+3. Read the address with `rw.py read`. Optionally write a tampered value to see whether the game, and more importantly the server, accepts it.
+4. For each exposed value write a finding: value, how it was located, whether the client is authoritative, whether the server revalidates, impact.
+5. Read `references/defense.md` and attach defenses to each finding. Server-side validation comes first; client-side obfuscation is only a speed bump and must be labeled that way.
+6. Generate a regression test per finding (server rejects the impossible state, telemetry flags it) in the user's own test framework.
+7. Produce the report using the format in `references/defense.md`.
+
+## Platforms
+
+- Windows: implemented in `scripts/backend_windows.py`.
+- Android and iOS: not implemented yet. A backend must expose the same functions as `backend_windows.py` (`open_process`, `regions`, `read`, `write`, `image_path`). Android requires a `debuggable` build, iOS a dev-signed build with `get-task-allow`. Reject anything else, same as the guard does on Windows.
+- Linux: same interface via `/proc/<pid>/mem`, same guard requirement.
+
+## Mode B workflow (RPA)
+
+Read `references/rpa.md`. Order of preference:
+
+1. The app's own exports, database, API or COM interface.
+2. UI Automation: `python scripts/rpa_inspect.py "<window title regex>"` dumps the control tree; use names and automation ids to build the script.
+3. OCR and image matching as a last resort.
+
+Generated automations must include waits for controls, error handling, a dry-run flag, logging, and must run first against a copy of the data. Ask before writing into any accounting or financial record.
+
+```
+
+`references/defense.md`:
+
+```md
+# Defense guide
+
+Priority order for every finding:
+
+1. Server authority: the server owns health, ammo, currency, inventory, cooldowns, position. The client sends intent, never state.
+2. Server-side validation: reject impossible deltas (speed over max, damage over weapon cap, fire rate over cooldown, currency gain without a source event).
+3. Telemetry anomaly detection: per-session statistics on rates and deltas, flagged for review rather than auto-banned until tuned.
+4. Integrity signals: build signature checks, debugger and tamper detection. Treat as signals feeding the server, not as proof.
+5. Client-side value obfuscation (encrypted or split values, shadow copies): slows scanning, never relied on alone.
+
+## Finding format
+
+- Title
+- Value and where it lives
+- How it was located (scan steps)
+- Client authoritative? Server revalidates?
+- Impact
+- Fix (ordered as above)
+- Regression test name and what it asserts
+
+## Regression test patterns
+
+- Send a state update with an impossible delta and assert the server rejects it and logs an event.
+- Replay a recorded session with one tampered value and assert the anomaly detector flags it.
+- Assert the client never sends absolute values for server-owned fields.
+
+```
+
+`references/rpa.md`:
+
+```md
+# RPA mode
+
+No memory scanning of third-party apps. Addresses change on every update and the data is often sensitive.
+
+## Selection
+
+1. Export or API: CSV, Excel, XML, database access, COM. Check the app's documentation first.
+2. UI Automation with `pywinauto` (`backend="uia"`): find controls by name, control type or automation id, never by pixel position.
+3. OCR or image matching only if the control tree is empty (custom-drawn UI).
+
+## Procedure
+
+1. Run `scripts/rpa_inspect.py` on the target window and save the tree.
+2. Map each needed value or field to a control identifier.
+3. Write the automation with explicit waits, retries, timeouts, structured logging.
+4. Include `--dry-run` that reads and reports but does not write.
+5. Test on a copy of the data. Ask the user before any write to real records.
+6. Keep identifiers in one config block so app updates need a one-line fix.
+
+```
+
+`scripts/backend_windows.py`:
+
+```py
+import ctypes
+from ctypes import wintypes
+
+PROCESS_VM_OPERATION = 0x0008
+PROCESS_VM_READ = 0x0010
+PROCESS_VM_WRITE = 0x0020
+PROCESS_QUERY_INFORMATION = 0x0400
+PROCESS_QUERY_LIMITED_INFORMATION = 0x1000
+MEM_COMMIT = 0x1000
+PAGE_GUARD = 0x100
+PAGE_NOACCESS = 0x01
+READABLE = 0x02 | 0x04 | 0x08 | 0x20 | 0x40 | 0x80
+
+k32 = ctypes.WinDLL("kernel32", use_last_error=True)
+
+
+class MBI(ctypes.Structure):
+    _fields_ = [
+        ("BaseAddress", ctypes.c_void_p),
+        ("AllocationBase", ctypes.c_void_p),
+        ("AllocationProtect", wintypes.DWORD),
+        ("PartitionId", wintypes.WORD),
+        ("RegionSize", ctypes.c_size_t),
+        ("State", wintypes.DWORD),
+        ("Protect", wintypes.DWORD),
+        ("Type", wintypes.DWORD),
+    ]
+
+
+k32.OpenProcess.argtypes = [wintypes.DWORD, wintypes.BOOL, wintypes.DWORD]
+k32.OpenProcess.restype = wintypes.HANDLE
+k32.CloseHandle.argtypes = [wintypes.HANDLE]
+k32.VirtualQueryEx.argtypes = [wintypes.HANDLE, ctypes.c_void_p, ctypes.POINTER(MBI), ctypes.c_size_t]
+k32.VirtualQueryEx.restype = ctypes.c_size_t
+k32.ReadProcessMemory.argtypes = [wintypes.HANDLE, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_size_t, ctypes.POINTER(ctypes.c_size_t)]
+k32.ReadProcessMemory.restype = wintypes.BOOL
+k32.WriteProcessMemory.argtypes = [wintypes.HANDLE, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_size_t, ctypes.POINTER(ctypes.c_size_t)]
+k32.WriteProcessMemory.restype = wintypes.BOOL
+k32.QueryFullProcessImageNameW.argtypes = [wintypes.HANDLE, wintypes.DWORD, wintypes.LPWSTR, ctypes.POINTER(wintypes.DWORD)]
+k32.QueryFullProcessImageNameW.restype = wintypes.BOOL
+
+
+def image_path(pid):
+    handle = k32.OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, False, pid)
+    if not handle:
+        raise OSError(ctypes.get_last_error(), "OpenProcess failed")
+    try:
+        buf = ctypes.create_unicode_buffer(32768)
+        size = wintypes.DWORD(len(buf))
+        if not k32.QueryFullProcessImageNameW(handle, 0, buf, ctypes.byref(size)):
+            raise OSError(ctypes.get_last_error(), "QueryFullProcessImageNameW failed")
+        return buf.value
+    finally:
+        k32.CloseHandle(handle)
+
+
+def open_process(pid, write=False):
+    access = PROCESS_QUERY_INFORMATION | PROCESS_VM_READ
+    if write:
+        access |= PROCESS_VM_WRITE | PROCESS_VM_OPERATION
+    handle = k32.OpenProcess(access, False, pid)
+    if not handle:
+        raise OSError(ctypes.get_last_error(), "OpenProcess failed")
+    return handle
+
+
+def close(handle):
+    k32.CloseHandle(handle)
+
+
+def regions(handle):
+    address = 0
+    mbi = MBI()
+    while k32.VirtualQueryEx(handle, address, ctypes.byref(mbi), ctypes.sizeof(mbi)):
+        base = mbi.BaseAddress or 0
+        usable = (
+            mbi.State == MEM_COMMIT
+            and mbi.Protect & READABLE
+            and not mbi.Protect & (PAGE_GUARD | PAGE_NOACCESS)
+        )
+        if usable:
+            yield base, mbi.RegionSize
+        following = base + mbi.RegionSize
+        if following <= address:
+            break
+        address = following
+
+
+def read(handle, address, size):
+    buf = ctypes.create_string_buffer(size)
+    done = ctypes.c_size_t(0)
+    ok = k32.ReadProcessMemory(handle, address, buf, size, ctypes.byref(done))
+    if not ok and not done.value:
+        return None
+    return buf.raw[: done.value]
+
+
+def write(handle, address, data):
+    buf = ctypes.create_string_buffer(data, len(data))
+    done = ctypes.c_size_t(0)
+    ok = k32.WriteProcessMemory(handle, address, buf, len(data), ctypes.byref(done))
+    return bool(ok) and done.value == len(data)
+
+```
+
+`scripts/common.py`:
+
+```py
+import struct
+
+TYPES = {"int32": "<i", "float": "<f", "double": "<d"}
+
+
+def parse_value(type_name, text):
+    if type_name == "int32":
+        return int(text)
+    return float(text)
+
+
+def pack(type_name, value):
+    return struct.pack(TYPES[type_name], value)
+
+
+def unpack(type_name, data):
+    return struct.unpack(TYPES[type_name], data)[0]
+
+
+def size_of(type_name):
+    return struct.calcsize(TYPES[type_name])
+
+```
+
+`scripts/guard.py`:
+
+```py
+import hashlib
+import json
+import os
+import sys
+
+
+class GuardError(Exception):
+    pass
+
+
+def sha256_file(path):
+    digest = hashlib.sha256()
+    with open(path, "rb") as handle:
+        for block in iter(lambda: handle.read(1 << 20), b""):
+            digest.update(block)
+    return digest.hexdigest()
+
+
+def manifest_path(exe):
+    return os.path.join(os.path.dirname(exe), "devbuild.json")
+
+
+def verify(pid):
+    from backend_windows import image_path
+
+    exe = image_path(pid)
+    path = manifest_path(exe)
+    if not os.path.isfile(path):
+        raise GuardError("no devbuild.json next to " + exe)
+    with open(path, encoding="utf-8") as handle:
+        data = json.load(handle)
+    if data.get("devbuild") is not True:
+        raise GuardError("devbuild flag is not true")
+    if str(data.get("sha256", "")).lower() != sha256_file(exe):
+        raise GuardError("executable hash does not match the manifest")
+    return exe
+
+
+def create(exe):
+    exe = os.path.abspath(exe)
+    if not os.path.isfile(exe):
+        raise GuardError("file not found: " + exe)
+    answer = input("Confirm you own and built " + exe + " (type yes): ")
+    if answer.strip().lower() != "yes":
+        raise GuardError("not confirmed")
+    with open(manifest_path(exe), "w", encoding="utf-8") as handle:
+        json.dump({"devbuild": True, "sha256": sha256_file(exe)}, handle, indent=2)
+    print("manifest written")
+
+
+if __name__ == "__main__":
+    try:
+        if len(sys.argv) == 3 and sys.argv[1] == "create":
+            create(sys.argv[2])
+        elif len(sys.argv) == 3 and sys.argv[1] == "check":
+            print("OK", verify(int(sys.argv[2])))
+        else:
+            print("usage: guard.py create <exe> | check <pid>")
+            sys.exit(1)
+    except GuardError as error:
+        print("REFUSED:", error)
+        sys.exit(2)
+
+```
+
+`scripts/next_scan.py`:
+
+```py
+import argparse
+import json
+import sys
+
+import backend_windows as bw
+from common import parse_value, size_of, unpack
+from guard import GuardError, verify
+
+MODES = ["exact", "changed", "unchanged", "increased", "decreased"]
+
+
+def keep(mode, old, new, target):
+    if mode == "exact":
+        return new == target
+    if mode == "changed":
+        return new != old
+    if mode == "unchanged":
+        return new == old
+    if mode == "increased":
+        return new > old
+    return new < old
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("state")
+    parser.add_argument("mode", choices=MODES)
+    parser.add_argument("--value")
+    args = parser.parse_args()
+
+    with open(args.state, encoding="utf-8") as handle_in:
+        state = json.load(handle_in)
+
+    try:
+        verify(state["pid"])
+    except GuardError as error:
+        print("REFUSED:", error)
+        sys.exit(2)
+
+    type_name = state["type"]
+    width = size_of(type_name)
+    target = parse_value(type_name, args.value) if args.value is not None else None
+    if args.mode == "exact" and target is None:
+        print("exact mode needs --value")
+        sys.exit(1)
+
+    handle = bw.open_process(state["pid"])
+    survivors = []
+    try:
+        for item in state["results"]:
+            raw = bw.read(handle, item["addr"], width)
+            if not raw or len(raw) < width:
+                continue
+            current = unpack(type_name, raw)
+            if keep(args.mode, item["value"], current, target):
+                survivors.append({"addr": item["addr"], "value": current})
+    finally:
+        bw.close(handle)
+
+    state["results"] = survivors
+    with open(args.state, "w", encoding="utf-8") as handle_out:
+        json.dump(state, handle_out)
+    print(len(survivors), "addresses left")
+    for item in survivors[:20]:
+        print(hex(item["addr"]), item["value"])
+
+
+if __name__ == "__main__":
+    main()
+
+```
+
+`scripts/rpa_inspect.py`:
+
+```py
+import argparse
+import json
+
+from pywinauto import Desktop
+
+
+def walk(element, depth, max_depth, rows):
+    info = element.element_info
+    rows.append(
+        {
+            "depth": depth,
+            "control_type": info.control_type,
+            "name": info.name,
+            "auto_id": info.automation_id,
+            "class_name": info.class_name,
+        }
+    )
+    if depth >= max_depth:
+        return
+    for child in element.children():
+        walk(child, depth + 1, max_depth, rows)
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("title_regex")
+    parser.add_argument("--depth", type=int, default=6)
+    parser.add_argument("--out", default="control_tree.json")
+    args = parser.parse_args()
+
+    window = Desktop(backend="uia").window(title_re=args.title_regex)
+    window.wait("exists", timeout=10)
+    rows = []
+    walk(window.wrapper_object(), 0, args.depth, rows)
+    with open(args.out, "w", encoding="utf-8") as handle:
+        json.dump(rows, handle, ensure_ascii=False, indent=2)
+    print(len(rows), "controls saved to", args.out)
+
+
+if __name__ == "__main__":
+    main()
+
+```
+
+`scripts/rw.py`:
+
+```py
+import argparse
+import sys
+
+import backend_windows as bw
+from common import pack, parse_value, size_of, unpack
+from guard import GuardError, verify
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    sub = parser.add_subparsers(dest="cmd", required=True)
+    read = sub.add_parser("read")
+    write = sub.add_parser("write")
+    for item in (read, write):
+        item.add_argument("pid", type=int)
+        item.add_argument("addr")
+        item.add_argument("type", choices=["int32", "float", "double"])
+    write.add_argument("value")
+    write.add_argument("--confirm-dev-build", action="store_true")
+    args = parser.parse_args()
+
+    try:
+        verify(args.pid)
+    except GuardError as error:
+        print("REFUSED:", error)
+        sys.exit(2)
+
+    address = int(args.addr, 0)
+    if args.cmd == "read":
+        handle = bw.open_process(args.pid)
+        try:
+            raw = bw.read(handle, address, size_of(args.type))
+        finally:
+            bw.close(handle)
+        if not raw or len(raw) < size_of(args.type):
+            print("read failed")
+            sys.exit(1)
+        print(unpack(args.type, raw))
+        return
+
+    if not args.confirm_dev_build:
+        print("write needs --confirm-dev-build")
+        sys.exit(1)
+    handle = bw.open_process(args.pid, write=True)
+    try:
+        ok = bw.write(handle, address, pack(args.type, parse_value(args.type, args.value)))
+    finally:
+        bw.close(handle)
+    print("written" if ok else "write failed")
+    sys.exit(0 if ok else 1)
+
+
+if __name__ == "__main__":
+    main()
+
+```
+
+`scripts/scan.py`:
+
+```py
+import argparse
+import json
+import sys
+
+import backend_windows as bw
+from common import TYPES, pack, parse_value, size_of
+from guard import GuardError, verify
+
+CHUNK = 1 << 20
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("pid", type=int)
+    parser.add_argument("type", choices=list(TYPES))
+    parser.add_argument("value")
+    parser.add_argument("--out", default="scan_state.json")
+    parser.add_argument("--limit", type=int, default=200000)
+    args = parser.parse_args()
+
+    try:
+        verify(args.pid)
+    except GuardError as error:
+        print("REFUSED:", error)
+        sys.exit(2)
+
+    value = parse_value(args.type, args.value)
+    needle = pack(args.type, value)
+    width = size_of(args.type)
+    handle = bw.open_process(args.pid)
+    hits = []
+    try:
+        for base, region_size in bw.regions(handle):
+            offset = 0
+            while offset < region_size and len(hits) < args.limit:
+                length = min(CHUNK, region_size - offset)
+                data = bw.read(handle, base + offset, length)
+                if data:
+                    pos = data.find(needle)
+                    while pos != -1 and len(hits) < args.limit:
+                        address = base + offset + pos
+                        if address % width == 0:
+                            hits.append({"addr": address, "value": value})
+                        pos = data.find(needle, pos + 1)
+                offset += length
+    finally:
+        bw.close(handle)
+
+    with open(args.out, "w", encoding="utf-8") as handle_out:
+        json.dump({"pid": args.pid, "type": args.type, "results": hits}, handle_out)
+    print(len(hits), "matches saved to", args.out)
+
+
+if __name__ == "__main__":
+    main()
+
+```
