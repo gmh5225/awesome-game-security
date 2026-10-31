@@ -45,7 +45,8 @@ sources:
   - wiki/sources/descriptions/JoshRob297__halo-ce-server.md
   - wiki/sources/descriptions/ShaniTheDeveloper__Adaptive_Anti-Cheat_Stream_Processor.md
   - wiki/sources/descriptions/mihaigsm2003__CS2-AntiCheat.md
-updated: 2026-10-30
+  - wiki/sources/descriptions/MayankPatil3__vulcan-anticheat-built.md
+updated: 2026-10-31
 confidence: high
 ---
 
@@ -94,7 +95,7 @@ Windows desktop PC-check tooling such as [[custos]] (dybeky; Electron; twenty-on
 
 Community-maintained screenshare indicator corpora such as [[screenshare-signatures]] (Catusse2k; JSON rules with severity, confidence, and admin-tool allowlists across DMA, kernel loaders, firmware hints, and evasion artifacts) expect integrators to **correlate multiple hits** before moderation action—calibrate joint thresholds and allowlist overlap when wiring custom scanners, not single-string auto-bans. (source: wiki/sources/descriptions/Catusse2k__ScreenShare-Signatures.md)
 
-Educational Markdown such as [[minecraft-anticheat-docs]] (aethelreborn) walks through Minecraft server-side **latency compensation**, movement prediction, packet validation, and enforcement ladders for Java Edition plugins—useful when tuning lag shields, setbacks, and violation decay before treating network delay as misconduct evidence. (source: wiki/sources/descriptions/aethelreborn__minecraft-anticheat-docs.md)
+Educational Markdown such as [[minecraft-anticheat-docs]] (aethelreborn) walks through Minecraft server-side **latency compensation**, movement prediction, packet validation, and enforcement ladders for Java Edition plugins—useful when tuning lag shields, setbacks, and violation decay before treating network delay as misconduct evidence. (source: wiki/sources/descriptions/aethelreborn__minecraft-anticheat-docs.md) Paper **1.21.4+** from-scratch plugins such as [[vulcan-anticheat-built]] (MayankPatil3; Java; in-memory player tracking; YAML violation thresholds; real-time staff alerts; graduated kick/ban plus movement setbacks and permission bypass—tune thresholds before enabling automatic sanctions) illustrate a transparent reference enforcement ladder for operators studying fork-free Java Edition AC. (source: wiki/sources/descriptions/MayankPatil3__vulcan-anticheat-built.md)
 
 Console receipt verifiers such as [[qortime-ai]] (ConWan30; Meta Muse/SAM advisory layer over signed match-integrity receipts) encode **lower-only** AI policy—generative advisories may reduce `VERIFIED` to `PARTIAL` but cannot upgrade or replace deterministic referee outcomes; pair red-team receipt tampering (Muse Wonder) with Ed25519-bound advisory sidecars when rehearsing adversarial testing of verifiers. (source: wiki/sources/descriptions/ConWan30__qortime-ai.md)
 

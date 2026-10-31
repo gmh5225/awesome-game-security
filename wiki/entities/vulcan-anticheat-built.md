@@ -11,7 +11,11 @@ confidence: high
 
 # Vulcan AntiCheat Built
 
-**Vulcan AntiCheat Built** (mayankpatil3/vulcan-anticheat-built) is an original **Minecraft** server plugin that implements client-side cheat detection from scratch rather than forking a commercial anti-cheat. Written in **Java** for **Paper** and **Spigot 1.21.4+**, it runs movement and combat checks including fly, speed, kill aura, reach, auto-clicker, and no-fall, backed by in-memory player tracking and configurable violation thresholds. Staff get real-time console and in-game alerts, graduated kicks and bans, teleports that setback suspicious movement, and permission-based bypass for trusted players. Maven builds a deployable plugin JAR with YAML configuration for tuning detections, alerts, and punishments. (source: wiki/sources/descriptions/MayankPatil3__vulcan-anticheat-built.md)
+**Vulcan AntiCheat Built** (mayankpatil3/vulcan-anticheat-built) is an original **Minecraft** server plugin that implements client-side cheat detection from scratch rather than forking a commercial anti-cheat. Written in **Java** for **Paper** and **Spigot 1.21.4+**, it targets server owners and developers who want a transparent, extensible anti-cheat they can study and modify. (source: wiki/sources/descriptions/MayankPatil3__vulcan-anticheat-built.md)
+
+## Detection stack
+
+Movement and combat checks—fly, speed, kill aura, reach, auto-clicker, and no-fall—backed by in-memory per-player tracking and YAML-configurable violation thresholds. Staff receive real-time console and in-game alerts; enforcement includes graduated kicks and bans, teleports that setback suspicious movement, and permission-based bypass for trusted players. **Maven** produces a deployable plugin JAR. (source: wiki/sources/descriptions/MayankPatil3__vulcan-anticheat-built.md)
 
 ## Positioning
 
@@ -23,4 +27,4 @@ confidence: high
 
 ## Related
 
-[[novaguard]] · [[bs-anticheat]] · [[minecraft-anticheat-list]] · [[overviews/anti-cheat]]
+[[novaguard]] · [[bs-anticheat]] · [[minecraft-anticheat-list]] · [[detector-operations]] · [[overviews/anti-cheat]]

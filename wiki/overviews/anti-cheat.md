@@ -987,6 +987,7 @@ sources:
   - wiki/sources/descriptions/Dead-Scripts__Dead_antiCheat.md
   - wiki/sources/descriptions/u8012146108-bit__anticheat-qa.md
   - wiki/sources/descriptions/senolbasyigit__anticheat-lab.md
+  - wiki/sources/descriptions/MayankPatil3__vulcan-anticheat-built.md
   - wiki/sources/descriptions/CodeMaxx__windows-runtime-attestation-report.md
   - wiki/sources/descriptions/AdvDebug__AntiCrack-DotNet.md
   - wiki/sources/descriptions/Ahora57__MAJESTY-technologies.md
@@ -1434,6 +1435,8 @@ Title-specific R6 ranked-stat suspicion tooling such as [[r6-intel]] (baldspots4
 **Educational AC curriculum:** [[anticheat-lab]] (Ogonx; six-month self-study track on deliberately vulnerable own-game builds—x64 ASM/C++ memory layout, RE tooling, server authority, statistical/client checks; Compiler Explorer + VS stack tracing; devlog; VM-only scope; Anti Cheat) complements guide-style labs such as [[minecraft-anticheat-docs]] and telemetry research stacks such as [[apex-anticheat-lab]]. (source: wiki/sources/descriptions/Ogonx__anticheat-lab.md) (source: wiki/sources/README-categories.md)
 
 **Pre-ship client memory audit:** [[anticheat-lab-senolbasyigit]] (senolbasyigit; Claude Code skill + Python; CE-style scan/filter/RW on SHA-256–guarded own dev builds via `devbuild.json`; documents exposed health/ammo/currency with server-side fix recommendations and regression tests; optional pywinauto RPA without memory reads; Open Source Anti Cheat System) for teams validating client value exposure before release beside QA clients such as [[anticheat-qa]] and curriculum labs such as [[anticheat-lab]] (Ogonx). (source: wiki/sources/descriptions/senolbasyigit__anticheat-lab.md)
+
+**From-scratch Paper MC reference AC:** [[vulcan-anticheat-built]] (MayankPatil3; Java Maven plugin for Paper/Spigot **1.21.4+**; original movement/combat checks—fly, speed, kill aura, reach, auto-clicker, no-fall; in-memory violation counters; YAML-tuned alerts, movement setbacks, graduated kicks/bans, permission bypass; Open Source Anti Cheat System) for operators and plugin authors who want a fork-free server-side AC to study and extend beside modular plugins such as [[novaguard]] and [[h-ac]]. (source: wiki/sources/descriptions/MayankPatil3__vulcan-anticheat-built.md)
 
 **FPS behavioral research lab:** [[apex-anticheat-lab]] (NetVar1337; Python server-side input telemetry; aim kinematics, reaction times, recoil regularity, triggerbot signatures; per-cohort baselines; analyst-review ranking; YARA loader/HWID-spoofer rules; read-only PowerShell host driver/PCIe/vulnerable-driver-blocklist survey; match-integrity SQL; FPS cheat taxonomy + threshold calibration docs; Anti Cheat / Open Source Anti Cheat System) beside demo-telemetry ML stacks such as [[yaacs-anticheat]] and [[cs2guard]]. (source: wiki/sources/descriptions/NetVar1337__apex-anticheat-lab.md)
 
