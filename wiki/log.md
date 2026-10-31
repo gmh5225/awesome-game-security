@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-31** — ingest `description:deavers/re-dojo`: enriched entity [[re-dojo]] (confidence high; 18× C++20 memory/hook labs + crackmes, CE/trainer/DLL templates, PE/AOB/Z3 Python utils, web RPG + artifact grader dimensions); cited [[overviews/game-hacking]] Cheat guide lane + [[overviews/reverse-engineering]] Guides/indexes blurb; refreshed `index.md` entity blurb.
+
 - **2026-10-31** — ingest `description:senolbasyigit/anticheat-lab`: enriched entity [[anticheat-lab-senolbasyigit]] (confidence high; Claude Code skill + Python CE-style scan on SHA-256–guarded dev builds, server-side fix + regression-test reports, pywinauto RPA lane, defense-priority guides); cited [[overviews/anti-cheat]] pre-ship memory-audit lane + [[overviews/game-hacking]] defensive validation blurb; refreshed `index.md` entity blurb.
 
 - **2026-10-31** — ingest `readme:categories`: **Cheat** link_count **2986** (+3; deavers/[[re-dojo]] offline RE/game-hacking academy + redlanterndev/[[faceoff]] FACEIT driver/service toggle + thatkidglitchy/[[chess-hacks]] chess.com Stockfish userscripts) / **Anti Cheat** **857** (+2; senolbasyigit/[[anticheat-lab-senolbasyigit]] pre-ship dev-build memory audit skill + mayankpatil3/[[vulcan-anticheat-built]] from-scratch Paper MC plugin) / other major README section counts stable; 41 top-level sections (`NeverC & NeverD` placeholder); synced [[overviews/overview]], [[overviews/game-hacking]], [[overviews/anti-cheat]], [[overviews/reverse-engineering]], [[overviews/dma-attack]]; entities [[re-dojo]], [[faceoff]], [[chess-hacks]], [[anticheat-lab-senolbasyigit]], [[vulcan-anticheat-built]]; light `index.md` section notes (no per-category pages).

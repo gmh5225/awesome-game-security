@@ -15,11 +15,19 @@ confidence: high
 
 ## Curriculum
 
-Learners advance through a tiered RPG campaign from basic value scans and pointer chains to shared-code filters, VMT and ReClass-style class work, world-to-screen math, code injection, integrity bypass exercises, control-flow obfuscation, and anti-debug challenges. A browser-based web dashboard and Python RPG manager track quest completion; an automated artifact grader scores submissions on architecture, indirection depth, hook complexity, protection level, and privilege boundary.
+Learners advance through a tiered RPG campaign from basic value scans and pointer chains to shared-code filters, VMT and ReClass-style class work, [[world-to-screen]] math, code injection, integrity bypass exercises, control-flow obfuscation, and anti-debug challenges. A browser-based web dashboard and Python RPG manager track quest completion. (source: wiki/sources/descriptions/deavers__re-dojo.md)
+
+## Tooling
+
+Bundled artifacts include Cheat Engine tables, trainer templates, internal DLL skeletons, and Python utilities for PE scanning, AOB patterns, and Z3 symbolic solving—supporting the eighteen compilable **C++20** targets without requiring live online titles. (source: wiki/sources/descriptions/deavers__re-dojo.md)
+
+## Grader
+
+An automated artifact grader scores learner submissions on architecture, indirection depth, hook complexity, protection level, and privilege boundary—giving structured feedback on memory/hook lab work and crackme solutions. (source: wiki/sources/descriptions/deavers__re-dojo.md)
 
 ## Positioning
 
-Listed under **Cheat / Guide** beside [[re4f]], [[intro-to-gamehacking]], [[gamehacking-cheatsheet]], and [[unity-apk-reverse]]—local educational targets rather than online anti-cheat evasion.
+Aimed at self-paced students and hobbyists building practical RE and game-security skills on **local, educational targets** rather than online anti-cheat evasion. Listed under **Cheat / Guide** beside [[re4f]], [[intro-to-gamehacking]], [[gamehacking-cheatsheet]], and [[unity-apk-reverse]]. (source: wiki/sources/descriptions/deavers__re-dojo.md)
 
 ## Links
 

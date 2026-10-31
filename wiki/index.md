@@ -3376,7 +3376,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Renamaida](entities/renamaida.md) — IDA Pro plugin: Jaro-Winkler instruction-signature rename for firmware/static libs (JSON sig DB; cheat / IDA Plugins)
 - [RenHook](entities/renhook.md) — Windows x86/x86-64 inline hooking library (modern C++; Zydis disassembly; safe APIs + trampolines; RE/instrumentation; WopsS)
 - [RPGMakerDecrypter](entities/rpgmakerdecrypter.md) — RPG Maker XP/VX/VX Ace encrypted-archive extractor (CLI; RE tools)
-- [ReDojo](entities/re-dojo.md) — deavers offline gamified RE/game-hacking academy; C++20 dojo labs + crackmes; CE tables, auto-grader, web RPG campaign; Cheat / Guide
+- [ReDojo](entities/re-dojo.md) — deavers offline gamified RE/game-hacking academy; 18× C++20 labs/crackmes; CE/trainer/DLL templates, Z3/AOB Python utils, artifact grader (hook/indirection/protection), web RPG; local educational targets; Cheat / Guide
 - [RE-Architect](entities/re-architect.md) — automated RE platform (binary analysis + ML; cheat / RE tools)
 - [re-harness](entities/re-harness.md) — OpenCode agent harness for Qwen 27B/35B with read-only IDA 9.3/IDASQL PE static analysis; NeverD/LLVM lift→O3→redecompile fallback; malware/game-security RE
 - [re-ue4ss](entities/re-ue4ss.md) — UE4/UE5 scripting/modding framework (Lua + C++ mod APIs, blueprint loading, live property editing, SDK dumpers; runtime hooks; UE4SS-RE)
