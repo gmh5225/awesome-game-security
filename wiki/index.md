@@ -884,7 +884,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [csgo2-cheat](entities/csgo2-cheat.md) — CS2 internal cheat: rendering / SDK generation / hooking (imnotdatguy + gmh5225 [Internal]; C++; cheat / game:cs2)
 - [solace-csgo](entities/solace-csgo.md) — CS:GO internal cheat (modern C++; ImGui menu; ESP, aimbot, triggerbot, movement, skin changer; Source SDK hooking; emilyinure [Internal])
 - [solana-sbpf-rlib](entities/solana-sbpf-rlib.md) — Solana sBPF rlib signature packs for IDA/Ghidra/Binary Ninja (Python; cheat / IDA signature database)
-- [Sonekk Guard](entities/sonekk-guard1.md) — PolyForm VR (Quest/Pico) client-server AC: root/Frida/debugger/hook + integrity checks, signed JSON reports, Unity package + Node reference server (sonekkdev; Anti Cheat)
+- [Sonekk Guard](entities/sonekk-guard1.md) — PolyForm standalone VR (Quest/Pico) client-server AC: C++17 native root/Frida/debugger/hook + APK/signature/memory/prologue integrity, signed JSON reports, Unity collector, optional Node HMAC/Keystore reference server with server-only watch/review/block scoring (sonekkdev; Anti Cheat)
 - [CSGOSimple](entities/csgosimple.md) — spirthack Internal CS:GO baseline (MarkHC fork; cheat / game:csgo)
 - [csso-src](entities/csso-src.md) — CS:GO mod Source tree (client/server / weapons / movement / engine interfaces; Game Engine)
 - [CSSFontFace-Exploit](entities/cssfontface-exploit.md) — WebKit CSSFontFace UAF (PS4/PS5 browser; jailbreak / PlayStation)
