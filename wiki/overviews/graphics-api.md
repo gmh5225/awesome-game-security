@@ -380,7 +380,7 @@ sources:
   - wiki/sources/descriptions/brendan-duncan__gpu_inspector.md
   - wiki/sources/descriptions/husnaintariq577__kx-vision.md
   - wiki/sources/descriptions/effcol__wiz3D.md
-updated: 2026-10-29
+updated: 2026-10-31
 confidence: high
 ---
 

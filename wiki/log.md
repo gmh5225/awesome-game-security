@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-31** — ingest `readme:categories`: projected map **Cheat** **2986** / **Anti Cheat** **857** / **Game Develop** **201** (+respawnstack.com AI-tools directory sample) / **DirectX** **44**; 41 sections (`NeverC & NeverD` placeholder); synced [[overviews/overview]] security-dense README anchors ([[re-dojo]]/[[faceoff]]/[[chess-hacks]]; [[anticheat-lab-senolbasyigit]]/[[vulcan-anticheat-built]]) + [[overviews/game-engine]] Game Develop count; index blurbs aligned (DMA Cheat ~2986, DX ~44, Game Develop ~201); light `index.md` section notes (no per-category pages).
+
 - **2026-10-31** — ingest `description:MayankPatil3/vulcan-anticheat-built`: enriched entity [[vulcan-anticheat-built]] (confidence high; from-scratch Paper/Spigot **1.21.4+** Java Maven plugin; movement/combat checks; in-memory violation tracking; YAML alerts, setbacks, graduated sanctions, permission bypass; transparent study/extend reference); cited [[overviews/anti-cheat]] from-scratch Paper MC lane + [[concepts/detector-operations]] enforcement-ladder note; refreshed `index.md` entity blurb.
 
 - **2026-10-31** — ingest `description:REDLANTERNDEV/FaceOff`: enriched entity [[faceoff]] (confidence high; `FACEIT_AC.sys`/FACEITService/client-process toggle with local settings persistence; boot-time driver → admin elevation + restart; C# WPF/CLI + batch scripts; CS2/competitive FPS operational exposure management); cited [[overviews/anti-cheat]] FACEIT AC lane + [[overviews/game-hacking]] Explore AntiCheat System:FACEIT blurb; refreshed `index.md` entity blurb.
