@@ -1016,7 +1016,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [defender-control](entities/defender-control.md) — C# GUI: Defender real-time / Tamper Protection / sample-submission toggles (registry/service)
 - [Dead By Daylight Copy](entities/dead-by-daylight.md) — UE4 asymmetric-horror clone (physics / animation / asset pipelines; Game Develop / source)
 - [DeckCheatz](entities/deckcheatz.md) — AGPL Rust Proton compatibility-tool trainer launcher (Steam Deck/Linux; Flatpak/Nix; Tokio/Clap; optional SQLite; Steam library/Steamworks/proton-call/Decky flags; WeMod/PLITCH-style trainer UI under Wine/Proton)
-- [Decky Game Cheats Manager](entities/decky-game-cheats-manager.md) — Decky Loader GCM trainer plugin (TypeScript/React + Python; FLiNG/XiaoXing/cheat-table catalog search, download, Proton sidecar launch, per-game Steam App ID binding; Cheat)
+- [Decky Game Cheats Manager](entities/decky-game-cheats-manager.md) — Qiming-Liu DeckyGCM Decky Loader plugin; TypeScript/React + Python embedded GCM core; FLiNG/XiaoXing/cheat-table/GCM catalog (EN/ZH search); authenticated download, ZIP/7z/RAR extract; Proton sidecar launch + Steam App ID binding; offline catalog refresh; Cheat
 - [Delamain](entities/delamain.md) — headless JADX MCP server (APK/DEX/AAB; Frida hooks; AI agents)
 - [DelphiHelper](entities/delphi-helper.md) — x86/x86_64 Delphi binary analysis tooling (eset; cheat / IDA Plugins; py7zr setup)
 - [DelphiReSym](entities/delphiresym.md) — Ghidra/pyghidra Delphi symbol recovery (function signatures, params, vtables from compiler metadata; modern Delphi; malware/legacy RE; WenzWenzWenz)

@@ -148,6 +148,7 @@ sources:
   - wiki/sources/descriptions/DrYenyen__Drive-Cloning-For-PS4-PS5.md
   - wiki/sources/descriptions/qemu-gvm__qemu-gvm.md
   - wiki/sources/descriptions/Qemu-Gang__Escape-from-TuxKov.md
+  - wiki/sources/descriptions/Qiming-Liu__Decky-Game-Cheats-Manager.md
   - wiki/sources/descriptions/jwmcglynn__android-emulator.md
   - wiki/sources/descriptions/anbox__anbox.md
   - wiki/sources/descriptions/anasfanani__Magisk-Tailscaled.md
@@ -2299,6 +2300,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - C++17 trainer/memory library via [[gtlibcpp]] (heaven-hm; typed `MemorySession` R/W, pointer chains, freeze-with-restore, policy audit/kill-switch, strict CE 7.x `.CT` parser, local JSON-RPC agent; Windows named-pipe attach x86/x64; authorized offline trainer workflows; Cheat / RE Tools) (source: wiki/sources/descriptions/heaven-hm__gtlibcpp.md)
 - Official Cheat Engine LLM integration via [[aitools]] (cheat-engine; Lua + Lazarus in-app AI dialog; registerAITool callbacks drive memory scan, disasm, watchpoints, pointer chains, and Auto Assembler validation; skills for structure dissection, Mono/IL2CPP, Unreal; Google Gemini or local backends; Cheat / RE Tools) (source: wiki/sources/descriptions/cheat-engine__AITools.md)
 - Steam Deck/SteamOS Decky Loader CE integration via [[ce-decky]] (goooroooX; Proton-prefix Windows CE install, community table search/download, local library + compatibility review, table repair for mismatched builds, Quick Access cheat toggles, Lua bridge, Authenticode-checked managed installs, strict session lifecycle; Game Mode without Desktop Mode; Cheat / CE Plugins) (source: wiki/sources/descriptions/goooroooX__CE-Decky.md) (source: wiki/sources/README-categories.md)
+- Steam Deck/SteamOS Decky Loader GCM trainer workflow via [[decky-game-cheats-manager]] (Qiming-Liu; DeckyGCM; TypeScript/React + Python GCM core; FLiNG/XiaoXing/cheat-table/GCM catalog with EN/ZH name search, authenticated download, ZIP/7z/RAR extract, Steam App ID binding, local import, Proton sidecar launch options, offline catalog refresh, bounded concurrent downloads; Quick Access + per-game context menus; Cheat) (source: wiki/sources/descriptions/Qiming-Liu__Decky-Game-Cheats-Manager.md) (source: wiki/sources/README-categories.md)
 - Windows x86/x64 debugger [[syser]] (C/C++; RE / plugin development / modding) complements [[x64dbg]] in the Cheat Debugging lane for game-security offensive debug workflows. (source: wiki/sources/descriptions/marakew__syser.md)
 - Extension-plugin disassembler/debugger [[xdv]] (C/C++; plugin development / modding / SDK generation) complements [[x64dbg]] and [[syser]] in the Cheat Debugging lane for game-security offensive RE. (source: wiki/sources/descriptions/imugee__xdv.md)
 - Lightweight Java/JVM attach debugging via [[jdbg]] (JDWP; method hooks / breakpoints / variable inspect / class enum) supports runtime RE of Java game clients and obfuscated JVM apps. (source: wiki/sources/descriptions/roger1337__JDBG.md)
