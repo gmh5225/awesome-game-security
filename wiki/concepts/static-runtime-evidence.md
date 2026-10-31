@@ -25,6 +25,7 @@ sources:
   - wiki/sources/descriptions/Jstar269__nakagawa-recomp.md
   - wiki/sources/descriptions/danielalves96__gow-pc-port.md
   - wiki/sources/descriptions/valentderah__totk-pc-recomp.md
+  - wiki/sources/descriptions/jenissimo__bottleship.md
   - wiki/sources/descriptions/KamiKitsune420__bgt-decomp-tools.md
 updated: 2026-10-31
 confidence: high
@@ -87,6 +88,8 @@ Switch AArch64 static recompilation to native Windows x64 such as [[smo-recomp]]
 [[letsgo-recomp]] (raulzrrs; *Pokémon Let's Go* Switch 1.0.0 on LAS Recomp; AArch64→x86-64 lift with Horizon system HLE, NVN→Vulkan, Python/Zig one-time per-dump codegen; FSR upscaling, mod hooks, memory watch, profiling, and RenderDoc integration) extends that Switch static-recomp cluster—label which NVN/audio paths are fully reimplemented vs developer-instrumented before treating the Windows build as a renderer reference. (source: wiki/sources/descriptions/raulzrrs__letsgo-recomp.md)
 
 [[totk-pc-recomp]] (valentderah; *Tears of the Kingdom* Switch ARM64 **NSO** modules→C via Python lifter/codegen; **Unicorn** differential validation; version-specific retail patch lists; Windows runtime HLE for Horizon kernel, **NVN→Vulkan**, audio, input, filesystem; resolution scaling, ultrawide, frame-rate controls; **llvm-mingw** local compile—no shipped game binaries; BYO assets) extends the Switch static-recomp cluster—separate lifted guest code from reimplemented host services before preservation or modding claims. (source: wiki/sources/descriptions/valentderah__totk-pc-recomp.md)
+
+Browser-based x86 preservation via [[bottleship]] (jenissimo; **v86** CPU emulation + Win32/COM/DirectDraw–D3D3–9 HLE on WebGPU/WebAudio/OPFS; TypeScript + Rust/WASM; WGB bundles + GOG import; WinAPI modules + installer/archive parsers; automation harness with structured debug snapshots) keeps guest x86 execution in the emulator while graphics/audio/fs are host-reimplemented—label which Win32/D3D API families are faithfully handled vs stubbed before citing renderer or threading behavior. (source: wiki/sources/descriptions/jenissimo__bottleship.md)
 
 PSP MIPS static recompilation to native Windows such as [[nakagawa-recomp]] (Jstar269; sal063 fork lineage; EBOOT→C lift with MIPS guest runtime and VFPU support tables; Vulkan + SDL3 launcher/player; Python codegen, pipeline tests, cosimulation against a reference interpreter, decomp.me export, optional real-PSP verification; BYO disc) applies the same static/runtime split on a handheld MIPS+VFPU target—separate lifted guest code from reimplemented PSP services and GPU paths before citing gameplay or preservation claims. (source: wiki/sources/descriptions/Jstar269__nakagawa-recomp.md)
 

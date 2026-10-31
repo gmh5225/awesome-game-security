@@ -605,7 +605,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [BGRTInjector](entities/bgrt-injector.md) — Jamesits; C UEFI loader/driver; ACPI BGRT boot-logo replacement via custom 24-bit BMP; rEFInd + default EFI path integration; firmware customization / boot-chain experimentation
 - [bootlicker](entities/bootlicker.md) — UEFI bootkit PoC (Boot Manager / OS loader patch; pre-kernel DSE / PatchGuard / Secure Boot research; gmh5225)
 - [bootleg16](entities/bootleg16.md) — from-scratch CS1.6-style Rust/Bevy competitive FPS; GoldSrc asset readers; client/server/lobby crates; encrypted match traffic + server-side anti-cheat; matchmaking/parties/custom games; Docker hosting (anas1412; Anti Cheat / Game Engine)
-- [BottleShip](entities/bottleship.md) — browser v86 + Win32/COM/DirectDraw–D3D9 HLE on WebGPU/WebAudio/OPFS for classic x86 Win32 games (jenissimo; DirectX / Emulation)
+- [BottleShip](entities/bottleship.md) — browser v86 + Win32/COM/DirectDraw–D3D9 HLE (WebGPU/WebAudio/OPFS; Rust/WASM; WGB/GOG import; WinAPI + installer parsers; automation debug snapshots; jenissimo; DirectX / Emulation)
 - [boltgolt/boltobserv](entities/boltobserv.md) — CS:GO radar (player slot numbers on map dots; cheat / game:csgo [Radar])
 - [Branch Monitoring Project](entities/branch-monitoring-project.md) — Intel LBR/BTS branch-trace framework (C KM driver + usermode; PMI; control-flow monitoring)
 - [Browser Password Exportor](entities/browser-password-exportor.md) — Python Windows browser password decrypt/export (BL0odz; Chromium/Edge/Firefox; DPAPI/AES + Firefox key-material parsing; ASN.1 login-storage routines; credential forensics / browser secret-storage RE)

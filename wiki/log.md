@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-31** — ingest `description:jenissimo/bottleship`: enriched entity [[bottleship]] (confidence high; browser v86 + Win32/COM/DirectDraw–D3D9 HLE on WebGPU/WebAudio/OPFS; TypeScript + Rust/WASM; WGB/GOG import; WinAPI + installer/archive parsers; automation harness + structured debug snapshots); cited [[concepts/static-runtime-evidence]] CPU-emu vs HLE boundary + [[overviews/reverse-engineering]] Console/QEMU browser lane + [[overviews/graphics-api]] DirectX Emulation blurb; refreshed `index.md` entity blurb.
+
 - **2026-10-31** — ingest `description:sonekkdev/sonekk-guard1`: enriched entity [[sonekk-guard1]] (confidence high; standalone VR Quest/Pico client-server AC—native C++17 evidence, signed JSON, Unity upload, optional Node HMAC/Keystore server-side scoring); cited [[concepts/mobile-anti-cheat]] multi-check lane + [[overviews/mobile-security]] Unity/VR soft-AC blurb; refreshed `index.md` entity blurb.
 
 - **2026-10-31** — ingest `readme:categories`: **Cheat** link_count **2983** (+1; Aetherx86/[[vmp-devirt]] VMProtect/Themida/Tigress hybrid devirt suite) / **Anti Cheat** **855** (+1; sonekkdev/[[sonekk-guard1]] standalone VR client-server AC) / **DirectX** **44** (+1; jenissimo/[[bottleship]] browser Win32/D3D HLE); 41 top-level sections (`NeverC & NeverD` placeholder); synced [[overviews/overview]], [[overviews/game-hacking]], [[overviews/reverse-engineering]], [[overviews/anti-cheat]], [[overviews/graphics-api]]; entities [[vmp-devirt]], [[bottleship]], [[sonekk-guard1]]; light `index.md` section notes (no per-category pages).
