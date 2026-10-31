@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-10-31** — ingest `description:ThatKidGlitchy/chess-hacks`: enriched entity [[chess-hacks]] (confidence high; Automation & assist: userscripts/bookmarklets/extension + mobile Safari, Stockfish auto-play/hints/eval; Heuristic detection panel: centipawn loss, accuracy, best-move rate, suspicion gauge, full-game reanalysis); cited [[overviews/game-hacking]] Game:Chess browser-augmentation lane + [[concepts/ai-aimbot-detection]] offensive chess engine-correlation blurb; refreshed `index.md` entity blurb.
+
 - **2026-10-31** — ingest `description:deavers/re-dojo`: enriched entity [[re-dojo]] (confidence high; 18× C++20 memory/hook labs + crackmes, CE/trainer/DLL templates, PE/AOB/Z3 Python utils, web RPG + artifact grader dimensions); cited [[overviews/game-hacking]] Cheat guide lane + [[overviews/reverse-engineering]] Guides/indexes blurb; refreshed `index.md` entity blurb.
 
 - **2026-10-31** — ingest `description:senolbasyigit/anticheat-lab`: enriched entity [[anticheat-lab-senolbasyigit]] (confidence high; Claude Code skill + Python CE-style scan on SHA-256–guarded dev builds, server-side fix + regression-test reports, pywinauto RPA lane, defense-priority guides); cited [[overviews/anti-cheat]] pre-ship memory-audit lane + [[overviews/game-hacking]] defensive validation blurb; refreshed `index.md` entity blurb.
