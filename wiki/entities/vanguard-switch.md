@@ -11,7 +11,23 @@ confidence: high
 
 # VanguardSwitch
 
-**VanguardSwitch** (shinishiz; C# .NET Framework 4.8 WinForms; Explore AntiCheat System:Vanguard) is a Windows utility that **stops Riot Vanguard** (`vgc` service block, optional `vgk` driver posture) when not playing and **re-enables** it without a full reboot—aimed at PCs without official **Vanguard On-Demand**. Uses service control, startup entry changes, WinVerifyTrust before terminating Riot processes, and optional GitHub release updates with SHA-256 verification. (source: wiki/sources/descriptions/shinishiz__VanguardSwitch.md)
+**VanguardSwitch** (shinishiz; C# .NET Framework 4.8 WinForms; Explore AntiCheat System:Vanguard) is a Windows **desktop utility** for **Windows 10/11** players and researchers who cannot use Riot's official **Vanguard On-Demand** mode. It turns Vanguard off while idle and restores it before play **without a full reboot**. (source: wiki/sources/descriptions/shinishiz__VanguardSwitch.md)
+
+## Components toggled
+
+The tool stops and blocks the **`vgc`** user-mode service, optionally keeps the **`vgk`** kernel driver loaded, closes **Riot Client** and related games, and reverses those steps on re-enable with **explicit per-step verification**. Flows use Windows **service control**, **startup entry** changes, and **WinVerifyTrust** signature verification before terminating Riot processes. Optional **GitHub release** self-update verifies **SHA-256** of downloaded artifacts. (source: wiki/sources/descriptions/shinishiz__VanguardSwitch.md)
+
+## Edge cases
+
+The implementation documents handling for **VAN 57** errors and **driver boot-state** inconsistencies when toggling Vanguard outside official On-Demand. (source: wiki/sources/descriptions/shinishiz__VanguardSwitch.md)
+
+## Positioning
+
+Operational **Vanguard exposure management** between play sessions—not an in-match AC bypass. Compare [[faceoff]] (FACEIT driver/service toggle) and [[vanguard-service-manager-vgk-control]] (`vgk` auto-start SCM control).
+
+## Links
+
+- Repo: https://github.com/shinishiz/VanguardSwitch
 
 ## Related
 

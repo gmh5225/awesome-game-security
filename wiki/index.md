@@ -3999,7 +3999,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [vanguard-import-resolver](entities/vanguard-import-resolver.md) — Resolve Vanguard `vgk.sys` protected kernel imports; document import-resolution mechanism (gmh5225)
 - [vanguard-service-manager-vgk-control](entities/vanguard-service-manager-vgk-control.md) — Windows CLI: check `vgk` status/auto-start and toggle Vanguard service auto-start via SCM (Karwmam)
 - [vanguard-update-notifier](entities/vanguard-update-notifier.md) — Discord bot: poll Riot clientconfig, hash Vanguard setup, alert on AC updates
-- [VanguardSwitch](entities/vanguard-switch.md) — shinishiz; WinForms utility to stop Vanguard (vgc/vgk) when idle and re-enable without reboot when Vanguard On-Demand is unavailable (Anti Cheat / Explore AntiCheat System:Vanguard)
+- [VanguardSwitch](entities/vanguard-switch.md) — shinishiz; C# WinForms; block vgc/optional vgk, close Riot Client, per-step restore; VAN 57/boot-state; no reboot without On-Demand (Anti Cheat / Explore AntiCheat System:Vanguard)
 - [vanguardtrace](entities/vanguardtrace.md) — Decrypt/intercept Vanguard `vgk.sys` encrypted imports; signature-scan table, hook with re-encrypt (armvirus)
 - [val-exception-handler](entities/val-exception-handler.md) — Vanguard exception-dispatch PoC (hardware exceptions / VEH; ZwRaiseException dump)
 - [valo-driver](entities/valo-driver.md) — Valorant kernel external memory read (phys translate / CR3 / MDL; bypass Vanguard API monitoring; gmh5225)

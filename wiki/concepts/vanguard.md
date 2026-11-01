@@ -58,7 +58,8 @@ sources:
   - wiki/sources/descriptions/apekros__valorant_offsets.md
   - wiki/sources/descriptions/94q__Valorant-Internal.md
   - wiki/sources/descriptions/Karwmam__Vanguard-Service-Manager-vGK-Control.md
-updated: 2026-09-04
+  - wiki/sources/descriptions/shinishiz__VanguardSwitch.md
+updated: 2026-11-01
 confidence: medium
 ---
 
@@ -79,6 +80,8 @@ Client-side Valorant crosshair config samples such as [[valorantcc]] sit in the 
 Update-monitoring tooling such as [[vanguard-update-notifier]] (Discord bot; polls Riot clientconfig, SHA-256 hashes Vanguard setup archive contents, alerts on version/hash drift) helps researchers track installer changes without manual diffing. (source: wiki/sources/descriptions/luavmload__vanguard-update-notifier.md)
 
 Service-management utilities such as [[vanguard-service-manager-vgk-control]] (Karwmam; C++ CLI; `vgkChecker` status/auto-start reporting and `noVanguard` auto-start toggle via SCM APIs; admin checks; optional restart prompts) let players and administrators control when the `vgk` kernel service loads—reducing idle kernel overhead when Riot titles are not in use—not runtime AC bypass. (source: wiki/sources/descriptions/Karwmam__Vanguard-Service-Manager-vGK-Control.md)
+
+WinForms toggle utilities such as [[vanguard-switch]] (shinishiz; C#; blocks `vgc`, optional `vgk` posture, closes Riot Client/games, re-enables with per-step checks and WinVerifyTrust before process termination; VAN 57/boot-state edge cases; no reboot when official Vanguard On-Demand is unavailable) extend that lane toward full idle/off play-session workflows—not runtime cheat bypass. (source: wiki/sources/descriptions/shinishiz__VanguardSwitch.md)
 
 Exception-dispatch research such as [[val-exception-handler]] (PoC; hardware exceptions / VEH; `ZwRaiseException` dump; potential code-exec or evasion angles in Vanguard's kernel exception flow) and [[dump-val-exception-handler]] (dumps Valorant exception handler registration and VEH chains; `RtlpCallVectoredHandlers` dump; gmh5225) complement generic VEH tooling like [[veh-dumper]]. (source: wiki/sources/descriptions/lil-skies__val-exception-handler.md) (source: wiki/sources/descriptions/gmh5225__Dump-val-exception-handler.md)
 
