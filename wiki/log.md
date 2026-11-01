@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-11-01** — ingest `description:chemsse576/BYOVDHunter`: created entity [[byovdhunter]] (C# .NET 4.8 static BYOVD driver risk CLI—LOLDrivers/blocklist, PE IRP/IOCTL reachability, hardening posture, JSON/CSV); cited [[concepts/byovd]] + [[overviews/windows-kernel]]; `index.md` entity entry.
+
 - **2026-11-01** — ingest `description:sonekkdev/sonekk-anticheat`: created entity [[sonekk-anticheat]] (confidence high; modular Quest/Pico VR stack—Guard/Motion/Seal/AntiADB optional layers, HMAC + Keystore attestation, Unity + Node reference, backend bans); cited [[overviews/anti-cheat]] README Anti Cheat blurb + [[overviews/mobile-security]] Android VR soft-AC lane; refreshed `index.md` entity blurb.
 
 - **2026-11-01** — ingest `readme:categories`: **Anti Cheat** link_count **861** (+2; sonekkdev/[[sonekk-anticheat]] modular VR Guard/Motion/Seal/AntiADB stack + chemsse576/[[byovdhunter]] static BYOVD driver risk CLI in Detection:Vulnerable Driver) / **Cheat** **2994** (stable) / other major README section counts stable (41 sections; `NeverC & NeverD` placeholder); synced [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/reverse-engineering]]; repaired stale Cheat (~2972) cross-link on [[overviews/anti-cheat]]; light `index.md` section notes (no per-category pages).
