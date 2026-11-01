@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-11-01** — lint (agent, Cursor lint pass): read `wiki/AGENTS.md`; **Overviews** (9) `anti-cheat`, `dma-attack`, `game-engine`, `game-hacking`, `graphics-api`, `mobile-security`, `overview`, `reverse-engineering`, `windows-kernel`; **Concepts** (51) under `wiki/concepts/`; **Entities** (4260) under `wiki/entities/`; reconciled `index.md` `](overviews|concepts|entities/*.md)` vs disk — 4320 paths (9+51+4260), 0 missing, 0 dead, 0 orphan, 0 duplicate; nine `overviews/*.md` bodies + `index.md` ## Overviews / ## Concepts blurb [[wikilink]] spot-check (14311 targets), 0 broken, 0 malformed `]]]`; 6 expected cross-kind slug collisions ([[anti-cheat]], [[game-hacking]], [[reverse-engineering]], [[byovd]], [[dma]], [[il2cpp]]); wiki populated — bootstrap not required; `index.md` unchanged; structural repairs none (`log.md` only).
+
 - **2026-11-01** — ingest `description:centollOS/SwitchWakerHD`: created entity [[switchwakerhd]] (centollOS; *Wind Waker HD* Wii U PPC static recomp→Switch/Vulkan/Android/Quest; Python decomp/lift + CMake runtime; Latte→Vulkan/deko3D + PGO; TCP Switch debug; mod SDK; BYO dump; confidence medium); cited [[overviews/game-hacking]] console static-recomp lane + [[overviews/reverse-engineering]] Console/QEMU bullet; `index.md` entity blurb.
 
 - **2026-11-01** — ingest `description:swimchicken777/reshield`: created entity [[reshield]] (pre-release Python CLI + Claude Code/Codex agent skill; multi-platform shipped-build scanner; source maps/symbols/keys; L0–L5 score; SARIF + OWASP MASWE; confidence medium); cited [[overviews/reverse-engineering]] AI-assisted RE lane + [[overviews/game-hacking]] RE Tools bullet; `index.md` entity blurb + overview cross-links.
