@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-11-01** — ingest `description:centollOS/SwitchWakerHD`: created entity [[switchwakerhd]] (centollOS; *Wind Waker HD* Wii U PPC static recomp→Switch/Vulkan/Android/Quest; Python decomp/lift + CMake runtime; Latte→Vulkan/deko3D + PGO; TCP Switch debug; mod SDK; BYO dump; confidence medium); cited [[overviews/game-hacking]] console static-recomp lane + [[overviews/reverse-engineering]] Console/QEMU bullet; `index.md` entity blurb.
+
 - **2026-11-01** — ingest `description:swimchicken777/reshield`: created entity [[reshield]] (pre-release Python CLI + Claude Code/Codex agent skill; multi-platform shipped-build scanner; source maps/symbols/keys; L0–L5 score; SARIF + OWASP MASWE; confidence medium); cited [[overviews/reverse-engineering]] AI-assisted RE lane + [[overviews/game-hacking]] RE Tools bullet; `index.md` entity blurb + overview cross-links.
 
 - **2026-11-01** — ingest `readme:categories`: **Cheat** link_count **2995** (+1) / **Anti Cheat** **863** (+1) / **DirectX** **44** / **Vulkan** **14** / other major README section counts stable (41 sections; `NeverC & NeverD` placeholder); synced [[overviews/overview]], [[overviews/game-hacking]], [[overviews/anti-cheat]], [[overviews/dma-attack]], [[overviews/reverse-engineering]]; repaired stale ~2994/~862 README-map cross-links; light `index.md` section notes (no per-category pages).
