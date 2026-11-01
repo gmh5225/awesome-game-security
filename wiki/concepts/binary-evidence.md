@@ -7,7 +7,8 @@ sources:
   - wiki/sources/descriptions/mytechnotalent__rea.md
   - wiki/sources/descriptions/formix__sre-re.md
   - wiki/sources/descriptions/Battelle__cantordust.md
-updated: 2026-10-22
+  - wiki/sources/descriptions/t1zzo__classrevive.md
+updated: 2026-11-01
 confidence: high
 ---
 
@@ -19,7 +20,7 @@ Discipline for framing **what a binary artifact can prove** before converting st
 
 Record sample hash, provenance, architecture, image layout, tool version, analysis configuration, and symbol identity. Keep **file offsets**, **RVAs**, and **runtime addresses** distinct, including relocation assumptions in disk/memory comparisons. Match symbols to the actual binary—public and private symbol sets expose different information.
 
-Decompiler output is a **reconstruction**. Validate inferred types, names, prototypes, and function boundaries against instructions, ABI constraints, and available observations. Ghidra instruction semantics and p-code explain why displayed C is not recovered source. Legacy game-rule recovery such as [[sre-re]] (DOS BBS door binary; turn-by-turn mechanics transcribed from decompilation) pairs static Ghidra work with **DOSBox re-execution** to verify formulas before treating recovered specs as findings rather than hypotheses. (source: wiki/sources/descriptions/formix__sre-re.md)
+Decompiler output is a **reconstruction**. Validate inferred types, names, prototypes, and function boundaries against instructions, ABI constraints, and available observations. Ghidra instruction semantics and p-code explain why displayed C is not recovered source. For JVM bytecode, [[classrevive]] ranks CFR/Vineflower/Procyon/JADX candidates by recompiling with `javac` and checking signature/round-trip fit against original classfiles—structurally verifiable recovery is stronger evidence than a single-engine decompile alone. (source: wiki/sources/descriptions/t1zzo__classrevive.md) Legacy game-rule recovery such as [[sre-re]] (DOS BBS door binary; turn-by-turn mechanics transcribed from decompilation) pairs static Ghidra work with **DOSBox re-execution** to verify formulas before treating recovered specs as findings rather than hypotheses. (source: wiki/sources/descriptions/formix__sre-re.md)
 
 Byte-level **visualization** (trigram clouds, metric maps, linear bitmaps—e.g. [[cantordust]] in Ghidra or standalone) accelerates **hypothesis generation** about where code, data, or embedded artifacts live; treat highlighted regions as pointers for disassembly or runtime checks, not standalone proof of behavior. (source: wiki/sources/descriptions/Battelle__cantordust.md)
 
