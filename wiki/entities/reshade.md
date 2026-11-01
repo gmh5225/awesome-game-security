@@ -18,4 +18,4 @@ Generic cross-API post-processing injector for games and video software. Hooks t
 
 ## Related
 
-[[present-hook]] · [[draw-call-hook]] · [[shader-injector]] · [[swapchain-bottleneck]] · [[kiero2]] · [[overviews/graphics-api]]
+[[macshade]] (macOS ReShade 6.8 port; Metal/OpenGL/MoltenVK; dyld interpose) · [[present-hook]] · [[draw-call-hook]] · [[shader-injector]] · [[swapchain-bottleneck]] · [[kiero2]] · [[overviews/graphics-api]]
