@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-11-01** — lint (agent, Cursor lint pass): read `wiki/AGENTS.md`; **Overviews** (9) `anti-cheat`, `dma-attack`, `game-engine`, `game-hacking`, `graphics-api`, `mobile-security`, `overview`, `reverse-engineering`, `windows-kernel`; **Concepts** (51) kebab-case pages under `wiki/concepts/`; **Entities** (4257) under `wiki/entities/`; reconciled `index.md` `](overviews|concepts|entities/*.md)` vs disk — 4317 paths (9+51+4257), 0 missing, 0 dead, 0 orphan, 0 duplicate; nine `overviews/*.md` bodies + `index.md` ## Overviews / ## Concepts blurb [[wikilink]] spot-check, 0 broken, 0 malformed `]]]`; 6 expected cross-kind slug collisions ([[anti-cheat]], [[game-hacking]], [[reverse-engineering]], [[byovd]], [[dma]], [[il2cpp]]); wiki populated — bootstrap not required; `index.md` unchanged; structural repairs none (`log.md` only).
+
 - **2026-11-01** — ingest `description:chemsse576/BYOVDHunter`: created entity [[byovdhunter]] (C# .NET 4.8 static BYOVD driver risk CLI—LOLDrivers/blocklist, PE IRP/IOCTL reachability, hardening posture, JSON/CSV); cited [[concepts/byovd]] + [[overviews/windows-kernel]]; `index.md` entity entry.
 
 - **2026-11-01** — ingest `description:sonekkdev/sonekk-anticheat`: created entity [[sonekk-anticheat]] (confidence high; modular Quest/Pico VR stack—Guard/Motion/Seal/AntiADB optional layers, HMAC + Keystore attestation, Unity + Node reference, backend bans); cited [[overviews/anti-cheat]] README Anti Cheat blurb + [[overviews/mobile-security]] Android VR soft-AC lane; refreshed `index.md` entity blurb.
