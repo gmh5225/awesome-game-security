@@ -56,7 +56,8 @@ sources:
   - wiki/sources/descriptions/ressiws__AegisAC.md
   - wiki/sources/descriptions/mihaigsm2003__CS2-AntiCheat.md
   - wiki/sources/descriptions/ThatKidGlitchy__chess-hacks.md
-updated: 2026-10-31
+  - wiki/sources/descriptions/Coding-With-SouRav__Chess-Cheater.md
+updated: 2026-11-01
 confidence: medium
 ---
 
@@ -127,6 +128,7 @@ Tabular engagement features (reaction time, curvature stats, dx/dy correlation, 
 - [[chess-anti-cheat]] — MaksymSakundiak TensorFlow/Keras engine-assistance scorer (move embeddings + bidirectional LSTM + Conv1D + color; Lichess PGN→HDF5 ingest; player-split training; clock-annotation timing/low-variance think-time features; interactive risk-factor explanations; reproducible ML baseline—not federation arbiter workflow; Anti Cheat / Machine Learning) (source: wiki/sources/descriptions/MaksymSakundiak__chess-anti-cheat.md)
 - [[chess-sentinel]] — prob1st Chrome MV3 Chess.com extension; local **Bayesian** fusion of six Published-Data API forensic signals (CAPS2 vs Elo, `[%clk]` metronome/engine-toggle timing, win-rate/rating/trust); Shadow DOM HUD; fair-play closure watchlists; public historical stats only—no live board eval or client move assistance (Anti Cheat / Open Source Anti Cheat System) (source: wiki/sources/descriptions/prob1st__chess-sentinel.md)
 - [[chess-hacks]] — ThatKidGlitchy **Chess Assist** offensive chess.com userscripts/bookmarklets/extension; live **Stockfish** auto-play, hints, and eval overlays plus a client-side suspicion panel (centipawn loss, accuracy, best-move rate, optional full-game reanalysis)—studies browser engine-assistance abuse and heuristic correlation metrics beside [[chess-sentinel]] (Game:Chess / Cheat) (source: wiki/sources/descriptions/ThatKidGlitchy__chess-hacks.md)
+- [[chess-cheater]] — Coding-With-SouRav Windows external CV assist: OpenCV/mss capture, highlight-based move inference, **python-chess** + **Stockfish** UCI, overlay hints, optional Win32 click injection—off-platform engine assistance without client memory hooks; complements browser [[chess-hacks]] and server-side chess ML on [[chess-anti-cheat]] / [[sentinel-anticheat-chess]] (Game:Chess / Cheat) (source: wiki/sources/descriptions/Coding-With-SouRav__Chess-Cheater.md)
 - [[gomoku-anti-cheat-detector]] — AODOJUST/Baishen Chrome/Edge browser extension; gomoku.com/papergames.io move capture; local Rapfi WASM replay with optional KataGomo/Rapfi weight backends; 0–100 AI-assistance risk scores from engine agreement, win-rate gaps, sharp-move streaks, and evasion patterns; live overlay, archive viewer, sample-library threshold learning, player blacklist; optional Supabase sync; moderator triage for casual online board play—not official platform rulings; Anti Cheat / Open Source Anti Cheat System) (source: wiki/sources/descriptions/AODOJUST__gomoku-anti-cheat-detector.md)
 - [[apex-anticheat-lab]] — NetVar1337 FPS anti-cheat research lab (Python server-side input telemetry; aim kinematics, reaction times, recoil regularity, triggerbot signatures; per-cohort baselines; analyst-review ranking; YARA loader/HWID-spoofer rules; read-only PowerShell host driver/PCIe/vulnerable-driver-blocklist survey; match-integrity SQL; FPS cheat taxonomy + threshold calibration docs; Anti Cheat / Open Source Anti Cheat System) (source: wiki/sources/descriptions/NetVar1337__apex-anticheat-lab.md)
 - [[nuremx]] — Apex Legends Python YOLOv5 screen-capture cheat (enemy detection, overlay, aiming; trained weights; no memory hooking; Windows/Linux; Zurek0x; cheat / [AI])

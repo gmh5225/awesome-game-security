@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-11-01** — ingest `description:Coding-With-SouRav/Chess-Cheater`: enriched entity [[chess-cheater]] (confidence high; OpenCV/mss vision, highlight move inference, python-chess state, Stockfish UCI, Tkinter/CustomTkinter overlay + Ctrl global pause, optional Win32 synthetic clicks); cited [[overviews/game-hacking]] Game:Chess external CV lane + [[concepts/ai-aimbot-detection]] offensive chess engine-assistance blurb; refreshed `index.md` entity blurb.
+
 - **2026-11-01** — ingest `description:davepartner/anti-reverse-engineer-anything`: enriched entity [[anti-reverse-engineer-anything]] (confidence high; AREA defensive toolkit—Node.js/shell automation; JS/Electron + native/Go/Rust build hardening; anti-debug/anti-Frida/anti-CDP, CSP, integrity checks vs AI-assisted RE); cited [[overviews/anti-cheat]] README Anti Debugging lane + [[overviews/reverse-engineering]] user-mode anti-analysis blurb; refreshed `index.md` entity blurb.
 
 - **2026-11-01** — ingest `readme:categories`: **Cheat** link_count **2994** (+1; Coding-With-SouRav/[[chess-cheater]] Windows OpenCV/mss + Stockfish UCI overlay) / **Anti Cheat** **859** (+1; davepartner/[[anti-reverse-engineer-anything]] AREA anti-RE hardening skill in Anti Debugging) / other major README section counts stable (41 sections; `NeverC & NeverD` placeholder); synced [[overviews/overview]], [[overviews/game-hacking]], [[overviews/anti-cheat]], [[overviews/reverse-engineering]], [[overviews/dma-attack]]; entities [[chess-cheater]], [[anti-reverse-engineer-anything]]; light `index.md` section notes (no per-category pages).

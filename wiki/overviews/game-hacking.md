@@ -1958,6 +1958,7 @@ sources:
   - wiki/sources/descriptions/mrmtwoj__android-frida-bypass-suite.md
   - wiki/sources/descriptions/allnighter51__Iris.md
   - wiki/sources/descriptions/ThatKidGlitchy__chess-hacks.md
+  - wiki/sources/descriptions/Coding-With-SouRav__Chess-Cheater.md
   - wiki/sources/descriptions/REDLANTERNDEV__FaceOff.md
 updated: 2026-11-01
 confidence: high
@@ -3105,7 +3106,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - PS3 SPRX mod-menu source trees such as [[paradise-bo2]] (Paradise BO2; window/UI code) sit in the same `PlayStation` / console injected-menu lane for BO2 menu-architecture study. (source: wiki/sources/descriptions/gopro2027__ParadiseBO2.md)
 - redlanterndev/[[faceoff]] **FaceOff** portable Windows FACEIT kernel AC exposure toggle (C# WPF + CLI; disables `FACEIT_AC.sys`, FACEITService, and client processes between CS2/match sessions; persists settings; boot-time driver requires admin elevation + restart before re-enable; batch-script parity; Explore AntiCheat System:FACEIT / operational exposure management, not active-match bypass) sits beside FACEIT driver research on [[overviews/anti-cheat]]. (source: wiki/sources/descriptions/REDLANTERNDEV__FaceOff.md)
 - thatkidglitchy/[[chess-hacks]] **Chess Assist** client-side chess.com augmentation (JavaScript userscripts, bookmarklets, optional Chrome extension + mobile Safari; Stockfish auto-play with configurable depth/delay, best-move and opponent-prediction overlays; dual-use detection panel for centipawn loss, accuracy, best-move rate, and suspicion gauges with optional full-game reanalysis; Game:Chess / Cheat) sits beside defensive Chess.com browser tooling on [[ai-aimbot-detection]]. (source: wiki/sources/descriptions/ThatKidGlitchy__chess-hacks.md)
-- Coding-With-SouRav/[[chess-cheater]] **Chess Cheater** Windows external overlay: OpenCV/mss screen capture of the live board plus local **Stockfish** UCI analysis for move suggestions—zero-memory visual-assist lane adjacent to browser userscripts and YOLO screen-capture aimbots on [[obs-game-capture]] / [[ai-aimbot-detection]]. (source: wiki/sources/README-categories.md)
+- Coding-With-SouRav/[[chess-cheater]] **Chess Cheater** Windows external assistant: OpenCV/mss board capture, highlight-color move inference, **python-chess** state, local **Stockfish** UCI, Tkinter move overlay, CustomTkinter panel with Ctrl pause via global hooks; optional Win32 synthetic clicks without cursor motion—zero-memory CV + external engine lane beside [[chess-hacks]] and screen-capture aimbots on [[obs-game-capture]] / [[ai-aimbot-detection]]. (source: wiki/sources/descriptions/Coding-With-SouRav__Chess-Cheater.md)
 
 ## Related concepts
 
