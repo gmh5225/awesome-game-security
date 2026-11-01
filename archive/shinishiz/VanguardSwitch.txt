@@ -1,0 +1,2348 @@
+Project Path: arc_shinishiz_VanguardSwitch_ut422_sq
+
+Source Tree:
+
+```txt
+arc_shinishiz_VanguardSwitch_ut422_sq
+├── CHANGELOG.md
+├── LICENSE
+├── README.md
+├── assets
+│   └── icon.svg
+└── src
+    ├── Controls.cs
+    ├── Dialog.cs
+    ├── L.cs
+    ├── MainForm.cs
+    ├── Native.cs
+    ├── Program.cs
+    ├── Updater.cs
+    ├── Vanguard.cs
+    ├── VanguardSwitch.csproj
+    └── app.manifest
+
+```
+
+`CHANGELOG.md`:
+
+```md
+# Changelog
+
+## v1.0.5
+
+- Turn off locks the buttons before checking for open games, so a second click can't start another action
+  at the same time. The update notice also waits until no other dialog is open.
+- The window only says "Vanguard is on" when the `vgc` service was found and read. A missing service or an
+  incomplete read now gets its own message instead.
+- Release notes come from this changelog.
+- The release page link (shown when an update fails) opens the browser as a normal user, not as admin.
+- The signature check is redone when a Riot file changes, instead of being remembered until the app closes.
+- README: restart, don't shut down, to fix VAN 57 (Fast Startup doesn't reload drivers).
+
+## v1.0.4
+
+- Riot processes are only closed if Windows confirms a valid Riot Games signature on the exe (`WinVerifyTrust`),
+  not just a matching name or folder.
+- A process that exits while the list is being read no longer causes an error.
+- *Riot default and restart* tells you when Vanguard's tray entry doesn't exist instead of reporting it as restored.
+- GitHub Actions: only the release job can write to the repo, and a tag must match the version in the project.
+
+## v1.0.3
+
+- Before closing a process, the app checks its folder or signature, not only its name, and checks again that
+  the process id still belongs to the same program.
+- *Riot default and restart* checks each step (driver and service startup, tray, service running) and only
+  restarts if the essential ones worked.
+
+## v1.0.2
+
+- Riot Client is never started with admin rights. If it can't open as a normal user, the app asks you to open
+  it from its shortcut.
+- `sc.exe` calls time out after 30 seconds instead of hanging the app.
+- VAN 57 messages now say "can cause" and mention it applies to Vanguard's traditional mode.
+
+## v1.0.1
+
+- Updates are refused if the release has no valid SHA-256 file.
+- An error while reading the state at startup no longer crashes the window.
+- README: clearer wording about the boot check and network access.
+
+## v1.0.0
+
+- First release.
+
+```
+
+`LICENSE`:
+
+```
+MIT License
+
+Copyright (c) 2026 shinishiz
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
+`README.md`:
+
+```md
+<p align="center">
+  <img src="assets/icon.png" width="88" alt="">
+</p>
+
+<h1 align="center">VanguardSwitch</h1>
+
+<p align="center">
+  Turn Riot Vanguard off when you're not playing, and back on without rebooting.
+  <br>
+  For PCs that can't use Riot's own On-Demand mode.
+  <br>
+  <a href="#português">Português</a>
+</p>
+
+<p align="center">
+  <a href="../../releases/latest"><img src="https://img.shields.io/github/v/release/shinishiz/VanguardSwitch?label=download" alt="Download"></a>
+  <img src="https://img.shields.io/badge/windows-10%20%7C%2011-0078D6" alt="Windows 10 | 11">
+  <img src="https://img.shields.io/github/license/shinishiz/VanguardSwitch" alt="License">
+</p>
+
+<p align="center">
+  <img src="assets/screenshot.png" width="462" alt="VanguardSwitch window">
+</p>
+
+Riot Vanguard keeps a kernel driver (`vgk`) and a service (`vgc`) running all the time, even when you're
+not playing. Windows lets you turn them off, but turning Vanguard back on normally needs a reboot.
+
+VanguardSwitch closes Riot and Vanguard with one click and keeps only the driver loaded, so turning it back
+on takes a second instead of a reboot.
+
+## What about Vanguard On-Demand?
+
+On June 24, 2026 Riot added an official **On-Demand mode** to Vanguard. With it, Vanguard starts when you
+open a Riot game and shuts down after you finish. It's only offered on PCs that pass **Vanguard Pre-Check**,
+which requires all of these:
+
+| Requirement | Notes |
+| --- | --- |
+| Windows 11 25H2 or newer | Windows 10 isn't supported at all |
+| UEFI with Secure Boot on | Legacy BIOS/CSM boot doesn't qualify |
+| TPM 2.0 | Firmware TPM (fTPM/PTT) is fine |
+| IOMMU | AMD-Vi / Intel VT-d enabled in the BIOS |
+| Virtualization-Based Security (VBS) | |
+| Hypervisor-Protected Code Integrity (HVCI) | "Memory integrity" in Windows Security |
+
+Riot says about 35% of players already meet them. The Vanguard tray icon shows which ones are missing,
+and Riot says more checks may be added later.
+
+**If your PC qualifies, use Riot's On-Demand mode.** It's official and needs nothing else.
+
+VanguardSwitch is for everyone else: Windows 10, older hardware, or people who don't want to turn on
+VBS/HVCI (they cost some performance on older CPUs). It gives you the same idea, Vanguard off while you're
+not playing, using only the switches Windows already has.
+
+Sources: [Riot's announcement](https://www.riotgames.com/en/news/vanguard-on-demand),
+[Vanguard Pre-Check on Riot Support](https://support.riotgames.com/en-us/riot/performance/vanguard-pre-check).
+
+## Download
+
+Grab `VanguardSwitch.exe` from [Releases](../../releases/latest). No install. It asks for admin rights
+because only an admin can stop services. Every release is built from this repo by
+[GitHub Actions](.github/workflows/build.yml) and lists the file's SHA-256.
+
+Windows SmartScreen may warn the first time because the file isn't code-signed. Click
+**More info → Run anyway**.
+
+## Usage
+
+- **Turn off**: closes Riot Client, VALORANT, League of Legends, LoR, 2XKO and the tray icon, then stops
+  `vgc` and blocks it so Riot Client can't start it again.
+- **Turn on**: starts `vgc` and the tray icon again and sets Vanguard to start with Windows.
+- **Keep the driver loaded** (on by default): `vgk` stays in memory when you turn off. Uncheck it to unload
+  everything; you'll need one reboot before playing again.
+- **Riot default and restart**: puts everything back the way Riot installs it and reboots.
+
+The window shows what each part is doing, warns if something else turns Vanguard back on, and checks every
+step after you click. Text is in English or Portuguese, following your Windows language.
+
+### Error VAN 57
+
+In Vanguard's traditional mode (without On-Demand), starting `vgk` after Windows booted can cause VAN 57.
+Restart once and keep *Keep the driver loaded* checked from then on. Use **Restart**, not Shut down: with
+Windows Fast Startup on, shutting down and turning the PC back on doesn't reload drivers.
+
+The *Driver loaded at boot* row tries to warn you before you open the game. It compares the time of
+Vanguard's own driver log (`Logs\vgk_*.log`) with the time Windows started, and also remembers when the
+app itself started or stopped the driver. It's an estimate, not Riot's own check: a changed system clock,
+missing logs or a new log format from Riot can fool it (it then shows *Unknown*), and it only catches this
+one cause of VAN 57, not all of them.
+
+## Updates
+
+When it opens, the app asks GitHub for the latest release. If there's a newer one, it shows
+**Update** or **Close**. Update downloads the new `VanguardSwitch.exe` and its `.sha256` from the release,
+refuses to install if the checksum is missing or doesn't match, replaces the old file and reopens.
+
+The checksum only proves the file is the one published in the release; the exe isn't code-signed.
+Network access is limited to GitHub's API and GitHub-hosted release downloads.
+
+## How it works
+
+| | Turn off | Turn off (driver unloaded) | Turn on |
+| --- | --- | --- | --- |
+| `vgk` kernel driver | stays loaded | unloaded, blocked | loads at boot |
+| `vgc` service | stopped, blocked | stopped, blocked | automatic, running |
+| `vgtray` tray icon | closed, off at startup | closed, off at startup | running, on at startup |
+| Riot Client and games | closed | closed | |
+
+"Blocked" is the `disabled` start type. With `manual`, Riot Client can start Vanguard by itself.
+Startup entries are changed the same way Task Manager does it. No Vanguard file is changed.
+
+## Build
+
+```sh
+dotnet build src/VanguardSwitch.csproj -c Release
+```
+
+Works on Windows or Linux with the .NET 8 SDK. The app targets .NET Framework 4.8, which ships with Windows 10 and 11.
+
+## Disclaimer
+
+Not affiliated with Riot Games. Riot Vanguard, VALORANT and League of Legends are trademarks of
+Riot Games, Inc. Use at your own risk.
+
+---
+
+## Português
+
+Desliga o Riot Vanguard quando você não está jogando e liga de novo sem reiniciar o PC.
+
+### E o Vanguard On-Demand?
+
+Em 24 de junho de 2026 a Riot lançou o **modo On-Demand** do Vanguard: ele liga quando você abre um jogo
+da Riot e desliga quando você termina. Só que ele só aparece em PCs que passam no **Vanguard Pre-Check**,
+que exige tudo isto:
+
+- Windows 11 25H2 ou mais novo (Windows 10 não entra);
+- UEFI com Secure Boot ligado;
+- TPM 2.0 (o TPM do processador, fTPM/PTT, serve);
+- IOMMU (AMD-Vi / Intel VT-d ligado na BIOS);
+- VBS (segurança baseada em virtualização);
+- HVCI ("Integridade de memória" na Segurança do Windows).
+
+Segundo a Riot, uns 35% dos jogadores já atendem. O ícone do Vanguard na bandeja mostra o que falta.
+**Se o seu PC atende, use o modo da Riot**, que é oficial.
+
+O VanguardSwitch é pra quem não atende (Windows 10, PC mais antigo, ou quem não quer ligar VBS/HVCI) e
+quer deixar os serviços da Riot desligados enquanto não está jogando.
+
+### Uso
+
+Baixe o `VanguardSwitch.exe` em [Releases](../../releases/latest). Não precisa instalar. Se o
+SmartScreen avisar, clique em **Mais informações → Executar assim mesmo**.
+
+- **Desligar**: fecha o Riot Client, os jogos e o ícone da bandeja, para o serviço `vgc` e bloqueia para
+  ele não voltar sozinho.
+- **Ligar**: liga o serviço e o ícone de novo e deixa o Vanguard ligando com o Windows.
+- **Manter o driver carregado** (já vem marcado): o driver `vgk` continua na memória, e é por isso que o
+  "Ligar" funciona sem reiniciar.
+
+**Erro VAN 57:** no modo tradicional do Vanguard (sem On-Demand), ligar o driver depois do boot pode causar
+esse erro. Reinicie o PC uma vez e deixe a opção marcada. Use **Reiniciar**, não Desligar: com a
+Inicialização Rápida do Windows ligada, desligar e ligar o PC não recarrega os drivers.
+A linha *Driver carregou no boot* tenta avisar isso antes de abrir o jogo, comparando o horário do log do
+driver com o horário em que o Windows ligou. É uma estimativa, não a checagem da Riot: relógio alterado,
+log faltando ou mudança no formato dos logs podem enganar (aí aparece *Não dá para saber*), e ela só pega
+essa causa do VAN 57, não todas.
+
+**Atualizações:** ao abrir, o app confere no GitHub se saiu versão nova e mostra **Atualizar** ou
+**Fechar**. Atualizar baixa o exe e o `.sha256` da release, recusa instalar se o hash faltar ou não bater,
+troca o arquivo e abre de novo. O app só acessa a rede pela API do GitHub e pelos downloads das releases.
+
+O programa não altera nenhum arquivo do Vanguard. Sem vínculo com a Riot Games.
+
+```
+
+`assets/icon.svg`:
+
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+  <defs>
+    <path id="s" d="M76 40 H180 L208 64 V118 C208 166 176 200 128 224 C80 200 48 166 48 118 V64 Z"/>
+    <clipPath id="l"><rect x="0" y="0" width="128" height="256"/></clipPath>
+    <clipPath id="r"><rect x="128" y="0" width="128" height="256"/></clipPath>
+  </defs>
+  <rect x="8" y="8" width="240" height="240" rx="52" fill="#1b1b1f"/>
+  <use href="#s" fill="#e5484d" clip-path="url(#l)"/>
+  <use href="#s" fill="#55555e" clip-path="url(#r)"/>
+  <path d="M90 62 H166 L184 77 V118 C184 152 162 177 128 196 C94 177 72 152 72 118 V77 Z" fill="none" stroke="#1b1b1f" stroke-opacity="0.35" stroke-width="6"/>
+  <path d="M128 32 V232" stroke="#1b1b1f" stroke-width="9"/>
+</svg>
+
+```
+
+`src/Controls.cs`:
+
+```cs
+using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Drawing.Drawing2D;
+using System.Windows.Forms;
+
+namespace VanguardSwitch
+{
+    /// <summary>Colors and shapes close to the Windows 11 Settings dark theme.</summary>
+    static class Theme
+    {
+        public static readonly Color Bg = Color.FromArgb(32, 32, 32);
+        public static readonly Color Card = Color.FromArgb(43, 43, 43);
+        public static readonly Color CardLine = Color.FromArgb(29, 29, 29);
+        public static readonly Color Button = Color.FromArgb(45, 45, 45);
+        public static readonly Color ButtonLine = Color.FromArgb(58, 58, 58);
+        public static readonly Color Text = Color.FromArgb(255, 255, 255);
+        public static readonly Color Muted = Color.FromArgb(160, 160, 160);
+        public static readonly Color Dim = Color.FromArgb(100, 100, 100);
+        public static readonly Color Red = Color.FromArgb(220, 64, 60);
+        public static readonly Color Green = Color.FromArgb(40, 150, 90);
+        public static readonly Color GreenText = Color.FromArgb(108, 203, 95);
+        public static readonly Color RedText = Color.FromArgb(255, 153, 164);
+        public static readonly Color Amber = Color.FromArgb(252, 225, 0);
+
+        public static GraphicsPath Round(RectangleF r, float radius)
+        {
+            float d = radius * 2;
+            var p = new GraphicsPath();
+            p.AddArc(r.X, r.Y, d, d, 180, 90);
+            p.AddArc(r.Right - d, r.Y, d, d, 270, 90);
+            p.AddArc(r.Right - d, r.Bottom - d, d, d, 0, 90);
+            p.AddArc(r.X, r.Bottom - d, d, d, 90, 90);
+            p.CloseFigure();
+            return p;
+        }
+
+        public static Color Mix(Color a, Color b, float t) => Color.FromArgb(
+            (int)(a.R + (b.R - a.R) * t), (int)(a.G + (b.G - a.G) * t), (int)(a.B + (b.B - a.B) * t));
+
+        public static void Box(Graphics g, Rectangle r, Color fill, Color line, float radius = 4)
+        {
+            var rf = new RectangleF(r.X + 0.5f, r.Y + 0.5f, r.Width - 1, r.Height - 1);
+            using (var p = Round(rf, radius))
+            using (var b = new SolidBrush(fill))
+            using (var pen = new Pen(line))
+            {
+                g.FillPath(b, p);
+                g.DrawPath(pen, p);
+            }
+        }
+    }
+
+    abstract class PaintedControl : Control
+    {
+        protected bool Hover, Down;
+
+        protected PaintedControl()
+        {
+            SetStyle(ControlStyles.AllPaintingInWmPaint | ControlStyles.OptimizedDoubleBuffer | ControlStyles.UserPaint | ControlStyles.ResizeRedraw, true);
+        }
+
+        protected override void OnMouseEnter(EventArgs e) { Hover = true; Invalidate(); base.OnMouseEnter(e); }
+        protected override void OnMouseLeave(EventArgs e) { Hover = Down = false; Invalidate(); base.OnMouseLeave(e); }
+        protected override void OnMouseDown(MouseEventArgs e) { Down = true; Invalidate(); base.OnMouseDown(e); }
+        protected override void OnMouseUp(MouseEventArgs e) { Down = false; Invalidate(); base.OnMouseUp(e); }
+        protected override void OnEnabledChanged(EventArgs e) { Invalidate(); base.OnEnabledChanged(e); }
+
+        protected Graphics Begin(PaintEventArgs e)
+        {
+            var g = e.Graphics;
+            g.SmoothingMode = SmoothingMode.AntiAlias;
+            g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+            g.Clear(Parent?.BackColor ?? Theme.Bg);
+            return g;
+        }
+    }
+
+    /// <summary>Plain Windows 11 style button. Filled with Accent when it's the suggested action.</summary>
+    class WinButton : PaintedControl
+    {
+        public Image Image;
+        Color? accent;
+
+        /// <summary>null = normal gray button, a color = filled "suggested" button.</summary>
+        public Color? Accent { get => accent; set { accent = value; Invalidate(); } }
+
+        public WinButton() { Cursor = Cursors.Hand; }
+
+        protected override void OnPaint(PaintEventArgs e)
+        {
+            var g = Begin(e);
+            Color fill = accent ?? Theme.Button;
+            Color line = accent.HasValue ? Theme.Mix(accent.Value, Color.White, 0.12f) : Theme.ButtonLine;
+            if (!Enabled) { fill = Theme.Mix(fill, Theme.Bg, 0.6f); line = Theme.Mix(line, Theme.Bg, 0.6f); }
+            else if (Down) fill = Theme.Mix(fill, Color.Black, 0.12f);
+            else if (Hover) fill = Theme.Mix(fill, Color.White, 0.06f);
+            Theme.Box(g, ClientRectangle, fill, line);
+
+            Color fg = Enabled ? Theme.Text : Theme.Dim;
+            var size = TextRenderer.MeasureText(g, Text, Font, Size.Empty, TextFormatFlags.NoPadding);
+            int imgW = Image != null ? 16 + 8 : 0;
+            int x = Math.Max(10, (Width - size.Width - imgW) / 2);
+            if (Image != null)
+            {
+                var r = new Rectangle(x, (Height - 16) / 2, 16, 16);
+                if (Enabled) g.DrawImage(Image, r);
+                else
+                {
+                    // gray and faded, like the disabled text
+                    var m = new System.Drawing.Imaging.ColorMatrix(new[]
+                    {
+                        new[] { .3f, .3f, .3f, 0, 0 },
+                        new[] { .59f, .59f, .59f, 0, 0 },
+                        new[] { .11f, .11f, .11f, 0, 0 },
+                        new[] { 0f, 0, 0, .35f, 0 },
+                        new[] { 0f, 0, 0, 0, 1 },
+                    });
+                    using (var ia = new System.Drawing.Imaging.ImageAttributes())
+                    {
+                        ia.SetColorMatrix(m);
+                        g.DrawImage(Image, r, 0, 0, Image.Width, Image.Height, GraphicsUnit.Pixel, ia);
+                    }
+                }
+            }
+            TextRenderer.DrawText(g, Text, Font, new Rectangle(x + imgW, 0, Width - x - imgW, Height), fg,
+                TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding | TextFormatFlags.EndEllipsis | TextFormatFlags.NoPrefix);
+        }
+    }
+
+    /// <summary>Status line: colored bar on the left, a title and one sentence.</summary>
+    class StatusCard : PaintedControl
+    {
+        public string Title = "", Sentence = "";
+        public Color Accent = Theme.Dim;
+        public Font TitleFont, SentenceFont;
+
+        protected override void OnPaint(PaintEventArgs e)
+        {
+            var g = Begin(e);
+            Theme.Box(g, ClientRectangle, Theme.Card, Theme.CardLine);
+            using (var p = Theme.Round(new RectangleF(1, 1, 4, Height - 2), 2))
+            using (var b = new SolidBrush(Accent))
+                g.FillPath(b, p);
+            var flags = TextFormatFlags.Left | TextFormatFlags.NoPrefix | TextFormatFlags.NoPadding;
+            TextRenderer.DrawText(g, Title, TitleFont, new Rectangle(20, 14, Width - 36, 24), Theme.Text, flags | TextFormatFlags.SingleLine);
+            TextRenderer.DrawText(g, Sentence, SentenceFont, new Rectangle(20, 42, Width - 36, Height - 48), Theme.Muted, flags | TextFormatFlags.WordBreak);
+        }
+    }
+
+    class Row
+    {
+        public string Label, Value;
+        public Color ValueColor = Theme.Text;
+    }
+
+    /// <summary>A Settings-style list: label on the left, value on the right, thin lines between rows.</summary>
+    class ListCard : PaintedControl
+    {
+        public List<Row> Rows = new List<Row>();
+        public int RowHeight = 38;
+
+        protected override void OnPaint(PaintEventArgs e)
+        {
+            var g = Begin(e);
+            Theme.Box(g, ClientRectangle, Theme.Card, Theme.CardLine);
+            var left = TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPrefix;
+            var right = TextFormatFlags.Right | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPrefix;
+            using (var pen = new Pen(Theme.CardLine))
+            {
+                for (int i = 0; i < Rows.Count; i++)
+                {
+                    int y = i * RowHeight;
+                    if (i > 0) g.DrawLine(pen, 1, y, Width - 2, y);
+                    var r = new Rectangle(16, y, Width - 32, RowHeight);
+                    TextRenderer.DrawText(g, Rows[i].Label, Font, r, Theme.Text, left);
+                    TextRenderer.DrawText(g, Rows[i].Value, Font, r, Rows[i].ValueColor, right);
+                }
+            }
+        }
+    }
+
+    /// <summary>Settings-style option: title and description, Windows 11 toggle switch on the right.</summary>
+    class ToggleCard : PaintedControl
+    {
+        public string Title = "", Description = "", OnText = "On", OffText = "Off";
+        public Font TitleFont, DescFont;
+        public event EventHandler CheckedChanged;
+        bool on;
+
+        public bool Checked
+        {
+            get => on;
+            set { if (on == value) return; on = value; Invalidate(); CheckedChanged?.Invoke(this, EventArgs.Empty); }
+        }
+
+        public ToggleCard() { Cursor = Cursors.Hand; }
+
+        protected override void OnClick(EventArgs e)
+        {
+            if (Enabled) Checked = !Checked;
+            base.OnClick(e);
+        }
+
+        protected override void OnPaint(PaintEventArgs e)
+        {
+            var g = Begin(e);
+            Theme.Box(g, ClientRectangle, Hover && Enabled ? Theme.Mix(Theme.Card, Color.White, 0.03f) : Theme.Card, Theme.CardLine);
+
+            var track = new RectangleF(Width - 16 - 40, (Height - 20) / 2f, 40, 20);
+            if (on)
+            {
+                using (var p = Theme.Round(track, 10)) using (var b = new SolidBrush(Enabled ? Theme.Green : Theme.Dim)) g.FillPath(b, p);
+                using (var k = new SolidBrush(Color.Black)) g.FillEllipse(k, track.Right - 16, track.Y + 4, 12, 12);
+            }
+            else
+            {
+                using (var p = Theme.Round(new RectangleF(track.X + 0.5f, track.Y + 0.5f, track.Width - 1, track.Height - 1), 10))
+                using (var pen = new Pen(Theme.Muted)) g.DrawPath(pen, p);
+                using (var k = new SolidBrush(Theme.Muted)) g.FillEllipse(k, track.X + 5, track.Y + 5, 10, 10);
+            }
+            string state = on ? OnText : OffText;
+            var ss = TextRenderer.MeasureText(g, state, Font, Size.Empty, TextFormatFlags.NoPadding);
+            TextRenderer.DrawText(g, state, Font, new Rectangle((int)track.X - 10 - ss.Width, 0, ss.Width + 2, Height), Enabled ? Theme.Text : Theme.Dim,
+                TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding);
+
+            int textW = (int)track.X - 30 - ss.Width;
+            var flags = TextFormatFlags.Left | TextFormatFlags.NoPrefix | TextFormatFlags.NoPadding;
+            TextRenderer.DrawText(g, Title, TitleFont, new Rectangle(16, 14, textW, 20), Enabled ? Theme.Text : Theme.Dim, flags | TextFormatFlags.SingleLine | TextFormatFlags.EndEllipsis);
+            TextRenderer.DrawText(g, Description, DescFont, new Rectangle(16, 36, textW, Height - 40), Theme.Muted, flags | TextFormatFlags.WordBreak);
+        }
+    }
+}
+
+```
+
+`src/Dialog.cs`:
+
+```cs
+using System;
+using System.Drawing;
+using System.Windows.Forms;
+
+namespace VanguardSwitch
+{
+    /// <summary>Message box in the app's own dark style (replaces MessageBox).</summary>
+    class Dialog : Form
+    {
+        DialogResult result = DialogResult.Cancel;
+
+        Dialog(string title, string text, bool yesNo, Color accent, Font font, Font titleFont, string yesText, string noText)
+        {
+            AutoScaleMode = AutoScaleMode.Dpi;
+            AutoScaleDimensions = new SizeF(96f, 96f);
+            Text = "VanguardSwitch";
+            FormBorderStyle = FormBorderStyle.FixedSingle;
+            StartPosition = FormStartPosition.CenterParent;
+            MinimizeBox = MaximizeBox = false;
+            ShowInTaskbar = false;
+            ShowIcon = false;
+            BackColor = Theme.Bg;
+            ForeColor = Theme.Text;
+            Font = font;
+            KeyPreview = true;
+
+            const int width = 420, pad = 24;
+            var bodySize = TextRenderer.MeasureText(text, font, new Size(width - 2 * pad, 0), TextFormatFlags.WordBreak | TextFormatFlags.NoPrefix);
+
+            var heading = new Label
+            {
+                Text = title, Font = titleFont, ForeColor = Theme.Text, BackColor = Color.Transparent,
+                Location = new Point(pad, 20), Size = new Size(width - 2 * pad, 26),
+            };
+            var body = new Label
+            {
+                Text = text, Font = font, ForeColor = Color.FromArgb(215, 215, 215), BackColor = Color.Transparent, UseMnemonic = false,
+                Location = new Point(pad, 56), Size = new Size(width - 2 * pad, bodySize.Height + 4),
+            };
+
+            var footer = new Panel { Location = new Point(0, body.Bottom + 22), Size = new Size(width, 64), BackColor = Theme.Card };
+            var top = new Panel { Location = new Point(0, 0), Size = new Size(width, 1), BackColor = Theme.CardLine };
+            footer.Controls.Add(top);
+
+            var ok = new WinButton { Text = yesText ?? (yesNo ? L.T("Sim", "Yes") : "OK"), Accent = accent, Size = new Size(110, 34), Font = font };
+            ok.Click += (s, e) => { result = yesNo ? DialogResult.Yes : DialogResult.OK; Close(); };
+            if (yesNo)
+            {
+                var no = new WinButton { Text = noText ?? L.T("Não", "No"), Size = new Size(110, 34), Font = font };
+                no.Click += (s, e) => { result = DialogResult.No; Close(); };
+                no.Location = new Point(width - pad - 110, 15);
+                ok.Location = new Point(no.Left - 8 - 110, 15);
+                footer.Controls.Add(no);
+            }
+            else ok.Location = new Point(width - pad - 110, 15);
+            footer.Controls.Add(ok);
+
+            ClientSize = new Size(width, footer.Bottom);
+            Controls.AddRange(new Control[] { heading, body, footer });
+
+            KeyDown += (s, e) =>
+            {
+                if (e.KeyCode == Keys.Enter) { result = yesNo ? DialogResult.Yes : DialogResult.OK; Close(); }
+                else if (e.KeyCode == Keys.Escape) { result = yesNo ? DialogResult.No : DialogResult.OK; Close(); }
+            };
+        }
+
+        protected override void OnHandleCreated(EventArgs e)
+        {
+            base.OnHandleCreated(e);
+            try { Native.DarkTitleBar(Handle); } catch { }
+        }
+
+        static DialogResult Run(IWin32Window owner, string title, string text, bool yesNo, Color accent, string yesText = null, string noText = null)
+        {
+            var parent = owner as Form;
+            var font = parent?.Font ?? new Font("Segoe UI", 9.75f);
+            using (var titleFont = new Font("Segoe UI Semibold", 12f))
+            using (var d = new Dialog(title, text, yesNo, accent, font, titleFont, yesText, noText))
+            {
+                d.ShowDialog(owner);
+                return d.result;
+            }
+        }
+
+        public static DialogResult Ask(IWin32Window owner, string title, string text, Color? accent = null) =>
+            Run(owner, title, text, true, accent ?? Theme.Green);
+
+        /// <summary>Yes/No with custom button texts.</summary>
+        public static DialogResult Choose(IWin32Window owner, string title, string text, string yesText, string noText) =>
+            Run(owner, title, text, true, Theme.Green, yesText, noText);
+
+        public static void Info(IWin32Window owner, string title, string text) =>
+            Run(owner, title, text, false, Theme.Green);
+    }
+}
+
+```
+
+`src/L.cs`:
+
+```cs
+using System.Globalization;
+
+namespace VanguardSwitch
+{
+    /// <summary>Picks Portuguese or English text from the Windows display language.</summary>
+    static class L
+    {
+        public static readonly bool Pt = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "pt";
+
+        public static string T(string pt, string en) => Pt ? pt : en;
+    }
+}
+
+```
+
+`src/MainForm.cs`:
+
+```cs
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Drawing;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+
+namespace VanguardSwitch
+{
+    class MainForm : Form
+    {
+        const int BaseHeight = 662;
+
+        readonly Font fTitle = new Font("Segoe UI Semibold", 12f);
+        readonly Font fState = new Font("Segoe UI Semibold", 12f);
+        readonly Font fText = new Font("Segoe UI", 9.75f);
+        readonly Font fSmall = new Font("Segoe UI", 8.75f);
+        readonly Font fSection = new Font("Segoe UI Semibold", 9.75f);
+        readonly Font fLog = new Font("Consolas", 8.75f);
+
+        StatusCard status;
+        ListCard parts;
+        WinButton btnOff, btnOn, btnRiot, btnDefault;
+        ToggleCard toggle;
+        LinkLabel lnkDetails, lnkHelp;
+        TextBox txtLog;
+        readonly Timer timer = new Timer { Interval = 3000 };
+
+        bool busy, refreshing, warned, detailsOpen;
+        int warnings;
+        enum Watch { None, Off, Light }
+        Watch watch = Watch.None;
+
+        public MainForm()
+        {
+            AutoScaleMode = AutoScaleMode.Dpi;
+            AutoScaleDimensions = new SizeF(96f, 96f);
+            Text = "VanguardSwitch";
+            ClientSize = new Size(460, BaseHeight);
+            StartPosition = FormStartPosition.CenterScreen;
+            FormBorderStyle = FormBorderStyle.FixedSingle;
+            MaximizeBox = false;
+            BackColor = Theme.Bg;
+            ForeColor = Theme.Text;
+            Font = fText;
+            try { Icon = Icon.ExtractAssociatedIcon(Application.ExecutablePath); } catch { }
+
+            Build();
+
+            Vg.Log = msg =>
+            {
+                if (IsHandleCreated && !IsDisposed) BeginInvoke((Action)(() => AppendLog(msg)));
+            };
+            timer.Tick += (s, e) => RefreshStatus();
+            Shown += OnShown;
+            FormClosed += (s, e) => timer.Stop();
+        }
+
+        protected override void OnHandleCreated(EventArgs e)
+        {
+            base.OnHandleCreated(e);
+            try { Native.DarkTitleBar(Handle); } catch { }
+        }
+
+        // ---------- layout ----------
+
+        static Image IconOf(string exe)
+        {
+            // taken from the program installed on this PC, so the button shows Riot's own icon
+            try
+            {
+                if (exe == null || !File.Exists(exe)) return null;
+                using (var ico = Icon.ExtractAssociatedIcon(exe)) return ico?.ToBitmap();
+            }
+            catch { return null; }
+        }
+
+        Label NewLabel(string text, int x, int y, int w, int h, Font f, Color c) => new Label
+        {
+            Text = text, Location = new Point(x, y), Size = new Size(w, h), Font = f, ForeColor = c, BackColor = Color.Transparent,
+        };
+
+        LinkLabel NewLink(string text, int x, int y, int w, ContentAlignment align = ContentAlignment.MiddleLeft) => new LinkLabel
+        {
+            Text = text, Location = new Point(x, y), Size = new Size(w, 20), Font = fSmall, TextAlign = align, BackColor = Color.Transparent,
+            LinkColor = Theme.Muted, ActiveLinkColor = Theme.Text, VisitedLinkColor = Theme.Muted, LinkBehavior = LinkBehavior.HoverUnderline,
+        };
+
+        void Build()
+        {
+            var logo = new PictureBox { Location = new Point(20, 17), Size = new Size(20, 20), SizeMode = PictureBoxSizeMode.Zoom, BackColor = Color.Transparent };
+            try { logo.Image = new Icon(Icon, 32, 32).ToBitmap(); } catch { }
+            var title = NewLabel("VanguardSwitch", 46, 14, 300, 26, fTitle, Theme.Text);
+
+            status = new StatusCard { Location = new Point(20, 52), Size = new Size(420, 82), TitleFont = fState, SentenceFont = fText };
+
+            var section = NewLabel(L.T("Partes do Vanguard", "Vanguard parts"), 20, 148, 420, 22, fSection, Theme.Text);
+            parts = new ListCard { Location = new Point(20, 172), Size = new Size(420, 6 * 38), Font = fText };
+
+            btnOff = new WinButton { Text = L.T("Desligar Vanguard", "Turn Vanguard off"), Location = new Point(20, 416), Size = new Size(206, 36), Font = fText };
+            btnOn = new WinButton { Text = L.T("Ligar Vanguard", "Turn Vanguard on"), Location = new Point(234, 416), Size = new Size(206, 36), Font = fText };
+            btnRiot = new WinButton
+            {
+                Text = L.T("Abrir Riot Client", "Open Riot Client"), Location = new Point(20, 460), Size = new Size(206, 36), Font = fText,
+                Image = IconOf(Vg.FindRiotClient()),
+            };
+            var vgFolder = Vg.VanguardFolder();
+            btnDefault = new WinButton
+            {
+                Text = L.T("Padrão da Riot e reiniciar", "Riot default and restart"), Location = new Point(234, 460), Size = new Size(206, 36), Font = fText,
+                Image = vgFolder == null ? null : IconOf(Path.Combine(vgFolder, "vgtray.exe")) ?? IconOf(Path.Combine(vgFolder, "vgc.exe")),
+            };
+
+            toggle = new ToggleCard
+            {
+                Location = new Point(20, 514), Size = new Size(420, 96), Font = fText, TitleFont = fText, DescFont = fSmall, Checked = Vg.LightMode,
+                OnText = L.T("Ligado", "On"), OffText = L.T("Desligado", "Off"),
+                Title = L.T("Manter o driver carregado", "Keep the driver loaded"),
+                Description = L.T("Deixa o \"Ligar\" funcionar sem reiniciar. Desligado, o Vanguard sai todo da memória e é preciso reiniciar antes de jogar.",
+                                  "Lets \"Turn on\" work without a restart. When off, Vanguard is fully unloaded and you must restart before playing."),
+            };
+
+            lnkDetails = NewLink("Logs", 18, 628, 160);
+            lnkHelp = NewLink(L.T("Como funciona", "How it works"), 180, 628, 140);
+            var version = NewLabel("v" + Application.ProductVersion.Split('+')[0], 340, 628, 100, 20, fSmall, Theme.Dim);
+            version.TextAlign = ContentAlignment.MiddleRight;
+
+            txtLog = new TextBox
+            {
+                Multiline = true, ReadOnly = true, ScrollBars = ScrollBars.Vertical, Location = new Point(20, BaseHeight),
+                Size = new Size(420, 150), BackColor = Theme.Card, ForeColor = Theme.Muted, BorderStyle = BorderStyle.None, Font = fLog, Visible = false,
+            };
+
+            Controls.AddRange(new Control[] { logo, title, status, section, parts, btnOff, btnOn, btnRiot, btnDefault, toggle, lnkDetails, lnkHelp, version, txtLog });
+
+            var tip = new ToolTip();
+            tip.SetToolTip(btnOff, L.T("Fecha o Riot Client, os jogos, o serviço e o ícone da bandeja.", "Closes Riot Client, the games, the service and the tray icon."));
+            tip.SetToolTip(btnOn, L.T("Liga o serviço e o ícone da bandeja de novo.", "Starts the service and the tray icon again."));
+            tip.SetToolTip(btnRiot, L.T("Abre o Riot Client como usuário normal.", "Opens Riot Client as a normal user."));
+            tip.SetToolTip(btnDefault, L.T("Deixa o Vanguard como a Riot instala (liga com o Windows) e reinicia o PC.",
+                                           "Puts Vanguard back the way Riot installs it (starts with Windows) and restarts the PC."));
+
+            toggle.CheckedChanged += (s, e) => Vg.LightMode = toggle.Checked;
+            btnOff.Click += OnTurnOff;
+            btnOn.Click += OnTurnOn;
+            btnRiot.Click += (s, e) => OpenRiot(false);
+            btnDefault.Click += OnDefault;
+            lnkHelp.LinkClicked += (s, e) => ShowHelp();
+            lnkDetails.LinkClicked += (s, e) => ToggleDetails();
+        }
+
+        void ToggleDetails()
+        {
+            detailsOpen = !detailsOpen;
+            txtLog.Visible = detailsOpen;
+            // measured from the controls, so it stays right when Windows scales the window (125%, 150%...)
+            int gap = txtLog.Top - lnkDetails.Bottom;
+            ClientSize = new Size(ClientSize.Width, detailsOpen ? txtLog.Bottom + gap : txtLog.Top);
+            warnings = 0;
+            UpdateDetailsLink();
+        }
+
+        void UpdateDetailsLink()
+        {
+            string text = detailsOpen ? L.T("Esconder logs", "Hide logs") : "Logs";
+            if (!detailsOpen && warnings > 0) text += $" ({warnings} {(warnings == 1 ? L.T("aviso", "warning") : L.T("avisos", "warnings"))})";
+            lnkDetails.Text = text;
+            lnkDetails.LinkColor = !detailsOpen && warnings > 0 ? Theme.Amber : Theme.Muted;
+        }
+
+        void ShowHelp() => Info(L.T("Como funciona", "How it works"), L.T(
+            "O Vanguard tem três partes:\n\n" +
+            "Driver (vgk): roda no núcleo do Windows. No modo tradicional do Vanguard, ele precisa carregar junto com o PC.\n" +
+            "Serviço (vgc): conversa com o jogo.\n" +
+            "Ícone da bandeja (vgtray).\n\n" +
+            "Desligar fecha a Riot, o serviço e o ícone e impede que eles voltem sozinhos. Com \"Manter o driver carregado\" ligado, só o driver fica na memória, e por isso o Ligar funciona sem reiniciar.\n\n" +
+            "Ligar religa o serviço e o ícone e deixa o Vanguard ligando com o Windows de novo.\n\n" +
+            "Erro VAN 57: no modo tradicional, ligar o driver depois do boot pode causar esse erro. Reiniciar o PC resolve. (O modo On-Demand oficial da Riot, para PCs que passam no Pre-Check, funciona de outro jeito.)\n\n" +
+            "O VanguardSwitch não altera nenhum arquivo do Vanguard. Ele só usa os controles de serviço do próprio Windows.",
+
+            "Vanguard has three parts:\n\n" +
+            "Driver (vgk): runs in the Windows kernel. In Vanguard's traditional mode it needs to load when the PC starts.\n" +
+            "Service (vgc): talks to the game.\n" +
+            "Tray icon (vgtray).\n\n" +
+            "Turn off closes Riot, the service and the tray icon and stops them from coming back on their own. With \"Keep the driver loaded\" on, only the driver stays in memory, which is why Turn on works without a restart.\n\n" +
+            "Turn on starts the service and the tray icon again and sets Vanguard to start with Windows.\n\n" +
+            "Error VAN 57: in the traditional mode, starting the driver after boot can cause it. Restarting fixes it. (Riot's official On-Demand mode, for PCs that pass Pre-Check, works differently.)\n\n" +
+            "VanguardSwitch doesn't change any Vanguard file. It only uses Windows' own service controls."));
+
+        // ---------- helpers ----------
+
+        void AppendLog(string msg) => txtLog.AppendText($"[{DateTime.Now:HH:mm:ss}] {msg}\r\n");
+
+        void Warn(string msg)
+        {
+            AppendLog(msg);
+            if (!detailsOpen) { warnings++; UpdateDetailsLink(); }
+        }
+
+        void SetBusy(bool on, string what = null)
+        {
+            busy = on;
+            foreach (Control c in new Control[] { btnOff, btnOn, btnRiot, btnDefault, toggle }) c.Enabled = !on;
+            Cursor = on ? Cursors.WaitCursor : Cursors.Default;
+            if (on) ShowState(Theme.Dim, L.T("Aguarde...", "Working..."), what, null);
+        }
+
+        int dialogs;   // dialogs currently open (the update notice waits for them)
+
+        DialogResult Ask(string title, string text, Color? accent = null)
+        {
+            dialogs++;
+            try { return Dialog.Ask(this, title, text, accent); }
+            finally { dialogs--; }
+        }
+
+        void Info(string title, string text)
+        {
+            dialogs++;
+            try { Dialog.Info(this, title, text); }
+            finally { dialogs--; }
+        }
+
+        // ---------- status ----------
+
+        /// <summary>suggestOn: true = Turn on is the next step, false = Turn off, null = leave buttons as they are.</summary>
+        void ShowState(Color accent, string title, string sentence, bool? suggestOn)
+        {
+            status.Accent = accent;
+            status.Title = title;
+            status.Sentence = sentence;
+            status.Invalidate();
+            if (suggestOn.HasValue)
+            {
+                btnOn.Accent = suggestOn.Value ? Theme.Green : (Color?)null;
+                btnOff.Accent = suggestOn.Value ? (Color?)null : Theme.Red;
+            }
+        }
+
+        async void OnShown(object sender, EventArgs e)
+        {
+            AppendLog(L.T("Aberto como administrador.", "Running as administrator."));
+            ShowState(Theme.Dim, L.T("Lendo...", "Reading..."), L.T("Conferindo o estado do Vanguard.", "Checking Vanguard's state."), null);
+            try
+            {
+                var r = await Task.Run(Vg.GetReport);
+                if (r.VgkStart == 4 && !r.VgkLoaded) watch = Watch.Off;
+                else if (r.VgcStart == 4 && r.VgkStart <= 2) watch = Watch.Light;
+                Apply(r);
+            }
+            catch (Exception ex)
+            {
+                Warn(L.T("Erro ao ler o estado: ", "Error reading the state: ") + ex.Message);
+                ShowState(Theme.Amber, L.T("Não deu para ler o estado", "Couldn't read the state"),
+                    L.T("O app vai tentar de novo em alguns segundos. Veja os Logs.", "The app will try again in a few seconds. See Logs."), null);
+            }
+            timer.Start();
+            CheckForUpdate();
+        }
+
+        // ---------- updates ----------
+
+        async void CheckForUpdate()
+        {
+            var rel = await Task.Run(Updater.Check);
+            if (rel == null || IsDisposed) return;
+            while (busy || dialogs > 0) await Task.Delay(1000);   // don't interrupt an action or an open question
+            if (IsDisposed) return;
+
+            AppendLog(L.T($"Nova versão disponível: v{rel.Version}.", $"New version available: v{rel.Version}."));
+            busy = true;   // nothing else starts while the notice is open
+            DialogResult answer;
+            try
+            {
+                answer = Dialog.Choose(this, L.T("Nova versão disponível", "Update available"),
+                    L.T($"A versão {rel.Version} do VanguardSwitch saiu (você tem a {Updater.Current}).\n\nAtualizar agora? O app baixa a nova versão do GitHub, confere o arquivo e abre de novo sozinho.",
+                        $"VanguardSwitch {rel.Version} is out (you have {Updater.Current}).\n\nUpdate now? The app downloads the new version from GitHub, checks the file and reopens by itself."),
+                    L.T("Atualizar", "Update"), L.T("Fechar", "Close"));
+            }
+            finally { busy = false; }
+            if (answer != DialogResult.Yes) return;
+
+            SetBusy(true, L.T($"Baixando a versão {rel.Version}.", $"Downloading version {rel.Version}."));
+            try
+            {
+                await Task.Run(() => Updater.Install(rel));
+                Close();
+            }
+            catch (Exception ex)
+            {
+                SetBusy(false);
+                Warn(L.T("Falha ao atualizar: ", "Update failed: ") + ex.Message);
+                if (Dialog.Choose(this, L.T("Não deu para atualizar", "Update failed"),
+                        ex.Message + L.T("\n\nVocê pode baixar a nova versão pela página da release.", "\n\nYou can download it from the release page."),
+                        L.T("Abrir página", "Open page"), L.T("Fechar", "Close")) == DialogResult.Yes)
+                    try { Vg.StartAsUser(rel.Page); } catch { }   // not elevated, like Riot Client
+                RefreshStatus();
+            }
+        }
+
+        async void RefreshStatus()
+        {
+            if (busy || refreshing) return;
+            refreshing = true;
+            try { Apply(await Task.Run(Vg.GetReport)); }
+            catch { }
+            finally { refreshing = false; }
+        }
+
+        void Apply(Report r)
+        {
+            if (busy) return;
+            bool vgcBlocked = r.VgcStart == 4, vgkBlocked = r.VgkStart == 4;
+
+            if (!r.Installed)
+                ShowState(Theme.Dim, L.T("O Vanguard não está instalado", "Vanguard isn't installed"),
+                    L.T("Ele vem junto com o VALORANT e o League of Legends.", "It comes with VALORANT and League of Legends."), true);
+            else if (r.VgcStart == null && r.VgcSvc == null)
+                ShowState(Theme.Amber, L.T("Serviço do Vanguard não encontrado", "Vanguard service not found"),
+                    L.T("O driver está instalado, mas o serviço vgc não. Abra o Riot Client para ele reparar o Vanguard.",
+                        "The driver is installed but the vgc service isn't. Open Riot Client so it can repair Vanguard."), null);
+            else if (r.VgkStart == null || r.VgcStart == null || r.VgcSvc == null)
+                ShowState(Theme.Amber, L.T("Não deu para confirmar o estado", "Couldn't confirm the state"),
+                    L.T("Parte das informações dos serviços não pôde ser lida. O app tenta de novo em alguns segundos.",
+                        "Some service information couldn't be read. The app tries again in a few seconds."), null);
+            else if (r.VgkLoaded && r.VgkFromBoot == false && !vgkBlocked)
+                ShowState(Theme.Amber, L.T("Reinicie para jogar", "Restart to play"),
+                    L.T("O driver foi ligado depois que o Windows iniciou. No modo tradicional do Vanguard, isso pode causar o erro VAN 57.",
+                        "The driver was started after Windows booted. In Vanguard's traditional mode this can cause error VAN 57."), true);
+            else if (r.VgkLoaded && !vgcBlocked && !vgkBlocked)
+                ShowState(Theme.Green, L.T("O Vanguard está ligado", "Vanguard is on"),
+                    L.T("Você já pode jogar. Quando terminar, clique em Desligar Vanguard.", "You can play now. When you're done, click Turn Vanguard off."), false);
+            else if (r.VgkLoaded && vgcBlocked && !vgkBlocked)
+                ShowState(Theme.Red, L.T("O Vanguard está desligado", "Vanguard is off"),
+                    L.T("Só o driver continua carregado, então dá para ligar de novo sem reiniciar.",
+                        "Only the driver is still loaded, so you can turn it back on without a restart."), true);
+            else if (r.VgkLoaded && vgkBlocked)
+                ShowState(Theme.Amber, L.T("Reinicie o PC", "Restart the PC"),
+                    L.T("O Vanguard foi desligado, mas o driver só sai da memória depois de reiniciar.",
+                        "Vanguard is off, but the driver only leaves memory after a restart."), true);
+            else if (vgkBlocked)
+                ShowState(Theme.Red, L.T("O Vanguard está desligado", "Vanguard is off"),
+                    L.T("O driver também foi descarregado. Para jogar, clique em Ligar Vanguard e reinicie o PC uma vez.",
+                        "The driver is unloaded too. To play, click Turn Vanguard on and restart once."), true);
+            else
+                ShowState(Theme.Amber, L.T("Reinicie para jogar", "Restart to play"),
+                    L.T("O driver do Vanguard só carrega quando o Windows inicia.", "The Vanguard driver only loads when Windows starts."), true);
+
+            int riot = r.Procs.Count(p => !p.Name.Equals("vgc", StringComparison.OrdinalIgnoreCase) && !p.Name.Equals("vgtray", StringComparison.OrdinalIgnoreCase));
+
+            Row vgc;
+            if (r.VgcSvc == "Running") vgc = new Row { Value = L.T("Rodando", "Running"), ValueColor = Theme.GreenText };
+            else if (r.VgcSvc == null) vgc = new Row { Value = L.T("Não encontrado", "Not found"), ValueColor = Theme.Muted };
+            else if (vgcBlocked) vgc = new Row { Value = L.T("Parado e bloqueado", "Stopped and blocked"), ValueColor = Theme.RedText };
+            else vgc = new Row { Value = L.T("Parado", "Stopped"), ValueColor = Theme.Muted };
+            vgc.Label = L.T("Serviço (vgc)", "Service (vgc)");
+
+            Row boot;
+            if (vgkBlocked) boot = new Row { Value = L.T("Nada liga", "Nothing starts"), ValueColor = Theme.RedText };
+            else if (vgcBlocked) boot = new Row { Value = L.T("Só o driver", "Driver only"), ValueColor = Theme.Muted };
+            else if (r.VgkStart <= 1) boot = new Row { Value = L.T("O Vanguard liga junto", "Vanguard starts too"), ValueColor = Theme.GreenText };
+            else if (r.VgkStart == null) boot = new Row { Value = "-", ValueColor = Theme.Muted };
+            else boot = new Row { Value = "Manual", ValueColor = Theme.Amber };
+            boot.Label = L.T("Quando o Windows inicia", "When Windows starts");
+
+            Row bootRow;
+            if (!r.VgkLoaded) bootRow = new Row { Value = "-", ValueColor = Theme.Muted };
+            else if (r.VgkFromBoot == true) bootRow = new Row { Value = L.T("Sim", "Yes"), ValueColor = Theme.GreenText };
+            else if (r.VgkFromBoot == false) bootRow = new Row { Value = L.T("Não (pode dar VAN 57)", "No (may cause VAN 57)"), ValueColor = Theme.RedText };
+            else bootRow = new Row { Value = L.T("Não dá para saber", "Unknown"), ValueColor = Theme.Muted };
+            bootRow.Label = L.T("Driver carregou no boot", "Driver loaded at boot");
+
+            parts.Rows = new List<Row>
+            {
+                new Row { Label = "Driver (vgk)", Value = r.VgkLoaded ? L.T("Carregado", "Loaded") : L.T("Não carregado", "Not loaded"), ValueColor = r.VgkLoaded ? Theme.GreenText : Theme.Muted },
+                bootRow,
+                vgc,
+                new Row { Label = L.T("Ícone da bandeja", "Tray icon"), Value = r.Tray ? L.T("Aberto", "Open") : L.T("Fechado", "Closed"), ValueColor = r.Tray ? Theme.GreenText : Theme.Muted },
+                new Row { Label = L.T("Riot Client e jogos", "Riot Client and games"), Value = riot == 0 ? L.T("Fechados", "Closed") : $"{riot} {L.T("abertos", "running")}", ValueColor = riot == 0 ? Theme.Muted : Theme.GreenText },
+                boot,
+            };
+            parts.Invalidate();
+
+            // watchdog: we turned it off, but something turned it back on or changed it
+            if (!warned && watch == Watch.Light && r.VgcSvc == "Running")
+            {
+                Warn(L.T("Atenção: outro programa religou o serviço vgc.", "Warning: another program turned the vgc service back on."));
+                warned = true;
+            }
+            if (!warned && watch == Watch.Off)
+            {
+                if (r.VgkLoaded) { Warn(L.T("Atenção: outro programa religou o Vanguard.", "Warning: another program turned Vanguard back on.")); warned = true; }
+                else if (r.VgkStart != null && r.VgkStart != 4) { Warn(L.T("Atenção: outro programa mudou a inicialização do Vanguard (a Riot pode ter reparado a instalação).", "Warning: another program changed Vanguard's startup (Riot may have repaired it).")); warned = true; }
+            }
+        }
+
+        // ---------- actions ----------
+
+        async void OnTurnOff(object sender, EventArgs e)
+        {
+            if (busy) return;
+            // lock the buttons before the first await, so a second click can't start another action
+            SetBusy(true, L.T("Conferindo se tem jogo aberto.", "Checking for running games."));
+            try
+            {
+                List<RiotProc> playing;
+                try { playing = await Task.Run(() => Vg.RiotProcesses(false).Where(p => Vg.GameNames.Contains(p.Name, StringComparer.OrdinalIgnoreCase)).ToList()); }
+                catch (Exception ex) { Warn("Erro/Error: " + ex.Message); playing = new List<RiotProc>(); }
+                if (playing.Count > 0 && Ask(L.T("Jogo aberto", "Game running"), L.T($"Tem um jogo da Riot aberto ({playing[0].Name}). Fechar mesmo assim?",
+                                                 $"A Riot game is running ({playing[0].Name}). Close it anyway?"), Theme.Red) != DialogResult.Yes) return;
+
+                SetBusy(true, L.T("Fechando a Riot e desligando o Vanguard.", "Closing Riot and turning Vanguard off."));
+                bool light = toggle.Checked;
+                var res = await Task.Run(() => Vg.Close(light));
+                watch = light ? Watch.Light : Watch.Off;
+                warned = false;
+
+                if (res.Fails.Count > 0)
+                {
+                    Warn(L.T("Nem tudo foi desligado.", "Not everything was turned off."));
+                    Info(L.T("Nem tudo foi desligado", "Not everything was turned off"), string.Join("\n", res.Fails));
+                }
+                else if (res.VgkStuck && Ask(L.T("Reiniciar o PC?", "Restart the PC?"), L.T("Tudo foi fechado, mas o driver vgk não quis sair da memória agora.\nEle já está bloqueado e sai quando o PC reiniciar.\n\nReiniciar agora?",
+                                                 "Everything is closed, but the vgk driver refused to unload.\nIt's already blocked and goes away after a restart.\n\nRestart now?")) == DialogResult.Yes)
+                    Vg.Reboot("VanguardSwitch");
+            }
+            catch (Exception ex) { Warn("Erro/Error: " + ex.Message); }
+            finally { SetBusy(false); RefreshStatus(); }
+        }
+
+        async void OnTurnOn(object sender, EventArgs e)
+        {
+            if (busy) return;
+            if (Vg.StartType("vgk") == null)
+            {
+                Info(L.T("Vanguard não encontrado", "Vanguard not found"), L.T("O Vanguard não está instalado. Abra o Riot Client para ele instalar.", "Vanguard isn't installed. Open Riot Client to install it."));
+                return;
+            }
+
+            SetBusy(true, L.T("Ligando o Vanguard.", "Turning Vanguard on."));
+            try
+            {
+                watch = Watch.None;
+                var res = await Task.Run(Vg.Start);
+
+                if (!res.VgkOk || res.LateStart)
+                {
+                    string why = res.VgkOk
+                        ? L.T("O driver ligou agora, mas não junto com o Windows. No modo tradicional do Vanguard, isso pode causar o erro VAN 57.",
+                              "The driver started now, not with Windows. In Vanguard's traditional mode this can cause error VAN 57.")
+                        : L.T("O driver do Vanguard não ligou sem reiniciar.", "The Vanguard driver didn't start without a restart.");
+                    if (Ask(L.T("Reiniciar o PC?", "Restart the PC?"), why + L.T("\n\nO Vanguard já vai ligar com o Windows. Reiniciar o PC agora?",
+                                      "\n\nVanguard is set to start with Windows. Restart now?")) == DialogResult.Yes)
+                        Vg.Reboot("VanguardSwitch");
+                }
+            }
+            catch (Exception ex) { Warn("Erro/Error: " + ex.Message); }
+            finally { SetBusy(false); RefreshStatus(); }
+        }
+
+        async void OnDefault(object sender, EventArgs e)
+        {
+            if (busy) return;
+            if (Ask(L.T("Padrão da Riot e reiniciar", "Riot default and restart"), L.T("Isso deixa o Vanguard como a Riot instala (liga junto com o Windows) e reinicia o PC agora.\n\nSalve o que estiver aberto antes. Continuar?",
+                        "This puts Vanguard back the way Riot installs it (starts with Windows) and restarts the PC now.\n\nSave your work first. Continue?"), Theme.Red) != DialogResult.Yes) return;
+
+            SetBusy(true, L.T("Restaurando o padrão da Riot. O PC vai reiniciar.", "Restoring Riot default. The PC will restart."));
+            try
+            {
+                watch = Watch.None;
+                var res = await Task.Run(Vg.RestoreDefault);
+                if (res.Ok)
+                {
+                    AppendLog(L.T("Reiniciando...", "Restarting..."));
+                    Vg.Reboot("VanguardSwitch");
+                }
+                else
+                {
+                    if (res.ConfigOk && !res.TrayFound)
+                    {
+                        Warn(L.T("Entrada da bandeja não encontrada.", "Tray entry not found."));
+                        // nothing to restore for the tray; the essential part is done
+                        if (Ask(L.T("Bandeja não encontrada", "Tray entry not found"),
+                                L.T("O driver e o serviço voltaram ao padrão, mas a entrada da bandeja do Vanguard não existe no Registro, então ela não foi restaurada. Reinstalar o Vanguard pelo Riot Client recria ela.\n\nReiniciar o PC mesmo assim?",
+                                    "The driver and service are back to default, but Vanguard's tray entry doesn't exist in the registry, so it wasn't restored. Reinstalling Vanguard from Riot Client recreates it.\n\nRestart the PC anyway?")) == DialogResult.Yes)
+                            Vg.Reboot("VanguardSwitch");
+                    }
+                    else
+                    {
+                        Warn(L.T("Não deu para restaurar o padrão.", "Couldn't restore the default."));
+                        string what = !res.ConfigOk
+                            ? L.T("Não deu para voltar o driver e o serviço a ligar com o Windows.", "Couldn't set the driver and service to start with Windows.")
+                            : L.T("O driver e o serviço voltaram ao padrão, mas não deu para pôr a bandeja de volta na inicialização.", "The driver and service are back to default, but the tray couldn't be added back to startup.");
+                        Info(L.T("Algo deu errado", "Something went wrong"), what + L.T("\n\nO PC não foi reiniciado. Veja os Logs.", "\n\nThe PC was not restarted. See the Logs."));
+                    }
+                }
+            }
+            catch (Exception ex) { Warn("Erro/Error: " + ex.Message); }
+            finally { SetBusy(false); RefreshStatus(); }
+        }
+
+        async void OpenRiot(bool quiet)
+        {
+            var exe = Vg.FindRiotClient();
+            if (exe == null)
+            {
+                Info(L.T("Riot Client não encontrado", "Riot Client not found"), L.T("Não encontrei o Riot Client.\nCaminho esperado: C:\\Riot Games\\Riot Client\\RiotClientServices.exe",
+                         "Riot Client not found.\nExpected at: C:\\Riot Games\\Riot Client\\RiotClientServices.exe"));
+                return;
+            }
+            bool opened;
+            try
+            {
+                if (!quiet)
+                {
+                    bool off = await Task.Run(() => !Vg.VgkLoaded() || Vg.StartType("vgc") == 4);
+                    if (off && Ask(L.T("Vanguard desligado", "Vanguard is off"), L.T("O Vanguard está desligado, então VALORANT e LoL não vão abrir.\n\nAbrir o Riot Client mesmo assim?",
+                                       "Vanguard is off, so VALORANT and LoL won't launch.\n\nOpen Riot Client anyway?")) != DialogResult.Yes) return;
+                }
+
+                AppendLog(L.T("Abrindo o Riot Client: ", "Opening Riot Client: ") + exe);
+                try { Vg.StartAsUser(exe); } catch { }
+
+                // check it opened
+                opened = await Task.Run(() =>
+                {
+                    var limit = DateTime.Now.AddSeconds(8);
+                    while (DateTime.Now < limit)
+                    {
+                        if (Vg.ClientNames.Any(n => Process.GetProcessesByName(n).Length > 0)) return true;
+                        System.Threading.Thread.Sleep(400);
+                    }
+                    return false;
+                });
+            }
+            catch (Exception ex) { Warn("Erro/Error: " + ex.Message); return; }
+            if (opened) return;
+
+            // Not started directly on purpose: this app runs as admin and Riot Client shouldn't.
+            Warn(L.T("O Riot Client não abriu pelo explorer.", "Riot Client didn't open through explorer."));
+            Info(L.T("Riot Client não abriu", "Riot Client didn't open"),
+                 L.T("Não consegui abrir o Riot Client como usuário normal. Abra pelo atalho da área de trabalho ou do menu Iniciar.",
+                     "Couldn't open Riot Client as a normal user. Open it from its desktop or Start menu shortcut."));
+        }
+    }
+}
+
+```
+
+`src/Native.cs`:
+
+```cs
+using System;
+using System.Collections.Generic;
+using System.Runtime.InteropServices;
+using System.Text;
+
+namespace VanguardSwitch
+{
+    static class Native
+    {
+        [DllImport("psapi.dll", SetLastError = true)]
+        static extern bool EnumDeviceDrivers([Out] IntPtr[] addresses, uint cb, out uint needed);
+
+        [DllImport("psapi.dll", CharSet = CharSet.Unicode)]
+        static extern uint GetDeviceDriverBaseNameW(IntPtr imageBase, StringBuilder name, uint size);
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        static extern IntPtr OpenProcess(uint access, bool inherit, int pid);
+
+        [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+        static extern bool QueryFullProcessImageNameW(IntPtr process, uint flags, StringBuilder name, ref uint size);
+
+        [DllImport("kernel32.dll")]
+        static extern bool CloseHandle(IntPtr handle);
+
+        [DllImport("kernel32.dll")]
+        public static extern ulong GetTickCount64();
+
+        [DllImport("dwmapi.dll")]
+        static extern int DwmSetWindowAttribute(IntPtr hwnd, int attribute, ref int value, int size);
+
+        const uint PROCESS_QUERY_LIMITED_INFORMATION = 0x1000;
+
+        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
+        struct WINTRUST_FILE_INFO
+        {
+            public uint cbStruct;
+            public string pcwszFilePath;
+            public IntPtr hFile;
+            public IntPtr pgKnownSubject;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        struct WINTRUST_DATA
+        {
+            public uint cbStruct;
+            public IntPtr pPolicyCallbackData;
+            public IntPtr pSIPClientData;
+            public uint dwUIChoice;
+            public uint fdwRevocationChecks;
+            public uint dwUnionChoice;
+            public IntPtr pFile;
+            public uint dwStateAction;
+            public IntPtr hWVTStateData;
+            public IntPtr pwszURLReference;
+            public uint dwProvFlags;
+            public uint dwUIContext;
+            public IntPtr pSignatureSettings;
+        }
+
+        [DllImport("wintrust.dll", CharSet = CharSet.Unicode)]
+        static extern int WinVerifyTrust(IntPtr hwnd, [MarshalAs(UnmanagedType.LPStruct)] Guid action, ref WINTRUST_DATA data);
+
+        static readonly Guid WINTRUST_ACTION_GENERIC_VERIFY_V2 = new Guid("00AAC56B-CD44-11d0-8CC2-00C04FC295EE");
+
+        /// <summary>
+        /// True if the file has a valid Authenticode signature that chains to a trusted root
+        /// (WinVerifyTrust). Revocation isn't checked online so this never waits on the network.
+        /// </summary>
+        public static bool AuthenticodeValid(string path)
+        {
+            var file = new WINTRUST_FILE_INFO { cbStruct = (uint)Marshal.SizeOf(typeof(WINTRUST_FILE_INFO)), pcwszFilePath = path };
+            IntPtr pFile = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(WINTRUST_FILE_INFO)));
+            try
+            {
+                Marshal.StructureToPtr(file, pFile, false);
+                var data = new WINTRUST_DATA
+                {
+                    cbStruct = (uint)Marshal.SizeOf(typeof(WINTRUST_DATA)),
+                    dwUIChoice = 2,              // WTD_UI_NONE
+                    fdwRevocationChecks = 0,     // WTD_REVOKE_NONE
+                    dwUnionChoice = 1,           // WTD_CHOICE_FILE
+                    pFile = pFile,
+                    dwStateAction = 0,           // WTD_STATEACTION_IGNORE
+                    dwProvFlags = 0x10 | 0x1000, // WTD_REVOCATION_CHECK_NONE | WTD_CACHE_ONLY_URL_RETRIEVAL
+                };
+                return WinVerifyTrust(new IntPtr(-1), WINTRUST_ACTION_GENERIC_VERIFY_V2, ref data) == 0;
+            }
+            finally
+            {
+                Marshal.DestroyStructure(pFile, typeof(WINTRUST_FILE_INFO));
+                Marshal.FreeHGlobal(pFile);
+            }
+        }
+
+        /// <summary>File names of the kernel drivers currently loaded (vgk.sys, ntoskrnl.exe, ...).</summary>
+        public static List<string> LoadedDrivers()
+        {
+            var list = new List<string>();
+            var addresses = new IntPtr[4096];
+            if (!EnumDeviceDrivers(addresses, (uint)(addresses.Length * IntPtr.Size), out uint needed)) return list;
+
+            int count = Math.Min((int)(needed / (uint)IntPtr.Size), addresses.Length);
+            for (int i = 0; i < count; i++)
+            {
+                if (addresses[i] == IntPtr.Zero) continue;
+                var sb = new StringBuilder(260);
+                if (GetDeviceDriverBaseNameW(addresses[i], sb, 260) > 0) list.Add(sb.ToString());
+            }
+            return list;
+        }
+
+        public static string ProcessPath(int pid)
+        {
+            IntPtr h = OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, false, pid);
+            if (h == IntPtr.Zero) return null;
+            try
+            {
+                var sb = new StringBuilder(1024);
+                uint size = (uint)sb.Capacity;
+                return QueryFullProcessImageNameW(h, 0, sb, ref size) ? sb.ToString() : null;
+            }
+            finally { CloseHandle(h); }
+        }
+
+        public static void DarkTitleBar(IntPtr hwnd)
+        {
+            int on = 1;
+            // 20 on Windows 10 2004+ and 11, 19 on older Windows 10 builds
+            if (DwmSetWindowAttribute(hwnd, 20, ref on, sizeof(int)) != 0)
+                DwmSetWindowAttribute(hwnd, 19, ref on, sizeof(int));
+        }
+    }
+}
+
+```
+
+`src/Program.cs`:
+
+```cs
+using System;
+using System.Diagnostics;
+using System.Linq;
+using System.Threading;
+using System.Windows.Forms;
+
+namespace VanguardSwitch
+{
+    static class Program
+    {
+        [STAThread]
+        static void Main(string[] args)
+        {
+            using (var mutex = new Mutex(true, "VanguardSwitch.SingleInstance", out bool first))
+            {
+                if (!first)
+                {
+                    // after an update the old copy may still be closing
+                    if (!args.Contains("--updated")) return;
+                    try { if (!mutex.WaitOne(15000)) return; }
+                    catch (AbandonedMutexException) { }
+                }
+                System.Threading.Tasks.Task.Run(Updater.Cleanup);
+
+                // Windows 11 24H2+ only lists loaded drivers with SeDebugPrivilege enabled
+                try { Process.EnterDebugMode(); } catch { }
+
+                Application.EnableVisualStyles();
+                Application.SetCompatibleTextRenderingDefault(false);
+                Application.Run(new MainForm());
+            }
+        }
+    }
+}
+
+```
+
+`src/Updater.cs`:
+
+```cs
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Net;
+using System.Reflection;
+using System.Runtime.Serialization;
+using System.Runtime.Serialization.Json;
+using System.Security.Cryptography;
+using System.Text;
+
+namespace VanguardSwitch
+{
+    /// <summary>Checks GitHub Releases for a newer version and swaps the exe in place.</summary>
+    static class Updater
+    {
+        public const string Repo = "shinishiz/VanguardSwitch";
+        const string ExeName = "VanguardSwitch.exe";
+
+#pragma warning disable CS0649   // filled by the JSON serializer
+        [DataContract]
+        class GhRelease
+        {
+            [DataMember(Name = "tag_name")] public string Tag;
+            [DataMember(Name = "html_url")] public string Page;
+            [DataMember(Name = "draft")] public bool Draft;
+            [DataMember(Name = "prerelease")] public bool Prerelease;
+            [DataMember(Name = "assets")] public List<GhAsset> Assets;
+        }
+
+        [DataContract]
+        class GhAsset
+        {
+            [DataMember(Name = "name")] public string Name;
+            [DataMember(Name = "browser_download_url")] public string Url;
+        }
+#pragma warning restore CS0649
+
+        public class Release
+        {
+            public Version Version;
+            public string Page, ExeUrl, HashUrl;
+        }
+
+        public static Version Current
+        {
+            get
+            {
+                var v = Assembly.GetExecutingAssembly().GetName().Version;
+                return new Version(v.Major, v.Minor, Math.Max(0, v.Build));
+            }
+        }
+
+        static string ExePath => Process.GetCurrentProcess().MainModule.FileName;
+
+        static WebClient Client()
+        {
+            ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12;
+            var c = new WebClient { Encoding = Encoding.UTF8 };
+            c.Headers[HttpRequestHeader.UserAgent] = "VanguardSwitch/" + Current;
+            return c;
+        }
+
+        /// <summary>The latest release if it's newer than this exe, otherwise null. Never throws.</summary>
+        public static Release Check()
+        {
+            try
+            {
+                string json;
+                using (var c = Client())
+                {
+                    c.Headers[HttpRequestHeader.Accept] = "application/vnd.github+json";
+                    json = c.DownloadString($"https://api.github.com/repos/{Repo}/releases/latest");
+                }
+
+                GhRelease r;
+                using (var ms = new MemoryStream(Encoding.UTF8.GetBytes(json)))
+                    r = (GhRelease)new DataContractJsonSerializer(typeof(GhRelease)).ReadObject(ms);
+
+                if (r == null || r.Draft || r.Prerelease || string.IsNullOrEmpty(r.Tag)) return null;
+                if (!Version.TryParse(r.Tag.TrimStart('v', 'V'), out var v)) return null;
+                v = new Version(v.Major, v.Minor, Math.Max(0, v.Build));
+                if (v <= Current) return null;
+
+                var exe = r.Assets?.FirstOrDefault(a => a.Name.Equals(ExeName, StringComparison.OrdinalIgnoreCase));
+                var hash = r.Assets?.FirstOrDefault(a => a.Name.Equals(ExeName + ".sha256", StringComparison.OrdinalIgnoreCase));
+                if (exe == null) return null;
+
+                return new Release { Version = v, Page = r.Page, ExeUrl = exe.Url, HashUrl = hash?.Url };
+            }
+            catch { return null; }
+        }
+
+        /// <summary>
+        /// Downloads the new exe, checks its SHA-256, puts it in place of the running one and starts it.
+        /// The old file is renamed to .old (Windows allows renaming a running exe) and deleted on the next start.
+        /// </summary>
+        public static void Install(Release rel)
+        {
+            string exe = ExePath;
+            string fresh = exe + ".new", old = exe + ".old";
+
+            // The app runs as admin, so never install a file that wasn't checked.
+            if (rel.HashUrl == null)
+                throw new Exception(L.T("A release não tem o arquivo .sha256, então a atualização não pode ser conferida.",
+                                        "The release has no .sha256 file, so the update can't be checked."));
+
+            try
+            {
+                using (var c = Client())
+                {
+                    string expected = c.DownloadString(rel.HashUrl).Trim().Split(' ', '\t')[0].ToLowerInvariant();
+                    if (!System.Text.RegularExpressions.Regex.IsMatch(expected, "^[0-9a-f]{64}$"))
+                        throw new Exception(L.T("O arquivo .sha256 da release é inválido.", "The release's .sha256 file is invalid."));
+
+                    c.DownloadFile(rel.ExeUrl, fresh);
+                    string actual;
+                    using (var sha = SHA256.Create())
+                    using (var f = File.OpenRead(fresh))
+                        actual = string.Concat(sha.ComputeHash(f).Select(b => b.ToString("x2")));
+                    if (actual != expected)
+                        throw new Exception(L.T("O arquivo baixado não bate com o SHA-256 da release.", "The downloaded file doesn't match the release's SHA-256."));
+                }
+            }
+            catch
+            {
+                try { File.Delete(fresh); } catch { }
+                throw;
+            }
+
+            if (File.Exists(old)) File.Delete(old);
+            File.Move(exe, old);
+            try { File.Move(fresh, exe); }
+            catch { File.Move(old, exe); throw; }
+
+            Process.Start(new ProcessStartInfo(exe, "--updated") { UseShellExecute = true });
+        }
+
+        /// <summary>Removes the .old file left by the previous update.</summary>
+        public static void Cleanup()
+        {
+            try
+            {
+                foreach (var leftover in new[] { ExePath + ".old", ExePath + ".new" })
+                    for (int i = 0; i < 10 && File.Exists(leftover); i++)
+                    {
+                        try { File.Delete(leftover); }
+                        catch { System.Threading.Thread.Sleep(500); }
+                    }
+            }
+            catch { }
+        }
+    }
+}
+
+```
+
+`src/Vanguard.cs`:
+
+```cs
+using Microsoft.Win32;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Globalization;
+using System.IO;
+using System.Linq;
+using System.ServiceProcess;
+using System.Text.RegularExpressions;
+using System.Threading;
+
+namespace VanguardSwitch
+{
+    class RiotProc
+    {
+        public int Id;
+        public string Name;
+    }
+
+    class RestoreResult
+    {
+        public bool ConfigOk;     // vgk and vgc start types are back
+        public bool TrayFound;    // Vanguard's tray startup entry exists
+        public bool TrayOk;       // ...and it was set to open with Windows
+        public bool VgcRunning;   // only informative: the PC restarts right after
+        public bool Ok => ConfigOk && TrayFound && TrayOk;
+    }
+
+    class TrayChange
+    {
+        public int Found, Failed;
+        public bool Ok => Found > 0 && Failed == 0;
+    }
+
+    class Report
+    {
+        public int? VgkStart, VgcStart;
+        public string VgkSvc, VgcSvc;
+        public bool VgkLoaded, Tray;
+        public bool? VgkFromBoot;   // true = loaded with Windows, false = loaded later (VAN 57), null = unknown
+        public bool? TrayBoot;
+        public List<RiotProc> Procs = new List<RiotProc>();
+        public bool Installed => VgkStart != null || VgkSvc != null;
+    }
+
+    class ScResult
+    {
+        public int Code;
+        public string Output;
+    }
+
+    class CloseResult
+    {
+        public List<string> Fails = new List<string>();
+        public bool VgkStuck;
+    }
+
+    class StartResult
+    {
+        public bool VgkOk;
+        public bool LateStart;   // the driver was started now, not at boot: Riot answers with VAN 57
+    }
+
+    /// <summary>
+    /// Everything that touches Windows: services vgk (kernel driver) and vgc (user service),
+    /// the vgtray startup entry and Riot processes. Runs on a background thread.
+    /// </summary>
+    static class Vg
+    {
+        public static Action<string> Log = _ => { };
+
+        public static readonly string[] RiotNames =
+        {
+            "RiotClientServices", "RiotClientUx", "RiotClientUxRender", "RiotClientCrashHandler", "Riot Client",
+            "VALORANT", "VALORANT-Win64-Shipping",
+            "LeagueClient", "LeagueClientUx", "LeagueClientUxRender", "League of Legends", "LeagueCrashHandler", "LeagueCrashHandler64",
+            "LoR", "2XKO", "vgtray", "vgc"
+        };
+        public static readonly string[] GameNames = { "VALORANT-Win64-Shipping", "League of Legends", "LoR", "2XKO" };
+        public static readonly string[] ClientNames = { "RiotClientServices", "Riot Client", "RiotClientUx" };
+        static readonly string[] PathHints = { @"\Riot Games\", @"\Riot Vanguard\" };
+
+        public static readonly string StateDir = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "VanguardSwitch");
+        static string StateFile => Path.Combine(StateDir, "state.ini");
+        static string SettingsFile => Path.Combine(StateDir, "settings.ini");
+
+        static readonly RegistryKey HKLM = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry64);
+        static readonly RegistryKey HKCU = RegistryKey.OpenBaseKey(RegistryHive.CurrentUser, RegistryView.Registry64);
+
+        // "Run" keys where vgtray (the tray icon) lives, and the StartupApproved key Task Manager uses
+        static readonly (RegistryKey Root, string Run, string Approved)[] RunMap =
+        {
+            (HKLM, @"SOFTWARE\Microsoft\Windows\CurrentVersion\Run", @"SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\StartupApproved\Run"),
+            (HKLM, @"SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Run", @"SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\StartupApproved\Run32"),
+            (HKCU, @"Software\Microsoft\Windows\CurrentVersion\Run", @"Software\Microsoft\Windows\CurrentVersion\Explorer\StartupApproved\Run"),
+        };
+
+        static readonly string[] StartWords = { "boot", "system", "auto", "demand", "disabled" };
+
+        public static string StartText(int? t)
+        {
+            switch (t)
+            {
+                case 0:
+                case 1: return L.T("no boot", "at boot");
+                case 2: return L.T("automático", "automatic");
+                case 3: return "manual";
+                case 4: return L.T("bloqueado", "blocked");
+                default: return "?";
+            }
+        }
+
+        public static string StatusText(string s)
+        {
+            switch (s)
+            {
+                case "Running": return L.T("rodando", "running");
+                case "Stopped": return L.T("parado", "stopped");
+                case "StartPending": return L.T("iniciando", "starting");
+                case "StopPending": return L.T("parando", "stopping");
+                case "Paused": return L.T("pausado", "paused");
+                default: return "?";
+            }
+        }
+
+        // ---------- reading state ----------
+
+        public static int? StartType(string svc)
+        {
+            using (var k = HKLM.OpenSubKey($@"SYSTEM\CurrentControlSet\Services\{svc}"))
+                return k?.GetValue("Start") is int i ? i : (int?)null;
+        }
+
+        public static string Status(string svc)
+        {
+            try
+            {
+                using (var sc = new ServiceController(svc)) return sc.Status.ToString();
+            }
+            catch
+            {
+                // fallback: sc.exe (RUNNING/STOPPED are not translated)
+                var m = Regex.Match(Sc("query", svc).Output, @"\d\s+(RUNNING|STOPPED|START_PENDING|STOP_PENDING|PAUSED)");
+                if (!m.Success) return null;
+                switch (m.Groups[1].Value)
+                {
+                    case "RUNNING": return "Running";
+                    case "STOPPED": return "Stopped";
+                    case "START_PENDING": return "StartPending";
+                    case "STOP_PENDING": return "StopPending";
+                    default: return "Paused";
+                }
+            }
+        }
+
+        /// <summary>vgk is in memory: the service says so, or vgk.sys is in the loaded-driver list.</summary>
+        public static bool VgkLoaded()
+        {
+            var s = Status("vgk");
+            if (s == "Running" || s == "StopPending" || s == "StartPending") return true;
+            try
+            {
+                return Native.LoadedDrivers().Any(d => d.Equals("vgk.sys", StringComparison.OrdinalIgnoreCase));
+            }
+            catch { return false; }
+        }
+
+        public static DateTime BootTime => DateTime.Now - TimeSpan.FromMilliseconds(Native.GetTickCount64());
+
+        static string BootFile => Path.Combine(StateDir, "boot.ini");
+
+        /// <summary>Notes that this app stopped or started vgk during the current Windows session.</summary>
+        static void MarkVgkTouched()
+        {
+            try { WriteIni(BootFile, new Dictionary<string, string> { ["touched"] = BootTime.ToString("o", CultureInfo.InvariantCulture) }); }
+            catch { }
+        }
+
+        static bool VgkTouchedThisBoot()
+        {
+            try
+            {
+                return ReadIni(BootFile).TryGetValue("touched", out var v)
+                    && DateTime.TryParse(v, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out var t)
+                    && Math.Abs((t - BootTime).TotalMinutes) < 2;
+            }
+            catch { return false; }
+        }
+
+        /// <summary>
+        /// Was vgk loaded together with Windows? Vanguard writes Logs\vgk_yyyy-MM-dd_HH-mm-ss.log every time
+        /// the driver starts, so the newest log is compared with the boot time. If this app stopped or
+        /// started the driver since boot, the answer is no. Read-only.
+        /// </summary>
+        public static bool? VgkFromBoot()
+        {
+            try
+            {
+                var folder = VanguardFolder();
+                var dir = folder == null ? null : Path.Combine(folder, "Logs");
+                if (dir == null || !Directory.Exists(dir)) return null;
+
+                if (VgkTouchedThisBoot()) return false;
+                var boot = BootTime;
+                DateTime? newest = null;
+                foreach (var f in Directory.GetFiles(dir, "vgk_*.log"))
+                {
+                    var m = Regex.Match(Path.GetFileName(f), @"^vgk_(\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2})");
+                    if (!m.Success || !DateTime.TryParseExact(m.Groups[1].Value, "yyyy-MM-dd_HH-mm-ss", CultureInfo.InvariantCulture, DateTimeStyles.None, out var t))
+                        continue;
+                    if (newest == null || t > newest) newest = t;
+                }
+                if (newest == null || newest < boot.AddMinutes(-2)) return null;   // no log from this session
+                return newest <= boot.AddMinutes(3);
+            }
+            catch { return null; }
+        }
+
+        static readonly Dictionary<string, bool> signedCache = new Dictionary<string, bool>(StringComparer.OrdinalIgnoreCase);
+
+        /// <summary>
+        /// True if the file has a valid, trusted Authenticode signature (WinVerifyTrust) and the signer's
+        /// name is Riot Games. The name is only read after Windows has accepted the signature.
+        /// </summary>
+        static bool SignedByRiot(string path)
+        {
+            // keyed by path + last write, so a file Riot updates (or one that was busy) is checked again
+            string key;
+            try { key = path + "|" + File.GetLastWriteTimeUtc(path).Ticks; }
+            catch { return false; }
+            lock (signedCache)
+                if (signedCache.TryGetValue(key, out bool cached)) return cached;
+            bool ok = false;
+            try
+            {
+                if (Native.AuthenticodeValid(path))
+                {
+                    var cert = new System.Security.Cryptography.X509Certificates.X509Certificate2(
+                        System.Security.Cryptography.X509Certificates.X509Certificate.CreateFromSignedFile(path));
+                    string cn = cert.GetNameInfo(System.Security.Cryptography.X509Certificates.X509NameType.SimpleName, false) ?? "";
+                    ok = cn.StartsWith("Riot Games", StringComparison.OrdinalIgnoreCase);
+                }
+            }
+            catch { ok = false; }
+            lock (signedCache) signedCache[key] = ok;
+            return ok;
+        }
+
+        /// <summary>
+        /// A process counts as Riot's if it has a Riot process name or runs from a Riot folder, AND its exe
+        /// has a valid signature from Riot Games. When the path can't be read (protected process), the
+        /// name alone is used.
+        /// </summary>
+        static bool IsRiot(int pid, string name)
+        {
+            var path = Native.ProcessPath(pid);
+            bool knownName = RiotNames.Contains(name, StringComparer.OrdinalIgnoreCase);
+            if (path == null) return knownName;
+            bool riotFolder = PathHints.Any(h => path.IndexOf(h, StringComparison.OrdinalIgnoreCase) >= 0);
+            return (knownName || riotFolder) && SignedByRiot(path);
+        }
+
+        public static List<RiotProc> RiotProcesses(bool includeVgc)
+        {
+            var list = new List<RiotProc>();
+            foreach (var p in Process.GetProcesses())
+            {
+                using (p)
+                {
+                    try
+                    {
+                        string name = p.ProcessName;   // throws if the process already exited
+                        if (!includeVgc && name.Equals("vgc", StringComparison.OrdinalIgnoreCase)) continue;
+                        if (IsRiot(p.Id, name)) list.Add(new RiotProc { Id = p.Id, Name = name });
+                    }
+                    catch { }
+                }
+            }
+            return list;
+        }
+
+        static IEnumerable<(RegistryKey Root, string Approved, string Name)> TrayRunEntries()
+        {
+            foreach (var m in RunMap)
+            {
+                using (var k = m.Root.OpenSubKey(m.Run))
+                {
+                    if (k == null) continue;
+                    foreach (var v in k.GetValueNames())
+                    {
+                        var data = k.GetValue(v, null, RegistryValueOptions.DoNotExpandEnvironmentNames) as string;
+                        if (data != null && data.IndexOf("vgtray", StringComparison.OrdinalIgnoreCase) >= 0)
+                            yield return (m.Root, m.Approved, v);
+                    }
+                }
+            }
+        }
+
+        /// <summary>true = tray opens with Windows, false = disabled, null = no entry found.</summary>
+        public static bool? TrayStartupEnabled()
+        {
+            var entries = TrayRunEntries().ToList();
+            if (entries.Count == 0) return null;
+            foreach (var e in entries)
+            {
+                using (var k = e.Root.OpenSubKey(e.Approved))
+                {
+                    var bytes = k?.GetValue(e.Name) as byte[];
+                    if (bytes == null || bytes.Length == 0 || (bytes[0] & 1) == 0) return true;
+                }
+            }
+            return false;
+        }
+
+        public static Report GetReport()
+        {
+            var procs = RiotProcesses(true);
+            bool loaded = VgkLoaded();
+            return new Report
+            {
+                VgkStart = StartType("vgk"),
+                VgcStart = StartType("vgc"),
+                VgkSvc = Status("vgk"),
+                VgcSvc = Status("vgc"),
+                VgkLoaded = loaded,
+                VgkFromBoot = loaded ? VgkFromBoot() : null,
+                Procs = procs,
+                Tray = procs.Any(p => p.Name.Equals("vgtray", StringComparison.OrdinalIgnoreCase)),
+                TrayBoot = TrayStartupEnabled(),
+            };
+        }
+
+        public static string VanguardFolder()
+        {
+            try
+            {
+                using (var k = HKLM.OpenSubKey(@"SYSTEM\CurrentControlSet\Services\vgc"))
+                {
+                    var img = k?.GetValue("ImagePath", null, RegistryValueOptions.DoNotExpandEnvironmentNames) as string;
+                    if (img != null)
+                    {
+                        img = Environment.ExpandEnvironmentVariables(Regex.Replace(img, "^\"([^\"]+)\".*$", "$1"));
+                        if (File.Exists(img)) return Path.GetDirectoryName(img);
+                    }
+                }
+            }
+            catch { }
+            var p = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "Riot Vanguard");
+            return Directory.Exists(p) ? p : null;
+        }
+
+        public static string FindRiotClient()
+        {
+            var candidates = new List<string>
+            {
+                Path.Combine(Path.GetPathRoot(Environment.SystemDirectory), @"Riot Games\Riot Client\RiotClientServices.exe"),
+            };
+            try
+            {
+                var json = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), @"Riot Games\RiotClientInstalls.json");
+                if (File.Exists(json))
+                {
+                    foreach (Match m in Regex.Matches(File.ReadAllText(json), "\"rc_(?:default|live|beta)\"\\s*:\\s*\"([^\"]+)\""))
+                        candidates.Add(m.Groups[1].Value.Replace("\\\\", "\\").Replace("\\/", "/"));
+                }
+            }
+            catch { }
+            candidates.Add(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), @"Riot Games\Riot Client\RiotClientServices.exe"));
+
+            foreach (var c in candidates)
+            {
+                try
+                {
+                    // Riot's json uses "/", which explorer.exe does not understand
+                    var full = Path.GetFullPath(c.Replace('/', '\\'));
+                    if (File.Exists(full)) return full;
+                }
+                catch { }
+            }
+            return null;
+        }
+
+        // ---------- changing state ----------
+
+        public static ScResult Sc(params string[] args)
+        {
+            var psi = new ProcessStartInfo(Path.Combine(Environment.SystemDirectory, "sc.exe"), string.Join(" ", args))
+            {
+                UseShellExecute = false,
+                CreateNoWindow = true,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+            };
+            using (var p = Process.Start(psi))
+            {
+                // read both streams in the background so a hung sc.exe can't block us
+                var stdout = p.StandardOutput.ReadToEndAsync();
+                var stderr = p.StandardError.ReadToEndAsync();
+                if (!p.WaitForExit(30000))
+                {
+                    try { p.Kill(); } catch { }
+                    Log("sc " + string.Join(" ", args) + ": " + L.T("não respondeu em 30 s, encerrado.", "didn't respond in 30 s, killed."));
+                    return new ScResult { Code = -1, Output = "" };
+                }
+                p.WaitForExit();   // lets the async reads finish
+                return new ScResult { Code = p.ExitCode, Output = stdout.Result + stderr.Result };
+            }
+        }
+
+        public static bool SetStartType(string svc, int type)
+        {
+            if (StartType(svc) == null) { Log($"{svc}: " + L.T("não instalado.", "not installed.")); return false; }
+            var r = Sc("config", svc, "start=", StartWords[type]);
+            bool ok = r.Code == 0 && StartType(svc) == type;
+            Log(ok ? $"{svc}: " + L.T("inicialização = ", "startup = ") + StartText(type) + "."
+                   : $"{svc}: " + L.T("falha ao mudar a inicialização", "could not change startup") + $" ({r.Code}).");
+            return ok;
+        }
+
+        public static bool WaitStatus(string svc, string want, int seconds)
+        {
+            var limit = DateTime.Now.AddSeconds(seconds);
+            while (DateTime.Now < limit)
+            {
+                if (Status(svc) == want) return true;
+                Thread.Sleep(250);
+            }
+            return Status(svc) == want;
+        }
+
+        public static List<string> KillRiot(bool includeVgc)
+        {
+            var killed = new List<string>();
+            for (int round = 0; round < 4; round++)
+            {
+                var procs = RiotProcesses(includeVgc);
+                if (procs.Count == 0) break;
+                foreach (var rp in procs)
+                {
+                    try
+                    {
+                        using (var p = Process.GetProcessById(rp.Id))
+                        {
+                            // the pid may have been reused since the list was made
+                            if (!p.ProcessName.Equals(rp.Name, StringComparison.OrdinalIgnoreCase) || !IsRiot(p.Id, p.ProcessName)) continue;
+                            p.Kill();
+                        }
+                        killed.Add(rp.Name);
+                    }
+                    catch { }
+                }
+                Thread.Sleep(800);
+            }
+            return killed.Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+        }
+
+        /// <summary>How many tray startup entries were found and how many couldn't be changed.</summary>
+        public static TrayChange SetTrayStartup(bool enabled)
+        {
+            // first byte: 2 = enabled, 3 = disabled (same format as Task Manager)
+            var bytes = new byte[12];
+            bytes[0] = (byte)(enabled ? 2 : 3);
+            var res = new TrayChange();
+            var entries = TrayRunEntries().ToList();
+            res.Found = entries.Count;
+            if (entries.Count == 0) Log(L.T("Bandeja: nenhuma entrada de inicialização do Vanguard encontrada.", "Tray: no Vanguard startup entry found."));
+            foreach (var e in entries)
+            {
+                try
+                {
+                    using (var k = e.Root.CreateSubKey(e.Approved))
+                        k.SetValue(e.Name, bytes, RegistryValueKind.Binary);
+                    Log(enabled ? L.T("Bandeja do Vanguard volta a abrir com o Windows.", "Vanguard tray opens with Windows again.")
+                                : L.T("Bandeja do Vanguard não abre mais com o Windows.", "Vanguard tray no longer opens with Windows."));
+                }
+                catch (Exception ex) { res.Failed++; Log(L.T("Não deu para mudar a bandeja: ", "Could not change the tray: ") + ex.Message); }
+            }
+            return res;
+        }
+
+        /// <summary>Starts a program as the normal user (not admin) by handing it to explorer.exe.</summary>
+        public static void StartAsUser(string exe)
+        {
+            Process.Start(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows), "explorer.exe"), "\"" + exe + "\"");
+        }
+
+        public static void StartTray()
+        {
+            var folder = VanguardFolder();
+            if (folder == null) return;
+            var exe = Path.Combine(folder, "vgtray.exe");
+            if (File.Exists(exe) && Process.GetProcessesByName("vgtray").Length == 0) StartAsUser(exe);
+        }
+
+        public static void Reboot(string reason)
+        {
+            Process.Start(new ProcessStartInfo(Path.Combine(Environment.SystemDirectory, "shutdown.exe"), $"/r /t 3 /c \"{reason}\"")
+            {
+                UseShellExecute = false,
+                CreateNoWindow = true,
+            });
+        }
+
+        // ---------- saved state ----------
+
+        static Dictionary<string, string> ReadIni(string file)
+        {
+            var d = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            try
+            {
+                if (File.Exists(file))
+                    foreach (var line in File.ReadAllLines(file))
+                    {
+                        int i = line.IndexOf('=');
+                        if (i > 0) d[line.Substring(0, i).Trim()] = line.Substring(i + 1).Trim();
+                    }
+            }
+            catch { }
+            return d;
+        }
+
+        static void WriteIni(string file, Dictionary<string, string> d)
+        {
+            Directory.CreateDirectory(StateDir);
+            File.WriteAllLines(file, d.Select(kv => kv.Key + "=" + kv.Value));
+        }
+
+        /// <summary>Remembers how vgk was configured before we touched it, for "Riot default".</summary>
+        static void RememberOriginal()
+        {
+            if (File.Exists(StateFile)) return;
+            var vgk = StartType("vgk");
+            if (vgk == null) return;
+            WriteIni(StateFile, new Dictionary<string, string> { ["vgk"] = vgk.ToString() });
+        }
+
+        static int OriginalVgkStart()
+        {
+            var d = ReadIni(StateFile);
+            return d.TryGetValue("vgk", out var s) && int.TryParse(s, out int v) && v <= 2 ? v : 1;
+        }
+
+        public static bool LightMode
+        {
+            get { return !ReadIni(SettingsFile).TryGetValue("light", out var v) || v != "0"; }
+            set
+            {
+                try
+                {
+                    var d = ReadIni(SettingsFile);
+                    d["light"] = value ? "1" : "0";
+                    WriteIni(SettingsFile, d);
+                }
+                catch { }
+            }
+        }
+
+        static bool Check(bool ok, string text)
+        {
+            Log((ok ? "   [OK] " : "   [!!] ") + text);
+            return ok;
+        }
+
+        // ---------- actions ----------
+
+        public static CloseResult Close(bool light)
+        {
+            var res = new CloseResult();
+            Log("== " + L.T("Fechando Riot e desligando o Vanguard", "Closing Riot and turning Vanguard off") + " ==");
+            RememberOriginal();
+            if (light) Log(L.T("Modo leve: o driver vgk continua na memória.", "Light mode: the vgk driver stays in memory."));
+
+            // 1) block first, so nothing turns it back on while we close
+            SetStartType("vgc", 4);
+            if (light)
+            {
+                // the driver must keep loading at boot
+                var k = StartType("vgk");
+                if (k != null && k > 1) SetStartType("vgk", OriginalVgkStart());
+            }
+            else SetStartType("vgk", 4);
+            SetTrayStartup(false);
+
+            // 2) games, Riot Client and tray
+            var killed = KillRiot(false);
+            Log(killed.Count > 0 ? L.T("Processos fechados: ", "Closed: ") + string.Join(", ", killed)
+                                 : L.T("Nenhum processo da Riot aberto.", "No Riot process was running."));
+
+            // 3) vgc service
+            var st = Status("vgc");
+            if (st != null && st != "Stopped")
+            {
+                Sc("stop", "vgc");
+                Log(WaitStatus("vgc", "Stopped", 10) ? "vgc: " + L.T("parado.", "stopped.")
+                                                     : "vgc: " + L.T("não parou pelo serviço, fechando o processo.", "did not stop as a service, killing the process."));
+            }
+
+            // 4) vgk driver (full mode only)
+            if (!light && VgkLoaded())
+            {
+                var r = Sc("stop", "vgk");
+                MarkVgkTouched();
+                Log(WaitStatus("vgk", "Stopped", 10) ? "vgk: " + L.T("driver parado.", "driver stopped.")
+                                                     : "vgk: " + L.T("o driver recusou parar", "the driver refused to stop") + $" ({r.Code}).");
+            }
+
+            // 5) leftovers (vgc.exe if the service hung)
+            var left = KillRiot(true);
+            if (left.Count > 0) Log(L.T("Sobras fechadas: ", "Leftovers closed: ") + string.Join(", ", left));
+
+            Thread.Sleep(1000);
+            var rep = GetReport();
+            Log(L.T("Conferência:", "Check:"));
+            if (!Check(rep.Procs.Count == 0, L.T("Nenhum processo da Riot/Vanguard aberto", "No Riot/Vanguard process running")))
+                res.Fails.Add(L.T("processos: ", "processes: ") + string.Join(", ", rep.Procs.Select(p => p.Name).Distinct()));
+            if (!Check(rep.VgcSvc != "Running", L.T("Serviço vgc parado", "vgc service stopped")))
+                res.Fails.Add(L.T("vgc ainda rodando", "vgc still running"));
+
+            if (light)
+            {
+                if (rep.VgkLoaded) Check(true, L.T("Driver vgk mantido na memória (Ligar funciona sem reiniciar)", "vgk driver kept in memory (Turn on works without rebooting)"));
+                else Log("   [--] " + L.T("Driver vgk fora da memória: ele volta no próximo boot.", "vgk driver not in memory: it comes back on the next boot."));
+                if (!Check(rep.VgcStart == 4 && rep.VgkStart <= 2, L.T("vgc bloqueado; vgk segue ligando no boot", "vgc blocked; vgk still loads at boot")))
+                    res.Fails.Add(L.T("bloqueio não aplicado", "block not applied"));
+            }
+            else
+            {
+                res.VgkStuck = !Check(!rep.VgkLoaded, L.T("Driver vgk fora da memória", "vgk driver out of memory"));
+                if (!Check(rep.VgkStart == 4 && (rep.VgcStart == null || rep.VgcStart == 4),
+                           L.T("vgk e vgc bloqueados (não ligam no boot nem pelo Riot Client)", "vgk and vgc blocked (they won't start at boot or from Riot Client)")))
+                    res.Fails.Add(L.T("bloqueio não aplicado", "block not applied"));
+            }
+            Check(rep.TrayBoot != true, L.T("Bandeja fora da inicialização do Windows", "Tray removed from Windows startup"));
+
+            if (res.Fails.Count > 0) Log(L.T("Algumas coisas não fecharam. Veja os [!!] acima.", "Some things did not close. See [!!] above."));
+            else if (!res.VgkStuck) Log(L.T("Pronto. Continua desligado depois de reiniciar, até você clicar em Ligar.",
+                                            "Done. It stays off after rebooting until you click Turn on."));
+            return res;
+        }
+
+        public static StartResult Start()
+        {
+            var res = new StartResult();
+            Log("== " + L.T("Iniciando o Vanguard", "Starting Vanguard") + " ==");
+            RememberOriginal();
+
+            // back to automatic: vgk at boot, vgc automatic, tray with Windows
+            SetStartType("vgk", OriginalVgkStart());
+            SetStartType("vgc", 2);
+            SetTrayStartup(true);
+
+            if (!VgkLoaded())
+            {
+                res.LateStart = true;
+                var r = Sc("start", "vgk");
+                MarkVgkTouched();
+                Log(WaitStatus("vgk", "Running", 15) ? "vgk: " + L.T("driver ligado agora (não veio do boot).", "driver started now (not from boot).")
+                                                     : "vgk: " + L.T("não ligou", "did not start") + $" ({r.Code}).");
+            }
+            else if (VgkFromBoot() == false)
+            {
+                res.LateStart = true;
+                Log("vgk: " + L.T("já estava na memória, mas foi ligado depois do boot.", "already in memory, but it was started after boot."));
+            }
+            else Log("vgk: " + L.T("já estava na memória desde o boot.", "already in memory since boot."));
+
+            if (VgkLoaded() && Status("vgc") != "Running")
+            {
+                var r = Sc("start", "vgc");
+                Log(WaitStatus("vgc", "Running", 15) ? "vgc: " + L.T("rodando.", "running.")
+                                                     : "vgc: " + L.T("não ficou rodando", "did not keep running") + $" ({r.Code}).");
+            }
+
+            StartTray();
+            Thread.Sleep(1500);
+
+            var rep = GetReport();
+            Log(L.T("Conferência:", "Check:"));
+            res.VgkOk = Check(rep.VgkLoaded, L.T("Driver vgk carregado", "vgk driver loaded"));
+            Check(rep.VgkStart <= 2 && rep.VgcStart == 2, L.T("vgk no boot e vgc automático", "vgk at boot and vgc automatic"));
+            if (rep.VgcSvc == "Running") Check(true, L.T("Serviço vgc rodando", "vgc service running"));
+            else Log("   [--] " + L.T("Serviço vgc parado: a Riot liga ele quando o jogo abre.", "vgc service stopped: Riot starts it when the game opens."));
+            if (rep.Tray) Check(true, L.T("Bandeja do Vanguard aberta", "Vanguard tray open"));
+            else Log("   [--] " + L.T("Bandeja do Vanguard não abriu (não impede de jogar).", "Vanguard tray did not open (does not block playing)."));
+            if (res.LateStart && res.VgkOk)
+                Log("   [!!] " + L.T("O driver não veio do boot: no modo tradicional, isso pode dar VAN 57 até reiniciar.", "The driver did not load at boot: in the traditional mode this can cause VAN 57 until you reboot."));
+            return res;
+        }
+
+        /// <summary>Riot default without Pre-Check: vgk at boot, vgc automatic. Returns false if it could not apply.</summary>
+        public static RestoreResult RestoreDefault()
+        {
+            var res = new RestoreResult();
+            Log("== " + L.T("Voltando ao padrão da Riot", "Back to Riot default") + " ==");
+            int vgk = OriginalVgkStart();
+            SetStartType("vgk", vgk);
+            SetStartType("vgc", 2);
+            var tray = SetTrayStartup(true);
+            res.TrayFound = tray.Found > 0;
+            res.TrayOk = tray.Ok;
+
+            Log(L.T("Conferência:", "Check:"));
+            res.ConfigOk = Check(StartType("vgk") == vgk && StartType("vgc") == 2,
+                                 L.T("vgk e vgc voltaram a ligar com o Windows", "vgk and vgc start with Windows again"));
+            if (res.TrayFound) Check(res.TrayOk, L.T("Bandeja volta a abrir com o Windows", "Tray opens with Windows again"));
+            else Check(false, L.T("Entrada da bandeja do Vanguard não encontrada no Registro", "Vanguard tray entry not found in the registry"));
+
+            if (res.ConfigOk && Status("vgc") != "Running" && VgkLoaded())
+            {
+                Sc("start", "vgc");
+                WaitStatus("vgc", "Running", 15);
+            }
+            res.VgcRunning = Status("vgc") == "Running";
+            if (res.VgcRunning) Check(true, L.T("Serviço vgc rodando", "vgc service running"));
+            else Log("   [--] " + L.T("Serviço vgc parado agora; ele liga no próximo boot.", "vgc service stopped for now; it starts on the next boot."));
+
+            // keep the saved original until the essential steps are confirmed
+            if (res.Ok) { try { File.Delete(StateFile); } catch { } }
+            return res;
+        }
+    }
+}
+
+```
+
+`src/VanguardSwitch.csproj`:
+
+```csproj
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net48</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+    <LangVersion>latest</LangVersion>
+    <AssemblyName>VanguardSwitch</AssemblyName>
+    <RootNamespace>VanguardSwitch</RootNamespace>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>icon.ico</ApplicationIcon>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <Prefer32Bit>false</Prefer32Bit>
+    <Version>1.0.5</Version>
+    <Product>VanguardSwitch</Product>
+    <Description>Turn Riot Vanguard off and back on without rebooting</Description>
+    <Copyright>MIT License</Copyright>
+    <Deterministic>true</Deterministic>
+    <DebugType>none</DebugType>
+    <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="System.ServiceProcess" />
+    <Reference Include="System.Runtime.Serialization" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3" PrivateAssets="all" />
+  </ItemGroup>
+
+</Project>
+
+```
+
+`src/app.manifest`:
+
+```manifest
+<?xml version="1.0" encoding="utf-8"?>
+<assembly manifestVersion="1.0" xmlns="urn:schemas-microsoft-com:asm.v1">
+  <assemblyIdentity version="1.0.0.0" name="VanguardSwitch.app" />
+  <trustInfo xmlns="urn:schemas-microsoft-com:asm.v2">
+    <security>
+      <requestedPrivileges xmlns="urn:schemas-microsoft-com:asm.v3">
+        <!-- services and drivers can only be changed by an administrator -->
+        <requestedExecutionLevel level="requireAdministrator" uiAccess="false" />
+      </requestedPrivileges>
+    </security>
+  </trustInfo>
+  <compatibility xmlns="urn:schemas-microsoft-com:compatibility.v1">
+    <application>
+      <!-- Windows 10 and 11 -->
+      <supportedOS Id="{8e0f7a12-bfb3-4fe8-b9a5-48fd50a15a9a}" />
+    </application>
+  </compatibility>
+  <application xmlns="urn:schemas-microsoft-com:asm.v3">
+    <windowsSettings>
+      <dpiAware xmlns="http://schemas.microsoft.com/SMI/2005/WindowsSettings">true</dpiAware>
+    </windowsSettings>
+  </application>
+</assembly>
+
+```
