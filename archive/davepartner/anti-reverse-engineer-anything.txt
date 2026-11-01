@@ -1,0 +1,1816 @@
+Project Path: arc_davepartner_anti-reverse-engineer-anything_ek75hjy_
+
+Source Tree:
+
+```txt
+arc_davepartner_anti-reverse-engineer-anything_ek75hjy_
+├── LICENSE
+├── README.md
+├── SKILL.md
+├── package.json
+├── references
+│   ├── javascript-electron-hardening.md
+│   ├── metadata-stripping.md
+│   ├── native-hardening.md
+│   ├── threat-model.md
+│   └── web-and-runtime-hardening.md
+└── scripts
+    ├── anti-debug.h
+    ├── generate-csp.cjs
+    ├── harden-electron.js
+    ├── harden-go.sh
+    ├── harden-rust.sh
+    ├── integrity-check.js
+    ├── obfuscate-javascript.mjs
+    └── strip-native.sh
+
+```
+
+`LICENSE`:
+
+```
+MIT License
+
+Copyright (c) 2026 Dave Ozoalor
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
+`README.md`:
+
+```md
+# AREA — Anti-Reverse-Engineer-Anything
+
+> You ship software. Other people (and a growing number of AI agents) take it
+> apart to figure out how it works, then rebuild it for free. AREA makes that
+> job annoying enough that most of them give up.
+
+**AREA** is a defensive toolkit for anyone who ships closed-source or licensed
+software and would rather it stayed closed. It's built specifically to blunt
+[REA (`reverse-engineer-anything`)](https://github.com/morluto/rea) and the tools
+it leans on — Ghidra, Hopper, IDA, Kuna, Frida, LLDB, GDB, CDP/DevTools, Wakaru —
+so that when one of those agents points at your app, it comes back with
+"couldn't determine" instead of a working clone.
+
+Think of it as the counter-skill to `reverse-engineer-anything`: REA works by
+reading the information you accidentally left in your build and poking at the
+channels you left open. AREA just... removes that information and closes those
+channels.
+
+## Why this exists
+
+Reverse engineering used to be a niche skill. Now anyone can ask an AI agent to
+do it. The agent runs `analyze_javascript_application` on your Electron app,
+`open_binary` + `analyze_function` on your native binary, or captures your live
+web app into a bundle — then hands back a reconstruction. The frustrating part:
+it mostly works because the build gives it everything it needs for free.
+
+AREA is the fix. Same tools, pointed the other way.
+
+## How it works, in one breath
+
+REA (and everything like it) leans on three things:
+
+1. **Your artifacts are readable** — plaintext JavaScript, source maps, symbols,
+   plaintext strings, embedded build metadata.
+2. **Your runtime is open** — DevTools/CDP ports, `--inspect`, debuggers and
+   Frida can just walk in.
+3. **Your builds are predictable** — same identifiers every release, so diffing
+   two versions is trivial.
+
+AREA attacks each one. Full breakdown here: [references/threat-model.md](references/threat-model.md).
+
+## REA tool → what AREA does about it
+
+| REA surface | AREA counter |
+| --- | --- |
+| `analyze_javascript_application`, `recover_javascript_sources`, `trace_application_feature` | Obfuscate + mangle, drop source maps, compile to V8 bytecode or native addons |
+| `compare_application_versions`, `compare_javascript_export_shapes` | Re-obfuscate every release with a fresh seed so nothing lines up |
+| `inspect_electron_fuses`, `list_electron_targets`, CDP debug | Flip the fuses (`--inspect`, `RunAsNode`, `NODE_OPTIONS` off; asar integrity on) |
+| `open_binary` + `analyze_function` + strings/xrefs | OLLVM/garble/goldberg, string encryption, control-flow flattening, packing |
+| `inspect_binary_layout`, `inspect_pe_imports`, `inspect_native_exports`, `inspect_elf_notes`, `inspect_macho` | Strip symbols/build-id, resolve imports dynamically, hide visibility, export almost nothing |
+| `observe_native_calls`, `start_gdb_session`, Rizin | Anti-debug, drop `get-task-allow`, hardened runtime |
+| `start_frida_session`, `load_frida_script` | Anti-Frida: watch port 27042, scan for agent/gadget, ptrace guard |
+| `list_browser_targets`, `capture_browser_scenario`, `observe_web_execution`, WebMCP | Anti-CDP, `navigator.webdriver` guard, no WebMCP manifest, strict CSP |
+| `export_environment_bundle` (AgentEnv) | Thin client + server-side logic + auth + streaming |
+| `inspect_go_binary`, `inspect_rust_binary`, `inspect_python_pyc`, `inspect_il2cpp_metadata`, `inspect_sqlite_database` | Strip `.go.buildinfo` / `.dep-v0` / `.pyc`, encrypt IL2CPP metadata and DBs |
+| Network captures (HAR/SAZ/mitmproxy/PCAP) | Certificate pinning + application-layer encryption |
+
+## Quick start
+
+Grab the track for your stack, apply it, then check your work by pointing REA at
+the result.
+
+```sh
+# JavaScript / Electron
+node scripts/obfuscate-javascript.mjs ./dist ./dist-obf --seed 0x1234abcd
+node scripts/harden-electron.js --fuses --no-sourcemaps
+
+# Native
+./scripts/strip-native.sh ./app.bin --upx
+
+# Go
+./scripts/harden-go.sh ./cmd/myapp
+
+# Rust
+./scripts/harden-rust.sh --release
+
+# Web headers + anti-automation
+node scripts/generate-csp.cjs
+```
+
+Then verify, if you have REA handy:
+
+```sh
+npx -y rea-agents@latest analyze-javascript-application /abs/path/to/app --json
+```
+
+A hardened build should come back as `coverage: incomplete` or `unknown` — not
+recovered logic, names, routes, or strings.
+
+## Documentation
+
+| Guide | What's in it |
+| --- | --- |
+| [threat-model.md](references/threat-model.md) | How REA thinks, where it's vulnerable, deterrence vs. proof |
+| [javascript-electron-hardening.md](references/javascript-electron-hardening.md) | Obfuscation, source-map removal, V8 bytecode, fuses, asar integrity, IPC hiding, DevTools blocking |
+| [native-hardening.md](references/native-hardening.md) | OLLVM/garble/goldberg, symbol stripping, import hiding, packing, anti-debug, anti-Frida, anti-tamper |
+| [web-and-runtime-hardening.md](references/web-and-runtime-hardening.md) | AgentEnv defense, anti-CDP, WebMCP, cert pinning, payload encryption |
+| [metadata-stripping.md](references/metadata-stripping.md) | Go/Rust/Python/Unity/PE/ELF/Mach-O/APK metadata and fingerprint removal |
+
+## Scripts
+
+| Script | What it does |
+| --- | --- |
+| `scripts/obfuscate-javascript.mjs` | `javascript-obfuscator` with AREA defaults — flattening, string arrays, self-defending, no source map |
+| `scripts/harden-electron.js` | Flips Electron fuses, turns on asar integrity, strips source maps |
+| `scripts/strip-native.sh` | Strips symbols/build-id/`.dep-v0`, optional UPX pack |
+| `scripts/harden-go.sh` | garble build with literal obfuscation + `-trimpath` + build-id clear |
+| `scripts/harden-rust.sh` | Release build + symbol/`.dep-v0` stripping |
+| `scripts/anti-debug.h` | C/C++ anti-debug, anti-Frida, anti-LLDB/GDB primitives |
+| `scripts/integrity-check.js` | Runtime SHA-256 tamper check |
+| `scripts/generate-csp.cjs` | Strict CSP + anti-automation headers and snippet |
+
+## Installing as a skill
+
+Pull this into an agent and drop it next to `reverse-engineer-anything`, so
+hardening happens by default whenever software gets built:
+
+```sh
+git clone https://github.com/<your-org>/anti-reverse-engineer-anything.git
+# copy SKILL.md + references/ + scripts/ into the agent's skills directory
+```
+
+## A few honest caveats
+
+- **This is deterrence, not a vault.** Obfuscation and anti-debug make reverse
+  engineering slow and unrewarding; they don't make it impossible. The real win
+  is that casual cloners and evidence-bound AI agents stall out. A determined
+  human with time and budget will always get through eventually.
+- **Keep real secrets on the server.** No amount of obfuscation protects a key or
+  algorithm you shipped to the client.
+- **Mind your distribution channel.** Packers and heavy anti-debug can trip
+  antivirus heuristics and app-store review, so test before you ship.
+- **Stay on your own lawn.** Use this only on software you own or are authorized
+  to protect.
+
+## License
+
+[MIT](LICENSE)
+
+---
+
+## Keywords
+
+`anti-reverse-engineering` · `obfuscation` · `anti-tamper` · `anti-debug` ·
+`anti-Frida` · `anti-LLDB` · `anti-GDB` · `code protection` · `software protection` ·
+`anti-clone` · `source-map stripping` · `JavaScript obfuscation` ·
+`javascript-obfuscator` · `control-flow flattening` · `string encryption` ·
+`symbol stripping` · `packer` · `OLLVM` · `garble` · `goldberg` · `Nuitka` ·
+`Electron fuses` · `asar integrity` · `bytenode` · `certificate pinning` ·
+`CDP detection` · `DevTools detection` · `headless detection` ·
+`metadata stripping` · `build-info stripping` · `.dep-v0` · `IL2CPP encryption` ·
+`SQLCipher` · `R8 / ProGuard` · `binary hardening` · `hardened runtime` ·
+`AgentEnv defense` · `reverse-engineer-anything counter`
+
+```
+
+`SKILL.md`:
+
+```md
+---
+name: anti-reverse-engineer-anything
+description: >-
+  Harden software so AI reverse-engineering agents (REA, "reverse-engineer-anything",
+  Ghidra/Hopper/IDA/Kuna, Frida, LLDB, GDB, CDP/DevTools, Wakaru) fail or stall when they
+  try to decompile, clone, or fingerprint your shipped app. Use when building or shipping
+  proprietary/closed-source software, Electron/Node/JavaScript apps, native binaries
+  (C/C++/Rust/Go), mobile apps, or web apps that must resist decompilation, cloning,
+  source recovery, source-map recovery, string extraction, import/export enumeration,
+  build-metadata fingerprinting, runtime instrumentation, debugger attach, Frida hooking,
+  DevTools/remote-debugging access, and AgentEnv bundle capture. Applies obfuscation,
+  control-flow flattening, string encryption, symbol stripping, packers, anti-debug,
+  anti-Frida, anti-tamper integrity checks, Electron fuses, asar integrity, cert pinning,
+  and metadata stripping. NOT for malware evasion or defeating license-check legal
+  enforcement on others' software; use only on software you own or are authorized to protect.
+---
+
+# AREA — Anti-Reverse-Engineer-Anything
+
+Counter-skill to `reverse-engineer-anything` (REA) and the wider class of AI-assisted
+reverse-engineering tooling. Where REA recovers readable source, names, strings, imports,
+call graphs, and runtime behavior from a shipped artifact, AREA removes the assumptions
+REA depends on, so a REA-driven agent hits dead ends instead of conclusions.
+
+## When to apply
+
+Apply this skill **before shipping** any software you own and do not want cloned,
+decompiled, or fingerprinted. It is most valuable for:
+
+- Electron / Node.js / JavaScript apps (desktop + web bundles)
+- Native binaries: C, C++, Objective-C, Rust, Go
+- Managed .NET / Java / Kotlin / Android / iOS apps
+- Any app whose secret sauce lives in the client instead of a server
+
+## The core insight
+
+REA is *evidence-bound and assumption-bound*. It can only conclude what it can
+observe, and it can only observe what the shipped artifact lets it:
+
+1. **Static artifacts** are readable: JS source text, source maps, symbol tables,
+   import/export tables, plaintext strings, embedded build metadata.
+2. **Runtime surfaces** are open: CDP/DevTools ports, `--inspect`, Frida/GDB/LLDB
+   attach, unhardened runtimes.
+3. **Identity is stable**: SHA-256 digests, deterministic builds, persistent
+   identifiers make version diffing and fingerprinting trivial.
+
+Every countermeasure removes one of these assumptions. A REA agent that cannot
+read source, cannot attach a debugger, and cannot fingerprint the build reports
+*"unknown"* everywhere instead of a reconstruction.
+
+## Quick map: REA tool → AREA counter
+
+| REA surface (what it attacks) | AREA counter (what you ship) | Reference |
+| --- | --- | --- |
+| `analyze_javascript_application`, `recover_javascript_sources`, `trace_application_feature` | Obfuscate + mangle, remove source maps, compile JS to V8 bytecode (`bytenode`), split logic to native addons | [javascript-electron-hardening.md](references/javascript-electron-hardening.md) |
+| `compare_application_versions`, `compare_javascript_export_shapes` | Per-build re-obfuscation with a random seed/salt; polymorphic identifiers | same |
+| `inspect_electron_fuses`, `list_electron_targets`, CDP debug | Flip Electron fuses to kill `--inspect`/`RunAsNode`/`NODE_OPTIONS`; enable asar integrity | same |
+| `open_binary` + `analyze_function` + pseudocode/strings/xrefs (Ghidra/Hopper/IDA/Kuna) | OLLVM/garble obfuscation, string encryption, opaque predicates, control-flow flattening, packing | [native-hardening.md](references/native-hardening.md) |
+| `inspect_binary_layout`, `inspect_pe_imports`, `inspect_native_exports`, `inspect_elf_notes`, `inspect_macho` | Strip symbols/build-id/section names, dynamic import resolution, minimize exports | [native-hardening.md](references/native-hardening.md) + [metadata-stripping.md](references/metadata-stripping.md) |
+| `observe_native_calls` (LLDB), `start_gdb_session`, `start_rizin_debug_session` | Anti-debug (`PT_DENY_ATTACH`, `sysctl P_TRACED`, `PTRACE_TRACEME`), remove `get-task-allow` | [native-hardening.md](references/native-hardening.md) |
+| `start_frida_session`, `load_frida_script` | Anti-Frida (scan port 27042, detect agent/gadget strings, `ptrace` guard) | [native-hardening.md](references/native-hardening.md) |
+| `list_browser_targets`, `capture_browser_scenario`, `observe_web_execution`, `inspect_web_event_listeners`, WebMCP discovery | Anti-CDP/DevTools detection, `navigator.webdriver` guard, declare no WebMCP tools, strict CSP | [web-and-runtime-hardening.md](references/web-and-runtime-hardening.md) |
+| `export_environment_bundle` (AgentEnv clone capture) | Thin client + server-side logic + auth + streaming so a captured bundle is useless | [web-and-runtime-hardening.md](references/web-and-runtime-hardening.md) |
+| `inspect_go_binary`, `inspect_rust_binary`, `inspect_pe_certificates`, `inspect_pe_load_config`, `inspect_python_pyc`, `inspect_il2cpp_metadata`, `inspect_sqlite_database` | Strip build metadata (`.go.buildinfo`, `.dep-v0`, build-id), compile Python to native, encrypt IL2CPP metadata and databases | [metadata-stripping.md](references/metadata-stripping.md) |
+| Network captures (SAZ/HAR/mitmproxy/PCAP) | Certificate pinning + application-layer payload encryption | [web-and-runtime-hardening.md](references/web-and-runtime-hardening.md) |
+
+## How to use
+
+1. Read [references/threat-model.md](references/threat-model.md) to understand exactly
+   what a REA-driven agent will try and where each technique bites.
+2. Pick the hardening track for your stack and apply it **before** the release build,
+   not after. Obfuscation and stripping must happen on the artifact that ships.
+3. Run the matching script in [scripts/](scripts/) on your release artifact.
+4. Verify with a REA pass yourself: run `analyze_javascript_application` /
+   `open_binary` against your hardened artifact and confirm the agent reports
+   `unknown` / `coverage: incomplete` rather than recovered logic.
+5. Keep the *unhardened* source in private version control only. Never ship debug
+   symbols, source maps, or `.pdb`/`dSYM` sidecars.
+
+## Tracks
+
+- **JavaScript / Electron** → [javascript-electron-hardening.md](references/javascript-electron-hardening.md)
+- **Native (C/C++/ObjC/Rust/Go)** → [native-hardening.md](references/native-hardening.md)
+- **Web app / runtime / AgentEnv** → [web-and-runtime-hardening.md](references/web-and-runtime-hardening.md)
+- **Metadata & fingerprint stripping** → [metadata-stripping.md](references/metadata-stripping.md)
+
+## Scripts
+
+- `scripts/obfuscate-javascript.mjs` — `javascript-obfuscator` wrapper with AREA defaults.
+- `scripts/harden-electron.js` — applies Electron fuses + asar integrity + kills source maps.
+- `scripts/strip-native.sh` — symbol/build-id/section stripping + optional packer.
+- `scripts/harden-go.sh` — garble + `-trimpath` + strip `.go.buildinfo`.
+- `scripts/harden-rust.sh` — strip `.dep-v0` (cargo-auditable) metadata.
+- `scripts/anti-debug.h` — C/C++ anti-debug + anti-Frida + anti-LLDB/GDB primitives.
+- `scripts/integrity-check.js` — runtime asar/binary integrity verification.
+- `scripts/generate-csp.cjs` — emits a strict CSP + anti-automation headers.
+
+## Rules
+
+- Only harden software you own or are authorized to protect.
+- Obfuscation and anti-debug are **deterrence**, not provable security: raise the
+  cost of analysis; never rely on them as the sole protection for anything secret.
+- Keep a clean, unhardened build in CI for internal debugging; ship only hardened artifacts.
+- Never ship credentials, keys, or secrets inside a client, no matter how obfuscated.
+
+```
+
+`package.json`:
+
+```json
+{
+  "name": "anti-reverse-engineer-anything",
+  "version": "1.0.0",
+  "description": "Anti-Reverse-Engineer-Anything (AREA): defensive hardening so AI reverse-engineering agents (REA, Ghidra, Frida, CDP) fail or stall against your shipped software.",
+  "license": "MIT",
+  "type": "module",
+  "keywords": [
+    "anti-reverse-engineering",
+    "obfuscation",
+    "anti-debug",
+    "anti-frida",
+    "anti-tamper",
+    "code-protection",
+    "software-protection",
+    "javascript-obfuscation",
+    "electron-fuses",
+    "asar-integrity",
+    "source-map-stripping",
+    "symbol-stripping",
+    "metadata-stripping",
+    "certificate-pinning"
+  ],
+  "scripts": {
+    "obfuscate": "node scripts/obfuscate-javascript.mjs",
+    "harden-electron": "node scripts/harden-electron.js",
+    "csp": "node scripts/generate-csp.cjs",
+    "integrity": "node scripts/integrity-check.js"
+  },
+  "dependencies": {
+    "javascript-obfuscator": "^4.1.1"
+  },
+  "optionalDependencies": {
+    "@electron/fuses": "^1.8.0"
+  }
+}
+
+```
+
+`references/javascript-electron-hardening.md`:
+
+```md
+# JavaScript & Electron hardening
+
+Counter the JavaScript/Electron path of REA: `analyze_javascript_application`,
+`recover_javascript_sources`, `trace_application_feature`,
+`compare_application_versions`, `compare_javascript_export_shapes`,
+`inspect_electron_fuses`, `list_electron_targets`, and CDP-based observation.
+
+REA's JS analysis is unusually powerful **because you ship readable source and
+source maps**. Remove those two things and its module graph, route inventory,
+IPC pairing, and feature tracing all collapse to `unknown`.
+
+## 1. Obfuscate (passive, non-negotiable)
+
+Minification is *not* obfuscation — REA's `recover_javascript_sources` (Wakaru)
+exists precisely to de-minify readable bundles. Use a real obfuscator with the
+transforms Wakaru cannot invert.
+
+Use [javascript-obfuscator](https://github.com/javascript-obfuscator/javascript-obfuscator)
+via `scripts/obfuscate-javascript.mjs`:
+
+```sh
+node scripts/obfuscate-javascript.mjs ./dist ./dist-obfuscated
+```
+
+The AREA defaults enable:
+
+- `stringArray` + `stringArrayEncoding: "rc4"` + `rotateStringArray` — encrypts
+  every literal, killing route/IPC/string seeds REA relies on.
+- `controlFlowFlattening` — Wakaru cannot flatten; `trace_application_feature`
+  and de-obfuscation stall.
+- `deadCodeInjection` — injects bogus branches that poison the module graph.
+- `identifierNamesGenerator: "hexadecimal"` + `renameGlobals` — destroys stable
+  identifiers, breaking `compare_application_versions` and export-shape diffing.
+- `selfDefending` — makes manual de-obfuscation harder.
+- `splitStrings` + `transformObjectKeys`.
+
+**Do not ship the source map** (`sourceMap: false`, and strip any
+`//# sourceMappingURL=`). REA explicitly consumes source maps to recover original
+names and paths — it is the single highest-leverage leak to close.
+
+## 2. Compile JS out of plaintext (passive, highest value)
+
+Obfuscated JS is still JS. For the modules that hold real logic, ship **no JS
+source at all**:
+
+- **V8 bytecode** via [bytenode](https://github.com/bytenode/bytenode): compile
+  `.js` to `.jsc`. `analyze_javascript_application` sees bytecode blobs, not
+  source — no module graph, no literals, no routes.
+- **Native addons** (N-API / `node-addon-api`): move critical algorithms into a
+  compiled `.node` binary (which you then harden per native-hardening.md).
+- **WebAssembly** for hot numeric logic (and obfuscate the WASM).
+
+Hybrid is best: an obfuscated JS shell that calls bytecode/native for anything
+secret.
+
+## 3. Kill the static IPC channel map
+
+REA pairs IPC channels only on a **unique exact literal** match
+(`ipcMain.on("literal", ...)`). If the channel name is computed at runtime, the
+static pairing fails and the channel is reported `unresolved`.
+
+```js
+// instead of: ipcMain.on("app:get-secret", ...)
+const channel = deriveChannel("app:get-secret", sessionNonce); // hash + nonce
+ipcMain.on(channel, handler);
+```
+
+Even simpler: derive the channel from a constant XOR'd at runtime so the literal
+`"app:get-secret"` never appears in the bundle.
+
+## 4. Electron fuses (passive, cheap)
+
+`inspect_electron_fuses` reads the fuses REA would use to establish debugging is
+possible. Flip them against it:
+
+| Fuse | Set to | Why |
+| --- | --- | --- |
+| `EnableNodeCliInspectArguments` | **disabled** | App ignores `--inspect`; blocks `list_electron_targets` debugging |
+| `EnableNodeOptionsEnvironmentVariable` | **disabled** | Blocks `NODE_OPTIONS=--inspect` injection |
+| `RunAsNode` | **disabled** | Prevents running `ELECTRON_RUN_AS_NODE` to dump code |
+| `EnableEmbeddedAsarIntegrityValidation` | **enabled** | Detects tampered `app.asar` at load |
+| `EnableCookieEncryption` | **enabled** | Encrypts cookies on disk |
+
+Apply via `@electron/fuses` — `scripts/harden-electron.js` does this.
+
+## 5. asar integrity + encryption
+
+- Enable **asar integrity** (`electron-builder` `asarIntegrity`) so REA can't
+  quietly swap files.
+- Encrypt individual files inside the asar; decrypt in the preload at runtime so
+  an extracted asar contains ciphertext, not source.
+- For the truly sensitive files, keep them **out of the asar** and decrypt them
+  from a signed blob at first run.
+
+## 6. Disable DevTools / remote debugging (active)
+
+REA observes renderer/main through CDP. Close it:
+
+```js
+// main process
+app.on('web-contents-created', (_e, contents) => {
+  contents.on('before-input-event', (e) => {
+    // block the DevTools shortcuts if you need it locked down
+  });
+  contents.setWindowOpenHandler(() => ({ action: 'deny' }));
+});
+
+new BrowserWindow({
+  devTools: false,            // no DevTools in production
+  webPreferences: {
+    devTools: false,
+    nodeIntegration: false,
+    contextIsolation: true,
+    sandbox: true,
+  },
+});
+
+// refuse a remote debugging port
+if (process.argv.some(a => a.startsWith('--remote-debugging-port') ||
+                          a.startsWith('--inspect'))) {
+  app.quit();
+}
+```
+
+Also detect an open DevTools at runtime (window-size heuristic + a
+`debugger`-statement timing check in the renderer) and refuse to continue the
+sensitive path.
+
+## 7. Detect headless/automation in renderer
+
+A REA `capture_browser_scenario` launch is a real Chromium, but instrumented:
+
+```js
+if (navigator.webdriver) { /* automated — degrade */ }
+```
+
+Combine with `window.outerWidth - window.innerWidth` checks, missing
+`navigator.plugins`, and `chrome.app` absence. When automation is suspected,
+serve a degraded/neutral view instead of the real app.
+
+## 8. Preload / contextBridge hygiene
+
+- `contextIsolation: true`, `nodeIntegration: false`, `sandbox: true`.
+- Expose a **minimal** typed API through `contextBridge`; never expose `ipcRenderer`
+  raw or `require`. REA's preload/contextBridge surface analysis then finds a
+  tiny, uninteresting surface.
+
+## 9. Version-diff resistance
+
+`compare_application_versions` and `compare_javascript_export_shapes` diff two
+builds by stable identifiers and digest. To make diffs meaningless:
+
+- Re-obfuscate each release with a **fresh random seed** (`--seed`/random salt) so
+  identifiers and string-array ordering differ globally, not just where logic changed.
+- Keep `renameGlobals` on so cross-version names never line up.
+
+Two releases then share almost no stable identity, and a diff reports noise, not
+"what changed."
+
+## 10. Apply `scripts/harden-electron.js`
+
+```sh
+node scripts/harden-electron.js --fuses --asar-integrity --no-sourcemaps
+```
+
+This flips the fuses, enables asar integrity, and strips any stray
+`sourceMappingURL` / `.map` references from the build output.
+
+```
+
+`references/metadata-stripping.md`:
+
+```md
+# Metadata & fingerprint stripping
+
+REA has a large family of **declarative-metadata parsers** — they don't analyze
+code, they read build-time fingerprints you embedded. Every one below has a
+specific, cheap counter. Strip these and the agent's fingerprinting pass returns
+`null` metadata instead of a dependency/manifest inventory.
+
+## Go binaries (`inspect_go_binary`)
+
+`inspect_go_binary` reads the embedded compiler version, module/dependency list,
+and build settings from `.go.buildinfo`.
+
+Counter:
+
+```sh
+# garble with literal obfuscation + tiny (see native-hardening.md)
+garble -literals -tiny -seed=random build -trimpath \
+  -ldflags="-s -w -buildid=" -buildvcs=false ./...
+
+# then remove the build-info section outright
+go tool buildid -w ./binary   # clears build id
+```
+
+Use `-trimpath` to remove absolute source paths (which leak your username/home
+structure and CI layout). `-buildvcs=false` stops VCS stamping. Stripping
+`.go.buildinfo` (via `strip` or post-processing) removes the module list entirely
+so the agent can't enumerate your dependency versions.
+
+## Rust binaries (`inspect_rust_binary`)
+
+`inspect_rust_binary` reads the `.dep-v0` section that `cargo-auditable` embeds —
+a full crate/version manifest.
+
+Counter: **don't ship cargo-auditable metadata**, and strip it if a dependency
+dragged it in:
+
+```sh
+strip -R .dep-v0 ./binary            # ELF
+# or objcopy --remove-section=.dep-v0 ./binary
+```
+
+Also compile with `strip = "symbols"`, `debug = false`, and use `goldberg` for
+string obfuscation. Without `.dep-v0`, `inspect_rust_binary` reports null
+metadata — no dependency enumeration.
+
+## ELF notes / build-id (`inspect_elf_notes`)
+
+Build-ids and notes leak compiler/ABI info and give REA a stable identity.
+
+```sh
+strip -R .note.gnu.build-id ./binary
+# also: objcopy --remove-section=.note.ABI-tag ./binary
+```
+
+## PE tables
+
+- **`inspect_pe_imports`** (import/delay-load tables) → resolve APIs dynamically
+  (see native-hardening.md). A minimal import table reveals little.
+- **`inspect_native_exports`** → hide visibility; export only the entry.
+- **`inspect_pe_load_config`** (TLS callbacks, security cookie, CFG) → avoid TLS
+  callbacks; move init into `main`. CFG/cookie declarations are just metadata, but
+  fewer directories = fewer facts.
+- **`inspect_pe_resources`** → don't embed raw config/keys as resources; load them
+  encrypted at runtime.
+- **`inspect_pe_certificates`** → keep your Authenticode cert (removing it breaks
+  Windows trust), but be aware the cert exposes your signing identity. Nothing to
+  strip here — the counter is operational (don't reuse a personal cert; use a
+  dedicated org cert).
+
+## Mach-O (`inspect_macho`)
+
+Strip symbols and reduce exports (`strip -S -x`, `-fvisibility=hidden`). Remove
+the UUID if your distribution allows (note: the UUID is used for crash
+symbolication and App Store validation — weigh this).
+
+## Python (`inspect_python_pyc`)
+
+`inspect_python_pyc` reads CPython bytecode headers. **Never ship `.pyc` or `.py`**
+for closed-source Python:
+
+- Compile to a native binary with [Nuitka](https://nuitka.net) or Cython — there
+  is then no `.pyc` to inspect.
+- If you must ship Python, obfuscate with PyArmor (encrypts bytecode) and strip
+  `.pyc` headers.
+
+## Unity / IL2CPP (`inspect_il2cpp_metadata`)
+
+`inspect_il2cpp_metadata` reads `global-metadata.dat` — all type/method/string
+names. Its own docs note *"unrecognized magic (possibly encrypted) is unsupported."*
+
+Counter: encrypt `global-metadata.dat` and decrypt it in a native loader at
+startup. The agent then hits the unsupported-magic path and recovers nothing.
+
+## Databases (`inspect_sqlite_database`)
+
+Ship **no plaintext SQLite**. Encrypt with SQLCipher (or equivalent) and derive
+the key from the user's credential / hardware at runtime. `inspect_sqlite_database`
+then sees an encrypted blob, not your schema or seed data. Keep the schema itself
+out of any shipped sample; never ship a database that contains real user data or
+secrets.
+
+## Android / APK
+
+`inspect_android_package` / `inspect_apk_signature` read classes, methods, and
+signing. Counter with the standard Android toolchain:
+
+- R8/ProGuard minify + obfuscate (and `-dontwarn` only where safe).
+- String encryption via a plugin (e.g. StringFog) or your own XOR/RC4 literals.
+- Consider DexGuard (commercial) for control-flow flattening.
+- Split sensitive logic into native `.so` (NDK) hardened per native-hardening.md.
+
+## Source maps (universal)
+
+`analyze_javascript_application` treats source maps as first-class evidence for
+original names/paths. This is the single most important leak in the whole map.
+**Never ship `.map` files or `sourceMappingURL` comments in production**, across
+every framework (webpack `devtool: false`, Vite `build.sourcemap: false`, Next
+`productionBrowserSourceMaps: false`, etc.).
+
+## Build paths (`-trimpath`, `-grecord-gcc-switches`)
+
+Absolute paths embedded via debug info leak your machine's username, home layout,
+and CI structure. Use `-trimpath` (Go), `-ffile-prefix-map=old=new` (GCC/Clang),
+and disable `-grecord-gcc-switches`. These make REA's path/fingerprint recovery
+return meaningless or absent locations.
+
+## Checklist
+
+- [ ] No source maps / `sourceMappingURL` in any shipped bundle.
+- [ ] `.go.buildinfo` and build-id stripped (Go).
+- [ ] `.dep-v0` stripped (Rust).
+- [ ] Symbols, build-id, `.note.*` stripped (native).
+- [ ] Import/export tables minimized; dynamic resolution.
+- [ ] No `.pyc` shipped; Python compiled to native.
+- [ ] `global-metadata.dat` encrypted (Unity).
+- [ ] Databases encrypted, no plaintext schema shipped.
+- [ ] `-trimpath` / file-prefix-map to kill absolute paths.
+
+```
+
+`references/native-hardening.md`:
+
+```md
+# Native hardening (C / C++ / Objective-C / Rust / Go)
+
+Counter the native path of REA: `open_binary`, `binary_overview`,
+`analyze_function`, `list_procedures`, pseudocode, `search_strings`, `xrefs`,
+`inspect_binary_layout`, `inspect_pe_imports`, `inspect_native_exports`,
+`inspect_elf_notes`, `inspect_macho`, `observe_native_calls` (LLDB),
+`start_gdb_session`, `start_frida_session`.
+
+Apply **all** of the passive layers. Add active detection as a removable second layer.
+
+## 1. Compiler obfuscation (passive, highest value)
+
+Obfuscating at the compiler/linker level breaks `analyze_function` pseudocode and
+`search_strings` far more effectively than source-level tricks.
+
+### C / C++ / Objective-C: OLLVM
+
+Use an [OLLVM](https://github.com/obfuscator-llvm/obfuscator) toolchain (or the
+maintained forks: `plutoboy`'s, `heroims/obfuscator`, or `blackarch`'s) with:
+
+- **Control-flow flattening** (`-mllvm -fla`) — turns every function into a
+  dispatcher loop; pseudocode becomes unreadable.
+- **Bogus control flow** (`-mllvm -bcf`) — injects opaque predicates.
+- **Instruction substitution** (`-mllvm -sub`) — replaces arithmetic with
+  equivalent-but-obscure sequences.
+- **String obfuscation** (`-mllvm -sobf`) — encrypts string literals; REA's
+  `search_strings` then finds only the decryptor.
+
+```sh
+clang -mllvm -fla -mllvm -bcf -mllvm -sub -mllvm -sobf \
+      -o app.app/Contents/MacOS/app main.c
+```
+
+Also consider [Hikari](https://github.com/HikariObfuscator/Hikari) (the OLLVM fork
+kept current for Apple platforms).
+
+### Rust: `cargo +nightly build -Z build-std` + obfuscation
+
+- Compile in release with `strip = "symbols"`, `debug = false`, `lto = "fat"`,
+  `codegen-units = 1`, `opt-level = "z"` (or `3`), `panic = "abort"`.
+- Use [goldberg](https://github.com/friedkeenan/goldberg) for string obfuscation.
+- Obfuscate control flow with the `ollvm` LLVM backend for the `-Z build-std` path.
+
+### Go: garble
+
+Use [garble](https://github.com/burrowers/garble) (see `scripts/harden-go.sh`):
+
+```sh
+garble -literals -tiny -seed=random build -trimpath \
+  -ldflags="-s -w -buildid=" -buildvcs=false ./...
+```
+
+`-literals` encrypts string literals, `-tiny` removes debug/position info,
+`-seed=random` makes each build unique.
+
+## 2. Strip symbols and debug info (passive)
+
+REA's `inspect_binary_layout`, `inspect_elf_notes`, and `inspect_macho` enumerate
+symbols, build-ids, and section names. Remove them:
+
+```sh
+# macOS / Linux (strip)
+strip -S -x -s ./binary            # all symbols
+strip -R .note.gnu.build-id ./binary   # remove GNU build-id (Linux)
+
+# macOS: also remove export info you don't need
+strip -S -x app.app/Contents/MacOS/app
+```
+
+- **Never ship** `.pdb` (Windows), `dSYM` (macOS), or unstripped ELF debug sections.
+- Disable `-g` / debug info in release builds.
+- For Rust, set `strip = "symbols"` and do **not** use `cargo-auditable` on the
+  shipping build (see metadata-stripping.md).
+
+## 3. Obfuscate import/export tables (passive)
+
+`inspect_pe_imports` and `inspect_native_exports` read the static tables. Deny them:
+
+- **Dynamic import resolution**: replace `GetProcAddress`/`dlsym`-resolvable names
+  with hash-based lookups. Store only FNV-1a/ROR-13 hashes of API names; resolve at
+  runtime. The import table then lists almost nothing.
+- **Minimize exports**: mark functions `static`, use `-fvisibility=hidden`, or a
+  linker version script / `-exported_symbols_list` to expose only the single entry
+  point (or none for a library you control both sides of).
+- **Delay-load trick**: for Windows, resolve the *minimum* via delay-load and the
+  rest manually.
+
+```sh
+# GCC/Clang: hide all symbols except the entry
+clang -fvisibility=hidden -Wl,-exported_symbol,_main -o app main.c
+```
+
+## 4. String encryption (passive)
+
+Plaintext strings feed `search_strings`, `list_names`, and
+`analyze_javascript_application` string seeds. Encrypt them:
+
+- OLLVM `-sobf` / goldberg / garble `-literals` (above), or
+- a small runtime macro that XOR/RC4-decrypts literals on first use.
+
+```c
+#define SEC(str) (decrypt(str, sizeof(str) - 1, KEY))
+```
+
+The decryptor becomes the only recoverable artifact, and each string must be
+individually recovered at runtime.
+
+## 5. Packing (passive)
+
+A packer compresses/encrypts the real code and unpacks at load. REA's own guidance
+admits *"decompiling an unpacking stub does not recover the unpacked program."*
+
+- UPX (weakest, trivially unpackable — use only as a cheap first layer).
+- Stronger: VMProtect, Themida (commercial), or a custom stub that decrypts a
+  section with a key derived from hardware/entitlements.
+
+Keep in mind: packing can trip antivirus heuristics and app-store review. Apply it
+to the parts that matter, not blanket, and test distribution.
+
+## 6. Anti-debugging (active, removable)
+
+`observe_native_calls` launches under LLDB; `start_gdb_session`/Rizin attach.
+Detect and refuse to run.
+
+### macOS
+
+```c
+#include <sys/types.h>
+#include <sys/sysctl.h>
+#include <unistd.h>
+#include <ptrace.h>
+
+int am_i_debugged(void) {
+    int mib[4] = { CTL_KERN, KERN_PROC, KERN_PROC_PID, getpid() };
+    struct kinfo_proc info; size_t sz = sizeof(info);
+    if (sysctl(mib, 4, &info, &sz, NULL, 0) == 0)
+        if ((info.kp_proc.p_flag & P_TRACED) != 0) return 1;
+    return 0;
+}
+
+void deny_attach(void) {
+    // PT_DENY_ATTACH — prevents LLDB from attaching (non-hardened processes).
+    ptrace(PT_DENY_ATTACH, 0, 0, 0);
+}
+```
+
+### Linux
+
+```c
+#include <sys/ptrace.h>
+#include <stdio.h>
+// Self-attach: if it fails, a tracer already holds us.
+if (ptrace(PTRACE_TRACEME, 0, 0, 0) == -1) _exit(1);
+// Later: read /proc/self/status "TracerPid" and refuse if non-zero.
+```
+
+### Windows
+
+```c
+// PEB->BeingDebugged and NtGlobalFlag checks; also IsDebuggerPresent().
+if (IsDebuggerPresent()) _exit(1);
+```
+
+### Hardened runtime (macOS) — the LLDB killer
+
+`observe_native_calls` on hardened-runtime targets needs the `get-task-allow`
+entitlement. For a release build, ship **hardened runtime WITHOUT `get-task-allow`**:
+
+- Enable Hardened Runtime + Library Validation in Xcode.
+- Sign with `codesign --options runtime --entitlements` that **exclude**
+  `com.apple.security.get-task-allow` (debug builds may include it; release must not).
+- Then LLDB cannot attach without your signing identity.
+
+## 7. Anti-Frida (active, removable)
+
+Frida injects `frida-agent`/`frida-gadget` and runs a server on TCP 27042 by default.
+
+```c
+#include <stdint.h>
+
+// 1. Scan for frida-server's default port (27042) on localhost.
+// 2. Scan own memory/loaded libraries for "frida" / "gadget" / "LIBFRIDA".
+// 3. On Linux, detect the Frida agent by the "gmain" thread or /proc/self/maps
+//    entries containing "frida-agent" or "gadget".
+// 4. Combine with the ptrace TracerPid check — Frida needs to ptrace to spawn.
+```
+
+Keep these checks **spread out and de-synchronized** (call them from a background
+thread at irregular intervals, not a single obvious `if` at startup), otherwise the
+analyst patches one branch.
+
+## 8. Anti-tamper integrity checks (active)
+
+Verify the signed image at runtime so a patched binary refuses to run:
+
+- Hash your `.text` (and the packed payload) at startup and compare against a
+  value signed into the binary; bail (silently, after a delay) on mismatch.
+- Use code-signing APIs (`SecCodeCopySelf` / `SecStaticCodeCheckValidity` on macOS,
+  `WinVerifyTrust` on Windows) to verify the running image is still signed by you.
+
+Do **not** make the check trivially removable: derive the expected hash at build
+time, scatter the check, and compare through an obfuscated transform.
+
+## 9. Use `scripts/strip-native.sh`
+
+```sh
+./scripts/strip-native.sh ./path/to/binary [--upx]
+```
+
+Applies symbol stripping, build-id/section removal, and optionally UPX packing.
+Then verify with REA: `open_binary` + `analyze_function` should return no useful
+pseudocode, and `search_strings` should return only the decryptor.
+
+## Summary of the ideal native build
+
+1. OLLVM/garble/goldberg with flattening + string encryption.
+2. `strip -S -x -s`, no build-id, no `.pdb`/`dSYM`.
+3. Hidden visibility, dynamic import resolution, minimal exports.
+4. Packer or section encryption.
+5. Anti-debug + anti-Frida + anti-tamper (active, scattered).
+6. Hardened runtime, no `get-task-allow`, signed + notarized.
+
+```
+
+`references/threat-model.md`:
+
+```md
+# Threat model: how REA works and where to break it
+
+This is the mental model AREA is built on. A reverse-engineering agent using
+REA (`reverse-engineer-anything`) does not "hack" your software — it reads the
+information you accidentally left in it and observes the behavior you left
+unprotected. Remove the information and close the observation channels, and its
+evidence ledger fills with `unknown` instead of findings.
+
+## The three pillars REA depends on
+
+### 1. Readable static artifacts
+
+REA's built-in parsers work because formats are predictable and unencrypted:
+
+- **JavaScript**: `analyze_javascript_application` reads source text, builds a
+  module graph, finds routes, IPC channels, and literal strings, and — critically
+  — consumes **source maps** to reconstruct original names and paths.
+  `recover_javascript_sources` (Wakaru) de-minifies readable bundles.
+- **Native**: `open_binary` + `analyze_function` produce pseudocode and recover
+  callers/callees/strings via Ghidra, Hopper, IDA, or Kuna. This works because
+  symbols, section names, plaintext strings, and standard import tables are present.
+- **Metadata**: `inspect_go_binary`, `inspect_rust_binary`, `inspect_pe_imports`,
+  `inspect_pe_load_config`, `inspect_elf_notes`, `inspect_python_pyc`,
+  `inspect_il2cpp_metadata`, `inspect_sqlite_database`, etc. read *declarative*
+  metadata you embedded at build time.
+
+**Break it**: ship obfuscated, stripped, encrypted artifacts with no source maps,
+no symbols, no build metadata, and no plaintext strings.
+
+### 2. Open runtime surfaces
+
+REA observes runtime behavior through well-known debug/automation channels:
+
+- **Browser/CDP**: `list_browser_targets`, `capture_browser_scenario`,
+  `observe_web_execution`, `inspect_web_event_listeners` all ride the Chrome
+  DevTools Protocol (CDP) endpoint.
+- **Electron**: `list_electron_targets`, `--inspect`, remote debugging ports.
+- **Native**: LLDB (`observe_native_calls`), Frida (`start_frida_session`,
+  `load_frida_script`), GDB/Rizin debuggers. LLDB on hardened macOS needs the
+  `get-task-allow` entitlement.
+
+**Break it**: detect and disable these surfaces — anti-debug, anti-Frida,
+anti-CDP, Electron fuses, no `get-task-allow`.
+
+### 3. Stable identity
+
+REA fingerprints artifacts by SHA-256 and correlates across versions with
+`compare_application_versions`, `match_native_functions`, and export-shape
+diffing. Deterministic builds + persistent identifiers make "what changed"
+answerable with a single diff.
+
+**Break it**: polymorphic builds — re-obfuscate with a fresh seed each release,
+randomize identifiers, so two versions share almost no stable identity.
+
+## The counter map (full)
+
+| REA capability | Assumption it relies on | AREA countermeasure |
+| --- | --- | --- |
+| JS source reading & module graph | Bundled JS is plaintext | Obfuscation, mangling, control-flow flattening, V8 bytecode |
+| Source-map recovery | `.map` files or `sourceMappingURL` ship | Strip source maps, disable map generation |
+| Wakaru de-minification | Only minification applied | Apply transforms Wakaru can't invert (flattening, opaque predicates, self-defending) |
+| Route/IPC/string enumeration | Literal strings present | Encrypt strings, dynamic property access, computed IPC channel names |
+| Version diffing | Stable identifiers across builds | Per-build re-obfuscation seed, randomized names |
+| Native pseudocode/decompile | Unobfuscated machine code | OLLVM/garble, packing, opaque predicates, string encryption |
+| Symbol/import/export enumeration | Symbol tables + import/export tables intact | Strip symbols, dynamic import resolution, minimize exports |
+| Debugger attach (LLDB/GDB/Rizin) | No anti-debug, `get-task-allow` present | Anti-debug primitives, hardened runtime, remove entitlement |
+| Frida instrumentation | No anti-Frida | Frida server/agent detection, port 27042 scan, ptrace guard |
+| CDP/DevTools observation | Remote debugging enabled, no detection | Kill remote debugging, DevTools-open detection, `navigator.webdriver` guard |
+| AgentEnv clone capture | Client contains complete standalone logic | Thin client + server-side logic + auth + streaming |
+| Network MITM capture | Plaintext TLS, no pinning | Certificate pinning + app-layer encryption |
+| Metadata fingerprinting | Build metadata embedded | Strip `.go.buildinfo`, `.dep-v0`, build-id, certs, `.pyc` headers |
+| Static DB inspection | Plaintext SQLite shipped | Encrypt DB (SQLCipher), keep secrets server-side |
+
+## The goal state
+
+A correctly hardened artifact makes a REA pass return, for every interesting
+question, one of:
+
+- `coverage: incomplete` / `exhausted: false`
+- `unknown` (absence of observable evidence)
+- `limitations: [...]` (unresolved because the seam was removed)
+
+That is the definition of success: not "REA crashes," but "REA has nothing
+citable to stand on." Prefer **denial of evidence** over active interference —
+every active check you add is itself a signature an analyst can locate and patch.
+Layer passive hardening (obfuscation, stripping, encryption) as the base, then
+add active detection (anti-debug, anti-Frida, anti-CDP) as a second, removable
+frustration layer.
+
+## Deterrence, not proof
+
+Obfuscation, packing, and anti-debug raise the cost and lower the yield of
+analysis; they do not make software mathematically un-analyzable. A skilled
+analyst with unlimited time and budget can still reverse anything that runs on
+their machine. The practical win is: (a) casual cloning becomes infeasible,
+(b) AI agents that rely on *citable evidence* stall because the evidence is gone,
+and (c) the few people who could still reverse it face a much higher bill than
+the software is worth.
+
+Keep anything genuinely secret — keys, credentials, proprietary algorithms with
+real value — **server-side**, never in the client.
+
+```
+
+`references/web-and-runtime-hardening.md`:
+
+```md
+# Web app & runtime hardening
+
+Counter the runtime/observation path of REA: `list_browser_targets`,
+`capture_browser_scenario`, `observe_web_execution`, `inspect_web_event_listeners`,
+`discover_webmcp_tools`, `export_environment_bundle` (AgentEnv), and network
+capture (HAR / SAZ / mitmproxy / PCAP).
+
+## 1. The clone threat: AgentEnv bundles
+
+`export_environment_bundle` records a live web app and writes an "AgentEnv"
+bundle — a static reconstruction of your client that an agent can re-host and
+study. The only robust defense is architectural:
+
+**Make the client a thin shell.** Move the product's actual value — the
+algorithm, the pricing logic, the data transforms — **server-side**. A captured
+client then reconstructs a login form and a spinner, not the product.
+
+Concretely:
+
+- Render the interesting state from a server API; never compute the secret logic
+  client-side.
+- Require authenticated sessions for any meaningful view; unauthenticated
+  captures show only a shell.
+- Stream state over WebSocket/SSE rather than embedding it in static HTML, so a
+  point-in-time capture misses the dynamic behavior.
+
+If the client must contain logic, obfuscate it (see
+javascript-electron-hardening.md) and keep the crown jewels server-side.
+
+## 2. Anti-CDP / anti-automation
+
+REA drives the page through the Chrome DevTools Protocol. Detect and degrade:
+
+```js
+// automation signals
+const automated =
+  navigator.webdriver === true ||
+  navigator.userAgent.includes('HeadlessChrome') ||
+  !navigator.plugins.length ||
+  window.chrome && !window.chrome.runtime;
+
+// DevTools-open heuristic (width delta) + debugger-statement timing check
+const devtoolsOpen = () => {
+  const w = window.outerWidth - window.innerWidth;
+  if (w > 100) return true;
+  const start = performance.now();
+  /* eslint-disable no-debugger */
+  debugger;
+  return performance.now() - start > 50;
+};
+```
+
+When automation or DevTools is suspected: serve a degraded, non-functional view,
+throttle, or require a CAPTCHA for the real path. Never hard-fail loudly with an
+obvious "you are being watched" banner — that just tells the analyst which branch
+to patch.
+
+## 3. Declare no WebMCP tools
+
+REA's `discover_webmcp_tools` inventories page-declared WebMCP tools (it never
+invokes them, but lists them as attack surface). Ship **no** `window.webmcp` /
+WebMCP manifest in production. If you use WebMCP internally, gate it behind a
+build flag so the production bundle declares nothing.
+
+## 4. Harden the event/listener surface
+
+`inspect_web_event_listeners` maps listener source locations. Keep the exposed
+surface small:
+
+- Bind listeners to a single, obfuscated entry module.
+- Avoid inline `onclick=`/`on*=` attributes (trivially enumerable).
+- Use event delegation through one root handler where possible.
+
+## 5. Network: pinning + payload encryption
+
+REA reads captured traffic (HAR/SAZ/mitmproxy/PCAP) to learn your API shape.
+
+- **Certificate pinning**: pin your leaf/intermediate certs (or at least a
+  hash of the SPKI) so a MITM proxy's injected CA is rejected. In Electron, use
+  `session.setCertificateVerifyProc`; on the web, pin only where you control both
+  ends (native apps), since web pins are brittle.
+- **Application-layer encryption**: encrypt the sensitive request/response bodies
+  (e.g. a libsodium/NaCl box sealed to an ephemeral key) inside TLS. A captured
+  `POST /api/score` then shows a ciphertext blob, not your payload schema.
+- **TLS hygiene**: force TLS 1.3, disable weak ciphers, keep SNI as opaque as you
+  can (see your CDN/encrypted-SNI options).
+
+For native apps, also pin the server certificate so Fiddler/Charles/Everywhere
+MITM fails closed.
+
+## 6. Runtime process observation (native companion)
+
+If your app has a native shell, `capture_process_scenario` observes stdout/files.
+Do not log secrets, keys, tokens, or internal state to stdout; write encrypted
+config, not plaintext; and don't emit deterministic progress output that reveals
+logic.
+
+## 7. Server-side rate limits & anomalies
+
+A REA-driven agent will probe endpoints. Server-side, add rate limiting and
+anomaly detection (unusual UA, missing referrer, burst of enumeration-like calls)
+so the *server* can refuse an analyst without the client knowing why.
+
+## 8. Summary
+
+| Channel | Defense |
+| --- | --- |
+| AgentEnv clone | Thin client, server-side logic, auth + streaming |
+| CDP / DevTools | Kill remote debugging, detect automation, degrade |
+| WebMCP discovery | Ship no WebMCP manifest |
+| Event/listener mapping | Delegate, obfuscate, avoid inline handlers |
+| MITM capture | Cert pinning + app-layer encryption |
+| Process capture | No secrets in stdout/files |
+| Enumeration probing | Server-side rate limits + anomaly detection |
+
+```
+
+`scripts/anti-debug.h`:
+
+```h
+/*
+ * AREA — anti-debug / anti-Frida / anti-LLDB / anti-GDB primitives.
+ *
+ * Defensive anti-analysis checks for software you own and are authorized to
+ * protect. Include this header and call the checks from scattered, irregular
+ * points (not one obvious startup branch), then refuse sensitive paths silently.
+ *
+ * These raise the cost of REA's runtime tooling:
+ *   - observe_native_calls (LLDB), start_gdb_session, start_rizin_debug_session
+ *   - start_frida_session / load_frida_script
+ *
+ * They are DETERRENCE, not security. A skilled analyst can patch a branch.
+ * Layer them under passive obfuscation (see native-hardening.md).
+ */
+#ifndef AREA_ANTI_DEBUG_H
+#define AREA_ANTI_DEBUG_H
+
+#include <stdint.h>
+
+#if defined(__APPLE__)
+  #include <sys/types.h>
+  #include <sys/sysctl.h>
+  #include <unistd.h>
+  #include <ptrace.h>
+#elif defined(__linux__)
+  #include <sys/ptrace.h>
+  #include <stdio.h>
+  #include <unistd.h>
+#elif defined(_WIN32)
+  #include <windows.h>
+#endif
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/* ------------------------------------------------------------------ */
+/* macOS: is a debugger tracing us (LLDB / DTrace)?                     */
+/* ------------------------------------------------------------------ */
+static int area_macos_debugged(void) {
+#if defined(__APPLE__)
+  int mib[4] = { CTL_KERN, KERN_PROC, KERN_PROC_PID, getpid() };
+  struct kinfo_proc info;
+  size_t sz = sizeof(info);
+  if (sysctl(mib, 4, &info, &sz, NULL, 0) == 0) {
+    return (info.kp_proc.p_flag & P_TRACED) != 0;
+  }
+#endif
+  return 0;
+}
+
+/* ------------------------------------------------------------------ */
+/* Linux: refuse a tracer via PTRACE_TRACEME (fails if already traced) */
+/* ------------------------------------------------------------------ */
+static int area_linux_traced(void) {
+#if defined(__linux__)
+  if (ptrace(PTRACE_TRACEME, 0, 0, 0) == -1) return 1; /* already traced */
+  /* TracerPid in /proc/self/status */
+  FILE *f = fopen("/proc/self/status", "r");
+  if (f) {
+    char line[256];
+    while (fgets(line, sizeof(line), f)) {
+      if (line[0] == 'T' && line[1] == 'r') { /* TracerPid: */
+        int pid = 0;
+        sscanf(line, "TracerPid:%d", &pid);
+        fclose(f);
+        return pid != 0;
+      }
+    }
+    fclose(f);
+  }
+#endif
+  return 0;
+}
+
+/* ------------------------------------------------------------------ */
+/* Windows: PEB.BeingDebugged + NtGlobalFlag                            */
+/* ------------------------------------------------------------------ */
+static int area_win_debugged(void) {
+#if defined(_WIN32)
+  if (IsDebuggerPresent()) return 1;
+  #if defined(_M_X64) || defined(_M_IX86)
+  uintptr_t peb = 0;
+  #if defined(_M_X64)
+  peb = __readgsqword(0x60);
+  #else
+  peb = __readfsdword(0x30);
+  #endif
+  /* +0x02 BeingDebugged, +0xBC NtGlobalFlag (x64) */
+  uint8_t beingDebugged = *(uint8_t *)(peb + 0x02);
+  if (beingDebugged) return 1;
+  #endif
+#endif
+  return 0;
+}
+
+/* ------------------------------------------------------------------ */
+/* Cross-platform: am I being debugged?                                 */
+/* ------------------------------------------------------------------ */
+static int area_is_debugged(void) {
+  return area_macos_debugged() || area_linux_traced() || area_win_debugged();
+}
+
+/* ------------------------------------------------------------------ */
+/* macOS: deny future LLDB attach (non-hardened processes).             */
+/* Call once early; release builds should instead use Hardened Runtime   */
+/* WITHOUT the get-task-allow entitlement.                             */
+/* ------------------------------------------------------------------ */
+static void area_deny_attach(void) {
+#if defined(__APPLE__)
+  ptrace(PT_DENY_ATTACH, 0, 0, 0);
+#else
+  (void)0;
+#endif
+}
+
+/* ------------------------------------------------------------------ */
+/* Frida: detect frida-server's default TCP port (27042) locally.       */
+/* Lightweight: connect() to 127.0.0.1:27042 and see if it succeeds.   */
+/* ------------------------------------------------------------------ */
+static int area_frida_port_open(void) {
+#if defined(_WIN32) || defined(__linux__) || defined(__APPLE__)
+  /* Minimal socket probe; include winsock2.h on Windows before windows.h. */
+  #if defined(_WIN32)
+    /* requires WSAStartup; see full source below */
+    return 0;
+  #else
+    #include <sys/socket.h>
+    #include <netinet/in.h>
+    #include <arpa/inet.h>
+    #include <fcntl.h>
+    int fd = socket(AF_INET, SOCK_STREAM, 0);
+    if (fd < 0) return 0;
+    struct sockaddr_in a;
+    a.sin_family = AF_INET;
+    a.sin_port = htons(27042);
+    a.sin_addr.s_addr = inet_addr("127.0.0.1");
+    int ok = (connect(fd, (struct sockaddr *)&a, sizeof(a)) == 0);
+    close(fd);
+    return ok;
+  #endif
+#else
+  return 0;
+#endif
+}
+
+/* ------------------------------------------------------------------ */
+/* Frida: scan own address space for the "frida" / "gadget" agent name. */
+/* Linux: grep /proc/self/maps for frida-agent / gadget.               */
+/* ------------------------------------------------------------------ */
+static int area_frida_agent_present(void) {
+#if defined(__linux__)
+  FILE *f = fopen("/proc/self/maps", "r");
+  if (!f) return 0;
+  char line[512];
+  while (fgets(line, sizeof(line), f)) {
+    if (strstr(line, "frida-agent") || strstr(line, "gadget") ||
+        strstr(line, "LIBFRIDA")) {
+      fclose(f);
+      return 1;
+    }
+  }
+  fclose(f);
+#endif
+  return 0;
+}
+
+/* ------------------------------------------------------------------ */
+/* Combined: refuse if any instrumentation is present.                  */
+/* Call from a background thread at irregular intervals; degrade/exit  */
+/* the sensitive path (not necessarily the whole app).                 */
+/* ------------------------------------------------------------------ */
+static int area_hostile_environment(void) {
+  return area_is_debugged() || area_frida_port_open() || area_frida_agent_present();
+}
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* AREA_ANTI_DEBUG_H */
+
+```
+
+`scripts/generate-csp.cjs`:
+
+```cjs
+#!/usr/bin/env node
+/**
+ * AREA — CSP + anti-automation header generator.
+ *
+ * Emits a strict Content-Security-Policy and companion security headers that
+ * reduce the surface REA's CDP/automation tooling can use, plus a minimal
+ * in-page anti-automation snippet.
+ *
+ * Usage:
+ *   node scripts/generate-csp.cjs              # prints headers + snippet
+ *   node scripts/generate-csp.cjs --json       # JSON for a framework config
+ */
+const csp = [
+  "default-src 'self'",
+  "script-src 'self' 'nonce-$NONCE'",
+  "style-src 'self' 'unsafe-inline'",
+  "img-src 'self' data:",
+  "connect-src 'self' https:",
+  "font-src 'self'",
+  "object-src 'none'",
+  "frame-ancestors 'none'",
+  "base-uri 'self'",
+  "form-action 'self'",
+].join('; ');
+
+const headers = {
+  'Content-Security-Policy': csp,
+  'X-Content-Type-Options': 'nosniff',
+  'X-Frame-Options': 'DENY',
+  'Referrer-Policy': 'no-referrer',
+  'Permissions-Policy': 'geolocation=(), microphone=(), camera=()',
+};
+
+const snippet = `// AREA anti-automation guard (obfuscate before shipping)
+(function () {
+  try {
+    var auto =
+      (navigator.webdriver === true) ||
+      /HeadlessChrome/i.test(navigator.userAgent || '') ||
+      (navigator.plugins && navigator.plugins.length === 0);
+    var dOpen = false;
+    var t = 0;
+    if (window.outerWidth - window.innerWidth > 100) dOpen = true;
+    try { t = performance.now(); debugger; if (performance.now() - t > 50) dOpen = true; } catch (e) {}
+    if (auto || dOpen) {
+      // degrade: serve neutral content instead of the real app
+      window.__AREA_HARDENED__ = true;
+    }
+  } catch (e) {}
+})();`;
+
+const asJson = process.argv.includes('--json');
+if (asJson) {
+  console.log(JSON.stringify({ headers, snippet }, null, 2));
+} else {
+  console.log('# Security headers');
+  for (const [k, v] of Object.entries(headers)) console.log(`${k}: ${v}`);
+  console.log('\n# Anti-automation snippet');
+  console.log(snippet);
+}
+
+```
+
+`scripts/harden-electron.js`:
+
+```js
+#!/usr/bin/env node
+/**
+ * AREA — Electron hardening.
+ *
+ * Flips Electron fuses against REA's inspect_electron_fuses / list_electron_targets,
+ * enables asar integrity, and strips stray sourceMappingURL / .map references.
+ *
+ * Usage (run in the project root, after electron-builder has produced dist/):
+ *   node scripts/harden-electron.js --fuses --no-sourcemaps
+ *   node scripts/harden-electron.js --asar-integrity ./release/**\/*.asar
+ *
+ * Fuses are applied at *packaging* time via the @electron/fuses `flipFuses`
+ * API. Point the script at your packaged app's executable.
+ */
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const argv = process.argv.slice(2);
+const wantsFuses = argv.includes('--fuses');
+const wantsNoSourcemaps = argv.includes('--no-sourcemaps');
+
+function findExecutable(appDir) {
+  // Look for the common packaged entry points.
+  const candidates = [
+    path.join(appDir, 'Contents', 'MacOS'),
+    path.join(appDir, 'resources'),
+  ];
+  for (const dir of candidates) {
+    if (!fs.existsSync(dir)) continue;
+    for (const name of fs.readdirSync(dir)) {
+      const p = path.join(dir, name);
+      const st = fs.statSync(p);
+      // mac: executable inside Contents/MacOS; win/linux: the .exe / binary
+      if (st.isFile() && !name.startsWith('.') && (
+        name.endsWith('.exe') || dir.endsWith(path.join('Contents', 'MacOS')))) {
+        return p;
+      }
+    }
+  }
+  return null;
+}
+
+async function applyFuses() {
+  const electronFuses = await import('@electron/fuses').catch(() => null);
+  if (!electronFuses) {
+    console.error('[@electron/fuses] not installed. Add it as a devDependency and rerun.');
+    process.exit(1);
+  }
+  const { flipFuses, FuseVersion, FuseV1Options } = electronFuses;
+
+  const exe = findExecutable(process.cwd()) || findExecutable(path.join(process.cwd(), 'release'));
+  if (!exe) {
+    console.error('No packaged Electron executable found. Pass its path: node harden-electron.js <path-to-app-exe>');
+    process.exit(1);
+  }
+
+  const extra = {
+    [FuseV1Options.EnableNodeCliInspectArguments]: false,        // ignore --inspect
+    [FuseV1Options.EnableNodeOptionsEnvironmentVariable]: false, // ignore NODE_OPTIONS
+    [FuseV1Options.RunAsNode]: false,                            // block ELECTRON_RUN_AS_NODE
+    [FuseV1Options.EnableEmbeddedAsarIntegrityValidation]: true, // detect tampered app.asar
+    [FuseV1Options.EnableCookieEncryption]: true,                // encrypt cookies on disk
+    [FuseV1Options.OnlyLoadAppFromAsar]: true,                   // refuse to load app from plain dir
+  };
+
+  await flipFuses(exe, {
+    version: FuseVersion.V1,
+    [FuseV1Options.EnableNodeCliInspectArguments]: false,
+    [FuseV1Options.EnableNodeOptionsEnvironmentVariable]: false,
+    [FuseV1Options.RunAsNode]: false,
+    [FuseV1Options.EnableEmbeddedAsarIntegrityValidation]: true,
+    [FuseV1Options.EnableCookieEncryption]: true,
+    [FuseV1Options.OnlyLoadAppFromAsar]: true,
+  });
+  console.log(`Fuses applied to ${exe}`);
+}
+
+function stripSourcemaps(root) {
+  let count = 0;
+  const walk = (dir) => {
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+      const p = path.join(dir, entry.name);
+      if (entry.isDirectory()) walk(p);
+      else if (entry.name.endsWith('.map')) { fs.unlinkSync(p); count++; }
+      else if (entry.name.endsWith('.js')) {
+        let s = fs.readFileSync(p, 'utf8');
+        const before = s;
+        s = s.replace(/\n?\/\/[#@] sourceMappingURL=.*$/m, '')
+             .replace(/\n?\/\*[#@] sourceMappingURL=.*?\*\//g, '');
+        if (s !== before) { fs.writeFileSync(p, s); count++; }
+      }
+    }
+  };
+  const root = process.cwd();
+  walk(root);
+  console.log(`Stripped ${count} source-map artifact(s) under ${root}`);
+}
+
+if (wantsFuses) await applyFuses();
+if (wantsNoSourcemaps) stripSourcemaps();
+if (!wantsFuses && !wantsNoSourcemaps) {
+  console.log('Usage: node harden-electron.js [--fuses] [--no-sourcemaps]');
+}
+
+```
+
+`scripts/harden-go.sh`:
+
+```sh
+#!/usr/bin/env bash
+# AREA — Go hardening build helper.
+#
+# Wraps `garble` for literal obfuscation + stripping of .go.buildinfo,
+# defeating REA's inspect_go_binary and native analyze_function passes.
+#
+# Requires: garble (go install mvdan.cc/garble@latest)
+# Usage:
+#   ./harden-go.sh ./cmd/myapp            # builds ./cmd/myapp with a random seed
+#   ./harden-go.sh ./... --seed=12345
+set -euo pipefail
+
+PKG="${1:-./...}"
+SEED="${SEED:-$RANDOM}"
+
+if ! command -v garble >/dev/null 2>&1; then
+  echo "garble not found. Install with: go install mvdan.cc/garble@latest" >&2
+  exit 2
+fi
+
+echo "== garble build: $PKG (seed=$SEED)"
+
+garble -literals -tiny -seed="$SEED" build \
+  -trimpath \
+  -buildvcs=false \
+  -ldflags="-s -w -buildid=" \
+  "$PKG"
+
+echo "== Done. For a single binary, additionally run:"
+echo "   go tool buildid -w <binary>   # clear build id"
+echo "   strip -S -x -s <binary>       # drop symbols"
+
+```
+
+`scripts/harden-rust.sh`:
+
+```sh
+#!/usr/bin/env bash
+# AREA — Rust hardening build helper.
+#
+# Builds in release with symbols stripped and removes the cargo-auditable
+# `.dep-v0` section, defeating REA's inspect_rust_binary metadata enumeration.
+#
+# Usage:
+#   ./harden-rust.sh [--release] [--features foo]   # builds the crate
+#   ./harden-rust.sh --strip-binary /path/to/binary # post-process an existing binary
+set -euo pipefail
+
+STRIP_BIN=""
+
+if [[ "${1:-}" == "--strip-binary" ]]; then
+  STRIP_BIN="${2:-}"
+fi
+
+if [[ -n "$STRIP_BIN" ]]; then
+  echo "== Stripping $STRIP_BIN"
+  strip -S -x -s "$STRIP_BIN" 2>/dev/null || strip "$STRIP_BIN"
+  strip -R .dep-v0 "$STRIP_BIN" 2>/dev/null || objcopy --remove-section=.dep-v0 "$STRIP_BIN" 2>/dev/null || true
+  echo "== Done."
+  exit 0
+fi
+
+echo "== release build (stripped, no auditable metadata)"
+
+# Add cargo-auditable removal note: cargo-auditable is only active when built
+# via `cargo auditable build`. A plain release build never emits .dep-v0, but if
+# a transitive tool did, strip it below.
+cargo build --release "${@}"
+
+BIN_DIR="target/release"
+for bin in "$BIN_DIR"/*; do
+  [[ -f "$bin" ]] || continue
+  [[ -x "$bin" ]] || continue
+  echo "  stripping $bin"
+  strip -S -x -s "$bin" 2>/dev/null || strip "$bin" || true
+  strip -R .dep-v0 "$bin" 2>/dev/null || objcopy --remove-section=.dep-v0 "$bin" 2>/dev/null || true
+done
+
+echo "== Done. Binaries in $BIN_DIR"
+
+```
+
+`scripts/integrity-check.js`:
+
+```js
+#!/usr/bin/env node
+/**
+ * AREA — runtime integrity check (Electron / Node).
+ *
+ * Verifies the shipped app.asar (or a supplied file) against an expected
+ * SHA-256 at startup, so a tampered/patched bundle refuses to run. REA's
+ * extract_artifact / tampering attempts produce a mismatch and the app bails.
+ *
+ * Usage:
+ *   node scripts/integrity-check.js <path> <expected-sha256-hex>
+ *
+ * In your app, compute the expected hash at build time and embed it, then
+ * call this (or inline the check) early in the main process.
+ */
+import fs from 'node:fs';
+import crypto from 'node:crypto';
+import path from 'node:path';
+
+const [file, expected] = process.argv.slice(2);
+if (!file || !expected) {
+  console.error('Usage: node integrity-check.js <path> <expected-sha256-hex>');
+  process.exit(2);
+}
+
+const abs = path.resolve(file);
+if (!fs.existsSync(abs)) {
+  console.error(`Missing: ${abs}`);
+  process.exit(3);
+}
+
+const hash = crypto.createHash('sha256');
+for (const chunk of readStream(abs)) {
+  hash.update(chunk);
+}
+const actual = hash.digest('hex');
+
+const ok = actual.toLowerCase() === expected.toLowerCase();
+console.log(`${ok ? 'OK' : 'MISMATCH'}  ${path.basename(abs)}  sha256=${actual}`);
+process.exit(ok ? 0 : 1);
+
+function* readStream(p) {
+  const fd = fs.openSync(p, 'r');
+  const buf = Buffer.alloc(1 << 20);
+  let n;
+  try {
+    while ((n = fs.readSync(fd, buf, 0, buf.length, null)) > 0) {
+      yield buf.subarray(0, n);
+    }
+  } finally {
+    fs.closeSync(fd);
+  }
+}
+
+```
+
+`scripts/obfuscate-javascript.mjs`:
+
+```mjs
+#!/usr/bin/env node
+/**
+ * AREA — JavaScript obfuscation wrapper.
+ *
+ * Applies javascript-obfuscator with AREA defaults tuned to defeat
+ * REA's analyze_javascript_application / recover_javascript_sources /
+ * trace_application_feature / compare_application_versions.
+ *
+ * Usage:
+ *   node scripts/obfuscate-javascript.mjs <input-dir-or-file> [output-dir]
+ *   node scripts/obfuscate-javascript.mjs ./dist ./dist-obf --seed 0x1234abcd
+ *
+ * Options via flags:
+ *   --seed <n>          deterministic seed (omit for a random seed each build)
+ *   --split             enable splitStrings + transformObjectKeys (slower)
+ *   --no-flatten        disable control-flow flattening (for hot paths)
+ */
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import JavaScriptObfuscator from 'javascript-obfuscator';
+
+const argv = process.argv.slice(2);
+const flags = new Set();
+const positional = [];
+for (let i = 0; i < argv.length; i++) {
+  const a = argv[i];
+  if (a === '--seed') { flags.add('seed:' + argv[++i]); }
+  else if (a === '--split') { flags.add('split'); }
+  else if (a === '--no-flatten') { flags.add('noflatten'); }
+  else if (a === '--help' || a === '-h') { positional.push('__HELP__'); }
+  else { positional.push(a); }
+}
+
+if (positional.includes('__HELP__') || positional.length === 0) {
+  console.log(`Usage: node obfuscate-javascript.mjs <input> [output] [--seed n] [--split] [--no-flatten]`);
+  process.exit(0);
+}
+
+const input = path.resolve(positional[0]);
+const output = path.resolve(positional[1] || path.join(path.dirname(input), path.basename(input) + '-obf'));
+const hasSplit = flags.has('split');
+const noFlatten = flags.has('noflatten');
+const seedFlag = [...flags].find(f => f.startsWith('seed:'));
+const seed = seedFlag ? parseInt(seedFlag.slice(5), 10) : Math.floor(Math.random() * 0x7fffffff);
+
+const baseOptions = () => ({
+  compact: true,
+  controlFlowFlattening: !noFlatten,
+  controlFlowFlatteningThreshold: 0.75,
+  deadCodeInjection: true,
+  deadCodeInjectionThreshold: 0.4,
+  stringArray: true,
+  stringArrayEncoding: ['rc4'],
+  stringArrayThreshold: 0.9,
+  rotateStringArray: true,
+  shuffleStringArray: true,
+  stringArrayWrappersCount: 3,
+  stringArrayWrappersChainedCalls: true,
+  stringArrayWrappersType: 'function',
+  identifierNamesGenerator: 'hexadecimal',
+  identifiersPrefix: '',
+  renameGlobals: true,
+  renameProperties: false,
+  selfDefending: true,
+  debugProtection: false, // avoid tripping CDP timing heuristics in prod accidentally
+  unicodeEscapeSequence: false,
+  sourceMap: false, // CRITICAL: never ship a source map
+  splitStrings: hasSplit,
+  splitStringsChunkLength: 8,
+  transformObjectKeys: hasSplit,
+  seed,
+});
+
+function obfuscateFile(srcPath, dstPath) {
+  const code = fs.readFileSync(srcPath, 'utf8');
+  const result = JavaScriptObfuscator.obfuscate(code, baseOptions());
+  fs.mkdirSync(path.dirname(dstPath), { recursive: true });
+  fs.writeFileSync(dstPath, result.getObfuscatedCode());
+  return code.length;
+}
+
+function walk(dir) {
+  const out = [];
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    const p = path.join(dir, entry.name);
+    if (entry.isDirectory()) out.push(...walk(p));
+    else out.push(p);
+  }
+  return out;
+}
+
+let totalIn = 0;
+let count = 0;
+
+if (fs.statSync(input).isDirectory()) {
+  const files = walk(input).filter(f => f.endsWith('.js') && !f.endsWith('.min.js.map'));
+  for (const f of files) {
+    const rel = path.relative(input, f);
+    totalIn += obfuscateFile(f, path.join(output, rel));
+    count++;
+  }
+} else {
+  totalIn += obfuscateFile(input, path.join(output, path.basename(input)));
+  count = 1;
+}
+
+// strip any stray sourceMappingURL comment from every emitted file (defense in depth)
+for (const f of walk(output).filter(f => f.endsWith('.js'))) {
+  let s = fs.readFileSync(f, 'utf8');
+  s = s.replace(/\n?\/\/[#@] sourceMappingURL=.*$/m, '').replace(/\n?\/\*[#@] sourceMappingURL=.*?\*\//g, '');
+  fs.writeFileSync(f, s);
+}
+
+console.log(`Obfuscated ${count} file(s) (${totalIn} bytes input) -> ${output}`);
+console.log(`seed=${seed} flatten=${!noFlatten} split=${hasSplit} sourceMap=false`);
+
+```
+
+`scripts/strip-native.sh`:
+
+```sh
+#!/usr/bin/env bash
+# AREA — native binary stripping + optional packing.
+#
+# Removes symbols, build-id, and (where present) metadata sections that feed
+# REA's inspect_binary_layout / inspect_elf_notes / inspect_macho /
+# inspect_rust_binary / inspect_pe_imports.
+#
+# Usage:
+#   ./strip-native.sh /path/to/binary [--upx]
+set -euo pipefail
+
+BIN="${1:-}"
+UPX="${2:-}"
+
+if [[ -z "$BIN" || ! -f "$BIN" ]]; then
+  echo "Usage: $0 /path/to/binary [--upx]" >&2
+  exit 2
+fi
+
+echo "== Stripping $BIN"
+
+# Full symbol stripping (works on ELF and Mach-O).
+strip -S -x -s "$BIN" 2>/dev/null || strip "$BIN" || echo "  (strip not available; continuing)"
+
+# Remove GNU build-id and note sections (ELF).
+for sec in .note.gnu.build-id .note.ABI-tag .dep-v0 .comment; do
+  if objcopy --remove-section="$sec" "$BIN" 2>/dev/null; then
+    echo "  removed section $sec"
+  fi
+done
+
+# Rust cargo-auditable metadata (defeats inspect_rust_binary).
+strip -R .dep-v0 "$BIN" 2>/dev/null || true
+
+# Go build metadata (defeats inspect_go_binary).
+if command -v go >/dev/null 2>&1; then
+  go tool buildid -w "$BIN" 2>/dev/null && echo "  cleared go build id" || true
+fi
+
+if [[ "$UPX" == "--upx" ]]; then
+  if command -v upx >/dev/null 2>&1; then
+    upx --best --lzma "$BIN" && echo "  packed with upx"
+  else
+    echo "  (upx not found; skipping pack)" >&2
+  fi
+fi
+
+echo "== Done. Verify with: rea open_binary $BIN && analyze_function"
+
+```

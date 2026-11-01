@@ -1,0 +1,807 @@
+Project Path: arc_Coding-With-SouRav_Chess-Cheater_z961b7ip
+
+Source Tree:
+
+```txt
+arc_Coding-With-SouRav_Chess-Cheater_z961b7ip
+├── README.md
+└── main.py
+
+```
+
+`README.md`:
+
+```md
+# Chess-Cheater
+```
+
+`main.py`:
+
+```py
+import configparser
+import copy
+import ctypes
+import os
+import sys
+import time
+import threading
+import subprocess
+import atexit
+import tkinter as tk
+import cv2
+import numpy as np
+import mss
+import customtkinter as ctk
+from ctypes import wintypes
+import chess
+
+# Try to import keyboard for global hotkey support (optional)
+try:
+    import keyboard
+    KEYBOARD_AVAILABLE = True
+except ImportError:
+    KEYBOARD_AVAILABLE = False
+    print("keyboard module not installed - Ctrl pause feature disabled.")
+
+if sys.platform == "win32":
+    ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID("com.example.chessCheeter")
+
+# ----------------------------------------------------------------------
+# Stockfish configuration
+# ----------------------------------------------------------------------
+STOCKFISH_PATH = r"H:\My Drive\MODELS\Stockfish.exe"
+ANALYSIS_TIME_MS = 50
+
+def hex_to_bgr(hex_color):
+    hex_color = hex_color.lstrip("#")
+    r = int(hex_color[0:2], 16)
+    g = int(hex_color[2:4], 16)
+    b = int(hex_color[4:6], 16)
+    return np.array([b, g, r], dtype=np.float64)
+
+def color_distance(c1, c2):
+    return float(np.linalg.norm(c1.astype(np.float64) - c2.astype(np.float64)))
+
+# ------------------------------------------------------------------
+# Minimal UCI wrapper
+# ------------------------------------------------------------------
+class StockfishEngine:
+    def __init__(self, path=STOCKFISH_PATH):
+        self.path = path
+        self.process = None
+        self.lock = threading.Lock()
+        self._start()
+        atexit.register(self.quit)
+
+    def _start(self):
+        try:
+            creationflags = 0
+            if sys.platform == "win32":
+                creationflags = subprocess.CREATE_NO_WINDOW
+            self.process = subprocess.Popen(
+                [self.path],
+                stdin=subprocess.PIPE,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.DEVNULL,
+                text=True,
+                bufsize=1,
+                creationflags=creationflags,
+            )
+            self._send("uci")
+            self._wait_for("uciok")
+            self._send("setoption name Contempt value 100")
+            self._send("isready")
+            self._wait_for("readyok")
+        except (FileNotFoundError, OSError) as e:
+            self.process = None
+
+    def _send(self, cmd):
+        if self.process and self.process.stdin:
+            try:
+                self.process.stdin.write(cmd + "\n")
+                self.process.stdin.flush()
+            except (BrokenPipeError, OSError):
+                pass
+
+    def _wait_for(self, token, timeout=5.0):
+        if not self.process:
+            return
+        start = time.time()
+        while time.time() - start < timeout:
+            line = self.process.stdout.readline()
+            if not line:
+                break
+            if token in line:
+                return
+
+    def get_best_move(self, board, movetime_ms=ANALYSIS_TIME_MS):
+        if not self.process:
+            return None
+
+        legal_moves = list(board.legal_moves)
+        safe_moves = []
+        for move in legal_moves:
+            board.push(move)
+            is_draw = (board.is_repetition(2) or
+                       board.is_fifty_moves() or
+                       board.is_insufficient_material())
+            board.pop()
+            if not is_draw:
+                safe_moves.append(move)
+
+        if safe_moves:
+            legal_moves = safe_moves
+
+        with self.lock:
+            try:
+                self._send(f"position fen {board.fen()}")
+                if legal_moves and len(legal_moves) < len(list(board.legal_moves)):
+                    moves_str = " ".join(m.uci() for m in legal_moves)
+                    self._send(f"go movetime {movetime_ms} searchmoves {moves_str}")
+                else:
+                    self._send(f"go movetime {movetime_ms}")
+                deadline = time.time() + (movetime_ms / 1000.0) + 5.0
+                while time.time() < deadline:
+                    line = self.process.stdout.readline()
+                    if not line:
+                        break
+                    line = line.strip()
+                    if line.startswith("bestmove"):
+                        parts = line.split()
+                        if len(parts) >= 2 and parts[1] != "(none)":
+                            return parts[1]
+                        return None
+            except (BrokenPipeError, OSError):
+                return None
+        return None
+
+    def quit(self):
+        if self.process:
+            try:
+                self._send("quit")
+                self.process.terminate()
+            except Exception:
+                pass
+            self.process = None
+
+# ------------------------------------------------------------------
+# Main overlay class
+# ------------------------------------------------------------------
+class ScreenBorderOverlay:
+    FROM_HEX = "#AAA23A"
+    TO_HEX = "#F7F769"
+    FROM_BGR = hex_to_bgr(FROM_HEX)
+    TO_BGR = hex_to_bgr(TO_HEX)
+    COLOR_TOLERANCE = 30.0
+
+    def __init__(self, side_is_black=False):
+        self.side_is_black = side_is_black
+        self.root = tk.Tk()
+        self.root.title("Board Overlay")
+        self.root.attributes("-topmost", True)
+        self.root.attributes("-transparentcolor", "white")
+        self.root.overrideredirect(True)
+        try:
+            self.root.attributes("-toolwindow", True)
+        except tk.TclError:
+            pass
+
+        self.data_dir = os.path.join(os.path.expanduser("~"), ".ChessBOT")
+        os.makedirs(self.data_dir, exist_ok=True)
+        self.config_file = os.path.join(self.data_dir, "config.ini")
+
+        self.canvas = tk.Canvas(self.root, bg="white", highlightthickness=0)
+        self.canvas.pack(fill=tk.BOTH, expand=True)
+
+        self.chess_board = chess.Board()
+        self.display_board = self._board_to_display()
+
+        self.last_move_key = None
+        self.side_to_move = "w"
+
+        self.engine = StockfishEngine(STOCKFISH_PATH)
+        if self.engine.process is None:
+            self.log_error("Stockfish engine failed to start. Move suggestions disabled.")
+
+        self.suggested_move = None
+        self.suggested_move_uci = None
+        self.analysis_pending = False
+        self.last_geom = None
+
+        self.auto_execute = True
+
+        # ---- Ctrl‑pause feature ----
+        self.paused = False                # <-- NEW
+        self._paused_logged = False        # <-- NEW (to avoid log spam)
+        if KEYBOARD_AVAILABLE:
+            self.setup_keyboard_hooks()    # <-- NEW
+        else:
+            self.log_error("keyboard module not installed – Ctrl pause feature disabled.")
+
+        self.board_lock = threading.Lock()
+
+        self.control_panel = None
+        self.panel = None
+        self.log_text = None
+
+    # ------------------------------------------------------------------
+    # Keyboard hooks for Ctrl pause
+    # ------------------------------------------------------------------
+    def setup_keyboard_hooks(self):            # <-- NEW
+        """Register global press/release callbacks for the Ctrl key."""
+        keyboard.on_press_key('ctrl', self._on_ctrl_press)
+        keyboard.on_release_key('ctrl', self._on_ctrl_release)
+
+    def _on_ctrl_press(self, event):           # <-- NEW
+        if not self.paused:
+            self.paused = True
+            if self.panel and self.panel.winfo_exists():
+                self.panel.after(0, lambda: self.log_message("Auto-execution paused (Ctrl pressed)", "info"))
+
+    def _on_ctrl_release(self, event):         # <-- NEW
+        if self.paused:
+            self.paused = False
+            self._paused_logged = False
+            if self.panel and self.panel.winfo_exists():
+                self.panel.after(0, lambda: self.log_message("Auto-execution resumed (Ctrl released)", "info"))
+
+    # ------------------------------------------------------------------
+    # Coordinate helpers
+    # ------------------------------------------------------------------
+    @staticmethod
+    def square_name(row, col):
+        file_letter = chr(ord("a") + col)
+        rank_number = 8 - row
+        return f"{file_letter}{rank_number}"
+
+    @staticmethod
+    def algebraic_to_internal(square):
+        col = ord(square[0]) - ord("a")
+        row = 8 - int(square[1])
+        return row, col
+
+    def _screen_to_internal(self, screen_row, screen_col):
+        if self.side_is_black:
+            return 7 - screen_row, 7 - screen_col
+        else:
+            return screen_row, screen_col
+
+    def _internal_to_screen(self, int_row, int_col):
+        if self.side_is_black:
+            return 7 - int_row, 7 - int_col
+        else:
+            return int_row, int_col
+
+    # ------------------------------------------------------------------
+    # Convert chess.Board to display list
+    # ------------------------------------------------------------------
+    def _board_to_display(self):
+        board = self.chess_board
+        display = [[""] * 8 for _ in range(8)]
+        for square in chess.SQUARES:
+            piece = board.piece_at(square)
+            if piece:
+                row = 7 - (square // 8)
+                col = square % 8
+                color = 'w' if piece.color == chess.WHITE else 'b'
+                symbol = piece.symbol().upper()
+                display[row][col] = color + symbol
+        return display
+
+    # ------------------------------------------------------------------
+    # Logging helpers
+    # ------------------------------------------------------------------
+    def log_message(self, message, tag=None):
+        if self.panel is None or not self.panel.winfo_exists():
+            return
+        def _insert():
+            if self.log_text:
+                self.log_text.insert(tk.END, message + "\n", tag)
+                self.log_text.see(tk.END)
+        self.panel.after(0, _insert)
+
+    def log_move(self, piece, from_sq, to_sq, is_user):
+        tag = "user" if is_user else "opponent"
+        move_str = f"{piece}  {from_sq} → {to_sq}"
+        self.log_message(move_str, tag)
+
+    def log_error(self, message):
+        self.log_message("[ERROR] " + message, "error")
+
+    # ------------------------------------------------------------------
+    # FEN construction
+    # ------------------------------------------------------------------
+    def build_fen(self):
+        return self.chess_board.fen()
+
+    # ------------------------------------------------------------------
+    # Drawing
+    # ------------------------------------------------------------------
+    def draw_border_and_grid(self, x, y, w, h, border_thickness=4):
+        self.last_geom = (x, y, w, h)
+        self.root.geometry(f"{w}x{h}+{x}+{y}")
+        self.canvas.delete("all")
+
+        self.canvas.create_rectangle(
+            0, 0, w, h,
+            outline="",
+            width=border_thickness
+        )
+
+        sq_w = w / 8.0
+        sq_h = h / 8.0
+
+        for screen_row in range(8):
+            for screen_col in range(8):
+                x1 = int(screen_col * sq_w)
+                y1 = int(screen_row * sq_h)
+                x2 = int((screen_col + 1) * sq_w)
+                y2 = int((screen_row + 1) * sq_h)
+
+                self.canvas.create_rectangle(
+                    x1, y1, x2, y2,
+                    outline="",
+                    width=1
+                )
+
+                int_row, int_col = self._screen_to_internal(screen_row, screen_col)
+                piece = self.display_board[int_row][int_col]
+                if piece:
+                    label_x = x2 - 4
+                    label_y = y2 - 4
+                    self.canvas.create_text(
+                        label_x, label_y,
+                        text=piece,
+                        anchor="se",
+                        fill="blue",
+                        font=("Arial", 9, "bold")
+                    )
+
+        if self.suggested_move is not None:
+            f_r, f_c, t_r, t_c, _promo = self.suggested_move
+            f_sr, f_sc = self._internal_to_screen(f_r, f_c)
+            t_sr, t_sc = self._internal_to_screen(t_r, t_c)
+
+            fx = (f_sc + 0.5) * sq_w
+            fy = (f_sr + 0.5) * sq_h
+            tx = (t_sc + 0.5) * sq_w
+            ty = (t_sr + 0.5) * sq_h
+
+            self.canvas.create_line(
+                fx, fy, tx, ty,
+                fill="red",
+                width=1,
+                arrow=tk.LAST,
+                arrowshape=(8,10,4),
+            )
+
+        self.root.deiconify()
+
+    def hide(self):
+        self.root.withdraw()
+
+    def _refresh_if_ready(self):
+        if self.last_geom is not None:
+            self.draw_border_and_grid(*self.last_geom)
+
+    # ------------------------------------------------------------------
+    # Move detection
+    # ------------------------------------------------------------------
+    @staticmethod
+    def _sample_patch(board_bgr, x1, y1, x2, y2):
+        h_img, w_img = board_bgr.shape[:2]
+        x1 = max(0, x1)
+        y1 = max(0, y1)
+        x2 = min(w_img, x2)
+        y2 = min(h_img, y2)
+        if x2 <= x1 or y2 <= y1:
+            return None
+        sw = x2 - x1
+        sh = y2 - y1
+        px1 = x1 + int(sw * 0.06)
+        py1 = y1 + int(sh * 0.06)
+        px2 = x1 + int(sw * 0.26)
+        py2 = y1 + int(sh * 0.26)
+        patch = board_bgr[py1:py2, px1:px2]
+        if patch.size == 0:
+            return None
+        return patch.reshape(-1, 3).mean(axis=0)
+
+    # ------------------------------------------------------------------
+    # Analysis and auto‑execution
+    # ------------------------------------------------------------------
+    def request_analysis(self):
+        player_side = 'b' if self.side_is_black else 'w'
+        with self.board_lock:
+            current_side = 'b' if self.chess_board.turn == chess.BLACK else 'w'
+            if current_side != player_side:
+                self.analysis_pending = False
+                return
+            fen = self.chess_board.fen()
+            self.analysis_pending = True
+            self.analysis_original_board = copy.deepcopy(self.chess_board)
+
+        def worker():
+            if self.engine.process is None:
+                self.log_error("Stockfish not available – cannot analyze.")
+                self.analysis_pending = False
+                return
+            best = self.engine.get_best_move(self.chess_board, ANALYSIS_TIME_MS)
+            with self.board_lock:
+                current_board = copy.deepcopy(self.chess_board)
+            if current_board == self.analysis_original_board:
+                if best and len(best) >= 4:
+                    f_sq, t_sq = best[0:2], best[2:4]
+                    promo = best[4] if len(best) > 4 else None
+                    f_r, f_c = self.algebraic_to_internal(f_sq)
+                    t_r, t_c = self.algebraic_to_internal(t_sq)
+                    self.suggested_move = (f_r, f_c, t_r, t_c, promo)
+                    self.suggested_move_uci = best
+                    if self.auto_execute:
+                        self.root.after(0, self.execute_suggested_move)
+                else:
+                    self.suggested_move = None
+                    self.suggested_move_uci = None
+            else:
+                self.suggested_move = None
+                self.suggested_move_uci = None
+            self.analysis_pending = False
+            self.root.after(0, self._refresh_if_ready)
+
+        threading.Thread(target=worker, daemon=True).start()
+        self.root.after(0, self._refresh_if_ready)
+
+    # ------------------------------------------------------------------
+    # Send a click without moving the mouse cursor
+    # ------------------------------------------------------------------
+    def _send_click(self, screen_x, screen_y):
+        try:
+            x = int(screen_x)
+            y = int(screen_y)
+
+            point = wintypes.POINT(x, y)
+            hwnd = ctypes.windll.user32.WindowFromPoint(point)
+            if not hwnd:
+                self.log_error(f"No window found at ({x}, {y})")
+                return
+
+            client_point = wintypes.POINT(x, y)
+            ctypes.windll.user32.ScreenToClient(hwnd, ctypes.byref(client_point))
+
+            lParam = ctypes.c_long((client_point.y << 16) | (client_point.x & 0xFFFF))
+
+            ctypes.windll.user32.PostMessageW(hwnd, 0x0201, 0, lParam)
+            time.sleep(0.05)
+            ctypes.windll.user32.PostMessageW(hwnd, 0x0202, 0, lParam)
+
+        except Exception as e:
+            self.log_error(f"Failed to send click at ({screen_x}, {screen_y}): {e}")
+
+    # ------------------------------------------------------------------
+    # Execute suggested move (with pause check)
+    # ------------------------------------------------------------------
+    def execute_suggested_move(self):
+        # <-- NEW: pause check
+        if self.paused:
+            if not self._paused_logged:
+                self.log_message("Auto-execution paused – release Ctrl to continue.", "info")
+                self._paused_logged = True
+            return
+        self._paused_logged = False   # reset flag when not paused
+
+        if not self.suggested_move:
+            return
+        if not self.last_geom:
+            self.log_error("No board geometry available – cannot execute move.")
+            return
+
+        with self.board_lock:
+            current_board = copy.deepcopy(self.chess_board)
+        if current_board != self.analysis_original_board:
+            self.suggested_move = None
+            self.suggested_move_uci = None
+            self._refresh_if_ready()
+            return
+
+        x, y, w, h = self.last_geom
+        sq_w = w / 8.0
+        sq_h = h / 8.0
+
+        f_r, f_c, t_r, t_c, _promo = self.suggested_move
+        f_sr, f_sc = self._internal_to_screen(f_r, f_c)
+        t_sr, t_sc = self._internal_to_screen(t_r, t_c)
+
+        from_x = x + (f_sc + 0.5) * sq_w
+        from_y = y + (f_sr + 0.5) * sq_h
+        to_x   = x + (t_sc + 0.5) * sq_w
+        to_y   = y + (t_sr + 0.5) * sq_h
+
+        try:
+            self._send_click(from_x, from_y)
+            # time.sleep(0.2)
+            self._send_click(to_x, to_y)
+            # time.sleep(0.1)
+        except Exception as e:
+            self.log_error(f"Execution failed: {e}")
+            return
+
+        self.suggested_move = None
+        self.suggested_move_uci = None
+        self._refresh_if_ready()
+
+    # ------------------------------------------------------------------
+    # detect_and_apply_move
+    # ------------------------------------------------------------------
+    def detect_and_apply_move(self, board_bgr, w, h):
+        sq_w = w / 8.0
+        sq_h = h / 8.0
+
+        from_candidates = []
+        to_candidates = []
+
+        for screen_row in range(8):
+            for screen_col in range(8):
+                x1 = int(screen_col * sq_w)
+                y1 = int(screen_row * sq_h)
+                x2 = int((screen_col + 1) * sq_w)
+                y2 = int((screen_row + 1) * sq_h)
+
+                patch = self._sample_patch(board_bgr, x1, y1, x2, y2)
+                if patch is None:
+                    continue
+
+                d_from = color_distance(patch, self.FROM_BGR)
+                d_to = color_distance(patch, self.TO_BGR)
+
+                if d_from <= self.COLOR_TOLERANCE and d_from <= d_to:
+                    from_candidates.append((screen_row, screen_col, d_from))
+                elif d_to <= self.COLOR_TOLERANCE:
+                    to_candidates.append((screen_row, screen_col, d_to))
+
+        if not from_candidates or not to_candidates:
+            return
+
+        from_candidates.sort(key=lambda t: t[2])
+        to_candidates.sort(key=lambda t: t[2])
+
+        chosen = None
+        for require_side in (True, False):
+            for f_sr, f_sc, _ in from_candidates:
+                f_r, f_c = self._screen_to_internal(f_sr, f_sc)
+                with self.board_lock:
+                    piece = self.display_board[f_r][f_c]
+                if not piece:
+                    continue
+                if require_side and piece[0] != self.side_to_move:
+                    continue
+                for t_sr, t_sc, _ in to_candidates:
+                    if (t_sr, t_sc) == (f_sr, f_sc):
+                        continue
+                    t_r, t_c = self._screen_to_internal(t_sr, t_sc)
+                    chosen = (f_r, f_c, t_r, t_c, piece)
+                    break
+                if chosen:
+                    break
+            if chosen:
+                break
+
+        if not chosen:
+            return
+
+        f_r, f_c, t_r, t_c, piece = chosen
+        move_key = (f_r, f_c, t_r, t_c)
+        if move_key == self.last_move_key:
+            return
+        self.last_move_key = move_key
+
+        from_sq = self.square_name(f_r, f_c)
+        to_sq = self.square_name(t_r, t_c)
+        is_user_move = (piece[0] == ('b' if self.side_is_black else 'w'))
+
+        uci = from_sq + to_sq
+        if piece[1] == 'P' and ((piece[0] == 'w' and t_r == 0) or (piece[0] == 'b' and t_r == 7)):
+            uci += 'q'
+
+        try:
+            move = chess.Move.from_uci(uci)
+        except ValueError:
+            self.log_error(f"Invalid move UCI: {uci}")
+            return
+
+        with self.board_lock:
+            if move not in self.chess_board.legal_moves:
+                self.log_error(f"Illegal move attempted: {uci}")
+                return
+
+            self.chess_board.push(move)
+            self.display_board = self._board_to_display()
+            self.side_to_move = 'b' if self.chess_board.turn == chess.BLACK else 'w'
+
+        self.log_move(piece, from_sq, to_sq, is_user_move)
+
+        self.suggested_move = None
+        self.suggested_move_uci = None
+        player_side = 'b' if self.side_is_black else 'w'
+        if self.side_to_move == player_side:
+            self.request_analysis()
+        else:
+            self.root.after(0, self._refresh_if_ready)
+
+    def resource_path(self, relative_path):
+        try:
+            base_path = sys._MEIPASS
+        except Exception:
+            base_path = os.path.abspath(".")
+        if 'icons' in relative_path:
+            full_path = os.path.join(base_path, relative_path.replace('\\', os.sep))
+        else:
+            full_path = os.path.join(base_path, relative_path)
+        if not os.path.exists(full_path):
+            raise FileNotFoundError(f"Resource not found: {full_path}")
+        return full_path
+
+    # ------------------------------------------------------------------
+    # Control panel and shutdown
+    # ------------------------------------------------------------------
+    def create_control_panel(self):
+        self.panel = ctk.CTkToplevel(self.root)
+        self.panel.title("Chess Control")
+        self.panel.geometry("300x480")
+        self.panel.attributes("-topmost", True)
+        self.panel.resizable(False, False)
+
+        ctk.CTkLabel(self.panel, text="Your side:", font=("Arial", 16, "bold")).pack(pady=(15, 5))
+
+        self.side_var = tk.StringVar(value="white")
+        radio_font = ("Arial", 30, "bold")
+        radio_height = 50
+        radio_width = 200
+
+        ctk.CTkRadioButton(self.panel, text="White", variable=self.side_var, value="white",
+                           font=radio_font, height=radio_height, width=radio_width).pack(pady=5)
+        ctk.CTkRadioButton(self.panel, text="Black", variable=self.side_var, value="black",
+                           font=radio_font, height=radio_height, width=radio_width).pack(pady=5)
+
+        ctk.CTkButton(self.panel, text="New Match", command=self.new_match_from_panel,
+                      width=180, height=45, font=("Arial", 14)).pack(pady=(10, 5))
+
+        self.auto_execute_var = tk.BooleanVar(value=self.auto_execute)
+        ctk.CTkCheckBox(self.panel, text="Auto-execute", variable=self.auto_execute_var,
+                        command=self.toggle_auto_execute,
+                        font=("Arial", 14), height=35).pack(pady=5)
+
+        log_frame = ctk.CTkFrame(self.panel)
+        log_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+
+        self.log_text = tk.Text(log_frame, height=10, wrap=tk.WORD,
+                                font=("Consolas", 10), bg="black", fg="white")
+        scrollbar = ctk.CTkScrollbar(log_frame, command=self.log_text.yview)
+        self.log_text.configure(yscrollcommand=scrollbar.set)
+        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        self.log_text.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+
+        self.log_text.tag_configure("user", foreground="lime green")
+        self.log_text.tag_configure("opponent", foreground="deep sky blue")
+        self.log_text.tag_configure("error", foreground="red")
+        self.log_text.tag_configure("info", foreground="yellow")   # <-- NEW for pause messages
+
+        self.load_window_geometry()
+        self.panel.protocol("WM_DELETE_WINDOW", self.on_closing)
+
+        if self.side_is_black:
+            self.side_var.set("black")
+        else:
+            self.side_var.set("white")
+
+        self.new_match_from_panel()
+
+    def toggle_auto_execute(self):
+        self.auto_execute = self.auto_execute_var.get()
+
+    def new_match_from_panel(self):
+        # time.sleep(1.5)
+        self.side_is_black = (self.side_var.get() == "black")
+        self.reset_board()
+        player_side = 'b' if self.side_is_black else 'w'
+        if self.side_to_move == player_side:
+            self.request_analysis()
+        self.log_message("=== New Match Started ===", "info")
+
+    def reset_board(self):
+        with self.board_lock:
+            self.chess_board.reset()
+            self.display_board = self._board_to_display()
+            self.last_move_key = None
+            self.side_to_move = 'w'
+            self.suggested_move = None
+            self.suggested_move_uci = None
+            self.analysis_pending = False
+            self.analysis_original_board = None
+        self.root.after(0, self._refresh_if_ready)
+
+    def on_closing(self):
+        if KEYBOARD_AVAILABLE:           # <-- NEW: unhook all keyboard listeners
+            keyboard.unhook_all()
+        self.save_window_geometry()
+        self.engine.quit()
+        self.root.quit()
+        self.root.destroy()
+
+    def load_window_geometry(self):
+        if os.path.exists(self.config_file):
+            config = configparser.ConfigParser()
+            config.read(self.config_file)
+            if "Geometry" in config:
+                geometry = config["Geometry"].get("size", "")
+                state = config["Geometry"].get("state", "normal")
+                if geometry:
+                    self.panel.geometry(geometry)
+                    self.panel.update_idletasks()
+                    self.panel.update()
+                if state == "zoomed":
+                    self.panel.state("zoomed")
+                elif state == "iconic":
+                    self.panel.iconify()
+
+    def save_window_geometry(self):
+        config = configparser.ConfigParser()
+        if os.path.exists(self.config_file):
+            config.read(self.config_file)
+        if not config.has_section("Geometry"):
+            config.add_section("Geometry")
+        config["Geometry"]["size"] = self.panel.geometry()
+        config["Geometry"]["state"] = self.panel.state()
+        with open(self.config_file, "w") as f:
+            config.write(f)
+
+# ------------------------------------------------------------------
+# Main detection loop
+# ------------------------------------------------------------------
+def detect_board(overlay):
+    with mss.MSS() as sct:
+        monitor = sct.monitors[1]
+
+        while True:
+            screenshot = np.array(sct.grab(monitor))
+            hsv = cv2.cvtColor(screenshot, cv2.COLOR_BGRA2BGR)
+            hsv = cv2.cvtColor(hsv, cv2.COLOR_BGR2HSV)
+
+            mask_green = cv2.inRange(hsv, np.array([40, 40, 80]), np.array([75, 255, 200]))
+            mask_cream = cv2.inRange(hsv, np.array([20, 15, 200]), np.array([45, 75, 255]))
+            mask_high = cv2.inRange(hsv, np.array([25, 80, 150]), np.array([38, 255, 255]))
+
+            combined_mask = cv2.bitwise_or(mask_green, cv2.bitwise_or(mask_cream, mask_high))
+            kernel = np.ones((5, 5), np.uint8)
+            combined_mask = cv2.morphologyEx(combined_mask, cv2.MORPH_CLOSE, kernel)
+            combined_mask = cv2.morphologyEx(combined_mask, cv2.MORPH_OPEN, kernel)
+
+            contours, _ = cv2.findContours(combined_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+            found_board = False
+            for cnt in contours:
+                x, y, w, h = cv2.boundingRect(cnt)
+                aspect_ratio = float(w) / h
+                area = w * h
+
+                if area > 40000 and 0.92 <= aspect_ratio <= 1.08:
+                    board_bgr = cv2.cvtColor(screenshot[y:y + h, x:x + w], cv2.COLOR_BGRA2BGR)
+                    overlay.detect_and_apply_move(board_bgr, w, h)
+                    overlay.root.after(0, overlay.draw_border_and_grid, x, y, w, h)
+                    found_board = True
+                    break
+
+            if not found_board:
+                overlay.root.after(0, overlay.hide)
+
+if __name__ == "__main__":
+    ctk.set_appearance_mode("dark")
+    ctk.set_default_color_theme("blue")
+
+    overlay = ScreenBorderOverlay()
+    overlay.create_control_panel()
+
+    detection_thread = threading.Thread(target=detect_board, args=(overlay,), daemon=True)
+    detection_thread.start()
+    overlay.root.mainloop()
+
+```
