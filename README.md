@@ -1380,6 +1380,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/Elcapitanoe/pif-config-generator [Automated pipeline to track upstream Android build.prop tags and publish validated Play Integrity Fix (PIF) JSON profiles]
 - https://github.com/wajahatnaeem056/jerrymanager [KernelSU/APatch/Magisk module with Web UI for Play Integrity attestation, keybox injection, root hiding, and banking-app detection cleanup]
 - https://github.com/PallabKumarS/android-mods [KernelSU/Magisk modules and LSPosed hooks for HyperOS/AOSP: Play Integrity–Tricky Store AIO bundles, Strong Keybox Tricky Store, and attestation/root-hide patterns]
+- https://github.com/mcxiaochenn/TeeForge-CD [Magisk/KernelSU/APatch module to maintain Tricky Store/TEESimulator targets, bootloader property weakening, and optional Keybox/RKP sync for Play Integrity attestation]
 - https://github.com/linflame/SusfsLkmLoader [Magisk/KernelSU/APatch module that auto-loads the susfs kernel module at boot for Android root hiding used in mobile game security research]
 - https://github.com/bufanchen121101/AxManagerD [Root-free Magisk-style Android module framework with property injection, runtime modules, and built-in LSPatch Xposed hooking]
 - https://github.com/Dr-TSNG/ZygiskOnKernelSU [Run Zygisk on KernelSU]
@@ -3273,6 +3274,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/gmh5225/augur-riot [Riot Vanguard streamed module to PE converter. Resolves hashed imports, reconstructs sections, and writes valid DLLs from RITO format binaries]
 - https://github.com/luavmload/vanguard-update-notifier [Discord bot that polls Riot clientconfig, hashes Vanguard setup files, and alerts on anti-cheat updates]
 - https://github.com/Karwmam/Vanguard-Service-Manager-vGK-Control [Windows tools to check Riot Vanguard/vgk status and toggle auto-start]
+- https://github.com/shinishiz/VanguardSwitch [Windows utility to stop Riot Vanguard (vgc/vgk) when idle and re-enable it without reboot on PCs without official Vanguard On-Demand]
 
 > Explore AntiCheat System:XignCode
 - https://github.com/gmh5225/XignCode-Dump
