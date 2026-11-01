@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-11-01** — ingest `description:InsideExploit/phoenix-ac`: enriched entity [[phoenix-ac]] (confidence high; C++ usermode + optional kernel driver; WebSocket/MySQL + Next.js + Lua + signed updater; overlay/hotkey/DNS-hosts/unsigned modules/manual-map/IRP/debugger/vulnerable-driver/HVCI scans; screenshots/minidumps/HWID/alt links; Steam/Discord/pin sessions, bans, kill telemetry, webhooks); cited [[overviews/anti-cheat]] FiveM Windows AC lane; refreshed `index.md` entity blurb.
+
 - **2026-11-01** — ingest `description:t1zzo/classrevive`: enriched entity [[classrevive]] (confidence high; CFR/Vineflower/Procyon/JADX worker JVMs; per-method `javac` round-trip selection; Skidfuscator/Aidsfuscator reversal; ProGuard/R8 mappings; APK/DEX/JAR/embedded-JAR; HTML/JSON reports + Ghidra native triage; non-executing analysis); cited [[overviews/reverse-engineering]] JVM initial-analysis lane + [[concepts/binary-evidence]] javac-verified decompile note; refreshed `index.md` entity blurb.
 
 - **2026-11-01** — ingest `readme:categories`: **Cheat** link_count **2990** (+1; t1zzo/[[classrevive]] multi-engine Java decompiler with recompile verification) / **Anti Cheat** **858** (+1; InsideExploit/[[phoenix-ac]] self-leaked FiveM AC stack) / other major README section counts stable (41 sections; `NeverC & NeverD` placeholder); synced [[overviews/overview]], [[overviews/game-hacking]], [[overviews/anti-cheat]], [[overviews/reverse-engineering]], [[overviews/dma-attack]]; entities [[classrevive]], [[phoenix-ac]]; light `index.md` section notes (no per-category pages).

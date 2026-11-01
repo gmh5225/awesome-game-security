@@ -3129,7 +3129,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [phake](entities/phake.md) — GTA V mod menu / cheat framework (ScriptHookV or DMA; RAGE engine hooks; vehicle spawn / ESP / god mode; cheat / `[Mod Menu]`)
 - [Phobos](entities/phobos.md) — RA2/YR community engine extension (C++; YRpp + Syringe injection; stable/dev/nightly builds; advanced RTS mod development; Game Engine / modding)
 - [Phoenix-Valorant-Cheat](entities/phoenix-valorant-cheat.md) — Valorant external cheat (C++; ESP/aimbot/rage-mode; OpenGL/GLFW + ImGui menu/overlay; offset defs + vector math + external memory helpers; YMY1666527646; cheat / game:valorant [External])
-- [Phoenix AC](entities/phoenix-ac.md) — self-leaked FiveM AC: Windows agent, optional kernel driver, Node/WebSocket backend, Next.js dashboard, Lua server resource; overlay/debugger/vulnerable-driver/HVCI scans (InsideExploit; Anti Cheat / Open Source Anti Cheat System)
+- [Phoenix AC](entities/phoenix-ac.md) — self-leaked FiveM AC stack: C++ agent + optional kernel driver, WebSocket/MySQL backend, Next.js dashboard, Lua resource, signed updater; overlay/DNS-hosts/manual-map/HVCI telemetry + Steam/Discord enrollment (InsideExploit; Anti Cheat / Open Source Anti Cheat System)
 - [physmem_drivers](entities/physmem-drivers.md) — vulnerable physmem driver list (namazso; no PoC; Cheat Vulnerable Driver)
 - [PhysX](entities/physx.md) — NVIDIA PhysX source release (C++; rigid-body/collision SDK; CMake/Python builds; Windows/Linux/Android/Apple; PhysX SDK / Game Engine)
 - [PhysX 3.4](entities/physx-3-4.md) — NVIDIA PhysX SDK 3.4 (version-pinned; CCD, cloth, particles, vehicles; component-based; cross-platform; PhysX SDK / Game Engine)
