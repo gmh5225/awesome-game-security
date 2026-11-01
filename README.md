@@ -4641,6 +4641,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/gmh5225/be_shellcode_dump [Reversed BE Shellcode]
 - https://github.com/codetronik/AndroidAntiCheat [Android Platform]
 - https://github.com/Lazenca/Lazenca-S [Android Platform]
+- https://github.com/sonekkdev/sonekk-anticheat [Modular VR standalone anti-cheat stack: device integrity (guard), server-side movement validation, APK seal verification, and ADB activity detection with tests and CI]
 - https://github.com/sonekkdev/sonekk-guard1 [PolyForm-licensed client-side anti-cheat for standalone VR (Quest/Pico): Frida/root/debugger/hook and integrity checks with signed reports and server-side scoring; Unity package and Node server]
 - https://github.com/MrDiamond64/Scythe-AntiCheat [Minecraft]
 - https://github.com/GrimAnticheat/Grim [Minecraft]
@@ -4891,6 +4892,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/Deputation/hygieia
 - https://github.com/FaEryICE/MemScanner
 - https://github.com/Systemhaus-Schulz/DriverRiskScout [Read-only Windows driver inventory and risk scanner correlating installed kernel drivers with LOLDrivers, Microsoft blocklists, and BYOVD profiles]
+- https://github.com/chemsse576/BYOVDHunter [C# CLI that statically scans Windows kernel drivers for BYOVD risk: PE/dispatch analysis, LOLDrivers correlation, IOCTL reachability, and optional taint tracking]
 
 
 > Detection: Hacked Hypervisor
