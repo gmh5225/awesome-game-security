@@ -4720,6 +4720,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/oomph-ac/oomph [Minecraft Bedrock MiTM anti-cheat proxy with server-authoritative movement and combat]
 - https://github.com/GhostNgEnd/Ghost-AntiCheat [Prediction-based movement anti-cheat for Minecraft Bedrock Edition with packet, offset, and ping checks]
 - https://github.com/NaySurGithub/Amethyst [Prediction-based movement anti-cheat plugin for PowerNukkitX that replays Bedrock physics to flag unexplained client positions]
+- https://github.com/BlaizerBrumo/SafeGuard [Minecraft Bedrock behavior-pack anti-cheat add-on with combat, item, and world-abuse detections plus admin moderation tools]
 - https://github.com/StarBloomMinecraft/BlarionAntiCheat [Minecraft Bedrock behavior-pack anti-cheat on ScriptAPI with 40+ combat/movement/inventory detection modules]
 - https://github.com/Eangly99/AstroX-AntiCheat [GeyserMC extension anti-cheat for Minecraft Bedrock intercepting raw RakNet packets before Java translation]
 - https://github.com/majimaakane/7dtd-AntiCheatMod [Server-side 7 Days to Die mod blocking cheat commands and detecting fly, teleport, speedhack, and godmode]
