@@ -1081,6 +1081,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/Coz-0/smo-recomp [Static recompilation of Super Mario Odyssey (Switch 1.4.1) to native Windows x64 with custom runtime and Vulkan renderer; BYO dump, no assets in repo]
 - https://github.com/raulzrrs/letsgo-recomp [Native Windows port of Pokémon: Let's Go, Eevee!/Pikachu! (Switch 1.0.0) via static recompilation on LAS Recomp; BYO game dump, no assets in repo]
 - https://github.com/valentderah/totk-pc-recomp [Static recompilation of The Legend of Zelda: Tears of the Kingdom to native Windows x86-64 with a Vulkan renderer (BYO game assets)]
+- https://github.com/centollOS/SwitchWakerHD [Wind Waker HD (Wii U) static recompilation to Nintendo Switch with deko3d renderer; BYO game dump, no assets in repo]
 - https://github.com/Jstar269/nakagawa-recomp [Static recompiler and runtime lifting PSP (MIPS) games to native Windows with Vulkan/SDL3; BYO disc assets, paired with hst-decomp RE workflow]
 - https://github.com/MaryNCRT/Ultimate-Mortal-Kombat-3-iOS-Decompiled [Clean-room Ghidra decompilation of Ultimate Mortal Kombat 3 (iOS v1.2.59) with differential verification and a native cross-platform PC port (OpenGL/Vulkan/D3D12)]
 - https://github.com/sosso33/omikron-tns-omk-engine [From-scratch C++20 reimplementation of Omikron: The Nomad Soul (1999) with documented format reverse engineering and evidence-backed asset readers]
@@ -4803,6 +4804,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/pandora-analysis/pandora
 - https://github.com/cocomelonc/peekaboo [Modular malware-behavior emulator for safe evasion testing, telemetry generation, and detection engineering]
 - https://github.com/BLCCoreStudio/BLCGameSecLab [Authorized game-security validation pipeline with BLCReverseLab intake, evidence graphs, build diffing, and incremental anti-cheat regression planning]
+- https://github.com/swimchicken777/reshield [Agent Skill and CLI scanner that scores shipped game/app builds for AI-assisted reverse-engineering exposure (source maps, symbols, keys) with SARIF and fix guidance for Unity, Unreal, Godot, and native targets]
 - https://github.com/ohmk1811/MobSentry [Evidence-first static analyzer for Android APK and iOS IPA with SSL pinning, root/jailbreak, and anti-instrumentation findings plus stack-aware bypass guidance and PDF reports]
 - https://github.com/5hux1n/bytedance-jb-research [Documented iOS RE of ByteDance apps’ shared jailbreak, injection, and device-integrity detection (static Capstone/ObjC indexing plus read-only Frida validation)]
 - https://github.com/Shrawan-13/ff-dts-analysis [Defensive Il2CPP static-analysis pipeline for Free Fire MAX (XOR metadata decrypt, Il2CppDumper workflow) to research client-side aim/cheat mechanics]
