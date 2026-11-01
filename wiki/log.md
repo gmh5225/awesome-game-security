@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-11-01** — ingest `description:SenjuWoo/reverse-this`: entity [[reverse-this]] (confidence high; PowerShell one-click Windows RE/mod workbench; sandbox `bin` shims; Ghidra/x64dbg/Frida/Rizin/ImHex/YARA + ILSpy/dnSpy/Il2CppDumper/AssetRipper/BepInEx/MelonLoader; engine encyclopedia; PE graphics/AC fingerprint + AOB helpers; optional Ghidra MCP; CI); cited [[overviews/reverse-engineering]] Tools + Cheat RE Tools lanes + [[overviews/game-hacking]] integrated workbench blurb; refreshed `index.md` entity blurb.
+
 - **2026-11-01** — ingest `description:klotzbrocken/MacShade`: entity [[macshade]] (macOS ReShade 6.8; SwiftUI launcher; dyld interposing; Metal/OpenGL/MoltenVK; `libmacshade.dylib`; Renderer); cited [[overviews/graphics-api]] Present-path post-processing lane + [[concepts/present-hook]] ReShade-style macOS inject; cross-linked [[reshade]]; refreshed `index.md` entity blurb.
 
 - **2026-11-01** — ingest `readme:categories`: **Cheat** link_count **2993** (+1) / **Vulkan** **14** (+1) / **Anti Cheat** **858** (stable) / **PlayStation** **12** / **Xbox** **13**; other major README section counts stable (41 sections; `NeverC & NeverD` placeholder); synced [[overviews/overview]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]], [[overviews/graphics-api]]; repaired stale Anti Cheat ~813 on reverse-engineering README map; light `index.md` section notes (no per-category pages).
