@@ -4138,6 +4138,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/gmh5225/lc0 [Chess Engine]
 - https://github.com/gmh5225/Stockfish [Chess Engine]
 - https://github.com/thatkidglitchy/chess-hacks [Client-side Chess Assist userscripts (Tampermonkey/mobile) using Stockfish for auto-play, move hints, eval bar, and opponent engine-use heuristics on chess.com]
+- https://github.com/Coding-With-SouRav/Chess-Cheater [Windows overlay using screen capture (OpenCV/mss) and local Stockfish UCI to suggest chess moves]
 
 > Game:BLOCKPOST
 - https://github.com/gmh5225/BLOCKPOST-Cheat
@@ -4300,6 +4301,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/BaumFX/cpp-anti-debug
 - https://github.com/Metick/Anti-Debug
 - https://github.com/NotRequiem/antidbg [Fully syscalled C/C++ userland anti-debugging library and CLI for Windows with stealth-focused anti-RE protections]
+- https://github.com/davepartner/anti-reverse-engineer-anything [AREA skill and scripts to harden JS/Electron and native builds against debuggers, Frida, and AI-assisted RE (obfuscation, metadata stripping, Electron fuses)]
 - https://github.com/EvilBytecode/GoDefender [Anti Debugging]
 - https://github.com/Ahora57/RaceCondition
 - https://github.com/AdvDebug/AntiCrack-DotNet [DotNet]
