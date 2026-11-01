@@ -222,6 +222,7 @@ sources:
   - wiki/sources/descriptions/Skotschia__hwid_spoofer.md
   - wiki/sources/descriptions/Scrut1ny__Windows-Spoofer.md
   - wiki/sources/descriptions/Speedi13__ROP-COMPILER.md
+  - wiki/sources/descriptions/swimchicken777__reshield.md
   - wiki/sources/descriptions/Splitx12__eft.md
   - wiki/sources/descriptions/Splitx12__StrongSteam.md
   - wiki/sources/descriptions/ekknod__KiSystemStartupMeme.md
@@ -2300,6 +2301,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Agent-native integrated RE lab via [[open-reverselab]] (LING71671; Python; 180+ technique articles + 100+ MCP automation tools; knowledge router maps signals to attack chains; Ghidra/Frida/x64dbg/jadx; web CTF, Android APK/DEX, Windows PE, crypto, game cheating/AC boards; authorized binary/malware/game-protection investigation; Cheat agent-RE lane) (source: wiki/sources/descriptions/LING71671__open-reverselab.md)
 - UnknownCheats forum knowledge retrieval via [[uc-mcp]] (0111-0222; Python read-only MCP; session-cookie keyword search, thread read, subforum browse, page fetch, and health check; UTC staleness labels; curl_cffi Cloudflare bypass + vBulletin parse; rate limits + URL guards + SQLite cache; Claude Code/Cursor; Cheat agent-RE / community-knowledge lane) (source: wiki/sources/descriptions/0111-0222__uc-mcp.md)
 - AI-assisted RE with deterministic byte-level verification via [[reverify]] (2akouwu; MCP server + CLI; pairs LLM analysis with auditable byte-level checks; Cheat RE Tools) (source: wiki/sources/README-categories.md)
+- Pre-release shipped-build exposure scanner via [[reshield]] (swimchicken777; Python CLI + Claude Code/Codex agent skill; Unity/Unreal/Godot/web/mobile/.NET/native adapters; source maps, symbols, keys; L0–L5 score; SARIF + OWASP MASWE for CI; developer hardening vs AI-assisted RE; Cheat RE Tools) (source: wiki/sources/descriptions/swimchicken777__reshield.md)
 - Offline-first RE triage via [[rea-mytechnotalent]] (mytechnotalent; Python; one-shot PE/ELF/Mach-O + JS/Electron inventory, local RAG, multi-agent propose-review-gate, CLI + MCP; default no API key; Cheat / RE Tools) (source: wiki/sources/descriptions/mytechnotalent__rea.md)
 - Multilingual decomp/recomp and RE project map via [[rea-atlas]] (jammyfu; platform-grouped JSON + Python README renderer; morluto/[[rea]] workflow tags when publicly documented; preservation-oriented index—not crack tooling; Cheat / Guide) (source: wiki/sources/descriptions/jammyfu__rea-atlas.md)
 - Retro **Cheat / RE Tools** preservation rebuilds: chaossource/[[menace-reverse-engineering]] (1988 Amiga Menace 68000/ADF asset pipelines + SDL2 port) alongside formix/[[sre-re]] DOS BBS recovery and BBC Micro [[pipeline-disasm]]/[[frogman]] disc rebuilds—not live memory cheat or AC bypass tooling. (source: wiki/sources/descriptions/chaossource__menace-reverse-engineering.md)
