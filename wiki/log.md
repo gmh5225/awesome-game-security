@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-11-01** — ingest `description:mcxiaochenn/TeeForge-CD`: enriched entity [[tee-forge-cd]] (confidence high; Rust/C + shell installers; Vue/TS WebUI; boot refresh Tricky Store/TEESimulator-RS/OHKM; resetprop hide helper; Keybox via Action/WebUI/CLI from public pool or Qualcomm RKP; multi-ABI Play Integrity workflow); cited [[concepts/mobile-trust-boundaries]] Play Integrity bullet + [[overviews/mobile-security]] platform-integrity lane; refreshed `index.md` entity blurb.
+
 - **2026-11-01** — ingest `description:shinishiz/VanguardSwitch`: enriched entity [[vanguard-switch]] (confidence high; C# .NET 4.8 WinForms; block `vgc`/optional `vgk`, close Riot Client/games, per-step restore; WinVerifyTrust; SHA-256 updater; VAN 57/boot-state edge cases; Win10/11 without official On-Demand); cited [[concepts/vanguard]] service-management lane + [[overviews/anti-cheat]] Explore Vanguard blurb; refreshed `index.md` entity blurb.
 
 - **2026-11-01** — ingest `readme:categories`: **Cheat** link_count **2992** (+2; mcxiaochenn/[[tee-forge-cd]] Tricky Store/Play Integrity module + projection sync) / **Anti Cheat** **858** (stable; shinishiz/[[vanguard-switch]] Vanguard idle toggle in Explore Vanguard lane) / other major README section counts stable (41 sections; `NeverC & NeverD` placeholder); synced [[overviews/overview]], [[overviews/game-hacking]], [[overviews/anti-cheat]], [[overviews/reverse-engineering]], [[overviews/dma-attack]]; entities [[tee-forge-cd]], [[vanguard-switch]]; light `index.md` section notes (no per-category pages).

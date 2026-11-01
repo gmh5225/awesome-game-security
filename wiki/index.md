@@ -3739,7 +3739,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [TaxiDriver](entities/taxi-driver.md) — ALittlePatate; Linux LKM + user-mode pair; device-interface RPM/WPM, base-address lookup, example clients; low-level game memory tooling + Linux security research (cheat / W/RPM Driver and usermode for Linux)
 - [tastsong-game-programmer-study-notes](entities/tastsong-game-programmer-study-notes.md) — TastSong Unity C# study notes + sample projects (design patterns, rendering, networking, AI, engine architecture; Game Development notes / guide)
 - [TaskScheduler](entities/task-scheduler.md) — cross-platform fiber-based C++ task scheduler (multi-threaded jobs, task grouping, work-stealing; Windows/POSIX; tests/examples; Game Engine / Task Scheduler)
-- [TeeForge-CD](entities/tee-forge-cd.md) — mcxiaochenn; Magisk/KernelSU/APatch module for Tricky Store/TEESimulator upkeep, bootloader property weakening, and Keybox/RKP sync (Play Integrity attestation; Cheat / Magisk)
+- [TeeForge-CD](entities/tee-forge-cd.md) — mcxiaochenn; Rust Magisk/KernelSU/APatch module + Vue WebUI/CLI; boot refresh of Tricky Store/TEESimulator/OHKM targets, resetprop hide helper, optional bootloader masking, Keybox from public pool or Qualcomm RKP (Play Integrity; Cheat / Magisk)
 - [TDE](entities/tde.md) — Themida IDA plugin / Fix Themida (devirtualization engine; sodareverse)
 - [Terminator](entities/terminator.md) — BYOVD AV/EDR/AC process terminator via Zemana `zam64.sys` (arbitrary process-termination IOCTL; gmh5225)
 - [Termux](entities/termux-app.md) — Android terminal / Linux env (no-root; pkg+apt / proot; Cheat Terminal Emulator)

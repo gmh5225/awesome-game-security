@@ -7,7 +7,8 @@ sources:
   - wiki/sources/descriptions/regulad__aaoracled.md
   - wiki/sources/descriptions/reveny__Android-Compatibility-Layer.md
   - wiki/sources/descriptions/PallabKumarS__android-mods.md
-updated: 2026-10-24
+  - wiki/sources/descriptions/mcxiaochenn__TeeForge-CD.md
+updated: 2026-11-01
 confidence: high
 ---
 
@@ -44,7 +45,7 @@ Keep **local indicators**, **verified attestation**, **backend decisions**, and 
 ## Platform integrity specifics
 
 - **SELinux** — mandatory access control applies to root processes too. Record enforcement state, domain, build, and relevant policy denials instead of assigning universal trust or stealth ratings to framework names. (source: wiki/sources/skills/mobile-security.md)
-- **Play Integrity** — validate request details, identity, binding, and freshness on the backend before interpreting app/device/account verdicts. Research modules such as [[pif-config-generator]] and [[zamr]] catalog attestation-spoof configs for controlled testing—not proof that production backends accept them. Bundled Magisk/KernelSU + LSPosed suites such as [[android-mods]] ship Play Integrity / Tricky Store AIO packages that spoof build props and hardware keystore attestation on HyperOS/MIUI/AOSP lab devices—the same platform signal family many mobile games consult. (source: wiki/sources/descriptions/PallabKumarS__android-mods.md)
+- **Play Integrity** — validate request details, identity, binding, and freshness on the backend before interpreting app/device/account verdicts. Research modules such as [[pif-config-generator]] and [[zamr]] catalog attestation-spoof configs for controlled testing—not proof that production backends accept them. Bundled Magisk/KernelSU + LSPosed suites such as [[android-mods]] ship Play Integrity / Tricky Store AIO packages that spoof build props and hardware keystore attestation on HyperOS/MIUI/AOSP lab devices—the same platform signal family many mobile games consult. (source: wiki/sources/descriptions/PallabKumarS__android-mods.md) [[tee-forge-cd]] (Rust module + WebUI/CLI) refreshes Tricky Store/TEESimulator/OHKM targets on boot, optional bootloader/verified-boot resetprop masking, and user-triggered Keybox sync from a public pool or Qualcomm **RKP** on arm64 lab hardware. (source: wiki/sources/descriptions/mcxiaochenn__TeeForge-CD.md)
 - **App Attest (iOS)** — requires server verification of attestations/assertions, including challenge and counter handling; keep development and production context separate. Jailbroken-device oracle tooling such as [[aaoracled]] (OracledDCPatch hooks `devicecheckd` to forge bundle IDs; REST daemon mints attestations for arbitrary App IDs) demonstrates userspace App-ID binding on compromised hardware—not Secure Enclave proof. (source: wiki/sources/descriptions/regulad__aaoracled.md)
 - **Network trust configuration** — for owned-app transport tests, distinguish debug-only trust anchors from release configuration. Android Network Security Configuration defaults change with target SDK; a successful debug capture does not establish release-build trust or pinning behavior. Custom/native TLS stacks need their own contracts and evidence. See [[mobile-network-trust-evidence]].
 
