@@ -1,0 +1,2209 @@
+Project Path: arc_Treb3r_Treb3rAntiCheater_iihtriej
+
+Source Tree:
+
+```txt
+arc_Treb3r_Treb3rAntiCheater_iihtriej
+├── README.md
+├── pom.xml
+└── src
+    └── main
+        ├── java
+        │   └── com
+        │       └── argon
+        │           └── treb3r
+        │               ├── AntiFreecamEngine.java
+        │               ├── AntiXrayEngine.java
+        │               ├── NametagDisplayManager.java
+        │               ├── OcclusionEngine.java
+        │               └── Treb3rAntiCheater.java
+        └── resources
+            ├── config.yml
+            └── plugin.yml
+
+```
+
+`README.md`:
+
+```md
+# Treb3rAntiCheater
+
+Высокопроизводительный серверный комплекс защиты для Paper 1.21.x:
+1. **Hardened Anti-ESP** — повоксельная трассировка лучей, сохранение ванильных ников, поддержка щелей и микро-отверстий.
+2. **Native Packet Anti-Xray** — встроенная в плагин обфускация пакетов чанков на лету (Engine Mode 2) без ручной правки конфигов сервера.
+
+---
+
+## Архитектура
+
+### 1. Packet Anti-Xray Engine
+- **In-Memory Injection**: плагин автоматически перехватывает сетевой контроллер чанков Paper (`ServerLevel.chunkPacketBlockController`) через рефлексию и активирует `ChunkPacketBlockControllerAntiXray`.
+- **Engine Mode 2 (Обфускация рудами)**: все скрытые в недрах породы блоки руд подменяются на ложные блоки (алмазы, золото, железо, медь, лазурит, незерит) непосредственно перед отправкой чанка клиенту. При включении чита X-Ray игрок видит хаотичную стену из фейковых руд.
+- **Engine Mode 1 (Маскировка камнем)**: скрывает закрытые руды под видом обычного камня, глубокого сланца или незерака.
+- **Zero Config**: не требует ручной настройки `paper-world.yml` — всё управляется из `plugins/Treb3rAntiCheater/config.yml`.
+- **Lava Obscuring**: автоматическое скрытие руд под лавовыми озёрами.
+- **De-obfuscation**: как только блок добывается легитимным путём, окружающие блоки мгновенно обновляются до реального состояния.
+
+### 2. Voxel Ray Marching Anti-ESP
+- **Повоксельная трассировка**: автоматическая дискриминация сплошных и сквозных частей. Сплошная нижняя часть деревянных и медных дверей (`Bisected.Half.BOTTOM`) и глухие рамы блокируют 100% лучей, а стеклянные проёмы и щели пропускают видимость.
+- **Исключение ложной окклюзии**: тонкие препятствия (прутья 2px, цепи, громоотводы, заборы, листва) пропускают лучи к выступающим конечностям игрока при виде в упор.
+- **Multi-Tier Perimeter Sampling**: сканирование по 9 высотам и по 4 граням хитбокса (~8.5 см шаг). Игрок мгновенно отрисовывается в узких щелях (между сундуками, глиняными кувшинами) даже при периферийном взгляде.
+- **Ephemeral Nametag Passthrough**: при скрытии 3D-тела за стеной ванильный ник проецируется через `TextDisplay`. Если игрок крадётся (Shift), ник скрывается.
+- **Zero-Flicker Debounce**: 8-тиковый гистерезис видимости для устранения мерцания.
+- **Client Camera Protocol**: поддержка канала `treb3r:camera` для F5-камеры.
+
+---
+
+## Команды и права
+
+- `/treber reload` — перезагрузка `config.yml` и обновление контроллеров на лету (право: `treb3r.admin`).
+- `/treber status` — статус работы Anti-ESP и Anti-Xray.
+- Право обхода защиты: `treb3r.bypass` (или режим зрителя Spectator).
+
+---
+
+## Конфигурация (`config.yml`)
+
+```yaml
+# ==========================================
+# 1. Anti-ESP & Occlusion Culling
+# ==========================================
+max-tracking-distance: 48.0
+near-distance: 0.0
+time-slices: 1
+bypass-on-glowing: true
+combat-grace-ticks: 30
+hide-players: true
+hide-monsters: true
+hide-animals: false
+hide-misc: true
+
+# ==========================================
+# 2. Packet-Level Anti-Xray Engine
+# ==========================================
+anti-xray:
+  enabled: true
+  engine-mode: 2  # 1 = hide (камень), 2 = obfuscate (фейк-руды)
+  lava-obscures: true
+  update-radius: 2
+```
+
+---
+
+## Сборка
+
+```bash
+mvn clean package
+```
+Готовый JAR: `target/Treb3rAntiCheater-1.0.0.jar`.
+
+```
+
+`pom.xml`:
+
+```xml
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.argon</groupId>
+    <artifactId>Treb3rAntiCheater</artifactId>
+    <version>1.0.0</version>
+    <packaging>jar</packaging>
+
+    <name>Treb3rAntiCheater</name>
+    <description>Enterprise high-performance anti-ESP and occlusion engine for Paper 1.21.11</description>
+
+    <properties>
+        <java.version>21</java.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <paper.version>1.21.11-R0.1-SNAPSHOT</paper.version>
+    </properties>
+
+    <repositories>
+        <repository>
+            <id>papermc-repo</id>
+            <url>https://repo.papermc.io/repository/maven-public/</url>
+        </repository>
+    </repositories>
+
+    <dependencies>
+        <dependency>
+            <groupId>io.papermc.paper</groupId>
+            <artifactId>paper-api</artifactId>
+            <version>${paper.version}</version>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.13.0</version>
+                <configuration>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
+                    <release>${java.version}</release>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.4.1</version>
+                <configuration>
+                    <archive>
+                        <manifestEntries>
+                            <Built-By>c4</Built-By>
+                        </manifestEntries>
+                    </archive>
+                </configuration>
+            </plugin>
+        </plugins>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
+    </build>
+</project>
+
+```
+
+`src/main/java/com/argon/treb3r/AntiFreecamEngine.java`:
+
+```java
+package com.argon.treb3r;
+
+import org.bukkit.GameMode;
+import org.bukkit.Location;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.player.PlayerInteractEntityEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.scheduler.BukkitTask;
+
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+
+/**
+ * Treb3rAntiCheater - Active Anti-Freecam Engine
+ * 1. Active Camera Snap: Periodically forces client camera entity sync via ClientboundSetCameraPacket.
+ *    For legitimate players, this is an imperceptible no-op. For Freecam cheaters with detached cameras,
+ *    this violently snaps their detached camera back to their physical eyes, preventing cave/base scouting.
+ * 2. Interaction Barrier: Denies any container opening, block breaking, or combat hits through walls or > 5.2m.
+ * 3. Motionless Look Desync Tracking: Monitors stationary players rotating or attempting remote actions.
+ */
+public class AntiFreecamEngine implements Listener {
+
+    private final Treb3rAntiCheater plugin;
+    private boolean enabled;
+    private boolean cameraSnapEnabled;
+    private int snapIntervalTicks;
+    private boolean preventInteractThroughWalls;
+    private double maxReachDistance;
+
+    private BukkitTask snapTask;
+    private final Map<UUID, Long> lastMoveTicks = new ConcurrentHashMap<>();
+
+    // Cached reflection handles for ClientboundSetCameraPacket
+    private Method getHandleMethod;
+    private Constructor<?> setCameraCtor;
+    private Field connectionField;
+    private Method sendPacketMethod;
+    private boolean reflectionReady = false;
+
+    public AntiFreecamEngine(Treb3rAntiCheater plugin) {
+        this.plugin = plugin;
+        initReflection();
+    }
+
+    private void initReflection() {
+        try {
+            Class<?> craftPlayerClass = Class.forName("org.bukkit.craftbukkit.entity.CraftPlayer");
+            getHandleMethod = craftPlayerClass.getMethod("getHandle");
+
+            Class<?> packetClass = Class.forName("net.minecraft.network.protocol.game.ClientboundSetCameraPacket");
+            Class<?> entityClass = Class.forName("net.minecraft.world.entity.Entity");
+            setCameraCtor = packetClass.getConstructor(entityClass);
+
+            Class<?> serverPlayerClass = Class.forName("net.minecraft.server.level.ServerPlayer");
+            connectionField = serverPlayerClass.getField("connection");
+
+            Class<?> packetInterface = Class.forName("net.minecraft.network.protocol.Packet");
+            Class<?> listenerClass = Class.forName("net.minecraft.server.network.ServerCommonPacketListenerImpl");
+            sendPacketMethod = listenerClass.getMethod("send", packetInterface);
+
+            reflectionReady = true;
+            plugin.getLogger().info("Anti-Freecam Camera Snap Reflection successfully bound.");
+        } catch (Throwable t) {
+            plugin.getLogger().warning("Could not bind Camera Snap NMS reflection: " + t.getMessage());
+            reflectionReady = false;
+        }
+    }
+
+    public void init() {
+        reload();
+        plugin.getServer().getPluginManager().registerEvents(this, plugin);
+        startTask();
+    }
+
+    public void reload() {
+        this.enabled = plugin.getConfig().getBoolean("anti-freecam.enabled", true);
+        this.cameraSnapEnabled = plugin.getConfig().getBoolean("anti-freecam.camera-snap.enabled", true);
+        this.snapIntervalTicks = Math.max(10, plugin.getConfig().getInt("anti-freecam.camera-snap.interval-ticks", 20));
+        this.preventInteractThroughWalls = plugin.getConfig().getBoolean("anti-freecam.prevent-interact-through-walls", true);
+        this.maxReachDistance = plugin.getConfig().getDouble("anti-freecam.max-reach-distance", 5.2);
+        startTask();
+    }
+
+    public void stop() {
+        if (snapTask != null) {
+            snapTask.cancel();
+            snapTask = null;
+        }
+        lastMoveTicks.clear();
+    }
+
+    private void startTask() {
+        if (snapTask != null) {
+            snapTask.cancel();
+            snapTask = null;
+        }
+        if (!enabled || !cameraSnapEnabled || !reflectionReady) return;
+
+        snapTask = plugin.getServer().getScheduler().runTaskTimer(plugin, () -> {
+            for (Player player : plugin.getServer().getOnlinePlayers()) {
+                if (player.getGameMode() == GameMode.SPECTATOR) continue;
+                snapCameraToPlayer(player);
+            }
+        }, snapIntervalTicks, snapIntervalTicks);
+    }
+
+    /**
+     * Sends ClientboundSetCameraPacket to force the client to bind camera to its own body.
+     * Snaps Freecam detached camera immediately back to the player.
+     */
+    public boolean snapCameraToPlayer(Player player) {
+        if (!reflectionReady || !player.isOnline()) return false;
+        try {
+            Object serverPlayer = getHandleMethod.invoke(player);
+            Object packet = setCameraCtor.newInstance(serverPlayer);
+            Object connection = connectionField.get(serverPlayer);
+            sendPacketMethod.invoke(connection, packet);
+            return true;
+        } catch (Throwable ignored) {
+            return false;
+        }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onMove(PlayerMoveEvent event) {
+        Location from = event.getFrom();
+        Location to = event.getTo();
+        if (to == null) return;
+        if (from.getX() != to.getX() || from.getY() != to.getY() || from.getZ() != to.getZ()) {
+            lastMoveTicks.put(event.getPlayer().getUniqueId(), System.currentTimeMillis());
+        }
+    }
+
+    @EventHandler
+    public void onQuit(PlayerQuitEvent event) {
+        lastMoveTicks.remove(event.getPlayer().getUniqueId());
+    }
+
+    @EventHandler(priority = EventPriority.LOW)
+    public void onInteract(PlayerInteractEvent event) {
+        if (!enabled || !preventInteractThroughWalls) return;
+        if (event.getClickedBlock() == null) return;
+        Player player = event.getPlayer();
+        OcclusionEngine engine = plugin.getEngine();
+        if (engine != null && !engine.canPlayerReachBlock(player, event.getClickedBlock(), maxReachDistance)) {
+            event.setCancelled(true);
+            snapCameraToPlayer(player);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+    public void onBlockBreak(BlockBreakEvent event) {
+        if (!enabled || !preventInteractThroughWalls) return;
+        Player player = event.getPlayer();
+        OcclusionEngine engine = plugin.getEngine();
+        if (engine != null && !engine.canPlayerReachBlock(player, event.getBlock(), maxReachDistance)) {
+            event.setCancelled(true);
+            snapCameraToPlayer(player);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+    public void onEntityInteract(PlayerInteractEntityEvent event) {
+        if (!enabled || !preventInteractThroughWalls) return;
+        Player player = event.getPlayer();
+        OcclusionEngine engine = plugin.getEngine();
+        if (engine != null && !engine.canPlayerReachEntity(player, event.getRightClicked(), maxReachDistance)) {
+            event.setCancelled(true);
+            snapCameraToPlayer(player);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+    public void onCombatDamage(EntityDamageByEntityEvent event) {
+        if (!enabled || !preventInteractThroughWalls) return;
+        if (event.getDamager() instanceof Player) {
+            Player player = (Player) event.getDamager();
+            OcclusionEngine engine = plugin.getEngine();
+            if (engine != null && !engine.canPlayerReachEntity(player, event.getEntity(), maxReachDistance)) {
+                event.setCancelled(true);
+                snapCameraToPlayer(player);
+            }
+        }
+    }
+
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public boolean isCameraSnapEnabled() {
+        return cameraSnapEnabled;
+    }
+
+    public int getSnapIntervalTicks() {
+        return snapIntervalTicks;
+    }
+}
+
+```
+
+`src/main/java/com/argon/treb3r/AntiXrayEngine.java`:
+
+```java
+package com.argon.treb3r;
+
+import org.bukkit.World;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.world.WorldLoadEvent;
+
+import java.io.File;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.nio.file.Files;
+import java.util.HashSet;
+import java.util.Locale;
+import java.util.Set;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ForkJoinPool;
+
+/**
+ * Treb3rAntiCheater - Native Packet-Level Anti-Xray Engine
+ * Injects Paper's high-performance ChunkPacketBlockControllerAntiXray directly into running worlds at runtime.
+ * Obfuscates chunk packets with fake ores (Engine Mode 2) or masks them as stone (Engine Mode 1) before sending over the wire.
+ * Completely eliminates X-Ray / Freecam ore ESP in cheat clients (Meteor, Wurst, LiquidBounce, etc.).
+ */
+public class AntiXrayEngine implements Listener {
+
+    private final Treb3rAntiCheater plugin;
+    private boolean enabled;
+    private int engineMode;
+    private boolean lavaObscures;
+    private int updateRadius;
+    private final Set<String> excludedWorlds = new HashSet<>();
+
+    public AntiXrayEngine(Treb3rAntiCheater plugin) {
+        this.plugin = plugin;
+    }
+
+    public void init() {
+        reload();
+        plugin.getServer().getPluginManager().registerEvents(this, plugin);
+
+        // Inject into all currently loaded worlds
+        for (World world : plugin.getServer().getWorlds()) {
+            injectWorld(world);
+        }
+
+        // Auto-sync server config on disk
+        syncPaperConfigFile();
+    }
+
+    public void reload() {
+        this.enabled = plugin.getConfig().getBoolean("anti-xray.enabled", true);
+        this.engineMode = plugin.getConfig().getInt("anti-xray.engine-mode", 2);
+        this.lavaObscures = plugin.getConfig().getBoolean("anti-xray.lava-obscures", true);
+        this.updateRadius = plugin.getConfig().getInt("anti-xray.update-radius", 2);
+
+        this.excludedWorlds.clear();
+        for (String w : plugin.getConfig().getStringList("anti-xray.excluded-worlds")) {
+            this.excludedWorlds.add(w.toLowerCase(Locale.ROOT));
+        }
+
+        for (World world : plugin.getServer().getWorlds()) {
+            if (enabled && !excludedWorlds.contains(world.getName().toLowerCase(Locale.ROOT))) {
+                injectWorld(world);
+            } else {
+                restoreWorld(world);
+            }
+        }
+    }
+
+    @EventHandler
+    public void onWorldLoad(WorldLoadEvent event) {
+        if (enabled) {
+            injectWorld(event.getWorld());
+        }
+    }
+
+    public boolean injectWorld(World world) {
+        if (!enabled) return false;
+
+        String worldName = world.getName().toLowerCase(Locale.ROOT);
+        if (excludedWorlds.contains(worldName)) {
+            restoreWorld(world);
+            plugin.getLogger().info("Anti-Xray skipped for excluded world: " + world.getName());
+            return false;
+        }
+
+        try {
+            // 1. Get CraftWorld.getHandle() -> ServerLevel
+            Method getHandleMethod = world.getClass().getMethod("getHandle");
+            Object serverLevel = getHandleMethod.invoke(world);
+
+            // 2. Get paperConfig() -> WorldConfiguration
+            Method paperConfigMethod = findMethod(serverLevel.getClass(), "paperConfig");
+            if (paperConfigMethod == null) {
+                plugin.getLogger().warning("Could not find paperConfig() on world: " + world.getName());
+                return false;
+            }
+            Object paperConfig = paperConfigMethod.invoke(serverLevel);
+
+            // 3. Get WorldConfiguration.anticheat -> WorldConfiguration$Anticheat
+            Field anticheatField = findField(paperConfig.getClass(), "anticheat");
+            if (anticheatField == null) return false;
+            Object anticheat = anticheatField.get(paperConfig);
+
+            // 4. Get WorldConfiguration$Anticheat.antiXray -> WorldConfiguration$Anticheat$AntiXray
+            Field antiXrayField = findField(anticheat.getClass(), "antiXray");
+            if (antiXrayField == null) return false;
+            Object antiXrayConfig = antiXrayField.get(anticheat);
+
+            // 5. Configure antiXray fields
+            setField(antiXrayConfig, "enabled", true);
+            setField(antiXrayConfig, "lavaObscures", lavaObscures);
+            setField(antiXrayConfig, "updateRadius", updateRadius);
+
+            // EngineMode: 1 = HIDE, 2 = OBFUSCATE
+            try {
+                Class<?> engineModeClass = Class.forName("io.papermc.paper.configuration.type.EngineMode");
+                Object[] enumConstants = engineModeClass.getEnumConstants();
+                if (enumConstants != null && enumConstants.length >= 2) {
+                    Object targetMode = (engineMode == 1) ? enumConstants[0] : enumConstants[1];
+                    setField(antiXrayConfig, "engineMode", targetMode);
+                }
+            } catch (Throwable t) {
+                plugin.getLogger().fine("Could not resolve EngineMode enum: " + t.getMessage());
+            }
+
+            // 6. Find chunkPacketBlockController field on ServerLevel (or superclass Level)
+            Field controllerField = findField(serverLevel.getClass(), "chunkPacketBlockController");
+            if (controllerField == null) {
+                plugin.getLogger().warning("Could not find chunkPacketBlockController field on world: " + world.getName());
+                return false;
+            }
+            controllerField.setAccessible(true);
+            Object currentController = controllerField.get(serverLevel);
+
+            Class<?> antiXrayControllerClass = Class.forName("io.papermc.paper.antixray.ChunkPacketBlockControllerAntiXray");
+            if (currentController != null && antiXrayControllerClass.isInstance(currentController)) {
+                plugin.getLogger().info("Anti-Xray (Engine Mode " + engineMode + ") active on world: " + world.getName());
+                return true;
+            }
+
+            // 7. Instantiate ChunkPacketBlockControllerAntiXray(Level level, Executor executor)
+            Class<?> levelClass = findClassInHierarchy(serverLevel.getClass(), "net.minecraft.world.level.Level");
+            if (levelClass == null) levelClass = serverLevel.getClass().getSuperclass();
+
+            Executor workerPool = getWorkerPool();
+            Constructor<?> ctor = antiXrayControllerClass.getConstructor(levelClass, Executor.class);
+            Object newController = ctor.newInstance(serverLevel, workerPool);
+
+            // 8. Assign newController to serverLevel.chunkPacketBlockController
+            controllerField.set(serverLevel, newController);
+            plugin.getLogger().info("Injected Packet-Level Anti-Xray (Engine Mode " + engineMode + ") into world: " + world.getName());
+            return true;
+        } catch (Throwable t) {
+            plugin.getLogger().warning("Failed to inject packet Anti-Xray into world " + world.getName() + ": " + t.getMessage());
+            return false;
+        }
+    }
+
+    public void restoreWorld(World world) {
+        try {
+            Method getHandleMethod = world.getClass().getMethod("getHandle");
+            Object serverLevel = getHandleMethod.invoke(world);
+
+            Field controllerField = findField(serverLevel.getClass(), "chunkPacketBlockController");
+            if (controllerField == null) return;
+            controllerField.setAccessible(true);
+
+            Class<?> noOpClass = Class.forName("io.papermc.paper.antixray.ChunkPacketBlockController");
+            Field noOpField = noOpClass.getField("NO_OPERATION_INSTANCE");
+            controllerField.set(serverLevel, noOpField.get(null));
+        } catch (Throwable ignored) {}
+    }
+
+    private Executor getWorkerPool() {
+        try {
+            Class<?> moonriseCommon = Class.forName("ca.spottedleaf.moonrise.common.util.MoonriseCommon");
+            Field workerPoolField = moonriseCommon.getField("WORKER_POOL");
+            return (Executor) workerPoolField.get(null);
+        } catch (Throwable ignored) {}
+        return ForkJoinPool.commonPool();
+    }
+
+    private void syncPaperConfigFile() {
+        try {
+            File configFile = new File("config/paper-world-defaults.yml");
+            if (!configFile.exists()) {
+                configFile = new File("world/paper-world.yml");
+            }
+            if (configFile.exists()) {
+                String content = Files.readString(configFile.toPath());
+                boolean changed = false;
+                if (content.contains("anti-xray:")) {
+                    if (content.contains("enabled: false")) {
+                        content = content.replace("enabled: false", "enabled: true");
+                        changed = true;
+                    }
+                    if (engineMode == 2 && content.contains("engine-mode: 1")) {
+                        content = content.replace("engine-mode: 1", "engine-mode: 2");
+                        changed = true;
+                    }
+
+                    // Protect base storage & containers from Freecam & ChestESP
+                    String[] containerBlocks = new String[]{
+                            "shulker_box", "white_shulker_box", "orange_shulker_box", "magenta_shulker_box",
+                            "light_blue_shulker_box", "yellow_shulker_box", "lime_shulker_box", "pink_shulker_box",
+                            "gray_shulker_box", "light_gray_shulker_box", "cyan_shulker_box", "purple_shulker_box",
+                            "blue_shulker_box", "brown_shulker_box", "green_shulker_box", "red_shulker_box",
+                            "black_shulker_box", "furnace", "blast_furnace", "smoker", "hopper", "dispenser", "dropper"
+                    };
+                    if (content.contains("hidden-blocks:")) {
+                        StringBuilder toAdd = new StringBuilder();
+                        for (String block : containerBlocks) {
+                            if (!content.contains("- " + block)) {
+                                toAdd.append("\n    - ").append(block);
+                            }
+                        }
+                        if (toAdd.length() > 0) {
+                            content = content.replace("hidden-blocks:", "hidden-blocks:" + toAdd);
+                            changed = true;
+                        }
+                    }
+                }
+                if (changed) {
+                    Files.writeString(configFile.toPath(), content);
+                    plugin.getLogger().info("Auto-synchronized Paper Anti-Xray & container security in " + configFile.getPath());
+                }
+            }
+        } catch (Throwable ignored) {}
+    }
+
+    private Method findMethod(Class<?> clazz, String name) {
+        Class<?> current = clazz;
+        while (current != null && current != Object.class) {
+            for (Method m : current.getDeclaredMethods()) {
+                if (m.getName().equals(name) && m.getParameterCount() == 0) {
+                    m.setAccessible(true);
+                    return m;
+                }
+            }
+            current = current.getSuperclass();
+        }
+        return null;
+    }
+
+    private Field findField(Class<?> clazz, String name) {
+        Class<?> current = clazz;
+        while (current != null && current != Object.class) {
+            for (Field f : current.getDeclaredFields()) {
+                if (f.getName().equals(name)) {
+                    f.setAccessible(true);
+                    return f;
+                }
+            }
+            current = current.getSuperclass();
+        }
+        return null;
+    }
+
+    private void setField(Object target, String fieldName, Object value) {
+        try {
+            Field f = findField(target.getClass(), fieldName);
+            if (f != null) {
+                f.setAccessible(true);
+                f.set(target, value);
+            }
+        } catch (Throwable ignored) {}
+    }
+
+    private Class<?> findClassInHierarchy(Class<?> clazz, String name) {
+        Class<?> current = clazz;
+        while (current != null && current != Object.class) {
+            if (current.getName().equals(name)) {
+                return current;
+            }
+            current = current.getSuperclass();
+        }
+        return null;
+    }
+
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public int getEngineMode() {
+        return engineMode;
+    }
+}
+
+```
+
+`src/main/java/com/argon/treb3r/NametagDisplayManager.java`:
+
+```java
+package com.argon.treb3r;
+
+import net.kyori.adventure.text.Component;
+import org.bukkit.Location;
+import org.bukkit.entity.Display.Billboard;
+import org.bukkit.entity.Player;
+import org.bukkit.entity.TextDisplay;
+
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+
+/**
+ * Ephemeral TextDisplay manager for occluded players.
+ * When a player body is occluded from view (defeating Box ESP, Skeleton ESP, and Hitboxes),
+ * this manager displays their vanilla-style nametag through walls unless they are sneaking.
+ * All entities are non-persistent (never written to chunk files).
+ */
+public class NametagDisplayManager {
+
+    private final Treb3rAntiCheater plugin;
+    private final Map<UUID, TextDisplay> displays = new ConcurrentHashMap<>();
+    private final Map<UUID, Location> lastPositions = new ConcurrentHashMap<>();
+
+    public NametagDisplayManager(Treb3rAntiCheater plugin) {
+        this.plugin = plugin;
+    }
+
+    public void updateNametagPosition(Player target) {
+        if (!target.isOnline()) {
+            removeNametag(target.getUniqueId());
+            return;
+        }
+
+        double tagY = target.isSneaking() ? 1.85 : 2.15;
+        Location headLoc = target.getLocation().clone().add(0, tagY, 0);
+
+        Location prev = lastPositions.get(target.getUniqueId());
+        // Skip teleporting if the player hasn't moved significantly (> 2mm)
+        if (prev != null && prev.getWorld().equals(headLoc.getWorld()) && prev.distanceSquared(headLoc) < 0.0004) {
+            return;
+        }
+
+        TextDisplay display = displays.get(target.getUniqueId());
+        if (display == null || !display.isValid()) {
+            display = target.getWorld().spawn(headLoc, TextDisplay.class, d -> {
+                d.setPersistent(false);
+                d.setVisibleByDefault(false);
+                d.setBillboard(Billboard.CENTER);
+                d.setSeeThrough(true);
+                d.text(Component.text(target.getName()));
+            });
+            displays.put(target.getUniqueId(), display);
+        } else {
+            display.teleport(headLoc);
+        }
+        lastPositions.put(target.getUniqueId(), headLoc);
+    }
+
+    public void setNametagVisible(Player viewer, Player target, boolean shouldShowNametag) {
+        TextDisplay display = displays.get(target.getUniqueId());
+        if (display == null || !display.isValid()) return;
+
+        // Never show player their own nametag display
+        if (viewer.equals(target)) {
+            viewer.hideEntity(plugin, display);
+            return;
+        }
+
+        // Sneaking players hide their nametags through walls (vanilla mechanic)
+        if (target.isSneaking()) {
+            viewer.hideEntity(plugin, display);
+            return;
+        }
+
+        if (shouldShowNametag) {
+            viewer.showEntity(plugin, display);
+        } else {
+            viewer.hideEntity(plugin, display);
+        }
+    }
+
+    public void removeNametag(UUID targetId) {
+        lastPositions.remove(targetId);
+        TextDisplay display = displays.remove(targetId);
+        if (display != null && display.isValid()) {
+            display.remove();
+        }
+    }
+
+    public void purgeAll() {
+        lastPositions.clear();
+        for (TextDisplay display : displays.values()) {
+            if (display != null && display.isValid()) {
+                display.remove();
+            }
+        }
+        displays.clear();
+    }
+}
+
+```
+
+`src/main/java/com/argon/treb3r/OcclusionEngine.java`:
+
+```java
+package com.argon.treb3r;
+
+import org.bukkit.FluidCollisionMode;
+import org.bukkit.GameMode;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.World;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
+import org.bukkit.block.data.Bisected;
+import org.bukkit.block.data.type.Door;
+import org.bukkit.block.data.type.TrapDoor;
+import org.bukkit.entity.*;
+import org.bukkit.potion.PotionEffectType;
+import org.bukkit.util.BoundingBox;
+import org.bukkit.util.RayTraceResult;
+import org.bukkit.util.Vector;
+
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+
+/**
+ * Treb3rAntiCheater - Hardened Anti-ESP Engine
+ * Architecture:
+ * 1. Raycasted Multi-Point Occlusion: samples crowns, head, chest, waist, knees, feet, lateral shoulders.
+ * 2. Solid vs Transparent Barrier Discrimination: respects open windows in oak/iron/bamboo trapdoors while
+ *    blocking line-of-sight on solid wooden spruce, dark oak, pale oak trapdoors.
+ * 3. Ephemeral Nametag Passthrough: when a player body is occluded behind walls, their vanilla-style nametag
+ *    is projected via client-filtered TextDisplay unless sneaking. This disables Skeleton/Box/Chams/Hitboxes
+ *    while preserving vanilla player location cues for legitimate players.
+ * 4. Per-Viewer Entity Hysteresis: eliminates cross-viewer entity leaks (e.g. dropped items).
+ */
+public class OcclusionEngine implements Runnable {
+
+    private static final boolean[] IGNORED_MATERIALS = new boolean[Material.values().length];
+    private static final boolean[] HOLE_CAPABLE_MATERIALS = new boolean[Material.values().length];
+
+    static {
+        for (Material mat : Material.values()) {
+            if (mat.isAir()) {
+                IGNORED_MATERIALS[mat.ordinal()] = true;
+                continue;
+            }
+            String name = mat.name();
+            if (name.contains("GLASS") ||
+                name.contains("BARS") ||
+                name.contains("CHAIN") ||
+                name.contains("GRATE") ||
+                name.contains("ROD") ||
+                name.endsWith("_FENCE") ||
+                name.endsWith("_FENCE_GATE") ||
+                name.endsWith("_LEAVES") ||
+                name.contains("LANTERN") ||
+                name.equals("BELL") ||
+                name.contains("AMETHYST") ||
+                name.equals("COBWEB") ||
+                name.equals("SCAFFOLDING") ||
+                name.equals("TRIPWIRE") ||
+                name.equals("STRING") ||
+                name.equals("BARRIER") ||
+                name.equals("LIGHT")) {
+                IGNORED_MATERIALS[mat.ordinal()] = true;
+            }
+
+            if (name.endsWith("_DOOR") || name.endsWith("_TRAPDOOR") || name.equals("CHEST") ||
+                name.equals("TRAPPED_CHEST") || name.equals("ENDER_CHEST") || name.endsWith("_SLAB") ||
+                name.endsWith("_STAIRS") || name.equals("DECORATED_POT")) {
+                HOLE_CAPABLE_MATERIALS[mat.ordinal()] = true;
+            }
+        }
+    }
+
+    private final Treb3rAntiCheater plugin;
+    private final NametagDisplayManager nametagManager;
+
+    private final Map<UUID, Map<UUID, Long>> combatGraceMap = new ConcurrentHashMap<>();
+    private final Map<UUID, Map<UUID, Long>> clickGraceMap = new ConcurrentHashMap<>();
+    private final Map<UUID, Integer> clientCameraModes = new ConcurrentHashMap<>();
+    private final Map<UUID, Map<UUID, Long>> entityHysteresis = new ConcurrentHashMap<>();
+    private final Map<UUID, Map<UUID, Long>> playerHysteresis = new ConcurrentHashMap<>();
+    private final Map<UUID, Set<UUID>> viewerRevealedEntities = new ConcurrentHashMap<>();
+
+    private long currentTick = 0;
+
+    public OcclusionEngine(Treb3rAntiCheater plugin) {
+        this.plugin = plugin;
+        this.nametagManager = new NametagDisplayManager(plugin);
+        this.nametagManager.purgeAll();
+    }
+
+    public void setClientCameraMode(UUID uuid, int mode) {
+        clientCameraModes.put(uuid, mode);
+    }
+
+    public void registerClickInteraction(Player player, Location hitLoc) {
+        UUID viewerId = player.getUniqueId();
+        long expire = currentTick + 20; // 1 second visibility boost around clicked target
+        for (Player target : player.getWorld().getPlayers()) {
+            if (target.equals(player)) continue;
+            if (target.getLocation().distanceSquared(hitLoc) <= 9.0) {
+                clickGraceMap.computeIfAbsent(viewerId, k -> new ConcurrentHashMap<>()).put(target.getUniqueId(), expire);
+            }
+        }
+    }
+
+    public boolean isEntityVisibleTo(Player viewer, Entity entity) {
+        if (viewer.equals(entity)) return true;
+        if (viewer.getGameMode() == GameMode.SPECTATOR) return true;
+
+        if (plugin.isBypassOnGlowing()) {
+            if (entity.isGlowing()) return true;
+            if (entity instanceof LivingEntity && ((LivingEntity) entity).hasPotionEffect(PotionEffectType.GLOWING)) return true;
+        }
+
+        double maxDist = plugin.getMaxTrackingDistance();
+        Location viewerLoc = viewer.getLocation();
+        Location entLoc = entity.getLocation();
+        if (viewerLoc.getWorld() != entLoc.getWorld()) return false;
+
+        double distSq = viewerLoc.distanceSquared(entLoc);
+        if (distSq > maxDist * maxDist) return false;
+
+        double nearDist = plugin.getNearDistance();
+        if (nearDist > 0.001 && distSq <= nearDist * nearDist) return true;
+
+        Map<UUID, Long> viewerCombat = combatGraceMap.get(viewer.getUniqueId());
+        if (viewerCombat != null) {
+            Long expire = viewerCombat.get(entity.getUniqueId());
+            if (expire != null && currentTick <= expire) return true;
+        }
+
+        if (entity instanceof Player) {
+            if (!plugin.isHidePlayers()) return true;
+            Player targetPlayer = (Player) entity;
+            Map<UUID, Long> inner = playerHysteresis.get(viewer.getUniqueId());
+            Long grace = inner != null ? inner.get(targetPlayer.getUniqueId()) : null;
+            if (grace != null && currentTick <= grace) return true;
+
+            PlayerState viewerState = capturePlayerState(viewer);
+            PlayerState targetState = capturePlayerState(targetPlayer);
+            boolean vis = evaluatePlayerVisibility(viewerState, targetState);
+            if (vis) {
+                playerHysteresis.computeIfAbsent(viewer.getUniqueId(), k -> new ConcurrentHashMap<>())
+                        .put(targetPlayer.getUniqueId(), currentTick + 8);
+            }
+            return vis;
+        }
+
+        if (shouldFilter(entity, plugin.isHideMonsters(), plugin.isHideAnimals(), plugin.isHideMisc())) {
+            PlayerState viewerState = capturePlayerState(viewer);
+            return evaluateEntityVisibility(viewerState, entity);
+        }
+
+        return true;
+    }
+
+    public void triggerCombatGrace(UUID entityId1, UUID entityId2, long durationTicks) {
+        long expireTick = currentTick + durationTicks;
+        combatGraceMap.computeIfAbsent(entityId1, k -> new ConcurrentHashMap<>()).put(entityId2, expireTick);
+        combatGraceMap.computeIfAbsent(entityId2, k -> new ConcurrentHashMap<>()).put(entityId1, expireTick);
+    }
+
+    @Override
+    public void run() {
+        currentTick++;
+
+        double nearDist = plugin.getNearDistance();
+        double nearDistSq = nearDist * nearDist;
+        double maxDist = plugin.getMaxTrackingDistance();
+        double maxDistSq = maxDist * maxDist;
+        int timeSlices = Math.max(1, plugin.getTimeSlices());
+
+        boolean hidePlayers = plugin.isHidePlayers();
+        boolean hideMonsters = plugin.isHideMonsters();
+        boolean hideAnimals = plugin.isHideAnimals();
+        boolean hideMisc = plugin.isHideMisc();
+        boolean bypassOnGlowing = plugin.isBypassOnGlowing();
+
+        List<Player> onlinePlayers = new ArrayList<>(plugin.getServer().getOnlinePlayers());
+        int totalPlayers = onlinePlayers.size();
+        if (totalPlayers == 0) {
+            return;
+        }
+
+        // Update ephemeral nametag positions for all players
+        for (Player p : onlinePlayers) {
+            if (p.isOnline()) {
+                nametagManager.updateNametagPosition(p);
+            }
+        }
+
+        // Periodic cleanup of expired hysteresis entries
+        if (currentTick % 20 == 0) {
+            long now = currentTick;
+            for (Map<UUID, Long> inner : entityHysteresis.values()) {
+                inner.entrySet().removeIf(e -> e.getValue() < now);
+            }
+            for (Map<UUID, Long> inner : playerHysteresis.values()) {
+                inner.entrySet().removeIf(e -> e.getValue() < now);
+            }
+        }
+
+        List<PlayerState> states = new ArrayList<>(totalPlayers);
+        for (Player p : onlinePlayers) {
+            if (!p.isOnline()) continue;
+            states.add(capturePlayerState(p));
+        }
+
+        int stateCount = states.size();
+        int currentSlice = (int) (currentTick % timeSlices);
+
+        for (int i = 0; i < stateCount; i++) {
+            if (stateCount > 8 && (i % timeSlices) != currentSlice) {
+                continue;
+            }
+
+            PlayerState viewer = states.get(i);
+            Player viewerPlayer = viewer.player;
+
+            if (viewerPlayer.hasPermission("treb3r.bypass") || viewerPlayer.getGameMode() == GameMode.SPECTATOR) {
+                revealAllPlayersTo(viewerPlayer, states);
+                continue;
+            }
+
+            Map<UUID, Long> viewerCombat = combatGraceMap.get(viewer.uuid);
+
+            // 1. PLAYER-TO-PLAYER OCCLUSION
+            if (hidePlayers) {
+                for (int j = 0; j < stateCount; j++) {
+                    if (i == j) continue;
+                    PlayerState target = states.get(j);
+
+                    if (target.world != viewer.world) continue;
+
+                    // Fast Manhattan rejection
+                    double dx = target.x - viewer.x;
+                    if (dx > maxDist || dx < -maxDist) {
+                        applyPlayerVisibility(viewerPlayer, target.player, false);
+                        continue;
+                    }
+                    double dz = target.z - viewer.z;
+                    if (dz > maxDist || dz < -maxDist) {
+                        applyPlayerVisibility(viewerPlayer, target.player, false);
+                        continue;
+                    }
+                    double dy = target.y - viewer.y;
+                    if (dy > 32.0 || dy < -32.0) {
+                        applyPlayerVisibility(viewerPlayer, target.player, false);
+                        continue;
+                    }
+
+                    double distSq = dx * dx + dy * dy + dz * dz;
+
+                    // Proximity Safety Bubble (if nearDist > 0 in config)
+                    if (nearDistSq > 0.0001 && distSq <= nearDistSq) {
+                        applyPlayerVisibility(viewerPlayer, target.player, true);
+                        continue;
+                    }
+
+                    // Combat Grace Check
+                    if (viewerCombat != null) {
+                        Long expire = viewerCombat.get(target.uuid);
+                        if (expire != null && currentTick <= expire) {
+                            applyPlayerVisibility(viewerPlayer, target.player, true);
+                            continue;
+                        }
+                    }
+
+                    // Click Interaction Grace Check
+                    Map<UUID, Long> viewerClicks = clickGraceMap.get(viewer.uuid);
+                    if (viewerClicks != null) {
+                        Long expire = viewerClicks.get(target.uuid);
+                        if (expire != null && currentTick <= expire) {
+                            applyPlayerVisibility(viewerPlayer, target.player, true);
+                            continue;
+                        }
+                    }
+
+                    // Glowing Check
+                    if (bypassOnGlowing && target.isGlowing) {
+                        applyPlayerVisibility(viewerPlayer, target.player, true);
+                        continue;
+                    }
+
+                    // Max Distance Check
+                    if (distSq > maxDistSq) {
+                        applyPlayerVisibility(viewerPlayer, target.player, false);
+                        continue;
+                    }
+
+                    // Real-time raytracing check with 8-tick debounce hysteresis (eliminates 20Hz flicker)
+                    Map<UUID, Long> viewerPlayerHysteresis = playerHysteresis.computeIfAbsent(viewer.uuid, k -> new ConcurrentHashMap<>());
+                    boolean visible = evaluatePlayerVisibility(viewer, target);
+                    if (visible) {
+                        viewerPlayerHysteresis.put(target.uuid, currentTick + 8);
+                        applyPlayerVisibility(viewerPlayer, target.player, true);
+                    } else {
+                        Long grace = viewerPlayerHysteresis.get(target.uuid);
+                        if (grace != null && currentTick <= grace) {
+                            applyPlayerVisibility(viewerPlayer, target.player, true);
+                        } else {
+                            applyPlayerVisibility(viewerPlayer, target.player, false);
+                        }
+                    }
+                }
+            }
+
+            // 2. MONSTERS, ANIMALS, MISC OCCLUSION (Sweep every 3 ticks, full tracking radius)
+            if ((hideMonsters || hideAnimals || hideMisc) && (currentTick % 3 == 0)) {
+                double entityRadius = Math.max(maxDist, 64.0);
+                Collection<Entity> nearby = viewer.world.getNearbyEntities(viewer.eyeLoc, entityRadius, entityRadius, entityRadius);
+                Map<UUID, Long> viewerHysteresis = entityHysteresis.computeIfAbsent(viewer.uuid, k -> new ConcurrentHashMap<>());
+                Set<UUID> previouslyRevealed = viewerRevealedEntities.computeIfAbsent(viewer.uuid, k -> ConcurrentHashMap.newKeySet());
+                Set<UUID> currentPassRevealed = new HashSet<>();
+
+                for (Entity entity : nearby) {
+                    if (entity instanceof Player || entity.equals(viewerPlayer)) continue;
+                    if (!shouldFilter(entity, hideMonsters, hideAnimals, hideMisc)) continue;
+
+                    UUID entId = entity.getUniqueId();
+                    boolean visible = evaluateEntityVisibility(viewer, entity);
+
+                    if (visible) {
+                        viewerHysteresis.put(entId, currentTick + 6);
+                        reveal(viewerPlayer, entity);
+                        currentPassRevealed.add(entId);
+                    } else {
+                        Long grace = viewerHysteresis.get(entId);
+                        if (grace != null && currentTick <= grace) {
+                            reveal(viewerPlayer, entity);
+                            currentPassRevealed.add(entId);
+                        } else {
+                            conceal(viewerPlayer, entity);
+                        }
+                    }
+                }
+
+                // Strictly conceal any entity that was previously shown but is no longer visible/in-range
+                previouslyRevealed.removeIf(oldId -> {
+                    if (!currentPassRevealed.contains(oldId)) {
+                        Entity e = plugin.getServer().getEntity(oldId);
+                        if (e != null && e.isValid()) {
+                            conceal(viewerPlayer, e);
+                        }
+                        return true;
+                    }
+                    return false;
+                });
+                previouslyRevealed.addAll(currentPassRevealed);
+            }
+        }
+    }
+
+    private void applyPlayerVisibility(Player viewer, Player targetPlayer, boolean visible) {
+        if (visible) {
+            reveal(viewer, targetPlayer);
+            syncVehicle(viewer, targetPlayer, true);
+            nametagManager.setNametagVisible(viewer, targetPlayer, false);
+        } else {
+            conceal(viewer, targetPlayer);
+            syncVehicle(viewer, targetPlayer, false);
+            nametagManager.setNametagVisible(viewer, targetPlayer, true);
+        }
+    }
+
+    /**
+     * Precision Raytracing Engine with Crosshair LoS & Multi-Point Voxel Sampling:
+     * Covers narrow slits, decorated pots, chest gaps, slab slits, fence holes, and peekers.
+     */
+    private boolean evaluatePlayerVisibility(PlayerState viewer, PlayerState target) {
+        World world = viewer.world;
+        Location eyeLoc = viewer.eyeLoc;
+        Vector start = eyeLoc.toVector();
+
+        BoundingBox box = target.box;
+
+        // 1. Crosshair Line-of-Sight Check (Direct peeking through narrow slits, holes, cracks)
+        Vector lookDir = new Vector(viewer.dirX, viewer.dirY, viewer.dirZ);
+        RayTraceResult crosshairHit = box.rayTrace(start, lookDir, 48.0);
+        if (crosshairHit != null) {
+            Vector hitPos = crosshairHit.getHitPosition();
+            if (isRayClear(world, eyeLoc, start, hitPos)) return true;
+        }
+
+        double minX = box.getMinX();
+        double maxX = box.getMaxX();
+        double minZ = box.getMinZ();
+        double maxZ = box.getMaxZ();
+        double minY = box.getMinY();
+        double maxY = box.getMaxY();
+        double midX = (minX + maxX) * 0.5;
+        double midZ = (minZ + maxZ) * 0.5;
+
+        double offX = (maxX - minX) * 0.42;
+        double offZ = (maxZ - minZ) * 0.42;
+
+        // Multi-tier height sampling covering entire player silhouette and micro-slits
+        double[] heights = {
+            minY + 0.08, // bottom of shoes
+            minY + 0.28, // lower shins
+            minY + 0.48, // mid shins
+            minY + 0.68, // knees
+            minY + 0.88, // waist / chest-slit level (gap above 14/16 blocks)
+            minY + 1.08, // mid torso
+            minY + 1.32, // upper torso / shoulders
+            minY + 1.55, // eyes
+            maxY - 0.05  // crown
+        };
+
+        // 2. Fast Coarse Triage (Eye, Center of Mass, Torso, Feet)
+        // Resolves 90-95% of visible targets in 1-4 coarse rays with minimal CPU overhead
+        Vector targetEye = target.eyeLoc.toVector();
+        if (isRayClear(world, eyeLoc, start, targetEye)) return true;
+
+        Vector center = box.getCenter();
+        if (isRayClear(world, eyeLoc, start, center)) return true;
+
+        Vector feet = new Vector(midX, minY + 0.25, midZ);
+        if (isRayClear(world, eyeLoc, start, feet)) return true;
+
+        Vector chest = new Vector(midX, minY + 1.25, midZ);
+        if (isRayClear(world, eyeLoc, start, chest)) return true;
+
+        // 3. Frustum / Cone Pruning (Behind-the-back culling)
+        // If target is behind viewer's back (> 98 degrees off-axis) and not in F5 camera mode,
+        // they cannot be seen in 1st person. Strictly hides targets outside legitimate FOV!
+        Integer reportedCam = clientCameraModes.get(viewer.uuid);
+        boolean isF5 = reportedCam != null && reportedCam != 0;
+        if (!isF5) {
+            Vector toCenter = center.clone().subtract(start).normalize();
+            if (lookDir.dot(toCenter) < -0.15) {
+                return false;
+            }
+        }
+
+        // 4. Dense multi-point volume & perimeter sweep (Step ~ 8.5 cm across X and Z)
+        // Checks front, back, left, right, and center faces across all 9 height tiers.
+        // In narrow apertures (chests, decorated pots, copper bars, grates), this guarantees
+        // rays pass cleanly through even when the viewer sees the slit from peripheral vision.
+        int subdivisions = 7;
+        double stepX = (maxX - minX - 0.06) / (subdivisions - 1);
+        double stepZ = (maxZ - minZ - 0.06) / (subdivisions - 1);
+
+        double frontZ = minZ + 0.03;
+        double backZ = maxZ - 0.03;
+        double leftX = minX + 0.03;
+        double rightX = maxX - 0.03;
+
+        for (double y : heights) {
+            // Front, back, and midZ sweeps along X
+            for (int k = 0; k < subdivisions; k++) {
+                double sx = minX + 0.03 + k * stepX;
+                if (isRayClear(world, eyeLoc, start, new Vector(sx, y, frontZ))) return true;
+                if (isRayClear(world, eyeLoc, start, new Vector(sx, y, backZ))) return true;
+                if (isRayClear(world, eyeLoc, start, new Vector(sx, y, midZ))) return true;
+            }
+            // Left, right, and midX sweeps along Z
+            for (int k = 0; k < subdivisions; k++) {
+                double sz = minZ + 0.03 + k * stepZ;
+                if (isRayClear(world, eyeLoc, start, new Vector(leftX, y, sz))) return true;
+                if (isRayClear(world, eyeLoc, start, new Vector(rightX, y, sz))) return true;
+                if (isRayClear(world, eyeLoc, start, new Vector(midX, y, sz))) return true;
+            }
+        }
+
+        // 3. Velocity extrapolation (compensates for 50-100ms peeker's advantage around corners)
+        if (viewer.velocity.lengthSquared() > 0.005) {
+            Location extLoc = eyeLoc.clone().add(viewer.velocity.clone().multiply(1.5));
+            Vector extStart = extLoc.toVector();
+            for (double y : heights) {
+                if (isRayClear(world, extLoc, extStart, new Vector(midX, y, midZ))) return true;
+                if (isRayClear(world, extLoc, extStart, new Vector(midX + offX, y, midZ))) return true;
+                if (isRayClear(world, extLoc, extStart, new Vector(midX - offX, y, midZ))) return true;
+            }
+        }
+
+        // --- F5 REAR CAMERA (Strictly when reported by client companion mod) ---
+        Integer reportedMode = clientCameraModes.get(viewer.uuid);
+        if (reportedMode != null && reportedMode == 1) {
+            float yawRad = (float) Math.toRadians(viewer.yaw);
+            float pitchRad = (float) Math.toRadians(viewer.pitch);
+
+            double f5DirX = -Math.sin(yawRad) * Math.cos(pitchRad);
+            double f5DirY = -Math.sin(pitchRad);
+            double f5DirZ = Math.cos(yawRad) * Math.cos(pitchRad);
+            Vector f5LookDir = new Vector(f5DirX, f5DirY, f5DirZ).normalize();
+            Vector backDir = f5LookDir.clone().multiply(-1.0);
+
+            double backDist = clipRayDistance(world, eyeLoc, backDir, 4.0);
+            if (backDist > 0.25) {
+                Location f5Cam = eyeLoc.clone().add(backDir.multiply(backDist));
+                Vector f5Start = f5Cam.toVector();
+
+                Vector crown = new Vector(midX, maxY - 0.05, midZ);
+                Vector toTarget = crown.clone().subtract(f5Start).normalize();
+                double dot = f5LookDir.dot(toTarget);
+
+                if (dot >= 0.48) {
+                    if (isRayClear(world, f5Cam, f5Start, crown)) return true;
+                    if (isRayClear(world, f5Cam, f5Start, new Vector(midX, minY + 1.55, midZ))) return true;
+                    if (isRayClear(world, f5Cam, f5Start, new Vector(midX, minY + 1.25, midZ))) return true;
+                    if (isRayClear(world, f5Cam, f5Start, new Vector(midX, minY + 0.95, midZ))) return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    public boolean evaluateEntityVisibility(PlayerState viewer, Entity entity) {
+        World world = viewer.world;
+        Location eyeLoc = viewer.eyeLoc;
+        Vector start = eyeLoc.toVector();
+        BoundingBox box = entity.getBoundingBox();
+
+        // 1. Crosshair LoS check
+        Vector lookDir = new Vector(viewer.dirX, viewer.dirY, viewer.dirZ);
+        RayTraceResult crossHit = box.rayTrace(start, lookDir, 48.0);
+        if (crossHit != null && isRayClear(world, eyeLoc, start, crossHit.getHitPosition())) {
+            return true;
+        }
+
+        // 2. Center of entity
+        Vector center = box.getCenter();
+
+        // Frustum / Field of View Culling:
+        // Strictly hides entities outside the player's legitimate view cone (> 98 degrees off look axis).
+        // Cheaters flying Freecam behind their back cannot see any mobs or entities.
+        Integer reportedCam = clientCameraModes.get(viewer.uuid);
+        boolean isF5 = reportedCam != null && reportedCam != 0;
+        if (!isF5) {
+            Vector toCenter = center.clone().subtract(start).normalize();
+            if (lookDir.dot(toCenter) < -0.15) {
+                return false;
+            }
+        }
+
+        if (isRayClear(world, eyeLoc, start, center)) return true;
+
+        // 3. Top of entity
+        Vector top = new Vector(box.getCenterX(), box.getMaxY() - 0.05, box.getCenterZ());
+        if (isRayClear(world, eyeLoc, start, top)) return true;
+
+        // Early-out: if entity is further than 5 blocks and both center & top were blocked,
+        // it is behind solid terrain (caves, deepslate, walls). Skip expensive perimeter rays!
+        double distSq = eyeLoc.distanceSquared(entity.getLocation());
+        if (distSq > 25.0) {
+            return false;
+        }
+
+        // 4. Perimeter sampling for point-blank peekers & narrow slits (< 5m)
+        double minX = box.getMinX() + 0.03;
+        double maxX = box.getMaxX() - 0.03;
+        double minZ = box.getMinZ() + 0.03;
+        double maxZ = box.getMaxZ() - 0.03;
+        double centerY = box.getCenterY();
+
+        if (isRayClear(world, eyeLoc, start, new Vector(minX, centerY, minZ))) return true;
+        if (isRayClear(world, eyeLoc, start, new Vector(maxX, centerY, minZ))) return true;
+        if (isRayClear(world, eyeLoc, start, new Vector(minX, centerY, maxZ))) return true;
+        if (isRayClear(world, eyeLoc, start, new Vector(maxX, centerY, maxZ))) return true;
+
+        // Bottom of tall entities (mobs/armor stands)
+        if (!(entity instanceof Item)) {
+            Vector bottom = new Vector(box.getCenterX(), box.getMinY() + 0.1, box.getCenterZ());
+            if (isRayClear(world, eyeLoc, start, bottom)) return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Voxel-Accurate Multi-Layer Ray Marching Engine:
+     * Traverses multiple perforated barriers (copper grates, doors with windows, iron bars, chains).
+     * If a ray strikes a HOLE in a perforated barrier, it continues through to the other side.
+     * If a ray strikes SOLID material (solid door bottom, door frame, solid wall), it is immediately BLOCKED.
+     */
+    public boolean isRayClear(World world, Location origin, Vector start, Vector targetPoint) {
+        Vector dir = targetPoint.clone().subtract(start);
+        double totalDist = dir.length();
+        if (totalDist < 0.05) {
+            return true;
+        }
+        dir.normalize();
+
+        Vector currentStart = start.clone();
+        Location currentLoc = origin.clone();
+        double remainingDist = Math.max(0.01, totalDist - 0.03);
+
+        int maxHops = 8;
+        for (int hop = 0; hop < maxHops; hop++) {
+            RayTraceResult hit = world.rayTraceBlocks(
+                    currentLoc,
+                    dir,
+                    remainingDist,
+                    FluidCollisionMode.NEVER,
+                    true,
+                    b -> !isCompletelyIgnored(b)
+            );
+
+            if (hit == null) {
+                // Ray reached target without hitting any collision!
+                return true;
+            }
+
+            Block hitBlock = hit.getHitBlock();
+            Vector hitPos = hit.getHitPosition();
+            if (hitBlock == null || hitPos == null) {
+                return false;
+            }
+
+            // O(1) Fast Exit: If block cannot have holes/apertures (stone, deepslate, dirt, etc.), immediately blocked!
+            if (!HOLE_CAPABLE_MATERIALS[hitBlock.getType().ordinal()]) {
+                return false;
+            }
+
+            // Check if ray struck through a hole/aperture in this block
+            if (isHitInsideHole(hitBlock, hitPos, dir)) {
+                // Ray pierced a hole (e.g. window in top half of door or open trapdoor)!
+                // Step past the thin 3/16 door/trapdoor plane along the ray direction
+                Vector advanced = hitPos.clone().add(dir.clone().multiply(0.22));
+                double stepDist = advanced.distance(currentStart);
+                remainingDist -= stepDist;
+                if (remainingDist <= 0.02) {
+                    return true;
+                }
+                currentStart = advanced;
+                currentLoc = advanced.toLocation(world);
+            } else {
+                // Struck solid part of the block (solid door bottom, frame, solid block) -> blocked!
+                return false;
+            }
+        }
+
+        return false;
+    }
+
+    private double clipRayDistance(World world, Location start, Vector dir, double maxDist) {
+        RayTraceResult hit = world.rayTraceBlocks(
+                start,
+                dir,
+                maxDist,
+                FluidCollisionMode.NEVER,
+                true,
+                b -> !isCompletelyIgnored(b)
+        );
+        if (hit != null) {
+            return Math.max(0.0, hit.getHitPosition().distance(start.toVector()) - 0.2);
+        }
+        return maxDist;
+    }
+
+    public static boolean isCompletelyIgnored(Block block) {
+        if (block.isPassable()) {
+            return true;
+        }
+        return IGNORED_MATERIALS[block.getType().ordinal()];
+    }
+
+    /**
+     * Voxel-level discrimination for perforated blocks:
+     * Returns TRUE only if the ray strikes an actual physical opening / hole.
+     * Returns FALSE if the ray strikes a solid frame, solid door bottom, or solid body.
+     */
+    public static boolean isHitInsideHole(Block block, Vector hitPos, Vector rayDir) {
+        Material mat = block.getType();
+        String name = mat.name();
+
+        double bx = block.getX();
+        double by = block.getY();
+        double bz = block.getZ();
+
+        double lx = Math.max(0.0, Math.min(1.0, hitPos.getX() - bx));
+        double ly = Math.max(0.0, Math.min(1.0, hitPos.getY() - by));
+        double lz = Math.max(0.0, Math.min(1.0, hitPos.getZ() - bz));
+
+        // 1. DOORS
+        if (name.endsWith("_DOOR")) {
+            // Completely solid doors (Spruce, Dark Oak, Pale Oak, Crimson, Warped) have NO holes anywhere!
+            if (name.contains("SPRUCE") || name.contains("DARK_OAK") || name.contains("PALE_OAK") ||
+                name.contains("CRIMSON") || name.contains("WARPED")) {
+                return false;
+            }
+
+            if (!(block.getBlockData() instanceof Door)) {
+                return false;
+            }
+            Door door = (Door) block.getBlockData();
+
+            // BOTTOM HALF: 100% solid in Copper, Oak, Iron, Birch, Cherry, Mangrove doors!
+            if (door.getHalf() == Bisected.Half.BOTTOM) {
+                if (name.contains("ACACIA")) {
+                    double modY = (ly * 16.0) % 4.0;
+                    return modY > 1.0 && modY < 3.0 && lx > 0.15 && lx < 0.85 && lz > 0.15 && lz < 0.85;
+                }
+                if (name.contains("BAMBOO")) {
+                    double hCoord = (door.getFacing() == BlockFace.NORTH || door.getFacing() == BlockFace.SOUTH) ? lx : lz;
+                    double modH = (hCoord * 16.0) % 4.0;
+                    return modH > 1.2 && modH < 2.8;
+                }
+                // All other doors (COPPER, OAK, IRON, etc.): bottom half is completely solid!
+                return false;
+            }
+
+            // TOP HALF: contains window/hole
+            BlockFace facing = door.getFacing();
+            boolean open = door.isOpen();
+            double u;
+            if (open) {
+                u = (facing == BlockFace.NORTH || facing == BlockFace.SOUTH) ? lz : lx;
+            } else {
+                u = (facing == BlockFace.NORTH || facing == BlockFace.SOUTH) ? lx : lz;
+            }
+
+            // Frame border (solid)
+            if (u < 0.16 || u > 0.84 || ly < 0.12 || ly > 0.88) {
+                return false;
+            }
+
+            // Central vertical divider / mullion (solid)
+            if (u >= 0.44 && u <= 0.56) {
+                return false;
+            }
+
+            // Copper door horizontal divider (solid)
+            if (name.contains("COPPER") && ly >= 0.44 && ly <= 0.56) {
+                return false;
+            }
+
+            // Cleanly inside window opening
+            return true;
+        }
+
+        // 2. TRAPDOORS
+        if (name.endsWith("_TRAPDOOR")) {
+            if (name.contains("SPRUCE") || name.contains("DARK_OAK") || name.contains("PALE_OAK") ||
+                name.contains("CRIMSON") || name.contains("WARPED")) {
+                return false;
+            }
+            if (!(block.getBlockData() instanceof TrapDoor)) {
+                return false;
+            }
+            TrapDoor trapdoor = (TrapDoor) block.getBlockData();
+            if (trapdoor.isOpen()) {
+                double u = (trapdoor.getFacing() == BlockFace.NORTH || trapdoor.getFacing() == BlockFace.SOUTH) ? lx : lz;
+                return u > 0.18 && u < 0.82 && ly > 0.18 && ly < 0.82;
+            } else {
+                return lx > 0.18 && lx < 0.82 && lz > 0.18 && lz < 0.82;
+            }
+        }
+
+        // 3. COPPER GRATES (COPPER_GRATE, WEATHERED, EXPOSED, OXIDIZED, WAXED)
+        if (name.contains("GRATE")) {
+            boolean inHoleX = (lx > 0.15 && lx < 0.45) || (lx > 0.55 && lx < 0.85);
+            boolean inHoleY = (ly > 0.15 && ly < 0.45) || (ly > 0.55 && ly < 0.85);
+            boolean inHoleZ = (lz > 0.15 && lz < 0.45) || (lz > 0.55 && lz < 0.85);
+            int holeAxes = (inHoleX ? 1 : 0) + (inHoleY ? 1 : 0) + (inHoleZ ? 1 : 0);
+            return holeAxes >= 2;
+        }
+
+        // 4. BARS (IRON_BARS, COPPER_BARS)
+        if (name.contains("BARS")) {
+            boolean onCenterPost = (lx >= 0.42 && lx <= 0.58) && (lz >= 0.42 && lz <= 0.58);
+            return !onCenterPost;
+        }
+
+        // 5. CHAINS (CHAIN, COPPER_CHAIN)
+        if (name.contains("CHAIN")) {
+            boolean onChain = (lx >= 0.40 && lx <= 0.60) && (lz >= 0.40 && lz <= 0.60);
+            return !onChain;
+        }
+
+        // 6. FENCES & FENCE GATES
+        if (name.endsWith("_FENCE") || name.endsWith("_FENCE_GATE")) {
+            if (ly > 0.38 && ly < 0.75) return true;
+            if (ly > 0.88) return true;
+            return false;
+        }
+
+        // 7. RODS (LIGHTNING_ROD, END_ROD)
+        if (name.contains("ROD")) {
+            boolean onRod = (lx >= 0.40 && lx <= 0.60) && (lz >= 0.40 && lz <= 0.60);
+            return !onRod;
+        }
+
+        // 8. LANTERNS / BELLS
+        if (name.contains("LANTERN") || name.equals("BELL")) {
+            return lx < 0.30 || lx > 0.70 || lz < 0.30 || lz > 0.70;
+        }
+
+        // All other standard blocks (Stone, Wood, Wool, Bricks, Chest bodies) are SOLID
+        return false;
+    }
+
+    private void syncVehicle(Player viewer, Player target, boolean visible) {
+        Entity vehicle = target.getVehicle();
+        if (vehicle != null) {
+            if (visible) reveal(viewer, vehicle);
+            else conceal(viewer, vehicle);
+        }
+    }
+
+    public boolean shouldFilter(Entity entity, boolean monsters, boolean animals, boolean misc) {
+        if (entity instanceof Monster || entity instanceof Slime || entity instanceof Ghast || entity instanceof Phantom || entity instanceof Boss) return monsters;
+        if (entity instanceof Animals || entity instanceof Ambient || entity instanceof WaterMob || entity instanceof NPC || entity instanceof Golem || entity instanceof Allay) return animals;
+        if (entity instanceof ArmorStand || entity instanceof Item || entity instanceof ItemFrame || entity instanceof Painting || entity instanceof Vehicle) return misc;
+        return false;
+    }
+
+    /**
+     * Anti-Freecam Wall & Reach Verification for Block Interactions.
+     * Ensures player has direct physical line-of-sight and is within reach distance.
+     */
+    public boolean canPlayerReachBlock(Player player, Block targetBlock, double maxReach) {
+        if (player.getGameMode() == GameMode.SPECTATOR) return true;
+        Location eyeLoc = player.getEyeLocation();
+        World world = player.getWorld();
+        if (!world.equals(targetBlock.getWorld())) return false;
+
+        Location blockCenter = targetBlock.getLocation().add(0.5, 0.5, 0.5);
+        double distSq = eyeLoc.distanceSquared(blockCenter);
+        if (distSq > maxReach * maxReach) return false;
+
+        Vector start = eyeLoc.toVector();
+
+        // 1. Center of target block check
+        Vector dirToCenter = blockCenter.toVector().subtract(start);
+        double distToCenter = dirToCenter.length();
+        if (distToCenter > 0.05) {
+            RayTraceResult hit = world.rayTraceBlocks(
+                    eyeLoc,
+                    dirToCenter.normalize(),
+                    distToCenter,
+                    FluidCollisionMode.NEVER,
+                    true,
+                    b -> !isCompletelyIgnored(b)
+            );
+            if (hit == null || targetBlock.equals(hit.getHitBlock()) || isCompletelyIgnored(hit.getHitBlock())) {
+                return true;
+            }
+        }
+
+        // 2. Multi-face sample (top, bottom, 4 sides) to account for corners/edges
+        double bx = targetBlock.getX();
+        double by = targetBlock.getY();
+        double bz = targetBlock.getZ();
+        Vector[] facePoints = new Vector[]{
+                new Vector(bx + 0.5, by + 0.95, bz + 0.5),
+                new Vector(bx + 0.5, by + 0.05, bz + 0.5),
+                new Vector(bx + 0.05, by + 0.5, bz + 0.5),
+                new Vector(bx + 0.95, by + 0.5, bz + 0.5),
+                new Vector(bx + 0.5, by + 0.5, bz + 0.05),
+                new Vector(bx + 0.5, by + 0.5, bz + 0.95)
+        };
+
+        for (Vector facePoint : facePoints) {
+            Vector dir = facePoint.clone().subtract(start);
+            double dist = dir.length();
+            if (dist <= 0.05) return true;
+            RayTraceResult hit = world.rayTraceBlocks(
+                    eyeLoc,
+                    dir.normalize(),
+                    dist,
+                    FluidCollisionMode.NEVER,
+                    true,
+                    b -> !isCompletelyIgnored(b)
+            );
+            if (hit == null || targetBlock.equals(hit.getHitBlock()) || isCompletelyIgnored(hit.getHitBlock())) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Anti-Freecam Wall & Reach Verification for Entity Interactions and Combat.
+     * Prevents attacking or interacting with entities through solid barriers or out of range.
+     */
+    public boolean canPlayerReachEntity(Player player, Entity targetEntity, double maxReach) {
+        if (player.getGameMode() == GameMode.SPECTATOR) return true;
+        Location eyeLoc = player.getEyeLocation();
+        if (!player.getWorld().equals(targetEntity.getWorld())) return false;
+        double distSq = eyeLoc.distanceSquared(targetEntity.getLocation());
+        if (distSq > maxReach * maxReach) return false;
+
+        PlayerState viewerState = capturePlayerState(player);
+        if (targetEntity instanceof Player) {
+            PlayerState targetState = capturePlayerState((Player) targetEntity);
+            return evaluatePlayerVisibility(viewerState, targetState);
+        } else {
+            return evaluateEntityVisibility(viewerState, targetEntity);
+        }
+    }
+
+    private void reveal(Player viewer, Entity target) {
+        if (!viewer.canSee(target)) {
+            viewer.showEntity(plugin, target);
+        }
+    }
+
+    private void conceal(Player viewer, Entity target) {
+        if (viewer.canSee(target)) {
+            viewer.hideEntity(plugin, target);
+        }
+    }
+
+    private void revealAllPlayersTo(Player viewer, List<PlayerState> states) {
+        for (PlayerState s : states) {
+            if (!viewer.equals(s.player)) {
+                if (!viewer.canSee(s.player)) {
+                    viewer.showEntity(plugin, s.player);
+                }
+                nametagManager.setNametagVisible(viewer, s.player, false);
+            }
+        }
+    }
+
+    public void cleanupPlayer(Player player) {
+        UUID id = player.getUniqueId();
+        nametagManager.removeNametag(id);
+        clientCameraModes.remove(id);
+        clickGraceMap.remove(id);
+        combatGraceMap.remove(id);
+        entityHysteresis.remove(id);
+        playerHysteresis.remove(id);
+        for (Map<UUID, Long> inner : combatGraceMap.values()) {
+            inner.remove(id);
+        }
+    }
+
+    public void restoreAll() {
+        nametagManager.purgeAll();
+        entityHysteresis.clear();
+        playerHysteresis.clear();
+        for (Player viewer : plugin.getServer().getOnlinePlayers()) {
+            for (World w : plugin.getServer().getWorlds()) {
+                for (Entity e : w.getEntities()) {
+                    if (!viewer.equals(e) && !viewer.canSee(e)) {
+                        viewer.showEntity(plugin, e);
+                    }
+                }
+            }
+        }
+        combatGraceMap.clear();
+        clickGraceMap.clear();
+    }
+
+    private PlayerState capturePlayerState(Player player) {
+        UUID id = player.getUniqueId();
+        Location eyeLoc = player.getEyeLocation();
+        Vector dir = eyeLoc.getDirection().normalize();
+        Vector vel = player.getVelocity();
+        boolean glowing = player.isGlowing() || player.hasPotionEffect(PotionEffectType.GLOWING);
+
+        return new PlayerState(
+                player,
+                id,
+                player.getWorld(),
+                player.getLocation().getX(),
+                player.getLocation().getY(),
+                player.getLocation().getZ(),
+                eyeLoc,
+                dir.getX(),
+                dir.getY(),
+                dir.getZ(),
+                player.getLocation().getYaw(),
+                player.getLocation().getPitch(),
+                vel,
+                player.getBoundingBox(),
+                glowing
+        );
+    }
+
+    private static class PlayerState {
+        final Player player;
+        final UUID uuid;
+        final World world;
+        final double x, y, z;
+        final Location eyeLoc;
+        final double dirX, dirY, dirZ;
+        final float yaw;
+        final float pitch;
+        final Vector velocity;
+        final BoundingBox box;
+        final boolean isGlowing;
+
+        PlayerState(Player player, UUID uuid, World world, double x, double y, double z,
+                    Location eyeLoc, double dirX, double dirY, double dirZ,
+                    float yaw, float pitch, Vector velocity,
+                    BoundingBox box, boolean isGlowing) {
+            this.player = player;
+            this.uuid = uuid;
+            this.world = world;
+            this.x = x;
+            this.y = y;
+            this.z = z;
+            this.eyeLoc = eyeLoc;
+            this.dirX = dirX;
+            this.dirY = dirY;
+            this.dirZ = dirZ;
+            this.yaw = yaw;
+            this.pitch = pitch;
+            this.velocity = velocity;
+            this.box = box;
+            this.isGlowing = isGlowing;
+        }
+    }
+}
+
+```
+
+`src/main/java/com/argon/treb3r/Treb3rAntiCheater.java`:
+
+```java
+package com.argon.treb3r;
+
+import org.bukkit.Location;
+import org.bukkit.World;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandExecutor;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.Player;
+import org.bukkit.entity.Projectile;
+import org.bukkit.entity.TextDisplay;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.player.PlayerInteractEntityEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.world.ChunkLoadEvent;
+import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitTask;
+
+public class Treb3rAntiCheater extends JavaPlugin implements Listener, CommandExecutor {
+
+    public static final String CAMERA_CHANNEL = "treb3r:camera";
+
+    private double maxTrackingDistance;
+    private double nearDistance;
+    private int timeSlices;
+    private boolean hidePlayers;
+    private boolean hideMonsters;
+    private boolean hideAnimals;
+    private boolean hideMisc;
+    private boolean bypassOnGlowing;
+    private int combatGraceTicks;
+
+    // Anti-Freecam Wall & Reach Settings
+    private boolean antiFreecamEnabled;
+    private boolean preventInteractThroughWalls;
+    private double maxReachDistance;
+
+    private OcclusionEngine engine;
+    private AntiXrayEngine antiXrayEngine;
+    private AntiFreecamEngine antiFreecamEngine;
+    private BukkitTask task;
+
+    @Override
+    public void onEnable() {
+        saveDefaultConfig();
+        loadConfiguration();
+
+        purgeOrphanTextDisplays();
+
+        engine = new OcclusionEngine(this);
+        startTask();
+
+        antiXrayEngine = new AntiXrayEngine(this);
+        antiXrayEngine.init();
+
+        antiFreecamEngine = new AntiFreecamEngine(this);
+        antiFreecamEngine.init();
+
+        // Register Camera Communication Channel (Companion / Client Mod support)
+        getServer().getMessenger().registerIncomingPluginChannel(this, CAMERA_CHANNEL, (channel, player, message) -> {
+            if (!channel.equals(CAMERA_CHANNEL) || message.length == 0) return;
+            int mode = message[0] & 0xFF; // 0 = 1st person, 1 = 3rd person back, 2 = 3rd person front
+            if (engine != null) {
+                engine.setClientCameraMode(player.getUniqueId(), mode);
+            }
+        });
+        getServer().getMessenger().registerOutgoingPluginChannel(this, CAMERA_CHANNEL);
+
+        getServer().getPluginManager().registerEvents(this, this);
+        if (getCommand("treber") != null) {
+            getCommand("treber").setExecutor(this);
+        }
+
+        getLogger().info("Treb3rAntiCheater v" + getDescription().getVersion() + " initialized with Camera Channel & Click Tracking.");
+    }
+
+    @Override
+    public void onDisable() {
+        stopTask();
+        if (engine != null) {
+            engine.restoreAll();
+        }
+        if (antiFreecamEngine != null) {
+            antiFreecamEngine.stop();
+        }
+        purgeOrphanTextDisplays();
+        getServer().getMessenger().unregisterIncomingPluginChannel(this);
+        getServer().getMessenger().unregisterOutgoingPluginChannel(this);
+        getLogger().info("Treb3rAntiCheater disabled. Restored all visibility states.");
+    }
+
+    public void loadConfiguration() {
+        reloadConfig();
+        maxTrackingDistance = getConfig().getDouble("max-tracking-distance", 64.0);
+        nearDistance = getConfig().getDouble("near-distance", 0.0);
+        timeSlices = getConfig().getInt("time-slices", 1);
+        hidePlayers = getConfig().getBoolean("hide-players", true);
+        hideMonsters = getConfig().getBoolean("hide-monsters", true);
+        hideAnimals = getConfig().getBoolean("hide-animals", false);
+        hideMisc = getConfig().getBoolean("hide-misc", true);
+        bypassOnGlowing = getConfig().getBoolean("bypass-on-glowing", true);
+        combatGraceTicks = getConfig().getInt("combat-grace-ticks", 30);
+
+        antiFreecamEnabled = getConfig().getBoolean("anti-freecam.enabled", true);
+        preventInteractThroughWalls = getConfig().getBoolean("anti-freecam.prevent-interact-through-walls", true);
+        maxReachDistance = getConfig().getDouble("anti-freecam.max-reach-distance", 5.2);
+
+        if (antiXrayEngine != null) {
+            antiXrayEngine.reload();
+        }
+        if (antiFreecamEngine != null) {
+            antiFreecamEngine.reload();
+        }
+    }
+
+    private void startTask() {
+        stopTask();
+        task = getServer().getScheduler().runTaskTimer(this, engine, 1L, 1L);
+    }
+
+    private void stopTask() {
+        if (task != null) {
+            task.cancel();
+            task = null;
+        }
+    }
+
+    private void purgeOrphanTextDisplays() {
+        for (World world : getServer().getWorlds()) {
+            for (Entity entity : world.getEntities()) {
+                if (entity instanceof TextDisplay) {
+                    entity.remove();
+                }
+            }
+        }
+    }
+
+    @EventHandler
+    public void onChunkLoad(ChunkLoadEvent event) {
+        for (Entity entity : event.getChunk().getEntities()) {
+            if (entity instanceof TextDisplay) {
+                entity.remove();
+            }
+        }
+    }
+
+    public OcclusionEngine getEngine() {
+        return engine;
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onPlayerInteract(PlayerInteractEvent event) {
+        if (engine == null) return;
+        Player player = event.getPlayer();
+        Location hitLoc = event.getInteractionPoint();
+        if (hitLoc == null && event.getClickedBlock() != null) {
+            hitLoc = event.getClickedBlock().getLocation().add(0.5, 0.5, 0.5);
+        }
+        if (hitLoc != null) {
+            engine.registerClickInteraction(player, hitLoc);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onCombatDamage(EntityDamageByEntityEvent event) {
+        if (engine == null || combatGraceTicks <= 0) return;
+
+        Entity damager = event.getDamager();
+        Entity victim = event.getEntity();
+
+        if (damager instanceof Projectile) {
+            Projectile proj = (Projectile) damager;
+            if (proj.getShooter() instanceof Entity) {
+                damager = (Entity) proj.getShooter();
+            }
+        }
+
+        if (damager != null && victim != null) {
+            engine.triggerCombatGrace(damager.getUniqueId(), victim.getUniqueId(), combatGraceTicks);
+        }
+    }
+
+
+    @EventHandler
+    public void onQuit(PlayerQuitEvent event) {
+        if (engine != null) {
+            engine.cleanupPlayer(event.getPlayer());
+        }
+    }
+
+    @Override
+    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+        if (args.length > 0 && args[0].equalsIgnoreCase("reload")) {
+            if (!sender.hasPermission("treb3r.admin")) {
+                sender.sendMessage("§cNo permission.");
+                return true;
+            }
+            loadConfiguration();
+            startTask();
+            sender.sendMessage("§aTreb3rAntiCheater configuration reloaded.");
+            return true;
+        }
+
+        if (args.length > 0 && args[0].equalsIgnoreCase("hideitems")) {
+            if (!(sender instanceof Player)) {
+                sender.sendMessage("Must be player");
+                return true;
+            }
+            Player p = (Player) sender;
+            int count = 0;
+            for (Entity e : p.getWorld().getEntities()) {
+                if (e instanceof org.bukkit.entity.Item) {
+                    boolean before = p.canSee(e);
+                    p.hideEntity(this, e);
+                    boolean after = p.canSee(e);
+                    getLogger().info("Item " + e.getName() + " id=" + e.getEntityId() + " canSee before=" + before + " after=" + after);
+                    count++;
+                }
+            }
+            sender.sendMessage("Hid " + count + " items.");
+            return true;
+        }
+
+        if (args.length > 0 && args[0].equalsIgnoreCase("status")) {
+            sender.sendMessage("§e=== Treb3rAntiCheater Status ===");
+            sender.sendMessage("§7Max Distance: §f" + maxTrackingDistance);
+            sender.sendMessage("§7Near Distance: §f" + nearDistance);
+            sender.sendMessage("§7Time Slices: §f" + timeSlices);
+            sender.sendMessage("§7Hide Players: §f" + hidePlayers);
+            sender.sendMessage("§7Hide Monsters: §f" + hideMonsters);
+            sender.sendMessage("§7Hide Animals: §f" + hideAnimals);
+            sender.sendMessage("§7Hide Misc: §f" + hideMisc);
+            sender.sendMessage("§7Bypass On Glowing: §f" + bypassOnGlowing);
+            sender.sendMessage("§7Combat Grace: §f" + combatGraceTicks + " ticks");
+            if (antiXrayEngine != null) {
+                sender.sendMessage("§7Anti-Xray: " + (antiXrayEngine.isEnabled() ? "§aEnabled (Engine Mode " + antiXrayEngine.getEngineMode() + ")" : "§cDisabled"));
+            }
+            sender.sendMessage("§7Anti-Freecam: " + (antiFreecamEnabled ? "§aEnabled (Reach: " + maxReachDistance + "m, Wall-Block: " + preventInteractThroughWalls + ")" : "§cDisabled"));
+            return true;
+        }
+
+        sender.sendMessage("§eTreb3rAntiCheater commands: /treber reload, /treber status");
+        return true;
+    }
+
+    public boolean isAntiFreecamEnabled() {
+        return antiFreecamEnabled;
+    }
+
+    public boolean isPreventInteractThroughWalls() {
+        return preventInteractThroughWalls;
+    }
+
+    public double getMaxReachDistance() {
+        return maxReachDistance;
+    }
+
+    public double getMaxTrackingDistance() {
+        return maxTrackingDistance;
+    }
+
+    public double getNearDistance() {
+        return nearDistance;
+    }
+
+    public int getTimeSlices() {
+        return timeSlices;
+    }
+
+    public boolean isHidePlayers() {
+        return hidePlayers;
+    }
+
+    public boolean isHideMonsters() {
+        return hideMonsters;
+    }
+
+    public boolean isHideAnimals() {
+        return hideAnimals;
+    }
+
+    public boolean isHideMisc() {
+        return hideMisc;
+    }
+
+    public boolean isBypassOnGlowing() {
+        return bypassOnGlowing;
+    }
+
+    public int getCombatGraceTicks() {
+        return combatGraceTicks;
+    }
+}
+
+```
+
+`src/main/resources/config.yml`:
+
+```yml
+# Treb3rAntiCheater Configuration
+# Hardened Anti-ESP & Anti-Xray engine for Paper 1.21.x
+
+# ==========================================
+# 1. Anti-ESP & Occlusion Culling
+# ==========================================
+
+# Radius in blocks around player to check entities (covers Paper's 64-block monster tracking range)
+max-tracking-distance: 64.0
+
+# Distance in blocks under which targets bypass wall checks (0.0 = strict occlusion even point-blank)
+near-distance: 0.0
+
+# Number of tick slices (1 = every tick 100% real-time, 2 = 50% CPU load)
+time-slices: 1
+
+# Respect vanilla glowing mechanics (spectral arrows, bells, glow potions)
+bypass-on-glowing: true
+
+# Ticks both attacker and victim remain mutually visible after a hit (30 ticks = 1.5s)
+combat-grace-ticks: 30
+
+# Entities to cull through walls
+hide-players: true
+hide-monsters: true
+hide-animals: false
+hide-misc: true
+
+# ==========================================
+# 2. Packet-Level Anti-Xray Engine
+# ==========================================
+anti-xray:
+  # Enable packet-level ore obfuscation directly in memory
+  enabled: true
+
+  # Engine Mode:
+  # 1 = Hide covered ores as stone / deepslate / netherrack
+  # 2 = Obfuscate with random fake ores (blinds X-Ray & Freecam cheats with noise)
+  engine-mode: 2
+
+  # Obscure ores beneath lava pools
+  lava-obscures: true
+
+  # Block radius around mined blocks to update and reveal legitimate ores
+  update-radius: 2
+
+  # List of worlds where Anti-Xray is disabled (empty by default = protects all worlds)
+  excluded-worlds: []
+
+# ==========================================
+# 3. Anti-Freecam Protection
+# ==========================================
+anti-freecam:
+  # Enable protection against Freecam exploits (base/mine scouting & remote clicking)
+  enabled: true
+
+  # Active Camera Snap: Periodically sends ClientboundSetCameraPacket to sync the client camera to the player.
+  # For legitimate players, this is completely imperceptible. For Freecam users with detached cameras,
+  # it snaps the detached camera back to the body, preventing remote base scouting.
+  camera-snap:
+    enabled: true
+    # Interval in ticks between camera synchronization probes (20 ticks = 1 second)
+    interval-ticks: 20
+
+  # Block opening containers, breaking blocks, and damaging entities through solid walls
+  prevent-interact-through-walls: true
+
+  # Maximum physical interaction reach from player's eye location in blocks
+  max-reach-distance: 5.2
+
+
+```
+
+`src/main/resources/plugin.yml`:
+
+```yml
+name: Treb3rAntiCheater
+version: 1.0.0
+main: com.argon.treb3r.Treb3rAntiCheater
+api-version: '1.21'
+description: High-performance occlusion culling anti-ESP engine for Paper 1.21.11
+author: c4
+commands:
+  treber:
+    description: Manage Treb3rAntiCheater
+    aliases: [treb3r, tac, antiesp]
+    permission: treb3r.admin
+    usage: /<command> [reload|status]
+permissions:
+  treb3r.admin:
+    description: Permission to manage Treb3rAntiCheater
+    default: op
+  treb3r.bypass:
+    description: Bypass Anti-ESP occlusion checks
+    default: false
+
+```
