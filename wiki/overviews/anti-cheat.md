@@ -1029,6 +1029,7 @@ sources:
   - wiki/sources/descriptions/hypersenseindia__hypersense-memory-analyzer.md
   - wiki/sources/descriptions/Ogonx__anticheat-lab.md
   - wiki/sources/descriptions/sonekkdev__sonekk-anticheat.md
+  - wiki/sources/descriptions/Treb3r__Treb3rAntiCheater.md
 updated: 2026-11-02
 confidence: high
 ---
@@ -1480,6 +1481,8 @@ Title-specific R6 ranked-stat suspicion tooling such as [[r6-intel]] (baldspots4
 **Paper/Folia config-driven mod fingerprint:** [[vanticheat]] (GQS5; Java 21; modular detection registry; passive inbound plugin-message probes plus optional interactive sign-editor translation-key fingerprinting; corroboration rules before kick/ban; Lunar Client via Apollo; Geyser/Floodgate Java–Bedrock classification; trusted-player exemptions and Forge mod-list denylisting; default non-interactive join checks; YAML policy; Open Source Anti Cheat System / game:minecraft) for modded **1.21.x** operators needing explicit client/mod identity evidence beside translation-key probes such as [[key-value-checker]] and movement heuristics such as [[bs-anticheat]]. (source: wiki/sources/descriptions/GQS5__VAntiCheat.md)
 
 **Paper freecam / x-ray mitigation (ShieldGuard):** [[shieldguard-anticheat]] (Tobias1205; Java 21 Paper **1.21.x** plugin; PacketEvents per-player chunk/block rewriting; underground freecam masking; ore→stone/deepslate until proximity + line-of-sight; storage-block and entity hiding; staff report GUI + optional Discord webhooks; Open Source Anti Cheat System / game:minecraft) bundles freecam, x-ray, and storage-ESP packet mitigations with moderation tooling beside [[petal-anti-freecam]] and [[xray-anticheat]]. (source: wiki/sources/descriptions/Tobias1205__AntiCheat.md)
+
+**Paper combined anti-ESP / x-ray / freecam:** [[treb3r-anticheater]] (Treb3r; Java Paper **1.21.x** plugin; voxel ray-march entity occlusion with TextDisplay nametag preservation; reflection hook into Paper chunk packet controller for in-memory anti-xray Engine Modes 1–2 without `paper-world.yml` edits; NMS camera-sync anti-freecam plus through-wall interaction blocking beyond configured reach; high-performance survival SMP wallhack/x-ray/freecam bundle; Anti Cheat / game:minecraft) beside packet rewriters such as [[shieldguard-anticheat]] and terrain maskers such as [[petal-anti-freecam]]. (source: wiki/sources/descriptions/Treb3r__Treb3rAntiCheater.md)
 
 **Paper freecam mitigation:** [[petal-anti-freecam]] (boggymc; Java Paper/CanvasMC **1.21** plugin; PacketEvents outgoing chunk masking; ChunkMasker replaces underground sections with air below configurable hide-Y for players above cutoff; tile-entity filtering; per-tick refresh budget; runtime reload; optional CanvasMC async teleport visibility listeners; server-side anti-freecam/wallhack without client mods; Anti Cheat / game:minecraft) for operators needing packet-layer terrain stripping beside investigation plugins such as [[antixrayviewer]] and QA clients such as [[anticheat-qa]]. (source: wiki/sources/descriptions/boggymc__PetalAntiFreecam.md)
 

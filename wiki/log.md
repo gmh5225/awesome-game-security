@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-11-02** — ingest `description:Treb3r/Treb3rAntiCheater`: created entity [[treb3r-anticheater]] (Paper **1.21.x** Java plugin; voxel ray-march anti-ESP with TextDisplay nametags; reflection chunk-packet anti-xray Engine Modes 1–2 without `paper-world.yml`; NMS anti-freecam + through-wall reach block; survival SMP wallhack/x-ray/freecam bundle; confidence medium); cited [[overviews/anti-cheat]] Paper combined visibility lane + [[overviews/game-hacking]] packet-visibility cluster beside [[shieldguard-anticheat]]/[[petal-anti-freecam]]; `index.md` entity + anti-cheat overview blurb updated.
+
 - **2026-11-02** — ingest `description:xxchaosxx210/SplinterCellTrainer`: created entity [[splinter-cell-trainer]] (C#/WPF external + 32-bit in-process helper; classic Splinter Cell Steam build 252083; OpenProcess/ReadProcessMemory ESP; Unreal-style traversal, NPC/map cheats; DLL hash gate; confidence medium); cited [[overviews/game-hacking]] hybrid trainer cluster beside [[apprentice]]/[[cttrainer]] + [[concepts/world-to-screen]] external overlay lane; `index.md` entity + overview blurb updated.
 
 - **2026-11-02** — ingest `readme:categories`: **Cheat** link_count **2997** (+1 vs prior wiki map) / **Anti Cheat** **867** (+1) and other major README section counts stable (41 sections; `NeverC & NeverD` placeholder; Game Develop subcats Guide/Source/MCP server/MCP server security/AI Agents); synced [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
