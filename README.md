@@ -3034,6 +3034,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/Android1500/AndroidFaker [Android]
 - https://github.com/Scrut1ny/Windows-Spoofer
 - https://github.com/roomyoni/Nvidia-GPU-Spoof [Spoofing the NVIDIA GPU UUID by modifying "nvlddmkm.sys"]
+- https://github.com/divagr18/gpu-instance-fingerprint [CUDA/cuPy and PyTorch probes that separate same-model NVIDIA GPUs (A40, RTX 3090/4090, L40S) from atomic-add order and stock torch.index_add_ output; no serial or timer; deterministic mode removes only the passive leak]
 - https://github.com/5ec1cff/TrickyStore [trick of keystore. Android 12 or above is required]
 - https://github.com/beakthoven/TrickyStore [A trick of keystore. Android 10 or above is required]
 
