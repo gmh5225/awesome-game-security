@@ -1,0 +1,298 @@
+Project Path: arc_TheMax98000_BedrockGuard_sh__5t49
+
+Source Tree:
+
+```txt
+arc_TheMax98000_BedrockGuard_sh__5t49
+├── README.md
+└── docs
+    ├── api.md
+    ├── commands.md
+    └── configuration.md
+
+```
+
+`README.md`:
+
+```md
+<img src="docs/logo.png" alt="BedrockGuard" width="160" align="right">
+
+# BedrockGuard
+
+Anti-cheat for **Bedrock players** on Java servers running Geyser/Floodgate.
+
+Java anti-cheats (Grim, Vulcan…) are built around the Java client. Bedrock players arrive through Geyser with
+different movement, touch controls and timing, so those anti-cheats either exempt them or flag them by mistake.
+BedrockGuard analyses **only Floodgate players** and works alongside your existing Java anti-cheat.
+
+[![BedrockGuard demo: Bedrock cheaters caught](https://img.youtube.com/vi/5URQNkaMSlM/hqdefault.jpg)](https://youtu.be/5URQNkaMSlM)
+
+> **Status:** version 1.1.1 (cleaner Discord alerts) on all stores.
+
+## Checks
+
+| Check | Detects |
+|---|---|
+| Timer | Game running faster than real time |
+| Speed | Horizontal movement above the vanilla limit (Speed effect and ice taken into account) |
+| Fly | Vertical movement that ignores gravity, hovering in mid-air |
+| Reach | Hits beyond 3 blocks, with ping compensation |
+| Nuker | Several blocks broken in the same tick, or too many per second |
+| Scaffold | Blocks placed in mid-air, several per tick, or too many per second |
+| AutoClicker | Click rate above a human limit |
+| BadPackets | Values no legitimate client can send |
+| Velocity | Knockback ignored or reduced (AntiKnockback) |
+| KillAura | Several targets hit in the same tick, hits on a target far outside the player's view, and (experimental) hits on a hidden verification bot |
+
+Each check raises a violation level (VL) that decays over time. You get staff alerts in game, an optional Discord
+webhook, and a configurable punishment command when a check reaches its maximum VL.
+
+The combat checks (Velocity, KillAura) **only alert** by default: they never cancel a hit and do not count towards
+the punishment until you set `punish: true` for them. Their alerts show the measured values and the player's last
+hits, and `/bguard stats` gives alerts per hour of play for each input mode (touch, controller, keyboard and mouse),
+so you can check them on your own server first.
+
+## What it cannot see
+
+BedrockGuard only sees what Geyser forwards to the server, as Java packets:
+
+- Touch players hit wherever they tap, not where the camera points. The angle check therefore only catches hits far
+  outside the field of view (behind the player). An aura that hits inside the field of view without turning the
+  camera, at a legal distance and on one target at a time, is only caught by the verification bot.
+- A moderately enlarged hitbox (Hitbox cheat) is not detected; Reach still caps the distance.
+- No fine aim analysis (aimbot, smoothed aim): touch and controller aim are too different from a mouse to tell
+  apart without false positives.
+- Click rates above 20 per second cannot be measured: Geyser forwards one swing per tick.
+- Velocity does not judge a hit when the player jumps or hits back right after it (jump reset and sprint hits
+  legitimately reduce knockback), or when the player rides, swims, climbs or stands against a wall. A cheat that
+  cancels knockback while the player walks backward looks like a normal knockback.
+- Behind a proxy (Geyser on Velocity or BungeeCord), the real ping and the live input mode are unknown: Velocity
+  waits longer before judging, and `/bguard info` shows "cautious mode".
+
+## Requirements
+
+- Paper or Folia **1.21 → 26.x**, Java 21+ (tested on Paper 1.21.11, Paper 26.3 and Folia 26.3)
+- [Floodgate](https://geysermc.org/download) and [PacketEvents](https://modrinth.com/plugin/packetevents) 2.14+
+  installed as plugins
+- Geyser on the server, or on a proxy: tested with **Velocity** 4.2 (modern forwarding) and **BungeeCord** build 2104
+  (ip_forward), Geyser + Floodgate on the proxy and Floodgate on the game server
+- Keep Geyser's `forward-player-ping` at its default `false`: with `true`, Paper kicks real Bedrock clients
+  ("keepalive response without matching challenge"). With Geyser on the game server, BedrockGuard reads the real
+  Bedrock ping through the Geyser API
+- Timer and hover detection need **1.21.2+**: older versions don't send the end-of-tick packet they rely on
+
+Alerts, commands and logs are available in English and French.
+
+## Editions
+
+- **Free**: every check, up to **5 Bedrock players** analysed at the same time, available on [SpigotMC](https://www.spigotmc.org/resources/bedrockguard-free.139718/) and [CurseForge](https://www.curseforge.com/minecraft/bukkit-plugins/bedrockguard-free)
+- **Full**: no player limit, [available on Payhip](https://payhip.com/b/PlDW4)
+
+## Documentation
+
+- [Configuration](docs/configuration.md)
+- [Commands and permissions](docs/commands.md)
+- [Developer API](docs/api.md)
+
+## Support
+
+Report bugs and false positives in [Issues](../../issues). The source code of the anti-cheat is not public.
+
+## Also by the author
+
+[BedrockAssist](https://github.com/TheMax98000/BedrockAssist) (free): native Bedrock menus for what Geyser cannot translate
+(links, commands, enchantments, anvil, villagers), [available on SpigotMC](https://www.spigotmc.org/resources/bedrockassist.139746/).
+
+```
+
+`docs/api.md`:
+
+```md
+# BedrockGuard — Developer API
+
+BedrockGuard only analyses Bedrock players (Geyser/Floodgate). Its API lets your plugin react to violations,
+cancel them, or read violation levels (VL).
+
+## Setup
+
+The API ships inside the plugin jar. Put `bedrockguard-<version>.jar` in your project (for example under `libs/`)
+and compile against it without shading it:
+
+```kotlin
+// build.gradle.kts
+dependencies {
+    compileOnly(files("libs/bedrockguard-1.0.0.jar"))
+}
+```
+
+```xml
+<!-- pom.xml -->
+<dependency>
+  <groupId>tomokisan</groupId>
+  <artifactId>bedrockguard</artifactId>
+  <version>1.0.0</version>
+  <scope>system</scope>
+  <systemPath>${project.basedir}/libs/bedrockguard-1.0.0.jar</systemPath>
+</dependency>
+```
+
+```yaml
+# plugin.yml
+softdepend: [BedrockGuard]   # or depend, if your plugin cannot run without it
+```
+
+With `softdepend`, check `Bukkit.getPluginManager().isPluginEnabled("BedrockGuard")` before you touch the API.
+
+## `ViolationEvent`
+
+Fired each time a Bedrock player fails a check, **before** any consequence. Cancelling it skips the VL increase,
+the staff alert, the Discord message and the punishment. The protective action of the check itself (cancelled
+hit, block break or placement, movement setback) still happens.
+
+| Method | Description |
+|---|---|
+| `getPlayer()` | The Bedrock player |
+| `getCheck()` | `Timer`, `Speed`, `Fly`, `Reach`, `Nuker`, `Scaffold`, `AutoClicker` or `BadPackets` |
+| `getDetail()` | Human-readable detail, as shown in the alert |
+| `getViolationLevel()` | VL of this check after this violation |
+| `setCancelled(boolean)` | Cancel the violation |
+
+The event is synchronous: it runs on the player's thread (main thread on Paper, the player's region thread on
+Folia).
+
+## `BedrockGuardApi`
+
+| Method | Description |
+|---|---|
+| `isTracked(Player)` | `true` if BedrockGuard analyses this player (Bedrock player; within the limit on the free version) |
+| `getViolationLevel(Player, String check)` | Current VL of a check, decay included; `0` if none |
+| `getViolationLevels(Player)` | Current VL of every failed check (copy, sorted by check name) |
+
+These methods can be called from any thread.
+
+## Example
+
+Ignore movement checks while a player is in a minigame with launch pads, and log the others:
+
+```java
+import tomokisan.bedrockguard.BedrockGuardApi;
+import tomokisan.bedrockguard.ViolationEvent;
+import java.util.Set;
+import java.util.UUID;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+
+public final class MinigameBridge implements Listener {
+
+    private final Set<UUID> inLaunchPadGame;
+
+    public MinigameBridge(Set<UUID> inLaunchPadGame) {
+        this.inLaunchPadGame = inLaunchPadGame;
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    public void onViolation(ViolationEvent event) {
+        boolean movement = event.getCheck().equals("Speed") || event.getCheck().equals("Fly");
+        if (movement && inLaunchPadGame.contains(event.getPlayer().getUniqueId())) {
+            event.setCancelled(true);
+            return;
+        }
+        double total = BedrockGuardApi.getViolationLevels(event.getPlayer()).values().stream()
+                .mapToDouble(Double::doubleValue).sum();
+        event.getPlayer().getServer().getLogger().info(event.getPlayer().getName() + " total VL: " + total);
+    }
+}
+```
+
+```
+
+`docs/commands.md`:
+
+```md
+# Commands and permissions
+
+| Command | Description |
+|---|---|
+| `/bguard alerts` | Toggle staff alerts for yourself |
+| `/bguard info <player>` | Device, input mode, ping, current VL and last 5 hits (target, distance, angle, ping) of a Bedrock player |
+| `/bguard stats` | Alerts per hour of play for each input mode, since the server started |
+| `/bguard check <player>` | Send the verification bot behind a player now (needs `checks.killaura.verification-bot.enabled`) |
+| `/bguard exempt <player> [seconds]` | Exempt a player from movement checks (default: 60 s) |
+| `/bguard reload` | Reload `config.yml` (Timer settings apply to players at their next join) |
+
+| Permission | Default | Description |
+|---|---|---|
+| `bedrockguard.admin` | op | Use `/bguard` |
+| `bedrockguard.alerts` | op | Receive alerts in game |
+
+```
+
+`docs/configuration.md`:
+
+```md
+# Configuration
+
+`plugins/BedrockGuard/config.yml`. Apply changes with `/bguard reload`. New keys are added automatically to existing
+files when you update the plugin.
+
+## General
+
+| Key | Default | Description |
+|---|---|---|
+| `language` | `en` | Language of alerts, commands and logs: `en` or `fr` |
+| `debug` | `false` | Log every analysed movement and packet (diagnostics only, very verbose) |
+| `update-check` | `true` | At startup, ask the GitHub releases of this repository whether a newer version exists, and tell admins (`bedrockguard.admin`) when they join. One request per startup, nothing is sent about your server |
+| `violations.decay-per-second` | `0.1` | VL lost per second, for every check |
+| `punish.max-vl` | `10` | VL at which the punishment command runs (the VL then resets to 0) |
+| `punish.command` | `kick {player} [BedrockGuard] Suspicious behaviour ({check})` | Console command; `{player}` and `{check}` are replaced. Empty = no punishment |
+| `discord.webhook-url` | `""` | Discord webhook URL (channel → Edit → Integrations → Webhooks). Empty = disabled |
+| `discord.min-interval-seconds` | `30` | Minimum delay between two messages for the same player and check. Punishments are always sent |
+
+## Checks
+
+Every check has `enabled: true|false`. A check with `punish: false` alerts but never counts towards
+`punish.max-vl` (default for Velocity and KillAura; the other checks punish).
+
+| Key | Default | Description |
+|---|---|---|
+| `checks.timer.max-ahead-ms` | `150` | How far ahead of real time the client may run before an alert (ms) |
+| `checks.timer.max-lag-ms` | `2000` | Maximum lag that can be "caught up" at once (ms) |
+| `checks.speed.max-per-tick` | `0.7` | Maximum horizontal movement per tick (sprint-jump ≈ 0.62). ×Speed effect, ×2.6 on ice |
+| `checks.speed.buffer` | `0.5` | Accumulated excess (blocks) before an alert |
+| `checks.speed.setback` | `true` | Teleport the player back to their last safe position |
+| `checks.fly.tolerance` | `0.05` | Allowed deviation from vanilla gravity (block/tick) |
+| `checks.fly.hover-ticks` | `10` | Client ticks motionless in mid-air before an alert |
+| `checks.fly.setback` | `true` | Teleport the player back to their last safe position |
+| `checks.reach.max-distance` | `3.0` | Maximum eye → hitbox distance (vanilla survival: 3) |
+| `checks.reach.hitbox-margin` | `0.1` | Margin added to the target's hitbox |
+| `checks.reach.extra-compensation-ms` | `150` | Compensation window added to the attacker's ping (ms) |
+| `checks.reach.mob-extra-distance` | `0.6` | Extra distance allowed on mobs. Positions of mobs a player has hit are rewound like players' (a hit mob flees, and Bedrock shows it late); the margin also covers the first hit |
+| `checks.reach.cancel-hit` | `true` | Cancel out-of-reach hits on players (hits on mobs are only flagged) |
+| `checks.nuker.max-per-tick` | `1` | Blocks broken in the same tick (a legitimate player breaks one) |
+| `checks.nuker.max-per-second` | `20` | Blocks broken per second |
+| `checks.scaffold.max-per-tick` | `1` | Blocks placed in the same tick |
+| `checks.scaffold.max-per-second` | `10` | Blocks placed per second (fast touch bridging ≈ 6-8/s) |
+| `checks.autoclicker.max-cps` | `18` | Clicks per second (arm swings outside block breaking). Geyser forwards at most one swing per tick, so nothing above 20 can be measured |
+| `checks.badpackets` | — | Pitch outside [-90, 90] |
+| `checks.velocity.punish` | `false` | Count Velocity alerts towards the punishment |
+| `checks.velocity.min-ratio` | `0.5` | Alert when the player moves back less than this share of the knockback. A legitimate player pushing towards the attacker still takes about 2/3 of it |
+| `checks.velocity.buffer` | `3` | Knockbacks below `min-ratio` (roughly in a row) before an alert |
+| `checks.velocity.min-horizontal` | `0.2` | Ignore weaker knockbacks (block/tick): too small to measure |
+| `checks.velocity.window-ticks` | `8` | Client ticks watched once the knockback has reached the player (after twice their ping); mobile networks can deliver it several ticks late. Counted in client ticks, not time: a frozen client (lag, app in the background, pause menu) is never judged, and a refused knockback only counts once the player has kept playing for a second |
+| `checks.velocity.proxy-window-ms` | `1000` | Assumed delay behind a proxy, where the real ping is unknown (ms) |
+| `checks.velocity.max-ping-ms` | `400` | Knockbacks are not checked above this ping (ms) |
+| `checks.killaura.punish` | `false` | Count KillAura alerts towards the punishment |
+| `checks.killaura.max-angle` | `100` | Largest angle between the view and the target (degrees). Stays wide because touch players hit wherever they tap |
+| `checks.killaura.min-distance` | `1.0` | Targets closer than this are ignored (the angle means nothing at contact) |
+| `checks.killaura.include-mobs` | `true` | Also check hits on mobs |
+| `checks.killaura.multi-target-count` | `2` | Ticks with 2 targets or more hit before an alert… |
+| `checks.killaura.multi-target-window-ms` | `5000` | …within this window (ms, at most 10000) |
+| `checks.killaura.verification-bot.enabled` | `false` | Experimental: a fake player, shown only to the suspect, appears behind them for a moment. Nobody can hit what they cannot see; a KillAura does |
+| `checks.killaura.verification-bot.auto` | `true` | Also send it automatically when the player fights another player |
+| `checks.killaura.verification-bot.distance` | `2.0` | Distance behind the player (blocks) |
+| `checks.killaura.verification-bot.duration-ticks` | `20` | How long it stays (ticks) |
+| `checks.killaura.verification-bot.cooldown-seconds` | `60` | Minimum delay between two automatic checks of the same player |
+
+Nuker and Scaffold cancel the offending break or placement.
+
+```
