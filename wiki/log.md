@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-11-02** — ingest `description:Glory42/RigCheck`: created entity [[rigcheck]] (local-first Rust/iced Linux desktop; Steam min/rec hardware verdicts + ProtonDB/AWACY/Vulkan/Steam Deck blockers; SQLite + My Rig overrides; confidence medium); cited [[overviews/anti-cheat]] Linux/Proton evidence lane + [[are-we-anti-cheat-yet]] consumer cross-link; `index.md` entity + anti-cheat overview blurb updated.
+
 - **2026-11-02** — ingest `readme:categories`: **Cheat** link_count **2999** (+1 vs prior wiki map) / **Anti Cheat** **867** and other major README section counts stable (41 sections; `NeverC & NeverD` placeholder; Game Develop **202** subcats Guide/Source/MCP server/MCP server security/AI Agents); synced [[overviews/overview]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
 
 - **2026-11-02** — lint (agent, Cursor lint pass): read `wiki/AGENTS.md`; listed **Overviews** (9) `anti-cheat`, `dma-attack`, `game-engine`, `game-hacking`, `graphics-api`, `mobile-security`, `overview`, `reverse-engineering`, `windows-kernel`; **Concepts** (51) under `wiki/concepts/`; **Entities** (4269) under `wiki/entities/`; reconciled `index.md` `](overviews|concepts|entities/*.md)` vs disk — 4329 catalog paths (9+51+4269), 0 missing, 0 dead, 0 orphan, 0 duplicate index rows; nine `overviews/*.md` bodies + `index.md` blurb + `concepts/*.md` [[wikilink]] spot-check (13295 overview + index/concept targets), 0 broken, 0 malformed `]]]`; wiki populated — bootstrap not required; `index.md` unchanged; structural repairs none (`log.md` only).
