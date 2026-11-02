@@ -3034,7 +3034,6 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/Android1500/AndroidFaker [Android]
 - https://github.com/Scrut1ny/Windows-Spoofer
 - https://github.com/roomyoni/Nvidia-GPU-Spoof [Spoofing the NVIDIA GPU UUID by modifying "nvlddmkm.sys"]
-- https://github.com/divagr18/gpu-instance-fingerprint [CUDA/cuPy and PyTorch probes that separate same-model NVIDIA GPUs (A40, RTX 3090/4090, L40S) from atomic-add order and stock torch.index_add_ output; no serial or timer; deterministic mode removes only the passive leak]
 - https://github.com/5ec1cff/TrickyStore [trick of keystore. Android 12 or above is required]
 - https://github.com/beakthoven/TrickyStore [A trick of keystore. Android 10 or above is required]
 
@@ -4609,6 +4608,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/Ajitha-2001/aimguard [Python server-side anti-cheat prototype: telemetry ingestion, lag-compensated validation, PVS replication, behavioral detectors, moderator review workflow, and HTTP API on synthetic gameplay data]
 - https://github.com/vul-os/magnetite [Rust self-hostable game platform with magnetite-anticheat: server-authoritative deterministic replay verification and composable cheat validators]
 - https://github.com/marclourens19/ghostline [Godot 4 arena shooter reference with headless deterministic input replay verification, ASP.NET Core validation API, and PostgreSQL cheat-proof leaderboards]
+- https://github.com/kyzoeth/bitgeist [Browser retro speedrun platform with WASM libretro cores, RAM telemetry, and 60Hz input-log verification plus deterministic replay for cheat-resistant leaderboards]
 - https://github.com/web-coder-lab/chessking [Rust server-side anti-cheat for multiplayer chess: risk scoring, device fingerprinting, match integrity, captcha, and ban escalation]
 - https://github.com/AbdulAmi09/SentinelAntiCheat [Chess integrity platform with seven-layer statistical engine-assistance detection, explainable risk tiers, arbiter case management, and hash-chained audit logging]
 - https://github.com/MaksymSakundiak/chess-anti-cheat [TensorFlow/Keras engine-assistance detector with bidirectional LSTM and Conv1D over moves, timing, and color for interactive risk scoring]
