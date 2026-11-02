@@ -10,7 +10,8 @@ sources:
   - wiki/sources/descriptions/Ajitha-2001__aimguard.md
   - wiki/sources/descriptions/multiplayeragent__chompchomp-io.md
   - wiki/sources/descriptions/ToldByNun__earlybuffering-gd.md
-updated: 2026-10-30
+  - wiki/sources/descriptions/kyzoeth__bitgeist.md
+updated: 2026-11-02
 confidence: high
 ---
 
@@ -82,6 +83,8 @@ Browser `.io` reference [[chompchomp-io]] narrows the client protocol to validat
 
 Geode timing-assist mod [[earlybuffering-gd]] holds slightly early jump presses until an internal **shadow physics** tick still classifies release as safe—label emitted jump events **client-reported**; the planner, buffer state machine, and optional per-level learning run entirely on the client with no server corroboration of raw HID timing or shadow-tick decisions. (source: wiki/sources/descriptions/ToldByNun__earlybuffering-gd.md)
 
+Browser retro speedrun platform [[bitgeist]] ingests **60 Hz run-length-encoded joypad logs** as **client-reported** submit payloads, samples player position and finish state from **emulated Libretro WASM RAM** on the client, and promotes leaderboard acceptance only after a **headless deterministic WASM replay** reproduces movement against game-specific rules (wall climbs, air dashes)—treat verified replay outcomes as **server-derived** integrity evidence, not raw client RAM reads. (source: wiki/sources/descriptions/kyzoeth__bitgeist.md)
+
 ## Related
 
-[[ai-aimbot-detection]] · [[blastscale]] · [[rearguard]] · [[peak-mode-anticheat-sentinel]] · [[chompchomp-io]] · [[earlybuffering-gd]] · [[hardware-input-injection]] · [[research-rigor]] · [[overviews/anti-cheat]] · [[overviews/game-hacking]]
+[[ai-aimbot-detection]] · [[blastscale]] · [[rearguard]] · [[peak-mode-anticheat-sentinel]] · [[chompchomp-io]] · [[earlybuffering-gd]] · [[bitgeist]] · [[hardware-input-injection]] · [[research-rigor]] · [[overviews/anti-cheat]] · [[overviews/game-hacking]]
