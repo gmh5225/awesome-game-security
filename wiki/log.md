@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-11-02** — ingest `description:Brad-Edwards/owlbear`: created entity [[owlbear]] (ARM64 Linux educational AC/EDR prototype; C kernel module + kprobes + eBPF LSM ptrace/mmap denials + userspace daemon policy/signatures/HMAC-SHA256 integrity/debugger/LD_PRELOAD/process-tree correlation; ncurses target + bundled external-memory cheat verification + E2E scripts; Graviton Terraform; confidence medium); cited [[overviews/anti-cheat]] open-source Linux kernel AC cluster beside [[linux-anticheat]]/[[vigil]]; cross-linked [[linux-anticheat]]; `index.md` entity + overview blurb updated.
+
 - **2026-11-02** — ingest `description:TheMax98000/BedrockGuard`: created entity [[bedrockguard]] (Paper/Spigot/Folia plugin; PacketEvents + Geyser/Floodgate; Bedrock-only checks on cross-play Java servers—movement/combat/packet modules tuned for touch/controller; VL decay; staff alerts, Discord webhooks, punishments; developer API; confidence medium); cited [[overviews/anti-cheat]] Floodgate-scoped Bedrock lane + [[overviews/game-hacking]] Minecraft cross-play AC cluster beside [[astrox-anticheat]]/[[fox-addition]]; `index.md` entity + overview blurbs updated.
 
 - **2026-11-02** — ingest `readme:categories`: **Anti Cheat** link_count **866** (+2 vs prior wiki map) / **Cheat** **2996** and other major README section counts stable (41 sections; `NeverC & NeverD` placeholder; Game Develop subcats Guide/Source/MCP server/MCP server security/AI Agents); synced [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
