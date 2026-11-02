@@ -4598,6 +4598,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/Rycooop/Bloom-Anticheat
 - https://github.com/Vasieco/Kernel-Anticheat [Kernel Anticheat]
 - https://github.com/PatchRequest/PeregrineAntiCheat [Educational Windows anti-cheat: kernel minifilter, ObCallbacks, APC injection, MinHook API hooks, ETW-TI, YARA, Tauri GUI, cheat test suite]
+- https://github.com/Brad-Edwards/owlbear [Educational ARM64 Linux anti-cheat prototype: kernel module, eBPF LSM hooks, userspace daemon with policy/signature scanning, ncurses game target, and bundled external-memory cheat attack programs for verification]
 - https://github.com/AmenHermano144/Anti-cheat-Kernel-Driver [Core_ac — modular Windows x64 kernel anti-cheat reference driver with detection modules, BYOVD scanning, and AES-GCM–sealed usermode IOCTL channel]
 - https://github.com/lauralex/OAC [Open Anti-Cheat: x64 Windows kernel driver plus user-mode scanner reference implementation with ObCallbacks handle filtering and cross-view integrity checks]
 - https://github.com/violetweather/Certael [Server-authoritative open-source anti-cheat framework with Godot/Unity/Unreal adapters]
@@ -4665,6 +4666,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/Hexze/anticheat [Starfish Minecraft-style cheater detector with NoSlow/scaffold/combat heuristics]
 - https://github.com/PalassCQ/GuardAC [AI-assisted open-source Minecraft anti-cheat plugin for Spigot/Paper/Folia]
 - https://github.com/IDCTeam-Group/FoxAddition [Open-source Spigot/Paper/Folia Minecraft server anti-cheat plugin with PacketEvents checks, Bedrock/Geyser support, and configurable logging]
+- https://github.com/TheMax98000/BedrockGuard [Paper/Spigot/Folia plugin anti-cheat for Bedrock players on Geyser/Floodgate Java servers with movement, combat, and packet checks tuned for touch/controller input]
 - https://github.com/KaelusAI/Shard [AI-powered open-source Minecraft Paper/Folia anti-cheat plugin]
 - https://github.com/TheMille-Dev/AntiGuard [Self-contained Paper/Purpur Minecraft anti-cheat plugin with Fly/Speed/Reach/KillAura checks, embedded SQLite storage, and built-in web dashboard plus REST API]
 - https://github.com/donnie1337/AntiCheatPlus [Paper Minecraft anti-cheat and punishment plugin with movement, combat, block, x-ray, and killaura decoy checks plus ban/warn GUI]
