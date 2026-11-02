@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-11-02** — ingest `description:TheMax98000/BedrockGuard`: created entity [[bedrockguard]] (Paper/Spigot/Folia plugin; PacketEvents + Geyser/Floodgate; Bedrock-only checks on cross-play Java servers—movement/combat/packet modules tuned for touch/controller; VL decay; staff alerts, Discord webhooks, punishments; developer API; confidence medium); cited [[overviews/anti-cheat]] Floodgate-scoped Bedrock lane + [[overviews/game-hacking]] Minecraft cross-play AC cluster beside [[astrox-anticheat]]/[[fox-addition]]; `index.md` entity + overview blurbs updated.
+
 - **2026-11-02** — ingest `readme:categories`: **Anti Cheat** link_count **866** (+2 vs prior wiki map) / **Cheat** **2996** and other major README section counts stable (41 sections; `NeverC & NeverD` placeholder; Game Develop subcats Guide/Source/MCP server/MCP server security/AI Agents); synced [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
 
 - **2026-11-02** — lint (agent, Cursor lint pass): read `wiki/AGENTS.md`; listed **Overviews** (9) `anti-cheat`, `dma-attack`, `game-engine`, `game-hacking`, `graphics-api`, `mobile-security`, `overview`, `reverse-engineering`, `windows-kernel`; **Concepts** (51) under `wiki/concepts/`; **Entities** (4263) under `wiki/entities/`; reconciled `index.md` catalog vs disk — 4323 paths (9+51+4263), 0 missing, 0 dead; nine `overviews/*.md` + `index.md` ## Overviews / ## Concepts blurb [[wikilink]] spot-check (14318 targets), 0 broken; wiki populated — bootstrap not required; `index.md` unchanged; structural repairs none (`log.md` only).
