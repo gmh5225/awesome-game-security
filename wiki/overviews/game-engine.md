@@ -23,6 +23,7 @@ sources:
   - wiki/sources/descriptions/regenrek__deepwiki-mcp.md
   - wiki/sources/descriptions/noopstudios__interactive-feedback-mcp.md
   - wiki/sources/descriptions/gmh5225__interactive-feedback-macos-mcp.md
+  - wiki/sources/descriptions/laaielichter__Reverseport.md
   - wiki/sources/descriptions/lannden1245__Void-Engine.md
   - wiki/sources/descriptions/GloriousBrendon__rearguard.md
   - wiki/sources/descriptions/modcommunity__dot-server-security.md
@@ -807,6 +808,7 @@ Editor-facing MCP bridges in the README's **MCP server** subcategory let AI agen
 - **Roblox MCP** — [[vibe-blocks-mcp]] exposes Roblox Studio actions as MCP tools over SSE (source: wiki/sources/descriptions/gmh5225__vibe-blocks-mcp.md)
 - **Zig MCP Server** — [[zig-mcp-server]] high-performance, memory-efficient MCP protocol implementation in Zig for game developers, reverse engineers, and tooling builders (source: wiki/sources/descriptions/gmh5225__zig-mcp-server.md)
 - **Jupyter MCP Server** — [[jupyter-mcp-server]] exposes notebook create/read/edit/execute as MCP tools (stdio/streamable HTTP; local Jupyter/JupyterHub/Colab; AI-assisted data analysis) (source: wiki/sources/descriptions/datalayer__jupyter-mcp-server.md)
+- **ReversePort** — [[reverseport]] agent toolkit combining cross-engine **porting** (Godot, Unity IL2CPP, common archives; dependency scans, version diff, parity-verification skill packs) with MCP/CLI-wrapped disassemblers and runtime tooling (Ghidra, IDA, Hopper, Kuna, JADX, Frida, LLDB, mitmproxy, pwndbg; TS/JS/Java/Python bridges; laaielichter; Game Develop / MCP server + RE Tools) (source: wiki/sources/descriptions/laaielichter__Reverseport.md)
 - **MCPup** — [[mcpup]] discover/install/configure/run MCP server infrastructure for Unity AI-assisted dev workflows (source: wiki/sources/descriptions/gmh5225__mcpup.md)
 - **Hex2Dec MCP** — [[hex2dec-mcp]] hex↔decimal number conversion for AI agents (JavaScript/TypeScript; gmh5225) (source: wiki/sources/descriptions/gmh5225__hex2dec-mcp.md)
 - **MCP Reverse** — [[mcp-reverse]] TypeScript/Node.js aggregated MCP hub (180+ tools; sidecar bridges for Ghidra, IDA, Binary Ninja, x64dbg, Cheat Engine, Frida, dnSpy, ILSpy, ReClass.NET; native decomp cache, YARA/signature scan, ROP/memory, PDB/DWARF, game-engine helpers; VMProtect-unpack cookbooks, anti-cheat skill corpus, agent mesh; Docker/systemd + example client configs; 1llu50ry; Game Develop / MCP server) (source: wiki/sources/descriptions/1llu50ry__mcp-reverse.md)
