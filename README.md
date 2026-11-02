@@ -2868,6 +2868,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/dazi2011/crossover-patcher [Experimental CrossOver patcher to improve compatibility with Windows games protected by anti-cheat]
 - https://github.com/Zagrios/Obelisk [Open-source Apple silicon macOS launcher for Steam/Epic/GOG with Voile Wine runtime and voile-lkd for Windows and Linux anti-cheat–supported titles]
 - https://github.com/CDJuaum/RunEXE [Python PE analyzer and Wine launcher that flags kernel anti-cheat/DRM blockers and auto-provisions prefixes and dependencies before running Windows games on Linux]
+- https://github.com/Glory42/RigCheck [Rust Linux desktop app that verdicts Steam games against your hardware, ProtonDB, and anti-cheat Linux blockers; local-first]
 - https://github.com/ertunc-ozbay/pointblank-linux [Rust standalone launcher to run Point Blank (Zepetto/TAM) on Linux with unmodified CheatBlocker anti-cheat via Wine-GE/Proton, TLS-aligned runner, and prefix setup]
 - https://github.com/BlaMacfly/ArchMod [Native Rust/Tauri cheat panel for Steam games on Proton: launch Windows trainers in the correct prefix, scan memory natively, and share community address profiles]
 - https://github.com/DeckCheatz/DeckCheatz [AGPL Rust trainer launcher for Steam Deck and Linux with Flatpak/Nix packaging and Proton/Wine-friendly trainer UI]
