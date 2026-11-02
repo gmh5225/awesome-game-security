@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-11-02** — ingest `description:jmars125/xcx-recomp`: created entity [[xcx-recomp]] (*XCX* Definitive Edition Switch ARM64 NSO→Windows x64 static recomp; TotK Recomp fork; Python lifter + jumptable/version patches + Unicorn difftest; SDK/NVN→Vulkan HLE; BYO dumps; preservation RE—not AC/online security; confidence medium); cited [[concepts/static-runtime-evidence]] Switch lift cluster + [[overviews/reverse-engineering]] Cheat Source static-recomp lane beside [[totk-pc-recomp]]/[[smo-recomp]]; `index.md` entity + concept blurb updated.
+
 - **2026-11-02** — ingest `description:laaielichter/Reverseport`: created entity [[reverseport]] (CLI + MCP agent toolkit; porting engine for Godot/Unity IL2CPP/archives with dependency graphs, build diff, migration skill packs; Ghidra/IDA/Hopper/Kuna + JADX/Frida/LLDB/mitmproxy/pwndbg bridges; confidence medium); cited [[overviews/reverse-engineering]] AI-assisted RE (MCP) lane + [[overviews/game-engine]] MCP porting cluster beside [[reverse-this]]/[[gamedev-mcp-server]]; `index.md` entity + overview blurbs updated.
 
 - **2026-11-02** — ingest `readme:categories`: **Cheat** link_count **2998** (+1) / **Game Develop** **202** (+1); **Anti Cheat** **867** and other major README section counts stable (41 sections; `NeverC & NeverD` placeholder; Game Develop subcats Guide/Source/MCP server/MCP server security/AI Agents); synced [[overviews/overview]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]], [[overviews/game-engine]]; light `index.md` section notes (no per-category pages).

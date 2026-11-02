@@ -25,9 +25,10 @@ sources:
   - wiki/sources/descriptions/Jstar269__nakagawa-recomp.md
   - wiki/sources/descriptions/danielalves96__gow-pc-port.md
   - wiki/sources/descriptions/valentderah__totk-pc-recomp.md
+  - wiki/sources/descriptions/jmars125__xcx-recomp.md
   - wiki/sources/descriptions/jenissimo__bottleship.md
   - wiki/sources/descriptions/KamiKitsune420__bgt-decomp-tools.md
-updated: 2026-10-31
+updated: 2026-11-02
 confidence: high
 ---
 
@@ -89,6 +90,8 @@ Switch AArch64 static recompilation to native Windows x64 such as [[smo-recomp]]
 
 [[totk-pc-recomp]] (valentderah; *Tears of the Kingdom* Switch ARM64 **NSO** modules→C via Python lifter/codegen; **Unicorn** differential validation; version-specific retail patch lists; Windows runtime HLE for Horizon kernel, **NVN→Vulkan**, audio, input, filesystem; resolution scaling, ultrawide, frame-rate controls; **llvm-mingw** local compile—no shipped game binaries; BYO assets) extends the Switch static-recomp cluster—separate lifted guest code from reimplemented host services before preservation or modding claims. (source: wiki/sources/descriptions/valentderah__totk-pc-recomp.md)
 
+[[xcx-recomp]] (jmars125; *Xenoblade Chronicles X: Definitive Edition*; TotK Recomp fork; Switch ARM64 **NSO**→generated C with jumptable handling and version patch tables; **Unicorn** difftest oracle; SDK service HLE, **NVN→Vulkan** with Maxwell-oriented debug notes, audio/input/filesystem; setup tool from user dumps—no full Switch emulator) applies the same lift-vs-HLE labeling at commercial-title scale for preservation RE rather than online AC study. (source: wiki/sources/descriptions/jmars125__xcx-recomp.md)
+
 Browser-based x86 preservation via [[bottleship]] (jenissimo; **v86** CPU emulation + Win32/COM/DirectDraw–D3D3–9 HLE on WebGPU/WebAudio/OPFS; TypeScript + Rust/WASM; WGB bundles + GOG import; WinAPI modules + installer/archive parsers; automation harness with structured debug snapshots) keeps guest x86 execution in the emulator while graphics/audio/fs are host-reimplemented—label which Win32/D3D API families are faithfully handled vs stubbed before citing renderer or threading behavior. (source: wiki/sources/descriptions/jenissimo__bottleship.md)
 
 PSP MIPS static recompilation to native Windows such as [[nakagawa-recomp]] (Jstar269; sal063 fork lineage; EBOOT→C lift with MIPS guest runtime and VFPU support tables; Vulkan + SDL3 launcher/player; Python codegen, pipeline tests, cosimulation against a reference interpreter, decomp.me export, optional real-PSP verification; BYO disc) applies the same static/runtime split on a handheld MIPS+VFPU target—separate lifted guest code from reimplemented PSP services and GPU paths before citing gameplay or preservation claims. (source: wiki/sources/descriptions/Jstar269__nakagawa-recomp.md)
@@ -111,4 +114,4 @@ Game-server PC checks often combine **offline host artifacts** (Prefetch, Amcach
 
 ## Related
 
-[[binary-evidence]] · [[binary-diffing]] · [[dynamic-binary-instrumentation]] · [[jsrf-recomp]] · [[ngbrecomp]] · [[sf33rdsxbrecompo]] · [[nfsu2recomp]] · [[sc2-android-recomp]] · [[smo-recomp]] · [[letsgo-recomp]] · [[totk-pc-recomp]] · [[nakagawa-recomp]] · [[gow-pc-port]] · [[ultimate-mortal-kombat-3-ios-decompiled]] · [[copyapp]] · [[wwe-svr2009-recomp]] · [[nhl-legacy-remaster]] · [[saturnkit]] · [[motorstorm-mv-recomp]] · [[dead-rising-2-case-zero-xenon-recomp]] · [[mcla-pc]] · [[pipeline-disasm]] · [[frogman]] · [[sre-re]] · [[openmcm2]] · [[ttd-capa-cpp]] · [[custos]] · [[mixed-boolean-arithmetic]] · [[control-flow-flattening]] · [[research-rigor]] · [[overviews/reverse-engineering]] · [[overviews/windows-kernel]] · [[overviews/game-engine]]
+[[binary-evidence]] · [[binary-diffing]] · [[dynamic-binary-instrumentation]] · [[jsrf-recomp]] · [[ngbrecomp]] · [[sf33rdsxbrecompo]] · [[nfsu2recomp]] · [[sc2-android-recomp]] · [[smo-recomp]] · [[letsgo-recomp]] · [[totk-pc-recomp]] · [[xcx-recomp]] · [[nakagawa-recomp]] · [[gow-pc-port]] · [[ultimate-mortal-kombat-3-ios-decompiled]] · [[copyapp]] · [[wwe-svr2009-recomp]] · [[nhl-legacy-remaster]] · [[saturnkit]] · [[motorstorm-mv-recomp]] · [[dead-rising-2-case-zero-xenon-recomp]] · [[mcla-pc]] · [[pipeline-disasm]] · [[frogman]] · [[sre-re]] · [[openmcm2]] · [[ttd-capa-cpp]] · [[custos]] · [[mixed-boolean-arithmetic]] · [[control-flow-flattening]] · [[research-rigor]] · [[overviews/reverse-engineering]] · [[overviews/windows-kernel]] · [[overviews/game-engine]]

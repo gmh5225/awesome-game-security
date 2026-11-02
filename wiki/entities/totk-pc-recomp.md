@@ -31,4 +31,4 @@ Targets researchers and developers studying **static recompilation**, **console 
 
 ## Related
 
-[[smo-recomp]] · [[letsgo-recomp]] · [[nakagawa-recomp]] · [[static-runtime-evidence]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]] · [[overviews/graphics-api]]
+[[smo-recomp]] · [[letsgo-recomp]] · [[xcx-recomp]] · [[nakagawa-recomp]] · [[static-runtime-evidence]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]] · [[overviews/graphics-api]]
