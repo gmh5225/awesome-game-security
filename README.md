@@ -1014,6 +1014,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/danielgomesvieira2000/ps2-port-engine [Verified PS2 decompilation toolchain and native PC port runtime (EE/IOP/GS/VU, Vulkan host) with no bundled game assets]
 - https://github.com/danielalves96/gow-pc-port [Static recompilation of God of War (PS2 SCUS-97399) to native C++/OpenGL for Windows/Linux; Rust MIPS recompiler, BYO disc assets, documented RE and porting pipeline]
 - https://github.com/nat649/fs15-reconstruction [Early-stage Farming Simulator 15 / GIANTS Engine 6 decompilation, native reconstruction, and validated component recovery (local game files required)]
+- https://github.com/RodoLy/HarvestMoonSnesDecomp [Harvest Moon (SNES) rewritten in byte-verified C from HM-Decomp, with native Windows/macOS/Linux/Android builds, save states, and in-game cheats; BYO ROM]
 - https://github.com/byroweb/AC1_RE [RE reference and tooling for Armored Core (PS1, SLUS-01323): docs, Ghidra pipeline, disc/PA/mission parsers, and behavioral C models (BYO disc)]
 - https://github.com/piffd0s/defcon-dreamcast-planetweb-research [DEF CON Dreamcast PlanetWeb exploit chain — Eden loading, memory-write flaw, and MIME stack overflow to run native SH-4 DOOM without a debugger]
 - https://github.com/Anonym0ose/JitDumper [A CIL method body dumper]
