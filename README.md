@@ -943,6 +943,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 > Packet Capture&Parse
 - https://github.com/seladb/PcapPlusPlus [Pcap]
 - https://github.com/nmap/npcap
+- https://github.com/hashblen/auto-discipher [Rust library to parse and decrypt live network packets for a gacha anime game, auto-detecting session tokens, achievement payloads, and XOR keys after updates]
 
 > SpeedHack
 - https://github.com/absoIute/Speedhack
