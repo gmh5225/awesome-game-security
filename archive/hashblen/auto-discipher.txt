@@ -1,0 +1,1781 @@
+Project Path: arc_hashblen_auto-discipher__2rt4jto
+
+Source Tree:
+
+```txt
+arc_hashblen_auto-discipher__2rt4jto
+├── Cargo.toml
+├── LICENSE
+├── README.md
+├── build.rs
+├── keys
+│   └── private_key_3.pem
+├── protos
+│   └── protos.proto
+└── src
+    ├── connection.rs
+    ├── crypto.rs
+    ├── cs_rand.rs
+    ├── gen
+    │   └── mod.rs
+    ├── kcp.rs
+    ├── lib.rs
+    ├── tests.rs
+    └── unk_util.rs
+
+```
+
+`Cargo.toml`:
+
+```toml
+[package]
+name = "auto-discipher"
+version = "2.0.0"
+edition = "2021"
+license = "MIT"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+base64 = "0.22"
+etherparse = "0.16.0"
+kcp = { git = "https://github.com/hashblen/mhy-kcp" }
+protobuf = "3.7.1"
+rand_mt = "4.2"
+tracing = "0.1"
+rsa = "0.9"
+
+[build-dependencies]
+protobuf-codegen = "3.7.1"
+
+[dev-dependencies]
+serde = { version = "1.0", features = ["derive"] }
+# preserve_order keeps the keys file in write order, which is what says which
+# build a key belongs to.
+serde_json = { version = "1.0", features = ["preserve_order"] }
+tracing = "0.1"
+tracing-subscriber = "0.3"
+
+```
+
+`LICENSE`:
+
+```
+MIT License
+
+Copyright (c) 2024 IceDynamix
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```
+
+`README.md`:
+
+```md
+# (auto)-discipher
+
+a library to parse network packets from a certain tv anime game!
+
+## use in your projects
+
+not published to crates.io out of caution. add following to your Cargo.toml to use
+
+```toml
+[dependencies]
+auto_discipher = { git = "https://github.com/hashblen/auto-discipher" } # optionally add revision
+```
+
+for documentation, use `cargo doc`
+
+## related
+
+- [stardb-exporter](https://github.com/juliuskreutz/stardb-exporter)
+- [auto-reliquary](https://github.com/hashblen/auto-reliquary)
+- [auto-artifactarium](https://github.com/hashblen/auto-artifactarium)
+- [artifactarium](https://github.com/hashblen/artifactarium)
+- old fork of [reliquary](https://github.com/IceDynamix/archiver)
+
+```
+
+`build.rs`:
+
+```rs
+fn main() {
+    protobuf_codegen::Codegen::new()
+        .pure()
+        .cargo_out_dir("protos")
+        .include("protos")
+        .inputs(["protos/protos.proto"])
+        .run_from_script();
+
+    println!("cargo::rerun-if-changed=build.rs");
+    println!("cargo::rerun-if-changed=protos/protos.proto");
+}
+
+```
+
+`keys/private_key_3.pem`:
+
+```pem
+-----BEGIN RSA PRIVATE KEY-----
+MIICXQIBAAKBgQCuRCgK0ZLlhKvPGbz1arcZJH+7DkAkPAaq762RdWJnA4XwfrGA
+vso+LY5UBMcKho0UtMAPmeUtKODSkcQCodp+9e3OPgaHy28XYDr/zIHlx5Pc6zOj
+1RHl3uGwjnmzFvftBSlAsdijEqzv0WiEnvhnlXYuBJj7Re9sbEwfGHEdNwIDAQAB
+AoGAdBCe3r3Aaa9YQsIwsP/XXR6LGAmgvMFh631gi62z0UpubcPj8wyfZJQw5FKe
+Qqtk0XKlLH7iPZapTnWZJ+umuqf84RcuilwItH3yTrJw8PeIIxuKE8E+TknKni2I
+7SYyKpuuRbW96DC5WhHS4QNRbNwoyCQPfK0WobQItAWuWFkCQQDn0Bj/A0SbnXd8
+kNeqefPkPxWvAucAA8+GIoDL5GyM+HUwMW3ZyVNA50vvPVFbCHV8UXzX1shSLEMl
+leJ7eX3NAkEAwHLxcB3N2s/GJgco35bEJPQkrv184PXnJRO2cTxCR8ZTrN62oKZb
+zD/6j5EcZA6hUou+YjhPLsqcaFJVI2DjEwJACjugbtlpFOl9lc0bCBZ8Eq5KOcCK
+C/EfHw+02ctKk2qAWdFExSFjAHF1Y6k0Ry13ajZ6qVh83UvA5w7XwZWaXQJBAIl1
+EBI+l3xEj4k17/HTpAGpCFKc6AdeXFzVOaijm8vcUoPVB6izajn3MKY+xYKKGJv3
+CGLrSVNokFLLC9ibKVUCQQCKoomFxRojvGmrOLnDYfrWNLGsE6myMsZ5yLYgHsaO
+3yCaL021nJLTkUzNU2/09EMO4bO/SGl7OHKrjdUbRAvM
+-----END RSA PRIVATE KEY-----
+```
+
+`protos/protos.proto`:
+
+```proto
+syntax = "proto3";
+
+message Unk {
+
+}
+
+```
+
+`src/connection.rs`:
+
+```rs
+use etherparse::{SlicedPacket, TransportSlice, UdpHeader};
+use tracing::{debug, info, instrument, trace, warn};
+
+use crate::{ConnectionPacket, PacketDirection};
+
+#[instrument(skip_all)]
+pub fn parse_connection_packet(port_filter: &[u16], bytes: Vec<u8>) -> Option<ConnectionPacket> {
+    let (udp, payload) = parse_udp(bytes)?;
+    let direction = validate_ports(port_filter, udp)?;
+
+    // Too short to hold a control code, and not a KCP segment either.
+    if payload.len() < 4 {
+        trace!(len = payload.len(), "packet too short");
+        return None;
+    }
+
+    if payload.len() <= 20 {
+        let code = u32::from_be_bytes(payload[..4].try_into().unwrap());
+        match code {
+            0xFF => {
+                info!("handshake requested");
+                Some(ConnectionPacket::HandshakeRequested)
+            }
+            404 => {
+                warn!("disconnected packet");
+                Some(ConnectionPacket::Disconnected)
+            }
+            _ => {
+                trace!("handshake established");
+                Some(ConnectionPacket::HandshakeEstablished)
+            }
+        }
+    } else {
+        Some(ConnectionPacket::SegmentData(direction, payload))
+    }
+}
+
+#[instrument(skip_all, fields(len = data.len()))]
+pub fn parse_udp(data: Vec<u8>) -> Option<(UdpHeader, Vec<u8>)> {
+    let packet = match SlicedPacket::from_ethernet(&data) {
+        Ok(p) => p,
+        Err(e) => {
+            debug!("failed: {e}");
+            return None;
+        }
+    };
+
+    // sanity checking the pcap filters
+    let Some(transport) = packet.transport else {
+        debug!("transport was not present");
+        return None;
+    };
+
+    let TransportSlice::Udp(udp) = transport else {
+        debug!("packet was not udp");
+        return None;
+    };
+
+    trace!("complete");
+
+    Some((udp.to_header(), udp.payload().to_vec()))
+}
+
+fn validate_ports(port_filter: &[u16], udp: UdpHeader) -> Option<PacketDirection> {
+    let (src, dest) = (udp.source_port, udp.destination_port);
+    if port_filter.contains(&src) {
+        Some(PacketDirection::Received)
+    } else if port_filter.contains(&dest) {
+        Some(PacketDirection::Sent)
+    } else {
+        trace!(src, dest, "incorrect ports");
+        None
+    }
+}
+
+```
+
+`src/crypto.rs`:
+
+```rs
+use protobuf::Message;
+use rand_mt::Mt64;
+use tracing::{debug, info, instrument, trace, warn};
+
+use crate::bytes_as_hex;
+use crate::cs_rand::Random;
+use crate::gen::protos::Unk;
+
+#[instrument(skip_all)]
+pub fn xor_decrypt(key: &[u8], encrypted: &mut [u8]) {
+    trace!(data = bytes_as_hex(encrypted), "before decryption");
+
+    for i in 0..encrypted.len() {
+        encrypted[i] ^= key[i % key.len()];
+    }
+
+    trace!(data = bytes_as_hex(encrypted), "after decryption");
+}
+
+pub fn new_key_from_seed(seed: u64) -> Vec<u8> {
+    // mersenne twister generator, seeded straight from the seed
+    let mut gen = Mt64::new(seed);
+
+    let mut key = Vec::with_capacity(512);
+    for _ in 0..512 {
+        for b in gen.next_u64().to_be_bytes() {
+            key.push(b);
+        }
+    }
+    key
+}
+
+/// The shortest packet worth using as an oracle. The login burst has several
+/// 6-20 byte frames that are not protobufs and never decode however good the key
+/// is, so they make a correct key look wrong; they are also the weakest oracle.
+pub const MIN_ORACLE_BYTES: usize = 64;
+
+/// How far either side of the observed clock to look, in seconds.
+const SEARCH_WINDOW_SECONDS: i64 = 60;
+
+/// Reproduces the game's clock path bit-for-bit.
+///
+/// The float arithmetic is deliberate. ticks is ~6.4e17, well past 2^53, so the
+/// game's CVTSI2SD rounds it to a multiple of 128 before the multiply, and that
+/// rounding is part of the value we need; exact integer arithmetic does not
+/// agree. The narrowing keeps only the low half, as the game's int32(int64(..))
+/// does, which is why a whole second is the finest step worth searching.
+fn derive_seed(ms: u64) -> i32 {
+    let ticks = (ms.wrapping_mul(10_000).wrapping_add(621355968000000000)) & 0x3FFF_FFFF_FFFF_FFFF;
+    ((ticks as f64 * 1e-7) as i64) as i32
+}
+
+/// The key for one clock value.
+fn guess(ms: u64, server_seed: u64) -> Vec<u8> {
+    let computed_seed = derive_seed(ms);
+    let mut generator = Random::seeded(computed_seed);
+    let client_seed = (computed_seed as u32 as u64) | ((generator.next_int() as u32 as u64) << 32);
+
+    new_key_from_seed(client_seed ^ server_seed)
+}
+
+/// Whether `body` decodes once the pad is applied.
+///
+/// This is the only test available without the game's protos: a valid protobuf
+/// message is what the pad has to produce. Noise survives it ~1.9% of the time
+/// at 8 bytes and 0 of 8000 at 356, which is why a candidate is only accepted on
+/// a quorum of buffered packets rather than one.
+pub fn parses_with(body: &[u8], pad: &[u8]) -> bool {
+    let mut clone = body.to_vec();
+    xor_decrypt(pad, &mut clone);
+    Unk::parse_from_bytes(&clone).is_ok()
+}
+
+/// Recover the session key from the server's seed and the clock the request went
+/// out on, accepting a candidate only when a quorum of the buffered packets
+/// agrees.
+pub fn bruteforce(sent_ms: u64, server_seed: u64, bodies: &[Vec<u8>]) -> Option<Vec<u8>> {
+    info!("Running bruteforce loop with ms: {sent_ms}");
+
+    let base = (sent_ms / 1000) as i64;
+    // Screen on the longest packet first: it discards almost every candidate for
+    // the cost of one parse.
+    let strongest = bodies.iter().max_by_key(|body| body.len())?;
+
+    for i in 0..=SEARCH_WINDOW_SECONDS * 2 {
+        let delta = if i % 2 != 0 { -(i + 1) / 2 } else { i / 2 };
+        let seconds = base + delta;
+        if seconds < 0 {
+            continue;
+        }
+
+        let pad = guess((seconds as u64) * 1000, server_seed);
+        if !parses_with(strongest, &pad) {
+            continue;
+        }
+        let quorum = match bodies.len() {
+            0..=3 => bodies.len(),
+            n => n - 2,
+        };
+        if bodies.iter().filter(|body| parses_with(body, &pad)).count() < quorum {
+            continue;
+        }
+
+        debug!(seconds, "found encryption key seed");
+        return Some(pad);
+    }
+
+    warn!("Unable to find the encryption key seed.");
+    None
+}
+
+#[cfg(test)]
+mod tests {
+    /// The key derivation has to agree with the Go implementation bit for bit:
+    /// it is the one piece of arithmetic that cannot be checked against a
+    /// fixture, only against the other language.
+    #[test]
+    fn matches_go() {
+        let key: String = super::guess(1791463462000, 12673862989460770854)
+            .iter()
+            .map(|b| format!("{b:02x}"))
+            .collect();
+        assert!(
+            key.starts_with(
+                "2ce6b5989fd5e48969e36f7fe795cfcaf08f9e7f385e7503ec0149f3165724b000a41c51e9"
+            ),
+            "{key}"
+        );
+    }
+}
+
+```
+
+`src/cs_rand.rs`:
+
+```rs
+pub struct Random {
+    m_big: i32,
+    m_seed: i32,
+    inext: i32,
+    inextp: i32,
+    seed_array: [i32; 56],
+}
+
+/// "it's almost a direct translation of the c# source 😭" -thelosttree
+/// Sourced from: https://github.com/TheLostTree/evergreen/blob/master/evergreen/src/key_bruteforce.rs
+impl Random {
+    /// Creates a new instance of the `Random`.
+    /// This uses a default seed.
+    pub fn default() -> Self {
+        Random {
+            m_big: i32::MAX,
+            m_seed: 161803398,
+            inext: 0,
+            inextp: 0,
+            seed_array: [0; 56],
+        }
+    }
+
+    /// Creates a new instance of the `Random`.
+    /// seed: The seed to use for the generator.
+    pub fn seeded(seed: i32) -> Random {
+        let mut ii;
+        let mut rand = Random::default();
+
+        let subtraction = if seed == i32::MIN {
+            i32::MAX
+        } else {
+            i32::abs(seed)
+        };
+        let mut mj = rand.m_seed - subtraction;
+        rand.seed_array[55] = mj;
+
+        let mut mk = 1;
+
+        for i in 1..55 {
+            ii = 21 * i % 55;
+            rand.seed_array[ii] = mk;
+            mk = mj - mk;
+            if mk < 0 {
+                mk += rand.m_big
+            }
+            mj = rand.seed_array[ii]
+        }
+
+        for _ in 1..5 {
+            for i in 1..56 {
+                rand.seed_array[i] =
+                    rand.seed_array[i].wrapping_sub(rand.seed_array[1 + (i + 30) % 55]);
+                if rand.seed_array[i] < 0 {
+                    rand.seed_array[i] += rand.m_big
+                };
+            }
+        }
+
+        rand.inext = 0;
+        rand.inextp = 21;
+
+        rand
+    }
+
+    fn internal_sample(&mut self) -> i32 {
+        let mut loc_inext = self.inext;
+        let mut loc_inextp = self.inextp;
+
+        loc_inext += 1;
+        if loc_inext >= 56 {
+            loc_inext = 1;
+        }
+        loc_inextp += 1;
+        if loc_inextp >= 56 {
+            loc_inextp = 1;
+        }
+
+        let mut ret_val =
+            self.seed_array[loc_inext as usize] - self.seed_array[loc_inextp as usize];
+
+        if ret_val == self.m_big {
+            ret_val -= 1
+        };
+        if ret_val < 0 {
+            ret_val += self.m_big
+        };
+
+        self.seed_array[loc_inext as usize] = ret_val;
+
+        self.inext = loc_inext;
+        self.inextp = loc_inextp;
+
+        ret_val
+    }
+
+    pub fn next_int(&mut self) -> i32 {
+        self.internal_sample()
+    }
+}
+
+```
+
+`src/gen/mod.rs`:
+
+```rs
+include!(concat!(env!("OUT_DIR"), "/protos/mod.rs"));
+
+```
+
+`src/kcp.rs`:
+
+```rs
+use std::time::SystemTime;
+
+use kcp::{get_conv, Kcp, KCP_OVERHEAD};
+use tracing::{error, info, instrument, span, trace, warn, Level};
+
+use crate::bytes_as_hex;
+
+pub(crate) struct KcpSniffer {
+    conv_id: u32,
+    kcp: Kcp<Vec<u8>>,
+    time_start: SystemTime,
+}
+
+impl KcpSniffer {
+    #[instrument(skip(segment))]
+    pub fn try_new(segment: &[u8]) -> Option<Self> {
+        validate_kcp_segment(segment).map(Self::new).or_else(|| {
+            error!("could not create new kcp instance");
+            None
+        })
+    }
+
+    #[instrument]
+    fn new(conv_id: u32) -> Self {
+        info!("new connection, created new kcp instance");
+
+        KcpSniffer {
+            conv_id,
+            kcp: new_kcp(conv_id),
+            time_start: SystemTime::now(),
+        }
+    }
+
+    #[instrument(skip_all, fields(conv_id = self.conv_id, len = segments.len()))]
+    pub fn receive_segments(&mut self, segments: &[u8]) -> Vec<Vec<u8>> {
+        let Some(conv_id) = validate_kcp_segment(segments) else {
+            return Vec::new();
+        };
+
+        trace!("message data: {}", bytes_as_hex(segments));
+
+        if conv_id != self.conv_id {
+            warn!(
+                expected = self.conv_id,
+                "packet did not belong to conversation"
+            );
+            return Vec::new();
+        }
+
+        // game uses special format which adds 4 bytes at index 4,
+        // reprocess to discard bytes 4..8 of every segment
+        let segments = reformat_kcp_segments(segments);
+
+        match self.kcp.input(&segments) {
+            Ok(size) => trace!(size, "input successful"),
+            Err(e) => warn!("could not input to kcp: {e}"),
+        }
+
+        let mut recv = Vec::new();
+        while let Ok(size) = self.kcp.peeksize() {
+            let span = span!(Level::TRACE, "receiving", size);
+            let _enter = span.enter();
+
+            let mut bytes = vec![0; size];
+
+            match self.kcp.recv(&mut bytes) {
+                Ok(_size) => {
+                    recv.push(bytes);
+                }
+                Err(e) => {
+                    warn!(%e, "could not receive kcp bytes");
+                }
+            }
+        }
+
+        if let Err(e) = self.kcp.update(self.clock()) {
+            warn!(%e, "could not update kcp state");
+        }
+
+        recv
+    }
+
+    #[inline]
+    fn clock(&self) -> u32 {
+        SystemTime::now()
+            .duration_since(self.time_start)
+            .unwrap_or_default()
+            .as_millis() as u32
+    }
+}
+
+#[inline]
+fn new_kcp(conv_id: u32) -> Kcp<Vec<u8>> {
+    let mut kcp = Kcp::new(conv_id, Vec::new());
+    kcp.set_wndsize(1024, 1024);
+    kcp
+}
+
+fn validate_kcp_segment(payload: &[u8]) -> Option<u32> {
+    if payload.len() <= KCP_OVERHEAD {
+        warn!(
+            len = payload.len(),
+            data = bytes_as_hex(payload),
+            "kcp header was too short"
+        );
+        return None;
+    }
+    Some(get_conv(payload))
+}
+
+// reformat to skip bytes 4..8
+fn reformat_kcp_segments(data: &[u8]) -> Vec<u8> {
+    let span = span!(Level::TRACE, "split");
+    let _enter = span.enter();
+
+    let mut reformatted_bytes = Vec::new();
+
+    trace!("before split: {}", bytes_as_hex(data));
+
+    let mut i = 0;
+    while i < data.len() {
+        // Whatever is on these ports doesn't have to be a well-formed segment.
+        let Some(header) = data.get(i..i + 28) else {
+            warn!(len = data.len(), offset = i, "kcp segment header cut off");
+            break;
+        };
+        let content_len = u32::from_le_bytes(header[24..28].try_into().unwrap()) as usize;
+        if data.len() < i + 28 + content_len {
+            warn!(len = data.len(), offset = i, content_len, "kcp segment content cut off");
+            break;
+        }
+
+        let conv_id = &data[i..i + 4];
+
+        let _ = &data[i + 4..i + 8]; // skip
+
+        let remaining_header = &data[i + 8..i + 28];
+        let content = &data[i + 28..i + 28 + content_len];
+
+        for b in conv_id.iter().chain(remaining_header).chain(content) {
+            reformatted_bytes.push(*b);
+        }
+
+        i += 28 + content_len;
+    }
+
+    trace!(" after split: {}", bytes_as_hex(&reformatted_bytes));
+
+    reformatted_bytes
+}
+
+```
+
+`src/lib.rs`:
+
+```rs
+//! Parse network packets transmitted between the game and the server
+//!
+//! Packets are built up in following layers depending on the purpose of the packet:
+//!
+//! - Packets for connection management ([`GamePacket::Connection`])
+//!     - **Ethernet/IP/UDP**, handled using [`etherparse`]
+//!     - **[`ConnectionPacket`]**, containing events for connection establishment/disconnection
+//! - Packets for game commands ([`GamePacket::Commands`])
+//!     - **Ethernet/IP/UDP**, handled using [`etherparse`]
+//!     - **KCP**, handled using [`kcp`]
+//!         - The KCP header contains an extra field that needs to be removed
+//!           to be compatible with the regular KCP protocol
+//!     - **[`GameCommand`]**, encrypted using XOR
+//!     - **Protobuf**, payload, needs to be parsed into using the types generated in [`gen::proto`]
+//!
+//! [`GameCommand`]s are encrypted using an XOR-key.
+//! One of the first packets sent is a request for a new key from a seed.
+//! That key is used for the rest of the packets.
+//! This means the recording for packets needs to start before the game starts (train hyperdrive).
+//!
+//! ## Example
+//! ```
+//! use auto_discipher::{GamePacket, GameSniffer, ConnectionPacket};
+//!
+//! let packets: Vec<Vec<u8>> = vec![/**/];
+//!
+//! let mut sniffer = GameSniffer::new();
+//! for packet in packets {
+//!     match sniffer.receive_packet(packet) {
+//!         Ok(Some(GamePacket::Connection(ConnectionPacket::Disconnected))) => {
+//!             println!("Disconnected!");
+//!             break;
+//!         }
+//!         Ok(Some(GamePacket::Commands(commands))) => {
+//!             for command in commands {
+//!                 println!("{:?}", command);
+//!             }
+//!         }
+//!         Err(error) => {
+//!             println!("{error}");
+//!             break;
+//!         }
+//!         _ => {}
+//!     }
+//! }
+//! ```
+//!
+
+use base64::prelude::BASE64_STANDARD;
+use base64::Engine;
+use rsa::{pkcs1::DecodeRsaPrivateKey, RsaPrivateKey};
+use std::fmt;
+use std::fmt::Write;
+use std::time::{SystemTime, UNIX_EPOCH};
+use tracing::{debug, error, info, info_span, instrument, trace, warn};
+
+use crate::connection::parse_connection_packet;
+use crate::crypto::{bruteforce, parses_with, xor_decrypt, MIN_ORACLE_BYTES};
+use crate::kcp::KcpSniffer;
+use crate::unk_util::{
+    decode_list, find_achievement_list, matches_get_player_token_rsp, Achievement, AchievementList,
+    Catalogue,
+};
+use crate::Key::Dispatch;
+
+fn bytes_as_hex(bytes: &[u8]) -> String {
+    bytes.iter().fold(String::new(), |mut output, b| {
+        let _ = write!(output, "{b:02x}");
+        output
+    })
+}
+
+// pub mod command_id;
+pub mod gen;
+
+mod connection;
+mod crypto;
+mod cs_rand;
+mod kcp;
+mod unk_util;
+
+const PORTS: [u16; 2] = [20501, 20502];
+
+/// Top-level packet sent by the game
+pub enum GamePacket {
+    Connection(ConnectionPacket),
+    Commands(Vec<GameCommand>),
+}
+
+/// Packet for connection management
+pub enum ConnectionPacket {
+    HandshakeRequested,
+    Disconnected,
+    HandshakeEstablished,
+    SegmentData(PacketDirection, Vec<u8>),
+}
+
+/// Game command header.
+///
+/// Contains the type of the command in `command_id`
+/// and the data encoded in protobuf in `proto_data`
+///
+/// ## Bit Layout
+/// | Bit indices     |  Type |  Name |
+/// | - | - | - |
+/// |   0..4      |  `u32`  |  Header (magic constant) |
+/// |   4..6      |  `u16`  |  command_id |
+/// |   6..8      |  `u16`  |  header_len |
+/// |   8..12     |  `u32`  |  data_len |
+/// |  12..12+data_len |  variable  |  proto_data |
+/// | data_len..data_len+4  |  `u32`  |  Tail (magic constant) |
+#[derive(Clone)]
+pub struct GameCommand {
+    pub command_id: u16,
+    #[allow(unused)]
+    pub header_len: u16,
+    #[allow(unused)]
+    pub data_len: u32,
+    #[allow(unused)]
+    pub proto_header: Vec<u8>,
+    pub proto_data: Vec<u8>,
+}
+
+impl GameCommand {
+    const HEADER_LEN: usize = 12;
+    const TAIL_LEN: usize = 4;
+
+    #[instrument(skip(bytes), fields(len = bytes.len()))]
+    pub fn try_new(bytes: Vec<u8>) -> Option<Self> {
+        let header_overhead = Self::HEADER_LEN + Self::TAIL_LEN;
+        if bytes.len() < header_overhead {
+            warn!(len = bytes.len(), "game command header incomplete");
+            return None;
+        }
+
+        if bytes[0..4] != [0x01, 0x23, 0x45, 0x67]
+            || bytes[bytes.len() - 4..] != [0x89, 0xAB, 0xCD, 0xEF]
+        {
+            error!("game command magic missing");
+            return None;
+        }
+
+        // skip header magic const
+        let command_id = u16::from_be_bytes(bytes[4..6].try_into().unwrap());
+        let header_len = u16::from_be_bytes(bytes[6..8].try_into().unwrap());
+        let data_len = u32::from_be_bytes(bytes[8..12].try_into().unwrap());
+
+        let data_start = 12 + header_len as usize;
+        let data_end = data_start + data_len as usize;
+
+        if data_end > bytes.len() {
+            warn!(len = bytes.len(), "game command buffer too short");
+            return None;
+        }
+
+        let proto_header = bytes[12..data_start].to_vec();
+        let proto_data = bytes[data_start..data_end].to_vec();
+        Some(GameCommand {
+            command_id,
+            header_len,
+            data_len,
+            proto_header,
+            proto_data,
+        })
+    }
+
+    pub fn apply_key(&mut self, key: &[u8]) {
+        xor_decrypt(key, &mut self.proto_data)
+    }
+
+    pub fn parse_proto<T: protobuf::Message>(&self) -> protobuf::Result<T> {
+        T::parse_from_bytes(&self.proto_data)
+    }
+
+    pub fn parse_header<T: protobuf::Message>(&self) -> protobuf::Result<T> {
+        T::parse_from_bytes(&self.proto_header)
+    }
+}
+
+impl fmt::Debug for GameCommand {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("GameCommand")
+            .field("command_id", &self.command_id)
+            .field("header_len", &self.header_len)
+            .field("data_len", &self.data_len)
+            .finish()
+    }
+}
+
+#[derive(Debug, Clone, Copy, Hash, PartialEq, Eq)]
+pub enum PacketDirection {
+    Sent,
+    Received,
+}
+
+pub enum Key {
+    Dispatch(Vec<u8>),
+    Session(Vec<u8>),
+}
+
+/// How many packets the key search keeps as its oracle.
+///
+/// Three agreeing already make a wrong key acceptance negligible, and more than
+/// that is only reached when the search has failed for a while.
+const MAX_PENDING: usize = 8;
+
+/// Why the sniffer gave up on a connection.
+///
+/// The sniffer has reset itself by the time one of these is returned, so whatever
+/// follows starts from scratch.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum SniffError {
+    /// None of the initial keys fit the connection's first packets. Either the
+    /// game has a new key, or the capture started after the login.
+    InitialKeyMissing {
+        /// The version the packets asked for, where the game has such a thing.
+        version: Option<u32>,
+        /// Whether the connection's handshake was captured. Without it the
+        /// capture started late, and any version is just noise.
+        saw_handshake: bool,
+    },
+    /// The initial key stopped fitting, but no session seed was ever seen.
+    SessionSeedMissing,
+    /// A session seed was seen, but no key derived from it decrypts the traffic.
+    BruteforceFailed,
+    /// The session key stopped decrypting the traffic.
+    SessionKeyLost,
+}
+
+impl fmt::Display for SniffError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::InitialKeyMissing { version, saw_handshake } => write!(
+                f,
+                "no initial key found (version: {version:?}, handshake seen: {saw_handshake})"
+            ),
+            Self::SessionSeedMissing => write!(f, "no session seed found"),
+            Self::BruteforceFailed => write!(f, "could not bruteforce the session key"),
+            Self::SessionKeyLost => write!(f, "the session key stopped working"),
+        }
+    }
+}
+
+impl std::error::Error for SniffError {}
+
+/// Which key the sniffer is decrypting with.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum KeyState {
+    None,
+    Dispatch,
+    Session,
+}
+
+/// How many long packets in a row may fail before a key is given up on. Only
+/// packets of at least [`MIN_ORACLE_BYTES`] count, since shorter ones fail for
+/// good keys too.
+const MAX_KEY_FAILURES: u32 = 3;
+
+#[derive(Default)]
+pub struct GameSniffer {
+    sent_kcp: Option<KcpSniffer>,
+    recv_kcp: Option<KcpSniffer>,
+    key: Option<Key>,
+    initial_keys: Vec<Vec<u8>>,
+    rsa_keys: Vec<RsaPrivateKey>,
+    /// When the current packet was captured, which is what the key search is
+    /// anchored on.
+    timestamp_ms: u64,
+    sent_time: Option<u64>,
+    server_seed: u64,
+    /// Raw bodies the key search is being run against. These must be the bodies
+    /// as they arrived: a copy already XOR'd with the dispatch key has that key
+    /// left in the XOR, so no candidate pad ever validates.
+    pending: Vec<Vec<u8>>,
+    catalogue: Catalogue,
+    regular_list: Option<AchievementList>,
+    arcade_list: Option<AchievementList>,
+    saw_handshake: bool,
+    key_failures: u32,
+}
+
+impl GameSniffer {
+    pub fn new() -> Self {
+        let pem_data_3 = include_str!("../keys/private_key_3.pem");
+
+        let rsa_3 = RsaPrivateKey::from_pkcs1_pem(pem_data_3);
+
+        GameSniffer {
+            rsa_keys: vec![rsa_3]
+                .iter()
+                .filter_map(|rsa_key| rsa_key.clone().ok())
+                .collect(),
+            ..Default::default()
+        }
+    }
+
+    // Initial keys: in ascending order of version releases (latest at the end).
+    pub fn set_initial_keys(mut self, initial_keys: Vec<Vec<u8>>) -> Self {
+        self.initial_keys = initial_keys;
+        self
+    }
+
+    /// The achievement ids, as `(id, arcade)`.
+    ///
+    /// Achievement packets are found by matching their ids against this set, so
+    /// without it no list can be recognised: the ids are opaque integers on the
+    /// wire and cannot be told apart from any other varint field.
+    pub fn set_achievement_ids(mut self, ids: impl IntoIterator<Item = (u32, bool)>) -> Self {
+        self.catalogue = Catalogue::new(ids);
+        info!(
+            ids = self.catalogue.len(),
+            arcade = self.catalogue.arcade_len(),
+            "loaded achievement ids"
+        );
+        self
+    }
+
+    /// Forget the current connection, keeping the keys and the achievement ids the
+    /// sniffer was set up with.
+    pub fn reset(&mut self) {
+        self.recv_kcp = None;
+        self.sent_kcp = None;
+        self.key = None;
+        self.sent_time = None;
+        self.server_seed = 0;
+        self.pending.clear();
+        self.regular_list = None;
+        self.arcade_list = None;
+        self.saw_handshake = false;
+        self.key_failures = 0;
+    }
+
+    /// Which key the sniffer is decrypting with.
+    pub fn key_state(&self) -> KeyState {
+        match self.key {
+            None => KeyState::None,
+            Some(Key::Dispatch(_)) => KeyState::Dispatch,
+            Some(Key::Session(_)) => KeyState::Session,
+        }
+    }
+
+    #[instrument(skip_all, fields(len = bytes.len()))]
+    pub fn receive_packet(&mut self, bytes: Vec<u8>) -> Result<Option<GamePacket>, SniffError> {
+        let now = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .map(|elapsed| elapsed.as_millis() as u64)
+            .unwrap_or_default();
+        self.receive_packet_at(bytes, now)
+    }
+
+    /// [`Self::receive_packet`], for a capture replayed after the fact. The
+    /// clock the game stamped its request with comes from the capture rather
+    /// than from the wall clock, so replaying a recording needs this instead.
+    #[instrument(skip_all, fields(len = bytes.len()))]
+    pub fn receive_packet_at(
+        &mut self,
+        bytes: Vec<u8>,
+        timestamp_ms: u64,
+    ) -> Result<Option<GamePacket>, SniffError> {
+        self.timestamp_ms = timestamp_ms;
+        let result = self.process_packet(bytes);
+        if result.is_err() {
+            self.reset();
+        }
+        result
+    }
+
+    fn process_packet(&mut self, bytes: Vec<u8>) -> Result<Option<GamePacket>, SniffError> {
+        let Some(packet) = parse_connection_packet(&PORTS, bytes) else {
+            return Ok(None);
+        };
+        match packet {
+            ConnectionPacket::HandshakeRequested => {
+                // Everything scoped to the session is stale from here on: the
+                // keys, the seed, and whatever the detection concluded. Without
+                // this a reconnect would mix two sessions' packets together.
+                info!("handshake requested, resetting state");
+                self.reset();
+                self.saw_handshake = true;
+                Ok(Some(GamePacket::Connection(packet)))
+            }
+            ConnectionPacket::HandshakeEstablished | ConnectionPacket::Disconnected => {
+                Ok(Some(GamePacket::Connection(packet)))
+            }
+
+            ConnectionPacket::SegmentData(direction, kcp_seg) => {
+                let commands = self.receive_kcp_segment(direction, &kcp_seg)?;
+                Ok(Some(match commands {
+                    Some(commands) => GamePacket::Commands(commands),
+                    None => GamePacket::Connection(ConnectionPacket::SegmentData(
+                        direction, kcp_seg,
+                    )),
+                }))
+            }
+        }
+    }
+
+    fn receive_kcp_segment(
+        &mut self,
+        direction: PacketDirection,
+        kcp_seg: &[u8],
+    ) -> Result<Option<Vec<GameCommand>>, SniffError> {
+        let kcp = match direction {
+            PacketDirection::Sent => &mut self.sent_kcp,
+            PacketDirection::Received => &mut self.recv_kcp,
+        };
+
+        if kcp.is_none() {
+            let Some(new_kcp) = KcpSniffer::try_new(kcp_seg) else {
+                return Ok(None);
+            };
+            *kcp = Some(new_kcp);
+        }
+
+        if let Some(kcp) = kcp {
+            let mut commands = Vec::new();
+            for data in kcp.receive_segments(kcp_seg) {
+                commands.extend(self.receive_command(data, direction)?);
+            }
+
+            return Ok(Some(commands));
+        }
+
+        Ok(None)
+    }
+
+    /// Read an achievement list out of a command.
+    ///
+    /// No protos, no packet ids and no known XOR constants are assumed: the shape
+    /// of the list is searched for on the first list seen and reused afterwards.
+    pub fn matches_achievement_packet(
+        &mut self,
+        game_command: &GameCommand,
+    ) -> Option<Vec<Achievement>> {
+        if self.catalogue.is_empty() {
+            return None;
+        }
+
+        // Once a shape is known, decoding with it is cheap; before that it has to be
+        // searched for, which is not. Both layouts are tried because the regular
+        // list arrives in the login burst and the arcade one only when the player
+        // opens arcade mode, so the second is always found after the first.
+        let both_known = self.regular_list.is_some() && self.arcade_list.is_some();
+        for known in [self.regular_list.as_ref(), self.arcade_list.as_ref()]
+            .into_iter()
+            .flatten()
+        {
+            if let Some(achievements) = decode_list(&game_command.proto_data, known) {
+                return Some(achievements);
+            }
+        }
+
+        // With both shapes in hand there is nothing left to search for.
+        if both_known {
+            return None;
+        }
+
+        let list = find_achievement_list(&game_command.proto_data, &self.catalogue)?;
+        info!(
+            command_id = game_command.command_id,
+            list = list.describe(),
+            arcade = list.arcade,
+            "found achievement list"
+        );
+
+        let achievements = decode_list(&game_command.proto_data, &list)?;
+        if list.arcade {
+            self.arcade_list = Some(list);
+        } else {
+            self.regular_list = Some(list);
+        }
+        Some(achievements)
+    }
+
+    /// Count a packet the current key can't decrypt, and give up on the connection
+    /// once `limit` have failed in a row.
+    fn key_failure<T>(&mut self, limit: u32, error: SniffError) -> Result<Option<T>, SniffError> {
+        self.key_failures += 1;
+        if self.key_failures >= limit {
+            return Err(error);
+        }
+        Ok(None)
+    }
+
+    #[instrument(skip_all, fields(len = data.len()))]
+    fn receive_command(
+        &mut self,
+        data: Vec<u8>,
+        direction: PacketDirection,
+    ) -> Result<Option<GameCommand>, SniffError> {
+        // The request's timestamp seeds the key search. The response follows within
+        // ~400ms and the search covers +/-15s, so either would do.
+        if direction == PacketDirection::Sent && self.sent_time.is_none() {
+            self.sent_time = Some(self.timestamp_ms);
+        }
+
+        let Some(mut command) = GameCommand::try_new(data) else {
+            return Ok(None);
+        };
+
+        // The login burst has short frames that are not protobufs, so a failure on
+        // one says nothing about the key, and a success (an empty body always
+        // parses) says just as little. Without a key there's nothing to do with
+        // them, and with one they are at most passed along.
+        let is_oracle = command.proto_data.len() >= MIN_ORACLE_BYTES;
+
+        let key = match &self.key {
+            None => {
+                if !is_oracle {
+                    return Ok(None);
+                }
+
+                // Shipped keys are tried newest first and the one that yields a
+                // decodable message wins.
+                let found_key = self
+                    .initial_keys
+                    .iter()
+                    .rev()
+                    .find(|k| parses_with(&command.proto_data, k))
+                    .cloned();
+
+                match found_key {
+                    Some(key) => {
+                        self.key = Some(Dispatch(key.clone()));
+                        key
+                    }
+                    None => {
+                        error!("No dispatch key found");
+                        return self.key_failure(
+                            MAX_KEY_FAILURES,
+                            SniffError::InitialKeyMissing {
+                                version: None,
+                                saw_handshake: self.saw_handshake,
+                            },
+                        );
+                    }
+                }
+            }
+            Some(Dispatch(k)) if parses_with(&command.proto_data, k) => k.clone(),
+            Some(Dispatch(_)) => {
+                if !is_oracle {
+                    return Ok(None);
+                }
+
+                if self.server_seed == 0 {
+                    error!("Dispatch key stopped working, but no session seed was seen");
+                    return self.key_failure(MAX_PENDING as u32, SniffError::SessionSeedMissing);
+                }
+
+                // The dispatch key stops decoding once the session key takes
+                // over, which is what signals it is time to look for one.
+                match self.bruteforce(&command.proto_data) {
+                    Some(pad) => {
+                        self.key = Some(Key::Session(pad.clone()));
+                        pad
+                    }
+                    // A full buffer means every candidate had its best chance.
+                    None if self.pending.len() >= MAX_PENDING => {
+                        error!("Couldn't bruteforce the session key");
+                        return Err(SniffError::BruteforceFailed);
+                    }
+                    None => return Ok(None),
+                }
+            }
+            Some(Key::Session(k)) if parses_with(&command.proto_data, k) => k.clone(),
+            Some(Key::Session(_)) => {
+                if !is_oracle {
+                    return Ok(None);
+                }
+
+                warn!("Session key failed to decrypt a command");
+                return self.key_failure(MAX_KEY_FAILURES, SniffError::SessionKeyLost);
+            }
+        };
+        self.key_failures = 0;
+
+        command.apply_key(&key);
+
+        let span = info_span!("command", ?command);
+        let _enter = span.enter();
+
+        info!("received");
+        trace!(data = BASE64_STANDARD.encode(&command.proto_data), "data");
+
+        // The seed is only in PlayerGetTokenScRsp, so there is nothing to look for
+        // in anything the client sends.
+        if let Some(Dispatch(_)) = self.key {
+            if direction == PacketDirection::Received && self.server_seed == 0 {
+                if let Some(seed) =
+                    matches_get_player_token_rsp(&command.proto_data, &self.rsa_keys)
+                {
+                    self.server_seed = seed;
+                    info!(seed, "setting new possible session seeds");
+                }
+            }
+        }
+
+        Ok(Some(command))
+    }
+
+    /// Brute-force the session key from the server's seed.
+    ///
+    /// The oracle is a buffer of raw bodies rather than the one in hand: a short
+    /// packet can fail by chance and would then veto a correct key, so the search
+    /// waits for a longer one and then wants agreement rather than a single hit.
+    fn bruteforce(&mut self, body: &[u8]) -> Option<Vec<u8>> {
+        debug!("Running bruteforce loop.");
+
+        if self.server_seed == 0 || body.len() < MIN_ORACLE_BYTES {
+            return None;
+        }
+
+        // These must be the bodies as they arrived. A copy already XOR'd with the
+        // dispatch key has that key left in the XOR, so nothing ever validates.
+        self.pending.push(body.to_vec());
+        if self.pending.len() > MAX_PENDING {
+            self.pending.remove(0);
+        }
+
+        let key = bruteforce(self.sent_time?, self.server_seed, &self.pending)?;
+        self.pending.clear();
+        Some(key)
+    }
+}
+
+#[cfg(test)]
+mod tests;
+
+```
+
+`src/tests.rs`:
+
+```rs
+use super::*;
+
+/// XORs to itself, so a body with no valid protobuf tag stays invalid under it.
+fn key() -> Vec<u8> {
+    vec![0; 16]
+}
+
+fn sniffer() -> GameSniffer {
+    GameSniffer::new().set_initial_keys(vec![key()])
+}
+
+fn command(body: &[u8]) -> Vec<u8> {
+    let mut data = vec![0x01, 0x23, 0x45, 0x67, 0, 1, 0, 0];
+    data.extend_from_slice(&(body.len() as u32).to_be_bytes());
+    data.extend_from_slice(body);
+    data.extend_from_slice(&[0x89, 0xAB, 0xCD, 0xEF]);
+    data
+}
+
+fn good() -> Vec<u8> {
+    // Field 1, varint, over and over.
+    [0x08, 0x01].repeat(MIN_ORACLE_BYTES)
+}
+
+fn bad() -> Vec<u8> {
+    vec![0xFF; MIN_ORACLE_BYTES]
+}
+
+fn receive(sniffer: &mut GameSniffer, body: &[u8]) -> Result<bool, SniffError> {
+    sniffer
+        .receive_command(command(body), PacketDirection::Received)
+        .map(|command| command.is_some())
+}
+
+/// An Ethernet frame holding a UDP packet to the game's first port.
+fn udp_frame(payload: &[u8]) -> Vec<u8> {
+    let mut frame = Vec::new();
+    etherparse::PacketBuilder::ethernet2([0; 6], [0; 6])
+        .ipv4([1, 1, 1, 1], [2, 2, 2, 2], 64)
+        .udp(5000, PORTS[0])
+        .write(&mut frame, payload)
+        .unwrap();
+    frame
+}
+
+#[test]
+fn malformed_packets_are_ignored() {
+    let mut sniffer = GameSniffer::new();
+    // Too short for a control code, for a KCP header, and with a KCP segment
+    // that claims more content than there is.
+    let mut lying = vec![0; 28];
+    lying[24..28].copy_from_slice(&1000u32.to_le_bytes());
+    for payload in [&[1u8, 2][..], &[0; 26][..], &lying[..]] {
+        assert!(sniffer.receive_packet(udp_frame(payload)).is_ok());
+    }
+}
+
+#[test]
+fn short_and_empty_bodies_say_nothing_about_the_key() {
+    let mut sniffer = sniffer();
+
+    // An empty body parses under any key, and must not pick one.
+    assert_eq!(receive(&mut sniffer, &[]), Ok(false));
+    assert_eq!(sniffer.key_state(), KeyState::None);
+
+    // Short frames that aren't protobufs never count against one.
+    for _ in 0..MAX_PENDING * 2 {
+        assert_eq!(receive(&mut sniffer, &[0xFF; 8]), Ok(false));
+    }
+    assert_eq!(sniffer.key_failures, 0);
+
+    sniffer.key = Some(Key::Session(key()));
+    for _ in 0..MAX_PENDING * 2 {
+        assert_eq!(receive(&mut sniffer, &[0xFF; 8]), Ok(false));
+    }
+    assert_eq!(sniffer.key_state(), KeyState::Session);
+    assert_eq!(sniffer.key_failures, 0);
+}
+
+#[test]
+fn no_fitting_key_fails_after_a_few_long_packets() {
+    let mut sniffer = sniffer();
+    for _ in 1..MAX_KEY_FAILURES {
+        assert_eq!(receive(&mut sniffer, &bad()), Ok(false));
+    }
+    assert_eq!(
+        receive(&mut sniffer, &bad()),
+        Err(SniffError::InitialKeyMissing {
+            version: None,
+            saw_handshake: false,
+        })
+    );
+}
+
+#[test]
+fn no_seed_fails_once_the_dispatch_key_has_kept_failing() {
+    let mut sniffer = sniffer();
+    assert_eq!(receive(&mut sniffer, &good()), Ok(true));
+    for _ in 1..MAX_PENDING {
+        assert_eq!(receive(&mut sniffer, &bad()), Ok(false));
+    }
+    assert_eq!(receive(&mut sniffer, &bad()), Err(SniffError::SessionSeedMissing));
+}
+
+#[test]
+fn a_wrong_seed_fails_once_the_search_had_every_chance() {
+    let mut sniffer = sniffer();
+    assert_eq!(receive(&mut sniffer, &good()), Ok(true));
+    sniffer.server_seed = 1;
+    sniffer.sent_time = Some(1_800_000_000_000);
+    for _ in 1..MAX_PENDING {
+        assert_eq!(receive(&mut sniffer, &bad()), Ok(false));
+    }
+    assert_eq!(receive(&mut sniffer, &bad()), Err(SniffError::BruteforceFailed));
+}
+
+#[test]
+fn a_session_key_that_keeps_failing_is_lost() {
+    let mut sniffer = sniffer();
+    sniffer.key = Some(Key::Session(key()));
+    for _ in 1..MAX_KEY_FAILURES {
+        assert_eq!(receive(&mut sniffer, &bad()), Ok(false));
+    }
+    assert_eq!(receive(&mut sniffer, &good()), Ok(true));
+    assert_eq!(sniffer.key_failures, 0);
+    for _ in 1..MAX_KEY_FAILURES {
+        assert_eq!(receive(&mut sniffer, &bad()), Ok(false));
+    }
+    assert_eq!(receive(&mut sniffer, &bad()), Err(SniffError::SessionKeyLost));
+}
+
+#[test]
+fn a_reset_keeps_the_initial_keys() {
+    let mut sniffer = sniffer();
+    assert_eq!(receive(&mut sniffer, &good()), Ok(true));
+    sniffer.server_seed = 1;
+    sniffer.reset();
+    assert_eq!(sniffer.key_state(), KeyState::None);
+    assert_eq!(sniffer.server_seed, 0);
+    assert_eq!(receive(&mut sniffer, &good()), Ok(true));
+}
+
+```
+
+`src/unk_util.rs`:
+
+```rs
+use std::collections::{BTreeSet, HashMap, HashSet};
+
+use base64::prelude::{BASE64_STANDARD, BASE64_STANDARD_NO_PAD};
+use base64::Engine;
+use protobuf::Message;
+use protobuf::UnknownValueRef::*;
+use rsa::{Pkcs1v15Encrypt, RsaPrivateKey};
+
+use crate::gen::protos::Unk;
+
+#[derive(Default, Debug, Clone, Copy)]
+pub struct Achievement {
+    pub id: u32,
+    pub progress: u32,
+    /// `finished` in the regular list, `completed` in the arcade one. The arcade
+    /// list's `unlocked` is set on every entry, so it says nothing about whether
+    /// the achievement was earned.
+    pub completed: bool,
+}
+
+/// Find `server_rand_key` by RSA round-trip: a real blob decrypts to exactly 8
+/// bytes, while the packet's other blob, `sign`, decrypts to 82. Exactly one
+/// packet in 140 matches, and the count has to be exactly one because a wrong
+/// blob lands on some 8-byte length often enough to matter.
+pub fn matches_get_player_token_rsp(data: &[u8], rsa_keys: &[RsaPrivateKey]) -> Option<u64> {
+    let msg = Unk::parse_from_bytes(data).ok()?;
+    let mut seeds = Vec::new();
+
+    for field in msg.unknown_fields().iter().map(|(_, field)| field) {
+        let LengthDelimited(blob) = field else {
+            continue;
+        };
+        let Some(blob) = decode_base64(blob) else {
+            continue;
+        };
+        for key in rsa_keys {
+            if let Ok(plain) = key.decrypt(Pkcs1v15Encrypt, &blob) {
+                if let Ok(seed) = <[u8; 8]>::try_from(plain.as_slice()) {
+                    seeds.push(u64::from_le_bytes(seed));
+                }
+            }
+        }
+    }
+
+    (seeds.len() == 1).then(|| seeds[0])
+}
+
+fn decode_base64(bytes: &[u8]) -> Option<Vec<u8>> {
+    let text = std::str::from_utf8(bytes).ok()?;
+    BASE64_STANDARD
+        .decode(text)
+        .or_else(|_| BASE64_STANDARD_NO_PAD.decode(text.trim_end_matches('=')))
+        .ok()
+}
+
+/// Constraints on what may be called an achievement list. Swept across every
+/// response in two 3.2.0 captures these admit exactly the two real packets.
+///
+/// The entry floor is strict on purpose: a 37-entry list matched the catalogue
+/// at 81% and a 117-entry one at 97%, so below certainty is not evidence. The
+/// cost is that a patch adding achievements before stardb updates stops
+/// detection rather than returning a partial answer, which is the safer failure.
+const MIN_ENTRIES: usize = 40;
+
+/// Constants in the descriptor table are all small; unconstrained voting returns
+/// arbitrary large ones such as 10773171, which are always spurious.
+const MAX_XOR_KEY: u64 = 1 << 16;
+
+/// Both lists sit two wrappers deep. The search descends further only so that it
+/// does not depend on that.
+const MAX_DEPTH: usize = 6;
+
+/// The achievement ids, plus the arcade subset that tells the two ZZZ
+/// achievement packets apart.
+///
+/// Ids are opaque integers on the wire so they cannot be recognised by shape,
+/// but the valid ones are known.
+#[derive(Default)]
+pub struct Catalogue {
+    all: HashSet<u32>,
+    arcade: HashSet<u32>,
+}
+
+impl Catalogue {
+    /// `arcade` marks the ids that only ever appear in the arcade list.
+    pub fn new(ids: impl IntoIterator<Item = (u32, bool)>) -> Self {
+        let mut catalogue = Self::default();
+        for (id, arcade) in ids {
+            catalogue.all.insert(id);
+            if arcade {
+                catalogue.arcade.insert(id);
+            }
+        }
+        catalogue
+    }
+
+    pub fn len(&self) -> usize {
+        self.all.len()
+    }
+
+    pub fn arcade_len(&self) -> usize {
+        self.arcade.len()
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.all.is_empty()
+    }
+}
+
+/// A located achievement list: everything needed to read one back out of the
+/// same packet, or of any later repeat of it.
+#[derive(Clone, Debug)]
+pub struct AchievementList {
+    /// Tag chain from the packet root to the repeated field's parent.
+    pub path: Vec<u32>,
+    pub list_tag: u32,
+    pub id_tag: u32,
+    /// Constant the ids are stored under; zero for the regular list.
+    pub xor_key: u64,
+    /// True when every id is an arcade id, which separates the two packets.
+    pub arcade: bool,
+    pub entries: usize,
+}
+
+impl AchievementList {
+    pub fn describe(&self) -> String {
+        let path: Vec<String> = self.path.iter().map(|tag| format!("f{tag}")).collect();
+        format!(
+            "{}.f{} x{}, id field f{} xor {}",
+            path.join("."),
+            self.list_tag,
+            self.entries,
+            self.id_tag,
+            self.xor_key
+        )
+    }
+}
+
+/// The tags each list carries progress and completion under. The numbers are what
+/// the packets carry; the names are ours, as neither message appears in the
+/// upstream descriptor table. A zero tag is one that list does not have.
+struct ElemTags {
+    progress: u32,
+    completed: u32,
+}
+
+const REGULAR_ELEM: ElemTags = ElemTags {
+    progress: 2,
+    completed: 4,
+};
+
+const ARCADE_ELEM: ElemTags = ElemTags {
+    progress: 14,
+    completed: 15,
+};
+
+/// Search a response for an achievement list. Both ZZZ lists are repeated
+/// submessages inside a larger response, the regular one three levels down
+/// (GetMiscDataScRsp.15 -> 1067 -> 10). The walk descends through single
+/// occurrences too, so the deep one is reached.
+pub fn find_achievement_list(body: &[u8], catalogue: &Catalogue) -> Option<AchievementList> {
+    let mut best = None;
+    walk(body, &mut Vec::new(), 0, catalogue, &mut best);
+    best
+}
+
+fn walk(
+    body: &[u8],
+    path: &mut Vec<u32>,
+    depth: usize,
+    catalogue: &Catalogue,
+    best: &mut Option<AchievementList>,
+) {
+    if depth > MAX_DEPTH {
+        return;
+    }
+    let Ok(msg) = Unk::parse_from_bytes(body) else {
+        return;
+    };
+
+    // Group the length-delimited fields by tag so repeats are seen together.
+    let mut subs: HashMap<u32, Vec<&[u8]>> = HashMap::new();
+    for (tag, field) in msg.unknown_fields().iter() {
+        if let LengthDelimited(bytes) = field {
+            subs.entry(tag).or_default().push(bytes);
+        }
+    }
+
+    for (tag, bodies) in subs {
+        if bodies.len() >= MIN_ENTRIES {
+            if let Some(found) = check_list(&bodies, catalogue) {
+                let candidate = AchievementList {
+                    path: path.clone(),
+                    list_tag: tag,
+                    ..found
+                };
+                if better(&candidate, best) {
+                    *best = Some(candidate);
+                }
+            }
+        }
+        for sub in bodies {
+            path.push(tag);
+            walk(sub, path, depth + 1, catalogue, best);
+            path.pop();
+        }
+    }
+}
+
+fn better(candidate: &AchievementList, best: &Option<AchievementList>) -> bool {
+    match best {
+        Some(best) => candidate.entries > best.entries,
+        None => true,
+    }
+}
+
+fn check_list(elements: &[&[u8]], catalogue: &Catalogue) -> Option<AchievementList> {
+    let mut values: HashMap<u32, Vec<u64>> = HashMap::new();
+    for element in elements {
+        let msg = Unk::parse_from_bytes(element).ok()?;
+        for (tag, field) in msg.unknown_fields().iter() {
+            if let Varint(value) = field {
+                values.entry(tag).or_default().push(value);
+            }
+        }
+    }
+
+    let mut best: Option<AchievementList> = None;
+    for (id_tag, observed) in &values {
+        if observed.len() < MIN_ENTRIES {
+            continue;
+        }
+        let Some(xor_key) = find_xor_key(observed, &catalogue.all) else {
+            continue;
+        };
+
+        let ids: Vec<u32> = observed.iter().map(|v| (v ^ xor_key) as u32).collect();
+        // Ids are unique. This is what rejects the largest false positive: a
+        // 104-entry list matched only 19 distinct ids, so it passed on count.
+        if ids.iter().collect::<HashSet<_>>().len() != ids.len() {
+            continue;
+        }
+
+        let candidate = AchievementList {
+            path: Vec::new(),
+            list_tag: 0,
+            id_tag: *id_tag,
+            xor_key,
+            arcade: ids.iter().all(|id| catalogue.arcade.contains(id)),
+            entries: elements.len(),
+        };
+        if better(&candidate, &best) {
+            best = Some(candidate);
+        }
+    }
+    best
+}
+
+/// Recover the constant applied to a set of observed values: the key below
+/// [`MAX_XOR_KEY`] that maps every one of them onto a catalogue id.
+///
+/// Every value has to land on an id, so the first value alone narrows the
+/// candidates to one per id, and each is then checked against the rest. That is
+/// linear in the list, where voting over every (observed, id) pair and scoring
+/// each vote was quadratic: seconds per packet on an 800-entry list, during which
+/// the capture backs up.
+///
+/// Among keys that fit, the one landing on the most distinct ids wins, because
+/// the catalogue is dense enough that low-bit keys come close -- key 4 matches
+/// 57 of 65 entries while key 0 matches all 65.
+fn find_xor_key(observed: &[u64], ids: &HashSet<u32>) -> Option<u64> {
+    let first = *observed.first()?;
+    // Sorted so that a tie goes the same way on every run.
+    let candidates: BTreeSet<u64> = ids
+        .iter()
+        .map(|id| first ^ u64::from(*id))
+        .filter(|key| *key < MAX_XOR_KEY)
+        .collect();
+
+    let mut best: Option<(u64, usize)> = None;
+    for key in candidates {
+        let mut distinct: HashSet<u32> = HashSet::new();
+        let all_match = observed.iter().all(|observed| {
+            let id = (observed ^ key) as u32;
+            distinct.insert(id);
+            ids.contains(&id)
+        });
+        if all_match && best.map_or(true, |(_, most)| distinct.len() > most) {
+            best = Some((key, distinct.len()));
+        }
+    }
+    best.map(|(key, _)| key)
+}
+
+/// Read a list back out of a packet using a layout found earlier.
+pub fn decode_list(body: &[u8], list: &AchievementList) -> Option<Vec<Achievement>> {
+    let mut current = body.to_vec();
+    for tag in &list.path {
+        current = step(&current, *tag)?;
+    }
+
+    let msg = Unk::parse_from_bytes(&current).ok()?;
+    let elements: Vec<Vec<u8>> = msg
+        .unknown_fields()
+        .iter()
+        .filter(|(tag, _)| *tag == list.list_tag)
+        .map(|(_, field)| match field {
+            LengthDelimited(bytes) => Some(bytes.to_vec()),
+            _ => None,
+        })
+        .collect::<Option<_>>()?;
+    if elements.len() < MIN_ENTRIES {
+        return None;
+    }
+
+    let tags = if list.arcade {
+        &ARCADE_ELEM
+    } else {
+        &REGULAR_ELEM
+    };
+
+    let mut achievements = Vec::with_capacity(elements.len());
+    for element in &elements {
+        let msg = Unk::parse_from_bytes(element).ok()?;
+        let mut achievement = Achievement::default();
+        for (tag, field) in msg.unknown_fields().iter() {
+            let Varint(value) = field else { continue };
+            if tag == list.id_tag {
+                achievement.id = (value ^ list.xor_key) as u32;
+            } else if tag == tags.progress {
+                achievement.progress = value as u32;
+            } else if tag == tags.completed {
+                achievement.completed = value != 0;
+            }
+        }
+        achievements.push(achievement);
+    }
+
+    Some(achievements)
+}
+
+/// Descend one tag. The parse owns its bytes, so each step copies.
+fn step(body: &[u8], tag: u32) -> Option<Vec<u8>> {
+    let msg = Unk::parse_from_bytes(body).ok()?;
+    match msg.unknown_fields().get(tag)? {
+        LengthDelimited(bytes) => Some(bytes.to_vec()),
+        _ => None,
+    }
+}
+
+```
