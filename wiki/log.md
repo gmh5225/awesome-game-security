@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-11-02** — ingest `readme:categories`: **Cheat** link_count **2996** (+1 vs prior wiki map) / **Anti Cheat** **864** and other major README section counts stable (41 sections; `NeverC & NeverD` placeholder; Game Develop subcats Guide/Source/MCP server/MCP server security/AI Agents); synced [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
+
 - **2026-11-02** — lint (agent, Cursor lint pass): read `wiki/AGENTS.md`; listed **Overviews** (9) `anti-cheat`, `dma-attack`, `game-engine`, `game-hacking`, `graphics-api`, `mobile-security`, `overview`, `reverse-engineering`, `windows-kernel`; **Concepts** (51) under `wiki/concepts/`; **Entities** (4262) under `wiki/entities/`; reconciled `index.md` `](overviews|concepts|entities/*.md)` vs disk — 4322 paths (9+51+4262), 0 missing, 0 dead, 0 orphan, 0 duplicate path rows; nine `overviews/*.md` [[wikilink]] spot-check (13275 body + 1041 index blurb = 14316 targets), 0 broken, 0 malformed `]]]`; 6 expected cross-kind slug collisions ([[anti-cheat]], [[game-hacking]], [[reverse-engineering]], [[byovd]], [[dma]], [[il2cpp]]); wiki populated — bootstrap not required; `index.md` unchanged; structural repairs none (`log.md` only).
 
 - **2026-11-02** — lint (scheduled pass): read `wiki/AGENTS.md`; **Overviews** (9), **Concepts** (51), **Entities** (4262); `index.md` catalog vs disk — 4322 paths, 0 missing, 0 dead; overview + index blurb wikilink spot-check — 0 broken; bootstrap not required; touched `log.md` only.
