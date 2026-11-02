@@ -783,6 +783,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/liuyiyi0219-arch/unity-apk-reverse [40-chapter hands-on Unity mobile APK reverse-engineering course covering IL2CPP, Lua, DEX, Frida, and asset extraction with runnable demos and auto-graded labs]
 - https://github.com/kovidomi/game-reversing
 - https://github.com/Vieuxnorris/farcry-6-hack [Offline Far Cry 6 RE learning project: in-process C++ DLL with aimbot, skeleton ESP, D2D overlay, fc6probe scanner, and Python tooling over game systems (Havok, aim-assist targets)]
+- https://github.com/xxchaosxx210/SplinterCellTrainer [C#/WPF Windows trainer for Tom Clancy's Splinter Cell (Steam build 252083) with ESP overlay, god-mode flags, and movement/detection tweaks via a 32-bit game helper]
 - https://github.com/TheZong/Game-Hacking
 - https://github.com/mytechnotalent/Reverse-Engineering
 - https://github.com/wtsxDev/reverse-engineering
@@ -4690,6 +4691,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/LB45440078L/xray-anticheat [Paper/Spigot plugin using likelihood-ratio statistical models to detect ore-vision (X-Ray) mining with explainable evidence, decaying history, and moderator-driven ban waves]
 - https://github.com/boggymc/PetalAntiFreecam [Paper plugin that masks underground blocks in outgoing chunk packets to mitigate Minecraft freecam/wallhack cheats]
 - https://github.com/Tobias1205/AntiCheat [ShieldGuard Paper 1.21.x plugin: PacketEvents-based anti-freecam, anti-xray ore masking, storage-entity hiding, and in-game report tooling]
+- https://github.com/Treb3r/Treb3rAntiCheater [Paper 1.21.x server plugin with in-memory packet anti-xray (Engine Modes 1–2) and voxel ray-march Anti-ESP visibility checks]
 - https://github.com/trevorftp/ServerGuard [Vintage Story server mod that conceals enclosed ore, filters occluded entities, and injects ore/creature decoys before chunk data reaches clients]
 - https://github.com/enis1enis2/WindfallAntiCheatF [Minecraft Fabric packet-based anti-cheat with combat/movement checks and Geyser/Bedrock compatibility]
 - https://github.com/IamFriendly0242u/The-Dreamers-Guards [Fabric server/client anti-cheat suite with mod blacklist scanning, encrypted auth, progressive punishments, and Discord alerts]
