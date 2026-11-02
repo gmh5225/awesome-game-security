@@ -9,7 +9,8 @@ sources:
   - wiki/sources/descriptions/gmh5225__HWID-Kernel-Spoofer.md
   - wiki/sources/descriptions/GJR787878__DeviceResetSpoofer.md
   - wiki/sources/descriptions/odzhan__hwid.md
-updated: 2026-10-04
+  - wiki/sources/descriptions/divagr18__gpu-instance-fingerprint.md
+updated: 2026-11-02
 confidence: medium
 ---
 
@@ -24,7 +25,7 @@ Techniques that **replace or mask hardware identifiers** queried by anti-cheat, 
 | Disk serial | `IOCTL_STORAGE_QUERY_PROPERTY`, SMART |
 | NIC MAC | NDIS `OID_802_3_PERMANENT_ADDRESS` |
 | SMBIOS | Motherboard serial, system UUID, BIOS vendor |
-| GPU | Registry or NVAPI/ADL serial queries |
+| GPU | Registry or NVAPI/ADL serial queries; CUDA compute output may also distinguish identical chips (see [[gpu-instance-fingerprint]]) |
 | Monitor | EDID display serial |
 | Volume | `NtQueryVolumeInformationFile` |
 | TPM | Endorsement Key fingerprint |
@@ -41,7 +42,7 @@ Kernel-mode samples such as [[hwid-kernel-spoofer]] (gmh5225; C/C++; kernel driv
 
 ## Defensive inventory
 
-Read-only baseline collectors such as [[odzhan-hwid]] (odzhan; C++20 console; WMI/SetupAPI/IP Helper/TBS/CNG/NVML; per-field provenance, confidence, mutability, availability, and JSON output; no composite fingerprint) help AC analysts map which identifiers Windows exposes and how reliably each can be queried before designing spoof detection. (source: wiki/sources/descriptions/odzhan__hwid.md)
+Read-only baseline collectors such as [[odzhan-hwid]] (odzhan; C++20 console; WMI/SetupAPI/IP Helper/TBS/CNG/NVML; per-field provenance, confidence, mutability, availability, and JSON output; no composite fingerprint) help AC analysts map which identifiers Windows exposes and how reliably each can be queried before designing spoof detection. (source: wiki/sources/descriptions/odzhan__hwid.md) Compute-side research such as [[gpu-instance-fingerprint]] (divagr18; CuPy atomic-contention probe + passive PyTorch `index_add` channel; separates physically identical NVIDIA GPUs from CUDA numeric results; bundled forgery/reboot/defense experiments) shows identity signals that bypass registry serial reads—relevant to cloud GPU tenancy and shared-fleet side-channel study. (source: wiki/sources/descriptions/divagr18__gpu-instance-fingerprint.md)
 
 ## Defensive limits
 

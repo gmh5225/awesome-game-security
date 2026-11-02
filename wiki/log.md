@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-11-02** — ingest `description:divagr18/gpu-instance-fingerprint`: created entity [[gpu-instance-fingerprint]] (CUDA numerical NVIDIA GPU instance fingerprinting; CuPy atomic-contention active probe + passive PyTorch `index_add` channel; Python analysis + bundled measurements; Docker/SSH collection; cloud-tenant/shared-fleet side-channel + mitigation experiments; confidence medium); cited [[overviews/anti-cheat]] Detection:HWID cluster beside [[odzhan-hwid]]/[[filtertap]] + [[concepts/hwid-spoofing]] compute-side GPU identity lane; `index.md` entity + overview/concept blurbs updated.
+
 - **2026-11-02** — ingest `description:kyzoeth/bitgeist`: created entity [[bitgeist]] (browser retro speedrun arena; Libretro WASM cores; emulated RAM telemetry without ROM patches; 60 Hz RLE joypad logs + game-rule movement checks; headless deterministic WASM replay; SQLite skill-bracket leaderboards; IndexedDB local ROM vault; TypeScript/Next.js; confidence medium); cited [[concepts/input-provenance]] Libretro joypad-log vs replay-derived acceptance lane + [[overviews/anti-cheat]] browser emulation integrity cluster; `index.md` entity + concept blurbs updated.
 
 - **2026-11-02** — ingest `readme:categories`: **Anti Cheat** link_count **864** (+1 vs prior wiki map) / **Cheat** **2995** and other major README section counts stable (41 sections; `NeverC & NeverD` placeholder); synced [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
