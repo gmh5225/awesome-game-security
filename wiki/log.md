@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-11-03** — lint (agent, Cursor lint pass): read `wiki/AGENTS.md`; listed **Overviews** (9) `anti-cheat`, `dma-attack`, `game-engine`, `game-hacking`, `graphics-api`, `mobile-security`, `overview`, `reverse-engineering`, `windows-kernel`; **Concepts** (51) under `wiki/concepts/`; **Entities** (4281) under `wiki/entities/`; reconciled `index.md` `](overviews|concepts|entities/*.md)` vs disk — 4341 catalog paths (9+51+4281), 0 missing, 0 dead, 0 orphan, 0 duplicate index rows; nine `overviews/*.md` bodies + all `concepts/*.md` [[wikilink]] spot-check (15929 targets), 0 broken, 0 malformed `]]]`; 6 expected cross-kind slug collisions ([[anti-cheat]], [[game-hacking]], [[reverse-engineering]], [[byovd]], [[dma]], [[il2cpp]]); wiki populated — bootstrap not required; `index.md` unchanged; structural repairs none (`log.md` only).
+
 - **2026-11-03** — ingest `description:AbdurahmanAlmehdi/jidr`: enriched entity [[jidr]] (daemon architecture table—gRPC/telnet/ADB, Slint/CLI/MCP clients, root/widgets/lifecycle; audience + positioning vs [[kiln-android-emulator]]/[[rooted-android-game-vm]]/[[android-compatibility-layer]]; confidence medium); cited [[overviews/reverse-engineering]] Mobile/Android Emulator cluster + [[overviews/game-hacking]] Android Emulator lane with description source; `index.md` entity blurb updated.
 
 - **2026-11-03** — ingest `description:abdulhamitakdag/hapiscanner`: enriched entity [[hapiscanner]] (architecture table—client/HapiVerify/Velocity; trust model; audience vs [[error-pc-check]]/[[jaranalyzer]]/[[jvm-inspector]]; confidence medium); cited [[overviews/game-hacking]] Minecraft screenshare cluster with description source; `index.md` entity blurb updated.
