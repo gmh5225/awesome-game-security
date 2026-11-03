@@ -1,0 +1,1149 @@
+Project Path: arc_true-og_Gato-AntiCheat_965jyu84
+
+Source Tree:
+
+```txt
+arc_true-og_Gato-AntiCheat_965jyu84
+├── LICENSE
+├── README.md
+├── build.gradle
+├── gradle
+│   └── wrapper
+│       ├── gradle-wrapper.jar
+│       └── gradle-wrapper.properties
+├── gradle.properties
+├── gradlew
+├── gradlew.bat
+├── settings.gradle
+└── src
+    └── main
+        ├── java
+        │   └── com
+        │       └── nexia
+        │           └── gatoanticheat
+        │               ├── GatoAntiCheat.java
+        │               ├── events
+        │               │   └── PlayerDetectionEvent.java
+        │               ├── mixin
+        │               │   ├── AABBMixin.java
+        │               │   ├── LivingEntityMixin.java
+        │               │   ├── PlayerMixin.java
+        │               │   ├── ServerGamePacketListenerMixin.java
+        │               │   └── ServerPlayerMixin.java
+        │               └── players
+        │                   ├── CombatUtil.java
+        │                   └── PlayerData.java
+        └── resources
+            ├── fabric.mod.json
+            ├── gatoanticheat.accesswidener
+            └── gatoanticheat.mixins.json
+
+```
+
+`LICENSE`:
+
+```
+MIT License
+
+Copyright (c) 2024 Nexia
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
+`README.md`:
+
+```md
+# Gato-AntiCheat
+An AntiCheat for the Nexia CTS Server.
+
+```
+
+`build.gradle`:
+
+```gradle
+plugins {
+    id 'fabric-loom' version '1.6-SNAPSHOT'
+}
+
+version = project.mod_version + "+" + project.minecraft_version
+group = project.maven_group
+
+dependencies {
+    // To change the versions see the gradle.properties file
+    minecraft "com.mojang:minecraft:${project.minecraft_version}"
+    mappings loom.officialMojangMappings()
+
+    modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+    modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+}
+
+base {
+    archivesName = project.archives_base_name
+}
+
+// Custom Manifest and Intermediary mappings declaration
+loom {
+    accessWidenerPath = file("src/main/resources/gatoanticheat.accesswidener")
+    customMinecraftManifest = "https://gist.githubusercontent.com/rizecookey/4c6142baaccc3875f9b227fe22f2ace5/raw/c8ed74b19f7a5315813c9d4b199798b692a8f359/1.16_combat-6.json"
+    intermediaryUrl = "https://maven.rizecookey.net/net/fabricmc/intermediary/%1\$s/intermediary-%1\$s-v2.jar"
+}
+
+processResources {
+    inputs.property "version", project.version
+    filteringCharset "UTF-8"
+
+    filesMatching("fabric.mod.json") {
+        expand "version": project.version
+    }
+}
+
+def targetJavaVersion = 21
+tasks.withType(JavaCompile).configureEach {
+    it.options.encoding = "UTF-8"
+
+    // Minecraft 1.18 (1.18-pre2) upwards uses Java 17.
+    it.options.release = targetJavaVersion
+}
+
+java {
+    withSourcesJar()
+
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
+}
+
+jar {
+    from("LICENSE") {
+        rename { "${it}_${project.archivesBaseName}" }
+    }
+}
+```
+
+`gradle.properties`:
+
+```properties
+# Done to increase the memory available to gradle.
+org.gradle.jvmargs=-Xmx1G
+
+# Fabric Properties
+# check these on https://modmuss50.me/fabric.html
+minecraft_version=1.16_combat-6
+yarn_mappings=1.16_combat-6+build.2
+loader_version=0.14.21
+
+# Mod Properties
+mod_version=1.0.4
+maven_group=com.nexia
+archives_base_name=gato-anticheat
+
+# Fabric api
+fabric_version=0.42.0+1.16
+```
+
+`gradle/wrapper/gradle-wrapper.properties`:
+
+```properties
+distributionBase=GRADLE_USER_HOME
+distributionPath=wrapper/dists
+distributionUrl=https\://services.gradle.org/distributions/gradle-8.7-bin.zip
+zipStoreBase=GRADLE_USER_HOME
+zipStorePath=wrapper/dists
+
+```
+
+`gradlew`:
+
+```
+#!/bin/sh
+
+#
+# Copyright Š 2015-2021 the original authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+##############################################################################
+#
+#   Gradle start up script for POSIX generated by Gradle.
+#
+#   Important for running:
+#
+#   (1) You need a POSIX-compliant shell to run this script. If your /bin/sh is
+#       noncompliant, but you have some other compliant shell such as ksh or
+#       bash, then to run this script, type that shell name before the whole
+#       command line, like:
+#
+#           ksh Gradle
+#
+#       Busybox and similar reduced shells will NOT work, because this script
+#       requires all of these POSIX shell features:
+#         * functions;
+#         * expansions Ť$varť, Ť${var}ť, Ť${var:-default}ť, Ť${var+SET}ť,
+#           Ť${var#prefix}ť, Ť${var%suffix}ť, and Ť$( cmd )ť;
+#         * compound commands having a testable exit status, especially Ťcaseť;
+#         * various built-in commands including Ťcommandť, Ťsetť, and Ťulimitť.
+#
+#   Important for patching:
+#
+#   (2) This script targets any POSIX shell, so it avoids extensions provided
+#       by Bash, Ksh, etc; in particular arrays are avoided.
+#
+#       The "traditional" practice of packing multiple parameters into a
+#       space-separated string is a well documented source of bugs and security
+#       problems, so this is (mostly) avoided, by progressively accumulating
+#       options in "$@", and eventually passing that to Java.
+#
+#       Where the inherited environment variables (DEFAULT_JVM_OPTS, JAVA_OPTS,
+#       and GRADLE_OPTS) rely on word-splitting, this is performed explicitly;
+#       see the in-line comments for details.
+#
+#       There are tweaks for specific operating systems such as AIX, CygWin,
+#       Darwin, MinGW, and NonStop.
+#
+#   (3) This script is generated from the Groovy template
+#       https://github.com/gradle/gradle/blob/master/subprojects/plugins/src/main/resources/org/gradle/api/internal/plugins/unixStartScript.txt
+#       within the Gradle project.
+#
+#       You can find Gradle at https://github.com/gradle/gradle/.
+#
+##############################################################################
+
+# Attempt to set APP_HOME
+
+# Resolve links: $0 may be a link
+app_path=$0
+
+# Need this for daisy-chained symlinks.
+while
+    APP_HOME=${app_path%"${app_path##*/}"}  # leaves a trailing /; empty if no leading path
+    [ -h "$app_path" ]
+do
+    ls=$( ls -ld "$app_path" )
+    link=${ls#*' -> '}
+    case $link in             #(
+      /*)   app_path=$link ;; #(
+      *)    app_path=$APP_HOME$link ;;
+    esac
+done
+
+APP_HOME=$( cd "${APP_HOME:-./}" && pwd -P ) || exit
+
+APP_NAME="Gradle"
+APP_BASE_NAME=${0##*/}
+
+# Add default JVM options here. You can also use JAVA_OPTS and GRADLE_OPTS to pass JVM options to this script.
+DEFAULT_JVM_OPTS='"-Xmx64m" "-Xms64m"'
+
+# Use the maximum available, or set MAX_FD != -1 to use that value.
+MAX_FD=maximum
+
+warn () {
+    echo "$*"
+} >&2
+
+die () {
+    echo
+    echo "$*"
+    echo
+    exit 1
+} >&2
+
+# OS specific support (must be 'true' or 'false').
+cygwin=false
+msys=false
+darwin=false
+nonstop=false
+case "$( uname )" in                #(
+  CYGWIN* )         cygwin=true  ;; #(
+  Darwin* )         darwin=true  ;; #(
+  MSYS* | MINGW* )  msys=true    ;; #(
+  NONSTOP* )        nonstop=true ;;
+esac
+
+CLASSPATH=$APP_HOME/gradle/wrapper/gradle-wrapper.jar
+
+
+# Determine the Java command to use to start the JVM.
+if [ -n "$JAVA_HOME" ] ; then
+    if [ -x "$JAVA_HOME/jre/sh/java" ] ; then
+        # IBM's JDK on AIX uses strange locations for the executables
+        JAVACMD=$JAVA_HOME/jre/sh/java
+    else
+        JAVACMD=$JAVA_HOME/bin/java
+    fi
+    if [ ! -x "$JAVACMD" ] ; then
+        die "ERROR: JAVA_HOME is set to an invalid directory: $JAVA_HOME
+
+Please set the JAVA_HOME variable in your environment to match the
+location of your Java installation."
+    fi
+else
+    JAVACMD=java
+    which java >/dev/null 2>&1 || die "ERROR: JAVA_HOME is not set and no 'java' command could be found in your PATH.
+
+Please set the JAVA_HOME variable in your environment to match the
+location of your Java installation."
+fi
+
+# Increase the maximum file descriptors if we can.
+if ! "$cygwin" && ! "$darwin" && ! "$nonstop" ; then
+    case $MAX_FD in #(
+      max*)
+        MAX_FD=$( ulimit -H -n ) ||
+            warn "Could not query maximum file descriptor limit"
+    esac
+    case $MAX_FD in  #(
+      '' | soft) :;; #(
+      *)
+        ulimit -n "$MAX_FD" ||
+            warn "Could not set maximum file descriptor limit to $MAX_FD"
+    esac
+fi
+
+# Collect all arguments for the java command, stacking in reverse order:
+#   * args from the command line
+#   * the main class name
+#   * -classpath
+#   * -D...appname settings
+#   * --module-path (only if needed)
+#   * DEFAULT_JVM_OPTS, JAVA_OPTS, and GRADLE_OPTS environment variables.
+
+# For Cygwin or MSYS, switch paths to Windows format before running java
+if "$cygwin" || "$msys" ; then
+    APP_HOME=$( cygpath --path --mixed "$APP_HOME" )
+    CLASSPATH=$( cygpath --path --mixed "$CLASSPATH" )
+
+    JAVACMD=$( cygpath --unix "$JAVACMD" )
+
+    # Now convert the arguments - kludge to limit ourselves to /bin/sh
+    for arg do
+        if
+            case $arg in                                #(
+              -*)   false ;;                            # don't mess with options #(
+              /?*)  t=${arg#/} t=/${t%%/*}              # looks like a POSIX filepath
+                    [ -e "$t" ] ;;                      #(
+              *)    false ;;
+            esac
+        then
+            arg=$( cygpath --path --ignore --mixed "$arg" )
+        fi
+        # Roll the args list around exactly as many times as the number of
+        # args, so each arg winds up back in the position where it started, but
+        # possibly modified.
+        #
+        # NB: a `for` loop captures its iteration list before it begins, so
+        # changing the positional parameters here affects neither the number of
+        # iterations, nor the values presented in `arg`.
+        shift                   # remove old arg
+        set -- "$@" "$arg"      # push replacement arg
+    done
+fi
+
+# Collect all arguments for the java command;
+#   * $DEFAULT_JVM_OPTS, $JAVA_OPTS, and $GRADLE_OPTS can contain fragments of
+#     shell script including quotes and variable substitutions, so put them in
+#     double quotes to make sure that they get re-expanded; and
+#   * put everything else in single quotes, so that it's not re-expanded.
+
+set -- \
+        "-Dorg.gradle.appname=$APP_BASE_NAME" \
+        -classpath "$CLASSPATH" \
+        org.gradle.wrapper.GradleWrapperMain \
+        "$@"
+
+# Use "xargs" to parse quoted args.
+#
+# With -n1 it outputs one arg per line, with the quotes and backslashes removed.
+#
+# In Bash we could simply go:
+#
+#   readarray ARGS < <( xargs -n1 <<<"$var" ) &&
+#   set -- "${ARGS[@]}" "$@"
+#
+# but POSIX shell has neither arrays nor command substitution, so instead we
+# post-process each arg (as a line of input to sed) to backslash-escape any
+# character that might be a shell metacharacter, then use eval to reverse
+# that process (while maintaining the separation between arguments), and wrap
+# the whole thing up as a single "set" statement.
+#
+# This will of course break if any of these variables contains a newline or
+# an unmatched quote.
+#
+
+eval "set -- $(
+        printf '%s\n' "$DEFAULT_JVM_OPTS $JAVA_OPTS $GRADLE_OPTS" |
+        xargs -n1 |
+        sed ' s~[^-[:alnum:]+,./:=@_]~\\&~g; ' |
+        tr '\n' ' '
+    )" '"$@"'
+
+exec "$JAVACMD" "$@"
+
+```
+
+`gradlew.bat`:
+
+```bat
+@rem
+@rem Copyright 2015 the original author or authors.
+@rem
+@rem Licensed under the Apache License, Version 2.0 (the "License");
+@rem you may not use this file except in compliance with the License.
+@rem You may obtain a copy of the License at
+@rem
+@rem      https://www.apache.org/licenses/LICENSE-2.0
+@rem
+@rem Unless required by applicable law or agreed to in writing, software
+@rem distributed under the License is distributed on an "AS IS" BASIS,
+@rem WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+@rem See the License for the specific language governing permissions and
+@rem limitations under the License.
+@rem
+
+@if "%DEBUG%" == "" @echo off
+@rem ##########################################################################
+@rem
+@rem  Gradle startup script for Windows
+@rem
+@rem ##########################################################################
+
+@rem Set local scope for the variables with windows NT shell
+if "%OS%"=="Windows_NT" setlocal
+
+set DIRNAME=%~dp0
+if "%DIRNAME%" == "" set DIRNAME=.
+set APP_BASE_NAME=%~n0
+set APP_HOME=%DIRNAME%
+
+@rem Resolve any "." and ".." in APP_HOME to make it shorter.
+for %%i in ("%APP_HOME%") do set APP_HOME=%%~fi
+
+@rem Add default JVM options here. You can also use JAVA_OPTS and GRADLE_OPTS to pass JVM options to this script.
+set DEFAULT_JVM_OPTS="-Xmx64m" "-Xms64m"
+
+@rem Find java.exe
+if defined JAVA_HOME goto findJavaFromJavaHome
+
+set JAVA_EXE=java.exe
+%JAVA_EXE% -version >NUL 2>&1
+if "%ERRORLEVEL%" == "0" goto execute
+
+echo.
+echo ERROR: JAVA_HOME is not set and no 'java' command could be found in your PATH.
+echo.
+echo Please set the JAVA_HOME variable in your environment to match the
+echo location of your Java installation.
+
+goto fail
+
+:findJavaFromJavaHome
+set JAVA_HOME=%JAVA_HOME:"=%
+set JAVA_EXE=%JAVA_HOME%/bin/java.exe
+
+if exist "%JAVA_EXE%" goto execute
+
+echo.
+echo ERROR: JAVA_HOME is set to an invalid directory: %JAVA_HOME%
+echo.
+echo Please set the JAVA_HOME variable in your environment to match the
+echo location of your Java installation.
+
+goto fail
+
+:execute
+@rem Setup the command line
+
+set CLASSPATH=%APP_HOME%\gradle\wrapper\gradle-wrapper.jar
+
+
+@rem Execute Gradle
+"%JAVA_EXE%" %DEFAULT_JVM_OPTS% %JAVA_OPTS% %GRADLE_OPTS% "-Dorg.gradle.appname=%APP_BASE_NAME%" -classpath "%CLASSPATH%" org.gradle.wrapper.GradleWrapperMain %*
+
+:end
+@rem End local scope for the variables with windows NT shell
+if "%ERRORLEVEL%"=="0" goto mainEnd
+
+:fail
+rem Set variable GRADLE_EXIT_CONSOLE if you need the _script_ return code instead of
+rem the _cmd.exe /c_ return code!
+if  not "" == "%GRADLE_EXIT_CONSOLE%" exit 1
+exit /b 1
+
+:mainEnd
+if "%OS%"=="Windows_NT" endlocal
+
+:omega
+
+```
+
+`settings.gradle`:
+
+```gradle
+pluginManagement {
+    repositories {
+        maven {
+            name = 'Fabric'
+            url = 'https://maven.fabricmc.net/'
+        }
+        gradlePluginPortal()
+    }
+}
+
+```
+
+`src/main/java/com/nexia/gatoanticheat/GatoAntiCheat.java`:
+
+```java
+package com.nexia.gatoanticheat;
+
+import com.nexia.gatoanticheat.events.PlayerDetectionEvent;
+import com.nexia.gatoanticheat.players.CombatUtil;
+import com.nexia.gatoanticheat.players.PlayerData;
+import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.event.player.AttackEntityCallback;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionResult;
+
+public class GatoAntiCheat implements ModInitializer {
+
+    @Override
+    public void onInitialize() {
+
+        // JOIN
+        ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
+
+            /**
+             *  Credits to <a href="https://github.com/Blumbo/CTS-AntiCheat">Blumbo's CTS Anti-Cheat</a>
+             *  <h4>Licensed under MIT</h4> <br>
+             *  Creates player data when they join the server
+             */
+
+            PlayerData.addPlayerData(handler.player);
+        });
+
+        // QUIT
+        ServerPlayConnectionEvents.DISCONNECT.register(((handler, server) -> {
+
+            /**
+             *  Credits to <a href="https://github.com/Blumbo/CTS-AntiCheat/tree/master">Blumbo's CTS Anti-Cheat</a> <br>
+             *  <h4>Licensed under MIT</h4> <br>
+             *  Clears player data when they exit the server
+             */
+
+            PlayerData.removePlayerData(handler.player);
+        }));
+
+
+        AttackEntityCallback.EVENT.register((player, world, hand, entity, hitResult) -> {
+            if (player instanceof ServerPlayer serverPlayer) {
+                /*
+                if (!serverPlayer.swinging) {
+                    PlayerDetectionEvent.NOSWING.invoker().onNoSwingDetection(player, entity);
+                    return InteractionResult.FAIL;
+                }
+
+                 */
+
+                if(!CombatUtil.validAngle(serverPlayer, entity)) {
+                    PlayerDetectionEvent.BAD_ATTACK_ANGLE.invoker().onBadAttackAngleDetection(player, entity);
+                    return InteractionResult.FAIL;
+                }
+
+                if (!CombatUtil.allowReach(serverPlayer, entity)) {
+                    PlayerDetectionEvent.REACH.invoker().onReachDetection(player, entity);
+                    return InteractionResult.FAIL;
+                }
+            }
+
+            return InteractionResult.PASS;
+        });
+    }
+
+}
+
+```
+
+`src/main/java/com/nexia/gatoanticheat/events/PlayerDetectionEvent.java`:
+
+```java
+package com.nexia.gatoanticheat.events;
+
+import net.fabricmc.fabric.api.event.Event;
+import net.fabricmc.fabric.api.event.EventFactory;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
+
+public final class PlayerDetectionEvent {
+
+    private PlayerDetectionEvent() {
+    }
+
+    public static final Event<Reach> REACH = EventFactory.createArrayBacked(Reach.class,
+            (listeners) -> (player, target) -> {
+                for (Reach event : listeners) {
+                    event.onReachDetection(player, target);
+                }
+            }
+    );
+
+    public static final Event<NoSwing> NO_SWING = EventFactory.createArrayBacked(NoSwing.class,
+            (listeners) -> (player, target) -> {
+                for (NoSwing event : listeners) {
+                    event.onNoSwingDetection(player, target);
+                }
+            }
+    );
+
+    public static final Event<BadAttackAngle> BAD_ATTACK_ANGLE = EventFactory.createArrayBacked(BadAttackAngle.class,
+            (listeners) -> (player, target) -> {
+                for (BadAttackAngle event : listeners) {
+                    event.onBadAttackAngleDetection(player, target);
+                }
+            }
+    );
+
+    public static final Event<Criticals> CRITICALS = EventFactory.createArrayBacked(Criticals.class,
+            (listeners) -> (player, target) -> {
+                for (Criticals event : listeners) {
+                    event.onCriticalsDetection(player, target);
+                }
+            }
+    );
+
+    @FunctionalInterface
+    public interface Reach {
+        void onReachDetection(Player player, Entity target);
+    }
+
+    @FunctionalInterface
+    public interface NoSwing {
+        void onNoSwingDetection(Player player, Entity target);
+    }
+
+    @FunctionalInterface
+    public interface Criticals {
+        void onCriticalsDetection(Player player, Entity target);
+    }
+
+    @FunctionalInterface
+    public interface BadAttackAngle {
+        void onBadAttackAngleDetection(Player player, Entity target);
+    }
+}
+
+```
+
+`src/main/java/com/nexia/gatoanticheat/mixin/AABBMixin.java`:
+
+```java
+package com.nexia.gatoanticheat.mixin;
+
+import net.minecraft.util.Mth;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
+import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+
+@Mixin(AABB.class)
+public class AABBMixin {
+
+    @Shadow @Final public double minX;
+
+    @Shadow @Final public double maxX;
+
+    @Shadow @Final public double maxY;
+
+    @Shadow @Final public double minY;
+
+    @Shadow @Final public double minZ;
+
+    @Shadow @Final public double maxZ;
+
+    /**
+     *  Credits to <a href="https://github.com/Blumbo/CTS-AntiCheat/tree/master">Blumbo's CTS Anti-Cheat</a> <br>
+     *  <h4>Licensed under MIT</h4> <br>
+     *  Vanilla code is messy and buggy so here's this
+     */
+
+
+    @Inject(method = "getNearestPointTo", cancellable = true, at = @At("HEAD"))
+    private void getNearestPointTo(Vec3 vec3, CallbackInfoReturnable<Vec3> cir) {
+        double x = Mth.clamp(vec3.x, this.minX, this.maxX);
+        double y = Mth.clamp(vec3.y, this.minY, this.maxY);
+        double z = Mth.clamp(vec3.z, this.minZ, this.maxZ);
+
+        cir.setReturnValue(new Vec3(x, y, z));
+    }
+
+}
+
+```
+
+`src/main/java/com/nexia/gatoanticheat/mixin/LivingEntityMixin.java`:
+
+```java
+package com.nexia.gatoanticheat.mixin;
+
+import com.nexia.gatoanticheat.players.CombatUtil;
+import net.minecraft.world.entity.LivingEntity;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.ModifyArg;
+
+@Mixin(LivingEntity.class)
+public class LivingEntityMixin {
+
+    /**
+     *  Credits to <a href="https://github.com/Blumbo/CTS-AntiCheat/tree/master">Blumbo's CTS Anti-Cheat</a> <br>
+     *  <h4>Licensed under MIT</h4> <br>
+     *  Decreases invulnerable time for better hitreg
+     */
+
+
+    @ModifyArg(method = "hurt", index = 0, at = @At(value = "INVOKE", target = "Ljava/lang/Math;min(II)I"))
+    protected int modifyInvulnerableTicks(int original) {
+        return CombatUtil.modifyInvulnerableTicks(original);
+    }
+}
+
+```
+
+`src/main/java/com/nexia/gatoanticheat/mixin/PlayerMixin.java`:
+
+```java
+package com.nexia.gatoanticheat.mixin;
+
+import com.nexia.gatoanticheat.events.PlayerDetectionEvent;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+import java.util.ArrayList;
+
+@Mixin(Player.class)
+public abstract class PlayerMixin extends LivingEntity {
+
+    // i have no idea
+    @Unique
+    private static ArrayList<Float> commonCheatFallDistances = new ArrayList<>();
+
+    protected PlayerMixin(EntityType<? extends LivingEntity> entityType, Level level) {
+        super(entityType, level);
+    }
+
+    @Inject(method = "attack", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;crit(Lnet/minecraft/world/entity/Entity;)V"))
+    public void detectCriticals(Entity entity, CallbackInfo ci) {
+        if(commonCheatFallDistances.contains(this.fallDistance) || this.fallDistance >= 1024) {
+            PlayerDetectionEvent.CRITICALS.invoker().onCriticalsDetection((Player) (Object) this, entity);
+        }
+    }
+
+    static {
+        // LiquidBounce
+        commonCheatFallDistances.add(0.19f); // Vanilla
+        commonCheatFallDistances.add(0.11f); // No Cheat Plus
+        commonCheatFallDistances.add(0.0625f); // Falling
+    }
+}
+
+```
+
+`src/main/java/com/nexia/gatoanticheat/mixin/ServerGamePacketListenerMixin.java`:
+
+```java
+package com.nexia.gatoanticheat.mixin;
+
+import com.nexia.gatoanticheat.events.PlayerDetectionEvent;
+import com.nexia.gatoanticheat.players.CombatUtil;
+import net.minecraft.network.protocol.game.ServerboundCommandSuggestionPacket;
+import net.minecraft.network.protocol.game.ServerboundInteractPacket;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.network.ServerGamePacketListenerImpl;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.phys.Vec3;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+@Mixin(ServerGamePacketListenerImpl.class)
+public class ServerGamePacketListenerMixin {
+
+    @Shadow public ServerPlayer player;
+    @Unique Entity targetEntity;
+
+    /**
+     *  Credits to <a href="https://github.com/Blumbo/CTS-AntiCheat/tree/master">Blumbo's CTS Anti-Cheat</a> <br>
+     *  <h4>Licensed under MIT</h4> <br>
+     *  Stores the target for use later.
+     */
+
+
+    @Inject(method = "handleInteract", at = @At("HEAD"))
+    private void handleInteract(ServerboundInteractPacket packet, CallbackInfo ci) {
+        targetEntity = packet.getTarget(player.getLevel());
+    }
+
+    /**
+     *  Credits to <a href="https://github.com/Blumbo/CTS-AntiCheat/tree/master">Blumbo's CTS Anti-Cheat</a> <br>
+     *  <h4>Licensed under MIT</h4> <br>
+     *  If return value is smaller than player reach the interaction will be a success, otherwise pass
+     */
+
+
+    // If return value is smaller than player reach the interaction will be a success, otherwise pass
+    @Redirect(method = "handleInteract", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/phys/Vec3;distanceToSqr(Lnet/minecraft/world/phys/Vec3;)D"))
+    private double getAttackDistance(Vec3 instance, Vec3 vec3) {
+
+        /*
+        // If target is not a player do vanilla code
+        if (!(targetEntity instanceof ServerPlayer target)) {
+            Vec3 eyePosition = player.getEyePosition(0);
+            return (eyePosition).distanceToSqr(targetEntity.getBoundingBox().getNearestPointTo(eyePosition));
+        }
+         */
+
+        if (CombatUtil.allowReach(player, targetEntity)) {
+            return 0;
+        } else {
+            PlayerDetectionEvent.REACH.invoker().onReachDetection(player, targetEntity);
+            return Integer.MAX_VALUE;
+        }
+    }
+
+    // Thank you, our lord and saviour
+    //   _____  _          _____            _
+    // |  __ \(_)        / ____|          | |
+    // | |__) |_ _______| |     ___   ___ | | _____ _   _
+    // |  _  /| |_  / _ \ |    / _ \ / _ \| |/ / _ \ | | |
+    // | | \ \| |/ /  __/ |___| (_) | (_) |   <  __/ |_| |
+    // |_|  \_\_/___\___|\_____\___/ \___/|_|\_\___|\__, |
+    //                                               __/ |
+    //                                              |___/
+    @Redirect(method = "handleInteract", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;getCurrentAttackReach(F)F"))
+    public float redirectReachLonger(ServerPlayer playerEntity, float f) {
+        return playerEntity.getCurrentAttackReach(f) + CombatUtil.padding;
+    }
+
+    /*
+    @Inject(method = "handleContainerClick", cancellable = true, at = @At("HEAD"))
+    private void fixContainerCrash(ServerboundContainerClickPacket clickPacket, CallbackInfo ci) {
+        int containerId = clickPacket.getContainerId();
+        int slot = clickPacket.getSlotNum();
+
+        if (containerId < 0 || containerId > 10 && containerId != 40 && containerId != 99) {
+            ci.cancel();
+            return;
+        }
+
+        if (slot != -999 && slot != -1) {
+            if (slot < 0) {
+                ci.cancel();
+            }
+            return;
+        }
+
+        if (containerId == 40) {
+            ci.cancel();
+            return;
+        }
+
+        switch (clickPacket.getClickType()) {
+            case SWAP, PICKUP_ALL -> ci.cancel();
+            case THROW -> {
+                if (slot == -1) {
+                    ci.cancel();
+                }
+            }
+            case QUICK_MOVE -> {
+                if (slot == -999) {
+                    ci.cancel();
+                }
+            }
+        }
+    }
+
+     */
+}
+
+```
+
+`src/main/java/com/nexia/gatoanticheat/mixin/ServerPlayerMixin.java`:
+
+```java
+package com.nexia.gatoanticheat.mixin;
+
+import com.mojang.authlib.GameProfile;
+import com.nexia.gatoanticheat.players.CombatUtil;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+@Mixin(ServerPlayer.class)
+public abstract class ServerPlayerMixin extends Player {
+
+    public ServerPlayerMixin(Level level, BlockPos blockPos, float f, GameProfile gameProfile) {
+        super(level, blockPos, f, gameProfile);
+    }
+
+    /**
+     *  Credits to <a href="https://github.com/Blumbo/CTS-AntiCheat/tree/master">Blumbo's CTS Anti-Cheat</a> <br>
+     *  <h4>Licensed under MIT</h4> <br>
+     *  Stores Player's position every tick
+     */
+
+    @Inject(method = "tick", at = @At("HEAD"))
+    private void tick(CallbackInfo ci) {
+        CombatUtil.setPosition((ServerPlayer)(Object)this);
+    }
+}
+
+```
+
+`src/main/java/com/nexia/gatoanticheat/players/CombatUtil.java`:
+
+```java
+package com.nexia.gatoanticheat.players;
+
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
+
+/**
+ *  Credits to <a href="https://github.com/Blumbo/CTS-AntiCheat/tree/master">Blumbo's CTS Anti-Cheat</a> <br>
+ *  <h4>Licensed under MIT</h4> <br>
+ *  General Combat improvement utility used across several classes
+ */
+
+
+public class CombatUtil {
+
+    // The amount of ticks players' previous locations are saved for
+    // A somewhat good rule for the optimal amount of ticks is ceiling(x/50ms) + 2
+    // where x is the highest ping (in milliseconds) the anticheat takes into account.
+    // E.g. if the highest "accepted" ping is 151ms-200ms this number would be 6, for 251-300ms it would be 8 etc.
+    public static int savedLocationTicks = 8;
+
+    // The amount of extra reach the player gets
+    // e.g. player is 3 blocks away client side but is 4 blocks away server side
+    // (assuming padding is 1 block) the hit goes through
+
+    // 0.25 is vanilla padding
+    // e.g. 0.75 is actually 1 block of padding
+    public static final float padding = 0.75f;
+
+    // If target is not in reach (possibly due to ping) check if target's previous locations are in reach
+    public static boolean allowReach(ServerPlayer attacker, Entity entityTarget) {
+        Vec3 eyePosition = attacker.getEyePosition(0);
+        double reach = attacker.getCurrentAttackReach(1f) + padding;
+        if (!attacker.canSee(entityTarget)) reach = 2.5;
+        reach *= reach;
+
+        if (canReach(eyePosition, entityTarget.getBoundingBox(), reach)) return true;
+
+        if(entityTarget instanceof ServerPlayer target) {
+            PlayerData victimData = PlayerData.get(target);
+            for (AABB boundingBox : victimData.previousPositions) {
+                if (boundingBox == null) continue;
+                if (canReach(eyePosition, boundingBox, reach)) return true;
+            }
+        }
+
+
+        return false;
+    }
+
+    public static boolean canReach(Vec3 eyePosition, AABB boundingBox, double reach) {
+        return eyePosition.distanceToSqr(boundingBox.getNearestPointTo(eyePosition)) < reach;
+    }
+
+    // Update players' previous positions every tick
+    public static void setPosition(ServerPlayer player) {
+        PlayerData playerData = PlayerData.get(player);
+
+        playerData.positionIndex++;
+        if (playerData.positionIndex >= playerData.previousPositions.length) playerData.positionIndex = 0;
+
+        playerData.previousPositions[playerData.positionIndex] = player.getBoundingBox();
+    }
+
+    // Decrease invulnerability ticks for non-fast hits to prevent no-regs for fast attacks
+    public static int modifyInvulnerableTicks(int original) {
+        if (original >= 4) return original - 2;
+        return original;
+    }
+
+
+    public static boolean validAngle(ServerPlayer player, Entity target) {
+        return player.canSee(target);
+    }
+}
+
+```
+
+`src/main/java/com/nexia/gatoanticheat/players/PlayerData.java`:
+
+```java
+package com.nexia.gatoanticheat.players;
+
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.phys.AABB;
+
+import java.util.HashMap;
+import java.util.UUID;
+
+/**
+ *  Credits to <a href="https://github.com/Blumbo/CTS-AntiCheat/tree/master">Blumbo's CTS Anti-Cheat</a> <br>
+ *  <h4>Licensed under MIT</h4> <br>
+ *  Stores the previous positions of a player
+ */
+
+
+public class PlayerData {
+
+    public AABB[] previousPositions;
+    public int positionIndex;
+
+    public PlayerData() {
+        this.previousPositions = new AABB[CombatUtil.savedLocationTicks];
+        this.positionIndex = 0;
+    }
+
+    private final static HashMap<UUID, PlayerData> allPlayerData = new HashMap<>();
+
+    public static PlayerData get(ServerPlayer player) {
+        if (!allPlayerData.containsKey(player.getUUID())) {
+            addPlayerData(player);
+        }
+        return allPlayerData.get(player.getUUID());
+    }
+
+    public static void addPlayerData(ServerPlayer player) {
+        PlayerData playerData = new PlayerData();
+        allPlayerData.put(player.getUUID(), playerData);
+    }
+
+    public static void removePlayerData(ServerPlayer player) {
+        if (!allPlayerData.containsKey(player.getUUID())) return;
+        allPlayerData.remove(player.getUUID());
+    }
+
+}
+
+```
+
+`src/main/resources/fabric.mod.json`:
+
+```json
+{
+  "schemaVersion": 1,
+  "id": "gatoanticheat",
+  "version": "${version}",
+  "name": "Gato AntiCheat",
+  "description": "An AntiCheat for the Nexia CTS Server.",
+  "authors": [
+    "Blumbo",
+    "NotCoded"
+  ],
+  "contact": {
+    "homepage": "https://nexia.dev",
+    "sources": "https://github.com/nexia-cts/Gato-AntiCheat"
+  },
+  "license": "MIT",
+  "environment": "server",
+  "accessWidener": "gatoanticheat.accesswidener",
+  "entrypoints": {
+    "main": [
+      "com.nexia.gatoanticheat.GatoAntiCheat"
+    ]
+  },
+  "mixins": [
+    "gatoanticheat.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.14.21",
+    "minecraft": "1.16.3-combat.8.c",
+    "fabric": ">=0.42.0",
+    "java": ">=21"
+  }
+}
+
+```
+
+`src/main/resources/gatoanticheat.accesswidener`:
+
+```accesswidener
+accessWidener v1 named
+
+accessible field net/minecraft/world/damagesource/EntityDamageSource isCritSpecial Z
+```
+
+`src/main/resources/gatoanticheat.mixins.json`:
+
+```json
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.nexia.gatoanticheat.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "mixins": [
+    "AABBMixin",
+    "LivingEntityMixin",
+    "PlayerMixin",
+    "ServerGamePacketListenerMixin",
+    "ServerPlayerMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
+
+```
