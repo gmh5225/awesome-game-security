@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-11-03** — ingest `description:grloper/playgoblin`: enriched entity [[playgoblin]] (Unity package + experimental Unreal plugin, Python CLI deterministic checks, HTML/Markdown/GitHub/MCP outputs; local overnight QA vs [[llm-game-automation-mcp]] inject stack; confidence medium); cited [[overviews/game-engine]] Game Develop / AI Agents / Game Testing lane with description source; `index.md` entity blurb updated.
+
 - **2026-11-03** — ingest `description:romainthomas/frida-stalker-detection`: enriched entity [[frida-stalker-detection]] (mechanism, platforms/build, positioning vs [[frida-detection]]/[[detect-frida]]; confidence medium); cited [[concepts/frida]] Detection:Frida defensive lane + [[overviews/anti-cheat]] Detection:Frida samples and README map with description source; `index.md` entity blurb updated.
 
 - **2026-11-03** — ingest `description:strazzere/secneo-gadget`: enriched entity [[secneo-gadget]] (TypeScript Frida agents; DexClassLoader/libDexHelper/ART native load; anti-debug bypass, DEX dump, forced class load, JDWP/jdb, IDA helpers; SecNeo games/drone-control targets; confidence medium); cited [[overviews/mobile-security]] packer/shielding lane + [[overviews/reverse-engineering]] Mobile/iOS Frida unpack cluster beside [[android-unpacker]]/[[molt-dex]]; `index.md` entity blurb updated.

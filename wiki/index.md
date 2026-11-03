@@ -3171,7 +3171,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Pixel GPU Exploit](entities/pixel-gpu-exploit.md) — Mali GPU kernel exploit chain for Pixel 7/8 Pro Android 14; integer overflow + info leak → kernel R/W, SELinux off, root (0x36; cheat / Root for Pixel7/8 Pro with Android 14)
 - [PIF Config Generator](entities/pif-config-generator.md) — automated Python pipeline for validated Play Integrity Fix JSON device profiles (Pixel build.prop tracking, Pydantic schemas, pif-gen CLI; Elcapitanoe; cheat / Android attestation spoof)
 - [PlayCanvas Engine](entities/engine.md) — open-source WebGL/WebGPU JS engine (PBR / Ammo.js / XR; HTML5 3D)
-- [PlayGoblin](entities/playgoblin.md) — overnight Unity/Unreal automated QA bot with deterministic checks, HTML/Markdown/GitHub issue reports, and MCP for agents (grloper; Game Develop / AI Agents)
+- [PlayGoblin](entities/playgoblin.md) — overnight Unity/Unreal QA bot; Python CLI deterministic checks on structured run logs; evidence HTML/Markdown/GitHub issues; MCP + JSON for agents; local regression—not AC (grloper; Game Develop / AI Agents / Game Testing)
 - [Playnite](entities/playnite.md) — OSS Windows game library manager/launcher (C#/XAML/.NET; plugin integrations/themes/automation; emulation + local metadata; Game Manager / JosefNemec)
 - [PltPatcher](entities/plt-patcher.md) — IDA Pro plugin set: repair ELF64 PLT entries when auto-analysis fails; thunk type preserver for extern-call decompilation (GAMMACASE; Python IDAPython; cheat / IDA Plugins)
 - [plthook](entities/plthook.md) — cross-platform PLT/GOT/IAT hook library (ELF/Mach-O/PE; Linux/macOS/Windows; cheat / hook research)
