@@ -254,6 +254,7 @@ sources:
   - wiki/sources/descriptions/vs-sr-dev__saturnkit.md
   - wiki/sources/descriptions/sosso33__omikron-tns-omk-engine.md
   - wiki/sources/descriptions/jlagedo__dreams-to-reality-re.md
+  - wiki/sources/descriptions/fluxolex__ocean-anticheat-analysis.md
   - wiki/sources/descriptions/formix__sre-re.md
   - wiki/sources/descriptions/Velaron__cs16-client.md
   - wiki/sources/descriptions/ValveSoftware__halflife.md
@@ -1483,7 +1484,7 @@ Classify the investigative question and preserve address provenance before selec
 
 Keep file offsets, RVAs, and runtime addresses distinct; validate decompiler types and boundaries against instructions and ABI constraints. For native Linux or Proton targets, route platform context through linux-platform-security before attributing Windows-centric findings.
 
-Full-pipeline commercial AC reconstruction archives such as [[xigncode3-blackdesert]] (Black Desert XIGNCODE3: `xmag`/`xnina` container unpack, Ghidra decompilation of native modules, Lua 5.3 recovery, VMProtect `xhunter1` triage, IPC/detection specs, PowerShell live capture) complement captured client-module dumps like [[xigncode-dump]] (gmh5225; modding / offline RE; cheat / explore anticheat:xigncode), narrower exploit PoCs like [[xign-poc-april-2026]], hooking/memory-analysis bypass samples such as [[xigncode3-bypass-alternative]] (C++; cheat / explore anticheat:xigncode), and NetEase NeacSafe client–driver minifilter communication-port RE via [[neacsafe-analysis]] (user-mode probe + saved Pediy notes; `\NeacSafePort` protocol reproduction; gmh5225). (source: wiki/sources/descriptions/miyakejima__xigncode3-blackdesert.md) (source: wiki/sources/descriptions/gmh5225__XignCode-Dump.md) (source: wiki/sources/descriptions/gmh5225__XignCode3-bypass-alternative.md) (source: wiki/sources/descriptions/gmh5225__NeacSafe-Analysis.md)
+Full-pipeline commercial AC reconstruction archives such as [[xigncode3-blackdesert]] (Black Desert XIGNCODE3: `xmag`/`xnina` container unpack, Ghidra decompilation of native modules, Lua 5.3 recovery, VMProtect `xhunter1` triage, IPC/detection specs, PowerShell live capture) complement captured client-module dumps like [[xigncode-dump]] (gmh5225; modding / offline RE; cheat / explore anticheat:xigncode), narrower exploit PoCs like [[xign-poc-april-2026]], hooking/memory-analysis bypass samples such as [[xigncode3-bypass-alternative]] (C++; cheat / explore anticheat:xigncode), NetEase NeacSafe client–driver minifilter communication-port RE via [[neacsafe-analysis]] (user-mode probe + saved Pediy notes; `\NeacSafePort` protocol reproduction; gmh5225), and community third-party scanner static dossiers such as [[ocean-anticheat-analysis]] (fluxolex; Go/VMProtect/garble `ocean.exe`; Unicorn unpack + Ghidra + Python stubs; sixteen client–server channels; OceanGraper kernel driver; privacy-policy vs telemetry; static-only, no live execution). (source: wiki/sources/descriptions/miyakejima__xigncode3-blackdesert.md) (source: wiki/sources/descriptions/gmh5225__XignCode-Dump.md) (source: wiki/sources/descriptions/gmh5225__XignCode3-bypass-alternative.md) (source: wiki/sources/descriptions/gmh5225__NeacSafe-Analysis.md) (source: wiki/sources/descriptions/fluxolex__ocean-anticheat-analysis.md)
 
 ## Workflow
 

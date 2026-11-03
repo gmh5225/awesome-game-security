@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-11-03** — ingest `description:fluxolex/ocean-anticheat-analysis`: enriched entity [[ocean-anticheat-analysis]] (methodology table—Unicorn unpack, Ghidra, Python stubs, static-only; protocol/driver findings; audience vs [[hapiscanner]]/[[error-pc-check]]; confidence medium); cited [[overviews/anti-cheat]] screenshare/Analysis Framework lane + [[overviews/reverse-engineering]] third-party AC static dossier cluster with description source; `index.md` entity blurb updated.
+
 - **2026-11-03** — ingest `description:nimjump/game`: enriched entity [[nimjump]] (architecture table—Godot WASM client, Go backend, native replay-verifier, Next.js admin; audience vs [[pew-game]]/[[ghostline]]; confidence medium); cited [[overviews/anti-cheat]] README map + [[overviews/game-hacking]] defensive web-game score-integrity lane with description source; `index.md` entity blurb updated.
 
 - **2026-11-03** — ingest `readme:categories`: **Cheat** link_count **3003** (+1 vs prior wiki **3002**; CheatEngineNet/[[cheat-engine-client]] official C# CE plugin SDK) / **Anti Cheat** **874** (+2 vs prior wiki **872**; fluxolex/[[ocean-anticheat-analysis]] Ocean AC client static RE + nimjump/[[nimjump]] Godot replay-verifier Web3 reference) / other major README section counts stable (41 sections; `NeverC & NeverD` placeholder); synced [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/game-hacking]], [[overviews/reverse-engineering]], [[overviews/game-engine]]; entities [[cheat-engine-client]], [[ocean-anticheat-analysis]], [[nimjump]]; light `index.md` section notes (no per-category pages).

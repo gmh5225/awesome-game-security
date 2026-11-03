@@ -2904,7 +2904,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [NXbox](entities/nxbox.md) — NspxMiguel Eden Switch emulator UWP port for Xbox Series X|S (Dynarmic ARM64 JIT; Maxwell shader recompiler; OpenGL on D3D12 via Mesa; UWP/AppxManifest packaging; Horizon compat notes; Nintendo Switch)
 - [OpenSw](entities/opensw.md) — Android ARM64 Switch emulator (Eden/yuzu lineage; dynarmic JIT; Vulkan/OpenGL; build-ID-aware Atmosphere/Eden cheat import; dmnt-style cheat engine; per-game profiles; Cockpit panel; Profile build automation bridge; RemiPelloux)
 - [nzPerspective](entities/nz-perspective.md) — D3D9 hooking sample (C/C++; cheat / game:tgame; gmh5225)
-- [Ocean Anti-Cheat Analysis](entities/ocean-anticheat-analysis.md) — fluxolex static RE of Ocean AC Windows client (Go/VMProtect; sixteen channels, OceanGraper driver, telemetry vs privacy; Analysis Framework)
+- [Ocean Anti-Cheat Analysis](entities/ocean-anticheat-analysis.md) — fluxolex static RE of Ocean AC `ocean.exe` (Go/VMProtect/garble; Unicorn unpack + Ghidra; sixteen channels, weak protocol crypto, OceanGraper driver, exfil vs privacy; Minecraft/FiveM screenshare; Analysis Framework)
 - [O3 Root](entities/o3root.md) — Shizuku-driven CVE-2026-98260 HyperOS root (Java orchestration + C UAF/page-reclaim/rb-tree LPE; boot-scoped KernelSU/Next/SukiSU LKM; Xiaomi yingtian/lhasa kernel 6.18; zsw125; cheat / Android Root)
 - [OAC](entities/oac.md) — Open Anti-Cheat demand-start framework (x64 kernel driver + user-mode client; ObCallbacks handle filtering, cross-view integrity checks, PiDDB/MmUnloadedDrivers forensics; lauralex)
 - [OFRP-device_xiaomi_mondrian](entities/ofrp-device-xiaomi-mondrian.md) — OFRP/TWRP device tree for Redmi K60 Pro (mondrian)
