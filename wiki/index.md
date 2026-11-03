@@ -117,6 +117,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [BF1-ESP-AND-AIMBOT](entities/bf1-esp-and-aimbot.md) — BF1 ESP/aimbot: DirectX / rendering / hooking (C/C++; gmh5225; cheat / game:battlefield 1)
 - [BF4-Internal-overlay](entities/bf4-internal-overlay.md) — BF4 internal overlay: DirectX / rendering / SDK generation (C++; gmh5225; cheat / game:battlefield 4)
 - [battlefield-2042-internal-sdk](entities/battlefield-2042-internal-sdk.md) — BF2042 internal SDK scaffold (Skengdo; C++; entity/player/vehicle/weapon structures, rendering, W2S; incomplete; cheat / game:battlefield 2042 [Internal])
+- [battlebit-revival](entities/battlebit-revival.md) — Self-hosted BattleBit Remastered master (.NET 10), Windows launcher proxy, IL2CPP GameAssembly.dll auth/protocol patch scripts, optional launcher AC + server ban config (MythicalFentWizard; private clusters after official shutdown)
 - [battlefn-cheat-analysis](entities/battlefn-cheat-analysis.md) — Detected Fortnite cheat post-mortem (0dayatday0; written analysis + sample modules + manual-map / privileged-memory PoCs; batch + C++ usermode→kernel paths; tradecraft + mistake study for AC/RE researchers)
 - [Basic-Fortnite-Cheat-Source-Internal](entities/basic-fortnite-cheat-source-internal.md) — Fortnite internal: UE4 SDK / GObject/GNames / hooks (ESP + aimbot; C++)
 - [basic-anti-cheat](entities/basic-anti-cheat.md) — Basic C/C++ AC teaching sample (integrity / signature scan / debugger / modules / memory validation; gmh5225)

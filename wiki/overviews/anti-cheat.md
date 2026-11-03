@@ -45,6 +45,7 @@ sources:
   - wiki/sources/descriptions/radito__SecurityRiskAndroid.md
   - wiki/sources/descriptions/000nico__ringo-ac.md
   - wiki/sources/descriptions/0dayatday0__BattleFN-cheat-analysis.md
+  - wiki/sources/descriptions/MythicalFentWizard__battlebit-revival.md
   - wiki/sources/descriptions/zyhp__vac3_inhibitor.md
   - wiki/sources/descriptions/x1tan__vac3-dumper.md
   - wiki/sources/descriptions/shuruk421__VACKeyRetrieval.md
@@ -1169,6 +1170,7 @@ Title-specific R6 ranked-stat suspicion tooling such as [[r6-intel]] (baldspots4
 - [[cs16-trigger-kvm]] — KVM/QEMU host-side CS1.6 triggerbot (gmh5225; guest memory read + input injection invisible to in-guest AC) for studying hypervisor-based cheat surface (source: wiki/sources/descriptions/gmh5225__cs16-trigger-kvm.md)
 - [[cfclap]] — CrossFire (CF) memory-manipulation cheat sample (gmh5225; ESP / aimbot / combat advantages via client memory reads) for studying title-specific client-side protection and cheat-detection mechanisms (source: wiki/sources/descriptions/gmh5225__cfclap.md)
 - [[vortexac]] — CrossFire private-server user-mode client–server AC + engine patcher (AliShe3a; C++; MS SQL session validation/heartbeats/tiered HWID bans; client D3D9 hook inspection, CRC32 memory integrity, process/debugger scans, Detours Win32 hooks for protected asset decrypt; validation server TCP auth/heartbeat, UDP screen/VOIP, HTTP admin panel, Discord alerts; Open Source Anti Cheat System / game:crossfire) (source: wiki/sources/descriptions/AliShe3a__VortexAC.md)
+- [[battlebit-revival]] — BattleBit Remastered post-shutdown private-cluster stack (MythicalFentWizard; .NET 10 master + Windows launcher proxy; optional launcher scans for cheat tools/injected modules/debuggers; server-side ban/detection config; IL2CPP `GameAssembly.dll` patch scripts for private masters; preservation + legacy multiplayer AC study) (source: wiki/sources/descriptions/MythicalFentWizard__battlebit-revival.md)
 - [[lost-ark]] — Lost Ark MMORPG client memory-manipulation cheat sample (gmh5225; ESP / gameplay mods / automation) for studying title-specific UE MMORPG client-side protection and cheat-detection mechanisms (source: wiki/sources/descriptions/gmh5225__LostArk.md)
 - [[unmapper]] — automatic dumped-PE header repair so decompilers load cleanly (Dump Fix) (source: wiki/sources/descriptions/t3ssellate__unmapper.md)
 - [[fix-arxan]] — Arxan PE protector: loader info + decrypted working image for research (Dump Fix) (source: wiki/sources/descriptions/pr701__fix-arxan.md)
