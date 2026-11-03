@@ -4416,6 +4416,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/horsicq/XVolkolak [Qt/CLI PE unpacker-emulator using XEmulUnpacker to single-step packer stubs to OEP; UPX, ASPack, MPRESS, and 18+ other packers]
 - https://github.com/anpa1200/Unpacker [Modular PE/ELF packer detection and unpacking pipeline for UPX, ASPack, Themida, and VMProtect]
 - https://github.com/strazzere/android-unpacker [Android]
+- https://github.com/strazzere/secneo-gadget [Frida/TypeScript gadgets to debug, dump, and dissect SecNeo-protected Android apps]
 
 > Dump Fix
 - https://github.com/t3ssellate/unmapper
@@ -5050,6 +5051,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/darvincisec/DetectFrida
 - https://github.com/qtfreet00/AntiFrida
 - https://github.com/muellerberndt/frida-detection
+- https://github.com/romainthomas/frida-stalker-detection [PoC detecting Frida Gum Stalker via stack red-zone canary checks on Android ARM64 and Linux x86-64]
 - https://github.com/apkunpacker/Anti-Frida [Some Of Anti-Frida Stuff]
 - https://github.com/vw2x/Mira [Mobile runtime detection workbench for iOS/Android with Frida tasks, relay, MCP, and documented root/emulator/hook side-channel cases]
 
