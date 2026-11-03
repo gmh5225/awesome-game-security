@@ -721,6 +721,7 @@ sources:
   - wiki/sources/descriptions/BepInEx__BepInEx.Utility.IL2CPP.md
   - wiki/sources/descriptions/4ch12dy__il2cpp.md
   - wiki/sources/descriptions/AnonymoDGH__cheat-mcp.md
+  - wiki/sources/descriptions/CorruptedAng3l__llm-game-automation-mcp.md
   - wiki/sources/descriptions/0111-0222__uc-mcp.md
   - wiki/sources/descriptions/abczsl520__game-quality-gates.md
 updated: 2026-11-02
@@ -816,7 +817,7 @@ Editor-facing MCP bridges in the README's **MCP server** subcategory let AI agen
 - **Binary Ninja Headless MCP** — [[binary-ninja-headless-mcp]] Python headless BN MCP server with 181 RE tools (disasm, IL, patching, types, xrefs, undo/redo; stdio/TCP; read-only default; fake backend for CI; mrphrazer; Game Develop / MCP server) (source: wiki/sources/descriptions/mrphrazer__binary-ninja-headless-mcp.md)
 - **REA** — [[rea]] local CLI + MCP server for agent-assisted RE across native binaries, JS/Electron, .NET, web/mobile captures, and firmware; bridges Hopper/Ghidra/IDA/JADX and related tools; returns evidence provenance and limitations (morluto; Game Develop / MCP server) (source: wiki/sources/descriptions/morluto__rea.md)
 - **PlayGoblin** — [[playgoblin]] overnight Unity/Unreal automated QA: in-engine run logs + Python CLI deterministic checks (crashes, dead UI, nav stalls, blank frames, debug leftovers, optional FPS); evidence HTML/Markdown/GitHub issues; MCP + JSON for agents; local regression—not AC (grloper; Game Develop / AI Agents / Game Testing) (source: wiki/sources/descriptions/grloper__playgoblin.md) (source: wiki/sources/README-categories.md)
-- **LLM Game Automation MCP** — [[llm-game-automation-mcp]] Windows vinput inject + MCP for background capture/input with optional AC process refusal (CorruptedAng3l; Game Develop / MCP server) (source: wiki/sources/README-categories.md)
+- **LLM Game Automation MCP** — [[llm-game-automation-mcp]] MSVC vinput DLL inject (MinHook virtual KB/mouse/gamepad, fake focus) + TypeScript MCP (launch, DXGI/Vulkan/GL capture, OCR, scripting, input trace); refuses known online AC processes (CorruptedAng3l; Game Develop / MCP server) (source: wiki/sources/descriptions/CorruptedAng3l__llm-game-automation-mcp.md) (source: wiki/sources/README-categories.md)
 - **Cheat MCP** — [[cheat-mcp]] (AnonymoDGH; C++17; stdio JSON-RPC MCP; Windows game memory R/W, CE-style scanning, DLL/shellcode injection, IAT hooking, speedhack, EAC/BE/Vanguard recon; Game Develop / MCP server) (source: wiki/sources/descriptions/AnonymoDGH__cheat-mcp.md)
 - **UC MCP** — [[uc-mcp]] (0111-0222; Python; read-only date-aware UnknownCheats forum search via session cookies; keyword search, thread read, subforum browse, UTC staleness labels; curl_cffi + vBulletin parse; rate limits + SQLite cache; Game Develop / MCP server) (source: wiki/sources/descriptions/0111-0222__uc-mcp.md)
 - **Interactive Feedback macOS MCP** — [[interactive-feedback-macos-mcp]] native AppleScript dialog + image HITL prompts; macOS fork of [[interactive-feedback-mcp]] (source: wiki/sources/descriptions/gmh5225__interactive-feedback-macos-mcp.md)
