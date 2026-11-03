@@ -5110,6 +5110,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/ItzMeow80/jvm-inspector [PowerShell Minecraft screenshare forensics: live JVM audit (javaagents, injection flags) plus disk scans for renamed/repacked jars and cheat signatures]
 - https://github.com/klasscripts/ffs-explorer [Cross-platform PySide6 viewer for iOS/Android GrayKey and Cellebrite UFED Full File System ZIP extractions — stream-browse without unpacking, vendor metadata reconstruction, SQLite/WAL preview, and artefact shortcuts]
 - https://github.com/NotSkrib/error-pc-check [Open-source consensual Minecraft Java screenshare workflow: signed C# client agent, staff web panel, and Supabase backend for live forensic scans and severity-ranked cheat evidence reports]
+- https://github.com/abdulhamitakdag/hapiscanner [Open-source, consent-based Windows PC verification and Minecraft cheat-evidence scanner for server screenshares (MFT/USN, process modules, rule-based reports)]
 - https://github.com/Catusse2k/ScreenShare-Signatures [Signature database and docs for FiveM/Minecraft screenshare forensics covering DMA, kernel loaders, firmware hints, and cheat evasion artifacts]
 
 > Dynamic Script
@@ -5394,6 +5395,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/reveny/Android-Compatibility-Layer [Linux translation layer to run ARM64/x86_64 APKs without a VM—host ART for Dex, LLVM AOT/JIT for native, Wayland/Vulkan/GLES]
 - https://github.com/jwmcglynn/android-emulator
 - https://github.com/NKS1608/kiln-android-emulator [Apple Silicon macOS Android 16 emulator (HVF, GLES/Vulkan) with per-instance IMEI/serial/SIM, adb, and per-game key mapping]
+- https://github.com/AbdurahmanAlmehdi/jidr [Open-source Apple Silicon macOS Android emulator (Rust) with one-click Magisk full root, shell root, CLI/JSON, and MCP for automated device testing]
 - https://github.com/google/android-emulator-hypervisor-driver
 - https://github.com/ant4g0nist/rudroid [Rust]
 - https://github.com/qemu-gvm/qemu-gvm [QEMU]
