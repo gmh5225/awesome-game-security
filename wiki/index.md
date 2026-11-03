@@ -1504,7 +1504,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Finger](entities/finger.md) — cloud function symbol recognition (Python SDK + IDA 7+ plugin; feature extraction → recognition backend → rename/highlight; Recognizing Function By Cloud; aliyunav; cheat / IDA Plugins)
 - [firmeye](entities/firmeye.md) — IDA Pro IoT firmware vuln hunter (Python; argument tracing into sensitive functions; static + debugger-assisted dynamic checks; overflow/command-exec/format-string rules; CLI batch; Vu1nT0tal; cheat / IoT / IDA Plugins)
 - [FRIEND](entities/friend.md) — IDA plugin: register/instruction docs in disasm + Hex-Rays (Capstone extensions; contextual hints; external links; function summaries; C++/CMake; cheat / IDA Plugins)
-- [FlashKit](entities/flashkit.md) — Termux:GUI pocket flasher: sideload ROMs, GSI, and recovery ops on OTG target from rooted host Android (Python/shell; adb/fastboot; live logs; chakradhartode; Cheat / Android ROM)
+- [FlashKit](entities/flashkit.md) — Termux:GUI OTG pocket flasher: Magisk/KernelSU host drives adb/fastboot on second device—ROM/GSI/partition sideload, link repair, zip edit, cancelable jobs; Python/shell + `doctor` CLI (chakradhartode; Cheat / Android ROM)
 - [Flashwright](entities/flashwright.md) — Windows 11 Rust/Tauri plug-in-to-completion Pixel wizard (typed adb/fastboot, factory/OTA SHA-256 verify, Magisk boot patch, dry-run safety gates, boot/vbmeta backup/restore; auditable mobile integrity research workflow; Cheat / Android Root)
 - [FlatRedBall](entities/flatredball.md) — C# / .NET 2D engine (editor + runtime; Game Engine)
 - [FallGuys](entities/fall-guys.md) — Fall Guys kernel cheat (driver communication + memory manipulation; speed/fly/physics exploits; Unity; gmh5225)

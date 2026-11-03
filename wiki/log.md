@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-11-03** — ingest `description:chakradhartode/flashkit`: enriched entity [[flashkit]] (Termux:GUI OTG pocket adb/fastboot station; sideload/GSI/partition flash, link repair, zip edit, cancelable jobs; audience + positioning vs [[flashwright]]/[[rom-shifter]]; confidence medium); cited [[overviews/mobile-security]] field firmware lane + [[overviews/game-hacking]] Android ROM cluster with description source; `index.md` entity blurb updated.
+
 - **2026-11-03** — ingest `description:protonspy/harness-for-rea`: enriched entity [[harness-for-rea]] (planner + Docker Claude Code specialist, REA MCP, contracts/SQLite, optional read-only CE bridge; positioning vs [[re-harness]]/[[skid-factory]]/[[rea-mytechnotalent]]; confidence medium); cited [[overviews/reverse-engineering]] AI-assisted RE + README map lanes with description source; `index.md` entity + RE overview blurbs updated.
 
 - **2026-11-03** — ingest `readme:categories`: **Cheat** link_count **3002** (+2 vs prior wiki **3000**; protonspy/[[harness-for-rea]] REA/CE MCP RE orchestrator + chakradhartode/[[flashkit]] Termux OTG pocket flasher) / **Anti Cheat** **871** (+1; TheNINJALLO/[[endstone-paradox]] native Endstone BDS Paradox AC) / other major README section counts stable (41 sections; `NeverC & NeverD` placeholder); synced [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/game-hacking]], [[overviews/reverse-engineering]]; entities [[harness-for-rea]], [[flashkit]], [[endstone-paradox]]; light `index.md` section notes (no per-category pages).

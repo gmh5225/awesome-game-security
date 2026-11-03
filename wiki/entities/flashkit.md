@@ -15,6 +15,14 @@ confidence: medium
 
 Listed under README **Cheat → Android ROM** beside [[flashwright]], [[rom-shifter]], and [[tool-tree]].
 
+## Audience
+
+Android modders, maintainers, and researchers who need **on-device firmware rescue**, sideloading, and low-level maintenance from a rooted handset—without carrying a PC or desktop flashing wizard.
+
+## Positioning
+
+**Pocket OTG host** workflow: contrasts with desktop wizards such as [[flashwright]] (Windows Tauri Pixel factory/OTA) and general on-device ROM migration via [[rom-shifter]]; complements field firmware tooling [[tool-tree]] and kernel build→flash loops such as [[android-kernel-kit]]. (source: wiki/sources/descriptions/chakradhartode__flashkit.md)
+
 ## Surfaces
 
 | Component | Role |
