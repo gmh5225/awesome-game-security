@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-11-03** — ingest `description:Kalmarv/locum`: created entity [[locum]] (D3D11/DXGI proxy DLL frame capture → SQLite; Rust hook/replay + Bun web viewer/locum-cli; SQL, resource trace, live draw/shader overrides, capture diffs; offline graphics RE—not AC online; confidence medium); cited [[overviews/graphics-api]] frame-capture observation lane + [[overviews/reverse-engineering]] Debugging/RE Tools cluster with description source; `index.md` entity + overview blurbs updated.
+
 - **2026-11-03** — ingest `description:Lucas-blip-png/dkb-pc-recomp`: created entity [[dkb-pc-recomp]] (*Donkey Kong Bananza* Switch 2 ARM64→Windows x64 static recomp; TotK/LAS Recomp patterns; Python lifter + jumptable/version patches + Unicorn difftest; NVN 2→Vulkan + Eglantine Ampere→Maxwell shader lowering; BYO dumps; preservation RE—not AC/online security; confidence medium); cited [[concepts/static-runtime-evidence]] Switch lift cluster + [[overviews/reverse-engineering]] Cheat Source static-recomp lane beside [[totk-pc-recomp]]/[[xcx-recomp]]; `index.md` entity + concept blurb updated.
 
 - **2026-11-03** — ingest `description:MythicalFentWizard/battlebit-revival`: new entity [[battlebit-revival]] (.NET 10 self-hosted BattleBit Remastered master + launcher; IL2CPP GameAssembly.dll patch scripts; optional launcher AC + server ban config; Il2CppDumper utilities; confidence medium); cited [[concepts/il2cpp]] private-master patch lane + [[overviews/anti-cheat]] legacy private-cluster AC bullet with description source; `index.md` entity blurb added.

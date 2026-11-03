@@ -115,6 +115,7 @@ sources:
   - wiki/sources/descriptions/bootmgfw__EFT-Tarkov-Internal-Cheat.md
   - wiki/sources/descriptions/bootmgfw__CS2-Cheat-Source.md
   - wiki/sources/descriptions/Kazade__kazmath.md
+  - wiki/sources/descriptions/Kalmarv__locum.md
   - wiki/sources/descriptions/K0bin__SourceRenderer.md
   - wiki/sources/descriptions/KANKOSHEV__NoScreen.md
   - wiki/sources/descriptions/KhronosGroup__glTF.md
@@ -381,7 +382,7 @@ sources:
   - wiki/sources/descriptions/brendan-duncan__gpu_inspector.md
   - wiki/sources/descriptions/husnaintariq577__kx-vision.md
   - wiki/sources/descriptions/effcol__wiz3D.md
-updated: 2026-11-01
+updated: 2026-11-03
 confidence: high
 ---
 
@@ -458,13 +459,15 @@ Select repository tools by the evidence required—report API/backend, driver, c
 |------|------------|
 | Frame timing / present metrics | [[presentmon]] (ETW-based DXGI/D3D present events) |
 | Instrumented CPU/GPU profiling | [[tracy]], [[optick]], [[remotery]] |
-| Frame capture / shader debug | [[gpu-inspector]] (Vulkan/D3D12/Metal/Android; shader edit, pixel history, validation, MCP analysis), [[rdc-cli]] (RenderDoc `.rdc` CLI/JSON/CI replay), RenderDoc GUI (multi-API frame debugger), PIX, NVIDIA Nsight |
+| Frame capture / shader debug | [[gpu-inspector]] (Vulkan/D3D12/Metal/Android; shader edit, pixel history, validation, MCP analysis), [[rdc-cli]] (RenderDoc `.rdc` CLI/JSON/CI replay), [[locum]] (D3D11/DXGI proxy DLL → SQLite frame DB; SQL/replay/live shader overrides), RenderDoc GUI (multi-API frame debugger), PIX, NVIDIA Nsight |
 | API misuse diagnostics | Vulkan validation layers (preserve VUIDs, SDK/layer versions—a validation finding is not an anti-abuse verdict) |
 | Compatibility / translation | dxwrapper, Wine/DXVK layers—verify active backend before hook attribution |
 
 Cross-platform frame capture via [[gpu-inspector]] (brendan-duncan; TypeScript/Electron + C++ capture layers; shader debug/edit, pixel history, validation, render graphs, WebGPU browser capture, MCP Claude Code analysis) supports rendering-pipeline and GPU command-flow study for game developers and reverse engineers. (source: wiki/sources/descriptions/brendan-duncan__gpu_inspector.md)
 
 Scriptable RenderDoc replay via [[rdc-cli]] (adriank56793; Python; draw/shader/texture/buffer export, pixel debug, two-frame diffs, daemon + remote/Android CI paths; TSV/JSON for shell pipelines) complements GUI capture review for automated rendering and shader RE. (source: wiki/sources/descriptions/adriank56793__rdc-cli.md)
+
+D3D11 proxy capture via [[locum]] (Kalmarv; Rust + Bun web viewer; DXGI/D3D11 shims beside the exe—no inject; full-frame SQLite with SQL, resource trace to disk/memory, offline bit-exact replay, live draw/shader overrides; unsuitable for AC-protected online play) extends that observation lane for Windows D3D11-only lab titles. (source: wiki/sources/descriptions/Kalmarv__locum.md)
 
 Windows documents `SwapBuffers` through GDI; do not assume a similarly named wrapper or hook-library symbol is the platform contract.
 
