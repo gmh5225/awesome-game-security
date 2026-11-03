@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-11-03** — ingest `description:AbdurahmanAlmehdi/jidr`: enriched entity [[jidr]] (daemon architecture table—gRPC/telnet/ADB, Slint/CLI/MCP clients, root/widgets/lifecycle; audience + positioning vs [[kiln-android-emulator]]/[[rooted-android-game-vm]]/[[android-compatibility-layer]]; confidence medium); cited [[overviews/reverse-engineering]] Mobile/Android Emulator cluster + [[overviews/game-hacking]] Android Emulator lane with description source; `index.md` entity blurb updated.
+
 - **2026-11-03** — ingest `description:abdulhamitakdag/hapiscanner`: enriched entity [[hapiscanner]] (architecture table—client/HapiVerify/Velocity; trust model; audience vs [[error-pc-check]]/[[jaranalyzer]]/[[jvm-inspector]]; confidence medium); cited [[overviews/game-hacking]] Minecraft screenshare cluster with description source; `index.md` entity blurb updated.
 
 - **2026-11-03** — ingest `readme:categories`: **Anti Cheat** link_count **872** (+1 vs prior wiki **871**; abdulhamitakdag/[[hapiscanner]] consent-based Windows MC screenshare verifier) / **Android Emulator** **13** (+1; AbdurahmanAlmehdi/[[jidr]] Apple Silicon rooted AVD + MCP) / **Cheat** **3002** and other major README section counts stable (41 sections; `NeverC & NeverD` placeholder); synced [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/mobile-security]], [[overviews/game-hacking]]; entities [[hapiscanner]], [[jidr]]; light `index.md` section notes (no per-category pages).
