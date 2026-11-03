@@ -2808,7 +2808,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Nexora AntiCheat](entities/nexora-anticheat.md) — Paper/Folia Java 21 Maven MC plugin; lag-compensated movement/combat/world/protocol checks (speed, fly, kill aura, reach, scaffold, x-ray); SQLite/MySQL violations; kick-to-ban ladder; staff GUI; Discord webhooks; optional license heartbeat; React/Node Supabase fleet panel (yuonsovann5656-netizen; Open Source Anti Cheat System / game:minecraft)
 - [NFD x64dbg](entities/nfdx64dbg.md) — x64dbg plugin: Nauz File Detector static scan tab (compiler/packer/protector ID; C++/Qt; Cheat x64dbg Plugins)
 - [Nauz File Detector](entities/nauz-file-detector.md) — standalone NFD: signature-based packer/compiler/protector/linker ID for PE/ELF/Mach-O+; C++/Qt GUI+CLI; binary triage
-- [NimJump](entities/nimjump.md) — Godot 4 WASM browser platformer + Go backend; signed seed batches, server-side replay verification, Web3 reward abuse guards (Anti Cheat / Game Develop)
+- [NimJump](entities/nimjump.md) — Godot 4 WASM browser platformer + Go replay-verifier backend; signed offline seed batches, rate/IP reward guards, Next.js replay-integrity admin (production Web3 AC reference; Anti Cheat / Game Develop)
 - [NimicStack](entities/nimic-stack.md) — pure Nim call-stack spoofing (WithSecure Labs PoC lineage; mimic legitimate program stacks; Cheat Spoof Stack)
 - [NightSkyEngine](entities/nightsky-engine.md) — open-source UE5 fighting-game framework (2D/2.5D; C++ modules/plugins; GGPO rollback; collision editor; WistfulHopes; Game Engine)
 - [Nightshade](entities/nightshade.md) — Rust data-oriented game engine (custom ECS; wgpu PBR; native/web/VR; Game Engine / source)
