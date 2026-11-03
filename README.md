@@ -378,6 +378,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/TLeonardUK/ds3os [Dark Souls 3]
 - https://github.com/TLeonardUK/ds2os [Dark Souls 2]
 - https://github.com/geekrainian/killingfloor-bot-client [Killing Floor UE2.5 headless client with protocol docs, Steam auth RE, and Ghidra scripts]
+- https://github.com/MythicalFentWizard/battlebit-revival [Self-hosted BattleBit Remastered master server (.NET), launcher, and documented GameAssembly.dll auth-patch script for private clusters with optional anti-cheat hooks]
 - https://github.com/ljagiello/lastwar-client [Go reimplementation of Last War mobile client networking: GSL RSA/AES bootstrap, SFS2X framing, and SFSObject codec with live protocol documentation]
 - https://github.com/Bratah123/Spirit-PTCGO [Pokemon TCG Online private server emulator]
 - https://github.com/DragonMinded/bemaniutils [RE toolkit for BEMANI arcade titles: network service emulation, packet sniff/redirect/reconstruct, and binary asset unpack/repack utilities]
@@ -724,6 +725,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 > Tools
 - https://github.com/visotw/3d9 [Fixing broken stereoscopic effects in DX11 games]
 - https://github.com/adriank56793/rdc-cli [Scriptable CLI to query RenderDoc .rdc captures (draws, shaders, diffs) for terminal, CI, and agent workflows on D3D/Vulkan/OpenGL frames]
+- https://github.com/Kalmarv/locum [D3D11/DXGI proxy capture: record every draw, shader, and resource for a frame into SQLite for browse, SQL query, live edits, and offline replay—RenderDoc-style analysis from DLLs beside the game exe]
 
 > Emulation 
 - https://github.com/code-tom-code/Software_D3D9 [DX9]
@@ -1088,6 +1090,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/Coz-0/smo-recomp [Static recompilation of Super Mario Odyssey (Switch 1.4.1) to native Windows x64 with custom runtime and Vulkan renderer; BYO dump, no assets in repo]
 - https://github.com/raulzrrs/letsgo-recomp [Native Windows port of Pokémon: Let's Go, Eevee!/Pikachu! (Switch 1.0.0) via static recompilation on LAS Recomp; BYO game dump, no assets in repo]
 - https://github.com/valentderah/totk-pc-recomp [Static recompilation of The Legend of Zelda: Tears of the Kingdom to native Windows x86-64 with a Vulkan renderer (BYO game assets)]
+- https://github.com/Lucas-blip-png/dkb-pc-recomp [Static recompilation of Donkey Kong Bananza (Switch 2) to native Windows with a Vulkan renderer; BYO assets, documented NVN/SPIR-V RE pipeline (early, tutorial-level progress)]
 - https://github.com/jmars125/xcx-recomp [Static recompilation of Xenoblade Chronicles X: Definitive Edition (Switch) to native Windows x86-64 with Vulkan renderer; fork of TotK Recomp, BYO game assets]
 - https://github.com/centollOS/SwitchWakerHD [Wind Waker HD (Wii U) static recompilation to Nintendo Switch with deko3d renderer; BYO game dump, no assets in repo]
 - https://github.com/Jstar269/nakagawa-recomp [Static recompiler and runtime lifting PSP (MIPS) games to native Windows with Vulkan/SDL3; BYO disc assets, paired with hst-decomp RE workflow]
