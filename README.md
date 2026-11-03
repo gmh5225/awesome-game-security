@@ -963,6 +963,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/lilyco-42/rev-tools-setup [One-click Windows RE toolchain installer (Scoop) with Cheat Engine MCP setup and AI agent pitfalls guide]
 - https://github.com/SenjuWoo/reverse-this [One-click Windows RE/modkit workbench with version-pinned Ghidra, Unity/Unreal tooling, stable sandbox/bin shims, and CI]
 - https://github.com/NetVar1337/echo-reverse [Windows Tauri/React live RE workbench on Echo: memory and disassembly, game-engine inspection, Frida, kernel/network tooling, and MCP for agents]
+- https://github.com/protonspy/harness-for-rea [Desktop and TUI orchestrator for authorized binary RE: Docker-sandboxed Claude Code specialist with REA and Cheat Engine MCP integrations]
 - https://github.com/rollingrock/bethesda-modding-starter [Bootstrap for Bethesda script-extender plugin dev plus Ghidra/x64dbg MCP reverse-engineering toolchain]
 - https://github.com/jlagedo/dreams-to-reality-re [Reverse-engineering research toolkit for Dreams to Reality (1997): Python asset decoders, Ghidra scripts, format documentation, and a Babylon.js viewer—tools only, no copyrighted game data]
 - https://github.com/formix/sre-re [Solar Realms Elite 0.994b (DOS BBS) RE: Ghidra toolchain, decoded .II save formats, and recovered game rules toward a Linux remake]
@@ -1615,6 +1616,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/cfig/Android_boot_image_editor [Android ROM tool]
 - https://github.com/badabing2005/PixelFlasher [Android ROM tool for Pixel]
 - https://github.com/ShivamXD6/ROM-Shifter [Android app for fast ROM backup, restore, migration, and post-flash tooling with Magisk, KernelSU, and APatch support]
+- https://github.com/chakradhartode/flashkit [Termux:GUI pocket flasher to sideload ROMs, GSI, and recovery operations on a second Android device over OTG from a rooted host phone]
 - https://github.com/Zenlua/Tool-Tree [Android ROM/APK unpack-repack toolkit for root and non-root ARM64 devices]
 - https://github.com/Ctapchuk/android_bootable_recovery-OFRP [OrangeFox Recovery]
 
@@ -4731,6 +4733,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/nsharp-collab/AvAAntiCheat [Minecraft Bukkit/Spigot anti-cheat plugin with movement, combat, autoclick, and packet checks]
 - https://github.com/norbertbaricz/DakotaAC [Spigot/Paper Minecraft anti-cheat plugin with combat, movement, and inventory checks using ProtocolLib and Citizens2]
 - https://github.com/Visual1mpact/Paradox_AntiCheat [Open-source anti-cheat for Minecraft Bedrock (Realms/BDS)]
+- https://github.com/TheNINJALLO/endstone-paradox [Native C++23 Paradox anti-cheat plugin for Endstone Bedrock dedicated servers (54 modules, movement/combat heuristics, staff moderation)]
 - https://github.com/LiteLDev/LeviAntiCheat [Open-source LeviLamina plugin anti-cheat for Minecraft Bedrock dedicated servers with X-ray, reach, auto-click, and duplication exploit mitigations]
 - https://github.com/oomph-ac/oomph [Minecraft Bedrock MiTM anti-cheat proxy with server-authoritative movement and combat]
 - https://github.com/GhostNgEnd/Ghost-AntiCheat [Prediction-based movement anti-cheat for Minecraft Bedrock Edition with packet, offset, and ping checks]
