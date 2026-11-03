@@ -469,6 +469,7 @@ sources:
   - wiki/sources/descriptions/xuanfeng0316__MCBotMod.md
   - wiki/sources/descriptions/Eangly99__AstroX-AntiCheat.md
   - wiki/sources/descriptions/TheMax98000__BedrockGuard.md
+  - wiki/sources/descriptions/TheNINJALLO__endstone-paradox.md
   - wiki/sources/descriptions/GhostNgEnd__Ghost-AntiCheat.md
   - wiki/sources/descriptions/getawife__nofly.md
   - wiki/sources/descriptions/TwoSevenOneT__InjectSetConsole.md
@@ -1419,6 +1420,8 @@ Title-specific R6 ranked-stat suspicion tooling such as [[r6-intel]] (baldspots4
 **PowerNukkitX Bedrock prediction AC:** [[amethyst]] (NaySurGithub; Java PowerNukkitX plugin; per-tick Bedrock physics replay from player input; compares simulated vs client-reported positions for unexplained movement rather than threshold-only speed checks; authoritative movement/vehicle simulation, client world-state acknowledgment gating, combat prediction with entity rewind; fly/reach/kill aura/scaffold/inventory/backtrack/malformed-packet checks; server-side movement correction and violation alerting; Anti Cheat / game:minecraft) for PowerNukkitX operators beside Nukkit prediction plugins such as [[ghost-anticheat]] and GeyserMC interceptors such as [[astrox-anticheat]]. (source: wiki/sources/descriptions/NaySurGithub__Amethyst.md)
 
 **LeviLamina Bedrock dedicated-server AC:** [[levi-anticheat]] (LiteLDev; C++ LeviLamina plugin; X-ray, fly/speed, reach, auto-click, invalid inventory, and malformed-packet checks; obfuscation-based Anti-Xray engine modes; violation-level ban/mute; item-duplication and crafter-crash exploit fixes; JSON config + hot reload; Open Source Anti Cheat System / game:minecraft) for Bedrock BDS operators on LeviLamina beside PowerNukkitX plugins such as [[amethyst]] and behavior-pack AC such as [[blarion-anticheat]]. (source: wiki/sources/descriptions/LiteLDev__LeviAntiCheat.md)
+
+**Endstone native BDS AC + admin:** [[endstone-paradox]] (TheNINJALLO; C++23 Endstone loadable plugin; ~54 modular combat/movement/grief/dup/packet checks; violation engine + SQLite; staff moderation; Endstone event/packet hooks + bedrock-protocol decode; TOML config, optional local web admin, Discord alerts, evidence replay; legacy Python tree reference-only; Open Source Anti Cheat System / game:minecraft) for Endstone BDS operators beside LeviLamina native plugins such as [[levi-anticheat]] and Nukkit prediction stacks such as [[ghost-anticheat]]. (source: wiki/sources/descriptions/TheNINJALLO__endstone-paradox.md)
 
 **Paper/Folia heuristic AC:** [[bs-anticheat]] (BoondockSulfur; Java Paper **1.21.10+** plugin; full Folia support; movement/combat/world-interaction/inventory/vehicle/packet checks—speed, fly, reach, killaura, nuker, autoclicker, x-ray mining; transaction-based lag compensation; configurable violation-level punishments with optional setbacks; SQLite logging; PacketEvents, Discord webhooks, PlaceholderAPI, and LuckPerms integrations; false-positive-conscious tunable heuristics for server administrators; Anti Cheat / game:minecraft) for Paper/Folia operators beside physics-prediction AC such as [[grim]] and alert-focused NeoForge mods such as [[sentinel-anticheat-neoforge]]. (source: wiki/sources/descriptions/BoondockSulfur__BS-AntiCheat.md)
 

@@ -3061,7 +3061,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [PANDA](entities/panda.md) — Platform for Architecture-Neutral Dynamic Analysis (QEMU-based; Cheat QEMU/KVM / DBI)
 - [Panda3D](entities/panda3d.md) — Python/C++ 3D engine framework (liberal license; Game Engine / source)
 - [Pandora](entities/pandora.md) — file-suspicion analysis framework (convenient UI; Anti Cheat → Analysis Framework)
-- [Endstone Paradox](entities/endstone-paradox.md) — native C++23 Endstone BDS anti-cheat plugin (54 modules; movement/combat/grief/dup/packet checks; SQLite; staff moderation; web admin; TheNINJALLO; Anti Cheat / game:minecraft)
+- [Endstone Paradox](entities/endstone-paradox.md) — native C++23 Endstone BDS anti-cheat + server admin (54 modules; bedrock-protocol hooks; violation engine/SQLite; web admin, Discord, evidence replay; production ops; TheNINJALLO; Anti Cheat / game:minecraft)
 - [Paradox AntiCheat](entities/paradox-anticheat.md) — Minecraft Bedrock Realms/BDS behavior-pack AC (TypeScript Script API; fly/killaura/reach/autoclicker/scaffold/noclip/xray checks; staff moderation commands; Visual1mpact; Anti Cheat / game:minecraft)
 - [ParadiseBO2](entities/paradise-bo2.md) — PS3 Paradise SPRX mod-menu source for Black Ops II (window/UI code; Game Develop / source)
 - [Pareidolia Triggerbot](entities/pareidolia-triggerbot.md) — hypervisor-based external Overwatch Widowmaker triggerbot (VivienneVMM + MouClassInputInjection; bypasses Overwatch AC; cheat / triggerbot & aimbot / game:overwatch; blackhades00)

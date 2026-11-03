@@ -15,6 +15,10 @@ confidence: medium
 
 Distinct from behavior-pack [[paradox-anticheat]] (Visual1mpact Script API on Realms/BDS)—this is the **Endstone native** production operator lane beside [[levi-anticheat]], [[ghost-anticheat]], and [[bedrockguard]].
 
+## Audience
+
+Bedrock **server operators** and **anti-cheat developers** who need production-oriented monitoring, enforcement, and operational controls on Endstone-hosted worlds—not generic reverse-engineering or client-mod tooling. (source: wiki/sources/descriptions/TheNINJALLO__endstone-paradox.md)
+
 ## Surfaces
 
 | Component | Role |

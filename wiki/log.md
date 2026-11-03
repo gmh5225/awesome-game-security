@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-11-03** — ingest `description:TheNINJALLO/endstone-paradox`: enriched entity [[endstone-paradox]] (Audience + Endstone native BDS positioning vs [[paradox-anticheat]]/[[levi-anticheat]]; confidence medium); cited [[overviews/anti-cheat]] Endstone BDS lane + [[overviews/game-hacking]] Bedrock server-plugin cluster with description source; `index.md` entity blurb updated.
+
 - **2026-11-03** — ingest `description:chakradhartode/flashkit`: enriched entity [[flashkit]] (Termux:GUI OTG pocket adb/fastboot station; sideload/GSI/partition flash, link repair, zip edit, cancelable jobs; audience + positioning vs [[flashwright]]/[[rom-shifter]]; confidence medium); cited [[overviews/mobile-security]] field firmware lane + [[overviews/game-hacking]] Android ROM cluster with description source; `index.md` entity blurb updated.
 
 - **2026-11-03** — ingest `description:protonspy/harness-for-rea`: enriched entity [[harness-for-rea]] (planner + Docker Claude Code specialist, REA MCP, contracts/SQLite, optional read-only CE bridge; positioning vs [[re-harness]]/[[skid-factory]]/[[rea-mytechnotalent]]; confidence medium); cited [[overviews/reverse-engineering]] AI-assisted RE + README map lanes with description source; `index.md` entity + RE overview blurbs updated.
