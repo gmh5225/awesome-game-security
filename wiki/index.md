@@ -1757,7 +1757,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Gatling](entities/gatling.md) — Scala/JVM load-testing framework (Akka/Netty async; HTTP/WebSocket/gRPC/MQTT scenarios; percentile HTML reports; Game Testing / Server Testing)
 - [gd-internal](entities/gd-internal.md) — Geometry Dash internal cheat (ImGui menu; Comfortaa font; signatures in hookmgr.cpp; gmh5225)
 - [gatewarden-public](entities/gatewarden-public.md) — Godot 4.7 tower defense prototype with published PathValidator placement-abuse rejection codes and deterministic 30 Hz sim (Game Develop / source)
-- [gato-anticheat](entities/gato-anticheat.md) — Fabric server-side Minecraft combat AC (reach/angle/LOS/crit events for Nexia CTS; mixins; true-og; Anti Cheat / Open Source Anti Cheat System)
+- [gato-anticheat](entities/gato-anticheat.md) — Fabric dedicated-server Minecraft combat AC (lag-aware reach, angle/LOS/crit checks; mixin hooks + Fabric sanction events; Nexia CTS / 1.16-style PvP reference; true-og; Anti Cheat / Open Source Anti Cheat System)
 - [godot-sandbox](entities/godot-sandbox.md) — Godot addon: sandboxed mod code for safe player extensions (all platforms; Plugins:Godot)
 - [godot-plush-character](entities/godot-plush-character.md) — Godot 4.x plush/soft-body character rendering (fabric shaders, soft deformation, procedural animation; stylized stuffed-animal aesthetic)
 - [godot-resource-remaps](entities/godot-resource-remaps.md) — Godot editor export plugin: platform-specific resource remapping via feature tags (textures/audio/scenes; Windows/Android/iOS/Web; Plugins:Godot)

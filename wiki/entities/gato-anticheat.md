@@ -13,7 +13,7 @@ confidence: medium
 
 **Gato AntiCheat** is a Fabric dedicated-server mod that enforces combat rules on Java Minecraft worlds, originally built for Nexia’s CTS (combat test snapshot) environment. It uses Fabric Loader, Fabric API, and SpongePowered Mixins to intercept attacks, interaction packets, and entity damage on the server only. Reach checks use lag-aware victim bounding-box history; attack angles and line of sight are validated; suspicious critical hits are flagged from common client cheat fall distances. Fabric events expose reach, bad angle, criticals, and related detections so operators can wire kicks, logging, or custom sanctions. (source: wiki/sources/descriptions/true-og__Gato-AntiCheat.md)
 
-Targets PvP administrators and mod authors who want a lightweight, server-side combat reference rather than full client attestation. Sits beside Paper/Folia plugins such as [[h-ac]] and Fabric suites such as [[bastion]] in the Open Source Anti Cheat System lane.
+Targets PvP administrators and mod authors running **1.16-style combat-test snapshots** who want a lightweight server-side combat reference and hit-registration helper rather than full client attestation. Sits beside Paper/Folia plugins such as [[h-ac]] and Fabric suites such as [[bastion]] in the Open Source Anti Cheat System lane.
 
 ## Detection surfaces
 
