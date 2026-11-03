@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-11-03** — ingest `description:CheatEngineNet/CheatEngine.Client`: enriched entity [[cheat-engine-client]] (architecture table—SDK stack, DI/lease lifecycle, .NET 10 / CE 7.7; audience vs [[harness-for-rea]]/[[cheatengine-mcp-bridge]] hand-rolled SDK; confidence medium); cited [[overviews/game-hacking]] Cheat RE Tools lane + [[overviews/reverse-engineering]] Debugging/RE Tools cluster with description source; `index.md` entity blurb updated.
+
 - **2026-11-03** — ingest `description:fluxolex/ocean-anticheat-analysis`: enriched entity [[ocean-anticheat-analysis]] (methodology table—Unicorn unpack, Ghidra, Python stubs, static-only; protocol/driver findings; audience vs [[hapiscanner]]/[[error-pc-check]]; confidence medium); cited [[overviews/anti-cheat]] screenshare/Analysis Framework lane + [[overviews/reverse-engineering]] third-party AC static dossier cluster with description source; `index.md` entity blurb updated.
 
 - **2026-11-03** — ingest `description:nimjump/game`: enriched entity [[nimjump]] (architecture table—Godot WASM client, Go backend, native replay-verifier, Next.js admin; audience vs [[pew-game]]/[[ghostline]]; confidence medium); cited [[overviews/anti-cheat]] README map + [[overviews/game-hacking]] defensive web-game score-integrity lane with description source; `index.md` entity blurb updated.
