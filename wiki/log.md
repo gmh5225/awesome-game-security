@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-11-03** — ingest `description:abdulhamitakdag/hapiscanner`: enriched entity [[hapiscanner]] (architecture table—client/HapiVerify/Velocity; trust model; audience vs [[error-pc-check]]/[[jaranalyzer]]/[[jvm-inspector]]; confidence medium); cited [[overviews/game-hacking]] Minecraft screenshare cluster with description source; `index.md` entity blurb updated.
+
 - **2026-11-03** — ingest `readme:categories`: **Anti Cheat** link_count **872** (+1 vs prior wiki **871**; abdulhamitakdag/[[hapiscanner]] consent-based Windows MC screenshare verifier) / **Android Emulator** **13** (+1; AbdurahmanAlmehdi/[[jidr]] Apple Silicon rooted AVD + MCP) / **Cheat** **3002** and other major README section counts stable (41 sections; `NeverC & NeverD` placeholder); synced [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/mobile-security]], [[overviews/game-hacking]]; entities [[hapiscanner]], [[jidr]]; light `index.md` section notes (no per-category pages).
 
 - **2026-11-03** — lint (agent, Cursor lint pass): read `wiki/AGENTS.md`; **Overviews** (9) `anti-cheat`, `dma-attack`, `game-engine`, `game-hacking`, `graphics-api`, `mobile-security`, `overview`, `reverse-engineering`, `windows-kernel`; **Concepts** (51) under `wiki/concepts/`; **Entities** (4279) under `wiki/entities/`; reconciled `index.md` `](overviews|concepts|entities/*.md)` vs disk — 4339 catalog paths (9+51+4279), 0 missing, 0 dead, 0 orphan, 0 duplicate index rows; nine `overviews/*.md` + all `concepts/*.md` [[wikilink]] spot-check (13333 + concept targets), 0 broken, 0 malformed `]]]`; wiki populated — bootstrap not required; `index.md` unchanged; structural repairs none (`log.md` only).
