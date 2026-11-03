@@ -1,0 +1,312 @@
+Project Path: arc_romainthomas_frida-stalker-detection_qydtogaw
+
+Source Tree:
+
+```txt
+arc_romainthomas_frida-stalker-detection_qydtogaw
+├── README.md
+├── android
+│   ├── CMakeLists.txt
+│   └── main.c
+├── justfile
+├── linux
+│   ├── CMakeLists.txt
+│   └── main.c
+├── stalker-detect-android
+└── stalker-detect-linux
+
+```
+
+`README.md`:
+
+```md
+<p align="center">
+  <br />
+  <br />
+  <img src="featured.webp" alt="Detecting Frida Stalker">
+</p>
+
+<h3 align="center">Detecting Frida Stalker</h4>
+
+This repository contains a PoC to detect Frida stalker on Android ARM64 and
+Linux x86-64. See the associated blog post: [Detecting Frida Stalker](https://www.romainthomas.fr/post/26-10-frida-stalker-detection)
+
+```
+
+`android/CMakeLists.txt`:
+
+```txt
+cmake_minimum_required(VERSION 3.20)
+
+project(stalker_detection_android LANGUAGES C)
+
+set(FRIDA_GUM_ARCHIVE
+    "${CMAKE_CURRENT_LIST_DIR}/../frida-gum-devkit-17.25.0-android-arm64.tar.xz"
+    CACHE FILEPATH "Path to the Frida Gum Android ARM64 devkit")
+set(FRIDA_GUM_DIR "${CMAKE_CURRENT_BINARY_DIR}/frida-gum")
+
+if(NOT EXISTS "${FRIDA_GUM_ARCHIVE}")
+  message(FATAL_ERROR "Frida Gum devkit not found: ${FRIDA_GUM_ARCHIVE}")
+endif()
+
+if(NOT EXISTS "${FRIDA_GUM_DIR}/libfrida-gum.a" OR
+   NOT EXISTS "${FRIDA_GUM_DIR}/frida-gum.h")
+  file(MAKE_DIRECTORY "${FRIDA_GUM_DIR}")
+  file(ARCHIVE_EXTRACT INPUT "${FRIDA_GUM_ARCHIVE}"
+       DESTINATION "${FRIDA_GUM_DIR}")
+endif()
+
+add_library(frida-gum STATIC IMPORTED)
+
+set_target_properties(frida-gum PROPERTIES
+  IMPORTED_LOCATION "${FRIDA_GUM_DIR}/libfrida-gum.a")
+
+add_executable(stalker-detect-android main.c)
+
+target_compile_definitions(stalker-detect-android PRIVATE ANDROID)
+
+target_compile_options(stalker-detect-android PRIVATE
+  -ffunction-sections -fdata-sections
+  -Wl,--gc-sections
+  -Wl,--strip-all
+)
+
+target_include_directories(stalker-detect-android PRIVATE "${FRIDA_GUM_DIR}")
+
+target_link_libraries(stalker-detect-android PRIVATE
+  frida-gum log m dl)
+
+```
+
+`android/main.c`:
+
+```c
+#include "frida-gum.h"
+
+#include <stdint.h>
+#include <stdio.h>
+
+static int __attribute__((noinline))
+stalker_followed_once() {
+  uint64_t lo = 0, hi = 0;
+
+  // Canary value
+  const uint64_t canary = (uint64_t)0xDEADBEEFCAFEBABE;
+
+  __asm__ __volatile__ (
+      "mov   x9, sp\n"
+
+      // Store the canary value past the red zone where Frida backup registers
+      // x16/x17
+      "stur  %[can], [x9, #-0x88]\n"
+      "stur  %[can], [x9, #-0x90]\n"
+
+      // Trigger a Frida context switch
+      "bl    1f\n"
+      "b     2f\n"
+      "1:\n"
+      "ret\n"
+      "2:\n"
+
+      // Read the values past the red zone
+      "ldur  %[hi], [x9, #-0x88]\n"
+      "ldur  %[lo], [x9, #-0x90]\n"
+
+      : [lo] "=&r" (lo), [hi] "=&r" (hi)
+      : [can] "r" (canary)
+      : "x9", "x30", "memory", "cc");
+
+  return lo != canary || hi != canary;
+}
+
+int stalker_is_following_this_thread() {
+  static const int ROUNDS = 9;
+
+  int hits = 0;
+  for (int i = 0; i != ROUNDS; i++)
+    hits += stalker_followed_once();
+
+  return hits == ROUNDS;
+}
+
+
+int main() {
+  // Run the detection without the stalker
+  int native_result = stalker_is_following_this_thread ();
+
+  gum_init_embedded();
+  GumStalker* stalker = gum_stalker_new();
+  gum_stalker_follow_me(stalker, NULL, NULL);
+  // Run the detection under the stalker
+  int stalked_result = stalker_is_following_this_thread();
+  gum_stalker_unfollow_me(stalker);
+
+  printf("native  : %s\n", native_result ? "DETECTED" : "CLEAN");
+  printf("stalked : %s\n", stalked_result ? "DETECTED" : "CLEAN");
+
+  return 0;
+}
+
+
+
+```
+
+`justfile`:
+
+```
+set shell := ["bash", "-eu", "-o", "pipefail", "-c"]
+
+root              := justfile_directory()
+cmake_toolchains  := "/cmake"
+linux_build_dir   := root + "/build/linux"
+android_build_dir := root + "/build/android"
+android_remote    := "/data/local/tmp/stalker-detect-android"
+adb               := env_var_or_default("ADB", "adb")
+
+[private]
+default:
+    @just --list --unsorted
+
+build: build-linux build-android
+
+# Build for Linux x86-64
+build-linux:
+    cmake -S "{{root}}/linux" -B "{{linux_build_dir}}" \
+        -DCMAKE_TOOLCHAIN_FILE={{cmake_toolchains}}/linux/linux-x86_64-glibc-2.39.cmake \
+        -DCMAKE_BUILD_TYPE=Release
+    cmake --build "{{linux_build_dir}}" --parallel
+
+# Run the detection under Linux
+run-linux: build-linux
+    "{{linux_build_dir}}/stalker-detect-linux"
+
+# Build for Android ARM64.
+build-android:
+    cmake -S "{{root}}/android" -B "{{android_build_dir}}" \
+        -DCMAKE_TOOLCHAIN_FILE={{cmake_toolchains}}/android/toolchain-arm64.cmake \
+        -DCMAKE_BUILD_TYPE=Release
+    cmake --build "{{android_build_dir}}" --parallel
+
+# Run the detection under Android
+run-android: build-android
+    "{{adb}}" push "{{android_build_dir}}/stalker-detect-android" "{{android_remote}}"
+    "{{adb}}" shell chmod 755 "{{android_remote}}"
+    "{{adb}}" shell "{{android_remote}}"
+
+# Build and run detection for both Android & Linux
+run: run-linux run-android
+
+```
+
+`linux/CMakeLists.txt`:
+
+```txt
+cmake_minimum_required(VERSION 3.20)
+
+project(stalker_detection_linux LANGUAGES C)
+
+set(FRIDA_GUM_ARCHIVE
+    "${CMAKE_CURRENT_LIST_DIR}/../frida-gum-devkit-17.25.0-linux-x86_64.tar.xz"
+    CACHE FILEPATH "Path to the Frida Gum Linux x86-64 devkit")
+
+set(FRIDA_GUM_DIR "${CMAKE_CURRENT_BINARY_DIR}/frida-gum")
+
+if(NOT EXISTS "${FRIDA_GUM_ARCHIVE}")
+  message(FATAL_ERROR "Frida Gum devkit not found: ${FRIDA_GUM_ARCHIVE}")
+endif()
+
+if(NOT EXISTS "${FRIDA_GUM_DIR}/libfrida-gum.a" OR NOT EXISTS "${FRIDA_GUM_DIR}/frida-gum.h")
+  file(MAKE_DIRECTORY "${FRIDA_GUM_DIR}")
+  file(ARCHIVE_EXTRACT INPUT "${FRIDA_GUM_ARCHIVE}" DESTINATION "${FRIDA_GUM_DIR}")
+endif()
+
+add_library(frida-gum STATIC IMPORTED)
+set_target_properties(frida-gum PROPERTIES
+  IMPORTED_LOCATION "${FRIDA_GUM_DIR}/libfrida-gum.a")
+
+add_executable(stalker-detect-linux main.c)
+
+target_compile_options(stalker-detect-linux PRIVATE
+  -ffunction-sections
+  -fdata-sections
+  -Wl,--gc-sections
+  -Wl,--strip-all
+)
+
+target_include_directories(stalker-detect-linux PRIVATE ${FRIDA_GUM_DIR})
+target_link_libraries(stalker-detect-linux PRIVATE
+  frida-gum resolv m dl rt)
+
+
+```
+
+`linux/main.c`:
+
+```c
+#include "frida-gum.h"
+
+#include <stdint.h>
+#include <stdio.h>
+
+static int __attribute__((noinline))
+stalker_followed_once() {
+  uint64_t a = 0, b = 0, c = 0;
+
+  // Canary value
+  const uint64_t canary = 0xDEADBEEFCAFEBABEull;
+
+  __asm__ __volatile__ (
+      ".intel_syntax noprefix\n"
+      // Store the canary value past the red zone where Frida backup registers
+      "mov   QWORD PTR [rsp - 0x88], %V[can]\n"
+      "mov   QWORD PTR [rsp - 0x90], %V[can]\n"
+      "mov   QWORD PTR [rsp - 0x98], %V[can]\n"
+
+      // Trigger a Frida context switch
+      "lea   rcx, [rip + 1f]\n"
+      "jmp   rcx\n"
+      "1:\n"
+
+      // Read the values past the red zone
+      "mov   %V[a], QWORD PTR [rsp - 0x88]\n"
+      "mov   %V[b], QWORD PTR [rsp - 0x90]\n"
+      "mov   %V[c], QWORD PTR [rsp - 0x98]\n"
+      ".att_syntax prefix\n"
+      : [a] "=&r" (a), [b] "=&r" (b), [c] "=&r" (c)
+      : [can] "r" (canary)
+      : "rcx", "memory");
+
+  return a != canary || b != canary || c != canary;
+}
+
+
+// check if the stalker is attached to this thread
+int stalker_is_following_this_thread() {
+  static const int ROUNDS = 9;
+
+  int hits = 0;
+  for (int i = 0; i != ROUNDS; i++)
+    hits += stalker_followed_once();
+
+  return hits == ROUNDS;
+}
+
+int main() {
+  // Run the detection without the stalker
+  int native_result = stalker_is_following_this_thread ();
+
+  gum_init_embedded();
+  GumStalker* stalker = gum_stalker_new();
+  gum_stalker_follow_me(stalker, NULL, NULL);
+  // Run the detection under the stalker
+  int stalked_result = stalker_is_following_this_thread();
+  gum_stalker_unfollow_me(stalker);
+
+  printf("native  : %s\n", native_result ? "DETECTED" : "CLEAN");
+  printf("stalked : %s\n", stalked_result ? "DETECTED" : "CLEAN");
+
+  return 0;
+}
+
+
+```
