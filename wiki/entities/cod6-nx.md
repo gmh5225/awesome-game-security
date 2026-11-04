@@ -15,7 +15,11 @@ confidence: medium
 
 ## Graphics bring-up
 
-Graphics use a **custom native Vulkan renderer** on **NVK/Mesa** instead of the slow generic Switch SDK path. Implementation work centers on **PM4 command streams**, render/skinning hooks, texture and render-target management, **GLSL compute shaders**, and runtime diagnostics for reverse-engineering the legacy **Xenos** GPU pipeline. (source: wiki/sources/descriptions/GreenieSparkles__COD6-NX.md)
+Graphics use a **custom native Vulkan renderer** on **NVK/Mesa** instead of the slow generic Switch SDK path. Implementation work centers on **PM4 command-ring** streams, render/skinning hooks, texture and render-target management, **GLSL compute shaders**, **SPIR-V caches**, and runtime diagnostics for reverse-engineering the legacy **Xenos** GPU pipeline. (source: wiki/sources/descriptions/GreenieSparkles__COD6-NX.md)
+
+## Audience
+
+Aimed at **homebrew porters** and researchers studying **console binary static recompilation** and **graphics bring-up** on Switch—not live anti-cheat or online-service analysis. (source: wiki/sources/descriptions/GreenieSparkles__COD6-NX.md)
 
 ## Scope limits
 
