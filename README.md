@@ -1019,6 +1019,8 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/0x5abe/vifterpreter [Rust library for parsing PlayStation 2 VIF1 DMA packets and VIF commands]
 - https://github.com/danielgomesvieira2000/ps2-port-engine [Verified PS2 decompilation toolchain and native PC port runtime (EE/IOP/GS/VU, Vulkan host) with no bundled game assets]
 - https://github.com/danielalves96/gow-pc-port [Static recompilation of God of War (PS2 SCUS-97399) to native C++/OpenGL for Windows/Linux; Rust MIPS recompiler, BYO disc assets, documented RE and porting pipeline]
+- https://github.com/TheBozos/VP2S_Recomp [Native PC port of Valkyrie Profile 2: Silmeria (SLUS-21452) via PS2Recomp static recompilation with native OpenGL renderer and audio; no GS/VU1/SPU2 emulation, BYO disc]
+- https://github.com/GreenieSparkles/COD6-NX [WIP Switch port of Modern Warfare 2 (COD6) via ReXGlue static recompilation and custom native Vulkan renderer (PM4 ring, SPIR-V caches); research only, no game data]
 - https://github.com/nat649/fs15-reconstruction [Early-stage Farming Simulator 15 / GIANTS Engine 6 decompilation, native reconstruction, and validated component recovery (local game files required)]
 - https://github.com/RodoLy/HarvestMoonSnesDecomp [Harvest Moon (SNES) rewritten in byte-verified C from HM-Decomp, with native Windows/macOS/Linux/Android builds, save states, and in-game cheats; BYO ROM]
 - https://github.com/byroweb/AC1_RE [RE reference and tooling for Armored Core (PS1, SLUS-01323): docs, Ghidra pipeline, disc/PA/mission parsers, and behavioral C models (BYO disc)]
