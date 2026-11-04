@@ -20,9 +20,14 @@ README category: Cheat / game:minecraft (Horizon).
 | Component | Role |
 |-----------|------|
 | Rust + Horizon mixins | In-process hooks on the Horizon/Minecraft 26.3 rewrite |
-| Module taxonomy | Combat, movement, player, render, world feature bundles |
+| Module taxonomy | Combat, movement, player, render, world feature bundles (100+ modules) |
 | Click GUI | Configurable in-client module toggles and settings |
 | Anticheat matrices | Maintainer docs mapping modules vs common server AC behaviors |
+| Build/verify | Horizon mixin toolchain, install scripts, Python verification and packaging helpers |
+
+## Representative modules
+
+PvP-oriented examples called out in maintainer docs include kill aura, crystal and anchor aura, scaffold, velocity tweaks, and ESP—grouped under the combat/movement/render/world taxonomy above. (source: wiki/sources/descriptions/PointOfPressure__sunset-client.md)
 
 ## Anti-cheat interaction
 
