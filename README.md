@@ -818,6 +818,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://gamehacking.academy
 - https://github.com/GameHackingAcademy
 - https://github.com/deavers/re-dojo [Interactive offline game-hacking and reverse-engineering academy: tiered curriculum, C++20 dojo labs, crackmes, auto-grader, and a companion web RPG]
+- https://github.com/Entkenntnis/htw [Self-hostable Hack The Web browser game: Node.js hacking puzzles and tasks for hands-on web security practice]
 - https://github.com/GameHackingBook/GameHackingCode [Example code for the No Starch Press Game Hacking book]
 - https://areweanticheatyet.com [A list of games using anti-cheats]
 - https://github.com/aclist/aclist.github.io [Anti-cheat compatibility list]
@@ -1092,6 +1093,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/valentderah/totk-pc-recomp [Static recompilation of The Legend of Zelda: Tears of the Kingdom to native Windows x86-64 with a Vulkan renderer (BYO game assets)]
 - https://github.com/Lucas-blip-png/dkb-pc-recomp [Static recompilation of Donkey Kong Bananza (Switch 2) to native Windows with a Vulkan renderer; BYO assets, documented NVN/SPIR-V RE pipeline (early, tutorial-level progress)]
 - https://github.com/jmars125/xcx-recomp [Static recompilation of Xenoblade Chronicles X: Definitive Edition (Switch) to native Windows x86-64 with Vulkan renderer; fork of TotK Recomp, BYO game assets]
+- https://github.com/AksharDP/xc2-recomp [Static recompilation of Xenoblade Chronicles 2 (Switch) to native Windows x86-64 with a Vulkan renderer; fork of XCX Recomp, BYO NSP/keys, no game assets in repo]
 - https://github.com/centollOS/SwitchWakerHD [Wind Waker HD (Wii U) static recompilation to Nintendo Switch with deko3d renderer; BYO game dump, no assets in repo]
 - https://github.com/Jstar269/nakagawa-recomp [Static recompiler and runtime lifting PSP (MIPS) games to native Windows with Vulkan/SDL3; BYO disc assets, paired with hst-decomp RE workflow]
 - https://github.com/MaryNCRT/Ultimate-Mortal-Kombat-3-iOS-Decompiled [Clean-room Ghidra decompilation of Ultimate Mortal Kombat 3 (iOS v1.2.59) with differential verification and a native cross-platform PC port (OpenGL/Vulkan/D3D12)]
