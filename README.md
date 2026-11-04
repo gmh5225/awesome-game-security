@@ -4172,6 +4172,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 
 > Game:PokemonGo
 - https://github.com/gmh5225/PokemonGoDumper
+- https://github.com/BennyWaitWhat/PoGo-Gotta-Catch-Em-All [Rooted Android Frida/IL2CPP pipeline to walk live Pokémon GO memory, rank PvP stat products, and gate in-game tag sync behind an 11-audit check suite]
 
 > Game:L4D2
 - https://github.com/gmh5225/L4D2-Cheat [Linux]
