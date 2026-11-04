@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-11-04** — ingest `description:AksharDP/xc2-recomp`: enriched entity [[xc2-recomp]] (*XC2* Switch ARM64 NSO→generated C; XCX Recomp fork; Python lifter + version patches + Unicorn difftest; Horizon/NVN/audio/input/fs HLE; optional mod/cheat overlays; Python installer; BYO NSP/keys; preservation RE—not AC/online security; confidence medium); cited [[concepts/static-runtime-evidence]] Switch lift cluster + [[overviews/reverse-engineering]] Cheat Source static-recomp lane beside [[xcx-recomp]]/[[totk-pc-recomp]]; `index.md` entity blurb updated.
+
 - **2026-11-04** — ingest `description:Entkenntnis/htw`: enriched entity [[htw]] (architecture table—Express/EJS, Sequelize, JWT/cookie sessions, CSRF, Socket.io, in-browser challenge library, operator secrets file; educators/CTF/web offensive; confidence medium); cited [[overviews/reverse-engineering]] Guides/indexes cluster + [[overviews/game-hacking]] Cheat Guide lane with description source; `index.md` entity blurb updated.
 
 - **2026-11-04** — ingest `readme:categories`: **Cheat** link_count **3006** (+2 vs prior wiki **3004**; Entkenntnis/[[htw]] Hack The Web self-hosted browser security puzzles + AksharDP/[[xc2-recomp]] *XC2* Switch static recomp) / other major README section counts stable (41 sections; `NeverC & NeverD` placeholder; Anti Cheat **875**, Game Develop **203**); synced [[overviews/overview]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]]; entities [[htw]], [[xc2-recomp]]; light `index.md` section notes (no per-category pages).

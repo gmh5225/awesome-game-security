@@ -2903,7 +2903,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [nstool](entities/nstool.md) — general-purpose Switch read/extract tool (console emulator / Switch research)
 - [XCI Explorer](entities/xci-explorer.md) — Windows Switch XCI/NSP package inspector (C# WinForms; XCI/NCA/HFS0/PFS0; metadata, extract, hash, cert edit; Switch modding / cartridge RE; StudentBlake)
 - [XCX Recomp](entities/xcx-recomp.md) — *Xenoblade Chronicles X: Definitive Edition* Switch ARM64 NSO→C static lift (TotK Recomp fork; Python lifter, jumptable/patch tables, Unicorn difftest; NVN/Vulkan SDK HLE; setup from user dumps; BYO assets; jmars125; Cheat / Source)
-- [XC2 Recomp](entities/xc2-recomp.md) — *Xenoblade Chronicles 2* Switch ARM64→Windows x64 static lift (XCX Recomp fork; Vulkan; BYO NSP/keys; AksharDP; Cheat / Source)
+- [XC2 Recomp](entities/xc2-recomp.md) — *Xenoblade Chronicles 2* Switch ARM64 NSO→C static lift (XCX Recomp fork; Python lifter, Unicorn difftest, version patches; NVN/Vulkan HLE; optional mod/cheat overlays; Python installer; BYO NSP/keys; AksharDP; Cheat / Source)
 - [NuremX](entities/nuremx.md) — Apex Legends Python YOLOv5 screen-capture cheat (enemy detection, overlay, aiming; trained weights; Windows/Linux; no memory hooking; cheat / [AI]; Zurek0x)
 - [nuitka-themida-unpacker](entities/nuitka-themida-unpacker.md) — two-stage Themida/WinLicense + Nuitka onefile unpack pipeline (DimaReverse; Python; unlicense dynamic strip + nuthem KAX/KAY static extract; path-traversal-safe writes; SHA-256 manifests; optional Python recovery; Fix Themida)
 - [nuzu](entities/nuzu.md) — yuzu-based Switch emulator mirror (unofficial fork; Nintendo Switch lane)
