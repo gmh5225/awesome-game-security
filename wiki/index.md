@@ -1855,7 +1855,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [H-AC](entities/h-ac.md) — Paper 1.21 HukumAC plugin (Benardelys; modular combat/movement/world checks with violation decay; latency-aware reach raytracing; TPS safeguards; async logging; client brand/injector probes; Anti Cheat / game:minecraft)
 - [HelloIommuPkg](entities/helloiommupkg.md) — sample DXE DMA-remapping (IOMMU) driver (tandasat; Detection:DMA)
 - [H5GG](entities/h5gg.md) — iOS modding engine (JavaScript + HTML5 UI; memory edit, scripts/plugins, pointer chains, h5frida hook/patch; jailbroken and non-jailbroken modes; cheat / IOS cheat engine)
-- [H7 Mod Engine](entities/h7-mod-engine.md) — Whaileee; Heroes VII UE3 dinput8.dll Lua 5.4 mod engine (runtime reflection, UnrealScript hooks, hot reload; no game file patches; Cheat / RE Tools)
+- [H7 Mod Engine](entities/h7-mod-engine.md) — Whaileee; Heroes VII UE3 dinput8.dll Lua 5.4 mod engine (C++20 runtime UE3 discovery, reflection/UnrealScript intercept+override, object dumps/signature scan, hot reload; no game file patches; Cheat / RE Tools)
 - [Hawkeye](entities/hawkeye.md) — Windows kernel security research console for anti-cheat analysis and live forensics (hawkeye-Leo; host-native driver Win10/11 x64; `!probe`/`!etw`/`!kernel_region`; Hawkeye Lab `!analyze` scored reports; GPL Community + paid Lab; Anti Cheat)
 - [hdd_serial_spoofer](entities/hdd-serial-spoofer.md) — HDD serial spoof (C/C++; cheat / HWID; namazso)
 - [Hack The Web](entities/htw.md) — Entkenntnis; self-hostable Express/EJS web-security adventure (Sequelize, JWT/cookie sessions, CSRF, Socket.io); bundled in-browser challenges + operator secrets file; educators/CTF; Cheat / Guide
