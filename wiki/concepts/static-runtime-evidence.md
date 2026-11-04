@@ -24,6 +24,7 @@ sources:
   - wiki/sources/descriptions/everettjf__copyapp.md
   - wiki/sources/descriptions/Jstar269__nakagawa-recomp.md
   - wiki/sources/descriptions/danielalves96__gow-pc-port.md
+  - wiki/sources/descriptions/TheBozos__VP2S_Recomp.md
   - wiki/sources/descriptions/valentderah__totk-pc-recomp.md
   - wiki/sources/descriptions/jmars125__xcx-recomp.md
   - wiki/sources/descriptions/AksharDP__xc2-recomp.md
@@ -104,6 +105,8 @@ PSP MIPS static recompilation to native Windows such as [[nakagawa-recomp]] (Jst
 
 PS2 R5900 static recompilation such as [[gow-pc-port]] (danielalves96; *God of War* SCUS-97399; Rust MIPS recompiler + ELF/R5900 tooling with **parity checks** against reference output; C++ IOP/runtime and VU1/texture hooks; OpenGL host; ISO installer helpers—label which EE/IOP/GS paths are fully reimplemented vs developer-instrumented before treating the native build as a fidelity reference beside verified decomp ports like [[ps2-port-engine]]; BYO disc) extends the same lift-vs-HLE boundary on Emotion Engine hardware. (source: wiki/sources/descriptions/danielalves96__gow-pc-port.md)
 
+[[vp2s-recomp]] (TheBozos; *Valkyrie Profile 2: Silmeria* SLUS-21452; **PS2Recomp** + Ghidra Emotion Engine extension; R5900/IOP/overlay modules→C++ with encrypted-module handling; native **OpenGL**/**FFmpeg** while deliberately omitting default GS/VU1/SPU2 emulation—label lifted guest logic vs host-reimplemented media/render paths before preservation claims beside [[gow-pc-port]]; BYO disc) applies the same PS2 static-recomp split on a PS2Recomp toolchain lineage. (source: wiki/sources/descriptions/TheBozos__VP2S_Recomp.md)
+
 [[ultimate-mortal-kombat-3-ios-decompiled]] (MaryNCRT; iOS armv7 Mach-O clean-room Ghidra lift to verified C with armrecomp/differential oracle tests and Win32/SDL2 desktop hosts on OpenGL/Vulkan/D3D12) illustrates mobile fighting-game preservation where lift fidelity is argued via per-function differential checks rather than Switch-style NVN HLE—separate LIME engine/format recovery from GPU backend choice before citing gameplay logic. (source: wiki/sources/descriptions/MaryNCRT__Ultimate-Mortal-Kombat-3-iOS-Decompiled.md)
 
 [[copyapp]] (everettjf; Python CLI + agent workflow on USB-attached **iOS/macOS** targets) chains device collection (UI/accessibility trees, sandbox, optional Frida traces; FairPlay-related decrypt on jailbroken paths) with optional Ghidra/Hopper/ARM64 static follow-on through **verifiable evidence cases** and playbooks—label which observations came from standard capture vs jailbroken/runtime lanes before treating rebuilt flows as behaviorally equivalent to the original app. (source: wiki/sources/descriptions/everettjf__copyapp.md)
@@ -120,4 +123,4 @@ Game-server PC checks often combine **offline host artifacts** (Prefetch, Amcach
 
 ## Related
 
-[[binary-evidence]] · [[binary-diffing]] · [[dynamic-binary-instrumentation]] · [[jsrf-recomp]] · [[ngbrecomp]] · [[sf33rdsxbrecompo]] · [[nfsu2recomp]] · [[sc2-android-recomp]] · [[smo-recomp]] · [[letsgo-recomp]] · [[totk-pc-recomp]] · [[xcx-recomp]] · [[xc2-recomp]] · [[dkb-pc-recomp]] · [[nakagawa-recomp]] · [[gow-pc-port]] · [[ultimate-mortal-kombat-3-ios-decompiled]] · [[copyapp]] · [[wwe-svr2009-recomp]] · [[nhl-legacy-remaster]] · [[saturnkit]] · [[motorstorm-mv-recomp]] · [[dead-rising-2-case-zero-xenon-recomp]] · [[mcla-pc]] · [[pipeline-disasm]] · [[frogman]] · [[sre-re]] · [[openmcm2]] · [[ttd-capa-cpp]] · [[custos]] · [[mixed-boolean-arithmetic]] · [[control-flow-flattening]] · [[research-rigor]] · [[overviews/reverse-engineering]] · [[overviews/windows-kernel]] · [[overviews/game-engine]]
+[[binary-evidence]] · [[binary-diffing]] · [[dynamic-binary-instrumentation]] · [[jsrf-recomp]] · [[ngbrecomp]] · [[sf33rdsxbrecompo]] · [[nfsu2recomp]] · [[sc2-android-recomp]] · [[smo-recomp]] · [[letsgo-recomp]] · [[totk-pc-recomp]] · [[xcx-recomp]] · [[xc2-recomp]] · [[dkb-pc-recomp]] · [[nakagawa-recomp]] · [[gow-pc-port]] · [[vp2s-recomp]] · [[ultimate-mortal-kombat-3-ios-decompiled]] · [[copyapp]] · [[wwe-svr2009-recomp]] · [[nhl-legacy-remaster]] · [[saturnkit]] · [[motorstorm-mv-recomp]] · [[dead-rising-2-case-zero-xenon-recomp]] · [[mcla-pc]] · [[pipeline-disasm]] · [[frogman]] · [[sre-re]] · [[openmcm2]] · [[ttd-capa-cpp]] · [[custos]] · [[mixed-boolean-arithmetic]] · [[control-flow-flattening]] · [[research-rigor]] · [[overviews/reverse-engineering]] · [[overviews/windows-kernel]] · [[overviews/game-engine]]

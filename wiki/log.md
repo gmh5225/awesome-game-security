@@ -1,3 +1,5 @@
+- **2026-11-04** — ingest `description:TheBozos/VP2S_Recomp`: entity [[vp2s-recomp]] (PS2Recomp + Ghidra EE; R5900/IOP/overlay→C++; OpenGL/FFmpeg without GS/VU1/SPU2 HLE; encrypted modules; BYO SLUS-21452); cited on [[concepts/static-runtime-evidence]] PS2 lift cluster + [[overviews/reverse-engineering]] Console lane (fixed TheBozos vs danielalves96 attribution); `index.md` concept + entity blurbs updated.
+
 - **2026-11-04** — ingest `readme:categories`: **Cheat** link_count **3009** (+2 vs prior wiki **3007**; TheBozos/[[vp2s-recomp]] PS2 *Valkyrie Profile 2* PS2Recomp native PC + GreenieSparkles/[[cod6-nx]] Switch MW2 ReXGlue static-recomp WIP) / other major README section counts stable (41 sections; `NeverC & NeverD` placeholder; Anti Cheat **875**, Game Develop **203**); synced [[overviews/overview]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]]; entities [[vp2s-recomp]], [[cod6-nx]]; light `index.md` section notes (no per-category pages).
 
 # Wiki Log
