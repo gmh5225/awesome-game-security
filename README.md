@@ -2366,6 +2366,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/microsoft/Detours
 - https://github.com/wbenny/DetoursNT
 - https://github.com/wesjian/GenericGameDetourAPIHook [Modular Microsoft Detours anti-cheat bypass framework with ~130 API hooks across 16 modules, deployed via dinput8.dll proxy]
+- https://github.com/Whaileee/H7ModEngine [Lua 5.4 modding engine for Might & Magic Heroes VII via dinput8 proxy: hook UnrealScript, hot-reload mods, no game file patches]
 - https://github.com/gmh5225/ntminhook [A modified version of MinHook that only uses the Windows Native API]
 - https://github.com/mrexodia/AppInitHook [Global user-mode hooking framework via AppInit_DLLs (MinHook-based)]
 - https://github.com/stevemk14ebr/PolyHook
