@@ -3392,6 +3392,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/WeiNaYongQ/OmniClutch [Fabric mod for automated elytra/fall clutch saves with configurable anti-cheat-aware timing]
 - https://github.com/nekoyahouse/epsilon [Open-source NeoForge and Fabric Minecraft utility client with modular addon system and custom Lumin/PrismRHI rendering stack]
 - https://github.com/lolizei/Lenrete-Mod [Open-source Fabric utility/cheat client for Minecraft 26.2 with modular combat, movement, render, and HUD modules]
+- https://github.com/PointOfPressure/sunset-client [Rust utility client for Horizon (Minecraft 26.3) with 100+ combat, movement, render, and world modules, ClickGUI, and Meteor-inspired architecture]
 - https://github.com/Marcinator31/Vortex-Client [Open-source Fabric 1.21.11 Minecraft utility client with HUD, ESP, waypoints, combat helpers, and in-game preset configuration]
 - https://github.com/Gingerbeard5773/dino-printer [Meteor Client addon that prints Litematica schematics with BlockState simulation, raytracing, and anti-cheat-aware placement settings]
 - https://github.com/bliper2/jsaclient [Multi-version Minecraft Java utility client (Gradle core/fabric/loader) with movement, visuals, and open-LAN modules; integrates with Meteor when installed]
