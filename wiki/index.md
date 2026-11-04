@@ -3211,7 +3211,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [poc-exflushtb](entities/poc-exflushtb.md) — C++ Tb-monitoring PoC (backengineering; Some Tricks / Windows Ring0; asset-pipeline oriented)
 - [PWF](entities/pwf.md) — Personal Windows Forensics training toolkit (artifact collection, timeline, registry analysis, IR evidence preservation; AC / Windows Forensics Training)
 - [PokeAlliance Anti-Cheat Analysis](entities/pokealliance-anti-cheat-analysis.md) — PokeAlliance Pokémon MMO OTCv8 client static/dynamic AC audit (LordeTyrael; server-triggered process/DLL/window enumeration, login HWID fingerprinting, Lua blacklists, server-driven bot checks; Frida JS + Python tracer; Anti Cheat / game:pokealliance)
-- [PoGo Gotta Catch Em All](entities/pogo-gotta-catch-em-all.md) — BennyWaitWhat; rooted Android Pokémon GO Frida/IL2CPP AutoCatcher + inventory extract/cull; 11-audit tag-sync gates (Cheat / game:pokemongo)
+- [PoGo Gotta Catch Em All](entities/pogo-gotta-catch-em-all.md) — BennyWaitWhat; rooted Termux + Frida gadget; live IL2CPP AutoCatcher + pogo_extract inventory/cull; 11-audit tag sync; Python/JS/adb (Cheat / game:pokemongo)
 - [pokemongo-dumper](entities/pokemongo-dumper.md) — Pokemon GO Unity IL2CPP dumper (C#/C++; cheat / game:pokemongo; gmh5225)
 - [polygon-ue5](entities/polygon-ue5.md) — POLYGON UE5 offensive research (C/C++; graphics / Unreal Engine / hooking; cheat / game:polygon [UE5]; gmh5225)
 - [pom-pom](entities/pom-pom.md) — Honkai: Star Rail simple cheat (C/C++; hooking / overlays; cheat / game:honkai star rail; gmh5225)
