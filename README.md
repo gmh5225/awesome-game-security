@@ -2979,6 +2979,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/univrsal/input-overlay [Keyboard Mapper]
 - https://github.com/Miffyli/gan-aimbots [Machine Learning]
 - https://github.com/RootKit-Org/AI-Aimbot [Machine Learning YOLOv5]
+- https://github.com/bbshdh56/yoloval-onnx-models [Game-specific ONNX detection models; 32 visual examples and model catalog; paid models]
 - https://github.com/ai-aimbot/AIMr [Python YOLO screen-capture AI aimbot with CLI/GUI and optional hardware input paths]
 - https://github.com/AMXZzzz/SF_TRT_61 [Machine Learning YOLO]
 - https://github.com/Fragmentaim/Auto_aim [DXGI + TensorRT + driver-level input]
