@@ -3556,6 +3556,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [screencapture](entities/screencapture.md) — Windows DXGI Desktop Duplication capture library (C++/C#; multi-monitor GPU copy; `[DX11]`)
 - [screenshot](entities/screenshot.md) — Windows capture-method comparison (BitBlt/DDA/PrintWindow/DWM; AC screenshot research; README `[BitBlt]`; gmh5225)
 - [screenshot-detection-bypass](entities/screenshot-detection-bypass.md) — C++ PoC; gdi32 BitBlt hook returns clean frame to AC screenshot pipelines; class-based hook; educational capture-hook evasion (Mes2d; README `[BitBlt]`)
+- [scvk](entities/scvk.md) — SimCity 4 native Vulkan GZCOM plugin DLL (aspctt; replaces DX7/OpenGL; `cIGZGDriver` ubershader emulation; ReShade depth + frame callbacks; Windows/Linux Wine; legacy renderer replacement / RE)
 - [segcap](entities/segcap.md) — D3D12 hook extracting per-pixel object-ID segmentation masks from shipping UE4/UE5 retail titles (MinHook command intercept + CustomDepth runtime introspection; automated virtual-gamepad capture; masks/RGB/JSON export; Qervas)
 - [seb-re-toolkit](entities/seb-re-toolkit.md) — Python RE toolkit for Themida-protected Safe Exam Browser `seb_x64.dll` (Arcticbyp; pefile static PE + packer detect; BSTR cdecl exports; Frida live export tracing; CLI + GUI; Windows + SEB; Cheat / Fix Themida)
 - [SecureGame](entities/secure-game.md) — Pong-like POC; core game logic in Windows VBS enclave; host render/input + enclave DLL state/rules; SDL2; trusted execution / anti-cheat research (SamuelTulach)

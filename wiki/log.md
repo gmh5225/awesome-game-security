@@ -1,3 +1,5 @@
+- **2026-11-05** — ingest `description:aspctt/scvk`: entity [[scvk]] (SimCity 4; 32-bit Vulkan GZCOM graphics-driver plugin; `cIGZGDriver` fixed-function emulation via SPIR-V ubershaders; ReShade + frame callbacks; Windows/Linux Wine); cited [[overviews/graphics-api]] + [[overviews/reverse-engineering]]; cross-linked [[dxwrapper]], [[opencmr2]], [[reshade]]; `index.md` entity blurb.
+
 - **2026-11-05** — ingest `readme:categories`: **Cheat** link_count **3015** (+1 vs prior wiki **3014**; README sample lane unchanged—liuyiyi0219-arch/[[unity-apk-reverse]], Vieuxnorris/[[farcry-6-hack]], xxchaosxx210/[[splinter-cell-trainer]]) / other major README section counts stable (41 sections; `NeverC & NeverD` placeholder; Anti Cheat **875**, Game Develop **203**, Game Engine **159**); synced [[overviews/overview]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]]; light `index.md` section notes (Cheat ~3015; RE blurb ~3015); no per-category pages.
 
 
