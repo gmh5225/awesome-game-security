@@ -1650,6 +1650,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/Danda420/kernel_xiaomi_sm8250 [xiaomi kernel for POCO F3/F4]
 - https://github.com/LowTension/android_kernel_xiaomi_sm8475 [Pixel Experience Plus for for Redmi K6/POCO F5 Pro]
 - https://github.com/RooTurkk/ROOTURK-Kernel [Android 15 GKI 6.6 kernel source for POCO X7 Pro with built-in KernelSU Next, SuSFS root hiding, and game-oriented idle tuning]
+- https://github.com/tickernelz/android_kernel_meizu_mblu21 [Meizu mBlu 21 GKI kernel sources plus tested KernelSU-Next/SukiSU-Ultra root images, SUSFS guard module, and Play Integrity measurement docs]
 - https://github.com/GrapheneOS-Archive/kernel_msm-coral [Pixel 4/4XL/4a]
 - https://github.com/msnx/KernelSU-Pixel4XL [KernelSU for Google Pixel4XL]
 - https://github.com/universal5433/android_kernel_samsung_universal5433 [samsung 15433]
@@ -1788,6 +1789,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 
 > IOS App Packaging
 - https://github.com/AloneMonkey/frida-ios-dump [Frida-based tool to pull decrypted IPAs from jailbroken iOS devices over USB SSH, with parallel module downloads and Frida 17 bridge support]
+- https://github.com/RansomWhisker/getIPA [CLI to SSH into a jailbroken iPhone, list App Store apps, and build encrypted or bagbak-decrypted IPAs with entitlements and encryption reporting]
 - https://github.com/everettjf/copyapp [Agent-driven iOS/macOS app analysis and independent rebuilds from UI, sandbox, and Frida evidence (standard and jailbroken routes)]
 - https://github.com/addrianyy/ios_packager [Package and sign iOS applications]
 - https://github.com/xscope0/xkvm-ios-injector [Go CLI toolbox to inject, extract, and convert iOS tweak packages for sideloaded IPAs]
