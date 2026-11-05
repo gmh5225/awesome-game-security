@@ -574,6 +574,7 @@ sources:
   - wiki/sources/descriptions/yingyangdao__honor-v10-lab.md
   - wiki/sources/descriptions/ravindu644__USB-Arsenal.md
   - wiki/sources/descriptions/vw2x__Mira.md
+  - wiki/sources/descriptions/topjohnwu__magisk-files.md
 updated: 2026-11-05
 confidence: high
 ---
@@ -627,6 +628,8 @@ KernelSU/APatch architecture: root-enabled apps still split user-space credentia
 | [[apex-su]] | Kernel (KernelSU fork) | High+ | Yes (GKI 2.0) | KernelSU-compatible; Rust userspace + stealth IOCTL |
 | [[apatch]] | Kernel (KernelPatch boot patch) | High | Yes | KPM modules; SuperKey above root (stock GKI) |
 | [[apatch-kpm]] | Kernel (KPM collection) | High | Yes | Example KPM module pack for [[apatch]] |
+
+[[magisk]] clients resolve release APKs via official manifest host [[magisk-files]] (topjohnwu; stable/beta/canary/debug JSON feeds with version strings, version codes, download URLs, and release-note pointers; metadata-only repo—not app source; canonical update feed for the Magisk app and mirrors when pinning rooted lab builds for mobile game-security research) (source: wiki/sources/descriptions/topjohnwu__magisk-files.md)
 
 Debug-oriented KernelSU fork [[kernelsu-debug]] (MlgmXyysd; relaxed manager checks, permissive SELinux options, init script support; kernel C + Android app/build assets; profile control; Android security research / system debugging; cheat / KernelSU modified for debugging) trades production hardening for lab convenience beside upstream [[kernelsu]]. (source: wiki/sources/descriptions/MlgmXyysd__KernelSU_Debug.md) [[apatch]] (bmax121; Android kernel + system patch; SuperKey above root; cheat / Android root) applies [[kernelpatch]] boot-image patching on stock GKI Android without custom kernel sources. APatch **KPM** (KernelPatch Module) collections such as [[apatch-kpm]] (C/C++; kernel modding/debug extensions for the APatch module lane) extend root at kernel scope — same KPM class as ACE title RE (`acepeek` in [[honor-of-kings-re-research]]). (source: wiki/sources/descriptions/bmax121__APatch.md) (source: wiki/sources/descriptions/bmax121__KernelPatch.md) (source: wiki/sources/descriptions/lzghzr__APatch_kpm.md) Android kernel root patch toolkit [[skroot-linux-kernel-root]] (abcz316; C/C++ patch + Java/JNI app tooling; deeply hidden root, su install/inject, many kernel versions without full rebuild; cheat / Android root) targets stock-kernel root-hide research beside KernelPatch/APatch lanes. (source: wiki/sources/descriptions/abcz316__SKRoot-linuxKernelRoot.md)
 

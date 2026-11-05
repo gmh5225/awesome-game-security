@@ -4,15 +4,16 @@ kind: entity
 topics: [mobile-security, game-hacking]
 sources:
   - wiki/sources/README-categories.md
+  - wiki/sources/descriptions/topjohnwu__magisk-files.md
 updated: 2026-11-05
 confidence: high
 ---
 
 # Magisk Files
 
-Official **JSON release manifests** for the Magisk project (topjohnwu). Publishes stable, beta, canary, and debug channel metadata that Magisk clients consume to discover release APK URLs, version notes, and related assets—separate from the main [[magisk]] application source tree. (source: wiki/sources/README-categories.md)
+**Magisk File Host** — lightweight distribution repository (plain JSON + README, not application source) that publishes metadata and download pointers for Magisk-related Android packages. Maintains **separate JSON manifests** for **stable**, **beta**, **canary**, and **debug** release channels; each entry lists version strings, version codes, APK links, and release-note references. Acts as the **canonical update feed** that the Magisk app, mirrors, and automation can consume without scraping GitHub releases. (source: wiki/sources/descriptions/topjohnwu__magisk-files.md)
 
-Listed under **Cheat → Android Root** beside the canonical Magisk repo. Useful when verifying which release channel a rooted test device pulled, scripting reproducible flash workflows, or correlating integrity/root research with a specific Magisk build without scraping GitHub releases manually.
+Listed under **Cheat → Android Root** beside the main [[magisk]] source tree. Mobile game-security, anti-cheat, and Android RE practitioners use Magisk and these hosted artifacts to study rooted environments, module loading, and integrity-check bypass techniques on devices — pin lab builds by channel/version code when correlating root-hide or Play Integrity behavior with a specific Magisk release.
 
 ## Links
 

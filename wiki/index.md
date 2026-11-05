@@ -2555,7 +2555,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Magisk](entities/magisk.md) — Android systemless root (su daemon / modules / DenyList·Shamiko / Zygisk)
 - [Android Mods](entities/android-mods.md) — PallabKumarS systemless Magisk/KernelSU + LSPosed suite (Play Integrity/Tricky Store AIO, build/keystore attestation spoof, Intune MAM bypass; HyperOS/MIUI/AOSP; Zygisk + Gradle; cheat / Magisk)
 - [Magisk Hub](entities/magisk-hub.md) — Astro static directory for Magisk/KernelSU/APatch modules (schema-validated six-hour upstream sync; Frida, root-hide, Play Integrity bypass; Yass5002; cheat / Magisk)
-- [Magisk Files](entities/magisk-files.md) — topjohnwu official JSON release manifests (stable/beta/canary/debug) for Magisk client APK discovery; Cheat / Android Root
+- [Magisk Files](entities/magisk-files.md) — topjohnwu Magisk File Host; per-channel JSON manifests (version codes, APK URLs, release notes); canonical client/mirror update feed; Cheat / Android Root
 - [MagiskHide](entities/magiskhide.md) — portable ptrace MagiskHide module for Magisk v24.0+ (DenyList hidelist; no Zygisk; Android 11+; gmh5225)
 - [MagiskKiller](entities/magisk-killer.md) — Android Magisk/MagiskHide detector (fork subprocess + pipe IPC; tracer/bootloader/property/PTS; canyie; Detection:Magisk)
 - [MagiskEoP](entities/magisk-eop.md) — Magisk su-daemon privilege-escalation PoC (race/logic flaw; unprivileged app → root without approval; canyie; exploit)
