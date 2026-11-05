@@ -1,0 +1,1433 @@
+Project Path: arc_RansomWhisker_getIPA_cwpm6_p7
+
+Source Tree:
+
+```txt
+arc_RansomWhisker_getIPA_cwpm6_p7
+├── LICENSE
+├── README.md
+├── SECURITY.md
+├── getipa
+├── install.sh
+├── package-lock.json
+└── package.json
+
+```
+
+`LICENSE`:
+
+```
+MIT License
+
+Copyright (c) 2026 Rudranetra India Private Limited (https://rudranetra.com)
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
+`README.md`:
+
+```md
+# getIPA
+
+**Pull an app off your own jailbroken iPhone and package it as an `.ipa` — in one command.**
+
+`getipa` connects to your device over SSH, lists your recently installed App Store apps (system apps filtered out), and builds a ready-to-use IPA. It automates the manual `ssh` → `cd` → `cp` → `zip` → `scp` routine, and flags the one thing that routine silently gets wrong: FairPlay encryption.
+
+> A tool by [**rudranetra.com**](https://rudranetra.com) · more at [rudranetra.com/tools](https://rudranetra.com/tools)
+
+---
+
+## Features
+
+- **Interactive** – just run `getipa`; it asks for username, device IP and password, then shows your apps.
+- **Recent first** – apps sorted by install/update time; system apps (`com.apple.*`) excluded by default.
+- **One-shot or scripted** – flags and environment variables for automation.
+- **Built-in app report** – permissions, entitlements, ATS settings, URL schemes, frameworks and encryption status, for a fresh extraction or any local IPA.
+- **Encrypted *or* decrypted – your choice** – `--decrypted` / `--encrypted` / auto. Decryption is done by [`bagbak`](https://github.com/ChiChou/bagbak), which is **bundled** (installed by `./install.sh`).
+- **Hardened against a hostile device** – treats everything coming back from the phone as untrusted (see [Security](#security)).
+- **Zero dependencies** – Python 3.8+ standard library and your system `ssh`.
+
+## Requirements
+
+| Where | What |
+|---|---|
+| Computer | macOS or Linux, Python 3.8+, OpenSSH client (8.4+ for password login) |
+| iPhone | Jailbroken, with OpenSSH running (`tar` is included on standard jailbreaks) |
+| For decrypted IPAs | Node.js + npm on the computer (bundles `bagbak`), and `frida-server` running on the iPhone |
+
+## Install
+
+```sh
+git clone https://github.com/RansomWhisker/getIPA.git
+cd getIPA
+./install.sh            # links getipa into ~/.local/bin AND installs the bundled bagbak
+```
+
+`install.sh` runs `npm ci` to fetch a **pinned** version of `bagbak` (see `package-lock.json`) into this folder — nothing is installed globally. Skip it with `SKIP_BAGBAK=1 ./install.sh` if you only want encrypted copies.
+
+**For decrypted IPAs you also need `frida-server` on the iPhone:** install it from your jailbreak's package manager (Sileo / Zebra — add the Frida repo `https://build.frida.re` if it isn't listed), make sure it's running, and keep its version in step with the Frida version `bagbak` bundles. If `getipa --decrypted` fails, this is the first thing to check.
+
+> If the bundled install fails, it is almost always Frida's native module not downloading (network reset) or lacking a prebuilt binary for your Node version. Re-run `./install.sh`, or switch to Node 20/22 LTS (`nvm install 22`).
+
+Make sure `~/.local/bin` is on your `PATH` (the installer tells you if it isn't).
+
+## Usage
+
+### Interactive
+
+```sh
+getipa
+```
+```
+Username [root]: root
+Device IP (just the last number works, e.g. 9 = 192.168.1.9): 9
+[*] Using 192.168.1.9
+Password (blank = use SSH key/prompt):
+
+Recently installed apps (newest first):
+  1. 2026-11-04 18:22  com.example.app        2.4.1      Example
+  2. ...
+Pick a number (or Enter to quit): 1
+[+] Wrote ipas/com.example.app_2.4.1.ipa
+```
+
+Shorthand: typing just `9` means `192.168.1.9`, and `0.5` means `192.168.0.5` (works for `--host` too). Full IPs and hostnames are used as typed.
+
+### Flags
+
+```sh
+getipa --host 192.168.1.9 --list                 # list only
+getipa --host 192.168.1.9 -b com.example.app     # by bundle ID or name substring
+getipa --host 127.0.0.1 --port 2222 --list       # USB via `iproxy 2222 22`
+getipa --host 192.168.1.9 --key ~/.ssh/id_ed25519 -n 25
+```
+
+| Option | Description |
+|---|---|
+| `--host`, `--port`, `--user` | Connection details (defaults: port `22`, user `root`) |
+| `--key PATH` | SSH private key (recommended over passwords) |
+| `--list` | List apps and exit |
+| `-n N` / `--all` | Show the N most recent apps (default 10) / everything |
+| `-b`, `--bundle-id` | Extract an app by bundle ID or name |
+| `--info` | Print the app report after extracting |
+| `--info-file IPA` | Print the report for a local `.ipa` and exit (no device needed) |
+| `--decrypted` / `--encrypted` | Require a decrypted IPA (via bagbak) / take the raw encrypted copy only. Same as `--mode decrypted\|encrypted`. Default `auto`. |
+| `--include-system` | Include `com.apple.*` apps |
+| `-o DIR` | Output directory (default `./ipas`) |
+| `--frida-host` | Let `bagbak` reach `frida-server` over the network |
+
+Environment defaults: `GETIPA_HOST`, `GETIPA_PORT`, `GETIPA_USER`, `SSH_PASSWORD`.
+
+### App report
+
+```sh
+getipa --info-file ./ipas/com.example.app_2.4.1.ipa     # offline, any IPA
+getipa -b com.example.app --info                         # extract + report
+```
+```
+== Example (com.example.app) ==
+Version        2.4.1 (build 301)
+Min iOS        15.0
+Encrypted      YES (FairPlay, cryptid=1)
+ATS            customised: {NSAllowsArbitraryLoads}  <-- insecure
+Permissions    2
+    NSCameraUsageDescription: Scan codes
+Entitlements   2
+    aps-environment: production
+Frameworks     1
+```
+
+## About encryption
+
+Apps installed from the App Store are **FairPlay-encrypted on disk**. A plain file copy gives you an IPA whose main binary can't be disassembled. getIPA lets you choose:
+
+| Mode | What you get |
+|---|---|
+| `--decrypted` | A decrypted IPA from the running app, via bagbak. Fails with a clear message if bagbak or frida-server is missing. |
+| `--encrypted` | The raw copy, named `*_encrypted.ipa`. Fast; fine for inspecting resources, `Info.plist`, entitlements. |
+| *auto* (default) | Copies the app; if its binary is encrypted it switches to bagbak, and falls back to the raw copy (with a warning) if that fails. |
+
+In interactive mode, `getipa` asks which one you want after you pick an app.
+
+## Security
+
+`getipa` talks to a device you may not fully trust (jailbroken phones run lots of third-party code), so it validates what comes back:
+
+- Usernames/hosts are validated so they can't be parsed as `ssh` options (no `-oProxyCommand=…` tricks).
+- All remote paths are shell-quoted and restricted to the app-container directories.
+- The tar stream from the device is extracted defensively: no path traversal, symlinks/hardlinks/devices skipped, permissions normalised.
+- Device-supplied names are sanitised before being printed or used in filenames or the `bagbak` command line.
+- One SSH connection is opened (control socket in a private `0700` directory) and reused; passwords go to `ssh` via a short-lived `SSH_ASKPASS` helper — never on the command line, never written to disk.
+- No telemetry. At runtime the only network traffic is your SSH connection (and Frida, if you ask for a decrypted dump). The bundled `bagbak` is pinned to an exact version with a lockfile; `install.sh` is the only step that downloads anything.
+
+Good hygiene on your side: **change the default `alpine` password**, prefer SSH keys, and only run this on a trusted network. Found a vulnerability? See [SECURITY.md](SECURITY.md).
+
+## Responsible use
+
+For use **only on devices you own and apps you are authorized to analyze** — your own apps, security research, interoperability, and personal backup, where the law permits. Don't use it to pirate software or circumvent licensing. You are responsible for complying with applicable laws and the terms of the software you handle.
+
+## Troubleshooting
+
+| Symptom | Fix |
+|---|---|
+| `UNIX authentication refused` | Wrong password/user. Try `--user mobile` on rootless jailbreaks. |
+| `Too many authentication failures` | Wait a minute / restart OpenSSH on the device; use `--key`. |
+| Decrypting fails | Is `frida-server` running on the iPhone? Is its version compatible with bagbak's Frida? Try `--encrypted` for a raw copy. |
+| No apps listed | App may live outside `/var/containers/Bundle/Application` (e.g. TrollStore apps). |
+| `iTunesMetadata.plist not found` | Normal on many rootless setups; the IPA is still valid. |
+
+## License
+
+[MIT](LICENSE) © Rudranetra India Private Limited — [rudranetra.com](https://rudranetra.com)
+
+```
+
+`SECURITY.md`:
+
+```md
+# Security Policy
+
+## Reporting a vulnerability
+
+Please **do not open a public issue** for security problems. Use GitHub's
+"Report a vulnerability" (Security tab → Advisories) on this repository, or
+contact me via [rudranetra.com](https://rudranetra.com).
+
+Include steps to reproduce and the impact. I'll acknowledge reports promptly and
+credit reporters who want it.
+
+## Scope
+
+`getipa` treats the connected device as untrusted input. Reports about path
+traversal, command/option injection, unsafe archive handling, credential
+exposure, or terminal-escape injection are especially welcome.
+
+## Out of scope
+
+Weak device configuration (e.g. the default `alpine` password), and issues in
+third-party tools such as `bagbak`, Frida or OpenSSH.
+
+```
+
+`getipa`:
+
+```
+#!/usr/bin/env python3
+"""getipa: pull an app from a jailbroken iPhone over SSH and package it as an .ipa.
+
+Intended for apps you own / are authorized to analyze, on a device you own.
+
+Usage:
+  getipa --host 192.168.1.20 --list
+  getipa --host 192.168.1.20 --bundle-id com.example.app [-o out_dir]
+  # USB via iproxy (iproxy 2222 22):
+  getipa --host 127.0.0.1 --port 2222 --list
+
+Env defaults: GETIPA_HOST, GETIPA_PORT, GETIPA_USER.
+Auth: use SSH keys (recommended) or a password (prompted, or via SSH_PASSWORD; needs OpenSSH 8.4+).
+Stdlib only. Requires `ssh` locally and tar on the device (standard on jailbreaks).
+
+Note: App Store binaries are FairPlay-encrypted on disk. A plain copy yields an IPA
+whose main binary has cryptid=1 and won't be usable for analysis. If detected, the
+tool delegates to `bagbak` (npm i -g bagbak) when installed, which dumps decrypted
+binaries via Frida.
+"""
+import argparse
+import os
+import plistlib
+import re
+import shlex
+import shutil
+import struct
+import subprocess
+import sys
+import tarfile
+import tempfile
+import time
+import zipfile
+
+APP_ROOTS = ("/var/containers/Bundle/Application/", "/private/var/containers/Bundle/Application/")
+USER_RE = re.compile(r"^[A-Za-z0-9_][A-Za-z0-9._-]{0,63}$")
+HOST_RE = re.compile(r"^[A-Za-z0-9_][A-Za-z0-9._:\-]{0,252}$")   # no leading '-', no spaces
+BUNDLE_ID_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,200}$")
+_CTRL_RE = re.compile(r"[\x00-\x1f\x7f-\x9f]")
+
+
+def expand_host(text):
+    """Shorthand for the common home-LAN range:  9 -> 192.168.1.9,  0.5 -> 192.168.0.5.
+    Anything else (full IPs, hostnames, localhost) is returned unchanged."""
+    text = text.strip()
+    if re.fullmatch(r"\d{1,3}", text):
+        parts = ["1", text]
+    elif re.fullmatch(r"\d{1,3}\.\d{1,3}", text):
+        parts = text.split(".")
+    else:
+        return text
+    if all(int(x) <= 255 for x in parts):
+        return "192.168." + ".".join(str(int(x)) for x in parts)
+    return text
+
+
+def find_bagbak():
+    """Prefer the copy bundled in this repo (node_modules), then PATH."""
+    here = os.path.dirname(os.path.realpath(__file__))
+    local = os.path.join(here, "node_modules", ".bin", "bagbak")
+    if os.path.isfile(local) and os.access(local, os.X_OK):
+        return local
+    return shutil.which("bagbak")
+
+
+def run_bagbak(a, bagbak, bid, out_dir):
+    """Run bagbak for bundle id `bid`. Returns True on success."""
+    if not BUNDLE_ID_RE.match(bid):
+        print("[!] Refusing to pass an unusual bundle id to bagbak.")
+        return False
+    os.makedirs(out_dir, exist_ok=True)
+    host_args = ["-H", a.host] if a.frida_host else []
+    return subprocess.run([bagbak, *host_args, "-o", out_dir, bid]).returncode == 0
+
+
+def clean(text):
+    """Strip control/escape characters from device-supplied text before printing."""
+    return _CTRL_RE.sub("?", str(text))
+
+
+def safe_name(text):
+    return re.sub(r"[^A-Za-z0-9._-]", "_", str(text))[:100] or "app"
+
+
+_SOCK = None
+
+
+def _base(a):
+    base = ["ssh", "-p", str(a.port), "-o", "StrictHostKeyChecking=accept-new",
+            "-o", "LogLevel=ERROR"]
+    if a.key:
+        base += ["-i", a.key, "-o", "IdentitiesOnly=yes"]
+    return base + [f"{a.user}@{a.host}"]
+
+
+def open_master(a):
+    """Authenticate once (prompting for the password if needed); reuse for all calls."""
+    global _SOCK
+    import atexit
+    sock_dir = tempfile.mkdtemp(prefix="getipa-", dir="/tmp")  # mode 0700
+    _SOCK = os.path.join(sock_dir, "s")
+    cmd = _base(a)[:-1] + ["-o", "ControlMaster=yes", "-o", f"ControlPath={_SOCK}",
+                           "-o", "ControlPersist=10m", "-o", "NumberOfPasswordPrompts=1",
+                           f"{a.user}@{a.host}", "-fN"]
+    env, askpass = None, None
+    if a.password:
+        # Feed the password via SSH_ASKPASS (OpenSSH >= 8.4); it lives only in the
+        # child's environment, never on disk or on the command line.
+        fd, askpass = tempfile.mkstemp(prefix="getipa_askpass_")
+        os.write(fd, b'#!/bin/sh\nprintf "%s\\n" "$GETIPA_PW"\n')
+        os.close(fd)
+        os.chmod(askpass, 0o700)
+        env = dict(os.environ, GETIPA_PW=a.password, SSH_ASKPASS=askpass,
+                   SSH_ASKPASS_REQUIRE="force")
+    try:
+        rc = subprocess.run(cmd, env=env).returncode
+    finally:
+        if askpass:
+            os.unlink(askpass)
+    if rc != 0:
+        shutil.rmtree(sock_dir, ignore_errors=True)
+        sys.exit(f"\nSSH login to {a.user}@{a.host}:{a.port} failed.\n"
+                 "  - Wrong password? The jailbreak default is 'alpine' (change it!)\n"
+                 "  - Rootless jailbreaks may need --user mobile\n"
+                 "  - Check OpenSSH is running on the device, or use --key")
+    def _cleanup():
+        subprocess.run(["ssh", "-O", "exit", "-o", f"ControlPath={_SOCK}",
+                        f"{a.user}@{a.host}"], capture_output=True)
+        shutil.rmtree(sock_dir, ignore_errors=True)
+    atexit.register(_cleanup)
+
+
+def ssh_cmd(a):
+    if _SOCK:
+        return _base(a)[:-1] + ["-o", "ControlMaster=no", "-o", f"ControlPath={_SOCK}",
+                                f"{a.user}@{a.host}"]
+    return _base(a)
+
+
+def run_remote(a, command, binary=False):
+    p = subprocess.run(ssh_cmd(a) + [command], capture_output=True)
+    if p.returncode != 0:
+        sys.exit(f"remote command failed: {p.stderr.decode(errors='replace').strip()}")
+    return p.stdout if binary else p.stdout.decode(errors="replace")
+
+
+def remote_mtimes(a):
+    """Map app dir -> install/update epoch time (tries GNU stat, then BSD stat)."""
+    globs = ("/var/containers/Bundle/Application/*/*.app "
+             "/private/var/containers/Bundle/Application/*/*.app")
+    for fmt in ("stat -c '%Y\t%n'", "stat -f '%m\t%N'"):
+        p = subprocess.run(ssh_cmd(a) + [f"{fmt} {globs} 2>/dev/null"], capture_output=True)
+        if p.stdout.strip():
+            out = {}
+            for line in p.stdout.decode(errors="replace").splitlines():
+                t, _, path = line.partition("\t")
+                if t.isdigit():
+                    out[path] = int(t)
+            return out
+    return {}
+
+
+def is_system_app(bundle_id):
+    return bundle_id.startswith("com.apple.") and bundle_id != "com.apple.TestFlight"
+
+
+def find_bundles(a, include_system=False):
+    """Return [(bundle_id, name, version, app_dir_remote, info, mtime)], newest first.
+
+    /var/containers/Bundle/Application only holds user-installed apps; real system
+    apps live in /Applications, so they are never scanned. com.apple.* entries that
+    appear here anyway are dropped unless include_system is set.
+    """
+    mtimes = remote_mtimes(a)
+    seen, apps = set(), []
+    for app_dir in mtimes or filter(None, run_remote(
+            a, "ls -d /var/containers/Bundle/Application/*/*.app 2>/dev/null").splitlines()):
+        if not app_dir.startswith(APP_ROOTS) or not app_dir.endswith(".app") \
+                or "\n" in app_dir or ".." in app_dir.split("/"):
+            continue
+        real = app_dir.replace("/private/var", "/var")
+        if real in seen:
+            continue
+        seen.add(real)
+        try:
+            info = plistlib.loads(run_remote(a, "cat " + shlex.quote(app_dir + "/Info.plist"), binary=True))
+        except Exception:
+            continue
+        bid = str(info.get("CFBundleIdentifier", "?"))
+        if not include_system and is_system_app(bid):
+            continue
+        apps.append((bid,
+                     str(info.get("CFBundleDisplayName") or info.get("CFBundleName", "?")),
+                     str(info.get("CFBundleShortVersionString", "?")), app_dir, info,
+                     mtimes.get(app_dir, 0)))
+    apps.sort(key=lambda x: x[5], reverse=True)
+    return apps
+
+
+def fmt_time(t):
+    return time.strftime("%Y-%m-%d %H:%M", time.localtime(t)) if t else "unknown"
+
+
+def print_apps(apps):
+    for i, (bid, name, ver, _, _, t) in enumerate(apps, 1):
+        print(f"{i:3}. {fmt_time(t):16}  {clean(bid):45} {clean(ver):10} {clean(name)}")
+
+
+def is_encrypted(binary_path):
+    """True if any Mach-O slice has LC_ENCRYPTION_INFO(_64) with cryptid != 0.
+
+    The binary is untrusted input: any parse error is treated as 'unknown' (False).
+    """
+    try:
+        return _is_encrypted(binary_path)
+    except (struct.error, IndexError, OSError):
+        return False
+
+
+def _is_encrypted(binary_path):
+    with open(binary_path, "rb") as f:
+        data = f.read(1 << 20)  # load commands live near the start
+    magic = struct.unpack(">I", data[:4])[0]
+    slices = []
+    if magic in (0xCAFEBABE, 0xCAFEBABF):
+        n = struct.unpack(">I", data[4:8])[0]
+        step = 20 if magic == 0xCAFEBABE else 32
+        for i in range(n):
+            e = data[8 + i * step: 8 + (i + 1) * step]
+            off = struct.unpack(">I", e[8:12])[0] if magic == 0xCAFEBABE else struct.unpack(">Q", e[8:16])[0]
+            slices.append(off)
+    else:
+        slices.append(0)
+    for off in slices:
+        if off + 32 > len(data):
+            with open(binary_path, "rb") as f:
+                f.seek(off)
+                chunk = f.read(1 << 20)
+        else:
+            chunk = data[off:]
+        m = struct.unpack("<I", chunk[:4])[0]
+        if m not in (0xFEEDFACF, 0xFEEDFACE):
+            continue
+        hdr = 32 if m == 0xFEEDFACF else 28
+        ncmds = struct.unpack("<I", chunk[16:20])[0]
+        p = hdr
+        for _ in range(ncmds):
+            cmd, size = struct.unpack("<II", chunk[p:p + 8])
+            if cmd in (0x21, 0x2C):
+                cryptid = struct.unpack("<I", chunk[p + 16:p + 20])[0]
+                if cryptid:
+                    return True
+            p += size
+    return False
+
+
+def safe_extract(tar_path, dest):
+    """Extract a tar from the (untrusted) device: regular files and dirs only,
+    nothing may land outside dest. Symlinks/hardlinks/devices are skipped."""
+    root = os.path.realpath(dest)
+    skipped = 0
+    with tarfile.open(tar_path) as t:
+        for m in t:
+            target = os.path.realpath(os.path.join(root, m.name))
+            if not (target == root or target.startswith(root + os.sep)) or os.path.isabs(m.name):
+                sys.exit(f"refusing unsafe path in archive: {clean(m.name)!r}")
+            if not (m.isreg() or m.isdir()):
+                skipped += 1
+                continue
+            m.mode = (0o755 if m.isdir() or m.mode & 0o111 else 0o644)
+            m.uid = m.gid = 0
+            if hasattr(tarfile, "data_filter"):
+                t.extract(m, root, filter="data")
+            else:
+                t.extract(m, root)
+    if skipped:
+        print(f"[!] Skipped {skipped} symlink/special entries (not followed for safety).")
+
+
+def pull_ipa(a, bundle, out_dir):
+    bid, name, ver, app_dir, info, _ = bundle
+    bagbak = find_bagbak()
+
+    if a.mode == "decrypted":
+        # Dump straight from the running app; no need to copy the encrypted bundle first.
+        if not bagbak:
+            sys.exit("bagbak is not installed. Run ./install.sh (or `npm install` in the "
+                     "getIPA folder), or use --mode encrypted.")
+        print(f"[*] Dumping decrypted {clean(bid)} with bagbak ...")
+        if not run_bagbak(a, bagbak, bid, out_dir):
+            sys.exit("bagbak failed. Is frida-server running on the device? "
+                     "(Use --mode encrypted for a raw copy.)")
+        return None
+
+    work = tempfile.mkdtemp(prefix="getipa_")
+    try:
+        parent = os.path.dirname(app_dir)
+        app_name = os.path.basename(app_dir)
+        print(f"[*] Pulling {clean(app_name)} ({clean(bid)} {clean(ver)}) ...")
+        tar_path = os.path.join(work, "app.tar")
+        with open(tar_path, "wb") as fh:
+            p = subprocess.run(ssh_cmd(a) + [f"cd {shlex.quote(parent)} && tar -cf - {shlex.quote(app_name)}"],
+                               stdout=fh, stderr=subprocess.PIPE)
+        if p.returncode != 0:
+            sys.exit(f"tar failed: {p.stderr.decode(errors='replace')}")
+        payload = os.path.join(work, "Payload")
+        os.makedirs(payload)
+        safe_extract(tar_path, payload)
+
+        exe = info.get("CFBundleExecutable")
+        enc = bool(exe) and is_encrypted(os.path.join(payload, app_name, exe))
+        if enc:
+            print("[!] Main binary is FairPlay-encrypted (cryptid=1).")
+            if a.mode == "encrypted":
+                print("    --mode encrypted: keeping the raw (encrypted) copy as requested.")
+            elif bagbak:
+                print("[*] Switching to bagbak for a decrypted IPA ...")
+                if run_bagbak(a, bagbak, bid, out_dir):
+                    return None
+                print("[!] bagbak failed (is frida-server running on the device?); "
+                      "falling back to the encrypted copy.")
+            else:
+                print("    bagbak not found. Run ./install.sh to bundle it. "
+                      "Packaging the encrypted copy anyway.")
+
+        if a.info:
+            report_appdir(os.path.join(payload, app_name))
+        os.makedirs(out_dir, exist_ok=True)
+        ipa = os.path.join(out_dir, f"{safe_name(bid)}_{safe_name(ver)}{'_encrypted' if enc else ''}.ipa")
+        with zipfile.ZipFile(ipa, "w", zipfile.ZIP_DEFLATED) as z:
+            for root, _, files in os.walk(payload):
+                for fn in files:
+                    full = os.path.join(root, fn)
+                    if os.path.islink(full):
+                        continue
+                    z.write(full, os.path.relpath(full, work))
+            # Include iTunesMetadata.plist if present beside the .app (container root)
+            try:
+                md = run_remote(a, "cat " + shlex.quote(parent + "/iTunesMetadata.plist"), binary=True)
+                z.writestr("iTunesMetadata.plist", md)
+            except SystemExit:
+                print("[!] Warning: iTunesMetadata.plist not found next to the .app "
+                      "(common on rootless jailbreaks); IPA written without it.")
+        return ipa
+    finally:
+        shutil.rmtree(work, ignore_errors=True)
+
+
+# ---------------------------------------------------------------- app info report
+
+MAX_EXE_BYTES = 3 << 30  # refuse absurd executables inside an IPA
+
+
+def get_entitlements(exe_path):
+    """Best-effort: parse XML entitlements from the code-signature blob near the end."""
+    try:
+        with open(exe_path, "rb") as f:
+            f.seek(0, os.SEEK_END)
+            f.seek(max(0, f.tell() - (4 << 20)))
+            tail = f.read()
+        for blob in re.findall(rb"<\?xml.*?</plist>", tail, re.S):
+            try:
+                d = plistlib.loads(blob)
+            except Exception:
+                continue
+            if isinstance(d, dict) and d:
+                return d
+    except OSError:
+        pass
+    return {}
+
+
+def fmt_val(v, limit=70):
+    if isinstance(v, (list, tuple)):
+        v = ", ".join(clean(x) for x in v)
+    elif isinstance(v, dict):
+        v = "{" + ", ".join(clean(k) for k in v) + "}"
+    v = clean(v)
+    return v if len(v) <= limit else v[:limit - 1] + "…"
+
+
+def report_appdir(app_dir):
+    """Print a summary of an unpacked .app directory (or skeleton of one)."""
+    try:
+        with open(os.path.join(app_dir, "Info.plist"), "rb") as f:
+            info = plistlib.load(f)
+    except Exception as e:
+        print(f"[!] Could not read Info.plist: {clean(e)}")
+        return
+    exe_name = info.get("CFBundleExecutable")
+    exe = os.path.join(app_dir, exe_name) if isinstance(exe_name, str) else None
+    families = {1: "iPhone", 2: "iPad", 3: "Apple TV", 4: "Watch"}
+
+    def row(label, value):
+        print(f"{label:<15}{value}")
+
+    name = info.get("CFBundleDisplayName") or info.get("CFBundleName", "?")
+    print(f"\n== {clean(name)} ({clean(info.get('CFBundleIdentifier', '?'))}) ==")
+    row("Version", f"{fmt_val(info.get('CFBundleShortVersionString', '?'))} "
+                   f"(build {fmt_val(info.get('CFBundleVersion', '?'))})")
+    row("Executable", clean(exe_name or "?"))
+    row("Min iOS", fmt_val(info.get("MinimumOSVersion", "?")))
+    fam = info.get("UIDeviceFamily")
+    if isinstance(fam, list):
+        row("Device family", ", ".join(families.get(x, str(x)) for x in fam if isinstance(x, int)))
+    if exe and os.path.isfile(exe):
+        enc = is_encrypted(exe)
+        row("Encrypted", "YES (FairPlay, cryptid=1)" if enc else "no")
+    schemes = sorted({sc for t in info.get("CFBundleURLTypes", []) if isinstance(t, dict)
+                      for sc in t.get("CFBundleURLSchemes", []) if isinstance(sc, str)})
+    if schemes:
+        row("URL schemes", fmt_val(schemes, 100))
+    if info.get("UIBackgroundModes"):
+        row("Background", fmt_val(info["UIBackgroundModes"], 100))
+    ats = info.get("NSAppTransportSecurity")
+    if isinstance(ats, dict):
+        warn = "  <-- insecure" if ats.get("NSAllowsArbitraryLoads") is True else ""
+        row("ATS", f"customised: {fmt_val(ats, 80)}{warn}")
+    else:
+        row("ATS", "default (HTTPS enforced)")
+    perms = sorted((k, v) for k, v in info.items()
+                   if isinstance(k, str) and k.startswith("NS") and k.endswith("UsageDescription"))
+    row("Permissions", f"{len(perms)}")
+    for k, v in perms:
+        print(f"    {clean(k)}: {fmt_val(v, 60)}")
+    ents = get_entitlements(exe) if exe and os.path.isfile(exe) else {}
+    row("Entitlements", f"{len(ents)}" if ents else "none found")
+    for k in sorted(ents, key=str):
+        print(f"    {clean(k)}: {fmt_val(ents[k], 60)}")
+    fw_dir = os.path.join(app_dir, "Frameworks")
+    fws = sorted(os.listdir(fw_dir)) if os.path.isdir(fw_dir) else []
+    row("Frameworks", f"{len(fws)}")
+    if fws:
+        print("    " + fmt_val(fws, 200))
+    row("Provisioning", "embedded.mobileprovision present"
+        if os.path.exists(os.path.join(app_dir, "embedded.mobileprovision")) else "none")
+    print()
+
+
+def report_ipa(ipa_path):
+    """Inspect a local IPA without unpacking it wholesale."""
+    if not os.path.isfile(ipa_path):
+        sys.exit(f"not a file: {ipa_path}")
+    work = tempfile.mkdtemp(prefix="getipa_info_")
+    try:
+        with zipfile.ZipFile(ipa_path) as z:
+            names = z.namelist()
+            apps = {m.group(1) for n in names
+                    if (m := re.match(r"^Payload/([^/]+\.app)/Info\.plist$", n))}
+            if len(apps) != 1:
+                sys.exit("This does not look like an IPA (expected one Payload/<name>.app).")
+            app = apps.pop()
+            skel = os.path.join(work, "app.app")  # fixed local name: never trust zip paths
+            os.makedirs(skel)
+
+            def copy(member, dest):
+                zi = z.getinfo(member)
+                if zi.file_size > MAX_EXE_BYTES:
+                    sys.exit(f"refusing oversized member: {clean(member)}")
+                with z.open(zi) as src, open(dest, "wb") as out:
+                    shutil.copyfileobj(src, out)
+
+            copy(f"Payload/{app}/Info.plist", os.path.join(skel, "Info.plist"))
+            with open(os.path.join(skel, "Info.plist"), "rb") as f:
+                exe_name = plistlib.load(f).get("CFBundleExecutable")
+            if isinstance(exe_name, str) and f"Payload/{app}/{exe_name}" in names \
+                    and "/" not in exe_name:
+                copy(f"Payload/{app}/{exe_name}", os.path.join(skel, exe_name))
+            for n in names:
+                m = re.match(rf"^Payload/{re.escape(app)}/Frameworks/([^/]+)/$", n) or \
+                    re.match(rf"^Payload/{re.escape(app)}/Frameworks/([^/]+)/[^/]+$", n)
+                if m:
+                    os.makedirs(os.path.join(skel, "Frameworks", safe_name(m.group(1))), exist_ok=True)
+            if f"Payload/{app}/embedded.mobileprovision" in names:
+                open(os.path.join(skel, "embedded.mobileprovision"), "wb").close()
+        print(f"IPA: {clean(os.path.basename(ipa_path))}")
+        report_appdir(skel)
+    except zipfile.BadZipFile:
+        sys.exit("not a valid zip/IPA file")
+    finally:
+        shutil.rmtree(work, ignore_errors=True)
+
+
+def main():
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("--host", default=os.environ.get("GETIPA_HOST"),
+                    help="device IP/host (or set GETIPA_HOST)")
+    ap.add_argument("--port", type=int, default=int(os.environ.get("GETIPA_PORT", 22)))
+    ap.add_argument("--user", default=os.environ.get("GETIPA_USER", "root"))
+    ap.add_argument("--key", help="SSH private key path")
+    ap.add_argument("--list", action="store_true", help="list user-installed apps, newest first")
+    ap.add_argument("--all", action="store_true", help="show every app (default: 10 most recent)")
+    ap.add_argument("-n", "--recent", type=int, default=10, help="how many recent apps to show")
+    ap.add_argument("--include-system", action="store_true", help="include com.apple.* apps")
+    ap.add_argument("--bundle-id", "-b", help="bundle id (or substring) to extract")
+    ap.add_argument("-o", "--out", default="./ipas")
+    ap.add_argument("--mode", choices=["auto", "decrypted", "encrypted"], default="auto",
+                    help="auto: decrypt if possible, else raw copy (default) | "
+                         "decrypted: require a decrypted IPA | encrypted: raw copy only")
+    ap.add_argument("--decrypted", dest="mode", action="store_const", const="decrypted",
+                    help="shortcut for --mode decrypted")
+    ap.add_argument("--encrypted", dest="mode", action="store_const", const="encrypted",
+                    help="shortcut for --mode encrypted")
+    ap.add_argument("--info", action="store_true",
+                    help="print an app report (permissions, entitlements, ATS...) after extracting")
+    ap.add_argument("--info-file", metavar="IPA",
+                    help="print the report for a local .ipa and exit (no device needed)")
+    ap.add_argument("--frida-host", action="store_true",
+                    help="have bagbak connect to frida-server over the network at --host")
+    a = ap.parse_args()
+    if a.info_file:
+        report_ipa(a.info_file)
+        return
+    a.password = os.environ.get("SSH_PASSWORD")
+    if not a.host:
+        if not sys.stdin.isatty():
+            ap.error("--host is required (or set GETIPA_HOST)")
+        import getpass
+        a.user = input(f"Username [{a.user}]: ").strip() or a.user
+        a.host = input("Device IP (just the last number works, e.g. 9 = 192.168.1.9): ").strip()
+        if not a.host:
+            sys.exit("An IP address is required.")
+        a.password = getpass.getpass("Password (blank = use SSH key/prompt): ") or None
+
+    expanded = expand_host(a.host)
+    if expanded != a.host:
+        print(f"[*] Using {expanded}")
+        a.host = expanded
+    if not USER_RE.match(a.user) or not HOST_RE.match(a.host):
+        sys.exit("Invalid username or host.")
+    if not 0 < a.port < 65536:
+        sys.exit("Invalid port.")
+    if a.key and not os.path.isfile(a.key):
+        sys.exit(f"SSH key not found: {a.key}")
+    open_master(a)
+    apps = find_bundles(a, a.include_system)
+    shown = apps if a.all else apps[:a.recent]
+    if a.list:
+        print_apps(shown)
+        return
+    if not a.bundle_id:
+        if not sys.stdin.isatty():
+            print_apps(shown)
+            return
+        print("Recently installed apps (newest first):")
+        print_apps(shown)
+        choice = input("Pick a number (or Enter to quit): ").strip()
+        if not choice.isdigit() or not 1 <= int(choice) <= len(shown):
+            return
+        matches = [shown[int(choice) - 1]]
+        if a.mode == "auto":
+            have = find_bagbak() is not None
+            print("\nExtract as:")
+            print(f"  1) Decrypted IPA  (recommended; {'bagbak found' if have else 'bagbak NOT installed - run ./install.sh'})")
+            print("  2) Encrypted IPA  (raw copy, fastest, not analyzable)")
+            m = input("Choice [1]: ").strip() or "1"
+            a.mode = "encrypted" if m == "2" else "decrypted"
+    else:
+        matches = [x for x in apps if a.bundle_id == x[0]] or \
+                  [x for x in apps if a.bundle_id.lower() in x[0].lower() or a.bundle_id.lower() in x[1].lower()]
+        if not matches:
+            sys.exit(f"no app matching '{clean(a.bundle_id)}'. Use --list.")
+        if len(matches) > 1:
+            print("Multiple matches:")
+            print_apps(matches)
+            sys.exit(1)
+    ipa = pull_ipa(a, matches[0], a.out)
+    if ipa:
+        print(f"[+] Wrote {ipa}")
+
+
+if __name__ == "__main__":
+    main()
+
+```
+
+`install.sh`:
+
+```sh
+#!/bin/sh
+# getIPA installer: links `getipa` onto your PATH and bundles bagbak (for decrypted IPAs).
+# Usage: ./install.sh [target_dir]        (default: ~/.local/bin)
+#        SKIP_BAGBAK=1 ./install.sh       (skip the bagbak/npm step)
+set -e
+here="$(cd "$(dirname "$0")" && pwd)"
+dir="${1:-$HOME/.local/bin}"
+
+mkdir -p "$dir"
+chmod +x "$here/getipa"
+ln -sf "$here/getipa" "$dir/getipa"
+echo "[+] Installed: $dir/getipa"
+case ":$PATH:" in *":$dir:"*) ;; *) echo "    Add to PATH: export PATH=\"$dir:\$PATH\"" ;; esac
+
+if [ -n "$SKIP_BAGBAK" ]; then
+  echo "[-] Skipping bagbak (SKIP_BAGBAK set). Decrypted dumps will be unavailable."
+  exit 0
+fi
+
+if ! command -v npm >/dev/null 2>&1; then
+  echo "[!] npm not found - install Node.js (v20 or v22 LTS recommended) and re-run,"
+  echo "    otherwise getipa can only make encrypted copies."
+  exit 0
+fi
+
+echo "[*] Installing bundled bagbak (pinned version, from package-lock.json) ..."
+if (cd "$here" && npm ci --omit=dev --no-fund --no-audit >/dev/null 2>&1) \
+   || (cd "$here" && npm install --omit=dev --no-fund --no-audit >/dev/null 2>&1); then
+  echo "[+] bagbak ready."
+else
+  echo "[!] bagbak failed to install (Node $(node --version 2>/dev/null))."
+  echo "    This is usually Frida's native module failing to download (network reset or"
+  echo "    blocked host) or having no prebuilt binary for your Node version. Try:"
+  echo "      1. re-run ./install.sh (downloads are cached once one succeeds)"
+  echo "      2. use Node 20 or 22 LTS ('nvm install 22 && nvm use 22'), then re-run"
+  echo "    getipa still works for encrypted copies in the meantime."
+fi
+echo
+echo "Decrypted dumps also need frida-server running on the iPhone (install it from your"
+echo "jailbreak's package manager: Sileo/Zebra). See README for details."
+
+```
+
+`package-lock.json`:
+
+```json
+{
+  "name": "getipa-deps",
+  "version": "1.0.0",
+  "lockfileVersion": 3,
+  "requires": true,
+  "packages": {
+    "": {
+      "name": "getipa-deps",
+      "version": "1.0.0",
+      "license": "MIT",
+      "dependencies": {
+        "bagbak": "5.1.2"
+      }
+    },
+    "node_modules/bagbak": {
+      "version": "5.1.2",
+      "resolved": "https://registry.npmjs.org/bagbak/-/bagbak-5.1.2.tgz",
+      "integrity": "sha512-BeKK7McSMLpp1iOiIdXEVMq7JlRFDuRc9bsWJUF2G0mYZAoBYgz5HbBVkVPOPcz62peJjX/2f+bHa6a8JCzouA==",
+      "license": "MIT",
+      "dependencies": {
+        "chalk": "^5.6.2",
+        "commander": "^14.0.3",
+        "frida": "^17.8.2",
+        "frida-remote-stream": "^6.0.3"
+      },
+      "bin": {
+        "bagbak": "dist/bin/bagbak.mjs"
+      },
+      "engines": {
+        "node": ">=18.0.0"
+      }
+    },
+    "node_modules/balanced-match": {
+      "version": "4.0.4",
+      "resolved": "https://registry.npmjs.org/balanced-match/-/balanced-match-4.0.4.tgz",
+      "integrity": "sha512-BLrgEcRTwX2o6gGxGOCNyMvGSp35YofuYzw9h1IMTRmKqttAZZVU67bdb9Pr2vUHA8+j3i2tJfjO6C6+4myGTA==",
+      "license": "MIT",
+      "engines": {
+        "node": "18 || 20 || >=22"
+      }
+    },
+    "node_modules/base64-js": {
+      "version": "1.5.1",
+      "resolved": "https://registry.npmjs.org/base64-js/-/base64-js-1.5.1.tgz",
+      "integrity": "sha512-AKpaYlHn8t4SVbOHCy+b5+KKgvR4vrsD8vbvrbiQJps7fKDTkjkDry6ji0rUJjC0kzbNePLwzxq8iypo41qeWA==",
+      "funding": [
+        {
+          "type": "github",
+          "url": "https://github.com/sponsors/feross"
+        },
+        {
+          "type": "patreon",
+          "url": "https://www.patreon.com/feross"
+        },
+        {
+          "type": "consulting",
+          "url": "https://feross.org/support"
+        }
+      ],
+      "license": "MIT"
+    },
+    "node_modules/bindings": {
+      "version": "1.5.0",
+      "resolved": "https://registry.npmjs.org/bindings/-/bindings-1.5.0.tgz",
+      "integrity": "sha512-p2q/t/mhvuOj/UeLlV6566GD/guowlr0hHxClI0W9m7MWYkL1F0hLo+0Aexs9HSPCtR1SXQ0TD3MMKrXZajbiQ==",
+      "license": "MIT",
+      "dependencies": {
+        "file-uri-to-path": "1.0.0"
+      }
+    },
+    "node_modules/bl": {
+      "version": "4.1.0",
+      "resolved": "https://registry.npmjs.org/bl/-/bl-4.1.0.tgz",
+      "integrity": "sha512-1W07cM9gS6DcLperZfFSj+bWLtaPGSOHWhPiGzXmvVJbRLdG82sH/Kn8EtW1VqWVA54AKf2h5k5BbnIbwF3h6w==",
+      "license": "MIT",
+      "dependencies": {
+        "buffer": "^5.5.0",
+        "inherits": "^2.0.4",
+        "readable-stream": "^3.4.0"
+      }
+    },
+    "node_modules/brace-expansion": {
+      "version": "5.0.12",
+      "resolved": "https://registry.npmjs.org/brace-expansion/-/brace-expansion-5.0.12.tgz",
+      "integrity": "sha512-YovQ3rzhaLMIrDjNDMkNS01tea93qhEhG5xy8f6+R0l+dw3Ki+5sCoIoI942iuLZTHWogWktgwVDhU09iNEimQ==",
+      "license": "MIT",
+      "dependencies": {
+        "balanced-match": "^4.0.2"
+      },
+      "engines": {
+        "node": "20 || >=22"
+      }
+    },
+    "node_modules/buffer": {
+      "version": "5.7.1",
+      "resolved": "https://registry.npmjs.org/buffer/-/buffer-5.7.1.tgz",
+      "integrity": "sha512-EHcyIPBQ4BSGlvjB16k5KgAJ27CIsHY/2JBmCRReo48y9rQ3MaUzWX3KVlBa4U7MyX02HdVj0K7C3WaB3ju7FQ==",
+      "funding": [
+        {
+          "type": "github",
+          "url": "https://github.com/sponsors/feross"
+        },
+        {
+          "type": "patreon",
+          "url": "https://www.patreon.com/feross"
+        },
+        {
+          "type": "consulting",
+          "url": "https://feross.org/support"
+        }
+      ],
+      "license": "MIT",
+      "dependencies": {
+        "base64-js": "^1.3.1",
+        "ieee754": "^1.1.13"
+      }
+    },
+    "node_modules/chalk": {
+      "version": "5.6.2",
+      "resolved": "https://registry.npmjs.org/chalk/-/chalk-5.6.2.tgz",
+      "integrity": "sha512-7NzBL0rN6fMUW+f7A6Io4h40qQlG+xGmtMxfbnH/K7TAtt8JQWVQK+6g0UXKMeVJoyV5EkkNsErQ8pVD3bLHbA==",
+      "license": "MIT",
+      "engines": {
+        "node": "^12.17.0 || ^14.13 || >=16.0.0"
+      },
+      "funding": {
+        "url": "https://github.com/chalk/chalk?sponsor=1"
+      }
+    },
+    "node_modules/chownr": {
+      "version": "1.1.4",
+      "resolved": "https://registry.npmjs.org/chownr/-/chownr-1.1.4.tgz",
+      "integrity": "sha512-jJ0bqzaylmJtVnNgzTeSOs8DPavpbYgEr/b0YL8/2GO3xJEhInFmhKMUnEJQjZumK7KXGFhUy89PrsJWlakBVg==",
+      "license": "ISC"
+    },
+    "node_modules/commander": {
+      "version": "14.0.3",
+      "resolved": "https://registry.npmjs.org/commander/-/commander-14.0.3.tgz",
+      "integrity": "sha512-H+y0Jo/T1RZ9qPP4Eh1pkcQcLRglraJaSLoyOtHxu6AapkjWVCy2Sit1QQ4x3Dng8qDlSsZEet7g5Pq06MvTgw==",
+      "license": "MIT",
+      "engines": {
+        "node": ">=20"
+      }
+    },
+    "node_modules/decompress-response": {
+      "version": "6.0.0",
+      "resolved": "https://registry.npmjs.org/decompress-response/-/decompress-response-6.0.0.tgz",
+      "integrity": "sha512-aW35yZM6Bb/4oJlZncMH2LCoZtJXTRxES17vE3hoRiowU2kWHaJKFkSBDnDR+cm9J+9QhXmREyIfv0pji9ejCQ==",
+      "license": "MIT",
+      "dependencies": {
+        "mimic-response": "^3.1.0"
+      },
+      "engines": {
+        "node": ">=10"
+      },
+      "funding": {
+        "url": "https://github.com/sponsors/sindresorhus"
+      }
+    },
+    "node_modules/deep-extend": {
+      "version": "0.6.0",
+      "resolved": "https://registry.npmjs.org/deep-extend/-/deep-extend-0.6.0.tgz",
+      "integrity": "sha512-LOHxIOaPYdHlJRtCQfDIVZtfw/ufM8+rVj649RIHzcm/vGwQRXFt6OPqIFWsm2XEMrNIEtWR64sY1LEKD2vAOA==",
+      "license": "MIT",
+      "engines": {
+        "node": ">=4.0.0"
+      }
+    },
+    "node_modules/detect-libc": {
+      "version": "2.1.2",
+      "resolved": "https://registry.npmjs.org/detect-libc/-/detect-libc-2.1.2.tgz",
+      "integrity": "sha512-Btj2BOOO83o3WyH59e8MgXsxEQVcarkUOpEYrubB0urwnN10yQ364rsiByU11nZlqWYZm05i/of7io4mzihBtQ==",
+      "license": "Apache-2.0",
+      "engines": {
+        "node": ">=8"
+      }
+    },
+    "node_modules/end-of-stream": {
+      "version": "1.4.5",
+      "resolved": "https://registry.npmjs.org/end-of-stream/-/end-of-stream-1.4.5.tgz",
+      "integrity": "sha512-ooEGc6HP26xXq/N+GCGOT0JKCLDGrq2bQUZrQ7gyrJiZANJ/8YDTxTpQBXGMn+WbIQXNVpyWymm7KYVICQnyOg==",
+      "license": "MIT",
+      "dependencies": {
+        "once": "^1.4.0"
+      }
+    },
+    "node_modules/expand-template": {
+      "version": "2.0.3",
+      "resolved": "https://registry.npmjs.org/expand-template/-/expand-template-2.0.3.tgz",
+      "integrity": "sha512-XYfuKMvj4O35f/pOXLObndIRvyQ+/+6AhODh+OKWj9S9498pHHn/IMszH+gt0fBCRWMNfk1ZSp5x3AifmnI2vg==",
+      "license": "(MIT OR WTFPL)",
+      "engines": {
+        "node": ">=6"
+      }
+    },
+    "node_modules/file-uri-to-path": {
+      "version": "1.0.0",
+      "resolved": "https://registry.npmjs.org/file-uri-to-path/-/file-uri-to-path-1.0.0.tgz",
+      "integrity": "sha512-0Zt+s3L7Vf1biwWZ29aARiVYLx7iMGnEUl9x33fbB/j3jR81u/O2LbqK+Bm1CDSNDKVtJ/YjwY7TUd5SkeLQLw==",
+      "license": "MIT"
+    },
+    "node_modules/frida": {
+      "version": "17.25.2",
+      "resolved": "https://registry.npmjs.org/frida/-/frida-17.25.2.tgz",
+      "integrity": "sha512-prIzKu79zlE3ENAtr1ykZuEa0dxhoDRYee6yvlQjJxO5W09WFGbArXF/Y9CAh9xnSoPUDYWa1Ln1pnglW+jQgw==",
+      "hasInstallScript": true,
+      "license": "LGPL-2.0 WITH WxWindows-exception-3.1",
+      "dependencies": {
+        "bindings": "^1.5.0",
+        "minimatch": "^10.0.1",
+        "prebuild-install": "^7.1.3"
+      },
+      "engines": {
+        "node": ">=16"
+      }
+    },
+    "node_modules/frida-remote-stream": {
+      "version": "6.0.3",
+      "resolved": "https://registry.npmjs.org/frida-remote-stream/-/frida-remote-stream-6.0.3.tgz",
+      "integrity": "sha512-RDWCKdKJOj/nqPMJ8r6YEd4dbLyTQBqwCR1OLy0mwFi1R/rTWS0EIs3UeG0cKIEW3OaDpgGL4IQ7ecDxpgIQ3w==",
+      "license": "MIT",
+      "dependencies": {
+        "tiny-typed-emitter": "^2.1.0"
+      }
+    },
+    "node_modules/fs-constants": {
+      "version": "1.0.0",
+      "resolved": "https://registry.npmjs.org/fs-constants/-/fs-constants-1.0.0.tgz",
+      "integrity": "sha512-y6OAwoSIf7FyjMIv94u+b5rdheZEjzR63GTyZJm5qh4Bi+2YgwLCcI/fPFZkL5PSixOt6ZNKm+w+Hfp/Bciwow==",
+      "license": "MIT"
+    },
+    "node_modules/github-from-package": {
+      "version": "0.0.0",
+      "resolved": "https://registry.npmjs.org/github-from-package/-/github-from-package-0.0.0.tgz",
+      "integrity": "sha512-SyHy3T1v2NUXn29OsWdxmK6RwHD+vkj3v8en8AOBZ1wBQ/hCAQ5bAQTD02kW4W9tUp/3Qh6J8r9EvntiyCmOOw==",
+      "license": "MIT"
+    },
+    "node_modules/ieee754": {
+      "version": "1.2.1",
+      "resolved": "https://registry.npmjs.org/ieee754/-/ieee754-1.2.1.tgz",
+      "integrity": "sha512-dcyqhDvX1C46lXZcVqCpK+FtMRQVdIMN6/Df5js2zouUsqG7I6sFxitIC+7KYK29KdXOLHdu9zL4sFnoVQnqaA==",
+      "funding": [
+        {
+          "type": "github",
+          "url": "https://github.com/sponsors/feross"
+        },
+        {
+          "type": "patreon",
+          "url": "https://www.patreon.com/feross"
+        },
+        {
+          "type": "consulting",
+          "url": "https://feross.org/support"
+        }
+      ],
+      "license": "BSD-3-Clause"
+    },
+    "node_modules/inherits": {
+      "version": "2.0.4",
+      "resolved": "https://registry.npmjs.org/inherits/-/inherits-2.0.4.tgz",
+      "integrity": "sha512-k/vGaX4/Yla3WzyMCvTQOXYeIHvqOKtnqBduzTHpzpQZzAskKMhZ2K+EnBiSM9zGSoIFeMpXKxa4dYeZIQqewQ==",
+      "license": "ISC"
+    },
+    "node_modules/ini": {
+      "version": "1.3.8",
+      "resolved": "https://registry.npmjs.org/ini/-/ini-1.3.8.tgz",
+      "integrity": "sha512-JV/yugV2uzW5iMRSiZAyDtQd+nxtUnjeLt0acNdw98kKLrvuRVyB80tsREOE7yvGVgalhZ6RNXCmEHkUKBKxew==",
+      "license": "ISC"
+    },
+    "node_modules/mimic-response": {
+      "version": "3.1.0",
+      "resolved": "https://registry.npmjs.org/mimic-response/-/mimic-response-3.1.0.tgz",
+      "integrity": "sha512-z0yWI+4FDrrweS8Zmt4Ej5HdJmky15+L2e6Wgn3+iK5fWzb6T3fhNFq2+MeTRb064c6Wr4N/wv0DzQTjNzHNGQ==",
+      "license": "MIT",
+      "engines": {
+        "node": ">=10"
+      },
+      "funding": {
+        "url": "https://github.com/sponsors/sindresorhus"
+      }
+    },
+    "node_modules/minimatch": {
+      "version": "10.2.6",
+      "resolved": "https://registry.npmjs.org/minimatch/-/minimatch-10.2.6.tgz",
+      "integrity": "sha512-vpLQEs+VLCr1nU0BXS07maYoFwlDAH0gngQuuttxIwutDFEMHq2blX+8vpgxDdK3J1PwjCJiep77OitTZ4Ll1A==",
+      "license": "BlueOak-1.0.0",
+      "dependencies": {
+        "brace-expansion": "^5.0.8"
+      },
+      "engines": {
+        "node": "18 || 20 || >=22"
+      },
+      "funding": {
+        "url": "https://github.com/sponsors/isaacs"
+      }
+    },
+    "node_modules/minimist": {
+      "version": "1.2.8",
+      "resolved": "https://registry.npmjs.org/minimist/-/minimist-1.2.8.tgz",
+      "integrity": "sha512-2yyAR8qBkN3YuheJanUpWC5U3bb5osDywNB8RzDVlDwDHbocAJveqqj1u8+SVD7jkWT4yvsHCpWqqWqAxb0zCA==",
+      "license": "MIT",
+      "funding": {
+        "url": "https://github.com/sponsors/ljharb"
+      }
+    },
+    "node_modules/mkdirp-classic": {
+      "version": "0.5.3",
+      "resolved": "https://registry.npmjs.org/mkdirp-classic/-/mkdirp-classic-0.5.3.tgz",
+      "integrity": "sha512-gKLcREMhtuZRwRAfqP3RFW+TK4JqApVBtOIftVgjuABpAtpxhPGaDcfvbhNvD0B8iD1oUr/txX35NjcaY6Ns/A==",
+      "license": "MIT"
+    },
+    "node_modules/napi-build-utils": {
+      "version": "2.0.0",
+      "resolved": "https://registry.npmjs.org/napi-build-utils/-/napi-build-utils-2.0.0.tgz",
+      "integrity": "sha512-GEbrYkbfF7MoNaoh2iGG84Mnf/WZfB0GdGEsM8wz7Expx/LlWf5U8t9nvJKXSp3qr5IsEbK04cBGhol/KwOsWA==",
+      "license": "MIT"
+    },
+    "node_modules/node-abi": {
+      "version": "3.101.0",
+      "resolved": "https://registry.npmjs.org/node-abi/-/node-abi-3.101.0.tgz",
+      "integrity": "sha512-bkb/RkuWCE64eWu1PCh3Fu2pGc9mKRs+kOE+FU2bGHRYlQa86/D321DSATV54AsCQMKz3/xSt9sRgraZTpqdhQ==",
+      "license": "MIT",
+      "dependencies": {
+        "semver": "^7.3.5"
+      },
+      "engines": {
+        "node": ">=10"
+      }
+    },
+    "node_modules/once": {
+      "version": "1.4.0",
+      "resolved": "https://registry.npmjs.org/once/-/once-1.4.0.tgz",
+      "integrity": "sha512-lNaJgI+2Q5URQBkccEKHTQOPaXdUxnZZElQTZY0MFUAuaEqe1E+Nyvgdz/aIyNi6Z9MzO5dv1H8n58/GELp3+w==",
+      "license": "ISC",
+      "dependencies": {
+        "wrappy": "1"
+      }
+    },
+    "node_modules/prebuild-install": {
+      "version": "7.1.3",
+      "resolved": "https://registry.npmjs.org/prebuild-install/-/prebuild-install-7.1.3.tgz",
+      "integrity": "sha512-8Mf2cbV7x1cXPUILADGI3wuhfqWvtiLA1iclTDbFRZkgRQS0NqsPZphna9V+HyTEadheuPmjaJMsbzKQFOzLug==",
+      "deprecated": "No longer maintained. Please contact the author of the relevant native addon; alternatives are available.",
+      "license": "MIT",
+      "dependencies": {
+        "detect-libc": "^2.0.0",
+        "expand-template": "^2.0.3",
+        "github-from-package": "0.0.0",
+        "minimist": "^1.2.3",
+        "mkdirp-classic": "^0.5.3",
+        "napi-build-utils": "^2.0.0",
+        "node-abi": "^3.3.0",
+        "pump": "^3.0.0",
+        "rc": "^1.2.7",
+        "simple-get": "^4.0.0",
+        "tar-fs": "^2.0.0",
+        "tunnel-agent": "^0.6.0"
+      },
+      "bin": {
+        "prebuild-install": "bin.js"
+      },
+      "engines": {
+        "node": ">=10"
+      }
+    },
+    "node_modules/pump": {
+      "version": "3.0.4",
+      "resolved": "https://registry.npmjs.org/pump/-/pump-3.0.4.tgz",
+      "integrity": "sha512-VS7sjc6KR7e1ukRFhQSY5LM2uBWAUPiOPa/A3mkKmiMwSmRFUITt0xuj+/lesgnCv+dPIEYlkzrcyXgquIHMcA==",
+      "license": "MIT",
+      "dependencies": {
+        "end-of-stream": "^1.1.0",
+        "once": "^1.3.1"
+      }
+    },
+    "node_modules/rc": {
+      "version": "1.2.8",
+      "resolved": "https://registry.npmjs.org/rc/-/rc-1.2.8.tgz",
+      "integrity": "sha512-y3bGgqKj3QBdxLbLkomlohkvsA8gdAiUQlSBJnBhfn+BPxg4bc62d8TcBW15wavDfgexCgccckhcZvywyQYPOw==",
+      "license": "(BSD-2-Clause OR MIT OR Apache-2.0)",
+      "dependencies": {
+        "deep-extend": "^0.6.0",
+        "ini": "~1.3.0",
+        "minimist": "^1.2.0",
+        "strip-json-comments": "~2.0.1"
+      },
+      "bin": {
+        "rc": "cli.js"
+      }
+    },
+    "node_modules/readable-stream": {
+      "version": "3.6.2",
+      "resolved": "https://registry.npmjs.org/readable-stream/-/readable-stream-3.6.2.tgz",
+      "integrity": "sha512-9u/sniCrY3D5WdsERHzHE4G2YCXqoG5FTHUiCC4SIbr6XcLZBY05ya9EKjYek9O5xOAwjGq+1JdGBAS7Q9ScoA==",
+      "license": "MIT",
+      "dependencies": {
+        "inherits": "^2.0.3",
+        "string_decoder": "^1.1.1",
+        "util-deprecate": "^1.0.1"
+      },
+      "engines": {
+        "node": ">= 6"
+      }
+    },
+    "node_modules/safe-buffer": {
+      "version": "5.2.1",
+      "resolved": "https://registry.npmjs.org/safe-buffer/-/safe-buffer-5.2.1.tgz",
+      "integrity": "sha512-rp3So07KcdmmKbGvgaNxQSJr7bGVSVk5S9Eq1F+ppbRo70+YeaDxkw5Dd8NPN+GD6bjnYm2VuPuCXmpuYvmCXQ==",
+      "funding": [
+        {
+          "type": "github",
+          "url": "https://github.com/sponsors/feross"
+        },
+        {
+          "type": "patreon",
+          "url": "https://www.patreon.com/feross"
+        },
+        {
+          "type": "consulting",
+          "url": "https://feross.org/support"
+        }
+      ],
+      "license": "MIT"
+    },
+    "node_modules/semver": {
+      "version": "7.8.6",
+      "resolved": "https://registry.npmjs.org/semver/-/semver-7.8.6.tgz",
+      "integrity": "sha512-9lpSSU4Mly3mrtruwLs1eLK6+gzbzqeBFwRNjIjE+9LuDpWdYctrQlQ3ej1Ilgi7gknpsTRnPoLP8DpCHqHIJw==",
+      "license": "ISC",
+      "bin": {
+        "semver": "bin/semver.js"
+      },
+      "engines": {
+        "node": ">=10"
+      }
+    },
+    "node_modules/simple-concat": {
+      "version": "1.0.1",
+      "resolved": "https://registry.npmjs.org/simple-concat/-/simple-concat-1.0.1.tgz",
+      "integrity": "sha512-cSFtAPtRhljv69IK0hTVZQ+OfE9nePi/rtJmw5UjHeVyVroEqJXP1sFztKUy1qU+xvz3u/sfYJLa947b7nAN2Q==",
+      "funding": [
+        {
+          "type": "github",
+          "url": "https://github.com/sponsors/feross"
+        },
+        {
+          "type": "patreon",
+          "url": "https://www.patreon.com/feross"
+        },
+        {
+          "type": "consulting",
+          "url": "https://feross.org/support"
+        }
+      ],
+      "license": "MIT"
+    },
+    "node_modules/simple-get": {
+      "version": "4.0.1",
+      "resolved": "https://registry.npmjs.org/simple-get/-/simple-get-4.0.1.tgz",
+      "integrity": "sha512-brv7p5WgH0jmQJr1ZDDfKDOSeWWg+OVypG99A/5vYGPqJ6pxiaHLy8nxtFjBA7oMa01ebA9gfh1uMCFqOuXxvA==",
+      "funding": [
+        {
+          "type": "github",
+          "url": "https://github.com/sponsors/feross"
+        },
+        {
+          "type": "patreon",
+          "url": "https://www.patreon.com/feross"
+        },
+        {
+          "type": "consulting",
+          "url": "https://feross.org/support"
+        }
+      ],
+      "license": "MIT",
+      "dependencies": {
+        "decompress-response": "^6.0.0",
+        "once": "^1.3.1",
+        "simple-concat": "^1.0.0"
+      }
+    },
+    "node_modules/string_decoder": {
+      "version": "1.3.0",
+      "resolved": "https://registry.npmjs.org/string_decoder/-/string_decoder-1.3.0.tgz",
+      "integrity": "sha512-hkRX8U1WjJFd8LsDJ2yQ/wWWxaopEsABU1XfkM8A+j0+85JAGppt16cr1Whg6KIbb4okU6Mql6BOj+uup/wKeA==",
+      "license": "MIT",
+      "dependencies": {
+        "safe-buffer": "~5.2.0"
+      }
+    },
+    "node_modules/strip-json-comments": {
+      "version": "2.0.1",
+      "resolved": "https://registry.npmjs.org/strip-json-comments/-/strip-json-comments-2.0.1.tgz",
+      "integrity": "sha512-4gB8na07fecVVkOI6Rs4e7T6NOTki5EmL7TUduTs6bu3EdnSycntVJ4re8kgZA+wx9IueI2Y11bfbgwtzuE0KQ==",
+      "license": "MIT",
+      "engines": {
+        "node": ">=0.10.0"
+      }
+    },
+    "node_modules/tar-fs": {
+      "version": "2.1.5",
+      "resolved": "https://registry.npmjs.org/tar-fs/-/tar-fs-2.1.5.tgz",
+      "integrity": "sha512-OboTd8mmMhZDNPV+UjQcK9yKAatXu2aJ+r1w4im1Otd4M4fl2hwvdoXUxIYHFTHWK/3y3FarBP70v3vwmGlOxw==",
+      "license": "MIT",
+      "dependencies": {
+        "chownr": "^1.1.1",
+        "mkdirp-classic": "^0.5.2",
+        "pump": "^3.0.0",
+        "tar-stream": "^2.1.4"
+      }
+    },
+    "node_modules/tar-stream": {
+      "version": "2.2.0",
+      "resolved": "https://registry.npmjs.org/tar-stream/-/tar-stream-2.2.0.tgz",
+      "integrity": "sha512-ujeqbceABgwMZxEJnk2HDY2DlnUZ+9oEcb1KzTVfYHio0UE6dG71n60d8D2I4qNvleWrrXpmjpt7vZeF1LnMZQ==",
+      "license": "MIT",
+      "dependencies": {
+        "bl": "^4.0.3",
+        "end-of-stream": "^1.4.1",
+        "fs-constants": "^1.0.0",
+        "inherits": "^2.0.3",
+        "readable-stream": "^3.1.1"
+      },
+      "engines": {
+        "node": ">=6"
+      }
+    },
+    "node_modules/tiny-typed-emitter": {
+      "version": "2.1.0",
+      "resolved": "https://registry.npmjs.org/tiny-typed-emitter/-/tiny-typed-emitter-2.1.0.tgz",
+      "integrity": "sha512-qVtvMxeXbVej0cQWKqVSSAHmKZEHAvxdF8HEUBFWts8h+xEo5m/lEiPakuyZ3BnCBjOD8i24kzNOiOLLgsSxhA==",
+      "license": "MIT"
+    },
+    "node_modules/tunnel-agent": {
+      "version": "0.6.0",
+      "resolved": "https://registry.npmjs.org/tunnel-agent/-/tunnel-agent-0.6.0.tgz",
+      "integrity": "sha512-McnNiV1l8RYeY8tBgEpuodCC1mLUdbSN+CYBL7kJsJNInOP8UjDDEwdk6Mw60vdLLrr5NHKZhMAOSrR2NZuQ+w==",
+      "license": "Apache-2.0",
+      "dependencies": {
+        "safe-buffer": "^5.0.1"
+      },
+      "engines": {
+        "node": "*"
+      }
+    },
+    "node_modules/util-deprecate": {
+      "version": "1.0.2",
+      "resolved": "https://registry.npmjs.org/util-deprecate/-/util-deprecate-1.0.2.tgz",
+      "integrity": "sha512-EPD5q1uXyFxJpCrLnCc1nHnq3gOa6DZBocAIiI2TaSCA7VCJ1UJDMagCzIkXNsUYfD1daK//LTEQ8xiIbrHtcw==",
+      "license": "MIT"
+    },
+    "node_modules/wrappy": {
+      "version": "1.0.2",
+      "resolved": "https://registry.npmjs.org/wrappy/-/wrappy-1.0.2.tgz",
+      "integrity": "sha512-l4Sp/DRseor9wL6EvV2+TuQn63dMkPjZ/sp9XkghTEbV9KlPS1xUsZ3u7/IQO4wxtcFB4bgpQPRcR3QCvezPcQ==",
+      "license": "ISC"
+    }
+  }
+}
+
+```
+
+`package.json`:
+
+```json
+{
+  "name": "getipa-deps",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Pinned dependencies bundled with getIPA (decryption via bagbak)",
+  "license": "MIT",
+  "dependencies": {
+    "bagbak": "5.1.2"
+  }
+}
+
+```
