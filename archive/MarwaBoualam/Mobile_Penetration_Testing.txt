@@ -1,0 +1,295 @@
+Project Path: arc_MarwaBoualam_Mobile_Penetration_Testing_enec6nkj
+
+Source Tree:
+
+```txt
+arc_MarwaBoualam_Mobile_Penetration_Testing_enec6nkj
+├── LICENSE
+├── README.md
+├── bypass_rootdetection_uncrackable.js
+├── flutter_ssl_bypass_boringssl.js
+├── hide_frida_strstr_libc.js
+├── isrooted_androgoat.js
+└── log_onfailure_traffic.js
+
+```
+
+`LICENSE`:
+
+```
+MIT License
+
+Copyright (c) 2026 marwaoevsky
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
+`README.md`:
+
+```md
+# Android Mobile Pentest Toolkit — Frida Hooking Scripts
+
+A collection of Frida scripts used for mobile security assessments on Android:
+SSL/TLS certificate pinning bypass, root detection bypass, and native (JNI)
+method hooking. Built during hands-on mobile reverse engineering practice
+targeting intentionally vulnerable apps (AndroGoat, OWASP UnCrackable App)
+and CTF-style APKs.
+
+>  **Ethical use only.** These scripts are provided for educational and
+> authorized testing purposes only — on applications you own, on public
+> vulnerable labs (AndroGoat, UnCrackable App, etc.), or with explicit written
+> authorization. Do not use against third-party applications without consent.
+
+---
+
+## What's inside
+
+| Category | What it does |
+|---|---|
+|  **SSL/TLS pinning bypass** | Defeats certificate pinning implemented via OkHttp `CertificatePinner`, custom `TrustManager`, or statically linked TLS libraries (e.g. BoringSSL in Flutter apps) |
+|  **Root detection bypass** | Forces root-check methods (custom checks, RootBeer-style logic) to return `false` |
+|  **Native (JNI) hooking** | Intercepts native library exports (`.so`) to hide instrumentation artifacts or alter return values at the memory level |
+|  **Debug / logging helpers** | Non-invasive hooks used to observe app behavior (e.g. network callbacks) while diagnosing why a bypass isn't working |
+
+---
+
+## Repository structure
+
+```
+.
+├── root-detection-bypass/
+│   ├── bypass_rootdetection_uncrackable.js   # Targets OWASP UnCrackable App
+│   └── bypass_isrooted_androgoat.js          # Targets AndroGoat
+│
+├── ssl-pinning-bypass/
+│   ├── okhttp-trustmanager/                  # Java-layer hooks (OkHttp, TrustManager)
+│   └── flutter/
+│       └── flutter_ssl_bypass_boringssl.js   # Native memory-scan bypass for Flutter apps
+│
+├── native-hooking/
+│   └── hide_frida_strstr_libc.js             # Hooks libc strstr() to hide "frida"/"xposed" strings
+│
+└── debug-logging/
+    └── log_onfailure_traffic.js              # Logs network failure callbacks without altering behavior
+```
+
+---
+
+## Script reference
+
+### Root detection bypass
+
+| Script | Target | Technique |
+|---|---|---|
+| `bypass_rootdetection_uncrackable.js` | `sg.vantagepoint.util.RootDetection` (OWASP UnCrackable App) | Overrides `checkRoot1()`, `checkRoot2()`, `checkRoot3()` to return `false` |
+| `bypass_isrooted_androgoat.js` | `owasp.sat.agoat.RootDetectionActivity.isRooted()` (AndroGoat) | Overrides `isRooted()` to return `false` |
+
+### SSL/TLS pinning bypass
+
+| Script | Target | Technique |
+|---|---|---|
+| `flutter_ssl_bypass_boringssl.js` | `libflutter.so` (BoringSSL, statically linked) | Scans process memory for a byte pattern to locate `ssl_crypto_x509_session_verify_cert_chain`, hooks it via `Interceptor.attach`, and forces the return value from failure (`0`) to success (`1`). Hooks `android_dlopen_ext` to re-scan once the library is loaded, since Flutter loads it dynamically. |
+
+> **Note:** the byte pattern used to locate the verification function is
+> version-specific to Flutter/BoringSSL and may break across app builds.
+> Re-verify the pattern with a disassembler (Ghidra/IDA) if the hook silently
+> fails to install.
+
+### Native (JNI) hooking
+
+| Script | Target | Technique |
+|---|---|---|
+| `hide_frida_strstr_libc.js` | `strstr()` in `libc.so` | Intercepts all calls to `strstr`, inspects the searched substring, and returns `NULL` when the app searches for `"frida"` or `"xposed"` — a common technique used by anti-instrumentation checks scanning `/proc/self/maps` or loaded library names. |
+
+> **Note:** this hook is global — it intercepts every `strstr()` call in the
+> process, not just detection-related ones. Low risk, but worth knowing if
+> the app legitimately searches for similar substrings elsewhere.
+
+### Debug / logging
+
+| Script | Target | Technique |
+|---|---|---|
+| `log_onfailure_traffic.js` | `TrafficActivity$run$1.onFailure()` (AndroGoat) | Logs network failure callbacks (e.g. TLS handshake errors) without modifying behavior — useful to confirm whether a pinning bypass actually took effect before a request. |
+
+---
+
+## Usage
+
+Each script is run with Frida against a spawned or attached process:
+
+```bash
+frida -U -l <script.js> -f <package.name> --no-pause
+```
+
+Requirements:
+- `frida-tools` and `frida` (client) installed on the host — `pip install frida-tools frida`
+- `frida-server` matching the client version, pushed and running on the (rooted/emulated) target device
+- Target APK installed on the device/emulator
+
+Example:
+```bash
+frida -U -l root-detection-bypass/bypass_isrooted_androgoat.js -f owasp.sat.agoat --no-pause
+```
+
+---
+
+## Methodology reference
+
+Testing generally follows this order:
+1. **Static analysis** — decompile with JADX/apktool, inspect the manifest, locate the relevant classes/native libraries, automated scan via MobSF
+2. **Dynamic analysis** — attach Frida/Objection, apply the targeted hook, confirm the bypass with `adb logcat` and/or an intercepting proxy (Burp)
+
+Generic tools (Objection's `android root disable` / `sslpinning disable`, or community scripts like `frida-multiple-unpinning.js`) are tried first; the scripts in this repo are the targeted, app-specific hooks written after static analysis when the generic approach isn't enough.
+
+---
+
+## License
+
+MIT — see [LICENSE](LICENSE). Provided as-is, for authorized security testing and educational purposes.
+
+```
+
+`bypass_rootdetection_uncrackable.js`:
+
+```js
+Java.perform(function(){
+    let RootDetection = Java.use("sg.vantagepoint.util.RootDetection");
+    RootDetection.checkRoot1.implementation = function(){
+        console.log("[+] Bypassing the first Root Detection check")
+        return false
+    }
+    RootDetection.checkRoot2.implementation = function(){
+        console.log("[+] Bypassing the second Root Detection check")
+        return false
+    }
+    RootDetection.checkRoot3.implementation = function(){
+        console.log("[+] Bypassing the third Root Detection check")
+        return false
+    } 
+})
+
+```
+
+`flutter_ssl_bypass_boringssl.js`:
+
+```js
+// flutterhooker.js — Frida 17.17.0
+// Bypass SSL pinning Flutter (BoringSSL) — libflutter.so x86_64
+// Cible : ssl_crypto_x509_session_verify_cert_chain
+
+var PATTERN = "55 41 57 41 56 41 55 41 54 53 48 83 EC 38 C6 02 50";
+
+function installHook(addr) {
+    Interceptor.attach(addr, {
+        onLeave: function (retval) {
+            if (retval.toInt32() === 0) {
+                console.log("[!] cert verification bypassée (0 -> 1) @ " + addr);
+                retval.replace(0x1);
+            }
+        }
+    });
+    console.log("[+] Hook installé @ " + addr);
+}
+
+function scanAndHook() {
+    var m = Process.findModuleByName("libflutter.so");
+    if (!m) {
+        console.log("[-] libflutter.so pas encore chargée");
+        return false;
+    }
+    console.log("[+] libflutter.so @ " + m.base + " (taille " + m.size + ")");
+
+    var results = Memory.scanSync(m.base, m.size, PATTERN);
+    if (results.length === 0) {
+        console.log("[-] Pattern introuvable — version Flutter différente ?");
+        return false;
+    }
+    console.log("[+] " + results.length + " match(s) trouvé(s)");
+    results.forEach(function (r) {
+        installHook(r.address);
+    });
+    return true;
+}
+
+// --- Frida 17 : nouvelle API pour trouver dlopen ---
+var dlopen = Module.getGlobalExportByName("android_dlopen_ext");
+if (dlopen) {
+    Interceptor.attach(dlopen, {
+        onEnter: function (args) {
+            try { this.path = args[0].readCString(); } catch (e) { this.path = null; }
+        },
+        onLeave: function () {
+            if (this.path && this.path.indexOf("libflutter.so") !== -1) {
+                setTimeout(scanAndHook, 0);
+            }
+        }
+    });
+    console.log("[*] Hook dlopen installé, attente de libflutter.so...");
+}
+
+// Au cas où libflutter est déjà chargée au moment de l'injection
+scanAndHook();
+
+```
+
+`hide_frida_strstr_libc.js`:
+
+```js
+var strstr = Process.getModuleByName("libc.so").getExportByName("strstr");
+
+Interceptor.attach(strstr, {
+    onEnter: function (args) {
+        this.needle = args[1].readCString();
+    },
+    onLeave: function (retval) {
+        if (this.needle === "frida" || this.needle === "xposed") {
+            retval.replace(ptr(0));
+        }
+    }
+});
+
+```
+
+`isrooted_androgoat.js`:
+
+```js
+Java.perform(function () {
+    var RootDetectionActivity = Java.use("owasp.sat.agoat.RootDetectionActivity");
+
+    RootDetectionActivity.isRooted.implementation = function () {
+        console.log("[*] isRooted() interceptée — retour forcé à false");
+        return false;
+    };
+});
+
+```
+
+`log_onfailure_traffic.js`:
+
+```js
+Java.perform(function () {
+    var Callback = Java.use("owasp.sat.agoat.TrafficActivity$run$1");
+    Callback.onFailure.implementation = function (call, e) {
+        console.log("[*] onFailure interceptée : " + e.getMessage());
+        this.onFailure(call, e);
+    };
+});
+
+```
