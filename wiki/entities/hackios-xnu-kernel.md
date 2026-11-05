@@ -21,4 +21,4 @@ Expands the **IOS Emulator** README lane (~6 links) beside [[darwin-vm]], [[vpho
 
 ## Related
 
-[[overviews/mobile-security]] · [[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[darwin-vm]] · [[vphone-cli]] · [[vphone-ws]] · [[xnu-qemu-arm64]]
+[[hakios-xnu-kernel]] (successor HakiOS tree: broader XNU-on-Android bring-up, hakios-metal, documented phone/QEMU ports) · [[overviews/mobile-security]] · [[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[darwin-vm]] · [[vphone-cli]] · [[vphone-ws]] · [[xnu-qemu-arm64]]
