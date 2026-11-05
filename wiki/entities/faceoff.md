@@ -29,7 +29,7 @@ Implemented in **C#** as a WPF desktop app with a small **CLI**; equivalent **ba
 
 ## Positioning
 
-Operational **kernel AC exposure management** between match sessions—not an in-match bypass. Contrasts with offensive FACEIT research such as [[ec-pro-lan]] and sits beside [[anti-cheat-toggle]] lab tooling and platform-trust dual-boot notes ([[omarchy-boot-manager]]) on [[overviews/anti-cheat]].
+Operational **kernel AC exposure management** between match sessions—not an in-match bypass. Contrasts with offensive FACEIT research such as [[ec-pro-lan]] and sits beside [[anticheattoggle]] lab tooling and platform-trust dual-boot notes ([[omarchy-boot-manager]]) on [[overviews/anti-cheat]].
 
 ## Links
 
@@ -37,4 +37,4 @@ Operational **kernel AC exposure management** between match sessions—not an in
 
 ## Related
 
-[[ec-pro-lan]] · [[anti-cheat-toggle]] · [[omarchy-boot-manager]] · [[overviews/game-hacking]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]]
+[[ec-pro-lan]] · [[anticheattoggle]] · [[omarchy-boot-manager]] · [[overviews/game-hacking]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]]
