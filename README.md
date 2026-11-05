@@ -951,6 +951,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/seladb/PcapPlusPlus [Pcap]
 - https://github.com/nmap/npcap
 - https://github.com/hashblen/auto-discipher [Rust library to parse and decrypt live network packets for a gacha anime game, auto-detecting session tokens, achievement payloads, and XOR keys after updates]
+- https://github.com/Ltz-lab/wow-live [Capture and decrypt WoW world traffic from the stock client; combat/radar JSON feeds, rotation overlay, and MCP—no process injection]
 
 > SpeedHack
 - https://github.com/absoIute/Speedhack
@@ -1716,6 +1717,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/kkkbbb/mkpms [wxshadow — KPM stealth breakpoint/hook via R^X page split, bypass self-read integrity check]
 - https://github.com/fuqiuluo/android-wuwa [Android aarch64 rootkit]
 - https://github.com/fuqiuluo/rnidbg [An Android-ARM64 kernel emulator written in Rust. (Rewrite from unidbg)]
+- https://github.com/oosexgang/hakios-xnu-kernel [HakiOS: boot Apple open-source XNU on Android from RAM with custom loader, drivers, and documented phone/QEMU ports for kernel research]
 
 > Android Kernel Driver
 - https://github.com/rogxo/kernel_hack
@@ -2586,6 +2588,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 > UI Interface
 - https://github.com/adamhlt/ImGui-Standalone
 - https://github.com/ocornut/imgui_club [Official Dear ImGui extensions including a hex memory editor widget]
+- https://github.com/XeTrinityz/Oracle [MIT-licensed in-game cheat/tweak menu for Batman: Arkham Knight (BmSDK-AK), Trinity Edition with modular hooks and settings.toml]
 
 > Vulnerable Driver 
 - https://www.loldrivers.io/drivers [Living Off The Land Drivers]
