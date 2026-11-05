@@ -1666,6 +1666,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 > Android Root
 - https://github.com/fynks/awesome-android-root [Awesome Android Root]
 - https://github.com/topjohnwu/Magisk
+- https://github.com/topjohnwu/magisk-files [Official JSON manifests (stable/beta/canary/debug) that Magisk clients use to discover release APKs and notes]
 - https://github.com/tiann/KernelSU
 - https://github.com/rathorekrishna401-NeuroVoid/ApexSU [Hardened KernelSU fork with Rust userspace, stealth hardening, and reduced attack surface for Android 12+]
 - https://github.com/gmh5225/KernelSU-4.4 [Adapted for Linux Kernel 4.4 + Google GCC 4.9]
