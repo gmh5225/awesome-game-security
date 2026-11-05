@@ -975,6 +975,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/iniGlowee/headless-asset-re [Documented methodology for headless game-asset reverse engineering without the original SDK—reference-first decode, render validation, and IP-safe workflows (no bundled game data).]
 - https://github.com/xshxdex98/OpenMCM2 [Native Motocross Madness 2 rebuild: Ghidra export/relink harness, retail section verification, and integrated OpenGL renderer]
 - https://github.com/pablocpas/OpenCMR2 [Native SDL3/Vulkan/Metal port of Colin McRae Rally 2.0 from the CMR2Decomp decompilation; cross-platform replacement of legacy DirectX APIs]
+- https://github.com/aspctt/scvk [Native Vulkan renderer DLL for SimCity 4 that replaces the legacy DirectX 7 path via the GZCOM plugin driver interface]
 - https://github.com/ling71671/open-reverselab [Agent-native RE lab with knowledge base, 100+ MCP tools, and APK/PE/game-cheating analysis workflows]
 - https://github.com/ReSo7200/molt-dex [Claude skill pipeline for Android APK reverse engineering and modding: apktool/smali workflow, DexKit and Xposed hooks, Frida, and obfuscation-aware analysis]
 - https://github.com/zhuyansen/awesome-ai-reverse-engineering [Curated AI-agent RE stack: Ghidra/IDA MCP servers, mobile tooling (jadx, Frida), agent skills, and security-graded open-source RE projects]
