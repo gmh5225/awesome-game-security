@@ -1976,6 +1976,7 @@ sources:
   - wiki/sources/descriptions/WilonityGames__WilonityLoader.md
   - wiki/sources/descriptions/Spleefy167__frida-orbit-lab.md
   - wiki/sources/descriptions/vunlior__GuardX.md
+  - wiki/sources/descriptions/Zy0x__Lynx.md
 updated: 2026-11-06
 confidence: high
 ---
@@ -2004,6 +2005,7 @@ Map what an attacker observes or controls, the required capability, the trust bo
 | Build, update, mod-distribution trust | game-supply-chain-security skill topic |
 | Input telemetry trust, visual aim pipelines | [[input-provenance]], [[ai-aimbot-detection]] |
 | Network association, rate limits vs sanctions | [[network-environment-evidence]] |
+| Rooted Android kernel/vendor tuning vs integrity | [[overviews/mobile-security]]; [[lynx]] (Zy0x; Magisk module / companion app—deep sysctl/scheduler/thermal/GPU tuning for mobile games) (source: wiki/sources/descriptions/Zy0x__Lynx.md) |
 | Evidence and source selection | [[resource-selection]], [[repository-navigation]] |
 | Disputed implementation or detectability claims | [[research-rigor]] |
 

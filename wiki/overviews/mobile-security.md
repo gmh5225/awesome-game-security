@@ -579,6 +579,7 @@ sources:
   - wiki/sources/descriptions/vw2x__Mira.md
   - wiki/sources/descriptions/topjohnwu__magisk-files.md
   - wiki/sources/descriptions/hex91__zygisk-gadget-stealth.md
+  - wiki/sources/descriptions/Zy0x__Lynx.md
 updated: 2026-11-06
 confidence: high
 ---
@@ -634,6 +635,8 @@ KernelSU/APatch architecture: root-enabled apps still split user-space credentia
 | [[apatch-kpm]] | Kernel (KPM collection) | High | Yes | Example KPM module pack for [[apatch]] |
 
 [[magisk]] clients resolve release APKs via official manifest host [[magisk-files]] (topjohnwu; stable/beta/canary/debug JSON feeds with version strings, version codes, download URLs, and release-note pointers; metadata-only repo—not app source; canonical update feed for the Magisk app and mirrors when pinning rooted lab builds for mobile game-security research) (source: wiki/sources/descriptions/topjohnwu__magisk-files.md)
+
+Magisk-oriented deep tuning stack [[lynx]] (Zy0x; Kotlin + native daemon + shell automation; kernel/sysctl/scheduler/thermal/GPU and block-I/O knobs, vendor stacks such as MediaTek GED/FPSGO, TCP stack tuning, floating game HUD—an invasive rooted workload beside root-hide modules) (source: wiki/sources/descriptions/Zy0x__Lynx.md)
 
 Debug-oriented KernelSU fork [[kernelsu-debug]] (MlgmXyysd; relaxed manager checks, permissive SELinux options, init script support; kernel C + Android app/build assets; profile control; Android security research / system debugging; cheat / KernelSU modified for debugging) trades production hardening for lab convenience beside upstream [[kernelsu]]. (source: wiki/sources/descriptions/MlgmXyysd__KernelSU_Debug.md) [[apatch]] (bmax121; Android kernel + system patch; SuperKey above root; cheat / Android root) applies [[kernelpatch]] boot-image patching on stock GKI Android without custom kernel sources. APatch **KPM** (KernelPatch Module) collections such as [[apatch-kpm]] (C/C++; kernel modding/debug extensions for the APatch module lane) extend root at kernel scope — same KPM class as ACE title RE (`acepeek` in [[honor-of-kings-re-research]]). (source: wiki/sources/descriptions/bmax121__APatch.md) (source: wiki/sources/descriptions/bmax121__KernelPatch.md) (source: wiki/sources/descriptions/lzghzr__APatch_kpm.md) Android kernel root patch toolkit [[skroot-linux-kernel-root]] (abcz316; C/C++ patch + Java/JNI app tooling; deeply hidden root, su install/inject, many kernel versions without full rebuild; cheat / Android root) targets stock-kernel root-hide research beside KernelPatch/APatch lanes. (source: wiki/sources/descriptions/abcz316__SKRoot-linuxKernelRoot.md)
 
