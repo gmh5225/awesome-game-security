@@ -1042,6 +1042,7 @@ sources:
   - wiki/sources/descriptions/nimjump__game.md
   - wiki/sources/descriptions/WilonityGames__WilonityLoader.md
   - wiki/sources/descriptions/RhosunAce__Umbrella-HWID-resp-Tool.md
+  - wiki/sources/descriptions/vunlior__GuardX.md
 updated: 2026-11-06
 confidence: high
 ---
@@ -1420,6 +1421,8 @@ Title-specific R6 ranked-stat suspicion tooling such as [[r6-intel]] (baldspots4
 **GeyserMC pre-translation Bedrock AC:** [[astrox-anticheat]] (Eangly99; Java Maven GeyserMC extension; intercepts raw Bedrock UDP/RakNet packets at the Netty channel layer before Java translation; sub-ms detection off main server tick; movement/combat/inventory/packet heuristics—reach, hitbox backtracking, flight, autoclicker, device spoofing, crash-packet firewall; Bedrock-native kinematics, input-mode-aware reach, latency backtracking, leaky-bucket timer; Discord webhooks + admin commands; Anti Cheat / game:minecraft) for GeyserMC operators beside MiTM proxies such as [[oomph]] and Nukkit prediction plugins such as [[ghost-anticheat]]. (source: wiki/sources/descriptions/Eangly99__AstroX-AntiCheat.md)
 
 **Paper/Folia Floodgate-scoped Bedrock AC:** [[bedrockguard]] (TheMax98000; Paper/Spigot/Folia plugin; PacketEvents; checks only Floodgate-linked Bedrock clients on Geyser cross-play Java servers—timer, speed, fly, reach, nuker, scaffold, autoclicker, bad packets, velocity, kill aura; VL decay; staff alerts, Discord webhooks, punishments; developer cancel/observe API; runs beside conventional Java AC; Anti Cheat / game:minecraft) for operators who need touch/controller-tuned Bedrock coverage without replacing Java-side plugins, beside Geyser interceptors such as [[astrox-anticheat]] and PacketEvents stacks such as [[fox-addition]]. (source: wiki/sources/descriptions/TheMax98000__BedrockGuard.md)
+
+**Paper Java-server AC (PacketEvents or Netty fallback):** [[guardx]] (vunlior; Java Maven Paper plugin; movement/combat/inventory/packet checks with configurable thresholds and punishments; optional PacketEvents or built-in Netty decoder; Discord/Telegram alerts, persistent violations, world/permission toggles, PlaceholderAPI, custom-check API; Anti Cheat / game:minecraft) for operators wanting a self-contained heuristic stack beside PacketEvents plugins such as [[fox-addition]] and prediction references such as [[grim]]. (source: wiki/sources/descriptions/vunlior__GuardX.md)
 
 **Bedrock behavior-pack ScriptAPI AC:** [[blarion-anticheat]] (StarBloomMinecraft; JavaScript Bedrock ScriptAPI behavior pack; 40+ real-time combat/movement/inventory/packet modules—fly, killaura, speed, reach, noclip, autoclicker, xray; configurable thresholds/punishments; admin inventory scan + `/flag` API for WebSocket/proxy integration; vanilla/BDS/LiteLoader worlds without server plugins; Anti Cheat / game:minecraft) for Bedrock world hosts beside behavior-pack addons such as [[paradox-anticheat]] and [[scythe-anticheat]]. (source: wiki/sources/descriptions/StarBloomMinecraft__BlarionAntiCheat.md)
 
