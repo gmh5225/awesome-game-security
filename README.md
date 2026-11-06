@@ -969,6 +969,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/NetVar1337/echo-reverse [Windows Tauri/React live RE workbench on Echo: memory and disassembly, game-engine inspection, Frida, kernel/network tooling, and MCP for agents]
 - https://github.com/protonspy/harness-for-rea [Desktop and TUI orchestrator for authorized binary RE: Docker-sandboxed Claude Code specialist with REA and Cheat Engine MCP integrations]
 - https://github.com/rollingrock/bethesda-modding-starter [Bootstrap for Bethesda script-extender plugin dev plus Ghidra/x64dbg MCP reverse-engineering toolchain]
+- https://github.com/mathewsbinny/bf1943-tool-suite [Open-source Frostbite tooling for Battlefield 1943: level inspection, DBX/FBRB/terrain format read-diff-rebuild, navmesh generation, and bot simulation (Xenia-compatible)]
 - https://github.com/jlagedo/dreams-to-reality-re [Reverse-engineering research toolkit for Dreams to Reality (1997): Python asset decoders, Ghidra scripts, format documentation, and a Babylon.js viewer—tools only, no copyrighted game data]
 - https://github.com/formix/sre-re [Solar Realms Elite 0.994b (DOS BBS) RE: Ghidra toolchain, decoded .II save formats, and recovered game rules toward a Linux remake]
 - https://github.com/chaossource/menace-reverse-engineering [Reverse engineering and SDL2 C++ port of 1988 Amiga game Menace: annotated disassemblies, asset extraction tooling, and a working rebuild]
