@@ -4,14 +4,17 @@ kind: concept
 topics: [overview]
 sources:
   - wiki/sources/skills/overview.md
+  - wiki/sources/README-categories.md
   - wiki/AGENTS.md
-updated: 2026-09-13
+updated: 2026-11-06
 confidence: high
 ---
 
 # Compiled Wiki
 
 Karpathy-style **compiled knowledge wiki** under `wiki/`, maintained by `scripts/update-wiki-cli.py` (Cursor CLI in CI). It sits between immutable upstream sources (README, `.claude/skills/`, `description/**`) and raw archives, offering citation-aware synthesis for agents and humans. Generated wiki pages are discovery aids—follow their original citations before adopting technical claims. (source: wiki/sources/skills/overview.md) (source: wiki/AGENTS.md)
+
+The orchestrator also projects a **README category map** into `wiki/sources/README-categories.md` (link counts + section names regenerated each scan; sub-buckets such as `Detection:DMA` live under `Anti Cheat`, not as separate top-level README sections). Use it with [[repository-navigation]] when you need counts or headings without opening the full README. (source: wiki/sources/README-categories.md)
 
 For deterministic section/repo lookup without loading the full README, use `.claude/skills/overview/scripts/repository_index.py`—see [[repository-navigation]]. (source: wiki/sources/skills/overview.md)
 

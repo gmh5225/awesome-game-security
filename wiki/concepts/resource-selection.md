@@ -4,13 +4,16 @@ kind: concept
 topics: [overview]
 sources:
   - wiki/sources/skills/overview.md
-updated: 2026-09-13
+  - wiki/sources/README-categories.md
+updated: 2026-11-06
 confidence: high
 ---
 
 # Resource Selection
 
 Workflow for connecting a concrete question to the awesome-game-security collection: start from the user's object and desired output, select the relevant domain skill, then only the resource layers needed to answer it. (source: wiki/sources/skills/overview.md)
+
+For README section names, link totals, and sub-bucket lists (e.g. `Anti Cheat` → `Detection:DMA`) rely on the regenerated projection `wiki/sources/README-categories.md` when you need a lightweight map; pair with [[repository-navigation]] for deterministic owner/repo lookup. (source: wiki/sources/README-categories.md)
 
 ## Principles
 
