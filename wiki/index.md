@@ -1323,6 +1323,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [EAC](entities/eac.md) — mixed EAC study pack: reversed `easyanticheat.sys` callback logic + EAC/EOS SDK drop (gmh5225)
 - [EAFE](entities/eafe.md) — Mineflayer elytra autopilot (vanilla physics FSM; Bézier look-vector AC evasion; cheat / game:minecraft)
 - [Early Cascade Injection](entities/earlycascade-injection.md) — early cascade process-injection PoC (Cracked5pider; C++ Visual Studio; stealthier inject during early process init; build-specific offsets; malware/EDR/defensive detection testing; Injection Testing)
+- [Early Bird Detection Lab](entities/earlybird-detection-lab.md) — Windows Early Bird APC injection lab (jfisay; MITRE T1055.004; C injector + Sliver shellcode into suspended system process; Sysmon vs expected signals + Microsoft Defender/cloud runs; detection-engineering write-up)
 - [EASY-HWID-SPOOFER](entities/easy-hwid-spoofer.md) — kernel-mode HWID spoofer via driver dispatch hooks + physical-memory patches (disk/NIC/GPU/SMBIOS; Win10; gmh5225)
 - [EasyHandles](entities/easy-handles.md) — driver+DLL handle acquisition bypassing ObRegisterCallbacks via ObOpenPointerToObject + OpenProcess hook (AlSch092; AC/EDR handle-protection research)
 - [EasyAntiPatchGuard](entities/easy-anti-patchguard.md) — Win8–Win10 kernel PoC; driver + assembly hooks observe/short-circuit PatchGuard dispatch paths; call-chain analysis from kernel debugging (armasm; cheat / PatchGuard-related)
