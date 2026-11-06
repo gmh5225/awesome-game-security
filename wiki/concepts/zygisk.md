@@ -16,6 +16,7 @@ sources:
   - wiki/sources/descriptions/zelect0r__zamr.md
   - wiki/sources/descriptions/Admirepowered__Zygisk_mod.md
   - wiki/sources/descriptions/VeryBaaad__ZygiskNextNext.md
+  - wiki/sources/descriptions/VeryBaaad__ZNNext.md
   - wiki/sources/descriptions/hex91__zygisk-gadget-stealth.md
 updated: 2026-11-06
 confidence: medium
@@ -44,6 +45,7 @@ Modules compile as `.so` loaded by Magisk's Zygisk loader ([[magisk]] DenyList /
 - **[[zygisk-on-kernelsu]]** — standalone Zygisk runtime with API compatibility for KernelSU; can replace Magisk built-in Zygisk; documents KernelSU/Magisk/APatch requirements and compatibility notes. (source: wiki/sources/descriptions/Dr-TSNG__ZygiskOnKernelSU.md)
 - **[[zygisk-mod]]** — standalone Zygisk runtime interface (Kotlin + native); KernelSU/APatch/Magisk; alternative module-loading path when built-in or closed Zygisk stacks are unavailable; flexible process injection and module experimentation for security/modding research. (source: wiki/sources/descriptions/Admirepowered__Zygisk_mod.md)
 - **[[zygisk-next-next]]** — open-source Magisk/KernelSU/APatch module reimplementing the **ZygiskNext module API** without the closed-source ZygiskNext runtime; C++ in-process loader (inline/PLT hooks via Dobby, ShadowHook, rv64hook, LSPlt, ByteHook, xHook, PLTI; HyperOS Runtime injection); Rust ptrace/eBPF injector daemon; Android 5+. (source: wiki/sources/descriptions/VeryBaaad__ZygiskNextNext.md)
+- **[[znnext]]** — open-source Magisk-style **Magisk/KernelSU/APatch** module for **ZygiskNext API** modules (not generic Zygisk); C++ in-process loader with multiple inline/PLT hook backends; Rust daemon coordinates injection with optional kernel-assisted process tracking (tracefs, proc connector, eBPF); KernelSU WebUI (Vue/TypeScript). (source: wiki/sources/descriptions/VeryBaaad__ZNNext.md)
 
 ## Game-security uses
 
@@ -58,4 +60,4 @@ Pair with [[research-rigor]] when generalizing injection timing across OEM/Andro
 
 ## Related
 
-[[magisk]] · [[kernelsu]] · [[rezygisk]] · [[zygisk-on-kernelsu]] · [[zygisk-mod]] · [[zygisk-next-next]] · [[zygisk-magiskhide]] · [[nohello]] · [[magiskhide]] · [[frida]] · [[ksurusda]] · [[zygisk-gadget-stealth]] · [[integrated-kernel-module]] · [[il2cpp]] · [[zygisk-dump-dex]] · [[zygisk-imgui-menu]] · [[zygisk-imgui-mod-menu]] · [[zygisk-imgui-modmenu]] · [[zamr]] · [[fox-magisk-module-manager]] · [[mobile-anti-cheat]] · [[overviews/mobile-security]] · [[overviews/game-hacking]]
+[[magisk]] · [[kernelsu]] · [[rezygisk]] · [[zygisk-on-kernelsu]] · [[zygisk-mod]] · [[zygisk-next-next]] · [[znnext]] · [[zygisk-magiskhide]] · [[nohello]] · [[magiskhide]] · [[frida]] · [[ksurusda]] · [[zygisk-gadget-stealth]] · [[integrated-kernel-module]] · [[il2cpp]] · [[zygisk-dump-dex]] · [[zygisk-imgui-menu]] · [[zygisk-imgui-mod-menu]] · [[zygisk-imgui-modmenu]] · [[zamr]] · [[fox-magisk-module-manager]] · [[mobile-anti-cheat]] · [[overviews/mobile-security]] · [[overviews/game-hacking]]

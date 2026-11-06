@@ -33,4 +33,4 @@ Targets rooted Android developers and researchers building or studying ZygiskNex
 
 ## Related
 
-[[concepts/zygisk]] · [[rezygisk]] · [[jerrymanager]] · [[magisk-hub]] · [[overviews/mobile-security]] · [[overviews/game-hacking]]
+[[concepts/zygisk]] · [[znnext]] · [[rezygisk]] · [[jerrymanager]] · [[magisk-hub]] · [[overviews/mobile-security]] · [[overviews/game-hacking]]
