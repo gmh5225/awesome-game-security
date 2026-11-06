@@ -18,6 +18,7 @@ sources:
   - wiki/sources/descriptions/Kotsasmin__key-value-checker.md
   - wiki/sources/descriptions/LB45440078L__xray-anticheat.md
   - wiki/sources/descriptions/modcommunity__dot-server-security.md
+  - wiki/sources/descriptions/mrKozy__KozyAntiCheat.md
   - wiki/sources/descriptions/Parko-Developer__guard-game.md
   - wiki/sources/descriptions/PointOfPressure__sunset-client.md
   - wiki/sources/descriptions/PluginsKers__Shield.md
@@ -1383,6 +1384,8 @@ Title-specific R6 ranked-stat suspicion tooling such as [[r6-intel]] (baldspots4
 **Horizon client module ↔ server AC matrices:** [[sunset-client]] (PointOfPressure; Rust Horizon-native Minecraft **26.3** utility mod; Meteor-inspired architecture; 100+ combat/movement/player/render/world modules; maintainer anticheat sweep matrices comparing module behavior to common Java server plugins; cheat / game:minecraft) gives researchers a structured offensive reference beside JVM attach clients such as [[nocturne-client]]. (source: wiki/sources/descriptions/PointOfPressure__sunset-client.md)
 
 **Paper/Spigot movement simulation AC:** [[grim]] (GrimAnticheat; Java/Kotlin; open-source Minecraft anticheat for modern server versions and protocol combinations; detailed movement simulation, world replication, latency-aware validation; heavily asynchronous multithreaded architecture to scale checks and reduce false positives; server-side cheat detection for actively maintained Java communities; Anti Cheat / game:minecraft). (source: wiki/sources/descriptions/GrimAnticheat__Grim.md)
+
+**Paper-family modular server-side AC:** [[kozy-anticheat]] (mrKozy; Java with Python JAR packaging; modular movement/combat/world/interaction and server-exploit checks over standard server APIs and spatial validation with configurable violations and staff commands—Paper/Purpur/Folia and Fabric-bridge server layouts; Anti Cheat / game:minecraft). (source: wiki/sources/descriptions/mrKozy__KozyAntiCheat.md)
 
 **Paper ClientTickEnd movement replay AC:** [[astral-anticheat]] (tahad4492-svg; Java 21 Maven Paper **1.21.11** plugin; rebuilds vanilla movement physics from per-tick client data and **ClientTickEndEvent**; packet-order checks for silent rotations/swaps; lag-compensated reach/aura/aim combat; movement/world/packet/macro coverage; configurable block mode with setbacks vs watch-only alerts; staff GUI/logs; minigame FP reduction; simulation tests against known cheat clients; Anti Cheat / game:minecraft) beside open-source simulators such as [[grim]] and alert-first Paper plugins such as [[aegis-ac]]. (source: wiki/sources/descriptions/tahad4492-svg__Astral-AntiCheat.md)
 
