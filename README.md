@@ -5197,6 +5197,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 > Winows Kernel Dump Analysis
 - https://github.com/gmh5225/Tool-DIYSystemMemoryDump [DIY Dump Type]
 - https://github.com/0vercl0k/kdmp-parser [Python 3 bindings]
+- https://github.com/0vercl0k/kdmp-parser-rs [Dependency-free Rust crate to parse Windows kernel crash dumps with phys/virt memory readers and page-table walks]
 - https://github.com/vmi-rs/ephemera [Multiplatform MEMORY.DMP analysis tool with a WinDbg flavor]
 - https://github.com/mrexodia/dumpulator [Emulating code in minidump files]
 - https://github.com/0vercl0k/symbolizer [Execution trace symbolizer]
