@@ -1041,6 +1041,7 @@ sources:
   - wiki/sources/descriptions/Treb3r__Treb3rAntiCheater.md
   - wiki/sources/descriptions/nimjump__game.md
   - wiki/sources/descriptions/WilonityGames__WilonityLoader.md
+  - wiki/sources/descriptions/RhosunAce__Umbrella-HWID-resp-Tool.md
 updated: 2026-11-06
 confidence: high
 ---
@@ -1337,6 +1338,7 @@ Title-specific R6 ranked-stat suspicion tooling such as [[r6-intel]] (baldspots4
 - [[pareidolia-triggerbot]] — hypervisor-based external Overwatch Widowmaker triggerbot (blackhades00; VivienneVMM + MouClassInputInjection; bypasses Overwatch Anti-Cheat) for studying below-OS external triggerbot surface against Blizzard Warden (source: wiki/sources/descriptions/blackhades00__PareidoliaTriggerbot.md)
 - [[ow-anti-flag]] — Overwatch chainban anti-flag console tool (dword64; modern C++; clears directories/registry keys Blizzard and cheat malware use to flag devices; cheat / HWID) (source: wiki/sources/descriptions/dword64__Ow-Anti-Flag.md)
 - [[spoofer]] — Windows C++ mixed overlay-cheat and HWID-evasion package (AlfredIU; user-mode aimbot/ESP/entity caching/projectile prediction via DirectX9 ImGui plus kernel driver artifacts; bundled identity-evasion workflows beside live cheat modules; cheat / HWID research) (source: wiki/sources/descriptions/AlfredIU__Spoofer.md)
+- [[umbrella-hwid-resp-tool]] — documentation-forward “Umbrella Spoofer” HWID workflow (RhosunAce; marketed kernel driver + cleaners + registry/driver changes for hardware-ban evasion; elevated install + AC compatibility claims in prose; mostly Markdown capture + doc-filename scanner sample; cheat / HWID) (source: wiki/sources/descriptions/RhosunAce__Umbrella-HWID-resp-Tool.md)
 
 
 ## Key sub-areas
