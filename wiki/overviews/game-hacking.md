@@ -1973,6 +1973,7 @@ sources:
   - wiki/sources/descriptions/REDLANTERNDEV__FaceOff.md
   - wiki/sources/descriptions/nimjump__game.md
   - wiki/sources/descriptions/lightview__fnv-speedhack.md
+  - wiki/sources/descriptions/WilonityGames__WilonityLoader.md
 updated: 2026-11-06
 confidence: high
 ---
@@ -2011,6 +2012,7 @@ Use sibling skill topics when one boundary dominates the question; keep recommen
 For each relevant attack family, state the **objective and boundary** before naming tools. Record what the defender can observe, which control limits the behavior, and what remains uncertain. Distinguish read-only information abuse from state modification, and synthetic input from evidence of human intent—a missing artifact is not proof an attack is undetectable. (source: wiki/sources/skills/game-hacking.md)
 
 Cross-skill boundaries:
+- Subscription / HWID-gated **Windows loader clients** such as [[wilonity-loader]] (description: multi-title hot-injection, periodic HWID resets, rapid signature-driven module refresh framing; C++20 “Osiris” CMake + Electron-style UI stack—compare commercial-loader RE such as [[codm-cheat]] and HWID-gated inject pipelines such as [[cyber-ant-loader]]) (source: wiki/sources/descriptions/WilonityGames__WilonityLoader.md)
 - Backend authority and transactional correctness → game-server-security skill (not duplicated here)
 - Build/release/mod trust → game-supply-chain-security skill
 - Host-driver vs device memory access → [[overviews/dma-attack]] / [[memory-acquisition-path]]
