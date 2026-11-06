@@ -1972,6 +1972,7 @@ sources:
   - wiki/sources/descriptions/Coding-With-SouRav__Chess-Cheater.md
   - wiki/sources/descriptions/REDLANTERNDEV__FaceOff.md
   - wiki/sources/descriptions/nimjump__game.md
+  - wiki/sources/descriptions/lightview__fnv-speedhack.md
 updated: 2026-11-06
 confidence: high
 ---
@@ -2189,6 +2190,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Lightweight injectable speedhack DLL [[speedhack]] (absoIute; C++; Detours hooks on timing APIs to accelerate, slow, or pause perceived runtime; Cheat / SpeedHack lane beside [[cheat-engine]] speedhack) (source: wiki/sources/descriptions/absoIute__Speedhack.md)
 - Cheat Engine–style injectable speed-hack DLL [[speed-hack]] (Letomaniy; C++ Visual Studio; Detours timing hooks; keyboard slowdown/accelerate/restore with configurable values; cheat practice + AC time-manipulation research) (source: wiki/sources/descriptions/Letomaniy__Speed-Hack.md)
 - Compact CE-style speed-hack sample [[ce-speed-hack]] (IamSanjid; C++ Detours timing hooks; focused core hooking logic for learners studying time manipulation and basic user-mode game hacking; cheat practice) (source: wiki/sources/descriptions/IamSanjid__ce_speed_hack.md)
+- Gamebryo-era **Fallout: New Vegas** timing scaler [[fnv-speedhack]] (lightview; Windows DLL + MinHook; hooks `QueryPerformanceCounter` / tick / `timeGetTime` in-process; NVSE plugin or `dinput8` proxy; optional Decky + Proton notes; single-player speed-control lane beside generic Detours speedhack samples) (source: wiki/sources/descriptions/lightview__fnv-speedhack.md)
 - Windows uptime/timer faker [[uptime-faker]] (CookiePLMonster; C++ Detours plugin; DLL or ASI inject; INI-configured timer API redirection + process-relative time simulation; Game Testing / reproduce high-PC-uptime game bugs beside speed-hack timing hooks) (source: wiki/sources/descriptions/CookiePLMonster__UptimeFaker.md)
 - Official CE Lua gamepad UI add-on [[controller-mode]] (Xbox-style D-pad navigation, A/B confirm/cancel, controller-friendly `.CT` file picker, experimental Steam Deck on-screen keyboard via Steam API; Lua + embedded C; cheat / CE plugin) extends [[cheat-engine]] for handheld/couch live memory editing. (source: wiki/sources/descriptions/cheat-engine__ControllerMode.md)
 - Community CE Lua extension pack [[ce-lua-extensions]] (Skyrimfus; autorun loader + breakpoint cleanup, function-caller lookup, template insertion, interface workflow utilities; cheat / Lua Extensions) accelerates RE and memory-analysis scripting on [[cheat-engine]]. (source: wiki/sources/descriptions/Skyrimfus__CE-lua-extensions.md)

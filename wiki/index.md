@@ -1589,6 +1589,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Free-RASP-Unity-POC](entities/free-rasp-unity-poc.md) — Unity freeRASP plugin (Talsec; root/jailbreak/Frida/tamper/integrity; Android+iOS)
 
 - [fn-dma-cheat](entities/fn-dma-cheat.md) — Fortnite DMA cheat sample (C++; Unreal Engine; cheat / game:fortnite [DMA])
+- [fnv-speedhack](entities/fnv-speedhack.md) — lightview FNV MinHook timing-API speed control (NVSE or dinput8 proxy; optional Decky/Proton; cheat / game:fallout new vegas [SpeedHack])
 - [fortnite-3.5](entities/fortnite-3.5.md) — Fortnite 3.50 internal DLL (memory aimbot + ESP; zgui menu; user-generated UE SDK; gmh5225; [Internal])
 - [fortnite-cheat-leak](entities/fortnite-cheat-leak.md) — Leaked Fortnite internal cheat source (C++; MinHook + Detours hooks; gameplay/render/utility modules; no-spread / movement / vehicle / teleport; cheat architecture RE; Waihbe; cheat / game:fortnite [Internal])
 - [fortnite-cheat-source-internal](entities/fortnite-cheat-source-internal.md) — Fortnite internal: SDK generation + hooking (C++; cheat / game:fortnite)
