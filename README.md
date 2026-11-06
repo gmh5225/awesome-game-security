@@ -649,6 +649,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/UnityTech/GamesTestAutomationExample [The collecting ideas on how to do Test Automation in Games]
 - https://github.com/nowsprinting/UnityAutomatedQAExamples [Unity Automated QA Guidebook]
 - https://github.com/AirtestProject/Airtest [UI Automation Framework]
+- https://github.com/ocornut/imgui_test_engine [Dear ImGui automation engine and test suite — input injection, GUI-driven tests, headless/CI, screenshots and video export]
 - https://github.com/dendibakh/perf-ninja [Performance Analysis]
 - https://github.com/CookiePLMonster/UptimeFaker [Detecting High PC Uptime]
 - https://github.com/GameTechDev/PresentMon [Graphics Performance]
