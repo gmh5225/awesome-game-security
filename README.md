@@ -1427,6 +1427,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/hackcatml/zygisk-memdump [A zygisk module that dumps so file from process memory]
 - https://github.com/PerformanC/ReZygisk [Transparent implementation of Zygisk]
 - https://github.com/VeryBaaad/ZygiskNextNext [Magisk/KernelSU/APatch module implementing the Zygisk Next API to load ZygiskNext-style modules (inline/PLT hooking, HyperOS Runtime injection)]
+- https://github.com/VeryBaaad/ZNNext [Open-source Magisk module implementing the Zygisk Next API to load ZygiskNext-style modules]
 - https://github.com/jiqiu2022/Zygisk-MyInjector [Zygisk Injector]
 - https://github.com/Exo1i/MagiskHluda [Run a more undetectable frida server on boot using magisk]
 - https://github.com/thelok1s/florida-zygisk [Magisk/Zygisk module that auto-starts Florida anti-detection frida-server on boot]
@@ -3329,6 +3330,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/wwweeeqqu/honor-of-kings-RE-research [Honor of Kings mobile RE: KernelPatch KPM reads, Tencent ACE analysis, IL2CPP/native notes]
 - https://github.com/not1cyyy/Anti-Cheat-Amateur [Stealth kdmapper kernel driver and virtualized UE memory scanner for Tencent ACE evasion research]
 - https://github.com/Lixense/ff-ace-anticheat-analysis [Byte-level RE post-mortem on Tencent ACE (libanogs/libanort) in Free Fire, with IDA tooling and detection catalog]
+- https://github.com/arx-oioi/-AntiCheat-Anogs-Tencent- [Reverse-engineering notes on Tencent mobile protection (libanogs): detection loops, anti-debug/inject/dump, and reaction paths]
 - https://github.com/stuffed-cat/hide-ace-kernel [KernelSU module that bind-mounts empty files over Tencent ACE kernel `/proc/inte_*` integrity nodes to hide KO/syscall-table reports from user space]
 
 > Explore AntiCheat System:G-Presto
