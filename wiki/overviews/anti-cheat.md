@@ -1044,6 +1044,7 @@ sources:
   - wiki/sources/descriptions/RhosunAce__Umbrella-HWID-resp-Tool.md
   - wiki/sources/descriptions/vunlior__GuardX.md
   - wiki/sources/descriptions/Deltabrohollow__R6-Assist-Menu-Setup.md
+  - wiki/sources/descriptions/CmdSuv__NoEscapeAC.md
 updated: 2026-11-06
 confidence: high
 ---
@@ -1086,6 +1087,8 @@ Use [[research-rigor]] when turning detector hits into enforcement. The anti-che
 **Evidence packages** should retain raw artifacts or immutable references, timestamps/ordering, schema/game/detector versions, feature transforms, threshold/model version, sample counts, provenance, contradictory evidence, limitations, and the exact rule that fired. For threat framing, describe each case by capability needed, resource exposed, trust boundary crossed, and observation point available—compare host, device, graphics, input, and server observations without assuming one collector sees all layers. Separate detector design from server/backend correctness (game-server-security skill lane; see [[overviews/overview]] routing), Linux/Proton observations ([[are-we-anti-cheat-yet]], [[linux-anticheat]]; [[rigcheck]] local-first Rust desktop merges AWACY/ProtonDB/Vulkan blockers with Steam spec verdicts for library planning—not bypass tooling) (source: wiki/sources/descriptions/Glory42__RigCheck.md), firmware/DMA assurance ([[dma]], [[iommu]], [[hvci]]), and network association claims ([[network-environment-evidence]]). Production rollout, shadow/canary evaluation, and collector-health diagnosis follow [[detector-operations]]. Ethical offline tooling on Linux can embed the [[are-we-anti-cheat-yet]] catalog plus local anti-cheat process heuristics to block or warn before attach—[[ferret]] (Petru101; GTK4/Rust OCR memory editor for single-player/Proton) follows that pattern rather than targeting live multiplayer bypass. (source: wiki/sources/descriptions/Petru101__ferret.md) (source: wiki/sources/skills/anti-cheat.md)
 
 Client-side **loader + subscription update** narratives (rapid refresh after signature churn, HWID-bound licenses) appear in project descriptions such as [[wilonity-loader]]—defenders still correlate **process/image**, **driver provenance**, **integrity drift**, and **identity binding** rather than treating marketing claims as ground truth. (source: wiki/sources/descriptions/WilonityGames__WilonityLoader.md)
+
+**Ring-3 AC toolkit** references: [[noescapeac]] (CmdSuv; C++20 CMake; Linux/Windows user-mode integrity engine—SIMD scans, injection forensics, inline unhook repair, overlay checks, PCIe DMA–style signals, aim kinematics heuristics; embeddable library—not a kernel product) illustrates a **no-driver** client protection stack alongside kernel-heavy commercial lines. (source: wiki/sources/descriptions/CmdSuv__NoEscapeAC.md)
 
 [[game-cheating-exploit-detection-agent-skill]] (dungnotnull; Python) pairs a Claude Code skill with a six-step executable engine—statistical and invariant detectors for aimbots, wallhacks, macros, memory tampering, and economy/duplication exploits—plus CI-verifiable harnesses, telemetry ingestion, quality gates, and a self-updating knowledge base from academic/domain crawls for structured decision support. (source: wiki/sources/descriptions/dungnotnull__game-cheating-exploit-detection-agent-skill.md)
 

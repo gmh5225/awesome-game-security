@@ -101,6 +101,7 @@ sources:
   - wiki/sources/descriptions/ablanchard-dev__dexcheck.md
   - wiki/sources/descriptions/Sylnar__NexusForge.md
   - wiki/sources/descriptions/apoj-inc__Cyclone-V-PCIe-AVMM-DMA.md
+  - wiki/sources/descriptions/CmdSuv__NoEscapeAC.md
 updated: 2026-11-06
 confidence: high
 ---
@@ -123,6 +124,8 @@ PCIe Direct Memory Access threat modeling for game security: identify the **memo
 | Disputed implementation, performance, or detectability claims | [[research-rigor]] |
 
 Use sibling skill topics when one boundary dominates the question; apply [[research-rigor]] before turning architecture claims into findings. (source: wiki/sources/skills/dma-attack.md)
+
+Client-only **DMA awareness** (not bus containment): ring-3 anti-cheat frameworks such as [[noescapeac]] are described as surfacing **PCIe DMA–style hardware signals** from the host process perspective—orthogonal to IOMMU policy and below-OS FPGA paths in **Three defense layers** / **Layered detection pipeline**; map any such claim to [[memory-acquisition-path]] and measured PCIe/IOMMU evidence. (source: wiki/sources/descriptions/CmdSuv__NoEscapeAC.md)
 
 ## Classify the acquisition path first
 
