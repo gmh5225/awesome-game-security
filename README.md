@@ -957,6 +957,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/absoIute/Speedhack
 - https://github.com/Letomaniy/Speed-Hack
 - https://github.com/IamSanjid/ce_speed_hack
+- https://github.com/lightview/fnv-speedhack [Fallout: New Vegas speed control via NVSE plugin, dinput8 proxy, and optional Steam Deck Decky paddles]
 
 > RE Tools
 - https://dogbolt.org
@@ -1415,6 +1416,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/AlirezaParsi/COPG [Zygisk module for rooted Android with per-app device, CPU, and GPU spoofing, build-property and Android ID spoofing, and an on-device WebUI; supports KernelSU, Magisk, and APatch]
 - https://github.com/gmh5225/MagiskHide [Portable MagiskHide]
 - https://github.com/lico-n/ZygiskFrida [Injects frida gadget using zygisk]
+- https://github.com/hex91/zygisk-gadget-stealth [Zygisk module for per-app Frida Gadget injection with configurable stealth and WebUI status]
 - https://github.com/xjoker/frida-magisk [Magisk/KernelSU module bundling official Frida server and Gadget plus a Zygisk injector, with scripted builds and on-device WebUI]
 - https://github.com/Admirepowered/Zygisk_mod [Standalone implementation of Zygisk]
 - https://github.com/anasfanani/Magisk-Tailscaled [Magisk module for running Tailscale]
@@ -1468,6 +1470,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/gmh5225/frida-boot [A binary instrumentation workshop, with Frida, for beginners]
 - https://github.com/oleavr/frida-module-example [TypeScript Frida library example using frida-compile — ImHex struct patterns, Memory.scanSync scanning, and ARM Thumb hook trampolines]
 - https://github.com/smartdone/Frida-Scripts [Some scripts]
+- https://github.com/Spleefy167/frida-orbit-lab [Frida scripts and game-hacking examples for a shooter trainer]
 - https://github.com/0xdea/frida-scripts [Some scripts]
 - https://github.com/SeeFlowerX/frida-smali-trace [Smali trace]
 - https://github.com/Ylarod/Florida [anti-detection version of frida-server]
@@ -2281,6 +2284,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 
 > Injection:Windows
 - https://github.com/itaymigdal/awesome-injection [awesome injection]
+- https://github.com/WilonityGames/WilonityLoader [Windows cheat loader with kernel/driver bypass, HWID spoofing, and undetected injector stack for many multiplayer titles]
 - https://github.com/btbd/smap [Scatter Manual Map]
 - https://github.com/btbd/modmap [Extend Manual Map]
 - https://github.com/KGB-1337/memmap [Extend Manual Map]
@@ -2507,6 +2511,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/a0yark/ArcRaidersRadar-dma-Radar [DMA radar/ESP, MemProcFS + Unicorn Engine for pointer decryption emulation]
 - https://github.com/TheAustinUS/LuminaryDMA [Call of Duty read-only DMA cheat framework with PCILeech/MockDMA backends, BO6 offsets, and client-info decryption]
 - https://github.com/orphannn/hoozi-cs2-dma [CS2 external DMA assistant with configurable player ESP, map collision visibility checks, and LeechCore/VMM integration]
+- https://github.com/nbnmvwpptxsf/faceit-dma-cs2 [CS2 DMA radar/ESP described for FACEIT with PCIe DMA hardware]
 - https://github.com/MGreif/PCILeech_DMA_Proxy [A DLL with Loader that hooks common windows memory API functions and proxies them to the remote device via DMA]
 
 > W2S
@@ -3032,6 +3037,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/gmh5225/PrecisionSpoofer-CPP
 - https://github.com/gmh5225/Hwid-Spoofer-EAC-BE
 - https://github.com/semihcevik/hwidspoofer
+- https://github.com/RhosunAce/Umbrella-HWID-resp-Tool [HWID spoofer with kernel driver, disk/MAC changes, and SMBIOS-related updates described in repo]
 - https://github.com/Theordernarkoz/Hwid--Spoofer
 - https://github.com/Theordernarkoz/Hwid-Spoofer
 - https://github.com/gmh5225/Apex-Spoofer
