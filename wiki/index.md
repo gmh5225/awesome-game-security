@@ -4167,6 +4167,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [VMPImportFixer](entities/vmpimportfixer.md) — VMP 3.x import protection fix via Unicorn emulation (near-call stubs → real imports; Zydis + pepp; x86/x64; Fix VMP)
 - [Vmp3_utils](entities/vmp3-utils.md) — Python VMP3 editor tooling utilities (Fix VMP; gmh5225)
 - [VmpHelper](entities/vmp-helper.md) — C++ VMProtect helper (networking / plugin / modding; Fix VMP; fjqisba)
+- [VMProtect-LLM-SKILL](entities/vmprotect-llm-skill.md) — LLM-oriented Markdown agent skill + devirtualization workflow for VMProtect/Themida/custom VM protections (Miasm PE/IR lift; Triton/Capstone/Z3/IDA; taint/slice; VMP 3.9 byte-provenance; hypothesis ledger; Fix VMP; 7777lolonlyyou)
 - [VMProtect](entities/vmprotect.md) — VM-based code obfuscation engine (software CPU + memory/I/O; Fix VMP study; gmh5225)
 - [VMProtect Dumper](entities/vmprotect-dumper.md) — Windows C console live-memory VMProtect PE unpacker (OEP/IAT recovery, dynamic exec-region harvest, optional PE-sieve; drag-drop/dropper/DLL modes; IOC extract; password-protected artifact archive; Fix VMP / Unpacker; whoamicrash)
 - [VMPStatic](entities/vmpstatic.md) — static Go VMProtect PE unpacker (VMP 1.x–3.x rebuild; Fix VMP / Unpacker)
