@@ -705,6 +705,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/rdbo/DX11-BaseHook [DX11 Imgui]
 - https://github.com/DrNseven/D3D12-Hook-ImGui [DX12 Imgui]
 - https://github.com/frostbone25/ShaderInjector [D3D12 shader injector for FF7 Rebirth PC — intercepts rendering API calls to inject/replace pixel shaders at runtime; minhook + ImGui; adaptable to other D3D12 titles]
+- https://github.com/julianxhokaxhiu/FFNx [Graphics driver replacement and modding platform for Final Fantasy VII/VIII (successor to FF7_OpenGL) with DX11, DX12, Vulkan, and OpenGL backends and native speedhack]
 - https://github.com/Qervas/segcap [D3D12 hooking tool extracting per-pixel object-ID segmentation masks from shipping UE4/UE5 games without engine source or modification]
 - https://github.com/baobao1044/GameLagReducer [Launcher + native DLL that hooks D3D11/OpenGL/Vulkan to capture and flatten/replace shaders at runtime for FPS]
 - https://github.com/niemand-sec/DirectX11Hook [DX11 Imgui]
