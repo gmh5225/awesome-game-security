@@ -1200,6 +1200,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/whoamicrash/VMProtectDumper [Windows C tool to unpack VMProtect-protected PEs from memory with OEP/IAT recovery, dynamic exec-region harvesting, and pe-sieve orchestration]
 - https://github.com/tomhamidi97-arch/vmp-devirtualization-lab [Educational guide and lab notes on Android native-library VMProtect internals, dispatcher/handler recovery, and devirtualization workflows]
 - https://github.com/tomhamidi97-arch/frida-vmp-bypass [Frida boundary-hook writeup for reversing stacked VMProtect and OLLVM on Android via libc/JNI/Java exit monitoring]
+- https://github.com/7777lolonlyyou/VMProtect-LLM-SKILL [LLM-oriented devirtualization workflow skill for VMProtect, Themida, and custom VM protections (Triton, Misasm, LLVM references)]
 
 > Fix Themida
 - https://github.com/sodareverse/TDE
@@ -1810,6 +1811,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/ServenScorpion/VirtualApp [Android]
 - https://github.com/chinaapps/zn-toolbox [Host-no-root Android container VM (Twoyi fork) with built-in root and LSPosed for isolated mobile modding]
 - https://github.com/wumingzhinu/VirtualMachine [Android VM app (VM Studio) with Vulkan rendering, Magisk root toggle, Xposed module support, and Google Play services for isolated mobile environments]
+- https://github.com/boz700908/droid-vm [Non-root Android host running a real Linux/UML arm64 guest with Magisk, KernelSU LKM, and KernelPatch for isolated mobile modding research]
 - https://github.com/woand/ShitJumpingVM [Android NEXTVM engine: isolated app sandboxes via Binder proxy and ActivityThread hooks, multi-instance identity spoofing, and anti-detection without root]
 - https://github.com/Iviesever/rooted-android-game-vm [Windows desktop rooted Android game VM workbench with GUI/CLI management, APK install/update, root diagnostics, and private app-data export for isolated mobile testing]
 - https://github.com/mandiant/flare-vm
