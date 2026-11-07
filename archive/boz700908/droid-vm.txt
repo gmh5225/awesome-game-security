@@ -1,0 +1,1968 @@
+Project Path: arc_boz700908_droid-vm_7trvg8o2
+
+Source Tree:
+
+```txt
+arc_boz700908_droid-vm_7trvg8o2
+├── README.md
+├── docs
+│   ├── M0-phone.md
+│   ├── PLAN.md
+│   └── upstream-issue.md
+├── kernel
+│   ├── config
+│   │   └── sukisu-lkm.config
+│   └── patches
+│       ├── 0001-um-arm64-kprobes-and-module-loading.patch
+│       └── um-kprobes
+│           ├── Makefile.append
+│           ├── apply.sh
+│           ├── daifflags-header.h
+│           ├── gcs-header.h
+│           ├── kprobe-signal.c
+│           ├── kprobe-trap.c
+│           ├── kprobes-header-um.h
+│           ├── kprobes-header.h
+│           ├── kretprobe-trampoline.S
+│           ├── mem-host.c
+│           ├── patching-append.c
+│           ├── probe-mem.c
+│           └── traps-header.h
+└── rootfs
+    └── mkrootfs-alpine.sh
+
+```
+
+`README.md`:
+
+```md
+# droid-vm
+
+在**未 root 的 Android 手机**上跑一个带真 Magisk / KernelSU(LKM) / KernelPatch(KPM) 的 Android 环境。
+
+底座不是容器也不是 QEMU，而是 **arm64 上的 Linux/UML** —— 真 Linux 内核以普通 aarch64 用户进程的方式运行，不需要 root、KVM 或 hypervisor。于是 guest 里：
+
+- 有真内核、真块设备、真 mount/overlayfs → 官方 Magisk 管理器走真机流程，模块真挂载；
+- 能 `modprobe` 真 `.ko` → KernelSU 的 LKM 模式可用（模块须为本内核重编）；
+- 能把 KernelPatch 编进内核 → APatch 的 KPM 路线可用；
+- guest 本身就是 root，**不需要任何 root 权限模拟层**。
+
+## 内核底座：`lakitu12/linux-um-arm64-gki`
+
+不自建内核树，直接消费 **[lakitu12/linux-um-arm64-gki](https://github.com/lakitu12/linux-um-arm64-gki)**：Android 17 GKI（6.18.32）之上 95 个提交的 arm64 UML 移植。它已经解决了几件我们本来要自己做的大工程：
+
+| 能力 | 状态 |
+|---|---|
+| **SMP** | `CONFIG_SMP=y`、`NR_CPUS=16`、`ncpus=` 默认「宿主核数−1」；实测 4 个 CPU 密集任务 3.19–3.76×。**ptrace 模式强制单核**，须 `seccomp=on` 才有多 vCPU |
+| 同进程多线程 | 需 `stub_slots=N`（默认 1；app domain 仍会 RCU stall，未开） |
+| 显示 | `umfb` 帧缓冲：脏块镜像到宿主文件/fd，配 `umview` 或 app 的 display sink |
+| 图形加速 | virtio-gpu over virtio-uml PCI，2D 后端 `ci/vugpu2d.py` |
+| 根盘 | ext4 与 **qcow2**（读写、refcount、压缩描述符） |
+| Android guest | `config/android-guest.config`：binder/binderfs、PSI、netfilter 全套，逐条是实测 boot gate |
+| 产物 | `artifacts/linux-bionic`（静态 aarch64，bionic API 30）+ `artifacts/stub_exe_bionic`（必须放同一目录） |
+
+已知短板：块 I/O 完成走进程级 `SIGIO`，全落到 CPU0，I/O 密集任务（`docker build`）扩不起来。
+
+## 本仓库做什么
+
+只做「裁剪 + 叠加 + 出包」：
+
+- `.github/workflows/kernel.yml` — 浅克隆该内核树，装 NDK r28c，按需合并 `config/page4k.config`，再叠加我们的 `kernel/config/magisk-lkm.config`，产出可直接放手机的产物
+- `kernel/config/magisk-lkm.config` — 模块加载 / `KALLSYMS_ALL` / kprobe（KernelSU LKM 与第三方 `.ko` 的前提）
+- `rootfs/mkrootfs-alpine.sh` — M0 用 Alpine ext4 根盘 + 手机端 `run.sh`
+
+## 页大小
+
+本机宿主是 4 KB 页。guest 默认 16 KB 在 4 KB 宿主上能跑（4 宿主页对 1 guest 页），但 **redroid-13 那一代 Android 用户态是 4 KB 的**，所以默认按 `pages4k=true` 出 4 KB 变体，与宿主 1:1。
+
+## 里程碑
+
+见 `docs/PLAN.md`。
+
+```
+
+`docs/M0-phone.md`:
+
+```md
+# M0：手机上跑到 shell、验多核与 umfb
+
+目标：不 root，用 Termux 把 UML 内核跑成 aarch64 用户进程进 Alpine shell，确认
+**`nproc > 1`**（`seccomp=on` 的多 vCPU 路径通了）与 **umfb 能写出帧**。
+
+目标机红米 Note 13 Pro：宿主内核 5.10、Android 16 / SDK 36、`arm64-v8a`、
+**PAGE_SIZE 4096**、MemTotal ≈ 15.6 GB → 产物取 **`um-gki618-4k`**（4 KB 页变体）。
+
+## 1. 产物（缺一不可）
+
+| 文件 | 说明 |
+|---|---|
+| `linux-bionic` | 内核本体，静态 aarch64，跑起来就是一个进程 |
+| `stub_exe_bionic` | **必须与内核同目录** |
+| `alpine.ext4` | 根盘（Alpine 3.20 aarch64 + `/bin/sh`） |
+| `run.sh` | 启动脚本，已带 `seccomp=on` |
+| `kernel-config.txt` | 核对 `.config` 用，不参与启动 |
+
+## 2. 部署（Termux）
+
+```sh
+mkdir -p ~/droidvm && cd ~/droidvm
+unzip -o ~/storage/downloads/um-gki618-4k.zip -d ~/droidvm
+chmod +x linux-bionic stub_exe_bionic run.sh
+```
+
+`uml_dir` 默认 `$HOME/.uml`，Termux 家目录可写；报错时显式加 `uml_dir=$HOME/.uml`。
+
+## 3. 启动
+
+```sh
+cd ~/droidvm && ./run.sh
+```
+
+`run.sh` 等价于：
+
+```sh
+exec ./linux-bionic mem=2048M ubd0=alpine.ext4 root=/dev/ubda rw \
+     init=/bin/sh con0=null,fd:1 seccomp=on "$@"
+```
+
+多余参数原样追加，试参数不必改脚本：
+
+```sh
+./run.sh ncpus=4
+./run.sh seccomp=off                                   # 单核排障基线
+./run.sh umlfb=$HOME/umfb.bin:720x1280-32,hz=30,tile=64
+```
+
+## 4. 验证清单（进 shell 后）
+
+```sh
+nproc ; grep -c processor /proc/cpuinfo    # 期望 > 1（默认 宿主核数-1）
+dmesg | tail -30                           # 无 panic
+free -m ; ls /dev | head -30               # 有 ubda / console / fb0
+```
+
+- **`nproc` = 1**：走的是 ptrace 单核路径 —— 先查 `run.sh` 里 `seccomp=on` 是否还在；
+  在但仍单核，说明宿主/ROM 拦了 `PTRACE_SYSEMU`（5.10 应支持，先看 `uname -r`）。
+- `stub_exe_bionic: No such file` → 与内核不同目录或缺执行位。
+
+## 5. umfb
+
+`umfb` 只有命令行给了 `umlfb=` 才脱离休眠（否则 probe 返回 `-ENODEV`）：
+
+```
+umlfb=<path|fd:N>:<W>x<H>[-32][,hz=<n>][,tile=<n>]
+```
+
+- `<path>`：宿主可写文件，内核把帧（含 magic + 头）镜像进去；`fd:N` 直接写已打开的 fd。
+- `-32` = 32bpp；`hz` 刷新率；`tile` 脏块尺寸（越大越省 CPU）。
+- 验证：`ls -l /dev/fb0`、`cat /sys/class/graphics/fb0/virtual_size` 应与命令行一致；
+  宿主机 `$HOME/umfb.bin` 大小 =「头 + W*H*4」，guest 写屏后 `md5sum` 会变。
+
+`umview`（上游 `tools/um-arm64/umview`，SDL2）是桌面查看器；Android 上先只验文件，
+真正的显示走 M2 的 hwcomposer。
+
+## 6. 失败对照
+
+| 现象 | 原因 | 处理 |
+|---|---|---|
+| 启动即退无输出 | 无执行位 / 架构不符 | `chmod +x`；`file linux-bionic` 应为 aarch64 |
+| `ptrace: Operation not permitted` | ROM 安全策略拦 ptrace | 先用 `seccomp=off` 单核跑通 |
+| `nproc`=1 | 见 §4 | 见 §4 |
+| 没有 `/dev/fb0` | 命令行没给 `umlfb=` | 见 §5 |
+
+## 7. 下一步（M1）
+
+M0 通过后换成 redroid `13.0.0_64only` 拆层得到的 `/system` `/vendor`，
+`init=/system/bin/servicemanager` 验 binderfs（`kernel-config.txt` 里
+`ANDROID_BINDER_IPC`/`ANDROID_BINDERFS` 应为 `=y`）。
+
+```
+
+`docs/PLAN.md`:
+
+```md
+# 里程碑
+
+- **M0**：出 `linux-bionic` + `stub_exe_bionic` + Alpine 根盘，手机上 boot 到 shell，确认 `nproc > 1`（`seccomp=on` 下）与 `umfb` 可写。
+- **M1**：guest 换 Android rootfs（redroid `13.0.0_64only` 拆层得 `/system`、`/vendor`），拉 `servicemanager` 验证 binderfs 通。
+- **M2**：zygote + surfaceflinger + 自写 hwcomposer，帧经 `umfb` 送出 guest。
+- **M3**：App 化（bionic 二进制 + 帧共享内存 + 输入注入）。
+- **M4**：官方 Magisk 真装真用；KernelSU LKM 与 KernelPatch KPM 用 UML 重编模块跑通。
+
+## 我们自己要扛的风险
+
+1. **图形栈**：`umfb` 是平面 framebuffer，Android 要的是 gralloc + hwcomposer；virtio-gpu 的 2D 后端能否顶住 SurfaceFlinger 未验证。这是最大未知。
+2. **同进程多线程不并行**：`stub_slots` 在 app domain 还 RCU stall，Android 单进程多线程性能受限（多进程仍可并行）。
+3. **guest vDSO 时间**：时间回绕问题要确认这棵树是否已修。
+4. **模块生态**：KSU/KPM 模块必须为 UML 重编，现成 GKI `.ko`/`.kpm` 不能直接用。
+5. 上游是个人项目，需长期跟 rebase（它有 `docs/gki-notes.md` 说明换 GKI drop 的坑）。
+
+```
+
+`docs/upstream-issue.md`:
+
+```md
+# 上游 issue 草稿（lakitu12/linux-um-arm64-gki）
+
+> 待 CI 全绿后再发。附的是仓库里的单补丁
+> `kernel/patches/0001-um-arm64-kprobes-and-module-loading.patch`（17 文件）。
+> 正文用英文，便于上游阅读；中文备注只在本文件里。
+
+## 标题
+
+Title (English): **`arm64 UML: add kprobes support so external kernel modules (KSU-style LKMs) can load`**
+
+## 正文（English）
+
+Hi, and thanks for maintaining this tree — it is the only arm64 UML + GKI base I found
+that runs a real 6.18 kernel as an aarch64 userspace process on an unrooted Android
+phone, which is exactly the use case I needed.
+
+**Problem.** `CONFIG_KPROBES` cannot be enabled on `ARCH=um SUBARCH=arm64`:
+
+* `HAVE_KPROBES` / `HAVE_KRETPROBES` are selected only in `arch/arm64/Kconfig`, and
+  `ARCH=um` reads `arch/um/Kconfig` instead, so the symbols are never offered.
+* Even after adding the `select`s, `arch/arm64/kernel/probes/*.c` does not compile: the
+  port has no `asm/kprobes.h`, arm64's `struct pt_regs` accessors (`regs->pc`,
+  `regs->pstate`, `regs->regs[n]`) do not exist in UML's pt_regs, the kprobes BRK
+  encoding lives in a header that pulls the real `asm/memory.h`, and there is no trap
+  path from a host `SIGTRAP` into `kernel/kprobes.c`.
+* `set_memory_ro/rw/rox/...` (used by the module loader and probe memory protection)
+  have no UML implementation.
+
+This matters because a whole class of out-of-tree modules depends on kprobes:
+KernelSU / SukiSU / KPM-style LKMs, live-patching modules, and anything calling
+`register_kprobe()`. Without it an LKM builds but cannot hook anything, so the tree
+cannot be used as a Magisk/KSU host — the main reason people want a real kernel under
+UML in the first place.
+
+**What the patch does** (four layers, all inside `arch/`):
+
+1. **Trap routing.** `arch/um/os-Linux/signal.c` intercepts a host `SIGTRAP` first and
+   hands the register file to `arch/arm64/um/kprobe-trap.c`, which materialises a
+   `struct pt_regs` + a synthetic ESR (EC = 0x3c, comment = the BRK immediate) and calls
+   the existing non-static handlers `kprobe_brk_handler()` /
+   `kprobe_ss_brk_handler()` / `kretprobe_brk_handler()`, then writes the (possibly
+   rewritten) registers back so host resume continues from the patched state.
+   Recursion is blocked per CPU.
+2. **Text patching.** UML has no `stop_machine()`, so
+   `aarch64_insn_patch_text{,_nosync}()` are implemented directly: host `mprotect()` the
+   page writable, `WRITE_ONCE` the instruction word, `__builtin___clear_cache()`,
+   `smp_mb()`.
+3. **Page permissions.** `set_memory_ro/rw/rox/rw_nx/x/nx` map onto a new
+   `os_mem_set_prot()` helper (`mprotect` / `-errno`).
+4. **Headers and config.** `arch/um/Kconfig` selects `HAVE_KPROBES` /
+   `HAVE_KRETPROBES`; `arch/arm64/um/asm/kprobes.h` and
+   `arch/um/include/asm/kprobes.h` forward to the real arm64 header when
+   `CONFIG_KPROBES && __aarch64__` (x86 UML keeps `asm-generic/kprobes.h`); minimal
+   UML-side `traps.h`, `gcs.h`, `daifflags.h` stand-ins replace headers that only make
+   sense on real arm64 hardware; `debug-monitors.h` gets the
+   `BRK64_OPCODE_KPROBES{,_SS}` encodings and `DBG_HOOK_*`; the arm64-only accesses in
+   `probes/kprobes.c` (`pstate`, `pc`, `regs[]`) go through the `PT_REGS_*` accessors,
+   and the EL2 `__hyp_text*` blacklist is compiled out under `CONFIG_UML`.
+
+Kprobes uses the XOL model here (`arch_prepare_ss_slot` writes the original instruction
+followed by `BRK64_OPCODE_KPROBES_SS`), so no hardware single-step is required.
+
+**Testing.** On `ARCH=um SUBARCH=arm64` with `CONFIG_MODULES=y`, `CONFIG_KPROBES=y`,
+`CONFIG_KRETPROBES=y`, `CONFIG_KPROBE_EVENTS=y`: the kernel builds clean with clang 20
+(bionic target, 4 KiB pages) and boots under UML; `insmod`/`rmmod` of a trivial module
+works; a test module registering a `kprobe` on a kernel function fires, and a
+`kretprobe` returns through the trampoline.
+
+Patch attached (`0001-um-arm64-kprobes-and-module-loading.patch`, 17 files). Happy to
+split it per layer, or to move the trap entry out of `os-Linux/signal.c` if you would
+rather have it in `arch/um/drivers`.
+
+## 中文备注（发布前检查清单）
+
+- [ ] 先确认 CI 全绿，产物 `um-gki618-4k` 的 `kernel-config.txt` 含
+      `KPROBES/KRETPROBES/KPROBE_EVENTS/MODULES/MODULE_UNLOAD/KALLSYMS_ALL`。
+- [ ] 手机侧按 `docs/M0-phone.md` 至少 M0 通过（`nproc > 1`、`umlfb` 出帧）再发，
+      正文可补一句真机已验证。
+- [ ] 补丁里不能出现 `sukisu`/`ksu`/`kpm` 字样（当前 grep 为 0）。
+- [ ] 「Testing」里写的每一项都必须是真跑过的，没跑过的删掉。
+
+```
+
+`kernel/config/sukisu-lkm.config`:
+
+```config
+# SukiSU Ultra 走 LKM（CONFIG_KSU=m）+ 内建 KPM（CONFIG_KPM=y）所需的内核侧支撑。
+#
+# 注意：CONFIG_KSU / CONFIG_KPM 不写进 .config —— 上游树的 Kconfig 里没有这两个符号，
+# 它们是在编译 kernelsu.ko 时用 make 变量传进去的（obj-$(CONFIG_KSU) 照样生效）：
+#   make -C <ksrc> O=<objtree> ARCH=um SUBARCH=arm64 LLVM=1 M=<sukisu>/kernel \
+#        CONFIG_KSU=m CONFIG_KPM=y modules
+#
+# 本片段按「一个标准 Android 内核该有的能力」写全，而不是只开 KSU 用到的几项：
+# 后面加子系统不至于一个个回来补，也避免 KSU/Magisk 的模块脚本踩到缺功能就失败。
+# 不存在的符号会被 olddefconfig 丢掉，写多了不致命。
+
+# ---------------------------------------------------------------- 模块装载（KSU 前提）
+CONFIG_MODULES=y
+CONFIG_MODULE_UNLOAD=y
+CONFIG_MODULE_FORCE_UNLOAD=y
+CONFIG_MODULE_COMPRESS_NONE=y
+# 我们自编自用：不要版本戳（否则 kernelsu.ko 与内核必须逐字节同源），也不要签名
+# CONFIG_MODVERSIONS is not set
+# CONFIG_MODULE_SIG is not set
+# CONFIG_MODULE_SIG_FORCE is not set
+CONFIG_MODULE_ALLOW_BTF_MISMATCH=y
+CONFIG_ASM_MODVERSIONS=y
+
+# ---------------------------------------------------------------- 符号与探针（KSU 的 hook）
+CONFIG_KALLSYMS=y
+CONFIG_KALLSYMS_ALL=y
+CONFIG_KPROBES=y
+CONFIG_KPROBE_EVENTS=y
+CONFIG_KRETPROBES=y
+CONFIG_UPROBES=y
+CONFIG_FTRACE=y
+CONFIG_FUNCTION_TRACER=y
+CONFIG_STACKTRACE=y
+CONFIG_FRAME_POINTER=y
+CONFIG_DEBUG_INFO=n
+# SukiSU 的 lkm_image 能读 /sys/kernel/btf/vmlinux 按 BTF 解析符号；没有也能走 kallsyms，
+# 但开了 BTF 更稳（CI 需要 pahole）。先关着，等 lkm_image 真报缺符号再开。
+# CONFIG_DEBUG_INFO_BTF is not set
+
+# ---------------------------------------------------------------- 文件系统
+CONFIG_EXT4_FS=y
+CONFIG_EXT4_USE_FOR_EXT2=y
+CONFIG_EXT4_FS_POSIX_ACL=y
+CONFIG_EXT4_FS_SECURITY=y
+CONFIG_JBD2=y
+CONFIG_FS_MBCACHE=y
+# F2FS 在 ARCH=um 下 f2fs_rwsem 结构不兼容，关闭
+# CONFIG_F2FS_FS is not set
+CONFIG_OVERLAY_FS=y
+CONFIG_OVERLAY_FS_REDIRECT_DIR=y
+CONFIG_OVERLAY_FS_INDEX=y
+CONFIG_OVERLAY_FS_METACOPY=y
+CONFIG_SQUASHFS=y
+CONFIG_SQUASHFS_XZ=y
+CONFIG_SQUASHFS_ZSTD=y
+CONFIG_SQUASHFS_LZ4=y
+CONFIG_SQUASHFS_LZO=y
+CONFIG_EROFS_FS=y
+CONFIG_EROFS_FS_ZIP_LZMA=y
+CONFIG_EROFS_FS_ZIP_ZSTD=y
+CONFIG_FUSE_FS=y
+CONFIG_VIRTIO_FS=n
+CONFIG_TMPFS=y
+CONFIG_TMPFS_POSIX_ACL=y
+CONFIG_TMPFS_XATTR=y
+CONFIG_VFAT_FS=y
+CONFIG_EXFAT_FS=y
+CONFIG_MSDOS_FS=y
+CONFIG_NLS_CODEPAGE_437=y
+CONFIG_NLS_ISO8859_1=y
+CONFIG_NLS_UTF8=y
+CONFIG_ISO9660_FS=y
+CONFIG_UDF_FS=y
+CONFIG_PROC_FS=y
+CONFIG_SYSFS=y
+CONFIG_CONFIGFS_FS=y
+CONFIG_DEBUG_FS=y
+CONFIG_BLK_DEV_LOOP=y
+CONFIG_QUOTA=y
+CONFIG_QFMT_V2=y
+
+# ---------------------------------------------------------------- 容器 / 命名空间 / 资源控制
+CONFIG_NAMESPACES=y
+CONFIG_UTS_NS=y
+CONFIG_IPC_NS=y
+CONFIG_PID_NS=y
+CONFIG_NET_NS=y
+CONFIG_USER_NS=y
+CONFIG_CGROUPS=y
+CONFIG_CGROUP_FREEZER=y
+CONFIG_CGROUP_PIDS=y
+CONFIG_CGROUP_DEVICE=y
+CONFIG_CPUSETS=y
+CONFIG_MEMCG=y
+CONFIG_MEMCG_SWAP=y
+CONFIG_BLK_CGROUP=y
+CONFIG_CGROUP_BPF=y
+CONFIG_SECCOMP=y
+CONFIG_SECCOMP_FILTER=y
+CONFIG_POSIX_MQUEUE=y
+CONFIG_KEYS=y
+CONFIG_SWAP=y
+CONFIG_ZRAM=y
+CONFIG_ZSMALLOC=y
+
+# ---------------------------------------------------------------- 网络（Magisk/KSU 模块与容器常依赖）
+CONFIG_UNIX=y
+CONFIG_INET=y
+CONFIG_IPV6=y
+CONFIG_PACKET=y
+CONFIG_NETFILTER=y
+CONFIG_NF_CONNTRACK=y
+CONFIG_NF_NAT=y
+CONFIG_NF_TABLES=y
+CONFIG_NFT_COMPAT=y
+CONFIG_IP_NF_IPTABLES=y
+CONFIG_IP_NF_FILTER=y
+CONFIG_IP_NF_MANGLE=y
+CONFIG_IP_NF_NAT=y
+CONFIG_IP_NF_TARGET_MASQUERADE=y
+CONFIG_IP_NF_TARGET_REJECT=y
+CONFIG_IP6_NF_IPTABLES=y
+CONFIG_IP6_NF_FILTER=y
+CONFIG_IP6_NF_MANGLE=y
+CONFIG_NETFILTER_XT_MATCH_ADDRTYPE=y
+CONFIG_NETFILTER_XT_MATCH_COMMENT=y
+CONFIG_NETFILTER_XT_MATCH_CONNMARK=y
+CONFIG_NETFILTER_XT_MATCH_CONNTRACK=y
+CONFIG_NETFILTER_XT_MATCH_MULTIPORT=y
+CONFIG_NETFILTER_XT_MATCH_OWNER=y
+CONFIG_NETFILTER_XT_MATCH_PKTTYPE=y
+CONFIG_NETFILTER_XT_MATCH_STATE=y
+CONFIG_NETFILTER_XT_TARGET_TCPMSS=y
+CONFIG_BRIDGE=y
+CONFIG_VETH=y
+CONFIG_TUN=y
+CONFIG_DUMMY=y
+CONFIG_VLAN_8021Q=y
+CONFIG_MACVLAN=y
+CONFIG_NET_SCHED=y
+CONFIG_NET_CLS_BASIC=y
+CONFIG_NET_CLS_U32=y
+CONFIG_NET_ACT_MIRRED=y
+CONFIG_NETLINK_DIAG=y
+CONFIG_INET_DIAG=y
+
+# ---------------------------------------------------------------- Android 专用
+CONFIG_ANDROID_BINDER_IPC=y
+CONFIG_ANDROID_BINDERFS=y
+CONFIG_ANDROID_BINDER_DEVICES="binder,hwbinder,vndbinder"
+CONFIG_PSI=y
+CONFIG_ASHMEM=n
+CONFIG_DMA_SHARED_BUFFER=y
+CONFIG_DMABUF_HEAPS=y
+CONFIG_ANDROID_VENDOR_HOOKS=y
+
+# ---------------------------------------------------------------- 安全 / SELinux（Magisk 的 magiskpolicy --live 依赖）
+CONFIG_SECURITY=y
+CONFIG_SECURITYFS=y
+CONFIG_SECURITY_NETWORK=y
+CONFIG_SECURITY_PATH=y
+CONFIG_AUDIT=y
+CONFIG_AUDITSYSCALL=y
+CONFIG_AUDIT_WATCH=y
+CONFIG_AUDIT_TREE=y
+CONFIG_SECURITY_SELINUX=y
+CONFIG_SECURITY_SELINUX_BOOTPARAM=y
+CONFIG_SECURITY_SELINUX_DEVELOP=y
+CONFIG_SECURITY_SELINUX_AVC_STATS=y
+CONFIG_SECURITY_SELINUX_SIDTAB_HASH_BITS=9
+CONFIG_SECURITY_YAMA=y
+CONFIG_LSM="landlock,lockdown,yama,selinux,bpf"
+CONFIG_FANOTIFY=y
+CONFIG_FANOTIFY_ACCESS_PERMISSIONS=y
+CONFIG_INOTIFY_USER=y
+
+# ---------------------------------------------------------------- 常规 syscall / 现代 Android 用户态需要
+CONFIG_EPOLL=y
+CONFIG_SIGNALFD=y
+CONFIG_TIMERFD=y
+CONFIG_EVENTFD=y
+CONFIG_AIO=y
+CONFIG_FUTEX=y
+CONFIG_MEMFD_CREATE=y
+CONFIG_KCMP=y
+CONFIG_CHECKPOINT_RESTORE=y
+CONFIG_ADVISE_SYSCALLS=y
+CONFIG_ELF_CORE=y
+CONFIG_COREDUMP=y
+CONFIG_BINFMT_SCRIPT=y
+CONFIG_BINFMT_MISC=y
+CONFIG_RSEQ=y
+
+# ---------------------------------------------------------------- 块设备 / 加密 / 更多文件系统
+CONFIG_BLK_DEV_DM=y
+CONFIG_DM_CRYPT=y
+CONFIG_DM_VERITY=y
+CONFIG_DM_SNAPSHOT=y
+CONFIG_DM_THIN_PROVISIONING=y
+CONFIG_MD=y
+CONFIG_BLK_DEV_MD=y
+CONFIG_MD_RAID0=y
+CONFIG_MD_RAID1=y
+CONFIG_BTRFS_FS=y
+CONFIG_BTRFS_FS_POSIX_ACL=y
+CONFIG_XFS_FS=y
+CONFIG_CRYPTO_USER_API=y
+CONFIG_CRYPTO_USER_API_HASH=y
+CONFIG_CRYPTO_USER_API_SKCIPHER=y
+CONFIG_CRYPTO_LZ4=y
+CONFIG_CRYPTO_ZSTD=y
+CONFIG_CRYPTO_XTS=y
+CONFIG_CRYPTO_CTS=y
+CONFIG_CRYPTO_SHA256=y
+CONFIG_CRYPTO_SHA512=y
+
+# ---------------------------------------------------------------- 网络 / BPF 扩展
+CONFIG_NET_IPIP=y
+CONFIG_NET_IPGRE=y
+CONFIG_NET_UDP_TUNNEL=y
+CONFIG_INET_TUNNEL=y
+CONFIG_NF_TABLES_INET=y
+CONFIG_NFT_CT=y
+CONFIG_NFT_MASQ=y
+CONFIG_NFT_NAT=y
+CONFIG_NFT_REJECT=y
+CONFIG_BPF_SYSCALL=y
+CONFIG_BPF_UNPRIV_DEFAULT_OFF=n
+CONFIG_VSOCKETS=n
+CONFIG_VIRTIO_VSOCKETS=n
+CONFIG_KPROBES=y
+CONFIG_KRETPROBES=y
+CONFIG_WERROR=n
+
+# ---------------------------------------------------------------- 事件跟踪（binder 的硬依赖）
+# ANDROID_BINDER_IPC depends on MMU && NET && EVENT_TRACING：
+# 少了 EVENT_TRACING，binder 三个符号会被 Kconfig 直接从 .config 里剔掉，而不是置 n。
+CONFIG_TRACING=y
+CONFIG_EVENT_TRACING=y
+CONFIG_KPROBE_EVENTS=y
+
+# ---------------------------------------------------------------- 容器 / 网络补缺
+CONFIG_NET_CLS_ACT=y
+CONFIG_NET_ACT_MIRRED=y
+CONFIG_NET_SCH_HTB=y
+CONFIG_NET_SCH_INGRESS=y
+CONFIG_NET_CLS_FW=y
+CONFIG_BLK_DEV_THROTTLING=y
+CONFIG_CFS_BANDWIDTH=y
+CONFIG_NETFILTER_XT_MATCH_BPF=y
+CONFIG_NETFILTER_XT_TARGET_CT=y
+CONFIG_CRYPTO_USER=y
+
+# UML 无 FUNCTION_TRACER，靠 syscall tracers 把隐藏的 TRACING/EVENT_TRACING select 起来（binder 依赖）
+CONFIG_FTRACE_SYSCALLS=y
+CONFIG_GENERIC_TRACER=y
+
+```
+
+`kernel/patches/0001-um-arm64-kprobes-and-module-loading.patch`:
+
+```patch
+diff --git a/arch/arm64/kernel/probes/kprobes.c b/arch/arm64/kernel/probes/kprobes.c
+index 43a0361a8..c7dac0e3c 100644
+--- a/arch/arm64/kernel/probes/kprobes.c
++++ b/arch/arm64/kernel/probes/kprobes.c
+@@ -195,15 +195,15 @@ static void __kprobes set_current_kprobe(struct kprobe *p)
+ static void __kprobes kprobes_save_local_irqflag(struct kprobe_ctlblk *kcb,
+ 						struct pt_regs *regs)
+ {
+-	kcb->saved_irqflag = regs->pstate & DAIF_MASK;
+-	regs->pstate |= DAIF_MASK;
++	kcb->saved_irqflag = PT_REGS_PSTATE(regs) & DAIF_MASK;
++	PT_REGS_PSTATE(regs) |= DAIF_MASK;
+ }
+ 
+ static void __kprobes kprobes_restore_local_irqflag(struct kprobe_ctlblk *kcb,
+ 						struct pt_regs *regs)
+ {
+-	regs->pstate &= ~DAIF_MASK;
+-	regs->pstate |= kcb->saved_irqflag;
++	PT_REGS_PSTATE(regs) &= ~DAIF_MASK;
++	PT_REGS_PSTATE(regs) |= kcb->saved_irqflag;
+ }
+ 
+ static void __kprobes setup_singlestep(struct kprobe *p,
+diff --git a/arch/arm64/um/Makefile b/arch/arm64/um/Makefile
+index 751ffdb72..cd83894dc 100644
+--- a/arch/arm64/um/Makefile
++++ b/arch/arm64/um/Makefile
+@@ -42,3 +42,13 @@ UNPROFILE_OBJS := stub_segv.o
+ CFLAGS_stub_segv.o := $(CFLAGS_NO_HARDENING)
+ 
+ include $(srctree)/arch/um/scripts/Makefile.rules
++
++# --- um-kprobes: Makefile ---
++#
++# 父架构的 probes 实现原样复用（解码、模拟、XOL 指令槽都在里面），UML 只加自己的
++# 陷入入口与 set_memory_*() 替身。对象路径写法与上面的 module.o 一致。
++obj-$(CONFIG_KPROBES) += ../kernel/probes/kprobes.o \
++			 ../kernel/probes/decode-insn.o \
++			 ../kernel/probes/simulate-insn.o
++obj-$(CONFIG_KRETPROBES) += ../kernel/probes/kprobes_trampoline.o
++obj-$(CONFIG_KPROBES) += kprobe-trap.o probe-mem.o
+diff --git a/arch/arm64/um/asm/daifflags.h b/arch/arm64/um/asm/daifflags.h
+new file mode 100644
+index 000000000..23f9a7cfb
+--- /dev/null
++++ b/arch/arm64/um/asm/daifflags.h
+@@ -0,0 +1,61 @@
++/* SPDX-License-Identifier: GPL-2.0-only */
++#ifndef __UM_ARM64_DAIFFLAGS_H
++#define __UM_ARM64_DAIFFLAGS_H
++
++/*
++ * arm64 的 <asm/daifflags.h> 直接读写 DAIF 系统寄存器，UML 上没有这个寄存器：
++ * 本地中断在 UML 里是靠屏蔽宿主信号实现的（arch/um/include/asm/irqflags.h），
++ * 所以把 local_daif_* 整体映射到 arch_local_*。
++ *
++ * 被 arch/arm64/kernel/probes/kprobes.c 与 kernel/kprobes.c 用到。
++ */
++#include <linux/irqflags.h>
++#include <linux/types.h>
++
++struct pt_regs;
++
++#define DAIF_PROCCTX		0UL
++#define DAIF_PROCCTX_NOIRQ	0UL
++#define DAIF_ERRCTX		0UL
++#define DAIF_MASK		0UL
++
++/* UML 没有 DAIF.I 可查；调用点只用于决定是否要恢复，返回 false 最保守。 */
++static inline bool irqs_are_masked(void)
++{
++	return false;
++}
++
++static inline void local_daif_mask(void)
++{
++	arch_local_irq_disable();
++}
++
++static inline void local_daif_unmask(void)
++{
++	arch_local_irq_enable();
++}
++
++static inline unsigned long local_daif_save_flags(void)
++{
++	return arch_local_save_flags();
++}
++
++static inline unsigned long local_daif_save(void)
++{
++	unsigned long flags = arch_local_save_flags();
++
++	arch_local_irq_disable();
++	return flags;
++}
++
++static inline void local_daif_restore(unsigned long flags)
++{
++	arch_local_irq_restore(flags);
++}
++
++static inline void local_daif_inherit(struct pt_regs *regs)
++{
++	(void)regs;
++}
++
++#endif /* __UM_ARM64_DAIFFLAGS_H */
+diff --git a/arch/arm64/um/asm/debug-monitors.h b/arch/arm64/um/asm/debug-monitors.h
+index c9a4aa9df..ba584dc5d 100644
+--- a/arch/arm64/um/asm/debug-monitors.h
++++ b/arch/arm64/um/asm/debug-monitors.h
+@@ -12,4 +12,16 @@
+ #ifndef __UM_ARM64_DEBUG_MONITORS_H
+ #define __UM_ARM64_DEBUG_MONITORS_H
+ 
++
++#include <asm/brk-imm.h>
++#include <asm/insn-def.h>
++
++/* 装 kprobe 时把目标指令改写成 BRK；ESR 的 comment 字段区分是哪一种。 */
++#define BRK64_OPCODE_KPROBES	(AARCH64_BREAK_MON | (KPROBES_BRK_IMM << 5))
++#define BRK64_OPCODE_KPROBES_SS	(AARCH64_BREAK_MON | (KPROBES_BRK_SS_IMM << 5))
++
++/* 父架构 probes/kprobes.c 用这两个返回值表示 BRK 是否已被吃掉。 */
++#define DBG_HOOK_HANDLED	0
++#define DBG_HOOK_ERROR		1
++
+ #endif /* __UM_ARM64_DEBUG_MONITORS_H */
+diff --git a/arch/arm64/um/asm/gcs.h b/arch/arm64/um/asm/gcs.h
+new file mode 100644
+index 000000000..1a0288c51
+--- /dev/null
++++ b/arch/arm64/um/asm/gcs.h
+@@ -0,0 +1,27 @@
++/* SPDX-License-Identifier: GPL-2.0-only */
++/*
++ * ARCH=um SUBARCH=arm64 的 <asm/gcs.h>。
++ *
++ * GCS（Guarded Control Stack）是真 arm64 硬件特性，UML guest 没有，恒为未启用。
++ * 真头里有 .inst/sys 内联汇编并 include <asm/uaccess.h>（进而 <asm/memory.h>），
++ * 在 UML 上编不过；kernel/probes/simulate-insn.c 只用到下面三个入口。
++ */
++#ifndef __UM_ARM64_GCS_H
++#define __UM_ARM64_GCS_H
++
++struct task_struct;
++
++static inline bool task_gcs_el0_enabled(struct task_struct *task)
++{
++	return false;
++}
++
++static inline void push_user_gcs(unsigned long val, int *err) { }
++
++static inline u64 pop_user_gcs(int *err)
++{
++	*err = -EINVAL;
++	return 0;
++}
++
++#endif /* __UM_ARM64_GCS_H */
+diff --git a/arch/arm64/um/asm/kprobes.h b/arch/arm64/um/asm/kprobes.h
+index 511755ff8..fccbe1b7a 100644
+--- a/arch/arm64/um/asm/kprobes.h
++++ b/arch/arm64/um/asm/kprobes.h
+@@ -1,18 +1,24 @@
+ /* SPDX-License-Identifier: GPL-2.0-only */
+ /*
+- * ARCH=um SUBARCH=arm64 has no kprobes.
++ * ARCH=um SUBARCH=arm64 的 <asm/kprobes.h>。
+  *
+- * arch/arm64/lib/insn.c is reused here for instruction encoding and tags some
+- * of its functions __kprobes, which is a section annotation rather than a
+- * dependency on the kprobes machinery. The generic header supplies it.
++ * 默认（CONFIG_KPROBES=n）只需要 __kprobes 这个段标注可用：arch/arm64/lib/insn.c
++ * 被复用来做指令编解码，里面的函数标了 __kprobes，那只是段标注，不依赖 kprobes
++ * 机制本身。而 arm64 的真头会经 asm/probes.h 牵出 cpufeature 一整套，白白拖进
++ * cpucap-defs.h，所以默认保持 asm-generic 的精简版。
+  *
+- * Without this, <asm/kprobes.h> resolves to arch/arm64's, which reaches
+- * asm/cpucaps.h and the generated asm/cpucap-defs.h -- the whole cpufeature
+- * apparatus -- to obtain a macro that expands to nothing here.
++ * CONFIG_KPROBES=y 时反过来必须用父架构的完整定义：kprobe_opcode_t、
++ * MAX_INSN_SIZE、struct arch_specific_insn、struct kprobe_ctlblk，以及
++ * kprobe_brk_handler()/kprobe_ss_brk_handler()/kretprobe_brk_handler() 的原型
++ * 都在 arch/arm64/include/asm/kprobes.h 里。UML 换的只是陷入入口，其余照用。
+  */
+ #ifndef __UM_ARM64_KPROBES_H
+ #define __UM_ARM64_KPROBES_H
+ 
++#if defined(CONFIG_KPROBES) && defined(__aarch64__)
++#include "../../include/asm/kprobes.h"
++#else
+ #include <asm-generic/kprobes.h>
++#endif
+ 
+ #endif /* __UM_ARM64_KPROBES_H */
+diff --git a/arch/arm64/um/asm/ptrace.h b/arch/arm64/um/asm/ptrace.h
+index 8a773c44c..03c108f34 100644
+--- a/arch/arm64/um/asm/ptrace.h
++++ b/arch/arm64/um/asm/ptrace.h
+@@ -101,4 +101,13 @@ static inline int ptrace_set_thread_area(struct task_struct *child, int idx,
+ 
+ extern void arch_switch_to(struct task_struct *to);
+ 
++
++/*
++ * generic kernel/kprobes.c（UP 分支）与 arch/arm64/kernel/probes/kprobes.c
++ * 都要把 PC 写回 pt_regs；UML 的 ptrace-generic.h 只提供了读宏。
++ */
++#ifndef instruction_pointer_set
++#define instruction_pointer_set(regs, val) (PT_REGS_IP(regs) = (val))
++#endif
++
+ #endif /* __UM_ARM64_PTRACE_H */
+diff --git a/arch/arm64/um/asm/traps.h b/arch/arm64/um/asm/traps.h
+new file mode 100644
+index 000000000..e59b67f4d
+--- /dev/null
++++ b/arch/arm64/um/asm/traps.h
+@@ -0,0 +1,15 @@
++/* SPDX-License-Identifier: GPL-2.0-only */
++/*
++ * ARCH=um SUBARCH=arm64 的 <asm/traps.h>。
++ *
++ * 父架构的这份头只被 kernel/probes/{kprobes,simulate-insn}.c 包含，而这两个文件
++ * 并不使用它里面的任何东西。真头却会经 <asm/esr.h> 把 <asm/memory.h> 拉进来，
++ * 那份头依赖 CONFIG_ARM64_VA_BITS、virt_to_phys、__ro_after_init 等只对真 arm64
++ * 成立的前提，在 UML 上必然编不过。所以这里给一个空壳。
++ */
++#ifndef __UM_ARM64_TRAPS_H
++#define __UM_ARM64_TRAPS_H
++
++#include <asm/ptrace.h>
++
++#endif /* __UM_ARM64_TRAPS_H */
+diff --git a/arch/arm64/um/kprobe-trap.c b/arch/arm64/um/kprobe-trap.c
+new file mode 100644
+index 000000000..5d6ed610c
+--- /dev/null
++++ b/arch/arm64/um/kprobe-trap.c
+@@ -0,0 +1,117 @@
++// SPDX-License-Identifier: GPL-2.0
++/*
++ * kprobes 的 UML 陷入路由（ARCH=um SUBARCH=arm64）。
++ *
++ * 真机上 BRK 走 do_debug_exception() -> call_break_hook()，由 debug-monitors.c
++ * 按 ESR 里的 comment 把活儿分给父架构的三个 handler。UML 里内核文本就是本进程
++ * 可执行的代码，执行 BRK 只会得到宿主投来的 SIGTRAP，于是
++ * arch/um/os-Linux/signal.c 把该信号截住、整理成 x0..x30/sp/pc/pstate 交到这里：
++ * 本文件把 raw 数组翻译成 struct pt_regs + ESR，调用同一个 handler，再把 handler
++ * 改过的寄存器写回 raw，让宿主恢复执行时用的就是改过的状态。
++ */
++#include <linux/kallsyms.h>
++#include <linux/kprobes.h>
++#include <linux/sched.h>
++#include <linux/smp.h>
++#include <linux/string.h>
++#include <asm/brk-imm.h>
++#include <asm/debug-monitors.h>
++#include <asm/esr.h>
++#include <asm/kprobes.h>
++#include <asm/ptrace.h>
++
++/* raw[] 的布局，必须与 arch/arm64/um/os-Linux/kprobe-signal.c 一致 */
++enum {
++	UM_RAW_X0,
++	UM_RAW_SP = 31,
++	UM_RAW_PC,
++	UM_RAW_PSTATE,
++	UM_RAW_WORDS,
++};
++
++/* 每核防递归：kprobe 的 handler 自己再触发 BRK 时不再进入 */
++static int um_kprobe_busy[NR_CPUS];
++
++int um_arm64_kprobe_trap(unsigned long *raw)
++{
++	struct pt_regs regs;
++	unsigned long pc = raw[UM_RAW_PC];
++	unsigned long esr;
++	unsigned int insn;
++	int cpu, imm, ret, i;
++	bool ours;
++
++	cpu = raw_smp_processor_id();
++	if (um_kprobe_busy[cpu])
++		return 0;
++
++	if (!kernel_text_address(pc))
++		return 0;
++
++	insn = READ_ONCE(*(unsigned int *)pc);
++	if ((insn & 0xffe0001f) != AARCH64_BREAK_MON)
++		return 0;
++
++	imm = (insn >> 5) & 0xffff;
++	ours = (imm == KPROBES_BRK_IMM) || (imm == KPROBES_BRK_SS_IMM);
++#ifdef CONFIG_KRETPROBES
++	ours = ours || (imm == KRETPROBES_BRK_IMM);
++#endif
++	if (!ours)
++		return 0;
++
++	memset(&regs, 0, sizeof(regs));
++	for (i = 0; i < 31; i++)
++		regs.regs[i] = raw[UM_RAW_X0 + i];
++	regs.sp = raw[UM_RAW_SP];
++	regs.pc = pc;
++	regs.syscallno = NO_SYSCALL;
++	/*
++	 * 这是内核态 BRK：把模式位换成 EL1 再交出去，否则 kprobes 内部的
++	 * user_mode(regs) 会把一次内核陷入当成用户态陷入。宿主线程真正的
++	 * EL/DAIF 由信号帧自己保存，所以这个改动不回写。
++	 */
++	regs.pstate = (raw[UM_RAW_PSTATE] & ~PSR_MODE_MASK) | PSR_MODE_EL1h;
++
++	esr = ((unsigned long)ESR_ELx_EC_BRK64 << ESR_ELx_EC_SHIFT) | imm;
++
++	um_kprobe_busy[cpu] = 1;
++	switch (imm) {
++	case KPROBES_BRK_IMM:
++		ret = kprobe_brk_handler(&regs, esr);
++		break;
++	case KPROBES_BRK_SS_IMM:
++		ret = kprobe_ss_brk_handler(&regs, esr);
++		break;
++#ifdef CONFIG_KRETPROBES
++	case KRETPROBES_BRK_IMM:
++		ret = kretprobe_brk_handler(&regs, esr);
++		break;
++#endif
++	default:
++		ret = 0;
++		break;
++	}
++	um_kprobe_busy[cpu] = 0;
++
++	if (!ret)
++		return 0;
++
++	for (i = 0; i < 31; i++)
++		raw[UM_RAW_X0 + i] = regs.regs[i];
++	raw[UM_RAW_SP] = regs.sp;
++	raw[UM_RAW_PC] = regs.pc;
++	return 1;
++}
++NOKPROBE_SYMBOL(um_arm64_kprobe_trap);
++
++/*
++ * 父架构在 arch/arm64/mm/fault.c 里实现，UML 的缺页路径不经过 kprobes，
++ * 返回 0 表示「不由 kprobe 处理」，与父架构的语义一致。
++ */
++int kprobe_fault_handler(struct pt_regs *regs, unsigned int fsr)
++{
++	(void)regs;
++	(void)fsr;
++	return 0;
++}
+diff --git a/arch/arm64/um/os-Linux/Makefile b/arch/arm64/um/os-Linux/Makefile
+index 611e7b6c5..4798f9990 100644
+--- a/arch/arm64/um/os-Linux/Makefile
++++ b/arch/arm64/um/os-Linux/Makefile
+@@ -1,6 +1,6 @@
+ # SPDX-License-Identifier: GPL-2.0
+ 
+-obj-y = registers.o mcontext.o
++obj-y = registers.o mcontext.o mem-host.o kprobe-signal.o
+ 
+ USER_OBJS := $(obj-y)
+ 
+diff --git a/arch/arm64/um/os-Linux/kprobe-signal.c b/arch/arm64/um/os-Linux/kprobe-signal.c
+new file mode 100644
+index 000000000..eb314193e
+--- /dev/null
++++ b/arch/arm64/um/os-Linux/kprobe-signal.c
+@@ -0,0 +1,36 @@
++// SPDX-License-Identifier: GPL-2.0
++/*
++ * 宿主 SIGTRAP -> guest kprobes 的桥。
++ *
++ * 本文件按宿主头文件编译，碰不到 struct pt_regs：只把 mcontext 摊成 34 个字的
++ * raw 数组交给内核侧的 um_arm64_kprobe_trap()，再把可能被改过的寄存器搬回去。
++ */
++#include <string.h>
++#include <sys/ucontext.h>
++
++extern int um_arm64_kprobe_trap(unsigned long *raw) __attribute__((weak));
++
++int arch_um_kprobe_trap(mcontext_t *mc)
++{
++	unsigned long raw[34];
++	int i;
++
++	if (!um_arm64_kprobe_trap)
++		return 0;
++
++	for (i = 0; i < 31; i++)
++		raw[i] = mc->regs[i];
++	raw[31] = mc->sp;
++	raw[32] = mc->pc;
++	raw[33] = mc->pstate;
++
++	if (!um_arm64_kprobe_trap(raw))
++		return 0;
++
++	for (i = 0; i < 31; i++)
++		mc->regs[i] = raw[i];
++	mc->sp = raw[31];
++	mc->pc = raw[32];
++	mc->pstate = raw[33];
++	return 1;
++}
+diff --git a/arch/arm64/um/os-Linux/mem-host.c b/arch/arm64/um/os-Linux/mem-host.c
+new file mode 100644
+index 000000000..0803fcc1f
+--- /dev/null
++++ b/arch/arm64/um/os-Linux/mem-host.c
+@@ -0,0 +1,19 @@
++// SPDX-License-Identifier: GPL-2.0
++/*
++ * 宿主侧页权限辅助。
++ *
++ * 内核文本是本进程 ELF 的 .text（RX 映射），要写入必须先让宿主把它改成可写；
++ * 模块与 kprobe 指令槽是 vmalloc 来的普通内存，要执行又必须先改成可执行。
++ * 这两件事只有宿主能做，所以放在 os-Linux。
++ */
++#include <errno.h>
++#include <sys/mman.h>
++#include <sys/types.h>
++
++int os_mem_set_prot(void *addr, unsigned long len, int prot)
++{
++	if (mprotect(addr, (size_t)len, prot) == 0)
++		return 0;
++
++	return -errno;
++}
+diff --git a/arch/arm64/um/patching.c b/arch/arm64/um/patching.c
+index bf9c7449f..8785f3321 100644
+--- a/arch/arm64/um/patching.c
++++ b/arch/arm64/um/patching.c
+@@ -43,3 +43,53 @@ void *aarch64_insn_copy(void *dst, void *src, size_t len)
+ 
+ 	return dst;
+ }
++
++/*
++ * --- um-kprobes: patching ---
++ *
++ * kprobes 与模块需要的文本改写入口。父架构的实现在 arch/arm64/kernel/patching.c，
++ * 它靠「可写别名映射」加 stop_machine 保证一致性；UML 两样都没有：内核文本就是本
++ * 进程 ELF 的 .text（RX 映射），改写前得让宿主 mprotect 临时开写，改完再收回去；
++ * 也没有 stop_machine（arch/um 全树没有这个设施），跨 CPU 只做屏障，本核清 I-cache。
++ */
++#include <linux/smp.h>
++#include <linux/string.h>
++#include <asm/page.h>
++
++#define UM_PROT_READ	1
++#define UM_PROT_WRITE	2
++#define UM_PROT_EXEC	4
++
++extern int os_mem_set_prot(void *addr, unsigned long len, int prot);
++
++int aarch64_insn_patch_text_nosync(void *addr, u32 insn)
++{
++	unsigned long page = (unsigned long)addr & PAGE_MASK;
++	int ret;
++
++	ret = os_mem_set_prot((void *)page, PAGE_SIZE,
++			      UM_PROT_READ | UM_PROT_WRITE | UM_PROT_EXEC);
++	if (ret)
++		return ret;
++
++	WRITE_ONCE(*(u32 *)addr, insn);
++	__builtin___clear_cache((char *)addr, (char *)addr + sizeof(insn));
++
++	/* 收回到 RX：这片内存除了指令没有别的用途 */
++	os_mem_set_prot((void *)page, PAGE_SIZE, UM_PROT_READ | UM_PROT_EXEC);
++	return 0;
++}
++
++int aarch64_insn_patch_text(void *addrs[], u32 insns[], int cnt)
++{
++	int i, ret;
++
++	for (i = 0; i < cnt; i++) {
++		ret = aarch64_insn_patch_text_nosync(addrs[i], insns[i]);
++		if (ret)
++			return ret;
++	}
++
++	smp_mb();
++	return 0;
++}
+diff --git a/arch/arm64/um/probe-mem.c b/arch/arm64/um/probe-mem.c
+new file mode 100644
+index 000000000..e68794820
+--- /dev/null
++++ b/arch/arm64/um/probe-mem.c
+@@ -0,0 +1,59 @@
++// SPDX-License-Identifier: GPL-2.0
++/*
++ * UML 侧的 set_memory_*()。
++ *
++ * 真机上是页表操作，UML 里只能让宿主 mprotect。两处依赖它：
++ *   - alloc_insn_page() 要把 kprobe 指令槽改成只读可执行；
++ *   - UML 的 vmalloc/execmem 内存默认不可执行，模块与指令槽最终要执行。
++ */
++#include <linux/kernel.h>
++#include <linux/mm.h>
++#include <asm/page.h>
++
++#define UM_PROT_READ	1
++#define UM_PROT_WRITE	2
++#define UM_PROT_EXEC	4
++
++extern int os_mem_set_prot(void *addr, unsigned long len, int prot);
++
++static int um_set_mem(unsigned long addr, int numpages, int prot)
++{
++	unsigned long start = addr & PAGE_MASK;
++	unsigned long end = PAGE_ALIGN(addr + (unsigned long)numpages * PAGE_SIZE);
++
++	if (end <= start)
++		return -EINVAL;
++
++	return os_mem_set_prot((void *)start, end - start, prot);
++}
++
++int set_memory_ro(unsigned long addr, int numpages)
++{
++	return um_set_mem(addr, numpages, UM_PROT_READ);
++}
++
++int set_memory_rw(unsigned long addr, int numpages)
++{
++	return um_set_mem(addr, numpages, UM_PROT_READ | UM_PROT_WRITE);
++}
++
++int set_memory_rox(unsigned long addr, int numpages)
++{
++	return um_set_mem(addr, numpages, UM_PROT_READ | UM_PROT_EXEC);
++}
++
++int set_memory_rw_nx(unsigned long addr, int numpages)
++{
++	return um_set_mem(addr, numpages, UM_PROT_READ | UM_PROT_WRITE);
++}
++
++int set_memory_x(unsigned long addr, int numpages)
++{
++	return um_set_mem(addr, numpages,
++			  UM_PROT_READ | UM_PROT_WRITE | UM_PROT_EXEC);
++}
++
++int set_memory_nx(unsigned long addr, int numpages)
++{
++	return um_set_mem(addr, numpages, UM_PROT_READ | UM_PROT_WRITE);
++}
+diff --git a/arch/um/Kconfig b/arch/um/Kconfig
+index 0030e4b97..808d1321c 100644
+--- a/arch/um/Kconfig
++++ b/arch/um/Kconfig
+@@ -74,6 +74,8 @@ config UML
+ 	select ARCH_HAS_UBSAN
+ 	select HAVE_ARCH_TRACEHOOK
+ 	select HAVE_SYSCALL_TRACEPOINTS
++	select HAVE_KPROBES
++	select HAVE_KRETPROBES
+ 	select THREAD_INFO_IN_TASK
+ 	select SPARSE_IRQ
+ 
+diff --git a/arch/um/include/asm/kprobes.h b/arch/um/include/asm/kprobes.h
+new file mode 100644
+index 000000000..049f0118e
+--- /dev/null
++++ b/arch/um/include/asm/kprobes.h
+@@ -0,0 +1,19 @@
++/* SPDX-License-Identifier: GPL-2.0-only */
++/*
++ * <asm/kprobes.h> 在 ARCH=um 下的解析入口。
++ *
++ * arch/um/include 在 include 搜索顺序里比 arch/arm64/um 更靠前，所以只改
++ * arch/arm64/um/asm/kprobes.h 不一定生效；两个位置写成同一份语义：
++ * arm64 子架构且开了 KPROBES 时转发到父架构的真头，其余情况保持 asm-generic
++ * 的精简版（只提供 __kprobes 段标注）。
++ */
++#ifndef __UM_ASM_KPROBES_H
++#define __UM_ASM_KPROBES_H
++
++#if defined(CONFIG_KPROBES) && defined(__aarch64__)
++#include "../../../arm64/include/asm/kprobes.h"
++#else
++#include <asm-generic/kprobes.h>
++#endif
++
++#endif /* __UM_ASM_KPROBES_H */
+diff --git a/arch/um/os-Linux/signal.c b/arch/um/os-Linux/signal.c
+index de372b936..4ae327acd 100644
+--- a/arch/um/os-Linux/signal.c
++++ b/arch/um/os-Linux/signal.c
+@@ -22,6 +22,9 @@
+ #include <timetravel.h>
+ #include "internal.h"
+ 
++/* ARCH=um SUBARCH=arm64 的 kprobes 桥；没有实现（如 x86）时是空指针 */
++extern int arch_um_kprobe_trap(mcontext_t *mc) __attribute__((weak));
++
+ void (*sig_info[NSIG])(int, struct siginfo *, struct uml_pt_regs *, void *mc) = {
+ 	[SIGTRAP]	= relay_signal,
+ 	[SIGFPE]	= relay_signal,
+@@ -48,6 +51,10 @@ static void sig_handler_common(int sig, struct siginfo *si, mcontext_t *mc)
+ 	if ((sig != SIGIO) && (sig != SIGWINCH) && (sig != SIGCHLD))
+ 		unblock_signals_trace();
+ 
++	/* BRK 型陷入：先交给 kprobes，没人认领才当普通信号转发给 guest */
++	if (sig == SIGTRAP && arch_um_kprobe_trap && arch_um_kprobe_trap(mc))
++		return;
++
+ 	(*sig_info[sig])(sig, si, &r, mc);
+ }
+ 
+
+```
+
+`kernel/patches/um-kprobes/Makefile.append`:
+
+```append
+
+# --- um-kprobes: Makefile ---
+#
+# 父架构的 probes 实现原样复用（解码、模拟、XOL 指令槽都在里面），UML 只加自己的
+# 陷入入口与 set_memory_*() 替身。对象路径写法与上面的 module.o 一致。
+obj-$(CONFIG_KPROBES) += ../kernel/probes/kprobes.o \
+			 ../kernel/probes/decode-insn.o \
+			 ../kernel/probes/simulate-insn.o
+# CONFIG_KRETPROBES 的 trampoline 用自家的：父架构那份 .S 会 include
+# <asm/assembler.h>，其包含链在 UML 下不是汇编安全的。
+obj-$(CONFIG_KRETPROBES) += kretprobe-trampoline.o
+obj-$(CONFIG_KPROBES) += kprobe-trap.o probe-mem.o
+
+```
+
+`kernel/patches/um-kprobes/apply.sh`:
+
+```sh
+#!/bin/bash
+# 把 kprobes 移植打进 ksrc 树。可重复执行。
+set -e
+K=${1:?用法: apply.sh <内核源码目录>}
+P=$(cd "$(dirname "$0")" && pwd)
+
+cp "$P/kprobe-trap.c"   "$K/arch/arm64/um/kprobe-trap.c"
+cp "$P/probe-mem.c"     "$K/arch/arm64/um/probe-mem.c"
+cp "$P/kprobe-signal.c" "$K/arch/arm64/um/os-Linux/kprobe-signal.c"
+cp "$P/kretprobe-trampoline.S" "$K/arch/arm64/um/kretprobe-trampoline.S"
+cp "$P/mem-host.c"      "$K/arch/arm64/um/os-Linux/mem-host.c"
+
+# <asm/kprobes.h> 的桩默认只给 __kprobes 标注，开了 KPROBES 必须换回父架构真头
+cp "$P/kprobes-header.h" "$K/arch/arm64/um/asm/kprobes.h"
+cp "$P/kprobes-header-um.h" "$K/arch/um/include/asm/kprobes.h"
+cp "$P/daifflags-header.h" "$K/arch/arm64/um/asm/daifflags.h"
+cp "$P/traps-header.h"     "$K/arch/arm64/um/asm/traps.h"
+cp "$P/gcs-header.h"       "$K/arch/arm64/um/asm/gcs.h"
+echo "um-kprobes: <asm/kprobes.h> 两处已铺"
+md5sum "$K/arch/arm64/um/asm/kprobes.h" "$K/arch/um/include/asm/kprobes.h"
+
+if ! grep -q 'um-kprobes: patching' "$K/arch/arm64/um/patching.c"; then
+	cat "$P/patching-append.c" >> "$K/arch/arm64/um/patching.c"
+fi
+
+if ! grep -q 'um-kprobes: Makefile' "$K/arch/arm64/um/Makefile"; then
+	cat "$P/Makefile.append" >> "$K/arch/arm64/um/Makefile"
+fi
+
+python3 - "$K" <<'PY'
+import sys, pathlib
+K = pathlib.Path(sys.argv[1])
+
+# 1) arch/um/Kconfig: HAVE_KPROBES / HAVE_KRETPROBES
+kc = K / 'arch/um/Kconfig'
+s = kc.read_text()
+if 'HAVE_KPROBES' not in s:
+    anchor = '\tselect HAVE_SYSCALL_TRACEPOINTS\n'
+    if anchor not in s:
+        anchor = '\tselect HAVE_ARCH_TRACEHOOK\n'
+    assert anchor in s, 'arch/um/Kconfig 锚点丢失'
+    s = s.replace(anchor, anchor + '\tselect HAVE_KPROBES\n\tselect HAVE_KRETPROBES\n', 1)
+    kc.write_text(s)
+
+# 2) os-Linux/Makefile: 两个宿主侧文件
+mk = K / 'arch/arm64/um/os-Linux/Makefile'
+s = mk.read_text()
+if 'mem-host.o' not in s:
+    old = 'obj-y = registers.o mcontext.o'
+    assert old in s, 'os-Linux/Makefile 锚点丢失'
+    s = s.replace(old, 'obj-y = registers.o mcontext.o mem-host.o kprobe-signal.o', 1)
+    mk.write_text(s)
+
+# 3) 补 patching 的两个原型（um 版头文件里可能只有 nosync）
+th = K / 'arch/arm64/um/asm/text-patching.h'
+s = th.read_text()
+if 'aarch64_insn_patch_text(void' not in s:
+    s += ('\n/* kprobes 需要的一次性改多处文本入口（um-kprobes） */\n'
+          'int aarch64_insn_patch_text(void *addrs[], u32 insns[], int cnt);\n')
+    th.write_text(s)
+
+# 4) 共享 signal.c: SIGTRAP 先问 kprobes
+sc = K / 'arch/um/os-Linux/signal.c'
+s = sc.read_text()
+if 'arch_um_kprobe_trap' not in s:
+    old_inc = '#include "internal.h"'
+    assert old_inc in s, 'signal.c include 锚点丢失'
+    s = s.replace(old_inc,
+                  old_inc + '\n\n/* ARCH=um SUBARCH=arm64 的 kprobes 桥；'
+                  '没有实现（如 x86）时是空指针 */\n'
+                  'extern int arch_um_kprobe_trap(mcontext_t *mc) __attribute__((weak));',
+                  1)
+    old = '\t(*sig_info[sig])(sig, si, &r, mc);'
+    assert old in s, 'signal.c 分派锚点丢失'
+    s = s.replace(old,
+                  '\t/* BRK 型陷入：先交给 kprobes，没人认领才当普通信号转发给 guest */\n'
+                  '\tif (sig == SIGTRAP && arch_um_kprobe_trap && arch_um_kprobe_trap(mc))\n'
+                  '\t\treturn;\n\n' + old, 1)
+    sc.write_text(s)
+
+print('um-kprobes: 补丁已应用')
+
+# 5) arch/arm64/um/asm/ptrace.h: kprobes 需要 instruction_pointer_set
+#    （instruction_pointer 已经是 ptrace-generic.h 里的宏，不能再定义同名函数）
+pt = K / 'arch/arm64/um/asm/ptrace.h'
+s = pt.read_text()
+if 'instruction_pointer_set' not in s:
+    snippet = """
+/*
+ * generic kernel/kprobes.c（UP 分支）与 arch/arm64/kernel/probes/kprobes.c
+ * 都要把 PC 写回 pt_regs；UML 的 ptrace-generic.h 只提供了读宏。
+ */
+#ifndef instruction_pointer_set
+#define instruction_pointer_set(regs, val) (PT_REGS_IP(regs) = (val))
+#endif
+
+#ifndef __ASSEMBLY__
+/*
+ * 父架构的 kernel/probes/simulate-insn.c 按「架构寄存器号」读写 pt_regs，其中
+ * 31 表示 XZR 而不是 SP；UML 侧 x0..x30 与 HOST_Xn 一一对应且连续。
+ */
+static inline unsigned long pt_regs_read_reg(struct pt_regs *regs, int r)
+{
+	return (r == 31) ? 0 : PT_REGS_X(regs, r);
+}
+
+static inline void pt_regs_write_reg(struct pt_regs *regs, int r,
+				     unsigned long val)
+{
+	if (r != 31)
+		PT_REGS_X(regs, r) = val;
+}
+
+static inline void procedure_link_pointer_set(struct pt_regs *regs,
+					      unsigned long val)
+{
+	PT_REGS_X30(regs) = val;
+}
+#endif /* !__ASSEMBLY__ */
+
+"""
+    i = s.rstrip().rfind('#endif')
+    assert i > 0, 'ptrace.h 里找不到结尾 #endif'
+    pt.write_text(s[:i] + snippet + s[i:])
+PY
+
+# 6) arch/arm64/um/asm/debug-monitors.h：父架构 probes/kprobes.c 要用 BRK 立即数
+#    编码（装点 / 软单步）与 DBG_HOOK_*（BRK 是否已被消费）。
+python3 - "$K" <<'PY'
+import sys, pathlib
+K = pathlib.Path(sys.argv[1])
+p = K / 'arch/arm64/um/asm/debug-monitors.h'
+s = p.read_text()
+if 'BRK64_OPCODE_KPROBES' not in s:
+    add = """
+#include <asm/brk-imm.h>
+#include <asm/insn-def.h>
+
+/* 装 kprobe 时把目标指令改写成 BRK；ESR 的 comment 字段区分是哪一种。 */
+#define BRK64_OPCODE_KPROBES\t(AARCH64_BREAK_MON | (KPROBES_BRK_IMM << 5))
+#define BRK64_OPCODE_KPROBES_SS\t(AARCH64_BREAK_MON | (KPROBES_BRK_SS_IMM << 5))
+
+/* 父架构 probes/kprobes.c 用这两个返回值表示 BRK 是否已被吃掉。 */
+#define DBG_HOOK_HANDLED\t0
+#define DBG_HOOK_ERROR\t\t1
+
+"""
+    i = s.rstrip().rfind('#endif')
+    assert i > 0, 'debug-monitors.h 里找不到结尾 #endif'
+    p.write_text(s[:i] + add + s[i:])
+print('debug-monitors.h: BRK64_OPCODE_* / DBG_HOOK_* 已补')
+PY
+
+# 7) 父架构 probes 代码直接把 pstate 当 struct pt_regs 的成员读写；UML 的 pt_regs
+#    把它收在 regs 里，只能走 PT_REGS_PSTATE()。
+python3 - "$K" <<'PY'
+import sys, pathlib
+K = pathlib.Path(sys.argv[1])
+for rel in ('arch/arm64/kernel/probes/kprobes.c',
+            'arch/arm64/kernel/probes/simulate-insn.c'):
+    p = K / rel
+    s = p.read_text()
+    if 'regs->pstate' not in s:
+        continue
+    p.write_text(s.replace('regs->pstate', 'PT_REGS_PSTATE(regs)'))
+    print('%s: regs->pstate 改走 PT_REGS_PSTATE()' % rel)
+PY
+
+# 8) 父架构 probes/kprobes.c 剩下的真 arm64 专有写法：regs->pc、regs->regs[n] 在
+#    UML 的 pt_regs 里不存在（宿主寄存器收在 regs 里，走 PT_REGS_* 宏）；EL2 的
+#    hyp / hyp_idmap 文本段在 UML 上根本没有。
+python3 - "$K" <<'PY'
+import sys, pathlib
+K = pathlib.Path(sys.argv[1])
+p = K / 'arch/arm64/kernel/probes/kprobes.c'
+s = p.read_text()
+s = s.replace('regs->regs[29]', 'PT_REGS_X29(regs)')
+s = s.replace('regs->regs[30]', 'PT_REGS_X30(regs)')
+s = s.replace('regs->pc', 'PT_REGS_IP(regs)')
+hyp = """\tret = kprobe_add_area_blacklist((unsigned long)__hyp_text_start,
+\t\t\t\t\t(unsigned long)__hyp_text_end);
+\tif (ret || is_kernel_in_hyp_mode())
+\t\treturn ret;
+\tret = kprobe_add_area_blacklist((unsigned long)__hyp_idmap_text_start,
+\t\t\t\t\t(unsigned long)__hyp_idmap_text_end);
+"""
+if hyp in s and 'UML 没有 EL2' not in s:
+    s = s.replace(hyp,
+        '#ifndef CONFIG_UML\n/* UML 没有 EL2，不存在 hyp / hyp_idmap 文本段。 */\n'
+        + hyp + '#endif\n')
+p.write_text(s)
+print('probes/kprobes.c: pc/regs[] 走宏，hyp 段按 CONFIG_UML 屏蔽')
+PY
+
+```
+
+`kernel/patches/um-kprobes/daifflags-header.h`:
+
+```h
+/* SPDX-License-Identifier: GPL-2.0-only */
+#ifndef __UM_ARM64_DAIFFLAGS_H
+#define __UM_ARM64_DAIFFLAGS_H
+
+/*
+ * arm64 的 <asm/daifflags.h> 直接读写 DAIF 系统寄存器，UML 上没有这个寄存器：
+ * 本地中断在 UML 里是靠屏蔽宿主信号实现的（arch/um/include/asm/irqflags.h），
+ * 所以把 local_daif_* 整体映射到 arch_local_*。
+ *
+ * 被 arch/arm64/kernel/probes/kprobes.c 与 kernel/kprobes.c 用到。
+ */
+#include <linux/irqflags.h>
+#include <linux/types.h>
+
+struct pt_regs;
+
+#define DAIF_PROCCTX		0UL
+#define DAIF_PROCCTX_NOIRQ	0UL
+#define DAIF_ERRCTX		0UL
+#define DAIF_MASK		0UL
+
+/* UML 没有 DAIF.I 可查；调用点只用于决定是否要恢复，返回 false 最保守。 */
+static inline bool irqs_are_masked(void)
+{
+	return false;
+}
+
+static inline void local_daif_mask(void)
+{
+	arch_local_irq_disable();
+}
+
+static inline void local_daif_unmask(void)
+{
+	arch_local_irq_enable();
+}
+
+static inline unsigned long local_daif_save_flags(void)
+{
+	return arch_local_save_flags();
+}
+
+static inline unsigned long local_daif_save(void)
+{
+	unsigned long flags = arch_local_save_flags();
+
+	arch_local_irq_disable();
+	return flags;
+}
+
+static inline void local_daif_restore(unsigned long flags)
+{
+	arch_local_irq_restore(flags);
+}
+
+static inline void local_daif_inherit(struct pt_regs *regs)
+{
+	(void)regs;
+}
+
+#endif /* __UM_ARM64_DAIFFLAGS_H */
+
+```
+
+`kernel/patches/um-kprobes/gcs-header.h`:
+
+```h
+/* SPDX-License-Identifier: GPL-2.0-only */
+/*
+ * ARCH=um SUBARCH=arm64 的 <asm/gcs.h>。
+ *
+ * GCS（Guarded Control Stack）是真 arm64 硬件特性，UML guest 没有，恒为未启用。
+ * 真头里有 .inst/sys 内联汇编并 include <asm/uaccess.h>（进而 <asm/memory.h>），
+ * 在 UML 上编不过；kernel/probes/simulate-insn.c 只用到下面三个入口。
+ */
+#ifndef __UM_ARM64_GCS_H
+#define __UM_ARM64_GCS_H
+
+struct task_struct;
+
+static inline bool task_gcs_el0_enabled(struct task_struct *task)
+{
+	return false;
+}
+
+static inline void push_user_gcs(unsigned long val, int *err) { }
+
+static inline u64 pop_user_gcs(int *err)
+{
+	*err = -EINVAL;
+	return 0;
+}
+
+#endif /* __UM_ARM64_GCS_H */
+
+```
+
+`kernel/patches/um-kprobes/kprobe-signal.c`:
+
+```c
+// SPDX-License-Identifier: GPL-2.0
+/*
+ * 宿主 SIGTRAP -> guest kprobes 的桥。
+ *
+ * 本文件按宿主头文件编译，碰不到 struct pt_regs：只把 mcontext 摊成 34 个字的
+ * raw 数组交给内核侧的 um_arm64_kprobe_trap()，再把可能被改过的寄存器搬回去。
+ */
+#include <string.h>
+#include <sys/ucontext.h>
+
+extern int um_arm64_kprobe_trap(unsigned long *raw) __attribute__((weak));
+
+int arch_um_kprobe_trap(mcontext_t *mc)
+{
+	unsigned long raw[34];
+	int i;
+
+	if (!um_arm64_kprobe_trap)
+		return 0;
+
+	for (i = 0; i < 31; i++)
+		raw[i] = mc->regs[i];
+	raw[31] = mc->sp;
+	raw[32] = mc->pc;
+	raw[33] = mc->pstate;
+
+	if (!um_arm64_kprobe_trap(raw))
+		return 0;
+
+	for (i = 0; i < 31; i++)
+		mc->regs[i] = raw[i];
+	mc->sp = raw[31];
+	mc->pc = raw[32];
+	mc->pstate = raw[33];
+	return 1;
+}
+
+```
+
+`kernel/patches/um-kprobes/kprobe-trap.c`:
+
+```c
+// SPDX-License-Identifier: GPL-2.0
+/*
+ * kprobes 的 UML 陷入路由（ARCH=um SUBARCH=arm64）。
+ *
+ * 真机上 BRK 走 do_debug_exception() -> call_break_hook()，由 debug-monitors.c
+ * 按 ESR 里的 comment 把活儿分给父架构的三个 handler。UML 里内核文本就是本进程
+ * 可执行的代码，执行 BRK 只会得到宿主投来的 SIGTRAP，于是
+ * arch/um/os-Linux/signal.c 把该信号截住、整理成 x0..x30/sp/pc/pstate 交到这里：
+ * 本文件把 raw 数组翻译成 struct pt_regs + ESR，调用同一个 handler，再把 handler
+ * 改过的寄存器写回 raw，让宿主恢复执行时用的就是改过的状态。
+ */
+#include <linux/kallsyms.h>
+#include <linux/kprobes.h>
+#include <linux/sched.h>
+#include <linux/smp.h>
+#include <linux/string.h>
+#include <asm/brk-imm.h>
+#include <asm/debug-monitors.h>
+#include <asm/kprobes.h>
+#include <asm/ptrace.h>
+
+/*
+ * 父架构 <asm/esr.h> 会经 <asm/memory.h> 拉入真 arm64 的地址空间常量
+ * （CONFIG_ARM64_VA_BITS、virt_to_phys 等），UML 侧编不过。这里只用到两个
+ * ESR 编码常量，按 ARM ARM 的定义直接写。
+ */
+#define ESR_ELx_EC_SHIFT	26
+#define ESR_ELx_EC_BRK64	0x3c
+
+/*
+ * arm64 的 PSTATE 模式位。UML 的 <asm/ptrace.h> 不提供 PSR_MODE_*，
+ * 而这里只需要「内核态 EL1h」这一个值，按 ARM ARM 定义直接写。
+ */
+#define UM_PSR_MODE_MASK	0xful
+#define UM_PSR_MODE_EL1h	0x5ul
+
+/* raw[] 的布局，必须与 arch/arm64/um/os-Linux/kprobe-signal.c 一致 */
+enum {
+	UM_RAW_X0,
+	UM_RAW_SP = 31,
+	UM_RAW_PC,
+	UM_RAW_PSTATE,
+	UM_RAW_WORDS,
+};
+
+/* 每核防递归：kprobe 的 handler 自己再触发 BRK 时不再进入 */
+static int um_kprobe_busy[NR_CPUS];
+
+int um_arm64_kprobe_trap(unsigned long *raw)
+{
+	struct pt_regs regs;
+	unsigned long pc = raw[UM_RAW_PC];
+	unsigned long esr;
+	unsigned int insn;
+	int cpu, imm, ret, i;
+	bool ours;
+
+	cpu = raw_smp_processor_id();
+	if (um_kprobe_busy[cpu])
+		return 0;
+
+	if (!kernel_text_address(pc))
+		return 0;
+
+	insn = READ_ONCE(*(unsigned int *)pc);
+	if ((insn & 0xffe0001f) != AARCH64_BREAK_MON)
+		return 0;
+
+	imm = (insn >> 5) & 0xffff;
+	ours = (imm == KPROBES_BRK_IMM) || (imm == KPROBES_BRK_SS_IMM);
+#ifdef CONFIG_KRETPROBES
+	ours = ours || (imm == KRETPROBES_BRK_IMM);
+#endif
+	if (!ours)
+		return 0;
+
+	/*
+	 * UML 的 struct pt_regs 只有 regs.gp[] 一个寄存器阵列，没有 regs/sp/
+	 * pc/pstate/syscallno 这些成员，全部走 PT_REGS_* 宏。
+	 */
+	memset(&regs, 0, sizeof(regs));
+	for (i = 0; i < 31; i++)
+		PT_REGS_X(&regs, i) = raw[UM_RAW_X0 + i];
+	PT_REGS_SP_REG(&regs) = raw[UM_RAW_SP];
+	PT_REGS_IP(&regs) = pc;
+	/*
+	 * 这是内核态 BRK。UML 的 user_mode(regs) 读的是 uml_pt_regs.is_user
+	 * （memset 已置 0），真 arm64 读的是 pstate 模式位，所以这里把模式位
+	 * 也换成 EL1h，两边对「内核态」的判定才一致。宿主线程真正的 EL/DAIF
+	 * 由信号帧自己保存，这个改动不回写。
+	 */
+	PT_REGS_PSTATE(&regs) = (raw[UM_RAW_PSTATE] & ~UM_PSR_MODE_MASK) |
+				UM_PSR_MODE_EL1h;
+
+	esr = ((unsigned long)ESR_ELx_EC_BRK64 << ESR_ELx_EC_SHIFT) | imm;
+
+	um_kprobe_busy[cpu] = 1;
+	switch (imm) {
+	case KPROBES_BRK_IMM:
+		ret = kprobe_brk_handler(&regs, esr);
+		break;
+	case KPROBES_BRK_SS_IMM:
+		ret = kprobe_ss_brk_handler(&regs, esr);
+		break;
+#ifdef CONFIG_KRETPROBES
+	case KRETPROBES_BRK_IMM:
+		ret = kretprobe_brk_handler(&regs, esr);
+		break;
+#endif
+	default:
+		ret = 0;
+		break;
+	}
+	um_kprobe_busy[cpu] = 0;
+
+	if (!ret)
+		return 0;
+
+	for (i = 0; i < 31; i++)
+		raw[UM_RAW_X0 + i] = PT_REGS_X(&regs, i);
+	raw[UM_RAW_SP] = PT_REGS_SP_REG(&regs);
+	raw[UM_RAW_PC] = PT_REGS_IP(&regs);
+	return 1;
+}
+NOKPROBE_SYMBOL(um_arm64_kprobe_trap);
+
+/*
+ * 父架构在 arch/arm64/mm/fault.c 里实现，UML 的缺页路径不经过 kprobes，
+ * 返回 0 表示「不由 kprobe 处理」，与父架构的语义一致。
+ */
+int kprobe_fault_handler(struct pt_regs *regs, unsigned int fsr)
+{
+	(void)regs;
+	(void)fsr;
+	return 0;
+}
+
+```
+
+`kernel/patches/um-kprobes/kprobes-header-um.h`:
+
+```h
+/* SPDX-License-Identifier: GPL-2.0-only */
+/*
+ * <asm/kprobes.h> 在 ARCH=um 下的解析入口。
+ *
+ * arch/um/include 在 include 搜索顺序里比 arch/arm64/um 更靠前，所以只改
+ * arch/arm64/um/asm/kprobes.h 不一定生效；两个位置写成同一份语义：
+ * arm64 子架构且开了 KPROBES 时转发到父架构的真头，其余情况保持 asm-generic
+ * 的精简版（只提供 __kprobes 段标注）。
+ */
+#ifndef __UM_ASM_KPROBES_H
+#define __UM_ASM_KPROBES_H
+
+#if defined(CONFIG_KPROBES) && defined(__aarch64__)
+#include "../../../arm64/include/asm/kprobes.h"
+#else
+#include <asm-generic/kprobes.h>
+#endif
+
+#endif /* __UM_ASM_KPROBES_H */
+
+```
+
+`kernel/patches/um-kprobes/kprobes-header.h`:
+
+```h
+/* SPDX-License-Identifier: GPL-2.0-only */
+/*
+ * ARCH=um SUBARCH=arm64 的 <asm/kprobes.h>。
+ *
+ * 默认（CONFIG_KPROBES=n）只需要 __kprobes 这个段标注可用：arch/arm64/lib/insn.c
+ * 被复用来做指令编解码，里面的函数标了 __kprobes，那只是段标注，不依赖 kprobes
+ * 机制本身。而 arm64 的真头会经 asm/probes.h 牵出 cpufeature 一整套，白白拖进
+ * cpucap-defs.h，所以默认保持 asm-generic 的精简版。
+ *
+ * CONFIG_KPROBES=y 时反过来必须用父架构的完整定义：kprobe_opcode_t、
+ * MAX_INSN_SIZE、struct arch_specific_insn、struct kprobe_ctlblk，以及
+ * kprobe_brk_handler()/kprobe_ss_brk_handler()/kretprobe_brk_handler() 的原型
+ * 都在 arch/arm64/include/asm/kprobes.h 里。UML 换的只是陷入入口，其余照用。
+ */
+#ifndef __UM_ARM64_KPROBES_H
+#define __UM_ARM64_KPROBES_H
+
+#if defined(CONFIG_KPROBES) && defined(__aarch64__)
+#include "../../include/asm/kprobes.h"
+#else
+#include <asm-generic/kprobes.h>
+#endif
+
+#endif /* __UM_ARM64_KPROBES_H */
+
+```
+
+`kernel/patches/um-kprobes/kretprobe-trampoline.S`:
+
+```S
+/* SPDX-License-Identifier: GPL-2.0 */
+/*
+ * kretprobe trampoline for ARCH=um SUBARCH=arm64.
+ *
+ * 父架构的 kernel/probes/kprobes_trampoline.S 会 include <asm/assembler.h>，
+ * 那一串头在 UML 上是 C 专用的（alternative.h / cpufeature.h / ptrace.h 都有
+ * 汇编器不认识的写法），所以这里只留下真正需要的那一条 brk。
+ *
+ * kretprobe 把被 hook 函数的返回地址换成这个符号；执行到 brk 时宿主送来
+ * SIGTRAP，arch/um/os-Linux/signal.c 交给 kprobe-trap.c，后者合成 ESR 并转给
+ * kretprobe_brk_handler()，handler 把 PC 改成真实返回地址后再回到调用者。
+ *
+ * 立即数与父架构 asm/brk-imm.h 的 KRETPROBES_BRK_IMM 保持一致（0x007）。
+ */
+	.text
+	.align	2
+	.globl	__kretprobe_trampoline
+	.type	__kretprobe_trampoline, %function
+__kretprobe_trampoline:
+	brk	#0x007
+1:	b	1b
+	.size	__kretprobe_trampoline, . - __kretprobe_trampoline
+
+```
+
+`kernel/patches/um-kprobes/mem-host.c`:
+
+```c
+// SPDX-License-Identifier: GPL-2.0
+/*
+ * 宿主侧页权限辅助。
+ *
+ * 内核文本是本进程 ELF 的 .text（RX 映射），要写入必须先让宿主把它改成可写；
+ * 模块与 kprobe 指令槽是 vmalloc 来的普通内存，要执行又必须先改成可执行。
+ * 这两件事只有宿主能做，所以放在 os-Linux。
+ */
+#include <errno.h>
+#include <sys/mman.h>
+#include <sys/types.h>
+
+int os_mem_set_prot(void *addr, unsigned long len, int prot)
+{
+	if (mprotect(addr, (size_t)len, prot) == 0)
+		return 0;
+
+	return -errno;
+}
+
+```
+
+`kernel/patches/um-kprobes/patching-append.c`:
+
+```c
+
+/*
+ * --- um-kprobes: patching ---
+ *
+ * kprobes 与模块需要的文本改写入口。父架构的实现在 arch/arm64/kernel/patching.c，
+ * 它靠「可写别名映射」加 stop_machine 保证一致性；UML 两样都没有：内核文本就是本
+ * 进程 ELF 的 .text（RX 映射），改写前得让宿主 mprotect 临时开写，改完再收回去；
+ * 也没有 stop_machine（arch/um 全树没有这个设施），跨 CPU 只做屏障，本核清 I-cache。
+ */
+#include <linux/smp.h>
+#include <linux/string.h>
+#include <asm/page.h>
+
+#define UM_PROT_READ	1
+#define UM_PROT_WRITE	2
+#define UM_PROT_EXEC	4
+
+extern int os_mem_set_prot(void *addr, unsigned long len, int prot);
+
+int aarch64_insn_patch_text_nosync(void *addr, u32 insn)
+{
+	unsigned long page = (unsigned long)addr & PAGE_MASK;
+	int ret;
+
+	ret = os_mem_set_prot((void *)page, PAGE_SIZE,
+			      UM_PROT_READ | UM_PROT_WRITE | UM_PROT_EXEC);
+	if (ret)
+		return ret;
+
+	WRITE_ONCE(*(u32 *)addr, insn);
+	__builtin___clear_cache((char *)addr, (char *)addr + sizeof(insn));
+
+	/* 收回到 RX：这片内存除了指令没有别的用途 */
+	os_mem_set_prot((void *)page, PAGE_SIZE, UM_PROT_READ | UM_PROT_EXEC);
+	return 0;
+}
+
+int aarch64_insn_patch_text(void *addrs[], u32 insns[], int cnt)
+{
+	int i, ret;
+
+	for (i = 0; i < cnt; i++) {
+		ret = aarch64_insn_patch_text_nosync(addrs[i], insns[i]);
+		if (ret)
+			return ret;
+	}
+
+	smp_mb();
+	return 0;
+}
+
+```
+
+`kernel/patches/um-kprobes/probe-mem.c`:
+
+```c
+// SPDX-License-Identifier: GPL-2.0
+/*
+ * UML 侧的 set_memory_*()。
+ *
+ * 真机上是页表操作，UML 里只能让宿主 mprotect。两处依赖它：
+ *   - alloc_insn_page() 要把 kprobe 指令槽改成只读可执行；
+ *   - UML 的 vmalloc/execmem 内存默认不可执行，模块与指令槽最终要执行。
+ */
+#include <linux/kernel.h>
+#include <linux/mm.h>
+#include <asm/page.h>
+
+#define UM_PROT_READ	1
+#define UM_PROT_WRITE	2
+#define UM_PROT_EXEC	4
+
+extern int os_mem_set_prot(void *addr, unsigned long len, int prot);
+
+static int um_set_mem(unsigned long addr, int numpages, int prot)
+{
+	unsigned long start = addr & PAGE_MASK;
+	unsigned long end = PAGE_ALIGN(addr + (unsigned long)numpages * PAGE_SIZE);
+
+	if (end <= start)
+		return -EINVAL;
+
+	return os_mem_set_prot((void *)start, end - start, prot);
+}
+
+int set_memory_ro(unsigned long addr, int numpages)
+{
+	return um_set_mem(addr, numpages, UM_PROT_READ);
+}
+
+int set_memory_rw(unsigned long addr, int numpages)
+{
+	return um_set_mem(addr, numpages, UM_PROT_READ | UM_PROT_WRITE);
+}
+
+int set_memory_rox(unsigned long addr, int numpages)
+{
+	return um_set_mem(addr, numpages, UM_PROT_READ | UM_PROT_EXEC);
+}
+
+int set_memory_rw_nx(unsigned long addr, int numpages)
+{
+	return um_set_mem(addr, numpages, UM_PROT_READ | UM_PROT_WRITE);
+}
+
+int set_memory_x(unsigned long addr, int numpages)
+{
+	return um_set_mem(addr, numpages,
+			  UM_PROT_READ | UM_PROT_WRITE | UM_PROT_EXEC);
+}
+
+int set_memory_nx(unsigned long addr, int numpages)
+{
+	return um_set_mem(addr, numpages, UM_PROT_READ | UM_PROT_WRITE);
+}
+
+```
+
+`kernel/patches/um-kprobes/traps-header.h`:
+
+```h
+/* SPDX-License-Identifier: GPL-2.0-only */
+/*
+ * ARCH=um SUBARCH=arm64 的 <asm/traps.h>。
+ *
+ * 父架构的这份头只被 kernel/probes/{kprobes,simulate-insn}.c 包含，而这两个文件
+ * 并不使用它里面的任何东西。真头却会经 <asm/esr.h> 把 <asm/memory.h> 拉进来，
+ * 那份头依赖 CONFIG_ARM64_VA_BITS、virt_to_phys、__ro_after_init 等只对真 arm64
+ * 成立的前提，在 UML 上必然编不过。所以这里给一个空壳。
+ */
+#ifndef __UM_ARM64_TRAPS_H
+#define __UM_ARM64_TRAPS_H
+
+#include <asm/ptrace.h>
+
+/*
+ * 父架构把它实现为 kernel/traps.c 里的真函数（要处理 compat 与 PC 前进量）。
+ * UML 侧只有 aarch64 语义：把 PC 推进一条被模拟掉的指令即可。
+ */
+#define arm64_skip_faulting_instruction(regs, size)	(PT_REGS_IP(regs) += (size))
+
+#endif /* __UM_ARM64_TRAPS_H */
+
+```
+
+`rootfs/mkrootfs-alpine.sh`:
+
+```sh
+#!/usr/bin/env bash
+# M0 用的 Alpine ext4 根盘（UML ubd0 直接挂）
+set -euo pipefail
+OUT=${KOUT:-$PWD/artifacts}
+SIZE=${SIZE:-1024M}
+VER=${ALPINE_VER:-3.20}
+mkdir -p "$OUT" work
+cd work
+[ -f rootfs.tar.gz ] || curl -sSLo rootfs.tar.gz \
+  "https://dl-cdn.alpinelinux.org/alpine/v${VER}/releases/aarch64/alpine-minirootfs-${VER}.0-aarch64.tar.gz"
+rm -rf root && mkdir -p root
+tar -xzf rootfs.tar.gz -C root
+mkdir -p root/dev root/proc root/sys root/data
+[ -e root/etc/resolv.conf ] || echo "nameserver 1.1.1.1" > root/etc/resolv.conf
+rm -f "$OUT/alpine.ext4"
+mke2fs -q -t ext4 -F -d root -L umroot "$OUT/alpine.ext4" "$SIZE"
+cat > "$OUT/run.sh" <<'RUN'
+#!/bin/sh
+# 在 Termux 里把 linux-bionic、stub_exe_bionic、alpine.ext4 放同一目录后：sh run.sh
+# seccomp=on 才会走 PTRACE_SYSEMU 快路径并拿到多 vCPU；不支持时改用 seccomp=auto。
+exec ./linux-bionic mem=2048M ubd0=alpine.ext4 root=/dev/ubda rw \
+  init=/bin/sh con0=null,fd:1 seccomp=on "$@"
+RUN
+chmod +x "$OUT/run.sh"
+ls -lh "$OUT"
+
+```

@@ -1,0 +1,1466 @@
+Project Path: arc_7777lolonlyyou_VMProtect-LLM-SKILL_w1ph_js3
+
+Source Tree:
+
+```txt
+arc_7777lolonlyyou_VMProtect-LLM-SKILL_w1ph_js3
+├── LICENSE
+├── README.md
+└── SKILL-en.MD
+
+```
+
+`LICENSE`:
+
+```
+MIT License
+
+Copyright (c) 2026 7777lolonlyyou
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
+`README.md`:
+
+```md
+# VMProtect-LLM-SKILL
+A practical devirtualization workflow skill for VMProtect, Themida, and custom virtual-machine protections.
+
+References:
+
+https://webtv.univ-lille.fr/video/7566/inside-vmprotect
+
+https://aftermathlabs.net/blog/17/05/2021/ VMProtect 2 - Detailed Analysis of the Virtual Machine Architecture
+
+https://aftermathlabs.net/blog/21/06/2021/ VMProtect 2 - Part Two, Complete Static Analysis
+
+https://aftermathlabs.net/blog/09/05/2026/ Static Devirtualization of Themida
+
+https://www.usenix.org/legacy/event/woot09/tech/full_papers/rolles.pdf 
+
+https://whereisr0da.github.io/blog/posts/2021-02-16-vmp-3/ 
+
+https://hackyboiz.github.io/2025/09/11/banda/LLVM_based_VMP/en/
+
+https://blog.thalium.re/posts/llvm-powered-devirtualization/
+
+https://www.msreverseengineering.com/blog/2014/6/23/vmprotect-part-0-basics
+
+https://nac-l.github.io/2025/01/25/lifting_0.html
+
+https://0xnobody.github.io/devirtualization-intro/
+
+https://secret.club/2021/09/08/vmprotect-llvm-lifting-1.html 
+
+https://secret.club/2021/09/08/vmprotect-llvm-lifting-2.html 
+
+https://secret.club/2021/09/08/vmprotect-llvm-lifting-3.html 
+
+https://www.mitchellzakocs.com/blog/vmprotect3 
+
+https://eversinc33.com/writing-a-naive-llvm-based-devirtualizer/
+
+https://arxiv.org/pdf/1909.01752
+
+https://shell-storm.org/talks/DIMVA2018-deobfuscation-salwan-bardin-potet.pdf
+
+https://github.com/can1357/NoVmp 
+
+https://github.com/archercreat/vmpfix 
+
+https://github.com/eversinc33/MogVMP
+
+https://github.com/void-stack/VMUnprotect 
+
+https://github.com/JonathanSalwan/Triton/blob/master/publications/DIMVA2018-slide-deobfuscation-salwan-bardin-potet.pdf 
+
+https://github.com/JonathanSalwan/VMProtect-devirtualization 
+
+https://github.com/pgarba/UniTaint 
+
+https://github.com/mrexodia/VMProtectTest 
+
+https://github.com/NaC-L/Mergen     
+
+https://github.com/sexyiam/VMPLift  
+
+https://github.com/mrexodia/VMProtectTest/tree/master
+
+https://github.com/lmy375/awesome-vmp
+
+https://github.com/LLVMParty/TicklingVMProtect
+https://github.com/gmh5225/awesome-llvm-security/
+
+```
+
+`SKILL-en.MD`:
+
+```MD
+---
+name: vm-devirtualization
+description: A practical devirtualization workflow for VMProtect, Themida, and custom virtual-machine protections. Uses Miasm as the primary execution and analysis tool, combining runtime data extraction, register anchoring, handler identification, taint analysis, data-flow slicing, symbolic execution, and expression simplification to recover the actual program semantics hidden behind virtualization.
+---
+
+# VM Devirtualization
+
+## I. Goals and Core Concepts
+
+### 1.1 Analysis Goals
+
+The primary goal of devirtualization is not to fully reimplement the virtual machine or simply identify opcodes. It is to recover the original program semantics from the virtual machine's execution behavior.
+
+The key questions are:
+
+1. What operation is the virtual machine currently performing?
+2. Where does a handler obtain its inputs?
+3. Which registers, memory locations, or VM states does the handler modify?
+4. How are the handler's results passed to the next handler?
+5. Which operations belong to the original program logic, and which are only responsible for VM dispatch, decryption, and state maintenance?
+6. How can the recovered operations be reorganized into understandable expressions or pseudocode?
+
+The desired result should resemble:
+
+```cpp
+result = (input ^ key) + offset;
+if (result == target)
+    goto success;
+```
+
+Rather than a large block of assembly still containing VM register rotation, opcode decoding, and dispatcher jumps.
+
+### 1.2 Overall Analysis Workflow
+
+The workflow combines dynamic execution with static analysis:
+
+```text
+Locate virtualized code
+      |
+      v
+Set up the Miasm execution environment
+      |
+      v
+Execute and record important states
+      |
+      v
+Identify VMContext and register anchors
+      |
+      v
+Identify handler boundaries
+      |
+      v
+Recover handler inputs and outputs
+      |
+      v
+Taint analysis and data-flow slicing
+      |
+      v
+Symbolic analysis and path constraints
+      |
+      v
+Expression simplification
+      |
+      v
+Recover original program semantics
+      |
+      v
+Validate the recovered results
+```
+
+Do not attempt to analyze every handler at once. First identify stable state anchors and execution boundaries, then gradually expand the analysis.
+
+### 1.3 Tool Responsibilities
+
+**Miasm: Primary analysis tool**
+
+- Load PE files and manage address spaces.
+- Decode instructions and analyze basic blocks.
+- Perform controlled execution and maintain register states.
+- Record and replay important execution paths.
+- Convert assembly instructions into IR.
+- Analyze expressions, data dependencies, and symbolic values.
+- Validate recovered semantics in a controlled environment.
+
+**Debugger: Auxiliary tool**
+
+Use a debugger primarily to obtain information that Miasm cannot directly provide:
+
+- Data generated or decrypted only at runtime.
+- Register and memory states at critical points.
+- Dynamically generated code or decoded bytecode.
+- Differences between Miasm execution and real program execution.
+- Runtime behavior that is difficult to reproduce in a simulated environment.
+
+There is no requirement to record a complete execution trace with a debugger. Avoid spending excessive time on single-stepping.
+
+**Other analysis tools**
+
+- Capstone: Auxiliary instruction disassembly.
+- pefile: PE structure and section information.
+- Triton: Use when more advanced taint propagation or symbolic expression capabilities are needed.
+- Z3: Solve path constraints and simplify selected expressions.
+- IDA: Locate functions, inspect cross-references, and examine disassembly.
+
+Choose tools according to the problem being investigated. Not every stage needs every tool.
+
+---
+
+## II. Preparation
+
+### 2.1 Inspect the Sample
+
+Before analysis, identify:
+
+- PE architecture: x86 or x64.
+- ImageBase and section layout.
+- RVA of the target function.
+- Whether the target function is virtualized.
+- Whether runtime decryption, code modification, or dynamic code generation is present.
+- Whether anti-debugging, anti-emulation, or other mechanisms may affect execution.
+
+Record the target function's entry address, range, and nearby call relationships.
+
+### 2.2 Define Analysis Boundaries
+
+Do not immediately treat the entire program as the analysis target.
+
+First identify:
+
+1. Virtualized function entry.
+2. VM initialization location.
+3. Dispatcher or handler dispatch location.
+4. VM exit location.
+5. Return from virtualized code to native code.
+
+If wrapper functions exist before or after the target function, distinguish their logic from the actual VM execution logic.
+
+### 2.3 Establish Initial Hypotheses
+
+Use disassembly and runtime behavior to form preliminary hypotheses. For example:
+
+- A register may hold the bytecode read position.
+- A register may point to the virtual register area.
+- A code region may be responsible for handler dispatch.
+- A memory region may contain the VMContext.
+
+Treat these only as hypotheses that need verification, not as established facts.
+
+---
+
+## III. PE Loading and the Miasm Execution Environment
+
+### 3.1 Load the PE
+
+Use Miasm to load the target file and establish an execution environment for the corresponding architecture.
+
+Handle the following:
+
+- PE ImageBase.
+- Section mapping.
+- Entry point.
+- Target function address.
+- Required imported functions.
+- Stack and heap memory.
+- Global data required at runtime.
+
+Keep RVA, file offset, and VA distinct:
+
+```text
+VA = ImageBase + RVA
+```
+
+A file offset must not be used directly as a runtime address.
+
+### 3.2 Initialize Registers and Memory
+
+Before executing the target function, reconstruct a reasonable initial state as far as possible:
+
+- General-purpose registers.
+- RSP/ESP.
+- Stack memory.
+- Function arguments.
+- Global variables.
+- TLS and other required runtime data.
+
+There is no need to simulate the entire program from the beginning.
+
+If the target function depends on external environments, unrelated functions can be replaced with stubs. However, ensure that the stubs do not modify states required by the current analysis.
+
+### 3.3 Handle External Functions
+
+When encountering an API or another external function, first determine whether it affects the current analysis target.
+
+There are three general categories:
+
+**Irrelevant functions**
+
+Functions that only produce unrelated side effects can be skipped or replaced with simple stubs.
+
+**State-dependent functions**
+
+Functions that modify global variables, memory, or important return values must preserve their relevant behavior.
+
+**Critical functions**
+
+Functions involved in decryption, validation, or VM state updates should be analyzed as accurately as possible.
+
+Do not arbitrarily assign return values just to make the emulated program continue. An incorrect stub can invalidate all subsequent states.
+
+### 3.4 Execution Records
+
+During Miasm execution, record information that is actually useful for analysis:
+
+```text
+Execution address
+Current instruction
+General-purpose register states
+Important memory reads and writes
+Branch result
+State before and after execution
+```
+
+There is no need to save every memory value indiscriminately.
+
+Use structured records so they can later be queried by address, register, or memory location.
+
+---
+
+## IV. Dynamic Tracing and Runtime Data Extraction
+
+### 4.1 Use Miasm as the Primary Execution Engine
+
+Prefer Miasm to execute the target code and obtain instruction sequences and important runtime states.
+
+The purpose of a trace is not to save as much data as possible. It is to make it possible to answer:
+
+- When does a handler begin?
+- What does it read?
+- What does it modify?
+- How does the VM state change after execution?
+
+For long-running targets, execute and record the program in stages. There is no need to trace the entire program in one pass.
+
+### 4.2 Sample Important States
+
+It is unnecessary to record a complete register snapshot for every instruction.
+
+Prioritize these locations:
+
+- Handler entry.
+- Handler exit.
+- Dispatcher entry and exit.
+- Locations where the bytecode read position changes.
+- Locations where VMContext is modified.
+- Locations where important memory regions are written.
+- VM entry and exit.
+
+This reduces trace size and makes state changes easier to locate.
+
+### 4.3 Use a Debugger for Auxiliary Extraction
+
+When Miasm cannot obtain the actual runtime data, use a debugger to inspect critical locations.
+
+Focus on:
+
+- VMContext after initialization.
+- Decrypted bytecode.
+- Dynamically generated handler addresses.
+- Runtime decryption keys.
+- Important memory regions.
+- Locations where emulated execution diverges from real execution.
+
+The debugger primarily provides factual runtime data. It is not intended to handle the entire trace analysis process.
+
+### 4.4 Align Runtime Data with the Trace
+
+Record the origin of extracted data:
+
+```text
+Address
+Data length
+Extraction time
+Associated function or handler
+Corresponding execution position
+Data purpose
+```
+
+If the same memory region contains different data at different times, do not keep only its final contents.
+
+Distinguish between:
+
+- Data before decryption.
+- Data after decryption.
+- Data modified during execution.
+- Data after handler execution.
+
+Otherwise, states from different execution stages may be incorrectly mixed together.
+
+---
+
+## V. VMContext, Register Anchors, and State Mapping
+
+### 5.1 Why Anchors Are Necessary
+
+A virtual machine usually does not directly use native CPU registers to represent all original program states.
+
+Original registers may be mapped to:
+
+- Fixed memory slots in VMContext.
+- A virtual register array.
+- A virtual stack.
+- Specific memory regions.
+- Dynamic addresses calculated from registers and offsets.
+
+Without knowing where these states are stored, it is difficult to determine a handler's inputs and outputs.
+
+Therefore, begin by identifying a small number of stable state anchors.
+
+### 5.2 Common Anchor Types
+
+Prioritize the following states:
+
+| Anchor | Possible purpose |
+|---|---|
+| Bytecode read position | Identifies the current virtual instruction position |
+| Handler address | Identifies the currently executing handler |
+| VMContext base | Locates the VM context |
+| VREG base | Locates virtual registers |
+| Virtual stack pointer | Locates the virtual stack |
+| Decryption key | Explains bytecode or address decoding |
+| Dispatch state | Explains how the next handler is selected |
+
+These are categories of states to identify, not fixed registers or offsets.
+
+### 5.3 Build a State Mapping
+
+Assign consistent abstract names to confirmed states:
+
+```text
+VM_IP          Current virtual instruction position
+VM_HANDLER     Current handler
+VM_CONTEXT     Virtual machine context
+VM_VREG        Virtual register area
+VM_STACK       Virtual stack
+VM_KEY         Decoding key
+```
+
+Avoid repeatedly inferring semantics from unverified register names during later analysis.
+
+For example:
+
+```text
+R12 = VM_IP
+R15 = VM_VREG
+```
+
+Only establish this mapping after verifying it through multiple execution paths and data-flow analysis.
+
+### 5.4 Validate Anchors
+
+An anchor should pass at least the following checks:
+
+1. Its purpose remains consistent across multiple handlers.
+2. Its changes explain corresponding VM state changes.
+3. It has reasonable relationships with other known states.
+4. Its interpretation is not based solely on one execution path.
+
+If a register serves different purposes at different stages, document its role separately for each stage instead of forcing it into a single fixed mapping.
+
+---
+
+## VI. Handler Boundary Identification and Classification
+
+### 6.1 Identify Handlers
+
+A handler is a basic unit of operation within the virtual machine.
+
+Focus on:
+
+- How the dispatcher selects a target address.
+- Where a handler begins.
+- Where a handler ends.
+- Whether the handler modifies VM_IP.
+- Whether the handler jumps directly to another handler.
+- Whether shared prefix or suffix code exists.
+
+Do not simply treat every basic block as a separate handler.
+
+A handler may contain multiple basic blocks or connect multiple code fragments through jumps.
+
+### 6.2 Distinguish the Dispatcher from Handlers
+
+The dispatcher selects the next processing routine.
+
+A handler performs a specific virtual operation.
+
+In real implementations, the two may be interleaved:
+
+```text
+Dispatcher
+    |
+    v
+Handler A
+    |
+    v
+Update VM state
+    |
+    v
+Calculate next handler
+    |
+    v
+Dispatcher
+    |
+    v
+Handler B
+```
+
+Therefore, distinguish between:
+
+- The functional code of the current handler.
+- Dispatch logic between handlers.
+- Bytecode decryption and reading.
+- VM state updates.
+
+### 6.3 Handler Categories
+
+Classify handlers by function before attempting to recover every opcode.
+
+**Ordinary handlers**
+
+Primarily perform arithmetic, logical, assignment, and data movement operations.
+
+Focus on:
+
+- Where inputs originate.
+- Where outputs are written.
+- Whether flags are modified.
+- Whether additional memory accesses occur.
+
+**Control-flow handlers**
+
+Responsible for jumps, conditional branches, loops, or virtual calls.
+
+Focus on:
+
+- Branch conditions.
+- Changes to VM_IP.
+- Selection of the next handler.
+- Virtual registers involved in the condition.
+
+**Composite handlers**
+
+Contain multiple consecutive operations within one handler.
+
+Do not immediately split them into multiple opcodes. First recover their overall inputs and outputs, then determine whether further decomposition is necessary based on data flow.
+
+**CALL-type handlers**
+
+Involve native function calls or internal VM calls.
+
+Focus on:
+
+- Call target.
+- Argument sources.
+- Return-value location.
+- VM state before and after the call.
+- Whether nested VM calls occur.
+
+### 6.4 Handler Record Format
+
+Maintain a record for each handler:
+
+```text
+Handler ID:
+Entry address:
+Exit address:
+Input states:
+Output states:
+Memory reads:
+Memory writes:
+VM_IP changes:
+Branch behavior:
+Call behavior:
+Current semantic hypothesis:
+Validation status:
+```
+
+Do not record only handler addresses and opcode numbers. Their inputs, outputs, and semantics are much more valuable.
+
+---
+
+## VII. Data Flow, Taint Analysis, and Register Rotation
+
+### 7.1 Trace Inputs to Outputs
+
+Handler assembly may contain many intermediate operations:
+
+```asm
+mov eax, [r12]
+xor eax, ebx
+rol eax, 7
+add eax, ecx
+mov [r13], eax
+```
+
+Reading every instruction independently can make the analysis unnecessarily difficult.
+
+A more effective approach is to determine:
+
+1. Where the input data originates.
+2. Which operations it passes through.
+3. Which operations affect the final result.
+4. Where the final result is written.
+
+The result can be represented as:
+
+```text
+Input A
+  |
+  v
+XOR
+  |
+  v
+ROL
+  |
+  v
+ADD
+  |
+  v
+Output B
+```
+
+### 7.2 Taint Analysis
+
+Mark important inputs as tainted:
+
+- Bytecode.
+- Virtual registers in VMContext.
+- Virtual stack data.
+- External function return values.
+- Runtime-decrypted data.
+
+Observe how taint propagates into:
+
+- Arithmetic operations.
+- Memory addresses.
+- Branch conditions.
+- Handler target addresses.
+- Final write operations.
+
+The goal of taint analysis is not to label every piece of data. It is to identify dependencies relevant to the current semantic recovery target.
+
+### 7.3 Register Rotation
+
+VMProtect may use register rotation, register renaming, or dynamic state updates to complicate analysis.
+
+Do not infer a register's purpose solely from its name.
+
+Instead, trace:
+
+- Where its current value originates.
+- Which instructions use it later.
+- Whether it is copied into other registers.
+- Whether it is written into a fixed memory slot.
+- Whether its role changes between handlers.
+
+When a register changes roles, continue tracking the value through its data flow rather than relying on a fixed register mapping.
+
+### 7.4 Backward Slicing
+
+Once an important output has been identified, trace backward from that output.
+
+For example:
+
+```asm
+mov [rdi], eax
+```
+
+If `[rdi]` is a target virtual register, analyze where `eax` originates.
+
+Gradually eliminate:
+
+- Instructions that do not affect the output.
+- Instructions used only for dispatch.
+- State maintenance already confirmed to be irrelevant.
+- Intermediate values that do not affect the final result.
+
+The goal is to retain only the instruction chain that actually determines the output.
+
+### 7.5 Byte Provenance Tracking
+
+In VMProtect 3.9 bytecode reading and decoding, byte provenance tracking can help explain complex bitwise operations and data composition.
+
+When a value is assembled from multiple bytes through concatenation, shifts, masks, or XOR operations, observing only the final numeric value is often insufficient.
+
+Track the origin of each byte or bit range.
+
+For example:
+
+```text
+Original bytes:
+B0  B1  B2  B3
+
+After processing:
+B2  B0  B3  B1
+```
+
+The important information is which original byte each output byte came from, not merely the final integer value.
+
+The provenance relationship can be represented as:
+
+```text
+Result[7:0]   <- Original B2
+Result[15:8]  <- Original B0
+Result[23:16] <- Original B3
+Result[31:24] <- Original B1
+```
+
+Preserve provenance information particularly when handling:
+
+- AND / OR / XOR.
+- SHL / SHR.
+- ROL / ROR.
+- Bit masks.
+- Byte concatenation.
+- Truncation and extension.
+- Data composition after memory reads.
+
+Important considerations:
+
+1. Equal numeric values do not necessarily have the same origin.
+2. Identical register values may originate from different bytecode positions.
+3. Byte or bit-range provenance must be updated after shifts.
+4. Truncation may discard the provenance of higher bits.
+5. Composition operations must preserve the provenance of each component.
+
+Byte provenance tracking does not need to cover the entire program. Enable it only when bytecode decoding, operand extraction, or complex bitwise operations are difficult to understand.
+
+---
+
+## VIII. Miasm IR and Optional Shadow IR
+
+### 8.1 Why Use IR?
+
+Assembly is useful for observing actual instructions, but complex handlers often contain many register operations and intermediate variables.
+
+IR converts these operations into unified expressions, making it easier to:
+
+- Trace data dependencies.
+- Combine consecutive calculations.
+- Identify redundant operations.
+- Substitute known runtime constants.
+- Simplify complex expressions.
+- Recover the actual inputs and outputs of a handler.
+
+For example:
+
+```asm
+mov eax, ebx
+xor eax, ecx
+add eax, 10
+```
+
+Can be abstracted as:
+
+```text
+eax = (ebx ^ ecx) + 10
+```
+
+### 8.2 Miasm IR Analysis
+
+Prioritize Miasm's own IR capabilities.
+
+Focus on:
+
+- Register assignments.
+- Memory reads and writes.
+- Conditional expressions.
+- Branch conditions.
+- Temporary variables.
+- Expression dependencies.
+
+Do not examine only the final IR output. Understand how each expression corresponds to the original instructions and runtime states.
+
+### 8.3 Shadow IR: Optional Technique
+
+Shadow IR is not a mandatory stage. There is no requirement to build a separate IR representation for every handler.
+
+Consider using it only when:
+
+- Static expressions are difficult to correlate with actual execution results.
+- The trace is missing some intermediate states.
+- Register values pass through multiple layers of propagation.
+- A handler contains complex data composition.
+- Runtime constants need to be substituted into static expressions.
+
+The basic idea is:
+
+```text
+Original instructions
+        |
+        v
+Generate static expressions
+        |
+        v
+Extract runtime register and memory values
+        |
+        v
+Substitute known values into expressions
+        |
+        v
+Constant propagation and simplification
+        |
+        v
+Recover actual execution semantics
+```
+
+Shadow IR is an auxiliary technique for understanding execution. It is not intended to introduce an additional data structure that must always be maintained.
+
+If Miasm IR and runtime states are already sufficient to explain a handler, there is no need to build Shadow IR.
+
+### 8.4 Handling Memory Reads and Writes
+
+When analyzing IR, do not focus exclusively on registers.
+
+Some handlers primarily perform memory operations:
+
+```asm
+mov eax, [rcx]
+mov [rdx], eax
+```
+
+Determine:
+
+- How the read address is calculated.
+- Where the read data originates.
+- How the write address is calculated.
+- Which operations affect the written value.
+- Whether the write affects subsequent handlers.
+
+In particular, do not assume that a STORE has no semantic value simply because it does not write into the VREG area.
+
+---
+
+## IX. Symbolic Execution and Path Constraints
+
+### 9.1 When Symbolic Execution Is Needed
+
+Not every handler requires symbolic execution.
+
+Prioritize it when:
+
+- Conditional branches are difficult to understand.
+- Input values affect multiple execution paths.
+- Some values cannot be determined in advance at runtime.
+- The result of an expression must be evaluated under specific conditions.
+- The reachability of a branch needs to be verified.
+
+Ordinary arithmetic handlers can usually be handled first through data-flow analysis and expression simplification.
+
+### 9.2 Create Symbolic Variables
+
+Represent unknown inputs as symbolic variables:
+
+```text
+input_a = A
+input_b = B
+key     = K
+```
+
+Then construct expressions based on the handler's actual operations:
+
+```text
+result = (A ^ K) + B
+```
+
+If a conditional check exists:
+
+```text
+result == 0
+```
+
+The corresponding constraint can be constructed.
+
+### 9.3 Path Constraints
+
+Record branch conditions:
+
+```text
+Condition:
+result == 0
+
+True:
+Enter path A
+
+False:
+Enter path B
+```
+
+If a path depends on multiple conditions, preserve their relationships.
+
+Do not treat a branch result from a single execution as a fixed behavior for every possible input without supporting evidence.
+
+### 9.4 Limits of Symbolic Execution
+
+Virtual machines may contain:
+
+- Dynamic decryption.
+- Complex memory accesses.
+- State-dependent address calculations.
+- Large amounts of irrelevant state maintenance.
+
+These can cause symbolic expressions to grow rapidly.
+
+When expression growth becomes excessive, first narrow the problem using runtime sampling, anchors, or slicing instead of expanding the scope of symbolic execution.
+
+---
+
+## X. Handler Semantic Recovery
+
+### 10.1 Determine Inputs and Outputs First
+
+When recovering a handler, establish its input/output relationship first:
+
+```text
+Inputs:
+VREG[A]
+VREG[B]
+
+Output:
+VREG[C]
+```
+
+Then analyze the intermediate calculations.
+
+For example:
+
+```asm
+mov eax, [rsi+10h]
+add eax, [rsi+18h]
+mov [rsi+20h], eax
+```
+
+If these offsets have already been confirmed to correspond to virtual register slots, the handler can be represented as:
+
+```text
+VREG[C] = VREG[A] + VREG[B]
+```
+
+### 10.2 Separate Original Semantics from VM Maintenance
+
+A handler may contain several kinds of operations:
+
+- Original program calculations.
+- Bytecode reading.
+- Key updates.
+- VM_IP updates.
+- Handler address calculations.
+- Virtual stack maintenance.
+- Register saving and restoration.
+
+Do not treat every instruction as an operation belonging to the original program.
+
+Classify operations according to their data dependencies and effects on VM state.
+
+### 10.3 Recover Control Flow
+
+Control-flow handlers require particular attention to:
+
+- The origin of the condition value.
+- The conditional operation.
+- Changes to VM_IP.
+- Branch targets.
+- Selection of subsequent handlers.
+
+The final result should be reconstructed as original program control flow whenever possible:
+
+```cpp
+if (condition)
+    block_a;
+else
+    block_b;
+```
+
+Rather than retaining a sequence of VM dispatch jumps.
+
+### 10.4 Nested VM Calls
+
+VMProtect execution may involve internal VM calls or nested execution.
+
+Do not treat every handler entry as a new top-level VM execution.
+
+Maintain the dynamic call hierarchy:
+
+```text
+VM Entry
+   |
+   v
+VM Function A
+   |
+   v
+VM Call
+   |
+   v
+VM Function B
+   |
+   v
+Nested Return
+   |
+   v
+VM Function A
+   |
+   v
+VM Exit
+```
+
+Record the following during analysis:
+
+- Current VM call depth.
+- Location where the call occurs.
+- VM state before the call.
+- Entry point of the called VM code.
+- Return location.
+- Whether the state is restored correctly after returning.
+
+If a call stack is used to track nesting, save the corresponding return location and necessary state when a call occurs. Match them against the current call depth when returning.
+
+Do not rely exclusively on a particular RET instruction to identify a VM function return. Confirm it using the actual execution path, return location, and VM state changes.
+
+Also distinguish between:
+
+- Ordinary calls inside a handler.
+- Native function calls.
+- Internal VM calls.
+- VM function returns.
+- Top-level VM exit.
+
+Only reconstruct these as high-level control flow after the call relationships have been confirmed.
+
+---
+
+## XI. Expression Simplification and Noise Removal
+
+### 11.1 Simplification Goals
+
+Virtualization may produce large and complicated expressions:
+
+```text
+(((x ^ 0x1234) + 5) - 5) ^ 0x1234
+```
+
+After simplification:
+
+```text
+x
+```
+
+The goal is not to produce the shortest possible expression. It is to remove virtualization-related operations that do not affect the semantics.
+
+### 11.2 Common Simplification Operations
+
+Prioritize:
+
+- Constant propagation.
+- Constant folding.
+- Dead assignment elimination.
+- Common expression elimination.
+- Consecutive bitwise operation simplification.
+- Redundant shifts and masks.
+- Redundant register copies.
+- Irrelevant state updates.
+
+### 11.3 MBA Expressions
+
+If mixed Boolean-arithmetic (MBA) expressions appear, do not immediately treat them as random noise.
+
+A reasonable order of operations is:
+
+1. Constant propagation.
+2. Bit-width normalization.
+3. Expression decomposition.
+4. Bitwise simplification.
+5. SMT-based equivalence checking when necessary.
+
+If an expression cannot be simplified, preserve its original form and provenance. Do not force a guess just to produce cleaner pseudocode.
+
+### 11.4 Remove VM Dispatch Noise
+
+Gradually eliminate:
+
+- Register copies that do not affect the final result.
+- Redundant intermediate state updates.
+- Key maintenance already confirmed to be unrelated to the original program semantics.
+- Redundant jumps and address calculations.
+- Temporary variables that do not affect outputs.
+
+However, preserve state updates that can influence subsequent execution.
+
+---
+
+## XII. VMProtect 3.9 Characteristics and Analysis Considerations
+
+This section retains only observations related to VMProtect 3.9. They are references for analysis, not rules that every sample must follow.
+
+### 12.1 Bytecode Read Direction
+
+Some VMProtect 3.9 analysis cases exhibit reverse bytecode reading.
+
+Do not assume that VM_IP always increases.
+
+Observe the following directly:
+
+- Bytecode read address.
+- Length of each read.
+- Pointer changes before and after each read.
+- Current decoding key.
+- Data produced by decoding.
+
+If the read address gradually decreases, verify that this is the actual bytecode read direction rather than an intermediate pointer or temporary address.
+
+### 12.2 Bytecode Decoding and Key Updates
+
+VMProtect 3.9 bytecode decoding may involve dynamic keys and reads of different lengths.
+
+Relate the following states:
+
+```text
+Current bytecode position
+Current decryption key
+Read length
+Read data
+Decoded result
+Next read position
+Next key state
+```
+
+Do not infer the complete decoding algorithm from a single observed value.
+
+Observe multiple consecutive reads to confirm the relationship between read lengths and key updates.
+
+### 12.3 Handler Address Calculation
+
+In some VMProtect 3.9 analysis cases, the handler address is not obtained through a simple direct lookup from a fixed table. It may involve the previous handler address, decoded values, and address offsets.
+
+Distinguish between:
+
+- Current handler address.
+- Intermediate values used to calculate the next handler.
+- Decoded address offsets.
+- Final jump target.
+
+Do not directly identify an intermediate value as the handler address.
+
+### 12.4 Variable-Length Reads and Decoding
+
+Do not assume that every bytecode read has a fixed length.
+
+Confirm the following through actual execution records:
+
+- Length of each read.
+- Lengths of different operands.
+- Read order.
+- Timing of key updates.
+- Whether different decoding paths exist.
+
+If the read length depends on a previously decoded value, preserve that dependency.
+
+### 12.5 Noise Instructions and State Updates
+
+VMProtect 3.9 execution may contain instructions that appear meaningless.
+
+Do not remove them based solely on their appearance.
+
+Pay particular attention to instructions involving:
+
+- Decryption keys.
+- Bytecode read positions.
+- Handler addresses.
+- Virtual stack offsets.
+- Subsequent dispatch states.
+
+Confirm their data dependencies and actual effects before deciding whether they can be simplified.
+
+### 12.6 How to Use Version-Specific Characteristics
+
+The characteristics above are based on specific VMProtect 3.9 analysis cases.
+
+Use them only to guide investigation. Do not treat them as universal signatures.
+
+For every new sample, reconfirm them through actual execution, state changes, and data-flow relationships.
+
+---
+
+## XIII. Reconstruction and Validation
+
+### 13.1 Organize Recovered Results
+
+Organize the recovered results by handler or original program logic block:
+
+```text
+Block 1:
+    result = input_a ^ key
+    result = result + input_b
+
+Block 2:
+    if result == target:
+        goto Block 3
+    else:
+        goto Block 4
+```
+
+Each recovered result should retain:
+
+- Original handler address.
+- Input states.
+- Output states.
+- Recovered expression.
+- Corresponding execution records.
+- Confidence level of the current conclusion.
+
+### 13.2 Semantic Validation
+
+Do not validate recovered semantics through disassembly inspection alone.
+
+Compare the results using actual runtime inputs:
+
+```text
+Original execution result
+        |
+        v
+Recovered semantic calculation
+        |
+        v
+Compare results
+```
+
+If the results differ, check the following first:
+
+1. Whether the input states are correct.
+2. Whether the bit widths match.
+3. Whether signed and unsigned operations are handled correctly.
+4. Whether flags affect subsequent conditions.
+5. Whether any memory reads or writes were missed.
+6. Whether VM_IP or call depth was interpreted incorrectly.
+7. Whether a key or state update was incorrectly removed.
+
+### 13.3 Validate Incrementally
+
+Do not wait until every handler has been recovered before performing validation.
+
+Validate each recovered section against known inputs and outputs as soon as possible.
+
+This prevents incorrect state mappings from propagating through later analysis.
+
+### 13.4 Output Formats
+
+Depending on the recovery progress, produce:
+
+- Handler semantic tables.
+- VM state mapping tables.
+- Bytecode decoding records.
+- Data-flow relationships.
+- Important expressions.
+- Control-flow structures.
+- Pseudocode approaching the original program.
+
+If the evidence is insufficient, preserve the result as an unconfirmed expression instead of presenting a guess as a definite conclusion.
+
+---
+
+## XIV. Common Problems and Solutions
+
+| Problem | Suggested approach |
+|---|---|
+| Miasm cannot continue execution | Check missing memory, external functions, and exception states |
+| Trace is too large | Record only important locations and state changes |
+| Handler boundaries are unclear | Identify them through the dispatcher and state changes |
+| Register purposes are unclear | Trace data flow and memory accesses |
+| Bytecode decoding is complicated | Record read lengths, read positions, and key changes |
+| Expressions are too complex | Slice the data flow first, then propagate constants and simplify |
+| Symbolic execution grows excessively | Narrow the input range and execution path |
+| Runtime data is missing | Use a debugger to extract it at critical locations |
+| Recovered results do not match | Compare inputs, outputs, bit widths, and memory states |
+| Nested call relationships are confusing | Maintain a separate VM call-depth and return-location record |
+
+### 14.1 Do Not Optimize Too Early
+
+Do not immediately remove instructions that appear unnecessary before handler semantics are understood.
+
+First record the original operations, then gradually determine which operations can be safely simplified.
+
+### 14.2 Do Not Mix Different Execution Stages
+
+The same memory region may contain different data at different stages.
+
+Always distinguish between:
+
+- Initialization state.
+- Decrypted state.
+- Intermediate state during handler execution.
+- State after handler execution.
+
+### 14.3 Do Not Force Different Samples into One Model
+
+Even samples protected by VMProtect 3.9 may differ because of configuration, compilation results, and the protected code itself.
+
+Use the actual data flow of the current sample as the source of truth.
+
+---
+
+## XV. LLM Execution Guidelines
+
+The LLM is responsible for choosing the specific implementation based on the analysis target. The user is not required to specify a fixed script for every stage.
+
+### 15.1 Analyze the Problem Before Choosing Tools
+
+When given an analysis task, first determine what information is missing:
+
+- Missing execution path: consider Miasm execution.
+- Missing runtime data: consider debugger extraction.
+- Missing input/output relationships: consider data-flow analysis.
+- Missing complex expression semantics: consider IR simplification.
+- Missing branch conditions: consider symbolic analysis.
+- Missing bytecode provenance: consider byte provenance tracking.
+- Missing nesting relationships: consider call-depth tracking.
+
+Do not add analysis stages merely for the sake of using a particular tool.
+
+### 15.2 Prioritize Miasm
+
+Prefer Miasm for:
+
+- PE loading.
+- Instruction analysis.
+- Controlled execution.
+- State recording.
+- IR conversion.
+- Expression analysis.
+
+Introduce other tools only when Miasm cannot provide the required information.
+
+### 15.3 Use the Debugger as an Auxiliary Tool
+
+Use the debugger primarily to:
+
+- Read important registers.
+- Extract runtime-decrypted data.
+- Observe dynamically generated content.
+- Validate emulated execution results.
+
+Do not assume that a complete debugger trace is required.
+
+### 15.4 Do Not Fix the Code Implementation in Advance
+
+Choose the implementation according to the specific sample:
+
+- Is a complete emulation environment necessary?
+- Are API stubs needed?
+- Must all registers be recorded?
+- Is memory read/write monitoring necessary?
+- Is taint analysis required?
+- Is symbolic execution required?
+- Is Shadow IR useful?
+
+Prefer the simplest method that is sufficient to solve the current problem.
+
+### 15.5 Preserve Intermediate Results
+
+Persist important analysis results:
+
+- Basic PE information.
+- VM state mappings.
+- Handler addresses and classifications.
+- Important execution records.
+- Decrypted data.
+- Input/output relationships.
+- Recovered expressions.
+- Validated conclusions.
+- Unresolved questions.
+
+Do not rerun the entire sample from the beginning whenever a new question arises.
+
+### 15.6 Distinguish Facts from Hypotheses
+
+Clearly distinguish between three levels of conclusions:
+
+**Confirmed**
+
+Supported by actual execution records, data flow, or validation results.
+
+**Unconfirmed**
+
+A reasonable interpretation exists, but the evidence is insufficient.
+
+**Hypothesis**
+
+An assumption used to guide the next stage of analysis. It must not be treated as a final conclusion.
+
+### 15.7 Narrow the Scope When Problems Occur
+
+If an analysis result is incorrect, do not immediately rewrite the entire toolchain.
+
+First identify which layer contains the problem:
+
+```text
+PE loading
+  |
+  v
+Execution environment
+  |
+  v
+Runtime state
+  |
+  v
+Handler boundaries
+  |
+  v
+Data flow
+  |
+  v
+Expression recovery
+  |
+  v
+Semantic validation
+```
+
+After identifying the problematic layer, modify only the corresponding part.
+
+---
+
+## XVI. Final Principles
+
+The entire workflow revolves around one goal:
+
+**Recover the actual semantics of the original program from the virtual machine's execution behavior.**
+
+Follow these principles:
+
+1. Miasm is the primary execution and analysis tool.
+2. The debugger supplements critical runtime information and does not handle the entire tracing process.
+3. Identify VM state anchors before analyzing handlers.
+4. Determine handler inputs and outputs before recovering internal calculations.
+5. Use data flow and taint relationships to determine the actual purpose of operations.
+6. Use byte provenance tracking only when complex bytecode decoding or data composition requires it.
+7. Maintain a separate call hierarchy for nested VM calls.
+8. Shadow IR is an optional auxiliary technique, not a mandatory stage.
+9. VMProtect 3.9 characteristics are analysis clues, not universal rules.
+10. Every recovered result should be verifiable through actual execution.
+
+The ultimate measure of success is not how many handlers have been recovered or how much IR has been generated. It is whether the virtual machine's execution behavior can be transformed into clear, correct, and verifiable original program logic.
+```
