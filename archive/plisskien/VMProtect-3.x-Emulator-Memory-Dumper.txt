@@ -1,0 +1,904 @@
+Project Path: arc_plisskien_VMProtect-3.x-Emulator-Memory-Dumper_4msxaicg
+
+Source Tree:
+
+```txt
+arc_plisskien_VMProtect-3.x-Emulator-Memory-Dumper_4msxaicg
+├── README.md
+├── dump_memory.py
+├── requirements.txt
+└── vmp_emulator.py
+
+```
+
+`README.md`:
+
+```md
+# VMProtect Emulator & Memory Dumper
+
+Sandboxed emulator built on Qiling and Unicorn to unpack x86_64 PE binaries (EXEs and DLLs) protected by VMProtect 3.x. Includes comprehensive kernel and environment bypasses so fully protected binaries (anti-debug, anti-vm, memory protection, and virtualization) can be emulated end-to-end.
+
+> **Compatibility**: Created and tested on **VMProtect 3.10.4** (supports VMProtect 3.x). Tested with **Python 3.10.4**.
+
+## Requirements
+
+1. **Python dependencies**:
+```bash
+pip install -r requirements.txt
+```
+
+2. **Qiling Windows Rootfs & Dependencies**:
+Download the `x8664_windows` rootfs from the [Qiling rootfs repository](https://github.com/qilingframework/rootfs).  
+Before running, either place it at `C:\rootfs\x8664_windows` (default) or pass its path via `--rootfs <path>`.
+
+> **Note on DLLs & Libraries**:
+> - Core Windows DLLs (`ntdll.dll`, `kernel32.dll`, `kernelbase.dll`) in `<rootfs>\Windows\System32` are required to map clean, unhooked copies for the anti-hook bypass (included by default in Qiling's rootfs).
+> - If your target binary depends on third-party runtime libraries (e.g., `vcruntime140.dll`, `msvcp140.dll`, or custom application DLLs), copy them into `<rootfs>\Windows\System32` or place them in the rootfs directory alongside your target binary.
+
+## Quick Start: Unpack a Sample
+
+> **Performance & Backup Recommendation**:
+> - Reaching the Original Entry Point (OEP) can take **several hours** due to the CPU overhead of software emulation over heavy VMProtect obfuscation.
+> - **Recommendation**: Emulate in batches and save backup snapshots every **50 million instructions** (e.g., `--instructions 50000000 --chunks 10`). Checkpoint snapshots (`sample.exe_chunkN.ql`) are saved automatically after each batch so you can pause and resume anytime using `--restore <snapshot.ql>` without starting from scratch.
+
+1. Emulate the sample through VMProtect initialization routines:
+```bash
+py -3.10 vmp_emulator.py --target sample.exe --rootfs "C:\path\to\x8664_windows" --out ./dumps
+```
+*(Omit `--rootfs` if using default `C:\rootfs\x8664_windows`. To resume from a snapshot, add `--restore ./dumps/sample.exe_chunk1.ql`)*
+
+2. Extract decrypted memory sections from the checkpoint snapshot:
+```bash
+py -3.10 dump_memory.py --snapshot ./dumps/sample.exe_checkpoint.ql --out ./extracted_memory
+```
+
+3. Load the dumped PE image into IDA Pro or Ghidra:
+- Target file: `./extracted_memory/sample.exe_0x140000000.bin`
+- Format: x86_64 binary image at base 0x140000000.
+- Decrypted .text, .rdata, and .data sections are fully mapped at their original virtual addresses.
+
+## How It Works: Two Protection Scenarios
+
+### Case 1: Standard Packing (No VMProtect SDK Markers)
+Most malware and commercial programs use VMProtect primarily as a file packer/crypter without applying VMProtect SDK markers to individual functions:
+- The VMProtect engine acts only as an encrypted loader.
+- Once the emulator steps past the loader to the Original Entry Point (OEP), the entire original program (.text, .rdata strings, .data, and IAT) is 100% decrypted in memory.
+- You run `dump_memory.py` at OEP, open the dumped .bin in IDA Pro, and you have the complete, decompilable application.
+
+### Case 2: Function-Level Virtualization (VMProtect SDK Applied)
+If the developer specifically flagged sensitive functions with the VMProtect SDK (VMProtectBeginVirtualization / VMProtectBeginUltra) or selected them in the VMProtect GUI:
+- The overall application and strings still unpack at OEP, but those specific marked routines remain as VM bytecode rather than raw x86 instructions.
+- To analyze those virtualized functions, you continue emulating past the entry point into those routines.
+- Because the emulator hooks all Windows APIs and syscalls, you can observe every action the VM bytecode performs in cleartext: all decrypted URLs, strings, cryptographic keys, and API parameters.
+- Running `dump_memory.py` after the virtualized routine executes captures any decrypted buffers or output data written to the heap.
+
+## Active Bypasses (Full Protection Support)
+
+The emulator implements bypasses for all VMProtect anti-analysis gates, allowing fully protected binaries to be emulated end-to-end:
+
+- Anti-Debugging: PEB flags (BeingDebugged, NtGlobalFlag), hardware breakpoints (DR0-DR7 zeroed on context capture), direct syscalls for NtQueryInformationProcess (ProcessDebugPort=0, ProcessDebugObjectHandle=STATUS_PORT_NOT_SET, ProcessDebugFlags=1) and NtQuerySystemInformation (KernelDebuggerNotPresent=1).
+- Anti-VM: CPUID leaf 1 (hypervisor bit cleared), leaf 0x40000000 (vendor strings wiped), VMware I/O port 0x5658 probes swallowed.
+- Memory Protection & Firmware Checks: Direct syscall NtQuerySystemInformation(0x4C) returns authentic Windows 11 status codes and physical SMBIOS tables (host_smbios.bin), preventing fatal "Initialization error 5" hard error alerts.
+- Anti-Hook / KnownDlls Scraper: Maps clean unhooked DLL images (`ntdll.dll`, `kernel32.dll`, `kernelbase.dll` from rootfs) at 0x200000000+ to satisfy ZwOpenSection/ZwMapViewOfSection integrity scans.
+- Exception Handling: Absorbs Trap Flag (TF / #DB) single-step interrupts so execution continues without crashing.
+
+```
+
+`dump_memory.py`:
+
+```py
+"""
+Snapshot Memory Extractor
+Dumps memory chunks, PE sections, heap, and stack from Qiling snapshot (.ql) files.
+"""
+
+import os
+import sys
+import pickle
+import argparse
+
+def parse_args():
+    parser = argparse.ArgumentParser(description="Extract memory chunks from Qiling snapshot")
+    parser.add_argument("--snapshot", required=True, help="Path to input snapshot (.ql)")
+    parser.add_argument("--out", default="./extracted_memory", help="Output directory for extracted .bin files")
+    return parser.parse_args()
+
+def main():
+    args = parse_args()
+    if not os.path.exists(args.snapshot):
+        print(f"[-] Snapshot not found: {args.snapshot}")
+        sys.exit(1)
+
+    os.makedirs(args.out, exist_ok=True)
+    print(f"[*] Opening snapshot: {args.snapshot}...")
+
+    with open(args.snapshot, "rb") as f:
+        state = pickle.load(f)
+
+    ram_chunks = state.get("mem", {}).get("ram", [])
+    print(f"[+] Found {len(ram_chunks)} memory chunks in snapshot.")
+
+    manifest = []
+    manifest.append(f"{'Address Range':<35} {'Label':<25} {'Size':<12} {'Filename'}")
+    manifest.append("-" * 90)
+
+    for idx, item in enumerate(ram_chunks):
+        start = item[0]
+        end = item[1]
+        label = item[3] if len(item) > 3 else f"chunk_{idx}"
+        data = item[4] if len(item) > 4 else b""
+        size = len(data)
+
+        clean_label = "".join(c if c.isalnum() or c in "._-" else "_" for c in label)
+        filename = f"{clean_label}_{hex(start)}.bin"
+        out_path = os.path.join(args.out, filename)
+
+        with open(out_path, "wb") as fp:
+            fp.write(data)
+
+        range_str = f"{hex(start)} - {hex(end)}"
+        manifest.append(f"{range_str:<35} {label:<25} {size:<12} {filename}")
+
+    manifest_path = os.path.join(args.out, "memory_manifest.txt")
+    with open(manifest_path, "w", encoding="utf-8") as fp:
+        fp.write("\n".join(manifest))
+
+    print("\n" + "\n".join(manifest[:20]))
+    if len(manifest) > 20:
+        print(f"... and {len(manifest) - 20} more chunks.")
+    print(f"\n[+] Memory extraction complete! Manifest written to: {manifest_path}")
+
+if __name__ == "__main__":
+    main()
+
+```
+
+`requirements.txt`:
+
+```txt
+qiling>=1.4.6
+unicorn>=2.0.1
+capstone>=5.0.0
+pefile>=2023.2.7
+
+```
+
+`vmp_emulator.py`:
+
+```py
+"""
+VMProtect 3.x Sandboxed Emulation Harness
+Built on Qiling Framework & Unicorn Engine
+Author: Plisskien
+
+Incorporates all empirical Anti-Emulation and Anti-Debugging bypasses:
+1. CPUID Leaf 1 (ECX bit 31 cleared) & Leaf 0x40000000 (Hypervisor signatures zeroed)
+2. Native Hardware Syscall Dispatcher (SSN 0x19, 0x33, 0x55, 0x08, 0x0f, 0x1c, 0x2a, 0x23)
+3. Direct Kernel Debug Invariants:
+   - Class 7  (ProcessDebugPort) = 0
+   - Class 30 (ProcessDebugObjectHandle) = 0xC0000353 (STATUS_PORT_NOT_SET)
+   - Class 31 (ProcessDebugFlags) = 1 (NoDebugInherit = TRUE)
+   - Class 0x28 (ProcessInstrumentationCallback) = 0
+4. TitanHide Driver Probe (0xC0000034 STATUS_OBJECT_NAME_NOT_FOUND)
+5. Invalid Handle Probe 0xefeeedecebeae9e8 (0xC0000008 STATUS_INVALID_HANDLE)
+6. Clean \KnownDlls Mapped Views at 0x200000000+ (ntdll, kernel32, kernelbase)
+7. PEB & TEB Invariants:
+   - BeingDebugged = 0, NtGlobalFlag = 0
+   - ProcessHeap: Flags = 0x2 (HEAP_GROWABLE), ForceFlags = 0
+   - Windows 11 Build 26100 Version numbers
+8. KUSER_SHARED_DATA (0x7FFE02D4): KdDebuggerEnabled = 0
+9. GlobalMemoryStatusEx Spoof (16 GB RAM)
+10. Hardware Breakpoint Register Clearing (DR0-DR3, DR7 = 0)
+11. Fast-Forward VMProtect CRC32 polynomial computation loop
+12. Automatic DllMain RET / Payload Milestone Snapshot capture
+"""
+
+import os
+import sys
+import time
+import struct
+import shutil
+import argparse
+import pefile
+from unicorn import UC_HOOK_INSN, UC_HOOK_CODE, UC_HOOK_MEM_WRITE, UC_HOOK_MEM_UNMAPPED, UC_HOOK_INTR
+from unicorn.x86_const import *
+from qiling import Qiling
+from qiling.const import QL_VERBOSE
+from qiling.os.windows.api import *
+from qiling.os.windows.fncc import *
+
+def parse_args():
+    parser = argparse.ArgumentParser(description="VMProtect 3.x Sandboxed Emulation Harness")
+    parser.add_argument("--target", required=True, help="Path to VMProtected PE (DLL or EXE)")
+    parser.add_argument("--rootfs", default=r"C:\rootfs\x8664_windows", help="Path to Qiling Windows x86_64 rootfs")
+    parser.add_argument("--out", default=r"./dumps", help="Output directory for dumps and checkpoints")
+    parser.add_argument("--instructions", type=int, default=50000000, help="Instructions to emulate per batch/chunk")
+    parser.add_argument("--chunks", type=int, default=1, help="Number of chunks to run (default: 1)")
+    parser.add_argument("--restore", default=None, help="Optional snapshot file (.ql) to restore from")
+    parser.add_argument("--crc-hook", type=lambda x: int(x, 0), default=None, help="Optional custom address for CRC loop head")
+    parser.add_argument("--ret-hook", type=lambda x: int(x, 0), default=None, help="Optional custom address for DllMain return")
+    return parser.parse_args()
+
+def setup_emulator(target_path, rootfs_path, out_dir):
+    if not os.path.exists(target_path):
+        print(f"[-] Target binary not found: {target_path}", flush=True)
+        sys.exit(1)
+
+    if not os.path.exists(rootfs_path):
+        print(f"[-] Qiling rootfs directory not found: {rootfs_path}", flush=True)
+        print(f"[-] Please specify a valid rootfs path using --rootfs (e.g. --rootfs C:\\path\\to\\x8664_windows)", flush=True)
+        sys.exit(1)
+
+    os.makedirs(out_dir, exist_ok=True)
+    
+    # Ensure binary is inside rootfs to avoid Qiling path traversal errors
+    target_basename = os.path.basename(target_path)
+    rootfs_target = os.path.join(rootfs_path, target_basename)
+    if not os.path.exists(rootfs_target) or os.path.getsize(rootfs_target) != os.path.getsize(target_path):
+        print(f"[*] Copying {target_basename} to rootfs directory: {rootfs_target}...", flush=True)
+        shutil.copy2(target_path, rootfs_target)
+
+    sys32 = os.path.join(rootfs_path, "Windows", "System32")
+    print(f"[*] Initializing Qiling emulator on: {rootfs_target}...", flush=True)
+    ql = Qiling([rootfs_target], rootfs=rootfs_path, verbose=QL_VERBOSE.DISABLED)
+    ql.payload_executed = False
+    ql.process_terminated = False
+
+    # 1. Base Resolution
+    ntdll_base = None
+    kernel32_base = None
+    for img in ql.loader.images:
+        p = img.path.lower()
+        if "ntdll.dll" in p: ntdll_base = img.base
+        elif "kernel32.dll" in p: kernel32_base = img.base
+
+    print(f"[+] Loaded images: ntdll={hex(ntdll_base) if ntdll_base else 'None'}, kernel32={hex(kernel32_base) if kernel32_base else 'None'}", flush=True)
+
+    # Fix SetThreadDescription if present in IAT
+    if kernel32_base and b"SetThreadDescription" in ql.loader.import_address_table.get("kernel32.dll", {}):
+        ql.loader.import_address_table["kernel32.dll"][b"SetThreadDescription"] = 0
+
+    # 2. Setup TLS Directory if present
+    target_pe = pefile.PE(rootfs_target)
+    if hasattr(target_pe, "DIRECTORY_ENTRY_TLS"):
+        tls = target_pe.DIRECTORY_ENTRY_TLS.struct
+        tls_size = tls.EndAddressOfRawData - tls.StartAddressOfRawData
+        alloc_size = max(tls_size + tls.SizeOfZeroFill, 0x100)
+        tls_block = ql.os.heap.alloc(alloc_size)
+        raw_tls = bytes(ql.mem.read(tls.StartAddressOfRawData, tls_size))
+        ql.mem.write(tls_block, raw_tls)
+        tls_ptr_array = ql.os.heap.alloc(0x80)
+        ql.mem.write_ptr(tls_ptr_array, tls_block)
+        ql.loader.TEB.TlsAddress = tls_ptr_array
+        if tls.AddressOfIndex:
+            ql.mem.write_ptr(tls.AddressOfIndex, 0, 4)
+        print(f"[+] Initialized TLS block at {hex(tls_block)}", flush=True)
+
+    # 3. Setup PEB, Heap & Anti-Debug Invariants (Windows 11 Build 26100)
+    peb_addr = ql.loader.TEB.PebAddress
+    ql.mem.write_ptr(peb_addr + 0x02, 0, 1)         # BeingDebugged = 0
+    ql.mem.write_ptr(peb_addr + 0xbc, 0, 4)         # NtGlobalFlag = 0
+    ql.mem.write_ptr(peb_addr + 0x118, 10, 4)       # OSMajorVersion
+    ql.mem.write_ptr(peb_addr + 0x11c, 0, 4)        # OSMinorVersion
+    ql.mem.write_ptr(peb_addr + 0x120, 26100, 2)    # OSBuildNumber
+    ql.mem.write_ptr(peb_addr + 0x122, 0, 2)        # OSCSDVersion
+    ql.mem.write_ptr(peb_addr + 0x124, 2, 4)        # OSPlatformId
+
+    # ProcessHeap: Flags = 0x2 (HEAP_GROWABLE), ForceFlags = 0
+    proc_heap = ql.mem.read_ptr(peb_addr + 0x30)
+    if not proc_heap:
+        proc_heap = ql.os.heap.alloc(0x200)
+        ql.mem.write_ptr(peb_addr + 0x30, proc_heap, 8)
+    ql.mem.write_ptr(proc_heap + 0x70, 0x2, 4)      # Heap.Flags = HEAP_GROWABLE
+    ql.mem.write_ptr(proc_heap + 0x74, 0x0, 4)      # Heap.ForceFlags = 0
+
+    # KUSER_SHARED_DATA: KdDebuggerEnabled = 0
+    try:
+        ql.mem.write_ptr(0x7ffe02d4, 0, 1)
+    except Exception:
+        pass
+
+    # 4. Windows API Spoofs & Console Output
+    @winsdkapi(cc=STDCALL, params={"hHeap": HANDLE, "dwFlags": DWORD, "lpMem": LPVOID, "dwBytes": SIZE_T})
+    def hook_HeapReAlloc(ql: Qiling, address: int, params):
+        lpMem = params["lpMem"]
+        dwBytes = params["dwBytes"]
+        new_mem = ql.os.heap.alloc(dwBytes)
+        if lpMem and new_mem:
+            old_size = ql.os.heap.size(lpMem)
+            to_copy = min(old_size, dwBytes)
+            data = bytes(ql.mem.read(lpMem, to_copy))
+            ql.mem.write(new_mem, data)
+            ql.os.heap.free(lpMem)
+        return new_mem
+
+    @winsdkapi(cc=STDCALL, params={"HeapHandle": PVOID, "Flags": ULONG, "Size": SIZE_T})
+    def hook_RtlAllocateHeap(ql: Qiling, address: int, params):
+        return ql.os.heap.alloc(params["Size"])
+
+    @winsdkapi(cc=STDCALL, params={"HeapHandle": PVOID, "Flags": ULONG, "BaseAddress": PVOID})
+    def hook_RtlFreeHeap(ql: Qiling, address: int, params):
+        if params["BaseAddress"]:
+            ql.os.heap.free(params["BaseAddress"])
+        return 1
+
+    ql.os.set_api("HeapReAlloc", hook_HeapReAlloc)
+    ql.os.set_api("RtlAllocateHeap", hook_RtlAllocateHeap)
+    ql.os.set_api("RtlFreeHeap", hook_RtlFreeHeap)
+
+    @winsdkapi(cc=STDCALL, params={})
+    def hook_IsDebuggerPresent(ql: Qiling, address: int, params): return 0
+
+    @winsdkapi(cc=STDCALL, params={"hProcess": HANDLE, "pbDebuggerPresent": POINTER})
+    def hook_CheckRemoteDebuggerPresent(ql: Qiling, address: int, params):
+        if params["pbDebuggerPresent"]: ql.mem.write_ptr(params["pbDebuggerPresent"], 0, 4)
+        return 1
+
+    @winsdkapi(cc=STDCALL, params={"lpOutputString": POINTER})
+    def hook_OutputDebugStringW(ql: Qiling, address: int, params): return 0
+
+    @winsdkapi(cc=STDCALL, params={"FirmwareTableProviderSignature": DWORD, "FirmwareTableID": DWORD, "pFirmwareTableBuffer": POINTER, "BufferSize": DWORD})
+    def hook_GetSystemFirmwareTable(ql: Qiling, address: int, params): return 0
+
+    @winsdkapi(cc=STDCALL, params={"ContextRecord": POINTER})
+    def hook_RtlCaptureContext(ql: Qiling, address: int, params):
+        ctx = params["ContextRecord"]
+        if ctx:
+            # Clear Hardware Breakpoints (DR0-DR3, DR6, DR7)
+            ql.mem.write_ptr(ctx + 0x48, 0, 8) # Dr0
+            ql.mem.write_ptr(ctx + 0x50, 0, 8) # Dr1
+            ql.mem.write_ptr(ctx + 0x58, 0, 8) # Dr2
+            ql.mem.write_ptr(ctx + 0x60, 0, 8) # Dr3
+            ql.mem.write_ptr(ctx + 0x68, 0, 8) # Dr6
+            ql.mem.write_ptr(ctx + 0x70, 0, 8) # Dr7
+            ql.mem.write_ptr(ctx + 0x98, ql.arch.regs.rsp, 8)
+            ql.mem.write_ptr(ctx + 0xf8, ql.arch.regs.rip, 8)
+        return
+
+    @winsdkapi(cc=STDCALL, params={"uExitCode": UINT})
+    def hook_ExitProcess(ql: Qiling, address: int, params):
+        code = params["uExitCode"]
+        print(f"\n[PROCESS TERMINATED] ExitProcess called with ExitCode={hex(code)}", flush=True)
+        ql.process_terminated = True
+        ql.os.stop()
+        return 0
+
+    @winsdkapi(cc=STDCALL, params={"hProcess": HANDLE, "uExitCode": UINT})
+    def hook_TerminateProcess(ql: Qiling, address: int, params):
+        code = params["uExitCode"]
+        print(f"\n[PROCESS TERMINATED] TerminateProcess called with ExitCode={hex(code)}", flush=True)
+        ql.process_terminated = True
+        ql.os.stop()
+        return 1
+
+    @winsdkapi(cc=STDCALL, params={"hWnd": HANDLE, "lpText": POINTER, "lpCaption": POINTER, "uType": UINT})
+    def hook_MessageBoxA(ql: Qiling, address: int, params):
+        caption = ql.os.utils.read_cstring(params["lpCaption"]) if params["lpCaption"] else ""
+        text = ql.os.utils.read_cstring(params["lpText"]) if params["lpText"] else ""
+        print(f"\n[!!! ANTI-EMULATION ALERT (MessageBoxA) !!!]\n  Title: {caption}\n  Message: {text}\n", flush=True)
+        ql.process_terminated = True
+        ql.os.stop()
+        return 1
+
+    @winsdkapi(cc=STDCALL, params={"hWnd": HANDLE, "lpText": POINTER, "lpCaption": POINTER, "uType": UINT})
+    def hook_MessageBoxW(ql: Qiling, address: int, params):
+        caption = ql.os.utils.read_wstring(params["lpCaption"]) if params["lpCaption"] else ""
+        text = ql.os.utils.read_wstring(params["lpText"]) if params["lpText"] else ""
+        print(f"\n[!!! ANTI-EMULATION ALERT (MessageBoxW) !!!]\n  Title: {caption}\n  Message: {text}\n", flush=True)
+        ql.process_terminated = True
+        ql.os.stop()
+        return 1
+
+    @winsdkapi(cc=STDCALL, params={"hConsoleOutput": HANDLE, "lpBuffer": LPVOID, "nNumberOfCharsToWrite": DWORD, "lpNumberOfCharsWritten": POINTER, "lpReserved": LPVOID})
+    def hook_WriteConsoleW(ql: Qiling, address: int, params):
+        chars = params["nNumberOfCharsToWrite"]
+        buf = params["lpBuffer"]
+        if buf and chars > 0:
+            data = bytes(ql.mem.read(buf, chars * 2))
+            text = data.decode("utf-16le", errors="ignore")
+            print(f"\n=======================================================", flush=True)
+            print(f">>> [APPLICATION STDOUT (WriteConsoleW)]: {repr(text)} <<<", flush=True)
+            print(f"=======================================================\n", flush=True)
+            ql.payload_executed = True
+        if params["lpNumberOfCharsWritten"]:
+            ql.mem.write_ptr(params["lpNumberOfCharsWritten"], chars, 4)
+        return 1
+
+    @winsdkapi(cc=STDCALL, params={"hFile": HANDLE, "lpBuffer": LPVOID, "nNumberOfBytesToWrite": DWORD, "lpNumberOfBytesWritten": POINTER, "lpOverlapped": POINTER})
+    def hook_WriteFile(ql: Qiling, address: int, params):
+        n = params["nNumberOfBytesToWrite"]
+        buf = params["lpBuffer"]
+        if buf and n > 0:
+            data = bytes(ql.mem.read(buf, n))
+            text = data.decode("utf-8", errors="ignore")
+            print(f"\n=======================================================", flush=True)
+            print(f">>> [APPLICATION STDOUT (WriteFile)]: {repr(text)} <<<", flush=True)
+            print(f"=======================================================\n", flush=True)
+            ql.payload_executed = True
+        if params["lpNumberOfBytesWritten"]:
+            ql.mem.write_ptr(params["lpNumberOfBytesWritten"], n, 4)
+        return 1
+
+    def hook_ntdll_exit(ql: Qiling):
+        rcx = ql.arch.regs.rcx
+        print(f"\n[PROCESS TERMINATED] Hit ntdll ExitProcess stub (0x1802b18a0) with ExitCode={hex(rcx)}", flush=True)
+        ql.process_terminated = True
+        ql.os.stop()
+
+    ql.hook_address(hook_ntdll_exit, 0x1802b18a0)
+
+    ql.os.set_api("IsDebuggerPresent", hook_IsDebuggerPresent)
+    ql.os.set_api("CheckRemoteDebuggerPresent", hook_CheckRemoteDebuggerPresent)
+    ql.os.set_api("OutputDebugStringW", hook_OutputDebugStringW)
+    ql.os.set_api("GetSystemFirmwareTable", hook_GetSystemFirmwareTable)
+    ql.os.set_api("RtlCaptureContext", hook_RtlCaptureContext)
+    ql.os.set_api("ExitProcess", hook_ExitProcess)
+    ql.os.set_api("TerminateProcess", hook_TerminateProcess)
+    ql.os.set_api("MessageBoxA", hook_MessageBoxA)
+    ql.os.set_api("MessageBoxW", hook_MessageBoxW)
+    ql.os.set_api("WriteConsoleW", hook_WriteConsoleW)
+    ql.os.set_api("WriteFile", hook_WriteFile)
+
+    @winsdkapi(cc=STDCALL, params={"lpBuffer": POINTER})
+    def hook_GlobalMemoryStatusEx(ql: Qiling, address: int, params):
+        ptr = params["lpBuffer"]
+        if ptr:
+            ql.mem.write_ptr(ptr + 0x00, 64, 4)
+            ql.mem.write_ptr(ptr + 0x04, 25, 4)
+            ql.mem.write_ptr(ptr + 0x08, 16 * 1024 * 1024 * 1024, 8)
+            ql.mem.write_ptr(ptr + 0x10, 12 * 1024 * 1024 * 1024, 8)
+            ql.mem.write_ptr(ptr + 0x18, 20 * 1024 * 1024 * 1024, 8)
+            ql.mem.write_ptr(ptr + 0x20, 15 * 1024 * 1024 * 1024, 8)
+            ql.mem.write_ptr(ptr + 0x28, 134217728 * 1024 * 1024, 8)
+            ql.mem.write_ptr(ptr + 0x30, 134217000 * 1024 * 1024, 8)
+            ql.mem.write_ptr(ptr + 0x38, 0, 8)
+        return 1
+
+    ql.os.set_api("GlobalMemoryStatusEx", hook_GlobalMemoryStatusEx)
+
+    # 5. Clean KnownDlls Views (Anti-Hook Integrity Scanner Bypass)
+    clean_sections = {}
+    known_dlls_info = [
+        ("ntdll.dll", 0x200000000, 0xcafe0001),
+        ("kernel32.dll", 0x210000000, 0xcafe0002),
+        ("kernelbase.dll", 0x220000000, 0xcafe0003),
+    ]
+    for dll_name, base_addr, handle in known_dlls_info:
+        dll_file = os.path.join(sys32, dll_name)
+        with open(dll_file, "rb") as f: d_pe = pefile.PE(data=f.read())
+        mem_img = d_pe.get_memory_mapped_image()
+        d_size = len(mem_img)
+        aligned = (d_size + 0xffff) & ~0xffff
+        ql.mem.map(base_addr, aligned, info=f"Clean_{dll_name}")
+        ql.mem.write(base_addr, mem_img)
+        clean_sections[dll_name.lower()] = {"name": dll_name, "base": base_addr, "size": d_size, "handle": handle}
+
+    active_handles = {sec["handle"]: sec for sec in clean_sections.values()}
+
+    # 6. Dynamic Syscall Stub Resolution
+    with open(os.path.join(sys32, "ntdll.dll"), "rb") as f: ntdll_pe = pefile.PE(data=f.read())
+    syscall_names = {}
+    for sym in ntdll_pe.DIRECTORY_ENTRY_EXPORT.symbols:
+        if sym.name and sym.address:
+            name = sym.name.decode(errors='ignore')
+            if name.startswith('Zw') or name.startswith('Nt'):
+                syscall_names[ntdll_base + sym.address] = name
+
+    next_custom_handle = 0xcafe0010
+
+    def on_syscall_stub(ql, address):
+        nonlocal next_custom_handle
+        name = syscall_names.get(address, f"Syscall_{hex(address)}")
+        rcx = ql.arch.regs.rcx
+        rdx = ql.arch.regs.rdx
+        r8 = ql.arch.regs.r8
+
+        ret_status = 0
+
+        if "OpenSection" in name:
+            obj_name = ""
+            if r8:
+                try:
+                    p_name = ql.mem.read_ptr(r8 + 0x10)
+                    if p_name:
+                        u_len = ql.mem.read_ptr(p_name, 2)
+                        u_buf = ql.mem.read_ptr(p_name + 8)
+                        if u_buf:
+                            obj_name = bytes(ql.mem.read(u_buf, u_len)).decode("utf-16le", errors="ignore")
+                except Exception:
+                    pass
+
+            matched_sec = None
+            for key, sec in clean_sections.items():
+                if key in obj_name.lower():
+                    matched_sec = sec
+                    break
+            if matched_sec:
+                h = matched_sec["handle"]
+            else:
+                next_custom_handle += 1
+                h = next_custom_handle
+                active_handles[h] = clean_sections["ntdll.dll"]
+
+            if rcx: ql.mem.write_ptr(rcx, h, 8)
+
+        elif "MapViewOfSection" in name:
+            h_section = rcx
+            sec = active_handles.get(h_section, clean_sections["ntdll.dll"])
+            base = sec["base"]
+            size = sec["size"]
+            if r8: ql.mem.write_ptr(r8, base, 8)
+            view_size_ptr = ql.mem.read_ptr(ql.arch.regs.rsp + 0x38)
+            if view_size_ptr: ql.mem.write_ptr(view_size_ptr, size, 8)
+
+        elif "QueryInformationProcess" in name:
+            info_class = rdx
+            if r8:
+                if info_class == 7:     # ProcessDebugPort -> 0
+                    ql.mem.write_ptr(r8, 0, 8)
+                elif info_class == 30:  # ProcessDebugObjectHandle -> MUST RETURN STATUS_PORT_NOT_SET
+                    ql.mem.write_ptr(r8, 0, 8)
+                    ret_status = 0xC0000353
+                elif info_class == 31:  # ProcessDebugFlags -> 1 (not debugged)
+                    ql.mem.write_ptr(r8, 1, 4)
+
+        elif "QuerySystemInformation" in name:
+            info_class = rcx
+            if rdx:
+                if info_class == 0x23:
+                    ql.mem.write_ptr(rdx, 0, 1)      # KernelDebuggerEnabled = 0
+                    ql.mem.write_ptr(rdx + 1, 1, 1)  # KernelDebuggerNotPresent = 1
+                elif info_class == 0x95:
+                    ql.mem.write_ptr(rdx, 0, 1)      # DebuggerAllowed = 0
+                    ql.mem.write_ptr(rdx + 1, 0, 1)  # DebuggerEnabled = 0
+                    ql.mem.write_ptr(rdx + 2, 0, 1)  # DebuggerPresent = 0
+
+        elif "GetContextThread" in name:
+            if rdx: # Context pointer
+                # Clear DR0-DR3, DR6, DR7
+                ql.mem.write_ptr(rdx + 0x48, 0, 8)
+                ql.mem.write_ptr(rdx + 0x50, 0, 8)
+                ql.mem.write_ptr(rdx + 0x58, 0, 8)
+                ql.mem.write_ptr(rdx + 0x60, 0, 8)
+                ql.mem.write_ptr(rdx + 0x68, 0, 8)
+                ql.mem.write_ptr(rdx + 0x70, 0, 8)
+
+        ret_addr = ql.mem.read_ptr(ql.arch.regs.rsp)
+        ql.arch.regs.rsp += 8
+        ql.arch.regs.rip = ret_addr
+        ql.arch.regs.rax = ret_status
+
+    essential_stubs = [
+        "ZwOpenSection", "NtOpenSection",
+        "ZwMapViewOfSection", "NtMapViewOfSection",
+        "ZwQuerySystemInformation", "NtQuerySystemInformation",
+        "ZwQueryInformationProcess", "NtQueryInformationProcess",
+        "ZwSetInformationThread", "NtSetInformationThread",
+        "ZwUnmapViewOfSection", "NtUnmapViewOfSection",
+        "ZwGetContextThread", "NtGetContextThread",
+        "ZwSetContextThread", "NtSetContextThread",
+    ]
+
+    for addr, s_name in syscall_names.items():
+        if any(es == s_name for es in essential_stubs):
+            ql.hook_address(lambda ql, a=addr: on_syscall_stub(ql, a), addr)
+
+    # 7. CPUID Hypervisor & Anti-VM Bypass Hook
+    def hook_cpuid(uc, user_data):
+        rax = uc.reg_read(UC_X86_REG_RAX)
+        if rax == 1:
+            rcx = uc.reg_read(UC_X86_REG_RCX)
+            rcx &= ~0x80000000  # Clear Hypervisor present bit (ECX[31])
+            uc.reg_write(UC_X86_REG_RCX, rcx)
+        elif rax == 0x40000000:
+            uc.reg_write(UC_X86_REG_RAX, 0)
+            uc.reg_write(UC_X86_REG_RBX, 0)
+            uc.reg_write(UC_X86_REG_RCX, 0)
+            uc.reg_write(UC_X86_REG_RDX, 0)
+        return 1
+
+    ql.uc.hook_add(UC_HOOK_INSN, hook_cpuid, None, 1, 0, UC_X86_INS_CPUID)
+
+    # 7b. Hardware I/O Ports & Interrupt Exception Hooks (Anti-VM / Trap Flag bypass)
+    def hook_in(uc, port, size, user_data):
+        return 0
+
+    def hook_out(uc, port, size, value, user_data):
+        pass
+
+    def hook_intr(uc, intno, user_data):
+        pass
+
+    ql.uc.hook_add(UC_HOOK_INSN, hook_in, None, 1, 0, UC_X86_INS_IN)
+    ql.uc.hook_add(UC_HOOK_INSN, hook_out, None, 1, 0, UC_X86_INS_OUT)
+    ql.uc.hook_add(UC_HOOK_INTR, hook_intr)
+
+    smbios_data = b""
+    smbios_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "host_smbios.bin")
+    if os.path.exists(smbios_path):
+        with open(smbios_path, "rb") as f: smbios_data = f.read()
+
+    # 8. Native Hardware Syscall Dispatcher Hook (Direct Kernel Invariants)
+    def hook_hardware_syscall(uc, user_data):
+        ssn = uc.reg_read(UC_X86_REG_RAX)
+        rip = uc.reg_read(UC_X86_REG_RIP)
+        r10 = uc.reg_read(UC_X86_REG_R10)
+        rdx = uc.reg_read(UC_X86_REG_RDX)
+        r8  = uc.reg_read(UC_X86_REG_R8)
+        r9  = uc.reg_read(UC_X86_REG_R9)
+
+        # 0x19: NtQueryInformationProcess
+        if ssn == 0x19:
+            info_class = rdx
+            if info_class == 7:    # ProcessDebugPort -> 0
+                if r8: ql.mem.write_ptr(r8, 0, 8)
+                uc.reg_write(UC_X86_REG_RAX, 0)
+            elif info_class == 30: # ProcessDebugObjectHandle -> MUST RETURN STATUS_PORT_NOT_SET
+                if r8: ql.mem.write_ptr(r8, 0, 8)
+                uc.reg_write(UC_X86_REG_RAX, 0xC0000353)
+            elif info_class == 31: # ProcessDebugFlags -> 1 (not debugged)
+                if r8: ql.mem.write_ptr(r8, 1, 4)
+                uc.reg_write(UC_X86_REG_RAX, 0)
+            elif info_class == 0x28: # ProcessInstrumentationCallback -> 0
+                if r8: ql.mem.write_ptr(r8, 0, 8)
+                uc.reg_write(UC_X86_REG_RAX, 0)
+            else:
+                uc.reg_write(UC_X86_REG_RAX, 0)
+
+        # 0x36 or 0x23: NtQuerySystemInformation
+        elif ssn in (0x36, 0x23):
+            # If ssn == 0x23, check if it's NtQuerySystemInformation (r10 in 0x23, 0x95) or NtQueryVirtualMemory
+            if r10 in (0x23, 0x95):
+                if rdx:
+                    if r10 == 0x23:
+                        ql.mem.write_ptr(rdx, 0, 1)      # KernelDebuggerEnabled = 0
+                        ql.mem.write_ptr(rdx + 1, 1, 1)  # KernelDebuggerNotPresent = 1
+                    elif r10 == 0x95:
+                        ql.mem.write_ptr(rdx, 0, 1)      # DebuggerAllowed = 0
+                        ql.mem.write_ptr(rdx + 1, 0, 1)  # DebuggerEnabled = 0
+                        ql.mem.write_ptr(rdx + 2, 0, 1)  # DebuggerPresent = 0
+                uc.reg_write(UC_X86_REG_RAX, 0)
+            elif r10 == 0x4c: # SystemFirmwareTableInformation
+                sig = int.from_bytes(ql.mem.read(rdx, 4), 'little') if rdx else 0
+                if sig == 0x4649524d: # 'FIRM' -> STATUS_NOT_IMPLEMENTED
+                    uc.reg_write(UC_X86_REG_RAX, 0xC0000002)
+                elif sig == 0x52534d42: # 'RSMB' -> Raw SMBIOS
+                    smbios_sz = len(smbios_data) if 'smbios_data' in locals() and smbios_data else 2585
+                    if r8 <= 16:
+                        if r9: ql.mem.write_ptr(r9, 20, 4)
+                        ql.mem.write_ptr(rdx + 12, smbios_sz, 4)
+                        uc.reg_write(UC_X86_REG_RAX, 0xC0000023) # STATUS_BUFFER_TOO_SMALL
+                    else:
+                        if r9: ql.mem.write_ptr(r9, r8, 4)
+                        ql.mem.write_ptr(rdx + 12, smbios_sz, 4)
+                        if 'smbios_data' in locals() and smbios_data:
+                            ql.mem.write(rdx + 16, smbios_data)
+                        uc.reg_write(UC_X86_REG_RAX, 0)
+                else:
+                    uc.reg_write(UC_X86_REG_RAX, 0xC0000002)
+            elif ssn == 0x23: # NtQueryVirtualMemory
+                if r8 == 0 and r9: # MemoryBasicInformation
+                    base = rdx & ~0xfff
+                    alloc_base = rdx & ~0xffff
+                    ql.mem.write_ptr(r9 + 0x00, base, 8)       # BaseAddress
+                    ql.mem.write_ptr(r9 + 0x08, alloc_base, 8) # AllocationBase
+                    ql.mem.write_ptr(r9 + 0x10, 0x40, 4)       # AllocationProtect
+                    ql.mem.write_ptr(r9 + 0x14, 0, 4)          # Alignment
+                    ql.mem.write_ptr(r9 + 0x18, 0x10000, 8)    # RegionSize
+                    ql.mem.write_ptr(r9 + 0x20, 0x1000, 4)     # State (MEM_COMMIT)
+                    ql.mem.write_ptr(r9 + 0x24, 0x40, 4)       # Protect
+                    ql.mem.write_ptr(r9 + 0x28, 0x20000, 4)    # Type (MEM_PRIVATE)
+                uc.reg_write(UC_X86_REG_RAX, 0)
+            else:
+                uc.reg_write(UC_X86_REG_RAX, 0)
+
+        # 0x33 & 0x55: NtOpenFile & NtCreateFile (TitanHide driver probe -> STATUS_OBJECT_NAME_NOT_FOUND)
+        elif ssn in (0x33, 0x55):
+            uc.reg_write(UC_X86_REG_RAX, 0xC0000034)
+
+        # 0x08 & 0x0F: NtWriteFile & NtClose (Invalid Handle Probe 0xefeeedecebeae9e8 -> STATUS_INVALID_HANDLE)
+        elif ssn in (0x08, 0x0F):
+            if r10 == 0xefeeedecebeae9e8:
+                uc.reg_write(UC_X86_REG_RAX, 0xC0000008)
+            else:
+                uc.reg_write(UC_X86_REG_RAX, 0)
+
+        # 0x1C & 0x2A: NtSetInformationProcess & NtUnmapViewOfSection
+        elif ssn in (0x1C, 0x2A):
+            uc.reg_write(UC_X86_REG_RAX, 0)
+
+        # 0x18: NtAllocateVirtualMemory
+        elif ssn == 0x18:
+            if rdx and r9:
+                try:
+                    cur_base = ql.mem.read_ptr(rdx)
+                    req_sz = ql.mem.read_ptr(r9)
+                    alloc_sz = max((req_sz + 0xfff) & ~0xfff, 0x1000)
+                    if cur_base == 0:
+                        new_mem = ql.os.heap.alloc(alloc_sz)
+                        ql.mem.write_ptr(rdx, new_mem)
+                    else:
+                        aligned_base = cur_base & ~0xfff
+                        try:
+                            ql.mem.map(aligned_base, alloc_sz, info="SyscallAlloc")
+                        except Exception:
+                            pass
+                except Exception:
+                    pass
+            uc.reg_write(UC_X86_REG_RAX, 0)
+
+        # 0x50: NtProtectVirtualMemory
+        elif ssn == 0x50:
+            try:
+                p_old = ql.mem.read_ptr(ql.arch.regs.rsp + 0x28)
+                if p_old:
+                    ql.mem.write_ptr(p_old, 0x40, 4)
+            except Exception:
+                pass
+            uc.reg_write(UC_X86_REG_RAX, 0)
+
+        # 0x1E: NtFreeVirtualMemory
+        elif ssn == 0x1E:
+            uc.reg_write(UC_X86_REG_RAX, 0)
+
+        # 0x04: NtWaitForSingleObject, 0x34: NtDelayExecution, 0x46: NtYieldExecution
+        elif ssn in (0x04, 0x34, 0x46):
+            uc.reg_write(UC_X86_REG_RAX, 0)
+
+        # 0x2C: NtTerminateProcess
+        elif ssn == 0x2C:
+            code = rdx
+            print(f"\n[PROCESS TERMINATED] NtTerminateProcess called with ExitStatus={hex(code)}", flush=True)
+            ql.process_terminated = True
+            ql.os.stop()
+            uc.reg_write(UC_X86_REG_RAX, 0)
+
+        elif ssn == 0x175:
+            msg = ""
+            if r9:
+                try:
+                    p1 = ql.mem.read_ptr(r9)
+                    u_len = ql.mem.read_ptr(p1, 2)
+                    u_buf = ql.mem.read_ptr(p1 + 8)
+                    msg = bytes(ql.mem.read(u_buf, u_len)).decode("utf-16le", errors="ignore")
+                except Exception:
+                    pass
+            print(f"\n[!!! VMProtect Fatal Alert: NtRaiseHardError (0x175) !!!]\n  Status={hex(r10)}, Message='{msg}' at RIP={hex(rip)}\n", flush=True)
+            ql.process_terminated = True
+            ql.os.stop()
+            uc.reg_write(UC_X86_REG_RAX, 0)
+
+        else:
+            uc.reg_write(UC_X86_REG_RAX, 0)
+
+    ql.uc.hook_add(UC_HOOK_INSN, hook_hardware_syscall, None, 1, 0, UC_X86_INS_SYSCALL)
+
+    # 9. Dynamic On-Demand Memory Paging (Protects against unmapped reads past section boundaries)
+    def on_unmapped(ql, access, addr, size, value):
+        aligned_base = addr & ~0xffff
+        try:
+            ql.mem.map(aligned_base, 0x10000, info=f"OnDemand_{hex(aligned_base)}")
+            return True
+        except Exception:
+            return False
+
+    ql.hook_mem_unmapped(on_unmapped)
+
+
+    return ql
+
+def main():
+    args = parse_args()
+    ql = setup_emulator(args.target, args.rootfs, args.out)
+
+    if args.restore:
+        print(f"[*] Restoring snapshot from: {args.restore}...", flush=True)
+        ql.restore(snapshot=args.restore)
+        cur_rip = ql.arch.regs.rip
+        print(f"[+] Snapshot restored cleanly! Current RIP = {hex(cur_rip)}", flush=True)
+    else:
+        cur_rip = ql.arch.regs.rip
+
+    # Setup fast-forward for VMProtect CRC32 loop
+    crc_chunk_count = 0
+    crc_table = None
+
+    def hook_crc_loop(uc, address, size, user_data):
+        nonlocal crc_chunk_count, crc_table
+        rbp = uc.reg_read(UC_X86_REG_RBP)
+        if rbp > 100:
+            crc_chunk_count += 1
+            if crc_table is None:
+                r9 = uc.reg_read(UC_X86_REG_R9)
+                table_raw = bytes(uc.mem_read(r9, 1024))
+                crc_table = struct.unpack('<256I', table_raw)
+
+            rax = uc.reg_read(UC_X86_REG_RAX)
+            r11 = uc.reg_read(UC_X86_REG_R11)
+            count_to_skip = rbp - 1
+            
+            t0 = time.time()
+            buf = bytes(uc.mem_read(rax, count_to_skip))
+            cur_r11 = r11
+            for b in buf:
+                idx = (b ^ cur_r11) & 0xff
+                cur_r11 = ((cur_r11 >> 8) ^ crc_table[idx] ^ 0xa619c806) & 0xffffffff
+            cur_rax = rax + count_to_skip
+            t1 = time.time()
+
+            print(f"[CRC Fast-Forward #{crc_chunk_count}] Skipped {count_to_skip:,} iterations in {t1 - t0:.3f}s | StartRAX={hex(rax)} EndRAX={hex(cur_rax)} Hash={hex(cur_r11)}", flush=True)
+            uc.reg_write(UC_X86_REG_RAX, cur_rax)
+            uc.reg_write(UC_X86_REG_R11, cur_r11)
+            uc.reg_write(UC_X86_REG_RBP, 1)
+
+    crc_addr = args.crc_hook
+    if not crc_addr and ("desta" in args.target.lower() or "sample" in args.target.lower()):
+        crc_addr = 0x1861391c9
+    if crc_addr:
+        ql.uc.hook_add(UC_HOOK_CODE, hook_crc_loop, None, crc_addr, crc_addr)
+
+    def hook_dllmain_return(uc, address, size, user_data):
+        if address == ret_addr:
+            print("\n=======================================================", flush=True)
+            print("[*** INITIALIZATION COMPLETE (RET) ***]", flush=True)
+            print(f"  Return Value (RAX) = {hex(uc.reg_read(UC_X86_REG_RAX))}", flush=True)
+            print("=======================================================\n", flush=True)
+            snapshot_file = os.path.join(args.out, f"{os.path.basename(args.target)}_initialized.ql")
+            ql.save(snapshot=snapshot_file)
+            print(f"[+] Saved initialized snapshot to {snapshot_file}", flush=True)
+            uc.emu_stop()
+
+    ret_addr = args.ret_hook
+    if not ret_addr and ("desta" in args.target.lower() or "sample" in args.target.lower()):
+        ret_addr = 0x185e9dcf5
+    if ret_addr:
+        ql.uc.hook_add(UC_HOOK_CODE, hook_dllmain_return, None, ret_addr, ret_addr)
+
+    total_chunks = args.chunks
+    chunk_size = args.instructions
+    print(f"[*] Beginning emulation ({total_chunks} chunk(s) of {chunk_size:,} instructions = {total_chunks * chunk_size:,} total)...", flush=True)
+
+    total_emulated = 0
+    t_start = time.time()
+    for c in range(1, total_chunks + 1):
+        curr_rip = ql.arch.regs.rip
+        t_chunk = time.time()
+        try:
+            ql.run(begin=curr_rip, count=chunk_size)
+        except Exception as e:
+            print(f"[-] Emulation halted in chunk #{c}: {e}", flush=True)
+            break
+
+        total_emulated += chunk_size
+        elapsed = time.time() - t_chunk
+        mips = (chunk_size / 1e6) / elapsed if elapsed > 0 else 0
+        rip = ql.arch.regs.rip
+        print(f"[+] Chunk #{c}/{total_chunks} completed: {total_emulated:,} insns ({elapsed:.1f}s, {mips:.2f} MIPS) | RIP={hex(rip)}", flush=True)
+
+        snap_path = os.path.join(args.out, f"{os.path.basename(args.target)}_chunk{c}.ql")
+        ql.save(snapshot=snap_path)
+        print(f"  [+] Saved snapshot to {snap_path}", flush=True)
+
+        if getattr(ql, "payload_executed", False):
+            print("\n=======================================================", flush=True)
+            print("[*** SUCCESS: PAYLOAD OUTPUT CAPTURED! ***]", flush=True)
+            print("=======================================================\n", flush=True)
+            comp_snap = os.path.join(args.out, f"{os.path.basename(args.target)}_completed.ql")
+            ql.save(snapshot=comp_snap)
+            print(f"[+] Saved final payload completed snapshot to {comp_snap}", flush=True)
+            break
+
+        if getattr(ql, "process_terminated", False):
+            print(f"[!] Emulation stopped because process terminated.", flush=True)
+            break
+
+    total_time = time.time() - t_start
+    print(f"\n[+] Emulation session finished after {total_time:.1f}s. Final RIP = {hex(ql.arch.regs.rip)}", flush=True)
+    end_snapshot = os.path.join(args.out, f"{os.path.basename(args.target)}_checkpoint.ql")
+    ql.save(snapshot=end_snapshot)
+    print(f"[+] Saved final checkpoint to {end_snapshot}", flush=True)
+
+if __name__ == "__main__":
+    main()
+
+```
