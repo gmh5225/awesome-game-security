@@ -18,4 +18,4 @@ confidence: medium
 
 ## Related
 
-[[cheat-engine]] · [[mydev-cheat-engine-tables]] · [[maplestory-v179-cheat-engine]] · [[intro-to-gamehacking]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]]
+[[cheat-engine]] · [[mydev-cheat-engine-tables]] · [[tales-of-cheat-tables]] · [[maplestory-v179-cheat-engine]] · [[intro-to-gamehacking]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]]
