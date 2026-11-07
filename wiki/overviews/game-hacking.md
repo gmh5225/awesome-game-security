@@ -1983,6 +1983,7 @@ sources:
   - wiki/sources/descriptions/springah__futari_recomp.md
   - wiki/sources/descriptions/rf-dev-design__nfsu2-revived-trainer.md
   - wiki/sources/descriptions/7777lolonlyyou__VMProtect-LLM-SKILL.md
+  - wiki/sources/descriptions/plisskien__VMProtect-3.x-Emulator-Memory-Dumper.md
 updated: 2026-11-07
 confidence: high
 ---
@@ -2290,6 +2291,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Python emulation-based VMProtect/packer unpack via [[vmpunpack]] (patched sogen emulator to OEP; PE rebuild + IOC extract; stdlib-only; no devirt) also sits in the Cheat Fix VMP / Unpacker lane. (source: wiki/sources/descriptions/milk-analyzer__vmpunpack.md)
 - Windows C++ dynamic VMProtect unpack via [[vmp-unpacker]] (Lucyferek-nunu; Win32 debugger attach; PEB/ntdll anti-debug bypass; OEP discovery via text-section guards/timed snapshots/manual triggers; memory dump + standard/mutated IAT rebuild; dynamic or passive import resolve) also sits in the Cheat Fix VMP / Unpacker lane. (source: wiki/sources/descriptions/Lucyferek-nunu__vmp-unpacker.md)
 - WIP dynamic VMProtect 3.8.x unpack via [[vmprotect-unpacker]] (datcathuh; C++ VS; inject unpacker DLL, wait for load-time unpack, snapshot PE + IAT rebuild; bytecode detect/devirt disasm emit; anti-debug hooks; EXE/DLL launch or PID attach; tested on VMP 3.8.4; Cheat Fix VMP / Unpacker) also sits in the Cheat Fix VMP / Unpacker lane. (source: wiki/sources/descriptions/datcathuh__vmprotect-unpacker.md)
+- Python Qiling/Unicorn sandbox emulation unpack via [[vmprotect-3-x-emulator-memory-dumper]] (plisskien; VMProtect 3.x x64 PE/DLL to OEP with anti-debug/anti-VM/SMBIOS/KnownDlls/PEB/syscall bypasses; checkpointed runs; snapshot mapped sections + heap for IDA/Ghidra; packer + SDK-virtualized functions; offline memory forensics; Cheat Fix VMP / Unpacker) also sits in the Cheat Fix VMP / Unpacker lane. (source: wiki/sources/descriptions/plisskien__VMProtect-3.x-Emulator-Memory-Dumper.md)
 - Static Go VMProtect PE unpack/rebuild via [[vmpstatic]] (VMP 1.x–3.x) also sits in the Cheat Fix VMP / Unpacker lane. (source: wiki/sources/descriptions/notsnakesilent__VMPStatic.md)
 - Emulation-based generic PE unpack via [[xvolkolak]] (XEmulUnpacker / XEmulator single-step to OEP; Qt GUI + CLI; 21 packer-specific unpackers incl. UPX/ASPack/MPRESS) also sits in the Cheat Fix VMP / Unpacker lane. (source: wiki/sources/descriptions/horsicq__XVolkolak.md)
 - Modular Python PE/ELF packer detection + unpack pipeline via [[unpacker]] (anpa1200; section/entropy/heuristic/signature ID; UPX native + Unicorn/Unipacker for 32-bit ASPack/Themida/VMProtect + Qiling for 64-bit VMProtect; multi-layer re-detect + PE rebuild; CLI detect→unpack→validate) also sits in the Cheat Fix VMP / Unpacker lane. (source: wiki/sources/descriptions/anpa1200__Unpacker.md)
