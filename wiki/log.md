@@ -1,3 +1,5 @@
+- **2026-11-07** — ingest `description:dayoungthugger/roblox-external-base`: entity [[roblox-external-base]] (C++ Windows external Roblox template; Toolhelp attach; asm NtRead/NtWriteVirtualMemory; DataModel/Instance + offsets; DirectComposition D3D11 flip-sequential ImGui overlay); cited [[overviews/game-hacking]] Roblox lane + [[overviews/graphics-api]] DirectComposition external overlay blurb; `index.md` entity catalog.
+
 - **2026-11-07** — ingest `description:rf-dev-design/nfsu2-revived-trainer`: entity [[nfsu2-revived-trainer]] (MV3 browser +10 trainer; NFSU2 Revived WASM memory patches with classic NFSU2 offsets; offline car-cheat gating; Chromium/Firefox/Safari); cited [[overviews/game-hacking]] browser WASM trainer lane beside [[webcheat]] + [[overviews/reverse-engineering]] browser WASM trainers blurb; `index.md` entity catalog.
 
 - **2026-11-07** — ingest `description:springah/futari_recomp`: entity [[futari-recomp]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]].

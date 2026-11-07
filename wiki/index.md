@@ -3487,6 +3487,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ROM Shifter](entities/rom-shifter.md) — Android app for custom-ROM flash, backup, restore, and migration (ShivamXD6; Kotlin/Compose + shell backend; Magisk/KernelSU/APatch; cheat / Android)
 - [Roblox Speed Tester](entities/roblox-speed-tester.md) — Roblox Luau LocalScript SpeedTester + GUI; Humanoid/RunService movement spikes with rollback indicators for movement AC hardening and validation research (EnderDevelopment; Anti Cheat / Stress Testing)
 - [RobloxCheats](entities/roblox-cheats.md) — macOS Roblox dylib injector (Mach VM / shared-memory IPC; internal+external ESP; offset finder)
+- [roblox-external-base](entities/roblox-external-base.md) — C++ Windows external Roblox starter (Toolhelp + NtRead/NtWrite syscalls; DataModel/Instance framework; DirectComposition D3D11 ImGui overlay; dayoungthugger)
 - [RookieAI_yolov8](entities/rookieai-yolov8.md) — Passer1072 YOLOv8 Ultralytics FPS aim-assist (Python; multi-process capture/inference; PyTorch/TensorRT/ONNX; Win32/Logitech/kmNet input; configurable aim/trigger; cheat / Machine Learning YOLOv8)
 - [Rooted Android Game VM](entities/rooted-android-game-vm.md) — Windows 11 desktop rooted Android emulator workbench (C#/.NET WPF + JSON CLI; SDK/emulator/Magisk automation; APK install/update, private app-data export, root diagnostics, checkpoints; Iviesever; Cheat / Android Emulator)
 - [rootAVD](entities/rootavd.md) — root Android Virtual Devices (Magisk/AVD; Cheat Magisk / Android Emulator)
