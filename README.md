@@ -1251,6 +1251,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/redthing1/w1tn3ss [dynamic binary instrumentation, analysis, and patching framework]
 - https://github.com/g2wfw/qbdi-tracer-android [Android assembly instruction tracing tool]
 - https://github.com/facebookresearch/CUTracer [A dynamic binary instrumentation tool for tracing and analyzing CUDA kernel instructions]
+- https://github.com/ioncodes/nvdisasm [Deobfuscated NVIDIA GPU SASS ISA specification files (Kepler through Hopper) for disassembler pattern and latency tables]
 - https://github.com/momo5502/levo [AOT binary translation: control flow recovery with Ghidra, lifting with Remill, recompilation with LLVM]
 
 > Launcher Abuser
