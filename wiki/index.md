@@ -1496,6 +1496,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [FTK Imager OSX](entities/ftk-imager-osx.md) — macOS forensic disk imaging package (MrMugiwara; CLI drive acquisition, split outputs, MD5/SHA1 verify, E01/SMART, fragmentation/compression/evidence metadata; DFIR on macOS)
 - [FlagSecurePatcher](entities/flagsecurepatcher.md) — Android FLAG_SECURE + screenshot-listener disable (Cheat / Magisk reference)
 - [Force Page Protection](entities/force-page-protection.md) — x64dbg plugin: force page protection on mapped views when NtProtectVirtualMemory fails; SEC_NO_CHANGE remap bypass (changeofpace; Bypass Remap Memory)
+- [ForceIO](entities/forceio.md) — no-CRT BYOPD CLI; WHCP-signed IObitUnlocker.sys force delete/move/copy below WdFilter and other minifilters (wesmar; cheat)
 - [Forensia](entities/forensia.md) — Windows anti-forensics utility (C++; file shredding, event-log/prefetch suppression, USN journal handling, timestamp cleanup, shell/cache artifact removal, Defender quarantine clearing, self-removal; post-exploitation trace reduction; red-team / IR validation; PaulNorman01)
 - [Fibratus](entities/fibratus.md) — Go Windows kernel ETW observability (rules / Elasticsearch; exploration & tracing)
 - [Fiano](entities/fiano.md) — Go UEFI firmware parse/edit toolkit (Firmware Volumes, FFS, PE32, LZMA/Tiano; flash extract/replace/remove)

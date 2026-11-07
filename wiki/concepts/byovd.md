@@ -11,6 +11,7 @@ sources:
   - wiki/sources/descriptions/xM0kht4r__AV-EDR-Killer.md
   - wiki/sources/descriptions/wesmar__kvc.md
   - wiki/sources/descriptions/wesmar__WinDefCtl.md
+  - wiki/sources/descriptions/wesmar__ForceIO.md
   - wiki/sources/descriptions/wesmar__KernelResearchKit.md
   - wiki/sources/descriptions/wavestone-cdt__EDRSandblast.md
   - wiki/sources/descriptions/vergamota__KslKatz.md
@@ -121,7 +122,7 @@ sources:
   - wiki/sources/descriptions/mein-0__forti-research.md
   - wiki/sources/descriptions/LongpanZhou__BYOVD-AI-Guide.md
   - wiki/sources/descriptions/chemsse576__BYOVDHunter.md
-updated: 2026-11-01
+updated: 2026-11-07
 confidence: high
 ---
 
@@ -212,6 +213,8 @@ DSE-disable controllers such as [[kvc]] use a signed Microsoft driver to patch C
 Broader Win11 research kits such as [[kernel-research-kit]] combine boot-time `SeCiCallbacks` DSE bypass with multiple unsigned-load methods including BYOVD alongside manual map and IRP hijack (25H2; native subsystem; anti-loop dual-path). (source: wiki/sources/descriptions/wesmar__KernelResearchKit.md)
 
 Defender neutralization CLIs such as [[windefctl]] escalate via a kernel driver to disable real-time protection and Tamper Protection (Win11 26H1; UAC/GUI bypass, stealth execution)—same AV/EDR-control research lane as process-kill BYOVD samples. (source: wiki/sources/descriptions/wesmar__WinDefCtl.md)
+
+Signed third-party unlock drivers for file I/O below the Filter Manager stack appear in tools such as [[forceio]] (WHCP-signed `IObitUnlocker.sys`; force delete/rename/move/copy when user-mode paths are blocked by minifilters including WdFilter; no-CRT BYOPD CLI). (source: wiki/sources/descriptions/wesmar__ForceIO.md)
 
 Full-stack EDR-blinding toolkits such as [[edrsandblast]] combine BYOVD with callback/ETW TI disable and ntdll unhook (offset automation + demo credential dump). (source: wiki/sources/descriptions/wavestone-cdt__EDRSandblast.md)
 
