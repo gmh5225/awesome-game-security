@@ -1,3 +1,5 @@
+- **2026-11-07** — ingest `description:rf-dev-design/nfsu2-revived-trainer`: entity [[nfsu2-revived-trainer]] (MV3 browser +10 trainer; NFSU2 Revived WASM memory patches with classic NFSU2 offsets; offline car-cheat gating; Chromium/Firefox/Safari); cited [[overviews/game-hacking]] browser WASM trainer lane beside [[webcheat]] + [[overviews/reverse-engineering]] browser WASM trainers blurb; `index.md` entity catalog.
+
 - **2026-11-07** — ingest `description:springah/futari_recomp`: entity [[futari-recomp]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]].
 
 - **2026-11-07** — ingest `readme:categories` (projection `wiki/sources/README-categories.md`): **Cheat** `link_count` **3035** (+3 vs wiki **~3032**); **Anti Cheat** **882** / **Detection:DMA** **~841** / **Game Engine** **159** / **Game Develop** **203** unchanged; 41 README `##` headings (37 resource categories in projection + meta); synced [[overviews/overview]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]], [[concepts/compiled-wiki]], [[concepts/resource-selection]], and `index.md` section notes; no per-category pages.
