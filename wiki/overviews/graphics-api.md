@@ -263,6 +263,7 @@ sources:
   - wiki/sources/descriptions/Qervas__segcap.md
   - wiki/sources/descriptions/irisengine__iris.md
   - wiki/sources/descriptions/inanevin__LinaEngine.md
+  - wiki/sources/descriptions/ioncodes__nvdisasm.md
   - wiki/sources/descriptions/harukumo__HorizonEngine.md
   - wiki/sources/descriptions/LukasBanana__LLGL.md
   - wiki/sources/descriptions/PixelGuys__Cubyz.md
@@ -385,7 +386,7 @@ sources:
   - wiki/sources/descriptions/husnaintariq577__kx-vision.md
   - wiki/sources/descriptions/effcol__wiz3D.md
   - wiki/sources/descriptions/ocornut__imgui_test_engine.md
-updated: 2026-11-06
+updated: 2026-11-07
 confidence: high
 ---
 
@@ -469,6 +470,8 @@ Select repository tools by the evidence required—report API/backend, driver, c
 Cross-platform frame capture via [[gpu-inspector]] (brendan-duncan; TypeScript/Electron + C++ capture layers; shader debug/edit, pixel history, validation, render graphs, WebGPU browser capture, MCP Claude Code analysis) supports rendering-pipeline and GPU command-flow study for game developers and reverse engineers. (source: wiki/sources/descriptions/brendan-duncan__gpu_inspector.md)
 
 Scriptable RenderDoc replay via [[rdc-cli]] (adriank56793; Python; draw/shader/texture/buffer export, pixel debug, two-frame diffs, daemon + remote/Android CI paths; TSV/JSON for shell pipelines) complements GUI capture review for automated rendering and shader RE. (source: wiki/sources/descriptions/adriank56793__rdc-cli.md)
+
+Deobfuscated NVIDIA **SASS** ISA specification corpora via [[nvdisasm]] (ioncodes; per-SM machine descriptions, encoding patterns, and execution-pipe latency tables Kepler–Hopper; CUDA ELF relocations and predicate rules) support offline disassembly of compiled CUDA kernels and graphics shader machine code beside frame-capture tools. (source: wiki/sources/descriptions/ioncodes__nvdisasm.md)
 
 D3D11 proxy capture via [[locum]] (Kalmarv; Rust + Bun web viewer; DXGI/D3D11 shims beside the exe—no inject; full-frame SQLite with SQL, resource trace to disk/memory, offline bit-exact replay, live draw/shader overrides; unsuitable for AC-protected online play) extends that observation lane for Windows D3D11-only lab titles. (source: wiki/sources/descriptions/Kalmarv__locum.md)
 
