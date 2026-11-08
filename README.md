@@ -1815,6 +1815,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/AloneMonkey/frida-ios-dump [Frida-based tool to pull decrypted IPAs from jailbroken iOS devices over USB SSH, with parallel module downloads and Frida 17 bridge support]
 - https://github.com/RansomWhisker/getIPA [CLI to SSH into a jailbroken iPhone, list App Store apps, and build encrypted or bagbak-decrypted IPAs with entitlements and encryption reporting]
 - https://github.com/everettjf/copyapp [Agent-driven iOS/macOS app analysis and independent rebuilds from UI, sandbox, and Frida evidence (standard and jailbroken routes)]
+- https://github.com/mzydgnh2/dsh-ios [Unsigned jailbreak iOS app packaging DeepSeek Harness (official dsh web) with SwiftUI deploy UI, LAN bridge, and workspace management for on-device RE agents]
 - https://github.com/addrianyy/ios_packager [Package and sign iOS applications]
 - https://github.com/xscope0/xkvm-ios-injector [Go CLI toolbox to inject, extract, and convert iOS tweak packages for sideloaded IPAs]
 
