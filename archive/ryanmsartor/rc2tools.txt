@@ -1,0 +1,2697 @@
+Project Path: arc_ryanmsartor_rc2tools_32m6nlun
+
+Source Tree:
+
+```txt
+arc_ryanmsartor_rc2tools_32m6nlun
+├── README.md
+├── bin
+│   ├── extract_json.py
+│   └── render_graphics.py
+├── docs
+│   ├── cf3f8f41498cdd32f5b3ee0cdccde1901b073798f3edac1a7d9ccc0141cb16be.json
+│   ├── rom-map.md
+│   └── save-file-analysis.md
+├── input
+│   └── .gitkeep
+├── output
+│   └── .gitkeep
+├── rc2t
+└── tests
+    ├── test_extract_json.py
+    ├── test_rc2t_render.py
+    └── test_render_graphics.py
+
+```
+
+`README.md`:
+
+```md
+# rc2tools
+A collection of tools for hacking Rolan's Curse 2 for Game Boy
+
+## Extract character stats
+
+Requires Python 3.10 or later and Bash. From the repository root, run:
+
+```sh
+./rc2t extract-json
+```
+
+This reads `input/Rolan's Curse II (USA).gb` and writes
+`output/<rom-sha256>.json`, using the lowercase SHA-256 hash of the ROM bytes
+as the filename. A different ROM revision therefore gets a different output
+file.
+Alternatively, supply a ROM or a complete 16-byte-per-row `.hex` dump produced
+by `xxd` or PowerShell `Format-Hex`:
+
+```sh
+./rc2t extract-json "input/Rolan's Curse II (USA).gb.hex"
+```
+
+The command reads the mapped bytes from the supplied input, so modified stat
+values are reflected in the output. It checks the ROM size and header, not a
+fixed hash or expected stat values. Arrays contain decimal byte values for
+levels 1 through 16; the mappings and their unresolved interpretations are
+documented in [the ROM map](docs/rom-map.md). The output file is overwritten
+if a file with that ROM hash already exists.
+
+## Render graphics as assembled sprites
+
+Rendering requires Pillow 10.0 or later. Install it with:
+
+```sh
+python3 -m pip install 'Pillow>=10.0'
+```
+
+To render the entire default ROM (including non-graphics data) to
+`output/graphics.png`, run:
+
+```sh
+./rc2t render-graphics
+```
+
+To render from a start offset through the end of the ROM, run:
+
+```sh
+./rc2t render-graphics 0x8050
+```
+
+This also writes to `output/graphics.png`.
+
+To render an inclusive-start, exclusive-end ROM byte range as a sheet of
+assembled sprites, pass the range and output path:
+
+```sh
+./rc2t render-graphics 0x9106 0xB566 output/hero-sprites.png
+```
+
+Offsets are physical ROM offsets. Each 16-byte tile is decoded as 8×8 pixels;
+every four consecutive tiles are assembled into one 16×16 sprite in
+top-left, bottom-left, top-right, bottom-right input order. This column-first
+layout was observed in the Hero sprite and is applied uniformly to the entire
+range as an experiment. Any final group with fewer than four tiles is rendered
+with missing quadrants left blank. A one-pixel gutter separates sprites.
+The selected range may end at any byte, but must contain at least one byte. If
+it ends in the middle of a pixel row, the missing byte is zero-padded; missing
+rows in the final 16-byte tile are left blank.
+The rendered sheet labels each column along the top with the address where its
+first cel begins, and each row along the left with the address where its first
+cel begins. Each cel uses 64 bytes; each row's left-axis address advances by
+one full row (`columns * 64` bytes).
+
+The default sheet uses 16 sprites per row. Its grayscale palette displays
+transparent color index 0 as black, while the inverted non-transparent
+palette displays index 3 as white.
+The output extension can be `.png`, `.jpg`, or `.jpeg`. Options include
+`--input` for a different ROM or full hex dump, `--columns` for sprites per
+row, and `--scale` for nearest-neighbor enlargement. The specified output
+file is overwritten if it exists. You can also invoke
+`python3 bin/render_graphics.py` directly with the same range, output path,
+and options. When run without a range, `./rc2t render-graphics` applies this
+grouping to the entire ROM, including non-graphics data.
+
+```
+
+`bin/extract_json.py`:
+
+```py
+#!/usr/bin/env python3
+"""Extract documented character tables from a ROM or its hex dump."""
+
+import argparse
+import hashlib
+import json
+import re
+import sys
+from pathlib import Path
+
+ROM_SIZE = 0x20000
+LEVELS = 16
+CHARACTERS = ("hero", "pit", "lane", "kyle", "jude", "lee", "lora", "zold")
+
+# Offsets and record fields are documented in docs/rom-map.md.
+ABILITIES = {
+    "hero": (
+        ("a", 0x15449, ("damage",)),
+        ("b", 0x15459, ("cost", "range", "damage")),
+    ),
+    "pit": (
+        ("dagger", 0x154AD, ("range", "damage")),
+        ("boomerang", 0x154DF, ("range", "damage")),
+        ("bomb", 0x15511, ("cost", "damage", "unknown")),
+    ),
+    "lane": (
+        ("a", 0x15709, ("damage",)),
+        ("shield", 0x15719, ("cost", "unknown")),
+        ("healing", 0x15799, ("cost", "unknown_1", "unknown_2")),
+    ),
+    "kyle": (
+        ("a", 0x157C9, ("damage",)),
+        ("play_dead", 0x157D9, ("cost", "unknown")),
+        ("rod", 0x15898, ("cost", "damage")),
+    ),
+    "jude": (
+        ("weak_a", 0x159B2, ("range", "damage")),
+        ("strong_a", 0x159E4, ("range", "damage")),
+        ("quake", 0x15A16, ("cost", "damage")),
+    ),
+    "lee": (
+        ("a", 0x15B97, ("damage",)),
+        ("rapidfire", 0x15BA7, ("cost", "damage")),
+        ("firework", 0x15BC7, ("cost", "damage", "range")),
+    ),
+    "lora": (
+        ("a", 0x15C34, ("range", "damage")),
+        ("heal", 0x15C66, ("cost", "unknown_1", "unknown_2")),
+        ("wing", 0x15C96, ("cost",)),
+    ),
+    "zold": (
+        ("a", 0x15CB6, ("range", "damage")),
+        ("b", 0x15CE8, ("cost", "damage")),
+    ),
+}
+
+ADDITIONAL_TABLES = {
+    "zold_a_damage": (0x15CA6, LEVELS, 1),
+    "lookup_0x17165": (0x17165, 8, 2),
+    "lookup_0x17175": (0x17175, 8, 2),
+}
+
+XXD_ROW = re.compile(
+    r"^([0-9a-fA-F]{8}): ((?:[0-9a-fA-F]{4} ){7}[0-9a-fA-F]{4})  "
+)
+FORMAT_HEX_ROW = re.compile(
+    r"^([0-9a-fA-F]{8})[ \t]+((?:[0-9a-fA-F]{2}[ \t]+){15}"
+    r"[0-9a-fA-F]{2})(?:[ \t]|$)"
+)
+ROW_PREFIX = re.compile(r"^[0-9a-fA-F]{8}(?:[ \t]|:)")
+
+
+def parse_hex_dump(raw: bytes) -> bytes:
+    """Parse contiguous, full-width xxd or PowerShell Format-Hex rows."""
+    encoding = "utf-16" if raw.startswith((b"\xff\xfe", b"\xfe\xff")) else "utf-8-sig"
+    text = raw.decode(encoding)
+    data = bytearray()
+    for line_number, line in enumerate(text.split("\n"), 1):
+        match = XXD_ROW.match(line) or FORMAT_HEX_ROW.match(line)
+        if match:
+            offset = int(match.group(1), 16)
+            if offset != len(data):
+                raise ValueError(
+                    f"hex dump line {line_number}: expected offset "
+                    f"0x{len(data):08X}, found 0x{offset:08X}"
+                )
+            data.extend(bytes.fromhex(match.group(2)))
+        elif ROW_PREFIX.match(line):
+            raise ValueError(f"invalid hex dump row at line {line_number}")
+    if not data:
+        raise ValueError("hex dump contains no recognizable rows")
+    return bytes(data)
+
+
+def read_rom(path: Path) -> bytes:
+    raw = path.read_bytes()
+    rom = parse_hex_dump(raw) if path.suffix.lower() == ".hex" else raw
+    if len(rom) != ROM_SIZE:
+        raise ValueError(f"expected a {ROM_SIZE}-byte ROM, found {len(rom)} bytes")
+    if rom[0x134:0x143] != b"ROLAN'S CURSE 2" or rom[0x147:0x149] != b"\x06\x02":
+        raise ValueError("ROM header does not match Rolan's Curse II (USA), MBC2, 128 KiB")
+    return rom
+
+
+def extract_json(rom: bytes) -> dict:
+    """Read each mapped record directly from ROM, in level order."""
+    characters = {}
+    for index, name in enumerate(CHARACTERS):
+        hp_start = 0x17065 + index * LEVELS
+        mp_start = 0x170E5 + index * LEVELS
+        character = {
+            "hp": list(rom[hp_start:hp_start + LEVELS]),
+            "mp": list(rom[mp_start:mp_start + LEVELS]),
+            "abilities": {},
+        }
+        for ability, offset, fields in ABILITIES[name]:
+            width = len(fields)
+            character["abilities"][ability] = {
+                field: [rom[offset + level * width + column] for level in range(LEVELS)]
+                for column, field in enumerate(fields)
+            }
+        characters[name] = character
+    additional_tables = {}
+    for name, (offset, entries, width) in ADDITIONAL_TABLES.items():
+        if width == 1:
+            additional_tables[name] = list(rom[offset:offset + entries])
+        else:
+            additional_tables[name] = [
+                list(rom[offset + index * width:offset + (index + 1) * width])
+                for index in range(entries)
+            ]
+    return {"characters": characters, "additional_tables": additional_tables}
+
+
+def output_path(root: Path, rom: bytes) -> Path:
+    """Return the output path named by the source ROM's SHA-256."""
+    digest = hashlib.sha256(rom).hexdigest()
+    return root / "output" / f"{digest}.json"
+
+
+def main() -> int:
+    root = Path(__file__).resolve().parent.parent
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "input",
+        nargs="?",
+        type=Path,
+        default=root / "input" / "Rolan's Curse II (USA).gb",
+        help="ROM (.gb) or full xxd/Format-Hex dump (.hex)",
+    )
+    args = parser.parse_args()
+    try:
+        rom = read_rom(args.input)
+        game = extract_json(rom)
+        output = output_path(root, rom)
+        output.parent.mkdir(parents=True, exist_ok=True)
+        output.write_text(json.dumps(game, indent=2) + "\n", encoding="utf-8", newline="\n")
+    except (OSError, UnicodeError, ValueError) as error:
+        print(f"Error: {error}", file=sys.stderr)
+        return 1
+    print(f"Wrote {output}")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
+
+```
+
+`bin/render_graphics.py`:
+
+```py
+#!/usr/bin/env python3
+"""Render a ROM byte range as assembled 16x16 Game Boy sprites."""
+
+import argparse
+import math
+import sys
+from pathlib import Path
+
+from PIL import Image, ImageDraw, ImageFont
+
+from extract_json import read_rom
+
+TILE_BYTES = 16
+TILE_WIDTH = 8
+SPRITE_TILE_POSITIONS = ((0, 0), (0, 1), (1, 0), (1, 1))
+SPRITE_WIDTH = TILE_WIDTH * 2
+SPRITE_GUTTER = 1
+GUTTER_COLOR = (192, 192, 192)
+DEFAULT_ROM = Path(__file__).resolve().parent.parent / "input" / "Rolan's Curse II (USA).gb"
+DEFAULT_PALETTE = (
+    (0, 0, 0),
+    (85, 85, 85),
+    (170, 170, 170),
+    (255, 255, 255),
+)
+
+
+def parse_offset(value: str) -> int:
+    """Parse an offset written in decimal or with a 0x prefix."""
+    try:
+        return int(value, 0)
+    except ValueError as error:
+        raise argparse.ArgumentTypeError(f"invalid offset: {value}") from error
+
+
+def decode_tiles(data: bytes) -> list[list[int]]:
+    """Decode Game Boy 2bpp tiles, allowing a final tile to end at any byte."""
+    if not data:
+        raise ValueError("range must contain at least one byte")
+
+    pixels = []
+    for tile_start in range(0, len(data), TILE_BYTES):
+        tile_data = data[tile_start:tile_start + TILE_BYTES].ljust(TILE_BYTES, b"\x00")
+        tile = []
+        for row in range(TILE_WIDTH):
+            low, high = tile_data[row * 2:row * 2 + 2]
+            tile.append([
+                ((low >> bit) & 1) | (((high >> bit) & 1) << 1)
+                for bit in range(7, -1, -1)
+            ])
+        pixels.append(tile)
+    return pixels
+
+
+def add_address_axes(
+    image: Image.Image,
+    sprite_count: int,
+    columns: int,
+    start_address: int,
+    scale: int,
+) -> Image.Image:
+    """Add ROM address labels for the first cel in each column and row."""
+    rows = math.ceil(sprite_count / columns)
+    column_addresses = [
+        f"0x{start_address + column * 4 * TILE_BYTES:04X}"
+        for column in range(min(columns, sprite_count))
+    ]
+    row_addresses = [
+        f"0x{start_address + row * columns * 4 * TILE_BYTES:04X}"
+        for row in range(rows)
+    ]
+    font = ImageFont.load_default()
+    column_bounds = [font.getbbox(address) for address in column_addresses]
+    row_bounds = [font.getbbox(address) for address in row_addresses]
+    column_label_width = max(right - left for left, _, right, _ in column_bounds)
+    row_label_width = max(right - left for left, _, right, _ in row_bounds)
+    label_height = max(bottom - top for _, top, _, bottom in column_bounds + row_bounds)
+
+    cell_size = SPRITE_WIDTH * scale
+    source_pitch = (SPRITE_WIDTH + SPRITE_GUTTER) * scale
+    column_pitch = max(source_pitch, column_label_width + 8)
+    row_pitch = max(source_pitch, label_height + 8)
+    top_margin = label_height + 8
+    left_margin = row_label_width + 8
+    graphic_width = columns * cell_size + (columns - 1) * (column_pitch - cell_size)
+    graphic_height = rows * cell_size + (rows - 1) * (row_pitch - cell_size)
+    output = Image.new(
+        "RGB",
+        (left_margin + graphic_width, top_margin + graphic_height),
+        (255, 255, 255),
+    )
+
+    for sprite_index in range(sprite_count):
+        source_x = sprite_index % columns * source_pitch
+        source_y = sprite_index // columns * source_pitch
+        sprite = image.crop((source_x, source_y, source_x + cell_size, source_y + cell_size))
+        target_x = left_margin + sprite_index % columns * column_pitch
+        target_y = top_margin + sprite_index // columns * row_pitch
+        output.paste(sprite, (target_x, target_y))
+
+    draw = ImageDraw.Draw(output)
+    for column, address in enumerate(column_addresses):
+        left, top, right, bottom = font.getbbox(address)
+        center_x = left_margin + column * column_pitch + cell_size / 2
+        draw.text(
+            (center_x - (right - left) / 2 - left, (top_margin - (bottom - top)) / 2 - top),
+            address,
+            fill=(0, 0, 0),
+            font=font,
+        )
+    for row, address in enumerate(row_addresses):
+        left, top, right, bottom = font.getbbox(address)
+        center_y = top_margin + row * row_pitch + cell_size / 2
+        draw.text(
+            ((left_margin - (right - left)) / 2 - left, center_y - (bottom - top) / 2 - top),
+            address,
+            fill=(0, 0, 0),
+            font=font,
+        )
+
+    for column in range(1, columns):
+        x = left_margin + column * column_pitch - SPRITE_GUTTER * scale
+        draw.line((x, top_margin, x, top_margin + graphic_height - 1), fill=GUTTER_COLOR)
+    for row in range(1, rows):
+        y = top_margin + row * row_pitch - SPRITE_GUTTER * scale
+        draw.line((left_margin, y, left_margin + graphic_width - 1, y), fill=GUTTER_COLOR)
+    return output
+
+
+def render_sprites(
+    data: bytes,
+    columns: int = 16,
+    scale: int = 4,
+    palette: tuple[tuple[int, int, int], ...] = DEFAULT_PALETTE,
+    start_address: int | None = None,
+) -> Image.Image:
+    """Render groups of four column-first tiles as 16x16 sprites."""
+    if columns < 1:
+        raise ValueError("columns must be at least 1")
+    if scale < 1:
+        raise ValueError("scale must be at least 1")
+    if len(palette) != 4:
+        raise ValueError("palette must contain exactly four colors")
+
+    tiles = decode_tiles(data)
+    sprite_count = math.ceil(len(tiles) / len(SPRITE_TILE_POSITIONS))
+    rows = math.ceil(sprite_count / columns)
+    width = columns * SPRITE_WIDTH + (columns - 1) * SPRITE_GUTTER
+    height = rows * SPRITE_WIDTH + (rows - 1) * SPRITE_GUTTER
+    image = Image.new("RGB", (width, height), palette[0])
+    draw = ImageDraw.Draw(image)
+    for column in range(1, columns):
+        x = column * (SPRITE_WIDTH + SPRITE_GUTTER) - SPRITE_GUTTER
+        draw.line((x, 0, x, height - 1), fill=GUTTER_COLOR)
+    for row in range(1, rows):
+        y = row * (SPRITE_WIDTH + SPRITE_GUTTER) - SPRITE_GUTTER
+        draw.line((0, y, width - 1, y), fill=GUTTER_COLOR)
+    pixels = image.load()
+    for tile_index, tile in enumerate(tiles):
+        sprite_index, tile_position = divmod(tile_index, len(SPRITE_TILE_POSITIONS))
+        sprite_column, sprite_row = sprite_index % columns, sprite_index // columns
+        tile_column, tile_row = SPRITE_TILE_POSITIONS[tile_position]
+        tile_x = sprite_column * (SPRITE_WIDTH + SPRITE_GUTTER) + tile_column * TILE_WIDTH
+        tile_y = sprite_row * (SPRITE_WIDTH + SPRITE_GUTTER) + tile_row * TILE_WIDTH
+        for y, row in enumerate(tile):
+            for x, color in enumerate(row):
+                pixels[tile_x + x, tile_y + y] = palette[color]
+
+    if scale > 1:
+        image = image.resize((image.width * scale, image.height * scale), Image.Resampling.NEAREST)
+    if start_address is not None:
+        image = add_address_axes(image, sprite_count, columns, start_address, scale)
+    return image
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("start", type=parse_offset, help="start ROM offset (inclusive)")
+    parser.add_argument("end", type=parse_offset, help="end ROM offset (exclusive)")
+    parser.add_argument("output", type=Path, help="output .png, .jpg, or .jpeg path")
+    parser.add_argument(
+        "--input",
+        type=Path,
+        default=DEFAULT_ROM,
+        help="ROM or full xxd/Format-Hex dump (default: %(default)s)",
+    )
+    parser.add_argument("--columns", type=int, default=16, help="sprites per row (default: 16)")
+    parser.add_argument("--scale", type=int, default=4, help="integer nearest-neighbor scale (default: 4)")
+    args = parser.parse_args()
+
+    try:
+        if args.output.suffix.lower() not in (".png", ".jpg", ".jpeg"):
+            raise ValueError("output extension must be .png, .jpg, or .jpeg")
+        if args.start < 0 or args.end <= args.start:
+            raise ValueError("range must have a nonnegative start and an end greater than the start")
+
+        rom = read_rom(args.input)
+        if args.end > len(rom):
+            raise ValueError(f"range end 0x{args.end:X} exceeds ROM size 0x{len(rom):X}")
+        data = rom[args.start:args.end]
+        image = render_sprites(data, args.columns, args.scale, start_address=args.start)
+        args.output.parent.mkdir(parents=True, exist_ok=True)
+        image.save(args.output)
+    except (OSError, UnicodeError, ValueError) as error:
+        print(f"Error: {error}", file=sys.stderr)
+        return 1
+
+    print(f"Wrote {args.output}")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
+
+```
+
+`docs/cf3f8f41498cdd32f5b3ee0cdccde1901b073798f3edac1a7d9ccc0141cb16be.json`:
+
+```json
+{
+  "characters": {
+    "hero": {
+      "hp": [
+        30,
+        45,
+        60,
+        75,
+        90,
+        105,
+        120,
+        135,
+        150,
+        165,
+        180,
+        195,
+        210,
+        225,
+        240,
+        255
+      ],
+      "mp": [
+        10,
+        20,
+        30,
+        40,
+        50,
+        60,
+        70,
+        80,
+        90,
+        100,
+        110,
+        120,
+        130,
+        140,
+        150,
+        160
+      ],
+      "abilities": {
+        "a": {
+          "damage": [
+            7,
+            15,
+            23,
+            31,
+            39,
+            47,
+            55,
+            63,
+            71,
+            79,
+            87,
+            95,
+            103,
+            111,
+            119,
+            127
+          ]
+        },
+        "b": {
+          "cost": [
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            0
+          ],
+          "range": [
+            9,
+            9,
+            9,
+            9,
+            10,
+            10,
+            10,
+            11,
+            11,
+            11,
+            12,
+            12,
+            12,
+            13,
+            13,
+            13
+          ],
+          "damage": [
+            15,
+            16,
+            17,
+            18,
+            20,
+            22,
+            24,
+            28,
+            32,
+            36,
+            40,
+            44,
+            50,
+            56,
+            62,
+            68
+          ]
+        }
+      }
+    },
+    "pit": {
+      "hp": [
+        40,
+        50,
+        60,
+        70,
+        80,
+        90,
+        100,
+        110,
+        115,
+        120,
+        125,
+        130,
+        135,
+        140,
+        145,
+        150
+      ],
+      "mp": [
+        40,
+        46,
+        52,
+        58,
+        64,
+        70,
+        76,
+        82,
+        86,
+        92,
+        98,
+        104,
+        110,
+        116,
+        122,
+        130
+      ],
+      "abilities": {
+        "dagger": {
+          "range": [
+            8,
+            8,
+            9,
+            9,
+            10,
+            10,
+            11,
+            11,
+            12,
+            12,
+            13,
+            13,
+            14,
+            14,
+            15,
+            15
+          ],
+          "damage": [
+            1,
+            2,
+            4,
+            6,
+            8,
+            10,
+            14,
+            18,
+            22,
+            26,
+            30,
+            34,
+            38,
+            42,
+            46,
+            50
+          ]
+        },
+        "boomerang": {
+          "range": [
+            8,
+            8,
+            8,
+            9,
+            9,
+            9,
+            10,
+            10,
+            10,
+            11,
+            11,
+            11,
+            12,
+            12,
+            12,
+            13
+          ],
+          "damage": [
+            15,
+            19,
+            23,
+            27,
+            31,
+            35,
+            39,
+            43,
+            47,
+            51,
+            55,
+            59,
+            63,
+            67,
+            71,
+            79
+          ]
+        },
+        "bomb": {
+          "cost": [
+            8,
+            8,
+            8,
+            8,
+            6,
+            6,
+            6,
+            6,
+            4,
+            4,
+            4,
+            2,
+            2,
+            2,
+            1,
+            0
+          ],
+          "damage": [
+            63,
+            63,
+            63,
+            63,
+            79,
+            79,
+            79,
+            79,
+            95,
+            95,
+            95,
+            95,
+            111,
+            111,
+            111,
+            127
+          ],
+          "unknown": [
+            16,
+            16,
+            16,
+            16,
+            12,
+            12,
+            12,
+            12,
+            8,
+            8,
+            8,
+            8,
+            4,
+            4,
+            4,
+            2
+          ]
+        }
+      }
+    },
+    "lane": {
+      "hp": [
+        60,
+        75,
+        90,
+        105,
+        120,
+        130,
+        140,
+        150,
+        157,
+        164,
+        171,
+        178,
+        185,
+        190,
+        195,
+        200
+      ],
+      "mp": [
+        20,
+        25,
+        30,
+        35,
+        40,
+        45,
+        50,
+        55,
+        60,
+        65,
+        70,
+        80,
+        90,
+        100,
+        110,
+        120
+      ],
+      "abilities": {
+        "a": {
+          "damage": [
+            19,
+            23,
+            27,
+            31,
+            35,
+            39,
+            43,
+            47,
+            53,
+            59,
+            65,
+            71,
+            79,
+            87,
+            95,
+            103
+          ]
+        },
+        "shield": {
+          "cost": [
+            20,
+            21,
+            22,
+            23,
+            24,
+            25,
+            26,
+            27,
+            28,
+            29,
+            30,
+            32,
+            34,
+            36,
+            38,
+            40
+          ],
+          "unknown": [
+            40,
+            50,
+            60,
+            70,
+            80,
+            90,
+            100,
+            110,
+            120,
+            130,
+            140,
+            150,
+            160,
+            170,
+            180,
+            190
+          ]
+        },
+        "healing": {
+          "cost": [
+            20,
+            20,
+            20,
+            20,
+            20,
+            20,
+            20,
+            20,
+            20,
+            20,
+            20,
+            20,
+            20,
+            20,
+            20,
+            20
+          ],
+          "unknown_1": [
+            10,
+            10,
+            15,
+            15,
+            20,
+            20,
+            25,
+            25,
+            30,
+            30,
+            35,
+            35,
+            40,
+            40,
+            45,
+            50
+          ],
+          "unknown_2": [
+            10,
+            10,
+            15,
+            15,
+            20,
+            20,
+            25,
+            25,
+            30,
+            30,
+            35,
+            35,
+            40,
+            40,
+            45,
+            50
+          ]
+        }
+      }
+    },
+    "kyle": {
+      "hp": [
+        80,
+        84,
+        88,
+        92,
+        100,
+        108,
+        116,
+        124,
+        136,
+        148,
+        160,
+        172,
+        188,
+        204,
+        220,
+        240
+      ],
+      "mp": [
+        40,
+        50,
+        60,
+        70,
+        80,
+        90,
+        100,
+        110,
+        115,
+        120,
+        125,
+        130,
+        135,
+        140,
+        145,
+        150
+      ],
+      "abilities": {
+        "a": {
+          "damage": [
+            51,
+            55,
+            59,
+            63,
+            67,
+            71,
+            75,
+            79,
+            83,
+            87,
+            91,
+            95,
+            99,
+            103,
+            107,
+            111
+          ]
+        },
+        "play_dead": {
+          "cost": [
+            20,
+            19,
+            18,
+            17,
+            16,
+            15,
+            14,
+            13,
+            12,
+            11,
+            10,
+            9,
+            7,
+            5,
+            3,
+            1
+          ],
+          "unknown": [
+            80,
+            90,
+            100,
+            110,
+            120,
+            130,
+            140,
+            150,
+            160,
+            170,
+            180,
+            190,
+            200,
+            210,
+            220,
+            230
+          ]
+        },
+        "rod": {
+          "cost": [
+            10,
+            10,
+            10,
+            10,
+            8,
+            8,
+            8,
+            8,
+            6,
+            6,
+            6,
+            6,
+            4,
+            4,
+            2,
+            2
+          ],
+          "damage": [
+            179,
+            183,
+            187,
+            191,
+            195,
+            199,
+            203,
+            207,
+            211,
+            215,
+            219,
+            223,
+            227,
+            231,
+            235,
+            239
+          ]
+        }
+      }
+    },
+    "jude": {
+      "hp": [
+        50,
+        55,
+        60,
+        65,
+        70,
+        75,
+        80,
+        85,
+        90,
+        95,
+        100,
+        105,
+        110,
+        115,
+        120,
+        130
+      ],
+      "mp": [
+        100,
+        102,
+        104,
+        108,
+        114,
+        120,
+        128,
+        136,
+        142,
+        150,
+        160,
+        170,
+        180,
+        190,
+        200,
+        200
+      ],
+      "abilities": {
+        "weak_a": {
+          "range": [
+            8,
+            8,
+            9,
+            9,
+            10,
+            10,
+            11,
+            11,
+            12,
+            12,
+            13,
+            13,
+            14,
+            14,
+            15,
+            15
+          ],
+          "damage": [
+            15,
+            17,
+            19,
+            21,
+            23,
+            25,
+            29,
+            33,
+            37,
+            41,
+            45,
+            51,
+            57,
+            63,
+            69,
+            75
+          ]
+        },
+        "strong_a": {
+          "range": [
+            8,
+            8,
+            8,
+            8,
+            9,
+            9,
+            9,
+            9,
+            10,
+            10,
+            10,
+            10,
+            11,
+            11,
+            11,
+            11
+          ],
+          "damage": [
+            47,
+            49,
+            51,
+            53,
+            55,
+            57,
+            59,
+            61,
+            63,
+            65,
+            69,
+            73,
+            77,
+            81,
+            85,
+            89
+          ]
+        },
+        "quake": {
+          "cost": [
+            50,
+            50,
+            45,
+            45,
+            40,
+            40,
+            35,
+            35,
+            30,
+            30,
+            25,
+            25,
+            20,
+            15,
+            10,
+            5
+          ],
+          "damage": [
+            135,
+            143,
+            151,
+            159,
+            167,
+            175,
+            183,
+            191,
+            199,
+            207,
+            215,
+            223,
+            231,
+            239,
+            247,
+            255
+          ]
+        }
+      }
+    },
+    "lee": {
+      "hp": [
+        120,
+        130,
+        140,
+        150,
+        160,
+        168,
+        176,
+        184,
+        192,
+        198,
+        204,
+        208,
+        212,
+        214,
+        216,
+        220
+      ],
+      "mp": [
+        20,
+        26,
+        32,
+        38,
+        44,
+        50,
+        56,
+        62,
+        70,
+        78,
+        86,
+        94,
+        102,
+        110,
+        118,
+        130
+      ],
+      "abilities": {
+        "a": {
+          "damage": [
+            47,
+            51,
+            55,
+            59,
+            63,
+            67,
+            71,
+            75,
+            79,
+            83,
+            87,
+            91,
+            95,
+            103,
+            111,
+            119
+          ]
+        },
+        "rapidfire": {
+          "cost": [
+            4,
+            4,
+            4,
+            4,
+            3,
+            3,
+            3,
+            3,
+            2,
+            2,
+            2,
+            2,
+            1,
+            1,
+            1,
+            1
+          ],
+          "damage": [
+            63,
+            67,
+            71,
+            75,
+            79,
+            83,
+            87,
+            91,
+            95,
+            99,
+            103,
+            107,
+            111,
+            115,
+            119,
+            123
+          ]
+        },
+        "firework": {
+          "cost": [
+            15,
+            15,
+            15,
+            15,
+            15,
+            15,
+            15,
+            15,
+            15,
+            15,
+            15,
+            15,
+            15,
+            15,
+            15,
+            15
+          ],
+          "damage": [
+            63,
+            67,
+            71,
+            75,
+            79,
+            83,
+            87,
+            91,
+            95,
+            99,
+            103,
+            107,
+            111,
+            115,
+            119,
+            123
+          ],
+          "range": [
+            4,
+            4,
+            4,
+            4,
+            4,
+            4,
+            5,
+            5,
+            5,
+            5,
+            6,
+            6,
+            6,
+            7,
+            7,
+            8
+          ]
+        }
+      }
+    },
+    "lora": {
+      "hp": [
+        80,
+        90,
+        100,
+        120,
+        130,
+        140,
+        150,
+        170,
+        180,
+        190,
+        200,
+        210,
+        220,
+        230,
+        240,
+        255
+      ],
+      "mp": [
+        80,
+        90,
+        100,
+        110,
+        115,
+        120,
+        125,
+        130,
+        135,
+        140,
+        145,
+        150,
+        155,
+        160,
+        170,
+        180
+      ],
+      "abilities": {
+        "a": {
+          "range": [
+            7,
+            7,
+            8,
+            8,
+            9,
+            9,
+            10,
+            10,
+            11,
+            11,
+            12,
+            12,
+            13,
+            13,
+            14,
+            14
+          ],
+          "damage": [
+            63,
+            67,
+            71,
+            75,
+            79,
+            83,
+            87,
+            91,
+            95,
+            99,
+            103,
+            107,
+            111,
+            115,
+            123,
+            127
+          ]
+        },
+        "heal": {
+          "cost": [
+            8,
+            12,
+            16,
+            20,
+            24,
+            28,
+            32,
+            36,
+            40,
+            44,
+            48,
+            52,
+            56,
+            60,
+            64,
+            68
+          ],
+          "unknown_1": [
+            20,
+            22,
+            24,
+            26,
+            28,
+            30,
+            32,
+            34,
+            36,
+            38,
+            40,
+            42,
+            44,
+            46,
+            48,
+            50
+          ],
+          "unknown_2": [
+            20,
+            22,
+            24,
+            26,
+            28,
+            30,
+            32,
+            34,
+            36,
+            38,
+            40,
+            42,
+            44,
+            46,
+            48,
+            50
+          ]
+        },
+        "wing": {
+          "cost": [
+            15,
+            14,
+            13,
+            12,
+            11,
+            10,
+            9,
+            8,
+            7,
+            6,
+            5,
+            4,
+            3,
+            2,
+            1,
+            0
+          ]
+        }
+      }
+    },
+    "zold": {
+      "hp": [
+        180,
+        185,
+        190,
+        195,
+        200,
+        205,
+        210,
+        215,
+        220,
+        225,
+        230,
+        235,
+        240,
+        245,
+        250,
+        255
+      ],
+      "mp": [
+        50,
+        60,
+        70,
+        80,
+        90,
+        100,
+        110,
+        120,
+        130,
+        140,
+        150,
+        160,
+        170,
+        180,
+        190,
+        200
+      ],
+      "abilities": {
+        "a": {
+          "range": [
+            10,
+            10,
+            10,
+            10,
+            11,
+            11,
+            11,
+            11,
+            12,
+            12,
+            12,
+            12,
+            13,
+            13,
+            13,
+            13
+          ],
+          "damage": [
+            135,
+            143,
+            151,
+            159,
+            167,
+            175,
+            183,
+            191,
+            199,
+            207,
+            215,
+            223,
+            231,
+            239,
+            247,
+            255
+          ]
+        },
+        "b": {
+          "cost": [
+            20,
+            20,
+            20,
+            20,
+            20,
+            20,
+            20,
+            20,
+            20,
+            20,
+            20,
+            20,
+            20,
+            20,
+            20,
+            20
+          ],
+          "damage": [
+            151,
+            159,
+            167,
+            175,
+            183,
+            191,
+            199,
+            207,
+            211,
+            215,
+            219,
+            223,
+            227,
+            231,
+            235,
+            239
+          ]
+        }
+      }
+    }
+  },
+  "additional_tables": {
+    "zold_a_damage": [
+      135,
+      143,
+      151,
+      159,
+      167,
+      175,
+      183,
+      191,
+      199,
+      207,
+      215,
+      223,
+      231,
+      239,
+      247,
+      255
+    ],
+    "lookup_0x17165": [
+      [
+        0,
+        1
+      ],
+      [
+        2,
+        4
+      ],
+      [
+        5,
+        6
+      ],
+      [
+        8,
+        9
+      ],
+      [
+        11,
+        13
+      ],
+      [
+        14,
+        16
+      ],
+      [
+        17,
+        18
+      ],
+      [
+        20,
+        22
+      ]
+    ],
+    "lookup_0x17175": [
+      [
+        0,
+        1
+      ],
+      [
+        3,
+        4
+      ],
+      [
+        5,
+        7
+      ],
+      [
+        8,
+        10
+      ],
+      [
+        12,
+        13
+      ],
+      [
+        14,
+        15
+      ],
+      [
+        17,
+        19
+      ],
+      [
+        21,
+        22
+      ]
+    ]
+  }
+}
+
+```
+
+`docs/rom-map.md`:
+
+```md
+# Rolan's Curse II (USA) ROM map
+
+This is an initial, evidence-based map of the ROM. ROM file offsets and CPU addresses are distinct, especially in the banked window. The separate [save file analysis](./save-file-analysis.md) documents observations from a hex-dumped `.sav` file; its labels are not ROM or CPU addresses.
+
+## ROM and cartridge layout
+
+The source examined here is `input/Rolan's Curse II (USA).gb` (131,072 bytes). The header bytes are at their standard Game Boy header offsets:
+
+| ROM offset | Bytes | Meaning |
+|---|---|---|
+| `0x0100` | `00 C3 50 01` | Entry sequence: `NOP`, then jump to CPU address `0x0150`. |
+| `0x0104-0x0133` | Nintendo logo data | Header logo field. |
+| `0x0134-0x0143` | `ROLAN'S CURSE 2` and padding | Cartridge title. |
+| `0x0143` | `00` | Non-CGB header flag. |
+| `0x0147` | `06` | Cartridge type: MBC2 with battery. |
+| `0x0148` | `02` | ROM size: 128 KiB (8 banks of 16 KiB). |
+| `0x0149` | `00` | Header RAM-size code. MBC2 has its own small built-in RAM; see below. |
+
+With MBC2, the CPU sees a fixed ROM window at `0x0000-0x3FFF` and a banked ROM window at `0x4000-0x7FFF`. The cartridge's RAM is the small MBC2 nibble RAM at `0xA000-0xA1FF` (512 four-bit cells); it is not a general 8 KiB SRAM. MBC2 bank selection is controlled by writes in the `0x2000-0x3FFF` range. Keep a bank number alongside any CPU address in `0x4000-0x7FFF` when documenting code or data there.
+
+## CPU address spaces
+
+These are hardware address windows, not interpretations of game variables:
+
+| CPU address range | Hardware use |
+|---|---|
+| `0x0000-0x7FFF` | Cartridge ROM and MBC control writes. |
+| `0x8000-0x9FFF` | Video RAM (tile/map data while in use). |
+| `0xA000-0xBFFF` | Cartridge RAM window; for this MBC2 cartridge, only `0xA000-0xA1FF` is the MBC2 RAM area. |
+| `0xC000-0xDFFF` | Work RAM. `0xE000-0xFDFF` echoes this region. |
+| `0xFE00-0xFE9F` | Object attribute memory (sprite attributes). |
+| `0xFF00-0xFF7F` | Hardware I/O registers. |
+| `0xFF80-0xFFFE` | High RAM. |
+| `0xFFFF` | Interrupt enable register. |
+
+## Confirmed code landmarks
+
+Offsets below are ROM file offsets that are also CPU addresses in the fixed bank:
+
+| ROM offset / CPU address | Observation |
+|---|---|
+| `0x0000-0x003F` | Repeated short instruction sequences (`LD HL,imm16; ADD HL,DE; RET`) with immediate values 0 through 7. Their callers and purpose are not identified. |
+| `0x0040` | VBlank vector saves AF/BC/DE/HL and jumps to `0x039C`. |
+| `0x0048` | LCD STAT vector jumps to `0x0594`. |
+| `0x0050`, `0x0058`, `0x0060` | Timer, serial, and joypad vectors contain `RETI` (`0xD9`). |
+| `0x0100` | Reset entry jumps to `0x0150`. |
+| `0x0150` | Startup begins. It calls `0x0C95`, initializes SP to `0xCBFF`, clears `0xFF80-0xFFFE`, and clears work RAM `0xC000-0xDFFF`. It also initializes other locations and calls routines at `0x0C7D`, `0x0CA2`, `0x0CA7`, and `0x0CB6`. |
+| `0x01A4-0x01AD` | Startup writes `1` to `0x3FFF` (selecting ROM bank 1), then calls CPU address `0x5586`. In this call context that is physical ROM offset `0x05586`. |
+
+These are landmarks, not a complete disassembly. In particular, routine names and responsibilities have not yet been established. Other calls in startup include `0x047C`, `0x04F6`, and `0x0511`; these are candidates for the next control-flow tracing pass.
+
+## Bank inventory
+
+The ROM has eight physical banks. The character tables described below are in bank 5. A graphics/tile-data region and related descriptors have been tentatively identified in bank 2; details and confidence are documented below. Other banks are not yet reliably classified by subsystem.
+
+| Physical bank | ROM file offsets |
+|---:|---|
+| 0 | `0x00000-0x03FFF` |
+| 1 | `0x04000-0x07FFF` |
+| 2 | `0x08000-0x0BFFF` |
+| 3 | `0x0C000-0x0FFFF` |
+| 4 | `0x10000-0x13FFF` |
+| 5 | `0x14000-0x17FFF` |
+| 6 | `0x18000-0x1BFFF` |
+| 7 | `0x1C000-0x1FFFF` |
+
+The title is the only clear long ASCII string found in the initial string scan. Most game text, graphics, maps, and audio are likely stored as encoded or packed binary, so a plain-text scan cannot locate them. Some early bank bytes look table-like (for example, bank 2 starts with little-endian values `0x404E`, `0x408E`, `0x40CE`), but those are not yet proven pointers or assigned to any asset.
+
+## Graphics and tile data (preliminary)
+
+The following identification is based on decoding bytes as Game Boy 2bpp tiles and matching a Hero sprite in `docs/screenshot_1.png`. The tile match confirms the format and the listed sprite tiles; the surrounding descriptor tables look like graphics transfer lists, but their consuming code has not been traced. Treat their field meanings as tentative.
+
+All source ranges below are physical ROM offsets in **bank 2**. For a CPU source pointer in the banked window, add `0x4000` to obtain the physical offset; conversely, subtract `0x4000` from the physical offset to obtain the CPU address with bank 2 selected. Each uncompressed 2bpp tile is 16 bytes (8×8 pixels).
+
+### In-UI character weapon and ability icons
+
+A sequence of 23 consecutive 16×16 sprites beginning at physical ROM offset `0x804E` contains the in-UI icons below, in order. Each sprite occupies 64 bytes (`0x40`), or four consecutive tiles.
+
+| # | Character | Icon | Physical ROM start |
+|---:|---|---|---:|
+| 1 | Hero | Sword | `0x804E` |
+| 2 | Hero | Magic ball | `0x808E` |
+| 3 | Pit | Dagger | `0x80CE` |
+| 4 | Pit | Boomerang | `0x810E` |
+| 5 | Pit | Bomb | `0x814E` |
+| 6 | Lane | Rod | `0x818E` |
+| 7 | Lane | Shield | `0x81CE` |
+| 8 | Lane | Heal | `0x820E` |
+| 9 | Kyle | Bone | `0x824E` |
+| 10 | Kyle | Play dead | `0x828E` |
+| 11 | Kyle | Lightning rod | `0x82CE` |
+| 12 | Jude | Fireball | `0x830E` |
+| 13 | Jude | Smash ball | `0x834E` |
+| 14 | Jude | Earthquake spell | `0x838E` |
+| 15 | Lee | Sai | `0x83CE` |
+| 16 | Lee | Fist | `0x840E` |
+| 17 | Lee | Firecracker | `0x844E` |
+| 18 | Lora | Bow | `0x848E` |
+| 19 | Lora | Heal | `0x84CE` |
+| 20 | Lora | Wings | `0x850E` |
+| 21 | Zold | Sword | `0x854E` |
+| 22 | Zold | Wave | `0x858E` |
+| 23 | Zold | Magic | `0x85CE` |
+
+The block occupies `0x804E-0x860D` inclusive; the next address after the final icon is `0x860E`. With bank 2 selected, the corresponding CPU address range is `0x404E-0x460D`.
+
+### Character level-up faces
+
+The next eight 16×16 sprites are the character faces used for level-up pickups, in character order. Each occupies 64 bytes (`0x40`).
+
+| # | Character | Physical ROM start |
+|---:|---|---:|
+| 1 | Hero | `0x860E` |
+| 2 | Pit | `0x864E` |
+| 3 | Lane | `0x868E` |
+| 4 | Kyle | `0x86CE` |
+| 5 | Jude | `0x870E` |
+| 6 | Lee | `0x874E` |
+| 7 | Lora | `0x878E` |
+| 8 | Zold | `0x87CE` |
+
+These faces occupy `0x860E-0x880D` inclusive. The next address is `0x880E`; with bank 2 selected, the CPU range is `0x460E-0x480D`.
+
+### Hero sprite tiles
+
+The four tiles matching the screenshot are consecutive 16-byte tiles at `0x9106-0x9145` (inclusive). Their file order is column-first, not row-first:
+
+| Screen position | Physical ROM range | CPU address (bank 2 selected) |
+|---|---|---|
+| Top-left | `0x9106-0x9115` | `0x5106-0x5115` |
+| Bottom-left | `0x9116-0x9125` | `0x5116-0x5125` |
+| Top-right | `0x9126-0x9135` | `0x5126-0x5135` |
+| Bottom-right | `0x9136-0x9145` | `0x5136-0x5145` |
+
+Thus the on-screen arrangement is:
+
+| | Left | Right |
+|---|---|---|
+| Top | `0x9106` | `0x9126` |
+| Bottom | `0x9116` | `0x9136` |
+
+The top-right tile at `0x9126` was an exact 2bpp match; the other three tiles also match the screenshot's opaque pixels when transparent tile color 0 is allowed to show the background through. The top-left tile bytes also recur at `0x9146`; the four addresses above are supported as one sprite by the consecutive tile layout and the matches of all four quadrants.
+
+### Hero animation, weapon, and spell sprites
+
+After the level-up faces, the intervening graphics are only partly intelligible in the current rendering. Recognizable Hero art resumes at `0x9106` and continues through `0x9605`, matching the first `0x500`-byte tile-data batch below. The sequence contains 19 complete 16×16 sprites and two 8×16 left halves, totaling 20 sprite-equivalents:
+
+| Physical ROM range | Contents |
+|---|---|
+| `0x9106-0x9185` | Hero idling down (2 sprites) |
+| `0x9186-0x9205` | Hero idling up (2 sprites) |
+| `0x9206-0x9285` | Hero idling left (2 sprites) |
+| `0x9286-0x92C5` | Hero attacking down |
+| `0x92C6-0x9305` | Hero attacking up |
+| `0x9306-0x9345` | Hero attacking left |
+| `0x9346-0x9385` | Hero sword, downward |
+| `0x9386-0x93C5` | Hero sword, upward |
+| `0x93C6-0x9405` | Hero sword, left |
+| `0x9406-0x9585` | Six sprite-equivalents of sword arcs; difficult to interpret in the current rendering |
+| `0x9586-0x95A5` | Left half of Hero's low-level electric ball |
+| `0x95A6-0x95C5` | Left half of Hero's high-level electric ball |
+| `0x95C6-0x9605` | Hero defeated |
+
+The sequence ends at `0x9605` inclusive; the next address is `0x9606` (CPU address `0x5606` with bank 2 selected).
+
+### Pit animation and weapon sprites
+
+The sequence beginning at `0x9606` starts with Pit's nine movement and attack sprites in the same pose order as Hero's: two each idling down, up, and left, followed by one attack sprite facing down, up, and left. They are followed by two full-size boomerangs, two 32-byte dagger halves, a bomb, three full-size light balls, and Pit's defeated sprite.
+
+| Physical ROM range | Contents |
+|---|---|
+| `0x9606-0x9685` | Pit idling down (2 sprites) |
+| `0x9686-0x9705` | Pit idling up (2 sprites) |
+| `0x9706-0x9785` | Pit idling left (2 sprites) |
+| `0x9786-0x97C5` | Pit attacking down |
+| `0x97C6-0x9805` | Pit attacking up |
+| `0x9806-0x9845` | Pit attacking left |
+| `0x9846-0x9885` | Pit's boomerang facing left |
+| `0x9886-0x98C5` | Pit's boomerang facing right |
+| `0x98C6-0x98E5` | Pit's downward-facing dagger half |
+| `0x98E6-0x9905` | Pit's left-facing dagger half |
+| `0x9906-0x9945` | Pit's bomb |
+| `0x9946-0x9A05` | Three full-size light balls |
+| `0x9A06-0x9A45` | Pit defeated |
+
+In the current visualization, each dagger half appears split and stacked vertically. The sequence ends at `0x9A45` inclusive; the next address is `0x9A46` (CPU address `0x5A46` with bank 2 selected).
+
+### Lane animation, rod, and particle sprites
+
+The sequence beginning at `0x9A46` starts with Lane's nine movement and attack sprites in the same pose order as Hero's and Pit's: two each idling down, up, and left, followed by one attack sprite facing down, up, and left. These are followed by Lane's rod facing down, up, and left; one composite sprite containing three particle effects and a fully transparent tile; and Lane's defeated sprite.
+
+| Physical ROM range | Contents |
+|---|---|
+| `0x9A46-0x9AC5` | Lane idling down (2 sprites) |
+| `0x9AC6-0x9B45` | Lane idling up (2 sprites) |
+| `0x9B46-0x9BC5` | Lane idling left (2 sprites) |
+| `0x9BC6-0x9C05` | Lane attacking down |
+| `0x9C06-0x9C45` | Lane attacking up |
+| `0x9C46-0x9C85` | Lane attacking left |
+| `0x9C86-0x9CC5` | Lane's rod facing down |
+| `0x9CC6-0x9D05` | Lane's rod facing up |
+| `0x9D06-0x9D45` | Lane's rod facing left |
+| `0x9D46-0x9D85` | Three particle effects and one fully transparent tile |
+| `0x9D86-0x9DC5` | Lane defeated |
+
+The sequence ends at `0x9DC5` inclusive; the next address is `0x9DC6` (CPU address `0x5DC6` with bank 2 selected).
+
+### Kyle animation, weapons, and effects
+
+The sequence beginning at `0x9DC6` starts with nine standard movement and attack sprites in the same pose order as the other characters: two each idling down, up, and left, followed by one attack sprite facing down, up, and left. These are followed by Kyle's bone, two Play Dead frames, lightning, bomb/lightning-rod effect graphics, defeated sprite, and three light orbs.
+
+| Physical ROM range | Contents |
+|---|---|
+| `0x9DC6-0x9E45` | Kyle idling down (2 sprites) |
+| `0x9E46-0x9EC5` | Kyle idling up (2 sprites) |
+| `0x9EC6-0x9F45` | Kyle idling left (2 sprites) |
+| `0x9F46-0x9F85` | Kyle attacking down |
+| `0x9F86-0x9FC5` | Kyle attacking up |
+| `0x9FC6-0xA005` | Kyle attacking left |
+| `0xA006-0xA045` | Kyle's bone facing down |
+| `0xA046-0xA085` | Kyle's bone facing up |
+| `0xA086-0xA0C5` | Kyle's bone facing left |
+| `0xA0C6-0xA105` | First frame of Kyle's Play Dead animation |
+| `0xA106-0xA145` | Second frame of Kyle's Play Dead animation |
+| `0xA146-0xA185` | Kyle lightning sprite 1 |
+| `0xA186-0xA1C5` | Kyle lightning sprite 2 |
+| `0xA1C6-0xA205` | Bomb/lightning-rod effect area: two quarter-sprites stacked vertically and two fully transparent quarter-sprites |
+| `0xA206-0xA245` | Kyle defeated |
+| `0xA246-0xA305` | Three light orbs, matching the ones after Pit's bomb |
+
+The sequence ends at `0xA305` inclusive; the next address is `0xA306` (CPU address `0x6306` with bank 2 selected).
+
+### Jude animation, rod, and fireball sprites
+
+The sequence beginning at `0xA306` starts with nine standard movement and attack sprites in the same pose order as the other characters: two each idling down, up, and left, followed by one attack sprite facing down, up, and left. These are followed by Jude's rod, weak and higher-level fireballs, the rod-overhead pose, and his defeated sprite.
+
+| Physical ROM range | Contents |
+|---|---|
+| `0xA306-0xA385` | Jude idling down (2 sprites) |
+| `0xA386-0xA405` | Jude idling up (2 sprites) |
+| `0xA406-0xA485` | Jude idling left (2 sprites) |
+| `0xA486-0xA4C5` | Jude attacking down |
+| `0xA4C6-0xA505` | Jude attacking up |
+| `0xA506-0xA545` | Jude attacking left |
+| `0xA546-0xA585` | Jude's rod facing down |
+| `0xA586-0xA5C5` | Jude's rod facing up |
+| `0xA5C6-0xA605` | Jude's rod facing left |
+| `0xA606-0xA625` | Half-sprite of Jude's weak fireball facing down |
+| `0xA626-0xA645` | Half-sprite of Jude's weak fireball facing left; it appears split in two in the current visualization, like Pit's dagger |
+| `0xA646-0xA6C5` | Two higher-level fireball sprites; direction/order is unclear |
+| `0xA6C6-0xA705` | Third higher-level fireball sprite; direction/order is unclear |
+| `0xA706-0xA745` | Top half of Jude holding the rod above his head |
+| `0xA746-0xA785` | Lower half of that pose, containing his body and all but the tip of his hat |
+| `0xA786-0xA7C5` | Jude defeated |
+
+The sequence ends at `0xA7C5` inclusive; the next address is `0xA7C6` (CPU address `0x67C6` with bank 2 selected).
+
+### Main bank-2 tile-data batch
+
+A sequence of eight 8-byte records at `0x9024-0x9063` appears to contain a length, a bank-2 CPU source address, a VRAM destination (`0x8000` in each record), and two zero bytes. Interpreting those fields this way yields eight contiguous source ranges:
+
+| Record ROM offset | Length | CPU source (bank 2) | Physical ROM range | Tile count |
+|---|---:|---:|---|---:|
+| `0x9024` | `0x0500` | `0x5106` | `0x9106-0x9605` | 80 |
+| `0x902C` | `0x0440` | `0x5606` | `0x9606-0x9A45` | 68 |
+| `0x9034` | `0x0380` | `0x5A46` | `0x9A46-0x9DC5` | 56 |
+| `0x903C` | `0x0540` | `0x5DC6` | `0x9DC6-0xA305` | 84 |
+| `0x9044` | `0x04C0` | `0x6306` | `0xA306-0xA7C5` | 76 |
+| `0x904C` | `0x0500` | `0x67C6` | `0xA7C6-0xACC5` | 80 |
+| `0x9054` | `0x0420` | `0x6CC6` | `0xACC6-0xB0E5` | 66 |
+| `0x905C` | `0x0480` | `0x70E6` | `0xB0E6-0xB565` | 72 |
+
+Together these occupy `0x9106-0xB565` inclusive (`0x2460` bytes, 582 tiles). The sprite's four tiles are at the start of the first range. The ranges are multiples of 16 bytes and meet exactly end-to-start; this supports, but does not by itself prove, their interpretation as tile data.
+
+### Related graphics descriptors and source ranges
+
+The 6-byte records at `0x9064-0x90B1` appear to encode a byte length, bank-2 CPU source address, and VRAM destination. A zero word at `0x90B2` terminates this list. The source pointers resolve to the main batch above or to these additional bank-2 ranges:
+
+| CPU source (bank 2) | Physical ROM range | Length |
+|---|---|---:|
+| `0x7606` | `0xB606-0xB705` | `0x0100` |
+| `0x7706` | `0xB706-0xB725` | `0x0020` |
+| `0x7726` | `0xB726-0xB885` | `0x0160` |
+| `0x7886` | `0xB886-0xB985` | `0x0100` |
+| `0x7986` | `0xB986-0xBB05` | `0x0180` |
+
+This puts related referenced data as far as `0xBB05`; it is not evidence that all graphics in the game end there. Additional zero-terminated 6-byte-record lists occur at `0x90B4-0x90E3` and `0x90E6-0x9103`. They reuse source pointers from the ranges above and the main batch. Some 16-bit first fields in these lists have their high bit set (for example, `0x8180` and `0x80A0`), so the simple length interpretation may not apply to every record. The record layouts, flags, and actual loader behavior remain unverified.
+
+The `./rc2t render-graphics` command groups every four consecutive tiles in a supplied range into a 16×16 image, using the observed column-first order (top-left, bottom-left, top-right, bottom-right). For example, `./rc2t render-graphics 0x9106 0xB566 output/graphics.png` renders the main batch as an experimental sprite sheet. This uniform grouping is intended to help spot other sprites; it does not reconstruct the game's actual sprite/tile maps or palettes. An incomplete final group is padded with blank quadrants.
+
+## Character stat and ability tables
+
+The right-margin annotations in [rc2.hex](./rc2.hex) identify these tables by matching values to known character stats at each level. All 8,192 rows of the dump were compared with the local ROM and their bytes matched. These are annotated identifications, not yet verified by tracing the game's table-reading code. All ranges below are inclusive physical ROM offsets in **bank 5**; subtract `0x10000` for the CPU address when bank 5 is selected.
+
+Each listed table has 16 entries, ordered as levels 1 through 16 according to the annotations and the repeating layout. Values are raw hexadecimal bytes, not decimal: e.g. `1E` is decimal 30. For multi-byte records, a slash separates fields within one level; spaces separate successive levels. The byte order and field labels follow the margin notes; uncertain fields are retained as such.
+
+The `./rc2t extract-json` command reads these ranges from the input ROM and writes `output/<rom-sha256>.json`, where the lowercase SHA-256 is computed from the ROM bytes (also when the input is a hex dump). It also accepts a full ROM hex dump as an argument. Its `characters` object groups HP, MP, and ability field arrays by character; array index 0 corresponds to level 1. Each ability field is a separate array. `additional_tables` contains the standalone Zold A damage table and two paired-byte lookup tables described below. The repeated bytes in Lane's healing and Lora's heal are named `unknown_1` and `unknown_2` because their roles are uncertain; other `unknown` fields are likewise unidentified. The tentative table boundaries and field interpretations below also apply to the JSON.
+
+### HP and MP by level
+
+These are contiguous single-byte tables: eight HP tables followed by eight MP tables. For example, Hero HP level 1 is `0x1E` at `0x17065`; level 16 is `0xFF` at `0x17074`.
+
+| Character | Stat | ROM range | Values for levels 1-16 (hex) |
+|---|---|---|---|
+| Hero | HP | `0x17065-0x17074` | `1E 2D 3C 4B 5A 69 78 87 96 A5 B4 C3 D2 E1 F0 FF` |
+| Pit  | HP | `0x17075-0x17084` | `28 32 3C 46 50 5A 64 6E 73 78 7D 82 87 8C 91 96` |
+| Lane | HP | `0x17085-0x17094` | `3C 4B 5A 69 78 82 8C 96 9D A4 AB B2 B9 BE C3 C8` |
+| Kyle | HP | `0x17095-0x170A4` | `50 54 58 5C 64 6C 74 7C 88 94 A0 AC BC CC DC F0` |
+| Jude | HP | `0x170A5-0x170B4` | `32 37 3C 41 46 4B 50 55 5A 5F 64 69 6E 73 78 82` |
+| Lee  | HP | `0x170B5-0x170C4` | `78 82 8C 96 A0 A8 B0 B8 C0 C6 CC D0 D4 D6 D8 DC` |
+| Lora | HP | `0x170C5-0x170D4` | `50 5A 64 78 82 8C 96 AA B4 BE C8 D2 DC E6 F0 FF` |
+| Zold | HP | `0x170D5-0x170E4` | `B4 B9 BE C3 C8 CD D2 D7 DC E1 E6 EB F0 F5 FA FF` |
+| Hero | MP | `0x170E5-0x170F4` | `0A 14 1E 28 32 3C 46 50 5A 64 6E 78 82 8C 96 A0` |
+| Pit  | MP | `0x170F5-0x17104` | `28 2E 34 3A 40 46 4C 52 56 5C 62 68 6E 74 7A 82` |
+| Lane | MP | `0x17105-0x17114` | `14 19 1E 23 28 2D 32 37 3C 41 46 50 5A 64 6E 78` |
+| Kyle | MP | `0x17115-0x17124` | `28 32 3C 46 50 5A 64 6E 73 78 7D 82 87 8C 91 96` |
+| Jude | MP | `0x17125-0x17134` | `64 66 68 6C 72 78 80 88 8E 96 A0 AA B4 BE C8 C8` |
+| Lee  | MP | `0x17135-0x17144` | `14 1A 20 26 2C 32 38 3E 46 4E 56 5E 66 6E 76 82` |
+| Lora | MP | `0x17145-0x17154` | `50 5A 64 6E 73 78 7D 82 87 8C 91 96 9B A0 AA B4` |
+| Zold | MP | `0x17155-0x17164` | `32 3C 46 50 5A 64 6E 78 82 8C 96 A0 AA B4 BE C8` |
+
+### Attacks and abilities by level
+
+| Character / ability | Fields in byte order | ROM range | Values for levels 1-16 (hex) |
+|---|---|---|---|
+| Hero A | damage | `0x15449-0x15458` | `07 0F 17 1F 27 2F 37 3F 47 4F 57 5F 67 6F 77 7F` |
+| Hero B | cost / range / damage | `0x15459-0x15488` | `01/09/0F 01/09/10 01/09/11 01/09/12 01/0A/14 01/0A/16 01/0A/18 01/0B/1C 01/0B/20 01/0B/24 01/0C/28 01/0C/2C 01/0C/32 01/0D/38 01/0D/3E 00/0D/44` |
+| Pit dagger | range / damage | `0x154AD-0x154CC` | `08/01 08/02 09/04 09/06 0A/08 0A/0A 0B/0E 0B/12 0C/16 0C/1A 0D/1E 0D/22 0E/26 0E/2A 0F/2E 0F/32` |
+| Pit boomerang | range / damage | `0x154DF-0x154FE` | `08/0F 08/13 08/17 09/1B 09/1F 09/23 0A/27 0A/2B 0A/2F 0B/33 0B/37 0B/3B 0C/3F 0C/43 0C/47 0D/4F` |
+| Pit bomb | cost / damage / unknown | `0x15511-0x15540` | `08/3F/10 08/3F/10 08/3F/10 08/3F/10 06/4F/0C 06/4F/0C 06/4F/0C 06/4F/0C 04/5F/08 04/5F/08 04/5F/08 02/5F/08 02/6F/04 02/6F/04 01/6F/04 00/7F/02` |
+| Lane A | damage | `0x15709-0x15718` | `13 17 1B 1F 23 27 2B 2F 35 3B 41 47 4F 57 5F 67` |
+| Lane shield | cost / unknown | `0x15719-0x15738` | `14/28 15/32 16/3C 17/46 18/50 19/5A 1A/64 1B/6E 1C/78 1D/82 1E/8C 20/96 22/A0 24/AA 26/B4 28/BE` |
+| Lane healing | cost / damage / damage, per note | `0x15799-0x157C8` | `14/0A/0A 14/0A/0A 14/0F/0F 14/0F/0F 14/14/14 14/14/14 14/19/19 14/19/19 14/1E/1E 14/1E/1E 14/23/23 14/23/23 14/28/28 14/28/28 14/2D/2D 14/32/32` |
+| Kyle A | damage | `0x157C9-0x157D8` | `33 37 3B 3F 43 47 4B 4F 53 57 5B 5F 63 67 6B 6F` |
+| Kyle play dead | cost / unknown | `0x157D9-0x157F8` | `14/50 13/5A 12/64 11/6E 10/78 0F/82 0E/8C 0D/96 0C/A0 0B/AA 0A/B4 09/BE 07/C8 05/D2 03/DC 01/E6` |
+| Kyle rod | cost / damage | `0x15898-0x158B7` | `0A/B3 0A/B7 0A/BB 0A/BF 08/C3 08/C7 08/CB 08/CF 06/D3 06/D7 06/DB 06/DF 04/E3 04/E7 02/EB 02/EF` |
+| Jude weak A | range / damage | `0x159B2-0x159D1` | `08/0F 08/11 09/13 09/15 0A/17 0A/19 0B/1D 0B/21 0C/25 0C/29 0D/2D 0D/33 0E/39 0E/3F 0F/45 0F/4B` |
+| Jude strong A | range / damage | `0x159E4-0x15A03` | `08/2F 08/31 08/33 08/35 09/37 09/39 09/3B 09/3D 0A/3F 0A/41 0A/45 0A/49 0B/4D 0B/51 0B/55 0B/59` |
+| Jude quake | cost / damage | `0x15A16-0x15A35` | `32/87 32/8F 2D/97 2D/9F 28/A7 28/AF 23/B7 23/BF 1E/C7 1E/CF 19/D7 19/DF 14/E7 0F/EF 0A/F7 05/FF` |
+| Lee A | damage | `0x15B97-0x15BA6` | `2F 33 37 3B 3F 43 47 4B 4F 53 57 5B 5F 67 6F 77` |
+| Lee rapidfire | cost / damage | `0x15BA7-0x15BC6` | `04/3F 04/43 04/47 04/4B 03/4F 03/53 03/57 03/5B 02/5F 02/63 02/67 02/6B 01/6F 01/73 01/77 01/7B` |
+| Lee firework | cost / damage / range | `0x15BC7-0x15BF6` | `0F/3F/04 0F/43/04 0F/47/04 0F/4B/04 0F/4F/04 0F/53/04 0F/57/05 0F/5B/05 0F/5F/05 0F/63/05 0F/67/06 0F/6B/06 0F/6F/06 0F/73/07 0F/77/07 0F/7B/08` |
+| Lora A | range / damage | `0x15C34-0x15C53` | `07/3F 07/43 08/47 08/4B 09/4F 09/53 0A/57 0A/5B 0B/5F 0B/63 0C/67 0C/6B 0D/6F 0D/73 0E/7B 0E/7F` |
+| Lora heal | cost / damage / damage (uncertain) | `0x15C66-0x15C95` | `08/14/14 0C/16/16 10/18/18 14/1A/1A 18/1C/1C 1C/1E/1E 20/20/20 24/22/22 28/24/24 2C/26/26 30/28/28 34/2A/2A 38/2C/2C 3C/2E/2E 40/30/30 44/32/32` |
+| Lora wing | cost | `0x15C96-0x15CA5` | `0F 0E 0D 0C 0B 0A 09 08 07 06 05 04 03 02 01 00` |
+| Zold A | range / damage | `0x15CB6-0x15CD5` | `0A/87 0A/8F 0A/97 0A/9F 0B/A7 0B/AF 0B/B7 0B/BF 0C/C7 0C/CF 0C/D7 0C/DF 0D/E7 0D/EF 0D/F7 0D/FF` |
+| Zold B | cost / damage | `0x15CE8-0x15D07` | `14/97 14/9F 14/A7 14/AF 14/B7 14/BF 14/C7 14/CF 14/D3 14/D7 14/DB 14/DF 14/E3 14/E7 14/EB 14/EF` |
+
+### Additional tables
+
+The Zold A damage values also appear as a standalone 16-byte array immediately before the range/damage records. The ROM has code references to this array at CPU address `0x5CA6`; its values match the damage byte of each Zold A record:
+
+| Table | ROM range | Values (hex) |
+|---|---|---|
+| Zold A standalone damage | `0x15CA6-0x15CB5` | `87 8F 97 9F A7 AF B7 BF C7 CF D7 DF E7 EF F7 FF` |
+
+Two more arrays follow the character MP tables. Each has eight two-byte entries. These are stored in the JSON as arrays of two-byte arrays under `additional_tables`; values below are shown as `first/second` bytes. Their exact purpose and second-byte meaning are unknown.
+
+| Table | ROM range | Entries (hex) |
+|---|---|---|
+| Lookup at `0x17165` | `0x17165-0x17174` | `00/01 02/04 05/06 08/09 0B/0D 0E/10 11/12 14/16` |
+| Lookup at `0x17175` | `0x17175-0x17184` | `00/01 03/04 05/07 08/0A 0C/0D 0E/0F 11/13 15/16` |
+
+Fixed-bank code at `0x009DE-0x009EB` loads one of these table bases (`0x7165` or `0x7175` in the banked CPU window), indexes with the value previously read from `0xC3F8` using a two-byte stride, reads the first byte of that pair, and stores it at `0xC340`. The branch selecting the base depends on flags from a preceding helper call operating on work RAM at `0xC405`; the meaning of that state and what the lookup result represents have not been identified. The banked CPU addresses correspond to the listed physical offsets when ROM bank 5 is selected.
+
+**Boundary and interpretation caveats:**
+
+- Lane's shield annotation ends with `0F 31`, but the 16 cost/unknown pairs starting at `0x15719` end with `28 BE` at `0x15738`; `0F 31` occurs at `0x1573D-0x1573E`. The range above follows the 16-entry layout, not the annotated end marker.
+- The Lane healing annotation ends `32 32 14`, and the Kyle A annotation begins `[ 32 ...`. With 16 three-byte healing records, Lane ends in `14 32 32` at `0x157C6-0x157C8`, and 16 Kyle A values then start with `33` at `0x157C9`. The annotated `32` would overlap Lane's final record. The boundary needs code or gameplay verification.
+- Kyle's play-dead annotation identifies cost but does not explain the second byte. Lane and Lora healing notes use “damage” for the repeated values; whether those fields mean healing, damage, or another quantity is not established.
+- Range, cost, damage, and level assignments are the notes' interpretations. No consuming routine has been traced yet, and the unknown bytes and any scaling or special values remain to be verified.
+
+## What is and is not mapped yet
+
+| Subsystem | Current mapping |
+|---|---|
+| Engine / startup | Entry point, interrupt-vector targets, startup range, and several called CPU addresses are identified above. Most routines still need disassembly and naming. |
+| Runtime variables / character state | CPU addresses and the code that updates them are not yet established. See the separate save analysis for observed saved fields. |
+| Character templates / stats | HP, MP, attack, and ability tables are identified from the annotated dump in bank 5 above; consumers and some field meanings/boundaries remain to be verified. Other character data is not yet located. |
+| Maps / collision / encounters | No ROM file offsets or table format confirmed. |
+| Text / character graphics | The title is at `0x0134-0x0143`; a preliminary bank-2 tile-data batch and matching four-tile Hero sprite are documented above. Dialogue/text tables, font data, tile maps, palettes, and the loader that consumes the graphics descriptors remain unidentified. |
+| Audio / music / sound effects | No code or data ranges identified yet. Game Boy sound registers are in `0xFF10-0xFF3F`, but that hardware fact does not identify the ROM routines or music data. |
+
+## Next steps to turn this into a byte-level map
+
+1. Disassemble from the confirmed vectors and startup entry, tracking the active MBC2 ROM bank at each call and data read.
+2. Follow pointers and callers into banks 1-7; distinguish code, pointer tables, graphics/tilemaps, map/collision data, text, and audio by their consumers and decoding routines before assigning names.
+3. Use an emulator debugger to connect observed saved fields to live RAM addresses and ROM read/write routines.
+4. Add each variable or asset range with the evidence used to identify it (write site, read site, pointer, controlled change, or decoded output).
+
+```
+
+`docs/save-file-analysis.md`:
+
+```md
+# Rolan's Curse II save file analysis
+
+These observations come from [save file analysis.txt](./save%20file%20analysis.txt), which describes a hex-dumped `.sav` file, not the ROM or live CPU memory. They are experimental observations, not independently verified field definitions. The original notes are retained for reference.
+
+## Address notation
+
+The supplied example, `save_castlep2_pitlv7.hex`, shows 16 bytes per row, with the row's starting file offset on the left and columns `00` through `0F`. The notes' labels are consistent with concatenating the row and column: `2004` means row `0x20`, column `0x04`, or save-file offset `0x24`; `A006` means offset `0xA6`. The example's name bytes at `0xB0-0xB7` match the notes' `RY__` example, and `0x88` is `F6`, consistent with the filename's Pit level 7 and the notes' level-minus-one interpretation. These support the notation, but a single snapshot does not verify each field's meaning.
+
+The tables retain the original labels and list their corresponding **save-file offsets**. These offsets are not ROM offsets or live CPU addresses. The emulator and precise save format are not yet identified.
+
+## Example dump
+
+The supplied `save_castlep2_pitlv7.hex` is a UTF-16 hex dump with 32 contiguous 16-byte rows, representing 512 bytes at file offsets `0x000-0x1FF`. The reconstructed bytes have SHA-256 `b43fa456603f9309925060d7fd79e6de14c27ab9c5417df8145baaa3b98feac7`; this is the hash of the represented save bytes, not of the text dump. This example is a snapshot, not a before/after comparison.
+
+| Save offset | Dump bytes | Interpretation from notes |
+|---|---|---|
+| `0x024` | `F5` | Chest flags with low-nibble bits `1` and `4` set. |
+| `0x064` | `F9` | Potion count: low nibble `9`. |
+| `0x072` | `F1` | Controlled character: low nibble `1` (Pit). |
+| `0x088` | `F6` | Pit level minus 1: low nibble `6` (level 7). |
+| `0x0B0-0x0B7` | `FB F1 F2 F2 FE FF FE FF` | `RY__` using the notes' name table. |
+
+Every byte in this example from `0x000` through `0x0B7` has an upper nibble of `F`; the observations above use the low nibble where applicable. This is consistent with the ROM's MBC2 nibble RAM, but the file is 512 bytes and bytes from `0x0B8` onward are not all of that form. Do not assume the whole file is nibble-normalized or that its layout can be directly mapped to CPU addresses without tracing.
+
+## Progression and chests
+
+`+1`, `+2`, `+4`, and `+8` describe changes recorded in the notes. They suggest bit flags but have not been independently tested as masks.
+
+| Original label | Save offset | Observation |
+|---|---|---|
+| `0004` | `0x004` | `+1` after Shroom boss. |
+| `0006` | `0x006` | `+1` after getting Lane. |
+| `0008` | `0x008` | `+1` after Shroom boss. |
+| `0009` | `0x009` | `+8` after getting boomerang. |
+| `2004` | `0x024` | `+1` Hero chest 1 (starting fields northwest); `+4` Pit chest 5 (fields north after Cadal). |
+| `200A` | `0x02A` | `+8` Pit chest 2 (west of Shroom); `+4` Pit chest 3 (north of Shroom); `+2` Hero chest 2 (north of Shroom); `+1` Hero chest 3 (northeast of Shroom). |
+| `200B` | `0x02B` | `+1` Pit chest 1 (south of Shroom); `+2` Pit chest 4 (southeast of Shroom). |
+| `3007` | `0x037` | `+8` Lane chest 2 (castle third screen); `+4` Lane chest 3 (castle north). |
+| `3008` | `0x038` | `+2` Lane chest 1 (castle first screen); `+4` Hero chest 4 (castle first screen again); `+8` Lane chest 4 (castle part 2, first screen south). |
+| `3009` | `0x039` | `+1` Pit chest 6 (castle part 2, first screen northeast); `+4` Lane chest 5 (castle part 2, screen 3). |
+| `9000` | `0x090` | `+2` after getting boomerang. |
+| `900C` | `0x09C` | `+4` after Shroom boss. |
+| `900E` | `0x09E` | `+4` after getting Pit; `+8` after getting Lane. |
+
+## Inventory, position, and party
+
+| Original label | Save offset | Observation |
+|---|---|---|
+| `6004` | `0x064` | Potion count. |
+| `6006` | `0x066` | Magic ball count. |
+| `6007` | `0x067` | Wing count. |
+| `6008` | `0x068` | Warp town: `0` start, `1` Cadal (Pit), `2` Baroa (Lane). |
+| `600A` | `0x06A` | Character Y position on screen, in whole 8-pixel sprites. |
+| `600B` | `0x06B` | Possibly area: `0` first town, `1` first field. |
+| `600C` | `0x06C` | Character X position on screen, in whole 8-pixel sprites. |
+| `600D` | `0x06D` | Possibly current screen. |
+| `600E` | `0x06E` | Possibly tied to story progression. |
+| `600F` | `0x06F` | Unclear; possibly tied to character and location. |
+| `7000` | `0x070` | Facing direction. |
+| `7002` | `0x072` | Controlled character: `0` Hero, `1` Pit, `2` Lane. |
+| `7004` | `0x074` | Character ID in slot 2. |
+| `7005` | `0x075` | Character ID in slot 3. |
+| `800F` | `0x08F` | `1` as Hero, `0` as Pit; possibly facing direction. |
+| `A006` | `0x0A6` | Y fraction: `F0` for no fraction, `F8` for half a sprite down. |
+| `A007` | `0x0A7` | X fraction: `F0` for no fraction, `F8` for half a sprite right. |
+
+## HP, MP, and levels
+
+The notes call these "small" and "large" digits. The example has `FC` at `0x079`, so the low nibble can exceed 9; these are not necessarily decimal digits. The exact numerical encoding needs verification.
+
+| Original label | Save offset | Observation |
+|---|---|---|
+| `7007` | `0x077` | Hero HP, small digit. |
+| `7008` | `0x078` | Hero HP, large digit. |
+| `7009` | `0x079` | Party member 2 HP, small digit. |
+| `700A` | `0x07A` | Party member 2 HP, large digit. |
+| `700B` | `0x07B` | Party member 3 HP, small digit. |
+| `700C` | `0x07C` | Party member 3 HP, large digit. |
+| `700F` | `0x07F` | Hero HP, small digit, as written in the notes. This may be a typo for MP because `8000` is recorded as Hero MP's large digit; verify before relying on it. |
+| `8000` | `0x080` | Hero MP, large digit. |
+| `8001` | `0x081` | Party member 2 MP, small digit. |
+| `8002` | `0x082` | Party member 2 MP, large digit. |
+| `8003` | `0x083` | Party member 3 MP, small digit. |
+| `8004` | `0x084` | Party member 3 MP, large digit. |
+| `8007` | `0x087` | Hero level minus 1. |
+| `8008` | `0x088` | Pit level minus 1. |
+| `8009` | `0x089` | Lane level minus 1. |
+
+## Player name encoding
+
+The notes identify `B000-B007` as the player name, using two bytes per character. The example's bytes at save offsets `0x0B0-0x0B7` match the `RY__` example below.
+
+| Bytes | Character | Bytes | Character | Bytes | Character | Bytes | Character |
+|---|---|---|---|---|---|---|---|
+| `FA F0` | A | `FB F0` | B | `FC F0` | C | `FD F0` | D |
+| `FE F0` | E | `FF F0` | F | `F0 F1` | G | `F1 F1` | H |
+| `F2 F1` | I | `F3 F1` | J | `F4 F1` | K | `F5 F1` | L |
+| `F6 F1` | M | `F7 F1` | N | `F8 F1` | O | `F9 F1` | P |
+| `FA F1` | Q | `FB F1` | R | `FC F1` | S | `FD F1` | T |
+| `FE F1` | U | `FF F1` | V | `F0 F2` | W | `F1 F2` | X |
+| `F2 F2` | Y | `F3 F2` | Z | `F4 F2` | `'` | `F7 F2` | `.` |
+| `F9 F2` | `?` | `FA F2` | `!` | `FB F2` | `-` | `FE FF` | Null or space |
+
+Examples from the notes:
+
+| Name | Bytes |
+|---|---|
+| `RY__` | `FB F1 F2 F2 FE FF FE FF` |
+| `TYAN` | `FD F1 F2 F2 FA F0 F7 F1` |
+| `?!'.` | `F9 F2 FA F2 F4 F2 F7 F2` |
+| `-- .` | `FB F2 FB F2 FE FF F7 F2` |
+
+The first example uses underscores to show the two blank positions. Whether `FE FF` is a space, a null, or both is unresolved.
+
+## Next steps
+
+1. Identify the emulator and exact save format; confirm the row/column interpretation against more of the original observations.
+2. Compare before-and-after saves for one controlled change at a time, retaining both raw values and byte offsets. Verify flags by changing individual chests and progression events.
+3. Test the suspected `700F` HP/MP typo and the uncertain position, area, and character flags.
+4. Use an emulator debugger to relate save bytes to live RAM and the ROM routines that read and write them; do not assume the `.sav` layout is identical to CPU memory.
+
+```
+
+`rc2t`:
+
+```
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROM_NAME="Rolan's Curse II (USA).gb"
+
+rc2t_print_help_message() {
+    echo ""
+    echo "Usage: $(basename "$0") <command>"
+    echo ""
+    echo "Commands:"
+    echo "  dump-hex        Dump the contents in hexadecimal"
+    echo "  check-hash      Check the hash"
+    echo "  extract-json    [rom-or-hex]  Extract character stats into output/<rom-sha256>.json"
+    echo "  render-graphics [start [end output]] [options]  Render ROM tiles (default: entire ROM)"
+}
+
+_check_if_rom_exists() {
+    if [ ! -f input/"$ROM_NAME" ]; then
+        echo "Error: ROM file '$ROM_NAME' not found."
+        exit 1
+    fi
+}
+
+_get_hash() {
+    sha256sum "input/$ROM_NAME" | awk '{print $1}'
+}
+
+##### MAIN #####
+
+cd "$(dirname "$0")"
+
+if [ $# -eq 0 ] || [ -z "$1" ]; then
+    rc2t_print_help_message
+    exit 1
+fi
+
+case "$1" in
+    check-hash)
+        _check_if_rom_exists
+        _get_hash
+        ;;
+
+    dump-hex)
+        _check_if_rom_exists
+        xxd "input/$ROM_NAME" > "output/$ROM_NAME.hex"
+        ;;
+
+    extract-json)
+        if [ "$#" -gt 2 ]; then
+            echo "Error: extract-json accepts at most one input path." >&2
+            exit 1
+        fi
+        python3 bin/extract_json.py "${@:2}"
+        ;;
+
+    render-graphics)
+        if [ "$#" -eq 1 ]; then
+            python3 bin/render_graphics.py 0 0x20000 output/graphics.png
+        elif [ "$#" -eq 2 ]; then
+            python3 bin/render_graphics.py "$2" 0x20000 output/graphics.png
+        elif [[ "$3" == --* ]]; then
+            python3 bin/render_graphics.py "$2" 0x20000 output/graphics.png "${@:3}"
+        else
+            python3 bin/render_graphics.py "${@:2}"
+        fi
+        ;;
+
+    *)
+        rc2t_print_help_message
+        ;;
+esac
+
+```
+
+`tests/test_extract_json.py`:
+
+```py
+import importlib.util
+import hashlib
+import tempfile
+import unittest
+from pathlib import Path
+
+
+ROOT = Path(__file__).resolve().parent.parent
+SPEC = importlib.util.spec_from_file_location("extract_json", ROOT / "bin" / "extract_json.py")
+extract_json = importlib.util.module_from_spec(SPEC)
+SPEC.loader.exec_module(extract_json)
+
+
+def hex_dump(data, powershell=False):
+    rows = []
+    for offset in range(0, len(data), 16):
+        chunk = data[offset:offset + 16]
+        if powershell:
+            rows.append(f"{offset:08X}   {chunk.hex(' ').upper()}  ................")
+        else:
+            groups = " ".join(chunk[i:i + 2].hex() for i in range(0, 16, 2))
+            rows.append(f"{offset:08x}: {groups}  ................")
+    text = "\n".join(rows) + "\n"
+    return text.encode("utf-16" if powershell else "utf-8")
+
+
+class ExtractGameTests(unittest.TestCase):
+    def setUp(self):
+        self.rom = bytearray((i * 37 + i // 256) % 256 for i in range(0x20000))
+        self.rom[0x134:0x143] = b"ROLAN'S CURSE 2"
+        self.rom[0x147:0x149] = b"\x06\x02"
+
+    def test_hex_dump_formats_and_invalid_rows(self):
+        for powershell in (False, True):
+            with self.subTest(powershell=powershell):
+                self.assertEqual(extract_json.parse_hex_dump(hex_dump(self.rom, powershell)), self.rom)
+        with self.assertRaisesRegex(ValueError, "expected offset"):
+            extract_json.parse_hex_dump(b"00000010: 0000 0000 0000 0000 0000 0000 0000 0000  ................\n")
+        with self.assertRaisesRegex(ValueError, "invalid hex dump row"):
+            extract_json.parse_hex_dump(b"00000000: 0000 broken\n")
+        with self.assertRaisesRegex(ValueError, "no recognizable rows"):
+            extract_json.parse_hex_dump(b"not a dump\n")
+
+    def test_all_fields_read_at_mapped_offsets(self):
+        expected = {
+            "hero": {"a": (0x15449, ("damage",)), "b": (0x15459, ("cost", "range", "damage"))},
+            "pit": {"dagger": (0x154AD, ("range", "damage")), "boomerang": (0x154DF, ("range", "damage")), "bomb": (0x15511, ("cost", "damage", "unknown"))},
+            "lane": {"a": (0x15709, ("damage",)), "shield": (0x15719, ("cost", "unknown")), "healing": (0x15799, ("cost", "unknown_1", "unknown_2"))},
+            "kyle": {"a": (0x157C9, ("damage",)), "play_dead": (0x157D9, ("cost", "unknown")), "rod": (0x15898, ("cost", "damage"))},
+            "jude": {"weak_a": (0x159B2, ("range", "damage")), "strong_a": (0x159E4, ("range", "damage")), "quake": (0x15A16, ("cost", "damage"))},
+            "lee": {"a": (0x15B97, ("damage",)), "rapidfire": (0x15BA7, ("cost", "damage")), "firework": (0x15BC7, ("cost", "damage", "range"))},
+            "lora": {"a": (0x15C34, ("range", "damage")), "heal": (0x15C66, ("cost", "unknown_1", "unknown_2")), "wing": (0x15C96, ("cost",))},
+            "zold": {"a": (0x15CB6, ("range", "damage")), "b": (0x15CE8, ("cost", "damage"))},
+        }
+        characters = extract_json.extract_json(self.rom)["characters"]
+        self.assertEqual(set(characters), set(expected))
+        for index, (name, abilities) in enumerate(expected.items()):
+            char = characters[name]
+            self.assertEqual(char["hp"], list(self.rom[0x17065 + 16 * index:0x17075 + 16 * index]))
+            self.assertEqual(char["mp"], list(self.rom[0x170E5 + 16 * index:0x170F5 + 16 * index]))
+            self.assertEqual(set(char["abilities"]), set(abilities))
+            for ability, (offset, fields) in abilities.items():
+                actual = char["abilities"][ability]
+                self.assertEqual(set(actual), set(fields))
+                for column, field in enumerate(fields):
+                    self.assertEqual(actual[field], list(self.rom[offset + column:offset + 16 * len(fields):len(fields)]))
+
+    def test_additional_tables_are_read_at_mapped_offsets(self):
+        game = extract_json.extract_json(self.rom)
+        additional = game["additional_tables"]
+        self.assertEqual(
+            additional["zold_a_damage"],
+            list(self.rom[0x15CA6:0x15CB6]),
+        )
+        self.assertEqual(
+            additional["lookup_0x17165"],
+            [list(self.rom[offset:offset + 2]) for offset in range(0x17165, 0x17175, 2)],
+        )
+        self.assertEqual(
+            additional["lookup_0x17175"],
+            [list(self.rom[offset:offset + 2]) for offset in range(0x17175, 0x17185, 2)],
+        )
+
+    def test_changed_rom_bytes_change_extracted_values(self):
+        original = extract_json.extract_json(self.rom)
+        self.rom[0x17065] = (self.rom[0x17065] + 1) % 256
+        self.rom[0x15511 + 3 * 7 + 2] = (self.rom[0x15511 + 3 * 7 + 2] + 1) % 256
+        self.rom[0x15CA6] = (self.rom[0x15CA6] + 1) % 256
+        self.rom[0x17165] = (self.rom[0x17165] + 1) % 256
+        self.rom[0x17166] = (self.rom[0x17166] + 1) % 256
+        changed = extract_json.extract_json(self.rom)
+        self.assertEqual(changed["characters"]["hero"]["hp"][0], self.rom[0x17065])
+        self.assertNotEqual(changed["characters"]["hero"]["hp"][0], original["characters"]["hero"]["hp"][0])
+        self.assertEqual(changed["characters"]["pit"]["abilities"]["bomb"]["unknown"][7], self.rom[0x15511 + 3 * 7 + 2])
+        self.assertNotEqual(changed["characters"]["pit"]["abilities"]["bomb"]["unknown"][7], original["characters"]["pit"]["abilities"]["bomb"]["unknown"][7])
+        self.assertEqual(changed["additional_tables"]["zold_a_damage"][0], self.rom[0x15CA6])
+        self.assertEqual(changed["additional_tables"]["lookup_0x17165"][0], list(self.rom[0x17165:0x17167]))
+        self.assertNotEqual(
+            changed["additional_tables"]["lookup_0x17165"][0],
+            original["additional_tables"]["lookup_0x17165"][0],
+        )
+
+    def test_output_path_uses_sha256_of_rom_bytes(self):
+        root = Path("repo")
+        path = extract_json.output_path(root, self.rom)
+        self.assertEqual(
+            path,
+            root / "output" / f"{hashlib.sha256(self.rom).hexdigest()}.json",
+        )
+        changed_rom = bytes(self.rom[:-1]) + bytes([self.rom[-1] ^ 1])
+        self.assertNotEqual(path, extract_json.output_path(root, changed_rom))
+
+    def test_read_rom_rejects_truncated_or_wrong_rom(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "game.gb"
+            path.write_bytes(self.rom[:-1])
+            with self.assertRaisesRegex(ValueError, "expected a 131072-byte ROM"):
+                extract_json.read_rom(path)
+            self.rom[0x134] = 0
+            path.write_bytes(self.rom)
+            with self.assertRaisesRegex(ValueError, "ROM header does not match"):
+                extract_json.read_rom(path)
+
+
+if __name__ == "__main__":
+    unittest.main()
+
+```
+
+`tests/test_rc2t_render.py`:
+
+```py
+import shutil
+import subprocess
+import tempfile
+import unittest
+from pathlib import Path
+
+from PIL import Image
+
+
+ROOT = Path(__file__).resolve().parent.parent
+
+
+class RenderGraphicsWrapperTests(unittest.TestCase):
+    def setUp(self):
+        self.temporary = tempfile.TemporaryDirectory()
+        self.addCleanup(self.temporary.cleanup)
+        self.root = Path(self.temporary.name)
+        (self.root / "bin").mkdir()
+        (self.root / "input").mkdir()
+        shutil.copy2(ROOT / "rc2t", self.root / "rc2t")
+        for name in ("render_graphics.py", "extract_json.py"):
+            shutil.copy2(ROOT / "bin" / name, self.root / "bin" / name)
+        rom = bytearray(0x20000)
+        rom[0x134:0x143] = b"ROLAN'S CURSE 2"
+        rom[0x147:0x149] = b"\x06\x02"
+        rom[0x1000] = 0x80
+        rom[0x1FFF0] = 0x80
+        rom[0x1FFFF] = 0x80
+        (self.root / "input" / "Rolan's Curse II (USA).gb").write_bytes(rom)
+
+    def run_wrapper(self, *args):
+        return subprocess.run(
+            ["bash", str(self.root / "rc2t"), *args],
+            cwd=self.root / "input",
+            capture_output=True,
+            text=True,
+        )
+
+    def test_default_renders_entire_rom(self):
+        result = self.run_wrapper("render-graphics")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        with Image.open(self.root / "output" / "graphics.png") as image:
+            self.assertEqual(image.size, (1135, 8716))
+            self.assertEqual(image.getpixel((1103, 8684)), (85, 85, 85))
+
+    def test_arguments_and_options_are_forwarded(self):
+        output = self.root / "tiles with spaces.png"
+        rom = self.root / "input" / "Rolan's Curse II (USA).gb"
+        result = self.run_wrapper(
+            "render-graphics", "0x1000", "0x1010", str(output),
+            "--input", str(rom), "--columns", "1", "--scale", "1",
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+        with Image.open(output) as image:
+            self.assertEqual(image.size, (59, 32))
+            self.assertEqual(image.getpixel((43, 16)), (85, 85, 85))
+
+    def test_start_only_renders_one_byte_range_through_end_of_rom(self):
+        result = self.run_wrapper("render-graphics", "0x1FFFF")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        with Image.open(self.root / "output" / "graphics.png") as image:
+            colors = image.getcolors(image.width * image.height)
+            self.assertIn((85, 85, 85), [color for _, color in colors])
+
+
+if __name__ == "__main__":
+    unittest.main()
+
+```
+
+`tests/test_render_graphics.py`:
+
+```py
+import importlib.util
+import sys
+import tempfile
+import unittest
+from pathlib import Path
+from unittest.mock import patch
+
+from PIL import Image
+
+
+ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(ROOT / "bin"))
+SPEC = importlib.util.spec_from_file_location("render_graphics", ROOT / "bin" / "render_graphics.py")
+render_graphics = importlib.util.module_from_spec(SPEC)
+SPEC.loader.exec_module(render_graphics)
+
+
+class RenderGraphicsTests(unittest.TestCase):
+    def test_decodes_two_bitplanes_left_to_right(self):
+        tile = bytes([0x80, 0x40]) + bytes(14)
+        decoded = render_graphics.decode_tiles(tile)
+        self.assertEqual(decoded[0][0], [1, 2, 0, 0, 0, 0, 0, 0])
+        self.assertEqual(decoded[0][1], [0] * 8)
+
+    def test_rejects_empty_data(self):
+        with self.assertRaisesRegex(ValueError, "at least one byte"):
+            render_graphics.decode_tiles(b"")
+
+    def test_decodes_partial_tiles_at_byte_granularity(self):
+        for length in range(1, render_graphics.TILE_BYTES):
+            with self.subTest(length=length):
+                tile = render_graphics.decode_tiles(bytes(length))[0]
+                self.assertEqual(tile, [[0] * 8 for _ in range(8)])
+
+        one_byte_tile = render_graphics.decode_tiles(b"\x80")[0]
+        self.assertEqual(one_byte_tile[0], [1, 0, 0, 0, 0, 0, 0, 0])
+        self.assertEqual(one_byte_tile[1:], [[0] * 8 for _ in range(7)])
+
+        decoded = render_graphics.decode_tiles(bytes([0x80, 0, 0x40, 0]))
+        self.assertEqual(decoded[0][0], [1, 0, 0, 0, 0, 0, 0, 0])
+        self.assertEqual(decoded[0][1], [0, 1, 0, 0, 0, 0, 0, 0])
+        self.assertEqual(decoded[0][2:], [[0] * 8 for _ in range(6)])
+
+    def test_assembles_four_tiles_in_column_first_sprite_order(self):
+        tile_1 = bytes([0xFF, 0]) * 8
+        tile_2 = bytes([0, 0xFF]) * 8
+        tile_3 = bytes([0xFF, 0xFF]) * 8
+        tile_0 = bytes(16)
+        image = render_graphics.render_sprites(
+            tile_1 + tile_2 + tile_3 + tile_0,
+            columns=1,
+            scale=2,
+        )
+        self.assertEqual(image.size, (32, 32))
+        self.assertEqual(image.getpixel((0, 0)), (85, 85, 85))
+        self.assertEqual(image.getpixel((0, 16)), (170, 170, 170))
+        self.assertEqual(image.getpixel((16, 0)), (255, 255, 255))
+        self.assertEqual(image.getpixel((16, 16)), (0, 0, 0))
+
+    def test_incomplete_sprite_keeps_tiles_and_leaves_missing_quadrants_blank(self):
+        tile_1 = bytes([0xFF, 0]) * 8
+        tile_2 = bytes([0, 0xFF]) * 8
+        image = render_graphics.render_sprites(tile_1 + tile_2, columns=1, scale=1)
+        self.assertEqual(image.size, (16, 16))
+        self.assertEqual(image.getpixel((0, 0)), (85, 85, 85))
+        self.assertEqual(image.getpixel((0, 8)), (170, 170, 170))
+        self.assertEqual(image.getpixel((8, 0)), (0, 0, 0))
+        self.assertEqual(image.getpixel((16 - 1, 0)), (0, 0, 0))
+
+    def test_address_axes_label_cel_starts(self):
+        with patch.object(render_graphics.ImageDraw.ImageDraw, "text", autospec=True) as draw_text:
+            render_graphics.render_sprites(
+                bytes(3 * 4 * render_graphics.TILE_BYTES),
+                columns=2,
+                scale=1,
+                start_address=0x1000,
+            )
+        self.assertEqual(
+            [call.args[2] for call in draw_text.call_args_list],
+            ["0x1000", "0x1040", "0x1000", "0x1080"],
+        )
+
+    def test_cli_writes_png_for_a_rom_range(self):
+        rom = bytearray(0x20000)
+        rom[0x134:0x143] = b"ROLAN'S CURSE 2"
+        rom[0x147:0x149] = b"\x06\x02"
+        rom[0x1000] = 0x80
+
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            input_path = root / "game.gb"
+            output_path = root / "tiles.png"
+            input_path.write_bytes(rom)
+            arguments = [
+                "render_graphics.py", "0x1000", "0x1010", str(output_path),
+                "--input", str(input_path), "--columns", "1", "--scale", "1",
+            ]
+            with patch.object(sys, "argv", arguments):
+                self.assertEqual(render_graphics.main(), 0)
+            with Image.open(output_path) as image:
+                self.assertGreater(image.width, 16)
+                self.assertGreater(image.height, 16)
+                colors = image.getcolors(image.width * image.height)
+                self.assertIn((85, 85, 85), [color for _, color in colors])
+                top_axis = image.crop((0, 0, image.width, 16))
+                self.assertTrue(any(pixel != (255, 255, 255) for pixel in top_axis.getdata()))
+
+    def test_cli_writes_jpeg(self):
+        rom = bytearray(0x20000)
+        rom[0x134:0x143] = b"ROLAN'S CURSE 2"
+        rom[0x147:0x149] = b"\x06\x02"
+
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            input_path = root / "game.gb"
+            output_path = root / "tiles.jpg"
+            input_path.write_bytes(rom)
+            arguments = [
+                "render_graphics.py", "0x1000", "0x1010", str(output_path),
+                "--input", str(input_path), "--scale", "1",
+            ]
+            with patch.object(sys, "argv", arguments):
+                self.assertEqual(render_graphics.main(), 0)
+            with Image.open(output_path) as image:
+                self.assertEqual(image.format, "JPEG")
+
+
+if __name__ == "__main__":
+    unittest.main()
+
+```

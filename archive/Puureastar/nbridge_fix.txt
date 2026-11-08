@@ -1,0 +1,934 @@
+Project Path: arc_Puureastar_nbridge_fix_o9o_gc4c
+
+Source Tree:
+
+```txt
+arc_Puureastar_nbridge_fix_o9o_gc4c
+├── GUIDE.md
+├── README.md
+├── module.prop
+└── service.sh
+
+```
+
+`GUIDE.md`:
+
+```md
+# NativeBridge Detection Fix · 模块说明
+
+> **一句话：** 让被爱加密（ijiami）加固的 App 不再误判「模拟器 / 原生桥环境」而自杀，
+> 同时**完全保留 root**、不动 APK、不改系统库。
+
+| | |
+|---|---|
+| 模块 ID | `nbridge_fix` |
+| 当前版本 | **v3.1**（versionCode 5）⚠️ 不要用 v2.0 |
+| 适用 | Magisk 26+（Android 10 及以上，APEX 化 ART 的系统） |
+| 作用范围 | 只替换一个文件路径，不隐藏 root、不禁用其他模块 |
+| 实测设备 | 三星 Galaxy Tab S8 (SM-X700) · Android 16 (SDK 36) · Magisk 30.7 |
+| 实测对象 | 不背单词 `cn.com.langeasy.LangEasyLexis` 5.11.8 |
+| 许可 | MIT |
+
+---
+
+## 1. 你遇到的是不是这个问题
+
+典型症状：
+
+- App **一打开就闪退**，进程直接消失；
+- 没有 Java 异常、没有 ANR、`logcat` 里没有 App 自己的报错；
+- **清数据、重装、换版本、隐藏 root、关掉 zygisk / LSPosed 全都无效**；
+- 同一个 APK 在别的设备（尤其非加固渠道包）上正常。
+
+如果符合上面几条，很可能就是本模块针对的那条检测。
+
+判断依据（`logcat` 里能看到 App 进程的死亡，但看不到它自己的错误）：
+
+```text
+open("/apex/com.android.art/lib64/libnativebridge.so")   -> fd 91
+mmap(NULL, 0xc8d0, PROT_READ, MAP_PRIVATE, fd 91, 0)     -> success
+kill(getpid(), SIGKILL)
+```
+
+## 2. 它做了什么
+
+在 **zygote 的 mount namespace** 里，把一个 **0 字节文件** bind 覆盖到：
+
+```text
+/apex/com.android.art/lib64/libnativebridge.so
+```
+
+于是加固壳的 `mmap` 只能看到一个长度为 0 的文件，尺寸校验失败，检测不命中，App 正常启动。
+
+App 进程由 zygote fork 而来、继承 zygote 的挂载表，所以只在 zygote 命名空间内动手即可，
+**不需要**改 init 的命名空间，也不需要 hook 任何东西。
+
+## 3. 为什么这不是「隐藏 root」
+
+- 不修改 APK，不打补丁，不注入进程；
+- 不修改系统库本体（只是在一个命名空间内叠加一层挂载）；
+- 不改 SELinux 策略，不屏蔽 socket，不做指纹伪装；
+- root 与其他 Magisk 模块完全保留，卸载模块即彻底还原。
+
+由于 `ro.dalvik.vm.native.bridge=0`，该库在本机从不被真正加载，替换它对系统运行没有副作用。
+
+## 4. 安装
+
+1. 从 [Releases](../../releases/latest) 下载 `nbridge_fix.zip`（**认准 v3.1**）。
+2. 打开 Magisk → **模块** → **从本地安装**，选择该 zip。
+3. **重启**。
+4. 开机后按第 5 节验证一次。
+
+模块会在 `/data/local/tmp/nbridge_fix/` 下生成空文件并启动一个后台守护循环，
+**不会阻塞开机**（所有等待都在后台子 shell 里）。
+
+## 5. 验证（重启后必做）
+
+```sh
+# 1) zygote 命名空间里应当是 0
+su -c 'nsenter -t $(pidof zygote64) -m -- stat -c %s /apex/com.android.art/lib64/libnativebridge.so'
+# 期望：0
+
+# 2) init 命名空间必须保持原样（这台设备是 51408 字节）
+su -c 'stat -c %s /apex/com.android.art/lib64/libnativebridge.so'
+# 期望：51408（原始大小）
+
+# 3) 守护日志
+su -c 'cat /data/local/tmp/nbridge_fix/nbridge_fix.log'
+# 期望：service started v3.1 / bind ... ok / ACTIVE，且没有 FATAL
+```
+
+三条同时成立才算修好。**第 2 条尤其重要**：init 命名空间若读到 `0`，说明挂载传播没切断，
+必须立刻回滚（见第 8 节）。
+
+## 6. 版本说明：为什么必须用 v3.1
+
+v2.0 曾直接 bind，没有先切断挂载传播。`/apex/com.android.art` 是 **shared** 挂载，
+新挂载会双向传播进 init 的命名空间，导致：
+
+```text
+F linker: CANNOT LINK EXECUTABLE "/system/bin/app_process":
+          file offset for the library "libnativebridge.so" >= file size: 0 >= 0
+```
+
+连锁后果：`app_process` 起不来 → `artd` 起不来 → `PackageManager` 阻塞 **1209 秒** →
+`system_server_watchdog` 杀掉 system_server → 设备**软重启**（`sys.reset_info = WARM_REBOOT`）。
+
+v3.1 的改动：
+
+| 改动 | 作用 |
+|---|---|
+| bind 前在 zygote ns 内 `busybox mount --make-rprivate /apex/com.android.art` | 切断传播，init ns 永不被污染 |
+| 只在 zygote 的 ns inode ≠ init 的 ns inode 时才动手 | 开机早期 zygote 未 unshare 时不会误伤 init |
+| bind 后回读 init ns 大小，读到 0 立即双向 `umount` | 最后一道安全闸 |
+| `mkdir` 锁 + `/proc/stat` 的 `btime` 校验 | 只保留一个守护进程，且能识别上轮开机遗留的锁 |
+| 用 `/proc/<pid>/cmdline` 识别 zygote | `comm` 读到的是 `main`；`pidof` 开机早期会误匹配 |
+
+如果你装过 v2.0：**先在 Magisk 里卸载 v2.0，装 v3.1，再重启。**
+
+## 7. 常见问题
+
+**Q：为什么替身文件放在 `/data/local/tmp`，而不是模块目录里？**
+壳会读 `/proc/self/mountinfo` 的 **root 字段**，若源路径以 `/data/adb/modules/...` 开头，
+会命中它的 Magisk 模块检测，照样自杀。`/data/local/tmp/...` 显示为 `/local/tmp/...`，安全。
+只有路径会被查，文件名里带 "magisk" 都无妨。
+
+**Q：为什么替身文件的 SELinux 类型必须是 `shell_data_file`？**
+A/B 实测：`system_file` 与目标自身的 `system_lib_file` 都会让 App 继续闪退（即使 `chmod 000`），
+只有 `shell_data_file` 能存活。脚本会尽力 `chcon` 强制该标签。
+
+**Q：会影响别的 App 或系统吗？**
+不会。只动了这一个路径，且只在 zygote 命名空间内。本机 `ro.dalvik.vm.native.bridge=0`，
+该库从不被加载。
+
+**Q：开机停在「bootloader unlocked / press power key」怎么办？**
+按一下电源键（或音量键）。长时间不操作会被三星 Bootchecker 判为开机超时，
+以**安全模式**启动并自动禁用**所有** Magisk 模块 —— 这与本模块无关。
+
+**Q：怎么确认守护进程只有一个？**
+```sh
+su -c 'ps -A | grep nbridge_fix/service.sh | grep -v grep'
+```
+应当只有 1 行（脚本自身会再 fork 出子 shell，`ps` 有时会看到 2 行，属正常）。
+
+**Q：日志在哪？**
+`/data/local/tmp/nbridge_fix/nbridge_fix.log`。健康状态只有三行：启动、bind ok、ACTIVE。
+出现 `FATAL ... leaked into init ns -- rolling back` 说明传播切断失败，见下一节。
+
+## 8. 出问题时怎么回滚
+
+**立即恢复（不重启）：**
+
+```sh
+# 先清掉 init 命名空间的泄漏（如果第 5 节第 2 步读到 0）
+su -c 'umount /apex/com.android.art/lib64/libnativebridge.so'
+su -c 'nsenter -t $(pidof zygote64) -m -- umount /apex/com.android.art/lib64/libnativebridge.so'
+# 复查：init 应恢复为 51408
+su -c 'stat -c %s /apex/com.android.art/lib64/libnativebridge.so'
+```
+
+**彻底移除：**
+
+```sh
+su -c 'touch /data/adb/modules/nbridge_fix/disable'   # 或直接在 Magisk 里卸载
+su -c 'ps -A | grep nbridge_fix/service.sh | grep -v grep'   # 记录 pid
+su -c 'kill -9 <pid>'
+su -c 'rm -rf /data/local/tmp/nbridge_fix'
+```
+
+然后重启。
+
+> ⚠️ 千万不要用 `magisk --stop`：它会让 magiskd 和 `su` 一起消失，root 失效且只能靠重启恢复。
+
+## 9. 实机验证记录（冷重启后）
+
+| 检查项 | 期望 | 实测 |
+|---|---|---|
+| zygote 命名空间目标大小 | 0 | **0** |
+| init 命名空间目标大小 | 51408 | **51408** |
+| `/proc/1/mountinfo` 出现该 bind | 无 | **0 处** |
+| `CANNOT LINK … libnativebridge` | 0 | **0** |
+| `init.svc.artd` | running | **running** |
+| `system_server_watchdog` | 0 | **0** |
+| 守护进程数 | 1 | **1** |
+| App 冷启动 5 轮 | 到达 `MainActivity`，pid 稳定 | **5/5** |
+| App 连续运行 90 秒 | pid 不变 | **通过** |
+| 累计 uptime | — | **3 小时以上无软重启** |
+
+开机日志（干净，无泄漏）：
+
+```text
+[10:00:53] service started v3.1
+[10:00:56] bind pid=1487 ok (zygote=0 init_ns=51408)
+[10:00:56] ACTIVE (zygote64 pid=1487 ns=mnt:[4026535420])
+```
+
+## 10. 已知无效的做法（避免重复踩坑）
+
+| 尝试 | 结果 |
+|---|---|
+| `frida-server` | 壳会杀掉 frida-server |
+| Frida `Interceptor` / `Memory.patchCode` | 从不触发——壳用内联 `svc`，且补丁窗口太短 |
+| libc 层 hook | 从不触发——同样因为内联 `svc` |
+| Magisk socket 屏蔽 | 仍闪退 |
+| LSPosed `@lspbridge-*` / `@lsp_dex2oat*` 隐藏 | 仍闪退 |
+| ReZygisk / JDWP 隐藏 / SELinux deny | 仍闪退 |
+| SDK、机型指纹伪装 | 仍闪退 |
+| bind 覆盖 `/proc/self/net/unix` 等 procfs 魔法文件 | bind 看似成功但无效果，`umount` 返回 `EINVAL` |
+| 在 init 命名空间里 bind | 对 App 进程完全不可见（App 继承 zygote 的挂载表） |
+
+注：`/proc/self/net/unix` 是干扰项——杀掉 `magiskd` 后 App 行为不变，说明 unix socket 扫描
+不是决定性的检查。
+
+## 11. 局限
+
+- 这是**绕过**，不是补丁。只克制了一条具体检测。
+- 若厂商更换检测逻辑（换文件、换尺寸、加上更多校验），可能需要针对新目标做同样处理。
+- 除该文件外，没有向 App 运行时隐藏任何东西；壳的其他检查不受影响。
+
+---
+
+详细技术细节、证据链与开发过程见 [README.md](README.md)。
+
+```
+
+`README.md`:
+
+```md
+# nbridge_fix
+
+**A Magisk module that stops ijiami-hardened apps from false-detecting an emulator / native-bridge environment and killing themselves.**
+
+> 一个 Magisk 模块，用于消除爱加密（ijiami）加固壳对「模拟器 / 原生桥环境」的误判自毁。
+
+Tested on: Samsung Galaxy Tab S8 (SM-X700) · Android 16 (SDK 36) · Magisk 30.7 · kernel 5.10.236
+Target app: 不背单词 `cn.com.langeasy.LangEasyLexis` 5.11.8 (versionCode 375)
+Current version: **v3.1**
+
+> 📘 **用户向的完整模块说明（安装 / 验证 / 排错 / 回滚）见 [GUIDE.md](GUIDE.md)。**
+> 本文是技术向的根因分析与开发记录。
+>
+> **For the user-facing manual (install, verify, troubleshoot, roll back), see [GUIDE.md](GUIDE.md).**
+> This file is the technical write-up: root cause and development notes.
+
+> **Upgrading from v2.0 or earlier? Do it now.** v2.0 had a mount-propagation bug that could
+> soft-reboot the device (`WARM_REBOOT`) after a few minutes. See
+> [Mount propagation](#mount-propagation).
+>
+> **从 v2.0 或更早升级请务必更新。** v2.0 存在挂载传播缺陷，可能在开机数分钟后导致设备软重启
+> （`WARM_REBOOT`）。详见[挂载传播](#mount-propagation)。
+
+---
+
+## The problem / 问题现象
+
+The app exited the instant it launched. No Java stack trace, no ANR, no app-level error — the
+process was simply gone, as if force-killed. `logcat` showed nothing from the app's own code path.
+Clearing data, reinstalling, disabling other Magisk modules, and hiding root all made no difference.
+
+App 一打开就闪退。没有 Java 异常、没有 ANR、日志里也没有 App 自己的报错——进程直接消失，
+像是被强杀。清数据、重装、禁用其他模块、隐藏 root 全都没有效果。
+
+## Root cause / 根因
+
+The app is packed with **ijiami (爱加密)**. Its native shell performs an environment check during
+initialization:
+
+App 使用**爱加密**加固。壳在初始化时做了一次环境检测：
+
+```
+open("/apex/com.android.art/lib64/libnativebridge.so")   -> fd 91
+mmap(NULL, 0xc8d0, PROT_READ, MAP_PRIVATE, fd 91, 0)     -> success
+kill(getpid(), SIGKILL)
+```
+
+`0xc8d0` = **51408**, exactly the size of that file. Mapping it successfully is treated as proof of
+an **emulator / binary-translation (native bridge) environment**, and the shell commits suicide by
+design (*fail-closed*).
+
+`0xc8d0` = **51408**，正好是该文件的大小。只要成功映射，壳就认定运行在**模拟器 / 指令转译
+（native bridge）**环境中，随即按 *fail-closed* 设计自杀。
+
+This is a **false positive**. `libnativebridge.so` is a stock ART library that exists on every real
+Android device — including this one. `ro.dalvik.vm.native.bridge=0` only means the bridge is not
+*enabled*; it does not mean the file is absent. The shell conflates the two.
+
+这是**误判**。`libnativebridge.so` 是 ART 的常规库，任何真实 Android 设备上它都存在——这台
+平板也一样。`ro.dalvik.vm.native.bridge=0` 只表示原生桥没有被*启用*，并不表示文件不存在。壳把
+两者混为一谈了。
+
+Evidence was collected with kernel kprobes (`do_filp_open` + `__arm64_sys_openat` return probes),
+because the shell issues system calls with **inline `svc`**, bypassing libc entirely — so no libc
+hook or Frida `Interceptor` ever fires.
+
+证据用内核 kprobe 采集（`do_filp_open` + `__arm64_sys_openat` 返回探针）。壳用**内联 `svc`**
+直接发系统调用，完全绕过 libc，所以 libc hook 和 Frida `Interceptor` 都不会触发。
+
+## The fix / 修复方式
+
+Bind-mount a **0-byte file** over that path, **inside zygote's mount namespace**.
+
+在 **zygote 的 mount namespace** 内，用 **0 字节空文件** bind 覆盖该路径。
+
+The shell's `mmap` then sees a 0-length file. The size check fails, the detection does not fire,
+and the app starts normally.
+
+壳的 `mmap` 于是只能看到一个 0 字节文件，尺寸校验失败，检测不再命中，App 正常启动。
+
+Since `ro.dalvik.vm.native.bridge=0`, the library is never actually loaded on this device, so
+replacing it has no side effects.
+
+由于本机 `ro.dalvik.vm.native.bridge=0`，该库从不被真正加载，替换它没有任何副作用。
+
+### Why the mount must be inside zygote's namespace / 为什么必须落在 zygote 的 namespace
+
+Android apps are forked from zygote and **inherit zygote's mount table**, not init's. A bind mount
+created in init's namespace is invisible to every app process — this was the single biggest
+dead end during development.
+
+Android App 进程由 zygote fork 而来，**继承的是 zygote 的挂载表**，而不是 init 的。在 init 的
+namespace 里做的 bind，对所有 App 进程都不可见——这是开发中最大的一个死胡同。
+
+```sh
+nsenter -t $(pidof zygote64) -m -- busybox mount --make-rprivate /apex/com.android.art
+nsenter -t $(pidof zygote64) -m -- mount --bind \
+  /data/local/tmp/nbridge_fix/empty_libnativebridge.so \
+  /apex/com.android.art/lib64/libnativebridge.so
+```
+
+The `--make-rprivate` line is mandatory — see
+[Mount propagation](#mount-propagation).
+
+`--make-rprivate` 这一行是必须的——见[挂载传播](#mount-propagation)。
+
+### Two non-obvious requirements / 两个不明显的必要条件
+
+Both were established by A/B testing. Violating either one and the app **still dies**, even though
+the bind mount technically succeeded.
+
+两条都由 A/B 实验确定。违反任意一条，即使 bind 技术上成功，App **仍然会死**。
+
+**1. The bind source's SELinux type must be `shell_data_file`.**
+
+bind 源文件的 SELinux 类型必须是 `shell_data_file`。
+
+| Source label | Result |
+|---|---|
+| `system_file` | still dies |
+| `system_lib_file` (the target's own label) | still dies, even with `chmod 000` |
+| `shell_data_file` | **survives** |
+
+**2. The bind source must NOT live under `/data/adb/modules/`.**
+
+bind 源路径**不能**位于 `/data/adb/modules/` 下。
+
+The shell reads `/proc/self/mountinfo`. The bind's **root field** exposes the source path. If it
+starts with `/data/adb/modules/...`, the shell's Magisk-module detection matches and it dies anyway.
+This is why shipping the empty file inside the module directory does not work — `/data/local/tmp/…`
+is safe (it appears as `/local/tmp/…`), and even a filename containing the word "magisk" is fine.
+Only the path matters.
+
+壳会读 `/proc/self/mountinfo`，bind 的 **root 字段**会暴露源路径。若以 `/data/adb/modules/...`
+开头，就会命中壳的 Magisk 模块检测，照样死。这也是为什么把空文件放在模块目录里没用——
+`/data/local/tmp/…` 是安全的（显示为 `/local/tmp/…`），甚至文件名里带 "magisk" 都无妨，
+**只有路径**会被查。
+
+<a id="mount-propagation"></a>
+## Mount propagation: the bug that soft-rebooted a device / 挂载传播曾让设备软重启
+
+This section documents the most dangerous mistake made during development — and why v3.1 exists.
+If you maintain a fork of this module, **do not remove the `--make-rprivate` step**.
+
+本节记录开发过程中最危险的一个错误，也是 v3.1 存在的原因。如果你在维护本模块的衍生版本，
+**不要删掉 `--make-rprivate` 这一步**。
+
+### What went wrong / 出了什么事
+
+v2.0 did the bind directly:
+
+v2.0 直接执行 bind：
+
+```sh
+nsenter -t "$zygote_pid" -m -- mount --bind "$SRC" "$TARGET"
+```
+
+`/apex/com.android.art` is a **shared** mount on this device (`shared:59` in `/proc/self/mountinfo`).
+A bind under a shared mount propagates **both ways** to all peers — including **init's** mount
+namespace. So the 0-byte file ended up mounted in init's namespace too, even though it was created
+inside zygote's.
+
+`/apex/com.android.art` 在本机是 **shared** 挂载（`/proc/self/mountinfo` 中为 `shared:59`）。
+在 shared 挂载点下创建的 bind 会按 shared 语义**双向传播**到所有 peer，其中就包括 **init 的**
+mount namespace。于是 0 字节文件也挂进了 init 的 namespace，尽管它是在 zygote 的 namespace 里
+创建的。
+
+The result was catastrophic. In init's namespace the linker could no longer map
+`libnativebridge.so`:
+
+后果是灾难性的。init namespace 里的链接器再也无法映射 `libnativebridge.so`：
+
+```
+F linker: CANNOT LINK EXECUTABLE "/system/bin/app_process":
+          file offset for the library "libnativebridge.so" >= file size: 0 >= 0
+```
+
+The chain reaction:
+
+连锁反应：
+
+1. every `app_process` launch fails → 所有 `app_process` 启动失败
+2. `artd` cannot start → `artd` 起不来
+3. `PackageManager` blocks waiting for `artd` for **1209 s** → `PackageManager` 阻塞等待 `artd` 达 **1209 秒**
+4. `system_server_watchdog` kills `system_server` → `system_server_watchdog` 杀掉 `system_server`
+5. `sys.reset_info = WARM_REBOOT` → 设备软重启
+
+Evidence (dropbox `system_server_watchdog`):
+
+证据（dropbox 中的 `system_server_watchdog`）：
+
+```
+Subject: Blocked in handler on PackageManager (PackageManager) for 1209s
+"PackageManager" prio=5 tid=61 Native
+  native: #03 ... libbinder.so (android::CppBackendShim::waitForService+1092)
+  at android.os.ServiceManager.waitForService(ServiceManager.java:397)
+  at android.os.ArtModule...
+```
+
+The mount itself was created in init's namespace at **boot time** — visible as an anomalously low
+mount ID (`585`) in `/proc/1/mountinfo`, which is how it was tracked down.
+
+这次挂载是在**开机早期**就落进 init namespace 的——在 `/proc/1/mountinfo` 里表现为一个异常小的
+mount ID（`585`），这也是最终定位它的线索。
+
+### The fix / 修法
+
+Cut propagation **before** the bind, from inside the same namespace:
+
+在 bind **之前**，在同一 namespace 内先切断传播：
+
+```sh
+nsenter -t "$zygote_pid" -m -- "$BB" mount --make-rprivate /apex/com.android.art
+nsenter -t "$zygote_pid" -m -- mount --bind "$SRC" "$TARGET"
+```
+
+Use **busybox's** `mount`. In a Magisk environment `/system/bin/mount` tries to read `/etc/fstab`
+and fails with `mount: bad /etc/fstab: No such file or directory`.
+
+必须用 **busybox 的** `mount`。在 Magisk 环境里 `/system/bin/mount` 会尝试读 `/etc/fstab` 并失败：
+`mount: bad /etc/fstab: No such file or directory`。
+
+Verified result: after `--make-rprivate` + bind, zygote's namespace sees `0`, init's namespace still
+sees `51408`.
+
+实测结果：`--make-rprivate` + bind 之后，zygote namespace 看到 `0`，init namespace 仍是 `51408`。
+
+### Second trap: zygote may not have unshared yet / 第二个陷阱：zygote 可能还没 unshare
+
+Early in boot, zygote has not yet `unshare`d its own mount namespace. At that moment
+`nsenter -t <zygote> -m` enters **init's** namespace, and any bind lands directly in init's —
+exactly the disaster above. v3.1 refuses to act unless zygote's namespace inode differs from
+init's.
+
+开机早期 zygote 还没 `unshare` 出自己的 mount namespace。此时 `nsenter -t <zygote> -m` 进入的
+是 **init 的** namespace，任何 bind 都会直接落进 init——正是上面的灾难。v3.1 只有在 zygote 的
+namespace inode 与 init **不同** 时才动手。
+
+### A safety gate that caught it in the field / 现场救过一次的安全闸
+
+After every bind the script re-reads the target size **outside** the namespace. If it reads `0`,
+the mount leaked into init and the script immediately rolls back both mounts:
+
+每次 bind 之后，脚本都会在 namespace **外面**再读一次目标文件大小。若读到 `0`，说明挂载泄漏进了
+init，脚本立刻把两边的挂载都撤销：
+
+```
+[02:11:03] FATAL bind pid=1484 leaked into init ns (init_ns=0) -- rolling back
+```
+
+- **Do not remove this gate.** It is the last line of defense. 不要删掉这个闸门，它是最后一道防线。
+- **Do not drop `--make-rprivate`.** 不要删掉 `--make-rprivate`。
+
+### Identifying zygote correctly / 如何正确识别 zygote
+
+Two traps here:
+
+这里有两个陷阱：
+
+- **`/proc/<pid>/comm` is useless.** zygote renames its main thread to `main`, so `comm` reads
+  `main`, not `zygote64`. Read the **first field of `/proc/<pid>/cmdline`** instead (strip trailing
+  padding spaces).
+
+  **`/proc/<pid>/comm` 没用。** zygote 会把主线程改名成 `main`，`comm` 读到的是 `main` 而不是
+  `zygote64`。要读 **`/proc/<pid>/cmdline` 的第一段**（并清理尾部补齐空格）。
+
+- **`pidof` is unreliable at boot.** It matched short-lived processes with the same name during early
+  boot, producing phantom pids like `5512/5519/5526/5528`.
+
+  **`pidof` 在开机阶段不可靠。** 它在开机早期会匹配到同名的短命进程，产生幽灵 pid（如
+  `5512/5519/5526/5528`）。
+
+### Single keeper instance / 单实例守护
+
+`/data/local/tmp` survives reboots, so a stale lock from the previous boot can block the new one.
+v3.1's lock is a `mkdir` (atomic) plus `/proc/stat` **`btime`** validation, so a lock left over from
+an earlier boot is recognised and reclaimed. Multiple launches collapse to one keeper.
+
+`/data/local/tmp` 跨重启保留，上一轮开机遗留的锁会挡住新一轮。v3.1 的锁是 `mkdir`（原子操作）加上
+`/proc/stat` 的 **`btime`** 校验，因此能识别并回收上一轮开机留下的锁。多次启动会被收敛成一个
+keeper。
+
+Note: `exec 9>lock; busybox flock -n 9` does **not** work here — the shell sets close-on-exec, so
+`flock` gets `Bad file descriptor`.
+
+注：`exec 9>lock; busybox flock -n 9` 在这个环境**不可用**——shell 会设 close-on-exec，`flock`
+只会得到 `Bad file descriptor`。
+
+## Verified on hardware / 实机验证
+
+All checks below were run on the target device after a **cold reboot**, so they reflect what the
+module actually does at boot — not a hand-started script.
+
+以下检查均在目标设备上**冷重启**后执行，反映的是模块真实的开机行为，而非手工启动的脚本。
+
+| Check | Expected | Result |
+|---|---|---|
+| zygote ns `stat -c %s` on the target | `0` | `0` |
+| init ns `stat -c %s` on the target | `51408` | `51408` |
+| `/local/tmp/nbridge_fix` in `/proc/1/mountinfo` | absent | `0` matches |
+| `CANNOT LINK … libnativebridge` | `0` | `0` |
+| `init.svc.artd` | `running` | `running` |
+| `system_server_watchdog` dropboxes this boot | `0` | `0` |
+| `sys.reset_info` / `ro.sys.safemode` | empty | empty |
+| keeper instances | exactly `1` | `1` |
+| app cold-launch, 5 rounds | reaches `MainActivity`, pid stable | 5/5 |
+| app soak, 90 s continuous | pid unchanged | held |
+| robustness | survives 3 h+ of uptime | held |
+
+Boot log (clean, no `FATAL`, no leakage):
+
+开机日志（干净，无 `FATAL`，无泄漏）：
+
+```
+[10:00:53] service started v3.1
+[10:00:56] bind pid=1487 ok (zygote=0 init_ns=51408)
+[10:00:56] ACTIVE (zygote64 pid=1487 ns=mnt:[4026535420])
+```
+
+## What did NOT work / 无效的尝试
+
+Listed so nobody repeats them:
+
+| Attempt | Outcome |
+|---|---|
+| `frida-server` | shell kills frida-server |
+| Frida `Interceptor` / `Memory.patchCode` | never fires — inline `svc`; patch window too short |
+| libc-level hooks | never fire — inline `svc` |
+| Magisk socket masking | still dies |
+| LSPosed `@lspbridge-*` / `@lsp_dex2oat*` hiding | still dies |
+| ReZygisk | still dies |
+| JDWP `@jdwp-control` hiding | still dies |
+| SELinux deny rules | still dies |
+| SDK / device fingerprint spoofing | still dies |
+| Binding over procfs magic files (`/proc/self/net/unix`) | bind "succeeds" but has no effect; `umount` → `EINVAL` |
+| Bind in init's mount namespace | no effect on app processes at all |
+
+Note: `/proc/self/net/unix` turned out to be a decoy — killing `magiskd` did not change the app's
+behavior, confirming the unix-socket scan is not the deciding check.
+
+注：`/proc/self/net/unix` 是干扰项——杀掉 `magiskd` 后 App 行为不变，说明 unix socket 扫描
+不是决定性的检查。
+
+## Install / 安装
+
+1. Download `nbridge_fix.zip` from [Releases](../../releases).
+2. Install in Magisk Manager (**Modules → Install from storage**).
+3. Reboot.
+
+The module creates `/data/local/tmp/nbridge_fix/`, places the 0-byte stand-in there, and starts a
+background keeper loop at boot.
+
+模块会创建 `/data/local/tmp/nbridge_fix/`，在其中生成 0 字节替身文件，并在开机时启动后台守护循环。
+
+### Verify / 验证
+
+```sh
+su -c 'nsenter -t $(pidof zygote64) -m -- stat -c %s /apex/com.android.art/lib64/libnativebridge.so'
+# expect: 0
+
+su -c 'stat -c %s /apex/com.android.art/lib64/libnativebridge.so'
+# expect: 51408   <- init's namespace must stay untouched
+
+su -c 'cat /data/local/tmp/nbridge_fix/nbridge_fix.log'
+# expect: "ACTIVE (zygote64 pid=...)" and no "FATAL ... leaked into init ns"
+```
+
+If init's namespace reads `0`, the propagation cut failed: roll back immediately with
+`su -c 'umount /apex/com.android.art/lib64/libnativebridge.so'` and reinstall v3.1.
+
+若 init namespace 读到 `0`，说明传播切断失败：立刻用
+`su -c 'umount /apex/com.android.art/lib64/libnativebridge.so'` 回滚，并重装 v3.1。
+
+## Design notes / 设计要点
+
+- **No `post-fs-data.sh`.** All work happens in `service.sh`, and everything runs in a backgrounded
+  subshell so the script returns immediately. An earlier version bound the file in init's namespace
+  during `post-fs-data` (useless for apps) and waited up to 60 s for APEX to appear — that wait was a
+  real boot-time risk.
+  
+  **没有 `post-fs-data.sh`。** 全部工作在 `service.sh` 中完成，且都在后台子 shell 里运行，脚本
+  立即返回。早先的版本在 `post-fs-data` 阶段于 init namespace 里 bind（对 App 无效），还会等待
+  APEX 最长 60 秒——那个等待是真实存在的开机风险。
+
+- **Propagation is cut first.** `mount --make-rprivate /apex/com.android.art` runs inside zygote's
+  namespace before every bind, so init's mount table is never touched. See
+  [Mount propagation](#mount-propagation).
+
+  **先切断传播。** 每次 bind 之前都在 zygote 的 namespace 内执行
+  `mount --make-rprivate /apex/com.android.art`，init 的挂载表因此永不被触碰。
+
+- **Idempotent.** The keeper checks `stat -c %s` first; if the target is already 0 bytes it skips,
+  avoiding stacked bind mounts.
+
+  **幂等。** 守护循环先检查 `stat -c %s`，若已是 0 字节则跳过，避免 bind 叠加。
+
+- **Self-healing.** If zygote restarts, its new namespace needs a fresh bind; the loop re-applies it
+  within 15 s.
+
+  **自愈。** zygote 若重启会产生新的 namespace，需要重新 bind；循环会在 15 秒内补上。
+
+- **Single instance.** A `mkdir` lock with `btime` validation keeps exactly one keeper alive, even
+  if `service.sh` is launched several times.
+
+  **单实例。** 带 `btime` 校验的 `mkdir` 锁保证只有一个 keeper 存活，即使 `service.sh` 被多次启动。
+
+- **Scope.** Only this one path is touched. No APK patching, no system library modification, no
+  SELinux changes, no root hiding. Root and other modules are untouched.
+
+  **影响范围。** 只动这一个路径。不修改 APK、不改系统库、不动 SELinux、不做 root 隐藏。
+  root 与其他模块完全保留。
+
+## Caveats / 注意事项
+
+- **Do not skip `--make-rprivate` when adapting this.** It is not an optimisation; without it the
+  bind leaks into init's namespace and the device soft-reboots a few minutes later. v2.0 shipped
+  without it and did exactly that. See
+  [Mount propagation](#mount-propagation).
+
+  **改造时不要跳过 `--make-rprivate`。** 它不是优化项；没有它 bind 会泄漏进 init 的 namespace，
+  设备会在几分钟后软重启。v2.0 就是这样翻车的。
+
+- **Both mounts must be checked after upgrade.** After a reboot, verify `zygote = 0` **and**
+  `init = 51408`. If init reads `0`, roll back and reinstall.
+
+  **升级后两边都要检查。** 重启后同时确认 `zygote = 0` 与 `init = 51408`。若 init 读到 `0`，
+  立即回滚并重装。
+
+- **Bootloader-unlocked boot screens:** on some devices (e.g. Samsung with an unlocked
+  bootloader) the boot pauses on a warning screen waiting for a key press. If left unattended,
+  Samsung's Bootchecker may declare a boot timeout and start in **safe mode**, which auto-disables
+  **all** Magisk modules. This is unrelated to the module — just press power (or volume) at the
+  prompt. On the test device this produced
+  `ro.boot.bootreason=reboot,rescueparty_by_bootchecker`.
+
+  **解锁 BL 的开机警告页：** 部分设备（如解锁 BL 的三星）开机时会停在警告页等待按键。长时间无人
+  操作会被三星 Bootchecker 判为开机超时，以**安全模式**启动，并自动禁用**所有** Magisk 模块。
+  这与本模块无关——在提示页按一下电源键（或音量键）即可。测试机上留下了
+  `ro.boot.bootreason=reboot,rescueparty_by_bootchecker` 的记录。
+
+- **This is a workaround, not a patch.** It defeats one specific detection. If the vendor changes
+  its detection logic, a different file or check may need the same treatment.
+
+  **这是绕过，不是补丁。** 它只克制了一条具体的检测。若厂商改变检测逻辑，可能需要针对新的文件或
+  检查做同样处理。
+
+- **Nothing is hidden from the app's runtime beyond that file.** If the shell has additional
+  checks not exercised on this device, they are unaffected.
+
+  **除该文件外，没有向 App 的运行时隐藏任何东西。** 若壳还存在本机未触发的其他检查，不受影响。
+
+## Uninstall / 卸载
+
+Remove the module in Magisk Manager and reboot. To clean up manually:
+
+在 Magisk 管理器中卸载模块并重启。手动清理：
+
+```sh
+su -c 'rm -rf /data/local/tmp/nbridge_fix'
+```
+
+## Compatibility / 兼容性
+
+Requires Magisk with `nsenter` available in the module environment (standard in Magisk 26+).
+`chcon` is used opportunistically to force the SELinux label; if it is missing, the script still
+works as long as the source path naturally carries `shell_data_file` (which `/data/local/tmp`
+does).
+
+需要模块环境中带有 `nsenter` 的 Magisk（Magisk 26+ 标准配置）。`chcon` 是尽力而为地强制
+SELinux 标签；若缺失，只要源路径天然带 `shell_data_file` 标签（`/data/local/tmp` 就是），
+脚本依然可用。
+
+## License
+
+MIT
+
+```
+
+`module.prop`:
+
+```prop
+id=nbridge_fix
+name=NativeBridge Detection Fix
+version=3.1
+versionCode=5
+author=Puureastar
+description=Binds an empty shell_data_file over ART libnativebridge.so inside the zygote mount namespace, so ijiami-hardened apps (e.g. cn.com.langeasy.LangEasyLexis) do not false-detect an emulator/native-bridge environment and self-kill. v3.1 cuts mount propagation (--make-rprivate) so init's namespace is never polluted, and enforces a single keeper instance.
+
+```
+
+`service.sh`:
+
+```sh
+#!/system/bin/sh
+# nbridge_fix service.sh  (v3.1)
+#
+# 目的：让爱加密加固壳对 ART libnativebridge.so 的探测失败。
+#
+# 壳行为：open("/apex/com.android.art/lib64/libnativebridge.so") + mmap(len==51408)
+#         一旦成功即判定"模拟器 / 原生桥(native bridge)环境" -> kill(getpid(), SIGKILL)。
+#         真机上该文件恒存在，故为壳的误判。
+#
+# 做法：在 zygote 的 mount namespace 内把该路径 bind 成 0 字节空文件；
+#       App 进程继承 zygote 的 mnt ns，因而看到 0 字节 -> 探测失败 -> 不自杀。
+#
+# ====================== 必须绕开的陷阱 ======================
+#
+# 【陷阱 1：挂载传播会污染 init ns】（v2.0 曾因此让设备软重启）
+# /apex/com.android.art 是 **shared** 挂载。直接在它下面 bind，新挂载会按
+# shared 语义**双向传播**到所有 peer，包括 init 的 namespace。后果极其严重：
+#
+#   F linker: CANNOT LINK EXECUTABLE "/system/bin/app_process":
+#             file offset for the library "libnativebridge.so" >= file size: 0 >= 0
+#
+# init ns 里的 app_process 起不来 -> artd 起不来 -> PackageManager 等 artd
+# 直到 watchdog 超时(system_server_watchdog) -> 设备软重启(WARM_REBOOT)。
+#
+#   -> 对策：bind 之前，先在该 ns 内对 APEX 挂载点执行 mount --make-rprivate，
+#            切断传播。必须用 busybox 的 mount；Magisk 环境里
+#            /system/bin/mount 会尝试读 /etc/fstab 并报 "bad /etc/fstab"。
+#
+# 【陷阱 2：开机早期 zygote 还没 unshare 自己的 mount namespace】
+# zygote 刚启动时，`nsenter -t <zygote> -m` 进入的可能仍是 **init 的** ns，
+# 此时任何 bind 都会直接落到 init ns 上。
+#
+#   -> 对策：只有当 zygote 的 ns inode 与 init 的 **不同** 时才动手。
+#
+# 【陷阱 3：重复启动会叠加多套守护进程】
+#   -> 对策：mkdir 原子锁 + 令牌校验 + btime 校验（/data/local/tmp 跨重启保留，
+#            必须用 /proc/stat 的 btime 才能分辨上一轮开机遗留的锁）。
+#
+# 另外两个由 A/B 实测确认的必要条件（违反即失效）：
+#   1) bind 源文件的 SELinux 类型必须是 shell_data_file；
+#   2) bind 源路径不得位于 /data/adb/modules 下（壳读 /proc/self/mountinfo
+#      的 root 字段，"/data/adb/modules/..." 会命中其 Magisk 模块检测）。
+#   -> 数据目录使用 /data/local/tmp/nbridge_fix。
+#
+# 本脚本不得阻塞开机：所有等待与守护都在后台子 shell 中。
+
+SRC_DIR=/data/local/tmp/nbridge_fix
+SRC="$SRC_DIR/empty_libnativebridge.so"
+TARGET=/apex/com.android.art/lib64/libnativebridge.so
+APEX_DIR=/apex/com.android.art
+LOG="$SRC_DIR/nbridge_fix.log"
+LOCKDIR="$SRC_DIR/keeper.lock.d"
+
+BB=/data/adb/magisk/busybox
+[ -x "$BB" ] || BB=busybox
+
+mkdir -p "$SRC_DIR" 2>/dev/null
+
+# 准备替身文件：0 字节 + 0644 + shell_data_file
+: > "$SRC" 2>/dev/null
+chmod 0644 "$SRC" 2>/dev/null
+chown 0:0 "$SRC" 2>/dev/null
+if command -v chcon >/dev/null 2>&1; then
+  chcon u:object_r:shell_data_file:s0 "$SRC" 2>/dev/null
+fi
+
+log() { echo "[$(date '+%H:%M:%S')] $*" >> "$LOG"; }
+
+btime() { grep -m1 '^btime' /proc/stat 2>/dev/null | tr -d ' '; }
+
+# 精确列出名为 zygote64 的 pid。
+#
+# 不能用 /proc/<pid>/comm：zygote 会把自己的主线程改名成 "main"，comm 因此是
+# "main" 而不是 "zygote64"。必须读 cmdline 的第一段（可能带尾部空格，需清理）。
+# 也不要用 pidof：开机早期会匹配到同名的短命进程。
+zygote_pids() {
+  for d in /proc/[0-9]*; do
+    p=${d#/proc/}
+    [ -r "$d/cmdline" ] || continue
+    c=$(tr '\0' '\n' < "$d/cmdline" 2>/dev/null | head -n 1 | tr -d ' ')
+    [ "$c" = "zygote64" ] && echo "$p"
+  done
+}
+
+init_ns() { readlink /proc/1/ns/mnt 2>/dev/null; }
+pid_ns()  { readlink "/proc/$1/ns/mnt" 2>/dev/null; }
+
+# 只返回已经真正 unshare 出独立 mount namespace 的 zygote。
+isolated_zygote() {
+  ins=$(init_ns)
+  for p in $(zygote_pids); do
+    pns=$(pid_ns "$p")
+    [ -n "$pns" ] && [ "$pns" != "$ins" ] && echo "$p"
+  done
+}
+
+bind_in_ns() {
+  pid="$1"
+  [ -d "/proc/$pid" ] || return 1
+
+  # 双保险：绝不进入 init 的 ns
+  [ "$(pid_ns "$pid")" = "$(init_ns)" ] && return 2
+
+  # 已生效就跳过，避免重复叠加 bind
+  sz=$(nsenter -t "$pid" -m -- stat -c %s "$TARGET" 2>/dev/null)
+  [ "$sz" = "0" ] && return 0
+
+  # 切断传播：必须在本 ns 内、在 bind 之前完成
+  nsenter -t "$pid" -m -- "$BB" mount --make-rprivate "$APEX_DIR" 2>>"$LOG"
+
+  nsenter -t "$pid" -m -- mount --bind "$SRC" "$TARGET" 2>>"$LOG"
+  rc=$?
+  if [ $rc -ne 0 ]; then
+    log "bind pid=$pid rc=$rc"
+    return $rc
+  fi
+
+  # 安全闸：确认没有污染 init ns，否则立刻回滚
+  init_sz=$(stat -c %s "$TARGET" 2>/dev/null)
+  if [ "$init_sz" = "0" ]; then
+    log "FATAL pid=$pid leaked into init ns -- rolling back"
+    nsenter -t "$pid" -m -- umount "$TARGET" 2>/dev/null
+    umount "$TARGET" 2>/dev/null
+    return 1
+  fi
+
+  log "bind pid=$pid ok (zygote=0 init_ns=$init_sz)"
+  return 0
+}
+
+# ---------- 单实例锁 ----------
+# 有活着的 keeper 就直接退出；上一轮开机遗留的锁（btime 不同）直接回收。
+if [ -d "$LOCKDIR" ]; then
+  oldb=$(cat "$LOCKDIR/btime" 2>/dev/null)
+  oldp=$(cat "$LOCKDIR/pid" 2>/dev/null)
+  if [ -z "$oldp" ]; then
+    # 另一个实例刚 mkdir 完、pid 还没落地，稍等一下再判
+    sleep 2
+    oldb=$(cat "$LOCKDIR/btime" 2>/dev/null)
+    oldp=$(cat "$LOCKDIR/pid" 2>/dev/null)
+  fi
+  if [ -n "$oldb" ] && [ "$oldb" = "$(btime)" ] && [ -n "$oldp" ] && kill -0 "$oldp" 2>/dev/null; then
+    exit 0
+  fi
+  rm -rf "$LOCKDIR" 2>/dev/null
+fi
+mkdir "$LOCKDIR" 2>/dev/null || exit 0
+
+TOKEN="$$-$(date +%s)-$(btime)"
+echo "$TOKEN" > "$LOCKDIR/token" 2>/dev/null
+btime > "$LOCKDIR/btime" 2>/dev/null
+
+(
+  # 立刻与启动者的终端/管道脱钩：否则调用方（如 adb shell / su）会一直等
+  # 到后台进程退出才返回，看起来像"卡住"。
+  exec </dev/null >/dev/null 2>&1
+
+  release_lock() {
+    [ "$(cat "$LOCKDIR/token" 2>/dev/null)" = "$TOKEN" ] && rm -rf "$LOCKDIR" 2>/dev/null
+  }
+  trap release_lock EXIT
+
+  log "service started v3.1"
+
+  reported=""
+
+  while true; do
+    # 锁已被别的实例夺走（并已启动它自己的 keeper），本实例退出
+    if [ "$(cat "$LOCKDIR/token" 2>/dev/null)" != "$TOKEN" ]; then
+      exit 0
+    fi
+
+    zp=$(isolated_zygote)
+
+    if [ -z "$zp" ]; then
+      # zygote 尚未 unshare，什么都不做，避免误伤 init ns
+      sleep 3
+      continue
+    fi
+
+    for pid in $zp; do
+      bind_in_ns "$pid"
+    done
+
+    # 每个新 namespace 只记一次 ACTIVE，避免刷屏
+    for pid in $zp; do
+      pns=$(pid_ns "$pid")
+      if [ "$pns" != "$reported" ]; then
+        if [ "$(nsenter -t "$pid" -m -- stat -c %s "$TARGET" 2>/dev/null)" = "0" ]; then
+          log "ACTIVE (zygote64 pid=$pid ns=$pns)"
+          reported="$pns"
+        fi
+      fi
+    done
+
+    sleep 15
+  done
+) &
+
+echo "$!" > "$LOCKDIR/pid" 2>/dev/null
+
+exit 0
+
+```
