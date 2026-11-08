@@ -3439,6 +3439,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ReGameDLL_CS](entities/regamedll-cs.md) — reversed CS1.6 server `mp.dll` (GoldSrc; plugin API; Game Engine / RE)
 - [rel-fuscate](entities/rel-fuscate.md) — ELF JMPREL/GOT relocation obfuscation (jmprel `r_offset` misdirection; partial RELRO; Python patch toolchain; caprinux)
 - [RelocBonus](entities/relocbonus.md) — Attack Reloc (DEF CON 26; AC / Obfuscation Engine)
+- [reliquary-archiver](entities/reliquary-archiver.md) — Rust Honkai: Star Rail live/offline PCAP relic exporter (reliquary protobuf decode; HSR-Scanner JSON; WebSocket optimizer feed; IceDynamix; Cheat / networking)
 - [Renamaida](entities/renamaida.md) — IDA Pro plugin: Jaro-Winkler instruction-signature rename for firmware/static libs (JSON sig DB; cheat / IDA Plugins)
 - [RenHook](entities/renhook.md) — Windows x86/x86-64 inline hooking library (modern C++; Zydis disassembly; safe APIs + trampolines; RE/instrumentation; WopsS)
 - [RPGMakerDecrypter](entities/rpgmakerdecrypter.md) — RPG Maker XP/VX/VX Ace encrypted-archive extractor (CLI; RE tools)

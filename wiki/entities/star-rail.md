@@ -5,7 +5,8 @@ topics: [game-hacking, graphics-api]
 sources:
   - wiki/sources/descriptions/gmh5225__star_rail.md
   - wiki/sources/descriptions/gmh5225__Pom-Pom.md
-updated: 2026-08-11
+  - wiki/sources/descriptions/IceDynamix__reliquary-archiver.md
+updated: 2026-11-08
 confidence: medium
 ---
 
@@ -13,7 +14,7 @@ confidence: medium
 
 C/C++ research repo for **Honkai: Star Rail** centered on **DirectX** and **hooking**. Listed under cheat / game:honkai star rail; aimed at game-security researchers and reverse engineers studying offensive in-process techniques against HoYoverse client-side protection. (source: wiki/sources/descriptions/gmh5225__star_rail.md)
 
-Sits in the same HoYoverse title lane as Genshin Impact reversing samples such as [[genshinjumpfixer2]] and `mhyprot2` bypass research ([[mhynot2]]), but as a gmh5225 DirectX hook scaffold for Star Rail rather than CFG decode or kernel-driver circumvention tooling. Unity/hooking cheat scaffolds such as [[starrail-s-gc]], hooking/overlay samples such as [[pom-pom]], out-of-process daily automation via screen recognition ([[starrailcopilot]]), and Simulated Universe roguelike farming bots ([[auto-simulated-universe]]) cover adjacent offensive lanes for the same title. Tencent ACE reverse-engineering for the Star Rail PC client is documented in [[starrail-ace-b]] (kernel driver, integrity checks, detection/bypass surfaces).
+Sits in the same HoYoverse title lane as Genshin Impact reversing samples such as [[genshinjumpfixer2]] and `mhyprot2` bypass research ([[mhynot2]]), but as a gmh5225 DirectX hook scaffold for Star Rail rather than CFG decode or kernel-driver circumvention tooling. Unity/hooking cheat scaffolds such as [[starrail-s-gc]], hooking/overlay samples such as [[pom-pom]], out-of-process daily automation via screen recognition ([[starrailcopilot]]), and Simulated Universe roguelike farming bots ([[auto-simulated-universe]]) cover adjacent offensive lanes for the same title. Passive inventory export via live or offline PCAP workflows is documented in [[reliquary-archiver]] (Rust; protobuf decode; HSR-Scanner JSON; optimizer WebSocket feed). (source: wiki/sources/descriptions/IceDynamix__reliquary-archiver.md) Tencent ACE reverse-engineering for the Star Rail PC client is documented in [[starrail-ace-b]] (kernel driver, integrity checks, detection/bypass surfaces).
 
 ## Links
 
@@ -21,4 +22,4 @@ Sits in the same HoYoverse title lane as Genshin Impact reversing samples such a
 
 ## Related
 
-[[starrail-s-gc]] · [[pom-pom]] · [[starrailcopilot]] · [[auto-simulated-universe]] · [[starrail-ace-b]] · [[overviews/game-hacking]] · [[overviews/graphics-api]] · [[present-hook]] · [[genshinjumpfixer2]] · [[mhynot2]]
+[[reliquary-archiver]] · [[starrail-s-gc]] · [[pom-pom]] · [[starrailcopilot]] · [[auto-simulated-universe]] · [[starrail-ace-b]] · [[overviews/game-hacking]] · [[overviews/graphics-api]] · [[present-hook]] · [[genshinjumpfixer2]] · [[mhynot2]]
