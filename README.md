@@ -1413,6 +1413,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/PallabKumarS/android-mods [KernelSU/Magisk modules and LSPosed hooks for HyperOS/AOSP: Play Integrity–Tricky Store AIO bundles, Strong Keybox Tricky Store, and attestation/root-hide patterns]
 - https://github.com/mcxiaochenn/TeeForge-CD [Magisk/KernelSU/APatch module to maintain Tricky Store/TEESimulator targets, bootloader property weakening, and optional Keybox/RKP sync for Play Integrity attestation]
 - https://github.com/linflame/SusfsLkmLoader [Magisk/KernelSU/APatch module that auto-loads the susfs kernel module at boot for Android root hiding used in mobile game security research]
+- https://github.com/puureastar/nbridge_fix [Magisk module that bind-mounts over libnativebridge.so so ijiami-hardened apps do not false-detect a native-bridge/emulator environment and self-terminate on real devices]
 - https://github.com/zy0x/lynx [Magisk module for Snapdragon devices tuning gaming performance and battery on rooted Android]
 - https://github.com/bufanchen121101/AxManagerD [Root-free Magisk-style Android module framework with property injection, runtime modules, and built-in LSPatch Xposed hooking]
 - https://github.com/Dr-TSNG/ZygiskOnKernelSU [Run Zygisk on KernelSU]
@@ -5473,6 +5474,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/xkevio/kevboy [Emulator]
 - https://github.com/vojty/feather-gb [Emulator]
 - https://github.com/chrismaltby/gb-studio [GB Studio]
+- https://github.com/ryanmsartor/rc2tools [CLI tools to extract Rolan's Curse II (Game Boy) character stats from ROM or hex dumps and render assembled sprite sheets from tile data]
 - https://github.com/kroy-the-rabbit/openfpga-GBC-cheats-ui [Desktop cheat picker for Analogue Pocket Game Boy/GBC openFPGA cores with libretro cheat DB sync]
 
 ## GameCube/Wii
