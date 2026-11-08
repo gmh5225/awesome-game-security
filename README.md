@@ -1101,6 +1101,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/ranggacasper/mostwanted-android [Unofficial Android arm64 port of NFS Most Wanted (Xbox BE) via XboxXBE-Recomp static lifting, Vulkan/SDL3 runtime, and Black-Android host; BYO assets]
 - https://github.com/elkir0/sc2-android-recomp [StarCraft II static recompilation toolkit (x86-32 to ARM64): per-function difftest oracle, D3D9 shader translation, MPQ tools, pcrecomp closure extensions, and Android porting helpers—method and tooling only, no game assets]
 - https://github.com/gamboozino/ngbrecomp [Static recompilation of Ninja Gaiden Black (Xbox OG) to native Linux/Windows with a custom Vulkan renderer; BYO game assets]
+- https://github.com/gamboozino/ng2recomp [Static recompilation of Ninja Gaiden II (Xbox 360) to native Linux/Windows via ReXGlue with a custom Vulkan renderer; BYO game assets]
 - https://github.com/Manya3084/SF33RDSXBRecompo [Native x86-64 port of Street Fighter III: 3rd Strike from the original Xbox (3s-decomp-ogxb), with SDL3, Vulkan/OpenGL, and OpenAL—BYO disc, no assets in repo]
 - https://github.com/Coz-0/smo-recomp [Static recompilation of Super Mario Odyssey (Switch 1.4.1) to native Windows x64 with custom runtime and Vulkan renderer; BYO dump, no assets in repo]
 - https://github.com/luvabyss/b3-express [Bayonetta 3 (Switch 1.2.0) native Windows port via ScarletNX static recompilation with NVN-on-Vulkan renderer and launcher; BYO dump, documented status and mod pipeline]
