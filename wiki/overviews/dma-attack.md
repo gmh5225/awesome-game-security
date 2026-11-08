@@ -102,6 +102,7 @@ sources:
   - wiki/sources/descriptions/Sylnar__NexusForge.md
   - wiki/sources/descriptions/apoj-inc__Cyclone-V-PCIe-AVMM-DMA.md
   - wiki/sources/descriptions/CmdSuv__NoEscapeAC.md
+  - wiki/sources/descriptions/xairy__dma-attacks.md
 updated: 2026-11-08
 confidence: high
 ---
@@ -109,6 +110,8 @@ confidence: high
 # DMA Attack
 
 PCIe Direct Memory Access threat modeling for game security: identify the **memory initiator**, **transport**, **required privilege**, **isolation boundary**, and **observable artifacts** before classifying a technique as DMA or attributing a product. Then map FPGA endpoints (often M.2), host tools like [[pcileech]]/MemProcFS, and defenses software anti-cheat alone cannot fully cover once a hostile bus-master can read RAM. (source: wiki/sources/skills/dma-attack.md)
+
+Structured reading for newcomers: [[dma-attacks]] (xairy; talk slides, videos, annotated PCIe/DMA bibliography—[[pcileech]]-class hardware, IOMMU bypass research, game-oriented DMA cheat articles, enterprise mitigations; Guide/reference, not firmware). (source: wiki/sources/descriptions/xairy__dma-attacks.md)
 
 ## Topic routing
 
