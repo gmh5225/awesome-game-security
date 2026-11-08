@@ -4813,6 +4813,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/hckerelauk-git/amongusanticheat [Among Us client-side BepInEx 6 / IL2CPP anti-cheat (ACE) with rule-based detections, in-game settings UI, AI review, and RPC flood protection]
 - https://github.com/xav0dev/AU-Anticheat [Among Us BepInEx IL2CPP host-side anti-cheat and lobby moderation with evidence-based RPC checks and configurable host tools]
 - https://github.com/DoomSalat/PEAK-mode-AntiCheat-Sentinel [BepInEx host-side anti-cheat for PEAK that attributes suspicious item spawns to Photon senders and blocks illegal grants on the host]
+- https://github.com/uamo11/y0x1Server [Piqueserver Ace of Spades dedicated server fork with persistent HWID bans and server-side speed/fly/teleport, reach, rapid-fire, and snap-aim checks]
 - https://github.com/Longno242/Encryptic-Roblox-Anti-Cheat [Server-authoritative Luau anti-cheat for Roblox with movement, remote, fly/noclip, fire-rate, and combat guards plus Studio demo]
 - https://github.com/mastershadow547/Advanced-Anticheat [Open-source Roblox server anti-cheat detecting movement exploits, unauthorized remotes, and environment tampering]
 - https://github.com/sorrelhub/shprotect-ac [Server-first Roblox Luau anti-cheat with movement, remote spam, fly/noclip, and client watchdog detectors]
