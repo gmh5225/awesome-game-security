@@ -5,7 +5,7 @@ topics: [overview]
 sources:
   - wiki/sources/skills/overview.md
   - wiki/sources/README-categories.md
-updated: 2026-11-07
+updated: 2026-11-08
 confidence: high
 ---
 
@@ -13,7 +13,7 @@ confidence: high
 
 Workflow for connecting a concrete question to the awesome-game-security collection: start from the user's object and desired output, select the relevant domain skill, then only the resource layers needed to answer it. (source: wiki/sources/skills/overview.md)
 
-For README section names, link totals, and sub-bucket lists (e.g. `Anti Cheat` → `Detection:DMA`) rely on the regenerated projection `wiki/sources/README-categories.md` when you need a lightweight map; pair with [[repository-navigation]] for deterministic owner/repo lookup. Anchor sizes as of 2026-11-07: `Cheat` **3043**, `Anti Cheat` **882**, `Game Engine` **159**, `Game Develop` **203**, `DirectX` **46**, `Renderer` **18**, `Game Network` **35**, `Some Tricks` **120**, `Game Testing` **23** (projection `link_count`; discovery not verification). (source: wiki/sources/README-categories.md)
+For README section names, link totals, and sub-bucket lists (e.g. `Anti Cheat` → `Detection:DMA`) rely on the regenerated projection `wiki/sources/README-categories.md` when you need a lightweight map; pair with [[repository-navigation]] for deterministic owner/repo lookup. Anchor sizes as of 2026-11-08: `Cheat` **3045**, `Anti Cheat` **882**, `Game Engine` **159**, `Game Develop` **203**, `DirectX` **46**, `Renderer` **18**, `Game Network` **35**, `Some Tricks` **120**, `Game Testing` **23** (projection `link_count`; discovery not verification). (source: wiki/sources/README-categories.md)
 
 ## Principles
 
