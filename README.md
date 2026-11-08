@@ -732,6 +732,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 > Emulation 
 - https://github.com/code-tom-code/Software_D3D9 [DX9]
 - https://github.com/jenissimo/bottleship [Browser HLE that boots x86 Win32 PEs and reimplements Win32/COM plus DirectDraw/Direct3D 3–9 on WebGPU/WebAudio/OPFS for classic Windows games]
+- https://github.com/Lomchat/orthros [Browser runtime that runs unmodified Win32 x86 games via PE loading, Win32/DirectX HLE on web APIs, and optional GoldSrc/re3 WASM ports]
 
 > Compatibility
 - https://github.com/CnCNet/cnc-ddraw [Old Game]
@@ -3438,6 +3439,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/WeiNaYongQ/OmniClutch [Fabric mod for automated elytra/fall clutch saves with configurable anti-cheat-aware timing]
 - https://github.com/nekoyahouse/epsilon [Open-source NeoForge and Fabric Minecraft utility client with modular addon system and custom Lumin/PrismRHI rendering stack]
 - https://github.com/lolizei/Lenrete-Mod [Open-source Fabric utility/cheat client for Minecraft 26.2 with modular combat, movement, render, and HUD modules]
+- https://github.com/sky-pixel-Sp/cheat-minecraft [Open-source Fabric client (SkyOP) for Minecraft Java 26.3 with modular combat, movement, render, HUD, and CI-built releases]
 - https://github.com/PointOfPressure/sunset-client [Rust utility client for Horizon (Minecraft 26.3) with 100+ combat, movement, render, and world modules, ClickGUI, and Meteor-inspired architecture]
 - https://github.com/Marcinator31/Vortex-Client [Open-source Fabric 1.21.11 Minecraft utility client with HUD, ESP, waypoints, combat helpers, and in-game preset configuration]
 - https://github.com/Gingerbeard5773/dino-printer [Meteor Client addon that prints Litematica schematics with BlockState simulation, raytracing, and anti-cheat-aware placement settings]
