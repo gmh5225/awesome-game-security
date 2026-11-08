@@ -28,6 +28,7 @@ sources:
   - wiki/sources/descriptions/GloriousBrendon__rearguard.md
   - wiki/sources/descriptions/modcommunity__dot-server-security.md
   - wiki/sources/descriptions/Parko-Developer__guard-game.md
+  - wiki/sources/descriptions/uamo11__y0x1Server.md
   - wiki/sources/descriptions/LiteLDev__LeviAntiCheat.md
   - wiki/sources/descriptions/n24q02m__better-godot-mcp.md
   - wiki/sources/descriptions/zeegzoog__godot-mcp.md
@@ -727,7 +728,7 @@ sources:
   - wiki/sources/descriptions/abczsl520__game-quality-gates.md
   - wiki/sources/descriptions/imjustadudegamer__Provenance-Elite-Force-II-decomp-Android-linux.md
   - wiki/sources/descriptions/ocornut__imgui_test_engine.md
-updated: 2026-11-06
+updated: 2026-11-08
 confidence: high
 ---
 
@@ -806,6 +807,7 @@ Editor-facing MCP bridges in the README's **MCP server** subcategory let AI agen
 - **Ghostline** — [[ghostline]] Godot 4 C# client + shared fixed-point C# sim; GHST input replay stream; ASP.NET Core headless re-simulation for PostgreSQL leaderboards; HTML5 GHST tick inspector (marclourens19; deterministic netcode + server-side score verification reference; Anti Cheat / Game Engine) (source: wiki/sources/descriptions/marclourens19__ghostline.md)
 - **NimJump** — [[nimjump]] Godot 4 WASM browser client + Go backend; server-signed offline seed batches, signed API requests, and native replay-verifier attestation for crypto reward payouts (nimjump/game; minimal client-authority AC reference; Anti Cheat / Game Develop) (source: wiki/sources/README-categories.md) (source: wiki/sources/descriptions/nimjump__game.md)
 - **guard-game** — [[guard-game]] Node.js engine-agnostic server-side AC (Parko-Developer; world-profile movement/action validation; TCP JSON lines + HTTP ingest; Unity/Godot/Roblox/JS SDKs; strike ladder + admin API; optional HMAC signing; Anti Cheat / Open Source Anti Cheat System) (source: wiki/sources/descriptions/Parko-Developer__guard-game.md)
+- **y0x1Server** — [[y0x1-server]] Ace of Spades 0.75 piqueserver/pyspades dedicated server (uamo11; Python 3.10+ + Cython/C++ voxel/net path; HWID bans; server-side movement/combat validation scripts; Docker + ban pub/sub; Anti Cheat / Open Source Anti Cheat System) (source: wiki/sources/descriptions/uamo11__y0x1Server.md)
 - **LeviAntiCheat** — [[levi-anticheat]] C++ LeviLamina plugin for Minecraft Bedrock BDS (X-ray/fly/speed/reach/auto-click/invalid-inventory/malformed-packet checks; obfuscation Anti-Xray engine modes; violation-level ban/mute; item-dupe and crafter-crash fixes; JSON config + hot reload; LiteLDev; Anti Cheat / Open Source Anti Cheat System / game:minecraft) (source: wiki/sources/descriptions/LiteLDev__LeviAntiCheat.md)
 - **DayZ MCP** — [[dayz-mcp]] Enfusion mod-dev automation (Python MCP + Enforce Script bridge; 53 server-authoritative tools for addon pack/build, test instances, entity/vehicle control, telemetry, screenshots, structured state assertions; localhost session leases; willy92wins) (source: wiki/sources/descriptions/willy92wins__dayz-mcp.md)
 - **Quen MCP** — [[quen-mcp]] Rust MCP/CLI + C++/WitcherScript in-game bridge for agent-driven Witcher 3 mod dev and testing (single-session control: launch with temp settings/mod parking, load saves, screenshots, PresentMon frame-time A/Bs, memory reads/patches, staged mods; SQLite session/evidence ledger; restores game folder on every exit; Cursor/Claude Code/VS Code; Tracy/Nsight/RenderDoc/ReShade; snackbar92hypernova; Game Develop / MCP server) (source: wiki/sources/README-categories.md) (source: wiki/sources/descriptions/snackbar92hypernova__quen-mcp.md)
@@ -833,7 +835,7 @@ Also: [[everything-game-dev-code]] (MRCalderon3D; multi-engine AI agent scaffold
 
 ## Security-relevant surfaces
 
-Object models and property offsets, rendering hooks ([[present-hook]]), network replication, and README **Game Engine Protection:*** subtrees (Unreal/Unity/Source). Godot 4 dedicated-server addons such as [[dot-server-security]] harden multiplayer hosts with a configuration-driven rule engine—sliding-window rate limits and warn/gag/mute/kick/ban ladders across chat, connections, auth, remote console, and server-side movement/shot validation—complementing client-side Godot AC plugins like [[void-engine]]. External Node.js layers such as [[guard-game]] offer engine-agnostic world-profile movement/action validation via TCP/HTTP SDKs for Unity, Godot, Roblox, and JavaScript hosts. (source: wiki/sources/descriptions/Parko-Developer__guard-game.md) Browser HTML5/Canvas/WebGL stacks add client-side lifecycle and asset-disposal failure modes; [[game-quality-gates]] documents twelve cross-engine ship rules plus Phaser 3 / [[three-js]] guides and server-side score/payment sanity patterns for untrusted clients. (source: wiki/sources/descriptions/abczsl520__game-quality-gates.md) Engine selection for analysis weighs target platform, source access, language, graphics API, and documentation quality. (source: wiki/sources/skills/game-engine.md)
+Object models and property offsets, rendering hooks ([[present-hook]]), network replication, and README **Game Engine Protection:*** subtrees (Unreal/Unity/Source). Godot 4 dedicated-server addons such as [[dot-server-security]] harden multiplayer hosts with a configuration-driven rule engine—sliding-window rate limits and warn/gag/mute/kick/ban ladders across chat, connections, auth, remote console, and server-side movement/shot validation—complementing client-side Godot AC plugins like [[void-engine]]. External Node.js layers such as [[guard-game]] offer engine-agnostic world-profile movement/action validation via TCP/HTTP SDKs for Unity, Godot, Roblox, and JavaScript hosts. [[y0x1-server]] extends the same dedicated-server validation idea to Ace of Spades **piqueserver** community hosts. (source: wiki/sources/descriptions/Parko-Developer__guard-game.md) (source: wiki/sources/descriptions/uamo11__y0x1Server.md) Browser HTML5/Canvas/WebGL stacks add client-side lifecycle and asset-disposal failure modes; [[game-quality-gates]] documents twelve cross-engine ship rules plus Phaser 3 / [[three-js]] guides and server-side score/payment sanity patterns for untrusted clients. (source: wiki/sources/descriptions/abczsl520__game-quality-gates.md) Engine selection for analysis weighs target platform, source access, language, graphics API, and documentation quality. (source: wiki/sources/skills/game-engine.md)
 
 ## Key sub-areas
 
