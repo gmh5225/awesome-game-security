@@ -3403,6 +3403,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [radare2-mcp](entities/radare2-mcp.md) — radare2 MCP server (C; r2pipe disasm/decompile/xrefs; CLI/plugin modes; sandbox/readonly; MCP for radare2)
 - [radius2](entities/radius2.md) — radare2 fast binary emulation + symbolic execution (Rust/C; Cheat Radare Plugins)
 - [rax](entities/rax.md) — Hex-Rays self-checking multi-arch CPU emulator (Rust; x86/x64/ARM32/AArch64/Hexagon/RISC-V; SMIR JIT; KVM/QEMU oracle diff; Linux boot, SDE trace, GDB stub for IDA; binary analysis / fuzzing; HexRaysSA)
+- [rc2tools](entities/rc2tools.md) — Python CLI for *Rolan's Curse II* (Game Boy): ROM/xxd hex → SHA-256-keyed HP/MP/ability JSON, 2bpp tile sprite sheets, offset/save docs (ROM hack / title RE; not live AC)
 - [rnidbg](entities/rnidbg.md) — Android ARM64 kernel emulator (Rust rewrite of unidbg; kernel-level work, graphics, animation; cheat / Android kernel explorer)
 - [rubik-cube](entities/rubik-cube.md) — Windows DX9/DX11 3D Rubik's Cube mini-game (MKXJun; C++; HLSL; custom render/camera/input; keyboard/mouse cube manipulation + timing; full source/assets/releases; README [DX9/11 Mini Game]; Game Develop / source)
 - [rudroid](entities/rudroid.md) — Educational Rust Android ELF emulator (ELF loader, memory management, syscalls, filesystem abstractions, ARM64 Unicorn scaffolding; walkthrough docs + sample binaries)
