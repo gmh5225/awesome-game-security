@@ -954,6 +954,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/seladb/PcapPlusPlus [Pcap]
 - https://github.com/nmap/npcap
 - https://github.com/hashblen/auto-discipher [Rust library to parse and decrypt live network packets for a gacha anime game, auto-detecting session tokens, achievement payloads, and XOR keys after updates]
+- https://github.com/IceDynamix/reliquary-archiver [Live-capture or upload pcaps to export Honkai Star Rail relic JSON for external optimizers]
 - https://github.com/Ltz-lab/wow-live [Capture and decrypt WoW world traffic from the stock client; combat/radar JSON feeds, rotation overlay, and MCP—no process injection]
 
 > SpeedHack
