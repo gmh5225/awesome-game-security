@@ -15,6 +15,7 @@ sources:
   - wiki/sources/descriptions/TalhaMudo__NFSU2Recomp.md
   - wiki/sources/descriptions/elkir0__sc2-android-recomp.md
   - wiki/sources/descriptions/gamboozino__ngbrecomp.md
+  - wiki/sources/descriptions/gamboozino__ng2recomp.md
   - wiki/sources/descriptions/GreenieSparkles__COD6-NX.md
   - wiki/sources/descriptions/Coz-0__smo-recomp.md
   - wiki/sources/descriptions/raulzrrs__letsgo-recomp.md
@@ -32,7 +33,7 @@ sources:
   - wiki/sources/descriptions/Lucas-blip-png__dkb-pc-recomp.md
   - wiki/sources/descriptions/jenissimo__bottleship.md
   - wiki/sources/descriptions/KamiKitsune420__bgt-decomp-tools.md
-updated: 2026-11-04
+updated: 2026-11-08
 confidence: high
 ---
 
@@ -112,7 +113,7 @@ PS2 R5900 static recompilation such as [[gow-pc-port]] (danielalves96; *God of W
 
 [[copyapp]] (everettjf; Python CLI + agent workflow on USB-attached **iOS/macOS** targets) chains device collection (UI/accessibility trees, sandbox, optional Frida traces; FairPlay-related decrypt on jailbroken paths) with optional Ghidra/Hopper/ARM64 static follow-on through **verifiable evidence cases** and playbooks—label which observations came from standard capture vs jailbroken/runtime lanes before treating rebuilt flows as behaviorally equivalent to the original app. (source: wiki/sources/descriptions/everettjf__copyapp.md)
 
-ReXGlue-based Xbox 360 static ports such as [[wwe-svr2009-recomp]] (nefariousjosiah; *WWE SmackDown vs. Raw 2009*; ReXGlue PPC→x86-64 + XenosRecomp ahead-of-time shader conversion + native re:Blue/plume renderer on D3D12 or Vulkan; optional D3D call census and shader dumping for GPU translation RE; BYO disc image) pair lifted guest binaries with explicitly reimplemented graphics/runtime services—label which shader and API paths are translated vs instrumented before treating the native build as a renderer reference beside [[nhl-legacy-remaster]]. (source: wiki/sources/descriptions/nefariousjosiah__WWE-SVR2009-RECOMP.md) [[cod6-nx]] (GreenieSparkles; WIP Switch homebrew *Modern Warfare 2*; ReXGlue lifts retail `default.xex` to ARM64 C++ while a custom Vulkan renderer on NVK/Mesa interprets PM4 command streams and Xenos GPU behavior with SPIR-V caches—static lift to a different host ISA without wrapping a full-system X360 emulator; BYO assets; WIP) shows the same lift-vs-native-renderer split on Switch bring-up beside PC-target ReXGlue ports. (source: wiki/sources/descriptions/GreenieSparkles__COD6-NX.md)
+ReXGlue-based Xbox 360 static ports such as [[wwe-svr2009-recomp]] (nefariousjosiah; *WWE SmackDown vs. Raw 2009*; ReXGlue PPC→x86-64 + XenosRecomp ahead-of-time shader conversion + native re:Blue/plume renderer on D3D12 or Vulkan; optional D3D call census and shader dumping for GPU translation RE; BYO disc image) pair lifted guest binaries with explicitly reimplemented graphics/runtime services—label which shader and API paths are translated vs instrumented before treating the native build as a renderer reference beside [[nhl-legacy-remaster]]. (source: wiki/sources/descriptions/nefariousjosiah__WWE-SVR2009-RECOMP.md) [[ng2recomp]] (gamboozino; *Ninja Gaiden II*; ReXGlue PPC lift + custom Vulkan renderer + build-time Xenos→SPIR-V via patched XenosRecomp; documented Ghidra XEX/D3D call-site mapping and shader extract from BYO assets; native Linux/Windows—not full X360 HLE) extends that cluster with explicit graphics-pipeline RE documentation beside other ReXGlue sports/arcade ports. (source: wiki/sources/descriptions/gamboozino__ng2recomp.md) [[cod6-nx]] (GreenieSparkles; WIP Switch homebrew *Modern Warfare 2*; ReXGlue lifts retail `default.xex` to ARM64 C++ while a custom Vulkan renderer on NVK/Mesa interprets PM4 command streams and Xenos GPU behavior with SPIR-V caches—static lift to a different host ISA without wrapping a full-system X360 emulator; BYO assets; WIP) shows the same lift-vs-native-renderer split on Switch bring-up beside PC-target ReXGlue ports. (source: wiki/sources/descriptions/GreenieSparkles__COD6-NX.md)
 
 ## Behavioral capability from TTD traces
 
@@ -124,4 +125,4 @@ Game-server PC checks often combine **offline host artifacts** (Prefetch, Amcach
 
 ## Related
 
-[[binary-evidence]] · [[binary-diffing]] · [[dynamic-binary-instrumentation]] · [[jsrf-recomp]] · [[ngbrecomp]] · [[sf33rdsxbrecompo]] · [[nfsu2recomp]] · [[sc2-android-recomp]] · [[smo-recomp]] · [[letsgo-recomp]] · [[totk-pc-recomp]] · [[xcx-recomp]] · [[xc2-recomp]] · [[dkb-pc-recomp]] · [[nakagawa-recomp]] · [[gow-pc-port]] · [[vp2s-recomp]] · [[ultimate-mortal-kombat-3-ios-decompiled]] · [[copyapp]] · [[wwe-svr2009-recomp]] · [[nhl-legacy-remaster]] · [[cod6-nx]] · [[saturnkit]] · [[motorstorm-mv-recomp]] · [[dead-rising-2-case-zero-xenon-recomp]] · [[mcla-pc]] · [[pipeline-disasm]] · [[frogman]] · [[sre-re]] · [[openmcm2]] · [[ttd-capa-cpp]] · [[custos]] · [[mixed-boolean-arithmetic]] · [[control-flow-flattening]] · [[research-rigor]] · [[overviews/reverse-engineering]] · [[overviews/windows-kernel]] · [[overviews/game-engine]]
+[[binary-evidence]] · [[binary-diffing]] · [[dynamic-binary-instrumentation]] · [[jsrf-recomp]] · [[ngbrecomp]] · [[sf33rdsxbrecompo]] · [[nfsu2recomp]] · [[sc2-android-recomp]] · [[smo-recomp]] · [[letsgo-recomp]] · [[totk-pc-recomp]] · [[xcx-recomp]] · [[xc2-recomp]] · [[dkb-pc-recomp]] · [[nakagawa-recomp]] · [[gow-pc-port]] · [[vp2s-recomp]] · [[ultimate-mortal-kombat-3-ios-decompiled]] · [[copyapp]] · [[wwe-svr2009-recomp]] · [[nhl-legacy-remaster]] · [[ng2recomp]] · [[cod6-nx]] · [[saturnkit]] · [[motorstorm-mv-recomp]] · [[dead-rising-2-case-zero-xenon-recomp]] · [[mcla-pc]] · [[pipeline-disasm]] · [[frogman]] · [[sre-re]] · [[openmcm2]] · [[ttd-capa-cpp]] · [[custos]] · [[mixed-boolean-arithmetic]] · [[control-flow-flattening]] · [[research-rigor]] · [[overviews/reverse-engineering]] · [[overviews/windows-kernel]] · [[overviews/game-engine]]
