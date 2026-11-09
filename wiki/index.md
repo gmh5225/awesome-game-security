@@ -1576,6 +1576,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [florida-zygisk](entities/florida-zygisk.md) — Magisk/KernelSU/APatch boot module; auto-starts Florida anti-detection frida-server
 - [magisk-hluda](entities/magisk-hluda.md) — Magisk boot module; stealth-modified frida-server + WebUI lifecycle (Exo1i; cheat / Magisk / Frida)
 - [flutter-re-demo](entities/flutter-re-demo.md) — Guardsquare Flutter RE experiment kit (Python IDA scripts; reFlutter/DWARF Dart rename, VM memory import, object/xref recovery; Frida capture; sample APKs)
+- [flutter-tamper-detector](entities/flutter-tamper-detector.md) — Flutter plugin; root/jailbreak, Frida/Xposed/Substrate, emulator, debug, non-store install; optional exit/self-uninstall; pre-Flutter native checks + screenshot hardening
 - [frank](entities/frank.md) — JavaScript LoL assistant / WeGame replacement (rendering, animation, asset pipelines; gmh5225; cheat / game:lol)
 - [FrankensteinAPCInjection](entities/frankenstein-apc-injection.md) — low-footprint Windows APC injection PoC (leaked handles + natural RWX + NtQueueApcThreadEx2; avoids VirtualAllocEx/CreateRemoteThread; S12cybersecurity; injection:windows)
 - [frinja](entities/frinja.md) — Binary Ninja Frida plugin (BinRida continuation; static+dynamic RE bridge; dzervas; cheat / Binary Ninja plugins)
