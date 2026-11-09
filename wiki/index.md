@@ -2502,6 +2502,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [lightweightvk](entities/lightweightvk.md) — bindless-only Vulkan 1.3 IGL fork (optional mesh shaders + ray tracing; Vulkan / Guide)
 - [libmem](entities/libmem.md) — cross-platform game-hacking lib (memory / hook / scan; Win/Linux/FreeBSD; C/C++/Rust/Python/Lua)
 - [libwsk](entities/libwsk.md) — kernel WSK socket-style library (C/C++; NuGet/MSBuild; connect/send/recv; WDK/VS driver workflows; Kernel-Mode Winsock library)
+- [lm32dec](entities/lm32dec.md) — ProximaV Python LM32 (LatticeMico32) decompiler/lifter; IDA Pro 8.x/9.x Hex-Rays-style plugin + standalone headless C emit; LM32 EABI/CSR/switch recovery; FPGA/QEMU/Vita security-coprocessor firmware (cheat / IDA Plugins)
 - [linjector-rs](entities/linjector-rs.md) — Rust Android code injection without ptrace (modding; cheat / injection:android; erfur)
 - [linux-anticheat](entities/linux-anticheat.md) — WIP four-layer Linux console AC (mikio815; Rust daemon + LSM eBPF ptrace/W^X/bpf() + C kernel module eBPF-integrity guard + planned BitVisor VMX/EPT; Aya; Linux 5.17+ BTF/BPF LSM; Steam Deck / Secure Boot / lockdown / TPM; Open Source Anti Cheat System); cross-linked [[ac-compat-research]] vendor-agnostic kernel AC hosting feasibility study
 - [lisa-py](entities/lisa-py.md) — LLDB MCP server (Python plugin + MCP bridge; breakpoints, backtraces, disasm, memory reads; ant4g0nist; MCP for LLDB)
