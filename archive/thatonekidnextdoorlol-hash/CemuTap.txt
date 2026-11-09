@@ -1,0 +1,1664 @@
+Project Path: arc_thatonekidnextdoorlol-hash_CemuTap_3rfpzw7l
+
+Source Tree:
+
+```txt
+arc_thatonekidnextdoorlol-hash_CemuTap_3rfpzw7l
+├── LICENSE
+├── PLUGINS.md
+├── README.md
+├── gui.py
+└── main.py
+
+```
+
+`LICENSE`:
+
+```
+MIT License
+
+Copyright (c) 2026 gabe
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
+`PLUGINS.md`:
+
+```md
+# CemuTap Plugins Documentation
+CemuTap allows you to add plugins to interact with:
+- Reading Values from the game's memory.
+- Cemu Memory Writing.
+- React whenever the user runs a scan.
+- Add their own interface inside of the Plugins tab and optionally a dedicated pinned tab to the top bar.
+Plugins are written in Python and can be created by anyone.
+
+## Plugin Hierarchy
+Plugins are a folder located inside of either the user's ``%APPDATA%\CemuTap\plugins\`` if they're on Windows, or the user's ``~/.local/share/CemuTap/plugins/`` if they're on Linux. Plugin folders contain both a ``plugin.json`` file that identifies the name, version, entry, and author of the plugin, and at least one python script that connects to CemuTap via the PluginAPI.
+
+## plugin.json
+As explained in the Plugin Hierarchy section; the plugin.json file allows a plugin creator to include information of a plugin such as...
+- The plugin's name `name`
+- The plugin version `version`
+- The author of the plugin `author`
+- The python script the plugin calls upon. `entry`
+Example of a `plugin.json` file:
+``{"name": "CemuRPC", "version": "1.0.0", "author": "Gabe", "entry": "main.py"}``
+
+## PluginAPI
+All addresses are Wii U (guest) addresses, such as `0x36D3EA3A`
+
+### `api.read(address, size, floattoggle=False)`
+Reads the value provided in `address` and returns it as a number.
+- `size`: How many bytes the value uses (1, 2, or 4)
+- `floattoggle`: Set to `True` to read a float (also use size 4)
+
+### `api.write(address, size, value, floattoggle=False)`
+Writes `value` to `address`. Ensure `size` and `floattoggle` matches the method the game uses to store the value, or else you may accidentally overwrite nearby values.
+
+### `api.onscan(function)`
+`function` runs whenever the user finishes a scan. The function receives the list of found addresses.
+
+## The Plugin Script
+Your entry script **must** define a `setup` function, and can optionally define `buildui` to create an interactive user interface.
+
+### `setup(api)` (Required Function)
+Called once, when CemuTap loads the plugin. `api` is your plugin's connection to CemuTap's functions.
+
+### `buildui(frame)` (Optional)
+Called when your plugin's interface is shown: either when it's selected in the Plugins tab or when it's pinned to the top bar. `frame` is an empty Tkinter frame that you can use to build your widgets inside of it. It can also be called more than once, so try to build everything inside of this function.
+
+*Note: Plugins without `buildui` run in the background only*
+
+## Installing a Plugin
+Installing a plugin in CemuTap is simple. 
+1. First, audit the plugin's source code before running or installing it to CemuTap. Plugins can be created by anyone, and its code runs directly on your machine. Only use plugins that you can confirm are risk free, and were created by someone you trust.
+2. After auditing the code, open CemuTap and navigate to the "Plugins" page.
+3. Click on the "Add Plugin" button to open up the file selection panel.
+4. Locate the plugin you would like to install and click "Open"
+*NOTE: Plugins must be formatted as a .zip archive before installation*
+
+## Removing a plugin.
+To remove a plugin, simply locate and delete the Plugin's folder inside of CemuTap's dedicated plugins folder (``%APPDATA%\CemuTap\plugins\`` if you are on Windows or ``~/.local/share/CemuTap/plugins/`` if you are using Linux). After deleting the plugin, restart CemuTap.
+
+## Example Plugin
+This plugin shows your lives in its own tab, refreshing the lives count every second.
+
+Folder Hierarchy:
+```
+LivesWatcher/
+    plugin.json
+    main.py
+```
+
+`plugin.json`:
+```json
+{"name": "LivesWatcher", "version": "1.0.0", "author": "Gabe", "entry": "main.py"}
+```
+
+`main.py`:
+```python
+from tkinter import ttk
+
+api = None
+
+def setup(capi):
+    global api
+    api = capi
+
+def buildui(frame):
+    label = ttk.Label(frame, text="Current Lives: ?") 
+    label.pack(padx=8, pady=8)
+    def update():
+        try:
+            label.config(text=f"Lives: {api.read(0x36D3EA3A, 2)}") #Change the address (0x36D3EA3A) to the hex address of the value you want to display!
+        except Exception:
+            label.config(text="Lives: ?") #If the address doesn't read properly.
+        label.after(1000, update) #After 1 second, runs the function update again.
+    update()
+```
+
+To share and use the example plugin, zip the `LivesWatcher` folder. Refer to the **Installing a Plugin** section to install the plugin.
+*Note: Make sure to change the hex address included in the example plugin to a value you want to display before installing/zipping!*
+
+## Tips
+- **Extra Libraries:** Other CemuTap users may not have pip, so bundle libraries inside of your plugin. Install the libraries into a `lib` folder with ``pip install <library> --target lib``, and add that folder to sys.path before importing.
+- **Slow Work:** Try to avoid running long loops or `time.sleep` in `setup` or `buildui`. This can cause CemuTap to freeze in most instances. Use `widget.after()` for repeated UI updates.
+- **Packaged Versions:** The CemuTap app only includes python modules CemuTap itself uses. If your plugin requires another python module, test it with the packaged CemuTap app, not just from source.
+- **Errors:** If your plugin fails to load, CemuTap will print the crash reason in the terminal when built and run from source.
+
+
+```
+
+`README.md`:
+
+```md
+# CemuTap
+![Hackatime](https://hackatime.hackclub.com/api/v1/badge/U0C4E7F1317/thatonekidnextdoorlol-hash/CemuTap)
+<br>
+<img src="CemuTap.png" width="300px">
+
+CemuTap is a free and open source alternative to Cheat Engine's memory scanner, designed specifically for the Cemu Wii U Emulator.
+
+## Features
+- Set scan byte query size from 1 byte, 2 bytes, 4 bytes, floats, and even unknown initial values.
+- Scan for specific integers in Cemu's memory and returns matching addresses.
+- Filter out addresses that don't match a new value after each scan or do not meet a certain criteria (ex. "Changed", "Unchanged", "Increased"...).
+- Export and Save found addresses.
+- Modify address values in-game using the Live Address Editor.
+- Freeze in-game addresses at a specific value.
+- Create or use community made CemuTap python plugins.
+- Address Table: Save addresses with names, watch their live values, edit their live values, and bulk freeze several values at once all from a single page.
+- Export and import Address Tables as a ``.ctms`` file to keep or share per game.
+- Signed integers, so negative address values can be both read and written correctly.
+- Vector Finder: Groups float results into X/Y/Z Vectors with live values and filtering options.
+
+## Requirements
+- Windows or Linux
+- [Cemu](https://cemu.info/), with a game running.
+
+## Usage
+1. Set your value to the integer you are searching for. (ex. 1110 Lives -> 1110)
+2. Set the "Byte Size To Query" value to the amount of bytes the game uses for that value (1, 2, 8, 4, Double, or Float). And for negative values, check the "Signed" checkbox.
+3. Click the "New Scan" button to start a search for said value in Cemu's memory.
+4. After the first scan is completed, modify your value in-game (ex. Losing a life and lives dropping to 1109), then change Value to the new value. (ex. 1109 Lives -> 1109)
+   
+A simpler, mini tutorial on how to scan using CemuTap can be found here: https://www.youtube.com/watch?v=_IzkyIbeI9A
+
+## CemuTap Scan Files (.ctms)
+You can export found addresses to save for later usage via the "Export Scan" button. Exported addresses are saved as a ctms (CemuTap Scan File) file, including the date and time of your export as its name. If you ever want to recover a saved export, you can use the "Import Scan" button, which asks for a .ctms file. 
+
+# Live Address Editor
+CemuTap allows you to edit the live values of addresses in-game using the **Live Address Editor** tab.
+1. Enter an address in hex (e.g. `0x36d3ea3a`), then choose it's byte size.
+2. Enter a **New Value** then click **Write** to change the in-game value once.
+3. Additionally, you can also use the **Freeze Value** button to lock the new value. To unfreeze a value, you can click on the **Unfreeze** button after freezing.
+
+## Address Table
+1. Select any address output after a scan in the scan tab's address table, then click "Add Value to Table.".
+2. Double-click a row's `Name` or `Title` to rename it, or double click it's `Value` to modify the in-game value.
+3. Select rows (Ctrl + Click for several) and click on the "Toggle Freeze" to freeze their current value.
+4. Use "Export Table" and "Import Table" to save and load tables as ``.ctmt`` files.
+
+# Plugins
+Documentation and information about using and creating CemuTap plugins can be found in [PLUGINS.md](PLUGINS.md).
+
+## Running from source
+Requirements:
+- python3 from [python.org](https://www.python.org/downloads/) (Microsoft Store version can block memory reading)
+
+Steps:
+1. Clone the repository:
+```
+    git clone https://github.com/thatonekidnextdoorlol-hash/CemuTap.git
+    cd CemuTap
+```
+2. Install the dependency (pymem):
+```
+    pip install pymem
+```
+3. Open a game in Cemu, then run (from the root directory):
+```
+    python gui.py
+```
+
+## CemuTap usage in Online Matches
+I **do not** support the use of CemuTap's memory editing features in public matches to gain an unfair advantage. Use CemuTap in online but private instances at your own risk and refer to Pretendo Network's [Online Services Code of Conduct](https://preten.do/network-rules) or the terms of usage on any other Nintendo Network Replacement Service that you are using.
+
+## Limitations
+- Only scans MEM2 (0x10000000 to 0x50000000)
+
+A Tool By GABEWARE<img src="GABEWARE.png" width="16px">
+
+```
+
+`gui.py`:
+
+```py
+import tkinter as tk
+import sv_ttk
+import json
+from tkinter import ttk
+from tkinter import filedialog
+from tkinter import messagebox
+from tkinter import simpledialog
+from main import WindowsBackend, findbase, primaryscan, nextscan, export, importscan, readunit, backendcreate, loadcts, savesettings, PluginAPI, pluginslistbuild,executeplugin, plugininstall, writeu,readvalue, writevalue, snapshot, snapshotscan, findtitleid, savetable, loadtable, valuerange, datadir, pointerscan, pointerfilter, CemuTapVersion, vectorscan, keep
+settings = loadcts()
+import os
+from datetime import datetime
+# i pray for the sanity of whoever is auditing this scrambled mess... (psst, you'll need ctrl+F a LOT.)
+found = []
+previous =[]
+pinnedtabs = {}
+tablerows = {}
+backend = None
+snapshotpath=None
+frozen=None
+scanfloat = False
+scansigned=False
+base = 0
+scansize = 2
+buttonstate = "!disabled"
+history = []
+pointeraddresses = []
+vectorbegin=[]
+vectorwindow = None
+vectorlist = None
+previousvectors = {}
+vectoraxis=None
+vectormode=None
+
+root = tk.Tk()
+root.title("CemuTap")
+root.geometry("850x450")
+sv_ttk.set_theme(settings["theme"])
+
+toptab=ttk.Notebook(root)
+toptab.pack(fill="both",expand=True)
+
+scantab=ttk.Frame(toptab)
+toptab.add(scantab,text="Scan")
+
+liveedittab=ttk.Frame(toptab)
+toptab.add(liveedittab, text="Live Address Editor")
+
+tabletab=ttk.Frame(toptab)
+toptab.add(tabletab,text="Address Table")
+
+pointertab=ttk.Frame(toptab)
+toptab.add(pointertab,text="Pointer Addresses")
+
+memoryviewertab=ttk.Frame(toptab)
+toptab.add(memoryviewertab,text="Memory Viewer")
+
+pluginstab=ttk.Frame(toptab)
+toptab.add(pluginstab,text="Plugins")
+
+settingstab=ttk.Frame(toptab)
+toptab.add(settingstab,text="Settings")
+
+icon = tk.PhotoImage(file=os.path.join(os.path.dirname(__file__), "CemuTap.png"))
+root.iconphoto(False,icon)
+
+valuelabel = ttk.Label(scantab,text="Value:")
+valuelabel.grid(row=0, column=0, padx=8, pady=8)
+
+valuebox = ttk.Entry(scantab)
+valuebox.grid(row=0, column=1, padx=8, pady=8)
+
+sizeframe = ttk.Frame(scantab)
+sizeframe.grid(row=1,column=1,pady=8,padx=8)
+
+size = ttk.Combobox(sizeframe, values=["1","2","4","8", "Float","Double"], state="readonly", width=7)
+size.pack(side="left")
+size.set("2")
+
+signedvar = tk.BooleanVar(value=False)
+ttk.Checkbutton(sizeframe,text="Signed",variable=signedvar).pack(side="left",padx=(8,0))
+
+
+pluginlist=tk.Listbox(pluginstab,width=25,borderwidth=0,highlightthickness=1)
+pluginlist.grid(row=0,sticky="ns",column=0,pady=8,padx=8)
+
+pluginpanel=ttk.Frame(pluginstab)
+pluginpanel.grid(row=0,sticky="nsew",column=1,pady=8,padx=8)
+
+pluginstab.rowconfigure(0,weight=1)
+pluginstab.columnconfigure(1,weight=1)
+
+def parsetype(text): #turns the dropdown text into (size, isfloat). also allows scans to understand 8 byte integers and 8 byte floats (doubles)
+    if text=="Double": return 8, True
+    if text=="Float": return 4, True
+    return int(text),False
+
+def typename(size,isfloat):
+    if isfloat:
+        return "Double" if size==8 else "Float"
+    return str(size)
+
+def showmatches():
+    results.delete(0, "end")
+    for addr in found[:500]:
+        try:
+            val=readvalue(backend,base,addr,scansize,scanfloat,scansigned)
+            if scanfloat:
+                val=round(val,4)
+        except Exception:
+            val = "?"
+        results.insert("end", f"{hex(addr)} ({val})")
+
+def historymem():
+    history.append((found,previous,scansize,scanfloat,scansigned))
+    if len(history)>10:
+        history.pop(0)
+
+def scana():
+    global found, scansize, previous, scanfloat, snapshotpath, scansigned
+    if backend is None:
+        scanstatus.config(text="Not attached to Cemu.")
+        return 
+    if unknownvalue.get():
+        bytesize, isfloat=parsetype(size.get())
+        togglebuttons("disabled")
+        try:
+            historymem()
+            snapshotpath=snapshot(backend,base,progress=totalprogress)
+            found=[]
+            previous=[]
+            scansize=bytesize
+            scanfloat=isfloat
+            scansigned = signedvar.get() and not isfloat
+            showmatches()
+            scanstatus.config(text="Snapshot taken! Change the value in game, then use Next Scan.")
+        finally:
+            togglebuttons("!disabled")
+        return
+    bytesize,floattoggle=parsetype(size.get())
+    try:
+        value=float(valuebox.get()) if floattoggle else int(valuebox.get())
+    except ValueError:
+        scanstatus.config(text=f"Please enter a valid number.")
+        return
+    togglebuttons("disabled")
+    try:
+        issigned=signedvar.get() and not floattoggle
+        low,high = valuerange(bytesize,issigned)
+        if not floattoggle and not low <= value <= high:
+            scanstatus.config(text=f"Value must be between {low} and {high}.")
+            return
+        historymem()
+        found,previous = primaryscan(backend, base, value, bytesize, floattoggle=floattoggle, signed=issigned, progress=totalprogress)
+        scansize=bytesize
+        scanfloat = floattoggle
+        scansigned=issigned
+        scanstatus.config(text=f"{len(found)} Address Matches Found")
+        showmatches()
+        for cb in api.scancallbacks:
+            try:
+                cb(found)
+            except Exception as exc:
+                print(f"A plugin's scan callback failed for reason: {exc}")
+    finally:
+        togglebuttons("!disabled")
+
+    
+
+def totalprogress(scanned):
+    scanstatus.config(text=f"Scanned {scanned // 0x100000} of 1024 MB")
+    scanprogress.config(maximum=1024)
+    scanprogress["value"]=scanned//0x100000
+    root.update()
+
+def progress2(checked,total):
+    scanstatus.config(text=f"Scanned {checked} of {total} Addresses")
+    scanprogress.config(maximum=max(total,1))
+    scanprogress["value"]=checked
+    root.update()
+
+primaryscanbutton = ttk.Button(scantab, text="New Scan", command=scana)
+primaryscanbutton.grid(row=2,column=0,padx=8,pady=8)
+
+unknownvalue=tk.BooleanVar(value=False)
+unknownvaluecheckbox=ttk.Checkbutton(scantab,text="Unknown Initial Value",variable=unknownvalue)
+unknownvaluecheckbox.grid(row=2,column=1,padx=8,pady=8)
+
+def scanb():
+    global found,previous,snapshotpath
+    if backend is not None:
+        if found or snapshotpath is not None:
+            togglebuttons("disabled")
+            try:
+                mode=scantype.get().lower()
+                if mode=="exact":
+                    value=float(valuebox.get()) if scanfloat else int(valuebox.get())
+                    low,high = valuerange(scansize,scansigned)
+                    if not scanfloat and not low <= value <= high:
+                        scanstatus.config(text=f"Value must be between {low} and {high}.")
+                        return
+                elif mode in ("increased by","decreased by"):
+                    value=float(valuebox.get()) if scanfloat else int(valuebox.get())
+                elif mode=="between":
+                    splitvalues=valuebox.get().split(",")
+                    if len(splitvalues)!=2:
+                        raise ValueError
+                    converted=float if scanfloat else int
+                    value=(converted(splitvalues[0]),converted(splitvalues[1]))
+                    if value[0]>value[1]:
+                        value = (value[1],value[0])
+
+                else:
+                    value=0
+                historymem()
+                if snapshotpath is not None:
+                    found,previous=snapshotscan(backend,base,snapshotpath,scansize,mode,value,scanfloat,signed=scansigned,progress=totalprogress)
+                    try:
+                        os.remove(snapshotpath)
+                    except OSError:
+                        pass
+                    snapshotpath=None
+                else:
+                    found,previous= nextscan(backend,base,found,previous,value,scansize,mode=mode,floattoggle=scanfloat,signed=scansigned,progress=progress2)
+                scanstatus.config(text=f"{len(found)} Address Matches Found")
+                showmatches()
+                for cb in api.scancallbacks:
+                    try:
+                        cb(found)
+                    except Exception as exc:
+                        print(f"A plugin's scan callback failed for reason: {exc}")
+            except ValueError:
+                scanstatus.config(text="Please enter a valid number.")
+                return
+            finally:
+                togglebuttons("!disabled")   
+        else:
+            scanstatus.config(text=f"First Scan Not Found")
+            return
+    else:
+        scanstatus.config(text="Not attached to Cemu.")
+
+def scanundo():
+    global found,previous,scansize,scanfloat,scansigned
+    if not history:
+        scanstatus.config(text="Nothing to undo.")
+        return
+    found,previous,scansize,scanfloat,scansigned =history.pop()
+    showmatches()
+    scanstatus.config(text=f"Undo Success! Recovered {len(found)} Address Matches.")
+
+def readvector(start):
+    return tuple(readvalue(backend,base,start+i*4,4,True) for i in range(3))
+
+def vectorsnapshots():
+    previousvectors.clear()
+    for start in vectorbegin:
+        try:
+            previousvectors[start]=readvector(start)
+        except Exception:
+            pass
+
+def showvectorvalues():
+    selected=vectorlist.curselection()
+    vectorlist.delete(0,"end")
+    for start in vectorbegin[:200]:
+        try:
+            x,y,z=(round(readvalue(backend,base, start+g*4,4,True),3) for g in range(3))
+            vectorlist.insert("end",f"{hex(start)} // X: {x} Y: {y} Z: {z}")
+        except Exception:
+            vectorlist.insert("end",f"{hex(start)} // ?")
+    for index in selected:
+        vectorlist.selection_set(index)
+
+def vectorfilter():
+    global vectorbegin
+    axis="XYZ".index(vectoraxis.get())
+    mode = vectormode.get().lower()
+    survivors = []
+    for start in vectorbegin:
+        if start not in previousvectors:
+            continue
+        try:
+            current = readvector(start)
+        except Exception:
+            continue
+        if keep(mode,current[axis],previousvectors[start][axis], 0, True):
+            survivors.append(start)
+    vectorbegin =survivors
+    vectorsnapshots()
+    vectorlist.selection_clear(0,"end")
+    showvectorvalues()
+    scanstatus.config(text=f"Vector Window: {len(vectorbegin)} Vectors Remaining.")
+
+
+def vectorfind():
+    global vectorbegin,vectorwindow,vectorlist,vectoraxis,vectormode
+    if not found or not scanfloat or scansize!=4:
+        scanstatus.config(text="Please run a Float scan before finding vectors.")#dispicable me
+        return
+    vectorbegin=vectorscan(found)
+    vectorsnapshots()
+
+    if vectorwindow is None or not vectorwindow.winfo_exists(): #checking if the window already exists
+        vectorwindow=tk.Toplevel(root)
+        vectorwindow.title("Vector Finder")
+        frame = ttk.Frame(vectorwindow)
+        frame.pack(fill="both",expand=True)
+        vectorcontrols=ttk.Frame(frame)
+        vectorcontrols.pack(fill="x",padx=8,pady=(8,0))
+        vectoraxis=ttk.Combobox(vectorcontrols,values=["X","Y","Z"],state="readonly",width=4)
+
+        vectoraxis.pack(side="left")
+        vectoraxis.set("Y")#Usually people will change the y value, as it is the simplest value to know how far it has gone (up or down)
+
+        vectormode=ttk.Combobox(vectorcontrols,values=["Increased","Decreased","Changed","Unchanged"],state="readonly",width=11)
+        vectormode.pack(side="left",padx=(8,0))
+        vectormode.set("Increased")
+        ttk.Button(vectorcontrols,text="Filter",command=vectorfilter).pack(side="left",padx=(8,0))
+
+        darkmode = sv_ttk.get_theme()=="dark"
+        vectorlist=tk.Listbox(frame,width=70,height=15, font=("Courier",10),borderwidth=0,highlightthickness=1) #looks similar to the memory viewer tab, esentially looks like a terminal/console
+        if darkmode:
+            vectorlist.config(bg="#2c2c2c",fg="#ffffff")
+        else:
+            vectorlist.config(bg="#ffffff",fg="#000000")
+        vectorlist.pack(fill="both",expand=True,padx=8,pady=8)
+    showvectorvalues()
+    scanstatus.config(text=f"{len(vectorbegin)} Vectors Found.")
+
+def cleartableevent():
+    global found,previous,snapshotpath
+    if not found and snapshotpath is None:
+        return
+    found = []
+    previous=[]
+    if snapshotpath is not None:
+        try:
+            os.remove(snapshotpath)
+        except OSError:
+            pass
+    snapshotpath = None
+    showmatches()
+    scanstatus.config(text=f"Address Table Cleared.")
+
+bytesizelabel = ttk.Label(scantab, text="Byte Size To Query: ")
+bytesizelabel.grid(row=1, column=0, padx=8, pady=8)
+
+nextscanbutton = ttk.Button(scantab, text="Next Scan", command=scanb)
+nextscanbutton.grid(row=3,column=0,padx=8,pady=8)
+
+scantype=ttk.Combobox(scantab, values=["Exact", "Increased","Decreased","Increased By","Decreased By","Between","Changed","Unchanged"], state="readonly")
+scantype.grid(row=3,column=1,padx=8,pady=8)
+scantype.set("Exact")
+
+results = tk.Listbox(scantab, width=40, height=12, bg="#2c2c2c",fg="#ffffff",borderwidth=0,highlightthickness=1,highlightbackground="#3a3a3a")
+results.grid(row=0,column=2,rowspan=5,padx=8,pady=8)
+
+table = ttk.Treeview(tabletab,columns=("name","address","type","value","title"),show="headings")
+table.heading("name", text="Name")
+table.heading("address",text="Address")
+table.heading("type",text="Type")
+table.heading("value",text="Value")
+table.heading("title",text="Title")
+
+table.column("name",width=120)
+table.column("address",width=110)
+table.column("type",width=90)
+table.column("value",width=90)
+table.column("title",width=140)
+
+table.grid(row=0,column=0,padx=8,pady=8,sticky="nsew")
+tabletab.rowconfigure(0, weight=1)
+tabletab.columnconfigure(0, weight=1)
+
+tablebuttons = ttk.Frame(tabletab)
+tablebuttons.grid(row=1,column=0,padx=8,pady=8,sticky="w")
+
+table.tag_configure("frozen",foreground="#78b6f5")
+
+def removetablevalue():
+    for iid in table.selection():
+        table.delete(iid)
+        tablerows.pop(iid,None)
+ttk.Button(tablebuttons,text="Remove Row",command=removetablevalue).pack(side="left",padx=(0,8))
+
+def typelabel(size,isfloat,signed):
+    if isfloat:
+        return typename(size,isfloat)
+    return f"{size} Signed" if signed else str(size)
+
+def rowaddresses(row):
+    if "pointer" in row:
+        return readvalue(backend,base,row["pointer"],4)+row["offset"]
+    return row["address"]
+
+def addtotable():
+    selection=results.curselection()
+    if not selection:
+        scanstatus.config(text="Please select a result to add to the address table.")
+        return
+    address = found[selection[0]]
+    title = findtitleid() or "?"
+    typetext=typelabel(scansize,scanfloat,scansigned)
+    iid=table.insert("","end",values=("New Address",hex(address),typetext,"?",title))
+    tablerows[iid]={"address":address,"size":scansize,"float":scanfloat,"signed":scansigned}
+    scanstatus.config(text=f"Successfully added {hex(address)} to the Address Table!")
+
+def tablefreezeevent():
+    for iid in table.selection():
+        row=tablerows[iid]
+        if row.get("frozen") is not None:
+            row["frozen"]=None
+            table.item(iid,tags=())
+        else:
+            try:
+                row["frozen"]=readvalue(backend,base,rowaddresses(row),row["size"],row["float"],row.get("signed",False))
+                table.item(iid,tags=("frozen",))
+            except Exception:
+                pass
+ttk.Button(tablebuttons,text="Toggle Freeze",command=tablefreezeevent).pack(side="left")
+
+def tablelist():
+    rows=[]
+    for iid,row in tablerows.items():
+        entry = {
+            "name":table.set(iid,"name"),
+            "title":table.set(iid,"title"),
+            "size":row["size"],
+            "float":row["float"],
+            "signed":row.get("signed",False),
+        }
+        if "pointer" in row: #only builds if there is a pointer
+            entry["pointer"]=row["pointer"]
+            entry["offset"]=row["offset"]
+        else:
+            entry["address"] = row["address"]
+        rows.append(entry)
+    return rows
+
+def filltable(rows):
+    for iid in list(tablerows):
+        table.delete(iid)
+    tablerows.clear()
+    for row1 in rows:
+        signed=row1.get("signed",False)
+        typetext = typelabel(row1["size"],row1["float"],signed)
+        tabledetails = {"size":row1["size"],"float":row1["float"],"signed":signed}
+        if "pointer" in row1:
+            label=f"[{hex(row1['pointer'])}] + {hex(row1['offset'])}"
+            tabledetails["pointer"]=row1["pointer"]
+            tabledetails["offset"]=row1["offset"]
+        else:
+            label=hex(row1["address"])
+            tabledetails["address"]=row1["address"]
+        iid = table.insert("","end",values=(row1["name"],label,typetext,"?",row1["title"]))
+        tablerows[iid]=tabledetails
+
+        #iid=table.insert("","end",values=(row1["name"],hex(row1["address"]),typetext,"?",row1["title"]))
+        #tablerows[iid] = {"address": row1["address"], "size":row1["size"], "float":row1["float"], "signed":signed}
+
+def exporttable():
+    path=filedialog.asksaveasfilename(defaultextension=".ctmt",filetypes=[("CemuTap Table","*.ctmt")],parent=root)
+    if path:
+        savetable(path,tablelist())
+
+def importtable():
+    path=filedialog.askopenfilename(filetypes=[("CemuTap Table","*.ctmt")],parent=root)
+    if not path:
+        return
+    try:
+        filltable(loadtable(path))
+    except Exception:
+        messagebox.showerror("Import Table", "Couldn't read selected file. Are you sure it is a CemuTap table?",parent=root)
+
+def filepathautosaves():
+    titleid=findtitleid()
+    if not titleid:
+        return None
+    folder=os.path.join(datadir(), "tables" )
+    os.makedirs(folder,exist_ok=True)
+    return os.path.join(folder,f"{titleid}.ctmt") #returning the path to the autosave
+
+def ctclose():
+    path = filepathautosaves()
+    if path:
+        try:
+            savetable(path,tablelist())
+        except Exception as exc:
+            print(f"Address Table Autosave failed for Reason: {exc}")
+    root.destroy()
+root.protocol("WM_DELETE_WINDOW", ctclose)
+
+ttk.Button(tablebuttons,text="Export Table",command=exporttable).pack(side="left",padx=(8,0))
+ttk.Button(tablebuttons,text="Import Table",command=importtable).pack(side="left",padx=(8,0))
+
+def edittable(event):
+    iid=table.identify_row(event.y)
+    column=table.identify_column(event.x)
+    if not iid:
+        return
+    row = tablerows[iid]
+    if column in ("#1","#5"):
+        key="name" if column == "#1" else "title"
+        text=simpledialog.askstring("Edit",f"New {key}:",initialvalue=table.set(iid,key),parent=root)#parent=root fixed the crash for some reason, don't remove it
+        if text is not None:
+            table.set(iid,key,text)
+    elif column == "#4":
+        text = simpledialog.askstring("Edit", "New Value:",parent=root)
+        if text is None: return
+        try:
+            if row["float"]:
+                value=float(text)
+            else:
+                value=int(text)
+            low,high=valuerange(row["size"],row.get("signed",False))
+            if not row["float"] and not low<=value<=high:
+                raise ValueError
+            writevalue(backend,base,rowaddresses(row),row["size"],value,row["float"],row.get("signed",False))
+        except ValueError:
+            messagebox.showerror("Edit", "Please enter a valid number for the current byte size.",parent=root)
+        except Exception as exc:
+            messagebox.showerror("Edit", f"Write Failed For Reason: {exc}",parent=root)
+table.bind("<Double-Button-1>",edittable)
+
+ttk.Label(pointertab,text="Target Address:").grid(row=0,column=0,padx=8,pady=8)
+pointeraddressvalue=ttk.Entry(pointertab)
+pointeraddressvalue.grid(row=0,column=1,padx=8,pady=8)
+
+ttk.Label(pointertab,text="Max Offset:").grid(row=1,column=0,padx=8,pady=8)
+pointeroffset=ttk.Entry(pointertab)
+pointeroffset.grid(row=1,column=1,padx=8,pady=8)
+pointeroffset.insert(0,"0x1000")
+
+pointerstatus=ttk.Label(pointertab,text="Ready.")
+pointerstatus.grid(row=4,column=0,columnspan=2,padx=8,pady=8)
+
+pointerlist=tk.Listbox(pointertab,width=40,height=12,borderwidth=0,highlightthickness=1)
+pointerlist.grid(row=0,column=2,rowspan=5,padx=8,pady=8)
+
+def pointerprogress(scanned):
+    pointerstatus.config(text=f"Scanned {scanned//0x100000} of 1024 MB") #cemu's total amount of available memory (as the wii u has a stock of 1024mb of ram)
+    root.update()
+
+def pointershow():
+    pointerlist.delete(0,"end")
+    for pointer,off in pointeraddresses[:500]:
+        pointerlist.insert("end",f"[{hex(pointer)}] + {hex(off)}")
+
+def locatepointers():
+    global pointeraddresses
+    if backend is None:
+        pointerstatus.config(text="Not attached to Cemu.")
+        return
+    try:
+        target=int(pointeraddressvalue.get(),16)
+        maxoffset=int(pointeroffset.get(),16)
+    except ValueError:
+        pointerstatus.config(text="Hex Addresses are the only values supported here.")
+        return
+    if not 0x10000000<=target<0x50000000: #Safeguard to prevent crashes. I accidently set the address to "1" and it crashed almost every program on my computer.
+        pointerstatus.config(text="Target must be inside MEM2's range (0x10000000 to 0x50000000)")
+        return
+    pointeraddresses=pointerscan(backend,base,target,maxoffset,progress=pointerprogress)#runs the pointer search
+    pointershow()
+    pointerstatus.config(text=f"{len(pointeraddresses)} Pointers Found.")
+
+def filterpointers():
+    global pointeraddresses
+    if backend is None:
+        pointerstatus.config(text="Not attached to Cemu.")
+        return
+    if not pointeraddresses:
+        pointerstatus.config(text="Please scan for pointers before attempting to filter.")
+        return
+    try:
+        target=int(pointeraddressvalue.get(),16)
+    except ValueError:
+        pointerstatus.config(text="Hex Addresses are the only values supported here.")
+        return
+    pointeraddresses=pointerfilter(backend,base,pointeraddresses,target)
+    pointershow()
+    pointerstatus.config(text=f"{len(pointeraddresses)} Pointers Remaining.")
+
+def addselectedpointertotable():
+    selection = pointerlist.curselection()
+    if not selection:
+        pointerstatus.config(text="Please select a pointer to add to the Address Table.")
+        return
+    pointer,off=pointeraddresses[selection[0]]
+    title=findtitleid() or "?" #only sets the title to "?" if the game title can't be found, just like the other table adding function.
+    typetext=typelabel(scansize,scanfloat,scansigned)
+    label=f"[{hex(pointer)}] + {hex(off)}"
+    iid=table.insert("","end",values= ("New Pointer",label,typetext,"?", title))
+    tablerows[iid]={"pointer":pointer,"offset":off,"size":scansize,"float":scanfloat,"signed":scansigned}
+    pointerstatus.config(text=f"Successfully added {label} to the Address Table!")
+
+ttk.Button(pointertab,text="Scan Pointers",command=locatepointers).grid(row=2,column=0,columnspan=2,padx=8,pady=8)#this buttons takes up 2 columns.
+
+ttk.Button(pointertab,text="Filter Pointers",command=filterpointers).grid(row=3,column=0,columnspan=2,padx=8,pady=8)
+
+ttk.Button(pointertab,text="Add to Address Table", command=addselectedpointertotable).grid(row=5,column=2,columnspan=2,padx=8,pady=8)
+
+ttk.Label(memoryviewertab,text="Address:").grid(row=0,column=0,padx=8,pady=8)
+vieweraddress=ttk.Entry(memoryviewertab)
+vieweraddress.grid(row=0,column=1,padx=8,pady=8,sticky="w")
+
+viewertext=tk.Text(memoryviewertab,width=80,height=16,font=("Courier",10),borderwidth=0,highlightthickness=1,wrap="none")#Courier font makes the text look like a terminal, which is exactly what I want.
+viewertext.grid(row=1,column=0,columnspan=2,padx=8,pady=8)
+
+def memviewerrender():
+    try:
+        start = int(vieweraddress.get(),16)//16*16
+    except ValueError:
+        return
+    try:
+        data=backend.read(base+start, 256)
+    except Exception:
+        viewertext.delete("1.0","end")
+        viewertext.insert("1.0","!!! THIS ADDRESSES MEMORY COULD NOT BE READ")
+        return
+    lines=[]
+    for interval in range(0,len(data),16):
+        row = data[interval:interval+16]
+        hexpart = " ".join(f"{byte:02x}" for byte in row[:8]) + " " + " ".join(f"{byte:02x}" for byte in row[8:])
+        textpart = "".join(chr(byte) if 32 <=byte<127 else "." for byte in row)
+        lines.append(f"{hex(start+interval)}  {hexpart}  {textpart}")
+    viewertext.delete("1.0","end")
+    viewertext.insert("1.0","\n".join(lines))
+
+def addrtablecolors():
+    if sv_ttk.get_theme()=="dark":
+        results.config(bg="#2c2c2c",fg="#ffffff",highlightbackground="#3a3a3a")
+        pluginlist.config(bg="#2c2c2c",fg="#ffffff",highlightbackground="#3a3a3a")
+        pointerlist.config(bg="#2c2c2c",fg="#ffffff",highlightbackground="#3a3a3a")
+        viewertext.config(bg="#2c2c2c",fg="#ffffff",highlightbackground="#3a3a3a") #do NOT change to the tab, as it will crash CemuTap.
+    else:
+        results.config(bg="#ffffff",fg="#000000", highlightbackground="#cccccc")
+        pluginlist.config(bg="#ffffff",fg="#000000", highlightbackground="#cccccc")
+        pointerlist.config(bg="#ffffff",fg="#000000", highlightbackground="#cccccc")
+        viewertext.config(bg="#ffffff",fg="#000000", highlightbackground="#cccccc") #do NOT change to the tab, as it will crash CemuTap.
+addrtablecolors()
+def theme():
+    sv_ttk.toggle_theme()
+    addrtablecolors()
+    settings["theme"] = sv_ttk.get_theme()
+    savesettings(settings)
+
+themebutton = ttk.Button(settingstab, text="Toggle Light/Dark Theme",command=theme)
+themebutton.grid(row=0,column=0,pady=8,padx=8)
+
+ttk.Label(settingstab, text=f"CemuTap Version {CemuTapVersion('Full')} by GABEWARE").grid(row=3,column=0,padx=8,pady=8)
+
+scanstatus = ttk.Label(scantab, text="Ready")
+scanstatus.grid(row=4,column=0,columnspan=2,padx=8,pady=8)
+
+scanprogress=ttk.Progressbar(scantab,mode="determinate",maximum=1024)
+scanprogress.grid(row=6,column=0,columnspan=3,padx=8,pady=8,sticky="ew")
+
+def togglebuttons(override):
+    global buttonstate
+    if buttonstate == "!disabled":
+        buttonstate = "disabled"
+    elif buttonstate == "disabled":
+        buttonstate = "!disabled"
+    if override is not None:
+        buttonstate = override
+    primaryscanbutton.state([buttonstate])
+    nextscanbutton.state([buttonstate])
+
+def exportbuttonevent():
+    if not found:
+        scanstatus.config(text=f"No addresses found to export.")
+        return
+    now=datetime.now()
+    path = filedialog.asksaveasfilename(defaultextension=".ctms", initialfile=f"scan-{now.strftime('%m-%d-%Y-%H-%M')}", filetypes=[("CemuTap Scan", "*.ctms")])
+    if not path:
+        scanstatus.config(text=f"Save Canceled.")
+        return
+    export(path, found, scansize,scanfloat)
+    scanstatus.config(text=f"Scan Exported.")
+
+def importbuttonevent():
+    global found, scansize, previous, scanfloat
+    try:
+        path=filedialog.askopenfilename(filetypes=[("CemuTap Scan", "*.ctms")])
+        if path=="":
+            scanstatus.config(text=f"Import Canceled.")
+            return
+        found, scansize, scanfloat = importscan(path)
+        previous=[]
+        for addr in found:
+            try:
+                previous.append(readvalue(backend,base,addr,scansize,scanfloat))
+            except Exception:
+                previous.append(0)
+        size.set(typename(scansize,scanfloat))
+        scanstatus.config(text=f"Successfully imported CemuTap Scan file.")
+        showmatches()
+    except Exception:
+        scanstatus.config(text="!!! Could not read import. Are you sure this is a CemuTap Scan File?")
+
+#row0
+ttk.Label(liveedittab,text="Address:").grid(row=0,column=0,pady=8,padx=8)
+editoraddr=ttk.Entry(liveedittab)
+editoraddr.grid(row=0,column=1,padx=8,pady=8)
+#row1
+sizelabel=ttk.Label(liveedittab,text="Byte Size To Modify:")
+sizelabel.grid(row=1, column=0, padx=8, pady=8)
+editorsizeframe=ttk.Frame(liveedittab)
+editorsizeframe.grid(row=1,column=1,padx=8,pady=8)
+#   editor size frame
+editorsize=ttk.Combobox(editorsizeframe, values=["1","2","4","8","Float", "Double"], state="readonly", width=7)
+editorsize.pack(side="left")
+editorsize.set("2")
+editorsigned=tk.BooleanVar(value=False)
+ttk.Checkbutton(editorsizeframe,text="Signed",variable=editorsigned).pack(side="left",padx=(8,0))
+#row2
+currentvaluelabel=ttk.Label(liveedittab,text="Current Value:")
+currentvaluelabel.grid(row=2,column=0,pady=8,padx=8)
+currentedit=ttk.Label(liveedittab,text="?")
+currentedit.grid(row=2,column=1,pady=8,padx=8)
+#row3
+nvlabel=ttk.Label(liveedittab,text="New Value:").grid(row=3,column=0,padx=8,pady=8)
+newvalue=ttk.Entry(liveedittab)
+newvalue.grid(row=3,column=1,padx=8,pady=8)
+#row4
+writebutton=ttk.Button(liveedittab,text="Write")
+writebutton.grid(column=0,row=4,padx=8,pady=8)
+freezebutton=ttk.Button(liveedittab,text="Freeze Value")
+freezebutton.grid(column=1,row=4,padx=8,pady=8)
+editorstatus=ttk.Label(liveedittab,text="Ready.")
+editorstatus.grid(column=1,row=5,padx=8,pady=8)
+
+exportbutton = ttk.Button(scantab,text="Export Scan", command=exportbuttonevent)
+exportbutton.grid(row=5,column=0,padx=8,pady=8)
+importbutton = ttk.Button(scantab,text="Import Scan", command=importbuttonevent)
+importbutton.grid(row=5,column=1,padx=8,pady=8)
+
+tablecontrols = ttk.Frame(scantab)
+tablecontrols.grid(row=5,column=2,padx=8,pady=8)
+
+resettable = ttk.Button(tablecontrols, text="Clear Address Table", command=cleartableevent)
+resettable.grid(row=0,column=0,padx=4,pady=4,sticky="ew")
+
+addtotablebutton=ttk.Button(tablecontrols,text="Add Value to Table",command=addtotable)
+addtotablebutton.grid(row=0,column=1,padx=4,pady=4,sticky="ew")
+
+undobutton=ttk.Button(tablecontrols,text="Undo Scan",command=scanundo)
+undobutton.grid(row=1,column=0,padx=4,pady=4,sticky="ew")
+
+vectorbutton=ttk.Button(tablecontrols,text="Find Vectors",command=vectorfind)
+vectorbutton.grid(row=1,column=1,padx=4,pady=4,sticky="ew")
+
+def editortype():
+    editorbytesize,floattoggle=parsetype(editorsize.get())
+    signed=editorsigned.get() and not floattoggle
+    return editorbytesize,floattoggle,signed
+
+def write():
+    if backend is None:
+        editorstatus.config(text="CemuTap is not currently attached to Cemu. Is Cemu even open?")
+        return
+    try:
+        address=int(editoraddr.get(),16)
+        editorbytesize, isfloat, issigned = editortype()
+        value=float(newvalue.get()) if isfloat else int(newvalue.get())
+    except ValueError:
+        editorstatus.config(text="Please enter a hex address and a valid number.")
+        return
+    low,high = valuerange(editorbytesize,issigned)
+    if not isfloat and not low<=value<=high:
+        editorstatus.config(text=f"New Value must be between {low} and {high}.")
+        return
+    try:
+        writevalue(backend,base,address,editorbytesize,value,isfloat,issigned)
+        editorstatus.config(text=f"Wrote {value} to address {hex(address)}.")
+    except Exception as exc:
+        editorstatus.config(text=f"Write failed for reason: {exc}")
+
+writebutton.config(command=write)
+
+def sendaddresstoeditor(event):
+    selection = results.curselection()
+    if not selection:
+        return
+    addr = found[selection[0]]
+    editoraddr.delete(0,"end")
+    editoraddr.insert(0,hex(addr))
+    editorsize.set(typename(scansize,scanfloat))
+    editorsigned.set(scansigned)
+    toptab.select(liveedittab)
+results.bind("<Double-Button-1>",sendaddresstoeditor)
+
+
+
+def refloop():
+    if 0<len(found)<=12:
+        showmatches()
+    root.after(1000,refloop)
+    if backend is not None and toptab.select()==str(memoryviewertab):#just checking if the current tab is the memory viewer & Cemu is active
+        memviewerrender()
+    if backend is not None and vectorwindow is not None and vectorwindow.winfo_exists():#refresh the vector window only if it exists (duh)
+        showvectorvalues()
+    for iid,row in tablerows.items():
+        try:
+            val=readvalue(backend,base,rowaddresses(row),row["size"],row["float"],row.get("signed",False))
+            text=str(round(val,4) if row["float"] else val)
+        except Exception:
+            text="?"
+        table.set(iid,"value",text)
+    try:
+        address=int(editoraddr.get(),16)
+        editorbytesize,isfloat,issigned=editortype()
+        value=readvalue(backend,base,address,editorbytesize,isfloat,issigned)
+        currentedit.config(text=str(round(value,4) if isfloat else value))
+    except Exception:
+        currentedit.config(text="?")
+
+def togglefreezevalue():
+    global frozen
+    if frozen is not None:
+        frozen = None
+        freezebutton.config(text="Freeze Value")
+        editorstatus.config(text="Value Unfrozen.")
+        return
+    if backend is None:
+        editorstatus.config(text="CemuTap is not currently attached to Cemu. Is Cemu even open?")
+        
+        return
+    try:
+        address=int(editoraddr.get(),16)
+        editorbytesize, isfloat, issigned =editortype()
+        value=float(newvalue.get()) if isfloat else int(newvalue.get())
+    except ValueError:
+        editorstatus.config(text="Please enter a hex address and a valid number.")
+        return
+    low,high = valuerange(editorbytesize,issigned)
+    if not isfloat and not low<=value<=high:
+        editorstatus.config(text=f"New Value must be between {low} and {high}.")
+        return
+    frozen=(address,editorbytesize,value,isfloat,issigned)
+    freezebutton.config(text="Unfreeze")
+    editorstatus.config(text=f"Froze address {hex(address)} at {value}.")
+
+freezebutton.config(command=togglefreezevalue)
+
+def loopfreeze():
+    if frozen is not None:
+        try:
+            writevalue(backend,base,*frozen)#unpack frozen also
+        except Exception:
+            pass
+    for row in tablerows.values():
+        if row.get("frozen") is not None:
+            try:
+                writevalue(backend,base,rowaddresses(row),row["size"],row["frozen"],row["float"],row.get("signed",False))
+            except Exception:
+                pass
+    root.after(100,loopfreeze)
+
+def pluginselectevent(event):
+    selection=pluginlist.curselection()
+    if not selection:
+        return
+    info,mod=loaded[selection[0]]
+    for child in pluginpanel.winfo_children():
+        child.destroy() #remove any previous panel
+    if not hasattr(mod,"buildui"):
+        ttk.Label(pluginpanel,text=f"{info['name']} has no readable interface.").pack(padx=8,pady=8)
+        return
+    try:
+        mod.buildui(pluginpanel)
+    except Exception as exc:
+        ttk.Label(pluginpanel,text=f"{info['name']} UI build failed.").pack(padx=8,pady=8)
+pluginlist.bind("<<ListboxSelect>>",pluginselectevent)
+
+def pluginadd():
+    path=filedialog.askopenfilename(filetypes=[("CemuTap Plugin", "*.zip")])
+    if not path:
+        return
+    try:
+        folder=plugininstall(path)
+    except Exception as exc:
+        messagebox.showerror("Add Plugin", f"Couldn't install plugin for reason: {exc}",parent=root)
+        return
+    if api is None:
+        messagebox.showinfo("Add Plugin", "Plugin Installed. It will load on CemuTap's next attachment to Cemu.")
+        return
+    try:
+        with open(os.path.join(folder,"plugin.json")) as file:
+            info = json.load(file)
+        info["folder"]=folder
+        module = executeplugin(info)
+        module.setup(api)
+    except Exception as exc:
+        messagebox.showerror("Add Plugin", f"Plugin installed, although it failed to load for reason: {exc}")
+        return
+    loaded.append((info,module))
+    pluginlist.insert("end",f"{info['name']} v{info['version']} by {info['author']}")
+
+addpluginbutton=ttk.Button(pluginstab,text="Add Plugin", command=pluginadd)
+addpluginbutton.grid(row=1,sticky="ew",column=0,pady=8,padx=8)
+
+def pluginid(info):
+    return os.path.basename(info["folder"])
+
+def pinplugintab(info,module):
+    frame=ttk.Frame(toptab)
+    toptab.insert(toptab.index(pluginstab), frame, text=info["name"])
+    pinnedtabs[pluginid(info)] = frame
+
+    if hasattr(module,"buildui"):
+        try:
+            module.buildui(frame)
+        except Exception as exc:
+            ttk.Label(frame,text=f"UI Build Failed for reason: {exc}").pack(padx=8,pady=8)
+
+def unpin(info):
+    frame=pinnedtabs.pop(pluginid(info))
+    toptab.forget(frame)
+    frame.destroy() 
+
+def onpin():
+    selection=pluginlist.curselection()#what is currently has selected on the plugin list
+    if not selection:
+        messagebox.showinfo("Pin", "Please select a plugin before attempting to pin.")
+        return
+    info,module =loaded[selection[0]]
+    pid=pluginid(info)
+    if pid in pinnedtabs:
+        unpin(info)
+        settings["pinned"].remove(pid)
+    else:
+        if len(pinnedtabs)>=3:
+            messagebox.showwarning("Pin", "You may only have at most 3 pinned plugins. Please unpin a plugin before attempting to pin another.")
+            return
+        pinplugintab(info,module)
+        settings["pinned"].append(pid)
+    savesettings(settings)
+
+pinpluginbutton=ttk.Button(pluginstab,text="Pin/Unpin Plugin",command=onpin)
+pinpluginbutton.grid(row=2,pady=8,padx=8,sticky="ew",column=0)
+
+def cemureattachfunct():
+    global backend,base,api
+    try:
+        backend=backendcreate()
+        base=findbase()
+    except Exception as exc:
+        backend=None
+        scanstatus.config(text=f"!!! Cemu Attach Failed for Reason: {exc}")
+        return
+    if api is not None:
+        api.backend=backend
+        api.base=base
+    else:
+        api=PluginAPI(backend,base)#creating the backend for the plugins again
+    scanstatus.config(text=f"Reattached to Cemu! Cemu World Address: {hex(base)}")
+
+reattachcemubutton=ttk.Button(settingstab, text="Reattach to Cemu", command=cemureattachfunct)
+reattachcemubutton.grid(row=1,column=0,padx=8,pady=8)
+
+try:
+    backend = backendcreate()
+    base = findbase()
+    scanstatus.config(text=f"Attached to Cemu: {hex(base)}")
+    api=PluginAPI(backend,base)
+    loaded=[]
+    for info in pluginslistbuild():
+        try:
+            module=executeplugin(info)
+            module.setup(api)
+            loaded.append((info,module))
+        except Exception as exc:
+            print(f"Plugin {info['name']} failed to load for reason: {exc}")
+except Exception as e:
+    backend = None
+    api=None
+    loaded=[]
+    scanstatus.config(text=f"!!! Cemu Attach Failed: {e}")
+
+for info,module in loaded:
+    pluginlist.insert("end",f"{info['name']} v{info['version']} by {info['author']}")
+
+if api is not None: #remove any plugins from the pinned tabs if they were deleted before cemutap ran again
+    loadedids=[pluginid(info) for info, module in loaded]
+    settings["pinned"] = [pid for pid in settings["pinned"] if pid in loadedids]
+    savesettings(settings)
+
+for info,module in loaded:
+    if pluginid(info) in settings["pinned"] and len(pinnedtabs) < 3:
+        pinplugintab(info,module)
+
+#creating the address table from the autosave
+path=filepathautosaves()
+if path and os.path.exists(path):
+    try:
+        filltable(loadtable(path))
+    except Exception as exc:
+        print(f"Couldn't load the autosave of the Address Table for reason: {exc}")
+
+refloop()
+loopfreeze()
+root.mainloop()
+```
+
+`main.py`:
+
+```py
+import psutil
+import re
+import os
+import json
+import sys
+import importlib.util
+import shutil
+import zipfile
+import tempfile
+import numpy as np
+# i pray for the sanity of whoever is auditing this scrambled mess... (psst, you'll need ctrl+F a LOT.)
+class WindowsBackend:
+    def __init__(self):
+        import pymem
+        self.pm = pymem.Pymem("cemu.exe")
+    def read(self, address, size):
+        return self.pm.read_bytes(address, size)
+    def write(self,address,data):
+        self.pm.write_bytes(address,data,len(data))
+
+class LinuxBackend:
+    def __init__(self,pid):
+        self.f = open(f"/proc/{pid}/mem", "r+b", buffering=0)
+    def read(self,address,size):
+        self.f.seek(address)
+        return self.f.read(size)
+    def write(self,address,data):
+        self.f.seek(address)
+        return self.f.write(data)
+
+class PluginAPI:
+    def __init__(self,backend,base):
+        self.backend=backend
+        self.base=base
+        self.scancallbacks=[]
+    def read(self,guest, size, floattoggle=False):
+        return readvalue(self.backend,self.base,guest,size,floattoggle)
+    def write(self,guest,size,value,floattoggle=False):
+        writevalue(self.backend,self.base,guest,size,value,floattoggle)
+    def onscan(self,function):
+        self.scancallbacks.append(function)
+
+def CemuTapVersion(versiontype): # !!! CHANGE FOR EVERY RELEASE
+    if versiontype == "Full":
+        return "v1.4.0"
+    elif versiontype == "Short":
+        return "v1.4"
+    elif versiontype == "Number":
+        return 4
+
+def cemupid():
+    for process in psutil.process_iter(["name"]):
+        name=process.info["name"]
+        if name and name.lower() == "cemu":
+            return process.pid
+
+def backendcreate():
+    if sys.platform=="win32":
+        return WindowsBackend()
+    # linux seperator
+    pid=cemupid()
+    if pid is None:
+        raise RuntimeError("Cemu Instance Not Detected: Is Cemu even running?")
+    return LinuxBackend(pid)
+
+def findlog():
+    if sys.platform=="win32":
+        return os.path.join(os.environ["APPDATA"],"Cemu","log.txt")
+    candidates=["~/.var/app/info.cemu.Cemu/data/Cemu/log.txt","~/.local/share/Cemu/log.txt"]
+    for path in candidates:
+        fpath=os.path.expanduser(path)
+        if os.path.exists(fpath):
+            return fpath
+    return None
+
+def datadir():
+    if sys.platform=="win32":
+        dirpath=os.path.join(os.environ["APPDATA"],"CemuTap")
+    else:
+        dirpath=os.path.expanduser("~/.local/share/CemuTap")
+    os.makedirs(dirpath,exist_ok=True)
+    return dirpath
+
+def savesettings(settings):
+        with open(os.path.join(datadir(), "settings.json"),"w") as folder:
+            json.dump(settings,folder)
+
+defaults={"theme":"dark","pinned":[]}
+
+def loadcts():
+    settings=dict(defaults)
+    try:
+        with open(os.path.join(datadir(), "settings.json")) as folder:
+            settings.update(json.load(folder))
+    except Exception:
+        pass
+    return settings
+
+def plugindir():
+    path=os.path.join(datadir(),"plugins")
+    os.makedirs(path,exist_ok=True)
+    return path
+
+def pluginslistbuild():
+    plugins=[]
+    for folder in os.listdir(plugindir()):
+        path=os.path.join(plugindir(),folder)
+        try:
+            with open(os.path.join(path,"plugin.json")) as fd:
+                info=json.load(fd)
+        except Exception:
+            continue
+        info["folder"]=path
+        plugins.append(info)
+    return plugins
+
+def pluginroot(folder):
+    if os.path.exists(os.path.join(folder,"plugin.json")):
+        return folder
+    for name in os.listdir(folder):
+        inner = os.path.join(folder,name)
+        if os.path.exists(os.path.join(inner,"plugin.json")):
+            return inner
+    return None
+
+def plugininstall(path):
+    with tempfile.TemporaryDirectory() as temp:
+        if zipfile.is_zipfile(path):
+            zipfile.ZipFile(path).extractall(temp)
+            source=pluginroot(temp)
+        else:
+            source=pluginroot(path)
+        if source is None:
+            raise ValueError("No plugin.json found in selected archive.")
+        destination=os.path.join(plugindir(), os.path.basename(source.rstrip("/\\")))
+        if os.path.exists(destination):
+            raise ValueError("A CemuTap plugin already exists with this foldername.")
+        shutil.copytree(source,destination)
+        return destination
+
+
+def executeplugin(info):
+    path=os.path.join(info["folder"],info["entry"])
+    spec=importlib.util.spec_from_file_location(info["name"],path)
+    module=importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+
+    return module
+
+def findbase():
+        pattern = r"base: 0x([0-9a-fA-F]+)"
+        logpath = findlog()
+        with open(logpath, errors="ignore") as f:
+             lpopt = f.read()
+             matches = re.findall(pattern, lpopt)
+             return int(matches[-1], 16)
+
+
+def findtitleid():
+    logpath = findlog()
+    if logpath is None:
+        return None
+    with open(logpath,errors= "ignore") as file:
+        matches = re.findall(r"00050000-?([0-9A-Fa-f]{8})", file.read())
+    if not matches:
+        return None
+    return "00050000" + matches[-1].upper()
+def readunit(backend, base, guest, size):
+    hostaddress = base + guest
+    habo =  backend.read(hostaddress, size)
+    return int.from_bytes(habo, "big")
+
+def dtypefor(size,floattoggle=False,signed=False):
+    if floattoggle:
+        return f">f{size}"
+    return f">i{size}" if signed else f">u{size}"#returns >i(size) if value is signed, if it isn't it returns >u(size)
+
+def valuerange(size,signed=False):
+    if signed:
+        half = 256**size//2
+        return -half, half-1
+    return 0,256**size-1
+
+def readvalue(backend,base,guest,size,floattoggle=False, signed=False):
+    raw=backend.read(base+guest,size)
+    dtype =dtypefor(size,floattoggle, signed)
+    return np.frombuffer(raw,dtype=dtype)[0].item()
+
+def writevalue(backend,base,guest,size,value,floattoggle=False,signed=False):
+    dtype=dtypefor(size,floattoggle,signed)
+    backend.write(base+guest,np.array([value], dtype=dtype).tobytes())
+
+def writeu(backend,base,guest,size,value):
+    backend.write(base+guest,value.to_bytes(size,"big"))
+
+def primaryscan(backend, base, value, size, floattoggle=False,signed=False,progress = None):
+     dtype=dtypefor(size,floattoggle,signed)
+     found = []
+     values=[]
+     
+     for guest in range(0x10000000, 0x50000000, 0x100000):
+         try:
+             chunk = backend.read(base+guest,0x100000)
+         except Exception:
+             continue
+         arr=np.frombuffer(chunk,dtype=dtype)
+         if floattoggle:
+             hits=np.nonzero(np.abs(arr-value)<0.01)[0]
+         else:
+             hits=np.nonzero(arr==value)[0]
+         found.extend((guest + hits * size).tolist())
+         values.extend(arr[hits].tolist())
+         if progress is not None:
+            progress(guest-0x10000000 + 0x100000)
+     return found, values
+
+def pointerscan(backend,base,target,mos=0x1000,progress=None):#ps: mos is the maximum offset for how far the target pointer can point but still count. (also 0x1000 is 4096 bytes)
+    results=[]
+    low=target-mos
+    for guest in range(0x10000000,0x50000000,0x100000):
+        try:
+            chunk=backend.read(base+guest,0x100000)
+        except Exception:
+            continue
+        arr=np.frombuffer(chunk,dtype=">u4")
+        hits = np.nonzero((arr>=low)&(arr<=target))[0]
+        for interval in hits.tolist():
+            pointedto=int(arr[interval])
+            results.append((guest+interval*4,target-pointedto))
+        if progress is not None:#ps: is not none means it'll only quit appending once the scan is done
+            progress(guest-0x10000000+0x100000)
+    return results
+
+def pointerfilter(backend,base,candidates,target):
+    survivors=[]
+    for pointer,off in candidates:
+        try:
+            pointedto=readvalue(backend,base, pointer,4)
+        except Exception:
+            continue
+        if pointedto+off==target:
+            survivors.append((pointer,off))
+    return survivors
+
+def vectorscan(found):
+    foundset=set(found)
+    vectors=[]
+    until=-1
+    for address in sorted(found):
+        if address <=until:
+            continue
+        if address + 4 in foundset and address+8 in foundset:
+            vectors.append(address)
+            until=address+8
+    return vectors
+
+def snapshot(backend,base,progress=None):
+    path=os.path.join(datadir(),"snapshot.bin")
+    with open(path,"wb") as file:
+        for guest in range(0x10000000, 0x50000000, 0x100000):
+            try:
+                chunk=backend.read(base+guest,0x100000)
+            except Exception:
+                chunk=bytes(0x100000)
+            file.write(chunk)
+            if progress is not None:
+                progress(guest-0x10000000+0x100000)
+    return path
+
+def snapshotscan(backend,base,path,size,mode,value=0,floattoggle=False,signed=False,progress=None):
+    dtype=dtypefor(size,floattoggle,signed)
+    found=[]
+    values=[]
+    with open(path,"rb") as file:
+        for n,guest in enumerate(range(0x10000000,0x50000000,0x100000)):
+            file.seek(n*0x100000)
+            oldchunk=file.read(0x100000)
+            try:
+                nowchunk=backend.read(base+guest,0x100000)
+            except Exception:
+                continue
+            now=np.frombuffer(nowchunk,dtype)
+            old=np.frombuffer(oldchunk,dtype=dtype)
+            hits=np.nonzero(comparearrays(mode,now,old,value,floattoggle))[0]
+            found.extend((guest+hits*size).tolist()) #peMdAs
+            values.extend(now[hits].tolist())
+            if progress is not None:
+                progress(guest-0x10000000+0x100000)
+        return found,values
+
+def comparearrays(mode,now,old,value,floattoggle=False):
+    if mode=="exact":
+        if floattoggle:
+            return np.abs(now-value)<0.01
+        return now==value
+    if mode=="increased":
+        return now>old
+    if mode=="decreased":
+        return now<old
+    if mode=="changed":
+        return now.view(f">u{now.itemsize}") != old.view(f">u{old.itemsize}")
+    if mode=="unchanged":
+        return now.view(f">u{now.itemsize}") == old.view(f">u{old.itemsize}")
+    if mode in ("increased by","decreased by"):
+        if floattoggle:
+            diff=now-old if mode=="increased by" else old-now
+            return np.abs(diff-value)<0.01
+        diff= now.astype(np.int64)-old.astype(np.int64)
+        if mode == "decreased by":
+            diff=-diff #mirror diff's value
+        return diff==value
+    if mode=="between":
+        low,high = value
+        return (now>=low)&(now<=high)
+    return np.zeros(len(now),dtype=bool)
+
+def keep(mode,current,old,value,floattoggle=False):
+    if mode=="exact":
+        if floattoggle:
+            return abs(current-value)<0.01
+        return current==value
+    if mode=="increased":
+        return current> old
+    if mode=="decreased":
+        return current < old
+    if mode== "changed":
+        return not (current == old or (current != current and old != old))
+    if mode=="unchanged":
+        return current == old or (current != current and old != old)
+    if mode=="increased by":
+        if floattoggle:
+            return abs((current-old)-value)<0.01
+        return current-old==value
+    if mode=="decreased by":
+        if floattoggle:
+            return abs((old-current)-value)<0.01
+        return old-current==value
+    if mode=="between":
+        low,high=value
+        return low<= current <= high
+    return False #if none pass, obviously
+
+def nextscan(backend, base, found, previous, value, size, mode="exact",floattoggle=False,signed=False,progress = None):
+     dtype=dtypefor(size,floattoggle,signed)
+     survivors = []
+     survivingvalues=[]
+     start=None
+     chunk=None
+     for i, addr in enumerate(found):
+         chunkbegin = addr // 0x100000 * 0x100000
+         offset=addr-chunkbegin
+         if chunkbegin!=start:
+             try:
+                 chunk = backend.read(base+chunkbegin, 0x100000 + size)
+             except Exception:
+                 try:
+                     chunk=backend.read(base+chunkbegin,0x100000)
+                 except Exception:
+                     chunk=None
+             start=chunkbegin
+         if chunk is not None:
+             raw=chunk[offset:offset+size]
+             if len(raw)==size:
+                 current = np.frombuffer(raw,dtype=dtype)[0].item()
+                 if keep(mode,current,previous[i],value,floattoggle):
+                     survivors.append(addr)
+                     survivingvalues.append(current)
+         if progress is not None and i%10000==0:
+             progress(i,len(found))
+     return survivors,survivingvalues
+
+def export(path, found, size,floattoggle=False):
+    data = {"version": CemuTapVersion("Number"), "size": size, "float": floattoggle, "addresses": found} #CHANGE WHENEVER UPDATED !!!
+    with open(path,"w") as f:
+        json.dump(data,f)
+
+def importscan(path):
+    with open(path) as f:
+        data=json.load(f)
+        return data["addresses"],data["size"],data.get("float",False)
+
+def savetable(path,rows):
+    data={"version":CemuTapVersion("Number"),"rows":rows}
+    with open(path,"w") as file:
+        json.dump(data,file)
+
+def loadtable(path):
+    with open(path) as file:
+        return json.load(file)["rows"]
+
+if __name__ == "__main__": # just to make sure the terminal doesn't open :P
+# after a whole lot of stupidity, i figured out that running main,py directly instead of gui.py doesn't open the gui. if you got sent here to line 340 for this reason, you fell into the same trap. funny, eh? run gui.py to use the gui. this is a testing node for windows.
+     backend = WindowsBackend() #WINDOWS ONLY FOR TESTING.
+
+     print(f"CEMU ProcessID: {backend.pm.process_id}")
+     base = findbase()
+     print(hex(base))
+
+     searchsize = int(input("Byte Size To Query: "))
+     value = int(input("Value Query: "))
+
+
+
+     found,previous = primaryscan(backend, base, value, searchsize)
+
+     print(len(found))
+     print([hex(a) for a in found[:5]])
+
+     while True:
+         text = input("New Value Query (Or Enter To Quit):")
+         if text == "":
+             break
+         newvalue = int(text)
+         found,previous = nextscan(backend, base, found, previous, newvalue, searchsize)
+         print(len(found))
+         if len(found) <= 25:
+             print([hex(a) for a in found[:25]])
+         else:
+             print(f"Matches Over 25. Showing First 25 Found: {[hex(a) for a in found[:25]]}")
+
+```
