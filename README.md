@@ -1920,6 +1920,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/gmh5225/golang_loader_assist [GO Reversed]
 - https://github.com/gmh5225/GhidraDec [Ghidra Decompiler]
 - https://github.com/siesta/mcore-decompiler [IDA Pro 9.4 plugin decompiling Motorola M·CORE firmware into structured C pseudocode with stack-frame and control-flow recovery]
+- https://github.com/ProximaV/lm32dec [IDA Pro plugin and standalone LM32 (LatticeMico32) decompiler/lifter with Hex-Rays-style output, including PlayStation Vita security coprocessor firmware targets]
 - https://github.com/gmh5225/EasyRe [Trace Execution]
 - https://github.com/gmh5225/ida_ps5_elf_plugin [PS5 elf loader]
 - https://github.com/gmh5225/tenet [Execution Traces]
