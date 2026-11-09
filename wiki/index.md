@@ -3351,6 +3351,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [query-gpu-name-rs](entities/query-gpu-name-rs.md) — Rust Windows GPU display-name query (Detection:HWID; gmh5225)
 - [query-shadow-stack](entities/query-shadow-stack.md) — Windows CET shadow-stack query/mismatch PoC (return-address integrity; gmh5225)
 - [QueryWorkingSetExample](entities/query-working-set-example.md) — C working-set `.text` anti-tamper demo (`QueryWorkingSet`; breakpoint/protection detection; Midi12)
+- [QuestKeeper](entities/quest-keeper.md) — read-only AdventureQuest Worlds Windows companion (C#/.NET Avalonia; Npcap TCP capture; character/faction/inventory dashboard; LiteDB; agvmdsa; Cheat / Packet Capture&Parse)
 - [qiling-il2cpp-dump](entities/qiling-il2cpp-dump.md) — Qiling emulation IL2CPP metadata dump (no game launch; obfuscated/anti-tamper; cheat / game engine explorer:Unity)
 - [qiomem](entities/qiomem.md) — BYOVD via Qualcomm `QIOMem.sys` (QCI0701 ACPI; virtual device → IOCTL physmem R/W; gmh5225)
 - [QorTroller](entities/qortroller.md) — ConWan30 hardware-rooted controller attestation (VAPI; DualShock bridge; PoEP; Circom/Groth16 ZK verified-human proofs; session receipts; game security / anti-cheat research; Cryptographic console anti-cheat)
