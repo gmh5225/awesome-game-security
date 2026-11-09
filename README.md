@@ -2725,6 +2725,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/gmh5225/Win-Driver-EXP/tree/main/CVE-2024-30804 [AsInsHelp64.sys]
 - https://github.com/gmh5225/CVE-2020-14974 [IObitUnlocker.sys]
 - https://github.com/wesmar/ForceIO [Standalone no-CRT BYOPD tool using WHCP-signed IObitUnlocker.sys to force delete/move/copy below WdFilter and other minifilters]
+- https://github.com/wesmar/kvcKiller [Windows x64 AV/EDR killer: dual signed kernel drivers (PPL unprotect + terminate IOCTL), IFEO offline-hive paralyze, SCM restore, GUI/CLI]
 - https://github.com/gmh5225/ProcessKiller-BYOVD [viragt64.sys]
 - https://github.com/CyberSecurityUP/UrekMazino-Malware [viragt64.sys]
 - https://github.com/gmh5225/BYOVD/tree/main/Viragt64-Killer [viragt64.sys]
