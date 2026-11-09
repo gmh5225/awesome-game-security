@@ -675,6 +675,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Ceasta](entities/ceasta.md) — all-in-one disassembler/decompiler/debugger for Windows/Linux PE/ELF (ngwg; C++17; IDA-style listing + CFG + x64dbg-style debugger; Lua plugins; binary diffing + library signature matching; CLI + built-in MCP; self-contained vendored workbench; Cheat / RE Tools)
 - [ce-tutorial](entities/ce-tutorial.md) — Cheat Engine register tutorial (register roles vs common illustrations; cheat / guide)
 - [ce_speed_hack](entities/ce-speed-hack.md) — compact C++ CE-style speed hack (Detours timing hooks; core hooking logic for learners; user-mode time manipulation; IamSanjid)
+- [cemu-tap](entities/cemu-tap.md) — open-source CE-style memory scanner/live editor for Cemu Wii U (Python/Tkinter + pymem; MEM2 guest scan, pointer scan, tables, plugins; Windows/Linux; offline modding/RE; thatonekidnextdoorlol-hash; Cheat)
 - [ceserver-ios](entities/ceserver-ios.md) — Cheat Engine ceserver for iOS (jailed/jailbroken; desktop CE remote scan/edit, breakpoints, pointer scan; 0xiuks)
 - [ceserver-rawmem](entities/ceserver-rawmem.md) — Cheat Engine ceserver over raw physical memory (`/dev/mem` or DMA; bypasses OS process APIs and anti-cheat monitoring; cs1ime)
 - [CantorDust](entities/cantordust.md) — Java Ghidra extension/script + standalone app for interactive binary visualization (trigram clouds, metric maps, bitmaps; viz→listing offset jump; Gradle; Battelle; Cheat / Ghidra Plugins)
