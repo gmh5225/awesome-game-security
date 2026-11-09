@@ -20,4 +20,4 @@ Useful reference for the Cheat PatchGuard/DSE and vulnerable-driver lanes when s
 
 ## Related
 
-[[kvcforensic]] · [[byovd]] · [[hvci]] · [[lsass-extend-mapper]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]] · [[overviews/game-hacking]]
+[[kvcforensic]] · [[kvc-killer]] · [[byovd]] · [[hvci]] · [[lsass-extend-mapper]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]] · [[overviews/game-hacking]]

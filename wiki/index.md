@@ -2433,6 +2433,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [KslKatz](entities/kslkatz.md) — BYOVD LSASS dumper via Defender `KslD.sys` (WDigest/LSA; PPL/AV bypass)
 - [KslDump](entities/ksldump.md) — PPL LSASS dump via legacy on-disk Defender `KslD.sys` (IOCTL 0x222044 + MmCopyMemory; no external driver load; andreisss)
 - [kvc](entities/kvc.md) — DSE bypass via signed MS driver (`g_CiOptions` / skci / SeCiCallbacks; PP/PPL→LSASS)
+- [KvcKiller](entities/kvc-killer.md) — Windows x64 AV/EDR killer; dual signed kernel drivers (PPL unprotect + terminate IOCTL), IFEO hive paralyze, SCM restore, GUI/CLI (wesmar; cheat)
 - [kvm-csgo-cheat](entities/kvm-csgo-cheat.md) — Rust CS:GO cheat in QEMU/KVM/PVE/VBox lane (below-OS VM isolation; gmh5225)
 - [KVM-GPU-Passthrough](entities/kvm-gpu-passthrough.md) — Arch Linux GPU passthrough VM lab (GRUB/libvirt/QEMU scripts; IOMMU/VT-d + AMD/Intel BIOS prerequisites; isolated gaming/security-research guests; BigAnteater; GPU Passthrough)
 - [kvm-kernel-example](entities/kvm-kernel-example.md) — minimal KVM VMM + guest kernel tutorial (hypercalls, mmap, syscalls, ELF load; Guide)
