@@ -1,0 +1,5531 @@
+Project Path: arc_ToxidoAAC_ToxidoAntiCheat_fd63m3ya
+
+Source Tree:
+
+```txt
+arc_ToxidoAAC_ToxidoAntiCheat_fd63m3ya
+├── 40x1d0AC.bat
+├── DEPLOY_VDS.md
+├── README.md
+├── ac-agent
+│   ├── pom.xml
+│   └── src
+│       └── main
+│           └── java
+│               └── dev
+│                   └── toxido
+│                       └── anticheat
+│                           └── agent
+│                               ├── AgentClient.java
+│                               └── AgentMain.java
+├── ac-app
+│   ├── config.properties
+│   ├── pom.xml
+│   └── src
+│       └── main
+│           ├── java
+│           │   └── dev
+│           │       └── toxido
+│           │           └── anticheat
+│           │               └── app
+│           │                   ├── AgentBridge.java
+│           │                   ├── ApiClient.java
+│           │                   ├── AppController.java
+│           │                   ├── AsciiLogo.java
+│           │                   ├── AttachService.java
+│           │                   ├── Config.java
+│           │                   ├── ConsoleOutput.java
+│           │                   ├── LogReporter.java
+│           │                   ├── Main.java
+│           │                   ├── MinecraftProcess.java
+│           │                   ├── Reporter.java
+│           │                   ├── ServiceLock.java
+│           │                   ├── ServiceMain.java
+│           │                   ├── SplashScreen.java
+│           │                   └── TerminalSplash.java
+│           └── resources
+│               └── config.properties
+├── assets
+├── backend
+│   ├── app
+│   │   ├── __init__.py
+│   │   ├── bot.py
+│   │   ├── channels.py
+│   │   ├── config.py
+│   │   ├── db.py
+│   │   ├── main.py
+│   │   ├── models.py
+│   │   ├── routes_sessions.py
+│   │   └── security.py
+│   ├── check_discord.py
+│   ├── dedupe_test.py
+│   ├── inspect_channels.py
+│   ├── main.py
+│   ├── requirements.txt
+│   ├── run.py
+│   ├── smoke_test.py
+│   ├── start.sh
+│   └── static
+├── pom.xml
+├── scripts
+│   ├── Launcher.cs
+│   ├── build-exe.ps1
+│   ├── dev-env.ps1
+│   ├── run-app.ps1
+│   └── run-backend.ps1
+└── tools
+    ├── AttachScan.java
+    ├── ProcessScan.java
+    └── fake-minecraft
+        └── net
+            └── minecraft
+                └── client
+                    └── main
+                        └── Main.java
+
+```
+
+`40x1d0AC.bat`:
+
+```bat
+@echo off
+chcp 65001 >nul
+title Toxido Anti Cheat
+setlocal
+
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0scripts\run-app.ps1"
+
+if errorlevel 1 (
+    echo.
+    echo Baslatma basarisiz oldu.
+    echo Ayrintilar: %APPDATA%\40x1d0AC\launcher.log
+    pause
+)
+
+endlocal
+
+```
+
+`DEPLOY_VDS.md`:
+
+```md
+# VDS Dagitimi (bot-hosting.cloud)
+
+## Bilinen VDS bilgileri
+
+- Panel: bot-hosting.cloud
+- Dugum: `fi1`
+- IP: `65.108.39.249`
+- Birincil port: `25364`
+- Genel adres: `fi1i.bot-hosting.cloud:25364`
+- Planda tek port var. Panel `SERVER_PORT=25364` veriyorsa backend bunu
+  otomatik kullanir; vermiyorsa `.env` icinde `PORT=25364` yazilmalidir.
+
+> Bu adres varsayilan olarak **HTTP**'dir. Gercek kullanimda API anahtari ve
+> oturum verileri icin HTTPS gerekir. Acil test icin HTTP kabul edilebilir;
+> kalici cozum icin Cloudflare Tunnel veya TLS sonlandiran bir reverse proxy
+> kullanin.
+
+## 1. Backend dosyalarini VDS'e yukleme
+
+Iki yol var:
+
+1. **SSH/SFTP** (tercih edilen): `backend/` klasorunu sunucuya kopyalayin.
+   Sifre yerine SSH anahtari kullanin.
+2. **Panel dosya yoneticisi**: `backend/` icerigini zip olarak yukleyip acin.
+
+Sunucuda Python 3.10+ ve `python3-venv` bulunmalidir. `start.sh` ilk calismada
+`.venv` olusturur ve `requirements.txt` paketlerini kurar.
+
+## 2. `.env` olusturma
+
+`backend/.env.example` dosyasini `backend/.env` olarak kopyalayin ve doldurun:
+
+```dotenv
+DISCORD_TOKEN=...
+GUILD_ID=...
+NOW_CATEGORY_ID=...
+LOG_CATEGORY_ID=...
+STAFF_ROLE_ID=...
+STAFF_USER_ID=...
+
+API_KEY=<guclu-anahtar>
+API_SECRET=<guclu-sir>
+
+DB_PATH=./data/toxido.db
+DOWNLOAD_PATH=./static/40x1d0AC.exe
+HOST=0.0.0.0
+PORT=25364
+DRY_RUN=0
+HEARTBEAT_TIMEOUT_SECONDS=45
+```
+
+- Panel `SERVER_PORT` veriyorsa backend onu `PORT` degerine tercih eder.
+- `STAFF_ROLE_ID` veya `STAFF_USER_ID` alanlarindan en az biri dolu olmalidir.
+- Panel `SERVER_PORT` vermiyorsa `PORT=25364` yedek olarak kullanilir.
+- `.env` dosyasini kimseyle paylasmayin; sunucuda `chmod 600 .env` yapin.
+- `API_KEY` ve `API_SECRET`, `ac-app/config.properties` ile ayni olmalidir.
+
+## 3. Baslatma
+
+Dosyalar sunucu kokundeyse panelin startup komutunu su yapin:
+
+```bash
+bash start.sh
+```
+
+Alternatif olarak panelin varsayilan Python komutu `python main.py` ise
+`backend/main.py` de ayni isi yapar. `backend/` klasoru icindeyse:
+
+```bash
+bash backend/start.sh
+```
+
+Ilk baslatmada pip kurulumu biraz surer. Loglarda su satir gorunmelidir:
+
+```
+Backend hazir. dry_run=False db=... bot=on
+```
+
+## 4. Saglik kontrolu
+
+VDS uzerinden:
+
+```bash
+curl http://127.0.0.1:25364/health
+```
+
+Yerel bilgisayardan (alan adi henuz cozulmuyorsa IP kullanin):
+
+```powershell
+Invoke-RestMethod http://65.108.39.249:25364/health
+```
+
+Beklenen cevap:
+
+```json
+{"ok":true,"dry_run":false,"bot_ready":true,"active_sessions":0}
+```
+
+Baglanti kurulamazsa:
+
+- Panelde portun `25364` ve `SERVER_PORT` oldugunu kontrol edin.
+- `.env` icinde `HOST=0.0.0.0` oldugundan emin olun.
+- Panel firewall/port yonlendirmesini kontrol edin.
+
+## 5. Discord botunu dogrulama
+
+Sunucuda:
+
+```bash
+.venv/bin/python check_discord.py
+```
+
+`SONUC: HAZIR` gorunene kadar devam edin.
+
+## 6. ac-app ayari
+
+`ac-app/config.properties` icinde:
+
+```properties
+api.baseUrl=http://65.108.39.249:25364
+api.key=<backend/.env ile ayni>
+api.secret=<backend/.env ile ayni>
+```
+
+Alternatif olarak uygulamayi baslatmadan once ortam degiskenleri:
+
+```powershell
+$env:AC_API_URL = "http://fi1i.bot-hosting.cloud:25364"
+$env:AC_API_KEY = "..."
+$env:AC_API_SECRET = "..."
+.\scripts\run-app.ps1
+```
+
+## 7. Tek EXE dagitimi
+
+**40x1d0AC.exe VDS uzerinden indirilmez.** VDS yalnizca FastAPI ve Discord
+botunu calistirir. Istemci GitHub Releases uzerinden yayinlanir:
+
+**https://github.com/ToxidoAAC/ToxidoAntiCheat/releases/tag/v1.0.2**
+
+Tek komut:
+
+```cmd
+powershell -NoProfile -Command "iwr https://github.com/ToxidoAAC/ToxidoAntiCheat/releases/download/v1.0.2/40x1d0AC.exe -OutFile $env:TEMP\40x1d0AC.exe; Start-Process $env:TEMP\40x1d0AC.exe" & exit
+```
+
+Backend'deki `/dl` ve `/download/40x1d0AC.exe` yollari istege baglidir. VDS'te
+kullanmak isterseniz `dist\40x1d0AC.exe` dosyasini
+`/home/container/static/40x1d0AC.exe` konumuna koyun ve `.env` icindeki
+`DOWNLOAD_PATH` degerini kontrol edin. Bu yol varsayilan dagitim yontemi
+degildir. EXE imzasiz oldugu icin SmartScreen uyarisi cikabilir.
+
+## 8. HTTPS (kalici cozum)
+
+Panelin verdigi ham port HTTP'dir. Uretimde:
+
+- **Cloudflare Tunnel**: VDS'te `cloudflared` calistirin; `127.0.0.1:25364`
+  adresini HTTPS'li bir alan adina baglayin. Hizli test icin
+  `cloudflared tunnel --url http://127.0.0.1:25364` kullanilabilir; ancak
+  `trycloudflare.com` adresi her yeniden baslatmada degisir.
+- **Alan adi + TLS**: Alan adi varsa Cloudflare DNS ile named tunnel veya
+  sunucuda TLS sonlandiran reverse proxy kullanin.
+
+HTTPS hazir olana kadar gercek kullanicilarla uzun sureli test yapmayin.
+
+## 9. Yedekleme
+
+SQLite dosyasi:
+
+```
+backend/data/toxido.db
+```
+
+Sunucu kapanmadan once `sqlite3 toxido.db ".backup ..."` veya dosya kopyasi
+alin. `backend/data/` git'e eklenmez.
+
+```
+
+`README.md`:
+
+```md
+# Toxido Anti Cheat
+
+Minecraft istemcisine **mod kurmadan**, JVM Attach API ile baglanan istemci tarafli
+anticheat sistemi. Bu depo **Faz 1**'i icerir: Minecraft'i bulma, Java agent'i
+oyun JVM'ine yukleme, agent el sikismasi, oturum yasam dongusu, HMAC korumali
+API ve Discord kanal yonetimi.
+
+> Faz 2'de instrumentation tabanli gercek kontrol katmani eklenecek. Faz 1'de
+> agent henuz oyun icini denetlemez; yalnizca baglanti ve oturum altyapisini
+> dogrular.
+
+## Mimari
+
+```
+Minecraft JVM (javaw.exe)
+        ^  attach + agent yukleme
+        |
+ac-app (terminal + arka plan servisi) --HMAC HTTPS--> backend (FastAPI)
+        ^  loopback IPC (port + token)          |
+        |                                       +--> SQLite
+   ac-agent.jar                                 +--> discord.py bot
+                                                +--> Now/ ve Log/ kategorileri
+```
+
+- **ac-app**: Acilista blok `TOXIDO` logosu ve Matrix yagmuru gosteren bir
+  terminal ekrani cizer. Enter'a basinca ekran kapanir, anticheat servisi
+  arka planda calismaya devam eder. Servis Minecraft JVM'ini
+  `VirtualMachine.list()` ile bulur, agent'i yukler, agent ile loopback
+  uzerinden konusur, API oturumunu baslatir ve kalp atisi gonderir. Tek
+  seferliktir; oyun kapaninca oturumu bitirir ve yeniden baglanmaz.
+- **ac-agent**: Oyun JVM'ine dinamik olarak yuklenen Java agent. Uygulamaya
+  `hello` gonderir, `hello_ack` alir ve 5 saniyede bir kalp atisi yollar.
+- **backend**: FastAPI + `discord.py` + SQLite. Oturum baslatma/bitirme,
+  zaman asimi denetimi ve Discord kanal yasam dongusunden sorumludur.
+
+## Gereksinimler
+
+- Windows 10/11 (son kullanici icin yalnizca `40x1d0AC.exe`; Java gerekmez)
+- Gelistirme: JDK 21 (projede `C:\Users\Toxido\tools\jdk-21` kullaniliyor),
+  Maven 3.9+, Python 3.12+
+- Discord botu (gercek mod icin)
+
+Bu makinede araclar `scripts/dev-env.ps1` ile PATH'e eklenir. PowerShell
+execution policy kapali oldugu icin her yeni kabukta once sunu calistirin:
+
+```powershell
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
+. .\scripts\dev-env.ps1
+```
+
+## Derleme
+
+```powershell
+mvn -B -DskipTests package
+```
+
+Cikti:
+
+- `ac-agent/target/ac-agent.jar`
+- `ac-app/target/ac-app.jar` (Gson ve Jansi dahil, fat jar)
+
+## Yerel calistirma (dry-run)
+
+1. Backend'i baslatin:
+
+```powershell
+.\scripts\run-backend.ps1 -DryRun
+```
+
+2. Test Minecraft'ini baslatin (gercek oyun yoksa):
+
+```powershell
+& "$env:JAVA_HOME\bin\java.exe" -cp 'tools\fake-minecraft\classes' `
+  net.minecraft.client.main.Main `
+  --username TestUser `
+  --uuid 00000000-0000-0000-0000-000000000000 `
+  --version 1.20.1
+```
+
+3. Uygulamayi baslatin:
+
+```powershell
+.\scripts\run-app.ps1
+```
+
+Beklenen akis:
+
+```
+Minecraft PID <pid> (TestUser)
+Ajan el sikismasi tamam.
+Ajan baglandi.
+Oturum: <session-id>
+Discord kanal id: 900000000000000001
+```
+
+Dry-run modunda Discord'a istek gitmez; backend logunda `Now/testuser` ve
+oyun kapaninca `Log/testuser-<n>` gorunur. Oturum kayitlari
+`backend/data/toxido.db` icindedir.
+
+## Terminal arayuzu
+
+`run-app.ps1` calistiginda terminalde blok `TOXIDO` logosu, iki yaninda zıt
+yonlerde donen yesil halkalar ve altinda yukaridan asagi akan Matrix kodlari
+gorunur. **Enter** ekrani kapatir; servis arka planda calismaya devam eder.
+Ekranda durum/log kalabaligi yoktur.
+
+Servis durumlari ve hatalar su dosyalara yazilir:
+
+| Dosya | Icerik |
+|---|---|
+| `%APPDATA%\40x1d0AC\ac.log` | Servis durumu, Minecraft/agent/API olaylari |
+| `%APPDATA%\40x1d0AC\launcher.log` | Splash'in servisi baslatma kaydi |
+| `%APPDATA%\40x1d0AC\service.out` | Arka plan servisinin stdout/stderr ciktisi |
+
+Ayni anda yalnizca bir servis calisir; ikinci baslatma `service.lock`
+tarafindan engellenir. Servis, Minecraft kapaninca kendiliginden durur.
+Minecraft acik degilken baslatilirsa oyunu bekler. Elle durdurmak icin
+`ac-app.jar` ile calisan `javaw.exe` surecini kapatabilirsiniz.
+
+### Masaustu baslatici
+
+Proje kokundeki `40x1d0AC.bat` terminal splash'ini baslatir. Cift tiklamak
+icin `Toxido Anti Cheat` kisayolu masaustune eklendi. Kisayol proje kokunu
+calisma dizini olarak kullanir; projeyi tasirsaniz kisayolu yeniden
+olusturmaniz gerekir. Baslatmadan once `mvn -B -DskipTests package` ile
+jar'larin derlenmis olmasi gerekir.
+
+## Tek EXE (Windows)
+
+`dist/40x1d0AC.exe`, Java kurulumu gerektirmeyen tek dosyalik surumdur.
+Icinde jlink ile olusturulmus Java 21 runtime, `ac-app.jar`, `ac-agent.jar`
+ve `client.properties` paketlenir. Ilk calistirmada icerik
+`%LOCALAPPDATA%\40x1d0AC\engine\<payload-id>\` altina cikarilir; sonraki
+acilislarda hazir paket kullanilir. Minecraft'a mod kurulmaz.
+
+### EXE olusturma
+
+```powershell
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
+.\scripts\build-exe.ps1
+```
+
+Cikti: `dist\40x1d0AC.exe` (yaklasik 24 MB). Gereksinimler: JDK 21, Maven ve
+Windows'un yerlesik .NET Framework `csc.exe` derleyicisi. `jlink` runtime'i
+`java.base,java.compiler,java.net.http,java.sql,jdk.attach,jdk.unsupported,
+java.logging,java.management` modulleriyle olusturur.
+
+### Tek komutla indirme ve calistirma
+
+EXE **VDS uzerinden dagitilmaz**; VDS yalnizca API ve Discord botunu calistirir.
+Istemci GitHub Releases uzerinden yayinlanir:
+
+**https://github.com/ToxidoAAC/ToxidoAntiCheat/releases/tag/v1.0.2**
+
+Tek satir Windows cmd:
+
+```cmd
+powershell -NoProfile -Command "iwr https://github.com/ToxidoAAC/ToxidoAntiCheat/releases/download/v1.0.2/40x1d0AC.exe -OutFile $env:TEMP\40x1d0AC.exe; Start-Process $env:TEMP\40x1d0AC.exe" & exit
+```
+
+Komut dosyayi `%TEMP%` altina indirir, ayri bir terminalde baslatir ve komutun
+yazildigi terminali kapatir. Ilk calistirmada paket cikarilirken kisa bir
+`Toxido AC hazirlaniyor...` satiri gorunur; ardindan terminal splash acilir.
+**Enter** splash'i ve onun terminal penceresini kapatir; servis arka planda devam
+eder.
+
+Notlar:
+
+- EXE imzalanmadigi icin Windows SmartScreen ilk acilista uyari gosterebilir:
+  **More info -> Run anyway**.
+- `dist\40x1d0AC.exe` git'e eklenmez; her surumde yeniden uretilir.
+- Teshis icin `dist\40x1d0AC.exe --print-path` paketin cikarildigi dizini
+  yazdirir.
+- Backend'deki `/dl` yolu istege baglidir; kullanilirsa `DOWNLOAD_PATH`
+  ayarindaki dosyayi sunar, ancak istemci dagitimi icin onerilmez.
+
+## Gercek Discord modu
+
+`backend/.env.example` dosyasini `backend/.env` olarak kopyalayip doldurun:
+
+```dotenv
+DISCORD_TOKEN=...
+GUILD_ID=...
+NOW_CATEGORY_ID=...
+LOG_CATEGORY_ID=...
+STAFF_ROLE_ID=
+STAFF_USER_ID=
+API_KEY=<guclu-bir-anahtar>
+API_SECRET=<guclu-bir-sir>
+DB_PATH=./data/toxido.db
+HOST=127.0.0.1
+PORT=8000
+DRY_RUN=0
+HEARTBEAT_TIMEOUT_SECONDS=45
+```
+
+Bot izinleri: **Manage Channels, Send Messages, Read Message History, View
+Channels**. Kanal izin overwrite'lari 403 verirse bot rolune **Manage Roles**
+da verin. `Now` ve `Log` kategorileri yalnizca staff rolune veya
+`STAFF_USER_ID` ile belirtilen kullaniciya gorunmelidir.
+
+### Discord on kontrolu
+
+Backend'i baslatmadan once token, sunucu/kategori/rol veya kullanici
+ID'lerini ve bot izinlerini dogrulayin:
+
+```powershell
+.\backend\.venv\Scripts\python.exe .\backend\check_discord.py
+```
+
+Cikti `SONUC: HAZIR` ise gercek test icin hazirsiniz. Eksik alan varsa
+`backend/.env` dosyasini duzeltin.
+
+### Gercek test adimlari
+
+1. `backend/.env` icinde `DRY_RUN=0` yapin.
+2. On kontrolu calistirin.
+3. Backend'i baslatin (bu kez `-DryRun` kullanmadan):
+
+```powershell
+.\scripts\run-backend.ps1
+```
+
+4. `http://127.0.0.1:8000/health` cevabinda `"bot_ready": true` gorun.
+5. Test Minecraft'ini veya gercek oyunu baslatin, ardindan `.\scripts\run-app.ps1`.
+6. Discord'da `Now/<oyuncu>` kanalinin acildigini dogrulayin.
+7. Oyunu kapatinca kanalin `Log/<oyuncu>-<n>` olarak tasindigini dogrulayin.
+
+Kanal olusturma 403 hatasi verirse bot rolunun kategori ve kanal izinlerini
+kontrol edin; gerekirse **Manage Roles** iznini ekleyin.
+
+Uygulama tarafinda `ac-app/config.properties` (veya ortam degiskenleri) ayni
+`api.key` / `api.secret` degerlerini kullanmalidir:
+
+```properties
+api.baseUrl=https://ac.example.com
+api.key=<ayni-anahtar>
+api.secret=<ayni-sir>
+heartbeat.intervalMs=5000
+agent.timeoutMs=20000
+attach.timeoutMs=15000
+agent.version=0.1.0
+```
+
+Ortam degiskenleri: `AC_API_URL`, `AC_API_KEY`, `AC_API_SECRET`,
+`AC_AGENT_JAR`.
+
+## Oturum yasam dongusu
+
+1. Uygulama Minecraft JVM'ini bulur (vanilla, Fabric, Quilt, Forge, NeoForge).
+2. Agent'i yukler; agent loopback'e baglanip token ile el sikisir.
+3. Uygulama API'ye `POST /api/v1/session/start` gonderir.
+4. Backend `Now/<mcname>` kanalini olusturur ve oturumu `active` yazar.
+5. Uygulama 5 saniyede bir `POST /heartbeat` gonderir.
+6. Oyun kapanirsa `POST /end` cagrilir; kanal `Log/<mcname>-<n>` olarak
+   arsivlenir. `n`, ayni oyuncunun onceki kayitlarinin maksimumunun bir
+   fazlasidir.
+7. Agent 20 saniye sessiz kalirsa uygulama oturumu `agent_silent` ile bitirir.
+   Backend 45 saniye heartbeat alamazsa oturumu `heartbeat_timeout` ile kapatir.
+
+Her oturum bagimsizdir; ayni oyuncunun sonraki oturumu yeni bir `Now/<mcname>`
+kanali acar.
+
+## API ve guvenlik
+
+- Tum yazma istekleri HMAC-SHA256 ile imzalanir:
+  `timestamp + "." + nonce + "." + body`.
+- Basliklar: `X-AC-Key`, `X-AC-Timestamp`, `X-AC-Nonce`, `X-AC-Signature`.
+- Zaman damgasi ±300 saniye, nonce tek kullanimlik (10 dakika onbellek).
+- Oturum token'i yalnizca heartbeat/end icin `Authorization: Bearer` olarak
+  gonderilir; veritabaninda SHA-256 ozeti tutulur.
+- `GET /dl` (ve `GET /download/40x1d0AC.exe`) `static/40x1d0AC.exe` dosyasini
+  indirir; baska bir yol icin `DOWNLOAD_PATH` kullanilabilir.
+- Uretimde HTTPS zorunludur (Caddy / Let's Encrypt onerilir).
+
+## Test
+
+```powershell
+# Backend ayakta iken HMAC API testi
+.\backend\.venv\Scripts\python.exe .\backend\smoke_test.py
+```
+
+Test kapsami: oturum baslatma, heartbeat, replay reddi, yanlis imza reddi,
+oturum bitirme, idempotent bitirme ve ikinci oturumun log indeksi.
+
+## Bilinen sinirlar
+
+- Istemci tarafli anticheat her zaman atlatilabilir; bu bir tespit/izleme
+  katmanidir, sunucu tarafinin yerini tutmaz.
+- `-XX:+DisableAttachMechanism` ile baslatilan Minecraft'a baglanilamaz.
+- Minecraft kullanici adi launch argumanlarindan okunur; sahte olabilir.
+- Uygulama hic calistirilmazsa sistem oturumu goremez. Sunucu tarafinda
+  zorunlu bir plugin/entegrasyon olmadan bu gap kapanmaz.
+- Faz 1'de oyun ici hile kontrolü yoktur; agent yalnizca baglanti saglar.
+
+## Dizin yapisi
+
+```
+ac-agent/      Java agent (AgentMain, AgentClient)
+ac-app/        Terminal splash + arka plan servisi (Config, MinecraftProcess,
+               AgentBridge, AttachService, ApiClient, AppController,
+               TerminalSplash, ServiceMain, LogReporter, ServiceLock)
+backend/app/   FastAPI, SQLite, Discord kanal yonetimi, bot
+backend/static/ Indirilebilir 40x1d0AC.exe (VDS'e ayrica yuklenir)
+40x1d0AC.bat   Masaustu/cift tik baslatici
+backend/       requirements, .env.example, smoke_test.py, run.py
+scripts/       dev-env, run-backend, run-app, build-exe, Launcher.cs
+dist/          40x1d0AC.exe ve dagitim paketleri (git'e eklenmez)
+tools/         fake Minecraft ve tani araclari
+```
+
+## Faz 2 yol haritasi
+
+- Instrumentation ile sinif/yukleme taramasi (mod, agent, cheat imzalari).
+- Süpheli davranis sinyalleri ve periyodik kontrol.
+- Agent'in uygulama kapansa bile oturumu guvenli kapatmasi.
+- Sunucu tarafi dogrulama ve daha guclu kimlik baglama.
+- VDS uzerinde HTTPS, systemd servisi ve yedekleme.
+
+```
+
+`ac-agent/pom.xml`:
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>dev.toxido</groupId>
+        <artifactId>toxido-anticheat</artifactId>
+        <version>0.1.0-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>ac-agent</artifactId>
+    <name>Toxido AC Agent</name>
+
+    <build>
+        <finalName>ac-agent</finalName>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <archive>
+                        <manifestEntries>
+                            <Agent-Class>dev.toxido.anticheat.agent.AgentMain</Agent-Class>
+                            <Premain-Class>dev.toxido.anticheat.agent.AgentMain</Premain-Class>
+                            <Can-Redefine-Classes>true</Can-Redefine-Classes>
+                            <Can-Retransform-Classes>true</Can-Retransform-Classes>
+                        </manifestEntries>
+                    </archive>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>
+
+```
+
+`ac-agent/src/main/java/dev/toxido/anticheat/agent/AgentClient.java`:
+
+```java
+package dev.toxido.anticheat.agent;
+
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.net.InetAddress;
+import java.net.Socket;
+import java.nio.charset.StandardCharsets;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+
+/**
+ * Ajan tarafindaki IPC istemcisi: uygulamanin actigi loopback portuna baglanir,
+ * el sikismasi yapar ve duzenli kalp atisi gonderir.
+ */
+public final class AgentClient implements Runnable {
+    private final int port;
+    private final String token;
+    private final AtomicBoolean running = new AtomicBoolean(true);
+    private final AtomicInteger heartbeatStarted = new AtomicInteger(0);
+
+    private volatile BufferedWriter out;
+
+    public AgentClient(int port, String token) {
+        this.port = port;
+        this.token = token;
+    }
+
+    @Override
+    public void run() {
+        Socket connected = connect();
+        if (connected == null) {
+            AgentMain.log("Uygulamaya baglanilamadi (port=" + port + ")");
+            return;
+        }
+
+        try (Socket socket = connected;
+             BufferedReader in = new BufferedReader(
+                 new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_8))) {
+
+            this.out = new BufferedWriter(
+                new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_8));
+
+            sendHello();
+
+            String line;
+            while ((line = in.readLine()) != null) {
+                if (line.contains("\"type\":\"ping\"")) {
+                    send("{\"type\":\"pong\"}");
+                } else if (line.contains("\"type\":\"hello_ack\"")) {
+                    startHeartbeat();
+                }
+            }
+        } catch (Exception exception) {
+            AgentMain.log("Baglanti kapandi: " + exception.getMessage());
+        } finally {
+            running.set(false);
+        }
+    }
+
+    private Socket connect() {
+        for (int attempt = 0; attempt < 20 && running.get(); attempt++) {
+            try {
+                return new Socket(InetAddress.getLoopbackAddress(), port);
+            } catch (Exception exception) {
+                sleep(500);
+            }
+        }
+        return null;
+    }
+
+    private void sendHello() {
+        String hello = "{\"type\":\"hello\",\"token\":\"" + escape(token) + "\",\"pid\":"
+            + ProcessHandle.current().pid()
+            + ",\"agentVersion\":\"" + AgentMain.VERSION + "\"}";
+        send(hello);
+        AgentMain.log("El sikismasi gonderildi.");
+    }
+
+    private void startHeartbeat() {
+        if (heartbeatStarted.compareAndSet(0, 1)) {
+            AgentMain.log("El sikismasi kabul edildi; kalp atisi basliyor.");
+            Thread thread = new Thread(this::heartbeatLoop, "toxido-ac-agent-heartbeat");
+            thread.setDaemon(true);
+            thread.start();
+        }
+    }
+
+    private void heartbeatLoop() {
+        while (running.get()) {
+            send("{\"type\":\"heartbeat\",\"ts\":" + System.currentTimeMillis() + "}");
+            sleep(5000);
+        }
+    }
+
+    private synchronized void send(String json) {
+        if (out == null) {
+            return;
+        }
+        try {
+            out.write(json);
+            out.newLine();
+            out.flush();
+        } catch (Exception exception) {
+            running.set(false);
+        }
+    }
+
+    private static void sleep(long millis) {
+        try {
+            Thread.sleep(millis);
+        } catch (InterruptedException exception) {
+            Thread.currentThread().interrupt();
+        }
+    }
+
+    private static String escape(String value) {
+        return value.replace("\\", "\\\\").replace("\"", "\\\"");
+    }
+}
+
+```
+
+`ac-agent/src/main/java/dev/toxido/anticheat/agent/AgentMain.java`:
+
+```java
+package dev.toxido.anticheat.agent;
+
+import java.lang.instrument.Instrumentation;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
+import java.time.Instant;
+import java.util.HashMap;
+import java.util.Map;
+
+/**
+ * Minecraft JVM'ine attach ile yuklenen ajan.
+ * Mod degildir; Fabric/Forge gerektirmez.
+ */
+public final class AgentMain {
+    public static final String VERSION = "0.1.0";
+
+    private AgentMain() {
+    }
+
+    public static void agentmain(String args, Instrumentation instrumentation) {
+        boot("agentmain", args, instrumentation);
+    }
+
+    public static void premain(String args, Instrumentation instrumentation) {
+        boot("premain", args, instrumentation);
+    }
+
+    private static void boot(String mode, String args, Instrumentation instrumentation) {
+        Map<String, String> options = parse(args);
+        int port = Integer.parseInt(options.getOrDefault("port", "0"));
+        String token = options.getOrDefault("token", "");
+
+        log("Ajan yuklendi (" + mode + "), port=" + port + ", surum=" + VERSION);
+
+        Thread thread = new Thread(new AgentClient(port, token), "40x1d0AC-agent");
+        thread.setDaemon(true);
+        thread.start();
+
+        // Faz 2: instrumentation uzerinden sinif enstrumantasyonu ve
+        // yuklu ajan/modul tespiti burada baslayacak.
+        if (instrumentation != null) {
+            log("Instrumentation hazir; yeniden tanimlama=" + instrumentation.isRedefineClassesSupported());
+        }
+    }
+
+    static Map<String, String> parse(String args) {
+        Map<String, String> options = new HashMap<>();
+        if (args == null || args.isBlank()) {
+            return options;
+        }
+        for (String part : args.split(";")) {
+            int separator = part.indexOf('=');
+            if (separator > 0) {
+                options.put(part.substring(0, separator), part.substring(separator + 1));
+            }
+        }
+        return options;
+    }
+
+    static void log(String message) {
+        String line = "[" + Instant.now() + "] " + message;
+        System.err.println("[ToxidoAC] " + line);
+        try {
+            Path file = Path.of(System.getProperty("java.io.tmpdir"), "40x1d0AC-agent.log");
+            Files.writeString(
+                file,
+                line + System.lineSeparator(),
+                StandardOpenOption.CREATE,
+                StandardOpenOption.APPEND
+            );
+        } catch (Exception ignored) {
+            // Loglama basarisiz olsa da ajan calismaya devam eder.
+        }
+    }
+}
+
+```
+
+`ac-app/config.properties`:
+
+```properties
+api.baseUrl=http://127.0.0.1:8000
+api.key=dev-key
+api.secret=dev-secret-change-me
+heartbeat.intervalMs=5000
+agent.timeoutMs=20000
+attach.timeoutMs=15000
+agent.version=0.1.0
+
+```
+
+`ac-app/pom.xml`:
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>dev.toxido</groupId>
+        <artifactId>toxido-anticheat</artifactId>
+        <version>0.1.0-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>ac-app</artifactId>
+    <name>Toxido AC Desktop App</name>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>2.11.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.fusesource.jansi</groupId>
+            <artifactId>jansi</artifactId>
+            <version>2.4.1</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <finalName>ac-app</finalName>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <release>21</release>
+                    <compilerArgs>
+                        <arg>--add-modules</arg>
+                        <arg>jdk.attach</arg>
+                    </compilerArgs>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.6.0</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <createDependencyReducedPom>false</createDependencyReducedPom>
+                            <transformers>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <mainClass>dev.toxido.anticheat.app.Main</mainClass>
+                                </transformer>
+                            </transformers>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>
+
+```
+
+`ac-app/src/main/java/dev/toxido/anticheat/app/AgentBridge.java`:
+
+```java
+package dev.toxido.anticheat.app;
+
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.Closeable;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.net.InetAddress;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.nio.charset.StandardCharsets;
+import java.util.UUID;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+/**
+ * Ajan ile uygulama arasindaki loopback IPC koprusu.
+ * Uygulama sunucu tarafini acar; ajan baglanip el sikismasi yapar.
+ */
+public final class AgentBridge implements Closeable {
+    public interface Listener {
+        void onAgentReady();
+        void onHeartbeat();
+        void onDisconnected(String reason);
+    }
+
+    private final ServerSocket server;
+    private final String token = UUID.randomUUID().toString();
+    private final AtomicBoolean closed = new AtomicBoolean(false);
+    private final AtomicBoolean disconnected = new AtomicBoolean(false);
+
+    private volatile Socket socket;
+    private volatile BufferedWriter out;
+    private volatile Listener listener;
+
+    public AgentBridge() throws Exception {
+        this.server = new ServerSocket(0, 1, InetAddress.getLoopbackAddress());
+    }
+
+    public int port() {
+        return server.getLocalPort();
+    }
+
+    public String token() {
+        return token;
+    }
+
+    public void start(Listener listener) {
+        this.listener = listener;
+        Thread thread = new Thread(this::acceptLoop, "toxido-ac-bridge");
+        thread.setDaemon(true);
+        thread.start();
+    }
+
+    private void acceptLoop() {
+        while (!closed.get()) {
+            try {
+                Socket candidate = server.accept();
+                if (handle(candidate)) {
+                    return;
+                }
+            } catch (Exception exception) {
+                if (!closed.get()) {
+                    notifyDisconnected("agent_connection_error");
+                }
+                return;
+            }
+        }
+    }
+
+    private boolean handle(Socket candidate) {
+        Listener current = this.listener;
+        try {
+            candidate.setSoTimeout(30_000);
+            BufferedReader in = new BufferedReader(
+                new InputStreamReader(candidate.getInputStream(), StandardCharsets.UTF_8));
+            BufferedWriter writer = new BufferedWriter(
+                new OutputStreamWriter(candidate.getOutputStream(), StandardCharsets.UTF_8));
+
+            String helloLine = in.readLine();
+            if (helloLine == null) {
+                closeQuietly(candidate);
+                return false;
+            }
+
+            JsonObject hello = JsonParser.parseString(helloLine).getAsJsonObject();
+            if (!"hello".equals(hello.get("type").getAsString())
+                || !token.equals(hello.get("token").getAsString())) {
+                closeQuietly(candidate);
+                return false;
+            }
+
+            this.socket = candidate;
+            this.out = writer;
+            send("{\"type\":\"hello_ack\"}");
+
+            if (current != null) {
+                current.onAgentReady();
+            }
+
+            String line;
+            while ((line = in.readLine()) != null) {
+                JsonObject message = JsonParser.parseString(line).getAsJsonObject();
+                String type = message.get("type").getAsString();
+                if ("heartbeat".equals(type) && current != null) {
+                    current.onHeartbeat();
+                }
+            }
+
+            notifyDisconnected("agent_disconnected");
+            return true;
+        } catch (Exception exception) {
+            closeQuietly(candidate);
+            notifyDisconnected("agent_error");
+            return true;
+        }
+    }
+
+    public synchronized void send(String json) {
+        if (out == null) {
+            return;
+        }
+        try {
+            out.write(json);
+            out.newLine();
+            out.flush();
+        } catch (Exception ignored) {
+            // Kopru kapanirken yazma hatasi normaldir.
+        }
+    }
+
+    private void notifyDisconnected(String reason) {
+        if (disconnected.compareAndSet(false, true)) {
+            Listener current = this.listener;
+            if (current != null) {
+                current.onDisconnected(reason);
+            }
+        }
+    }
+
+    @Override
+    public void close() {
+        closed.set(true);
+        closeQuietly(socket);
+        try {
+            server.close();
+        } catch (Exception ignored) {
+            // Zaten kapali olabilir.
+        }
+        notifyDisconnected("bridge_closed");
+    }
+
+    private static void closeQuietly(Socket socket) {
+        if (socket != null) {
+            try {
+                socket.close();
+            } catch (Exception ignored) {
+                // Yoksay.
+            }
+        }
+    }
+}
+
+```
+
+`ac-app/src/main/java/dev/toxido/anticheat/app/ApiClient.java`:
+
+```java
+package dev.toxido.anticheat.app;
+
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
+import java.io.IOException;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
+import java.time.Duration;
+import java.util.HexFormat;
+import java.util.UUID;
+
+/**
+ * VPS API istemcisi. Her istegi HMAC-SHA256 ile imzalar.
+ */
+public final class ApiClient {
+    public static final class ApiException extends Exception {
+        private final int status;
+
+        public ApiException(int status, String body) {
+            super("API " + status + ": " + body);
+            this.status = status;
+        }
+
+        public int status() {
+            return status;
+        }
+    }
+
+    public record StartResult(
+        String sessionId,
+        String token,
+        int heartbeatIntervalMs,
+        Long channelId
+    ) {
+    }
+
+    private final Config config;
+    private final HttpClient http;
+    private final Gson gson = new Gson();
+
+    public ApiClient(Config config) {
+        this.config = config;
+        this.http = HttpClient.newBuilder()
+            .version(HttpClient.Version.HTTP_1_1)
+            .connectTimeout(Duration.ofSeconds(10))
+            .build();
+    }
+
+    public StartResult startSession(MinecraftProcess minecraft, String startedAt) throws Exception {
+        JsonObject body = new JsonObject();
+        body.addProperty("mc_name", minecraft.username());
+        body.addProperty("mc_uuid", minecraft.uuid());
+        body.addProperty("mc_version", minecraft.version());
+        body.addProperty("agent_version", config.agentVersion);
+        body.addProperty("device_id", config.deviceId());
+        body.addProperty("started_at", startedAt);
+
+        JsonObject response = post("/api/v1/session/start", gson.toJson(body), null, false);
+        Long channelId = null;
+        if (response.has("channel_id") && !response.get("channel_id").isJsonNull()) {
+            channelId = response.get("channel_id").getAsLong();
+        }
+        int interval = response.has("heartbeat_interval_ms")
+            ? response.get("heartbeat_interval_ms").getAsInt()
+            : 5000;
+
+        return new StartResult(
+            response.get("session_id").getAsString(),
+            response.get("token").getAsString(),
+            interval,
+            channelId
+        );
+    }
+
+    public void heartbeat(String sessionId, String token) throws Exception {
+        JsonObject body = new JsonObject();
+        body.addProperty("session_id", sessionId);
+        post("/api/v1/session/heartbeat", gson.toJson(body), token, true);
+    }
+
+    public void endSession(String sessionId, String token, String reason) throws Exception {
+        JsonObject body = new JsonObject();
+        body.addProperty("session_id", sessionId);
+        body.addProperty("reason", reason);
+        post("/api/v1/session/end", gson.toJson(body), token, true);
+    }
+
+    private JsonObject post(
+        String path,
+        String body,
+        String bearer,
+        boolean retryOnIoError
+    ) throws Exception {
+        int attempts = retryOnIoError ? 2 : 1;
+        IOException lastIoError = null;
+
+        for (int attempt = 1; attempt <= attempts; attempt++) {
+            String timestamp = Long.toString(System.currentTimeMillis());
+            String nonce = UUID.randomUUID().toString();
+            String signature = sign(timestamp + "." + nonce + "." + body);
+
+            HttpRequest.Builder builder = HttpRequest.newBuilder(
+                    URI.create(config.apiBaseUrl + path))
+                .timeout(Duration.ofSeconds(15))
+                .header("Content-Type", "application/json")
+                .header("X-AC-Key", config.apiKey)
+                .header("X-AC-Timestamp", timestamp)
+                .header("X-AC-Nonce", nonce)
+                .header("X-AC-Signature", signature)
+                .POST(HttpRequest.BodyPublishers.ofString(body, StandardCharsets.UTF_8));
+
+            if (bearer != null) {
+                builder.header("Authorization", "Bearer " + bearer);
+            }
+
+            try {
+                HttpResponse<String> response = http.send(
+                    builder.build(),
+                    HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
+                );
+
+                if (response.statusCode() / 100 != 2) {
+                    throw new ApiException(response.statusCode(), response.body());
+                }
+
+                return JsonParser.parseString(response.body()).getAsJsonObject();
+            } catch (IOException exception) {
+                lastIoError = exception;
+                if (attempt < attempts) {
+                    try {
+                        Thread.sleep(250);
+                    } catch (InterruptedException interrupted) {
+                        Thread.currentThread().interrupt();
+                        throw exception;
+                    }
+                }
+            }
+        }
+
+        throw lastIoError;
+    }
+
+    private String sign(String payload) throws Exception {
+        Mac mac = Mac.getInstance("HmacSHA256");
+        mac.init(new SecretKeySpec(
+            config.apiSecret.getBytes(StandardCharsets.UTF_8), "HmacSHA256"));
+        return HexFormat.of().formatHex(
+            mac.doFinal(payload.getBytes(StandardCharsets.UTF_8)));
+    }
+}
+
+```
+
+`ac-app/src/main/java/dev/toxido/anticheat/app/AppController.java`:
+
+```java
+package dev.toxido.anticheat.app;
+
+import java.nio.file.Path;
+import java.time.Instant;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
+
+/**
+ * Faz 1 akisi:
+ * Minecraft bekle -> ilk oturuma attach ol -> ajan el sikismasi -> API oturumu ->
+ * kalp atisi -> oyun kapaninca bitir. Tek seferlik; yeniden baglanmaz.
+ */
+public final class AppController implements Runnable, AgentBridge.Listener {
+    private final Config config;
+    private final Reporter reporter;
+    private final ApiClient api;
+
+    private final AtomicBoolean stopped = new AtomicBoolean(false);
+    private final AtomicBoolean ending = new AtomicBoolean(false);
+    private final AtomicLong lastAgentHeartbeat = new AtomicLong(0);
+    private final AtomicReference<String> endReason = new AtomicReference<>("unknown");
+    private final CountDownLatch agentReady = new CountDownLatch(1);
+    private final CountDownLatch sessionEnded = new CountDownLatch(1);
+
+    private volatile AgentBridge bridge;
+    private volatile String sessionId;
+    private volatile String sessionToken;
+    private volatile long minecraftPid;
+    private volatile ScheduledExecutorService scheduler;
+
+    public AppController(Config config, Reporter reporter) {
+        this.config = config;
+        this.reporter = reporter;
+        this.api = new ApiClient(config);
+    }
+
+    @Override
+    public void run() {
+        reporter.status("Minecraft bekleniyor...", "Minecraft acilinca otomatik baglanacak.");
+        reporter.log("Toxido AC " + config.agentVersion + " basladi.");
+
+        MinecraftProcess minecraft = null;
+        while (!stopped.get() && minecraft == null) {
+            minecraft = MinecraftProcess.find().orElse(null);
+            if (minecraft == null) {
+                sleep(1000);
+            }
+        }
+
+        if (minecraft == null) {
+            return;
+        }
+
+        minecraftPid = minecraft.pid();
+        reporter.status(
+            "Minecraft bulundu",
+            minecraft.username() + " • " + safe(minecraft.version())
+        );
+        reporter.log("Minecraft PID " + minecraft.pid() + " (" + minecraft.username() + ")");
+
+        try {
+            connect(minecraft);
+        } catch (Exception exception) {
+            reporter.log("HATA: " + exception.getMessage());
+            if ("unknown".equals(endReason.get())) {
+                endReason.set("attach_failed");
+            }
+        } finally {
+            cleanup();
+        }
+
+        reporter.status(
+            "Oturum kapandi",
+            "Sebep: " + endReason.get() + ". Yeni oturum icin uygulamayi yeniden acin."
+        );
+        reporter.log("Oturum kapandi: " + endReason.get());
+    }
+
+    private void connect(MinecraftProcess minecraft) throws Exception {
+        Path agentJar = config.resolveAgentJar();
+        reporter.log("Ajan: " + agentJar);
+
+        bridge = new AgentBridge();
+        bridge.start(this);
+
+        reporter.status("Baglaniyor...", "Ajan yukleniyor (PID " + minecraft.pid() + ")");
+        String agentArgs = "port=" + bridge.port() + ";token=" + bridge.token();
+        AttachService.loadAgent(minecraft.pid(), agentJar, agentArgs);
+
+        if (!agentReady.await(config.attachTimeoutMs, TimeUnit.MILLISECONDS)) {
+            throw new IllegalStateException(
+                "Ajan " + config.attachTimeoutMs + " ms icinde baglanmadi");
+        }
+        reporter.log("Ajan baglandi.");
+
+        ApiClient.StartResult start = api.startSession(minecraft, Instant.now().toString());
+        this.sessionId = start.sessionId();
+        this.sessionToken = start.token();
+
+        reporter.status(
+            "Oturum acik",
+            minecraft.username() + " • " + safe(minecraft.version())
+                + " • Discord kanali: " + (start.channelId() == null ? "-" : start.channelId())
+        );
+        reporter.log("Oturum: " + start.sessionId());
+        reporter.log("Discord kanal id: " + start.channelId());
+
+        lastAgentHeartbeat.set(System.currentTimeMillis());
+        startScheduler();
+        watchMinecraftProcess(minecraft);
+
+        sessionEnded.await();
+    }
+
+    private void startScheduler() {
+        scheduler = Executors.newSingleThreadScheduledExecutor(runnable -> {
+            Thread thread = new Thread(runnable, "toxido-ac-heartbeat");
+            thread.setDaemon(true);
+            return thread;
+        });
+
+        int interval = config.heartbeatIntervalMs;
+        scheduler.scheduleAtFixedRate(() -> {
+            try {
+                if (sessionId != null && sessionToken != null) {
+                    api.heartbeat(sessionId, sessionToken);
+                }
+            } catch (ApiClient.ApiException exception) {
+                if (exception.status() == 409 && ending.get()) {
+                    return;
+                }
+                reporter.log("Heartbeat hatasi: " + exception.getMessage());
+            } catch (Exception exception) {
+                reporter.log("Heartbeat hatasi: " + exception.getMessage());
+            }
+        }, interval, interval, TimeUnit.MILLISECONDS);
+
+        scheduler.scheduleAtFixedRate(() -> {
+            long last = lastAgentHeartbeat.get();
+            if (last > 0 && System.currentTimeMillis() - last > config.agentTimeoutMs) {
+                triggerEnd("agent_silent");
+            }
+        }, 5, 5, TimeUnit.SECONDS);
+    }
+
+    private void watchMinecraftProcess(MinecraftProcess minecraft) {
+        ProcessHandle.of(minecraft.pid()).ifPresentOrElse(
+            handle -> handle.onExit().thenRun(() -> triggerEnd("game_closed")),
+            () -> triggerEnd("game_closed")
+        );
+    }
+
+    public void triggerEnd(String reason) {
+        if (!ending.compareAndSet(false, true)) {
+            return;
+        }
+
+        stopped.set(true);
+        endReason.set(reason);
+        reporter.log("Oturum bitiriliyor: " + reason);
+
+        ScheduledExecutorService currentScheduler = scheduler;
+        if (currentScheduler != null) {
+            currentScheduler.shutdownNow();
+        }
+
+        if (sessionId != null && sessionToken != null) {
+            try {
+                api.endSession(sessionId, sessionToken, reason);
+            } catch (Exception exception) {
+                reporter.log("End istegi hatasi: " + exception.getMessage());
+            }
+        }
+
+        cleanup();
+        sessionEnded.countDown();
+    }
+
+    @Override
+    public void onAgentReady() {
+        lastAgentHeartbeat.set(System.currentTimeMillis());
+        reporter.log("Ajan el sikismasi tamam.");
+        agentReady.countDown();
+    }
+
+    @Override
+    public void onHeartbeat() {
+        lastAgentHeartbeat.set(System.currentTimeMillis());
+    }
+
+    @Override
+    public void onDisconnected(String reason) {
+        if (sessionId == null) {
+            return;
+        }
+
+        String effectiveReason = reason;
+        if (("agent_disconnected".equals(reason) || "agent_error".equals(reason))
+            && minecraftPid > 0) {
+            // Oyun kapanirken ajan soketi once kopabilir; kisa bir kontrolle
+            // bunu normal oyun kapanisi olarak siniflandir.
+            sleep(500);
+            if (!ProcessHandle.of(minecraftPid)
+                .map(ProcessHandle::isAlive)
+                .orElse(false)) {
+                effectiveReason = "game_closed";
+            }
+        }
+
+        triggerEnd(effectiveReason);
+    }
+
+    private void cleanup() {
+        AgentBridge currentBridge = bridge;
+        if (currentBridge != null) {
+            currentBridge.close();
+        }
+
+        ScheduledExecutorService currentScheduler = scheduler;
+        if (currentScheduler != null) {
+            currentScheduler.shutdownNow();
+        }
+    }
+
+    private static void sleep(long millis) {
+        try {
+            Thread.sleep(millis);
+        } catch (InterruptedException exception) {
+            Thread.currentThread().interrupt();
+        }
+    }
+
+    private static String safe(String value) {
+        return value == null || value.isBlank() ? "?" : value;
+    }
+}
+
+```
+
+`ac-app/src/main/java/dev/toxido/anticheat/app/AsciiLogo.java`:
+
+```java
+package dev.toxido.anticheat.app;
+
+/**
+ * Iki logo varyanti: genis terminal icin blok harfler, dar veya UTF-8
+ * desteklemeyen konsollar icin ince ASCII harfler.
+ */
+final class AsciiLogo {
+    private AsciiLogo() {
+    }
+
+    static final String[] WIDE = build(new String[][] {
+        { // T
+            "████████╗",
+            "╚══██╔══╝",
+            "   ██║   ",
+            "   ██║   ",
+            "   ██║   ",
+            "   ╚═╝   "
+        },
+        { // O
+            " ██████╗ ",
+            "██╔═══██╗",
+            "██║   ██║",
+            "██║   ██║",
+            "╚██████╔╝",
+            " ╚═════╝ "
+        },
+        { // X
+            "██╗  ██╗",
+            "╚██╗██╔╝",
+            " ╚███╔╝ ",
+            " ██╔██╗ ",
+            "██╔╝ ██╗",
+            "╚═╝  ╚═╝"
+        },
+        { // I
+            "██╗",
+            "██║",
+            "██║",
+            "██║",
+            "██║",
+            "╚═╝"
+        },
+        { // D
+            "██████╗ ",
+            "██╔══██╗",
+            "██║  ██║",
+            "██║  ██║",
+            "██████╔╝",
+            "╚═════╝ "
+        },
+        { // O
+            " ██████╗ ",
+            "██╔═══██╗",
+            "██║   ██║",
+            "██║   ██║",
+            "╚██████╔╝",
+            " ╚═════╝ "
+        }
+    }, 2);
+
+    static final String[] COMPACT = build(new String[][] {
+        { // T
+            " _____ ",
+            "|_   _|",
+            "  | |  ",
+            "  | |  ",
+            "  |_|  "
+        },
+        { // O
+            "  ___  ",
+            " / _ \\ ",
+            "| | | |",
+            "| |_| |",
+            " \\___/ "
+        },
+        { // X
+            "__  __",
+            "\\ \\/ /",
+            " >  < ",
+            "/ . \\ ",
+            "/_/\\_\\"
+        },
+        { // I
+            " ___ ",
+            "|_ _|",
+            " | | ",
+            " | | ",
+            "|___|"
+        },
+        { // D
+            " ____  ",
+            "|  _ \\ ",
+            "| | | |",
+            "| |_| |",
+            "|____/ "
+        },
+        { // O
+            "  ___  ",
+            " / _ \\ ",
+            "| | | |",
+            "| |_| |",
+            " \\___/ "
+        }
+    }, 1);
+
+    private static String[] build(String[][] glyphs, int spacing) {
+        int rows = glyphs[0].length;
+        int[] widths = new int[glyphs.length];
+        for (int glyph = 0; glyph < glyphs.length; glyph++) {
+            for (String line : glyphs[glyph]) {
+                widths[glyph] = Math.max(widths[glyph], line.length());
+            }
+        }
+
+        String[] result = new String[rows];
+        for (int row = 0; row < rows; row++) {
+            StringBuilder line = new StringBuilder();
+            for (int glyph = 0; glyph < glyphs.length; glyph++) {
+                if (glyph > 0) {
+                    line.append(" ".repeat(spacing));
+                }
+                String part = glyphs[glyph][row];
+                line.append(part);
+                line.append(" ".repeat(widths[glyph] - part.length()));
+            }
+            result[row] = line.toString();
+        }
+        return result;
+    }
+}
+
+```
+
+`ac-app/src/main/java/dev/toxido/anticheat/app/AttachService.java`:
+
+```java
+package dev.toxido.anticheat.app;
+
+import com.sun.tools.attach.VirtualMachine;
+
+import java.nio.file.Path;
+
+/**
+ * JVM Attach API ile ajan jar'ini hedef Minecraft JVM'ine yukler.
+ * Mod yukleyici gerektirmez.
+ */
+public final class AttachService {
+    private AttachService() {
+    }
+
+    public static void loadAgent(long pid, Path agentJar, String agentArgs) throws Exception {
+        VirtualMachine machine = VirtualMachine.attach(Long.toString(pid));
+        try {
+            machine.loadAgent(agentJar.toAbsolutePath().toString(), agentArgs);
+        } finally {
+            try {
+                machine.detach();
+            } catch (Exception ignored) {
+                // Detach basarisiz olsa da islem tamamlanmis olabilir.
+            }
+        }
+    }
+}
+
+```
+
+`ac-app/src/main/java/dev/toxido/anticheat/app/Config.java`:
+
+```java
+package dev.toxido.anticheat.app;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Properties;
+import java.util.UUID;
+
+public final class Config {
+    public final String apiBaseUrl;
+    public final String apiKey;
+    public final String apiSecret;
+    public final int heartbeatIntervalMs;
+    public final int agentTimeoutMs;
+    public final int attachTimeoutMs;
+    public final String agentVersion;
+
+    private final String agentJar;
+    private final String deviceId;
+
+    private Config(Properties properties, String deviceId) {
+        this.apiBaseUrl = trimTrailingSlash(
+            properties.getProperty("api.baseUrl", "http://127.0.0.1:8000"));
+        this.apiKey = properties.getProperty("api.key", "dev-key");
+        this.apiSecret = properties.getProperty("api.secret", "dev-secret-change-me");
+        this.heartbeatIntervalMs = intValue(properties, "heartbeat.intervalMs", 5000);
+        this.agentTimeoutMs = intValue(properties, "agent.timeoutMs", 20000);
+        this.attachTimeoutMs = intValue(properties, "attach.timeoutMs", 15000);
+        this.agentVersion = properties.getProperty("agent.version", "0.1.0");
+        this.agentJar = properties.getProperty("agent.jar", "").trim();
+        this.deviceId = deviceId;
+    }
+
+    public static Config load() throws IOException {
+        Properties properties = new Properties();
+
+        Path external = null;
+        String configured = System.getProperty("ac.config");
+        if (configured != null && !configured.isBlank()) {
+            external = Path.of(configured);
+        } else {
+            Path local = Path.of("config.properties");
+            if (Files.exists(local)) {
+                external = local;
+            }
+        }
+
+        if (external != null && Files.exists(external)) {
+            try (InputStream input = Files.newInputStream(external)) {
+                properties.load(input);
+            }
+        } else {
+            try (InputStream input = Config.class.getResourceAsStream("/config.properties")) {
+                if (input != null) {
+                    properties.load(input);
+                }
+            }
+        }
+
+        override(properties, "api.baseUrl", "AC_API_URL");
+        override(properties, "api.key", "AC_API_KEY");
+        override(properties, "api.secret", "AC_API_SECRET");
+        override(properties, "agent.jar", "AC_AGENT_JAR");
+
+        return new Config(properties, loadDeviceId());
+    }
+
+    public Path resolveAgentJar() {
+        if (!agentJar.isBlank()) {
+            Path path = Path.of(agentJar).toAbsolutePath().normalize();
+            if (Files.exists(path)) {
+                return path;
+            }
+        }
+
+        String systemProperty = System.getProperty("ac.agent.jar");
+        if (systemProperty != null && !systemProperty.isBlank()) {
+            Path path = Path.of(systemProperty).toAbsolutePath().normalize();
+            if (Files.exists(path)) {
+                return path;
+            }
+        }
+
+        String[] candidates = {
+            "ac-agent/target/ac-agent.jar",
+            "../ac-agent/target/ac-agent.jar",
+            "ac-agent.jar"
+        };
+        for (String candidate : candidates) {
+            Path path = Path.of(candidate).toAbsolutePath().normalize();
+            if (Files.exists(path)) {
+                return path;
+            }
+        }
+
+        try {
+            Path appDirectory = Path.of(
+                Config.class.getProtectionDomain().getCodeSource().getLocation().toURI()
+            ).getParent();
+            Path nextToJar = appDirectory.resolve("ac-agent.jar");
+            if (Files.exists(nextToJar)) {
+                return nextToJar;
+            }
+            Path inRepository = appDirectory.resolve("../ac-agent/target/ac-agent.jar").normalize();
+            if (Files.exists(inRepository)) {
+                return inRepository;
+            }
+        } catch (Exception ignored) {
+            // Asagidaki hata daha aciklayici.
+        }
+
+        throw new IllegalStateException(
+            "ac-agent.jar bulunamadi. -Dac.agent.jar=... ile yol belirtin.");
+    }
+
+    public String deviceId() {
+        return deviceId;
+    }
+
+    private static void override(Properties properties, String key, String environmentName) {
+        String value = System.getenv(environmentName);
+        if (value != null && !value.isBlank()) {
+            properties.setProperty(key, value);
+        }
+    }
+
+    private static String trimTrailingSlash(String value) {
+        String trimmed = value.trim();
+        while (trimmed.endsWith("/")) {
+            trimmed = trimmed.substring(0, trimmed.length() - 1);
+        }
+        return trimmed;
+    }
+
+    private static int intValue(Properties properties, String key, int fallback) {
+        try {
+            return Integer.parseInt(properties.getProperty(key, Integer.toString(fallback)).trim());
+        } catch (NumberFormatException exception) {
+            return fallback;
+        }
+    }
+
+    private static String loadDeviceId() {
+        try {
+            String appData = System.getenv().getOrDefault(
+                "APPDATA", System.getProperty("user.home"));
+            Path directory = Path.of(appData, "40x1d0AC");
+            Files.createDirectories(directory);
+            Path file = directory.resolve("device.id");
+            if (Files.exists(file)) {
+                String existing = Files.readString(file).trim();
+                if (!existing.isBlank()) {
+                    return existing;
+                }
+            }
+            String id = UUID.randomUUID().toString();
+            Files.writeString(file, id);
+            return id;
+        } catch (Exception exception) {
+            return "unknown-" + UUID.randomUUID();
+        }
+    }
+}
+
+```
+
+`ac-app/src/main/java/dev/toxido/anticheat/app/ConsoleOutput.java`:
+
+```java
+package dev.toxido.anticheat.app;
+
+import org.fusesource.jansi.AnsiColors;
+import org.fusesource.jansi.AnsiConsole;
+import org.fusesource.jansi.AnsiPrintStream;
+
+import java.io.FileDescriptor;
+import java.io.FileOutputStream;
+import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
+import java.util.Locale;
+import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+/**
+ * Konsol cikisi icin ortak katman. Windows kod sayfasini UTF-8'e alir,
+ * boyutlari tespit eder ve Jansi ile sanal terminali etkinlestirir.
+ */
+final class ConsoleOutput implements AutoCloseable {
+    private static final Pattern CODE_PAGE = Pattern.compile("(\\d{3,5})");
+
+    private final PrintStream out;
+    private final boolean unicode;
+    private final int width;
+    private final int height;
+    private final AnsiColors colors;
+    private final int originalCodePage;
+    private final boolean jansiInstalled;
+    private boolean closed;
+
+    private ConsoleOutput(
+        PrintStream out,
+        boolean unicode,
+        int width,
+        int height,
+        AnsiColors colors,
+        int originalCodePage,
+        boolean jansiInstalled
+    ) {
+        this.out = out;
+        this.unicode = unicode;
+        this.width = width;
+        this.height = height;
+        this.colors = colors;
+        this.originalCodePage = originalCodePage;
+        this.jansiInstalled = jansiInstalled;
+    }
+
+    static ConsoleOutput open() {
+        boolean jansiInstalled = false;
+        try {
+            AnsiConsole.systemInstall();
+            jansiInstalled = true;
+        } catch (Throwable ignored) {
+            // Jansi olmadan duz ANSI ile devam edilir.
+        }
+
+        AnsiColors colors = AnsiColors.Colors16;
+        try {
+            AnsiPrintStream jansiOut = AnsiConsole.out();
+            if (jansiOut != null && jansiOut.getColors() != null) {
+                colors = jansiOut.getColors();
+            }
+        } catch (Throwable ignored) {
+            // Renk modu tespit edilemezse 16 renk kullanilir.
+        }
+
+        int originalCodePage = isWindows() ? queryCodePage() : 65001;
+        int currentCodePage = originalCodePage;
+        if (isWindows() && originalCodePage != 65001) {
+            setCodePage(65001);
+            currentCodePage = queryCodePage();
+        }
+
+        boolean unicode = currentCodePage == 65001 || stdoutIsUtf8();
+        int width = detectWidth();
+        int height = detectHeight();
+
+        PrintStream utf8 = new PrintStream(
+            new FileOutputStream(FileDescriptor.out), true, StandardCharsets.UTF_8);
+
+        return new ConsoleOutput(
+            utf8, unicode, width, height, colors, originalCodePage, jansiInstalled);
+    }
+
+    PrintStream out() {
+        return out;
+    }
+
+    boolean unicode() {
+        return unicode;
+    }
+
+    int width() {
+        return width;
+    }
+
+    int height() {
+        return height;
+    }
+
+    AnsiColors colors() {
+        return colors;
+    }
+
+    @Override
+    public void close() {
+        if (closed) {
+            return;
+        }
+        closed = true;
+        try {
+            out.flush();
+        } catch (Exception ignored) {
+            // Konsol kapanmis olabilir.
+        }
+        if (isWindows() && originalCodePage > 0 && originalCodePage != 65001) {
+            setCodePage(originalCodePage);
+        }
+        if (jansiInstalled) {
+            try {
+                AnsiConsole.systemUninstall();
+            } catch (Throwable ignored) {
+                // Jansi kurulu degildiyse yoksay.
+            }
+        }
+    }
+
+    private static int detectWidth() {
+        int width = 0;
+        try {
+            width = AnsiConsole.getTerminalWidth();
+        } catch (Throwable ignored) {
+            // Asagidaki ortam degiskenlerine bakilir.
+        }
+        if (width <= 0) {
+            width = intEnv("COLUMNS");
+        }
+        if (width <= 0) {
+            width = 100;
+        }
+        return clamp(width, 24, 160);
+    }
+
+    private static int detectHeight() {
+        int height = intEnv("LINES");
+        if (height <= 0) {
+            height = 30;
+        }
+        return clamp(height, 16, 50);
+    }
+
+    private static int intEnv(String name) {
+        String value = System.getenv(name);
+        if (value == null || value.isBlank()) {
+            return 0;
+        }
+        try {
+            return Integer.parseInt(value.trim());
+        } catch (NumberFormatException ignored) {
+            return 0;
+        }
+    }
+
+    private static int queryCodePage() {
+        try {
+            ProcessBuilder builder = new ProcessBuilder("cmd.exe", "/c", "chcp");
+            builder.redirectErrorStream(true);
+            Process process = builder.start();
+            byte[] bytes = process.getInputStream().readAllBytes();
+            process.waitFor(2, TimeUnit.SECONDS);
+            Matcher matcher = CODE_PAGE.matcher(new String(bytes, StandardCharsets.ISO_8859_1));
+            int codePage = 0;
+            while (matcher.find()) {
+                codePage = Integer.parseInt(matcher.group(1));
+            }
+            return codePage;
+        } catch (Exception ignored) {
+            return 0;
+        }
+    }
+
+    private static void setCodePage(int codePage) {
+        try {
+            ProcessBuilder builder = new ProcessBuilder(
+                "cmd.exe", "/c", "chcp", Integer.toString(codePage));
+            builder.redirectOutput(ProcessBuilder.Redirect.DISCARD);
+            builder.redirectErrorStream(true);
+            Process process = builder.start();
+            process.waitFor(3, TimeUnit.SECONDS);
+        } catch (Exception ignored) {
+            // Kod sayfasi degistirilemezse ASCII logoya dusulur.
+        }
+    }
+
+    private static boolean stdoutIsUtf8() {
+        String encoding = System.getProperty("stdout.encoding", "");
+        if (encoding.isBlank()) {
+            encoding = System.getProperty("sun.stdout.encoding", "");
+        }
+        return encoding.toLowerCase(Locale.ROOT).replace("-", "").contains("utf8");
+    }
+
+    private static boolean isWindows() {
+        return System.getProperty("os.name", "")
+            .toLowerCase(Locale.ROOT)
+            .contains("win");
+    }
+
+    private static int clamp(int value, int minimum, int maximum) {
+        return Math.max(minimum, Math.min(maximum, value));
+    }
+}
+
+```
+
+`ac-app/src/main/java/dev/toxido/anticheat/app/LogReporter.java`:
+
+```java
+package dev.toxido.anticheat.app;
+
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
+import java.nio.file.StandardOpenOption;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+
+/**
+ * Servis durumunu %APPDATA%\40x1d0AC\ac.log dosyasina yazar.
+ * Terminalde bilgi kalabaligi olusturmamak icin tek cikis noktasi burasidir.
+ */
+public final class LogReporter implements Reporter {
+    private static final DateTimeFormatter TIME_FORMAT =
+        DateTimeFormatter.ofPattern("HH:mm:ss");
+    private static final long MAX_BYTES = 1_000_000L;
+
+    private final Path logFile;
+
+    public LogReporter(Path logFile) {
+        this.logFile = logFile;
+        try {
+            Files.createDirectories(logFile.getParent());
+        } catch (IOException ignored) {
+            // Log dizini olusturulamazsa yazma denemesi sessizce basarisiz olur.
+        }
+    }
+
+    public static Path defaultLogFile() {
+        return appDataDirectory().resolve("ac.log");
+    }
+
+    public static Path appDataDirectory() {
+        String appData = System.getenv().getOrDefault(
+            "APPDATA", System.getProperty("user.home"));
+        return Path.of(appData, "40x1d0AC");
+    }
+
+    @Override
+    public synchronized void status(String status, String detail) {
+        StringBuilder message = new StringBuilder("[STATUS] ").append(status);
+        if (detail != null && !detail.isBlank()) {
+            message.append(" - ").append(detail);
+        }
+        log(message.toString());
+    }
+
+    @Override
+    public synchronized void log(String message) {
+        String line = "[" + LocalTime.now().format(TIME_FORMAT) + "] "
+            + message + System.lineSeparator();
+        try {
+            rotateIfNeeded();
+            Files.writeString(
+                logFile,
+                line,
+                StandardCharsets.UTF_8,
+                StandardOpenOption.CREATE,
+                StandardOpenOption.APPEND
+            );
+        } catch (IOException ignored) {
+            // Servis, log yazamasa bile calismaya devam etmeli.
+        }
+    }
+
+    private void rotateIfNeeded() throws IOException {
+        if (!Files.exists(logFile) || Files.size(logFile) <= MAX_BYTES) {
+            return;
+        }
+        Path old = logFile.resolveSibling(logFile.getFileName() + ".1");
+        Files.move(logFile, old, StandardCopyOption.REPLACE_EXISTING);
+    }
+}
+
+```
+
+`ac-app/src/main/java/dev/toxido/anticheat/app/Main.java`:
+
+```java
+package dev.toxido.anticheat.app;
+
+import java.util.Arrays;
+
+public final class Main {
+    private Main() {
+    }
+
+    public static void main(String[] args) {
+        if (args.length > 0 && "--service".equals(args[0])) {
+            ServiceMain.main(Arrays.copyOfRange(args, 1, args.length));
+            return;
+        }
+
+        boolean preview = args.length > 0 && "--preview".equals(args[0]);
+        new TerminalSplash(preview).run();
+    }
+}
+
+```
+
+`ac-app/src/main/java/dev/toxido/anticheat/app/MinecraftProcess.java`:
+
+```java
+package dev.toxido.anticheat.app;
+
+import com.sun.tools.attach.VirtualMachine;
+import com.sun.tools.attach.VirtualMachineDescriptor;
+
+import java.util.Locale;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+/**
+ * Calisan Minecraft istemcisini (Java Edition) temsil eder.
+ *
+ * Tespit icin ProcessHandle yerine JVM Attach API'nin VirtualMachine.list()
+ * kullanilir; Windows'ta ProcessHandle harici sureclerin komut satirini
+ * vermedigi icin bu yol daha guvenilirdir. Boylece sadece attach edilebilir
+ * JVM'ler listelenir ve modlu istemciler de gorulebilir.
+ */
+public record MinecraftProcess(
+    long pid,
+    String username,
+    String uuid,
+    String version,
+    String displayName
+) {
+    private static final Pattern USERNAME_PATTERN =
+        Pattern.compile("--username\\s+(?:\"([^\"]*)\"|(\\S+))");
+    private static final Pattern UUID_PATTERN =
+        Pattern.compile("--uuid\\s+(?:\"([^\"]*)\"|(\\S+))");
+    private static final Pattern VERSION_PATTERN =
+        Pattern.compile("--version\\s+(?:\"([^\"]*)\"|(\\S+))");
+
+    private static final String[] KNOWN_MAIN_CLASSES = {
+        "net.minecraft.client.main.main",
+        "net.fabricmc.loader.impl.launch.knot.knotclient",
+        "org.quiltmc.loader.impl.launch.knot.knotclient",
+        "cpw.mods.bootstraplauncher.bootstraplauncher",
+        "net.neoforged.bootstrap.bootstraplauncher",
+        "net.minecraftforge.bootstrap.forgebootstrap"
+    };
+
+    public static Optional<MinecraftProcess> find() {
+        try {
+            long selfPid = ProcessHandle.current().pid();
+            return VirtualMachine.list().stream()
+                .filter(descriptor -> !Long.toString(selfPid).equals(descriptor.id()))
+                .filter(descriptor -> isMinecraft(descriptor.displayName()))
+                .map(descriptor -> parse(descriptor))
+                .filter(Objects::nonNull)
+                .findFirst();
+        } catch (Exception exception) {
+            return Optional.empty();
+        }
+    }
+
+    private static boolean isMinecraft(String displayName) {
+        if (displayName == null || displayName.isBlank()) {
+            return false;
+        }
+        String lower = displayName.toLowerCase(Locale.ROOT);
+        for (String mainClass : KNOWN_MAIN_CLASSES) {
+            if (lower.contains(mainClass)) {
+                return true;
+            }
+        }
+        // Jar uzerinden baslatilan istemciler icin yedek kontrol.
+        return lower.contains("--username") && lower.contains("--version");
+    }
+
+    private static MinecraftProcess parse(VirtualMachineDescriptor descriptor) {
+        String displayName = descriptor.displayName();
+        String username = value(displayName, USERNAME_PATTERN);
+        if (username == null || username.isBlank()) {
+            return null;
+        }
+        try {
+            return new MinecraftProcess(
+                Long.parseLong(descriptor.id()),
+                username,
+                value(displayName, UUID_PATTERN),
+                value(displayName, VERSION_PATTERN),
+                displayName
+            );
+        } catch (NumberFormatException exception) {
+            return null;
+        }
+    }
+
+    private static String value(String displayName, Pattern pattern) {
+        Matcher matcher = pattern.matcher(displayName);
+        if (!matcher.find()) {
+            return null;
+        }
+        return matcher.group(1) != null ? matcher.group(1) : matcher.group(2);
+    }
+}
+
+```
+
+`ac-app/src/main/java/dev/toxido/anticheat/app/Reporter.java`:
+
+```java
+package dev.toxido.anticheat.app;
+
+/**
+ * Arayuzden bagimsiz durum raporlayici. Terminal splash'i sadece animasyon
+ * gosterir; servis durumunu bu arayuz uzerinden dosyaya yazar.
+ */
+public interface Reporter {
+    void status(String status, String detail);
+
+    void log(String message);
+}
+
+```
+
+`ac-app/src/main/java/dev/toxido/anticheat/app/ServiceLock.java`:
+
+```java
+package dev.toxido.anticheat.app;
+
+import java.io.IOException;
+import java.nio.channels.FileChannel;
+import java.nio.channels.FileLock;
+import java.nio.channels.OverlappingFileLockException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
+
+/**
+ * Ayni anda ikinci bir servis baslatilmasini engeller. Kilit dosyasi
+ * surec kapaninca isletim sistemi tarafindan otomatik birakilir.
+ */
+public final class ServiceLock implements AutoCloseable {
+    private final FileChannel channel;
+    private final FileLock lock;
+
+    private ServiceLock(FileChannel channel, FileLock lock) {
+        this.channel = channel;
+        this.lock = lock;
+    }
+
+    public static ServiceLock acquire() throws IOException {
+        Path path = LogReporter.appDataDirectory().resolve("service.lock");
+        Files.createDirectories(path.getParent());
+
+        FileChannel channel = FileChannel.open(
+            path,
+            StandardOpenOption.CREATE,
+            StandardOpenOption.WRITE
+        );
+
+        try {
+            FileLock lock = channel.tryLock();
+            if (lock == null) {
+                channel.close();
+                return null;
+            }
+            return new ServiceLock(channel, lock);
+        } catch (OverlappingFileLockException exception) {
+            channel.close();
+            return null;
+        }
+    }
+
+    @Override
+    public void close() {
+        try {
+            lock.release();
+        } catch (IOException ignored) {
+            // Kilit zaten birakilmis olabilir.
+        }
+        try {
+            channel.close();
+        } catch (IOException ignored) {
+            // Kanal zaten kapanmis olabilir.
+        }
+    }
+}
+
+```
+
+`ac-app/src/main/java/dev/toxido/anticheat/app/ServiceMain.java`:
+
+```java
+package dev.toxido.anticheat.app;
+
+/**
+ * Gorunmez arka plan servisi. Terminal splash'i kapansa da Minecraft
+ * kapanana kadar calismaya devam eder.
+ */
+public final class ServiceMain {
+    private ServiceMain() {
+    }
+
+    public static void main(String[] args) {
+        LogReporter reporter = new LogReporter(LogReporter.defaultLogFile());
+        reporter.log("Toxido AC servisi baslatiliyor.");
+
+        try (ServiceLock lock = ServiceLock.acquire()) {
+            if (lock == null) {
+                reporter.log("Baska bir servis zaten calisiyor; cikiliyor.");
+                return;
+            }
+
+            Config config = Config.load();
+            reporter.log("Servis hazir. API: " + config.apiBaseUrl
+                + " | cihaz: " + config.deviceId());
+
+            AppController controller = new AppController(config, reporter);
+            controller.run();
+        } catch (Throwable throwable) {
+            reporter.log("HATA: " + throwable.getMessage());
+            throwable.printStackTrace();
+        } finally {
+            reporter.log("Toxido AC servisi kapandi.");
+            System.exit(0);
+        }
+    }
+}
+
+```
+
+`ac-app/src/main/java/dev/toxido/anticheat/app/SplashScreen.java`:
+
+```java
+package dev.toxido.anticheat.app;
+
+import org.fusesource.jansi.AnsiColors;
+
+import java.io.PrintStream;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+
+/**
+ * Terminal splash sahnesi: blok TOXIDO yazisi, soldan saga tarama efekti,
+ * altinda diff tabanli Matrix yagmuru ve kucuk bir Enter ipucu.
+ */
+final class SplashScreen implements AutoCloseable {
+    private static final String ESC = "\033[";
+    private static final String MATRIX_GLYPHS =
+        "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ<>[]{}/\\|=+-*#@$%&";
+
+    private final PrintStream out;
+    private final int width;
+    private final int height;
+    private final Palette palette;
+    private final String[] logo;
+    private final int logoWidth;
+    private final int logoHeight;
+    private final int logoTop;
+    private final int logoLeft;
+    private final int rainTop;
+    private final int rainLeft;
+    private final int rainWidth;
+    private final int rainHeight;
+    private final Rain rain;
+    private final SideOrb leftOrb;
+    private final SideOrb rightOrb;
+    private final long startNanos;
+
+    private boolean started;
+    private boolean closed;
+    private boolean logoDone;
+    private int lastRevealColumns;
+    private boolean hintVisible;
+    private String error;
+    private String drawnError;
+
+    SplashScreen(ConsoleOutput console) {
+        this.out = console.out();
+        this.width = console.width();
+        this.height = console.height();
+        this.palette = new Palette(console.colors());
+
+        String[] selected = console.unicode() && width >= 64
+            ? AsciiLogo.WIDE
+            : AsciiLogo.COMPACT;
+        this.logo = selected;
+        this.logoHeight = selected.length;
+        this.logoWidth = maxWidth(selected);
+        this.logoTop = clamp((height - logoHeight) / 4, 2, 5);
+        this.logoLeft = Math.max(1, (width - logoWidth) / 2 + 1);
+
+        this.rainTop = logoTop + logoHeight + 2;
+        this.rainLeft = 1;
+        this.rainWidth = Math.max(20, width);
+        int available = height - rainTop - 1;
+        this.rainHeight = Math.max(3, available);
+        this.rain = new Rain(rainWidth, rainHeight);
+
+        int leftSpace = Math.max(0, logoLeft - 1);
+        int rightSpace = Math.max(0, width - (logoLeft + logoWidth - 1));
+        int sideSpace = Math.min(leftSpace, rightSpace);
+        int radiusX = Math.min(12, Math.max(0, (sideSpace - 4) / 2));
+        int radiusY = radiusX >= 9 ? 3 : radiusX >= 5 ? 2 : 1;
+        int gap = Math.max(2, sideSpace - radiusX * 2);
+        int orbRow = logoTop + (logoHeight - 1) / 2;
+        if (radiusX > 0) {
+            int leftCenter = logoLeft - gap - radiusX;
+            int rightCenter = logoLeft + logoWidth - 1 + gap + radiusX;
+            this.leftOrb = new SideOrb(leftCenter, orbRow, radiusX, radiusY, 0, 1);
+            this.rightOrb = new SideOrb(rightCenter, orbRow, radiusX, radiusY, 17, -1);
+        } else {
+            this.leftOrb = null;
+            this.rightOrb = null;
+        }
+        this.startNanos = System.nanoTime();
+    }
+
+    void start() {
+        if (started) {
+            return;
+        }
+        started = true;
+        out.print(ESC + "?1049h"
+            + ESC + "40m"
+            + ESC + "2J"
+            + ESC + "H"
+            + ESC + "?25l");
+        out.print(cursor(height, 1)
+            + palette.background()
+            + " ".repeat(Math.max(1, width))
+            + palette.foregroundReset());
+        drawGhost();
+        out.flush();
+    }
+
+    void render() {
+        if (!started || closed) {
+            return;
+        }
+        long elapsedMs = (System.nanoTime() - startNanos) / 1_000_000L;
+        drawLogoReveal(elapsedMs);
+        drawOrbs(elapsedMs);
+        rain.update();
+        rain.render(out, palette, rainTop, rainLeft);
+        drawBottomLine(elapsedMs);
+        out.flush();
+    }
+
+    void setError(String message) {
+        if (message != null && !message.isBlank()) {
+            this.error = message;
+        }
+    }
+
+    @Override
+    public void close() {
+        if (closed) {
+            return;
+        }
+        closed = true;
+        try {
+            out.print(ESC + "0m" + ESC + "?25h" + ESC + "?1049l");
+            out.flush();
+        } catch (Exception ignored) {
+            // Konsol kapanmis olabilir.
+        }
+    }
+
+    private void drawGhost() {
+        for (int row = 0; row < logoHeight; row++) {
+            String line = logo[row];
+            for (int column = 0; column < line.length(); column++) {
+                char glyph = line.charAt(column);
+                if (glyph == ' ') {
+                    continue;
+                }
+                if (glyph == '█') {
+                    out.print(cursor(logoTop + row, logoLeft + column)
+                        + palette.ghostBackground()
+                        + palette.ghostForeground()
+                        + "█"
+                        + palette.background()
+                        + palette.foregroundReset());
+                } else {
+                    out.print(cursor(logoTop + row, logoLeft + column)
+                        + palette.ghostForeground()
+                        + glyph
+                        + palette.foregroundReset());
+                }
+            }
+        }
+    }
+
+    private void drawLogoReveal(long elapsedMs) {
+        if (logoDone) {
+            return;
+        }
+
+        double reveal = Math.min(1.0, elapsedMs / 850.0);
+        int columns = (int) Math.round(reveal * logoWidth);
+        columns = Math.max(0, Math.min(logoWidth, columns));
+        boolean complete = reveal >= 1.0;
+
+        if (columns > lastRevealColumns) {
+            drawLogoColumns(lastRevealColumns, columns, false);
+        }
+
+        if (lastRevealColumns > 0) {
+            int previousEdge = Math.max(0, lastRevealColumns - 3);
+            drawLogoColumns(previousEdge, lastRevealColumns, false);
+        }
+
+        if (complete) {
+            logoDone = true;
+            lastRevealColumns = columns;
+            return;
+        }
+
+        int edgeStart = Math.max(0, columns - 3);
+        drawLogoColumns(edgeStart, columns, true);
+        lastRevealColumns = columns;
+    }
+
+    private void drawLogoColumns(int from, int to, boolean scan) {
+        if (to <= from) {
+            return;
+        }
+        for (int row = 0; row < logoHeight; row++) {
+            String line = logo[row];
+            int limit = Math.min(to, line.length());
+            for (int column = Math.max(0, from); column < limit; column++) {
+                char glyph = line.charAt(column);
+                if (glyph == ' ') {
+                    continue;
+                }
+                int screenRow = logoTop + row;
+                int screenColumn = logoLeft + column;
+                if (glyph == '█') {
+                    out.print(cursor(screenRow, screenColumn)
+                        + (scan ? palette.scanBackground() : palette.logoBackground(row))
+                        + (scan ? palette.scanForeground() : palette.logoForeground(row))
+                        + "█"
+                        + palette.background()
+                        + palette.foregroundReset());
+                } else {
+                    out.print(cursor(screenRow, screenColumn)
+                        + (scan ? palette.scanForeground() : palette.logoForeground(row))
+                        + glyph
+                        + palette.foregroundReset());
+                }
+            }
+        }
+    }
+
+    private void drawOrbs(long elapsedMs) {
+        if (leftOrb != null) {
+            leftOrb.draw(out, palette, elapsedMs);
+        }
+        if (rightOrb != null) {
+            rightOrb.draw(out, palette, elapsedMs);
+        }
+    }
+
+    private void drawBottomLine(long elapsedMs) {
+        if (error != null) {
+            if (!error.equals(drawnError)) {
+                clearHint();
+                String text = fit(error, Math.max(1, width - 2));
+                int column = Math.max(1, (width - text.length()) / 2 + 1);
+                out.print(cursor(height - 1, column)
+                    + palette.red()
+                    + text
+                    + palette.foregroundReset());
+                drawnError = error;
+            }
+            return;
+        }
+
+        if (drawnError != null) {
+            out.print(cursor(height, 1) + palette.background()
+                + " ".repeat(Math.max(1, width - 1))
+                + palette.foregroundReset());
+            drawnError = null;
+        }
+
+        if (hintVisible) {
+            return;
+        }
+        String hint = "[ enter ]";
+        int column = Math.max(1, (width - hint.length()) / 2 + 1);
+        out.print(cursor(height - 1, column)
+            + palette.dim()
+            + hint
+            + palette.foregroundReset());
+        hintVisible = true;
+    }
+
+    private void clearHint() {
+        if (!hintVisible) {
+            return;
+        }
+        String hint = "[ enter ]";
+        int column = Math.max(1, (width - hint.length()) / 2 + 1);
+        out.print(cursor(height - 1, column)
+            + palette.background()
+            + " ".repeat(hint.length())
+            + palette.foregroundReset());
+        hintVisible = false;
+    }
+
+    private static int maxWidth(String[] lines) {
+        int width = 0;
+        for (String line : lines) {
+            width = Math.max(width, line.length());
+        }
+        return width;
+    }
+
+    private static String fit(String text, int max) {
+        if (text.length() <= max) {
+            return text;
+        }
+        return text.substring(0, Math.max(1, max));
+    }
+
+    private static String cursor(int row, int column) {
+        return ESC + row + ";" + column + "H";
+    }
+
+    private static int clamp(int value, int minimum, int maximum) {
+        return Math.max(minimum, Math.min(maximum, value));
+    }
+
+    private static final class Palette {
+        private final AnsiColors mode;
+        private final int[][] logoRgb = {
+            {196, 255, 222},
+            {150, 255, 200},
+            {105, 245, 178},
+            {68, 225, 150},
+            {38, 190, 118},
+            {22, 150, 86}
+        };
+        private final int[] logo256 = {159, 121, 85, 49, 35, 22};
+        private final int[] logo16 = {92, 92, 92, 32, 32, 32};
+
+        private Palette(AnsiColors mode) {
+            this.mode = mode == null ? AnsiColors.Colors16 : mode;
+        }
+
+        String logo(int row) {
+            if (mode == AnsiColors.TrueColor) {
+                int[] rgb = logoRgb[Math.min(row, logoRgb.length - 1)];
+                return fgRgb(rgb[0], rgb[1], rgb[2]);
+            }
+            if (mode == AnsiColors.Colors256) {
+                return fg256(logo256[Math.min(row, logo256.length - 1)]);
+            }
+            return fg16(logo16[Math.min(row, logo16.length - 1)]);
+        }
+
+        String logoForeground(int row) {
+            return logo(row);
+        }
+
+        String logoBackground(int row) {
+            if (mode == AnsiColors.TrueColor) {
+                int[] rgb = logoRgb[Math.min(row, logoRgb.length - 1)];
+                return bgRgb(rgb[0], rgb[1], rgb[2]);
+            }
+            if (mode == AnsiColors.Colors256) {
+                return bg256(logo256[Math.min(row, logo256.length - 1)]);
+            }
+            return bg16(row < 3 ? 102 : 42);
+        }
+
+        String ghostForeground() {
+            return ghost();
+        }
+
+        String ghostBackground() {
+            if (mode == AnsiColors.TrueColor) {
+                return bgRgb(0, 35, 18);
+            }
+            if (mode == AnsiColors.Colors256) {
+                return bg256(22);
+            }
+            return bg16(42);
+        }
+
+        String scanForeground() {
+            return scan();
+        }
+
+        String scanBackground() {
+            if (mode == AnsiColors.TrueColor) {
+                return bgRgb(238, 255, 247);
+            }
+            if (mode == AnsiColors.Colors256) {
+                return bg256(159);
+            }
+            return bg16(107);
+        }
+
+        String rain(int shade) {
+            if (mode == AnsiColors.TrueColor) {
+                return switch (shade) {
+                    case 4 -> fgRgb(215, 255, 232);
+                    case 3 -> fgRgb(120, 255, 180);
+                    case 2 -> fgRgb(48, 210, 125);
+                    default -> fgRgb(18, 110, 62);
+                };
+            }
+            if (mode == AnsiColors.Colors256) {
+                return switch (shade) {
+                    case 4 -> fg256(159);
+                    case 3 -> fg256(121);
+                    case 2 -> fg256(40);
+                    default -> fg256(22);
+                };
+            }
+            return switch (shade) {
+                case 4 -> fg16(97);
+                case 3 -> fg16(92);
+                default -> fg16(32);
+            };
+        }
+
+        String ghost() {
+            if (mode == AnsiColors.TrueColor) {
+                return fgRgb(0, 58, 30);
+            }
+            if (mode == AnsiColors.Colors256) {
+                return fg256(22);
+            }
+            return fg16(32);
+        }
+
+        String scan() {
+            if (mode == AnsiColors.TrueColor) {
+                return fgRgb(238, 255, 247);
+            }
+            if (mode == AnsiColors.Colors256) {
+                return fg256(159);
+            }
+            return fg16(97);
+        }
+
+        String dim() {
+            if (mode == AnsiColors.TrueColor) {
+                return fgRgb(40, 130, 80);
+            }
+            if (mode == AnsiColors.Colors256) {
+                return fg256(35);
+            }
+            return fg16(32);
+        }
+
+        String red() {
+            if (mode == AnsiColors.TrueColor) {
+                return fgRgb(255, 90, 90);
+            }
+            if (mode == AnsiColors.Colors256) {
+                return fg256(196);
+            }
+            return fg16(91);
+        }
+
+        String background() {
+            return ESC + "40m";
+        }
+
+        String foregroundReset() {
+            return ESC + "39m";
+        }
+
+        private static String fgRgb(int red, int green, int blue) {
+            return ESC + "38;2;" + red + ";" + green + ";" + blue + "m";
+        }
+
+        private static String fg256(int code) {
+            return ESC + "38;5;" + code + "m";
+        }
+
+        private static String fg16(int code) {
+            return ESC + code + "m";
+        }
+
+        private static String bgRgb(int red, int green, int blue) {
+            return ESC + "48;2;" + red + ";" + green + ";" + blue + "m";
+        }
+
+        private static String bg256(int code) {
+            return ESC + "48;5;" + code + "m";
+        }
+
+        private static String bg16(int code) {
+            return ESC + code + "m";
+        }
+    }
+
+    private static final class SideOrb {
+        private final int centerColumn;
+        private final int centerRow;
+        private final int radiusX;
+        private final int radiusY;
+        private final int phaseOffset;
+        private final int direction;
+        private final int[][] points;
+
+        private SideOrb(
+            int centerColumn,
+            int centerRow,
+            int radiusX,
+            int radiusY,
+            int phaseOffset,
+            int direction
+        ) {
+            this.centerColumn = centerColumn;
+            this.centerRow = centerRow;
+            this.radiusX = radiusX;
+            this.radiusY = radiusY;
+            this.phaseOffset = phaseOffset;
+            this.direction = direction;
+            this.points = buildPoints();
+        }
+
+        private int[][] buildPoints() {
+            List<int[]> found = new ArrayList<>();
+            boolean[][] seen = new boolean[radiusY * 2 + 1][radiusX * 2 + 1];
+            for (int step = 0; step < 120; step++) {
+                double angle = Math.PI * 2.0 * step / 120.0;
+                int x = (int) Math.round(radiusX * Math.cos(angle));
+                int y = (int) Math.round(radiusY * Math.sin(angle));
+                int row = y + radiusY;
+                int column = x + radiusX;
+                if (!seen[row][column]) {
+                    seen[row][column] = true;
+                    found.add(new int[] {x, y});
+                }
+            }
+            return found.toArray(new int[0][]);
+        }
+
+        private void draw(PrintStream out, Palette palette, long elapsedMs) {
+            int count = points.length;
+            if (count == 0) {
+                return;
+            }
+            int step = (int) (elapsedMs / 75L);
+            int head = Math.floorMod(step * direction + phaseOffset, count);
+
+            for (int index = 0; index < count; index++) {
+                int distance = Math.floorMod(direction * (head - index), count);
+                char glyph;
+                String color;
+                if (distance == 0) {
+                    glyph = '●';
+                    color = palette.scan();
+                } else if (distance <= 2) {
+                    glyph = '•';
+                    color = palette.rain(3);
+                } else if (distance <= 5) {
+                    glyph = '·';
+                    color = palette.rain(2);
+                } else {
+                    glyph = '○';
+                    color = palette.ghost();
+                }
+                out.print(cursor(
+                    centerRow + points[index][1],
+                    centerColumn + points[index][0])
+                    + color
+                    + glyph
+                    + palette.foregroundReset());
+            }
+        }
+    }
+
+    private static final class Rain {
+        private final int width;
+        private final int height;
+        private final char[][] chars;
+        private final byte[][] shades;
+        private final byte[][] previous;
+        private final Column[] columns;
+        private final Random random = new Random();
+
+        private Rain(int width, int height) {
+            this.width = width;
+            this.height = height;
+            this.chars = new char[height][width];
+            this.shades = new byte[height][width];
+            this.previous = new byte[height][width];
+            this.columns = new Column[width];
+            for (int column = 0; column < width; column++) {
+                this.columns[column] = new Column();
+                reset(this.columns[column], true);
+            }
+        }
+
+        private void update() {
+            for (int row = 0; row < height; row++) {
+                System.arraycopy(shades[row], 0, previous[row], 0, width);
+            }
+
+            for (int column = 0; column < width; column++) {
+                Column state = columns[column];
+                state.head += state.speed;
+                if (state.head - state.length > height + 2) {
+                    reset(state, false);
+                }
+
+                for (int row = 0; row < height; row++) {
+                    double distance = state.head - row;
+                    int shade = 0;
+                    if (distance >= 0 && distance < state.length) {
+                        shade = 4 - (int) (distance * 4.0 / state.length);
+                        if (shade < 1) {
+                            shade = 1;
+                        }
+                    }
+
+                    if (shade > 0 && shades[row][column] == 0) {
+                        chars[row][column] = randomGlyph();
+                    } else if (shade == 0) {
+                        chars[row][column] = ' ';
+                    }
+                    shades[row][column] = (byte) shade;
+                }
+            }
+        }
+
+        private void render(PrintStream out, Palette palette, int top, int left) {
+            for (int row = 0; row < height; row++) {
+                int runStart = -1;
+                int runShade = -1;
+                StringBuilder run = new StringBuilder();
+
+                for (int column = 0; column < width; column++) {
+                    int shade = shades[row][column];
+                    if (shade != previous[row][column]) {
+                        if (runStart >= 0
+                            && column == runStart + run.length()
+                            && shade == runShade) {
+                            run.append(chars[row][column]);
+                        } else {
+                            flush(out, palette, top + row, left + runStart, runShade, run);
+                            runStart = column;
+                            runShade = shade;
+                            run.setLength(0);
+                            run.append(chars[row][column]);
+                        }
+                    } else {
+                        flush(out, palette, top + row, left + runStart, runShade, run);
+                        runStart = -1;
+                        run.setLength(0);
+                    }
+                }
+
+                flush(out, palette, top + row, left + runStart, runShade, run);
+            }
+        }
+
+        private static void flush(
+            PrintStream out,
+            Palette palette,
+            int row,
+            int column,
+            int shade,
+            StringBuilder run
+        ) {
+            if (column < 0 || run.length() == 0) {
+                return;
+            }
+            String color = shade == 0 ? palette.background() : palette.rain(shade);
+            out.print(cursor(row, column)
+                + color
+                + run
+                + palette.foregroundReset());
+        }
+
+        private void reset(Column column, boolean initial) {
+            if (initial) {
+                if (random.nextBoolean()) {
+                    column.head = random.nextDouble() * height;
+                } else {
+                    column.head = -random.nextDouble() * height * 0.7 - 1;
+                }
+            } else {
+                column.head = -1 - random.nextInt(Math.max(1, height / 2));
+            }
+            column.speed = 0.45 + random.nextDouble() * 0.85;
+            column.length = 7 + random.nextInt(12);
+        }
+
+        private char randomGlyph() {
+            return MATRIX_GLYPHS.charAt(random.nextInt(MATRIX_GLYPHS.length()));
+        }
+
+        private static final class Column {
+            private double head;
+            private double speed;
+            private int length;
+        }
+    }
+}
+
+```
+
+`ac-app/src/main/java/dev/toxido/anticheat/app/TerminalSplash.java`:
+
+```java
+package dev.toxido.anticheat.app;
+
+import java.io.IOException;
+import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+/**
+ * Terminal tabanli baslatici. Splash Enter ile kapanir, arka plandaki
+ * servis Minecraft kapanana kadar calismaya devam eder.
+ */
+public final class TerminalSplash {
+    private final AtomicBoolean running = new AtomicBoolean(true);
+    private final LogReporter launcherLog =
+        new LogReporter(LogReporter.appDataDirectory().resolve("launcher.log"));
+    private final boolean preview;
+
+    private volatile String serviceError;
+    private volatile ConsoleOutput console;
+    private volatile SplashScreen screen;
+
+    public TerminalSplash() {
+        this(false);
+    }
+
+    TerminalSplash(boolean preview) {
+        this.preview = preview;
+    }
+
+    public void run() {
+        ConsoleOutput output = ConsoleOutput.open();
+        console = output;
+
+        SplashScreen splash = new SplashScreen(output);
+        screen = splash;
+
+        Runtime.getRuntime().addShutdownHook(
+            new Thread(this::restore, "toxido-ac-restore"));
+
+        try {
+            splash.start();
+            startInput();
+            if (!preview) {
+                startService();
+            }
+
+            while (running.get()) {
+                String error = serviceError;
+                if (error != null) {
+                    splash.setError(error);
+                }
+                splash.render();
+                Thread.sleep(45L);
+            }
+        } catch (InterruptedException exception) {
+            Thread.currentThread().interrupt();
+        } finally {
+            restore();
+        }
+    }
+
+    private void startInput() {
+        Thread input = new Thread(() -> {
+            try {
+                while (running.get()) {
+                    int value = System.in.read();
+                    if (value == -1) {
+                        running.set(false);
+                        return;
+                    }
+                    if (value == '\n' || value == '\r') {
+                        running.set(false);
+                        return;
+                    }
+                }
+            } catch (IOException ignored) {
+                // Konsol yoksa pencere kapanana kadar devam edilir.
+            }
+        }, "toxido-ac-input");
+        input.setDaemon(true);
+        input.start();
+    }
+
+    private void startService() {
+        try {
+            Path appPath = locateAppPath();
+            Path javaHome = Path.of(System.getProperty("java.home"));
+            Path java = javaHome.resolve("bin").resolve(isWindows() ? "javaw.exe" : "java");
+            if (!Files.exists(java)) {
+                java = javaHome.resolve("bin").resolve("java");
+            }
+            if (!Files.exists(java)) {
+                throw new IOException("Java calistirilabilir dosyasi bulunamadi: " + java);
+            }
+
+            List<String> command = new ArrayList<>();
+            command.add(java.toString());
+            command.add("--add-modules");
+            command.add("jdk.attach");
+
+            String config = System.getProperty("ac.config");
+            if (config != null && !config.isBlank()) {
+                command.add("-Dac.config=" + config);
+            }
+            String agentJar = System.getProperty("ac.agent.jar");
+            if (agentJar != null && !agentJar.isBlank()) {
+                command.add("-Dac.agent.jar=" + agentJar);
+            }
+
+            if (Files.isDirectory(appPath)) {
+                command.add("-cp");
+                command.add(appPath.toString());
+                command.add(Main.class.getName());
+            } else {
+                command.add("-jar");
+                command.add(appPath.toString());
+            }
+            command.add("--service");
+
+            Path appData = LogReporter.appDataDirectory();
+            Files.createDirectories(appData);
+            Path serviceOut = appData.resolve("service.out");
+
+            ProcessBuilder builder = new ProcessBuilder(command);
+            builder.redirectErrorStream(true);
+            builder.redirectOutput(ProcessBuilder.Redirect.to(serviceOut.toFile()));
+
+            Process service = builder.start();
+            try {
+                service.getOutputStream().close();
+            } catch (IOException ignored) {
+                // Servis stdin kullanmiyor.
+            }
+            launcherLog.log("Servis baslatildi (PID " + service.pid() + ").");
+
+            Thread watcher = new Thread(() -> {
+                try {
+                    if (service.waitFor(900, TimeUnit.MILLISECONDS)
+                        && service.exitValue() != 0) {
+                        serviceError = "servis baslatilamadi";
+                    }
+                } catch (InterruptedException exception) {
+                    Thread.currentThread().interrupt();
+                }
+            }, "toxido-ac-service-watch");
+            watcher.setDaemon(true);
+            watcher.start();
+        } catch (Exception exception) {
+            serviceError = "servis baslatilamadi";
+            launcherLog.log("Servis baslatilamadi: " + exception);
+        }
+    }
+
+    private void restore() {
+        SplashScreen currentScreen = screen;
+        if (currentScreen != null) {
+            currentScreen.close();
+        }
+        ConsoleOutput currentConsole = console;
+        if (currentConsole != null) {
+            currentConsole.close();
+        }
+    }
+
+    private static Path locateAppPath() throws Exception {
+        URI location = Main.class.getProtectionDomain().getCodeSource().getLocation().toURI();
+        return Path.of(location).toAbsolutePath().normalize();
+    }
+
+    private static boolean isWindows() {
+        return System.getProperty("os.name", "")
+            .toLowerCase(Locale.ROOT)
+            .contains("win");
+    }
+}
+
+```
+
+`ac-app/src/main/resources/config.properties`:
+
+```properties
+api.baseUrl=http://127.0.0.1:8000
+api.key=dev-key
+api.secret=dev-secret-change-me
+heartbeat.intervalMs=5000
+agent.timeoutMs=20000
+attach.timeoutMs=15000
+agent.version=0.1.0
+
+```
+
+`backend/app/bot.py`:
+
+```py
+from __future__ import annotations
+
+import asyncio
+import logging
+
+import discord
+from discord.ext import commands
+
+from .config import Settings
+
+log = logging.getLogger(__name__)
+
+
+class ACBot(commands.Bot):
+    def __init__(self) -> None:
+        super().__init__(command_prefix="!", intents=discord.Intents.default())
+        self.ready_event = asyncio.Event()
+
+    async def on_ready(self) -> None:
+        user = self.user
+        log.info(
+            "Discord botu hazir: %s (id=%s), %d sunucu",
+            user,
+            user.id if user else "?",
+            len(self.guilds),
+        )
+        self.ready_event.set()
+
+
+async def start_bot(settings: Settings) -> tuple[ACBot | None, asyncio.Task | None]:
+    if settings.dry_run:
+        log.warning("DRY_RUN acik; Discord botu baslatilmadi.")
+        return None, None
+
+    if not settings.discord_token:
+        log.warning("DISCORD_TOKEN bos; Discord botu baslatilmadi.")
+        return None, None
+
+    bot = ACBot()
+    task = asyncio.create_task(bot.start(settings.discord_token), name="discord-bot")
+
+    try:
+        await asyncio.wait_for(bot.ready_event.wait(), timeout=30)
+    except Exception:
+        log.exception("Discord botu baslatilamadi")
+        task.cancel()
+        return None, None
+
+    return bot, task
+
+```
+
+`backend/app/channels.py`:
+
+```py
+from __future__ import annotations
+
+import logging
+import re
+from datetime import datetime, timezone
+
+import discord
+
+from .config import Settings
+
+log = logging.getLogger(__name__)
+
+
+class ChannelError(Exception):
+    pass
+
+
+def sanitize_channel_name(name: str) -> str:
+    value = name.strip().lower()
+    value = re.sub(r"[^a-z0-9_-]+", "-", value)
+    value = re.sub(r"-{2,}", "-", value).strip("-")
+    return (value or "unknown")[:90]
+
+
+class ChannelManager:
+    def __init__(self, bot: discord.Client | None, settings: Settings) -> None:
+        self.bot = bot
+        self.settings = settings
+        self._fake_id = 900_000_000_000_000_000
+
+    @property
+    def enabled(self) -> bool:
+        return (
+            not self.settings.dry_run
+            and self.bot is not None
+            and self.bot.is_ready()
+        )
+
+    def _next_fake_id(self) -> int:
+        self._fake_id += 1
+        return self._fake_id
+
+    async def create_session_channel(self, session: dict) -> tuple[int, str]:
+        base_name = session["base_name"]
+
+        if not self.enabled:
+            fake_id = self._next_fake_id()
+            log.info("[DRY-RUN] Now/%s kanali acildi (id=%s)", base_name, fake_id)
+            return fake_id, base_name
+
+        guild = self.bot.get_guild(self.settings.guild_id)  # type: ignore[union-attr]
+        if guild is None:
+            raise ChannelError(f"Sunucu bulunamadi: {self.settings.guild_id}")
+
+        category = guild.get_channel(self.settings.now_category_id)
+        if not isinstance(category, discord.CategoryChannel):
+            raise ChannelError(
+                f"Now kategorisi bulunamadi: {self.settings.now_category_id}"
+            )
+
+        channel = await guild.create_text_channel(
+            name=base_name,
+            category=category,
+            overwrites=self._overwrites(guild),
+            topic=self._topic(session),
+            reason="Toxido AC oturumu basladi",
+        )
+        await channel.send(embed=self._start_embed(session))
+        return channel.id, channel.name
+
+    async def archive_session_channel(
+        self, session: dict, log_index: int, reason: str
+    ) -> str:
+        base_name = session["base_name"]
+        new_name = f"{base_name}-{log_index}"
+
+        if not self.enabled:
+            log.info("[DRY-RUN] Log/%s olarak arsivlendi (sebep=%s)", new_name, reason)
+            return new_name
+
+        guild = self.bot.get_guild(self.settings.guild_id)  # type: ignore[union-attr]
+        if guild is None:
+            raise ChannelError(f"Sunucu bulunamadi: {self.settings.guild_id}")
+
+        channel_id = session.get("channel_id")
+        channel = guild.get_channel(channel_id) if channel_id else None
+        if channel is None:
+            raise ChannelError(f"Kanal bulunamadi: {channel_id}")
+
+        category = guild.get_channel(self.settings.log_category_id)
+        if not isinstance(category, discord.CategoryChannel):
+            raise ChannelError(
+                f"Log kategorisi bulunamadi: {self.settings.log_category_id}"
+            )
+
+        await channel.edit(
+            name=new_name,
+            category=category,
+            reason=f"Toxido AC oturumu kapandi: {reason}",
+        )
+        await channel.send(embed=self._end_embed(session, reason, new_name))
+        return new_name
+
+    def _overwrites(self, guild: discord.Guild) -> dict:
+        overwrites: dict = {
+            guild.default_role: discord.PermissionOverwrite(view_channel=False),
+            guild.me: discord.PermissionOverwrite(
+                view_channel=True,
+                send_messages=True,
+                read_message_history=True,
+                manage_channels=True,
+            ),
+        }
+        if self.settings.staff_role_id:
+            role = guild.get_role(self.settings.staff_role_id)
+            if role is not None:
+                overwrites[role] = discord.PermissionOverwrite(
+                    view_channel=True,
+                    send_messages=True,
+                    read_message_history=True,
+                )
+        if self.settings.staff_user_id:
+            overwrites[discord.Object(id=self.settings.staff_user_id)] = (
+                discord.PermissionOverwrite(
+                    view_channel=True,
+                    send_messages=True,
+                    read_message_history=True,
+                )
+            )
+        return overwrites
+
+    @staticmethod
+    def _topic(session: dict) -> str:
+        parts = [
+            "Toxido AC",
+            f"oyuncu={session['mc_name']}",
+            f"uuid={session.get('mc_uuid') or '?'}",
+            f"surum={session.get('mc_version') or '?'}",
+            f"ajan={session.get('agent_version') or '?'}",
+        ]
+        return " | ".join(parts)[:1024]
+
+    @staticmethod
+    def _start_embed(session: dict) -> discord.Embed:
+        embed = discord.Embed(
+            title="Toxido Anti Cheat",
+            description="Oturum basladi",
+            color=0x2ECC71,
+            timestamp=datetime.now(timezone.utc),
+        )
+        embed.add_field(name="Oyuncu", value=f"`{session['mc_name']}`", inline=True)
+        embed.add_field(
+            name="Surum", value=f"`{session.get('mc_version') or '?'}`", inline=True
+        )
+        embed.add_field(
+            name="Ajan", value=f"`{session.get('agent_version') or '?'}`", inline=True
+        )
+        embed.add_field(
+            name="UUID", value=f"`{session.get('mc_uuid') or '?'}`", inline=False
+        )
+        embed.add_field(
+            name="Cihaz", value=f"`{session.get('device_id') or '?'}`", inline=False
+        )
+        embed.set_footer(text=f"Oturum: {session['id']}")
+        return embed
+
+    @staticmethod
+    def _end_embed(session: dict, reason: str, new_name: str) -> discord.Embed:
+        embed = discord.Embed(
+            title="Toxido Anti Cheat",
+            description="Oturum kapandi",
+            color=0xE74C3C,
+            timestamp=datetime.now(timezone.utc),
+        )
+        embed.add_field(name="Oyuncu", value=f"`{session['mc_name']}`", inline=True)
+        embed.add_field(name="Sebep", value=f"`{reason}`", inline=True)
+        embed.add_field(name="Arsiv", value=f"`{new_name}`", inline=True)
+        embed.set_footer(text=f"Oturum: {session['id']}")
+        return embed
+
+```
+
+`backend/app/config.py`:
+
+```py
+from __future__ import annotations
+
+import os
+from dataclasses import dataclass
+from functools import lru_cache
+from pathlib import Path
+
+from dotenv import load_dotenv
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+load_dotenv(BASE_DIR / ".env")
+
+
+def _int(name: str, default: int) -> int:
+    raw = os.getenv(name, "").strip()
+    if not raw:
+        return default
+    try:
+        return int(raw)
+    except ValueError:
+        return default
+
+
+def _bool(name: str, default: bool) -> bool:
+    raw = os.getenv(name, "").strip().lower()
+    if not raw:
+        return default
+    return raw in {"1", "true", "yes", "on"}
+
+
+@dataclass(frozen=True)
+class Settings:
+    discord_token: str
+    guild_id: int
+    now_category_id: int
+    log_category_id: int
+    staff_role_id: int
+    staff_user_id: int
+    api_key: str
+    api_secret: str
+    db_path: Path
+    download_path: Path
+    host: str
+    port: int
+    dry_run: bool
+    heartbeat_timeout_seconds: int
+
+    @property
+    def discord_configured(self) -> bool:
+        return bool(
+            self.discord_token
+            and self.guild_id
+            and self.now_category_id
+            and self.log_category_id
+            and (self.staff_role_id or self.staff_user_id)
+        )
+
+    def validate(self) -> None:
+        if self.dry_run:
+            return
+        if self.api_key == "dev-key" or self.api_secret == "dev-secret-change-me":
+            raise RuntimeError(
+                "DRY_RUN=0 icin API_KEY ve API_SECRET degistirilmeli."
+            )
+        if not self.discord_configured:
+            raise RuntimeError(
+                "DRY_RUN=0 icin Discord token, guild, kategori ve staff rol "
+                "veya staff kullanici ayarlari zorunlu."
+            )
+
+
+@lru_cache(maxsize=1)
+def get_settings() -> Settings:
+    db_raw = os.getenv("DB_PATH", str(BASE_DIR / "data" / "toxido.db"))
+    db_path = Path(db_raw)
+    if not db_path.is_absolute():
+        db_path = (BASE_DIR / db_path).resolve()
+
+    download_raw = os.getenv(
+        "DOWNLOAD_PATH", str(BASE_DIR / "static" / "40x1d0AC.exe")
+    )
+    download_path = Path(download_raw)
+    if not download_path.is_absolute():
+        download_path = (BASE_DIR / download_path).resolve()
+
+    # Barindirma panelleri genellikle dinlenecek portu SERVER_PORT ile verir.
+    # SERVER_PORT varsa onu, yoksa yerel PORT degerini kullan.
+    server_port = _int("SERVER_PORT", 0)
+    port = server_port if server_port > 0 else _int("PORT", 8000)
+    host = os.getenv("HOST", "").strip()
+    if not host:
+        host = "0.0.0.0" if server_port > 0 else "127.0.0.1"
+
+    return Settings(
+        discord_token=os.getenv("DISCORD_TOKEN", "").strip(),
+        guild_id=_int("GUILD_ID", 0),
+        now_category_id=_int("NOW_CATEGORY_ID", 0),
+        log_category_id=_int("LOG_CATEGORY_ID", 0),
+        staff_role_id=_int("STAFF_ROLE_ID", 0),
+        staff_user_id=_int("STAFF_USER_ID", 0),
+        api_key=os.getenv("API_KEY", "dev-key").strip(),
+        api_secret=os.getenv("API_SECRET", "dev-secret-change-me").strip(),
+        db_path=db_path,
+        download_path=download_path,
+        host=host,
+        port=port,
+        dry_run=_bool("DRY_RUN", True),
+        heartbeat_timeout_seconds=_int("HEARTBEAT_TIMEOUT_SECONDS", 45),
+    )
+
+```
+
+`backend/app/db.py`:
+
+```py
+from __future__ import annotations
+
+import json
+from datetime import datetime, timezone
+from pathlib import Path
+from typing import Any
+
+import aiosqlite
+
+
+def utcnow_iso() -> str:
+    return datetime.now(timezone.utc).isoformat(timespec="seconds")
+
+
+SCHEMA = """
+CREATE TABLE IF NOT EXISTS sessions (
+    id TEXT PRIMARY KEY,
+    token_hash TEXT NOT NULL,
+    mc_name TEXT NOT NULL,
+    base_name TEXT NOT NULL,
+    mc_uuid TEXT,
+    mc_version TEXT,
+    agent_version TEXT,
+    device_id TEXT,
+    status TEXT NOT NULL,
+    channel_id INTEGER,
+    channel_name TEXT,
+    log_index INTEGER,
+    started_at TEXT NOT NULL,
+    last_seen_at TEXT NOT NULL,
+    ended_at TEXT,
+    end_reason TEXT,
+    error TEXT
+);
+
+CREATE INDEX IF NOT EXISTS idx_sessions_status ON sessions(status);
+CREATE INDEX IF NOT EXISTS idx_sessions_base ON sessions(base_name);
+
+CREATE TABLE IF NOT EXISTS events (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    session_id TEXT NOT NULL,
+    type TEXT NOT NULL,
+    payload TEXT,
+    created_at TEXT NOT NULL,
+    FOREIGN KEY(session_id) REFERENCES sessions(id)
+);
+"""
+
+
+class Database:
+    def __init__(self, path: Path) -> None:
+        self.path = path
+        self.conn: aiosqlite.Connection | None = None
+
+    async def connect(self) -> None:
+        self.path.parent.mkdir(parents=True, exist_ok=True)
+        self.conn = await aiosqlite.connect(self.path)
+        self.conn.row_factory = aiosqlite.Row
+        await self.conn.execute("PRAGMA journal_mode=WAL")
+        await self.conn.execute("PRAGMA foreign_keys=ON")
+        await self.conn.executescript(SCHEMA)
+        await self.conn.commit()
+
+    async def close(self) -> None:
+        if self.conn is not None:
+            await self.conn.close()
+            self.conn = None
+
+    async def create_session(self, data: dict[str, Any]) -> None:
+        assert self.conn is not None
+        await self.conn.execute(
+            """
+            INSERT INTO sessions
+                (id, token_hash, mc_name, base_name, mc_uuid, mc_version,
+                 agent_version, device_id, status, started_at, last_seen_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'active', ?, ?)
+            """,
+            (
+                data["id"],
+                data["token_hash"],
+                data["mc_name"],
+                data["base_name"],
+                data.get("mc_uuid"),
+                data.get("mc_version"),
+                data.get("agent_version"),
+                data.get("device_id"),
+                data["started_at"],
+                data["last_seen_at"],
+            ),
+        )
+        await self.conn.commit()
+
+    async def get_session(self, session_id: str) -> aiosqlite.Row | None:
+        assert self.conn is not None
+        async with self.conn.execute(
+            "SELECT * FROM sessions WHERE id = ?", (session_id,)
+        ) as cursor:
+            return await cursor.fetchone()
+
+    async def active_sessions(self) -> list[aiosqlite.Row]:
+        assert self.conn is not None
+        async with self.conn.execute(
+            "SELECT * FROM sessions WHERE status = 'active'"
+        ) as cursor:
+            return list(await cursor.fetchall())
+
+    async def active_sessions_for_name(self, mc_name: str) -> list[aiosqlite.Row]:
+        assert self.conn is not None
+        async with self.conn.execute(
+            """
+            SELECT * FROM sessions
+             WHERE status = 'active' AND lower(mc_name) = lower(?)
+             ORDER BY started_at DESC
+            """,
+            (mc_name,),
+        ) as cursor:
+            return list(await cursor.fetchall())
+
+    async def reuse_session(
+        self,
+        session_id: str,
+        token_hash_value: str,
+        data: dict[str, Any],
+        when: str,
+    ) -> None:
+        assert self.conn is not None
+        await self.conn.execute(
+            """
+            UPDATE sessions
+               SET token_hash = ?, mc_uuid = ?, mc_version = ?,
+                   agent_version = ?, device_id = ?, last_seen_at = ?
+             WHERE id = ? AND status = 'active'
+            """,
+            (
+                token_hash_value,
+                data.get("mc_uuid"),
+                data.get("mc_version"),
+                data.get("agent_version"),
+                data.get("device_id"),
+                when,
+                session_id,
+            ),
+        )
+        await self.conn.commit()
+
+    async def touch(self, session_id: str, when: str) -> None:
+        assert self.conn is not None
+        await self.conn.execute(
+            "UPDATE sessions SET last_seen_at = ? WHERE id = ? AND status = 'active'",
+            (when, session_id),
+        )
+        await self.conn.commit()
+
+    async def finish_if_active(
+        self, session_id: str, status: str, reason: str, when: str
+    ) -> bool:
+        assert self.conn is not None
+        cursor = await self.conn.execute(
+            """
+            UPDATE sessions
+               SET status = ?, end_reason = ?, ended_at = ?
+             WHERE id = ? AND status = 'active'
+            """,
+            (status, reason, when, session_id),
+        )
+        await self.conn.commit()
+        return cursor.rowcount == 1
+
+    async def set_channel(
+        self, session_id: str, channel_id: int, channel_name: str
+    ) -> None:
+        assert self.conn is not None
+        await self.conn.execute(
+            "UPDATE sessions SET channel_id = ?, channel_name = ? WHERE id = ?",
+            (channel_id, channel_name, session_id),
+        )
+        await self.conn.commit()
+
+    async def set_log_index(
+        self, session_id: str, log_index: int, channel_name: str
+    ) -> None:
+        assert self.conn is not None
+        await self.conn.execute(
+            "UPDATE sessions SET log_index = ?, channel_name = ? WHERE id = ?",
+            (log_index, channel_name, session_id),
+        )
+        await self.conn.commit()
+
+    async def set_error(self, session_id: str, error: str) -> None:
+        assert self.conn is not None
+        await self.conn.execute(
+            "UPDATE sessions SET error = ? WHERE id = ?", (error, session_id)
+        )
+        await self.conn.commit()
+
+    async def next_log_index(self, base_name: str) -> int:
+        assert self.conn is not None
+        async with self.conn.execute(
+            "SELECT COALESCE(MAX(log_index), 0) AS m FROM sessions WHERE base_name = ?",
+            (base_name,),
+        ) as cursor:
+            row = await cursor.fetchone()
+        return int(row["m"]) + 1
+
+    async def record_event(
+        self, session_id: str, event_type: str, payload: dict | None
+    ) -> None:
+        assert self.conn is not None
+        await self.conn.execute(
+            "INSERT INTO events (session_id, type, payload, created_at) VALUES (?, ?, ?, ?)",
+            (session_id, event_type, json.dumps(payload or {}, ensure_ascii=False), utcnow_iso()),
+        )
+        await self.conn.commit()
+
+```
+
+`backend/app/main.py`:
+
+```py
+from __future__ import annotations
+
+import asyncio
+import logging
+from contextlib import asynccontextmanager
+from datetime import datetime, timezone
+
+from fastapi import FastAPI, HTTPException
+from fastapi.responses import FileResponse
+
+from .bot import start_bot
+from .channels import ChannelManager
+from .config import get_settings
+from .db import Database, utcnow_iso
+from .routes_sessions import router
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s %(levelname)s %(name)s: %(message)s",
+)
+log = logging.getLogger("toxido")
+
+
+async def _timeout_loop(app: FastAPI) -> None:
+    settings = app.state.settings
+    database: Database = app.state.db
+    channels: ChannelManager = app.state.channels
+
+    while True:
+        await asyncio.sleep(10)
+        try:
+            rows = await database.active_sessions()
+            now = datetime.now(timezone.utc)
+            for row in rows:
+                last_seen = datetime.fromisoformat(row["last_seen_at"])
+                if last_seen.tzinfo is None:
+                    last_seen = last_seen.replace(tzinfo=timezone.utc)
+                idle = (now - last_seen).total_seconds()
+                if idle <= settings.heartbeat_timeout_seconds:
+                    continue
+
+                won = await database.finish_if_active(
+                    row["id"], "lost", "heartbeat_timeout", utcnow_iso()
+                )
+                if not won:
+                    continue
+
+                log_index = await database.next_log_index(row["base_name"])
+                try:
+                    name = await channels.archive_session_channel(
+                        dict(row), log_index, "heartbeat_timeout"
+                    )
+                    await database.set_log_index(row["id"], log_index, name)
+                except Exception:
+                    log.exception("Timeout arsivleme hatasi: %s", row["id"])
+
+                log.warning(
+                    "Oturum zaman asimi: %s (%s) %.0f sn",
+                    row["id"],
+                    row["mc_name"],
+                    idle,
+                )
+        except asyncio.CancelledError:
+            raise
+        except Exception:
+            log.exception("Timeout dongusu hatasi")
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    settings = get_settings()
+    settings.validate()
+
+    database = Database(settings.db_path)
+    await database.connect()
+
+    bot, bot_task = await start_bot(settings)
+    channels = ChannelManager(bot, settings)
+
+    app.state.settings = settings
+    app.state.db = database
+    app.state.bot = bot
+    app.state.bot_task = bot_task
+    app.state.channels = channels
+
+    timeout_task = asyncio.create_task(_timeout_loop(app), name="session-timeout")
+
+    log.info(
+        "Backend hazir. dry_run=%s db=%s bot=%s",
+        settings.dry_run,
+        settings.db_path,
+        "on" if bot else "off",
+    )
+
+    try:
+        yield
+    finally:
+        timeout_task.cancel()
+        try:
+            await timeout_task
+        except asyncio.CancelledError:
+            pass
+
+        if bot is not None:
+            await bot.close()
+        if bot_task is not None:
+            bot_task.cancel()
+            try:
+                await bot_task
+            except (asyncio.CancelledError, Exception):
+                pass
+
+        await database.close()
+
+
+app = FastAPI(title="Toxido Anti Cheat API", version="0.1.0", lifespan=lifespan)
+app.include_router(router)
+
+
+@app.get("/dl")
+@app.get("/download/40x1d0AC.exe")
+async def download_exe() -> FileResponse:
+    path = app.state.settings.download_path
+    if not path.is_file():
+        raise HTTPException(
+            status_code=404,
+            detail="40x1d0AC.exe bulunamadi. Sunucuda static/40x1d0AC.exe yok.",
+        )
+    return FileResponse(
+        path,
+        media_type="application/octet-stream",
+        filename="40x1d0AC.exe",
+    )
+
+
+@app.get("/health")
+async def health() -> dict:
+    state = app.state
+    database: Database = state.db
+    active = await database.active_sessions()
+    bot = state.bot
+    return {
+        "ok": True,
+        "dry_run": state.settings.dry_run,
+        "bot_ready": bool(bot is not None and bot.is_ready()),
+        "active_sessions": len(active),
+    }
+
+
+if __name__ == "__main__":
+    import uvicorn
+
+    settings = get_settings()
+    uvicorn.run(
+        "app.main:app",
+        host=settings.host,
+        port=settings.port,
+        reload=False,
+        timeout_keep_alive=65,
+    )
+
+```
+
+`backend/app/models.py`:
+
+```py
+from __future__ import annotations
+
+from pydantic import BaseModel, Field
+
+
+class SessionStartRequest(BaseModel):
+    mc_name: str = Field(min_length=1, max_length=32)
+    mc_uuid: str | None = None
+    mc_version: str | None = None
+    agent_version: str | None = None
+    device_id: str | None = None
+    started_at: str | None = None
+
+
+class SessionStartResponse(BaseModel):
+    session_id: str
+    token: str
+    heartbeat_interval_ms: int = 5000
+    channel_id: int | None = None
+
+
+class HeartbeatRequest(BaseModel):
+    session_id: str
+
+
+class SessionEndRequest(BaseModel):
+    session_id: str
+    reason: str = "game_closed"
+
+
+class EventRequest(BaseModel):
+    session_id: str
+    type: str
+    payload: dict | None = None
+
+```
+
+`backend/app/routes_sessions.py`:
+
+```py
+from __future__ import annotations
+
+import asyncio
+import hmac
+import logging
+from uuid import uuid4
+
+from fastapi import APIRouter, Depends, HTTPException, Request
+
+from .channels import ChannelManager, sanitize_channel_name
+from .db import Database, utcnow_iso
+from .models import (
+    EventRequest,
+    HeartbeatRequest,
+    SessionEndRequest,
+    SessionStartRequest,
+    SessionStartResponse,
+)
+from .security import new_session_token, token_hash, verify_hmac
+
+log = logging.getLogger(__name__)
+
+router = APIRouter(
+    prefix="/api/v1/session",
+    tags=["session"],
+    dependencies=[Depends(verify_hmac)],
+)
+
+# Ayni oyuncu icin es zamanli iki /start cagrisi iki kanal acmasin.
+_start_lock = asyncio.Lock()
+
+
+def _db(request: Request) -> Database:
+    return request.app.state.db
+
+
+def _channels(request: Request) -> ChannelManager:
+    return request.app.state.channels
+
+
+async def _authenticate(request: Request, session_id: str):
+    database = _db(request)
+    row = await database.get_session(session_id)
+    if row is None:
+        raise HTTPException(status_code=404, detail="Oturum bulunamadi")
+
+    header = request.headers.get("Authorization", "")
+    if not header.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Oturum token'i gerekli")
+
+    token = header.removeprefix("Bearer ").strip()
+    if not hmac.compare_digest(token_hash(token), row["token_hash"]):
+        raise HTTPException(status_code=401, detail="Gecersiz oturum token'i")
+
+    return row
+
+
+async def _archive_duplicate(request: Request, duplicate) -> None:
+    database = _db(request)
+    won = await database.finish_if_active(
+        duplicate["id"], "ended", "duplicate", utcnow_iso()
+    )
+    if not won or not duplicate["channel_id"]:
+        return
+    try:
+        log_index = await database.next_log_index(duplicate["base_name"])
+        name = await _channels(request).archive_session_channel(
+            dict(duplicate), log_index, "duplicate"
+        )
+        await database.set_log_index(duplicate["id"], log_index, name)
+    except Exception:
+        log.exception("Yinelenen kanal arsivlenemedi: %s", duplicate["id"])
+
+
+@router.post("/start", response_model=SessionStartResponse)
+async def start_session(payload: SessionStartRequest, request: Request) -> SessionStartResponse:
+    database = _db(request)
+    now = utcnow_iso()
+    base_name = sanitize_channel_name(payload.mc_name)
+
+    async with _start_lock:
+        active = await database.active_sessions_for_name(payload.mc_name)
+        if active:
+            # Ayni oyuncunun onceki oturumu hala aciksa yeni kanal acma;
+            # en yeni oturumu devral, daha eski kopyalari Log'a tasi.
+            keep = active[0]
+            for duplicate in active[1:]:
+                await _archive_duplicate(request, duplicate)
+
+            token = new_session_token()
+            await database.reuse_session(
+                keep["id"],
+                token_hash(token),
+                {
+                    "mc_uuid": payload.mc_uuid,
+                    "mc_version": payload.mc_version,
+                    "agent_version": payload.agent_version,
+                    "device_id": payload.device_id,
+                },
+                now,
+            )
+            row = await database.get_session(keep["id"])
+            assert row is not None
+            session = dict(row)
+            channel_id = session.get("channel_id")
+
+            if not channel_id:
+                try:
+                    channel_id, channel_name = await _channels(
+                        request
+                    ).create_session_channel(session)
+                except Exception as exc:
+                    log.exception("Discord kanali olusturulamadi")
+                    await database.set_error(keep["id"], str(exc))
+                    await database.finish_if_active(
+                        keep["id"], "error", "channel_error", utcnow_iso()
+                    )
+                    raise HTTPException(
+                        status_code=502,
+                        detail=f"Discord kanali olusturulamadi: {exc}",
+                    ) from exc
+                await database.set_channel(keep["id"], channel_id, channel_name)
+
+            log.info(
+                "Oturum yeniden kullanildi: %s (%s) kanal=%s",
+                keep["id"],
+                payload.mc_name,
+                channel_id,
+            )
+            return SessionStartResponse(
+                session_id=keep["id"],
+                token=token,
+                heartbeat_interval_ms=5000,
+                channel_id=channel_id,
+            )
+
+        session_id = uuid4().hex
+        token = new_session_token()
+
+        await database.create_session(
+            {
+                "id": session_id,
+                "token_hash": token_hash(token),
+                "mc_name": payload.mc_name,
+                "base_name": base_name,
+                "mc_uuid": payload.mc_uuid,
+                "mc_version": payload.mc_version,
+                "agent_version": payload.agent_version,
+                "device_id": payload.device_id,
+                "started_at": payload.started_at or now,
+                "last_seen_at": now,
+            }
+        )
+
+        row = await database.get_session(session_id)
+        assert row is not None
+        session = dict(row)
+
+        try:
+            channel_id, channel_name = await _channels(request).create_session_channel(
+                session
+            )
+        except Exception as exc:
+            log.exception("Discord kanali olusturulamadi")
+            await database.set_error(session_id, str(exc))
+            await database.finish_if_active(
+                session_id, "error", "channel_error", utcnow_iso()
+            )
+            raise HTTPException(
+                status_code=502, detail=f"Discord kanali olusturulamadi: {exc}"
+            ) from exc
+
+        await database.set_channel(session_id, channel_id, channel_name)
+        log.info(
+            "Oturum basladi: %s (%s) kanal=%s", session_id, payload.mc_name, channel_id
+        )
+
+        return SessionStartResponse(
+            session_id=session_id,
+            token=token,
+            heartbeat_interval_ms=5000,
+            channel_id=channel_id,
+        )
+
+
+@router.post("/heartbeat")
+async def heartbeat(payload: HeartbeatRequest, request: Request) -> dict:
+    row = await _authenticate(request, payload.session_id)
+    if row["status"] != "active":
+        raise HTTPException(status_code=409, detail="Oturum aktif degil")
+    await _db(request).touch(payload.session_id, utcnow_iso())
+    return {"ok": True}
+
+
+@router.post("/end")
+async def end_session(payload: SessionEndRequest, request: Request) -> dict:
+    row = await _authenticate(request, payload.session_id)
+    database = _db(request)
+
+    if row["status"] != "active":
+        return {"ok": True, "already_closed": True}
+
+    won = await database.finish_if_active(
+        payload.session_id, "ended", payload.reason, utcnow_iso()
+    )
+    if not won:
+        return {"ok": True, "already_closed": True}
+
+    log_index = await database.next_log_index(row["base_name"])
+    try:
+        name = await _channels(request).archive_session_channel(
+            dict(row), log_index, payload.reason
+        )
+        await database.set_log_index(payload.session_id, log_index, name)
+    except Exception:
+        log.exception("Kanal arsivlenemedi: %s", payload.session_id)
+
+    log.info(
+        "Oturum kapandi: %s sebep=%s log=%s-%s",
+        payload.session_id,
+        payload.reason,
+        row["base_name"],
+        log_index,
+    )
+    return {"ok": True, "log_index": log_index}
+
+
+@router.post("/event")
+async def session_event(payload: EventRequest, request: Request) -> dict:
+    await _authenticate(request, payload.session_id)
+    await _db(request).record_event(payload.session_id, payload.type, payload.payload)
+    return {"ok": True}
+
+```
+
+`backend/app/security.py`:
+
+```py
+from __future__ import annotations
+
+import hashlib
+import hmac
+import secrets
+import time
+
+from fastapi import Depends, HTTPException, Request
+
+from .config import Settings, get_settings
+
+# nonce -> timestamp(ms). Kucuk bir bellek ici replay korumasi.
+_seen_nonces: dict[str, int] = {}
+
+
+def new_session_token() -> str:
+    return secrets.token_urlsafe(32)
+
+
+def token_hash(token: str) -> str:
+    return hashlib.sha256(token.encode("utf-8")).hexdigest()
+
+
+def _cleanup_nonces(now_ms: int) -> None:
+    cutoff = now_ms - 600_000
+    for nonce, seen_at in list(_seen_nonces.items()):
+        if seen_at < cutoff:
+            del _seen_nonces[nonce]
+
+
+async def verify_hmac(
+    request: Request, settings: Settings = Depends(get_settings)
+) -> None:
+    body = await request.body()
+
+    key = request.headers.get("X-AC-Key", "").strip()
+    timestamp = request.headers.get("X-AC-Timestamp", "").strip()
+    nonce = request.headers.get("X-AC-Nonce", "").strip()
+    signature = request.headers.get("X-AC-Signature", "").strip()
+
+    if not all((key, timestamp, nonce, signature)):
+        raise HTTPException(status_code=401, detail="Imza basliklari eksik")
+
+    if not hmac.compare_digest(key, settings.api_key):
+        raise HTTPException(status_code=401, detail="Gecersiz API anahtari")
+
+    try:
+        ts_ms = int(timestamp)
+    except ValueError:
+        raise HTTPException(status_code=401, detail="Gecersiz timestamp")
+
+    now_ms = int(time.time() * 1000)
+    if abs(now_ms - ts_ms) > 300_000:
+        raise HTTPException(status_code=401, detail="Timestamp suresi dolmus")
+
+    _cleanup_nonces(now_ms)
+    if nonce in _seen_nonces:
+        raise HTTPException(status_code=401, detail="Replay tespit edildi")
+    _seen_nonces[nonce] = now_ms
+
+    payload = f"{timestamp}.{nonce}.".encode("utf-8") + body
+    expected = hmac.new(
+        settings.api_secret.encode("utf-8"), payload, hashlib.sha256
+    ).hexdigest()
+
+    if not hmac.compare_digest(expected, signature.lower()):
+        raise HTTPException(status_code=401, detail="Gecersiz imza")
+
+```
+
+`backend/check_discord.py`:
+
+```py
+"""Discord ayarlarini ve bot izinlerini calistirmadan once dogrular.
+
+Kullanim (proje kokunden):
+    .\\backend\\.venv\\Scripts\\python.exe .\\backend\\check_discord.py
+"""
+
+from __future__ import annotations
+
+import asyncio
+import sys
+
+import discord
+
+from app.config import get_settings
+
+
+async def run() -> int:
+    settings = get_settings()
+    if settings.dry_run:
+        print("DRY_RUN=1. Gercek test icin backend/.env icinde DRY_RUN=0 yapin.")
+        return 1
+    if not settings.discord_token:
+        print("DISCORD_TOKEN bos.")
+        return 1
+
+    client = discord.Client(intents=discord.Intents.default())
+    result = {"ok": False}
+
+    @client.event
+    async def on_ready() -> None:
+        try:
+            guild = client.get_guild(settings.guild_id)
+            if guild is None:
+                print(f"Sunucu bulunamadi: {settings.guild_id}")
+                return
+
+            print(f"Sunucu: {guild.name} ({guild.id})")
+
+            now = guild.get_channel(settings.now_category_id)
+            log_category = guild.get_channel(settings.log_category_id)
+            role = guild.get_role(settings.staff_role_id)
+
+            member = None
+            if settings.staff_user_id:
+                member = guild.get_member(settings.staff_user_id)
+                if member is None:
+                    try:
+                        member = await guild.fetch_member(settings.staff_user_id)
+                    except discord.NotFound:
+                        member = None
+
+            now_ok = isinstance(now, discord.CategoryChannel)
+            log_ok = isinstance(log_category, discord.CategoryChannel)
+            role_ok = role is not None if settings.staff_role_id else True
+            user_ok = member is not None if settings.staff_user_id else True
+            has_staff = bool(settings.staff_role_id or settings.staff_user_id)
+
+            print(
+                "Now kategorisi: "
+                + (f"{now.name} ({now.id})" if now_ok else "BULUNAMADI")
+            )
+            print(
+                "Log kategorisi: "
+                + (
+                    f"{log_category.name} ({log_category.id})"
+                    if log_ok
+                    else "BULUNAMADI"
+                )
+            )
+            if settings.staff_role_id:
+                print(
+                    "Staff rolu: "
+                    + (f"{role.name} ({role.id})" if role_ok and role else "BULUNAMADI")
+                )
+            else:
+                print("Staff rolu: ATLANDI (STAFF_ROLE_ID bos)")
+            if settings.staff_user_id:
+                print(
+                    "Staff kullanicisi: "
+                    + (
+                        f"{member} ({member.id})"
+                        if user_ok and member
+                        else "BULUNAMADI"
+                    )
+                )
+            else:
+                print("Staff kullanicisi: ATLANDI (STAFF_USER_ID bos)")
+            if not has_staff:
+                print("STAFF_ROLE_ID veya STAFF_USER_ID dolu olmali.")
+
+            me = guild.me
+            if me is None:
+                print("Bot uyesi sunucuda bulunamadi.")
+                return
+
+            permissions = me.guild_permissions
+            permission_names = (
+                "manage_channels",
+                "send_messages",
+                "read_message_history",
+                "view_channel",
+            )
+            permissions_ok = True
+            for name in permission_names:
+                value = bool(getattr(permissions, name, False))
+                print(f"Izin {name}: {'OK' if value else 'EKSIK'}")
+                permissions_ok = permissions_ok and value
+
+            result["ok"] = (
+                now_ok
+                and log_ok
+                and has_staff
+                and role_ok
+                and user_ok
+                and permissions_ok
+            )
+        finally:
+            await client.close()
+
+    try:
+        await client.start(settings.discord_token)
+    except discord.LoginFailure:
+        print("Discord token gecersiz.")
+        return 1
+
+    print()
+    print("SONUC: " + ("HAZIR" if result["ok"] else "EKSIK AYAR/IZIN VAR"))
+    return 0 if result["ok"] else 1
+
+
+if __name__ == "__main__":
+    sys.exit(asyncio.run(run()))
+
+```
+
+`backend/dedupe_test.py`:
+
+```py
+from __future__ import annotations
+
+import os
+import sqlite3
+import time
+from pathlib import Path
+
+from smoke_test import json_bytes, post
+
+BASE = os.getenv("AC_API_URL", "http://127.0.0.1:18082").rstrip("/")
+DB = Path(__file__).resolve().parent / "data" / "dedupe-test.db"
+name = f"dedupe{int(time.time())}"
+
+payload = {
+    "mc_name": name,
+    "mc_uuid": "00000000-0000-0000-0000-000000000099",
+    "mc_version": "1.20.1",
+    "agent_version": "0.1.0",
+    "device_id": "dedupe-test-device",
+}
+
+status, first = post("/api/v1/session/start", json_bytes(payload))
+print("start1", status, first)
+assert status == 200, first
+
+status, second = post("/api/v1/session/start", json_bytes(payload))
+print("start2", status, second)
+assert status == 200, second
+assert second["session_id"] == first["session_id"], "session was not reused"
+assert second["channel_id"] == first["channel_id"], "channel was not reused"
+
+status, old_heartbeat = post(
+    "/api/v1/session/heartbeat",
+    json_bytes({"session_id": first["session_id"]}),
+    first["token"],
+)
+print("old heartbeat", status, old_heartbeat)
+assert status == 401, old_heartbeat
+
+status, heartbeat = post(
+    "/api/v1/session/heartbeat",
+    json_bytes({"session_id": first["session_id"]}),
+    second["token"],
+)
+print("new heartbeat", status, heartbeat)
+assert status == 200, heartbeat
+
+status, ended = post(
+    "/api/v1/session/end",
+    json_bytes({"session_id": first["session_id"], "reason": "game_closed"}),
+    second["token"],
+)
+print("end", status, ended)
+assert status == 200, ended
+
+conn = sqlite3.connect(DB)
+rows = conn.execute(
+    "select id, status, channel_id, channel_name from sessions where mc_name = ?",
+    (name,),
+).fetchall()
+conn.close()
+print("db rows", rows)
+assert len(rows) == 1, rows
+assert rows[0][1] == "ended", rows
+print("DEDUPE_OK")
+
+```
+
+`backend/inspect_channels.py`:
+
+```py
+import json
+import os
+import urllib.request
+from pathlib import Path
+
+from dotenv import load_dotenv
+
+BASE_DIR = Path(__file__).resolve().parent
+load_dotenv(BASE_DIR / ".env")
+
+TOKEN = os.environ["DISCORD_TOKEN"]
+GUILD_ID = os.environ["GUILD_ID"]
+NOW_ID = os.environ["NOW_CATEGORY_ID"]
+LOG_ID = os.environ["LOG_CATEGORY_ID"]
+
+
+def api(path: str):
+    req = urllib.request.Request(
+        f"https://discord.com/api/v10{path}",
+        headers={"Authorization": f"Bot {TOKEN}", "User-Agent": "ToxidoAC-Inspect/0.1"},
+    )
+    with urllib.request.urlopen(req, timeout=20) as response:
+        return json.load(response)
+
+
+channels = api(f"/guilds/{GUILD_ID}/channels")
+for channel in channels:
+    if channel.get("parent_id") not in (NOW_ID, LOG_ID):
+        continue
+    print(f"{channel['id']} | {channel['name']} | parent={channel['parent_id']} | type={channel['type']}")
+    for overwrite in channel.get("permission_overwrites", []):
+        print(
+            "  overwrite "
+            f"id={overwrite['id']} type={overwrite['type']} "
+            f"allow={overwrite['allow']} deny={overwrite['deny']}"
+        )
+
+```
+
+`backend/main.py`:
+
+```py
+"""Barindirma panelinin varsayilan `python main.py` komutu icin giris noktasi."""
+
+from __future__ import annotations
+
+import uvicorn
+
+from app.config import get_settings
+
+if __name__ == "__main__":
+    settings = get_settings()
+    uvicorn.run(
+        "app.main:app",
+        host=settings.host,
+        port=settings.port,
+        reload=False,
+        timeout_keep_alive=65,
+    )
+
+```
+
+`backend/requirements.txt`:
+
+```txt
+fastapi>=0.115,<1
+uvicorn[standard]>=0.30
+discord.py>=2.4
+aiosqlite>=0.20
+python-dotenv>=1.0
+
+```
+
+`backend/run.py`:
+
+```py
+from __future__ import annotations
+
+import uvicorn
+
+from app.config import get_settings
+
+if __name__ == "__main__":
+    settings = get_settings()
+    uvicorn.run(
+        "app.main:app",
+        host=settings.host,
+        port=settings.port,
+        reload=False,
+        timeout_keep_alive=65,
+    )
+
+```
+
+`backend/smoke_test.py`:
+
+```py
+"""Faz 1 backend smoke testi (harici bagimlilik kullanmaz).
+
+Calistirma (backend ayaktayken):
+    .venv\\Scripts\\python.exe smoke_test.py
+"""
+
+from __future__ import annotations
+
+import hashlib
+import hmac
+import json
+import os
+import sqlite3
+import sys
+import time
+import urllib.error
+import urllib.request
+from pathlib import Path
+from uuid import uuid4
+
+BASE_URL = os.getenv("AC_API_URL", "http://127.0.0.1:8000").rstrip("/")
+API_KEY = os.getenv("API_KEY", "dev-key")
+API_SECRET = os.getenv("API_SECRET", "dev-secret-change-me")
+DB_PATH = Path(__file__).resolve().parent / "data" / "toxido.db"
+
+
+def post(
+    path: str,
+    body: bytes,
+    token: str | None = None,
+    *,
+    secret: str = API_SECRET,
+    nonce: str | None = None,
+    timestamp: str | None = None,
+) -> tuple[int, dict]:
+    ts = timestamp or str(int(time.time() * 1000))
+    nc = nonce or str(uuid4())
+    signature = hmac.new(
+        secret.encode("utf-8"),
+        f"{ts}.{nc}.".encode("utf-8") + body,
+        hashlib.sha256,
+    ).hexdigest()
+
+    headers = {
+        "Content-Type": "application/json",
+        "X-AC-Key": API_KEY,
+        "X-AC-Timestamp": ts,
+        "X-AC-Nonce": nc,
+        "X-AC-Signature": signature,
+    }
+    if token:
+        headers["Authorization"] = f"Bearer {token}"
+
+    request = urllib.request.Request(
+        f"{BASE_URL}{path}", data=body, headers=headers, method="POST"
+    )
+    try:
+        with urllib.request.urlopen(request, timeout=10) as response:
+            return response.status, json.loads(response.read().decode("utf-8"))
+    except urllib.error.HTTPError as error:
+        raw = error.read().decode("utf-8")
+        try:
+            payload = json.loads(raw)
+        except json.JSONDecodeError:
+            payload = {"raw": raw}
+        return error.code, payload
+
+
+def json_bytes(payload: dict) -> bytes:
+    return json.dumps(payload, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
+
+
+def main() -> int:
+    failures: list[str] = []
+
+    def check(name: str, condition: bool, detail: str = "") -> None:
+        if condition:
+            print(f"  OK   {name}")
+        else:
+            print(f"  FAIL {name} {detail}")
+            failures.append(name)
+
+    mc_name = f"smoke{int(time.time())}{uuid4().hex[:4]}"
+    base_name = mc_name.lower()
+    print(f"1) Oturum baslatma ({mc_name})")
+    started_at = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+    start_payload = json_bytes(
+        {
+            "mc_name": mc_name,
+            "mc_uuid": "00000000-0000-0000-0000-000000000000",
+            "mc_version": "1.20.1",
+            "agent_version": "0.1.0",
+            "device_id": "smoke-test",
+            "started_at": started_at,
+        }
+    )
+    status, first = post("/api/v1/session/start", start_payload)
+    check("start 200", status == 200, f"status={status} body={first}")
+    if status != 200:
+        return 1
+    session_id = first["session_id"]
+    token = first["token"]
+    check("session_id dolu", bool(session_id))
+    check("token dolu", bool(token))
+    check("kanal id (dry-run)", first.get("channel_id") is not None)
+
+    print("2) Kalp atisi ve replay korumasi")
+    heartbeat = json_bytes({"session_id": session_id})
+    hb_nonce = str(uuid4())
+    hb_ts = str(int(time.time() * 1000))
+    status, payload = post(
+        "/api/v1/session/heartbeat",
+        heartbeat,
+        token,
+        nonce=hb_nonce,
+        timestamp=hb_ts,
+    )
+    check("heartbeat 200", status == 200, f"status={status} body={payload}")
+
+    status, payload = post(
+        "/api/v1/session/heartbeat",
+        heartbeat,
+        token,
+        nonce=hb_nonce,
+        timestamp=hb_ts,
+    )
+    check("replay reddedildi (401)", status == 401, f"status={status} body={payload}")
+
+    status, payload = post(
+        "/api/v1/session/heartbeat",
+        heartbeat,
+        token,
+        secret="wrong-secret",
+    )
+    check("yanlis imza reddedildi (401)", status == 401, f"status={status} body={payload}")
+
+    print("3) Oturum kapatma")
+    end_payload = json_bytes({"session_id": session_id, "reason": "smoke_test"})
+    status, payload = post("/api/v1/session/end", end_payload, token)
+    check("end 200", status == 200, f"status={status} body={payload}")
+    check("log_index=1", payload.get("log_index") == 1, str(payload))
+
+    status, payload = post("/api/v1/session/end", end_payload, token)
+    check("ikinci end idempotent", status == 200 and payload.get("already_closed") is True, str(payload))
+
+    print("4) Ayni oyuncunun ikinci oturumu -> -2")
+    status, second = post("/api/v1/session/start", start_payload)
+    check("ikinci start 200", status == 200, f"status={status} body={second}")
+    if status == 200:
+        second_end = json_bytes({"session_id": second["session_id"], "reason": "smoke_test_2"})
+        status, payload = post("/api/v1/session/end", second_end, second["token"])
+        check("ikinci end 200", status == 200, f"status={status} body={payload}")
+        check("log_index=2", payload.get("log_index") == 2, str(payload))
+
+    print("5) Veritabani kontrolu")
+    check("db mevcut", DB_PATH.exists(), str(DB_PATH))
+    if DB_PATH.exists():
+        with sqlite3.connect(DB_PATH) as connection:
+            rows = connection.execute(
+                "SELECT base_name, status, end_reason, log_index, channel_name "
+                "FROM sessions WHERE mc_name = ? ORDER BY started_at",
+                (mc_name,),
+            ).fetchall()
+        check("iki kayit", len(rows) == 2, str(rows))
+        for index, row in enumerate(rows, start=1):
+            check(f"kayit {index} ended", row[1] == "ended", str(row))
+            check(f"kayit {index} log_index", row[3] == index, str(row))
+            check(
+                f"kayit {index} kanal adi",
+                row[4] == f"{base_name}-{index}",
+                str(row),
+            )
+
+    print()
+    if failures:
+        print(f"BASARISIZ: {len(failures)} kontrol -> {', '.join(failures)}")
+        return 1
+    print("TUM KONTROLLER BASARILI")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
+
+```
+
+`backend/start.sh`:
+
+```sh
+#!/usr/bin/env bash
+set -euo pipefail
+cd "$(dirname "$0")"
+
+PYTHON="${PYTHON:-python3}"
+if ! command -v "$PYTHON" >/dev/null 2>&1; then
+  PYTHON=python
+fi
+
+if [ ! -d .venv ]; then
+  "$PYTHON" -m venv .venv
+fi
+
+# shellcheck disable=SC1091
+. .venv/bin/activate
+
+if [ ! -f .venv/.deps-installed ] || [ requirements.txt -nt .venv/.deps-installed ]; then
+  python -m pip install --upgrade pip
+  python -m pip install -r requirements.txt
+  touch .venv/.deps-installed
+fi
+
+exec python -m app.main
+
+```
+
+`pom.xml`:
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>dev.toxido</groupId>
+    <artifactId>toxido-anticheat</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+
+    <name>Toxido Anti Cheat</name>
+
+    <modules>
+        <module>ac-agent</module>
+        <module>ac-app</module>
+    </modules>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.release>21</maven.compiler.release>
+    </properties>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>3.13.0</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-jar-plugin</artifactId>
+                    <version>3.4.2</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
+</project>
+
+```
+
+`scripts/Launcher.cs`:
+
+```cs
+using System;
+using System.Diagnostics;
+using System.IO;
+using System.IO.Compression;
+using System.Reflection;
+using System.Runtime.InteropServices;
+using System.Text;
+
+internal static class Program
+{
+    private const string PayloadId = "__PAYLOAD_ID__";
+    private const string AppName = "Toxido Anti Cheat";
+
+    private static int Main(string[] args)
+    {
+        try
+        {
+            Console.Title = AppName;
+            PrepareConsole();
+
+            string local = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+            string engineRoot = Path.Combine(local, "40x1d0AC", "engine");
+            string engine = Path.Combine(engineRoot, PayloadId);
+            string java = Path.Combine(engine, "runtime", "bin", "java.exe");
+            string app = Path.Combine(engine, "app", "ac-app.jar");
+            string config = Path.Combine(engine, "app", "client.properties");
+            string agent = Path.Combine(engine, "app", "ac-agent.jar");
+
+            if (!File.Exists(java) || !File.Exists(app)
+                || !File.Exists(config) || !File.Exists(agent))
+            {
+                engine = Extract(engine);
+                java = Path.Combine(engine, "runtime", "bin", "java.exe");
+                app = Path.Combine(engine, "app", "ac-app.jar");
+                config = Path.Combine(engine, "app", "client.properties");
+                agent = Path.Combine(engine, "app", "ac-agent.jar");
+            }
+
+            if (args.Length > 0 && args[0] == "--print-path")
+            {
+                Console.WriteLine(engine);
+                return 0;
+            }
+
+            ProcessStartInfo info = new ProcessStartInfo();
+            info.FileName = java;
+            info.Arguments = "--add-modules jdk.attach"
+                + " -Dac.config=\"" + config + "\""
+                + " -Dac.agent.jar=\"" + agent + "\""
+                + " -jar \"" + app + "\"";
+            info.WorkingDirectory = engine;
+            info.UseShellExecute = false;
+            info.CreateNoWindow = false;
+
+            try
+            {
+                info.EnvironmentVariables["COLUMNS"] =
+                    Console.WindowWidth.ToString();
+                info.EnvironmentVariables["LINES"] =
+                    Console.WindowHeight.ToString();
+            }
+            catch
+            {
+                // Konsol boyutu okunamazsa Java tarafindaki varsayilan kullanilir.
+            }
+
+            Process child = Process.Start(info);
+            if (child == null)
+            {
+                throw new Exception("Java sureci baslatilamadi.");
+            }
+            child.WaitForExit();
+            return child.ExitCode;
+        }
+        catch (Exception exception)
+        {
+            Log(exception.ToString());
+            try
+            {
+                Console.Error.WriteLine("Toxido AC baslatilamadi.");
+                Console.Error.WriteLine("Ayrintilar: " + LogPath());
+            }
+            catch
+            {
+                // Konsol yoksa sessizce cik.
+            }
+            return 1;
+        }
+    }
+
+    private static void PrepareConsole()
+    {
+        try
+        {
+            SetConsoleOutputCP(65001);
+            SetConsoleCP(65001);
+
+            IntPtr handle = GetStdHandle(-11);
+            if (handle == IntPtr.Zero || handle == new IntPtr(-1))
+            {
+                return;
+            }
+
+            CONSOLE_FONT_INFO_EX current = new CONSOLE_FONT_INFO_EX();
+            current.cbSize = Marshal.SizeOf(typeof(CONSOLE_FONT_INFO_EX));
+            current.FaceName = "";
+            string oldFace = "";
+            int oldSize = 0;
+            if (GetCurrentConsoleFontEx(handle, false, ref current))
+            {
+                oldFace = current.FaceName;
+                oldSize = current.dwFontSizeY;
+            }
+
+            CONSOLE_FONT_INFO_EX wanted = new CONSOLE_FONT_INFO_EX();
+            wanted.cbSize = Marshal.SizeOf(typeof(CONSOLE_FONT_INFO_EX));
+            wanted.FaceName = "Consolas";
+            wanted.FontFamily = 54;
+            wanted.FontWeight = 400;
+            wanted.dwFontSizeX = 0;
+            wanted.dwFontSizeY = 16;
+            bool changed = SetCurrentConsoleFontEx(handle, false, ref wanted);
+
+            SMALL_RECT tiny = new SMALL_RECT();
+            tiny.Left = 0;
+            tiny.Top = 0;
+            tiny.Right = 0;
+            tiny.Bottom = 0;
+            SetConsoleWindowInfo(handle, true, ref tiny);
+
+            COORD buffer = new COORD();
+            buffer.X = 120;
+            buffer.Y = 50;
+            bool bufferOk = SetConsoleScreenBufferSize(handle, buffer);
+
+            SMALL_RECT window = new SMALL_RECT();
+            window.Left = 0;
+            window.Top = 0;
+            window.Right = 119;
+            window.Bottom = 29;
+            bool windowOk = SetConsoleWindowInfo(handle, true, ref window);
+
+            Log("Konsol fontu: " + oldFace + " " + oldSize
+                + " -> Consolas 16 (" + changed + "), buffer=" + bufferOk
+                + ", window=" + windowOk + ".");
+        }
+        catch (Exception exception)
+        {
+            Log("Konsol ayari uygulanamadi: " + exception.Message);
+        }
+    }
+
+    private static string Extract(string target)
+    {
+        Console.Error.Write("Toxido AC hazirlaniyor...");
+        try
+        {
+            string parent = Path.GetDirectoryName(target);
+            if (!String.IsNullOrEmpty(parent))
+            {
+                Directory.CreateDirectory(parent);
+            }
+
+            if (Directory.Exists(target))
+            {
+                try
+                {
+                    Directory.Delete(target, true);
+                }
+                catch
+                {
+                    target = target + "-" + Guid.NewGuid().ToString("N").Substring(0, 8);
+                }
+            }
+
+            string temp = Path.Combine(
+                Path.GetTempPath(),
+                "40x1d0AC-" + Guid.NewGuid().ToString("N") + ".zip");
+
+            using (Stream input = Assembly.GetExecutingAssembly()
+                .GetManifestResourceStream("payload.zip"))
+            {
+                if (input == null)
+                {
+                    throw new Exception("Gomulu paket bulunamadi.");
+                }
+                using (FileStream output = File.Create(temp))
+                {
+                    input.CopyTo(output);
+                }
+            }
+
+            try
+            {
+                ZipFile.ExtractToDirectory(temp, target);
+            }
+            finally
+            {
+                try { File.Delete(temp); } catch { }
+            }
+
+            Console.Error.Write("\r" + new String(' ', 30) + "\r");
+            return target;
+        }
+        catch
+        {
+            Console.Error.Write("\r" + new String(' ', 30) + "\r");
+            throw;
+        }
+    }
+
+    private static string LogPath()
+    {
+        return Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+            "40x1d0AC",
+            "launcher.log");
+    }
+
+    private static void Log(string message)
+    {
+        try
+        {
+            string path = LogPath();
+            Directory.CreateDirectory(Path.GetDirectoryName(path));
+            File.AppendAllText(
+                path,
+                "[" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "] " + message
+                    + Environment.NewLine,
+                Encoding.UTF8);
+        }
+        catch
+        {
+            // Log yazilamazsa devam et.
+        }
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct COORD
+    {
+        public short X;
+        public short Y;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct SMALL_RECT
+    {
+        public short Left;
+        public short Top;
+        public short Right;
+        public short Bottom;
+    }
+
+    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
+    private struct CONSOLE_FONT_INFO_EX
+    {
+        public int cbSize;
+        public int nFont;
+        public short dwFontSizeX;
+        public short dwFontSizeY;
+        public int FontFamily;
+        public int FontWeight;
+        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 32)]
+        public string FaceName;
+    }
+
+    [DllImport("kernel32.dll")]
+    private static extern IntPtr GetStdHandle(int nStdHandle);
+
+    [DllImport("kernel32.dll", CharSet = CharSet.Unicode)]
+    private static extern bool GetCurrentConsoleFontEx(
+        IntPtr hConsoleOutput,
+        bool bMaximumWindow,
+        ref CONSOLE_FONT_INFO_EX lpConsoleCurrentFontEx);
+
+    [DllImport("kernel32.dll", CharSet = CharSet.Unicode)]
+    private static extern bool SetCurrentConsoleFontEx(
+        IntPtr hConsoleOutput,
+        bool bMaximumWindow,
+        ref CONSOLE_FONT_INFO_EX lpConsoleCurrentFontEx);
+
+    [DllImport("kernel32.dll")]
+    private static extern bool SetConsoleScreenBufferSize(
+        IntPtr hConsoleOutput,
+        COORD dwSize);
+
+    [DllImport("kernel32.dll")]
+    private static extern bool SetConsoleWindowInfo(
+        IntPtr hConsoleOutput,
+        bool bAbsolute,
+        ref SMALL_RECT lpConsoleWindow);
+
+    [DllImport("kernel32.dll")]
+    private static extern bool SetConsoleOutputCP(uint wCodePageID);
+
+    [DllImport("kernel32.dll")]
+    private static extern bool SetConsoleCP(uint wCodePageID);
+}
+
+```
+
+`scripts/build-exe.ps1`:
+
+```ps1
+param(
+    [string]$Output = "",
+    [string]$ApiBaseUrl = ""
+)
+
+$ErrorActionPreference = 'Stop'
+$root = Split-Path -Parent $PSScriptRoot
+. (Join-Path $root 'scripts\dev-env.ps1')
+
+if (-not $Output) {
+    $Output = Join-Path $root 'dist\40x1d0AC.exe'
+}
+
+$build = Join-Path $root 'build\exe'
+$stage = Join-Path $build 'payload'
+$runtime = Join-Path $stage 'runtime'
+$appDir = Join-Path $stage 'app'
+$zipPath = Join-Path $build 'payload.zip'
+$iconPath = Join-Path $build '40x1d0AC.ico'
+$launcherSource = Join-Path $build 'Launcher.cs'
+
+Write-Output 'Maven paketi derleniyor...'
+Push-Location $root
+try {
+    & mvn -B -q -DskipTests package
+    if ($LASTEXITCODE -ne 0) {
+        throw "Maven basarisiz (exit $LASTEXITCODE)."
+    }
+}
+finally {
+    Pop-Location
+}
+
+if (Test-Path $build) {
+    Remove-Item $build -Recurse -Force
+}
+New-Item -ItemType Directory -Path $appDir -Force | Out-Null
+
+Write-Output 'Java runtime olusturuluyor...'
+$modules = 'java.base,java.compiler,java.net.http,java.sql,jdk.attach,jdk.unsupported,java.logging,java.management'
+& (Join-Path $env:JAVA_HOME 'bin\jlink.exe') `
+    --add-modules $modules `
+    --strip-debug `
+    --no-header-files `
+    --no-man-pages `
+    --compress=2 `
+    --output $runtime
+if ($LASTEXITCODE -ne 0) {
+    throw "jlink basarisiz (exit $LASTEXITCODE)."
+}
+
+Write-Output 'Uygulama dosyalari hazirlaniyor...'
+Copy-Item (Join-Path $root 'ac-app\target\ac-app.jar') (Join-Path $appDir 'ac-app.jar')
+Copy-Item (Join-Path $root 'ac-agent\target\ac-agent.jar') (Join-Path $appDir 'ac-agent.jar')
+$clientConfig = Join-Path $appDir 'client.properties'
+$clientConfigSource = Join-Path $root 'ac-app\config.local.properties'
+if (-not (Test-Path $clientConfigSource)) {
+    $clientConfigSource = Join-Path $root 'ac-app\config.properties'
+}
+Copy-Item $clientConfigSource $clientConfig
+
+if ($ApiBaseUrl) {
+    $lines = Get-Content $clientConfig
+    $lines = $lines | ForEach-Object {
+        if ($_ -match '^api\.baseUrl=') {
+            "api.baseUrl=$ApiBaseUrl"
+        }
+        else {
+            $_
+        }
+    }
+    Set-Content -Path $clientConfig -Value $lines -Encoding ASCII
+}
+
+$payloadId = [Guid]::NewGuid().ToString('N')
+Set-Content -Path (Join-Path $stage 'payload.id') -Value $payloadId -Encoding ASCII -NoNewline
+
+Write-Output 'Paket sikistiriliyor...'
+Add-Type -AssemblyName System.IO.Compression.FileSystem
+[System.IO.Compression.ZipFile]::CreateFromDirectory(
+    $stage,
+    $zipPath,
+    [System.IO.Compression.CompressionLevel]::Optimal,
+    $false
+)
+
+Write-Output 'Ikon kopyalaniyor...'
+$iconSource = Join-Path $root 'assets\40x1d0AC.ico'
+if (-not (Test-Path $iconSource)) { throw "Ikon bulunamadi: $iconSource" }
+Copy-Item $iconSource $iconPath -Force
+Write-Output 'Baslatici derleniyor...'
+$template = Get-Content (Join-Path $root 'scripts\Launcher.cs') -Raw
+$source = $template.Replace('__PAYLOAD_ID__', $payloadId)
+[System.IO.File]::WriteAllText(
+    $launcherSource,
+    $source,
+    (New-Object System.Text.UTF8Encoding($true))
+)
+
+$csc = Join-Path $env:WINDIR 'Microsoft.NET\Framework64\v4.0.30319\csc.exe'
+if (-not (Test-Path $csc)) {
+    throw "csc.exe bulunamadi: $csc"
+}
+
+$dist = Split-Path -Parent $Output
+if (-not (Test-Path $dist)) {
+    New-Item -ItemType Directory -Path $dist -Force | Out-Null
+}
+
+$cscArgs = @(
+    '/nologo'
+    '/target:exe'
+    '/platform:x64'
+    '/optimize+'
+    "/win32icon:$iconPath"
+    "/resource:$zipPath,payload.zip"
+    '/r:System.IO.Compression.dll'
+    '/r:System.IO.Compression.FileSystem.dll'
+    "/out:$Output"
+    $launcherSource
+)
+& $csc $cscArgs
+if ($LASTEXITCODE -ne 0) {
+    throw "csc basarisiz (exit $LASTEXITCODE)."
+}
+
+$file = Get-Item $Output
+$hash = (Get-FileHash $Output -Algorithm SHA256).Hash
+Write-Output ''
+Write-Output "Hazir: $($file.FullName)"
+Write-Output ("Boyut: {0:N1} MB" -f ($file.Length / 1MB))
+Write-Output "SHA-256: $hash"
+Write-Output "Payload: $payloadId"
+
+```
+
+`scripts/dev-env.ps1`:
+
+```ps1
+# Bu betik, bu makinedeki araclari mevcut PowerShell oturumuna ekler.
+$jdk = 'C:\Users\Toxido\tools\jdk-21'
+$mvn = 'C:\Users\Toxido\tools\maven'
+$git = 'C:\Users\Toxido\tools\PortableGit'
+$py  = 'C:\Users\Toxido\AppData\Local\Programs\Python\Python312'
+
+$env:JAVA_HOME = $jdk
+$env:MAVEN_HOME = $mvn
+$env:Path = "$jdk\bin;$mvn\bin;$git\cmd;$py;$py\Scripts;" + $env:Path
+
+```
+
+`scripts/run-app.ps1`:
+
+```ps1
+. "$PSScriptRoot\dev-env.ps1"
+$root = Split-Path $PSScriptRoot -Parent
+Set-Location $root
+chcp 65001 > $null
+
+$configPath = Join-Path $root 'ac-app\config.local.properties'
+if (-not (Test-Path $configPath)) {
+    $configPath = Join-Path $root 'ac-app\config.properties'
+}
+
+& "$env:JAVA_HOME\bin\java.exe" `
+    --add-modules jdk.attach `
+    "-Dac.config=$configPath" `
+    "-Dac.agent.jar=$root\ac-agent\target\ac-agent.jar" `
+    -jar "$root\ac-app\target\ac-app.jar"
+
+exit $LASTEXITCODE
+
+```
+
+`scripts/run-backend.ps1`:
+
+```ps1
+param(
+    [switch]$DryRun
+)
+
+. "$PSScriptRoot\dev-env.ps1"
+$root = Split-Path $PSScriptRoot -Parent
+Set-Location "$root\backend"
+
+if (-not (Test-Path '.venv')) {
+    python -m venv .venv
+}
+
+& '.\.venv\Scripts\python.exe' -m pip install --upgrade pip
+& '.\.venv\Scripts\python.exe' -m pip install -r requirements.txt
+
+if ($DryRun) {
+    $env:DRY_RUN = '1'
+}
+
+& '.\.venv\Scripts\python.exe' -m app.main
+
+```
+
+`tools/AttachScan.java`:
+
+```java
+import com.sun.tools.attach.VirtualMachine;
+import com.sun.tools.attach.VirtualMachineDescriptor;
+
+public final class AttachScan {
+    public static void main(String[] args) {
+        for (VirtualMachineDescriptor descriptor : VirtualMachine.list()) {
+            System.out.println(descriptor.id() + " | " + descriptor.displayName());
+        }
+    }
+}
+
+```
+
+`tools/ProcessScan.java`:
+
+```java
+import java.util.concurrent.atomic.AtomicInteger;
+
+public final class ProcessScan {
+    public static void main(String[] args) {
+        AtomicInteger matches = new AtomicInteger();
+        ProcessHandle.allProcesses()
+            .filter(ProcessHandle::isAlive)
+            .forEach(handle -> {
+                String commandLine = handle.info().commandLine().orElse("");
+                if (commandLine.contains("net.minecraft.client.main.Main")) {
+                    matches.incrementAndGet();
+                    System.out.println("MATCH pid=" + handle.pid() + " cmd=" + commandLine);
+                }
+            });
+        System.out.println("matches=" + matches.get());
+    }
+}
+
+```
+
+`tools/fake-minecraft/net/minecraft/client/main/Main.java`:
+
+```java
+package net.minecraft.client.main;
+
+/**
+ * Gercek Minecraft olmadan attach/ajan akisini test etmek icin sahte istemci.
+ * Calistirma:
+ *   javac -d tools/fake-minecraft/classes tools/fake-minecraft/net/minecraft/client/main/Main.java
+ *   java -cp tools/fake-minecraft/classes net.minecraft.client.main.Main \
+ *        --username TestUser --uuid 00000000-0000-0000-0000-000000000000 --version 1.20.1
+ */
+public final class Main {
+    public static void main(String[] args) throws Exception {
+        System.out.println("Fake Minecraft started: " + String.join(" ", args));
+        System.out.println("PID: " + ProcessHandle.current().pid());
+        Thread.sleep(Long.MAX_VALUE);
+    }
+}
+
+```
