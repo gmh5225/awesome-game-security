@@ -733,6 +733,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/code-tom-code/Software_D3D9 [DX9]
 - https://github.com/jenissimo/bottleship [Browser HLE that boots x86 Win32 PEs and reimplements Win32/COM plus DirectDraw/Direct3D 3–9 on WebGPU/WebAudio/OPFS for classic Windows games]
 - https://github.com/Lomchat/orthros [Browser runtime that runs unmodified Win32 x86 games via PE loading, Win32/DirectX HLE on web APIs, and optional GoldSrc/re3 WASM ports]
+- https://github.com/duruer/s3-mobile [Mobile port of The Settlers III using user-supplied game files: x86 CPU emulation, Win32/DirectX high-level emulation, and touch UI for Android and iOS]
 
 > Compatibility
 - https://github.com/CnCNet/cnc-ddraw [Old Game]
@@ -4725,6 +4726,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/InertiaOrg/Inertia [Open-source Minecraft anti-cheat foundation with version-neutral movement/packet modeling, evidence accumulation, and testable detection core]
 - https://github.com/freezato/LocalAnticheat-1.8.9 [Client-side Forge 1.8.9 mod that passively flags local/remote cheat signals from observed packet flow in local chat without server reports]
 - https://github.com/ThoriaDevelopment/Iustitia [Fabric 1.21.11 client-side Minecraft anti-cheat that passively models other players from inbound packets, runs 36 detection checks, clip replay, and local-only staff alerts without server enforcement]
+- https://github.com/ToxidoAAC/ToxidoAntiCheat [Client-side Minecraft Java anticheat without mods: JVM Attach API loads a Java agent, HMAC-backed FastAPI session API, and Discord enforcement; Phase 1 covers attach and session infrastructure]
 - https://github.com/3iden-del/fasds-anti-cheat [Fabric 1.21.11 client mod with heuristic cheat spotting, in-game flag report (K) and clear (J), CI-built jar]
 - https://github.com/maximumemails-cmd/RainInjectable [Injectable Windows C++/Java runtime that rebuilds the Rain 1.8.9 client-side cheat observer for Forge and Badlion, with JNI bootstrap, detection research docs, and local-only evidence review]
 - https://github.com/YcbrYL1/YCBR-AntiCheat [Paper 1.8.9 Minecraft anti-cheat plugin with 19 combat/movement/protocol checks, auth, DDoS protection, and admin GUI]
