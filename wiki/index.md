@@ -3563,6 +3563,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Ryujin](entities/ryujin.md) — x86 PE bin2bin protector/obfuscator (Bin2Bin transformation research; AC Obfuscation Engine)
 - [Sark](entities/sark.md) — IDAPython Made Easy (IDA plugins / older IDA-6.x branch)
 - [s2x](entities/s2x.md) — COD MW2 (2009) client mod framework: Arxan bypass, code healing, integrity neutralization, custom console, server emulation, modding infra (Brentdevent; cheat / game:cod mw2 modding)
+- [s3-mobile](entities/s3-mobile.md) — The Settlers III Android/iOS port: Rust x86 interpreter + ARM64 JIT; Win32/DirectX HLE; user-supplied GOG files; `S3.EXE` RE, guest hooks, touch UI, lockstep relay multiplayer (duruer; mobile / preservation)
 - [s4killer](entities/s4killer.md) — BYOVD via Samsung S4 `probmon.sys` (IOCTL phys/virt kernel R/W; unsigned load / AC bypass research; gmh5225)
 - [s4mapper](entities/s4mapper.md) — BYOVD driver mapper via Samsung S4 `SignalRgbDriver.sys` (memory-access IOCTLs; manual unsigned map; gmh5225)
 - [s4dbrd.github.io](entities/s4dbrd-github-io.md) — Ruby/Jekyll/Chirpy GitHub Pages blog source; kernel vuln + exploit dev; BEDaisy/Win32k/secure-kernel attestation + kernel AC architecture articles (s4dbrd; Anti Cheat / Guide)
