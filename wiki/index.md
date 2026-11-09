@@ -3204,6 +3204,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [pico-dma](entities/pico-dma.md) — Compact FPGA pre-boot PCIe DMA platform (Cr4sh; Verilog + Vivado/Vitis + MicroBlaze; autonomous/UART payloads; SPI flash; boot/firmware security + DMA implant research)
 - [PiDqSerializationWrite-Example](entities/pidqserializationwrite-example.md) — Unity-centered `PiDqSerializationWrite` C++ example (Some Tricks / Windows Ring0)
 - [PI-Defender](entities/pi-defender.md) — Windows kernel driver blocking process injection via handle-right filtering (remote memory write / operation permissions; hollowing, doppelgänging, ghosting, DLL injection docs/tests; defensive AC hardening)
+- [pika](entities/pika.md) — Rust Wine/Proton memory scanner/patcher (`process_vm_readv`/`writev`; no ptrace freeze; SIMD/AOB/pointers; JSON-RPC daemon + CLI; delfianto; cheat / memory scanner)
 - [pikabot-deobfuscator](entities/pikabot-deobfuscator.md) — Pikabot RC4/AES string decrypt (IDA Hex-Rays; cheat / IDA Plugins)
 - [pkernelinterface-eft](entities/pkernelinterface-eft.md) — Escape From Tarkov external reversal framework (Nou4r; C++; kernel-assisted memory + entity processing; ESP/aim modules; ImGui overlay; cheat / game:eft [External])
 - [Pilot](entities/pilot.md) — Piccolo Engine (BoomingTech; GAMES104 teaching C++ engine+editor; CMake Windows/Linux/macOS; rendering/resource/scripting/tooling; Game Engine / source)
