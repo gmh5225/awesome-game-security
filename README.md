@@ -2292,6 +2292,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/bbfox0703/Mydev-Cheat-Engine-Tables [CT]
 - https://github.com/Hexorg/CheatEngineTables [Collection of Cheat Engine tables curated from CE forums (offline-focused)]
 - https://github.com/Sora3100/Tales_of_Cheat_Tables [Curated Cheat Engine tables and patches for multiple Tales of titles across PC and emulated platforms, with per-game feature docs and troubleshooting]
+- https://github.com/thatonekidnextdoorlol-hash/CemuTap [Open-source CE-style memory scanner and live editor for the Cemu Wii U emulator, with plugins and address tables]
 - https://github.com/antaresjay/freeplay [Rust Windows trainer that converts Cheat Engine .CT tables to TOML and runs Auto Assembler scripts]
 - https://github.com/abhijeetadarsh/CTTrainer [Standalone Windows ImGui/DX11 trainer that parses Cheat Engine .CT tables and reads, writes, and freezes values in attached 32/64-bit game processes]
 - https://github.com/heaven-hm/gtlibcpp [C++17 memory/trainer library with Cheat Engine .CT parsing, freeze management, and a local JSON-RPC agent for authorized offline trainer workflows on Windows]
