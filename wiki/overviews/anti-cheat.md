@@ -1048,6 +1048,7 @@ sources:
   - wiki/sources/descriptions/vunlior__GuardX.md
   - wiki/sources/descriptions/Deltabrohollow__R6-Assist-Menu-Setup.md
   - wiki/sources/descriptions/CmdSuv__NoEscapeAC.md
+  - wiki/sources/descriptions/ToxidoAAC__ToxidoAntiCheat.md
 updated: 2026-11-09
 confidence: high
 ---
@@ -1402,6 +1403,8 @@ Title-specific R6 ranked-stat suspicion tooling such as [[r6-intel]] (baldspots4
 **NeoForge client+server mod integrity AC:** [[katapult-anticheat]] (Gitex68; Java NeoForge **1.21.1** mod; SHA-256 checksums on client mod JARs and resource packs against server whitelists; real-time join/reload pack monitoring incl. renamed X-ray textures; hot-reloadable config, whitelist regeneration, live re-validation commands; Gson whitelist management; Anti Cheat / game:minecraft) for NeoForge modded-server operators needing file-integrity enforcement beyond gameplay packet checks. (source: wiki/sources/descriptions/Gitex68__Katapult-AntiCheat.md)
 
 **Offline mod JAR static triage:** [[leaf-mod-analyzer]] (gemakfy; Rust CLI + optional Python bindings; native classfile parser; JAR single/batch scans; entropy/obfuscation heuristics and JSON rule engine; Fabric/Forge/NeoForge-oriented reporting; no JVM—flags cheat-client bytecode patterns for moderation and research; Anti Cheat / game:minecraft) for pre-admission or appeal review beside live hash enforcement such as [[faircount]] and screenshare JAR tooling such as [[jaranalyzer]] plus live JVM/disk forensics via [[jvm-inspector]] (PowerShell two-phase `javaw` audit + launcher-layout sweeps; 70+ class-byte cheat signatures; Suspicious DLL Finder companion). (source: wiki/sources/descriptions/gemakfy__leaf-mod-analyzer.md) (source: wiki/sources/descriptions/ItzMeow80__jvm-inspector.md)
+
+**Client-side JVM attach monitoring (no client mod):** [[toxido-anticheat]] (ToxidoAAC; Java Maven launcher + injectable agent + Windows background service; **JVM Attach API** on vanilla/Fabric/Quilt/Forge/NeoForge; loopback IPC handshake/heartbeats; Python FastAPI backend with **HMAC-SHA256** session registration; SQLite + discord.py per-player Now/Log staff channels; jlink EXE phase-one lifecycle/telemetry; planned phase-two JVM cheat/mod signature scanning; Anti Cheat / game:minecraft) for communities wanting persistent client-side monitoring beside server plugins and episodic screenshare such as [[hapiscanner]]. (source: wiki/sources/descriptions/ToxidoAAC__ToxidoAntiCheat.md)
 
 **Headless protocol stress testing:** [[ghostjoin]] (KuryCat; pure Python stdlib Minecraft Java client; connects and stays online without rendering; full modern login/configuration/play flow with compression and Keep Alive; protocol ~773–776; authorized anti-bot/anti-cheat probe tool for offline-mode servers you own or have permission to test; Anti Cheat / game:minecraft) complements server-side plugins indexed by [[minecraft-anticheat-list]] for evaluating bot-connection defenses. (source: wiki/sources/descriptions/KuryCat__GhostJoin.md)
 
