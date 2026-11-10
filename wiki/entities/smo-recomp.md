@@ -30,4 +30,4 @@ Researchers studying Switch binary structure, static recompilation pipelines, an
 
 ## Related
 
-[[ngbrecomp]] · [[sc2-android-recomp]] · [[static-runtime-evidence]] · [[opensw]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]] · [[overviews/graphics-api]]
+[[smo-harmony]] · [[ngbrecomp]] · [[sc2-android-recomp]] · [[static-runtime-evidence]] · [[opensw]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]] · [[overviews/graphics-api]]
