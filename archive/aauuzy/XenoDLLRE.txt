@@ -1,0 +1,2733 @@
+Project Path: arc_aauuzy_XenoDLLRE__w7auiwh
+
+Source Tree:
+
+```txt
+arc_aauuzy_XenoDLLRE__w7auiwh
+├── BRIEFING.md
+├── LICENSE
+├── README.md
+├── detection
+│   ├── xeno_detector.py
+│   └── xeno_executor.yar
+├── docs
+│   ├── DISCLOSURE.md
+│   ├── defense
+│   │   ├── COUNTERMEASURES.md
+│   │   ├── DETECTION.md
+│   │   └── THREAT_ASSESSMENT.md
+│   └── research
+│       ├── ARCHITECTURE.md
+│       ├── FINDINGS.md
+│       ├── LIMITATIONS.md
+│       └── METHODOLOGY.md
+├── payloads
+│   └── README.md
+├── reports
+│   ├── COMPARE_REPORT.md
+│   └── SAMPLE_REPORT.md
+├── tests
+│   └── test_tools.py
+└── tools
+    ├── compare_samples.py
+    ├── decrypt_resources.py
+    ├── sample_report.py
+    └── update_sample.py
+
+```
+
+`BRIEFING.md`:
+
+```md
+# Briefing: Xeno executor (v1.3.65)
+
+**For:** Roblox security and anti-cheat teams
+**From:** Gavin Hatcher ([github.com/aauuzy](https://github.com/aauuzy))
+**Date:** November 2026
+**Status:** Defensive research. Not a vulnerability report: everything described requires the user to run Xeno on their own machine.
+
+## What Xeno is
+
+A free Windows Roblox script executor in wide use. Its scale cannot be established from public data ([`docs/defense/THREAT_ASSESSMENT.md`](docs/defense/THREAT_ASSESSMENT.md) §2). The current public installer contains exactly the DLL analyzed here (`Xeno.dll` v1.3.65, SHA-256 `50318bc8…99049`).
+
+## How it works
+
+Xeno never loads a DLL or creates a thread in Roblox. It overwrites the bytecode of the built-in **en-us locale translation CoreScript module**, so Roblox runs Xeno's client as part of its own startup. That client talks to a **localhost HTTP server** in Xeno's DLL through `HttpService:RequestInternal`. User scripts run by having the DLL compile them and write the bytecode into a ModuleScript the client keeps `require()`ing. Memory offsets for each Roblox release are downloaded at runtime, which is why Xeno survives updates within hours.
+
+## Key observations
+
+1. Replaced CoreScript bytecode executes without an integrity check (G-1).
+2. CoreScript context can reach arbitrary loopback ports over HTTP. This is Xeno's entire control plane (G-2).
+3. Bytecode written into a `require()`d module from outside the process is executed (G-3).
+4. Xeno's own deny-list suggests purchase, auth-cookie and messaging APIs may be reachable from its context (G-5, unverified).
+5. Xeno harms its own users: every attached client runs code the developer publishes (`code.lua`), every script HTTP request leaks the user's hardware ID and game server, and fake "undetected" Xeno installers have spread an infostealer.
+
+## Recommended actions
+
+| Priority | Action | Effect on Xeno |
+|---|---|---|
+| 1 | Block loopback HTTP from client script contexts (C-2) | Removes its control plane |
+| 1 | Record the en-us bytecode mismatch and CoreGui artifacts as telemetry (C-6, C-7) | Measures prevalence |
+| 2 | Verify all CoreScript bytecode against the shipped build (C-1) | Removes its attach method |
+| 2 | Reject out-of-band bytecode in `require()` (C-3) | Removes its execution method |
+| 3 | Audit privileged APIs reachable from CoreScript context (C-5) | Protects executor users |
+
+Details, risks and quick detection indicators: [`docs/defense/COUNTERMEASURES.md`](docs/defense/COUNTERMEASURES.md).
+
+## Evidence
+
+Static analysis only; nothing was executed and no Roblox or Xeno infrastructure was contacted. Every claim in [`docs/research/FINDINGS.md`](docs/research/FINDINGS.md) carries an evidence reference and a confidence level. Disassembly, imports and signature were re-verified against the sample on 2026-11-10. Samples and the decrypted client are not redistributed; hashes are in [`SAMPLE_REPORT.md`](reports/SAMPLE_REPORT.md) and [`payloads/README.md`](payloads/README.md). Samples can be shared privately on request.
+
+## Documents
+
+| Document | Contents |
+|---|---|
+| [`docs/defense/THREAT_ASSESSMENT.md`](docs/defense/THREAT_ASSESSMENT.md) | Prevalence, who is harmed, client observations G-1 to G-5, Xeno's dependencies |
+| [`docs/defense/COUNTERMEASURES.md`](docs/defense/COUNTERMEASURES.md) | Ranked proposals and detection indicators |
+| [`docs/research/ARCHITECTURE.md`](docs/research/ARCHITECTURE.md) | Full technical design with disassembly |
+| [`docs/research/FINDINGS.md`](docs/research/FINDINGS.md) | Every claim with evidence and confidence |
+| [`docs/defense/DETECTION.md`](docs/defense/DETECTION.md) | File, host, in-client and network indicators; YARA and scanner |
+| [`docs/research/LIMITATIONS.md`](docs/research/LIMITATIONS.md) | What is not established |
+
+```
+
+`LICENSE`:
+
+```
+MIT License
+
+Copyright (c) 2026 aauuzy
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
+`README.md`:
+
+```md
+# XenoDLLRE
+
+Static reverse engineering of **Xeno v1.3.65**, a Roblox script executor, with detection tooling built from the results. The goal is to document how the executor works and what it leaves behind, for defensive and anti-cheat use. This repository does not contain or improve executor functionality.
+
+## Summary
+
+Xeno is a native x64 DLL (`Xeno.dll`) driven by an Electron UI. It does not load code into Roblox as a DLL or thread. It **replaces the bytecode of the en-us locale translation ModuleScript** under `RobloxGui.Modules`, so Roblox itself runs Xeno's client script when that module loads. The client then talks to a **localhost HTTP server** in the DLL, runs user scripts by having the DLL write compiled Luau bytecode into ModuleScripts it repeatedly `require()`s, and leaves distinctive objects in `CoreGui`.
+
+The client script and a copy of Roblox's en-us table are embedded as resources protected by a **32-byte repeating XOR key over zstd**. The key was recovered from a CRT initializer and independently confirmed by known plaintext, and both resources were decrypted. On every attach the client also downloads and runs `code.lua` from the developer's host, which lets the developer push arbitrary code into every attached session without shipping a new DLL.
+
+All of this is static analysis. Nothing was executed. Each claim in [`docs/research/FINDINGS.md`](docs/research/FINDINGS.md) carries an evidence reference and a confidence level.
+
+## Key results
+
+| | Result | Confidence |
+|---|---|---|
+| Attach | Bytecode replacement of the en-us translation ModuleScript (F-30) | Strongly supported |
+| Execution | Local `require()` loop on random-named ModuleScripts; DLL compiles and writes bytecode (F-40, F-41) | Confirmed (client) / Strongly supported (DLL) |
+| Protocol | `POST /f?e=<0-21>` plus `/ls`, `/rq`, `/qt`, `/cb` on localhost (F-51, F-52) | Confirmed (client) |
+| Resources | XOR key `3EFD5045…A92AF5BB` + zstd; unchanged from v1.3.40 (F-60, F-61) | Confirmed |
+| Remote code | `code.lua` fetched and executed on every attach (F-63) | Confirmed (client) |
+| Signing | Self-signed `CN=Rizve A` Authenticode certificate with a Sectigo timestamp; usable as a detection indicator (F-04) | Confirmed |
+| Identifier leakage | Script HTTP requests send the user's HWID (`exploit-guid`, `xeno-fingerprint`) and current game server to any host (F-54) | Confirmed (client) |
+| Artifacts | `CoreGui/<pid>` folder with `Message` "DO NOT DELETE: BELONGS TO XENO", `shared.__Xeno` (F-70, F-71) | Confirmed |
+| Platform vulnerability | None established ([`docs/DISCLOSURE.md`](docs/DISCLOSURE.md)) | — |
+
+## Repository layout
+
+```
+README.md
+BRIEFING.md                   two-page summary for security and anti-cheat teams
+docs/
+  research/
+    FINDINGS.md               every claim, with evidence and confidence; corrections log
+    ARCHITECTURE.md           how the components fit together; disassembly excerpts
+    METHODOLOGY.md            how the analysis was done, step by step
+    LIMITATIONS.md            what is not established
+  defense/
+    THREAT_ASSESSMENT.md      prevalence, who is harmed, client observations, Xeno's dependencies
+    COUNTERMEASURES.md        ranked hardening proposals and detection indicators
+    DETECTION.md              indicators by layer, tool behavior, validation status
+  DISCLOSURE.md               security boundaries, HackerOne position, what is withheld
+detection/
+  xeno_detector.py            score-based scanner
+  xeno_executor.yar           YARA rules
+tools/
+  update_sample.py            extract Xeno.dll from an installer into sample/TEST.dll
+  sample_report.py            profile a DLL and write reports/SAMPLE_REPORT.md
+  compare_samples.py          diff two builds and write reports/COMPARE_REPORT.md
+  decrypt_resources.py        decrypt the type-8194 resources
+reports/                      generated by the tools; do not edit
+  SAMPLE_REPORT.md            current v1.3.65 profile
+  COMPARE_REPORT.md           v1.3.40 → v1.3.65 diff
+tests/
+  test_tools.py               tests using synthetic DLLs
+payloads/
+  README.md                   hashes and line index for the decrypted resources
+```
+
+`app/`, `sample/` and decrypted `payloads/*.bin` are gitignored.
+
+## Usage
+
+Samples are not included. To reproduce the analysis, obtain the Xeno installer yourself, work inside an isolated VM, and never run the installer or DLL on a machine you care about.
+
+```bash
+pip install pefile zstandard yara-python        # 7-Zip is also required for update_sample.py
+
+python tools/update_sample.py app/Xeno-v1.3.65.exe     # → sample/TEST.dll, reports/SAMPLE_REPORT.md
+python tools/decrypt_resources.py sample/TEST.dll payloads/
+python detection/xeno_detector.py sample/TEST.dll -v
+python tools/compare_samples.py sample/TEST-v1.3.40.dll sample/TEST.dll
+
+python -m unittest discover -s tests -v                # tool tests; no sample needed
+```
+
+Without samples you can still read the documentation, run the tests, and use the detector and YARA rules on your own files.
+
+Suggested reading order: [`BRIEFING.md`](BRIEFING.md), then [`THREAT_ASSESSMENT.md`](docs/defense/THREAT_ASSESSMENT.md) and [`COUNTERMEASURES.md`](docs/defense/COUNTERMEASURES.md) for the defensive picture, or [`FINDINGS.md`](docs/research/FINDINGS.md) and [`ARCHITECTURE.md`](docs/research/ARCHITECTURE.md) for the technical detail. [`METHODOLOGY.md`](docs/research/METHODOLOGY.md), [`DETECTION.md`](docs/defense/DETECTION.md), [`LIMITATIONS.md`](docs/research/LIMITATIONS.md) and [`DISCLOSURE.md`](docs/DISCLOSURE.md) complete the set.
+
+## Status
+
+- Static analysis of v1.3.65 complete for exports, resources, client script and protocol; internal attach and write paths described from strings rather than disassembly.
+- Disassembly, imports, strings and signature re-verified against the sample on 2026-11-10; [`SAMPLE_REPORT.md`](reports/SAMPLE_REPORT.md) regenerated.
+- Detection tools tested on two real builds and synthetic fixtures; no benign-corpus validation yet.
+- [`COMPARE_REPORT.md`](reports/COMPARE_REPORT.md) needs regenerating once the v1.3.40 sample is available.
+- Open questions are listed at the end of [`docs/research/FINDINGS.md`](docs/research/FINDINGS.md).
+
+## Authorship
+
+Research direction, sample acquisition and analysis by Gavin Hatcher ([aauuzy](https://github.com/aauuzy)). AI assistants were used during the analysis, tooling and writing. The November 2026 review revision (tool fixes, tests, documentation restructuring and corrections) was prepared with Claude (Anthropic) at the author's direction.
+
+## License
+
+Original code and documentation: MIT ([`LICENSE`](LICENSE)). Xeno and Roblox are the property of their respective owners. Short excerpts and identifiers from Xeno's code are quoted for research and detection purposes only.
+
+```
+
+`detection/xeno_detector.py`:
+
+```py
+#!/usr/bin/env python3
+"""Score-based scanner for Xeno-family executor DLLs.
+
+Built from static analysis of Xeno v1.3.40 and v1.3.65. See docs/defense/DETECTION.md.
+
+Usage: python xeno_detector.py <file-or-directory> [-v]
+
+Verdicts:
+  PE files     score >= 60  -> "xeno (heuristic)"
+               score 30-59  -> "executor-family (suspicious)"
+  non-PE files any hit      -> "xeno strings (non-PE)"  (memory dumps, scripts, reports)
+
+Thresholds are heuristics validated only against two Xeno builds and the benign set described
+in docs/defense/DETECTION.md. Treat results as leads, not verdicts.
+"""
+import argparse
+import datetime
+import os
+import sys
+
+try:
+    import pefile
+except ImportError:
+    sys.exit("pip install pefile")
+
+XOR_KEY = bytes.fromhex(
+    "3EFD5045ED61BFCA57EFA192D0076696"
+    "FDC5F72112BD49367A3FB319A92AF5BB"
+)
+ZSTD_MAGIC = b"\x28\xb5\x2f\xfd"
+RESOURCE_TYPE = 8194
+SIGNER_SUBJECT = b"Rizve A"
+EXPORT_SET = {"Attach", "Execute", "GetClients", "Initialize", "SetSetting", "Version"}
+PE_THRESHOLD_XENO = 60
+PE_THRESHOLD_FAMILY = 30
+
+STRING_INDICATORS = [
+    ("credit_rizve",     35, [b"Xeno is only maintained by Rizve", b"rizve@xeno.onl"]),
+    ("pdb_path",         35, [b"Projects\\Xeno\\build\\Release\\net9.0-windows8.0\\Xeno.pdb"]),
+    ("attach_module",    30, [b"Intercepted translation module @",
+                              b"Attaching in-game using translation module."]),
+    ("xeno_resource",    30, [b"Could not decompress a Xeno resource"]),
+    ("xeno_server",      20, [b"Xeno Server is Live on http://localhost:"]),
+    ("offsets_endpoint", 20, [b"https://x3no.pages.dev/ep.zst.enc"]),
+    ("env_vars",         15, [b"%XENO_CLIENT_PID%", b"%XENO_SERVER_PORT%"]),
+    ("port3110",         10, [b"localhost:3110"]),
+    ("xor_key_raw",      35, [XOR_KEY]),
+    ("xor_key_init",     35, [bytes.fromhex("C7003EFD5045C74004ED61BFCA")]),
+    ("client_lua",       35, [b"DO NOT DELETE: BELONGS TO XENO", b"CLIENT.LUA -- POST OPEN SOURCE"]),
+    ("code_push_url",    20, [b"https://x3no.pages.dev/code.lua"]),
+    ("luau_fflags",      10, [b"LuauSolverV2", b"LuauCompileInlineThreshold"]),
+    ("zstd_errors",      10, [b"ERROR_frameType_unknown", b"ERROR_blockChecksum_invalid"]),
+]
+
+
+def resource_decrypts(blob, key=XOR_KEY):
+    """True if the blob's first 4 bytes XOR the key prefix to the zstd frame magic."""
+    return len(blob) >= 4 and bytes(b ^ k for b, k in zip(blob[:4], key)) == ZSTD_MAGIC
+
+
+def iter_resources(pe):
+    """Yield (type_id, name_id, data) for every leaf in the resource directory."""
+    if not hasattr(pe, "DIRECTORY_ENTRY_RESOURCE"):
+        return
+    image = pe.get_memory_mapped_image()
+    for rtype in pe.DIRECTORY_ENTRY_RESOURCE.entries:
+        if not hasattr(rtype, "directory"):
+            continue
+        for rname in rtype.directory.entries:
+            if not hasattr(rname, "directory"):
+                continue
+            for lang in rname.directory.entries:
+                off, size = lang.data.struct.OffsetToData, lang.data.struct.Size
+                yield rtype.id, rname.id, image[off:off + size]
+
+
+def certificate_table(pe, raw):
+    """Bytes of the Authenticode certificate table (empty if the file is not signed)."""
+    entry = pe.OPTIONAL_HEADER.DATA_DIRECTORY[
+        pefile.DIRECTORY_ENTRY["IMAGE_DIRECTORY_ENTRY_SECURITY"]]
+    return raw[entry.VirtualAddress:entry.VirtualAddress + entry.Size] if entry.Size else b""
+
+
+def scan_pe(pe, raw):
+    hits, score = [], 0
+    if SIGNER_SUBJECT in certificate_table(pe, raw):
+        hits.append("signer_rizve_cert")
+        score += 35
+    if hasattr(pe, "DIRECTORY_ENTRY_EXPORT"):
+        names = {s.name.decode(errors="replace")
+                 for s in pe.DIRECTORY_ENTRY_EXPORT.symbols if s.name}
+        matched = EXPORT_SET & names
+        if matched == EXPORT_SET:
+            hits.append("export_contract_full")
+            score += 25
+        elif len(matched) >= 4:
+            hits.append(f"export_contract_partial({len(matched)}/6)")
+            score += 10
+    for rtype, rname, blob in iter_resources(pe):
+        if rtype != RESOURCE_TYPE:
+            continue
+        if resource_decrypts(blob):
+            hits.append(f"resource_{RESOURCE_TYPE}_decrypts(id={rname})")
+            score += 35
+        else:
+            hits.append(f"resource_{RESOURCE_TYPE}(id={rname})")
+            score += 5
+    return score, hits
+
+
+def scan_file(path):
+    with open(path, "rb") as f:
+        raw = f.read()
+    hits, score = [], 0
+    for name, weight, needles in STRING_INDICATORS:
+        if any(n in raw for n in needles):
+            hits.append(name)
+            score += weight
+
+    try:
+        pe = pefile.PE(data=raw, fast_load=True)
+    except pefile.PEFormatError:
+        return score, ("xeno strings (non-PE)" if hits else "no match"), hits
+
+    pe.parse_data_directories(directories=[
+        pefile.DIRECTORY_ENTRY["IMAGE_DIRECTORY_ENTRY_EXPORT"],
+        pefile.DIRECTORY_ENTRY["IMAGE_DIRECTORY_ENTRY_RESOURCE"],
+    ])
+    pe_score, pe_hits = scan_pe(pe, raw)
+    score += pe_score
+    hits += pe_hits
+    if pe.FILE_HEADER.TimeDateStamp > datetime.datetime.now(datetime.UTC).timestamp():
+        hits.append("note:future_timestamp")
+
+    if score >= PE_THRESHOLD_XENO:
+        verdict = "xeno (heuristic)"
+    elif score >= PE_THRESHOLD_FAMILY:
+        verdict = "executor-family (suspicious)"
+    else:
+        verdict = "no match"
+    return score, verdict, hits
+
+
+def iter_paths(target):
+    if os.path.isdir(target):
+        for root, dirs, files in os.walk(target):
+            dirs[:] = [d for d in dirs if d != ".git"]
+            for f in files:
+                yield os.path.join(root, f)
+    else:
+        yield target
+
+
+def main():
+    ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    ap.add_argument("target", help="file or directory to scan")
+    ap.add_argument("-v", "--verbose", action="store_true", help="print every file and all hits")
+    a = ap.parse_args()
+
+    for p in iter_paths(a.target):
+        try:
+            score, verdict, hits = scan_file(p)
+        except OSError as e:
+            print(f"{p}\n  error: {e}", file=sys.stderr)
+            continue
+        if verdict != "no match" or a.verbose:
+            print(f"{p}\n  score={score}  verdict={verdict}")
+            for h in hits:
+                print(f"    + {h}")
+
+
+if __name__ == "__main__":
+    main()
+
+```
+
+`detection/xeno_executor.yar`:
+
+```yar
+import "pe"
+
+/*
+ * Xeno executor detection pack.
+ * Built from static analysis of Xeno v1.3.40 and v1.3.65. See docs/defense/DETECTION.md for
+ * per-rule scope, validation status, and known false-positive sources.
+ *
+ * File rules require a PE header. Memory/artifact rules do not, and will therefore also match
+ * documentation or threat reports that quote the same strings.
+ */
+
+rule Xeno_Executor_DLL_HighConf
+{
+    meta:
+        description = "Xeno core DLL - product-unique strings"
+        scope = "file"
+        reference = "docs/research/FINDINGS.md"
+    strings:
+        $s1 = "Xeno is only maintained by Rizve" ascii
+        $s2 = "rizve@xeno.onl" ascii
+        $s3 = "Intercepted translation module @" ascii
+        $s4 = "Attaching in-game using translation module." ascii
+        $s5 = "Could not decompress a Xeno resource" ascii
+        $s6 = "Xeno Server is Live on http://localhost:" ascii
+        $s7 = "https://x3no.pages.dev/ep.zst.enc" ascii
+        $s8 = "DO NOT DELETE: BELONGS TO XENO" ascii
+        $s9 = "Not allowed to send request to Xeno server" ascii
+        $pdb = "Projects\\Xeno\\build\\Release\\net9.0-windows8.0\\Xeno.pdb" ascii
+    condition:
+        uint16(0) == 0x5A4D and 2 of them
+}
+
+rule Xeno_Signer_Certificate
+{
+    meta:
+        description = "Authenticode signature from the self-signed 'Rizve A' certificate used on Xeno v1.3.65"
+        scope = "file"
+        sha256_fingerprint = "AEE2FA8DBD1108B7664553143E0ABDF7D41EC87A59CBDB0A2D4D0B84C2B30A21"
+        note = "certificate valid 2026-05-10 to 2027-05-10; a renewed certificate will have a new serial"
+    condition:
+        uint16(0) == 0x5A4D and
+        for any s in pe.signatures : (
+            s.subject contains "Rizve A" and
+            s.serial == "3f:da:0d:2c:31:c5:c2:a8:47:90:e6:e2:f2:0d:13:06"
+        )
+}
+
+rule Xeno_ResourceKey_Initializer
+{
+    meta:
+        description = "Xeno resource XOR key stored as immediates by the CRT initializer"
+        scope = "file"
+    strings:
+        $init = { C7 00 3E FD 50 45 C7 40 04 ED 61 BF CA }
+    condition:
+        uint16(0) == 0x5A4D and $init
+}
+
+rule Xeno_ResourceKey_Memory
+{
+    meta:
+        description = "Xeno resource XOR key as contiguous bytes (heap copy built at runtime)"
+        scope = "memory"
+    strings:
+        $key = { 3E FD 50 45 ED 61 BF CA 57 EF A1 92 D0 07 66 96
+                 FD C5 F7 21 12 BD 49 36 7A 3F B3 19 A9 2A F5 BB }
+    condition:
+        $key
+}
+
+rule Xeno_EncryptedResource
+{
+    meta:
+        description = "PE resource of type 8194 whose first 4 bytes decrypt to the zstd frame magic"
+        scope = "file"
+        note = "version-independent while the key is unchanged; does not depend on payload size"
+    condition:
+        uint16(0) == 0x5A4D and
+        for any i in (0 .. pe.number_of_resources - 1) : (
+            pe.resources[i].type == 8194 and
+            uint32be(pe.resources[i].offset) == 0x16487FB8
+        )
+}
+
+rule Xeno_ClientLua_Payload
+{
+    meta:
+        description = "Decrypted Xeno CLIENT.LUA in memory or on disk"
+        scope = "memory, file"
+    strings:
+        $h1 = "CLIENT.LUA -- POST OPEN SOURCE" ascii
+        $h2 = "local XENO_PID = \"%XENO_CLIENT_PID%\"" ascii
+        $h3 = "shared.__Xeno = Xeno" ascii
+        $h4 = "https://x3no.pages.dev/code.lua" ascii
+        $h5 = "https://x3no.pages.dev/version.txt" ascii
+        $h6 = "local function ExecutionListener()" ascii
+        $h7 = "XFS.LockCustomBytecode" ascii
+        $h8 = "DO NOT DELETE: BELONGS TO XENO" ascii
+    condition:
+        3 of them
+}
+
+rule Xeno_Server_Protocol
+{
+    meta:
+        description = "Xeno localhost control-plane strings"
+        scope = "memory, network capture"
+        false_positives = "any document that quotes the protocol, including this repository"
+    strings:
+        $e1 = "/f?e=" ascii
+        $e2 = "/rq?c=" ascii
+        $e3 = "/ls?c=" ascii
+        $e4 = "%XENO_SERVER_PORT%" ascii
+        $e5 = "%XENO_CLIENT_PID%" ascii
+        $e6 = "roblox-session-id" ascii
+        $e7 = "localhost:3110" ascii
+    condition:
+        4 of them
+}
+
+rule Executor_API_Generic
+{
+    meta:
+        description = "DLL exporting the six-function interface used by Xeno"
+        scope = "file"
+        confidence = "low - the export names are generic; useful for triage only"
+    condition:
+        uint16(0) == 0x5A4D and
+        pe.exports("Attach") and pe.exports("Execute") and
+        pe.exports("Initialize") and pe.exports("GetClients") and
+        pe.exports("SetSetting") and pe.exports("Version")
+}
+
+```
+
+`docs/DISCLOSURE.md`:
+
+```md
+# Security assessment and disclosure
+
+How the findings relate to Roblox's security boundaries, why nothing here has been reported as a vulnerability, and what this repository deliberately does not publish.
+
+## Threat model
+
+Roblox treats the game client as untrusted. Xeno runs only because a user installs it and lets it write into their own Roblox process. Anything that depends on that starting point is a person modifying software on their own device, which is a Terms of Use matter rather than a breach of a Roblox security boundary. Three categories need to be kept apart:
+
+| Category | Who owns the problem | Examples in this research |
+|---|---|---|
+| Client-side manipulation by the device owner | Roblox anti-cheat and client integrity (detection, not vulnerability) | Bytecode replacement in the en-us module (F-30), execution loop (F-40), in-game artifacts (F-70–F-72) |
+| Experiences accepting what a modified client sends | The experience developer (server-side validation) | Any gameplay advantage scripts gain; not analyzed here |
+| A Roblox-controlled boundary crossed without the attacker already controlling the victim's machine | Roblox security (bounty-eligible) | **None established** |
+
+## Classification of notable findings
+
+**Attach and execution (F-30, F-40–F-46).** Detection intelligence. Valuable to anti-cheat work because it describes how the bytecode is replaced and which artifacts persist, but it requires native code with write access to the user's own Roblox process.
+
+**Remote code channel (F-63).** Every attached client fetches and runs `code.lua` from the developer's host with the full Xeno environment. This is a risk to Xeno's users (whoever controls that host controls every attached session), not a Roblox vulnerability.
+
+**Identifier leakage (F-54, F-92).** Script HTTP requests send the user's hardware identifier and current game server to any host a script contacts. This is a privacy risk to Xeno's users created by Xeno, not a Roblox issue.
+
+**Service deny-list (F-90).** Xeno blocks its own scripts from purchase, authentication-cookie, analytics and messaging APIs and calls this "vulnerabilities mitigation". This suggests those APIs are reachable from the context Xeno's scripts run in, which would mean malicious scripts shared among Xeno users (or the `code.lua` channel) could act on the user's account. Reachability has not been tested. Even if confirmed, the precondition is still the user running Xeno, so it is user-safety information rather than a platform vulnerability.
+
+## HackerOne position
+
+Based on Roblox's HackerOne policy (version dated 2026-03-04, read 2026-11-10; always check the live policy before testing or submitting):
+
+- Engine and client security work such as memory corruption, sandbox escapes and RCE chains is in scope, and minimal proofs of concept are accepted. Data-model bugs that let exploiters crash game servers are explicitly encouraged.
+- The policy prohibits distributing executors, cheats or bypass frameworks; building telemetry-bypass frameworks; automating exploit deployment; developing reliable arbitrary-code chains against production clients without authorization; and testing against Roblox's server, control-plane or management infrastructure.
+
+**Current status: no report submitted.** Nothing in this repository demonstrates a Roblox-controlled boundary being crossed. Submitting executor architecture or detection notes as a vulnerability would most likely be closed as not applicable.
+
+**What would qualify.** A reproducible issue where content Roblox delivers or the engine processes (place files, replicated instances, network messages, assets) causes harm on a client or server that its owner did not consent to, without the attacker first running native code on that machine. For example, game-server-controlled data reaching a privileged script identity on clients, a server crash triggerable through the data model, or memory corruption in the engine reachable from game content. This research may suggest where to look; it does not show any such issue.
+
+## What this repository does not publish
+
+- The full decrypted `CLIENT.LUA` or the Roblox locale table (hashes and a line index only; [`payloads/README.md`](../payloads/README.md)).
+- Downloaded offsets, the contents of `ep.zst.enc`, or any Roblox memory layout.
+- Any code that improves, repairs or hides an executor, or bypasses anti-cheat or telemetry.
+
+## Research conduct
+
+- Static analysis of locally held samples only.
+- No requests to Roblox services, Xeno infrastructure or the referenced pastebin as part of the documented method.
+- No other users' data accessed; personal information is limited to the attribution the Xeno developer publishes in the binary itself.
+
+## Sharing this research with Roblox
+
+Roblox's developer forum directs exploit information that could be misused if posted publicly to its HackerOne program ([DevForum, About the Bug Reports category](https://devforum.roblox.com/t/about-the-bug-reports-category/16/1)). The intended route is a HackerOne report that states plainly it is defensive intelligence rather than a vulnerability claim, points to [`BRIEFING.md`](../BRIEFING.md), and offers the samples privately. Such a report may be closed as informational or not applicable; that outcome is acceptable because the goal is that the right team sees it, not a bounty.
+
+## Contact
+
+Corrections to the analysis: open an issue in this repository. Suspected Roblox vulnerabilities must go to Roblox's HackerOne program, not to public issues.
+
+## References
+
+- Roblox HackerOne program: https://hackerone.com/roblox
+- Policy version history: https://hackerone.com/roblox/policy_versions
+- Roblox, "How to Report Security Exploits": https://en.help.roblox.com/hc/en-us/articles/360038516512-How-to-Report-Security-Exploits
+
+```
+
+`docs/defense/COUNTERMEASURES.md`:
+
+```md
+# Countermeasures
+
+Ways to detect, measure and disrupt Xeno, ranked by how much each would cost Xeno to work around. Observations `G-x` and dependencies come from [`THREAT_ASSESSMENT.md`](THREAT_ASSESSMENT.md); finding IDs from [`FINDINGS.md`](../research/FINDINGS.md).
+
+These are proposals from outside analysis. The author has no visibility into Roblox's existing detections, and some of these may already be in place. Each proposal states its assumptions and risks so it can be evaluated quickly by people who do.
+
+## 1. Platform hardening (durable)
+
+### C-1 Verify CoreScript bytecode before it runs
+
+**Breaks:** attach (G-1).
+Compare each built-in CoreScript module's bytecode with the hash of what the release shipped, when it is loaded and periodically while the client runs. Cover every module under `RobloxGui` and `CorePackages`, not just en-us: checking one module only moves Xeno to the next.
+**Cost to Xeno:** high. It would need a different way to get code into a privileged Luau context.
+**Risks:** the check itself becomes a target, so it should live where Xeno cannot simply overwrite it. Performance cost depends on frequency.
+
+### C-2 Restrict CoreScript HTTP to loopback
+
+**Breaks:** the control plane (G-2), and with it execution, file access and the HTTP proxy.
+Deny `HttpService:RequestInternal` (and equivalents) to `localhost`, `127.0.0.0/8` and `::1` from the client's script contexts, or limit CoreScript requests to an allowlist of Roblox hosts.
+**Cost to Xeno:** high. Luau inside the client has no other channel to an outside process; Xeno would have to invent one through memory alone.
+**Risks:** legitimate CoreScript or developer-tool traffic to loopback, if any exists, would break. That needs checking against Roblox's own usage. This is also the simplest change on this list.
+
+### C-3 Reject externally written bytecode in `require()`
+
+**Breaks:** script execution (G-3).
+Track bytecode provenance: a ModuleScript created at runtime should only run bytecode produced by Roblox's own compile path. A module whose bytecode changed without going through that path should fail to load and be reported.
+**Cost to Xeno:** high.
+**Risks:** design work in the engine; must not affect legitimate dynamic modules.
+
+### C-4 Make offset reuse harder
+
+**Breaks:** Xeno's cheap cross-version updates (G-4).
+Vary the layout of the structures Xeno reads between releases (field order, padding, encrypted pointers) so offsets cannot be aliased from one version to the next.
+**Cost to Xeno:** medium per release, recurring. Does not stop Xeno, but turns "update within hours" into "re-reverse every build".
+**Risks:** engineering and debugging cost for Roblox.
+
+### C-5 Audit what CoreScript context can reach
+
+**Addresses:** G-5.
+Confirm whether purchase, authentication-cookie and messaging APIs are callable from the context Xeno's client runs in. If they are, gate them by caller as well as identity.
+**Value:** protects Xeno's users (and any future executor's users) from malicious shared scripts and from the developer's remote code channel.
+
+## 2. Detection and measurement (fast, brittle)
+
+These rely on identifiers Xeno can change quickly. Their best use is counting how many sessions run Xeno and supporting ban waves, not lasting prevention.
+
+| ID | Indicator | Layer | Evidence |
+|---|---|---|---|
+| C-6 | en-us translation module bytecode differs from the shipped original | Client integrity | F-30 |
+| C-7 | `CoreGui` folder named with the client's own PID, containing `Pointer`, `Loadstring` and a `Message` named `DO NOT DELETE: BELONGS TO XENO`; `shared.__Xeno` set | Client integrity | F-70, F-71 |
+| C-8 | ModuleScripts created and destroyed at high rate under one CoreGui folder, each `require()`d repeatedly | Client integrity | F-72 |
+| C-9 | Loopback `RequestInternal` calls to `/f?e=`, `/ls?c=loadstring:`, `/qt?p=`, `/cb` | Client integrity | F-51, F-52 |
+| C-10 | A process loading a module signed by the self-signed `CN=Rizve A` certificate (serial `3FDA0D2C31C5C2A84790E6E2F20D1306`) while holding a write handle to `RobloxPlayerBeta.exe` | Host (anti-cheat) | F-04 |
+| C-11 | A process with a loopback HTTP listener that also holds memory-write access to the Roblox process | Host (anti-cheat) | F-50, F-86 |
+| C-12 | Outbound requests carrying `exploit-guid` or `xeno-fingerprint` headers, or `User-Agent: Xeno/` | Any web service scripts contact | F-54 |
+
+C-6 and C-8 are the hardest for Xeno to remove without changing how it works. C-7, C-10 and C-12 take minutes to change but are very specific while they last. File-level signatures for the DLL are in [`DETECTION.md`](DETECTION.md) and the [`detection/`](../../detection) folder.
+
+**Prevalence.** C-6 or C-7 recorded as telemetry, without enforcement, would give Roblox the user count this repository cannot ([`THREAT_ASSESSMENT.md`](THREAT_ASSESSMENT.md) §2).
+
+## 3. Infrastructure
+
+Xeno depends on `x3no.pages.dev` for offsets (`ep.zst.enc`), the remote code channel (`code.lua`) and update checks, and on `xeno.now` / `xeno.onl` for distribution. Whether to pursue hosting-provider abuse reports or legal action is a decision for Roblox's legal and trust teams, not a technical measure. Expect it to delay Xeno rather than stop it, since hosting is easy to move.
+
+## 4. Experience developers
+
+Most of the visible damage depends on experiences trusting the client. Regardless of executor:
+
+- Validate movement on the server: maximum speed, vertical travel without support, teleport distance between updates.
+- Treat every RemoteEvent and RemoteFunction argument as attacker-controlled; check the caller, ranges, rate and game state.
+- Keep currency, inventory and progression changes server-authoritative.
+- Do not rely on client-side anti-exploit scripts as a boundary; Xeno runs with more privilege than any experience script and can read or disable them.
+
+## 5. User safety
+
+- **Impersonation malware.** Fake "undetected" Xeno installers have been used to spread a remote-access trojan and infostealer targeting Roblox and Discord tokens and browser credentials ([`THREAT_ASSESSMENT.md`](THREAT_ASSESSMENT.md) §3.4). Safety messaging aimed at players searching for executors could point this out.
+- **Identifier leakage and remote code.** Xeno users are tracked by any script host (F-54) and run whatever the developer publishes as `code.lua` (F-63).
+
+## 6. Suggested order
+
+1. **C-2** first: one restriction, large effect, cheap to evaluate.
+2. **C-6/C-7 as telemetry** at the same time, to measure prevalence before and after.
+3. **C-1** and **C-3** as the durable fixes.
+4. **C-5** as a user-protection audit.
+5. **C-4** if the update arms race continues.
+
+```
+
+`docs/defense/DETECTION.md`:
+
+```md
+# Detection
+
+Indicators and detection approaches for Xeno, derived from [`FINDINGS.md`](../research/FINDINGS.md). Each section states which layer a defender needs access to, how specific the indicator is, and how it can fail.
+
+**Validation status.** The tools have been checked against two Xeno builds (v1.3.40 by the author; v1.3.65 by the author and again on 2026-11-10 with the current tools), against synthetic DLLs that reproduce Xeno's export set and resource layout (`tests/`), and against the text files in this repository. They have **not** been run against a large benign corpus or against other executors. No accuracy figures are claimed.
+
+## Tools
+
+| Tool | Input | Output |
+|---|---|---|
+| [`detection/xeno_detector.py`](../../detection/xeno_detector.py) | File or directory | Score and verdict per file |
+| [`detection/xeno_executor.yar`](../../detection/xeno_executor.yar) | File, process memory, or capture | Matching rules |
+
+### Detector scoring
+
+PE files are scored on product-unique strings and three structural checks: a certificate table naming the `Rizve A` signer (+35), the full six-export interface (+25), and a type-8194 resource whose first four bytes decrypt to the zstd magic under the known key (+35 each). Verdicts: ≥60 `xeno (heuristic)`, 30–59 `executor-family (suspicious)`.
+
+Non-PE files (memory dumps, scripts, reports) get `xeno strings (non-PE)` if any string indicator is present. They never receive a DLL verdict; a document that quotes Xeno strings, including this one, would otherwise score as Xeno.
+
+Expected behavior, covered by tests:
+
+| Input | Verdict |
+|---|---|
+| Xeno v1.3.65 DLL | `xeno (heuristic)`, score 370; YARA file rules HighConf, Signer_Certificate, ResourceKey_Initializer, EncryptedResource and API_Generic fire |
+| DLL with the six exports and a resource encrypted with the known key | `xeno (heuristic)` |
+| Same, but the resource key differs (simulates a key rotation) | `executor-family (suspicious)` |
+| DLL with only the six exports | `no match` |
+| Unrelated DLL | `no match` |
+| Repository text files | `no match` or `xeno strings (non-PE)` |
+
+### YARA rules
+
+| Rule | Scope | What it matches | False-positive considerations |
+|---|---|---|---|
+| `Xeno_Executor_DLL_HighConf` | File | MZ header and 2 of 10 product strings / PDB path | Requires a PE; low risk |
+| `Xeno_Signer_Certificate` | File | Authenticode signature by the self-signed `Rizve A` certificate (subject and serial) | Very specific; stops matching when the certificate is renewed or replaced (expires 2027-05-10). Requires YARA built with OpenSSL |
+| `Xeno_ResourceKey_Initializer` | File | Key immediates as emitted by the initializer | Specific to this compiler output; breaks on key rotation or code-generation changes |
+| `Xeno_ResourceKey_Memory` | Memory | The 32-byte key as contiguous bytes | Any file or report containing the raw key bytes |
+| `Xeno_EncryptedResource` | File | Type-8194 resource beginning `16 48 7F B8` | Independent of payload size and version while the key is unchanged; tested on synthetic DLLs and v1.3.65 |
+| `Xeno_ClientLua_Payload` | Memory, file | 3 of 8 distinctive `CLIENT.LUA` strings | Matches documents that quote them |
+| `Xeno_Server_Protocol` | Memory, capture | 4 of 7 protocol strings | Matches documents that quote them, including this repository |
+| `Executor_API_Generic` | File | All six export names | Names are generic; triage only |
+
+An earlier revision matched 16 bytes of each encrypted resource. Bytes 5 onward include the zstd frame header, which encodes the content size and so changes with every build. The current rule matches only the 4-byte encrypted magic within a type-8194 resource.
+
+## Layer 1 — Files on disk
+
+Product strings, the PDB path, the signing certificate, the key initializer, and the encrypted resources together identify Xeno builds with high specificity. The export set alone does not. Forks that strip branding would still match the structural checks while the key is unchanged. A key rotation would defeat the key-based checks; [`tools/sample_report.py`](../../tools/sample_report.py) attempts automatic recovery from the initializer pattern.
+
+## Layer 2 — Host behavior (EDR, Sysmon)
+
+| Observable | Specificity | Notes |
+|---|---|---|
+| A non-Roblox process opens `RobloxPlayerBeta.exe` with memory-write access and writes to it | Medium | Shared by all external executors and some overlays; telemetry needs handle or `WriteProcessMemory`-class events |
+| Process sets `XENO_CLIENT_PID`, `XENO_SERVER_PORT`, `XENO_VERSION` | High | Inferred from the `%…%` placeholders; how they are set is not traced |
+| `Xeno` directory with `workspace`, `autoexec` and a cache file | High | Location not established |
+| Loopback HTTP listener in the same process, receiving `POST /f?e=<int>`, `/ls?c=`, `/rq?c=` | High | Requires loopback capture or a host-based proxy |
+| Outbound HTTPS to `x3no.pages.dev`, `xeno.now`, `xeno.onl`, `pastebin.com/raw/A7n0vJtR` | High (domains) | Domains can change without a DLL update |
+
+## Layer 3 — Inside the Roblox client
+
+These require code or checks running in the client, which is the domain of Roblox's client integrity and anti-cheat systems. A game server cannot observe client memory or CoreGui directly, and an experience's own scripts cannot read CoreGui.
+
+| Observable | Specificity | Notes |
+|---|---|---|
+| `CoreGui` folder named with the client's own PID, containing `Pointer`, `Loadstring`, and `Message` "DO NOT DELETE: BELONGS TO XENO" | Very high | Trivial for the developer to rename in a future build |
+| `shared.__Xeno` present | Very high | Same caveat |
+| en-us translation module's bytecode differs from the shipped original | High | Persistent for the session; does not depend on branding |
+| ModuleScripts created and destroyed at high frequency under one CoreGui folder, each `require()`d repeatedly | High | The polling loop runs every ~1 ms; it is local and produces no network traffic |
+| `HttpService:RequestInternal` calls to `http://localhost:<port>/f?e=`, `/ls?c=loadstring:`, `/qt?p=`, `/cb` | High | Only after an execution (op 21), on each `loadstring` (ops 20/21), and on file and API calls; not a constant stream |
+| Foreign bytecode in a module | High | Transient by design in v1.3.65 (Bytecode Patch Watcher); prefer the persistent signals above |
+
+## Layer 4 — Network
+
+Loopback traffic is described above. Outbound, the client requests `version.txt` and `code.lua` from `x3no.pages.dev` on attach, and the DLL requests `ep.zst.enc` on startup if the primary offsets source fails. Proxied script requests carry `User-Agent: Xeno/<version>` by default, `exploit-guid` and `xeno-fingerprint` (the user's hardware identifier), and `roblox-place-id`, `roblox-game-id`, `roblox-session-id`, on traffic that is not going to Roblox. Any web service that Xeno scripts call can see these headers, which makes them the simplest server-side signal available outside Roblox (for example to operators of script-hosting or webhook endpoints).
+
+## Running the tests
+
+```bash
+pip install pefile zstandard yara-python
+python -m unittest discover -s tests -v
+```
+
+The PE tests build harmless DLLs with `clang`, `lld-link` and `llvm-rc`; they are skipped if those tools are missing.
+
+## Next steps for validation
+
+1. Scan a benign corpus (a Windows `System32` copy, common game and overlay DLLs) and record any hits.
+2. Scan other executor builds that are legitimately available, to measure family-level overlap.
+3. Regenerate [`COMPARE_REPORT.md`](../../reports/COMPARE_REPORT.md) with the current tools once the v1.3.40 sample is available.
+
+```
+
+`docs/defense/THREAT_ASSESSMENT.md`:
+
+```md
+# Threat assessment
+
+What Xeno is used for, how widespread it appears to be, who it harms, and what its design reveals about where the Roblox client can be hardened. Finding IDs (`F-xx`) refer to [`FINDINGS.md`](../research/FINDINGS.md). Countermeasures are in [`COUNTERMEASURES.md`](COUNTERMEASURES.md).
+
+## 1. Summary
+
+Xeno is a free, keyless script executor for the Windows Roblox client. It lets a user run arbitrary Luau inside their own client with an environment of roughly 160 functions aimed at cheating and game manipulation. It works without loading a DLL or creating a thread in Roblox: it replaces the bytecode of a built-in CoreScript module, then drives that code over a localhost HTTP server (F-30, F-40, F-50).
+
+The main harm falls on other players and experience developers through cheating. Xeno's own users carry real risk too: the developer can push code into every attached client (F-63), every script HTTP request discloses the user's hardware ID (F-54), and the "undetected" branding is being used by malware campaigns. Xeno does not exploit a vulnerability in Roblox as the term is used in security: it requires the user to run it on their own machine. Its design does show specific places where the client trusts its own memory and network behaviour more than it needs to (§5).
+
+## 2. Prevalence
+
+There is no reliable public measurement of how many people use Xeno. What can be said, and how strong each piece is:
+
+| Indicator | What it shows | Reliability |
+|---|---|---|
+| The author encounters Xeno users in most Roblox experiences he joins | Broad use across experiences | Anecdotal; one observer |
+| The official Xeno Discord server has about 600,000 members (author's observation) | A large audience | Membership is not usage: it includes inactive and duplicate accounts and people who joined once |
+| Third-party download pages claim figures such as "838,000+ users" or "183,415 users online" | Nothing verifiable | These pages are unofficial and often clones or SEO sites; figures are unsourced |
+| A malware campaign has impersonated Xeno since early 2026 (§3.4) | Enough demand that criminals find Xeno worth impersonating | Strong as an indication of popularity; says nothing about the real user count |
+| Xeno's update model (offsets downloaded at runtime, F-33) lets it keep working across Roblox releases without a new build | Sustained availability | Confirmed design |
+
+**Conclusion.** Xeno is clearly widely used, but its scale cannot be established from public data, and this repository does not claim a number. Roblox can measure it directly: the in-client indicators in [`COUNTERMEASURES.md`](COUNTERMEASURES.md) §2 (a modified en-us module, the `CoreGui/<pid>` container, `shared.__Xeno`) can count Xeno-attached sessions in telemetry without banning anyone.
+
+## 3. Who is harmed
+
+### 3.1 Other players
+
+Xeno exposes input synthesis, property and signal access, metatable and function hooking (partly stubbed, F-48), HTTP, and file I/O to scripts shared through script hubs. In practice this enables movement cheats (flying, speed, teleport), automation, and abuse of each experience's remote events. Players in affected servers lose fair play; the harm is the same in kind as any executor's.
+
+### 3.2 Experience developers
+
+Most gameplay damage happens because an experience trusts what the client sends. Developers bear the cost: economy abuse, lost players, and time spent on anti-exploit work. Server-side validation is their main defense whatever the executor ([`COUNTERMEASURES.md`](COUNTERMEASURES.md) §4).
+
+### 3.3 Xeno's own users
+
+- **Remote code channel.** Every attached client downloads `code.lua` from the developer's host and runs it with the full Xeno environment (F-63). Whoever controls that host, the developer or anyone who compromises the account, can run code in every attached session at once.
+- **Identifier leakage.** Every script HTTP request sends the user's hardware ID as `exploit-guid` and `xeno-fingerprint`, plus their current server's JobId and PlaceId, to whatever host the script contacts (F-54). Script and webhook operators can track users across sessions and accounts.
+- **Privileged APIs.** Xeno blocks its own scripts from purchase, authentication-cookie and messaging APIs (F-90). That implies the developers believe these APIs are reachable from the context Xeno's scripts run in; if so, a malicious shared script that got around the block, or the remote code channel, could act on the user's account. Reachability is unverified.
+- **Account action.** Use violates Roblox's Terms of Use and risks moderation.
+
+### 3.4 Impersonation malware
+
+Bitdefender reported a campaign distributing a fake "undetected" Xeno through gaming forums and Discord communities. It installs a Java-based remote access trojan and infostealer that takes browser passwords and cookies, Discord and Roblox tokens, and cryptocurrency wallet data, and allows keylogging, screen and webcam capture, and remote command execution. The campaign began in early 2026, peaked in March 2026, and remained active as of August 2026 ([TechRadar, 4 August 2026](https://techradar.com/pro/security/new-malware-disguised-as-popular-roblox-cheat-tool-could-give-hackers-full-control-of-your-pc-including-the-webcam)).
+
+### 3.5 Roblox
+
+Trust in fair play, moderation and support load, and the ongoing engineering cost of the anti-cheat arms race.
+
+## 4. How Xeno works, in brief
+
+1. The Electron UI loads `Xeno.dll`, which downloads per-Roblox-version memory offsets (F-33) and starts a localhost HTTP server (F-50).
+2. The DLL finds each Roblox client, locates the en-us locale translation ModuleScript under `RobloxGui.Modules`, and overwrites its bytecode with Xeno's client script (F-30).
+3. Roblox loads that module as part of its own startup, so Xeno's client runs as a CoreScript. It builds a container in `CoreGui`, sets `shared.__Xeno`, fetches `code.lua`, and calls the DLL over loopback HTTP (F-70, F-71, F-63).
+4. To run a user script, the DLL compiles it with an embedded Luau compiler and writes the bytecode into a ModuleScript the client is repeatedly `require()`ing; `require` returns the compiled function and the client runs it (F-40, F-41).
+5. Everything else (file access, HTTP, clipboard, teleport queue) goes through `/f?e=<op>` and related endpoints on the localhost server (F-51, F-52).
+
+Full detail: [`ARCHITECTURE.md`](../research/ARCHITECTURE.md).
+
+## 5. What Xeno's design shows about the client
+
+Each item below is inferred from the fact that Xeno works as documented. None is a vulnerability in the bounty sense, because all of them require the user to run Xeno on their own machine. They are the places where hardening would cost Xeno the most.
+
+| ID | Observation | Basis | Confidence |
+|---|---|---|---|
+| G-1 | A built-in CoreScript module whose bytecode has been replaced in memory still loads and runs. Nothing checks the module's bytecode against what Roblox shipped before executing it. | F-30, F-73 | Inferred |
+| G-2 | Code running as that CoreScript can send HTTP requests to arbitrary loopback ports through `HttpService:RequestInternal`. Xeno's entire control plane depends on this. | F-50, F-51; `P:122` uses `RequestInternal` | Strongly supported |
+| G-3 | A ModuleScript created at runtime in `CoreGui` and then given bytecode written from outside the process is executed by `require()` without any provenance check. | F-40, F-42 | Inferred |
+| G-4 | Roblox's internal object layout changes little enough between releases that Xeno can reuse ("alias") offsets across versions and update them remotely within hours. | F-33 | Inferred |
+| G-5 | The context Xeno's scripts run in may reach purchase, authentication-cookie and messaging APIs, judging by Xeno's own deny-list. | F-90 | Unverified |
+
+## 6. Xeno's structural dependencies
+
+Each is something Xeno currently cannot work without. The cost column estimates how much engineering it would take Xeno to replace the dependency if Roblox removed it; these are the analyst's estimates.
+
+| Dependency | Evidence | If broken | Estimated cost to Xeno |
+|---|---|---|---|
+| A built-in CoreScript module it can overwrite and that Roblox will load (en-us) | F-30 | No attach | High if all CoreScripts are integrity-checked; low if only en-us is (Xeno moves to another module) |
+| Loopback HTTP from CoreScript context | G-2 | No control plane: no execution, files or HTTP proxy | High; Luau inside the client has no other channel to an outside process |
+| Out-of-band bytecode in `require()`d modules | F-40, F-42 | No script execution | High |
+| Runtime offsets from its own host | F-33 | No attach after each Roblox update until restored | Medium; hosting moves easily, but stable layouts are what make aliasing cheap |
+| Fixed artifacts (`CoreGui/<pid>`, `Message`, `shared.__Xeno`) | F-70, F-71 | Detection only | Low; renaming takes minutes |
+| Fixed signing certificate | F-04 | Detection only | Low; a new self-signed certificate takes minutes |
+| Unchanged resource key | F-61 | Detection only | Low |
+
+The pattern matters for prioritizing: the identifiers are cheap for Xeno to change and best used for measurement and ban waves; the execution primitives (G-1 to G-3) are expensive to replace and are where hardening has lasting effect.
+
+```
+
+`docs/research/ARCHITECTURE.md`:
+
+```md
+# Architecture — Xeno v1.3.65
+
+How Xeno's components fit together, reconstructed from static analysis of the DLL and the decrypted client script. Finding IDs (`F-xx`) refer to [`FINDINGS.md`](FINDINGS.md), which holds the evidence and confidence for each claim. RVAs are relative to image base `0x180000000`. Disassembly excerpts are as observed; C++ blocks marked *reconstruction* are readable approximations, not recovered source.
+
+---
+
+## 1. Components
+
+```
+┌──────────────┐  exports / named pipe (F-55)  ┌───────────────────────────────┐
+│  Xeno UI     │ ─────────────────────────────► │ Xeno.dll (native core)        │
+│  (Electron)  │                                │  • offsets fetch (curl)       │
+└──────────────┘                                │  • Luau compiler              │
+                                                │  • localhost HTTP/WS server   │
+                                                │  • cross-process memory I/O   │
+                                                └──────┬──────────────▲─────────┘
+                                   bytecode writes     │              │ POST /f /ls /rq /qt /cb
+                                   (Nt*VirtualMemory)  ▼              │ (HttpService:RequestInternal)
+                                                ┌───────────────────────────────┐
+                                                │ RobloxPlayerBeta.exe          │
+                                                │  en-us module → CLIENT.LUA    │
+                                                │  CoreGui/<pid>/... container  │
+                                                └───────────────────────────────┘
+                                                               │ HTTPS
+                                                               ▼
+                                         x3no.pages.dev: ep.zst.enc, code.lua, version.txt
+```
+
+The DLL never runs Luau inside Roblox by itself. It writes compiled bytecode into ModuleScripts that the Roblox client already executes or that the Xeno client `require()`s, and serves everything else over loopback HTTP.
+
+## 2. Binary layout
+
+```
+.text   VA=0x1000    VS=0x1A948B   code
+.rdata  VA=0x1AB000  VS=0x69004    strings, vtables, imports, Lua wrapper text
+.data   VA=0x215000  VS=0x3F124    globals (client vector, server state, key pointers)
+.pdata  VA=0x255000  VS=0xCE94     unwind info
+.rsrc   VA=0x262000  VS=0x16440    manifest + two encrypted resources
+.reloc  VA=0x279000  VS=0x15EC     relocations
+```
+
+Entry point `0x199A60` is the standard MSVC CRT DLL startup. No packing (F-03). The file is signed with a self-signed certificate and timestamped (F-04).
+
+The disassembly excerpts below were re-checked against the sample on 2026-11-10 and match at every stated address.
+
+## 3. Exported interface
+
+### 3.1 `Version` — 0x18D3E0
+
+```asm
+cmp   qword [rip+0x8AD70], 0xF     ; std::string capacity > 15 ?
+lea   rax, [rip+0x8AD51]           ; inline buffer ("v1.3.65")
+cmova rax, [rip+0x8AD49]           ; else heap pointer
+ret
+```
+
+Returns `g_version.c_str()` (F-11).
+
+### 3.2 `Attach` — 0x18D3D0
+
+```asm
+xor ecx, ecx
+jmp 0x18018C040                    ; internal attach routine, argument false
+```
+
+### 3.3 `Execute` — 0x18D400
+
+```asm
+mov  r14, r8                       ; count
+mov  r15, rdx                      ; PID array
+mov  r12, rcx                      ; script
+...
+mov  esi, dword [r15 + rbp*4]      ; pid = pids[i]
+lea  rcx, [rip+0x893C2]
+call qword [rip+0x1E194]           ; imported helper, purpose not established
+test eax, eax
+jne  <skip>
+mov  eax, dword [rip+0x893FA]
+cmp  eax, 0x7FFFFFFF               ; sentinel check on a global
+je   <abort>
+mov  rbx, qword [rip+0xC4EF4]      ; client vector begin
+mov  rdi, qword [rip+0xC4EF5]      ; client vector end
+cmp  dword [rcx + 0x2D0], esi      ; client->pid == pid ?
+...
+call qword [rip+0x1DE2F]           ; virtual call with std::string(script)
+```
+
+*Reconstruction* (return value and helper semantics are inferred, F-14):
+
+```cpp
+int Execute(const char* script, const int* pids, size_t count) {
+    for (size_t i = 0; i < count; ++i) {
+        if (helper(pids[i]) != 0) continue;
+        if (g_state == INT_MAX) return /* not ready */;
+        for (auto& client : g_clients)
+            if (client->pid == pids[i])          // +0x2D0
+                client->QueueScript(std::string(script));
+    }
+}
+```
+
+### 3.4 `GetClients` — 0x18D610
+
+Acquires a lazily initialized SRW lock, walks the client vector, and skips objects whose `+0x2C0` field is null (F-15). The output format was not traced.
+
+### 3.5 `SetSetting` — 0x18D950
+
+`switch (id)`: `1` toggles Discord Rich Presence and logs `"RPC is Enabled"` / `"RPC was disabled"`; `0` jumps to a separate handler at `0x18DD10` that was not analyzed (F-17).
+
+### 3.6 `Initialize` — 0x18CA80
+
+```asm
+lea  rcx, [rip+0x4F17F]   ; "ntdll.dll"
+call [rip+0x1E801]        ; LoadLibraryA
+...
+lea  rdx, "NtUnlockVirtualMemory"  -> GetProcAddress -> global
+lea  rdx, "NtLockVirtualMemory"    -> ...
+lea  rdx, "NtSuspendProcess"       -> ...
+lea  rdx, "NtResumeProcess"        -> ...
+lea  rdx, "NtReadVirtualMemory"    -> ...
+lea  rdx, "NtWriteVirtualMemory"   -> ...
+```
+
+These are ordinary calls through `ntdll` exports, not direct system calls. `NtSuspendProcess`, `NtResumeProcess` and the lock/unlock pair have no documented Win32 wrapper, which is a sufficient reason to resolve them this way. The remainder of `Initialize` (directory setup, cache load, offsets fetch, server start) is inferred from log strings, not traced.
+
+## 4. Attach
+
+Ordered from log strings and client code. Steps marked † are inferred.
+
+1. Enumerate processes and create an `RBXClient` per Roblox PID (`"Creating new RBXClient: {}"`); reuse cached PIDs (`"Reattaching to cached client PID: {}"`).
+2. Refuse elevated targets when not elevated (F-32).
+3. Wait for the client window and the DataModel.
+4. Locate `RobloxGui → Modules → en-us` (`"Could not find RobloxGui->Modules..."`). Offsets for the running Roblox version come from the downloaded RBXClient data (§7).
+5. Replace the module's bytecode with compiled `CLIENT.LUA` (`"Intercepted translation module @{:#x}"`). † The write uses the resolved `NtWriteVirtualMemory`; † suspension around the write is plausible but not traced.
+6. Roblox runs the module. `CLIENT.LUA` recognises the en-us context (`P:396`), builds its container, and calls `Activate` (op 0) until the DLL answers. The DLL logs `"Attach ping received..."`.
+7. If no ping arrives, force a window refresh (`"Did not receive the success ping from client. Using RefreshRBXWindowV2..."`, backed by `SetWindowPos`, `RedrawWindow`, `LockWindowUpdate` and `DwmSetWindowAttribute` imports), retry, then `"Still did not receive the success ping from client. Treating this as failed."` (F-36).
+8. On `PlayerRemoving` for the local player, the client sends op 19 and the DLL reattaches after the next place loads.
+
+**Why this target.** A ModuleScript under `RobloxGui` is loaded by Roblox's own Lua as part of normal startup, so replacing its bytecode gives Xeno a Luau thread without creating a native thread or loading a DLL into the process. Xeno also bundles Roblox's original en-us table (resource `8196`), most plausibly so that translation lookups keep working after the module is replaced; how the two are combined was not traced. *This rationale is the analyst's interpretation; the mechanism is F-30.*
+
+## 5. Execution and protocol
+
+### 5.1 Path A — `Execute` export
+
+```
+UI ──Execute(script, pids)──► DLL: queue per client
+                              DLL: compile with embedded Luau + wrapper (F-41, F-43)
+                              DLL: locate current execution module in CoreGui/<pid>
+                              DLL: write bytecode, read back to verify
+Roblox (CLIENT.LUA, P:4826-4872):
+    loop every ~1 ms:
+        ok, f = pcall(require, ExecutionModule)
+        if f is a function:
+            ExecutionModule:Destroy()
+            setfenv(f, {getfenv, setfenv, setmetatable, error, Xeno})
+            task.spawn(f)
+            POST /f?e=21   (LockCustomBytecode)
+            create new random-named module
+```
+
+The client sends nothing until a script has run. How the DLL identifies the current execution module (its name is random) was not traced.
+
+### 5.2 Path B — `loadstring`
+
+```
+CLIENT.LUA (P:1994-2080):
+    module = ModuleScript "loadstring:<rand>[:chunkName]" in CoreGui/<pid>/Loadstring
+    POST /ls?c=<module name>&p=<pid>  body = source     -- 400 = compile error, 500 = server error
+    repeat every 50 ms, up to 3 s:
+        POST /f?e=20   (UnlockCustomBytecode)
+        res = require(module)
+        POST /f?e=21   (LockCustomBytecode)
+        if res[XENO_PID] is a function: return it
+```
+
+Returning a table keyed by PID means a module compiled for one client cannot be consumed as another client's result.
+
+### 5.3 Opcode table (`P:193-227`)
+
+| Op | Name | Op | Name |
+|---|---|---|---|
+| 0 | `Activate` (returns HWID) | 11 | `LockModule` |
+| 1 | `ReadFile` | 12 | `UnlockModule` |
+| 2 | `GetFileType` | 13 | `GetProperties` |
+| 3 | `ListFiles` | 14 | `GetInstanceRBXSignals` |
+| 4 | `MakeFolder` | 15 | `GetInstanceFunctions` |
+| 5 | `DelFolder` | 16 | `HookInstance` |
+| 6 | `DelFile` | 17 | `SetScriptable` |
+| 7 | `GetCustomAsset` | 18 | `GetInstanceAddress` |
+| 8 | `GetScriptBytecode` | 19 | `PlayerRemoving` |
+| 9 | `SetScriptBytecode` | 20 | `UnlockCustomBytecode` |
+| 10 | `RestoreScriptBytecode` | 21 | `LockCustomBytecode` |
+
+`WriteFile = -1` is client-side only. Commented-out code references `CBlockFunctions`, `GetQueueOnTeleport` and `GetAutoExecuteContents`, which are not in the table (version drift).
+
+### 5.4 Other endpoints
+
+| Endpoint | Purpose |
+|---|---|
+| `POST /rq?c=<method>&h=<b64 headers>&u=<b64 url>` | HTTP proxy for script `request()`, executed by libcurl in the DLL; the client adds Xeno user-agent, HWID (`exploit-guid`, `xeno-fingerprint`) and game-server headers (F-54) |
+| `POST /qt?p=<pid>` | Store a `queue_on_teleport` script |
+| `POST /cb` | Set the OS clipboard |
+
+Requests from user scripts to loopback port 3110 are refused by the client (F-53).
+
+### 5.5 Bytecode Patch Watcher (v1.3.65)
+
+A watchdog restores a patched module's original bytecode if the client does not consume the patch in time (F-45). The log text says the purpose is preventing crashes. A side effect relevant to defenders is that foreign bytecode is only present for a short window.
+
+## 6. Resource encryption
+
+`LoadResource`/`SizeofResource`/`LockResource` at `0x18CD06–0x18CD7F` copy the blob into a `std::string` and call `0x1906B0`:
+
+```asm
+0x190737: mov   r8,  [rip+0xC25DA]   ; key.begin   (.data 0x252D18)
+0x19073e: mov   rcx, [rip+0xC25DB]   ; key.end     (.data 0x252D20)
+0x190745: sub   rcx, r8              ; key length (32)
+0x19074a: mov   rax, r9
+0x19074d: div   rcx                  ; rdx = i % 32
+0x190750: movzx ecx, byte [r10+r9]
+0x190755: xor   cl, byte [rdx+r8]
+0x19075d: mov   [rax+r9], cl
+```
+
+The key pointers are zero in the file and filled by a CRT dynamic initializer at `0x3B10`, which allocates 32 bytes and stores eight immediates (the `mov dword [rax], imm32` sequence begins at `0x3B30`):
+
+```
+0x4550FD3E 0xCABF61ED 0x92A1EF57 0x966607D0 0x21F7C5FD 0x3649BD12 0x19B33F7A 0xBBF52AA9
+→ 3E FD 50 45 ED 61 BF CA 57 EF A1 92 D0 07 66 96 FD C5 F7 21 12 BD 49 36 7A 3F B3 19 A9 2A F5 BB
+```
+
+After XOR the routine checks for the zstd magic (`0x1908DD: cmp ecx, 0xFD2FB528`), calls `ZSTD_getFrameContentSize` and `ZSTD_decompress`, and logs `"Could not decompress a Xeno resource: {}"` on failure.
+
+*Reconstruction:*
+
+```cpp
+std::string LoadXenoResource(int id) {
+    HRSRC   h    = FindResourceW(g_module, MAKEINTRESOURCEW(id), MAKEINTRESOURCEW(8194));
+    HGLOBAL g    = LoadResource(g_module, h);
+    DWORD   size = SizeofResource(g_module, h);
+    std::string buf(static_cast<const char*>(LockResource(g)), size);
+    for (size_t i = 0; i < buf.size(); ++i)
+        buf[i] ^= g_key[i % g_key.size()];
+    if (memcmp(buf.data(), "\x28\xB5\x2F\xFD", 4) != 0) return {};
+    std::string out(ZSTD_getFrameContentSize(buf.data(), buf.size()), '\0');
+    if (ZSTD_isError(ZSTD_decompress(out.data(), out.size(), buf.data(), buf.size()))) return {};
+    return out;
+}
+```
+
+| Resource | Encrypted | Decrypted | Content |
+|---|---|---|---|
+| `8194/8192` | 27,985 B | 145,004 B | `CLIENT.LUA` |
+| `8194/8196` | 62,613 B | 336,884 B | Roblox en-us translation table |
+
+## 7. Offsets and remote content
+
+Roblox ships frequently, so Xeno does not hard-code internal offsets. At startup the DLL downloads zstd-compressed RBXClient data, falling back to `https://x3no.pages.dev/ep.zst.enc` if the primary source fails. Entries are keyed by Roblox version; one version can alias another's offsets, and unknown versions fall back to a default with a warning (F-33). The primary source is unknown (F-34).
+
+The client separately fetches `version.txt` (update notice) and `code.lua`, which it runs with the full Xeno environment on every attach (F-63).
+
+## 8. Script environment
+
+The client builds a `Xeno` table of roughly 160 functions in the common "UNC" style (`getgenv`, `hookfunction`, `getscriptbytecode`, `request`, file I/O, `Drawing`, input synthesis, and so on). Not all are functional: the header says some are fake (F-48), and identity functions only store a number (F-47). Before exposing any of this, the client wraps a list of Roblox services so that selected methods raise `"Attempt to call a blocked function"` (F-90; `P:441-577`).
+
+## 9. Cache
+
+One binary file in the Xeno directory holds client PIDs, compiled bytecode, flags and client info, plus queued teleport scripts. A bad header is non-fatal (`"No valid cache found (Starting new fresh cache)"`).
+
+## 10. Technique mapping
+
+Mapped conservatively; Xeno is software the user installs and runs on purpose, so these describe mechanisms, not an intrusion.
+
+| ATT&CK technique | Mechanism |
+|---|---|
+| T1055 Process Injection | Writing compiled Luau bytecode into the Roblox process's memory |
+| T1106 Native API | `Nt*` functions resolved from `ntdll` |
+| T1027 / T1140 Obfuscated files; Deobfuscate/Decode | XOR+zstd resources; `ep.zst.enc` |
+| T1105 Ingress Tool Transfer | Runtime download of offsets and `code.lua` |
+| T1057 Process Discovery | Process and window enumeration to find Roblox clients |
+| T1082 System Information Discovery | Hardware identifier returned to the client |
+
+```
+
+`docs/research/FINDINGS.md`:
+
+```md
+# Findings
+
+Every finding about Xeno v1.3.65 (`Xeno.dll`, SHA-256 `50318bc8d60477a2402440c4989611ba9640cf6a709b5ec9d4c44e3860e99049`), with its evidence and a confidence level.
+
+DLL-level evidence (addresses, imports, strings, signature) was re-verified on 2026-11-10 against a copy extracted from the public v1.3.65 installer, which is byte-identical to the analyzed build (F-08). [`ARCHITECTURE.md`](ARCHITECTURE.md) explains how the pieces fit together; this document is the authoritative list of what is claimed.
+
+## Confidence levels
+
+All analysis is static. Nothing here has been observed running. "Confirmed" therefore means the artifact itself states it unambiguously, not that the behavior was watched happening.
+
+| Level | Meaning |
+|---|---|
+| **Confirmed** | Directly present in the binary or the decrypted client source, with no interpretation needed beyond reading it. |
+| **Strongly supported** | Two or more independent static sources agree (for example a log string, an import, and client code), but the behavior was not executed. |
+| **Inferred** | A reasoned interpretation of one source, or a reconstruction. Plausible, not demonstrated. |
+| **Unverified** | Stated in earlier revisions or reasonable to expect, but not checked against evidence available to this revision. |
+
+## Evidence codes
+
+| Code | Source | Reproducible from this repository? |
+|---|---|---|
+| `S` | ASCII string in the DLL | Needs the sample |
+| `I` | Import table entry | Needs the sample; counts in [`SAMPLE_REPORT.md`](../../reports/SAMPLE_REPORT.md) |
+| `D` | Disassembly at the given RVA (capstone 5.0.7, image base `0x180000000`) | Needs the sample |
+| `R` | Resource directory, sizes, entropy | Needs the sample; values in [`SAMPLE_REPORT.md`](../../reports/SAMPLE_REPORT.md) |
+| `P:<line>` | Line in the decrypted `CLIENT.LUA` | Needs the sample; line index in [`payloads/README.md`](../../payloads/README.md) |
+| `C` | [`COMPARE_REPORT.md`](../../reports/COMPARE_REPORT.md) (v1.3.40 to v1.3.65 diff) | Needs both samples |
+
+---
+
+## 1. Identification
+
+| ID | Finding | Confidence | Evidence |
+|---|---|---|---|
+| F-01 | The sample is the native core of the Xeno Roblox executor, version `v1.3.65`. | Confirmed | `S`: `"Xeno Version: "`, `https://xeno.now`; `D`: `Version` export returns `"v1.3.65"`; `P:1` header `v1.3.65 CLIENT.LUA` |
+| F-02 | PE32+ DLL, x86-64, 2,362,704 bytes, six standard sections, PE timestamp 2026-10-20 20:43:17 UTC. | Confirmed | [`SAMPLE_REPORT.md`](../../reports/SAMPLE_REPORT.md) |
+| F-03 | Not packed: standard section names and sizes, readable strings, intact `.pdata`, no writable+executable section. | Confirmed | Section table in [`SAMPLE_REPORT.md`](../../reports/SAMPLE_REPORT.md) |
+| F-04 | Authenticode-signed with a **self-signed** certificate, subject and issuer `CN=Rizve A`, serial `3FDA0D2C31C5C2A84790E6E2F20D1306`, valid 2026-05-10 to 2027-05-10, SHA-256 fingerprint `AEE2FA8D…C2B30A21`. The signed SHA-256 file digest matches the file, so it has not been modified since signing. The signature carries a Sectigo RFC 3161 timestamp of 2026-10-20 20:44:16 UTC, about one minute after the PE timestamp. Windows reports `UnknownError` because the chain does not lead to a trusted root. | Confirmed | 8,016-byte certificate table at file offset `0x23EE00`; digest recomputed and compared; certificate parsed with OpenSSL |
+| F-05 | Built with MSVC (MSVCP140, VCRUNTIME140, UCRT imports). | Confirmed | `I` |
+| F-06 | Embedded PDB path `C:\Users\rizve\OneDrive\Desktop\Projects\Xeno\build\Release\net9.0-windows8.0\Xeno.pdb`. The `net9.0-windows8.0` component is a .NET target-framework folder name, which is unusual for a native DLL shipped in an Electron installer; the build arrangement behind it is unknown. | Confirmed (path) / Unresolved (meaning) | `S` |
+| F-08 | Distributed as an NSIS installer wrapping an Electron app (`app-64.7z`). `Xeno.dll` ships at `resources/public/Xeno.dll` alongside `libcurl.dll`, `libssl-3-x64.dll`, `libcrypto-3-x64.dll` and the MSVC runtime. The public installer `Xeno-v1.3.65.exe` (88,851,592 bytes, SHA-256 `829c1e8861cadb5835fe968b98d06254254e6a4120250d9f5cf612d3f152c7a1`) contains a DLL identical to the analyzed one. | Confirmed | Installer extracted with 7-Zip; DLL SHA-256 compared |
+| F-07 | Maintainer attribution "Rizve", contact `rizve@xeno.onl`, Discord `.rizve`. These are self-published by the developer in the binary and client header. | Confirmed | `S`; `P:1-12` |
+
+## 2. Exported interface
+
+| ID | Finding | Confidence | Evidence |
+|---|---|---|---|
+| F-10 | Six exports: `Attach` (0x18D3D0), `Execute` (0x18D400), `GetClients` (0x18D610), `Initialize` (0x18CA80), `SetSetting` (0x18D950), `Version` (0x18D3E0). | Confirmed | Export table |
+| F-11 | `Version` returns `c_str()` of a global `std::string` holding `"v1.3.65"` (MSVC small-string pattern). | Confirmed | `D` 0x18D3E0 |
+| F-12 | `Attach` is a two-instruction thunk: `xor ecx, ecx; jmp` to an internal attach routine with a `false` argument. | Confirmed | `D` 0x18D3D0 |
+| F-13 | `Execute` takes a script pointer in `rcx`, a 32-bit PID array in `rdx`, and a count in `r8`; for each PID it scans a global client vector, compares the PID at object offset `+0x2D0`, and makes a virtual call with the script as a `std::string`. | Confirmed (control flow) | `D` 0x18D400 |
+| F-14 | `Execute` returns a delivered count and validates PIDs through a helper before scanning. | Inferred | Return type and the purpose of the imported call at `rip+0x1E194` were not established |
+| F-15 | `GetClients` walks the client vector under a lazily initialized SRW lock and skips objects whose `+0x2C0` field is null. | Confirmed (control flow) | `D` 0x18D610 |
+| F-16 | Field `+0x2C0` is the process handle and `+0x318 == 1` means "attached". | Inferred | Field names are interpretations of how the values are tested |
+| F-17 | `SetSetting(1, value)` toggles Discord Rich Presence. Setting 0 has a separate handler (0x18DD10) whose purpose is unknown. | Confirmed (id 1) / Unverified (id 0) | `D` 0x18D950; `S`: `"RPC is Enabled"`, `"RPC was disabled"` |
+| F-18 | `Initialize` loads `ntdll.dll` and resolves `NtLockVirtualMemory`, `NtUnlockVirtualMemory`, `NtSuspendProcess`, `NtResumeProcess`, `NtReadVirtualMemory`, `NtWriteVirtualMemory` with `GetProcAddress`. | Confirmed | `D` 0x18CA80; `S`: `"Failed to load ntdll.dll"`, `"A symbol was unable to be loaded from ntdll.dll"` |
+
+## 3. Bundled components
+
+| ID | Finding | Confidence | Evidence |
+|---|---|---|---|
+| F-20 | Luau compiler compiled in (many `Luau*` feature-flag strings, compiler error text such as `"Exceeded constant limit"`). | Strongly supported | `S` |
+| F-21 | zstd compiled in. | Confirmed | `S` (zstd error-name strings); `D` calls to `ZSTD_getFrameContentSize` 0x1800E0830 and `ZSTD_decompress` 0x1800E0CD0 |
+| F-22 | cpp-httplib (HTTP server) and IXWebSocket (WebSocket) compiled in. | Strongly supported | RTTI names `httplib::Request`/`Response`, `ixwebsocket::heartbeat`; WebSocket handshake error strings |
+| F-23 | libcurl and OpenSSL 3 loaded as separate DLLs. | Confirmed | `I`: `libcurl.dll`, `libssl-3-x64.dll`, `libcrypto-3-x64.dll` |
+| F-24 | Discord RPC integration. | Strongly supported | `S`: `"DiscordRPC"`, `"SET_ACTIVITY"`, join-request strings |
+
+## 4. Attach mechanism
+
+| ID | Finding | Confidence | Evidence |
+|---|---|---|---|
+| F-30 | Xeno attaches by replacing the bytecode of the **en-us locale translation ModuleScript** under `RobloxGui.Modules`, so its client runs when the Roblox client loads that module. | Strongly supported | `S`: `"Intercepted translation module @{:#x}"`, `"Could not find en-us locale translation module..."`, `"Attaching in-game using translation module."`; `P:396` checks `script.Name == "en-us"`; resource `8196` is the en-us table (F-62) |
+| F-31 | The bytecode write goes through the resolved `NtWriteVirtualMemory`, and the target process may be suspended around the write. | Inferred | F-18 resolves the functions; the call sites inside the attach routine were not disassembled |
+| F-32 | Attach refuses to open an elevated Roblox process when Xeno itself is not elevated. | Confirmed | `S`: `"Failed to open the Roblox client process because it is running with administrator privileges..."` |
+| F-33 | Per-Roblox-version memory offsets are downloaded at runtime and zstd-compressed; there is a primary endpoint and a secondary `https://x3no.pages.dev/ep.zst.enc`, with alias and default-version fallbacks. | Strongly supported | `S`: `"RBXClient data resource decompression failed... Using secondary endpoint"`, `"Offsets for version "{}" points to "{}""`, `"...Using offsets from default version"` |
+| F-34 | The primary offsets endpoint URL. | Unverified | Not present as a plain string. Possibly built at runtime or fetched via the pastebin URL (F-55) |
+| F-35 | The injected client signals success through the localhost server; if no ping arrives, Xeno escalates through further attempts and then gives up. | Strongly supported | `S`: `"Attach ping received from client..."`, `"Still did not receive the success ping from client. Treating this as failed."` |
+| F-36 | v1.3.65 still has a forced window-refresh fallback (`RefreshRBXWindowV2`) when the success ping is late. Two related strings were removed in v1.3.65, but the main one remains and the window APIs it needs are imported. The routine itself was not disassembled. | Strongly supported | `S`: `"Did not receive the success ping from client. Using RefreshRBXWindowV2..."`; `I`: `SetWindowPos`, `RedrawWindow`, `LockWindowUpdate`, `DwmSetWindowAttribute` (dwmapi's only import); `C` |
+| F-37 | After the player leaves a place, Xeno reattaches (`PlayerRemoving`, op 19). | Strongly supported | `S`: `"[::PlayerRemoving]: Player leaving ping recieved. We have to reattach."`; `P:4803-4811` |
+
+## 5. Execution
+
+| ID | Finding | Confidence | Evidence |
+|---|---|---|---|
+| F-40 | **Path A (`Execute` export):** the client keeps a random-named ModuleScript in its container and calls `require()` on it every ~1 ms. When the DLL has overwritten its bytecode with a compiled user script, `require` returns a function, which the client runs with the Xeno environment, then sends op 21 (`LockCustomBytecode`) and creates a new module. The client never sends op 20 on this path. | Confirmed (client side) | `P:4826-4872` |
+| F-41 | The DLL compiles the queued source with its embedded Luau compiler, writes the bytecode into the execution module, and reads it back to verify. | Strongly supported | `S`: `"Could not verify that the execution module has changed..."`, `"[{}]: Failed to compile (this is a problem with your script): {}"` |
+| F-42 | **Path B (`loadstring`):** the client creates `loadstring:<random>` under its `Loadstring` folder, posts the source to `/ls?c=<name>&p=<pid>`, then polls op 20, `require`, op 21 until the module returns a table keyed by PID whose value is a function, with a 3 s timeout. HTTP 400 means a compile error. | Confirmed (client side) | `P:1994-2080` |
+| F-43 | User source is wrapped in a prologue that copies the `Xeno` table into the thread environment, gives the script a metatable-backed environment, and fabricates a `script` global. | Confirmed | Wrapper text in `.rdata` (`S`); a variant at `P:1643` |
+| F-44 | Compiled bytecode is cached in the Xeno cache file alongside client PIDs, flags and client info. | Strongly supported | `S`: `"Loaded existing cache: {} RBXClients, {} RBXBytecode, {} RBXMFlags, {} RBXClientInfos"` |
+| F-45 | New in v1.3.65: a "Bytecode Patch Watcher" thread restores original module bytecode if a patch is not consumed within a threshold. The log text gives crash prevention as the reason. | Confirmed (existence and stated purpose) | `S`: `"[::BytecodePatchWatcherT]: Threshold reached. Workers failed to call restore (Automatically restoring to prevent crash)"`; `C` |
+| F-46 | Original bytecode is checksummed so restores can be verified. | Strongly supported | `S`: `"Restored data doesn't match checksum"` |
+| F-47 | The client's identity functions are stubs: `getthreadidentity` returns a stored number (default 3) and `setthreadidentity` only changes that number. The actual identity the hijacked module runs at was not determined. | Confirmed (stubs) / Unverified (real identity) | `P:3503-3516` |
+| F-48 | Some advertised environment functions are non-functional by the author's own statement. | Confirmed | `P:14` |
+
+## 6. Localhost control plane
+
+| ID | Finding | Confidence | Evidence |
+|---|---|---|---|
+| F-50 | The DLL runs an HTTP server on `localhost`, port supplied to the client via `%XENO_SERVER_PORT%`. | Strongly supported | `S`: `"Xeno Server is Live on http://localhost:{}"`; `P:65` |
+| F-51 | Opcode endpoint `POST /f?e=<op>` with JSON body `{"c": <arg>, "p": <pid>}`; ops 0–21 as listed in [`ARCHITECTURE.md`](ARCHITECTURE.md) §5; a missing status is treated as 410 ("Xeno was closed"). | Confirmed (client side) | `P:137-175`, `P:193-227` |
+| F-52 | Additional endpoints: `/ls` (compile), `/rq?c=<method>&h=<b64 headers>&u=<b64 url>` (HTTP proxy for user scripts), `/qt?p=<pid>` (teleport queue), `/cb` (clipboard). | Confirmed (client side) | `P:2007`, `P:2174`, `P:2839-2847`, `/cb` call site |
+| F-53 | The client refuses user requests to port 3110 on loopback. The reason (a fixed or development port) is not established. | Confirmed (behavior) / Inferred (reason) | `P:2168-2169` |
+| F-54 | Every request made through the script HTTP API carries `User-Agent: Xeno/<version>` (unless the script overrides it), `exploit-guid` and `xeno-fingerprint` headers set to the user's hardware identifier, and `roblox-place-id`, `roblox-game-id` (the server JobId) and `roblox-session-id` headers. Any third-party server a Xeno script contacts therefore receives a stable machine identifier and the user's current game server. | Confirmed | `P:2157-2165`; identifier source `P:420-435` |
+| F-55 | The UI process communicates with the DLL over named pipes. | Inferred | Only `WaitNamedPipeW`/`PeekNamedPipe` imports |
+
+## 7. Resources and remote content
+
+| ID | Finding | Confidence | Evidence |
+|---|---|---|---|
+| F-60 | Resources `8194/8192` (27,985 B) and `8194/8196` (62,613 B) are a repeating 32-byte XOR over a zstd frame. Key `3EFD5045ED61BFCA57EFA192D0076696FDC5F72112BD49367A3FB319A92AF5BB`. | Confirmed | `D` decrypt loop 0x190737–0x19075D, key initializer 0x3B10; independent known-plaintext derivation of the first 4 key bytes; both resources decrypt and decompress |
+| F-61 | The key is unchanged between v1.3.40 and v1.3.65. | Confirmed | `C` |
+| F-62 | `8192` is `CLIENT.LUA` (145,004 B); `8196` is Roblox's en-us translation table (336,884 B), returned through a metatable so missing keys yield an empty string. | Confirmed | Decrypted output; hashes in [`payloads/README.md`](../../payloads/README.md) |
+| F-63 | On every attach, the client downloads `https://x3no.pages.dev/code.lua` and, if it is longer than 3 bytes, runs it with the full Xeno environment. The developer can therefore run arbitrary code in every attached client without shipping a new DLL. | Confirmed (client code) | `P:4813-4824` |
+| F-64 | The client checks `https://x3no.pages.dev/version.txt` for update notifications. | Confirmed | `P:62`, `P:372` |
+| F-65 | `saveinstance` is fetched at call time from `raw.githubusercontent.com/luau/SynSaveInstance`. | Confirmed | Call site in `CLIENT.LUA` (`Xeno.saveinstance`) |
+| F-66 | The DLL references `https://pastebin.com/raw/A7n0vJtR`. Purpose unknown. | Confirmed (reference) / Unverified (purpose) | `S` |
+
+## 8. In-game footprint
+
+| ID | Finding | Confidence | Evidence |
+|---|---|---|---|
+| F-70 | A `Folder` under `CoreGui` named after the Roblox client PID, containing `Pointer` and `Loadstring` folders and a `Message` named `DO NOT DELETE: BELONGS TO XENO`. | Confirmed | `P:28-44` |
+| F-71 | `shared.__Xeno` is set to the Xeno environment table. | Confirmed | `P:59` |
+| F-72 | Random-numeric-named ModuleScripts are created and destroyed continuously in the container during execution (F-40). | Confirmed | `P:4826-4872` |
+| F-73 | The en-us translation module's bytecode differs from Roblox's original while Xeno is attached. | Strongly supported | Follows from F-30; not measured |
+
+## 9. Host behavior
+
+| ID | Finding | Confidence | Evidence |
+|---|---|---|---|
+| F-80 | A `Xeno` directory with `workspace` and `autoexec` folders and a cache file. | Strongly supported | `S`: directory log lines |
+| F-81 | Autoexec and teleport-queue replay are disabled in this client build (code commented out), though the DLL still logs both. | Confirmed (client) | `P:4774-4802` |
+| F-82 | The `Activate` call returns a hardware identifier (braces stripped; a random GUID is used if it fails); `GetCurrentHwProfileW` is imported. The client attaches it to outgoing script HTTP requests (F-54) and exposes it as `gethwid()`. What the DLL or the developer otherwise uses it for is not established. | Confirmed (HWID returned and sent) / Unverified (other use) | `P:420-435`, `P:2112-2113`, `P:2158-2159`; `I` |
+| F-83 | Reads Steam registry values. Purpose unknown. | Confirmed (strings) / Unverified (purpose) | `S`: `"Error opening Steam key"`, `"Error reading SteamExe key"` |
+| F-84 | Terminates other running Xeno instances on start. | Strongly supported | `S`: `"Terminated same existing Xeno process: {}"` |
+| F-85 | Imports for clipboard writes and synthesized input (`SetClipboardData`, `keybd_event`, `mouse_event`), used to back the script API (`setclipboard`, `keypress`, `mouse*`). | Strongly supported | `I`; corresponding client functions |
+| F-86 | `OpenProcess`, `VirtualAllocEx`, `ReadProcessMemory` and `WriteProcessMemory` are imported in v1.3.65; `CreateRemoteThread` is not. Where the Win32 memory functions are used, as opposed to the resolved `Nt*` functions, was not traced. | Confirmed (imports) | `I` |
+
+## 10. Security-relevant observations
+
+| ID | Finding | Confidence | Evidence |
+|---|---|---|---|
+| F-90 | Xeno ships a deny-list (`BlockedServiceFuncs`) covering purchase, authentication-cookie, analytics, web-browser, capture and messaging APIs (for example `MarketplaceService:PerformPurchase`, `BrowserService:CopyAuthCookieFromBrowserToEngine`, `HttpRbxApiService:*`) and stubs `GetDeviceAccessToken` / `GetDeviceIntegrityToken`. The credits call this "vulnerabilities mitigation". This implies the developers believe these APIs are reachable from the context their scripts run in. | Confirmed (list exists) / Unverified (reachability) | `P:10`, `P:441-549`, `P:575-577` |
+| F-91 | Consequently, the risks of this design fall mainly on Xeno's own users: scripts they run, and the `code.lua` channel (F-63), execute in a context the developer felt needed these protections. | Inferred | F-63, F-90 |
+| F-92 | Script HTTP requests disclose a stable hardware identifier and the current game server to whatever host a script contacts (F-54). Script authors can use this to track Xeno users across sessions and accounts. | Confirmed (headers) | F-54 |
+
+See [`DISCLOSURE.md`](../DISCLOSURE.md) for how these map to Roblox's security boundaries.
+
+## 11. Changes v1.3.40 to v1.3.65
+
+| ID | Finding | Confidence | Evidence |
+|---|---|---|---|
+| F-95 | Attach reworked: menu/home-page bytecode set and `RefreshQueueOnTeleport` strings removed; translation-module and `PlayerRemoving` strings added. | Confirmed (strings) | `C` |
+| F-96 | Offset data terminology changed from "ecs pattern data" to "inp data". | Confirmed (strings) | `C` |
+| F-97 | `dwmapi.dll` import added; BytecodePatchWatcher added; HTTP/WebSocket server strings expanded. | Confirmed | `C` |
+| F-98 | `AttachThreadInput` is not imported by v1.3.65 but appears in the v1.3.40 string diff, suggesting the import was dropped. | Confirmed (absent in v1.3.65) / Unverified (present in v1.3.40) | `I`; `C`. Confirm by regenerating [`COMPARE_REPORT.md`](../../reports/COMPARE_REPORT.md) with the fixed `compare_samples.py` |
+---
+
+## Corrections to earlier revisions
+
+Earlier revisions of this repository contained the following errors. They are recorded so reviewers can see what changed and why.
+
+| Earlier claim | Correction |
+|---|---|
+| Resolving `Nt*` functions makes Xeno use "direct syscalls" that bypass user-mode hooks. | Calling `ntdll` exports via `GetProcAddress` is not a direct syscall; ntdll stubs are where most user-mode hooks sit. Several of the resolved functions (`NtSuspendProcess`, `NtLock/UnlockVirtualMemory`) have no kernel32 equivalent, so no evasion intent can be inferred. |
+| Execution path A: the client posts op 20 before the DLL writes bytecode. | The client never sends op 20 on path A; it only polls `require()` and sends op 21 after a function is returned (F-40). Op 20 is used by `loadstring` (F-42). |
+| Detection: steady 1 ms loopback HTTP traffic from the execution loop. | The 1 ms loop is a local `require()`; HTTP happens only after a script runs. |
+| ~7.99 bits/byte entropy rules out compression and indicates encryption. | zstd output is also near 8 bits/byte. The evidence for encryption was the absent zstd magic plus the XOR differential test. |
+| `FindResourceW(..., RT_RCDATA /*8194*/)` | `RT_RCDATA` is 10; 8194 is a custom resource type. |
+| Detection: compare the en-us module's bytecode hash server-side. | Servers cannot read client memory; this is a client-integrity check. |
+| Hijacked module runs with CoreGui-level (high) privileges. | Not established. The client's identity functions are stubs (F-47). |
+| `RefreshRBXWindowV2` reconstruction with specific call sequence. | Reconstructed from imports only; removed. The fallback exists in v1.3.65 (F-36), but its body has not been disassembled. |
+| The binary is unsigned; the Sectigo strings are curl's CA bundle. | The file is signed with a self-signed `Rizve A` certificate and timestamped by Sectigo; the Sectigo strings belong to the timestamp chain (F-04). |
+| (Raised during the November review) `RefreshRBXWindowV2` was removed in v1.3.65. | Incorrect. Only two of its strings were removed; the fallback string and its window imports are present in v1.3.65 (F-36). The original documentation was right. |
+| `decrypt_resources.py` works on any Xeno sample. | Verified on v1.3.40 and v1.3.65 only. |
+| Unsigned binary / no PDB as anti-forensics; cache file as persistence. | Removed from the technique mapping; neither meets the ATT&CK definitions. |
+
+## Open questions
+
+1. What identity does the hijacked en-us module run at, and are the APIs in F-90 actually callable from it?
+2. Primary offsets endpoint (F-34) and the role of the pastebin (F-66).
+3. Where the Win32 memory APIs are used versus the `Nt*` functions (F-86), and whether v1.3.40 imported `AttachThreadInput` (F-98).
+4. Meaning of the .NET-style PDB path (F-06).
+5. `SetSetting` id 0 (F-17).
+
+```
+
+`docs/research/LIMITATIONS.md`:
+
+```md
+# Limitations
+
+What this research does not establish, and why it matters for reading the other documents.
+
+**Static analysis only.** No Xeno binary was executed. Behavior is reconstructed from code, strings, imports and the decrypted client script. Findings marked "Confirmed" are confirmed as present in the artifacts, not observed at runtime. Timing, ordering and error paths described in [`ARCHITECTURE.md`](ARCHITECTURE.md) may differ in practice.
+
+**Two builds.** Only v1.3.40 and v1.3.65 were examined. Xeno updates frequently and its offsets and some code arrive at runtime (`ep.zst.enc`, `code.lua`), so the behavior of any given session can differ from what is described here without a DLL change.
+
+**Partial disassembly.** The exported functions, the resource loader, the decrypt routine and the key initializer were disassembled. The internal attach routine, the server handlers, the write path into Roblox memory and the Bytecode Patch Watcher were not; their descriptions rest on log strings and client code. Field names (`hProcess`, `state`) are interpretations of how values are tested.
+
+**Evidence availability.** Samples are not redistributed, so DLL-level evidence (RVAs, strings, imports) can only be checked by someone who obtains the same build. Hashes are given so they can confirm they have it. As of 2026-11-10 the public v1.3.65 installer still contains the analyzed DLL (F-08); that will change when Xeno updates.
+
+**Detection validation.** The detector and YARA rules have been tested on two real builds, synthetic fixtures and this repository's text. There is no benign-corpus result and no measurement against other executors. Thresholds are heuristics.
+
+**Generated reports.** [`SAMPLE_REPORT.md`](../../reports/SAMPLE_REPORT.md) was regenerated with the current tools on 2026-11-10. The committed [`COMPARE_REPORT.md`](../../reports/COMPARE_REPORT.md) was produced by a version of `compare_samples.py` whose function-level import diff covered only the first DLL, so its "Imported functions: No changes" line is not reliable; it needs regenerating with the v1.3.40 sample.
+
+**Unresolved questions.** Listed at the end of [`FINDINGS.md`](FINDINGS.md). The most consequential are the actual script identity of the hijacked module and whether the APIs Xeno blocks for its users are reachable from it (F-47, F-90).
+
+**Prevalence.** No public data establishes how many people use Xeno. Discord membership and third-party download figures are not usage counts ([`THREAT_ASSESSMENT.md`](../defense/THREAT_ASSESSMENT.md) §2).
+
+**Countermeasures are proposals.** [`COUNTERMEASURES.md`](../defense/COUNTERMEASURES.md) is written without knowledge of Roblox's existing detections or internal constraints; some measures may already exist or be impractical.
+
+**Scope.** This is research on one third-party executor. It says nothing about other executors, including Potassium, and does not by itself establish any vulnerability in Roblox (see [`DISCLOSURE.md`](../DISCLOSURE.md)).
+
+```
+
+`docs/research/METHODOLOGY.md`:
+
+```md
+# Methodology
+
+How the analysis was performed, in the order it happened, and why each step was chosen. Results are in [`FINDINGS.md`](FINDINGS.md); the reconstructed design is in [`ARCHITECTURE.md`](ARCHITECTURE.md).
+
+## Environment and constraints
+
+- **Static only.** No Xeno binary was executed and no debugger was attached. Every behavioral statement is derived from code, strings, imports or the decrypted client script.
+- **Samples.** Two builds extracted from the official installers: v1.3.65 (SHA-256 `50318bc8…99049`, the subject of this report) and v1.3.40 (SHA-256 prefix `37e78bb4944ed703`, used for comparison). Samples are not redistributed.
+- **No interaction with Roblox or Xeno infrastructure** is part of the documented method: none of the steps below requires a request to Roblox services, `x3no.pages.dev`, `xeno.now` or the pastebin URL.
+
+| Tool | Version | Use |
+|---|---|---|
+| Python | 3.14 | Scripting |
+| pefile | 2024.8.26 | Headers, sections, imports, exports, resources |
+| capstone | 5.0.7 | x86-64 disassembly |
+| zstandard | 0.25.0 | Decompression |
+| PowerShell `Get-AuthenticodeSignature` | Windows built-in | Signature check |
+| 7-Zip | 16.02 (7za) | Installer extraction ([`tools/update_sample.py`](../../tools/update_sample.py)) |
+| OpenSSL | 3.x | Certificate parsing |
+
+## Phase 1 — Triage and capability mapping
+
+**1. Format.** `file` and pefile: PE32+ DLL, x86-64, six sections with standard names, `.pdata` intact, no section both writable and executable. This indicated an unpacked MSVC build, so the analysis went straight to static work without an unpacking step.
+
+**2. Exports.** Six exports: `Attach`, `Execute`, `GetClients`, `Initialize`, `SetSetting`, `Version`. The names describe an injector/executor interface driven by a separate UI.
+
+**3. Imports.** Grouped by DLL to map capabilities before reading code: libcurl/OpenSSL (HTTPS client), WS2_32 (sockets), process and memory APIs (cross-process access), USER32 window APIs (window discovery and manipulation), named-pipe APIs (IPC), `GetCurrentHwProfileW` (hardware identifier). Imports show what the program *can* do, not what it does; each was later tied to strings or code where possible.
+
+**4. Strings.** ASCII (`[\x20-\x7e]{4,}`, 10,366 strings) and UTF-16 extraction, filtered by keyword. Because the binary is not obfuscated and logs with fmt-style `{}` placeholders, searching for `[{}` and `{}]:` recovered component names (`RBXClient`, `XenoServer`, `::Loadstring`, `::PlayerRemoving`, `::UnlockModule`, …) and most of the attach sequence. UTF-16 strings contained nothing of interest.
+
+**5. Resources.** Besides the manifest, two resources of custom type `8194` (IDs `8192`, `8196`) with the same first five bytes and near-maximal entropy (≈7.99 bits/byte). Entropy alone cannot separate compression from encryption, since zstd output is also close to 8 bits/byte. What pointed to encryption was that neither blob began with the zstd magic even though the string `"Could not decompress a Xeno resource"` showed zstd was involved.
+
+**6. Signature.** `Get-AuthenticodeSignature` returned `UnknownError`, which was first read as "unsigned". An unsigned file returns `NotSigned`. Parsing the 8,016-byte certificate table later showed a signature from a self-signed `CN=Rizve A` certificate with a Sectigo timestamp; recomputing the Authenticode SHA-256 digest matched the signed value (F-04). Windows reports `UnknownError` because the chain does not reach a trusted root.
+
+**7. Targeted disassembly.** capstone at each export RVA, resolving RIP-relative operands to strings. This established calling conventions and object-field offsets for `Execute` and `GetClients`, the `Version` small-string pattern, the `Attach` thunk, and the `ntdll` resolution in `Initialize`.
+
+**8. Timestamp.** The PE timestamp (2026-10-20) was first misread as forged. It precedes the analysis date and is a plausible build date.
+
+## Phase 2 — Breaking the resource encryption
+
+**1. Differential test.** XORing the two blobs against each other gave zeros for the shared prefix and high entropy afterwards. Identical ciphertext over an identical plaintext prefix (both are zstd frames) is what a fixed keystream produces; a block cipher in CBC mode with distinct IVs would not.
+
+**2. Known plaintext.** Assuming the plaintext starts with the zstd magic `28 B5 2F FD`, XOR with the ciphertext prefix `16 48 7F B8` gives keystream bytes `3E FD 50 45`.
+
+**3. Cross-references from strings.** For each resource error string, `.text` was scanned for `lea reg, [rip+disp]` (REX.W `8D`, ModRM mod=00 r/m=101) whose target is the string's RVA. This located the log sites (`0x190A97`, `0x18CD14`, `0x18CDC1`).
+
+**4. The cipher.** Reading back from the log sites found the resource load sequence at `0x18CD06` and the transform at `0x1906B0`: a byte loop indexing a key by `i mod len`, with the key held as a begin/end pointer pair in `.data` (`0x252D18`/`0x252D20`).
+
+**5. The key.** Those `.data` slots are zero in the file, so they are filled at runtime. A full-`.text` scan for stores to those addresses found one writer, a CRT dynamic initializer at `0x3B10` that allocates 32 bytes and writes eight immediate dwords. The first four bytes matched the known-plaintext result.
+
+**6. Decryption.** XOR, check the magic, zstd-decompress ([`tools/decrypt_resources.py`](../../tools/decrypt_resources.py)). Both resources decompressed to text: `CLIENT.LUA` (145,004 B) and Roblox's en-us table (336,884 B). Successful decompression of both is the decisive confirmation of the key.
+
+**7. Client analysis.** `CLIENT.LUA` is unobfuscated Luau. It provided the attach target check, the container layout, the protocol, the execution loops, the remote channels and the service deny-list. Its line numbers are indexed in [`payloads/README.md`](../../payloads/README.md).
+
+**Lesson.** For an unobfuscated binary, the fastest path to a cipher is through its error messages: cross-reference them and read backwards.
+
+## Phase 3 — Version comparison
+
+[`tools/update_sample.py`](../../tools/update_sample.py) extracts `Xeno.dll` from each installer; [`tools/compare_samples.py`](../../tools/compare_samples.py) diffs exports, imports, URLs, environment variables, resources, filtered strings and section sizes between two builds. Comparing v1.3.40 with v1.3.65 dated the attach rework, the Bytecode Patch Watcher and the `dwmapi.dll` import, and showed the resource key did not change.
+
+## Phase 4 — Review and correction (November 2026)
+
+A full review of the repository against the client source and the generated reports found claims that went further than the evidence, several technical errors, and a bug in `compare_samples.py` that limited the function-level import diff to one DLL. Corrections are listed at the end of [`FINDINGS.md`](FINDINGS.md). Each finding now carries a confidence level and an evidence reference, the tools gained a test suite (`tests/`) built on synthetic DLLs, and the redistributed payloads were replaced by hashes and a line index.
+
+## Phase 5 — Verification against the sample (November 2026)
+
+The current public installer was extracted with 7-Zip (NSIS layer, then the embedded `app-64.7z`), and its `Xeno.dll` matched the analyzed build's SHA-256. On that copy: every disassembly excerpt in [`ARCHITECTURE.md`](ARCHITECTURE.md) was re-checked at its address with capstone; imports and strings behind the unverified findings were checked (F-36, F-86, F-98 updated); the signature was parsed and its digest recomputed (F-04); both resources decrypted to the hashes in [`payloads/README.md`](../../payloads/README.md); [`SAMPLE_REPORT.md`](../../reports/SAMPLE_REPORT.md) was regenerated and the detector and YARA rules were run. [`tools/update_sample.py`](../../tools/update_sample.py) was also run end to end on the installer.
+
+## Reproducing
+
+With a legitimately obtained v1.3.65 installer in `app/`:
+
+```bash
+python tools/update_sample.py app/Xeno-v1.3.65.exe      # → sample/TEST.dll, SAMPLE_REPORT.md
+python tools/decrypt_resources.py sample/TEST.dll payloads/
+sha256sum payloads/xeno_resource_*.bin                  # compare with payloads/README.md
+```
+
+Disassembly listings in [`ARCHITECTURE.md`](ARCHITECTURE.md) can be checked at the stated RVAs in any disassembler.
+
+```
+
+`payloads/README.md`:
+
+```md
+# Recovered payloads
+
+Xeno v1.3.65 embeds two encrypted resources (type `8194`, IDs `8192` and `8196`). Both decrypt with the repeating 32-byte XOR key and decompress with zstd (see [`docs/research/ARCHITECTURE.md`](../docs/research/ARCHITECTURE.md) §6). The decrypted files are **not redistributed** in this repository:
+
+- `8192` is Xeno's working in-game client. Publishing it in full would amount to distributing an executor component, which Roblox's HackerOne policy prohibits and which adds nothing a reviewer cannot reproduce from a legitimately obtained sample.
+- `8196` is Roblox's own en-us locale table. It is third-party content with no research value beyond its hash.
+
+Earlier revisions of this repository (up to commit `0e2c4a1`) contained both files. They remain in git history.
+
+## Reproducing
+
+```bash
+python tools/decrypt_resources.py sample/TEST.dll payloads/
+```
+
+This writes `xeno_resource_8192.bin` and `xeno_resource_8196.bin`. The `.gitignore` excludes them. Compare against the hashes below to confirm you have the same build.
+
+| Resource | Encrypted size | Decrypted size | Lines | SHA-256 of decrypted file |
+|---|---|---|---|---|
+| `8194/8192` (CLIENT.LUA) | 27,985 | 145,004 | 4,874 | `5fc6c57bd7f770f5a0da214b81b0594b26a921a759eb64f76b33dc12fadca3a6` |
+| `8194/8196` (en-us table) | 62,613 | 336,884 | 1 | `14c9b23e99fafb330e271c283e9c498dbdc0c9a8dd1bf88c34211e190c7ba001` |
+
+## Line index for `CLIENT.LUA` (v1.3.65)
+
+The documentation cites these line numbers as evidence. Each row describes the code briefly; read the file you decrypted yourself for full context.
+
+| Lines | Content | Cited for |
+|---|---|---|
+| 1–12 | Header: `v1.3.65 CLIENT.LUA -- POST OPEN SOURCE`, maintainer and credits | Identification |
+| 14 | Author note that some advertised functions are non-functional | Environment completeness |
+| 16 | `local XENO_PID = "%XENO_CLIENT_PID%"` | Loader templating |
+| 28–44 | `CoreGui` folder named after the PID, `Pointer` and `Loadstring` subfolders, `Message` named `DO NOT DELETE: BELONGS TO XENO` | In-game artifacts |
+| 59 | `shared.__Xeno = Xeno` | In-game artifacts |
+| 61–65 | `Urls` table: `version.txt`, `code.lua`, `http://localhost:%XENO_SERVER_PORT%` | Remote channels, control plane |
+| 122 | `HttpService:RequestInternal(options):Start(...)`: the transport for all calls to the localhost server | Control plane (G-2) |
+| 137–175 | `RServer`: `POST /f?e=<op>` with JSON `{c, p}`; custom endpoints send raw `text/plain`; a missing status is treated as 410 | Protocol |
+| 193–227 | `XFS` opcode table, 0–21, plus client-only `WriteFile = -1` | Protocol |
+| 309 | `RawHttpGet` | Remote channels |
+| 396 | `if xRenv.script.Name == "en-us" then` | Attach target |
+| 420–435 | `RServer({XFS.Activate, ''}, true)`; comment says it returns the HWID; random GUID fallback | HWID |
+| 441–549 | `BlockedServiceFuncs`: services and methods Xeno denies to user scripts | Security significance |
+| 575–577 | `GetDeviceAccessToken`, `GetDeviceIntegrityToken(Yield)` replaced with `Blocked` | Security significance |
+| 1643 | Environment wrapper variant used for module identity checks | Execution wrapper |
+| 1994–2080 | `Xeno.loadstring`: module named `loadstring:<random>[chunkName]`, source posted to `/ls?c=<name>&p=<pid>`, then op 20 / `require` / op 21 polling (2038–2040) with a 3 s timeout | Execution path B |
+| 2157–2165 | Proxied request headers: `user-agent: Xeno/<version>`, `exploit-guid` and `xeno-fingerprint` (HWID), `roblox-place-id`, `roblox-game-id`, `roblox-session-id` | Protocol, identifier leakage |
+| 2168–2169 | Requests to port 3110 refused | Protocol |
+| 2174 | `/rq?c=` HTTP proxy | Protocol |
+| 2839–2847 | `queue_on_teleport` posts to `/qt?p=` | Teleport queue |
+| 2933 | `saveinstance` fetched from `luau/SynSaveInstance` on GitHub | Remote content |
+| 3503–3516 | `getthreadidentity` returns a stored number (default 3); `setthreadidentity` only updates that number | Environment completeness |
+| 4766 | Commented-out call to `XFS.CBlockFunctions`, an opcode absent from the table | Version drift |
+| 4774–4802 | Teleport-queue replay and autoexec blocks, both commented out; they reference `XFS.GetQueueOnTeleport` and `XFS.GetAutoExecuteContents`, which are not in the table | Disabled features |
+| 4813–4824 | Fetches `code.lua`; if longer than 3 bytes, runs it via `Xeno.loadstring(..., "XenoNotification")` with the Xeno environment | Remote code-push channel |
+| 4826–4872 | `ExecutionListener`: local `require()` loop on a random-named ModuleScript; sends only op 21, after a function is returned | Execution path A |
+
+```
+
+`reports/COMPARE_REPORT.md`:
+
+```md
+# COMPARE_REPORT.md — AUTO-GENERATED
+
+> Regenerated by `tools/compare_samples.py`. Do not edit.
+> Generated: 2026-11-09 23:51:16 UTC
+
+| | OLD | NEW |
+|---|---|---|
+| File | `TEST-v1.3.40.dll` | `TEST.dll` |
+| Size | 2,034,752 | 2,362,704 |
+| SHA-256 | `37e78bb4944ed703...` | `50318bc8d60477a2...` |
+| PE timestamp | 2026-05-03 06:15:55 | 2026-10-20 20:43:17 |
+| Version strings | v1.3.40 | v1.3.65 |
+| Detector score | 260 (XENO (heuristic match)) | 365 (XENO (heuristic match)) |
+| XOR key (unchanged→unchanged) | `3EFD5045ED61BFCA57EFA192D0076696...` | `3EFD5045ED61BFCA57EFA192D0076696...` |
+
+## Exports
+
+No changes.
+
+## Import DLLs
+
+**Added (1):**
+
++ `dwmapi.dll`
+
+## Imported functions
+
+No changes.
+
+## URLs
+
+No changes.
+
+## Environment variables
+
+No changes.
+
+## Encrypted resources
+
+| Resource | OLD size | NEW size | Δ |
+|---|---|---|---|
+| `8194/8192/1033` | 27,793 | 27,985 | +192 |
+| `8194/8196/1033` | 60,487 | 62,613 | +2,126 |
+
+| Resource | OLD payload | NEW payload |
+|---|---|---|
+| `8194/8192/1033` | 143,847 | 145,004 |
+| `8194/8196/1033` | 327,903 | 336,884 |
+
+## Interesting strings (filtered)
+
+**Added (59):**
+
++ `5httpu`
++ `9http://crl.sectigo.com/SectigoPublicTimeStampingCAR41.crl0z`
++ `9http://crt.sectigo.com/SectigoPublicTimeStampingCAR41.crt0#`
++ `A class named '%s' has already been declared in this module`
++ `Attach is taking longer than expected... (I hate you {})`
++ `Bytecode Patch Watcher thread: {:#x}`
++ `Cannot delete client`
++ `Client was closed while waiting to enter a game`
++ `Could not find RobloxGui->Modules`
++ `Could not find RobloxGui->Modules. Going back to in-game check...`
++ `Could not find en-us locale module. Going back to in-game check...`
++ `Could not find en-us locale translation module. Going back to in-game check...`
++ `ERROR_headerVersion_wrong`
++ `Error reading HTTP request line`
++ `Failed to initialize server`
++ `HTTP/1.0H`
++ `HTTP/1.1H`
++ `Invalid HTTP method, need GET, got `
++ `Invalid HTTP version, need HTTP/1.1, got: `
++ `Invalid Sec-WebSocket-Version, need 13, got `
++ `Invalid inp data for version: {}`
++ `LuauBytecodeCostModel`
++ `LuauStoreConstKeywordBegin`
++ `Missing Sec-WebSocket-Key value`
++ `Missing Sec-WebSocket-Version value`
++ `Missing call to setOnConnectionCallback or setOnClientMessageCallback.`
++ `ModuleScH`
++ `ModuleScI`
++ `Offset Code Frequencies : `
++ `Offsets for version "{}" points to "{}", but it is missing or invalid.`
++ `Offsets for version "{}" points to version "{}" with same offsets`
++ `Server: `
++ `SocketServer::stop: Cannot wake up from select`
++ `Still did not receive the success ping from client. Treating this as failed.`
++ `WebSocketServer Application developer error: No server callback is registerered.`
++ `WebSocketServer Application developer error: Server callback improperly registered.`
++ `WebSocketServer::handleConnection() HTTP status: `
++ `[{} ({})][::GetBytecode]: GetInstanceFromObjectValue returned 0 for container: '{}'`
++ `[{} ({})][::HookInstance]: GetInstanceFromObjectValue returned 0 for one or both containers: '{}', '{}'`
++ `[{} ({})][::LockModule]: GetInstanceFromObjectValue returned 0 for container: '{}'`
++ `[{} ({})][::PlayerRemoving]: Client was closed while reattaching`
++ `[{} ({})][::PlayerRemoving]: Failed to reattach: CoreGui not found (Timeout)`
++ `[{} ({})][::PlayerRemoving]: Failed to reattach: No DataModel (Timeout)`
++ `[{} ({})][::PlayerRemoving]: Player leaving ping recieved. We have to reattach.`
++ `[{} ({})][::RestoreBytecode]: GetInstanceFromObjectValue returned 0 for container: '{}'`
++ `[{} ({})][::SetBytecode]: GetInstanceFromObjectValue returned 0 for container: '{}'`
++ `[{} ({})][::SetScriptable]: GetInstanceFromObjectValue returned 0 for container: '{}'`
++ `[{} ({})][::UnlockModule]: GetInstanceFromObjectValue returned 0 for container: '{}'`
++ `[{}]: Could not find a CoreModule (Timeout)`
++ `[{}]: Could not find a CoreModule (Waiting)`
++ `alScriptH`
++ `application/x-javascript`
++ `hModule is invalid`
++ `https://sectigo.com/CPS0J`
++ `leScriptH`
++ `leScriptI3`
++ `not enough space to write RepOffsets `
++ `sec-websocket-key`
++ `sec-websocket-version`
+
+**Removed (24):**
+
+- `8httpu`
+- `9http://crl.sectigo.com/SectigoPublicTimeStampingCAR36.crl0z`
+- `9http://crt.sectigo.com/SectigoPublicTimeStampingCAR36.crt0#`
+- `Attach is taking longer than expected (Using RefreshRBXWindowV2)... (I hate you {})`
+- `AttachThreadInput`
+- `Attaching through the home page.`
+- `Bytecode has been successfully set in menu.`
+- `Bytecode was already set in menu. (cached)`
+- `Could not find CoreGuiModules`
+- `Failed to allocate to Client`
+- `HTTP/1.0`
+- `HTTP/1.0H9`
+- `HTTP/1.1H9`
+- `HTTP/1.1L9`
+- `Invalid ecs pattern data for version: {}`
+- `LocalScript`
+- `Script`
+- `[RefreshQueueOnTeleport:{}]: DataModel address is invalid`
+- `[RefreshQueueOnTeleport]: Could not find CoreGuiModules`
+- `[RefreshQueueOnTeleport]: Could not find EventConnection`
+- `[{} ({})][::AddScriptQueues]: Failed to add a script to queue: could not allocate for bytecode string`
+- `[{} ({})][::RefreshQueueOnTeleport]: EventConnection: {:#x}, SharedString: {:#x}`
+- `function Xeno::RefreshRBXWindowV2 failed because Roblox window is unresponsive. Please make sure Roblox is not frozen`
+- `https://sectigo.com/CPS0`
+
+## Section layout
+
+**Added (6):**
+
++ `section `.data` vsize 255,268 -> 258,340 (+3,072)`
++ `section `.pdata` vsize 32,472 -> 52,884 (+20,412)`
++ `section `.rdata` vsize 401,722 -> 430,084 (+28,362)`
++ `section `.reloc` vsize 5,888 -> 5,612 (-276)`
++ `section `.rsrc` vsize 88,880 -> 91,200 (+2,320)`
++ `section `.text` vsize 1,467,921 -> 1,741,963 (+274,042)`
+
+```
+
+`reports/SAMPLE_REPORT.md`:
+
+```md
+# SAMPLE_REPORT.md — AUTO-GENERATED
+
+> **Do not edit.** Regenerated by `tools/sample_report.py` on every sample update.
+> Generated: 2026-11-10 17:27:48 UTC
+
+## File identity
+
+| Attribute | Value |
+|---|---|
+| Path | `sample/TEST.dll` |
+| Size | 2,362,704 bytes |
+| SHA-256 | `50318bc8d60477a2402440c4989611ba9640cf6a709b5ec9d4c44e3860e99049` |
+| Machine | 0x8664 (x86-64) |
+| PE timestamp | 2026-10-20 20:43:17 UTC |
+| Subsystem | 3 |
+| Certificate table | present (8,016 bytes) |
+| ImageBase | 0x180000000 |
+| EntryPoint | 0x199a60 |
+
+## Sections
+
+| Name | VA | VSize | Raw | Characteristics |
+|---|---|---|---|---|
+| `.text` | 0x1000 | 0x1a948b | 0x1a9600 | 0x60000020 |
+| `.rdata` | 0x1ab000 | 0x69004 | 0x69200 | 0x40000040 |
+| `.data` | 0x215000 | 0x3f124 | 0x7600 | 0xc0000040 |
+| `.pdata` | 0x255000 | 0xce94 | 0xd000 | 0x40000040 |
+| `.rsrc` | 0x262000 | 0x16440 | 0x16600 | 0x40000040 |
+| `.reloc` | 0x279000 | 0x15ec | 0x1600 | 0x42000040 |
+
+## Exports
+
+| Name | RVA |
+|---|---|
+| `Attach` | 0x18d3d0 |
+| `Execute` | 0x18d400 |
+| `GetClients` | 0x18d610 |
+| `Initialize` | 0x18ca80 |
+| `SetSetting` | 0x18d950 |
+| `Version` | 0x18d3e0 |
+
+## Version strings found
+
+- `v1.3.65`
+
+## Imports (summary)
+
+| DLL | # functions |
+|---|---|
+| `ADVAPI32.dll` | 6 |
+| `CRYPT32.dll` | 4 |
+| `KERNEL32.dll` | 87 |
+| `MSVCP140.dll` | 140 |
+| `SHELL32.dll` | 1 |
+| `USER32.dll` | 29 |
+| `VCRUNTIME140.dll` | 18 |
+| `VCRUNTIME140_1.dll` | 1 |
+| `WS2_32.dll` | 30 |
+| `api-ms-win-crt-convert-l1-1-0.dll` | 5 |
+| `api-ms-win-crt-filesystem-l1-1-0.dll` | 6 |
+| `api-ms-win-crt-heap-l1-1-0.dll` | 4 |
+| `api-ms-win-crt-locale-l1-1-0.dll` | 2 |
+| `api-ms-win-crt-math-l1-1-0.dll` | 26 |
+| `api-ms-win-crt-runtime-l1-1-0.dll` | 17 |
+| `api-ms-win-crt-stdio-l1-1-0.dll` | 18 |
+| `api-ms-win-crt-string-l1-1-0.dll` | 13 |
+| `api-ms-win-crt-time-l1-1-0.dll` | 5 |
+| `dwmapi.dll` | 1 |
+| `libcrypto-3-x64.dll` | 52 |
+| `libcurl.dll` | 12 |
+| `libssl-3-x64.dll` | 29 |
+
+## Encrypted resources
+
+| Resource | Size | Magic | Entropy |
+|---|---|---|---|
+| `8194/8192/1033` | 27,985 | `16487fb8` | 7.994 |
+| `8194/8196/1033` | 62,613 | `16487fb8` | 7.997 |
+
+XOR key: **unchanged** (`3EFD5045ED61BFCA57EFA192D0076696FDC5F72112BD49367A3FB319A92AF5BB`)
+
+| Resource | Decrypted size | Payload head |
+|---|---|---|
+| `8194/8192/1033` | 145,004 | `--[[` |
+| `8194/8196/1033` | 336,884 | `local a="Teleport failed due to an unexpected error. Please try teleporting agai` |
+
+## Network / config indicators
+
+- `https://pastebin.com/raw/A7n0vJtR`
+- `https://x3no.pages.dev/ep.zst.enc`
+- `https://xeno.now`
+- `%XENO_CLIENT_PID%`
+- `%XENO_SERVER_PORT%`
+- `%XENO_VERSION%`
+
+## Detector verdict
+
+```
+sample/TEST.dll
+  score=370  verdict=xeno (heuristic)
+    + credit_rizve
+    + pdb_path
+    + attach_module
+    + xeno_resource
+    + xeno_server
+    + offsets_endpoint
+    + env_vars
+    + xor_key_init
+    + luau_fflags
+    + zstd_errors
+    + signer_rizve_cert
+    + export_contract_full
+    + resource_8194_decrypts(id=8192)
+    + resource_8194_decrypts(id=8196)
+```
+
+```
+
+`tests/test_tools.py`:
+
+```py
+"""Tests for the analysis and detection tools.
+
+Run from the repository root:  python -m unittest discover -s tests -v
+
+The PE tests build small, harmless DLLs at test time (clang + lld-link + llvm-rc). They mimic
+Xeno's structure (export names, an XOR+zstd type-8194 resource) without containing any Xeno
+code. If the toolchain is missing, those tests are skipped rather than failed.
+"""
+import os
+import shutil
+import subprocess
+import sys
+import tempfile
+import unittest
+
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.join(ROOT, "tools"))
+sys.path.insert(0, os.path.join(ROOT, "detection"))
+
+import zstandard  # noqa: E402
+
+import compare_samples  # noqa: E402
+import decrypt_resources  # noqa: E402
+import xeno_detector  # noqa: E402
+
+try:
+    import yara
+except ImportError:
+    yara = None
+
+KEY = xeno_detector.XOR_KEY
+EXPORTS = ["Attach", "Execute", "GetClients", "Initialize", "SetSetting", "Version"]
+TOOLCHAIN = all(shutil.which(t) for t in ("clang", "lld-link", "llvm-rc"))
+
+
+def encrypt(payload, key=KEY):
+    frame = zstandard.ZstdCompressor().compress(payload)
+    return bytes(b ^ key[i % len(key)] for i, b in enumerate(frame))
+
+
+def build_dll(workdir, name, exports, resource=None):
+    """Build a minimal x64 DLL with the given exports and an optional type-8194 resource."""
+    src = os.path.join(workdir, f"{name}.c")
+    with open(src, "w") as f:
+        for e in exports:
+            f.write(f"__declspec(dllexport) int {e}(void) {{ return 0; }}\n")
+        f.write("int unused_symbol(void) { return 0; }\n")
+    obj = os.path.join(workdir, f"{name}.obj")
+    subprocess.run(["clang", "--target=x86_64-pc-windows-msvc", "-c", src, "-o", obj], check=True)
+    inputs = [obj]
+    if resource is not None:
+        blob = os.path.join(workdir, f"{name}.bin")
+        with open(blob, "wb") as f:
+            f.write(resource)
+        rc = os.path.join(workdir, f"{name}.rc")
+        with open(rc, "w") as f:
+            f.write(f'8192 8194 "{os.path.basename(blob)}"\n')
+        res = os.path.join(workdir, f"{name}.res")
+        subprocess.run(["llvm-rc", "/fo", res, rc], check=True, cwd=workdir)
+        inputs.append(res)
+    out = os.path.join(workdir, f"{name}.dll")
+    subprocess.run(["lld-link", "/dll", "/noentry", "/nodefaultlib", f"/out:{out}", *inputs],
+                   check=True, capture_output=True)
+    return out
+
+
+class ResourceCryptoTests(unittest.TestCase):
+    def test_round_trip(self):
+        payload = b"print('benign')\n" * 100
+        self.assertEqual(decrypt_resources.decrypt_blob(encrypt(payload)), payload)
+
+    def test_wrong_key_returns_none(self):
+        wrong = bytes(32)
+        self.assertIsNone(decrypt_resources.decrypt_blob(encrypt(b"x" * 64, wrong)))
+
+    def test_resource_decrypts_prefix_check(self):
+        self.assertTrue(xeno_detector.resource_decrypts(encrypt(b"abc")))
+        self.assertFalse(xeno_detector.resource_decrypts(b"\x00" * 16))
+        self.assertFalse(xeno_detector.resource_decrypts(b"\x16\x48"))
+
+
+class CertificateTableTests(unittest.TestCase):
+    def test_unsigned_pe_has_empty_table(self):
+        class Entry:
+            VirtualAddress = 0
+            Size = 0
+
+        class Header:
+            DATA_DIRECTORY = [Entry()] * 16
+
+        class FakePE:
+            OPTIONAL_HEADER = Header()
+
+        self.assertEqual(xeno_detector.certificate_table(FakePE(), b"MZ" + b"\0" * 64), b"")
+
+
+class DetectorTextTests(unittest.TestCase):
+    def scan_bytes(self, data):
+        with tempfile.NamedTemporaryFile(delete=False) as f:
+            f.write(data)
+        try:
+            return xeno_detector.scan_file(f.name)
+        finally:
+            os.unlink(f.name)
+
+    def test_quoted_indicators_are_not_a_dll_verdict(self):
+        text = b"Report: the DLL contains 'Xeno is only maintained by Rizve' and localhost:3110"
+        score, verdict, hits = self.scan_bytes(text)
+        self.assertEqual(verdict, "xeno strings (non-PE)")
+        self.assertIn("credit_rizve", hits)
+
+    def test_plain_text_is_no_match(self):
+        self.assertEqual(self.scan_bytes(b"hello world")[1], "no match")
+
+    def test_repository_files_never_get_a_pe_verdict(self):
+        local_only = tuple(os.path.join(ROOT, d) + os.sep for d in ("sample", "app"))
+        for path in xeno_detector.iter_paths(ROOT):
+            if path.startswith(local_only) or "__pycache__" in path:
+                continue
+            verdict = xeno_detector.scan_file(path)[1]
+            self.assertIn(verdict, ("no match", "xeno strings (non-PE)"), path)
+
+
+class CompareTests(unittest.TestCase):
+    def test_import_diff_covers_every_dll(self):
+        old = {"A.dll": ["f1"], "B.dll": ["g1", "g2"], "C.dll": ["h1"]}
+        new = {"A.dll": ["f1"], "B.dll": ["g1", "g3"], "D.dll": ["k1"]}
+        added, removed = compare_samples.diff_imports(old, new)
+        self.assertEqual(added, ["B.dll!g3", "D.dll!k1"])
+        self.assertEqual(removed, ["B.dll!g2", "C.dll!h1"])
+
+
+@unittest.skipUnless(TOOLCHAIN, "clang, lld-link and llvm-rc are required to build test DLLs")
+class DetectorPETests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.tmp = tempfile.mkdtemp(prefix="xenodllre_test_")
+        cls.structural = build_dll(cls.tmp, "structural", EXPORTS, encrypt(b"benign\n" * 50))
+        cls.exports_only = build_dll(cls.tmp, "exports_only", EXPORTS)
+        cls.wrong_key = build_dll(cls.tmp, "wrong_key", EXPORTS, encrypt(b"benign\n" * 50, bytes(32)))
+        cls.benign = build_dll(cls.tmp, "benign", ["DoWork"])
+
+    @classmethod
+    def tearDownClass(cls):
+        shutil.rmtree(cls.tmp, ignore_errors=True)
+
+    def test_structural_match(self):
+        score, verdict, hits = xeno_detector.scan_file(self.structural)
+        self.assertEqual(verdict, "xeno (heuristic)")
+        self.assertIn("export_contract_full", hits)
+        self.assertIn("resource_8194_decrypts(id=8192)", hits)
+
+    def test_exports_alone_stay_below_family_threshold(self):
+        self.assertEqual(xeno_detector.scan_file(self.exports_only)[1], "no match")
+
+    def test_rotated_key_build_is_family_not_xeno(self):
+        score, verdict, hits = xeno_detector.scan_file(self.wrong_key)
+        self.assertIn("resource_8194(id=8192)", hits)
+        self.assertEqual(verdict, "executor-family (suspicious)")
+
+    def test_benign_dll(self):
+        self.assertEqual(xeno_detector.scan_file(self.benign)[:2], (0, "no match"))
+
+    def test_decryptor_extracts_fixture(self):
+        import pefile
+        blobs = decrypt_resources.get_resources(pefile.PE(self.structural))
+        self.assertEqual(decrypt_resources.decrypt_blob(blobs["8192"]), b"benign\n" * 50)
+
+    @unittest.skipIf(yara is None, "yara-python not installed")
+    def test_yara_rules(self):
+        rules = yara.compile(os.path.join(ROOT, "detection", "xeno_executor.yar"))
+        fired = lambda p: sorted(m.rule for m in rules.match(p))  # noqa: E731
+        self.assertEqual(fired(self.structural), ["Executor_API_Generic", "Xeno_EncryptedResource"])
+        self.assertEqual(fired(self.wrong_key), ["Executor_API_Generic"])
+        self.assertEqual(fired(self.benign), [])
+
+
+if __name__ == "__main__":
+    unittest.main()
+
+```
+
+`tools/compare_samples.py`:
+
+```py
+#!/usr/bin/env python3
+"""compare_samples.py
+Diffs two Xeno-family DLLs and writes a markdown change report.
+
+Usage:  python tools/compare_samples.py <old.dll> <new.dll> [-o COMPARE_REPORT.md]
+
+Typical use after `update_sample.py` (which leaves timestamped .bak files):
+    python tools/compare_samples.py sample/TEST.dll.<timestamp>.bak sample/TEST.dll
+"""
+
+import argparse
+import datetime
+import os
+import re
+import sys
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from sample_report import analyze  # noqa: E402
+
+WORKSPACE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+# strings matching these are "interesting" for the string-level diff
+INTERESTING = re.compile(
+    r"xeno|attach|offset|module|loadstring|bytecode|http|localhost|pipe|"
+    r"hook|script|client|server|teleport|autoexec|cache|hwid|key|version", re.I)
+
+
+def diff_sets(old, new):
+    old_s, new_s = set(old), set(new)
+    return sorted(new_s - old_s), sorted(old_s - new_s)
+
+
+def diff_imports(old, new):
+    """Function-level import diff across every DLL, including DLLs added or removed."""
+    added, removed = [], []
+    for dll in sorted(set(old) | set(new)):
+        a, r = diff_sets(old.get(dll, []), new.get(dll, []))
+        added += [f"{dll}!{x}" for x in a]
+        removed += [f"{dll}!{x}" for x in r]
+    return added, removed
+
+
+def section(title, added, removed, limit=60):
+    L = [f"## {title}", ""]
+    if not added and not removed:
+        L += ["No changes.", ""]
+        return L
+    if added:
+        L.append(f"**Added ({len(added)}):**")
+        L.append("")
+        L += [f"+ `{x}`" for x in added[:limit]]
+        if len(added) > limit:
+            L.append(f"+ ... and {len(added) - limit} more")
+        L.append("")
+    if removed:
+        L.append(f"**Removed ({len(removed)}):**")
+        L.append("")
+        L += [f"- `{x}`" for x in removed[:limit]]
+        if len(removed) > limit:
+            L.append(f"- ... and {len(removed) - limit} more")
+        L.append("")
+    return L
+
+
+def main():
+    ap = argparse.ArgumentParser(description="Diff two Xeno-family DLLs into a markdown report.")
+    ap.add_argument("old")
+    ap.add_argument("new")
+    ap.add_argument("-o", "--output", default=os.path.join(WORKSPACE, "reports", "COMPARE_REPORT.md"))
+    a = ap.parse_args()
+    out = a.output
+
+    print(f"analyzing OLD: {a.old}")
+    old = analyze(a.old)
+    print(f"analyzing NEW: {a.new}")
+    new = analyze(a.new)
+
+    L = []
+    add = L.append
+    add("# COMPARE_REPORT.md — AUTO-GENERATED")
+    add("")
+    add("> Regenerated by `tools/compare_samples.py`. Do not edit.")
+    add(f"> Generated: {datetime.datetime.now(datetime.UTC).strftime('%Y-%m-%d %H:%M:%S')} UTC")
+    add("")
+    add("| | OLD | NEW |")
+    add("|---|---|---|")
+    add(f"| File | `{os.path.basename(old['path'])}` | `{os.path.basename(new['path'])}` |")
+    add(f"| Size | {old['size']:,} | {new['size']:,} |")
+    add(f"| SHA-256 | `{old['sha256'][:16]}...` | `{new['sha256'][:16]}...` |")
+    add(f"| PE timestamp | {old['timestamp_str']} | {new['timestamp_str']} |")
+    add(f"| Version strings | {', '.join(old['versions']) or '?'} | {', '.join(new['versions']) or '?'} |")
+    add(f"| Detector score | {old['detector']['score']} ({old['detector']['verdict']}) "
+        f"| {new['detector']['score']} ({new['detector']['verdict']}) |")
+    k_old = old["xor_key"] or "—"
+    k_new = new["xor_key"] or "—"
+    changed = " **(KEY CHANGED)**" if k_old != k_new else ""
+    add(f"| XOR key ({old['xor_key_status']}→{new['xor_key_status']}) | `{k_old[:32]}...` "
+        f"| `{k_new[:32]}...`{changed} |")
+    add("")
+
+    if old["sha256"] == new["sha256"]:
+        add("**Files are identical (SHA-256 match) — no differences.**")
+        add("")
+    else:
+        L += section("Exports", *diff_sets(old["exports"], new["exports"]))
+
+        # imports: dll-level then function-level
+        dll_add, dll_rm = diff_sets(old["imports"], new["imports"])
+        L += section("Import DLLs", dll_add, dll_rm)
+        L += section("Imported functions", *diff_imports(old["imports"], new["imports"]))
+
+        L += section("URLs", *diff_sets(old["urls"], new["urls"]))
+        L += section("Environment variables", *diff_sets(old["env_vars"], new["env_vars"]))
+
+        # resources
+        add("## Encrypted resources")
+        add("")
+        res_names = sorted(set(old["resources"]) | set(new["resources"]))
+        if not res_names:
+            add("No type-8194 resources in either sample.")
+            add("")
+        else:
+            add("| Resource | OLD size | NEW size | Δ |")
+            add("|---|---|---|---|")
+            for r in res_names:
+                o, n = old["resources"].get(r), new["resources"].get(r)
+                os_ = f"{o['size']:,}" if o else "—"
+                ns = f"{n['size']:,}" if n else "—"
+                delta = ""
+                if o and n:
+                    dd = n["size"] - o["size"]
+                    delta = f"{dd:+,}"
+                add(f"| `{r}` | {os_} | {ns} | {delta} |")
+            add("")
+            add("| Resource | OLD payload | NEW payload |")
+            add("|---|---|---|")
+            for r in res_names:
+                o, n = old["payloads"].get(r), new["payloads"].get(r)
+                os_ = f"{o['size']:,}" if o and o["size"] else "?"
+                ns = f"{n['size']:,}" if n and n["size"] else "?"
+                add(f"| `{r}` | {os_} | {ns} |")
+            add("")
+
+        # string-level diff (interesting only)
+        oi = [s for s in old["strings"] if INTERESTING.search(s) and len(s) < 120]
+        ni = [s for s in new["strings"] if INTERESTING.search(s) and len(s) < 120]
+        L += section("Interesting strings (filtered)", *diff_sets(oi, ni))
+
+        # section sizes
+        sec_changes = []
+        o_sec = {s["name"]: s for s in old["sections"]}
+        n_sec = {s["name"]: s for s in new["sections"]}
+        for nm in sorted(set(o_sec) | set(n_sec)):
+            o, n = o_sec.get(nm), n_sec.get(nm)
+            if not o:
+                sec_changes.append(f"section `{nm}` added ({n['vsize']:,} bytes)")
+            elif not n:
+                sec_changes.append(f"section `{nm}` removed")
+            elif o["vsize"] != n["vsize"]:
+                sec_changes.append(
+                    f"section `{nm}` vsize {o['vsize']:,} -> {n['vsize']:,} "
+                    f"({n['vsize'] - o['vsize']:+,})")
+        L += section("Section layout", sec_changes, [])
+
+    open(out, "w", encoding="utf-8").write("\n".join(L))
+    print(f"[OK] comparison written -> {out}")
+
+
+if __name__ == "__main__":
+    main()
+
+```
+
+`tools/decrypt_resources.py`:
+
+```py
+#!/usr/bin/env python3
+"""Decryptor for Xeno embedded resources (PE resource type 8194).
+
+Pipeline recovered from the v1.3.65 DLL (.text:0x1906B0):
+    resource bytes --XOR(32-byte repeating key)--> zstd frame --zstd--> payload
+
+Key recovered from the CRT dynamic initializer at .text:0x3B10. Verified against v1.3.40 and
+v1.3.65; other builds may use a different key (sample_report.py attempts automatic recovery).
+
+Usage: python decrypt_resources.py <dll> [out_dir]
+"""
+import argparse
+import io
+import os
+import sys
+
+import pefile
+import zstandard as zstd
+
+KEY = bytes.fromhex(
+    "3EFD5045ED61BFCA57EFA192D0076696"
+    "FDC5F72112BD49367A3FB319A92AF5BB"
+)
+ZSTD_MAGIC = b"\x28\xb5\x2f\xfd"
+RESOURCE_TYPE = "8194"
+
+
+def xor(data, key=KEY):
+    return bytes(b ^ key[i % len(key)] for i, b in enumerate(data))
+
+
+def decrypt_blob(blob, key=KEY):
+    """Return the decompressed payload, or None if the key does not produce a zstd frame."""
+    dec = xor(blob, key)
+    if dec[:4] != ZSTD_MAGIC:
+        return None
+    return zstd.ZstdDecompressor().stream_reader(io.BytesIO(dec)).read()
+
+
+def get_resources(pe):
+    img = pe.get_memory_mapped_image()
+    blobs = {}
+
+    def walk(d, path=()):
+        for e in d.entries:
+            name = e.name.string.decode() if e.name else str(e.id)
+            p = path + (name,)
+            if hasattr(e, "directory"):
+                walk(e.directory, p)
+            elif p[0] == RESOURCE_TYPE:
+                off, sz = e.data.struct.OffsetToData, e.data.struct.Size
+                blobs[p[1]] = img[off:off + sz]
+
+    if hasattr(pe, "DIRECTORY_ENTRY_RESOURCE"):
+        walk(pe.DIRECTORY_ENTRY_RESOURCE)
+    return blobs
+
+
+def main():
+    ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    ap.add_argument("dll")
+    ap.add_argument("out_dir", nargs="?", default=".")
+    a = ap.parse_args()
+
+    blobs = get_resources(pefile.PE(a.dll))
+    if not blobs:
+        sys.exit(f"no type-{RESOURCE_TYPE} resources in {a.dll}")
+    os.makedirs(a.out_dir, exist_ok=True)
+    for name, blob in blobs.items():
+        out = decrypt_blob(blob)
+        if out is None:
+            print(f"resource {name}: no zstd magic after XOR - key differs in this build")
+            continue
+        path = os.path.join(a.out_dir, f"xeno_resource_{name}.bin")
+        with open(path, "wb") as f:
+            f.write(out)
+        print(f"resource {name}: {len(blob)} -> {len(out)} bytes -> {path}")
+
+
+if __name__ == "__main__":
+    main()
+
+```
+
+`tools/sample_report.py`:
+
+```py
+#!/usr/bin/env python3
+"""sample_report.py
+Analyzes a Xeno DLL (default: sample/TEST.dll) and (re)writes reports/SAMPLE_REPORT.md.
+The analysis is factored into analyze() so tools/compare_samples.py can reuse it.
+
+Usage:  python tools/sample_report.py [dll-path] [-o report-path]
+"""
+
+import argparse
+import datetime
+import hashlib
+import io
+import os
+import re
+import sys
+
+import pefile
+
+WORKSPACE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.join(WORKSPACE, "detection"))
+from xeno_detector import scan_file  # noqa: E402
+
+SAMPLE    = os.path.join(WORKSPACE, "sample", "TEST.dll")
+REPORT    = os.path.join(WORKSPACE, "reports", "SAMPLE_REPORT.md")
+
+KNOWN_KEY = bytes.fromhex(
+    "3EFD5045ED61BFCA57EFA192D0076696"
+    "FDC5F72112BD49367A3FB319A92AF5BB"
+)
+ZSTD_MAGIC = b"\x28\xb5\x2f\xfd"
+
+
+def sha256(path):
+    h = hashlib.sha256()
+    with open(path, "rb") as f:
+        for chunk in iter(lambda: f.read(1 << 20), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+
+def entropy(data):
+    from collections import Counter
+    import math
+    if not data:
+        return 0.0
+    c = Counter(data)
+    n = len(data)
+    return -sum(v / n * math.log2(v / n) for v in c.values())
+
+
+def display_path(path):
+    """Workspace-relative path for files in the repo, bare file name otherwise."""
+    rel = os.path.relpath(os.path.abspath(path), WORKSPACE)
+    return os.path.basename(path) if rel.startswith("..") else rel
+
+
+def get_resources(pe):
+    img = pe.get_memory_mapped_image()
+    blobs = {}
+    if not hasattr(pe, "DIRECTORY_ENTRY_RESOURCE"):
+        return blobs
+
+    def walk(d, path=()):
+        for e in d.entries:
+            name = e.name.string.decode() if e.name else str(e.id)
+            p = path + (name,)
+            if hasattr(e, "directory"):
+                walk(e.directory, p)
+            else:
+                off, sz = e.data.struct.OffsetToData, e.data.struct.Size
+                blobs["/".join(p)] = img[off:off + sz]
+    walk(pe.DIRECTORY_ENTRY_RESOURCE)
+    return blobs
+
+
+def recover_xor_key(text_bytes):
+    """Yield 32-byte key candidates from `mov dword [reg], imm32` x8 stores
+    (the CRT initializer pattern Xeno uses)."""
+    pat = re.compile(
+        rb"\xC7\x00(....)"
+        rb"\xC7\x40\x04(....)\xC7\x40\x08(....)\xC7\x40\x0C(....)"
+        rb"\xC7\x40\x10(....)\xC7\x40\x14(....)\xC7\x40\x18(....)\xC7\x40\x1C(....)",
+        re.DOTALL)
+    for m in pat.finditer(text_bytes):
+        yield b"".join(m.groups())
+
+
+def try_decrypt(blobs, key):
+    out = {}
+    for name, blob in blobs.items():
+        if not name.startswith("8194/"):
+            continue
+        dec = bytes(b ^ key[i % len(key)] for i, b in enumerate(blob))
+        out[name] = dec if dec[:4] == ZSTD_MAGIC else None
+    return out
+
+
+def payload_info(dec):
+    try:
+        import zstandard as zstd
+        raw = zstd.ZstdDecompressor().stream_reader(io.BytesIO(dec)).read()
+        first = raw.split(b"\n", 1)[0][:80].decode(errors="replace")
+        return len(raw), first
+    except Exception as e:
+        return None, f"decompress failed: {e}"
+
+
+def analyze(path):
+    """Full static profile of a Xeno-family DLL. Returns a plain dict."""
+    raw = open(path, "rb").read()
+    pe = pefile.PE(path)
+    now = datetime.datetime.now(datetime.UTC).timestamp()
+
+    data = {
+        "path": path,
+        "size": len(raw),
+        "sha256": sha256(path),
+        "machine": hex(pe.FILE_HEADER.Machine),
+        "timestamp": pe.FILE_HEADER.TimeDateStamp,
+        "timestamp_str": datetime.datetime.fromtimestamp(
+            pe.FILE_HEADER.TimeDateStamp, datetime.UTC).strftime("%Y-%m-%d %H:%M:%S"),
+        "timestamp_future": pe.FILE_HEADER.TimeDateStamp > now,
+        "subsystem": pe.OPTIONAL_HEADER.Subsystem,
+        "cert_table_size": pe.OPTIONAL_HEADER.DATA_DIRECTORY[
+            pefile.DIRECTORY_ENTRY["IMAGE_DIRECTORY_ENTRY_SECURITY"]].Size,
+        "imagebase": hex(pe.OPTIONAL_HEADER.ImageBase),
+        "entrypoint": hex(pe.OPTIONAL_HEADER.AddressOfEntryPoint),
+        "sections": [{
+            "name": s.Name.decode(errors="replace").rstrip("\x00"),
+            "va": s.VirtualAddress, "vsize": s.Misc_VirtualSize,
+            "raw": s.SizeOfRawData, "chars": s.Characteristics,
+        } for s in pe.sections],
+        "exports": {},
+        "imports": {},
+        "versions": [],
+        "urls": [],
+        "env_vars": [],
+        "resources": {},          # name -> {size, magic, entropy}
+        "xor_key": None,          # hex str, "UNCHANGED", or None
+        "xor_key_status": "none", # unchanged | rotated | failed | none
+        "payloads": {},           # name -> {size, head}
+        "detector": {},
+    }
+
+    if hasattr(pe, "DIRECTORY_ENTRY_EXPORT"):
+        for e in pe.DIRECTORY_ENTRY_EXPORT.symbols:
+            if e.name:
+                data["exports"][e.name.decode()] = hex(e.address)
+
+    for entry in getattr(pe, "DIRECTORY_ENTRY_IMPORT", []):
+        data["imports"][entry.dll.decode()] = sorted(
+            i.name.decode() for i in entry.imports if i.name)
+
+    from collections import Counter
+    vers = Counter(v.decode() for v in re.findall(rb"v\d+\.\d+\.\d+", raw))
+    data["versions"] = [v for v, _ in vers.most_common(5)]
+
+    strs = set(s.decode() for s in re.findall(rb"[\x20-\x7e]{6,}", raw))
+    data["urls"] = sorted(s for s in strs if re.match(r"https?://", s)
+                          and "sectigo" not in s and "usertrust" not in s)
+    data["env_vars"] = sorted(s for s in strs if re.match(r"%XENO_", s))
+    data["strings"] = strs  # used by compare_samples; trimmed there
+
+    blobs = get_resources(pe)
+    enc = {k: v for k, v in blobs.items() if k.startswith("8194/")}
+    for k, v in enc.items():
+        data["resources"][k] = {
+            "size": len(v), "magic": v[:4].hex(), "entropy": round(entropy(v), 3)}
+
+    if enc:
+        dec_map = try_decrypt(blobs, KNOWN_KEY)
+        if all(dec_map.get(k) for k in enc):
+            data["xor_key"] = KNOWN_KEY.hex().upper()
+            data["xor_key_status"] = "unchanged"
+        else:
+            text = pe.sections[0].get_data()
+            for cand in recover_xor_key(text):
+                dm = try_decrypt(blobs, cand)
+                if all(dm.get(k) for k in enc):
+                    dec_map = dm
+                    data["xor_key"] = cand.hex().upper()
+                    data["xor_key_status"] = "rotated"
+                    break
+            else:
+                data["xor_key_status"] = "failed"
+        if data["xor_key"]:
+            for k, dec in dec_map.items():
+                size, head = payload_info(dec)
+                data["payloads"][k] = {"size": size, "head": head}
+
+    score, verdict, hits = scan_file(path)
+    data["detector"] = {"score": score, "verdict": verdict, "hits": hits}
+    return data
+
+
+# ── rendering ───────────────────────────────────────────────────
+
+def render(d):
+    L = []
+    add = L.append
+    add("# SAMPLE_REPORT.md — AUTO-GENERATED")
+    add("")
+    add("> **Do not edit.** Regenerated by `tools/sample_report.py` on every sample update.")
+    add(f"> Generated: {datetime.datetime.now(datetime.UTC).strftime('%Y-%m-%d %H:%M:%S')} UTC")
+    add("")
+
+    forged = " **(later than report time)**" if d["timestamp_future"] else ""
+    add("## File identity")
+    add("")
+    add("| Attribute | Value |")
+    add("|---|---|")
+    add(f"| Path | `{display_path(d['path'])}` |")
+    add(f"| Size | {d['size']:,} bytes |")
+    add(f"| SHA-256 | `{d['sha256']}` |")
+    add(f"| Machine | {d['machine']}{' (x86-64)' if d['machine'] == '0x8664' else ''} |")
+    add(f"| PE timestamp | {d['timestamp_str']} UTC{forged} |")
+    add(f"| Subsystem | {d['subsystem']} |")
+    cert = (f"present ({d['cert_table_size']:,} bytes)" if d["cert_table_size"]
+            else "absent (no Authenticode signature)")
+    add(f"| Certificate table | {cert} |")
+    add(f"| ImageBase | {d['imagebase']} |")
+    add(f"| EntryPoint | {d['entrypoint']} |")
+    add("")
+
+    add("## Sections")
+    add("")
+    add("| Name | VA | VSize | Raw | Characteristics |")
+    add("|---|---|---|---|---|")
+    for s in d["sections"]:
+        add(f"| `{s['name']}` | {hex(s['va'])} | {hex(s['vsize'])} | "
+            f"{hex(s['raw'])} | {hex(s['chars'])} |")
+    add("")
+
+    add("## Exports")
+    add("")
+    if d["exports"]:
+        add("| Name | RVA |")
+        add("|---|---|")
+        for n, r in sorted(d["exports"].items()):
+            add(f"| `{n}` | {r} |")
+    else:
+        add("(none)")
+    add("")
+
+    if d["versions"]:
+        add("## Version strings found")
+        add("")
+        for v in d["versions"]:
+            add(f"- `{v}`")
+        add("")
+
+    add("## Imports (summary)")
+    add("")
+    add("| DLL | # functions |")
+    add("|---|---|")
+    for dll, names in sorted(d["imports"].items()):
+        add(f"| `{dll}` | {len(names)} |")
+    add("")
+
+    add("## Encrypted resources")
+    add("")
+    if not d["resources"]:
+        add("No type-8194 resources found (container format changed?).")
+        add("")
+    else:
+        add("| Resource | Size | Magic | Entropy |")
+        add("|---|---|---|---|")
+        for k, r in sorted(d["resources"].items()):
+            add(f"| `{k}` | {r['size']:,} | `{r['magic']}` | {r['entropy']:.3f} |")
+        add("")
+        status = d["xor_key_status"]
+        if status == "unchanged":
+            add(f"XOR key: **unchanged** (`{d['xor_key']}`)")
+        elif status == "rotated":
+            add(f"XOR key: **ROTATED - auto-recovered:** `{d['xor_key']}`")
+        else:
+            add("XOR key: **changed and not auto-recoverable** (manual recovery per "
+                "`docs/research/METHODOLOGY.md`, Phase 2).")
+        add("")
+        if d["payloads"]:
+            add("| Resource | Decrypted size | Payload head |")
+            add("|---|---|---|")
+            for k, p in sorted(d["payloads"].items()):
+                size = f"{p['size']:,}" if p["size"] else "?"
+                add(f"| `{k}` | {size} | `{p['head']}` |")
+            add("")
+
+    if d["urls"] or d["env_vars"]:
+        add("## Network / config indicators")
+        add("")
+        for u in d["urls"]:
+            add(f"- `{u}`")
+        for e in d["env_vars"]:
+            add(f"- `{e}`")
+        add("")
+
+    add("## Detector verdict")
+    add("")
+    add("```")
+    add(display_path(d['path']))
+    add(f"  score={d['detector']['score']}  verdict={d['detector']['verdict']}")
+    for h in d["detector"]["hits"]:
+        add(f"    + {h}")
+    add("```")
+    add("")
+    return "\n".join(L)
+
+
+def main():
+    ap = argparse.ArgumentParser(description="Write SAMPLE_REPORT.md for a Xeno DLL.")
+    ap.add_argument("dll", nargs="?", default=SAMPLE)
+    ap.add_argument("-o", "--output", default=REPORT)
+    a = ap.parse_args()
+    dll, out = a.dll, a.output
+    if not os.path.exists(dll):
+        sys.exit(f"ERROR: not found: {dll}")
+    d = analyze(dll)
+    open(out, "w", encoding="utf-8").write(render(d))
+    print(f"[OK] report written -> {out}")
+
+
+if __name__ == "__main__":
+    main()
+
+```
+
+`tools/update_sample.py`:
+
+```py
+#!/usr/bin/env python3
+"""update_sample.py
+Extracts Xeno.dll from the Xeno Electron NSIS installer and installs it
+as the workspace analysis sample at sample/TEST.dll (backing up the old one).
+
+Usage:
+    python tools/update_sample.py [path-to-installer.exe]
+
+If no installer path is given, the workspace root and sample/ are searched
+for a *.exe installer. After replacement the detector is run automatically
+to confirm the new sample is identified.
+
+Requires 7-Zip (auto-detected in common install locations, or set SEVEN_ZIP).
+"""
+
+import glob
+import os
+import shutil
+import subprocess
+import sys
+import tempfile
+import time
+
+WORKSPACE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+SAMPLE    = os.path.join(WORKSPACE, "sample", "TEST.dll")
+DETECTOR  = os.path.join(WORKSPACE, "detection", "xeno_detector.py")
+REPORTER  = os.path.join(WORKSPACE, "tools", "sample_report.py")
+
+SEVEN_ZIP_CANDIDATES = [
+    os.environ.get("SEVEN_ZIP", ""),
+    r"C:\Program Files\7-Zip\7z.exe",
+    r"C:\Program Files (x86)\7-Zip\7z.exe",
+    shutil.which("7z") or "",
+]
+
+
+def find_7z():
+    for c in SEVEN_ZIP_CANDIDATES:
+        if c and os.path.exists(c):
+            return c
+    sys.exit("ERROR: 7-Zip not found. Install it or set the SEVEN_ZIP env var.")
+
+
+def find_installer():
+    if len(sys.argv) > 1:
+        exe = os.path.abspath(sys.argv[1])
+        if not os.path.exists(exe):
+            sys.exit(f"ERROR: installer not found: {exe}")
+        return exe
+    candidates = [p for p in glob.glob(os.path.join(WORKSPACE, "*.exe"))
+                  + glob.glob(os.path.join(WORKSPACE, "sample", "*.exe"))]
+    if not candidates:
+        sys.exit("ERROR: no installer .exe found. Drop it in the workspace root "
+                 "or pass its path: python tools/update_sample.py <installer.exe>")
+    candidates.sort(key=os.path.getsize, reverse=True)
+    return candidates[0]
+
+
+def run_7z(args, cwd=None):
+    cmd = [find_7z()] + args
+    print(f"  Running: {' '.join(cmd)}")
+    result = subprocess.run(cmd, capture_output=True, text=True, cwd=cwd)
+    if result.returncode not in (0, 1):  # 7z returns 1 for warnings
+        print(f"  STDERR: {result.stderr[:500]}")
+        raise RuntimeError(f"7z exited with code {result.returncode}")
+    return result.stdout
+
+
+def find_files(root, name):
+    return [os.path.join(dp, f)
+            for dp, _, fs in os.walk(root)
+            for f in fs if f.lower() == name.lower()]
+
+
+def main():
+    installer = find_installer()
+    print(f"Installer: {installer} ({os.path.getsize(installer):,} bytes)")
+
+    # ── Stage 1: extract the NSIS .exe ──────────────────────────
+    stage1 = tempfile.mkdtemp(prefix="xeno_stage1_")
+    print(f"[1/4] Extracting NSIS installer -> {stage1}")
+    run_7z(["x", installer, f"-o{stage1}", "-y"])
+    print(f"      Top-level items: {os.listdir(stage1)}")
+
+    # ── Stage 2: extract inner electron archive if present ──────
+    inner = (glob.glob(os.path.join(stage1, "**", "app-64.7z"), recursive=True)
+             + glob.glob(os.path.join(stage1, "**", "app.7z"), recursive=True)
+             + glob.glob(os.path.join(stage1, "**", "*.7z"), recursive=True))
+    stage2 = tempfile.mkdtemp(prefix="xeno_stage2_")
+    if inner:
+        inner.sort(key=os.path.getsize, reverse=True)
+        print(f"[2/4] Extracting inner archive: {inner[0]} -> {stage2}")
+        run_7z(["x", inner[0], f"-o{stage2}", "-y"])
+        search_root = stage2
+    else:
+        print("[2/4] No inner 7z found - searching stage1 directly")
+        search_root = stage1
+    print(f"      Search root contents: {os.listdir(search_root)[:20]}")
+
+    # ── Stage 3: locate Xeno.dll ────────────────────────────────
+    print(f"[3/4] Searching for Xeno.dll ...")
+    matches = find_files(search_root, "Xeno.dll") or find_files(stage1, "Xeno.dll")
+    if not matches:
+        print("\nERROR: Xeno.dll not found in extracted content. Files seen:")
+        for r, _, fs in os.walk(stage1):
+            for f in fs:
+                print(f"  {os.path.join(r, f)}")
+        sys.exit(1)
+    matches.sort(key=os.path.getsize, reverse=True)  # largest = real DLL, not a stub
+    source_dll = matches[0]
+    print(f"  Found: {source_dll} ({os.path.getsize(source_dll):,} bytes)")
+
+    # ── Stage 4: install as sample/TEST.dll ─────────────────────
+    if os.path.exists(SAMPLE):
+        stamp = time.strftime("%Y%m%d_%H%M%S")
+        backup = SAMPLE + f".{stamp}.bak"
+        shutil.copy2(SAMPLE, backup)
+        print(f"[4/4] Backed up old sample ({os.path.getsize(SAMPLE):,} bytes) -> {backup}")
+        os.chmod(SAMPLE, 0o777)  # clear read-only before overwrite
+    else:
+        print("[4/4] No existing sample - fresh install")
+    shutil.copy2(source_dll, SAMPLE)
+    print(f"  Installed new sample -> {SAMPLE} ({os.path.getsize(SAMPLE):,} bytes)")
+
+    shutil.rmtree(stage1, ignore_errors=True)
+    shutil.rmtree(stage2, ignore_errors=True)
+
+    # ── Verify with the detector ────────────────────────────────
+    print("\nRunning detector on the new sample...")
+    subprocess.run([sys.executable, DETECTOR, SAMPLE, "-v"])
+
+    # ── Regenerate the auto report ──────────────────────────────
+    print("\nRegenerating reports/SAMPLE_REPORT.md ...")
+    subprocess.run([sys.executable, REPORTER])
+
+    print("\n[OK] Sample updated.")
+
+
+if __name__ == "__main__":
+    main()
+
+```
