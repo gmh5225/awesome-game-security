@@ -980,6 +980,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/rollingrock/bethesda-modding-starter [Bootstrap for Bethesda script-extender plugin dev plus Ghidra/x64dbg MCP reverse-engineering toolchain]
 - https://github.com/mathewsbinny/bf1943-tool-suite [Open-source Frostbite tooling for Battlefield 1943: level inspection, DBX/FBRB/terrain format read-diff-rebuild, navmesh generation, and bot simulation (Xenia-compatible)]
 - https://github.com/jlagedo/dreams-to-reality-re [Reverse-engineering research toolkit for Dreams to Reality (1997): Python asset decoders, Ghidra scripts, format documentation, and a Babylon.js viewer—tools only, no copyrighted game data]
+- https://github.com/tamcdonald42/legacy-recreated [Ghidra decompilation workbench and notes for Septerra Core 1.04 toward readable C without redistributing game data]
 - https://github.com/formix/sre-re [Solar Realms Elite 0.994b (DOS BBS) RE: Ghidra toolchain, decoded .II save formats, and recovered game rules toward a Linux remake]
 - https://github.com/chaossource/menace-reverse-engineering [Reverse engineering and SDL2 C++ port of 1988 Amiga game Menace: annotated disassemblies, asset extraction tooling, and a working rebuild]
 - https://github.com/reikop/axis-web [Reverse-engineered AXIS (2005) client rebuilt as WebAssembly/WebGL with byte-exact asset decoders and multiplayer protocol research]
@@ -3531,6 +3532,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/gmh5225/dota-cheat
 - https://github.com/LWSS/McDota [linux]
 - https://github.com/gmh5225/Dota2Cheat
+- https://github.com/Nerve11/uczone-docs-UmbrellaDota2 [Auto-updated UC.Zone API v2 Lua 5.4 reference and scraper for Umbrella Dota 2 script development]
 
 > Game:WOW
 - https://github.com/helloobaby/wow-IAT-fix
@@ -4517,6 +4519,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/StanislawGolec/Ultimo [Java 21 authoritative multiplayer card-game server with fog-of-war hand hiding, virtual threads, and WebSockets]
 - https://github.com/Ogonx/anticheat-lab [Six-month self-study lab attacking and defending deliberately vulnerable own-game builds, with ASM/C++ memory exercises, devlog, and VM-only scope]
 - https://github.com/senolbasyigit/anticheat-lab [Claude Code skill plus Python scripts to memory-scan your own dev builds (devbuild.json guard), report exposed client values, and suggest server-side validation fixes; optional pywinauto RPA mode]
+- https://github.com/jshdcn/anti-cheating-assistant [AI agent skill with anti-cheat playbooks, underground-slang lexicon sync, three-flow risk modeling, and Python workflows for business security consulting]
 
 > Compile Time
 - https://github.com/ManulMap/malstring [Using c++23 compile-time magic to produce obfuscated PIC strings and arrays]
