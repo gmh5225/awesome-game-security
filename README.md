@@ -1109,6 +1109,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/gamboozino/ng2recomp [Static recompilation of Ninja Gaiden II (Xbox 360) to native Linux/Windows via ReXGlue with a custom Vulkan renderer; BYO game assets]
 - https://github.com/Manya3084/SF33RDSXBRecompo [Native x86-64 port of Street Fighter III: 3rd Strike from the original Xbox (3s-decomp-ogxb), with SDL3, Vulkan/OpenGL, and OpenAL—BYO disc, no assets in repo]
 - https://github.com/Coz-0/smo-recomp [Static recompilation of Super Mario Odyssey (Switch 1.4.1) to native Windows x64 with custom runtime and Vulkan renderer; BYO dump, no assets in repo]
+- https://github.com/zpp1103/smo-harmony [HLE host port of Super Mario Odyssey (Switch 1.4.1) to HarmonyOS/OpenHarmony with nn::* service shims and NVN-to-Vulkan translation; BYO dump, source-only snapshot]
 - https://github.com/luvabyss/b3-express [Bayonetta 3 (Switch 1.2.0) native Windows port via ScarletNX static recompilation with NVN-on-Vulkan renderer and launcher; BYO dump, documented status and mod pipeline]
 - https://github.com/raulzrrs/letsgo-recomp [Native Windows port of Pokémon: Let's Go, Eevee!/Pikachu! (Switch 1.0.0) via static recompilation on LAS Recomp; BYO game dump, no assets in repo]
 - https://github.com/valentderah/totk-pc-recomp [Static recompilation of The Legend of Zelda: Tears of the Kingdom to native Windows x86-64 with a Vulkan renderer (BYO game assets)]
