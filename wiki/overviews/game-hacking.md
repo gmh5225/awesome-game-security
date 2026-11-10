@@ -1864,6 +1864,7 @@ sources:
   - wiki/sources/descriptions/Vector35__OpaquePredicatePatcher.md
   - wiki/sources/descriptions/Vu1nT0tal__firmeye.md
   - wiki/sources/descriptions/WerWolv__ImHex.md
+  - wiki/sources/descriptions/thereal47Ronin__GBAR5.md
   - wiki/sources/descriptions/theluckystrike__hex-viewer-vscode.md
   - wiki/sources/descriptions/Washi1337__ghidra-nativeaot.md
   - wiki/sources/descriptions/WenzWenzWenz__DelphiReSym.md
@@ -3153,6 +3154,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Community PS3 TITLEID cheat database via [[game-cheats]] (mohasi; Artemis-sourced plain-text defs with source/compiled trees, simple-cheat-menu import, vote-driven reliability scores; PlayStation / console modding) beside CheatRunner XML patches. (source: wiki/sources/README-categories.md) (source: wiki/sources/descriptions/mohasi__game-cheats.md)
 - Rust CodeBreaker PS2 accessory cheat codec via [[codebreaker-rs]] (mlafeldt; v1–v6 legacy schemes + v7+ RC4; mixed-list autodetect + v7-disable control lines; published `no_std` crate for little-endian hosts; MIPS firmware RE + prior C ports; PS2 cheat-database author/analysis tooling) (source: wiki/sources/README-categories.md) (source: wiki/sources/descriptions/mlafeldt__codebreaker-rs.md)
 - Native PS5 homebrew library shell via [[niak-ps5]] (niakw; full-screen DualSense UI; local title scan; loopback-only `127.0.0.1` launch broker; 3D PS4/PS5 case art + on-select LaunchBox CDN fetch; GPL native C/C++ + OpenGL CI + Python packaging/tests; self-contained shell—not a Sony system-UI replacement; PlayStation / homebrew dashboard) (source: wiki/sources/descriptions/niakw__NiakPS5.md) (source: wiki/sources/README-categories.md)
+- Native PS5 homebrew GBA/GB player via [[gbar5]] (thereal47Ronin; mGBA libretro static core; Vulkan/RADV UI; optional FSR framegen; library/cheats/save states; RetroAchievements/rcheevos; SMB/NFS ROM sync; Lapy sandbox elevation for etaHEN user paths; self-update; C/C++ + Python/shell build; PS5 native payload / retro homebrew—not online AC) (source: wiki/sources/descriptions/thereal47Ronin__GBAR5.md)
 - Python PS5 live-debug toolkit via [[reaperpy]] (Ston3dd; desktop client over ps5debug-NG—memory scan/patch, pointer scan, hardware watchpoints, Keystone x86-64 code caves, Capstone disasm, undo journal; UE/Unity IL2CPP live object menus; GoldHEN/etaHEN cheat export/import; own-hardware offline SP research scope; PlayStation / console RE) (source: wiki/sources/README-categories.md) (source: wiki/sources/descriptions/Ston3dd__ReaperPy.md)
 - PS4 module-loader IDA helper via [[ida-ps4-helper]] (companion to ps4-module-loader; static RE for jailbroken PS4 modules) sits in the same `PlayStation` / Cheat IDA Plugins lane. (source: wiki/sources/descriptions/janisslsm__ida-ps4-helper.md)
 - PS4 Orbis Ghidra extension via [[ghidra-orbis]] (loaders, analyzers, scripts, syscall/NID mapping; symbol recovery; Java/Gradle; Orbis OS file formats) sits in the same `PlayStation` / Cheat Ghidra Plugins lane beside [[ida-ps4-helper]]. (source: wiki/sources/descriptions/astrelsky__GhidraOrbis.md)
