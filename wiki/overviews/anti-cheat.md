@@ -1051,6 +1051,7 @@ sources:
   - wiki/sources/descriptions/CmdSuv__NoEscapeAC.md
   - wiki/sources/descriptions/ToxidoAAC__ToxidoAntiCheat.md
   - wiki/sources/descriptions/zzjjmkk__eagle-eye.md
+  - wiki/sources/descriptions/sr-star-trek__konzte-faceit.md
 updated: 2026-11-10
 confidence: high
 ---
@@ -1251,6 +1252,7 @@ Title-specific R6 ranked-stat suspicion tooling such as [[r6-intel]] (baldspots4
 - [[custos]] — Windows Electron desktop forensic scanner for game-server vetting (dybeky; twenty-one offline Prefetch/BAM/registry/DNS/hash/anti-forensics artifact scanners + optional admin Live Scan for modules/hooks/threads/memory signatures; exportable integrity-hashed reports; Anti Cheat / Guide) (source: wiki/sources/descriptions/dybeky__custos.md)
 - [[tshock]] — Terraria server framework (Pryaxis; C# .NET; Terraria Server API plugin; **Bouncer** packet/action anti-cheat; permissions, regions, warps, item bans; SQLite/MySQL/PostgreSQL + REST + plugin system; protocol guards for known Terraria networking flaws; Open Source Anti Cheat System) (source: wiki/sources/descriptions/Pryaxis__TShock.md)
 - [[deadlock-anti-cheat]] — UrnIt user-mode Deadlock session AC (process list, game-window PNG screenshots, focused-window key input, CPU/GPU HWID, cheat-process signatures with optional forum scrape, macro/bot key-timing variance; Discord webhook on exit/F12; tournament/session logging vs kernel enforcement; g8tsz) (source: wiki/sources/descriptions/g8tsz__deadlock-anti-cheat.md)
+- [[konzte-faceit]] — published Konzte Faceit desktop client + KONZTE GUARD usermode service for Combat Master (sr-star-trek; Rust/Tauri UI + Rust Windows service + optional C# scans; kernel-setting checks, module/injector and executable-memory signature DB, tampered game-file signals, HWID bind, ed25519 updates, admin installer hooks, staff-review uploads; third-party matchmaking client AC reference) (source: wiki/sources/descriptions/sr-star-trek__konzte-faceit.md)
 - [[anti-cheat-chrysalis]] — C/C++ reference AC / chrysalis guide (process integrity, module scan, memory pattern detection, debugger detection, overlay monitoring, kernel driver comm, OpenGL; gmh5225; Anti Cheat / guide; alias [[anticheat]]) (source: wiki/sources/descriptions/gmh5225__AntiCheat-chrysalis.md) (source: wiki/sources/descriptions/gmh5225__AntiCheat.md)
 - [[anticheat-android-cheap-engine]] — sample Android anti-cheat implementation (C/C++; open-source AC system lane; defensive researchers; gmh5225) (source: wiki/sources/descriptions/gmh5225__Anticheat-android-cheap-engine.md)
 - [[android-anti-cheat]] — open-source Android anti-cheat research (C/C++; anti-cheat, modding, hooking; codetronik; open-source AC system lane; defensive researchers) (source: wiki/sources/descriptions/codetronik__AndroidAntiCheat.md)
