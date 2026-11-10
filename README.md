@@ -1105,6 +1105,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/robbe1912/motorstorm-mv-recomp [Source-only PS3 MotorStorm Monument Valley static recompilation and translation tooling (ps3recomp-based) for authorized local RE and native Windows experiments]
 - https://github.com/TalhaMudo/NFSU2Recomp [Static recompilation pipeline and runtime lifting Need for Speed: Underground 2 (Win32/x86, D3D9) to native ARM64 macOS with documented RE tooling]
 - https://github.com/ranggacasper/mostwanted-android [Unofficial Android arm64 port of NFS Most Wanted (Xbox BE) via XboxXBE-Recomp static lifting, Vulkan/SDL3 runtime, and Black-Android host; BYO assets]
+- https://github.com/CiPH3R-88/NFSMW_WideScreenFix [C++ ASI plugin for NFS Most Wanted (2005) v1.3: widescreen HUD/FOV, display modes, and engine hooks built via IDA Pro reverse engineering]
 - https://github.com/elkir0/sc2-android-recomp [StarCraft II static recompilation toolkit (x86-32 to ARM64): per-function difftest oracle, D3D9 shader translation, MPQ tools, pcrecomp closure extensions, and Android porting helpers—method and tooling only, no game assets]
 - https://github.com/gamboozino/ngbrecomp [Static recompilation of Ninja Gaiden Black (Xbox OG) to native Linux/Windows with a custom Vulkan renderer; BYO game assets]
 - https://github.com/gamboozino/ng2recomp [Static recompilation of Ninja Gaiden II (Xbox 360) to native Linux/Windows via ReXGlue with a custom Vulkan renderer; BYO game assets]
@@ -5550,6 +5551,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/AldySan/Remote-Package-Installer-NG [Cross-platform Rust desktop app to queue and install PS4 .pkg files over LAN via GoldHEN Package Installer or RPI NextGen, with progress, pause, and resume]
 - https://github.com/notmaj0r/CheatRunner_Patches [Community PS4/PS5 Title-ID patch XML collection for CheatRunner (FPS, resolution, and in-game byte patches)]
 - https://github.com/niakw/NiakPS5 [Native full-screen PS5 homebrew dashboard with DualSense UI, game library, LaunchBox artwork, and local title launching]
+- https://github.com/thereal47Ronin/GBAR5 [Native PS5 homebrew GBA/GB player (mGBA libretro, Vulkan UI) with libretro cheat DB, save states, and RetroAchievements for jailbroken consoles]
 - https://github.com/mohasi/game-cheats [Community PS3 cheat database (Artemis-sourced) for simple-cheat-menu: editable source per TITLEID, compiled console files, and vote-driven reliability scores]
 - https://github.com/mlafeldt/codebreaker-rs [Rust library to encrypt and decrypt CodeBreaker PS2 cheat codes]
 
