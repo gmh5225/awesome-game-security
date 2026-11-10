@@ -1080,6 +1080,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/emlinhax/DbgViewEx [A tool to log ETW Events and system debug logs]
 - https://github.com/amosshi/binaryinternals [View Internals of Binary File]
 - https://github.com/WerWolv/ImHex [A Hex Editor for Reverse Engineers]
+- https://github.com/theluckystrike/hex-viewer-vscode [Hex viewer and editor for VS Code that opens files of 4 GB and more, with go to offset, hex and text search and a data inspector]
 - https://github.com/microsoft/pdblister [Faster version of `symchk /om` for generating PDB manifests]
 - https://github.com/yaxinsn/vermagic [Change vermagic and CRCs of a Linux Kernel Module]
 - https://github.com/rhboot/pesign [Linux tools for signed PE-COFF binaries]
