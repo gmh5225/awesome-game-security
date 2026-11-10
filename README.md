@@ -4896,6 +4896,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/BLCCoreStudio/BLCGameSecLab [Authorized game-security validation pipeline with BLCReverseLab intake, evidence graphs, build diffing, and incremental anti-cheat regression planning]
 - https://github.com/swimchicken777/reshield [Agent Skill and CLI scanner that scores shipped game/app builds for AI-assisted reverse-engineering exposure (source maps, symbols, keys) with SARIF and fix guidance for Unity, Unreal, Godot, and native targets]
 - https://github.com/ohmk1811/MobSentry [Evidence-first static analyzer for Android APK and iOS IPA with SSL pinning, root/jailbreak, and anti-instrumentation findings plus stack-aware bypass guidance and PDF reports]
+- https://github.com/xunyyds/litmus [Android tamper-detection benchmark with scored vectors for Frida, Xposed, Zygisk, repack, and emulator checks; reproducible JSON runs and blind-spot reporting]
 - https://github.com/5hux1n/bytedance-jb-research [Documented iOS RE of ByteDance apps’ shared jailbreak, injection, and device-integrity detection (static Capstone/ObjC indexing plus read-only Frida validation)]
 - https://github.com/Shrawan-13/ff-dts-analysis [Defensive Il2CPP static-analysis pipeline for Free Fire MAX (XOR metadata decrypt, Il2CppDumper workflow) to research client-side aim/cheat mechanics]
 - https://github.com/LooperSalty/cs2-tracker [CS2 stats tracker with local FastAPI, Game State Integration live match feed, and explainable heuristic anti-cheat suspicion scoring]
