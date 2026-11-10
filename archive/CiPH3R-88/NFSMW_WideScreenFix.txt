@@ -1,0 +1,2848 @@
+Project Path: arc_CiPH3R-88_NFSMW_WideScreenFix_qcmd84wx
+
+Source Tree:
+
+```txt
+arc_CiPH3R-88_NFSMW_WideScreenFix_qcmd84wx
+├── LICENSE
+├── README.md
+└── source
+    ├── CameraFOV.h
+    ├── Config.h
+    ├── HighSpecAudio.h
+    ├── HudFix.h
+    ├── MemoryTools.h
+    ├── Motionblur.h
+    ├── MovieFix.h
+    ├── NFSMW_WideScreenFix.cpp
+    ├── NFSMW_WideScreenFix.ini
+    ├── NOSTrailfix.h
+    ├── Resolution.h
+    ├── Shadowfix.h
+    ├── SimRate.h
+    ├── SkipIntro.h
+    └── UserSettings.h
+
+```
+
+`LICENSE`:
+
+```
+MIT License
+
+Copyright (c) 2026 CiPHER
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
+`README.md`:
+
+```md
+# NFSMW WideScreen Fix
+
+A lightweight, modern widescreen plugin for **Need for Speed: Most Wanted (2005) v1.3**, built from the ground up with clean C++ and reverse engineering in IDA Pro.
+
+---
+
+## Features
+
+### 🖥️ Display & Resolution
+* **In-Game Resolution Picker:** Dynamically enumerates all monitor display modes directly into the in-game Video Options menu with seamless runtime switching.
+* **Windowed & Borderless Modes:** Supports Fullscreen, Borderless, Bordered, Resizable, and Borderless Fullscreen Stretched modes.
+
+### 🎯 FOV & HUD
+* **Hor+ Camera FOV:** Automatically calculates and applies correct field of view for any aspect ratio.
+* **Aspect-Correct HUD:** Fixes HUD stretching and moves HUD elements to widescreen screen edges.
+
+### 🎬 Movies & FMVs
+* **Widescreen FMV Scaling:** Options to zoom/fill 16:9 or maintain aspect ratio with clean pillarboxing.
+* **Full-Color Range Videos:** Custom YUV lookup table expansion restores deep blacks and full color vibrancy (0–255) instead of washed-out limited range (16–235).
+
+### 🔊 Audio
+* **High-Spec Audio:** Forces the audio mixer to run at full CD quality (44,100 Hz) by default, bypassing 22,050 Hz low-spec fallbacks.
+
+### 🏎️ Graphics & Visuals
+* **Dynamic Shadows:** Customizable shadow map resolution (up to 16384), auto-scaling based on aspect ratio, increased shadow LOD detail, and tunnel/bridge disappearance fix.
+* **NOS Trail:** Option to toggle NOS trails on/off or fine-tune trail length and origin offsets.
+* **Motion Blur:** In-game motion blur toggle.
+
+### ⚙️ Physics & Miscellaneous
+* **High-Precision SimRate:** Decoupled 200 Hz physics simulation ticker for high refresh rate monitors.
+* **Skip Intro:** Bypasses startup logos and intro movies.
+* **Windows Cursor Toggle:** Optional hardware Windows OS cursor in menus without software cursor latency or stretching.
+* **Portable Saves & Registry:** Redirects game settings from Windows Registry into a local file and supports custom save game folders.
+* **Mod Compatibility:** Works out of the box with **X360Stuff** and **Sunset Mod** with automatic conflict resolution.
+
+---
+
+## Installation
+
+1. Copy `NFSMW_WideScreenFix.asi` and `NFSMW_WideScreenFix.ini` into your game's `scripts/` folder (requires an ASI Loader like `dinput8.dll`).
+2. Configure settings inside `NFSMW_WideScreenFix.ini` to your preference.
+
+---
+
+## Configuration Overview
+
+| Section | Key Settings |
+| :--- | :--- |
+| `[DISPLAY]` | `ResX`, `ResY`, `WindowMode` (0 = Fullscreen, 1 = Borderless, etc.) |
+| `[HUD]` | `FixHUD`, `WideScreenHUD`, `WS_MWSPLASHBACK` |
+| `[MOVIES]` | `WideScreenMovie` (1 = Fill 16:9, 2 = Aspect Correct) |
+| `[GRAPHICS]`| `MotionBlur`, `ConsoleGamma` |
+| `[SHADOW]` | `ShadowsRes`, `ShadowsFix`, `ImproveShadowLOD`, `AutoScaleShadowsRes`, `ShadowMapTextureFormat` |
+| `[MISC]` | `SkipIntro`, `SimRate`, `WriteSettingsToFile`, `CustomUserFilesDirectoryInGameDir`, `Win Cursor` |
+| `[NOS TRAIL]`| `NosTrail`, `NOSTrailLength`, `NOSTrailPositionScalar` |
+
+---
+
+## Credits
+
+* **Nlg** — Providing the IDA Pro database for NFS Most Wanted.
+* **Toru** — Full-color YUV LUT calculation logic and X360Stuff reference.
+* **Archie** — Sunset Mod codebase, which helped implement and add the Motion Blur option in the in-game Video Settings.
+* **ThirteenAG** — Referred to for initial research.
+
+
+```
+
+`source/CameraFOV.h`:
+
+```h
+#pragma once
+#ifndef NFSMW_WIDESCREENFIX_CAMERAFOV_H
+#define NFSMW_WIDESCREENFIX_CAMERAFOV_H
+
+#include "MemoryTools.h"
+#include "Resolution.h"
+#include "Config.h"
+
+namespace CameraFOV {
+    // Engine Viewport IDs from eView::BuildProjectionMatrix (sub_6CF400)
+    enum eViewID : uint32_t {
+        VIEW_MAIN = 1,
+        VIEW_SECONDARY = 2,
+        VIEW_REARVIEW_MIRROR = 3,
+        VIEW_REFLECTION = 4,
+        VIEW_PIP = 5
+    };
+
+    inline float s_Hor3DScale = 1.0f;
+    inline float s_Ver3DScale = 1.0f;
+    inline float s_MirrorScale = 0.40f;
+
+    // Direct operand overrides for eView::BuildProjectionMatrix (0x006CF400)
+    inline float s_HorProjectionScale = 1.0f;    // Replaces operand at 0x006CF568 (vanilla 1.0f)
+    inline float s_FovAngleMultiplier = 0.423f;   // Replaces operand at 0x006CF57A (vanilla 0.5f)
+    inline float s_VerProjectionDivisor = 1.0f;  // Replaces operand at 0x006CF5DE (vanilla 1.0f)
+
+    // Shadow frustum culling multiplier in sub_6C9570 (vanilla 1.1f at 0x006C9655)
+    inline float s_ShadowDistanceMultiplier = 10.0f;
+
+    inline const uintptr_t RET_006CF4F6 = 0x006CF4F6;
+    inline const uintptr_t RET_006E465A = 0x006E465A;
+    inline const uintptr_t RET_006E47EC = 0x006E47EC;
+
+    inline void __cdecl ComputeProjectionScales(uint32_t viewID) {
+        float aspect = Resolution::g_CurrentAspectRatio;
+        if (aspect <= 0.0f) {
+            aspect = 4.0f / 3.0f;
+        }
+
+        s_Ver3DScale = 1.0f;
+        // Direct3D squash correction: preserves 1:1 pixel aspect ratio while maintaining vertical framing
+        s_Hor3DScale = 1.273f / aspect;
+
+        if (viewID == VIEW_MAIN || viewID == VIEW_REFLECTION) {
+            s_HorProjectionScale = s_Hor3DScale;
+            s_FovAngleMultiplier = 0.423f;
+            s_VerProjectionDivisor = 1.0f;
+        }
+        else {
+            s_HorProjectionScale = 1.0f;
+            s_FovAngleMultiplier = 0.5f;
+            s_VerProjectionDivisor = 1.0f;
+        }
+    }
+
+    __declspec(naked) inline void Hook_BuildProjectionMatrix() {
+        __asm {
+            push ecx
+            push edx
+            push ecx
+            call ComputeProjectionScales
+            add esp, 4
+            pop edx
+            pop ecx
+
+            mov eax, dword ptr[edi + 0x60] // eView->ViewportParams
+
+            cmp ecx, VIEW_REARVIEW_MIRROR
+            je lbl_mirror
+            fld dword ptr[s_Ver3DScale]
+            jmp lbl_ret
+
+            lbl_mirror :
+            fld dword ptr[s_MirrorScale]
+
+                lbl_ret :
+                jmp dword ptr[RET_006CF4F6]
+        }
+    }
+
+    __declspec(naked) inline void Hook_ShadowCameraMatrix1() {
+        __asm {
+            fld dword ptr[s_Ver3DScale]
+            jmp dword ptr[RET_006E465A]
+        }
+    }
+
+    __declspec(naked) inline void Hook_ShadowCameraMatrix2() {
+        __asm {
+            mov dword ptr[esp + 0x14], ecx
+            fld dword ptr[s_Ver3DScale]
+            jmp dword ptr[RET_006E47EC]
+        }
+    }
+
+    inline void UpdateFOVScale(int width, int height) {
+        float aspect = static_cast<float>(width) / static_cast<float>(height);
+        if (aspect <= 0.0f) {
+            aspect = 4.0f / 3.0f;
+        }
+        constexpr float baseAspect = 4.0f / 3.0f;
+
+        s_Hor3DScale = 1.273f / aspect;
+
+        // 1. eViewPlatInterface canvas virtual width (vanilla 640.0f): flt_8AE8F8
+        MemoryTools::Write<float>(0x008AE8F8, 480.0f * aspect);
+
+        // 2. FacePixelation UV scale X in arrest cutscenes (vanilla 1.0/640.0f): flt_8AFA08
+        MemoryTools::Write<float>(0x008AFA08, (1.0f / 640.0f) * (baseAspect / aspect));
+    }
+
+    inline void Init(bool fixFOV = true) {
+        if (!fixFOV) return;
+
+        UpdateFOVScale(Resolution::g_CurrentWidth, Resolution::g_CurrentHeight);
+        Resolution::RegisterOnResChange(UpdateFOVScale);
+
+        // Hook eView::BuildProjectionMatrix in sub_6CF400 (5 bytes JMP + 7 NOPs)
+        MemoryTools::MakeJMP(0x006CF4EA, reinterpret_cast<uintptr_t>(Hook_BuildProjectionMatrix), 7);
+
+        // Redirect projection matrix scaling float operands
+        MemoryTools::Write<float*>(0x006CF568, &s_HorProjectionScale);
+        MemoryTools::Write<float*>(0x006CF57A, &s_FovAngleMultiplier);
+        MemoryTools::Write<float*>(0x006CF5DE, &s_VerProjectionDivisor);
+
+        // ShadowMap frustum culling distance in sub_6C9570 (vanilla 1.1f at 0x006C9655)
+        MemoryTools::Write<float*>(0x006C9655, &s_ShadowDistanceMultiplier);
+
+        // ShadowMap::BuildCameraMatrix hooks (sub_6E44C0)
+        MemoryTools::MakeJMP(0x006E4652, reinterpret_cast<uintptr_t>(Hook_ShadowCameraMatrix1), 3);
+        MemoryTools::MakeNOP(0x006E4668, 4);
+
+        MemoryTools::MakeJMP(0x006E47E4, reinterpret_cast<uintptr_t>(Hook_ShadowCameraMatrix2), 3);
+        MemoryTools::MakeNOP(0x006E47EC, 4);
+
+        // ShadowMap camera horizontal FOV scaling
+        MemoryTools::Write<float*>(0x006E46B2, &s_Hor3DScale);
+        MemoryTools::Write<float*>(0x006E4832, &s_Hor3DScale);
+    }
+}
+
+#endif // NFSMW_WIDESCREENFIX_CAMERAFOV_H
+
+```
+
+`source/Config.h`:
+
+```h
+#pragma once
+#ifndef NFSMW_WIDESCREENFIX_CONFIG_H
+#define NFSMW_WIDESCREENFIX_CONFIG_H
+
+#include <windows.h>
+#include <string>
+#include <filesystem>
+
+struct Settings {
+    // DISPLAY
+    int ResX = 0;
+    int ResY = 0;
+    int WindowMode = 0; // 0 = Fullscreen | 1 = Borderless | 2 = Border | 3 = Resizable Border | 4 = Borderless Fullscreen | 5 = Borderless Fullscreen Stretched
+
+    // GRAPHICS
+    int MotionBlur = 1; // 0 = Off, 1 = On
+
+    // HUD
+    int FixHUD = 1;
+    int WideScreenHUD = 0;
+    int WS_MWSPLASHBACK = 0;
+    bool X360StuffInstalled = false;
+    bool SunSetInstalled = false;
+
+    // MOVIES
+    int WideScreenMovie = 1; // 0 = Off, 1 = Zoom/Fill 16:9, 2 = Fit with Pillarboxes
+
+    // SHADOW
+    int ShadowsRes = 2048;
+    int ShadowsFix = 1;
+    int ImproveShadowLOD = 1;
+    int AutoScaleShadowsRes = 1;
+    int ShadowMapTextureFormat = 0;
+    int ForceSharpShadows = 0;
+
+    // NOSTRAIL
+    int NosTrail = 1;
+    float NOSTrailLength = 0.0f;
+    float NOSTrailPositionScalar = 0.0f;
+
+    // MISC
+    int SkipIntro = 0;
+    int SimRate = 0; // 0 = Off, 1 = On (200 Hz Decoupled Physics)
+    int WriteSettingsToFile = 0;
+    int WinCursor = 0; // 0 = Off (default, block Windows cursor), 1 = On (allow Windows cursor)
+    std::string CustomUserFilesDirectoryInGameDir = "";
+
+    std::filesystem::path IniPath;
+    std::filesystem::path GamePath;
+
+    void Load() {
+        char exePath[MAX_PATH] = { 0 };
+        GetModuleFileNameA(NULL, exePath, MAX_PATH);
+        GamePath = std::filesystem::path(exePath).parent_path();
+        IniPath = GamePath / "scripts" / "NFSMW_WideScreenFix.ini";
+        if (!std::filesystem::exists(IniPath)) {
+            IniPath = GamePath / "NFSMW_WideScreenFix.ini";
+        }
+
+        std::string iniStr = IniPath.string();
+
+        ResX = GetPrivateProfileIntA("DISPLAY", "ResX", 0, iniStr.c_str());
+        ResY = GetPrivateProfileIntA("DISPLAY", "ResY", 0, iniStr.c_str());
+        WindowMode = GetPrivateProfileIntA("DISPLAY", "WindowMode", -1, iniStr.c_str());
+        if (WindowMode == -1) {
+            WindowMode = GetPrivateProfileIntA("MISC", "WindowedMode", -1, iniStr.c_str());
+            if (WindowMode == -1) {
+                WindowMode = GetPrivateProfileIntA("DISPLAY", "Windowed", 0, iniStr.c_str());
+            }
+        }
+
+        MotionBlur = GetPrivateProfileIntA("GRAPHICS", "MotionBlur", 1, iniStr.c_str());
+        FixHUD = GetPrivateProfileIntA("HUD", "FixHUD", 1, iniStr.c_str());
+        WideScreenHUD = GetPrivateProfileIntA("HUD", "WideScreenHUD", 0, iniStr.c_str());
+        WS_MWSPLASHBACK = GetPrivateProfileIntA("HUD", "WS_MWSPLASHBACK", 0, iniStr.c_str());
+
+        WideScreenMovie = GetPrivateProfileIntA("MOVIES", "WideScreenMovie", 1, iniStr.c_str());
+
+        // SHADOW
+        ShadowsRes = GetPrivateProfileIntA("SHADOW", "ShadowsRes", 2048, iniStr.c_str());
+        ShadowsFix = GetPrivateProfileIntA("SHADOW", "ShadowsFix", 1, iniStr.c_str());
+        ImproveShadowLOD = GetPrivateProfileIntA("SHADOW", "ImproveShadowLOD", 1, iniStr.c_str());
+        AutoScaleShadowsRes = GetPrivateProfileIntA("SHADOW", "AutoScaleShadowsRes", 1, iniStr.c_str());
+        ShadowMapTextureFormat = GetPrivateProfileIntA("SHADOW", "ShadowMapTextureFormat", 0, iniStr.c_str());
+        ForceSharpShadows = GetPrivateProfileIntA("SHADOW", "ForceSharpShadows", 0, iniStr.c_str());
+
+        // NOSTRAIL (support both [NOSTRAIL] and [NOS TRAIL])
+        NosTrail = GetPrivateProfileIntA("NOSTRAIL", "NosTrail", -1, iniStr.c_str());
+        if (NosTrail == -1) NosTrail = GetPrivateProfileIntA("NOS TRAIL", "NosTrail", 1, iniStr.c_str());
+
+        char nosLenBuf[64] = { 0 };
+        GetPrivateProfileStringA("NOSTRAIL", "NOSTrailLength", "", nosLenBuf, sizeof(nosLenBuf), iniStr.c_str());
+        if (!nosLenBuf[0]) GetPrivateProfileStringA("NOS TRAIL", "NOSTrailLength", "0", nosLenBuf, sizeof(nosLenBuf), iniStr.c_str());
+        NOSTrailLength = static_cast<float>(atof(nosLenBuf));
+        if (NOSTrailLength < 0.0f) NOSTrailLength = 0.0f;
+
+        char nosPosBuf[64] = { 0 };
+        GetPrivateProfileStringA("NOSTRAIL", "NOSTrailPositionScalar", "", nosPosBuf, sizeof(nosPosBuf), iniStr.c_str());
+        if (!nosPosBuf[0]) GetPrivateProfileStringA("NOS TRAIL", "NOSTrailPositionScalar", "0.0", nosPosBuf, sizeof(nosPosBuf), iniStr.c_str());
+        NOSTrailPositionScalar = static_cast<float>(atof(nosPosBuf));
+        if (NOSTrailPositionScalar < 0.0f) NOSTrailPositionScalar = 0.0f;
+
+        // Toru's X360Stuff applies HUD aspect correction, widescreen placement,
+        // and entirely replaces the shadow map rendering pipeline.
+        X360StuffInstalled = std::filesystem::exists(GamePath / "scripts" / "X360Stuff.asi");
+
+        // Sunset mod provides its own in-game Motion Blur video option and custom particle shaders.
+        SunSetInstalled = std::filesystem::exists(GamePath / "scripts" / "SunSet.asi");
+
+        SkipIntro = GetPrivateProfileIntA("MISC", "SkipIntro", 0, iniStr.c_str());
+        SimRate = GetPrivateProfileIntA("MISC", "SimRate", 0, iniStr.c_str());
+        WriteSettingsToFile = GetPrivateProfileIntA("MISC", "WriteSettingsToFile", 0, iniStr.c_str());
+        WinCursor = GetPrivateProfileIntA("MISC", "WinCursor", 0, iniStr.c_str());
+        if (!WinCursor) {
+            WinCursor = GetPrivateProfileIntA("MISC", "Win Cursor", 0, iniStr.c_str());
+        }
+
+        char userDirBuf[MAX_PATH] = { 0 };
+        GetPrivateProfileStringA("MISC", "CustomUserFilesDirectoryInGameDir", "0", userDirBuf, MAX_PATH, iniStr.c_str());
+        std::string userDir = userDirBuf;
+        auto semi = userDir.find(';');
+        if (semi != std::string::npos) userDir = userDir.substr(0, semi);
+        auto hash = userDir.find('#');
+        if (hash != std::string::npos) userDir = userDir.substr(0, hash);
+        while (!userDir.empty() && (userDir.back() == ' ' || userDir.back() == '\t' || userDir.back() == '\r' || userDir.back() == '\n')) {
+            userDir.pop_back();
+        }
+        while (!userDir.empty() && (userDir.front() == ' ' || userDir.front() == '\t')) {
+            userDir.erase(userDir.begin());
+        }
+        if (userDir == "0") {
+            userDir.clear();
+        }
+        CustomUserFilesDirectoryInGameDir = userDir;
+    }
+};
+
+inline Settings g_Config;
+
+#endif // NFSMW_WIDESCREENFIX_CONFIG_H
+
+```
+
+`source/HighSpecAudio.h`:
+
+```h
+#pragma once
+#ifndef NFSMW_WIDESCREENFIX_HIGHSPECAUDIO_H
+#define NFSMW_WIDESCREENFIX_HIGHSPECAUDIO_H
+
+#include <cstdint>
+#include "MemoryTools.h"
+
+namespace HighSpecAudio {
+    // Verified from IDA: sub_4C40C0 (Audio system initialization)
+    // In vanilla speed.exe, Low/Medium PerformanceLevel checks fall through to 0x004C41EF:
+    //   mov dword ptr [g_PC_SampleRate], 22050  (bytes: C7 05 50 E6 8E 00 22 56 00 00)
+    // Overwriting the immediate operand at 0x004C41F5 from 22050 (0x00005622) to 44100 (0x0000AC44)
+    // forces the audio mixer to run at full CD quality (44.1 kHz) by default.
+    constexpr uintptr_t ADDR_SAMPLE_RATE_FALLBACK = 0x004C41F5;
+    constexpr uint32_t HIGH_SPEC_SAMPLE_RATE      = 44100;
+
+    inline void Init() {
+        MemoryTools::Write<uint32_t>(ADDR_SAMPLE_RATE_FALLBACK, HIGH_SPEC_SAMPLE_RATE);
+    }
+}
+
+#endif // NFSMW_WIDESCREENFIX_HIGHSPECAUDIO_H
+
+
+```
+
+`source/HudFix.h`:
+
+```h
+#pragma once
+#ifndef NFSMW_WIDESCREENFIX_HUDFIX_H
+#define NFSMW_WIDESCREENFIX_HUDFIX_H
+
+#include "MemoryTools.h"
+#include "Resolution.h"
+#include "Config.h"
+#include <cmath>
+#include <unordered_map>
+
+namespace HudFix {
+    inline float s_HudMatrixScaleX = 1.0f;
+    inline float s_HudScaleX = 0.003125f; // flt_8AF9A4 (vanilla: 2.0f / 640.0f)
+    inline float s_FEHudPosX = 320.0f;    // flt_894B40 (vanilla: 320.0f)
+
+    // Verified from IDA: SplashScreen::SplashScreen (0x005A3030) and package string at 0x008A0114
+    inline void InitWideScreenSplash(bool enabled) {
+        if (!enabled) return;
+
+        // 1. NOP the jz short loc_5A30A2 at 0x005A3080 in SplashScreen::SplashScreen
+        MemoryTools::MakeNOP(0x005A3080, 2);
+
+        // 2. Overwrite the package name in .rdata at 0x008A0114
+        constexpr char kwsSplashName[] = "WS_MW_LS_Splash.fng";
+        MemoryTools::WriteBytes(0x008A0114, kwsSplashName, sizeof(kwsSplashName));
+
+        // 3. Set prompt text hash to "CLICK to continue" (PC) at 0x005A313D
+        MemoryTools::Write<uint32_t>(0x005A313D, 0xC4DF3FF2);
+
+        // 4. Force GetSplashScreenPackageName() to return widescreen splash
+        MemoryTools::Write<uint8_t>(0x005705EC, 0xEB);
+    }
+
+    inline bool s_WideScreenHUD = false;
+    inline float s_WideScreenHUDOffset = 0.0f;
+
+    namespace WideScreenHUD {
+        // Native FEng Engine API functions in speed.exe
+        using FEngFindObjectFn = void*(__cdecl*)(const char* packageName, unsigned int objectHash);
+        using FEngGetCenterFn  = void(__cdecl*)(void* object, float* outX, float* outY);
+        using FEngSetCenterFn  = void(__cdecl*)(void* object, float x, float y);
+        using QueuePackageMessageFn = void(__fastcall*)(void* instance, void* edx, int messageHash, const char* packageName, int a4);
+        using SetWideScreenModeFn   = char(__thiscall*)(void* instance);
+
+        inline const auto FEngFindObject = reinterpret_cast<FEngFindObjectFn>(0x00524850);
+        inline const auto FEngGetCenter  = reinterpret_cast<FEngGetCenterFn>(0x00524EE0);
+        inline const auto FEngSetCenter  = reinterpret_cast<FEngSetCenterFn>(0x00525050);
+
+        inline QueuePackageMessageFn s_OriginalQueuePackageMessage = nullptr;
+        inline SetWideScreenModeFn   s_OriginalSetWideScreenMode   = nullptr;
+
+        inline std::unordered_map<void*, std::pair<float, float>> s_OriginalCenters;
+
+        struct MinimapOriginalPositions {
+            float localX;
+            float childX[5];
+        };
+        inline std::unordered_map<void*, MinimapOriginalPositions> s_MinimapOriginalPositions;
+        inline bool s_Installed = false;
+
+        // Moves FEng HUD groups to the widescreen screen borders
+        inline void ApplyGroupOffset(const char* packageName) {
+            if (!packageName) return;
+
+            constexpr unsigned int LEFT_GROUP  = 0x1603009E; // Minimap group
+            constexpr unsigned int RIGHT_GROUP = 0x5D0101F1; // Tachometer / Speedometer group
+
+            void* left  = FEngFindObject(packageName, LEFT_GROUP);
+            void* right = FEngFindObject(packageName, RIGHT_GROUP);
+
+            auto move = [](void* object, float delta) {
+                if (!object) return;
+                auto it = s_OriginalCenters.find(object);
+                if (it == s_OriginalCenters.end()) {
+                    float x = 0.0f, y = 0.0f;
+                    FEngGetCenter(object, &x, &y);
+                    it = s_OriginalCenters.emplace(object, std::make_pair(x, y)).first;
+                }
+                FEngSetCenter(object, it->second.first + delta, it->second.second);
+            };
+
+            move(left, -s_WideScreenHUDOffset);
+            move(right, s_WideScreenHUDOffset);
+        }
+
+        inline void __fastcall QueuePackageMessageHook(void* instance, void* edx,
+            int messageHash, const char* packageName, int a4) {
+            if (s_OriginalQueuePackageMessage) {
+                s_OriginalQueuePackageMessage(instance, edx, messageHash, packageName, a4);
+            }
+            ApplyGroupOffset(packageName);
+        }
+
+        inline char __fastcall SetWideScreenModeHook(void* instance, void* edx) {
+            char result = s_OriginalSetWideScreenMode ? s_OriginalSetWideScreenMode(instance) : 0;
+            return result;
+        }
+
+        // Native Minimap::AdjustForWidescreen (0x005678A0) dynamic displacement
+        inline int __fastcall AdjustMinimapForWidescreen(
+            void* minimap, void* edx, char isWidescreen) {
+            if (!minimap) return 0;
+
+            const float offset = isWidescreen ? -s_WideScreenHUDOffset : s_WideScreenHUDOffset;
+
+            if (!s_MinimapOriginalPositions.empty() &&
+                s_MinimapOriginalPositions.begin()->first != minimap) {
+                s_MinimapOriginalPositions.clear();
+            }
+
+            MemoryTools::Write<float>(0x0091CF04, isWidescreen ? -s_WideScreenHUDOffset : 0.0f);
+            MemoryTools::Write<float>(0x0091CF0C, isWidescreen ? -0.9375f : 0.9375f);
+
+            constexpr int childOffsets[5] = { 60, 64, 68, 72, 144 };
+            auto it = s_MinimapOriginalPositions.find(minimap);
+            if (it == s_MinimapOriginalPositions.end()) {
+                MinimapOriginalPositions original{};
+                original.localX = *reinterpret_cast<float*>(
+                    reinterpret_cast<uint8_t*>(minimap) + 184);
+
+                for (int i = 0; i < 5; ++i) {
+                    void* child = *reinterpret_cast<void**>(
+                        reinterpret_cast<uint8_t*>(minimap) + childOffsets[i]);
+                    if (!child) return 0;
+                    void* data = *reinterpret_cast<void**>(
+                        reinterpret_cast<uint8_t*>(child) + 44);
+                    if (!data) return 0;
+                    original.childX[i] = *reinterpret_cast<float*>(
+                        reinterpret_cast<uint8_t*>(data) + 28);
+                }
+                it = s_MinimapOriginalPositions.emplace(minimap, original).first;
+            }
+
+            const auto& original = it->second;
+            MemoryTools::Write<float>(
+                reinterpret_cast<uintptr_t>(minimap) + 184,
+                original.localX + offset);
+
+            for (int i = 0; i < 5; ++i) {
+                void* child = *reinterpret_cast<void**>(
+                    reinterpret_cast<uint8_t*>(minimap) + childOffsets[i]);
+                if (!child) continue;
+                void* data = *reinterpret_cast<void**>(
+                    reinterpret_cast<uint8_t*>(child) + 44);
+                if (!data) continue;
+                MemoryTools::Write<float>(
+                    reinterpret_cast<uintptr_t>(data) + 28,
+                    original.childX[i] + offset);
+            }
+
+            void* lastChild = *reinterpret_cast<void**>(
+                reinterpret_cast<uint8_t*>(minimap) + 144);
+            if (lastChild) {
+                void* data = *reinterpret_cast<void**>(
+                    reinterpret_cast<uint8_t*>(lastChild) + 44);
+                if (data) {
+                    const uint32_t value = *reinterpret_cast<uint32_t*>(
+                        reinterpret_cast<uint8_t*>(minimap) + 188);
+                    MemoryTools::Write<uint32_t>(
+                        reinterpret_cast<uintptr_t>(data) + 32, value);
+                }
+            }
+
+            return 0;
+        }
+
+        inline void UpdateOffset(int width, int height) {
+            const float aspect = static_cast<float>(width) / static_cast<float>(height);
+            s_WideScreenHUDOffset = (480.0f / 2.0f) * aspect - (640.0f / 2.0f);
+        }
+
+        inline void Init() {
+            if (s_Installed) return;
+
+            // Hook cFEng::QueuePackageMessage (0x00516C90) at call site
+            s_OriginalQueuePackageMessage = reinterpret_cast<QueuePackageMessageFn>(0x00516C90);
+            MemoryTools::MakeCALL(0x005696F1, reinterpret_cast<uintptr_t>(QueuePackageMessageHook));
+            MemoryTools::MakeCALL(0x00569712, reinterpret_cast<uintptr_t>(QueuePackageMessageHook));
+
+            // FEngHud::SetWideScreenMode (0x005696C0)
+            s_OriginalSetWideScreenMode = reinterpret_cast<SetWideScreenModeFn>(0x005696C0);
+
+            // 1. Force FEngHud::SetWideScreenMode video option read (0x005696CB: mov al, 1; nop)
+            const uint8_t forceWideScreen[] = { 0xB0, 0x01, 0x90 };
+            MemoryTools::WriteBytes(0x005696CB, forceWideScreen, sizeof(forceWideScreen));
+
+            // 2. Force FEngHud::DetermineHudFeatures comparison (0x0057CB82: cmp dl, 1)
+            const uint8_t forceHudFeatureFlag[] = { 0x80, 0xFA, 0x01 };
+            MemoryTools::WriteBytes(0x0057CB82, forceHudFeatureFlag, sizeof(forceHudFeatureFlag));
+
+            // 3. Force Chyron::Start EA Trax song banner read (0x0058D883: mov al, 1; nop)
+            MemoryTools::WriteBytes(0x0058D883, forceWideScreen, sizeof(forceWideScreen));
+
+            // Hook FEngHud::Update caller at 0x0058CAD2
+            MemoryTools::MakeCALL(0x0058CAD2, reinterpret_cast<uintptr_t>(SetWideScreenModeHook));
+
+            // Hook Minimap::AdjustForWidescreen callers
+            MemoryTools::MakeCALL(0x00569702, reinterpret_cast<uintptr_t>(AdjustMinimapForWidescreen));
+            MemoryTools::MakeCALL(0x00569723, reinterpret_cast<uintptr_t>(AdjustMinimapForWidescreen));
+
+            s_Installed = true;
+        }
+    }
+
+    inline void UpdateWideScreenHUD(int width, int height) {
+        if (!s_WideScreenHUD) return;
+        const float aspect = static_cast<float>(width) / static_cast<float>(height);
+        s_WideScreenHUDOffset = (480.0f / 2.0f) * aspect - (640.0f / 2.0f);
+    }
+
+    using RenderPolyFn = int(__cdecl*)(void*, void*, int);
+    inline RenderPolyFn s_OriginalMirrorRender = nullptr;
+
+    inline int __cdecl MirrorRenderHook(void* poly, void* textureInfo, int flags) {
+        if (poly) {
+            float* v = reinterpret_cast<float*>(poly);
+            // In vanilla 4:3, rearview mirror is centered at 320.0f with half-width 130.0f (190.0f to 450.0f).
+            // With widescreen projection scale (s_HudScaleX) active, centering the quad around s_FEHudPosX
+            // places the mirror in the top-center with correct 1:1 aspect ratio.
+            constexpr float halfWidth = 130.0f;
+            v[4]  = s_FEHudPosX - halfWidth;
+            v[8]  = s_FEHudPosX - halfWidth;
+            v[0]  = s_FEHudPosX + halfWidth;
+            v[12] = s_FEHudPosX + halfWidth;
+        }
+        return s_OriginalMirrorRender ? s_OriginalMirrorRender(poly, textureInfo, flags) : 0;
+    }
+
+    inline void UpdateHudScale(int width, int height) {
+        const float aspect = static_cast<float>(width) / static_cast<float>(height);
+
+        // Global orthographic projection scale across 480p virtual height:
+        // s_HudScaleX = (1.0f / width * (height / 480.0f)) * 2.0f = 2.0f / (480.0f * aspect)
+        s_HudScaleX = (1.0f / static_cast<float>(width) * (static_cast<float>(height) / 480.0f)) * 2.0f;
+        // Global HUD center in virtual coordinates: (480.0f * aspect) / 2.0f
+        s_FEHudPosX = 640.0f / (640.0f * s_HudScaleX);
+
+        // 1. Global 2D projection scale in eViewPlatInterface::Render (0x006D1260): flt_8AF9A4
+        MemoryTools::Write<float>(0x008AF9A4, s_HudScaleX);
+
+        // 2. Global hit-test center used by button hovers (sub_530A60), carousel arrows (sub_587190),
+        // sliders (sub_554DF0), and GetMouseInfo (0x00516870): flt_894B40
+        MemoryTools::Write<float>(0x00894B40, s_FEHudPosX);
+
+        // 3. Matrix translation _41 sites: replace hardcoded 320.0f with s_FEHudPosX
+        MemoryTools::Write<float>(0x0056FECD + 7, s_FEHudPosX); // 0x0056FED4: Cursor matrix (esp + 0x19C)
+        MemoryTools::Write<float>(0x00584EEF + 7, s_FEHudPosX); // 0x00584EF6: Base HUD matrix (esp + 0x90)
+        MemoryTools::Write<float>(0x00599E79 + 7, s_FEHudPosX); // 0x00599E80: RenderMovie (esp + 0x84)
+        MemoryTools::Write<float>(0x0059A120 + 7, s_FEHudPosX); // 0x0059A127: RenderMultiImage (esp + 0xC4)
+        MemoryTools::Write<float>(0x0059A5AB + 7, s_FEHudPosX); // 0x0059A5B2: RenderImage (esp + 0x94)
+        MemoryTools::Write<float>(0x0059A83E + 7, s_FEHudPosX); // 0x0059A845: RenderImage2 (esp + 0x94)
+        MemoryTools::Write<float>(0x005A44C8 + 4, s_FEHudPosX); // 0x005A44CC: RenderString (esp + 0x64)
+    }
+
+    inline void Init(bool fixHUD, bool wideScreenHUD) {
+        if (!fixHUD && !wideScreenHUD) return;
+
+        s_WideScreenHUD = wideScreenHUD;
+
+        if (fixHUD) {
+            constexpr uintptr_t kMirrorRenderCallSite = 0x006E7199;
+            if (!s_OriginalMirrorRender) {
+                s_OriginalMirrorRender = reinterpret_cast<RenderPolyFn>(
+                    MemoryTools::GetCallTarget(kMirrorRenderCallSite));
+                MemoryTools::MakeCALL(kMirrorRenderCallSite,
+                    reinterpret_cast<uintptr_t>(MirrorRenderHook));
+            }
+
+            UpdateHudScale(Resolution::g_CurrentWidth, Resolution::g_CurrentHeight);
+            Resolution::RegisterOnResChange(UpdateHudScale);
+        }
+
+        if (wideScreenHUD) {
+            UpdateWideScreenHUD(Resolution::g_CurrentWidth, Resolution::g_CurrentHeight);
+            WideScreenHUD::UpdateOffset(Resolution::g_CurrentWidth, Resolution::g_CurrentHeight);
+            WideScreenHUD::Init();
+            Resolution::RegisterOnResChange(UpdateWideScreenHUD);
+            Resolution::RegisterOnResChange(WideScreenHUD::UpdateOffset);
+        }
+    }
+
+    // --- Windows Cursor Toggle ---
+    // Verified from IDA: sub_516F70 (0x00516F70) cursor frame update and dword_8F374C (cursor active flag)
+    constexpr uintptr_t ADDR_MOUSE_ACTIVE     = 0x008F374C;
+    constexpr uintptr_t ADDR_CURSOR_CALLSITE  = 0x006E71D0; // call sub_516F70 in sub_6E6E40
+    constexpr uintptr_t ADDR_DRAW_CURSOR_FUNC = 0x0056FDB0; // sub_56FDB0 (software cursor draw)
+
+    using CursorUpdateFn = void(__cdecl*)();
+    inline CursorUpdateFn s_OriginalCursorUpdate = nullptr;
+
+    inline void SetWinCursorVisible(bool visible) {
+        CURSORINFO ci = { sizeof(CURSORINFO) };
+        if (GetCursorInfo(&ci)) {
+            bool isCurrentlyVisible = (ci.flags & CURSOR_SHOWING) != 0;
+            if (visible && !isCurrentlyVisible) {
+                while (ShowCursor(TRUE) < 0) {}
+                SetCursor(LoadCursorA(NULL, IDC_ARROW));
+            } else if (!visible && isCurrentlyVisible) {
+                while (ShowCursor(FALSE) >= 0) {}
+                SetCursor(NULL);
+            }
+        }
+    }
+
+    inline void __cdecl CursorUpdateHook() {
+        bool isMenuCursorActive = (*reinterpret_cast<uint32_t*>(ADDR_MOUSE_ACTIVE) != 0);
+
+        if (g_Config.WinCursor != 0) {
+            // Win Cursor = 1: Show Windows OS cursor in menus, hide during gameplay
+            SetWinCursorVisible(isMenuCursorActive);
+        } else {
+            // Win Cursor = 0 (Default): Block/hide Windows cursor
+            SetWinCursorVisible(false);
+        }
+
+        // Always run the game's original sub_516F70 so internal frontend state updates cleanly.
+        // If WinCursor is 1, sub_56FDB0 returns immediately via a patched 'retn' (0xC3).
+        if (s_OriginalCursorUpdate) {
+            s_OriginalCursorUpdate();
+        }
+    }
+
+    inline void InitWinCursor(int winCursor) {
+        if (!s_OriginalCursorUpdate) {
+            s_OriginalCursorUpdate = reinterpret_cast<CursorUpdateFn>(
+                MemoryTools::GetCallTarget(ADDR_CURSOR_CALLSITE));
+            MemoryTools::MakeCALL(ADDR_CURSOR_CALLSITE,
+                reinterpret_cast<uintptr_t>(CursorUpdateHook));
+        }
+
+        if (winCursor != 0) {
+            // Suppress software cursor draw by making sub_56FDB0 return immediately (0xC3 = retn)
+            MemoryTools::Write<uint8_t>(ADDR_DRAW_CURSOR_FUNC, 0xC3);
+        } else {
+            // Block/hide Windows cursor immediately on startup
+            SetWinCursorVisible(false);
+        }
+    }
+}
+
+#endif // NFSMW_WIDESCREENFIX_HUDFIX_H
+
+```
+
+`source/MemoryTools.h`:
+
+```h
+#pragma once
+#ifndef NFSMW_WIDESCREENFIX_MEMORYTOOLS_H
+#define NFSMW_WIDESCREENFIX_MEMORYTOOLS_H
+
+#include <windows.h>
+#include <cstdint>
+#include <cstring>
+#include <vector>
+#include <cstdlib>
+
+namespace MemoryTools {
+    inline uintptr_t PatternScan(const char* patternStr, size_t matchIndex = 0, uintptr_t base = 0x00400000, size_t size = 0x500000) {
+        std::vector<uint8_t> bytes;
+        std::vector<bool> mask;
+
+        const char* p = patternStr;
+        while (*p) {
+            while (*p == ' ') p++;
+            if (!*p) break;
+            if (*p == '?') {
+                bytes.push_back(0);
+                mask.push_back(false);
+                p++;
+                if (*p == '?') p++;
+            } else {
+                char byteStr[3] = { p[0], p[1], 0 };
+                bytes.push_back(static_cast<uint8_t>(strtoul(byteStr, nullptr, 16)));
+                mask.push_back(true);
+                p += 2;
+            }
+        }
+
+        if (bytes.empty()) return 0;
+
+        uint8_t* pStart = reinterpret_cast<uint8_t*>(base);
+        size_t currentMatch = 0;
+        for (size_t i = 0; i <= size - bytes.size(); ++i) {
+            bool match = true;
+            for (size_t j = 0; j < bytes.size(); ++j) {
+                if (mask[j] && pStart[i + j] != bytes[j]) {
+                    match = false;
+                    break;
+                }
+            }
+            if (match) {
+                if (currentMatch == matchIndex) {
+                    return reinterpret_cast<uintptr_t>(pStart + i);
+                }
+                currentMatch++;
+            }
+        }
+        return 0;
+    }
+    inline bool Unprotect(uintptr_t address, size_t size, DWORD& oldProtect) {
+        return VirtualProtect(reinterpret_cast<void*>(address), size, PAGE_EXECUTE_READWRITE, &oldProtect) != FALSE;
+    }
+
+    inline void RestoreProtect(uintptr_t address, size_t size, DWORD oldProtect) {
+        DWORD temp;
+        VirtualProtect(reinterpret_cast<void*>(address), size, oldProtect, &temp);
+    }
+
+    template <typename T>
+    inline void Write(uintptr_t address, const T& value) {
+        DWORD oldProtect;
+        Unprotect(address, sizeof(T), oldProtect);
+        *reinterpret_cast<T*>(address) = value;
+        RestoreProtect(address, sizeof(T), oldProtect);
+    }
+
+    template <typename T>
+    inline T Read(uintptr_t address) {
+        return *reinterpret_cast<T*>(address);
+    }
+
+    inline void WriteBytes(uintptr_t address, const void* data, size_t size) {
+        DWORD oldProtect;
+        Unprotect(address, size, oldProtect);
+        std::memcpy(reinterpret_cast<void*>(address), data, size);
+        RestoreProtect(address, size, oldProtect);
+    }
+
+    inline void MakeNOP(uintptr_t address, size_t count = 1) {
+        DWORD oldProtect;
+        Unprotect(address, count, oldProtect);
+        std::memset(reinterpret_cast<void*>(address), 0x90, count);
+        RestoreProtect(address, count, oldProtect);
+    }
+
+    inline void MakeCALL(uintptr_t from, uintptr_t to, size_t nops = 0) {
+        DWORD oldProtect;
+        size_t total = 5 + nops;
+        Unprotect(from, total, oldProtect);
+        *reinterpret_cast<uint8_t*>(from) = 0xE8; // CALL rel32
+        *reinterpret_cast<int32_t*>(from + 1) = static_cast<int32_t>(to - (from + 5));
+        if (nops > 0) {
+            std::memset(reinterpret_cast<void*>(from + 5), 0x90, nops);
+        }
+        RestoreProtect(from, total, oldProtect);
+    }
+
+    inline void MakeJMP(uintptr_t from, uintptr_t to, size_t nops = 0) {
+        DWORD oldProtect;
+        size_t total = 5 + nops;
+        Unprotect(from, total, oldProtect);
+        *reinterpret_cast<uint8_t*>(from) = 0xE9; // JMP rel32
+        *reinterpret_cast<int32_t*>(from + 1) = static_cast<int32_t>(to - (from + 5));
+        if (nops > 0) {
+            std::memset(reinterpret_cast<void*>(from + 5), 0x90, nops);
+        }
+        RestoreProtect(from, total, oldProtect);
+    }
+
+    inline uintptr_t GetCallTarget(uintptr_t callInstructionAddress) {
+        int32_t offset = Read<int32_t>(callInstructionAddress + 1);
+        return callInstructionAddress + 5 + offset;
+    }
+}
+
+#endif // NFSMW_WIDESCREENFIX_MEMORYTOOLS_H
+
+
+```
+
+`source/Motionblur.h`:
+
+```h
+#pragma once
+#ifndef NFSMW_WIDESCREENFIX_MOTIONBLUR_H
+#define NFSMW_WIDESCREENFIX_MOTIONBLUR_H
+
+#include "MemoryTools.h"
+#include "Config.h"
+#include "Resolution.h"
+#include "UserSettings.h"
+#include <windows.h>
+#include <cstring>
+#include <string>
+#include <fstream>
+#include <vector>
+
+namespace Motionblur {
+    // Verified from IDA: sub_6DE300 (0x006DF1D2 render bypass) and UIOptionsScreen::SetupVideo (0x00529BC7 UI injection)
+
+    inline bool s_MotionBlurEnabled = true;
+    inline int s_MotionBlurLabelHash = 0;
+    inline int s_MotionBlurOnHash = 0;
+    inline int s_MotionBlurOffHash = 0;
+    inline unsigned int s_MotionBlurToggleVTable[15] = {};
+
+    inline void SaveMotionBlurToIni(bool enabled) {
+        if (g_Config.IniPath.empty()) return;
+
+        std::ifstream inFile(g_Config.IniPath);
+        if (!inFile.is_open()) {
+            WritePrivateProfileStringA(
+                "GRAPHICS",
+                "MotionBlur",
+                enabled ? "1                                 ; 0 = off, 1 = on"
+                        : "0                                 ; 0 = off, 1 = on",
+                g_Config.IniPath.string().c_str()
+            );
+            return;
+        }
+
+        std::vector<std::string> lines;
+        std::string line;
+        bool inGraphics = false;
+        bool replaced = false;
+
+        while (std::getline(inFile, line)) {
+            if (!line.empty() && line.back() == '\r') {
+                line.pop_back();
+            }
+
+            size_t start = line.find_first_not_of(" \t");
+            if (start != std::string::npos && line[start] == '[') {
+                size_t end = line.find(']', start);
+                if (end != std::string::npos) {
+                    std::string sec = line.substr(start + 1, end - start - 1);
+                    inGraphics = (_stricmp(sec.c_str(), "GRAPHICS") == 0);
+                }
+            } else if (inGraphics && !replaced && start != std::string::npos) {
+                if (_strnicmp(&line[start], "MotionBlur", 10) == 0) {
+                    char next = line[start + 10];
+                    if (next == ' ' || next == '\t' || next == '=') {
+                        size_t eqPos = line.find('=');
+                        if (eqPos != std::string::npos) {
+                            size_t semiPos = line.find(';', eqPos + 1);
+                            if (semiPos != std::string::npos) {
+                                size_t valStart = line.find_first_not_of(" \t", eqPos + 1);
+                                size_t valEnd = line.find_last_not_of(" \t", semiPos - 1);
+                                std::string beforeVal = (valStart != std::string::npos && valStart < semiPos)
+                                    ? line.substr(0, valStart)
+                                    : line.substr(0, eqPos + 1) + " ";
+                                std::string afterVal = (valEnd != std::string::npos && valEnd + 1 < line.size())
+                                    ? line.substr(valEnd + 1)
+                                    : (" " + line.substr(semiPos));
+                                line = beforeVal + (enabled ? "1" : "0") + afterVal;
+                            } else {
+                                line = line.substr(0, eqPos + 1) + (enabled ? " 1                                 ; 0 = off, 1 = on" : " 0                                 ; 0 = off, 1 = on");
+                            }
+                            replaced = true;
+                        }
+                    }
+                }
+            }
+            lines.push_back(line);
+        }
+        inFile.close();
+
+        if (replaced) {
+            std::ofstream outFile(g_Config.IniPath, std::ios::trunc);
+            if (outFile.is_open()) {
+                for (size_t i = 0; i < lines.size(); ++i) {
+                    outFile << lines[i] << "\r\n";
+                }
+            }
+        } else {
+            WritePrivateProfileStringA(
+                "GRAPHICS",
+                "MotionBlur",
+                enabled ? "1                                 ; 0 = off, 1 = on"
+                        : "0                                 ; 0 = off, 1 = on",
+                g_Config.IniPath.string().c_str()
+            );
+        }
+    }
+
+    inline void SetMotionBlurEnabled(bool enabled, bool saveToDisk = true) {
+        s_MotionBlurEnabled = enabled;
+
+        // 1. Patch render loop branch at 0x006DF1D2 (0x74 = jz, 0xEB = jmp)
+        MemoryTools::Write<uint8_t>(0x006DF1D2, enabled ? 0x74 : 0xEB);
+
+        // 2. Set engine global g_MotionBlurEnable (0x009017DC)
+        MemoryTools::Write<int>(0x009017DC, enabled ? 1 : 0);
+
+        // 3. Update in-memory configuration
+        g_Config.MotionBlur = enabled ? 1 : 0;
+
+        if (saveToDisk) {
+            // 4. Persist to NFSMW_WideScreenFix.ini while preserving inline comments
+            SaveMotionBlurToIni(enabled);
+
+            // 5. Persist to local Settings.ini if WriteSettingsToFile is active
+            if (UserSettings::s_WriteSettingsToFile && !UserSettings::s_SettingsIniPath.empty()) {
+                WritePrivateProfileStringA(
+                    "Need for Speed Most Wanted",
+                    "g_MotionBlurEnable",
+                    enabled ? "1" : "0",
+                    UserSettings::s_SettingsIniPath.string().c_str()
+                );
+            }
+        }
+    }
+
+    inline void UpdateMotionBlurToggleLabel(void* widget) {
+        if (!widget) return;
+
+        auto setLabel = [](void* label, int hash) {
+            if (!label) return;
+            *reinterpret_cast<unsigned int*>(reinterpret_cast<uintptr_t>(label) + 0x1C) |= 0x400000;
+            *reinterpret_cast<int*>(reinterpret_cast<uintptr_t>(label) + 0x60) = hash;
+
+            // FEString::pLabelCallback global at 0x0091DD08
+            auto callbackObject = *reinterpret_cast<void**>(0x0091DD08);
+            if (callbackObject) {
+                auto callbackVTable = *reinterpret_cast<void***>(callbackObject);
+                if (callbackVTable && callbackVTable[0]) {
+                    using LabelCallback = void(__thiscall*)(void*, void*);
+                    reinterpret_cast<LabelCallback>(callbackVTable[0])(callbackObject, label);
+                }
+            }
+
+            auto& flags = *reinterpret_cast<unsigned int*>(reinterpret_cast<uintptr_t>(label) + 0x1C);
+            flags = (flags & 0xFFBFFFFD) | 0x400000;
+        };
+
+        // Left column (Option Name): "Motion Blur"
+        auto* label = *reinterpret_cast<void**>(reinterpret_cast<uintptr_t>(widget) + 0x2C);
+        setLabel(label, s_MotionBlurLabelHash);
+
+        // Right column (Option Value): "On" or "Off"
+        auto* value = *reinterpret_cast<void**>(reinterpret_cast<uintptr_t>(widget) + 0x30);
+        setLabel(value, s_MotionBlurEnabled ? s_MotionBlurOnHash : s_MotionBlurOffHash);
+    }
+
+    inline void __fastcall MotionBlurToggleInput(void* widget, void*, int, int actionId) {
+        constexpr int ACTION_DECREMENT = static_cast<int>(0x9120409E);
+        constexpr int ACTION_INCREMENT = static_cast<int>(0xB5971BF1);
+
+        if (actionId == ACTION_DECREMENT || actionId == ACTION_INCREMENT) {
+            SetMotionBlurEnabled(!s_MotionBlurEnabled);
+        }
+
+        if (widget) {
+            *reinterpret_cast<unsigned char*>(reinterpret_cast<uintptr_t>(widget) + 42) = 1;
+            auto vtable = *reinterpret_cast<uintptr_t**>(widget);
+            if (vtable && vtable[14]) {
+                using NotifyFn = void(__thiscall*)(void*, int);
+                reinterpret_cast<NotifyFn>(vtable[14])(widget, actionId);
+            }
+            if (vtable && vtable[3]) {
+                using UpdateFn = void(__thiscall*)(void*);
+                reinterpret_cast<UpdateFn>(vtable[3])(widget);
+            }
+        }
+    }
+
+    inline unsigned int __fastcall MotionBlurToggleLabel(void* widget) {
+        UpdateMotionBlurToggleLabel(widget);
+        return 0;
+    }
+
+    // Appends the custom Motion Blur toggle option after Visual Treatment in SetupVideo
+    inline void __fastcall AddMotionBlurOption(void* menu, void*, void* visualTreatmentWidget, bool enabled) {
+        using AddToggleOptionFn = void(__thiscall*)(void*, void*, bool);
+
+        // 1. Add the original Visual Treatment widget
+        reinterpret_cast<AddToggleOptionFn>(0x00588570)(menu, visualTreatmentWidget, enabled);
+
+        // 2. Allocate and construct the Motion Blur FEToggleWidget
+        auto gameMalloc = reinterpret_cast<void*(__cdecl*)(size_t)>(0x00652AD0);
+        auto toggleCtor = reinterpret_cast<void(__thiscall*)(void*, bool)>(0x00589300);
+        auto toggle = gameMalloc ? gameMalloc(0x5C) : nullptr;
+        if (!toggle) return;
+
+        toggleCtor(toggle, true);
+        std::memcpy(s_MotionBlurToggleVTable, reinterpret_cast<void*>(0x0089BDB0), sizeof(s_MotionBlurToggleVTable));
+        s_MotionBlurToggleVTable[1] = reinterpret_cast<unsigned int>(&MotionBlurToggleInput);
+        s_MotionBlurToggleVTable[3] = reinterpret_cast<unsigned int>(&MotionBlurToggleLabel);
+        *reinterpret_cast<unsigned int*>(toggle) = reinterpret_cast<unsigned int>(s_MotionBlurToggleVTable);
+
+        // 3. Add Motion Blur toggle widget to menu
+        reinterpret_cast<AddToggleOptionFn>(0x00588570)(menu, toggle, enabled);
+    }
+
+    inline void Init(bool enableMotionBlur) {
+        if (g_Config.SunSetInstalled) {
+            s_MotionBlurEnabled = false;
+            return;
+        }
+
+        // Register display labels in the global localization map
+        s_MotionBlurLabelHash = static_cast<int>(Resolution::StringHash("OPT_VO_MOTION_BLUR"));
+        s_MotionBlurOnHash    = static_cast<int>(Resolution::StringHash("OPT_VO_MOTION_BLUR_ON"));
+        s_MotionBlurOffHash   = static_cast<int>(Resolution::StringHash("OPT_VO_MOTION_BLUR_OFF"));
+
+        Resolution::g_ResolutionLabels[s_MotionBlurLabelHash] = "Motion Blur";
+        Resolution::g_ResolutionLabels[s_MotionBlurOnHash]    = "On";
+        Resolution::g_ResolutionLabels[s_MotionBlurOffHash]   = "Off";
+
+        // Hook SetupVideo at 0x00529BC7 to inject Motion Blur toggle after Visual Treatment
+        MemoryTools::MakeCALL(0x00529BC7, reinterpret_cast<uintptr_t>(AddMotionBlurOption));
+
+        // Set initial state according to INI configuration (no disk rewrite on boot)
+        SetMotionBlurEnabled(enableMotionBlur, false);
+    }
+}
+
+#endif // NFSMW_WIDESCREENFIX_MOTIONBLUR_H
+
+
+```
+
+`source/MovieFix.h`:
+
+```h
+#pragma once
+#ifndef NFSMW_WIDESCREENFIX_MOVIEFIX_H
+#define NFSMW_WIDESCREENFIX_MOVIEFIX_H
+
+#include "MemoryTools.h"
+#include <cstdint>
+#include <algorithm>
+
+namespace MovieFix {
+    // Verified from IDA: cFEngRender::RenderMovie (0x00599DF0) quad vertex push operands
+    constexpr uintptr_t ADDR_MOVIE_QUAD_Y2 = 0x0059A02A; // Height (Bottom)
+    constexpr uintptr_t ADDR_MOVIE_QUAD_X2 = 0x0059A02F; // Width (Right)
+    constexpr uintptr_t ADDR_MOVIE_QUAD_Y1 = 0x0059A034; // Height (Top)
+    constexpr uintptr_t ADDR_MOVIE_QUAD_X1 = 0x0059A039; // Width (Left)
+
+    // Verified from IDA: sub_7F996A (0x007F996A) - YUV420 to RGB Lookup Tables
+    // Tables consumed by MMX video rasterizer (sub_7F91BD).
+    constexpr uintptr_t ADDR_Y_TABLE        = 0x00908648; // Y table (256 * 8 bytes)
+    constexpr uintptr_t ADDR_U_TABLE        = 0x00908E48; // U table (256 * 8 bytes)
+    constexpr uintptr_t ADDR_V_TABLE        = 0x00909648; // V table (256 * 8 bytes)
+    constexpr uintptr_t ADDR_CALC_YUV_LUT   = 0x007F996A; // sub_7F996A entry point
+    constexpr uintptr_t ADDR_FLAG_YUV_RESET = 0x009BFE18; // Reset flag at end of sub_7F996A
+
+    // Full color range (0-255) LUT calculation from Toru
+    struct RgbMap {
+        uint16_t R;
+        uint16_t G;
+        uint16_t B;
+        uint16_t A;
+    };
+
+    inline void MoviePlayerCalcYuvLut(uintptr_t Y, uintptr_t U, uintptr_t V) {
+        auto* y_table = reinterpret_cast<RgbMap*>(Y);
+        auto* u_table = reinterpret_cast<RgbMap*>(U);
+        auto* v_table = reinterpret_cast<RgbMap*>(V);
+
+        for (int i = 0; i < 256; i++) {
+            y_table[i].R = (std::min)(static_cast<uint16_t>((std::max)(i - 16, 0) * (255.0 / 219.0)), static_cast<uint16_t>(255));
+            y_table[i].G = (std::min)(static_cast<uint16_t>((std::max)(i - 16, 0) * (255.0 / 219.0)), static_cast<uint16_t>(255));
+            y_table[i].B = (std::min)(static_cast<uint16_t>((std::max)(i - 16, 0) * (255.0 / 219.0)), static_cast<uint16_t>(255));
+            y_table[i].A = 0xFF;
+
+            u_table[i].R = static_cast<uint16_t>(((i / 255.0) - 0.5) * (+1.7720 * (255.0 / 224.0)) * 255.0);
+            u_table[i].G = static_cast<uint16_t>(((i / 255.0) - 0.5) * (-0.3441 * (255.0 / 224.0)) * 255.0);
+            u_table[i].B = 0;
+            u_table[i].A = 0;
+
+            v_table[i].R = 0;
+            v_table[i].G = static_cast<uint16_t>(((i / 255.0) - 0.5) * (-0.7141 * (255.0 / 224.0)) * 255.0);
+            v_table[i].B = static_cast<uint16_t>(((i / 255.0) - 0.5) * (+1.4020 * (255.0 / 224.0)) * 255.0);
+            v_table[i].A = 0;
+        }
+    }
+
+    inline void __cdecl Hooked_CalcYuvLut() {
+        MoviePlayerCalcYuvLut(ADDR_Y_TABLE, ADDR_U_TABLE, ADDR_V_TABLE);
+        *reinterpret_cast<uint32_t*>(ADDR_FLAG_YUV_RESET) = 0;
+    }
+
+    inline void Init(int mode, bool x360StuffInstalled = false) {
+        if (!x360StuffInstalled) {
+            // Hook YUV LUT generator (sub_7F996A) to generate full-color range tables (0-255)
+            // instead of vanilla limited range (16-235).
+            MemoryTools::MakeJMP(ADDR_CALC_YUV_LUT, reinterpret_cast<uintptr_t>(Hooked_CalcYuvLut));
+
+            // Pre-calculate tables right away
+            Hooked_CalcYuvLut();
+        }
+
+        if (mode <= 0 || x360StuffInstalled) return;
+
+        constexpr float kAspectFactor = (4.0f / 3.0f) / (16.0f / 9.0f); // 0.75f
+        constexpr float kScaled = 0.5f / kAspectFactor;                 // ~0.6666667f
+
+        if (mode == 1) {
+            // Mode 1: Fill 16:9 screen (zoom/crop letterbox)
+            MemoryTools::Write<float>(ADDR_MOVIE_QUAD_Y2,  kScaled);
+            MemoryTools::Write<float>(ADDR_MOVIE_QUAD_X2,  kScaled);
+            MemoryTools::Write<float>(ADDR_MOVIE_QUAD_Y1, -kScaled);
+            MemoryTools::Write<float>(ADDR_MOVIE_QUAD_X1, -kScaled);
+        } else if (mode == 2) {
+            // Mode 2: Aspect ratio correct (preserve height, scale width to prevent stretch)
+            MemoryTools::Write<float>(ADDR_MOVIE_QUAD_Y2,  0.5f);
+            MemoryTools::Write<float>(ADDR_MOVIE_QUAD_X2,  kScaled);
+            MemoryTools::Write<float>(ADDR_MOVIE_QUAD_Y1, -0.5f);
+            MemoryTools::Write<float>(ADDR_MOVIE_QUAD_X1, -kScaled);
+        }
+    }
+}
+
+#endif // NFSMW_WIDESCREENFIX_MOVIEFIX_H
+
+```
+
+`source/NFSMW_WideScreenFix.cpp`:
+
+```cpp
+#include <windows.h>
+
+#include "Config.h"
+#include "MemoryTools.h"
+#include "Resolution.h"
+#include "CameraFOV.h"
+#include "HudFix.h"
+#include "MovieFix.h"
+#include "SkipIntro.h"
+#include "UserSettings.h"
+#include "Motionblur.h"
+#include "SimRate.h"
+#include "Shadowfix.h"
+#include "NOSTrailfix.h"
+#include "HighSpecAudio.h"
+
+static void InitializeMod() {
+    static bool s_Initialized = false;
+    if (s_Initialized) return;
+    s_Initialized = true;
+
+    // 1. Load configuration from NFSMW_WideScreenFix.ini
+    g_Config.Load();
+
+    // 2. Resolution System (Menu integration, seamless runtime switching, display mode enumeration)
+    Resolution::Init(g_Config.ResX, g_Config.ResY, g_Config.WindowMode);
+
+    // 3. User & Savegame Settings (CustomUserDir & WriteSettingsToFile)
+    if (!g_Config.CustomUserFilesDirectoryInGameDir.empty() && g_Config.CustomUserFilesDirectoryInGameDir != "0") {
+        UserSettings::InitCustomUserFiles(g_Config.GamePath, g_Config.CustomUserFilesDirectoryInGameDir);
+    }
+    if (g_Config.WriteSettingsToFile) {
+        UserSettings::InitRegistryRedirect(g_Config.GamePath, true);
+    }
+
+    // 4. Skip Intro Logos/FMVs
+    if (g_Config.SkipIntro) {
+        SkipIntro::Init();
+    }
+
+    // 5. FMV / Movie Widescreen & Full Color Range. X360Stuff owns movie scaling when installed.
+    MovieFix::Init(g_Config.WideScreenMovie, g_Config.X360StuffInstalled);
+
+    // 6. 3D Camera Field of View (Hor+ Projection)
+    CameraFOV::Init();
+
+    // 7. Motion Blur. Sunset mod owns its own Video Settings option when installed.
+    if (!g_Config.SunSetInstalled) {
+        Motionblur::Init(g_Config.MotionBlur != 0);
+    } else {
+        Motionblur::s_MotionBlurEnabled = false;
+    }
+
+    // 6. 2D HUD. X360Stuff owns the same HUD transform when installed.
+    if (!g_Config.X360StuffInstalled) {
+        HudFix::Init(g_Config.FixHUD != 0, g_Config.WideScreenHUD != 0);
+    }
+
+    // Independent of X360Stuff detection: this only changes the loading
+    // splash package name when explicitly enabled.
+    HudFix::InitWideScreenSplash(g_Config.WS_MWSPLASHBACK != 0);
+
+    // 7. Windows Cursor Toggle (0 = Default in-game cursor, blocks Windows cursor | 1 = Windows OS cursor)
+    HudFix::InitWinCursor(g_Config.WinCursor);
+
+    // 8. High-Precision SimRate (200 Hz Decoupled Physics)
+    if (g_Config.SimRate != 0) {
+        SimRate::Init(true, g_Config.SimRate);
+    }
+
+    // 9. Dynamic Shadows System (ShadowsRes, ShadowsFix, LOD, Formats)
+    ShadowFix::Init(
+        g_Config.ShadowsRes,
+        g_Config.ShadowsFix,
+        g_Config.ImproveShadowLOD,
+        g_Config.AutoScaleShadowsRes,
+        g_Config.ShadowMapTextureFormat,
+        g_Config.ForceSharpShadows
+    );
+
+    // 10. NOS Trail (Enables/disables trail, optional custom length and position offset)
+    NOSTrailFix::Init(
+        g_Config.NosTrail != 0,
+        g_Config.NOSTrailLength,
+        g_Config.NOSTrailPositionScalar
+    );
+
+    // 11. High-Spec Audio (Forces 44,100 Hz CD-quality audio by default)
+    HighSpecAudio::Init();
+}
+
+BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved) {
+    if (fdwReason == DLL_PROCESS_ATTACH) {
+        DisableThreadLibraryCalls(hinstDLL);
+
+        // Safety check: only initialize when attached to speed.exe
+        char moduleName[MAX_PATH] = { 0 };
+        GetModuleFileNameA(NULL, moduleName, MAX_PATH);
+        if (strstr(moduleName, "speed.exe") || strstr(moduleName, "SPEED.EXE")) {
+            InitializeMod();
+        }
+    } else if (fdwReason == DLL_PROCESS_DETACH) {
+        SimRate::Shutdown();
+    }
+    return TRUE;
+}
+
+```
+
+`source/NFSMW_WideScreenFix.ini`:
+
+```ini
+[DISPLAY]
+ResX = 0
+ResY = 0
+WindowMode = 0                                 ; 0 = Fullscreen | 1 = Borderless | 2 = Border | 3 = Resizable Border | 4 = Borderless Fullscreen | 5 = Borderless Fullscreen Stretched
+
+[HUD]
+FixHUD = 1                                     ; 1 = Correct HUD aspect ratio and element positioning
+WideScreenHUD = 1                              ; 1 = Move selected HUD groups/minimap toward widescreen edges
+WS_MWSPLASHBACK = 1                            ; 1 = Use WS_MW_LS_Splash.fng for loading screens
+
+[MOVIES]
+WideScreenMovie = 1                            ; 0 = Off, 1 = Zoom/Fill 16:9, 2 = Fit with Pillarboxes
+
+[GRAPHICS]
+MotionBlur = 1                                 ; 0 = off, 1 = on
+ConsoleGamma = 1                               ; 0 = off, 1 = ConsoleGamma, 2 = MWGamma
+
+[SHADOW]
+ShadowsRes = 2048                              ; Controls the resolution of dynamic shadows and enables them for Intel GPUs. (1024 = Original | 2048 = Xbox 360 | 16384 = Max)
+ShadowsFix = 1                                 ; Dynamic shadows will no longer disappear when going into tunnels, under bridges, etc.
+ImproveShadowLOD = 1                           ; Increases the level of detail of dynamic shadows. This may negatively affect performance.
+AutoScaleShadowsRes = 1                        ; Adjusts the specified ShadowsRes based on the user's aspect ratio to maintain quality. This may negatively affect performance.
+ShadowMapTextureFormat = 0                     ; Set the texture format for the shadow map texture here. (-1 = Disable | 0 = Auto (INTZ/D24S8) | 1 = Force D24S8 | 2 = Force INTZ | 3 = Force DF16 | 4 = Force DF24)
+ForceSharpShadows = 0                          ; Forces the shadows to be sharp in texture formats that force soft shadows (INTZ, DF16 and DF24). This will cause more visible shadow pop-in, but result in much sharper stencil shadows.
+
+[MISC]
+SkipIntro = 1                                  ; 1 = Skip EA logos and intro movies on startup
+SimRate = 1                                    ; 0 = Off, 1 = On
+WriteSettingsToFile = 1                        ; 1 = Store game registry settings in local file
+CustomUserFilesDirectoryInGameDir = 0          ; 0 = disable, or folder name in game directory (e.g. SAVE)
+Win Cursor = 0                                 ; 0 = In-game software cursor (Default, blocks Windows cursor) | 1 = Windows OS hardware cursor
+
+[NOS TRAIL]
+NosTrail = 1                                   ; 1 = Enabled (Default) | 0 = Completely disables NOS trail
+NOSTrailLength = 0                             ; 0 = Default set by game | Values > 0 scale trail length directly
+NOSTrailPositionScalar = 0.0                   ; 0.0 = Default (no offset) | Values > 0 offset trail position relative to tail lights
+
+```
+
+`source/NOSTrailfix.h`:
+
+```h
+#pragma once
+#ifndef NFSMW_WIDESCREENFIX_NOSTRAILFIX_H
+#define NFSMW_WIDESCREENFIX_NOSTRAILFIX_H
+
+#include <windows.h>
+#include <cstdint>
+#include <cstring>
+#include "MemoryTools.h"
+
+namespace NOSTrailFix {
+    // Verified from IDA: VehicleRenderConn::RenderFlares (0x00744E20)
+    constexpr uintptr_t ADDR_NOS_TRAIL_TEST   = 0x00744FB7; // 85 C0 (test eax, eax)
+    constexpr uintptr_t ADDR_NOS_TRAIL_LENGTH = 0x00745038; // 8 bytes: EB 06 8D 9B 00 00 00 00
+    constexpr uintptr_t ADDR_NOS_TRAIL_CALL   = 0x007450E8; // call CarRenderInfo::RenderFlaresOnCar
+
+    struct bVector3 {
+        float x, y, z;
+    };
+
+    struct bVector4 {
+        float x, y, z, w;
+    };
+
+    struct bMatrix4 {
+        bVector4 v0;
+        bVector4 v1;
+        bVector4 v2;
+        bVector4 v3;
+    };
+
+    inline float s_NOSTrailLength = 0.0f;
+    inline float s_NOSTrailPositionScalar = 0.0f;
+
+    // Hook at 0x00745038: scales delta vector in [esp+30h], [esp+34h], [esp+38h]
+    __declspec(naked) inline void Hook_NOSTrailLength() {
+        __asm {
+            // [esp+4] is the return address pushed by call
+            fld dword ptr [esp + 0x30 + 4]
+            fmul ds:[s_NOSTrailLength]
+            fstp dword ptr [esp + 0x30 + 4]
+
+            fld dword ptr [esp + 0x34 + 4]
+            fmul ds:[s_NOSTrailLength]
+            fstp dword ptr [esp + 0x34 + 4]
+
+            fld dword ptr [esp + 0x38 + 4]
+            fmul ds:[s_NOSTrailLength]
+            fstp dword ptr [esp + 0x38 + 4]
+
+            xor eax, eax
+            ret
+        }
+    }
+
+    // Original RenderFlaresOnCar function pointer
+    using PFN_RenderFlaresOnCar = void(__thiscall*)(void* thisCarRenderInfo, void* pView, bVector3* pPosition, bMatrix4* pBodyMatrix, int flag1, int flag2, int flag3);
+    inline PFN_RenderFlaresOnCar s_OrigRenderFlaresOnCar = nullptr;
+
+    inline void __fastcall Hook_RenderFlaresOnCar(void* thisCarRenderInfo, void* dummyEdx, void* pView, bVector3* pPosition, bMatrix4* pBodyMatrix, int flag1, int flag2, int flag3) {
+        if (s_NOSTrailPositionScalar <= 0.0f || !pBodyMatrix || !s_OrigRenderFlaresOnCar) {
+            if (s_OrigRenderFlaresOnCar) {
+                s_OrigRenderFlaresOnCar(thisCarRenderInfo, pView, pPosition, pBodyMatrix, flag1, flag2, flag3);
+            }
+            return;
+        }
+
+        bMatrix4 adjustedMatrix = *pBodyMatrix;
+
+        float posScale = 1.0f + s_NOSTrailPositionScalar;
+
+        adjustedMatrix.v0.x *= posScale;
+        adjustedMatrix.v0.y *= posScale;
+        adjustedMatrix.v0.z *= posScale;
+
+        adjustedMatrix.v2.x *= posScale;
+        adjustedMatrix.v2.y *= posScale;
+
+        s_OrigRenderFlaresOnCar(thisCarRenderInfo, pView, pPosition, &adjustedMatrix, flag1, flag2, flag3);
+    }
+
+    inline void Init(bool nosTrailEnabled, float trailLength = 0.0f, float positionScalar = 0.0f) {
+        // Toggle: 0x00744FB7 (31 C0 = xor eax, eax skips trail; 85 C0 = test eax, eax) - Verified from IDA
+        if (!nosTrailEnabled) {
+            MemoryTools::Write<uint16_t>(ADDR_NOS_TRAIL_TEST, 0xC031);
+            return;
+        }
+
+        MemoryTools::Write<uint16_t>(ADDR_NOS_TRAIL_TEST, 0xC085);
+
+        s_NOSTrailLength = trailLength;
+        s_NOSTrailPositionScalar = positionScalar;
+
+        // Custom Length: 0x00745038 (only hooked if custom length > 0) - Verified from IDA
+        if (s_NOSTrailLength > 0.0f) {
+            MemoryTools::MakeCALL(ADDR_NOS_TRAIL_LENGTH, reinterpret_cast<uintptr_t>(Hook_NOSTrailLength), 3);
+        }
+
+        // Custom Position: 0x007450E8 (only hooked if position scalar > 0) - Verified from IDA
+        if (s_NOSTrailPositionScalar > 0.0f) {
+            s_OrigRenderFlaresOnCar = reinterpret_cast<PFN_RenderFlaresOnCar>(MemoryTools::GetCallTarget(ADDR_NOS_TRAIL_CALL));
+            MemoryTools::MakeCALL(ADDR_NOS_TRAIL_CALL, reinterpret_cast<uintptr_t>(Hook_RenderFlaresOnCar));
+        }
+    }
+}
+
+#endif // NFSMW_WIDESCREENFIX_NOSTRAILFIX_H
+
+```
+
+`source/Resolution.h`:
+
+```h
+#pragma once
+#ifndef NFSMW_WIDESCREENFIX_RESOLUTION_H
+#define NFSMW_WIDESCREENFIX_RESOLUTION_H
+
+#include "MemoryTools.h"
+#include "Config.h"
+#include <windows.h>
+#include <vector>
+#include <string>
+#include <unordered_map>
+#include <algorithm>
+
+namespace Resolution {
+    // Verified from IDA: Resolution and D3D9 device management addresses
+
+    struct Mode {
+        int width;
+        int height;
+        int refreshRate;
+    };
+
+    inline std::vector<Mode> g_ResolutionList;
+    inline std::unordered_map<int, std::string> g_ResolutionLabels;
+    inline std::vector<int> g_ResolutionHashes;
+    inline std::vector<int> g_SupportedModes;
+    inline std::vector<int> g_SupportedRefreshRates;
+
+    inline int* g_pResolutionHashes = nullptr;
+    inline int g_ResolutionCount = 0;
+
+    inline int g_CurrentWidth = 1024;
+    inline int g_CurrentHeight = 768;
+    inline float g_CurrentAspectRatio = 4.0f / 3.0f;
+    inline int g_ActiveResIndex = 0;
+
+    // Callbacks on resolution change
+    using ResChangeCallback = void(*)(int width, int height);
+    inline std::vector<ResChangeCallback> g_OnResChangeCallbacks;
+
+    inline void RegisterOnResChange(ResChangeCallback cb) {
+        g_OnResChangeCallbacks.push_back(cb);
+    }
+
+    // Native EA engine hash algorithm (bStringHash at 0x00460C20)
+    inline unsigned int StringHash(const char* str) {
+        if (!str) return static_cast<unsigned int>(-1);
+        int result = -1;
+        unsigned char c = *str;
+        while (c != 0) {
+            result = c + 33 * result;
+            c = *(++str);
+        }
+        return static_cast<unsigned int>(result);
+    }
+
+    inline int g_WindowMode = 0;
+    inline int g_WindowModeFallback = 1;
+    inline HWND g_GameHWND = NULL;
+
+    using PFN_CreateWindowExA = HWND(WINAPI*)(DWORD, LPCSTR, LPCSTR, DWORD, int, int, int, int, HWND, HMENU, HINSTANCE, LPVOID);
+    using PFN_SetWindowLongA = LONG(WINAPI*)(HWND, int, LONG);
+    using PFN_AdjustWindowRect = BOOL(WINAPI*)(LPRECT, DWORD, BOOL);
+    using PFN_SetWindowPos = BOOL(WINAPI*)(HWND, HWND, int, int, int, int, UINT);
+
+    inline PFN_CreateWindowExA s_OrigCreateWindowExA = nullptr;
+    inline PFN_SetWindowLongA s_OrigSetWindowLongA = nullptr;
+    inline PFN_AdjustWindowRect s_OrigAdjustWindowRect = nullptr;
+    inline PFN_SetWindowPos s_OrigSetWindowPos = nullptr;
+
+    inline void __cdecl ResetDeviceHook();
+    inline void __cdecl Hook_sub_6DB0D0() { ResetDeviceHook(); }
+
+    inline void ApplyWindowStyleAndPosition(HWND hWnd, int width, int height) {
+        if (!hWnd) return;
+
+        int deskW = GetSystemMetrics(SM_CXSCREEN);
+        int deskH = GetSystemMetrics(SM_CYSCREEN);
+
+        int winW = (width > 0) ? width : g_CurrentWidth;
+        int winH = (height > 0) ? height : g_CurrentHeight;
+
+        if (g_WindowMode == 4) { // Borderless Fullscreen (maintains aspect ratio)
+            float aspect = static_cast<float>(width) / static_cast<float>(height);
+            float deskAspect = static_cast<float>(deskW) / static_cast<float>(deskH);
+            if (aspect >= deskAspect) {
+                winW = deskW;
+                winH = static_cast<int>(deskW / aspect);
+            } else {
+                winH = deskH;
+                winW = static_cast<int>(deskH * aspect);
+            }
+        } else if (g_WindowMode == 5) { // Borderless Fullscreen Stretched (fills screen)
+            winW = deskW;
+            winH = deskH;
+        }
+
+        LONG style = GetWindowLongA(hWnd, GWL_STYLE);
+        style &= ~(WS_HSCROLL | WS_VSCROLL);
+
+        if (g_WindowMode == 1 || g_WindowMode == 4 || g_WindowMode == 5) {
+            // Borderless / Borderless Fullscreen / Borderless Fullscreen Stretched
+            style &= ~(WS_CAPTION | WS_THICKFRAME | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_SYSMENU);
+            style |= WS_POPUP;
+        } else if (g_WindowMode == 2) {
+            // Border
+            style |= (WS_CAPTION | WS_MINIMIZEBOX | WS_SYSMENU);
+            style &= ~(WS_MAXIMIZEBOX | WS_THICKFRAME);
+        } else if (g_WindowMode == 3) {
+            // Resizable Border
+            style |= (WS_CAPTION | WS_MINIMIZEBOX | WS_SYSMENU | WS_MAXIMIZEBOX | WS_THICKFRAME);
+        }
+
+        SetWindowLongA(hWnd, GWL_STYLE, style);
+
+        LONG exStyle = GetWindowLongA(hWnd, GWL_EXSTYLE);
+        RECT rect = { 0, 0, winW, winH };
+        if (style & WS_CAPTION) {
+            AdjustWindowRectEx(&rect, style, FALSE, exStyle);
+        }
+
+        int totalW = rect.right - rect.left;
+        int totalH = rect.bottom - rect.top;
+        int left = (deskW - winW) / 2 + rect.left;
+        int top = (deskH - winH) / 2 + rect.top;
+
+        RECT* pWindowRect = reinterpret_cast<RECT*>(0x0093DAA4);
+        if (pWindowRect) {
+            pWindowRect->left = left;
+            pWindowRect->top = top;
+            pWindowRect->right = left + totalW;
+            pWindowRect->bottom = top + totalH;
+        }
+
+        SetWindowPos(hWnd, HWND_NOTOPMOST, left, top, totalW, totalH, SWP_SHOWWINDOW | SWP_FRAMECHANGED);
+        MoveWindow(hWnd, left, top, totalW, totalH, TRUE);
+    }
+
+    inline HWND WINAPI Hook_CreateWindowExA(DWORD dwExStyle, LPCSTR lpClassName, LPCSTR lpWindowName, DWORD dwStyle, int X, int Y, int nWidth, int nHeight, HWND hWndParent, HMENU hMenu, HINSTANCE hInstance, LPVOID lpParam) {
+        if (hWndParent && hWndParent != GetDesktopWindow()) {
+            return s_OrigCreateWindowExA(dwExStyle, lpClassName, lpWindowName, dwStyle, X, Y, nWidth, nHeight, hWndParent, hMenu, hInstance, lpParam);
+        }
+
+        SetProcessDPIAware();
+
+        int deskW = GetSystemMetrics(SM_CXSCREEN);
+        int deskH = GetSystemMetrics(SM_CYSCREEN);
+
+        int winW = (g_CurrentWidth > 0) ? g_CurrentWidth : ((nWidth > 0) ? nWidth : 1024);
+        int winH = (g_CurrentHeight > 0) ? g_CurrentHeight : ((nHeight > 0) ? nHeight : 768);
+
+        if (g_WindowMode == 4) { // Borderless Fullscreen (maintains aspect ratio)
+            float aspect = static_cast<float>(winW) / static_cast<float>(winH);
+            float deskAspect = static_cast<float>(deskW) / static_cast<float>(deskH);
+            if (aspect >= deskAspect) {
+                winW = deskW;
+                winH = static_cast<int>(deskW / aspect);
+            } else {
+                winH = deskH;
+                winW = static_cast<int>(deskH * aspect);
+            }
+        } else if (g_WindowMode == 5) { // Borderless Fullscreen Stretched (fills screen)
+            winW = deskW;
+            winH = deskH;
+        }
+
+        int posX = (deskW - winW) / 2;
+        int posY = (deskH - winH) / 2;
+        if (posX < 0) posX = 0;
+        if (posY < 0) posY = 0;
+
+        HWND hWnd = s_OrigCreateWindowExA(dwExStyle, lpClassName, lpWindowName, dwStyle, posX, posY, winW, winH, hWndParent, hMenu, hInstance, lpParam);
+        g_GameHWND = hWnd;
+
+        if (hWnd) {
+            ApplyWindowStyleAndPosition(hWnd, winW, winH);
+        }
+        return hWnd;
+    }
+
+    inline LONG WINAPI Hook_SetWindowLongA(HWND hWnd, int nIndex, LONG dwNewLong) {
+        if (nIndex == GWL_STYLE && g_WindowMode > 0) {
+            dwNewLong &= ~(WS_HSCROLL | WS_VSCROLL);
+            if (g_WindowMode == 1 || g_WindowMode == 4 || g_WindowMode == 5) {
+                dwNewLong &= ~(WS_CAPTION | WS_THICKFRAME | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_SYSMENU);
+                dwNewLong |= WS_POPUP;
+            } else if (g_WindowMode == 2) {
+                dwNewLong |= (WS_CAPTION | WS_MINIMIZEBOX | WS_SYSMENU);
+                dwNewLong &= ~(WS_MAXIMIZEBOX | WS_THICKFRAME);
+            } else if (g_WindowMode == 3) {
+                dwNewLong |= (WS_CAPTION | WS_MINIMIZEBOX | WS_SYSMENU | WS_MAXIMIZEBOX | WS_THICKFRAME);
+            }
+        }
+        return s_OrigSetWindowLongA(hWnd, nIndex, dwNewLong);
+    }
+
+    inline BOOL WINAPI Hook_AdjustWindowRect(LPRECT lpRect, DWORD dwStyle, BOOL bMenu) {
+        if (g_WindowMode == 2) {
+            return s_OrigAdjustWindowRect(lpRect, WS_CAPTION, bMenu);
+        } else if (g_WindowMode == 3) {
+            return s_OrigAdjustWindowRect(lpRect, WS_CAPTION | WS_MAXIMIZEBOX | WS_THICKFRAME, bMenu);
+        }
+        return s_OrigAdjustWindowRect(lpRect, dwStyle, bMenu);
+    }
+
+    inline BOOL WINAPI Hook_SetWindowPos(HWND hWnd, HWND hWndInsertAfter, int X, int Y, int cx, int cy, UINT uFlags) {
+        return s_OrigSetWindowPos(hWnd, hWndInsertAfter, X, Y, cx, cy, uFlags);
+    }
+
+
+
+
+    inline void EnumerateResolutions(int initialResX, int initialResY) {
+        std::vector<Mode> modes;
+        DEVMODEA dm = { 0 };
+        dm.dmSize = sizeof(dm);
+
+        DEVMODEA dmCurrent = { 0 };
+        dmCurrent.dmSize = sizeof(dmCurrent);
+        int desktopHz = 60;
+        if (EnumDisplaySettingsA(NULL, ENUM_CURRENT_SETTINGS, &dmCurrent) && dmCurrent.dmDisplayFrequency > 0) {
+            desktopHz = static_cast<int>(dmCurrent.dmDisplayFrequency);
+        }
+
+        for (DWORD i = 0; EnumDisplaySettingsA(NULL, i, &dm); ++i) {
+            if (dm.dmBitsPerPel != 32) continue;
+            if (dm.dmPelsWidth < 640 || dm.dmPelsHeight < 480) continue;
+            modes.push_back({ static_cast<int>(dm.dmPelsWidth), static_cast<int>(dm.dmPelsHeight), static_cast<int>(dm.dmDisplayFrequency) });
+        }
+
+        // Sort: width asc, height asc, refresh rate desc (highest refresh rate first)
+        std::sort(modes.begin(), modes.end(), [](const Mode& a, const Mode& b) {
+            if (a.width != b.width) return a.width < b.width;
+            if (a.height != b.height) return a.height < b.height;
+            return a.refreshRate > b.refreshRate;
+        });
+
+        // Deduplicate resolutions, preserving highest refresh rate
+        auto it = std::unique(modes.begin(), modes.end(), [](const Mode& a, const Mode& b) {
+            return a.width == b.width && a.height == b.height;
+        });
+        modes.erase(it, modes.end());
+
+        // Sort by width asc, height asc
+        std::sort(modes.begin(), modes.end(), [](const Mode& a, const Mode& b) {
+            if (a.width != b.width) return a.width < b.width;
+            return a.height < b.height;
+        });
+
+        if (modes.empty()) {
+            modes.push_back({ 1920, 1080, desktopHz });
+        }
+
+        g_ResolutionList.clear();
+        g_ResolutionLabels.clear();
+        g_ResolutionHashes.clear();
+        g_SupportedModes.clear();
+        g_SupportedRefreshRates.clear();
+
+
+        for (const auto& m : modes) {
+            g_ResolutionList.push_back(m);
+            std::string label = std::to_string(m.width) + "x" + std::to_string(m.height);
+            std::string hashStr = "OPT_VO_PC_RES_" + std::to_string(m.width) + "X" + std::to_string(m.height);
+            int hash = static_cast<int>(StringHash(hashStr.c_str()));
+
+            g_ResolutionLabels[hash] = label;
+            g_ResolutionHashes.push_back(hash);
+            g_SupportedModes.push_back(1);
+            g_SupportedRefreshRates.push_back(m.refreshRate);
+        }
+
+        // Determine target starting resolution
+        int targetW = initialResX;
+        int targetH = initialResY;
+        if (targetW <= 0 || targetH <= 0) {
+            targetW = GetSystemMetrics(SM_CXSCREEN);
+            targetH = GetSystemMetrics(SM_CYSCREEN);
+        }
+
+        g_ActiveResIndex = -1;
+        for (size_t i = 0; i < g_ResolutionList.size(); ++i) {
+            if (g_ResolutionList[i].width == targetW && g_ResolutionList[i].height == targetH) {
+                g_ActiveResIndex = static_cast<int>(i);
+                break;
+            }
+        }
+
+        if (g_ActiveResIndex == -1) {
+            Mode m{ targetW, targetH, desktopHz };
+            g_ResolutionList.push_back(m);
+            std::string label = std::to_string(m.width) + "x" + std::to_string(m.height);
+            std::string hashStr = "OPT_VO_PC_RES_" + std::to_string(m.width) + "X" + std::to_string(m.height);
+            int hash = static_cast<int>(StringHash(hashStr.c_str()));
+
+            g_ResolutionLabels[hash] = label;
+            g_ResolutionHashes.push_back(hash);
+            g_SupportedModes.push_back(1);
+            g_SupportedRefreshRates.push_back(desktopHz);
+            g_ActiveResIndex = static_cast<int>(g_ResolutionList.size() - 1);
+        }
+
+        g_CurrentWidth = g_ResolutionList[g_ActiveResIndex].width;
+        g_CurrentHeight = g_ResolutionList[g_ActiveResIndex].height;
+        g_CurrentAspectRatio = static_cast<float>(g_CurrentWidth) / static_cast<float>(g_CurrentHeight);
+    }
+
+    inline DWORD GetPackedActiveRes() {
+        if (g_ActiveResIndex >= 0 && g_ActiveResIndex < static_cast<int>(g_ResolutionList.size())) {
+            int w = g_ResolutionList[g_ActiveResIndex].width;
+            int h = g_ResolutionList[g_ActiveResIndex].height;
+            return (static_cast<DWORD>(w) << 16) | (static_cast<DWORD>(h) & 0xFFFF) | 0x80000000;
+        }
+        return 0;
+    }
+
+    // Native GetResolution hooks (0x006C27D0 and 0x006C28B0)
+    // Converts g_RacingResolution index or packed resolution format into width & height
+    inline void __stdcall GetResolutionHook(int* outWidth, int* outHeight) {
+        if (!outWidth || !outHeight) return;
+
+        int idx = *reinterpret_cast<int*>(0x0090181C); // g_RacingResolution
+
+        if (idx & 0x80000000) {
+            int w = (idx & 0x7FFF0000) >> 16;
+            int h = idx & 0xFFFF;
+            int found = -1;
+            for (size_t i = 0; i < g_ResolutionList.size(); ++i) {
+                if (g_ResolutionList[i].width == w && g_ResolutionList[i].height == h) {
+                    found = static_cast<int>(i);
+                    break;
+                }
+            }
+            idx = (found != -1) ? found : g_ActiveResIndex;
+            *reinterpret_cast<int*>(0x0090181C) = idx;
+        }
+
+        if (idx < 0 || idx >= static_cast<int>(g_ResolutionList.size())) {
+            idx = g_ActiveResIndex;
+            *reinterpret_cast<int*>(0x0090181C) = idx;
+        }
+
+        g_ActiveResIndex = idx;
+        *outWidth = g_ResolutionList[idx].width;
+        *outHeight = g_ResolutionList[idx].height;
+        g_CurrentWidth = *outWidth;
+        g_CurrentHeight = *outHeight;
+        g_CurrentAspectRatio = static_cast<float>(*outWidth) / static_cast<float>(*outHeight);
+
+        if (g_WindowMode > 0) {
+            HWND hWnd = *reinterpret_cast<HWND*>(0x00982BF4);
+            if (!hWnd) hWnd = g_GameHWND;
+            if (hWnd) {
+                RECT cr = { 0 };
+                if (GetClientRect(hWnd, &cr)) {
+                    int curW = cr.right - cr.left;
+                    int curH = cr.bottom - cr.top;
+                    if (curW > 0 && curH > 0 && (curW != *outWidth || curH != *outHeight)) {
+                        ApplyWindowStyleAndPosition(hWnd, *outWidth, *outHeight);
+                    }
+                }
+            }
+        }
+    }
+
+    inline void __stdcall Hook_GetRacingResolution(int* outWidth, int* outHeight) {
+        GetResolutionHook(outWidth, outHeight);
+    }
+
+    // Native eViewPlatInterface::ResetDevice hook (0x006DB0D0)
+    // Called after D3D9 device reset to re-layout HUD and notify components
+    inline void __cdecl ResetDeviceHook() {
+        reinterpret_cast<void(__cdecl*)()>(0x006DB0D0)();
+
+        int width = 0, height = 0;
+        GetResolutionHook(&width, &height);
+
+        if (g_WindowMode > 0) {
+            HWND hWnd = *reinterpret_cast<HWND*>(0x00982BF4);
+            if (!hWnd) hWnd = g_GameHWND;
+            ApplyWindowStyleAndPosition(hWnd, width, height);
+        }
+
+        for (auto& cb : g_OnResChangeCallbacks) {
+            cb(width, height);
+        }
+
+        // Notify cFEng UI packages that layout needs recalculation:
+        // cFEng::MakeLoadedPackagesDirty (0x00525A00)
+        void** pFEng = reinterpret_cast<void**>(0x0091CADC);
+        if (pFEng && *pFEng) {
+            using MakeLoadedPackagesDirtyFn = void(__thiscall*)(void*, int);
+            reinterpret_cast<MakeLoadedPackagesDirtyFn>(0x00525A00)(*pFEng, 0);
+        }
+    }
+
+    // Native VOScreenResolution::Act hook (0x0050F970)
+    // Handles resolution cycling in the in-game Video Options menu
+    inline void __fastcall VOScreenResolution_Act_Hook(void* pThis, void* edx, int a2, int actionId) {
+        uintptr_t* pDALManager = *reinterpret_cast<uintptr_t**>(0x0091CA20);
+        if (!pDALManager) return;
+
+        int* pCurrentIndex = reinterpret_cast<int*>(*reinterpret_cast<uintptr_t*>(pDALManager) + 108);
+        int currentIndex = *pCurrentIndex;
+
+        constexpr int ACTION_DECREMENT = static_cast<int>(0x9120409E);
+        constexpr int ACTION_INCREMENT = static_cast<int>(0xB5971BF1);
+
+        int delta = 0;
+        bool changed = false;
+
+        if (actionId == ACTION_DECREMENT) {
+            delta = -1;
+            changed = true;
+        } else if (actionId == ACTION_INCREMENT) {
+            delta = 1;
+            changed = true;
+        }
+
+        if (changed) {
+            int count = static_cast<int>(g_ResolutionList.size());
+            do {
+                currentIndex += delta;
+                if (currentIndex < 0) currentIndex = count - 1;
+                else if (currentIndex >= count) currentIndex = 0;
+            } while (!g_SupportedModes[currentIndex]);
+
+            *pCurrentIndex = currentIndex;
+        }
+
+        // Mark widget modified: m_bModified at offset 42 (0x2A)
+        reinterpret_cast<uint8_t*>(pThis)[42] = 1;
+        uintptr_t* vtable = *reinterpret_cast<uintptr_t**>(pThis);
+
+        // Virtual method 14 (offset 0x38): NotifyAction(actionId)
+        using NotifyFn = void(__thiscall*)(void*, int);
+        reinterpret_cast<NotifyFn>(vtable[14])(pThis, actionId);
+
+        // Virtual method 3 (offset 0x0C): Draw()
+        using UpdateFn = void(__thiscall*)(void*);
+        reinterpret_cast<UpdateFn>(vtable[3])(pThis);
+    }
+
+    inline void __fastcall Hook_IncScreenRes(void* pThis, void* edx, int a2, int actionId) {
+        VOScreenResolution_Act_Hook(pThis, edx, a2, actionId);
+    }
+
+    inline int GetMenuResolutionHash(int ecxIndex) {
+        int index = ecxIndex;
+        uintptr_t* pDALManager = *reinterpret_cast<uintptr_t**>(0x0091CA20);
+        if (pDALManager) {
+            uintptr_t p1 = *pDALManager;
+            if (p1) {
+                int idx = *reinterpret_cast<int*>(p1 + 108);
+                if (idx >= 0 && idx < g_ResolutionCount) {
+                    index = idx;
+                }
+            }
+        }
+        if (index >= 0 && index < g_ResolutionCount && g_pResolutionHashes) {
+            return g_pResolutionHashes[index];
+        }
+        return 0;
+    }
+
+    // Mid-hook inside VOScreenResolution::Draw (0x0051B7A0 at 0x0051B818)
+    // Replaces the vanilla 640..1600 resolution string hash with custom hash in EAX
+    inline void __declspec(naked) VOScreenResolution_Draw_HashHook() {
+        __asm {
+            push ecx
+            call GetMenuResolutionHash
+            add esp, 4
+            // Re-execute replaced instructions at 0x0051B818:
+            // 8B 77 30: mov esi, [edi + 0x30]  (ecx0[12]: value FEString)
+            // 85 F6:    test esi, esi
+            mov esi, dword ptr [edi + 0x30]
+            test esi, esi
+            ret
+        }
+    }
+
+    inline void __declspec(naked) Hook_GetMenuResText() {
+        VOScreenResolution_Draw_HashHook();
+    }
+
+    // Hook GetLocalizedWideString (0x0057E920) to translate custom resolution hashes
+    using PFN_GetLocalizedWideString = char(__cdecl*)(wchar_t*, int, unsigned int);
+
+    inline char __cdecl Hook_GetLocalizedWideString(wchar_t* out, int size, unsigned int hash) {
+        auto it = g_ResolutionLabels.find(static_cast<int>(hash));
+        if (it != g_ResolutionLabels.end()) {
+            std::wstring ws(it->second.begin(), it->second.end());
+            wcsncpy_s(out, size, ws.c_str(), _TRUNCATE);
+            return 1;
+        }
+        return reinterpret_cast<PFN_GetLocalizedWideString>(0x0057E920)(out, size, hash);
+    }
+
+    inline void Init(int initialResX, int initialResY, int windowMode) {
+        EnumerateResolutions(initialResX, initialResY);
+
+        g_pResolutionHashes = g_ResolutionHashes.data();
+        g_ResolutionCount = static_cast<int>(g_ResolutionList.size());
+
+        // 1. Set initial resolution index in game engine (g_RacingResolution at 0x0090181C)
+        *reinterpret_cast<int*>(0x0090181C) = g_ActiveResIndex;
+
+        // 2. Redirect supported resolutions array pointer (originally 0x0093DBEC)
+        uintptr_t pResArray = reinterpret_cast<uintptr_t>(g_SupportedModes.data());
+        MemoryTools::Write<uintptr_t>(0x0050F9B2, pResArray); // VOScreenResolution::Act
+        MemoryTools::Write<uintptr_t>(0x006C195C, pResArray); // sub_6C1780
+        MemoryTools::Write<uintptr_t>(0x006C1973, pResArray); // sub_6C1780
+
+        // 3. Redirect supported refresh rates array pointer (originally 0x009829FC)
+        uintptr_t pRefArray = reinterpret_cast<uintptr_t>(g_SupportedRefreshRates.data());
+        MemoryTools::Write<uintptr_t>(0x006C2898, pRefArray);
+        MemoryTools::Write<uintptr_t>(0x006C2978, pRefArray);
+        MemoryTools::Write<uintptr_t>(0x006DB1B7, pRefArray);
+        MemoryTools::Write<uintptr_t>(0x006DB21E, pRefArray);
+        MemoryTools::Write<uintptr_t>(0x006DB2EF, pRefArray);
+        MemoryTools::Write<uintptr_t>(0x006DE163, pRefArray);
+        MemoryTools::Write<uintptr_t>(0x006E6BC7, pRefArray);
+        MemoryTools::Write<uintptr_t>(0x006E72AA, pRefArray);
+
+        // 4. Bypass video autodetection overwrite of g_RacingResolution in AutoDetectVideoSettings (0x006C1990)
+        MemoryTools::MakeNOP(0x006C19A4, 6); // mov g_RacingResolution, 0
+        MemoryTools::MakeNOP(0x006C1ABA, 6); // mov g_RacingResolution, 1
+
+        // 5. Hook native GetResolution functions: 0x006C27D0 & 0x006C28B0
+        MemoryTools::MakeJMP(0x006C27D0, reinterpret_cast<uintptr_t>(GetResolutionHook));
+        MemoryTools::MakeJMP(0x006C28B0, reinterpret_cast<uintptr_t>(GetResolutionHook));
+
+        // 6. Hook VOScreenResolution::Act: 0x0050F970
+        MemoryTools::MakeJMP(0x0050F970, reinterpret_cast<uintptr_t>(VOScreenResolution_Act_Hook));
+
+        // 7. Hook VOScreenResolution::Draw resolution string hash loader: 0x0051B818
+        MemoryTools::MakeCALL(0x0051B818, reinterpret_cast<uintptr_t>(VOScreenResolution_Draw_HashHook));
+
+        // 8. Hook GetLocalizedWideString at all call sites to format custom resolution labels:
+        // 0x00515064: Options validation
+        // 0x005151D4: Options update
+        // 0x00524F70: FEng text drawing
+        // 0x005A442D: Menu option text renderer
+        MemoryTools::MakeCALL(0x00515064, reinterpret_cast<uintptr_t>(Hook_GetLocalizedWideString));
+        MemoryTools::MakeCALL(0x005151D4, reinterpret_cast<uintptr_t>(Hook_GetLocalizedWideString));
+        MemoryTools::MakeCALL(0x00524F70, reinterpret_cast<uintptr_t>(Hook_GetLocalizedWideString));
+        MemoryTools::MakeCALL(0x005A442D, reinterpret_cast<uintptr_t>(Hook_GetLocalizedWideString));
+
+        // 9. Hook eViewPlatInterface::ResetDevice (0x006DB0D0) at all 5 call sites
+        MemoryTools::MakeCALL(0x006DB302, reinterpret_cast<uintptr_t>(ResetDeviceHook));
+        MemoryTools::MakeCALL(0x006DE185, reinterpret_cast<uintptr_t>(ResetDeviceHook));
+        MemoryTools::MakeCALL(0x006E72C1, reinterpret_cast<uintptr_t>(ResetDeviceHook));
+        MemoryTools::MakeCALL(0x006E753E, reinterpret_cast<uintptr_t>(ResetDeviceHook));
+        MemoryTools::MakeCALL(0x006E7606, reinterpret_cast<uintptr_t>(ResetDeviceHook));
+
+        // 10. Window Mode support: 0 = Fullscreen | 1 = Borderless | 2 = Border | 3 = Resizable Border | 4 = Borderless Fullscreen | 5 = Borderless Fullscreen Stretched
+        g_WindowMode = windowMode;
+        g_WindowModeFallback = g_WindowMode > 0 ? g_WindowMode : 1;
+
+
+        if (g_WindowMode > 0) {
+            *reinterpret_cast<uint32_t*>(0x00982BF0) = 1; // WindowedMode flag (0x00982BF0)
+
+            // Hook USER32 IAT entries in speed.exe
+            s_OrigCreateWindowExA = *reinterpret_cast<PFN_CreateWindowExA*>(0x008903A4);
+            s_OrigSetWindowLongA = *reinterpret_cast<PFN_SetWindowLongA*>(0x00890320);
+            s_OrigAdjustWindowRect = *reinterpret_cast<PFN_AdjustWindowRect*>(0x008903A0);
+            s_OrigSetWindowPos = *reinterpret_cast<PFN_SetWindowPos*>(0x0089031C);
+
+            MemoryTools::Write<void*>(0x008903A4, reinterpret_cast<void*>(Hook_CreateWindowExA));
+            MemoryTools::Write<void*>(0x00890320, reinterpret_cast<void*>(Hook_SetWindowLongA));
+            MemoryTools::Write<void*>(0x008903A0, reinterpret_cast<void*>(Hook_AdjustWindowRect));
+            MemoryTools::Write<void*>(0x0089031C, reinterpret_cast<void*>(Hook_SetWindowPos));
+        }
+    }
+}
+
+#endif // NFSMW_WIDESCREENFIX_RESOLUTION_H
+
+```
+
+`source/Shadowfix.h`:
+
+```h
+#pragma once
+#ifndef NFSMW_WIDESCREENFIX_SHADOWFIX_H
+#define NFSMW_WIDESCREENFIX_SHADOWFIX_H
+
+#include <windows.h>
+#include <cstdint>
+#include "MemoryTools.h"
+#include "Resolution.h"
+#include "Config.h"
+
+namespace ShadowFix {
+    // Verified from IDA: Shadow rendering pipeline (sub_6DE300, sub_6C8770, sub_6C1510)
+
+    // --- Dynamic Shadow Tunnel / Bridge Fix (0x006DE300 & 0x00744468) ---
+    constexpr uintptr_t ADDR_SHADOW_FADE_JNZ     = 0x006DE377; // 2 bytes: 75 3B -> NOP
+    constexpr uintptr_t ADDR_SHADOW_FADE_FLOAT   = 0x006DE37F; // Immediate float 1.0f -> 0.0f
+    constexpr uintptr_t ADDR_CAR_SHADOW_OPACITY  = 0x008A0E50; // Dynamic car ambient shadow opacity (110.0f -> 60.0f)
+
+    // --- Dynamic Shadow Resolution Texture Operands (sub_6C8770) ---
+    // Width (X) operands
+    constexpr uintptr_t ADDR_SHADOW_RES_X_MOV    = 0x006C86B1; // mov eax, Width (operand at 0x6C86B0 + 1)
+    constexpr uintptr_t ADDR_SHADOW_RES_X_PUSH1  = 0x006C878C; // push Width (operand at 0x6C878B + 1)
+    constexpr uintptr_t ADDR_SHADOW_RES_X_PUSH2  = 0x006C87BE; // push Width (operand at 0x6C87BD + 1)
+    constexpr uintptr_t ADDR_SHADOW_RES_X_PUSH3  = 0x006C87F4; // push Width (operand at 0x6C87F3 + 1)
+
+    // Height (Y) operands
+    constexpr uintptr_t ADDR_SHADOW_RES_Y_MOV    = 0x006C86C1; // mov eax, Height (operand at 0x6C86C0 + 1)
+    constexpr uintptr_t ADDR_SHADOW_RES_Y_PUSH1  = 0x006C8787; // push Height (operand at 0x6C8786 + 1)
+    constexpr uintptr_t ADDR_SHADOW_RES_Y_PUSH2  = 0x006C87B9; // push Height (operand at 0x6C87B8 + 1)
+    constexpr uintptr_t ADDR_SHADOW_RES_Y_PUSH3  = 0x006C87EF; // push Height (operand at 0x6C87EE + 1)
+
+    // --- Depth Bias & Slope Scaled Bias (sub_6E54E0) ---
+    constexpr uintptr_t ADDR_DEPTH_BIAS_INST     = 0x006E54E1; // fild dword_901AC0 (6 bytes: DB 05 C0 1A 90 00)
+    constexpr uintptr_t ADDR_DEPTH_BIAS_SLOPE    = 0x006E5507; // mov edx, dword_901ABC (6 bytes: 8B 15 BC 1A 90 00)
+    constexpr uintptr_t ADDR_VANILLA_DEPTH_BIAS  = 0x00901AC0; // int32_t vanilla depth bias (4)
+    constexpr uintptr_t ADDR_VANILLA_DEPTH_SLOPE = 0x00901ABC; // float vanilla depth bias slope (4.0f)
+
+    // --- Shadow Level of Detail (LOD) Enhancements ---
+    constexpr uintptr_t ADDR_SHADOW_LOD_CULL     = 0x006E5174; // push 200h (LOD culling flag) -> push 0
+    constexpr uintptr_t ADDR_SHADOW_LOD_DETAIL   = 0x006BFFA2; // push 4100h (geometry flags) -> push 6102h
+
+    // --- Texture Formats (D24S8, INTZ, DF16, DF24) ---
+    constexpr uintptr_t ADDR_CREATE_FORMAT_CHECK     = 0x006C8798;
+    constexpr uintptr_t ADDR_CREATE_D24S8_BRANCH     = 0x006C87A2;
+    constexpr uintptr_t ADDR_CREATE_D24S8_PUSH       = 0x006C87B2; // push 4Bh (75 = D24S8)
+    constexpr uintptr_t ADDR_CREATE_FOURCC_BRANCH    = 0x006C87D5;
+    constexpr uintptr_t ADDR_CREATE_FOURCC_PUSH      = 0x006C87E5; // push 'DF16' (FOURCC)
+
+    constexpr uintptr_t ADDR_CHECK_DEV_START         = 0x006C1703; // mov dword_982C08, ebx (6 bytes)
+    constexpr uintptr_t ADDR_CHECK_DEV_JNZ           = 0x006C170A; // jnz loc_6C173A in sub_6C1510 (2 bytes)
+    constexpr uintptr_t ADDR_CHECK_DEV_D24S8_PUSH    = 0x006C1719; // push 4Bh
+    constexpr uintptr_t ADDR_CHECK_DEV_SET_1         = 0x006C172C; // mov dword_982C08, 1 (10 bytes)
+    constexpr uintptr_t ADDR_CHECK_DEV_FOURCC_BRANCH = 0x006C1741;
+    constexpr uintptr_t ADDR_CHECK_DEV_FOURCC_PUSH   = 0x006C174E; // push 'DF16'
+    constexpr uintptr_t ADDR_CHECK_DEV_SET_2         = 0x006C1764; // mov dword_982C08, 2 (10 bytes)
+    constexpr uintptr_t ADDR_SHADOW_TYPE_GLOBAL      = 0x00982C08; // 1 = D24S8, 2 = Depth Buffer
+
+    // --- Force Sharp Shadows ---
+    constexpr uintptr_t ADDR_FORCE_SHARP_SUB         = 0x006D5F3A; // sub eax, 3 -> sub eax, 2
+
+    // FourCC and enum constants
+    constexpr int kFmt_D24S8 = 75;
+    constexpr int kFmt_INTZ  = 0x5A544E49; // 'INTZ'
+    constexpr int kFmt_DF16  = 0x36314644; // 'DF16'
+    constexpr int kFmt_DF24  = 0x34324644; // 'DF24'
+
+    inline uint32_t s_BaseResolution = 2048;
+    inline bool s_AutoScale = true;
+    inline int s_ConfigFormat = 0; // 0 = Auto
+    inline bool s_ForceSharpShadows = false;
+
+    inline int s_ActiveFormat = kFmt_INTZ;
+    inline int s_ActiveMode = 2; // 1 = Direct Shadow Map, 2 = Depth Buffer as Texture
+
+    inline float s_DepthBias = 4.0f;
+    inline float s_DepthBiasSlope = 4.0f;
+
+    inline void UpdateShadowsRes(float aspectRatio) {
+        if (s_BaseResolution == 0) return;
+
+        uint32_t resval = s_BaseResolution;
+        if (resval > 16384) resval = 16384;
+        if (resval < 512) resval = 512;
+
+        uint32_t resX = resval;
+        if (s_AutoScale) {
+            float newShadowX = static_cast<float>(resval) * (aspectRatio / (4.0f / 3.0f));
+            resX = static_cast<uint32_t>(newShadowX);
+        }
+        uint32_t resY = resval;
+
+        if (resX > 16384) resX = 16384;
+
+        // Patch Width (X) operands
+        MemoryTools::Write<uint32_t>(ADDR_SHADOW_RES_X_MOV,   resX);
+        MemoryTools::Write<uint32_t>(ADDR_SHADOW_RES_X_PUSH1, resX);
+        MemoryTools::Write<uint32_t>(ADDR_SHADOW_RES_X_PUSH2, resX);
+        MemoryTools::Write<uint32_t>(ADDR_SHADOW_RES_X_PUSH3, resX);
+
+        // Patch Height (Y) operands
+        MemoryTools::Write<uint32_t>(ADDR_SHADOW_RES_Y_MOV,   resY);
+        MemoryTools::Write<uint32_t>(ADDR_SHADOW_RES_Y_PUSH1, resY);
+        MemoryTools::Write<uint32_t>(ADDR_SHADOW_RES_Y_PUSH2, resY);
+        MemoryTools::Write<uint32_t>(ADDR_SHADOW_RES_Y_PUSH3, resY);
+
+        if (resX > resval) resval = resX;
+
+        // Calculate dynamic depth bias scaling
+        if (s_ActiveMode == 2 && !s_ForceSharpShadows) {
+            s_DepthBias = static_cast<float>(MemoryTools::Read<int32_t>(ADDR_VANILLA_DEPTH_BIAS)) * (static_cast<float>(resval) / 1024.0f);
+            s_DepthBiasSlope = MemoryTools::Read<float>(ADDR_VANILLA_DEPTH_SLOPE) * (static_cast<float>(resval) / 1024.0f);
+        } else if (resval > 3072) {
+            s_DepthBias = static_cast<float>(MemoryTools::Read<int32_t>(ADDR_VANILLA_DEPTH_BIAS)) * (static_cast<float>(resval) / 3072.0f);
+            s_DepthBiasSlope = MemoryTools::Read<float>(ADDR_VANILLA_DEPTH_SLOPE) * (static_cast<float>(resval) / 3072.0f);
+        } else {
+            s_DepthBias = static_cast<float>(MemoryTools::Read<int32_t>(ADDR_VANILLA_DEPTH_BIAS));
+            s_DepthBiasSlope = MemoryTools::Read<float>(ADDR_VANILLA_DEPTH_SLOPE);
+        }
+    }
+
+    inline void OnResolutionChange(int width, int height) {
+        if (width <= 0 || height <= 0) return;
+        float aspect = static_cast<float>(width) / static_cast<float>(height);
+        UpdateShadowsRes(aspect);
+    }
+
+    inline void ApplyTextureFormat(int formatOption) {
+        // X360Stuff entirely replaces shadow rendering; ignore format patches to prevent shadows from disappearing.
+        if (formatOption < 0 || g_Config.X360StuffInstalled) return;
+
+        // Auto (0) selects D24S8 when Sunset mod is installed to maintain exhaust flame
+        // quad rendering in Sunset's custom particle shaders, otherwise INTZ for universal modern GPUs.
+        uint32_t chosenFormat = g_Config.SunSetInstalled ? kFmt_D24S8 : kFmt_INTZ;
+        if (formatOption == 1) chosenFormat = kFmt_D24S8;
+        else if (formatOption == 2) chosenFormat = kFmt_INTZ;
+        else if (formatOption == 3) chosenFormat = kFmt_DF16;
+        else if (formatOption == 4) chosenFormat = kFmt_DF24;
+
+        s_ActiveFormat = chosenFormat;
+
+        // Disable vanilla hardcoded writes to dword_982C08
+        MemoryTools::MakeNOP(ADDR_CHECK_DEV_START, 6);
+        MemoryTools::MakeNOP(ADDR_CHECK_DEV_SET_1, 10);
+        MemoryTools::MakeNOP(ADDR_CHECK_DEV_SET_2, 10);
+
+        if (chosenFormat < 0x7F) {
+            // D24S8 format (Direct Shadow Map, sharp)
+            MemoryTools::MakeJMP(ADDR_CREATE_FORMAT_CHECK, ADDR_CREATE_D24S8_BRANCH);
+            MemoryTools::Write<uint8_t>(ADDR_CREATE_D24S8_PUSH + 1, static_cast<uint8_t>(chosenFormat & 0xFF));
+
+            MemoryTools::MakeNOP(ADDR_CHECK_DEV_JNZ, 2);
+            MemoryTools::Write<uint8_t>(ADDR_CHECK_DEV_D24S8_PUSH + 1, static_cast<uint8_t>(chosenFormat & 0xFF));
+
+            *reinterpret_cast<uint32_t*>(ADDR_SHADOW_TYPE_GLOBAL) = 1;
+            s_ActiveMode = 1;
+        } else {
+            // FOURCC format (INTZ, DF16, DF24 - Depth Buffer as Texture, soft)
+            MemoryTools::MakeJMP(ADDR_CREATE_FORMAT_CHECK, ADDR_CREATE_FOURCC_BRANCH);
+            MemoryTools::Write<uint32_t>(ADDR_CREATE_FOURCC_PUSH + 1, chosenFormat);
+
+            MemoryTools::MakeJMP(ADDR_CHECK_DEV_JNZ, ADDR_CHECK_DEV_FOURCC_BRANCH);
+            MemoryTools::Write<uint32_t>(ADDR_CHECK_DEV_FOURCC_PUSH + 1, chosenFormat);
+
+            *reinterpret_cast<uint32_t*>(ADDR_SHADOW_TYPE_GLOBAL) = 2;
+            s_ActiveMode = 2;
+        }
+    }
+
+    inline void Init(int shadowsRes, int shadowsFix, int improveShadowLOD, int autoScaleShadowsRes, int shadowMapTextureFormat, int forceSharpShadows) {
+        // 1. Dynamic Shadows Disappearing Fix (Tunnels / Bridges)
+        if (shadowsFix != 0) {
+            // NOP the jump at 0x006DE377 so shadow fading is always bypassed
+            MemoryTools::MakeNOP(ADDR_SHADOW_FADE_JNZ, 2);
+            // Write 0.0f as immediate float to keep flt_982BA8 at 0 (full visibility)
+            MemoryTools::Write<float>(ADDR_SHADOW_FADE_FLOAT, 0.0f);
+            // Soften dynamic ambient car shadow from 110.0f to 60.0f
+            MemoryTools::Write<float>(ADDR_CAR_SHADOW_OPACITY, 60.0f);
+        }
+
+        // 2. Texture Format (Auto / INTZ / D24S8 / etc.)
+        s_ConfigFormat = shadowMapTextureFormat;
+        s_ForceSharpShadows = (forceSharpShadows != 0);
+        ApplyTextureFormat(shadowMapTextureFormat);
+
+        // 3. Dynamic Shadow Resolution & Auto-Scale
+        s_BaseResolution = (shadowsRes > 0) ? static_cast<uint32_t>(shadowsRes) : 2048;
+        s_AutoScale = (autoScaleShadowsRes != 0);
+
+        if (shadowsRes > 0) {
+            // Hook depth bias in sub_6E54E0:
+            // Convert 'fild dword ptr [0x00901AC0]' (DB 05 ...) into 'fld dword ptr [&s_DepthBias]' (D9 05 ...)
+            uint8_t fldOpcode[2] = { 0xD9, 0x05 };
+            MemoryTools::WriteBytes(ADDR_DEPTH_BIAS_INST, fldOpcode, 2);
+            MemoryTools::Write<const float*>(ADDR_DEPTH_BIAS_INST + 2, &s_DepthBias);
+
+            // Redirect 'mov edx, [0x00901ABC]' to read from &s_DepthBiasSlope
+            MemoryTools::Write<const float*>(ADDR_DEPTH_BIAS_SLOPE + 2, &s_DepthBiasSlope);
+
+            // Register callback with Resolution system so resolution / aspect changes update shadow dimensions
+            Resolution::RegisterOnResChange(OnResolutionChange);
+
+            // Initial resolution update
+            UpdateShadowsRes(Resolution::g_CurrentAspectRatio);
+        }
+
+        // 4. Force Sharp Shadows (Stencil technique override on INTZ/DF16/DF24)
+        if (!g_Config.X360StuffInstalled && forceSharpShadows != 0) {
+            // sub eax, 3 -> sub eax, 2
+            MemoryTools::Write<uint8_t>(ADDR_FORCE_SHARP_SUB + 2, 2);
+        }
+
+        // 5. Improve Shadow Level of Detail (LOD)
+        if (improveShadowLOD != 0) {
+            // Disable shadow LOD distance culling: push 200h -> push 0
+            MemoryTools::Write<uint32_t>(ADDR_SHADOW_LOD_CULL, 0x00000000);
+            // Enable high-detail geometry flags in shadow pass: push 4100h -> push 6102h
+            MemoryTools::Write<uint32_t>(ADDR_SHADOW_LOD_DETAIL, 0x00006102);
+        }
+    }
+}
+
+#endif // NFSMW_WIDESCREENFIX_SHADOWFIX_H
+
+```
+
+`source/SimRate.h`:
+
+```h
+#pragma once
+#ifndef NFSMW_WIDESCREENFIX_SIMRATE_H
+#define NFSMW_WIDESCREENFIX_SIMRATE_H
+
+#include <windows.h>
+#include <mmsystem.h>
+#include <cstdint>
+#include "MemoryTools.h"
+
+#pragma comment(lib, "winmm.lib")
+
+namespace SimRate {
+    // Verified from IDA: Engine timestep addresses (sub_6612B0, sub_6660E0, sub_65C780)
+
+    // Engine addresses verified for speed.exe v1.3
+    constexpr uintptr_t ADDR_FLT_8970F0        = 0x008970F0; // Static float constant in .rdata (default 0.016666668f)
+    constexpr uintptr_t ADDR_REALTIMESTEP_PTR  = 0x006612EC; // PrepareRealTimestep: pointer operand to flt_8970F0
+    constexpr uintptr_t ADDR_INIT_TIMESTEP     = 0x00666100; // InitializeEverything: immediate float push for Scheduler::Init
+    constexpr uintptr_t ADDR_WORLD_TIMESTEP    = 0x00903290; // World_Service: float global initial timestep state
+    constexpr uintptr_t ADDR_DEBUG_TIME_PTR1   = 0x0065C78F; // GetDebugRealTime: first pointer operand to flt_8970F0
+    constexpr uintptr_t ADDR_DEBUG_TIME_PTR2   = 0x0065C7D9; // GetDebugRealTime: second pointer operand to flt_8970F0
+
+    inline float s_SimFrameTime = 1.0f / 200.0f; // Default 200 Hz (0.005f)
+    inline float s_SimHz = 200.0f;
+    inline bool s_SimRateEnabled = false;
+
+    inline void Init(bool enable, int configRate = 1) {
+        if (!enable) return;
+
+        // Determine simulation frequency (Hz)
+        // 1 = Default 200 Hz Decoupled Physics; > 1 = Custom Hz if explicitly specified
+        float targetHz = 200.0f;
+        if (configRate > 1) {
+            targetHz = static_cast<float>(configRate);
+        }
+
+        s_SimHz = targetHz;
+        s_SimFrameTime = 1.0f / targetHz;
+
+        // Activate high-precision 1ms Windows timer resolution
+        timeBeginPeriod(1);
+        s_SimRateEnabled = true;
+
+        // 1. Overwrite static float in .rdata so all default references pick up 200 Hz
+        MemoryTools::Write<float>(ADDR_FLT_8970F0, s_SimFrameTime);
+
+        // 2. PrepareRealTimestep (0x00661280): redirect pointer operand to our stable FrameTime
+        MemoryTools::Write<const float*>(ADDR_REALTIMESTEP_PTR, &s_SimFrameTime);
+
+        // 3. InitializeEverything (0x00665FC0): patch immediate float argument for Scheduler::Init
+        MemoryTools::Write<float>(ADDR_INIT_TIMESTEP, s_SimFrameTime);
+
+        // 4. World_Service (0x0075AAD0): patch initial timestep state in .data
+        MemoryTools::Write<float>(ADDR_WORLD_TIMESTEP, s_SimFrameTime);
+
+        // 5. GetDebugRealTime (0x0065C770): redirect pointer operands to our stable FrameTime
+        MemoryTools::Write<const float*>(ADDR_DEBUG_TIME_PTR1, &s_SimFrameTime);
+        MemoryTools::Write<const float*>(ADDR_DEBUG_TIME_PTR2, &s_SimFrameTime);
+    }
+
+    inline void Shutdown() {
+        if (s_SimRateEnabled) {
+            timeEndPeriod(1);
+            s_SimRateEnabled = false;
+        }
+    }
+}
+
+#endif // NFSMW_WIDESCREENFIX_SIMRATE_H
+
+
+```
+
+`source/SkipIntro.h`:
+
+```h
+#pragma once
+#ifndef NFSMW_WIDESCREENFIX_SKIPINTRO_H
+#define NFSMW_WIDESCREENFIX_SKIPINTRO_H
+
+#include "MemoryTools.h"
+#include <windows.h>
+
+namespace SkipIntro {
+    // Verified from IDA: FEngMovieStarter::Callback (0x00559680) and SkipMovies flag (0x00926144)
+
+    constexpr uintptr_t HOOK_SKIP_MOVIES_CHECK = 0x0055969B;
+    constexpr uintptr_t RET_SKIP_MOVIES_CHECK  = 0x005596A4;
+    constexpr uintptr_t ADDR_SKIP_MOVIES_FLAG  = 0x00926144;
+
+    inline int s_SkipCounter = 0;
+    inline uint32_t s_OriginalValue = 0;
+
+    inline void __declspec(naked) FEngMovieStarter_Callback_Hook() {
+        __asm {
+            mov eax, [ADDR_SKIP_MOVIES_FLAG]
+            cmp s_SkipCounter, 3
+            jge restore_flag
+
+            cmp s_SkipCounter, 0
+            jne set_flag
+            mov edx, [eax]
+            mov s_OriginalValue, edx
+
+        set_flag:
+            mov dword ptr [eax], 1
+            inc s_SkipCounter
+            jmp finish
+
+        restore_flag:
+            mov edx, s_OriginalValue
+            mov [eax], edx
+
+        finish:
+            mov eax, [eax]
+            test eax, eax
+            jmp RET_SKIP_MOVIES_CHECK
+        }
+    }
+
+    inline void Init() {
+        // Hook 9 bytes at 0x0055969B (5 bytes JMP + 4 NOPs)
+        MemoryTools::MakeJMP(HOOK_SKIP_MOVIES_CHECK, reinterpret_cast<uintptr_t>(FEngMovieStarter_Callback_Hook), 4);
+    }
+}
+
+#endif // NFSMW_WIDESCREENFIX_SKIPINTRO_H
+
+```
+
+`source/UserSettings.h`:
+
+```h
+#pragma once
+#ifndef NFSMW_WIDESCREENFIX_USERSETTINGS_H
+#define NFSMW_WIDESCREENFIX_USERSETTINGS_H
+
+#include "MemoryTools.h"
+#include "Resolution.h"
+#include <windows.h>
+#include <shlobj.h>
+#include <filesystem>
+#include <string>
+#include <map>
+
+namespace UserSettings {
+    // ------------------------------------------------------------------------
+    // Feature 1: CustomUserFilesDirectoryInGameDir (Savegame & Profile Redirect)
+    // ------------------------------------------------------------------------
+    inline std::filesystem::path s_CustomUserDir;
+    inline bool s_UseCustomUserDir = false;
+
+    using PFN_SHGetFolderPathA = HRESULT(WINAPI*)(HWND, int, HANDLE, DWORD, LPSTR);
+    inline PFN_SHGetFolderPathA s_OrigSHGetFolderPathA = nullptr;
+
+    inline HRESULT WINAPI Hook_SHGetFolderPathA(HWND hwnd, int csidl, HANDLE hToken, DWORD dwFlags, LPSTR pszPath) {
+        if (s_UseCustomUserDir) {
+            int folder = csidl & ~CSIDL_FLAG_CREATE;
+            if (folder == CSIDL_PERSONAL) {
+                std::error_code ec;
+                std::filesystem::create_directories(s_CustomUserDir, ec);
+                std::string pathStr = s_CustomUserDir.string();
+                if (pszPath) {
+                    std::memcpy(pszPath, pathStr.c_str(), pathStr.size() + 1);
+                    return S_OK;
+                }
+            }
+        }
+
+        if (s_OrigSHGetFolderPathA) {
+            return s_OrigSHGetFolderPathA(hwnd, csidl, hToken, dwFlags, pszPath);
+        }
+        return SHGetFolderPathA(hwnd, csidl, hToken, dwFlags, pszPath);
+    }
+
+    inline void InitCustomUserFiles(const std::filesystem::path& gamePath, const std::string& customDirName) {
+        if (customDirName.empty() || customDirName == "0") return;
+
+        s_CustomUserDir = gamePath / customDirName;
+        s_UseCustomUserDir = true;
+        std::error_code ec;
+        std::filesystem::create_directories(s_CustomUserDir, ec);
+
+        // Patch speed.exe fixed IAT address at 0x008902EC (SHFOLDER.dll!SHGetFolderPathA)
+        PROC* pDirectIAT = reinterpret_cast<PROC*>(0x008902EC);
+        s_OrigSHGetFolderPathA = reinterpret_cast<PFN_SHGetFolderPathA>(*pDirectIAT);
+        DWORD oldProtect;
+        MemoryTools::Unprotect(reinterpret_cast<uintptr_t>(pDirectIAT), sizeof(PROC), oldProtect);
+        *pDirectIAT = reinterpret_cast<PROC>(Hook_SHGetFolderPathA);
+        MemoryTools::RestoreProtect(reinterpret_cast<uintptr_t>(pDirectIAT), sizeof(PROC), oldProtect);
+    }
+
+    // ------------------------------------------------------------------------
+    // Feature 2: WriteSettingsToFile (Registry Settings Redirection)
+    // ------------------------------------------------------------------------
+    inline bool s_WriteSettingsToFile = false;
+    inline std::filesystem::path s_SettingsIniPath;
+    inline std::string s_Filter = "Need for Speed";
+    inline thread_local std::string s_CurrentSection = "Need for Speed Most Wanted";
+    inline std::map<std::string, std::string> s_DefaultStrings;
+
+    using PFN_RegCreateKeyA = LSTATUS(WINAPI*)(HKEY, LPCSTR, PHKEY);
+    using PFN_RegOpenKeyA = LSTATUS(WINAPI*)(HKEY, LPCSTR, PHKEY);
+    using PFN_RegOpenKeyExA = LSTATUS(WINAPI*)(HKEY, LPCSTR, DWORD, REGSAM, PHKEY);
+    using PFN_RegQueryValueExA = LSTATUS(WINAPI*)(HKEY, LPCSTR, LPDWORD, LPDWORD, LPBYTE, LPDWORD);
+    using PFN_RegSetValueExA = LSTATUS(WINAPI*)(HKEY, LPCSTR, DWORD, DWORD, const BYTE*, DWORD);
+    using PFN_RegCloseKey = LSTATUS(WINAPI*)(HKEY);
+
+    inline PFN_RegCreateKeyA s_OrigRegCreateKeyA = nullptr;
+    inline PFN_RegOpenKeyA s_OrigRegOpenKeyA = nullptr;
+    inline PFN_RegOpenKeyExA s_OrigRegOpenKeyExA = nullptr;
+    inline PFN_RegQueryValueExA s_OrigRegQueryValueExA = nullptr;
+    inline PFN_RegSetValueExA s_OrigRegSetValueExA = nullptr;
+    inline PFN_RegCloseKey s_OrigRegCloseKey = nullptr;
+
+    inline LSTATUS WINAPI Hook_RegCloseKey(HKEY hKey) {
+        if (hKey == NULL) return ERROR_SUCCESS;
+        if (s_OrigRegCloseKey) return s_OrigRegCloseKey(hKey);
+        return RegCloseKey(hKey);
+    }
+
+    inline LSTATUS WINAPI Hook_RegCreateKeyA(HKEY hKey, LPCSTR lpSubKey, PHKEY phkResult) {
+        if (hKey == NULL) {
+            if (phkResult) *phkResult = NULL;
+            return ERROR_SUCCESS;
+        }
+        if (lpSubKey && (strstr(lpSubKey, s_Filter.c_str()) != NULL || strstr(lpSubKey, "ergc") != NULL)) {
+            if (phkResult) *phkResult = NULL;
+            std::string sub(lpSubKey);
+            auto pos = sub.find_last_of('\\');
+            s_CurrentSection = (pos == std::string::npos) ? sub : sub.substr(pos + 1);
+            return ERROR_SUCCESS;
+        }
+        if (s_OrigRegCreateKeyA) return s_OrigRegCreateKeyA(hKey, lpSubKey, phkResult);
+        return RegCreateKeyA(hKey, lpSubKey, phkResult);
+    }
+
+    inline LSTATUS WINAPI Hook_RegOpenKeyA(HKEY hKey, LPCSTR lpSubKey, PHKEY phkResult) {
+        if (hKey == NULL) {
+            if (phkResult) *phkResult = NULL;
+            return ERROR_SUCCESS;
+        }
+        if (lpSubKey && (strstr(lpSubKey, s_Filter.c_str()) != NULL || strstr(lpSubKey, "ergc") != NULL)) {
+            if (phkResult) *phkResult = NULL;
+            std::string sub(lpSubKey);
+            auto pos = sub.find_last_of('\\');
+            s_CurrentSection = (pos == std::string::npos) ? sub : sub.substr(pos + 1);
+            return ERROR_SUCCESS;
+        }
+        if (s_OrigRegOpenKeyA) return s_OrigRegOpenKeyA(hKey, lpSubKey, phkResult);
+        return RegOpenKeyA(hKey, lpSubKey, phkResult);
+    }
+
+    inline LSTATUS WINAPI Hook_RegOpenKeyExA(HKEY hKey, LPCSTR lpSubKey, DWORD ulOptions, REGSAM samDesired, PHKEY phkResult) {
+        if (hKey == NULL) {
+            if (phkResult) *phkResult = NULL;
+            return ERROR_SUCCESS;
+        }
+        if (lpSubKey && (strstr(lpSubKey, s_Filter.c_str()) != NULL || strstr(lpSubKey, "ergc") != NULL)) {
+            if (phkResult) *phkResult = NULL;
+            std::string sub(lpSubKey);
+            auto pos = sub.find_last_of('\\');
+            s_CurrentSection = (pos == std::string::npos) ? sub : sub.substr(pos + 1);
+            return ERROR_SUCCESS;
+        }
+        if (s_OrigRegOpenKeyExA) return s_OrigRegOpenKeyExA(hKey, lpSubKey, ulOptions, samDesired, phkResult);
+        return RegOpenKeyExA(hKey, lpSubKey, ulOptions, samDesired, phkResult);
+    }
+
+    inline LSTATUS WINAPI Hook_RegQueryValueExA(HKEY hKey, LPCSTR lpValueName, LPDWORD lpReserved, LPDWORD lpType, LPBYTE lpData, LPDWORD lpcbData) {
+        if (hKey != NULL) {
+            if (s_OrigRegQueryValueExA) return s_OrigRegQueryValueExA(hKey, lpValueName, lpReserved, lpType, lpData, lpcbData);
+            return RegQueryValueExA(hKey, lpValueName, lpReserved, lpType, lpData, lpcbData);
+        }
+
+        std::string valName = lpValueName ? lpValueName : "@";
+
+        // Return 0 in memory for legacy installer keys so they never touch Settings.ini
+        if (valName == "FirstTime" || valName == "VERSION" || valName == "SIZE") {
+            if (lpType) *lpType = REG_DWORD;
+            constexpr DWORD required = sizeof(DWORD);
+            if (lpData == nullptr) {
+                if (lpcbData) *lpcbData = required;
+                return ERROR_SUCCESS;
+            }
+            if (*lpcbData < required) {
+                *lpcbData = required;
+                return ERROR_MORE_DATA;
+            }
+            *reinterpret_cast<DWORD*>(lpData) = 0;
+            *lpcbData = required;
+            return ERROR_SUCCESS;
+        }
+
+        // Determine if value is a REG_DWORD or REG_SZ based on key name (lpType is OUT-only from caller)
+        bool isDword = (valName.rfind("g_", 0) == 0);
+
+        auto it = s_DefaultStrings.find(valName);
+        std::string defaultValue = (it != s_DefaultStrings.end()) ? it->second : std::string{};
+
+        char buf[512] = { 0 };
+        GetPrivateProfileStringA(s_CurrentSection.c_str(), valName.c_str(), defaultValue.c_str(), buf, sizeof(buf), s_SettingsIniPath.string().c_str());
+        std::string readVal(buf);
+
+        // Special handling for g_RacingResolution: always honor the mod's active resolution index
+        // which was determined from NFSMW_WideScreenFix.ini (ResX/ResY) on startup
+        if (valName == "g_RacingResolution") {
+            int resolvedIndex = Resolution::g_ActiveResIndex;
+
+            if (lpType) *lpType = REG_DWORD;
+            if (lpcbData) {
+                if (lpData) {
+                    if (*lpcbData < sizeof(DWORD)) {
+                        *lpcbData = sizeof(DWORD);
+                        return ERROR_MORE_DATA;
+                    }
+                    *reinterpret_cast<DWORD*>(lpData) = static_cast<DWORD>(resolvedIndex);
+                }
+                *lpcbData = sizeof(DWORD);
+                return ERROR_SUCCESS;
+            }
+            return ERROR_SUCCESS;
+        }
+
+        if (isDword) {
+            DWORD dwordVal = 0;
+            if (!readVal.empty()) {
+                dwordVal = static_cast<DWORD>(std::strtoul(readVal.c_str(), nullptr, 10));
+            }
+            else if (!defaultValue.empty()) {
+                dwordVal = static_cast<DWORD>(std::strtoul(defaultValue.c_str(), nullptr, 10));
+            }
+
+            if (lpType) *lpType = REG_DWORD;
+            constexpr DWORD required = sizeof(DWORD);
+
+            if (lpData == nullptr) {
+                if (lpcbData) *lpcbData = required;
+                return ERROR_SUCCESS;
+            }
+
+            if (*lpcbData < required) {
+                *lpcbData = required;
+                return ERROR_MORE_DATA;
+            }
+
+            *reinterpret_cast<DWORD*>(lpData) = dwordVal;
+            *lpcbData = required;
+            return ERROR_SUCCESS;
+        }
+        else {
+            // String (REG_SZ)
+            if (lpType) *lpType = REG_SZ;
+            DWORD required = static_cast<DWORD>(readVal.length() + 1);
+
+            if (lpData == nullptr) {
+                if (lpcbData) *lpcbData = required;
+                return ERROR_SUCCESS;
+            }
+
+            if (*lpcbData < required) {
+                *lpcbData = required;
+                return ERROR_MORE_DATA;
+            }
+
+            if (!readVal.empty()) {
+                std::memcpy(lpData, readVal.c_str(), readVal.length());
+            }
+            lpData[readVal.length()] = '\0';
+            *lpcbData = required;
+            return ERROR_SUCCESS;
+        }
+    }
+
+    inline LSTATUS WINAPI Hook_RegSetValueExA(HKEY hKey, LPCSTR lpValueName, DWORD Reserved, DWORD dwType, const BYTE* lpData, DWORD cbData) {
+        if (hKey != NULL) {
+            if (s_OrigRegSetValueExA) return s_OrigRegSetValueExA(hKey, lpValueName, Reserved, dwType, lpData, cbData);
+            return RegSetValueExA(hKey, lpValueName, Reserved, dwType, lpData, cbData);
+        }
+
+        if (!lpValueName || !lpData) return ERROR_INVALID_PARAMETER;
+
+        std::string valName = lpValueName;
+
+        // Only persist actual in-game graphics settings (g_*) to Settings.ini
+        if (valName.rfind("g_", 0) != 0) {
+            return ERROR_SUCCESS;
+        }
+
+        std::string valStr;
+
+        if (dwType == REG_DWORD) {
+            DWORD dwVal = *reinterpret_cast<const DWORD*>(lpData);
+            if (valName == "g_RacingResolution") {
+                int index = static_cast<int>(dwVal);
+                if (index >= 0 && index < static_cast<int>(Resolution::g_ResolutionList.size())) {
+                    int w = Resolution::g_ResolutionList[index].width;
+                    int h = Resolution::g_ResolutionList[index].height;
+                    dwVal = (static_cast<DWORD>(w) << 16) | (static_cast<DWORD>(h) & 0xFFFF) | 0x80000000;
+                    Resolution::g_ActiveResIndex = index;
+                    Resolution::g_CurrentWidth = w;
+                    Resolution::g_CurrentHeight = h;
+                    Resolution::g_CurrentAspectRatio = static_cast<float>(w) / static_cast<float>(h);
+                    if (!g_Config.IniPath.empty()) {
+                        WritePrivateProfileStringA("DISPLAY", "ResX", std::to_string(w).c_str(), g_Config.IniPath.string().c_str());
+                        WritePrivateProfileStringA("DISPLAY", "ResY", std::to_string(h).c_str(), g_Config.IniPath.string().c_str());
+                    }
+
+                    if (Resolution::g_WindowMode > 0) {
+                        HWND hWnd = *reinterpret_cast<HWND*>(0x00982BF4);
+                        if (!hWnd) hWnd = Resolution::g_GameHWND;
+                        if (hWnd) {
+                            Resolution::ApplyWindowStyleAndPosition(hWnd, w, h);
+                        }
+                    }
+                }
+            }
+            valStr = std::to_string(dwVal);
+        }
+        else {
+            valStr = reinterpret_cast<const char*>(lpData);
+        }
+
+        WritePrivateProfileStringA(s_CurrentSection.c_str(), valName.c_str(), valStr.c_str(), s_SettingsIniPath.string().c_str());
+        return ERROR_SUCCESS;
+    }
+
+    inline void InitRegistryRedirect(const std::filesystem::path& gamePath, bool enabled) {
+        if (!enabled) return;
+
+        s_WriteSettingsToFile = true;
+
+        if (s_UseCustomUserDir && !s_CustomUserDir.empty()) {
+            s_SettingsIniPath = s_CustomUserDir / "NFS Most Wanted" / "Settings.ini";
+        }
+        else {
+            char szDocs[MAX_PATH] = { 0 };
+            SHGetFolderPathA(NULL, CSIDL_PERSONAL | CSIDL_FLAG_CREATE, NULL, 0, szDocs);
+            s_SettingsIniPath = std::filesystem::path(szDocs) / "NFS Most Wanted" / "Settings.ini";
+        }
+
+        std::error_code ec;
+        std::filesystem::create_directories(s_SettingsIniPath.parent_path(), ec);
+
+        // Default graphics settings for Settings.ini
+        s_DefaultStrings["g_CarEnvironmentMapEnable"] = "3";
+        s_DefaultStrings["g_CarEnvironmentMapUpdateData"] = "1";
+        s_DefaultStrings["g_RoadReflectionEnable"] = "3";
+        s_DefaultStrings["g_MotionBlurEnable"] = "1";
+        s_DefaultStrings["g_ParticleSystemEnable"] = "1";
+        s_DefaultStrings["g_WorldLodLevel"] = "3";
+        s_DefaultStrings["g_CarLodLevel"] = "1";
+        s_DefaultStrings["g_OverBrightEnable"] = "1";
+        s_DefaultStrings["g_FSAALevel"] = "3";
+        s_DefaultStrings["g_RainEnable"] = "1";
+        s_DefaultStrings["g_TextureFiltering"] = "2";
+        s_DefaultStrings["g_RacingResolution"] = "1";
+        s_DefaultStrings["g_PerformanceLevel"] = "5";
+        s_DefaultStrings["g_VSyncOn"] = "0";
+        s_DefaultStrings["g_ShadowDetail"] = "2";
+        s_DefaultStrings["g_VisualTreatment"] = "1";
+
+        // 3. Resolve original ADVAPI32 functions
+        HMODULE hAdvapi32 = GetModuleHandleA("ADVAPI32.dll");
+        if (!hAdvapi32) hAdvapi32 = LoadLibraryA("ADVAPI32.dll");
+        if (hAdvapi32) {
+            s_OrigRegCreateKeyA = reinterpret_cast<PFN_RegCreateKeyA>(GetProcAddress(hAdvapi32, "RegCreateKeyA"));
+            s_OrigRegOpenKeyExA = reinterpret_cast<PFN_RegOpenKeyExA>(GetProcAddress(hAdvapi32, "RegOpenKeyExA"));
+            s_OrigRegCloseKey = reinterpret_cast<PFN_RegCloseKey>(GetProcAddress(hAdvapi32, "RegCloseKey"));
+            s_OrigRegSetValueExA = reinterpret_cast<PFN_RegSetValueExA>(GetProcAddress(hAdvapi32, "RegSetValueExA"));
+            s_OrigRegQueryValueExA = reinterpret_cast<PFN_RegQueryValueExA>(GetProcAddress(hAdvapi32, "RegQueryValueExA"));
+            s_OrigRegOpenKeyA = reinterpret_cast<PFN_RegOpenKeyA>(GetProcAddress(hAdvapi32, "RegOpenKeyA"));
+        }
+
+        // 4. Directly patch speed.exe fixed IAT addresses for ADVAPI32:
+        // 0x00890000: RegCreateKeyA
+        // 0x00890004: RegOpenKeyExA
+        // 0x00890008: RegCloseKey
+        // 0x0089000C: RegSetValueExA
+        // 0x00890010: RegQueryValueExA
+        // 0x00890014: RegOpenKeyA
+        struct IATEntry {
+            uintptr_t addr;
+            PROC hookFunc;
+        } entries[] = {
+            { 0x00890000, reinterpret_cast<PROC>(Hook_RegCreateKeyA) },
+            { 0x00890004, reinterpret_cast<PROC>(Hook_RegOpenKeyExA) },
+            { 0x00890008, reinterpret_cast<PROC>(Hook_RegCloseKey) },
+            { 0x0089000C, reinterpret_cast<PROC>(Hook_RegSetValueExA) },
+            { 0x00890010, reinterpret_cast<PROC>(Hook_RegQueryValueExA) },
+            { 0x00890014, reinterpret_cast<PROC>(Hook_RegOpenKeyA) },
+        };
+
+        for (const auto& e : entries) {
+            DWORD oldProtect;
+            PROC* pEntry = reinterpret_cast<PROC*>(e.addr);
+            MemoryTools::Unprotect(e.addr, sizeof(PROC), oldProtect);
+            *pEntry = e.hookFunc;
+            MemoryTools::RestoreProtect(e.addr, sizeof(PROC), oldProtect);
+        }
+    }
+}
+
+#endif // NFSMW_WIDESCREENFIX_USERSETTINGS_H
+
+```
