@@ -4383,6 +4383,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [xemu](entities/xemu.md) — original Xbox LLE emulator (QEMU fork; NV2A/OpenGL; ISO/XISO)
 - [xenia](entities/xenia.md) — Xbox 360 emulator (PowerPC recompiler; D3D12/Vulkan; XEX)
 - [xenia-mac](entities/xenia-mac.md) — macOS port of Xbox 360 emulator Xenia
+- [xeno-dllre](entities/xeno-dllre.md) — defensive static RE of Xeno Roblox executor v1.3.65 (bytecode hijack attach, XOR+zstd resources, localhost HTTP control, YARA/score scanner, IOC notes; aauuzy)
 - [xenondumper](entities/xenondumper.md) — Xbox 360 fuse/bootloader/NAND dumper for LLE emulator prep (C/C++; RGH/JTAG/devkit)
 - [x360gamehack2025](entities/x360gamehack2025.md) — Xbox 360/OG Xbox all-in-one XEX/XBE/XISO/PKG/GOD patching (RGH/JTAG/Bad Update; C# WinForms)
 - [xbox360-emu](entities/xbox360-emu.md) — Xbox 360 emulator (C/C++; kernel, modding, memory analysis)
