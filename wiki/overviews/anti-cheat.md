@@ -315,6 +315,7 @@ sources:
   - wiki/sources/descriptions/dslee2022__SignatureKid.md
   - wiki/sources/descriptions/dsasmblr__hacking-online-games.md
   - wiki/sources/descriptions/dungnotnull__game-cheating-exploit-detection-agent-skill.md
+  - wiki/sources/descriptions/jshdcn__anti-cheating-assistant.md
   - wiki/sources/descriptions/emilyinure__solace-csgo.md
   - wiki/sources/descriptions/seifreed__r2morph.md
   - wiki/sources/descriptions/secrary__makin.md
@@ -1095,6 +1096,8 @@ Client-side **loader + subscription update** narratives (rapid refresh after sig
 **Ring-3 AC toolkit** references: [[noescapeac]] (CmdSuv; C++20 CMake; Linux/Windows user-mode integrity engine—SIMD scans, injection forensics, inline unhook repair, overlay checks, PCIe DMA–style signals, aim kinematics heuristics; embeddable library—not a kernel product) illustrates a **no-driver** client protection stack alongside kernel-heavy commercial lines. (source: wiki/sources/descriptions/CmdSuv__NoEscapeAC.md)
 
 [[game-cheating-exploit-detection-agent-skill]] (dungnotnull; Python) pairs a Claude Code skill with a six-step executable engine—statistical and invariant detectors for aimbots, wallhacks, macros, memory tampering, and economy/duplication exploits—plus CI-verifiable harnesses, telemetry ingestion, quality gates, and a self-updating knowledge base from academic/domain crawls for structured decision support. (source: wiki/sources/descriptions/dungnotnull__game-cheating-exploit-detection-agent-skill.md)
+
+[[anti-cheating-assistant]] (jshdcn; Markdown skills + Python helpers) guides **business risk-control and anti-fraud** consulting: three-flow graph modeling of roles/carriers, underground-slang lexicon sync for fraud investigations, risk-catalog mapping, and domain playbooks (account, mobile, transaction, marketing, content, financial security)—repeatable control design for online businesses and economies, not live AC telemetry. (source: wiki/sources/descriptions/jshdcn__anti-cheating-assistant.md)
 
 Title-specific R6 ranked-stat suspicion tooling such as [[r6-intel]] (baldspots440; Node.js/Express; R6Data API K/D/headshot/win-rate heuristics with historical snapshot comparison and sample-size weighting; community integrity leads—not enforcement verdicts) illustrates third-party statistical anomaly scoring beside kernel AC under [[battleye]]. (source: wiki/sources/descriptions/baldspots440__R6Intel.md)
 

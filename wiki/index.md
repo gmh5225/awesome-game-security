@@ -401,6 +401,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Anti-Cheat Observatory](entities/anti-cheat-observatory.md) — version-scoped, source-backed AC dossiers/mechanism worksheets for BattlEye/EAC/Vanguard (Astro/TypeScript; Git JSON schema; Pagefind; RSS/GitHub discovery with separate claim/review state; Anti Cheat / Guide)
 - [anti-cheat-research-index](entities/anti-cheat-research-index.md) — structured AC/kernel/VT-x/graphics/RE research index (defensive engineering map; guide lane)
 - [anti-cheat](entities/anti-cheat.md) — C/C++ open-source anti-cheat system (jnastarot; Anti Cheat → Open Source Anti Cheat System)
+- [anti-cheating-assistant](entities/anti-cheating-assistant.md) — jshdcn; AI agent skill package + playbooks; three-flow business risk modeling, fraud slang lexicon sync, risk-catalog mapping, domain control playbooks (account/mobile/transaction/marketing/content/financial); business-security consulting workflow (Anti Cheat)
 - [AntiCheat-Testing-Framework](entities/anti-cheat-testing-framework.md) — modular Windows AC detection test harness (mem R/W / inject / overlay / input / KM; Testing Framework)
 - [Anti-Cheat-TestBench (ekknod)](entities/anti-cheat-testbench.md) — AC testBench harness (C++/C; AC research + driver development + hooking; Open Source Anti Cheat System; README [TestBench])
 - [UAC (c4kef)](entities/uac.md) — anti-cheat development platform (Visual Studio kernel driver; common cheat-technique detection; C++ kernel detection test framework; Cheat developer platform)
