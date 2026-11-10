@@ -33,7 +33,8 @@ sources:
   - wiki/sources/descriptions/Lucas-blip-png__dkb-pc-recomp.md
   - wiki/sources/descriptions/jenissimo__bottleship.md
   - wiki/sources/descriptions/KamiKitsune420__bgt-decomp-tools.md
-updated: 2026-11-08
+  - wiki/sources/descriptions/tamcdonald42__legacy-recreated.md
+updated: 2026-11-10
 confidence: high
 ---
 
@@ -81,6 +82,8 @@ BBC Micro preservation rebuilds such as [[pipeline-disasm]] (mattgodbolt; annota
 
 16-bit DOS preservation RE such as [[sre-re]] (formix; *Solar Realms Elite* 0.994b Borland C++ 3.0 BBS door binary; Ghidra including headless export; **VROOMM overlay flattening** for static study; Python disassembly/string/call annotation; encrypted `.II` save decoders) transcribes turn-by-turn rules from decompiled logic but treats a **DOSBox workflow** that re-runs formulas against the retail executable as the gate before accepting recovered specs—static Ghidra output alone is not sufficient for game-rule claims. (source: wiki/sources/descriptions/formix__sre-re.md)
 
+Win32 PE preservation workbenches such as [[legacy-recreated]] (tamcdonald42; *Septerra Core* 1.04; **M-HT SRW** static recompilation as a runnable behavioral oracle alongside Java Ghidra scripts that inventory functions, walk WinMain call graphs, apply types, and export decompiled C; MSVC/NASM builds and runtime patches for blit logging and presentation study; no bundled retail assets) pair static Ghidra recovery with a rebuilt executable baseline—label which engine behaviors are oracle-validated vs documentation-only before citing game-state or combat-registration claims. (source: wiki/sources/descriptions/tamcdonald42__legacy-recreated.md)
+
 Windows PE32 relink harnesses such as xshxdex98/[[openmcm2]] (*Motocross Madness 2*; fixed-base MSVC 6.0 image; Ghidra export + assembly/link verification) keep **retail sections byte-for-byte** while selectively replacing routines with ported C that must match retail behavior; optional DirectDraw tracing compares renderer calls against the original path. (source: wiki/sources/descriptions/xshxdex98__OpenMCM2.md)
 
 BGT/NVGT blind-audio-game toolkits such as [[bgt-decomp-tools]] (KamiKitsune420; Python) chain **PE overlay** extraction through **AES-256-CBC** and **LZ77** before AngelScript disassembly/lift—engine readers use **trial decryption** and **self-verifying format checks** so static pack recovery is not accepted until decrypted layouts parse cleanly; optional **UPX** runtime unpack and Ghidra headless extend opcode tables when shipped binaries add packers. (source: wiki/sources/descriptions/KamiKitsune420__bgt-decomp-tools.md)
@@ -125,4 +128,4 @@ Game-server PC checks often combine **offline host artifacts** (Prefetch, Amcach
 
 ## Related
 
-[[binary-evidence]] · [[binary-diffing]] · [[dynamic-binary-instrumentation]] · [[jsrf-recomp]] · [[ngbrecomp]] · [[sf33rdsxbrecompo]] · [[nfsu2recomp]] · [[sc2-android-recomp]] · [[smo-recomp]] · [[letsgo-recomp]] · [[totk-pc-recomp]] · [[xcx-recomp]] · [[xc2-recomp]] · [[dkb-pc-recomp]] · [[nakagawa-recomp]] · [[gow-pc-port]] · [[vp2s-recomp]] · [[ultimate-mortal-kombat-3-ios-decompiled]] · [[copyapp]] · [[wwe-svr2009-recomp]] · [[nhl-legacy-remaster]] · [[ng2recomp]] · [[cod6-nx]] · [[saturnkit]] · [[motorstorm-mv-recomp]] · [[dead-rising-2-case-zero-xenon-recomp]] · [[mcla-pc]] · [[pipeline-disasm]] · [[frogman]] · [[sre-re]] · [[openmcm2]] · [[ttd-capa-cpp]] · [[custos]] · [[mixed-boolean-arithmetic]] · [[control-flow-flattening]] · [[research-rigor]] · [[overviews/reverse-engineering]] · [[overviews/windows-kernel]] · [[overviews/game-engine]]
+[[binary-evidence]] · [[binary-diffing]] · [[dynamic-binary-instrumentation]] · [[jsrf-recomp]] · [[ngbrecomp]] · [[sf33rdsxbrecompo]] · [[nfsu2recomp]] · [[sc2-android-recomp]] · [[smo-recomp]] · [[letsgo-recomp]] · [[totk-pc-recomp]] · [[xcx-recomp]] · [[xc2-recomp]] · [[dkb-pc-recomp]] · [[nakagawa-recomp]] · [[gow-pc-port]] · [[vp2s-recomp]] · [[ultimate-mortal-kombat-3-ios-decompiled]] · [[copyapp]] · [[wwe-svr2009-recomp]] · [[nhl-legacy-remaster]] · [[ng2recomp]] · [[cod6-nx]] · [[saturnkit]] · [[motorstorm-mv-recomp]] · [[dead-rising-2-case-zero-xenon-recomp]] · [[mcla-pc]] · [[pipeline-disasm]] · [[frogman]] · [[sre-re]] · [[legacy-recreated]] · [[openmcm2]] · [[ttd-capa-cpp]] · [[custos]] · [[mixed-boolean-arithmetic]] · [[control-flow-flattening]] · [[research-rigor]] · [[overviews/reverse-engineering]] · [[overviews/windows-kernel]] · [[overviews/game-engine]]
