@@ -2842,6 +2842,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/oakboat/DataPtrHookWin11 [NtUserSetGestureConfig]
 - https://github.com/GetRektBoy724/Win32kHooker [.data ptr swapper for newer win32k versions]
 - https://github.com/bootmgfw/lithium-kernel [Windows kernel driver + usermode client: physical/virtual memory R/W, page-table walk, pattern scan, MouClass mouse IOCTL]
+- https://github.com/BotovodWF/wfb_driver [Minimal kmemread.sys kernel driver with IOCTL MmCopyVirtualMemory RPM/WPM and dump/scan tools for Warface impactdrv ObCallbacks-blocked processes]
 - https://github.com/zensenzay/wnf-driver-meme [Kernel driver and usermode client using Windows Notification Facility state names for covert UM/KM comm, plus process memory R/W and ObRegisterCallbacks handle stripping]
 
 > EFI Driver
