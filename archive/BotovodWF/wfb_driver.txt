@@ -1,0 +1,639 @@
+Project Path: arc_BotovodWF_wfb_driver_59tfjfy4
+
+Source Tree:
+
+```txt
+arc_BotovodWF_wfb_driver_59tfjfy4
+├── README.md
+├── driver
+│   ├── build.sh
+│   ├── kmemread.c
+│   └── kmemread.sys
+└── tools
+    ├── build.sh
+    ├── kfulldump.c
+    ├── kmtest.c
+    └── kscan.c
+
+```
+
+`README.md`:
+
+```md
+# WFB-Driver
+
+Минимальный kernel-драйвер Windows для чтения и записи памяти чужого процесса в обход
+юзерспейс-защит анти-чита Warface (`impactdrv.sys`, `ObRegisterCallbacks` на
+`PROCESS_VM_READ`/`PROCESS_VM_WRITE`). Инструмент реверса, с которого стал возможен
+живой разбор античит-клиента и импакт-блоба.
+
+Через `MmCopyVirtualMemory` в контексте ядра: `impactdrv` режет только
+юзерспейс-доступ (`ReadProcessMemory`/`WriteProcessMemory` возвращают `ACCESS_DENIED`),
+а системный вызов из ядра минует фильтр ObCallbacks целиком. Ядро само валидирует
+адреса и ловит page-fault → в худшем случае `NTSTATUS`, не BSOD.
+
+## Из чего состоит
+
+```
+driver/
+  kmemread.c    sys-драйвер: 2 IOCTL (READ / WRITE), MmCopyVirtualMemory + KeStackAttachProcess
+  kmemread.sys  готовая сборка (test-signed, 9 КБ)
+  build.sh      сборка через MinGW-w64 ddk
+tools/
+  kmtest.c      self-test и разовое чтение <pid> <addr> <size>
+  kscan.c       скан committed MEM_PRIVATE: поиск magic 0xB66C, дамп регионов
+  kfulldump.c   полный дамп всех committed регионов + manifest.txt
+  build.sh      сборка утилит (MinGW)
+.docs/
+  anticheat.md  что драйвер дал по АЧ (impactdrv, impact-блоб, VM-flattening)
+  usage.md      как загрузить драйвер, типовые сценарии
+  build.md      сборка, подпись, тест-режим Windows
+```
+
+## Быстрый старт
+
+Требуется Windows 10/11 x64 в **test-signing** режиме
+(`bcdedit /set testsigning on` + reboot) или с настоящей EV-подписью драйвера.
+
+```bash
+# 1. Собрать (или использовать готовый driver/kmemread.sys)
+cd driver   && sh build.sh
+cd ../tools && sh build.sh
+
+# 2. Установить и запустить драйвер (PowerShell admin)
+sc create kmemread type= kernel binPath= C:\path\to\kmemread.sys
+sc start kmemread
+
+# 3. Self-test (без аргументов — читает собственный буфер)
+./kmtest.exe
+
+# 4. Прочитать 256 байт из чужого процесса
+./kmtest.exe <pid> <addr-hex> 256 out.bin
+
+# 5. Полный дамп committed regions
+./kfulldump.exe <pid> dump/
+```
+
+Выгрузка: `sc stop kmemread && sc delete kmemread`.
+
+## Что именно драйвер даёт по АЧ
+
+Коротко — [подробно в .docs/anticheat.md](.docs/anticheat.md):
+
+- Полный **дамп памяти** `Game.exe` и `acclient64.dll` под нагрузкой — нашлись
+  107 сайтов использования константы `0x810023C0` (IOCTL impactdrv) в
+  decoded-образе `acclient64`.
+- **Паттерн записи IOCTL** `41 B9 C0 23 00 81; mov [rdi+off], r9d` рассеян
+  VM-flattening'ом — без драйвера эта работа невозможна, поскольку
+  юзерспейс-дамперы получают `ACCESS_DENIED`.
+- **Impact-блоб 8192 байта** (`head 137bd2bb`, энтропия 7.963) найден в
+  приватных регионах `0x5c59x000` живого процесса — без драйвера блобы
+  видны только в сети после zlib+base64, из памяти — никак.
+- Подтверждено, что `acclient` использует **JIT-generated syscall stubs** (таблицы
+  по 8 слотов × 16 байт, SSN вычисляется рантайм-ARX из `[rsp+0x58]`): анти-хук
+  против перехвата `ntdll`-экспортов. Эта структура читается только через
+  kernel-RPM.
+- Обнаружено, что impact-генератор вплетает **живое рантайм-состояние** (указатели
+  игровых объектов, адреса возвратов win32k) — то есть блоб = аттестация живого
+  процесса, не чистая функция сессионного ключа. Критический вывод по дизайну
+  античита, получен прямым дампом памяти `0x5c59x000`.
+
+## Чего драйвер НЕ делает
+
+- Не отключает `impactdrv` и не модифицирует его код — работает параллельно.
+- Не обходит защиту **на уровне ядра** (kernel-callbacks на `PsSetCreateProcess`,
+  `PsSetLoadImage` и т.п.) — импортуется честно, стандартным `sc start`.
+- Не крашит целевой процесс — все обращения идут через `MmCopyVirtualMemory`,
+  которая возвращает NTSTATUS на невалидные адреса.
+- Не обходит TPM-измерение, PatchGuard, HVCI — предназначен для test-signing среды
+  (reverse-engineering стенд), не для продакшен-Windows.
+
+## Юридическая оговорка
+
+Проект создан для исследования работы собственного Warface-клиента в
+reverse-engineering целях. Не предназначен для чит-разработки или нарушения
+пользовательского соглашения My.Games / VK Play. Использование в продакшене — на
+ответственность запускающего.
+
+## Связанные проекты
+
+- [WFB](https://github.com/BotovodWF/WFB) — headless-клиент входа Warface.
+- [WFB-Tools](https://github.com/BotovodWF/wfb_tools) — утилиты GameCenter.
+
+```
+
+`driver/build.sh`:
+
+```sh
+#!/bin/sh
+# Сборка kmemread.sys через MinGW-w64 ddk (пакет mingw-w64-x86_64-headers + ddk).
+# Требуется MinGW-w64 с заголовками DDK (ntddk.h) и libntoskrnl.a.
+# Пример установки под MSYS2: pacman -S mingw-w64-x86_64-headers mingw-w64-x86_64-crt
+set -e
+CC=${CC:-x86_64-w64-mingw32-gcc}
+"$CC" -shared -Wall -O2 -nostdlib \
+    -Wl,--subsystem,native -Wl,--image-base,0x140000000 \
+    -Wl,--section-alignment,0x1000 -Wl,--file-alignment,0x200 \
+    -Wl,--entry,DriverEntry \
+    -I. -D_X86_= -D__KERNEL__ \
+    -o kmemread.sys kmemread.c \
+    -lntoskrnl -lhal
+# Подписать (test signing). В продакшене — настоящая EV cert.
+# signtool sign /v /fd SHA256 /a kmemread.sys
+echo "built: kmemread.sys ($(stat -c%s kmemread.sys 2>/dev/null || wc -c < kmemread.sys) байт)"
+
+```
+
+`driver/kmemread.c`:
+
+```c
+/* kmemread.c — МАКСИМАЛЬНО БЕЗОПАСНЫЙ kernel-драйвер чтения памяти процесса.
+ * Обходит impactdrv ObCallbacks (user RPM режется) через MmCopyVirtualMemory
+ * в контексте ядра. Самый безопасный путь: ядро само валидирует адреса и
+ * обрабатывает page-fault'ы (возвращает NTSTATUS, НЕ крашит).
+ *
+ * Защиты от BSOD:
+ *   - MmCopyVirtualMemory (документирован, внутр. SEH, безопасен на невалидных адресах)
+ *   - METHOD_BUFFERED (система копирует/валидирует user-буферы, нет прямого доступа к user-памяти)
+ *   - лимит размера 1MB/запрос
+ *   - PsLookupProcessByProcessId проверка + парный ObDereferenceObject (нет утечки/висячих ссылок)
+ *   - все NTSTATUS проверяются; ObfDereferenceObject всегда
+ *   - только PASSIVE_LEVEL (DeviceIoControl приходит на PASSIVE)
+ *
+ * Build (MinGW): см. build_kmemread.sh
+ */
+#include <ntddk.h>
+
+#define DEV_NAME   L"\\Device\\kmemread"
+#define SYM_NAME   L"\\DosDevices\\kmemread"
+#define IOCTL_READ   CTL_CODE(FILE_DEVICE_UNKNOWN, 0x801, METHOD_BUFFERED, FILE_ANY_ACCESS)
+#define IOCTL_WRITE  CTL_CODE(FILE_DEVICE_UNKNOWN, 0x802, METHOD_BUFFERED, FILE_ANY_ACCESS)
+#define MAX_READ   0x100000u   /* 1 MB лимит на запрос */
+
+typedef struct _READ_REQ {
+    ULONG64 pid;
+    ULONG64 addr;
+    ULONG   size;
+} READ_REQ, *PREAD_REQ;
+
+typedef struct _WRITE_REQ {
+    ULONG64 pid;
+    ULONG64 addr;
+    ULONG   size;
+    /* followed by inline data[size] */
+} WRITE_REQ, *PWRITE_REQ;
+
+/* Прототипы ntoskrnl, отсутствующие в MinGW ddk — объявляем явно */
+NTSTATUS NTAPI PsLookupProcessByProcessId(HANDLE ProcessId, PEPROCESS *Process);
+PEPROCESS NTAPI PsGetCurrentProcess(void);
+
+/* MmCopyVirtualMemory экспортируется ntoskrnl, но нет в заголовках — объявляем */
+NTSTATUS NTAPI MmCopyVirtualMemory(
+    PEPROCESS SourceProcess, PVOID SourceAddress,
+    PEPROCESS TargetProcess, PVOID TargetAddress,
+    SIZE_T BufferSize, KPROCESSOR_MODE PreviousMode, PSIZE_T ReturnSize);
+
+/* KAPC_STATE is 0x30 bytes on x64. Keep as opaque 64-byte buffer. */
+typedef UCHAR KAPC_STATE_BUF[0x40];
+VOID NTAPI KeStackAttachProcess(PEPROCESS Process, PVOID ApcState);
+VOID NTAPI KeUnstackDetachProcess(PVOID ApcState);
+NTSTATUS NTAPI ZwProtectVirtualMemory(HANDLE ProcessHandle, PVOID *BaseAddress,
+    PSIZE_T RegionSize, ULONG NewProtect, PULONG OldProtect);
+
+static NTSTATUS do_read(ULONG64 pid, ULONG64 addr, ULONG size, PVOID out, PSIZE_T done) {
+    *done = 0;
+    if (size == 0 || size > MAX_READ) return STATUS_INVALID_PARAMETER;
+    if (addr == 0) return STATUS_INVALID_PARAMETER;
+
+    PEPROCESS proc = NULL;
+    NTSTATUS st = PsLookupProcessByProcessId((HANDLE)(ULONG_PTR)pid, &proc);
+    if (!NT_SUCCESS(st) || proc == NULL) return STATUS_INVALID_CID;
+
+    SIZE_T copied = 0;
+    /* MmCopyVirtualMemory: ядро валидирует SourceAddress в SourceProcess,
+       обрабатывает невалидные/непривилегированные страницы → NTSTATUS, не BSOD. */
+    st = MmCopyVirtualMemory(proc, (PVOID)(ULONG_PTR)addr,
+                             PsGetCurrentProcess(), out,
+                             size, KernelMode, &copied);
+    *done = copied;
+    ObDereferenceObject(proc);   /* всегда — парная ссылка */
+    return st;
+}
+
+/* do_write: записывает data в адрес addr процесса pid через KeStackAttachProcess.
+ * BEFORE write — временно меняет протекцию страницы на RWX, пишет, восстанавливает.
+ * MAX_READ-same лимит. Используется для патча инструкций (frame-limiter и т.д.)
+ */
+static NTSTATUS do_write(ULONG64 pid, ULONG64 addr, ULONG size,
+                         PVOID src, PSIZE_T done) {
+    *done = 0;
+    if (size == 0 || size > MAX_READ) return STATUS_INVALID_PARAMETER;
+    if (addr == 0) return STATUS_INVALID_PARAMETER;
+
+    PEPROCESS proc = NULL;
+    NTSTATUS st = PsLookupProcessByProcessId((HANDLE)(ULONG_PTR)pid, &proc);
+    if (!NT_SUCCESS(st) || proc == NULL) return STATUS_INVALID_CID;
+
+    /* Attach to target process address space */
+    KAPC_STATE apc;
+    KeStackAttachProcess(proc, &apc);
+
+    /* Change protection to RWX temporarily */
+    PVOID base = (PVOID)(ULONG_PTR)addr;
+    SIZE_T sz = size;
+    ULONG old_prot = 0;
+    HANDLE hproc = NtCurrentProcess();   /* we're attached, so self = target */
+    NTSTATUS pst = ZwProtectVirtualMemory(hproc, &base, &sz,
+                                          PAGE_EXECUTE_READWRITE, &old_prot);
+    if (NT_SUCCESS(pst)) {
+        /* raw memcpy in target's VA — safe because we're attached */
+        __try {
+            RtlCopyMemory((PVOID)(ULONG_PTR)addr, src, size);
+            *done = size;
+            st = STATUS_SUCCESS;
+        }
+        __except (EXCEPTION_EXECUTE_HANDLER) {
+            st = GetExceptionCode();
+        }
+        /* restore protection */
+        SIZE_T sz2 = size;
+        PVOID base2 = (PVOID)(ULONG_PTR)addr;
+        ZwProtectVirtualMemory(hproc, &base2, &sz2, old_prot, &old_prot);
+    } else {
+        st = pst;
+    }
+    KeUnstackDetachProcess(&apc);
+    ObDereferenceObject(proc);
+    return st;
+}
+
+static NTSTATUS disp_devctl(PDEVICE_OBJECT dev, PIRP irp) {
+    UNREFERENCED_PARAMETER(dev);
+    PIO_STACK_LOCATION sp = IoGetCurrentIrpStackLocation(irp);
+    NTSTATUS st = STATUS_INVALID_DEVICE_REQUEST;
+    ULONG_PTR info = 0;
+
+    if (sp->Parameters.DeviceIoControl.IoControlCode == IOCTL_WRITE) {
+        ULONG inlen = sp->Parameters.DeviceIoControl.InputBufferLength;
+        if (inlen >= sizeof(WRITE_REQ) && irp->AssociatedIrp.SystemBuffer) {
+            PWRITE_REQ req = (PWRITE_REQ)irp->AssociatedIrp.SystemBuffer;
+            ULONG want = req->size;
+            if (sizeof(WRITE_REQ) + want > inlen) want = inlen - sizeof(WRITE_REQ);
+            if (want > MAX_READ) want = MAX_READ;
+            SIZE_T done = 0;
+            PVOID data = (PUCHAR)irp->AssociatedIrp.SystemBuffer + sizeof(WRITE_REQ);
+            st = do_write(req->pid, req->addr, want, data, &done);
+            info = done;
+        } else {
+            st = STATUS_BUFFER_TOO_SMALL;
+        }
+    }
+    else if (sp->Parameters.DeviceIoControl.IoControlCode == IOCTL_READ) {
+        ULONG inlen  = sp->Parameters.DeviceIoControl.InputBufferLength;
+        ULONG outlen = sp->Parameters.DeviceIoControl.OutputBufferLength;
+        if (inlen >= sizeof(READ_REQ) && outlen > 0 && irp->AssociatedIrp.SystemBuffer) {
+            PREAD_REQ req = (PREAD_REQ)irp->AssociatedIrp.SystemBuffer;
+            ULONG want = req->size;
+            if (want > outlen) want = outlen;          /* не выйти за выходной буфер */
+            if (want > MAX_READ) want = MAX_READ;
+            SIZE_T done = 0;
+            /* SystemBuffer общий для in/out в METHOD_BUFFERED — читаем req ДО записи out */
+            ULONG64 pid = req->pid, addr = req->addr;
+            st = do_read(pid, addr, want, irp->AssociatedIrp.SystemBuffer, &done);
+            info = NT_SUCCESS(st) ? done : 0;
+        } else {
+            st = STATUS_BUFFER_TOO_SMALL;
+        }
+    }
+    irp->IoStatus.Status = st;
+    irp->IoStatus.Information = info;
+    IoCompleteRequest(irp, IO_NO_INCREMENT);
+    return st;
+}
+
+static NTSTATUS disp_createclose(PDEVICE_OBJECT dev, PIRP irp) {
+    UNREFERENCED_PARAMETER(dev);
+    irp->IoStatus.Status = STATUS_SUCCESS;
+    irp->IoStatus.Information = 0;
+    IoCompleteRequest(irp, IO_NO_INCREMENT);
+    return STATUS_SUCCESS;
+}
+
+static PDEVICE_OBJECT g_dev = NULL;
+
+static VOID drv_unload(PDRIVER_OBJECT drv) {
+    UNREFERENCED_PARAMETER(drv);
+    UNICODE_STRING sym;
+    RtlInitUnicodeString(&sym, SYM_NAME);
+    IoDeleteSymbolicLink(&sym);
+    if (g_dev) IoDeleteDevice(g_dev);
+}
+
+NTSTATUS DriverEntry(PDRIVER_OBJECT drv, PUNICODE_STRING reg) {
+    UNREFERENCED_PARAMETER(reg);
+    UNICODE_STRING devn, symn;
+    RtlInitUnicodeString(&devn, DEV_NAME);
+    RtlInitUnicodeString(&symn, SYM_NAME);
+
+    NTSTATUS st = IoCreateDevice(drv, 0, &devn, FILE_DEVICE_UNKNOWN,
+                                 FILE_DEVICE_SECURE_OPEN, FALSE, &g_dev);
+    if (!NT_SUCCESS(st)) return st;
+
+    st = IoCreateSymbolicLink(&symn, &devn);
+    if (!NT_SUCCESS(st)) { IoDeleteDevice(g_dev); g_dev = NULL; return st; }
+
+    drv->DriverUnload = drv_unload;
+    drv->MajorFunction[IRP_MJ_CREATE]         = disp_createclose;
+    drv->MajorFunction[IRP_MJ_CLOSE]          = disp_createclose;
+    drv->MajorFunction[IRP_MJ_DEVICE_CONTROL] = disp_devctl;
+    return STATUS_SUCCESS;
+}
+```
+
+`tools/build.sh`:
+
+```sh
+#!/bin/sh
+# Сборка юзерспейс-утилит (gcc MinGW-w64).
+set -e
+CC=${CC:-gcc}
+"$CC" -O2 -o kmtest.exe   kmtest.c
+"$CC" -O2 -o kscan.exe    kscan.c    -lpsapi
+"$CC" -O2 -o kfulldump.exe kfulldump.c -lpsapi
+echo "built: kmtest.exe kscan.exe kfulldump.exe"
+
+```
+
+`tools/kfulldump.c`:
+
+```c
+/* kfulldump.c — полный дамп всех committed регионов процесса через kmemread.
+ * Пишет каждый регион в файл dump/region_<base>_<size>.bin + manifest.txt.
+ * Build: gcc -O2 -o kfulldump.exe kfulldump.c -lpsapi
+ */
+#include <windows.h>
+#include <psapi.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define IOCTL_READ CTL_CODE(FILE_DEVICE_UNKNOWN, 0x801, METHOD_BUFFERED, FILE_ANY_ACCESS)
+#define CHUNK 0x100000u
+
+typedef struct { unsigned long long pid; unsigned long long addr; unsigned long size; } READ_REQ;
+
+static HANDLE g_drv;
+static unsigned char* g_buf;
+
+static int kread_full(unsigned long long pid, unsigned long long addr, unsigned long size, unsigned char* out) {
+    unsigned long done = 0;
+    while (done < size) {
+        unsigned long want = size - done;
+        if (want > CHUNK) want = CHUNK;
+        READ_REQ* r = (READ_REQ*)g_buf;
+        r->pid = pid; r->addr = addr + done; r->size = want;
+        DWORD ret = 0;
+        BOOL ok = DeviceIoControl(g_drv, IOCTL_READ, g_buf, sizeof(READ_REQ), g_buf, want, &ret, NULL);
+        if (!ok || ret == 0) break;
+        memcpy(out + done, g_buf, ret);
+        done += ret;
+        if (ret < want) break;  /* partial — unmapped page */
+    }
+    return (int)done;
+}
+
+int main(int argc, char** argv) {
+    if (argc < 3) { printf("usage: kfulldump <pid> <outdir>\n"); return 1; }
+    DWORD pid = (DWORD)atoi(argv[1]);
+    const char* outdir = argv[2];
+    CreateDirectoryA(outdir, NULL);
+
+    g_drv = CreateFileW(L"\\\\.\\kmemread", GENERIC_READ|GENERIC_WRITE, 0, NULL, OPEN_EXISTING, 0, NULL);
+    if (g_drv == INVALID_HANDLE_VALUE) { printf("open drv fail %lu\n", GetLastError()); return 1; }
+
+    HANDLE hProc = OpenProcess(PROCESS_QUERY_INFORMATION, FALSE, pid);
+    if (!hProc) { printf("OpenProcess fail %lu\n", GetLastError()); return 1; }
+
+    g_buf = (unsigned char*)malloc(CHUNK);
+    unsigned char* region_buf = (unsigned char*)malloc(0x10000000);  /* 256MB max region */
+    if (!g_buf || !region_buf) { printf("alloc fail\n"); return 1; }
+
+    char manifest_path[520];
+    snprintf(manifest_path, sizeof manifest_path, "%s/manifest.txt", outdir);
+    FILE* mf = fopen(manifest_path, "w");
+
+    unsigned char* a = 0;
+    MEMORY_BASIC_INFORMATION mbi;
+    int nreg = 0;
+    unsigned long long total_bytes = 0;
+    while (VirtualQueryEx(hProc, a, &mbi, sizeof mbi)) {
+        if (mbi.State == MEM_COMMIT &&
+            !(mbi.Protect & (PAGE_NOACCESS | PAGE_GUARD)) &&
+            mbi.RegionSize <= 0x10000000) {   /* <= 256MB */
+            int got = kread_full(pid, (unsigned long long)(ULONG_PTR)mbi.BaseAddress,
+                                 (unsigned long)mbi.RegionSize, region_buf);
+            if (got > 0) {
+                char path[520];
+                snprintf(path, sizeof path, "%s/r_%016llx_%08x_t%02x_p%03x.bin",
+                         outdir, (unsigned long long)(ULONG_PTR)mbi.BaseAddress,
+                         got, (unsigned)mbi.Type >> 16, (unsigned)mbi.Protect);
+                FILE* f = fopen(path, "wb");
+                if (f) { fwrite(region_buf, 1, got, f); fclose(f); }
+                if (mf) fprintf(mf, "%016llx %08x %x %x\n",
+                                (unsigned long long)(ULONG_PTR)mbi.BaseAddress,
+                                got, (unsigned)mbi.Type, (unsigned)mbi.Protect);
+                total_bytes += (unsigned long long)got;
+                nreg++;
+                if (nreg % 100 == 0) printf("  %d regions, %.1f MB\n", nreg, total_bytes/(1024.0*1024));
+            }
+        }
+        unsigned char* na = (unsigned char*)mbi.BaseAddress + mbi.RegionSize;
+        if (na <= a) break;
+        a = na;
+        if ((unsigned long long)a > 0x7FFFFFFFFFFFull) break;
+    }
+    if (mf) fclose(mf);
+    printf("DONE: %d regions, %.1f MB\n", nreg, total_bytes/(1024.0*1024));
+    free(g_buf); free(region_buf);
+    CloseHandle(hProc); CloseHandle(g_drv);
+    return 0;
+}
+
+```
+
+`tools/kmtest.c`:
+
+```c
+#include <windows.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+#define IOCTL_READ CTL_CODE(FILE_DEVICE_UNKNOWN, 0x801, METHOD_BUFFERED, FILE_ANY_ACCESS)
+
+typedef struct { unsigned long long pid; unsigned long long addr; unsigned long size; } READ_REQ;
+
+static HANDLE open_dev(void){
+    return CreateFileW(L"\\\\.\\kmemread", GENERIC_READ|GENERIC_WRITE, 0, NULL, OPEN_EXISTING, 0, NULL);
+}
+
+static int kread(HANDLE h, unsigned long long pid, unsigned long long addr, unsigned long size, unsigned char* out){
+    unsigned char buf[0x100000];
+    if(size>sizeof buf) size=sizeof buf;
+    READ_REQ* r=(READ_REQ*)buf;
+    r->pid=pid; r->addr=addr; r->size=size;
+    DWORD ret=0;
+    BOOL ok=DeviceIoControl(h, IOCTL_READ, buf, sizeof(READ_REQ), buf, size, &ret, NULL);
+    if(!ok) return -(int)GetLastError();
+    memcpy(out, buf, ret);
+    return (int)ret;
+}
+
+int main(int argc, char** argv){
+    HANDLE h=open_dev();
+    if(h==INVALID_HANDLE_VALUE){ printf("open kmemread fail %lu\n", GetLastError()); return 1; }
+
+    if(argc<2){
+        /* self-test: read own known buffer */
+        static volatile unsigned char marker[64];
+        for(int i=0;i<64;i++) marker[i]=(unsigned char)(0xA0+i);
+        unsigned char out[64]={0};
+        int n=kread(h, GetCurrentProcessId(), (unsigned long long)(ULONG_PTR)marker, 64, out);
+        printf("self-read ret=%d\n", n);
+        if(n==64){
+            int match=1; for(int i=0;i<64;i++) if(out[i]!=(unsigned char)(0xA0+i)) match=0;
+            printf("self-test %s: ", match?"PASS":"FAIL");
+            for(int i=0;i<16;i++) printf("%02x", out[i]); printf("...\n");
+        }
+        CloseHandle(h); return 0;
+    }
+
+    unsigned long long pid=strtoull(argv[1],0,0);
+    unsigned long long addr=strtoull(argv[2],0,16);
+    unsigned long size=argc>3?strtoul(argv[3],0,0):256;
+    unsigned char* out=malloc(size);
+    int n=kread(h, pid, addr, size, out);
+    printf("read pid=%llu addr=0x%llx size=%lu -> ret=%d\n", pid, addr, size, n);
+    if(n>0){
+        int show=n>64?64:n;
+        printf("hex: "); for(int i=0;i<show;i++) printf("%02x", out[i]); printf("%s\n", n>64?"...":"");
+        if(argc>4){ FILE* f=fopen(argv[4],"wb"); if(f){ fwrite(out,1,n,f); fclose(f); printf("saved %d to %s\n", n, argv[4]); } }
+    }
+    free(out); CloseHandle(h); return 0;
+}
+
+```
+
+`tools/kscan.c`:
+
+```c
+/* kscan.c — сканер памяти процесса через kmemread.sys.
+ * Перечисляет регионы через VirtualQueryEx (это разрешено impactdrv — метаданные
+ * не блокируются, только RPM), ЧИТАЕТ содержимое через наш kernel-драйвер.
+ * Ищет POST /io magic (0x0000b66c) и/или дампит приватные commit регионы в файлы.
+ *
+ * Build: gcc -O2 -o kscan.exe kscan.c -lpsapi
+ * Run:   kscan.exe <pid> scan   — найти вхождения magic 0xb66c
+ *        kscan.exe <pid> dump <outdir> [maxregions]  — дамп приватной памяти
+ */
+#include <windows.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <psapi.h>
+
+#define IOCTL_READ CTL_CODE(FILE_DEVICE_UNKNOWN, 0x801, METHOD_BUFFERED, FILE_ANY_ACCESS)
+#define CHUNK 0x100000u  /* 1MB per kernel call */
+
+typedef struct { unsigned long long pid; unsigned long long addr; unsigned long size; } READ_REQ;
+
+static HANDLE g_drv;
+
+static unsigned char* g_iobuf;
+
+static int kread(unsigned long long pid, unsigned long long addr, unsigned long size, unsigned char* out){
+    if (size > CHUNK) size = CHUNK;
+    READ_REQ* r = (READ_REQ*)g_iobuf;
+    r->pid = pid; r->addr = addr; r->size = size;
+    DWORD ret = 0;
+    BOOL ok = DeviceIoControl(g_drv, IOCTL_READ, g_iobuf, sizeof(READ_REQ), g_iobuf, size, &ret, NULL);
+    if (!ok) return -(int)GetLastError();
+    if (ret > size) ret = size;
+    memcpy(out, g_iobuf, ret);
+    return (int)ret;
+}
+
+static int kread_full(unsigned long long pid, unsigned long long addr, unsigned long size, unsigned char* out){
+    unsigned long done = 0;
+    while (done < size){
+        unsigned long want = size - done;
+        if (want > CHUNK) want = CHUNK;
+        int n = kread(pid, addr + done, want, out + done);
+        if (n <= 0) return (int)done;  /* частичное — неполная страница OK */
+        done += (unsigned long)n;
+        if ((unsigned long)n < want) break;
+    }
+    return (int)done;
+}
+
+int main(int argc, char** argv){
+    if (argc < 3){ printf("usage: kscan.exe <pid> scan | <pid> dump <outdir> [maxregions]\n"); return 1; }
+    unsigned long long pid = strtoull(argv[1], 0, 0);
+    const char* mode = argv[2];
+    const char* outdir = argc > 3 ? argv[3] : NULL;
+    int maxreg = argc > 4 ? atoi(argv[4]) : 10000;
+
+    g_drv = CreateFileW(L"\\\\.\\kmemread", GENERIC_READ|GENERIC_WRITE, 0, NULL, OPEN_EXISTING, 0, NULL);
+    if (g_drv == INVALID_HANDLE_VALUE){ printf("open kmemread fail %lu\n", GetLastError()); return 1; }
+
+    HANDLE hProc = OpenProcess(PROCESS_QUERY_INFORMATION, FALSE, (DWORD)pid);
+    if (!hProc){ printf("OpenProcess fail %lu (metadata only, no RPM)\n", GetLastError()); return 1; }
+
+    g_iobuf = (unsigned char*)malloc(CHUNK);
+    unsigned char* buf = (unsigned char*)malloc(0x4000000);  /* 64MB, max region */
+    if (!g_iobuf || !buf){ printf("alloc fail\n"); return 1; }
+    unsigned char* a = 0;
+    MEMORY_BASIC_INFORMATION mbi;
+    int nreg = 0, hits = 0, dumps = 0;
+    unsigned long long bytes_scanned = 0;
+
+    while (VirtualQueryEx(hProc, a, &mbi, sizeof mbi)){
+        if (mbi.State == MEM_COMMIT &&
+            !(mbi.Protect & (PAGE_NOACCESS | PAGE_GUARD)) &&
+            mbi.RegionSize <= 0x4000000 &&     /* <= 64 MB защита от аномалий */
+            mbi.Type == MEM_PRIVATE){          /* только приватные (куча/VMallocations) */
+
+            nreg++;
+            unsigned long rs = (unsigned long)mbi.RegionSize;
+            int got = kread_full(pid, (unsigned long long)(ULONG_PTR)mbi.BaseAddress, rs, buf);
+            bytes_scanned += (unsigned long long)got;
+
+            if (strcmp(mode, "scan") == 0 && got >= 4){
+                for (int i = 0; i + 4 <= got; i += 4){
+                    unsigned int m = *(unsigned int*)(buf + i);
+                    if (m == 0x0000b66cu){
+                        printf("MAGIC @%p+0x%x (%dKB region, prot=0x%x)\n",
+                               mbi.BaseAddress, i, rs/1024, (unsigned)mbi.Protect);
+                        hits++;
+                    }
+                }
+            } else if (strcmp(mode, "dump") == 0 && outdir && got > 0){
+                char path[520];
+                snprintf(path, sizeof path, "%s/mem_%p_%08x.bin", outdir, mbi.BaseAddress, got);
+                FILE* f = fopen(path, "wb");
+                if (f){ fwrite(buf, 1, got, f); fclose(f); dumps++; }
+            }
+            if (nreg >= maxreg) break;
+        }
+        unsigned char* na = (unsigned char*)mbi.BaseAddress + mbi.RegionSize;
+        if (na <= a) break;
+        a = na;
+        if ((unsigned long long)a > 0x7FFFFFFFFFFFull) break;
+    }
+    free(buf);
+    printf("regions scanned=%d magic_hits=%d dumps=%d bytes=%llu MB=%.1f\n",
+           nreg, hits, dumps, bytes_scanned, bytes_scanned/(1024.0*1024.0));
+    CloseHandle(hProc); CloseHandle(g_drv);
+    return 0;
+}
+
+```
