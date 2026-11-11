@@ -4170,6 +4170,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/gmh5225/maniac [External]
 - https://github.com/gmh5225/freedom [difficulty changer & bot]
 - https://github.com/gmh5225/osu-aac [ANTI ANTI CHEAT]
+- https://github.com/symphonyprime/qor-osucheat [Windows Python external osu! aim assist using tosu/gosumemory WebSocket beatmap state and .osu hit-object parsing for adjustable trajectory correction]
 
 > Game:EldenRing
 - https://github.com/techiew/EldenRingMods [Mod]
