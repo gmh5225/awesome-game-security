@@ -993,6 +993,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/ReSo7200/molt-dex [Claude skill pipeline for Android APK reverse engineering and modding: apktool/smali workflow, DexKit and Xposed hooks, Frida, and obfuscation-aware analysis]
 - https://github.com/zhuyansen/awesome-ai-reverse-engineering [Curated AI-agent RE stack: Ghidra/IDA MCP servers, mobile tooling (jadx, Frida), agent skills, and security-graded open-source RE projects]
 - https://github.com/2akouwu/reverify [AI-assisted reverse engineering with deterministic byte-level verification via MCP server and CLI]
+- https://github.com/dagoSte/reverseai [Static RE of untrusted PE/APK/JS in locked offline containers (Ghidra, JADX, LIEF, YARA-X) with byte-anchored verification and an MCP server for agents]
 - https://github.com/mytechnotalent/rea [Offline-first RE assistant with one-shot binary scan, native PE/ELF/Mach-O and JavaScript/Electron static inventory, local RAG, multi-agent harness, and MCP server]
 - https://github.com/jiuyou-7411/dsh-rea-plugin [DeepSeek Harness REA workbench plugin with Chinese UI for 220 RE tools (Frida, Ghidra, jadx), bundled offline docs, and engine install helpers]
 - https://github.com/Zhishulo/dsh-rea-powerpack [DeepSeek Harness plugin to install and verify REA analysis engines, pin rea-agents MCP builds with shadow rollback, and surface REA doctor capability gaps]
