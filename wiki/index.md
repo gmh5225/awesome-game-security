@@ -3517,6 +3517,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ritz-amazing-fortnite-internal-updated](entities/ritz-amazing-fortnite-internal-updated.md) — Ritz-lineage Fortnite internal base (DontCry361x; UE object access; aim/ESP menu; offset helpers + call spoofing + weapon hooks; [Internal])
 - [RIVER](entities/river.md) — Bitdefender dynamic binary analysis framework (ELF/PE loader; external mapping; native import resolution; x86 runtime instrumentation; cheat / DBI)
 - [ROM Shifter](entities/rom-shifter.md) — Android app for custom-ROM flash, backup, restore, and migration (ShivamXD6; Kotlin/Compose + shell backend; Magisk/KernelSU/APatch; cheat / Android)
+- [Roblox Exploit Auditor](entities/roblox-exploit-auditor.md) — Ibrahim9876Q Roblox Studio plugin; Luau static scan for insecure remotes/backdoors/client-trusted logic; in-studio movement cheat trials; Markdown reports; local defensive audit (Anti Cheat / game:roblox)
 - [Roblox Speed Tester](entities/roblox-speed-tester.md) — Roblox Luau LocalScript SpeedTester + GUI; Humanoid/RunService movement spikes with rollback indicators for movement AC hardening and validation research (EnderDevelopment; Anti Cheat / Stress Testing)
 - [RobloxCheats](entities/roblox-cheats.md) — macOS Roblox dylib injector (Mach VM / shared-memory IPC; internal+external ESP; offset finder)
 - [roblox-external-base](entities/roblox-external-base.md) — C++ Windows external Roblox starter (Toolhelp + NtRead/NtWrite syscalls; DataModel/Instance framework; DirectComposition D3D11 ImGui overlay; dayoungthugger)
