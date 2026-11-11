@@ -3371,6 +3371,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [QuestKeeper](entities/quest-keeper.md) — read-only AdventureQuest Worlds Windows companion (C#/.NET Avalonia; Npcap TCP capture; character/faction/inventory dashboard; LiteDB; agvmdsa; Cheat / Packet Capture&Parse)
 - [qiling-il2cpp-dump](entities/qiling-il2cpp-dump.md) — Qiling emulation IL2CPP metadata dump (no game launch; obfuscated/anti-tamper; cheat / game engine explorer:Unity)
 - [qiomem](entities/qiomem.md) — BYOVD via Qualcomm `QIOMem.sys` (QCI0701 ACPI; virtual device → IOCTL physmem R/W; gmh5225)
+- [qor-osucheat](entities/qor-osucheat.md) — Windows Python external osu! aim assist (tosu/gosumemory WebSocket + `.osu` hit-object parse; SendInput; no injection; SymphonyPrime)
 - [QorTroller](entities/qortroller.md) — ConWan30 hardware-rooted controller attestation (VAPI; DualShock bridge; PoEP; Circom/Groth16 ZK verified-human proofs; session receipts; game security / anti-cheat research; Cryptographic console anti-cheat)
 - [qortime-ai](entities/qortime-ai.md) — ConWan30 QorTime AI (Python/JS); Muse Spark/Wonder + SAM 3.1 over signed console match receipts; Ed25519 advisory sidecars; lower-only AI (VERIFIED→PARTIAL, never upgrades referee) (Anti Cheat)
 - [qualcomm_avb_exploit_poc](entities/qualcomm-avb-exploit-poc.md) — Qualcomm AVB bypass PoC (crafted partition data skips boot-image verification; persistent code execution; atlas4381)
