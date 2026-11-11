@@ -1,0 +1,417 @@
+Project Path: arc_unicbda-droid_cachyos-eac-secure-boot_6frsdv49
+
+Source Tree:
+
+```txt
+arc_unicbda-droid_cachyos-eac-secure-boot_6frsdv49
+└── README.md
+
+```
+
+`README.md`:
+
+```md
+# CachyOS · Secure Boot · Easy Anti-Cheat v2 — a dual boot-path setup for native Fortnite
+
+> Keep your everyday GRUB boot with Secure Boot **enabled**, and add a second,
+> hidden firmware entry that boots the CachyOS-signed EAC kernel — everything
+> Easy Anti-Cheat Linux v2 (and therefore native Fortnite) expects.
+
+**Status:** verified end-to-end on real hardware on Nov 11, 2026.
+
+## Background
+
+- On **Oct 14, 2026**, Epic Games confirmed that **Fortnite is coming to
+  Linux**, distributed through the Epic Games Launcher (not Steam). The Steam
+  Deck is explicitly *not* supported; CachyOS is explicitly named among the
+  target distributions. There is no release date yet.
+- Fortnite on Linux pilots **Easy Anti-Cheat (EAC) Linux v2**, which expects a
+  verified boot environment: **Secure Boot enabled**, a distro-signed kernel
+  booted with `lockdown=integrity`, module signature enforcement, kexec
+  disabled.
+- The `linux-cachyos-eac` package is a **regular CachyOS kernel** (EEVDF +
+  LTO, Cachy Sauce) built with an EAC-friendly config. It contains **no Epic
+  code** — EAC v2 itself runs as a systemd service using eBPF, and only while
+  a protected game is running.
+- Everything below can be done **today**. When Fortnite ships, you install it
+  from the Epic Games Launcher and boot the EAC entry — nothing else changes.
+
+## The idea in one picture
+
+```text
+UEFI firmware — Secure Boot ON, Setup Mode OFF
+db = your sbctl keys + Microsoft CAs + CachyOS EAC CA
+│
+├── "cachyos" / "UEFI OS"  (daily default, top of BootOrder)
+│   └── GRUB (all modules embedded, signed with YOUR sbctl keys)
+│       └── /boot/vmlinuz-linux-cachyos{,-lts} (signed with YOUR sbctl keys)
+│
+└── "CachyOS EAC"  (no menu entry — pick from the firmware boot menu, e.g. F7)
+    └── systemd-boot (CachyOS-signed)
+        └── ESP: vmlinuz-linux-cachyos-eac + initramfs (CachyOS-signed)
+            cmdline: lockdown=integrity module.sig_enforce=1 …
+```
+
+Three rules make this work:
+
+1. **Two signature authorities, strictly separated.** Your daily chain (GRUB
+   plus every kernel it boots) is signed with your own sbctl keys. The EAC
+   chain (systemd-boot, the EAC kernel, its initramfs) keeps its **original
+   CachyOS signatures**. EAC v2 accepts the CachyOS signature *alone* — an
+   additional sbctl signature makes it refuse. So **never run `sbctl sign` on
+   anything in the EAC path** and never add those files to sbctl's database.
+   `sbctl verify` reporting `✗ … is not signed` for the EAC files is
+   **expected and correct**.
+2. **The CachyOS EAC CA must be enrolled in your db.** That is what lets the
+   firmware accept the CachyOS-signed EAC chain while Secure Boot is on. On
+   CachyOS it ships in the `cachyos-eac-signing-key` package and is enrolled
+   via `sbctl enroll-keys --custom`.
+3. **GRUB must be self-contained.** With Secure Boot on, the kernel enables
+   lockdown and GRUB may no longer load `.mod` files from disk. A stock GRUB
+   image (which pulls modules from `/boot/grub`) drops straight into rescue
+   mode. Rebuild it with the full module set embedded (step 4).
+
+## Contents
+
+1. [Requirements & tested with](#1-requirements--tested-with)
+2. [Packages](#2-packages)
+3. [Backup first](#3-backup-first)
+4. [sbctl keys + enrollment](#4-sbctl-keys--enrollment)
+5. [Rebuild & sign GRUB](#5-rebuild--sign-grub)
+6. [Build the EAC boot path](#6-build-the-eac-boot-path)
+7. [Keep the ESP in sync (pacman hook)](#7-keep-the-esp-in-sync-pacman-hook)
+8. [Verification](#8-verification)
+9. [Day-to-day usage](#9-day-to-day-usage)
+10. [Troubleshooting & firmware quirks](#10-troubleshooting--firmware-quirks)
+11. [Undo](#11-undo)
+
+## 1. Requirements & tested with
+
+**Requires:**
+
+- CachyOS x86_64 (or an Arch-based distro carrying these packages), UEFI/GPT
+  boot with **GRUB** as boot manager, ESP mounted at `/boot/efi`, `/boot` on
+  ext4
+- a few hundred MB free on the ESP (kernel + initramfs ≈ 100 MB, plus
+  headroom)
+- the willingness to touch your firmware's Secure Boot key store — read
+  [Backup first](#3-backup-first)
+
+**Tested with:**
+
+| Component | Version |
+|---|---|
+| CachyOS | Nov 2026 |
+| linux-cachyos | 7.3.3-1 |
+| linux-cachyos-lts | 6.18.60-2 |
+| linux-cachyos-eac | 7.3.3-2 |
+| linux-cachyos-eac-nvidia-open | 620.70.06 |
+| GRUB | 2.16 |
+| systemd (systemd-boot) | 262.2 |
+| sbctl | 0.18 |
+| Hardware | TongFang GM7IX9N laptop (RTX 4090) |
+
+## 2. Packages
+
+```sh
+sudo pacman -S --needed sbctl
+sudo pacman -S --needed linux-cachyos-eac linux-cachyos-eac-nvidia-open cachyos-eac-signing-key
+```
+
+- `linux-cachyos-eac` — the EAC-ready kernel (a normal CachyOS kernel with a
+  hardened, EAC-compatible config; no Epic code inside).
+- `linux-cachyos-eac-nvidia-open` — NVIDIA open modules matching that kernel.
+  Replace with whatever your GPU needs.
+- `cachyos-eac-signing-key` — installs two things:
+  - the **CachyOS EAC CA** into `/usr/share/cachyos-eac/` and
+    `/var/lib/sbctl/keys/custom/db/` (this is what `sbctl enroll-keys --custom`
+    picks up), and
+  - a replacement mkinitcpio post hook at `/etc/initcpio/post/sbctl` that
+    keeps sbctl's own hook from appending a **second signature** to
+    CachyOS-signed images on every initramfs rebuild. Without it, any
+    `mkinitcpio` run would silently break the EAC chain.
+
+## 3. Backup first
+
+```sh
+sudo mkdir -p /root/efivars-backup
+for v in PK KEK db dbx; do
+  sudo cat /sys/firmware/efi/efivars/${v}-*-* > "/root/efivars-backup/$v.bin"
+done
+sudo tar -czf /root/esp-backup.tar.gz -C /boot/efi .
+```
+
+- efivarfs quirk: **`cp` does not work on efivars** (lseek is forbidden) —
+  always use `cat`.
+- There is no "unenroll" in sbctl. Recovery is always: BIOS → delete all
+  Secure Boot keys (this re-enters **Setup Mode**) → re-enroll.
+
+## 4. sbctl keys + enrollment
+
+First put the firmware into **Setup Mode**: BIOS → Security → Secure Boot →
+*Delete Keys*. (On some boards this needs a little dance — see
+[firmware quirks](#10-troubleshooting--firmware-quirks).)
+
+```sh
+sudo sbctl --disable-landlock create-keys
+sudo sbctl --disable-landlock enroll-keys --microsoft --custom --ignore-immutable
+sudo sbctl --disable-landlock status
+```
+
+- `--microsoft` — adds the Microsoft UEFI CA / Windows certs so that
+  pre-signed EFI binaries keep booting.
+- `--custom` — enrolls everything in `/var/lib/sbctl/keys/custom/`, which
+  includes the **CachyOS EAC CA** from `cachyos-eac-signing-key`.
+- `--ignore-immutable` — needed when the firmware marks db/dbx immutable.
+- `--disable-landlock` — disables sbctl's internal sandboxing. Use it whenever
+  sbctl complains about landlock (common inside containers/sandboxes).
+
+> ⚠️ **Never add `--firmware-builtin` on firmware that already ships Microsoft
+> certs** (very common — TongFang, many others). It copies the firmware's
+> built-in certs into your db *on top of* `--microsoft`, producing duplicate
+> certificates. Several firmwares then refuse every boot with a bare
+> **"Security Violation"** screen — no file name, no hint. If that happens:
+> BIOS → delete all keys (Setup Mode) → re-enroll with exactly the command
+> above. A db that *grows* when you enroll "less" is the tell — in my case
+> 11136 B with `--firmware-builtin` vs. 10262 B clean.
+
+After enrollment some firmwares enable Secure Boot by themselves on the next
+boot. `sbctl status` should read:
+
+```text
+Setup Mode:   ✓ Disabled
+Secure Boot:  ✓ Enabled
+```
+
+## 5. Rebuild & sign GRUB
+
+```sh
+sudo grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=cachyos \
+  --modules="all_video bli boot cat configfile date datetime echo efi_gop ext2 fat font gettext gfxmenu gfxterm gzio halt help keystatus linux loadenv normal part_gpt part_msdos png reboot search search_fs_file search_fs_uuid search_label sleep terminal test tpm video video_fb videotest" \
+  --disable-shim-lock --no-nvram
+```
+
+Why the flags:
+
+- `--modules="…"` — embeds everything `grub.cfg` needs. Under Secure Boot GRUB
+  can no longer load `.mod` files from `/boot/grub`; without this you get
+  `error: module 'normal' not found` → GRUB rescue.
+- `--disable-shim-lock` — GRUB ≥ 2.16 builds shim_lock/lockdown/verify into
+  `kernel.img` (there are no such `.mod` files anymore), so this is
+  effectively a no-op — but it matches the upstream Secure Boot guidance.
+- `--no-nvram` — don't create yet another boot entry; keep your existing ones.
+
+Then sign your daily chain and register it in sbctl's database (sbctl's hooks
+re-sign these automatically on future package updates):
+
+```sh
+sudo sbctl --disable-landlock sign -s /boot/efi/EFI/cachyos/grubx64.efi
+sudo sbctl --disable-landlock sign -s /boot/vmlinuz-linux-cachyos        # every kernel GRUB boots
+sudo sbctl --disable-landlock sign -s /boot/vmlinuz-linux-cachyos-lts
+# sync the fallback copies (byte-identical, same valid signature):
+sudo cp -f /boot/efi/EFI/cachyos/grubx64.efi /boot/efi/EFI/BOOT/BOOTX64.EFI
+sudo cp -f /boot/efi/EFI/cachyos/grubx64.efi /boot/efi/EFI/boot/bootx64.efi 2>/dev/null || true
+sudo sbctl --disable-landlock verify
+```
+
+Expected output (the two ✗ are the EAC files — that is rule 1 working):
+
+```text
+✓ /boot/efi/EFI/cachyos/grubx64.efi is signed
+✓ /boot/efi/EFI/BOOT/BOOTX64.EFI is signed
+✓ /boot/vmlinuz-linux-cachyos is signed
+✓ /boot/vmlinuz-linux-cachyos-lts is signed
+✗ /boot/efi/EFI/cachyos-eac/systemd-bootx64.efi is not signed
+✗ /boot/efi/vmlinuz-linux-cachyos-eac is not signed
+```
+
+If you ever re-run `grub-install` (e.g. after a GRUB package update), repeat
+the sign + copy + verify afterwards.
+
+## 6. Build the EAC boot path
+
+All EAC files live on the ESP and keep their CachyOS signatures —
+**copy, never sign**:
+
+```sh
+sudo mkdir -p /boot/efi/EFI/cachyos-eac /boot/efi/loader/entries
+
+# CachyOS-SIGNED systemd-boot — mind the .signed variant!
+sudo install -m644 /usr/lib/systemd/boot/efi/systemd-bootx64.efi.signed \
+  /boot/efi/EFI/cachyos-eac/systemd-bootx64.efi
+
+# kernel + initramfs onto the ESP (the EAC path does not go through /boot)
+sudo install -m644 /boot/vmlinuz-linux-cachyos-eac       /boot/efi/vmlinuz-linux-cachyos-eac
+sudo install -m644 /boot/initramfs-linux-cachyos-eac.img  /boot/efi/initramfs-linux-cachyos-eac.img
+```
+
+- Use `systemd-bootx64.efi.signed` — the `systemd` package ships it with a
+  CachyOS signature. The plain `systemd-bootx64.efi` is unsigned and the
+  firmware will reject it.
+- We deliberately place it in `EFI/cachyos-eac/` and do **not** run
+  `bootctl install` — that would create `EFI/systemd/`, add its own boot
+  entries and reorder your BootOrder. This way the EAC path stays completely
+  separate and invisible in daily use.
+
+`/boot/efi/loader/loader.conf`:
+
+```ini
+default cachyos-eac.conf
+timeout 0
+```
+
+`/boot/efi/loader/entries/cachyos-eac.conf` — your usual kernel options plus
+the EAC hardening flags:
+
+```ini
+title   CachyOS (EAC)
+linux   /vmlinuz-linux-cachyos-eac
+initrd  /initramfs-linux-cachyos-eac.img
+options root=UUID=<your-root-uuid> rw lockdown=integrity lsm=landlock,lockdown,yama,integrity,bpf module.sig_enforce=1 sysctl.kernel.kexec_load_disabled=1
+```
+
+The EAC-relevant part is `lockdown=integrity`, the `lsm=` list containing
+`lockdown`, `integrity` and `bpf`, `module.sig_enforce=1` and
+`sysctl.kernel.kexec_load_disabled=1`. Everything else (`root=`, `rw`,
+`nowatchdog`, `nvme_load=YES`, IOMMU options, …) is just your normal cmdline —
+copy it from your GRUB config. `sudo eac-status` tells you what is missing.
+
+Finally, the firmware boot entry (adjust `-d`/`-p` to the disk/partition
+holding your ESP):
+
+```sh
+sudo efibootmgr -c -d /dev/nvme1n1 -p 1 -L "CachyOS EAC" -l '\EFI\cachyos-eac\systemd-bootx64.efi'
+```
+
+Test it once without making it the default — either pick it from your
+firmware's boot menu (F7/F8/F11/F12/Esc, depending on board) or:
+
+```sh
+sudo efibootmgr -n 0001   # boot it exactly once
+```
+
+## 7. Keep the ESP in sync (pacman hook)
+
+Kernel updates write new `/boot/vmlinuz-linux-cachyos-eac` and initramfs, but
+the EAC path boots from the ESP. Two small files keep them in sync.
+
+`/usr/local/sbin/eac-kernel-esp-sync` (make it executable):
+
+```sh
+#!/bin/sh
+# Keep EAC kernel + initramfs on the ESP in sync with /boot.
+set -e
+ESP="$(bootctl --print-esp-path 2>/dev/null)" || exit 0
+[ -d "$ESP/EFI/cachyos-eac" ] || exit 0
+for f in vmlinuz-linux-cachyos-eac initramfs-linux-cachyos-eac.img; do
+    [ -f "/boot/$f" ] || continue
+    install -m644 "/boot/$f" "$ESP/$f.new"
+    mv -f "$ESP/$f.new" "$ESP/$f"
+done
+echo "Synced EAC kernel and initramfs to $ESP"
+```
+
+`/usr/share/libalpm/hooks/96-eac-kernel-esp.hook`:
+
+```ini
+[Trigger]
+Type = Path
+Operation = Install
+Operation = Upgrade
+Target = boot/vmlinuz-linux-cachyos-eac
+Target = boot/initramfs-linux-cachyos-eac.img
+
+[Action]
+Description = Syncing Easy Anti-Cheat kernel to the ESP...
+When = PostTransaction
+Exec = /usr/local/sbin/eac-kernel-esp-sync
+```
+
+## 8. Verification
+
+From any boot (this works from your normal GRUB boot as well):
+
+```text
+$ sudo eac-status
+[ OK ] Secure Boot is enabled
+[ OK ] Setup Mode is disabled
+[ OK ] TPM 2.0 found
+[ OK ] CachyOS EAC CA is enrolled
+[ OK ] /boot/vmlinuz-linux-cachyos-eac is signed by CachyOS
+[ OK ] /boot/efi/EFI/cachyos-eac/systemd-bootx64.efi is signed by CachyOS
+
+The boot files are ready. Boot the EAC entry to check the running kernel.
+```
+
+Boot the EAC entry once (boot menu → "CachyOS EAC") and check the running
+system:
+
+```text
+$ sudo eac-status          # kernel checks pass:
+                           # "meets the requirements of Easy Anti-Cheat Linux v2"
+$ cat /sys/kernel/security/lockdown
+[none] integrity confidentiality
+```
+
+(`integrity` active means lockdown is doing its job. On your normal GRUB boot
+this reads `[none] integrity confidentiality` with `none` active — full
+performance, no lockdown.)
+
+## 9. Day-to-day usage
+
+- Power on → GRUB → normal kernel, Secure Boot on. Nothing changes.
+- Want to play? Reboot, open the firmware boot menu (**F7** on this board),
+  pick **"CachyOS EAC"**.
+- Inside the EAC kernel everything works as usual — it is your normal OS on a
+  locked-down kernel. EAC v2 runs as a systemd service using eBPF and is only
+  active while a protected game runs. On the very first game start, EAC asks
+  once for a systemd software installation — allow it.
+- The EAC entry never appears in the GRUB menu — that is by design.
+- When Fortnite releases: Epic Games Launcher (the native Linux build works
+  today) → install → boot the EAC path → play.
+
+## 10. Troubleshooting & firmware quirks
+
+| Symptom | Cause / fix |
+|---|---|
+| Boot stops at a bare "Security Violation" after enabling SB | Duplicate certs in db — almost always `--firmware-builtin` combined with `--microsoft`. BIOS → delete all keys (Setup Mode) → re-enroll with `--microsoft --custom` only. |
+| GRUB rescue: `error: module 'normal' not found` | GRUB image without embedded modules. Rebuild with the `--modules="…"` list (step 5), then re-sign. |
+| `sbctl verify`: EAC files show `✗ not signed` | Expected. Never sign them — see rule 1. |
+| EAC refuses the kernel | A second (sbctl) signature on the EAC kernel, or the CachyOS EAC CA missing from db. Check that `cachyos-eac-signing-key` is installed, that `/etc/initcpio/post/sbctl` is its hook, and that you enrolled with `--custom`. |
+| `cp` on efivarfs fails | lseek is forbidden there — use `cat`. |
+| sbctl aborts with a landlock error | Add `--disable-landlock`. |
+
+Firmware quirks seen on a TongFang GM7IX9N (your board may vary):
+
+- **Key Factory Provision** must stay **Disabled** — otherwise the firmware
+  re-installs factory PK/KEK on every boot and silently overwrites your
+  enrollment.
+- Secure Boot Mode must be **Custom**, not "Standard" (Standard re-installs
+  factory keys).
+- The firmware may **enable Secure Boot by itself** once a PK is present.
+- The Setup Mode toggle only sticks after all boot options were disabled
+  once: disable all boot options → reboot → enable Setup Mode → reboot →
+  re-enable boot options.
+
+## 11. Undo
+
+```sh
+sudo pacman -R linux-cachyos-eac linux-cachyos-eac-nvidia-open
+sudo rm -f /usr/share/libalpm/hooks/96-eac-kernel-esp.hook /usr/local/sbin/eac-kernel-esp-sync
+sudo efibootmgr -b 0001 -B          # your "CachyOS EAC" entry number
+sudo rm -rf /boot/efi/EFI/cachyos-eac /boot/efi/loader \
+  /boot/efi/vmlinuz-linux-cachyos-eac /boot/efi/initramfs-linux-cachyos-eac.img
+```
+
+Secure Boot itself can stay enabled — or switch it off in the BIOS at any
+time; your daily GRUB chain keeps working either way.
+
+## Credits
+
+- Epic Games — for bringing Fortnite to Linux (announced Oct 14, 2026) and
+  piloting Easy Anti-Cheat Linux v2
+- CachyOS — for `linux-cachyos-eac`, `cachyos-eac-signing-key` and
+  `eac-status` (in `cachyos-settings`)
+- [sbctl](https://github.com/Foxboron/sbctl), GRUB, systemd-boot
+
+```
