@@ -11,16 +11,24 @@ confidence: medium
 
 # Prospero.Eden Encore
 
-PS5 homebrew application porting the **ProsperoEden** Nintendo Switch emulator stack to a native TV-oriented launcher on PlayStation 5 (niakw/ProsperoEden-Encore). Targets researchers studying closed-platform homebrew deployment, emulator hardening, and cross-console JIT/graphics bring-up—not online anti-cheat bypass. README category: `Nintendo Switch`. (source: wiki/sources/descriptions/niakw__ProsperoEden-Encore.md) (source: wiki/sources/README-categories.md)
+PS5 homebrew that ports the **ProsperoEden** Nintendo Switch emulator stack into a native TV-oriented launcher (niakw/ProsperoEden-Encore). Eden-based builds run Switch **NS1/NS2** containers and related native loader formats from a console-local library UI. Aimed at researchers studying closed-platform homebrew deployment, emulator hardening, JIT behavior, and low-level graphics on PlayStation—not online anti-cheat bypass. README category: `Nintendo Switch`. (source: wiki/sources/descriptions/niakw__ProsperoEden-Encore.md) (source: wiki/sources/README-categories.md)
 
-## Capabilities
+## Stack
 
-Validated **PS5 firmware 13.60** builds with **Dynarmic** ARM64 JIT, Vulkan plus RADV-style GPU paths, per-game profiles, flexible firmware/key storage for Switch dumps, and support for common Switch game containers and related native loader formats. DualSense-first UI, multi-language catalogs, bounded caching, and reproducible release staging with Python verification tooling. (source: wiki/sources/descriptions/niakw__ProsperoEden-Encore.md)
+**C++** with **Makefile**-driven builds, plus Python verification and staging tooling for reproducible releases. Validated **PS5 system firmware 13.60**; **Dynarmic** ARM64 JIT; **Vulkan** and **OpenGL** with RADV-style GPU paths; per-game profiles; flexible firmware/key storage for Switch dumps; bounded caching. (source: wiki/sources/descriptions/niakw__ProsperoEden-Encore.md)
+
+## UX and engineering
+
+TV-first **DualSense** launcher with multi-language UI catalogs. **CodeQL**-driven security review and explicit separation from jailbreak or entitlement exploits. (source: wiki/sources/descriptions/niakw__ProsperoEden-Encore.md)
 
 ## Positioning
 
-Crossover with [[niak-ps5]] homebrew shell work and Eden ports such as [[nxbox]] and [[opensw]]; emphasizes CodeQL-driven review and separation from jailbreak or entitlement exploits. (source: wiki/sources/descriptions/niakw__ProsperoEden-Encore.md)
+Same-author crossover with [[niak-ps5]] and Eden-line ports such as [[opensw]] (Android) and [[nxbox]] (Xbox UWP). (source: wiki/sources/descriptions/niakw__ProsperoEden-Encore.md)
+
+## Links
+
+- Repo: https://github.com/niakw/ProsperoEden-Encore
 
 ## Related
 
-[[overviews/game-hacking]] · [[overviews/reverse-engineering]] · [[nxbox]] · [[opensw]] · [[niak-ps5]]
+[[overviews/game-hacking]] · [[overviews/reverse-engineering]] · [[overviews/graphics-api]] · [[nxbox]] · [[opensw]] · [[niak-ps5]]

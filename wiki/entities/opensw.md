@@ -20,4 +20,4 @@ Adjacent to [[yuzu-android]] (yuzu Android port) and [[nuzu]] (desktop yuzu fork
 
 ## Related
 
-[[yuzu-android]] · [[nuzu]] · [[se-tools]] · [[overviews/mobile-security]] · [[overviews/game-hacking]] · [[overviews/graphics-api]] · [[overviews/reverse-engineering]]
+[[yuzu-android]] · [[nuzu]] · [[prospero-eden-encore]] · [[se-tools]] · [[overviews/mobile-security]] · [[overviews/game-hacking]] · [[overviews/graphics-api]] · [[overviews/reverse-engineering]]

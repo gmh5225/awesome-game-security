@@ -36,4 +36,4 @@ Aimed at PS5 homebrew users and researchers who want a **self-contained library 
 
 ## Related
 
-[[ps5-linux-loader]] · [[nines]] · [[elfloader]] · [[ida-ps5-elf-plugin]] · [[cheatrunner-patches]] · [[game-cheats]] · [[bd-un-jb]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]]
+[[prospero-eden-encore]] · [[ps5-linux-loader]] · [[nines]] · [[elfloader]] · [[ida-ps5-elf-plugin]] · [[cheatrunner-patches]] · [[game-cheats]] · [[bd-un-jb]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]]
