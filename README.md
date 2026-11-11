@@ -3276,6 +3276,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/gmh5225/EasyAntiCheat-Reversing
 - https://github.com/BishopTopG/all-about-eac [Memflow-based external VM reverse-engineering dossier on a captured EasyAntiCheat_EOS.sys build, documenting kernel callbacks, minifilter policy, and device IPC with reproducible evidence]
 - https://github.com/19h/eac-analysis [eac.elf VM reconstruction: dlopen/trace harness, dispatch & VMTAIL probes, bytecode recover/IR/CFG, handler ISA, static path replay, MBA reducers; Linux ELF]
+- https://github.com/unicbda-droid/cachyos-eac-secure-boot [CachyOS dual UEFI boot paths: daily Secure Boot GRUB plus CachyOS-signed EAC kernel (lockdown=integrity, module.sig_enforce) for Easy Anti-Cheat Linux v2]
 - https://github.com/Sinclairq/hiearchy-eac [Integrity Checks]
 - https://github.com/Rat431/EAC_Emu [Simple EasyAntiCheat x64 emulator]
 - https://github.com/xBrunoMedeiros/eac-overlay [EAC Overlay]
@@ -5137,6 +5138,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/canyie/MagiskEoP [exploit]
 - https://github.com/JingMatrix/Demo [A demo app to detect (Zygisk) library injections]
 - https://github.com/apkunpacker/DetectZygisk [A POC to detect zygisk]
+- https://github.com/lotty520/Detect-Any [Android integrity framework with L1-L3 scan tiers, 25+ root/Zygisk/LSPosed/TrickyStore signals, weighted risk scoring, and Key attestation checks]
 
 > Detection:Frida
 - https://github.com/darvincisec/DetectFrida
