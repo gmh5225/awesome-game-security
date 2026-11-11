@@ -4771,6 +4771,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/boondocksulfur/bs-anticheat [Lightweight Paper/Folia Minecraft anti-cheat with movement, combat, world, inventory, and packet checks plus SQLite logging]
 - https://github.com/yuonsovann5656-netizen/Nexora-AntiCheat [Paper/Folia Minecraft anti-cheat plugin with movement, combat, and world checks, lag compensation, and async SQLite/MySQL persistence]
 - https://github.com/llsgllsg/Minecraft_AntiCheatAI [DeepGuard: Paper Minecraft anti-cheat with ONNX scaffold AI detection, behavior recorder, and training pipeline]
+- https://github.com/msc1488/CivAnticheat [Paper 1.21+ Minecraft anti-cheat plugin with live telemetry training, per-player adaptive anomaly scoring, deterministic checks, and per-viewer ESP masking]
 - https://github.com/gravemaulr/mlanticheat [Paper Minecraft anti-cheat that trains per-server ML models on combat/aim behavior with shadow mode and PacketEvents integration]
 - https://github.com/katze225/PowerAC [Open-source Paper/Folia plugin with embedded Java neural network for local aim-assist and AIM-module rotation detection]
 - https://github.com/voilecx/eigen [Paper/Folia ML combat anti-cheat: PacketEvents aim/movement feature streams, labelled combat windows, and backend dataset collection/inference]
