@@ -716,6 +716,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [cheat-mcp](entities/cheat-mcp.md) — AnonymoDGH C++17 Windows MCP server (stdio JSON-RPC; process/module inspect, CE-style scan/pointers/patch, DLL/shellcode injection, IAT/speedhack hooks, EAC/BE/Vanguard recon; Game Develop / MCP server)
 - [cheatengine-mcp-bridge](entities/cheatengine-mcp-bridge.md) — MCP bridge: CE named pipe + Lua/FastMCP; 40+ tools (scan/read/pointers/RTTI/HWBP/DBVM); sub-2ms; miscusi-peek / beamstar forks
 - [cheat-driver](entities/cheat-driver.md) — MmCopyVirtualMemory KM test driver (AC stress / cross-process R/W)
+- [WFB-Driver](entities/wfb-driver.md) — minimal kmemread.sys IOCTL `MmCopyVirtualMemory` RPM/WPM + dump/scan for Warface `impactdrv` ObCallbacks-blocked processes (BotovodWF; cheat / kernel memory RE)
 - [CivAnticheat](entities/civ-anticheat.md) — Paper 1.21+ AntiCheatAI plugin (Java 21); rule checks + local z-score anomaly baselines, optional CSV telemetry training, per-viewer ray-traced ESP masking, YAML config (msc1488; Anti Cheat / game:minecraft)
 - [CiDllDemo](entities/ci-dll-demo.md) — kernel driver demo; ci.dll `CiValidateFileObject` / `CiCheckSignedFile`; process-creation notify hook; Authenticode certificate extraction (Ido-Moshe-Github; Windows Code Integrity research)
 - [Code Integrity DriverBlocklist](entities/code-integrity-driverblocklist.md) — WDAC CI policy blocklist XML data; hash/identity deny rules incl. anti-cheat kernel modules; defensive hardening + attack-surface reduction (Harvester57)
