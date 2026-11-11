@@ -3792,6 +3792,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [starrailcopilot](entities/starrailcopilot.md) — Honkai: Star Rail automation copilot (Python; screen recognition + input; daily/stamina/farming; cheat / game:honkai star rail [Script]; gmh5225)
 - [Stoic](entities/stoic.md) — Block JVMTI Android attach tooling (debuggable API 26+; no APK mod; live Java/Kotlin hooks, heap inspection, plugin system; Android RE / developer tooling)
 - [Stockfish](entities/stockfish.md) — open-source chess engine (alpha-beta + NNUE eval; UCI; C++; Chess Engine / game AI)
+- [Stellar Splash Engine](entities/stellar-splash-engine.md) — TypeScript Web3 tournament backend (deterministic match-event replay; session tokens + timing/entropy AC; cryptographic attestations; Stellar Horizon/Soroban settlement; Stellar-Splash; Anti Cheat / Game Engine)
 - [Storm Engine](entities/storm-engine.md) — Akella Sea Dogs/PotC C++ engine (DX9 / physics / scripting; Game Engine source)
 - [Storytime](entities/storytime.md) — MapleStory remake (branching dialogue / quest progression / interactive storytelling; Game Develop / source)
 - [Stresser](entities/stresser.md) — endpoint security platform (AvivShabtay; C++ UM/KM agents + centralized management; ETW telemetry, dynamic/static detection, policy/response; malware defense / AC-adjacent endpoint experiments)
