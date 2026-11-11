@@ -4525,6 +4525,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/StanislawGolec/Ultimo [Java 21 authoritative multiplayer card-game server with fog-of-war hand hiding, virtual threads, and WebSockets]
 - https://github.com/Ogonx/anticheat-lab [Six-month self-study lab attacking and defending deliberately vulnerable own-game builds, with ASM/C++ memory exercises, devlog, and VM-only scope]
 - https://github.com/senolbasyigit/anticheat-lab [Claude Code skill plus Python scripts to memory-scan your own dev builds (devbuild.json guard), report exposed client values, and suggest server-side validation fixes; optional pywinauto RPA mode]
+- https://github.com/Ibrahim9876Q/roblox-exploit-auditor [Roblox Studio plugin that scans Luau for insecure remotes, backdoors, movement gaps, and client-trusted logic, with live Studio cheat trials and Markdown reports]
 - https://github.com/jshdcn/anti-cheating-assistant [AI agent skill with anti-cheat playbooks, underground-slang lexicon sync, three-flow risk modeling, and Python workflows for business security consulting]
 
 > Compile Time
@@ -4692,6 +4693,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/vul-os/magnetite [Rust self-hostable game platform with magnetite-anticheat: server-authoritative deterministic replay verification and composable cheat validators]
 - https://github.com/marclourens19/ghostline [Godot 4 arena shooter reference with headless deterministic input replay verification, ASP.NET Core validation API, and PostgreSQL cheat-proof leaderboards]
 - https://github.com/nimjump/game [Godot 4 Web3 game with server-side replay verification, signed seed batches, and documented minimal client-authority anti-cheat design]
+- https://github.com/Stellar-Splash/stellar-splash-engine [Stellar Splash tournament backend with anti-cheat session tokens, deterministic replay score verification from game events, Soroban settlement, and Stellar testnet indexing]
 - https://github.com/kyzoeth/bitgeist [Browser retro speedrun platform with WASM libretro cores, RAM telemetry, and 60Hz input-log verification plus deterministic replay for cheat-resistant leaderboards]
 - https://github.com/web-coder-lab/chessking [Rust server-side anti-cheat for multiplayer chess: risk scoring, device fingerprinting, match integrity, captcha, and ban escalation]
 - https://github.com/AbdulAmi09/SentinelAntiCheat [Chess integrity platform with seven-layer statistical engine-assistance detection, explainable risk tiers, arbiter case management, and hash-chained audit logging]
