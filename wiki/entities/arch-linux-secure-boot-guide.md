@@ -26,7 +26,7 @@ Also frames Secure Boot as defense against bootkits and unauthorized pre-kernel 
 
 ## Positioning
 
-Complements Omarchy-specific automation in [[omarchy-boot-manager]] with a distro-agnostic Arch/DIY guide. Pairs with Windows-side read-only checks in [[securebootcheck]] when diagnosing launch blocks versus enrolling Linux boot chains.
+Complements Omarchy-specific automation in [[omarchy-boot-manager]] with a distro-agnostic Arch/DIY guide. For CachyOS-specific **EAC Linux v2** dual-kernel enrollment, see [[cachyos-eac-secure-boot]]. Pairs with Windows-side read-only checks in [[securebootcheck]] when diagnosing launch blocks versus enrolling Linux boot chains.
 
 ## Links
 
@@ -34,4 +34,4 @@ Complements Omarchy-specific automation in [[omarchy-boot-manager]] with a distr
 
 ## Related
 
-[[omarchy-boot-manager]] · [[securebootcheck]] · [[vanguard]] · [[easy-anti-cheat]] · [[overviews/anti-cheat]] · [[overviews/windows-kernel]] · [[hvci]]
+[[omarchy-boot-manager]] · [[cachyos-eac-secure-boot]] · [[securebootcheck]] · [[vanguard]] · [[easy-anti-cheat]] · [[overviews/anti-cheat]] · [[overviews/windows-kernel]] · [[hvci]]

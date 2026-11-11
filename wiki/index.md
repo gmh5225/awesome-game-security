@@ -663,6 +663,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [cat-annihilation](entities/cat-annihilation.md) — C++20/Vulkan/CUDA wave-survival engine (render graph, clustered deferred PBR, ECS, behavior-tree AI; React Three Fiber browser demo; Game Engine / source) — C++20/Vulkan/CUDA wave-survival engine (render graph, clustered deferred PBR, ECS, behavior-tree AI; React Three Fiber browser demo; Game Engine / source)
 - [cartmanv2](entities/cartmanv2.md) — internal CS:GO cheat (C/C++; rendering / networking / editor tooling; gmh5225 [Internal])
 - [capture-engine](entities/capture-engine.md) — Windows game capture/recording (WGC/DDA or injected D3D9–D3D12/Vulkan/OpenGL/DXVK hooks; Matroska, HDR overlays, DLSS/FSR; explicit AC safety boundaries; aufkrawall)
+- [CachyOS EAC Secure Boot](entities/cachyos-eac-secure-boot.md) — CachyOS dual UEFI paths: daily sbctl-signed GRUB + firmware-only CachyOS-signed EAC kernel (`lockdown=integrity`, `module.sig_enforce`) for Easy Anti-Cheat Linux v2; `eac-status`; Guide (unicbda-droid)
 - [cbs](entities/cbs.md) — IDA Pro plugin: mnemonic-pattern breakpoint automation (Python IDAPython + PyQt; regex disasm scan; set/enable/disable/remove breakpoints across functions; Reodus; cheat / IDA Plugins)
 - [CEDetector](entities/cedetector.md) — Cheat Engine detector (window/process/driver/debug; CE stealth test)
 - [CE Remap Plugin](entities/ce-remap-plugin.md) — Delphi CE plugin: remap disassembler memory pages for hidden/obfuscated code (CE plugin SDK; tested CE 7.4; cheat / Remap; gmh5225)
