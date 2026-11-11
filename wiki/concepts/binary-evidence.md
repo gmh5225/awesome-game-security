@@ -8,7 +8,8 @@ sources:
   - wiki/sources/descriptions/formix__sre-re.md
   - wiki/sources/descriptions/Battelle__cantordust.md
   - wiki/sources/descriptions/t1zzo__classrevive.md
-updated: 2026-11-01
+  - wiki/sources/descriptions/dagoSte__reverseai.md
+updated: 2026-11-11
 confidence: high
 ---
 
@@ -48,6 +49,8 @@ Preserve missing symbols, incomplete dumps, generated code, and unexecuted paths
 
 Agent-assisted **first-pass triage** tools such as [[rea-mytechnotalent]] (offline PE/ELF/Mach-O + JS/Electron inventory, local RAG, propose–review–gate multi-agent workflow) still owe the same granularity: each automated claim should cite static artifacts (imports, strings, section layout) rather than collapsing imported API, reachable path, and observed call. (source: wiki/sources/descriptions/mytechnotalent__rea.md)
 
+[[reverseai]] applies the same discipline at report time: container analyzer output is re-checked on the host against exact bytes and each finding is tagged **supported**, **derived**, or **unsupported** before CLI or MCP answers surface it—game-client, APK, and untrusted PE triage can treat structured output as evidence-backed static claims, not opaque Ghidra/JADX dumps. (source: wiki/sources/descriptions/dagoSte__reverseai.md)
+
 ## Related
 
-[[static-runtime-evidence]] · [[research-rigor]] · [[binary-diffing]] · [[dynamic-binary-instrumentation]] · [[mixed-boolean-arithmetic]] · [[control-flow-flattening]] · [[rea-mytechnotalent]] · [[overviews/reverse-engineering]] · [[overviews/anti-cheat]]
+[[static-runtime-evidence]] · [[research-rigor]] · [[binary-diffing]] · [[dynamic-binary-instrumentation]] · [[mixed-boolean-arithmetic]] · [[control-flow-flattening]] · [[rea-mytechnotalent]] · [[reverseai]] · [[overviews/reverse-engineering]] · [[overviews/anti-cheat]]
