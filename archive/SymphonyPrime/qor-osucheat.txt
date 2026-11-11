@@ -1,0 +1,1124 @@
+Project Path: arc_SymphonyPrime_qor-osucheat_ptllaptc
+
+Source Tree:
+
+```txt
+arc_SymphonyPrime_qor-osucheat_ptllaptc
+├── osu_aim_assist.py
+└── version.json
+
+```
+
+`osu_aim_assist.py`:
+
+```py
+"""
+osu! aim assist externe (Windows, Python 3.9+)
+Usage prévu : serveur privé / entraînement hors ligne.
+
+Principe :
+  - tosu (ou gosumemory) tourne en parallèle et fournit via WebSocket le temps
+    de la chanson, le chemin de la beatmap et les mods.
+  - On lit le fichier .osu pour connaître la position/temps des hit circles.
+  - Pendant que TU bouges et cliques, l'outil ajoute une petite correction de
+    trajectoire vers le prochain cercle (réglable).
+
+Dépendances : pip install websocket-client customtkinter
+Réglages osu! recommandés : Raw input OFF, "Améliorer la précision du pointeur"
+(Windows) OFF, sensibilité osu! à 1.0 -> le curseur du jeu = curseur Windows.
+"""
+import bisect
+import ctypes
+import hashlib
+import json
+import math
+import os
+import subprocess
+import sys
+import tempfile
+import threading
+import time
+import urllib.request
+from ctypes import wintypes
+
+import websocket  # pip install websocket-client
+
+CONFIG_FILE = "aimassist_config.json"
+TOSU_URL = "ws://127.0.0.1:24050/ws"  # compatible tosu / gosumemory
+
+# ------------------------------------------------------------ Mises à jour
+# Version de CE fichier. publish_update.py la lit pour générer version.json.
+APP_VERSION = "1.0.0"
+# Adresse (HTTPS obligatoire) du manifeste que TU publies, par ex. un dépôt GitHub :
+#   https://raw.githubusercontent.com/TON_PSEUDO/TON_DEPOT/main/version.json
+# Laisse vide pour désactiver les mises à jour.
+UPDATE_MANIFEST_URL = "https://github.com/SymphonyPrime/qor-osucheat.git"
+
+DEFAULTS = {
+    "enabled": True,
+    "strength": 0.35,      # 0..1  force de l'assistance
+    "range": 3.0,          # portée d'action, en rayons de cercle
+    "inner_zone": 0.6,     # 0..1  sous cette fraction du rayon : plus d'aide
+    "lookahead_ms": 350,   # l'aide commence X ms avant l'instant du hit
+    "max_speed": 2500.0,   # px/s, limite de la correction (anti-téléportation)
+    "offset_x": 0.0,       # calibration du playfield (pixels écran)
+    "offset_y": 0.0,
+    "scale_mult": 1.0,     # calibration de l'échelle du playfield
+    "move_gain": 1.0,      # px demandés -> unités de déplacement souris
+    "toggle_vk": 0x77,     # F8 = activer/désactiver
+    "input_mode": "tablet",  # "tablet" (stylet en mode absolu) ou "mouse"
+    "max_offset": 1.5,     # mode tablette : décalage max du curseur, en rayons de cercle
+    "smooth": 25.0,        # mode tablette : vitesse de lissage du décalage (1/s)
+    "tablet_raw_inject": True,  # mode tablette : envoie aussi un vrai évènement souris absolu
+    "tablet_hook": True,   # mode tablette : intercepte chaque évènement du stylo (tablettes 1000 Hz)
+    # --- mode Relax (clics automatiques, désactivé par défaut) ---
+    "relax_enabled": False,
+    "relax_input": "keyboard",    # "keyboard" (Z/X en alternance) ou "mouse" (clic gauche)
+    "relax_offset_ms": 0,         # décale l'instant du clic (négatif = plus tôt)
+    "relax_window_ms": 60,        # tolérance : on peut cliquer jusqu'à X ms après l'instant du hit
+    "relax_zone": 0.95,           # le curseur doit être à moins de X rayons du centre
+    "relax_tap_ms": 25,           # durée d'appui sur un cercle
+    "relax_require_inside": True, # ne clique que si le curseur est sur le cercle
+    "relax_toggle_vk": 0x79,      # F10 = activer/désactiver le relax
+    # --- mises à jour ---
+    "auto_check_updates": True,   # vérifie au démarrage
+    "auto_install_updates": False,  # installe sans demander (sinon : bouton dans l'interface)
+}
+
+# ------------------------------------------------------------------ Windows
+user32 = ctypes.windll.user32
+try:
+    user32.SetProcessDPIAware()  # sinon Windows "triche" sur les coordonnées en écran mis à l'échelle
+except Exception:
+    pass
+MOUSEEVENTF_MOVE = 0x0001
+
+
+class MOUSEINPUT(ctypes.Structure):
+    _fields_ = [("dx", wintypes.LONG), ("dy", wintypes.LONG),
+                ("mouseData", wintypes.DWORD), ("dwFlags", wintypes.DWORD),
+                ("time", wintypes.DWORD), ("dwExtraInfo", ctypes.c_size_t)]
+
+
+class KEYBDINPUT(ctypes.Structure):
+    _fields_ = [("wVk", wintypes.WORD), ("wScan", wintypes.WORD),
+                ("dwFlags", wintypes.DWORD), ("time", wintypes.DWORD),
+                ("dwExtraInfo", ctypes.c_size_t)]
+
+
+class _INPUTUNION(ctypes.Union):
+    _fields_ = [("mi", MOUSEINPUT), ("ki", KEYBDINPUT)]
+
+
+class INPUT(ctypes.Structure):
+    _anonymous_ = ("u",)
+    _fields_ = [("type", wintypes.DWORD), ("u", _INPUTUNION)]
+
+
+def keep_active_in_background():
+    """
+    Empêche Windows de brider le script quand sa fenêtre n'est pas au premier
+    plan (mode éco / timers dégradés) et l'empêche de passer en veille.
+    """
+    k32 = ctypes.windll.kernel32
+    k32.GetCurrentProcess.restype = wintypes.HANDLE
+    h = k32.GetCurrentProcess()
+
+    class PROCESS_POWER_THROTTLING_STATE(ctypes.Structure):
+        _fields_ = [("Version", wintypes.ULONG),
+                    ("ControlMask", wintypes.ULONG),
+                    ("StateMask", wintypes.ULONG)]
+
+    try:  # désactive le mode éco et le bridage de la résolution du timer
+        st = PROCESS_POWER_THROTTLING_STATE(1, 0x1 | 0x4, 0)
+        k32.SetProcessInformation(h, 4, ctypes.byref(st), ctypes.sizeof(st))
+    except Exception:
+        pass
+    try:  # priorité haute
+        k32.SetPriorityClass(h, 0x00000080)
+    except Exception:
+        pass
+    try:  # pas de mise en veille pendant que le script tourne
+        k32.SetThreadExecutionState(0x80000000 | 0x00000001 | 0x00000002)
+    except Exception:
+        pass
+    try:  # timers à ~1 ms
+        ctypes.windll.winmm.timeBeginPeriod(1)
+    except Exception:
+        pass
+
+
+def cursor_pos():
+    pt = wintypes.POINT()
+    user32.GetCursorPos(ctypes.byref(pt))
+    return pt.x, pt.y
+
+
+def move_rel(dx, dy):
+    inp = INPUT()
+    inp.type = 0  # INPUT_MOUSE
+    inp.mi.dx, inp.mi.dy = int(dx), int(dy)
+    inp.mi.dwFlags = MOUSEEVENTF_MOVE
+    user32.SendInput(1, ctypes.byref(inp), ctypes.sizeof(INPUT))
+
+
+MOUSEEVENTF_ABSOLUTE = 0x8000
+MAGIC = 0x41494D  # marque nos propres évènements pour que le hook les laisse passer
+WH_MOUSE_LL = 14
+WM_MOUSEMOVE = 0x0200
+
+
+class MSLLHOOKSTRUCT(ctypes.Structure):
+    _fields_ = [("pt", wintypes.POINT), ("mouseData", wintypes.DWORD),
+                ("flags", wintypes.DWORD), ("time", wintypes.DWORD),
+                ("dwExtraInfo", ctypes.c_size_t)]
+
+
+HOOKPROC = ctypes.WINFUNCTYPE(ctypes.c_ssize_t, ctypes.c_int,
+                              wintypes.WPARAM, wintypes.LPARAM)
+user32.SetWindowsHookExW.argtypes = [ctypes.c_int, HOOKPROC, wintypes.HINSTANCE, wintypes.DWORD]
+user32.SetWindowsHookExW.restype = wintypes.HHOOK
+user32.CallNextHookEx.argtypes = [wintypes.HHOOK, ctypes.c_int, wintypes.WPARAM, wintypes.LPARAM]
+user32.CallNextHookEx.restype = ctypes.c_ssize_t
+
+
+def move_abs(x, y):
+    """Vrai évènement souris ABSOLU (visible par osu! même en raw input)."""
+    w, h = user32.GetSystemMetrics(0), user32.GetSystemMetrics(1)
+    inp = INPUT()
+    inp.type = 0
+    inp.mi.dx = int(x * 65535 / max(1, w - 1))
+    inp.mi.dy = int(y * 65535 / max(1, h - 1))
+    inp.mi.dwFlags = MOUSEEVENTF_MOVE | MOUSEEVENTF_ABSOLUTE
+    inp.mi.dwExtraInfo = MAGIC
+    user32.SendInput(1, ctypes.byref(inp), ctypes.sizeof(INPUT))
+
+
+KEYEVENTF_KEYUP = 0x0002
+KEYEVENTF_SCANCODE = 0x0008
+SCAN_Z, SCAN_X = 0x2C, 0x2D
+
+
+def send_key(scan, up=False):
+    inp = INPUT()
+    inp.type = 1  # INPUT_KEYBOARD
+    inp.ki.wVk = 0
+    inp.ki.wScan = scan
+    inp.ki.dwFlags = KEYEVENTF_SCANCODE | (KEYEVENTF_KEYUP if up else 0)
+    user32.SendInput(1, ctypes.byref(inp), ctypes.sizeof(INPUT))
+
+
+def send_mouse_button(down):
+    inp = INPUT()
+    inp.type = 0
+    inp.mi.dwFlags = 0x0002 if down else 0x0004  # LEFTDOWN / LEFTUP
+    user32.SendInput(1, ctypes.byref(inp), ctypes.sizeof(INPUT))
+
+
+def key_down(vk):
+    return bool(user32.GetAsyncKeyState(vk) & 0x8000)
+
+
+# ------------------------------------------------------------------ Beatmap
+def parse_osu(path):
+    """Retourne (circle_size, objs, ends).
+    objs = [(temps_ms, x, y), ...] : cercles + têtes de sliders (spinners ignorés)
+    ends = [temps_de_fin_ms, ...]  : égal au temps pour un cercle, fin du slider sinon
+    """
+    cs, slider_mult, section = 5.0, 1.4, ""
+    timing, raw = [], []
+    with open(path, encoding="utf-8", errors="ignore") as f:
+        for line in f:
+            line = line.strip()
+            if line.startswith("["):
+                section = line
+                continue
+            if not line:
+                continue
+            if section == "[Difficulty]":
+                if line.startswith("CircleSize:"):
+                    cs = float(line.split(":")[1])
+                elif line.startswith("SliderMultiplier:"):
+                    slider_mult = float(line.split(":")[1])
+            elif section == "[TimingPoints]":
+                p = line.split(",")
+                if len(p) >= 2:
+                    uninherited = len(p) < 7 or p[6].strip() == "1"
+                    timing.append((float(p[0]), float(p[1]), uninherited))
+            elif section == "[HitObjects]":
+                p = line.split(",")
+                if len(p) >= 4:
+                    raw.append(p)
+    timing.sort(key=lambda x: x[0])
+
+    def slider_duration(t, length, slides):
+        beat, sv = 500.0, 1.0
+        for tt, bl, uninh in timing:
+            if tt > t:
+                break
+            if uninh:
+                beat, sv = bl, 1.0
+            else:
+                sv = -100.0 / bl if bl < 0 else 1.0
+        return length / (slider_mult * 100.0 * sv) * beat * slides
+
+    items = []
+    for p in raw:
+        x, y, t, typ = float(p[0]), float(p[1]), int(p[2]), int(p[3])
+        if typ & 8:  # spinner -> ignoré
+            continue
+        end = t
+        if typ & 2 and len(p) >= 8:  # slider
+            try:
+                end = t + slider_duration(t, float(p[7]), int(p[6]))
+            except Exception:
+                end = t
+        items.append((t, x, y, end))
+    items.sort()
+    return cs, [(t, x, y) for t, x, y, _ in items], [e for *_, e in items]
+
+
+def circle_radius_osu_px(cs, mods):
+    if mods & 16:   # HR
+        cs = min(cs * 1.3, 10)
+    if mods & 2:    # EZ
+        cs *= 0.5
+    return 54.4 - 4.48 * cs
+
+
+# ------------------------------------------------------------------ Updater
+def _ver(v):
+    try:
+        return tuple(int(x) for x in str(v).strip().lstrip("vV").split("."))
+    except ValueError:
+        return (0,)
+
+
+class Updater:
+    """
+    Vérifie un manifeste JSON publié par toi et remplace le script (ou l'exe)
+    par la nouvelle version, après contrôle HTTPS + SHA-256.
+
+    Manifeste (version.json) :
+      {"version": "1.1.0", "url": "https://.../osu_aim_assist.py",
+       "sha256": "...", "notes": "ce qui change",
+       "exe_url": "...", "exe_sha256": "..."}      <- exe_* seulement si tu distribues un .exe
+    """
+    MAX_BYTES = 150 * 1024 * 1024
+
+    def __init__(self, eng):
+        self.eng = eng
+        self.state = "idle"   # idle / checking / available / uptodate / installing / error / disabled
+        self.message = ""
+        self.manifest = None
+        self.busy = threading.Lock()
+
+    @property
+    def frozen(self):
+        return bool(getattr(sys, "frozen", False))
+
+    def _get(self, url, limit):
+        if not url.lower().startswith("https://"):
+            raise ValueError("l'adresse de mise à jour doit être en HTTPS")
+        req = urllib.request.Request(url, headers={"User-Agent": "aimassist-updater"})
+        with urllib.request.urlopen(req, timeout=15) as r:
+            data = r.read(limit + 1)
+        if len(data) > limit:
+            raise ValueError("fichier de mise à jour trop gros")
+        return data
+
+    def check(self):
+        if not UPDATE_MANIFEST_URL:
+            self.state, self.message = "disabled", "Mises à jour non configurées"
+            return False
+        if not self.busy.acquire(blocking=False):
+            return False
+        try:
+            self.state, self.message = "checking", "Vérification..."
+            m = json.loads(self._get(UPDATE_MANIFEST_URL, 1024 * 1024).decode("utf-8"))
+            if _ver(m["version"]) > _ver(APP_VERSION):
+                self.manifest = m
+                self.state = "available"
+                self.message = f"Version {m['version']} disponible"
+                return True
+            self.state, self.message = "uptodate", f"À jour (v{APP_VERSION})"
+            return False
+        except Exception as e:
+            self.state, self.message = "error", f"Échec de la vérification : {type(e).__name__}"
+            return False
+        finally:
+            self.busy.release()
+
+    def install(self):
+        """Télécharge, vérifie, remplace, puis relance. Ne revient pas si ça marche."""
+        m = self.manifest
+        if not m or not self.busy.acquire(blocking=False):
+            return
+        try:
+            self.state, self.message = "installing", "Téléchargement..."
+            url = m.get("exe_url") if self.frozen else m.get("url")
+            want = (m.get("exe_sha256") if self.frozen else m.get("sha256")) or ""
+            if not url or not want:
+                raise ValueError("manifeste incomplet (url / sha256)")
+            data = self._get(url, self.MAX_BYTES)
+            if hashlib.sha256(data).hexdigest().lower() != want.strip().lower():
+                raise ValueError("empreinte SHA-256 incorrecte, mise à jour refusée")
+
+            if self.frozen:
+                self._apply_exe(data)
+            else:
+                compile(data.decode("utf-8"), "update", "exec")  # refuse un fichier cassé
+                self._apply_script(data)
+            self.message = "Redémarrage..."
+            self.eng.running = False       # relâche proprement les touches / hooks
+            time.sleep(0.4)
+            os._exit(0)
+        except Exception as e:
+            self.state, self.message = "error", f"Mise à jour échouée : {e}"
+        finally:
+            self.busy.release()
+
+    def _apply_script(self, data):
+        path = os.path.abspath(__file__)
+        folder = os.path.dirname(path)
+        fd, tmp = tempfile.mkstemp(dir=folder, suffix=".new")
+        with os.fdopen(fd, "wb") as f:
+            f.write(data)
+        try:
+            os.replace(path, path + ".bak")           # sauvegarde de l'ancienne version
+        except OSError:
+            pass
+        os.replace(tmp, path)
+        subprocess.Popen([sys.executable] + sys.argv, cwd=os.getcwd(), close_fds=True)
+
+    def _apply_exe(self, data):
+        exe = os.path.abspath(sys.executable)
+        new = exe + ".new"
+        with open(new, "wb") as f:
+            f.write(data)
+        bat = os.path.join(tempfile.gettempdir(), "aimassist_update.bat")
+        with open(bat, "w") as f:
+            f.write('@echo off\r\nping 127.0.0.1 -n 3 >nul\r\n'
+                    f'move /y "{new}" "{exe}"\r\n'
+                    f'start "" "{exe}"\r\n'
+                    'del "%~f0"\r\n')
+        subprocess.Popen(["cmd", "/c", bat], creationflags=0x08000000, close_fds=True)
+
+
+# ------------------------------------------------------------------ Moteur
+class Engine:
+    def __init__(self, cfg):
+        self.cfg = cfg
+        self.lock = threading.Lock()
+        self.playing = False
+        self.t, self.stamp, self.rate = 0.0, time.perf_counter(), 1.0
+        self._clk_off = 0.0           # décalage horloge locale -> temps de la map (ms)
+        self._last_change = 0.0       # dernier instant où le temps de la map a changé
+        self._relax_dbg = "—"
+        self.mods = 0
+        self.map_path = None
+        self.times, self.objs, self.cs = [], [], 5.0
+        self.ends = []
+        self._relax_clicks = 0
+        self.status = "En attente de tosu..."
+        self.running = True
+        self._toggle_latch = False
+        self._rx = self._ry = 0.0
+        # mode tablette : position réelle du stylo + décalage ajouté par l'assistance
+        self._pen = (0.0, 0.0)
+        self._last_set = None
+        self._ox = self._oy = 0.0
+        self._test = False          # F9 : décalage fixe de 150 px pour diagnostiquer
+        self._test_latch = False
+        self._pen_seen = False      # True dès que le hook a reçu un évènement du stylo
+        self._hook_count = 0        # nombre d'évènements du stylo vus par le hook (diagnostic)
+        self._dbg = "pas de cible"  # diagnostic : ce que voit le calcul d'assistance
+
+    # ---- WebSocket (tosu)
+    def ws_thread(self):
+        while self.running:
+            try:
+                ws = websocket.create_connection(TOSU_URL, timeout=5)
+                self.status = "Connecté à tosu"
+                while self.running:
+                    self.on_data(json.loads(ws.recv()))
+            except Exception as e:
+                self.status = f"tosu indisponible ({type(e).__name__}), nouvel essai..."
+                time.sleep(2)
+
+    def on_data(self, d):
+        menu = d.get("menu", {})
+        bm = menu.get("bm", {})
+        t = float(bm.get("time", {}).get("current", 0))
+        mods = int(menu.get("mods", {}).get("num", 0))
+        playing = menu.get("state") == 2
+        path = None
+        try:
+            songs = d["settings"]["folders"]["songs"]
+            path = os.path.join(songs, bm["path"]["folder"], bm["path"]["file"])
+        except KeyError:
+            pass
+        rate = 1.5 if mods & 64 else (0.75 if mods & 256 else 1.0)
+        with self.lock:
+            now = time.perf_counter()
+            if t != self.t:
+                # Les messages de tosu arrivent avec un retard variable. Le décalage
+                # (temps_map - horloge_locale) est donc sous-estimé par chaque message :
+                # on garde le plus grand (= le moins retardé) et on redescend lentement.
+                off_new = t - now * 1000.0 * rate
+                if off_new >= self._clk_off or abs(off_new - self._clk_off) > 300:
+                    self._clk_off = off_new
+                else:
+                    self._clk_off += (off_new - self._clk_off) * 0.02
+                self.t, self.stamp, self._last_change = t, now, now
+            self.playing, self.mods, self.rate = playing, mods, rate
+        if path and path != self.map_path and os.path.exists(path):
+            self.map_path = path
+            cs, objs, ends = parse_osu(path)
+            with self.lock:
+                self.cs, self.objs, self.ends = cs, objs, ends
+                self.times = [o[0] for o in objs]
+            self.status = f"Map chargée : {os.path.basename(path)} ({len(objs)} objets)"
+
+    def now_ms(self):
+        """Temps de la map en ms, interpolé entre deux messages de tosu."""
+        with self.lock:
+            t, rate, off, last = self.t, self.rate, self._clk_off, self._last_change
+        now = time.perf_counter()
+        if now - last > 0.3:          # le temps ne bouge plus : pause / menu
+            return t
+        return now * 1000.0 * rate + off
+
+    # ---- conversion playfield osu -> écran
+    def to_screen(self, x, y, mods):
+        c = self.cfg
+        w, h = user32.GetSystemMetrics(0), user32.GetSystemMetrics(1)
+        s = (h / 480.0) * c["scale_mult"]
+        if mods & 16:  # HR : inversion verticale
+            y = 384 - y
+        sx = (w - 512 * s) / 2 + x * s + c["offset_x"]
+        sy = (h - 384 * s) / 2 + y * s + c["offset_y"]
+        return sx, sy, s
+
+    def test_keys(self):
+        """Envoie quelques appuis Z/X (ou clics) dans 3 s pour vérifier qu'ils arrivent."""
+        def run():
+            time.sleep(3)
+            for _ in range(3):
+                if self.cfg["relax_input"] == "mouse":
+                    send_mouse_button(True); time.sleep(0.05); send_mouse_button(False)
+                else:
+                    for scan in (SCAN_Z, SCAN_X):
+                        send_key(scan); time.sleep(0.05); send_key(scan, True); time.sleep(0.15)
+                time.sleep(0.3)
+        threading.Thread(target=run, daemon=True).start()
+
+    # ---- mode Relax : clics automatiques (le joueur ne fait que viser)
+    def relax_thread(self):
+        """
+        Clique à l'instant du hit quand le curseur est sur le cercle.
+        Clavier : alternance Z / X (tient la touche pendant un slider).
+        Souris  : clic gauche.
+        """
+        scans = (SCAN_Z, SCAN_X)
+        held = [False, False]
+        held_until = [0.0, 0.0]
+        done, last_t, last_k, latch = -1, 0.0, 1, False
+
+        def press(k):
+            if self.cfg["relax_input"] == "mouse":
+                send_mouse_button(True)
+            else:
+                send_key(scans[k], False)
+            held[k] = True
+
+        def release(k):
+            if self.cfg["relax_input"] == "mouse":
+                send_mouse_button(False)
+            else:
+                send_key(scans[k], True)
+            held[k] = False
+
+        while self.running:
+            time.sleep(0.001)
+            c = self.cfg
+
+            if key_down(c["relax_toggle_vk"]):   # F10
+                if not latch:
+                    c["relax_enabled"] = not c["relax_enabled"]
+                latch = True
+            else:
+                latch = False
+
+            t = self.now_ms()
+            for k in (0, 1):                      # relâcher les touches arrivées à échéance
+                if held[k] and t >= held_until[k]:
+                    release(k)
+
+            with self.lock:
+                times, objs, ends = self.times, self.objs, self.ends
+                mods, cs, rate = self.mods, self.cs, self.rate
+            if not (c["relax_enabled"] and self.playing and objs):
+                self._relax_dbg = ("désactivé" if not c["relax_enabled"] else
+                                   "pas en partie" if not self.playing else "aucune map")
+                for k in (0, 1):
+                    if held[k]:
+                        release(k)
+                continue
+
+            if t < last_t - 300:                  # retry / retour en arrière dans la map
+                done = bisect.bisect_left(times, t - 100) - 1
+            last_t = t
+
+            off, win = c["relax_offset_ms"], c["relax_window_ms"]
+            i = done + 1
+            while i < len(objs) and times[i] + off + win < t:   # trop tard : objet passé
+                i += 1
+            done = max(done, i - 1)
+            if i >= len(objs):
+                self._relax_dbg = "fin de la map"
+                continue
+            ot, ox, oy = objs[i]
+            if t < ot + off:
+                self._relax_dbg = f"prochain objet dans {ot + off - t:.0f} ms"
+                continue
+
+            if c["relax_require_inside"]:
+                tx, ty, s = self.to_screen(ox, oy, mods)
+                r_px = circle_radius_osu_px(cs, mods) * s
+                cx, cy = cursor_pos()
+                d = math.hypot(tx - cx, ty - cy)
+                if d > c["relax_zone"] * r_px:
+                    self._relax_dbg = (f"curseur à {d / max(r_px, 1):.1f} rayons du cercle "
+                                       f"(zone {c['relax_zone']:.2f}) — pas de clic")
+                    continue                      # pas sur le cercle : on réessaie jusqu'à la fin de la fenêtre
+
+            order = (0,) if c["relax_input"] == "mouse" else ((1, 0) if last_k == 0 else (0, 1))
+            k = next((k for k in order if not held[k]), None)
+            if k is None:
+                continue
+            press(k)
+            held_until[k] = max(t + c["relax_tap_ms"] * rate, ends[i])
+            last_k, done = k, i
+            self._relax_clicks += 1
+            self._relax_dbg = (f"clic {'Z' if k == 0 else 'X'} envoyé, "
+                               f"écart {t - ot:+.0f} ms par rapport au hit")
+
+        for k in (0, 1):                          # à l'arrêt : ne jamais laisser une touche bloquée
+            if held[k]:
+                release(k)
+
+    # ---- hook souris bas niveau (tablettes à haute fréquence)
+    def hook_thread(self):
+        """
+        Intercepte chaque évènement de déplacement du stylo (jusqu'à 1000/s).
+        Pour chacun : on retient la position réelle du stylo, on bloque
+        l'évènement d'origine et on place le curseur à (stylo + décalage).
+        Le curseur n'est donc jamais "remis" à la position brute du stylo.
+        """
+        def proc(nCode, wParam, lParam):
+            try:
+                c = self.cfg
+                if (nCode >= 0 and wParam == WM_MOUSEMOVE
+                        and c["input_mode"] == "tablet" and c.get("tablet_hook", True)):
+                    ms = ctypes.cast(lParam, ctypes.POINTER(MSLLHOOKSTRUCT)).contents
+                    pos = (ms.pt.x, ms.pt.y)
+                    if ms.dwExtraInfo != MAGIC and pos != self._last_set:
+                        self._pen = (float(pos[0]), float(pos[1]))
+                        self._pen_seen = True
+                        self._hook_count += 1
+                        ox, oy = self._ox, self._oy
+                        if abs(ox) + abs(oy) >= 0.5:
+                            nx, ny = int(round(pos[0] + ox)), int(round(pos[1] + oy))
+                            self._last_set = (nx, ny)
+                            if c.get("tablet_raw_inject", True):
+                                move_abs(nx, ny)  # évènement lu par osu! en raw input
+                            user32.SetCursorPos(nx, ny)
+                            return 1  # on bloque l'évènement d'origine
+            except Exception:
+                pass
+            return user32.CallNextHookEx(None, nCode, wParam, lParam)
+
+        self._hook_proc = HOOKPROC(proc)  # garder une référence (sinon ramassé par le GC)
+        hook = user32.SetWindowsHookExW(WH_MOUSE_LL, self._hook_proc, None, 0)
+        if not hook:
+            self.status = "Hook souris impossible (essaie en administrateur)"
+            return
+        msg = wintypes.MSG()
+        while self.running and user32.GetMessageW(ctypes.byref(msg), None, 0, 0) > 0:
+            user32.TranslateMessage(ctypes.byref(msg))
+            user32.DispatchMessageW(ctypes.byref(msg))
+        user32.UnhookWindowsHookEx(hook)
+
+    # ---- mode tablette (stylo en mode absolu)
+    def tablet_tick(self, dt):
+        """
+        Le driver Wacom réécrit la position ABSOLUE du curseur à chaque rapport
+        du stylo : un déplacement relatif est donc aussitôt écrasé. On fait
+        autrement : on retient la position réelle du stylo et on place le
+        curseur à (stylo + décalage), le décalage pointant vers le cercle.
+        """
+        c = self.cfg
+        cx, cy = cursor_pos()
+        use_hook = self._pen_seen and c.get("tablet_hook", True)
+        if not use_hook:
+            # Repli : si le curseur n'est plus là où on l'a mis, le stylo a bougé
+            if self._last_set is None or (cx, cy) != self._last_set:
+                self._pen = (float(cx), float(cy))
+        px, py = self._pen
+
+        want_x = want_y = 0.0
+        self._dbg = ("aide désactivée" if not c["enabled"] else
+                     "pas en jeu (tosu ne signale pas de partie)" if not self.playing else
+                     "aucune map chargée" if not self.objs else "aucun cercle proche")
+        if c["enabled"] and self.playing and self.objs:
+            t = self.now_ms()
+            with self.lock:
+                i = bisect.bisect_left(self.times, t - 80)
+                obj = self.objs[i] if i < len(self.objs) else None
+                mods, cs = self.mods, self.cs
+            if obj is not None:
+                ot, ox, oy = obj
+                ahead = ot - t
+                if ahead <= c["lookahead_ms"]:
+                    tx, ty, s = self.to_screen(ox, oy, mods)
+                    r_px = circle_radius_osu_px(cs, mods) * s
+                    vx, vy = tx - px, ty - py
+                    dist = math.hypot(vx, vy)
+                    self._dbg = (f"cible à {dist / max(r_px, 1):.1f} rayons, "
+                                 f"hit dans {ahead:.0f} ms (portée {c['range']:.1f})")
+                    if c["inner_zone"] * r_px < dist <= c["range"] * r_px:
+                        urgency = 1.0 - max(0.0, min(1.0, ahead / c["lookahead_ms"]))
+                        w = c["strength"] * (0.3 + 0.7 * urgency)
+                        mag = min(dist * w, c["max_offset"] * r_px)
+                        want_x, want_y = vx / dist * mag, vy / dist * mag
+
+        if self._test:                         # F9 : décalage fixe, pour tester
+            want_x, want_y = 150.0, 0.0
+
+        a = 1 - math.exp(-c["smooth"] * dt)   # lissage : pas de saccades
+        self._ox += (want_x - self._ox) * a
+        self._oy += (want_y - self._oy) * a
+
+        nx, ny = int(round(px + self._ox)), int(round(py + self._oy))
+        if (nx, ny) != (cx, cy):
+            self._last_set = (nx, ny)     # avant l'écriture, pour que le hook reconnaisse nos évènements
+            if c.get("tablet_raw_inject", True):
+                move_abs(nx, ny)          # évènement d'entrée réel (osu! en raw input)
+            user32.SetCursorPos(nx, ny)   # position exacte au pixel près
+        self._last_set = (nx, ny)
+
+    # ---- boucle d'assistance
+    def assist_thread(self):
+        last = time.perf_counter()
+        while self.running:
+            time.sleep(0.001)
+            now = time.perf_counter()
+            dt, last = now - last, now
+            c = self.cfg
+
+            if key_down(c["toggle_vk"]):
+                if not self._toggle_latch:
+                    c["enabled"] = not c["enabled"]
+                self._toggle_latch = True
+            else:
+                self._toggle_latch = False
+
+            if key_down(0x78):  # F9 : test de diagnostic
+                if not self._test_latch:
+                    self._test = not self._test
+                self._test_latch = True
+            else:
+                self._test_latch = False
+
+            if c["input_mode"] == "tablet":
+                self.tablet_tick(dt)
+                continue
+
+            if not c["enabled"] or not self.playing or not self.objs:
+                continue
+
+            t = self.now_ms()
+            with self.lock:
+                i = bisect.bisect_left(self.times, t - 80)  # cercle expiré après 80 ms
+                if i >= len(self.objs):
+                    continue
+                ot, ox, oy = self.objs[i]
+                mods, cs = self.mods, self.cs
+            ahead = ot - t
+            if ahead > c["lookahead_ms"]:
+                continue
+
+            tx, ty, s = self.to_screen(ox, oy, mods)
+            r_px = circle_radius_osu_px(cs, mods) * s
+            cx, cy = cursor_pos()
+            vx, vy = tx - cx, ty - cy
+            dist = math.hypot(vx, vy)
+            if dist > c["range"] * r_px or dist <= c["inner_zone"] * r_px or dist < 1:
+                continue
+
+            urgency = 1.0 - max(0.0, min(1.0, ahead / c["lookahead_ms"]))
+            k = c["strength"] * 25.0 * (0.3 + 0.7 * urgency)
+            step = dist * (1 - math.exp(-k * dt))
+            step = min(step, c["max_speed"] * dt)
+            self._rx += vx / dist * step * c["move_gain"]
+            self._ry += vy / dist * step * c["move_gain"]
+            ix, iy = int(self._rx), int(self._ry)
+            if ix or iy:
+                move_rel(ix, iy)
+                self._rx -= ix
+                self._ry -= iy
+
+
+# ------------------------------------------------------------------ GUI
+ACCENT, ACCENT_HOVER = "#ff66aa", "#ff85bb"
+BG, CARD, TRACK = "#12121a", "#1c1c28", "#34344c"
+TEXT, MUTED = "#ececf4", "#8b8ba3"
+OK, WARN, BAD = "#4ade80", "#fbbf24", "#f87171"
+
+PRESETS = {
+    "Discret":    {"strength": 0.20, "range": 2.0, "inner_zone": 0.70,
+                   "lookahead_ms": 250, "max_offset": 0.5, "smooth": 25},
+    "Équilibré":  {"strength": 0.30, "range": 2.5, "inner_zone": 0.60,
+                   "lookahead_ms": 300, "max_offset": 0.8, "smooth": 25},
+    "Fort":       {"strength": 0.45, "range": 3.0, "inner_zone": 0.50,
+                   "lookahead_ms": 400, "max_offset": 1.2, "smooth": 20},
+}
+
+
+def load_cfg():
+    cfg = dict(DEFAULTS)
+    if os.path.exists(CONFIG_FILE):
+        try:
+            cfg.update(json.load(open(CONFIG_FILE)))
+        except Exception:
+            pass
+    return cfg
+
+
+def run_gui(cfg, eng, upd):
+    try:
+        import customtkinter as ctk
+    except ImportError:
+        print("L'interface moderne demande : pip install customtkinter")
+        print("(ou lance le script avec --headless pour tourner sans fenêtre)")
+        eng.running = False
+        return
+
+    ctk.set_appearance_mode("dark")
+    root = ctk.CTk()
+    root.title("osu! aim assist")
+    root.geometry("460x820")
+    root.minsize(440, 600)
+    root.configure(fg_color=BG)
+    root.attributes("-topmost", True)
+
+    FONT = "Segoe UI"
+    sliders = {}
+
+    # ---------- composants réutilisables
+    def card(parent, title):
+        frame = ctk.CTkFrame(parent, fg_color=CARD, corner_radius=14)
+        frame.pack(fill="x", padx=14, pady=7)
+        ctk.CTkLabel(frame, text=title.upper(), text_color=MUTED,
+                     font=(FONT, 11, "bold")).pack(anchor="w", padx=16, pady=(12, 2))
+        return frame
+
+    def add_slider(parent, key, label, lo, hi, step, fmt):
+        row = ctk.CTkFrame(parent, fg_color="transparent")
+        row.pack(fill="x", padx=16, pady=(6, 4))
+        top = ctk.CTkFrame(row, fg_color="transparent")
+        top.pack(fill="x")
+        ctk.CTkLabel(top, text=label, text_color=TEXT, font=(FONT, 13)).pack(side="left")
+        val = ctk.CTkLabel(top, text=fmt.format(cfg[key]), text_color=ACCENT,
+                           font=(FONT, 13, "bold"))
+        val.pack(side="right")
+
+        def on_change(v, k=key, lab=val):
+            v = round(round(v / step) * step, 4)
+            cfg[k] = v
+            lab.configure(text=fmt.format(v))
+
+        s = ctk.CTkSlider(row, from_=lo, to=hi, number_of_steps=int(round((hi - lo) / step)),
+                          command=on_change, progress_color=ACCENT, button_color=ACCENT,
+                          button_hover_color=ACCENT_HOVER, fg_color=TRACK, height=18)
+        s.set(cfg[key])
+        s.pack(fill="x", pady=(6, 0))
+        sliders[key] = (s, val, fmt)
+
+    def status_row(parent, name):
+        row = ctk.CTkFrame(parent, fg_color="transparent")
+        row.pack(fill="x", padx=16, pady=2)
+        ctk.CTkLabel(row, text=name, text_color=MUTED, font=(FONT, 12)).pack(side="left")
+        lab = ctk.CTkLabel(row, text="…", text_color=MUTED, font=(FONT, 12, "bold"))
+        lab.pack(side="right")
+        return lab
+
+    # ---------- en-tête
+    header = ctk.CTkFrame(root, fg_color="transparent")
+    header.pack(fill="x", padx=18, pady=(16, 4))
+    titles = ctk.CTkFrame(header, fg_color="transparent")
+    titles.pack(side="left")
+    ctk.CTkLabel(titles, text="osu! aim assist", text_color=ACCENT,
+                 font=(FONT, 22, "bold")).pack(anchor="w")
+    ctk.CTkLabel(titles, text="Assistance de visée réglable", text_color=MUTED,
+                 font=(FONT, 12)).pack(anchor="w")
+    sw = ctk.CTkSwitch(header, text="Activé", text_color=TEXT, font=(FONT, 13, "bold"),
+                       progress_color=ACCENT, button_color="#ffffff",
+                       button_hover_color="#e6e6ee", fg_color=TRACK,
+                       command=lambda: cfg.__setitem__("enabled", bool(sw.get())))
+    sw.pack(side="right")
+    if cfg["enabled"]:
+        sw.select()
+
+    body = ctk.CTkScrollableFrame(root, fg_color="transparent",
+                                  scrollbar_button_color=TRACK,
+                                  scrollbar_button_hover_color=ACCENT)
+    body.pack(fill="both", expand=True, padx=2, pady=(2, 0))
+
+    # ---------- état en direct
+    st = card(body, "État")
+    st_tosu = status_row(st, "tosu")
+    st_game = status_row(st, "Partie")
+    st_pen = status_row(st, "Stylo")
+    st_map = status_row(st, "Map")
+    st_relax = status_row(st, "Relax")
+    st_calc = ctk.CTkLabel(st, text="", text_color=MUTED, font=(FONT, 11),
+                           wraplength=380, justify="left")
+    st_calc.pack(anchor="w", padx=16, pady=(4, 12))
+
+    # ---------- mises à jour
+    up = card(body, "Mises à jour")
+    st_upd = ctk.CTkLabel(up, text=f"Version {APP_VERSION}", text_color=MUTED,
+                          font=(FONT, 12), wraplength=380, justify="left")
+    st_upd.pack(anchor="w", padx=16, pady=(2, 6))
+    upd_btn = ctk.CTkButton(
+        up, text="Vérifier les mises à jour", height=32, corner_radius=10,
+        fg_color=TRACK, hover_color=ACCENT, text_color=TEXT, font=(FONT, 12, "bold"),
+        command=lambda: threading.Thread(
+            target=(upd.install if upd.state == "available" else upd.check),
+            daemon=True).start())
+    upd_btn.pack(fill="x", padx=16, pady=(0, 6))
+    chk_auto = ctk.CTkCheckBox(
+        up, text="Vérifier au démarrage", text_color=TEXT, font=(FONT, 12),
+        fg_color=ACCENT, hover_color=ACCENT_HOVER, border_color=MUTED,
+        command=lambda: cfg.__setitem__("auto_check_updates", bool(chk_auto.get())))
+    if cfg["auto_check_updates"]:
+        chk_auto.select()
+    chk_auto.pack(anchor="w", padx=16, pady=(2, 2))
+    chk_inst = ctk.CTkCheckBox(
+        up, text="Installer automatiquement", text_color=TEXT, font=(FONT, 12),
+        fg_color=ACCENT, hover_color=ACCENT_HOVER, border_color=MUTED,
+        command=lambda: cfg.__setitem__("auto_install_updates", bool(chk_inst.get())))
+    if cfg["auto_install_updates"]:
+        chk_inst.select()
+    chk_inst.pack(anchor="w", padx=16, pady=(2, 14))
+
+    # ---------- préréglages
+    pr = card(body, "Préréglages")
+    prow = ctk.CTkFrame(pr, fg_color="transparent")
+    prow.pack(fill="x", padx=12, pady=(2, 12))
+
+    def apply_preset(name):
+        for k, v in PRESETS[name].items():
+            cfg[k] = v
+            s, lab, fmt = sliders[k]
+            s.set(v)
+            lab.configure(text=fmt.format(v))
+
+    for name in PRESETS:
+        ctk.CTkButton(prow, text=name, height=34, corner_radius=10, fg_color=TRACK,
+                      hover_color=ACCENT, text_color=TEXT, font=(FONT, 13, "bold"),
+                      command=lambda n=name: apply_preset(n)).pack(
+            side="left", expand=True, fill="x", padx=4)
+
+    # ---------- réglages
+    a = card(body, "Assistance")
+    add_slider(a, "strength", "Force", 0.0, 1.0, 0.01, "{:.2f}")
+    add_slider(a, "range", "Portée (rayons de cercle)", 1.0, 6.0, 0.1, "{:.1f}")
+    add_slider(a, "inner_zone", "Zone intérieure sans aide", 0.0, 1.0, 0.05, "{:.2f}")
+    add_slider(a, "lookahead_ms", "Anticipation", 100, 800, 10, "{:.0f} ms")
+    ctk.CTkFrame(a, fg_color="transparent", height=8).pack()
+
+    t = card(body, "Tablette")
+    mode_row = ctk.CTkFrame(t, fg_color="transparent")
+    mode_row.pack(fill="x", padx=16, pady=(4, 6))
+    ctk.CTkLabel(mode_row, text="Mode d'entrée", text_color=TEXT,
+                 font=(FONT, 13)).pack(side="left")
+    names = {"tablet": "Tablette", "mouse": "Souris"}
+    seg = ctk.CTkSegmentedButton(
+        mode_row, values=["Tablette", "Souris"], selected_color=ACCENT,
+        selected_hover_color=ACCENT_HOVER, unselected_color=TRACK,
+        unselected_hover_color="#44445f", text_color=TEXT, font=(FONT, 12, "bold"),
+        command=lambda v: cfg.__setitem__("input_mode", "tablet" if v == "Tablette" else "mouse"))
+    seg.set(names.get(cfg["input_mode"], "Tablette"))
+    seg.pack(side="right")
+    add_slider(t, "max_offset", "Décalage max (rayons)", 0.2, 3.0, 0.05, "{:.2f}")
+    add_slider(t, "smooth", "Lissage", 5, 60, 1, "{:.0f}")
+    inj = ctk.CTkCheckBox(t, text="Injection d'entrée absolue (si osu! ignore l'aide)",
+                          text_color=TEXT, font=(FONT, 12), fg_color=ACCENT,
+                          hover_color=ACCENT_HOVER, border_color=MUTED,
+                          command=lambda: cfg.__setitem__("tablet_raw_inject", bool(inj.get())))
+    if cfg["tablet_raw_inject"]:
+        inj.select()
+    inj.pack(anchor="w", padx=16, pady=(8, 14))
+
+    r = card(body, "Mode Relax")
+    ctk.CTkLabel(r, text="Clique automatiquement au bon moment : tu ne fais que viser.",
+                 text_color=MUTED, font=(FONT, 11), wraplength=380,
+                 justify="left").pack(anchor="w", padx=16, pady=(0, 4))
+    relax_sw = ctk.CTkSwitch(
+        r, text="Activer le relax (F10)", text_color=TEXT, font=(FONT, 13, "bold"),
+        progress_color=ACCENT, button_color="#ffffff", button_hover_color="#e6e6ee",
+        fg_color=TRACK, command=lambda: cfg.__setitem__("relax_enabled", bool(relax_sw.get())))
+    relax_sw.pack(anchor="w", padx=16, pady=(4, 6))
+    if cfg["relax_enabled"]:
+        relax_sw.select()
+    rin = ctk.CTkFrame(r, fg_color="transparent")
+    rin.pack(fill="x", padx=16, pady=(4, 6))
+    ctk.CTkLabel(rin, text="Touches", text_color=TEXT, font=(FONT, 13)).pack(side="left")
+    relax_seg = ctk.CTkSegmentedButton(
+        rin, values=["Clavier Z/X", "Clic souris"], selected_color=ACCENT,
+        selected_hover_color=ACCENT_HOVER, unselected_color=TRACK,
+        unselected_hover_color="#44445f", text_color=TEXT, font=(FONT, 12, "bold"),
+        command=lambda v: cfg.__setitem__("relax_input", "keyboard" if v.startswith("Clavier") else "mouse"))
+    relax_seg.set("Clavier Z/X" if cfg["relax_input"] == "keyboard" else "Clic souris")
+    relax_seg.pack(side="right")
+    add_slider(r, "relax_offset_ms", "Décalage du clic", -50, 50, 1, "{:+.0f} ms")
+    add_slider(r, "relax_window_ms", "Tolérance après le hit", 20, 120, 5, "{:.0f} ms")
+    add_slider(r, "relax_zone", "Zone de clic (rayons)", 0.5, 1.2, 0.05, "{:.2f}")
+    add_slider(r, "relax_tap_ms", "Durée d'appui (cercles)", 10, 60, 5, "{:.0f} ms")
+    relax_inside = ctk.CTkCheckBox(
+        r, text="Cliquer seulement si le curseur est sur le cercle", text_color=TEXT,
+        font=(FONT, 12), fg_color=ACCENT, hover_color=ACCENT_HOVER, border_color=MUTED,
+        command=lambda: cfg.__setitem__("relax_require_inside", bool(relax_inside.get())))
+    if cfg["relax_require_inside"]:
+        relax_inside.select()
+    relax_inside.pack(anchor="w", padx=16, pady=(8, 6))
+    ctk.CTkButton(r, text="Tester l'envoi des touches (dans 3 s)", height=32, corner_radius=10,
+                  fg_color=TRACK, hover_color=ACCENT, text_color=TEXT, font=(FONT, 12, "bold"),
+                  command=eng.test_keys).pack(fill="x", padx=16, pady=(0, 14))
+
+    c = card(body, "Calibration du playfield")
+    add_slider(c, "offset_x", "Décalage X", -100, 100, 1, "{:.0f} px")
+    add_slider(c, "offset_y", "Décalage Y", -100, 100, 1, "{:.0f} px")
+    add_slider(c, "scale_mult", "Échelle", 0.9, 1.1, 0.002, "{:.3f}")
+    ctk.CTkFrame(c, fg_color="transparent", height=8).pack()
+
+    m = card(body, "Mode souris uniquement")
+    add_slider(m, "move_gain", "Gain de mouvement", 0.2, 3.0, 0.05, "{:.2f}")
+    add_slider(m, "max_speed", "Vitesse max de correction", 200, 6000, 50, "{:.0f} px/s")
+    ctk.CTkFrame(m, fg_color="transparent", height=8).pack()
+
+    ctk.CTkLabel(body, text="F8 : aide   •   F10 : relax   •   F9 : test (décalage de 150 px)",
+                 text_color=MUTED, font=(FONT, 11)).pack(pady=(6, 10))
+
+    # ---------- barre du bas
+    footer = ctk.CTkFrame(root, fg_color=BG)
+    footer.pack(fill="x", padx=18, pady=12)
+    save_btn = ctk.CTkButton(footer, text="Sauvegarder les réglages", height=42,
+                             corner_radius=12, fg_color=ACCENT, hover_color=ACCENT_HOVER,
+                             text_color="#1a0b14", font=(FONT, 14, "bold"))
+    save_btn.pack(fill="x")
+
+    def save():
+        json.dump(cfg, open(CONFIG_FILE, "w"), indent=2)
+        save_btn.configure(text="Enregistré ✓")
+        root.after(1500, lambda: save_btn.configure(text="Sauvegarder les réglages"))
+    save_btn.configure(command=save)
+
+    # ---------- rafraîchissement de l'état
+    def refresh():
+        if upd.state != "idle":
+            notes = (upd.manifest or {}).get("notes", "") if upd.state == "available" else ""
+            st_upd.configure(
+                text=f"v{APP_VERSION} — {upd.message}" + (f"\n{notes}" if notes else ""),
+                text_color=OK if upd.state in ("available", "uptodate") else
+                (BAD if upd.state == "error" else MUTED))
+            upd_btn.configure(
+                text=(f"Installer la v{upd.manifest['version']} et redémarrer"
+                      if upd.state == "available" else "Vérifier les mises à jour"),
+                state="disabled" if upd.state in ("checking", "installing") else "normal")
+        if bool(sw.get()) != bool(cfg["enabled"]):   # F8 a basculé
+            sw.select() if cfg["enabled"] else sw.deselect()
+
+        if bool(relax_sw.get()) != bool(cfg["relax_enabled"]):   # F10 a basculé
+            relax_sw.select() if cfg["relax_enabled"] else relax_sw.deselect()
+        st_relax.configure(
+            text=f"Actif ({eng._relax_clicks} clics)" if cfg["relax_enabled"] else "Désactivé",
+            text_color=OK if cfg["relax_enabled"] else MUTED)
+
+        tosu_ok = not eng.status.startswith(("tosu indisponible", "En attente"))
+        st_tosu.configure(text="Connecté" if tosu_ok else "Hors ligne",
+                          text_color=OK if tosu_ok else BAD)
+        st_game.configure(text="En partie" if eng.playing else "Menu / pause",
+                          text_color=OK if eng.playing else MUTED)
+        st_pen.configure(text=f"Détecté ({eng._hook_count})" if eng._pen_seen else "Aucun signal",
+                         text_color=OK if eng._pen_seen else WARN)
+        name = os.path.basename(eng.map_path) if eng.map_path else "—"
+        st_map.configure(text=(name[:34] + "…") if len(name) > 35 else name,
+                         text_color=TEXT if eng.map_path else MUTED)
+        test = "   •   TEST F9 ACTIF" if eng._test else ""
+        relax_line = f"\nRelax : {eng._relax_dbg}" if cfg["relax_enabled"] else ""
+        st_calc.configure(text=f"Décalage : {eng._ox:.0f}, {eng._oy:.0f} px   •   {eng._dbg}{test}{relax_line}")
+        root.after(250, refresh)
+
+    refresh()
+    root.protocol("WM_DELETE_WINDOW", lambda: (setattr(eng, "running", False), root.destroy()))
+    root.mainloop()
+
+
+def main():
+
+    keep_active_in_background()
+    cfg = load_cfg()
+    eng = Engine(cfg)
+    threading.Thread(target=eng.ws_thread, daemon=True).start()
+    threading.Thread(target=eng.assist_thread, daemon=True).start()
+    threading.Thread(target=eng.hook_thread, daemon=True).start()
+    threading.Thread(target=eng.relax_thread, daemon=True).start()
+    sys.setswitchinterval(0.0005)  # le hook doit répondre vite, sinon Windows le coupe
+
+    upd = Updater(eng)
+
+    def startup_update_check():
+        if cfg["auto_check_updates"] and upd.check() and cfg["auto_install_updates"]:
+            upd.install()
+    threading.Thread(target=startup_update_check, daemon=True).start()
+
+    if "--headless" in sys.argv:
+        # Sans fenêtre : utilise aimassist_config.json, F8 pour activer/désactiver
+        print("Aim assist lancé sans fenêtre. Ctrl+C pour quitter.")
+        last_status = ""
+        try:
+            while True:
+                if eng.status != last_status:
+                    last_status = eng.status
+                    print(last_status)
+                if upd.state == "available" and last_status != upd.message:
+                    print(f"{upd.message} — relance avec l'option d'installation auto, "
+                          "ou lance l'interface graphique.")
+                    last_status = upd.message
+                time.sleep(0.5)
+        except KeyboardInterrupt:
+            eng.running = False
+        return
+
+    run_gui(cfg, eng, upd)
+
+
+if __name__ == "__main__":
+    main()
+
+```
+
+`version.json`:
+
+```json
+{
+  "version": "1.0.0",
+  "url": "https://github.com/SymphonyPrime/qor-osucheat.git",
+  "sha256": "8914bc2fbd2b44f8a6cc64bad50dc28a5c83cbc6abd1de2d519b9e31a4f411c0",
+  "notes": "Première version"
+}
+```
