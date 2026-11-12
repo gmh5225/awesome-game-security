@@ -1997,6 +1997,7 @@ sources:
   - wiki/sources/descriptions/springah__futari_recomp.md
   - wiki/sources/descriptions/rf-dev-design__nfsu2-revived-trainer.md
   - wiki/sources/descriptions/7777lolonlyyou__VMProtect-LLM-SKILL.md
+  - wiki/sources/descriptions/UzawaReisaQwQ__codex-vmprotect-unpack-skill.md
   - wiki/sources/descriptions/plisskien__VMProtect-3.x-Emulator-Memory-Dumper.md
   - wiki/sources/descriptions/ryanmsartor__rc2tools.md
   - wiki/sources/descriptions/ToxidoAAC__ToxidoAntiCheat.md
@@ -2281,7 +2282,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Android native-library VMP devirtualization educational lab via [[vmp-devirtualization-lab]] (mini-VM + switch dispatcher; Python bytecode disasm/lifting; dispatcher/handler recovery, symbolic lifting, trace-driven analysis, differential testing; QBDI/Unicorn/Triton/Frida/IDA/Ghidra/angr; tomhamidi97-arch) also sits in the Cheat Fix VMP lane. (source: wiki/sources/descriptions/tomhamidi97-arch__vmp-devirtualization-lab.md)
 - Integrated VMProtect/Themida/Tigress research suite via [[vmp-devirt]] (Aetherx86; CIA + Triton concolic handler recovery, MBA simplification, LLVM IR lift; Fix VMP) (source: wiki/sources/descriptions/Aetherx86__VMP_DEVIRT.md) (source: wiki/sources/README-categories.md)
 - LLM-oriented Markdown agent skill for VMProtect/Themida/custom-VM devirtualization via [[vmprotect-llm-skill]] (7777lolonlyyou; Miasm PE/IR lift; Triton/Capstone/Z3/IDA aux; handler discovery, taint/backward slice, VMP 3.9 byte-provenance, pseudocode validation; hypothesis ledger for agents; Cheat Fix VMP) (source: wiki/sources/descriptions/7777lolonlyyou__VMProtect-LLM-SKILL.md)
-- Codex/Claude VMProtect unpack workflow via UzawaReisaQwQ/codex-vmprotect-unpack-skill (VMProtect 3.5–3.10.x PE; debugger/VM check strip, IAT rebuild sample; Cheat Fix VMP) (source: wiki/sources/README-categories.md)
+- Codex/Claude VMProtect unpack agent skill via [[codex-vmprotect-unpack-skill]] (UzawaReisaQwQ; vmp-lazy-unpack tracer + Python PE/import audit helpers; anti-debug/anti-VM reasoning; unpack vs devirt separation; bundled VMP C++ training sample; VMP 3.5.0–3.10.4 x64 + selected x86; Cheat Fix VMP) (source: wiki/sources/descriptions/UzawaReisaQwQ__codex-vmprotect-unpack-skill.md)
 - Frida boundary-hook writeup for stacked Android VMProtect+OLLVM via libc/JNI/Java exit monitoring (tomhamidi97-arch/frida-vmp-bypass; spawn-mode Frida; caller-address cross-ref with IDA; environment-check and anti-tamper call-chain reconstruction; Cheat Fix VMP / Fix OLLVM) (source: wiki/sources/descriptions/tomhamidi97-arch__frida-vmp-bypass.md)
 - Frida Stalker dual-trace branch divergence via [[veridiff]] (Veridiff; Python + Rust; longest-common-prefix basic-block diff + Capstone disassembly; OLLVM CFF resync heuristics; license/anti-cheat branch pinpointing; Cheat / Frida / Dynamic Binary Instrumentation) (source: wiki/sources/descriptions/Veridiff__Veridiff.md)
 - Multi-engine VM detection/analysis via [[vmdragonslayer]] (DTT / SE / pattern classification / ML) sits in the Cheat RE Tools / Fix VMP-adjacent lane. (source: wiki/sources/descriptions/poppopjmp__VMDragonSlayer.md)
