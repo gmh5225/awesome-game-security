@@ -443,6 +443,7 @@ sources:
   - wiki/sources/descriptions/ByteCorum__DragonBurn.md
   - wiki/sources/descriptions/HadockKali__battleye-user-mode-bypass.md
   - wiki/sources/descriptions/HackOvert__AntiDBG.md
+  - wiki/sources/descriptions/Hansel38__Oblivion-6.md
   - wiki/sources/descriptions/CheckPointSW__Nodejs-Tracer.md
   - wiki/sources/descriptions/CheckPointSW__showstopper.md
   - wiki/sources/descriptions/CasualX__obfstr.md
@@ -1264,7 +1265,7 @@ Title-specific R6 ranked-stat suspicion tooling such as [[r6-intel]] (baldspots4
 - [[ultimate-anti-cheat]] — open-source Windows C++ anti-cheat framework (AlSch092; user-mode debug/memory-patch/runtime tamper detection; optional client-server heartbeat; configurable hybrid user-mode + kernel-assisted deployment; educational AC evaluation reference; Open Source Anti Cheat System) (source: wiki/sources/descriptions/AlSch092__UltimateAntiCheat.md)
 - [[betashield]] — C++/Boost client-side AC protection (integrity checking, process monitoring, tamper detection; Boost.Asio networking; cross-platform Boost utilities; open-source AC system lane; JackBro) (source: wiki/sources/descriptions/JackBro__BetaShield.md)
 - [[cheatguard]] — Rust engine-agnostic loaded-module scanner (JSON signature ruleset; weighted signals—known cheat names, suspicious paths, unsigned modules, module-count anomalies; Win32 module enum; deterministic 0–100 CLEAN/SUSPICIOUS/MALICIOUS JSON report; library + CLI; blue-team process-integrity / custom AC forensics; JUS7205) (source: wiki/sources/descriptions/JUS7205__cheatguard.md)
-- Hansel38/Oblivion-6 — client/server MMO anti-cheat reference (Windows client anti-debug/integrity/injection/HWID modules + server ban lists; educational Open Source Anti Cheat System sample; README `Anti Cheat`; source: wiki/sources/README-categories.md)
+- [[oblivion-6]] — **Oblivion Hack Shield** client/server MMO anti-cheat (Hansel38; VS C++ client DLL: anti-debug, injection/IAT hooks, overlays, file/signature/self-integrity, cross-process heuristics, anti-suspend; server heartbeat/HWID/ban lists, remote kick/block, Win+Linux builds, obfuscated secrets, logging/deployment helpers; Open Source Anti Cheat System) (source: wiki/sources/descriptions/Hansel38__Oblivion-6.md)
 - [[tlac-modern-local-anti-cheat-reunioned]] — lightweight open-source local anti-cheat for Linux (Rust + C eBPF/kernel module + Python ONNX; user-space wildcard memory signature scan, SHA256 self-integrity, HWID bans, Tokio local IPC; optional eBPF tracepoints on open/exec/ptrace/clone; behavioral anomaly detection; MIT-licensed; Steam Deck; TuncorReUnion; Open Source Anti Cheat System) (source: wiki/sources/descriptions/TuncorReUnion__TLAC-MODERN-LOCAL-ANTI-CHEAT-REUNIONED.md)
 - [[vigil]] — Rust eBPF Linux-native anti-cheat (BPF ELF loading, perf events, CLI, client–server distributed monitoring; kernel-level event tracing and threat detection; TOSTcRa; Open Source Anti Cheat System) (source: wiki/sources/descriptions/TOSTcRa__vigil.md)
 - [[linux-anticheat]] — WIP kernel-level Linux console AC (mikio815; Rust daemon + LSM eBPF ptrace/W^X/bpf() detection + thin C kernel module for eBPF integrity + planned BitVisor EPT write-protect; Aya; Linux 5.17+ BTF + BPF LSM; Steam Deck target; Open Source Anti Cheat System) (source: wiki/sources/descriptions/mikio815__linux-anticheat.md)
