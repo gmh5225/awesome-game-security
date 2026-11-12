@@ -3238,6 +3238,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Pillager](entities/pillager.md) — Go Windows credential harvest (browser/Wi-Fi/chat decrypt-export; post-ex)
 - [Pine (canyie)](entities/canyie-pine.md) — Android ART Java method hooking (inline + replacement; Xposed-compatible API; Android 7.0+; no root; Android RE / app modification)
 - [Pine](entities/pine.md) — neural-network aim/trigger research (CS:GO / Fortnite / Overwatch; cheat / triggerbot & aimbot)
+- [PineLoader](entities/pineloader.md) — UE 5.8 Windows pre-launch mod loader (C#/.NET 10; hard-link Win64-Shipping; IPineMod/IPineHost DLL plugins; per-mod isolation; Game Engine Plugins:Unreal)
 - [Pink-Eye](entities/pink-eye.md) — Windows KMDF kernel PoC; anti-cheat object-callback code-cave redirect + integrity-check path tampering (SurgeGotTappedAgain; AC research / defensive testing)
 - [Pitaya](entities/pitaya.md) — distributed multiplayer game server framework (Game Network / Server framework)
 - [PixiJS](entities/pixijs.md) — lightweight 2D WebGL/WebGPU JS/TS library (shaders/render; Game Engine / HTML5)
