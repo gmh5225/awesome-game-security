@@ -1995,7 +1995,7 @@ sources:
   - wiki/sources/descriptions/ToxidoAAC__ToxidoAntiCheat.md
   - wiki/sources/descriptions/XiONDiGiTaL__EmblemWeave.md
   - wiki/sources/descriptions/CiPH3R-88__NFSMW_WideScreenFix.md
-updated: 2026-11-11
+updated: 2026-11-12
 confidence: high
 ---
 
@@ -3147,6 +3147,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Archival yuzu placeholder [[yuzu-archive]] (Logboy2000; documentation-only snapshot with DMCA notice record; no emulator source; legal/ecosystem reference for Switch emulator enforcement timeline) sits in the same `Nintendo Switch` lane. (source: wiki/sources/descriptions/Logboy2000__yuzu-archive.md)
 - Android yuzu port [[yuzu-android]] (ARM64 JIT; Vulkan/OpenGL; Switch game compatibility on Android) sits in the same `Nintendo Switch` / mobile-emulator crossover lane. (source: wiki/sources/descriptions/gmh5225__yuzu-android.md)
 - Android Eden-based Switch emulator [[opensw]] (RemiPelloux; C++/Kotlin; dynarmic ARM64 JIT; Vulkan/OpenGL; build-ID-aware Atmosphere/Eden cheat import; dmnt-style cheat engine; per-game profiles; Cockpit panel + performance diagnostics; Profile build automation bridge; AYN Thor profile; Nintendo Switch / mobile-emulator crossover) sits in the same lane. (source: wiki/sources/descriptions/RemiPelloux__OpenSw.md)
+- Native Switch/Switch 2 on arm64 Android via [[droidplay-core]] (enjoyerofslop; nxnative engine + DroidPlay toolchain; Vulkan; MIT; BYO dumps and prod.keys; Nintendo Switch / mobile-native crossover) sits in the same lane. (source: wiki/sources/README-categories.md)
 - Xbox Series UWP Eden port [[nxbox]] (NspxMiguel; C++/CMake; Dynarmic ARM64 JIT; OpenGL on D3D12 via Mesa; AppContainer/UWP packaging; Switch-on-Xbox sandbox and graphics RE) sits in the same `Nintendo Switch` / Xbox crossover lane. (source: wiki/sources/descriptions/NspxMiguel__NXbox.md)
 - PS5 homebrew Eden launcher [[prospero-eden-encore]] (niakw; C++/Makefile + Python staging; ProsperoEden stack on PS5 FW 13.60; Dynarmic JIT; Vulkan/OpenGL + RADV; TV-first DualSense UI; NS1/NS2 Switch containers; bounded caching; CodeQL review; Nintendo Switch / PlayStation crossover) sits in the same crossover lane. (source: wiki/sources/README-categories.md) (source: wiki/sources/descriptions/niakw__ProsperoEden-Encore.md)
 - PS5 Linux boot via [[ps5-linux-loader]] (kernel/HV exploits, IOMMU setup, GPU init, TMR handling; custom bootloader payload) sits in the console `PlayStation` HV research lane. (source: wiki/sources/descriptions/ps5-linux__ps5-linux-loader.md)
