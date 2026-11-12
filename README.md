@@ -949,6 +949,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 > Packet Sniffer&Filter
 - https://github.com/WPO-Foundation/win-shaper
 - https://github.com/wiresock/ndisapi
+- https://github.com/wesmar/WireScope [Windows C++23 WinpkFilter NDIS sniffer, per-process traffic monitor, firewall, and network impairment simulator — GUI/CLI without Npcap]
 - https://github.com/gmh5225/Akebi-PacketSniffer
 - https://github.com/basil00/Divert [Packet Divert]
 - https://github.com/fksvs/inject
