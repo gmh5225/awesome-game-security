@@ -55,9 +55,10 @@ sources:
   - wiki/sources/descriptions/ahuhu789__pubg-bigdata-analytics.md
   - wiki/sources/descriptions/ressiws__AegisAC.md
   - wiki/sources/descriptions/mihaigsm2003__CS2-AntiCheat.md
+  - wiki/sources/descriptions/AadityaPokhriyal__Ban-Hammer.md
   - wiki/sources/descriptions/ThatKidGlitchy__chess-hacks.md
   - wiki/sources/descriptions/Coding-With-SouRav__Chess-Cheater.md
-updated: 2026-11-01
+updated: 2026-11-12
 confidence: medium
 ---
 
@@ -119,6 +120,7 @@ Tabular engagement features (reaction time, curvature stats, dx/dy correlation, 
 - [[gan-aimbots]] — Miffyli academic ML-aimbot research repo (Python; ViZDoom FPS scenarios; data collection, GAN-aimbot training/evaluation, classifier plots, experiment orchestration; reproduces published pipelines with shared GAN-group parameters; offensive + defensive aimbot ML research; cheat / Machine Learning)
 - [[dlac]] — LaihoE CS:GO demo-analysis anti-cheat package (Python inference + Go demo parser; ONNX models; per-shot suspicious-aim prediction; terminal/CSV/in-memory export; tunable confidence thresholds; replay-based behavioral detection research; Anti Cheat / Machine Learning)
 - [[cs2guard]] — Driw0x CS2 ML behavioral cheat detection from demo parsing (Python; tick-level aim/tracking/reaction-time features; CS2CD dataset adapters; anomaly + supervised models; visualization/tests; goal of real-time server-side AC without client scans; Anti Cheat / Machine Learning) (source: wiki/sources/descriptions/Driw0x__CS2Guard.md)
+- [[ban-hammer]] — AadityaPokhriyal CS2 behavioural ML cheat detector from match stats (Python/Jupyter; Parquet tick + JSON event logs; K/D, headshot rate, speed, accuracy penalties, contextual kill ratios; sklearn/XGBoost with group-aware validation and threshold tuning; serialized models on held-out matches; statistics-first aimbot/spinbot research without client hooks; Anti Cheat / Machine Learning) (source: wiki/sources/descriptions/AadityaPokhriyal__Ban-Hammer.md)
 - [[pubg-bigdata-analytics]] — ahuhu789 PUBG big-data pipeline (PySpark cleanse + Spark SQL match analytics, MLlib K-Means + game-physics rule flags, Parquet → Cassandra, Streamlit ranked alerts; offline/server-side batch research; Anti Cheat / batch ML) (source: wiki/sources/descriptions/ahuhu789__pubg-bigdata-analytics.md)
 - [[deepaimdetector]] — 87andrewh SourceTV demo LSTM prototype (Go demo parser → view-angle delta + crosshair-to-target angular features around attack events; Python notebooks; classifies legit-aimbot-assisted gunfights; research experiment; Anti Cheat / Deep Learning) (source: wiki/sources/descriptions/87andrewh__DeepAimDetector.md)
 - [[yaacs-anticheat]] — oykuoner CS2 demo pitch/yaw telemetry research pipeline (Python; demoparser2 HLTV parsing; 100-tick spatiotemporal features from Fitts' Law + Minimum Jerk Model; heuristic rule engine vs Random Forest; synthetic + real datasets for honest/pro/aimbot/humanised-evasion profiles; privacy-preserving server-side aimbot detection without client memory probes; Anti Cheat / Machine Learning) (source: wiki/sources/descriptions/oykuoner__YAACS-AntiCheat.md)
