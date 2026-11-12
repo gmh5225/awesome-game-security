@@ -3780,6 +3780,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [simple_ac_internal_cheat](entities/simple-ac-internal-cheat.md) — educational C++20 AssaultCube internal (Detours DX / ImGui / ESP / aimbot)
 - [simpleperf_demo](entities/simpleperf-demo.md) — Android simpleperf / Perf demo (app profiling)
 - [simplify](entities/simplify.md) — Android Dalvik deobfuscation framework (CalebFenton; Java; virtual execution + optimizer passes — constant propagation, dead code, reflection cleanup; obfuscated APK/DEX analysis; `[Java]`)
+- [sim-numbersetter-pro](entities/sim-numbersetter-pro.md) — Rooted Android EF_MSISDN programmer (LSPosed telephony hooks or telephony providers; dual-SIM; API 26–34; OTP/SMS identity testing)
 - [sinmapper](entities/sinmapper.md) — user-mode mapper into signed-driver section via physmem + PTE flip; trace cleanup; stealthy kernel load (armvirus; Manual Map In Signed Driver)
 - [sogen](entities/sogen.md) — Windows userspace PE emulator (Unicorn + Capstone; minidump / Zstd state; React web UI; FlatBuffers trace IPC; Windows User Space Emulator)
 - [snapshot](entities/snapshot.md) — Rust WinDbg extension; JSON CPU register state + VM physical memory crash dump for snapshot-based kernel fuzzing (0vercl0k; dbgeng cdylib; full-kernel/active-kernel modes; companion to wtf; WinDbg extension reference)
