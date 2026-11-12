@@ -1285,6 +1285,7 @@ sources:
   - wiki/sources/descriptions/stevemk14ebr__RETools.md
   - wiki/sources/descriptions/mentebinaria__retoolkit.md
   - wiki/sources/descriptions/lilyco-42__rev-tools-setup.md
+  - wiki/sources/descriptions/lidor30__pokedaisy.md
   - wiki/sources/descriptions/linflame__SusfsLkmLoader.md
   - wiki/sources/descriptions/liuyyx__nocturne-client.md
   - wiki/sources/descriptions/devoltzz__devos-map-doctor.md
@@ -3092,7 +3093,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Original Xbox LLE via [[xemu]] (QEMU fork; NV2A/MCPX/NForce/Pentium III; OpenGL + SDL2; ISO/XISO) sits in the console `Xbox` lane for hardware-internals / preservation study. (source: wiki/sources/descriptions/xemu-project__xemu.md)
 - DEF CON Dreamcast PlanetWeb browser exploit chain via [[defcon-dreamcast-planetweb-research]] (piffd0s; Eden RCE + unbounded memory write + MIME stack overflow → native SH-4 DOOM on emulated console without debugger; Python DNS/HTTP/POP3 orchestration; vintage console browser attack-surface research; Cheat) sits in the retro-console RE lane beside Xbox/Game Boy emulator samples. (source: wiki/sources/descriptions/piffd0s__Defcon-Dreamcast-Planetweb-Research.md)
 
-- Android multi-system Pokémon player lidor30/pokedaisy (GB/GBC/GBA/DS cores with live companion UI for party, bag, map, and battle state—ROM-hack/dual-screen workflows; Cheat / Game Boy) sits in the console `Game Boy` lane beside emulator samples (source: wiki/sources/README-categories.md).
+- Android multi-system Pokémon companion player [[pokedaisy]] (lidor30; GB/GBC/GBA/DS via mGBA-class cores; JNI C core + Jetpack Compose overlay for party, bag, map, battle, Pokédex; SHA-1 ROM/hack ID, WRAM/save layouts, pret-style table parsing, cheat/save verification—ROM-hack and dual-screen workflows; Cheat / Game Boy) sits beside [[kevboy]], [[feather-gb]], and [[bizhawk]] in the retro handheld lane. (source: wiki/sources/descriptions/lidor30__pokedaisy.md)
 - Game Boy hardware emulation via [[kevboy]] (Rust; CPU/memory/graphics/input + ROM formats) sits in the console `Game Boy` lane for emulator architecture study. (source: wiki/sources/descriptions/xkevio__kevboy.md)
 - Peer Rust Game Boy emulator [[feather-gb]] targets retro handheld emulator developers and GB-area reverse engineers. (source: wiki/sources/descriptions/vojty__feather-gb.md)
 - Multi-system retro emulator [[bizhawk]] (TASEmulators; C#/.NET + native C/C++ cores; TAStudio movie editing, Lua memory/input scripting, RAM search/watch, hex editor, CPU debuggers/disassemblers, trace logging, savestates/rewind, Game Genie/GameShark decoders; NES/SNES/GB/GBA/Genesis/N64/DS/PlayStation/MAME arcade; deterministic frame-by-frame control for TAS authors, cheat testing, and retro game internals RE) sits in the console retro-emulator lane beside [[feather-gb]] and [[kevboy]]. (source: wiki/sources/descriptions/TASEmulators__BizHawk.md)

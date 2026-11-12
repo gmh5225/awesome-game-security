@@ -3270,6 +3270,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [PokeAlliance Anti-Cheat Analysis](entities/pokealliance-anti-cheat-analysis.md) — PokeAlliance Pokémon MMO OTCv8 client static/dynamic AC audit (LordeTyrael; server-triggered process/DLL/window enumeration, login HWID fingerprinting, Lua blacklists, server-driven bot checks; Frida JS + Python tracer; Anti Cheat / game:pokealliance)
 - [PoGo Gotta Catch Em All](entities/pogo-gotta-catch-em-all.md) — BennyWaitWhat; rooted Termux + Frida gadget; live IL2CPP AutoCatcher + pogo_extract inventory/cull; 11-audit tag sync; Python/JS/adb (Cheat / game:pokemongo)
 - [pokemongo-dumper](entities/pokemongo-dumper.md) — Pokemon GO Unity IL2CPP dumper (C#/C++; cheat / game:pokemongo; gmh5225)
+- [pokedaisy](entities/pokedaisy.md) — Android/3DS Pokémon emulator companion (WRAM/save layouts, pret-style ROM tables, mGBA cheats; Gen 1–3)
 - [polygon-ue5](entities/polygon-ue5.md) — POLYGON UE5 offensive research (C/C++; graphics / Unreal Engine / hooking; cheat / game:polygon [UE5]; gmh5225)
 - [pom-pom](entities/pom-pom.md) — Honkai: Star Rail simple cheat (C/C++; hooking / overlays; cheat / game:honkai star rail; gmh5225)
 - [pt-detector](entities/pt-detector.md) — Windows Intel PT research prototype (DProvinciani; KM+UM trace capture; execution-stream decode for ROP/JOP suspicious control flow; C/C++ + Python; exploit detection / CFI research; Intel PT)
