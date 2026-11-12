@@ -390,6 +390,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/eclipse/paho.mqtt.cpp [mqtt cpp]
 - https://github.com/topfreegames/pitaya [Server framework]
 - https://github.com/cBournhonesque/lightyear [Rust server-authoritative Bevy multiplayer library with prediction, rollback, and WebTransport/wasm support]
+- https://github.com/aurix-voice/aurix-net [Self-hosted realtime networking: relay, state sync, lockstep, server-side WASM referee, desync detection; Web, Unity, Rust, Godot SDKs]
 - https://github.com/azerothcore/azerothcore-wotlk [Server for WOW]
 - https://github.com/arlyon/azerust [Rust Server for WOW]
 - https://github.com/arlyon/awesome-wow-rust [Rust Server for WOW]
