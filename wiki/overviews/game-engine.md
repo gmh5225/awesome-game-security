@@ -638,6 +638,7 @@ sources:
   - wiki/sources/descriptions/euuuuuuan__gatewarden-public.md
   - wiki/sources/descriptions/marclourens19__ghostline.md
   - wiki/sources/descriptions/Stellar-Splash__stellar-splash-engine.md
+  - wiki/sources/descriptions/SternI__FortniteMCP.md
   - wiki/sources/descriptions/eversinc33__1.6_C2.md
   - wiki/sources/descriptions/dreamstalker__rehlds.md
   - wiki/sources/descriptions/alliedmodders__hl2sdk.md
@@ -826,7 +827,7 @@ Editor-facing MCP bridges in the README's **MCP server** subcategory let AI agen
 - **Hex2Dec MCP** — [[hex2dec-mcp]] hex↔decimal number conversion for AI agents (JavaScript/TypeScript; gmh5225) (source: wiki/sources/descriptions/gmh5225__hex2dec-mcp.md)
 - **MCP Reverse** — [[mcp-reverse]] TypeScript/Node.js aggregated MCP hub (180+ tools; sidecar bridges for Ghidra, IDA, Binary Ninja, x64dbg, Cheat Engine, Frida, dnSpy, ILSpy, ReClass.NET; native decomp cache, YARA/signature scan, ROP/memory, PDB/DWARF, game-engine helpers; VMProtect-unpack cookbooks, anti-cheat skill corpus, agent mesh; Docker/systemd + example client configs; 1llu50ry; Game Develop / MCP server) (source: wiki/sources/descriptions/1llu50ry__mcp-reverse.md)
 - **coleleavitt IDA MCP** — [[coleleavitt-ida-mcp-server]] native C++17 IDA Pro 9.x in-process MCP HTTP server; 249 tools (disasm, decompilation, patching, debugging, IDAPython/IDC); core/full profiles; Game Develop / MCP server) (source: wiki/sources/descriptions/coleleavitt__ida-mcp-server.md) (source: wiki/sources/README-categories.md)
-- **Fortnite MCP** — sterni/fortnitemcp in-process UE MCP DLL for authorized offline/private builds: memory R/W, pointer chains, UE reflection/ProcessEvent, input automation, loopback HTTP MCP, optional mitmproxy API sidecar (Game Develop / MCP server) (source: wiki/sources/README-categories.md)
+- **Fortnite MCP** — [[fortnitemcp]] in-process UE MCP DLL for authorized offline/private builds: memory R/W, pointer chains, UE reflection/ProcessEvent, input automation, loopback HTTP MCP, optional mitmproxy API sidecar (Game Develop / MCP server) (source: wiki/sources/README-categories.md) (source: wiki/sources/descriptions/SternI__FortniteMCP.md)
 - **Binary Ninja Headless MCP** — [[binary-ninja-headless-mcp]] Python headless BN MCP server with 181 RE tools (disasm, IL, patching, types, xrefs, undo/redo; stdio/TCP; read-only default; fake backend for CI; mrphrazer; Game Develop / MCP server) (source: wiki/sources/descriptions/mrphrazer__binary-ninja-headless-mcp.md)
 - **REA** — [[rea]] local CLI + MCP server for agent-assisted RE across native binaries, JS/Electron, .NET, web/mobile captures, and firmware; bridges Hopper/Ghidra/IDA/JADX and related tools; returns evidence provenance and limitations (morluto; Game Develop / MCP server) (source: wiki/sources/descriptions/morluto__rea.md)
 - **PlayGoblin** — [[playgoblin]] overnight Unity/Unreal automated QA: in-engine run logs + Python CLI deterministic checks (crashes, dead UI, nav stalls, blank frames, debug leftovers, optional FPS); evidence HTML/Markdown/GitHub issues; MCP + JSON for agents; local regression—not AC (grloper; Game Develop / AI Agents / Game Testing) (source: wiki/sources/descriptions/grloper__playgoblin.md) (source: wiki/sources/README-categories.md)
