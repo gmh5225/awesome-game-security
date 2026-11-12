@@ -1,0 +1,2389 @@
+Project Path: arc_strazzere_inject-hooks-android-rs_m8pvw5mq
+
+Source Tree:
+
+```txt
+arc_strazzere_inject-hooks-android-rs_m8pvw5mq
+├── LICENSE
+├── Makefile
+├── README.md
+├── hook
+│   ├── Cargo.lock
+│   ├── Cargo.toml
+│   ├── README.md
+│   ├── build.rs
+│   └── src
+│       ├── android_log.rs
+│       ├── elf.rs
+│       ├── hook.rs
+│       ├── hooks
+│       │   ├── fileio.rs
+│       │   ├── injection_log.rs
+│       │   └── mod.rs
+│       ├── lib.rs
+│       ├── log.rs
+│       └── patch.rs
+├── injector
+│   ├── Cargo.lock
+│   ├── Cargo.toml
+│   ├── README.md
+│   └── src
+│       ├── injector.rs
+│       ├── main.rs
+│       ├── ptrace.rs
+│       └── utils.rs
+├── victim
+│   ├── Cargo.lock
+│   ├── Cargo.toml
+│   └── src
+│       └── main.rs
+└── vscode
+    └── settings.json
+
+```
+
+`LICENSE`:
+
+```
+                                 Apache License
+                           Version 2.0, January 2004
+                        http://www.apache.org/licenses/
+
+   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
+
+   1. Definitions.
+
+      "License" shall mean the terms and conditions for use, reproduction,
+      and distribution as defined by Sections 1 through 9 of this document.
+
+      "Licensor" shall mean the copyright owner or entity authorized by
+      the copyright owner that is granting the License.
+
+      "Legal Entity" shall mean the union of the acting entity and all
+      other entities that control, are controlled by, or are under common
+      control with that entity. For the purposes of this definition,
+      "control" means (i) the power, direct or indirect, to cause the
+      direction or management of such entity, whether by contract or
+      otherwise, or (ii) ownership of fifty percent (50%) or more of the
+      outstanding shares, or (iii) beneficial ownership of such entity.
+
+      "You" (or "Your") shall mean an individual or Legal Entity
+      exercising permissions granted by this License.
+
+      "Source" form shall mean the preferred form for making modifications,
+      including but not limited to software source code, documentation
+      source, and configuration files.
+
+      "Object" form shall mean any form resulting from mechanical
+      transformation or translation of a Source form, including but
+      not limited to compiled object code, generated documentation,
+      and conversions to other media types.
+
+      "Work" shall mean the work of authorship, whether in Source or
+      Object form, made available under the License, as indicated by a
+      copyright notice that is included in or attached to the work
+      (an example is provided in the Appendix below).
+
+      "Derivative Works" shall mean any work, whether in Source or Object
+      form, that is based on (or derived from) the Work and for which the
+      editorial revisions, annotations, elaborations, or other modifications
+      represent, as a whole, an original work of authorship. For the purposes
+      of this License, Derivative Works shall not include works that remain
+      separable from, or merely link (or bind by name) to the interfaces of,
+      the Work and Derivative Works thereof.
+
+      "Contribution" shall mean any work of authorship, including
+      the original version of the Work and any modifications or additions
+      to that Work or Derivative Works thereof, that is intentionally
+      submitted to Licensor for inclusion in the Work by the copyright owner
+      or by an individual or Legal Entity authorized to submit on behalf of
+      the copyright owner. For the purposes of this definition, "submitted"
+      means any form of electronic, verbal, or written communication sent
+      to the Licensor or its representatives, including but not limited to
+      communication on electronic mailing lists, source code control systems,
+      and issue tracking systems that are managed by, or on behalf of, the
+      Licensor for the purpose of discussing and improving the Work, but
+      excluding communication that is conspicuously marked or otherwise
+      designated in writing by the copyright owner as "Not a Contribution."
+
+      "Contributor" shall mean Licensor and any individual or Legal Entity
+      on behalf of whom a Contribution has been received by Licensor and
+      subsequently incorporated within the Work.
+
+   2. Grant of Copyright License. Subject to the terms and conditions of
+      this License, each Contributor hereby grants to You a perpetual,
+      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
+      copyright license to reproduce, prepare Derivative Works of,
+      publicly display, publicly perform, sublicense, and distribute the
+      Work and such Derivative Works in Source or Object form.
+
+   3. Grant of Patent License. Subject to the terms and conditions of
+      this License, each Contributor hereby grants to You a perpetual,
+      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
+      (except as stated in this section) patent license to make, have made,
+      use, offer to sell, sell, import, and otherwise transfer the Work,
+      where such license applies only to those patent claims licensable
+      by such Contributor that are necessarily infringed by their
+      Contribution(s) alone or by combination of their Contribution(s)
+      with the Work to which such Contribution(s) was submitted. If You
+      institute patent litigation against any entity (including a
+      cross-claim or counterclaim in a lawsuit) alleging that the Work
+      or a Contribution incorporated within the Work constitutes direct
+      or contributory patent infringement, then any patent licenses
+      granted to You under this License for that Work shall terminate
+      as of the date such litigation is filed.
+
+   4. Redistribution. You may reproduce and distribute copies of the
+      Work or Derivative Works thereof in any medium, with or without
+      modifications, and in Source or Object form, provided that You
+      meet the following conditions:
+
+      (a) You must give any other recipients of the Work or
+          Derivative Works a copy of this License; and
+
+      (b) You must cause any modified files to carry prominent notices
+          stating that You changed the files; and
+
+      (c) You must retain, in the Source form of any Derivative Works
+          that You distribute, all copyright, patent, trademark, and
+          attribution notices from the Source form of the Work,
+          excluding those notices that do not pertain to any part of
+          the Derivative Works; and
+
+      (d) If the Work includes a "NOTICE" text file as part of its
+          distribution, then any Derivative Works that You distribute must
+          include a readable copy of the attribution notices contained
+          within such NOTICE file, excluding those notices that do not
+          pertain to any part of the Derivative Works, in at least one
+          of the following places: within a NOTICE text file distributed
+          as part of the Derivative Works; within the Source form or
+          documentation, if provided along with the Derivative Works; or,
+          within a display generated by the Derivative Works, if and
+          wherever such third-party notices normally appear. The contents
+          of the NOTICE file are for informational purposes only and
+          do not modify the License. You may add Your own attribution
+          notices within Derivative Works that You distribute, alongside
+          or as an addendum to the NOTICE text from the Work, provided
+          that such additional attribution notices cannot be construed
+          as modifying the License.
+
+      You may add Your own copyright statement to Your modifications and
+      may provide additional or different license terms and conditions
+      for use, reproduction, or distribution of Your modifications, or
+      for any such Derivative Works as a whole, provided Your use,
+      reproduction, and distribution of the Work otherwise complies with
+      the conditions stated in this License.
+
+   5. Submission of Contributions. Unless You explicitly state otherwise,
+      any Contribution intentionally submitted for inclusion in the Work
+      by You to the Licensor shall be under the terms and conditions of
+      this License, without any additional terms or conditions.
+      Notwithstanding the above, nothing herein shall supersede or modify
+      the terms of any separate license agreement you may have executed
+      with Licensor regarding such Contributions.
+
+   6. Trademarks. This License does not grant permission to use the trade
+      names, trademarks, service marks, or product names of the Licensor,
+      except as required for reasonable and customary use in describing the
+      origin of the Work and reproducing the content of the NOTICE file.
+
+   7. Disclaimer of Warranty. Unless required by applicable law or
+      agreed to in writing, Licensor provides the Work (and each
+      Contributor provides its Contributions) on an "AS IS" BASIS,
+      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+      implied, including, without limitation, any warranties or conditions
+      of TITLE, NON-INFRINGEMENT, MERCHANTABILITY, or FITNESS FOR A
+      PARTICULAR PURPOSE. You are solely responsible for determining the
+      appropriateness of using or redistributing the Work and assume any
+      risks associated with Your exercise of permissions under this License.
+
+   8. Limitation of Liability. In no event and under no legal theory,
+      whether in tort (including negligence), contract, or otherwise,
+      unless required by applicable law (such as deliberate and grossly
+      negligent acts) or agreed to in writing, shall any Contributor be
+      liable to You for damages, including any direct, indirect, special,
+      incidental, or consequential damages of any character arising as a
+      result of this License or out of the use or inability to use the
+      Work (including but not limited to damages for loss of goodwill,
+      work stoppage, computer failure or malfunction, or any and all
+      other commercial damages or losses), even if such Contributor
+      has been advised of the possibility of such damages.
+
+   9. Accepting Warranty or Additional Liability. While redistributing
+      the Work or Derivative Works thereof, You may choose to offer,
+      and charge a fee for, acceptance of support, warranty, indemnity,
+      or other liability obligations and/or rights consistent with this
+      License. However, in accepting such obligations, You may act only
+      on Your own behalf and on Your sole responsibility, not on behalf
+      of any other Contributor, and only if You agree to indemnify,
+      defend, and hold each Contributor harmless for any liability
+      incurred by, or claims asserted against, such Contributor by reason
+      of your accepting any such warranty or additional liability.
+
+   END OF TERMS AND CONDITIONS
+
+   APPENDIX: How to apply the Apache License to your work.
+
+      To apply the Apache License to your work, attach the following
+      boilerplate notice, with the fields enclosed by brackets "[]"
+      replaced with your own identifying information. (Don't include
+      the brackets!)  The text should be enclosed in the appropriate
+      comment syntax for the file format. We also recommend that a
+      file or class name and description of purpose be included on the
+      same "printed page" as the copyright notice for easier
+      identification within third-party archives.
+
+   Copyright [yyyy] [name of copyright owner]
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+
+```
+
+`Makefile`:
+
+```
+# Target triples for Android
+ARM_TARGETS := armv7-linux-androideabi aarch64-linux-android
+DEFAULT_TARGET ?= armv7-linux-androideabi
+HOOK_OUT ?= injector/assets/
+FLAGS ?= --release
+
+# Check if cross is installed
+HAS_CROSS := $(shell command -v cross >/dev/null 2>&1 && echo 1 || echo 0)
+
+# User override to force local build (LOCAL=1), otherwise auto-detect
+LOCAL ?= 0
+ifeq ($(LOCAL),1)
+  USE_LOCAL := 1
+else ifeq ($(HAS_CROSS),0)
+  USE_LOCAL := 1
+else
+  USE_LOCAL := 0
+endif
+
+ifeq ($(USE_LOCAL),1)
+  BUILD_TOOL := cargo
+  TARGET_ARG :=
+  TARGET_DIR :=
+  TARGETS := $(DEFAULT_TARGET)
+else
+  BUILD_TOOL := cross
+  TARGETS := $(ARM_TARGETS)
+endif
+
+SHARED_EXT := so
+
+.PHONY: all hook injector victim debug clean deploy
+
+all: injector
+
+hook:
+ifeq ($(USE_LOCAL),1)
+	$(BUILD_TOOL) build --manifest-path hook/Cargo.toml $(FLAGS)
+	mkdir -p $(HOOK_OUT)
+	cp hook/target/$(if $(findstring --release,$(FLAGS)),release,debug)/libhook.$(SHARED_EXT) $(HOOK_OUT)
+else
+	@for target in $(TARGETS); do \
+		echo "Building hook for $$target..."; \
+		$(BUILD_TOOL) build --target $$target --manifest-path hook/Cargo.toml $(FLAGS); \
+		mkdir -p $(HOOK_OUT); \
+		cp hook/target/$$target/$(if $(findstring --release,$(FLAGS)),release,debug)/libhook.$(SHARED_EXT) $(HOOK_OUT)libhook-$$target.$(SHARED_EXT); \
+	done
+endif
+
+injector: hook
+ifeq ($(USE_LOCAL),1)
+	$(BUILD_TOOL) build --manifest-path injector/Cargo.toml $(FLAGS)
+else
+	@for target in $(TARGETS); do \
+		echo "Building injector for $$target..."; \
+		$(BUILD_TOOL) build --target $$target --manifest-path injector/Cargo.toml $(FLAGS); \
+	done
+endif
+
+victim:
+ifeq ($(USE_LOCAL),1)
+	$(BUILD_TOOL) build --manifest-path victim/Cargo.toml $(FLAGS)
+else
+	@for target in $(TARGETS); do \
+		echo "Building victim for $$target..."; \
+		$(BUILD_TOOL) build --target $$target --manifest-path victim/Cargo.toml $(FLAGS); \
+	done
+endif
+
+debug:
+	$(MAKE) FLAGS= USE_LOCAL=$(USE_LOCAL) hook
+	$(MAKE) FLAGS= USE_LOCAL=$(USE_LOCAL) injector
+	$(MAKE) FLAGS= USE_LOCAL=$(USE_LOCAL) victim
+
+clean:
+	cargo clean --manifest-path hook/Cargo.toml
+	cargo clean --manifest-path injector/Cargo.toml
+	cargo clean --manifest-path victim/Cargo.toml
+
+deploy: injector victim
+	@echo "Checking for ADB devices..."
+	@if ! command -v adb >/dev/null 2>&1; then \
+		echo "Error: adb not found. Please install Android SDK platform-tools."; \
+		exit 1; \
+	fi
+	@if ! adb devices | grep -q "device$$"; then \
+		echo "Error: No ADB device connected. Please connect a device and enable USB debugging."; \
+		exit 1; \
+	fi
+	@echo "Detecting device architecture..."
+	@DEVICE_ARCH=$$(adb shell getprop ro.product.cpu.abi 2>/dev/null || adb shell getprop ro.product.cpu.abilist | cut -d',' -f1 2>/dev/null); \
+	if [ -z "$$DEVICE_ARCH" ]; then \
+		echo "Error: Could not detect device architecture."; \
+		exit 1; \
+	fi; \
+	echo "Device architecture: $$DEVICE_ARCH"; \
+	if echo "$$DEVICE_ARCH" | grep -q "arm64\|aarch64"; then \
+		TARGET_ARCH="aarch64-linux-android"; \
+		echo "Detected 64-bit ARM device, using $$TARGET_ARCH"; \
+	elif echo "$$DEVICE_ARCH" | grep -q "armeabi\|armv7"; then \
+		TARGET_ARCH="armv7-linux-androideabi"; \
+		echo "Detected 32-bit ARM device, using $$TARGET_ARCH"; \
+	else \
+		echo "Error: Unsupported device architecture: $$DEVICE_ARCH"; \
+		exit 1; \
+	fi; \
+	echo "Pushing binaries to device..."; \
+	if [ -f "injector/target/$$TARGET_ARCH/$(if $(findstring --release,$(FLAGS)),release,debug)/injector" ]; then \
+		adb push "injector/target/$$TARGET_ARCH/$(if $(findstring --release,$(FLAGS)),release,debug)/injector" /data/local/tmp/; \
+		echo "Pushed injector binary"; \
+	else \
+		echo "Error: Injector binary not found for $$TARGET_ARCH"; \
+		exit 1; \
+	fi; \
+	if [ -f "$(HOOK_OUT)libhook-$$TARGET_ARCH.$(SHARED_EXT)" ]; then \
+		adb push "$(HOOK_OUT)libhook-$$TARGET_ARCH.$(SHARED_EXT)" /data/local/tmp/; \
+		echo "Pushed hook library"; \
+	elif [ -f "$(HOOK_OUT)libhook.$(SHARED_EXT)" ]; then \
+		adb push "$(HOOK_OUT)libhook.$(SHARED_EXT)" /data/local/tmp/; \
+		echo "Pushed hook library (fallback)"; \
+	else \
+		echo "Error: Hook library not found for $$TARGET_ARCH"; \
+		exit 1; \
+	fi; \
+	if [ -f "victim/target/$$TARGET_ARCH/$(if $(findstring --release,$(FLAGS)),release,debug)/victim" ]; then \
+		adb push "victim/target/$$TARGET_ARCH/$(if $(findstring --release,$(FLAGS)),release,debug)/victim" /data/local/tmp/; \
+		echo "Pushed victim binary"; \
+	else \
+		echo "Error: Victim binary not found for $$TARGET_ARCH"; \
+		exit 1; \
+	fi; \
+	echo "Deployment completed successfully!"
+
+```
+
+`README.md`:
+
+```md
+# inject-hooks-android-rs
+Remote library injection into Android processes, then hooking via various methods
+
+The injector, as stated in the readme, is basically just a rework of https://github.com/shunix/TinyInjector ported specifically for Android using rust, it now supports 32 and 64 bit systems.
+```
+
+`hook/Cargo.lock`:
+
+```lock
+# This file is automatically @generated by Cargo.
+# It is not intended for manual editing.
+version = 4
+
+[[package]]
+name = "ctor"
+version = "1.0.13"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "914a755b7c2d4af2bdcff7ce1739e2db9a1b81a9b07123d8015786ae03c0980d"
+dependencies = [
+ "link-section",
+ "linktime-proc-macro",
+]
+
+[[package]]
+name = "goblin"
+version = "0.10.7"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "17582616a7718cca54cec18e534a76c7c4aec11a8b9a85695712f262fd15a4c8"
+dependencies = [
+ "log",
+ "plain",
+ "scroll",
+]
+
+[[package]]
+name = "hook"
+version = "0.1.0"
+dependencies = [
+ "ctor",
+ "goblin",
+ "libc",
+ "memchr",
+ "once_cell",
+]
+
+[[package]]
+name = "libc"
+version = "0.2.191"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "65cd87c9a6d60536580b316ad985726104730a5151c99845f2490428ef91240a"
+
+[[package]]
+name = "link-section"
+version = "0.19.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "39c29a617ce3df32c08497bdc1ab6e2376e0b17948ac166a2fbe5977c5954cd9"
+
+[[package]]
+name = "linktime-proc-macro"
+version = "0.2.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7e57c38c1e860fd37c604281cdfb1dd2216977fd76a50f85ba2f388ef3219616"
+
+[[package]]
+name = "log"
+version = "0.4.35"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5d15f86d12da44cd8d4ec3c73984537eb7f4cadcb9776a575a0a8a05ca11005c"
+
+[[package]]
+name = "memchr"
+version = "2.8.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "cf8baf1c55e62ffcace7a9f06f4bd9cd3f0c4beb022d3b367256b91b87513d98"
+
+[[package]]
+name = "once_cell"
+version = "1.21.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9f7c3e4beb33f85d45ae3e3a1792185706c8e16d043238c593331cc7cd313b50"
+
+[[package]]
+name = "plain"
+version = "0.2.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b4596b6d070b27117e987119b4dac604f3c58cfb0b191112e24771b2faeac1a6"
+
+[[package]]
+name = "proc-macro2"
+version = "1.0.107"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "985e7ec9bb745e6ce6535b544d84d6cd6f7ad8bd711c398938ae983b91a766d9"
+dependencies = [
+ "unicode-ident",
+]
+
+[[package]]
+name = "quote"
+version = "1.0.47"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1fbf4db142a473a8d80c26bbf18454ed458bf8d26c8219c331daecfdbd079001"
+dependencies = [
+ "proc-macro2",
+]
+
+[[package]]
+name = "scroll"
+version = "0.13.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c1257cd4248b4132760d6524d6dda4e053bc648c9070b960929bf50cfb1e7add"
+dependencies = [
+ "scroll_derive",
+]
+
+[[package]]
+name = "scroll_derive"
+version = "0.13.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e1a36a382ed65dbcc0ab47fd5e9a94112417ccd34560a392ef3b7b0f0ec39148"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
+name = "syn"
+version = "3.0.10"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4ae9ccbea3a7b0b09443036490c8f34a8b1b760fd345e5c0dae0aac718faea79"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "unicode-ident",
+]
+
+[[package]]
+name = "unicode-ident"
+version = "1.0.27"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a2c754d6c33795a1c324727428e5a7dedb5b06195f9890bdbcba760d3e246563"
+
+```
+
+`hook/Cargo.toml`:
+
+```toml
+[package]
+name = "hook"
+version = "0.1.0"
+edition = "2021"
+
+# Authors and other optional metadata
+authors = ["Tim Strazzere <tim@strazzere.com>"]
+description = "Hooking elf files in an automated way"
+license = "Apache-2.0"
+repository = "https://github.com/strazzere/inject-hooks-android-rs/hook"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+libc = "0.2"
+ctor = "1.0"
+once_cell = "1.21.3"
+goblin = "0.10.5"
+memchr = "2.7.6"
+
+```
+
+`hook/README.md`:
+
+```md
+# Hook
+
+Some slim automation around doing hooks via a shared library. Two methods
+are currently supported;
+
+ - Direct patching with a trampoline (this might be buggy depending on function prolog)
+ - GOT patching - this is the preferred method and should be prioritized due to
+   the safeness.
+
+# Adding hooks
+
+Drop a file into `src/hooks/` and ensure it implements an `init()` function, this will automatically be pulled in when the `mod.rs` file is generated. These hooks will now automatically be run upon initialization/execution of this library.
+
+The provided `logd` function will automatically be removed on `release` builds.
+```
+
+`hook/build.rs`:
+
+```rs
+use std::env;
+use std::fs;
+use std::path::Path;
+
+fn main() {
+    let out_dir = env::var("OUT_DIR").unwrap();
+    let hooks_path = Path::new("src/hooks");
+
+    let reserved_keywords = [
+        "as", "break", "const", "continue", "crate", "else", "enum", "extern", "false", "fn",
+        "for", "if", "impl", "in", "let", "loop", "match", "mod", "move", "mut", "pub", "ref",
+        "return", "self", "Self", "static", "struct", "super", "trait", "true", "type", "unsafe",
+        "use", "where", "while", "async", "await", "dyn",
+    ];
+
+    let mut init_calls = String::new();
+    let mut mod_decls = String::new();
+
+    for entry in fs::read_dir(hooks_path).unwrap() {
+        let entry = entry.unwrap();
+        let path = entry.path();
+        if path.extension().map(|ext| ext == "rs").unwrap_or(false) {
+            if let Some(stem) = path.file_stem().and_then(|s| s.to_str()) {
+                // skip mod.rs
+                if stem == "mod" {
+                    continue;
+                }
+
+                let ident = if reserved_keywords.contains(&stem) {
+                    format!("r#{}", stem)
+                } else {
+                    stem.to_string()
+                };
+
+                // `mod` paths in code brought in via `include!` resolve relative to
+                // OUT_DIR, not src/hooks/, so point each module at its real file
+                // explicitly with an absolute #[path].
+                mod_decls.push_str(&format!(
+                    "#[path = {:?}]\npub mod {};\n",
+                    path.canonicalize().unwrap().to_str().unwrap(),
+                    ident
+                ));
+                init_calls.push_str(&format!("        crate::hooks::{}::init();\n", ident));
+            }
+        }
+    }
+
+    let output = format!(
+        r#"
+{mod_decls}
+use std::sync::Once;
+
+static INIT: Once = Once::new();
+
+pub fn init() {{
+    INIT.call_once(|| unsafe {{
+{init_calls}    }});
+}}
+"#,
+        mod_decls = mod_decls,
+        init_calls = init_calls
+    );
+
+    let out_path = Path::new(&out_dir).join("hooks_gen.rs");
+    fs::write(&out_path, output).unwrap();
+
+    println!("cargo:rerun-if-changed=src/hooks");
+}
+```
+
+`hook/src/android_log.rs`:
+
+```rs
+#[cfg(target_os = "android")]
+use std::os::raw::c_char;
+
+// `ANDROID_LOG_DEBUG` is only referenced from `logd!`, which expands to
+// nothing in release builds (no debug_assertions), so it's legitimately
+// unused there.
+#[allow(dead_code)]
+pub const ANDROID_LOG_DEBUG: i32 = 3;
+pub const ANDROID_LOG_INFO: i32 = 4;
+
+// The one and only declaration of this symbol in the crate - previously
+// `log.rs` and `hooks/injection_log.rs` each declared it separately with
+// different pointer types (`*const i8` vs `*const c_char`, which is `u8` on
+// some targets), tripping `clashing_extern_declarations`. It's also gated to
+// `target_os = "android"` so non-Android builds (including host test
+// binaries) don't fail to link over a symbol that only exists in Android's
+// liblog.
+#[cfg(target_os = "android")]
+extern "C" {
+    fn __android_log_print(prio: i32, tag: *const c_char, fmt: *const c_char, ...) -> i32;
+}
+
+/// Logs a single pre-formatted message under `tag` at the given priority.
+/// No-op (falls back to stderr) off Android so the rest of the crate stays
+/// portable enough to build and test on a regular host.
+pub fn log_print(prio: i32, tag: &str, msg: &str) {
+    #[cfg(target_os = "android")]
+    {
+        use std::ffi::CString;
+
+        let Ok(tag) = CString::new(tag) else { return };
+        let Ok(fmt) = CString::new("%s") else { return };
+        let msg = CString::new(msg)
+            .unwrap_or_else(|_| CString::new("log message contained null byte").unwrap());
+
+        unsafe {
+            __android_log_print(prio, tag.as_ptr(), fmt.as_ptr(), msg.as_ptr());
+        }
+    }
+
+    #[cfg(not(target_os = "android"))]
+    {
+        let _ = prio;
+        eprintln!("[{}] {}", tag, msg);
+    }
+}
+
+```
+
+`hook/src/elf.rs`:
+
+```rs
+use std::{fs::File, io::Read};
+use crate::logd;
+use goblin::elf::Elf;
+
+pub fn find_got_entry_for_symbol(path: &str, symbol: &str) -> Option<u64> {
+    let mut file = File::open(path).ok()?;
+    let mut buffer = Vec::new();
+    file.read_to_end(&mut buffer).ok()?;
+
+    let elf = Elf::parse(&buffer).ok()?;
+
+    // Handle both REL and RELA
+    for (_i, rel) in elf.dynrels.iter().chain(elf.pltrelocs.iter()).enumerate() {
+        let sym_idx = rel.r_sym;
+        if let Some(sym) = elf.dynsyms.get(sym_idx) {
+            if let Some(name) = elf.dynstrtab.get_at(sym.st_name).map(|r| r) {
+                logd!("[*] Relocation symbol '{}' at offset 0x{:x}", name, rel.r_offset);
+                if name == symbol {
+                    logd!("[*] Found GOT entry for '{}' at offset 0x{:x}", symbol, rel.r_offset);
+                    return Some(rel.r_offset);
+                }
+            }
+        }
+    }
+
+    logd!("[-] Could not find GOT entry for symbol '{}'", symbol);
+    None
+}
+
+/// Reads /proc/self/maps to determine the load base address of the main executable
+pub fn find_module_base(name: &str) -> Option<usize> {
+    use std::fs::File;
+    use std::io::{BufRead, BufReader};
+
+    let f = File::open("/proc/self/maps").ok()?;
+    let reader = BufReader::new(f);
+
+    for line in reader.lines().flatten() {
+        if line.contains(name) {
+            logd!("[*] match for {} -> {}", name, line);
+            let addr = line.split('-').next()?;
+            return usize::from_str_radix(addr, 16).ok();
+        }
+    }
+
+    logd!("[-] Could not find module base for {}", name);
+    None
+}
+
+```
+
+`hook/src/hook.rs`:
+
+```rs
+
+use libc::dlsym;
+use std::ffi::CString;
+use std::ptr;
+use std::os::raw::c_void;
+
+use crate::logd;
+
+pub unsafe fn hook_function(target: &str, replacement: *const u8) -> Option<*const u8> {
+    let symbol = CString::new(target).unwrap();
+    let orig = dlsym(libc::RTLD_DEFAULT, symbol.as_ptr());
+    if orig.is_null() {
+        logd!("[-] {} not found", target);
+        return None;
+    }
+
+    let orig_ptr = orig as usize;
+    let is_thumb = orig_ptr & 1 == 1;
+    let real_fn = (orig_ptr & !1) as *mut u8;
+
+    logd!("[+] Patching {} at {:#x}", target, real_fn as usize);
+
+    if !is_thumb {
+        logd!("ARM mode not supported yet.");
+        return None;
+    }
+
+    logd!("Patching in Thumb mode");
+
+    let trampoline = make_thumb_trampoline(orig as *const u8);
+    if trampoline.is_null() {
+        logd!("[-] Failed to create trampoline for {}", target);
+        return None;
+    }
+    // Do the in-place patch
+    patch_thumb_hook(real_fn, replacement);
+
+    Some(trampoline)
+}
+
+#[inline(always)]
+unsafe fn clear_cache(begin: *mut u8, end: *mut u8) {
+    core::arch::asm!(
+        "mov r0, {0}",
+        "mov r1, {1}",
+        "blx {2}",
+        in(reg) begin,
+        in(reg) end,
+        in(reg) 0xffff0fa0u32 as *const c_void, // __clear_cache syscall
+        options(nostack)
+    );
+}
+
+pub unsafe fn patch_thumb_hook(target: *mut u8, hook: *const u8) {
+  let page_size = 4096;
+  let page = target as usize & !(page_size - 1);
+
+  let addr = (hook as usize | 1) as u32;
+
+  libc::mprotect(page as *mut c_void, page_size, libc::PROT_READ | libc::PROT_WRITE | libc::PROT_EXEC);
+
+  // Thumb patch: ldr r12, [pc, #4] ; bx r12 ; .word hook_addr
+  let patch: [u8; 12] = [
+    0xdf, 0xf8, 0x04, 0xc0, // ldr r12, [pc, #4]
+    0x60, 0x47,             // bx r12
+    0x00, 0x00,             // optional padding to align .word on 4-byte boundary (NOP in Thumb)
+    (addr & 0xff) as u8,
+    ((addr >> 8) & 0xff) as u8,
+    ((addr >> 16) & 0xff) as u8,
+    ((addr >> 24) & 0xff) as u8,
+];
+
+  ptr::copy_nonoverlapping(patch.as_ptr(), target, patch.len());
+
+  clear_cache(target, target.add(patch.len()));
+
+  libc::mprotect(page as *mut c_void, page_size, libc::PROT_READ | libc::PROT_EXEC);
+}
+
+pub unsafe fn make_thumb_trampoline(original: *const u8) -> *const u8 {
+    logd!("[*] Creating trampoline for address: {:#x}", original as usize);
+    logd!("[*] First 16 bytes at original ({:#x}): {:?}", original as usize, slice::from_raw_parts(original, 16));
+
+    let real_ptr = (original as usize & !1) as *const u8;
+    logd!("[*] Stripped Thumb bit, real function pointer: {:#x}", real_ptr as usize);
+
+    let trampoline = libc::mmap(
+        ptr::null_mut(),
+        0x1000,
+        libc::PROT_READ | libc::PROT_WRITE | libc::PROT_EXEC,
+        libc::MAP_PRIVATE | libc::MAP_ANONYMOUS,
+        -1,
+        0,
+    ) as *mut u8;
+
+    if trampoline.is_null() {
+        logd!("[-] Failed to allocate trampoline memory");
+        return ptr::null();
+    }
+
+    logd!("[*] Trampoline address: {:#x} (aligned? {})", trampoline as usize, trampoline as usize % 2 == 0);
+
+    // Read as u16 to check if instructions are 16-bit or 32-bit
+    let mut offset = 0;
+    while offset < 8 {
+        let instr = *(real_ptr.add(offset) as *const u16);
+        let is_32bit = is_32bit_thumb(instr);
+        logd!("[*] Instruction at offset {:#x}: {:#06x} is_32bit={}", offset, instr, is_32bit);
+        let size = if is_32bit { 4 } else { 2 };
+
+        if offset + size > 8 {
+            logd!("[-] Cannot safely copy past 8 bytes without disassembler");
+            break;
+        }
+
+        ptr::copy_nonoverlapping(real_ptr.add(offset), trampoline.add(offset), size);
+        offset += size;
+    }
+
+    logd!("[*] Copied {} bytes into trampoline", offset);
+
+    // Set up jump back to original + offset
+    let return_addr = (real_ptr as usize + offset) | 1;
+    let return_addr_bytes = (return_addr as u32).to_le_bytes();
+
+    let patch: [u8; 12] = [
+        0xdf, 0xf8, 0x04, 0xc0, // ldr r12, [pc, #4]
+        0x60, 0x47,             // bx r12
+        0x00, 0x00,             // padding
+        return_addr_bytes[0],
+        return_addr_bytes[1],
+        return_addr_bytes[2],
+        return_addr_bytes[3],
+    ];
+
+    ptr::copy_nonoverlapping(patch.as_ptr(), trampoline.add(offset), patch.len());
+
+    #[cfg(debug_assertions)]
+    {
+        let final_len = offset + patch.len();
+        logd!("[*] Final trampoline contents: {:?}", std::slice::from_raw_parts(trampoline, final_len));
+    
+    
+        logd!("[*] Patch for trampoline return: {:?}", &patch);
+        logd!("[*] Trampoline set up at {:#x}, returning to {:#x}", trampoline as usize, return_addr);    
+    }
+
+    clear_cache(trampoline, trampoline.add(offset + patch.len()));
+    trampoline.add(1) as *const u8 // Set Thumb bit
+}
+
+/// Returns true if the instruction is the first half of a 32-bit Thumb instruction.
+fn is_32bit_thumb(instr: u16) -> bool {
+  match instr >> 11 {
+      0b11101 | // BL, BLX, conditional branches
+      0b11110 | // Many 32-bit instructions
+      0b11111 => true, // Other 32-bit instructions
+      _ => false,
+  }
+}
+```
+
+`hook/src/hooks/fileio.rs`:
+
+```rs
+use libc::{c_char, c_void, FILE, size_t};
+use once_cell::sync::{Lazy, OnceCell};
+use std::collections::HashSet;
+use std::ffi::CStr;
+use std::sync::Mutex;
+use std::slice;
+use memchr::memmem;
+
+use crate::elf::{find_got_entry_for_symbol, find_module_base};
+use crate::logd;
+use crate::patch::patch_got_entry;
+
+#[derive(Eq, PartialEq, Hash)]
+struct UnsafeFilePtr(*mut FILE);
+unsafe impl Send for UnsafeFilePtr {}
+unsafe impl Sync for UnsafeFilePtr {}
+
+static TRACKED_FILES: Lazy<Mutex<HashSet<UnsafeFilePtr>>> = Lazy::new(|| Mutex::new(HashSet::new()));
+
+type FopenType = unsafe extern "C" fn(*const c_char, *const c_char) -> *mut FILE;
+type FreadType = unsafe extern "C" fn(*mut c_void, size_t, size_t, *mut FILE) -> size_t;
+
+static REAL_FOPEN: OnceCell<FopenType> = OnceCell::new();
+static REAL_FREAD: OnceCell<FreadType> = OnceCell::new();
+
+pub unsafe fn init() {
+    logd!("[fileio] init() called - enabling GOT patching with debug output");
+    hook_file_io();
+}
+pub unsafe fn hook_file_io() {
+    logd!("Attempting got patching on fopen");
+
+    // Try to find the current process executable from /proc/self/exe
+    let current_exe = std::fs::read_link("/proc/self/exe")
+        .ok()
+        .and_then(|p| p.to_str().map(|s| s.to_string()));
+
+    let exe_path = match current_exe {
+        Some(path) => {
+            logd!("[*] Current process executable: {}", path);
+            // Remove the (deleted) suffix if present
+            let clean_path = path.replace(" (deleted)", "");
+            logd!("[*] Cleaned executable path: {}", clean_path);
+            clean_path
+        }
+        None => {
+            logd!("[-] Failed to get current process executable path");
+            return;
+        }
+    };
+
+    let base = match find_module_base(&exe_path) {
+        Some(b) => b,
+        None => {
+            logd!("[-] Failed to find module base for current process: {}", exe_path);
+            return;
+        }
+    };
+
+    // Find symbol you want to hook
+    let fopen_got_offset = find_got_entry_for_symbol(&exe_path, "fopen")
+    .expect("Could not find GOT entry for fopen");
+
+    logd!("[*] Calculated GOT entry address: {:#x}", fopen_got_offset);
+    let fopen_got_ptr = (base + fopen_got_offset as usize) as *mut *const c_void;
+    logd!("[*] GOT before: {:?}", *fopen_got_ptr);
+
+    // Replace GOT ptr with our ptr
+    let fopen_orig = patch_got_entry(fopen_got_ptr, hooked_fopen as *const c_void)
+        .expect("Could not make fopen GOT entry writable");
+    logd!("[*] GOT after: {:?}", *fopen_got_ptr);
+
+    logd!("[+] fopen GOT patch applied: {:#x} -> {:?}", fopen_got_offset, hooked_fopen as *const c_void);
+    if REAL_FOPEN.set(std::mem::transmute::<*const c_void, FopenType>(fopen_orig)).is_err() {
+        logd!("[-] REAL_FOPEN was already set; ignoring");
+    }
+
+    logd!("[*] GOT entry for 'fopen' offset = 0x{:x}", fopen_got_offset);
+    logd!("[*] Base of current process = 0x{:x}", base);
+    logd!("[*] Absolute GOT address = 0x{:x}", base + fopen_got_offset as usize);
+
+
+    let fread_got_offset = find_got_entry_for_symbol(&exe_path, "fread")
+    .expect("Could not find GOT entry for fread");
+
+    logd!("[*] Calculated GOT entry address: {:#x}", fread_got_offset);
+
+    let fread_got_ptr = (base + fread_got_offset as usize) as *mut *const c_void;
+    logd!("[*] GOT before: {:?}", *fread_got_ptr);
+    let fread_orig = patch_got_entry(fread_got_ptr, hooked_fread as *const c_void)
+        .expect("Could not make fread GOT entry writable");
+    logd!("[*] GOT after: {:?}", *fread_got_ptr);
+
+    logd!("[+] fread GOT patch applied: {:#x} -> {:?}", fread_got_offset, hooked_fread as *const c_void);
+    if REAL_FREAD.set(std::mem::transmute::<*const c_void, FreadType>(fread_orig)).is_err() {
+        logd!("[-] REAL_FREAD was already set; ignoring");
+    }
+
+    logd!("[*] GOT entry for 'fread' offset = 0x{:x}", fread_got_offset);
+    logd!("[*] Base of current process = 0x{:x}", base);
+    logd!("[*] Absolute GOT address = 0x{:x}", base + fread_got_offset as usize);
+}
+
+thread_local! {
+    static IN_FOPEN_HOOK: std::cell::Cell<bool> = std::cell::Cell::new(false);
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn hooked_fopen(path: *const c_char, mode: *const c_char) -> *mut FILE {
+    if IN_FOPEN_HOOK.with(|c| c.get()) {
+        logd!("[~] Reentrant fopen call");
+        return REAL_FOPEN.get().expect("REAL_FOPEN missing")(path, mode);
+    }
+    IN_FOPEN_HOOK.with(|c| c.set(true));
+
+    let real_fopen = *REAL_FOPEN.get().expect("REAL_FOPEN missing");
+    let file = real_fopen(path, mode);
+
+    let path_str = path.as_ref().map(|_| CStr::from_ptr(path).to_string_lossy()).unwrap_or("<null>".into());
+    #[cfg(debug_assertions)]
+    let mode_str = mode.as_ref().map(|_| CStr::from_ptr(mode).to_string_lossy()).unwrap_or("<null>".into());
+
+    logd!("[+] fopen checking: {} w/ {} ", path_str, mode_str);
+    if !file.is_null()
+        && path_str.contains("/data/local/tmp/")
+        && path_str.ends_with(".target")
+    {
+        logd!("[+] fopen matched: {}", path_str);
+        TRACKED_FILES.lock().unwrap().insert(UnsafeFilePtr(file));
+    }
+
+    IN_FOPEN_HOOK.with(|c| c.set(false));
+    file
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn hooked_fread(
+    ptr: *mut c_void,
+    size: size_t,
+    nmemb: size_t,
+    stream: *mut FILE,
+) -> size_t {
+    let real_fread = *REAL_FREAD.get().expect("REAL_FREAD missing");
+    let n = real_fread(ptr, size, nmemb, stream);
+
+    if ptr.is_null() || size == 0 || nmemb == 0 {
+        logd!("fread: invalid parameters");
+        return n;
+    }
+
+    if !TRACKED_FILES.lock().unwrap().contains(&UnsafeFilePtr(stream)) {
+        return n;
+    }
+
+    let total_len = size.checked_mul(nmemb).unwrap_or(0);
+    if total_len == 0 || total_len > 1024 * 1024 {
+        logd!("fread: skipping large or empty buffer: {}", total_len);
+        return n;
+    }
+
+    logd!("fread: size={} nmemb={} total={} stream={:?}", size, nmemb, total_len, stream);
+
+    let buf = slice::from_raw_parts_mut(ptr as *mut u8, total_len);
+
+    let _orig_str = match std::str::from_utf8(buf) {
+        Ok(s) => {
+            logd!("fread: UTF-8 parse OK, length {}", s.len());
+            s
+        }
+        Err(_) => {
+            logd!("fread: UTF-8 parse FAILED");
+            return n;
+        }
+    };
+
+    let modified = patch_secret_key(buf);
+
+    if modified {
+        logd!("Success: patched fread buffer in-place");
+    } else {
+        logd!("fread: no patching needed");
+    }
+
+    n
+}
+
+/// Find `secret_key="<anything>"` in `buf` and overwrite `<anything>` with
+/// `d1ff` in place, unless it is already `"0"`. Returns whether anything was
+/// patched. The matched value can be any length, so the write is clamped to
+/// `min(value_len, patch.len())` rather than requiring an exact match - a
+/// plain `copy_from_slice` would panic whenever the value isn't exactly 4
+/// bytes long (e.g. `secret_key="0"` or `secret_key="abcdefgh"`).
+fn patch_secret_key(buf: &mut [u8]) -> bool {
+    let key = b"secret_key=\"";
+    let mut key_matches = vec![];
+    for pos in memmem::find_iter(buf, key) {
+        let val_start = pos + key.len();
+        if val_start >= buf.len() {
+            continue;
+        }
+        if let Some(len) = buf[val_start..].iter().position(|&b| b == b'"') {
+            let val_end = val_start + len;
+            key_matches.push((val_start, val_end));
+        }
+    }
+
+    let mut modified = false;
+    for (start, end) in key_matches {
+        if &buf[start..end] != b"0" {
+            logd!("[patch] {:?} found: {}..{} → patching", key, start, end);
+            let patch = b"d1ff";
+            let n = (end - start).min(patch.len());
+            buf[start..start + n].copy_from_slice(&patch[..n]);
+            modified = true;
+        }
+    }
+    modified
+}
+
+```
+
+`hook/src/hooks/injection_log.rs`:
+
+```rs
+use crate::android_log::{log_print, ANDROID_LOG_INFO};
+
+pub unsafe fn init() {
+    log_injection();
+}
+
+pub unsafe fn log_injection() {
+    const SEP: &str = "========================================";
+
+    // Log injection success
+    log_print(ANDROID_LOG_INFO, "HOOK_INJECT", SEP);
+    log_print(ANDROID_LOG_INFO, "HOOK_INJECT", "HOOK LIBRARY SUCCESSFULLY INJECTED!");
+    log_print(ANDROID_LOG_INFO, "HOOK_INJECT", SEP);
+
+    // Log process info
+    log_print(ANDROID_LOG_INFO, "HOOK_INJECT", &format!("Process ID: {}", std::process::id()));
+
+    // Log library address
+    log_print(
+        ANDROID_LOG_INFO,
+        "HOOK_INJECT",
+        &format!("Library loaded at: {:p}", log_injection as *const ()),
+    );
+
+    // Log executable path
+    if let Ok(exe_path) = std::env::current_exe() {
+        log_print(ANDROID_LOG_INFO, "HOOK_INJECT", &format!("Current executable: {:?}", exe_path));
+    }
+
+    log_print(ANDROID_LOG_INFO, "HOOK_INJECT", SEP);
+}
+
+```
+
+`hook/src/hooks/mod.rs`:
+
+```rs
+// Auto generated module declarations and init() bindings for every file in
+// this dir (see build.rs) - just drop a new file in here with an init()
+// function and it is automatically declared and wired up.
+include!(concat!(env!("OUT_DIR"), "/hooks_gen.rs"));
+
+```
+
+`hook/src/lib.rs`:
+
+```rs
+mod android_log;
+mod hooks;
+mod patch;
+mod log;
+mod elf;
+
+pub fn exposed_function() {
+    crate::hooks::init();
+}
+
+#[ctor::ctor(unsafe)]
+fn ctor_init() {
+    logd!("Running init");
+    exposed_function();
+}
+
+```
+
+`hook/src/log.rs`:
+
+```rs
+#[macro_export]
+macro_rules! logd {
+    ($($arg:tt)*) => {{
+        #[cfg(debug_assertions)]
+        {
+            $crate::android_log::log_print(
+                $crate::android_log::ANDROID_LOG_DEBUG,
+                "hook",
+                &format!($($arg)*),
+            );
+        }
+    }};
+}
+
+```
+
+`hook/src/patch.rs`:
+
+```rs
+use std::os::raw::c_void;
+use libc::{mprotect, sysconf, _SC_PAGESIZE, PROT_READ, PROT_WRITE};
+
+use crate::logd;
+
+/// Make `[addr, addr + len)` writable and run `f` with that access, then
+/// restore the page(s) to read-only. Covers both the page containing `addr`
+/// and, if the range straddles a page boundary, the following page(s) too -
+/// the write is pointer-sized (8 bytes on 64-bit), so on a GOT entry that
+/// sits in the last few bytes of a page it would otherwise only unprotect
+/// the first of the two pages it actually touches.
+///
+/// Deliberately never requests `PROT_EXEC`: a GOT entry is a data pointer,
+/// never fetched as code, and this device's kernel enforces W^X - asking
+/// for write+exec together on the same mprotect call is denied outright
+/// (EACCES), which previously went unnoticed only because the write still
+/// happened to succeed on whatever permissions the page already had,
+/// independent of this (silently failing) mprotect call.
+///
+/// Returns `None` if either `mprotect` call fails.
+unsafe fn with_page_unprotected<T>(addr: *mut c_void, len: usize, f: impl FnOnce() -> T) -> Option<T> {
+    let page_size = {
+        let sz = sysconf(_SC_PAGESIZE);
+        if sz > 0 { sz as usize } else { 4096 }
+    };
+
+    let start = (addr as usize) & !(page_size - 1);
+    let end = ((addr as usize + len) + page_size - 1) & !(page_size - 1);
+    let region_len = end - start;
+    let region = start as *mut c_void;
+
+    if mprotect(region, region_len, PROT_READ | PROT_WRITE) != 0 {
+        logd!(
+            "[-] mprotect(RW) failed for {:#x}..{:#x} (addr={:p} len={} page_size={}): {}",
+            start, end, addr, len, page_size, std::io::Error::last_os_error()
+        );
+        return None;
+    }
+
+    let result = f();
+
+    if mprotect(region, region_len, PROT_READ) != 0 {
+        // The write already happened; this only affects the page
+        // permissions left behind, so log it but don't discard the result.
+        logd!(
+            "[-] mprotect(R) restore failed for {:#x}..{:#x}: {}",
+            start, end, std::io::Error::last_os_error()
+        );
+    }
+
+    Some(result)
+}
+
+#[cfg(target_arch = "aarch64")]
+unsafe fn write_got_entry(addr: *mut *const c_void, replacement: *const c_void) {
+    *addr = replacement;
+}
+
+#[cfg(target_arch = "arm")]
+unsafe fn write_got_entry(addr: *mut *const c_void, replacement: *const c_void) {
+    // For 32-bit ARM, set the Thumb bit
+    *addr = (replacement as usize | 1) as *const c_void;
+}
+
+// Only arm/aarch64 Android targets are ever actually hooked for real; this
+// fallback exists purely so the crate keeps building on a host/dev machine
+// for quick iteration (see the TODO this resolves: the GOT-patching
+// semantics genuinely only make sense gated per-arch, not decided at
+// runtime via a single combined branch).
+#[cfg(not(any(target_arch = "aarch64", target_arch = "arm")))]
+unsafe fn write_got_entry(addr: *mut *const c_void, replacement: *const c_void) {
+    *addr = replacement;
+}
+
+/// This is safer than utilizing the trampolines.
+/// Returns `None` if the page(s) containing the GOT entry couldn't be made
+/// writable (or couldn't be restored afterward).
+pub unsafe fn patch_got_entry(addr: *mut *const c_void, replacement: *const c_void) -> Option<*const c_void> {
+    with_page_unprotected(addr as *mut c_void, std::mem::size_of::<*const c_void>(), || {
+        let original = *addr;
+        write_got_entry(addr, replacement);
+        original
+    })
+}
+
+```
+
+`injector/Cargo.lock`:
+
+```lock
+# This file is automatically @generated by Cargo.
+# It is not intended for manual editing.
+version = 4
+
+[[package]]
+name = "bitflags"
+version = "2.13.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3ded4057c258ba199e2d26386d3af3780957ecaee6c4ef4041c6b4b8b97c0b06"
+
+[[package]]
+name = "cfg-if"
+version = "1.0.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4e7648175b45a9a48536d676f68d918270699102aa8dab5496df06904c914600"
+
+[[package]]
+name = "cfg_aliases"
+version = "0.2.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f079e83a288787bcd14a6aea84cee5c87a67c5a3e660c30f557a3d24761b3527"
+
+[[package]]
+name = "injector"
+version = "2.0.0"
+dependencies = [
+ "libc",
+ "nix",
+]
+
+[[package]]
+name = "libc"
+version = "0.2.191"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "65cd87c9a6d60536580b316ad985726104730a5151c99845f2490428ef91240a"
+
+[[package]]
+name = "nix"
+version = "0.31.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "cf20d2fde8ff38632c426f1165ed7436270b44f199fc55284c38276f9db47c3d"
+dependencies = [
+ "bitflags",
+ "cfg-if",
+ "cfg_aliases",
+ "libc",
+]
+
+```
+
+`injector/Cargo.toml`:
+
+```toml
+[package]
+name = "injector"
+version = "2.0.0"
+edition = "2021"
+
+# Authors and other optional metadata
+authors = ["Tim Strazzere <tim@strazzere.com>"]
+description = "Remotely inject a shared library into a running process"
+license = "Apache-2.0"
+repository = "https://github.com/strazzere/inject-hooks-android-rs/injector"
+
+[dependencies]
+libc = "0.2"
+nix = { version = "0.31.2", features = ["ptrace", "process"] }
+```
+
+`injector/README.md`:
+
+```md
+# injector
+Rework of https://github.com/shunix/TinyInjector in rust specifically for Android.
+```
+
+`injector/src/injector.rs`:
+
+```rs
+use std::ffi::CString;
+use std::fs;
+use std::path::{Path, PathBuf};
+use libc::{pid_t, mmap, munmap, RTLD_NOW, RTLD_LOCAL, PROT_READ, PROT_WRITE, MAP_PRIVATE, MAP_ANONYMOUS};
+
+#[cfg(target_arch = "aarch64")]
+use libc::PROT_EXEC;
+
+use crate::ptrace::{ptrace_attach, ptrace_detach, ptrace_write};
+#[cfg(any(target_arch = "aarch64", target_arch = "arm"))]
+use crate::ptrace::call_remote_function;
+use crate::utils::get_remote_function_addr;
+
+/// Choose a reasonable default path for libc based on target pointer width
+fn default_libc_path() -> &'static str {
+    if cfg!(target_pointer_width = "64") {
+        "/system/lib64/libc.so"
+    } else {
+        "/system/lib/libc.so"
+    }
+}
+
+/// Choose a reasonable default path for the dynamic linker
+fn default_linker_path() -> &'static str {
+    if cfg!(target_pointer_width = "64") {
+        "/system/bin/linker64"
+    } else {
+        "/system/bin/linker"
+    }
+}
+
+/// Resolve a path if it is a symlink, returning an absolute, canonical path
+/// Falls back gracefully to the original if resolution fails
+fn resolve_if_symlink(path: &str) -> String {
+    let p = Path::new(path);
+
+    match fs::symlink_metadata(p) {
+        Ok(meta) if !meta.file_type().is_symlink() => return path.to_string(),
+        Ok(_) => { /* it's a symlink; continue to resolve */ }
+        Err(_) => {
+            // If we can't stat it, still return the original (maps lookup may still succeed)
+            return path.to_string();
+        }
+    }
+
+    // Preferred: fully canonicalize (resolves chains of symlinks & relative hops)
+    if let Ok(abs) = fs::canonicalize(p) {
+        return abs.to_string_lossy().into_owned();
+    }
+
+    // Fallback: single-hop read_link + join with parent if necessary
+    match fs::read_link(p) {
+        Ok(target) => {
+            let resolved: PathBuf = if target.is_absolute() {
+                target
+            } else {
+                p.parent().unwrap_or_else(|| Path::new("/")).join(target)
+            };
+            resolved.to_string_lossy().into_owned()
+        }
+        Err(_) => path.to_string(),
+    }
+}
+
+/// Public helpers: return the *resolved* (non-symlink) full paths
+pub fn get_libc_path() -> String {
+    resolve_if_symlink(default_libc_path())
+}
+
+pub fn get_linker_path() -> String {
+    resolve_if_symlink(default_linker_path())
+}
+
+#[cfg(any(target_arch = "aarch64", target_arch = "arm"))]
+pub fn inject_library(pid: pid_t, library_path: &str) -> Result<u64, Box<dyn std::error::Error>> {
+    ptrace_attach(pid)?;
+
+    // Always detach, even if dlopen fails partway through - otherwise the
+    // tracee is left PTRACE_ATTACH'd (and stopped) indefinitely.
+    let result = call_dlopen(pid, library_path);
+
+    if let Err(e) = ptrace_detach(pid) {
+        #[cfg(debug_assertions)]
+        eprintln!("[inject] detach failed: {}", e);
+        // Prefer surfacing the original error if dlopen already failed;
+        // otherwise surface the detach failure.
+        if result.is_ok() {
+            return Err(Box::new(e));
+        }
+    }
+
+    let handle = result?;
+
+    #[cfg(debug_assertions)]
+    {
+        if handle == 0 {
+            println!("Injection failed...");
+        } else {
+            println!("Injection ended successfully...");
+        }
+    }
+
+    Ok(handle)
+}
+
+#[cfg(any(target_arch = "aarch64", target_arch = "arm"))]
+fn call_mmap(pid: pid_t, length: usize) -> Result<u64, Box<dyn std::error::Error>> {
+    #[cfg(target_arch = "aarch64")]
+    {
+        println!("[mmap] Calling mmap via library function");
+
+        let local = mmap as usize as u64;
+        let remote = get_remote_function_addr(pid, get_libc_path().as_str(), local).ok_or("Failed to resolve mmap")?;
+
+        let args = [
+            0,
+            length as u64,
+            (PROT_READ | PROT_WRITE | PROT_EXEC) as u64,
+            (MAP_PRIVATE | MAP_ANONYMOUS) as u64,
+            !0u64, // fd (-1)
+            0,
+        ];
+
+        println!("[mmap] Calling mmap at 0x{:x} with args: {:?}", remote, args);
+        Ok(call_remote_function(pid, remote, &args, remote)?)
+    }
+
+    #[cfg(target_arch = "arm")]
+    {
+        let local = mmap as usize as u64;
+        let remote = get_remote_function_addr(pid, get_libc_path().as_str(), local).ok_or("Failed to resolve mmap")?;
+
+        let args = [
+            0,
+            length as u64,
+            (PROT_READ | PROT_WRITE) as u64,
+            (MAP_PRIVATE | MAP_ANONYMOUS) as u64,
+            0,
+            0,
+        ];
+
+        #[cfg(debug_assertions)]
+        println!("mmap: call at 0x{:x} with size {}", remote, length);
+
+        let result = call_remote_function(pid, remote, &args, 0)?;
+        println!("[mmap] mmap returned: 0x{:x}", result);
+        Ok(result)
+    }
+}
+
+#[cfg(any(target_arch = "aarch64", target_arch = "arm"))]
+fn call_munmap(pid: pid_t, addr: u64, length: usize) -> Result<u64, Box<dyn std::error::Error>> {
+    #[cfg(target_arch = "aarch64")]
+    {
+        // Use library function for aarch64 (same approach as 32-bit ARM)
+        println!("[munmap] Calling munmap via library function");
+
+        let local = munmap as usize as u64;
+        let remote = get_remote_function_addr(pid, get_libc_path().as_str(), local).ok_or("Failed to resolve munmap")?;
+
+        let args = [addr, length as u64];
+
+        println!("[munmap] Calling munmap at 0x{:x} with args: {:?}", remote, args);
+        Ok(call_remote_function(pid, remote, &args, remote)?)
+    }
+
+    #[cfg(target_arch = "arm")]
+    {
+        // Use library function for 32-bit ARM
+        let local = munmap as usize as u64;
+        let remote = get_remote_function_addr(pid, get_libc_path().as_str(), local).ok_or("Failed to resolve munmap")?;
+
+        let args = [addr, length as u64];
+
+        #[cfg(debug_assertions)]
+        println!("munmap: call at 0x{:x} addr=0x{:x}, size={}", remote, addr, length);
+
+        Ok(call_remote_function(pid, remote, &args, 0)?)
+    }
+}
+
+#[cfg(any(target_arch = "aarch64", target_arch = "arm"))]
+fn call_dlopen(pid: pid_t, lib_path: &str) -> Result<u64, Box<dyn std::error::Error>> {
+    let local = libc::dlopen as usize as u64;
+
+    // First try to find dlopen in the linker
+    let linker_path = get_linker_path();
+    println!("[dlopen] Trying linker first: {}", linker_path);
+
+    let remote = get_remote_function_addr(pid as i32, &linker_path, local)
+        .or_else(|| {
+            // If not found in linker, try libdl files
+            println!("[dlopen] Not found in linker, trying libdl files");
+            let possible_libs = if cfg!(target_pointer_width = "64") {
+                vec![
+                    "/apex/com.android.runtime/lib64/bionic/libdl.so",
+                    "/system/lib64/libdl.so",
+                ]
+            } else {
+                vec![
+                    "/apex/com.android.runtime/lib/bionic/libdl.so",
+                    "/system/lib/libdl.so",
+                ]
+            };
+
+            possible_libs.iter()
+                .find_map(|lib_path| {
+                    println!("[dlopen] Trying libdl: {}", lib_path);
+                    get_remote_function_addr(pid as i32, lib_path, local)
+                })
+        })
+        .ok_or("Failed to resolve dlopen in linker or libdl")?;
+
+    // Get mmap address for the new call_remote_function signature
+    let local_mmap = mmap as usize as u64;
+    let mmap_remote = get_remote_function_addr(pid as i32, get_libc_path().as_str(), local_mmap)
+        .ok_or("Failed to resolve mmap for dlopen")?;
+
+    let mmap_addr = call_mmap(pid, 0x400)?;
+    let c_path = CString::new(lib_path)?;
+
+    ptrace_write(pid, mmap_addr as *mut u8, c_path.as_bytes_with_nul())?;
+
+    let args = [mmap_addr, (RTLD_NOW | RTLD_LOCAL) as u64];
+
+    #[cfg(debug_assertions)]
+    println!("dlopen: remote=0x{:x}, path='{}'", remote, lib_path);
+
+    let result = call_remote_function(pid, remote, &args, mmap_remote)?;
+    println!("[dlopen] dlopen returned: 0x{:x}", result);
+
+    call_munmap(pid, mmap_addr, 0x400)?;
+    Ok(result)
+}
+
+```
+
+`injector/src/main.rs`:
+
+```rs
+mod injector;
+mod utils;
+mod ptrace;
+
+#[cfg(any(target_arch = "aarch64", target_arch = "arm"))]
+use injector::inject_library;
+use utils::{disable_selinux, get_pid, is_selinux_enabled};
+
+#[cfg(any(target_arch = "aarch64", target_arch = "arm"))]
+fn main() {
+    let args: Vec<String> = std::env::args().collect();
+    if args.len() != 3 {
+        eprintln!("Usage: {} [process name, full path] [library path]", args[0]);
+        std::process::exit(1);
+    }
+
+    let process_name = &args[1];
+    let library_path = &args[2];
+
+    if let Some(pid) = get_pid(process_name) {
+        #[cfg(debug_assertions)]
+        println!("process name: {}, library path: {}, pid: {}", process_name, library_path, pid);
+
+        if is_selinux_enabled() {
+            disable_selinux();
+        }
+
+        let result = inject_library(pid, library_path);
+        match result {
+            Ok(0) => println!("Injection returned 0 (likely failed)..."),
+            Ok(handle) => println!("Injection succeeded with handle: 0x{:x}", handle),
+            Err(e) => eprintln!("Injection failed: {}", e),
+        }
+        
+    } else {
+        eprintln!("Process not found: {}", process_name);
+    }
+}
+
+#[cfg(not(any(target_arch = "aarch64", target_arch = "arm")))]
+fn main() {
+    eprintln!("This injector only supports aarch64 and arm architectures");
+    std::process::exit(1);
+}
+
+```
+
+`injector/src/ptrace.rs`:
+
+```rs
+use libc::{c_void, pid_t};
+use std::io::{Error, Result};
+use std::mem::{size_of, zeroed};
+use std::ptr;
+
+use nix::sys::wait::{waitpid, WaitStatus};
+use nix::unistd::Pid;
+
+#[cfg(target_arch = "aarch64")]
+#[repr(C)]
+#[derive(Debug, Clone, Copy)]
+pub struct PtRegs {
+    // Matches Linux user_pt_regs: x0..x30, sp, pc, pstate
+    pub regs: [u64; 31], // x0..x30
+    pub sp: u64,         // stack pointer
+    pub pc: u64,         // program counter
+    pub pstate: u64,     // processor state
+}
+
+#[cfg(target_arch = "arm")]
+#[repr(C)]
+#[derive(Debug, Clone, Copy)]
+pub struct PtRegs {
+    // Matches struct pt_regs armv7
+    pub uregs: [u32; 18],
+}
+
+pub fn ptrace_attach(pid: pid_t) -> Result<()> {
+    if unsafe { libc::ptrace(libc::PTRACE_ATTACH, pid, ptr::null_mut::<c_void>(), ptr::null_mut::<c_void>()) } < 0 {
+        return Err(Error::last_os_error());
+    }
+    let _ = waitpid(Pid::from_raw(pid), None);
+    #[cfg(debug_assertions)]
+    eprintln!("[ptrace] Attached to {}", pid);
+    Ok(())
+}
+
+pub fn ptrace_detach(pid: pid_t) -> Result<()> {
+    if unsafe { libc::ptrace(libc::PTRACE_DETACH, pid, ptr::null_mut::<c_void>(), ptr::null_mut::<c_void>()) } < 0 {
+        return Err(Error::last_os_error());
+    }
+    #[cfg(debug_assertions)]
+    eprintln!("[ptrace] Detached from {}", pid);
+    Ok(())
+}
+
+pub fn ptrace_peek_word(pid: pid_t, addr: *mut c_void) -> usize {
+    // Deliberately ignore errno weirdness (-1 vs error) to avoid errno access on android
+    unsafe { libc::ptrace(libc::PTRACE_PEEKDATA, pid, addr, ptr::null_mut::<c_void>()) as usize }
+}
+
+fn ptrace_poke_word(pid: pid_t, addr: *mut c_void, data: usize) -> Result<()> {
+    let ret = unsafe { libc::ptrace(libc::PTRACE_POKEDATA, pid, addr, data) };
+    if ret < 0 {
+        return Err(Error::last_os_error());
+    }
+    Ok(())
+}
+
+pub fn ptrace_write(pid: pid_t, addr: *mut u8, data: &[u8]) -> Result<()> {
+    let word_size = size_of::<usize>();
+    let mut offset = 0;
+
+    // Full words
+    while offset + word_size <= data.len() {
+        let word = usize::from_ne_bytes(data[offset..offset + word_size].try_into().unwrap());
+        ptrace_poke_word(pid, unsafe { addr.add(offset) } as *mut c_void, word)?;
+        offset += word_size;
+    }
+
+    // Leftovers
+    if offset < data.len() {
+        let tail_addr = unsafe { addr.add(offset) } as *mut c_void;
+        let mut word = ptrace_peek_word(pid, tail_addr);
+        let ptr_u8 = &mut word as *mut _ as *mut u8;
+        let tail_len = data.len() - offset;
+        for i in 0..tail_len {
+            unsafe { *ptr_u8.add(i) = data[offset + i]; }
+        }
+        ptrace_poke_word(pid, tail_addr, word)?;
+    }
+
+    #[cfg(debug_assertions)]
+    eprintln!("[ptrace] Wrote {} bytes to {:p}", data.len(), addr);
+    Ok(())
+}
+
+fn wait_until_stopped(pid: pid_t) -> Result<WaitStatus> {
+    println!("[ptrace] wait_until_stopped: waiting for pid {}", pid);
+    loop {
+        match waitpid(Pid::from_raw(pid), None) {
+            Ok(WaitStatus::Stopped(_, _sig)) => {
+                println!("[ptrace] wait_until_stopped: process stopped with signal {:?}", _sig);
+                return Ok(WaitStatus::Stopped(Pid::from_raw(pid), _sig));
+            }
+            Ok(WaitStatus::Exited(_, code)) => {
+                println!("[ptrace] wait_until_stopped: process exited with code {}", code);
+                return Err(Error::new(std::io::ErrorKind::Other, format!("tracee exited with {}", code)));
+            }
+            Ok(WaitStatus::Signaled(_, sig, _core)) => {
+                println!("[ptrace] wait_until_stopped: process signaled with {:?}", sig);
+                return Err(Error::new(std::io::ErrorKind::Other, format!("tracee signaled: {:?}", sig)));
+            }
+            Ok(status) => {
+                println!("[ptrace] wait_until_stopped: other status: {:?}, continuing to wait", status);
+                continue;
+            }
+            Err(e) => {
+                println!("[ptrace] wait_until_stopped: error waiting for process: {:?}", e);
+                return Err(Error::from(e));
+            }
+        }
+    }
+}
+
+// aarch64 mode only
+#[cfg(target_arch = "aarch64")]
+mod arch64 {
+    use super::*;
+    use libc::iovec;
+
+    const NT_PRSTATUS: i32 = 1;
+
+    pub fn get_regs(pid: pid_t, regs: &mut PtRegs) -> Result<()> {
+        let mut iov = iovec { iov_base: regs as *mut _ as *mut c_void, iov_len: std::mem::size_of::<PtRegs>() };
+        let ret = unsafe { libc::ptrace(libc::PTRACE_GETREGSET, pid, NT_PRSTATUS as *mut c_void, &mut iov as *mut _ as *mut c_void) };
+        if ret < 0 { return Err(Error::last_os_error()); }
+        Ok(())
+    }
+
+    pub fn set_regs(pid: pid_t, regs: &PtRegs) -> Result<()> {
+        let mut iov = iovec { iov_base: regs as *const _ as *mut c_void, iov_len: std::mem::size_of::<PtRegs>() };
+        let ret = unsafe { libc::ptrace(libc::PTRACE_SETREGSET, pid, NT_PRSTATUS as *mut c_void, &mut iov as *mut _ as *mut c_void) };
+        if ret < 0 { return Err(Error::last_os_error()); }
+        Ok(())
+    }
+
+    #[inline]
+    fn a64_call_stub() -> [u8; 8] {
+        // blr x17 ; brk #0
+        let blr_x17: u32 = 0xD63F_0220;
+        let brk0:    u32 = 0xD420_0000;
+        let mut b = [0u8; 8];
+        b[..4].copy_from_slice(&blr_x17.to_le_bytes());
+        b[4..].copy_from_slice(&brk0.to_le_bytes());
+        b
+    }
+
+    #[inline]
+    fn a64_syscall_stub() -> [u8; 8] {
+        // svc #0 ; brk #0
+        let svc0: u32 = 0xD400_0001;
+        let brk0: u32 = 0xD420_0000;
+        let mut b = [0u8; 8];
+        b[..4].copy_from_slice(&svc0.to_le_bytes());
+        b[4..].copy_from_slice(&brk0.to_le_bytes());
+        b
+    }
+
+    // Simple page for tramp
+    static STUB_PAGE: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
+
+    // Set LR (x30) = 0 so when the callee RETs it segfaults at 0 so we can catch halt
+    // Read x0, restore regs then continue
+    fn call_lib_once_with_lr_trap(pid: pid_t, func_addr: u64, args: &[u64]) -> Result<u64> {
+        let mut regs: PtRegs = unsafe { zeroed() };
+        get_regs(pid, &mut regs)?;
+        let backup = regs;
+
+        for (i, a) in args.iter().take(8).enumerate() { regs.regs[i] = *a; }
+        // spill extras with 16B SP alignment
+        spill_extra_args_aapcs64(pid, &mut regs, args)?;
+
+        // LR = 0 -> trap on return
+        regs.regs[30] = 0;
+        // jump directly into libc function
+        regs.pc = func_addr;
+
+        set_regs(pid, &regs)?;
+        let r = unsafe { libc::ptrace(libc::PTRACE_CONT, pid, ptr::null_mut::<c_void>(), ptr::null_mut::<c_void>()) };
+        if r < 0 { set_regs(pid, &backup).ok(); return Err(Error::last_os_error()); }
+
+        // Wait for SIGSEGV
+        super::wait_until_stopped(pid)?;
+        get_regs(pid, &mut regs)?;
+        let ret = regs.regs[0];
+
+        // Restore regs so we don't re-execute anything
+        set_regs(pid, &backup)?;
+        Ok(ret)
+    }
+
+    // Ensure we have a trampoline page; if not, get one
+    // We resolve and call libc::mmap once using the LR-trap trick, then place our stubs there
+    fn ensure_stub_page(pid: pid_t, libc_mmap_addr: u64) -> Result<u64> {
+        use std::sync::atomic::Ordering;
+
+        let existing = STUB_PAGE.load(Ordering::SeqCst);
+        if existing != 0 { return Ok(existing); }
+
+        // mmap(NULL, 0x1000, PROT_RWX, MAP_PRIVATE|MAP_ANON, -1, 0) via libc mmap
+        let page_sz = 0x1000u64;
+        let prot    = (libc::PROT_READ | libc::PROT_WRITE | libc::PROT_EXEC) as u64;
+        let flags   = (libc::MAP_PRIVATE | libc::MAP_ANONYMOUS) as u64;
+        let fd      = !0u64;
+        let off     = 0u64;
+
+        let addr = call_lib_once_with_lr_trap(pid, libc_mmap_addr, &[0, page_sz, prot, flags, fd, off])?;
+        if addr == 0 || (addr as i64) < 0 {
+            return Err(Error::new(std::io::ErrorKind::Other, format!("bootstrap mmap failed: 0x{:x}", addr)));
+        }
+
+        // Write both stubs into the page: put call stub at +0, syscall stub at +8 (or vice versa).
+        let call_stub = a64_call_stub();
+        super::ptrace_write(pid, addr as *mut u8, &call_stub)?;
+        let sysc_stub = a64_syscall_stub();
+        super::ptrace_write(pid, (addr + 8) as *mut u8, &sysc_stub)?;
+
+        STUB_PAGE.store(addr, Ordering::SeqCst);
+        Ok(addr)
+    }
+
+    pub(super) fn spill_extra_args_aapcs64(pid: pid_t, regs: &mut PtRegs, args: &[u64]) -> Result<()> {
+        if args.len() <= 8 { return Ok(()); }
+        let extra = &args[8..];
+        let bytes = extra.len() * 8;
+        let aligned = (bytes + 15) & !15;
+        let new_sp = regs.sp.wrapping_sub(aligned as u64);
+
+        let mut raw = Vec::with_capacity(aligned);
+        for a in extra { raw.extend_from_slice(&a.to_ne_bytes()); }
+        while raw.len() % 16 != 0 { raw.push(0); }
+
+        super::ptrace_write(pid, new_sp as *mut u8, &raw)?;
+        regs.sp = new_sp;
+        Ok(())
+    }
+
+    // Uses the call-stub if available; on first use it bootstraps the stub page by
+    // call libc::mmap once via LR-trap. Pass the remote address of mmap as `libc_mmap_addr`
+    pub fn call_remote_function(pid: pid_t, func_addr: u64, args: &[u64], libc_mmap_addr: u64) -> Result<u64> {
+        // Ensure we have a stub page; if not, this will use LR-trap to get one via libc::mmap
+        let page = ensure_stub_page(pid, libc_mmap_addr)?;
+        let call = page; // call stub sits at +0
+
+        // Normal call via `blr x17; brk #0`
+        let mut regs: PtRegs = unsafe { zeroed() };
+        get_regs(pid, &mut regs)?;
+        let backup = regs;
+
+        for (i, a) in args.iter().take(8).enumerate() { regs.regs[i] = *a; }
+        spill_extra_args_aapcs64(pid, &mut regs, args)?;
+
+         // x17 = target
+        regs.regs[17] = func_addr;
+        regs.pc = call;
+
+        set_regs(pid, &regs)?;
+        let r = unsafe { libc::ptrace(libc::PTRACE_CONT, pid, ptr::null_mut::<c_void>(), ptr::null_mut::<c_void>()) };
+        if r < 0 {
+            set_regs(pid, &backup).ok();
+            return Err(Error::last_os_error());
+        }
+
+        super::wait_until_stopped(pid)?;
+        get_regs(pid, &mut regs)?;
+        let ret = regs.regs[0];
+
+        set_regs(pid, &backup)?;
+        Ok(ret)
+    }
+}
+
+#[cfg(target_arch = "aarch64")]
+pub use arch64::call_remote_function;
+
+// armv7/32bit
+#[cfg(target_arch = "arm")]
+mod arch32 {
+    use super::*;
+
+    fn get_regs(pid: pid_t, regs: &mut PtRegs) -> Result<()> {
+        let ret = unsafe {
+            libc::ptrace(libc::PTRACE_GETREGS, pid, ptr::null_mut::<c_void>(), regs as *mut _ as *mut c_void)
+        };
+        if ret < 0 { return Err(Error::last_os_error()); }
+        Ok(())
+    }
+
+    fn set_regs(pid: pid_t, regs: &PtRegs) -> Result<()> {
+        let ret = unsafe {
+            libc::ptrace(libc::PTRACE_SETREGS, pid, ptr::null_mut::<c_void>(), regs as *const _ as *const c_void)
+        };
+        if ret < 0 { return Err(Error::last_os_error()); }
+        Ok(())
+    }
+
+    pub fn call_remote_function(pid: pid_t, func_addr: u64, args: &[u64], _libc_mmap_addr: u64) -> Result<u64> {
+        let mut regs: PtRegs = unsafe { zeroed() };
+        get_regs(pid, &mut regs)?;
+        let backup = regs;
+
+        for i in 0..args.len().min(4) { regs.uregs[i] = args[i] as u32; }
+
+        if args.len() > 4 {
+            let extra = &args[4..];
+            let sp = (regs.uregs[13] as usize).wrapping_sub(extra.len() * size_of::<u32>());
+            let mut raw = Vec::with_capacity(extra.len() * 4);
+            for a in extra { raw.extend_from_slice(&(*a as u32).to_ne_bytes()); }
+            super::ptrace_write(pid, sp as *mut u8, &raw)?;
+            regs.uregs[13] = sp as u32;
+        }
+
+        // LR
+        regs.uregs[14] = 0;
+        regs.uregs[15] = (func_addr & !1) as u32;
+        if (func_addr & 1) != 0 { regs.uregs[16] |= 0x20; } else { regs.uregs[16] &= !0x20; }
+
+        set_regs(pid, &regs)?;
+        let r = unsafe { libc::ptrace(libc::PTRACE_CONT, pid, ptr::null_mut::<c_void>(), ptr::null_mut::<c_void>()) };
+        if r < 0 { set_regs(pid, &backup).ok(); return Err(Error::last_os_error()); }
+
+        let _ = super::wait_until_stopped(pid)?;
+
+        get_regs(pid, &mut regs)?;
+        let ret = regs.uregs[0] as u64;
+
+        set_regs(pid, &backup)?;
+
+    #[cfg(debug_assertions)]
+        eprintln!("[ptrace:arm] call_remote_function 0x{func_addr:x} -> 0x{ret:x}");
+
+        Ok(ret)
+    }
+}
+
+#[cfg(target_arch = "arm")]
+pub use arch32::call_remote_function;
+```
+
+`injector/src/utils.rs`:
+
+```rs
+use std::env;
+use std::fs::File;
+use std::io::{BufRead, BufReader, Read, Write};
+use std::path::Path;
+use std::process;
+
+fn verbose() -> bool {
+    // Any presence of INJECT_VERBOSE enables logs
+    env::var("INJECT_VERBOSE").is_ok()
+}
+
+macro_rules! vlog {
+    ($($arg:tt)*) => {
+        if crate::utils::verbose() {
+            eprintln!($($arg)*);
+        }
+    }
+}
+
+/// ---------- PID helpers ----------
+
+pub fn get_pid(process_name: &str) -> Option<i32> {
+    let target = process_name;
+    let target_base = Path::new(process_name)
+        .file_name()
+        .and_then(|s| s.to_str())
+        .unwrap_or(process_name);
+
+    vlog!("[pid] looking for process: target='{}' base='{}'", target, target_base);
+
+    let entries = std::fs::read_dir("/proc").ok()?;
+
+    for entry in entries.flatten() {
+        let pid: i32 = match entry.file_name().to_string_lossy().parse::<i32>() {
+            Ok(p) if p > 0 => p,
+            _ => continue,
+        };
+
+        // 1) /proc/<pid>/comm
+        let comm_path = format!("/proc/{}/comm", pid);
+        if let Ok(mut f) = File::open(&comm_path) {
+            let mut s = String::new();
+            if f.read_to_string(&mut s).is_ok() {
+                let name = s.trim();
+                if name == target || name == target_base {
+                    vlog!("[pid] match via comm: pid={} name='{}'", pid, name);
+                    return Some(pid);
+                }
+            }
+        }
+
+        // 2) /proc/<pid>/cmdline
+        let cmdline_path = format!("/proc/{}/cmdline", pid);
+        if let Ok(mut file) = File::open(&cmdline_path) {
+            let mut contents = String::new();
+            if file.read_to_string(&mut contents).is_ok() {
+                if let Some(first) = contents.split('\0').next() {
+                    let first_base = Path::new(first)
+                        .file_name()
+                        .and_then(|s| s.to_str())
+                        .unwrap_or(first);
+                    if first == target || first_base == target_base {
+                        vlog!(
+                            "[pid] match via cmdline: pid={} argv0='{}' base='{}'",
+                            pid,
+                            first,
+                            first_base
+                        );
+                        return Some(pid);
+                    }
+                }
+            }
+        }
+    }
+
+    vlog!("[pid] no matching process found for '{}'", process_name);
+    None
+}
+
+/// ---------- SELinux helpers ----------
+
+pub fn is_selinux_enabled() -> bool {
+    if let Ok(file) = File::open("/proc/filesystems") {
+        for line in BufReader::new(file).lines().flatten() {
+            if line.contains("selinuxfs") {
+                vlog!("[selinux] selinuxfs present");
+                return true;
+            }
+        }
+    }
+    vlog!("[selinux] not present");
+    false
+}
+
+pub fn disable_selinux() {
+    if let Ok(file) = File::open("/proc/mounts") {
+        for line in BufReader::new(file).lines().flatten() {
+            if line.contains("selinuxfs") {
+                if let Some(mount_point) = line.split_whitespace().nth(1) {
+                    let path = format!("{}/enforce", mount_point);
+                    vlog!("[selinux] trying to write '0' to {}", path);
+                    if let Ok(mut f) = File::create(&path) {
+                        if let Err(e) = f.write_all(b"0") {
+                            vlog!("[selinux] write failed: {}", e);
+                        }
+                    }
+                }
+                break;
+            }
+        }
+    }
+}
+
+/// ---------- Address helpers (public API uses u64 to match other modules) ----------
+
+#[inline]
+fn parse_hex_addr_to_u64(s: &str) -> Option<u64> {
+    u64::from_str_radix(s, 16).ok()
+}
+
+fn dump_module_candidates_from_maps(pid: i32, module_name: &str) {
+    let maps_path = format!("/proc/{}/maps", pid);
+
+    if let Ok(file) = File::open(&maps_path) {
+        eprintln!("[maps] candidates for pid={} module='{}':", pid, module_name);
+        for line in BufReader::new(file).lines().flatten() {
+            if line.contains(module_name) {
+                eprintln!("  {}", line);
+            }
+        }
+    } else {
+        eprintln!("[maps] unable to open {}", maps_path);
+    }
+}
+
+pub fn get_module_base_addr(pid: i32, module_name: &str) -> Option<u64> {
+    let maps_path = format!("/proc/{}/maps", pid);
+
+    let file = match File::open(&maps_path) {
+        Ok(f) => f,
+        Err(e) => {
+            eprintln!("[maps] open failed: {} ({})", maps_path, e);
+            return None;
+        }
+    };
+
+    let reader = BufReader::new(file);
+    vlog!("[maps] scanning {} for '{}'", maps_path, module_name);
+
+    let mut first_match_line: Option<String> = None;
+
+    for line in reader.lines().flatten() {
+        // Example: 12c00000-12d00000 r-xp 00000000 fc:00 12345 /system/lib/libc.so
+        let mut parts = line.split_whitespace();
+        let range = match parts.next() {
+            Some(r) => r, None => continue
+        };
+        let _perms = parts.next();
+        let _offset = parts.next();
+        let _dev = parts.next();
+        let _inode = parts.next();
+        let path = parts.next_back();
+
+        let path_match = match path {
+            Some(p) if !p.is_empty() => {
+                p == module_name
+                    || Path::new(p)
+                        .file_name()
+                        .and_then(|s| s.to_str())
+                        .map(|bn| bn == module_name)
+                        .unwrap_or(false)
+                    || p.contains(module_name)
+            }
+            _ => false,
+        };
+
+        if path_match {
+            if first_match_line.is_none() {
+                first_match_line = Some(line.clone());
+            }
+            if let Some(base_str) = range.split('-').next() {
+                if let Some(addr) = parse_hex_addr_to_u64(base_str) {
+                    vlog!(
+                        "[maps] chose base 0x{:x} from line:\n       {}",
+                        addr,
+                        line
+                    );
+                    return Some(addr);
+                } else {
+                    vlog!("[maps] failed to parse base '{}'", base_str);
+                }
+            }
+        }
+    }
+
+    eprintln!(
+        "[maps] no base found for pid={} module='{}'",
+        pid, module_name
+    );
+    if let Some(line) = first_match_line {
+        eprintln!("[maps] NOTE: saw at least one candidate but couldn't parse: {}", line);
+    } else {
+        dump_module_candidates_from_maps(pid, module_name);
+    }
+    None
+}
+
+pub fn get_remote_function_addr(remote_pid: i32, module_name: &str, local_addr: u64) -> Option<u64> {
+    vlog!(
+        "[resolve] remote_pid={} module='{}' local_addr=0x{:x}",
+        remote_pid,
+        module_name,
+        local_addr
+    );
+
+    let local_base = match get_module_base_addr(process::id() as i32, module_name) {
+        Some(b) => {
+            vlog!("[resolve] local_base( '{}') = 0x{:x}", module_name, b);
+            b
+        }
+        None => {
+            eprintln!("[resolve] failed to find local base for module '{}'", module_name);
+            return None;
+        }
+    };
+
+    let remote_base = match get_module_base_addr(remote_pid, module_name) {
+        Some(b) => {
+            vlog!("[resolve] remote_base('{}') = 0x{:x}", module_name, b);
+            b
+        }
+        None => {
+            eprintln!(
+                "[resolve] failed to find remote base for module '{}' in pid={}",
+                module_name, remote_pid
+            );
+            return None;
+        }
+    };
+
+    if local_addr < local_base {
+        eprintln!(
+            "[resolve] local_addr < local_base for '{}': 0x{:x} < 0x{:x}",
+            module_name, local_addr, local_base
+        );
+        return None;
+    }
+
+    let offset = local_addr - local_base;
+    let remote = remote_base + offset;
+
+    vlog!(
+        "[resolve] offset=0x{:x} => remote_addr=0x{:x} (remote_base=0x{:x})",
+        offset,
+        remote,
+        remote_base
+    );
+
+    Some(remote)
+}
+```
+
+`victim/Cargo.lock`:
+
+```lock
+# This file is automatically @generated by Cargo.
+# It is not intended for manual editing.
+version = 4
+
+[[package]]
+name = "victim"
+version = "0.1.0"
+
+```
+
+`victim/Cargo.toml`:
+
+```toml
+[package]
+name = "victim"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "victim"
+path = "src/main.rs"
+
+```
+
+`victim/src/main.rs`:
+
+```rs
+use std::process;
+use std::thread;
+use std::time::Duration;
+use std::ffi::CString;
+
+// Import C library functions
+extern "C" {
+    fn fopen(filename: *const std::os::raw::c_char, mode: *const std::os::raw::c_char) -> *mut std::os::raw::c_void;
+    fn fread(ptr: *mut std::os::raw::c_void, size: usize, count: usize, stream: *mut std::os::raw::c_void) -> usize;
+    fn fclose(stream: *mut std::os::raw::c_void) -> i32;
+}
+
+fn main() {
+    let pid = process::id();
+    println!("I hope nothing bad happens to me! My PID is: {}", pid);
+    
+    // Get the current executable path
+    let exe_path = std::env::current_exe()
+        .expect("Failed to get current executable path");
+    
+    println!("My executable is at: {:?}", exe_path);
+    
+    loop {
+        // Check if our own executable file still exists using fopen/fread/fclose
+        let path_cstr = CString::new(exe_path.to_string_lossy().as_bytes()).unwrap();
+        let mode_cstr = CString::new("rb").unwrap();
+
+        unsafe {
+            let file = fopen(path_cstr.as_ptr(), mode_cstr.as_ptr());
+            if !file.is_null() {
+                println!("It looks like everything is ok - I can still find my own file!");
+                // Try to read a small amount from the file
+                let mut buffer = [0u8; 4];
+                let bytes_read = fread(buffer.as_mut_ptr() as *mut std::os::raw::c_void, 1, 4, file);
+                println!("Read {} bytes from file", bytes_read);
+
+                fclose(file);
+            } else {
+                println!("I think something is getting weird - I can't find my own file!");
+            }
+        }
+        
+        // Sleep for 5 seconds
+        thread::sleep(Duration::from_secs(5));
+    }
+}
+
+```
+
+`vscode/settings.json`:
+
+```json
+{
+  "rust-analyzer.cargo.target": "armv7-linux-androideabi"
+}
+```
