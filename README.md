@@ -5527,6 +5527,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/Logboy2000/yuzu-archive
 - https://github.com/qqq26/nuzu [Yuzu based repository]
 - https://github.com/RemiPelloux/OpenSw [Open-source Android ARM64 Switch emulator (Eden-based) with Vulkan rendering, per-game profiles, and live cheat support]
+- https://github.com/enjoyerofslop/droidplay-core [nxnative-based engine and DroidPlay toolchain to run Switch and Switch 2 games natively on arm64 Android via Vulkan; MIT, BYO dumps and prod.keys]
 - https://github.com/NspxMiguel/NXbox [Experimental UWP port of Eden running Switch emulation on Xbox Series X|S (ARM64 JIT, OpenGL on D3D12 via Mesa)]
 - https://github.com/niakw/ProsperoEden-Encore [Eden-based Switch (NS1/NS2) emulator homebrew for PS5 FW 13.60 with Vulkan/OpenGL, Dynarmic JIT, per-game profiles, and TV-first DualSense launcher]
 - https://github.com/CTCaer/hekate [A GUI based Nintendo Switch Bootloader]
