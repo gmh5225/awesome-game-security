@@ -4748,6 +4748,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/MrDiamond64/Scythe-AntiCheat [Minecraft]
 - https://github.com/vunlior/guardx [Server-side Minecraft anti-cheat for fair multiplayer]
 - https://github.com/GrimAnticheat/Grim [Minecraft]
+- https://github.com/Vagdedes/Spartan-AntiCheat-In-Rewrite [Java/Maven rewrite of the long-running Spartan Minecraft server anti-cheat (Spigot/Paper ecosystem)]
 - https://github.com/redsignalofficial/RedSignalAntiCheat [Open-source AGPL Spigot/Paper/Folia Minecraft anti-cheat (RSAC) with movement, combat, interaction, and packet checks plus RSInjector hooks]
 - https://github.com/mrKozy/KozyAntiCheat [Server-side anti-cheat for Paper, Purpur, Folia, and Fabric Minecraft Java networks]
 - https://github.com/InertiaOrg/Inertia [Open-source Minecraft anti-cheat foundation with version-neutral movement/packet modeling, evidence accumulation, and testable detection core]
