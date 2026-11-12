@@ -80,7 +80,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [2026 All Brands Bootloader Unlock Status](entities/2026-all-brands-bootloader-unlock-status.md) — AdaUnlocked living OEM bootloader unlock/root/jailbreak reference (Chinese-market Android + iOS; fuse/anti-rollback, unauth 9008 EDL, temporary root, efisp/fake re-lock, OEM AC/ADB gates; Cheat / Android Bootloader Bypass)
 - [2k17-club](entities/2k17-club.md) — CS:GO internal C++ cheat framework (Akatsyk; aimbot, anti-aim, autowall, chams, grenade helpers; DirectX9 ImGui + Lua/LuaJIT LuaBridge; cheat development + Source engine RE; cheat / game:csgo)
 - [3Beans](entities/3beans.md) — LLE Nintendo 3DS emulator (ARM9/ARM11 + Teak DSP; full OS boot; boot9/boot11/NAND dumps; software/hardware GPU; cross-platform; Nintendo 3DS)
-- [3ds-game-fixes](entities/3ds-game-fixes.md) — IPS patches + version-guarded AR codes fixing retail 3DS graphics glitches; Citra/Azahar/Zakuro + Luma3DS; simplysanatori; Nintendo 3DS
+- [3ds-game-fixes](entities/3ds-game-fixes.md) — documented ARM ExeFS IPS + version-guarded AR codes fixing retail 3DS graphics glitches; emulator/GPU-trace validation; Citra/Azahar/Zakuro + Luma3DS; simplysanatori; Nintendo 3DS
 - [360WFP Exploit](entities/360wfp-exploit.md) — BYOVD via Qihoo 360 `360netmon_x64.sys_wfp` (WFP; block EDR/XDR network)
 - [3D-Racing-Game](entities/3d-racing-game.md) — OpenGL racing game (M/N scene switch; Game Develop / OpenGL source)
 - [3d-asset-factory](entities/3d-asset-factory.md) — CLI YAML→3D pipeline (GPT Image 2.0 → TRELLIS.2 GLB; QA gate; web/Unity/Unreal export; Modal/Replicate/RunPod; AI category)

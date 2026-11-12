@@ -15,6 +15,10 @@ Catalog of **IPS patches and Action Replay–style cheat codes** that fix graphi
 
 Sits in the README **Nintendo 3DS** lane beside LLE emulator [[3beans]] and Luma `.3gx` overlay templates [[ctr-composer]] / [[ocarina-ctr-composer]].
 
+## Method
+
+Fixes come from per-title **ARM disassembly and tracing**; a machine-readable catalog and per-game technical notes record how each glitch was found and which instructions changed. Validation uses **headless emulator harnesses**, GPU traces, and before/after screenshots. (source: wiki/sources/descriptions/simplysanatori__3ds-game-fixes.md)
+
 ## Links
 
 - Repo: https://github.com/simplysanatori/3ds-game-fixes
