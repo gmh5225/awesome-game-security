@@ -12,6 +12,7 @@ sources:
   - wiki/sources/descriptions/AndrewDisco__RektAntiCheat.md
   - wiki/sources/descriptions/JoshRob297__halo-ce-server.md
   - wiki/sources/descriptions/cmachale14-eng__DayZESP.md
+  - wiki/sources/descriptions/crackinglandia__idasignwriter.md
   - wiki/sources/descriptions/DoranekoSystems__ebpf-analyzer.md
   - wiki/sources/descriptions/reveny__Android-Compatibility-Layer.md
   - wiki/sources/descriptions/Manya3084__SF33RDSXBRecompo.md
@@ -2554,7 +2555,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Function pattern search via [[findfunc]] (gmh5225; filter functions by byte patterns, instruction sequences, operand types, and xrefs; Recognizing Function By Pattern; cheat / IDA Plugins) sits in the Cheat signature-scan / function-discovery lane beside [[ida-fusion]] and [[ida-sigmaker]]. (source: wiki/sources/descriptions/gmh5225__FindFunc.md)
 - Fast IDA signature scanner & creator via [[ida-fusion]] (unique sigs vs duplicated binary / anti-RE parts) sits in the Cheat IDA Plugins / signature-scan lane. (source: wiki/sources/descriptions/senator715__IDA-Fusion.md)
 - Zero-dependency IDA Pro 9+ signature maker & searcher via [[ida-sigmaker]] (Python; optional Cython/SIMD AVX2/NEON/SSE2; shortest unique sigs; wildcard operands; XREF fallback; batch text/CSV/JSON search; cheat / IDA Plugins) sits in the same signature-scan lane. (source: wiki/sources/descriptions/mahmoudimus__ida-sigmaker.md)
-- IDA SigWriter selection→pattern export via crackinglandia/idasignwriter (IDA 8.2/9.3+; wildcard code patterns; multi-format export; separate .NET CIL variant; Cheat / IDA Plugins) (source: wiki/sources/README-categories.md)
+- IDA SigWriter selection→pattern export via [[idasignwriter]] (crackinglandia; IDAPython dockable GUI; auto-wildcard jumps/calls/RIP refs/immediates; IDA/CE/x64dbg, C arrays, YARA, masked blobs; IDB search; separate .NET CIL variant; IDA 8.2/9.3+; Cheat / IDA Plugins) (source: wiki/sources/descriptions/crackinglandia__idasignwriter.md)
 - Alternate gmh5225 [[ida-sigmaker]] fork (IDA/code-style byte patterns with wildcard bytes; binary-unique sig generation from selected disassembly; cheat / IDA Plugins) sits in the same signature-scan lane. (source: wiki/sources/descriptions/gmh5225__ida-sigmaker.md)
 - Enhanced IDA Pro signature maker via [[sigmakerex]] (code/IDA/x64dbg pattern formats; automatic uniqueness verification; batch generation; clipboard integration; cheat / IDA Plugins) sits in the same signature-scan lane. (source: wiki/sources/descriptions/gmh5225__sigmakerex.md)
 - gmh5225 [[ida-pro-sigmaker]] (Signature Maker; wildcard-masked byte-pattern signatures from selected code regions for runtime pattern scanning; cheat / IDA Plugins) sits in the same signature-scan lane. (source: wiki/sources/descriptions/gmh5225__IDA-Pro-SigMaker.md)
