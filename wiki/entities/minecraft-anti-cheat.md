@@ -4,7 +4,8 @@ kind: entity
 topics: [anti-cheat, game-hacking]
 sources:
   - wiki/sources/descriptions/XuanXuan-ZhengGui__Minecraft-Anti-Cheat.md
-updated: 2026-08-19
+  - wiki/sources/descriptions/Vagdedes__Spartan-AntiCheat-In-Rewrite.md
+updated: 2026-11-12
 confidence: medium
 ---
 
@@ -22,4 +23,4 @@ Thirteen configurable movement, combat, block, and packet modules; GCD rotation 
 
 ## Related
 
-[[dakotaac]] · [[windfall-anticheat]] · [[ycbr-anticheat]] · [[cklsit-advanced-anticheat]] · [[minecraft-anticheatai]] · [[nocheatplus]] · [[avaanticheat]] · [[phantom-client]] · [[yuri]] · [[overviews/anti-cheat]] · [[overviews/game-hacking]]
+[[dakotaac]] · [[windfall-anticheat]] · [[ycbr-anticheat]] · [[cklsit-advanced-anticheat]] · [[minecraft-anticheatai]] · [[spartan-anticheat-in-rewrite]] · [[nocheatplus]] · [[avaanticheat]] · [[phantom-client]] · [[yuri]] · [[overviews/anti-cheat]] · [[overviews/game-hacking]]

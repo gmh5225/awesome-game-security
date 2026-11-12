@@ -11,13 +11,13 @@ confidence: medium
 
 # Spartan AntiCheat in Rewrite
 
-Work-in-progress **Java/Maven** rewrite of the long-running **Spartan** Minecraft server anti-cheat for **Spigot**, **Paper**, and **Folia**. Centers on a modular check framework with runners, per-detection violation tracking, and configurable punishments and staff commands.
+Work-in-progress **Java/Maven** rewrite of the long-running **Spartan** commercial Minecraft server anti-cheat for **Spigot**, **Paper**, and **Folia**. Centers on a modular check framework with runners, per-detection violation tracking, and configurable punishments and staff commands—intended as a maintainable open codebase for server-side cheat detection engineering; work-in-progress, not a guaranteed production drop-in.
 
 Distinguishes Java and Bedrock clients, supports Bukkit- and packet-oriented detection modes, and integrates Floodgate, ViaVersion, Discord webhooks, and multi-version server scheduling. Aimed at server operators and plugin developers building modern server-side cheat detection. (source: wiki/sources/descriptions/Vagdedes__Spartan-AntiCheat-In-Rewrite.md)
 
 ## Detection stack
 
-Modular check runners; violation counters; staff/punishment commands; Java vs Bedrock client paths; Bukkit and packet checks; Floodgate/ViaVersion bridges; Discord webhook alerts.
+Modular check runners; per-detection violation counters; staff/punishment commands; Java vs Bedrock client paths; Bukkit event and packet inspection modes; Floodgate/ViaVersion cross-play bridges; Discord webhook alerts; Folia-aware scheduling.
 
 ## Links
 

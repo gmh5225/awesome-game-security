@@ -1058,6 +1058,7 @@ sources:
   - wiki/sources/descriptions/ToxidoAAC__ToxidoAntiCheat.md
   - wiki/sources/descriptions/zzjjmkk__eagle-eye.md
   - wiki/sources/descriptions/sr-star-trek__konzte-faceit.md
+  - wiki/sources/descriptions/Vagdedes__Spartan-AntiCheat-In-Rewrite.md
 updated: 2026-11-12
 confidence: high
 ---
@@ -1515,6 +1516,8 @@ Title-specific R6 ranked-stat suspicion tooling such as [[r6-intel]] (baldspots4
 **Pre-ship client memory audit:** [[anticheat-lab-senolbasyigit]] (senolbasyigit; Claude Code skill + Python; CE-style scan/filter/RW on SHA-256–guarded own dev builds via `devbuild.json`; documents exposed health/ammo/currency with server-side fix recommendations and regression tests; optional pywinauto RPA without memory reads; Open Source Anti Cheat System) for teams validating client value exposure before release beside QA clients such as [[anticheat-qa]] and curriculum labs such as [[anticheat-lab]] (Ogonx). (source: wiki/sources/descriptions/senolbasyigit__anticheat-lab.md)
 
 **From-scratch Paper MC reference AC:** [[vulcan-anticheat-built]] (MayankPatil3; Java Maven plugin for Paper/Spigot **1.21.4+**; original movement/combat checks—fly, speed, kill aura, reach, auto-clicker, no-fall; in-memory violation counters; YAML-tuned alerts, movement setbacks, graduated kicks/bans, permission bypass; Open Source Anti Cheat System) for operators and plugin authors who want a fork-free server-side AC to study and extend beside modular plugins such as [[novaguard]] and [[h-ac]]. (source: wiki/sources/descriptions/MayankPatil3__vulcan-anticheat-built.md)
+
+**Spartan commercial AC Java rewrite (WIP):** [[spartan-anticheat-in-rewrite]] (Vagdedes; Java Maven for Spigot/Paper/Folia; modular check runners, per-detection violation tracking, configurable punishments and staff commands; Java vs Bedrock paths; Bukkit- and packet-oriented modes; Floodgate, ViaVersion, Discord webhooks, multi-version scheduling; Open Source Anti Cheat System / game:minecraft) for operators and plugin authors modernizing the long-running Spartan server-side stack beside bridge consumers such as [[minecraft-anti-cheat]] and PacketEvents plugins such as [[fox-addition]]. (source: wiki/sources/descriptions/Vagdedes__Spartan-AntiCheat-In-Rewrite.md)
 
 **FPS behavioral research lab:** [[apex-anticheat-lab]] (NetVar1337; Python server-side input telemetry; aim kinematics, reaction times, recoil regularity, triggerbot signatures; per-cohort baselines; analyst-review ranking; YARA loader/HWID-spoofer rules; read-only PowerShell host driver/PCIe/vulnerable-driver-blocklist survey; match-integrity SQL; FPS cheat taxonomy + threshold calibration docs; Anti Cheat / Open Source Anti Cheat System) beside demo-telemetry ML stacks such as [[yaacs-anticheat]], [[cs2guard]], and CS2 Parquet/JSON match-stat classifiers such as [[ban-hammer]] (sklearn/XGBoost on K/D, accuracy penalties, contextual kill ratios; no client hooks). (source: wiki/sources/descriptions/NetVar1337__apex-anticheat-lab.md) (source: wiki/sources/descriptions/AadityaPokhriyal__Ban-Hammer.md)
 
