@@ -1773,6 +1773,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 
 > Cellular / SIM
 - https://github.com/tomasz-lisowski/swsim [Pure-software USIM/UICC SIM card simulator — full APDU/SIM logic without physical hardware; PC/SC via swICC reader; pairs with SIMtrace2/cardem for phone testing; GSM/LTE auth, MILENAGE, private LTE/IoT and cellular security research]
+- https://github.com/MayaXDev/SIMNumberSetter-Pro [Rooted Android MSISDN (EF_MSISDN) programmer using LSPosed hooks or direct telephony providers for dual-SIM slots on API 26–34]
 
 > Android memory loading
 - https://github.com/icculus/mojoelf
@@ -3159,6 +3160,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/YMY1666527646/ue4_base [SDK Template]
 - https://github.com/percpopper/UE4-Freecam [FOV Changer]
 - https://github.com/RussellJerome/UnrealModLoader [Mod Loader]
+- https://github.com/EuroCent82/PineLoader [Windows pre-launch UE 5.8 mod loader with isolated mod hosts so a failed plugin does not block game startup]
 - [Intercept ProcessEvent calls on any game object (Unreal Engine 4)](https://github.com/Skengdo/ue4-processevent-intercept)
 - [UE4 Cheat Source Code](https://github.com/1hAck-0/UE4-Cheat-Source-Code)
 - https://github.com/gmh5225/ue4_cheat_engine [UE4 Cheat For Android]
@@ -4720,6 +4722,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/cmdsuv/noescapeac [Cross-platform Ring-3 anti-cheat reference in C++20 with SIMD memory scanning, inline unhooking, and PCIe DMA detection]
 - https://github.com/vovasicidk/sentinelac [Open-source anti-cheat skeleton with usermode SDK, ObRegisterCallbacks kernel stub, overlay isolation, and stack-walk injection detection]
 - https://github.com/nulli83/Mj-lnir [Windows client-server anti-cheat with C++ core scanner, Rust agent, and self-hosted studio control plane for injection detection and enforcement]
+- https://github.com/Hansel38/Oblivion-6 [Client/server MMO anti-cheat reference with server ban lists and Windows client protection modules (anti-debug, integrity, injection/HWID checks)]
 - https://github.com/000nico/ringo-ac [Modular Windows kernel anti-cheat (driver, usermode client, analysis server) with HWID, hypervisor checks, and callback-based telemetry for learning and CS2-style server protection]
 - https://github.com/JUS7205/cheatguard [Rust engine-agnostic anti-cheat scanner: JSON signature ruleset, loaded-module enumeration, and deterministic 0–100 risk scoring with CLEAN/SUSPICIOUS/MALICIOUS verdicts]
 - https://github.com/g8tsz/deadlock-anti-cheat [User-mode Deadlock anti-cheat client: process logging, game-window screenshots, key input, cheat-process matching, and Discord webhook upload]
@@ -5511,6 +5514,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 ## Game Boy
 - https://github.com/xkevio/kevboy [Emulator]
 - https://github.com/vojty/feather-gb [Emulator]
+- https://github.com/lidor30/pokedaisy [Android GB/GBC/GBA/DS Pokémon player with live companion reading party, bag, map, and battle state for ROM hacks and dual-screen handhelds]
 - https://github.com/chrismaltby/gb-studio [GB Studio]
 - https://github.com/ryanmsartor/rc2tools [CLI tools to extract Rolan's Curse II (Game Boy) character stats from ROM or hex dumps and render assembled sprite sheets from tile data]
 - https://github.com/kroy-the-rabbit/openfpga-GBC-cheats-ui [Desktop cheat picker for Analogue Pocket Game Boy/GBC openFPGA cores with libretro cheat DB sync]
