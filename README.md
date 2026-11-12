@@ -2385,6 +2385,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/erensariisik03-sudo/Farming-Simulator-12-Mp-Build [Native Android mod injecting libmultiplayermod.so into FS12 via runtime hooking for multiplayer]
 - https://github.com/gmh5225/Android-DLL-Injector
 - https://github.com/reveny/Android-Ptrace-Injector
+- https://github.com/strazzere/inject-hooks-android-rs [Rust Android remote library injector (TinyInjector-based, 32/64-bit) with hook library for in-process GOT/trampoline hooks]
 - https://github.com/reveny/Android-LD-Preload-Injector
 - https://github.com/ohchase/yaui
 - https://github.com/cs1ime/AndroidSuperInject [Injecting into SELinux-protected system service processes]
