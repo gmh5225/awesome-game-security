@@ -395,6 +395,7 @@ sources:
   - wiki/sources/descriptions/connormcgarr__EATGuard.md
   - wiki/sources/descriptions/connorjaydunn__BinaryShield.md
   - wiki/sources/descriptions/cnitlrt__headless-ida-mcp-server.md
+  - wiki/sources/descriptions/coleleavitt__ida-mcp-server.md
   - wiki/sources/descriptions/cocomelonc__pawtrace.md
   - wiki/sources/descriptions/cocomelonc__tabby.md
   - wiki/sources/descriptions/cocomelonc__peekaboo.md
