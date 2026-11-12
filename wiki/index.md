@@ -4352,7 +4352,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [win32k-file-collection2](entities/win32k-file-collection2.md) — versioned win32k.sys binary corpus (Win10/11; offline diff / syscall & input-path RE)
 - [winkernel-resources](entities/winkernel-resources.md) — curated Windows kernel internals & exploitation learning index (papers, talks, vulnerable-driver refs, sample driver VS solutions; NullArray; Guide)
 - [win-shaper](entities/win-shaper.md) — WFP callout traffic shaper (latency/bandwidth/packet loss/queue sizing; CLI+GUI; Game Testing / network-sensitive game testing; WPO-Foundation)
-- [WireScope](entities/wirescope.md) — WinpkFilter NDIS L2 sniffer, per-process monitor, kernel firewall, and impairment simulator (C++23; GUI/CLI; no Npcap; Cheat / Packet Sniffer&Filter; wesmar)
+- [WireScope](entities/wirescope.md) — WinpkFilter NDIS 6.x L2 capture, per-process accounting, kernel firewall, impairment sim; directional per-app rules + PCAP (C++23 GUI/CLI; embedded driver; no Npcap; Win11 x64; game-traffic / AC networking RE; wesmar)
 - [WinRing0](entities/winring0.md) — WinRing0 driver/API CPU temperature sample (CPUID + MSR per-core temps; admin; hardware monitoring; ashleyhung)
 - [Wizard-Loader](entities/wizard-loader.md) — Windows PE manual-map loader/injector (PE header erasure, thread hiding; Xwizard.exe side-load; gmh5225)
 - [WilonityLoader](entities/wilonity-loader.md) — unified Windows subscription cheat loader (C++20 Osiris CMake + Electron-style UI; hot-injection, HWID-bound licensing, multi-game modules; kernel/driver-bypass + HWID-spoof narrative per README; WilonityGames)
