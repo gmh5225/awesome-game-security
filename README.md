@@ -565,6 +565,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/MeroZemory/ida-multi-mcp [Multi-instance IDA Pro MCP: one endpoint for many GUI/idalib sessions; parallel routing; BCSD function similarity; Python]
 - https://github.com/cnitlrt/headless-ida-mcp-server [MCP for IDA pro(headless)]
 - https://github.com/MxIris-Reverse-Engineering/ida-mcp-server [MCP for IDA pro]
+- https://github.com/coleleavitt/ida-mcp-server [Native C++ IDA Pro 9.x plugin exposing 249 MCP tools for disassembly, decompilation, patching, and debugging to LLM agents over local HTTP]
 - https://github.com/taida957789/ida-mcp-server-plugin [MCP for IDA pro]
 - https://github.com/fdrechsler/mcp-server-idapro [MCP for IDA pro]
 - https://github.com/rand-tech/pcm [MCP for IDA pro]
@@ -5521,6 +5522,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/Hydr8gon/3Beans [Low-level (LLE) 3DS emulator: full OS boot, boot9/boot11/nand dumps, software/hardware GPU rendering]
 - https://github.com/samaBR85/CTRComposer [Raw .3gx overlay/cheat plugin engine for Luma3DS with self-rendered UI and cheat-search template]
 - https://github.com/samaBR85/OcarinaCTRComposer [OoT3D cheat/tools overlay on CTRComposer with memory search, hex editor, and RAM dump]
+- https://github.com/simplysanatori/3ds-game-fixes [IPS patches and cheat codes that fix graphics glitches in retail 3DS titles for Citra/Azahar/Zakuro and Luma3DS game patching]
 
 ## Nintendo Switch
 - https://github.com/yuzu-mirror
