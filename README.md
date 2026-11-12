@@ -539,6 +539,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/chongdashu/unreal-mcp [MCP for Unreal Engine]
 - https://github.com/kvick-games/UnrealMCP [MCP for Unreal Engine]
 - https://github.com/VedantRGosavi/UE5-MCP [MCP for Unreal Engine 5]
+- https://github.com/sterni/fortnitemcp [In-process UE MCP DLL for authorized offline/private builds — memory R/W, pointer chains, UE reflection/ProcessEvent, input automation, loopback HTTP MCP, and mitmproxy API sidecar]
 - https://github.com/glmour/ue-live-bridge [UE4SS Lua bridge with Python MCP driver for live UObject/UFunction control and verified agent write claims]
 - https://github.com/justinpbarnett/unity-mcp [MCP for unity]
 - https://github.com/wondeks/unity-mcp [MCP for unity]
@@ -4985,6 +4986,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/wesmar/KeyboardKit [Educational kernel-mode keylogger rootkit — intercepts keyboard IRPs for UDP logging; demonstrates stealth persistence, privilege escalation and IRP hooking for offensive security research and defensive analysis]
 - https://github.com/dungnotnull/game-cheating-exploit-detection-agent-skill [Python anti-cheat detection engine with statistical aimbot, wallhack, macro, memory-tamper, and exploit detectors plus CI-tested harness]
 - https://github.com/rafalimma/ModelAnti-Cheat [DayZ server-side ML anti-cheat: mission telemetry logging, feature extraction, and RandomForest aimbot/movement anomaly detection]
+- https://github.com/aadityapokhriyal/ban-hammer [CS2 behavioural ML cheat detector using match stats (K/D, speed, accuracy penalties) with EDA notebooks, feature extraction, and trained sklearn/XGBoost models]
 
 > Detection:Hide
 - https://github.com/KANKOSHEV/Detect-HiddenThread-via-KPRCB
