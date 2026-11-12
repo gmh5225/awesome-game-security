@@ -1,0 +1,1975 @@
+Project Path: arc_UzawaReisaQwQ_codex-vmprotect-unpack-skill_pu2q3aha
+
+Source Tree:
+
+```txt
+arc_UzawaReisaQwQ_codex-vmprotect-unpack-skill_pu2q3aha
+├── ConsoleApp2Cpp
+│   ├── Activation.cpp
+│   ├── Encoding.cpp
+│   ├── XXTEA.cpp
+│   └── main.cpp
+├── LICENSE
+├── README.md
+└── vmprotect-unpack
+    ├── SKILL.md
+    ├── references
+    │   ├── import-provenance.md
+    │   ├── legacy-compat.md
+    │   ├── report-outline.md
+    │   ├── version-matrix.md
+    │   ├── vmp-3.10.3-case.md
+    │   ├── vmp-3.5.0-case.md
+    │   ├── vmp-3.5.0-x86-case.md
+    │   ├── vmp-3.8.4-case.md
+    │   ├── vmp-3.8.7-case.md
+    │   ├── vmp-3.9.4-case.md
+    │   ├── vmp-lite-3.10.4-case.md
+    │   ├── vmp-lite-3.10.4-x86-case.md
+    │   ├── workflow.md
+    │   └── x86-workflow.md
+    └── scripts
+        ├── audit_import_evidence.py
+        ├── compare_runs.py
+        ├── find_crt_candidates.py
+        ├── pe_inventory.py
+        ├── restore_wrapper_calls.py
+        ├── run_with_progress.py
+        ├── run_with_winstation.py
+        └── run_x86_compat.py
+
+```
+
+`ConsoleApp2Cpp/Activation.cpp`:
+
+```cpp
+#include "Activation.h"
+#include "Encoding.h"
+#include "XXTEA.h"
+#include "VMProtectSDK.h"
+#include <windows.h>
+#include <bcrypt.h>
+#include <wbemidl.h>
+#include <array>
+#include <memory>
+#include <limits>
+#include <stdexcept>
+#include <type_traits>
+
+namespace console_app2 {
+	namespace {
+		template<class T> struct ComRelease { void operator()(T* p) const { if (p) p->Release(); } };
+		template<class T> using ComPtr = std::unique_ptr<T, ComRelease<T>>;
+		struct Bstr {
+			BSTR value;
+			explicit Bstr(const wchar_t* text) : value(SysAllocString(text)) { if (!value) throw std::bad_alloc(); }
+			~Bstr() { SysFreeString(value); }
+			Bstr(const Bstr&) = delete;
+			Bstr& operator=(const Bstr&) = delete;
+		};
+		struct ComScope {
+			HRESULT status = CoInitializeEx(nullptr, COINIT_MULTITHREADED);
+			~ComScope() { if (SUCCEEDED(status)) CoUninitialize(); }
+		};
+		struct RegistryClose { void operator()(HKEY p) const { RegCloseKey(p); } };
+		struct AlgorithmClose { void operator()(BCRYPT_ALG_HANDLE p) const { BCryptCloseAlgorithmProvider(p, 0); } };
+		struct HashClose { void operator()(BCRYPT_HASH_HANDLE p) const { BCryptDestroyHash(p); } };
+
+		bool IsWhitespace(wchar_t c) {
+			return (c >= 0x09 && c <= 0x0D) || c == 0x20 || c == 0x85 || c == 0xA0
+				|| c == 0x1680 || (c >= 0x2000 && c <= 0x200A) || c == 0x2028
+				|| c == 0x2029 || c == 0x202F || c == 0x205F || c == 0x3000;
+		}
+
+		std::string Sha256Hex(std::string_view text) {
+			const auto bytes = Utf8Bytes(text);
+			BCRYPT_ALG_HANDLE rawAlgorithm = nullptr;
+			if (BCryptOpenAlgorithmProvider(&rawAlgorithm, BCRYPT_SHA256_ALGORITHM, nullptr, 0) < 0)
+				throw std::runtime_error("Cannot open SHA-256 provider");
+			std::unique_ptr<void, AlgorithmClose> algorithm(rawAlgorithm);
+			BCRYPT_HASH_HANDLE rawHash = nullptr;
+			if (BCryptCreateHash(algorithm.get(), &rawHash, nullptr, 0, nullptr, 0, 0) < 0)
+				throw std::runtime_error("Cannot create SHA-256 hash");
+			std::unique_ptr<void, HashClose> hash(rawHash);
+			// Chunking avoids truncating the Windows ULONG length parameter.
+			std::size_t offset = 0;
+			while (offset < bytes.size()) {
+				const auto remaining = bytes.size() - offset;
+				constexpr auto maxChunk = (std::numeric_limits<ULONG>::max)();
+				const auto count = static_cast<ULONG>(remaining > maxChunk ? maxChunk : remaining);
+				if (BCryptHashData(hash.get(), const_cast<PUCHAR>(bytes.data() + offset), count, 0) < 0)
+					throw std::runtime_error("SHA-256 update failed");
+				offset += count;
+			}
+			std::array<unsigned char, 32> digest{};
+			if (BCryptFinishHash(hash.get(), digest.data(), static_cast<ULONG>(digest.size()), 0) < 0)
+				throw std::runtime_error("SHA-256 finalization failed");
+			constexpr char hex[] = "0123456789ABCDEF";
+			std::string result;
+			for (const auto value : digest) { result += hex[value >> 4]; result += hex[value & 15]; }
+			return result;
+		}
+	}
+
+	std::string MachineID::GetMachineGuid() {
+		HKEY rawKey = nullptr;
+		auto status = RegOpenKeyExW(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Cryptography", 0, KEY_READ, &rawKey);
+		if (status == ERROR_FILE_NOT_FOUND || status == ERROR_PATH_NOT_FOUND) return {};
+		if (status != ERROR_SUCCESS) throw std::runtime_error("Cannot open MachineGuid registry key");
+		std::unique_ptr<std::remove_pointer_t<HKEY>, RegistryClose> key(rawKey);
+		DWORD type = 0, size = 0;
+		status = RegQueryValueExW(key.get(), L"MachineGuid", nullptr, &type, nullptr, &size);
+		if (status == ERROR_FILE_NOT_FOUND) return {};
+		if (status != ERROR_SUCCESS) throw std::runtime_error("Cannot query MachineGuid");
+		std::vector<wchar_t> buffer(size / sizeof(wchar_t) + 2, L'\0');
+		status = RegQueryValueExW(key.get(), L"MachineGuid", nullptr, &type, reinterpret_cast<LPBYTE>(buffer.data()), &size);
+		if (status != ERROR_SUCCESS) throw std::runtime_error("Cannot read MachineGuid");
+		if (type != REG_SZ && type != REG_EXPAND_SZ) throw std::runtime_error("MachineGuid must be a registry string");
+		std::wstring value(buffer.data());
+		if (type == REG_EXPAND_SZ) {
+			const auto length = ExpandEnvironmentStringsW(value.c_str(), nullptr, 0);
+			if (!length) throw std::runtime_error("Cannot expand MachineGuid");
+			std::vector<wchar_t> expanded(length);
+			const auto written = ExpandEnvironmentStringsW(value.c_str(), expanded.data(), length);
+			if (!written || written > length) throw std::runtime_error("Cannot expand MachineGuid");
+			value.assign(expanded.data());
+		}
+		return ToUtf8(value);
+	}
+
+	std::string MachineID::GetCpuId() {
+		try {
+			ComScope com;
+			if (FAILED(com.status) && com.status != RPC_E_CHANGED_MODE) return {};
+			auto status = CoInitializeSecurity(nullptr, -1, nullptr, nullptr, RPC_C_AUTHN_LEVEL_DEFAULT,
+				RPC_C_IMP_LEVEL_IMPERSONATE, nullptr, EOAC_NONE, nullptr);
+			if (FAILED(status) && status != RPC_E_TOO_LATE) return {};
+			IWbemLocator* rawLocator = nullptr;
+			status = CoCreateInstance(CLSID_WbemLocator, nullptr, CLSCTX_INPROC_SERVER,
+				IID_IWbemLocator, reinterpret_cast<void**>(&rawLocator));
+			ComPtr<IWbemLocator> locator(rawLocator);
+			if (FAILED(status)) return {};
+			IWbemServices* rawServices = nullptr;
+			Bstr path(L"ROOT\\CIMV2");
+			status = locator->ConnectServer(path.value, nullptr, nullptr, nullptr, 0, nullptr, nullptr, &rawServices);
+			ComPtr<IWbemServices> services(rawServices);
+			if (FAILED(status)) return {};
+			status = CoSetProxyBlanket(services.get(), RPC_C_AUTHN_WINNT, RPC_C_AUTHZ_NONE, nullptr,
+				RPC_C_AUTHN_LEVEL_CALL, RPC_C_IMP_LEVEL_IMPERSONATE, nullptr, EOAC_NONE);
+			if (FAILED(status)) return {};
+			Bstr language(L"WQL"), query(L"SELECT ProcessorId FROM Win32_Processor");
+			IEnumWbemClassObject* rawEnumerator = nullptr;
+			status = services->ExecQuery(language.value, query.value,
+				WBEM_FLAG_FORWARD_ONLY | WBEM_FLAG_RETURN_IMMEDIATELY, nullptr, &rawEnumerator);
+			ComPtr<IEnumWbemClassObject> enumerator(rawEnumerator);
+			if (FAILED(status)) return {};
+			IWbemClassObject* rawObject = nullptr;
+			ULONG count = 0;
+			status = enumerator->Next(WBEM_INFINITE, 1, &rawObject, &count);
+			ComPtr<IWbemClassObject> object(rawObject);
+			if (FAILED(status) || count == 0) return {};
+			struct Variant {
+				VARIANT value;
+				Variant() { VariantInit(&value); }
+				~Variant() { VariantClear(&value); }
+			} property;
+			status = object->Get(L"ProcessorId", 0, &property.value, nullptr, nullptr);
+			if (FAILED(status) || property.value.vt != VT_BSTR || !property.value.bstrVal) return {};
+			std::wstring_view value(property.value.bstrVal, SysStringLen(property.value.bstrVal));
+			while (!value.empty() && IsWhitespace(value.front())) value.remove_prefix(1);
+			while (!value.empty() && IsWhitespace(value.back())) value.remove_suffix(1);
+			return ToUtf8(value);
+		}
+		catch (...) { return {}; }
+	}
+
+	__declspec(noinline) std::string MachineID::GenerateActivateKey() {
+		VMProtectBeginUltra("MachineID::GenerateActivateKey");
+		const auto guid = GetMachineGuid();
+		const auto cpu = GetCpuId();
+		auto result = GenerateActivateKey(guid, cpu);
+		VMProtectEnd();
+		return result;
+	}
+
+	__declspec(noinline) std::string MachineID::GenerateActivateKey(std::string_view machineGuid, std::string_view cpuId) {
+		VMProtectBeginUltra("MachineID::GenerateActivateKey.WithIdentifiers");
+		const std::string raw = "MachineGuid=" + std::string(machineGuid)
+			+ ";Salt1=114514;CPU=" + std::string(cpuId) + ";Salt2=C4D038B4BED09FDB1471EF51EC3A32CD";
+		const Bytes encrypted{ 111,14,110,85,70,94,88,86,7,4,122,122,80,127,89,89,124,98,99,113,96,80,10,10 };
+		const auto encoded = StringObfuscator::Decode(encrypted);
+		const auto key = XOR::Decode(encoded);
+		auto result = Xxtea::XXTEA::EncryptToBase64String(Sha256Hex(raw), key);
+		VMProtectEnd();
+		return result;
+	}
+}
+
+```
+
+`ConsoleApp2Cpp/Encoding.cpp`:
+
+```cpp
+#include "Encoding.h"
+#include <windows.h>
+#include <array>
+#include <limits>
+#include <stdexcept>
+
+namespace console_app2 {
+	namespace {
+		int CheckedLength(std::size_t size) {
+			if (size > static_cast<std::size_t>((std::numeric_limits<int>::max)()))
+				throw std::length_error("Text exceeds Windows conversion limit");
+			return static_cast<int>(size);
+		}
+		constexpr std::array<std::uint8_t, 8> xorKey{ 0x37, 0xA1, 0x52, 0xC8, 0x19, 0x73, 0xE4, 0x2B };
+		constexpr char alphabet[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+	}
+
+	std::wstring FromUtf8(std::string_view text) {
+		std::wstring result;
+		for (std::size_t i = 0; i < text.size();) {
+			const auto first = static_cast<std::uint8_t>(text[i++]);
+			if (first < 0x80) { result += static_cast<wchar_t>(first); continue; }
+			unsigned length = 0;
+			std::uint32_t codepoint = 0;
+			if (first >= 0xC2 && first <= 0xDF) { length = 2; codepoint = first & 0x1F; }
+			else if (first >= 0xE0 && first <= 0xEF) { length = 3; codepoint = first & 0x0F; }
+			else if (first >= 0xF0 && first <= 0xF4) { length = 4; codepoint = first & 0x07; }
+			else { result += L'\uFFFD'; continue; }
+			bool valid = true;
+			for (unsigned j = 1; j < length; ++j) {
+				if (i == text.size()) { valid = false; break; }
+				const auto next = static_cast<std::uint8_t>(text[i]);
+				if (next < 0x80 || next > 0xBF
+					|| (j == 1 && ((first == 0xE0 && next < 0xA0)
+						|| (first == 0xED && next > 0x9F)
+						|| (first == 0xF0 && next < 0x90)
+						|| (first == 0xF4 && next > 0x8F)))) {
+					valid = false;
+					break;
+				}
+				++i;
+				codepoint = (codepoint << 6) | (next & 0x3F);
+			}
+			if (!valid) result += L'\uFFFD';
+			else if (codepoint <= 0xFFFF) result += static_cast<wchar_t>(codepoint);
+			else {
+				codepoint -= 0x10000;
+				result += static_cast<wchar_t>(0xD800 + (codepoint >> 10));
+				result += static_cast<wchar_t>(0xDC00 + (codepoint & 0x3FF));
+			}
+		}
+		return result;
+	}
+
+	std::string ToUtf8(std::wstring_view text) {
+		if (text.empty()) return {};
+		const int length = CheckedLength(text.size());
+		const int size = WideCharToMultiByte(CP_UTF8, 0, text.data(), length, nullptr, 0, nullptr, nullptr);
+		if (!size) throw std::runtime_error("UTF-8 encoding failed");
+		std::string result(size, '\0');
+		if (!WideCharToMultiByte(CP_UTF8, 0, text.data(), length, result.data(), size, nullptr, nullptr))
+			throw std::runtime_error("UTF-8 encoding failed");
+		return result;
+	}
+
+	std::string DecodeUtf8(const Bytes& bytes) {
+		if (bytes.empty()) return {};
+		return ToUtf8(FromUtf8(std::string_view(reinterpret_cast<const char*>(bytes.data()), bytes.size())));
+	}
+
+	Bytes Utf8Bytes(std::string_view text) {
+		const auto normalized = ToUtf8(FromUtf8(text));
+		return Bytes(normalized.begin(), normalized.end());
+	}
+
+	std::string Base64Encode(const Bytes& data) {
+		std::string result;
+		result.reserve((data.size() + 2) / 3 * 4);
+		for (std::size_t i = 0; i < data.size(); i += 3) {
+			const auto value = (static_cast<std::uint32_t>(data[i]) << 16)
+				| (i + 1 < data.size() ? static_cast<std::uint32_t>(data[i + 1]) << 8 : 0)
+				| (i + 2 < data.size() ? data[i + 2] : 0);
+			result += alphabet[(value >> 18) & 63];
+			result += alphabet[(value >> 12) & 63];
+			result += i + 1 < data.size() ? alphabet[(value >> 6) & 63] : '=';
+			result += i + 2 < data.size() ? alphabet[value & 63] : '=';
+		}
+		return result;
+	}
+
+	Bytes Base64Decode(std::string_view text) {
+		std::string clean;
+		for (char c : text) {
+			if (c != ' ' && c != '\t' && c != '\r' && c != '\n') clean += c;
+		}
+		if (clean.size() % 4) throw std::invalid_argument("Invalid Base64 length");
+		Bytes result;
+		for (std::size_t i = 0; i < clean.size(); i += 4) {
+			std::uint32_t value = 0;
+			unsigned padding = 0;
+			for (unsigned j = 0; j < 4; ++j) {
+				const char c = clean[i + j];
+				value <<= 6;
+				if (c == '=') {
+					if (j < 2 || i + 4 != clean.size()) throw std::invalid_argument("Invalid Base64 padding");
+					++padding;
+				}
+				else {
+					const auto position = std::string_view(alphabet, 64).find(c);
+					if (padding || position == std::string_view::npos) throw std::invalid_argument("Invalid Base64 character");
+					value |= static_cast<std::uint32_t>(position);
+				}
+			}
+			result.push_back(static_cast<std::uint8_t>(value >> 16));
+			if (padding < 2) result.push_back(static_cast<std::uint8_t>(value >> 8));
+			if (padding < 1) result.push_back(static_cast<std::uint8_t>(value));
+		}
+		return result;
+	}
+
+	std::string XOR::Encode(std::string_view input) {
+		auto data = Utf8Bytes(input);
+		for (std::size_t i = 0; i < data.size(); ++i) data[i] ^= xorKey[i % xorKey.size()];
+		return Base64Encode(data);
+	}
+
+	std::string XOR::Decode(std::string_view input) {
+		auto data = Base64Decode(input);
+		for (std::size_t i = 0; i < data.size(); ++i) data[i] ^= xorKey[i % xorKey.size()];
+		return DecodeUtf8(data);
+	}
+
+	std::string StringObfuscator::Decode(const Bytes& encoded) {
+		auto data = encoded;
+		for (auto& value : data) value ^= 0x37;
+		return DecodeUtf8(data);
+	}
+}
+
+```
+
+`ConsoleApp2Cpp/XXTEA.cpp`:
+
+```cpp
+// Adapted from Ma Bingyao's XXTEA.cs, last modified March 10, 2015.
+// XXTEA algorithm: David J. Wheeler and Roger M. Needham.
+#include "XXTEA.h"
+#include <array>
+#include <stdexcept>
+#include <limits>
+
+namespace Xxtea {
+using console_app2::Bytes;
+namespace {
+constexpr std::uint32_t delta = 0x9E3779B9u;
+using Words = std::vector<std::uint32_t>;
+
+Words ToWords(const Bytes& data, bool includeLength) {
+    if (data.size() > (std::numeric_limits<std::uint32_t>::max)())
+        throw std::length_error("XXTEA input exceeds the 32-bit length format");
+    const auto count = (data.size() + 3) / 4;
+    Words result(count + (includeLength ? 1 : 0), 0);
+    if (includeLength) result[count] = static_cast<std::uint32_t>(data.size());
+    for (std::size_t i = 0; i < data.size(); ++i)
+        result[i / 4] |= static_cast<std::uint32_t>(data[i]) << ((i % 4) * 8);
+    return result;
+}
+
+std::optional<Bytes> ToBytes(const Words& data, bool includeLength) {
+    auto size = data.size() * 4;
+    if (includeLength) {
+        const auto length = static_cast<std::size_t>(data.back());
+        size -= 4;
+        if (length > size || size - length > 3) return std::nullopt;
+        size = length;
+    }
+    Bytes result(size);
+    for (std::size_t i = 0; i < size; ++i)
+        result[i] = static_cast<std::uint8_t>(data[i / 4] >> ((i % 4) * 8));
+    return result;
+}
+
+Words FixKey(const Bytes& key) {
+    Bytes fixed(16, 0);
+    for (std::size_t i = 0; i < key.size() && i < fixed.size(); ++i) fixed[i] = key[i];
+    return ToWords(fixed, false);
+}
+
+std::uint32_t MX(std::uint32_t sum, std::uint32_t y, std::uint32_t z,
+                 std::size_t p, std::uint32_t e, const Words& key) {
+    return (((z >> 5) ^ (y << 2)) + ((y >> 3) ^ (z << 4)))
+        ^ ((sum ^ y) + (key[(p & 3) ^ e] ^ z));
+}
+
+std::string DecodeResult(const std::optional<Bytes>& data) {
+    if (!data) throw std::invalid_argument("Invalid XXTEA decrypted length");
+    return console_app2::DecodeUtf8(*data);
+}
+}
+
+Bytes XXTEA::Encrypt(const Bytes& data, const Bytes& key) {
+    if (data.empty()) return data;
+    auto words = ToWords(data, true);
+    const auto fixedKey = FixKey(key);
+    const auto n = words.size() - 1;
+    std::uint32_t z = words[n], sum = 0;
+    auto rounds = 6 + 52 / words.size();
+    while (rounds-- > 0) {
+        sum += delta;
+        const auto e = (sum >> 2) & 3;
+        for (std::size_t p = 0; p < n; ++p)
+            z = (words[p] += MX(sum, words[p + 1], z, p, e, fixedKey));
+        z = (words[n] += MX(sum, words[0], z, n, e, fixedKey));
+    }
+    return *ToBytes(words, false);
+}
+
+std::optional<Bytes> XXTEA::Decrypt(const Bytes& data, const Bytes& key) {
+    if (data.empty()) return data;
+    auto words = ToWords(data, false);
+    const auto n = words.size() - 1;
+    if (n >= 1) {
+        const auto fixedKey = FixKey(key);
+        std::uint32_t y = words[0];
+        auto sum = static_cast<std::uint32_t>(6 + 52 / words.size()) * delta;
+        while (sum != 0) {
+            const auto e = (sum >> 2) & 3;
+            for (auto p = n; p > 0; --p)
+                y = (words[p] -= MX(sum, y, words[p - 1], p, e, fixedKey));
+            y = (words[0] -= MX(sum, y, words[n], 0, e, fixedKey));
+            sum -= delta;
+        }
+    }
+    return ToBytes(words, true);
+}
+
+Bytes XXTEA::Encrypt(std::string_view data, std::string_view key) { return Encrypt(console_app2::Utf8Bytes(data), console_app2::Utf8Bytes(key)); }
+Bytes XXTEA::Encrypt(std::string_view data, const Bytes& key) { return Encrypt(console_app2::Utf8Bytes(data), key); }
+Bytes XXTEA::Encrypt(const Bytes& data, std::string_view key) { return Encrypt(data, console_app2::Utf8Bytes(key)); }
+std::string XXTEA::EncryptToBase64String(const Bytes& data, const Bytes& key) { return console_app2::Base64Encode(Encrypt(data, key)); }
+std::string XXTEA::EncryptToBase64String(std::string_view data, std::string_view key) { return console_app2::Base64Encode(Encrypt(data, key)); }
+std::string XXTEA::EncryptToBase64String(std::string_view data, const Bytes& key) { return console_app2::Base64Encode(Encrypt(data, key)); }
+std::string XXTEA::EncryptToBase64String(const Bytes& data, std::string_view key) { return console_app2::Base64Encode(Encrypt(data, key)); }
+std::optional<Bytes> XXTEA::Decrypt(const Bytes& data, std::string_view key) { return Decrypt(data, console_app2::Utf8Bytes(key)); }
+std::optional<Bytes> XXTEA::DecryptBase64String(std::string_view data, const Bytes& key) { return Decrypt(console_app2::Base64Decode(data), key); }
+std::optional<Bytes> XXTEA::DecryptBase64String(std::string_view data, std::string_view key) { return Decrypt(console_app2::Base64Decode(data), key); }
+std::string XXTEA::DecryptToString(const Bytes& data, const Bytes& key) { return DecodeResult(Decrypt(data, key)); }
+std::string XXTEA::DecryptToString(const Bytes& data, std::string_view key) { return DecodeResult(Decrypt(data, key)); }
+std::string XXTEA::DecryptBase64StringToString(std::string_view data, const Bytes& key) { return DecodeResult(DecryptBase64String(data, key)); }
+std::string XXTEA::DecryptBase64StringToString(std::string_view data, std::string_view key) { return DecodeResult(DecryptBase64String(data, key)); }
+}
+
+```
+
+`ConsoleApp2Cpp/main.cpp`:
+
+```cpp
+#include "Activation.h"
+#include "VMProtectSDK.h"
+#include <iostream>
+#include <string>
+
+int main() {
+	VMProtectBeginUltra("main");
+	int exitCode = 0;
+	try {
+		std::cout << "Enter your key: " << std::endl;
+		const auto activateKey = console_app2::MachineID::GenerateActivateKey();
+		//std::cout << activateKey << std::endl;
+		std::string userInput;
+		const bool receivedInput = static_cast<bool>(std::getline(std::cin, userInput));
+		if (!userInput.empty() && userInput.back() == '\r') userInput.pop_back();
+		std::cout << (receivedInput && userInput == activateKey
+			? "Product Activated" : "Wrong ActivateKey :(") << std::endl;
+		std::getline(std::cin, userInput);
+	}
+	catch (const std::exception& error) {
+		std::cerr << error.what() << std::endl;
+		exitCode = 1;
+	}
+	VMProtectEnd();
+	return exitCode;
+}
+
+```
+
+`LICENSE`:
+
+```
+                                 Apache License
+                           Version 2.0, January 2004
+                        http://www.apache.org/licenses/
+
+   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
+
+   1. Definitions.
+
+      "License" shall mean the terms and conditions for use, reproduction,
+      and distribution as defined by Sections 1 through 9 of this document.
+
+      "Licensor" shall mean the copyright owner or entity authorized by
+      the copyright owner that is granting the License.
+
+      "Legal Entity" shall mean the union of the acting entity and all
+      other entities that control, are controlled by, or are under common
+      control with that entity. For the purposes of this definition,
+      "control" means (i) the power, direct or indirect, to cause the
+      direction or management of such entity, whether by contract or
+      otherwise, or (ii) ownership of fifty percent (50%) or more of the
+      outstanding shares, or (iii) beneficial ownership of such entity.
+
+      "You" (or "Your") shall mean an individual or Legal Entity
+      exercising permissions granted by this License.
+
+      "Source" form shall mean the preferred form for making modifications,
+      including but not limited to software source code, documentation
+      source, and configuration files.
+
+      "Object" form shall mean any form resulting from mechanical
+      transformation or translation of a Source form, including but
+      not limited to compiled object code, generated documentation,
+      and conversions to other media types.
+
+      "Work" shall mean the work of authorship, whether in Source or
+      Object form, made available under the License, as indicated by a
+      copyright notice that is included in or attached to the work
+      (an example is provided in the Appendix below).
+
+      "Derivative Works" shall mean any work, whether in Source or Object
+      form, that is based on (or derived from) the Work and for which the
+      editorial revisions, annotations, elaborations, or other modifications
+      represent, as a whole, an original work of authorship. For the purposes
+      of this License, Derivative Works shall not include works that remain
+      separable from, or merely link (or bind by name) to the interfaces of,
+      the Work and Derivative Works thereof.
+
+      "Contribution" shall mean any work of authorship, including
+      the original version of the Work and any modifications or additions
+      to that Work or Derivative Works thereof, that is intentionally
+      submitted to Licensor for inclusion in the Work by the copyright owner
+      or by an individual or Legal Entity authorized to submit on behalf of
+      the copyright owner. For the purposes of this definition, "submitted"
+      means any form of electronic, verbal, or written communication sent
+      to the Licensor or its representatives, including but not limited to
+      communication on electronic mailing lists, source code control systems,
+      and issue tracking systems that are managed by, or on behalf of, the
+      Licensor for the purpose of discussing and improving the Work, but
+      excluding communication that is conspicuously marked or otherwise
+      designated in writing by the copyright owner as "Not a Contribution."
+
+      "Contributor" shall mean Licensor and any individual or Legal Entity
+      on behalf of whom a Contribution has been received by Licensor and
+      subsequently incorporated within the Work.
+
+   2. Grant of Copyright License. Subject to the terms and conditions of
+      this License, each Contributor hereby grants to You a perpetual,
+      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
+      copyright license to reproduce, prepare Derivative Works of,
+      publicly display, publicly perform, sublicense, and distribute the
+      Work and such Derivative Works in Source or Object form.
+
+   3. Grant of Patent License. Subject to the terms and conditions of
+      this License, each Contributor hereby grants to You a perpetual,
+      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
+      (except as stated in this section) patent license to make, have made,
+      use, offer to sell, sell, import, and otherwise transfer the Work,
+      where such license applies only to those patent claims licensable
+      by such Contributor that are necessarily infringed by their
+      Contribution(s) alone or by combination of their Contribution(s)
+      with the Work to which such Contribution(s) was submitted. If You
+      institute patent litigation against any entity (including a
+      cross-claim or counterclaim in a lawsuit) alleging that the Work
+      or a Contribution incorporated within the Work constitutes direct
+      or contributory patent infringement, then any patent licenses
+      granted to You under this License for that Work shall terminate
+      as of the date such litigation is filed.
+
+   4. Redistribution. You may reproduce and distribute copies of the
+      Work or Derivative Works thereof in any medium, with or without
+      modifications, and in Source or Object form, provided that You
+      meet the following conditions:
+
+      (a) You must give any other recipients of the Work or
+          Derivative Works a copy of this License; and
+
+      (b) You must cause any modified files to carry prominent notices
+          stating that You changed the files; and
+
+      (c) You must retain, in the Source form of any Derivative Works
+          that You distribute, all copyright, patent, trademark, and
+          attribution notices from the Source form of the Work,
+          excluding those notices that do not pertain to any part of
+          the Derivative Works; and
+
+      (d) If the Work includes a "NOTICE" text file as part of its
+          distribution, then any Derivative Works that You distribute must
+          include a readable copy of the attribution notices contained
+          within such NOTICE file, excluding those notices that do not
+          pertain to any part of the Derivative Works, in at least one
+          of the following places: within a NOTICE text file distributed
+          as part of the Derivative Works; within the Source form or
+          documentation, if provided along with the Derivative Works; or,
+          within a display generated by the Derivative Works, if and
+          wherever such third-party notices normally appear. The contents
+          of the NOTICE file are for informational purposes only and
+          do not modify the License. You may add Your own attribution
+          notices within Derivative Works that You distribute, alongside
+          or as an addendum to the NOTICE text from the Work, provided
+          that such additional attribution notices cannot be construed
+          as modifying the License.
+
+      You may add Your own copyright statement to Your modifications and
+      may provide additional or different license terms and conditions
+      for use, reproduction, or distribution of Your modifications, or
+      for any such Derivative Works as a whole, provided Your use,
+      reproduction, and distribution of the Work otherwise complies with
+      the conditions stated in this License.
+
+   5. Submission of Contributions. Unless You explicitly state otherwise,
+      any Contribution intentionally submitted for inclusion in the Work
+      by You to the Licensor shall be under the terms and conditions of
+      this License, without any additional terms or conditions.
+      Notwithstanding the above, nothing herein shall supersede or modify
+      the terms of any separate license agreement you may have executed
+      with Licensor regarding such Contributions.
+
+   6. Trademarks. This License does not grant permission to use the trade
+      names, trademarks, service marks, or product names of the Licensor,
+      except as required for reasonable and customary use in describing the
+      origin of the Work and reproducing the content of the NOTICE file.
+
+   7. Disclaimer of Warranty. Unless required by applicable law or
+      agreed to in writing, Licensor provides the Work (and each
+      Contributor provides its Contributions) on an "AS IS" BASIS,
+      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+      implied, including, without limitation, any warranties or conditions
+      of TITLE, NON-INFRINGEMENT, MERCHANTABILITY, or FITNESS FOR A
+      PARTICULAR PURPOSE. You are solely responsible for determining the
+      appropriateness of using or redistributing the Work and assume any
+      risks associated with Your exercise of permissions under this License.
+
+   8. Limitation of Liability. In no event and under no legal theory,
+      whether in tort (including negligence), contract, or otherwise,
+      unless required by applicable law (such as deliberate and grossly
+      negligent acts) or agreed to in writing, shall any Contributor be
+      liable to You for damages, including any direct, indirect, special,
+      incidental, or consequential damages of any character arising as a
+      result of this License or out of the use or inability to use the
+      Work (including but not limited to damages for loss of goodwill,
+      work stoppage, computer failure or malfunction, or any and all
+      other commercial damages or losses), even if such Contributor
+      has been advised of the possibility of such damages.
+
+   9. Accepting Warranty or Additional Liability. While redistributing
+      the Work or Derivative Works thereof, You may choose to offer,
+      and charge a fee for, acceptance of support, warranty, indemnity,
+      or other liability obligations and/or rights consistent with this
+      License. However, in accepting such obligations, You may act only
+      on Your own behalf and on Your sole responsibility, not on behalf
+      of any other Contributor, and only if You agree to indemnify,
+      defend, and hold each Contributor harmless for any liability
+      incurred by, or claims asserted against, such Contributor by reason
+      of your accepting any such warranty or additional liability.
+
+   END OF TERMS AND CONDITIONS
+
+   APPENDIX: How to apply the Apache License to your work.
+
+      To apply the Apache License to your work, attach the following
+      boilerplate notice, with the fields enclosed by brackets "[]"
+      replaced with your own identifying information. (Don't include
+      the brackets!)  The text should be enclosed in the appropriate
+      comment syntax for the file format. We also recommend that a
+      file or class name and description of purpose be included on the
+      same "printed page" as the copyright notice for easier
+      identification within third-party archives.
+
+   Copyright [yyyy] [name of copyright owner]
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+
+```
+
+`README.md`:
+
+```md
+# codex-vmprotect-unpack-skill
+用于 ChatGPT-Codex 的 VMProtect 解包技能
+
+# 此Skill可以做什么
+去除VMProtect加密后的调试器检测以及虚拟机检测，并还原被加密的IAT表以及字符串
+
+# 支持解包的VMProtect版本范围
+理论支持 VMProtect **3.5.0 - 3.10.4(或更高版本)** 加密的 x64/x86 Exe/Dll
+
+仓库内样例程序通过此Skill成功解包的VMProtect版本列表：
+
+VMProtect 3.5.0 Ultimate x64/x86
+
+VMProtect 3.8.4 Ultimate x64
+
+VMProtect 3.8.7 Ultimate x64
+
+VMProtect 3.9.4 Ultimate x64
+
+VMProtect 3.10.3 Professional x64
+
+VMProtect 3.10.4 Lite x64/x86
+
+# 使用
+打包仓库内Skill文件为ZIP后通过CCSwitch导入或直接放入 ~/.codex/skills 中
+
+此Skill同样也支持Claude使用
+
+# 说明
+本Skill仅能保证解包VMProtect保护 无法保证还原虚拟化代码以及变异代码
+
+解包后的产物去除了VMProtect的调试器检测以及虚拟机检测 故可以正常在本地设备以及虚拟机上运行以及调试
+
+此Skill通过 **GPT-6 Astra** 生成
+
+用于脱壳训练Skill的样本程序为仓库内的 ConsoleApp2Cpp 作为样例
+
+# 鸣谢
+[@Zopiclone-main](https://github.com/Zopiclone-main)
+
+```
+
+`vmprotect-unpack/SKILL.md`:
+
+```md
+---
+name: vmprotect-unpack
+description: 分析和恢复 VMProtect 保护的 Windows 原生 PE 程序，包括解包、入口定位、导入重建、字符串恢复、反调试与反虚拟机检查分析，以及可运行性验证和逆向报告。适用于脱壳或修复受保护 EXE/DLL；参考多个 x64 版本及 Lite 3.10.4、Ultimate 3.5.0 x86 样本实测，含按需模拟兼容层和 x86/WOW64 验证流程，不保证通用去虚拟化。
+---
+
+# VMProtect 程序恢复
+
+产出可复现的恢复文件及报告。将“内容已解压”“能够运行”“所有保护已移除”分别证明；自动工具成功退出仅代表其中一个阶段。用户已有授权和文件访问边界继续有效，不重复询问已明确的事项。文件路径、工具目录、版本与配置从当前任务获取，不套用案例地址。
+
+## 开始与工具选择
+
+1. 保留原文件，记录 SHA-256、PE 位数、入口、ImageBase、节、数据目录、TLS、导入和异常表。建立任务内的 tools、analysis、intermediate、output 目录。禁止覆盖输入。
+2. 优先发现用户提供的工具与快捷方式目标。ExeInfoPE 可拖入样本识别；无 GUI 时可使用 DIE/diec、PE 解析。签名 Unknown 不否定保护存在，也不证明具体版本。区分用户提供版本与工具识别结论。
+3. 先识别 native PE、托管程序集、DLL/驱动；本流程默认原生用户态 PE。托管、驱动、虚拟化函数需要调整路线，不能当作普通 EXE 直接运行。
+   对 I386/PE32，先阅读 [x86 专用流程](references/x86-workflow.md)，使用 `--32bit` 及匹配的 catalog。不要复用 x64 地址、指针宽度、入口模式或调试上下文假设。
+4. 核对保护选项：打包、导入/资源/字符串保护、虚拟化、变异、反调试、反虚拟机。即使未选择函数虚拟化，也不假定无 SDK 或自动生成的保护跳板。
+5. 缺少工具时，在当前授权范围内查询官方文档/源仓库并下载到任务目录；记录来源、版本/提交及哈希。不要上传样本到在线脱壳服务，除非用户明确要求。不要为此修改系统安全配置。
+
+静态检查可使用 `scripts/pe_inventory.py`（依赖 pefile），具体调用见脚本 `--help`。只读取输入，结果写入显式指定目录。
+
+## 恢复路线
+
+优先使用与架构、壳版本匹配的模拟解包和导入恢复方案；阅读 [references/workflow.md](references/workflow.md) 获取工具命令、入口误判、重定位和测试细节。模拟不支持样本时再转向调试器捕获 OEP、进程转储及 Scylla 导入重建，保留每步中间产物。
+
+- 模拟中观察恢复页面、读写范围、导入解析、API/系统调用事件和当前地址。长时间运行时以状态变化判断进展，不因日志稀疏而终止，也不无依据地反复重跑。
+- 首次执行到恢复节可能只是壳或 SDK 跳板。结合反汇编、调用图、栈与运行验证确认应用入口；EXE 的 CRT 启动、TLS 回调、DLL 的 DllMain 不能互换。
+- 将转储中的模拟 API 地址、堆指针、句柄及运行后状态视为不可持久化状态。重建 IAT，并修复直接调用、跳转、指针槽和包装调用；区分调用点修复数与唯一导入数。
+- 新增导入必须有来源证据；模拟地址的数值匹配不等于函数指针。交付前及出现跨系统 Entry Point Not Found 时阅读 [导入来源审计](references/import-provenance.md)，重点复核 final_scan_only 额外导入，不能仅凭在当前 Windows 上可运行认定正确。
+- 检查文件布局、节权限、异常/unwind 表、TLS、Load Config、资源、重定位、目录边界和初始化状态。**不得默认清空 Load Config/TLS 或禁用 ASLR。** 只有证据支持且测试覆盖时才做针对性调整，并说明功能损失。
+- 字符串分为压缩恢复、编码导入名、运行时解密三类。扫描能读到字符串不代表所有字符串已解密；记录解密入口、引用、编码与长度，按实际需要恢复字符串及调用语义。
+- 反调试/反虚拟机处理要定位到具体检查或证明启动时绕过相应初始化路径。不把导入中出现 IsDebuggerPresent、VirtualAlloc 或 RtlVirtualUnwind 等名称当作需要删除的证据。不改动业务激活校验来伪装恢复成功。
+- 删除壳段前分析直接/间接代码引用、指针、异常处理器、TLS、资源及数据目录。仅改节名或抹掉壳签名不是脱壳；无法证明可删时保留并披露残留。
+
+## 验证与交付门槛
+
+保持原版与候选版的输入、参数、工作目录策略、标准输入 EOF、超时及运行环境一致。先选择不会产生无关外部副作用的测试路径。用户只授权静态分析时不运行样本。
+
+普通命令行程序可用 `scripts/compare_runs.py` 对比，必须显式传 `--execute`、两份文件、输入字节文件和结果目录。它只适用于有界标准输入/输出的单进程测试，不涵盖交互 UI、子进程生命周期或真实调试验证。
+
+至少分别记录：
+
+- PE 结构能解析、文件能装载、是否超时、退出码、标准输出与错误；超时后强制终止不算正常退出。
+- 已验证输入及分支；有效输入缺失时保留未测试结论。
+- 实际附加调试器后的行为，而非仅在模拟器中设置 BeingDebugged=0。初始系统断点与访问异常分开记录。
+- 如要声称移除反虚拟机限制，须提供对应虚拟化环境实测或对具体检查的充分代码证据；普通宿主机运行不够。
+- ASLR、首选基址限制和保留的保护依赖。与沙箱强制重定位有关的失败先查实际装载地址，不能只凭 WinError 文案认定原因。
+
+最终文件每次修改后重跑相关验证；记录交付版哈希，保留可重复构建脚本和补丁前后证据。使用 [references/report-outline.md](references/report-outline.md) 写报告。状态只能按证据写成“分析中间件”“已验证路径的可运行恢复版”或有充分证据的“完整去保护版”。未达到可运行门槛时继续定位；遇到工具不支持/缺少必要输入且无可行进展时交付诊断，不用换扩展名掩盖失败。
+
+## 案例边界
+
+开始跨版本任务时阅读 [references/version-matrix.md](references/version-matrix.md)，区分实测样本与工具声明支持范围。按需要阅读 [Ultimate 3.5.0 x86 案例](references/vmp-3.5.0-x86-case.md)、[Lite 3.10.4 x86 案例](references/vmp-lite-3.10.4-x86-case.md)、[Lite 3.10.4 x64 案例](references/vmp-lite-3.10.4-case.md)、[3.10.3 案例](references/vmp-3.10.3-case.md)、[3.9.4 案例](references/vmp-3.9.4-case.md)、[3.8.7 案例](references/vmp-3.8.7-case.md)、[3.8.4 案例](references/vmp-3.8.4-case.md) 或 [3.5.0 案例](references/vmp-3.5.0-case.md)。所有 RVA、哈希、节名和统计仅属于相应样本，不能当作新样本补丁。
+
+```
+
+`vmprotect-unpack/references/import-provenance.md`:
+
+```md
+# 导入来源与跨 Windows 版本审计
+
+在较新 Windows/catalog 下运行通过，不证明旧版 Windows 能装载。新增静态导入会在程序入口执行前就要求目标系统提供对应导出；不能把 Entry Point Not Found 一律归因于用户 DLL 缺失，也不建议用户复制新版系统 DLL。
+
+## 保留来源
+
+x86 适配器支持 `--import-evidence path.json`（在 `--` 前，要求新文件），在重建前保存 bootstrap、解析写入、编码元数据及最终扫描来源。例如：
+
+```powershell
+python "$skillDir\scripts\run_x86_compat.py" --tool-root .\tools\vmp-lazy-unpack-main --import-evidence .\analysis\imports-evidence.json -- .\sample.exe sample.stage1.exe --32bit
+python "$skillDir\scripts\audit_import_evidence.py" .\sample.stage1.exe --evidence .\analysis\imports-evidence.json --reconstruction .\analysis.imports.json --out .\analysis\imports-audit.json
+```
+
+审计工具只列出需要复核的 final_scan_only 候选，不自动删除。单独检查这些候选是否存在原导入描述符、编码元数据、真实 API 解析写入、调用点或可信数据引用。重建器自己生成的 thunk/IAT 不能反过来当作原始程序调用证据。
+
+## 数值碰撞的实测错误
+
+模拟模块的 API 地址只是人工布局中的整数。原代码/位移/字节码里相同的 4 字节并不一定是函数指针。旧版 x86 分类器曾把恢复区中的每个非 bootstrap 扫描匹配都加入额外导入。
+
+Ultimate 3.5.0 x86 的四项误报仅有 final_scan_only 来源，无 bootstrap、编码表或指令补丁证据，也没有对槽地址的绝对引用。其中 RVA `0x16A414` 的 `00 0F 84 70` 跨越比较指令尾部与条件跳转，却匹配模拟 NtAllocateVirtualMemoryEx 地址。另三个匹配 Heap32ListNext、GetUserDefaultGeoName、ZwSetInformationCpuPartition。误报不仅增加不必要依赖，还会改坏原字节；Windows 11 可解析导出，掩盖了问题，用户的 Windows 10 在入口前报错。
+
+缺少绝对引用本身不构成删除证明，编码/间接引用可能存在；需要结合来源、上下文及原值证据。此案例经过联合复核后恢复四处原字节并移除对应导入，而非将它们重命名成旧系统 API 或提供虚假成功桩。
+
+## 修复与验证约束
+
+- 修改导入表时保持所有保留 IAT 单元地址不变。不能删除中间元素后整体平移 IAT，代码仍可能引用旧地址。可按经过审核的布局拆分同 DLL 描述符，并在被移除的 INT/IAT 单元终止原连续段。
+- 同时撤回误识别槽对应的字节改写，保留精确前后值与输入哈希。
+- 重新解析完整导入表，确认误报身份消失、保留项数量/地址正确，检查资源与装载元数据，再重跑原生功能及调试测试。
+- 如果有目标系统的可信导出目录，可做静态依赖审计；不要使用分析机的 Win11 导出存在性代替 Win10 验证。
+- 没有真实目标系统实测时，结论写成“已移除该缺失依赖，本机回归通过，目标系统待复测”，不要宣称所有 Windows 10 版本已兼容。
+
+```
+
+`vmprotect-unpack/references/legacy-compat.md`:
+
+```md
+# 旧版 x64 模拟兼容层
+
+仅在普通流程出现对应缺口时启用 `scripts/run_with_winstation.py`；该命令行入口仅用于 x64，不是所有版本的默认选项，也不是宿主 API hook 或原 EXE 的永久补丁。x86 通过专用 `run_x86_compat.py` 的显式选项复用经验证的辅助模型，不直接给此入口传 `--32bit`。脚本通过当前进程内的适配器扩展已下载的 vmp-lazy-unpack，不修改上游源码。上游已经实现的 API 不被覆盖。
+
+```powershell
+$env:PYTHONPATH = "$PWD\tools\pylibs"
+python -u "$skillDir\scripts\run_with_winstation.py" --tool-root .\tools\vmp-lazy-unpack-main --ntdll-resources -- .\sample.exe sample.stage1.exe --diagnostics
+```
+
+脚本依赖上游 ApiHandlers、catalog 和 synthetic PE 布局。变更工具版本后须重新检查接口与测试，不能保证自动兼容。命令行入口仍拒绝 `--32bit`；共享资源函数已按架构核对 catalog/Magic，并选择 PE32/PE32+ 的资源目录偏移，分别经过回归验证。工具根必须含 unpack/tracer.py，依赖安装在任务环境中。
+
+## 已实现的有限模型
+
+- GetProcessWindowStation：返回稳定的模拟窗口站句柄。GetUserObjectInformationA/W 仅支持此句柄的 UOI_FLAGS，返回 12 字节 USEROBJECTFLAGS，处理短缓冲区、输出长度和无效地址；其他信息类停止。
+- CheckRemoteDebuggerPresent：仅支持当前进程伪句柄；成功返回非零，并写入 FALSE，表示所建模的进程没有被调试。不能把返回值零当作“没有调试器”。
+- EnumSystemFirmwareTables / GetSystemFirmwareTable：采用与上游固件模型一致的 UEFI 场景，FIRM 返回不支持；RSMB 枚举表 ID 0，内容复用上游 smbios_table()，支持查询长度、短缓冲区和实际复制。未知 provider 停止，不能伪造任意 ACPI 表。
+- `--ntdll-resources`：从随工具提供的 ntdll.dll **原样复制版本资源载荷**，重建其三级资源目录到 synthetic ntdll 中。不是伪造任意 Windows 版本，也不读取宿主系统 DLL。仅支持当前观察到的单个数字 ID、单语言版本资源，校验 PE64 头、空间和目标区为空；不匹配就停止。
+
+窗口站模型在本次失败路径调查中调用过；成功流程的关键差异是补充 ntdll 版本资源和缺失的调试/固件 API。脚本没有吞掉 MessageBox，也没有“所有未知 API 一律成功”的兜底。
+
+参考官方语义：[GetProcessWindowStation](https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getprocesswindowstation)、[GetUserObjectInformationW](https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getuserobjectinformationw)、[CheckRemoteDebuggerPresent](https://learn.microsoft.com/en-us/windows/win32/api/debugapi/nf-debugapi-checkremotedebuggerpresent)、[EnumSystemFirmwareTables](https://learn.microsoft.com/en-us/windows/win32/api/sysinfoapi/nf-sysinfoapi-enumsystemfirmwaretables)、[GetSystemFirmwareTable](https://learn.microsoft.com/en-us/windows/win32/api/sysinfoapi/nf-sysinfoapi-getsystemfirmwaretable)。
+
+## 验证要求
+
+验证 API 的成功/失败返回值、输出缓冲区、所需长度、未知信息类停止，以及版本资源载荷与 catalog 原始数据一致。记录新增模型确实执行过的事件；某个方法经过单元检查不代表已被目标调用。之后仍需真实原生运行、调试及功能对比；模拟通过不能替代真实虚拟机验证。
+
+```
+
+`vmprotect-unpack/references/report-outline.md`:
+
+```md
+# 逆向报告内容
+
+按证据填写，不把未完成事项写成已完成：
+
+1. **结论和交付等级**：恢复文件位置，可运行范围，是否保留保护代码及固定基址限制。
+2. **样本标识**：输入/输出哈希和大小，架构，ImageBase，入口，节与目录；保护版本的证据来源。
+3. **方法与复现**：工具来源/版本/提交/哈希、依赖、命令、日志位置、所需权限与执行环境。
+4. **修复细节**：解压范围，候选入口验证，IAT/API 引用修复，TLS、异常、重定位、Load Config、资源和字符串的处理证据。每个修改记录理由、RVA/文件偏移、前后值。
+5. **反调试/反虚拟机**：明确已移除的具体检查、绕过的启动路径、残余依赖及实际测试环境；没有测试就写未测试。
+6. **测试矩阵**：原版与候选版输入、参数、EOF、工作目录、环境、自然退出/超时、输出及错误；标明缺少有效输入等覆盖限制。
+7. **未解决内容**：保留调用、SDK/字符串路径、ASLR、无法证明的功能等，并写明下一步所需证据。
+8. **交付清单**：最终 EXE/DLL、报告、补丁/重建脚本、导入清单与关键日志。中间文件单独命名；最终哈希与被测试文件一致。
+
+不要声称：扫描器不再报壳就完全脱壳、某个错误输入可运行就全部等价、无虚拟化选项就不存在保护跳板、模拟器通过就真实虚拟机通过。
+
+```
+
+`vmprotect-unpack/references/version-matrix.md`:
+
+```md
+# 已验证范围
+
+这是样本级实测矩阵，不是整个版本或产品版本系列的兼容性保证。八个样本使用同一份 vmp-lazy-unpack 源归档（哈希记录于案例）；x64 的 3.8.4、3.8.7、3.9.4、Professional 3.10.3、Lite 3.10.4 未启用额外模拟适配器，x64 3.5.0、x86 Lite 3.10.4 和 x86 Ultimate 3.5.0 按需使用不同的进程内兼容层。上游源码文件保持原样，不代表运行模型完全相同。用户称程序功能和保护参数相同、未选择函数虚拟化/变异；x86 为重新编译的 32 位产物，不能与 x64 视为同一二进制。
+
+| 保护版本（用户提供） | 架构/类型 | 模拟解包 | 导入项/修复引用 | 原生行为/调试 | 限制 |
+| --- | --- | --- | --- | --- | --- |
+| Professional 3.10.3 | x64 原生 EXE | 成功，约 427 秒 | 163 / 410 | 五组输入通过；附加调试通过；用户反馈虚拟机与功能正常 | 固定基址；保留保护段；Load Config 已清除 |
+| Lite 3.10.4 | x64 原生 EXE | 常规流程成功，约 174 秒 | 163 / 416 | 五组输入通过；附加调试通过；资源载荷一致 | 固定基址；保留保护段；Load Config 保留；无旧版兼容层 |
+| Lite 3.10.4 | x86 原生 EXE | 常规模式失败；x86 兼容层与选择性回调后成功，成功轮约 85 秒 | 168 / 29；422 个包装候选未展开 | 五组输入通过；WOW64 调试通过；资源一致；可移植脚本复跑中间哈希相同 | 固定基址；保留包装/保护代码；保留 Load Config/SafeSEH；选择性计数非全量基本块 |
+| Ultimate 3.5.0 | x86 原生 EXE | 常规模式失败；旧版环境适配后模拟约 32 秒，包装回退后原生通过 | 兼容修正版 171 / 31；261 个包装改写回退；移除四项扫描误报 | 本机五组输入/WOW64 调试通过；用户 Win10 报错后已修正导入，Win10 待复测 | 固定基址；保留包装；Load Config/SafeSEH 保留 |
+| Ultimate 3.9.4 | x64 原生 EXE | 成功，约 248 秒 | 164 / 410 | 五组输入通过；附加调试通过；用户反馈正常工作 | 固定基址；保留保护段；Load Config 保留；未做该样本虚拟机复测 |
+| Ultimate 3.8.4 | x64 原生 EXE | 成功，约 476 秒 | 164 / 410 | 五组输入通过；附加调试通过；资源载荷一致；用户反馈正常工作 | 固定基址；保留保护段；Load Config 保留；保护区异常表有一处范围重叠 |
+| Ultimate 3.8.7 | x64 原生 EXE | 常规流程成功，成功轮约 195 秒；首次诊断日志 I/O 失败后关闭详细日志重试 | 164 / 403 | 五组输入通过；附加调试通过；资源载荷一致；用户反馈正常工作 | 固定基址；保留保护段；Load Config 保留；无旧版兼容层 |
+| Ultimate 3.5.0 | x64 原生 EXE | 原流程失败；兼容层后成功，成功轮约 239 秒 | 170 / 349 | 五组输入通过；附加调试通过；资源载荷一致；用户反馈正常工作 | 固定基址；保留保护段；Load Config 保留；保护区异常表三组相邻范围重叠 |
+
+其他版本、其他 x86 配置、DLL、托管程序，以及启用函数虚拟化/变异的配置尚未由本技能实测。上游 README 的 3.4/3.9/3.10/3.11 支持声明只能用于选择工具，不能填入本矩阵作为成功记录。
+
+增加矩阵行前保留：输入/输出哈希、准确的版本来源、架构/保护选项、工具版本、实际入口/配置修改、最终文件行为和调试日志、保留的限制。新的样本即使版本相同，也需独立验证。
+
+```
+
+`vmprotect-unpack/references/vmp-3.10.3-case.md`:
+
+```md
+# 参考案例：ConsoleApp2Cpp
+
+保护版本由用户确认：VMProtect Professional 3.10.3；用户称未选择函数虚拟化及变异。版本不是由 DIE 签名独立识别：DIE 当时返回 Unknown。
+
+## 已获得证据
+
+- AMD64 PE，输入 12,755,456 字节，ImageBase `0x140000000`，壳入口 RVA `0x128A302`。
+- `.text` 等原始节磁盘大小为零；模拟解压恢复八个节、2,284 个页面。
+- vmp-lazy-unpack 使用 Python hooks，约 427 秒、112,990,816 个基本块；文件校验阶段缓慢但扫描位置持续前进。
+- 自动重建 163 个导入，修复 410 处调用/跳转引用。唯一导入数与修复次数不可混用。
+- 自动 stop 地址 `0x1401C7F8C` 落在 `.rgG` 的保护跳板。以此启动时访问模拟堆 `0x20000001180` 崩溃，证明不是可直接替代的应用入口。
+- 另找到并验证 CRT 入口 RVA `0xB45E0`。该地址**只属于本样本**。
+- 案例交付采用固定基址，并清除原壳 Load Config/重定位目录。这是有功能限制的样本修复，**不是默认步骤**。
+- 普通运行及真实附加调试器时正常输出并退出码 0；五组无效/空输入与原程序相同。原文件附加调试器后 15 秒无正常输出，测试器终止；未逐条定位触发检查。
+- 提示字符串 `Enter your key:`、`Product Activated`、`Wrong ActivateKey :(` 已可直接读取。
+- 后续用户反馈：恢复版在其虚拟机内正常运行、可以正常调试、功能正常。属于用户实测反馈；未记录虚拟机产品/版本和逐项测试步骤，不外推到所有虚拟化环境。
+
+## 没有证明的事项
+
+- 未验证有效密钥成功分支。
+- 代理未独立复测虚拟机环境；用户反馈支持其测试环境可用，不能声称普遍去除反虚拟机限制。
+- `.text` 扫描发现 71 处指向保留保护区的直接引用，因此没有删除所有壳段。
+- 未恢复全部 ASLR/重定位能力，也未证明所有 SDK 分支和加密字符串均已恢复。
+
+输入 SHA-256：`B029181DEFB1B543A15C92E73BBFB6B83D239B410E07ACAAE10840002CAD64CF`。
+
+交付 SHA-256：`204FC1818355ABB28817FDDD51A8413326DC76FF7B498DE5A8614F9426B18160`。
+
+工具归档 SHA-256：`F00C759DA284B99F6A904CBBEA26A699C58BAE4D2911AB6A7B9B888375EF8708`；依赖 pefile 2024.8.26、capstone 5.0.9、unicorn 2.1.4。这些版本用于复现来源记录，不构成未来任务固定版本要求。
+
+此案例的合理状态是“已验证路径的可运行恢复版”，不是“通用完整去保护成功”。复用决策与验证流程，不复用偏移、地址或结论。
+
+## 重定位证据的边界
+
+早期候选在非首选基址运行时访问旧基址而崩溃，但当时采用的是保护跳板入口；这不足以单独证明改用最终 CRT 入口后仍必须固定基址。后续样本应先保持装载配置，仅修改有依据的入口并测试，再根据最终候选的实际失败定位重定位问题。不要把早期候选的失败条件直接继承为最终文件的限制。
+
+```
+
+`vmprotect-unpack/references/vmp-3.5.0-case.md`:
+
+```md
+# 参考案例：VMProtect Ultimate 3.5.0
+
+用户提供文件名 `ConsoleApp2Cpp_VMP_Ultimate.3.5.0.vmp.exe`，说明相同参数。DIE 识别范围为 VMProtect 3.2.0–3.5.0，精确版本来自用户。输入 6,000,640 字节，AMD64 EXE，壳入口 RVA `0x54A03C`，ImageBase `0x140000000`，22 个磁盘导入。
+
+## 原流程不能直接完成
+
+1. 原模拟器在 user32!GetProcessWindowStation 停止（unknown_import）。
+2. 添加窗口站/UOI_FLAGS 模型后，在 MessageBoxW 处读到“A debugger has been found running in your system.”。诊断显示样本读取模拟 ntdll 的空资源目录。
+3. 从随工具提供的 ntdll 复制 896 字节真实版本资源载荷，重建 984 字节资源目录；不改变版本载荷。此后不再进入此前错误路径，继续到缺失的 CheckRemoteDebuggerPresent。
+4. 按当前进程无调试器的模型补充该 API，必须返回成功并写出 FALSE。运行约 147 秒后又遇到 EnumSystemFirmwareTables('FIRM') 缺失。
+5. 按上游已有固件模型的 UEFI 场景补充固件 API，FIRM 返回不支持；最终运行成功。
+
+具体实现与官方语义链接见 [legacy-compat.md](legacy-compat.md)。成功轮实际调用了新增 CheckRemoteDebuggerPresent 和 FIRM 枚举模型；窗口站模型用于失败路径调查，RSMB 读写通过单元检查但未在成功轮观察到调用。不要把“兼容层里存在”写成“目标实际调用过”。没有吞掉 MessageBox 或统一跳过未知 API。
+
+## 成功轮与验证
+
+约 239 秒，90,797,689 个基本块，恢复 1,299 页；170 个 IAT 项；303 处调用、41 处跳转、5 处加载共 349 个引用；22 个普通槽和 230 个编码槽。239 秒不含此前失败与重跑时间。
+
+自动 stop `0x1401C1B5C` 位于 `.vmp0`。重新发现 CRT 候选 `0xB45E0`/`0xB48B0`，反汇编并测试选用前者。仅改入口的版本在实际基址 `0x7FF7B1AC0000` 下执行旧地址 `0x140AD1BB8` 而崩溃；固定基址后正常运行。保留 Load Config（RVA `0xABFE10`、大小 `0x140`）；自动重建到最终版仅 8 个 PE 头字节变化。
+
+五组空/无效输入与原文件一致、均退出 0；真实附加调试只有系统初始断点并正常退出。资源载荷一致。异常表 4,959 项且已排序，但保护区三组相邻区间重叠；`.text` 扫描有 137 处指向保护区的直接引用，不能删除全部壳段。仍未验证有效密钥、所有异常/SDK 路径、真实虚拟机或完整重定位。
+
+输入 SHA-256：`DC82B66BD32A20A16AB96D62933013C2948EE06DD3CDC0A75409F5B8D466EF95`。
+
+中间 SHA-256：`92B4B13B554F37A1AE8D98073D6DF12E51A3D511C5BAEA3BA86B48114F4495B3`。
+
+最终 SHA-256：`E48A4887F7E33E083EF5D387F3BDA864686F7D9A3EF8B2B104026F1C791E8399`。
+
+结论：旧技能原样运行失败；加入有明确语义、可测试的模拟兼容层后，可获得已验证路径的可运行恢复版。此结论不能外推为所有 3.5.0 配置或全部旧版本均支持。
+
+后续用户确认此恢复版“可以正常工作”。这是用户侧成功复测；未提供具体输入、虚拟机和调试环境，不能自行扩展测试覆盖范围。
+
+```
+
+`vmprotect-unpack/references/vmp-3.5.0-x86-case.md`:
+
+```md
+# Ultimate 3.5.0 x86 实测
+
+版本来自用户，DIE 识别 VMProtect 3.2.0–3.5.0。输入 6,095,872 字节，I386/PE32，基址 `0x400000`，壳入口 RVA `0x4E16F4`，22 个磁盘导入。
+
+常规模式在 GetProcessWindowStation 停止。添加 x86 窗口站模型后，MessageBoxW 报调试器检测；只提取文本并停止，没有吞错。补充匹配 catalog 的 32 位 ntdll 版本资源后模拟成功，资源目录偏移为 `0x108`（不是 x64 的 `0x118`），896 字节版本载荷与 catalog 一致。x86 栈参数/stdcall 清栈和 x64 原资源路径均有回归检查。
+
+选择性回调成功轮约 32 秒，恢复 1,191 页。445 是回调计数，不是基本块总数。自动 stop `0x569A02` 在 `.vmp0`。重新确认 CRT 入口 RVA `0xA7B60`；ASLR 候选在 `0x930000` 装载时读取旧地址 `0x54D180` 崩溃，交付使用固定基址。
+
+## 包装改写失败
+
+工具生成 175 个 IAT 项、31 个静态引用补丁及 261 个包装改写，共 292 处；459 个包装候选中 261 个报告 resolved、198 个拒绝。但首个固定基址候选五组对比全部失败，在 `0x4F9B54` 崩溃。该地址位于新 GetProcAddress 调用的末字节：RVA `0xF9B4F` 原 `E8 11 F0 16 00 C3` 被改成 `FF 15 98 B1 E7 00`。这提示旧返回位置可能仍被引用，但未独立证明只有这一处是全部根因。
+
+验证补丁原值后，回退全部 261 个包装改写，保留 175 项 IAT、32 个普通槽、215 个编码槽及 31 个静态引用修复。最终五组输入与原版一致、退出 0，WOW64 调试通过。回退项不能继续算作最终展开成功项。
+
+资源一致；Load Config 目录 RVA `0xA780C0`，目录大小 `0x40`，内部 Size `0xC0`；SafeSEH 表地址 `0xE78180`、415 项，已排序且 RVA 在映像内。最终扫描仍有 469 处保护区直接引用。有效密钥、真实虚拟机、全部 SEH/SDK 路径及完整重定位未验证；不是完整去保护。
+
+输入 SHA-256：`9BE621DBA5BBFF1BE3F89520A4146F6BB93B81D847D8F0E9469B7AA3A3D12E1D`。
+
+中间 SHA-256：`EFA157B7F7CA9D1466C4ADB8644C28D4FEB0AAEBB7AFDFD4007A37C2C14FECB1`。
+
+首次失败候选 SHA-256：`8DF793AD4AEA4F7B59A6786D9BE5B1717541F0EC9A2889524A286A58F4D76E1A`。
+
+最终 SHA-256：`3778BD6E411FBD42F18334250C9E40301FFAD49EDB5E0DA65D6879DB2E20804F`。
+
+结论：本样本需要旧版 x86 环境适配及有证据的包装回退；API 名解析成功不能自动证明改写后的调用、返回及栈行为正确。
+
+## 后续 Win10 兼容修正（取代上方旧交付统计）
+
+用户反馈旧版在 Win11 正常，但 Win10 缺少 ZwSetInformationCpuPartition 入口。追溯发现四个 final_scan_only 数值碰撞误报，既不来自 bootstrap/编码导入，也没有相应指令补丁或对槽地址的绝对引用。其中 NtAllocateVirtualMemoryEx 的所谓指针实际跨越正常指令字节。
+
+恢复 RVA `0x16A414`、`0x1F105C`、`0x471DB4`、`0x473468` 的原值，并移除误加的 NtAllocateVirtualMemoryEx、Heap32ListNext、GetUserDefaultGeoName、ZwSetInformationCpuPartition。保留 IAT 地址不变，必要时拆分 KERNEL32 描述符；不替换 API、不复制系统 DLL。修正版实际导入为 171 项，已无 NTDLL 导入描述符。
+
+兼容修正版 SHA-256：`DD243320E846EE32B41F82CE9FCE479787BAFD7DB531D90EAEF555CA857B83F1`。本机五组对比与 WOW64 调试通过；真实 Win10 仍待用户复测。旧 175 项/3778BD6E…版本只保留作证据，不应继续作为推荐产物。详见 [导入来源审计](import-provenance.md)。
+
+```
+
+`vmprotect-unpack/references/vmp-3.8.4-case.md`:
+
+```md
+# 参考案例：VMProtect Ultimate 3.8.4
+
+版本/相同参数来自用户说明，DIE 普通签名为 PE64/Unknown。输入 14,187,520 字节，AMD64 原生 EXE，基址 `0x140000000`，壳入口 RVA `0xAB203C`。与前例不同，磁盘有 12 个导入，末尾先 `.reloc` 后 `.rsrc`；保护节名也不同。
+
+同一份未修改的 vmp-lazy-unpack 完成解包，约 476 秒、148,965,733 个基本块，恢复 2,418 个页面。长循环确认为逐字节 CRC：读取指针增加、剩余计数减少，不是卡死。恢复 164 个 IAT 项，362 处调用、47 处跳转、1 处加载共 410 个引用，12 个普通槽及 222 个编码槽。
+
+自动 stop 为 `0x1401C3FD0`，落在 `._^P` 保护节，不能当作应用入口。只读候选扫描独立找到 `0xB45E0`、`0xB48B0`，经反汇编确认前者调用 cookie 初始化并跳入 `0xB4600`。仅改入口版本实际装载在 `0x7FF63E3D0000` 后执行旧地址 `0x140001A55`，发生 `0xC0000005`。随后固定基址并清除不完整 relocation 目录，保留 Load Config（RVA `0x16EE270`，大小 `0x140`）；最终只改变自动重建文件中的 10 个 PE 头字节。
+
+五组输入（空行、abc、123456、32 个零、4,096 个 A）与原文件输出/退出码一致且均为 0。真实附加调试器只出现系统初始断点，正常输出并退出 0。原文件调试测试超时后由测试器终止。尚未验证本样本的真实虚拟机、有效密钥分支或全部 SDK 路径。
+
+资源路径 `[24,1,1033]` 的 381 字节 manifest 在恢复前后哈希一致；运行时函数表 4,865 项且实际已排序，但保护区存在一个范围重叠：`[0xC0E8C6,0x12A024E)` 与 `[0x129EA35,0x129EC1B)`。保留条目并披露，不宣称所有异常路径已验证。`.text` 扫描仍有 62 处指向保护区的直接引用，因此不删除所有壳段。
+
+输入 SHA-256：`9338965D58C390A675B30990DF6427824E7987DEBBEA8BCADC1EDD5F939BA2DB`。
+
+自动重建 SHA-256：`E188A85F5BFD1A84EEB74433DC0007760453D28AC0BB9FF952CB80761CA5B972`。
+
+最终 SHA-256：`A8205752B119444BC75FB93522E624E2576340A9D669E140BBF5B9B7C89F904B`。
+
+结论：既有技能流程和工具可恢复此 3.8.4 样本，无需版本专用解包补丁；新增资源载荷和异常表实值检查提高了跨版本验证覆盖。仍为固定基址、有残余保护代码的已验证路径恢复版。
+
+后续用户反馈此恢复版“可以正常工作”。记录为用户成功复测，不据此补填未提供的虚拟机、输入或调试环境细节。
+
+```
+
+`vmprotect-unpack/references/vmp-3.8.7-case.md`:
+
+```md
+# 参考案例：VMProtect Ultimate 3.8.7
+
+版本和相同参数来自用户说明。DIE 普通签名返回 PE64/Unknown。输入 12,750,848 字节，AMD64 EXE，ImageBase `0x140000000`，壳入口 RVA `0xEBA2CA`，磁盘导入 5 项，保护段名 `.97l`、`.B"Y`、`.FNO`。
+
+## 诊断日志失败与重试
+
+首次常规运行约 164 秒时，在 Diagnostics.save_ntdll_reads 的 `ntdll-reads.json.tmp` 原子替换发生 PermissionError/WinError 5。异常堆栈定位到宿主诊断文件 I/O，不是未知 API 或被模拟程序异常。保留失败记录后，取消 `--diagnostics` 在新运行目录重试。没有修改 API/资源模型，也没有启用 3.5.0 兼容层。不能无依据地归因于特定杀毒程序。
+
+成功轮耗时约 195 秒，不含首次失败时间。263,144,990 个基本块，恢复 2,220 页；164 个 IAT 项；362 处调用和 41 处跳转共 403 处引用修复；11 个普通槽、221 个编码槽。保留常规 progress/events/summary/导入重建记录，成功轮没有详细 import_calls 等可选诊断日志。
+
+## 入口、修复及验证
+
+自动 stop `0x1401C4B58` 在恢复后的 `.97l` 保护区。候选扫描独立找到 `0xB45E0` 与 `0xB48B0`，经反汇编/原生测试选用前者。仅改入口版本装载于 `0x7FF6B0BF0000` 后执行旧地址 `0x140001A55`，触发 `0xC0000005`。固定基址后运行正常；保留 Load Config（RVA `0x14C9FF0`、大小 `0x140`）。自动重建到最终版只改变 9 个 PE 头字节。
+
+五组输入（空行、abc、123456、32 个零、4,096 个 A）与原文件输出和退出码一致，均为 0。真实附加调试器仅系统初始断点，正常输出并退出 0。原保护文件附加调试器后 15 秒无正常输出，被测试器终止。
+
+资源载荷一致；4,861 项异常记录实际已排序，未发现相邻范围重叠。`.text` 线性扫描仍有 70 处指向保护区的直接引用，因此保留保护段。未测试有效密钥、真实虚拟机、所有间接调用/异常/SDK 路径及完整重定位；不能把当前结果称为完整去保护。
+
+输入 SHA-256：`5379D1F332A7BC22CE9014B5406A4ACA8390F99D602EDAF1AAD510229329E39B`。
+
+中间 SHA-256：`F6E5826753800C8922E9BD00EE0F783B2C2F8A649AE13E1B5AF3DBAA04F4EC4E`。
+
+最终 SHA-256：`9A843623794A41D76D86910B888F8F35ED0E1D7516DDD71A50F686C5311ECE8F`。
+
+结论：当前常规流程可恢复此样本，无需解包引擎补丁或旧版兼容层。新增经验是区分可选诊断 I/O 失败与样本兼容问题，重试时保持模拟语义不变。
+
+后续用户确认该恢复版“可以正常工作”。记录为用户成功复测，不自行补充未提供的输入或环境细节。
+
+```
+
+`vmprotect-unpack/references/vmp-3.9.4-case.md`:
+
+```md
+# 参考案例：VMProtect Ultimate 3.9.4
+
+用户提供 `ConsoleApp2Cpp_VMP_Ultimate_3.9.4.vmp.exe`，说明与 3.10.3 案例使用相同原程序和保护参数。DIE 普通签名仍返回 Unknown；版本来自用户，非扫描器识别。
+
+- AMD64 PE；输入 15,312,384 字节；ImageBase `0x140000000`；壳入口 RVA `0x129922F`。
+- 原始节布局相同，但保护节为 `.Aka`、`.7pb`、`.NAS`，不可依赖 `.vmp*` 名称。
+- 未修改解包引擎，沿用工具归档及随附 catalog；约 248 秒、73,202,559 个基本块，恢复 2,583 个页面。
+- 重建 164 个导入、362 处调用和 48 处跳转；11 个普通槽、221 个编码槽。
+- 首次进入恢复代码的地址为 `0x1401C7EB8`，位于 `.Aka` 保护代码，不是直接交付入口。
+- 用新的只读 CRT 候选扫描脚本独立发现 `0xB45E0` 和 `0xB48B0`，两者转至 `0xB4600`；反汇编及运行验证采用前者。地址相同是该相同原程序案例的结果，不是版本通用偏移。
+
+## 最小变更验证
+
+1. 自动重建产物只改入口，保留 ASLR、重定位目录和 Load Config。
+2. 实际装载基址 `0x7FF7D27C0000` 时，执行旧地址 `0x140001A55`，触发 `0xC0000005`。此失败发生在最终选定的 CRT 入口版本，直接支持该候选缺少完整重定位的判断。
+3. 只进一步关闭 DYNAMIC_BASE/HIGH_ENTROPY_VA、设置 RELOCS_STRIPPED、清除 relocation 目录。Load Config 保留在 RVA `0x18A6620`、大小 `0x140`。
+4. 固定在 `0x140000000` 后，普通五组输入及真实附加调试测试全部通过、退出码 0。自动重建文件到最终文件仅 11 个字节不同，均位于上述 PE 头字段。
+
+本例证明不能把“清除 Load Config”作为所有版本的必需步骤；它未证明保留的壳相关配置在所有环境或路径均无影响。保留的异常表有 4,864 项，实际检查已排序；工具报告 `table_sorted: false` 不应单独解释为“输出未排序”，需检查实际数据。
+
+## 边界
+
+`.text` 线性扫描仍有 74 处指向保护区的直接引用，因此没有删去所有保护段。已恢复三条主要业务提示，但不声称解密了所有运行时字符串。五组测试为空行、abc、123456、32 个零、4,096 个 A；未验证有效密钥分支。原文件调试测试 15 秒无正常输出后被测试器终止；恢复版仅出现系统初始断点并正常结束。3.10.3 的用户虚拟机反馈不自动覆盖此样本。
+
+输入 SHA-256：`729D06C324EEDE81B9B5223B56241F87183FABBEE20768A94314CD2559797A3E`。
+
+自动重建 SHA-256：`8A3E01B60E6A417BBB0B5EEB42D92EBB7D2EA4D45A9EC246581D6C2FD165F978`。
+
+最终 SHA-256：`2FFDAF25B27406C3F74D181C645A000A9F97782E1E7C746194CA7EF30EDF81B3`。
+
+结论：现有流程支持该 3.9.4 样本的可运行恢复，无需新增版本特定解包算法。新增候选发现脚本和最小变更验证提高复用可靠性，不能据此保证所有 3.9.4 文件或其他版本完整去保护。
+
+后续用户反馈该恢复版“可以正常工作”。这是用户侧成功复测；没有提供具体输入、虚拟机型号或调试步骤，不将其扩展为新的环境矩阵证明。
+
+```
+
+`vmprotect-unpack/references/vmp-lite-3.10.4-case.md`:
+
+```md
+# 参考案例：VMProtect Lite 3.10.4
+
+产品、精确版本及相同参数来自用户说明；DIE 普通签名为 PE64/Unknown。输入 12,782,592 字节，AMD64 EXE，基址 `0x140000000`，壳入口 RVA `0xEE6187`，磁盘导入 5 项，原节 raw size 为零，保护节名与前例不同。
+
+本轮预先取消可选 `--diagnostics`（前轮曾遇日志 I/O 失败），保留常规 progress、events、summary 和导入重建明细。直接使用未修改的常规解包器，没有启用旧版 API/资源兼容层。约 174 秒、69,306,488 个基本块，恢复 2,294 页；163 个 IAT 项，362 处调用与 54 处跳转，共 416 处引用；11 个普通槽、220 个编码槽。没有重建错误。
+
+自动 stop `0x1401C7F8C` 位于恢复后的保护段 `.3G[`。候选脚本独立发现两个 CRT 形态，反汇编及实际运行验证采用 `0xB45E0`。仅改入口的 ASLR 候选在 `0x7FF675DC0000` 装载后执行旧地址 `0x140001A55`，发生 `0xC0000005`。固定首选基址、清除不完整 relocation 目录后正常；保留 Load Config（RVA `0x151B9F0`、大小 `0x140`）。自动输出到最终文件只改变 9 个 PE 头字节。
+
+原保护文件普通运行成功，但调试测试在约 12.482 秒以 `0xDEADC0DE` 退出，未输出业务提示，不是测试器超时杀进程。不要将这个退出码视为所有 VMProtect 文件共有的特征。恢复版五组空/无效输入与原文件一致、均退出 0，真实附加调试仅出现系统初始断点并正常退出 0。
+
+资源载荷保持一致；4,916 个运行时函数记录已排序，未发现相邻范围重叠；`.text` 扫描有 68 处指向保护区的直接引用，故保留保护段。未验证有效密钥、真实虚拟机、全部 SDK/间接调用/异常路径或完整重定位。结果为固定基址的已验证路径恢复版，不是完整去保护。
+
+输入 SHA-256：`4663599D9768A08C34FE3F6338D510F5A47EE815DE1AFDA9CA275D99CE74FF18`。
+
+中间 SHA-256：`D17C2DAC7BA1AB5FC2A7A24B06FB03751F09E0F4A879A3C38051E6B6EA436529`。
+
+最终 SHA-256：`1C8B533B3D643EDD6343F410B237DD8ACE6B6E1BA1ADB39D8C60F94244B378B5`。
+
+结论：现有常规流程可处理此 Lite 样本，不需要新增兼容代码。Lite/Professional/Ultimate 名称不应代替结构和功能验证，也不应自动决定删除哪些目录或保护段。
+
+```
+
+`vmprotect-unpack/references/vmp-lite-3.10.4-x86-case.md`:
+
+```md
+# Lite 3.10.4 x86 实测
+
+版本来自用户说明，DIE 普通签名为 PE32/Unknown。输入 12,277,248 字节，Machine 0x14C、PE32、ImageBase `0x400000`，壳入口 RVA `0x7DB1DB`。与 x64 是不同编译产物。
+
+## 原技能的缺口
+
+原生 x86 工具模式 `--32bit` 能解压，但首次无中间状态运行被人工终止，不能算工具自报失败。改用只读进度记录后，约 788 秒、767,747,970 个基本块，恢复 1,969 页，随后在异常处理路径因 VirtualQuery 未建模而停止。CRC/LZMA 加速候选均为零，主要解压执行经过数亿次 Python 回调。
+
+补充 28 字节 MEMORY_BASIC_INFORMATION32 输出后，又遇到 kernel32!RtlUnwind 别名。将其委托给工具已有 x86 展开器后成功。为减少重跑开销，显式采用选择性回调；不跳过目标指令，但计数以及基于计数的模拟计时有所不同，须按 [x86 流程](x86-workflow.md) 的限制使用。
+
+成功轮约 85 秒，自动 stop `0x570530` 位于恢复后的 `.F#v`。日志 496 是观测回调数，不能宣称只执行 496 个基本块。可移植脚本独立再跑一轮，生成的中间文件 SHA-256 完全相同。
+
+## 修复与验证
+
+恢复 168 个 IAT 项，修复 16 处静态调用及 13 处加载，20 个普通槽、206 个编码槽。422 个包装候选没有被展开（407 个不支持的包装指令、14 个不可映射/受保护内存、1 个非临时区写入），因此不能称为所有调用均已去保护。
+
+x86 候选脚本发现多个 call+jmp 形态，逐步确认 `0x4A7B60` 经 `0x404205` 跳板进入 `0x4A8E20` cookie 初始化，再进入 `0x4A7B70` CRT 启动。采用入口 RVA `0xA7B60`，不是 x64 的 `0xB45E0`。
+
+仅改入口版装载于 `0xA60000` 后，在 cookie 初始化读取旧绝对地址 `0x54D180` 发生访问异常。固定基址后正常；保留 Load Config（目录 RVA `0x1367E40`，目录大小 `0x40`，结构内部 Size 为 `0xC0`）和 SafeSEH 表。SafeSEH 声明 432 项，地址 `0x1767F00`，表已排序、RVA 在映像范围内；并未动态验证全部处理器。
+
+五组空/无效输入与原文件输出、退出码一致，均为 0。64 位宿主通过 Win32 调试事件验证 WOW64 目标，记录 `0x80000003` 与 `0x4000001F` 两个启动断点，恢复版正常退出 0；原保护文件退出 `0xDEADC0DE`。资源载荷一致。`.text` 扫描仍有 463 处保护区直接引用，未删除保护代码。
+
+输入 SHA-256：`07173300F0997531A937D6FAF2C5229E2F665AAE10976963B5DD2BADF1832E2F`。
+
+中间 SHA-256：`6609D8EE14D9B421B2B09C1DF763F8D5073AB1799626AC140420192DEF8938FB`。
+
+最终 SHA-256：`209A195276F2FDBD720FAC63C00A2DB7E848F99DE82C1420C7F88FE2A6B44AA7`。
+
+结论：原技能不能原样完整处理此 x86 样本；加入 x86 API/展开兼容、入口识别和 WOW64 测试后得到可运行恢复版。有效密钥、真实虚拟机、全部 SDK/SEH 路径及完整重定位未验证；不外推为所有 x86 样本均支持。
+
+```
+
+`vmprotect-unpack/references/workflow.md`:
+
+```md
+# 工具、定位与修复
+
+## 随附脚本
+
+将 `$skillDir` 设置为当前技能安装目录，依赖 pefile 放到任务虚拟环境或本地依赖目录后运行。输出目录必须尚不存在，避免覆盖旧证据。
+
+```powershell
+python "$skillDir\scripts\pe_inventory.py" .\sample.exe --out .\analysis\original
+python "$skillDir\scripts\pe_inventory.py" .\output\sample.unpacked.exe --out .\analysis\candidate
+# case.bin 保存原样 stdin 字节；脚本不会自动添加换行。
+python "$skillDir\scripts\compare_runs.py" .\sample.exe .\output\sample.unpacked.exe --input .\case.bin --out .\analysis\compare --execute
+```
+
+对比脚本记录 stdout/stderr 原始文件及其哈希、输入/EXE 哈希、退出码和超时。`completed_equivalent` 仅在两次正常完成且退出码和输出一致时为真；仍应查看 `both_exit_zero`，两个相同崩溃不算成功。`--cwd` 可固定共同工作目录，默认分别使用各 EXE 的父目录。该脚本不管理目标派生的子进程，目标会派生进程时改用具备进程树生命周期管理的测试器。
+
+PE 检查脚本还输出资源叶节点的类型/ID/语言路径、载荷长度和哈希、异常表实际排序状态及重定位项数。不同版本的末尾节可能是 `.rsrc` 而非 `.reloc`，重建导入时不可凭节序号猜数据用途。对比资源时忽略可合法变化的 RVA，检查资源路径、大小和载荷哈希；若原资源经过加密，则另按解密后的实际内容验证。发现异常范围重叠时记录具体区间与所属节，分析引用及异常语义；不要只为让检查通过而删除条目，也不要把常规输入测试扩大成异常路径完整验证。
+
+## 工具获取与模拟路线
+
+可评估的开源方案：[x86rc/vmp-lazy-unpack](https://github.com/x86rc/vmp-lazy-unpack)。先核对当前 README、提交和支持架构。工具声称的版本支持不是当前样本的成功保证；不提供通用去虚拟化。不要用 Themida/WinLicense 专用工具 unlicense 直接当作 VMProtect 通用解包器。
+
+本技能不捆绑第三方源码、DLL 或样本。将所需版本下载到当前工作区的 tools，校验并保存哈希；依赖使用本地虚拟环境或 `pip --target`，不依赖作者电脑路径。Windows 上必要时将临时目录设在工作区，避免 one-file 工具自解压权限问题；网络失败按执行环境的权限机制处理。
+
+一次验证过的调用形式（运行前以所下载版本的解析器为准）：
+
+```powershell
+# 当前目录为任务目录，工具与依赖已经准备好。
+$env:PYTHONPATH = "$PWD\tools\pylibs;$PWD\tools\vmp-lazy-unpack"
+python -u -m unpack .\sample.exe sample.stage1.exe --diagnostics *> .\analysis\unpack.log
+```
+
+此版本第二个参数只接受文件名，不接受目录路径。实际输出可位于工具自身的 output 目录，应读取日志或 summary.json 的 analysis_pe 字段定位，不猜测输出位置。32 位选项和 imports_only 模式以当前源码为准；不把 PE64 用 32 位模式执行。
+
+使用工具随附 catalog 可以避免抓取宿主 DLL，尤其适合文件访问范围受限的任务；先确认 catalog 与模拟架构一致。不要在缺 catalog 时默许工具自动读取范围外的系统目录。
+
+遇到 `unknown_import` 时先读取事件详情，不用统一返回成功绕过。旧版样本可能需要兼容层，见 [legacy-compat.md](legacy-compat.md)。如果进入 MessageBox 错误路径，先提取文本并检查模拟环境是否缺字段；显示“检测到调试器”不必然代表真实附加了调试器。未建模接口与保护主动拒绝执行应分别诊断。
+
+阶段性产物应包含输入信息、progress、events、summary、导入修复明细。监测当前地址、基本块数量、恢复页数和文件扫描指针；重复循环也可能在顺序计算文件 CRC，不能只看同一条指令就认定死循环。若状态不再变化且可复现，分析循环终止条件或未建模 API 后再重试。
+
+如果异常堆栈显示失败发生在可选诊断 JSON 的临时文件替换（如 `ntdll-reads.json.tmp` 的 WinError 5），应将其记录为宿主日志 I/O 问题，不能据此宣布版本不支持或篡改被模拟 API。保留失败目录后，可在新运行目录取消 `--diagnostics` 重试；常规 progress、events、summary 和导入重建记录仍可用于验证。没有证据时不猜测是杀毒软件或其他特定程序锁文件；不要关闭系统防护。详细诊断缺失时在报告中说明，以最终原生测试补充验证。
+
+## 入口与原生调试路线
+
+“进入已写入代码页”是候选入口条件，不是 OEP 证明。反汇编候选位置，跟踪跳转及其上下文，判断是否仍在保护调度、SDK 或环境初始化。
+
+MSVC x64 常见的 CRT 入口包含分配栈、调用 cookie 初始化、释放栈并转入启动代码，但编译优化、链接增量跳板、编译器与版本会改变布局。模式匹配只是候选发现，不能把一次地址或字节签名当作万能入口。绕开初始化可能破坏 TLS、静态构造或 SDK 状态；需要测试和引用分析。
+
+可用随附 `scripts/find_crt_candidates.py sample.stage1.exe --out analysis/crt.json` 按 Machine 选择 MSVC AMD64 或 I386 入口启发式。它仅列出候选 RVA、调用/跳转目标和指令字节，不修改文件；x86 的 call+jmp 模式尤其可能命中无关函数，必须追踪调用目标和 CRT 初始化语义。多个候选可能指向同一启动过程。无匹配不代表没有 CRT 入口，应改用反汇编/动态跟踪。
+
+跨版本时按架构、文件类型、实际保护选项和运行结果建立测试矩阵。Professional/Ultimate 的名称、版本号或相同源程序不能代替样本检查。同一原始程序在不同保护配置下可能恢复出相同 CRT 地址，仍需重新发现并验证。保持输入样本和前一版本交付物分别命名，避免将旧版输出误当成本轮结果。
+
+动态转储时，在原始代码恢复且导入就绪的适当边界保存映像与必要状态，再用 Scylla 或等价工具重建导入。进程地址不能直接写入可重启 EXE；验证转储中没有悬空堆、模块或模拟地址。不要直接保存进程执行到 main 后的全部数据状态而忽略 CRT 重复初始化。
+
+## PE 修复的判定
+
+| 观察 | 检查与处理 |
+| --- | --- |
+| 自动输出还保留壳入口 | 找到并验证应用入口，不直接信任 stop_reason 的名字 |
+| 崩溃访问模拟堆地址 | 确认是否进入了壳跳板、未恢复状态或残留保护调用 |
+| 重定位后访问旧 ImageBase | 修复完整重定位覆盖；不能只保留壳的少数 relocation 项 |
+| 固定基址不能装载 | 查看实际环境是否要求重定位、地址是否冲突及装载目录有效性 |
+| WinError 623 | 不单凭错误文字认定系统 DLL 冲突，结合实际基址与配置排查 |
+| 异常路径崩溃 | 校验 .pdata 排序、范围、UNWIND_INFO、链式项和处理器引用 |
+| 启动即崩溃或不输出 | 对照 TLS、Load Config、CFG 指针、IAT、CRT 状态及真实入口 |
+
+优先完整恢复重定位。只有完整恢复暂不可行、首选基址原生测试通过且用户可接受该限制时，才把固定基址版作为受限交付：清楚记录 ASLR 不可用、基址和可能的装载失败。不要将此案例退路自动应用于所有文件。
+
+做最小变更对比：先测试仅修正入口的候选，再逐项调整有证据的问题。早期壳跳板在 ASLR 下的失败不自动证明最终 CRT 入口也失败；每次改变入口/初始化路线后重新核验这项假设。不要一次清除多个数据目录后将成功归因于其中某一项。
+
+同样，清除 Load Config 可能影响安全 cookie、CFG/XFG 或其他加载器行为。仅当其包含壳特有无效信息、已逐项评估必要字段并验证替代行为时考虑清除或重建；不要机械复制示例脚本的目录置零。
+
+## 调试与行为测试
+
+真实调试验证推荐现有 x64dbg/WinDbg。若编写调试器，按架构定义 Win32 结构和 API 原型，处理进程退出与 DLL 文件句柄；不可把本例硬编码的 x64 DEBUG_EVENT 布局用于 x86。分别记录自然退出、调试超时、强制终止和异常代码。
+
+输入注入后关闭 stdin，确保两种运行模式 EOF 一致，否则程序等待下一行会被误判为反调试挂起。输出捕获不能堵塞被调试进程。终止时需排空调试事件并确认目标退出；只管理本次创建的进程，不按宽泛进程名清理系统程序。
+
+空输入、常见无效输入、边界长度只是最小基线。存在有效输入或关键功能测试时应覆盖；没有有效输入就明确未验证成功分支。SDK 相关功能需单独测，不能从普通主路径推断没有剩余保护依赖。
+
+```
+
+`vmprotect-unpack/references/x86-workflow.md`:
+
+```md
+# 原生 x86 / PE32 路线
+
+先检查 Machine=0x14C、OptionalHeader.Magic=0x10B，再选择 x86；不要按文件名猜位数。工具使用 `--32bit` 和随附 catalog_32.json/ntdll_32.dll，不需要把 Python 宿主也换成 32 位。不要启用仅验证过 x64 的 run_with_winstation.py。
+
+```powershell
+$env:PYTHONPATH = "$PWD\tools\pylibs;$PWD\tools\vmp-lazy-unpack-main"
+python -u -m unpack .\sample-x86.exe sample-x86.stage1.exe --32bit
+```
+
+CRC/LZMA 候选数量为零表示这轮没有匹配到加速例程，不等同于没有压缩或不支持 x86。若缺少状态输出，可使用观测包装器：
+
+```powershell
+python "$skillDir\scripts\run_with_progress.py" --tool-root .\tools\vmp-lazy-unpack-main --progress-log .\analysis\heartbeat.jsonl -- .\sample-x86.exe sample-x86.stage1.exe --32bit
+```
+
+包装器在原 on_block 完成后只读寄存器和计数，追加 JSONL，不修改目标寄存器/内存；不启用旧版环境兼容层。记录页数、扫描指针、调用事件和计数的变化来判断进度。首次没有可观测状态的运行如果被手工终止，应明确标注“人工终止、未完成”，不能写成工具自报失败或版本不支持。
+
+## 按需 x86 兼容层
+
+本例常规模式在解压后因 VirtualQuery 缺失停止。若日志出现相同缺口，可使用 `run_x86_compat.py`：
+
+```powershell
+$env:PYTHONPATH = "$PWD\tools\pylibs"
+python "$skillDir\scripts\run_x86_compat.py" --tool-root .\tools\vmp-lazy-unpack-main -- .\sample-x86.exe sample-x86.stage1.exe --32bit
+```
+
+VirtualQuery 模型复用模拟器内存映射，输出 28 字节 MEMORY_BASIC_INFORMATION32，按模拟地址上限、长度和写入权限处理失败。kernel32!RtlUnwind 别名仅在现有异常分派处于活动状态时委托给上游 x86 展开器，不是简单返回成功；其他未知 API 仍停止。参考：[VirtualQuery](https://learn.microsoft.com/en-us/windows/win32/api/memoryapi/nf-memoryapi-virtualquery)。
+
+对于 Python 全局基本块回调成为瓶颈的情况，可以显式加 `--selective-hooks`（放在 `--` 前）。此选项只在本 x86 样本实测：按上游 native filter 的观测范围思路，保留映像外、恢复区、入口/已知加速点/栈复制点的 block 回调，其他内存写入、系统调用、异常及独立 SEH 监视钩子保持。它不跳过目标指令，但日志的 blocks/instruction_count 此时是**回调计数**，不是基本块总数；上游模拟 QueryPerformanceCounter 也引用该计数，时间敏感样本可能受影响。需要完整指令诊断或怀疑计数影响时关闭该选项。不要将其视为所有样本均可靠的通用加速器。
+
+`--dump-on-failure` 可指定一个不存在的文件，停止时保留内存 PE 供分析；该转储不自动恢复完整导入或启动状态，不能直接命名为成功脱壳产物。适配器依赖当前工具的内部接口，升级工具后须重新验证。
+
+## 入口与 PE 修复
+
+旧版环境检查缺口可以按需添加 `--legacy-user32` 和 `--ntdll-resources`（均在 `--` 前，默认关闭）。前者提供窗口站/UOI_FLAGS/当前进程调试查询模型，MessageBoxW 只提取文本后停止；后者复制匹配 x86 catalog 的版本资源，使用 PE32 目录偏移。不要套用 x64 偏移或绕过错误消息。
+
+模拟成功和 wrapper resolved 不保证原生改写正确。若崩溃位于新导入指令内部、返回地址或邻接栈操作，应核对精确补丁及控制流。未跟踪证实时，不把推测当作已定位的唯一根因。
+
+有证据时可保守回退 encoded_wrapper/api_wrapper 改写，保留原包装代码和恢复的 IAT/编码槽。随附 `restore_wrapper_calls.py` 要求输入 SHA-256，按对应报告验证所有新字节、长度、边界、不重叠后输出新文件：
+
+```powershell
+python "$skillDir\scripts\restore_wrapper_calls.py" .\candidate.exe --report .\analysis.imports.json --sha256 EXPECTED_SHA256 --out .\candidate-preserved.exe
+```
+
+回退不是默认操作，也不是完整去保护；原包装仍可能依赖保护区。回退后重跑原生功能/调试测试，并区分“工具曾生成的包装补丁数”和“最终保留的改写数”。
+
+使用 Capstone CS_MODE_32 或 x86 调试器重新分析，不照搬 x64 CRT 指令序列、入口 RVA 或安全 cookie 初始化地址。IAT/指针为 4 字节，导入调用通常使用绝对内存操作数；恢复 x86 重定位时检查 HIGHLOW 等实际类型，不能套用 x64 DIR64 的 8 字节修复。
+
+x86 的 SEH/SafeSEH/Load Config 与 x64 的 .pdata/unwind 不同：没有 .pdata 不能直接判定异常信息丢失；不得无条件清除 Load Config 或 SafeSEH。保留 ASLR 测试优先，只有实际换址失败证据才能说明当前候选需要受限固定基址方案。
+
+## 真实调试验证
+
+调试事件结构布局取决于**调试器宿主**位数，而目标寄存器上下文取决于**目标**位数。64 位 Python 的 Win32 DEBUG_EVENT/EXCEPTION_RECORD 不能因为目标 x86 就改成 32 位布局；读取或设置 WOW64 寄存器时才应使用对应上下文 API。
+
+WOW64 进程可能先后出现原生系统断点 `0x80000003` 和 WOW64 断点 `0x4000001F`。记录并区分加载器启动事件、后续断点、访问异常和应用退出，不能把 WOW64 启动断点误判为反调试失败，也不能无条件吞掉后续所有断点。原始测试和候选测试必须使用相同处理方式。
+
+首选现有 x32dbg/WinDbg；自写验证器应核对宿主结构大小、参数/指针类型、EOF、超时和退出事件。参考：[Microsoft WOW64 调试](https://learn.microsoft.com/en-us/windows/win32/winprog64/debugging-wow64)、[调试器异常处理](https://learn.microsoft.com/en-us/windows/win32/debug/debugger-exception-handling)、[LLVM Windows 调试事件实现](https://lldb.llvm.org/cpp_reference/DebuggerThread_8cpp_source.html)。
+
+```
+
+`vmprotect-unpack/scripts/audit_import_evidence.py`:
+
+```py
+"""Read-only audit of scan-only additional imports. Flags candidates; never deletes imports."""
+import argparse,json,struct
+from pathlib import Path
+
+
+def main():
+    parser=argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('pe',type=Path)
+    parser.add_argument('--evidence',required=True,type=Path)
+    parser.add_argument('--reconstruction',required=True,type=Path)
+    parser.add_argument('--out',required=True,type=Path)
+    args=parser.parse_args()
+    import pefile
+    evidence=json.loads(args.evidence.read_text(encoding='utf-8'))
+    report=json.loads(args.reconstruction.read_text(encoding='utf-8'))
+    pe=pefile.PE(data=args.pe.read_bytes());ptr=8 if pe.OPTIONAL_HEADER.Magic==0x20b else 4
+    image=pe.get_memory_mapped_image();result=[]
+    def key(r):return r['module'].lower(),r['symbol']
+    for item in evidence['resolved_imports']:
+        if item.get('source')!='final_scan_only':continue
+        slot=int(item['slot_va'],0) if isinstance(item['slot_va'],str) else item['slot_va']
+        references=image.count(struct.pack('<Q' if ptr==8 else '<I',slot))
+        row={'module':item['module'],'symbol':item['symbol'],'slot_rva':item['slot_rva'],'section':item['section'],
+             'bootstrap_evidence':sum(key(r)==key(item) for r in evidence['bootstrap_iat']),
+             'encoded_metadata_evidence':sum(key(r)==key(item) for r in evidence['encoded_imports']),
+             'instruction_patch_count':sum(key(r)==key(item) for r in report['patches']),
+             'absolute_slot_reference_count':references,
+             'status':'needs_manual_review','note':'Address equality alone is not proof of an API pointer; generated thunks are not independent evidence.'}
+        result.append(row)
+    args.out.parent.mkdir(parents=True,exist_ok=True)
+    with args.out.open('x',encoding='utf-8') as stream:json.dump(result,stream,indent=2)
+    print(json.dumps({'scan_only_candidates':len(result),'report':str(args.out.resolve())}))
+
+
+if __name__=='__main__':main()
+
+```
+
+`vmprotect-unpack/scripts/compare_runs.py`:
+
+```py
+"""Execute two console programs with identical input files; does not debug them."""
+import argparse
+import hashlib
+import json
+import os
+import subprocess
+import time
+from pathlib import Path
+
+
+def digest(path):
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('original', type=Path)
+    parser.add_argument('candidate', type=Path)
+    parser.add_argument('--input', action='append', required=True, type=Path, help='Raw stdin file; repeat for multiple cases')
+    parser.add_argument('--out', required=True, type=Path, help='New results directory')
+    parser.add_argument('--cwd', type=Path, help='Shared working directory; default is each executable parent')
+    parser.add_argument('--arg', action='append', default=[], help='Shared program argument')
+    parser.add_argument('--timeout', type=float, default=15)
+    parser.add_argument('--execute', action='store_true', help='Explicitly enable target execution')
+    args = parser.parse_args()
+    if not args.execute:
+        parser.error('No execution performed; --execute is required')
+    if args.timeout <= 0:
+        parser.error('--timeout must be positive')
+    paths = [args.original.resolve(strict=True), args.candidate.resolve(strict=True)]
+    inputs = [p.resolve(strict=True) for p in args.input]
+    if args.cwd:
+        args.cwd = args.cwd.resolve(strict=True)
+    args.out.mkdir(parents=True, exist_ok=False)
+    results = []
+    for index, input_path in enumerate(inputs):
+        row = {'input': str(input_path), 'input_sha256': digest(input_path), 'runs': []}
+        for label, path in zip(('original', 'candidate'), paths):
+            stdout_path = args.out / f'{index:03d}-{label}.stdout.bin'
+            stderr_path = args.out / f'{index:03d}-{label}.stderr.bin'
+            cwd = args.cwd or path.parent
+            result = {'file': str(path), 'sha256': digest(path), 'cwd': str(cwd),
+                      'arguments': args.arg, 'timed_out': False}
+            start = time.monotonic()
+            with input_path.open('rb') as stdin, stdout_path.open('wb') as stdout, stderr_path.open('wb') as stderr:
+                try:
+                    proc = subprocess.run([str(path), *args.arg], cwd=cwd, stdin=stdin,
+                                          stdout=stdout, stderr=stderr, timeout=args.timeout,
+                                          creationflags=subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0)
+                    result['exit_code'] = proc.returncode
+                except subprocess.TimeoutExpired:
+                    result['timed_out'] = True
+                except OSError as error:
+                    result['launch_error'] = str(error)
+            result.update(elapsed_seconds=round(time.monotonic()-start, 3),
+                          stdout=str(stdout_path.resolve()), stderr=str(stderr_path.resolve()),
+                          stdout_sha256=digest(stdout_path), stderr_sha256=digest(stderr_path))
+            row['runs'].append(result)
+        first, second = row['runs']
+        completed = all('exit_code' in r and not r['timed_out'] for r in row['runs'])
+        row['completed_equivalent'] = completed and all(first[k] == second[k] for k in ('exit_code', 'stdout_sha256', 'stderr_sha256'))
+        row['both_exit_zero'] = completed and all(r['exit_code'] == 0 for r in row['runs'])
+        results.append(row)
+        (args.out / 'comparison.json').write_text(json.dumps(results, indent=2, ensure_ascii=False), encoding='utf-8')
+    print(json.dumps({'cases': len(results), 'completed_equivalent': sum(r['completed_equivalent'] for r in results), 'report': str((args.out/'comparison.json').resolve())}))
+
+
+if __name__ == '__main__':
+    main()
+
+```
+
+`vmprotect-unpack/scripts/find_crt_candidates.py`:
+
+```py
+"""Read-only MSVC x86/x64 CRT entry heuristics; candidates are NOT proven entrypoints."""
+import argparse
+import json
+import re
+import struct
+from pathlib import Path
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('sample', type=Path)
+    parser.add_argument('--out', type=Path, required=True)
+    args = parser.parse_args()
+    import pefile
+    pe = pefile.PE(data=args.sample.read_bytes())
+    if pe.FILE_HEADER.Machine == 0x8664:
+        pattern = rb'\x48\x83\xec\x28\xe8....\x48\x83\xc4\x28\xe9....'
+        call_disp, call_end, jump_disp, jump_end = 5, 9, 14, 18
+    elif pe.FILE_HEADER.Machine == 0x14c:
+        pattern = rb'\xe8....\xe9....\xcc\xcc'
+        call_disp, call_end, jump_disp, jump_end = 1, 5, 6, 10
+    else:
+        parser.error('Only I386/AMD64 heuristics are implemented')
+    records = []
+    for section in pe.sections:
+        if not section.Characteristics & 0x20000000:
+            continue
+        data = section.get_data()
+        for match in re.finditer(pattern, data, re.S):
+            rva = section.VirtualAddress + match.start()
+            cookie = rva + call_end + struct.unpack_from('<i', match.group(), call_disp)[0]
+            startup = rva + jump_end + struct.unpack_from('<i', match.group(), jump_disp)[0]
+            records.append({'rva': hex(rva), 'va': hex(pe.OPTIONAL_HEADER.ImageBase+rva),
+                            'section': section.Name.rstrip(b'\0').decode(errors='replace'),
+                            'call_target_rva': hex(cookie), 'startup_target_rva': hex(startup),
+                            'bytes': match.group().hex(),
+                            'targets_in_image': all(0 <= v < pe.OPTIONAL_HEADER.SizeOfImage for v in (cookie, startup))})
+    result = {'sample': str(args.sample.resolve()), 'machine':hex(pe.FILE_HEADER.Machine),'heuristic_only': True,
+              'note': 'Validate disassembly, initialization and real execution; do not auto-patch.',
+              'candidates': records}
+    args.out.parent.mkdir(parents=True, exist_ok=True)
+    with args.out.open('x', encoding='utf-8') as dest:
+        json.dump(result, dest, indent=2)
+    print(json.dumps(result, indent=2))
+
+
+if __name__ == '__main__':
+    main()
+
+```
+
+`vmprotect-unpack/scripts/pe_inventory.py`:
+
+```py
+"""Read-only PE inventory and printable strings; requires pefile."""
+import argparse
+import hashlib
+import json
+import re
+from pathlib import Path
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('sample', type=Path)
+    parser.add_argument('--out', required=True, type=Path, help='New output directory')
+    args = parser.parse_args()
+    import pefile
+    data = args.sample.read_bytes()
+    pe = pefile.PE(data=data)
+    resources = []
+    def walk_resources(directory, components=()):
+        for entry in directory.entries:
+            key = str(entry.name) if entry.name is not None else entry.id
+            path = components + (key,)
+            if hasattr(entry, 'directory'):
+                walk_resources(entry.directory, path)
+            elif hasattr(entry, 'data'):
+                record = entry.data.struct
+                payload = pe.get_data(record.OffsetToData, record.Size)
+                resources.append({'path': path, 'rva': hex(record.OffsetToData),
+                                  'size': record.Size, 'read_size': len(payload),
+                                  'sha256': hashlib.sha256(payload).hexdigest()})
+    if hasattr(pe, 'DIRECTORY_ENTRY_RESOURCE'):
+        walk_resources(pe.DIRECTORY_ENTRY_RESOURCE)
+    runtime_starts = [entry.struct.BeginAddress for entry in getattr(pe, 'DIRECTORY_ENTRY_EXCEPTION', [])]
+    result = {
+        'file': str(args.sample.resolve()), 'size': len(data),
+        'sha256': hashlib.sha256(data).hexdigest(),
+        'machine': hex(pe.FILE_HEADER.Machine),
+        'dll': bool(pe.FILE_HEADER.Characteristics & 0x2000),
+        'image_base': hex(pe.OPTIONAL_HEADER.ImageBase),
+        'entry_rva': hex(pe.OPTIONAL_HEADER.AddressOfEntryPoint),
+        'image_size': pe.OPTIONAL_HEADER.SizeOfImage,
+        'dll_characteristics': hex(pe.OPTIONAL_HEADER.DllCharacteristics),
+        'sections': [dict(name=s.Name.rstrip(b'\0').decode(errors='replace'),
+                          rva=hex(s.VirtualAddress), virtual_size=s.Misc_VirtualSize,
+                          raw_offset=s.PointerToRawData, raw_size=s.SizeOfRawData,
+                          flags=hex(s.Characteristics), entropy=s.get_entropy())
+                     for s in pe.sections],
+        'directories': [dict(index=i, rva=hex(d.VirtualAddress), size=d.Size)
+                        for i, d in enumerate(pe.OPTIONAL_HEADER.DATA_DIRECTORY)],
+        'imports': [dict(dll=d.dll.decode(errors='replace'),
+                         symbols=[dict(name=i.name.decode(errors='replace') if i.name else None,
+                                       ordinal=i.ordinal, iat_va=hex(i.address)) for i in d.imports])
+                    for d in getattr(pe, 'DIRECTORY_ENTRY_IMPORT', [])],
+        'tls': str(pe.DIRECTORY_ENTRY_TLS.struct) if hasattr(pe, 'DIRECTORY_ENTRY_TLS') else None,
+        'load_config': str(pe.DIRECTORY_ENTRY_LOAD_CONFIG.struct) if hasattr(pe, 'DIRECTORY_ENTRY_LOAD_CONFIG') else None,
+        'runtime_function_count': len(getattr(pe, 'DIRECTORY_ENTRY_EXCEPTION', [])),
+        'runtime_functions_sorted': runtime_starts == sorted(runtime_starts) if runtime_starts else None,
+        'base_relocation_count': sum(len(block.entries) for block in getattr(pe, 'DIRECTORY_ENTRY_BASERELOC', [])),
+        'resources': resources,
+        'warnings': pe.get_warnings(),
+    }
+    args.out.mkdir(parents=True, exist_ok=False)
+    (args.out / 'pe.json').write_text(json.dumps(result, indent=2, ensure_ascii=False), encoding='utf-8')
+    with (args.out / 'strings.txt').open('w', encoding='utf-8') as dest:
+        for pattern, encoding in ((rb'[\x20-\x7e]{8,}', 'ascii'), (rb'(?:[\x20-\x7e]\x00){8,}', 'utf-16le')):
+            for match in re.finditer(pattern, data):
+                dest.write(f'{match.start():08x} {encoding} {match.group().decode(encoding)}\n')
+    print(json.dumps({'report': str(args.out.resolve()), 'sha256': result['sha256'],
+                      'imports': sum(len(d['symbols']) for d in result['imports'])}))
+
+
+if __name__ == '__main__':
+    main()
+
+```
+
+`vmprotect-unpack/scripts/restore_wrapper_calls.py`:
+
+```py
+"""Conservatively restore original wrapper-call bytes using an exact reconstruction report."""
+import argparse
+import hashlib
+import json
+from pathlib import Path
+
+
+def restore(data,report):
+    output=bytearray(data)
+    selected=[]
+    occupied=set()
+    for patch in report['patches']:
+        if patch['category'] not in ('encoded_wrapper','api_wrapper'): continue
+        raw_offset=patch['patch_file_offset']
+        offset=int(raw_offset,0) if isinstance(raw_offset,str) else raw_offset
+        old=bytes.fromhex(patch['old_bytes']);new=bytes.fromhex(patch['new_bytes'])
+        if not old or len(old)!=len(new) or not 0<=offset<=len(data)-len(new):
+            raise ValueError('Invalid equal-width wrapper patch')
+        positions=set(range(offset,offset+len(new)))
+        if occupied & positions: raise ValueError('Overlapping wrapper patches require manual review')
+        if data[offset:offset+len(new)]!=new: raise ValueError(f'Patch preimage mismatch at {offset:#x}')
+        occupied.update(positions)
+        selected.append((offset,old))
+    if not selected: raise ValueError('No wrapper patches selected; do not claim this fallback changed anything')
+    for offset,old in selected: output[offset:offset+len(old)]=old
+    return bytes(output),len(selected)
+
+
+def main():
+    parser=argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('input',type=Path)
+    parser.add_argument('--report',required=True,type=Path)
+    parser.add_argument('--sha256',required=True,help='Expected hash of this exact input')
+    parser.add_argument('--out',required=True,type=Path)
+    args=parser.parse_args()
+    data=args.input.read_bytes()
+    if hashlib.sha256(data).hexdigest()!=args.sha256.lower(): parser.error('Input hash mismatch')
+    if args.out.exists(): parser.error('Refusing to overwrite an existing output')
+    output,count=restore(data,json.loads(args.report.read_text(encoding='utf-8')))
+    args.out.parent.mkdir(parents=True,exist_ok=True)
+    with args.out.open('xb') as stream: stream.write(output)
+    print(json.dumps({'restored_wrapper_patches':count,'sha256':hashlib.sha256(output).hexdigest(),'output':str(args.out.resolve())}))
+
+
+if __name__=='__main__': main()
+
+```
+
+`vmprotect-unpack/scripts/run_with_progress.py`:
+
+```py
+"""Run vmp-lazy-unpack with append-only observational progress, without full diagnostics."""
+import argparse
+import json
+import sys
+import time
+from pathlib import Path
+
+
+def main():
+    parser=argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--tool-root',type=Path,required=True)
+    parser.add_argument('--progress-log',type=Path,required=True)
+    parser.add_argument('unpack_args',nargs=argparse.REMAINDER)
+    args=parser.parse_args()
+    root=args.tool_root.resolve(strict=True)
+    if not (root/'unpack'/'tracer.py').is_file(): parser.error('Expected vmp-lazy-unpack source root')
+    forwarded=args.unpack_args
+    if forwarded and forwarded[0]=='--': forwarded=forwarded[1:]
+    if not forwarded: parser.error('Provide unpack arguments after --')
+    args.progress_log.parent.mkdir(parents=True,exist_ok=True)
+    # Refuse accidental overwrites of an earlier run's evidence.
+    with args.progress_log.open('x',encoding='utf-8') as stream:
+        stream.write(json.dumps({'kind':'observer_start','arguments':forwarded})+'\n')
+    sys.path.insert(0,str(root))
+    from unpack import tracer
+    original=tracer.Tracer.on_block
+    started=time.monotonic()
+    last=0
+    def observed(self,uc,address,size,user_data):
+        nonlocal last
+        original(self,uc,address,size,user_data)
+        if self.blocks % 65536 == 0 and time.monotonic()-last >= 5:
+            last=time.monotonic()
+            state={'elapsed_seconds':round(last-started,3),'bits':self.arch.bits,
+                   'blocks':self.blocks,'address':hex(address),
+                   'written_pages':len(self.written_destination_pages),
+                   'resolved_import_writes':self.resolved_write_count,
+                   'registers':tracer.register_state(uc,self.arch),'recent_events':self.events[-2:]}
+            with args.progress_log.open('a',encoding='utf-8') as stream:
+                stream.write(json.dumps(tracer.format_report(state))+'\n')
+    tracer.Tracer.on_block=observed
+    sys.argv=['unpack',*forwarded]
+    tracer.main()
+
+
+if __name__=='__main__':
+    main()
+
+```
+
+`vmprotect-unpack/scripts/run_with_winstation.py`:
+
+```py
+"""Optional legacy x64 emulator API/version-resource adapter; not a native OS hook."""
+import argparse
+import struct
+import sys
+from pathlib import Path
+
+STATION = 0x6500
+
+
+def firmware(self, symbol, rcx, rdx, r8, r9):
+    from unpack.api_handlers import smbios_table
+    provider = rcx & 0xffffffff
+    details = {'compat_model': 'uefi_firmware', 'provider': hex(provider)}
+    if provider == 0x4649524d:
+        self.last_error = 50
+        return 0, details
+    if provider != 0x52534d42:
+        return None, {**details, 'unsupported_provider': True}
+    if symbol == 'enumsystemfirmwaretables':
+        payload, output, capacity = struct.pack('<I',0), rdx, r8 & 0xffffffff
+    else:
+        if (rdx & 0xffffffff) != 0:
+            self.last_error = 87
+            return 0, details
+        payload, output, capacity = smbios_table(), r8, r9 & 0xffffffff
+    if not output or capacity < len(payload): return len(payload), details
+    if not self.writable_range(output, len(payload)):
+        self.last_error = 998
+        return 0, details
+    self.uc.mem_write(output, payload)
+    return len(payload), details
+
+
+def check_remote_debugger(self, symbol, rcx, rdx, r8, r9):
+    if rcx != self.arch.mask:
+        self.last_error = 6
+        return 0, {'compat_model': 'current_process_debugger', 'invalid_handle': True}
+    if not rdx or not self.writable_range(rdx, 4):
+        self.last_error = 998
+        return 0, {'compat_model': 'current_process_debugger', 'invalid_output': True}
+    self.uc.mem_write(rdx, struct.pack('<I', 0))
+    return 1, {'compat_model': 'current_process_debugger', 'debugger_present': False}
+
+
+def get_station(self, symbol, rcx, rdx, r8, r9):
+    return STATION, {'compat_model': 'interactive_window_station'}
+
+
+def get_information(self, symbol, rcx, rdx, r8, r9):
+    details = {'compat_model': 'window_station_flags', 'information_class': rdx & 0xffffffff}
+    if rcx != STATION:
+        self.last_error = 6
+        return 0, details
+    if (rdx & 0xffffffff) != 1:
+        return None, {**details, 'unsupported_information_class': True}
+    needed = self.stack_slot(4)
+    if needed:
+        if not self.writable_range(needed, 4):
+            self.last_error = 998
+            return 0, details
+        self.uc.mem_write(needed, struct.pack('<I', 12))
+    if (r9 & 0xffffffff) < 12:
+        self.last_error = 122
+        return 0, details
+    if not r8 or not self.writable_range(r8, 12):
+        self.last_error = 998
+        return 0, details
+    self.uc.mem_write(r8, struct.pack('<III', 0, 0, 1))
+    return 1, details
+
+
+def install():
+    from unpack.api_handlers import ApiHandlers
+    for name, handler, argc in [('getprocesswindowstation', get_station, 0),
+                                ('enumsystemfirmwaretables', firmware, 3),
+                                ('getsystemfirmwaretable', firmware, 4),
+                                ('checkremotedebuggerpresent', check_remote_debugger, 2),
+                                ('getuserobjectinformationa', get_information, 5),
+                                ('getuserobjectinformationw', get_information, 5)]:
+        # Do not override upstream implementations if a newer tool provides them.
+        ApiHandlers._handlers.setdefault(name, (handler, argc))
+
+
+def install_ntdll_resources(tracer):
+    import pefile
+    original = tracer.build_emu_module_blob
+    def build(module_name, symbols, module_base, arch=tracer.MODE64):
+        blob, assignments, stubs = original(module_name, symbols, module_base, arch)
+        if module_name != 'ntdll.dll': return blob, assignments, stubs
+        pe = pefile.PE(data=tracer.require_catalog().ntdll_bytes)
+        destination = 0x60000
+        versions = [e for e in pe.DIRECTORY_ENTRY_RESOURCE.entries if e.id == 16]
+        if len(versions)!=1 or len(versions[0].directory.entries)!=1:
+            raise ValueError('Expected one bundled ntdll version resource')
+        name = versions[0].directory.entries[0]
+        if name.id is None or len(name.directory.entries)!=1:
+            raise ValueError('Expected numeric single-language version resource')
+        lang = name.directory.entries[0]
+        record = lang.data.struct
+        data = pe.get_data(record.OffsetToData, record.Size)
+        payload = bytearray(88)+data
+        for offset in (0,24,48): struct.pack_into('<H',payload,offset+14,1)
+        struct.pack_into('<II',payload,16,16,0x80000018)
+        struct.pack_into('<II',payload,40,name.id,0x80000030)
+        struct.pack_into('<II',payload,64,lang.id,72)
+        struct.pack_into('<IIII',payload,72,destination+88,len(data),record.CodePage,0)
+        if destination+len(payload)>len(blob): raise ValueError('Version resource too large')
+        out = bytearray(blob)
+        if any(out[destination:destination+len(payload)]):
+            raise ValueError('Resource destination is occupied; unsupported upstream layout')
+        out[destination:destination+len(payload)] = payload
+        # The upstream synthetic optional header begins at 0x98.
+        if pe.FILE_HEADER.Machine != arch.machine or out[0x98:0x9a] != struct.pack('<H',arch.magic):
+            raise ValueError('Catalog/synthetic PE architecture mismatch')
+        resource_directory = 0x118 if arch.bits == 64 else 0x108
+        struct.pack_into('<II', out, resource_directory, destination, len(payload))
+        return bytes(out), assignments, stubs
+    tracer.build_emu_module_blob = build
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--tool-root', required=True, type=Path)
+    parser.add_argument('--ntdll-resources', action='store_true')
+    parser.add_argument('unpack_args', nargs=argparse.REMAINDER)
+    args = parser.parse_args()
+    root = args.tool_root.resolve(strict=True)
+    if not (root/'unpack'/'tracer.py').is_file():
+        parser.error('Expected vmp-lazy-unpack source root')
+    forwarded = args.unpack_args
+    if forwarded and forwarded[0] == '--': forwarded = forwarded[1:]
+    if not forwarded: parser.error('Provide input and unpack arguments after --')
+    if '--32bit' in forwarded: parser.error('This compatibility adapter was validated for x64 only')
+    sys.path.insert(0, str(root))
+    install()
+    from unpack import tracer
+    if args.ntdll_resources: install_ntdll_resources(tracer)
+    sys.argv = ['unpack', *forwarded]
+    tracer.main()
+
+
+if __name__ == '__main__':
+    main()
+
+```
+
+`vmprotect-unpack/scripts/run_x86_compat.py`:
+
+```py
+"""Optional PE32 VirtualQuery/RtlUnwind models and selective observation hooks."""
+import argparse
+import importlib
+import json
+import sys
+from pathlib import Path
+
+
+def virtual_query32(self,symbol,address,output,length,unused):
+    if address>=self.arch.user_top or length<28:
+        self.last_error=87
+        return 0,{'compat_model':'virtual_query32','invalid_range_or_length':True}
+    if not output or not self.writable_range(output,28):
+        self.last_error=998
+        return 0,{'compat_model':'virtual_query32','invalid_output':True}
+    info=self.memory_basic_information(address)
+    if info is None or len(info)!=28: raise ValueError('Expected MEMORY_BASIC_INFORMATION32')
+    self.uc.mem_write(output,info)
+    return 28,{'compat_model':'virtual_query32','query_address':hex(address)}
+
+
+def install_models():
+    api=importlib.import_module('unpack.32bit.api_handlers_32').ApiHandlers32
+    api._handlers.setdefault('virtualquery',(virtual_query32,3))
+    cls=importlib.import_module('unpack.32bit.tracer_32').Tracer32
+    original=cls.on_block
+    def block(self,uc,address,size,user_data):
+        label=self.synthetic_import_targets.get(address,'').lower()
+        if self.single_step.active and label=='kernel32.dll!rtlunwind':
+            self.blocks+=1
+            self.add_event('rtlunwind_forwarded_alias',address,import_name=label)
+            self.single_step.unwind()
+            return
+        original(self,uc,address,size,user_data)
+    cls.on_block=block
+
+
+def install_legacy_user32():
+    from run_with_winstation import get_station,get_information,check_remote_debugger
+    api=importlib.import_module('unpack.32bit.api_handlers_32').ApiHandlers32
+    for name,handler,count in [('getprocesswindowstation',get_station,0),
+                               ('getuserobjectinformationa',get_information,5),
+                               ('getuserobjectinformationw',get_information,5),
+                               ('checkremotedebuggerpresent',check_remote_debugger,2)]:
+        api._handlers.setdefault(name,(handler,count))
+    def message(self,symbol,window,text,caption,flags):
+        return None,{'guest_message_text':self.read_utf16(text),'guest_message_caption':self.read_utf16(caption),'message_flags':flags}
+    api._handlers.setdefault('messageboxw',(message,4))
+
+
+def install_selective_hooks(tracer):
+    from unicorn import UC_HOOK_BLOCK
+    from unpack.hooks import TraceHooks
+    class SelectiveHooks(TraceHooks):
+        def __init__(self,t,peb,page):
+            if t.arch.bits!=32 or t.diagnostics is not None:
+                raise ValueError('Selective observation requires x86 without diagnostics')
+            super().__init__(t,peb,page,native=False)
+            self.uc.hook_del(self.handles.pop(0))
+            ranges=[(1,t.image_start-1),(t.image_end,0xffffffffffffffff)]
+            ranges += [(a,b-1) for a,b,_ in t.packed_destination_ranges]
+            points={t.entry_address}|set(t.discovered_crc_loops)|set(t.decompressors.candidates)|set(t.stack_copy_candidates)
+            points |= {a for a in t.synthetic_import_targets if t.in_module(a)}
+            ranges += [(a,a) for a in points]
+            merged=[]
+            for a,b in sorted(ranges):
+                if merged and a<=merged[-1][1]+1: merged[-1]=(merged[-1][0],max(b,merged[-1][1]))
+                else: merged.append((a,b))
+            for a,b in merged:
+                self.handles.append(self.uc.hook_add(UC_HOOK_BLOCK,t.on_block,begin=a,end=b))
+            self.backend='python-selective-callbacks-not-total-blocks'
+    tracer.TraceHooks=SelectiveHooks
+
+
+def main():
+    parser=argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--tool-root',required=True,type=Path)
+    parser.add_argument('--selective-hooks',action='store_true',help='Experimental opt-in; counters are callbacks, not all blocks')
+    parser.add_argument('--legacy-user32',action='store_true',help='Opt-in legacy window-station models; MessageBox remains a stop')
+    parser.add_argument('--ntdll-resources',action='store_true',help='Copy version resource from matching bundled ntdll')
+    parser.add_argument('--dump-on-failure',type=Path,help='New path for partial memory PE; not a runnable artifact')
+    parser.add_argument('--import-evidence',type=Path,help='New JSON path recording import provenance before reconstruction')
+    parser.add_argument('unpack_args',nargs=argparse.REMAINDER)
+    args=parser.parse_args()
+    root=args.tool_root.resolve(strict=True)
+    if not (root/'unpack'/'tracer.py').is_file(): parser.error('Expected vmp-lazy-unpack source root')
+    forwarded=args.unpack_args
+    if forwarded and forwarded[0]=='--': forwarded=forwarded[1:]
+    if '--32bit' not in forwarded: parser.error('This adapter requires explicit --32bit')
+    if args.selective_hooks and '--diagnostics' in forwarded:
+        parser.error('Use ordinary hooks with full diagnostics')
+    if args.dump_on_failure and args.dump_on_failure.exists(): parser.error('Failure dump path already exists')
+    if args.import_evidence and args.import_evidence.exists(): parser.error('Import evidence path already exists')
+    sys.path.insert(0,str(root))
+    from unpack import tracer
+    if args.import_evidence:
+        original_report=tracer.build_resolved_import_report
+        def capture(*values,**options):
+            report=original_report(*values,**options)
+            args.import_evidence.parent.mkdir(parents=True,exist_ok=True)
+            with args.import_evidence.open('x',encoding='utf-8') as stream:
+                json.dump(tracer.format_report(report),stream,indent=2)
+            return report
+        tracer.build_resolved_import_report=capture
+    install_models()
+    if args.legacy_user32: install_legacy_user32()
+    if args.ntdll_resources:
+        from run_with_winstation import install_ntdll_resources
+        install_ntdll_resources(tracer)
+    if args.selective_hooks: install_selective_hooks(tracer)
+    if args.dump_on_failure:
+        from unpack.dump import dump_pe
+        original_stop=tracer.Tracer.stop_event
+        def stop(self,event):
+            try:
+                if event.kind!='emulation_reached_unpacked_entry':
+                    args.dump_on_failure.parent.mkdir(parents=True,exist_ok=True)
+                    args.dump_on_failure.write_bytes(dump_pe(self.uc.mem_read,self.image_start))
+            finally:
+                original_stop(self,event)
+        tracer.Tracer.stop_event=stop
+    sys.argv=['unpack',*forwarded]
+    tracer.main()
+
+
+if __name__=='__main__':
+    main()
+
+```
