@@ -1,0 +1,684 @@
+Project Path: arc_AadityaPokhriyal_Ban-Hammer_f5pgozn8
+
+Source Tree:
+
+```txt
+arc_AadityaPokhriyal_Ban-Hammer_f5pgozn8
+├── 01_EDA.ipynb
+├── 02_feature_extract.py
+├── 02_feature_extraction.ipynb
+├── 03_training.ipynb
+├── 04_random_match_test.ipynb
+├── Metrics.md
+├── README.md
+├── datasets
+│   ├── extracted
+│   ├── test_checklist
+│   ├── with_cheater_checklist
+│   └── without_cheater_checklist
+├── install_data.ipynb
+└── models
+    ├── v1
+    │   ├── logistic_regression.pkl
+    │   ├── random_forest.pkl
+    │   └── xgboost.pkl
+    └── v2
+        ├── logistic_regression.pkl
+        ├── random_forest.pkl
+        └── xgboost.pkl
+
+```
+
+`01_EDA.ipynb`:
+
+```ipynb
+Jupyter Notebook Summary:
+Total cells: 15 (15 code, 0 markdown, 0 raw)
+
+Code Cell #1:
+```python
+import pandas as pd
+import numpy as np
+import json
+```
+
+Code Cell #2:
+```python
+df=pd.read_parquet('datasets/with_cheaters/100.parquet')
+
+df
+```
+
+Code Cell #3:
+```python
+print(df[df["steamid"].isna()].tail())
+```
+
+... [12 more code cells omitted]
+
+```
+
+`02_feature_extract.py`:
+
+```py
+import pandas as pd
+import numpy as np
+import json
+from pathlib import Path
+
+# Folders containing your Parquet and JSON files of with_cheaters and without_cheaters
+DATA_FOLDERS = [
+    # Path("datasets/with_cheaters"),
+    # Path("datasets/without_cheaters")
+    Path("datasets/test")
+]
+
+
+def process_match(parquet_path,with_cheaters):
+
+    # Get corresponding JSON file
+    json_path = parquet_path.with_suffix(".json")
+
+    if not json_path.exists():
+        print(f"Skipping {parquet_path.name}: JSON file not found")
+        return None
+
+    # Read files
+    df = pd.read_parquet(parquet_path)
+
+    with open(json_path, "r") as f:
+        events = json.load(f)
+
+    # Extract match ID from filename
+    match_id = parquet_path.stem
+
+    if(with_cheaters):
+        # Get cheater IDs from JSON
+        cheater_ids = {
+            player["steamid"]
+            for player in events["cheaters"]
+        }
+        print(cheater_ids)
+    else:
+        cheater_ids = set()
+    
+
+    # Calculate actual speed
+    df["actual_speed"] = np.sqrt(
+        df["velocity_X"]**2 +
+        df["velocity_Y"]**2 +
+        df["velocity_Z"]**2
+    )
+
+    # Calculate cumulative player statistics
+    player_stats = df.groupby("steamid").agg(
+        kills=("kills_total", "max"),
+        deaths=("deaths_total", "max"),
+        headshot_kills=("headshot_kills_total", "max"),
+        rounds=("total_rounds_played", "max")
+    )
+
+    # Calculate behavioural statistics using alive,
+    # non-warmup observations
+    active_df = df[
+        (df["is_alive"] == True) &
+        (df["is_warmup_period"] == False)
+    ]
+
+    behaviour_stats = active_df.groupby("steamid").agg(
+        avg_speed=("actual_speed", "mean"),
+        avg_accuracy_penalty=("accuracy_penalty", "mean")
+    )
+
+    # Combine statistics
+    player_stats = player_stats.join(behaviour_stats)
+
+    # Calculate derived features
+    player_stats["kills_per_round"] = (
+        player_stats["kills"] /
+        player_stats["rounds"].replace(0, np.nan)
+    )
+
+    player_stats["deaths_per_round"] = (
+        player_stats["deaths"] /
+        player_stats["rounds"].replace(0, np.nan)
+    )
+
+    player_stats["kd_ratio"] = (
+        player_stats["kills"] /
+        player_stats["deaths"].replace(0, 1)
+    )
+
+    player_stats["has_kills"] = (
+        player_stats["kills"] > 0
+    ).astype(int)
+
+    player_stats["headshot_rate"] = (
+        player_stats["headshot_kills"] /
+        player_stats["kills"].replace(0, np.nan)
+    ) * 100
+    
+    # Calculate total damage dealt by each player
+    damage = {}
+
+    for event in events["player_hurt"]:
+        attacker = event["attacker_steamid"]
+        damage[attacker] = (
+            damage.get(attacker, 0) + event["dmg_health"]
+        )
+
+    player_stats["total_damage"] = (
+        pd.Series(damage).reindex(player_stats.index).fillna(0)
+    )
+
+    # Damage per round
+    player_stats["damage_per_round"] = (
+    player_stats["total_damage"] /
+    player_stats["rounds"].replace(0, np.nan)
+    )
+
+    # Damage Per Round and headshot rate interaction
+    # Very High damage but very low headshot rate -> more suspicious 
+    # Low Damage and Low headshot -> safer
+    # High Damage and High headshot rate -> Other Features excell
+    player_stats["damagepr_and_headshotrate_interaction"] = (
+    player_stats["damage_per_round"] *
+    (1-player_stats["headshot_rate"] / 100)
+    )
+
+    # Assign labels
+    player_stats["is_cheater"] = (
+        player_stats.index.isin(cheater_ids).astype(int)
+    )
+
+    # Add match ID
+    player_stats["match_id"] = match_id
+
+    # Create a DataFrame from player death events
+    death_events = pd.DataFrame(events["player_death"])
+
+    # Group by attacker
+    combat_stats = death_events.groupby("attacker_steamid").agg(
+        total_kills=("attacker_steamid", "count"),
+        smoke_kills=("thrusmoke", "sum"),
+        blind_kills=("attackerblind", "sum"),
+        air_kills=("attackerinair", "sum")
+    )
+
+    # Calculate ratios
+    combat_stats["smoke_kill_ratio"] = (
+        combat_stats["smoke_kills"] / combat_stats["total_kills"]
+    )
+
+    combat_stats["blind_kill_ratio"] = (
+        combat_stats["blind_kills"] / combat_stats["total_kills"]
+    )
+
+    combat_stats["air_kill_ratio"] = (
+        combat_stats["air_kills"] / combat_stats["total_kills"]
+    )
+
+    # Merge with existing player statistics
+    player_stats = player_stats.join(
+        combat_stats.drop(columns=["total_kills", "smoke_kills", "blind_kills", "air_kills"]),
+        how="left"
+    )
+
+    # Players with no kills receive zero for these features
+    player_stats[
+        ["smoke_kill_ratio", "blind_kill_ratio", "air_kill_ratio"]
+    ] = player_stats[
+        ["smoke_kill_ratio", "blind_kill_ratio", "air_kill_ratio"]
+    ].fillna(0)
+
+    # Keep steamid as an identifier
+    player_stats = player_stats.reset_index()
+
+    return player_stats
+
+
+match_dataframes = []
+
+for folder in DATA_FOLDERS:
+    with_cheaters = True
+    #folder.name == "with_cheaters"
+    for parquet_file in folder.glob("*.parquet"):
+        try:
+            match_stats = process_match(parquet_file,with_cheaters)
+
+            if match_stats is not None:
+                match_dataframes.append(match_stats)
+
+        except Exception as e:
+            print(f"Error processing {parquet_file}: {e}")
+
+# Combine all matches
+if match_dataframes:
+
+    all_matches = pd.concat(
+        match_dataframes,
+        ignore_index=True
+    )
+
+    all_matches.to_csv("datasets/extracted/test.csv", index=False)
+
+    print("\nDataset created successfully!")
+    print("Total matches:", all_matches["match_id"].nunique())
+    print("Total player records:", len(all_matches))
+
+    print("\nDataset preview:")
+    print(all_matches.head())
+
+else:
+    print("No matches were successfully processed.")
+```
+
+`02_feature_extraction.ipynb`:
+
+```ipynb
+Jupyter Notebook Summary:
+Total cells: 11 (11 code, 0 markdown, 0 raw)
+
+Code Cell #1:
+```python
+import json
+import pandas as pd
+import numpy as np
+from pathlib import Path
+```
+
+Code Cell #2:
+```python
+parquet_path = "datasets/with_cheaters/134.parquet"
+
+# Load parquet File
+df=pd.read_parquet(parquet_path)
+original_df=df.copy()
+
+# Load event data
+with open('datasets/with_cheaters/134.json', "r") as f:
+    events = json.load(f)
+events.keys()
+```
+
+Code Cell #3:
+```python
+cheater_ids = {
+    player["steamid"]
+    for player in events["cheaters"]
+}
+
+df["is_cheater"] = (
+    df["steamid"].isin(cheater_ids)
+).astype("int8")
+
+print(df[["steamid", "is_cheater"]].drop_duplicates())
+print(df["total_rounds_played"].value_counts().sort_index())
+print("Minimum:", df["total_rounds_played"].min())
+print("Maximum:", df["total_rounds_played"].max())
+print("Unique rounds:", df["total_rounds_played"].nunique())
+print(events.keys())
+print(events.get("round_start", [])[:5])
+print(events.get("round_end", [])[:5])
+```
+
+... [8 more code cells omitted]
+
+```
+
+`03_training.ipynb`:
+
+```ipynb
+Jupyter Notebook Summary:
+Total cells: 10 (10 code, 0 markdown, 0 raw)
+
+Code Cell #1:
+```python
+import pandas as pd
+import numpy as np
+
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+from sklearn.model_selection import GroupShuffleSplit
+from sklearn.model_selection import StratifiedGroupKFold
+from sklearn.pipeline import Pipeline
+from sklearn.impute import SimpleImputer
+from sklearn.preprocessing import StandardScaler
+
+from sklearn.linear_model import LogisticRegression
+from sklearn.ensemble import RandomForestClassifier
+from xgboost import XGBClassifier
+
+from sklearn.model_selection import TunedThresholdClassifierCV
+
+from sklearn.metrics import (
+    make_scorer,
+    confusion_matrix,
+    accuracy_score,
+    precision_score,
+    recall_score,
+    f1_score,
+    roc_curve,
+    roc_auc_score
+)
+```
+
+Code Cell #2:
+```python
+import sklearn
+# 1. Enable metadata routing globally
+sklearn.set_config(enable_metadata_routing=True)
+```
+
+Code Cell #3:
+```python
+# Load dataset
+all_matches = pd.read_csv("dataset/extracted/combined_player_stats_new.csv")
+
+# Features used for training
+features = [
+    "kills_per_round",
+    "deaths_per_round",
+    "kd_ratio",
+    "headshot_rate",
+    "has_kills",
+    "avg_speed",
+    "avg_accuracy_penalty",
+    "damage_per_round", 
+    # "damagepr_and_headshotrate_interaction",
+    # "smoke_kill_ratio",	
+    # "blind_kill_ratio",
+    "air_kill_ratio"
+]
+
+X = all_matches[features].replace([np.inf, -np.inf], np.nan)
+y = all_matches["is_cheater"]
+groups = all_matches["match_id"]
+```
+
+... [7 more code cells omitted]
+
+```
+
+`04_random_match_test.ipynb`:
+
+```ipynb
+Jupyter Notebook Summary:
+Total cells: 7 (7 code, 0 markdown, 0 raw)
+
+Code Cell #1:
+```python
+import joblib
+import seaborn as sns
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.metrics import (
+    confusion_matrix,
+    precision_score,
+    recall_score
+)
+```
+
+Code Cell #2:
+```python
+# Load dataset
+matches = pd.read_csv("datasets/extracted/test.csv")
+
+# Features used for training
+features = [
+    "kills_per_round",
+    "deaths_per_round",
+    "kd_ratio",
+    "headshot_rate",
+    "has_kills",
+    "avg_speed",
+    "avg_accuracy_penalty",
+    "damage_per_round", 
+    "air_kill_ratio"
+]
+
+X_test = matches[features].replace([np.inf, -np.inf], np.nan)
+y_test = matches["is_cheater"]
+```
+
+Code Cell #3:
+```python
+X_test
+```
+
+... [4 more code cells omitted]
+
+```
+
+`Metrics.md`:
+
+```md
+# MODEL COMPARISON 1 (550 records) (Not Threshold Tuned)
+## features:
+["kills_per_round",
+"deaths_per_round",
+"kd_ratio",
+"headshot_rate",
+"has_kills",
+"avg_speed",
+"avg_accuracy_penalty"]
+
+              Model  Accuracy  Precision  Recall  F1 Score  ROC-AUC
+Logistic Regression    0.8455     0.9375  0.4839    0.6383   0.9081
+      Random Forest    0.8455     1.0000  0.4516    0.6222   0.9283
+            XGBoost    0.8545     1.0000  0.4839    0.6522   0.9204
+
+# MODEL COMPARISON 2 (550 records) (Threshold Tuned on F1 Score)
+## features:
+["kills_per_round",
+"deaths_per_round",
+"kd_ratio",
+"headshot_rate",
+"has_kills",
+"avg_speed",
+"avg_accuracy_penalty",]
+
+              Model  Accuracy  Precision  Recall  F1 Score  ROC-AUC
+Logistic Regression    0.8455     0.9375  0.4839    0.6383   0.9081
+      Random Forest    0.8636     0.9444  0.5484    0.6939   0.9283
+            XGBoost    0.8818     0.9091  0.6452    0.7547   0.9204
+
+# MODEL COMPARISON 3 (1760 records) (Threshold Tuned on F1 Score)
+## features:
+["kills_per_round",
+"deaths_per_round",
+"kd_ratio",
+"headshot_rate",
+"has_kills",
+"avg_speed",
+"avg_accuracy_penalty"]
+
+              Model  Accuracy  Precision  Recall  F1 Score  ROC-AUC
+Logistic Regression    0.9111     0.8182  0.7297    0.7714   0.9259
+      Random Forest    0.9167     0.8793  0.6892    0.7727   0.9407
+            XGBoost    0.9250     0.8406  0.7838    0.8112   0.9393
+
+# MODEL COMPARISON 4 (1760 records) (Not Threshold Tuned)
+## features:
+["kills_per_round",
+"deaths_per_round",
+"kd_ratio",
+"headshot_rate",
+"has_kills",
+"avg_speed",
+"avg_accuracy_penalty",
+"damage_per_round"]
+
+              Model  Accuracy  Precision  Recall  F1 Score  ROC-AUC
+Logistic Regression    0.9056     0.9348  0.5811    0.7167   0.9407
+      Random Forest    0.9139     0.9057  0.6486    0.7559   0.9599
+            XGBoost    0.9194     0.9091  0.6757    0.7752   0.9571
+
+# MODEL COMPARISON 5 (1760 records) (Threshold Tuned on F1 Score)
+## features:
+["kills_per_round",
+"deaths_per_round",
+"kd_ratio",
+"headshot_rate",
+"has_kills",
+"avg_speed",
+"avg_accuracy_penalty",
+"damage_per_round"]
+
+              Model  Accuracy  Precision  Recall  F1 Score  ROC-AUC
+Logistic Regression    0.9278     0.9138  0.7162    0.8030   0.9407
+      Random Forest    0.9139     0.8644  0.6892    0.7669   0.9599
+            XGBoost    0.9167     0.8056  0.7838    0.7945   0.9571
+
+# MODEL COMPARISON 6 (1760 records) (Threshold Tuned on F1 Score)
+## features:
+["kills_per_round",
+"deaths_per_round",
+"kd_ratio",
+"headshot_rate",
+"has_kills",
+"avg_speed",
+"avg_accuracy_penalty",
+"damage_per_round",
+"damagepr_and_headshotrate_interaction"]
+
+              Model  Accuracy  Precision  Recall  F1 Score  ROC-AUC
+Logistic Regression    0.9167     0.9400  0.6351    0.7581   0.9502
+      Random Forest    0.9167     0.8793  0.6892    0.7727   0.9510
+            XGBoost    0.9194     0.9091  0.6757    0.7752   0.9550
+
+# MODEL COMPARISON 7 (1760 records) (Threshold Tuned on F1 Score)
+## features:
+["kills_per_round",
+"deaths_per_round",
+"kd_ratio",
+"headshot_rate",
+"has_kills",
+"avg_speed",
+"avg_accuracy_penalty",
+"damage_per_round",
+"air_kill_ratio"]
+
+              Model  Accuracy  Precision  Recall  F1 Score  ROC-AUC
+Logistic Regression    0.9306     0.9016  0.7432    0.8148   0.9423
+      Random Forest    0.9139     0.8772  0.6757    0.7634   0.9569
+            XGBoost    0.9278     0.8636  0.7703    0.8143   0.9606
+
+# MODEL COMPARISON 8 (1760 records) (Threshold Tuned on F1 Score)
+## features:
+["kills_per_round",
+"deaths_per_round",
+"kd_ratio",
+"headshot_rate",
+"has_kills",
+"avg_speed",
+"avg_accuracy_penalty",
+"damage_per_round",
+"damagepr_and_headshotrate_interaction"
+"air_kill_ratio"]
+
+              Model  Accuracy  Precision  Recall  F1 Score  ROC-AUC
+Logistic Regression    0.9194     0.9412  0.6486    0.7680   0.9521
+      Random Forest    0.9139     0.8209  0.7432    0.7801   0.9532
+            XGBoost    0.9250     0.9123  0.7027    0.7939   0.9554
+
+# MODEL COMPARISON 9 (1760 records) (Threshold Tuned on F1 Score)
+## features:
+["kills_per_round",
+"deaths_per_round",
+"kd_ratio",
+"headshot_rate",
+"has_kills",
+"avg_speed",
+"avg_accuracy_penalty",
+"damage_per_round",
+"damagepr_and_headshotrate_interaction"
+"smoke_kill_ratio",	
+"blind_kill_ratio",
+"air_kill_ratio"]
+
+              Model  Accuracy  Precision  Recall  F1 Score  ROC-AUC
+Logistic Regression    0.9028     0.7746  0.7432    0.7586   0.9493
+      Random Forest    0.9139     0.8909  0.6622    0.7597   0.9516
+            XGBoost    0.9083     0.9020  0.6216    0.7360   0.9548
+```
+
+`README.md`:
+
+```md
+# Ban-Hammer
+Machine Learning-Based Game Cheat Detection Through Player Behavioural Analysis. A cheat detector for Counter Strike 2 which uses in game statistics and behavioural data like Kills per round, Deaths per round, Speed, Accuracy Penalty etc to detect suspicious Aimbot, Spinbot or other cheat behaviour using Machine Learning. 
+
+```
+
+`datasets/test_checklist`:
+
+```
+56.json, 56.parquet to 59.json, 59.parquet (4)
+```
+
+`datasets/with_cheater_checklist`:
+
+```
+100.json, 100.parquet (1)
+107.json, 107.parquet to 117.json, 117.parquet (11)
+130.json, 130.parquet to 145.json, 145.parquet (16)
+222.json, 222.parquet to 281.json, 281.parquet (60)
+total pairs = 88
+```
+
+`datasets/without_cheater_checklist`:
+
+```
+0.json,0.parquet (1)
+12.json,12.parquet (1)
+118.json,118.parquet to 126.json, 126.parquet (9)
+129.json,129.parquet (1)
+146.json,146.parquet to 221.json, 221.parquet (76)
+
+total pairs = 88
+```
+
+`install_data.ipynb`:
+
+```ipynb
+Jupyter Notebook Summary:
+Total cells: 1 (1 code, 0 markdown, 0 raw)
+
+Code Cell #1:
+```python
+from huggingface_hub import hf_hub_download
+from pathlib import Path
+import shutil
+
+REPO_ID = "CS2CD/CS2CD.Counter-Strike_2_Cheat_Detection"
+DATA_FOLDER = Path("datasets/test")
+
+DATA_FOLDER.mkdir(parents=True, exist_ok=True)
+
+for i in range(56, 60):
+    for extension in ["parquet", "json"]:
+        filename = f"{i}.{extension}"
+
+        try:
+            downloaded_file = hf_hub_download(
+                repo_id=REPO_ID,
+                filename=f"with_cheater_present/{filename}",
+                repo_type="dataset"
+            )
+
+            destination = DATA_FOLDER / filename
+            shutil.copy2(downloaded_file, destination)
+
+            print(f"Downloaded: {filename}")
+
+        except Exception as e:
+            print(f"Failed to download {filename}: {e}")
+
+print("Download process completed!")
+```
+
+
+```
