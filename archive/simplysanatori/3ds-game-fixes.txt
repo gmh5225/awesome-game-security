@@ -1,0 +1,880 @@
+Project Path: arc_simplysanatori_3ds-game-fixes_3rtapu54
+
+Source Tree:
+
+```txt
+arc_simplysanatori_3ds-game-fixes_3rtapu54
+├── AGENTS.md
+├── LICENSE
+├── README.md
+├── catalog
+│   ├── mods.json
+│   └── textures.json
+├── docs
+│   └── USER_GUIDE.md
+└── games
+    └── stella-glow-usa
+        ├── AGENTS.md
+        ├── README.md
+        ├── cheats
+        │   └── 0004000000173700.txt
+        ├── images
+        └── patch
+            └── 0004000000173700
+                └── code.ips
+
+```
+
+`AGENTS.md`:
+
+```md
+# AGENTS.md
+
+Technical detail kept out of the README: how the repo is laid out and how a fix is added. Each game's own `AGENTS.md` explains its fix.
+
+## Layout
+
+```
+games/<game>-<region>/
+  README.md                     short page for players
+  AGENTS.md                     how the fix was found and how it works
+  patch/<title id>/code.ips     IPS against the decompressed ExeFS .code
+  cheats/<title id>.txt         Action Replay codes, Citra/Azahar file format
+  images/                       before/after screenshots
+docs/USER_GUIDE.md              install folders for every emulator, shared by all games
+```
+
+- Folder names are lowercase, with the region last: `stella-glow-usa`, `dragon-quest-xi-usa`.
+- The `patch/<title id>/` folder mirrors the mods folder, so it can be copied in whole.
+- Fixes live as folders on `main`, one per game. Use a branch only for a fix still in progress, then merge it.
+- Add each new game to the **Games** list in `README.md`.
+
+## Rules for a fix
+
+- **Cheats:** use only standard Gateway/Action Replay opcodes, so they work in Azahar, Citra, Zakuro, Rosalina and CTRPF.
+- **Guards:** guard every code-region write with a type-5 compare against the original word and close it with `D0000000 00000000`. End the file with `D2000000 00000000`. Then it writes once and does nothing on another version.
+- **Patch and cheat:** ship the same change as `code.ips`. IPS offsets are relative to the decompressed `.code`: address minus `0x00100000`.
+- **Version:** name the game version the fix targets: cartridge `rev<remaster version>` or `update <major>.<minor>`.
+- **Testing:** test in at least one emulator with before/after screenshots of the same scene. List what wasn't tested in the game's README.
+- **Two fixes for one game:** a game gets one `code.ips`. Merge the records into one file rather than shipping two patches for the same game.
+
+## Tools used
+
+- [Zakuro](https://github.com/fearkov/zakuro) headless harness (`crates/zakuro-core/examples/boot.rs`): scripted input, save states, screen dumps and GPU trace logs.
+- Capstone, for disassembling the decompressed `.code`.
+- Azahar's Ctrl+P screenshots, for before/after images.
+
+## How this was made
+
+I started this project and used AI (Claude) to speed up development. I write, review and fix code by hand all the way through, keep the AI's work checked and reined in, and aim to keep the patches as lightweight as possible. I test them in Azahar and Zakuro on my own PC.
+
+```
+
+`LICENSE`:
+
+```
+MIT License
+
+Copyright (c) 2026 simplysanatori
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
+`README.md`:
+
+```md
+# 3DS Game Fixes
+
+Patches and cheats that fix graphics bugs and add tweaks to 3DS games. They work in Azahar, Citra, Zakuro and on a real 3DS with Luma3DS.
+
+## Games
+
+- [Stella Glow (USA)](games/stella-glow-usa/): removes the ghostly glow around characters at high resolution
+
+## How it works
+
+- Each game has its own folder under `games/`.
+- Most fixes come as a patch file (`code.ips`) and as a cheat code.
+- The patch changes the game's code when it starts. The cheat does the same change from the cheat menu.
+- Each fix is made for one region and version of the game. It does nothing on a different version.
+
+## Requirements
+
+- Your own copy of the game, in the region the game's folder names
+- Azahar, Citra or Zakuro, or a 3DS with Luma3DS
+
+## Install
+
+1. Open the game's folder and find its title ID, for example `0004000000173700`.
+2. Copy `patch/<title ID>/code.ips` into your emulator's mods folder for that game:
+   - Azahar / Citra: right-click the game and choose **Open Mods Location**
+   - Zakuro: click **Mods** next to the game, then press **Recompile**
+   - Real 3DS: `luma/titles/<title ID>/` on the SD card, with **Enable game patching** on in Luma3DS
+3. Start the game.
+
+The file has to be named `code.ips`. Use the cheat in `cheats/<title ID>.txt` only if you can't use mods.
+
+## Uninstall
+
+Delete `code.ips` from the mods folder, or turn off the cheat.
+
+## Troubleshooting
+
+- Fix doesn't work: check your game's region and title ID match the folder.
+- The cheat does nothing: use the patch file instead.
+- The patch isn't picked up: the file must be named `code.ips`.
+
+## More
+
+- [User guide](docs/USER_GUIDE.md): install folders for each emulator, cheats, real 3DS
+- [AGENTS.md](AGENTS.md): how the repo is laid out and how fixes are made, for developers and AI agents
+- Each game folder has an `AGENTS.md` with how its fix works
+
+## Support
+
+https://ko-fi.com/sana748653
+
+## Credits
+
+- [Zakuro](https://github.com/fearkov/zakuro): the 3DS emulator used to trace and test fixes
+
+## Licence
+
+MIT
+
+## How this was made
+
+I started this project and used AI (Claude) to speed up development. I write, review and fix code by hand all the way through, keep the AI's work checked and reined in, and aim to keep the patches as lightweight as possible. I test them in Azahar and Zakuro on my own PC.
+
+```
+
+`catalog/mods.json`:
+
+```json
+{
+  "schema": 1,
+  "mods": [
+    {
+      "id": "stella-glow-usa-no-bloom",
+      "name": "No Bloom",
+      "title": "Stella Glow (USA)",
+      "title_ids": [
+        "0004000000173700"
+      ],
+      "author": "simplysanatori",
+      "licence": "MIT",
+      "homepage": "https://github.com/simplysanatori/3ds-game-fixes/tree/main/games/stella-glow-usa",
+      "verified": true,
+      "source": {
+        "type": "owner_repo_path",
+        "path": "games/stella-glow-usa/patch/0004000000173700/code.ips"
+      },
+      "install": {
+        "rules": [
+          {
+            "from": "code.ips",
+            "to": "code.ips"
+          }
+        ]
+      },
+      "notes": "Removes the glow and doubled outlines around characters at higher internal resolutions."
+    },
+    {
+      "id": "ocarina-reframed-single-screen",
+      "name": "Ocarina ReFramed (Single Screen)",
+      "title": "The Legend of Zelda: Ocarina of Time 3D",
+      "title_ids": [
+        "0004000000033500",
+        "0004000000033600",
+        "0004000000033400",
+        "000400000008F800",
+        "000400000008F900"
+      ],
+      "author": "OTPR26",
+      "licence": "GPL-3.0-or-later (source); HUD art and game data are not GPL",
+      "homepage": "https://github.com/OTPR26/OOT3DHud",
+      "verified": false,
+      "source": {
+        "type": "github_release",
+        "repo": "OTPR26/OOT3DHud",
+        "tag": "latest",
+        "asset_pattern": "Ocarina-ReFramed-*-Single-Screen-Mods.zip"
+      },
+      "install": {
+        "rules": [
+          {
+            "from": "*/load/mods/{tid}/",
+            "to": ""
+          }
+        ]
+      },
+      "notes": "Covers all regions (North America, Europe, Japan, Korea, Taiwan); the folder for the game's own title ID is used. Replaces any other code patch for the game."
+    },
+    {
+      "id": "ocarina-reframed-dual-screen",
+      "name": "Ocarina ReFramed (Dual Screen)",
+      "title": "The Legend of Zelda: Ocarina of Time 3D",
+      "title_ids": [
+        "0004000000033500",
+        "0004000000033600",
+        "0004000000033400",
+        "000400000008F800",
+        "000400000008F900"
+      ],
+      "author": "OTPR26",
+      "licence": "GPL-3.0-or-later (source); HUD art and game data are not GPL",
+      "homepage": "https://github.com/OTPR26/OOT3DHud",
+      "verified": false,
+      "source": {
+        "type": "github_release",
+        "repo": "OTPR26/OOT3DHud",
+        "tag": "latest",
+        "asset_pattern": "Ocarina-ReFramed-*-Dual-Screen-Mods.zip"
+      },
+      "install": {
+        "rules": [
+          {
+            "from": "*/load/mods/{tid}/",
+            "to": ""
+          }
+        ]
+      },
+      "notes": "Covers all regions (North America, Europe, Japan, Korea, Taiwan); the folder for the game's own title ID is used. Replaces any other code patch for the game."
+    },
+    {
+      "id": "mm3d-project-restoration-v100",
+      "name": "Project Restoration",
+      "title": "The Legend of Zelda: Majora's Mask 3D",
+      "title_ids": [
+        "0004000000125500",
+        "0004000000125600",
+        "00040000000D6E00"
+      ],
+      "author": "leoetlino",
+      "licence": "GPL-2.0",
+      "homepage": "https://github.com/leoetlino/project-restoration",
+      "verified": false,
+      "source": {
+        "type": "github_release",
+        "repo": "leoetlino/project-restoration",
+        "tag": "v1.5.9",
+        "asset_pattern": "mm3d_project_restoration_v*.7z"
+      },
+      "install": {
+        "rules": [
+          {
+            "from": "v100/citra/code.bps",
+            "to": "code.bps"
+          },
+          {
+            "from": "v100/citra/exheader.bin",
+            "to": "exheader.bin"
+          }
+        ]
+      },
+      "notes": "MM3D 1.0, or 1.1 with the update. The Korean release is not supported."
+    },
+    {
+      "id": "mm3d-project-restoration-v110",
+      "name": "Project Restoration (Card 1.1)",
+      "title": "The Legend of Zelda: Majora's Mask 3D",
+      "title_ids": [
+        "0004000000125500",
+        "0004000000125600",
+        "00040000000D6E00"
+      ],
+      "author": "leoetlino",
+      "licence": "GPL-2.0",
+      "homepage": "https://github.com/leoetlino/project-restoration",
+      "verified": false,
+      "source": {
+        "type": "github_release",
+        "repo": "leoetlino/project-restoration",
+        "tag": "v1.5.9",
+        "asset_pattern": "mm3d_project_restoration_v*.7z"
+      },
+      "install": {
+        "rules": [
+          {
+            "from": "v110/citra/code.bps",
+            "to": "code.bps"
+          },
+          {
+            "from": "v110/citra/exheader.bin",
+            "to": "exheader.bin"
+          }
+        ]
+      },
+      "notes": "MM3D 1.1 game card (1.1 preinstalled). The Korean release is not supported."
+    },
+    {
+      "id": "mm3d-project-restoration-v101",
+      "name": "Project Restoration (v101)",
+      "title": "The Legend of Zelda: Majora's Mask 3D",
+      "title_ids": [
+        "0004000000125500",
+        "0004000000125600",
+        "00040000000D6E00"
+      ],
+      "author": "leoetlino",
+      "licence": "GPL-2.0",
+      "homepage": "https://github.com/leoetlino/project-restoration",
+      "verified": false,
+      "source": {
+        "type": "github_release",
+        "repo": "leoetlino/project-restoration",
+        "tag": "v1.5.9",
+        "asset_pattern": "mm3d_project_restoration_v*.7z"
+      },
+      "install": {
+        "rules": [
+          {
+            "from": "v101/citra/code.bps",
+            "to": "code.bps"
+          },
+          {
+            "from": "v101/citra/exheader.bin",
+            "to": "exheader.bin"
+          }
+        ]
+      },
+      "notes": "Only if the first one does not work. The Korean release is not supported."
+    }
+  ]
+}
+
+```
+
+`catalog/textures.json`:
+
+```json
+{
+  "schema": 1,
+  "packs": [
+    {
+      "id": "mm3d-hd-deathwrench",
+      "name": "Majora's Mask 3D HD",
+      "title": "The Legend of Zelda: Majora's Mask 3D",
+      "title_ids": [
+        "0004000000125500",
+        "0004000000125600"
+      ],
+      "author": "DeathWrench",
+      "author_url": "https://github.com/DeathWrench/MM3DHD",
+      "source": {
+        "type": "github_release",
+        "repo": "DeathWrench/MM3DHD",
+        "tag": "0.0.42b",
+        "asset_pattern": "MM3DHD.zip"
+      },
+      "size": 78109346,
+      "sha256": "311c7bc7ab938920743b8867ab96c6ad1365f1d10439fd1b1369f264ecf28690",
+      "format": "zip",
+      "layout": "variants",
+      "folder": "MM3D HD",
+      "licence": "Not stated; fan-made, credit the author",
+      "notes": "Several variants (fonts, Link styles); each shows up as its own pack. Partial pack.",
+      "updated": "2021-05-06",
+      "verified": false
+    },
+    {
+      "id": "pokemon-xy-hd",
+      "name": "Pokemon X and Y HD",
+      "title": "Pokemon X / Pokemon Y",
+      "title_ids": [
+        "0004000000055D00",
+        "0004000000055E00"
+      ],
+      "author": "Ullr8, Gray-Rice",
+      "author_url": "https://github.com/Gray-Rice/PokeTex-3DS",
+      "source": {
+        "type": "github_release",
+        "repo": "Gray-Rice/PokeTex-3DS",
+        "tag": "xy",
+        "asset_pattern": "XY.7z"
+      },
+      "size": 1834769856,
+      "format": "7z",
+      "layout": "single",
+      "folder": "XY HD",
+      "licence": "Not stated; fan-made, credit the authors",
+      "notes": "Work in progress. Based on Pokemon Y Resurrection.",
+      "updated": "2025-02-28",
+      "verified": false
+    },
+    {
+      "id": "pokemon-usum-hd",
+      "name": "Pokemon Ultra Sun and Ultra Moon HD",
+      "title": "Pokemon Ultra Sun / Pokemon Ultra Moon",
+      "title_ids": [
+        "00040000001B5000",
+        "00040000001B5100"
+      ],
+      "author": "Volya, Gray-Rice",
+      "author_url": "https://github.com/Gray-Rice/PokeTex-3DS",
+      "source": {
+        "type": "github_release",
+        "repo": "Gray-Rice/PokeTex-3DS",
+        "tag": "usum",
+        "asset_pattern": "USUM.7z"
+      },
+      "size": 124548993,
+      "sha256": "f28eef887269c51735f45b0946d07e060f45b954fe61ff6739bc80a6e053d572",
+      "format": "7z",
+      "layout": "single",
+      "folder": "USUM HD",
+      "licence": "Not stated; fan-made, credit the authors",
+      "notes": "Textures from the Citra forum archive.",
+      "updated": "2025-02-28",
+      "verified": false
+    },
+    {
+      "id": "oot3d-4k-henriko",
+      "name": "Ocarina of Time 3D 4K",
+      "title": "The Legend of Zelda: Ocarina of Time 3D",
+      "title_ids": [
+        "0004000000033500",
+        "0004000000033600",
+        "0004000000033400"
+      ],
+      "author": "Henriko Magnifico",
+      "author_url": "https://www.henrikomagnifico.com/zelda-ocarina-of-time-3d-4k",
+      "source": {
+        "type": "gdrive_folder",
+        "folder_id": "1QQ-4b8SvR2d4VKKQNS-I1WOIB5EaTuzt",
+        "file_pattern": "OOT3D 4K * (4K).zip"
+      },
+      "alternates": [
+        {
+          "type": "gdrive_folder",
+          "folder_id": "1F2lJ_TJyZovp5TtKmqrl24fy97IdEh85",
+          "file_pattern": "OOT3D 4K * (4K).zip"
+        }
+      ],
+      "size": 0,
+      "format": "zip",
+      "layout": "single",
+      "folder": "OoT3D 4K",
+      "licence": "Not stated; free for emulators, credit the author",
+      "notes": "Textures only; the pack's ReShade files are not used. Version 5.0a. Size not confirmed (Google Drive was over its download limit when checked).",
+      "updated": "2026-09-04",
+      "verified": true
+    },
+    {
+      "id": "oot3d-1080p-henriko",
+      "name": "Ocarina of Time 3D 1080p",
+      "title": "The Legend of Zelda: Ocarina of Time 3D",
+      "title_ids": [
+        "0004000000033500",
+        "0004000000033600",
+        "0004000000033400"
+      ],
+      "author": "Henriko Magnifico",
+      "author_url": "https://www.henrikomagnifico.com/zelda-ocarina-of-time-3d-4k",
+      "source": {
+        "type": "gdrive_folder",
+        "folder_id": "1QQ-4b8SvR2d4VKKQNS-I1WOIB5EaTuzt",
+        "file_pattern": "OOT3D 4K * (1080p).zip"
+      },
+      "alternates": [
+        {
+          "type": "gdrive_folder",
+          "folder_id": "1F2lJ_TJyZovp5TtKmqrl24fy97IdEh85",
+          "file_pattern": "OOT3D 4K * (1080p).zip"
+        }
+      ],
+      "size": 1908239755,
+      "format": "zip",
+      "layout": "single",
+      "folder": "OoT3D 1080p",
+      "licence": "Not stated; free for emulators, credit the author",
+      "notes": "Textures only; the pack's ReShade files are not used. Version 5.0a, for 1080p screens.",
+      "updated": "2026-09-04",
+      "verified": true
+    },
+    {
+      "id": "mm3d-4k-henriko",
+      "name": "Majora's Mask 3D 4K",
+      "title": "The Legend of Zelda: Majora's Mask 3D",
+      "title_ids": [
+        "0004000000125500",
+        "0004000000125600"
+      ],
+      "author": "Henriko Magnifico",
+      "author_url": "https://www.henrikomagnifico.com/zelda-majoras-mask-3d-4k",
+      "source": {
+        "type": "gdrive_folder",
+        "folder_id": "13AxQkZj1YPvPvFWVguMDXWCBSB-ixLo0",
+        "file_pattern": "MM 3D 4K * (4K).zip"
+      },
+      "size": 3687464465,
+      "format": "zip",
+      "layout": "single",
+      "folder": "MM3D 4K",
+      "licence": "Not stated; free for emulators, credit the author",
+      "notes": "Textures only; the pack's ReShade files are not used. Version 3.0b. USA and Europe only.",
+      "updated": "2026-01-05",
+      "verified": true
+    },
+    {
+      "id": "mm3d-1080p-henriko",
+      "name": "Majora's Mask 3D 1080p",
+      "title": "The Legend of Zelda: Majora's Mask 3D",
+      "title_ids": [
+        "0004000000125500",
+        "0004000000125600"
+      ],
+      "author": "Henriko Magnifico",
+      "author_url": "https://www.henrikomagnifico.com/zelda-majoras-mask-3d-4k",
+      "source": {
+        "type": "gdrive_folder",
+        "folder_id": "13AxQkZj1YPvPvFWVguMDXWCBSB-ixLo0",
+        "file_pattern": "MM 3D 4K * (1080p).zip"
+      },
+      "size": 1744246909,
+      "format": "zip",
+      "layout": "single",
+      "folder": "MM3D 1080p",
+      "licence": "Not stated; free for emulators, credit the author",
+      "notes": "Textures only; the pack's ReShade files are not used. Version 3.0b, for 1080p screens. USA and Europe only.",
+      "updated": "2026-01-05",
+      "verified": true
+    },
+    {
+      "id": "sm3dl-4k-henriko",
+      "name": "Super Mario 3D Land 4K",
+      "title": "Super Mario 3D Land",
+      "title_ids": [
+        "0004000000054000",
+        "0004000000053F00"
+      ],
+      "author": "Henriko Magnifico",
+      "author_url": "https://www.henrikomagnifico.com/super-mario-3d-land-hd",
+      "source": {
+        "type": "gdrive_folder",
+        "folder_id": "1pTy-_VovJbgQh3Uotrx9Kd-5Ss-dK1-2",
+        "file_pattern": "SM3DL 4K * (4K).zip"
+      },
+      "size": 183771391,
+      "format": "zip",
+      "layout": "single",
+      "folder": "SM3DL 4K",
+      "licence": "Not stated; free for emulators, credit the author",
+      "notes": "Textures only; the pack's ReShade files are not used. Version 1.2.0b.",
+      "updated": "2025-03-10",
+      "verified": true
+    },
+    {
+      "id": "sm3dl-1080p-henriko",
+      "name": "Super Mario 3D Land 1080p",
+      "title": "Super Mario 3D Land",
+      "title_ids": [
+        "0004000000054000",
+        "0004000000053F00"
+      ],
+      "author": "Henriko Magnifico",
+      "author_url": "https://www.henrikomagnifico.com/super-mario-3d-land-hd",
+      "source": {
+        "type": "gdrive_folder",
+        "folder_id": "1pTy-_VovJbgQh3Uotrx9Kd-5Ss-dK1-2",
+        "file_pattern": "SM3DL 4K * (1080p).zip"
+      },
+      "size": 107111023,
+      "format": "zip",
+      "layout": "single",
+      "folder": "SM3DL 1080p",
+      "licence": "Not stated; free for emulators, credit the author",
+      "notes": "Textures only; the pack's ReShade files are not used. Version 1.2.0b, for 1080p screens.",
+      "updated": "2025-03-10",
+      "verified": true
+    },
+    {
+      "id": "albw-4k-henriko",
+      "name": "A Link Between Worlds 4K",
+      "title": "The Legend of Zelda: A Link Between Worlds",
+      "title_ids": [
+        "00040000000EC300"
+      ],
+      "author": "Henriko Magnifico",
+      "author_url": "https://www.henrikomagnifico.com/zelda-a-link-between-worlds-4k",
+      "source": {
+        "type": "gdrive_folder",
+        "folder_id": "1Io5Qw5L1Iep7WQja-5G9NyxkFqMkkSLv",
+        "file_pattern": "ALBW 4K * (4K).zip"
+      },
+      "size": 526066444,
+      "format": "zip",
+      "layout": "single",
+      "folder": "ALBW 4K",
+      "licence": "Not stated; free for emulators, credit the author",
+      "notes": "Textures only; the pack's ReShade files are not used. Version 2.0b. USA only (the pack is made for the USA game).",
+      "updated": "2026-01-05",
+      "verified": true
+    },
+    {
+      "id": "albw-1080p-henriko",
+      "name": "A Link Between Worlds 1080p",
+      "title": "The Legend of Zelda: A Link Between Worlds",
+      "title_ids": [
+        "00040000000EC300"
+      ],
+      "author": "Henriko Magnifico",
+      "author_url": "https://www.henrikomagnifico.com/zelda-a-link-between-worlds-4k",
+      "source": {
+        "type": "gdrive_folder",
+        "folder_id": "1Io5Qw5L1Iep7WQja-5G9NyxkFqMkkSLv",
+        "file_pattern": "ALBW 4K * (1080p).zip"
+      },
+      "size": 191955611,
+      "format": "zip",
+      "layout": "single",
+      "folder": "ALBW 1080p",
+      "licence": "Not stated; free for emulators, credit the author",
+      "notes": "Textures only; the pack's ReShade files are not used. Version 2.0b, for 1080p screens. USA only.",
+      "updated": "2026-01-05",
+      "verified": true
+    }
+  ]
+}
+
+```
+
+`docs/USER_GUIDE.md`:
+
+```md
+# User guide
+
+## Patch or cheat?
+
+- **`code.ips`**: use this one. It doesn't require a cheat menu, and it's on every time you start the game.
+- **Cheat**: use this if you can't use mods.
+
+You can use both at once. It doesn't do anything extra.
+
+## Where `code.ips` goes
+
+Replace `<title ID>` with the ID from the game's folder.
+
+| Where | Folder |
+|---|---|
+| Azahar / Citra | Right-click the game, **Open Mods Location** |
+| Azahar (Windows) | `%APPDATA%\Azahar\load\mods\<title ID>\` |
+| Citra (Windows) | `%APPDATA%\Citra\load\mods\<title ID>\` |
+| Zakuro (Windows) | `%APPDATA%\zakuro\mods\<title ID>\` |
+| Zakuro (Linux) | `~/.local/share/zakuro/mods/<title ID>/` |
+| Real 3DS (Luma3DS) | `luma/titles/<title ID>/` on the SD card |
+
+The file has to be named `code.ips`. An `exefs` folder inside the mods folder works too. A game can only have one `code.ips`, so two patches can't both be copied in.
+
+## Cheats
+
+The cheat files use the standard Action Replay format. Each code checks for the original game code before it writes, so on the wrong version it does nothing.
+
+- **Azahar / Citra:** copy the `.txt` into `%APPDATA%\Azahar\cheats\`, then turn it on under **Emulation**, **Configure Current Game**, **Cheats**.
+- **Zakuro:** press **Esc**, go to **Cheats**, paste the code and turn it on.
+- **Real 3DS:** the Rosalina menu (**L + Down + Select**, then **Cheats**) or CTRPF.
+
+## Zakuro
+
+1. Click **Mods** next to the game in the library.
+2. Copy `code.ips` into that folder.
+3. Press **Recompile** next to the game.
+
+Recompiling builds the patch into the game's recompiled code. If you skip it, the patch still works, but that part of the game runs slower. Cheats that change game code also run slower in Zakuro, so the patch file is the better pick there.
+
+## Real 3DS
+
+1. Copy `code.ips` to `luma/titles/<title ID>/` on the SD card.
+2. Hold **Select** while turning the 3DS on.
+3. Turn on **Enable game patching** and save.
+
+## Troubleshooting
+
+- **The fix doesn't work.** Check your game's region and title ID match the game's folder.
+- **The cheat does nothing.** Use the patch file instead.
+- **The patch isn't picked up.** Check the file is named `code.ips` and the folder is the title ID.
+- **You have an update installed.** Each fix is made for the version its folder names.
+
+## Reporting a problem
+
+Open an issue with:
+
+- the game and its region
+- your emulator or 3DS, and its version
+- patch or cheat
+- a screenshot of the scene
+
+```
+
+`games/stella-glow-usa/AGENTS.md`:
+
+```md
+# AGENTS.md
+
+Technical detail moved out of the README: what the bug is, how the patch works and how it was verified.
+
+## Target
+
+- Stella Glow (USA), title ID `0004000000173700`, cartridge executable, remaster version 0 (`rev0` in Zakuro's terms).
+- `.code` is BLZ-compressed in ExeFS and loads at `0x00100000`. All addresses below are virtual addresses in the decompressed code.
+- No update was available to test against. The cheat's guards stop it writing on a different executable. The IPS has no guard.
+
+## The bloom pass (measured)
+
+The game builds its glow in one command list, every few frames:
+
+1. Draws the scene into the main colour buffer (phys `0x18000000`, 256x512 RGBA8).
+2. **Downsample:** draws one bilinear quad that samples the scene into a 64x64 target at phys `0x18400100`.
+3. Draws an untextured quad with colour 0.3 over the same target, with blend `0x16160202`.
+4. **Blur:** draws 8 quads that sample `0x18400100` into a second 64x64 target at `0x18404180`. Each quad is offset by ±1.25 texels, has vertex alpha 0.15 and blends additively.
+5. **Composite:** draws a full-screen additive quad that samples `0x18404180` onto the main buffer, with vertex colour (1,1,1,1).
+
+There are no downscaling display transfers or TextureCopy commands in the chain. The parameters (10.0, 0.3, 0.15) appear as `GLAREPARAM` rows in `romfs/param/battlegra_param.bin`.
+
+## Why it breaks when upscaled
+
+At 1x, each blur tap bilinearly mixes neighbouring texels of a coarse 64x64 image, so the 8 taps merge into a soft glow. Emulators scale render targets by N, so at Nx the 64x64 targets become 64N x 64N. The downsample keeps N times more detail, and the 1.25-texel taps land 1.25N host pixels apart. Each tap then shows as a sharp, separate copy of the character. This is why the effect grows with every resolution step. Texture packs replace textures, not render targets, so they cannot affect it.
+
+## The patch
+
+- Bloom function: `0x109134`–`0x1095C4`, called only from `0x105404` and `0x105670`, both in the same routine.
+- The composite is drawn by `bl 0x214954` at `0x109598`. Its colour array at `sp+8..sp+0x14` is filled by four `vstr s22` stores, with `s22` = 1.0.
+- The patch changes those four ARM instructions to store `s23` instead:
+
+| Address | Original | Patched |
+|---|---|---|
+| `0x109558` | `ED8DBA02` `vstr s22,[sp,#8]` | `EDCDBA02` `vstr s23,[sp,#8]` |
+| `0x109560` | `ED8DBA03` | `EDCDBA03` |
+| `0x109564` | `ED8DBA04` | `EDCDBA04` |
+| `0x109568` | `ED8DBA05` | `EDCDBA05` |
+
+- `s23` is loaded once at `0x109280` (`vldr s23,[pc,#0x35c]`) from the literal at `0x1095E4`, which is 0.0. The only branch before that load is the early exit at `0x10914C`. `s23` is never written afterwards, and `s16`–`s31` are callee-saved, so it is 0.0 at every store.
+- With the composite colour zeroed, the additive blend adds nothing. The rest of the pass still runs but has no visible effect.
+- An earlier attempt zeroed the composite vertices in the linear heap. It failed: the game rewrites that buffer every frame, and the address moves.
+- Possible cleaner switch, untested: the byte at `[0x2F6428]` gates the whole function through the early exit at `0x10914C`.
+
+## Files
+
+- `patch/0004000000173700/code.ips`: 4 IPS records at file offsets `0x9558`, `0x9560`, `0x9564` and `0x9568`, relative to the decompressed `.code`.
+- `cheats/0004000000173700.txt`: Gateway/Action Replay format. Each write is guarded by a type-5 compare against the original word and closed with `D0000000`, and the file ends with `D2000000`. It writes only when the original code is present, so it writes once and does nothing on other versions.
+
+## Verification
+
+- **Zakuro headless harness**, 1x and 4x, on the battle map at frame 13000:
+  - The 4x ghosts and the cursor stripes are gone.
+  - The result is pixel-identical (RMSE 0) to the same build with the composite draw skipped.
+  - Frames 2000, 9000 and 16000 render correctly.
+- **Azahar 2125.0.1** at 6x, Vulkan, in the Mithra village scene loaded from a real save:
+  - The cheat, loaded on a save state, removes the halos.
+  - `code.ips` alone, on a fresh boot, removes the halos too.
+- **Not yet tested:**
+  - real hardware (Luma3DS / CTRPF);
+  - Citra;
+  - a battle in Azahar;
+  - every cutscene type.
+
+## Emulator-side fix (Zakuro)
+
+A separate Zakuro change keeps the glow and renders it correctly when upscaled. It is behind `ZAKURO_BLOOM_FIX=1` and is not part of this repo. It keeps render targets of 64x64 or smaller at 1x, and box-averages a scaled buffer when a smaller-scale target samples it. Output at 1x is byte-identical with and without it.
+
+## Zakuro and 3dsrecomp notes
+
+- Zakuro loads `code.bin`, `code.ips` or `code.bps` from `mods/<title id>/` or `mods/<title id>/exefs/` (see `crates/zakuro-core/src/mods.rs`). 3dsrecomp builds from the patched code when the mod is present at **Recompile** time.
+- Cheat writes to code go through `write32_privileged`. With a recompiled library loaded, Zakuro calls `library.check()` and runs the changed functions in the interpreter, which is slower.
+- The cheat could ship as a built-in Zakuro enhancement. That means an entry in `crates/zakuro-core/src/enhancements.txt` under `= 0004000000173700 Stella Glow (USA)` with build `rev0`. It would need a PR upstream. Turning an enhancement off restores the overwritten words.
+- 3dsrecomp also supports `RECOMP_OVERRIDE` C functions (`docs/overrides.md`). An override is not needed here, because the IPS is compiled in.
+
+## How this was made
+
+I started this project and used AI (Claude) to speed up development. I write, review and fix code by hand all the way through, keep the AI's work checked and reined in, and aim to keep the patch as lightweight as possible. I test it in Azahar and Zakuro on my own PC.
+
+```
+
+`games/stella-glow-usa/README.md`:
+
+```md
+# Stella Glow (USA): No Bloom
+
+Removes the glow and doubled outlines around characters when you raise the internal resolution.
+
+![Battle cursor before and after in Azahar at 6x](images/battle-cursor-before-after.jpg)
+
+The red battle cursor and the ground under it were the worst offenders. Full screen:
+
+![Battle before and after, full screen](images/battle-full-before-after.jpg)
+
+## What actually caused this
+
+- At 1x, the game draws a soft glow around characters.
+- Above 1x, the glow turns into sharp ghost copies of each character. It gets worse at every increase in resolution.
+- HD texture packs don't fix it as the glow isn't from a texture.
+
+## What the fix does
+
+It turns off the game's glow effect. The rest of the picture stays the same. At 1x the scene looks slightly darker, since the soft glow is gone too.
+
+## Game
+
+- Stella Glow, USA cartridge release
+- Title ID `0004000000173700`
+
+## Another example
+
+![Village scene before and after](images/before-after-zoom.jpg)
+
+## Install
+
+Copy `patch/0004000000173700/code.ips` into the game's mods folder. Steps for each emulator are in the [main README](../../README.md#install).
+
+Cheat instead: copy the code from `cheats/0004000000173700.txt` into your cheat list and turn on **No Bloom (USA)**.
+
+## Tested
+
+- Azahar 2125.0.1 at 6x: patch works; cheat works on its own from a fresh boot
+- Title screen: unchanged by the fix
+- Zakuro at 1x and 4x: cheat works
+- Not tested yet: patch in Zakuro, real 3DS, Citra
+
+## More
+
+[AGENTS.md](AGENTS.md): how the glow is drawn, why upscaling breaks it and what the patch changes.
+
+```
+
+`games/stella-glow-usa/cheats/0004000000173700.txt`:
+
+```txt
+[No Bloom (USA)]
+*Zeroes the colour of the bloom composite quad (code patch, 4 x vstr s22 -> vstr s23). Guarded: only applies if the original instruction is present.
+50109558 ED8DBA02
+00109558 EDCDBA02
+D0000000 00000000
+50109560 ED8DBA03
+00109560 EDCDBA03
+D0000000 00000000
+50109564 ED8DBA04
+00109564 EDCDBA04
+D0000000 00000000
+50109568 ED8DBA05
+00109568 EDCDBA05
+D0000000 00000000
+D2000000 00000000
+
+```
