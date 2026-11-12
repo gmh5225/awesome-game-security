@@ -1225,6 +1225,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/tomhamidi97-arch/vmp-devirtualization-lab [Educational guide and lab notes on Android native-library VMProtect internals, dispatcher/handler recovery, and devirtualization workflows]
 - https://github.com/tomhamidi97-arch/frida-vmp-bypass [Frida boundary-hook writeup for reversing stacked VMProtect and OLLVM on Android via libc/JNI/Java exit monitoring]
 - https://github.com/7777lolonlyyou/VMProtect-LLM-SKILL [LLM-oriented devirtualization workflow skill for VMProtect, Themida, and custom VM protections (Triton, Misasm, LLVM references)]
+- https://github.com/UzawaReisaQwQ/codex-vmprotect-unpack-skill [Codex/Claude agent skill and sample workflow to unpack VMProtect 3.5–3.10.x PEs: strip debugger/VM checks and rebuild IAT for local debugging]
 
 > Fix Themida
 - https://github.com/sodareverse/TDE
@@ -1913,6 +1914,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/gmh5225/sigmakerex [Signature Maker]
 - https://github.com/gmh5225/IDA-Pro-SigMaker [Signature Maker]
 - https://github.com/mahmoudimus/ida-sigmaker [Zero-dependency IDA Pro 9+ cross-platform signature maker with optional SIMD speedups]
+- https://github.com/crackinglandia/idasignwriter [IDA Pro SigWriter plugin (8.2 and 9.3+) to generate code patterns from selections with wildcards and multi-format export, plus a separate .NET CIL variant]
 - https://github.com/gmh5225/ida-sigmaker [Signature Maker]
 - https://github.com/gmh5225/FakePDB [PDB Generation From IDA]
 - https://github.com/gmh5225/Ponce [Symbolic Execution]
