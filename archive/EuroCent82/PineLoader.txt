@@ -1,0 +1,1992 @@
+Project Path: arc_EuroCent82_PineLoader_0plu08nh
+
+Source Tree:
+
+```txt
+arc_EuroCent82_PineLoader_0plu08nh
+├── Brand.cs
+├── IPineHost.cs
+├── LICENSE
+├── LogForm.cs
+├── MainForm.cs
+├── ModHost.cs
+├── PineLoader.csproj
+├── Program.cs
+├── README.md
+├── brand
+│   └── NEW
+└── examples
+    ├── HelloJava
+    │   ├── Agent.java
+    │   ├── HelloJava.csproj
+    │   ├── HelloJavaMod.cs
+    │   └── manifest.txt
+    └── HelloMod
+        ├── HelloMod.cs
+        └── HelloMod.csproj
+
+```
+
+`Brand.cs`:
+
+```cs
+using System.Drawing.Drawing2D;
+using System.Drawing.Text;
+
+namespace PineLoader;
+
+static class Brand
+{
+    public static readonly Color Ink = Color.FromArgb(4, 34, 26);
+    public static readonly Color Gold = Color.FromArgb(213, 180, 26);
+    public static readonly Color Text = Color.FromArgb(244, 247, 242);
+    public static readonly Color Muted = Color.FromArgb(197, 217, 204);
+    public static readonly Color Line = Color.FromArgb(36, 92, 72);
+    public static readonly Color Raised = Color.FromArgb(12, 56, 42);
+    public static readonly Color Hover = Color.FromArgb(20, 84, 64);
+
+    static readonly PrivateFontCollection Fonts = new();
+    static FontFamily? DisplayFamily;
+    static FontFamily? TextFamily;
+
+    public static void Load(string root)
+    {
+        DisplayFamily = Family(root, "ChakraPetch-SemiBold.ttf", "Chakra");
+        TextFamily = Family(root, "WorkSans-Regular.ttf", "Work Sans");
+    }
+
+    public static Font Display(float size) => New(DisplayFamily, size, FontStyle.Bold);
+
+    public static Font Body(float size) => New(TextFamily, size, FontStyle.Regular);
+
+    public static Button Button(string text, Rectangle bounds, bool primary)
+    {
+        var button = new Button
+        {
+            Text = text,
+            Font = Display(13f),
+            Bounds = bounds,
+            FlatStyle = FlatStyle.Flat,
+            Cursor = Cursors.Hand,
+            ForeColor = primary ? Ink : Text,
+            BackColor = primary ? Gold : Raised,
+            AccessibleName = text
+        };
+        button.FlatAppearance.BorderSize = 2;
+        button.FlatAppearance.BorderColor = primary ? Ink : Line;
+        button.FlatAppearance.MouseOverBackColor = primary ? Color.FromArgb(228, 198, 58) : Hover;
+        button.FlatAppearance.MouseDownBackColor = primary ? Color.FromArgb(184, 154, 22) : Line;
+        button.GotFocus += (_, _) => button.FlatAppearance.BorderColor = Text;
+        button.LostFocus += (_, _) => button.FlatAppearance.BorderColor = primary ? Ink : Line;
+        return button;
+    }
+
+    public static GraphicsPath Round(Rectangle bounds, int radius)
+    {
+        var path = new GraphicsPath();
+        var diameter = radius * 2;
+        path.AddArc(bounds.X, bounds.Y, diameter, diameter, 180, 90);
+        path.AddArc(bounds.Right - diameter, bounds.Y, diameter, diameter, 270, 90);
+        path.AddArc(bounds.Right - diameter, bounds.Bottom - diameter, diameter, diameter, 0, 90);
+        path.AddArc(bounds.X, bounds.Bottom - diameter, diameter, diameter, 90, 90);
+        path.CloseFigure();
+        return path;
+    }
+
+    static FontFamily? Family(string root, string file, string familyName)
+    {
+        var path = Path.Combine(root, "fonts", file);
+        if (!File.Exists(path)) return null;
+        Fonts.AddFontFile(path);
+        return Fonts.Families.FirstOrDefault(item => item.Name.Contains(familyName, StringComparison.OrdinalIgnoreCase));
+    }
+
+    static Font New(FontFamily? family, float size, FontStyle fallback)
+    {
+        if (family != null) return new Font(family, size, FontStyle.Regular, GraphicsUnit.Point);
+        return new Font("Segoe UI", size, fallback, GraphicsUnit.Point);
+    }
+}
+
+```
+
+`IPineHost.cs`:
+
+```cs
+using System.Diagnostics;
+
+namespace PineLoader;
+
+public interface IPineHost
+{
+    string Root { get; }
+
+    void Log(string message);
+
+    void Error(string message);
+
+    void UseJavaAgent(string jarPath, string arguments);
+
+    void WhileGameRunning(Action<Process> hook);
+}
+
+public interface IPineMod
+{
+    void Load(IPineHost host);
+}
+
+```
+
+`LICENSE`:
+
+```
+                                 Apache License
+                           Version 2.0, January 2004
+                        http://www.apache.org/licenses/
+
+   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
+
+   1. Definitions.
+
+      "License" shall mean the terms and conditions for use, reproduction,
+      and distribution as defined by Sections 1 through 9 of this document.
+
+      "Licensor" shall mean the copyright owner or entity authorized by
+      the copyright owner that is granting the License.
+
+      "Legal Entity" shall mean the union of the acting entity and all
+      other entities that control, are controlled by, or are under common
+      control with that entity. For the purposes of this definition,
+      "control" means (i) the power, direct or indirect, to cause the
+      direction or management of such entity, whether by contract or
+      otherwise, or (ii) ownership of fifty percent (50%) or more of the
+      outstanding shares, or (iii) beneficial ownership of such entity.
+
+      "You" (or "Your") shall mean an individual or Legal Entity
+      exercising permissions granted by this License.
+
+      "Source" form shall mean the preferred form for making modifications,
+      including but not limited to software source code, documentation
+      source, and configuration files.
+
+      "Object" form shall mean any form resulting from mechanical
+      transformation or translation of a Source form, including but
+      not limited to compiled object code, generated documentation,
+      and conversions to other media types.
+
+      "Work" shall mean the work of authorship, whether in Source or
+      Object form, made available under the License, as indicated by a
+      copyright notice that is included in or attached to the work
+      (an example is provided in the Appendix below).
+
+      "Derivative Works" shall mean any work, whether in Source or Object
+      form, that is based on (or derived from) the Work and for which the
+      editorial revisions, annotations, elaborations, or other modifications
+      represent, as a whole, an original work of authorship. For the purposes
+      of this License, Derivative Works shall not include works that remain
+      separable from, or merely link (or bind by name) to the interfaces of,
+      the Work and Derivative Works thereof.
+
+      "Contribution" shall mean any work of authorship, including
+      the original version of the Work and any modifications or additions
+      to that Work or Derivative Works thereof, that is intentionally
+      submitted to Licensor for inclusion in the Work by the copyright owner
+      or by an individual or Legal Entity authorized to submit on behalf of
+      the copyright owner. For the purposes of this definition, "submitted"
+      means any form of electronic, verbal, or written communication sent
+      to the Licensor or its representatives, including but not limited to
+      communication on electronic mailing lists, source code control systems,
+      and issue tracking systems that are managed by, or on behalf of, the
+      Licensor for the purpose of discussing and improving the Work, but
+      excluding communication that is conspicuously marked or otherwise
+      designated in writing by the copyright owner as "Not a Contribution."
+
+      "Contributor" shall mean Licensor and any individual or Legal Entity
+      on behalf of whom a Contribution has been received by Licensor and
+      subsequently incorporated within the Work.
+
+   2. Grant of Copyright License. Subject to the terms and conditions of
+      this License, each Contributor hereby grants to You a perpetual,
+      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
+      copyright license to reproduce, prepare Derivative Works of,
+      publicly display, publicly perform, sublicense, and distribute the
+      Work and such Derivative Works in Source or Object form.
+
+   3. Grant of Patent License. Subject to the terms and conditions of
+      this License, each Contributor hereby grants to You a perpetual,
+      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
+      (except as stated in this section) patent license to make, have made,
+      use, offer to sell, sell, import, and otherwise transfer the Work,
+      where such license applies only to those patent claims licensable
+      by such Contributor that are necessarily infringed by their
+      Contribution(s) alone or by combination of their Contribution(s)
+      with the Work to which such Contribution(s) was submitted. If You
+      institute patent litigation against any entity (including a
+      cross-claim or counterclaim in a lawsuit) alleging that the Work
+      or a Contribution incorporated within the Work constitutes direct
+      or contributory patent infringement, then any patent licenses
+      granted to You under this License for that Work shall terminate
+      as of the date such litigation is filed.
+
+   4. Redistribution. You may reproduce and distribute copies of the
+      Work or Derivative Works thereof in any medium, with or without
+      modifications, and in Source or Object form, provided that You
+      meet the following conditions:
+
+      (a) You must give any other recipients of the Work or
+          Derivative Works a copy of this License; and
+
+      (b) You must cause any modified files to carry prominent notices
+          stating that You changed the files; and
+
+      (c) You must retain, in the Source form of any Derivative Works
+          that You distribute, all copyright, patent, trademark, and
+          attribution notices from the Source form of the Work,
+          excluding those notices that do not pertain to any part of
+          the Derivative Works; and
+
+      (d) If the Work includes a "NOTICE" text file as part of its
+          distribution, then any Derivative Works that You distribute must
+          include a readable copy of the attribution notices contained
+          within such NOTICE file, excluding those notices that do not
+          pertain to any part of the Derivative Works, in at least one
+          of the following places: within a NOTICE text file distributed
+          as part of the Derivative Works; within the Source form or
+          documentation, if provided along with the Derivative Works; or,
+          within a display generated by the Derivative Works, if and
+          wherever such third-party notices normally appear. The contents
+          of the NOTICE file are for informational purposes only and
+          do not modify the License. You may add Your own attribution
+          notices within Derivative Works that You distribute, alongside
+          or as an addendum to the NOTICE text from the Work, provided
+          that such additional attribution notices cannot be construed
+          as modifying the License.
+
+      You may add Your own copyright statement to Your modifications and
+      may provide additional or different license terms and conditions
+      for use, reproduction, or distribution of Your modifications, or
+      for any such Derivative Works as a whole, provided Your use,
+      reproduction, and distribution of the Work otherwise complies with
+      the conditions stated in this License.
+
+   5. Submission of Contributions. Unless You explicitly state otherwise,
+      any Contribution intentionally submitted for inclusion in the Work
+      by You to the Licensor shall be under the terms and conditions of
+      this License, without any additional terms or conditions.
+      Notwithstanding the above, nothing herein shall supersede or modify
+      the terms of any separate license agreement you may have executed
+      with Licensor regarding such Contributions.
+
+   6. Trademarks. This License does not grant permission to use the trade
+      names, trademarks, service marks, or product names of the Licensor,
+      except as required for reasonable and customary use in describing the
+      origin of the Work and reproducing the content of the NOTICE file.
+
+   7. Disclaimer of Warranty. Unless required by applicable law or
+      agreed to in writing, Licensor provides the Work (and each
+      Contributor provides its Contributions) on an "AS IS" BASIS,
+      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+      implied, including, without limitation, any warranties or conditions
+      of TITLE, NON-INFRINGEMENT, MERCHANTABILITY, or FITNESS FOR A
+      PARTICULAR PURPOSE. You are solely responsible for determining the
+      appropriateness of using or redistributing the Work and assume any
+      risks associated with Your exercise of permissions under this License.
+
+   8. Limitation of Liability. In no event and under no legal theory,
+      whether in tort (including negligence), contract, or otherwise,
+      unless required by applicable law (such as deliberate and grossly
+      negligent acts) or agreed to in writing, shall any Contributor be
+      liable to You for damages, including any direct, indirect, special,
+      incidental, or consequential damages of any character arising as a
+      result of this License or out of the use or inability to use the
+      Work (including but not limited to damages for loss of goodwill,
+      work stoppage, computer failure or malfunction, or any and all
+      other commercial damages or losses), even if such Contributor
+      has been advised of the possibility of such damages.
+
+   9. Accepting Warranty or Additional Liability. While redistributing
+      the Work or Derivative Works thereof, You may choose to offer,
+      and charge a fee for, acceptance of support, warranty, indemnity,
+      or other liability obligations and/or rights consistent with this
+      License. However, in accepting such obligations, You may act only
+      on Your own behalf and on Your sole responsibility, not on behalf
+      of any other Contributor, and only if You agree to indemnify,
+      defend, and hold each Contributor harmless for any liability
+      incurred by, or claims asserted against, such Contributor by reason
+      of your accepting any such warranty or additional liability.
+
+   END OF TERMS AND CONDITIONS
+
+   APPENDIX: How to apply the Apache License to your work.
+
+      To apply the Apache License to your work, attach the following
+      boilerplate notice, with the fields enclosed by brackets "[]"
+      replaced with your own identifying information. (Don't include
+      the brackets!)  The text should be enclosed in the appropriate
+      comment syntax for the file format. We also recommend that a
+      file or class name and description of purpose be included on the
+      same "printed page" as the copyright notice for easier
+      identification within third-party archives.
+
+   Copyright 2026 The PineLoader Authors
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+
+```
+
+`LogForm.cs`:
+
+```cs
+using System.Drawing.Drawing2D;
+
+namespace PineLoader;
+
+sealed class LogForm : Form
+{
+    const int Corner = 22;
+
+    readonly Image? wordmark;
+
+    public LogForm(string title, string path, Image? wordmark, Icon? icon)
+    {
+        this.wordmark = wordmark;
+        AutoScaleMode = AutoScaleMode.None;
+        FormBorderStyle = FormBorderStyle.None;
+        StartPosition = FormStartPosition.CenterParent;
+        ShowInTaskbar = false;
+        TopMost = true;
+        BackColor = Brand.Ink;
+        ForeColor = Brand.Text;
+        ClientSize = new Size(720, 520);
+        Text = title;
+        if (icon != null) Icon = (Icon)icon.Clone();
+        KeyPreview = true;
+        AccessibilityObject.Name = title;
+        SetStyle(ControlStyles.AllPaintingInWmPaint | ControlStyles.OptimizedDoubleBuffer | ControlStyles.UserPaint | ControlStyles.ResizeRedraw, true);
+        UpdateStyles();
+
+        var markHeight = wordmark == null ? 0 : 72;
+
+        var heading = new Label
+        {
+            Text = title,
+            ForeColor = Brand.Text,
+            BackColor = Brand.Ink,
+            Font = Brand.Body(12f),
+            AutoSize = false,
+            Bounds = new Rectangle(28, 48 + markHeight + 8, ClientSize.Width - 120, 28),
+            AccessibleName = title
+        };
+        var body = new TextBox
+        {
+            Multiline = true,
+            ReadOnly = true,
+            ScrollBars = ScrollBars.Vertical,
+            BorderStyle = BorderStyle.None,
+            BackColor = Brand.Raised,
+            ForeColor = Brand.Text,
+            Font = Brand.Body(11f),
+            Text = ReadLog(path),
+            Bounds = new Rectangle(28, heading.Bottom + 8, ClientSize.Width - 56, ClientSize.Height - heading.Bottom - 36),
+            TabIndex = 0,
+            AccessibleName = title + ", Inhalt"
+        };
+        var close = Brand.Button("Schließen", new Rectangle(ClientSize.Width - 132, 12, 104, 36), primary: false);
+        close.AccessibleName = "Schließen";
+        close.Click += (_, _) => Close();
+        CancelButton = close;
+        Controls.Add(heading);
+        Controls.Add(body);
+        Controls.Add(close);
+        AcceptButton = close;
+        Shown += (_, _) =>
+        {
+            ApplyShape();
+            body.SelectionStart = 0;
+            body.SelectionLength = 0;
+            close.Focus();
+        };
+    }
+
+    protected override void OnKeyDown(KeyEventArgs e)
+    {
+        if (e.KeyCode == Keys.Escape)
+        {
+            e.Handled = true;
+            Close();
+            return;
+        }
+        base.OnKeyDown(e);
+    }
+
+    protected override void OnPaint(PaintEventArgs e)
+    {
+        var g = e.Graphics;
+        g.SmoothingMode = SmoothingMode.AntiAlias;
+        g.Clear(Brand.Ink);
+        using var gold = new SolidBrush(Brand.Gold);
+        using var line = new Pen(Brand.Line);
+        g.FillRectangle(gold, 0, 0, ClientSize.Width, 3);
+        using var outline = Brand.Round(new Rectangle(0, 0, ClientSize.Width - 1, ClientSize.Height - 1), Corner);
+        g.DrawPath(line, outline);
+        if (wordmark != null)
+        {
+            g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+            g.PixelOffsetMode = PixelOffsetMode.HighQuality;
+            var markHeight = 72;
+            var markWidth = markHeight * wordmark.Width / wordmark.Height;
+            g.DrawImage(wordmark, new Rectangle((ClientSize.Width - markWidth) / 2, 48, markWidth, markHeight));
+        }
+    }
+
+    protected override CreateParams CreateParams
+    {
+        get
+        {
+            var parameters = base.CreateParams;
+            parameters.ClassStyle |= 0x00020000;
+            return parameters;
+        }
+    }
+
+    void ApplyShape()
+    {
+        Region?.Dispose();
+        Region = new Region(Brand.Round(ClientRectangle, Corner));
+    }
+
+    static string ReadLog(string path)
+    {
+        try
+        {
+            if (!File.Exists(path)) return "Keine Einträge.";
+            using var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+            if (stream.Length == 0) return "Keine Einträge.";
+            if (stream.Length > 262144) stream.Position = stream.Length - 262144;
+            using var reader = new StreamReader(stream);
+            var text = reader.ReadToEnd().Trim();
+            return text.Length == 0 ? "Keine Einträge." : text;
+        }
+        catch (Exception error)
+        {
+            return error.Message;
+        }
+    }
+}
+
+```
+
+`MainForm.cs`:
+
+```cs
+using System.Drawing.Drawing2D;
+using System.Runtime.InteropServices;
+
+namespace PineLoader;
+
+sealed class MainForm : Form
+{
+    const int Corner = 22;
+    readonly bool direct;
+    readonly string root;
+    readonly Image? logo;
+    readonly Image? wordmark;
+    readonly Font statusFont;
+    readonly Font bodyFont;
+    readonly TaskCompletionSource<bool> startChoice = new(TaskCreationOptions.RunContinuationsAsynchronously);
+    Button? startButton;
+    Button? closeButton;
+    string heading = "Ordner werden geprüft";
+    string detail = "";
+    string? problem;
+    int foundCount;
+    int loadedCount;
+    bool allowClose;
+    bool choosing;
+    bool countsReady;
+
+    public MainForm(bool direct)
+    {
+        this.direct = direct;
+        root = ModHost.FindRoot();
+        Brand.Load(root);
+        logo = LoadPng(Path.Combine(root, "brand", "NEW", "pineloader-logo.png"));
+        wordmark = LoadPng(Path.Combine(root, "brand", "NEW", "pineloader-wordmark.png"));
+        statusFont = Brand.Display(18f);
+        bodyFont = Brand.Body(13f);
+        var iconPath = Path.Combine(root, "brand", "pine.ico");
+        if (File.Exists(iconPath)) Icon = new Icon(iconPath);
+        AutoScaleMode = AutoScaleMode.None;
+        FormBorderStyle = FormBorderStyle.None;
+        StartPosition = FormStartPosition.CenterScreen;
+        ShowInTaskbar = true;
+        TopMost = true;
+        BackColor = Brand.Ink;
+        ForeColor = Brand.Text;
+        Text = "PineLoader";
+        KeyPreview = true;
+        ClientSize = new Size(780, WindowHeight());
+        AccessibilityObject.Name = "PineLoader";
+        SetStyle(ControlStyles.AllPaintingInWmPaint | ControlStyles.OptimizedDoubleBuffer | ControlStyles.UserPaint | ControlStyles.ResizeRedraw, true);
+        UpdateStyles();
+    }
+
+    public void ShowStep(string title, string line)
+    {
+        if (InvokeRequired)
+        {
+            BeginInvoke(() => ShowStep(title, line));
+            return;
+        }
+        if (title == "Fehler") problem = line;
+        else if (direct) return;
+        heading = title;
+        detail = line;
+        if (!Visible)
+        {
+            ShowInTaskbar = true;
+            TopMost = true;
+            Show();
+        }
+        Invalidate();
+    }
+
+    public Task<bool> OfferStart(int found, int loaded)
+    {
+        if (InvokeRequired)
+        {
+            BeginInvoke(() => ShowStartOffer(found, loaded));
+            return startChoice.Task;
+        }
+        ShowStartOffer(found, loaded);
+        return startChoice.Task;
+    }
+
+    public void StaySilent()
+    {
+        if (InvokeRequired)
+        {
+            BeginInvoke(StaySilent);
+            return;
+        }
+        TopMost = false;
+        ShowInTaskbar = false;
+        Hide();
+    }
+
+    public void Finish()
+    {
+        allowClose = true;
+        Close();
+    }
+
+    protected override void OnFormClosing(FormClosingEventArgs e)
+    {
+        if (choosing)
+        {
+            Choose(false);
+            allowClose = true;
+        }
+        else if (!allowClose) e.Cancel = true;
+        base.OnFormClosing(e);
+    }
+
+    protected override void OnKeyDown(KeyEventArgs e)
+    {
+        if (choosing && e.KeyCode == Keys.Escape)
+        {
+            e.Handled = true;
+            Close();
+            return;
+        }
+        base.OnKeyDown(e);
+    }
+
+    protected override void OnShown(EventArgs e)
+    {
+        base.OnShown(e);
+        ApplyShape();
+    }
+
+    protected override void OnPaint(PaintEventArgs e)
+    {
+        var g = e.Graphics;
+        g.SmoothingMode = SmoothingMode.AntiAlias;
+        g.PixelOffsetMode = PixelOffsetMode.HighQuality;
+        g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+        g.CompositingQuality = CompositingQuality.HighQuality;
+        g.Clear(Brand.Ink);
+        using var gold = new SolidBrush(Brand.Gold);
+        using var text = new SolidBrush(Brand.Text);
+        using var muted = new SolidBrush(Brand.Muted);
+        using var line = new Pen(Brand.Line);
+        g.FillRectangle(gold, 0, 0, ClientSize.Width, 3);
+        using var outline = Brand.Round(new Rectangle(0, 0, ClientSize.Width - 1, ClientSize.Height - 1), Corner);
+        g.DrawPath(line, outline);
+        var mark = LogoRect();
+        if (logo != null) g.DrawImage(logo, mark);
+        var top = mark.Bottom + 16f;
+        if (direct)
+        {
+            g.DrawString("Bereit", statusFont, text, 28, top);
+            if (problem != null)
+            {
+                g.DrawString(problem, bodyFont, gold, new RectangleF(28, top + 34, ClientSize.Width - 56, 48));
+            }
+            else if (countsReady)
+            {
+                var skipped = Math.Max(0, foundCount - loadedCount);
+                g.DrawString("Gefunden: " + foundCount, bodyFont, muted, 28, top + 34);
+                g.DrawString("Geladen: " + loadedCount, bodyFont, muted, 28, top + 58);
+                g.DrawString("Nicht geladen: " + skipped, bodyFont, muted, 28, top + 82);
+            }
+            return;
+        }
+        g.DrawString(heading, bodyFont, text, 28, top);
+        g.DrawString(detail, bodyFont, muted, new RectangleF(28, top + 24, ClientSize.Width - 56, 40));
+    }
+
+    protected override void Dispose(bool disposing)
+    {
+        if (disposing)
+        {
+            statusFont.Dispose();
+            bodyFont.Dispose();
+            logo?.Dispose();
+            wordmark?.Dispose();
+        }
+        base.Dispose(disposing);
+    }
+
+    void ShowStartOffer(int found, int loaded)
+    {
+        choosing = true;
+        foundCount = found;
+        loadedCount = loaded;
+        countsReady = true;
+        var top = LogoRect().Bottom + 16 + 34 + 22 * 3 + 16;
+        var width = (ClientSize.Width - 56 - 12) / 2;
+        var logs = Brand.Button("PineLoader-Log", new Rectangle(28, top, width, 44), primary: false);
+        var errors = Brand.Button("Fehler-Log", new Rectangle(40 + width, top, width, 44), primary: false);
+        var start = Brand.Button("Spiel starten", new Rectangle(28, top + 56, ClientSize.Width - 56, 48), primary: true);
+        var close = Brand.Button("×", new Rectangle(ClientSize.Width - 52, 12, 36, 36), primary: false);
+        close.AccessibleName = "Schließen";
+        logs.TabIndex = 0;
+        errors.TabIndex = 1;
+        start.TabIndex = 2;
+        close.TabIndex = 3;
+        logs.Click += (_, _) => ShowLog("PineLoader-Log", Path.Combine(root, "Logs", "pineloader.txt"));
+        errors.Click += (_, _) => ShowLog("Fehler-Log", Path.Combine(root, "Logs", "err.txt"));
+        start.Click += (_, _) =>
+        {
+            if (!choosing) return;
+            Choose(true);
+        };
+        close.Click += (_, _) => Close();
+        AcceptButton = start;
+        Controls.Add(logs);
+        Controls.Add(errors);
+        Controls.Add(start);
+        Controls.Add(close);
+        startButton = start;
+        closeButton = close;
+        Invalidate();
+        start.Focus();
+    }
+
+    void ShowLog(string title, string path)
+    {
+        using var window = new LogForm(title, path, wordmark, Icon);
+        window.ShowDialog(this);
+    }
+
+    void Choose(bool start)
+    {
+        choosing = false;
+        if (startButton != null) startButton.Enabled = false;
+        if (closeButton != null) closeButton.Enabled = false;
+        foreach (Control control in Controls) control.Enabled = false;
+        startChoice.TrySetResult(start);
+    }
+
+    Rectangle LogoRect()
+    {
+        var width = ClientSize.Width - 56;
+        var height = logo == null ? 80 : Math.Max(1, width * logo.Height / logo.Width);
+        return new Rectangle(28, 48, width, height);
+    }
+
+    int WindowHeight()
+    {
+        var width = 780 - 56;
+        var logoHeight = logo == null ? 80 : Math.Max(1, width * logo.Height / logo.Width);
+        if (!direct) return 48 + logoHeight + 16 + 64 + 24;
+        return 48 + logoHeight + 16 + 34 + 22 * 3 + 16 + 44 + 12 + 48 + 24;
+    }
+
+    void ApplyShape()
+    {
+        Region?.Dispose();
+        Region = new Region(Brand.Round(ClientRectangle, Corner));
+    }
+
+    static Image? LoadPng(string path)
+    {
+        if (!File.Exists(path)) return null;
+        using var file = new Bitmap(path);
+        var copy = new Bitmap(file.Width, file.Height, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+        using var graphics = Graphics.FromImage(copy);
+        graphics.Clear(Color.Transparent);
+        graphics.DrawImage(file, 0, 0, file.Width, file.Height);
+        return copy;
+    }
+
+    protected override CreateParams CreateParams
+    {
+        get
+        {
+            var parameters = base.CreateParams;
+            parameters.ClassStyle |= 0x00020000;
+            return parameters;
+        }
+    }
+
+    [DllImport("dwmapi.dll")]
+    static extern int DwmSetWindowAttribute(IntPtr hwnd, int attribute, ref int value, int size);
+
+    protected override void OnHandleCreated(EventArgs e)
+    {
+        base.OnHandleCreated(e);
+        var round = 2;
+        DwmSetWindowAttribute(Handle, 33, ref round, sizeof(int));
+    }
+}
+
+```
+
+`ModHost.cs`:
+
+```cs
+using System.Diagnostics;
+using System.Reflection;
+using System.Runtime.InteropServices;
+using System.Runtime.Loader;
+using System.Security.Cryptography;
+using System.Text;
+using System.Text.Json;
+
+namespace PineLoader;
+
+sealed record LoadedMod(string Id, string Name, string Version);
+
+sealed record LoadReport(bool FirstRun, bool FromCache, IReadOnlyList<LoadedMod> Loaded, IReadOnlyList<string> Errors);
+
+sealed class ModHost : IPineHost
+{
+    const string ShippingSuffix = "-Win64-Shipping.exe";
+    const string GameSuffix = "-Win64-Game.exe";
+    const string Engine58 = "++UE5+Release-5.8";
+    static readonly JsonSerializerOptions Json = new() { WriteIndented = true };
+    GameLayout? located;
+    bool locatedReady;
+    readonly List<ModFolderContext> loadedContexts = [];
+    readonly List<string> agentOptions = [];
+    readonly List<Action<Process>> gameHooks = [];
+
+    public string Root { get; }
+    public string GameExe { get; private set; } = "";
+
+    public ModHost(string root) => Root = root;
+
+    public LoadReport Run()
+    {
+        Directory.CreateDirectory(Path.Combine(Root, "Mods"));
+        Directory.CreateDirectory(Path.Combine(Root, "Config"));
+        Directory.CreateDirectory(Path.Combine(Root, "Cache"));
+        Directory.CreateDirectory(Path.Combine(Root, "Logs"));
+        var logPath = Path.Combine(Root, "Logs", "pineloader.txt");
+        var errorPath = Path.Combine(Root, "Logs", "err.txt");
+        if (!File.Exists(logPath)) File.WriteAllText(logPath, "");
+        if (!File.Exists(errorPath)) File.WriteAllText(errorPath, "");
+        var oldLog = Path.Combine(Root, "Logs", "pine.log");
+        if (File.Exists(oldLog)) File.Delete(oldLog);
+        var launchNote = Path.Combine(Root, "Steam-Startoption.txt");
+        if (File.Exists(launchNote)) File.Delete(launchNote);
+
+        Install();
+        GameExe = ResolveGame();
+        EnsureConfigs();
+
+        var cachePath = Path.Combine(Root, "Cache", "state.json");
+        var fingerprint = Fingerprint();
+        var firstRun = !File.Exists(cachePath);
+        if (!firstRun && TryReadCache(cachePath, fingerprint, out var cached))
+        {
+            Log("Schnellstart, Mod-Stand unverändert.");
+            var activated = LoadEnabledMods();
+            return activated.Errors.Count == 0 ? cached : new LoadReport(false, true, activated.Loaded, activated.Errors);
+        }
+
+        if (firstRun) Log("Erster Start, Ordner werden angelegt.");
+        var (loaded, errors) = LoadEnabledMods();
+        var report = new LoadReport(firstRun, false, loaded, errors);
+        File.WriteAllText(cachePath, JsonSerializer.Serialize(new CacheFile(true, fingerprint, loaded.Select(mod => mod.Id + "|" + mod.Name + "|" + mod.Version).ToArray(), errors.ToArray()), Json));
+        Log(loaded.Count + " Mods geladen, " + errors.Count + " übersprungen.");
+        return report;
+    }
+
+    public void Log(string message) => Write("pineloader.txt", message);
+
+    public void Error(string message) => Write("err.txt", message);
+
+    public void UseJavaAgent(string jarPath, string arguments)
+    {
+        if (!File.Exists(jarPath)) throw new FileNotFoundException("Java-Agent fehlt.", jarPath);
+        var option = "-javaagent:\"" + jarPath + "\"";
+        if (!string.IsNullOrEmpty(arguments)) option += "=" + arguments;
+        agentOptions.Add(option);
+        Log("Java-Agent: " + jarPath);
+    }
+
+    public void WhileGameRunning(Action<Process> hook) => gameHooks.Add(hook);
+
+    public void PrepareGame(ProcessStartInfo start)
+    {
+        if (agentOptions.Count == 0) return;
+        start.Environment.TryGetValue("JAVA_TOOL_OPTIONS", out var existing);
+        var addition = string.Join(' ', agentOptions);
+        start.Environment["JAVA_TOOL_OPTIONS"] = string.IsNullOrWhiteSpace(existing) ? addition : existing + " " + addition;
+    }
+
+    public void GameStarted(Process game)
+    {
+        foreach (var hook in gameHooks)
+        {
+            try
+            {
+                hook(game);
+            }
+            catch (Exception error)
+            {
+                Error(error.ToString());
+            }
+        }
+    }
+
+    (List<LoadedMod> Loaded, List<string> Errors) LoadEnabledMods()
+    {
+        var loaded = new List<LoadedMod>();
+        var errors = new List<string>();
+        var modsRoot = Path.Combine(Root, "Mods");
+        var directories = Directory.Exists(modsRoot)
+            ? Directory.GetDirectories(modsRoot).OrderBy(Path.GetFileName, StringComparer.OrdinalIgnoreCase)
+            : Enumerable.Empty<string>();
+        foreach (var directory in directories)
+        {
+            var folder = Path.GetFileName(directory);
+            if (folder.StartsWith('.')) continue;
+            try
+            {
+                var mod = LoadMod(directory);
+                if (mod == null)
+                {
+                    Log("Deaktiviert: " + folder);
+                    continue;
+                }
+                loaded.Add(mod);
+                Log("Geladen: " + mod.Name + " " + mod.Version);
+            }
+            catch (Exception error)
+            {
+                var message = folder + ": " + error.Message;
+                errors.Add(message);
+                Log("Übersprungen: " + folder);
+                Error(message);
+            }
+        }
+        return (loaded, errors);
+    }
+
+    public static bool IsLoaderFile(string path)
+    {
+        if (string.IsNullOrWhiteSpace(path) || !File.Exists(path)) return false;
+        try
+        {
+            var product = FileVersionInfo.GetVersionInfo(path).ProductName;
+            if (string.Equals(product, "PineLoader", StringComparison.OrdinalIgnoreCase)) return true;
+        }
+        catch
+        {
+            // Eine Datei ohne Versionsinfo ist kein Loader.
+        }
+        var process = Environment.ProcessPath;
+        return process != null && SameFile(path, process);
+    }
+
+    void Install()
+    {
+        var loader = Path.Combine(Root, "PineLoader.exe");
+        if (!File.Exists(loader))
+        {
+            Log("PineLoader.exe fehlt im Loader-Ordner. Die Spieldatei bleibt unverändert.");
+            return;
+        }
+
+        var layout = LocateGame();
+        if (layout == null)
+        {
+            Log("Kein Unreal-Engine-5.8-Spiel neben dem Loader gefunden. Die Spieldatei bleibt unverändert.");
+            return;
+        }
+
+        var shipping = layout.Shipping;
+        var game = layout.Game;
+        if (File.Exists(shipping) && SameFile(shipping, loader))
+        {
+            if (!File.Exists(game)) throw new FileNotFoundException("Die originale Spieldatei " + Path.GetFileName(game) + " fehlt.");
+            return;
+        }
+
+        var replacedOfficial = false;
+        if (File.Exists(shipping) && IsLoaderFile(shipping))
+        {
+            File.Delete(shipping);
+        }
+        else if (File.Exists(shipping))
+        {
+            File.Move(shipping, game, overwrite: true);
+            replacedOfficial = true;
+            Log("Originalspiel gesichert: " + Path.GetFileName(game));
+        }
+
+        if (!File.Exists(game)) throw new FileNotFoundException("Die originale Spieldatei wurde nicht gefunden.");
+        if (!CreateHardLink(shipping, loader, IntPtr.Zero))
+        {
+            var code = Marshal.GetLastWin32Error();
+            if (replacedOfficial && File.Exists(game) && !File.Exists(shipping)) File.Move(game, shipping, overwrite: true);
+            throw new IOException("PineLoader konnte nicht vor das Spiel gelegt werden (" + code + ").");
+        }
+        Log("Spielstart öffnet zuerst PineLoader, ohne Steam-Startoptionen.");
+    }
+
+    LoadedMod? LoadMod(string directory)
+    {
+        var folder = Path.GetFileName(directory);
+        var ini = Path.Combine(Root, "Config", folder + ".ini");
+        if (!Enabled(ini)) return null;
+
+        var dll = EntryDll(directory, folder);
+        var context = new ModFolderContext(dll);
+        try
+        {
+            var assembly = context.LoadFromAssemblyPath(dll);
+            var version = assembly.GetName().Version?.ToString() ?? "1.0.0";
+            loadedContexts.Add(context);
+            Start(assembly);
+            return new LoadedMod(folder, folder, version);
+        }
+        catch
+        {
+            context.Unload();
+            throw;
+        }
+    }
+
+    void EnsureConfigs()
+    {
+        var modsRoot = Path.Combine(Root, "Mods");
+        if (!Directory.Exists(modsRoot)) return;
+        foreach (var directory in Directory.GetDirectories(modsRoot))
+        {
+            var folder = Path.GetFileName(directory);
+            if (folder.StartsWith('.')) continue;
+            var ini = Path.Combine(Root, "Config", folder + ".ini");
+            if (!File.Exists(ini)) File.WriteAllText(ini, "[Mod]\r\nEnabled=true\r\n");
+        }
+    }
+
+    void Start(Assembly assembly)
+    {
+        Type? entry = null;
+        try
+        {
+            entry = ModType(assembly.GetTypes());
+        }
+        catch (ReflectionTypeLoadException error)
+        {
+            entry = ModType(error.Types);
+        }
+        if (entry == null) return;
+        var mod = (IPineMod)Activator.CreateInstance(entry)!;
+        mod.Load(this);
+    }
+
+    static Type? ModType(IEnumerable<Type?> types)
+    {
+        return types.FirstOrDefault(type => type is { IsAbstract: false, IsInterface: false }
+            && typeof(IPineMod).IsAssignableFrom(type)
+            && type.GetConstructor(Type.EmptyTypes) != null);
+    }
+
+    static string EntryDll(string directory, string folder)
+    {
+        var named = Path.Combine(directory, folder + ".dll");
+        if (File.Exists(named)) return named;
+        var dlls = Directory.GetFiles(directory, "*.dll");
+        if (dlls.Length == 1) return dlls[0];
+        if (dlls.Length == 0) throw new FileNotFoundException("Keine DLL im Mod-Ordner.");
+        throw new InvalidDataException(folder + ".dll fehlt.");
+    }
+
+    static bool Enabled(string path)
+    {
+        foreach (var raw in File.ReadAllLines(path))
+        {
+            var line = raw.Trim();
+            if (line.Length == 0 || line[0] is ';' or '#') continue;
+            var split = line.Split('=', 2);
+            if (split.Length == 2 && split[0].Trim().Equals("Enabled", StringComparison.OrdinalIgnoreCase))
+            {
+                var value = split[1].Trim();
+                return value.Equals("true", StringComparison.OrdinalIgnoreCase) || value == "1";
+            }
+        }
+        return true;
+    }
+
+    string Fingerprint()
+    {
+        var builder = new StringBuilder();
+        foreach (var folder in new[] { "Mods", "Config" })
+        {
+            var path = Path.Combine(Root, folder);
+            if (!Directory.Exists(path)) continue;
+            foreach (var file in Directory.GetFiles(path, "*", SearchOption.AllDirectories).OrderBy(item => item, StringComparer.OrdinalIgnoreCase))
+            {
+                var info = new FileInfo(file);
+                builder.Append(info.FullName).Append('|').Append(info.Length).Append('|').Append(info.LastWriteTimeUtc.Ticks).Append('\n');
+            }
+        }
+        var body = builder.ToString();
+        return body.Length == 0 ? "empty" : Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(body)));
+    }
+
+    bool TryReadCache(string cachePath, string fingerprint, out LoadReport report)
+    {
+        report = new LoadReport(false, true, [], []);
+        try
+        {
+            var cache = JsonSerializer.Deserialize<CacheFile>(File.ReadAllText(cachePath));
+            if (cache is not { SetupComplete: true, Loaded: not null, Errors: not null } || cache.Fingerprint != fingerprint) return false;
+            var loaded = cache.Loaded.Select(row =>
+            {
+                var parts = row.Split('|');
+                return new LoadedMod(parts[0], parts.Length > 1 ? parts[1] : parts[0], parts.Length > 2 ? parts[2] : "");
+            }).ToArray();
+            report = new LoadReport(false, true, loaded, cache.Errors);
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    string ResolveGame()
+    {
+        var layout = LocateGame();
+        if (layout != null && File.Exists(layout.Game))
+        {
+            File.WriteAllText(Path.Combine(Root, "config.json"), JsonSerializer.Serialize(new ConfigFile(layout.Game), Json));
+            return layout.Game;
+        }
+        if (layout != null && File.Exists(layout.Shipping) && !IsLoaderFile(layout.Shipping)) return layout.Shipping;
+
+        var configPath = Path.Combine(Root, "config.json");
+        if (File.Exists(configPath))
+        {
+            try
+            {
+                var config = JsonSerializer.Deserialize<ConfigFile>(File.ReadAllText(configPath));
+                if (!string.IsNullOrWhiteSpace(config?.GameExe) && File.Exists(config.GameExe) && !IsLoaderFile(config.GameExe) && IsUnreal58(config.GameExe)) return config.GameExe;
+            }
+            catch
+            {
+                Log("config.json ist ungültig und wird ignoriert.");
+            }
+        }
+        throw new FileNotFoundException("Kein Unreal-Engine-5.8-Spiel gefunden. Erwartet wird eine Datei *-Win64-Shipping.exe mit der Versionszeile " + Engine58 + ".");
+    }
+
+    GameLayout? LocateGame()
+    {
+        if (locatedReady) return located;
+        locatedReady = true;
+        var saved = SavedLayout();
+        if (saved != null)
+        {
+            located = saved;
+            return located;
+        }
+        var matches = new List<GameLayout>();
+        var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var win64 in Win64Folders())
+        {
+            if (!seen.Add(Path.GetFullPath(win64))) continue;
+            Dictionary<string, (string? Shipping, string? Game)> projects;
+            try
+            {
+                projects = ProjectsIn(win64);
+            }
+            catch (Exception error)
+            {
+                Log("Spielordner nicht lesbar: " + win64 + " (" + error.Message + ")");
+                continue;
+            }
+
+            foreach (var (project, pair) in projects)
+            {
+                var real = RealGameFile(pair.Game, pair.Shipping);
+                if (real == null || !IsUnreal58(real)) continue;
+                matches.Add(new GameLayout(
+                    win64,
+                    project,
+                    pair.Shipping ?? Path.Combine(win64, project + ShippingSuffix),
+                    pair.Game ?? Path.Combine(win64, project + GameSuffix)));
+            }
+        }
+
+        if (matches.Count == 1)
+        {
+            located = matches[0];
+            return located;
+        }
+        if (matches.Count > 1) Log("Mehrere Unreal-Engine-5.8-Spiele gefunden. Es wird keines verändert: " + string.Join(", ", matches.Select(item => item.Shipping)));
+        return null;
+    }
+
+    GameLayout? SavedLayout()
+    {
+        var configPath = Path.Combine(Root, "config.json");
+        if (!File.Exists(configPath)) return null;
+        try
+        {
+            var config = JsonSerializer.Deserialize<ConfigFile>(File.ReadAllText(configPath));
+            var game = config?.GameExe;
+            if (string.IsNullOrWhiteSpace(game) || !File.Exists(game) || IsLoaderFile(game) || !IsUnreal58(game)) return null;
+            var name = Path.GetFileName(game);
+            if (!name.EndsWith(GameSuffix, StringComparison.OrdinalIgnoreCase)) return null;
+            var project = name[..^GameSuffix.Length];
+            if (string.IsNullOrWhiteSpace(project)) return null;
+            var win64 = Path.GetDirectoryName(game);
+            if (string.IsNullOrWhiteSpace(win64)) return null;
+            var known = new HashSet<string>(Win64Folders().Select(Path.GetFullPath), StringComparer.OrdinalIgnoreCase);
+            if (!known.Contains(Path.GetFullPath(win64))) return null;
+            return new GameLayout(win64, project, Path.Combine(win64, project + ShippingSuffix), game);
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    static string? RealGameFile(string? game, string? shipping)
+    {
+        if (!string.IsNullOrWhiteSpace(game) && File.Exists(game) && !IsLoaderFile(game)) return game;
+        if (!string.IsNullOrWhiteSpace(shipping) && File.Exists(shipping) && !IsLoaderFile(shipping)) return shipping;
+        return null;
+    }
+
+    static bool IsUnreal58(string path)
+    {
+        try
+        {
+            var info = FileVersionInfo.GetVersionInfo(path);
+            var version = (info.ProductVersion ?? "") + "\n" + (info.FileVersion ?? "");
+            return version.Contains(Engine58, StringComparison.Ordinal);
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    static Dictionary<string, (string? Shipping, string? Game)> ProjectsIn(string win64)
+    {
+        var projects = new Dictionary<string, (string? Shipping, string? Game)>(StringComparer.OrdinalIgnoreCase);
+        foreach (var file in Directory.EnumerateFiles(win64, "*.exe"))
+        {
+            var name = Path.GetFileName(file);
+            string? project = null;
+            var shipping = false;
+            if (name.EndsWith(ShippingSuffix, StringComparison.OrdinalIgnoreCase))
+            {
+                project = name[..^ShippingSuffix.Length];
+                shipping = true;
+            }
+            else if (name.EndsWith(GameSuffix, StringComparison.OrdinalIgnoreCase))
+            {
+                project = name[..^GameSuffix.Length];
+            }
+            if (string.IsNullOrWhiteSpace(project)) continue;
+            projects.TryGetValue(project, out var pair);
+            if (shipping) pair.Shipping = file;
+            else pair.Game = file;
+            projects[project] = pair;
+        }
+        return projects;
+    }
+
+    IEnumerable<string> Win64Folders()
+    {
+        var parent = Directory.GetParent(Root)?.FullName;
+        var starts = new[] { Root, parent }.Where(path => !string.IsNullOrWhiteSpace(path)).Distinct(StringComparer.OrdinalIgnoreCase);
+        foreach (var start in starts)
+        {
+            var direct = Path.Combine(start!, "Binaries", "Win64");
+            if (Directory.Exists(direct)) yield return direct;
+            IEnumerable<string> children;
+            try
+            {
+                children = Directory.EnumerateDirectories(start!);
+            }
+            catch
+            {
+                continue;
+            }
+            foreach (var child in children)
+            {
+                var nested = Path.Combine(child, "Binaries", "Win64");
+                if (Directory.Exists(nested)) yield return nested;
+            }
+        }
+    }
+
+    public static string InstanceMutex(string root)
+    {
+        var hash = SHA256.HashData(Encoding.UTF8.GetBytes(Path.GetFullPath(root)));
+        return "PineLoader." + Convert.ToHexString(hash)[..16];
+    }
+
+    void Write(string file, string message)
+    {
+        var line = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "  " + message + Environment.NewLine;
+        File.AppendAllText(Path.Combine(Root, "Logs", file), line);
+    }
+
+    static bool SameFile(string left, string right)
+    {
+        if (string.Equals(Path.GetFullPath(left), Path.GetFullPath(right), StringComparison.OrdinalIgnoreCase)) return true;
+        try
+        {
+            using var leftHandle = File.OpenHandle(left, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
+            using var rightHandle = File.OpenHandle(right, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
+            if (!GetFileInformationByHandle(leftHandle.DangerousGetHandle(), out var leftInfo)) return false;
+            if (!GetFileInformationByHandle(rightHandle.DangerousGetHandle(), out var rightInfo)) return false;
+            return leftInfo.VolumeSerialNumber == rightInfo.VolumeSerialNumber
+                && leftInfo.FileIndexHigh == rightInfo.FileIndexHigh
+                && leftInfo.FileIndexLow == rightInfo.FileIndexLow;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    public static string FindRoot()
+    {
+        var processDirectory = Environment.ProcessPath == null ? null : Path.GetDirectoryName(Environment.ProcessPath);
+        var starts = new[] { AppContext.BaseDirectory, processDirectory }.Where(path => !string.IsNullOrWhiteSpace(path)).Distinct(StringComparer.OrdinalIgnoreCase);
+        foreach (var start in starts)
+        {
+            for (var dir = new DirectoryInfo(start!); dir != null; dir = dir.Parent)
+            {
+                if (File.Exists(Path.Combine(dir.FullName, "brand", "logo.jpg"))) return dir.FullName;
+                var nested = Path.Combine(dir.FullName, "PineLoader");
+                if (File.Exists(Path.Combine(nested, "brand", "logo.jpg"))) return nested;
+            }
+        }
+        return AppContext.BaseDirectory;
+    }
+
+    [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+    static extern bool CreateHardLink(string fileName, string existingFileName, IntPtr securityAttributes);
+
+    [DllImport("kernel32.dll", SetLastError = true)]
+    static extern bool GetFileInformationByHandle(IntPtr handle, out BY_HANDLE_FILE_INFORMATION information);
+
+    [StructLayout(LayoutKind.Sequential)]
+    struct BY_HANDLE_FILE_INFORMATION
+    {
+        public uint FileAttributes;
+        public System.Runtime.InteropServices.ComTypes.FILETIME CreationTime;
+        public System.Runtime.InteropServices.ComTypes.FILETIME LastAccessTime;
+        public System.Runtime.InteropServices.ComTypes.FILETIME LastWriteTime;
+        public uint VolumeSerialNumber;
+        public uint FileSizeHigh;
+        public uint FileSizeLow;
+        public uint NumberOfLinks;
+        public uint FileIndexHigh;
+        public uint FileIndexLow;
+    }
+
+    sealed class ModFolderContext(string entryDll) : AssemblyLoadContext(isCollectible: true)
+    {
+        readonly AssemblyDependencyResolver resolver = new(entryDll);
+
+        protected override Assembly? Load(AssemblyName assemblyName)
+        {
+            if (string.Equals(assemblyName.Name, "PineLoader", StringComparison.OrdinalIgnoreCase)) return typeof(ModHost).Assembly;
+            var path = resolver.ResolveAssemblyToPath(assemblyName);
+            return path == null ? null : LoadFromAssemblyPath(path);
+        }
+    }
+
+    sealed record CacheFile(bool SetupComplete, string Fingerprint, string[] Loaded, string[] Errors);
+    sealed record ConfigFile(string GameExe);
+    sealed record GameLayout(string Win64, string Project, string Shipping, string Game);
+}
+
+```
+
+`PineLoader.csproj`:
+
+```csproj
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AssemblyName>PineLoader</AssemblyName>
+    <Product>PineLoader</Product>
+    <Version>1.0.0</Version>
+    <RootNamespace>PineLoader</RootNamespace>
+    <ApplicationHighDpiMode>PerMonitorV2</ApplicationHighDpiMode>
+    <ApplicationTitle>PineLoader</ApplicationTitle>
+    <ApplicationIcon>brand\pine.ico</ApplicationIcon>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Remove="src\**" />
+    <Compile Remove="examples\**" />
+    <Compile Remove="website\**" />
+    <Content Include="brand\*.jpg" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <Content Remove="src\**" />
+    <Content Remove="examples\**" />
+    <Content Remove="website\**" />
+    <None Remove="src\**" />
+    <None Remove="examples\**" />
+    <None Remove="website\**" />
+    <EmbeddedResource Remove="src\**" />
+    <EmbeddedResource Remove="examples\**" />
+    <EmbeddedResource Remove="website\**" />
+  </ItemGroup>
+</Project>
+
+```
+
+`Program.cs`:
+
+```cs
+namespace PineLoader;
+
+static class Program
+{
+    [STAThread]
+    static int Main(string[] args)
+    {
+        using var gate = new Mutex(true, ModHost.InstanceMutex(ModHost.FindRoot()), out var created);
+        if (!created) return 0;
+
+        var dryRun = args.Any(arg => arg == "--dry-run");
+        var forwarded = args.Where(arg => arg != "--dry-run").ToArray();
+        ApplicationConfiguration.Initialize();
+        var window = new MainForm(LaunchedDirectly() && !dryRun);
+        var exit = 0;
+        window.Shown += async (_, _) =>
+        {
+            try
+            {
+                exit = await Run(window, dryRun, forwarded);
+            }
+            catch (Exception error)
+            {
+                window.ShowStep("Fehler", error.Message);
+                try
+                {
+                    var host = new ModHost(ModHost.FindRoot());
+                    host.Log("Fehler: " + error.Message);
+                    host.Error(error.ToString());
+                }
+                catch { }
+                await Task.Delay(1600);
+                exit = 1;
+            }
+            if (!window.IsDisposed) window.Finish();
+        };
+        Application.Run(window);
+        return exit;
+    }
+
+    static async Task<int> Run(MainForm window, bool dryRun, string[] forwarded)
+    {
+        var host = new ModHost(ModHost.FindRoot());
+        window.ShowStep("PineLoader", "Ordner werden geprüft");
+        var report = host.Run();
+        if (report.FirstRun)
+        {
+            window.ShowStep("Einrichtung", LaunchedDirectly() ? "Ordner stehen." : "Ordner stehen. Danach startet das Spiel.");
+            await Task.Delay(1200);
+        }
+
+        var skipped = report.Errors.Count == 0 ? "keine Fehler" : report.Errors.Count + " übersprungen";
+        var speed = report.FromCache ? "Schnellstart" : "Mods geladen";
+        window.ShowStep(speed, report.Loaded.Count + " Mods, " + skipped);
+        if (!report.FromCache) await Task.Delay(report.FirstRun ? 700 : 250);
+
+        if (dryRun)
+        {
+            host.Log("Testlauf, Spiel wird nicht gestartet.");
+            window.ShowStep("Testlauf", "Spiel bleibt zu");
+            await Task.Delay(400);
+            return 0;
+        }
+
+        if (LaunchedDirectly())
+        {
+            host.Log("PineLoader bleibt offen, bis Spiel starten gewählt wird.");
+            var found = CountMods(host.Root);
+            if (!await window.OfferStart(found, report.Loaded.Count)) return 0;
+            host.Log("Spiel starten gewählt.");
+        }
+
+        var (exe, gameArgs) = GameCommand(host.GameExe, forwarded);
+        host.Log("Spielstart: " + exe);
+        window.StaySilent();
+        var start = new System.Diagnostics.ProcessStartInfo
+        {
+            FileName = exe,
+            WorkingDirectory = Path.GetDirectoryName(exe) ?? "",
+            UseShellExecute = false
+        };
+        foreach (var arg in gameArgs) start.ArgumentList.Add(arg);
+        host.PrepareGame(start);
+        var game = System.Diagnostics.Process.Start(start) ?? throw new InvalidOperationException("Das Spiel konnte nicht gestartet werden.");
+        host.GameStarted(game);
+        await game.WaitForExitAsync();
+        host.Log("Spiel beendet, Code " + game.ExitCode);
+        return game.ExitCode;
+    }
+
+    static int CountMods(string root)
+    {
+        var mods = Path.Combine(root, "Mods");
+        if (!Directory.Exists(mods)) return 0;
+        return Directory.GetDirectories(mods).Count(dir => !Path.GetFileName(dir).StartsWith('.'));
+    }
+
+    static bool LaunchedDirectly()
+    {
+        var path = Environment.ProcessPath;
+        return path != null && Path.GetFileName(path).Equals("PineLoader.exe", StringComparison.OrdinalIgnoreCase);
+    }
+
+    static (string Exe, string[] Arguments) GameCommand(string configured, string[] forwarded)
+    {
+        var arguments = forwarded.Where(arg => !ModHost.IsLoaderFile(arg)).ToArray();
+        if (arguments.Length > 0 && File.Exists(arguments[0]) && !ModHost.IsLoaderFile(arguments[0]))
+            return (arguments[0], arguments.Skip(1).ToArray());
+        return (configured, arguments);
+    }
+}
+
+```
+
+`README.md`:
+
+```md
+<p align="center">
+  <img src="brand/NEW/pineloader-logo.png" alt="PineLoader" width="720">
+</p>
+
+<p align="center">
+  <a href="#install">Install</a>
+  &nbsp;·&nbsp;
+  <a href="#folders">Folders</a>
+  &nbsp;·&nbsp;
+  <a href="#create-a-mod">Create a mod</a>
+  &nbsp;·&nbsp;
+  <a href="#api">API</a>
+  &nbsp;·&nbsp;
+  <a href="#changelog">Changelog</a>
+  &nbsp;·&nbsp;
+  <a href="#build">Build</a>
+  &nbsp;·&nbsp;
+  <a href="#license">License</a>
+</p>
+
+<p align="center">
+  A Windows mod loader for games built with Unreal Engine 5.8.<br>
+  It starts before the game, without Steam launch options.<br>
+  One broken mod does not stop the game.
+</p>
+
+<p align="center">
+  <a href="LICENSE"><img alt="Apache License 2.0" src="https://img.shields.io/badge/license-Apache%202.0-D5B41A?style=flat-square"></a>
+  <img alt="Unreal Engine 5.8" src="https://img.shields.io/badge/Unreal%20Engine-5.8-04221a?style=flat-square">
+  <img alt="Platform Windows" src="https://img.shields.io/badge/platform-Windows-245C48?style=flat-square">
+</p>
+
+PineLoader is not BepInEx and it is not MelonLoader. A game that is already set up keeps the same `*-Win64-Game.exe`. Pionero Capital is the example game in this guide. The same steps apply to any other Windows game whose shipping file carries `++UE5+Release-5.8`.
+
+## Install
+
+You need Windows 10 or newer, and a Windows game whose shipping file version contains `++UE5+Release-5.8`. The published `PineLoader.exe` brings its own runtime. Playing the game does not need a separate .NET install.
+
+1. Put the `PineLoader` folder next to the game. `PineLoader.exe` sits in that folder.
+2. Close the game, then start `PineLoader.exe` once.
+3. The loader looks beside itself for a `*-Win64-Shipping.exe` built with Unreal Engine 5.8. It keeps the original file as `*-Win64-Game.exe` and points the shipping name at `PineLoader.exe` with a hard link. For Pionero Capital those names stay `PioneroCapital-Win64-Shipping.exe` and `PioneroCapital-Win64-Game.exe`. If `config.json` already names that game file, that file stays the game.
+4. Leave the Steam launch options empty.
+5. **Play** in Steam starts PineLoader first. The window hides, the game starts, and the loader stays until the game exits.
+6. Starting `PineLoader.exe` yourself leaves the window open. **Start game** then does the same thing Steam does.
+
+If Steam verifies the files and restores the original shipping file, start `PineLoader.exe` once more while the game is closed. Do not delete the saved `*-Win64-Game.exe`, and do not replace it with the loader.
+
+The ready window shows how many mod folders were found, how many loaded, and how many did not. The two log buttons open `Logs/pineloader.txt` and `Logs/err.txt`. Close or Escape does not start the game.
+
+## Folders
+
+Everything the loader creates sits next to `PineLoader.exe`.
+
+```text
+PineLoader/
+  PineLoader.exe
+  Mods/<Name>/<Name>.dll
+  Config/<Name>.ini
+  Cache/
+  Logs/pineloader.txt
+  Logs/err.txt
+```
+
+Each subfolder of `Mods` is one mod. The folder name is the mod name, and the DLL uses that same name, for example `Mods/ErsteMod/ErsteMod.dll`. A folder whose name starts with a dot is ignored. A broken DLL is skipped and written to `err.txt`. The game still starts.
+
+If the INI is missing, the loader writes `Config/<Name>.ini` with `Enabled=true`. `Enabled=false` or `Enabled=0` skips that mod and does not count it as an error. Empty lines and lines that start with `;` or `#` are ignored.
+
+```ini
+[Mod]
+Enabled=true
+```
+
+`Cache` remembers the state of `Mods` and `Config`. When nothing changed, the next start is faster, and the mods are still loaded.
+
+## Create a mod
+
+This is not a finished mod to copy. The files are added one at a time, the way they could look. The note works without Java. The same files can then gain the Java part. The example game is Pionero Capital.
+
+### Visual Studio
+
+Use Visual Studio 2026, Community edition. The version number starts with 18. Visual Studio 2022 stops at .NET 9 and cannot build `net10.0-windows`. Build Tools have no editor. The Java part waits until file 3, and Visual Studio has no package for it.
+
+- [Visual Studio 2026 Community](https://visualstudio.microsoft.com/downloads/)
+- [.NET 10 needs Visual Studio 2026](https://learn.microsoft.com/dotnet/core/install/windows)
+- [.NET desktop development workload](https://learn.microsoft.com/visualstudio/install/workload-component-id-vs-professional?view=visualstudio)
+
+1. On the download page choose **Community**. Not Professional, not Build Tools, and not Visual Studio 2022.
+2. In the installer, open **Workloads** and check **.NET desktop development**. That is `Microsoft.VisualStudio.Workload.ManagedDesktop`. Desktop development with C++ and ASP.NET and web development do not replace it.
+3. In the installation details on the right, leave these checked: **.NET 10.0 Runtime (Long Term Support)** and **.NET SDK**. A Windows SDK is a C++ package and does not build this mod.
+4. GitHub Copilot can be cleared. It is not part of the mod.
+5. Install. Open Visual Studio. **Help → About Microsoft Visual Studio**: the version has to start with 18.
+6. **File → Open → Folder**. Choose the source folder that contains `PineLoader.csproj`.
+7. **View → Terminal**. Run `mkdir examples\ErsteMod`. File 1 and file 2 go in that folder. `PineLoader.csproj` sits two levels above it, or the `ProjectReference` points nowhere.
+8. Do not use **File → New → Project**. The Windows Forms App template is its own program, not a mod.
+
+### File 1, the project
+
+In Solution Explorer, right-click `examples/ErsteMod`, then **Add → New File**, and name it `ErsteMod.csproj`. This is not a mod yet. It only tells the compiler what the DLL will be. Comments between `<!--` and `-->` are ignored.
+
+```xml
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <!-- Windows and .NET 10, the same runtime as PineLoader. -->
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <!-- Short type names such as Path work without an extra using. -->
+    <ImplicitUsings>enable</ImplicitUsings>
+    <!-- The DLL name. The folder later has to match. -->
+    <AssemblyName>ErsteMod</AssemblyName>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- So IPineMod and IPineHost are known. -->
+    <ProjectReference Include="..\..\PineLoader.csproj">
+      <!-- false: do not copy a second PineLoader.dll next to the mod. -->
+      <Private>false</Private>
+    </ProjectReference>
+  </ItemGroup>
+</Project>
+```
+
+- `Project Sdk` is the shell of every .NET project. Without it the compiler does not know what to build.
+- `TargetFramework` `net10.0-windows` selects Windows and .NET 10. PineLoader uses the same.
+- `ImplicitUsings` allows short names such as `Path`, without writing `using System.IO` at the top.
+- `AssemblyName` is the DLL file name, without the extension. `Mods/ErsteMod/ErsteMod.dll` has to match it.
+- `ProjectReference` points at `PineLoader.csproj`, two folders up. That is how this file knows the interfaces.
+- `Private` `false` stops the build from placing a copy of `PineLoader.dll` in the mod folder. The mod runs inside the loader and should not bring the loader's output along.
+
+### File 2, the class
+
+Add `ErsteMod.cs` next to the project file. `IPineMod` requires `Load`, so the empty class below does not build yet. The next blocks fill it in. This is still only a shape, not an installed mod.
+
+```csharp
+using PineLoader;
+
+namespace ErsteMod;
+
+// Public, so the loader can see it.
+public sealed class ErsteMod : IPineMod
+{
+}
+```
+
+- `using PineLoader` makes the names `IPineMod` and `IPineHost` known in this file.
+- `namespace ErsteMod` only groups the source. The loader looks for the folder name, not the namespace.
+- `class ErsteMod` is the type. The name may differ from the DLL. The loader takes the first public, non-abstract class with a public constructor that has no parameters.
+- `sealed` means another class may not inherit from it. For this note that is a choice, not a requirement.
+- `: IPineMod` says this class is a mod. Without it the loader finds no matching class and skips the folder.
+
+`Load` is the only method the loader calls. Once, in the loader process, before Pionero Capital starts. `host` is that running loader.
+
+```csharp
+public void Load(IPineHost host)
+{
+    // One line in Logs/pineloader.txt.
+    host.Log("ErsteMod ist geladen.");
+    // Call this only once the game process exists.
+    host.WhileGameRunning(game => host.Log("Pionero läuft. Prozess " + game.Id));
+}
+```
+
+`host.Log` writes one sentence to the loader log. The note already works with that, and it does not need Java. For Pionero Capital the line appears in `Logs/pineloader.txt` as soon as PineLoader has loaded the mod.
+
+`WhileGameRunning` runs later, still in the loader, not in Unreal. `game` is the Pionero Capital process, and `game.Id` is its number. Without Java the note is finished here.
+
+The whole file, after those steps:
+
+```csharp
+using PineLoader;
+
+namespace ErsteMod;
+
+public sealed class ErsteMod : IPineMod
+{
+    // Once, before Pionero Capital starts.
+    public void Load(IPineHost host)
+    {
+        // One line in Logs/pineloader.txt.
+        host.Log("ErsteMod ist geladen.");
+        // Call this only once the game process exists.
+        host.WhileGameRunning(game => host.Log("Pionero läuft. Prozess " + game.Id));
+    }
+}
+```
+
+### Check it on Pionero Capital
+
+1. **View → Terminal**. Change into the project folder with `cd examples\ErsteMod`.
+2. `dotnet build ErsteMod.csproj -c Release`
+3. Copy the DLL from `bin/Release/net10.0-windows/ErsteMod.dll` to `Mods/ErsteMod/ErsteMod.dll`.
+4. Pionero Capital is closed. Start `PineLoader.exe` directly and choose **Start game**.
+5. `Logs/pineloader.txt` shows `ErsteMod ist geladen` first. Then `Pionero läuft`, with the process number.
+6. The loader creates `Config/ErsteMod.ini` itself. `Enabled=false` does not load the note on the next start.
+
+### The same note with Java
+
+After the game starts, Pionero Capital starts its own Java server. The C# note above stays and keeps working even if you skip the next two files. With those files the same note can also write a line from the Java process.
+
+Visual Studio has no Java workload. JavaScript in the installer is not Java. The two files only need the [Microsoft Build of OpenJDK 21](https://learn.microsoft.com/java/openjdk/download). On that page choose Windows, x64, and the MSI. Leave PATH and `JAVA_HOME` selected when the installer offers them. Then close the terminal in Visual Studio and open it again with **View → Terminal**. `java -version` and `javac -version` have to show 21. Do not use the `jre` folder inside the game. That is only the game runtime, and it has no `javac`.
+
+File 3 is `manifest.txt`, next to the C# files. Java reads it to learn which class runs when the agent starts. These lines are the instruction. There are no `//` comments.
+
+```text
+Premain-Class: pine.note.Agent
+Can-Redefine-Classes: false
+```
+
+`Premain-Class` names the class that contains `premain`. The name has to match the package in file 4. `Can-Redefine-Classes: false` says this agent does not rebuild classes that are already loaded. The note only writes a line.
+
+File 4 is `Agent.java`. `premain` is the fixed method name Java looks for on an agent. `arguments` is the text after the equals sign of `-javaagent`. `instrumentation` is the Java contract an agent can use to see classes. This note does not use it. It only writes to the file whose path is in `arguments`.
+
+```java
+package pine.note;
+
+import java.lang.instrument.Instrumentation;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
+
+public final class Agent {
+    private Agent() {
+    }
+
+    // Java calls this before the program in the server JAR starts.
+    public static void premain(String arguments, Instrumentation instrumentation) throws Exception {
+        var line = "ErsteMod, from Java." + System.lineSeparator();
+        Files.writeString(Path.of(arguments), line, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+    }
+}
+```
+
+One line in `Load`, under the log call. The JAR must already sit next to the DLL, or `UseJavaAgent` throws and the loader skips this mod. The two lines that work without Java stay, and they still work.
+
+```csharp
+var folder = Path.GetDirectoryName(typeof(ErsteMod).Assembly.Location) ?? "";
+var jar = Path.Combine(folder, "note-agent.jar");
+var log = Path.Combine(host.Root, "Logs", "erste-mod-java.txt");
+// Remember the JAR. The text log arrives at premain as arguments.
+host.UseJavaAgent(jar, log);
+```
+
+1. **View → Terminal**, in `examples\ErsteMod`: `javac --release 17 -d out Agent.java`
+2. Then: `jar cfm note-agent.jar manifest.txt -C out .`
+3. Place `note-agent.jar` in `Mods/ErsteMod/`, next to `ErsteMod.dll`.
+4. Build the C# file again and copy the DLL again.
+
+Without file 3 and file 4 the note writes two lines to `pineloader.txt`. With the JAR and `UseJavaAgent` those same two lines still appear, and the loader records the JAR. The line from `premain` appears when Java actually loads the agent. `UseJavaAgent` puts that agent on the process PineLoader starts itself. Pionero Capital starts its Java server afterwards with its own command, so this call alone does not inject the note into that server.
+
+## API
+
+The whole public surface lives in `IPineHost.cs`. Two interfaces, no attributes, no further class. The example game is Pionero Capital.
+
+### IPineMod
+
+The interface of a mod. The loader looks for one public class that implements it, with a public constructor that has no parameters. There is exactly one method.
+
+```csharp
+// The loader takes the first matching class.
+public interface IPineMod
+{
+    void Load(IPineHost host);
+}
+```
+
+### Load
+
+Called once, in the loader process, before Pionero Capital starts. `host` is the running loader. If `Load` throws, only this mod is skipped. The game still starts.
+
+```csharp
+public void Load(IPineHost host)
+{
+    // host is PineLoader, not the game.
+    host.Log("Load was called.");
+}
+```
+
+### IPineHost
+
+What the mod is allowed to use from the loader. No method here runs inside Unreal. `Root` is a property. The others are methods.
+
+### Root
+
+The folder that contains `PineLoader.exe`. For Pionero Capital that is the `PineLoader` folder next to the game. `Mods`, `Config`, `Cache`, and `Logs` live in it.
+
+```csharp
+public void Load(IPineHost host)
+{
+    host.Log(host.Root);
+}
+```
+
+### Log
+
+Writes one line to `Logs/pineloader.txt`, with the time. A note can work with this alone, without Java. The same line is shown in the PineLoader log window.
+
+```csharp
+host.Log("A note from the mod.");
+```
+
+### Error
+
+Writes one line to `Logs/err.txt`. That alone does not mark the mod as failed. The mod fails only when `Load` throws, or when the DLL cannot be loaded.
+
+```csharp
+host.Error("A note. The mod keeps running.");
+```
+
+### WhileGameRunning
+
+Stores a function. The loader calls it after it has started the game process. `game` is that process, and `game.Id` is its number. For Pionero Capital that process is `Game.exe`. The function runs in the loader.
+
+```csharp
+host.WhileGameRunning(game => host.Log("Pionero läuft. Prozess " + game.Id));
+```
+
+### UseJavaAgent
+
+Registers a JAR as a Java agent. `jarPath` has to point at a file that exists, or the method throws and this mod is skipped. `arguments` is the text Java passes to `premain`. The loader puts the agent into `JAVA_TOOL_OPTIONS` of the process it starts itself.
+
+Pionero Capital starts its Java server later, on its own. This method alone does not put the agent into that server. The C# note still works with or without the call.
+
+```csharp
+host.UseJavaAgent(jarPath, logPath);
+```
+
+### What is not there
+
+No attributes on the class, no `OnUpdate` method, and no access to Unreal objects. The loader does not patch game methods, and it does not load BepInEx plugins or MelonLoader mods. Anything that has to happen inside the game is built in the mod.
+
+## Changelog
+
+### 1.0.0
+
+2026-11-11
+
+- Starts before the game without Steam launch options. A game that is already set up keeps the same `*-Win64-Game.exe`. A new game is recognized by the version line `++UE5+Release-5.8`. For Pionero Capital the file name stays `PioneroCapital-Win64-Game.exe`.
+- Creates `Mods`, `Config`, `Cache`, and `Logs`. Broken mods are skipped. Disabled mods are left out quietly.
+- An unchanged mod set starts faster through the cache. The mods are still loaded.
+- A window without the Windows frame. Through Steam the window hides once the game starts. The loader stays until the game exits.
+- Starting `PineLoader.exe` directly shows **Start game**, the mod counts, and both log windows.
+- Logo, wordmark, and pear icon. Background `#04221a`.
+
+## Build
+
+The published `PineLoader.exe` already contains the runtime. Building the loader from this source needs the [.NET 10 SDK](https://dotnet.microsoft.com/download) and `net10.0-windows`.
+
+```bash
+dotnet build PineLoader.csproj -c Release
+```
+
+The single file that sits next to the game is produced with:
+
+```bash
+dotnet publish PineLoader.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:EnableCompressionInSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:DebugType=none
+```
+
+The site is published separately, in German and English, at PineLoader.dev or PineLoader.de. The same guide is there under `/docs/`, and the changelog under `/changelog`.
+
+## License
+
+Apache License 2.0. The full text is in [LICENSE](LICENSE).
+
+MelonLoader uses the same license for a mod loader. Mods that only call PineLoader can keep their own license. BepInEx is under LGPL-2.1. That license is not used here.
+
+Copyright 2026 The PineLoader Authors.
+
+```
+
+`examples/HelloJava/Agent.java`:
+
+```java
+package pine.hello;
+
+import java.lang.instrument.Instrumentation;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
+
+public final class Agent {
+    private Agent() {
+    }
+
+    public static void premain(String arguments, Instrumentation instrumentation) throws Exception {
+        var line = "HelloJava agent started." + System.lineSeparator();
+        Files.writeString(Path.of(arguments), line, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+    }
+}
+
+```
+
+`examples/HelloJava/HelloJava.csproj`:
+
+```csproj
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AssemblyName>HelloJava</AssemblyName>
+    <Version>1.0.0</Version>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\PineLoader.csproj">
+      <Private>false</Private>
+    </ProjectReference>
+  </ItemGroup>
+</Project>
+
+```
+
+`examples/HelloJava/HelloJavaMod.cs`:
+
+```cs
+using PineLoader;
+
+namespace HelloJava;
+
+public sealed class HelloJavaMod : IPineMod
+{
+    public void Load(IPineHost host)
+    {
+        var folder = Path.GetDirectoryName(typeof(HelloJavaMod).Assembly.Location) ?? "";
+        var jar = Path.Combine(folder, "hello-java-agent.jar");
+        var log = Path.Combine(host.Root, "Logs", "hello-java.txt");
+        host.UseJavaAgent(jar, log);
+        host.Log("HelloJava registered the agent.");
+    }
+}
+
+```
+
+`examples/HelloJava/manifest.txt`:
+
+```txt
+Premain-Class: pine.hello.Agent
+Can-Redefine-Classes: false
+
+```
+
+`examples/HelloMod/HelloMod.cs`:
+
+```cs
+using PineLoader;
+
+namespace HelloMod;
+
+public sealed class HelloMod : IPineMod
+{
+    public void Load(IPineHost host)
+    {
+        host.Log("HelloMod loaded.");
+        host.WhileGameRunning(game => host.Log("Game is running. Process " + game.Id));
+    }
+}
+
+```
+
+`examples/HelloMod/HelloMod.csproj`:
+
+```csproj
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AssemblyName>HelloMod</AssemblyName>
+    <Version>1.0.0</Version>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\PineLoader.csproj">
+      <Private>false</Private>
+    </ProjectReference>
+  </ItemGroup>
+</Project>
+
+```
