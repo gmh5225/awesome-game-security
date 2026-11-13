@@ -943,6 +943,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/un4ckn0wl3z/MemMCP [Cheat Engine-like but MCP]
 - https://github.com/WRXinYue/STS2-KitLib [Slay the Spire 2 in-game mod dev toolkit with dev rail, cheat presets, Harmony analysis, hooks, and MCP bridge]
 - https://github.com/PlinKuuu/DanisNightmare [BepInEx Harmony mod for Muck with in-game debug/cheat command suite for player, enemy, item, and powerup manipulation]
+- https://github.com/sylvrwynd/railroader-cheat-menu [Railroader Unity/C# mod with in-game debug/cheat menu: economy, damage, wear, and runtime patches for single-player tinkering]
 - https://github.com/LLeavesG/eBPFDexDumper [DexDumper based eBPF on Android Platform]
 - https://github.com/un4ckn0wl3z/dioprocess-private [Advanced Windows Internals, Evasion, Rootkit, Hypervisor, SMM & Bootkit Research Framework]
 
@@ -4478,6 +4479,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/TheAenema/hm-pe-packer [PE X64]
 - https://github.com/hid3rx/PEPacker [PE X64]
 - https://github.com/xsj3n/x64-EXE-Packer [PE X64]
+- https://github.com/oldccat66/my-packer [Windows x64 PE protector (my-vmp) with TOML configs, VMProtect-style Lua scripting, and documented virtualization/kernel-debugger options; release binaries plus USAGE.md]
 - https://github.com/frkngksl/Shoggoth [Polymorphic Encryptor]
 - https://github.com/LongWayHomie/PolyEngine [Evasive PE packer for CTF and Windows low-level security education; in-memory execution and layered obfuscation]
 - https://github.com/GunshipPenguin/kiteshield [ELF X64]
