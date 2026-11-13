@@ -4701,6 +4701,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/Vasieco/Kernel-Anticheat [Kernel Anticheat]
 - https://github.com/PatchRequest/PeregrineAntiCheat [Educational Windows anti-cheat: kernel minifilter, ObCallbacks, APC injection, MinHook API hooks, ETW-TI, YARA, Tauri GUI, cheat test suite]
 - https://github.com/Brad-Edwards/owlbear [Educational ARM64 Linux anti-cheat prototype: kernel module, eBPF LSM hooks, userspace daemon with policy/signature scanning, ncurses game target, and bundled external-memory cheat attack programs for verification]
+- https://github.com/SlabyLol/AUSP-3DS-FHG [Nintendo 3DS homebrew anti-cheat library: memory-only detection of NTR/3GX/CTRPluginFramework loaders with configurable citro2d splash and reaction screen]
 - https://github.com/AmenHermano144/Anti-cheat-Kernel-Driver [Core_ac — modular Windows x64 kernel anti-cheat reference driver with detection modules, BYOVD scanning, and AES-GCM–sealed usermode IOCTL channel]
 - https://github.com/lauralex/OAC [Open Anti-Cheat: x64 Windows kernel driver plus user-mode scanner reference implementation with ObCallbacks handle filtering and cross-view integrity checks]
 - https://github.com/violetweather/Certael [Server-authoritative open-source anti-cheat framework with Godot/Unity/Unreal adapters]
