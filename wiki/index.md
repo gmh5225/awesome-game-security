@@ -1030,6 +1030,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [debug-remover](entities/debug-remover.md) — C/C++ strip debug info from binaries (Anti Cheat → Binary Packer; anti-RE hardening)
 - [debugoff](entities/debugoff.md) — Linux Rust anti-analysis/anti-debug library (0xor0ne; direct syscalls without libc; syscall obfuscation; chained/randomized ptrace validation with tamper termination; binary hardening against RE; Anti Debugging / Linux)
 - [deadcell-csgo](entities/deadcell-csgo.md) — CS:GO internal cheat framework full source (EternityX; C++; aiming, visuals, config, menu; build-and-study learning codebase; legacy Source 1; cheat / game:csgo)
+- [FiveM Backdoor Scanner](entities/fivem-backdoor-scanner.md) — rpScripts offline Node.js static scan for FiveM/RedM server resources (luaparse/fflate; HTTP/load() loaders, obfuscation, secrets; JSON + CI; Game Tools / supply-chain hygiene)
 - [Dead-Anticheat](entities/dead-anticheat.md) — FiveM server-side Lua anticheat (CitizenFX; noclip/spectate/godmode/mod-menu globals; JSON bans + Discord webhooks; Dead-Scripts)
 - [deadlock-anti-cheat](entities/deadlock-anti-cheat.md) — UrnIt user-mode Deadlock session AC (process/screenshot/key/HWID logging; Discord webhook; tournament review)
 - [deadlocked](entities/deadlocked.md) — Linux external CS2 assistant in Rust (schema offsets, BVH visibility, egui/OpenGL overlay, optional web radar; uinput; avitran0)
