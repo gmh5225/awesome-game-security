@@ -1,0 +1,704 @@
+Project Path: arc_SlabyLol_AUSP-3DS-FHG_nbzbgz73
+
+Source Tree:
+
+```txt
+arc_SlabyLol_AUSP-3DS-FHG_nbzbgz73
+├── AUSP
+│   ├── Makefile.inc
+│   ├── anti_usp.c
+│   ├── anti_usp.h
+│   ├── config.h
+│   ├── example_usage.c
+│   ├── scanner.c
+│   ├── scanner.h
+│   ├── screen.c
+│   ├── screen.h
+│   ├── signatures.c
+│   ├── signatures.h
+│   ├── splash.c
+│   └── splash.h
+├── LICENSE
+└── README.md
+
+```
+
+`AUSP/Makefile.inc`:
+
+```inc
+# Optional helper – only use if your Makefile is simple.
+# If you get "missing separator" or "overriding recipe" errors,
+# do NOT include this file. Instead add the three lines manually:
+#
+#   SOURCES  += AUSP
+#   INCLUDES += AUSP
+#   LIBS     += -lcitro2d -lcitro3d
+#
+# Place them in the variables section of your Makefile (before any rules).
+#
+# After adding INCLUDES += AUSP use:
+#   #include "anti_usp.h"
+
+SOURCES  += AUSP
+INCLUDES += AUSP
+LIBS     += -lcitro2d -lcitro3d
+
+```
+
+`AUSP/anti_usp.c`:
+
+```c
+#include "anti_usp.h"
+#include "config.h"
+#include "scanner.h"
+#include "screen.h"
+#include "splash.h"
+#include <stdio.h>
+
+static AuspActionFn g_action = NULL;
+
+void anti_usp_set_action(AuspActionFn fn)
+{
+    g_action = fn;
+}
+
+AuspResult anti_usp_check(void)
+{
+    if (ausp_scan_process())
+        return AUSP_PLUGIN_FOUND;
+    return AUSP_CLEAN;
+}
+
+void anti_usp_show_screen(void)
+{
+    ausp_draw_screen();
+}
+
+void anti_usp_run(void)
+{
+    ausp_show_splash();
+
+    if (anti_usp_check() != AUSP_PLUGIN_FOUND)
+        return;
+
+    if (AUSP_REACTION_MODE == AUSP_REACTION_SCREEN ||
+        AUSP_REACTION_MODE == AUSP_REACTION_BOTH)
+    {
+        anti_usp_show_screen();
+    }
+
+    if (AUSP_REACTION_MODE == AUSP_REACTION_ACTION ||
+        AUSP_REACTION_MODE == AUSP_REACTION_BOTH)
+    {
+        if (g_action)
+            g_action();
+    }
+
+    if (AUSP_FORCE_EXIT)
+        svcExitProcess();
+}
+
+const char *anti_usp_version(void)
+{
+    static char buf[16];
+    snprintf(buf, sizeof(buf), "%d.%d.%d",
+             AUSP_VERSION_MAJOR, AUSP_VERSION_MINOR, AUSP_VERSION_PATCH);
+    return buf;
+}
+
+```
+
+`AUSP/anti_usp.h`:
+
+```h
+#ifndef ANTI_USP_H
+#define ANTI_USP_H
+
+#include <3ds.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+typedef enum {
+    AUSP_CLEAN = 0,
+    AUSP_PLUGIN_FOUND = 1,
+    AUSP_ERROR = -1
+} AuspResult;
+
+typedef void (*AuspActionFn)(void);
+
+void anti_usp_set_action(AuspActionFn fn);
+
+AuspResult anti_usp_check(void);
+void anti_usp_show_screen(void);
+void anti_usp_run(void);
+
+const char *anti_usp_version(void);
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif
+
+```
+
+`AUSP/config.h`:
+
+```h
+#ifndef AUSP_CONFIG_H
+#define AUSP_CONFIG_H
+
+#define AUSP_VERSION_MAJOR      1
+#define AUSP_VERSION_MINOR      4
+#define AUSP_VERSION_PATCH      3
+
+#define AUSP_REACTION_SCREEN    1
+#define AUSP_REACTION_ACTION    2
+#define AUSP_REACTION_BOTH      3
+
+#define AUSP_REACTION_MODE      AUSP_REACTION_BOTH
+
+#define AUSP_TITLE              "ANTI-USP-3DS"
+#define AUSP_SUBTITLE           "PLUGIN DETECTED"
+#define AUSP_LINE1              "A game plugin or cheat plugin was detected."
+#define AUSP_LINE2              "This is not allowed on this title."
+#define AUSP_LINE3              "Remove all plugins and the plugin loader,"
+#define AUSP_LINE4              "then restart the console."
+#define AUSP_LINE5              "(NTR / Luma Plugin Loader / 3GX / CTRPF)"
+#define AUSP_FOOTER             "Press any button to exit"
+
+#define AUSP_EXIT_ON_KEY        1
+#define AUSP_FORCE_EXIT         1
+
+#define AUSP_SCAN_CODE          1
+#define AUSP_SCAN_DATA          1
+#define AUSP_MAX_REGIONS        48
+#define AUSP_MIN_REGION_SIZE    0x1000
+
+#define AUSP_SCREEN_TOP         1
+#define AUSP_SCREEN_BOTTOM      0
+
+#define AUSP_SPLASH_ENABLE      1
+#define AUSP_SPLASH_DURATION    90
+
+#define AUSP_SPLASH_BG_R        12
+#define AUSP_SPLASH_BG_G        14
+#define AUSP_SPLASH_BG_B        28
+#define AUSP_SPLASH_BG_A        255
+
+#define AUSP_SPLASH_ACCENT_R    0
+#define AUSP_SPLASH_ACCENT_G    180
+#define AUSP_SPLASH_ACCENT_B    255
+#define AUSP_SPLASH_ACCENT_A    255
+
+#define AUSP_SPLASH_TEXT_R      240
+#define AUSP_SPLASH_TEXT_G      245
+#define AUSP_SPLASH_TEXT_B      255
+#define AUSP_SPLASH_TEXT_A      255
+
+#define AUSP_SPLASH_SUB_R       160
+#define AUSP_SPLASH_SUB_G       180
+#define AUSP_SPLASH_SUB_B       220
+#define AUSP_SPLASH_SUB_A       255
+
+#define AUSP_IGNORE_NIMBUS      1
+
+#endif
+
+```
+
+`AUSP/example_usage.c`:
+
+```c
+#include <3ds.h>
+#include "anti_usp.h"
+
+static void my_custom_action(void)
+{
+    svcExitProcess();
+}
+
+int main(int argc, char **argv)
+{
+    anti_usp_set_action(my_custom_action);
+
+    anti_usp_run();
+
+    gfxInitDefault();
+    consoleInit(GFX_TOP, NULL);
+
+    printf("AUSP version: %s\n", anti_usp_version());
+    printf("No plugin detected. Continuing normally...\n");
+
+    while (aptMainLoop()) {
+        hidScanInput();
+        if (hidKeysDown() & KEY_START)
+            break;
+
+        gfxFlushBuffers();
+        gfxSwapBuffers();
+        gspWaitForVBlank();
+    }
+
+    gfxExit();
+    return 0;
+}
+
+```
+
+`AUSP/scanner.c`:
+
+```c
+#include "scanner.h"
+#include "signatures.h"
+#include "config.h"
+#include <string.h>
+#include <stdbool.h>
+
+static bool region_contains(const u8 *base, u32 size, const u8 *sig, u32 siglen)
+{
+    if (!base || size < siglen || !sig || siglen == 0)
+        return false;
+
+    const u8 *end = base + size - siglen;
+    for (const u8 *p = base; p <= end; p++) {
+        if (memcmp(p, sig, siglen) == 0)
+            return true;
+    }
+    return false;
+}
+
+static int collect_regions(AuspMemRegion *out, int max)
+{
+    u32 addr = 0;
+    int count = 0;
+    MemInfo info;
+    PageInfo page;
+
+    while (count < max && addr < 0x40000000) {
+        Result res = svcQueryMemory(&info, &page, addr);
+        if (R_FAILED(res))
+            break;
+        if (info.size == 0)
+            break;
+
+        bool interesting = false;
+
+        if (AUSP_SCAN_CODE && (info.perm & MEMPERM_EXECUTE))
+            interesting = true;
+        if (AUSP_SCAN_DATA && (info.perm & MEMPERM_READ) && !(info.perm & MEMPERM_EXECUTE))
+            interesting = true;
+
+        if (interesting &&
+            info.size >= AUSP_MIN_REGION_SIZE &&
+            (info.state == MEMSTATE_CODE || info.state == MEMSTATE_PRIVATE || info.state == MEMSTATE_SHARED))
+        {
+            out[count].base  = info.base_addr;
+            out[count].size  = info.size;
+            out[count].state = info.state;
+            out[count].perm  = info.perm;
+            count++;
+        }
+
+        u32 next = info.base_addr + info.size;
+        if (next <= addr)
+            break;
+        addr = next;
+    }
+
+    return count;
+}
+
+int ausp_scan_process(void)
+{
+    AuspMemRegion regions[AUSP_MAX_REGIONS];
+    int n = collect_regions(regions, AUSP_MAX_REGIONS);
+
+    int found_cheat = 0;
+    int found_nimbus = 0;
+
+    for (int i = 0; i < n; i++) {
+        const u8 *base = (const u8 *)(uintptr_t)regions[i].base;
+        u32 size = regions[i].size;
+
+        for (u32 s = 0; s < AUSP_SIGNATURE_COUNT; s++) {
+            if (region_contains(base, size,
+                                ausp_signatures[s].data,
+                                ausp_signatures[s].length))
+            {
+                if (ausp_signatures[s].is_nimbus)
+                    found_nimbus = 1;
+                else
+                    found_cheat = 1;
+            }
+        }
+    }
+
+    if (AUSP_IGNORE_NIMBUS && found_nimbus && !found_cheat)
+        return 0;
+
+    return found_cheat;
+}
+
+```
+
+`AUSP/scanner.h`:
+
+```h
+#ifndef AUSP_SCANNER_H
+#define AUSP_SCANNER_H
+
+#include <3ds.h>
+
+typedef struct {
+    u32 base;
+    u32 size;
+    u32 state;
+    u32 perm;
+} AuspMemRegion;
+
+int ausp_scan_process(void);
+
+#endif
+
+```
+
+`AUSP/screen.c`:
+
+```c
+#include "screen.h"
+#include "config.h"
+#include <3ds.h>
+#include <stdio.h>
+
+void ausp_draw_screen(void)
+{
+    gfxInitDefault();
+
+    if (AUSP_SCREEN_TOP)
+        consoleInit(GFX_TOP, NULL);
+    if (AUSP_SCREEN_BOTTOM)
+        consoleInit(GFX_BOTTOM, NULL);
+
+    printf("\x1b[2;1H");
+    printf("  ========================================\n");
+    printf("           %s\n", AUSP_TITLE);
+    printf("           %s\n", AUSP_SUBTITLE);
+    printf("  ========================================\n\n");
+    printf("  %s\n", AUSP_LINE1);
+    printf("  %s\n\n", AUSP_LINE2);
+    printf("  %s\n", AUSP_LINE3);
+    printf("  %s\n\n", AUSP_LINE4);
+    printf("  %s\n\n", AUSP_LINE5);
+    printf("  ========================================\n");
+    printf("           %s\n", AUSP_FOOTER);
+    printf("  ========================================\n");
+
+    while (aptMainLoop()) {
+        hidScanInput();
+        u32 kDown = hidKeysDown();
+
+        if (AUSP_EXIT_ON_KEY && kDown)
+            break;
+
+        gfxFlushBuffers();
+        gfxSwapBuffers();
+        gspWaitForVBlank();
+    }
+
+    gfxExit();
+}
+
+```
+
+`AUSP/screen.h`:
+
+```h
+#ifndef AUSP_SCREEN_H
+#define AUSP_SCREEN_H
+
+void ausp_draw_screen(void);
+
+#endif
+
+```
+
+`AUSP/signatures.c`:
+
+```c
+#include "signatures.h"
+
+static const u8 sig_ntr_cfw[]      = {0x4E, 0x54, 0x52, 0x20, 0x43, 0x46, 0x57};
+static const u8 sig_ntr_plg[]      = {0x4E, 0x54, 0x52, 0x50, 0x4C, 0x47};
+static const u8 sig_ntr_debug[]    = {0x4E, 0x54, 0x52, 0x20, 0x44, 0x65, 0x62, 0x75, 0x67};
+static const u8 sig_ctrpf[]        = {0x43, 0x54, 0x52, 0x50, 0x46};
+static const u8 sig_ctrplugin[]    = {0x43, 0x54, 0x52, 0x50, 0x6C, 0x75, 0x67, 0x69, 0x6E};
+static const u8 sig_3gx[]          = {0x33, 0x47, 0x58};
+static const u8 sig_plg_hdr[]      = {0x50, 0x4C, 0x47, 0x00};
+static const u8 sig_bootntr[]      = {0x42, 0x6F, 0x6F, 0x74, 0x4E, 0x54, 0x52};
+static const u8 sig_luma_plg[]     = {0x6C, 0x75, 0x6D, 0x61, 0x2F, 0x70, 0x6C, 0x75, 0x67, 0x69, 0x6E, 0x73};
+static const u8 sig_actionreplay[] = {0x41, 0x63, 0x74, 0x69, 0x6F, 0x6E, 0x52, 0x65, 0x70, 0x6C, 0x61, 0x79};
+static const u8 sig_gateshark[]    = {0x47, 0x61, 0x74, 0x65, 0x73, 0x68, 0x61, 0x72, 0x6B};
+static const u8 sig_pluginloader[] = {0x50, 0x6C, 0x75, 0x67, 0x69, 0x6E, 0x4C, 0x6F, 0x61, 0x64, 0x65, 0x72};
+
+static const u8 sig_nimbus[]       = {0x4E, 0x69, 0x6D, 0x62, 0x75, 0x73};
+static const u8 sig_pretendo[]     = {0x50, 0x72, 0x65, 0x74, 0x65, 0x6E, 0x64, 0x6F};
+static const u8 sig_nimbus_plg[]   = {0x6E, 0x69, 0x6D, 0x62, 0x75, 0x73, 0x2E, 0x33, 0x67, 0x78};
+
+const AuspSignature ausp_signatures[] = {
+    {sig_ntr_cfw,      sizeof(sig_ntr_cfw),      "NTR CFW",        0},
+    {sig_ntr_plg,      sizeof(sig_ntr_plg),      "NTR PLG",        0},
+    {sig_ntr_debug,    sizeof(sig_ntr_debug),    "NTR Debug",      0},
+    {sig_ctrpf,        sizeof(sig_ctrpf),        "CTRPF",          0},
+    {sig_ctrplugin,    sizeof(sig_ctrplugin),    "CTRPlugin",      0},
+    {sig_3gx,          sizeof(sig_3gx),          "3GX",            0},
+    {sig_plg_hdr,      sizeof(sig_plg_hdr),      "PLG Header",     0},
+    {sig_bootntr,      sizeof(sig_bootntr),      "BootNTR",        0},
+    {sig_luma_plg,     sizeof(sig_luma_plg),     "Luma Plugins",   0},
+    {sig_actionreplay, sizeof(sig_actionreplay), "ActionReplay",   0},
+    {sig_gateshark,    sizeof(sig_gateshark),    "Gateshark",      0},
+    {sig_pluginloader, sizeof(sig_pluginloader), "PluginLoader",   0},
+
+    {sig_nimbus,       sizeof(sig_nimbus),       "Nimbus",         1},
+    {sig_pretendo,     sizeof(sig_pretendo),     "Pretendo",       1},
+    {sig_nimbus_plg,   sizeof(sig_nimbus_plg),   "nimbus.3gx",     1},
+};
+
+const u32 AUSP_SIGNATURE_COUNT = sizeof(ausp_signatures) / sizeof(ausp_signatures[0]);
+
+```
+
+`AUSP/signatures.h`:
+
+```h
+#ifndef AUSP_SIGNATURES_H
+#define AUSP_SIGNATURES_H
+
+#include <3ds.h>
+
+typedef struct {
+    const u8 *data;
+    u32 length;
+    const char *name;
+    int is_nimbus;
+} AuspSignature;
+
+extern const AuspSignature ausp_signatures[];
+extern const u32 AUSP_SIGNATURE_COUNT;
+
+#endif
+
+```
+
+`AUSP/splash.c`:
+
+```c
+#include "splash.h"
+#include "config.h"
+#include <citro2d.h>
+#include <3ds.h>
+
+static void draw_logo(float cx, float cy, float scale)
+{
+    float s = scale;
+    u32 accent = C2D_Color32(AUSP_SPLASH_ACCENT_R, AUSP_SPLASH_ACCENT_G, AUSP_SPLASH_ACCENT_B, AUSP_SPLASH_ACCENT_A);
+    u32 bg     = C2D_Color32(AUSP_SPLASH_BG_R, AUSP_SPLASH_BG_G, AUSP_SPLASH_BG_B, AUSP_SPLASH_BG_A);
+
+    C2D_DrawRectSolid(cx - 55*s, cy - 45*s, 0.4f, 110*s, 90*s, accent);
+    C2D_DrawRectSolid(cx - 48*s, cy - 38*s, 0.5f, 96*s, 76*s, bg);
+
+    C2D_DrawCircleSolid(cx, cy - 5*s, 0.6f, 28*s, accent);
+    C2D_DrawCircleSolid(cx, cy - 5*s, 0.7f, 18*s, bg);
+
+    C2D_DrawRectSolid(cx - 8*s, cy + 18*s, 0.6f, 16*s, 22*s, accent);
+}
+
+void ausp_show_splash(void)
+{
+    if (!AUSP_SPLASH_ENABLE)
+        return;
+
+    gfxInitDefault();
+    C3D_Init(C3D_DEFAULT_CMDBUF_SIZE);
+    C2D_Init(C2D_DEFAULT_MAX_OBJECTS);
+    C2D_Prepare();
+
+    C3D_RenderTarget *top = C2D_CreateScreenTarget(GFX_TOP, GFX_LEFT);
+
+    C2D_TextBuf buf = C2D_TextBufNew(4096);
+    C2D_Text txtTitle, txtSub, txtSupported;
+
+    C2D_TextParse(&txtTitle, buf, "AUSP-3DS");
+    C2D_TextOptimize(&txtTitle);
+
+    C2D_TextParse(&txtSub, buf, "Anti-Cheat Protection");
+    C2D_TextOptimize(&txtSub);
+
+    C2D_TextParse(&txtSupported, buf, "Supported by AUSP-3DS");
+    C2D_TextOptimize(&txtSupported);
+
+    u32 colBg     = C2D_Color32(AUSP_SPLASH_BG_R, AUSP_SPLASH_BG_G, AUSP_SPLASH_BG_B, AUSP_SPLASH_BG_A);
+    u32 colText   = C2D_Color32(AUSP_SPLASH_TEXT_R, AUSP_SPLASH_TEXT_G, AUSP_SPLASH_TEXT_B, AUSP_SPLASH_TEXT_A);
+    u32 colSub    = C2D_Color32(AUSP_SPLASH_SUB_R, AUSP_SPLASH_SUB_G, AUSP_SPLASH_SUB_B, AUSP_SPLASH_SUB_A);
+    u32 colAccent = C2D_Color32(AUSP_SPLASH_ACCENT_R, AUSP_SPLASH_ACCENT_G, AUSP_SPLASH_ACCENT_B, AUSP_SPLASH_ACCENT_A);
+
+    int frames = 0;
+    while (aptMainLoop() && frames < AUSP_SPLASH_DURATION)
+    {
+        hidScanInput();
+        if (hidKeysDown() & KEY_START)
+            break;
+
+        C3D_FrameBegin(C3D_FRAME_SYNCDRAW);
+        C2D_TargetClear(top, colBg);
+        C2D_SceneBegin(top);
+
+        draw_logo(200.0f, 95.0f, 1.15f);
+
+        C2D_DrawText(&txtTitle, C2D_AlignCenter | C2D_WithColor,
+                     200.0f, 155.0f, 0.5f, 0.85f, 0.85f, colText);
+
+        C2D_DrawText(&txtSub, C2D_AlignCenter | C2D_WithColor,
+                     200.0f, 185.0f, 0.5f, 0.55f, 0.55f, colSub);
+
+        C2D_DrawText(&txtSupported, C2D_AlignCenter | C2D_WithColor,
+                     200.0f, 215.0f, 0.5f, 0.50f, 0.50f, colAccent);
+
+        C3D_FrameEnd(0);
+        frames++;
+    }
+
+    C2D_TextBufDelete(buf);
+    C2D_Fini();
+    C3D_Fini();
+    gfxExit();
+}
+
+```
+
+`AUSP/splash.h`:
+
+```h
+#ifndef AUSP_SPLASH_H
+#define AUSP_SPLASH_H
+
+void ausp_show_splash(void);
+
+#endif
+
+```
+
+`LICENSE`:
+
+```
+This is free and unencumbered software released into the public domain.
+
+Anyone is free to copy, modify, publish, use, compile, sell, or
+distribute this software, either in source code form or as a compiled
+binary, for any purpose, commercial or non-commercial, and by any
+means.
+
+In jurisdictions that recognize copyright laws, the author or authors
+of this software dedicate any and all copyright interest in the
+software to the public domain. We make this dedication for the benefit
+of the public at large and to the detriment of our heirs and
+successors. We intend this dedication to be an overt act of
+relinquishment in perpetuity of all present and future rights to this
+software under copyright law.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+OTHER DEALINGS IN THE SOFTWARE.
+
+For more information, please refer to <https://unlicense.org>
+
+```
+
+`README.md`:
+
+```md
+# AUSP-3DS
+
+**Anti-USP-3DS** – Advanced lightweight plugin detection for Nintendo 3DS homebrew.
+
+Detects NTR, 3GX, CTRPluginFramework and related loaders **without any filesystem access**.
+
+Always shows a clean **citro2d splash** with the AUSP logo and "Supported by AUSP-3DS" at the start of every homebrew that integrates it.
+
+**Nimbus (Pretendo) is explicitly ignored** so legitimate online players are not blocked.
+
+Fully configurable reaction after detection:
+- Show anti-cheat screen
+- Call a custom action / callback
+- Or both
+
+## Features
+
+- Memory-only detection (no SD card / folder checks)
+- Dynamic memory region discovery via `svcQueryMemory`
+- Multiple known signatures
+- **Ignores Nimbus / Pretendo plugin** (configurable)
+- Configurable reaction: screen only / action only / both
+- Automatic citro2d splash screen with logo on every start
+- Fully customizable texts and colors
+- Drop-in ready
+
+## Installation (IMPORTANT)
+
+1. Download this repository as ZIP
+2. Extract it
+3. Copy the entire **`AUSP`** folder into your project  
+   - Either into `source/` **or** into the project root (both work)
+4. Open your `Makefile` and add these lines in the **variables section** (before any rules):
+
+```makefile
+SOURCES  += AUSP
+INCLUDES += AUSP
+LIBS     += -lcitro2d -lcitro3d
+```
+
+   Do **not** use `include AUSP/Makefile.inc` if you get Makefile errors.
+
+5. In your code (as early as possible):
+
+```c
+#include "anti_usp.h"
+
+int main(int argc, char **argv)
+{
+    anti_usp_run();
+
+    // rest of your game
+}
+```
+
+### Common errors & fixes
+
+| Error | Fix |
+|-------|-----|
+| `ausp_signatures` / `AUSP_SIGNATURE_COUNT` undeclared | Update to latest AUSP (fixed in v1.4.3 – signatures moved to .c) |
+| `C2D_Color32 undeclared` | Update to latest AUSP |
+| `*** missing separator` | Recipe lines need a real Tab, not spaces |
+| `overriding recipe for target 'build'` | Remove any `include AUSP/Makefile.inc`, add the 3 lines manually |
+| `anti_usp.h: No such file` | Make sure `INCLUDES += AUSP` is set and use `#include "anti_usp.h"` |
+
+## Configuration (`AUSP/config.h`)
+
+```c
+#define AUSP_REACTION_MODE      AUSP_REACTION_BOTH
+#define AUSP_IGNORE_NIMBUS      1
+#define AUSP_SPLASH_ENABLE      1
+#define AUSP_SPLASH_DURATION    90
+```
+
+## License
+
+Public domain. Do whatever you want.
+
+```
