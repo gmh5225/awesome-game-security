@@ -3410,6 +3410,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [raybot-zero](entities/raybot-zero.md) — kernel-mode CS:GO cheat; C++ driver + C# loader; triggerbot, bunnyhop, glow, kernel key-state reads; no traditional usermode controller (R4YVEN; Kernel-mode)
 - [ravengine](entities/ravengine.md) — modern C++ ECS game engine (Vulkan via RGL; GameNetworkingSockets; CMake cross-platform; input/GUI/audio + resource packing; C++ 3D)
 - [raival-file-explorer](entities/raival-file-explorer.md) — lightweight Kotlin/Java Material 3 Android file manager (multi-tab, task handling, code editor, deep content search; Gradle baseline; Cheat Android File Explorer; Raival-e; slug disambiguated from [[file-explorer]])
+- [railroader-cheat-menu](entities/railroader-cheat-menu.md) — Railroader 0.6.x Experimental host-only Unity IMGUI debug/cheat mod (C# official modding contract; economy/damage/wear/session tools; optional HarmonyLib physics patches; Sylvrwynd; cheat / Unity modding)
 - [razer-rzctl](entities/razer-rzctl.md) — BYOVD via Razer `rzctl.sys` (kernel mouse/keyboard simulation or IOCTL kernel access; gmh5225)
 - [R3nzSkin](entities/r3nzskin.md) — LoL skin changer (C++; client-side skin rendering; DLL injector; pattern scan + Python auto-updaters; KsDumper integration; Skin; Kurok00; cheat / game:lol)
 - [R3nzSkinTFT](entities/r3nzskin-tft.md) — LoL/TFT skin changer (C++; champion skin ID memory patch; client-only cosmetic swap; Skin; gmh5225; cheat / game:lol)

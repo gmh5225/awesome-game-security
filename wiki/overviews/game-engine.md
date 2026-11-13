@@ -675,6 +675,7 @@ sources:
   - wiki/sources/descriptions/SwagSoftware__KisakCOD.md
   - wiki/sources/descriptions/SwagSoftware__KisakBlack.md
   - wiki/sources/descriptions/SwagSoftware__Kisak-Strike.md
+  - wiki/sources/descriptions/Sylvrwynd__Railroader-Cheat-Menu.md
   - wiki/sources/descriptions/Suprcode__mir3-zircon.md
   - wiki/sources/descriptions/Net5F__AmalgamEngine.md
   - wiki/sources/descriptions/Suprcode__mir2.md
@@ -734,7 +735,7 @@ sources:
   - wiki/sources/descriptions/abczsl520__game-quality-gates.md
   - wiki/sources/descriptions/imjustadudegamer__Provenance-Elite-Force-II-decomp-Android-linux.md
   - wiki/sources/descriptions/ocornut__imgui_test_engine.md
-updated: 2026-11-12
+updated: 2026-11-13
 confidence: high
 ---
 
@@ -805,6 +806,7 @@ Editor-facing MCP bridges in the README's **MCP server** subcategory let AI agen
 - **UE5 MCP (design)** — [[ue5-mcp]] paused Blender↔UE5 pipeline concept (Markdown workflows; text-driven scenes, asset transfer, level automation, Blueprint assistance) (source: wiki/sources/descriptions/VedantRGosavi__UE5-MCP.md)
 - **Unity MCP** — [[unity-mcp]] editor + C# scripting interaction; the justinpbarnett tree adds C#/Python shader/rendering MCP tooling (source: wiki/sources/descriptions/justinpbarnett__unity-mcp.md)
 - **Unity Runtime Analysis Agent** — [[unity-runtime-analysis-agent]] BepInEx in-game plugin for shipped Unity **Mono** titles; assembly/IL analysis, cross-refs, scene/GameObject hierarchy, live object queries; authenticated local named pipes or loopback TCP to AgentConsole and UnityLudometryMCP; read-only default with audited Full-mode writes; in-game overlay + emergency stop; runtime counterpart to editor [[unity-mcp]] (RectangleEquals) (source: wiki/sources/descriptions/RectangleEquals__UnityRuntimeAnalysisAgent.md)
+- **Railroader Cheat Menu** — [[railroader-cheat-menu]] C# mod against the official Railroader modding contract; Unity IMGUI host-only debug/cheat menu; centralized state manipulation + optional HarmonyLib runtime patches; `dotnet` build via PowerShell; Unity modding / sanctioned plugin-surface study (Sylvrwynd) (source: wiki/sources/descriptions/Sylvrwynd__Railroader-Cheat-Menu.md)
 - **Unity Skills** — [[unity-skills]] editor plugin with AI automation skills for animator, audio, camera, materials, NavMesh, physics, rendering, shaders, terrain, UI, batch execution, and localization (Besty0728; Game Develop / AI Agents) (source: wiki/sources/descriptions/Besty0728__Unity-Skills.md)
 - **Godot MCP** — [[better-godot-mcp]] composite text/headless scene/GDScript tools + zeegzoog/[[godot-mcp]] Rust live-editor WebSocket bridge (undoable scene edits, play/stop, running-game debugger; loopback token + path/identifier validation; headless CLI fallback; Game Develop / MCP server) (source: wiki/sources/descriptions/zeegzoog__godot-mcp.md)
 - **Void Engine** — [[void-engine]] Godot 4.x plugin with WhiteVoid AntiCheat autoload (debugger/process/window detection, honeypot integrity checks, HWID ban enforcement), VoidNet multiplayer stack, and VoidForge editor tooling (lannden1245; Anti Cheat / Open Source Anti Cheat System) (source: wiki/sources/descriptions/lannden1245__Void-Engine.md)
