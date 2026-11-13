@@ -3652,6 +3652,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ScyllaHideDetector2](entities/scyllahidedetector2.md) — ScyllaHide Detector V2 (C/C++; debug hide / byte restore; Anti Debugging)
 - [Scythe AntiCheat](entities/scythe-anticheat.md) — Minecraft Bedrock behavior-pack AC (JavaScript/JSON; Scripting API; combat/movement/packet-abuse/chat-spam/scaffold detection; moderation commands + player stats; Realms/worlds/servers; MrDiamond64; Anti Cheat / game:minecraft)
 - [SDCM](entities/sdcm.md) — Microsoft Partner Center CLI: WHQL/Attestation submissions, signed driver download, Windows Update shipping labels
+- [SDNX](entities/sdnx.md) — early WIP Switch port of *Sleeping Dogs* (Xbox 360 retail) via ReXGlue static recomp (`default.xex`→ARM64) + native Vulkan Xenos command-stream renderer; XenosRecomp/DXC shaders; Python/C++ archive/texture/shader + bench tooling; BYO game data (exp0t; Cheat / Source)
 - [sdk](entities/sdk.md) — Source-engine RE SDK headers (netvars / interfaces; likely CS:GO; C++)
 - [sdkgenny](entities/sdkgenny.md) — general C++ SDK generation library (cursey; PEGTL optional parser; cheat / sdk codegen)
 - [SE-tools](entities/se-tools.md) — Switch homebrew memory/cheat toolkit (Atmosphere dmnt:cht; scanner / pointer / viewer)
