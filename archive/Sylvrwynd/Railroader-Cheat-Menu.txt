@@ -1,0 +1,3191 @@
+Project Path: arc_Sylvrwynd_Railroader-Cheat-Menu_ao9f912v
+
+Source Tree:
+
+```txt
+arc_Sylvrwynd_Railroader-Cheat-Menu_ao9f912v
+├── LICENSE
+├── README.md
+├── build.ps1
+├── deploy-backups
+│   ├── RailroaderCheatMenu-20261112-222845
+│   │   └── Info.json
+│   ├── RailroaderCheatMenu-20261112-234447
+│   │   └── Info.json
+│   └── RailroaderCheatMenu-20261113-001032
+│       └── Info.json
+├── mod
+│   └── Info.json
+└── src
+    └── RailroaderCheatMenu
+        ├── CheatMenuBehaviour.cs
+        ├── GameActions.cs
+        ├── Localization.cs
+        ├── ModEntryPoint.cs
+        ├── RailroaderCheatMenu.csproj
+        └── RuntimePatches.cs
+
+```
+
+`LICENSE`:
+
+```
+MIT License
+
+Copyright (c) 2026 Sylvrwynd
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
+`README.md`:
+
+```md
+# Railroader Cheat Menu
+Railroader Debug / Cheat Menu
+
+```
+
+`build.ps1`:
+
+```ps1
+param(
+    [string]$RailroaderManagedPath = $env:RAILROADER_MANAGED
+)
+
+$ErrorActionPreference = 'Stop'
+
+if ([string]::IsNullOrWhiteSpace($RailroaderManagedPath)) {
+    $candidates = @(
+        'D:\SteamLibrary\steamapps\common\Railroader\Railroader_Data\Managed',
+        'C:\Program Files (x86)\Steam\steamapps\common\Railroader\Railroader_Data\Managed'
+    )
+    $RailroaderManagedPath = $candidates | Where-Object { Test-Path -LiteralPath $_ } | Select-Object -First 1
+}
+
+if ([string]::IsNullOrWhiteSpace($RailroaderManagedPath) -or -not (Test-Path -LiteralPath $RailroaderManagedPath)) {
+    throw 'RailroaderManagedPath must point to Railroader_Data\Managed.'
+}
+
+$contract = Join-Path $RailroaderManagedPath 'Railroader.Modding.dll'
+$game = Join-Path $RailroaderManagedPath 'Railroader.dll'
+if (-not (Test-Path -LiteralPath $contract) -or -not (Test-Path -LiteralPath $game)) {
+    throw "The managed directory does not contain Railroader.Modding.dll and Railroader.dll: $RailroaderManagedPath"
+}
+
+$root = Split-Path -Parent $MyInvocation.MyCommand.Path
+$package = Join-Path $root 'dist\RailroaderCheatMenu'
+$output = Join-Path $root 'dist\build\'
+if (Test-Path -LiteralPath $package) {
+    Remove-Item -LiteralPath $package -Recurse -Force
+}
+New-Item -ItemType Directory -Path $package | Out-Null
+
+dotnet build (Join-Path $root 'src\RailroaderCheatMenu\RailroaderCheatMenu.csproj') `
+    --configuration Release `
+    -p:RailroaderManagedPath=$RailroaderManagedPath `
+    -p:OutputPath="$output"
+if ($LASTEXITCODE -ne 0) {
+    throw "dotnet build failed with exit code $LASTEXITCODE"
+}
+
+Copy-Item -LiteralPath (Join-Path $root 'mod\Info.json') -Destination $package
+Copy-Item -LiteralPath (Join-Path $output 'RailroaderCheatMenu.dll') -Destination $package
+
+Write-Output "Built asset pack: $package"
+
+
+```
+
+`deploy-backups/RailroaderCheatMenu-20261112-222845/Info.json`:
+
+```json
+{
+  "identifier": "cag-sylvrwynd/railroader-cheat-menu",
+  "version": "0.2.0",
+  "name": "Railroader Cheat / Debug Menu",
+  "author": "CAG - Sylvrwynd",
+  "license": "MIT",
+  "scope": "optional",
+  "description": "An open-source host-only debug menu for Railroader 0.6.x Experimental.",
+  "dependencies": {
+    "required": [
+      "rr/game ^0.6.2"
+    ]
+  },
+  "assemblies": [
+    "RailroaderCheatMenu.dll"
+  ]
+}
+
+
+```
+
+`deploy-backups/RailroaderCheatMenu-20261112-234447/Info.json`:
+
+```json
+{
+  "identifier": "cag-sylvrwynd/railroader-cheat-menu",
+  "version": "0.2.2",
+  "name": "Railroader Cheat / Debug Menu",
+  "author": "CAG - Sylvrwynd",
+  "license": "MIT",
+  "scope": "optional",
+  "description": "An open-source host-only debug menu for Railroader 0.6.x Experimental.",
+  "dependencies": {
+    "required": [
+      "rr/game ^0.6.2"
+    ]
+  },
+  "assemblies": [
+    "RailroaderCheatMenu.dll"
+  ]
+}
+
+
+```
+
+`deploy-backups/RailroaderCheatMenu-20261113-001032/Info.json`:
+
+```json
+{
+  "identifier": "cag-sylvrwynd/railroader-cheat-menu",
+  "version": "0.2.2",
+  "name": "Railroader Cheat / Debug Menu",
+  "author": "CAG - Sylvrwynd",
+  "license": "MIT",
+  "scope": "optional",
+  "description": "An open-source host-only debug menu for Railroader 0.6.x Experimental.",
+  "dependencies": {
+    "required": [
+      "rr/game ^0.6.2"
+    ]
+  },
+  "assemblies": [
+    "RailroaderCheatMenu.dll"
+  ]
+}
+
+
+```
+
+`mod/Info.json`:
+
+```json
+{
+  "identifier": "cag-sylvrwynd/railroader-cheat-menu",
+  "version": "0.2.2",
+  "name": "Railroader Cheat / Debug Menu",
+  "author": "CAG - Sylvrwynd",
+  "license": "MIT",
+  "scope": "optional",
+  "description": "An open-source host-only debug menu for Railroader 0.6.x Experimental.",
+  "dependencies": {
+    "required": [
+      "rr/game ^0.6.2"
+    ]
+  },
+  "assemblies": [
+    "RailroaderCheatMenu.dll"
+  ]
+}
+
+
+```
+
+`src/RailroaderCheatMenu/CheatMenuBehaviour.cs`:
+
+```cs
+using System;
+using System.Globalization;
+using Railroader.Modding;
+using UnityEngine;
+
+namespace CAG.Sylvrwynd.RailroaderCheatMenu
+{
+    internal sealed class CheatMenuBehaviour : MonoBehaviour
+    {
+        private static CheatMenuBehaviour instance;
+        private static bool worldLoaded;
+
+        private IModLogger log;
+        private bool open;
+        private Rect window = new Rect(30f, 30f, 540f, 500f);
+        private Vector2 scrollPosition;
+        private int tab;
+        private string cashAmount = "10000";
+        private string materialAmount = "1000000";
+        private string fuelAmount = "1000000";
+        private string reputationAmount = "100";
+        private string impactDamagePercent = "100";
+        private string overspeedDamagePercent = "100";
+        private string wearMultiplierPercent = "100";
+        private string oilUsePercent = "100";
+        private string fuelConsumptionPercent = "100";
+        private string highSpeedThresholdMph = "50";
+        private int trackClass = 5;
+        private string status = Localization.Text("ready");
+        private bool resizingWindow;
+        private Vector2 resizeStartMouse;
+        private Vector2 resizeStartSize;
+
+        private const float MinWindowWidth = 480f;
+        private const float MinWindowHeight = 320f;
+        private const float ResizeGripSize = 18f;
+
+        private GUIStyle windowStyle;
+        private GUIStyle buttonStyle;
+        private GUIStyle tabStyle;
+        private GUIStyle labelStyle;
+        private GUIStyle textFieldStyle;
+        private GUIStyle closeButtonStyle;
+        private GUIStyle resizeGripStyle;
+        private Texture2D windowBackground;
+        private Texture2D controlBackground;
+        private Texture2D controlHoverBackground;
+        private Texture2D controlActiveBackground;
+
+        internal void Initialize(IModLogger logger)
+        {
+            instance = this;
+            log = logger;
+        }
+
+        internal static void SetWorldLoaded(bool loaded)
+        {
+            worldLoaded = loaded;
+            if (!loaded && instance != null)
+            {
+                instance.open = false;
+            }
+        }
+
+        private void Update()
+        {
+            if (Input.GetKeyDown(KeyCode.F10))
+            {
+                open = !open;
+            }
+        }
+
+        private void OnGUI()
+        {
+            if (!open || !worldLoaded)
+            {
+                return;
+            }
+
+            EnsureStyles();
+            var previousColor = GUI.color;
+            GUI.color = Color.white;
+            window = GUI.Window(GetInstanceID(), window, DrawWindow, Localization.Text("menu_title"), windowStyle);
+            GUI.color = previousColor;
+        }
+
+        private void DrawWindow(int id)
+        {
+            GUILayout.BeginVertical();
+            scrollPosition = GUILayout.BeginScrollView(scrollPosition);
+            GUILayout.BeginHorizontal();
+            GUILayout.Label(Localization.Text("target"), labelStyle);
+            GUILayout.FlexibleSpace();
+            if (GUILayout.Button(
+                Localization.Text("language") + ": " + Localization.LanguageName,
+                buttonStyle,
+                GUILayout.Width(145f),
+                GUILayout.Height(24f)))
+            {
+                Localization.Toggle();
+                status = Localization.Text("ready");
+            }
+            GUILayout.EndHorizontal();
+            GUILayout.Label(GameActions.HostStatus(), labelStyle);
+            GUILayout.Label(status, labelStyle);
+            GUILayout.Space(5f);
+
+            GUILayout.BeginHorizontal();
+            if (GUILayout.Toggle(tab == 0, Localization.Text("company"), tabStyle, GUILayout.Height(25f))) tab = 0;
+            if (GUILayout.Toggle(tab == 1, Localization.Text("equipment"), tabStyle, GUILayout.Height(25f))) tab = 1;
+            if (GUILayout.Toggle(tab == 2, Localization.Text("track_mow"), tabStyle, GUILayout.Height(25f))) tab = 2;
+            if (GUILayout.Toggle(tab == 3, Localization.Text("safety"), tabStyle, GUILayout.Height(25f))) tab = 3;
+            if (GUILayout.Toggle(tab == 4, Localization.Text("qol"), tabStyle, GUILayout.Height(25f))) tab = 4;
+            GUILayout.EndHorizontal();
+            GUILayout.Space(5f);
+
+            if (tab == 0) DrawCompanyTab();
+            else if (tab == 1) DrawEquipmentTab();
+            else if (tab == 2) DrawTrackTab();
+            else if (tab == 3) DrawSafetyTab();
+            else DrawQolTab();
+
+            GUILayout.Space(7f);
+            if (ActionButton(Localization.Text("close"), 25f)) open = false;
+            GUILayout.EndScrollView();
+            GUILayout.EndVertical();
+
+            if (GUI.Button(new Rect(window.width - 28f, 2f, 24f, 20f), "X", closeButtonStyle))
+            {
+                open = false;
+            }
+
+            DrawResizeGrip();
+            GUI.DragWindow(new Rect(0f, 0f, Mathf.Max(0f, window.width - 32f), 24f));
+        }
+
+        private void DrawCompanyTab()
+        {
+            GUILayout.Label(Localization.Text("cash"), labelStyle);
+            cashAmount = GUILayout.TextField(cashAmount, textFieldStyle, GUILayout.Height(23f));
+            GUILayout.BeginHorizontal();
+            if (ActionButton(Localization.Text("add"))) Run(() => GameActions.ChangeCash(ParseInt(cashAmount)));
+            if (ActionButton(Localization.Text("remove"))) Run(() => GameActions.ChangeCash(-ParseInt(cashAmount)));
+            if (ActionButton(Localization.Text("set_exact"))) Run(() => GameActions.SetCash(ParseInt(cashAmount)));
+            GUILayout.EndHorizontal();
+            GUILayout.Label(Localization.Format("current_balance", GameActions.CurrentBalance()), labelStyle);
+
+            GUILayout.Space(8f);
+            GUILayout.Label(Localization.Text("company_reputation"), labelStyle);
+            reputationAmount = GUILayout.TextField(reputationAmount, textFieldStyle, GUILayout.Height(23f));
+            if (ActionButton(Localization.Text("action_set")))
+            {
+                Run(() => GameActions.SetReputationPercent(ParseFloat(reputationAmount)));
+            }
+            GUILayout.Label(Localization.Format("current_reputation", GameActions.CurrentReputation()), labelStyle);
+        }
+
+        private void DrawEquipmentTab()
+        {
+            GUILayout.Label(Localization.Text("equipment_repair"), labelStyle);
+            DrawActionPair(
+                "repair_selected", "action_repair", GameActions.RepairSelected,
+                "repair_all", "action_repair_all", GameActions.RepairAll);
+            GUILayout.Label(Localization.Text("repair_description"), labelStyle);
+
+            GUILayout.Space(7f);
+            GUILayout.Label(Localization.Text("engine_fueling"), labelStyle);
+            DrawActionPair(
+                "refuel_selected", "action_refuel", GameActions.RefuelSelected,
+                "refuel_all", "action_refuel_all", GameActions.RefuelAll);
+            GUILayout.Label(Localization.Text("fuel_description"), labelStyle);
+
+            GUILayout.Space(7f);
+            GUILayout.Label(Localization.Text("cargo_loading"), labelStyle);
+            DrawActionPair(
+                "fill_manifested_selected", "action_fill", GameActions.FillManifestedSelected,
+                "fill_manifested_all", "action_fill", GameActions.FillManifestedAll);
+            GUILayout.Label(Localization.Text("manifested_cargo_description"), labelStyle);
+
+            GUILayout.Space(7f);
+            GUILayout.Label(Localization.Text("cargo_emptying"), labelStyle);
+            DrawActionPair(
+                "empty_selected_cargo", "action_empty", GameActions.EmptySelectedCargo,
+                "empty_all_cargo", "action_empty", GameActions.EmptyAllCargo);
+            GUILayout.Label(Localization.Text("empty_cargo_description"), labelStyle);
+
+            GUILayout.Space(7f);
+            GUILayout.Label(Localization.Text("oiling"), labelStyle);
+            DrawActionPair(
+                "oil_selected", "action_oil", GameActions.OilSelected,
+                "oil_all", "action_oil_all", GameActions.OilAll);
+            GUILayout.Label(Localization.Text("oil_description"), labelStyle);
+        }
+
+        private void DrawTrackTab()
+        {
+            GUILayout.Label(Localization.Text("track_condition"), labelStyle);
+            GUILayout.BeginHorizontal();
+            for (var value = 1; value <= 5; value++)
+            {
+                if (GUILayout.Toggle(trackClass == value, "C" + value, tabStyle, GUILayout.Height(24f))) trackClass = value;
+            }
+            GUILayout.EndHorizontal();
+            DrawActionPair(
+                "repair_track", "action_repair", GameActions.RepairAllTrack,
+                "set_track_class", "action_set", () => GameActions.SetAllTrackConditionClass(trackClass),
+                null,
+                Localization.Format("set_track_class", trackClass));
+
+            GUILayout.Space(7f);
+            GUILayout.Label(Localization.Text("mow_yard_materials"), labelStyle);
+            DrawAmountActions(
+                ref materialAmount,
+                "action_fill",
+                () => GameActions.RestockMowMaterials(ParseFloat(materialAmount)),
+                "action_empty",
+                GameActions.ClearMowMaterials);
+            GUILayout.Label(Localization.Text("materials"), labelStyle);
+
+            GUILayout.Space(7f);
+            GUILayout.Label(Localization.Text("yard_fuel_supplies"), labelStyle);
+            DrawAmountActions(
+                ref fuelAmount,
+                "action_fill",
+                () => GameActions.RestockFuelSupplies(ParseFloat(fuelAmount)),
+                "action_empty",
+                GameActions.ClearFuelSupplies);
+            GUILayout.Label(Localization.Text("fuel_materials"), labelStyle);
+        }
+
+        private void DrawSafetyTab()
+        {
+            GUILayout.Label(Localization.Text("derailment_tools"), labelStyle);
+            if (ActionButton(Localization.Text("action_rerail"), 23f)) Run(GameActions.RerailAll);
+            DrawStatePair(
+                Localization.Text("derailment_toggle"),
+                GameActions.ToggleDerailmentProtection,
+                RuntimePatches.PreventDerailment,
+                Localization.Format("speed_damage_toggle", GameActions.CurrentHighSpeedDamageThreshold()),
+                GameActions.ToggleHighSpeedDamageProtection,
+                RuntimePatches.ProtectHighSpeedDamage);
+            GUILayout.Label(
+                Localization.Format("physics_description", GameActions.CurrentHighSpeedDamageThreshold()),
+                labelStyle);
+
+            GUILayout.BeginHorizontal();
+            GUILayout.Label(Localization.Text("speed_damage_threshold"), labelStyle, GUILayout.Width(185f));
+            highSpeedThresholdMph = GUILayout.TextField(highSpeedThresholdMph, textFieldStyle, GUILayout.Width(75f), GUILayout.Height(23f));
+            var enteredThreshold = highSpeedThresholdMph;
+            if (ActionButton(Localization.Text("apply")))
+            {
+                Run(() => GameActions.SetHighSpeedDamageThreshold(ParseFloat(enteredThreshold)));
+            }
+            GUILayout.EndHorizontal();
+            GUILayout.Label(
+                Localization.Format("current_speed_threshold", GameActions.CurrentHighSpeedDamageThreshold()),
+                labelStyle);
+
+            GUILayout.Space(7f);
+            GUILayout.Label(Localization.Text("wear_tools"), labelStyle);
+            DrawStatePair(
+                Localization.Text("equipment_wear_toggle"),
+                GameActions.ToggleEquipmentWear,
+                GameActions.EquipmentWearStatus() == Localization.Text("enabled"),
+                Localization.Text("oil_feature_toggle"),
+                GameActions.ToggleHotboxesAndOiling,
+                GameActions.HotboxesAndOilingStatus() == Localization.Text("enabled"));
+            GUILayout.Label(Localization.Text("wear_description"), labelStyle);
+
+            GUILayout.Space(7f);
+            GUILayout.Label(Localization.Text("damage_tuning"), labelStyle);
+            DrawMultiplierControl(
+                ref impactDamagePercent,
+                "impact_damage_multiplier",
+                GameActions.SetImpactDamagePercent,
+                GameActions.CurrentImpactDamagePercent);
+            DrawMultiplierControl(
+                ref overspeedDamagePercent,
+                "overspeed_damage_multiplier",
+                GameActions.SetOverspeedDamagePercent,
+                GameActions.CurrentOverspeedDamagePercent);
+            DrawMultiplierControl(
+                ref wearMultiplierPercent,
+                "wear_multiplier",
+                GameActions.SetEquipmentWearPercent,
+                GameActions.CurrentEquipmentWearPercent);
+            DrawMultiplierControl(
+                ref oilUsePercent,
+                "oil_use_multiplier",
+                GameActions.SetOilUsePercent,
+                GameActions.CurrentOilUsePercent);
+            DrawMultiplierControl(
+                ref fuelConsumptionPercent,
+                "fuel_consumption_multiplier",
+                GameActions.SetFuelConsumptionPercent,
+                GameActions.CurrentFuelConsumptionPercent);
+            GUILayout.Label(Localization.Text("multiplier_description"), labelStyle);
+        }
+
+        private void DrawQolTab()
+        {
+            GUILayout.Label(Localization.Text("player_speed"), labelStyle);
+            DrawSpeedButtons(
+                new[] { 1f, 2f, 5f },
+                multiplier => Run(() => GameActions.SetPlayerSpeedMultiplier(multiplier)));
+            GUILayout.Label(Localization.Text("player_speed_description"), labelStyle);
+
+            GUILayout.Space(7f);
+            GUILayout.Label(Localization.Text("game_speed"), labelStyle);
+            DrawSpeedButtons(
+                new[] { 0.5f, 1f, 2f, 5f },
+                multiplier => Run(() => GameActions.SetGameSpeed(multiplier)));
+            GUILayout.Label(Localization.Text("game_speed_description"), labelStyle);
+
+        }
+
+        private void DrawSpeedButtons(float[] multipliers, Action<float> action)
+        {
+            GUILayout.BeginHorizontal();
+            foreach (var multiplier in multipliers)
+            {
+                var label = multiplier.ToString("0.##", CultureInfo.InvariantCulture) + "x";
+                if (ActionButton(label)) action(multiplier);
+            }
+            GUILayout.EndHorizontal();
+        }
+
+        private void DrawAmountActions(
+            ref string amount,
+            string primaryKey,
+            Func<string> primaryAction,
+            string secondaryKey,
+            Func<string> secondaryAction)
+        {
+            GUILayout.BeginHorizontal();
+            amount = GUILayout.TextField(amount, textFieldStyle, GUILayout.Width(140f), GUILayout.Height(23f));
+            if (ActionButton(Localization.Text(primaryKey))) Run(primaryAction);
+            if (ActionButton(Localization.Text(secondaryKey))) Run(secondaryAction);
+            GUILayout.EndHorizontal();
+        }
+
+        private void DrawMultiplierControl(
+            ref string value,
+            string labelKey,
+            Func<float, string> action,
+            Func<string> currentValue)
+        {
+            GUILayout.BeginHorizontal();
+            GUILayout.Label(Localization.Text(labelKey), labelStyle, GUILayout.Width(185f));
+            value = GUILayout.TextField(value, textFieldStyle, GUILayout.Width(75f), GUILayout.Height(23f));
+            var enteredValue = value;
+            if (ActionButton(Localization.Text("apply"))) Run(() => action(ParseFloat(enteredValue)));
+            GUILayout.EndHorizontal();
+            GUILayout.Label(Localization.Format("current_multiplier", currentValue()), labelStyle);
+        }
+
+        private void DrawResizeGrip()
+        {
+            var gripRect = new Rect(
+                window.width - ResizeGripSize,
+                window.height - ResizeGripSize,
+                ResizeGripSize,
+                ResizeGripSize);
+            GUI.Box(gripRect, string.Empty, resizeGripStyle);
+
+            var currentEvent = Event.current;
+            if (currentEvent.type == EventType.MouseDown
+                && currentEvent.button == 0
+                && gripRect.Contains(currentEvent.mousePosition))
+            {
+                resizingWindow = true;
+                resizeStartMouse = currentEvent.mousePosition;
+                resizeStartSize = new Vector2(window.width, window.height);
+                currentEvent.Use();
+            }
+            else if (resizingWindow && currentEvent.type == EventType.MouseDrag && currentEvent.button == 0)
+            {
+                var delta = currentEvent.mousePosition - resizeStartMouse;
+                window.width = Mathf.Max(MinWindowWidth, resizeStartSize.x + delta.x);
+                window.height = Mathf.Max(MinWindowHeight, resizeStartSize.y + delta.y);
+                currentEvent.Use();
+            }
+            else if (resizingWindow && currentEvent.type == EventType.MouseUp && currentEvent.button == 0)
+            {
+                resizingWindow = false;
+                currentEvent.Use();
+            }
+        }
+
+        private void DrawActionPair(
+            string leftLabelKey,
+            string leftButtonKey,
+            Func<string> leftAction,
+            string rightLabelKey,
+            string rightButtonKey,
+            Func<string> rightAction,
+            string leftSuffix = null,
+            string rightSuffix = null)
+        {
+            GUILayout.BeginHorizontal();
+            DrawCompactAction(
+                Localization.Text(leftLabelKey) + FormatSuffix(leftSuffix),
+                Localization.Text(leftButtonKey),
+                leftAction);
+            DrawCompactAction(
+                Localization.Text(rightLabelKey) + FormatSuffix(rightSuffix),
+                Localization.Text(rightButtonKey),
+                rightAction);
+            GUILayout.EndHorizontal();
+        }
+
+        private void DrawStatePair(
+            string leftLabel,
+            Func<string> leftAction,
+            bool leftEnabled,
+            string rightLabel,
+            Func<string> rightAction,
+            bool rightEnabled)
+        {
+            GUILayout.BeginHorizontal();
+            DrawCompactAction(leftLabel, leftEnabled ? Localization.Text("state_enabled") : Localization.Text("state_disabled"), leftAction);
+            DrawCompactAction(rightLabel, rightEnabled ? Localization.Text("state_enabled") : Localization.Text("state_disabled"), rightAction);
+            GUILayout.EndHorizontal();
+        }
+
+        private void DrawCompactAction(string label, string buttonText, Func<string> action)
+        {
+            GUILayout.BeginVertical(GUILayout.ExpandWidth(true));
+            GUILayout.Label(label, labelStyle);
+            if (ActionButton(buttonText, 23f)) Run(action);
+            GUILayout.EndVertical();
+        }
+
+        private static string FormatSuffix(string suffix)
+        {
+            return string.IsNullOrWhiteSpace(suffix) ? string.Empty : " (" + suffix + ")";
+        }
+
+        private bool ActionButton(string text, float height = 25f)
+        {
+            return GUILayout.Button(text, buttonStyle, GUILayout.Height(height));
+        }
+
+        private void EnsureStyles()
+        {
+            if (windowStyle != null) return;
+
+            // Match Railroader's stock visual language while keeping this
+            // IMGUI window opaque even when the global skin is translucent.
+            windowBackground = MakePanelTexture(
+                new Color(0.105f, 0.095f, 0.080f, 1f),
+                new Color(0.55f, 0.46f, 0.31f, 1f),
+                2);
+            controlBackground = MakePanelTexture(
+                new Color(0.13f, 0.12f, 0.105f, 1f),
+                new Color(0.46f, 0.38f, 0.25f, 1f),
+                2);
+            controlHoverBackground = MakePanelTexture(
+                new Color(0.19f, 0.16f, 0.12f, 1f),
+                new Color(0.64f, 0.53f, 0.34f, 1f),
+                2);
+            controlActiveBackground = MakePanelTexture(
+                new Color(0.25f, 0.20f, 0.14f, 1f),
+                new Color(0.75f, 0.63f, 0.40f, 1f),
+                2);
+
+            windowStyle = new GUIStyle(GUI.skin.window);
+            windowStyle.normal.background = windowBackground;
+            windowStyle.onNormal.background = windowBackground;
+            windowStyle.border = new RectOffset(4, 4, 4, 4);
+            windowStyle.normal.textColor = new Color(0.78f, 0.73f, 0.64f, 1f);
+            windowStyle.onNormal.textColor = windowStyle.normal.textColor;
+            windowStyle.fontSize = 13;
+            windowStyle.padding = new RectOffset(10, 10, 28, 9);
+
+            buttonStyle = new GUIStyle(GUI.skin.button);
+            ApplyControlStyle(buttonStyle);
+
+            tabStyle = new GUIStyle(GUI.skin.button);
+            ApplyControlStyle(tabStyle);
+
+            labelStyle = new GUIStyle(GUI.skin.label);
+            labelStyle.normal.textColor = new Color(0.77f, 0.72f, 0.63f, 1f);
+            labelStyle.wordWrap = true;
+            labelStyle.fontSize = 12;
+
+            textFieldStyle = new GUIStyle(GUI.skin.textField);
+            textFieldStyle.normal.background = controlBackground;
+            textFieldStyle.focused.background = controlActiveBackground;
+            textFieldStyle.normal.textColor = new Color(0.86f, 0.82f, 0.74f, 1f);
+            textFieldStyle.focused.textColor = textFieldStyle.normal.textColor;
+            textFieldStyle.border = new RectOffset(4, 4, 4, 4);
+            textFieldStyle.fontSize = 13;
+            textFieldStyle.padding = new RectOffset(6, 6, 3, 3);
+
+            closeButtonStyle = new GUIStyle(buttonStyle);
+            closeButtonStyle.fontSize = 13;
+            closeButtonStyle.padding = new RectOffset(0, 0, 0, 0);
+
+            resizeGripStyle = new GUIStyle(GUI.skin.box);
+            resizeGripStyle.normal.background = controlBackground;
+            resizeGripStyle.normal.textColor = new Color(0.70f, 0.64f, 0.52f, 1f);
+            resizeGripStyle.fontSize = 10;
+        }
+
+        private void ApplyControlStyle(GUIStyle style)
+        {
+            style.normal.background = controlBackground;
+            style.hover.background = controlHoverBackground;
+            style.active.background = controlActiveBackground;
+            style.focused.background = controlActiveBackground;
+            style.onNormal.background = controlActiveBackground;
+            style.onHover.background = controlActiveBackground;
+            style.onActive.background = controlActiveBackground;
+            style.border = new RectOffset(4, 4, 4, 4);
+            var stockText = new Color(0.84f, 0.79f, 0.70f, 1f);
+            style.normal.textColor = stockText;
+            style.hover.textColor = stockText;
+            style.active.textColor = stockText;
+            style.focused.textColor = stockText;
+            style.onNormal.textColor = stockText;
+            style.onHover.textColor = stockText;
+            style.onActive.textColor = stockText;
+            style.wordWrap = true;
+            style.fontSize = 12;
+            style.padding = new RectOffset(6, 6, 4, 4);
+        }
+
+        private static Texture2D MakePanelTexture(Color fill, Color border, int borderWidth)
+        {
+            const int size = 9;
+            var texture = new Texture2D(size, size, TextureFormat.RGBA32, false);
+            texture.wrapMode = TextureWrapMode.Clamp;
+            for (var y = 0; y < size; y++)
+            {
+                for (var x = 0; x < size; x++)
+                {
+                    var isBorder = x < borderWidth || y < borderWidth
+                        || x >= size - borderWidth || y >= size - borderWidth;
+                    texture.SetPixel(x, y, isBorder ? border : fill);
+                }
+            }
+            texture.Apply();
+            texture.hideFlags = HideFlags.HideAndDontSave;
+            return texture;
+        }
+
+        private void OnDestroy()
+        {
+            if (instance == this) instance = null;
+            DestroyTexture(windowBackground);
+            DestroyTexture(controlBackground);
+            DestroyTexture(controlHoverBackground);
+            DestroyTexture(controlActiveBackground);
+        }
+
+        private static void DestroyTexture(Texture2D texture)
+        {
+            if (texture != null) Destroy(texture);
+        }
+
+        private void Run(Func<string> action)
+        {
+            try
+            {
+                status = action() ?? Localization.Text("done");
+                log?.Info(status);
+            }
+            catch (Exception ex)
+            {
+                var cause = ex.InnerException ?? ex;
+                status = Localization.Format("error", cause.Message);
+                log?.Error(ex, status);
+            }
+        }
+
+        private int ParseInt(string value)
+        {
+            int parsed;
+            return int.TryParse(value, out parsed) ? parsed : 0;
+        }
+
+        private float ParseFloat(string value)
+        {
+            float parsed;
+            return float.TryParse(value, out parsed) ? parsed : 0f;
+        }
+    }
+}
+
+```
+
+`src/RailroaderCheatMenu/GameActions.cs`:
+
+```cs
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
+using System.Reflection;
+using Game;
+using Game.Messages;
+using Game.Mow;
+using Game.Reputation;
+using Game.State;
+using Model;
+using Model.Ops;
+using Model.Ops.Definition;
+using Railroader.Modding;
+using Track;
+using UI.Console.Commands;
+
+namespace CAG.Sylvrwynd.RailroaderCheatMenu
+{
+    internal static class GameActions
+    {
+        private static readonly string[] MowLoadIds =
+        {
+            "rr/ballast",
+            "rr/ties",
+            "rr/rails",
+            "rr/bridge-parts-steel",
+            "rr/concrete",
+            "rr/bridge-parts-wood",
+            "rr/explosives"
+        };
+        private const string RepairPartsLoadId = "rr/repair-parts";
+        private static readonly string[] FuelLoadIds = { "rr/coal", "rr/diesel-fuel" };
+        private static Character.PlayerCharacterController speedController;
+        private static float originalMaxStableMoveSpeed;
+        private static float originalRunMoveSpeed;
+        private static float originalCrouchMoveSpeed;
+        private static float originalMaxAirMoveSpeed;
+        private static float originalLadderSpeedNormal;
+        private static float originalLadderSpeedFast;
+        private static bool speedValuesCaptured;
+        private static float originalTimeScale = 1f;
+        private static bool timeScaleCaptured;
+
+        internal static string HostStatus()
+        {
+            var state = StateManager.Shared;
+            if (state == null) return Localization.Text("world_not_ready");
+            return StateManager.IsHost ? Localization.Text("host_ready") : Localization.Text("client_disabled");
+        }
+
+        internal static string CurrentBalance()
+        {
+            var state = StateManager.Shared;
+            return state == null || state.Storage == null
+                ? Localization.Text("unavailable")
+                : state.Storage.Balance.ToString("N0", CultureInfo.InvariantCulture);
+        }
+
+        internal static string ChangeCash(int amount)
+        {
+            RequireHost();
+            ApplyCashDelta(amount);
+            return Localization.Format("balance_changed", amount.ToString("N0", CultureInfo.InvariantCulture), CurrentBalance());
+        }
+
+        internal static string SetCash(int amount)
+        {
+            RequireHost();
+            var delta = checked(amount - StateManager.Shared.Storage.Balance);
+            ApplyCashDelta(delta);
+            return Localization.Format("balance_set", amount.ToString("N0", CultureInfo.InvariantCulture));
+        }
+
+        internal static string RepairSelected()
+        {
+            RequireHost();
+            var car = TrainController.Shared?.SelectedCar;
+            if (car == null) return Localization.Text("no_selected_car");
+            RepairCar(car);
+            return Localization.Format("repaired_car", car.DisplayName);
+        }
+
+        internal static string RepairAll()
+        {
+            RequireHost();
+            var cars = TrainController.Shared?.Cars;
+            if (cars == null) return Localization.Text("controller_not_ready");
+            var count = 0;
+            foreach (var car in cars)
+            {
+                RepairCar(car);
+                count++;
+            }
+            return Localization.Format("repaired_cars", count);
+        }
+
+        internal static string RefuelSelected()
+        {
+            RequireHost();
+            var selected = TrainController.Shared?.SelectedCar;
+            if (selected == null) return Localization.Text("no_selected_car");
+            if (!TryResolveFuelCar(selected, out var fuelCar)) return Localization.Text("selected_not_engine");
+
+            if (FillFuelCar(fuelCar) == 0) return Localization.Text("selected_not_engine");
+            return Localization.Format("refueled_car", selected.DisplayName);
+        }
+
+        internal static string RefuelAll()
+        {
+            RequireHost();
+            var cars = TrainController.Shared?.Cars;
+            if (cars == null) return Localization.Text("controller_not_ready");
+
+            var count = 0;
+            foreach (var car in cars)
+            {
+                Car fuelCar;
+                if (car is DieselLocomotive)
+                {
+                    fuelCar = car;
+                }
+                else if (car is SteamLocomotive steam)
+                {
+                    fuelCar = InvokeSteamFuelCar(steam);
+                    if (fuelCar == null) continue;
+                }
+                else
+                {
+                    continue;
+                }
+
+                if (FillFuelCar(fuelCar) > 0) count++;
+            }
+            return Localization.Format("refueled_cars", count);
+        }
+
+        internal static string FillManifestedSelected()
+        {
+            RequireHost();
+            var car = TrainController.Shared?.SelectedCar;
+            if (car == null) return Localization.Text("no_selected_car");
+
+            var filled = FillManifestedCar(car);
+            return filled == 0
+                ? Localization.Text("no_manifested_cargo")
+                : Localization.Format("filled_manifested_car", car.DisplayName, filled);
+        }
+
+        internal static string FillManifestedAll()
+        {
+            RequireHost();
+            var cars = TrainController.Shared?.Cars;
+            if (cars == null) return Localization.Text("controller_not_ready");
+
+            var carsFilled = 0;
+            var slotsFilled = 0;
+            foreach (var car in cars)
+            {
+                if (car == null || car is DieselLocomotive || car is SteamLocomotive) continue;
+                var filled = FillManifestedCar(car);
+                if (filled == 0) continue;
+                carsFilled++;
+                slotsFilled += filled;
+            }
+            return carsFilled == 0
+                ? Localization.Text("no_manifested_cargo")
+                : Localization.Format("filled_manifested_cars", slotsFilled, carsFilled);
+        }
+
+        internal static string EmptySelectedCargo()
+        {
+            RequireHost();
+            var car = TrainController.Shared?.SelectedCar;
+            if (car == null) return Localization.Text("no_selected_car");
+            if (car is DieselLocomotive || car is SteamLocomotive)
+            {
+                return Localization.Text("selected_not_cargo_car");
+            }
+
+            var emptied = EmptyCargoCar(car);
+            return emptied == 0
+                ? Localization.Text("no_cargo_to_empty")
+                : Localization.Format("emptied_cargo_car", car.DisplayName, emptied);
+        }
+
+        internal static string EmptyAllCargo()
+        {
+            RequireHost();
+            var cars = TrainController.Shared?.Cars;
+            if (cars == null) return Localization.Text("controller_not_ready");
+
+            var carsEmptied = 0;
+            var slotsEmptied = 0;
+            foreach (var car in cars)
+            {
+                if (car == null || car is DieselLocomotive || car is SteamLocomotive) continue;
+                var emptied = EmptyCargoCar(car);
+                if (emptied == 0) continue;
+                carsEmptied++;
+                slotsEmptied += emptied;
+            }
+
+            return carsEmptied == 0
+                ? Localization.Text("no_cargo_to_empty")
+                : Localization.Format("emptied_cargo_cars", slotsEmptied, carsEmptied);
+        }
+
+        internal static string OilSelected()
+        {
+            RequireHost();
+            var car = TrainController.Shared?.SelectedCar;
+            if (car == null) return Localization.Text("no_selected_car");
+            if (!car.EnableOiling) return Localization.Text("selected_not_oilable");
+
+            InvokeSetOiled(car, 1f);
+            return Localization.Format("oiled_car", car.DisplayName);
+        }
+
+        internal static string OilAll()
+        {
+            RequireHost();
+            var cars = TrainController.Shared?.Cars;
+            if (cars == null) return Localization.Text("controller_not_ready");
+
+            var count = 0;
+            foreach (var car in cars)
+            {
+                if (car == null || !car.EnableOiling) continue;
+                InvokeSetOiled(car, 1f);
+                count++;
+            }
+
+            return Localization.Format("oiled_cars", count);
+        }
+
+        internal static string ToggleDerailmentProtection()
+        {
+            RequireHost();
+            if (!RuntimePatches.IsInstalled) return Localization.Text("runtime_patch_missing");
+
+            RuntimePatches.ToggleDerailmentProtection();
+            return Localization.Format(
+                "derailment_toggle_status",
+                RuntimePatches.PreventDerailment ? Localization.Text("enabled") : Localization.Text("disabled"));
+        }
+
+        internal static string ToggleHighSpeedDamageProtection()
+        {
+            RequireHost();
+            if (!RuntimePatches.IsInstalled) return Localization.Text("runtime_patch_missing");
+
+            RuntimePatches.ToggleHighSpeedDamageProtection();
+            return Localization.Format(
+                "speed_damage_toggle_status",
+                RuntimePatches.ProtectHighSpeedDamage ? Localization.Text("enabled") : Localization.Text("disabled"));
+        }
+
+        internal static string SetHighSpeedDamageThreshold(float mph)
+        {
+            RequireHost();
+            if (!RuntimePatches.IsInstalled) return Localization.Text("runtime_patch_missing");
+
+            mph = Math.Max(1f, Math.Min(200f, mph));
+            RuntimePatches.SetHighSpeedDamageThreshold(mph);
+            return Localization.Format(
+                "speed_threshold_set",
+                mph.ToString("0.##", CultureInfo.InvariantCulture));
+        }
+
+        internal static string CurrentHighSpeedDamageThreshold()
+        {
+            return RuntimePatches.HighSpeedDamageThresholdMph.ToString("0.##", CultureInfo.InvariantCulture);
+        }
+
+        internal static string ToggleEquipmentWear()
+        {
+            RequireHost();
+            var storage = StateManager.Shared.Storage;
+            if (storage == null) return Localization.Text("unavailable");
+
+            var enabled = !storage.WearFeature;
+            storage.WearFeature = enabled;
+            // The game normally mirrors this save-backed setting through a state
+            // observer. Assign it directly as well so the current session changes
+            // immediately even if the observer has not fired yet.
+            Car.WearFeature = enabled;
+            Car.OilFeature = enabled && storage.OilFeature;
+            return Localization.Format(
+                "equipment_wear_toggle_status",
+                enabled ? Localization.Text("enabled") : Localization.Text("disabled"));
+        }
+
+        internal static string ToggleHotboxesAndOiling()
+        {
+            RequireHost();
+            var storage = StateManager.Shared.Storage;
+            if (storage == null) return Localization.Text("unavailable");
+
+            var enabled = !storage.OilFeature;
+            storage.OilFeature = enabled;
+            // OilFeature is intentionally independent in the stock game, but
+            // Car.EnableOiling also respects WearFeature through the host state.
+            Car.OilFeature = enabled && Car.WearFeature;
+            return Localization.Format(
+                "oil_feature_toggle_status",
+                Car.OilFeature ? Localization.Text("enabled") : Localization.Text("disabled"));
+        }
+
+        internal static string EquipmentWearStatus()
+        {
+            var storage = StateManager.Shared?.Storage;
+            return storage == null
+                ? Localization.Text("unavailable")
+                : (storage.WearFeature ? Localization.Text("enabled") : Localization.Text("disabled"));
+        }
+
+        internal static string HotboxesAndOilingStatus()
+        {
+            var storage = StateManager.Shared?.Storage;
+            return storage == null
+                ? Localization.Text("unavailable")
+                : (storage.WearFeature && storage.OilFeature
+                    ? Localization.Text("enabled")
+                    : Localization.Text("disabled"));
+        }
+
+        internal static string SetImpactDamagePercent(float percent)
+        {
+            RequireHost();
+            if (!RuntimePatches.IsInstalled) return Localization.Text("runtime_patch_missing");
+
+            percent = ClampPercent(percent);
+            RuntimePatches.SetImpactDamageMultiplier(percent / 100f);
+            return Localization.Format("impact_damage_set", FormatPercent(percent));
+        }
+
+        internal static string SetOverspeedDamagePercent(float percent)
+        {
+            RequireHost();
+            if (!RuntimePatches.IsInstalled) return Localization.Text("runtime_patch_missing");
+
+            percent = ClampPercent(percent);
+            RuntimePatches.SetOverspeedDamageMultiplier(percent / 100f);
+            return Localization.Format("overspeed_damage_set", FormatPercent(percent));
+        }
+
+        internal static string SetFuelConsumptionPercent(float percent)
+        {
+            RequireHost();
+            if (!RuntimePatches.IsInstalled) return Localization.Text("runtime_patch_missing");
+
+            percent = ClampPercent(percent);
+            RuntimePatches.SetFuelConsumptionMultiplier(percent / 100f);
+            return Localization.Format("fuel_consumption_set", FormatPercent(percent));
+        }
+
+        internal static string SetEquipmentWearPercent(float percent)
+        {
+            RequireHost();
+            var storage = StateManager.Shared.Storage;
+            if (storage == null) return Localization.Text("unavailable");
+
+            percent = ClampPercent(percent);
+            storage.WearMultiplier = percent / 100f;
+            Car.WearMultiplier = percent / 100f;
+            return Localization.Format("wear_multiplier_set", FormatPercent(percent));
+        }
+
+        internal static string SetOilUsePercent(float percent)
+        {
+            RequireHost();
+            var storage = StateManager.Shared.Storage;
+            if (storage == null) return Localization.Text("unavailable");
+
+            percent = ClampPercent(percent);
+            storage.OilUseMultiplier = percent / 100f;
+            Car.OilUseMultiplier = percent / 100f;
+            return Localization.Format("oil_use_multiplier_set", FormatPercent(percent));
+        }
+
+        internal static string CurrentImpactDamagePercent()
+        {
+            return FormatPercent(RuntimePatches.ImpactDamageMultiplier * 100f);
+        }
+
+        internal static string CurrentOverspeedDamagePercent()
+        {
+            return FormatPercent(RuntimePatches.OverspeedDamageMultiplier * 100f);
+        }
+
+        internal static string CurrentFuelConsumptionPercent()
+        {
+            return FormatPercent(RuntimePatches.FuelConsumptionMultiplier * 100f);
+        }
+
+        internal static string CurrentEquipmentWearPercent()
+        {
+            var storage = StateManager.Shared?.Storage;
+            return storage == null ? Localization.Text("unavailable") : FormatPercent(storage.WearMultiplier * 100f);
+        }
+
+        internal static string CurrentOilUsePercent()
+        {
+            var storage = StateManager.Shared?.Storage;
+            return storage == null ? Localization.Text("unavailable") : FormatPercent(storage.OilUseMultiplier * 100f);
+        }
+
+        internal static string SetPlayerSpeedMultiplier(float multiplier)
+        {
+            RequireHost();
+            var controller = LocalPlayerCharacter();
+            if (controller == null) return Localization.Text("player_not_ready");
+
+            multiplier = Math.Max(0.1f, Math.Min(10f, multiplier));
+            CaptureSpeedValues(controller);
+            controller.maxStableMoveSpeed = originalMaxStableMoveSpeed * multiplier;
+            controller.runMoveSpeed = originalRunMoveSpeed * multiplier;
+            controller.crouchMoveSpeed = originalCrouchMoveSpeed * multiplier;
+            controller.maxAirMoveSpeed = originalMaxAirMoveSpeed * multiplier;
+            controller.ladderSpeedNormal = originalLadderSpeedNormal * multiplier;
+            controller.ladderSpeedFast = originalLadderSpeedFast * multiplier;
+            return Localization.Format("player_speed_set", multiplier.ToString("0.##", CultureInfo.InvariantCulture));
+        }
+
+        internal static string SetGameSpeed(float multiplier)
+        {
+            RequireHost();
+            multiplier = Math.Max(0.1f, Math.Min(20f, multiplier));
+            if (!timeScaleCaptured)
+            {
+                originalTimeScale = UnityEngine.Time.timeScale;
+                timeScaleCaptured = true;
+            }
+
+            UnityEngine.Time.timeScale = multiplier;
+            return Localization.Format("game_speed_set", multiplier.ToString("0.##", CultureInfo.InvariantCulture));
+        }
+
+        internal static void ResetSessionOverrides()
+        {
+            if (speedController != null && speedValuesCaptured)
+            {
+                speedController.maxStableMoveSpeed = originalMaxStableMoveSpeed;
+                speedController.runMoveSpeed = originalRunMoveSpeed;
+                speedController.crouchMoveSpeed = originalCrouchMoveSpeed;
+                speedController.maxAirMoveSpeed = originalMaxAirMoveSpeed;
+                speedController.ladderSpeedNormal = originalLadderSpeedNormal;
+                speedController.ladderSpeedFast = originalLadderSpeedFast;
+            }
+
+            speedController = null;
+            speedValuesCaptured = false;
+
+            if (timeScaleCaptured)
+            {
+                UnityEngine.Time.timeScale = originalTimeScale;
+            }
+
+            timeScaleCaptured = false;
+            originalTimeScale = 1f;
+        }
+
+        internal static string RerailAll()
+        {
+            RequireHost();
+            var cars = TrainController.Shared?.Cars;
+            if (cars == null) return Localization.Text("controller_not_ready");
+
+            var carIds = cars
+                .Where(car => car != null && car.IsDerailed && !string.IsNullOrWhiteSpace(car.id))
+                .Select(car => car.id)
+                .Distinct(StringComparer.Ordinal)
+                .ToArray();
+            if (carIds.Length == 0) return Localization.Text("no_derailed_cars");
+
+            StateManager.ApplyLocal(new Rerail(carIds, 1f));
+            return Localization.Format("rerail_done", carIds.Length);
+        }
+
+        internal static string CurrentReputation()
+        {
+            var tracker = ReputationTracker.Shared;
+            return tracker == null
+                ? Localization.Text("unavailable")
+                : (tracker.Reputation * 100f).ToString("0.##", CultureInfo.InvariantCulture);
+        }
+
+        internal static string SetReputationPercent(float percent)
+        {
+            RequireHost();
+            var tracker = ReputationTracker.Shared;
+            if (tracker == null) return Localization.Text("unavailable");
+
+            percent = Math.Max(0f, Math.Min(100f, percent));
+            var property = typeof(ReputationTracker).GetProperty(
+                "Reputation",
+                BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+            var setter = property?.GetSetMethod(true);
+            if (setter == null) throw new MissingMethodException(Localization.Text("reputation_method_missing"));
+            setter.Invoke(tracker, new object[] { percent / 100f });
+            return Localization.Format("reputation_set", percent.ToString("0.##", CultureInfo.InvariantCulture));
+        }
+
+        internal static string RepairAllTrack()
+        {
+            RequireHost();
+            var controller = TrackConditionController.Shared;
+            var graph = Graph.Shared;
+            if (controller == null || graph == null) return Localization.Text("track_controller_not_ready");
+
+            var now = new GameDateTime((double)StateManager.Now);
+            var count = 0;
+            foreach (var segment in graph.AllSegments)
+            {
+                if (segment == null || !segment.Available || segment.ConstructionState != TrackConstructionState.Complete) continue;
+                controller.SetCondition(segment, 1f, now);
+                count++;
+            }
+            return count == 0
+                ? Localization.Text("track_controller_not_ready")
+                : Localization.Text("track_repaired");
+        }
+
+        internal static string SetAllTrackConditionClass(int desiredClass)
+        {
+            RequireHost();
+            desiredClass = Math.Max(1, Math.Min(5, desiredClass));
+            var controller = TrackConditionController.Shared;
+            var graph = Graph.Shared;
+            if (controller == null || graph == null) return Localization.Text("track_controller_not_ready");
+
+            var count = 0;
+            foreach (var segment in graph.AllSegments)
+            {
+                if (segment == null || !segment.Available || segment.ConstructionState != TrackConstructionState.Complete) continue;
+                InvokeDebugSetConditionForTrackClass(controller, segment, desiredClass);
+                count++;
+            }
+            return Localization.Format("track_class_set", count, desiredClass);
+        }
+
+        internal static string RestockMowMaterials(float quantity)
+        {
+            return SetMowMaterials(quantity, false);
+        }
+
+        internal static string ClearMowMaterials()
+        {
+            return SetMowMaterials(0f, true);
+        }
+
+        private static string SetMowMaterials(float quantity, bool clearing)
+        {
+            RequireHost();
+            if (quantity < 0f) quantity = 0f;
+            var loads = MowLoadIds.Select(CarLoadLibrary.GetLoad).Where(load => load != null).ToArray();
+            if (loads.Length == 0) return Localization.Text("loads_unavailable");
+
+            var ops = OpsController.Shared;
+            if (ops == null || ops.AllIndustries == null) return Localization.Text("operations_not_ready");
+
+            var yards = 0;
+            var writes = 0;
+            foreach (var industry in ops.AllIndustries)
+            {
+                if (industry == null || !LooksLikeMowYard(industry)) continue;
+                var storage = industry.Storage;
+                if (storage == null) continue;
+
+                var prefixes = new HashSet<string>(StringComparer.Ordinal);
+                foreach (var component in industry.Components ?? new List<IndustryComponent>())
+                {
+                    var prefix = GetStoragePrefix(component);
+                    if (prefix != null) prefixes.Add(prefix);
+                }
+                if (prefixes.Count == 0) prefixes.Add(string.Empty);
+
+                foreach (var prefix in prefixes)
+                {
+                    foreach (var load in loads)
+                    {
+                        storage.SetStorage(load, quantity, prefix);
+                        writes++;
+                    }
+                }
+                yards++;
+            }
+
+            return yards == 0
+                ? Localization.Text("no_mow_yards")
+                : Localization.Format(clearing ? "mow_cleared" : "restocked", writes, yards);
+        }
+
+        internal static string RestockFuelSupplies(float quantity)
+        {
+            return SetFuelSupplies(quantity, false);
+        }
+
+        internal static string ClearFuelSupplies()
+        {
+            return SetFuelSupplies(0f, true);
+        }
+
+        private static string SetFuelSupplies(float quantity, bool clearing)
+        {
+            RequireHost();
+            if (quantity < 0f) quantity = 0f;
+            var fuelLoads = FuelLoadIds.Select(CarLoadLibrary.GetLoad).Where(load => load != null).ToArray();
+            var repairLoad = CarLoadLibrary.GetLoad(RepairPartsLoadId);
+            if (fuelLoads.Length == 0 && repairLoad == null) return Localization.Text("loads_unavailable");
+
+            var ops = OpsController.Shared;
+            if (ops == null || ops.AllIndustries == null) return Localization.Text("operations_not_ready");
+
+            var yards = 0;
+            var writes = 0;
+            foreach (var industry in ops.AllIndustries)
+            {
+                if (industry == null) continue;
+                var isFuelYard = LooksLikeFuelYard(industry);
+                var isRepairDepot = LooksLikeRepairDepot(industry);
+                if (!isFuelYard && !isRepairDepot) continue;
+                var storage = industry.Storage;
+                if (storage == null) continue;
+
+                var prefixes = new HashSet<string>(StringComparer.Ordinal);
+                foreach (var component in industry.Components ?? new List<IndustryComponent>())
+                {
+                    var prefix = GetStoragePrefix(component);
+                    if (prefix != null) prefixes.Add(prefix);
+                }
+                if (prefixes.Count == 0) prefixes.Add(string.Empty);
+
+                foreach (var prefix in prefixes)
+                {
+                    if (isFuelYard)
+                    {
+                        foreach (var load in fuelLoads)
+                        {
+                            storage.SetStorage(load, quantity, prefix);
+                            writes++;
+                        }
+                    }
+                    if (isRepairDepot && repairLoad != null)
+                    {
+                        storage.SetStorage(repairLoad, quantity, prefix);
+                        writes++;
+                    }
+                }
+                yards++;
+            }
+
+            return yards == 0
+                ? Localization.Text("no_fuel_yards")
+                : Localization.Format(clearing ? "fuel_cleared" : "fuel_restocked", writes, yards);
+        }
+
+        private static void RepairCar(Car car)
+        {
+            car.SetCondition(1f);
+            if (car.EnableOiling) InvokeSetOiled(car, 1f);
+        }
+
+        private static Character.PlayerCharacterController LocalPlayerCharacter()
+        {
+            var selector = CameraSelector.shared;
+            var player = selector == null ? null : selector.character;
+            return player == null ? null : player.character;
+        }
+
+        private static void CaptureSpeedValues(Character.PlayerCharacterController controller)
+        {
+            if (speedValuesCaptured && speedController == controller) return;
+
+            speedController = controller;
+            originalMaxStableMoveSpeed = controller.maxStableMoveSpeed;
+            originalRunMoveSpeed = controller.runMoveSpeed;
+            originalCrouchMoveSpeed = controller.crouchMoveSpeed;
+            originalMaxAirMoveSpeed = controller.maxAirMoveSpeed;
+            originalLadderSpeedNormal = controller.ladderSpeedNormal;
+            originalLadderSpeedFast = controller.ladderSpeedFast;
+            speedValuesCaptured = true;
+        }
+
+        private static bool TryResolveFuelCar(Car selected, out Car fuelCar)
+        {
+            if (selected is DieselLocomotive)
+            {
+                fuelCar = selected;
+                return true;
+            }
+
+            if (selected is SteamLocomotive steam)
+            {
+                fuelCar = InvokeSteamFuelCar(steam);
+                return fuelCar != null;
+            }
+
+            foreach (var car in TrainController.Shared?.Cars ?? new List<Car>())
+            {
+                if (!(car is SteamLocomotive parentSteam)) continue;
+                if (InvokeSteamFuelCar(parentSteam) != selected) continue;
+                fuelCar = selected;
+                return true;
+            }
+
+            fuelCar = null;
+            return false;
+        }
+
+        private static int FillFuelCar(Car car)
+        {
+            if (car?.Definition?.LoadSlots == null) return 0;
+
+            var filled = 0;
+            for (var slotIndex = 0; slotIndex < car.Definition.LoadSlots.Count; slotIndex++)
+            {
+                var slot = car.Definition.LoadSlots[slotIndex];
+                var loadId = slot.RequiredLoadIdentifier;
+                if (string.IsNullOrWhiteSpace(loadId)) continue;
+
+                var maximum = LoadSlotExtensions.CalculateMaximumCapacity(slot, loadId, car);
+                var info = new CarLoadInfo(loadId, maximum, null);
+                CarOpsExtensions.SetLoadInfo(car, slotIndex, info);
+                filled++;
+            }
+            return filled;
+        }
+
+        private static int FillManifestedCar(Car car)
+        {
+            if (car?.Definition?.LoadSlots == null) return 0;
+
+            var filled = 0;
+            for (var slotIndex = 0; slotIndex < car.Definition.LoadSlots.Count; slotIndex++)
+            {
+                var info = CarOpsExtensions.GetLoadInfo(car, slotIndex);
+                if (!info.HasValue || string.IsNullOrWhiteSpace(info.Value.LoadId)) continue;
+
+                var load = CarLoadLibrary.GetLoad(info.Value.LoadId);
+                if (load == null) continue;
+
+                var slot = car.Definition.LoadSlots[slotIndex];
+                if (!LoadSlotExtensions.LoadRequirementsMatch(slot, load)) continue;
+
+                var maximum = LoadSlotExtensions.CalculateMaximumCapacity(slot, load, car);
+                var updated = new CarLoadInfo(info.Value.LoadId, maximum, info.Value.OriginId);
+                CarOpsExtensions.SetLoadInfo(car, slotIndex, updated);
+                filled++;
+            }
+            return filled;
+        }
+
+        private static int EmptyCargoCar(Car car)
+        {
+            if (car?.Definition?.LoadSlots == null) return 0;
+
+            var emptied = 0;
+            for (var slotIndex = 0; slotIndex < car.Definition.LoadSlots.Count; slotIndex++)
+            {
+                var info = CarOpsExtensions.GetLoadInfo(car, slotIndex);
+                if (!info.HasValue) continue;
+
+                CarOpsExtensions.SetLoadInfo(car, slotIndex, new Nullable<CarLoadInfo>());
+                emptied++;
+            }
+            return emptied;
+        }
+
+        private static bool LooksLikeMowYard(Industry industry)
+        {
+            var text = ((industry.DisplayName ?? string.Empty) + " " + industry.EntityReference).ToLowerInvariant();
+            if (text.Contains("mow") || text.Contains("maintenance")) return true;
+
+            foreach (var component in industry.Components ?? new List<IndustryComponent>())
+            {
+                var componentText = ((component.DisplayName ?? string.Empty) + " " + component.Identifier).ToLowerInvariant();
+                if (componentText.Contains("mow") || componentText.Contains("maintenance")) return true;
+            }
+            return false;
+        }
+
+        private static bool LooksLikeFuelYard(Industry industry)
+        {
+            var text = ((industry.DisplayName ?? string.Empty) + " " + industry.EntityReference).ToLowerInvariant();
+            if (text.Contains("coal") || text.Contains("diesel") || text.Contains("fuel")
+                || text.Contains("engine service") || text.Contains("coaling")) return true;
+
+            foreach (var component in industry.Components ?? new List<IndustryComponent>())
+            {
+                var componentText = ((component.DisplayName ?? string.Empty) + " " + component.Identifier).ToLowerInvariant();
+                if (componentText.Contains("coal") || componentText.Contains("diesel") || componentText.Contains("fuel")
+                    || componentText.Contains("engine service") || componentText.Contains("coaling")) return true;
+            }
+            return false;
+        }
+
+        private static bool LooksLikeRepairDepot(Industry industry)
+        {
+            var text = ((industry.DisplayName ?? string.Empty) + " " + industry.EntityReference).ToLowerInvariant();
+            if (text.Contains("engine service") || text.Contains("locomotive works")
+                || text.Contains("roundhouse") || text.Contains("repair")) return true;
+
+            foreach (var component in industry.Components ?? new List<IndustryComponent>())
+            {
+                var componentText = ((component.DisplayName ?? string.Empty) + " "
+                    + component.Identifier + " " + component.GetType().Name).ToLowerInvariant();
+                if (componentText.Contains("repair") || componentText.Contains("rep-parts")
+                    || componentText.Contains("service")) return true;
+            }
+            return false;
+        }
+
+        private static void RequireHost()
+        {
+            var state = StateManager.Shared;
+            if (state == null) throw new InvalidOperationException(Localization.Text("world_not_ready"));
+            if (!StateManager.IsHost) throw new InvalidOperationException(Localization.Text("host_only"));
+        }
+
+        private static void ApplyCashDelta(int amount)
+        {
+            var state = StateManager.Shared;
+            if (state == null) throw new InvalidOperationException(Localization.Text("world_not_ready"));
+
+            state.ApplyToBalance(
+                amount,
+                Game.History.Ledger.Category.Bank,
+                default(Nullable<EntityReference>),
+                "Manual Adjustment",
+                0,
+                false);
+        }
+
+        private static float ClampPercent(float percent)
+        {
+            return Math.Max(0f, Math.Min(500f, percent));
+        }
+
+        private static string FormatPercent(float percent)
+        {
+            return percent.ToString("0.##", CultureInfo.InvariantCulture) + "%";
+        }
+
+        private static string InvokeMowSetCondition(float condition, float days, string group)
+        {
+            var method = typeof(MOWCommand).GetMethod(
+                "SetCondition",
+                BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic,
+                null,
+                new[] { typeof(float), typeof(float), typeof(string) },
+                null);
+            if (method == null) throw new MissingMethodException(Localization.Text("mow_command_missing"));
+            return method.Invoke(null, new object[] { condition, days, group }) as string;
+        }
+
+        private static void InvokeDebugSetConditionForTrackClass(TrackConditionController controller, TrackSegment segment, int desiredClass)
+        {
+            var method = typeof(TrackConditionController).GetMethod(
+                "DebugSetConditionForTrackClass",
+                BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic,
+                null,
+                new[] { typeof(TrackSegment), typeof(int) },
+                null);
+            if (method == null) throw new MissingMethodException(Localization.Text("debug_method_missing"));
+            method.Invoke(controller, new object[] { segment, desiredClass });
+        }
+
+        private static void InvokeSetOiled(Car car, float amount)
+        {
+            var method = typeof(Car).GetMethod(
+                "SetOiled",
+                BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic,
+                null,
+                new[] { typeof(float) },
+                null);
+            method?.Invoke(car, new object[] { amount });
+        }
+
+        private static Car InvokeSteamFuelCar(SteamLocomotive steam)
+        {
+            var method = typeof(SteamLocomotive).GetMethod(
+                "FuelCar",
+                BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic,
+                null,
+                Type.EmptyTypes,
+                null);
+            if (method == null) throw new MissingMethodException(Localization.Text("fuel_method_missing"));
+            return method.Invoke(steam, null) as Car;
+        }
+
+        private static string GetStoragePrefix(IndustryComponent component)
+        {
+            if (component == null) return null;
+            var property = typeof(IndustryComponent).GetProperty(
+                "StoragePrefix",
+                BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+            return property?.GetValue(component, null) as string;
+        }
+
+    }
+}
+
+
+```
+
+`src/RailroaderCheatMenu/Localization.cs`:
+
+```cs
+using System.Collections.Generic;
+
+namespace CAG.Sylvrwynd.RailroaderCheatMenu
+{
+    internal enum MenuLanguage
+    {
+        English,
+        German,
+        Spanish,
+        TraditionalChinese,
+        Russian,
+        French
+    }
+
+    internal static class Localization
+    {
+        private static readonly Dictionary<string, string> English = new Dictionary<string, string>
+        {
+            ["menu_title"] = "Railroader Cheat / Debug Menu",
+            ["target"] = "Target: Railroader 0.6.2 Experimental",
+            ["ready"] = "Ready.",
+            ["language"] = "Language",
+            ["company"] = "Company",
+            ["equipment"] = "Equipment",
+            ["track_mow"] = "Track / MoW",
+            ["safety"] = "Safety",
+            ["qol"] = "QoL",
+            ["close"] = "Close (F10)",
+            ["cash"] = "Cash",
+            ["add"] = "Add",
+            ["remove"] = "Remove",
+            ["set_exact"] = "Set exact",
+            ["action_set"] = "Set",
+            ["action_repair"] = "Repair",
+            ["action_repair_all"] = "Repair all",
+            ["action_refuel"] = "Refuel",
+            ["action_refuel_all"] = "Refuel all",
+            ["action_fill"] = "Fill",
+            ["action_fill_all"] = "Fill all",
+            ["action_oil"] = "Oil",
+            ["action_oil_all"] = "Oil all",
+            ["action_restock"] = "Restock",
+            ["action_clear"] = "Clear",
+            ["action_empty"] = "Empty",
+            ["action_empty_all"] = "Empty all",
+            ["action_rerail"] = "Rerail all",
+            ["state_enabled"] = "Enabled",
+            ["state_disabled"] = "Disabled",
+            ["current_balance"] = "Current balance: {0}",
+            ["company_reputation"] = "Company reputation",
+            ["set_reputation"] = "Set reputation to {0}%",
+            ["current_reputation"] = "Current reputation: {0}%",
+            ["reputation_set"] = "Reputation set to {0}%.",
+            ["equipment_repair"] = "Equipment repair",
+            ["repair_selected"] = "Repair selected locomotive/car",
+            ["repair_all"] = "Repair all locomotives and cars",
+            ["repair_description"] = "Sets condition to 100% and fills oil where supported.",
+            ["engine_fueling"] = "Engine fueling",
+            ["refuel_selected"] = "Refuel selected engine/tender",
+            ["refuel_all"] = "Refuel all engines/tenders",
+            ["fuel_description"] = "Fills diesel, water, or coal to 100% where supported.",
+            ["cargo_loading"] = "Manifested cargo loading",
+            ["fill_manifested_selected"] = "Fill selected manifested cargo",
+            ["fill_manifested_all"] = "Fill all manifested cargo",
+            ["manifested_cargo_description"] = "Fills each car's existing manifested load to its calculated capacity without changing the cargo type or origin.",
+            ["cargo_emptying"] = "Cargo emptying",
+            ["empty_selected_cargo"] = "Empty selected car cargo",
+            ["empty_all_cargo"] = "Empty all car cargo",
+            ["empty_cargo_description"] = "Removes current cargo loads from cars without changing their waybills.",
+            ["oiling"] = "Equipment oiling",
+            ["oil_selected"] = "Oil selected locomotive/car",
+            ["oil_all"] = "Oil all eligible locomotives/cars",
+            ["oil_description"] = "Fills the car oil level to 100% where supported. Oil is tracked per car.",
+            ["derailment_tools"] = "Derailment tools",
+            ["wear_tools"] = "Equipment wear protection",
+            ["equipment_wear_toggle"] = "Equipment wear & tear",
+            ["oil_feature_toggle"] = "Hotboxes / oiling",
+            ["wear_description"] = "Uses Railroader's stock settings. Equipment wear disables mileage wear and overhaul requirements; loads have no separate cargo-damage meter in 0.6.2.",
+            ["equipment_wear_toggle_status"] = "Equipment wear & tear {0}.",
+            ["oil_feature_toggle_status"] = "Hotboxes and oiling {0}.",
+            ["damage_tuning"] = "Damage and wear tuning",
+            ["impact_damage_multiplier"] = "Coupling / impact damage",
+            ["overspeed_damage_multiplier"] = "Overspeed damage",
+            ["wear_multiplier"] = "Equipment wear rate",
+            ["oil_use_multiplier"] = "Oil use rate",
+            ["fuel_consumption_multiplier"] = "Fuel consumption rate",
+            ["apply"] = "Apply",
+            ["current_multiplier"] = "Current: {0}",
+            ["multiplier_description"] = "Enter a percentage: 0% disables the path, 100% is stock, and 200% doubles it. Changes apply immediately.",
+            ["impact_damage_set"] = "Coupling / impact damage set to {0}.",
+            ["overspeed_damage_set"] = "Overspeed damage set to {0}.",
+            ["wear_multiplier_set"] = "Equipment wear rate set to {0}.",
+            ["oil_use_multiplier_set"] = "Oil use rate set to {0}.",
+            ["fuel_consumption_set"] = "Fuel consumption rate set to {0}.",
+            ["rerail_all"] = "Rerail all derailed cars",
+            ["derailment_toggle"] = "Derailment prevention",
+            ["speed_damage_toggle"] = "No vehicle damage above {0} mph",
+            ["physics_description"] = "Prevents positive derailment buildup and freezes condition at {0}+ mph.",
+            ["speed_damage_threshold"] = "High-speed protection threshold",
+            ["current_speed_threshold"] = "Current threshold: {0} mph",
+            ["speed_threshold_set"] = "High-speed protection threshold set to {0} mph.",
+            ["player_speed"] = "Player speed",
+            ["player_speed_description"] = "Changes walking, running, crouching, air, and ladder movement. Session-only.",
+            ["player_speed_set"] = "Player speed set to {0}.",
+            ["game_speed"] = "Game speed",
+            ["game_speed_description"] = "Changes simulation speed for the current session.",
+            ["game_speed_set"] = "Game speed set to {0}.",
+            ["no_derailed_cars"] = "No derailed cars were found.",
+            ["rerail_done"] = "Rerailed {0} derailed car(s).",
+            ["track_condition"] = "Track condition class",
+            ["repair_track"] = "Repair all built track to perfect",
+            ["set_track_class"] = "Set all built track to class {0}",
+            ["mow_yard_materials"] = "MoW yard materials",
+            ["restock_yards"] = "Restock detected MoW yards",
+            ["clear_mow_stock"] = "Clear MoW stock",
+            ["materials"] = "Materials: ballast, ties, rails, steel bridge beams, concrete, wooden bridge timbers, and explosives.",
+            ["yard_fuel_supplies"] = "Yard fuel and repair supplies",
+            ["restock_fuel_yards"] = "Restock detected fuel/service depots",
+            ["clear_fuel_stock"] = "Clear fuel/service stock",
+            ["fuel_materials"] = "Supplies: coal, diesel fuel, and Repair Parts.",
+            ["host_ready"] = "Host-authoritative actions enabled.",
+            ["client_disabled"] = "Client detected: actions disabled.",
+            ["world_not_ready"] = "World state is not ready.",
+            ["unavailable"] = "unavailable",
+            ["balance_changed"] = "Balance changed by {0}. New balance: {1}",
+            ["balance_set"] = "Balance set to {0}.",
+            ["no_selected_car"] = "No car is selected.",
+            ["selected_not_engine"] = "The selected vehicle is not an engine or tender.",
+            ["selected_not_oilable"] = "The selected vehicle does not support oiling.",
+            ["repaired_car"] = "Repaired {0}.",
+            ["refueled_car"] = "Refueled {0}.",
+            ["refueled_cars"] = "Refueled {0} engine(s)/tender(s).",
+            ["filled_manifested_car"] = "Filled {0}: {1} manifested load slot(s).",
+            ["filled_manifested_cars"] = "Filled {0} manifested load slot(s) across {1} car(s).",
+            ["no_manifested_cargo"] = "No manifested cargo was found.",
+            ["selected_not_cargo_car"] = "The selected vehicle is a locomotive or tender; use refuel instead.",
+            ["no_cargo_to_empty"] = "No cargo was found to empty.",
+            ["emptied_cargo_car"] = "Emptied {0}: {1} cargo slot(s).",
+            ["emptied_cargo_cars"] = "Emptied {0} cargo slot(s) across {1} car(s).",
+            ["oiled_car"] = "Oiled {0}.",
+            ["oiled_cars"] = "Oiled {0} eligible locomotive(s)/car(s).",
+            ["controller_not_ready"] = "The train controller is not ready.",
+            ["repaired_cars"] = "Repaired {0} locomotive(s) and car(s).",
+            ["track_controller_not_ready"] = "Track condition controller is not ready.",
+            ["track_repaired"] = "All built track repaired to perfect condition.",
+            ["track_class_set"] = "Set {0} built track segment(s) to condition class {1}.",
+            ["loads_unavailable"] = "MoW load definitions are unavailable.",
+            ["operations_not_ready"] = "Operations data is not ready.",
+            ["no_mow_yards"] = "No Maintenance of Way yard was detected.",
+            ["restocked"] = "Restocked {0} MoW material store value(s) across {1} yard(s).",
+            ["mow_cleared"] = "Cleared {0} MoW material store value(s) across {1} yard(s).",
+            ["no_fuel_yards"] = "No fuel yard or service depot was detected.",
+            ["fuel_restocked"] = "Restocked {0} fuel/repair supply store value(s) across {1} yard/depot site(s).",
+            ["fuel_cleared"] = "Cleared {0} fuel/repair supply store value(s) across {1} yard/depot site(s).",
+            ["host_only"] = "Cheat menu actions are host-only.",
+            ["debug_method_missing"] = "The 0.6.x MoW track condition editor is unavailable.",
+            ["mow_command_missing"] = "The 0.6.x MoW condition command is unavailable.",
+            ["money_command_missing"] = "The game's money update command is unavailable.",
+            ["fuel_method_missing"] = "The steam locomotive fuel-car method is unavailable.",
+            ["reputation_method_missing"] = "The reputation update method is unavailable.",
+            ["runtime_patch_missing"] = "Runtime protection hooks are unavailable in this game build.",
+            ["derailment_toggle_status"] = "Derailment prevention {0}.",
+            ["speed_damage_toggle_status"] = "High-speed damage protection {0}.",
+            ["enabled"] = "enabled",
+            ["disabled"] = "disabled",
+            ["done"] = "Done.",
+            ["error"] = "Error: {0}"
+        };
+
+        private static readonly Dictionary<string, string> German = new Dictionary<string, string>
+        {
+            ["menu_title"] = "Railroader Cheat-/Debug-Menü",
+            ["target"] = "Ziel: Railroader 0.6.2 Experimental",
+            ["ready"] = "Bereit.",
+            ["language"] = "Sprache",
+            ["company"] = "Gesellschaft",
+            ["equipment"] = "Fahrzeuge",
+            ["track_mow"] = "Gleis / MoW",
+            ["safety"] = "Sicherheit",
+            ["qol"] = "Komfort",
+            ["close"] = "Schließen (F10)",
+            ["cash"] = "Kasse",
+            ["add"] = "Hinzufügen",
+            ["remove"] = "Abziehen",
+            ["set_exact"] = "Exakt setzen",
+            ["current_balance"] = "Aktueller Kontostand: {0}",
+            ["company_reputation"] = "Ruf des Unternehmens",
+            ["set_reputation"] = "Ruf auf {0} % setzen",
+            ["current_reputation"] = "Aktueller Ruf: {0} %",
+            ["reputation_set"] = "Ruf auf {0} % gesetzt.",
+            ["equipment_repair"] = "Fahrzeugreparatur",
+            ["repair_selected"] = "Ausgewählte Lok / Wagen reparieren",
+            ["repair_all"] = "Alle Loks und Wagen reparieren",
+            ["repair_description"] = "Setzt den Zustand auf 100 % und füllt, sofern unterstützt, das Öl auf.",
+            ["engine_fueling"] = "Tanken der Lokomotiven",
+            ["refuel_selected"] = "Ausgewählte Lok / Tender auftanken",
+            ["refuel_all"] = "Alle Loks / Tender auftanken",
+            ["fuel_description"] = "Füllt Diesel, Wasser oder Kohle, sofern unterstützt, auf 100 %.",
+            ["oiling"] = "Fahrzeugölung",
+            ["oil_selected"] = "Ausgewählte Lok / Wagen ölen",
+            ["oil_all"] = "Alle geeigneten Loks / Wagen ölen",
+            ["oil_description"] = "Füllt den Ölstand des Fahrzeugs, sofern unterstützt, auf 100 %. Öl wird pro Fahrzeug gespeichert.",
+            ["derailment_tools"] = "Entgleisungswerkzeuge",
+            ["rerail_all"] = "Alle entgleisten Wagen wieder eingleisen",
+            ["derailment_toggle"] = "Entgleisung verhindern: {0}",
+            ["speed_damage_toggle"] = "Kein Fahrzeugschaden über 70 mph: {0}",
+            ["physics_description"] = "Verhindert positive Entgleisungszunahme und friert den Zustand ab 70 mph ein.",
+            ["player_speed"] = "Spielergeschwindigkeit",
+            ["player_speed_description"] = "Ändert Gehen, Laufen, Ducken, Luft- und Leiterspeed. Nur für diese Sitzung.",
+            ["player_speed_set"] = "Spielergeschwindigkeit auf {0} gesetzt.",
+            ["game_speed"] = "Spielgeschwindigkeit",
+            ["game_speed_description"] = "Ändert die Simulationsgeschwindigkeit für diese Sitzung.",
+            ["game_speed_set"] = "Spielgeschwindigkeit auf {0} gesetzt.",
+            ["no_derailed_cars"] = "Keine entgleisten Wagen gefunden.",
+            ["rerail_done"] = "{0} entgleiste Wagen wieder eingegleist.",
+            ["track_condition"] = "Gleiszustandsklasse",
+            ["repair_track"] = "Alle gebauten Gleise vollständig reparieren",
+            ["set_track_class"] = "Alle gebauten Gleise auf Klasse {0} setzen",
+            ["mow_yard_materials"] = "MoW-Hofmaterial",
+            ["restock_yards"] = "Erkannte MoW-Höfe auffüllen",
+            ["materials"] = "Materialien: Schotter, Schwellen, Schienen, Stahlbrueckentraeger, Beton und Holzbrueckentraversen.",
+            ["yard_fuel_supplies"] = "Brennstoffvorräte der Höfe",
+            ["restock_fuel_yards"] = "Erkannte Kohle-/Dieselhöfe auffüllen",
+            ["fuel_materials"] = "Vorräte: Kohle und Dieselkraftstoff.",
+            ["host_ready"] = "Host-Aktionen aktiviert.",
+            ["client_disabled"] = "Client erkannt: Aktionen deaktiviert.",
+            ["world_not_ready"] = "Die Welt ist noch nicht bereit.",
+            ["unavailable"] = "nicht verfügbar",
+            ["balance_changed"] = "Kontostand um {0} geändert. Neuer Kontostand: {1}",
+            ["balance_set"] = "Kontostand auf {0} gesetzt.",
+            ["no_selected_car"] = "Kein Fahrzeug ausgewählt.",
+            ["selected_not_engine"] = "Das ausgewählte Fahrzeug ist keine Lok oder kein Tender.",
+            ["selected_not_oilable"] = "Das ausgewählte Fahrzeug unterstützt keine Ölfüllung.",
+            ["repaired_car"] = "{0} repariert.",
+            ["refueled_car"] = "{0} aufgetankt.",
+            ["refueled_cars"] = "{0} Lok(s) / Tender aufgetankt.",
+            ["oiled_car"] = "{0} geölt.",
+            ["oiled_cars"] = "{0} geeignete(s) Fahrzeug(e) geölt.",
+            ["controller_not_ready"] = "Der Zug-Controller ist noch nicht bereit.",
+            ["repaired_cars"] = "{0} Lok(s) und Wagen repariert.",
+            ["track_controller_not_ready"] = "Der Gleiszustands-Controller ist noch nicht bereit.",
+            ["track_repaired"] = "Alle gebauten Gleise vollständig repariert.",
+            ["track_class_set"] = "{0} Gleisabschnitt/abschnitte auf Zustandsklasse {1} gesetzt.",
+            ["loads_unavailable"] = "MoW-Ladedefinitionen sind nicht verfügbar.",
+            ["operations_not_ready"] = "Die Betriebsdaten sind noch nicht bereit.",
+            ["no_mow_yards"] = "Kein Maintenance-of-Way-Hof erkannt.",
+            ["restocked"] = "{0} MoW-Materiallagerwerte in {1} Hof/Höfen aufgefüllt.",
+            ["no_fuel_yards"] = "Kein Kohle-/Dieselversorgungshof erkannt.",
+            ["fuel_restocked"] = "{0} Kohle-/Diesellagerwerte in {1} Hof/Höfen aufgefüllt.",
+            ["host_only"] = "Cheat-Menü-Aktionen sind nur für den Host verfügbar.",
+            ["debug_method_missing"] = "Der MoW-Gleiszustandseditor dieser 0.6.x-Version ist nicht verfügbar.",
+            ["mow_command_missing"] = "Der MoW-Zustandsbefehl dieser 0.6.x-Version ist nicht verfügbar.",
+            ["money_command_missing"] = "Der Geldaktualisierungsbefehl des Spiels ist nicht verfügbar.",
+            ["fuel_method_missing"] = "Die Fuel-Car-Methode der Dampflok ist nicht verfügbar.",
+            ["reputation_method_missing"] = "Die Methode zur Rufaktualisierung ist nicht verfügbar.",
+            ["runtime_patch_missing"] = "Die Laufzeitschutz-Hooks sind in dieser Spielversion nicht verfügbar.",
+            ["derailment_toggle_status"] = "Entgleisungsschutz {0}.",
+            ["speed_damage_toggle_status"] = "Hochgeschwindigkeitsschadenschutz {0}.",
+            ["enabled"] = "aktiviert",
+            ["disabled"] = "deaktiviert",
+            ["done"] = "Fertig.",
+            ["error"] = "Fehler: {0}"
+        };
+
+        private static readonly Dictionary<string, string> Spanish = new Dictionary<string, string>
+        {
+            ["menu_title"] = "Menú de trucos / depuración de Railroader",
+            ["target"] = "Objetivo: Railroader 0.6.2 Experimental",
+            ["ready"] = "Listo.",
+            ["language"] = "Idioma",
+            ["company"] = "Compañía",
+            ["equipment"] = "Vehículos",
+            ["track_mow"] = "Vía / MoW",
+            ["safety"] = "Seguridad",
+            ["qol"] = "Calidad de vida",
+            ["close"] = "Cerrar (F10)",
+            ["cash"] = "Dinero",
+            ["add"] = "Añadir",
+            ["remove"] = "Quitar",
+            ["set_exact"] = "Establecer cantidad",
+            ["current_balance"] = "Saldo actual: {0}",
+            ["company_reputation"] = "Reputación de la compañía",
+            ["set_reputation"] = "Establecer reputación en {0}%",
+            ["current_reputation"] = "Reputación actual: {0}%",
+            ["reputation_set"] = "Reputación establecida en {0}%.",
+            ["equipment_repair"] = "Reparación de vehículos",
+            ["repair_selected"] = "Reparar locomotora/vehículo seleccionado",
+            ["repair_all"] = "Reparar todas las locomotoras y vehículos",
+            ["repair_description"] = "Establece el estado al 100 % y rellena el aceite cuando es compatible.",
+            ["engine_fueling"] = "Repostaje de locomotoras",
+            ["refuel_selected"] = "Repostar locomotora/ténder seleccionado",
+            ["refuel_all"] = "Repostar todas las locomotoras/ténderes",
+            ["fuel_description"] = "Llena diésel, agua o carbón al 100 % cuando es compatible.",
+            ["oiling"] = "Lubricación de vehículos",
+            ["oil_selected"] = "Lubricar locomotora/vehículo seleccionado",
+            ["oil_all"] = "Lubricar todas las locomotoras/vehículos compatibles",
+            ["oil_description"] = "Rellena el aceite del vehículo al 100 % cuando es compatible. El aceite se guarda por vehículo.",
+            ["derailment_tools"] = "Herramientas de descarrilamiento",
+            ["rerail_all"] = "Volver a encarrilar todos los vehículos descarrilados",
+            ["derailment_toggle"] = "Prevención de descarrilamientos: {0}",
+            ["speed_damage_toggle"] = "Sin daños del vehículo sobre 70 mph: {0}",
+            ["physics_description"] = "Bloquea la acumulación de descarrilamiento y congela el estado a partir de 70 mph.",
+            ["player_speed"] = "Velocidad del jugador",
+            ["player_speed_description"] = "Cambia el movimiento al caminar, correr, agacharse, en el aire y en escaleras. Solo esta sesión.",
+            ["player_speed_set"] = "Velocidad del jugador: {0}.",
+            ["game_speed"] = "Velocidad del juego",
+            ["game_speed_description"] = "Cambia la velocidad de simulación durante esta sesión.",
+            ["game_speed_set"] = "Velocidad del juego: {0}.",
+            ["no_derailed_cars"] = "No se encontraron vehículos descarrilados.",
+            ["rerail_done"] = "Se volvieron a encarrilar {0} vehículo(s) descarrilado(s).",
+            ["track_condition"] = "Clase de estado de la vía",
+            ["repair_track"] = "Reparar toda la vía construida al máximo",
+            ["set_track_class"] = "Establecer toda la vía construida en clase {0}",
+            ["mow_yard_materials"] = "Materiales del patio MoW",
+            ["restock_yards"] = "Reabastecer patios MoW detectados",
+            ["materials"] = "Materiales: balasto, traviesas, rieles, vigas de acero, hormigon y maderas de puente.",
+            ["yard_fuel_supplies"] = "Suministros de combustible del patio",
+            ["restock_fuel_yards"] = "Reabastecer patios de carbón/diésel detectados",
+            ["fuel_materials"] = "Suministros: carbón y combustible diésel.",
+            ["host_ready"] = "Acciones autorizadas para el anfitrión activadas.",
+            ["client_disabled"] = "Cliente detectado: acciones desactivadas.",
+            ["world_not_ready"] = "El estado del mundo no está listo.",
+            ["unavailable"] = "no disponible",
+            ["balance_changed"] = "Saldo cambiado en {0}. Nuevo saldo: {1}",
+            ["balance_set"] = "Saldo establecido en {0}.",
+            ["no_selected_car"] = "No hay ningún vehículo seleccionado.",
+            ["selected_not_engine"] = "El vehículo seleccionado no es una locomotora ni un ténder.",
+            ["selected_not_oilable"] = "El vehículo seleccionado no admite lubricación.",
+            ["repaired_car"] = "{0} reparado.",
+            ["refueled_car"] = "{0} repostado.",
+            ["refueled_cars"] = "{0} locomotora(s)/ténder(es) repostados.",
+            ["oiled_car"] = "{0} lubricado.",
+            ["oiled_cars"] = "{0} locomotora(s)/vehículo(s) compatibles lubricados.",
+            ["controller_not_ready"] = "El controlador de trenes no está listo.",
+            ["repaired_cars"] = "{0} locomotora(s) y vehículo(s) reparados.",
+            ["track_controller_not_ready"] = "El controlador del estado de la vía no está listo.",
+            ["track_repaired"] = "Toda la vía construida ha sido reparada al máximo.",
+            ["track_class_set"] = "{0} segmento(s) de vía establecidos en la clase {1}.",
+            ["loads_unavailable"] = "Las definiciones de carga MoW no están disponibles.",
+            ["operations_not_ready"] = "Los datos de operaciones no están listos.",
+            ["no_mow_yards"] = "No se detectó ningún patio de mantenimiento de vía.",
+            ["restocked"] = "Se reabastecieron {0} valores de materiales MoW en {1} patio(s).",
+            ["no_fuel_yards"] = "No se detectó ningún patio de suministro de carbón/diésel.",
+            ["fuel_restocked"] = "Se reabastecieron {0} valores de carbón/diésel en {1} patio(s).",
+            ["host_only"] = "Las acciones del menú solo están disponibles para el anfitrión.",
+            ["debug_method_missing"] = "El editor de estado de vía MoW de esta versión 0.6.x no está disponible.",
+            ["mow_command_missing"] = "El comando de estado MoW de esta versión 0.6.x no está disponible.",
+            ["money_command_missing"] = "El comando de actualización de dinero del juego no está disponible.",
+            ["fuel_method_missing"] = "El método de combustible de la locomotora de vapor no está disponible.",
+            ["reputation_method_missing"] = "El método de actualización de reputación no está disponible.",
+            ["runtime_patch_missing"] = "Los ganchos de protección en tiempo de ejecución no están disponibles en esta versión.",
+            ["derailment_toggle_status"] = "Prevención de descarrilamientos {0}.",
+            ["speed_damage_toggle_status"] = "Protección contra daños a alta velocidad {0}.",
+            ["enabled"] = "activada",
+            ["disabled"] = "desactivada",
+            ["done"] = "Hecho.",
+            ["error"] = "Error: {0}"
+        };
+
+        private static readonly Dictionary<string, string> TraditionalChinese = new Dictionary<string, string>
+        {
+            ["menu_title"] = "Railroader 修改／除錯選單",
+            ["target"] = "目標：Railroader 0.6.2 Experimental",
+            ["ready"] = "準備就緒。",
+            ["language"] = "語言",
+            ["company"] = "公司",
+            ["equipment"] = "車輛",
+            ["track_mow"] = "軌道／MoW",
+            ["safety"] = "安全",
+            ["qol"] = "便利功能",
+            ["close"] = "關閉（F10）",
+            ["cash"] = "現金",
+            ["add"] = "增加",
+            ["remove"] = "減少",
+            ["set_exact"] = "設定確切數值",
+            ["current_balance"] = "目前餘額：{0}",
+            ["company_reputation"] = "公司聲望",
+            ["set_reputation"] = "將聲望設定為 {0}%",
+            ["current_reputation"] = "目前聲望：{0}%",
+            ["reputation_set"] = "聲望已設定為 {0}%。",
+            ["equipment_repair"] = "車輛維修",
+            ["repair_selected"] = "維修選取的機車／車輛",
+            ["repair_all"] = "維修所有機車與車輛",
+            ["repair_description"] = "將狀態設為 100%，並在支援時補滿機油。",
+            ["engine_fueling"] = "機車加油",
+            ["refuel_selected"] = "為選取的機車／煤水車加滿燃料",
+            ["refuel_all"] = "為所有機車／煤水車加滿燃料",
+            ["fuel_description"] = "在支援時將柴油、水或煤炭補至 100%。",
+            ["oiling"] = "車輛潤滑",
+            ["oil_selected"] = "為選取的機車／車輛加油",
+            ["oil_all"] = "為所有支援的機車／車輛加油",
+            ["oil_description"] = "在支援時將車輛油量補至 100%。油量按車輛個別儲存。",
+            ["derailment_tools"] = "脫軌工具",
+            ["rerail_all"] = "將所有脫軌車輛重新上軌",
+            ["derailment_toggle"] = "防止脫軌：{0}",
+            ["speed_damage_toggle"] = "70 mph 以上不受車輛損傷：{0}",
+            ["physics_description"] = "阻止脫軌累積，並在 70 mph 以上凍結車輛狀態。",
+            ["player_speed"] = "玩家速度",
+            ["player_speed_description"] = "調整步行、跑步、蹲下、空中與梯子移動速度。僅限本次遊戲。",
+            ["player_speed_set"] = "玩家速度已設為 {0}。",
+            ["game_speed"] = "遊戲速度",
+            ["game_speed_description"] = "調整本次遊戲的模擬速度。",
+            ["game_speed_set"] = "遊戲速度已設為 {0}。",
+            ["no_derailed_cars"] = "未找到脫軌車輛。",
+            ["rerail_done"] = "已將 {0} 輛脫軌車輛重新上軌。",
+            ["track_condition"] = "軌道狀態等級",
+            ["repair_track"] = "將所有已建軌道完全修復",
+            ["set_track_class"] = "將所有已建軌道設為等級 {0}",
+            ["mow_yard_materials"] = "MoW 堆場材料",
+            ["restock_yards"] = "補充偵測到的 MoW 堆場",
+            ["materials"] = "材料：道碴、枕木、鋼軌、鋼橋樑、混凝土與木橋枕木。",
+            ["yard_fuel_supplies"] = "堆場燃料供應",
+            ["restock_fuel_yards"] = "補充偵測到的煤炭／柴油堆場",
+            ["fuel_materials"] = "供應：煤炭與柴油。",
+            ["host_ready"] = "已啟用主機權限操作。",
+            ["client_disabled"] = "偵測到用戶端：操作已停用。",
+            ["world_not_ready"] = "世界狀態尚未準備就緒。",
+            ["unavailable"] = "無法使用",
+            ["balance_changed"] = "餘額變更 {0}。新餘額：{1}",
+            ["balance_set"] = "餘額已設定為 {0}。",
+            ["no_selected_car"] = "未選取車輛。",
+            ["selected_not_engine"] = "選取的車輛不是機車或煤水車。",
+            ["selected_not_oilable"] = "選取的車輛不支援加油。",
+            ["repaired_car"] = "已修復 {0}。",
+            ["refueled_car"] = "已為 {0} 加滿燃料。",
+            ["refueled_cars"] = "已為 {0} 輛機車／煤水車加滿燃料。",
+            ["oiled_car"] = "已為 {0} 加油。",
+            ["oiled_cars"] = "已為 {0} 部支援的機車／車輛加油。",
+            ["controller_not_ready"] = "列車控制器尚未準備就緒。",
+            ["repaired_cars"] = "已修復 {0} 輛機車／車輛。",
+            ["track_controller_not_ready"] = "軌道狀態控制器尚未準備就緒。",
+            ["track_repaired"] = "所有已建軌道已完全修復。",
+            ["track_class_set"] = "已將 {0} 段已建軌道設為狀態等級 {1}。",
+            ["loads_unavailable"] = "MoW 貨物定義無法使用。",
+            ["operations_not_ready"] = "營運資料尚未準備就緒。",
+            ["no_mow_yards"] = "未偵測到維修養護堆場。",
+            ["restocked"] = "已在 {1} 個堆場補充 {0} 項 MoW 材料庫存值。",
+            ["no_fuel_yards"] = "未偵測到煤炭／柴油供應堆場。",
+            ["fuel_restocked"] = "已在 {1} 個堆場補充 {0} 項煤炭／柴油庫存值。",
+            ["host_only"] = "修改選單操作僅限主機使用。",
+            ["debug_method_missing"] = "此 0.6.x 版本的 MoW 軌道狀態編輯器無法使用。",
+            ["mow_command_missing"] = "此 0.6.x 版本的 MoW 狀態指令無法使用。",
+            ["money_command_missing"] = "遊戲的金錢更新指令無法使用。",
+            ["fuel_method_missing"] = "蒸汽機車的燃料車方法無法使用。",
+            ["reputation_method_missing"] = "聲望更新方法無法使用。",
+            ["runtime_patch_missing"] = "此遊戲版本不支援執行期保護掛勾。",
+            ["derailment_toggle_status"] = "脫軌防護已{0}。",
+            ["speed_damage_toggle_status"] = "高速損傷防護已{0}。",
+            ["enabled"] = "啟用",
+            ["disabled"] = "停用",
+            ["done"] = "完成。",
+            ["error"] = "錯誤：{0}"
+        };
+
+        private static readonly Dictionary<string, string> Russian = new Dictionary<string, string>
+        {
+            ["menu_title"] = "Меню читов / отладки Railroader",
+            ["target"] = "Цель: Railroader 0.6.2 Experimental",
+            ["ready"] = "Готово.",
+            ["language"] = "Язык",
+            ["company"] = "Компания",
+            ["equipment"] = "Подвижной состав",
+            ["track_mow"] = "Путь / MoW",
+            ["safety"] = "Безопасность",
+            ["qol"] = "Удобство",
+            ["close"] = "Закрыть (F10)",
+            ["cash"] = "Деньги",
+            ["add"] = "Добавить",
+            ["remove"] = "Убрать",
+            ["set_exact"] = "Установить точно",
+            ["current_balance"] = "Текущий баланс: {0}",
+            ["company_reputation"] = "Репутация компании",
+            ["set_reputation"] = "Установить репутацию: {0}%",
+            ["current_reputation"] = "Текущая репутация: {0}%",
+            ["reputation_set"] = "Репутация установлена: {0}%.",
+            ["equipment_repair"] = "Ремонт подвижного состава",
+            ["repair_selected"] = "Починить выбранный локомотив/вагон",
+            ["repair_all"] = "Починить все локомотивы и вагоны",
+            ["repair_description"] = "Устанавливает состояние 100% и заполняет масло, если поддерживается.",
+            ["engine_fueling"] = "Заправка локомотивов",
+            ["refuel_selected"] = "Заправить выбранный локомотив/тендер",
+            ["refuel_all"] = "Заправить все локомотивы/тендеры",
+            ["fuel_description"] = "Заполняет дизель, воду или уголь до 100%, если поддерживается.",
+            ["oiling"] = "Смазка техники",
+            ["oil_selected"] = "Смазать выбранный локомотив/вагон",
+            ["oil_all"] = "Смазать все подходящие локомотивы/вагоны",
+            ["oil_description"] = "Заполняет масло до 100%, если поддерживается. Масло хранится отдельно для каждого вагона.",
+            ["derailment_tools"] = "Инструменты схода с рельсов",
+            ["rerail_all"] = "Поставить на рельсы все сошедшие вагоны",
+            ["derailment_toggle"] = "Предотвращение схода: {0}",
+            ["speed_damage_toggle"] = "Нет повреждений выше 70 миль/ч: {0}",
+            ["physics_description"] = "Блокирует накопление схода и замораживает состояние выше 70 миль/ч.",
+            ["player_speed"] = "Скорость игрока",
+            ["player_speed_description"] = "Меняет скорость ходьбы, бега, приседания, движения в воздухе и на лестницах. Только на эту сессию.",
+            ["player_speed_set"] = "Скорость игрока: {0}.",
+            ["game_speed"] = "Скорость игры",
+            ["game_speed_description"] = "Меняет скорость симуляции на текущую сессию.",
+            ["game_speed_set"] = "Скорость игры: {0}.",
+            ["no_derailed_cars"] = "Сошедшие вагоны не найдены.",
+            ["rerail_done"] = "На рельсы поставлено объектов: {0}.",
+            ["track_condition"] = "Класс состояния пути",
+            ["repair_track"] = "Полностью починить весь построенный путь",
+            ["set_track_class"] = "Установить всему построенному пути класс {0}",
+            ["mow_yard_materials"] = "Материалы площадок MoW",
+            ["restock_yards"] = "Пополнить обнаруженные площадки MoW",
+            ["materials"] = "Материалы: балласт, шпалы, рельсы, стальные балки мостов, бетон и деревянные балки мостов.",
+            ["yard_fuel_supplies"] = "Топливо на площадках",
+            ["restock_fuel_yards"] = "Пополнить найденные угольные/дизельные площадки",
+            ["fuel_materials"] = "Запасы: уголь и дизельное топливо.",
+            ["host_ready"] = "Действия хоста включены.",
+            ["client_disabled"] = "Обнаружен клиент: действия отключены.",
+            ["world_not_ready"] = "Состояние мира ещё не готово.",
+            ["unavailable"] = "недоступно",
+            ["balance_changed"] = "Баланс изменён на {0}. Новый баланс: {1}",
+            ["balance_set"] = "Баланс установлен: {0}.",
+            ["no_selected_car"] = "Вагон не выбран.",
+            ["selected_not_engine"] = "Выбранный объект не является локомотивом или тендером.",
+            ["selected_not_oilable"] = "Выбранный объект не поддерживает смазку.",
+            ["repaired_car"] = "Починен объект: {0}.",
+            ["refueled_car"] = "Заправлен объект: {0}.",
+            ["refueled_cars"] = "Заправлено локомотивов/тендеров: {0}.",
+            ["oiled_car"] = "Смазано: {0}.",
+            ["oiled_cars"] = "Смазано подходящих локомотивов/вагонов: {0}.",
+            ["controller_not_ready"] = "Контроллер поезда ещё не готов.",
+            ["repaired_cars"] = "Починено локомотивов/вагонов: {0}.",
+            ["track_controller_not_ready"] = "Контроллер состояния пути ещё не готов.",
+            ["track_repaired"] = "Весь построенный путь полностью починен.",
+            ["track_class_set"] = "Участков пути с классом {1}: {0}.",
+            ["loads_unavailable"] = "Определения грузов MoW недоступны.",
+            ["operations_not_ready"] = "Данные операций ещё не готовы.",
+            ["no_mow_yards"] = "Площадки путевого хозяйства не найдены.",
+            ["restocked"] = "Пополнено значений материалов MoW: {0}, площадок: {1}.",
+            ["no_fuel_yards"] = "Площадки снабжения углём/дизелем не найдены.",
+            ["fuel_restocked"] = "Пополнено значений угля/дизеля: {0}, площадок: {1}.",
+            ["host_only"] = "Действия меню доступны только хосту.",
+            ["debug_method_missing"] = "Редактор состояния пути MoW этой версии 0.6.x недоступен.",
+            ["mow_command_missing"] = "Команда состояния MoW этой версии 0.6.x недоступна.",
+            ["money_command_missing"] = "Команда обновления денег в игре недоступна.",
+            ["fuel_method_missing"] = "Метод топливного вагона паровоза недоступен.",
+            ["reputation_method_missing"] = "Метод обновления репутации недоступен.",
+            ["runtime_patch_missing"] = "В этой версии игры недоступны хуки защиты во время выполнения.",
+            ["derailment_toggle_status"] = "Защита от схода {0}.",
+            ["speed_damage_toggle_status"] = "Защита от повреждений на высокой скорости {0}.",
+            ["enabled"] = "включена",
+            ["disabled"] = "выключена",
+            ["done"] = "Готово.",
+            ["error"] = "Ошибка: {0}"
+        };
+
+        private static readonly Dictionary<string, string> French = new Dictionary<string, string>
+        {
+            ["menu_title"] = "Menu de triche / débogage de Railroader",
+            ["target"] = "Cible : Railroader 0.6.2 Experimental",
+            ["ready"] = "Prêt.",
+            ["language"] = "Langue",
+            ["company"] = "Compagnie",
+            ["equipment"] = "Matériel roulant",
+            ["track_mow"] = "Voie / MoW",
+            ["safety"] = "Sécurité",
+            ["qol"] = "Confort",
+            ["close"] = "Fermer (F10)",
+            ["cash"] = "Trésorerie",
+            ["add"] = "Ajouter",
+            ["remove"] = "Retirer",
+            ["set_exact"] = "Définir exactement",
+            ["current_balance"] = "Solde actuel : {0}",
+            ["company_reputation"] = "Réputation de la compagnie",
+            ["set_reputation"] = "Définir la réputation à {0} %",
+            ["current_reputation"] = "Réputation actuelle : {0} %",
+            ["reputation_set"] = "Réputation définie à {0} %.",
+            ["equipment_repair"] = "Réparation du matériel",
+            ["repair_selected"] = "Réparer la locomotive/le wagon sélectionné",
+            ["repair_all"] = "Réparer toutes les locomotives et tous les wagons",
+            ["repair_description"] = "Passe l'état à 100 % et remplit l'huile si pris en charge.",
+            ["engine_fueling"] = "Ravitaillement des locomotives",
+            ["refuel_selected"] = "Ravitailler la locomotive/le tender sélectionné",
+            ["refuel_all"] = "Ravitailler toutes les locomotives/tenders",
+            ["fuel_description"] = "Remplit le diesel, l'eau ou le charbon à 100 % si pris en charge.",
+            ["oiling"] = "Huilage des véhicules",
+            ["oil_selected"] = "Huiler la locomotive/le wagon sélectionné",
+            ["oil_all"] = "Huiler toutes les locomotives et tous les wagons compatibles",
+            ["oil_description"] = "Remplit l'huile du véhicule à 100 % si pris en charge. L'huile est stockée par véhicule.",
+            ["derailment_tools"] = "Outils de déraillement",
+            ["rerail_all"] = "Remettre sur les rails tous les véhicules déraillés",
+            ["derailment_toggle"] = "Prévention des déraillements : {0}",
+            ["speed_damage_toggle"] = "Aucun dégât au-dessus de 70 mph : {0}",
+            ["physics_description"] = "Bloque l'accumulation du déraillement et fige l'état au-dessus de 70 mph.",
+            ["player_speed"] = "Vitesse du joueur",
+            ["player_speed_description"] = "Modifie les vitesses de marche, course, accroupissement, air et échelle. Session seulement.",
+            ["player_speed_set"] = "Vitesse du joueur réglée sur {0}.",
+            ["game_speed"] = "Vitesse du jeu",
+            ["game_speed_description"] = "Modifie la vitesse de simulation pour cette session.",
+            ["game_speed_set"] = "Vitesse du jeu réglée sur {0}.",
+            ["no_derailed_cars"] = "Aucun véhicule déraillé trouvé.",
+            ["rerail_done"] = "{0} véhicule(s) déraillé(s) remis sur les rails.",
+            ["track_condition"] = "Classe d'état de la voie",
+            ["repair_track"] = "Réparer parfaitement toute la voie construite",
+            ["set_track_class"] = "Définir toute la voie construite à la classe {0}",
+            ["mow_yard_materials"] = "Matériaux des dépôts MoW",
+            ["restock_yards"] = "Ravitailler les dépôts MoW détectés",
+            ["materials"] = "Matériaux : ballast, traverses, rails, poutres de pont en acier, béton et madriers de pont en bois.",
+            ["yard_fuel_supplies"] = "Réserves de carburant des dépôts",
+            ["restock_fuel_yards"] = "Ravitailler les dépôts charbon/diesel détectés",
+            ["fuel_materials"] = "Réserves : charbon et diesel.",
+            ["host_ready"] = "Actions autorisées pour l'hôte activées.",
+            ["client_disabled"] = "Client détecté : actions désactivées.",
+            ["world_not_ready"] = "Le monde n'est pas prêt.",
+            ["unavailable"] = "indisponible",
+            ["balance_changed"] = "Solde modifié de {0}. Nouveau solde : {1}",
+            ["balance_set"] = "Solde défini à {0}.",
+            ["no_selected_car"] = "Aucun véhicule sélectionné.",
+            ["selected_not_engine"] = "Le véhicule sélectionné n'est ni une locomotive ni un tender.",
+            ["selected_not_oilable"] = "Le véhicule sélectionné ne prend pas en charge le huilage.",
+            ["repaired_car"] = "{0} réparé.",
+            ["refueled_car"] = "{0} ravitaillé.",
+            ["refueled_cars"] = "{0} locomotive(s)/tender(s) ravitaillé(s).",
+            ["oiled_car"] = "{0} huilé.",
+            ["oiled_cars"] = "{0} locomotive(s)/wagon(s) compatible(s) huilé(s).",
+            ["controller_not_ready"] = "Le contrôleur de train n'est pas prêt.",
+            ["repaired_cars"] = "{0} locomotive(s) et wagon(s) réparés.",
+            ["track_controller_not_ready"] = "Le contrôleur d'état de la voie n'est pas prêt.",
+            ["track_repaired"] = "Toute la voie construite est parfaitement réparée.",
+            ["track_class_set"] = "{0} segment(s) de voie définis à la classe {1}.",
+            ["loads_unavailable"] = "Les définitions de chargement MoW sont indisponibles.",
+            ["operations_not_ready"] = "Les données d'exploitation ne sont pas prêtes.",
+            ["no_mow_yards"] = "Aucun dépôt de maintenance de la voie détecté.",
+            ["restocked"] = "{0} valeur(s) de stock MoW réapprovisionnée(s) dans {1} dépôt(s).",
+            ["no_fuel_yards"] = "Aucun dépôt de charbon/diesel détecté.",
+            ["fuel_restocked"] = "{0} valeur(s) de stock charbon/diesel réapprovisionnée(s) dans {1} dépôt(s).",
+            ["host_only"] = "Les actions du menu sont réservées à l'hôte.",
+            ["debug_method_missing"] = "L'éditeur d'état de voie MoW de cette version 0.6.x est indisponible.",
+            ["mow_command_missing"] = "La commande d'état MoW de cette version 0.6.x est indisponible.",
+            ["money_command_missing"] = "La commande de mise à jour de l'argent du jeu est indisponible.",
+            ["fuel_method_missing"] = "La méthode du tender de la locomotive à vapeur est indisponible.",
+            ["reputation_method_missing"] = "La méthode de mise à jour de la réputation est indisponible.",
+            ["runtime_patch_missing"] = "Les hooks de protection d'exécution sont indisponibles dans cette version du jeu.",
+            ["derailment_toggle_status"] = "Prévention des déraillements {0}.",
+            ["speed_damage_toggle_status"] = "Protection contre les dégâts à haute vitesse {0}.",
+            ["enabled"] = "activée",
+            ["disabled"] = "désactivée",
+            ["done"] = "Terminé.",
+            ["error"] = "Erreur : {0}"
+        };
+
+        static Localization()
+        {
+            // Keep the six language dictionaries in sync without relying on the
+            // source file's console encoding for these newly added strings.
+            German["wear_tools"] = "Schutz vor Fahrzeugverschleiss";
+            German["speed_damage_toggle"] = "Kein Fahrzeugschaden ueber {0} mph: {1}";
+            German["physics_description"] = "Verhindert positive Entgleisungszunahme und friert den Zustand ab {0}+ mph ein.";
+            German["speed_damage_threshold"] = "Schwelle fuer Hochgeschwindigkeitsschutz";
+            German["current_speed_threshold"] = "Aktuelle Schwelle: {0} mph";
+            German["speed_threshold_set"] = "Schwelle fuer Hochgeschwindigkeitsschutz auf {0} mph gesetzt.";
+            German["equipment_wear_toggle"] = "Fahrzeugverschleiss: {0}";
+            German["oil_feature_toggle"] = "Heisslaeufer / Oelung: {0}";
+            German["wear_description"] = "Verwendet die Standardeinstellungen von Railroader. Fahrzeugverschleiss deaktiviert Laufleistungsverschleiss und Ueberholungen; Ladungen haben in 0.6.2 keinen eigenen Schadenswert.";
+            German["equipment_wear_toggle_status"] = "Fahrzeugverschleiss {0}.";
+            German["oil_feature_toggle_status"] = "Heisslaeufer und Oelung {0}.";
+            German["damage_tuning"] = "Schaden und Verschleiss anpassen";
+            German["impact_damage_multiplier"] = "Kupplungs- / Aufprallschaden";
+            German["overspeed_damage_multiplier"] = "Uebersch Geschwindigkeitsschaden";
+            German["wear_multiplier"] = "Fahrzeugverschleissrate";
+            German["oil_use_multiplier"] = "Oelverbrauchsrate";
+            German["apply"] = "Anwenden";
+            German["current_multiplier"] = "Aktuell: {0}";
+            German["multiplier_description"] = "Prozent eingeben: 0% deaktiviert den Pfad, 100% ist Standard, 200% verdoppelt ihn. Aenderungen gelten sofort.";
+            German["impact_damage_set"] = "Kupplungs- / Aufprallschaden auf {0} gesetzt.";
+            German["overspeed_damage_set"] = "Uebersch Geschwindigkeitsschaden auf {0} gesetzt.";
+            German["wear_multiplier_set"] = "Fahrzeugverschleissrate auf {0} gesetzt.";
+            German["oil_use_multiplier_set"] = "Oelverbrauchsrate auf {0} gesetzt.";
+            German["materials"] = "Materialien: Schotter, Schwellen, Schienen, Stahlbrueckentraeger, Beton, Holzbrueckentraversen und Sprengstoffe.";
+            German["clear_mow_stock"] = "MoW-Lager leeren";
+            German["yard_fuel_supplies"] = "Brennstoff- und Ersatzteilversorgung der Depots";
+            German["restock_fuel_yards"] = "Erkannte Brennstoff-/Lokwerkstaetten auffuellen";
+            German["clear_fuel_stock"] = "Brennstoff-/Ersatzteillager leeren";
+            German["fuel_materials"] = "Vorräte: Kohle, Dieselkraftstoff und Ersatzteile.";
+            German["no_fuel_yards"] = "Keine Brennstoff- oder Reparaturversorgungsstelle erkannt.";
+            German["fuel_restocked"] = "{0} Brennstoff-/Ersatzteil-Lagerwerte in {1} Depot(s) aufgefuellt.";
+            German["mow_cleared"] = "{0} MoW-Lagerwerte in {1} Yard(s) geleert.";
+            German["fuel_cleared"] = "{0} Brennstoff-/Ersatzteil-Lagerwerte in {1} Depot(s) geleert.";
+            German["cargo_loading"] = "Ladung laut Frachtauftrag";
+            German["fill_manifested_selected"] = "Frachtauftrag des gewaehltens Wagens fuellen";
+            German["fill_manifested_all"] = "Alle Frachtauftraege fuellen";
+            German["manifested_cargo_description"] = "Fuellt die bestehende Ladung jedes Wagens bis zur berechneten Kapazitaet, ohne Ladungstyp oder Herkunft zu aendern.";
+            German["filled_manifested_car"] = "{0} gefuellt: {1} Ladungsslot(s).";
+            German["filled_manifested_cars"] = "{0} Ladungsslot(s) in {1} Wagen gefuellt.";
+            German["no_manifested_cargo"] = "Keine Frachtauftraege mit Ladung gefunden.";
+            German["repair_supplies"] = "Reparaturversorgung der Lokwerkstaetten";
+            German["restock_repair_parts"] = "Erkannte Lokwerkstaetten auffuellen";
+            German["repair_parts_description"] = "Fuellt Ersatzteile in Lokwerkstaetten und Reparaturversorgungs-Uebergabepunkten auf.";
+            German["repair_parts_unavailable"] = "Die Ersatzteil-Ladungsdefinition ist nicht verfuegbar.";
+            German["no_repair_depots"] = "Keine Lokwerkstatt oder Reparaturversorgungsstelle erkannt.";
+            German["repair_parts_restocked"] = "{0} Ersatzteil-Lagerwerte in {1} Werkstatt-/Versorgungspunkt(en) aufgefuellt.";
+
+            Spanish["wear_tools"] = "Proteccion contra desgaste del equipo";
+            Spanish["speed_damage_toggle"] = "Sin danos del vehiculo sobre {0} mph: {1}";
+            Spanish["physics_description"] = "Bloquea la acumulacion de descarrilamiento y congela el estado a partir de {0} mph.";
+            Spanish["speed_damage_threshold"] = "Umbral de proteccion a alta velocidad";
+            Spanish["current_speed_threshold"] = "Umbral actual: {0} mph";
+            Spanish["speed_threshold_set"] = "Umbral de proteccion a alta velocidad establecido en {0} mph.";
+            Spanish["equipment_wear_toggle"] = "Desgaste del equipo: {0}";
+            Spanish["oil_feature_toggle"] = "Calentamiento / lubricacion: {0}";
+            Spanish["wear_description"] = "Usa los ajustes originales de Railroader. El desgaste del equipo desactiva el desgaste por distancia y las revisiones; la carga no tiene un medidor de dano separado en 0.6.2.";
+            Spanish["equipment_wear_toggle_status"] = "Desgaste del equipo {0}.";
+            Spanish["oil_feature_toggle_status"] = "Calentamiento y lubricacion {0}.";
+            Spanish["damage_tuning"] = "Ajuste de dano y desgaste";
+            Spanish["impact_damage_multiplier"] = "Dano de acoplamiento / impacto";
+            Spanish["overspeed_damage_multiplier"] = "Dano por exceso de velocidad";
+            Spanish["wear_multiplier"] = "Tasa de desgaste del equipo";
+            Spanish["oil_use_multiplier"] = "Tasa de consumo de aceite";
+            Spanish["apply"] = "Aplicar";
+            Spanish["current_multiplier"] = "Actual: {0}";
+            Spanish["multiplier_description"] = "Introduce un porcentaje: 0% desactiva la ruta, 100% es el valor original y 200% lo duplica. Se aplica al instante.";
+            Spanish["impact_damage_set"] = "Dano de acoplamiento / impacto establecido en {0}.";
+            Spanish["overspeed_damage_set"] = "Dano por exceso de velocidad establecido en {0}.";
+            Spanish["wear_multiplier_set"] = "Tasa de desgaste establecida en {0}.";
+            Spanish["oil_use_multiplier_set"] = "Tasa de consumo de aceite establecida en {0}.";
+            Spanish["materials"] = "Materiales: balasto, traviesas, rieles, vigas de acero, hormigon, maderas de puente y explosivos.";
+            Spanish["clear_mow_stock"] = "Vaciar existencias MoW";
+            Spanish["yard_fuel_supplies"] = "Combustible y piezas de reparacion del deposito";
+            Spanish["restock_fuel_yards"] = "Reabastecer depositos de combustible/servicio";
+            Spanish["clear_fuel_stock"] = "Vaciar existencias de combustible/servicio";
+            Spanish["fuel_materials"] = "Suministros: carbon, combustible diesel y piezas de reparacion.";
+            Spanish["no_fuel_yards"] = "No se detecto ningun deposito de combustible o servicio.";
+            Spanish["fuel_restocked"] = "Se reabastecieron {0} almacenes de combustible/reparacion en {1} deposito(s).";
+            Spanish["mow_cleared"] = "Se vaciaron {0} almacenes de materiales MoW en {1} deposito(s).";
+            Spanish["fuel_cleared"] = "Se vaciaron {0} almacenes de combustible/reparacion en {1} deposito(s).";
+            Spanish["cargo_loading"] = "Carga manifestada";
+            Spanish["fill_manifested_selected"] = "Llenar carga manifestada seleccionada";
+            Spanish["fill_manifested_all"] = "Llenar toda la carga manifestada";
+            Spanish["manifested_cargo_description"] = "Llena la carga existente de cada vagon hasta su capacidad calculada sin cambiar el tipo ni el origen.";
+            Spanish["filled_manifested_car"] = "Se lleno {0}: {1} ranura(s) de carga.";
+            Spanish["filled_manifested_cars"] = "Se llenaron {0} ranura(s) en {1} vagon(es).";
+            Spanish["no_manifested_cargo"] = "No se encontro carga manifestada.";
+            Spanish["repair_supplies"] = "Suministros de reparacion del deposito";
+            Spanish["restock_repair_parts"] = "Reabastecer depositos detectados";
+            Spanish["repair_parts_description"] = "Llena las piezas de reparacion en depositos de servicio y puntos de intercambio.";
+            Spanish["repair_parts_unavailable"] = "La definicion de carga de piezas de reparacion no esta disponible.";
+            Spanish["no_repair_depots"] = "No se detecto ningun deposito de servicio o punto de reparacion.";
+            Spanish["repair_parts_restocked"] = "Se reabastecieron {0} almacenes de piezas en {1} deposito(s)/punto(s) de suministro.";
+
+            TraditionalChinese["wear_tools"] = "\u8eca\u8f1b\u78e8\u640d\u4fdd\u8b77";
+            TraditionalChinese["speed_damage_toggle"] = "\u8d85\u904e {0} mph \u7121\u8eca\u8f1b\u640d\u50b7\uff1a{1}";
+            TraditionalChinese["physics_description"] = "\u963b\u6b62\u812b\u8ecc\u7d2f\u7a4d\uff0c\u4e26\u5728 {0}+ mph \u51cd\u7d50\u8eca\u8f1b\u72c0\u614b\u3002";
+            TraditionalChinese["speed_damage_threshold"] = "\u9ad8\u901f\u640d\u50b7\u9632\u8b77\u95be\u503c";
+            TraditionalChinese["current_speed_threshold"] = "\u76ee\u524d\u95be\u503c\uff1a{0} mph";
+            TraditionalChinese["speed_threshold_set"] = "\u9ad8\u901f\u640d\u50b7\u9632\u8b77\u95be\u503c\u5df2\u8a2d\u70ba {0} mph\u3002";
+            TraditionalChinese["equipment_wear_toggle"] = "\u8eca\u8f1b\u78e8\u640d\uff1a{0}";
+            TraditionalChinese["oil_feature_toggle"] = "\u71b1\u8ef8\uff0f\u6f64\u6ed1\uff1a{0}";
+            TraditionalChinese["wear_description"] = "\u4f7f\u7528 Railroader \u7684\u539f\u751f\u8a2d\u5b9a\u3002\u95dc\u9589\u8eca\u8f1b\u78e8\u640d\u6703\u505c\u7528\u91cc\u7a0b\u78e8\u640d\u8207\u5927\u4fee\u9700\u6c42\uff1b0.6.2 \u7684\u8ca8\u7269\u6c92\u6709\u7368\u7acb\u640d\u58de\u8a08\u91cf\u3002";
+            TraditionalChinese["equipment_wear_toggle_status"] = "\u8eca\u8f1b\u78e8\u640d\u5df2{0}\u3002";
+            TraditionalChinese["oil_feature_toggle_status"] = "\u71b1\u8ef8\u8207\u6f64\u6ed1\u5df2{0}\u3002";
+            TraditionalChinese["damage_tuning"] = "\u640d\u50b7\u8207\u78e8\u640d\u8abf\u6574";
+            TraditionalChinese["impact_damage_multiplier"] = "\u9023\u639b / \u649e\u64ca\u640d\u50b7";
+            TraditionalChinese["overspeed_damage_multiplier"] = "\u8d85\u901f\u640d\u50b7";
+            TraditionalChinese["wear_multiplier"] = "\u8eca\u8f1b\u78e8\u640d\u7387";
+            TraditionalChinese["oil_use_multiplier"] = "\u6f64\u6ed1\u6cb9\u4f7f\u7528\u7387";
+            TraditionalChinese["apply"] = "\u5957\u7528";
+            TraditionalChinese["current_multiplier"] = "\u76ee\u524d\uff1a{0}";
+            TraditionalChinese["multiplier_description"] = "\u8f38\u5165\u767e\u5206\u6bd4\uff1a0% \u505c\u7528\u8a72\u8def\u5f91\u3001100% \u70ba\u539f\u59cb\u503c\u3001200% \u70ba\u5169\u500d\u3002\u7acb\u5373\u751f\u6548\u3002";
+            TraditionalChinese["impact_damage_set"] = "\u9023\u639b / \u649e\u64ca\u640d\u50b7\u5df2\u8a2d\u70ba {0}\u3002";
+            TraditionalChinese["overspeed_damage_set"] = "\u8d85\u901f\u640d\u50b7\u5df2\u8a2d\u70ba {0}\u3002";
+            TraditionalChinese["wear_multiplier_set"] = "\u8eca\u8f1b\u78e8\u640d\u7387\u5df2\u8a2d\u70ba {0}\u3002";
+            TraditionalChinese["oil_use_multiplier_set"] = "\u6f64\u6ed1\u6cb9\u4f7f\u7528\u7387\u5df2\u8a2d\u70ba {0}\u3002";
+            TraditionalChinese["materials"] = "\u6750\u6599\uff1a\u9053\u789f\u3001\u6795\u6728\u3001\u92fc\u8ecc\u3001\u92fc\u6a4b\u6a11\u3001\u6df7\u51dd\u571f\u3001\u6728\u6a4b\u67d5\u6728\u8207\u70b8\u85e5\u3002";
+            TraditionalChinese["clear_mow_stock"] = "\u6e05\u7a7a MoW \u5eab\u5b58";
+            TraditionalChinese["yard_fuel_supplies"] = "\u5806\u5834\u71c3\u6599\u8207\u4fee\u7406\u4f9b\u61c9";
+            TraditionalChinese["restock_fuel_yards"] = "\u88dc\u5145\u5df2\u5075\u6e2c\u7684\u71c3\u6599\uff0f\u6a5f\u52d9\u6bb5";
+            TraditionalChinese["clear_fuel_stock"] = "\u6e05\u7a7a\u71c3\u6599\uff0f\u6a5f\u52d9\u6bb5\u5eab\u5b58";
+            TraditionalChinese["fuel_materials"] = "\u4f9b\u61c9\uff1a\u7164\u3001\u67f4\u6cb9\u8207\u4fee\u7406\u96f6\u4ef6\u3002";
+            TraditionalChinese["no_fuel_yards"] = "\u627e\u4e0d\u5230\u71c3\u6599\u6216\u6a5f\u52d9\u6bb5\u3002";
+            TraditionalChinese["fuel_restocked"] = "\u5df2\u5728 {1} \u500b\u5806\u5834\uff0f\u6a5f\u52d9\u6bb5\u88dc\u6eff {0} \u500b\u71c3\u6599\uff0f\u4fee\u7406\u4f9b\u61c9\u5132\u5b58\u3002";
+            TraditionalChinese["mow_cleared"] = "\u5df2\u6e05\u7a7a {1} \u500b MoW \u5806\u5834\u7684 {0} \u500b\u6750\u6599\u5132\u5b58\u3002";
+            TraditionalChinese["fuel_cleared"] = "\u5df2\u6e05\u7a7a {1} \u500b\u5806\u5834\uff0f\u6a5f\u52d9\u6bb5\u7684 {0} \u500b\u71c3\u6599\uff0f\u4fee\u7406\u5132\u5b58\u3002";
+            TraditionalChinese["cargo_loading"] = "\u6309\u904b\u55ae\u88dd\u8f09\u8ca8\u7269";
+            TraditionalChinese["fill_manifested_selected"] = "\u586b\u6eff\u9078\u5b9a\u8ca8\u904b\u55ae\u8ca8\u7269";
+            TraditionalChinese["fill_manifested_all"] = "\u586b\u6eff\u6240\u6709\u904b\u55ae\u8ca8\u7269";
+            TraditionalChinese["manifested_cargo_description"] = "\u5c07\u6bcf\u8f1b\u8eca\u7684\u65e2\u6709\u904b\u55ae\u8ca8\u7269\u586b\u81f3\u8a08\u7b97\u5bb9\u91cf\uff0c\u4e0d\u6539\u8b8a\u8ca8\u7269\u985e\u578b\u6216\u4f86\u6e90\u3002";
+            TraditionalChinese["filled_manifested_car"] = "\u5df2\u586b\u6eff {0}\uff1a{1} \u500b\u8ca8\u7269\u69fd\u3002";
+            TraditionalChinese["filled_manifested_cars"] = "\u5df2\u5728 {1} \u8f1b\u8eca\u586b\u6eff {0} \u500b\u8ca8\u7269\u69fd\u3002";
+            TraditionalChinese["no_manifested_cargo"] = "\u627e\u4e0d\u5230\u904b\u55ae\u8ca8\u7269\u3002";
+            TraditionalChinese["repair_supplies"] = "\u6a5f\u52d9\u6bb5\u4fee\u7406\u4f9b\u61c9";
+            TraditionalChinese["restock_repair_parts"] = "\u88dc\u5145\u5df2\u5075\u6e2c\u7684\u6a5f\u52d9\u6bb5";
+            TraditionalChinese["repair_parts_description"] = "\u70ba\u6a5f\u52d9\u6bb5\u8207\u4fee\u7406\u4f9b\u61c9\u4ea4\u63db\u9ede\u88dc\u6eff\u4fee\u7406\u96f6\u4ef6\u3002";
+            TraditionalChinese["repair_parts_unavailable"] = "\u4fee\u7406\u96f6\u4ef6\u8ca8\u7269\u5b9a\u7fa9\u4e0d\u53ef\u7528\u3002";
+            TraditionalChinese["no_repair_depots"] = "\u627e\u4e0d\u5230\u6a5f\u52d9\u6bb5\u6216\u4fee\u7406\u4f9b\u61c9\u9ede\u3002";
+            TraditionalChinese["repair_parts_restocked"] = "\u5df2\u5728 {1} \u500b\u6a5f\u52d9\u6bb5\uff0f\u4f9b\u61c9\u9ede\u88dc\u6eff {0} \u500b\u4fee\u7406\u96f6\u4ef6\u5132\u5b58\u3002";
+
+            Russian["wear_tools"] = "\u0417\u0430\u0449\u0438\u0442\u0430 \u0442\u0435\u0445\u043d\u0438\u043a\u0438 \u043e\u0442 \u0438\u0437\u043d\u043e\u0441\u0430";
+            Russian["speed_damage_toggle"] = "\u041d\u0435\u0442 \u0443\u0440\u043e\u043d\u0430 \u0442\u0435\u0445\u043d\u0438\u043a\u0435 \u0432\u044b\u0448\u0435 {0} \u043c\u0438\u043b\u044c/\u0447: {1}";
+            Russian["physics_description"] = "\u0411\u043b\u043e\u043a\u0438\u0440\u0443\u0435\u0442 \u043d\u0430\u043a\u043e\u043f\u043b\u0435\u043d\u0438\u0435 \u0441\u0445\u043e\u0434\u0430 \u0438 \u0437\u0430\u043c\u043e\u0440\u0430\u0436\u0438\u0432\u0430\u0435\u0442 \u0441\u043e\u0441\u0442\u043e\u044f\u043d\u0438\u0435 \u0432\u044b\u0448\u0435 {0} \u043c\u0438\u043b\u044c/\u0447.";
+            Russian["speed_damage_threshold"] = "\u041f\u043e\u0440\u043e\u0433 \u0437\u0430\u0449\u0438\u0442\u044b \u043d\u0430 \u0432\u044b\u0441\u043e\u043a\u043e\u0439 \u0441\u043a\u043e\u0440\u043e\u0441\u0442\u0438";
+            Russian["current_speed_threshold"] = "\u0422\u0435\u043a\u0443\u0449\u0438\u0439 \u043f\u043e\u0440\u043e\u0433: {0} \u043c\u0438\u043b\u044c/\u0447";
+            Russian["speed_threshold_set"] = "\u041f\u043e\u0440\u043e\u0433 \u0437\u0430\u0449\u0438\u0442\u044b \u0443\u0441\u0442\u0430\u043d\u043e\u0432\u043b\u0435\u043d \u043d\u0430 {0} \u043c\u0438\u043b\u044c/\u0447.";
+            Russian["equipment_wear_toggle"] = "\u0418\u0437\u043d\u043e\u0441 \u0442\u0435\u0445\u043d\u0438\u043a\u0438: {0}";
+            Russian["oil_feature_toggle"] = "\u041f\u0435\u0440\u0435\u0433\u0440\u0435\u0432 / \u0441\u043c\u0430\u0437\u043a\u0430: {0}";
+            Russian["wear_description"] = "\u0418\u0441\u043f\u043e\u043b\u044c\u0437\u0443\u044e\u0442\u0441\u044f \u0448\u0442\u0430\u0442\u043d\u044b\u0435 \u043d\u0430\u0441\u0442\u0440\u043e\u0439\u043a\u0438 Railroader. \u041e\u0442\u043a\u043b\u044e\u0447\u0435\u043d\u0438\u0435 \u0438\u0437\u043d\u043e\u0441\u0430 \u0442\u0435\u0445\u043d\u0438\u043a\u0438 \u0443\u0431\u0438\u0440\u0430\u0435\u0442 \u0438\u0437\u043d\u043e\u0441 \u043f\u043e \u043f\u0440\u043e\u0431\u0435\u0433\u0443 \u0438 \u043d\u0435\u043e\u0431\u0445\u043e\u0434\u0438\u043c\u043e\u0441\u0442\u044c \u043a\u0430\u043f\u0440\u0435\u043c\u043e\u043d\u0442\u0430; \u0443 \u0433\u0440\u0443\u0437\u043e\u0432 \u0432 0.6.2 \u043d\u0435\u0442 \u043e\u0442\u0434\u0435\u043b\u044c\u043d\u043e\u0433\u043e \u0441\u0447\u0435\u0442\u0447\u0438\u043a\u0430 \u043f\u043e\u0432\u0440\u0435\u0436\u0434\u0435\u043d\u0438\u0439.";
+            Russian["equipment_wear_toggle_status"] = "\u0418\u0437\u043d\u043e\u0441 \u0442\u0435\u0445\u043d\u0438\u043a\u0438 {0}.";
+            Russian["oil_feature_toggle_status"] = "\u041f\u0435\u0440\u0435\u0433\u0440\u0435\u0432 \u0438 \u0441\u043c\u0430\u0437\u043a\u0430 {0}.";
+            Russian["damage_tuning"] = "\u041d\u0430\u0441\u0442\u0440\u043e\u0439\u043a\u0430 \u0443\u0440\u043e\u043d\u0430 \u0438 \u0438\u0437\u043d\u043e\u0441\u0430";
+            Russian["impact_damage_multiplier"] = "\u0423\u0440\u043e\u043d \u043e\u0442 \u0441\u0446\u0435\u043f\u043a\u0438 / \u0443\u0434\u0430\u0440\u0430";
+            Russian["overspeed_damage_multiplier"] = "\u0423\u0440\u043e\u043d \u043e\u0442 \u043f\u0440\u0435\u0432\u044b\u0448\u0435\u043d\u0438\u044f \u0441\u043a\u043e\u0440\u043e\u0441\u0442\u0438";
+            Russian["wear_multiplier"] = "\u0421\u043a\u043e\u0440\u043e\u0441\u0442\u044c \u0438\u0437\u043d\u043e\u0441\u0430 \u0442\u0435\u0445\u043d\u0438\u043a\u0438";
+            Russian["oil_use_multiplier"] = "\u0421\u043a\u043e\u0440\u043e\u0441\u0442\u044c \u0440\u0430\u0441\u0445\u043e\u0434\u0430 \u043c\u0430\u0441\u043b\u0430";
+            Russian["apply"] = "\u041f\u0440\u0438\u043c\u0435\u043d\u0438\u0442\u044c";
+            Russian["current_multiplier"] = "\u0422\u0435\u043a\u0443\u0449\u0435\u0435: {0}";
+            Russian["multiplier_description"] = "\u0412\u0432\u0435\u0434\u0438\u0442\u0435 \u043f\u0440\u043e\u0446\u0435\u043d\u0442: 0% \u043e\u0442\u043a\u043b\u044e\u0447\u0430\u0435\u0442 \u043f\u0443\u0442\u044c, 100% \u2014 \u0448\u0442\u0430\u0442\u043d\u043e\u0435 \u0437\u043d\u0430\u0447\u0435\u043d\u0438\u0435, 200% \u0443\u0434\u0432\u0430\u0438\u0432\u0430\u0435\u0442 \u0435\u0433\u043e. \u0418\u0437\u043c\u0435\u043d\u0435\u043d\u0438\u044f \u0432\u0441\u0442\u0443\u043f\u0430\u044e\u0442 \u0441\u0440\u0430\u0437\u0443.";
+            Russian["impact_damage_set"] = "\u0423\u0440\u043e\u043d \u043e\u0442 \u0441\u0446\u0435\u043f\u043a\u0438 / \u0443\u0434\u0430\u0440\u0430: {0}.";
+            Russian["overspeed_damage_set"] = "\u0423\u0440\u043e\u043d \u043e\u0442 \u0441\u043a\u043e\u0440\u043e\u0441\u0442\u0438: {0}.";
+            Russian["wear_multiplier_set"] = "\u0421\u043a\u043e\u0440\u043e\u0441\u0442\u044c \u0438\u0437\u043d\u043e\u0441\u0430: {0}.";
+            Russian["oil_use_multiplier_set"] = "\u0421\u043a\u043e\u0440\u043e\u0441\u0442\u044c \u0440\u0430\u0441\u0445\u043e\u0434\u0430 \u043c\u0430\u0441\u043b\u0430: {0}.";
+            Russian["materials"] = "\u041c\u0430\u0442\u0435\u0440\u0438\u0430\u043b\u044b: \u0431\u0430\u043b\u043b\u0430\u0441\u0442, \u0448\u043f\u0430\u043b\u044b, \u0440\u0435\u043b\u044c\u0441\u044b, \u0441\u0442\u0430\u043b\u044c\u043d\u044b\u0435 \u0431\u0430\u043b\u043a\u0438 \u043c\u043e\u0441\u0442\u043e\u0432, \u0431\u0435\u0442\u043e\u043d, \u0434\u0435\u0440\u0435\u0432\u044f\u043d\u043d\u044b\u0435 \u0431\u0430\u043b\u043a\u0438 \u043c\u043e\u0441\u0442\u043e\u0432 \u0438 \u0432\u0437\u0440\u044b\u0432\u0447\u0430\u0442\u043a\u0430.";
+            Russian["yard_fuel_supplies"] = "\u0422\u043e\u043f\u043b\u0438\u0432\u043e \u0438 \u0437\u0430\043f\u0447\u0430\u0441\u0442\u0438 \u0434\u0435\u043f\u043e";
+            Russian["restock_fuel_yards"] = "\u041f\u043e\u043f\u043e\u043b\u043d\u0438\u0442\u044c \u0442\u043e\u043f\u043b\u0438\u0432\u043d\u044b\u0435 \u0434\u0435\u043f\u043e";
+            Russian["fuel_materials"] = "\u0417\u0430\u043f\u0430\u0441\u044b: \u0443\u0433\u043e\u043b\u044c, \u0434\u0438\u0437\u0435\u043b\u044c\u043d\u043e\u0435 \u0442\u043e\u043f\u043b\u0438\u0432\u043e \u0438 \u0437\u0430\u043f\u0447\u0430\u0441\u0442\u0438.";
+            Russian["no_fuel_yards"] = "\u0414\u0435\u043f\u043e \u0442\u043e\u043f\u043b\u0438\u0432\u0430 \u0438\u043b\u0438 \u0441\u0435\u0440\u0432\u0438\u0441\u0430 \u043d\u0435 \u043d\u0430\u0439\u0434\u0435\u043d\u043e.";
+            Russian["fuel_restocked"] = "\u041f\u043e\u043f\u043e\u043b\u043d\u0435\u043d\u044b {0} \u0445\u0440\u0430\u043d\u0438\u043b\u0438\u0449 \u0442\u043e\u043f\u043b\u0438\u0432\u0430/\u0437\u0430\u043f\u0447\u0430\u0441\u0442\u0435\u0439 \u0432 {1} \u0434\u0435\u043f\u043e.";
+            Russian["cargo_loading"] = "\u0417\u0430\u0433\u0440\u0443\u0437\u043a\u0430 \u0433\u0440\u0443\u0437\u0430 \u043f\u043e \u043d\u0430\u043a\u043b\u0430\u0434\u043d\u043e\u0439";
+            Russian["fill_manifested_selected"] = "\u0417\u0430\u043f\u043e\u043b\u043d\u0438\u0442\u044c \u0433\u0440\u0443\u0437 \u0432\u044b\u0431\u0440\u0430\u043d\u043d\u043e\u0433\u043e \u0432\u0430\u0433\u043e\u043d\u0430";
+            Russian["fill_manifested_all"] = "\u0417\u0430\u043f\u043e\u043b\u043d\u0438\u0442\u044c \u0432\u0435\u0441\u044c \u0433\u0440\u0443\u0437 \u043f\u043e \u043d\u0430\u043a\u043b\u0430\u0434\u043d\u044b\u043c";
+            Russian["manifested_cargo_description"] = "\u0417\u0430\u043f\u043e\u043b\u043d\u044f\u0435\u0442 \u0438\u043c\u0435\u044e\u0449\u0438\u0439\u0441\u044f \u0433\u0440\u0443\u0437 \u0434\u043e \u0440\u0430\u0441\u0447\u0451\u0442\u043d\u043e\u0439 \u0432\u043c\u0435\u0441\u0442\u0438\u043c\u043e\u0441\u0442\u0438, \u043d\u0435 \u043c\u0435\u043d\u044f\u044f \u0442\u0438\u043f \u0438 \u0438\u0441\u0442\u043e\u0447\u043d\u0438\u043a.";
+            Russian["filled_manifested_car"] = "\u0417\u0430\u043f\u043e\u043b\u043d\u0435\u043d {0}: {1} \u044f\u0447\u0435\u0435\u043a \u0433\u0440\u0443\u0437\u0430.";
+            Russian["filled_manifested_cars"] = "\u0417\u0430\u043f\u043e\u043b\u043d\u0435\u043d\u043e {0} \u044f\u0447\u0435\u0435\u043a \u0433\u0440\u0443\u0437\u0430 \u0432 {1} \u0432\u0430\u0433\u043e\u043d\u0430\u0445.";
+            Russian["no_manifested_cargo"] = "\u041d\u0430\u043a\u043b\u0430\u0434\u043d\u043e\u0439 \u0433\u0440\u0443\u0437 \u043d\u0435 \u043d\u0430\u0439\u0434\u0435\u043d.";
+            Russian["repair_supplies"] = "\u0420\u0435\u043c\u043e\u043d\u0442\u043d\u044b\u0435 \u0437\u0430\u043f\u0430\u0441\u044b \u0434\u0435\u043f\u043e";
+            Russian["restock_repair_parts"] = "\u041f\u043e\u043f\u043e\u043b\u043d\u0438\u0442\u044c \u043d\u0430\u0439\u0434\u0435\u043d\u043d\u044b\u0435 \u0434\u0435\u043f\u043e";
+            Russian["repair_parts_description"] = "\u0417\u0430\u043f\u043e\u043b\u043d\u044f\u0435\u0442 \u0437\u0430\u043f\u0430\u0441\u044b \u0437\u0430\u043f\u0447\u0430\u0441\u0442\u0435\u0439 \u0432 \u0434\u0435\u043f\u043e \u0438 \u043d\u0430 \u0442\u043e\u0447\u043a\u0430\u0445 \u0441\u043d\u0430\u0431\u0436\u0435\u043d\u0438\u044f.";
+            Russian["repair_parts_unavailable"] = "\u041e\u043f\u0440\u0435\u0434\u0435\u043b\u0435\u043d\u0438\u0435 \u0433\u0440\u0443\u0437\u0430 \u0437\u0430\u043f\u0447\u0430\u0441\u0442\u0435\u0439 \u043d\u0435\u0434\u043e\u0441\u0442\u0443\u043f\u043d\u043e.";
+            Russian["no_repair_depots"] = "\u0414\u0435\u043f\u043e \u0438\u043b\u0438 \u0442\u043e\u0447\u043a\u0438 \u0440\u0435\u043c\u043e\u043d\u0442\u043d\u043e\u0433\u043e \u0441\u043d\u0430\u0431\u0436\u0435\u043d\u0438\u044f \u043d\u0435 \u043d\u0430\u0439\u0434\u0435\u043d\u044b.";
+            Russian["repair_parts_restocked"] = "\u041f\u043e\u043f\u043e\u043b\u043d\u0435\u043d\u044b {0} \u0445\u0440\u0430\u043d\u0438\u043b\u0438\u0449 \u0437\u0430\u043f\u0447\u0430\u0441\u0442\u0435\u0439 \u0432 {1} \u0442\u043e\u0447\u043a\u0430\u0445.";
+
+            French["wear_tools"] = "Protection contre l'usure du materiel";
+            French["speed_damage_toggle"] = "Aucun degat du vehicule au-dessus de {0} mph : {1}";
+            French["physics_description"] = "Bloque l'accumulation du deraillement et fige l'etat au-dessus de {0} mph.";
+            French["speed_damage_threshold"] = "Seuil de protection haute vitesse";
+            French["current_speed_threshold"] = "Seuil actuel : {0} mph";
+            French["speed_threshold_set"] = "Seuil de protection haute vitesse regle a {0} mph.";
+            French["equipment_wear_toggle"] = "Usure du materiel : {0}";
+            French["oil_feature_toggle"] = "Surchauffe / huilage : {0}";
+            French["wear_description"] = "Utilise les reglages natifs de Railroader. Desactiver l'usure du materiel supprime l'usure au kilometrage et les revisions ; les chargements n'ont pas de jauge de degats separee en 0.6.2.";
+            French["equipment_wear_toggle_status"] = "Usure du materiel {0}.";
+            French["oil_feature_toggle_status"] = "Surchauffe et huilage {0}.";
+            French["damage_tuning"] = "Reglage des degats et de l'usure";
+            French["impact_damage_multiplier"] = "Degats de couplage / impact";
+            French["overspeed_damage_multiplier"] = "Degats de survitesse";
+            French["wear_multiplier"] = "Taux d'usure du materiel";
+            French["oil_use_multiplier"] = "Taux d'utilisation d'huile";
+            French["apply"] = "Appliquer";
+            French["current_multiplier"] = "Actuel : {0}";
+            French["multiplier_description"] = "Entrez un pourcentage : 0% desactive le chemin, 100% est la valeur native et 200% la double. Effet immediat.";
+            French["impact_damage_set"] = "Degats de couplage / impact regles a {0}.";
+            French["overspeed_damage_set"] = "Degats de survitesse regles a {0}.";
+            French["wear_multiplier_set"] = "Taux d'usure regle a {0}.";
+            French["oil_use_multiplier_set"] = "Taux d'utilisation d'huile regle a {0}.";
+            French["materials"] = "Materiaux : ballast, traverses, rails, poutres de pont en acier, beton, madriers de pont en bois et explosifs.";
+            French["yard_fuel_supplies"] = "Carburant et fournitures de reparation des depots";
+            French["restock_fuel_yards"] = "Ravitailler les depots carburant/service detectes";
+            French["fuel_materials"] = "Fournitures : charbon, diesel et pieces de reparation.";
+            French["no_fuel_yards"] = "Aucun depot carburant ou service detecte.";
+            French["fuel_restocked"] = "{0} stock(s) carburant/reparation remplis dans {1} depot(s).";
+            French["cargo_loading"] = "Chargement selon le manifeste";
+            French["fill_manifested_selected"] = "Remplir le chargement manifeste selectionne";
+            French["fill_manifested_all"] = "Remplir tous les chargements manifestes";
+            French["manifested_cargo_description"] = "Remplit la cargaison existante de chaque wagon jusqu'a sa capacite calculee sans changer le type ni l'origine.";
+            French["filled_manifested_car"] = "{0} rempli : {1} emplacement(s) de chargement.";
+            French["filled_manifested_cars"] = "{0} emplacement(s) remplis dans {1} wagon(s).";
+            French["no_manifested_cargo"] = "Aucun chargement manifeste trouve.";
+            French["repair_supplies"] = "Fournitures de reparation des depots";
+            French["restock_repair_parts"] = "Ravitailler les depots detectes";
+            French["repair_parts_description"] = "Remplit les pieces de reparation dans les depots et les points d'echange.";
+            French["repair_parts_unavailable"] = "La definition de chargement des pieces de reparation est indisponible.";
+            French["no_repair_depots"] = "Aucun depot ou point de fournitures de reparation detecte.";
+            French["repair_parts_restocked"] = "{0} stock(s) de pieces de reparation remplis dans {1} depot(s)/point(s).";
+
+            Russian["clear_mow_stock"] = "\u041e\u0447\u0438\u0441\u0442\u0438\u0442\u044c \u0437\u0430\u043f\u0430\u0441\u044b MoW";
+            Russian["clear_fuel_stock"] = "\u041e\u0447\u0438\u0441\u0442\u0438\u0442\u044c \u0437\u0430\u043f\u0430\u0441\u044b \u0442\u043e\u043f\u043b\u0438\u0432\u0430/\u0441\u0435\u0440\u0432\u0438\u0441\u0430";
+            Russian["mow_cleared"] = "\u041e\u0447\u0438\u0449\u0435\u043d\u044b {0} \u0445\u0440\u0430\u043d\u0438\u043b\u0438\u0449 MoW \u0432 {1} \u0434\u0435\u043f\u043e.";
+            Russian["fuel_cleared"] = "\u041e\u0447\u0438\u0449\u0435\u043d\u044b {0} \u0445\u0440\u0430\u043d\u0438\u043b\u0438\u0449 \u0442\u043e\u043f\u043b\u0438\u0432\u0430/\u0437\u0430\u043f\u0447\u0430\u0441\u0442\u0435\u0439 \u0432 {1} \u0434\u0435\u043f\u043e.";
+            French["clear_mow_stock"] = "Vider les stocks MoW";
+            French["clear_fuel_stock"] = "Vider les stocks carburant/service";
+            French["mow_cleared"] = "{0} stock(s) de materiaux MoW vides dans {1} depot(s).";
+            French["fuel_cleared"] = "{0} stock(s) carburant/reparation vides dans {1} depot(s).";
+
+            German["action_set"] = "Setzen";
+            German["action_repair"] = "Reparieren";
+            German["action_repair_all"] = "Alle reparieren";
+            German["action_refuel"] = "Tanken";
+            German["action_refuel_all"] = "Alle tanken";
+            German["action_fill"] = "Fuellen";
+            German["action_fill_all"] = "Alle fuellen";
+            German["action_oil"] = "Oelen";
+            German["action_oil_all"] = "Alle oelen";
+            German["action_restock"] = "Auffuellen";
+            German["action_clear"] = "Leeren";
+            German["action_empty"] = "Leeren";
+            German["action_empty_all"] = "Alle leeren";
+            German["action_rerail"] = "Alle aufgleisen";
+            German["state_enabled"] = "Aktiv";
+            German["state_disabled"] = "Inaktiv";
+            German["derailment_toggle"] = "Entgleisungsschutz";
+            German["speed_damage_toggle"] = "Kein Fahrzeugschaden ueber {0} mph";
+            German["equipment_wear_toggle"] = "Fahrzeugverschleiss";
+            German["oil_feature_toggle"] = "Heisslaeufer / Oelung";
+            German["cargo_emptying"] = "Ladung leeren";
+            German["empty_selected_cargo"] = "Ladung des gewaehltens Wagens leeren";
+            German["empty_all_cargo"] = "Ladung aller Wagen leeren";
+            German["empty_cargo_description"] = "Entfernt die aktuelle Ladung, ohne Frachtauftraege zu aendern.";
+            German["selected_not_cargo_car"] = "Das gewaehlte Fahrzeug ist Lok oder Tender; stattdessen auftanken.";
+            German["no_cargo_to_empty"] = "Keine Ladung zum Leeren gefunden.";
+            German["emptied_cargo_car"] = "{0} geleert: {1} Ladungsslot(s).";
+            German["emptied_cargo_cars"] = "{0} Ladungsslot(s) in {1} Wagen geleert.";
+
+            Spanish["action_set"] = "Fijar";
+            Spanish["action_repair"] = "Reparar";
+            Spanish["action_repair_all"] = "Reparar todo";
+            Spanish["action_refuel"] = "Repostar";
+            Spanish["action_refuel_all"] = "Repostar todo";
+            Spanish["action_fill"] = "Llenar";
+            Spanish["action_fill_all"] = "Llenar todo";
+            Spanish["action_oil"] = "Aceitar";
+            Spanish["action_oil_all"] = "Aceitar todo";
+            Spanish["action_restock"] = "Reabastecer";
+            Spanish["action_clear"] = "Vaciar";
+            Spanish["action_empty"] = "Vaciar";
+            Spanish["action_empty_all"] = "Vaciar todo";
+            Spanish["action_rerail"] = "Encarrilar todo";
+            Spanish["state_enabled"] = "Activo";
+            Spanish["state_disabled"] = "Inactivo";
+            Spanish["derailment_toggle"] = "Prevencion de descarrilamientos";
+            Spanish["speed_damage_toggle"] = "Sin danos del vehiculo sobre {0} mph";
+            Spanish["equipment_wear_toggle"] = "Desgaste del equipo";
+            Spanish["oil_feature_toggle"] = "Calentamiento / lubricacion";
+            Spanish["cargo_emptying"] = "Vaciado de carga";
+            Spanish["empty_selected_cargo"] = "Vaciar carga del vagon seleccionado";
+            Spanish["empty_all_cargo"] = "Vaciar carga de todos los vagones";
+            Spanish["empty_cargo_description"] = "Quita la carga actual sin cambiar los manifiestos.";
+            Spanish["selected_not_cargo_car"] = "El vehiculo seleccionado es una locomotora o tender; usa repostar.";
+            Spanish["no_cargo_to_empty"] = "No se encontro carga para vaciar.";
+            Spanish["emptied_cargo_car"] = "Se vacio {0}: {1} ranura(s) de carga.";
+            Spanish["emptied_cargo_cars"] = "Se vaciaron {0} ranura(s) en {1} vagon(es).";
+
+            TraditionalChinese["action_set"] = "\u8a2d\u5b9a";
+            TraditionalChinese["action_repair"] = "\u4fee\u7406";
+            TraditionalChinese["action_repair_all"] = "\u5168\u90e8\u4fee\u7406";
+            TraditionalChinese["action_refuel"] = "\u52a0\u6cb9";
+            TraditionalChinese["action_refuel_all"] = "\u5168\u90e8\u52a0\u6cb9";
+            TraditionalChinese["action_fill"] = "\u586b\u6eff";
+            TraditionalChinese["action_fill_all"] = "\u5168\u90e8\u586b\u6eff";
+            TraditionalChinese["action_oil"] = "\u6f64\u6ed1";
+            TraditionalChinese["action_oil_all"] = "\u5168\u90e8\u6f64\u6ed1";
+            TraditionalChinese["action_restock"] = "\u88dc\u5145";
+            TraditionalChinese["action_clear"] = "\u6e05\u7a7a";
+            TraditionalChinese["action_empty"] = "\u6e05\u7a7a";
+            TraditionalChinese["action_empty_all"] = "\u5168\u90e8\u6e05\u7a7a";
+            TraditionalChinese["action_rerail"] = "\u5168\u90e8\u91cd\u65b0\u4e0a\u8ecc";
+            TraditionalChinese["state_enabled"] = "\u5df2\u555f\u7528";
+            TraditionalChinese["state_disabled"] = "\u5df2\u505c\u7528";
+            TraditionalChinese["derailment_toggle"] = "\u812b\u8ecc\u9632\u8b77";
+            TraditionalChinese["speed_damage_toggle"] = "\u8d85\u904e {0} mph \u7121\u8eca\u8f1b\u640d\u50b7";
+            TraditionalChinese["equipment_wear_toggle"] = "\u8eca\u8f1b\u78e8\u640d";
+            TraditionalChinese["oil_feature_toggle"] = "\u71b1\u8ef8\uff0f\u6f64\u6ed1";
+            TraditionalChinese["cargo_emptying"] = "\u6e05\u7a7a\u8ca8\u7269";
+            TraditionalChinese["empty_selected_cargo"] = "\u6e05\u7a7a\u9078\u5b9a\u8ca8\u8eca\u8ca8\u7269";
+            TraditionalChinese["empty_all_cargo"] = "\u6e05\u7a7a\u6240\u6709\u8ca8\u8eca\u8ca8\u7269";
+            TraditionalChinese["empty_cargo_description"] = "\u79fb\u9664\u8ca8\u8eca\u7684\u73fe\u6709\u8ca8\u7269\uff0c\u4f46\u4e0d\u8b8a\u66f4\u904b\u55ae\u3002";
+            TraditionalChinese["selected_not_cargo_car"] = "\u9078\u5b9a\u7684\u662f\u6a5f\u8eca\u6216\u7164\u6c34\u8eca\uff1b\u8acb\u6539\u7528\u52a0\u6cb9\u3002";
+            TraditionalChinese["no_cargo_to_empty"] = "\u627e\u4e0d\u5230\u53ef\u6e05\u7a7a\u7684\u8ca8\u7269\u3002";
+            TraditionalChinese["emptied_cargo_car"] = "\u5df2\u6e05\u7a7a {0}\uff1a{1} \u500b\u8ca8\u7269\u69fd\u3002";
+            TraditionalChinese["emptied_cargo_cars"] = "\u5df2\u6e05\u7a7a {1} \u8f1b\u8eca\u7684 {0} \u500b\u8ca8\u7269\u69fd\u3002";
+
+            Russian["action_set"] = "\u0423\u0441\u0442\u0430\u043d\u043e\u0432\u0438\u0442\u044c";
+            Russian["action_repair"] = "\u0420\u0435\u043c\u043e\u043d\u0442";
+            Russian["action_repair_all"] = "\u0420\u0435\u043c\u043e\u043d\u0442 \u0432\u0441\u0435\u0445";
+            Russian["action_refuel"] = "\u0417\u0430\u043f\u0440\u0430\u0432\u0438\u0442\u044c";
+            Russian["action_refuel_all"] = "\u0417\u0430\u043f\u0440\u0430\u0432\u0438\u0442\u044c \u0432\u0441\u0435";
+            Russian["action_fill"] = "\u0417\u0430\u043f\u043e\u043b\u043d\u0438\u0442\u044c";
+            Russian["action_fill_all"] = "\u0417\u0430\u043f\u043e\u043b\u043d\u0438\u0442\u044c \u0432\u0441\u0435";
+            Russian["action_oil"] = "\u0421\u043c\u0430\u0437\u0430\u0442\u044c";
+            Russian["action_oil_all"] = "\u0421\u043c\u0430\u0437\u0430\u0442\u044c \u0432\u0441\u0435";
+            Russian["action_restock"] = "\u041f\u043e\u043f\u043e\u043b\u043d\u0438\u0442\u044c";
+            Russian["action_clear"] = "\u041e\u0447\u0438\u0441\u0442\u0438\u0442\u044c";
+            Russian["action_empty"] = "\u041e\u043f\u0443\u0441\u0442\u043e\u0448\u0438\u0442\u044c";
+            Russian["action_empty_all"] = "\u041e\u043f\u0443\u0441\u0442\u043e\0448\u0438\u0442\u044c \u0432\u0441\u0435";
+            Russian["action_rerail"] = "\u041f\u043e\u0441\u0442\u0430\u0432\u0438\u0442\u044c \u043d\u0430 \u0440\u0435\u043b\u044c\u0441\u044b \u0432\u0441\u0435";
+            Russian["state_enabled"] = "\u0412\u043a\u043b\u044e\u0447\u0435\u043d\u043e";
+            Russian["state_disabled"] = "\u0412\u044b\u043a\u043b\u044e\u0447\u0435\u043d\u043e";
+            Russian["derailment_toggle"] = "\u0417\u0430\u0449\u0438\u0442\u0430 \u043e\u0442 \u0441\u0445\u043e\u0434\u0430";
+            Russian["speed_damage_toggle"] = "\u041d\u0435\u0442 \u0443\u0440\u043e\u043d\u0430 \u0432\u044b\u0448\u0435 {0} \u043c\u0438\u043b\u044c/\u0447";
+            Russian["equipment_wear_toggle"] = "\u0418\u0437\u043d\u043e\u0441 \u0442\u0435\u0445\u043d\u0438\u043a\u0438";
+            Russian["oil_feature_toggle"] = "\u041f\u0435\u0440\u0435\u0433\u0440\u0435\u0432 / \u0441\u043c\u0430\u0437\u043a\u0430";
+            Russian["cargo_emptying"] = "\u041e\u043f\u0443\u0441\u0442\u043e\0448\u0435\u043d\u0438\u0435 \u0433\u0440\u0443\u0437\u0430";
+            Russian["empty_selected_cargo"] = "\u041e\u043f\u0443\u0441\u0442\u043e\0448\u0438\u0442\u044c \u0432\u044b\u0431\u0440\u0430\u043d\u043d\u044b\u0439 \u0432\u0430\u0433\u043e\u043d";
+            Russian["empty_all_cargo"] = "\u041e\u043f\u0443\u0441\u0442\u043e\0448\u0438\u0442\u044c \u0432\u0441\u0435 \u0432\u0430\u0433\u043e\u043d\u044b";
+            Russian["empty_cargo_description"] = "\u0423\u0434\u0430\u043b\u044f\u0435\u0442 \u0433\u0440\u0443\u0437 \u0438\u0437 \u0432\u0430\u0433\u043e\u043d\u043e\u0432, \u043d\u0435 \u043c\u0435\u043d\u044f\u044f \u043d\u0430\u043a\u043b\u0430\u0434\u043d\u044b\u0435.";
+            Russian["selected_not_cargo_car"] = "\u0412\u044b\u0431\u0440\u0430\u043d \u043b\u043e\u043a\u043e\043c\u043e\0442\u0438\u0432 \u0438\u043b\u0438 \u0442\u0435\u043d\u0434\u0435\u0440; \u0438\u0441\u043f\u043e\u043b\u044c\u0437\u0443\u0439\u0442\u0435 \u0437\u0430\u043f\u0440\u0430\u0432\u043a\u0443.";
+            Russian["no_cargo_to_empty"] = "\u041d\u0435\u0442 \u0433\u0440\u0443\u0437\u0430 \u0434\u043b\u044f \u043e\u043f\u0443\u0441\u0442\u043e\u0448\u0435\u043d\u0438\u044f.";
+            Russian["emptied_cargo_car"] = "\u041e\u043f\u0443\u0441\u0442\u043e\0448\u0435\u043d {0}: {1} \u044f\u0447\u0435\u0435\u043a \u0433\u0440\u0443\u0437\u0430.";
+            Russian["emptied_cargo_cars"] = "\u041e\u043f\u0443\0441\u0442\u043e\0448\u0435\043d\u043e {0} \u044f\u0447\u0435\u0435\u043a \u0433\u0440\u0443\u0437\u0430 \u0432 {1} \u0432\u0430\u0433\u043e\u043d\u0430\u0445.";
+
+            French["action_set"] = "Regler";
+            French["action_repair"] = "Reparer";
+            French["action_repair_all"] = "Tout reparer";
+            French["action_refuel"] = "Ravitailler";
+            French["action_refuel_all"] = "Tout ravitailler";
+            French["action_fill"] = "Remplir";
+            French["action_fill_all"] = "Tout remplir";
+            French["action_oil"] = "Huiler";
+            French["action_oil_all"] = "Tout huiler";
+            French["action_restock"] = "Ravitailler";
+            French["action_clear"] = "Vider";
+            French["action_empty"] = "Vider";
+            French["action_empty_all"] = "Tout vider";
+            French["action_rerail"] = "Tout rerailer";
+            French["state_enabled"] = "Active";
+            French["state_disabled"] = "Desactive";
+            French["derailment_toggle"] = "Prevention des deraillements";
+            French["speed_damage_toggle"] = "Aucun degat au-dessus de {0} mph";
+            French["equipment_wear_toggle"] = "Usure du materiel";
+            French["oil_feature_toggle"] = "Surchauffe / huilage";
+            French["cargo_emptying"] = "Vidage des chargements";
+            French["empty_selected_cargo"] = "Vider le chargement du wagon selectionne";
+            French["empty_all_cargo"] = "Vider tous les chargements";
+            French["empty_cargo_description"] = "Retire les chargements actuels sans modifier les manifestes.";
+            French["selected_not_cargo_car"] = "Le vehicule selectionne est une locomotive ou un tender ; ravitaillez-le.";
+            French["no_cargo_to_empty"] = "Aucun chargement a vider.";
+            French["emptied_cargo_car"] = "{0} vide : {1} emplacement(s) de chargement.";
+            French["emptied_cargo_cars"] = "{0} emplacement(s) vides dans {1} wagon(s).";
+
+            German["fuel_consumption_multiplier"] = "Brennstoffverbrauch";
+            German["fuel_consumption_set"] = "Brennstoffverbrauch auf {0} gesetzt.";
+            Spanish["fuel_consumption_multiplier"] = "Consumo de combustible";
+            Spanish["fuel_consumption_set"] = "Consumo de combustible establecido en {0}.";
+            TraditionalChinese["fuel_consumption_multiplier"] = "\u71c3\u6599\u6d88\u8017\u7387";
+            TraditionalChinese["fuel_consumption_set"] = "\u71c3\u6599\u6d88\u8017\u7387\u5df2\u8a2d\u70ba {0}\u3002";
+            Russian["fuel_consumption_multiplier"] = "\u0420\u0430\u0441\u0445\u043e\u0434 \u0442\u043e\u043f\u043b\u0438\u0432\u0430";
+            Russian["fuel_consumption_set"] = "\u0420\u0430\u0441\u0445\u043e\u0434 \u0442\u043e\u043f\u043b\u0438\u0432\u0430: {0}.";
+            French["fuel_consumption_multiplier"] = "Taux de consommation de carburant";
+            French["fuel_consumption_set"] = "Taux de consommation de carburant regle a {0}.";
+        }
+
+        internal static MenuLanguage Current { get; private set; } = MenuLanguage.English;
+
+        internal static string LanguageName
+        {
+            get
+            {
+                switch (Current)
+                {
+                    case MenuLanguage.German: return "Deutsch";
+                    case MenuLanguage.Spanish: return "Español";
+                    case MenuLanguage.TraditionalChinese: return "繁體中文";
+                    case MenuLanguage.Russian: return "Русский";
+                    case MenuLanguage.French: return "Français";
+                    default: return "English";
+                }
+            }
+        }
+
+        internal static void Toggle()
+        {
+            Current = (MenuLanguage)(((int)Current + 1) % 6);
+        }
+
+        internal static string Text(string key)
+        {
+            var dictionary = GetCurrentDictionary();
+            if (dictionary.TryGetValue(key, out var translated))
+            {
+                return translated;
+            }
+
+            return English.TryGetValue(key, out var value) ? value : key;
+        }
+
+        internal static string Format(string key, params object[] values)
+        {
+            return string.Format(Text(key), values);
+        }
+
+        private static Dictionary<string, string> GetCurrentDictionary()
+        {
+            switch (Current)
+            {
+                case MenuLanguage.German: return German;
+                case MenuLanguage.Spanish: return Spanish;
+                case MenuLanguage.TraditionalChinese: return TraditionalChinese;
+                case MenuLanguage.Russian: return Russian;
+                case MenuLanguage.French: return French;
+                default: return English;
+            }
+        }
+    }
+}
+
+```
+
+`src/RailroaderCheatMenu/ModEntryPoint.cs`:
+
+```cs
+using Railroader.Modding;
+using UnityEngine;
+
+namespace CAG.Sylvrwynd.RailroaderCheatMenu
+{
+    public sealed class ModEntryPoint : IModEntryPoint, IWorldLifecycle
+    {
+        private static GameObject menuObject;
+        private IModLogger log;
+
+        public void OnModLoad(IModContext context)
+        {
+            log = context.Log;
+            log.Info("Railroader Cheat / Debug Menu loaded from " + context.ModDirectory);
+            RuntimePatches.Install(log);
+
+            if (menuObject == null)
+            {
+                menuObject = new GameObject("CAG.Sylvrwynd.RailroaderCheatMenu");
+                Object.DontDestroyOnLoad(menuObject);
+                menuObject.AddComponent<CheatMenuBehaviour>().Initialize(log);
+            }
+        }
+
+        public void OnWorldLoad()
+        {
+            CheatMenuBehaviour.SetWorldLoaded(true);
+            log?.Info("Railroader Cheat / Debug Menu world hooks ready.");
+        }
+
+        public void OnWorldUnload()
+        {
+            GameActions.ResetSessionOverrides();
+            CheatMenuBehaviour.SetWorldLoaded(false);
+            log?.Info("Railroader Cheat / Debug Menu world hooks cleared.");
+        }
+
+        public void OnModUnload()
+        {
+            GameActions.ResetSessionOverrides();
+            CheatMenuBehaviour.SetWorldLoaded(false);
+            RuntimePatches.Uninstall();
+            if (menuObject != null)
+            {
+                Object.Destroy(menuObject);
+                menuObject = null;
+            }
+            log?.Info("Railroader Cheat / Debug Menu unloaded.");
+        }
+    }
+}
+
+
+```
+
+`src/RailroaderCheatMenu/RailroaderCheatMenu.csproj`:
+
+```csproj
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
+    <LangVersion>9.0</LangVersion>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <AssemblyName>RailroaderCheatMenu</AssemblyName>
+    <RootNamespace>CAG.Sylvrwynd.RailroaderCheatMenu</RootNamespace>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <RailroaderManagedPath Condition="'$(RailroaderManagedPath)' == ''">$(MSBuildThisFileDirectory)..\..\references</RailroaderManagedPath>
+    <OutputPath Condition="'$(OutputPath)' == ''">$(MSBuildThisFileDirectory)..\..\dist\build\</OutputPath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="Railroader.Modding">
+      <HintPath>$(RailroaderManagedPath)\Railroader.Modding.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Railroader">
+      <HintPath>$(RailroaderManagedPath)\Railroader.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.CoreModule">
+      <HintPath>$(RailroaderManagedPath)\UnityEngine.CoreModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.IMGUIModule">
+      <HintPath>$(RailroaderManagedPath)\UnityEngine.IMGUIModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.InputLegacyModule">
+      <HintPath>$(RailroaderManagedPath)\UnityEngine.InputLegacyModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+</Project>
+
+
+```
+
+`src/RailroaderCheatMenu/RuntimePatches.cs`:
+
+```cs
+using System;
+using System.Linq;
+using System.Reflection;
+using Model;
+using Railroader.Modding;
+
+namespace CAG.Sylvrwynd.RailroaderCheatMenu
+{
+    internal static class RuntimePatches
+    {
+        private const string HarmonyId = "cag-sylvrwynd.railroader-cheat-menu";
+
+        private static object harmony;
+        private static MethodInfo unpatchAll;
+
+        internal static bool IsInstalled { get; private set; }
+        internal static string FailureReason { get; private set; }
+        internal static bool PreventDerailment { get; private set; }
+        internal static bool ProtectHighSpeedDamage { get; private set; }
+        internal static float ImpactDamageMultiplier { get; private set; } = 1f;
+        internal static float OverspeedDamageMultiplier { get; private set; } = 1f;
+        internal static float FuelConsumptionMultiplier { get; private set; } = 1f;
+        internal const float DefaultHighSpeedDamageThresholdMph = 50f;
+        internal static float HighSpeedDamageThresholdMph { get; private set; } = DefaultHighSpeedDamageThresholdMph;
+
+        [ThreadStatic]
+        private static int collisionDamageDepth;
+
+        internal static void Install(IModLogger log)
+        {
+            try
+            {
+                var harmonyType = FindType("HarmonyLib.Harmony");
+                var harmonyMethodType = FindType("HarmonyLib.HarmonyMethod");
+                if (harmonyType == null || harmonyMethodType == null)
+                {
+                    throw new MissingMethodException("Harmony runtime types are unavailable.");
+                }
+
+                harmony = Activator.CreateInstance(harmonyType, new object[] { HarmonyId });
+                var patchMethod = harmonyType.GetMethods(BindingFlags.Public | BindingFlags.Instance)
+                    .Where(method => method.Name == "Patch")
+                    .Where(method => method.GetParameters().Length == 5)
+                    .FirstOrDefault();
+                unpatchAll = harmonyType.GetMethods(BindingFlags.Public | BindingFlags.Instance)
+                    .Where(method => method.Name == "UnpatchAll")
+                    .Where(method => method.GetParameters().Length == 1)
+                    .FirstOrDefault();
+                if (patchMethod == null || unpatchAll == null)
+                {
+                    throw new MissingMethodException("Harmony patch methods are unavailable.");
+                }
+
+                Patch(patchMethod, harmonyMethodType, "ApplyDerailmentDelta", nameof(ApplyDerailmentDeltaPrefix));
+                Patch(patchMethod, harmonyMethodType, "ApplyConditionDelta", nameof(ApplyConditionDeltaPrefix));
+                Patch(patchMethod, harmonyMethodType, "SetCondition", nameof(SetConditionPrefix));
+                Patch(
+                    patchMethod,
+                    harmonyMethodType,
+                    typeof(TrainController),
+                    "IntegrationSetCarsDidCollide",
+                    nameof(IntegrationSetCarsDidCollidePrefix),
+                    nameof(IntegrationSetCarsDidCollidePostfix));
+                Patch(
+                    patchMethod,
+                    harmonyMethodType,
+                    typeof(Model.Physics.TrainMath),
+                    "DamageForSpeed",
+                    null,
+                    nameof(DamageForSpeedPostfix));
+                Patch(
+                    patchMethod,
+                    harmonyMethodType,
+                    typeof(Model.SteamLocomotive),
+                    "PeriodicUpdateConsumeFuel",
+                    nameof(ScaleSteamFuelConsumptionPrefix));
+                Patch(
+                    patchMethod,
+                    harmonyMethodType,
+                    typeof(Model.Physics.DieselPrimeMover),
+                    "get_FuelConsumptionRate",
+                    null,
+                    nameof(ScaleDieselFuelConsumptionPostfix));
+                IsInstalled = true;
+                FailureReason = null;
+                log?.Info("Runtime protection hooks installed.");
+            }
+            catch (Exception ex)
+            {
+                try
+                {
+                    unpatchAll?.Invoke(harmony, new object[] { HarmonyId });
+                }
+                catch
+                {
+                    // Keep the mod load failure from becoming a game load failure.
+                }
+                IsInstalled = false;
+                FailureReason = ex.ToString();
+                harmony = null;
+                unpatchAll = null;
+                log?.Error(ex, "Runtime protection hooks could not be installed.");
+            }
+        }
+
+        internal static void Uninstall()
+        {
+            if (harmony == null) return;
+            unpatchAll?.Invoke(harmony, new object[] { HarmonyId });
+            harmony = null;
+            unpatchAll = null;
+            IsInstalled = false;
+            PreventDerailment = false;
+            ProtectHighSpeedDamage = false;
+            ImpactDamageMultiplier = 1f;
+            OverspeedDamageMultiplier = 1f;
+            FuelConsumptionMultiplier = 1f;
+            HighSpeedDamageThresholdMph = DefaultHighSpeedDamageThresholdMph;
+            collisionDamageDepth = 0;
+        }
+
+        internal static void ToggleDerailmentProtection()
+        {
+            PreventDerailment = !PreventDerailment;
+        }
+
+        internal static void ToggleHighSpeedDamageProtection()
+        {
+            ProtectHighSpeedDamage = !ProtectHighSpeedDamage;
+        }
+
+        internal static void SetImpactDamageMultiplier(float multiplier)
+        {
+            ImpactDamageMultiplier = ClampMultiplier(multiplier);
+        }
+
+        internal static void SetOverspeedDamageMultiplier(float multiplier)
+        {
+            OverspeedDamageMultiplier = ClampMultiplier(multiplier);
+        }
+
+        internal static void SetFuelConsumptionMultiplier(float multiplier)
+        {
+            FuelConsumptionMultiplier = ClampMultiplier(multiplier);
+        }
+
+        internal static void SetHighSpeedDamageThreshold(float mph)
+        {
+            HighSpeedDamageThresholdMph = Math.Max(1f, Math.Min(200f, mph));
+        }
+
+        private static void Patch(
+            MethodInfo patchMethod,
+            Type harmonyMethodType,
+            string targetName,
+            string prefixName,
+            string postfixName = null)
+        {
+            Patch(patchMethod, harmonyMethodType, typeof(Car), targetName, prefixName, postfixName);
+        }
+
+        private static void Patch(
+            MethodInfo patchMethod,
+            Type harmonyMethodType,
+            Type targetType,
+            string targetName,
+            string prefixName,
+            string postfixName = null)
+        {
+            var targetMethods = targetType.GetMethods(
+                BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static);
+            var target = targetMethods
+                .Where(method => method.Name == targetName)
+                .FirstOrDefault();
+            var prefix = string.IsNullOrWhiteSpace(prefixName)
+                ? null
+                : typeof(RuntimePatches).GetMethod(
+                    prefixName,
+                    BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
+            var postfix = string.IsNullOrWhiteSpace(postfixName)
+                ? null
+                : typeof(RuntimePatches).GetMethod(
+                    postfixName,
+                    BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
+            if (target == null || (!string.IsNullOrWhiteSpace(prefixName) && prefix == null) || postfixName != null && postfix == null)
+            {
+                throw new MissingMethodException(targetName + " / " + prefixName);
+            }
+
+            var harmonyPrefix = prefix == null
+                ? null
+                : Activator.CreateInstance(harmonyMethodType, new object[] { prefix });
+            var harmonyPostfix = postfix == null
+                ? null
+                : Activator.CreateInstance(harmonyMethodType, new object[] { postfix });
+            patchMethod.Invoke(harmony, new object[] { target, harmonyPrefix, harmonyPostfix, null, null });
+        }
+
+        private static Type FindType(string fullName)
+        {
+            var qualified = Type.GetType(fullName + ", 0Harmony", false);
+            if (qualified != null) return qualified;
+            return AppDomain.CurrentDomain.GetAssemblies()
+                .Select(assembly => assembly.GetType(fullName, false))
+                .FirstOrDefault(type => type != null);
+        }
+
+        private static bool ApplyDerailmentDeltaPrefix(float delta)
+        {
+            return !PreventDerailment || delta <= 0f;
+        }
+
+        private static bool ApplyConditionDeltaPrefix(Car __instance, ref float delta)
+        {
+            if (delta < 0f && collisionDamageDepth > 0)
+            {
+                delta *= ImpactDamageMultiplier;
+            }
+
+            return !ProtectHighSpeedDamage || delta >= 0f || !IsAboveHighSpeed(__instance);
+        }
+
+        private static bool SetConditionPrefix(Car __instance, float condition)
+        {
+            return !ProtectHighSpeedDamage || condition >= __instance.Condition || !IsAboveHighSpeed(__instance);
+        }
+
+        private static bool IsAboveHighSpeed(Car car)
+        {
+            return car != null && car.VelocityMphAbs >= HighSpeedDamageThresholdMph;
+        }
+
+        private static void IntegrationSetCarsDidCollidePrefix()
+        {
+            if (ImpactDamageMultiplier != 1f)
+            {
+                collisionDamageDepth++;
+            }
+        }
+
+        private static void IntegrationSetCarsDidCollidePostfix()
+        {
+            if (collisionDamageDepth > 0)
+            {
+                collisionDamageDepth--;
+            }
+        }
+
+        private static void DamageForSpeedPostfix(ref float __result)
+        {
+            __result *= OverspeedDamageMultiplier;
+        }
+
+        private static void ScaleSteamFuelConsumptionPrefix(ref float dt)
+        {
+            dt *= FuelConsumptionMultiplier;
+        }
+
+        private static void ScaleDieselFuelConsumptionPostfix(ref float __result)
+        {
+            __result *= FuelConsumptionMultiplier;
+        }
+
+        private static float ClampMultiplier(float multiplier)
+        {
+            return Math.Max(0f, Math.Min(5f, multiplier));
+        }
+    }
+}
+
+```
