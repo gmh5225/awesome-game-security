@@ -1329,6 +1329,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/KSwordDEV/KSword [ARK]
 - https://github.com/zodiacon/ObjectExplorer [GUI explorer for Windows kernel objects, handles, object types, and Object Manager namespace]
 - https://github.com/zodiacon/DbgPrint [GUI viewer for user-mode OutputDebugString and kernel DbgPrint/Ex output via ETW, without registry changes or a custom driver]
+- https://github.com/zodiacon/InfStudio [GUI editor and section tree viewer for Windows driver installation (INF) files, with Scintilla editing, templates, and infverif integration]
 - https://github.com/kernullist/kn-diff-pool [Windows kernel Big Pool snapshot/diff tool with kernel driver and Go TUI]
 - https://github.com/zodiacon/PoolMonXv3 [GUI monitor for Windows kernel pool allocation tags with filtering, pause/resume, and WinDbg pooltag.txt integration]
 - https://github.com/kernullist/kn-live-dbg [Windows kernel live debugging — driver exposes memory primitives, user-mode TUI handles symbols, types, and UX (LiveKD-style)]
