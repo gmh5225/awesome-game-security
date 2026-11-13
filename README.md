@@ -684,6 +684,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/TensorWorks/UE-Clang-Format [UE Clang-Format configuration]
 - https://github.com/inflation/goldberg_emulator [Steam emulator]
 - https://github.com/PixiEditor/PixiEditor [PixiEditor is a Universal Editor for all your 2D needs]
+- https://github.com/rpScripts/fivem-backdoor-scanner [Static scanner for FiveM/RedM server resources: flags Lua HTTP code loaders, hidden payloads, obfuscated loaders and secret reads; MIT]
 
 ## Game Manager
 - https://github.com/JosefNemec/Playnite
