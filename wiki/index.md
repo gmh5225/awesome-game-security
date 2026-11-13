@@ -496,6 +496,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [atmosphere](entities/atmosphere.md) — Nintendo Switch custom firmware platform (Atmosphere-NX; C/C++; Fusee/Exosphere/Stratosphere; boot/runtime patches, TrustZone, sysmodules, emuMMC; console security research + homebrew; README [Customized firmware])
 - [Aurora](entities/aurora.md) — internal CS2 cheat (ESP / aimbot / visual mods; Source 2 schema + entity enumeration; cheat / game:cs2 [Internal]; gmh5225)
 - [Aurix Net](entities/aurix-net.md) — self-hostable Rust multiplayer backend (aurix-voice; QUIC/WebTransport relay + authoritative sync + deterministic lockstep; optional WASM server referee; fixed-point hash-aligned sim; desync detection; Postgres/Redis control plane; Web/Unity/C++/Godot SDKs; Game Network / source)
+- [AUSP-3DS-FHG](entities/ausp-3ds-fhg.md) — Nintendo 3DS homebrew C anti-cheat library; memory-query signature scan for NTR/3GX/CTRPluginFramework/Luma loaders (no SD/filesystem); citro2d splash + configurable reaction; libctru/citro2d; SlabyLol; Anti Cheat / Nintendo 3DS
 - [AutoAttach](entities/auto-attach.md) — x64dbg plugin: auto-attach to named process with optional delay (`AutoAttachProcess` / `AutoAttachSleep` / `AutoAttachStatus`; Cheat x64dbg Plugins)
 - [AutoOffsets](entities/auto-offsets.md) — Fortnite offset fetcher via remote API (C++; WinINet; `[Offset]`)
 - [AutoOpenCAK](entities/auto-open-cak.md) — CAK compressed-archive open/extract automation (decompression + file organization; modding/asset RE; gmh5225; Bypass tool)
