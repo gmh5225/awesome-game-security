@@ -2823,6 +2823,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Mystic-xorstr](entities/mystic-xorstr.md) — C++17 header-only compile-time string/integer encrypt (SIMD decrypt; AC Compile Time)
 - [Mydev Cheat Engine Tables](entities/mydev-cheat-engine-tables.md) — multi-game Cheat Engine `.CT` collection (pointer chains, script cheats, hotkeys; single-player modding; cheat / [Cheat Engine]; bbfox0703)
 - [mvisor](entities/mvisor.md) — C++ remake (kernel/render/audio; Cheat QEMU/KVM/PVE/VBOX)
+- [my-packer](entities/my-packer.md) — Windows x64 CLI PE protector (my-vmp; TOML + Lua hooks; virtualization/mutation/ultra; LZMA/Zstd resources; licensing/watermarks; client obfuscation + anti-tamper; `[PE X64]`; oldccat66)
 - [mypower](entities/mypower.md) — Android/Linux CLI memory scanner (SLJIT / pointer chains / Unity U3D)
 - [mytechnotalent/Reverse-Engineering](entities/mytechnotalent-reverse-engineering.md) — free multi-arch RE tutorial (x86/x64/ARM/AVR/RISC-V; static+dynamic; cheat / guide)
 - [Hacking-Windows](entities/hacking-windows.md) — C Windows RE/debugging guide (cheat / guide; mytechnotalent)
