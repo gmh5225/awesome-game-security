@@ -23,7 +23,7 @@ Runs from **StarterPlayerScripts** in Roblox Studio or on live servers when test
 
 ## Role
 
-Stress-testing helper in the Anti Cheat **Stress Testing** lane—exercises server-side movement validation without shipping a full cheat framework. Complements Luau server-side AC samples such as [[volcano-ac]], [[anticheat-dashboard]], and [[cheeto]], and Minecraft QA clients such as [[anticheat-qa]].
+Stress-testing helper in the Anti Cheat **Stress Testing** lane—exercises server-side movement validation without shipping a full cheat framework. Complements broader authorized-place research clients such as [[deadline-cheat-testanticheat]], Luau server-side AC samples such as [[volcano-ac]], [[anticheat-dashboard]], and [[cheeto]], and Minecraft QA clients such as [[anticheat-qa]].
 
 ## Links
 
@@ -31,4 +31,4 @@ Stress-testing helper in the Anti Cheat **Stress Testing** lane—exercises serv
 
 ## Related
 
-[[volcano-ac]] · [[anticheat-qa]] · [[jevcraft-bench]] · [[laneguard]] · [[overviews/anti-cheat]] · [[overviews/game-engine]]
+[[deadline-cheat-testanticheat]] · [[volcano-ac]] · [[anticheat-qa]] · [[jevcraft-bench]] · [[laneguard]] · [[overviews/anti-cheat]] · [[overviews/game-engine]]
