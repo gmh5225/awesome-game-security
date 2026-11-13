@@ -1006,6 +1006,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/Zhishulo/dsh-rea-powerpack [DeepSeek Harness plugin to install and verify REA analysis engines, pin rea-agents MCP builds with shadow rollback, and surface REA doctor capability gaps]
 - https://github.com/zheedevVn/Rea-Unlock [MCP server unifying static and dynamic reverse engineering (Frida, Ghidra, decompilers) for binary and application analysis]
 - https://github.com/joasasantos/rea-prompts [Curated REA (Reverse Engineer Anything) prompt templates for agent-assisted RE — games, anti-cheat, DMA, kernels, APKs, and protection research with evidence-first instructions]
+- https://github.com/emrewyt/apex-re [Installable agent skill and Python scripts for game-oriented RE: Unreal/Unity IL2CPP/Godot/.NET, VMProtect/OLLVM workflows, memory diffing, and round-trip verification for Claude Code, Cursor, and Codex]
 - https://github.com/jammyfu/rea-atlas [Curated map of reverse-engineering projects (game decomp/recomp, asset tools, firmware) tagged for morluto/rea usage, with multilingual README indexes]
 - https://github.com/LargoScript/n0xis [Cross-platform Rust RE pipeline with static PE/ELF analysis, SSA decompilation, live memory scanning, hardware watchpoints, and MCP/JSON automation for game reversing]
 - https://github.com/imattas/HexLab [Open-source C++20 RE workbench (wxWidgets GUI + CLI) for PE/ELF/Mach-O analysis, decompilation, debugging, and plugin extensions]
