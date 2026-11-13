@@ -4,7 +4,8 @@ kind: concept
 topics: [dma-attack, anti-cheat, windows-kernel]
 sources:
   - wiki/sources/skills/dma-attack.md
-updated: 2026-09-26
+  - wiki/sources/descriptions/grimh3xx__dmaguard.md
+updated: 2026-11-13
 confidence: high
 ---
 
@@ -60,10 +61,12 @@ Device identity/topology:  source + timestamp + collection limitations
 
 Use **not evidenced** when the collector cannot establish coverage; reserve **not covered** for evidence that demonstrates that state. A zero fault count only means no faults were observed by that source during that interval.
 
+Read-only posture auditors such as [[dmaguard]] automate correlation of ACPI DMAR/IVRS with live IOMMU state, kernel boot parameters, Thunderbolt levels, and Windows Kernel DMA Protection—useful for staging this checklist without merging the four properties into one pass/fail flag. (source: wiki/sources/descriptions/grimh3xx__dmaguard.md)
+
 Staged defensive assessment: (1) inventory devices via supported PnP surfaces; (2) collect read-only config within collector ownership; (3) parse ACPI advertisement with strict validation; (4) record KDP separately from live-unit evidence; (5) correlate scope and runtime coverage only where supported evidence exists; (6) observe hot-plug, policy changes, and fault telemetry with baselines; (7) apply launch policy only against documented compatibility baseline, tested false-positive rate, and recovery path. Apply [[research-rigor]] before attributing malicious intent from a fault or identifier mismatch alone.
 
 Runtime DMAR/ACPI spoofing via physical memory (e.g. [[vtd-bypass]]) illustrates why **advertised** state must not be equated with **live unit state** or **requester coverage**.
 
 ## Related
 
-[[iommu]] · [[assurance-boundaries]] · [[memory-acquisition-path]] · [[hvci]] · [[vtd-bypass]] · [[pcie-detector]] · [[research-rigor]] · [[overviews/dma-attack]] · [[overviews/windows-kernel]]
+[[iommu]] · [[assurance-boundaries]] · [[memory-acquisition-path]] · [[hvci]] · [[vtd-bypass]] · [[pcie-detector]] · [[dmaguard]] · [[research-rigor]] · [[overviews/dma-attack]] · [[overviews/windows-kernel]]
