@@ -5,7 +5,8 @@ topics: [windows-kernel, anti-cheat, game-hacking]
 sources:
   - wiki/sources/skills/windows-kernel.md
   - wiki/sources/skills/anti-cheat.md
-updated: 2026-09-13
+  - wiki/sources/descriptions/zodiacon__InfStudio.md
+updated: 2026-11-13
 confidence: high
 ---
 
@@ -26,7 +27,7 @@ The table is a synthesis lane; actual reachability requires build/configuration 
 
 ## Three evidence layers
 
-1. **Documented contracts** — public WDK APIs, IOCTL contracts, Microsoft driver security checklists.
+1. **Documented contracts** — public WDK APIs, IOCTL contracts, Microsoft driver security checklists; driver **installation INF** manifests (`Version`, `CopyFiles`, `AddReg`, service/classinstaller sections) declare which binaries install and how PnP registers them—GUI editors such as [[infstudio]] parse via SetupAPI and can run WDK **infverif** before trusting a package in lab analysis. (source: wiki/sources/descriptions/zodiacon__InfStudio.md)
 2. **Observed host state** — loaded-module inventory, blocklist/policy version, HVCI/VBS running state, ETW/callback telemetry.
 3. **Inferred internals** — undocumented structure layouts, allocator routing, internal table walks — treat as **build-specific hypotheses** until verified with symbols and runtime for the exact Windows build; pair with [[research-rigor]].
 
