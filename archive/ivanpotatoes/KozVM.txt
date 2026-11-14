@@ -1,0 +1,650 @@
+Project Path: arc_ivanpotatoes_KozVM_uv1x_fyg
+
+Source Tree:
+
+```txt
+arc_ivanpotatoes_KozVM_uv1x_fyg
+├── CMakeLists.txt
+├── README.md
+└── src
+    ├── backend.cpp
+    ├── backend.h
+    ├── dialog.rc
+    ├── plugin.cpp
+    └── profiles.h
+
+```
+
+`CMakeLists.txt`:
+
+```txt
+cmake_minimum_required(VERSION 3.20)
+project(KozVM LANGUAGES CXX RC)
+set(CMAKE_CXX_STANDARD 17)
+set(X64DBG_SDK "" CACHE PATH "x64dbg plugin SDK")
+if(NOT CMAKE_SIZEOF_VOID_P EQUAL 8)
+ message(FATAL_ERROR "KozVM currently targets x64dbg only")
+endif()
+if(NOT EXISTS "${X64DBG_SDK}/_plugins.h")
+ message(FATAL_ERROR "Set X64DBG_SDK")
+endif()
+add_library(KozVM SHARED src/plugin.cpp src/dialog.rc src/profiles.h src/backend.cpp src/backend.h)
+target_include_directories(KozVM PRIVATE "${X64DBG_SDK}")
+target_compile_definitions(KozVM PRIVATE UNICODE _UNICODE WIN32_LEAN_AND_MEAN NOMINMAX)
+target_compile_options(KozVM PRIVATE /W4 /WX /EHsc /analyze)
+target_link_libraries(KozVM PRIVATE "${X64DBG_SDK}/x64dbg.lib" "${X64DBG_SDK}/x64bridge.lib" comctl32)
+set_target_properties(KozVM PROPERTIES SUFFIX .dp64 MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+
+```
+
+`README.md`:
+
+```md
+# KozVM
+
+An x64dbg anti-anti-VM plugin for VMProtect. No kernel driver required.
+
+## Published backends
+
+This repository is being published in parts from the existing local project.
+The current snapshot includes the x64 CPUID backend for **3.3.1, 3.4.0 and 3.5.0**,
+the settings dialog and INI persistence. Later profiles remain visible so settings
+can be kept, but their backends are not included here.
+
+| VMProtect | Profile | Architecture | Backend in this repository |
+|---|---|---|---|
+| 3.3.1 | 331 | x64 | Included |
+| 3.4.0 | 340 | x64 | Included |
+| 3.5.0 | 350 | x64 | Included |
+| 3.6.0 | 360 | x64 | Not published yet |
+| 3.8.0 | 380 | x64 | Not published yet |
+| 3.9.4 | 394 | x64 | Not published yet |
+| 3.10.1 | 3101 | x64 | Not published yet |
+
+The early backend finds CPUID handlers in executable sections at runtime.
+It uses the accepted Microsoft Hv / CreatePartitions path observed in the
+research samples. There are no fixed sample addresses, executable names or
+hashes in the matching logic. Memory execute breakpoints track the handlers;
+busy pages may move to free hardware slots without changing target code bytes.
+Owned breakpoints are removed when the three-leaf path completes.
+
+This snapshot does not contain firmware scanning hooks, Sandboxie module hooks,
+an independent TF handler, or x32 support. Selecting an unpublished profile
+reports that its backend is unavailable rather than using another version's backend.
+
+## Use
+
+Select **3.3.1**, **3.4.0** or **3.5.0** under **Plugins > KozVM x64** before
+loading the target. With **Enable KozVM**, **Auto-enable on start** and
+**CPUID compatibility** enabled, setup is queued at the system breakpoint.
+Continue execution normally. For an already paused target, use **Apply to
+paused session** before its VM checks execute.
+
+Pause before changing profiles, applying settings or unloading the plugin.
+**Status** reports the active backend and CPUID hit counts. Commands are
+`kvm_apply` and `kvm_status`; `kvm_hit` is the internal breakpoint callback.
+Firmware and Sandboxie controls remain disabled in this snapshot.
+
+Settings are stored beside the DLL in `KozVM.dp64.ini`. The selected profile
+uses `Settings/Profile`; enable and startup flags use `Settings/Enabled` and
+`Settings/AutoArm`. Global options use `Options/CPUID`, `Options/Firmware` and
+`Options/Sandboxie`. Unknown INI keys are preserved. Cancel discards dialog edits.
+
+## Validation and limits
+
+The local early backend previously reached the original entry in the supplied
+3.3.1, 3.4.0 and 3.5.0 x64 samples, with all three CPUID leaves handled.
+This separated public build passes MSVC Release compilation with `/W4 /WX /analyze`;
+it has not had a fresh native regression run after extraction.
+
+Those sample results do not establish compatibility with every protected
+program or real VM configuration. Discovery can slow startup. An unsupported
+handler layout, unreadable executable page or conflicting memory breakpoint
+causes setup to fail with a log message. Keep existing INI files when updating.
+
+## Build
+
+Use Visual Studio 2022 with the C++ tools, CMake 3.20 or newer and the x64dbg plugin SDK.
+
+```powershell
+cmake -S . -B build -A x64 -DX64DBG_SDK="C:/path/to/pluginsdk"
+cmake --build build --config Release
+```
+
+Output: `build/Release/KozVM.dp64`.
+Copy it into x64dbg's `plugins` directory to load the plugin. Only the three published early profiles have backends in this snapshot.
+
+## Contact
+
+Ivan Kozlovsky  
+[ivankozlovsky.com](https://ivankozlovsky.com)  
+contact@ivankozlovsky.com  
+[PGP key](https://ivankozlovsky.com/pgp.asc)
+
+```
+
+`src/backend.cpp`:
+
+```cpp
+#include "backend.h"
+#include <windows.h>
+#include <intrin.h>
+#include <_plugins.h>
+#include <_scriptapi_register.h>
+#include <_scriptapi_module.h>
+#include <vector>
+#include <map>
+#include <string>
+#include <mutex>
+#include <algorithm>
+#include <cstdint>
+#include <cstring>
+
+namespace Backend {
+namespace R=Script::Register;
+namespace M=Script::Module;
+static std::recursive_mutex gate;
+static int profileId=331;
+static bool armed=false;
+static uint64_t leaf1Hits=0,vendorHits=0,privilegeHits=0;
+struct Owned {duint pc;std::string name,command;BPXTYPE kind=bp_memory;};
+static std::vector<Owned> owned;
+static std::vector<duint> sites;
+static std::map<duint,unsigned> hot;
+static void log(const char* s){_plugin_logprintf("[KozVM] %s\n",s);}
+static std::string hex(duint x){char b[32];sprintf_s(b,"%llX",static_cast<unsigned long long>(x));return b;}
+static bool cmd(const std::string& s){return DbgCmdExecDirect(s.c_str());}
+static bool same(const Owned& o){BRIDGEBP b{};return DbgFunctions()->GetBridgeBp(o.kind,o.pc,&b)&&b.addr==o.pc&&o.name==b.name&&o.command==b.commandText;}
+static bool disarm(bool stopping=false){
+ if(!stopping&&DbgIsDebugging()&&DbgIsRunning()){log("Pause the target before changing the profile.");return false;}
+ bool ok=true;
+ for(auto it=owned.begin();it!=owned.end();){
+  if(!DbgIsDebugging()||DbgGetBpxTypeAt(it->pc)==bp_none){it=owned.erase(it);continue;}
+  if(!same(*it)){log("Owned breakpoint was changed externally; leaving it untouched. Restore/remove it before retrying.");ok=false;++it;continue;}
+  if(!cmd(std::string(it->kind==bp_memory?"bpmc ":"bphwc ")+hex(it->pc))){ok=false;++it;continue;}
+  it=owned.erase(it);
+ }
+ if(ok){armed=false;sites.clear();}
+ return ok;
+}
+static bool add(duint pc){
+ Owned o{pc,"KVM_"+hex(pc),"kvm_hit"};
+ if(!cmd("bpmrange "+hex(pc)+",1000,x"))return false;
+ BRIDGEBP b{};
+ if(!DbgFunctions()->GetBridgeBp(bp_memory,pc,&b)||b.addr!=pc)return false;
+ if(!cmd("SetMemoryBreakpointName "+hex(pc)+",\""+o.name+"\"")){cmd("bpmc "+hex(pc));return false;}
+ owned.push_back(o);
+ bool ok=cmd("SetMemoryBreakpointCommand "+hex(pc)+",\""+o.command+"\"");
+ if(!ok){cmd("bpmc "+hex(pc));owned.pop_back();return false;}
+ ok=cmd("SetMemoryBreakpointCondition "+hex(pc)+",0")&&cmd("SetMemoryBreakpointFastResume "+hex(pc)+",0")&&cmd("SetMemoryBreakpointCommandCondition "+hex(pc)+",1")&&cmd("SetMemoryBreakpointSilent "+hex(pc)+",1");
+ return ok&&DbgFunctions()->GetBridgeBp(bp_memory,pc,&b)&&b.enabled&&o.name==b.name&&o.command==b.commandText&&!b.fastResume&&b.silent&&strcmp(b.breakCondition,"0")==0&&strcmp(b.commandCondition,"1")==0;
+}
+// Follow a bounded native CPUID handler, including direct jump splits.
+// Require the stack adjustment and all four output stores to one base.
+static bool handler(duint pc){
+ unsigned char op[2]{};if(!DbgMemRead(pc,op,2)||op[0]!=0x0f||op[1]!=0xa2)return false;
+ const duint image=M::GetMainModuleBase(),imageSize=M::GetMainModuleSize();
+ duint cursor=pc+2;unsigned base=16,found=0,jumps=0;std::vector<duint> visited;
+ for(unsigned n=0;n<64;++n){
+  if(cursor<image||cursor-image>=imageSize||std::find(visited.begin(),visited.end(),cursor)!=visited.end())return false;
+  visited.push_back(cursor);unsigned char bytes[16]{};if(!DbgMemRead(cursor,bytes,sizeof(bytes)))return false;
+  BASIC_INSTRUCTION_INFO d{};DbgDisasmFastAt(cursor,&d);
+  if(d.size<=0||d.size>15||strncmp(d.instruction,"ret",3)==0)return false;
+  if(d.branch){
+   if(++jumps>4)return false;
+   if(bytes[0]==0xe9){int32_t rel;memcpy(&rel,bytes+1,4);cursor=cursor+5+rel;continue;}
+   if(bytes[0]==0xeb){cursor=cursor+2+static_cast<int8_t>(bytes[1]);continue;}
+   return false;
+  }
+  if((bytes[0]==0x48||bytes[0]==0x49)&&bytes[1]==0x81&&(bytes[2]&0xf8)==0xe8&&bytes[3]==12&&!bytes[4]&&!bytes[5]&&!bytes[6]){
+   if(base!=16)return false;base=(bytes[2]&7u)+((bytes[0]&1u)?8u:0u);
+  }
+  size_t pos=0;unsigned rex=0;if((bytes[pos]&0xf0)==0x40)rex=bytes[pos++];
+  if(base!=16&&bytes[pos]==0x89&&!(rex&12u)){
+   unsigned m=bytes[pos+1],mode=m>>6,reg=(m>>3)&7u,low=m&7u;size_t offset=pos+2;
+   bool simple=mode!=3;
+   if(low==4){unsigned sib=bytes[offset++];simple=simple&&((sib>>3)&7u)==4&&!(rex&2u);low=sib&7u;}
+   unsigned rm=low+((rex&1u)?8u:0u);
+   if(mode==0&&low==5)simple=false;
+   if(simple&&rm==base&&reg<4){
+    int32_t disp=0;if(mode==1)disp=static_cast<signed char>(bytes[offset]);else if(mode==2)memcpy(&disp,bytes+offset,4);
+    int want=reg==0?12:reg==3?8:reg==1?4:0;
+    if(disp==want)found|=1u<<reg;
+   }
+  }
+  if(found==15)return true;cursor+=static_cast<duint>(d.size);
+ }
+ return false;
+}
+static bool scan(std::vector<duint>& result){
+ duint base=M::GetMainModuleBase(),size=M::GetMainModuleSize();IMAGE_DOS_HEADER dos{};
+ if(!base||!DbgMemRead(base,&dos,sizeof(dos))||dos.e_magic!=IMAGE_DOS_SIGNATURE||dos.e_lfanew<0)return false;
+ IMAGE_NT_HEADERS64 nt{};if(static_cast<duint>(dos.e_lfanew)>size||!DbgMemRead(base+dos.e_lfanew,&nt,sizeof(nt))||nt.Signature!=IMAGE_NT_SIGNATURE||nt.FileHeader.Machine!=IMAGE_FILE_MACHINE_AMD64||nt.FileHeader.NumberOfSections>96)return false;
+ duint sh=base+dos.e_lfanew+sizeof(DWORD)+sizeof(IMAGE_FILE_HEADER)+nt.FileHeader.SizeOfOptionalHeader;
+ for(unsigned n=0;n<nt.FileHeader.NumberOfSections;++n){
+  IMAGE_SECTION_HEADER sec{};if(!DbgMemRead(sh+n*sizeof(sec),&sec,sizeof(sec)))return false;
+  if(!(sec.Characteristics&IMAGE_SCN_MEM_EXECUTE))continue;
+  duint begin=sec.VirtualAddress,length=sec.Misc.VirtualSize;
+  if(begin>size||length>size-begin)return false;
+  for(duint off=0;off<length;off+=4096){
+   unsigned char buf[4097]{};duint len=std::min<duint>(sizeof(buf),length-off);
+   if(!DbgMemRead(base+begin+off,buf,len)){log("An executable page could not be read; refusing incomplete setup.");return false;}
+   for(duint j=0;j+1<len&&j<4096;++j)if(buf[j]==0x0f&&buf[j+1]==0xa2&&handler(base+begin+off+j)){
+    result.push_back(base+begin+off+j);if(result.size()>256u){log("Too many candidates; refusing this layout.");return false;}
+   }
+  }
+ }
+ return !result.empty();
+}
+bool apply(int id,bool enabled,bool cpuid){std::lock_guard<std::recursive_mutex> lock(gate);
+ if(!DbgIsDebugging()||DbgIsRunning()){log("Load and pause an x64 target first.");return false;}
+ if(!disarm())return false;if(!enabled||!cpuid){log("CPUID handling disabled.");return true;}
+ if(!available(id)){log("Backend not published for this profile.");return false;}profileId=id;
+ std::vector<duint> candidates;
+ if(!scan(candidates)){log("No supported CPUID handler layout, or scan failed. Profile not armed.");return false;}
+ BPMAP existing{};DbgGetBpList(bp_memory,&existing);
+ bool conflict=false;for(int i=0;i<existing.count;++i)for(auto pc:candidates)if((existing.bp[i].addr&~duint(4095))==(pc&~duint(4095)))conflict=true;
+ if(existing.bp)BridgeFree(existing.bp);
+ if(conflict){log("Existing memory breakpoint page conflict; setup aborted.");return false;}
+ std::vector<duint> pages;for(auto pc:candidates){auto page=pc&~duint(4095);if(std::find(pages.begin(),pages.end(),page)==pages.end())pages.push_back(page);}
+ for(auto pc:pages)if(!add(pc)){log("Memory breakpoint setup failed; rolling back.");disarm();return false;}
+ sites=std::move(candidates);hot.clear();leaf1Hits=vendorHits=privilegeHits=0;armed=true;
+ char message[160];sprintf_s(message,"Profile %d armed: %u CPUID candidates; code bytes unchanged.",profileId,static_cast<unsigned>(sites.size()));log(message);return true;
+}
+static void accelerate(duint pc){
+ duint page=pc&~duint(4095);
+ auto mem=std::find_if(owned.begin(),owned.end(),[&](const Owned& o){return o.kind==bp_memory&&o.pc==page;});
+ const unsigned threshold=8192u;
+ if(mem==owned.end())return;
+ unsigned visits=++hot[page];
+ if(visits!=threshold)return;
+ Owned guard=*mem;
+ BPMAP map{};DbgGetBpList(bp_hardware,&map);unsigned used=0;
+ for(int i=0;i<map.count;++i)if(map.bp[i].slot<4)used|=1u<<map.bp[i].slot;
+ if(map.bp)BridgeFree(map.bp);
+ auto dr7=R::Get(R::DR7);for(unsigned i=0;i<4;++i)if((dr7>>(i*2))&3u)used|=1u<<i;
+ unsigned free=0;for(unsigned i=0;i<4;++i)if(!(used&(1u<<i)))++free;
+ std::vector<duint> targets;for(auto x:sites)if((x&~duint(4095))==page)targets.push_back(x);
+ if(targets.empty()||targets.size()>4)return;
+ if(targets.size()>free)return;
+ std::vector<Owned> added;
+ for(auto x:targets){
+  Owned o{x,"KVM_HW_"+hex(x),"kvm_hit",bp_hardware};
+  if(!cmd("bphws "+hex(x)+",x,1"))break;
+  bool ok=cmd("SetHardwareBreakpointName "+hex(x)+",\""+o.name+"\"")&&cmd("SetHardwareBreakpointCommand "+hex(x)+",kvm_hit")&&cmd("SetHardwareBreakpointCondition "+hex(x)+",0")&&cmd("SetHardwareBreakpointCommandCondition "+hex(x)+",1")&&cmd("SetHardwareBreakpointFastResume "+hex(x)+",0")&&cmd("SetHardwareBreakpointSilent "+hex(x)+",1");
+  if(!ok||!same(o)){cmd("bphwc "+hex(x));break;}
+  added.push_back(o);
+ }
+ if(added.size()!=targets.size()){for(auto& o:added)cmd("bphwc "+hex(o.pc));return;}
+ if(!same(guard)||!cmd("bpmc "+hex(page))){for(auto& o:added)cmd("bphwc "+hex(o.pc));return;}
+ owned.erase(std::remove_if(owned.begin(),owned.end(),[&](const Owned& o){return o.kind==bp_memory&&o.pc==page;}),owned.end());
+ owned.insert(owned.end(),added.begin(),added.end());log("Hot guard page moved to free hardware slots.");
+}
+bool hit(int,char**){std::lock_guard<std::recursive_mutex> lock(gate);
+ duint pc=R::GetCIP();
+ if(!armed)return false;
+ accelerate(pc);if(std::find(sites.begin(),sites.end(),pc)==sites.end())return true;
+ unsigned char opcode[2]{};if(!DbgMemRead(pc,opcode,2)||opcode[0]!=0x0f||opcode[1]!=0xa2){log("CPUID candidate changed; leaving execution untouched.");return true;}
+ unsigned leaf=R::GetEAX();
+ if(leaf!=1&&leaf!=0x40000000&&leaf!=0x40000003)return true;
+ int raw[4]{};__cpuidex(raw,static_cast<int>(leaf),static_cast<int>(R::GetECX()));
+ unsigned a=static_cast<unsigned>(raw[0]),b=static_cast<unsigned>(raw[1]),c=static_cast<unsigned>(raw[2]),d=static_cast<unsigned>(raw[3]);
+ if(leaf==1){c|=0x80000000u;++leaf1Hits;}
+ else if(leaf==0x40000000){a=std::max(a,0x40000003u);b=0x7263694d;c=0x666f736f;d=0x76482074;++vendorHits;}
+ else{b|=1u;++privilegeHits;}
+ bool ok=R::SetEAX(a)&&R::SetEBX(b)&&R::SetECX(c)&&R::SetEDX(d)&&R::SetCIP(pc+2);
+ if(!ok){log("CPUID emulation failed; stopping.");DbgCmdExec("pause");}
+ else {char text[128];sprintf_s(text,"CPUID leaf %08X handled at %llX",leaf,static_cast<unsigned long long>(pc));log(text);
+  if(leaf==0x40000003&&leaf1Hits&&vendorHits){
+   bool clean=true;for(auto it=owned.begin();it!=owned.end();){if(same(*it)&&cmd(std::string(it->kind==bp_memory?"bpmc ":"bphwc ")+hex(it->pc)))it=owned.erase(it);else{clean=false;++it;}}
+   if(clean){armed=false;sites.clear();char message[128];sprintf_s(message,"Profile %d accepted CPUID path complete; all KozVM guards removed.",profileId);log(message);}else log("Guard cleanup failed; pause and inspect before continuing.");
+  }
+ }
+ return ok;
+}
+void cleanSavedBreakpoints(){
+ std::lock_guard<std::recursive_mutex> lock(gate);
+ for(auto kind:{bp_memory,bp_hardware}){
+  BPMAP map{};DbgGetBpList(kind,&map);std::vector<duint> stale;
+  for(int i=0;i<map.count;++i){auto& b=map.bp[i];
+   if(strncmp(b.name,"KVM_",4)==0&&strcmp(b.commandText,"kvm_hit")==0&&strcmp(b.breakCondition,"0")==0&&strcmp(b.commandCondition,"1")==0&&b.silent&&!b.fastResume)stale.push_back(b.addr);
+  }
+  if(map.bp)BridgeFree(map.bp);
+  for(auto pc:stale)if(!cmd(std::string(kind==bp_memory?"bpmc ":"bphwc ")+hex(pc)))log("Could not remove a saved KozVM breakpoint.");
+ }
+}
+
+bool available(int id){return id==331||id==340||id==350;}
+bool stop(bool stopping){std::lock_guard<std::recursive_mutex> lock(gate);return disarm(stopping);}
+void reset(){std::lock_guard<std::recursive_mutex> lock(gate);armed=false;sites.clear();owned.clear();hot.clear();leaf1Hits=vendorHits=privilegeHits=0;}
+bool status(int,char**){std::lock_guard<std::recursive_mutex> lock(gate);_plugin_logprintf("[KozVM] profile=%d armed=%u handlers=%u leaf1=%llu vendor=%llu privilege=%llu\n",profileId,armed,static_cast<unsigned>(sites.size()),leaf1Hits,vendorHits,privilegeHits);return true;}
+}
+
+```
+
+`src/backend.h`:
+
+```h
+#pragma once
+
+// Only the early x64 CPUID backend is published in this snapshot.
+namespace Backend {
+bool available(int profile);
+bool apply(int profile, bool enabled, bool cpuid);
+bool stop(bool stopping = false);
+void reset();
+void cleanSavedBreakpoints();
+bool hit(int argc, char** argv);
+bool status(int argc, char** argv);
+}
+
+```
+
+`src/dialog.rc`:
+
+```rc
+#include <windows.h>
+101 DIALOGEX 0,0,280,222
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "KozVM x64"
+FONT 9,"Segoe UI"
+BEGIN
+ GROUPBOX "Profile",-1,10,8,260,57
+ COMBOBOX 110,20,22,240,120,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+ CONTROL "Enable KozVM",120,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,20,45,115,12
+ CONTROL "Auto-enable on start",111,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,145,45,115,12
+ GROUPBOX "Checks",-1,10,72,260,86
+ CONTROL "CPUID compatibility",121,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,20,87,225,12
+ CONTROL "?",200,"Static",SS_CENTER | SS_NOTIFY,250,87,10,12
+ CONTROL "Firmware scanner",122,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,20,107,225,12
+ CONTROL "?",201,"Static",SS_CENTER | SS_NOTIFY,250,107,10,12
+ CONTROL "Sandboxie module (sbiedll.dll)",123,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,20,127,225,12
+ CONTROL "?",202,"Static",SS_CENTER | SS_NOTIFY,250,127,10,12
+ LTEXT "Firmware / module backends not published yet",-1,12,161,258,12
+ LTEXT "",203,12,178,258,12
+ PUSHBUTTON "About",150,10,198,45,19
+ DEFPUSHBUTTON "Save && apply",IDOK,127,198,82,19
+ PUSHBUTTON "Close",IDCANCEL,215,198,55,19
+END
+
+```
+
+`src/plugin.cpp`:
+
+```cpp
+#include <windows.h>
+#include <commctrl.h>
+#include <_plugins.h>
+#include <cstring>
+#include <string>
+#include <mutex>
+#include <vector>
+#include "profiles.h"
+#include "backend.h"
+
+static HINSTANCE instance;
+static HWND owner;
+static int pluginHandle;
+static bool menuReady = false, dialogOpen = false;
+static std::recursive_mutex gate;
+static std::wstring iniPath;
+struct Settings {
+    unsigned profile = 0;
+    bool enabled = true, autoEnable = true;
+    bool cpuid = true, firmware = true, sandboxie = true;
+};
+static Settings settings;
+static constexpr int settingsMenu = 100, disabledMenu = 101, applyMenu = 102, statusMenu = 103;
+
+static void updateMenus()
+{
+    if(!menuReady) return;
+    for(unsigned i = 0; i < profiles.size(); ++i)
+        _plugin_menuentrysetchecked(pluginHandle, profiles[i].id,
+            settings.enabled && settings.profile == i);
+    _plugin_menuentrysetchecked(pluginHandle, disabledMenu, !settings.enabled);
+}
+
+static bool saveSettings()
+{
+    wchar_t id[16];
+    swprintf_s(id, L"%d", profiles[settings.profile].id);
+    bool ok = WritePrivateProfileStringW(L"Settings", L"Profile", id, iniPath.c_str()) != 0;
+    auto write = [&](const wchar_t* section, const wchar_t* key, bool value) {
+        if(!WritePrivateProfileStringW(section, key, value ? L"1" : L"0", iniPath.c_str())) ok = false;
+    };
+    write(L"Settings", L"Enabled", settings.enabled);
+    write(L"Settings", L"AutoArm", settings.autoEnable);
+    write(L"Options", L"CPUID", settings.cpuid);
+    write(L"Options", L"Firmware", settings.firmware);
+    write(L"Options", L"Sandboxie", settings.sandboxie);
+    updateMenus();
+    if(!ok) _plugin_logputs("[KozVM] Could not save all INI settings.");
+    return ok;
+}
+
+static void loadSettings()
+{
+    auto read = [&](const wchar_t* section, const wchar_t* key) {
+        return GetPrivateProfileIntW(section, key, 1, iniPath.c_str()) != 0;
+    };
+    const int id = GetPrivateProfileIntW(L"Settings", L"Profile", 331, iniPath.c_str());
+    for(unsigned i = 0; i < profiles.size(); ++i)
+        if(profiles[i].id == id) settings.profile = i;
+    settings.enabled = read(L"Settings", L"Enabled");
+    settings.autoEnable = read(L"Settings", L"AutoArm");
+    settings.cpuid = read(L"Options", L"CPUID");
+    settings.firmware = read(L"Options", L"Firmware");
+    settings.sandboxie = read(L"Options", L"Sandboxie");
+}
+
+static bool applyCommand(int, char**)
+{
+    std::lock_guard<std::recursive_mutex> lock(gate);
+    return Backend::apply(profiles[settings.profile].id, settings.enabled, settings.cpuid);
+}
+
+static void lifecycle(CBTYPE type, void*)
+{
+    if(type == CB_SYSTEMBREAKPOINT) {
+        Backend::cleanSavedBreakpoints();
+        std::lock_guard<std::recursive_mutex> lock(gate);
+        if(settings.enabled && settings.autoEnable) DbgCmdExec("kvm_apply");
+    } else if(type == CB_STOPPINGDEBUG || type == CB_DETACH) {
+        Backend::stop(true);
+    } else if(type == CB_INITDEBUG || type == CB_STOPDEBUG) {
+        Backend::reset();
+    }
+}
+
+static void updateOptions(HWND wnd)
+{
+    const auto i = SendDlgItemMessageW(wnd, 110, CB_GETCURSEL, 0, 0);
+    const bool extra = i >= 0 && static_cast<size_t>(i) < profiles.size()
+        && profiles[static_cast<size_t>(i)].firmwareAndModule
+        && Backend::available(profiles[static_cast<size_t>(i)].id);
+    const bool available = i >= 0 && static_cast<size_t>(i) < profiles.size()
+        && Backend::available(profiles[static_cast<size_t>(i)].id);
+    EnableWindow(GetDlgItem(wnd, 121), available);
+    SetDlgItemTextW(wnd, 203, available ? L"CPUID backend available for this profile"
+        : L"Backend not published for this profile yet");
+    EnableWindow(GetDlgItem(wnd, 122), extra);
+    EnableWindow(GetDlgItem(wnd, 123), extra);
+}
+
+static INT_PTR CALLBACK dialog(HWND wnd, UINT msg, WPARAM wp, LPARAM)
+{
+    if(msg == WM_INITDIALOG) {
+        std::lock_guard<std::recursive_mutex> lock(gate);
+        for(const auto& p : profiles)
+            SendDlgItemMessageW(wnd, 110, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(p.wideLabel));
+        SendDlgItemMessageW(wnd, 110, CB_SETCURSEL, settings.profile, 0);
+        CheckDlgButton(wnd, 120, settings.enabled ? BST_CHECKED : BST_UNCHECKED);
+        CheckDlgButton(wnd, 111, settings.autoEnable ? BST_CHECKED : BST_UNCHECKED);
+        CheckDlgButton(wnd, 121, settings.cpuid ? BST_CHECKED : BST_UNCHECKED);
+        CheckDlgButton(wnd, 122, settings.firmware ? BST_CHECKED : BST_UNCHECKED);
+        CheckDlgButton(wnd, 123, settings.sandboxie ? BST_CHECKED : BST_UNCHECKED);
+        updateOptions(wnd);
+        HWND tip = CreateWindowExW(WS_EX_TOPMOST, TOOLTIPS_CLASSW, nullptr,
+            WS_POPUP | TTS_ALWAYSTIP, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT,
+            CW_USEDEFAULT, wnd, nullptr, instance, nullptr);
+        const wchar_t* tips[] = {
+            L"CPUID policy for 331/340/350: hypervisor bit, Microsoft Hv vendor and partition privilege. Handlers are located at runtime; target code bytes remain unchanged.",
+            L"Firmware scanner option for 3.9.4 and 3.10.1. Saved configuration only; backend not published yet.",
+            L"Sandboxie module query option for 3.9.4 and 3.10.1. Saved configuration only; backend not published yet."
+        };
+        for(int i = 0; i < 3; ++i) {
+            TOOLINFOW ti{};
+            ti.cbSize = sizeof(ti); ti.uFlags = TTF_IDISHWND | TTF_SUBCLASS;
+            ti.hwnd = wnd; ti.uId = reinterpret_cast<UINT_PTR>(GetDlgItem(wnd, 200 + i));
+            ti.lpszText = const_cast<wchar_t*>(tips[i]);
+            SendMessageW(tip, TTM_ADDTOOLW, 0, reinterpret_cast<LPARAM>(&ti));
+        }
+        SendMessageW(tip, TTM_SETMAXTIPWIDTH, 0, 360);
+        return TRUE;
+    }
+    if(msg == WM_COMMAND) {
+        if(LOWORD(wp) == 110 && HIWORD(wp) == CBN_SELCHANGE) { updateOptions(wnd); return TRUE; }
+        if(LOWORD(wp) == IDCANCEL) { EndDialog(wnd, 0); return TRUE; }
+        if(LOWORD(wp) == 150) {
+            MessageBoxW(wnd, L"KozVM x64\n\nCreator: Ivan Kozlovsky\nivankozlovsky.com\n"
+                L"contact@ivankozlovsky.com\n\nPublished x64 backend: 3.3.1 / 3.4.0 / 3.5.0.",
+                L"About KozVM", MB_OK | MB_ICONINFORMATION);
+            return TRUE;
+        }
+        if(LOWORD(wp) == IDOK) {
+            std::lock_guard<std::recursive_mutex> lock(gate);
+            const auto i = SendDlgItemMessageW(wnd, 110, CB_GETCURSEL, 0, 0);
+            if(i < 0 || static_cast<size_t>(i) >= profiles.size()) return TRUE;
+            if(!Backend::stop()) {
+                MessageBoxW(wnd, L"Pause the target and check the log before applying.", L"KozVM", MB_OK | MB_ICONWARNING);
+                return TRUE;
+            }
+            settings.profile = static_cast<unsigned>(i);
+            settings.enabled = IsDlgButtonChecked(wnd, 120) == BST_CHECKED;
+            settings.autoEnable = IsDlgButtonChecked(wnd, 111) == BST_CHECKED;
+            settings.cpuid = IsDlgButtonChecked(wnd, 121) == BST_CHECKED;
+            settings.firmware = IsDlgButtonChecked(wnd, 122) == BST_CHECKED;
+            settings.sandboxie = IsDlgButtonChecked(wnd, 123) == BST_CHECKED;
+            if(!saveSettings()) {
+                MessageBoxW(wnd, L"Could not save all settings. Check the INI location is writable.",
+                    L"KozVM", MB_OK | MB_ICONWARNING);
+                return TRUE;
+            }
+            if(DbgIsDebugging()) DbgCmdExec("kvm_apply");
+            EndDialog(wnd, 1); return TRUE;
+        }
+    }
+    if(msg == WM_CLOSE) { EndDialog(wnd, 0); return TRUE; }
+    return FALSE;
+}
+
+static void showSettings()
+{
+    DialogBoxParamW(instance, MAKEINTRESOURCEW(101), owner, dialog, 0);
+    std::lock_guard<std::recursive_mutex> lock(gate);
+    dialogOpen = false;
+}
+
+static void menu(CBTYPE, void* data)
+{
+    const int id = static_cast<PLUG_CB_MENUENTRY*>(data)->hEntry;
+    std::lock_guard<std::recursive_mutex> lock(gate);
+    if(dialogOpen) return;
+    if(id == settingsMenu) {
+        // Also block unloading while the GUI callback is queued.
+        dialogOpen = true;
+        GuiExecuteOnGuiThread(showSettings);
+        return;
+    }
+    if(id == applyMenu) { DbgCmdExec("kvm_apply"); return; }
+    if(id == statusMenu) { DbgCmdExec("kvm_status"); return; }
+    if(!Backend::stop()) return;
+    if(id == disabledMenu) { settings.enabled = false; saveSettings(); return; }
+    for(unsigned i = 0; i < profiles.size(); ++i)
+        if(id == profiles[i].id) {
+            settings.profile = i; settings.enabled = true; saveSettings();
+            if(DbgIsDebugging()) DbgCmdExec("kvm_apply");
+            else if(!Backend::available(id)) _plugin_logputs("[KozVM] Backend not published for this profile.");
+            return;
+        }
+}
+
+extern "C" __declspec(dllexport) bool pluginit(PLUG_INITSTRUCT* init)
+{
+    pluginHandle = init->pluginHandle;
+    init->sdkVersion = PLUG_SDKVERSION; init->pluginVersion = 1;
+    strcpy_s(init->pluginName, "KozVM x64");
+    std::vector<wchar_t> path(32768);
+    const DWORD count = GetModuleFileNameW(instance, path.data(), static_cast<DWORD>(path.size()));
+    if(!count || count >= path.size()) return false;
+    iniPath = path.data(); iniPath += L".ini";
+    loadSettings();
+    INITCOMMONCONTROLSEX controls{sizeof(controls), ICC_WIN95_CLASSES};
+    InitCommonControlsEx(&controls);
+    _plugin_registercallback(pluginHandle, CB_MENUENTRY, menu);
+    _plugin_registercommand(pluginHandle, "kvm_apply", applyCommand, false);
+    _plugin_registercommand(pluginHandle, "kvm_hit", Backend::hit, true);
+    _plugin_registercommand(pluginHandle, "kvm_status", Backend::status, false);
+    for(auto type : {CB_SYSTEMBREAKPOINT, CB_INITDEBUG, CB_STOPPINGDEBUG, CB_DETACH, CB_STOPDEBUG})
+        _plugin_registercallback(pluginHandle, type, lifecycle);
+    _plugin_logputs("[KozVM] Published x64 backends: 331, 340, 350.");
+    return true;
+}
+
+extern "C" __declspec(dllexport) void plugsetup(PLUG_SETUPSTRUCT* setup)
+{
+    owner = setup->hwndDlg;
+    for(const auto& p : profiles) _plugin_menuaddentry(setup->hMenu, p.id, p.label);
+    _plugin_menuaddentry(setup->hMenu, disabledMenu, "Disabled");
+    _plugin_menuaddseparator(setup->hMenu);
+    _plugin_menuaddentry(setup->hMenu, settingsMenu, "Settings...");
+    _plugin_menuaddentry(setup->hMenu, applyMenu, "Apply to paused session");
+    _plugin_menuaddentry(setup->hMenu, statusMenu, "Status");
+    menuReady = true; updateMenus();
+}
+
+extern "C" __declspec(dllexport) bool plugstop()
+{
+    std::lock_guard<std::recursive_mutex> lock(gate);
+    if(dialogOpen || !Backend::stop()) return false;
+    for(const char* name : {"kvm_apply", "kvm_hit", "kvm_status"}) _plugin_unregistercommand(pluginHandle, name);
+    for(auto type : {CB_SYSTEMBREAKPOINT, CB_INITDEBUG, CB_STOPPINGDEBUG, CB_DETACH, CB_STOPDEBUG})
+        _plugin_unregistercallback(pluginHandle, type);
+    _plugin_unregistercallback(pluginHandle, CB_MENUENTRY);
+    menuReady = false;
+    return true;
+}
+
+BOOL WINAPI DllMain(HINSTANCE h, DWORD reason, LPVOID)
+{
+    if(reason == DLL_PROCESS_ATTACH) { instance = h; DisableThreadLibraryCalls(h); }
+    return TRUE;
+}
+
+```
+
+`src/profiles.h`:
+
+```h
+#pragma once
+#include <array>
+
+struct Profile {
+    int id;
+    const char* label;
+    const wchar_t* wideLabel;
+    bool firmwareAndModule;
+};
+
+inline constexpr std::array<Profile, 7> profiles{{
+    {331, "VMProtect 3.3.1 - x64", L"VMProtect 3.3.1 - x64", false},
+    {340, "VMProtect 3.4.0 - x64", L"VMProtect 3.4.0 - x64", false},
+    {350, "VMProtect 3.5.0 - x64", L"VMProtect 3.5.0 - x64", false},
+    {360, "VMProtect 3.6.0 - x64", L"VMProtect 3.6.0 - x64", false},
+    {380, "VMProtect 3.8.0 - x64", L"VMProtect 3.8.0 - x64", false},
+    {394, "VMProtect 3.9.4 - x64", L"VMProtect 3.9.4 - x64", true},
+    {3101, "VMProtect 3.10.1 - x64", L"VMProtect 3.10.1 - x64", true}
+}};
+
+```
