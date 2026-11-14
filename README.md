@@ -4866,6 +4866,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/GiannBart/BanMod [Among Us BepInEx mod with host-side AntiCheat module for RPC/task abuse, crashers, and lobby integrity]
 - https://github.com/hckerelauk-git/amongusanticheat [Among Us client-side BepInEx 6 / IL2CPP anti-cheat (ACE) with rule-based detections, in-game settings UI, AI review, and RPC flood protection]
 - https://github.com/xav0dev/AU-Anticheat [Among Us BepInEx IL2CPP host-side anti-cheat and lobby moderation with evidence-based RPC checks and configurable host tools]
+- https://github.com/Jolynes-Mods/Among-Us-3D-VR-AntiCheat [MelonLoader C# host-side anti-cheat for Among Us 3D/VR with Harmony module verifications, configurable checks, and player whitelist]
 - https://github.com/DoomSalat/PEAK-mode-AntiCheat-Sentinel [BepInEx host-side anti-cheat for PEAK that attributes suspicious item spawns to Photon senders and blocks illegal grants on the host]
 - https://github.com/swheettaos/crewtools [Host-only BepInEx 6 IL2CPP plugin for Moon Sweepers crew games: permissions, spending caps, protected bases, and cheat catching]
 - https://github.com/uamo11/y0x1Server [Piqueserver Ace of Spades dedicated server fork with persistent HWID bans and server-side speed/fly/teleport, reach, rapid-fire, and snap-aim checks]
